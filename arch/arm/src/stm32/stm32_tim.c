@@ -158,9 +158,12 @@
 #  undef CONFIG_STM32_TIM17
 #endif
 
+#undef HAVE_TIM_GPIOCONFIG
 #if defined(CONFIG_STM32_TIM1)
 #  if defined(GPIO_TIM1_CH1OUT) ||defined(GPIO_TIM1_CH2OUT)||\
       defined(GPIO_TIM1_CH3OUT) ||defined(GPIO_TIM1_CH4OUT)
+#    undef  HAVE_TIM_GPIOCONFIG
+#    define HAVE_TIM_GPIOCONFIG  1
 #    define HAVE_TIM1_GPIOCONFIG 1
 #endif
 #endif
@@ -168,6 +171,8 @@
 #if defined(CONFIG_STM32_TIM2)
 #  if defined(GPIO_TIM2_CH1OUT) ||defined(GPIO_TIM2_CH2OUT)||\
       defined(GPIO_TIM2_CH3OUT) ||defined(GPIO_TIM2_CH4OUT)
+#    undef  HAVE_TIM_GPIOCONFIG
+#    define HAVE_TIM_GPIOCONFIG  1
 #    define HAVE_TIM2_GPIOCONFIG 1
 #endif
 #endif
@@ -175,6 +180,8 @@
 #if defined(CONFIG_STM32_TIM3)
 #  if defined(GPIO_TIM3_CH1OUT) ||defined(GPIO_TIM3_CH2OUT)||\
       defined(GPIO_TIM3_CH3OUT) ||defined(GPIO_TIM3_CH4OUT)
+#    undef  HAVE_TIM_GPIOCONFIG
+#    define HAVE_TIM_GPIOCONFIG  1
 #    define HAVE_TIM3_GPIOCONFIG 1
 #endif
 #endif
@@ -182,6 +189,8 @@
 #if defined(CONFIG_STM32_TIM4)
 #  if defined(GPIO_TIM4_CH1OUT) ||defined(GPIO_TIM4_CH2OUT)||\
       defined(GPIO_TIM4_CH3OUT) ||defined(GPIO_TIM4_CH4OUT)
+#    undef  HAVE_TIM_GPIOCONFIG
+#    define HAVE_TIM_GPIOCONFIG  1
 #    define HAVE_TIM4_GPIOCONFIG 1
 #endif
 #endif
@@ -189,6 +198,8 @@
 #if defined(CONFIG_STM32_TIM5)
 #  if defined(GPIO_TIM5_CH1OUT) ||defined(GPIO_TIM5_CH2OUT)||\
       defined(GPIO_TIM5_CH3OUT) ||defined(GPIO_TIM5_CH4OUT)
+#    undef  HAVE_TIM_GPIOCONFIG
+#    define HAVE_TIM_GPIOCONFIG  1
 #    define HAVE_TIM5_GPIOCONFIG 1
 #endif
 #endif
@@ -196,6 +207,8 @@
 #if defined(CONFIG_STM32_TIM8)
 #  if defined(GPIO_TIM8_CH1OUT) ||defined(GPIO_TIM8_CH2OUT)||\
       defined(GPIO_TIM8_CH3OUT) ||defined(GPIO_TIM8_CH4OUT)
+#    undef  HAVE_TIM_GPIOCONFIG
+#    define HAVE_TIM_GPIOCONFIG  1
 #    define HAVE_TIM8_GPIOCONFIG 1
 #endif
 #endif
@@ -314,7 +327,10 @@ static void stm32_tim_reload_counter(FAR struct stm32_tim_dev_s *dev);
 static void stm32_tim_enable(FAR struct stm32_tim_dev_s *dev);
 static void stm32_tim_disable(FAR struct stm32_tim_dev_s *dev);
 static void stm32_tim_reset(FAR struct stm32_tim_dev_s *dev);
+
+#ifdef HAVE_TIM_GPIOCONFIG
 static void stm32_tim_gpioconfig(uint32_t cfg, stm32_tim_channel_t mode);
+#endif
 
 /* Timer methods */
 
@@ -637,9 +653,7 @@ static void stm32_tim_reset(FAR struct stm32_tim_dev_s *dev)
  * Name: stm32_tim_gpioconfig
  ************************************************************************************/
 
-#if defined(HAVE_TIM1_GPIOCONFIG)||defined(HAVE_TIM2_GPIOCONFIG)||\
-    defined(HAVE_TIM3_GPIOCONFIG)||defined(HAVE_TIM4_GPIOCONFIG)||\
-    defined(HAVE_TIM5_GPIOCONFIG)||defined(HAVE_TIM8_GPIOCONFIG)
+#ifdef HAVE_TIM_GPIOCONFIG
 static void stm32_tim_gpioconfig(uint32_t cfg, stm32_tim_channel_t mode)
 {
   /* TODO: Add support for input capture and bipolar dual outputs for TIM8 */

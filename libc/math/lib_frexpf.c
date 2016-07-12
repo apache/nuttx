@@ -38,5 +38,5 @@
 float frexpf(float x, int *exponent)
 {
   *exponent = (int)ceilf(log2f(x));
-  return x / ldexpf(1.0, *exponent);
+  return x / ldexpf(1.0F, *exponent);
 }

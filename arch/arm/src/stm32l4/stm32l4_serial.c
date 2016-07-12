@@ -1755,7 +1755,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
         /* Configure TX as a GPIO output pin and Send a break signal*/
 
         tx_break = GPIO_OUTPUT | (~(GPIO_MODE_MASK|GPIO_OUTPUT_SET) & priv->tx_gpio);
-        stm32_configgpio(tx_break);
+        stm32l4_configgpio(tx_break);
 
         leave_critical_section(flags);
       }
@@ -1769,7 +1769,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 
         /* Configure TX back to U(S)ART */
 
-        stm32_configgpio(priv->tx_gpio);
+        stm32l4_configgpio(priv->tx_gpio);
 
         priv->ie &= ~USART_CR1_IE_BREAK_INPROGRESS;
 

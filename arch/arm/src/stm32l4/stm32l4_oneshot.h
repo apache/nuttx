@@ -63,7 +63,7 @@
 typedef void (*oneshot_handler_t)(void *arg);
 
 /* The oneshot client must allocate an instance of this structure and called
- * stm32_oneshot_initialize() before using the oneshot facilities.  The client
+ * stm32l4_oneshot_initialize() before using the oneshot facilities.  The client
  * should not access the contents of this structure directly since the
  * contents are subject to change.
  */
@@ -139,7 +139,7 @@ int stm32l4_oneshot_max_delay(struct stm32l4_oneshot_s *oneshot, uint64_t *usec)
  * Input Parameters:
  *   oneshot Caller allocated instance of the oneshot state structure.  This
  *           structure must have been previously initialized via a call to
- *           stm32_oneshot_initialize();
+ *           stm32l4_oneshot_initialize();
  *   handler The function to call when when the oneshot timer expires.
  *   arg     An opaque argument that will accompany the callback.
  *   ts      Provides the duration of the one shot timer.
@@ -166,7 +166,7 @@ int stm32l4_oneshot_start(struct stm32l4_oneshot_s *oneshot,
  * Input Parameters:
  *   oneshot Caller allocated instance of the oneshot state structure.  This
  *           structure must have been previously initialized via a call to
- *           stm32_oneshot_initialize();
+ *           stm32l4_oneshot_initialize();
  *   ts      The location in which to return the time remaining on the
  *           oneshot timer.  A time of zero is returned if the timer is
  *           not running.

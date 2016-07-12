@@ -93,9 +93,14 @@
 #define NAN         (0.0/0.0)
 #define HUGE_VAL    INFINITY
 
+#define INFINITY_F  (1.0F/0.0F)
+#define NAN_F       (0.0F/0.0F)
+
 #define isnan(x)    ((x) != (x))
 #define isinf(x)    (((x) == INFINITY) || ((x) == -INFINITY))
 #define isfinite(x) (!(isinf(x)) && (x != NAN))
+
+#define isinf_f(x)  (((x) == INFINITY_F) || ((x) == -INFINITY_F))
 
 /* Exponential and Logarithmic constants ************************************/
 
@@ -115,6 +120,9 @@
 #define M_1_PI     0.3183098861837906715377675267450287
 #define M_2_PI     0.6366197723675813430755350534900574
 #define M_2_SQRTPI 1.1283791670955125738961589031215452
+
+#define M_PI_F     ((float)M_PI)
+#define M_PI_2_F   ((float)M_PI_2)
 
 /****************************************************************************
  * Public Function Prototypes

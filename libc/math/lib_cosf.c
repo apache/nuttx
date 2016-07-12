@@ -37,5 +37,5 @@
 
 float cosf(float x)
 {
-  return sinf(x + M_PI_2);
+  return sinf(x + M_PI_2_F);
 }

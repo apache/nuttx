@@ -58,31 +58,31 @@ float sinf(float x)
 
   /* Move x to [-pi, pi) */
 
-  x = fmodf(x, 2 * M_PI);
-  if (x >= M_PI)
+  x = fmodf(x, 2 * M_PI_F);
+  if (x >= M_PI_F)
     {
-      x -= 2 * M_PI;
+      x -= 2 * M_PI_F;
     }
 
-  if (x < -M_PI)
+  if (x < -M_PI_F)
     {
-      x += 2 * M_PI;
+      x += 2 * M_PI_F;
     }
 
   /* Move x to [-pi/2, pi/2) */
 
-  if (x >= M_PI_2)
+  if (x >= M_PI_2_F)
     {
-      x = M_PI - x;
+      x = M_PI_F - x;
     }
 
-  if (x < -M_PI_2)
+  if (x < -M_PI_2_F)
     {
-      x = -M_PI - x;
+      x = -M_PI_F - x;
     }
 
   x_squared = x * x;
-  sin_x = 0.0;
+  sin_x = 0.0F;
 
   /* Perform Taylor series approximation for sin(x) with six terms */
 

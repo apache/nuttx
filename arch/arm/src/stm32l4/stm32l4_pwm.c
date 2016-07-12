@@ -95,7 +95,7 @@
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_DEBUG_PWM_INFO
-#  define pwm_dumpgpio(p,m) stm32_dumpgpio(p,m)
+#  define pwm_dumpgpio(p,m) stm32l4_dumpgpio(p,m)
 #else
 #  define pwm_dumpgpio(p,m)
 #endif
@@ -104,41 +104,41 @@
  * Private Types
  ****************************************************************************/
 
-enum stm32_timmode_e
+enum stm32l4_timmode_e
 {
-  STM32_TIMMODE_COUNTUP   = 0,
-  STM32_TIMMODE_COUNTDOWN = 1,
-  STM32_TIMMODE_CENTER1   = 2,
-  STM32_TIMMODE_CENTER2   = 3,
-  STM32_TIMMODE_CENTER3   = 4,
+  STM32L4_TIMMODE_COUNTUP   = 0,
+  STM32L4_TIMMODE_COUNTDOWN = 1,
+  STM32L4_TIMMODE_CENTER1   = 2,
+  STM32L4_TIMMODE_CENTER2   = 3,
+  STM32L4_TIMMODE_CENTER3   = 4,
 };
 
-enum stm32_chanmode_e
+enum stm32l4_chanmode_e
 {
-  STM32_CHANMODE_PWM1        = 0,
-  STM32_CHANMODE_PWM2        = 1,
-  STM32_CHANMODE_COMBINED1   = 2,
-  STM32_CHANMODE_COMBINED2   = 3,
-  STM32_CHANMODE_ASYMMETRIC1 = 4,
-  STM32_CHANMODE_ASYMMETRIC2 = 5,
+  STM32L4_CHANMODE_PWM1        = 0,
+  STM32L4_CHANMODE_PWM2        = 1,
+  STM32L4_CHANMODE_COMBINED1   = 2,
+  STM32L4_CHANMODE_COMBINED2   = 3,
+  STM32L4_CHANMODE_ASYMMETRIC1 = 4,
+  STM32L4_CHANMODE_ASYMMETRIC2 = 5,
 };
 
-struct stm32_pwmchan_s
+struct stm32l4_pwmchan_s
 {
   uint8_t channel;                     /* Timer output channel: {1,..4} */
   uint32_t pincfg;                     /* Output pin configuration */
-  enum stm32_chanmode_e mode;
+  enum stm32l4_chanmode_e mode;
 };
 
 /* This structure represents the state of one PWM timer */
 
-struct stm32_pwmtimer_s
+struct stm32l4_pwmtimer_s
 {
   FAR const struct pwm_ops_s *ops;     /* PWM operations */
   uint8_t timid;                       /* Timer ID {1,...,17} */
-  struct stm32_pwmchan_s channels[PWM_NCHANNELS];
+  struct stm32l4_pwmchan_s channels[PWM_NCHANNELS];
   uint8_t timtype;                     /* See the TIMTYPE_* definitions */
-  enum stm32_timmode_e mode;
+  enum stm32l4_timmode_e mode;
 #ifdef CONFIG_PWM_PULSECOUNT
   uint8_t irq;                         /* Timer update IRQ */
   uint8_t prev;                        /* The previous value of the RCR (pre-loaded) */
@@ -160,48 +160,48 @@ struct stm32_pwmtimer_s
  ****************************************************************************/
 /* Register access */
 
-static uint16_t pwm_getreg(struct stm32_pwmtimer_s *priv, int offset);
-static void pwm_putreg(struct stm32_pwmtimer_s *priv, int offset, uint16_t value);
+static uint16_t stm32l4pwm_getreg(struct stm32l4_pwmtimer_s *priv, int offset);
+static void stm32l4pwm_putreg(struct stm32l4_pwmtimer_s *priv, int offset, uint16_t value);
 
 #ifdef CONFIG_DEBUG_PWM_INFO
-static void pwm_dumpregs(struct stm32_pwmtimer_s *priv, FAR const char *msg);
+static void stm32l4pwm_dumpregs(struct stm32l4_pwmtimer_s *priv, FAR const char *msg);
 #else
-#  define pwm_dumpregs(priv,msg)
+#  define stm32l4pwm_dumpregs(priv,msg)
 #endif
 
 /* Timer management */
 
-static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
-                     FAR const struct pwm_info_s *info);
+static int stm32l4pwm_timer(FAR struct stm32l4_pwmtimer_s *priv,
+                            FAR const struct pwm_info_s *info);
 
 #if defined(CONFIG_PWM_PULSECOUNT) && (defined(CONFIG_STM32L4_TIM1_PWM) || defined(CONFIG_STM32L4_TIM8_PWM))
-static int pwm_interrupt(struct stm32_pwmtimer_s *priv);
+static int stm32l4pwm_interrupt(struct stm32l4_pwmtimer_s *priv);
 #if defined(CONFIG_STM32L4_TIM1_PWM)
-static int pwm_tim1interrupt(int irq, void *context);
+static int stm32l4pwm_tim1interrupt(int irq, void *context);
 #endif
 #if defined(CONFIG_STM32L4_TIM8_PWM)
-static int pwm_tim8interrupt(int irq, void *context);
+static int stm32l4pwm_tim8interrupt(int irq, void *context);
 #endif
-static uint8_t pwm_pulsecount(uint32_t count);
+static uint8_t stm32l4pwm_pulsecount(uint32_t count);
 #endif
 
 /* PWM driver methods */
 
-static int pwm_setup(FAR struct pwm_lowerhalf_s *dev);
-static int pwm_shutdown(FAR struct pwm_lowerhalf_s *dev);
+static int stm32l4pwm_setup(FAR struct pwm_lowerhalf_s *dev);
+static int stm32l4pwm_shutdown(FAR struct pwm_lowerhalf_s *dev);
 
 #ifdef CONFIG_PWM_PULSECOUNT
-static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
-                     FAR const struct pwm_info_s *info,
-                     FAR void *handle);
+static int stm32l4pwm_start(FAR struct pwm_lowerhalf_s *dev,
+                            FAR const struct pwm_info_s *info,
+                            FAR void *handle);
 #else
-static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
-                     FAR const struct pwm_info_s *info);
+static int stm32l4pwm_start(FAR struct pwm_lowerhalf_s *dev,
+                            FAR const struct pwm_info_s *info);
 #endif
 
-static int pwm_stop(FAR struct pwm_lowerhalf_s *dev);
-static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev,
-                     int cmd, unsigned long arg);
+static int stm32l4pwm_stop(FAR struct pwm_lowerhalf_s *dev);
+static int stm32l4pwm_ioctl(FAR struct pwm_lowerhalf_s *dev,
+                            int cmd, unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -210,15 +210,15 @@ static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev,
 
 static const struct pwm_ops_s g_pwmops =
 {
-  .setup       = pwm_setup,
-  .shutdown    = pwm_shutdown,
-  .start       = pwm_start,
-  .stop        = pwm_stop,
-  .ioctl       = pwm_ioctl,
+  .setup       = stm32l4pwm_setup,
+  .shutdown    = stm32l4pwm_shutdown,
+  .start       = stm32l4pwm_start,
+  .stop        = stm32l4pwm_stop,
+  .ioctl       = stm32l4pwm_ioctl,
 };
 
 #ifdef CONFIG_STM32L4_TIM1_PWM
-static struct stm32_pwmtimer_s g_pwm1dev =
+static struct stm32l4_pwmtimer_s g_pwm1dev =
 {
   .ops         = &g_pwmops,
   .timid       = 1,
@@ -264,7 +264,7 @@ static struct stm32_pwmtimer_s g_pwm1dev =
 #endif
 
 #ifdef CONFIG_STM32L4_TIM2_PWM
-static struct stm32_pwmtimer_s g_pwm2dev =
+static struct stm32l4_pwmtimer_s g_pwm2dev =
 {
   .ops         = &g_pwmops,
   .timid       = 2,
@@ -310,7 +310,7 @@ static struct stm32_pwmtimer_s g_pwm2dev =
 #endif
 
 #ifdef CONFIG_STM32L4_TIM3_PWM
-static struct stm32_pwmtimer_s g_pwm3dev =
+static struct stm32l4_pwmtimer_s g_pwm3dev =
 {
   .ops         = &g_pwmops,
   .timid       = 3,
@@ -356,7 +356,7 @@ static struct stm32_pwmtimer_s g_pwm3dev =
 #endif
 
 #ifdef CONFIG_STM32L4_TIM4_PWM
-static struct stm32_pwmtimer_s g_pwm4dev =
+static struct stm32l4_pwmtimer_s g_pwm4dev =
 {
   .ops         = &g_pwmops,
   .timid       = 4,
@@ -402,7 +402,7 @@ static struct stm32_pwmtimer_s g_pwm4dev =
 #endif
 
 #ifdef CONFIG_STM32L4_TIM5_PWM
-static struct stm32_pwmtimer_s g_pwm5dev =
+static struct stm32l4_pwmtimer_s g_pwm5dev =
 {
   .ops         = &g_pwmops,
   .timid       = 5,
@@ -448,7 +448,7 @@ static struct stm32_pwmtimer_s g_pwm5dev =
 #endif
 
 #ifdef CONFIG_STM32L4_TIM8_PWM
-static struct stm32_pwmtimer_s g_pwm8dev =
+static struct stm32l4_pwmtimer_s g_pwm8dev =
 {
   .ops         = &g_pwmops,
   .timid       = 8,
@@ -494,7 +494,7 @@ static struct stm32_pwmtimer_s g_pwm8dev =
 #endif
 
 #ifdef CONFIG_STM32L4_TIM15_PWM
-static struct stm32_pwmtimer_s g_pwm15dev =
+static struct stm32l4_pwmtimer_s g_pwm15dev =
 {
   .ops         = &g_pwmops,
   .timid       = 15,
@@ -526,7 +526,7 @@ static struct stm32_pwmtimer_s g_pwm15dev =
 #endif
 
 #ifdef CONFIG_STM32L4_TIM16_PWM
-static struct stm32_pwmtimer_s g_pwm16dev =
+static struct stm32l4_pwmtimer_s g_pwm16dev =
 {
   .ops         = &g_pwmops,
   .timid       = 16,
@@ -551,7 +551,7 @@ static struct stm32_pwmtimer_s g_pwm16dev =
 #endif
 
 #ifdef CONFIG_STM32L4_TIM17_PWM
-static struct stm32_pwmtimer_s g_pwm17dev =
+static struct stm32l4_pwmtimer_s g_pwm17dev =
 {
   .ops         = &g_pwmops,
   .timid       = 17,
@@ -580,7 +580,7 @@ static struct stm32_pwmtimer_s g_pwm17dev =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pwm_getreg
+ * Name: stm32l4pwm_getreg
  *
  * Description:
  *   Read the value of an PWM timer register.
@@ -594,13 +594,13 @@ static struct stm32_pwmtimer_s g_pwm17dev =
  *
  ****************************************************************************/
 
-static uint16_t pwm_getreg(struct stm32_pwmtimer_s *priv, int offset)
+static uint16_t stm32l4pwm_getreg(struct stm32l4_pwmtimer_s *priv, int offset)
 {
   return getreg16(priv->base + offset);
 }
 
 /****************************************************************************
- * Name: pwm_putreg
+ * Name: stm32l4pwm_putreg
  *
  * Description:
  *   Read the value of an PWM timer register.
@@ -614,7 +614,8 @@ static uint16_t pwm_getreg(struct stm32_pwmtimer_s *priv, int offset)
  *
  ****************************************************************************/
 
-static void pwm_putreg(struct stm32_pwmtimer_s *priv, int offset, uint16_t value)
+static void stm32l4pwm_putreg(struct stm32l4_pwmtimer_s *priv, int offset, 
+                              uint16_t value)
 {
   if (priv->timtype == TIMTYPE_GENERAL32 &&
       (offset == STM32L4_GTIM_CNT_OFFSET ||
@@ -639,7 +640,7 @@ static void pwm_putreg(struct stm32_pwmtimer_s *priv, int offset, uint16_t value
 }
 
 /****************************************************************************
- * Name: pwm_dumpregs
+ * Name: stm32l4pwm_dumpregs
  *
  * Description:
  *   Dump all timer registers.
@@ -653,50 +654,51 @@ static void pwm_putreg(struct stm32_pwmtimer_s *priv, int offset, uint16_t value
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_PWM_INFO
-static void pwm_dumpregs(struct stm32_pwmtimer_s *priv, FAR const char *msg)
+static void stm32l4pwm_dumpregs(struct stm32l4_pwmtimer_s *priv,
+                                FAR const char *msg)
 {
   pwminfo("%s:\n", msg);
   pwminfo("  CR1: %04x CR2:  %04x SMCR:  %04x DIER:  %04x\n",
-          pwm_getreg(priv, STM32L4_GTIM_CR1_OFFSET),
-          pwm_getreg(priv, STM32L4_GTIM_CR2_OFFSET),
-          pwm_getreg(priv, STM32L4_GTIM_SMCR_OFFSET),
-          pwm_getreg(priv, STM32L4_GTIM_DIER_OFFSET));
+          stm32l4pwm_getreg(priv, STM32L4_GTIM_CR1_OFFSET),
+          stm32l4pwm_getreg(priv, STM32L4_GTIM_CR2_OFFSET),
+          stm32l4pwm_getreg(priv, STM32L4_GTIM_SMCR_OFFSET),
+          stm32l4pwm_getreg(priv, STM32L4_GTIM_DIER_OFFSET));
   pwminfo("   SR: %04x EGR:  %04x CCMR1: %04x CCMR2: %04x\n",
-          pwm_getreg(priv, STM32L4_GTIM_SR_OFFSET),
-          pwm_getreg(priv, STM32L4_GTIM_EGR_OFFSET),
-          pwm_getreg(priv, STM32L4_GTIM_CCMR1_OFFSET),
-          pwm_getreg(priv, STM32L4_GTIM_CCMR2_OFFSET));
+          stm32l4pwm_getreg(priv, STM32L4_GTIM_SR_OFFSET),
+          stm32l4pwm_getreg(priv, STM32L4_GTIM_EGR_OFFSET),
+          stm32l4pwm_getreg(priv, STM32L4_GTIM_CCMR1_OFFSET),
+          stm32l4pwm_getreg(priv, STM32L4_GTIM_CCMR2_OFFSET));
   pwminfo(" CCER: %04x CNT:  %04x PSC:   %04x ARR:   %04x\n",
-          pwm_getreg(priv, STM32L4_GTIM_CCER_OFFSET),
-          pwm_getreg(priv, STM32L4_GTIM_CNT_OFFSET),
-          pwm_getreg(priv, STM32L4_GTIM_PSC_OFFSET),
-          pwm_getreg(priv, STM32L4_GTIM_ARR_OFFSET));
+          stm32l4pwm_getreg(priv, STM32L4_GTIM_CCER_OFFSET),
+          stm32l4pwm_getreg(priv, STM32L4_GTIM_CNT_OFFSET),
+          stm32l4pwm_getreg(priv, STM32L4_GTIM_PSC_OFFSET),
+          stm32l4pwm_getreg(priv, STM32L4_GTIM_ARR_OFFSET));
   pwminfo(" CCR1: %04x CCR2: %04x CCR3:  %04x CCR4:  %04x\n",
-          pwm_getreg(priv, STM32L4_GTIM_CCR1_OFFSET),
-          pwm_getreg(priv, STM32L4_GTIM_CCR2_OFFSET),
-          pwm_getreg(priv, STM32L4_GTIM_CCR3_OFFSET),
-          pwm_getreg(priv, STM32L4_GTIM_CCR4_OFFSET));
+          stm32l4pwm_getreg(priv, STM32L4_GTIM_CCR1_OFFSET),
+          stm32l4pwm_getreg(priv, STM32L4_GTIM_CCR2_OFFSET),
+          stm32l4pwm_getreg(priv, STM32L4_GTIM_CCR3_OFFSET),
+          stm32l4pwm_getreg(priv, STM32L4_GTIM_CCR4_OFFSET));
 #if defined(CONFIG_STM32L4_TIM1_PWM) || defined(CONFIG_STM32L4_TIM8_PWM)
   if (priv->timtype == TIMTYPE_ADVANCED)
     {
       pwminfo("  RCR: %04x BDTR: %04x DCR:   %04x DMAR:  %04x\n",
-          pwm_getreg(priv, STM32L4_ATIM_RCR_OFFSET),
-          pwm_getreg(priv, STM32L4_ATIM_BDTR_OFFSET),
-          pwm_getreg(priv, STM32L4_ATIM_DCR_OFFSET),
-          pwm_getreg(priv, STM32L4_ATIM_DMAR_OFFSET));
+          stm32l4pwm_getreg(priv, STM32L4_ATIM_RCR_OFFSET),
+          stm32l4pwm_getreg(priv, STM32L4_ATIM_BDTR_OFFSET),
+          stm32l4pwm_getreg(priv, STM32L4_ATIM_DCR_OFFSET),
+          stm32l4pwm_getreg(priv, STM32L4_ATIM_DMAR_OFFSET));
     }
   else
 #endif
     {
       pwminfo("  DCR: %04x DMAR: %04x\n",
-          pwm_getreg(priv, STM32L4_GTIM_DCR_OFFSET),
-          pwm_getreg(priv, STM32L4_GTIM_DMAR_OFFSET));
+          stm32l4pwm_getreg(priv, STM32L4_GTIM_DCR_OFFSET),
+          stm32l4pwm_getreg(priv, STM32L4_GTIM_DMAR_OFFSET));
     }
 }
 #endif
 
 /****************************************************************************
- * Name: pwm_timer
+ * Name: stm32l4pwm_timer
  *
  * Description:
  *   (Re-)initialize the timer resources and start the pulsed output
@@ -710,8 +712,8 @@ static void pwm_dumpregs(struct stm32_pwmtimer_s *priv, FAR const char *msg)
  *
  ****************************************************************************/
 
-static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
-                     FAR const struct pwm_info_s *info)
+static int stm32l4pwm_timer(FAR struct stm32l4_pwmtimer_s *priv,
+                            FAR const struct pwm_info_s *info)
 {
 #ifdef CONFIG_PWM_MULTICHAN
   int      i;
@@ -760,8 +762,8 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
   /* Disable all interrupts and DMA requests, clear all pending status */
 
 #ifdef CONFIG_PWM_PULSECOUNT
-  pwm_putreg(priv, STM32L4_GTIM_DIER_OFFSET, 0);
-  pwm_putreg(priv, STM32L4_GTIM_SR_OFFSET, 0);
+  stm32l4pwm_putreg(priv, STM32L4_GTIM_DIER_OFFSET, 0);
+  stm32l4pwm_putreg(priv, STM32L4_GTIM_SR_OFFSET, 0);
 #endif
 
   /* Calculate optimal values for the timer prescaler and for the timer reload
@@ -831,7 +833,7 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
    * 15-17 CKD[1:0] ARPE              OPM URS UDIS CEN
    */
 
-  cr1 = pwm_getreg(priv, STM32L4_GTIM_CR1_OFFSET);
+  cr1 = stm32l4pwm_getreg(priv, STM32L4_GTIM_CR1_OFFSET);
 
   /* Disable the timer until we get it configured */
 
@@ -861,23 +863,23 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
 
       switch (priv->mode)
         {
-          case STM32_TIMMODE_COUNTUP:
+          case STM32L4_TIMMODE_COUNTUP:
             cr1 |= GTIM_CR1_EDGE;
             break;
 
-          case STM32_TIMMODE_COUNTDOWN:
+          case STM32L4_TIMMODE_COUNTDOWN:
             cr1 |= GTIM_CR1_EDGE | GTIM_CR1_DIR;
             break;
 
-          case STM32_TIMMODE_CENTER1:
+          case STM32L4_TIMMODE_CENTER1:
             cr1 |= GTIM_CR1_CENTER1;
             break;
 
-          case STM32_TIMMODE_CENTER2:
+          case STM32L4_TIMMODE_CENTER2:
             cr1 |= GTIM_CR1_CENTER2;
             break;
 
-          case STM32_TIMMODE_CENTER3:
+          case STM32L4_TIMMODE_CENTER3:
             cr1 |= GTIM_CR1_CENTER3;
             break;
 
@@ -893,12 +895,12 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
    */
 
   cr1 &= ~GTIM_CR1_CKD_MASK;
-  pwm_putreg(priv, STM32L4_GTIM_CR1_OFFSET, cr1);
+  stm32l4pwm_putreg(priv, STM32L4_GTIM_CR1_OFFSET, cr1);
 
   /* Set the reload and prescaler values */
 
-  pwm_putreg(priv, STM32L4_GTIM_ARR_OFFSET, (uint16_t)reload);
-  pwm_putreg(priv, STM32L4_GTIM_PSC_OFFSET, (uint16_t)(prescaler - 1));
+  stm32l4pwm_putreg(priv, STM32L4_GTIM_ARR_OFFSET, (uint16_t)reload);
+  stm32l4pwm_putreg(priv, STM32L4_GTIM_PSC_OFFSET, (uint16_t)(prescaler - 1));
 
   /* Set the advanced timer's repetition counter */
 
@@ -906,7 +908,7 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
   if (priv->timtype == TIMTYPE_ADVANCED)
     {
       /* If a non-zero repetition count has been selected, then set the
-       * repitition counter to the count-1 (pwm_start() has already
+       * repitition counter to the count-1 (stm32l4pwm_start() has already
        * assured us that the count value is within range).
        */
 
@@ -922,22 +924,22 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
            * value.
            */
 
-          priv->prev  = pwm_pulsecount(info->count);
-          pwm_putreg(priv, STM32L4_ATIM_RCR_OFFSET, (uint16_t)priv->prev - 1);
+          priv->prev  = stm32l4pwm_pulsecount(info->count);
+          stm32l4pwm_putreg(priv, STM32L4_ATIM_RCR_OFFSET, (uint16_t)priv->prev - 1);
 
           /* Generate an update event to reload the prescaler.  This should
            * preload the RCR into active repetition counter.
            */
 
-          pwm_putreg(priv, STM32L4_GTIM_EGR_OFFSET, ATIM_EGR_UG);
+          stm32l4pwm_putreg(priv, STM32L4_GTIM_EGR_OFFSET, ATIM_EGR_UG);
 
           /* Now set the value of the RCR that will be loaded on the next
            * update event.
            */
 
           priv->count = info->count;
-          priv->curr  = pwm_pulsecount(info->count - priv->prev);
-          pwm_putreg(priv, STM32L4_ATIM_RCR_OFFSET, (uint16_t)priv->curr - 1);
+          priv->curr  = stm32l4pwm_pulsecount(info->count - priv->prev);
+          stm32l4pwm_putreg(priv, STM32L4_ATIM_RCR_OFFSET, (uint16_t)priv->curr - 1);
         }
 
       /* Otherwise, just clear the repetition counter */
@@ -947,11 +949,11 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
         {
           /* Set the repetition counter to zero */
 
-          pwm_putreg(priv, STM32L4_ATIM_RCR_OFFSET, 0);
+          stm32l4pwm_putreg(priv, STM32L4_ATIM_RCR_OFFSET, 0);
 
           /* Generate an update event to reload the prescaler */
 
-          pwm_putreg(priv, STM32L4_GTIM_EGR_OFFSET, ATIM_EGR_UG);
+          stm32l4pwm_putreg(priv, STM32L4_GTIM_EGR_OFFSET, ATIM_EGR_UG);
         }
     }
   else
@@ -959,7 +961,7 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
     {
       /* Generate an update event to reload the prescaler (all timers) */
 
-      pwm_putreg(priv, STM32L4_GTIM_EGR_OFFSET, ATIM_EGR_UG);
+      stm32l4pwm_putreg(priv, STM32L4_GTIM_EGR_OFFSET, ATIM_EGR_UG);
     }
 
   /* Handle channel specific setup */
@@ -979,7 +981,7 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
 #ifdef CONFIG_PWM_MULTICHAN
       int                   j;
 #endif
-      enum stm32_chanmode_e mode;
+      enum stm32l4_chanmode_e mode;
 
 #ifdef CONFIG_PWM_MULTICHAN
       duty = info->channels[i].duty;
@@ -1025,30 +1027,30 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
 
       switch (mode)
         {
-          case STM32_CHANMODE_PWM1:
+          case STM32L4_CHANMODE_PWM1:
             chanmode = ATIM_CCMR_MODE_PWM1;
             break;
 
-          case STM32_CHANMODE_PWM2:
+          case STM32L4_CHANMODE_PWM2:
             chanmode = ATIM_CCMR_MODE_PWM2;
             break;
 
-          case STM32_CHANMODE_COMBINED1:
+          case STM32L4_CHANMODE_COMBINED1:
             chanmode = ATIM_CCMR_MODE_COMBINED1;
             ocmbit = true;
             break;
 
-          case STM32_CHANMODE_COMBINED2:
+          case STM32L4_CHANMODE_COMBINED2:
             chanmode = ATIM_CCMR_MODE_COMBINED2;
             ocmbit = true;
             break;
 
-          case STM32_CHANMODE_ASYMMETRIC1:
+          case STM32L4_CHANMODE_ASYMMETRIC1:
             chanmode = ATIM_CCMR_MODE_ASYMMETRIC1;
             ocmbit = true;
             break;
 
-          case STM32_CHANMODE_ASYMMETRIC2:
+          case STM32L4_CHANMODE_ASYMMETRIC2:
             chanmode = ATIM_CCMR_MODE_ASYMMETRIC2;
             ocmbit = true;
             break;
@@ -1079,7 +1081,7 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
 
               /* Set the duty cycle by writing to the CCR register for this channel */
 
-              pwm_putreg(priv, STM32L4_GTIM_CCR1_OFFSET, (uint16_t)ccr);
+              stm32l4pwm_putreg(priv, STM32L4_GTIM_CCR1_OFFSET, (uint16_t)ccr);
             }
             break;
 
@@ -1102,7 +1104,7 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
 
               /* Set the duty cycle by writing to the CCR register for this channel */
 
-              pwm_putreg(priv, STM32L4_GTIM_CCR2_OFFSET, (uint16_t)ccr);
+              stm32l4pwm_putreg(priv, STM32L4_GTIM_CCR2_OFFSET, (uint16_t)ccr);
             }
             break;
 
@@ -1125,7 +1127,7 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
 
               /* Set the duty cycle by writing to the CCR register for this channel */
 
-              pwm_putreg(priv, STM32L4_GTIM_CCR3_OFFSET, (uint16_t)ccr);
+              stm32l4pwm_putreg(priv, STM32L4_GTIM_CCR3_OFFSET, (uint16_t)ccr);
             }
             break;
 
@@ -1148,7 +1150,7 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
 
               /* Set the duty cycle by writing to the CCR register for this channel */
 
-              pwm_putreg(priv, STM32L4_GTIM_CCR4_OFFSET, (uint16_t)ccr);
+              stm32l4pwm_putreg(priv, STM32L4_GTIM_CCR4_OFFSET, (uint16_t)ccr);
             }
             break;
 
@@ -1160,15 +1162,15 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
 
   /* Disable the Channel by resetting the CCxE Bit in the CCER register */
 
-  ccer = pwm_getreg(priv, STM32L4_GTIM_CCER_OFFSET);
+  ccer = stm32l4pwm_getreg(priv, STM32L4_GTIM_CCER_OFFSET);
   ccer &= ~ccenable;
-  pwm_putreg(priv, STM32L4_GTIM_CCER_OFFSET, ccer);
+  stm32l4pwm_putreg(priv, STM32L4_GTIM_CCER_OFFSET, ccer);
 
   /* Fetch the CR2, CCMR1, and CCMR2 register (already have cr1 and ccer) */
 
-  cr2   = pwm_getreg(priv, STM32L4_GTIM_CR2_OFFSET);
-  ccmr1 = pwm_getreg(priv, STM32L4_GTIM_CCMR1_OFFSET);
-  ccmr2 = pwm_getreg(priv, STM32L4_GTIM_CCMR2_OFFSET);
+  cr2   = stm32l4pwm_getreg(priv, STM32L4_GTIM_CR2_OFFSET);
+  ccmr1 = stm32l4pwm_getreg(priv, STM32L4_GTIM_CCMR1_OFFSET);
+  ccmr2 = stm32l4pwm_getreg(priv, STM32L4_GTIM_CCMR2_OFFSET);
 
   /* Reset the Output Compare Mode Bits and set the select output compare mode */
 
@@ -1215,10 +1217,10 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
        * bits in the BDTR register.
        */
 
-      bdtr  = pwm_getreg(priv, STM32L4_ATIM_BDTR_OFFSET);
+      bdtr  = stm32l4pwm_getreg(priv, STM32L4_ATIM_BDTR_OFFSET);
       bdtr &= ~(ATIM_BDTR_OSSI | ATIM_BDTR_OSSR);
       bdtr |= ATIM_BDTR_MOE;
-      pwm_putreg(priv, STM32L4_ATIM_BDTR_OFFSET, bdtr);
+      stm32l4pwm_putreg(priv, STM32L4_ATIM_BDTR_OFFSET, bdtr);
     }
   else
 #endif
@@ -1228,19 +1230,19 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
 
   /* Save the modified register values */
 
-  pwm_putreg(priv, STM32L4_GTIM_CR2_OFFSET, cr2);
+  stm32l4pwm_putreg(priv, STM32L4_GTIM_CR2_OFFSET, cr2);
   putreg32(ccmr1, priv->base + STM32L4_GTIM_CCMR1_OFFSET);
   putreg32(ccmr2, priv->base + STM32L4_GTIM_CCMR2_OFFSET);
-  pwm_putreg(priv, STM32L4_GTIM_CCER_OFFSET, ccer);
+  stm32l4pwm_putreg(priv, STM32L4_GTIM_CCER_OFFSET, ccer);
 
   /* Set the ARR Preload Bit */
 
-  cr1 = pwm_getreg(priv, STM32L4_GTIM_CR1_OFFSET);
+  cr1 = stm32l4pwm_getreg(priv, STM32L4_GTIM_CR1_OFFSET);
   cr1 |= GTIM_CR1_ARPE;
-  pwm_putreg(priv, STM32L4_GTIM_CR1_OFFSET, cr1);
+  stm32l4pwm_putreg(priv, STM32L4_GTIM_CR1_OFFSET, cr1);
 
   /* Setup update interrupt.  If info->count is > 0, then we can be
-   * assured that pwm_start() has already verified: (1) that this is an
+   * assured that stm32l4pwm_start() has already verified: (1) that this is an
    * advanced timer, and that (2) the repetition count is within range.
    */
 
@@ -1249,13 +1251,13 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
     {
       /* Clear all pending interrupts and enable the update interrupt. */
 
-      pwm_putreg(priv, STM32L4_GTIM_SR_OFFSET, 0);
-      pwm_putreg(priv, STM32L4_GTIM_DIER_OFFSET, ATIM_DIER_UIE);
+      stm32l4pwm_putreg(priv, STM32L4_GTIM_SR_OFFSET, 0);
+      stm32l4pwm_putreg(priv, STM32L4_GTIM_DIER_OFFSET, ATIM_DIER_UIE);
 
       /* Enable the timer */
 
       cr1 |= GTIM_CR1_CEN;
-      pwm_putreg(priv, STM32L4_GTIM_CR1_OFFSET, cr1);
+      stm32l4pwm_putreg(priv, STM32L4_GTIM_CR1_OFFSET, cr1);
 
       /* And enable timer interrupts at the NVIC */
 
@@ -1267,16 +1269,16 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
       /* Just enable the timer, leaving all interrupts disabled */
 
       cr1 |= GTIM_CR1_CEN;
-      pwm_putreg(priv, STM32L4_GTIM_CR1_OFFSET, cr1);
+      stm32l4pwm_putreg(priv, STM32L4_GTIM_CR1_OFFSET, cr1);
     }
 
-  pwm_dumpregs(priv, "After starting");
+  stm32l4pwm_dumpregs(priv, "After starting");
   return OK;
 }
 
 #ifndef CONFIG_PWM_PULSECOUNT
 /****************************************************************************
- * Name: pwm_update_duty
+ * Name: stm32l4pwm_update_duty
  *
  * Description:
  *   Try to change only channel duty.
@@ -1291,8 +1293,8 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
  *
  ****************************************************************************/
 
-static  int pwm_update_duty(FAR struct stm32_pwmtimer_s *priv, uint8_t channel,
-                            ub16_t duty)
+static  int stm32l4pwm_update_duty(FAR struct stm32l4_pwmtimer_s *priv,
+                                   uint8_t channel, ub16_t duty)
 {
   /* Register offset */
 
@@ -1315,7 +1317,7 @@ static  int pwm_update_duty(FAR struct stm32_pwmtimer_s *priv, uint8_t channel,
 
   /* Get the reload values */
 
-  reload = pwm_getreg(priv, STM32L4_GTIM_ARR_OFFSET);
+  reload = stm32l4pwm_getreg(priv, STM32L4_GTIM_ARR_OFFSET);
 
   /* Duty cycle:
    *
@@ -1351,14 +1353,14 @@ static  int pwm_update_duty(FAR struct stm32_pwmtimer_s *priv, uint8_t channel,
 
   /* Set the duty cycle by writing to the CCR register for this channel */
 
-  pwm_putreg(priv, ccr_offset, (uint16_t)ccr);
+  stm32l4pwm_putreg(priv, ccr_offset, (uint16_t)ccr);
 
   return OK;
 }
 #endif
 
 /****************************************************************************
- * Name: pwm_interrupt
+ * Name: stm32l4pwm_interrupt
  *
  * Description:
  *   Handle timer interrupts.
@@ -1371,19 +1373,19 @@ static  int pwm_update_duty(FAR struct stm32_pwmtimer_s *priv, uint8_t channel,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_PWM_PULSECOUNT) && (defined(CONFIG_STM32_TIM1_PWM) || defined(CONFIG_STM32_TIM8_PWM))
-static int pwm_interrupt(struct stm32_pwmtimer_s *priv)
+#if defined(CONFIG_PWM_PULSECOUNT) && (defined(CONFIG_STM32L4_TIM1_PWM) || defined(CONFIG_STM32L4_TIM8_PWM))
+static int stm32l4pwm_interrupt(struct stm32l4_pwmtimer_s *priv)
 {
   uint16_t regval;
 
   /* Verify that this is an update interrupt.  Nothing else is expected. */
 
-  regval = pwm_getreg(priv, STM32L4_ATIM_SR_OFFSET);
+  regval = stm32l4pwm_getreg(priv, STM32L4_ATIM_SR_OFFSET);
   DEBUGASSERT((regval & ATIM_SR_UIF) != 0);
 
   /* Clear the UIF interrupt bit */
 
-  pwm_putreg(priv, STM32L4_ATIM_SR_OFFSET, regval & ~ATIM_SR_UIF);
+  stm32l4pwm_putreg(priv, STM32L4_ATIM_SR_OFFSET, regval & ~ATIM_SR_UIF);
 
   /* Calculate the new count by subtracting the number of pulses
    * since the last interrupt.
@@ -1395,13 +1397,13 @@ static int pwm_interrupt(struct stm32_pwmtimer_s *priv)
        * quickly as possible.
        */
 
-      regval  = pwm_getreg(priv, STM32L4_ATIM_BDTR_OFFSET);
+      regval  = stm32l4pwm_getreg(priv, STM32L4_ATIM_BDTR_OFFSET);
       regval &= ~ATIM_BDTR_MOE;
-      pwm_putreg(priv, STM32L4_ATIM_BDTR_OFFSET, regval);
+      stm32l4pwm_putreg(priv, STM32L4_ATIM_BDTR_OFFSET, regval);
 
       /* Disable first interrtups, stop and reset the timer */
 
-      (void)pwm_stop((FAR struct pwm_lowerhalf_s *)priv);
+      (void)stm32l4pwm_stop((FAR struct pwm_lowerhalf_s *)priv);
 
       /* Then perform the callback into the upper half driver */
 
@@ -1427,8 +1429,8 @@ static int pwm_interrupt(struct stm32_pwmtimer_s *priv)
        */
 
       priv->prev = priv->curr;
-      priv->curr = pwm_pulsecount(priv->count - priv->prev);
-      pwm_putreg(priv, STM32L4_ATIM_RCR_OFFSET, (uint16_t)priv->curr - 1);
+      priv->curr = stm32l4pwm_pulsecount(priv->count - priv->prev);
+      stm32l4pwm_putreg(priv, STM32L4_ATIM_RCR_OFFSET, (uint16_t)priv->curr - 1);
     }
 
   /* Now all of the time critical stuff is done so we can do some debug output */
@@ -1454,22 +1456,22 @@ static int pwm_interrupt(struct stm32_pwmtimer_s *priv)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_PWM_PULSECOUNT) && defined(CONFIG_STM32_TIM1_PWM)
-static int pwm_tim1interrupt(int irq, void *context)
+#if defined(CONFIG_PWM_PULSECOUNT) && defined(CONFIG_STM32L4_TIM1_PWM)
+static int stm32l4pwm_tim1interrupt(int irq, void *context)
 {
-  return pwm_interrupt(&g_pwm1dev);
+  return stm32l4pwm_interrupt(&g_pwm1dev);
 }
 #endif
 
-#if defined(CONFIG_PWM_PULSECOUNT) && defined(CONFIG_STM32_TIM8_PWM)
-static int pwm_tim8interrupt(int irq, void *context)
+#if defined(CONFIG_PWM_PULSECOUNT) && defined(CONFIG_STM32L4_TIM8_PWM)
+static int stm32l4pwm_tim8interrupt(int irq, void *context)
 {
-  return pwm_interrupt(&g_pwm8dev);
+  return stm32l4pwm_interrupt(&g_pwm8dev);
 }
 #endif
 
 /****************************************************************************
- * Name: pwm_pulsecount
+ * Name: stm32l4pwm_pulsecount
  *
  * Description:
  *   Pick an optimal pulse count to program the RCR.
@@ -1482,8 +1484,8 @@ static int pwm_tim8interrupt(int irq, void *context)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_PWM_PULSECOUNT) && (defined(CONFIG_STM32_TIM1_PWM) || defined(CONFIG_STM32_TIM8_PWM))
-static uint8_t pwm_pulsecount(uint32_t count)
+#if defined(CONFIG_PWM_PULSECOUNT) && (defined(CONFIG_STM32L4_TIM1_PWM) || defined(CONFIG_STM32L4_TIM8_PWM))
+static uint8_t stm32l4pwm_pulsecount(uint32_t count)
 {
   /* The the remaining pulse count is less than or equal to the maximum, the
    * just return the count.
@@ -1516,7 +1518,7 @@ static uint8_t pwm_pulsecount(uint32_t count)
 #endif
 
 /****************************************************************************
- * Name: pwm_set_apb_clock
+ * Name: stm32l4pwm_setapbclock
  *
  * Description:
  *   Enable or disable APB clock for the timer peripheral
@@ -1527,7 +1529,7 @@ static uint8_t pwm_pulsecount(uint32_t count)
  *
  ****************************************************************************/
 
-static void pwm_set_apb_clock(FAR struct stm32_pwmtimer_s *priv, bool on)
+static void stm32l4pwm_setapbclock(FAR struct stm32l4_pwmtimer_s *priv, bool on)
 {
   uint32_t en_bit;
   uint32_t regaddr;
@@ -1607,7 +1609,7 @@ static void pwm_set_apb_clock(FAR struct stm32_pwmtimer_s *priv, bool on)
 }
 
 /****************************************************************************
- * Name: pwm_setup
+ * Name: stm32l4pwm_setup
  *
  * Description:
  *   This method is called when the driver is opened.  The lower half driver
@@ -1626,18 +1628,18 @@ static void pwm_set_apb_clock(FAR struct stm32_pwmtimer_s *priv, bool on)
  *
  ****************************************************************************/
 
-static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
+static int stm32l4pwm_setup(FAR struct pwm_lowerhalf_s *dev)
 {
-  FAR struct stm32_pwmtimer_s *priv = (FAR struct stm32_pwmtimer_s *)dev;
+  FAR struct stm32l4_pwmtimer_s *priv = (FAR struct stm32l4_pwmtimer_s *)dev;
   uint32_t pincfg;
   int i;
 
   pwminfo("TIM%u\n", priv->timid);
-  pwm_dumpregs(priv, "Initially");
+  stm32l4pwm_dumpregs(priv, "Initially");
 
   /* Enable APB1/2 clocking for timer. */
 
-  pwm_set_apb_clock(priv, true);
+  stm32l4pwm_setapbclock(priv, true);
 
   /* Configure the PWM output pins, but do not start the timer yet */
 
@@ -1651,7 +1653,7 @@ static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
 
       pwminfo("pincfg: %08x\n", pincfg);
 
-      stm32_configgpio(pincfg);
+      stm32l4_configgpio(pincfg);
       pwm_dumpgpio(pincfg, "PWM setup");
     }
 
@@ -1659,7 +1661,7 @@ static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
 }
 
 /****************************************************************************
- * Name: pwm_shutdown
+ * Name: stm32l4pwm_shutdown
  *
  * Description:
  *   This method is called when the driver is closed.  The lower half driver
@@ -1674,9 +1676,9 @@ static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
  *
  ****************************************************************************/
 
-static int pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
+static int stm32l4pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
 {
-  FAR struct stm32_pwmtimer_s *priv = (FAR struct stm32_pwmtimer_s *)dev;
+  FAR struct stm32l4_pwmtimer_s *priv = (FAR struct stm32l4_pwmtimer_s *)dev;
   uint32_t pincfg;
   int i;
 
@@ -1684,11 +1686,11 @@ static int pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
 
   /* Make sure that the output has been stopped */
 
-  pwm_stop(dev);
+  stm32l4pwm_stop(dev);
 
   /* Disable APB1/2 clocking for timer. */
 
-  pwm_set_apb_clock(priv, false);
+  stm32l4pwm_setapbclock(priv, false);
 
   /* Then put the GPIO pins back to the default state */
 
@@ -1706,14 +1708,14 @@ static int pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
 
       pincfg |= GPIO_INPUT | GPIO_FLOAT;
 
-      stm32_configgpio(pincfg);
+      stm32l4_configgpio(pincfg);
     }
 
   return OK;
 }
 
 /****************************************************************************
- * Name: pwm_start
+ * Name: stm32l4pwm_start
  *
  * Description:
  *   (Re-)initialize the timer resources and start the pulsed output
@@ -1728,11 +1730,11 @@ static int pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_PWM_PULSECOUNT
-static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
+static int stm32l4pwm_start(FAR struct pwm_lowerhalf_s *dev,
                      FAR const struct pwm_info_s *info,
                      FAR void *handle)
 {
-  FAR struct stm32_pwmtimer_s *priv = (FAR struct stm32_pwmtimer_s *)dev;
+  FAR struct stm32l4_pwmtimer_s *priv = (FAR struct stm32l4_pwmtimer_s *)dev;
 
   /* Check if a pulsecount has been selected */
 
@@ -1754,14 +1756,14 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
 
   /* Start the time */
 
-  return pwm_timer(priv, info);
+  return stm32l4pwm_timer(priv, info);
 }
 #else
-static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
+static int stm32l4pwm_start(FAR struct pwm_lowerhalf_s *dev,
                      FAR const struct pwm_info_s *info)
 {
   int ret = OK;
-  FAR struct stm32_pwmtimer_s *priv = (FAR struct stm32_pwmtimer_s *)dev;
+  FAR struct stm32l4_pwmtimer_s *priv = (FAR struct stm32l4_pwmtimer_s *)dev;
 
 #ifndef CONFIG_PWM_PULSECOUNT
   /* if frequency has not changed we just update duty */
@@ -1773,17 +1775,17 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
 
       for (i = 0; ret == OK && i < CONFIG_PWM_NCHANNELS; i++)
         {
-          ret = pwm_update_duty(priv,info->channels[i].channel,
+          ret = stm32l4pwm_update_duty(priv,info->channels[i].channel,
                                 info->channels[i].duty);
         }
 #else
-      ret = pwm_update_duty(priv,priv->channels[0].channel,info->duty);
+      ret = stm32l4pwm_update_duty(priv,priv->channels[0].channel,info->duty);
 #endif
     }
   else
 #endif
     {
-      ret = pwm_timer(priv, info);
+      ret = stm32l4pwm_timer(priv, info);
 
 #ifndef CONFIG_PWM_PULSECOUNT
       /* Save current frequency */
@@ -1800,7 +1802,7 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
 #endif
 
 /****************************************************************************
- * Name: pwm_stop
+ * Name: stm32l4pwm_stop
  *
  * Description:
  *   Stop the pulsed output and reset the timer resources
@@ -1818,9 +1820,9 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
  *
  ****************************************************************************/
 
-static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
+static int stm32l4pwm_stop(FAR struct pwm_lowerhalf_s *dev)
 {
-  FAR struct stm32_pwmtimer_s *priv = (FAR struct stm32_pwmtimer_s *)dev;
+  FAR struct stm32l4_pwmtimer_s *priv = (FAR struct stm32l4_pwmtimer_s *)dev;
   uint32_t resetbit;
   uint32_t regaddr;
   uint32_t regval;
@@ -1840,8 +1842,8 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
 
   /* Disable further interrupts and stop the timer */
 
-  pwm_putreg(priv, STM32L4_GTIM_DIER_OFFSET, 0);
-  pwm_putreg(priv, STM32L4_GTIM_SR_OFFSET, 0);
+  stm32l4pwm_putreg(priv, STM32L4_GTIM_DIER_OFFSET, 0);
+  stm32l4pwm_putreg(priv, STM32L4_GTIM_SR_OFFSET, 0);
 
   /* Determine which timer to reset */
 
@@ -1900,7 +1902,7 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
     }
 
   /* Reset the timer - stopping the output and putting the timer back
-   * into a state where pwm_start() can be called.
+   * into a state where stm32l4pwm_start() can be called.
    */
 
   regval  = getreg32(regaddr);
@@ -1912,12 +1914,12 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
   leave_critical_section(flags);
 
   pwminfo("regaddr: %08x resetbit: %08x\n", regaddr, resetbit);
-  pwm_dumpregs(priv, "After stop");
+  stm32l4pwm_dumpregs(priv, "After stop");
   return OK;
 }
 
 /****************************************************************************
- * Name: pwm_ioctl
+ * Name: stm32l4pwm_ioctl
  *
  * Description:
  *   Lower-half logic may support platform-specific ioctl commands
@@ -1932,10 +1934,11 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
  *
  ****************************************************************************/
 
-static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev, int cmd, unsigned long arg)
+static int stm32l4pwm_ioctl(FAR struct pwm_lowerhalf_s *dev, int cmd, 
+                            unsigned long arg)
 {
 #ifdef CONFIG_DEBUG_PWM_INFO
-  FAR struct stm32_pwmtimer_s *priv = (FAR struct stm32_pwmtimer_s *)dev;
+  FAR struct stm32l4_pwmtimer_s *priv = (FAR struct stm32l4_pwmtimer_s *)dev;
 
   /* There are no platform-specific ioctl commands */
 
@@ -1967,7 +1970,7 @@ static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev, int cmd, unsigned long arg
 
 FAR struct pwm_lowerhalf_s *stm32l4_pwminitialize(int timer)
 {
-  FAR struct stm32_pwmtimer_s *lower;
+  FAR struct stm32l4_pwmtimer_s *lower;
 
   pwminfo("TIM%u\n", timer);
 
@@ -1980,7 +1983,7 @@ FAR struct pwm_lowerhalf_s *stm32l4_pwminitialize(int timer)
         /* Attach but disable the TIM1 update interrupt */
 
 #ifdef CONFIG_PWM_PULSECOUNT
-        irq_attach(lower->irq, pwm_tim1interrupt);
+        irq_attach(lower->irq, stm32l4pwm_tim1interrupt);
         up_disable_irq(lower->irq);
 #endif
         break;
@@ -2017,7 +2020,7 @@ FAR struct pwm_lowerhalf_s *stm32l4_pwminitialize(int timer)
         /* Attach but disable the TIM8 update interrupt */
 
 #ifdef CONFIG_PWM_PULSECOUNT
-        irq_attach(lower->irq, pwm_tim8interrupt);
+        irq_attach(lower->irq, stm32l4pwm_tim8interrupt);
         up_disable_irq(lower->irq);
 #endif
         break;

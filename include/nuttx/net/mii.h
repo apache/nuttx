@@ -547,7 +547,7 @@
 #define MII_KSZ80x1_INT_LU           (1 << 0)  /* Link up interrupt */
 
 /* KSZ8041 Register 0x1e: PHY Control 1 -- To be provided */
-/* KSZ8041 Register 0x1e: PHY Control 2 */
+/* KSZ8041 Register 0x1f: PHY Control 2 */
 
 #define MII_PHYCTRL2_MDIX            (1 << 15) /* Bit 15: Micrel/HP MDI/MDI-X state */
 #define MII_PHYCTRL2_MDIX_SEL        (1 << 14) /* Bit 14: MDI/MDI-X select */

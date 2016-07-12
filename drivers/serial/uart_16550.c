@@ -871,14 +871,17 @@ static int u16550_ioctl(struct file *filep, int cmd, unsigned long arg)
   struct inode      *inode = filep->f_inode;
   struct uart_dev_s *dev   = inode->i_private;
   struct u16550_s   *priv  = (FAR struct u16550_s *)dev->priv;
+  int ret;
 
 #ifdef CONFIG_SERIAL_UART_ARCH_IOCTL
-  int ret = uart_ioctl(filep, cmd, arg);
+  ret = uart_ioctl(filep, cmd, arg);
 
   if (ret != -ENOTTY)
     {
       return ret;
     }
+#else
+  ret = OK;
 #endif
 
   switch (cmd)

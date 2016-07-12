@@ -10,8 +10,12 @@ Contents
   o Freedom K64F Features
   o Serial Console
   o LEDs and Buttons
+  o Ethernet
   o Development Environment
   o GNU Toolchain Options
+  o Freedom K64F Configuration Options
+  o Configurations
+  o Status
 
 Kinetis Freedom K64F Features:
 =============================
@@ -124,6 +128,40 @@ LEDs and Buttons
   --------- ---------------------------------------------------------------
   SW2       PTC6/SPI0_SOUT/PD0_EXTRG/I2S0_RX_BCLK/FB_AD9/I2S0_MCLK/LLWU_P10
   SW3       PTA4/FTM0_CH1/NMI_b/LLWU_P3
+
+Ethernet
+========
+
+  ------------ ----------------- --------------------------------------------
+  KSZ8081      Board Signal(s)   K64F Pin
+  Pin Signal                     Function
+  --- -------- ----------------- --------------------------------------------
+   1  VDD_1V2  VDDPLL_1.2V       ---
+   2  VDDA_3V3 VDDA_ENET         ---
+   3  RXM      ENET1_RX-         ---
+   4  RXP      ENET1_RX+         ---
+   5  TXM      ENET1_TX-         ---
+   6  TXP      ENET1_TX+         ---
+   7  X0       RMII_XTAL0        ---
+   8  XI       RMII_XTAL1        ---
+   9  REXT     ---               ---, Apparently not connected
+  10  MDIO     RMII0_MDIO        PTB0/RMII0_MDIO
+  11  MDC      RMII0_MDC         PTB1/RMII0_MDC
+  12  RXD1     RMII0_RXD_1       PTA12/RMII0_RXD1
+  13  RXD0     RMII0_RXD_0       PTA13/RMII0_RXD0
+  14  VDDIO    VDDIO_ENET        ---
+  15  CRS_DIV                    PTA14/RMII0_CRS_DV
+  16  REF_CLK  RMII_RXCLK        PTA18/EXTAL0, PHY clock input
+  17  RXER     RMII0_RXER        PTA5/RMII0_RXER
+  18  INTRP    RMII0_INT_B,      J14 Pin 2, Apparently not available unless jumpered
+               PHY_INT_1
+  19  TXEN     RMII0_TXEN        PTA15/RMII0_TXEN
+  20  TXD0     RMII0_TXD_0       PTA16/RMII0_TXD0
+  21  TXD1     RMII0_TXD_1       PTA17/RMII0_TXD1
+  22  GND1     ---               ---
+  24  nRST     PHY_RST_B         ---
+  25  GND2     ---               ---
+  --- -------- ----------------- --------------------------------------------
 
 Development Environment
 =======================
@@ -345,6 +383,23 @@ can be selected as follow:
 
 Where <subdir> is one of the following:
 
+  netnsh:
+  ------
+    This configuration is identical to the nsh configuration described
+    below except that networking support is enabled.
+
+    NOTES:
+
+    1. Most of the notes associated with the nsh configuration apply here
+       as well (see below).
+
+    2. Default platform/toolchain:
+
+       CONFIG_HOST_WINDOWS=y               : Cygwin under Windows
+       CONFIG_WINDOWS_CYGWIN=y
+       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : ARM/mbed toolcahin (arm-none-elf-gcc)
+       CONFIG_INTELHEX_BINARY=y            : Output formats: Intel hex binary
+
   nsh:
   ---
     Configures the NuttShell (nsh) located at apps/examples/nsh using a
@@ -366,7 +421,7 @@ Where <subdir> is one of the following:
        CONFIG_HOST_LINUX=y                 : Linux (Cygwin under Windows okay too).
        CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot (arm-nuttx-elf-gcc)
        CONFIG_ARMV7M_OABI_TOOLCHAIN=y      : The older OABI version
-       CONFIG_RAW_BINARY=y                 : Output formats: ELF and raw binary
+       CONFIG_INTELHEX_BINARY=y            : Output formats: Intel hex binary
 
     3. The Serial Console is provided on UART3 with the correct pin
        configuration for use with an Arduino Serial Shield.
@@ -391,3 +446,14 @@ Where <subdir> is one of the following:
       CONFIG_SCHED_WORKQUEUE=y             : Enable the NuttX workqueue
 
       CONFIG_NSH_ARCHINIT=y                : Provide NSH initializeation logic
+
+Status
+======
+
+  2016-07-11:  Received hardware today and the board came up on the very
+    first try.  That does not happen often.  At this point, the very basic
+    NSH configuration is working and LEDs are working.  The only odd
+    behavior that I see is that pressing SW3 causes an unexpected interrupt
+    error.
+  2016-07-12:  Added support for the KSZ8081 PHY and added the netnsh
+    configuration.  Untested as of this writing.

@@ -1,7 +1,7 @@
 /************************************************************************************
- * configs/teensy-3.x/src/k20_usbdev.c
+ * configs/stm32f4discovery/src/stm32_ostest.c
  *
- *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,103 +39,73 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 #include <debug.h>
 
-#include <nuttx/usb/usbdev.h>
-#include <nuttx/usb/usbdev_trace.h>
+#include <nuttx/irq.h>
+#include <arch/board/board.h>
 
 #include "up_arch.h"
-#include "kinetis.h"
-#include "kinetis_usbotg.h"
-#include "chip/kinetis_sim.h"
-#include "teensy-3x.h"
+#include "up_internal.h"
+#include "stm32f4discovery.h"
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
 
-#define khci_getreg(addr)      getreg8(addr)
-#define khci_putreg(val,addr)  putreg8(val,addr)
-#define SIM_CLKDIV2_USBDIV(n)  (uint32_t)(((n) & 0x07) << 1)
+/* Configuration ********************************************************************/
+
+#undef HAVE_FPU
+#if defined(CONFIG_ARCH_FPU) && !defined(CONFIG_EXAMPLES_OSTEST_FPUTESTDISABLE) && \
+    defined(CONFIG_EXAMPLES_OSTEST_FPUSIZE) && defined(CONFIG_SCHED_WAITPID) && \
+    !defined(CONFIG_DISABLE_SIGNALS)
+#    define HAVE_FPU 1
+#endif
+
+#ifdef HAVE_FPU
+
+#if CONFIG_EXAMPLES_OSTEST_FPUSIZE != (4*SW_FPU_REGS)
+#  error "CONFIG_EXAMPLES_OSTEST_FPUSIZE has the wrong size"
+#endif
+
+/************************************************************************************
+ * Private Data
+ ************************************************************************************/
+
+static uint32_t g_saveregs[XCPTCONTEXT_REGS];
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
-/************************************************************************************
- * Name: kinetis_usbinitialize
- *
- * Description:
- *   Called to setup USB-related GPIO pins for the KwikStik-K40 board.
- *
- ************************************************************************************/
+/* Given an array of size CONFIG_EXAMPLES_OSTEST_FPUSIZE, this function will return
+ * the current FPU registers.
+ */
 
-void kinetis_usbinitialize(void)
+void arch_getfpu(FAR uint32_t *fpusave)
 {
+  irqstate_t flags;
+
+  /* Take a snapshot of the thread context right now */
+
+  flags = enter_critical_section();
+  up_saveusercontext(g_saveregs);
+
+  /* Return only the floating register values */
+
+  memcpy(fpusave, &g_saveregs[REG_S0], (4*SW_FPU_REGS));
+  leave_critical_section(flags);
 }
 
-/************************************************************************************
- * Name:  kinetis_usbpullup
- *
- * Description:
- *   If USB is supported and the board supports a pullup via GPIO (for USB software
- *   connect and disconnect), then the board software must provide kinetis_pullup.
- *   See include/nuttx/usb/usbdev.h for additional description of this method.
- *   Alternatively, if no pull-up GPIO the following EXTERN can be redefined to be
- *   NULL.
- *
- ************************************************************************************/
+/* Given two arrays of size CONFIG_EXAMPLES_OSTEST_FPUSIZE this function
+ * will compare them and return true if they are identical.
+ */
 
-int kinetis_usbpullup(FAR struct usbdev_s *dev, bool enable)
+bool arch_cmpfpu(FAR const uint32_t *fpusave1, FAR const uint32_t *fpusave2)
 {
-  usbtrace(TRACE_DEVPULLUP, (uint16_t)enable);
-#if 0
-  uint32_t regval;
-#endif
-
-  if (enable)
-    {
-      khci_putreg(USB_CONTROL_DPPULLUPNONOTG, KINETIS_USB0_CONTROL);
-    }
-  else
-    {
-      khci_putreg(0,KINETIS_USB0_CONTROL);
-    }
-
-#if 0
-  regval = khci_getreg(KINETIS_USB0_OTGCTL);
-
-  if (enable)
-    {
-      regval |= (1 << 2);
-    }
-  else
-    {
-      regval &= ~(1 << 2);
-    }
-
-  khci_putreg(regval,KINETIS_USB0_OTGCTL);
-#endif
-
-  return OK;
+  return memcmp(fpusave1, fpusave2, (4*SW_FPU_REGS)) == 0;
 }
 
-/************************************************************************************
- * Name:  kinetis_usbsuspend
- *
- * Description:
- *   Board logic must provide the kinetis_usbsuspend logic if the USBDEV driver is
- *   used.  This function is called whenever the USB enters or leaves suspend mode.
- *   This is an opportunity for the board logic to shutdown clocks, power, etc.
- *   while the USB is suspended.
- *
- ************************************************************************************/
-
-void kinetis_usbsuspend(FAR struct usbdev_s *dev, bool resume)
-{
-  uinfo("resume: %d\n", resume);
-#warning "Missing logic"
-}
+#endif /* HAVE_FPU */
