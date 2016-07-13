@@ -48,7 +48,8 @@ config RAMLOG_CRLF
 	bool "RAMLOG CR/LF"
 	default n
 	---help---
-		Pre-pend a carriage return before every linefeed that goes into the RAM log.
+		Pre-pend a carriage return before every linefeed that goes into the
+		RAM log.
 
 config RAMLOG_NONBLOCKING
 	bool "RAMLOG non-block reads"
@@ -161,14 +162,35 @@ config CONSOLE_SYSLOG
 		example, if the only console is a Telnet console.  Then in that case,
 		console output from non-Telnet threads will go to the syslog output.
 
+config SYSLOG_CHAR_CRLF
+	bool "SYSLOG device CR/LF"
+	default y
+	depends on SYSLOG_CHAR
+	---help---
+		Pre-pend a carriage return before every linefeed that goes to the
+		character device.
+
 config SYSLOG_DEVPATH
 	string "System log device"
-	default "/dev/syslog"
+	default "/dev/ttyS1"
 	depends on SYSLOG_CHAR
 	---help---
 		The full path to the system logging device.  For the RAMLOG SYSLOG device,
 		this is normally "/dev/ramlog".  For character SYSLOG devices, it should be
 		some other existing character device (or file) supported by the configuration
 		(such as "/dev/ttyS1")/
+
+config SYSLOG_CHARDEV
+	bool "SYSLOG character device"
+	default n
+	---help---
+		Enables support for a simple character driver at /dev/syslog whose
+		write() method will transfer data to the SYSLOG device.  This can be
+		useful if, for example, you want to redirect the output of a program
+		to the SYSLOG.
+
+		NOTE that unlike other syslog output, this data is unformatted raw
+		byte output with no time-stamping or any other SYSLOG features
+		supported.
 
 endmenu # System logging

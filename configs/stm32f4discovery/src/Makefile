@@ -48,6 +48,10 @@ ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS +=  stm32_buttons.c
 endif
 
+ifeq ($(CONFIG_CAN),y)
+CSRCS += stm32_can.c
+endif
+
 ifeq ($(CONFIG_STM32_OTGFS),y)
 CSRCS += stm32_usb.c
 endif
@@ -130,6 +134,10 @@ endif
 
 ifeq ($(CONFIG_LCD_UG2864HSWEG01),y)
 CSRCS += stm32_ug2864hsweg01.c
+endif
+
+ifeq ($(CONFIG_EXAMPLES_OSTEST),y)
+CSRCS += stm32_ostest.c
 endif
 
 ifeq ($(CONFIG_TIMER),y)

@@ -67,8 +67,8 @@
 #include "up_arch.h"
 #include "kinetis.h"
 #include "kinetis_usbotg.h"
-#include "kinetis_sim.h"
-#include "kinetis_fmc.h"
+#include "chip/kinetis_sim.h"
+#include "chip/kinetis_fmc.h"
 
 #if defined(CONFIG_USBDEV) && defined(CONFIG_KINETIS_USBOTG)
 

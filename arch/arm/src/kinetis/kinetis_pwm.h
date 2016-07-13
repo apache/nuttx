@@ -73,7 +73,7 @@
     defined(CONFIG_KINETIS_FTM2_PWM)
 
 #include <arch/board/board.h>
-#include "kinetis_pinmux.h"
+#include "chip/kinetis_pinmux.h"
 
 /* For each timer that is enabled for PWM usage, we need the following additional
  * configuration settings:

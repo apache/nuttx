@@ -41,7 +41,7 @@ CONFIG_WINDOWS_CYGWIN=y
 #
 # Debug Options
 #
-CONFIG_DEBUG_FEATURES=y
+# CONFIG_DEBUG_FEATURES is not set
 # CONFIG_DEBUG_INFO is not set
 
 

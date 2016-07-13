@@ -51,7 +51,7 @@
 #include "up_internal.h"
 
 #include "kinetis.h"
-#include "kinetis_smc.h"
+#include "chip/kinetis_smc.h"
 #include "kinetis_userspace.h"
 
 /****************************************************************************

@@ -666,7 +666,7 @@ static void twi_startwrite(struct twi_dev_s *priv, struct i2c_msg_s *msg)
 
 static void twi_startmessage(struct twi_dev_s *priv, struct i2c_msg_s *msg)
 {
-  if ((msg->flags & I2C_M_READ) == 0)
+  if ((msg->flags & I2C_M_READ) != 0)
     {
       twi_startread(priv, msg);
     }

@@ -2544,6 +2544,54 @@ config STM32_FSMC_SRAM
 
 menu "Timer Configuration"
 
+if SCHED_TICKLESS
+
+config STM32_ONESHOT
+	bool
+	default y
+
+config STM32_FREERUN
+	bool
+	default y
+
+endif # SCHED_TICKLESS
+
+if !SCHED_TICKLESS
+
+config STM32_ONESHOT
+	bool "TIM one-shot wrapper"
+	default n
+	---help---
+		Enable a wrapper around the low level timer/counter functions to
+		support one-shot timer.
+
+config STM32_FREERUN
+	bool "TIM free-running wrapper"
+	default n
+	---help---
+		Enable a wrapper around the low level timer/counter functions to
+		support a free-running timer.
+
+endif # !SCHED_TICKLESS
+
+config STM32_TICKLESS_ONESHOT
+	int "Tickless one-shot timer channel"
+	default 2
+	range 1 14
+	depends on STM32_ONESHOT
+	---help---
+		If the Tickless OS feature is enabled, the one clock must be
+		assigned to provided the one-shot timer needed by the OS.
+
+config STM32_TICKLESS_FREERUN
+	int "Tickless free-running timer channel"
+	default 5
+	range 1 14
+	depends on STM32_FREERUN
+	---help---
+		If the Tickless OS feature is enabled, the one clock must be
+		assigned to provided the free-running timer needed by the OS.
+
 config STM32_TIM1_PWM
 	bool "TIM1 PWM"
 	default n

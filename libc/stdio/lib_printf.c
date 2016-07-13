@@ -58,13 +58,8 @@ int printf(FAR const IPTR char *fmt, ...)
   va_start(ap, fmt);
 #if CONFIG_NFILE_STREAMS > 0
   ret = vfprintf(stdout, fmt, ap);
-#elif CONFIG_NFILE_DESCRIPTORS > 0
-  ret = vsyslog(LOG_INFO, fmt, ap);
 #else
-# ifdef CONFIG_CPP_HAVE_WARNING
-#   warning "printf has no data sink"
-# endif
-  ret = 0;
+  ret = vsyslog(LOG_INFO, fmt, ap);
 #endif
   va_end(ap);
 

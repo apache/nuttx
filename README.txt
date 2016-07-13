@@ -1283,6 +1283,8 @@ nuttx/
  |   |   `- README.txt
  |   |- fire-stm32v2/
  |   |   `- README.txt
+ |   |- freedom-k64f/
+ |   |   `- README.txt
  |   |- freedom-kl25z/
  |   |   `- README.txt
  |   |- freedom-kl26z/
@@ -1324,8 +1326,6 @@ nuttx/
  |   |- mikroe-stm32f/
  |   |   `- README.txt
  |   |- mirtoo/
- |   |   `- README.txt
- |   |- mt-db-x3/
  |   |   `- README.txt
  |   |- moteino-mega/
  |   |   `- README.txt
@@ -1524,6 +1524,8 @@ nuttx/
  |- lib/
  |   `- README.txt
  |- libc/
+ |   |- zoneinfo
+ |   |   `- README.txt
  |   `- README.txt
  |- libnx/
  |   `- README.txt
@@ -1590,9 +1592,7 @@ apps/
  |   |   `- README.txt
  |   |- usbmsc
  |   |  `- README.txt
- |   |- zmodem
- |   |  `- README.txt
- |   `- zoneinfo
+ |   `- zmodem
  |      `- README.txt
  `- README.txt
 

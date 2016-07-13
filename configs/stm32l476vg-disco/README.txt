@@ -43,11 +43,7 @@ Board features:
 Contents
 ========
 
-  - Development Environment
-  - GNU Toolchain Options
-  - IDEs
-  - NuttX EABI "buildroot" Toolchain
-  - NXFLAT Toolchain
+  - mbed
   - Hardware
     - Button
     - LED
@@ -56,230 +52,6 @@ Contents
   - mbed
   - Shields
   - Configurations
-
-Development Environment
-=======================
-
-  Either Linux or Cygwin on Windows can be used for the development environment.
-  The source has been built only using the GNU toolchain (see below).  Other
-  toolchains will likely cause problems.
-
-GNU Toolchain Options
-=====================
-
-  Toolchain Configurations
-  ------------------------
-  The NuttX make system has been modified to support the following different
-  toolchain options.
-
-    1. The CodeSourcery GNU toolchain,
-    2. The Atollic Toolchain,
-    3. The devkitARM GNU toolchain,
-    4. Raisonance GNU toolchain, or
-    5. The NuttX buildroot Toolchain (see below).
-
-  All testing has been conducted using the CodeSourcery toolchain for Linux.
-  To use the Atollic, devkitARM, Raisonance GNU, or NuttX buildroot toolchain,
-  you simply need to add one of the following configuration options to your
-  .config (or defconfig) file:
-
-    CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=n  : CodeSourcery under Windows
-    CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYL=y  : CodeSourcery under Linux
-    CONFIG_ARMV7M_TOOLCHAIN_ATOLLIC=y        : The Atollic toolchain under Windows
-    CONFIG_ARMV7M_TOOLCHAIN_DEVKITARM=n      : devkitARM under Windows
-    CONFIG_ARMV7M_TOOLCHAIN_RAISONANCE=y     : Raisonance RIDE7 under Windows
-    CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=n      : NuttX buildroot under Linux or Cygwin (default)
-
-  If you change the default toolchain, then you may also have to modify the PATH in
-  the setenv.h file if your make cannot find the tools.
-
-  NOTE: There are several limitations to using a Windows based toolchain in a
-  Cygwin environment.  The three biggest are:
-
-  1. The Windows toolchain cannot follow Cygwin paths.  Path conversions are
-     performed automatically in the Cygwin makefiles using the 'cygpath' utility
-     but you might easily find some new path problems.  If so, check out 'cygpath -w'
-
-  2. Windows toolchains cannot follow Cygwin symbolic links.  Many symbolic links
-     are used in Nuttx (e.g., include/arch).  The make system works around these
-     problems for the Windows tools by copying directories instead of linking them.
-     But this can also cause some confusion for you:  For example, you may edit
-     a file in a "linked" directory and find that your changes had no effect.
-     That is because you are building the copy of the file in the "fake" symbolic
-     directory.  If you use a Windows toolchain, you should get in the habit of
-     making like this:
-
-       V=1 make clean_context all 2>&1 |tee mout
-
-     An alias in your .bashrc file might make that less painful.
-
-  3. Dependencies are not made when using Windows versions of the GCC.  This is
-     because the dependencies are generated using Windows pathes which do not
-     work with the Cygwin make.
-
-       MKDEP = $(TOPDIR)/tools/mknulldeps.sh
-
-  The Atollic "Pro" and "Lite" Toolchain
-  --------------------------------------
-  One problem that I had with the Atollic toolchains is that the provide a gcc.exe
-  and g++.exe in the same bin/ file as their ARM binaries.  If the Atollic bin/ path
-  appears in your PATH variable before /usr/bin, then you will get the wrong gcc
-  when you try to build host executables.  This will cause to strange, uninterpretable
-  errors build some host binaries in tools/ when you first make.
-
-  Also, the Atollic toolchains are the only toolchains that have built-in support for
-  the FPU in these configurations.  If you plan to use the Cortex-M4 FPU, you will
-  need to use the Atollic toolchain for now.  See the FPU section below for more
-  information.
-
-  The Atollic "Lite" Toolchain
-  ----------------------------
-  The free, "Lite" version of the Atollic toolchain does not support C++ nor
-  does it support ar, nm, objdump, or objdcopy. If you use the Atollic "Lite"
-  toolchain, you will have to set:
-
-    CONFIG_HAVE_CXX=n
-
-  In order to compile successfully.  Otherwise, you will get errors like:
-
-    "C++ Compiler only available in TrueSTUDIO Professional"
-
-  The make may then fail in some of the post link processing because of some of
-  the other missing tools.  The Make.defs file replaces the ar and nm with
-  the default system x86 tool versions and these seem to work okay.  Disable all
-  of the following to avoid using objcopy:
-
-    CONFIG_RRLOAD_BINARY=n
-    CONFIG_INTELHEX_BINARY=n
-    CONFIG_MOTOROLA_SREC=n
-    CONFIG_RAW_BINARY=n
-
-  devkitARM
-  ---------
-  The devkitARM toolchain includes a version of MSYS make.  Make sure that the
-  the paths to Cygwin's /bin and /usr/bin directories appear BEFORE the devkitARM
-  path or will get the wrong version of make.
-
-IDEs
-====
-
-  NuttX is built using command-line make.  It can be used with an IDE, but some
-  effort will be required to create the project.
-
-  Makefile Build
-  --------------
-  Under Eclipse, it is pretty easy to set up an "empty makefile project" and
-  simply use the NuttX makefile to build the system.  That is almost for free
-  under Linux.  Under Windows, you will need to set up the "Cygwin GCC" empty
-  makefile project in order to work with Windows (Google for "Eclipse Cygwin" -
-  there is a lot of help on the internet).
-
-  Using Sourcery CodeBench from http://www.mentor.com/embedded-software/sourcery-tools/sourcery-codebench/overview
-    Download and install the latest version (as of this writting it was
-    sourceryg++-2013.05-64-arm-none-eabi)
-
-   Import the  project from git.
-     File->import->Git-URI, then import a Exiting code as a Makefile progject
-     from the working directory the git clone was done to.
-
-   Select the Sourcery CodeBench for ARM EABI. N.B. You must do one command line
-     build, before the make will work in CodeBench.
-
-  Native Build
-  ------------
-  Here are a few tips before you start that effort:
-
-  1) Select the toolchain that you will be using in your .config file
-  2) Start the NuttX build at least one time from the Cygwin command line
-     before trying to create your project.  This is necessary to create
-     certain auto-generated files and directories that will be needed.
-  3) Set up include pathes:  You will need include/, arch/arm/src/stm32,
-     arch/arm/src/common, arch/arm/src/armv7-m, and sched/.
-  4) All assembly files need to have the definition option -D __ASSEMBLY__
-     on the command line.
-
-  Startup files will probably cause you some headaches.  The NuttX startup file
-  is arch/arm/src/stm32/stm32_vectors.S.  With RIDE, I have to build NuttX
-  one time from the Cygwin command line in order to obtain the pre-built
-  startup object needed by RIDE.
-
-NuttX EABI "buildroot" Toolchain
-================================
-
-  A GNU GCC-based toolchain is assumed.  The files */setenv.sh should
-  be modified to point to the correct path to the Cortex-M3 GCC toolchain (if
-  different from the default in your PATH variable).
-
-  If you have no Cortex-M3 toolchain, one can be downloaded from the NuttX
-  Bitbucket download site (https://bitbucket.org/nuttx/buildroot/downloads/).
-  This GNU toolchain builds and executes in the Linux or Cygwin environment.
-
-  1. You must have already configured Nuttx in <some-dir>/nuttx.
-
-     $ (cd tools; ./configure.sh nucleo-f4x1re/f401-nsh)
-     $ make qconfig
-     $ V=1 make context all 2>&1 | tee mout
-
-     Use the f411-nsh configuration if you have the Nucleo-F411RE board.
-
-  2. Download the latest buildroot package into <some-dir>
-
-  3. unpack the buildroot tarball.  The resulting directory may
-     have versioning information on it like buildroot-x.y.z.  If so,
-     rename <some-dir>/buildroot-x.y.z to <some-dir>/buildroot.
-
-  4. cd <some-dir>/buildroot
-
-  5. cp configs/cortexm3-eabi-defconfig-4.6.3 .config
-
-  6. make oldconfig
-
-  7. make
-
-  8. Edit setenv.h, if necessary, so that the PATH variable includes
-     the path to the newly built binaries.
-
-  See the file configs/README.txt in the buildroot source tree.  That has more
-  details PLUS some special instructions that you will need to follow if you are
-  building a Cortex-M3 toolchain for Cygwin under Windows.
-
-  NOTE:  Unfortunately, the 4.6.3 EABI toolchain is not compatible with the
-  the NXFLAT tools.  See the top-level TODO file (under "Binary loaders") for
-  more information about this problem. If you plan to use NXFLAT, please do not
-  use the GCC 4.6.3 EABI toolchain; instead use the GCC 4.3.3 EABI toolchain.
-
-NXFLAT Toolchain
-================
-
-  If you are *not* using the NuttX buildroot toolchain and you want to use
-  the NXFLAT tools, then you will still have to build a portion of the buildroot
-  tools -- just the NXFLAT tools.  The buildroot with the NXFLAT tools can
-  be downloaded from the NuttX Bitbucket download site
-  (https://bitbucket.org/nuttx/nuttx/downloads/).
-
-  This GNU toolchain builds and executes in the Linux or Cygwin environment.
-
-  1. You must have already configured Nuttx in <some-dir>/nuttx.
-
-     cd tools
-     ./configure.sh lpcxpresso-lpc1768/<sub-dir>
-
-  2. Download the latest buildroot package into <some-dir>
-
-  3. unpack the buildroot tarball.  The resulting directory may
-     have versioning information on it like buildroot-x.y.z.  If so,
-     rename <some-dir>/buildroot-x.y.z to <some-dir>/buildroot.
-
-  4. cd <some-dir>/buildroot
-
-  5. cp configs/cortexm3-defconfig-nxflat .config
-
-  6. make oldconfig
-
-  7. make
-
-  8. Edit setenv.h, if necessary, so that the PATH variable includes
-     the path to the newly builtNXFLAT binaries.
 
 mbed
 ====
@@ -568,8 +340,8 @@ Shields
 Configurations
 ==============
 
-  f401-nsh:
-  ---------
+  nsh:
+  ---
     Configures the NuttShell (nsh) located at apps/examples/nsh for the
     Nucleo-F401RE board.  The Configuration enables the serial interfaces
     on UART2.  Support for builtin applications is enabled, but in the base
@@ -586,26 +358,76 @@ Configurations
        b. Execute 'make menuconfig' in nuttx/ in order to start the
           reconfiguration process.
 
-    2. By default, this configuration uses the CodeSourcery toolchain
+    2. By default, this configuration uses the Generic ARM EABI toolchain
        for Linux.  That can easily be reconfigured, of course.
 
-       CONFIG_HOST_LINUX=y                     : Builds under Linux
-       CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYL=y : CodeSourcery for Linux
+       CONFIG_HOST_LINUX=y                 : Builds under Linux
+       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL=y : Generic EABI toolchain for Linux
 
     3. Although the default console is USART2 (which would correspond to
        the Virtual COM port) I have done all testing with the console
        device configured for USART1 (see instruction above under "Serial
-       Consoles).  I have been using a TTL-to-RS-232 converter connected
-       as shown below:
+       Consoles).  I have been using a TTL-to-RS-232 converter.
 
-       Nucleo CN10 STM32F4x1RE
-       ----------- ------------
-       Pin 21 PA9  USART1_RX   *Warning you make need to reverse RX/TX on
-       Pin 33 PA10 USART1_TX    some RS-232 converters
-       Pin 20 GND
-       Pin 8  U5V
+    4. This example has been used to verify the OTGFS functionality.  USB is
+       not enabled in the default configuration but can be enabled with the
+       following settings:
 
-  f411-nsh
-  --------
-    This configuration is the same as the f401-nsh configuration, except
-    that it is configured to support the Nucleo-F411RE.
+         CONFIG_STM32L4_OTGFS=y
+
+         CONFIG_USBDEV=y
+         CONFIG_USBDEV_SELFPOWERED=y
+
+     These will enable the USB CDC/ACM serial device
+
+         CONFIG_CDCACM=y
+         CONFIG_CDCACM_EP0MAXPACKET=64
+         CONFIG_CDCACM_EPINTIN=1
+         CONFIG_CDCACM_EPINTIN_FSSIZE=64
+         CONFIG_CDCACM_EPINTIN_HSSIZE=64
+         CONFIG_CDCACM_EPBULKOUT=3
+         CONFIG_CDCACM_EPBULKOUT_FSSIZE=64
+         CONFIG_CDCACM_EPBULKOUT_HSSIZE=512
+         CONFIG_CDCACM_EPBULKIN=2
+         CONFIG_CDCACM_EPBULKIN_FSSIZE=64
+         CONFIG_CDCACM_EPBULKIN_HSSIZE=512
+         CONFIG_CDCACM_NRDREQS=4
+         CONFIG_CDCACM_NWRREQS=4
+         CONFIG_CDCACM_BULKIN_REQLEN=96
+         CONFIG_CDCACM_RXBUFSIZE=257
+         CONFIG_CDCACM_TXBUFSIZE=193
+         CONFIG_CDCACM_VENDORID=0x0525
+         CONFIG_CDCACM_PRODUCTID=0xa4a7
+         CONFIG_CDCACM_VENDORSTR="NuttX"
+         CONFIG_CDCACM_PRODUCTSTR="CDC/ACM Serial"
+
+         CONFIG_SERIAL_REMOVABLE=y
+
+    These will enable the USB serial example at apps/examples/usbserial
+
+         CONFIG_BOARDCTL_USBDEVCTRL=y
+
+         CONFIG_EXAMPLES_USBSERIAL=y
+         CONFIG_EXAMPLES_USBSERIAL_BUFSIZE=512
+         CONFIG_EXAMPLES_USBSERIAL_TRACEINIT=y
+         CONFIG_EXAMPLES_USBSERIAL_TRACECLASS=y
+         CONFIG_EXAMPLES_USBSERIAL_TRACETRANSFERS=y
+         CONFIG_EXAMPLES_USBSERIAL_TRACECONTROLLER=y
+         CONFIG_EXAMPLES_USBSERIAL_TRACEINTERRUPTS=y
+
+    Optional USB debug features:
+
+         CONFIG_DEBUG_FEATURES=y
+         CONFIG_DEBUG_USB=y
+         CONFIG_ARCH_USBDUMP=y
+         CONFIG_USBDEV_TRACE=y
+         CONFIG_USBDEV_TRACE_NRECORDS=128
+         CONFIG_USBDEV_TRACE_STRINGS=y
+         CONFIG_USBDEV_TRACE_INITIALIDSET=y
+
+         CONFIG_NSH_USBDEV_TRACE=y
+         CONFIG_NSH_USBDEV_TRACEINIT=y
+         CONFIG_NSH_USBDEV_TRACECLASS=y
+         CONFIG_NSH_USBDEV_TRACETRANSFERS=y
+         CONFIG_NSH_USBDEV_TRACECONTROLLER=y
+         CONFIG_NSH_USBDEV_TRACEINTERRUPTS=y

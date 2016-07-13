@@ -59,6 +59,7 @@ CSRCS += lib_tanhl.c lib_asinhl.c lib_acoshl.c lib_atanhl.c lib_erfl.c lib_copys
 CSRCS += lib_truncl.c
 
 CSRCS += lib_libexpi.c lib_libsqrtapprox.c
+CSRCS += lib_libexpif.c
 
 # Add the floating point math directory to the build
 

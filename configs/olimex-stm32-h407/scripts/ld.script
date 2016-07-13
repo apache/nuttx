@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/olimex-stm32-h405/scripts/ld.script
+ * configs/olimex-stm32-h407/scripts/ld.script
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

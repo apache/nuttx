@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated June 6, 2016)
+NuttX TODO List (Last updated July 3, 2016)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -17,7 +17,7 @@ nuttx/:
   (9)  Kernel/Protected Build
   (3)  C++ Support
   (6)  Binary loaders (binfmt/)
- (12)  Network (net/, drivers/net)
+ (11)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
   (0)  Other drivers (drivers/)
  (11)  Libraries (libc/, libm/)
@@ -937,7 +937,9 @@ o Network (net/, drivers/net)
                  LM3S         NO                      NO
                  TM4C         YES                     YES
                eZ80           NO                      NO
+               Kinetis        YES                     YES (not tested)
                LPC17xx        YES                     YES (not tested)
+               LPC43xx        YES                     YES (not tested)
                DMxxx NIC      NO                      NO
                PIC32          NO                      NO
                RGMP           ???                     ???
@@ -1352,12 +1354,6 @@ o File system / Generic drivers (fs/, drivers/)
   Status:      Open
   Priority:    Low
 
-  Title:       CAN POLL SUPPORT
-  Description: At present, the CAN driver does not support the poll() method.
-               See drivers/can.c
-  Status:      Open
-  Priority:    Low
-
   Title:       ROMFS CHECKSUMS
   Description: The ROMFS file system does not verify checksums on either
                volume header on on the individual files.
@@ -1602,7 +1598,7 @@ o Build system
   Priority:    Low.
 
   Title:       NATIVE WINDOWS BUILD BROKEN
-  Description: The way that apps/ no generates Kmenu files depends on changes added
+  Description: The way that apps/ now generates Kmenu files depends on changes added
                to apps/tools/mkkconfig.sh.  Similar changes need to be made to
                apps/tools/mkkconfig.bat to restore the Windows Native build.
                UPDATE: The mkkconfig.bat script has been updated and appears to work.

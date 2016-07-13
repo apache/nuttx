@@ -12117,3 +12117,181 @@
 	  (2016-06-21).
 	* drivers/syslog: Extend SYSLOG logic so that we can send SYSLOG output
 	  to a file.  Not verified on initial commit  (2016-06-21).
+	* arch/arm/src/stm32l4: Add some CAN mode IOCTL calls.  These will be
+	  useful for device autotest when the application boots.  They are
+	  redundant with the CONFIG_CAN_LOOPBACK option, which can now just be
+	  interpreted as a default setting.  From Sebastien Lorquet (2016-06-22).
+	* drivers/syslog: syslog_dev_flush() needs to check if the inode is a
+	  mountpoint before calling the flush() method.  Noted by David Sidrane
+	  (2016-06-22).
+	* arch/arm/src/stm32f7: Adds SDMMC1 for stm32F7 74-75.  From Lok Tep
+	  (2016-06-22).
+	* drivers/syslog: SYSLOG character device channel will now expand LF to
+	  CR-LF.  Controllable with a configuration option (2016-06-22).
+	* arch/arm/src/stm32l4: Implementation of loopback IOCTLs.  From
+	  Sebastien Lorquet (2016-06-22).
+	* Documentation: Add SYSLOG documentation to the porting guide
+	  (2016-06-22).
+	* configs/stm32f746g-disco:  Removed knsh configuration it failed to
+	  refresh (via tools/refresh.sh).  I assume that it is a hand-edited
+	  configuration and, hence, must be removed from the repository
+	  (2016-06-23).
+	* arch/arm/arc/sam34: DAC bugfix: DACC_WPMR_WPKEY_MASK -> DACC_WPMR_WPKEY. 
+	  Timer bugfix:  Fix ops check in TCIOC_STOP.  From Wolfgang Reissnegge
+	  (2016-06-23).
+	* configs/nucleo-144: Added SDMMC support to Nucleo-144. From David
+	  Sidrane (2016-06-23).
+	* arch/arm/src/stm32: Port STM32L4 CAN IOCTLs to STM32.  From Sebastien
+	  Lorquet (2016-06-24).
+	* drivers/ioexpander:  Add support for a very simple GPIO driver.  It
+	  supports only pre-conrigured input and output pins and only basic
+	  input and output operations (2016-06-24).
+	* arch/arm/src/lpc43xx:  Correct auto-negotiation mode in the LPC43xx
+	  Ethernet.  From Alexander Vasiljev (2016-06-24)
+	* arch/arm/src/samv7: TWIHS Driver improved and GPIO-Driver fixed for
+	  Open-Drain Pins
+	  - sam_gpioread: Now the actual line level from the pin is read back.
+	    This is extremely important for Open-Drain Pins, which can be used
+	    bidirectionally
+	  - Re-Implemented twi_reset-function and enhanced it so it can be
+	    called from inside the driver (see next point)
+	  - Glitch-Filter: Added a configuration option to enable the twi-built-
+	    in glitch filter
+	  - Added a "Single Master Mode": In EMC Testing the TWI-Bus got stuck
+	    because the TWI-Master detected a Multi-Master access (but there is
+	    no second master). With the option "Single Master" we detect these
+	    events and automatically trigger a twi_reset. We also do an
+	    automatic recovery if a slave got stuck (SDA stays low).
+	  With the above changes I²C-Bus reliability in harsh environments (eg.
+	  EMC) is greatly improved. The small change in the GPIO-Driver was
+	  necessary because otherwise you cannot read back the correct line
+	  status of Open-Drain Outputs and this is needed by the twi_reset
+	  function.  From Michael Spahlinger (2016-06-24)
+	* arch/arm/src/stm32f7:  BUGFIX:PLLs IS2 and SAI P Calculation. From
+	  David Sidrane (2016-06-24).
+	* arch/arm/src/stm32f7: USB support.  From Lok Tep (2016-06-27).
+	* configs/olimex-stm32-e407:  Add support for Olimex STM32 E407
+	  board.  From Mateusz Szafoni (2016-06-27).
+	* drivers/ioexpander: Shadow-Mode: The output- and configuration
+	  registers of the IO-Expander are held in the microcontrollers memory
+	  and only written to the IO-Expander.  This reduces bus traffic and
+	  is more error-proof than the normal read-modify-write operation. Retry
+	  Mode: If enabled and an error occurs while writing to the IO-Expander
+	  the current transmission is automatically repeated once. From Michael
+	  Spahlinger (2016-06-27).
+	* libc/hex2bin:  Move the portable library portion of apps/system/hex2bin
+	  to nuttx/libc/hex2bin where it can be shared with the OS internals
+	  (2016-06-27).
+	* configs/nucleo-144: Added USB OTG device to Nucleo-144.  From David
+	  Sidrane (2016-06-27).
+	* arch/arm/src/stm32l4:  STM32 CAN fixes need to be backported to
+	  STM32L4 as well (2016-06-27).
+	* ARM stack check: Fix double fault on IDLE task with stack size = 0.
+	  From David Sidrane (2016-06-27).
+	* configs/nucleo-144: Added bbsram test to Nucleo-144.  From David
+	  Sidrane (2016-06-27).
+	* arch/arm/src/stm32f7: Added PWR, RTC, and BBSRAM support for stm32f7.
+	  From David Sidrane (2016-06-27).
+	* Build system: Fixed build of SAMV71-XULT/nsh.  With the changes from
+	  26f7b8c the build process of the default configuration did not succeed
+	  anymore.  From Michael Spahlinger (2016-06-28).
+	* sched/semaphore: Need to set errno to EINVAL on errors in sem_post()
+	  and sem_wait(). From Paul Alexander Patience (2016-06-28).
+	* Build system: This change fixes a build problem that only occurs when
+	  reconfiguring from Linux to Windows or vice-versa.  It is a problem
+	  that was present but not usually experienced until two things happened:
+	  (1) The pre_config target was added to run before the menconfig
+	  operation and (2) the context target was added before the pre_config
+	  target in order to set up the correct symbolic links (in the apps/platform
+	  directory) needed by the pre_config target.
+	  But then now if you start with a Linux system and run 'make menuconfig'
+	  to switch to Linux, the context target will execute first and set up
+	  POSIX style symbolic links before doing the menuconfig.  Then after the
+	  menuconfig, the make will fail on Windows if you are using a Windows
+	  native toolchain because that native toolchain cannot follow the Cygwin-
+	  style symbolic links.
+	  The fix here is to also execute the clean_context AFTER executing
+	  menuconfig.  A lot more happens now:  It used to be that doing 'make
+	  menuconfig' only did the menuconfig operation.  No it does context,
+	  pre_config, menuconfig, clean_context.  Not nearly as snappy as it used
+	  to be (2016-06-28).
+	* arch/arm/src/efm32, lcp43, stm32, stm32l4: disable interrupts with
+	  NVIC_IRQ_CLEAR.  From Paul Alexander Patience (2016-06-28).
+	* arch/arm/src/stm32f7: STMF7xxx RTC: (1) Remove proxy #defines, (2)
+	  Ensure the LSE(ON) etal are set and remembered in a) A cold start
+	  (RTC_MAGIC invalid) of the RTC, and b) A warm start (RTC_MAGIC valid)
+	  of the RTC but a clock change.  The change was needed because in bench
+	  testing a merge of the latest's STM32  53ec3ca (and friends) it became
+	  apparent that the sequence of operation is wrong in the reset of the
+	  Backup Domain in the RCC code.  PWR is required before the Backup
+	  Domain can be futzed with. !!!This Code should be tested on STM32 and
+	  if needed rippled to the STM32 families.  From David Sidrane
+	  (2016-06-28).
+	* arch/arm/src/stm32f7: Added STMF7xxx RTC.  From David Sidrane
+	  (2016-06-28).
+	* arch/arm/src/stm32: STM32 BBSRAM fixed (and formatted) flags.  From
+	  David Sidrane (2016-06-28).
+	* arch/arm/src/stm32f7: STM32F7 BBSRAM fixed (and formatted) flags.
+	  From David Sidrane (2016-06-28).
+	* arch/arm/src/stm32f7: Added STM32F7 DBGMCU.  From David Sidrane
+	  (2016-06-28).
+	* arch/arm/src/samv7: SAMV7: CAN Message Filtering fixed: (1) stdfilters
+	  didn't work because the filter was never enabled (wrong number of bits
+	  to shift), and (2) Filters were never used because the configuration
+	  register cannot be written without using the initialization mode.
+	  Both bugs are fixed by this change. Filtering has been tested with
+	  both standard and extended identifiers and is now working properly.
+	  From Michael Spahlinger (2016-06-29).
+	* configs/Kconfig and dummy/: Add logic to support custom board
+	  directories that include a Kconfig file.  During the context phase
+	  of the build, any Kconfig file in the custom board directory is copied
+	  into configs/dummy, replacing the existing Kconfig file with the
+	  target Kconfig file (2016-06-29).
+	* arch/arm/src/stm32l4: Port support for both RX FIFOs from STM32 CAN.
+	  From Paul Alexander Patience (2016-06-29).
+	* Remove all inclusion of header files from the apps/include directory.
+	  This caused a lot of reshuffling of logic:  binfmt pcode support,
+	  usbmonitor is now a kernel thread, TZ/Olson database moved to
+	  libc/zoneinfo (2016-06-29).
+	* drivers/mtd: Several MTD FLASH drivers nullify the freed 'priv'
+	  structure and failed to return NULL as stated in the comments.
+	  Result, will operate on a NULL pointer later.  Noted by David Sidrane
+	  (2016-06-30).
+	* arch/arm/src/kinetis:  Add basic support for the K64 family.  I
+	  leveraged the changes from https://github.com/jmacintyre/nuttx-k64f
+	  and merged into the existing kinetis code  with a lot of changes and
+	  additions (like pin multiplexing definitions).  (2016-07-01).
+	* configs/freedom-k64f: Add support for the NXP Freedom-K64F board.
+	  This is primarily the work of Jordan Macintyre.  I leveraged this
+	  code from https://github.com/jmacintyre/nuttx-k64f but with
+	  significant corrections (LEDs, buttons, README, etc) and extensions
+	  and updates to match more recent BSPs (2016-07-01).
+	* libc/signal: Add raise() (2016-07-04).
+	* drivers/syslog: Add a SYSLOG character device that can be used to re-
+	  direct output to the SYSLOG (2016-07-05).
+	* net/netdev: Break out internal interface psock_ioctl() (2016-07-06).
+	* configs/stm32f4disovery: add can driver for stm32f4discovery.  From
+	  Matthias Renner (2016-07-06).
+	* configs/freedom-k64f: Increase MCU clock to 120MHz (2016-07-06).
+	* arch/arm/src/stm32:  Add support for Tickless mode (two timer
+	  implementation).  From Max Neklyudov (2016-07-06).
+	* drivers/usbdev: cdcacm_unbind leaks write request objects.  This
+	  arises due to freeing the bulk IN endpoint before the loop that
+	  frees the requests via cdcasm_freereq.  That function checks the
+	  parameters and skips the freeing if either is NULL.  Freeing the bulk
+	  IN enpoint will cause the first param to be NULL, thereby bypassing
+	  the free operation.  To fix, I moved the release of the bulk IN
+	  endpoint until after to loop (much as was the case for the OUT and
+	  read requests, which did not exhibit the problem).  From ziggurat29
+	  (2016-07-07).
+	* arch/arm/src/stm32l4: Update usb dev/host controller drivers to
+	  reflect new(ish) logging standards; augment device enpoint and fifo
+	  allocation #defines to do more sanity checking, and be automatically
+	  adaptive to size changes.  Update README.txt to reflect current status
+	  of the implementation.  From ziggurat29 (2016-07-07).
+	* arch/arm/src/stm32f7: Fixed STM32F7 DMA stm32_dmacapable.  DMA working
+	  on SDMMC.  From David Sidrane (2016-07-07).
+	* configs/stm32f4discovery:  add configuration files for canard.  From
+	  Matthias Renner (2016-07-08).
+	* drivers/pipe: Add missing configuration for pipe ring buffer size.
+	  From Frank Benkert (2016-07-08).

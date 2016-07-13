@@ -46,33 +46,10 @@ CONFIG_BUILD_FLAT=y
 #
 # Debug Options
 #
-CONFIG_DEBUG_FEATURES=y
-# CONFIG_ARCH_HAVE_HEAPCHECK is not set
-# CONFIG_DEBUG_INFO is not set
-
-#
-# Subsystem Debug Options
-#
-# CONFIG_DEBUG_BINFMT is not set
-# CONFIG_DEBUG_FS is not set
-# CONFIG_DEBUG_GRAPHICS is not set
-# CONFIG_DEBUG_LIB is not set
-# CONFIG_DEBUG_MM is not set
-# CONFIG_DEBUG_NET is not set
-# CONFIG_DEBUG_SCHED is not set
-
-#
-# OS Function Debug Options
-#
-# CONFIG_DEBUG_IRQ is not set
-
-#
-# Driver Debug Options
-#
-# CONFIG_DEBUG_LEDS is not set
-# CONFIG_DEBUG_ANALOG is not set
-# CONFIG_DEBUG_GPIO is not set
+# CONFIG_DEBUG_ALERT is not set
+# CONFIG_DEBUG_FEATURES is not set
 # CONFIG_ARCH_HAVE_STACKCHECK is not set
+# CONFIG_ARCH_HAVE_HEAPCHECK is not set
 # CONFIG_DEBUG_SYMBOLS is not set
 # CONFIG_ARCH_HAVE_CUSTOMOPT is not set
 # CONFIG_DEBUG_NOOPT is not set
@@ -239,11 +216,11 @@ CONFIG_ARCH_HAVE_LEDS=y
 CONFIG_ARCH_LEDS=y
 CONFIG_ARCH_HAVE_BUTTONS=y
 # CONFIG_ARCH_BUTTONS is not set
-CONFIG_NSH_MMCSDMINOR=0
 
 #
 # Board-Specific Options
 #
+# CONFIG_BOARD_CRASHDUMP is not set
 # CONFIG_LIB_BOARDCTL is not set
 
 #
@@ -376,7 +353,12 @@ CONFIG_DEV_NULL=y
 # CONFIG_VIDEO_DEVICES is not set
 # CONFIG_BCH is not set
 # CONFIG_INPUT is not set
+
+#
+# IO Expander/GPIO Support
+#
 # CONFIG_IOEXPANDER is not set
+# CONFIG_DEV_GPIO is not set
 
 #
 # LCD Driver Support
@@ -390,6 +372,7 @@ CONFIG_DEV_NULL=y
 # CONFIG_USERLED is not set
 # CONFIG_RGBLED is not set
 # CONFIG_PCA9635PW is not set
+# CONFIG_NCP5623C is not set
 # CONFIG_MMCSD is not set
 # CONFIG_MODEM is not set
 # CONFIG_MTD is not set
@@ -407,7 +390,6 @@ CONFIG_TELNET_TXBUFFER_SIZE=256
 CONFIG_ARCH_HAVE_NETDEV_STATISTICS=y
 # CONFIG_NETDEV_STATISTICS is not set
 # CONFIG_NETDEV_LATEINIT is not set
-# CONFIG_NET_DUMPPACKET is not set
 
 #
 # External Ethernet MAC Device Support
@@ -438,7 +420,6 @@ CONFIG_ETH0_PHY_AM79C874=y
 # CONFIG_ETH0_PHY_LAN8740A is not set
 # CONFIG_ETH0_PHY_LAN8742A is not set
 # CONFIG_ETH0_PHY_DM9161 is not set
-# CONFIG_NETDEV_PHY_DEBUG is not set
 # CONFIG_PIPES is not set
 # CONFIG_PM is not set
 # CONFIG_POWER is not set
@@ -446,6 +427,8 @@ CONFIG_ETH0_PHY_AM79C874=y
 # CONFIG_SERCOMM_CONSOLE is not set
 CONFIG_SERIAL=y
 # CONFIG_DEV_LOWCONSOLE is not set
+# CONFIG_SERIAL_REMOVABLE is not set
+CONFIG_SERIAL_CONSOLE=y
 # CONFIG_16550_UART is not set
 # CONFIG_UART_SERIALDRIVER is not set
 CONFIG_UART0_SERIALDRIVER=y
@@ -474,7 +457,6 @@ CONFIG_STANDARD_SERIAL=y
 # CONFIG_SERIAL_IFLOWCONTROL is not set
 # CONFIG_SERIAL_OFLOWCONTROL is not set
 # CONFIG_SERIAL_DMA is not set
-# CONFIG_SERIAL_TIOCSERGSTRUCT is not set
 # CONFIG_ARCH_HAVE_SERIAL_TERMIOS is not set
 CONFIG_UART0_SERIAL_CONSOLE=y
 # CONFIG_OTHER_SERIAL_CONSOLE is not set
@@ -494,17 +476,22 @@ CONFIG_UART0_2STOP=0
 # CONFIG_UART0_DMA is not set
 # CONFIG_USBDEV is not set
 # CONFIG_USBHOST is not set
+# CONFIG_HAVE_USBTRACE is not set
 # CONFIG_DRIVERS_WIRELESS is not set
-
-#
-# System Logging Device Options
-#
 
 #
 # System Logging
 #
+# CONFIG_ARCH_SYSLOG is not set
 # CONFIG_RAMLOG is not set
-# CONFIG_CONSOLE_SYSLOG is not set
+# CONFIG_SYSLOG_INTBUFFER is not set
+# CONFIG_SYSLOG_TIMESTAMP is not set
+CONFIG_SYSLOG_SERIAL_CONSOLE=y
+# CONFIG_SYSLOG_CHAR is not set
+CONFIG_SYSLOG_CONSOLE=y
+# CONFIG_SYSLOG_NONE is not set
+# CONFIG_SYSLOG_FILE is not set
+# CONFIG_SYSLOG_CHARDEV is not set
 
 #
 # Networking Support
@@ -603,7 +590,6 @@ CONFIG_NET_ARPTAB_SIZE=16
 CONFIG_NET_ARP_MAXAGE=120
 # CONFIG_NET_ARP_IPIN is not set
 # CONFIG_NET_ARP_SEND is not set
-# CONFIG_NET_ARP_DUMP is not set
 
 #
 # Network I/O Buffer Support
@@ -612,7 +598,6 @@ CONFIG_NET_IOB=y
 CONFIG_IOB_NBUFFERS=24
 CONFIG_IOB_BUFSIZE=196
 CONFIG_IOB_NCHAINS=8
-# CONFIG_IOB_DEBUG is not set
 # CONFIG_NET_ARCH_INCR32 is not set
 # CONFIG_NET_ARCH_CHKSUM is not set
 CONFIG_NET_STATISTICS=y
@@ -650,11 +635,6 @@ CONFIG_NET_HOSTNAME=""
 # CONFIG_FS_SMARTFS is not set
 # CONFIG_FS_PROCFS is not set
 # CONFIG_FS_UNIONFS is not set
-
-#
-# System Logging
-#
-# CONFIG_SYSLOG_TIMESTAMP is not set
 
 #
 # Graphics Support
@@ -736,8 +716,10 @@ CONFIG_NETDB_DNSSERVER_NOADDR=y
 #
 # Non-standard Library Support
 #
+# CONFIG_LIB_CRC64_FAST is not set
 # CONFIG_LIB_KBDCODEC is not set
 # CONFIG_LIB_SLCDCODEC is not set
+# CONFIG_LIB_HEX2BIN is not set
 
 #
 # Basic CXX Support
@@ -933,6 +915,7 @@ CONFIG_NSH_DISABLE_LOSMART=y
 # CONFIG_NSH_DISABLE_USLEEP is not set
 # CONFIG_NSH_DISABLE_WGET is not set
 # CONFIG_NSH_DISABLE_XD is not set
+CONFIG_NSH_MMCSDMINOR=0
 
 #
 # Configure Command Options
@@ -960,7 +943,6 @@ CONFIG_NSH_CONSOLE=y
 #
 CONFIG_NSH_NETINIT=y
 # CONFIG_NSH_NETINIT_THREAD is not set
-# CONFIG_NSH_NETINIT_DEBUG is not set
 
 #
 # IP Address Configuration

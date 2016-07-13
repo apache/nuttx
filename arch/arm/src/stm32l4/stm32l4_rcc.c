@@ -140,7 +140,7 @@ static inline void rcc_resetbkp(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_clockconfig
+ * Name: stm32l4_clockconfig
  *
  * Description:
  *   Called to establish the clock settings based on the values in board.h.

@@ -61,7 +61,10 @@
 
 /* SYSLOG channel methods */
 
-static int syslog_dev_force(int ch);
+#ifdef CONFIG_SYSLOG_CHAR_CRLF
+static int syslog_devchan_putc(int ch);
+#endif
+static int syslog_devchan_force(int ch);
 
 /****************************************************************************
  * Private Data
@@ -71,8 +74,12 @@ static int syslog_dev_force(int ch);
 
 static const struct syslog_channel_s g_syslog_dev_channel =
 {
+#ifdef CONFIG_SYSLOG_CHAR_CRLF
+  syslog_devchan_putc,
+#else
   syslog_dev_putc,
-  syslog_dev_force,
+#endif
+  syslog_devchan_force,
   syslog_dev_flush,
 };
 
@@ -81,14 +88,46 @@ static const struct syslog_channel_s g_syslog_dev_channel =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: syslog_dev_force
+ * Name: syslog_devchan_putc
+ *
+ * Description:
+ *   A front-end to syslog_dev_putc that does LF -> CR-LF expansion
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SYSLOG_CHAR_CRLF
+static int syslog_devchan_putc(int ch)
+{
+  int ret;
+
+  /* Check for a linefeed */
+
+  if (ch == '\n')
+    {
+      /* Pre-pend a carriage return */
+
+      ret = syslog_dev_putc('\r');
+      if (ret < 0)
+        {
+          return ret;
+        }
+    }
+
+  /* Output the provided character */
+
+  return syslog_dev_putc(ch);
+}
+#endif
+
+/****************************************************************************
+ * Name: syslog_devchan_force
  *
  * Description:
  *   A dummy FORCE method
  *
  ****************************************************************************/
 
-static int syslog_dev_force(int ch)
+static int syslog_devchan_force(int ch)
 {
   return ch;
 }

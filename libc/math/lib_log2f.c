@@ -37,5 +37,5 @@
 
 float log2f(float x)
 {
-  return (logf(x) / M_LN2);
+  return (logf(x) / (float)M_LN2);
 }

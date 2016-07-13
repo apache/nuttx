@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: May 12, 2016</p>
+      <p>Last Updated: June 22, 2016</p>
     </td>
   </tr>
 </table>
@@ -208,11 +208,18 @@
        <a href="#usbhostdrivers">6.3.8 USB Host-Side Drivers</a><br>
        <a href="#usbdevdrivers">6.3.9 USB Device-Side Drivers</a><br>
     </ul>
-    <a href="#pwrmgmt">6.4 Power Management</a>
+    <a href="#syslog">6.4 SYSLOG</a>
     <ul>
-       <a href="#pmoverview">6.4.1 Overview</a><br>
-       <a href="#pminterfaces">6.4.2 Interfaces</a><br>
-       <a href="#pmcallbacks">6.4.3 Callbacks</a>
+       <a href="#syslogif">6.4.1 SYSLOG Interfaces</a><br>
+       <a href="#syslogchannels">6.4.2 SYSLOG Channels</a><br>
+       <a href="#syslogoptions">6.4.3 SYSLOG Channel Options</a><br>
+       <a href="#ramlog">6.4.4 RAM Logging Device</a>
+    </ul>
+    <a href="#pwrmgmt">6.5 Power Management</a>
+    <ul>
+       <a href="#pmoverview">6.5.1 Overview</a><br>
+       <a href="#pminterfaces">6.5.2 Interfaces</a><br>
+       <a href="#pmcallbacks">6.5.3 Callbacks</a>
     </ul>
   </ul>
   <a href="#apndxconfigs">Appendix A: NuttX Configuration Settings</a><br>
@@ -5546,9 +5553,507 @@ int kbd_decode(FAR struct lib_instream_s *stream, FAR struct kbd_getstate_s *sta
   </li>
 </ul>
 
-<h2><a name="pwrmgmt">6.4 Power Management</a></h2>
+<h2><a name="syslog">6.4 SYSLOG</a></h2>
 
-<h3><a name="pmoverview">6.4.1 Overview</a></h3>
+<h3><a name="syslogif">6.4.1 SYSLOG Interfaces</a></h3>
+<h4><a name="syslogstdif">6.4.1.1 Standard SYSLOG Interfaces</a></h4>
+
+  The NuttX SYSLOG is an architecture for getting debug and status
+  information from the system.  The syslogging interfaces are defined in the
+  header file <code>include/syslog.h</code>.  The primary interface to SYSLOG sub-system
+  is the function <code>syslog()</code> and, to a lesser extent, its companion <code>vsyslog()</code>:
+
+<h4><a name="vsyslog">6.4.1.2 <code>syslog()</code> and <code>vsyslog()</code></a></h4>
+<p><b>Function Prototypes:</b></p>
+<ul><pre>
+#include &lt;syslog.h&gt;
+int syslog(int priority, FAR const IPTR char *format, ...);
+int vsyslog(int priority, FAR const IPTR char *src, va_list ap);
+</pre></ul>
+<p><b>Description:</b>
+  <code>syslog()</code> generates a log message. The priority argument is formed by  ORing the facility and the level values (see <code>include/syslog.h</code>). The remaining arguments are a format, as in <code>printf()</code> and any arguments to the format.
+</p>
+<p>
+  The NuttX implementation does not support any special formatting characters beyond those supported by <code>printf()</code>.
+</p>
+<p>
+  The function <code>vsyslog()</code> performs the same task as <code>syslog()</code> with the difference that it takes a set of arguments which have been obtained using the <code>stdarg</code> variable argument list macros.
+</p>
+
+<h4><a name="setlogmask">6.4.1.3 <code>setlogmask()</code></a></h4>
+<p>
+  The additional <code>setlogmask()</code> interface can use use to filter SYSLOG output:
+</p>
+<p><b>Function Prototype:</b></p>
+<ul><pre>
+#include &lt;syslog.h&gt;
+int setlogmask(int mask);
+</pre></ul>
+<p><b>Description:</b>
+  The <code>setlogmask()</code> function sets the logmask and returns the previous mask. If the mask argument is zerio, the current logmask is not modified.
+</p>
+<p>
+  The SYSLOG priorities are: <code>LOG_EMERG</code>, <code>LOG_ALERT</code>, <code>LOG_CRIT</code>, <code>LOG_ERR</code>, <code>LOG_WARNING</code>, <code>LOG_NOTICE</code>, <code>LOG_INFO</code>, and <code>LOG_DEBUG</code>.  The bit corresponding to a priority <code>p</code> is <code>LOG_MASK(p)</code>; <code>LOG_UPTO(p)</code> provides the mask of all priorities in the above list up to and including <code>p</code>.
+</p>
+<p>
+  Per <i>OpenGroup.org</i> &quot;If the maskpri argument is 0, the current log mask is not modified.&quot;  In this implementation, the value zero is permitted in order to disable all SYSLOG levels.
+</p>
+<p>
+  REVISIT: Per POSIX the SYSLOG mask should be a per-process value but in NuttX, the scope of the mask is dependent on the nature of the build:
+</p>
+<ul>
+  </li>
+  <li>
+    <p>
+      <i>Flat Build</i>:  There is one, global SYSLOG mask that controls all output.
+  </li>
+  <li>
+    <p>
+      <i>Protected Build</i>:  There are two SYSLOG masks.  One within the kernel that controls only kernel output.  And one in user-space that controls only user SYSLOG output.
+  </li>
+  <li>
+    <p>
+      <i>Kernel Build</i>:  The kernel build is compliant with the POSIX requirement: There will be one mask for for each user process, controlling the SYSLOG output only form that process.  There will be a separate mask accessable only in the kernel code to control kernel SYSLOG output.
+</ul>
+<p>
+  The above are all standard interfaces as defined at <a href="http://pubs.opengroup.org/onlinepubs/009695399/functions/closelog.html">OpenGroup.org</a>.  Those interfaces are available for use by application software.  The remaining interfaces discussed in this section are non-standard, OS-internal interfaces.
+</p>
+
+<h4><a name="debugifs">6.4.1.4 Debug Interfaces</a></h4>
+<p>
+  In NuttX, syslog output is really synonymous to debug output and, herefore, the debugging interface macros defined in the header file
+  <code>include/debug.h</code> are also syslogging interfaces.  Those macros are simply wrappers around <code>syslog()</code>.  The debugging interfaces differ from the syslog interfaces in that:
+</p>
+<ul>
+  </li>
+  <li>
+    <p>
+      They do not take a priority parameter; the priority is inherent in the
+      debug macro name.
+  </li>
+  <li>
+    <p>
+      They decorate the output stream with information such as the file name
+  </li>
+  <li>
+    <p>
+      They can each be disabled via configuration options.
+  </li>
+</ul>
+<p>
+  Each debug macro has a base name that represents the priority and a prefix that represents the sub-system.  Each macro is individually initialized by both priority and sub-system.  For example, <code>uerr()</code> is the macro used for error level messages from the USB subsystem and is enabled with <code>CONFIG_DEBUG_USB_ERROR</code>.
+</p>
+<p>
+  The base debug macro names, their priority, and configuration variable are summarized below:
+</p>
+<ul>
+  </li>
+  <li>
+    <p>
+      <code>info()</code>.  The <code>info()</code> macro is the lowest priority (<code>LOG_INFO</code>) and is intended to provide general information about the flow of program execution so that you can get an overview of the behavior of the program.  <code>info()</code> is often very chatty and voluminous and usually more  information than you may want to see.  The <code>info()</code> macro is controlled via CONFIG_DEBUG_subsystem_INFO
+  </li>
+  <li>
+    <p>
+      <code>warn()</code>.  The <code>warn()</code> macro has medium priority (<code>LOG_WARN</code>) and is controlled by <code>CONFIG_DEBUG_<i>subsystem</i>_WARN</code>.  The <code>warn()</code> is intended to
+      note exceptional or unexpected conditions that meigh be potential
+      errors or, perhaps, minor errors that easily recovered.
+  </li>
+  <li>
+    <p>
+      <code>err()</code>.  This is a high priority debug macro (<code>LOG_ERROR</code>) and controlled by <code>CONFIG_DEBUG_<i>subsystem</i>_ERROR</code>.  The <code>err()</code> is reserved to indicate important error conditions.
+  </li>
+  <li>
+    <p>
+      <code>alert()</code>. The highest priority debug macro (<code>LOG_EMERG</code>) and is controlled by <code>CONFIG_DEBUG_ALERT</code>.  The <code>alert()</code> macro is reserved for use solely by assertion and crash handling logic.  It also differs from the other macros in that it cannot be enabled or disabled per subsystem.
+  </li>
+</ul>
+
+<h3><a name="syslogchannels">6.4.2 SYSLOG Channels</a></h3>
+<h4><a name="debugifs">6.4.2.1 SYSLOG Channel Interfaces</a></h4>
+<p>
+  In the NuttX SYSLOG implementation, the underlying device logic the supports the SYSLOG output is referred to as a SYSLOG <i>channel</i>.  Each SYSLOG channel is represented by an interface defined in <code>include/nuttx/syslog/syslog.h</code>:
+</p>
+<ul><pre>
+    /* This structure provides the interface to a SYSLOG device */
+
+    typedef CODE int (*syslog_putc_t)(int ch);
+    typedef CODE int (*syslog_flush_t)(void);
+
+    struct syslog_channel_s
+    {
+      /* I/O redirection methods */
+
+      syslog_putc_t sc_putc;    /* Normal buffered output */
+      syslog_putc_t sc_force;   /* Low-level output for interrupt handlers */
+      syslog_flush_t sc_flush;  /* Flush buffered output (on crash) */
+
+      /* Implementation specific logic may follow */
+    };
+</pre></ul>
+<p>
+  The channel interface is instantiated by calling <code>syslog_channel()</code>:
+</p>
+
+<h4><a name="syslogchannel">6.4.2.1 <code>syslog_channel()</code></a></h4>
+<p><b>Function Prototype:</b></p>
+<ul><pre>
+#include &lt;nuttx/syslog/syslog.h&gt;
+int syslog_channel(FAR const struct syslog_channel_s *channel);
+</pre></ul>
+<p><b>Description:</b>
+  Configure the SYSLOG function to use the provided channel to generate SYSLOG output.
+</p>
+<p>
+  <code>syslog_channel()</code> is a non-standard, internal OS interface and is not available to applications.  It may be called numerous times as necessary to change channel interfaces.
+  By default, all system log output goes to console (<code>/dev/console</code>).
+</p>
+<p><b>Input Parmeters:</b>
+<ul>
+  <li>
+    <p>
+       <code>channel</code>: Describes the interface to the channel to be used.
+  </li>
+</ul>
+<p><b>Returned Value:</b>
+<ul>
+  <p>
+    Zero (<code>OK</code>)is returned on success.  A negated <code>errno</code> value is returned on any failure.
+  </p>
+</ul>
+
+<h4><a name="sysloginit">6.4.2.2 SYSLOG Channel Initialization</a></h4>
+<p>
+  The initial, default SYSLOG channel is established with statically initialized global variables so that some level of SYSLOG output may be available immediately upon reset.  This initialized data is in the file <code>drivers/syslog/syslog_channel.c</code>.  The initial SYSLOG capability is determined by the selected SYSLOG channel:
+</p>
+<ul>
+  <li>
+    <p>
+      <i>In-Memory Buffer (RAMLOG)</i>.  Full SYSLOG capability as available at reset.
+  </li>
+  <li>
+    <p>
+      <i>Serial Console</i>.  If the serial implementation provides the low-level character output function <code>up_putc()</code>, then that low level serial output is available as soon as the serial device has been configured.
+  </li>
+  <li>
+    <p>
+      For all other SYSLOG channels, all SYSLOG output goes to the bit-
+      bucket until the SYSLOG channel device has been initialized.
+  </li>
+</ul>
+<p>
+  The syslog channel device is initialized when the bring-up logic calls <code>syslog_initialize()</code>:
+</p>
+
+<h4><a name="sysloginit">6.4.2.3 <code>syslog_initialize()</code></a></h4>
+<p><b>Function Prototype:</b></p>
+<ul><pre>
+#include &lt;nuttx/syslog/syslog.h&gt;
+#ifndef CONFIG_ARCH_SYSLOG
+int syslog_initialize(enum syslog_init_e phase);
+#else
+#  define syslog_initialize(phase)
+#endif
+</ul></pre>
+<p><b>Description:</b>
+  One power up, the SYSLOG facility is non-existent or limited to very low-level output.  This function is called later in the initialization sequence after full driver support has been initialized.  It installs the configured SYSLOG drivers and enables full SYSLOG capability.
+</p>
+<p>
+  This function performs these basic operations:
+</p>
+<ul>
+  <li>
+    <p>
+      Initialize the SYSLOG device
+  </li>
+  <li>
+    <p>
+      Call <code>syslog_channel()</code> to begin using that device.
+  </li>
+  <li>
+    <p>
+      If <code>CONFIG_ARCH_SYSLOG</code> is selected, then the architecture-specific logic will provide its own SYSLOG device initialize which must include as a minimum a call to <code>syslog_channel()</code> to use the device.
+  </li>
+</ul>
+<p><b>Input Parameters:</b>
+<ul>
+  <li>
+    <p>
+      <code>phase</code>: One of {<code>SYSLOG_INIT_EARLY</code>, <code>SYSLOG_INIT_LATE</code>}
+  </li>
+</ul>
+<p><b>Returned Value:</b>
+  Zero (<code>OK</code>) is returned on success; a negated <code>errno</code> value is returned on any failure.
+</p>
+<p>
+  Different types of SYSLOG devices have different OS initialization
+  requirements.  Some are available immediately at reset, some are available
+  after some basic OS initialization, and some only after OS is fully
+  initialized.  In order to satisfy these different initialization
+  requirements, <code>syslog_initialize()</code> is called twice from the boot-up logic:
+</p>
+<ul>
+  <li>
+    <p>
+      <code>syslog_initialize()</code> is called from the architecture-specific <code>up_initialize()</code> function as some as basic hardware resources have been initialized: Timers, interrupts, etc.  In this case, <code>syslog_initialize()</code> is called with the argument <code>SYSLOG_INIT_EARLY</code>.
+  </li>
+  <li>
+    <p>
+      <code>syslog_initialize()</code> is called again from <code>os_start()</code> when the full OS initialization has completed, just before the application main entry point is spawned.  In this case, <code>syslog_initialize()</code> is called with the argument <code>SYSLOG_INIT_LATE</code>.
+  </li>
+</ul>
+<p>
+  There are other types of SYSLOG channel devices that may require even further initialization.  For example, the file SYSLOG channel (described below) cannot be initialized until the necessary file systems have been mounted.
+</p>
+
+<h4><a name="sysloginterrupt">6.4.2.3 Interrupt Level SYSLOG Output</a></h4>
+<p>
+  As a general statement, SYSLOG output only supports //normal// output from NuttX tasks.  However, for debugging purposes, it is also useful to get SYSLOG output from interrupt level logic.  In an embedded system, that is often where the most critical operations are performed.
+</p>
+<p>
+  There are three conditions under which SYSLOG output generated from interrupt level processing can a included the SYSLOG output stream:
+</p>
+<ol>
+  <li>
+    <p><b>Low-Level Serial Output</b>.
+      If you are using a SYSLOG console channel (<code>CONFIG_SYSLOG_CONSOLE</code>) with a serial console (<code>CONFIG_SYSLOG_SERIAL_CONSOLE</code>) and if the underlying architecture supports the low-level <code>up_putc()</code> interface(<code>CONFIG_ARCH_LOWPUTC</code>), then the SYLOG logic will direct the output to <code>up_putc()</code> which is capable of generating the serial output within the context of an interrupt handler.
+    </p>
+    <p>
+      There are a few issues in doing this however:
+    </p>
+    <ul>
+      <li>
+        <p>
+          <code>up_putc()</code> is able to generate debug output in any context because it disables serial interrupts and polls the hardware directly.  These polls may take many milliseconds and during that time, all interrupts are disable within the interrupt handler.  This, of course, interferes with the real-time behavior of the RTOS.
+        </p>
+      </li>
+      <li>
+        <p>
+          The output generated by <code>up_putc()</code> is immediate and in real-time.  The normal SYSLOG output, on the other hand, is buffered in the serial driver and may be delayed with respect to the immediate output by many lines.  Therefore, the interrupt level SYSLOG ouput provided throug <code>up_putc()</code> is grossly out of synchronization with other debug output
+        </p>
+      </li>
+    </ul>
+  </ul>
+</li>
+<li>
+  <p><b>In-Memory Buffering</b>.
+    If the RAMLOG SYSLOG channel is supported, then all SYSLOG output is buffered in memory.  Interrupt level SYSLOG output is no different than normal SYSLOG output in this case.
+  </p>
+</li>
+<li>
+  <p><b>Serialization Buffer</b>.
+    A final option is the use the an <i>interrupt buffer</i> to buffer the interrupt level SYSLOG output.  In this case:
+  </p>
+  <ul>
+    <li>
+      <p>
+        SYSLOG output generated from interrupt level process in not sent to the SYSLOG channel immediately.  Rather, it is buffered in the interrupt serialization buffer.
+      </p>
+    </li>
+    <li>
+      <p>
+        Later, when the next normal syslog output is generated, it will first empty the content of the interrupt buffer to the SYSLOG device in the proper context.  It will then be followed by the normal syslog output.  In this case, the interrupt level SYSLOG output will interrupt the normal output stream and the interrupt level SYSLOG output will be inserted into the correct position in the SYSLOG output when the next normal SYLOG output is generated.
+      </p>
+    </li>
+  </ul>
+  <p>
+    The SYSLOG interrupt buffer is enabled with <code>CONFIG_SYSLOG_INTBUFFER</code>.  When the interrupt buffer is enabled, you must also provide the size of the interrupt buffer with <code>CONFIG_SYSLOG_INTBUFSIZE</code>.
+  </p>
+</li>
+</ol>
+
+<h3><a name="syslogoptions">6.4.3 SYSLOG Channel Options</a></h3>
+<h4><a name="syslogconsole">6.4.3.1 SYSLOG Console Device</a></h4>
+<p>
+  The typical SYSLOG device is the system console.  If you are using a serial console, for example, then the SYSLOG output will appear on that serial port.
+</p>
+<p>
+  This SYSLOG channel is automatically selected by <code>syslog_initialize()</code> in the LATE initialization phase based on configuration options.  The configuration options that affect this channel selection include:
+</p>
+<ul>
+  <li>
+    <p>
+      <code>CONFIG_DEV_CONSOLE</code>.  This setting indicates that the system supports a console device, i.e., that the character device <code>/dev/console</code> exists.
+  </li>
+  <li>
+    <p>
+      <code>CONFIG_SERIAL_CONSOLE</code>.  This configuration option is automatically selected when a UART or USART is configured as the system console.  There is no user selection.
+  </li>
+  <li>
+    <p>
+      <code>CONFIG_SYSLOG_CONSOLE</code>.  This configuration option is manually selected from the SYSLOG menu.  This is the option that acutally enables the SYSLOG console device.  It depends on <code>CONFIG_DEV_CONSOLE</code> and it will automatically select <code>CONFIG_SYSLOG_SERIAL_CONSOLE</code> if <code>CONFIG_SERIAL_CONSOLE</code> is selected.
+  </li>
+  <li>
+    <p>
+      <code>CONFIG_ARCH_LOWPUTC</code>.  This is an indication from the architecture configuration that the platform supports the <code>up_putc()</code> interface.  <code>up_putc()</code> is a very low level UART interface that can even be used from interrupt handling.
+  </li>
+  <li>
+    <p>
+      <code>CONFIG_SYSLOG_SERIAL_CONSOLE</code>.  This enables certain features of the SYSLOG operation that depend on a serial console.  If <code>CONFIG_ARCH_LOWPUTC</code> is also selected, for example, then <code>up_putc()</code> will be used for the forced SYSLOG output.
+  </li>
+</ul>
+<p>
+  Interrupt level SYSLOG output will be lost unless:  (1) the interrupt buffer
+  is enabled to support serialization, or (2) a serial console is used and
+  <code>up_putc()</code> is supported.
+</p>
+<p>
+  NOTE: The console channel uses the fixed character device at <code>/dev/console</code>.  The console channel is not synonymous with <code>stdout</code> (or file descriptor 1).  <code>stdout</code> is the current output from a task when, say, <code>printf()</code> if used.  Initially, <code>stdout</code> does, indeed, use the <code>/dev/console</code> device.  However, <code>stdout</code> may subsequently be redirected to some other device or file.  This is always the case, for example, when a transient device is used for a console -- such as a USB console or a Telnet console.  The SYSLOG channel is not redirected as <code>stdout</code> is; the SYSLOG channel will stayed fixed (unless it is explicitly changed via <code>syslog_channel()</code>).
+</p>
+<p>
+  References: <code>drivers/syslog/syslog_consolechannel.c</code> and
+  <code>drivers/syslog/syslog_device.c</code>
+</p>
+
+<h4><a name="syslogchardev">6.4.3.2 SYSLOG Character Device</a></h4>
+<p>
+  The system console device, <code>/dev/console</code>, is a character driver with some special properties.  However, any character driver may be used as the SYSLOG output channel.  For example, suppose you have a serial console on <code>/dev/ttyS0</code> and you want SYSLOG output on <code>/dev/ttyS1</code>.  Or suppose you support only a Telnet console but want to capture debug output <code>/dev/ttyS0</code>.
+</p>
+<p>
+  This SYSLOG device channel is selected with <code>CONFIG_SYSLOG_CHAR</code> and has no other dependencies.  Differences fromthe SYSLOG console channel include:
+</p>
+<ul>
+  <li>
+    <p>
+      <code>CONFIG_SYSLOG_DEVPATH</code>.  This configuration option string must be set provide the full path to the character device to be used.
+  </li>
+  <li>
+    <p>
+      The forced SYSLOG output always goes to the bit-bucket.  This means that interrupt level SYSLOG output will be lost unless the interrupt buffer is enabled to support serialization.
+  </li>
+  <li>
+    <p>
+      <code>CONFIG_SYSLOG_CHAR_CRLF</code>.  If <code>CONFIG_SYSLOG_CHAR_CRLF</code> is selected, then linefeeds in the SYSLOG output will be expanded to Carriage Return plus Linefeed.  Since the character device is not a console device, the addition of carriage returns to line feeds would not be performed otherwise.  You would probably want this expansion if you use a serial terminal program with the character device output.
+  </li>
+</ul>
+<p>
+  References: <code>drivers/syslog/syslog_devchannel.c</code> and <code>drivers/syslog/syslog_device.c</code>
+</p>
+
+<h4><a name="syslogfiledev">6.4.3.3 SYSLOG File Device</a></h4>
+<p>
+  Files can also be used as the sink for SYSLOG output.  There is, however, a very fundamental difference in using a file as opposed the system console, a RAM buffer, or character device:  You must first mount the file system that supports the SYSLOG file.  That difference means that the file SYSLOG channel cannot be supported during the boot-up phase but can be instantiated later when board level logic configures the application environment, including mounting of the file systems.
+</p>
+<p>
+  The interface <code>syslog_file_channel()</code> is used to configure the SYSLOG file channel:
+</p>
+
+<h4><a name="syslogfiledev">6.4.3.4 <code>syslog_file_channel()</code></a></h4>
+<p><b>Function Prototype:</b></p>
+<ul><pre>
+#include &lt;nuttx/syslog/syslog.h&gt;
+#ifdef CONFIG_SYSLOG_FILE
+int syslog_file_channel(FAR const char *devpath);
+#endif
+</pre></ul>
+<p><b>Description:</b>
+  Configure to use a file in a mounted file system at <code>devpath</code> as the SYSLOG channel.
+</p>
+<p>
+  This tiny function is simply a wrapper around <code>syslog_dev_initialize()</code> and <code>syslog_channel()</code>.  It calls <code>syslog_dev_initialize()</code> to configure the character file at <code>devpath</code> then calls <code>syslog_channel()</code> to use that device as the SYSLOG output channel.
+</p>
+<p>
+  File SYSLOG channels differ from other SYSLOG channels in that they cannot be established until after fully booting and mounting the target file system.  This function would need to be called from board-specific bring-up logic AFTER mounting the file system containing <code>devpath</code>.
+</p>
+<p>
+  SYSLOG data generated prior to calling <code>syslog_file_channel()</code> will, of course, not be included in the file.
+</p>
+<p>
+  NOTE interrupt level SYSLOG output will be lost in this case unless the interrupt buffer is used.
+</p>
+
+<p><b>Input Parameters:</b>
+<ul>
+  <li>
+    <p>
+      <code>devpath</code>: The full path to the file to be used for SYSLOG output.  This may be an existing file or not.  If the file exists,
+      <code>syslog_file_channel()</code> will append new SYSLOG data to the end of the file.  If it does not, then <code>syslog_file_channel()</code> will create the file.
+  </li>
+</ul>
+<p><b>Returned Value:</b>
+  Zero (<code>OK</code>) is returned on success; a negated <code>errno</code> value is returned on any failure.
+</p>
+<p>
+  References: <code>drivers/syslog/syslog_filechannel.c</code>, <code>drivers/syslog/syslog_device.c</code>, and <code>include/nuttx/syslog/syslog.h</code>.
+</p>
+
+<h4><a name="syslogramlog">6.4.3.5 SYSLOG RAMLOG Device</a></h4>
+<p>
+  The RAMLOG is a standalone feature that can be used to buffer any
+  character data in memory.  There are, however, special configurations
+  that can be used to configure the RAMLOG as a SYSLOG channel.  The RAMLOG
+  functionality is described in a more general way in the following
+  paragraphs.
+</p>
+
+<h3><a name="ramlog">6.4.4 RAM Logging Device</a></h3>
+</p>
+  The RAM logging driver is a driver that was intended to support debugging output (SYSLOG) when the normal serial output is not available.  For example, if you are using a Telnet or USB serial console, the debug output will get lost -- or worse.  For example, what if you want to debug the network over Telnet?
+</p>
+<p>
+  The RAM logging driver can also accept debug output data from interrupt handler with no special serialization buffering.  As an added benefit, the RAM logging driver is much less invasive.  Since no actual I/O is performed with the debug output is generated, the RAM logger tends to be much faster and will interfere much less when used with time critical drivers.
+</p>
+<p>
+  The RAM logging driver is similar to a pipe in that it saves the debugging output in a circular buffer in RAM.  It differs from a pipe in numerous details as needed to support logging.
+</p>
+<p>
+  This driver is built when <code>CONFIG_RAMLOG</code> is defined in the Nuttx configuration.
+</p>
+
+<h4><a name="ramlogdmesg">6.4.4.1 <code>dmesg</code></a></h4>
+<p>
+  When the RAMLOG (with SYSLOG) is enabled, a new NuttShell (NSH) command will appear:  <code>dmesg</code>.  The <code>dmesg</code> command will dump the contents of the circular buffer to the console (and also clear the circular buffer).
+</p>
+
+<h4><a name="ramlogconfig">6.4.4.2 RAMLOG Configuration options</a></h4>
+<ul>
+  <li>
+    <p>
+      <code>CONFIG_RAMLOG</code>: Enables the RAM logging feature
+  </li>
+  <li>
+    <p>
+      <code>CONFIG_RAMLOG_CONSOLE</code>: Use the RAM logging device as a system console. If this feature is enabled (along with <code>CONFIG_DEV_CONSOLE</code>), then all console output will be re-directed to a circular buffer in RAM.  This might be useful, for example, if the only console is a Telnet console.  Then in that case, console output from non-Telnet threads will go to the circular buffer and can be viewed using the NSH <code>dmesg</code> command.  This optional is not useful in other scenarios.
+  </li>
+  <li>
+    <p>
+      <code>CONFIG_RAMLOG_SYSLOG</code>: Use the RAM logging device for the SYSLOG interface.  If this feature is enabled, then all debug output will be re-directed to the circular  buffer in RAM.  This RAM log can be viewed from NSH using the <code>dmesg</code>  command.  NOTE:  Unlike the limited, generic character driver SYSLOG device, the RAMLOG <i>can</i> be used to capture debug output from
+      interrupt level handlers.
+  </li>
+  <li>
+    <p>
+      <code>CONFIG_RAMLOG_NPOLLWAITERS</code>: The number of threads than can be waiting for this driver on <code>poll()</code>.  Default: 4
+  </li>
+</ul>
+<p>
+  If <code>CONFIG_RAMLOG_CONSOLE</code> or <code>CONFIG_RAMLOG_SYSLOG</code> is selected, then the following must also be provided:
+</p>
+<ul>
+  <li>
+    <p>
+      <code>CONFIG_RAMLOG_BUFSIZE</code>: The size of the circular buffer to use. Default: 1024 bytes.
+  </li>
+</ul>
+<p>
+  Other miscellaneous settings
+</p>
+<ul>
+  <li>
+    <p>
+      <code>CONFIG_RAMLOG_CRLF</code>: Pre-pend a carriage return before every linefeed that goes into the RAM log.
+  </li>
+  <li>
+    <p>
+      <code>CONFIG_RAMLOG_NONBLOCKING</code>: Reading from the RAMLOG will never block if the RAMLOG is empty.  If the RAMLOG is empty, then zero is returned (usually interpreted as end-of-file).  If you do not define this, the NSH <code>dmesg</code> command will lock up when called!  So you probably do want this!
+  </li>
+  <li>
+    <p>
+      <code>CONFIG_RAMLOG_NPOLLWAITERS</code>: The maximum number of threads that may be waiting on the poll method.
+  </li>
+</ul>
+
+<h2><a name="pwrmgmt">6.5 Power Management</a></h2>
+
+<h3><a name="pmoverview">6.5.1 Overview</a></h3>
 <p>
   <b>Power Management (PM) Sub-System</b>.
   NuttX supports a simple power management (PM) sub-system.  This sub-system:
@@ -5632,12 +6137,12 @@ int kbd_decode(FAR struct lib_instream_s *stream, FAR struct kbd_getstate_s *sta
   Multiple PM domains might be useful, for example, if you would want to control power states associated with a network separately from power states associated with a user interface.
 </p>
 
-<h3><a name="pminterfaces">6.4.2 Interfaces</a></h3>
+<h3><a name="pminterfaces">6.5.2 Interfaces</a></h3>
 <p>
   All PM interfaces are declared in the file <code>include/nuttx/power/pm.h</code>.
 </p>
 
-<h4><a name="pminitialize">6.4.2.1 <code>pm_initialize()</code></a></h4>
+<h4><a name="pminitialize">6.5.2.1 <code>pm_initialize()</code></a></h4>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/power/pm.h&gt;
@@ -5654,7 +6159,7 @@ None
 None
 </p>
 
-<h4><a name="pmregister">6.4.2.2 <code>pm_register()</code></a></h4>
+<h4><a name="pmregister">6.5.2.2 <code>pm_register()</code></a></h4>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/power/pm.h&gt;
@@ -5674,7 +6179,7 @@ int pm_register(FAR struct pm_callback_s *callbacks);
 Zero (<code>OK</code>) on success; otherwise a negated <code>errno</code> value is returned.
 </p>
 
-<h4><a name="pmactivity">6.4.2.3 <code>pm_activity()</code></a></h4>
+<h4><a name="pmactivity">6.5.2.3 <code>pm_activity()</code></a></h4>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/power/pm.h&gt;
@@ -5703,7 +6208,7 @@ void pm_activity(int domain, int priority);
   This function may be called from an interrupt handler (this is the ONLY PM function that may be called from an interrupt handler!).
 </p>
 
-<h4><a name="pmcheckstate">6.4.2.4 <code>pm_checkstate()</code></a></h4>
+<h4><a name="pmcheckstate">6.5.2.4 <code>pm_checkstate()</code></a></h4>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/power/pm.h&gt;
@@ -5733,7 +6238,7 @@ enum pm_state_e pm_checkstate(int domain);
   The recommended power management state.
 </p>
 
-<h4><a name="pmchangestate">6.4.2.5 <code>pm_changestate()</code></a></h4>
+<h4><a name="pmchangestate">6.5.2.5 <code>pm_changestate()</code></a></h4>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/power/pm.h&gt;
@@ -5763,14 +6268,14 @@ enum pm_state_e pm_checkstate(int domain);
    suspend the IDLE thread before it completes the entire state change unless interrupts are disabled throughout the state change.
 </p>
 
-<h3><a name="pmcallbacks">6.4.3 Callbacks</a></h3>
+<h3><a name="pmcallbacks">6.5.3 Callbacks</a></h3>
 <p>
   The <code>struct pm_callback_s</code> includes the pointers to the driver callback functions.
   This structure is defined <code>include/nuttx/power/pm.h</code>.
   These callback functions can be used to provide power management information to the driver.
 </p>
 
-<h4><a name="pmprepare">6.4.3.1 <code>prepare()</code></a></h4>
+<h4><a name="pmprepare">6.5.3.1 <code>prepare()</code></a></h4>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 int (*prepare)(FAR struct pm_callback_s *cb, int domain, enum pm_state_e pmstate);
@@ -5800,7 +6305,7 @@ int (*prepare)(FAR struct pm_callback_s *cb, int domain, enum pm_state_e pmstate
    consumption modes!
 </p>
 
-<h4><a name="pmnotify">6.4.3.1 <code>notify()</code></a></h4>
+<h4><a name="pmnotify">6.5.3.1 <code>notify()</code></a></h4>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/power/pm.h&gt;

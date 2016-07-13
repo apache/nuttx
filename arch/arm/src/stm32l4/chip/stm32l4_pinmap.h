@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/stm32l4/chip/stm32_pinmap.h
+ * arch/arm/src/stm32l4/chip/stm32l4_pinmap.h
  *
  *   Copyright (C) 2015 Sebastien Lorquet. All rights reserved.
  *   Author: Sebastien Lorquet <sebastien@lorquet.fr>

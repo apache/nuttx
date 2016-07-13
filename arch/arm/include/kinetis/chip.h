@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/include/kinetis/chip.h
  *
- *   Copyright (C) 2011, 2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -72,6 +72,7 @@
 #  define KINETIS_K20             1          /* Kinetics K20 family */
 #  undef  KINETIS_K40                        /* Not Kinetics K40 family */
 #  undef  KINETIS_K60                        /* Not Kinetis K60 family */
+#  undef  KINETIS_K64                        /* Not Kinetis K64 family */
 
 #if defined(CONFIG_ARCH_CHIP_MK20DN32VLH5)
 #  define KINETIS_FLASH_SIZE      (64*1024)  /* 32Kb */
@@ -153,6 +154,7 @@
 #  define KINETIS_K20             1          /* Kinetics K20 family */
 #  undef  KINETIS_K40                        /* Not Kinetics K40 family */
 #  undef  KINETIS_K60                        /* Not Kinetis K60 family */
+#  undef  KINETIS_K64                        /* Not Kinetis K64 family */
 
 #if defined(CONFIG_ARCH_CHIP_MK20DX64VLH7)
 #  define KINETIS_FLASH_SIZE      (64*1024)  /* 64Kb */
@@ -207,6 +209,7 @@
 #  undef  KINETIS_K20                        /* Not Kinetis K20 family */
 #  define KINETIS_K40             1          /* Kinetics K40 family */
 #  undef  KINETIS_K60                        /* Not Kinetis K60 family */
+#  undef  KINETIS_K64                        /* Not Kinetis K64 family */
 #  define KINETIS_FLASH_SIZE      (64*1024)  /* 64Kb */
 #  define KINETIS_FLEXMEM_SIZE    (32*1024)  /* 32Kb */
 #  define KINETIS_SRAM_SIZE       (16*1024)  /* 16Kb */
@@ -257,6 +260,7 @@
 #  undef  KINETIS_K20                        /* Not Kinetis K20 family */
 #  define KINETIS_K40             1          /* Kinetics K40 family */
 #  undef  KINETIS_K60                        /* Not Kinetis K60 family */
+#  undef  KINETIS_K64                        /* Not Kinetis K64 family */
 #  define KINETIS_FLASH_SIZE      (128*1024) /* 128Kb */
 #  define KINETIS_FLEXMEM_SIZE    (32*1024)  /* 32Kb */
 #  define KINETIS_SRAM_SIZE       (32*1024)  /* 32Kb */
@@ -299,6 +303,7 @@
 #  undef  KINETIS_K20                        /* Not Kinetis K20 family */
 #  define KINETIS_K40             1          /* Kinetics K40 family */
 #  undef  KINETIS_K60                        /* Not Kinetis K60 family */
+#  undef  KINETIS_K64                        /* Not Kinetis K64 family */
 #  define KINETIS_FLASH_SIZE      (256*1024) /* 256Kb */
 #  define KINETIS_FLEXMEM_SIZE    (32*1024)  /* 32Kb */
 #  define KINETIS_SRAM_SIZE       (32*1024)  /* 64Kb */
@@ -340,6 +345,7 @@
 #  undef  KINETIS_K20                        /* Not Kinetis K20 family */
 #  define KINETIS_K40             1          /* Kinetics K40 family */
 #  undef  KINETIS_K60                        /* Not Kinetis K60 family */
+#  undef  KINETIS_K64                        /* Not Kinetis K64 family */
 #  define KINETIS_FLASH_SIZE      (128*1024) /* 128Kb */
 #  define KINETIS_FLEXMEM_SIZE    (128*1024) /* 128Kb */
 #  define KINETIS_SRAM_SIZE       (32*1024)  /* 32Kb */
@@ -381,6 +387,7 @@
 #  undef  KINETIS_K20                        /* Not Kinetis K20 family */
 #  define KINETIS_K40             1          /* Kinetics K40 family */
 #  undef  KINETIS_K60                        /* Not Kinetis K60 family */
+#  undef  KINETIS_K64                        /* Not Kinetis K64 family */
 #  define KINETIS_FLASH_SIZE      (256*1024) /* 256Kb */
 #  define KINETIS_FLEXMEM_SIZE    (256*1024) /* 256Kb */
 #  define KINETIS_SRAM_SIZE       (64*1024)  /* 32Kb */
@@ -424,6 +431,7 @@
 #  undef  KINETIS_K20                        /* Not Kinetis K20 family */
 #  define KINETIS_K40             1          /* Kinetics K40 family */
 #  undef  KINETIS_K60                        /* Not Kinetis K60 family */
+#  undef  KINETIS_K64                        /* Not Kinetis K64 family */
 #  define KINETIS_FLASH_SIZE      (512*1024) /* 512Kb */
 #  undef  KINETIS_FLEXMEM_SIZE               /* No FlexMemory */
 #  define KINETIS_SRAM_SIZE       (128*1024) /* 128Kb */
@@ -465,6 +473,7 @@
 #  undef  KINETIS_K20                        /* Not Kinetis K20 family */
 #  undef  KINETIS_K40                        /* Not Kinetics K40 family */
 #  define KINETIS_K60             1          /* Kinetis K60 family */
+#  undef  KINETIS_K64                        /* Not Kinetis K64 family */
 #  define KINETIS_FLASH_SIZE      (256*1024) /* 256Kb */
 #  undef  KINETIS_FLEXNVM_SIZE               /* No FlexNVM */
 #  undef  KINETIS_FLEXRAM_SIZE               /* No FlexRAM */
@@ -509,6 +518,7 @@
 #  undef  KINETIS_K20                        /* Not Kinetis K20 family */
 #  undef  KINETIS_K40                        /* Not Kinetics K40 family */
 #  define KINETIS_K60             1          /* Kinetis K60 family */
+#  undef  KINETIS_K64                        /* Not Kinetis K64 family */
 #  define KINETIS_FLASH_SIZE      (256*1024) /* 256Kb */
 #  define KINETIS_FLEXNVM_SIZE    (256*1024) /* 256Kb  */
 #  define KINETIS_FLEXRAM_SIZE    (4*1024)   /* 32Kb */
@@ -553,6 +563,7 @@
 #  undef  KINETIS_K20                        /* Not Kinetis K20 family */
 #  undef  KINETIS_K40                        /* Not Kinetics K40 family */
 #  define KINETIS_K60             1          /* Kinetis K60 family */
+#  undef  KINETIS_K64                        /* Not Kinetis K64 family */
 #  define KINETIS_FLASH_SIZE      (512*1024) /* 256Kb */
 #  undef  KINETIS_FLEXNVM_SIZE               /* No FlexNVM */
 #  undef  KINETIS_FLEXRAM_SIZE               /* No FlexRAM */
@@ -598,6 +609,7 @@
 #  undef  KINETIS_K20                        /* Not Kinetis K20 family */
 #  undef  KINETIS_K40                        /* Not Kinetics K40 family */
 #  define KINETIS_K60             1          /* Kinetis K60 family */
+#  undef  KINETIS_K64                        /* Not Kinetis K64 family */
 #  define KINETIS_FLASH_SIZE      (256*1024) /* 256Kb */
 #  undef  KINETIS_FLEXNVM_SIZE               /* No FlexNVM */
 #  undef  KINETIS_FLEXRAM_SIZE               /* No FlexRAM */
@@ -642,6 +654,7 @@
 #  undef  KINETIS_K20                        /* Not Kinetis K20 family */
 #  undef  KINETIS_K40                        /* Not Kinetics K40 family */
 #  define KINETIS_K60             1          /* Kinetis K60 family */
+#  undef  KINETIS_K64                        /* Not Kinetis K64 family */
 #  define KINETIS_FLASH_SIZE      (256*1024) /* 256Kb */
 #  define KINETIS_FLEXNVM_SIZE    (256*1024) /* 256Kb */
 #  define KINETIS_FLEXRAM_SIZE    (4*1024)   /* 4Kb */
@@ -686,6 +699,7 @@
 #  undef  KINETIS_K20                        /* Not Kinetis K20 family */
 #  undef  KINETIS_K40                        /* Not Kinetics K40 family */
 #  define KINETIS_K60             1          /* Kinetis K60 family */
+#  undef  KINETIS_K64                        /* Not Kinetis K64 family */
 #  define KINETIS_FLASH_SIZE      (512*1024) /* 256Kb */
 #  undef  KINETIS_FLEXNVM_SIZE               /* No FlexNVM */
 #  undef  KINETIS_FLEXRAM_SIZE               /* No FlexRAM */
@@ -730,6 +744,7 @@
 #  undef  KINETIS_K20                        /* Not Kinetis K20 family */
 #  undef  KINETIS_K40                        /* Not Kinetics K40 family */
 #  define KINETIS_K60             1          /* Kinetis K60 family */
+#  undef  KINETIS_K64                        /* Not Kinetis K64 family */
 #  define KINETIS_FLASH_SIZE      (256*1024) /* 256Kb */
 #  undef  KINETIS_FLEXNVM_SIZE               /* No FlexNVM */
 #  undef  KINETIS_FLEXRAM_SIZE               /* No FlexRAM */
@@ -774,6 +789,7 @@
 #  undef  KINETIS_K20                        /* Not Kinetis K20 family */
 #  undef  KINETIS_K40                        /* Not Kinetics K40 family */
 #  define KINETIS_K60             1          /* Kinetis K60 family */
+#  undef  KINETIS_K64                        /* Not Kinetis K64 family */
 #  define KINETIS_FLASH_SIZE      (256*1024) /* 256Kb */
 #  define KINETIS_FLEXNVM_SIZE    (256*1024) /* 256Kb */
 #  define KINETIS_FLEXRAM_SIZE    (4*1024)   /* 4Kb */
@@ -818,6 +834,7 @@
 #  undef  KINETIS_K20                        /* Not Kinetis K20 family */
 #  undef  KINETIS_K40                        /* Not Kinetics K40 family */
 #  define KINETIS_K60             1          /* Kinetis K60 family */
+#  undef  KINETIS_K64                        /* Not Kinetis K64 family */
 #  define KINETIS_FLASH_SIZE      (512*1024) /* 512Kb */
 #  undef  KINETIS_FLEXNVM_SIZE               /* No FlexNVM */
 #  undef  KINETIS_FLEXRAM_SIZE               /* No FlexRAM */
@@ -862,6 +879,7 @@
 #  undef  KINETIS_K20                        /* Not Kinetis K20 family */
 #  undef  KINETIS_K40                        /* Not Kinetics K40 family */
 #  define KINETIS_K60             1          /* Kinetis K60 family */
+#  undef  KINETIS_K64                        /* Not Kinetis K64 family */
 #  define KINETIS_FLASH_SIZE      (256*1024) /* 256Kb */
 #  undef  KINETIS_FLEXNVM_SIZE               /* No FlexNVM */
 #  undef  KINETIS_FLEXRAM_SIZE               /* No FlexRAM */
@@ -906,6 +924,7 @@
 #  undef  KINETIS_K20                        /* Not Kinetis K20 family */
 #  undef  KINETIS_K40                        /* Not Kinetics K40 family */
 #  define KINETIS_K60             1          /* Kinetis K60 family */
+#  undef  KINETIS_K64                        /* Not Kinetis K64 family */
 #  define KINETIS_FLASH_SIZE      (256*1024) /* 256Kb */
 #  define KINETIS_FLEXNVM_SIZE    (256*1024) /* 256Kb */
 #  define KINETIS_FLEXRAM_SIZE    (4*1024)   /* 4Kb */
@@ -950,6 +969,7 @@
 #  undef  KINETIS_K20                        /* Not Kinetis K20 family */
 #  undef  KINETIS_K40                        /* Not Kinetics K40 family */
 #  define KINETIS_K60             1          /* Kinetis K60 family */
+#  undef  KINETIS_K64                        /* Not Kinetis K64 family */
 #  define KINETIS_FLASH_SIZE      (512*1024) /* 512Kb */
 #  undef  KINETIS_FLEXNVM_SIZE               /* No FlexNVM */
 #  undef  KINETIS_FLEXRAM_SIZE               /* No FlexRAM */
@@ -989,6 +1009,278 @@
 #  undef  KINETIS_NMMCAU                     /* No hardware encryption */
 #  undef  KINETIS_NTAMPER                    /* No tamper detect */
 #  define KINETIS_NCRC            1          /* CRC */
+
+#elif defined(CONFIG_ARCH_CHIP_MK64FN1M0VLL12)
+#  undef  KINETIS_K20                          /* Not Kinetics K20 family */
+#  undef  KINETIS_K40                          /* Not Kinetics K40 family */
+#  undef  KINETIS_K60                          /* Not Kinetis K60 family */
+#  define KINETIS_K64             1            /* Kinetis K64 family */
+#  define KINETIS_FLASH_SIZE      (1024*1024)  /* 1Mb */
+#  define KINETIS_FLEXNVM_SIZE    (0*1024)     /* 0Kb  */
+#  define KINETIS_FLEXRAM_SIZE    (4*1024)     /* 4Kb */
+#  define KINETIS_SRAM_SIZE       (256*1024)   /* 256Kb */
+#  define KINETIS_MPU             1            /* Memory protection unit */
+#  define KINETIS_EXTBUS          1            /* External bus interface */
+#  define KINETIS_NDMACH          16           /* Up to 16 DMA channels */
+#  define KINETIS_NENET           1            /* One IEEE 1588 Ethernet controller */
+#  define KINETIS_NUSBOTG         1            /* With USB OTG controller */
+#  define KINETIS_NUSBDEV         1            /* One USB device controller */
+#  define KINETIS_NSDHC           1            /* SD host controller */
+#  define KINETIS_NI2C            3            /* Three I2C modules */
+#  define KINETIS_NUART           6            /* Six UART modues */
+#  define KINETIS_NSPI            3            /* Three SPI modules */
+#  define KINETIS_NCAN            1            /* One CAN controllers */
+#  define KINETIS_NI2S            1            /* One I2S modules */
+#  define KINETIS_NSLCD           1            /* One segment LCD interface (up to 36x8/40x4) */
+#  define KINETIS_NADC16          2            /* Four 16-bit ADC */
+#  define KINETIS_NCMP            3            /* Three analog comparators */
+#  define KINETIS_NDAC6           3            /* Three 6-bit DAC */
+#  define KINETIS_NDAC12          2            /* Two 12-bit DAC */
+#  define KINETIS_NVREF           1            /* Voltage reference */
+#  define KINETIS_NTIMERS8        2            /* Two 8 channel timers */
+#  define KINETIS_NTIMERS2        2            /* Two 2 channel timers */
+#  define KINETIS_NRTC            1            /* Real time clock */
+#  define KINETIS_NRNG            1            /* Random number generator */
+#  define KINETIS_NMMCAU          1            /* Hardware encryption */
+#  define KINETIS_NCRC            1            /* CRC */
+
+#elif defined(CONFIG_ARCH_CHIP_MK64FX512VLL12)
+#  undef  KINETIS_K20                          /* Not Kinetics K20 family */
+#  undef  KINETIS_K40                          /* Not Kinetics K40 family */
+#  undef  KINETIS_K60                          /* Not Kinetis K60 family */
+#  define KINETIS_K64             1            /* Kinetis K64 family */
+#  define KINETIS_FLASH_SIZE      (1024*1024)  /* 1Mb */
+#  define KINETIS_FLEXNVM_SIZE    (0*1024)     /* 0Kb  */
+#  define KINETIS_FLEXRAM_SIZE    (4*1024)     /* 4Kb */
+#  define KINETIS_SRAM_SIZE       (256*1024)   /* 256Kb */
+#  define KINETIS_MPU             1            /* Memory protection unit */
+#  define KINETIS_EXTBUS          1            /* External bus interface */
+#  define KINETIS_NDMACH          16           /* Up to 16 DMA channels */
+#  define KINETIS_NENET           1            /* One IEEE 1588 Ethernet controller */
+#  define KINETIS_NUSBOTG         1            /* With USB OTG controller */
+#  define KINETIS_NUSBDEV         1            /* One USB device controller */
+#  define KINETIS_NSDHC           1            /* SD host controller */
+#  define KINETIS_NI2C            3            /* Three I2C modules */
+#  define KINETIS_NUART           6            /* Six UART modues */
+#  define KINETIS_NSPI            3            /* Three SPI modules */
+#  define KINETIS_NCAN            1            /* One CAN controllers */
+#  define KINETIS_NI2S            1            /* One I2S modules */
+#  define KINETIS_NSLCD           1            /* One segment LCD interface (up to 36x8/40x4) */
+#  define KINETIS_NADC16          2            /* Four 16-bit ADC */
+#  define KINETIS_NCMP            3            /* Three analog comparators */
+#  define KINETIS_NDAC6           3            /* Three 6-bit DAC */
+#  define KINETIS_NDAC12          2            /* Two 12-bit DAC */
+#  define KINETIS_NVREF           1            /* Voltage reference */
+#  define KINETIS_NTIMERS8        2            /* Two 8 channel timers */
+#  define KINETIS_NTIMERS2        2            /* Two 2 channel timers */
+#  define KINETIS_NRTC            1            /* Real time clock */
+#  define KINETIS_NRNG            1            /* Random number generator */
+#  define KINETIS_NMMCAU          1            /* Hardware encryption */
+#  define KINETIS_NCRC            1            /* CRC */
+
+#elif defined(CONFIG_ARCH_CHIP_MK64FX512VDC12)
+#  undef  KINETIS_K20                          /* Not Kinetics K20 family */
+#  undef  KINETIS_K40                          /* Not Kinetics K40 family */
+#  undef  KINETIS_K60                          /* Not Kinetis K60 family */
+#  define KINETIS_K64             1            /* Kinetis K64 family */
+#  define KINETIS_FLASH_SIZE      (1024*1024)  /* 1Mb */
+#  define KINETIS_FLEXNVM_SIZE    (0*1024)     /* 0Kb  */
+#  define KINETIS_FLEXRAM_SIZE    (4*1024)     /* 4Kb */
+#  define KINETIS_SRAM_SIZE       (256*1024)   /* 256Kb */
+#  define KINETIS_MPU             1            /* Memory protection unit */
+#  define KINETIS_EXTBUS          1            /* External bus interface */
+#  define KINETIS_NDMACH          16           /* Up to 16 DMA channels */
+#  define KINETIS_NENET           1            /* One IEEE 1588 Ethernet controller */
+#  define KINETIS_NUSBOTG         1            /* With USB OTG controller */
+#  define KINETIS_NUSBDEV         1            /* One USB device controller */
+#  define KINETIS_NSDHC           1            /* SD host controller */
+#  define KINETIS_NI2C            3            /* Three I2C modules */
+#  define KINETIS_NUART           6            /* Six UART modues */
+#  define KINETIS_NSPI            3             Three SPI modules
+#  define KINETIS_NCAN            1            /* One CAN controllers */
+#  define KINETIS_NI2S            1            /* One I2S modules */
+#  define KINETIS_NSLCD           1            /* One segment LCD interface (up to 36x8/40x4) */
+#  define KINETIS_NADC16          2            /* Four 16-bit ADC */
+#  define KINETIS_NCMP            3            /* Three analog comparators */
+#  define KINETIS_NDAC6           3            /* Three 6-bit DAC */
+#  define KINETIS_NDAC12          2            /* Two 12-bit DAC */
+#  define KINETIS_NVREF           1            /* Voltage reference */
+#  define KINETIS_NTIMERS8        2            /* Two 8 channel timers */
+#  define KINETIS_NTIMERS2        2            /* Two 2 channel timers */
+#  define KINETIS_NRTC            1            /* Real time clock */
+#  define KINETIS_NRNG            1            /* Random number generator */
+#  define KINETIS_NMMCAU          1            /* Hardware encryption */
+#  define KINETIS_NCRC            1            /* CRC */
+
+#elif defined(CONFIG_ARCH_CHIP_MK64FN1M0VDC12)
+#  undef  KINETIS_K20                          /* Not Kinetics K20 family */
+#  undef  KINETIS_K40                          /* Not Kinetics K40 family */
+#  undef  KINETIS_K60                          /* Not Kinetis K60 family */
+#  define KINETIS_K64             1            /* Kinetis K64 family */
+#  define KINETIS_FLASH_SIZE      (1024*1024)  /* 1Mb */
+#  define KINETIS_FLEXNVM_SIZE    (0*1024)     /* 0Kb  */
+#  define KINETIS_FLEXRAM_SIZE    (4*1024)     /* 4Kb */
+#  define KINETIS_SRAM_SIZE       (256*1024)   /* 256Kb */
+#  define KINETIS_MPU             1            /* Memory protection unit */
+#  define KINETIS_EXTBUS          1            /* External bus interface */
+#  define KINETIS_NDMACH          16           /* Up to 16 DMA channels */
+#  define KINETIS_NENET           1            /* One IEEE 1588 Ethernet controller */
+#  define KINETIS_NUSBOTG         1            /* With USB OTG controller */
+#  define KINETIS_NUSBDEV         1            /* One USB device controller */
+#  define KINETIS_NSDHC           1            /* SD host controller */
+#  define KINETIS_NI2C            3            /* Three I2C modules */
+#  define KINETIS_NUART           6            /* Six UART modues */
+#  define KINETIS_NSPI            3             Three SPI modules
+#  define KINETIS_NCAN            1            /* One CAN controllers */
+#  define KINETIS_NI2S            1            /* One I2S modules */
+#  define KINETIS_NSLCD           1            /* One segment LCD interface (up to 36x8/40x4) */
+#  define KINETIS_NADC16          2            /* Four 16-bit ADC */
+#  define KINETIS_NCMP            3            /* Three analog comparators */
+#  define KINETIS_NDAC6           3            /* Three 6-bit DAC */
+#  define KINETIS_NDAC12          2            /* Two 12-bit DAC */
+#  define KINETIS_NVREF           1            /* Voltage reference */
+#  define KINETIS_NTIMERS8        2            /* Two 8 channel timers */
+#  define KINETIS_NTIMERS2        2            /* Two 2 channel timers */
+#  define KINETIS_NRTC            1            /* Real time clock */
+#  define KINETIS_NRNG            1            /* Random number generator */
+#  define KINETIS_NMMCAU          1            /* Hardware encryption */
+#  define KINETIS_NCRC            1            /* CRC */
+
+#elif defined(CONFIG_ARCH_CHIP_MK64FX512VLQ12)
+#  undef  KINETIS_K20                          /* Not Kinetics K20 family */
+#  undef  KINETIS_K40                          /* Not Kinetics K40 family */
+#  undef  KINETIS_K60                          /* Not Kinetis K60 family */
+#  define KINETIS_K64             1            /* Kinetis K64 family */
+#  define KINETIS_FLASH_SIZE      (1024*1024)  /* 1Mb */
+#  define KINETIS_FLEXNVM_SIZE    (0*1024)     /* 0Kb  */
+#  define KINETIS_FLEXRAM_SIZE    (4*1024)     /* 4Kb */
+#  define KINETIS_SRAM_SIZE       (256*1024)   /* 256Kb */
+#  define KINETIS_MPU             1            /* Memory protection unit */
+#  define KINETIS_EXTBUS          1            /* External bus interface */
+#  define KINETIS_NDMACH          16           /* Up to 16 DMA channels */
+#  define KINETIS_NENET           1            /* One IEEE 1588 Ethernet controller */
+#  define KINETIS_NUSBOTG         1            /* With USB OTG controller */
+#  define KINETIS_NUSBDEV         1            /* One USB device controller */
+#  define KINETIS_NSDHC           1            /* SD host controller */
+#  define KINETIS_NI2C            3            /* Three I2C modules */
+#  define KINETIS_NUART           6            /* Six UART modues */
+#  define KINETIS_NSPI            3            /* Three SPI modules */
+#  define KINETIS_NCAN            1            /* One CAN controllers */
+#  define KINETIS_NI2S            1            /* One I2S modules */
+#  define KINETIS_NSLCD           1            /* One segment LCD interface (up to 36x8/40x4) */
+#  define KINETIS_NADC16          2            /* Four 16-bit ADC */
+#  define KINETIS_NCMP            3            /* Three analog comparators */
+#  define KINETIS_NDAC6           3            /* Three 6-bit DAC */
+#  define KINETIS_NDAC12          2            /* Two 12-bit DAC */
+#  define KINETIS_NVREF           1            /* Voltage reference */
+#  define KINETIS_NTIMERS8        2            /* Two 8 channel timers */
+#  define KINETIS_NTIMERS2        2            /* Two 2 channel timers */
+#  define KINETIS_NRTC            1            /* Real time clock */
+#  define KINETIS_NRNG            1            /* Random number generator */
+#  define KINETIS_NMMCAU          1            /* Hardware encryption */
+#  define KINETIS_NCRC            1            /* CRC */
+
+#elif defined(CONFIG_ARCH_CHIP_MK64FN1M0VLQ12)
+#  undef  KINETIS_K20                          /* Not Kinetics K20 family */
+#  undef  KINETIS_K40                          /* Not Kinetics K40 family */
+#  undef  KINETIS_K60                          /* Not Kinetis K60 family */
+#  define KINETIS_K64             1            /* Kinetis K64 family */
+#  define KINETIS_FLASH_SIZE      (1024*1024)  /* 1Mb */
+#  define KINETIS_FLEXNVM_SIZE    (0*1024)     /* 0Kb  */
+#  define KINETIS_FLEXRAM_SIZE    (4*1024)     /* 4Kb */
+#  define KINETIS_SRAM_SIZE       (256*1024)   /* 256Kb */
+#  define KINETIS_MPU             1            /* Memory protection unit */
+#  define KINETIS_EXTBUS          1            /* External bus interface */
+#  define KINETIS_NDMACH          16           /* Up to 16 DMA channels */
+#  define KINETIS_NENET           1            /* One IEEE 1588 Ethernet controller */
+#  define KINETIS_NUSBOTG         1            /* With USB OTG controller */
+#  define KINETIS_NUSBDEV         1            /* One USB device controller */
+#  define KINETIS_NSDHC           1            /* SD host controller */
+#  define KINETIS_NI2C            3            /* Three I2C modules */
+#  define KINETIS_NUART           6            /* Six UART modues */
+#  define KINETIS_NSPI            3            /* Three SPI modules */
+#  define KINETIS_NCAN            1            /* One CAN controllers */
+#  define KINETIS_NI2S            1            /* One I2S modules */
+#  define KINETIS_NSLCD           1            /* One segment LCD interface (up to 36x8/40x4) */
+#  define KINETIS_NADC16          2            /* Four 16-bit ADC */
+#  define KINETIS_NCMP            3            /* Three analog comparators */
+#  define KINETIS_NDAC6           3            /* Three 6-bit DAC */
+#  define KINETIS_NDAC12          2            /* Two 12-bit DAC */
+#  define KINETIS_NVREF           1            /* Voltage reference */
+#  define KINETIS_NTIMERS8        2            /* Two 8 channel timers */
+#  define KINETIS_NTIMERS2        2            /* Two 2 channel timers */
+#  define KINETIS_NRTC            1            /* Real time clock */
+#  define KINETIS_NRNG            1            /* Random number generator */
+#  define KINETIS_NMMCAU          1            /* Hardware encryption */
+#  define KINETIS_NCRC            1            /* CRC */
+
+#elif defined(CONFIG_ARCH_CHIP_MK64FX512VMD12)
+#  undef  KINETIS_K20                          /* Not Kinetics K20 family */
+#  undef  KINETIS_K40                          /* Not Kinetics K40 family */
+#  undef  KINETIS_K60                          /* Not Kinetis K60 family */
+#  define KINETIS_K64             1            /* Kinetis K64 family */
+#  define KINETIS_FLASH_SIZE      (1024*1024)  /* 1Mb */
+#  define KINETIS_FLEXNVM_SIZE    (0*1024)     /* 0Kb  */
+#  define KINETIS_FLEXRAM_SIZE    (4*1024)     /* 4Kb */
+#  define KINETIS_SRAM_SIZE       (256*1024)   /* 256Kb */
+#  define KINETIS_MPU             1            /* Memory protection unit */
+#  define KINETIS_EXTBUS          1            /* External bus interface */
+#  define KINETIS_NDMACH          16           /* Up to 16 DMA channels */
+#  define KINETIS_NENET           1            /* One IEEE 1588 Ethernet controller */
+#  define KINETIS_NUSBOTG         1            /* With USB OTG controller */
+#  define KINETIS_NUSBDEV         1            /* One USB device controller */
+#  define KINETIS_NSDHC           1            /* SD host controller */
+#  define KINETIS_NI2C            3            /* Three I2C modules */
+#  define KINETIS_NUART           6            /* Six UART modues */
+#  define KINETIS_NSPI            3            /* Three SPI modules */
+#  define KINETIS_NCAN            1            /* One CAN controllers */
+#  define KINETIS_NI2S            1            /* One I2S modules */
+#  define KINETIS_NSLCD           1            /* One segment LCD interface (up to 36x8/40x4) */
+#  define KINETIS_NADC16          2            /* Four 16-bit ADC */
+#  define KINETIS_NCMP            3            /* Three analog comparators */
+#  define KINETIS_NDAC6           3            /* Three 6-bit DAC */
+#  define KINETIS_NDAC12          2            /* Two 12-bit DAC */
+#  define KINETIS_NVREF           1            /* Voltage reference */
+#  define KINETIS_NTIMERS8        2            /* Two 8 channel timers */
+#  define KINETIS_NTIMERS2        2            /* Two 2 channel timers */
+#  define KINETIS_NRTC            1            /* Real time clock */
+#  define KINETIS_NRNG            1            /* Random number generator */
+#  define KINETIS_NMMCAU          1            /* Hardware encryption */
+#  define KINETIS_NCRC            1            /* CRC */
+
+#elif defined(CONFIG_ARCH_CHIP_MK64FN1M0VMD12)
+#  undef  KINETIS_K20                          /* Not Kinetics K20 family */
+#  undef  KINETIS_K40                          /* Not Kinetics K40 family */
+#  undef  KINETIS_K60                          /* Not Kinetis K60 family */
+#  define KINETIS_K64             1            /* Kinetis K64 family */
+#  define KINETIS_FLASH_SIZE      (1024*1024)  /* 1Mb */
+#  define KINETIS_FLEXNVM_SIZE    (0*1024)     /* 0Kb  */
+#  define KINETIS_FLEXRAM_SIZE    (4*1024)     /* 4Kb */
+#  define KINETIS_SRAM_SIZE       (256*1024)   /* 256Kb */
+#  define KINETIS_MPU             1            /* Memory protection unit */
+#  define KINETIS_EXTBUS          1            /* External bus interface */
+#  define KINETIS_NDMACH          16           /* Up to 16 DMA channels */
+#  define KINETIS_NENET           1            /* One IEEE 1588 Ethernet controller */
+#  define KINETIS_NUSBOTG         1            /* With USB OTG controller */
+#  define KINETIS_NUSBDEV         1            /* One USB device controller */
+#  define KINETIS_NSDHC           1            /* SD host controller */
+#  define KINETIS_NI2C            3            /* Three I2C modules */
+#  define KINETIS_NUART           6            /* Six UART modues */
+#  define KINETIS_NSPI            3            /* Three SPI modules */
+#  define KINETIS_NCAN            1            /* One CAN controllers */
+#  define KINETIS_NI2S            1            /* One I2S modules */
+#  define KINETIS_NSLCD           1            /* One segment LCD interface (up to 36x8/40x4) */
+#  define KINETIS_NADC16          2            /* Four 16-bit ADC */
+#  define KINETIS_NCMP            3            /* Three analog comparators */
+#  define KINETIS_NDAC6           3            /* Three 6-bit DAC */
+#  define KINETIS_NDAC12          2            /* Two 12-bit DAC */
+#  define KINETIS_NVREF           1            /* Voltage reference */
+#  define KINETIS_NTIMERS8        2            /* Two 8 channel timers */
+#  define KINETIS_NTIMERS2        2            /* Two 2 channel timers */
+#  define KINETIS_NRTC            1            /* Real time clock */
+#  define KINETIS_NRNG            1            /* Random number generator */
+#  define KINETIS_NMMCAU          1            /* Hardware encryption */
+#  define KINETIS_NCRC            1            /* CRC */
 
 #else
 #  error "Unsupported Kinetis chip"

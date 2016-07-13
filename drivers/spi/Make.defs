@@ -49,4 +49,3 @@ DEPPATH += --dep-path spi
 VPATH += :spi
 CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)spi}
 endif
-

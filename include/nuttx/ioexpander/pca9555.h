@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * include/nuttx/ioexpander/pca9555.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
@@ -35,20 +35,31 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_IOEXPANDER_PCA9555_H
 #define __INCLUDE_NUTTX_IOEXPANDER_PCA9555_H
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/config.h>
 #include <nuttx/i2c/i2c_master.h>
 
-/* A reference to a structure of this type must be passed to the PCA9555 driver when the
- * driver is instantiated. This structure provides information about the configuration of
- * the PCA9555 and provides some board-specific hooks.
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+/* A reference to a structure of this type must be passed to the PCA9555
+ * driver when the driver is instantiated. This structure provides
+ * information about the configuration of the PCA9555 and provides some
+ * board-specific hooks.
  *
- * Memory for this structure is provided by the caller.  It is not copied by the driver
- * and is presumed to persist while the driver is active. The memory must be writeable
- * because, under certain circumstances, the driver may modify the frequency.
+ * Memory for this structure is provided by the caller.  It is not copied by
+ * the driver and is presumed to persist while the driver is active. The
+ * memory must be writeable because, under certain circumstances, the driver
+ * may modify the frequency.
  */
 
 struct pca9555_config_s
@@ -81,9 +92,9 @@ struct pca9555_config_s
 #endif
 };
 
-/********************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
@@ -93,11 +104,12 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/********************************************************************************************
+/****************************************************************************
  * Name: pca9555_initialize
  *
  * Description:
- *   Instantiate and configure the PCA9555 device driver to use the provided I2C device 
+ *   Instantiate and configure the PCA9555 device driver to use the provided
+ *   I2C device
  *   instance.
  *
  * Input Parameters:
@@ -108,9 +120,9 @@ extern "C"
  * Returned Value:
  *   an ioexpander_dev_s instance on success, NULL on failure.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
-FAR struct ioexpander_dev_s* pca9555_initialize(FAR struct i2c_master_s *dev,
+FAR struct ioexpander_dev_s *pca9555_initialize(FAR struct i2c_master_s *dev,
                                                 FAR struct pca9555_config_s *config);
 
 #ifdef __cplusplus

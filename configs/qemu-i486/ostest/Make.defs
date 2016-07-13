@@ -71,7 +71,7 @@ ARCHDEFINES =
 
 # Check if building a 32-bit target with a 64-bit toolchain
 
-ifeq ($(ARCH_X86_M32),y)
+ifeq ($(CONFIG_ARCH_X86_M32),y)
 ARCHCPUFLAGS += -m32
 endif
 

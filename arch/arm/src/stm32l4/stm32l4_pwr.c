@@ -138,7 +138,7 @@ bool stm32l4_pwr_enablebkp(bool writable)
   uint16_t regval;
   bool waswritable;
 
-  /* Get the current state of the STM32 PWR control register */
+  /* Get the current state of the STM32L4 PWR control register 1 */
 
   regval      = stm32l4_pwr_getreg(STM32L4_PWR_CR1_OFFSET);
   waswritable = ((regval & PWR_CR1_DBP) != 0);
@@ -165,4 +165,50 @@ bool stm32l4_pwr_enablebkp(bool writable)
     }
 
   return waswritable;
+}
+
+/************************************************************************************
+ * Name: stm32l4_pwr_enableusv
+ *
+ * Description:
+ *   Enables or disables the USB Supply Valid monitoring.  Setting this bit is
+ *   mandatory to use the USB OTG FS peripheral.
+ *
+ * Input Parameters:
+ *   set - True: Vddusb is valid; False: Vddusb is not present. Logical and electrical
+ *         isolation is applied to ignore this supply.
+ *
+ * Returned Value:
+ *   True: The bit was previously set.
+ *
+ ************************************************************************************/
+
+bool stm32l4_pwr_enableusv(bool set)
+{
+  uint16_t regval;
+  bool wasset;
+
+  /* Get the current state of the STM32L4 PWR control register 2 */
+
+  regval      = stm32l4_pwr_getreg(STM32L4_PWR_CR2_OFFSET);
+  wasset = ((regval & PWR_CR2_USV) != 0);
+
+  /* Enable or disable the ability to write */
+
+  if (wasset && !set)
+    {
+      /* Disable the Vddusb monitoring */
+
+      regval &= ~PWR_CR2_USV;
+      stm32l4_pwr_putreg(STM32L4_PWR_CR2_OFFSET, regval);
+    }
+  else if (!wasset && set)
+    {
+      /* Enable the Vddusb monitoring */
+
+      regval |= PWR_CR2_USV;
+      stm32l4_pwr_putreg(STM32L4_PWR_CR2_OFFSET, regval);
+    }
+
+  return wasset;
 }

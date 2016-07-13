@@ -74,6 +74,8 @@
  * CONFIG_CAN_LOOPBACK - A CAN driver may or may not support a loopback
  *   mode for testing. If the driver does support loopback mode, the setting
  *   will enable it. (If the driver does not, this setting will have no effect).
+ *   The loopback mode may be changed later by ioctl() if the driver supports the
+ *   CANIOC_SET_CONNMODES ioctl command.
  * CONFIG_CAN_TXREADY - Add support for the can_txready() callback.  This is needed
  *   only for CAN hardware the supports an separate H/W TX message FIFO.  The call
  *   back is needed to keep the S/W FIFO and the H/W FIFO in sync.  Work queue
@@ -163,6 +165,24 @@
  *                   is returned with the errno variable set to indicate the
  *                   nature of the error.
  *   Dependencies:   None
+ *
+ * CANIOC_GET_CONNMODES:
+ *   Description:    Get the current bus connection modes
+ *   Argument:       A pointer to a write-able instance of struct
+ *                   canioc_connmodes_s in which the new bus modes will be returned.
+ *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
+ *                   is returned with the errno variable set to indicate the
+ *                   nature of the error.
+ *   Dependencies:   None
+ *
+ * CANIOC_SET_CONNMODES:
+ *   Description:    Set new bus connection modes values
+ *   Argument:       A pointer to a read-able instance of struct
+ *                   canioc_connmodes_s in which the new bus modes are provided.
+ *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
+ *                   is returned with the errno variable set to indicate the
+ *                   nature of the error.
+ *   Dependencies:   None
  */
 
 #define CANIOC_RTR                _CANIOC(1)
@@ -172,12 +192,14 @@
 #define CANIOC_ADD_EXTFILTER      _CANIOC(5)
 #define CANIOC_DEL_STDFILTER      _CANIOC(6)
 #define CANIOC_DEL_EXTFILTER      _CANIOC(7)
+#define CANIOC_GET_CONNMODES      _CANIOC(8)
+#define CANIOC_SET_CONNMODES      _CANIOC(9)
 
 /* CANIOC_USER: Device specific ioctl calls can be supported with cmds greater
  * than this value
  */
 
-#define CANIOC_USER               _CANIOC(8)
+#define CANIOC_USER               _CANIOC(10)
 
 /* Convenience macros ***************************************************************/
 
@@ -545,6 +567,19 @@ struct canioc_bittiming_s
   uint8_t               bt_tseg1;        /* TSEG1 in time quanta */
   uint8_t               bt_tseg2;        /* TSEG2 in time quanta */
   uint8_t               bt_sjw;          /* Synchronization Jump Width in time quanta */
+};
+
+/* CANIOC_GET_CONNMODES/CANIOC_SET_CONNMODES: */
+/* A CAN device may support loopback and silent mode. Both modes may not be
+ * settable independently.
+ */
+
+struct canioc_connmodes_s
+{
+  uint8_t               bm_loopback : 1; /* Enable reception of messages sent
+                                          * by this node.*/
+  uint8_t               bm_silent   : 1; /* Disable transmission of messages.
+                                          * The node still receives messages. */
 };
 
 #ifdef CONFIG_CAN_EXTID

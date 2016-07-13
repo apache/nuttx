@@ -133,9 +133,9 @@ static inline int syslog_dev_takesem(void)
   int ret;
 
   /* Does this thread already hold the semaphore?  That could happen if
-   * we wer called recursively, i.e., if the logic kicked off by
-   * syslog_dev_write() where to generate more debug output.  Return an error
-   * in that case.
+   * we were called recursively, i.e., if the logic kicked off by
+   * file_write() where to generate more debug output.  Return an
+   * error in that case.
    */
 
   if (g_syslog_dev.sl_holder == me)
@@ -182,26 +182,6 @@ static inline void syslog_dev_givesem(void)
 
   g_syslog_dev.sl_holder = NO_HOLDER;
   sem_post(&g_syslog_dev.sl_sem);
-}
-
-/****************************************************************************
- * Name: syslog_dev_write
- *
- * Description:
- *   Write to the syslog device
- *
- ****************************************************************************/
-
-static inline ssize_t syslog_dev_write(FAR const void *buf, size_t nbytes)
-{
-  FAR struct inode *inode;
-
-  /* Let the driver perform the write */
-
-  inode = g_syslog_dev.sl_file.f_inode;
-  DEBUGASSERT(inode != NULL);
-
-  return inode->u.i_ops->write(&g_syslog_dev.sl_file, buf, nbytes);
 }
 
 /****************************************************************************
@@ -505,7 +485,7 @@ int syslog_dev_putc(int ch)
   if (ret < 0)
     {
       /* We probably already hold the semaphore and were probably
-       * re-entered by the logic kicked off by syslog_dev_write().
+       * re-entered by the logic kicked off by file_write().
        * We might also have been interrupted by a signal.  Either
        * way, we are outta here.
        */
@@ -520,7 +500,7 @@ int syslog_dev_putc(int ch)
     {
       /* Write the CR-LF sequence */
 
-      nbytes = syslog_dev_write(g_syscrlf, 2);
+      nbytes = file_write(&g_syslog_dev.sl_file, g_syscrlf, 2);
 
       /* Synchronize the file when each CR-LF is encountered (i.e.,
        * implements line buffering always).
@@ -538,7 +518,7 @@ int syslog_dev_putc(int ch)
       /* Write the non-newline character (and don't flush) */
 
       uch = (uint8_t)ch;
-      nbytes = syslog_dev_write(&uch, 1);
+      nbytes = file_write(&g_syslog_dev.sl_file, &uch, 1);
     }
 
   syslog_dev_givesem();
@@ -576,22 +556,16 @@ errout_with_errcode:
 
 int syslog_dev_flush(void)
 {
-  int ret = 0;;
+#if defined(CONFIG_SYSLOG_FILE) && !defined(CONFIG_DISABLE_MOUNTPOINT)
+  /* Ignore return value, always return success.  file_fsync() could fail
+   * because the file is not open, the inode is not a mountpoint, or the
+   * mountpoint does not support the sync() method.
+   */
 
-#ifndef CONFIG_DISABLE_MOUNTPOINT
-  FAR struct inode *inode = g_syslog_dev.sl_file.f_inode;
-
-  /* Is this a mountpoint? Does it support the sync method? */
-
-  if (inode && inode->u.i_mops->sync)
-    {
-      /* Yes... synchronize to the stream */
-
-      ret = inode->u.i_mops->sync(&g_syslog_dev.sl_file);
-    }
+  (void)file_fsync(&g_syslog_dev.sl_file);
 #endif
 
-  return ret;
+  return OK;
 }
 
 #endif /* CONFIG_NFILE_DESCRIPTORS > 0 */

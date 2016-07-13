@@ -47,10 +47,13 @@
 #include <nuttx/sdio.h>
 #include <nuttx/mmcsd.h>
 
-#include "stm32.h"
+#include "chip.h"
 #include "nucleo-144.h"
+#include "stm32_gpio.h"
+#include "stm32_sdmmc.h"
 
-#ifdef HAVE_SDIO
+#ifdef CONFIG_MMCSD
+
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -61,7 +64,7 @@
 /* Card detections requires card support and a card detection GPIO */
 
 #define HAVE_NCD   1
-#if !defined(CONFIG_STM32_SDIO) || !defined(GPIO_SDIO_NCD)
+#if !defined(GPIO_SDMMC1_NCD)
 #  undef HAVE_NCD
 #endif
 
@@ -91,8 +94,8 @@ static int stm32_ncd_interrupt(int irq, FAR void *context)
 {
   bool present;
 
-  present = !stm32_gpioread(GPIO_SDIO_NCD);
-  if (present != g_sd_inserted)
+  present = !stm32_gpioread(GPIO_SDMMC1_NCD);
+  if (g_sdio_dev && present != g_sd_inserted)
     {
       sdio_mediachange(g_sdio_dev, present);
       g_sd_inserted = present;
@@ -125,11 +128,11 @@ int stm32_sdio_initialize(void)
 
   /* Configure the card detect GPIO */
 
-  stm32_configgpio(GPIO_SDIO_NCD);
+  stm32_configgpio(GPIO_SDMMC1_NCD);
 
   /* Register an interrupt handler for the card detect pin */
 
-  stm32_gpiosetevent(GPIO_SDIO_NCD, true, true, true, stm32_ncd_interrupt);
+  stm32_gpiosetevent(GPIO_SDMMC1_NCD, true, true, true, stm32_ncd_interrupt);
 #endif
 
   /* Mount the SDIO-based MMC/SD block driver */
@@ -160,7 +163,7 @@ int stm32_sdio_initialize(void)
 #ifdef HAVE_NCD
   /* Use SD card detect pin to check if a card is g_sd_inserted */
 
-  cd_status = !stm32_gpioread(GPIO_SDIO_NCD);
+  cd_status = !stm32_gpioread(GPIO_SDMMC1_NCD);
   finfo("Card detect : %d\n", cd_status);
 
   sdio_mediachange(g_sdio_dev, cd_status);

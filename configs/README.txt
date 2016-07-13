@@ -261,6 +261,10 @@ configs/fire-stm32v2
   STM32F103VET6 chip.  See http://firestm32.taobao.com .  Version 2 and 3 of
   the boards are supported but only version 2 has been tested.
 
+configs/freedom-k64f
+  This port uses the FreeScale FREEDOM-K64F development board. This board
+  uses the Kinetis K64 MK64FN1M0VLL12 Cortex-M4 MCU.
+
 configs/freedom-kl25z
 configs/freedom-kl26z
   These configurations are for the Freescale Freedom KL25Z and very similar
@@ -437,6 +441,10 @@ configs/olimex-stm32-h407
   toolchain* under Linux or Cygwin. See the http://www.olimex.com for
   further information. This board features the STMicro STM32F407ZGT6 (144
   pins). Contributed by Neil Hancock.
+
+configs/olimex-stm32-e407
+  Olimex STM32 E407 board based on the STMicro STM32F407ZGT6 (144pins).
+  Contributed by Mateusz Szafoni.
 
 configs/olimex-stm32-p107
   This port uses the Olimex STM32-P107 board (STM32F107VC) and a GNU arm-nuttx-elf

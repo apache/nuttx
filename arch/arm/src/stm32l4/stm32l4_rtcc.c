@@ -535,7 +535,7 @@ static void rtc_resume(void)
  ************************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-static int stm32l4_rtc_alarm_handler(int irq, void *context)
+static int stm32l4_rtc_alarm_handler(int irq, FAR void *context)
 {
   FAR struct alm_cbinfo_s *cbinfo;
   alm_callback_t cb;
@@ -685,7 +685,7 @@ static int rtchw_check_alrbwf(void)
 #endif
 
 /************************************************************************************
- * Name: stm32_rtchw_set_alrmXr X is a or b
+ * Name: stm32l4_rtchw_set_alrmXr X is a or b
  *
  * Description:
  *   Set the alarm (A or B) hardware registers, using the required hardware access

@@ -213,6 +213,7 @@ config ARCH_CHIP_SAMV7
 	select ARCH_HAVE_RAMFUNCS
 	select ARCH_HAVE_TICKLESS
 	select ARMV7M_HAVE_STACKCHECK
+	select ARCH_HAVE_I2CRESET
 	---help---
 		Atmel SAMV7 (ARM Cortex-M7) architectures
 
@@ -223,6 +224,7 @@ config ARCH_CHIP_STM32
 	select ARM_HAVE_MPU_UNIFIED
 	select ARCH_HAVE_I2CRESET
 	select ARCH_HAVE_HEAPCHECK
+	select ARCH_HAVE_TICKLESS
 	select ARMV7M_HAVE_STACKCHECK
 	---help---
 		STMicro STM32 architectures (ARM Cortex-M3/4).
@@ -249,6 +251,7 @@ config ARCH_CHIP_STM32L4
 	select ARM_HAVE_MPU_UNIFIED
 	select ARCH_HAVE_I2CRESET
 	select ARCH_HAVE_HEAPCHECK
+	select ARCH_HAVE_TICKLESS
 	select ARMV7M_HAVE_STACKCHECK
 	---help---
 		STMicro STM32 architectures (ARM Cortex-M4).

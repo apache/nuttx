@@ -38,5 +38,5 @@
 float sinhf(float x)
 {
   x = expf(x);
-  return ((x - (1.0 / x)) / 2.0);
+  return ((x - (1.0F / x)) / 2.0F);
 }

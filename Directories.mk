@@ -74,7 +74,7 @@ endif
 
 NONFSDIRS = sched drivers configs $(ARCH_SRC) $(NUTTX_ADDONS)
 FSDIRS = fs binfmt
-CONTEXTDIRS = $(APPDIR)
+CONTEXTDIRS = configs $(APPDIR)
 USERDIRS =
 OTHERDIRS = lib
 
@@ -112,6 +112,10 @@ CONTEXTDIRS += syscall
 USERDIRS += syscall
 else
 OTHERDIRS += syscall
+endif
+
+ifeq ($(CONFIG_LIB_ZONEINFO_ROMFS),y)
+CONTEXTDIRS += libc
 endif
 
 ifeq ($(CONFIG_NX),y)

@@ -46,8 +46,8 @@
 #include <errno.h>
 #include <debug.h>
 
-#ifdef CONFIG_SYSTEM_USBMONITOR
-#  include <apps/usbmonitor.h>
+#ifdef CONFIG_USBMONITOR
+#  include <nuttx/usb/usbmonitor.h>
 #endif
 
 #include <nuttx/fs/ramdisk.h>
@@ -286,7 +286,7 @@ int sam_bringup(void)
 #ifdef HAVE_USBMONITOR
   /* Start the USB Monitor */
 
-  ret = usbmonitor_start(0, NULL);
+  ret = usbmonitor_start();
   if (ret != OK)
     {
       _err("ERROR: Failed to start the USB monitor: %d\n", ret);

@@ -78,7 +78,7 @@
 
 /* Check if we should enable the USB monitor before starting NSH */
 
-#if !defined(CONFIG_USBDEV_TRACE) || !defined(CONFIG_SYSTEM_USBMONITOR)
+#if !defined(CONFIG_USBDEV_TRACE) || !defined(CONFIG_USBMONITOR)
 #  undef HAVE_USBMONITOR
 #endif
 

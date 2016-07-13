@@ -101,6 +101,24 @@ bool stm32l4_pwr_enableclk(bool enable);
 
 bool stm32l4_pwr_enablebkp(bool writable);
 
+/************************************************************************************
+ * Name: stm32l4_pwr_enableusv
+ *
+ * Description:
+ *   Enables or disables the USB Supply Valid monitoring.  Setting this bit is
+ *   mandatory to use the USB OTG FS peripheral.
+ *
+ * Input Parameters:
+ *   set - True: Vddusb is valid; False: Vddusb is not present. Logical and electrical
+ *         isolation is applied to ignore this supply.
+ *
+ * Returned Value:
+ *   True: The bit was previously set.
+ *
+ ************************************************************************************/
+
+bool stm32l4_pwr_enableusv(bool set);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
