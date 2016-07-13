@@ -52,13 +52,12 @@
 #define M_E128  (M_E64  * M_E64)
 #define M_E256  (M_E128 * M_E128)
 #define M_E512  (M_E256 * M_E256)
-#define M_E1024 (M_E512 * M_E512)
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static const double g_expi_square_tbl[11] =
+static const double g_expi_square_tbl[] =
 {
   M_E,          /* e^1 */
   M_E2,         /* e^2 */
@@ -69,8 +68,7 @@ static const double g_expi_square_tbl[11] =
   M_E64,        /* e^64 */
   M_E128,       /* e^128 */
   M_E256,       /* e^256 */
-  M_E512,       /* e^512 */
-  M_E1024,      /* e^1024 */
+  M_E512        /* e^512 */
 };
 
 /****************************************************************************
@@ -82,7 +80,9 @@ double lib_expi(size_t n)
   size_t i;
   double val;
 
-  if (n > 1024)
+  /* The largest calculable value for n is floor(ln(DBL_MAX)) */
+
+  if (n > 709)
     {
       return INFINITY;
     }

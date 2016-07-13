@@ -57,6 +57,10 @@
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
 
+#ifdef CONFIG_NET_NOINTS
+#  include <nuttx/wqueue.h>
+#endif
+
 #ifdef CONFIG_NET_PKT
 #  include <nuttx/net/pkt.h>
 #endif
@@ -76,29 +80,40 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* CONFIG_ENET_NETHIFS determines the number of physical interfaces
+/* If processing is not done at the interrupt level, then high priority
+ * work queue support is required.
+ */
+
+#if defined(CONFIG_NET_NOINTS) && !defined(CONFIG_SCHED_HPWORK)
+#  error High priority work queue support is required
+#endif
+
+/* CONFIG_KINETIS_ENETNETHIFS determines the number of physical interfaces
  * that will be supported.
  */
 
-#if CONFIG_ENET_NETHIFS != 1
-#  error "CONFIG_ENET_NETHIFS must be one for now"
+#if CONFIG_KINETIS_ENETNETHIFS != 1
+#  error "CONFIG_KINETIS_ENETNETHIFS must be one for now"
 #endif
 
-#if CONFIG_ENET_NTXBUFFERS < 1
+#if CONFIG_KINETIS_ENETNTXBUFFERS < 1
 #  error "Need at least one TX buffer"
 #endif
 
-#if CONFIG_ENET_NRXBUFFERS < 1
+#if CONFIG_KINETIS_ENETNRXBUFFERS < 1
 #  error "Need at least one RX buffer"
 #endif
 
-#define NENET_NBUFFERS (CONFIG_ENET_NTXBUFFERS+CONFIG_ENET_NRXBUFFERS)
+#define NENET_NBUFFERS \
+  (CONFIG_KINETIS_ENETNTXBUFFERS+CONFIG_KINETIS_ENETNRXBUFFERS)
 
 #ifndef CONFIG_NET_MULTIBUFFER
 #  error "CONFIG_NET_MULTIBUFFER is required in the configuration"
 #endif
 
-/* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per second */
+/* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per
+ * second.
+ */
 
 #define KINETIS_WDDELAY   (1*CLK_TCK)
 
@@ -108,14 +123,47 @@
 #define MII_MAXPOLLS      (0x1ffff)
 #define LINK_WAITUS       (500*1000)
 
-/* PHY hardware specifics.  This was copied from the FreeScale code examples.
- * this is a vendor specific register and bit settings.  I really should
- * do the research and find out what this really is.
+/* PHY definitions.
+ *
+ * The selected PHY must be selected from the drivers/net/Kconfig PHY menu.
+ * A description of the PHY must be provided here.  That description must
+ * include:
+ *
+ * 1. BOARD_PHY_NAME: A PHY name string (for debug output),
+ * 2. BOARD_PHYID1 and BOARD_PHYID2: The PHYID1 and PHYID2 values (from
+ *    include/nuttx/net/mii.h)
+ * 3. BOARD_PHY_STATUS:  The address of the status register to use when
+ *    querying link status (from include/nuttx/net/mii.h)
+ * 4. BOARD_PHY_ISDUPLEX:  A macro that can convert the status register
+ *    value into a boolean: true=duplex mode, false=half-duplex mode
+ * 5. BOARD_PHY_10BASET:  A macro that can convert the status register
+ *    value into a boolean: true=10Base-T, false=Not 10Base-T
+ * 6. BOARD_PHY_100BASET:  A macro that can convert the status register
+ *    value into a boolean: true=100Base-T, false=Not 100Base-T
+ *
+ * The Tower SER board uses a KSZ8041 PHY.
+ * The Freedom K64F board uses a KSZ8081 PHY
  */
 
-#define PHY_STATUS         (0x1f)
-#define PHY_DUPLEX_STATUS  (4 << 2)
-#define PHY_SPEED_STATUS   (1 << 2)
+#if defined(CONFIG_ETH0_PHY_KSZ8041)
+#  define BOARD_PHY_NAME        "KSZ8041"
+#  define BOARD_PHYID1          MII_PHYID1_KSZ8041
+#  define BOARD_PHYID2          MII_PHYID2_KSZ8041
+#  define BOARD_PHY_STATUS      MII_KSZ8041_PHYCTRL2
+#  define BOARD_PHY_ISDUPLEX(s) (((s) & (4 << MII_PHYCTRL2_MODE_SHIFT)) != 0)
+#  define BOARD_PHY_10BASET(s)  (((s) & (1 << MII_PHYCTRL2_MODE_SHIFT)) != 0)
+#  define BOARD_PHY_100BASET(s) (((s) & (2 << MII_PHYCTRL2_MODE_SHIFT)) != 0)
+#elif defined(CONFIG_ETH0_PHY_KSZ8081)
+#  define BOARD_PHY_NAME        "KSZ8081"
+#  define BOARD_PHYID1          MII_PHYID1_KSZ8081
+#  define BOARD_PHYID2          MII_PHYID2_KSZ8081
+#  define BOARD_PHY_STATUS      MII_KSZ8081_PHYCTRL2
+#  define BOARD_PHY_ISDUPLEX(s) (((s) & (4 << MII_PHYCTRL2_MODE_SHIFT)) != 0)
+#  define BOARD_PHY_10BASET(s)  (((s) & (1 << MII_PHYCTRL2_MODE_SHIFT)) != 0)
+#  define BOARD_PHY_100BASET(s) (((s) & (2 << MII_PHYCTRL2_MODE_SHIFT)) != 0)
+#else
+#  error "Unrecognized or missing PHY selection"
+#endif
 
 /* Estimate the hold time to use based on the peripheral (bus) clock:
  *
@@ -160,8 +208,12 @@ struct kinetis_driver_s
   uint8_t txtail;              /* The oldest busy TX descriptor */
   uint8_t txhead;              /* The next TX descriptor to use */
   uint8_t rxtail;              /* The next RX descriptor to use */
+  uint8_t phyaddr;             /* Selected PHY address */
   WDOG_ID txpoll;              /* TX poll timer */
   WDOG_ID txtimeout;           /* TX timeout timer */
+#ifdef CONFIG_NET_NOINTS
+  struct work_s work;          /* For deferring work to the work queue */
+#endif
   struct enet_desc_s *txdesc;  /* A pointer to the list of TX descriptor */
   struct enet_desc_s *rxdesc;  /* A pointer to the list of RX descriptors */
 
@@ -188,7 +240,7 @@ struct kinetis_driver_s
  * Private Data
  ****************************************************************************/
 
-static struct kinetis_driver_s g_enet[CONFIG_ENET_NETHIFS];
+static struct kinetis_driver_s g_enet[CONFIG_KINETIS_ENETNETHIFS];
 
 /****************************************************************************
  * Private Function Prototypes
@@ -218,22 +270,43 @@ static int  kinetis_txpoll(struct net_driver_s *dev);
 
 static void kinetis_receive(FAR struct kinetis_driver_s *priv);
 static void kinetis_txdone(FAR struct kinetis_driver_s *priv);
+
+static inline void kinetis_interrupt_process(FAR struct kinetis_driver_s *priv);
+#ifdef CONFIG_NET_NOINTS
+static void kinetis_interrupt_work(FAR void *arg);
+#endif
 static int  kinetis_interrupt(int irq, FAR void *context);
 
 /* Watchdog timer expirations */
 
-static void kinetis_polltimer(int argc, uint32_t arg, ...);
-static void kinetis_txtimeout(int argc, uint32_t arg, ...);
+static inline void kinetis_txtimeout_process(FAR struct kinetis_driver_s *priv);
+#ifdef CONFIG_NET_NOINTS
+static void kinetis_txtimeout_work(FAR void *arg);
+#endif
+static void kinetis_txtimeout_expiry(int argc, uint32_t arg, ...);
+
+static inline void kinetis_poll_process(FAR struct kinetis_driver_s *priv);
+#ifdef CONFIG_NET_NOINTS
+static void kinetis_poll_work(FAR void *arg);
+#endif
+static void kinetis_polltimer_expiry(int argc, uint32_t arg, ...);
 
 /* NuttX callback functions */
 
 static int kinetis_ifup(struct net_driver_s *dev);
 static int kinetis_ifdown(struct net_driver_s *dev);
+
+static inline void kinetis_txavail_process(FAR struct kinetis_driver_s *priv);
+#ifdef CONFIG_NET_NOINTS
+static void kinetis_txavail_work(FAR void *arg);
+#endif
 static int kinetis_txavail(struct net_driver_s *dev);
+
 #ifdef CONFIG_NET_IGMP
 static int kinetis_addmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 static int kinetis_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif
+
 #ifdef CONFIG_NETDEV_PHY_IOCTL
 static int kinetis_ioctl(struct net_driver_s *dev, int cmd, long arg);
 #endif
@@ -241,7 +314,11 @@ static int kinetis_ioctl(struct net_driver_s *dev, int cmd, long arg);
 /* PHY/MII support */
 
 static inline void kinetis_initmii(struct kinetis_driver_s *priv);
-static inline void kinetis_initphy(struct kinetis_driver_s *priv);
+static int kinetis_writemii(struct kinetis_driver_s *priv, uint8_t phyaddr,
+                            uint8_t regaddr, uint16_t data);
+static int kinetis_readmii(struct kinetis_driver_s *priv, uint8_t phyaddr,
+                           uint8_t regaddr, uint16_t *data);
+static inline int kinetis_initphy(struct kinetis_driver_s *priv);
 
 /* Initialization */
 
@@ -323,7 +400,7 @@ static bool kinetics_txringfull(FAR struct kinetis_driver_s *priv)
    */
 
   txnext = priv->txhead + 1;
-  if (txnext >= CONFIG_ENET_NTXBUFFERS)
+  if (txnext >= CONFIG_KINETIS_ENETNTXBUFFERS)
     {
       txnext = 0;
     }
@@ -375,7 +452,7 @@ static int kinetis_transmit(FAR struct kinetis_driver_s *priv)
 
   txdesc = &priv->txdesc[priv->txhead];
   priv->txhead++;
-  if (priv->txhead >= CONFIG_ENET_NTXBUFFERS)
+  if (priv->txhead >= CONFIG_KINETIS_ENETNTXBUFFERS)
     {
       priv->txhead = 0;
     }
@@ -392,7 +469,7 @@ static int kinetis_transmit(FAR struct kinetis_driver_s *priv)
    */
 
   txdesc->length  = kinesis_swap16(priv->dev.d_len);
-#ifdef CONFIG_ENET_ENHANCEDBD
+#ifdef CONFIG_KINETIS_ENETENHANCEDBD
   txdesc->bdu     = 0x00000000;
   txdesc->status2 = TXDESC_INT | TXDESC_TS; /* | TXDESC_IINS | TXDESC_PINS; */
 #endif
@@ -426,8 +503,8 @@ static int kinetis_transmit(FAR struct kinetis_driver_s *priv)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  (void)wd_start(priv->txtimeout, KINETIS_TXTIMEOUT, kinetis_txtimeout, 1,
-                 (uint32_t)priv);
+  (void)wd_start(priv->txtimeout, KINETIS_TXTIMEOUT, kinetis_txtimeout_expiry, 1,
+                 (wdparm_t)priv);
   return OK;
 }
 
@@ -668,7 +745,7 @@ static void kinetis_receive(FAR struct kinetis_driver_s *priv)
       /* Update the index to the next descriptor */
 
       priv->rxtail++;
-      if (priv->rxtail >= CONFIG_ENET_NRXBUFFERS)
+      if (priv->rxtail >= CONFIG_KINETIS_ENETNRXBUFFERS)
         {
           priv->rxtail = 0;
         }
@@ -708,7 +785,7 @@ static void kinetis_txdone(FAR struct kinetis_driver_s *priv)
       /* Yes.. bump up the tail pointer, making space for a new TX descriptor */
 
       priv->txtail++;
-      if (priv->txtail >= CONFIG_ENET_NTXBUFFERS)
+      if (priv->txtail >= CONFIG_KINETIS_ENETNTXBUFFERS)
         {
           priv->txtail = 0;
         }
@@ -739,28 +816,25 @@ static void kinetis_txdone(FAR struct kinetis_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: kinetis_interrupt
+ * Function: kinetis_interrupt_process
  *
  * Description:
- *   Three interrupt sources will vector this this function:
- *   1. Ethernet MAC transmit interrupt handler
- *   2. Ethernet MAC receive interrupt handler
- *   3.
+ *   Interrupt processing.  This may be performed either within the interrupt
+ *   handler or on the worker thread, depending upon the configuration
  *
  * Parameters:
- *   irq     - Number of the IRQ that generated the interrupt
- *   context - Interrupt register state save info (architecture-specific)
+ *   priv - Reference to the driver state structure
  *
  * Returned Value:
- *   OK on success
+ *   None
  *
  * Assumptions:
+ *   The network is locked.
  *
  ****************************************************************************/
 
-static int kinetis_interrupt(int irq, FAR void *context)
+static inline void kinetis_interrupt_process(FAR struct kinetis_driver_s *priv)
 {
-  register FAR struct kinetis_driver_s *priv = &g_enet[0];
   uint32_t pending;
 
   /* Get the set of unmasked, pending interrupt. */
@@ -810,33 +884,130 @@ static int kinetis_interrupt(int irq, FAR void *context)
 
       putreg32(ENET_RDAR, KINETIS_ENET_RDAR);
     }
+}
+
+/****************************************************************************
+ * Function: kinetis_interrupt_work
+ *
+ * Description:
+ *   Perform interrupt related work from the worker thread
+ *
+ * Parameters:
+ *   arg - The argument passed when work_queue() was called.
+ *
+ * Returned Value:
+ *   OK on success
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_NOINTS
+static void kinetis_interrupt_work(FAR void *arg)
+{
+  FAR struct kinetis_driver_s *priv = (FAR struct kinetis_driver_s *)arg;
+  net_lock_t state;
+
+  /* Process pending Ethernet interrupts */
+
+  state = net_lock();
+  kinetis_interrupt_process(priv);
+  net_unlock(state);
+
+  /* Re-enable Ethernet interrupts */
+
+#if 0
+  up_enable_irq(KINETIS_IRQ_EMACTMR);
+#endif
+  up_enable_irq(KINETIS_IRQ_EMACTX);
+  up_enable_irq(KINETIS_IRQ_EMACRX);
+  up_enable_irq(KINETIS_IRQ_EMACMISC);
+}
+#endif
+
+/****************************************************************************
+ * Function: kinetis_interrupt
+ *
+ * Description:
+ *   Three interrupt sources will vector this this function:
+ *   1. Ethernet MAC transmit interrupt handler
+ *   2. Ethernet MAC receive interrupt handler
+ *   3.
+ *
+ * Parameters:
+ *   irq     - Number of the IRQ that generated the interrupt
+ *   context - Interrupt register state save info (architecture-specific)
+ *
+ * Returned Value:
+ *   OK on success
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static int kinetis_interrupt(int irq, FAR void *context)
+{
+  register FAR struct kinetis_driver_s *priv = &g_enet[0];
+
+#ifdef CONFIG_NET_NOINTS
+  /* Disable further Ethernet interrupts.  Because Ethernet interrupts are
+   * also disabled if the TX timeout event occurs, there can be no race
+   * condition here.
+   */
+
+  up_disable_irq(KINETIS_IRQ_EMACTMR);
+  up_disable_irq(KINETIS_IRQ_EMACTX);
+  up_disable_irq(KINETIS_IRQ_EMACRX);
+  up_disable_irq(KINETIS_IRQ_EMACMISC);
+
+  /* TODO: Determine if a TX transfer just completed */
+
+    {
+      /* If a TX transfer just completed, then cancel the TX timeout so
+       * there will be do race condition between any subsequent timeout
+       * expiration and the deferred interrupt processing.
+       */
+
+       wd_cancel(priv->txtimeout);
+    }
+
+  /* Cancel any pending poll work */
+
+  work_cancel(HPWORK, &priv->work);
+
+  /* Schedule to perform the interrupt processing on the worker thread. */
+
+  work_queue(HPWORK, &priv->work, kinetis_interrupt_work, priv, 0);
+
+#else
+  /* Process the interrupt now */
+
+  kinetis_interrupt_process(priv);
+#endif
 
   return OK;
 }
 
 /****************************************************************************
- * Function: kinetis_txtimeout
+ * Function: kinetis_txtimeout_process
  *
  * Description:
- *   Our TX watchdog timed out.  Called from the timer interrupt handler.
- *   The last TX never completed.  Reset the hardware and start again.
+ *   Process a TX timeout.  Called from the either the watchdog timer
+ *   expiration logic or from the worker thread, depending upon the
+ *   configuration.  The timeout means that the last TX never completed.
+ *   Reset the hardware and start again.
  *
  * Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   priv - Reference to the driver state structure
  *
  * Returned Value:
  *   None
  *
- * Assumptions:
- *   Global interrupts are disabled by the watchdog logic.
- *
  ****************************************************************************/
 
-static void kinetis_txtimeout(int argc, uint32_t arg, ...)
+static inline void kinetis_txtimeout_process(FAR struct kinetis_driver_s *priv)
 {
-  FAR struct kinetis_driver_s *priv = (FAR struct kinetis_driver_s *)arg;
-
   /* Increment statistics and dump debug info */
 
   NETDEV_TXTIMEOUTS(&priv->dev);
@@ -854,10 +1025,42 @@ static void kinetis_txtimeout(int argc, uint32_t arg, ...)
 }
 
 /****************************************************************************
- * Function: kinetis_polltimer
+ * Function: kinetis_txtimeout_work
  *
  * Description:
- *   Periodic timer handler.  Called from the timer interrupt handler.
+ *   Perform TX timeout related work from the worker thread
+ *
+ * Parameters:
+ *   arg - The argument passed when work_queue() as called.
+ *
+ * Returned Value:
+ *   OK on success
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_NOINTS
+static void kinetis_txtimeout_work(FAR void *arg)
+{
+  FAR struct kinetis_driver_s *priv = (FAR struct kinetis_driver_s *)arg;
+  net_lock_t state;
+
+  /* Process pending Ethernet interrupts */
+
+  state = net_lock();
+  kinetis_txtimeout_process(priv);
+  net_unlock(state);
+}
+#endif
+
+/****************************************************************************
+ * Function: kinetis_txtimeout_expiry
+ *
+ * Description:
+ *   Our TX watchdog timed out.  Called from the timer interrupt handler.
+ *   The last TX never completed.  Reset the hardware and start again.
  *
  * Parameters:
  *   argc - The number of available arguments
@@ -871,10 +1074,56 @@ static void kinetis_txtimeout(int argc, uint32_t arg, ...)
  *
  ****************************************************************************/
 
-static void kinetis_polltimer(int argc, uint32_t arg, ...)
+static void kinetis_txtimeout_expiry(int argc, uint32_t arg, ...)
 {
   FAR struct kinetis_driver_s *priv = (FAR struct kinetis_driver_s *)arg;
 
+#ifdef CONFIG_NET_NOINTS
+  /* Disable further Ethernet interrupts.  This will prevent some race
+   * conditions with interrupt work.  There is still a potential race
+   * condition with interrupt work that is already queued and in progress.
+   */
+
+  up_disable_irq(KINETIS_IRQ_EMACTMR);
+  up_disable_irq(KINETIS_IRQ_EMACTX);
+  up_disable_irq(KINETIS_IRQ_EMACRX);
+  up_disable_irq(KINETIS_IRQ_EMACMISC);
+
+  /* Cancel any pending poll or interrupt work.  This will have no effect
+   * on work that has already been started.
+   */
+
+  work_cancel(HPWORK, &priv->work);
+
+  /* Schedule to perform the TX timeout processing on the worker thread. */
+
+  work_queue(HPWORK, &priv->work, kinetis_txtimeout_work, priv, 0);
+#else
+  /* Process the timeout now */
+
+  kinetis_txtimeout_process(priv);
+#endif
+}
+
+/****************************************************************************
+ * Function: kinetis_poll_process
+ *
+ * Description:
+ *   Perform the periodic poll.  This may be called either from watchdog
+ *   timer logic or from the worker thread, depending upon the configuration.
+ *
+ * Parameters:
+ *   priv - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static inline void kinetis_poll_process(FAR struct kinetis_driver_s *priv)
+{
   /* Check if there is there is a transmission in progress.  We cannot perform
    * the TX poll if he are unable to accept another packet for transmission.
    */
@@ -891,7 +1140,89 @@ static void kinetis_polltimer(int argc, uint32_t arg, ...)
 
   /* Setup the watchdog poll timer again in any case */
 
-  (void)wd_start(priv->txpoll, KINETIS_WDDELAY, kinetis_polltimer, 1, arg);
+  (void)wd_start(priv->txpoll, KINETIS_WDDELAY, kinetis_polltimer_expiry,
+                 1, (wdparm_t)priv);
+}
+
+/****************************************************************************
+ * Function: kinetis_poll_work
+ *
+ * Description:
+ *   Perform periodic polling from the worker thread
+ *
+ * Parameters:
+ *   arg - The argument passed when work_queue() as called.
+ *
+ * Returned Value:
+ *   OK on success
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_NOINTS
+static void kinetis_poll_work(FAR void *arg)
+{
+  FAR struct kinetis_driver_s *priv = (FAR struct kinetis_driver_s *)arg;
+  net_lock_t state;
+
+  /* Perform the poll */
+
+  state = net_lock();
+  kinetis_poll_process(priv);
+  net_unlock(state);
+}
+#endif
+
+/****************************************************************************
+ * Function: kinetis_polltimer_expiry
+ *
+ * Description:
+ *   Periodic timer handler.  Called from the timer interrupt handler.
+ *
+ * Parameters:
+ *   argc - The number of available arguments
+ *   arg  - The first argument
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Global interrupts are disabled by the watchdog logic.
+ *
+ ****************************************************************************/
+
+static void kinetis_polltimer_expiry(int argc, uint32_t arg, ...)
+{
+  FAR struct kinetis_driver_s *priv = (FAR struct kinetis_driver_s *)arg;
+
+#ifdef CONFIG_NET_NOINTS
+  /* Is our single work structure available?  It may not be if there are
+   * pending interrupt actions.
+   */
+
+  if (work_available(&priv->work))
+    {
+      /* Schedule to perform the interrupt processing on the worker thread. */
+
+      work_queue(HPWORK, &priv->work, kinetis_poll_work, priv, 0);
+    }
+  else
+    {
+      /* No.. Just re-start the watchdog poll timer, missing one polling
+       * cycle.
+       */
+
+      (void)wd_start(priv->txpoll, KINETIS_WDDELAY, kinetis_polltimer_expiry,
+                     1, (wdparm_t)arg);
+    }
+
+#else
+  /* Process the interrupt now */
+
+  kinetis_poll_process(priv);
+#endif
 }
 
 /****************************************************************************
@@ -917,6 +1248,7 @@ static int kinetis_ifup(struct net_driver_s *dev)
     (FAR struct kinetis_driver_s *)dev->d_private;
   uint8_t *mac = dev->d_mac.ether_addr_octet;
   uint32_t regval;
+  int ret;
 
   ninfo("Bringing up: %d.%d.%d.%d\n",
         dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
@@ -949,7 +1281,12 @@ static int kinetis_ifup(struct net_driver_s *dev)
 
   /* Configure the PHY */
 
-  kinetis_initphy(priv);
+  ret = kinetis_initphy(priv);
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to configure the PHY: %d\n", ret);
+      return ret;
+    }
 
   /* Handle promiscuous mode */
 
@@ -961,7 +1298,7 @@ static int kinetis_ifup(struct net_driver_s *dev)
 
   /* Select legacy of enhanced buffer descriptor format */
 
-#ifdef CONFIG_ENET_ENHANCEDBD
+#ifdef CONFIG_KINETIS_ENETENHANCEDBD
   putreg32(ENET_ECR_EN1588, KINETIS_ENET_ECR);
 #else
   putreg32(0, KINETIS_ENET_ECR);
@@ -995,8 +1332,8 @@ static int kinetis_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  (void)wd_start(priv->txpoll, KINETIS_WDDELAY, kinetis_polltimer, 1,
-                 (uint32_t)priv);
+  (void)wd_start(priv->txpoll, KINETIS_WDDELAY, kinetis_polltimer_expiry, 1,
+                 (wdparm_t)priv);
 
   /* Clear all pending ENET interrupt */
 
@@ -1072,6 +1409,77 @@ static int kinetis_ifdown(struct net_driver_s *dev)
 }
 
 /****************************************************************************
+ * Function: kinetis_txavail_process
+ *
+ * Description:
+ *   Perform an out-of-cycle poll.
+ *
+ * Parameters:
+ *   dev - Reference to the NuttX driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Called in normal user mode
+ *
+ ****************************************************************************/
+
+static inline void kinetis_txavail_process(FAR struct kinetis_driver_s *priv)
+{
+  net_lock_t state;
+
+  /* Ignore the notification if the interface is not yet up */
+
+  state = net_lock();
+  if (priv->bifup)
+    {
+      /* Check if there is room in the hardware to hold another outgoing
+       * packet.
+       */
+
+      if (!kinetics_txringfull(priv))
+        {
+          /* No, there is space for another transfer.  Poll the network for new
+           * XMIT data.
+           */
+
+          (void)devif_poll(&priv->dev, kinetis_txpoll);
+        }
+    }
+
+  net_unlock(state);
+}
+
+/****************************************************************************
+ * Function: kinetis_txavail_work
+ *
+ * Description:
+ *   Perform an out-of-cycle poll on the worker thread.
+ *
+ * Parameters:
+ *   arg - Reference to the NuttX driver state structure (cast to void*)
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Called on the higher priority worker thread.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_NOINTS
+static void kinetis_txavail_work(FAR void *arg)
+{
+  FAR struct kinetis_driver_s *priv = (FAR struct kinetis_driver_s *)arg;
+
+  /* Perform the poll */
+
+  kinetis_txavail_process(priv);
+}
+#endif
+
+/****************************************************************************
  * Function: kinetis_txavail
  *
  * Description:
@@ -1094,33 +1502,26 @@ static int kinetis_txavail(struct net_driver_s *dev)
 {
   FAR struct kinetis_driver_s *priv =
     (FAR struct kinetis_driver_s *)dev->d_private;
-  irqstate_t flags;
 
-  /* Disable interrupts because this function may be called from interrupt
-   * level processing.
+#ifdef CONFIG_NET_NOINTS
+  /* Is our single work structure available?  It may not be if there are
+   * pending interrupt actions and we will have to ignore the Tx
+   * availability action.
    */
 
-  flags = enter_critical_section();
-
-  /* Ignore the notification if the interface is not yet up */
-
-  if (priv->bifup)
+  if (work_available(&priv->work))
     {
-      /* Check if there is room in the hardware to hold another outgoing
-       * packet.
-       */
+      /* Schedule to serialize the poll on the worker thread. */
 
-      if (!kinetics_txringfull(priv))
-        {
-          /* No, there is space for another transfer.  Poll the network for new
-           * XMIT data.
-           */
-
-          (void)devif_poll(&priv->dev, kinetis_txpoll);
-        }
+      work_queue(HPWORK, &priv->work, kinetis_txavail_work, priv, 0);
     }
 
-  leave_critical_section(flags);
+#else
+  /* Perform the out-of-cycle poll now */
+
+  kinetis_txavail_process(priv);
+#endif
+
   return OK;
 }
 
@@ -1216,7 +1617,7 @@ static int kinetis_ioctl(struct net_driver_s *dev, int cmd, long arg)
     {
       struct mii_ioctl_data_s *req =
         (struct mii_ioctl_data_s *)((uintptr_t)arg);
-      req->phy_id = CONFIG_ENET_PHYADDR;
+      req->phy_id = priv->phyaddr;
       ret = OK;
     }
     break;
@@ -1381,6 +1782,7 @@ static int kinetis_readmii(struct kinetis_driver_s *priv, uint8_t phyaddr,
 
   if (timeout >= MII_MAXPOLLS)
     {
+      nerr("ERROR: Timed out waiting for transfer to complete\n");
       return -ETIMEDOUT;
     }
 
@@ -1404,33 +1806,95 @@ static int kinetis_readmii(struct kinetis_driver_s *priv, uint8_t phyaddr,
  *   priv - Reference to the private ENET driver state structure
  *
  * Returned Value:
- *   None
+ *   Zero (OK) returned on success; a negated errno value is returned on any
+ *   failure;
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-static inline void kinetis_initphy(struct kinetis_driver_s *priv)
+static inline int kinetis_initphy(struct kinetis_driver_s *priv)
 {
   uint32_t rcr;
   uint32_t tcr;
   uint16_t phydata;
+  uint8_t phyaddr;
+  int retries;
+  int ret;
 
   /* Loop (potentially infinitely?) until we successfully communicate with
    * the PHY.
    */
 
-  do
+  for (phyaddr = 0; phyaddr < 32; phyaddr++)
     {
-      usleep(LINK_WAITUS);
-      phydata = 0xffff;
-      kinetis_readmii(priv, CONFIG_ENET_PHYADDR, MII_PHYID1, &phydata);
+      ninfo("%s: Try phyaddr: %u\n", BOARD_PHY_NAME, phyaddr);
+
+      /* Try to read PHYID1 few times using this address */
+
+      retries = 0;
+      do
+        {
+          usleep(LINK_WAITUS);
+          ninfo("%s: Read PHYID1, retries=%d\n",  BOARD_PHY_NAME, retries + 1);
+          phydata = 0xffff;
+          ret = kinetis_readmii(priv, phyaddr, MII_PHYID1, &phydata);
+        }
+      while (ret >= 0 && phydata == 0xffff && ++retries < 3);
+
+      /* If we successfully read anything then break out, using this PHY address */
+
+      if (retries < 3)
+        {
+          break;
+        }
     }
-  while (phydata == 0xffff);
+
+  if (phyaddr >= 32)
+    {
+      nerr("ERROR: Failed to read %s PHYID1 at any address\n");
+      return -ENOENT;
+    }
+
+  ninfo("%s: Using PHY address %u\n", BOARD_PHY_NAME, phyaddr);
+  priv->phyaddr = phyaddr;
+
+  /* Verify PHYID1.  Compare OUI bits 3-18 */
+
+  ninfo("%s: PHYID1: %04x\n", BOARD_PHY_NAME, phydata);
+  if (phydata != BOARD_PHYID1)
+    {
+      nerr("ERROR: PHYID1=%04x incorrect for %s.  Expected %04x\n",
+           phydata, BOARD_PHY_NAME, BOARD_PHYID1);
+      return -ENXIO;
+    }
+
+  /* Read PHYID2 */
+
+  ret = kinetis_readmii(priv, phyaddr, MII_PHYID2, &phydata);
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to read %s PHYID2: %d\n", BOARD_PHY_NAME, ret);
+      return ret;
+    }
+
+  ninfo("%s: PHYID2: %04x\n", BOARD_PHY_NAME, phydata);
+
+  /* Verify PHYID2:  Compare OUI bits 19-24 and the 6-bit model number
+   * (ignoring the 4-bit revision number).
+   */
+
+  if ((phydata & 0xfff0) != (BOARD_PHYID2 & 0xfff0))
+    {
+      nerr("ERROR: PHYID2=%04x incorrect for %s.  Expected %04x\n",
+           (phydata & 0xfff0), BOARD_PHY_NAME, (BOARD_PHYID2 & 0xfff0));
+      return -ENXIO;
+    }
 
   /* Start auto negotiation */
 
-  kinetis_writemii(priv, CONFIG_ENET_PHYADDR, MII_MCR,
+  ninfo("%s: Start autonegotiation...\n",  BOARD_PHY_NAME);
+  kinetis_writemii(priv, phyaddr, MII_MCR,
                   (MII_MCR_ANRESTART | MII_MCR_ANENABLE));
 
   /* Wait (potentially forever) for auto negotiation to complete */
@@ -1438,21 +1902,38 @@ static inline void kinetis_initphy(struct kinetis_driver_s *priv)
   do
     {
       usleep(LINK_WAITUS);
-      kinetis_readmii(priv, CONFIG_ENET_PHYADDR, MII_MSR, &phydata);
-
+      ret = kinetis_readmii(priv, phyaddr, MII_MSR, &phydata);
+      if (ret < 0)
+        {
+          nerr("ERROR: Failed to read %s MII_MSR: %d\n",
+                BOARD_PHY_NAME, ret);
+          return ret;
+        }
     }
   while ((phydata & MII_MSR_ANEGCOMPLETE) == 0);
+
+  ninfo("%s: Autonegotiation complete\n",  BOARD_PHY_NAME);
+  ninfo("%s: MII_MSR: %04x\n", BOARD_PHY_NAME, phydata);
 
   /* When we get here we have a link - Find the negotiated speed and duplex. */
 
   phydata = 0;
-  kinetis_readmii(priv, CONFIG_ENET_PHYADDR, PHY_STATUS, &phydata);
+  ret = kinetis_readmii(priv, phyaddr, BOARD_PHY_STATUS, &phydata);
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to read %s BOARD_PHY_STATUS{%02x]: %d\n",
+           BOARD_PHY_NAME, BOARD_PHY_STATUS, ret);
+      return ret;
+   }
+
+
+  ninfo("%s: BOARD_PHY_STATUS: %04x\n", BOARD_PHY_NAME, phydata);
 
   /* Set up the transmit and receive control registers based on the
    * configuration and the auto negotiation results.
    */
 
-#ifdef CONFIG_ENET_USEMII
+#ifdef CONFIG_KINETIS_ENETUSEMII
   rcr = ENET_RCR_MII_MODE | ENET_RCR_CRCFWD |
         CONFIG_NET_ETH_MTU << ENET_RCR_MAX_FL_SHIFT |
         ENET_RCR_MII_MODE;
@@ -1468,28 +1949,46 @@ static inline void kinetis_initphy(struct kinetis_driver_s *priv)
 
   /* Setup half or full duplex */
 
-  if ((phydata & PHY_DUPLEX_STATUS) != 0)
+  if (BOARD_PHY_ISDUPLEX(phydata))
     {
       /* Full duplex */
 
+      ninfo("%s: Full duplex\n",  BOARD_PHY_NAME);
       tcr |= ENET_TCR_FDEN;
     }
   else
     {
       /* Half duplex */
 
+      ninfo("%s: Half duplex\n",  BOARD_PHY_NAME);
       rcr |= ENET_RCR_DRT;
     }
 
-  if ((phydata & PHY_SPEED_STATUS) != 0)
+  if (BOARD_PHY_10BASET(phydata))
     {
-      /* 10Mbps */
+      /* 10 Mbps */
 
+      ninfo("%s: 10 Base-T\n",  BOARD_PHY_NAME);
       rcr |= ENET_RCR_RMII_10T;
+    }
+  else if (!BOARD_PHY_100BASET(phydata))
+    {
+      /* 100 Mbps */
+
+      ninfo("%s: 100 Base-T\n",  BOARD_PHY_NAME);
+    }
+  else
+    {
+      /* This might happen if autonegotiation did not complete(?) */
+
+      nerr("ERROR: Neither 10- nor 100-BaseT reported: PHY STATUS=%04x\n",
+           phydata);
+      return -EIO;
     }
 
   putreg32(rcr, KINETIS_ENET_RCR);
   putreg32(tcr, KINETIS_ENET_TCR);
+  return OK;
 }
 
 /****************************************************************************
@@ -1520,7 +2019,7 @@ static void kinetis_initbuffers(struct kinetis_driver_s *priv)
 
   /* Get an aligned RX descriptor (array) address */
 
-  addr        +=  CONFIG_ENET_NTXBUFFERS * sizeof(struct enet_desc_s);
+  addr        +=  CONFIG_KINETIS_ENETNTXBUFFERS * sizeof(struct enet_desc_s);
   priv->rxdesc = (struct enet_desc_s *)addr;
 
   /* Get the beginning of the first aligned buffer */
@@ -1529,12 +2028,12 @@ static void kinetis_initbuffers(struct kinetis_driver_s *priv)
 
   /* Then fill in the TX descriptors */
 
-  for (i = 0; i < CONFIG_ENET_NTXBUFFERS; i++)
+  for (i = 0; i < CONFIG_KINETIS_ENETNTXBUFFERS; i++)
     {
       priv->txdesc[i].status1 = 0;
       priv->txdesc[i].length  = 0;
       priv->txdesc[i].data    = (uint8_t *)kinesis_swap32((uint32_t)addr);
-#ifdef CONFIG_ENET_ENHANCEDBD
+#ifdef CONFIG_KINETIS_ENETENHANCEDBD
       priv->txdesc[i].status2 = TXDESC_IINS | TXDESC_PINS;
 #endif
       addr                   += KINETIS_BUF_SIZE;
@@ -1542,12 +2041,12 @@ static void kinetis_initbuffers(struct kinetis_driver_s *priv)
 
   /* Then fill in the RX descriptors */
 
-  for (i = 0; i < CONFIG_ENET_NRXBUFFERS; i++)
+  for (i = 0; i < CONFIG_KINETIS_ENETNRXBUFFERS; i++)
     {
       priv->rxdesc[i].status1 = RXDESC_E;
       priv->rxdesc[i].length  = 0;
       priv->rxdesc[i].data    = (uint8_t *)kinesis_swap32((uint32_t)addr);
-#ifdef CONFIG_ENET_ENHANCEDBD
+#ifdef CONFIG_KINETIS_ENETENHANCEDBD
       priv->rxdesc[i].bdu     = 0;
       priv->rxdesc[i].status2 = RXDESC_INT;
 #endif
@@ -1556,8 +2055,8 @@ static void kinetis_initbuffers(struct kinetis_driver_s *priv)
 
   /* Set the wrap bit in the last descriptors to form a ring */
 
-  priv->txdesc[CONFIG_ENET_NTXBUFFERS-1].status1 |= TXDESC_W;
-  priv->rxdesc[CONFIG_ENET_NRXBUFFERS-1].status1 |= RXDESC_W;
+  priv->txdesc[CONFIG_KINETIS_ENETNTXBUFFERS-1].status1 |= TXDESC_W;
+  priv->rxdesc[CONFIG_KINETIS_ENETNRXBUFFERS-1].status1 |= RXDESC_W;
 
   /* We start with RX descriptor 0 and with no TX descriptors in use */
 
@@ -1631,7 +2130,7 @@ int kinetis_netinitialize(int intf)
 
   /* Get the interface structure associated with this interface number. */
 
-  DEBUGASSERT(intf < CONFIG_ENET_NETHIFS);
+  DEBUGASSERT(intf < CONFIG_KINETIS_ENETNETHIFS);
   priv = &g_enet[intf];
 
   /* Enable the ENET clock */
@@ -1646,9 +2145,9 @@ int kinetis_netinitialize(int intf)
 
   putreg32(0, KINETIS_MPU_CESR);
 
+#ifdef CONFIG_KINETIS_ENETUSEMII
   /* Configure all ENET/MII pins */
 
-#ifdef CONFIG_ENET_USEMII
   kinetis_pinconfig(PIN_MII0_MDIO);
   kinetis_pinconfig(PIN_MII0_MDC);
   kinetis_pinconfig(PIN_MII0_RXDV);
@@ -1668,6 +2167,8 @@ int kinetis_netinitialize(int intf)
   kinetis_pinconfig(PIN_MII0_CRS);
   kinetis_pinconfig(PIN_MII0_COL);
 #else
+  /* Use RMII subset */
+
   kinetis_pinconfig(PIN_RMII0_MDIO);
   kinetis_pinconfig(PIN_RMII0_MDC);
   kinetis_pinconfig(PIN_RMII0_CRS_DV);
@@ -1773,7 +2274,7 @@ int kinetis_netinitialize(int intf)
  *
  ****************************************************************************/
 
-#if CONFIG_ENET_NETHIFS == 1
+#if CONFIG_KINETIS_ENETNETHIFS == 1
 void up_netinitialize(void)
 {
   (void)kinetis_netinitialize(0);

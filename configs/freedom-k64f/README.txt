@@ -10,9 +10,12 @@ Contents
   o Freedom K64F Features
   o Serial Console
   o LEDs and Buttons
-  o Ethernet
+  o Networking Support
   o Development Environment
   o GNU Toolchain Options
+  o Freedom K64F Configuration Options
+  o Configurations
+  o Status
 
 Kinetis Freedom K64F Features:
 =============================
@@ -126,39 +129,285 @@ LEDs and Buttons
   SW2       PTC6/SPI0_SOUT/PD0_EXTRG/I2S0_RX_BCLK/FB_AD9/I2S0_MCLK/LLWU_P10
   SW3       PTA4/FTM0_CH1/NMI_b/LLWU_P3
 
-Ethernet
-========
+Networking Support
+==================
 
+  Ethernet MAC/KSZ8081 PHY
+  ------------------------
   ------------ ----------------- --------------------------------------------
   KSZ8081      Board Signal(s)   K64F Pin
-  Pin Signal                     Function
+  Pin Signal                     Function                       pinmux Name
   --- -------- ----------------- --------------------------------------------
-   1  VDD_1V2  VDDPLL_1.2V       ---
-   2  VDDA_3V3 VDDA_ENET         ---
-   3  RXM      ENET1_RX-         ---
-   4  RXP      ENET1_RX+         ---
-   5  TXM      ENET1_TX-         ---
-   6  TXP      ENET1_TX+         ---
-   7  X0       RMII_XTAL0        ---
-   8  XI       RMII_XTAL1        ---
-   9  REXT     ---               ---, Apparently not connected
-  10  MDIO     RMII0_MDIO        PTB0/RMII0_MDIO
-  11  MDC      RMII0_MDC         PTB1/RMII0_MDC
-  12  RXD1     RMII0_RXD_1       PTA12/RMII0_RXD1
-  13  RXD0     RMII0_RXD_0       PTA13/RMII0_RXD0
-  14  VDDIO    VDDIO_ENET        ---
-  15  CRS_DIV                    PTA14/RMII0_CRS_DV
-  16  REF_CLK  RMII_RXCLK        PTA18/EXTAL0, PHY clock input
-  17  RXER     RMII0_RXER        PTA5/RMII0_RXER
-  18  INTRP    RMII0_INT_B,      J14 Pin 2, Apparently not available unless jumpered
-               PHY_INT_1
-  19  TXEN     RMII0_TXEN        PTA15/RMII0_TXEN
-  20  TXD0     RMII0_TXD_0       PTA16/RMII0_TXD0
-  21  TXD1     RMII0_TXD_1       PTA17/RMII0_TXD1
-  22  GND1     ---               ---
-  24  nRST     PHY_RST_B         ---
-  25  GND2     ---               ---
+   1  VDD_1V2  VDDPLL_1.2V       ---                            ---
+   2  VDDA_3V3 VDDA_ENET         ---                            ---
+   3  RXM      ENET1_RX-         ---                            ---
+   4  RXP      ENET1_RX+         ---                            ---
+   5  TXM      ENET1_TX-         ---                            ---
+   6  TXP      ENET1_TX+         ---                            ---
+   7  X0       RMII_XTAL0        ---                            ---
+   8  XI       RMII_XTAL1        ---                            ---
+   9  REXT     ---               ---, Apparently not connected  ---
+  10  MDIO     RMII0_MDIO        PTB0/RMII0_MDIO                PIN_RMII0_MDIO
+  11  MDC      RMII0_MDC         PTB1/RMII0_MDC                 PIN_RMII0_MDC
+  12  RXD1     RMII0_RXD_1       PTA12/RMII0_RXD1               PIN_RMII0_RXD1
+  13  RXD0     RMII0_RXD_0       PTA13/RMII0_RXD0               PIN_RMII0_RXD0
+  14  VDDIO    VDDIO_ENET        ---                            ---
+  15  CRS_DIV                    PTA14/RMII0_CRS_DV             PIN_RMII0_CRS_DV
+  16  REF_CLK  RMII_RXCLK        PTA18/EXTAL0, PHY clock input  ---
+  17  RXER     RMII0_RXER        PTA5/RMII0_RXER                PIN_RMII0_RXER
+  18  INTRP    RMII0_INT_B,      J14 Pin 2, Apparently not      ---
+               PHY_INT_1         available unless jumpered
+  19  TXEN     RMII0_TXEN        PTA15/RMII0_TXEN               PIN_RMII0_TXEN
+  20  TXD0     RMII0_TXD_0       PTA16/RMII0_TXD0               PIN_RMII0_TXD0
+  21  TXD1     RMII0_TXD_1       PTA17/RMII0_TXD1               PIN_RMII0_TXD1
+  22  GND1     ---               ---                            ---
+  24  nRST     PHY_RST_B         ---                            ---
+  25  GND2     ---               ---                            ---
   --- -------- ----------------- --------------------------------------------
+
+  No external pullup is available on MDIO signal when MK64FN1M0VLL12 MCU is
+  requests status of the Ethernet link connection. Internal pullup is required
+  when port configuration for MDIO signal is enabled:
+
+    CONFIG_KINETIS_ENET_MDIOPULLUP=y
+
+  Networking support via the can be added to NSH by selecting the following
+  configuration options.
+
+  Selecting the EMAC peripheral
+  -----------------------------
+
+  System Type -> Kinetis Peripheral Support
+    CONFIG_KINETIS_ENET=y               : Enable the EThernet MAC peripheral
+
+  System Type -> Ethernet Configuration
+    CONFIG_KINETIS_ENETNETHIFS=1
+    CONFIG_KINETIS_ENETNRXBUFFERS=6
+    CONFIG_KINETIS_ENETNTXBUFFERS=2
+    CONFIG_KINETIS_ENET_MDIOPULLUP=y
+
+  Networking Support
+    CONFIG_NET=y                        : Enable Neworking
+    CONFIG_NET_ETHERNET=y               : Support Ethernet data link
+    CONFIG_NET_NOINTS=y                 : Should operative at non-interrupt level
+    CONFIG_NET_SOCKOPTS=y               : Enable socket operations
+    CONFIG_NET_MULTIBUFFER=y            : Multi-packet buffer option required
+    CONFIG_NET_ETH_MTU=590              : Maximum packet size (MTU) 1518 is more standard
+    CONFIG_NET_ETH_TCP_RECVWNDO=536     : Should be the same as CONFIG_NET_ETH_MTU
+    CONFIG_NET_ARP=y                    : Enable ARP
+    CONFIG_NET_ARPTAB_SIZE=16           : ARP table size
+    CONFIG_NET_ARP_IPIN=y               : Enable ARP address harvesting
+    CONFIG_NET_ARP_SEND=y               : Send ARP request before sending data
+    CONFIG_NET_TCP=y                    : Enable TCP/IP networking
+    CONFIG_NET_TCP_READAHEAD=y          : Support TCP read-ahead
+    CONFIG_NET_TCP_WRITE_BUFFERS=y      : Support TCP write-buffering
+    CONFIG_NET_TCPBACKLOG=y             : Support TCP/IP backlog
+    CONFIG_NET_MAX_LISTENPORTS=20       :
+    CONFIG_NET_TCP_READAHEAD_BUFSIZE=536  Read-ahead buffer size
+    CONFIG_NET_UDP=y                    : Enable UDP networking
+    CONFIG_NET_BROADCAST=y              : Needed for DNS name resolution
+    CONFIG_NET_ICMP=y                   : Enable ICMP networking
+    CONFIG_NET_ICMP_PING=y              : Needed for NSH ping command
+                                        : Defaults should be okay for other options
+f Application Configuration -> Network Utilities
+    CONFIG_NETDB_DNSCLIENT=y               : Enable host address resolution
+    CONFIG_NETUTILS_TELNETD=y           : Enable the Telnet daemon
+    CONFIG_NETUTILS_TFTPC=y             : Enable TFTP data file transfers for get and put commands
+    CONFIG_NETUTILS_NETLIB=y            : Network library support is needed
+    CONFIG_NETUTILS_WEBCLIENT=y         : Needed for wget support
+                                        : Defaults should be okay for other options
+  Application Configuration -> NSH Library
+    CONFIG_NSH_TELNET=y                 : Enable NSH session via Telnet
+    CONFIG_NSH_IPADDR=0x0a000002        : Select a fixed IP address
+    CONFIG_NSH_DRIPADDR=0x0a000001      : IP address of gateway/host PC
+    CONFIG_NSH_NETMASK=0xffffff00       : Netmask
+    CONFIG_NSH_NOMAC=y                  : Need to make up a bogus MAC address
+                                        : Defaults should be okay for other options
+
+  You can also enable enable the DHCPC client for networks that use
+  dynamically assigned address:
+
+  Application Configuration -> Network Utilities
+    CONFIG_NETUTILS_DHCPC=y             : Enables the DHCP client
+
+  Networking Support
+    CONFIG_NET_UDP=y                    : Depends on broadcast UDP
+
+  Application Configuration -> NSH Library
+    CONFIG_NET_BROADCAST=y
+    CONFIG_NSH_DHCPC=y                  : Tells NSH to use DHCPC, not
+                                        : the fixed addresses
+
+  Using the network with NSH
+  --------------------------
+
+  So what can you do with this networking support?  First you see that
+  NSH has several new network related commands:
+
+    ifconfig, ifdown, ifup:  Commands to help manage your network
+    get and put:             TFTP file transfers
+    wget:                    HTML file transfers
+    ping:                    Check for access to peers on the network
+    Telnet console:          You can access the NSH remotely via telnet.
+
+  You can also enable other add on features like full FTP or a Web
+  Server or XML RPC and others.  There are also other features that
+  you can enable like DHCP client (or server) or network name
+  resolution.
+
+  By default, the IP address of the DK-TM4C129X will be 10.0.0.2 and
+  it will assume that your host is the gateway and has the IP address
+  10.0.0.1.
+
+    nsh> ifconfig
+    eth0    HWaddr 00:e0:de:ad:be:ef at UP
+            IPaddr:10.0.0.2 DRaddr:10.0.0.1 Mask:255.255.255.0
+
+  You can use ping to test for connectivity to the host (Careful,
+  Window firewalls usually block ping-related ICMP traffic).  On the
+  target side, you can:
+
+    nsh> ping 10.0.0.1
+    PING 10.0.0.1 56 bytes of data
+    56 bytes from 10.0.0.1: icmp_seq=1 time=0 ms
+    56 bytes from 10.0.0.1: icmp_seq=2 time=0 ms
+    56 bytes from 10.0.0.1: icmp_seq=3 time=0 ms
+    56 bytes from 10.0.0.1: icmp_seq=4 time=0 ms
+    56 bytes from 10.0.0.1: icmp_seq=5 time=0 ms
+    56 bytes from 10.0.0.1: icmp_seq=6 time=0 ms
+    56 bytes from 10.0.0.1: icmp_seq=7 time=0 ms
+    56 bytes from 10.0.0.1: icmp_seq=8 time=0 ms
+    56 bytes from 10.0.0.1: icmp_seq=9 time=0 ms
+    56 bytes from 10.0.0.1: icmp_seq=10 time=0 ms
+    10 packets transmitted, 10 received, 0% packet loss, time 10100 ms
+
+  NOTE: In this configuration is is normal to have packet loss > 0%
+  the first time you ping due to the default handling of the ARP
+  table.
+
+  On the host side, you should also be able to ping the DK-TM4C129X:
+
+    $ ping 10.0.0.2
+
+  You can also log into the NSH from the host PC like this:
+
+    $ telnet 10.0.0.2
+    Trying 10.0.0.2...
+    Connected to 10.0.0.2.
+    Escape character is '^]'.
+    sh_telnetmain: Session [3] Started
+
+    NuttShell (NSH) NuttX-6.31
+    nsh> help
+    help usage:  help [-v] [<cmd>]
+
+      [           echo        ifconfig    mkdir       mw          sleep
+      ?           exec        ifdown      mkfatfs     ping        test
+      cat         exit        ifup        mkfifo      ps          umount
+      cp          free        kill        mkrd        put         usleep
+      cmp         get         losetup     mh          rm          wget
+      dd          help        ls          mount       rmdir       xd
+      df          hexdump     mb          mv          sh
+
+    Builtin Apps:
+    nsh>
+
+  NOTE:  If you enable this networking as described above, you will
+  experience a delay on booting NSH.  That is because the start-up logic
+  waits for the network connection to be established before starting
+  NuttX.  In a real application, you would probably want to do the
+  network bringup on a separate thread so that access to the NSH prompt
+  is not delayed.
+
+  This delay will be especially long if the board is not connected to
+  a network.  On the order of minutes!  You will probably think that
+  NuttX has crashed!  And then, when it finally does come up after
+  numerous timeouts and retries, the network will not be available --
+  even if the network cable is plugged in later.
+
+  The long delays can be eliminated by using a separate the network
+  initialization thread discussed below.  Recovering after the network
+  becomes available requires the network monitor feature, also discussed
+  below.
+
+  Network Initialization Thread
+  -----------------------------
+  There is a configuration option enabled by CONFIG_NSH_NETINIT_THREAD
+  that will do the NSH network bring-up asynchronously in parallel on
+  a separate thread.  This eliminates the (visible) networking delay
+  altogether.  This current implementation, however, has some limitations:
+
+    - If no network is connected, the network bring-up will fail and
+      the network initialization thread will simply exit.  There are no
+      retries and no mechanism to know if the network initialization was
+      successful (it could perform a network Ioctl to see if the link is
+      up and it now, keep trying, but it does not do that now).
+
+    - Furthermore, there is currently no support for detecting loss of
+      network connection and recovery of the connection (similarly, this
+      thread could poll periodically for network status, but does not).
+
+  Both of these shortcomings could be eliminated by enabling the network
+  monitor:
+
+  Network Monitor
+  ---------------
+  By default the network initialization thread will bring-up the network
+  then exit, freeing all of the resources that it required.  This is a
+  good behavior for systems with limited memory.
+
+  If the CONFIG_NSH_NETINIT_MONITOR option is selected, however, then the
+  network initialization thread will persist forever; it will monitor the
+  network status.  In the event that the network goes down (for example, if
+  a cable is removed), then the thread will monitor the link status and
+  attempt to bring the network back up.  In this case the resources
+  required for network initialization are never released.
+
+  Pre-requisites:
+
+    - CONFIG_NSH_NETINIT_THREAD as described above.
+
+    - The K64F EMAC block does not support PHY interrupts.  The KSZ8081
+      PHY interrupt line is brought to a jumper block and it should be
+      possible to connect that some some interrupt port pin.  You would
+      need to provide some custom logic in the Freedcom K64F
+      configuration to set up that PHY interrupt.
+
+    - In addtion to the PHY interrupt, the Network Monitor also requires the
+      following setting:
+
+        CONFIG_NETDEV_PHY_IOCTL. Enable PHY IOCTL commands in the Ethernet
+        device driver. Special IOCTL commands must be provided by the Ethernet
+        driver to support certain PHY operations that will be needed for link
+        management. There operations are not complex and are implemented for
+        the Atmel SAMA5 family.
+
+        CONFIG_ARCH_PHY_INTERRUPT. This is not a user selectable option.
+        Rather, it is set when you select a board that supports PHY
+        interrupts.  For the K64F, like most other architectures, the PHY
+        interrupt must be provided via some board-specific GPIO.  In any
+        event, the board-specific logic must provide support for the PHY
+        interrupt. To do this, the board logic must do two things: (1) It
+        must provide the function arch_phy_irq() as described and prototyped
+        in the nuttx/include/nuttx/arch.h, and (2) it must select
+        CONFIG_ARCH_PHY_INTERRUPT in the board configuration file to
+        advertise that it supports arch_phy_irq().
+
+        And a few other things: UDP support is required (CONFIG_NET_UDP) and
+        signals must not be disabled (CONFIG_DISABLE_SIGNALS).
+
+  Given those prerequisites, the network monitor can be selected with these
+  additional settings.
+
+    System Type -> Kinetis Ethernet Configuration
+      CONFIG_ARCH_PHY_INTERRUPT=y           : (auto-selected)
+      CONFIG_NETDEV_PHY_IOCTL=y             : (auto-selected)
+
+    Application Configuration -> NSH Library -> Networking Configuration
+      CONFIG_NSH_NETINIT_THREAD             : Enable the network initialization thread
+      CONFIG_NSH_NETINIT_MONITOR=y          : Enable the network monitor
+      CONFIG_NSH_NETINIT_RETRYMSEC=2000     : Configure the network monitor as you like
+      CONFIG_NSH_NETINIT_SIGNO=18
 
 Development Environment
 =======================
@@ -380,6 +629,41 @@ can be selected as follow:
 
 Where <subdir> is one of the following:
 
+  netnsh:
+  ------
+    This configuration is identical to the nsh configuration described
+    below except that networking support is enabled.
+
+    NOTES:
+
+    1. Most of the notes associated with the nsh configuration apply here
+       as well (see below).
+
+    2. Default platform/toolchain:
+
+       CONFIG_HOST_WINDOWS=y               : Cygwin under Windows
+       CONFIG_WINDOWS_CYGWIN=y
+       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : ARM/mbed toolcahin (arm-none-elf-gcc)
+       CONFIG_INTELHEX_BINARY=y            : Output formats: Intel hex binary
+
+    3. No external pullup is available on MDIO signal when MK64FN1M0VLL12 MCU
+       is requests status of the Ethernet link connection. Internal pullup is
+       required when port configuration for MDIO signal is enabled:
+
+       CONFIG_KINETIS_ENET_MDIOPULLUP=y
+
+    4. Configured to use a fixed IPv4 address:
+
+       CONFIG_NSH_IPADDR=0x0a000002
+       CONFIG_NSH_DRIPADDR=0x0a000001
+       CONFIG_NSH_NETMASK=0xffffff00
+
+       And a bogus MAC address:
+
+       CONFIG_NSH_NOMAC=y
+       CONFIG_NSH_SWMAC=y
+       CONFIG_NSH_MACADDR=0x00e0deadbeef
+
   nsh:
   ---
     Configures the NuttShell (nsh) located at apps/examples/nsh using a
@@ -401,7 +685,7 @@ Where <subdir> is one of the following:
        CONFIG_HOST_LINUX=y                 : Linux (Cygwin under Windows okay too).
        CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot (arm-nuttx-elf-gcc)
        CONFIG_ARMV7M_OABI_TOOLCHAIN=y      : The older OABI version
-       CONFIG_RAW_BINARY=y                 : Output formats: ELF and raw binary
+       CONFIG_INTELHEX_BINARY=y            : Output formats: Intel hex binary
 
     3. The Serial Console is provided on UART3 with the correct pin
        configuration for use with an Arduino Serial Shield.
@@ -426,3 +710,22 @@ Where <subdir> is one of the following:
       CONFIG_SCHED_WORKQUEUE=y             : Enable the NuttX workqueue
 
       CONFIG_NSH_ARCHINIT=y                : Provide NSH initializeation logic
+
+Status
+======
+
+  2016-07-11:  Received hardware today and the board came up on the very
+    first try.  That does not happen often.  At this point, the very basic
+    NSH configuration is working and LEDs are working.  The only odd
+    behavior that I see is that pressing SW3 causes an unexpected interrupt
+    error.
+
+  2016-07-12:  Added support for the KSZ8081 PHY and added the netnsh
+    configuration.  The network is basically functional, but a lot more
+    testing is needed to confirm that.
+ 
+    In testing, I notice a strange thing.  If I run at full optimization the
+    code runs (albeit with bugs-to-be-solved).  But with no optimization or
+    even at -O1, the system fails to boot.  This seems to be related to the
+    watchdog timer.
+

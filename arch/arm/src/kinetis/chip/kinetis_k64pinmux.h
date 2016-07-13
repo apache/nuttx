@@ -398,14 +398,22 @@
 #define PIN_MII0_COL              (PIN_ALT4   | PIN_PORTA | PIN29)
 #define PIN_MII0_CRS              (PIN_ALT4   | PIN_PORTA | PIN27)
 #define PIN_MII0_MDC              (PIN_ALT4   | PIN_PORTB | PIN1)
-#define PIN_MII0_MDIO             (PIN_ALT4   | PIN_PORTB | PIN0)
+#ifdef CONFIG_KINETIS_ENET_MDIOPULLUP
+#  define PIN_MII0_MDIO           (PIN_ALT4_PULLUP | PIN_PORTB | PIN0)
+#else
+#  define PIN_MII0_MDIO           (PIN_ALT4   | PIN_PORTB | PIN0)
+#endif
 #define PIN_MII0_RXCLK            (PIN_ALT4   | PIN_PORTA | PIN11)
 #define PIN_MII0_RXD0             (PIN_ALT4   | PIN_PORTA | PIN13)
 #define PIN_MII0_RXD1             (PIN_ALT4   | PIN_PORTA | PIN12)
 #define PIN_MII0_RXD2             (PIN_ALT4   | PIN_PORTA | PIN10)
 #define PIN_MII0_RXD3             (PIN_ALT4   | PIN_PORTA | PIN9)
 #define PIN_MII0_RXDV             (PIN_ALT4   | PIN_PORTA | PIN14)
-#define PIN_MII0_RXER             (PIN_ALT4   | PIN_PORTA | PIN5)
+#ifdef CONFIG_KINETIS_ENET_NORXER
+#  define PIN_MII0_RXER           (GPIO_PULLDOWN | PIN_PORTA | PIN5)
+#else
+#  define PIN_MII0_RXER           (PIN_ALT4   | PIN_PORTA | PIN5)
+#endif
 #define PIN_MII0_TXCLK            (PIN_ALT4   | PIN_PORTA | PIN25)
 #define PIN_MII0_TXD0             (PIN_ALT4   | PIN_PORTA | PIN16)
 #define PIN_MII0_TXD1             (PIN_ALT4   | PIN_PORTA | PIN17)
@@ -427,10 +435,18 @@
 
 #define PIN_RMII0_CRS_DV          (PIN_ALT4   | PIN_PORTA | PIN14)
 #define PIN_RMII0_MDC             (PIN_ALT4   | PIN_PORTB | PIN1)
-#define PIN_RMII0_MDIO            (PIN_ALT4   | PIN_PORTB | PIN0)
+#ifdef CONFIG_KINETIS_ENET_MDIOPULLUP
+#  define PIN_RMII0_MDIO          (PIN_ALT4_PULLUP | PIN_PORTB | PIN0)
+#else
+#  define PIN_RMII0_MDIO          (PIN_ALT4   | PIN_PORTB | PIN0)
+#endif
 #define PIN_RMII0_RXD0            (PIN_ALT4   | PIN_PORTA | PIN13)
 #define PIN_RMII0_RXD1            (PIN_ALT4   | PIN_PORTA | PIN12)
-#define PIN_RMII0_RXER            (PIN_ALT4   | PIN_PORTA | PIN5)
+#ifdef CONFIG_KINETIS_ENET_NORXER
+#  define PIN_RMII0_RXER          (GPIO_PULLDOWN | PIN_PORTA | PIN5)
+#else
+#  define PIN_RMII0_RXER          (PIN_ALT4   | PIN_PORTA | PIN5)
+#endif
 #define PIN_RMII0_TXD0            (PIN_ALT4   | PIN_PORTA | PIN16)
 #define PIN_RMII0_TXD1            (PIN_ALT4   | PIN_PORTA | PIN17)
 #define PIN_RMII0_TXEN            (PIN_ALT4   | PIN_PORTA | PIN15)

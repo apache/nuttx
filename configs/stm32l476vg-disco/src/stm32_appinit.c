@@ -210,22 +210,60 @@ FAR struct mtd_dev_s *mtd_temp;
       g_mtd_fs = mtd_temp;
         
 #ifdef CONFIG_MTD_PARTITION
-      /* Setup a partition of 256KiB for our file system. */
+      {
+        FAR struct mtd_geometry_s geo;
+        off_t nblocks;
 
-#if defined(CONFIG_N25QXXX_SECTOR512)
-      mtd_temp = mtd_partition(g_mtd_fs, 0, 512);
-#else
-      mtd_temp = mtd_partition(g_mtd_fs, 0, 64);
+        /* Setup a partition of 256KiB for our file system. */
+
+        ret = MTD_IOCTL(g_mtd_fs, MTDIOC_GEOMETRY, (unsigned long)(uintptr_t)&geo);
+        if (ret < 0)
+          {
+            _err("ERROR: MTDIOC_GEOMETRY failed\n");
+            return ret;
+          }
+
+        nblocks = (256*1024) / geo.blocksize;
+
+        mtd_temp = mtd_partition(g_mtd_fs, 0, nblocks);
+        if (!mtd_temp)
+          {
+            _err("ERROR: mtd_partition failed\n");
+            return ret;
+          }
+
+        g_mtd_fs = mtd_temp;
+      }
 #endif
-      if (!g_mtd_fs)
+
+#ifdef HAVE_N25QXXX_SMARTFS
+      /* Configure the device with no partition support */
+
+      ret = smart_initialize(N25QXXX_SMART_MINOR, g_mtd_fs, NULL);
+      if (ret != OK)
         {
-          _err("ERROR: mtd_partition failed\n");
+          _err("ERROR: Failed to initialize SmartFS: %d\n", ret);
+        }
+
+#elif defined(HAVE_N25QXXX_NXFFS)
+      /* Initialize to provide NXFFS on the N25QXXX MTD interface */
+
+      ret = nxffs_initialize(g_mtd_fs);
+      if (ret < 0)
+        {
+         _err("ERROR: NXFFS initialization failed: %d\n", ret);
+        }
+
+      /* Mount the file system at /mnt/nxffs */
+
+      ret = mount(NULL, "/mnt/nxffs", "nxffs", 0, NULL);
+      if (ret < 0)
+        {
+          _err("ERROR: Failed to mount the NXFFS volume: %d\n", errno);
           return ret;
         }
 
-      g_mtd_fs = mtd_temp;
-#endif
-
+#else /* if  defined(HAVE_N25QXXX_CHARDEV) */
       /* Use the FTL layer to wrap the MTD driver as a block driver */
 
       ret = ftl_initialize(N25QXXX_MTD_MINOR, g_mtd_fs);
@@ -256,6 +294,7 @@ FAR struct mtd_dev_s *mtd_temp;
           _err("ERROR: bchdev_register %s failed: %d\n", chardev, ret);
           return ret;
         }
+#endif
     }
 #endif
 

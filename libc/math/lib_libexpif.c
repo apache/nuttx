@@ -49,13 +49,16 @@
 #define M_E16    (M_E8  * M_E8)
 #define M_E32    (M_E16 * M_E16)
 #define M_E64    (M_E32 * M_E32)
-#define M_E128   (M_E64 * M_E64)
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static const float g_expif_square_tbl[8] =
+/* Values above M_E64 will never be used since it’s larger than FLT_MAX
+ *(3.402823e+38).
+ */
+
+static const float g_expif_square_tbl[] =
 {
   (float)M_E,    /* e^1 */
   (float)M_E2,   /* e^2 */
@@ -63,8 +66,7 @@ static const float g_expif_square_tbl[8] =
   (float)M_E8,   /* e^8 */
   (float)M_E16,  /* e^16 */
   (float)M_E32,  /* e^32 */
-  (float)M_E64,  /* e^64 */
-  (float)M_E128, /* e^128 */
+  (float)M_E64   /* e^64 */
 };
 
 /****************************************************************************
@@ -76,7 +78,9 @@ float lib_expif(size_t n)
   size_t i;
   float val;
 
-  if (n > 128)
+  /* The largest calculable value for n is floor(ln(FLT_MAX)) */
+
+  if (n > 88)
     {
       return INFINITY_F;
     }
