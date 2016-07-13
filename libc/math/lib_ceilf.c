@@ -38,9 +38,9 @@
 float ceilf(float x)
 {
   modff(x, &x);
-  if (x > 0.0)
+  if (x > 0.0F)
     {
-      x += 1.0;
+      x += 1.0F;
     }
 
   return x;

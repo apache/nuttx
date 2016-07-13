@@ -40,8 +40,8 @@ float logf(float x)
 {
   float y, y_old, ey, epsilon;
 
-  y = 0.0;
-  y_old = 1.0;
+  y = 0.0F;
+  y_old = 1.0F;
   epsilon = FLT_EPSILON;
 
   while (y > y_old + epsilon || y < y_old - epsilon)
@@ -50,25 +50,25 @@ float logf(float x)
       ey = exp(y);
       y -= (ey - x) / ey;
 
-      if (y > 700.0)
+      if (y > 700.0F)
         {
-          y = 700.0;
+          y = 700.0F;
         }
 
-      if (y < -700.0)
+      if (y < -700.0F)
         {
-          y = -700.0;
+          y = -700.0F;
         }
 
-      epsilon = (fabs(y) > 1.0) ? fabs(y) * FLT_EPSILON : FLT_EPSILON;
+      epsilon = (fabsf(y) > 1.0F) ? fabsf(y) * FLT_EPSILON : FLT_EPSILON;
     }
 
-  if (y == 700.0)
+  if (y == 700.0F)
     {
       return INFINITY;
     }
 
-  if (y == -700.0)
+  if (y == -700.0F)
     {
       return INFINITY;
     }

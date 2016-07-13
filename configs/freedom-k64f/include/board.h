@@ -41,8 +41,9 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
+
 #ifndef __ASSEMBLY__
-# include <stdint.h>
+#  include <stdint.h>
 #endif
 
 /************************************************************************************
@@ -68,7 +69,7 @@
  *
  *   PLL Input frequency:   PLLIN  = REFCLK / PRDIV = 50  Mhz  / 20 = 2.5 MHz
  *   PLL Output frequency:  PLLOUT = PLLIN  * VDIV  = 2.5 Mhz  * 48 = 120 MHz
- *   MCG Frequency:         PLLOUT = 96MHz
+ *   MCG Frequency:         PLLOUT = 120 MHz
  *
  * PRDIV register value is the divider minus one.  So 20 -> 19
  * VDIV  regiser value is offset by 24.  So 28 -> 24
@@ -100,36 +101,37 @@
  *   SDCLK  frequency = (base clock) / (prescaler * divisor)
  *
  * The SDHC module is always configure configured so that the core clock is the base
- * clock.
+ * clock.  Possible values for presscaler and divisor are:
+ *
+ *   SDCLKFS: {2, 4, 8, 16, 32, 63, 128, 256}
+ *   DVS:     {1..16}
  */
 
-/* Identification mode:  400KHz = 96MHz / ( 16 * 15) */
+/* Identification mode:  Optimal 400KHz, Actual 120MHz / (32 * 10) = 375 Khz */
 
-#define BOARD_SDHC_IDMODE_PRESCALER    SDHC_SYSCTL_SDCLKFS_DIV16
-#define BOARD_SDHC_IDMODE_DIVISOR      SDHC_SYSCTL_DVS_DIV(15)
+#define BOARD_SDHC_IDMODE_PRESCALER    SDHC_SYSCTL_SDCLKFS_DIV32
+#define BOARD_SDHC_IDMODE_DIVISOR      SDHC_SYSCTL_DVS_DIV(10)
 
-/* MMC normal mode: 16MHz  = 96MHz / (2 * 3) */
+/* MMC normal mode: Optimal 20MHz, Actual 120MHz / (2 * 3) = 20 MHz */
 
 #define BOARD_SDHC_MMCMODE_PRESCALER   SDHC_SYSCTL_SDCLKFS_DIV2
 #define BOARD_SDHC_MMCMODE_DIVISOR     SDHC_SYSCTL_DVS_DIV(3)
 
-/* SD normal mode (1-bit): 16MHz  = 96MHz / (2 * 3) */
+/* SD normal mode (1-bit): Optimal 20MHz, Actual 120MHz / (2 * 3) = 20 MHz */
 
 #define BOARD_SDHC_SD1MODE_PRESCALER   SDHC_SYSCTL_SDCLKFS_DIV2
 #define BOARD_SDHC_SD1MODE_DIVISOR     SDHC_SYSCTL_DVS_DIV(3)
 
-/* SD normal mode (4-bit): 24MHz  = 96MHz / (2 * 2) (with DMA)
- * SD normal mode (4-bit): 16MHz  = 96MHz / (2 * 3) (no DMA)
+/* SD normal mode (4-bit): Optimal 25MHz, Actual 120MHz / (2 * 3) = 20 MHz (with DMA)
+ * SD normal mode (4-bit): Optimal 20MHz, Actual 120MHz / (2 * 3) = 20 MHz (no DMA)
  */
 
 #ifdef CONFIG_SDIO_DMA
 #  define BOARD_SDHC_SD4MODE_PRESCALER SDHC_SYSCTL_SDCLKFS_DIV2
-#  define BOARD_SDHC_SD4MODE_DIVISOR   SDHC_SYSCTL_DVS_DIV(2)
+#  define BOARD_SDHC_SD4MODE_DIVISOR   SDHC_SYSCTL_DVS_DIV(3)
 #else
-//#  define BOARD_SDHC_SD4MODE_PRESCALER SDHC_SYSCTL_SDCLKFS_DIV2
-//#  define BOARD_SDHC_SD4MODE_DIVISOR   SDHC_SYSCTL_DVS_DIV(3)
-#  define BOARD_SDHC_SD4MODE_PRESCALER SDHC_SYSCTL_SDCLKFS_DIV16
-#  define BOARD_SDHC_SD4MODE_DIVISOR   SDHC_SYSCTL_DVS_DIV(15)
+#  define BOARD_SDHC_SD4MODE_PRESCALER SDHC_SYSCTL_SDCLKFS_DIV2
+#  define BOARD_SDHC_SD4MODE_DIVISOR   SDHC_SYSCTL_DVS_DIV(3)
 #endif
 
 /* LED definitions ******************************************************************/
@@ -162,18 +164,18 @@
  * the Freedom K64F.  The following definitions describe how NuttX controls
  * the LEDs:
  *
- *   SYMBOL                Meaning                 LED state
- *                                                 RED   GREEN  BLUE
- *   -------------------  -----------------------  -----------------   */
-#define LED_STARTED       1 /* NuttX has been started    OFF  OFF  OFF */
-#define LED_HEAPALLOCATE  2 /* Heap has been allocated   OFF  OFF  ON  */
-#define LED_IRQSENABLED   0 /* Interrupts enabled        OFF  OFF  ON  */
-#define LED_STACKCREATED  3 /* Idle stack created        OFF  ON   OFF */
-#define LED_INIRQ         0 /* In an interrupt          (no change)    */
-#define LED_SIGNAL        0 /* In a signal handler      (no change)    */
-#define LED_ASSERTION     0 /* An assertion failed      (no change)    */
-#define LED_PANIC         4 /* The system has crashed    FLASH OFF OFF */
-#undef  LED_IDLE            /* K64 is in sleep mode     (Not used)     */
+ *   SYMBOL                Meaning                      LED state
+ *                                                      RED   GREEN  BLUE
+ *   -------------------  ----------------------------  ----------------- */
+#define LED_STARTED       1 /* NuttX has been started    OFF   OFF    OFF */
+#define LED_HEAPALLOCATE  2 /* Heap has been allocated   OFF   OFF    ON  */
+#define LED_IRQSENABLED   0 /* Interrupts enabled        OFF   OFF    ON  */
+#define LED_STACKCREATED  3 /* Idle stack created        OFF   ON     OFF */
+#define LED_INIRQ         0 /* In an interrupt          (no change)       */
+#define LED_SIGNAL        0 /* In a signal handler      (no change)       */
+#define LED_ASSERTION     0 /* An assertion failed      (no change)       */
+#define LED_PANIC         4 /* The system has crashed    FLASH OFF    OFF */
+#undef  LED_IDLE            /* K64 is in sleep mode     (Not used)        */
 
 /* Button definitions ***************************************************************/
 /* Two push buttons, SW2 and SW3, are available on FRDM-K64F board, where SW2 is

@@ -924,8 +924,8 @@ static int tmpfs_find_object(FAR struct tmpfs_s *fs,
                              FAR struct tmpfs_object_s **object,
                              FAR struct tmpfs_directory_s **parent)
 {
-  FAR struct tmpfs_object_s *to;
-  FAR struct tmpfs_directory_s *tdo;
+  FAR struct tmpfs_object_s *to = NULL;
+  FAR struct tmpfs_directory_s *tdo = NULL;
   FAR struct tmpfs_directory_s *next_tdo;
   FAR char *segment;
   FAR char *next_segment;
@@ -1019,24 +1019,30 @@ static int tmpfs_find_object(FAR struct tmpfs_s *fs,
 
   if (parent)
     {
-      /* Get exclusive access to the parent and increment the reference
-       * count on the object.
-       */
+      if (tdo != NULL)
+        {
+          /* Get exclusive access to the parent and increment the reference
+           * count on the object.
+           */
 
-      tmpfs_lock_directory(tdo);
-      tdo->tdo_refs++;
+          tmpfs_lock_directory(tdo);
+          tdo->tdo_refs++;
+        }
 
       *parent = tdo;
     }
 
   if (object)
     {
-      /* Get exclusive access to the object and increment the reference
-       * count on the object.
-       */
+      if (to != NULL)
+        {
+          /* Get exclusive access to the object and increment the reference
+           * count on the object.
+           */
 
-      tmpfs_lock_object(to);
-      to->to_refs++;
+          tmpfs_lock_object(to);
+          to->to_refs++;
+        }
 
       *object = to;
     }
@@ -2086,7 +2092,7 @@ static int tmpfs_unlink(FAR struct inode *mountpt, FAR const char *relpath)
 {
   FAR struct tmpfs_s *fs;
   FAR struct tmpfs_directory_s *tdo;
-  FAR struct tmpfs_file_s *tfo;
+  FAR struct tmpfs_file_s *tfo = NULL;
   FAR const char *name;
   int ret;
 
@@ -2112,6 +2118,8 @@ static int tmpfs_unlink(FAR struct inode *mountpt, FAR const char *relpath)
     {
       goto errout_with_lock;
     }
+
+  DEBUGASSERT(tfo != NULL);
 
   /* Get the file name from the relative path */
 

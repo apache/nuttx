@@ -1,10 +1,10 @@
 /****************************************************************************
- * libc/math/lib_libexpi.c
+ * libc/math/lib_libexpif.c
  *
  * This file is a part of NuttX:
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
- *   Ported by: Darcy Gong
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Ported by: Darcy Gong/Gregory Nutt
  *
  * It derives from the Rhombs OS math library by Nick Johnson which has
  * a compatibile, MIT-style license:
@@ -43,58 +43,56 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define M_E2    (M_E    * M_E)
-#define M_E4    (M_E2   * M_E2)
-#define M_E8    (M_E4   * M_E4)
-#define M_E16   (M_E8   * M_E8)
-#define M_E32   (M_E16  * M_E16)
-#define M_E64   (M_E32  * M_E32)
-#define M_E128  (M_E64  * M_E64)
-#define M_E256  (M_E128 * M_E128)
-#define M_E512  (M_E256 * M_E256)
+#define M_E2     (M_E   * M_E)
+#define M_E4     (M_E2  * M_E2)
+#define M_E8     (M_E4  * M_E4)
+#define M_E16    (M_E8  * M_E8)
+#define M_E32    (M_E16 * M_E16)
+#define M_E64    (M_E32 * M_E32)
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static const double g_expi_square_tbl[] =
+/* Values above M_E64 will never be used since it’s larger than FLT_MAX
+ *(3.402823e+38).
+ */
+
+static const float g_expif_square_tbl[] =
 {
-  M_E,          /* e^1 */
-  M_E2,         /* e^2 */
-  M_E4,         /* e^4 */
-  M_E8,         /* e^8 */
-  M_E16,        /* e^16 */
-  M_E32,        /* e^32 */
-  M_E64,        /* e^64 */
-  M_E128,       /* e^128 */
-  M_E256,       /* e^256 */
-  M_E512        /* e^512 */
+  (float)M_E,    /* e^1 */
+  (float)M_E2,   /* e^2 */
+  (float)M_E4,   /* e^4 */
+  (float)M_E8,   /* e^8 */
+  (float)M_E16,  /* e^16 */
+  (float)M_E32,  /* e^32 */
+  (float)M_E64   /* e^64 */
 };
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-double lib_expi(size_t n)
+float lib_expif(size_t n)
 {
   size_t i;
-  double val;
+  float val;
 
-  /* The largest calculable value for n is floor(ln(DBL_MAX)) */
+  /* The largest calculable value for n is floor(ln(FLT_MAX)) */
 
-  if (n > 709)
+  if (n > 88)
     {
-      return INFINITY;
+      return INFINITY_F;
     }
 
-  val = 1.0;
+  val = 1.0F;
 
   for (i = 0; n != 0; i++)
     {
       if ((n & (1 << i)) != 0)
         {
           n   &= ~(1 << i);
-          val *= g_expi_square_tbl[i];
+          val *= g_expif_square_tbl[i];
         }
     }
 

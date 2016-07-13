@@ -95,9 +95,10 @@ static int stm32_oneshot_handler(int irq, void *context)
    * Disable the TC now and disable any further interrupts.
    */
 
+  STM32_TIM_SETISR(oneshot->tch, NULL, 0);
+  STM32_TIM_DISABLEINT(oneshot->tch, 0);
   STM32_TIM_SETMODE(oneshot->tch, STM32_TIM_MODE_DISABLED);
   STM32_TIM_ACKINT(oneshot->tch, 0);
-  STM32_TIM_DISABLEINT(oneshot->tch, 0);
 
   /* The timer is no longer running */
 
@@ -351,6 +352,7 @@ int stm32_oneshot_cancel(struct stm32_oneshot_s *oneshot,
   /* Now we can disable the interrupt and stop the timer. */
 
   STM32_TIM_DISABLEINT(oneshot->tch, 0);
+  STM32_TIM_SETISR(oneshot->tch, NULL, 0);
   STM32_TIM_SETMODE(oneshot->tch, STM32_TIM_MODE_DISABLED);
 
   oneshot->running = false;

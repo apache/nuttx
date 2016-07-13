@@ -937,6 +937,7 @@ o Network (net/, drivers/net)
                  LM3S         NO                      NO
                  TM4C         YES                     YES
                eZ80           NO                      NO
+               Kinetis        YES                     YES (not tested)
                LPC17xx        YES                     YES (not tested)
                LPC43xx        YES                     YES (not tested)
                DMxxx NIC      NO                      NO

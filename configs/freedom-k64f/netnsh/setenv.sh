@@ -1,5 +1,5 @@
 #!/bin/bash
-# configs/freedom-k64f/nsh/setenv.sh
+# configs/freedom-k64f/netnsh/setenv.sh
 #
 #   Copyright (C) 2016 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -69,7 +69,7 @@ export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/GNU Tools ARM Embedded/4.9
 
 # This is the Cygwin path to the location where I build the buildroot
 # toolchain.
-# export TOOLCHAIN_BIN="${WD}/../buildroot/build_arm_nofpu/staging_dir/bin"
+#export TOOLCHAIN_BIN="${WD}/../buildroot/build_arm_nofpu/staging_dir/bin"
 
 # Add the path to the toolchain to the PATH varialble
 export PATH="${TOOLCHAIN_BIN}:/sbin:/usr/sbin:${PATH_ORIG}"

@@ -301,6 +301,7 @@ enum sam_epstate_e
   USBHS_EPSTATE_STALLED,      /* Endpoint is stalled */
   USBHS_EPSTATE_IDLE,         /* Endpoint is idle (i.e. ready for transmission) */
   USBHS_EPSTATE_SENDING,      /* Endpoint is sending data */
+  USBHS_EPSTATE_SENDING_DMA,  /* Endpoint is sending data via DMA */
   USBHS_EPSTATE_NBUSYBK,      /* Endpoint DMA complete, waiting for NBUSYBK==0 */
   USBHS_EPSTATE_RECEIVING,    /* Endpoint is receiving data */
                               /* --- Endpoint 0 Only --- */
@@ -1006,7 +1007,7 @@ static void sam_dma_wrsetup(struct sam_usbdev_s *priv, struct sam_ep_s *privep,
 
   /* Switch to the sending state */
 
-  privep->epstate   = USBHS_EPSTATE_SENDING;
+  privep->epstate   = USBHS_EPSTATE_SENDING_DMA;
   privreq->inflight = 0;
 
   /* Get the endpoint number */
@@ -1211,16 +1212,23 @@ static void sam_req_complete(struct sam_ep_s *privep, int16_t result)
 
       privreq->req.result = result;
 
-      /* Callback to the request completion handler */
-
-      privreq->flink = NULL;
-      privreq->req.callback(&privep->ep, &privreq->req);
-
-      /* Reset the endpoint state and restore the stalled indication */
+      /* Reset the endpoint state and restore the stalled indication.
+       *
+       * At least the USB class CDC/ACM calls the function sam_ep_submit within
+       * the callback. This function uses sam_req_write or sam_req_read to process
+       * the request, both functions can change the state. Therefore it is verry
+       * important to set the state to USBHS_EPSTATE_IDLE before the callback is
+       * called.
+       */
 
       privep->epstate   = USBHS_EPSTATE_IDLE;
       privep->zlpneeded = false;
       privep->zlpsent   = false;
+
+      /* Callback to the request completion handler */
+
+      privreq->flink = NULL;
+      privreq->req.callback(&privep->ep, &privreq->req);
     }
 }
 
@@ -2497,7 +2505,8 @@ static void sam_dma_interrupt(struct sam_usbdev_s *priv, int epno)
 
       /* Were we sending?  Or receiving? */
 
-      if (privep->epstate == USBHS_EPSTATE_SENDING)
+      if (privep->epstate == USBHS_EPSTATE_SENDING ||
+          privep->epstate == USBHS_EPSTATE_SENDING_DMA)
         {
           uint32_t nbusybk;
           uint32_t byct;
@@ -2923,7 +2932,8 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
        */
 
       if (privep->epstate == USBHS_EPSTATE_RECEIVING ||
-          privep->epstate == USBHS_EPSTATE_SENDING)
+          privep->epstate == USBHS_EPSTATE_SENDING ||
+          privep->epstate == USBHS_EPSTATE_SENDING_DMA)
         {
           sam_req_complete(privep, -EPROTO);
         }

@@ -49,6 +49,109 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
+/* Application Configuration ********************************************************/
+
+/* Assume we have everything */
+
+#define HAVE_PROC        1
+#define HAVE_MMCSD       1
+#define HAVE_AUTOMOUNTER 1
+#define HAVE_USBDEV      1
+
+/* Automount procfs */
+
+#if !defined(CONFIG_FS_PROCFS)
+#  undef HAVE_PROC
+#endif
+
+#if defined(HAVE_PROC) && defined(CONFIG_DISABLE_MOUNTPOINT)
+#  warning Mountpoints disabled.  No procfs support
+#  undef HAVE_PROC
+#endif
+
+#if defined(CONFIG_NSH_PROC_MOUNTPOINT)
+#  define PROCFS_MOUNTPOUNT CONFIG_NSH_PROC_MOUNTPOINT
+#else
+#  define PROCFS_MOUNTPOUNT "/proc"
+#endif
+
+/* SD card support */
+
+#define MMCSD_SLOTNO 0
+
+/* Can't support MMC/SD features if mountpoints are disabled or if SDHC support
+ * is not enabled.
+ */
+
+#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_KINETIS_SDHC)
+#  undef HAVE_MMCSD
+#endif
+
+#ifdef HAVE_MMCSD
+#  if defined(CONFIG_NSH_MMCSDSLOTNO) && CONFIG_NSH_MMCSDSLOTNO != 0
+#    error Only one MMC/SD slot, slot 0
+#  endif
+
+#  ifdef CONFIG_NSH_MMCSDMINOR
+#    define MMSCD_MINOR CONFIG_NSH_MMCSDMINOR
+#  else
+#    define MMSCD_MINOR 0
+#  endif
+
+/* We expect to receive GPIO interrupts for card insertion events */
+
+#  ifndef CONFIG_GPIO_IRQ
+#    error "CONFIG_GPIO_IRQ required for card detect interrupt"
+#  endif
+
+#  ifndef CONFIG_KINETIS_PORTEINTS
+#    error "CONFIG_KINETIS_PORTEINTS required for card detect interrupt"
+#  endif
+
+#endif
+
+/* Automounter */
+
+#if !defined(CONFIG_FS_AUTOMOUNTER) || !defined(HAVE_MMCSD)
+#  undef HAVE_AUTOMOUNTER
+#  undef CONFIG_FRDMK64F_SDHC_AUTOMOUNT
+#endif
+
+#ifndef CONFIG_FRDMK64F_SDHC_AUTOMOUNT
+#  undef HAVE_AUTOMOUNTER
+#endif
+
+/* Automounter defaults */
+
+#ifdef HAVE_AUTOMOUNTER
+
+#  ifndef CONFIG_FRDMK64F_SDHC_AUTOMOUNT_FSTYPE
+#    define CONFIG_FRDMK64F_SDHC_AUTOMOUNT_FSTYPE "vfat"
+#  endif
+
+#  ifndef CONFIG_FRDMK64F_SDHC_AUTOMOUNT_BLKDEV
+#    define CONFIG_FRDMK64F_SDHC_AUTOMOUNT_BLKDEV "/dev/mmcds0"
+#  endif
+
+#  ifndef CONFIG_FRDMK64F_SDHC_AUTOMOUNT_MOUNTPOINT
+#    define CONFIG_FRDMK64F_SDHC_AUTOMOUNT_MOUNTPOINT "/mnt/sdcard0"
+#  endif
+
+#  ifndef CONFIG_FRDMK64F_SDHC_AUTOMOUNT_DDELAY
+#    define CONFIG_FRDMK64F_SDHC_AUTOMOUNT_DDELAY 1000
+#  endif
+
+#  ifndef CONFIG_FRDMK64F_SDHC_AUTOMOUNT_UDELAY
+#    define CONFIG_FRDMK64F_SDHC_AUTOMOUNT_UDELAY 2000
+#  endif
+#endif /* HAVE_AUTOMOUNTER */
+
+/* Can't support USB features if USB is not enabled */
+
+#ifndef CONFIG_USBDEV
+#  undef HAVE_USBDEV
+#endif
+
 /* How many SPI modules does this chip support? The LM3S6918 supports 2 SPI
  * modules (others may support more -- in such case, the following must be
  * expanded).
@@ -66,6 +169,18 @@
  * the SD Host Controller (SDHC) signals of the MCU. This slot will accept micro
  * format SD memory cards. The SD card detect pin (PTE6) is an open switch that
  * shorts with VDD when card is inserted.
+ *
+ *   ------------ ------------- --------
+ *    SD Card Slot Board Signal  K64F Pin
+ *    ------------ ------------- --------
+ *    DAT0         SDHC0_D0      PTE0
+ *    DAT1         SDHC0_D1      PTE1
+ *    DAT2         SDHC0_D2      PTE5
+ *    CD/DAT3      SDHC0_D3      PTE4
+ *    CMD          SDHC0_CMD     PTE3
+ *    CLK          SDHC0_DCLK    PTE2
+ *    SWITCH       D_CARD_DETECT PTE6
+ *    ------------ ------------- --------
  *
  * There is no Write Protect pin available to the K64F.
  */
@@ -91,13 +206,13 @@
  *   LED    K64
  *   ------ -------------------------------------------------------
  *   RED    PTB22/SPI2_SOUT/FB_AD29/CMP2_OUT
- *   BLUE   PTB21/SPI2_SCK/FB_AD30/CMP1_OUT
  *   GREEN  PTE26/ENET_1588_CLKIN/UART4_CTS_b/RTC_CLKOUT/USB0_CLKIN
+ *   BLUE   PTB21/SPI2_SCK/FB_AD30/CMP1_OUT
  */
 
 #define GPIO_LED_R         (GPIO_LOWDRIVE | GPIO_OUTPUT_ONE | PIN_PORTB | PIN22)
-#define GPIO_LED_G         (GPIO_LOWDRIVE | GPIO_OUTPUT_ONE | PIN_PORTB | PIN21)
-#define GPIO_LED_B         (GPIO_LOWDRIVE | GPIO_OUTPUT_ONE | PIN_PORTE | PIN26)
+#define GPIO_LED_G         (GPIO_LOWDRIVE | GPIO_OUTPUT_ONE | PIN_PORTE | PIN26)
+#define GPIO_LED_B         (GPIO_LOWDRIVE | GPIO_OUTPUT_ONE | PIN_PORTB | PIN21)
 
 /************************************************************************************
  * Public data
@@ -139,6 +254,90 @@ void weak_function k64_usbinitialize(void);
 
 #if defined(CONFIG_LIB_BOARDCTL) || defined(CONFIG_BOARD_INITIALIZE)
 int k64_bringup(void);
+#endif
+
+/****************************************************************************
+ * Name: k64_sdhc_initialize
+ *
+ * Description:
+ *   Inititialize the SDHC SD card slot
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_MMCSD
+int k64_sdhc_initialize(void);
+#else
+#  define k64_sdhc_initialize() (OK)
+#endif
+
+/************************************************************************************
+ * Name: k64_cardinserted
+ *
+ * Description:
+ *   Check if a card is inserted into the SDHC slot
+ *
+ ************************************************************************************/
+
+#ifdef HAVE_AUTOMOUNTER
+bool k64_cardinserted(void);
+#else
+#  define k64_cardinserted() (false)
+#endif
+
+/************************************************************************************
+ * Name: k64_writeprotected
+ *
+ * Description:
+ *   Check if the card in the MMC/SD slot is write protected
+ *
+ ************************************************************************************/
+
+#ifdef HAVE_AUTOMOUNTER
+bool k64_writeprotected(void);
+#else
+#  define k64_writeprotected() (false)
+#endif
+
+/************************************************************************************
+ * Name:  k64_automount_initialize
+ *
+ * Description:
+ *   Configure auto-mounter for the configured SDHC slot
+ *
+ * Input Parameters:
+ *   None
+ *
+ *  Returned Value:
+ *    None
+ *
+ ************************************************************************************/
+
+#ifdef HAVE_AUTOMOUNTER
+void k64_automount_initialize(void);
+#endif
+
+/************************************************************************************
+ * Name:  k64_automount_event
+ *
+ * Description:
+ *   The SDHC card detection logic has detected an insertion or removal event.  It
+ *   has already scheduled the MMC/SD block driver operations.  Now we need to
+ *   schedule the auto-mount event which will occur with a substantial delay to make
+ *   sure that everything has settle down.
+ *
+ * Input Parameters:
+ *   inserted - True if the card is inserted in the slot.  False otherwise.
+ *
+ *  Returned Value:
+ *    None
+ *
+ *  Assumptions:
+ *    Interrupts are disabled.
+ *
+ ************************************************************************************/
+
+#ifdef HAVE_AUTOMOUNTER
+void k64_automount_event(bool inserted);
 #endif
 
 #endif /* __ASSEMBLY__ */

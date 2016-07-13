@@ -83,12 +83,12 @@
 #define PIN_FTM0_CH1_1           (PIN_ALT3   | PIN_PORTA | PIN4)
 #define PIN_NMI                  (PIN_ALT7   | PIN_PORTA | PIN4)
 #define PIN_FTM0_CH2_1           (PIN_ALT3   | PIN_PORTA | PIN5)
-#if 0
+#ifdef CONFIG_KINETIS_ENET_NORXER
+#  define PIN_RMII0_RXER         (GPIO_PULLDOWN | PIN_PORTA | PIN5)
+#  define PIN_MII0_RXER          (GPIO_PULLDOWN | PIN_PORTA | PIN5)
+#else
 #  define PIN_RMII0_RXER         (PIN_ALT4   | PIN_PORTA | PIN5)
 #  define PIN_MII0_RXER          (PIN_ALT4   | PIN_PORTA | PIN5)
-#else
-#  define PIN_RMII0_RXER         (GPIO_PULLDOWN | PIN_PORTA | PIN5)
-# define PIN_MII0_RXER           (GPIO_PULLDOWN | PIN_PORTA | PIN5)
 #endif
 #define PIN_CMP2_OUT_1           (PIN_ALT5   | PIN_PORTA | PIN5)
 #define PIN_I2S0_RX_BCLK_1       (PIN_ALT6   | PIN_PORTA | PIN5)
@@ -174,7 +174,11 @@
 #define PIN_TSI0_CH0             (PIN_ANALOG | PIN_PORTB | PIN0)
 #define PIN_I2C0_SCL_1           (PIN_ALT2   | PIN_PORTB | PIN0)
 #define PIN_FTM1_CH0_3           (PIN_ALT3   | PIN_PORTB | PIN0)
-#define PIN_RMII0_MDIO           (PIN_ALT4   | PIN_PORTB | PIN0)
+#ifdef CONFIG_KINETIS_ENET_MDIOPULLUP
+#  define PIN_RMII0_MDIO         (PIN_ALT4_PULLUP | PIN_PORTB | PIN0)
+#else
+#  define PIN_RMII0_MDIO         (PIN_ALT4   | PIN_PORTB | PIN0)
+#endif
 #define PIN_MII0_MDIO            (PIN_ALT4   | PIN_PORTB | PIN0)
 #define PIN_FTM1_QD_PHA_3        (PIN_ALT6   | PIN_PORTB | PIN0)
 #define PIN_ADC0_SE9             (PIN_ANALOG | PIN_PORTB | PIN1)

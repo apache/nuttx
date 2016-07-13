@@ -275,19 +275,6 @@ tools\mkdeps$(HOSTEXEEXT):
 # setting up symbolic links with 'generic' directory names to specific,
 # configured directories.
 #
-# Link the apps\include directory to include\apps
-
-include\apps: Make.defs
-ifneq ($(APPDIR),)
-	@echo LN: include\apps $(APPDIR)\include
-ifeq ($(CONFIG_WINDOWS_MKLINK),y)
-	$(Q) /user:administrator mklink /d include\apps $(APPDIR)\include
-else
-	$(Q) xcopy $(APPDIR)\include include\apps /c /q /s /e /y /i
-	$(Q) echo FAKELNK > include\apps\.fakelnk
-endif
-endif
-
 # Link the arch\<arch-name>\include directory to include\arch
 
 include\arch: Make.defs
@@ -347,7 +334,7 @@ else
 endif
 endif
 
-dirlinks: include\arch include\arch\board include\arch\chip $(ARCH_SRC)\board $(ARCH_SRC)\chip include\apps
+dirlinks: include\arch include\arch\board include\arch\chip $(ARCH_SRC)\board $(ARCH_SRC)\chip
 
 # context
 #
@@ -374,7 +361,6 @@ clean_context:
 	$(call DELDIR, include\arch)
 	$(call DELDIR, $(ARCH_SRC)\board)
 	$(call DELDIR, $(ARCH_SRC)\chip)
-	$(call DELDIR, include\apps)
 
 # check_context
 #
