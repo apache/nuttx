@@ -114,11 +114,14 @@ static void k64_mediachange(void)
    */
 
   inserted = !kinetis_gpioread(GPIO_SD_CARDDETECT);
+  mcinfo("inserted: %s\n", inserted ? "Yes" : "No");
 
   /* Has the pin changed state? */
 
   if (inserted != g_sdhc.inserted)
     {
+      mcinfo("Media change: %d->%d\n",  g_sdhc.inserted, inserted);
+
       /* Yes.. perform the appropriate action (this might need some debounce). */
 
       g_sdhc.inserted = inserted;
@@ -127,7 +130,7 @@ static void k64_mediachange(void)
 #ifdef CONFIG_FRDMK64F_SDHC_AUTOMOUNT
       /* Let the automounter know about the insertion event */
 
-      k64_automount_event(SDHC0_SLOTNO, k64_cardinserted());
+      k64_automount_event(k64_cardinserted());
 #endif
     }
 }
@@ -162,9 +165,10 @@ int k64_sdhc_initialize(void)
 
   /* Configure GPIO pins */
 
+  kinetis_pinconfig(GPIO_SD_CARDDETECT);
+
   /* Attached the card detect interrupt (but don't enable it yet) */
 
-  kinetis_pinconfig(GPIO_SD_CARDDETECT);
   kinetis_pinirqattach(GPIO_SD_CARDDETECT, k64_cdinterrupt);
 
   /* Configure the write protect GPIO -- None */
@@ -215,7 +219,15 @@ int k64_sdhc_initialize(void)
 #ifdef HAVE_AUTOMOUNTER
 bool k64_cardinserted(void)
 {
-  return !kinetis_gpioread(GPIO_SD_CARDDETECT);
+  bool inserted;
+
+  /* Get the current value of the card detect pin.  This pin is pulled up on
+   * board.  So low means that a card is present.
+   */
+
+  inserted = !kinetis_gpioread(GPIO_SD_CARDDETECT);
+  mcinfo("inserted: %s\n", inserted ? "Yes" : "No");
+  return inserted;
 }
 #endif
 

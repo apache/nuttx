@@ -853,6 +853,9 @@ Status
 
   2016-07-13:  Add SD automounter logic; broke out SDHC logic into a separate
     file.  The nsh configuration now has SDHC enabled be default.  Does not
-    yet work.  You might want to disable SDHC and MMC/SD if you are using
+    yet work.  The basic problem seems to be that it does not sense the
+    presence of the SD card on PTE6.  No interrupts are generated when the
+    SD card is inserted or removed.  You might want to disable SDHC and
+    MMC/SD if you are using
     this configuration.
  

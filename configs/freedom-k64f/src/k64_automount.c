@@ -149,7 +149,7 @@ static int k64_attach(FAR const struct automount_lower_s *lower,
   /* Recover references to our structure */
 
   config = (FAR struct k64_automount_config_s *)lower;
-  DEBUGASSERT(config && config->state);
+  DEBUGASSERT(config != NULL && config->state != NULL);
 
   state = config->state;
 
@@ -188,7 +188,7 @@ static void k64_enable(FAR const struct automount_lower_s *lower, bool enable)
   /* Recover references to our structure */
 
   config = (FAR struct k64_automount_config_s *)lower;
-  DEBUGASSERT(config && config->state);
+  DEBUGASSERT(config != NULL && config->state != NULL);
 
   state = config->state;
 
@@ -231,11 +231,6 @@ static void k64_enable(FAR const struct automount_lower_s *lower, bool enable)
 
 static bool k64_inserted(FAR const struct automount_lower_s *lower)
 {
-  FAR const struct k64_automount_config_s *config;
-
-  config = (FAR struct k64_automount_config_s *)lower;
-  DEBUGASSERT(config && config->state);
-
   return k64_cardinserted();
 }
 

@@ -8,7 +8,7 @@ if ARCH_BOARD_FREEDOM_K64F
 config FRDMK64F_SDHC_AUTOMOUNT
 	bool "SDHC automounter"
 	default n
-	depends on FS_AUTOMOUNTER && SAMA5_SDHC
+	depends on FS_AUTOMOUNTER && KINETIS_SDHC
 
 if FRDMK64F_SDHC_AUTOMOUNT
 
@@ -22,7 +22,7 @@ config FRDMK64F_SDHC_AUTOMOUNT_BLKDEV
 
 config FRDMK64F_SDHC_AUTOMOUNT_MOUNTPOINT
 	string "SDHC mount point"
-	default "/mnt/sdcard0"
+	default "/mnt/sdcard"
 
 config FRDMK64F_SDHC_AUTOMOUNT_DDELAY
 	int "SDHC debounce delay (milliseconds)"
@@ -33,5 +33,4 @@ config FRDMK64F_SDHC_AUTOMOUNT_UDELAY
 	default 2000
 
 endif # FRDMK64F_SDHC_AUTOMOUNT
-
-endif
+endif # ARCH_BOARD_FREEDOM_K64F
