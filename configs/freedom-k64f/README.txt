@@ -843,8 +843,8 @@ Status
     error.
 
   2016-07-12:  Added support for the KSZ8081 PHY and added the netnsh
-    configuration.  The network is basically functional, but a lot more
-    testing is needed to confirm that.
+    configuration.  The network is basically functional.  More testing is
+    needed, but I have not seen any obvious network failures.
 
     In testing, I notice a strange thing.  If I run at full optimization the
     code runs (albeit with bugs-to-be-solved).  But with no optimization or
