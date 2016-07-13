@@ -851,3 +851,8 @@ Status
     even at -O1, the system fails to boot.  This seems to be related to the
     watchdog timer.
 
+  2016-07-13:  Add SD automounter logic; broke out SDHC logic into a separate
+    file.  The nsh configuration now has SDHC enabled be default.  Does not
+    yet work.  You might want to disable SDHC and MMC/SD if you are using
+    this configuration.
+ 

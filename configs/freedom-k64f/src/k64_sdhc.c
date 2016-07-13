@@ -63,6 +63,7 @@
 #include <stdio.h>
 #include <debug.h>
 #include <errno.h>
+#include <debug.h>
 
 #include <nuttx/sdio.h>
 #include <nuttx/mmcsd.h>
@@ -157,7 +158,6 @@ static int k64_cdinterrupt(int irq, FAR void *context)
 
 int k64_sdhc_initialize(void)
 {
-  struct k64_sdhc_state_s *state = &g_sdhc;
   int ret;
 
   /* Configure GPIO pins */

@@ -43,6 +43,7 @@
 #include <sys/mount.h>
 #include <syslog.h>
 #include <errno.h>
+#include <debug.h>
 
 #include "freedom-k64f.h"
 
@@ -82,10 +83,10 @@ int k64_bringup(void)
 #ifdef HAVE_MMCSD
   /* Initialize the SDHC driver */
 
-  ret = k64_sdhc_initialize(0);
+  ret = k64_sdhc_initialize();
   if (ret < 0)
     {
-      mcerr("ERROR: k64_sdhc_initialize(%d,%d) failed: %d\n", HSMCI0_SLOTNO, 0, ret);
+      mcerr("ERROR: k64_sdhc_initialize() failed: %d\n", ret);
     }
 
 #ifdef CONFIG_FRDMK64F_SDHC_MOUNT
