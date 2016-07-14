@@ -911,9 +911,14 @@ Status
 
   2016-07-11:  Received hardware today and the board came up on the very
     first try.  That does not happen often.  At this point, the very basic
-    NSH configuration is working and LEDs are working.  The only odd
-    behavior that I see is that pressing SW3 causes an unexpected interrupt
-    error.
+    NSH configuration is working and LEDs are working.
+
+    The only odd behavior that I see is that pressing SW3 causes an NMI
+    interrupt (followed by a crash):
+
+      kinetis_nmi: PANIC!!! NMI received
+
+    I don't yet understand why this is.
 
   2016-07-12:  Added support for the KSZ8081 PHY and added the netnsh
     configuration.  The network is basically functional.  More testing is
@@ -929,6 +934,10 @@ Status
     yet work.  The basic problem seems to be that it does not sense the
     presence of the SD card on PTE6.  No interrupts are generated when the
     SD card is inserted or removed.  You might want to disable SDHC and
-    MMC/SD if you are using
-    this configuration.
+    MMC/SD if you are using this configuration.
+
+    The nsh configuration now builds successfully with USB device enabled.
+    USB device, however, has not yet been tested.  I have not yet looked
+    into 48MHz clocking requirements.
+
  
