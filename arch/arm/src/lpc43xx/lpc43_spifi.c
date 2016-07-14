@@ -785,6 +785,7 @@ static ssize_t lpc43_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t 
 
   FAR struct lpc43_dev_s *priv = (FAR struct lpc43_dev_s *)dev;
   FAR uint8_t *dest;
+  int ret;
 
   finfo("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
 
@@ -792,19 +793,17 @@ static ssize_t lpc43_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t 
 
   dest = SPIFI_BASE + (startblock << SPIFI_BLKSHIFT);
 
-#if defined(CONFIG_SPIFI_SECTOR512)
   /* Write all of the erase blocks to FLASH */
 
-  ret = lpc43_pagewrite(priv, dest, buffer, nblocks << SPIFI_512SHIFT);
+  ret = lpc43_pagewrite(priv, dest, buffer, nblocks << SPIFI_BLKSHIFT);
   if (ret < 0)
     {
       ferr("ERROR: lpc43_pagewrite failed: %d\n", ret);
       return ret;
     }
-#endif
 
-  lpc43_dumpbuffer(__func__, buffer, nblocks << SPIFI_BLKSHIFT)
-  return nblocks;
+  lpc43_dumpbuffer(__func__, buffer, nblocks << SPIFI_BLKSHIFT);
+  return (int)nblocks;
 
 #endif
 }
