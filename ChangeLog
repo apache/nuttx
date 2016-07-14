@@ -12295,3 +12295,83 @@
 	  Matthias Renner (2016-07-08).
 	* drivers/pipe: Add missing configuration for pipe ring buffer size.
 	  From Frank Benkert (2016-07-08).
+	* STM32L4: Fix incorrect clock setup for LPTIM1.  From ziggurat29
+	  (2016-07-08).
+	* nucleo-l476rg and stm32lf76vg-disco: Define timer clock frequencies on
+	  STM32L4-based boards.  From ziggurat29 (2016-07-08).
+	* STM32L4: Add support for tickless OS, and incidentally timers, pwm,
+	  oneshot, free-running....  From ziggurat29 (2016-07-08).
+	* SAM3/4 I2C: Fix reversed logic in twi_startmessage().  From Wolfgang
+	  Reissnegger (2016-07-09).
+	* VFS ioctl().  Per comments from David Sidrane, file_ioctl() should not
+	  return succeed if the ioctl method is not supported.  It probably
+	  should return ENOTTY in that case (2016-07-09).
+	* libm: This change should significantly improve the performance of
+	  single precision floating point math library functions. The vast
+	  majority of changes have to do with preventing the compiler from
+	  needlessly promoting floats to doubles, performing the calculation
+	  with doubles, only to demote the result to float. These changes only
+	  affect the math lib functions that return float. From David Alessio
+	  (2016-07-11).
+	* STM32F4 Discovery: Add FPU support for ostest for the STM32F4Discovery
+	  platform. From David Alessio (2016-07-11).
+	* Build system:  Remove the includes/apps link to apps/include.  It is
+	  no longer used.  From Sebastien Lorquet (2016-07-11).
+	* printf(): If there are no streams, let printf() fall back to use
+	  syslog() for output (2016-07-11).
+	* Qemu-i486: Fix qemu-i486/ostest/Make.defs test for M32.  From Heath
+	  Petersen (2016-07-12).
+	* UART 16550: Handle when CONFIG_SERIAL_UART_ARCH_IOCTL is not enabled.
+	  From Heath Petersen (2016-07-12).
+	* Kinetis Ethernet:  Add support for the KSZ8081 PHY (2016-07-12).
+	* SST26 Driver: Before accessing the sst26 flash, the "Global Unlock"
+	  command must me executed, which I do in the sst26 driver.  BUT re-
+	  reading the datasheet, the WREN instruction is required to enable the
+	  execution of this command. This was not done. I have no idea how the
+	  driver currently works except by chance. The writes should never
+	  happen at all, the flash is half-enabled!  From Sebastien Lorquet
+	  (2016-07-12).
+	* Freedom K64F: Add a networking NSH configuration. (2016-07-12).
+	* N25Qxx Driver: Alter the notion of 'blocksize' to be equivalent to
+	  'flash write page size' in order to align with assumptions in the
+	  smartfs driver (at least, maybe other things do as well).  Correct a
+	  bug that was previously masked by having blocksize=eraseblocksize
+	  which would cause buffer overflows and delicious hardfaults.  Trivial
+	  spelling changes in comments, etc.  From ziggurat29 (2016-07-12).
+	* STM32L476 Discovery: Update stm32l476 disco to include init code for
+	  smartfs and nxffs for cases where those fs are included in build.
+	  From ziggurat29 (2016-07-12).
+	* Kinetis Ethernet and Freedom-K64F:  Freedcom-K64F PHY address was
+	  wrong.  Modified Ethernet driver to try all PHY addresses and then
+	  only fail if the driver cannot find a usable PHY address.  MDIO pin
+	  must have an internal pull-up on the Freedom-K64F (2016-07-12).
+	* Kinetis Ethernet:  Add support for CONFIG_NET_NOINTS (2016-07-12).
+	* SmartFS: Fix a 32-byte memory leak.  From Ken Pettit (2016-07-12).
+	* Freedom-K64F: SDHC is now enabled in the nsh configuration (but does
+	  not work)Add hooks for automounter; Change NSH configuration to use
+	  Windows (2016-07-13).
+	* SAMV7 USBHS Device:  This change solves a problem which causes data
+	  loss while sending data via USB. This problem is caused by an incorrect
+	  handling of the endpoint state in the USB driver sam_usbdevhs.  This
+	  leads under some circumstances to situations in which an DMA transfer
+	  is setup while a previous DMA transfer is currently active. Amongst
+	  other things I introduced the new endpoint state USBHS_EPSTATE_SENDING_DMA
+	  for the fix.  To reproduce the problem, I used a program which send as
+	  many data as possible via a CDC/ACM device and verified the received
+	  data on the PC.  From Stefan Kolb (2016-07-13).
+	* STM32: Fix bug in oneshot timer.  From Max Neklyudov (2016-07-13).
+	* STM32L4: Port foward bugfix from stm32 of oneshot timer.  From
+	  ziggurat29 (2016-07-13).
+	* STM32 and EFM32: I'm using syslog through ITM. In this case
+	  syslog_channel function is call before RAM initialisation in
+	  stm32_clockconfig. But syslog channel uses a global variable that is
+	  reset to default by the RAM initialization.  From Pierre-noel
+	  Bouteville (2016-07-14).
+	* LPC43xx SPIFI: If CONFIG_SPIFI_SECTOR512 undefined, lpc43_bwrite
+	  doesn't do actual write (probably copy/paste errors). Still not sure
+	  about current state of lpc43_spifi implementation, but for me NXFFS
+	  works with this patch.  From Vytautas Lukenskas (2016-07-14).
+	* SMART MTD layer: Fixes freesector logic error when sectorsPerBlk=256,
+	  adds DEBUGASSERT for invalid geometry and additional memory debug
+	  logic.  Also fixes the dangling pointer on error bug.  From Ken
+	  Pettit (2016-07-14).
