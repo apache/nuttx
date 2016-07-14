@@ -282,6 +282,12 @@ void __start(void)
 
   showprogress('C');
 
+#ifdef CONFIG_ARMV7M_ITMSYSLOG
+  /* Perform ARMv7-M ITM SYSLOG initialization */
+
+  itm_syslog_initialize();
+#endif
+
   /* Perform early serial initialization */
 
 #ifdef USE_EARLYSERIALINIT
