@@ -1,7 +1,7 @@
 /****************************************************************************
  *  arch/arm/src/lpc43/lpc43_spifi.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -779,7 +779,7 @@ static ssize_t lpc43_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t 
   lpc43_cachewrite(priv, buffer, startblock, nblocks);
 
   lpc43_dumpbuffer(__func__, buffer, nblocks << SPIFI_512SHIFT)
-  return nblocks;
+  return (ssize_t)nblocks;
 
 #else
 
@@ -803,7 +803,7 @@ static ssize_t lpc43_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t 
     }
 
   lpc43_dumpbuffer(__func__, buffer, nblocks << SPIFI_BLKSHIFT);
-  return (int)nblocks;
+  return (ssize_t)nblocks;
 
 #endif
 }
