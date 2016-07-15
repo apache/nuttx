@@ -55,6 +55,21 @@ extern "C"
 #endif
 
 /****************************************************************************
+ * Name: ptmx_minor_free
+ *
+ * Description:
+ *   De-allocate a PTY minor number.
+ *
+ * Assumptions:
+ *   Caller hold the px_exclsem
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PSEUDOTERM_SUSV1
+void ptmx_minor_free(uint8_t minor);
+#endif
+
+/****************************************************************************
  * Name: pty_register
  *
  * Input Parameters:

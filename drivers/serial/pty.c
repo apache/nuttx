@@ -182,6 +182,12 @@ static void pty_destroy(FAR struct pty_devpair_s *devpair)
   (void)file_close_detached(&devpair->pp_slave.pd_src);
   (void)file_close_detached(&devpair->pp_slave.pd_sink);
 
+#ifdef CONFIG_PSEUDOTERM_SUSV1
+  /* Free this minor number so that it can be reused */
+
+  ptmx_minor_free(devpair->pp_minor);
+#endif
+
   /* And free the device structure */
 
   sem_destroy(&devpair->pp_exclsem);

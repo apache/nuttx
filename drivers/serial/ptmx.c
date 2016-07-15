@@ -203,38 +203,6 @@ static int ptmx_minor_allocate(void)
 }
 
 /****************************************************************************
- * Name: ptmx_minor_free
- *
- * Description:
- *   De-allocate a PTY minor number.
- *
- * Assumptions:
- *   Caller hold the px_exclsem
- *
- ****************************************************************************/
-
-static void ptmx_minor_free(uint8_t minor)
-{
-  int index;
-  int bitno;
-
-  /* Free the address by clearing the associated bit in the px_alloctab[]; */
-
-  index = minor >> 5;
-  bitno = minor & 31;
-
-  DEBUGASSERT((g_ptmx.px_alloctab[index] |= (1 << bitno)) != 0);
-  g_ptmx.px_alloctab[index] &= ~(1 << bitno);
-
-  /* Reset the next pointer if the one just released has a lower value */
-
-  if (minor < g_ptmx.px_next)
-    {
-      g_ptmx.px_next = minor;
-    }
-}
-
-/****************************************************************************
  * Name: ptmx_open
  ****************************************************************************/
 
@@ -340,4 +308,36 @@ int ptmx_register(void)
   /* Register the PTMX driver */
 
   return register_driver("/dev/ptmx", &g_ptmx_fops, 0666, NULL);
+}
+
+/****************************************************************************
+ * Name: ptmx_minor_free
+ *
+ * Description:
+ *   De-allocate a PTY minor number.
+ *
+ * Assumptions:
+ *   Caller hold the px_exclsem
+ *
+ ****************************************************************************/
+
+void ptmx_minor_free(uint8_t minor)
+{
+  int index;
+  int bitno;
+
+  /* Free the address by clearing the associated bit in the px_alloctab[]; */
+
+  index = minor >> 5;
+  bitno = minor & 31;
+
+  DEBUGASSERT((g_ptmx.px_alloctab[index] |= (1 << bitno)) != 0);
+  g_ptmx.px_alloctab[index] &= ~(1 << bitno);
+
+  /* Reset the next pointer if the one just released has a lower value */
+
+  if (minor < g_ptmx.px_next)
+    {
+      g_ptmx.px_next = minor;
+    }
 }
