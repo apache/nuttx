@@ -244,6 +244,49 @@ static inline int poll_teardown(FAR struct pollfd *fds, nfds_t nfds, int *count,
  ****************************************************************************/
 
 /****************************************************************************
+ * Function: file_poll
+ *
+ * Description:
+ *   Low-level poll operation based on struc file.  This is used both to (1)
+ *   support detached file, and also (2) by fdesc_poll() to perform all
+ *   normal operations on file descriptors descriptors.
+ *
+ * Input Parameters:
+ *   file     File structure instance
+ *   fds   - The structure describing the events to be monitored, OR NULL if
+ *           this is a request to stop monitoring events.
+ *   setup - true: Setup up the poll; false: Teardown the poll
+ *
+ * Returned Value:
+ *  0: Success; Negated errno on failure
+ *
+ ****************************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+int file_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
+{
+  FAR struct inode *inode;
+  int ret = -ENOSYS;
+
+  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
+  inode = filep->f_inode;
+
+  /* Is a driver registered? Does it support the poll method?
+   * If not, return -ENOSYS
+   */
+
+  if (inode != NULL && inode->u.i_ops != NULL && inode->u.i_ops->poll != NULL)
+    {
+      /* Yes, it does... Setup the poll */
+
+      ret = (int)inode->u.i_ops->poll(filep, fds, setup);
+    }
+
+  return ret;
+}
+#endif
+
+/****************************************************************************
  * Function: fdesc_poll
  *
  * Description:
@@ -265,8 +308,6 @@ static inline int poll_teardown(FAR struct pollfd *fds, nfds_t nfds, int *count,
 int fdesc_poll(int fd, FAR struct pollfd *fds, bool setup)
 {
   FAR struct file *filep;
-  FAR struct inode *inode;
-  int ret = -ENOSYS;
 
   /* Get the file pointer corresponding to this file descriptor */
 
@@ -275,22 +316,14 @@ int fdesc_poll(int fd, FAR struct pollfd *fds, bool setup)
     {
       /* The errno value has already been set */
 
-      return -get_errno();
+      int errorcode = get_errno();
+      DEBUGASSERT(errcode > 0);
+      return -errcode;
     }
 
-  /* Is a driver registered? Does it support the poll method?
-   * If not, return -ENOSYS
-   */
+  /* Let file_poll() do the rest */
 
-  inode = filep->f_inode;
-  if (inode && inode->u.i_ops && inode->u.i_ops->poll)
-    {
-      /* Yes, then setup the poll */
-
-      ret = (int)inode->u.i_ops->poll(filep, fds, setup);
-    }
-
-  return ret;
+  return file_poll(filep, fds, setup);
 }
 #endif
 

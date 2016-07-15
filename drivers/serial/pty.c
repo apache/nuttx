@@ -504,32 +504,6 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_POLL
-/* REVISIT: There is a file_poll() function, but it does not work in this
- * context so the logic is implemented locally as my_file_poll().
- */
-
-static my_file_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
-{
-  FAR struct inode *inode;
-  int ret = -ENOSYS;
-
-  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
-  inode = filep->f_inode;
-
-  /* Is a driver registered? Does it support the poll method?
-   * If not, return -ENOSYS
-   */
-
-  if (inode != NULL && inode->u.i_ops != NULL && inode->u.i_ops->poll != NULL)
-    {
-      /* Yes, then setup the poll */
-
-      ret = (int)inode->u.i_ops->poll(filep, fds, setup);
-    }
-
-  return ret;
-}
-
 static int pty_poll(FAR struct file *filep, FAR struct pollfd *fds,
                         bool setup)
 {
@@ -544,16 +518,13 @@ static int pty_poll(FAR struct file *filep, FAR struct pollfd *fds,
   /* REVISIT: If both POLLIN and POLLOUT are set, might the following logic
    * fail?  Could we not get POLLIN on the sink file and POLLOUT on the source
    * file?
-   *
-   * REVISIT: There is a file_poll() function, but it does not work in this
-   * context so the logic is implemented locally as my_file_poll().
    */
 
   /* POLLIN: Data other than high-priority data may be read without blocking. */
 
   if ((fds->events & POLLIN) != 0)
     {
-      ret = my_file_poll(dev->pd_src, fds, setup);
+      ret = file_poll(dev->pd_src, fds, setup);
     }
 
   if (ret >= OK || ret == -ENOTTY)
@@ -562,7 +533,7 @@ static int pty_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if ((fds->events & POLLOUT) != 0)
         {
-          ret = my_file_poll(dev->pd_sink, fds, setup);
+          ret = file_poll(dev->pd_sink, fds, setup);
         }
     }
 

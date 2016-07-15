@@ -930,6 +930,29 @@ int file_vfcntl(FAR struct file *filep, int cmd, va_list ap);
 #endif
 
 /****************************************************************************
+ * Function: file_poll
+ *
+ * Description:
+ *   Low-level poll operation based on struc file.  This is used both to (1)
+ *   support detached file, and also (2) by fdesc_poll() to perform all
+ *   normal operations on file descriptors descriptors.
+ *
+ * Input Parameters:
+ *   file     File structure instance
+ *   fds   - The structure describing the events to be monitored, OR NULL if
+ *           this is a request to stop monitoring events.
+ *   setup - true: Setup up the poll; false: Teardown the poll
+ *
+ * Returned Value:
+ *  0: Success; Negated errno on failure
+ *
+ ****************************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+int file_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup);
+#endif
+
+/****************************************************************************
  * Function: fdesc_poll
  *
  * Description:
