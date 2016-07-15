@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/serial/pty.h
+ * libc/stdlib/lib_unlockpt.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,69 +33,43 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_SERIAL_PTY_H
-#define __DRIVERS_SERIAL_PTY_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
+#include <sys/ioctl.h>
+#include <stdlib.h>
+
+#ifdef CONFIG_PSEUDOTERM
+
 /****************************************************************************
- * Public Function Prototypes
+ * Public Functions
  ****************************************************************************/
 
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
+/****************************************************************************
+ * Name: unlockpt
+ *
+ * Description:
+ *   The unlockpt() function unlocks the slave pseudoterminal device
+ *   corresponding to the master pseudoterminal referred to by fd. 
+ *   unlockpt() must be called before opening the slave side of a
+ *   pseudoterminal. 
+ *
+ * Returned Values:
+ *   When successful, unlockpt() returns 0. Otherwise, it returns -1 and
+ *   sets errno appropriately.
+ *
+ *     EBADF - The fd argument is not a file descriptor open for writing. 
+ *     EINVAL - The fd argument is not associated with a master
+ *       pseudoterminal
+ *
+ ****************************************************************************/
+
+int unlockpt(int fd)
 {
-#else
-#define EXTERN extern
-#endif
-
-/****************************************************************************
- * Name: ptmx_minor_free
- *
- * Description:
- *   De-allocate a PTY minor number.
- *
- * Assumptions:
- *   Caller hold the px_exclsem
- *
- ****************************************************************************/
-
-#ifdef CONFIG_PSEUDOTERM_SUSV1
-void ptmx_minor_free(uint8_t minor);
-#endif
-
-/****************************************************************************
- * Name: pty_register
- *
- * Description:
- *   Create and register PTY master and slave devices.  The master device
- *   will be registered at /dev/ptyN and slave at /dev/pts/N where N is
- *   the provided minor number.
- *
- *   The slave side of the interface is always locked initially.  The
- *   master must call unlockpt() before the slave device can be opened.
- *
- * Input Parameters:
- *   minor - The number that qualifies the naming of the created devices.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_PSEUDOTERM_SUSV1
-int pty_register(int minor);
-#endif
-
-#undef EXTERN
-#ifdef __cplusplus
+  return ioctl(fd, TIOCSPTLCK, 0);
 }
-#endif
 
-#endif /* __DRIVERS_SERIAL_PTY_H */
+#endif /* CONFIG_PSEUDOTERM */

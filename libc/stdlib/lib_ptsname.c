@@ -39,7 +39,6 @@
 
 #include <nuttx/config.h>
 
-#include <sys/ioctl.h>
 #include <stdlib.h>
 
 #ifdef CONFIG_PSEUDOTERM_SUSV1

@@ -76,13 +76,16 @@ int ptmx_register(void);
 /****************************************************************************
  * Name: pty_register
  *
- * Input Parameters:
- *   minor - The number that qualifies the naming of the created devices.
- *
  * Description:
  *   Create and register PTY master and slave devices.  The master device
  *   will be registered at /dev/ptyN and slave at /dev/ttypN where N is
  *   the provided minor number.
+ *
+ *   The slave side of the interface is always locked initially.  The
+ *   master must call unlockpt() before the slave device can be opened.
+ *
+ * Input Parameters:
+ *   minor - The number that qualifies the naming of the created devices.
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on

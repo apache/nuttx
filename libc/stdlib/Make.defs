@@ -49,6 +49,10 @@ ifeq ($(CONFIG_PSEUDOTERM_SUSV1),y)
 CSRCS += lib_ptsname.c lib_ptsnamer.c
 endif
 
+ifeq ($(CONFIG_PSEUDOTERM),y)
+CSRCS += lib_unlockpt.c
+endif
+
 # Add the stdlib directory to the build
 
 DEPPATH += --dep-path stdlib

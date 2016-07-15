@@ -87,9 +87,7 @@ struct pty_dev_s
   FAR struct pty_devpair_s *pd_devpair;
   struct file pd_src;           /* Provides data to read() method (pipe output) */
   struct file pd_sink;          /* Accepts data from write() method (pipe input) */
-#ifdef CONFIG_PSEUDOTERM_SUSV1
   bool pd_master;               /* True: this is the master */
-#endif
 };
 
 /* This structure describes the pipe pair */
@@ -97,14 +95,16 @@ struct pty_dev_s
 struct pty_devpair_s
 {
   struct pty_dev_s pp_master;   /* Maseter device */
-  struct pty_dev_s pp_slave;    /* Slave device */ 
+  struct pty_dev_s pp_slave;    /* Slave device */
 
+  bool pp_locked;               /* Slave is locked */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  bool pp_unlinked;             /* File has been unlinked */
   uint8_t pp_minor;             /* Minor device number */
   uint16_t pp_nopen;            /* Open file count */
-  sem_t pp_exclsem;             /* Mutual exclusion */
-  bool pp_unlinked;             /* File has been unlinked */
 #endif
+  sem_t pp_slavesem;            /* Slave lock semaphore */
+  sem_t pp_exclsem;             /* Mutual exclusion */
 };
 
 /****************************************************************************
@@ -140,7 +140,6 @@ static const struct file_operations pty_fops =
  * Name: pty_semtake
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static void pty_semtake(FAR struct pty_devpair_s *devpair)
 {
   while (sem_wait(&devpair->pp_exclsem) < 0)
@@ -148,7 +147,6 @@ static void pty_semtake(FAR struct pty_devpair_s *devpair)
       DEBUGASSERT(errno == EINTR);
     }
 }
-#endif
 
 /****************************************************************************
  * Name: pty_semgive
@@ -217,9 +215,53 @@ static int pty_open(FAR struct file *filep)
   DEBUGASSERT(dev != NULL && dev->pd_devpair != NULL);
   devpair = dev->pd_devpair;
 
-  /* Get exclusive access */
+  /* Wait if this is an attempt to open the slave device and the slave
+   * device is locked.
+   */
 
-  pty_semtake(devpair);
+  if (!dev->pd_master)
+    {
+      /* Slave... Check if the slave driver is locked.  We need to lock the
+       * scheduler while we are running to prevent asyncrhonous modification
+       * of pp_locked by pty_ioctl().
+       */
+
+      sched_lock();
+      while (devpair->pp_locked)
+        {
+          /* Wait until unlocked.  We will also most certainly suspend here. */
+
+          sem_wait(&devpair->pp_slavesem);
+
+          /* Get exclusive access to the device structure.  This might also
+           * cause suspension.
+           */
+
+          pty_semtake(devpair);
+
+          /* Check again in case something happened asynchronously while we
+           * were suspended.
+           */
+
+          if (devpair->pp_locked)
+           {
+             /* This cannot suspend because we have the scheduler locked.
+              * So pp_locked cannot change asyncrhonously between this test
+              * and the redundant test at the top of the loop.
+              */
+
+             pty_semgive(devpair);
+           }
+        }
+
+      sched_unlock();
+    }
+  else
+    {
+       /* Master ... Get exclusive access to the device structure */
+
+       pty_semtake(devpair);
+    }
 
   /* If one side of the driver has been unlinked, then refuse further
    * opens.
@@ -358,6 +400,10 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   DEBUGASSERT(dev != NULL && dev->pd_devpair != NULL);
   devpair = dev->pd_devpair;
 
+  /* Get exclusive access */
+
+  pty_semtake(devpair);
+
   /* Handle IOCTL commands */
 
   switch (cmd)
@@ -384,11 +430,54 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
 
       case TIOCSPTLCK:  /* Lock/unlock Pty: int */
-        ret = -ENOSYS;  /* Not implemented */
+        {
+          if (arg == 0)
+            {
+               int sval;
+
+               /* Unlocking */
+
+               sched_lock();
+               devpair->pp_locked = false;
+
+               /* Release any waiting threads */
+
+               do
+                 {
+                   DEBUGVERIFY(sem_getvalue(&devpair->pp_slavesem, &sval));
+                   if (sval < 0)
+                     {
+                       sem_post(&devpair->pp_slavesem);
+                     }
+                 }
+               while (sval < 0);
+
+               sched_unlock();
+               ret = OK;
+            }
+          else
+            {
+              /* Locking */
+
+               devpair->pp_locked = true;
+               ret = OK;
+            }
+        }
         break;
 
       case TIOCGPTLCK:  /* Get Pty lock state: FAR int* */
-        ret = -ENOSYS;  /* Not implemented */
+        {
+          FAR int *ptr = (FAR int *)((uintptr_t)arg);
+          if (ptr == NULL)
+            {
+              ret = -EINVAL;
+            }
+          else
+            {
+              *ptr = (int)devpair->pp_locked;
+              ret = OK;
+            }
+        }
         break;
 
       /* Any unrecognized IOCTL commands will be passed to the contained
@@ -406,6 +495,7 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
     }
 
+  pty_semgive(devpair);
   return ret;
 }
 
@@ -465,11 +555,13 @@ static int pty_unlink(FAR struct inode *inode)
 /****************************************************************************
  * Name: pty_register
  *
+ * Description:
+ *   Create and register PTY master and slave devices.  The slave side of
+ *   the interface is always locked initially.  The master must call
+ *   unlockpt() before the slave device can be opened.
+ *
  * Input Parameters:
  *   minor - The number that qualifies the naming of the created devices.
- *
- * Description:
- *   Create and register PTY master and slave devices.
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
@@ -493,15 +585,15 @@ int pty_register(int minor)
       return -ENOMEM;
     }
 
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  sem_init(&devpair->pp_slavesem, 0, 0);
   sem_init(&devpair->pp_exclsem, 0, 1);
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   devpair->pp_minor             = minor;
 #endif
+  devpair->pp_locked            = true;
   devpair->pp_master.pd_devpair = devpair;
-  devpair->pp_slave.pd_devpair  = devpair;
-#ifdef CONFIG_PSEUDOTERM_SUSV1
   devpair->pp_master.pd_master  = true;
-#endif
+  devpair->pp_slave.pd_devpair  = devpair;
 
   /* Create two pipes */
 
@@ -640,9 +732,8 @@ errout_with_pipea:
     }
 
 errout_with_devpair:
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
    sem_destroy(&devpair->pp_exclsem);
-#endif
+   sem_destroy(&devpair->pp_slavesem);
    kmm_free(devpair);
    return ret;
 }
