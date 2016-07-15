@@ -855,13 +855,16 @@ Where <subdir> is one of the following:
     4. SDHC support is not enabled in this configuration.  Refer to the
        configuration settings listed above under "SD Card Support".
 
-    5. No external pullup is available on MDIO signal when MK64FN1M0VLL12 MCU
+    5. Support for NSH built-in applications is enabled, but no built-in
+       applications have been configured in.
+
+    6. No external pullup is available on MDIO signal when MK64FN1M0VLL12 MCU
        is requests status of the Ethernet link connection. Internal pullup is
        required when port configuration for MDIO signal is enabled:
 
        CONFIG_KINETIS_ENET_MDIOPULLUP=y
 
-    6. Configured to use a fixed IPv4 address:
+    7. Configured to use a fixed IPv4 address:
 
        CONFIG_NSH_IPADDR=0x0a000002
        CONFIG_NSH_DRIPADDR=0x0a000001
@@ -899,7 +902,10 @@ Where <subdir> is one of the following:
     3. The Serial Console is provided on UART3 with the correct pin
        configuration for use with an Arduino Serial Shield.
 
-    4. An SDHC driver is enabled in this configuration but does not yet work.
+    4. Support for NSH built-in applications is enabled, but no built-in
+       applications have been configured in.
+
+    5. An SDHC driver is enabled in this configuration but does not yet work.
        The basic problem seems to be that it does not sense the presence of
        the SD card on PTE6.  No interrupts are generated when the SD card is
        inserted or removed.  You might want to disable SDHC and MMC/SD if
