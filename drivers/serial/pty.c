@@ -263,8 +263,12 @@ static int pty_open(FAR struct file *filep)
        pty_semtake(devpair);
     }
 
+#ifndef CONFIG_PSEUDOTERM_SUSV1
   /* If one side of the driver has been unlinked, then refuse further
    * opens.
+   *
+   * NOTE: We ignore this case in the SUSv1 case.  In the SUSv1 case, the
+   * master side is always unlinked.
    */
 
   if (devpair->pp_unlinked)
@@ -272,6 +276,7 @@ static int pty_open(FAR struct file *filep)
       ret = -EIDRM;
     }
   else
+#endif
     {
       /* Increment the count of open references on the driver */
 
@@ -505,7 +510,7 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
 #ifndef CONFIG_DISABLE_POLL
 static int pty_poll(FAR struct file *filep, FAR struct pollfd *fds,
-                        bool setup)
+                    bool setup)
 {
   FAR struct inode *inode;
   FAR struct pty_dev_s *dev;

@@ -233,6 +233,34 @@ int open(const char *path, int oflags, ...)
       goto errout_with_fd;
     }
 
+#ifdef CONFIG_PSEUDOTERM_SUSV1
+  /* If the return value from the open method is > 0, then we may assume that
+   * it is actually a file descriptor.  This kind of logic is only needed for
+   * /dev/ptmx:  When dev ptmx is opened, it does not return a file descriptor
+   * associated with the /dev/ptmx inode, but rather with the master device.
+   *
+   * REVISIT: This is a kludge.  It is dangerous because (1) Zero is also a
+   * valid file descriptor, and (2) there could potentially be driver open
+   * methods that return values > 0 for normal success conditions.
+   */
+
+  if (ret > 0)
+    {
+      /* Release file descriptor and inode that we allocated.  We don't
+       * need those.
+       */
+
+      files_release(fd);
+      inode_release(inode);
+
+      /* Instead, return the descriptor associated with the master side
+       * device.
+       */
+
+      fd = ret;
+    }
+#endif
+
   return fd;
 
 errout_with_fd:
