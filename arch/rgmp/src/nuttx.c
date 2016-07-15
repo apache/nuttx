@@ -56,6 +56,7 @@
 #include <nuttx/serial/pty.h>
 #include <nuttx/syslog/syslog.h>
 #include <nuttx/crypto/crypto.h>
+#include <nuttx/power/pm.h>
 
 #include "task/task.h"
 #include "sched/sched.h"
@@ -106,6 +107,16 @@ void up_initialize(void)
   vdev_init();
 
   nuttx_arch_init();
+
+#ifdef CONFIG_PM
+  /* Initialize the power management subsystem.  This MCU-specific function
+   * must be called *very* early in the initialization sequence *before* any
+   * other device drivers are initialized (since they may attempt to register
+   * with the power management subsystem).
+   */
+
+  up_pminitialize();
+#endif
 
 #if CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_PSEUDOTERM_SUSV1)
   /* Register the master pseudo-terminal multiplexor device */

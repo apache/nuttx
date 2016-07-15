@@ -52,6 +52,7 @@
 #include <nuttx/syslog/syslog_console.h>
 #include <nuttx/serial/pty.h>
 #include <nuttx/crypto/crypto.h>
+#include <nuttx/power/pm.h>
 
 #include <arch/board/board.h>
 
@@ -121,9 +122,9 @@ void up_initialize(void)
 
   up_calibratedelay();
 
+#if CONFIG_MM_REGIONS > 1
   /* Add any extra memory fragments to the memory manager */
 
-#if CONFIG_MM_REGIONS > 1
   up_addregion();
 #endif
 
@@ -131,9 +132,19 @@ void up_initialize(void)
 
   up_irqinitialize();
 
-  /* Initialize the system timer interrupt */
+#ifdef CONFIG_PM
+  /* Initialize the power management subsystem.  This MCU-specific function
+   * must be called *very* early in the initialization sequence *before* any
+   * other device drivers are initialized (since they may attempt to register
+   * with the power management subsystem).
+   */
+
+  up_pminitialize();
+#endif
 
 #if !defined(CONFIG_SUPPRESS_INTERRUPTS) && !defined(CONFIG_SUPPRESS_TIMER_INTS)
+  /* Initialize the system timer interrupt */
+
   up_timer_initialize();
 #endif
 

@@ -54,6 +54,7 @@
 #include <nuttx/syslog/syslog_console.h>
 #include <nuttx/serial/pty.h>
 #include <nuttx/crypto/crypto.h>
+#include <nuttx/power/pm.h>
 
 #include "up_internal.h"
 
@@ -126,13 +127,23 @@ static void up_init_smartfs(void)
 
 void up_initialize(void)
 {
+#ifdef CONFIG_NET
   /* The real purpose of the following is to make sure that syslog
    * is drawn into the link.  It is needed by up_tapdev which is linked
    * separately.
    */
 
-#ifdef CONFIG_NET
   syslog(LOG_INFO, "SIM: Initializing");
+#endif
+
+#ifdef CONFIG_PM
+  /* Initialize the power management subsystem.  This MCU-specific function
+   * must be called *very* early in the initialization sequence *before* any
+   * other device drivers are initialized (since they may attempt to register
+   * with the power management subsystem).
+   */
+
+  up_pminitialize();
 #endif
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
