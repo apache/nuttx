@@ -51,6 +51,8 @@
 #include <nuttx/net/telnet.h>
 #include <nuttx/syslog/syslog.h>
 #include <nuttx/syslog/syslog_console.h>
+#include <nuttx/serial/pty.h>
+#include <nuttx/crypto/crypto.h>
 
 #include "up_arch.h"
 #include "up_internal.h"
@@ -178,12 +180,34 @@ void up_initialize(void)
   ramlog_consoleinit();
 #endif
 
+#if CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_PSEUDOTERM_SUSV1)
+  /* Register the master pseudo-terminal multiplexor device */
+
+  (void)ptmx_register();
+#endif
+
   /* Early initialization of the system logging device.  Some SYSLOG channel
    * can be initialized early in the initialization sequence because they
    * depend on only minimal OS initialization.
    */
 
   syslog_initialize(SYSLOG_INIT_EARLY);
+
+#if defined(CONFIG_CRYPTO)
+  /* Initialize the HW crypto and /dev/crypto */
+
+  up_cryptoinitialize();
+#endif
+
+#if CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_CRYPTO_CRYPTODEV)
+  devcrypto_register();
+#endif
+
+#ifdef CONFIG_DEV_RANDOM
+  /* Initialize the Random Number Generator (RNG)  */
+
+  up_rnginitialize();
+#endif
 
 #ifndef CONFIG_NETDEV_LATEINIT
   /* Initialize the network */

@@ -51,6 +51,7 @@
 #include <nuttx/net/telnet.h>
 #include <nuttx/syslog/syslog.h>
 #include <nuttx/syslog/syslog_console.h>
+#include <nuttx/serial/pty.h>
 #include <nuttx/crypto/crypto.h>
 
 #include <arch/board/board.h>
@@ -228,22 +229,10 @@ void up_initialize(void)
   ramlog_consoleinit();
 #endif
 
-  /* Initialize the HW crypto and /dev/crypto */
+#if CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_PSEUDOTERM_SUSV1)
+  /* Register the master pseudo-terminal multiplexor device */
 
-#if defined(CONFIG_CRYPTO)
-  up_cryptoinitialize();
-#endif
-
-#if CONFIG_NFILE_DESCRIPTORS > 0
-#if defined(CONFIG_CRYPTO_CRYPTODEV)
-  devcrypto_register();
-#endif
-#endif
-
-  /* Initialize the Random Number Generator (RNG)  */
-
-#ifdef CONFIG_DEV_RANDOM
-  up_rnginitialize();
+  (void)ptmx_register();
 #endif
 
   /* Early initialization of the system logging device.  Some SYSLOG channel
@@ -252,6 +241,22 @@ void up_initialize(void)
    */
 
   syslog_initialize(SYSLOG_INIT_EARLY);
+
+#if defined(CONFIG_CRYPTO)
+  /* Initialize the HW crypto and /dev/crypto */
+
+  up_cryptoinitialize();
+#endif
+
+#if CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_CRYPTO_CRYPTODEV)
+  devcrypto_register();
+#endif
+
+#ifdef CONFIG_DEV_RANDOM
+  /* Initialize the Random Number Generator (RNG)  */
+
+  up_rnginitialize();
+#endif
 
 #ifndef CONFIG_NETDEV_LATEINIT
   /* Initialize the network */
