@@ -260,6 +260,7 @@ int open(const char *path, int oflags, ...)
        */
 
       fd = (int)OPEN_GETFD(ret);
+      DEBUGASSERT((unsigned)fd < (CONFIG_NFILE_DESCRIPTORS + CONFIG_NSOCKET_DESCRIPTORS));
     }
 #endif
 
