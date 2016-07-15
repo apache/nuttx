@@ -96,7 +96,7 @@
 #endif
 
 #if CONFIG_NSH_MMCSDSLOTNO != 0
-#  error SAME70 has only one MMC/SD slot (CONFIG_NSH_MMCSDMINOR)
+#  error SAME70 has only one MMC/SD slot (CONFIG_NSH_MMCSDSLOTNO)
 #  undef CONFIG_NSH_MMCSDSLOTNO
 #  define CONFIG_NSH_MMCSDSLOTNO 0
 #endif
