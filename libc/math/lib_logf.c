@@ -32,6 +32,8 @@
 #include <math.h>
 #include <float.h>
 
+#define FLT_MAX_EXP_X   88.0F
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -50,25 +52,25 @@ float logf(float x)
       ey = exp(y);
       y -= (ey - x) / ey;
 
-      if (y > 700.0F)
+      if (y > FLT_MAX_EXP_X)
         {
-          y = 700.0F;
+          y = FLT_MAX_EXP_X;
         }
 
-      if (y < -700.0F)
+      if (y < -FLT_MAX_EXP_X)
         {
-          y = -700.0F;
+          y = -FLT_MAX_EXP_X;
         }
 
       epsilon = (fabsf(y) > 1.0F) ? fabsf(y) * FLT_EPSILON : FLT_EPSILON;
     }
 
-  if (y == 700.0F)
+  if (y == FLT_MAX_EXP_X)
     {
       return INFINITY;
     }
 
-  if (y == -700.0F)
+  if (y == -FLT_MAX_EXP_X)
     {
       return INFINITY;
     }

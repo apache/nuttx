@@ -67,6 +67,7 @@ double erf(double x)
 
   sign = (x >= 0 ? 1 : -1);
   t = 1.0/(1.0 + p*x);
-  return sign * (1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * expf(-x * x));
+  return sign * (1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t *
+                 (double)expf(-x * x));
 }
 #endif

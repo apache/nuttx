@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/kinetis/kinetis_sdhc.c
  *
- *   Copyright (C) 2011-2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -83,10 +83,6 @@
 
 #ifndef CONFIG_KINETIS_SDHC_PRIO
 #  define CONFIG_KINETIS_SDHC_PRIO NVIC_SYSH_PRIORITY_DEFAULT
-#endif
-
-#ifndef CONFIG_KINETIS_SDHC_DMAPRIO
-#  define CONFIG_KINETIS_SDHC_DMAPRIO DMA_CCR_PRIMED
 #endif
 
 #ifndef CONFIG_DEBUG_MEMCARD_INFO

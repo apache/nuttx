@@ -39,112 +39,27 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
 #include <sys/mount.h>
-#include <stdbool.h>
-#include <stdio.h>
 #include <syslog.h>
 #include <errno.h>
+#include <debug.h>
 
-#ifdef CONFIG_KINETIS_SDHC
-#  include <nuttx/sdio.h>
-#  include <nuttx/mmcsd.h>
-#endif
-
-#include "kinetis.h"
 #include "freedom-k64f.h"
 
 #if defined(CONFIG_LIB_BOARDCTL) || defined(CONFIG_BOARD_INITIALIZE)
 
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/* This structure encapsulates the global variable used in this file and
- * reduces the probability of name collistions.
- */
-
-#ifdef NSH_HAVEMMCSD
-struct k64_nsh_s
-{
-  FAR struct sdio_dev_s *sdhc; /* SDIO driver handle */
-  bool inserted;               /* True: card is inserted */
-};
-#endif
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-#ifdef NSH_HAVEMMCSD
-static struct k64_nsh_s g_nsh;
-#endif
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: k64_mediachange
- ****************************************************************************/
-
-#ifdef NSH_HAVEMMCSD
-static void k64_mediachange(void)
-{
-  bool inserted;
-
-  /* Get the current value of the card detect pin.  This pin is pulled up on
-   * board.  So low means that a card is present.
-   */
-
-  inserted = !kinetis_gpioread(GPIO_SD_CARDDETECT);
-
-  /* Has the pin changed state? */
-
-  if (inserted != g_nsh.inserted)
-    {
-      /* Yes.. perform the appropriate action (this might need some debounce). */
-
-      g_nsh.inserted = inserted;
-      sdhc_mediachange(g_nsh.sdhc, inserted);
-
-      /* If the card has been inserted, then check if it is write protected
-       * as well.  The pin is pulled up, but apparently logic high means
-       * write protected.
-       */
-
-      if (inserted)
-        {
-          sdhc_wrprotect(g_nsh.sdhc, kinetis_gpioread(GPIO_SD_WRPROTECT));
-        }
-    }
-}
-#endif
-
-/****************************************************************************
- * Name: k64_cdinterrupt
- ****************************************************************************/
-
-#ifdef NSH_HAVEMMCSD
-static int k64_cdinterrupt(int irq, FAR void *context)
-{
-  /* All of the work is done by k64_mediachange() */
-
-  k64_mediachange();
-  return OK;
-}
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: k64_bringup
  *
  * Description:
  *   Bring up board features
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int k64_bringup(void)
 {
@@ -165,52 +80,40 @@ int k64_bringup(void)
     }
 #endif
 
-#ifdef NSH_HAVEMMCSD
-  /* Configure GPIO pins */
+#ifdef HAVE_MMCSD
+  /* Initialize the SDHC driver */
 
-  /* Attached the card detect interrupt (but don't enable it yet) */
-
-  kinetis_pinconfig(GPIO_SD_CARDDETECT);
-  kinetis_pinirqattach(GPIO_SD_CARDDETECT, k64_cdinterrupt);
-
-  /* Configure the write protect GPIO */
-
-  //kinetis_pinconfig(GPIO_SD_WRPROTECT);
-
-  /* Mount the SDHC-based MMC/SD block driver */
-  /* First, get an instance of the SDHC interface */
-
-  syslog(LOG_INFO, "Initializing SDHC slot %d\n", MMCSD_SLOTNO);
-
-  g_nsh.sdhc = sdhc_initialize(MMCSD_SLOTNO);
-  if (!g_nsh.sdhc)
+  ret = k64_sdhc_initialize();
+  if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Failed to initialize SDHC slot %d\n",
-             MMCSD_SLOTNO);
-      return -ENODEV;
+      mcerr("ERROR: k64_sdhc_initialize() failed: %d\n", ret);
     }
 
-  /* Now bind the SDHC interface to the MMC/SD driver */
-
-  syslog(LOG_INFO, "Bind SDHC to the MMC/SD driver, minor=%d\n",
-         CONFIG_NSH_MMCSDMINOR);
-
-  ret = mmcsd_slotinitialize(CONFIG_NSH_MMCSDMINOR, g_nsh.sdhc);
-  if (ret != OK)
+#ifdef CONFIG_FRDMK64F_SDHC_MOUNT
+  else
     {
-      syslog(LOG_ERR, "ERROR: Failed to bind SDHC to the MMC/SD driver: %d\n", ret);
-      return ret;
+      /* REVISIT:  A delay seems to be required here or the mount will fail. */
+      /* Mount the volume on HSMCI0 */
+
+      ret = mount(CONFIG_FRDMK64F_SDHC_MOUNT_BLKDEV,
+                  CONFIG_FRDMK64F_SDHC_MOUNT_MOUNTPOINT,
+                  CONFIG_FRDMK64F_SDHC_MOUNT_FSTYPE,
+                  0, NULL);
+
+      if (ret < 0)
+        {
+          mcerr("ERROR: Failed to mount %s: %d\n",
+                CONFIG_FRDMK64F_SDHC_MOUNT_MOUNTPOINT, errno);
+        }
     }
 
-  syslog(LOG_INFO, "Successfully bound SDHC to the MMC/SD driver\n");
+#endif /* CONFIG_FRDMK64F_SDHC_MOUNT */
+#endif /* HAVE_MMCSD */
 
-  /* Handle the initial card state */
+#ifdef HAVE_AUTOMOUNTER
+  /* Initialize the auto-mounter */
 
-  k64_mediachange();
-
-  /* Enable CD interrupts to handle subsequent media changes */
-
-  kinetis_pinirqenable(GPIO_SD_CARDDETECT);
+  k64_automount_initialize();
 #endif
 
   UNUSED(ret);

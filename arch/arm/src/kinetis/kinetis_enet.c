@@ -1840,7 +1840,7 @@ static inline int kinetis_initphy(struct kinetis_driver_s *priv)
           phydata = 0xffff;
           ret = kinetis_readmii(priv, phyaddr, MII_PHYID1, &phydata);
         }
-      while (ret >= 0 && phydata == 0xffff && ++retries < 3);
+      while ((ret < 0 || phydata == 0xffff) && ++retries < 3);
 
       /* If we successfully read anything then break out, using this PHY address */
 

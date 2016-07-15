@@ -919,7 +919,6 @@ static inline void rcc_itm_syslog(void)
   modifyreg32(STM32_DBGMCU_CR, DBGMCU_CR_TRACEMODE_MASK, DBGMCU_CR_ASYNCH |
               DBGMCU_CR_TRACEIOEN);
 
-  itm_syslog_initialize();
 }
 #else
 #  define rcc_itm_syslog()

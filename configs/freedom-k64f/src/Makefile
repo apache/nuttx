@@ -54,6 +54,13 @@ else ifeq ($(CONFIG_BOARD_INITIALIZE),y)
 CSRCS += k64_bringup.c
 endif
 
+ifeq ($(CONFIG_KINETIS_SDHC),y)
+CSRCS += k64_sdhc.c
+ifeq ($(CONFIG_FS_AUTOMOUNTER),y)
+CSRCS += k64_automount.c
+endif
+endif
+
 ifeq ($(CONFIG_USBDEV),y)
 CSRCS += k64_usbdev.c
 endif
