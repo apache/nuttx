@@ -121,7 +121,7 @@ static int poll_fdsetup(int fd, FAR struct pollfd *fds, bool setup)
         }
     }
 
-  return file_poll(fd, fds, setup);
+  return fdesc_poll(fd, fds, setup);
 }
 #endif
 
@@ -244,7 +244,7 @@ static inline int poll_teardown(FAR struct pollfd *fds, nfds_t nfds, int *count,
  ****************************************************************************/
 
 /****************************************************************************
- * Function: file_poll
+ * Function: fdesc_poll
  *
  * Description:
  *   The standard poll() operation redirects operations on file descriptors
@@ -262,7 +262,7 @@ static inline int poll_teardown(FAR struct pollfd *fds, nfds_t nfds, int *count,
  ****************************************************************************/
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
-int file_poll(int fd, FAR struct pollfd *fds, bool setup)
+int fdesc_poll(int fd, FAR struct pollfd *fds, bool setup)
 {
   FAR struct file *filep;
   FAR struct inode *inode;

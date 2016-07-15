@@ -930,7 +930,7 @@ int file_vfcntl(FAR struct file *filep, int cmd, va_list ap);
 #endif
 
 /****************************************************************************
- * Function: file_poll
+ * Function: fdesc_poll
  *
  * Description:
  *   The standard poll() operation redirects operations on file descriptors
@@ -948,7 +948,7 @@ int file_vfcntl(FAR struct file *filep, int cmd, va_list ap);
  ****************************************************************************/
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
-int file_poll(int fd, FAR struct pollfd *fds, bool setup);
+int fdesc_poll(int fd, FAR struct pollfd *fds, bool setup);
 #endif
 
 /****************************************************************************
