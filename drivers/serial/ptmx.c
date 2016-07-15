@@ -226,7 +226,13 @@ static int ptmx_open(FAR struct file *filep)
       goto errout_with_sem;
     }
 
-  /* Create the master slave pair */
+  /* Create the master slave pair.  This should create:
+   *
+   *   Slave device:  /dev/pts/N
+   *   Master device: /dev/ptyN
+   *
+   * Where N=minor
+   */
 
   ret = pty_register(minor);
   if (ret < 0)
@@ -234,9 +240,9 @@ static int ptmx_open(FAR struct file *filep)
       goto errout_with_minor;
     }
 
-  /* Open the master side */
+  /* Open the master device:  /dev/ptyN, where N=minor */
 
-  snprintf(devname, 16, "/dev/ttyp%d", minor);
+  snprintf(devname, 16, "/dev/pty%d", minor);
   fd = open(devname, O_RDWR);
   DEBUGASSERT(fd >= 0);  /* open() should never fail */
 

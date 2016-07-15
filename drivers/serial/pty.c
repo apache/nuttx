@@ -111,7 +111,7 @@ struct pty_devpair_s
  * Private Data
  ****************************************************************************/
 
-static const struct file_operations pty_fops =
+static const struct file_operations g_pty_fops =
 {
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   pty_open,      /* open */
@@ -691,7 +691,7 @@ int pty_register(int minor)
   snprintf(devname, 16, "/dev/pts/%d", minor);
 #endif
 
-  ret = register_driver(devname, &pty_fops, 0666, &devpair->pp_slave);
+  ret = register_driver(devname, &g_pty_fops, 0666, &devpair->pp_slave);
   if (ret < 0)
     {
       goto errout_with_pipeb;
@@ -707,7 +707,7 @@ int pty_register(int minor)
 
   snprintf(devname, 16, "/dev/pty%d", minor);
 
-  ret = register_driver(devname, &pty_fops, 0666, &devpair->pp_master);
+  ret = register_driver(devname, &g_pty_fops, 0666, &devpair->pp_master);
   if (ret < 0)
     {
       goto errout_with_slave;
