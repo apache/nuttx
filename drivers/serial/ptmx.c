@@ -50,6 +50,9 @@
 #include <errno.h>
 
 #include <nuttx/fs/fs.h>
+#include <nuttx/serial/pty.h>
+
+#include "pty.h"
 
 /****************************************************************************
  * Private Function Prototypes
@@ -316,12 +319,19 @@ static ssize_t ptmx_write(FAR struct file *filep, FAR const char *buffer, size_t
 /****************************************************************************
  * Name: ptmx_register
  *
+ * Input Parameters:
+ *   None
+ *
  * Description:
- *   Register /dev/null
+ *   Register the master pseudo-terminal device at /dev/ptmx
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
  *
  ****************************************************************************/
 
-void ptmx_register(void)
+int ptmx_register(void)
 {
   /* Initialize driver state */
 
@@ -329,5 +339,5 @@ void ptmx_register(void)
 
   /* Register the PTMX driver */
 
-  (void)register_driver("/dev/ptmx", &g_ptmx_fops, 0666, NULL);
+  return register_driver("/dev/ptmx", &g_ptmx_fops, 0666, NULL);
 }

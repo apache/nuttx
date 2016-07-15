@@ -51,6 +51,9 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/serial/pty.h>
+
+#include "pty.h"
 
 /****************************************************************************
  * Private Function Prototypes
@@ -409,9 +412,14 @@ static int pty_unlink(FAR struct inode *inode)
  * Name: pty_register
  *
  * Input Parameters:
+ *   minor - The number that qualifies the naming of the created devices.
  *
  * Description:
- *   Create and register PTY master and slave devices
+ *   Create and register PTY master and slave devices.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
  *
  ****************************************************************************/
 
