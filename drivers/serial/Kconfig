@@ -2041,7 +2041,7 @@ config PSEUDOTERM_SUSV1
 	---help---
 		PTYs as specified in the Single Unix Specification (SUSv1).
 
-		Master: /dev/ptmx
+		Master: /dev/ptmx (multiplexor)
 		Slave: /dev/pts/N
 
 		Where N is the minor number

@@ -729,7 +729,7 @@ int pty_register(int minor)
   /* Register the master device
    *
    * BSD style (deprecated):  /dev/ptyN
-   * SUSv1 style: Master: /dev/ptmx (see ptmx.c)
+   * SUSv1 style: Master: /dev/ptmx (multiplexor, see ptmx.c)
    *
    * Where N is the minor number
    */

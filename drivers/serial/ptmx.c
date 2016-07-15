@@ -291,7 +291,7 @@ static ssize_t ptmx_write(FAR struct file *filep, FAR const char *buffer, size_t
  *   None
  *
  * Description:
- *   Register the master pseudo-terminal device at /dev/ptmx
+ *   Register the master pseudo-terminal multiplexor device at /dev/ptmx
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
