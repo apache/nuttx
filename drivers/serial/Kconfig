@@ -2011,3 +2011,39 @@ config SCI1_2STOP
 		1=Two stop bits
 
 endmenu # SCI1 Configuration
+
+config PSEUDOTERM
+	bool "Pseudo-Terminal (PTY) suppport"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		Enable support support for master and slave pseudo-terminal devices.
+
+choice
+	prompt "PTY model"
+	default PSEUDOTERM_BSD if DISABLE_PSEUDOFS_OPERATIONS
+	default PSEUDOTERM_SUSV1 if !DISABLE_PSEUDOFS_OPERATIONS
+	depends on PSEUDOTERM
+
+config PSEUDOTERM_BSD
+	bool "BSD style"
+	---help---
+		Deprecated BSD style PTYs.
+
+		Master: /dev/ptyN
+		Slave: /dev/ttypN
+
+		Where N is the minor number
+
+config PSEUDOTERM_SUSV1
+	bool "SUSv1 style"
+	depends on !DISABLE_PSEUDOFS_OPERATIONS
+	---help---
+		PTYs as specified in the Single Unix Specification (SUSv1).
+
+		Master: /dev/ptmx
+		Slave: /dev/pts/N
+
+		Where N is the minor number
+
+endchoice # PTY model

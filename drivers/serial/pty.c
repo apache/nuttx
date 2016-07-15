@@ -43,11 +43,13 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <semaphore.h>
+#include <stdio.h>
 #include <string.h>
 #include <poll.h>
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 
 /****************************************************************************
@@ -78,7 +80,7 @@ static int     pty_unlink(FAR struct inode *inode);
 struct pty_devpair_s;
 struct pty_dev_s
 {
-  FAR struct pty_common_s *pd_devpair;
+  FAR struct pty_devpair_s *pd_devpair;
   struct file pd_src;           /* Provides data to read() method (pipe output) */
   struct file pd_sink;          /* Accepts data from write() method (pipe input) */
 };
@@ -87,8 +89,8 @@ struct pty_dev_s
 
 struct pty_devpair_s
 {
-  struct pty_dev_s pp_ptyp;     /* /dev/ptypN device */    
-  struct pty_dev_s pp_ttyp;     /* /dev/ttypN device */    
+  struct pty_dev_s pp_master;   /* Maseter device */
+  struct pty_dev_s pp_slave;    /* Slave device */ 
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   uint8_t pp_minor;             /* Minor device number */
@@ -132,7 +134,7 @@ static const struct file_operations pty_fops =
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-static void pty_semtake(FAR struct pty_common_s *devpair)
+static void pty_semtake(FAR struct pty_devpair_s *devpair)
 {
   while (sem_wait(&devpair->pp_exclsem) < 0)
     {
@@ -152,31 +154,35 @@ static void pty_semtake(FAR struct pty_common_s *devpair)
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-static void pty_destroy(FAR struct pty_common_s *devpair)
+static void pty_destroy(FAR struct pty_devpair_s *devpair)
 {
   char devname[16];
 
-  /* Un-register /dev/ptypN */
+  /* Un-register the slave device */
 
-  snprintf(devname, 16, "/dev/pp_ptyp%d", (int)devpair->pp_minor);
+#ifdef CONFIG_PSEUDOTERM_BSD
+  snprintf(devname, 16, "/dev/ttyp%d", devpair->pp_minor);
+#else
+  snprintf(devname, 16, "/dev/pts/%d", devpair->pp_minor);
+#endif
   (void)unregister_driver(devname);
-  
-  /* Un-register /dev/ptypN */
 
-  snprintf(devname, 16, "/dev/ttyp%d", (int)devpair->pp_minor);
+  /* Un-register the master device (/dev/ptyN may have already been unlinked) */
+
+  snprintf(devname, 16, "/dev/pty%d", (int)devpair->pp_minor);
   (void)unregister_driver(devname);
 
   /* Close the contained file structures */
 
-  (void)file_close_detached(&devpair->pp_ptyp.pd_src);
-  (void)file_close_detached(&devpair->pp_ptyp.pd_sink);
-  (void)file_close_detached(&devpair->pp_ttyp.pd_src);
-  (void)file_close_detached(&devpair->pp_ttyp.pd_sink);
+  (void)file_close_detached(&devpair->pp_master.pd_src);
+  (void)file_close_detached(&devpair->pp_master.pd_sink);
+  (void)file_close_detached(&devpair->pp_slave.pd_src);
+  (void)file_close_detached(&devpair->pp_slave.pd_sink);
 
   /* And free the device structure */
 
   sem_destroy(&devpair->pp_exclsem);
-  kmm_free(upper);
+  kmm_free(devpair);
 }
 #endif
 
@@ -189,10 +195,10 @@ static int pty_open(FAR struct file *filep)
 {
   FAR struct inode *inode;
   FAR struct pty_dev_s *dev;
-  FAR struct pty_common_s *devpair;
+  FAR struct pty_devpair_s *devpair;
   int ret;
 
-  DEBUGASSERT(filep != NULL && file->f_inode != NULL);
+  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode   = filep->f_inode;
   dev     = inode->i_private;
   DEBUGASSERT(dev != NULL && dev->pd_devpair != NULL);
@@ -206,9 +212,9 @@ static int pty_open(FAR struct file *filep)
    * opens.
    */
 
-  if (cmd->pp_unlinked)
+  if (devpair->pp_unlinked)
     {
-      ret = -EIDRAM
+      ret = -EIDRM;
     }
   else
     {
@@ -234,9 +240,9 @@ static int pty_close(FAR struct file *filep)
 {
   FAR struct inode *inode;
   FAR struct pty_dev_s *dev;
-  FAR struct pty_common_s *devpair;
+  FAR struct pty_devpair_s *devpair;
 
-  DEBUGASSERT(filep != NULL && file->f_inode != NULL);
+  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode     = filep->f_inode;
   dev       = inode->i_private;
   DEBUGASSERT(dev != NULL && dev->pd_devpair != NULL);
@@ -277,12 +283,12 @@ static ssize_t pty_read(FAR struct file *filep, FAR char *buffer, size_t len)
   FAR struct inode *inode;
   FAR struct pty_dev_s *dev;
 
-  DEBUGASSERT(filep != NULL && file->f_inode != NULL);
+  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode = filep->f_inode;
   dev   = inode->i_private;
   DEBUGASSERT(dev != NULL);
 
-  return file_read(&dev->src, buffer, len);
+  return file_read(&dev->pd_src, buffer, len);
 }
 
 /****************************************************************************
@@ -294,12 +300,12 @@ static ssize_t pty_write(FAR struct file *filep, FAR const char *buffer, size_t 
   FAR struct inode *inode;
   FAR struct pty_dev_s *dev;
 
-  DEBUGASSERT(filep != NULL && file->f_inode != NULL);
+  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode = filep->f_inode;
   dev   = inode->i_private;
   DEBUGASSERT(dev != NULL);
 
-  return file_write(&dev->src, buffer, len);
+  return file_write(&dev->pd_sink, buffer, len);
 }
 
 /****************************************************************************
@@ -316,7 +322,7 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct pty_dev_s *dev;
   int ret;
 
-  DEBUGASSERT(filep != NULL && file->f_inode != NULL);
+  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode = filep->f_inode;
   dev   = inode->i_private;
   DEBUGASSERT(dev != NULL);
@@ -334,16 +340,15 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       default:
         {
-          ret = file_ioctl(dev->pd_src, cmd, arg);
+          ret = file_ioctl(&dev->pd_src, cmd, arg);
           if (ret >= 0 || ret == -ENOTTY)
             {
-              ret = file_ioctl(dev->pd_sink, cmd, arg);
+              ret = file_ioctl(&dev->pd_sink, cmd, arg);
             }
         }
         break;
     }
 
-  sem_post(&upper->exclsem);
   return ret;
 }
 
@@ -366,15 +371,13 @@ static int pty_poll(FAR struct file *filep, FAR struct pollfd *fds,
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int pty_unlink(FAR struct inode *inode)
 {
-  FAR struct inode *inode;
   FAR struct pty_dev_s *dev;
-  FAR struct pty_common_s *devpair;
+  FAR struct pty_devpair_s *devpair;
 
-  DEBUGASSERT(filep != NULL && file->f_inode != NULL);
-  inode     = filep->f_inode;
+  DEBUGASSERT(inode != NULL && inode->i_private != NULL);
   dev       = inode->i_private;
-  DEBUGASSERT(dev != NULL && dev->pd_devpair != NULL);
   devpair   = dev->pd_devpair;
+  DEBUGASSERT(dev->pd_devpair != NULL);
 
   /* Get exclusive access */
 
@@ -406,9 +409,9 @@ static int pty_unlink(FAR struct inode *inode)
  * Name: pty_register
  *
  * Input Parameters:
- *   
+ *
  * Description:
- *   Register /dev/ttypN and /dev/ptpN where N=minor number
+ *   Create and register PTY master and slave devices
  *
  ****************************************************************************/
 
@@ -418,6 +421,7 @@ int pty_register(int minor)
   int pipe_a[2];
   int pipe_b[2];
   char devname[16];
+  int ret;
 
   /* Allocate a device instance */
 
@@ -431,8 +435,8 @@ int pty_register(int minor)
   sem_init(&devpair->pp_exclsem, 0, 1);
   devpair->pp_minor           = minor;
 #endif
-  devpair->pp_ptyp.pd_devpair = devpair;
-  devpair->pp_ttyp.pd_devpair = devpair;
+  devpair->pp_master.pd_devpair = devpair;
+  devpair->pp_slave.pd_devpair = devpair;
 
   /* Create two pipes */
 
@@ -454,7 +458,7 @@ int pty_register(int minor)
    *  fd[1] is for writing.
    */
 
-  ret = file_detach(pipe_a[0], &devpair->pp_ptyp.pd_src);
+  ret = file_detach(pipe_a[0], &devpair->pp_master.pd_src);
   if (ret < 0)
     {
       goto errout_with_pipeb;
@@ -462,7 +466,7 @@ int pty_register(int minor)
 
   pipe_a[0] = -1;
 
-  ret = file_detach(pipe_a[1], &devpair->pp_ttyp.pd_sink);
+  ret = file_detach(pipe_a[1], &devpair->pp_slave.pd_sink);
   if (ret < 0)
     {
       goto errout_with_pipeb;
@@ -470,7 +474,7 @@ int pty_register(int minor)
 
   pipe_a[1] = -1;
 
-  ret = file_detach(pipe_b[0], &devpair->pp_ttyp.pd_src);
+  ret = file_detach(pipe_b[0], &devpair->pp_slave.pd_src);
   if (ret < 0)
     {
       goto errout_with_pipeb;
@@ -478,7 +482,7 @@ int pty_register(int minor)
 
   pipe_b[0] = -1;
 
-  ret = file_detach(pipe_b[1], &devpair->pp_ptyp.pd_sink);
+  ret = file_detach(pipe_b[1], &devpair->pp_master.pd_sink);
   if (ret < 0)
     {
       goto errout_with_pipeb;
@@ -486,31 +490,51 @@ int pty_register(int minor)
 
   pipe_b[1] = -1;
 
-  /* Register /dev/ptypN */
+  /* Register the slave device
+   *
+   * BSD style (deprecated): /dev/ttypN
+   * SUSv1 style:  /dev/pts/N
+   *
+   * Where N is the minor number
+   */
 
+#ifdef CONFIG_PSEUDOTERM_BSD
+  snprintf(devname, 16, "/dev/ttyp%d", minor);
+#else
   snprintf(devname, 16, "/dev/pts/%d", minor);
+#endif
 
-  ret = register_driver(devname, &pty_fops, 0666, &devpair->pp_ptyp);
+  ret = register_driver(devname, &pty_fops, 0666, &devpair->pp_slave);
   if (ret < 0)
     {
       goto errout_with_pipeb;
     }
-  
-  /* Register /dev/ptypN */
 
-  snprintf(devname, 16, "/dev/ttyp%d", minor);
+  /* Register the master device
+   *
+   * BSD style (deprecated):  /dev/ptyN
+   * SUSv1 style: Master: /dev/ptmx (see ptmx.c)
+   *
+   * Where N is the minor number
+   */
 
-  ret = register_driver(devname, &pty_fops, 0666, &devpair->pp_ttyp);
+  snprintf(devname, 16, "/dev/pty%d", minor);
+
+  ret = register_driver(devname, &pty_fops, 0666, &devpair->pp_master);
   if (ret < 0)
     {
-      goto errout_with_ptyp;
+      goto errout_with_slave;
     }
 
   return OK;
 
-errout_with_ptyp:
-  snprintf(devname, 16, "/dev/ptyp%d", minor);
-  (void)unregister_driver(devname)
+errout_with_slave:
+#ifdef CONFIG_PSEUDOTERM_BSD
+  snprintf(devname, 16, "/dev/ttyp%d", minor);
+#else
+  snprintf(devname, 16, "/dev/pts/%d", minor);
+#endif
+  (void)unregister_driver(devname);
 
 errout_with_pipeb:
   if (pipe_b[0] >= 0)
@@ -519,7 +543,7 @@ errout_with_pipeb:
     }
   else
     {
-      (void)file_close_detached(&devpair->pp_ptyp.pd_src);
+      (void)file_close_detached(&devpair->pp_master.pd_src);
     }
 
   if (pipe_b[1] >= 0)
@@ -528,7 +552,7 @@ errout_with_pipeb:
     }
   else
     {
-      (void)file_close_detached(&devpair->pp_ttyp.pd_sink);
+      (void)file_close_detached(&devpair->pp_slave.pd_sink);
     }
 
 errout_with_pipea:
@@ -538,7 +562,7 @@ errout_with_pipea:
     }
   else
     {
-      (void)file_close_detached(&devpair->pp_ttyp.pd_src);
+      (void)file_close_detached(&devpair->pp_slave.pd_src);
     }
 
   if (pipe_a[1] >= 0)
@@ -547,7 +571,7 @@ errout_with_pipea:
     }
   else
     {
-      (void)file_close_detached(&devpair->pp_ptyp.pd_sink);
+      (void)file_close_detached(&devpair->pp_master.pd_sink);
     }
 
 errout_with_devpair:

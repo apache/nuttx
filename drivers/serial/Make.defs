@@ -47,6 +47,15 @@ ifeq ($(CONFIG_16550_UART),y)
   CSRCS += uart_16550.c
 endif
 
+# Pseudo-terminal support
+
+ifeq ($(CONFIG_PSEUDOTERM),y)
+  CSRCS += pty.c
+ifeq ($(CONFIG_PSEUDOTERM_SUSV1),y)
+  CSRCS += ptmx.c
+endif
+endif
+
 # Include serial build support
 
 DEPPATH += --dep-path serial

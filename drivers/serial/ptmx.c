@@ -41,9 +41,14 @@
 
 #include <sys/types.h>
 #include <stdbool.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <stdio.h>
 #include <string.h>
 #include <poll.h>
+#include <assert.h>
 #include <errno.h>
+
 #include <nuttx/fs/fs.h>
 
 /****************************************************************************
@@ -146,7 +151,7 @@ static void ptmx_semtake(void)
  *
  ****************************************************************************/
 
-static int ptmx_minor_allocate(FAR struct ptmx_dev_s *ptmx)
+static int ptmx_minor_allocate(void)
 {
   uint8_t startaddr = g_ptmx.px_next;
   uint8_t minor;
@@ -318,8 +323,6 @@ static ssize_t ptmx_write(FAR struct file *filep, FAR const char *buffer, size_t
 
 void ptmx_register(void)
 {
-  FAR struct ptmx_dev_s *ptmx;
-
   /* Initialize driver state */
 
   sem_init(&g_ptmx.px_exclsem, 0, 1);
