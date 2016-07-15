@@ -86,6 +86,9 @@ struct pty_dev_s
   FAR struct pty_devpair_s *pd_devpair;
   struct file pd_src;           /* Provides data to read() method (pipe output) */
   struct file pd_sink;          /* Accepts data from write() method (pipe input) */
+#ifdef CONFIG_PSEUDOTERM_SUSV1
+  bool pd_master;               /* True: this is the master */
+#endif
 };
 
 /* This structure describes the pipe pair */
@@ -261,12 +264,28 @@ static int pty_close(FAR struct file *filep)
 
   pty_semtake(devpair);
 
-  /* Is this the last open reference? */
+#ifdef CONFIG_PSEUDOTERM_SUSV1
+  /* Did the (single) master just close its reference? */
+
+  if (dev->pd_master)
+    {
+      /* Yes, then we are essentially unlinked and when all of the
+       * slaves close there references, then the PTY should be
+       * destroyed.
+       */
+
+      devpair->pp_unlinked = true;
+    }
+#endif
+
+  /* Is this the last open reference?  If so, was the driver previously
+   * unlinked?
+   */
 
   DEBUGASSERT(devpair->pp_nopen > 0);
   if (devpair->pp_nopen <= 1 && devpair->pp_unlinked)
     {
-      /* Free the device pair now (without freeing the semaphore) */
+      /* Yes.. Free the device pair now (without freeing the semaphore) */
 
       pty_destroy(devpair);
       return OK;
@@ -447,10 +466,13 @@ int pty_register(int minor)
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   sem_init(&devpair->pp_exclsem, 0, 1);
-  devpair->pp_minor           = minor;
+  devpair->pp_minor             = minor;
 #endif
   devpair->pp_master.pd_devpair = devpair;
-  devpair->pp_slave.pd_devpair = devpair;
+  devpair->pp_slave.pd_devpair  = devpair;
+#ifdef CONFIG_PSEUDOTERM_SUSV1
+  devpair->pp_master.pd_master  = true;
+#endif
 
   /* Create two pipes */
 
