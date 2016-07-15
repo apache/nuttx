@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <sys/ioctl.h>
 #include <stdbool.h>
 #include <unistd.h>
 #include <semaphore.h>
@@ -348,19 +349,47 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   FAR struct inode *inode;
   FAR struct pty_dev_s *dev;
+  FAR struct pty_devpair_s *devpair;
   int ret;
 
   DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
-  inode = filep->f_inode;
-  dev   = inode->i_private;
-  DEBUGASSERT(dev != NULL);
+  inode   = filep->f_inode;
+  dev     = inode->i_private;
+  DEBUGASSERT(dev != NULL && dev->pd_devpair != NULL);
+  devpair = dev->pd_devpair;
 
   /* Handle IOCTL commands */
 
   switch (cmd)
     {
       /* PTY IOCTL commands would be handled here */
-      /* There aren't any yet */
+
+      case TIOCGPTN:    /* Get Pty Number (of pty-mux device): FAR int* */
+        {
+#ifdef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+          ret = -ENOSYS;
+#else
+          FAR int *ptyno = (FAR int *)((uintptr_t)arg);
+          if (ptyno == NULL)
+            {
+              ret = -EINVAL;
+            }
+          else
+            {
+              *ptyno = (int)devpair->pp_minor;
+              ret = OK;
+            }
+#endif
+        }
+        break;
+
+      case TIOCSPTLCK:  /* Lock/unlock Pty: int */
+        ret = -ENOSYS;  /* Not implemented */
+        break;
+
+      case TIOCGPTLCK:  /* Get Pty lock state: FAR int* */
+        ret = -ENOSYS;  /* Not implemented */
+        break;
 
       /* Any unrecognized IOCTL commands will be passed to the contained
        * pipe driver.

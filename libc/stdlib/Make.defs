@@ -45,6 +45,10 @@ ifeq ($(CONFIG_FS_WRITABLE),y)
 CSRCS += lib_mktemp.c lib_mkstemp.c
 endif
 
+ifeq ($(CONFIG_PSEUDOTERM_SUSV1),y)
+CSRCS += lib_ptsname.c lib_ptsnamer.c
+endif
+
 # Add the stdlib directory to the build
 
 DEPPATH += --dep-path stdlib
