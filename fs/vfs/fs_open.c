@@ -234,17 +234,19 @@ int open(const char *path, int oflags, ...)
     }
 
 #ifdef CONFIG_PSEUDOTERM_SUSV1
-  /* If the return value from the open method is > 0, then we may assume that
-   * it is actually a file descriptor.  This kind of logic is only needed for
-   * /dev/ptmx:  When dev ptmx is opened, it does not return a file descriptor
-   * associated with the /dev/ptmx inode, but rather with the master device.
+  /* If the return value from the open method is > 0, then it may actually
+   * be an encoded file descriptor.  This kind of logic is currently only
+   * needed for /dev/ptmx:  When dev ptmx is opened, it does not return a
+   * file descriptor associated with the /dev/ptmx inode, but rather with
+   * the inode of master device created by the /dev/ptmx open method.
    *
-   * REVISIT: This is a kludge.  It is dangerous because (1) Zero is also a
-   * valid file descriptor, and (2) there could potentially be driver open
-   * methods that return values > 0 for normal success conditions.
+   * The encoding supports (a) returning file descriptor 0 (which really
+   * should not happen), and (b) avoiding confusion if some other open
+   * method returns a positive, non-zero value which is not a file
+   * descriptor.
    */
 
-  if (ret > 0)
+  if (OPEN_ISFD(ret))
     {
       /* Release file descriptor and inode that we allocated.  We don't
        * need those.
@@ -253,11 +255,11 @@ int open(const char *path, int oflags, ...)
       files_release(fd);
       inode_release(inode);
 
-      /* Instead, return the descriptor associated with the master side
-       * device.
+      /* Instead, decode and return the descriptor associated with the
+       * master side device.
        */
 
-      fd = ret;
+      fd = (int)OPEN_GETFD(ret);
     }
 #endif
 

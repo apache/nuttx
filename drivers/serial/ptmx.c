@@ -255,10 +255,11 @@ static int ptmx_open(FAR struct file *filep)
   DEBUGASSERT(ret >= 0);  /* unlink() should never fail */
   UNUSED(ret);
 
-  /* Return the master file descriptor */
+  /* Return the encoded, master file descriptor */
 
   ptmx_semgive();
-  return fd;
+  DEBUGASSERT((unsigned)fd <= OPEN_MAXFD);
+  return (int)OPEN_SETFD(fd);
 
 errout_with_minor:
   ptmx_minor_free(minor);
