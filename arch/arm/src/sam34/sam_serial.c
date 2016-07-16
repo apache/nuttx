@@ -692,8 +692,8 @@ static void up_disableallints(struct up_dev_s *priv, uint32_t *imr)
 
 static int up_setup(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   uint32_t regval;
   uint32_t imr;
 
