@@ -317,8 +317,8 @@ int fdesc_poll(int fd, FAR struct pollfd *fds, bool setup)
       /* The errno value has already been set */
 
       int errorcode = get_errno();
-      DEBUGASSERT(errcode > 0);
-      return -errcode;
+      DEBUGASSERT(errorcode > 0);
+      return -errorcode;
     }
 
   /* Let file_poll() do the rest */

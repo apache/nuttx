@@ -529,7 +529,7 @@ static int pty_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
   if ((fds->events & POLLIN) != 0)
     {
-      ret = file_poll(dev->pd_src, fds, setup);
+      ret = file_poll(&dev->pd_src, fds, setup);
     }
 
   if (ret >= OK || ret == -ENOTTY)
@@ -538,7 +538,7 @@ static int pty_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if ((fds->events & POLLOUT) != 0)
         {
-          ret = file_poll(dev->pd_sink, fds, setup);
+          ret = file_poll(&dev->pd_sink, fds, setup);
         }
     }
 
