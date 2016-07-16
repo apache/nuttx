@@ -44,6 +44,7 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <semaphore.h>
+#include <termios.h>
 #include <stdio.h>
 #include <string.h>
 #include <poll.h>
@@ -88,6 +89,13 @@ struct pty_dev_s
   struct file pd_src;           /* Provides data to read() method (pipe output) */
   struct file pd_sink;          /* Accepts data from write() method (pipe input) */
   bool pd_master;               /* True: this is the master */
+
+#ifdef CONFIG_SERIAL_TERMIOS
+  /* Terminal control flags */
+
+  tcflag_t pd_iflag;            /* Terminal nput modes */
+  tcflag_t pd_oflag;            /* Terminal output modes */
+#endif
 };
 
 /* This structure describes the pipe pair */
@@ -229,6 +237,12 @@ static int pty_open(FAR struct file *filep)
       sched_lock();
       while (devpair->pp_locked)
         {
+          /* REVISIT: Should no block if the oflags include O_NONBLOCK.
+           * Also, how wouldwbe ripple the O_NONBLOCK characteristic
+           * to the contained drivers?  And how would we change the
+           * O_NONBLOCK characteristic if it is changed via fcntl?
+           */
+
           /* Wait until unlocked.  We will also most certainly suspend here. */
 
           sem_wait(&devpair->pp_slavesem);
@@ -358,13 +372,80 @@ static ssize_t pty_read(FAR struct file *filep, FAR char *buffer, size_t len)
 {
   FAR struct inode *inode;
   FAR struct pty_dev_s *dev;
+  ssize_t ntotal;
+#ifdef CONFIG_SERIAL_TERMIOS
+  ssize_t nread;
+  size_t i;
+  char ch;
+#endif
 
   DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode = filep->f_inode;
   dev   = inode->i_private;
   DEBUGASSERT(dev != NULL);
 
-  return file_read(&dev->pd_src, buffer, len);
+#ifdef CONFIG_SERIAL_TERMIOS
+  /* Do input processing if any is enabled
+   *
+   * Specifically not handled:
+   *
+   * All of the local modes; echo, line editing, etc.
+   * Anything to do with break or parity errors.
+   * ISTRIP     - We should be 8-bit clean.
+   * IUCLC      - Not Posix
+   * IXON/OXOFF - No xon/xoff flow control.
+   */
+
+  if (dev->pd_iflag & (INLCR | IGNCR | ICRNL))
+    {
+      /* We will transfer one byte at a time, making the appropriae
+       * translations.
+       */
+
+      ntotal = 0;
+      for (i = 0; i < len; i++)
+        {
+          ch = *buffer++;
+
+          /* \n -> \r or \r -> \n translation? */
+
+          if (ch == '\n' && (dev->pd_iflag & INLCR) != 0)
+            {
+               ch = '\r';
+            }
+          else if (ch == '\r' && (dev->pd_iflag & ICRNL) != 0)
+            {
+              ch = '\n';
+            }
+
+          /* Discarding \r ?  Print character if (1) character is not \r or
+           * if (2) we were not asked to ignore \r.
+           */
+
+          if (ch != '\r' || (dev->pd_iflag & IGNCR) == 0)
+            {
+              /* Transfer the byte */
+
+              nread = file_read(&dev->pd_src, &ch, 1);
+              if (nread < 0)
+                {
+                  ntotal = nread;
+                  break;
+                }
+
+              /* Update the count of bytes transferred */
+
+              ntotal++;
+            }
+        }
+    }
+  else
+#endif
+    {
+      ntotal = file_read(&dev->pd_src, buffer, len);
+    }
+
+  return ntotal;
 }
 
 /****************************************************************************
@@ -375,13 +456,85 @@ static ssize_t pty_write(FAR struct file *filep, FAR const char *buffer, size_t 
 {
   FAR struct inode *inode;
   FAR struct pty_dev_s *dev;
+  ssize_t ntotal;
+#ifdef CONFIG_SERIAL_TERMIOS
+  ssize_t nwritten;
+  size_t i;
+  char ch;
+#endif
 
   DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode = filep->f_inode;
   dev   = inode->i_private;
   DEBUGASSERT(dev != NULL);
 
-  return file_write(&dev->pd_sink, buffer, len);
+#ifdef CONFIG_SERIAL_TERMIOS
+  /* Do output post-processing */
+
+  if ((dev->pd_oflag & OPOST) != 0)
+    {
+      /* We will transfer one byte at a time, making the appropriae
+       * translations.  Specifically not handled:
+       *
+       *   OXTABS - primarily a full-screen terminal optimisation
+       *   ONOEOT - Unix interoperability hack
+       *   OLCUC  - Not specified by POSIX
+       *   ONOCR  - low-speed interactive optimisation
+       */
+
+      ntotal = 0;
+      for (i = 0; i < len; i++)
+        {
+          ch = *buffer++;
+
+          /* Mapping CR to NL? */
+
+          if (ch == '\r' && (dev->pd_oflag & OCRNL) != 0)
+            {
+              ch = '\n';
+            }
+
+          /* Are we interested in newline processing? */
+
+          if ((ch == '\n') && (dev->pd_oflag & (ONLCR | ONLRET)) != 0)
+            {
+              char cr = '\r';
+
+              /* Transfer the carriage return */
+
+              nwritten = file_write(&dev->pd_sink, &cr, 1);
+              if (nwritten < 0)
+                {
+                  ntotal = nwritten;
+                  break;
+                }
+
+              /* Update the count of bytes transferred */
+
+              ntotal++;
+            }
+
+          /* Transfer the (possibly translated) character. */
+
+          nwritten = file_write(&dev->pd_sink, &ch, 1);
+          if (nwritten < 0)
+            {
+              ntotal = nwritten;
+              break;
+            }
+
+          /* Update the count of bytes transferred */
+
+          ntotal++;
+        }
+    }
+  else
+#endif
+    {
+      ntotal = file_write(&dev->pd_sink, buffer, len);
+    }
+
+  return ntotal;
 }
 
 /****************************************************************************
@@ -485,6 +638,42 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
+#ifdef CONFIG_SERIAL_TERMIOS
+      case TCGETS:
+        {
+          FAR struct termios *termiosp = (FAR struct termios *)arg;
+
+          if (!termiosp)
+            {
+              ret = -EINVAL;
+              break;
+            }
+
+          /* And update with flags from this layer */
+
+          termiosp->c_iflag = dev->pd_iflag;
+          termiosp->c_oflag = dev->pd_oflag;
+          termiosp->c_lflag = 0;
+        }
+        break;
+
+      case TCSETS:
+        {
+          FAR struct termios *termiosp = (FAR struct termios *)arg;
+
+          if (!termiosp)
+            {
+              ret = -EINVAL;
+              break;
+            }
+
+          /* Update the flags we keep at this layer */
+
+          dev->pd_iflag = termiosp->c_iflag;
+          dev->pd_oflag = termiosp->c_oflag;
+        }
+        break;
+#endif
       /* Any unrecognized IOCTL commands will be passed to the contained
        * pipe driver.
        */

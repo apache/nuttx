@@ -2015,6 +2015,7 @@ endmenu # SCI1 Configuration
 config PSEUDOTERM
 	bool "Pseudo-Terminal (PTY) suppport"
 	default n
+	select ARCH_HAVE_SERIAL_TERMIOS
 	---help---
 		Enable support support for master and slave pseudo-terminal devices.
 
