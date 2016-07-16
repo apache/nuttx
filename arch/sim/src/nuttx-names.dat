@@ -70,6 +70,7 @@ rmdir          NXrmdir
 sched_yield    NXsched_yield
 seekdir        NXseekdir
 select         NXselect
+sem_getvalue   NXsem_getvalue
 sem_init       NXsem_init
 sem_post       NXsem_post
 sem_wait       NXsem_wait
