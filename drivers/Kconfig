@@ -33,6 +33,14 @@ config DEV_RANDOM
 config DEV_URANDOM
 	bool "Enable /dev/urandom"
 	default n
+	---help---
+		Enable support for /dev/urandom provided by a software PRNG
+		implementation.
+
+		NOTE:  This option may not be cryptographially secure and should not
+		be enabled if you are concerned about cyptographically secure
+		pseudo-random numbers (CPRNG) and do not know the characteristics
+		of the software PRNG impelementation!
 
 if DEV_URANDOM
 
@@ -46,6 +54,8 @@ config DEV_URANDOM_XORSHIFT128
 		xorshift128 is a pseudorandom number generator that's simple,
 		portable, and can also be used on 8-bit and 16-bit MCUs.
 
+		NOTE: Not cyptographically secure
+
 config DEV_URANDOM_CONGRUENTIAL
 	bool "Conguential"
 	---help---
@@ -53,6 +63,9 @@ config DEV_URANDOM_CONGRUENTIAL
 		is computationally more intense and uses double precision floating
 		point.  NOTE: Good randomness from the congruential generator also
 		requires that you also select CONFIG_LIB_RAND_ORDER > 2
+
+		NOTE: Cyptographically secure?  Certainly not if CONFIG_LIB_RAND_ORDER
+		is small.
 
 endchoice # /dev/urandom algorithm
 endif # DEV_URANDOM
