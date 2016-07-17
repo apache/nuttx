@@ -53,6 +53,8 @@
 #include <nuttx/sched.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
+#include <nuttx/fs/fs.h>
+#include <nuttx/sched_note.h>
 #include <nuttx/serial/pty.h>
 #include <nuttx/syslog/syslog.h>
 #include <nuttx/crypto/crypto.h>
@@ -130,6 +132,32 @@ void up_initialize(void)
    */
 
   syslog_initialize(SYSLOG_INIT_EARLY);
+
+  /* Register devices */
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+
+#if defined(CONFIG_DEV_NULL)
+  devnull_register();   /* Standard /dev/null */
+#endif
+
+#if defined(CONFIG_DEV_URANDOM)
+  devurandom_register();   /* Standard /dev/urandom */
+#endif
+
+#if defined(CONFIG_DEV_ZERO)
+  devzero_register();   /* Standard /dev/zero */
+#endif
+
+#if defined(CONFIG_DEV_LOOP)
+  loop_register();      /* Standard /dev/loop */
+#endif
+#endif /* CONFIG_NFILE_DESCRIPTORS */
+
+#if defined(CONFIG_SCHED_INSTRUMENTATION_BUFFER) && \
+    defined(CONFIG_DRIVER_NOTE)
+  note_register();      /* Non-standard /dev/note */
+#endif
 
 #if defined(CONFIG_CRYPTO)
   /* Initialize the HW crypto and /dev/crypto */

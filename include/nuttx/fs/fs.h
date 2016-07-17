@@ -1014,6 +1014,16 @@ int fdesc_poll(int fd, FAR struct pollfd *fds, bool setup);
 void devnull_register(void);
 
 /****************************************************************************
+ * Name: devurandom_register
+ *
+ * Description:
+ *   Register /dev/urandom
+ *
+ ****************************************************************************/
+
+void devurandom_register(void);
+
+/****************************************************************************
  * Name: devcrypto_register
  *
  * Description:

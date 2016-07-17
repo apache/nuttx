@@ -153,6 +153,10 @@ void up_initialize(void)
   devnull_register();       /* Standard /dev/null */
 #endif
 
+#if defined(CONFIG_DEV_URANDOM)
+  devurandom_register();   /* Standard /dev/urandom */
+#endif
+
 #if defined(CONFIG_DEV_ZERO)
   devzero_register();       /* Standard /dev/zero */
 #endif

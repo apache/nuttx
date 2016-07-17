@@ -98,6 +98,10 @@ endif
 ifeq ($(CONFIG_PWM),y)
   CSRCS += pwm.c
 endif
+
+ifeq ($(CONFIG_DEV_URANDOM),y)
+  CSRCS += dev_urandom.c
+endif
 endif
 
 AOBJS = $(ASRCS:.S=$(OBJEXT))

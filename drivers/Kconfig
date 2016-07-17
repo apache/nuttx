@@ -30,6 +30,13 @@ config DEV_RANDOM
 	default y
 	depends on ARCH_HAVE_RNG
 
+config DEV_URANDOM
+	bool "Enable /dev/urandom"
+	default n
+	---help---
+		xorshift128 is a pseudorandom number generator that's simple,
+		portable, and can also be used on 8-bit and 16-bit MCUs.
+
 source drivers/loop/Kconfig
 
 menu "Buffering"
