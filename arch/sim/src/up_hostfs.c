@@ -186,6 +186,8 @@ int host_dup(int fd)
 
 void *host_opendir(const char *name)
 {
+  /* Return the host DIR pointer */
+
   return (void *)opendir(name);
 }
 
