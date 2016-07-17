@@ -1,8 +1,7 @@
 /****************************************************************************
- * include/nuttx/lib.h
- * Non-standard, internal APIs available in lib/.
+ * libc/stdlib/lib_rand.c
  *
- *   Copyright (C) 2007-2009, 2012-2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,57 +33,31 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_LIB_H
-#define __INCLUDE_NUTTX_LIB_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/fs/fs.h>
+
+#include <sys/types.h>
+#include <stdlib.h>
+
+#include <nuttx/lib.h>
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
+ * Name:  rand
+ *
+ * Description:
+ *   Generate a non-negative, integer random number in the range of 0 through
+ *   (RAND_MAX - 1)
+ *
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
-
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
+int rand(void)
 {
-#else
-#define EXTERN extern
-#endif
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-/* Hook for library initialization.  No is needed now, however */
-
-#define lib_initialize()
-
-/* Functions contained in lib_streams.c *************************************/
-
-#if CONFIG_NFILE_STREAMS > 0
-struct task_group_s;
-void lib_stream_initialize(FAR struct task_group_s *group);
-void lib_stream_release(FAR struct task_group_s *group);
-#endif
-
-/* Functions defined in lib_srand.c *****************************************/
-
-unsigned long nrand(unsigned long limit);
-
-#undef EXTERN
-#ifdef __cplusplus
+  return (int)nrand(32768L);
 }
-#endif
-
-#endif /* __ASSEMBLY__ */
-#endif /* __INCLUDE_NUTTX_LIB_H */

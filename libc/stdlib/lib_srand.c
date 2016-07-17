@@ -37,12 +37,17 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <sys/types.h>
 #include <stdlib.h>
+
+#include <nuttx/lib.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* First, second, and thired order congruential generators are supported */
 
 #ifndef CONFIG_LIB_RAND_ORDER
@@ -69,8 +74,6 @@
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
-
-static unsigned int nrand(unsigned int limit);
 
 /* First order congruential generators */
 
@@ -110,34 +113,6 @@ static unsigned long g_randint3;
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-static unsigned int nrand(unsigned int limit)
-{
-  unsigned long result;
-  double_t ratio;
-
-  /* Loop to be sure a legal random number is generated */
-
-  do
-    {
-      /* Get a random integer in the requested range */
-
-#if (CONFIG_LIB_RAND_ORDER == 1)
-      ratio = frand1();
-#elif (CONFIG_LIB_RAND_ORDER == 2)
-      ratio = frand2();
-#else /* if (CONFIG_LIB_RAND_ORDER > 2) */
-      ratio = frand3();
-#endif
-
-      /* Then, produce the return-able value */
-
-      result = (unsigned long)(((double_t)limit) * ratio);
-    }
-  while (result >= (unsigned long)limit);
-
-  return (unsigned int)result;
-}
 
 /* First order congruential generators */
 
@@ -255,7 +230,11 @@ static double_t frand3(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  srand, rand
+ * Name: srand
+ *
+ * Description:
+ *   Seed the confluent hypergeometric random number generator.
+ *
  ****************************************************************************/
 
 void srand(unsigned int seed)
@@ -271,7 +250,38 @@ void srand(unsigned int seed)
 #endif
 }
 
-int rand(void)
+/****************************************************************************
+ * Name: nrand
+ *
+ * Description:
+ *   Return a random unsigned long value in the range of 0 to (limit - 1)
+ *
+ ****************************************************************************/
+
+unsigned long nrand(unsigned long limit)
 {
-  return (int)nrand(32768);
+  unsigned long result;
+  double_t ratio;
+
+  /* Loop to be sure a legal random number is generated */
+
+  do
+    {
+      /* Get a random integer in the requested range */
+
+#if (CONFIG_LIB_RAND_ORDER == 1)
+      ratio = frand1();
+#elif (CONFIG_LIB_RAND_ORDER == 2)
+      ratio = frand2();
+#else /* if (CONFIG_LIB_RAND_ORDER > 2) */
+      ratio = frand3();
+#endif
+
+      /* Then, produce the return-able value */
+
+      result = (unsigned long)(((double_t)limit) * ratio);
+    }
+  while (result >= limit);
+
+  return result;
 }

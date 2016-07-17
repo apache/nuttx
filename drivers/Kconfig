@@ -33,9 +33,29 @@ config DEV_RANDOM
 config DEV_URANDOM
 	bool "Enable /dev/urandom"
 	default n
+
+if DEV_URANDOM
+
+choice
+	prompt "/dev/urandom algorithm"
+	default DEV_URANDOM_XORSHIFT128
+
+config DEV_URANDOM_XORSHIFT128
+	bool "xorshift128"
 	---help---
 		xorshift128 is a pseudorandom number generator that's simple,
 		portable, and can also be used on 8-bit and 16-bit MCUs.
+
+config DEV_URANDOM_CONGRUENTIAL
+	bool "Conguential"
+	---help---
+		Use the same congruential general used with srand().  This algorithm
+		is computationally more intense and uses double precision floating
+		point.  NOTE: Good randomness from the congruential generator also
+		requires that you also select CONFIG_LIB_RAND_ORDER > 2
+
+endchoice # /dev/urandom algorithm
+endif # DEV_URANDOM
 
 source drivers/loop/Kconfig
 
