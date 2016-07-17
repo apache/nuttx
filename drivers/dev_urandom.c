@@ -138,20 +138,20 @@ static ssize_t devurand_read(FAR struct file *filep, FAR char *buffer,
 
   /* Align buffer pointer to 4-byte boundry */
 
-  if ((unsigned)buffer & 0x03)
+  if (((unsigned)buffer & 0x03) != 0)
     {
       /* Generate a pseudo random number */
 
       rnd = xorshift128();
 
-      while ((unsigned)buffer & 0x03)
+      while (((unsigned)buffer & 0x03) != 0)
         {
           if (n <= 0)
             {
               return len;
             }
 
-          *buffer++ = rnd & 0xFF;
+          *buffer++ = rnd & 0xff;
           rnd >>= 8;
           --n;
         }

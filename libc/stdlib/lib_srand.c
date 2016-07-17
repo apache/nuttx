@@ -1,7 +1,7 @@
 /****************************************************************************
- * libc/stdlib/lib_rand.c
+ * libc/stdlib/lib_srand.c
  *
- *   Copyright (C) 2007, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -70,7 +70,7 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static unsigned int nrand(unsigned int nLimit);
+static unsigned int nrand(unsigned int limit);
 
 /* First order congruential generators */
 
@@ -111,7 +111,7 @@ static unsigned long g_randint3;
  * Private Functions
  ****************************************************************************/
 
-static unsigned int nrand(unsigned int nLimit)
+static unsigned int nrand(unsigned int limit)
 {
   unsigned long result;
   double_t ratio;
@@ -132,9 +132,9 @@ static unsigned int nrand(unsigned int nLimit)
 
       /* Then, produce the return-able value */
 
-      result = (unsigned long)(((double_t)nLimit) * ratio);
+      result = (unsigned long)(((double_t)limit) * ratio);
     }
-  while (result >= (unsigned long)nLimit);
+  while (result >= (unsigned long)limit);
 
   return (unsigned int)result;
 }
