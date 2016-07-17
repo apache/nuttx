@@ -233,7 +233,7 @@ static double_t frand3(void)
  * Name: srand
  *
  * Description:
- *   Seed the confluent hypergeometric random number generator.
+ *   Seed the congruential random number generator.
  *
  ****************************************************************************/
 
@@ -254,7 +254,7 @@ void srand(unsigned int seed)
  * Name: nrand
  *
  * Description:
- *   Return a random unsigned long value in the range of 0 to (limit - 1)
+ *   Return a random, unsigned long value in the range of 0 to (limit - 1)
  *
  ****************************************************************************/
 
@@ -267,7 +267,7 @@ unsigned long nrand(unsigned long limit)
 
   do
     {
-      /* Get a random integer in the requested range */
+      /* Get a random integer in the range 0.0 - 1.0 */
 
 #if (CONFIG_LIB_RAND_ORDER == 1)
       ratio = frand1();
@@ -277,9 +277,13 @@ unsigned long nrand(unsigned long limit)
       ratio = frand3();
 #endif
 
-      /* Then, produce the return-able value */
+      /* Then, produce the return-able value in the requested range */
 
       result = (unsigned long)(((double_t)limit) * ratio);
+
+      /* Loop because there is a (unlikely) possibility that round could but
+       * the result at the limit value.
+       */
     }
   while (result >= limit);
 
