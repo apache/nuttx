@@ -46,6 +46,8 @@
 #  include <sys/statfs.h>
 #  include <dirent.h>
 #  include <time.h>
+#else
+#  include <stdint.h>
 #endif
 
 /****************************************************************************
@@ -84,6 +86,10 @@
 
 #define NUTTX_O_RDWR     (NUTTX_O_RDONLY | NUTTX_O_WRONLY)
 
+/* Should match definition in include/limits.h */
+
+#define NUTTX_NAME_MAX   32
+
 #endif /* __SIM__ */
 
 /****************************************************************************
@@ -109,7 +115,7 @@ typedef uint32_t     nuttx_time_t;
 struct nuttx_dirent_s
 {
   uint8_t      d_type;             /* type of file */
-  char         d_name[NAME_MAX+1]; /* filename */
+  char         d_name[NUTTX_NAME_MAX+1]; /* filename */
 };
 
 /* These must exactly match the definition from include/sys/statfs.h: */

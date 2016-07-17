@@ -195,12 +195,11 @@ void *host_opendir(const char *name)
 
 int host_readdir(void* dirp, struct nuttx_dirent_s* entry)
 {
-    struct dirent  *ent;
+    struct dirent *ent;
 
     /* Call the host's readdir routine */
 
     ent = readdir(dirp);
-
     if (ent != NULL)
       {
         /* Copy the entry name */
@@ -226,10 +225,7 @@ int host_readdir(void* dirp, struct nuttx_dirent_s* entry)
           {
             entry->d_type = NUTTX_DTYPE_DIRECTORY;
           }
-      }
 
-    if (ent)
-      {
         return 0;
       }
 
@@ -240,7 +236,7 @@ int host_readdir(void* dirp, struct nuttx_dirent_s* entry)
  * Public Functions
  ****************************************************************************/
 
-void host_rewinddir(void* dirp)
+void host_rewinddir(void *dirp)
 {
   /* Just call the rewinddir routine */
 
@@ -251,7 +247,7 @@ void host_rewinddir(void* dirp)
  * Public Functions
  ****************************************************************************/
 
-int host_closedir(void* dirp)
+int host_closedir(void *dirp)
 {
   return closedir(dirp);
 }
