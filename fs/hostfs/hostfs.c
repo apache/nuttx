@@ -677,7 +677,6 @@ static int hostfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
   /* Call the host's opendir function */
 
   dir->u.hostfs.fs_dir = host_opendir(path);
-
   if (dir->u.hostfs.fs_dir == NULL)
     {
       ret = -ENOENT;
@@ -735,7 +734,7 @@ static int hostfs_readdir(FAR struct inode *mountpt,
                           FAR struct fs_dirent_s *dir)
 {
   FAR struct hostfs_mountpt_s *fs;
-  FAR struct host_dirent_s entry;
+  struct dirent entry;
   int ret;
 
   /* Sanity checks */
@@ -753,22 +752,6 @@ static int hostfs_readdir(FAR struct inode *mountpt,
   /* Call the host OS's readdir function */
 
   ret = host_readdir(dir->u.hostfs.fs_dir, &entry);
-
-  /* Save the entry name when successful */
-
-  if (ret == OK)
-    {
-      /* Copy the entry name */
-
-      memset(dir->fd_dir.d_name, 0, sizeof(dir->fd_dir.d_name));
-      strncpy(dir->fd_dir.d_name, entry.d_name, sizeof(dir->fd_dir.d_name));
-
-      /* Copy the entry type */
-
-      /* TODO:  May need to do some type mapping */
-
-      dir->fd_dir.d_type = entry.d_type;
-    }
 
   hostfs_semgive(fs);
   return ret;
@@ -810,7 +793,7 @@ static int hostfs_bind(FAR struct inode *blkdriver, FAR const void *data,
                        FAR void **handle)
 {
   FAR struct hostfs_mountpt_s  *fs;
-  struct host_stat_s  buf;
+  struct stat buf;
   FAR const char *options;
   int len;
   int ret;
@@ -879,7 +862,7 @@ static int hostfs_bind(FAR struct inode *blkdriver, FAR const void *data,
   /* Try to stat the file in the host FS */
 
   ret = host_stat(fs->fs_root, &buf);
-  if ((ret != 0) || ((buf.st_mode & HOST_ST_MODE_DIR) == 0))
+  if (ret != 0 || (buf.st_mode & S_IFDIR) == 0)
     {
       hostfs_semgive(fs);
       kmm_free(fs);
@@ -946,7 +929,6 @@ static int hostfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
 static int hostfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
 {
   FAR struct hostfs_mountpt_s *fs;
-  struct host_statfs_s host_buf;
   int ret;
 
   /* Sanity checks */
@@ -966,15 +948,7 @@ static int hostfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
 
   /* Call the host fs to perform the statfs */
 
-  ret = host_statfs(fs->fs_root, &host_buf);
-
-  buf->f_namelen = host_buf.f_namelen;
-  buf->f_bsize   = host_buf.f_bsize;
-  buf->f_blocks  = host_buf.f_blocks;
-  buf->f_bfree   = host_buf.f_bfree;
-  buf->f_bavail  = host_buf.f_bavail;
-  buf->f_files   = host_buf.f_files;
-  buf->f_ffree   = host_buf.f_ffree;
+  ret = host_statfs(fs->fs_root, buf);
 
   hostfs_semgive(fs);
   return ret;
@@ -1139,7 +1113,6 @@ static int hostfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
                        FAR struct stat *buf)
 {
   FAR struct hostfs_mountpt_s *fs;
-  struct host_stat_s host_buf;
   char path[HOSTFS_MAX_PATH];
   int ret;
 
@@ -1157,59 +1130,10 @@ static int hostfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
 
   hostfs_mkpath(fs, relpath, path, sizeof(path));
 
-  /* Call the host FS to do the mkdir */
+  /* Call the host FS to do the stat operation */
 
-  ret = host_stat(path, &host_buf);
-  if (ret != 0)
-    {
-      goto errout_with_semaphore;
-    }
+  ret = host_stat(path, buf);
 
-  /* Initialize the stat structure */
-
-  memset(buf, 0, sizeof(struct stat));
-
-  buf->st_mode = host_buf.st_mode & 0xFFF;
-
-  if (host_buf.st_mode & HOST_ST_MODE_DIR)
-    {
-      buf->st_mode |= S_IFDIR;
-    }
-
-  if (host_buf.st_mode & HOST_ST_MODE_REG)
-    {
-      buf->st_mode |= S_IFREG;
-    }
-
-  if (host_buf.st_mode & HOST_ST_MODE_CHR)
-    {
-      buf->st_mode |= S_IFCHR;
-    }
-
-  if (host_buf.st_mode & HOST_ST_MODE_BLK)
-    {
-      buf->st_mode |= S_IFBLK;
-    }
-
-  if (host_buf.st_mode & HOST_ST_MODE_LINK)
-    {
-      buf->st_mode |= S_IFLNK;
-    }
-
-  if (host_buf.st_mode & HOST_ST_MODE_PIPE)
-    {
-      buf->st_mode |= S_IFIFO;
-    }
-
-  buf->st_size      = host_buf.st_size;
-  buf->st_blksize   = host_buf.st_blksize;
-  buf->st_blocks    = host_buf.st_blocks;
-  buf->st_atime     = host_buf.st_atim;
-  buf->st_ctime     = host_buf.st_ctim;
-
-  ret = OK;
-
-errout_with_semaphore:
   hostfs_semgive(fs);
   return ret;
 }
