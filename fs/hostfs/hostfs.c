@@ -161,7 +161,7 @@ const struct mountpt_operations hostfs_operations =
  * Name: hostfs_semtake
  ****************************************************************************/
 
-void hostfs_semtake(struct hostfs_mountpt_s *fs)
+void hostfs_semtake(FAR struct hostfs_mountpt_s *fs)
 {
   /* Take the semaphore (perhaps waiting) */
 
@@ -179,7 +179,7 @@ void hostfs_semtake(struct hostfs_mountpt_s *fs)
  * Name: hostfs_semgive
  ****************************************************************************/
 
-void hostfs_semgive(struct hostfs_mountpt_s *fs)
+void hostfs_semgive(FAR struct hostfs_mountpt_s *fs)
 {
   sem_post(fs->fs_sem);
 }
@@ -191,12 +191,13 @@ void hostfs_semgive(struct hostfs_mountpt_s *fs)
  *
  ****************************************************************************/
 
-static void hostfs_mkpath(struct hostfs_mountpt_s  *fs, const char *relpath,
-                          char *path, int pathlen)
+static void hostfs_mkpath(FAR struct hostfs_mountpt_s  *fs,
+                          FAR const char *relpath,
+                          FAR char *path, int pathlen)
 {
-  int   depth = 0;
-  int   first;
-  int   x;
+  int depth = 0;
+  int first;
+  int x;
 
   /* Copy base host path to output */
 
@@ -247,14 +248,14 @@ static void hostfs_mkpath(struct hostfs_mountpt_s  *fs, const char *relpath,
  * Name: hostfs_open
  ****************************************************************************/
 
-static int hostfs_open(FAR struct file *filep, const char *relpath,
+static int hostfs_open(FAR struct file *filep, FAR const char *relpath,
                        int oflags, mode_t mode)
 {
-  struct inode             *inode;
-  struct hostfs_mountpt_s  *fs;
-  int                       ret;
-  struct hostfs_ofile_s    *hf;
-  char                      path[HOSTFS_MAX_PATH];
+  FAR struct inode *inode;
+  FAR struct hostfs_mountpt_s *fs;
+  FAR struct hostfs_ofile_s  *hf;
+  char path[HOSTFS_MAX_PATH];
+  int ret;
 
   /* Sanity checks */
 
@@ -335,11 +336,11 @@ errout_with_semaphore:
 
 static int hostfs_close(FAR struct file *filep)
 {
-  struct inode             *inode;
-  struct hostfs_mountpt_s  *fs;
-  struct hostfs_ofile_s    *hf;
-  struct hostfs_ofile_s    *nextfile;
-  struct hostfs_ofile_s    *prevfile;
+  FAR struct inode            *inode;
+  FAR struct hostfs_mountpt_s *fs;
+  FAR struct hostfs_ofile_s   *hf;
+  FAR struct hostfs_ofile_s   *nextfile;
+  FAR struct hostfs_ofile_s   *prevfile;
 
   /* Sanity checks */
 
@@ -415,12 +416,13 @@ okout:
  * Name: hostfs_read
  ****************************************************************************/
 
-static ssize_t hostfs_read(FAR struct file *filep, char *buffer, size_t buflen)
+static ssize_t hostfs_read(FAR struct file *filep, FAR char *buffer,
+                           size_t buflen)
 {
-  struct inode             *inode;
-  struct hostfs_mountpt_s  *fs;
-  struct hostfs_ofile_s    *hf;
-  int                       ret = OK;
+  FAR struct inode *inode;
+  FAR struct hostfs_mountpt_s *fs;
+  FAR struct hostfs_ofile_s *hf;
+  int ret = OK;
 
   /* Sanity checks */
 
@@ -453,10 +455,10 @@ static ssize_t hostfs_read(FAR struct file *filep, char *buffer, size_t buflen)
 static ssize_t hostfs_write(FAR struct file *filep, const char *buffer,
                          size_t buflen)
 {
-  struct inode             *inode;
-  struct hostfs_mountpt_s  *fs;
-  struct hostfs_ofile_s    *hf;
-  int                       ret;
+  FAR struct inode *inode;
+  FAR struct hostfs_mountpt_s *fs;
+  FAR struct hostfs_ofile_s *hf;
+  int ret;
 
   /* Sanity checks.  I have seen the following assertion misfire if
    * CONFIG_DEBUG_MM is enabled while re-directing output to a
@@ -511,10 +513,10 @@ errout_with_semaphore:
 
 static off_t hostfs_seek(FAR struct file *filep, off_t offset, int whence)
 {
-  struct inode             *inode;
-  struct hostfs_mountpt_s  *fs;
-  struct hostfs_ofile_s    *hf;
-  int                       ret;
+  FAR struct inode *inode;
+  FAR struct hostfs_mountpt_s *fs;
+  FAR struct hostfs_ofile_s *hf;
+  int ret;
 
   /* Sanity checks */
 
@@ -546,10 +548,10 @@ static off_t hostfs_seek(FAR struct file *filep, off_t offset, int whence)
 
 static int hostfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-  struct inode             *inode;
-  struct hostfs_mountpt_s  *fs;
-  struct hostfs_ofile_s    *hf;
-  int                       ret;
+  FAR struct inode *inode;
+  FAR struct hostfs_mountpt_s *fs;
+  FAR struct hostfs_ofile_s *hf;
+  int ret;
 
   /* Sanity checks */
 
@@ -585,9 +587,9 @@ static int hostfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
 static int hostfs_sync(FAR struct file *filep)
 {
-  struct inode             *inode;
-  struct hostfs_mountpt_s  *fs;
-  struct hostfs_ofile_s    *hf;
+  FAR struct inode            *inode;
+  FAR struct hostfs_mountpt_s *fs;
+  FAR struct hostfs_ofile_s   *hf;
 
   /* Sanity checks */
 
@@ -620,7 +622,7 @@ static int hostfs_sync(FAR struct file *filep)
 
 static int hostfs_dup(FAR const struct file *oldp, FAR struct file *newp)
 {
-  struct hostfs_ofile_s   *sf;
+  FAR struct hostfs_ofile_s *sf;
 
   /* Sanity checks */
 
@@ -649,11 +651,12 @@ static int hostfs_dup(FAR const struct file *oldp, FAR struct file *newp)
  *
  ****************************************************************************/
 
-static int hostfs_opendir(struct inode *mountpt, const char *relpath, struct fs_dirent_s *dir)
+static int hostfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
+                          FAR struct fs_dirent_s *dir)
 {
-  struct hostfs_mountpt_s  *fs;
-  int                       ret;
-  char                      path[HOSTFS_MAX_PATH];
+  FAR struct hostfs_mountpt_s *fs;
+  char path[HOSTFS_MAX_PATH];
+  int ret;
 
   /* Sanity checks */
 
@@ -696,7 +699,8 @@ errout_with_semaphore:
  *
  ****************************************************************************/
 
-static int hostfs_closedir(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir)
+static int hostfs_closedir(FAR struct inode *mountpt,
+                           FAR struct fs_dirent_s *dir)
 {
   struct hostfs_mountpt_s  *fs;
 
@@ -727,11 +731,12 @@ static int hostfs_closedir(FAR struct inode *mountpt, FAR struct fs_dirent_s *di
  *
  ****************************************************************************/
 
-static int hostfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
+static int hostfs_readdir(FAR struct inode *mountpt,
+                          FAR struct fs_dirent_s *dir)
 {
-  struct hostfs_mountpt_s  *fs;
-  int                       ret;
-  struct host_dirent_s      entry;
+  FAR struct hostfs_mountpt_s *fs;
+  FAR struct host_dirent_s entry;
+  int ret;
 
   /* Sanity checks */
 
@@ -754,6 +759,7 @@ static int hostfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
   if (ret == OK)
     {
       /* Copy the entry name */
+
       memset(dir->fd_dir.d_name, 0, sizeof(dir->fd_dir.d_name));
       strncpy(dir->fd_dir.d_name, entry.d_name, sizeof(dir->fd_dir.d_name));
 
@@ -775,7 +781,8 @@ static int hostfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
  *
  ****************************************************************************/
 
-static int hostfs_rewinddir(struct inode *mountpt, struct fs_dirent_s *dir)
+static int hostfs_rewinddir(FAR struct inode *mountpt,
+                            FAR struct fs_dirent_s *dir)
 {
   /* Sanity checks */
 
@@ -799,13 +806,14 @@ static int hostfs_rewinddir(struct inode *mountpt, struct fs_dirent_s *dir)
  *
  ****************************************************************************/
 
-static int hostfs_bind(FAR struct inode *blkdriver, const void *data,
-                        void **handle)
+static int hostfs_bind(FAR struct inode *blkdriver, FAR const void *data,
+                       FAR void **handle)
 {
-  struct hostfs_mountpt_s  *fs;
-  struct host_stat_s        buf;
-  int                       ret, len;
-  const char *              options;
+  FAR struct hostfs_mountpt_s  *fs;
+  struct host_stat_s  buf;
+  FAR const char *options;
+  int len;
+  int ret;
 
   /* Validate the block driver is NULL */
 
@@ -896,7 +904,7 @@ static int hostfs_bind(FAR struct inode *blkdriver, const void *data,
  ****************************************************************************/
 
 static int hostfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
-                          unsigned int flags)
+                         unsigned int flags)
 {
   FAR struct hostfs_mountpt_s *fs = (FAR struct hostfs_mountpt_s *)handle;
   int ret;
@@ -935,10 +943,10 @@ static int hostfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
  *
  ****************************************************************************/
 
-static int hostfs_statfs(struct inode *mountpt, struct statfs *buf)
+static int hostfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
 {
-  struct hostfs_mountpt_s *fs;
-  struct host_statfs_s      host_buf;
+  FAR struct hostfs_mountpt_s *fs;
+  struct host_statfs_s host_buf;
   int ret;
 
   /* Sanity checks */
@@ -961,12 +969,12 @@ static int hostfs_statfs(struct inode *mountpt, struct statfs *buf)
   ret = host_statfs(fs->fs_root, &host_buf);
 
   buf->f_namelen = host_buf.f_namelen;
-  buf->f_bsize = host_buf.f_bsize;
-  buf->f_blocks = host_buf.f_blocks;
-  buf->f_bfree = host_buf.f_bfree;
-  buf->f_bavail = host_buf.f_bavail;
-  buf->f_files = host_buf.f_files;
-  buf->f_ffree = host_buf.f_ffree;
+  buf->f_bsize   = host_buf.f_bsize;
+  buf->f_blocks  = host_buf.f_blocks;
+  buf->f_bfree   = host_buf.f_bfree;
+  buf->f_bavail  = host_buf.f_bavail;
+  buf->f_files   = host_buf.f_files;
+  buf->f_ffree   = host_buf.f_ffree;
 
   hostfs_semgive(fs);
   return ret;
@@ -979,11 +987,11 @@ static int hostfs_statfs(struct inode *mountpt, struct statfs *buf)
  *
  ****************************************************************************/
 
-static int hostfs_unlink(struct inode *mountpt, const char *relpath)
+static int hostfs_unlink(FAR struct inode *mountpt, FAR const char *relpath)
 {
-  struct hostfs_mountpt_s  *fs;
-  int                       ret;
-  char                      path[HOSTFS_MAX_PATH];
+  FAR struct hostfs_mountpt_s *fs;
+  char path[HOSTFS_MAX_PATH];
+  int ret;
 
   /* Sanity checks */
 
@@ -1014,11 +1022,12 @@ static int hostfs_unlink(struct inode *mountpt, const char *relpath)
  *
  ****************************************************************************/
 
-static int hostfs_mkdir(struct inode *mountpt, const char *relpath, mode_t mode)
+static int hostfs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
+                        mode_t mode)
 {
-  struct hostfs_mountpt_s  *fs;
-  int                       ret;
-  char                      path[HOSTFS_MAX_PATH];
+  FAR struct hostfs_mountpt_s *fs;
+  char path[HOSTFS_MAX_PATH];
+  int ret;
 
   /* Sanity checks */
 
@@ -1049,11 +1058,11 @@ static int hostfs_mkdir(struct inode *mountpt, const char *relpath, mode_t mode)
  *
  ****************************************************************************/
 
-int hostfs_rmdir(struct inode *mountpt, const char *relpath)
+int hostfs_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
 {
-  struct hostfs_mountpt_s  *fs;
-  int                       ret;
-  char                      path[HOSTFS_MAX_PATH];
+  FAR struct hostfs_mountpt_s *fs;
+  char path[HOSTFS_MAX_PATH];
+  int ret;
 
   /* Sanity checks */
 
@@ -1086,13 +1095,13 @@ int hostfs_rmdir(struct inode *mountpt, const char *relpath)
  *
  ****************************************************************************/
 
-int hostfs_rename(struct inode *mountpt, const char *oldrelpath,
-               const char *newrelpath)
+int hostfs_rename(FAR struct inode *mountpt, FAR const char *oldrelpath,
+                  FAR const char *newrelpath)
 {
-  struct hostfs_mountpt_s  *fs;
-  int                       ret;
-  char                      oldpath[HOSTFS_MAX_PATH];
-  char                      newpath[HOSTFS_MAX_PATH];
+  FAR struct hostfs_mountpt_s *fs;
+  char oldpath[HOSTFS_MAX_PATH];
+  char newpath[HOSTFS_MAX_PATH];
+  int ret;
 
   /* Sanity checks */
 
@@ -1126,12 +1135,13 @@ int hostfs_rename(struct inode *mountpt, const char *oldrelpath,
  *
  ****************************************************************************/
 
-static int hostfs_stat(struct inode *mountpt, const char *relpath, struct stat *buf)
+static int hostfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
+                       FAR struct stat *buf)
 {
-  struct hostfs_mountpt_s  *fs;
-  int                       ret;
-  struct host_stat_s        host_buf;
-  char                      path[HOSTFS_MAX_PATH];
+  FAR struct hostfs_mountpt_s *fs;
+  struct host_stat_s host_buf;
+  char path[HOSTFS_MAX_PATH];
+  int ret;
 
   /* Sanity checks */
 
@@ -1150,7 +1160,6 @@ static int hostfs_stat(struct inode *mountpt, const char *relpath, struct stat *
   /* Call the host FS to do the mkdir */
 
   ret = host_stat(path, &host_buf);
-
   if (ret != 0)
     {
       goto errout_with_semaphore;
