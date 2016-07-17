@@ -184,7 +184,7 @@ struct fs_unionfsdir_s
 
 struct fs_hostfsdir_s
 {
-  FAR void *  fs_dir;                         /* Opaque pointer to host DIR * */
+  FAR void *fs_dir;                           /* Opaque pointer to host DIR * */
 };
 #endif
 
