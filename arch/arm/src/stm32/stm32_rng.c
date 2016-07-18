@@ -302,7 +302,7 @@ void devrandom_register(void)
 void devurandom_register(void)
 {
 #ifndef CONFIG_DEV_RANDOM
-  stm32l4_rnginitialize();
+  stm32_rng_initialize();
 #endif
   (void)register_driver("/dev/urandom", &g_rngops, 0444, NULL);
 }
