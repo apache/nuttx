@@ -64,8 +64,7 @@ config DEV_URANDOM_CONGRUENTIAL
 		point.  NOTE: Good randomness from the congruential generator also
 		requires that you also select CONFIG_LIB_RAND_ORDER > 2
 
-		NOTE: Cyptographically secure?  Certainly not if CONFIG_LIB_RAND_ORDER
-		is small.
+		NOTE: Not cyptographically secure
 
 endchoice # /dev/urandom algorithm
 endif # DEV_URANDOM
