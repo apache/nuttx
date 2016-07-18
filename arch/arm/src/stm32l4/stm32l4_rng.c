@@ -306,10 +306,10 @@ static ssize_t stm32l4_rngread(struct file *filep, char *buffer, size_t buflen)
  ****************************************************************************/
 
 #ifdef CONFIG_DEV_RANDOM
-int devrandom_register(void)
+void devrandom_register(void)
 {
   stm32l4_rng_initialize();
-  return register_driver("/dev/random", &g_rngops, 0444, NULL);
+  (void)register_driver("/dev/random", &g_rngops, 0444, NULL);
 }
 #endif
 
@@ -319,15 +319,21 @@ int devrandom_register(void)
  * Description:
  *   Register /dev/urandom
  *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
  ****************************************************************************/
 
 #ifdef CONFIG_DEV_URANDOM_ARCH
-int devurandom_register(void)
+void devurandom_register(void)
 {
 #ifndef CONFIG_DEV_RANDOM
   stm32l4_rng_initialize();
 #endif
-  return register_driver("/dev/urandom", &g_rngops, 0444, NULL);
+  (void)register_driver("/dev/urandom", &g_rngops, 0444, NULL);
 }
 #endif
 

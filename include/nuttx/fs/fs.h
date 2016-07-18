@@ -1009,6 +1009,12 @@ int fdesc_poll(int fd, FAR struct pollfd *fds, bool setup);
  * Description:
  *   Register /dev/null
  *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
  ****************************************************************************/
 
 void devnull_register(void);
@@ -1018,6 +1024,12 @@ void devnull_register(void);
  *
  * Description:
  *   Initialize the RNG hardware and register the /dev/random driver.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
  *
  ****************************************************************************/
 
@@ -1031,6 +1043,12 @@ void devrandom_register(void);
  * Description:
  *   Register /dev/urandom
  *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
  ****************************************************************************/
 
 #ifdef CONFIG_DEV_URANDOM
@@ -1043,6 +1061,12 @@ void devurandom_register(void);
  * Description:
  *   Register /dev/crypto
  *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
  ****************************************************************************/
 
 void devcrypto_register(void);
@@ -1052,6 +1076,12 @@ void devcrypto_register(void);
  *
  * Description:
  *   Register /dev/zero
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
  *
  ****************************************************************************/
 

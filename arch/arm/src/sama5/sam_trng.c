@@ -400,7 +400,7 @@ static int sam_rng_initialize(void)
  ****************************************************************************/
 
 #ifdef CONFIG_DEV_RANDOM
-int devrandom_register(void)
+void devrandom_register(void)
 {
   int ret;
 
@@ -413,8 +413,6 @@ int devrandom_register(void)
           ferr("ERROR: Failed to register /dev/random\n");
         }
     }
-
-  return ret;
 }
 #endif
 
@@ -424,10 +422,16 @@ int devrandom_register(void)
  * Description:
  *   Register /dev/urandom
  *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
  ****************************************************************************/
 
 #ifdef CONFIG_DEV_URANDOM_ARCH
-int devurandom_register(void)
+void devurandom_register(void)
 {
   int ret;
 
@@ -442,8 +446,6 @@ int devurandom_register(void)
           ferr("ERROR: Failed to register /dev/urandom\n");
         }
     }
-
-  return ret;
 }
 #endif
 
