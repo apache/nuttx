@@ -59,6 +59,9 @@
 #include "sam_periphclks.h"
 #include "sam_trng.h"
 
+#if defined(CONFIG_SAMA5_TRNG)
+#if defined(CONFIG_DEV_RANDOM) || defined(CONFIG_DEV_URANDOM_ARCH)
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -325,14 +328,10 @@ errout:
 }
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: devrandom_register
+ * Name: sam_rng_initialize
  *
  * Description:
- *   Initialize the TRNG hardware and register the /dev/random driver.
+ *   Initialize the TRNG hardware.
  *
  * Input Parameters:
  *   None
@@ -342,7 +341,7 @@ errout:
  *
  ****************************************************************************/
 
-int devrandom_register(void)
+static int sam_rng_initialize(void)
 {
   int ret;
 
@@ -375,17 +374,78 @@ int devrandom_register(void)
 
   putreg32(TRNG_CR_DISABLE | TRNG_CR_KEY, SAM_TRNG_CR);
 
-  /* Register the character driver */
-
-  ret = register_driver("/dev/random", &g_trngops, 0644, NULL);
-  if (ret < 0)
-    {
-      ferr("ERROR: Failed to register /dev/random\n");
-      return ret;
-    }
-
   /* Enable the TRNG interrupt at the AIC */
 
   up_enable_irq(SAM_IRQ_TRNG);
   return OK;
 }
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: devrandom_register
+ *
+ * Description:
+ *   Initialize the TRNG hardware and register the /dev/random driver.
+ *   Must be called BEFORE devurandom_register.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEV_RANDOM
+int devrandom_register(void)
+{
+  int ret;
+
+  ret = sam_rng_initialize();
+  if (ret >= 0)
+    {
+      ret = register_driver("/dev/random", &g_trngops, 0644, NULL);
+      if (ret < 0)
+        {
+          ferr("ERROR: Failed to register /dev/random\n");
+        }
+    }
+
+  return ret;
+}
+#endif
+
+/****************************************************************************
+ * Name: devurandom_register
+ *
+ * Description:
+ *   Register /dev/urandom
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEV_URANDOM_ARCH
+int devurandom_register(void)
+{
+  int ret;
+
+#ifndef CONFIG_DEV_RANDOM
+  ret = sam_rng_initialize();
+  if (ret >= 0)
+#endif
+    {
+      ret = register_driver("/dev/urandom", &g_trngops, 0644, NULL);
+      if (ret < 0)
+        {
+          ferr("ERROR: Failed to register /dev/urandom\n");
+        }
+    }
+
+  return ret;
+}
+#endif
+
+#endif /* CONFIG_DEV_RANDOM || CONFIG_DEV_URANDOM_ARCH */
+#endif /* CONFIG_SAMA5_TRNG */

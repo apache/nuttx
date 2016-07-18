@@ -52,13 +52,14 @@
 #include "chip/stm32l4_rng.h"
 #include "up_internal.h"
 
-#ifdef CONFIG_STM32L4_RNG
+#if defined(CONFIG_STM32L4_RNG)
+#if defined(CONFIG_DEV_RANDOM) || defined(CONFIG_DEV_URANDOM_ARCH)
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static int stm32l4_rnginitialize(void);
+static int stm32l4_rng_initialize(void);
 static int stm32l4_rnginterrupt(int irq, void *context);
 static void stm32l4_rngenable(void);
 static void stm32l4_rngdisable(void);
@@ -105,7 +106,7 @@ static const struct file_operations g_rngops =
  * Private functions
  ****************************************************************************/
 
-static int stm32l4_rnginitialize(void)
+static int stm32l4_rng_initialize(void)
 {
   _info("Initializing RNG\n");
 
@@ -294,6 +295,7 @@ static ssize_t stm32l4_rngread(struct file *filep, char *buffer, size_t buflen)
  *
  * Description:
  *   Initialize the RNG hardware and register the /dev/random driver.
+ *   Must be called BEFORE devurandom_register.
  *
  * Input Parameters:
  *   None
@@ -303,10 +305,31 @@ static ssize_t stm32l4_rngread(struct file *filep, char *buffer, size_t buflen)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_DEV_RANDOM
 int devrandom_register(void)
 {
-  stm32l4_rnginitialize();
+  stm32l4_rng_initialize();
   return register_driver("/dev/random", &g_rngops, 0444, NULL);
 }
+#endif
 
+/****************************************************************************
+ * Name: devurandom_register
+ *
+ * Description:
+ *   Register /dev/urandom
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEV_URANDOM_ARCH
+int devurandom_register(void)
+{
+#ifndef CONFIG_DEV_RANDOM
+  stm32l4_rng_initialize();
+#endif
+  return register_driver("/dev/urandom", &g_rngops, 0444, NULL);
+}
+#endif
+
+#endif /* CONFIG_DEV_RANDOM || CONFIG_DEV_URANDOM_ARCH */
 #endif /* CONFIG_STM32L4_RNG */
