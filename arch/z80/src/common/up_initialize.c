@@ -164,6 +164,10 @@ void up_initialize(void)
   devnull_register();   /* Standard /dev/null */
 #endif
 
+#if defined(CONFIG_DEV_RANDOM)
+  devrandom_register(); /* Standard /dev/random */
+#endif
+
 #if defined(CONFIG_DEV_URANDOM)
   devurandom_register();   /* Standard /dev/urandom */
 #endif
@@ -221,12 +225,6 @@ void up_initialize(void)
 
 #if CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_CRYPTO_CRYPTODEV)
   devcrypto_register();
-#endif
-
-#ifdef CONFIG_DEV_RANDOM
-  /* Initialize the Random Number Generator (RNG)  */
-
-  devrandom_register();
 #endif
 
 #ifndef CONFIG_NETDEV_LATEINIT
