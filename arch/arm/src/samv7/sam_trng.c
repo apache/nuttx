@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/samv7/sam_trng.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Derives from the SAMA5D3 TRNG Nuttx driver which, in turn, derives, in
@@ -330,10 +330,10 @@ errout:
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_rnginitialize
+ * Name: devrandom_register
  *
  * Description:
- *   Initialize the TRNG hardware and register the /dev/randome driver.
+ *   Initialize the TRNG hardware and register the /dev/random driver.
  *
  * Input Parameters:
  *   None
@@ -343,7 +343,7 @@ errout:
  *
  ****************************************************************************/
 
-void up_rnginitialize(void)
+int devrandom_register(void)
 {
   int ret;
 
@@ -361,10 +361,11 @@ void up_rnginitialize(void)
 
   /* Initialize the TRNG interrupt */
 
-  if (irq_attach(SAM_IRQ_TRNG, sam_interrupt))
+  ret = irq_attach(SAM_IRQ_TRNG, sam_interrupt);
+  if (ret < 0)
     {
       ferr("ERROR: Failed to attach to IRQ%d\n", SAM_IRQ_TRNG);
-      return;
+      return ret;
     }
 
   /* Disable the interrupts at the TRNG */
@@ -381,10 +382,11 @@ void up_rnginitialize(void)
   if (ret < 0)
     {
       ferr("ERROR: Failed to register /dev/random\n");
-      return;
+      return ret;
     }
 
   /* Enable the TRNG interrupt at the AIC */
 
   up_enable_irq(SAM_IRQ_TRNG);
+  return OK;
 }

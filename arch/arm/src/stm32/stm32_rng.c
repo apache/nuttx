@@ -258,8 +258,22 @@ static ssize_t stm32_read(struct file *filep, char *buffer, size_t buflen)
  * Public Functions
  ****************************************************************************/
 
-void up_rnginitialize()
+/****************************************************************************
+ * Name: devrandom_register
+ *
+ * Description:
+ *   Initialize the RNG hardware and register the /dev/random driver.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+int devrandom_register(void)
 {
   stm32_rnginitialize();
-  register_driver("/dev/random", &g_rngops, 0444, NULL);
+  return register_driver("/dev/random", &g_rngops, 0444, NULL);
 }

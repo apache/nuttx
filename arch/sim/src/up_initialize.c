@@ -211,7 +211,7 @@ void up_initialize(void)
 #ifdef CONFIG_DEV_RANDOM
   /* Initialize the Random Number Generator (RNG)  */
 
-  up_rnginitialize();
+  devrandom_register();
 #endif
 
 #if defined(CONFIG_FS_FAT) && !defined(CONFIG_DISABLE_MOUNTPOINT)

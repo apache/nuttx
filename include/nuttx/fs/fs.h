@@ -1014,6 +1014,18 @@ int fdesc_poll(int fd, FAR struct pollfd *fds, bool setup);
 void devnull_register(void);
 
 /****************************************************************************
+ * Name: devrandom_register
+ *
+ * Description:
+ *   Initialize the RNG hardware and register the /dev/random driver.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEV_RANDOM
+void devrandom_register(void);
+#endif
+
+/****************************************************************************
  * Name: devurandom_register
  *
  * Description:
@@ -1021,7 +1033,9 @@ void devnull_register(void);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_DEV_URANDOM
 void devurandom_register(void);
+#endif
 
 /****************************************************************************
  * Name: devcrypto_register

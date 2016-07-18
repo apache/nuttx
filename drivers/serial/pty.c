@@ -424,7 +424,7 @@ static ssize_t pty_read(FAR struct file *filep, FAR char *buffer, size_t len)
            *
            * There is an inherent race condition in this test, but leaving
            * a few bytes unnecessarily in the pipe should not be harmful.
-           * (we could lock the scheduler between the test and the
+           * (we could lock the scheduler before the test and after the
            * file_read() below if we wanted to eliminate the race)
            */
 
@@ -443,7 +443,9 @@ static ssize_t pty_read(FAR struct file *filep, FAR char *buffer, size_t len)
                 }
 
               /* Break out of the loop and return ntotal if the pipe is
-               * empty.
+               * empty.  This is the race:  The fifo was emtpy when we
+               * called file_ioctl() above, but it might not be empty right
+               * now.
                */
 
               if (nsrc < 1)
@@ -495,7 +497,7 @@ static ssize_t pty_read(FAR struct file *filep, FAR char *buffer, size_t len)
   else
 #endif
     {
-      /* NOTE: the source pipe will block is no data is available in
+      /* NOTE: the source pipe will block if no data is available in
        * the pipe.   Otherwise, it will return data from the pipe.  If
        * there are fewer than 'len' bytes in the, it will return with
        * ntotal < len.

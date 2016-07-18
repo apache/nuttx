@@ -229,7 +229,7 @@ void up_initialize(void)
 #ifdef CONFIG_DEV_RANDOM
   /* Initialize the Random Number Generator (RNG)  */
 
-  up_rnginitialize();
+  devrandom_register();
 #endif
 
 #ifndef CONFIG_NETDEV_LATEINIT
