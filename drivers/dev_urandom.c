@@ -53,6 +53,8 @@
 #include <nuttx/lib.h>
 #include <nuttx/fs/fs.h>
 
+#if defined(CONFIG_DEV_URANDOM) && !defined(CONFIG_DEV_URANDOM_ARCH)
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -297,3 +299,5 @@ void devurandom_register(void)
 
   (void)register_driver("/dev/urandom", &devurand_fops, 0666, NULL);
 }
+
+#endif /* CONFIG_DEV_URANDOM && CONFIG_DEV_URANDOM_ARCH */

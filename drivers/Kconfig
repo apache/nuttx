@@ -34,8 +34,8 @@ config DEV_URANDOM
 	bool "Enable /dev/urandom"
 	default n
 	---help---
-		Enable support for /dev/urandom provided by a software PRNG
-		implementation.
+		Enable support for /dev/urandom provided by either a hardware TRNG or
+		by a software PRNG implementation.
 
 		NOTE:  This option may not be cryptographially secure and should not
 		be enabled if you are concerned about cyptographically secure
@@ -46,7 +46,8 @@ if DEV_URANDOM
 
 choice
 	prompt "/dev/urandom algorithm"
-	default DEV_URANDOM_XORSHIFT128
+	default DEV_URANDOM_ARCH if ARCH_HAVE_RNG
+	default DEV_URANDOM_XORSHIFT128 if !ARCH_HAVE_RNG
 
 config DEV_URANDOM_XORSHIFT128
 	bool "xorshift128"
@@ -65,6 +66,18 @@ config DEV_URANDOM_CONGRUENTIAL
 		requires that you also select CONFIG_LIB_RAND_ORDER > 2
 
 		NOTE: Not cyptographically secure
+
+config DEV_URANDOM_ARCH
+	bool "Architecture-specific"
+	depends on ARCH_HAVE_RNG
+	---help---
+		The implementation of /dev/urandom is provided in archtecture-
+		specific logic using hardware TRNG logic.  architecture-specific
+		logic must provide the whole implementation in this case, including
+		the function devurandom_register().
+
+		May or may not be cyptographically secure, depending upon the
+		implementation.
 
 endchoice # /dev/urandom algorithm
 endif # DEV_URANDOM
