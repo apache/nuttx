@@ -115,19 +115,19 @@ static ssize_t filemtd_write(FAR struct file_dev_s *priv, size_t offset,
 
 /* MTD driver methods */
 
-static int file_erase(FAR struct mtd_dev_s *dev, off_t startblock,
+static int filemtd_erase(FAR struct mtd_dev_s *dev, off_t startblock,
                  size_t nblocks);
-static ssize_t file_bread(FAR struct mtd_dev_s *dev, off_t startblock,
+static ssize_t filemtd_bread(FAR struct mtd_dev_s *dev, off_t startblock,
                  size_t nblocks, FAR uint8_t *buf);
-static ssize_t file_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
+static ssize_t filemtd_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
                  size_t nblocks, FAR const uint8_t *buf);
-static ssize_t file_byteread(FAR struct mtd_dev_s *dev, off_t offset,
+static ssize_t filemtd_byteread(FAR struct mtd_dev_s *dev, off_t offset,
                  size_t nbytes, FAR uint8_t *buf);
 #ifdef CONFIG_MTD_BYTE_WRITE
 static ssize_t file_bytewrite(FAR struct mtd_dev_s *dev, off_t offset,
                  size_t nbytes, FAR const uint8_t *buf);
 #endif
-static int file_ioctl(FAR struct mtd_dev_s *dev, int cmd,
+static int filemtd_ioctl(FAR struct mtd_dev_s *dev, int cmd,
                  unsigned long arg);
 
 /****************************************************************************
@@ -236,10 +236,10 @@ static ssize_t filemtd_read(FAR struct file_dev_s *priv,
 }
 
 /****************************************************************************
- * Name: file_erase
+ * Name: filemtd_erase
  ****************************************************************************/
 
-static int file_erase(FAR struct mtd_dev_s *dev, off_t startblock,
+static int filemtd_erase(FAR struct mtd_dev_s *dev, off_t startblock,
                       size_t nblocks)
 {
   FAR struct file_dev_s *priv = (FAR struct file_dev_s *)dev;
@@ -289,10 +289,10 @@ static int file_erase(FAR struct mtd_dev_s *dev, off_t startblock,
 }
 
 /****************************************************************************
- * Name: file_bread
+ * Name: filemtd_bread
  ****************************************************************************/
 
-static ssize_t file_bread(FAR struct mtd_dev_s *dev, off_t startblock,
+static ssize_t filemtd_bread(FAR struct mtd_dev_s *dev, off_t startblock,
                           size_t nblocks, FAR uint8_t *buf)
 {
   FAR struct file_dev_s *priv = (FAR struct file_dev_s *)dev;
@@ -329,10 +329,10 @@ static ssize_t file_bread(FAR struct mtd_dev_s *dev, off_t startblock,
 }
 
 /****************************************************************************
- * Name: file_bwrite
+ * Name: filemtd_bwrite
  ****************************************************************************/
 
-static ssize_t file_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
+static ssize_t filemtd_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
                           size_t nblocks, FAR const uint8_t *buf)
 {
   FAR struct file_dev_s *priv = (FAR struct file_dev_s *)dev;
@@ -369,10 +369,10 @@ static ssize_t file_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
 }
 
 /****************************************************************************
- * Name: file_byteread
+ * Name: filemtd_byteread
  ****************************************************************************/
 
-static ssize_t file_byteread(FAR struct mtd_dev_s *dev, off_t offset,
+static ssize_t filemtd_byteread(FAR struct mtd_dev_s *dev, off_t offset,
                             size_t nbytes, FAR uint8_t *buf)
 {
   FAR struct file_dev_s *priv = (FAR struct file_dev_s *)dev;
@@ -419,10 +419,10 @@ static ssize_t file_bytewrite(FAR struct mtd_dev_s *dev, off_t offset,
 #endif
 
 /****************************************************************************
- * Name: file_ioctl
+ * Name: filemtd_ioctl
  ****************************************************************************/
 
-static int file_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
+static int filemtd_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 {
   FAR struct file_dev_s *priv = (FAR struct file_dev_s *)dev;
   int ret = -EINVAL; /* Assume good command with bad parameters */
@@ -456,7 +456,7 @@ static int file_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
         {
           /* Erase the entire device */
 
-          file_erase(dev, 0, priv->nblocks);
+          filemtd_erase(dev, 0, priv->nblocks);
           ret = OK;
         }
         break;
@@ -566,14 +566,14 @@ FAR struct mtd_dev_s *filemtd_initialize(FAR const char *path, size_t offset,
    * nullified by kmm_zalloc).
    */
 
-  priv->mtd.erase  = file_erase;
-  priv->mtd.bread  = file_bread;
-  priv->mtd.bwrite = file_bwrite;
-  priv->mtd.read   = file_byteread;
+  priv->mtd.erase  = filemtd_erase;
+  priv->mtd.bread  = filemtd_bread;
+  priv->mtd.bwrite = filemtd_bwrite;
+  priv->mtd.read   = filemtd_byteread;
 #ifdef CONFIG_MTD_BYTE_WRITE
   priv->mtd.write  = file_bytewrite;
 #endif
-  priv->mtd.ioctl  = file_ioctl;
+  priv->mtd.ioctl  = filemtd_ioctl;
   priv->offset     = offset;
   priv->nblocks    = nblocks;
 
@@ -632,7 +632,7 @@ bool filemtd_isfilemtd(FAR struct mtd_dev_s *dev)
 {
   FAR struct file_dev_s *priv = (FAR struct file_dev_s *) dev;
 
-  if (priv->mtd.erase == file_erase)
+  if (priv->mtd.erase == filemtd_erase)
     return 1;
 
   return 0;
