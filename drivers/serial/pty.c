@@ -58,6 +58,14 @@
 #include "pty.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Should never be set... only for comparison to serial.c */
+
+#undef CONFIG_PSEUDOTERM_FULLBLOCKS
+
+/****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
@@ -180,7 +188,9 @@ static void pty_destroy(FAR struct pty_devpair_s *devpair)
 #endif
   (void)unregister_driver(devname);
 
-  /* Un-register the master device (/dev/ptyN may have already been unlinked) */
+  /* Un-register the master device (/dev/ptyN may have already been
+   * unlinked).
+   */
 
   snprintf(devname, 16, "/dev/pty%d", (int)devpair->pp_minor);
   (void)unregister_driver(devname);
@@ -377,6 +387,7 @@ static ssize_t pty_read(FAR struct file *filep, FAR char *buffer, size_t len)
   ssize_t nread;
   size_t i;
   char ch;
+  int ret;
 #endif
 
   DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
@@ -389,24 +400,71 @@ static ssize_t pty_read(FAR struct file *filep, FAR char *buffer, size_t len)
    *
    * Specifically not handled:
    *
-   * All of the local modes; echo, line editing, etc.
-   * Anything to do with break or parity errors.
-   * ISTRIP     - We should be 8-bit clean.
-   * IUCLC      - Not Posix
-   * IXON/OXOFF - No xon/xoff flow control.
+   *   All of the local modes; echo, line editing, etc.
+   *   Anything to do with break or parity errors.
+   *   ISTRIP     - We should be 8-bit clean.
+   *   IUCLC      - Not Posix
+   *   IXON/OXOFF - No xon/xoff flow control.
    */
 
   if (dev->pd_iflag & (INLCR | IGNCR | ICRNL))
     {
-      /* We will transfer one byte at a time, making the appropriae
+      /* We will transfer one byte at a time, making the appropriate
        * translations.
        */
 
       ntotal = 0;
       for (i = 0; i < len; i++)
         {
-          ch = *buffer++;
+#ifndef CONFIG_PSEUDOTERM_FULLBLOCKS
+          /* This logic should return if the pipe becomes empty after some
+           * bytes were read from the pipe.  If we have already read some
+           * data, we use the FIONREAD ioctl to test if there are more bytes
+           * in the pipe.
+           *
+           * There is an inherent race condition in this test, but leaving
+           * a few bytes unnecessarily in the pipe should not be harmful.
+           * (we could lock the scheduler between the test and the
+           * file_read() below if we wanted to eliminate the race)
+           */
 
+          if (ntotal > 0)
+            {
+              int nsrc;
+
+              /* Check how many bytes are waiting in the pipe */
+
+              ret = file_ioctl(&dev->pd_src, FIONREAD,
+                               (unsigned long)((uintptr_t)&nsrc));
+              if (ret < 0)
+                {
+                  ntotal = ret;
+                  break;
+                }
+
+              /* Break out of the loop and return ntotal if the pipe is
+               * empty.
+               */
+
+              if (nsrc < 1)
+                {
+                  break;
+                }
+            }
+#endif
+
+          /* Read one byte from the source the byte.  This call will block
+           * if the source pipe is empty.
+           */
+
+          nread = file_read(&dev->pd_src, &ch, 1);
+          if (nread < 0)
+            {
+              ntotal = nread;
+              break;
+            }
+
+          /* Perform input processing */
           /* \n -> \r or \r -> \n translation? */
 
           if (ch == '\n' && (dev->pd_iflag & INLCR) != 0)
@@ -424,17 +482,12 @@ static ssize_t pty_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
           if (ch != '\r' || (dev->pd_iflag & IGNCR) == 0)
             {
-              /* Transfer the byte */
 
-              nread = file_read(&dev->pd_src, &ch, 1);
-              if (nread < 0)
-                {
-                  ntotal = nread;
-                  break;
-                }
+              /* Transfer the (possibly translated) character and update the
+               * count of bytes transferred.
+               */
 
-              /* Update the count of bytes transferred */
-
+              *buffer++ = ch;
               ntotal++;
             }
         }
@@ -442,6 +495,12 @@ static ssize_t pty_read(FAR struct file *filep, FAR char *buffer, size_t len)
   else
 #endif
     {
+      /* NOTE: the source pipe will block is no data is available in
+       * the pipe.   Otherwise, it will return data from the pipe.  If
+       * there are fewer than 'len' bytes in the, it will return with
+       * ntotal < len.
+       */
+
       ntotal = file_read(&dev->pd_src, buffer, len);
     }
 

@@ -397,7 +397,7 @@ int pipecommon_close(FAR struct file *filep)
           return OK;
         }
 #endif
-   }
+    }
 
   sem_post(&dev->d_bfsem);
   return OK;
@@ -475,6 +475,7 @@ ssize_t pipecommon_read(FAR struct file *filep, FAR char *buffer, size_t len)
         {
           dev->d_rdndx = 0;
         }
+
       nread++;
     }
 
