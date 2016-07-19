@@ -1,7 +1,7 @@
 /****************************************************************************
- * drivers/pipes/fifo.c
+ * libc/misc/lib_mkfifo.c
  *
- *   Copyright (C) 2008-2009, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,40 +42,14 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include <stdint.h>
-#include <nuttx/fs/fs.h>
-#include <errno.h>
-
-#include "pipe_common.h"
-
 #if CONFIG_DEV_FIFO_SIZE > 0
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-static const struct file_operations fifo_fops =
-{
-  pipecommon_open,  /* open */
-  pipecommon_close, /* close */
-  pipecommon_read,  /* read */
-  pipecommon_write, /* write */
-  0,                /* seek */
-  pipecommon_ioctl, /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  pipecommon_poll,  /* poll */
-#endif
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  pipecommon_unlink /* unlink */
-#endif
-};
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mkfifo2
+ * Name: mkfifo
  *
  * Description:
  *   mkfifo() makes a FIFO device driver file with name 'pathname.'  Unlike
@@ -92,15 +66,10 @@ static const struct file_operations fifo_fops =
  *   If all threads that write to the FIFO have closed, subsequent calls to
  *   read() on the FIFO will return 0 (end-of-file).
  *
- *   NOTE: mkfifo2 is a special, non-standard, NuttX-only interface.  Since
- *   the NuttX FIFOs are based in in-memory, circular buffers, the ability
- *   to control the size of those buffers is critical for system tuning.
- *
  * Inputs:
  *   pathname - The full path to the FIFO instance to attach to or to create
  *     (if not already created).
  *   mode - Ignored for now
- *   bufsize - The size of the in-memory, circular buffer in bytes.
  *
  * Return:
  *   0 is returned on success; otherwise, -1 is returned with errno set
@@ -108,26 +77,10 @@ static const struct file_operations fifo_fops =
  *
  ****************************************************************************/
 
-int mkfifo2(FAR const char *pathname, mode_t mode, size_t bufsize)
+int mkfifo(FAR const char *pathname, mode_t mode)
 {
-  FAR struct pipe_dev_s *dev;
-  int ret;
-
-  /* Allocate and initialize a new device structure instance */
-
-  dev = pipecommon_allocdev(bufsize);
-  if (!dev)
-    {
-      return -ENOMEM;
-    }
-
-  ret = register_driver(pathname, &fifo_fops, mode, (FAR void *)dev);
-  if (ret != 0)
-    {
-      pipecommon_freedev(dev);
-    }
-
-  return ret;
+  return mkfifo2(pathname, mode, CONFIG_DEV_FIFO_SIZE);
 }
 
 #endif /* CONFIG_DEV_FIFO_SIZE > 0 */
+

@@ -294,26 +294,4 @@ errout:
   return ERROR;
 }
 
-/****************************************************************************
- * Name: pipe2
- *
- * Description:
- *   pipe() creates a pair of file descriptors, pointing to a pipe inode,
- *   and  places them in the array pointed to by 'fd'. fd[0] is for reading,
- *   fd[1] is for writing.
- *
- * Inputs:
- *   fd[2] - The user provided array in which to catch the pipe file
- *   descriptors
- *
- * Return:
- *   0 is returned on success; otherwise, -1 is returned with errno set
- *   appropriately.
- *
- ****************************************************************************/
-
-int pipe(int fd[2])
-{
-  return pipe2(fd, CONFIG_DEV_PIPE_SIZE);
-}
 #endif /* CONFIG_DEV_PIPE_SIZE > 0 */
