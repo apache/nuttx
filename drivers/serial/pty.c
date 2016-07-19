@@ -471,10 +471,18 @@ static ssize_t pty_read(FAR struct file *filep, FAR char *buffer, size_t len)
               sched_unlock();
             }
           else
+#else
+          /* If we wanted to return full blocks of data, then file_read()
+           * may need to be called repeatedly.  That is because the pipe
+           * read() method will return early if the fifo becomes empty
+           * after any data has been read.
+           */
+
+# error Missing logic
 #endif
             {
-              /* Read one byte from the source the byte.  This call will block
-               * if the source pipe is empty.
+              /* Read one byte from the source the byte.  This call will
+               * block if the source pipe is empty.
                */
 
               nread = file_read(&dev->pd_src, &ch, 1);
