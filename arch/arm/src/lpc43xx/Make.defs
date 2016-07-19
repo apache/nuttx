@@ -126,6 +126,10 @@ ifeq ($(CONFIG_LPC43_ETHERNET),y)
 CHIP_CSRCS += lpc43_ethernet.c
 endif
 
+ifeq ($(CONFIG_LPC43_EMC),y)
+CHIP_CSRCS += lpc43_emc.c
+endif
+
 ifeq ($(CONFIG_LPC43_SPI),y)
 CHIP_CSRCS += lpc43_spi.c
 else
