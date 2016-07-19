@@ -157,7 +157,7 @@ FAR struct pipe_dev_s *pipecommon_allocdev(size_t bufsize)
 {
   FAR struct pipe_dev_s *dev;
 
-  DEBUGASSERT(bufsize <= CONFIG_DEV_PIPE_MAXSIZE)
+  DEBUGASSERT(bufsize <= CONFIG_DEV_PIPE_MAXSIZE);
 
   /* Allocate a private structure to manage the pipe */
 
