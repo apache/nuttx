@@ -336,7 +336,12 @@ void netdriver_loop(void);
 
 #ifdef CONFIG_SIM_SPIFLASH
 struct spi_dev_s;
-struct spi_dev_s *up_spiflashinitialize(void);
+struct spi_dev_s *up_spiflashinitialize(FAR const char *name);
+#endif
+
+#ifdef CONFIG_SIM_QSPIFLASH
+struct qspi_dev_s;
+struct qspi_dev_s *up_qspiflashinitialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

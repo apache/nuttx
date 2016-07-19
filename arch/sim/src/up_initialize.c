@@ -71,32 +71,86 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_FS_SMARTFS) && defined(CONFIG_SIM_SPIFLASH)
+#if defined(CONFIG_FS_SMARTFS) && (defined(CONFIG_SIM_SPIFLASH) || defined(CONFIG_SIM_QSPIFLASH))
 static void up_init_smartfs(void)
 {
   FAR struct mtd_dev_s *mtd;
+  int minor = 0;
+#if defined(CONFIG_MTD_M25P) || defined(CONFIG_MTD_W25) || defined(CONFIG_MTD_SST26)
   FAR struct spi_dev_s *spi;
+#endif
+#ifdef CONFIG_MTD_N25QXXX
+  FAR struct qspi_dev_s *qspi;
+#endif
 
+#ifdef CONFIG_SIM_SPIFLASH
 #ifdef CONFIG_MTD_M25P
   /* Initialize a simulated SPI FLASH block device m25p MTD driver */
 
-  spi = up_spiflashinitialize();
-  mtd = m25p_initialize(spi);
+  spi = up_spiflashinitialize("m25p");
+  if (spi != NULL)
+    {
+      mtd = m25p_initialize(spi);
 
-  /* Now initialize a SMART Flash block device and bind it to the MTD device */
+      /* Now initialize a SMART Flash block device and bind it to the MTD device */
 
-  smart_initialize(0, mtd, NULL);
+      if (mtd != NULL)
+        {
+          smart_initialize(minor++, mtd, "_m25p");
+        }
+    }
+#endif
+
+#ifdef CONFIG_MTD_SST26
+  /* Initialize a simulated SPI FLASH block device sst26 MTD driver */
+
+  spi = up_spiflashinitialize("sst26");
+  if (spi != NULL)
+    {
+      mtd = sst26_initialize_spi(spi);
+
+      /* Now initialize a SMART Flash block device and bind it to the MTD device */
+
+      if (mtd != NULL)
+        {
+          smart_initialize(minor++, mtd, "_sst26");
+        }
+    }
 #endif
 
 #ifdef CONFIG_MTD_W25
-  /* Initialize a simulated SPI FLASH block device m25p MTD driver */
+  /* Initialize a simulated SPI FLASH block device w25 MTD driver */
 
-  spi = up_spiflashinitialize();
-  mtd = w25_initialize(spi);
+  spi = up_spiflashinitialize("w25");
+  if (spi != NULL)
+    {
+      mtd = w25_initialize(spi);
 
-  /* Now initialize a SMART Flash block device and bind it to the MTD device */
+      /* Now initialize a SMART Flash block device and bind it to the MTD device */
 
-  smart_initialize(0, mtd, NULL);
+      if (mtd != NULL)
+        {
+          smart_initialize(minor++, mtd, "_w25");
+        }
+    }
+#endif
+#endif      /* CONFIG_SIM_SPIFLASH */
+
+#if defined(CONFIG_MTD_N25QXXX) && defined(CONFIG_SIM_QSPIFLASH)
+  /* Initialize a simulated SPI FLASH block device n25qxxx MTD driver */
+
+  qspi = up_qspiflashinitialize();
+  if (qspi != NULL)
+    {
+      mtd = n25qxxx_initialize(qspi, 0);
+
+      /* Now initialize a SMART Flash block device and bind it to the MTD device */
+
+      if (mtd != NULL)
+        {
+          smart_initialize(minor++, mtd, "_n25q");
+        }
+    }
 #endif
 }
 #endif
@@ -238,7 +292,7 @@ void up_initialize(void)
   (void)telnet_initialize();
 #endif
 
-#if defined(CONFIG_FS_SMARTFS) && defined(CONFIG_SIM_SPIFLASH)
+#if defined(CONFIG_FS_SMARTFS) && (defined(CONFIG_SIM_SPIFLASH) || defined(CONFIG_SIM_QSPIFLASH))
   up_init_smartfs();
 #endif
 }
