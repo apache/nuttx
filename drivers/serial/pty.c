@@ -918,15 +918,19 @@ int pty_register(int minor)
   devpair->pp_master.pd_master  = true;
   devpair->pp_slave.pd_devpair  = devpair;
 
-  /* Create two pipes */
+  /* Create two pipes:
+   *
+   *   pipe_a:  Master source, slave sink (TX, slave-to-master)
+   *   pipe_b:  Master sink, slave source (RX, master-to-slave)
+   */
 
-  ret = pipe(pipe_a);
+  ret = pipe2(pipe_a, CONFIG_PSEUDOTERM_TXBUFSIZE);
   if (ret < 0)
     {
       goto errout_with_devpair;
     }
 
-  ret = pipe(pipe_b);
+  ret = pipe2(pipe_b, CONFIG_PSEUDOTERM_RXBUFSIZE);
   if (ret < 0)
     {
       goto errout_with_pipea;

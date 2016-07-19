@@ -2012,18 +2012,19 @@ config SCI1_2STOP
 
 endmenu # SCI1 Configuration
 
-config PSEUDOTERM
+menuconfig PSEUDOTERM
 	bool "Pseudo-Terminal (PTY) suppport"
 	default n
 	select ARCH_HAVE_SERIAL_TERMIOS
 	---help---
 		Enable support support for master and slave pseudo-terminal devices.
 
+if PSEUDOTERM
+
 choice
 	prompt "PTY model"
 	default PSEUDOTERM_BSD if DISABLE_PSEUDOFS_OPERATIONS
 	default PSEUDOTERM_SUSV1 if !DISABLE_PSEUDOFS_OPERATIONS
-	depends on PSEUDOTERM
 
 config PSEUDOTERM_BSD
 	bool "BSD style"
@@ -2047,3 +2048,17 @@ config PSEUDOTERM_SUSV1
 		Where N is the minor number
 
 endchoice # PTY model
+
+config PSEUDOTERM_RXBUFSIZE
+	int "Pseudo-Terminal Rx buffer size"
+	default 256
+	---help---
+		Master-to-slave pipe buffer size.  Default: 256
+
+config PSEUDOTERM_TXBUFSIZE
+	int "Pseudo-Terminal Tx buffer size"
+	default 256
+	---help---
+		Slave-to-master buffer size.  Default: 256
+
+endif # PSEUDOTERM
