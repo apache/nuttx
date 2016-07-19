@@ -130,6 +130,7 @@ extern "C"
 #endif
 
 int mkdir(FAR const char *pathname, mode_t mode);
+int mkfifo2(FAR const char *pathname, mode_t mode, size_t bufsize); /* NuttX only */
 int mkfifo(FAR const char *pathname, mode_t mode);
 int stat(const char *path, FAR struct stat *buf);
 #if 0 /* Not yet supported */
