@@ -222,7 +222,7 @@ int pipe(int fd[2])
     {
       /* No.. Allocate and initialize a new device structure instance */
 
-      dev = pipecommon_allocdev();
+      dev = pipecommon_allocdev(CONFIG_DEV_PIPE_SIZE);
       if (!dev)
         {
           (void)sem_post(&g_pipesem);

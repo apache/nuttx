@@ -48,7 +48,7 @@
 
 #include "pipe_common.h"
 
-#if CONFIG_DEV_PIPE_SIZE > 0
+#if CONFIG_DEV_FIFO_SIZE > 0
 
 /****************************************************************************
  * Private Data
@@ -110,7 +110,7 @@ int mkfifo(FAR const char *pathname, mode_t mode)
 
   /* Allocate and initialize a new device structure instance */
 
-  dev = pipecommon_allocdev();
+  dev = pipecommon_allocdev(CONFIG_DEV_FIFO_SIZE);
   if (!dev)
     {
       return -ENOMEM;
@@ -125,4 +125,4 @@ int mkfifo(FAR const char *pathname, mode_t mode)
   return ret;
 }
 
-#endif /* CONFIG_DEV_PIPE_SIZE > 0 */
+#endif /* CONFIG_DEV_FIFO_SIZE > 0 */
