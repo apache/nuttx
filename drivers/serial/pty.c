@@ -422,6 +422,12 @@ static ssize_t pty_read(FAR struct file *filep, FAR char *buffer, size_t len)
            * bytes were read from the pipe.  If we have already read some
            * data, we use the FIONREAD ioctl to test if there are more bytes
            * in the pipe.
+           *
+           * REVISIT:  An alternative design might be to (1) configure the
+           * source file as non-blocking, then (2) wait using poll() for the
+           * first byte to be received.  (3) Subsequent bytes would
+           * use file_read() without polling and would (4) terminate when no
+           * data is returned.
            */
 
           if (ntotal > 0)
