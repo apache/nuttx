@@ -307,7 +307,7 @@ struct sim_spiflashdev_s *gp_spidev[] =
   &g_spidev_custom,
 #endif
 
-  // Null termination pointer at end of list
+  /* Null termination pointer at end of list */
 
   NULL
 };
@@ -733,17 +733,17 @@ static void spiflash_writeword(FAR struct sim_spiflashdev_s *priv, uint16_t data
       /* Read ID States */
 
       case SPIFLASH_STATE_RDID1:
-        priv->read_data = priv->manuf; //CONFIG_SIM_SPIFLASH_MANUFACTURER;
+        priv->read_data = priv->manuf;    /* CONFIG_SIM_SPIFLASH_MANUFACTURER; */
         priv->state = SPIFLASH_STATE_RDID2;
         break;
 
       case SPIFLASH_STATE_RDID2:
-        priv->read_data = priv->type; //CONFIG_SIM_SPIFLASH_MEMORY_TYPE;
+        priv->read_data = priv->type;     /* CONFIG_SIM_SPIFLASH_MEMORY_TYPE; */
         priv->state = SPIFLASH_STATE_RDID3;
         break;
 
       case SPIFLASH_STATE_RDID3:
-        priv->read_data = priv->capacity; //CONFIG_SPIFLASH_CAPACITY;
+        priv->read_data = priv->capacity; /* CONFIG_SPIFLASH_CAPACITY; */
         priv->state = SPIFLASH_STATE_IDLE;
         break;
 
