@@ -29,6 +29,7 @@ config DEV_RANDOM
 	bool "Enable /dev/random"
 	default y
 	depends on ARCH_HAVE_RNG
+		Enable support for /dev/urandom provided by a hardware TRNG.
 
 config DEV_URANDOM
 	bool "Enable /dev/urandom"
@@ -52,7 +53,7 @@ choice
 config DEV_URANDOM_XORSHIFT128
 	bool "xorshift128"
 	---help---
-		xorshift128 is a pseudorandom number generator that's simple,
+		xorshift128 is a pseudorandom number generator that is simple,
 		portable, and can also be used on 8-bit and 16-bit MCUs.
 
 		NOTE: Not cyptographically secure
@@ -74,9 +75,10 @@ config DEV_URANDOM_ARCH
 		The implementation of /dev/urandom is provided in archtecture-
 		specific logic using hardware TRNG logic.  architecture-specific
 		logic must provide the whole implementation in this case, including
-		the function devurandom_register().
+		the function devurandom_register().  In this case, /dev/urandom may
+		refer to the same driver as /dev/random.
 
-		May or may not be cyptographically secure, depending upon the
+		NOTE: May or may not be cyptographically secure, depending upon the
 		implementation.
 
 endchoice # /dev/urandom algorithm

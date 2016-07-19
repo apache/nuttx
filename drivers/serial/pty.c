@@ -43,6 +43,7 @@
 #include <sys/ioctl.h>
 #include <stdbool.h>
 #include <unistd.h>
+#include <sched.h>
 #include <semaphore.h>
 #include <termios.h>
 #include <stdio.h>
@@ -421,16 +422,21 @@ static ssize_t pty_read(FAR struct file *filep, FAR char *buffer, size_t len)
            * bytes were read from the pipe.  If we have already read some
            * data, we use the FIONREAD ioctl to test if there are more bytes
            * in the pipe.
-           *
-           * There is an inherent race condition in this test, but leaving
-           * a few bytes unnecessarily in the pipe should not be harmful.
-           * (we could lock the scheduler before the test and after the
-           * file_read() below if we wanted to eliminate the race)
            */
 
           if (ntotal > 0)
             {
               int nsrc;
+
+              /* There are inherent race conditions in this test.  We lock
+               * the scheduler before the test and after the file_read()
+               * below to eliminate one race:  (a) We detect that there is
+               * data in the source file, (b) we are suspended and another
+               * thread reads the data, emptying the fifo, then (c) we
+               * resume and call file_read(), blocking indefinitely.
+               */
+
+              sched_lock();
 
               /* Check how many bytes are waiting in the pipe */
 
@@ -438,28 +444,44 @@ static ssize_t pty_read(FAR struct file *filep, FAR char *buffer, size_t len)
                                (unsigned long)((uintptr_t)&nsrc));
               if (ret < 0)
                 {
+                  sched_unlock();
                   ntotal = ret;
                   break;
                 }
 
               /* Break out of the loop and return ntotal if the pipe is
-               * empty.  This is the race:  The fifo was emtpy when we
+               * empty.  This is another race:  There fifo was empty when we
                * called file_ioctl() above, but it might not be empty right
-               * now.
+               * now.  Losing that race should not lead to any bad behaviors,
+               * however, we the caller will get those bytes on the next
+               * read.
                */
 
               if (nsrc < 1)
                 {
+                  sched_unlock();
                   break;
                 }
+
+              /* Read one byte from the source the byte.  This should not
+               * block.
+               */
+
+              nread = file_read(&dev->pd_src, &ch, 1);
+              sched_unlock();
             }
+          else
 #endif
+            {
+              /* Read one byte from the source the byte.  This call will block
+               * if the source pipe is empty.
+               */
 
-          /* Read one byte from the source the byte.  This call will block
-           * if the source pipe is empty.
-           */
+              nread = file_read(&dev->pd_src, &ch, 1);
+            }
 
-          nread = file_read(&dev->pd_src, &ch, 1);
+          /* Check if file_read was successful */
+
           if (nread < 0)
             {
               ntotal = nread;
