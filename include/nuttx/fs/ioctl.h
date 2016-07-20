@@ -251,7 +251,7 @@
                                            * IN: None
                                            * OUT: None */
 
-/* NuttX PWM ioctl definitions (see nuttx/pwm.h) ****************************/
+/* NuttX PWM ioctl definitions (see nuttx/drivers/pwm.h) ****************************/
 
 #define _PWMIOCVALID(c)   (_IOC_TYPE(c)==_PWMIOCBASE)
 #define _PWMIOC(nr)       _IOC(_PWMIOCBASE,nr)

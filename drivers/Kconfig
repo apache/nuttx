@@ -286,7 +286,7 @@ menuconfig PWM
 	default n
 	---help---
 		This selection enables building of the "upper-half" PWM driver.
-		See include/nuttx/pwm.h for further PWM driver information.
+		See include/nuttx/drivers/pwm.h for further PWM driver information.
 
 if PWM
 

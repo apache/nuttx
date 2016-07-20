@@ -25,7 +25,7 @@ dev_null.c and dev_zero.c
 pwm.c
   Provides the "upper half" of a pulse width modulation (PWM) driver.
   The "lower half" of the PWM driver is provided by device-specific
-  logic.  See include/nuttx/pwm.h for usage information.
+  logic.  See include/nuttx/drivers/pwm.h for usage information.
 
 ramdisk.c
   Can be used to set up a block of memory or (read-only) FLASH as
