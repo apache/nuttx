@@ -315,7 +315,6 @@
 #  else
 #    define __SYS_fs_fdopen            (__SYS_mkfifo2+0)
 #  endif
-#  endif
 
 #  if CONFIG_NFILE_STREAMS > 0
 #    define SYS_fs_fdopen              (__SYS_fs_fdopen+0)
