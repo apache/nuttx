@@ -223,7 +223,7 @@ uintptr_t STUB_open(int nbr, uintptr_t parm1, uintptr_t parm2,
             uintptr_t parm3, uintptr_t parm4, uintptr_t parm5,
             uintptr_t parm6);
 uintptr_t STUB_opendir(int nbr, uintptr_t parm1);
-uintptr_t STUB_pipe2(int nbr, uintptr_t parm1, uinptr_t parm2);
+uintptr_t STUB_pipe2(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_readdir(int nbr, uintptr_t parm1);
 uintptr_t STUB_rewinddir(int nbr, uintptr_t parm1);
 uintptr_t STUB_seekdir(int nbr, uintptr_t parm1, uintptr_t parm2);
