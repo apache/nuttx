@@ -894,17 +894,40 @@ Where <subdir> is one of the following:
 
     2. Default platform/toolchain:
 
-       CONFIG_HOST_WINDOWS=y               : Cygwin under Windows
-       CONFIG_WINDOWS_CYGWIN=y
-       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : ARM/mbed toolcahin (arm-none-elf-gcc)
-       CONFIG_INTELHEX_BINARY=y            : Output formats: Intel hex binary
+         CONFIG_HOST_WINDOWS=y               : Cygwin under Windows
+         CONFIG_WINDOWS_CYGWIN=y
+         CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : ARM/mbed toolcahin (arm-none-elf-gcc)
+         CONFIG_INTELHEX_BINARY=y            : Output formats: Intel hex binary
 
     3. The Serial Console is provided on UART0 with the correct pin
        configuration for use with the OpenSDAv2 VCOM.  This can be switched
        to use a RS-232 shield on UART3 by reconfiguring the serial console.
 
+         -CONFIG_KINETIS_UART0=y
+         +CONFIG_KINETIS_UART3=y
+         -CONFIG_UART0_SERIALDRIVER=y
+         +CONFIG_UART3_SERIALDRIVER=y
+         -CONFIG_UART0_SERIAL_CONSOLE=y
+         +CONFIG_UART3_SERIAL_CONSOLE=y
+         -CONFIG_UART0_RXBUFSIZE=256
+         +CONFIG_UART3_RXBUFSIZE=256
+         -CONFIG_UART0_TXBUFSIZE=256
+         +CONFIG_UART3_TXBUFSIZE=256
+         -CONFIG_UART0_BAUD=115200
+         +CONFIG_UART3_BAUD=115200
+         -CONFIG_UART0_BITS=8
+         +CONFIG_UART3_BITS=8
+         -CONFIG_UART0_PARITY=0
+         +CONFIG_UART3_PARITY=0
+         -CONFIG_UART0_2STOP=0
+         +CONFIG_UART3_2STOP=0
+
        NOTE: On my Windows 10 / Cygwin64 system, the OpenSDAv2 VCOM is not
        recognized.  I probably need to install a driver?
+
+       There is a serial USB driver on the mbed web site.  However, this
+       driver would not install on Windows 10 for me.  I understand that
+       it installs OK on Windows 7.
 
     4. Support for NSH built-in applications is enabled, but no built-in
        applications have been configured in.
