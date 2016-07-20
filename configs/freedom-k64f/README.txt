@@ -899,8 +899,12 @@ Where <subdir> is one of the following:
        CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : ARM/mbed toolcahin (arm-none-elf-gcc)
        CONFIG_INTELHEX_BINARY=y            : Output formats: Intel hex binary
 
-    3. The Serial Console is provided on UART3 with the correct pin
-       configuration for use with an Arduino Serial Shield.
+    3. The Serial Console is provided on UART0 with the correct pin
+       configuration for use with the OpenSDAv2 VCOM.  This can be switched
+       to use a RS-232 shield on UART3 by reconfiguring the serial console.
+
+       NOTE: On my Windows 10 / Cygwin64 system, the OpenSDAv2 VCOM is not
+       recognized.  I probably need to install a driver?
 
     4. Support for NSH built-in applications is enabled, but no built-in
        applications have been configured in.
