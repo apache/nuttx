@@ -30,7 +30,7 @@ pwm.c
 ramdisk.c
   Can be used to set up a block of memory or (read-only) FLASH as
   a block driver that can be mounted as a files system.  See
-  include/nuttx/fs/ramdisk.h.
+  include/nuttx/drivers/ramdisk.h.
 
 rwbuffer.c
   A facility that can be use by any block driver in-order to add

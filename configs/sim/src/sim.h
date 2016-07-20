@@ -90,7 +90,7 @@ int sim_bringup(void);
  *
  *   - First, a ROM disk device must be created.  This is done by calling
  *     the function romdisk_register() as described in
- *     nuttx/include/nuttx/fs/ramdisk.h.  This is an OS level operation
+ *     nuttx/include/nuttx/drivers/ramdisk.h.  This is an OS level operation
  *     and must be done in the board-level logic before your appliction
  *     starts.
  *
