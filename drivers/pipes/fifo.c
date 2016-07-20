@@ -41,10 +41,11 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-
 #include <stdint.h>
-#include <nuttx/fs/fs.h>
 #include <errno.h>
+
+#include <nuttx/fs/fs.h>
+#include <nuttx/drivers/drivers.h>
 
 #include "pipe_common.h"
 

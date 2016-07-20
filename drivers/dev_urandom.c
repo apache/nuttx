@@ -52,6 +52,7 @@
 
 #include <nuttx/lib.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/drivers/drivers.h>
 
 #if defined(CONFIG_DEV_URANDOM) && !defined(CONFIG_DEV_URANDOM_ARCH)
 

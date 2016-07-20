@@ -54,6 +54,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/drivers/drivers.h>
 #include <nuttx/serial/pty.h>
 
 #include "pty.h"

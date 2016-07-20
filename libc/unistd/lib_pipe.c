@@ -41,7 +41,7 @@
 
 #include <unistd.h>
 
-#include <nuttx/fs/fs.h>
+#include <nuttx/drivers/drivers.h>
 
 #if defined(CONFIG_PIPES) && CONFIG_DEV_PIPE_SIZE > 0
 

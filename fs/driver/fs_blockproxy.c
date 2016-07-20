@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/driver/fs_blockproxy.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,7 +53,7 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
-#include <nuttx/fs/fs.h>
+#include <nuttx/drivers/drivers.h>
 
 #if !defined(CONFIG_DISABLE_PSEUDOFS_OPERATIONS) && \
     !defined(CONFIG_DISABLE_MOUNTPOINT)

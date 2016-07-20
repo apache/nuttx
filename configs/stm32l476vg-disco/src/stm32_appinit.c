@@ -58,7 +58,7 @@
 #include <arch/board/board.h>
 #include <arch/board/boardctl.h>
 
-#include <nuttx/fs/fs.h>
+#include <nuttx/drivers/drivers.h>
 #include <nuttx/fs/ramdisk.h>
 #include <nuttx/fs/nxffs.h>
 #include <nuttx/fs/mkfatfs.h>

@@ -50,7 +50,7 @@
 #  include <nuttx/usb/usbmonitor.h>
 #endif
 
-#include <nuttx/fs/fs.h>
+#include <nuttx/drivers/drivers.h>
 #include <nuttx/fs/ramdisk.h>
 #include <nuttx/fs/nxffs.h>
 #include <nuttx/binfmt/elf.h>

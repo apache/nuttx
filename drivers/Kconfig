@@ -406,8 +406,8 @@ menuconfig BCH
 	---help---
 		Contains logic that may be used to convert a block driver into
 		a character driver.  This is the complementary conversion as that
-		performed by loop.c.  See include/nuttx/fs/fs.h for registration
-		information.
+		performed by loop.c.  See include/nuttx/drivers/drivers.h for
+		registration information.
 
 if BCH
 source drivers/bch/Kconfig

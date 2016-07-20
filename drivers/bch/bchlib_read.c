@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/bch/bchlib_read.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,8 +45,6 @@
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
-
-#include <nuttx/fs/fs.h>
 
 #include "bch.h"
 
