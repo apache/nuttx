@@ -42,7 +42,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#if CONFIG_DEV_FIFO_SIZE > 0
+#include <nuttx/fs/fs.h>
+
+#if defined(CONFIG_PIPES) && CONFIG_DEV_FIFO_SIZE > 0
 
 /****************************************************************************
  * Public Functions
@@ -82,5 +84,5 @@ int mkfifo(FAR const char *pathname, mode_t mode)
   return mkfifo2(pathname, mode, CONFIG_DEV_FIFO_SIZE);
 }
 
-#endif /* CONFIG_DEV_FIFO_SIZE > 0 */
+#endif /* CONFIG_PIPES && CONFIG_DEV_FIFO_SIZE > 0 */
 

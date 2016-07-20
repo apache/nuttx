@@ -60,6 +60,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Stream flags for the fs_flags field of in struct file_struct */
 
 #define __FS_FLAG_EOF   (1 << 0) /* EOF detected by a read operation */
@@ -1159,6 +1160,71 @@ ssize_t bchlib_read(FAR void *handle, FAR char *buffer, size_t offset,
 
 ssize_t bchlib_write(FAR void *handle, FAR const char *buffer, size_t offset,
                      size_t len);
+
+/****************************************************************************
+ * Name: pipe2
+ *
+ * Description:
+ *   pipe() creates a pair of file descriptors, pointing to a pipe inode,
+ *   and  places them in the array pointed to by 'fd'. fd[0] is for reading,
+ *   fd[1] is for writing.
+ *
+ *   NOTE: mkfifo2 is a special, non-standard, NuttX-only interface.  Since
+ *   the NuttX FIFOs are based in in-memory, circular buffers, the ability
+ *   to control the size of those buffers is critical for system tuning.
+ *
+ * Inputs:
+ *   fd[2] - The user provided array in which to catch the pipe file
+ *   descriptors
+ *   bufsize - The size of the in-memory, circular buffer in bytes.
+ *
+ * Return:
+ *   0 is returned on success; otherwise, -1 is returned with errno set
+ *   appropriately.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_PIPES) && CONFIG_DEV_PIPE_SIZE > 0
+int pipe2(int fd[2], size_t bufsize);
+#endif
+
+/****************************************************************************
+ * Name: mkfifo2
+ *
+ * Description:
+ *   mkfifo() makes a FIFO device driver file with name 'pathname.'  Unlike
+ *   Linux, a NuttX FIFO is not a special file type but simply a device
+ *   driver instance.  'mode' specifies the FIFO's permissions.
+ *
+ *   Once the FIFO has been created by mkfifo(), any thread can open it for
+ *   reading or writing, in the same way as an ordinary file. However, it
+ *   must have been opened from both reading and writing before input or
+ *   output can be performed.  This FIFO implementation will block all
+ *   attempts to open a FIFO read-only until at least one thread has opened
+ *   the FIFO for  writing.
+ *
+ *   If all threads that write to the FIFO have closed, subsequent calls to
+ *   read() on the FIFO will return 0 (end-of-file).
+ *
+ *   NOTE: mkfifo2 is a special, non-standard, NuttX-only interface.  Since
+ *   the NuttX FIFOs are based in in-memory, circular buffers, the ability
+ *   to control the size of those buffers is critical for system tuning.
+ *
+ * Inputs:
+ *   pathname - The full path to the FIFO instance to attach to or to create
+ *     (if not already created).
+ *   mode - Ignored for now
+ *   bufsize - The size of the in-memory, circular buffer in bytes.
+ *
+ * Return:
+ *   0 is returned on success; otherwise, -1 is returned with errno set
+ *   appropriately.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_PIPES) && CONFIG_DEV_FIFO_SIZE > 0
+int mkfifo2(FAR const char *pathname, mode_t mode, size_t bufsize);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

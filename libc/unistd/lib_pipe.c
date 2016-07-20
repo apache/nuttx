@@ -41,7 +41,9 @@
 
 #include <unistd.h>
 
-#if CONFIG_DEV_PIPE_SIZE > 0
+#include <nuttx/fs/fs.h>
+
+#if defined(CONFIG_PIPES) && CONFIG_DEV_PIPE_SIZE > 0
 
 /****************************************************************************
  * Public Functions
@@ -70,5 +72,5 @@ int pipe(int fd[2])
   return pipe2(fd, CONFIG_DEV_PIPE_SIZE);
 }
 
-#endif /* CONFIG_DEV_PIPE_SIZE > 0 */
+#endif /* CONFIG_PIPES && CONFIG_DEV_PIPE_SIZE > 0 */
 

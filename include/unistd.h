@@ -174,7 +174,6 @@ FAR void *sbrk(intptr_t incr);
 
 /* Special devices */
 
-int     pipe2(int fd[2], size_t bufsize); /* NuttX only */
 int     pipe(int fd[2]);
 
 /* Working directory operations */

@@ -44,12 +44,14 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <nuttx/fs/fs.h>
+
 #include <stdio.h>
 #include <unistd.h>
 #include <semaphore.h>
 #include <fcntl.h>
 #include <errno.h>
+
+#include <nuttx/fs/fs.h>
 
 #include "pipe_common.h"
 
