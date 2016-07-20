@@ -148,7 +148,7 @@ menuconfig CAN
 	default n
 	---help---
 		This selection enables building of the "upper-half" CAN driver.
-		See include/nuttx/can.h for further CAN driver information.
+		See include/nuttx/drivers/can.h for further CAN driver information.
 
 if CAN
 

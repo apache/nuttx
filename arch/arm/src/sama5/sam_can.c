@@ -60,7 +60,7 @@
 
 #include <arch/board/board.h>
 #include <nuttx/arch.h>
-#include <nuttx/can.h>
+#include <nuttx/drivers/can.h>
 
 #include "up_internal.h"
 #include "up_arch.h"

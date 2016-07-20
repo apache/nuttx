@@ -46,7 +46,7 @@
 #include <debug.h>
 
 #include <nuttx/board.h>
-#include <nuttx/can.h>
+#include <nuttx/drivers/can.h>
 
 #include "stm32.h"
 

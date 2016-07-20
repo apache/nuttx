@@ -13,7 +13,8 @@ Files in this directory
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 can.c
-  This is a CAN driver.  See include/nuttx/can.h for usage information.
+  This is a CAN driver.  See include/nuttx/drivers/can.h for usage
+  information.
 
 dev_null.c and dev_zero.c
   These files provide the standard /dev/null and /dev/zero devices.

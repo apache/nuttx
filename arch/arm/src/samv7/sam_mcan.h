@@ -45,7 +45,7 @@
 #include "chip.h"
 #include "chip/sam_mcan.h"
 
-#include <nuttx/can.h>
+#include <nuttx/drivers/can.h>
 
 #if defined(CONFIG_CAN) && (defined(CONFIG_SAMV7_MCAN0) || \
     defined(CONFIG_SAMV7_MCAN1))

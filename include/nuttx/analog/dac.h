@@ -5,7 +5,7 @@
  *   Author: Li Zhuoyi <lzyy.cn@gmail.com>
  *   History: 0.1 2011-08-04 initial version
  *
- * Derived from include/nuttx/can.h
+ * Derived from include/nuttx/drivers/can.h
  *
  *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

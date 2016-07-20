@@ -56,7 +56,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/semaphore.h>
-#include <nuttx/can.h>
+#include <nuttx/drivers/can.h>
 
 #include "cache.h"
 #include "up_internal.h"

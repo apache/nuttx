@@ -56,7 +56,7 @@
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/arch.h>
-#include <nuttx/can.h>
+#include <nuttx/drivers/can.h>
 
 #ifdef CONFIG_CAN_TXREADY
 #  include <nuttx/wqueue.h>
