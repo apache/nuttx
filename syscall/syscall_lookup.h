@@ -218,11 +218,11 @@ SYSCALL_LOOKUP(up_assert,                 2, STUB_up_assert)
   SYSCALL_LOOKUP(statfs,                  2, STUB_statfs)
   SYSCALL_LOOKUP(telldir,                 1, STUB_telldir)
 
-#  if defined(CONFIG_PIPES) && ONFIG_DEV_PIPE_SIZE > 0
+#  if defined(CONFIG_PIPES) && CONFIG_DEV_PIPE_SIZE > 0
   SYSCALL_LOOKUP(pipe2,                   2, STUB_pipe2)
 #  endif
 
-#  if defined(CONFIG_PIPES) && ONFIG_DEV_FIFO_SIZE > 0
+#  if defined(CONFIG_PIPES) && CONFIG_DEV_FIFO_SIZE > 0
   SYSCALL_LOOKUP(mkfifo2,                 3, STUB_mkfifo2)
 #  endif
 
