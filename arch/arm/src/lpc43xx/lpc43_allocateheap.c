@@ -324,20 +324,22 @@
  */
 
 const uint32_t g_idle_topstack = (uint32_t)&_ebss + CONFIG_IDLETHREAD_STACKSIZE;
-static uint32_t mem_region_next = 0;
+static uint32_t g_mem_region_next = 0;
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
+#if CONFIG_MM_REGIONS > 1
 static void mem_addregion(FAR void *region_start, size_t region_size)
 {
-  if (mem_region_next <= CONFIG_MM_REGIONS)
+  if (g_mem_region_next <= CONFIG_MM_REGIONS)
     {
       kmm_addregion(region_start, region_size);
-      mem_region_next++;
+      g_mem_region_next++;
     }
 }
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -379,11 +381,9 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 #if CONFIG_MM_REGIONS > 1
 void up_addregion(void)
 {
-#if CONFIG_MM_REGIONS > 1
-
   /* start from second region */
 
-  mem_region_next = 2;
+  g_mem_region_next = 2;
 
 #  ifdef MM_USE_LOCSRAM_BANK1
   mem_addregion((FAR void *)LPC43_LOCSRAM_BANK1_BASE, LPC43_LOCSRAM_BANK1_SIZE);
@@ -416,7 +416,5 @@ void up_addregion(void)
 #  ifdef MM_USE_EXTSDRAM3
   mem_addregion((FAR void *)MM_EXTSDRAM3_REGION, MM_EXTSDRAM3_SIZE);
 #  endif
-
-#endif /* CONFIG_MM_REGIONS > 1 */
 }
 #endif
