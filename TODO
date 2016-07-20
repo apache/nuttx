@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated July 3, 2016)
+NuttX TODO List (Last updated July 20, 2016)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -447,6 +447,7 @@ o Kernel/Protected Build
                mkfatfs  mkfatfs
                mkrd     ramdisk_register()
                ping     icmp_ping()
+               mount    foreach_mountpoint()
 
                The busybox mkfatfs does not involve any OS calls; it does
                its job by simply opening the block driver (using open/xopen)
@@ -1399,6 +1400,15 @@ o File system / Generic drivers (fs/, drivers/)
                socket structures.  There really should be one array that
                is a union of file and socket descriptors.  Then socket and
                file descriptors could lie in the same range.
+
+               Another example of how the current implementation limits
+               functionality:  I recently started an implement of the FILEMAX
+               (using pctl() instead sysctl()).  My objective was to be able
+               to control the number of available file descriptors on a task-
+               by-task basis.  The complexity due to the partitioning of
+               desciptor space in a range for file descriptors and a range
+               for socket descriptors made this feature nearly impossible to
+               implement.
   Status:      Open
   Priority:    Low
 
