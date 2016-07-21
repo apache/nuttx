@@ -1,8 +1,8 @@
 /****************************************************************************
- * include/nuttx/regex.h
+ * include/nuttx/lib/regex.h
  * Non-standard, pattern-matching APIs available in lib/.
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_REGEX_H
-#define __INCLUDE_NUTTX_REGEX_H
+#ifndef __INCLUDE_NUTTX_LIB_REGEX_H
+#define __INCLUDE_NUTTX_LIB_REGEX_H
 
 /****************************************************************************
  * Included Files
@@ -80,4 +80,4 @@ int match(const char *pattern, const char *string);
 }
 #endif
 
-#endif /* __INCLUDE_NUTTX_REGEX_H */
+#endif /* __INCLUDE_NUTTX_LIB_REGEX_H */
