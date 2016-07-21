@@ -44,7 +44,7 @@
 
 #include "chip.h"
 
-#ifdef KINETIS_K64
+#ifdef KINETIS_K60
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -192,5 +192,5 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* KINETIS_K64 */
+#endif /* KINETIS_K60 */
 #endif /* __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_K60MEMORYMAP_H */
