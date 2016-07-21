@@ -221,8 +221,8 @@ endif
 # the settings in this float.h are actually correct for your platform!
 
 ifeq ($(CONFIG_ARCH_FLOAT_H),y)
-include/float.h: include/nuttx/float.h
-	$(Q) cp -f include/nuttx/float.h include/float.h
+include/float.h: include/nuttx/lib/float.h
+	$(Q) cp -f include/nuttx/lib/float.h include/float.h
 else
 include/float.h:
 endif
