@@ -2060,6 +2060,6 @@ config PSEUDOTERM_TXBUFSIZE
 	int "Pseudo-Terminal Tx buffer size"
 	default 256
 	---help---
-		Slave-to-master buffer size.  Default: 256
+		Slave-to-master pipe buffer size.  Default: 256
 
 endif # PSEUDOTERM

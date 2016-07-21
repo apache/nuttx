@@ -65,7 +65,7 @@
 
 #ifdef CONFIG_STM32F429I_DISCO_FLASH_CONFIG_PART
 #ifdef CONFIG_PLATFORM_CONFIGDATA
-#  include <nuttx/configdata.h>
+#  include <nuttx/mtd/configdata.h>
 #endif
 #endif
 
