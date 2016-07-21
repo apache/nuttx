@@ -54,9 +54,9 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
-#include <nuttx/1wire.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/clock.h>
+#include <nuttx/drivers/1wire.h>
 
 #include <arch/board/board.h>
 
