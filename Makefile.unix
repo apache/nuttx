@@ -227,14 +227,14 @@ else
 include/float.h:
 endif
 
-# Target used to copy include/nuttx/stdarg.h.  If CONFIG_ARCH_STDARG_H is
+# Target used to copy include/nuttx/lib/stdarg.h.  If CONFIG_ARCH_STDARG_H is
 # defined, then there is an architecture specific stdarg.h header file
-# that will be included indirectly from include/stdarg.h.  But first, we
+# that will be included indirectly from include/lib/stdarg.h.  But first, we
 # have to copy stdarg.h from include/nuttx/. to include/.
 
 ifeq ($(CONFIG_ARCH_STDARG_H),y)
-include/stdarg.h: include/nuttx/stdarg.h
-	$(Q) cp -f include/nuttx/stdarg.h include/stdarg.h
+include/stdarg.h: include/nuttx/lib/stdarg.h
+	$(Q) cp -f include/nuttx/lib/stdarg.h include/stdarg.h
 else
 include/stdarg.h:
 endif
