@@ -50,7 +50,7 @@
 #include <poll.h>
 #include <errno.h>
 
-#include <nuttx/lib.h>
+#include <nuttx/lib/lib.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/drivers/drivers.h>
 

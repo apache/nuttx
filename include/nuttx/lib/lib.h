@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/lib.h
+ * include/nuttx/lib/lib.h
  * Non-standard, internal APIs available in lib/.
  *
  *   Copyright (C) 2007-2009, 2012-2014, 2016 Gregory Nutt. All rights reserved.
@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_LIB_H
-#define __INCLUDE_NUTTX_LIB_H
+#ifndef __INCLUDE_NUTTX_LIB_LIB_H
+#define __INCLUDE_NUTTX_LIB_LIB_H
 
 /****************************************************************************
  * Included Files
@@ -87,4 +87,4 @@ unsigned long nrand(unsigned long limit);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __INCLUDE_NUTTX_LIB_H */
+#endif /* __INCLUDE_NUTTX_LIB_LIB_H */

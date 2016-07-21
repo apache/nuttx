@@ -42,7 +42,7 @@
 #include <sys/types.h>
 #include <stdlib.h>
 
-#include <nuttx/lib.h>
+#include <nuttx/lib/lib.h>
 
 /****************************************************************************
  * Pre-processor Definitions
