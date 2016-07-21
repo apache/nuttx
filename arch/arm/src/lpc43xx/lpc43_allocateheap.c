@@ -335,7 +335,7 @@
 const uint32_t g_idle_topstack = (uint32_t)&_ebss + CONFIG_IDLETHREAD_STACKSIZE;
 
 #ifdef MM_HAVE_REGION
-static uint32_t g_mem_region_next = 0;
+static uint8_t g_mem_region_next = 0;
 #endif
 
 /****************************************************************************
