@@ -181,6 +181,7 @@
 #undef MM_USE_EXTSDRAM1
 #undef MM_USE_EXTSDRAM2
 #undef MM_USE_EXTSDRAM3
+#undef MM_HAVE_REGION
 
 #ifndef CONFIG_LPC43_BOOT_SRAM
 
@@ -305,6 +306,14 @@
 #  define MM_EXTSDRAM3_SIZE   CONFIG_LPC43_EXTSDRAM3_SIZE
 #endif /* CONFIG_LPC43_EXTSDRAM3_SIZE */
 
+#if CONFIG_MM_REGIONS > 1 && \
+    (defined(MM_USE_LOCSRAM_BANK1) || defined(MM_USE_AHBSRAM_BANK0) || \
+     defined(MM_USE_AHBSRAM_BANK1) || defined(MM_USE_AHBSRAM_BANK2) || \
+     defined(MM_USE_EXTSDRAM0)     || defined(MM_USE_EXTSDRAM1) || \
+     defined(MM_USE_EXTSDRAM2)     || defined(MM_USE_EXTSDRAM3))
+#  define MM_HAVE_REGION 1
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -324,13 +333,16 @@
  */
 
 const uint32_t g_idle_topstack = (uint32_t)&_ebss + CONFIG_IDLETHREAD_STACKSIZE;
+
+#ifdef MM_HAVE_REGION
 static uint32_t g_mem_region_next = 0;
+#endif
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-#if CONFIG_MM_REGIONS > 1
+#ifdef MM_HAVE_REGION
 static void mem_addregion(FAR void *region_start, size_t region_size)
 {
   if (g_mem_region_next <= CONFIG_MM_REGIONS)
@@ -381,6 +393,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 #if CONFIG_MM_REGIONS > 1
 void up_addregion(void)
 {
+#ifdef MM_HAVE_REGION
   /* start from second region */
 
   g_mem_region_next = 2;
@@ -416,5 +429,6 @@ void up_addregion(void)
 #  ifdef MM_USE_EXTSDRAM3
   mem_addregion((FAR void *)MM_EXTSDRAM3_REGION, MM_EXTSDRAM3_SIZE);
 #  endif
+#endif
 }
 #endif
