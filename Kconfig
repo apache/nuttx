@@ -339,10 +339,10 @@ config ARCH_MATH_H
 	default n
 	---help---
 		There is also a re-directing version of math.h in the source tree.
-		However, it resides out-of-the-way at include/nuttx/math.h because it
+		However, it resides out-of-the-way at include/nuttx/lib/math.h because it
 		conflicts too often with the system math.h. If ARCH_MATH_H=y is
 		defined, however, the top-level makefile will copy the redirecting
-		math.h header file from include/nuttx/math.h to include/math.h. math.h
+		math.h header file from include/nuttx/lib/math.h to include/math.h. math.h
 		will then include the architecture-specific version of math.h that you
 		must provide at nuttx/arch/>architecture</include/math.h.
 

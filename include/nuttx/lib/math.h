@@ -1,7 +1,7 @@
 /****************************************************************************
- * include/nuttx/math.h
+ * include/nuttx/lib/math.h
  *
- *   Copyright (C) 2009, 2012, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2012, 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_MATH_H
-#define __INCLUDE_NUTTX_MATH_H
+#ifndef __INCLUDE_NUTTX_LIB_MATH_H
+#define __INCLUDE_NUTTX_LIB_MATH_H
 
 /****************************************************************************
  * Included Files
@@ -406,4 +406,4 @@ long double truncl (long double x);
 #endif
 
 #endif /* CONFIG_LIBM */
-#endif /* __INCLUDE_NUTTX_MATH_H */
+#endif /* __INCLUDE_NUTTX_LIB_MATH_H */

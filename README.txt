@@ -321,13 +321,13 @@ Notes about Header Files
 
     If you have a custom, architecture specific math.h header file, then
     that header file should be placed at arch/<cpu>/include/math.h.  There
-    is a stub math.h header file located at include/nuttx/math.h.  This stub
+    is a stub math.h header file located at include/nuttx/lib/math.h.  This stub
     header file can be used to "redirect" the inclusion to an architecture-
     specific math.h header file.  If you add an architecture specific math.h
     header file then you should also define CONFIG_ARCH_MATH_H=y in your
     NuttX Configuration file.  If CONFIG_ARCH_MATH_H is selected, then the
     top-level Makefile will copy the stub math.h header file from
-    include/nuttx/math.h to include/math.h where it will become the system
+    include/nuttx/lib/math.h to include/math.h where it will become the system
     math.h header file.  The stub math.h header file does nothing other
     than to include that architecture-specific math.h header file as the
     system math.h header file.
