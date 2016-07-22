@@ -40,4 +40,11 @@ config HCS12_NONBANKED
 		in memory.
 
 endmenu # HSC12 Build Options
+
+config HCS12_GPIOIRQ
+	bool "GPIO interrupt support"
+	default n
+	---help---
+		Enable support for GPIO interrupts
+
 endif # ARCH_HSC12
