@@ -236,7 +236,7 @@ CONFIG_KINETIS_ENET=y
 #
 # Kinetis GPIO Interrupt Configuration
 #
-# CONFIG_GPIO_IRQ is not set
+# CONFIG_KINETIS_GPIOIRQ is not set
 
 #
 # Kinetis Ethernet Configuration

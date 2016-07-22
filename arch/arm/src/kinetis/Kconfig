@@ -483,12 +483,12 @@ config KINETIS_FTM2_CHANNEL
 
 menu "Kinetis GPIO Interrupt Configuration"
 
-config GPIO_IRQ
+config KINETIS_GPIOIRQ
 	bool "GPIO pin interrupts"
 	---help---
 		Enable support for interrupting GPIO pins
 
-if GPIO_IRQ
+if KINETIS_GPIOIRQ
 
 config KINETIS_PORTAINTS
 	bool "GPIOA interrupts"

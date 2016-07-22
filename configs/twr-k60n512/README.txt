@@ -605,7 +605,7 @@ TWR-K60N512-specific Configuration Options
 
   PIN Interrupt Support
 
-    CONFIG_GPIO_IRQ          -- Enable pin interrupt support.  Also needs
+    CONFIG_KINETIS_GPIOIRQ   -- Enable pin interrupt support.  Also needs
       one or more of the following:
     CONFIG_KINETIS_PORTAINTS -- Support 32 Port A interrupts
     CONFIG_KINETIS_PORTBINTS -- Support 32 Port B interrupts
@@ -687,7 +687,7 @@ Where <subdir> is one of the following:
       CONFIG_FAT_LFN=y                     : FAT long file name support
       CONFIG_FAT_MAXFNAME=32               : Maximum lenght of a long file name
 
-      CONFIG_GPIO_IRQ=y                    : Enable GPIO interrupts
+      CONFIG_KINETIS_GPIOIRQ=y             : Enable GPIO interrupts
       CONFIG_KINETIS_PORTEINTS=y           : Enable PortE GPIO interrupts
 
       CONFIG_SCHED_WORKQUEUE=y             : Enable the NuttX workqueue
