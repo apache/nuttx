@@ -104,7 +104,7 @@
 #ifdef NSH_HAVE_MMCSD
 #  ifdef CONFIG_MMCSD_HAVECARDDETECT
 #    define NSH_HAVE_MMCSD_CD 1
-#    ifdef CONFIG_GPIO_IRQ
+#    ifdef CONFIG_LPC17_GPIOIRQ
 #      define NSH_HAVE_MMCSD_CDINT 1
 #    endif
 #  endif

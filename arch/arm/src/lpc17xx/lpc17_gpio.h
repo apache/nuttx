@@ -89,7 +89,7 @@ extern "C"
  * lpc17_gpioint.c, and lpc17_gpiodbg.c
  */
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_LPC17_GPIOIRQ
 EXTERN uint64_t g_intedge0;
 EXTERN uint64_t g_intedge2;
 #endif
@@ -109,7 +109,7 @@ EXTERN const uint32_t g_intbase[GPIO_NPORTS];
  *
  ************************************************************************************/
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_LPC17_GPIOIRQ
 void lpc17_gpioirqinitialize(void);
 #else
 #  define lpc17_gpioirqinitialize()
@@ -153,7 +153,7 @@ bool lpc17_gpioread(lpc17_pinset_t pinset);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_LPC17_GPIOIRQ
 void lpc17_gpioirqenable(int irq);
 #else
 #  define lpc17_gpioirqenable(irq)
@@ -167,7 +167,7 @@ void lpc17_gpioirqenable(int irq);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_LPC17_GPIOIRQ
 void lpc17_gpioirqdisable(int irq);
 #else
 #  define lpc17_gpioirqdisable(irq)
