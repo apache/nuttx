@@ -44,24 +44,7 @@
 
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
-#  ifdef CONFIG_SAM34_GPIO_IRQ
-#    include <arch/irq.h>
-#  endif
-#endif
-
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-
-/************************************************************************************
- * Included Files
- ************************************************************************************/
-
-#include <nuttx/config.h>
-
-#ifndef __ASSEMBLY__
-#  include <stdint.h>
-#  ifdef CONFIG_SAM34_GPIO_IRQ
+#  ifdef CONFIG_SAM34_SAM34_GPIO_IRQ
 #    include <arch/irq.h>
 #  endif
 #endif
