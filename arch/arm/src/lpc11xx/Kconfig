@@ -237,7 +237,7 @@ config CAN_REGDEBUG
 
 endmenu
 
-config GPIO_IRQ
+config LPC11_GPIOIRQ
 	bool "GPIO interrupt support"
 	default n
 	---help---
