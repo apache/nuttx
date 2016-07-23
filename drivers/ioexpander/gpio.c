@@ -99,7 +99,7 @@ static const struct file_operations g_gpio_drvrops =
 static int gpio_handler(FAR struct gpio_dev_s *dev)
 {
   DEBUGASSERT(dev != NULL);
-  kill(dev->gp_pid, dev->gp_signo);
+  (void)kill(dev->gp_pid, dev->gp_signo);
   return OK;
 }
 
