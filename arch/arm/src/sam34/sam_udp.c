@@ -1873,7 +1873,6 @@ static void sam_ep_bankinterrupt(struct sam_usbdev_s *priv,
        * transferred from the FIFO.
        */
 
-      privep->epstate = UDP_EPSTATE_IDLE;
       (void)sam_req_read(priv, privep, pktsize, bank);
     }
 
