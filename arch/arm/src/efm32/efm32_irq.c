@@ -94,10 +94,6 @@ volatile uint32_t *g_current_regs[1];
 extern uint32_t _vectors[];
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -261,15 +257,9 @@ static int efm32_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
     {
       if (irq < NR_VECTORS)
         {
-          n = irq - EFM32_IRQ_INTERRUPTS;
+          n        = irq - EFM32_IRQ_INTERRUPTS;
           *regaddr = NVIC_IRQ_ENABLE(n) + offset;
-
-          while (n >= 32)
-            {
-              n -= 32;
-            }
-
-          *bit     = 1 << n;
+          *bit     = (uint32_t)1 << (n & 0x1f);
         }
       else
         {

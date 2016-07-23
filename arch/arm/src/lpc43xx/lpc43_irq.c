@@ -92,10 +92,6 @@ volatile uint32_t *g_current_regs[1];
 extern uint32_t _vectors[];
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -250,15 +246,9 @@ static int lpc43_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
 
   if (irq >= LPC43_IRQ_EXTINT)
     {
-      n = irq - LPC43_IRQ_EXTINT;
+      n        = irq - LPC43_IRQ_EXTINT;
       *regaddr = NVIC_IRQ_ENABLE(n) + offset;
-
-      while (n >= 32)
-        {
-          n -= 32;
-        }
-
-      *bit     = 1 << n;
+      *bit     = (uint32_t)1 << (n & 0x1f);
     }
 
   /* Handle processor exceptions.  Only a few can be disabled */

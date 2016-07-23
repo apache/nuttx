@@ -1,8 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32l4/stm32l4_irq.c
- * arch/arm/src/chip/stm32l4_irq.c
  *
- *   Copyright (C) 2009-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -89,10 +88,6 @@ volatile uint32_t *g_current_regs[1];
  */
 
 extern uint32_t _vectors[];
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -254,13 +249,7 @@ static int stm32l4_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
     {
       n = irq - STM32L4_IRQ_FIRST;
       *regaddr = NVIC_IRQ_ENABLE(n) + offset;
-
-      while (n >= 32)
-        {
-          n -= 32;
-        }
-
-      *bit     = 1 << n;
+      *bit     = (uint32_t)1 << (n & 0x1f);
     }
 
   /* Handle processor exceptions.  Only a few can be disabled */
