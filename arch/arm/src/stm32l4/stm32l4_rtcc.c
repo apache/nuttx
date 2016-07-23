@@ -963,10 +963,6 @@ int up_rtc_initialize(void)
    */
 
   stm32l4_exti_alarm(true, false, true, stm32l4_rtc_alarm_handler);
-
-  /* Enable RTC Alarm interrupts */
-
-  up_enable_irq(STM32L4_IRQ_RTCALRM);
 #endif
 
   g_rtc_enabled = true;

@@ -1026,10 +1026,6 @@ int up_rtc_initialize(void)
 
   stm32_exti_alarm(true, false, true, stm32_rtc_alarm_handler);
   rtc_dumpregs("After InitExtiAlarm");
-
-  /* Enable RTC Alarm interrupts */
-
-  up_enable_irq(STM32_IRQ_RTCALRM);
 #else
   rtc_dumpregs("After Initialization");
 #endif
