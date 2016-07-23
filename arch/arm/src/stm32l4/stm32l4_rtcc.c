@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/stm32l4/stm32l4_rtcc.c
  *
- *   Copyright (C) 2012-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           dev@ziggurat29.com (adaptations to stm32l4)
  *
@@ -233,31 +233,6 @@ static void rtc_dumptime(FAR const struct tm *tp, FAR const char *msg)
 #else
 #  define rtc_dumptime(tp, msg)
 #endif
-
-/************************************************************************************
- * Name: rtc_is_inits
- *
- * Description:
- *    Returns 'true' if the RTC has been initialized (according to the RTC itself).
- *    It will be 'false' if the RTC has never been initialized since first time power
- *    up, and the counters are stopped until it is first initialized.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   bool -- true if the INITS flag is set in the ISR.
- *
- ************************************************************************************/
-
-bool rtc_is_inits(void)
-{
-  uint32_t regval;
-
-  regval = getreg32(STM32L4_RTC_ISR);
-
-  return (regval & RTC_ISR_INITS) ? true : false;
-}
 
 /************************************************************************************
  * Name: rtc_wprunlock
@@ -796,6 +771,31 @@ rtchw_set_alrmbr_exit:
  ************************************************************************************/
 
 /************************************************************************************
+ * Name: rtc_is_inits
+ *
+ * Description:
+ *    Returns 'true' if the RTC has been initialized (according to the RTC itself).
+ *    It will be 'false' if the RTC has never been initialized since first time power
+ *    up, and the counters are stopped until it is first initialized.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   bool -- true if the INITS flag is set in the ISR.
+ *
+ ************************************************************************************/
+
+bool rtc_is_inits(void)
+{
+  uint32_t regval;
+
+  regval = getreg32(STM32L4_RTC_ISR);
+
+  return (regval & RTC_ISR_INITS) ? true : false;
+}
+
+/************************************************************************************
  * Name: up_rtc_initialize
  *
  * Description:
@@ -963,6 +963,10 @@ int up_rtc_initialize(void)
    */
 
   stm32l4_exti_alarm(true, false, true, stm32l4_rtc_alarm_handler);
+
+  /* Enable RTC Alarm interrupts */
+
+  up_enable_irq(STM32L4_IRQ_RTCALRM);
 #endif
 
   g_rtc_enabled = true;
