@@ -247,7 +247,7 @@ static int stm32l4_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
 
   if (irq >= STM32L4_IRQ_FIRST)
     {
-      n = irq - STM32L4_IRQ_FIRST;
+      n        = irq - STM32L4_IRQ_FIRST;
       *regaddr = NVIC_IRQ_ENABLE(n) + offset;
       *bit     = (uint32_t)1 << (n & 0x1f);
     }

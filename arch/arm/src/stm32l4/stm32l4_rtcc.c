@@ -134,6 +134,7 @@ struct alm_cbinfo_s
 /* Callback to use when an EXTI is activated  */
 
 static struct alm_cbinfo_s g_alarmcb[RTC_ALARM_LAST];
+static bool g_alarm_enabled;  /* True: Alarm interrupts are enabled */
 #endif
 
 /************************************************************************************
@@ -153,6 +154,7 @@ static int rtchw_check_alrawf(void);
 static int rtchw_check_alrbwf(void);
 static int rtchw_set_alrmar(rtc_alarmreg_t alarmreg);
 static int rtchw_set_alrmbr(rtc_alarmreg_t alarmreg);
+static void alarm_enable(void);
 #endif
 
 /************************************************************************************
@@ -766,6 +768,45 @@ rtchw_set_alrmbr_exit:
 }
 #endif
 
+/****************************************************************************
+ * Name: alarm_enable
+ *
+ * Description:
+ *   Enable ALARM interrupts
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RTC_ALARM
+static void alarm_enable(void)
+{
+  /* Is the alarm already enabled? */
+
+  if (!g_alarm_enabled)
+    {
+      /* Configure RTC interrupt to catch alarm interrupts. All RTC
+       * interrupts are connected to the EXTI controller.  To enable the
+       * RTC Alarm interrupt, the following sequence is required:
+       *
+       * 1. Configure and enable the EXTI Line 18 in interrupt mode and
+       *    select the rising edge sensitivity.
+       *    EXTI line 19 RTC Tamper or Timestamp or CSS_LSE
+       *    EXTI line 20 RTC Wakeup
+       * 2. Configure and enable the RTC_Alarm IRQ channel in the NVIC.
+       * 3. Configure the RTC to generate RTC alarms (Alarm A or Alarm B).
+       */
+
+      stm32l4_exti_alarm(true, false, true, stm32l4_rtc_alarm_handler);
+      g_alarm_enabled = true;
+    }
+}
+#endif
+
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
@@ -948,22 +989,6 @@ int up_rtc_initialize(void)
 
       (void)stm32l4_pwr_enablebkp(false);
     }
-
-#ifdef CONFIG_RTC_ALARM
-  /* Configure RTC interrupt to catch alarm interrupts. All RTC interrupts are
-   * connected to the EXTI controller.  To enable the RTC Alarm interrupt, the
-   * following sequence is required:
-   *
-   * 1. Configure and enable the EXTI Line 18 in interrupt mode and select the
-   *    rising edge sensitivity.
-   *    EXTI line 19 RTC Tamper or Timestamp or CSS_LSE
-   *    EXTI line 20 RTC Wakeup
-   * 2. Configure and enable the RTC_Alarm IRQ channel in the NVIC.
-   * 3. Configure the RTC to generate RTC alarms (Alarm A or Alarm B).
-   */
-
-  stm32l4_exti_alarm(true, false, true, stm32l4_rtc_alarm_handler);
-#endif
 
   g_rtc_enabled = true;
   rtc_dumpregs("After Initialization");
@@ -1241,6 +1266,10 @@ int stm32l4_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
   ASSERT(alminfo != NULL);
   DEBUGASSERT(RTC_ALARM_LAST > alminfo->as_id);
 
+  /* Make sure the the alarm interrupt is enabled at the NVIC */
+
+  alarm_enable();
+
   /* REVISIT:  Should test that the time is in the future */
 
   rtc_dumptime(&alminfo->as_time, "New alarm time");
@@ -1249,7 +1278,7 @@ int stm32l4_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
 
   alarmreg = rtc_reg_alrmr_bin2bcd(&alminfo->as_time);
 
-  /* Set the alarm in hardware and enable interrupts */
+  /* Set the alarm in hardware and enable interrupts from the RTC */
 
   switch (alminfo->as_id)
     {
