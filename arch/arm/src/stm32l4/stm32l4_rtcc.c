@@ -154,7 +154,7 @@ static int rtchw_check_alrawf(void);
 static int rtchw_check_alrbwf(void);
 static int rtchw_set_alrmar(rtc_alarmreg_t alarmreg);
 static int rtchw_set_alrmbr(rtc_alarmreg_t alarmreg);
-static void alarm_enable(void);
+static inline void rtc_enable_alarm(void);
 #endif
 
 /************************************************************************************
@@ -769,7 +769,7 @@ rtchw_set_alrmbr_exit:
 #endif
 
 /****************************************************************************
- * Name: alarm_enable
+ * Name: rtc_enable_alarm
  *
  * Description:
  *   Enable ALARM interrupts
@@ -783,7 +783,7 @@ rtchw_set_alrmbr_exit:
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-static void alarm_enable(void)
+static inline void rtc_enable_alarm(void)
 {
   /* Is the alarm already enabled? */
 
@@ -1268,7 +1268,7 @@ int stm32l4_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
 
   /* Make sure the the alarm interrupt is enabled at the NVIC */
 
-  alarm_enable();
+  rtc_enable_alarm();
 
   /* REVISIT:  Should test that the time is in the future */
 
