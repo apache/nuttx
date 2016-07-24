@@ -1964,6 +1964,8 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
   struct sam_ep_s *privep;
   uintptr_t regaddr;
   uint32_t csr;
+  bool bk0;
+  bool bk1;
 
   DEBUGASSERT((unsigned)epno < SAM_UDP_NENDPOINTS);
 
@@ -2052,30 +2054,35 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
    * and clear RXDATABKx.
    */
 
-  bool bk0 = (csr & UDPEP_CSR_RXDATABK0) != 0;
-  bool bk1 = (csr & UDPEP_CSR_RXDATABK1) != 0;
+  bk0 = (csr & UDPEP_CSR_RXDATABK0) != 0;
+  bk1 = (csr & UDPEP_CSR_RXDATABK1) != 0;
 
   /* 2. and 6. - Only read bank 0 */
+
   if (bk0 && !bk1)
     {
       usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_RXDATABK0), (uint16_t)csr);
       sam_ep_bankinterrupt(priv, privep, csr, 0);
     }
+
   /* 3. and 7. - Only read bank 1*/
+
   else if (!bk0 && bk1)
     {
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_USB_WARN
       if (privep->lastbank == 1)
         {
-          ulldbg("Unexpected USB RX case.\n");
+          uwarn("WARNING: Unexpected USB RX case.\n");
         }
 #endif
+
       usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_RXDATABK1), (uint16_t)csr);
       sam_ep_bankinterrupt(priv, privep, csr, 1);
     }
   else if (bk0 && bk1)
     {
       /* 4. - Read bank 1, then read bank 0 */
+
       if (privep->lastbank == 0)
         {
           usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_RXDATABK1), (uint16_t)csr);
@@ -2084,7 +2091,9 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
           usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_RXDATABK0), (uint16_t)csr);
           sam_ep_bankinterrupt(priv, privep, csr, 0);
         }
+
       /* 8. - Read bank 0, then read bank 1 */
+
       else
         {
           usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_RXDATABK0), (uint16_t)csr);
