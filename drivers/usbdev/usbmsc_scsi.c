@@ -2263,7 +2263,9 @@ static int usbmsc_cmdwritestate(FAR struct usbmsc_dev_s *priv)
        * data to be written.
        */
 
+      irqstate_t flags = enter_critical_section();
       privreq = (FAR struct usbmsc_req_s *)sq_remfirst(&priv->rdreqlist);
+      leave_critical_section(flags);
 
       /* If there no request data available, then just return an error.
        * This will cause us to remain in the CMDWRITE state.  When a filled request is
