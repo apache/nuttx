@@ -2641,8 +2641,8 @@ int usbmsc_scsi_main(int argc, char *argv[])
   uinfo("Waiting to be signalled\n");
   usbmsc_scsi_lock(priv);
   priv->thstate = USBMSC_STATE_STARTED;
-  while ((priv->theventset & USBMSC_EVENT_READY) != 0 &&
-         (priv->theventset & USBMSC_EVENT_TERMINATEREQUEST) != 0)
+  while ((priv->theventset & USBMSC_EVENT_READY) == 0 &&
+         (priv->theventset & USBMSC_EVENT_TERMINATEREQUEST) == 0)
     {
       usbmsc_scsi_wait(priv);
     }
