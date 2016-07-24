@@ -12375,3 +12375,46 @@
 	  adds DEBUGASSERT for invalid geometry and additional memory debug
 	  logic.  Also fixes the dangling pointer on error bug.  From Ken
 	  Pettit (2016-07-14).
+	* arch/arm/src/lpc32xx: Extend LPC43xx EMC code to support SDRAM on a
+	  dynamic memory interface.  From Vytautas Lukenskas (2016-07-19).
+	* arch/srim/src:  Add the simulated QSPI (N25Q) flash to the simulation
+	  and modify sim up_spiflash.c to enable it to run with different MTD
+	  drivers based on config options (currently m25p, sst26 and w25).
+	  From Ken Pettit (2016-07-19).
+	* drivers/pipe:  Add support to allocated different sizes for pipe and
+	  fifo buffers.  Adds mkfifo2() and pipe2() which are just like mkfifo()
+	  and pipe(), but allow control of the size of the underlying, in-memory
+	  circular buffer .  Move pipe() and mkpipe() to nuttx/libc, they are no
+	  longer core OS interfaces.  Capability currenty used only by PTY logic
+	  to support, configurable, smaller buffers for PTYs (2016-07-19).
+	* include/nuttx/drivers:  Move driver-related files from include/nuttx
+	  to include/nuttx/drivers.  Move driver related prototypes out of
+	  include/nuttx/fs/fs.h and into new include/drivers/drivers.h
+	  (2016-07-20).
+	* include /nuttx/lib: Move library-related files from include/nuttx to
+	  include/nuttx/lib  (2016-07-21).
+	* drivers/serial/serial.c:  Fix a race condition noted by Stefan Kolb.
+	  Between the test if the TX buffer is full and entering a critical
+	  section, bytes may be removed from the TX buffer making the wait
+	  unnecessary.  The unnecessary wait is an inefficiency, but not really
+	  a problem.  But with USB CDC/ACM it can be a problem because the
+	  entire TX buffer may be emptied when we lose the race.  If that
+	  happens that uart_putxmitchar() can hang waiting for data to be
+	  removed from an empty TX buffer (2016-07-22).
+	* arch/arm/src/stm32 and stm32l4: STM32 F4/L4 RTC ALARM: were enabling
+	  interrupts too early in the power-up sequence,  BEFORE the interrupt
+	  system was being initialized (2016-07-23).
+	* drivers/ioexpander: GPIO driver: Add support for receiving signals
+	  from interrupt pins (2016-07-23).
+	* drivers/usbdev: USBMSC: Add locks when removing request from queue.
+	  From Wolfgang Reissnegger (2016-07-23).
+	* drivers/usbdev: USBMSC: Fix reversed logic on waiting for SCSI thread
+	  start.  The scsi thread was waiting for the wrong condition. However,
+	  this was masked by the fact that the code creating the scsi thread was
+	  also holding usbmsc_scsi_lock(priv) while initializing data, hence
+	  this lock synchronized the scsi thread start with init completion.
+	  From Wolfgang Reissnegger (2016-07-23).
+	* arch/arm/src/sam34: SAM3/4 UDP: Fix handling of endpoint RX FIFO
+	  banks.  This fixes a race condition where the HW fills a FIFO bank
+	  while the SW is busy, resulting in out of sequence USB packets
+	  (2016-07-23).
