@@ -85,7 +85,15 @@ enum gpio_pintype_e
 
 typedef CODE int (*pin_interrupt_t)(FAR struct gpio_dev_s *dev);
 
-/* Pin interface definition. */
+/* Pin interface vtable definition.  Instances of this vtable are read-only
+ * and may reside in FLASH.
+ *
+ *   - go_read.  Required for all all pin types.
+ *   - go_write.  Required only for the GPIO_OUTPUT_PIN pin type.  Unused
+ *     for other pin types may be NULL.
+ *   - go_attach and gp_eanble.  Required only the GPIO_INTERRUPT_PIN pin
+ *     type.  Unused for other pin types may be NULL.
+ */
 
 struct gpio_dev_s;
 struct gpio_operations_s
@@ -99,7 +107,7 @@ struct gpio_operations_s
   CODE int (*go_enable)(FAR struct gpio_dev_s *dev, bool enable);
 };
 
-/* Pin interface definition. */
+/* Pin interface definition.  Must lie in writable memory. */
 
 struct gpio_dev_s
 {
@@ -120,7 +128,7 @@ struct gpio_dev_s
 
   FAR const struct gpio_operations_s *gp_ops;
 
-  /* Device specific, lower-half information may follow */
+  /* Device specific, lower-half information may follow. */
 };
 
 /****************************************************************************
@@ -140,6 +148,13 @@ extern "C"
  *
  * Description:
  *   Register GPIO pin device driver.
+ *
+ *   - Input pin types will be registered at /dev/gpinN
+ *   - Output pin types will be registered at /dev/gpoutN
+ *   - Interrupt pin types will be registered at /dev/gpintN
+ *
+ *   Where N is the provided minor number in the range of 0-99.
+ *
  *
  ****************************************************************************/
 
