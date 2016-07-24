@@ -41,6 +41,7 @@
 
 #include <sys/types.h>
 #include <stdio.h>
+#include <signal.h>
 #include <assert.h>
 #include <errno.h>
 
@@ -53,6 +54,7 @@
  * Private Function Prototypes
  ****************************************************************************/
 
+static int     gpio_handler(FAR struct gpio_dev_s *dev);
 static int     gpio_open(FAR struct file *filep);
 static int     gpio_close(FAR struct file *filep);
 static ssize_t gpio_read(FAR struct file *filep, FAR char *buffer,
@@ -66,23 +68,7 @@ static int     gpio_ioctl(FAR struct file *filep, int cmd,
  * Private Data
  ****************************************************************************/
 
-static const struct file_operations g_gpio_input_ops =
-{
-  gpio_open,  /* open */
-  gpio_close, /* close */
-  gpio_read,  /* read */
-  NULL,       /* write */
-  NULL,       /* seek */
-  gpio_ioctl  /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , NULL      /* poll */
-#endif
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL      /* unlink */
-#endif
-};
-
-static const struct file_operations g_gpio_output_ops =
+static const struct file_operations g_gpio_drvrops =
 {
   gpio_open,  /* open */
   gpio_close, /* close */
@@ -101,6 +87,21 @@ static const struct file_operations g_gpio_output_ops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: gpio_handler
+ *
+ * Description:
+ *   Standard character driver open method.
+ *
+ ****************************************************************************/
+
+static int gpio_handler(FAR struct gpio_dev_s *dev)
+{
+  DEBUGASSERT(dev != NULL);
+  (void)kill(dev->gp_pid, dev->gp_signo);
+  return OK;
+}
 
 /****************************************************************************
  * Name: gpio_open
@@ -167,7 +168,7 @@ static ssize_t gpio_write(FAR struct file *filep, FAR const char *buffer,
 static int gpio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   FAR struct inode *inode;
-  FAR struct gpio_common_dev_s *dev;
+  FAR struct gpio_dev_s *dev;
   int ret;
 
   DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
@@ -177,20 +178,16 @@ static int gpio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   switch (cmd)
     {
-      /* Command:     GPIO_WRITE
+      /* Command:     GPIOC_WRITE
        * Description: Set the value of an output GPIO
        * Argument:    0=output a low value; 1=outut a high value
        */
 
-      case GPIO_WRITE:
-        if (dev->gp_output)
+      case GPIOC_WRITE:
+        if (dev->gp_pintype == GPIO_OUTPUT_PIN)
           {
-            FAR struct gpio_output_dev_s *outdev =
-              (FAR struct gpio_output_dev_s *)dev;
-
-            DEBUGASSERT(outdev->gpout_write != NULL &&
-                        ((arg == 0UL) || (arg == 1UL)));
-            ret = outdev->gpout_write(outdev, (int)arg);
+            DEBUGASSERT(arg == 0ul || arg == 1ul);
+            ret = dev->gp_ops->go_write(dev, (int)arg);
           }
         else
           {
@@ -198,36 +195,62 @@ static int gpio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           }
         break;
 
-      /* Command:     GPIO_READ
+      /* Command:     GPIOC_READ
        * Description: Read the value of an input or output GPIO
        * Argument:    A pointer to an integer value to receive the result:
        *              0=low value; 1=high value.
        */
 
-      case GPIO_READ:
+      case GPIOC_READ:
         {
           FAR int *ptr = (FAR int *)((uintptr_t)arg);
           DEBUGASSERT(ptr != NULL);
 
-          if (dev->gp_output)
-            {
-              FAR struct gpio_output_dev_s *outdev =
-                (FAR struct gpio_output_dev_s *)dev;
-
-              DEBUGASSERT(outdev->gpout_read != NULL);
-              ret = outdev->gpout_read(outdev, ptr);
-            }
-          else
-            {
-              FAR struct gpio_input_dev_s *indev =
-                (FAR struct gpio_input_dev_s *)dev;
-
-              DEBUGASSERT(indev->gpin_read != NULL);
-              ret = indev->gpin_read(indev, ptr);
-            }
-
+          ret = dev->gp_ops->go_read(dev, ptr);
           DEBUGASSERT(ret < 0 || *ptr == 0 || *ptr == 1);
         }
+        break;
+
+      /* Command:     GPIOC_REGISTER
+       * Description: Register to receive a signal whenever there an
+       *              interrupt is received on an input gpio pin.  This
+       *              feature, of course, depends upon interrupt GPIO
+       *              support from the platform.
+       * Argument:    The number of signal to be generated when the
+       *              interrupt occurs.
+       */
+
+      case GPIOC_REGISTER:
+        if (dev->gp_pintype == GPIO_INTERRUPT_PIN)
+          {
+            /* Make sure that the pin interrupt is disabled */
+
+            ret = dev->gp_ops->go_enable(dev, false);
+            if (ret >= 0)
+              {
+                /* Save signal information */
+
+                DEBUGASSERT(GOOD_SIGNO(arg));
+
+                dev->gp_pid   = getpid();
+                dev->gp_signo = (uint8_t)arg;
+
+                /* Register our handler */
+
+                ret = dev->gp_ops->go_attach(dev,
+                                             (pin_interrupt_t)gpio_handler);
+                if (ret >= 0)
+                  {
+                    /* Enable pin interrupts */
+
+                    ret = dev->gp_ops->go_enable(dev, true);
+                  }
+              }
+          }
+        else
+          {
+            ret = -EACCES;
+          }
         break;
 
       /* Unrecognized command */
@@ -245,41 +268,63 @@ static int gpio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: gpio_input_register
+ * Name: gpio_pin_register
  *
  * Description:
- *   Register GPIO input pin device driver.
+ *   Register GPIO pin device driver.
  *
  ****************************************************************************/
 
-int gpio_input_register(FAR struct gpio_input_dev_s *dev, int minor)
+int gpio_pin_register(FAR struct gpio_dev_s *dev, int minor)
 {
+  FAR const char *fmt;
   char devname[16];
+  int ret;
 
-  DEBUGASSERT(dev != NULL && !dev->gpin_output && dev->gpin_read != NULL &&
-              (unsigned int)minor < 100);
+  DEBUGASSERT(dev != NULL && dev->gp_ops != NULL && (unsigned int)minor < 100);
 
-  snprintf(devname, 16, "/dev/gpin%u", (unsigned int)minor);
-  return register_driver(devname, &g_gpio_input_ops, 0444, dev);
-}
+  switch (dev->gp_pintype)
+    {
+      case GPIO_INPUT_PIN:
+        {
+          DEBUGASSERT(dev->gp_ops->go_read != NULL);
+          fmt = "/dev/gpin%u";
+        }
+        break;
 
-/****************************************************************************
- * Name: gpio_output_register
- *
- * Description:
- *   Register GPIO output pin device driver.
- *
- ****************************************************************************/
+      case GPIO_OUTPUT_PIN:
+        {
+          DEBUGASSERT(dev->gp_ops->go_read != NULL &&
+                     dev->gp_ops->go_write != NULL);
+          fmt = "/dev/gpout%u";
+          
+        }
+        break;
 
-int gpio_output_register(FAR struct gpio_output_dev_s *dev, int minor)
-{
-  char devname[16];
+      case GPIO_INTERRUPT_PIN:
+        {
+          DEBUGASSERT(dev->gp_ops->go_read != NULL &&
+                      dev->gp_ops->go_attach != NULL &&
+                      dev->gp_ops->go_enable != NULL);
 
-  DEBUGASSERT(dev != NULL && dev->gpout_output && dev->gpout_read != NULL &&
-              dev->gpout_write != NULL &&(unsigned int)minor < 100);
+          /* Make sure that the pin interrupt is disabled */
 
-  snprintf(devname, 16, "/dev/gpout%u", (unsigned int)minor);
-  return register_driver(devname, &g_gpio_output_ops, 0222, dev);
+          ret = dev->gp_ops->go_enable(dev, false);
+          if (ret < 0)
+            {
+              return ret;
+            }
+
+          fmt = "/dev/gpint%u";  
+        }
+        break;
+
+      default:
+        return -EINVAL;      
+    }
+
+  snprintf(devname, 16, fmt, (unsigned int)minor);
+  return register_driver(devname, &g_gpio_drvrops, 0666, dev);
 }
 
 #endif /* CONFIG_DEV_GPIO */

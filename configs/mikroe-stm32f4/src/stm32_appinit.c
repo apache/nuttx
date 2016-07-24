@@ -61,7 +61,7 @@
 
 #ifdef CONFIG_MIKROE_FLASH_CONFIG_PART
 #ifdef CONFIG_PLATFORM_CONFIGDATA
-#  include <nuttx/configdata.h>
+#  include <nuttx/mtd/configdata.h>
 #endif
 #endif
 

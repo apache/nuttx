@@ -47,64 +47,80 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Command:     GPIO_WRITE
+/* Command:     GPIOC_WRITE
  * Description: Set the value of an output GPIO
  * Argument:    0=output a low value; 1=outut a high value
  *
- * Command:     GPIO_READ
+ * Command:     GPIOC_READ
  * Description: Read the value of an input or output GPIO
  * Argument:    A pointer to an integer value to receive the result:
  *              0=low value; 1=high value.
+ *
+ * Command:     GPIOC_REGISTER
+ * Description: Register to receive a signal whenever there an interrupt
+ *              is received on an input gpio pin.  This feature, of course,
+ *              depends upon interrupt GPIO support from the platform.
+ * Argument:    The number of signal to be generated when the interrupt
+ *              occurs.
  */
 
-#define GPIO_WRITE _GPIOC(1)
-#define GPIO_READ  _GPIOC(2)
+#define GPIOC_WRITE    _GPIOC(1)
+#define GPIOC_READ     _GPIOC(2)
+#define GPIOC_REGISTER _GPIOC(3)
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
-/* Common interface definition.  Must be cast-compatible with struct
- * gpio_input_dev_s and struct gpio_output_dev_s
- */
+/* Identifies the type of the GPIO pin */
 
-struct gpio_common_dev_s
+enum gpio_pintype_e
 {
-  bool gp_output;
-  uint8_t gp_unused[3];
+  GPIO_INPUT_PIN = 0,
+  GPIO_OUTPUT_PIN,
+  GPIO_INTERRUPT_PIN
 };
 
-/* The interface to a GPIO input pin */
+/* Interrupt callback */
 
-struct gpio_input_dev_s
+typedef CODE int (*pin_interrupt_t)(FAR struct gpio_dev_s *dev);
+
+/* Pin interface definition. */
+
+struct gpio_dev_s;
+struct gpio_operations_s
 {
-  /* Common fields */
+  /* Interface methods */
 
-  bool gpin_output;
-  uint8_t gpin_unused[3];
-
-  /* Fields unique to input pins */
-
-  CODE int (*gpin_read)(FAR struct gpio_input_dev_s *dev, FAR int *value);
-
-  /* Lower-half private definitions may follow */
+  CODE int (*go_read)(FAR struct gpio_dev_s *dev, FAR int *value);
+  CODE int (*go_write)(FAR struct gpio_dev_s *dev, int value);
+  CODE int (*go_attach)(FAR struct gpio_dev_s *dev,
+                        pin_interrupt_t callback);
+  CODE int (*go_enable)(FAR struct gpio_dev_s *dev, bool enable);
 };
 
-/* The interface to a GPIO input pin */
+/* Pin interface definition. */
 
-struct gpio_output_dev_s
+struct gpio_dev_s
 {
-  /* Common fields */
+  /* Information provided from the lower half driver to the upper half
+   * driver when gpio_pin_register() is called.
+   */
 
-  bool gpout_output;
-  uint8_t gpout_unused[3];
+  uint8_t gp_pintype;  /* See enum gpio_pintype_e */;
 
-  /* Fields unique to output pins */
+  /* Writable storage used by the upper half driver */
 
-  CODE int (*gpout_read)(FAR struct gpio_output_dev_s *dev, FAR int *value);
-  CODE int (*gpout_write)(FAR struct gpio_output_dev_s *dev, int value);
+  uint8_t gp_signo;    /* signo to use when signaling a GPIO interrupt */
+  pid_t gp_pid;        /* The task to be signalled */
 
-  /* Lower-half private definitions may follow */
+  /* Read-only pointer to GPIO device operations (also provided by the
+   * lower half driver).
+   */
+
+  FAR const struct gpio_operations_s *gp_ops;
+
+  /* Device specific, lower-half information may follow */
 };
 
 /****************************************************************************
@@ -120,24 +136,14 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: gpio_input_register
+ * Name: gpio_pin_register
  *
  * Description:
- *   Register GPIO input pin device driver.
+ *   Register GPIO pin device driver.
  *
  ****************************************************************************/
 
-int gpio_input_register(FAR struct gpio_input_dev_s *dev, int minor);
-
-/****************************************************************************
- * Name: gpio_output_register
- *
- * Description:
- *   Register GPIO output pin device driver.
- *
- ****************************************************************************/
-
-int gpio_output_register(FAR struct gpio_output_dev_s *dev, int minor);
+int gpio_pin_register(FAR struct gpio_dev_s *dev, int minor);
 
 #ifdef __cplusplus
 }

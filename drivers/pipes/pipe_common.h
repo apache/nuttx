@@ -47,15 +47,42 @@
 #include <stdbool.h>
 #include <poll.h>
 
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Pipe/FIFO support */
+
+#ifndef CONFIG_PIPES
+#  undef CONFIG_DEV_PIPE_MAXSIZE
+#  undef CONFIG_DEV_PIPE_SIZE
+#  undef CONFIG_DEV_FIFO_SIZE
+#  define CONFIG_DEV_PIPE_MAXSIZE 0
+#  define CONFIG_DEV_PIPE_SIZE 0
+#  define CONFIG_DEV_FIFO_SIZE 0
+#endif
+
+/* Pipe/FIFO size */
+
+#ifndef CONFIG_DEV_PIPE_MAXSIZE
+#  define CONFIG_DEV_PIPE_MAXSIZE 1024
+#endif
+
+#if CONFIG_DEV_PIPE_MAXSIZE <= 0
+#  undef CONFIG_PIPES
+#  undef CONFIG_DEV_PIPE_SIZE
+#  undef CONFIG_DEV_FIFO_SIZE
+#  define CONFIG_DEV_PIPE_SIZE 0
+#  define CONFIG_DEV_FIFO_SIZE 0
+#endif
+
 #ifndef CONFIG_DEV_PIPE_SIZE
 #  define CONFIG_DEV_PIPE_SIZE 1024
 #endif
 
-#if CONFIG_DEV_PIPE_SIZE > 0
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#ifndef CONFIG_DEV_FIFO_SIZE
+#  define CONFIG_DEV_FIFO_SIZE 1024
+#endif
 
 /* Maximum number of threads than can be waiting for POLL events */
 
@@ -87,9 +114,9 @@
 
 /* Make the buffer index as small as possible for the configured pipe size */
 
-#if CONFIG_DEV_PIPE_SIZE > 65535
+#if CONFIG_DEV_PIPE_MAXSIZE > 65535
 typedef uint32_t pipe_ndx_t;  /* 32-bit index */
-#elif CONFIG_DEV_PIPE_SIZE > 255
+#elif CONFIG_DEV_PIPE_MAXSIZE > 255
 typedef uint16_t pipe_ndx_t;  /* 16-bit index */
 #else
 typedef uint8_t pipe_ndx_t;   /*  8-bit index */
@@ -107,6 +134,7 @@ struct pipe_dev_s
   sem_t      d_wrsem;       /* Full buffer - Writer waits for data read */
   pipe_ndx_t d_wrndx;       /* Index in d_buffer to save next byte written */
   pipe_ndx_t d_rdndx;       /* Index in d_buffer to return the next byte read */
+  pipe_ndx_t d_bufsize;     /* allocated size of d_buffer in bytes */
   uint8_t    d_refs;        /* References counts on pipe (limited to 255) */
   uint8_t    d_nwriters;    /* Number of reference counts for write access */
   uint8_t    d_nreaders;    /* Number of reference counts for read access */
@@ -130,7 +158,8 @@ struct pipe_dev_s
 
 #ifdef __cplusplus
 #  define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #  define EXTERN extern
 #endif
@@ -138,7 +167,7 @@ extern "C" {
 struct file;  /* Forward reference */
 struct inode; /* Forward reference */
 
-FAR struct pipe_dev_s *pipecommon_allocdev(void);
+FAR struct pipe_dev_s *pipecommon_allocdev(size_t bufsize);
 void    pipecommon_freedev(FAR struct pipe_dev_s *dev);
 int     pipecommon_open(FAR struct file *filep);
 int     pipecommon_close(FAR struct file *filep);
@@ -158,5 +187,4 @@ int     pipecommon_unlink(FAR struct inode *priv);
 }
 #endif
 
-#endif /* CONFIG_DEV_PIPE_SIZE > 0 */
 #endif /* __DRIVERS_PIPES_PIPE_COMMON_H */

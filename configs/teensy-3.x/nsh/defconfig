@@ -226,7 +226,7 @@ CONFIG_KINETIS_UART0=y
 #
 # Kinetis GPIO Interrupt Configuration
 #
-# CONFIG_GPIO_IRQ is not set
+# CONFIG_KINETIS_GPIOIRQ is not set
 
 #
 # Kinetis UART Configuration

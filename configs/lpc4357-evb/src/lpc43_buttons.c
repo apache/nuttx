@@ -72,7 +72,7 @@ static const uint16_t g_buttoncfg[BOARD_NUM_BUTTONS] =
  * button events.
  */
 
-#if defined(CONFIG_ARCH_IRQBUTTONS) && defined(CONFIG_GPIO_IRQ)
+#if defined(CONFIG_ARCH_IRQBUTTONS) && defined(CONFIG_LPC43_GPIO_IRQ)
 static xcpt_t g_buttonisr[BOARD_NUM_BUTTONS];
 
 /* This array provides the mapping from button ID numbers to button IRQ
@@ -183,7 +183,7 @@ uint8_t board_buttons(void)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_IRQBUTTONS) && defined(CONFIG_GPIO_IRQ)
+#if defined(CONFIG_ARCH_IRQBUTTONS) && defined(CONFIG_LPC43_GPIO_IRQ)
 xcpt_t board_button_irq(int id, xcpt_t irqhandler)
 {
 #if 0 /* Not yet implemented */

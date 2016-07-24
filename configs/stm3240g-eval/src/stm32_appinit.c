@@ -254,7 +254,8 @@ int board_app_initialize(uintptr_t arg)
   lower = stm32_rtc_lowerhalf();
   if (!lower)
     {
-      serr("ERROR: Failed to instantiate the RTC lower-half driver\n");
+      syslog(LOG_ERR,
+             "ERROR: Failed to instantiate the RTC lower-half driver\n");
       return -ENOMEM;
     }
   else
@@ -266,7 +267,9 @@ int board_app_initialize(uintptr_t arg)
       ret = rtc_initialize(0, lower);
       if (ret < 0)
         {
-          serr("ERROR: Failed to bind/register the RTC driver: %d\n", ret);
+          syslog(LOG_ERR,
+                 "ERROR: Failed to bind/register the RTC driver: %d\n",
+                 ret);
           return ret;
         }
     }
@@ -289,7 +292,8 @@ int board_app_initialize(uintptr_t arg)
   mtd = m25p_initialize(spi);
   if (!mtd)
     {
-      syslog(LOG_ERR, "ERROR: Failed to bind SPI port 0 to the SPI FLASH driver\n");
+      syslog(LOG_ERR,
+             "ERROR: Failed to bind SPI port 0 to the SPI FLASH driver\n");
       return -ENODEV;
     }
 #warning "Now what are we going to do with this SPI FLASH driver?"
@@ -303,7 +307,8 @@ int board_app_initialize(uintptr_t arg)
   sdio = sdio_initialize(CONFIG_NSH_MMCSDSLOTNO);
   if (!sdio)
     {
-      syslog(LOG_ERR, "ERROR: Failed to initialize SDIO slot %d\n",
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize SDIO slot %d\n",
              CONFIG_NSH_MMCSDSLOTNO);
       return -ENODEV;
     }
@@ -313,7 +318,9 @@ int board_app_initialize(uintptr_t arg)
   ret = mmcsd_slotinitialize(CONFIG_NSH_MMCSDMINOR, sdio);
   if (ret != OK)
     {
-      syslog(LOG_ERR, "ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
+      syslog(LOG_ERR,
+             "ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n",
+             ret);
       return ret;
     }
 

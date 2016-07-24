@@ -62,7 +62,7 @@
 
 #include "pipe_common.h"
 
-#if CONFIG_DEV_PIPE_SIZE > 0
+#ifdef CONFIG_PIPES
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -153,9 +153,11 @@ static void pipecommon_pollnotify(FAR struct pipe_dev_s *dev,
  * Name: pipecommon_allocdev
  ****************************************************************************/
 
-FAR struct pipe_dev_s *pipecommon_allocdev(void)
+FAR struct pipe_dev_s *pipecommon_allocdev(size_t bufsize)
 {
   FAR struct pipe_dev_s *dev;
+
+  DEBUGASSERT(bufsize <= CONFIG_DEV_PIPE_MAXSIZE);
 
   /* Allocate a private structure to manage the pipe */
 
@@ -168,6 +170,8 @@ FAR struct pipe_dev_s *pipecommon_allocdev(void)
       sem_init(&dev->d_bfsem, 0, 1);
       sem_init(&dev->d_rdsem, 0, 0);
       sem_init(&dev->d_wrsem, 0, 0);
+
+      dev->d_bufsize = bufsize;
     }
 
   return dev;
@@ -217,7 +221,7 @@ int pipecommon_open(FAR struct file *filep)
 
   if (dev->d_refs == 0 && dev->d_buffer == NULL)
     {
-      dev->d_buffer = (FAR uint8_t *)kmm_malloc(CONFIG_DEV_PIPE_SIZE);
+      dev->d_buffer = (FAR uint8_t *)kmm_malloc(dev->d_bufsize);
       if (!dev->d_buffer)
         {
           (void)sem_post(&dev->d_bfsem);
@@ -397,7 +401,7 @@ int pipecommon_close(FAR struct file *filep)
           return OK;
         }
 #endif
-   }
+    }
 
   sem_post(&dev->d_bfsem);
   return OK;
@@ -471,10 +475,11 @@ ssize_t pipecommon_read(FAR struct file *filep, FAR char *buffer, size_t len)
   while ((size_t)nread < len && dev->d_wrndx != dev->d_rdndx)
     {
       *buffer++ = dev->d_buffer[dev->d_rdndx];
-      if (++dev->d_rdndx >= CONFIG_DEV_PIPE_SIZE)
+      if (++dev->d_rdndx >= dev->d_bufsize)
         {
           dev->d_rdndx = 0;
         }
+
       nread++;
     }
 
@@ -545,7 +550,7 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
       /* Calculate the write index AFTER the next byte is written */
 
       nxtwrndx = dev->d_wrndx + 1;
-      if (nxtwrndx >= CONFIG_DEV_PIPE_SIZE)
+      if (nxtwrndx >= dev->d_bufsize)
         {
           nxtwrndx = 0;
         }
@@ -676,14 +681,14 @@ int pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds,
         }
       else
         {
-          nbytes = (CONFIG_DEV_PIPE_SIZE-1) + dev->d_wrndx - dev->d_rdndx;
+          nbytes = (dev->d_bufsize - 1) + dev->d_wrndx - dev->d_rdndx;
         }
 
       /* Notify the POLLOUT event if the pipe is not full, but only if
        * there is readers. */
 
       eventset = 0;
-      if (nbytes < (CONFIG_DEV_PIPE_SIZE-1))
+      if (nbytes < (dev->d_bufsize - 1))
         {
           eventset |= POLLOUT;
         }
@@ -788,7 +793,7 @@ int pipecommon_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
           if (dev->d_wrndx < dev->d_rdndx)
             {
-              count = (CONFIG_DEV_PIPE_SIZE - dev->d_rdndx) + dev->d_wrndx;
+              count = (dev->d_bufsize - dev->d_rdndx) + dev->d_wrndx;
             }
           else
             {
@@ -812,7 +817,7 @@ int pipecommon_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             }
           else
             {
-              count = ((CONFIG_DEV_PIPE_SIZE - dev->d_wrndx) + dev->d_rdndx) - 1;
+              count = ((dev->d_bufsize - dev->d_wrndx) + dev->d_rdndx) - 1;
             }
 
           *(FAR int *)((uintptr_t)arg) = count;
@@ -864,4 +869,4 @@ int pipecommon_unlink(FAR struct inode *inode)
 }
 #endif
 
-#endif /* CONFIG_DEV_PIPE_SIZE > 0 */
+#endif /* CONFIG_PIPES */

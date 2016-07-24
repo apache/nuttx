@@ -79,7 +79,7 @@
  * actually set up to interrupt until the interrupt is enabled.
  */
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_LPC11_GPIOIRQ
 uint64_t g_intedge0;
 uint64_t g_intedge2;
 #endif
@@ -295,7 +295,7 @@ static int lpc11_pullup(lpc11_pinset_t cfgset, unsigned int port,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_LPC11_GPIOIRQ
 static void lpc11_setintedge(unsigned int port, unsigned int pin,
                              unsigned int value)
 {
@@ -323,7 +323,7 @@ static void lpc11_setintedge(unsigned int port, unsigned int pin,
   *intedge &= ~((uint64_t)3     << shift);
   *intedge |=  ((uint64_t)value << shift);
 }
-#endif /* CONFIG_GPIO_IRQ */
+#endif /* CONFIG_LPC11_GPIOIRQ */
 
 /****************************************************************************
  * Name: lpc11_setopendrain
@@ -453,7 +453,7 @@ static inline int lpc11_configinput(lpc11_pinset_t cfgset, unsigned int port,
 
       /* Forget about any falling/rising edge interrupt enabled */
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_LPC11_GPIOIRQ
       lpc11_setintedge(port, pin, 0);
 #endif
     }
@@ -495,7 +495,7 @@ static inline int lpc11_configinterrupt(lpc11_pinset_t cfgset, unsigned int port
   /* Then just remember the rising/falling edge interrupt enabled */
 
   DEBUGASSERT(port == 0 || port == 2);
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_LPC11_GPIOIRQ
   lpc11_setintedge(port, pin, (cfgset & GPIO_EDGE_MASK) >> GPIO_EDGE_SHIFT);
 #endif
   return OK;

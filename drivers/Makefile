@@ -98,7 +98,13 @@ endif
 ifeq ($(CONFIG_PWM),y)
   CSRCS += pwm.c
 endif
+
+ifeq ($(CONFIG_DEV_URANDOM),y)
+ifneq ($(CONFIG_DEV_URANDOM_ARCH),y)
+  CSRCS += dev_urandom.c
 endif
+endif
+endif # CONFIG_NFILE_DESCRIPTORS != 0
 
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 COBJS = $(CSRCS:.c=$(OBJEXT))

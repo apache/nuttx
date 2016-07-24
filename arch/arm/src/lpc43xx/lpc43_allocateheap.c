@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc43xx/lpc43_allocateheap.c
  *
- *   Copyright (C) 2012-2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,6 +61,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Get customizations for each supported chip.
  *
  * SRAM Resources
@@ -95,6 +96,25 @@
  * NOTE 1: The 64Kb of AHB of SRAM on the LPC4350/30/20 span all AHB SRAM
  * banks but are treated as two banks of 48 an 16Kb by the NuttX memory
  * manager.  This gives some symmetry to all of the members of the family.
+ *
+ * ----------------------------------------------------------------------
+ * EMC SDRAM
+ * ----------------------------------------------------------------------
+ * LPC43xx may have dynamic RAM connected on EMC bus. Up to 4 chips can be
+ * connected.
+ *
+ * DYCS0 (0x2800 0000) up to 128MB
+ * DYCS1 (0x3000 0000) up to 256MB
+ * DYCS2 (0x6000 0000) up to 256MB
+ * DYCS3 (0x7000 0000) up to 256MB
+ *
+ * LPC43xx may have static RAM connected on EMC bus.
+ *
+ * CS0 (0x1C00 0000) up to 16MB
+ * CS1 (0x1D00 0000) up to 16MB
+ * CS2 (0x1E00 0000) up to 16MB
+ * CS3 (0x1F00 0000) up to 16MB
+ *
  */
 
 /* Configuration ************************************************************/
@@ -136,58 +156,89 @@
  *
  *    CONFIG_RAM_START = The start of the data RAM region which may be
  *      either local SRAM bank 0 (Configuration A) or 1 (Configuration B).
- *    CONFIG_RAM_START = The size of the data RAM region.
- *    CONFIG_RAM_END   = The sum of the above
+ *    CONFIG_RAM_SIZE  = The size of the data RAM region.
+ *    CONFIG_RAM_END   = The sum of the above.
+ */
+
+/* External Memory Configuration
+ *
+ * Dynamic memory configuration
+ *   For dynamic memory configuration at least one of LPC43_EXTSDRAMx
+ *   should by defined.
+ * Also, together with LPC43_EXTSDRAMx should be defined:
+ *   LPC43_EXTSDRAMxSIZE = External RAM size in bytes.
+ *   LPC43_EXTSDRAMxHEAP = Should this RAM be use as heap space?
  */
 
 /* Check for Configuration A. */
 
+#undef MM_USE_LOCSRAM_BANK0
+#undef MM_USE_LOCSRAM_BANK1
+#undef MM_USE_AHBSRAM_BANK0
+#undef MM_USE_AHBSRAM_BANK1
+#undef MM_USE_AHBSRAM_BANK2
+#undef MM_USE_EXTSDRAM0
+#undef MM_USE_EXTSDRAM1
+#undef MM_USE_EXTSDRAM2
+#undef MM_USE_EXTSDRAM3
+#undef MM_HAVE_REGION
+
 #ifndef CONFIG_LPC43_BOOT_SRAM
 
 /* Configuration A */
-/* CONFIG_RAM_START should be set to the base of AHB SRAM, local 0. */
+/* CONFIG_RAM_START shoudl be set to the base of local SRAM, Bank 0. */
 
 #  if CONFIG_RAM_START != LPC43_LOCSRAM_BANK0_BASE
-#    error "CONFIG_RAM_START must be set to the base address of RAM Bank 0"
+#    error "CONFIG_RAM_START must be set to the base address of RAM bank 0"
 #  endif
 
-/* The configured RAM size should be equal to the size of local SRAM Bank 0 */
+/* The configured RAM size should be equal to the size of local SRAM Bank 0. */
 
 #  if CONFIG_RAM_SIZE != LPC43_LOCSRAM_BANK0_SIZE
-#    error "CONFIG_RAM_SIZE must be set to size of AHB SRAM Bank 0"
+#    error "CONFIG_RAM_SIZE must be set to size of local SRAM Bank 0"
 #  endif
 
-/* Now we can assign all of the memory regions for configuration A */
+/* Local SRAM Bank 0 will be used as main memory region */
 
-#  define MM_REGION1_BASE  LPC43_LOCSRAM_BANK0_BASE
-#  define MM_REGION1_SIZE  LPC43_LOCSRAM_BANK0_SIZE
-#  define MM_REGION2_BASE  LPC43_LOCSRAM_BANK1_BASE
-#  define MM_REGION2_SIZE  LPC43_LOCSRAM_BANK1_SIZE
-#  define MM_REGION3_BASE  LPC43_AHBSRAM_BANK0_BASE
-#  define MM_REGION3_SIZE  LPC43_AHBSRAM_BANK0_SIZE
-#else
+#  define MM_USE_LOCSRAM_BANK0 0
+
+/* Use local SRAM Bank 1 if configured */
+
+#  ifdef CONFIG_LPC43_USE_LOCSRAM_BANK1
+#    define MM_USE_LOCSRAM_BANK1 1
+#  endif
+
+#else /* CONFIG_LPC43_BOOT_SRAM */
 
 /* Configuration B */
-/* CONFIG_RAM_START should be set to the base of local SRAM, bank 1. */
+/* CONFIG_RAM_START should be set to the base of local SRAM, Bank 1. */
 
 #  if CONFIG_RAM_START != LPC43_LOCSRAM_BANK1_BASE
-#    error "CONFIG_RAM_START must be set to the base address of SRAM Bank 1"
+#    error "CONFIG_RAM_START must be set to the base address of RAM bank 1"
 #  endif
 
-/* The configured RAM size should be equal to the size of local SRAM Bank 1 */
+/* The configured RAM size should be equal to the size of local SRAM Bank 1. */
 
 #  if CONFIG_RAM_SIZE != LPC43_LOCSRAM_BANK1_SIZE
-#    error "CONFIG_RAM_SIZE must be set to size of AHB SRAM Bank 1"
+#    error "CONFIG_RAM_SIZE must be set to size of local SRAM Bank 1"
 #  endif
 
-/* Now we can assign all of the memory regions for configuration B */
+/* Shouldn't use Local SRAM Bank 0 as system use it for code.
+ * Local SRAM Bank1 is used as main memory region.
+ */
 
-#  define MM_REGION1_BASE  LPC43_LOCSRAM_BANK1_BASE
-#  define MM_REGION1_SIZE  LPC43_LOCSRAM_BANK1_SIZE
-#  define MM_REGION2_BASE  LPC43_AHBSRAM_BANK0_BASE
-#  define MM_REGION2_SIZE  LPC43_AHBSRAM_BANK0_SIZE
-#  undef  MM_REGION3_BASE
-#  undef  MM_REGION3_SIZE
+#  define MM_USE_LOCSRAM_BANK1 0
+
+#endif /* CONFIG_LPC43_BOOT_SRAM */
+
+/* Configure other memory banks */
+
+#ifdef CONFIG_LPC43_AHBSRAM_BANK0
+#  define MM_USE_AHBSRAM_BANK0 1
+#endif
+
+#ifdef CONFIG_LPC43_AHBSRAM_BANK1
+#  define MM_USE_AHBSRAM_BANK1 1
 #endif
 
 #define MM_DMAREGION_BASE  LPC43_AHBSRAM_BANK2_BASE
@@ -199,8 +250,69 @@
 
 #warning "Missing Logic"
 
-#define MM_DMAHEAP_BASE MM_DMAREGION_BASE /* For now... use it all */
-#define MM_DMAHEAP_SIZE MM_DMAREGION_SIZE
+#ifdef CONFIG_LPC43_AHBSRAM_BANK2
+#  define MM_USE_AHBSRAM_BANK2 1
+#  define MM_DMAHEAP_BASE MM_DMAREGION_BASE /* For now... use it all */
+#  define MM_DMAHEAP_SIZE MM_DMAREGION_SIZE
+#endif
+
+/* External RAM configuration */
+
+/* Check if external SDRAM is supported and, if so, it is intended to be used
+ * used as heap.
+ */
+
+#if !defined(CONFIG_LPC43_EXTSDRAM0) || !defined(CONFIG_LPC43_EXTSDRAM0_HEAP)
+#  undef CONFIG_LPC43_EXTSDRAM0_SIZE
+#  define CONFIG_LPC43_EXTSDRAM0_SIZE 0
+#endif
+
+#if !defined(CONFIG_LPC43_EXTSDRAM1) || !defined(CONFIG_LPC43_EXTSDRAM1_HEAP)
+#  undef CONFIG_LPC43_EXTSDRAM1_SIZE
+#  define CONFIG_LPC43_EXTSDRAM1_SIZE 0
+#endif
+
+#if !defined(CONFIG_LPC43_EXTSDRAM2) || !defined(CONFIG_LPC43_EXTSDRAM2_HEAP)
+#  undef CONFIG_LPC43_EXTSDRAM2_SIZE
+#  define CONFIG_LPC43_EXTSDRAM2_SIZE 0
+#endif
+
+#if !defined(CONFIG_LPC43_EXTSDRAM3) || !defined(CONFIG_LPC43_EXTSDRAM3_HEAP)
+#  undef CONFIG_LPC43_EXTSDRAM3_SIZE
+#  define CONFIG_LPC43_EXTSDRAM3_SIZE 0
+#endif
+
+#if CONFIG_LPC43_EXTSDRAM0_SIZE > 0
+#  define MM_USE_EXTSDRAM0 1
+#  define MM_EXTSDRAM0_REGION LPC43_DYCS0_BASE
+#  define MM_EXTSDRAM0_SIZE   CONFIG_LPC43_EXTSDRAM0_SIZE
+#endif /* CONFIG_LPC43_EXTSDRAM0_SIZE */
+
+#if CONFIG_LPC43_EXTSDRAM1_SIZE > 0
+#  define MM_USE_EXTSDRAM1 1
+#  define MM_EXTSDRAM1_REGION LPC43_DYCS1_BASE
+#  define MM_EXTSDRAM1_SIZE   CONFIG_LPC43_EXTSDRAM1_SIZE
+#endif /* CONFIG_LPC43_EXTSDRAM1_SIZE */
+
+#if CONFIG_LPC43_EXTSDRAM2_SIZE > 0
+#  define MM_USE_EXTSDRAM2 1
+#  define MM_EXTSDRAM2_REGION LPC43_DYCS2_BASE
+#  define MM_EXTSDRAM2_SIZE   CONFIG_LPC43_EXTSDRAM2_SIZE
+#endif /* CONFIG_LPC43_EXTSDRAM1_SIZE */
+
+#if CONFIG_LPC43_EXTSDRAM3_SIZE > 0
+#  define HAVE_EXTSDRAM3_REGION 1
+#  define MM_EXTSDRAM3_REGION LPC43_DYCS3_BASE
+#  define MM_EXTSDRAM3_SIZE   CONFIG_LPC43_EXTSDRAM3_SIZE
+#endif /* CONFIG_LPC43_EXTSDRAM3_SIZE */
+
+#if CONFIG_MM_REGIONS > 1 && \
+    (defined(MM_USE_LOCSRAM_BANK1) || defined(MM_USE_AHBSRAM_BANK0) || \
+     defined(MM_USE_AHBSRAM_BANK1) || defined(MM_USE_AHBSRAM_BANK2) || \
+     defined(MM_USE_EXTSDRAM0)     || defined(MM_USE_EXTSDRAM1) || \
+     defined(MM_USE_EXTSDRAM2)     || defined(MM_USE_EXTSDRAM3))
+#  define MM_HAVE_REGION 1
+#endif
 
 /****************************************************************************
  * Private Data
@@ -216,14 +328,30 @@
  * thread is the thread that the system boots on and, eventually, becomes the
  * idle, do nothing task that runs only when there is nothing else to run.
  * The heap continues from there until the configured end of memory.
- * g_idle_topstack is the beginning of this heap region (not necessarily aligned).
+ * g_idle_topstack is the beginning of this heap region (not necessarily
+ * aligned).
  */
 
 const uint32_t g_idle_topstack = (uint32_t)&_ebss + CONFIG_IDLETHREAD_STACKSIZE;
 
+#ifdef MM_HAVE_REGION
+static uint8_t g_mem_region_next = 0;
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+#ifdef MM_HAVE_REGION
+static void mem_addregion(FAR void *region_start, size_t region_size)
+{
+  if (g_mem_region_next <= CONFIG_MM_REGIONS)
+    {
+      kmm_addregion(region_start, region_size);
+      g_mem_region_next++;
+    }
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -265,35 +393,42 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 #if CONFIG_MM_REGIONS > 1
 void up_addregion(void)
 {
-#if CONFIG_MM_REGIONS > 1
-  /* Add the next SRAM region (which should exist) */
+#ifdef MM_HAVE_REGION
+  /* start from second region */
 
-  kmm_addregion((FAR void *)MM_REGION2_BASE, MM_REGION2_SIZE);
+  g_mem_region_next = 2;
 
-#ifdef MM_REGION3_BASE
-  /* Add the third SRAM region (which will not exist in configuration B) */
+#  ifdef MM_USE_LOCSRAM_BANK1
+  mem_addregion((FAR void *)LPC43_LOCSRAM_BANK1_BASE, LPC43_LOCSRAM_BANK1_SIZE);
+#  endif
 
-#if CONFIG_MM_REGIONS > 2
-  /* Add the third SRAM region (which may not exist) */
+#  ifdef MM_USE_AHBSRAM_BANK0
+  mem_addregion((FAR void *)LPC43_AHBSRAM_BANK0_BASE, LPC43_AHBSRAM_BANK0_SIZE);
+#  endif
 
-  kmm_addregion((FAR void *)MM_REGION3_BASE, MM_REGION3_SIZE);
+#  ifdef MM_USE_AHBSRAM_BANK1
+  mem_addregion((FAR void *)LPC43_AHBSRAM_BANK1_BASE, LPC43_AHBSRAM_BANK1_SIZE);
+#  endif
 
-#if CONFIG_MM_REGIONS > 3 && defined(MM_DMAHEAP_BASE)
-  /* Add the DMA region (which may not be available) */
+#  ifdef MM_USE_AHBSRAM_BANK2
+  mem_addregion((FAR void *)MM_DMAREGION_BASE, MM_DMAREGION_SIZE);
+#  endif
 
-  kmm_addregion((FAR void *)MM_DMAHEAP_BASE, MM_DMAHEAP_SIZE);
+#  ifdef MM_USE_EXTSDRAM0
+  mem_addregion((FAR void *)MM_EXTSDRAM0_REGION, MM_EXTSDRAM0_SIZE);
+#  endif
 
-#endif /* CONFIG_MM_REGIONS > 3 && defined(MM_DMAHEAP_BASE) */
-#endif /* CONFIG_MM_REGIONS > 2 */
-#else  /* MM_REGION3_BASE */
+#  ifdef MM_USE_EXTSDRAM1
+  mem_addregion((FAR void *)MM_EXTSDRAM1_REGION, MM_EXTSDRAM1_SIZE);
+#  endif
 
-#if CONFIG_MM_REGIONS > 2 && defined(MM_DMAHEAP_BASE)
-  /* Add the DMA region (which may not be available) */
+#  ifdef MM_USE_EXTSDRAM2
+  mem_addregion((FAR void *)MM_EXTSDRAM2_REGION, MM_EXTSDRAM2_SIZE);
+#  endif
 
-  kmm_addregion((FAR void *)MM_DMAHEAP_BASE, MM_DMAHEAP_SIZE);
-
-#endif /* CONFIG_MM_REGIONS > 3 && defined(MM_DMAHEAP_BASE) */
-#endif /* MM_REGION3_BASE */
-#endif /* CONFIG_MM_REGIONS > 1 */
+#  ifdef MM_USE_EXTSDRAM3
+  mem_addregion((FAR void *)MM_EXTSDRAM3_REGION, MM_EXTSDRAM3_SIZE);
+#  endif
+#endif
 }
 #endif

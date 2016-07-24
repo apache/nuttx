@@ -36,6 +36,7 @@
 /****************************************************************************
  * Included Files
  ****************************************************************************/
+
 #define _BSD_SOURCE
 
 #include <sys/types.h>
@@ -50,6 +51,7 @@
 #include <fcntl.h>
 #include <errno.h>
 
+#define __SIM__ 1
 #include "hostfs.h"
 
 /****************************************************************************
@@ -62,38 +64,42 @@ int host_open(const char *pathname, int flags, int mode)
 
   /* Perform flag mapping */
 
-  if ((flags & (HOSTFS_FLAG_RDOK | HOSTFS_FLAG_WROK)) == 
-        (HOSTFS_FLAG_RDOK | HOSTFS_FLAG_WROK))
+  if ((flags & NUTTX_O_RDWR) == NUTTX_O_RDWR)
     {
       mapflags = O_RDWR;
     }
-  else if (flags & HOSTFS_FLAG_RDOK)
+  else if (flags & NUTTX_O_RDONLY)
     {
       mapflags = O_RDONLY;
     }
-  else if (flags & HOSTFS_FLAG_WROK)
+  else if (flags & NUTTX_O_WRONLY)
     {
       mapflags = O_WRONLY;
     }
 
-  if (flags & HOSTFS_FLAG_APPEND)
+  if (flags & NUTTX_O_APPEND)
     {
       mapflags |= O_APPEND;
     }
 
-  if (flags & HOSTFS_FLAG_CREAT)
+  if (flags & NUTTX_O_CREAT)
     {
       mapflags |= O_CREAT;
     }
 
-  if (flags & HOSTFS_FLAG_EXCL)
+  if (flags & NUTTX_O_EXCL)
     {
       mapflags |= O_EXCL;
     }
 
-  if (flags & HOSTFS_FLAG_TRUNC)
+  if (flags & NUTTX_O_TRUNC)
     {
       mapflags |= O_TRUNC;
+    }
+
+  if (flags & NUTTX_O_NONBLOCK)
+    {
+      mapflags |= O_NONBLOCK;
     }
 
   return open(pathname, mapflags, mode);
@@ -180,21 +186,22 @@ int host_dup(int fd)
 
 void *host_opendir(const char *name)
 {
-  return (void *) opendir(name);
+  /* Return the host DIR pointer */
+
+  return (void *)opendir(name);
 }
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-int host_readdir(void* dirp, struct host_dirent_s* entry)
+int host_readdir(void* dirp, struct nuttx_dirent_s* entry)
 {
-    struct dirent  *ent;
+    struct dirent *ent;
 
     /* Call the host's readdir routine */
 
     ent = readdir(dirp);
-
     if (ent != NULL)
       {
         /* Copy the entry name */
@@ -206,24 +213,21 @@ int host_readdir(void* dirp, struct host_dirent_s* entry)
         entry->d_type = 0;
         if (ent->d_type == DT_REG)
           {
-            entry->d_type = HOSTFS_DTYPE_FILE;
+            entry->d_type = NUTTX_DTYPE_FILE;
           }
         else if (ent->d_type == DT_CHR)
           {
-            entry->d_type = HOSTFS_DTYPE_CHR;
+            entry->d_type = NUTTX_DTYPE_CHR;
           }
         else if (ent->d_type == DT_BLK)
           {
-            entry->d_type = HOSTFS_DTYPE_BLK;
+            entry->d_type = NUTTX_DTYPE_BLK;
           }
         else if (ent->d_type == DT_DIR)
           {
-            entry->d_type = HOSTFS_DTYPE_DIRECTORY;
+            entry->d_type = NUTTX_DTYPE_DIRECTORY;
           }
-      }
 
-    if (ent)
-      {
         return 0;
       }
 
@@ -234,7 +238,7 @@ int host_readdir(void* dirp, struct host_dirent_s* entry)
  * Public Functions
  ****************************************************************************/
 
-void host_rewinddir(void* dirp)
+void host_rewinddir(void *dirp)
 {
   /* Just call the rewinddir routine */
 
@@ -245,7 +249,7 @@ void host_rewinddir(void* dirp)
  * Public Functions
  ****************************************************************************/
 
-int host_closedir(void* dirp)
+int host_closedir(void *dirp)
 {
   return closedir(dirp);
 }
@@ -254,7 +258,7 @@ int host_closedir(void* dirp)
  * Public Functions
  ****************************************************************************/
 
-int host_statfs(const char *path, struct host_statfs_s *buf)
+int host_statfs(const char *path, struct nuttx_statfs_s *buf)
 {
   int           ret;
   struct statfs host_buf; 
@@ -263,18 +267,16 @@ int host_statfs(const char *path, struct host_statfs_s *buf)
 
   ret = statfs(path, &host_buf);
 
-  /* Map the return values */
+  /* Map the struct statfs value */
 
   buf->f_type    = host_buf.f_type;
+  buf->f_namelen = host_buf.f_namelen;
   buf->f_bsize   = host_buf.f_bsize;
   buf->f_blocks  = host_buf.f_blocks;
   buf->f_bfree   = host_buf.f_bfree;
   buf->f_bavail  = host_buf.f_bavail;
   buf->f_files   = host_buf.f_files;
   buf->f_ffree   = host_buf.f_ffree;
-  buf->f_fsid    = 0;
-  buf->f_namelen = host_buf.f_namelen;
-  buf->f_frsize  = host_buf.f_frsize;
 
   return ret;
 }
@@ -321,62 +323,50 @@ int host_rename(const char *oldpath, const char *newpath)
  * Public Functions
  ****************************************************************************/
 
-int host_stat(const char *path, struct host_stat_s *buf)
+int host_stat(const char *path, struct nuttx_stat_s *buf)
 {
-  struct stat   host_buf;
-  int           ret;
+  struct stat host_buf;
+  int ret;
 
   /* Call the host's stat routine */
 
   ret = stat(path, &host_buf);
 
-  /* Now map the return values to the common struct */
+  /* Map the return values */
 
-  buf->st_dev     = host_buf.st_dev;      /* ID of the device containing file */
-  buf->st_ino     = host_buf.st_ino;;     /* inode number */
-  buf->st_nlink   = host_buf.st_nlink;    /* number of hard links */
-  buf->st_uid     = host_buf.st_uid;      /* user ID of owner */
-  buf->st_gid     = host_buf.st_gid;      /* group ID of owner */
-  buf->st_rdev    = host_buf.st_rdev;     /* device ID */
-  buf->st_size    = host_buf.st_size;     /* total size, in bytes */
-  buf->st_blksize = host_buf.st_blksize;  /* blocksize for file system I/O */
-  buf->st_blocks  = host_buf.st_blocks;   /* number of 512B blocks allocated */
-  buf->st_atim    = host_buf.st_atime;    /* time of last access */
-  buf->st_mtim    = host_buf.st_mtime;    /* time of last modification */
-  buf->st_ctim    = host_buf.st_ctime;    /* time of last status change */
+  buf->st_mode = host_buf.st_mode & 0777;
 
-  /* Map the mode bits */
-
-  buf->st_mode = host_buf.st_mode & 0xFFF;
-  if (S_ISREG(host_buf.st_mode))
+  if (host_buf.st_mode & S_IFDIR)
     {
-      buf->st_mode |= HOST_ST_MODE_REG;
+      buf->st_mode |= NUTTX_S_IFDIR;
+    }
+  else if (host_buf.st_mode & S_IFREG)
+    {
+      buf->st_mode |= NUTTX_S_IFREG;
+    }
+  else if (host_buf.st_mode & S_IFCHR)
+    {
+      buf->st_mode |= NUTTX_S_IFCHR;
+    }
+  else if (host_buf.st_mode & S_IFBLK)
+    {
+      buf->st_mode |= NUTTX_S_IFBLK;
+    }
+  else if (host_buf.st_mode & S_IFLNK)
+    {
+      buf->st_mode |= NUTTX_S_IFLNK;
+    }
+  else /* if (host_buf.st_mode & S_IFIFO) */
+    {
+      buf->st_mode |= NUTTX_S_IFIFO;
     }
 
-  if (S_ISDIR(host_buf.st_mode))
-    {
-      buf->st_mode |= HOST_ST_MODE_DIR;
-    }
-
-  if (S_ISCHR(host_buf.st_mode))
-    {
-      buf->st_mode |= HOST_ST_MODE_CHR;
-    }
-
-  if (S_ISBLK(host_buf.st_mode))
-    {
-      buf->st_mode |= HOST_ST_MODE_BLK;
-    }
-
-  if (S_ISFIFO(host_buf.st_mode))
-    {
-      buf->st_mode |= HOST_ST_MODE_PIPE;
-    }
-
-  if (S_ISLNK(host_buf.st_mode))
-    {
-      buf->st_mode |= HOST_ST_MODE_LINK;
-    }
+  buf->st_size    = host_buf.st_size;
+  buf->st_blksize = host_buf.st_blksize;
+  buf->st_blocks  = host_buf.st_blocks;
+  buf->st_atim    = host_buf.st_atim.tv_sec;
+  buf->st_mtim    = host_buf.st_mtim.tv_sec;
+  buf->st_ctim    = host_buf.st_ctim.tv_sec;
 
   return ret;
 }

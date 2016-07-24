@@ -53,7 +53,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/mtd/mtd.h>
-#include <nuttx/rwbuffer.h>
+#include <nuttx/drivers/rwbuffer.h>
 
 /****************************************************************************
  * Pre-processor Definitions

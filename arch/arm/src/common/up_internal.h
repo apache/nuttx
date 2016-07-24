@@ -545,12 +545,6 @@ void up_usbuninitialize(void);
 # define up_usbuninitialize()
 #endif
 
-/* Random Number Generator (RNG) ********************************************/
-
-#ifdef CONFIG_DEV_RANDOM
-void up_rnginitialize(void);
-#endif
-
 /* Debug ********************************************************************/
 #ifdef CONFIG_STACK_COLORATION
 void up_stack_color(FAR void *stackbase, size_t nbytes);

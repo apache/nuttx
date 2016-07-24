@@ -11,6 +11,8 @@ Contents
   o Serial Console
   o LEDs and Buttons
   o Networking Support
+  o SD Card Support
+  o USB Device Controller Support
   o Development Environment
   o GNU Toolchain Options
   o Freedom K64F Configuration Options
@@ -409,6 +411,201 @@ f Application Configuration -> Network Utilities
       CONFIG_NSH_NETINIT_RETRYMSEC=2000     : Configure the network monitor as you like
       CONFIG_NSH_NETINIT_SIGNO=18
 
+SD Card Support
+===============
+
+  Card Slot
+  ---------
+  A micro Secure Digital (SD) card slot is available on the FRDM-K64F connected to
+  the SD Host Controller (SDHC) signals of the MCU. This slot will accept micro
+  format SD memory cards. The SD card detect pin (PTE6) is an open switch that
+  shorts with VDD when card is inserted.
+
+    ------------ ------------- --------
+    SD Card Slot Board Signal  K64F Pin
+    ------------ ------------- --------
+    DAT0         SDHC0_D0      PTE0
+    DAT1         SDHC0_D1      PTE1
+    DAT2         SDHC0_D2      PTE5
+    CD/DAT3      SDHC0_D3      PTE4
+    CMD          SDHC0_CMD     PTE3
+    CLK          SDHC0_DCLK    PTE2
+    SWITCH       D_CARD_DETECT PTE6
+    ------------ ------------- --------
+
+  There is no Write Protect pin available to the K64F.
+
+  Configuration Settings
+  ----------------------
+  Enabling SDHC support. The Freedom K64F provides one microSD memory card
+  slot.  Support for the SD slots can be enabled with the following
+  settings:
+
+    System Type->Kinetic Peripheral Selection
+      CONFIG_KINETIS_SDHC=y                 : To enable SDHC0 support
+
+    System Type
+      CONFIG_KINETIS_GPIOIRQ=y              : GPIO interrupts needed
+      CONFIG_KINETIS_PORTEINTS=y            : Card detect pin is on PTE6
+
+    Device Drivers -> MMC/SD Driver Support
+      CONFIG_MMCSD=y                        : Enable MMC/SD support
+      CONFIG_MMSCD_NSLOTS=1                 : One slot per driver instance
+      CONFIG_MMCSD_MULTIBLOCK_DISABLE=y     : (REVISIT)
+      CONFIG_MMCSD_HAVECARDDETECT=y         : Supports card-detect PIOs
+      CONFIG_MMCSD_MMCSUPPORT=n             : Interferes with some SD cards
+      CONFIG_MMCSD_SPI=n                    : No SPI-based MMC/SD support
+      CONFIG_MMCSD_SDIO=y                   : SDIO-based MMC/SD support
+      CONFIG_SDIO_DMA=y                     : Use SDIO DMA
+      CONFIG_SDIO_BLOCKSETUP=y              : Needs to know block sizes
+
+    RTOS Features -> Work Queue Support
+      CONFIG_SCHED_WORKQUEUE=y              : Driver needs work queue support
+      CONFIG_SCHED_HPWORK=y
+
+    Application Configuration -> NSH Library
+      CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization, and
+      CONFIG_LIB_BOARDCTL=y                 : Or
+      CONFIG_BOARD_INITIALIZE=y
+
+  Using the SD card
+  -----------------
+
+  1. After booting, the SDHC device will appear as /dev/mmcsd0.
+  2. If you try mounting an SD card with nothing in the slot, the mount will
+     fail:
+
+       nsh> mount -t vfat /dev/mmcsd0 /mnt/sd0
+       nsh: mount: mount failed: 19
+
+     NSH can be configured to provide errors as strings instead of
+     numbers.  But in this case, only the error number is reported.  The
+     error numbers can be found in nuttx/include/errno.h:
+
+       #define ENODEV              19
+       #define ENODEV_STR          "No such device"
+
+     So the mount command is saying that there is no device or, more
+     correctly, that there is no card in the SD card slot.
+
+  3. Insert the SD card.  Then the mount should succeed.
+
+      nsh> mount -t vfat /dev/mmcsd0 /mnt/sd0
+      nsh> ls /mnt/sd1
+      /mnt/sd1:
+       atest.txt
+      nsh> cat /mnt/sd1/atest.txt
+      This is a test
+
+     NOTE:  See the next section entitled "Auto-Mounter" for another way
+     to mount your SD card.
+
+  4. Before removing the card, you must umount the file system.  This is
+     equivalent to "ejecting" or "safely removing" the card on Windows:  It
+     flushes any cached data to an SD card and makes the SD card unavailable
+     to the applications.
+
+       nsh> umount -t /mnt/sd0
+
+     It is now safe to remove the card.  NuttX provides into callbacks
+     that can be used by an application to automatically unmount the
+     volume when it is removed.  But those callbacks are not used in
+     these configurations.
+
+  Auto-Mounter
+  ------------
+  NuttX implements an auto-mounter than can make working with SD cards
+  easier.  With the auto-mounter, the file system will be automatically
+  mounted when the SD card is inserted into the SDHC slot and automatically
+  unmounted when the SD card is removed.
+
+  Here is a sample configuration for the auto-mounter:
+
+    File System Configuration
+      CONFIG_FS_AUTOMOUNTER=y
+
+    Board-Specific Options
+      CONFIG_FRDMK64F_SDHC_AUTOMOUNT=y
+      CONFIG_FRDMK64F_SDHC_AUTOMOUNT_FSTYPE="vfat"
+      CONFIG_FRDMK64F_SDHC_AUTOMOUNT_BLKDEV="/dev/mmcsd0"
+      CONFIG_FRDMK64F_SDHC_AUTOMOUNT_MOUNTPOINT="/mnt/sdcard"
+      CONFIG_FRDMK64F_SDHC_AUTOMOUNT_DDELAY=1000
+      CONFIG_FRDMK64F_SDHC_AUTOMOUNT_UDELAY=2000
+
+  WARNING:  SD cards should never be removed without first unmounting
+  them.  This is to avoid data and possible corruption of the file
+  system.  Certainly this is the case if you are writing to the SD card
+  at the time of the removal.  If you use the SD card for read-only access,
+  however, then I cannot think of any reason why removing the card without
+  mounting would be harmful.
+
+USB Device Controller Support
+==============================
+
+  USB Device Controller Support
+  -----------------------------
+  The USBHS device controller driver is enabled with he following
+  configurationsettings:
+
+    Device Drivers -> USB Device Driver Support
+      CONFIG_USBDEV=y                           : Enable USB device support
+    For full-speed/low-power mode:
+      CONFIG_USBDEV_DUALSPEED=n                 : Disable High speed support
+    For high-speed/normal mode:
+      CONFIG_USBDEV_DUALSPEED=y                 : Enable High speed support
+      CONFIG_USBDEV_DMA=y                       : Enable DMA methods
+      CONFIG_USBDEV_MAXPOWER=100                : Maximum power consumption
+      CONFIG_USBDEV_SELFPOWERED=y               : Self-powered device
+
+    System Type -> Kinetis Peripheral Selection
+      CONFIG_KINETIS_USBOTG=y
+
+  CDC/ACM Device Class
+  --------------------
+  In order to be usable, you must all enabled some class driver(s) for the
+  USBHS device controller.  Here, for example, is how to configure the CDC/ACM
+  serial device class:
+
+    Device Drivers -> USB Device Driver Support
+      CONFIG_CDCACM=y                           : USB Modem (CDC ACM) support
+      CONFIG_CDCACM_EP0MAXPACKET=64             : Enpoint 0 packet size
+      CONFIG_CDCACM_EPINTIN=1                   : Interrupt IN endpoint number
+      CONFIG_CDCACM_EPINTIN_FSSIZE=64           : Full speed packet size
+      CONFIG_CDCACM_EPINTIN_HSSIZE=64           : High speed packet size
+      CONFIG_CDCACM_EPBULKOUT=3                 : Bulk OUT endpoint number
+      CONFIG_CDCACM_EPBULKOUT_FSSIZE=64         : Full speed packet size
+      CONFIG_CDCACM_EPBULKOUT_HSSIZE=512        : High speed packet size
+      CONFIG_CDCACM_EPBULKIN=2                  : Bulk IN endpoint number
+      CONFIG_CDCACM_EPBULKIN_FSSIZE=64          : Full speed packet size
+      CONFIG_CDCACM_EPBULKIN_HSSIZE=512         : High speed packet size
+      CONFIG_CDCACM_NWRREQS=4                   : Number of write requests
+      CONFIG_CDCACM_NRDREQS=8                   : Number of read requests
+      CONFIG_CDCACM_BULKIN_REQLEN=96            : Size of write request buffer (for full speed)
+      CONFIG_CDCACM_BULKIN_REQLEN=768           : Size of write request buffer (for high speed)
+      CONFIG_CDCACM_RXBUFSIZE=257               : Serial read buffer size
+      CONFIG_CDCACM_TXBUFSIZE=193               : Serial transmit buffer size (for full speed)
+      CONFIG_CDCACM_TXBUFSIZE=769               : Serial transmit buffer size (for high speed)
+      CONFIG_CDCACM_VENDORID=0x0525             : Vendor ID
+      CONFIG_CDCACM_PRODUCTID=0xa4a7            : Product ID
+      CONFIG_CDCACM_VENDORSTR="NuttX"           : Vendor string
+      CONFIG_CDCACM_PRODUCTSTR="CDC/ACM Serial" : Product string
+
+    Device Drivers -> Serial Driver Support
+      CONFIG_SERIAL_REMOVABLE=y                 : Support for removable serial device
+
+  The CDC/ACM application provides commands to connect and disconnect the
+  CDC/ACM serial device:
+
+    CONFIG_SYSTEM_CDCACM=y                     : Enable connect/disconnect support
+    CONFIG_SYSTEM_CDCACM_DEVMINOR=0            : Use device /dev/ttyACM0
+    CONFIG_CDCACM_RXBUFSIZE=???                : A large RX may be needed
+
+  If you include this CDC/ACM application, then you can connect the CDC/ACM
+  serial device to the host by entering the command 'sercon' and you detach
+  the serial device with the command 'serdis'.  If you do no use this
+  application, they you will have to write logic in your board initialization
+  code to initialize and attach the USB device.
+
 Development Environment
 =======================
 
@@ -587,7 +784,7 @@ Freedom K64F Configuration Options
 
   PIN Interrupt Support
 
-    CONFIG_GPIO_IRQ          -- Enable pin interrupt support.  Also needs
+    CONFIG_KINETIS_GPIOIRQ   -- Enable pin interrupt support.  Also needs
       one or more of the following:
     CONFIG_KINETIS_PORTAINTS -- Support 32 Port A interrupts
     CONFIG_KINETIS_PORTBINTS -- Support 32 Port B interrupts
@@ -636,8 +833,14 @@ Where <subdir> is one of the following:
 
     NOTES:
 
-    1. Most of the notes associated with the nsh configuration apply here
-       as well (see below).
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configuration using that tool, you should:
+
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          see additional README.txt files in the NuttX tools repository.
+
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
 
     2. Default platform/toolchain:
 
@@ -646,13 +849,22 @@ Where <subdir> is one of the following:
        CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : ARM/mbed toolcahin (arm-none-elf-gcc)
        CONFIG_INTELHEX_BINARY=y            : Output formats: Intel hex binary
 
-    3. No external pullup is available on MDIO signal when MK64FN1M0VLL12 MCU
+    3. The Serial Console is provided on UART3 with the correct pin
+       configuration for use with an Arduino Serial Shield.
+
+    4. SDHC support is not enabled in this configuration.  Refer to the
+       configuration settings listed above under "SD Card Support".
+
+    5. Support for NSH built-in applications is enabled, but no built-in
+       applications have been configured in.
+
+    6. No external pullup is available on MDIO signal when MK64FN1M0VLL12 MCU
        is requests status of the Ethernet link connection. Internal pullup is
        required when port configuration for MDIO signal is enabled:
 
        CONFIG_KINETIS_ENET_MDIOPULLUP=y
 
-    4. Configured to use a fixed IPv4 address:
+    7. Configured to use a fixed IPv4 address:
 
        CONFIG_NSH_IPADDR=0x0a000002
        CONFIG_NSH_DRIPADDR=0x0a000001
@@ -682,50 +894,83 @@ Where <subdir> is one of the following:
 
     2. Default platform/toolchain:
 
-       CONFIG_HOST_LINUX=y                 : Linux (Cygwin under Windows okay too).
-       CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot (arm-nuttx-elf-gcc)
-       CONFIG_ARMV7M_OABI_TOOLCHAIN=y      : The older OABI version
-       CONFIG_INTELHEX_BINARY=y            : Output formats: Intel hex binary
+         CONFIG_HOST_WINDOWS=y               : Cygwin under Windows
+         CONFIG_WINDOWS_CYGWIN=y
+         CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : ARM/mbed toolcahin (arm-none-elf-gcc)
+         CONFIG_INTELHEX_BINARY=y            : Output formats: Intel hex binary
 
-    3. The Serial Console is provided on UART3 with the correct pin
-       configuration for use with an Arduino Serial Shield.
+    3. The Serial Console is provided on UART0 with the correct pin
+       configuration for use with the OpenSDAv2 VCOM.  This can be switched
+       to use a RS-232 shield on UART3 by reconfiguring the serial console.
 
-    4. An SDHC driver is has not yet been tested but can be enabled in the NSH
-       configuration by setting the following configuration values as follows:
+         -CONFIG_KINETIS_UART0=y
+         +CONFIG_KINETIS_UART3=y
+         -CONFIG_UART0_SERIALDRIVER=y
+         +CONFIG_UART3_SERIALDRIVER=y
+         -CONFIG_UART0_SERIAL_CONSOLE=y
+         +CONFIG_UART3_SERIAL_CONSOLE=y
+         -CONFIG_UART0_RXBUFSIZE=256
+         +CONFIG_UART3_RXBUFSIZE=256
+         -CONFIG_UART0_TXBUFSIZE=256
+         +CONFIG_UART3_TXBUFSIZE=256
+         -CONFIG_UART0_BAUD=115200
+         +CONFIG_UART3_BAUD=115200
+         -CONFIG_UART0_BITS=8
+         +CONFIG_UART3_BITS=8
+         -CONFIG_UART0_PARITY=0
+         +CONFIG_UART3_PARITY=0
+         -CONFIG_UART0_2STOP=0
+         +CONFIG_UART3_2STOP=0
 
-      CONFIG_KINETIS_SDHC=y                : Enable the SDHC driver
+       NOTE: On my Windows 10 / Cygwin64 system, the OpenSDAv2 VCOM is not
+       recognized.  I probably need to install a driver?
 
-      CONFIG_MMCSD=y                       : Enable MMC/SD support
-      CONFIG_MMCSD_SDIO=y                  : Use the SDIO-based MMC/SD driver
-      CONFIG_MMCSD_NSLOTS=1                : One MMC/SD slot
+       There is a serial USB driver on the mbed web site.  However, this
+       driver would not install on Windows 10 for me.  I understand that
+       it installs OK on Windows 7.
 
-      CONFIG_FAT=y                         : Eable FAT file system
-      CONFIG_FAT_LCNAMES=y                 : FAT lower case name support
-      CONFIG_FAT_LFN=y                     : FAT long file name support
-      CONFIG_FAT_MAXFNAME=32               : Maximum lenght of a long file name
+    4. Support for NSH built-in applications is enabled, but no built-in
+       applications have been configured in.
 
-      CONFIG_GPIO_IRQ=y                    : Enable GPIO interrupts
-      CONFIG_KINETIS_PORTEINTS=y           : Enable PortE GPIO interrupts
-
-      CONFIG_SCHED_WORKQUEUE=y             : Enable the NuttX workqueue
-
-      CONFIG_NSH_ARCHINIT=y                : Provide NSH initializeation logic
+    5. An SDHC driver is enabled in this configuration but does not yet work.
+       The basic problem seems to be that it does not sense the presence of
+       the SD card on PTE6.  No interrupts are generated when the SD card is
+       inserted or removed.  You might want to disable SDHC and MMC/SD if
+       you are using this configuration.  Refer to the configuration
+       settings listed above under "SD Card Support".
 
 Status
 ======
 
   2016-07-11:  Received hardware today and the board came up on the very
     first try.  That does not happen often.  At this point, the very basic
-    NSH configuration is working and LEDs are working.  The only odd
-    behavior that I see is that pressing SW3 causes an unexpected interrupt
-    error.
+    NSH configuration is working and LEDs are working.
+
+    The only odd behavior that I see is that pressing SW3 causes an NMI
+    interrupt (followed by a crash):
+
+      kinetis_nmi: PANIC!!! NMI received
+
+    I don't yet understand why this is.
 
   2016-07-12:  Added support for the KSZ8081 PHY and added the netnsh
-    configuration.  The network is basically functional, but a lot more
-    testing is needed to confirm that.
- 
+    configuration.  The network is basically functional.  More testing is
+    needed, but I have not seen any obvious network failures.
+
     In testing, I notice a strange thing.  If I run at full optimization the
     code runs (albeit with bugs-to-be-solved).  But with no optimization or
     even at -O1, the system fails to boot.  This seems to be related to the
     watchdog timer.
 
+  2016-07-13:  Add SD automounter logic; broke out SDHC logic into a separate
+    file.  The nsh configuration now has SDHC enabled be default.  Does not
+    yet work.  The basic problem seems to be that it does not sense the
+    presence of the SD card on PTE6.  No interrupts are generated when the
+    SD card is inserted or removed.  You might want to disable SDHC and
+    MMC/SD if you are using this configuration.
+
+    The nsh configuration now builds successfully with USB device enabled.
+    USB device, however, has not yet been tested.  I have not yet looked
+    into 48MHz clocking requirements.
+
+ 

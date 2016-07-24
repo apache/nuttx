@@ -81,7 +81,7 @@ ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CHIP_CSRCS += kl_userspace.c
 endif
 
-ifeq ($(CONFIG_GPIO_IRQ),y)
+ifeq ($(CONFIG_KL_GPIOIRQ),y)
 CHIP_CSRCS += kl_gpioirq.c
 endif
 

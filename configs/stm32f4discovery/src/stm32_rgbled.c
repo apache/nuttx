@@ -42,7 +42,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/pwm.h>
+#include <nuttx/drivers/pwm.h>
 #include <nuttx/leds/rgbled.h>
 #include <arch/board/board.h>
 

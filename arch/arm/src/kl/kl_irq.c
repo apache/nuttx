@@ -248,7 +248,7 @@ void up_irqinitialize(void)
    * configured pin interrupts.
    */
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_KL_GPIOIRQ
   kl_gpioirqinitialize();
 #endif
 

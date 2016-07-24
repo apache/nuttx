@@ -13,7 +13,8 @@ Files in this directory
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 can.c
-  This is a CAN driver.  See include/nuttx/can.h for usage information.
+  This is a CAN driver.  See include/nuttx/drivers/can.h for usage
+  information.
 
 dev_null.c and dev_zero.c
   These files provide the standard /dev/null and /dev/zero devices.
@@ -24,12 +25,12 @@ dev_null.c and dev_zero.c
 pwm.c
   Provides the "upper half" of a pulse width modulation (PWM) driver.
   The "lower half" of the PWM driver is provided by device-specific
-  logic.  See include/nuttx/pwm.h for usage information.
+  logic.  See include/nuttx/drivers/pwm.h for usage information.
 
 ramdisk.c
   Can be used to set up a block of memory or (read-only) FLASH as
   a block driver that can be mounted as a files system.  See
-  include/nuttx/fs/ramdisk.h.
+  include/nuttx/drivers/ramdisk.h.
 
 rwbuffer.c
   A facility that can be use by any block driver in-order to add

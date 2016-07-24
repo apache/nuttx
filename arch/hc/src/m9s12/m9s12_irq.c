@@ -75,7 +75,7 @@ void up_irqinitialize(void)
    * GPIO pins.
    */
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_HCS12_GPIOIRQ
   hcs12_gpioirqinitialize();
 #endif
 

@@ -183,10 +183,10 @@ SYSCALL_LOOKUP(up_assert,                 2, STUB_up_assert)
   SYSCALL_LOOKUP(pread,                   4, STUB_pread)
   SYSCALL_LOOKUP(pwrite,                  4, STUB_pwrite)
 #  ifdef CONFIG_FS_AIO
-  SYSCALL_LOOKUP(aio_read,                1, SYS_aio_read)
-  SYSCALL_LOOKUP(aio_write,               1, SYS_aio_write)
-  SYSCALL_LOOKUP(aio_fsync,               2, SYS_aio_fsync)
-  SYSCALL_LOOKUP(aio_cancel,              2, SYS_aio_cancel)
+  SYSCALL_LOOKUP(aio_read,                1, STUB_aio_read)
+  SYSCALL_LOOKUP(aio_write,               1, STUB_aio_write)
+  SYSCALL_LOOKUP(aio_fsync,               2, STUB_aio_fsync)
+  SYSCALL_LOOKUP(aio_cancel,              2, STUB_aio_cancel)
 #  endif
 #  ifndef CONFIG_DISABLE_POLL
   SYSCALL_LOOKUP(poll,                    3, STUB_poll)
@@ -208,17 +208,23 @@ SYSCALL_LOOKUP(up_assert,                 2, STUB_up_assert)
   SYSCALL_LOOKUP(dup2,                    2, STUB_dup2)
   SYSCALL_LOOKUP(fcntl,                   6, STUB_fcntl)
   SYSCALL_LOOKUP(lseek,                   3, STUB_lseek)
-  SYSCALL_LOOKUP(mkfifo,                  2, STUB_mkfifo)
   SYSCALL_LOOKUP(mmap,                    6, STUB_mmap)
   SYSCALL_LOOKUP(open,                    6, STUB_open)
   SYSCALL_LOOKUP(opendir,                 1, STUB_opendir)
-  SYSCALL_LOOKUP(pipe,                    1, STUB_pipe)
   SYSCALL_LOOKUP(readdir,                 1, STUB_readdir)
   SYSCALL_LOOKUP(rewinddir,               1, STUB_rewinddir)
   SYSCALL_LOOKUP(seekdir,                 2, STUB_seekdir)
   SYSCALL_LOOKUP(stat,                    2, STUB_stat)
   SYSCALL_LOOKUP(statfs,                  2, STUB_statfs)
   SYSCALL_LOOKUP(telldir,                 1, STUB_telldir)
+
+#  if defined(CONFIG_PIPES) && CONFIG_DEV_PIPE_SIZE > 0
+  SYSCALL_LOOKUP(pipe2,                   2, STUB_pipe2)
+#  endif
+
+#  if defined(CONFIG_PIPES) && CONFIG_DEV_FIFO_SIZE > 0
+  SYSCALL_LOOKUP(mkfifo2,                 3, STUB_mkfifo2)
+#  endif
 
 #  if CONFIG_NFILE_STREAMS > 0
   SYSCALL_LOOKUP(fdopen,                  3, STUB_fs_fdopen)

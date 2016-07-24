@@ -61,7 +61,7 @@
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/clock.h>
 #include <nuttx/arch.h>
-#include <nuttx/rwbuffer.h>
+#include <nuttx/drivers/rwbuffer.h>
 #include <nuttx/sdio.h>
 #include <nuttx/mmcsd.h>
 
@@ -171,7 +171,7 @@ static int     mmcsd_getSCR(FAR struct mmcsd_state_s *priv, uint32_t scr[2]);
 
 static void    mmcsd_decodeCSD(FAR struct mmcsd_state_s *priv,
                  uint32_t csd[4]);
-#if defined(CONFIG_DEBUG_FEATURES) && defined (CONFIG_DEBUG_INFO) && defined(CONFIG_DEBUG_FS)
+#ifdef CONFIG_DEBUG_FS_INFO
 static void    mmcsd_decodeCID(FAR struct mmcsd_state_s *priv,
                  uint32_t cid[4]);
 #else
@@ -558,7 +558,7 @@ static int mmcsd_getSCR(FAR struct mmcsd_state_s *priv, uint32_t scr[2])
 
 static void mmcsd_decodeCSD(FAR struct mmcsd_state_s *priv, uint32_t csd[4])
 {
-#if defined(CONFIG_DEBUG_FEATURES) && defined (CONFIG_DEBUG_INFO) && defined(CONFIG_DEBUG_FS)
+#ifdef CONFIG_DEBUG_FS_INFO
   struct mmcsd_csd_s decoded;
 #endif
   unsigned int readbllen;
@@ -578,7 +578,7 @@ static void mmcsd_decodeCSD(FAR struct mmcsd_state_s *priv, uint32_t csd[4])
    *   TRANSFER_RATE_UNIT 2:0 Rate mantissa
    */
 
-#if defined(CONFIG_DEBUG_FEATURES) && defined (CONFIG_DEBUG_INFO) && defined(CONFIG_DEBUG_FS)
+#ifdef CONFIG_DEBUG_FS_INFO
   memset(&decoded, 0, sizeof(struct mmcsd_csd_s));
   decoded.csdstructure               =  csd[0] >> 30;
   decoded.mmcspecvers                = (csd[0] >> 26) & 0x0f;
@@ -606,7 +606,7 @@ static void mmcsd_decodeCSD(FAR struct mmcsd_state_s *priv, uint32_t csd[4])
   priv->dsrimp             = (csd[1] >> 12) & 1;
   readbllen                = (csd[1] >> 16) & 0x0f;
 
-#if defined(CONFIG_DEBUG_FEATURES) && defined (CONFIG_DEBUG_INFO) && defined(CONFIG_DEBUG_FS)
+#ifdef CONFIG_DEBUG_FS_INFO
   decoded.ccc              = (csd[1] >> 20) & 0x0fff;
   decoded.readbllen        = (csd[1] >> 16) & 0x0f;
   decoded.readblpartial    = (csd[1] >> 15) & 1;
@@ -667,7 +667,7 @@ static void mmcsd_decodeCSD(FAR struct mmcsd_state_s *priv, uint32_t csd[4])
       priv->blocksize                = 1 << 9;
       priv->nblocks                  = priv->capacity >> 9;
 
-#if defined(CONFIG_DEBUG_FEATURES) && defined (CONFIG_DEBUG_INFO) && defined(CONFIG_DEBUG_FS)
+#ifdef CONFIG_DEBUG_FS_INFO
       decoded.u.sdblock.csize        = csize;
       decoded.u.sdblock.sderblen     = (csd[2] >> 14) & 1;
       decoded.u.sdblock.sdsectorsize = (csd[2] >> 7) & 0x7f;
@@ -703,7 +703,7 @@ static void mmcsd_decodeCSD(FAR struct mmcsd_state_s *priv, uint32_t csd[4])
           priv->blockshift           = 9;
         }
 
-#if defined(CONFIG_DEBUG_FEATURES) && defined (CONFIG_DEBUG_INFO) && defined(CONFIG_DEBUG_FS)
+#ifdef CONFIG_DEBUG_FS_INFO
       if (IS_SD(priv->type))
         {
           decoded.u.sdbyte.csize            = csize;
@@ -753,7 +753,7 @@ static void mmcsd_decodeCSD(FAR struct mmcsd_state_s *priv, uint32_t csd[4])
   tmpwriteprotect          = (csd[3] >> 12) & 1;
   priv->wrprotect          = (permwriteprotect || tmpwriteprotect);
 
-#if defined(CONFIG_DEBUG_FEATURES) && defined (CONFIG_DEBUG_INFO) && defined(CONFIG_DEBUG_FS)
+#ifdef CONFIG_DEBUG_FS_INFO
   decoded.wpgrpen          =  csd[3] >> 31;
   decoded.mmcdfltecc       = (csd[3] >> 29) & 3;
   decoded.r2wfactor        = (csd[3] >> 26) & 7;
@@ -844,7 +844,7 @@ static void mmcsd_decodeCSD(FAR struct mmcsd_state_s *priv, uint32_t csd[4])
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_FEATURES) && defined (CONFIG_DEBUG_INFO) && defined(CONFIG_DEBUG_FS)
+#ifdef CONFIG_DEBUG_FS_INFO
 static void mmcsd_decodeCID(FAR struct mmcsd_state_s *priv, uint32_t cid[4])
 {
   struct mmcsd_cid_s decoded;
@@ -910,7 +910,7 @@ static void mmcsd_decodeCID(FAR struct mmcsd_state_s *priv, uint32_t cid[4])
 
 static void mmcsd_decodeSCR(FAR struct mmcsd_state_s *priv, uint32_t scr[2])
 {
-#if defined(CONFIG_DEBUG_FEATURES) && defined (CONFIG_DEBUG_INFO) && defined(CONFIG_DEBUG_FS)
+#ifdef CONFIG_DEBUG_FS_INFO
 struct mmcsd_scr_s decoded;
 #endif
 
@@ -923,14 +923,14 @@ struct mmcsd_scr_s decoded;
    *   Reserved               47:32 16-bit SD reserved space
    */
 
-#ifdef CONFIG_ENDIAN_BIG	/* Card transfers SCR in big-endian order */
+#ifdef CONFIG_ENDIAN_BIG  /* Card transfers SCR in big-endian order */
   priv->buswidth     = (scr[0] >> 16) & 15;
 #else
   priv->buswidth     = (scr[0] >> 8) & 15;
 #endif
 
-#if defined(CONFIG_DEBUG_FEATURES) && defined (CONFIG_DEBUG_INFO) && defined(CONFIG_DEBUG_FS)
-#ifdef CONFIG_ENDIAN_BIG	/* Card SCR is big-endian order / CPU also big-endian
+#ifdef CONFIG_DEBUG_FS_INFO
+#ifdef CONFIG_ENDIAN_BIG    /* Card SCR is big-endian order / CPU also big-endian
                              *   60   56   52   48   44   40   36   32
                              * VVVV SSSS ESSS BBBB RRRR RRRR RRRR RRRR */
   decoded.scrversion =  scr[0] >> 28;
@@ -952,7 +952,7 @@ struct mmcsd_scr_s decoded;
    *   Reserved               31:0  32-bits reserved for manufacturing usage.
    */
 
-#if defined(CONFIG_DEBUG_FEATURES) && defined (CONFIG_DEBUG_INFO) && defined(CONFIG_DEBUG_FS)
+#ifdef CONFIG_DEBUG_FS_INFO
   decoded.mfgdata   = scr[1];  /* Might be byte reversed! */
 
   finfo("SCR:\n");

@@ -412,7 +412,7 @@ void up_irqinitialize(void)
    * GPIO pins.
    */
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_LPC17_GPIOIRQ
   lpc17_gpioirqinitialize();
 #endif
 
@@ -456,7 +456,7 @@ void up_disable_irq(int irq)
           putreg32(regval, regaddr);
         }
     }
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_LPC17_GPIOIRQ
   else if (irq >= LPC17_VALID_FIRST0L)
     {
       /* Maybe it is a (derived) GPIO IRQ */
@@ -501,7 +501,7 @@ void up_enable_irq(int irq)
           putreg32(regval, regaddr);
         }
     }
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_LPC17_GPIOIRQ
   else if (irq >= LPC17_VALID_FIRST0L)
     {
       /* Maybe it is a (derived) GPIO IRQ */

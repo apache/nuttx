@@ -139,65 +139,27 @@
 /* DMA priority */
 
 #  ifndef CONFIG_USART_DMAPRIO
-#    if defined(CONFIG_STM32L4_STM32L15XX) || defined(CONFIG_STM32L4_STM32F10XX) || \
-        defined(CONFIG_STM32L4_STM32F30XX) || defined(CONFIG_STM32L4_STM32F37XX)
-#      define CONFIG_USART_DMAPRIO  DMA_CCR_PRIMED
-#    elif defined(CONFIG_STM32L4_STM32F20XX) || defined(CONFIG_STM32L4_STM32F40XX)
-#      define CONFIG_USART_DMAPRIO  DMA_SCR_PRIMED
-#    else
-#      error "Unknown STM32 DMA"
-#    endif
+#    define CONFIG_USART_DMAPRIO  DMA_CCR_PRIMED
 #  endif
-#    if defined(CONFIG_STM32L4_STM32L15XX) || defined(CONFIG_STM32L4_STM32F10XX) || \
-        defined(CONFIG_STM32L4_STM32F30XX) || defined(CONFIG_STM32L4_STM32F37XX)
-#    if (CONFIG_USART_DMAPRIO & ~DMA_CCR_PL_MASK) != 0
-#      error "Illegal value for CONFIG_USART_DMAPRIO"
-#    endif
-#  elif defined(CONFIG_STM32L4_STM32F20XX) || defined(CONFIG_STM32L4_STM32F40XX)
-#    if (CONFIG_USART_DMAPRIO & ~DMA_SCR_PL_MASK) != 0
-#      error "Illegal value for CONFIG_USART_DMAPRIO"
-#    endif
-#  else
-#    error "Unknown STM32 DMA"
+#  if (CONFIG_USART_DMAPRIO & ~DMA_CCR_PL_MASK) != 0
+#    error "Illegal value for CONFIG_USART_DMAPRIO"
 #  endif
 
 /* DMA control words */
 
-#  if defined(CONFIG_STM32L4_STM32F20XX) || defined(CONFIG_STM32L4_STM32F40XX)
-#    define SERIAL_DMA_CONTROL_WORD      \
-                (DMA_SCR_DIR_P2M       | \
-                 DMA_SCR_CIRC          | \
-                 DMA_SCR_MINC          | \
-                 DMA_SCR_PSIZE_8BITS   | \
-                 DMA_SCR_MSIZE_8BITS   | \
-                 CONFIG_USART_DMAPRIO  | \
-                 DMA_SCR_PBURST_SINGLE | \
-                 DMA_SCR_MBURST_SINGLE)
-#    ifdef CONFIG_SERIAL_IFLOWCONTROL
-#      define SERIAL_DMA_IFLOW_CONTROL_WORD \
-                (DMA_SCR_DIR_P2M       | \
-                 DMA_SCR_MINC          | \
-                 DMA_SCR_PSIZE_8BITS   | \
-                 DMA_SCR_MSIZE_8BITS   | \
-                 CONFIG_USART_DMAPRIO  | \
-                 DMA_SCR_PBURST_SINGLE | \
-                 DMA_SCR_MBURST_SINGLE)
-#    endif
-#  else
-#    define SERIAL_DMA_CONTROL_WORD      \
-                (DMA_CCR_CIRC          | \
-                 DMA_CCR_MINC          | \
-                 DMA_CCR_PSIZE_8BITS   | \
-                 DMA_CCR_MSIZE_8BITS   | \
-                 CONFIG_USART_DMAPRIO)
-#    ifdef CONFIG_SERIAL_IFLOWCONTROL
-#      define SERIAL_DMA_IFLOW_CONTROL_WORD \
-                (DMA_CCR_MINC          | \
-                 DMA_CCR_PSIZE_8BITS   | \
-                 DMA_CCR_MSIZE_8BITS   | \
-                 CONFIG_USART_DMAPRIO)
-#    endif
-# endif
+#  define SERIAL_DMA_CONTROL_WORD      \
+              (DMA_CCR_CIRC          | \
+               DMA_CCR_MINC          | \
+               DMA_CCR_PSIZE_8BITS   | \
+               DMA_CCR_MSIZE_8BITS   | \
+               CONFIG_USART_DMAPRIO)
+#  ifdef CONFIG_SERIAL_IFLOWCONTROL
+#    define SERIAL_DMA_IFLOW_CONTROL_WORD \
+              (DMA_CCR_MINC          | \
+               DMA_CCR_PSIZE_8BITS   | \
+               DMA_CCR_MSIZE_8BITS   | \
+               CONFIG_USART_DMAPRIO)
+#  endif
 
 #endif
 
@@ -1590,12 +1552,11 @@ static int up_interrupt_common(FAR struct stm32l4_serial_s *priv)
 static int stm32l4serial_ioctl(FAR struct file *filep, int cmd,
                                unsigned long arg)
 {
-#if defined(CONFIG_SERIAL_TERMIOS) || defined(CONFIG_SERIAL_TIOCSERGSTRUCT) \
-    || defined(CONFIG_STM32F7_SERIALBRK_BSDCOMPAT)
+#if defined(CONFIG_SERIAL_TERMIOS) || defined(CONFIG_SERIAL_TIOCSERGSTRUCT)
   FAR struct inode      *inode = filep->f_inode;
   FAR struct uart_dev_s *dev   = inode->i_private;
 #endif
-#if defined(CONFIG_SERIAL_TERMIOS) || defined(CONFIG_STM32F7_SERIALBRK_BSDCOMPAT)
+#if defined(CONFIG_SERIAL_TERMIOS)
   FAR struct stm32l4_serial_s   *priv  = (FAR struct stm32l4_serial_s *)dev->priv;
 #endif
   int                ret    = OK;
@@ -1619,6 +1580,7 @@ static int stm32l4serial_ioctl(FAR struct file *filep, int cmd,
 #endif
 
 #ifdef CONFIG_STM32L4_USART_SINGLEWIRE
+#warning please review the potential use of ALTERNATE_FUNCTION_OPENDRAIN
     case TIOCSSINGLEWIRE:
       {
         /* Change the TX port to be open-drain/push-pull and enable/disable
@@ -1627,18 +1589,6 @@ static int stm32l4serial_ioctl(FAR struct file *filep, int cmd,
 
         uint32_t cr = stm32l4serial_getreg(priv, STM32L4_USART_CR3_OFFSET);
 
-#if defined(CONFIG_STM32L4_STM32F10XX)
-        if (arg == SER_SINGLEWIRE_ENABLED)
-          {
-            stm32l4_configgpio((priv->tx_gpio & ~(GPIO_CNF_MASK)) | GPIO_CNF_AFOD);
-            cr |= USART_CR3_HDSEL;
-          }
-        else
-          {
-            stm32l4_configgpio((priv->tx_gpio & ~(GPIO_CNF_MASK)) | GPIO_CNF_AFPP);
-            cr &= ~USART_CR3_HDSEL;
-          }
-#else
         if (arg == SER_SINGLEWIRE_ENABLED)
           {
             stm32l4_configgpio(priv->tx_gpio | GPIO_OPENDRAIN);
@@ -1649,7 +1599,6 @@ static int stm32l4serial_ioctl(FAR struct file *filep, int cmd,
             stm32l4_configgpio(priv->tx_gpio | GPIO_PUSHPULL);
             cr &= ~USART_CR3_HDSEL;
           }
-#endif
 
         stm32l4serial_putreg(priv, STM32L4_USART_CR3_OFFSET, cr);
       }
@@ -2484,7 +2433,7 @@ void up_earlyserialinit(void)
  *
  ****************************************************************************/
 
-void stm32l4serial_getregit(void)
+void up_serialinit(void)
 {
 #ifdef HAVE_UART
   char devname[16];

@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/bch/bchlib_cache.c
  *
- *   Copyright (C) 2008-2009, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,25 +45,11 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/fs/fs.h>
-
 #include "bch.h"
 
 #if defined(CONFIG_BCH_ENCRYPTION)
 #  include <crypto/crypto.h>
 #endif
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions

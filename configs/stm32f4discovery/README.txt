@@ -1934,6 +1934,18 @@ Where <subdir> is one of the following:
     3. By default, this project assumes that you are *NOT* using the DFU
        bootloader.
 
+  pseudoterm:
+  -----------
+
+    This is a configuration to test the Pseudo Terminal support for NuttX.
+
+    To test it you will need two USB/Serial dongles. The first dongle as
+    usual will be used to main NSH console port in UART2 (PA2 and PA3) and
+    the second dongle you will connect to UART3 (PB10 and PB11).
+
+    In the main NSH console (in UART2) type: "pts_test &". It will create a
+    new console in UART3. Just press ENTER and start typing commands on it.
+
   rgbled:
   -------
 

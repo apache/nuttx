@@ -146,7 +146,7 @@
 
 /* Marking a line as local */
 
-#define TIOCGSOFTCAR    _TIOC(0x0023)  /* Get software carrier flag: FAR int */
+#define TIOCGSOFTCAR    _TIOC(0x0023)  /* Get software carrier flag: FAR int* */
 #define TIOCSSOFTCAR    _TIOC(0x0024)  /* Set software carrier flag: FAR const int */
 
 /* Get/set serial line info */
@@ -160,10 +160,16 @@
 #define TIOCMIWAIT      _TIOC(0x0028)  /* Wait for a change on serial input line(s): void */
 #define TIOCGICOUNT     _TIOC(0x0029)  /* Read serial port interrupt count: FAR  struct serial_icounter_struct */
 
+/* Pseudo-terminals */
+
+#define TIOCGPTN        _TIOC(0x002a)  /* Get Pty Number (of pty-mux device): FAR int* */
+#define TIOCSPTLCK      _TIOC(0x002b)  /* Lock/unlock Pty: int */
+#define TIOCGPTLCK      _TIOC(0x002c)  /* Get Pty lock state: FAR int* */
+
 /* RS-485 Support */
 
-#define TIOCSRS485      _TIOC(0x002a)  /* Set RS485 mode, arg: pointer to struct serial_rs485 */
-#define TIOCGRS485      _TIOC(0x002b)  /* Get RS485 mode, arg: pointer to struct serial_rs485 */
+#define TIOCSRS485      _TIOC(0x002d)  /* Set RS485 mode, arg: pointer to struct serial_rs485 */
+#define TIOCGRS485      _TIOC(0x002e)  /* Get RS485 mode, arg: pointer to struct serial_rs485 */
 
 /* Definitions for flags used in struct serial_rs485 (Linux compatible) */
 
@@ -174,14 +180,14 @@
 
 /* Single-wire UART support */
 
-#define TIOCSSINGLEWIRE _TIOC(0x002c)  /* Set single-wire mode */
-#define TIOCGSINGLEWIRE _TIOC(0x002d)  /* Get single-wire mode */
+#define TIOCSSINGLEWIRE _TIOC(0x002f)  /* Set single-wire mode */
+#define TIOCGSINGLEWIRE _TIOC(0x0030)  /* Get single-wire mode */
 
 #  define SER_SINGLEWIRE_ENABLED   (1 << 0) /* Enable/disable single-wire support */
 
 /* Debugging */
 
-#define TIOCSERGSTRUCT  _TIOC(0x002e) /* Get device TTY structure */
+#define TIOCSERGSTRUCT  _TIOC(0x0031) /* Get device TTY structure */
 
 /********************************************************************************************
  * Public Type Definitions

@@ -483,12 +483,12 @@ config KINETIS_FTM2_CHANNEL
 
 menu "Kinetis GPIO Interrupt Configuration"
 
-config GPIO_IRQ
+config KINETIS_GPIOIRQ
 	bool "GPIO pin interrupts"
 	---help---
 		Enable support for interrupting GPIO pins
 
-if GPIO_IRQ
+if KINETIS_GPIOIRQ
 
 config KINETIS_PORTAINTS
 	bool "GPIOA interrupts"
@@ -615,13 +615,6 @@ config KINETIS_SD4BIT_FREQ
 		Frequency to use for transferring data to/from an SD card using all four data lines.
 
 endif
-
-config KINETIS_SDHC_DMAPRIO
-	int "SDHC DMA priority"
-	depends on SDIO_DMA
-	---help---
-		SDHC DMA priority
-
 endmenu # Kinetis SDHC Configuration
 
 menu "Kinetis UART Configuration"

@@ -422,7 +422,7 @@ CONFIGURATION
             CONFIG_SPI_EXCHANGE=n             : exchange() method is not supported
 
           System Type:
-            CONFIG_GPIO_IRQ=y                 : GPIO interrupt support
+            CONFIG_LPC17_GPIOIRQ=y                 : GPIO interrupt support
             CONFIG_LPC17_SSP1=y               : Enable support for SSP1
 
           RTOS Features:
@@ -472,7 +472,7 @@ CONFIGURATION
        information about the button test.
 
        System Type:
-         CONFIG_GPIO_IRQ=y
+         CONFIG_LPC17_GPIOIRQ=y
 
        Board Selection:
         CONFIG_ARCH_BUTTONS=y

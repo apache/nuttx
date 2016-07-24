@@ -242,7 +242,7 @@ uint8_t up_buttons(void);
  *
  ************************************************************************************/
 
-#if defined(CONFIG_ARCH_IRQBUTTONS) && defined(CONFIG_GPIO_IRQ)
+#if defined(CONFIG_ARCH_IRQBUTTONS) && defined(CONFIG_TIVA_GPIO_IRQS)
 xcpt_t up_irqbutton(int id, xcpt_t irqhandler);
 #endif
 #endif /* CONFIG_ARCH_BUTTONS */

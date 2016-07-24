@@ -45,13 +45,20 @@
 #include <rgmp/string.h>
 #include <rgmp/arch/arch.h>
 
-#include <nuttx/sched.h>
-#include <nuttx/kmalloc.h>
-#include <nuttx/arch.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <arch/irq.h>
 #include <arch/arch.h>
+
+#include <nuttx/sched.h>
+#include <nuttx/kmalloc.h>
+#include <nuttx/arch.h>
+#include <nuttx/drivers/drivers.h>
+#include <nuttx/sched_note.h>
+#include <nuttx/serial/pty.h>
+#include <nuttx/syslog/syslog.h>
+#include <nuttx/crypto/crypto.h>
+#include <nuttx/power/pm.h>
 
 #include "task/task.h"
 #include "sched/sched.h"
@@ -85,23 +92,90 @@ static inline void up_switchcontext(struct tcb_s *ctcb, struct tcb_s *ntcb)
 
 void up_initialize(void)
 {
-    extern pidhash_t g_pidhash[];
-    extern void vdev_init(void);
-    extern void nuttx_arch_init(void);
+  extern pidhash_t g_pidhash[];
+  extern void vdev_init(void);
+  extern void nuttx_arch_init(void);
 
-    // initialize the current_task to g_idletcb
-    current_task = g_pidhash[PIDHASH(0)].tcb;
+  /* Initialize the current_task to g_idletcb */
 
-    // OS memory alloc system is ready
-    use_os_kmalloc = 1;
+  current_task = g_pidhash[PIDHASH(0)].tcb;
 
-    // rgmp vdev init
-    vdev_init();
+  /* OS memory alloc system is ready */
 
-    nuttx_arch_init();
+  use_os_kmalloc = 1;
 
-    // enable interrupt
-    local_irq_enable();
+  /* rgmp vdev init */
+
+  vdev_init();
+
+  nuttx_arch_init();
+
+#ifdef CONFIG_PM
+  /* Initialize the power management subsystem.  This MCU-specific function
+   * must be called *very* early in the initialization sequence *before* any
+   * other device drivers are initialized (since they may attempt to register
+   * with the power management subsystem).
+   */
+
+  up_pminitialize();
+#endif
+
+#if CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_PSEUDOTERM_SUSV1)
+  /* Register the master pseudo-terminal multiplexor device */
+
+  (void)ptmx_register();
+#endif
+
+  /* Early initialization of the system logging device.  Some SYSLOG channel
+   * can be initialized early in the initialization sequence because they
+   * depend on only minimal OS initialization.
+   */
+
+  syslog_initialize(SYSLOG_INIT_EARLY);
+
+  /* Register devices */
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+
+#if defined(CONFIG_DEV_NULL)
+  devnull_register();   /* Standard /dev/null */
+#endif
+
+#if defined(CONFIG_DEV_RANDOM)
+  devrandom_register(); /* Standard /dev/random */
+#endif
+
+#if defined(CONFIG_DEV_URANDOM)
+  devurandom_register();   /* Standard /dev/urandom */
+#endif
+
+#if defined(CONFIG_DEV_ZERO)
+  devzero_register();   /* Standard /dev/zero */
+#endif
+
+#if defined(CONFIG_DEV_LOOP)
+  loop_register();      /* Standard /dev/loop */
+#endif
+#endif /* CONFIG_NFILE_DESCRIPTORS */
+
+#if defined(CONFIG_SCHED_INSTRUMENTATION_BUFFER) && \
+    defined(CONFIG_DRIVER_NOTE)
+  note_register();      /* Non-standard /dev/note */
+#endif
+
+#if defined(CONFIG_CRYPTO)
+  /* Initialize the HW crypto and /dev/crypto */
+
+  up_cryptoinitialize();
+#endif
+
+#if CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_CRYPTO_CRYPTODEV)
+  devcrypto_register();
+#endif
+
+  /* Enable interrupt */
+
+  local_irq_enable();
 }
 
 void up_idle(void)
@@ -251,6 +325,7 @@ void up_release_stack(struct tcb_s *dtcb, uint8_t ttype)
  *     hold the blocked task TCB.
  *
  ****************************************************************************/
+
 void up_block_task(struct tcb_s *tcb, tstate_t task_state)
 {
   /* Verify that the context switch can be performed */

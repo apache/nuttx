@@ -183,16 +183,16 @@ BIN = nuttx$(EXEEXT)
 all: $(BIN)
 .PHONY: context clean_context check_context export subdir_clean clean subdir_distclean distclean apps_clean apps_distclean
 
-# Target used to copy include/nuttx/math.h.  If CONFIG_ARCH_MATH_H is
+# Target used to copy include/nuttx/lib/math.h.  If CONFIG_ARCH_MATH_H is
 # defined, then there is an architecture specific math.h header file
 # that will be included indirectly from include/math.h.  But first, we
 # have to copy math.h from include/nuttx/. to include/.  Logic within
-# include/nuttx/math.h will hand the redirection to the architecture-
+# include/nuttx/lib/math.h will hand the redirection to the architecture-
 # specific math.h header file.
 #
 # If the CONFIG_LIBM is defined, the Rhombus libm will be built at libc/math.
 # Definitions and prototypes for the Rhombus libm are also contained in
-# include/nuttx/math.h and so the file must also be copied in that case.
+# include/nuttx/lib/math.h and so the file must also be copied in that case.
 #
 # If neither CONFIG_ARCH_MATH_H nor CONFIG_LIBM is defined, then no math.h
 # header file will be provided.  You would want that behavior if (1) you
@@ -208,8 +208,8 @@ endif
 endif
 
 ifeq ($(NEED_MATH_H),y)
-include/math.h: include/nuttx/math.h
-	$(Q) cp -f include/nuttx/math.h include/math.h
+include/math.h: include/nuttx/lib/math.h
+	$(Q) cp -f include/nuttx/lib/math.h include/math.h
 else
 include/math.h:
 endif
@@ -221,20 +221,20 @@ endif
 # the settings in this float.h are actually correct for your platform!
 
 ifeq ($(CONFIG_ARCH_FLOAT_H),y)
-include/float.h: include/nuttx/float.h
-	$(Q) cp -f include/nuttx/float.h include/float.h
+include/float.h: include/nuttx/lib/float.h
+	$(Q) cp -f include/nuttx/lib/float.h include/float.h
 else
 include/float.h:
 endif
 
-# Target used to copy include/nuttx/stdarg.h.  If CONFIG_ARCH_STDARG_H is
+# Target used to copy include/nuttx/lib/stdarg.h.  If CONFIG_ARCH_STDARG_H is
 # defined, then there is an architecture specific stdarg.h header file
-# that will be included indirectly from include/stdarg.h.  But first, we
+# that will be included indirectly from include/lib/stdarg.h.  But first, we
 # have to copy stdarg.h from include/nuttx/. to include/.
 
 ifeq ($(CONFIG_ARCH_STDARG_H),y)
-include/stdarg.h: include/nuttx/stdarg.h
-	$(Q) cp -f include/nuttx/stdarg.h include/stdarg.h
+include/stdarg.h: include/nuttx/lib/stdarg.h
+	$(Q) cp -f include/nuttx/lib/stdarg.h include/stdarg.h
 else
 include/stdarg.h:
 endif

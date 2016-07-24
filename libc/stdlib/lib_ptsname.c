@@ -1,8 +1,7 @@
 /****************************************************************************
- * include/nuttx/regex.h
- * Non-standard, pattern-matching APIs available in lib/.
+ * libc/stdlib/lib_ptsname.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,50 +33,41 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_REGEX_H
-#define __INCLUDE_NUTTX_REGEX_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/fs/fs.h>
+
+#include <stdlib.h>
+
+#ifdef CONFIG_PSEUDOTERM_SUSV1
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-/****************************************************************************
- * Name: match
+ * Name: ptsname
  *
  * Description:
- *   Simple shell-style filename pattern matcher written by Jef Poskanzer
- *   (See copyright notice in lib/lib_match.c).  This pattern matcher only
- *   handles '?', '*' and '**', and  multiple patterns separated by '|'.
+ *   The ptsname() function returns the name of the slave pseudoterminal
+ *   device corresponding to the master referred to by fd.
  *
- * Returned Value:
- *   Returns 1 (match) or 0 (no-match).
+ * Returned Values:
+ *   On success, ptsname() returns a pointer to a string in static storage
+ *   which will be overwritten by subsequent calls.  This pointer must not
+ *   be freed.  On failure, NULL is returned.
+ *
+ *     ENOTTY fd does not refer to a pseudoterminal master device.
  *
  ****************************************************************************/
 
-int match(const char *pattern, const char *string);
-
-#undef EXTERN
-#ifdef __cplusplus
+FAR char *ptsname(int fd)
+{
+  static char devname[16];
+  int ret = ptsname_r(fd, devname, 16);
+  return ret < 0 ? NULL : devname;
 }
-#endif
 
-#endif /* __INCLUDE_NUTTX_REGEX_H */
+#endif /* CONFIG_PSEUDOTERM_SUSV1 */

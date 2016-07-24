@@ -2,7 +2,7 @@
  * arch/arm/src/sam34/chip/sam_tc.h
  * Timer Counter (TC) definitions for the SAM3U, SAM4E, and SAM4S
  *
- *   Copyright (C) 2009, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2013-2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -537,16 +537,10 @@
 #  define TC_BMR_TC1XC1S_TIOA2       (3 << TC_BMR_TC1XC1S_SHIFT)
 #define TC_BMR_TC2XC2S_SHIFT         (4)       /* Bits 4-5: External Clock Signal 2 Selection */
 #define TC_BMR_TC2XC2S_MASK          (3 << TC_BMR_TC2XC2S_SHIFT)
-#if defined(CONFIG_ARCH_CHIP_SAM4s) || defined(CONFIG_ARCH_CHIP_SAM4E)
-#  define TC_BMR_TC2XC2S_TCLK2       (0 << TC_BMR_TC2XC2S_SHIFT)
-#  define TC_BMR_TC2XC2S_TIOA1       (2 << TC_BMR_TC2XC2S_SHIFT)
-#  define TC_BMR_TC2XC2S_TIOA2       (3 << TC_BMR_TC2XC2S_SHIFT)
-#else
 #  define TC_BMR_TC2XC2S_TCLK2       (0 << TC_BMR_TC2XC2S_SHIFT)
 #  define TC_BMR_TC2XC2S_NONE        (1 << TC_BMR_TC2XC2S_SHIFT)
 #  define TC_BMR_TC2XC2S_TIOA0       (2 << TC_BMR_TC2XC2S_SHIFT)
 #  define TC_BMR_TC2XC2S_TIOA1       (3 << TC_BMR_TC2XC2S_SHIFT)
-#endif
 #define TC_BMR_QDEN                  (1 << 8)  /* Bit 8:  Quadrature Decoder Enabled */
 #define TC_BMR_POSEN                 (1 << 9)  /* Bit 9:  Position Enabled */
 #define TC_BMR_SPEEDEN               (1 << 10) /* Bit 10: Speed Enabled */

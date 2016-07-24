@@ -69,7 +69,7 @@
 #include <nuttx/audio/i2s.h>
 #include <nuttx/audio/audio.h>
 #include <nuttx/audio/wm8904.h>
-#include <nuttx/math.h>
+#include <nuttx/lib/math.h>
 
 #include "wm8904.h"
 

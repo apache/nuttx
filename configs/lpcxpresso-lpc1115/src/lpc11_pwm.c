@@ -43,7 +43,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/pwm.h>
+#include <nuttx/drivers/pwm.h>
 #include <arch/board/board.h>
 
 #include "chip.h"

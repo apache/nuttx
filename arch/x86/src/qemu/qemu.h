@@ -115,7 +115,7 @@ void i486_lowsetup(void);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_QEMU_GPIOIRQ
 void i486_gpioirqinitialize(void);
 #else
 #  define i486_gpioirqinitialize()
@@ -159,7 +159,7 @@ bool i486_gpioread(uint16_t pinset);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_QEMU_GPIOIRQ
 void i486_gpioirqenable(int irq);
 #else
 #  define i486_gpioirqenable(irq)
@@ -173,7 +173,7 @@ void i486_gpioirqenable(int irq);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_QEMU_GPIOIRQ
 void i486_gpioirqdisable(int irq);
 #else
 #  define i486_gpioirqdisable(irq)

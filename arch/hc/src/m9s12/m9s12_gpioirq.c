@@ -75,7 +75,7 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_HCS12_GPIOIRQ
 static int hcs12_mapirq(int irq, uint16_t *regaddr, uint8_t *pin)
 {
   if (irq >= HCC12_IRQ_PGFIRST)
@@ -121,7 +121,7 @@ static int hcs12_mapirq(int irq, uint16_t *regaddr, uint8_t *pin)
     }
   return -EINVAL;
 }
-#endif /* CONFIG_GPIO_IRQ */
+#endif /* CONFIG_HCS12_GPIOIRQ */
 
 /****************************************************************************
  * Name: up_gpioa/b/cinterrupt
@@ -131,7 +131,7 @@ static int hcs12_mapirq(int irq, uint16_t *regaddr, uint8_t *pin)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_HCS12_GPIOIRQ
 static int hcs12_interrupt(uint16_t base, int irq0, uint8_t valid, void *context)
 {
   uint8_t pending;
@@ -204,7 +204,7 @@ static int hcs12_pjinterrupt(int irq, void *context)
                          HCS12_IRQ_PJSET, context);
 }
 #endif
-#endif /* CONFIG_GPIO_IRQ */
+#endif /* CONFIG_HCS12_GPIOIRQ */
 
 /****************************************************************************
  * Public Functions
@@ -229,7 +229,7 @@ void hcs12_gpioirqinitialize(void)
 
   /* Attach GPIO IRQ interrupt handlers */
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_HCS12_GPIOIRQ
 # ifdef CONFIG_HCS12_PORTG_INTS
   irq_attach(HCS12_IRQ_VPORTG, hcs12_pginterrupt);
 # endif
@@ -239,7 +239,7 @@ void hcs12_gpioirqinitialize(void)
 # ifdef CONFIG_HCS12_PORTJ_INTS
   irq_attach(HCS12_IRQ_VPORTJ, hcs12_pjinterrupt);
 # endif
-#endif /* CONFIG_GPIO_IRQ */
+#endif /* CONFIG_HCS12_GPIOIRQ */
 }
 
 /****************************************************************************
@@ -250,7 +250,7 @@ void hcs12_gpioirqinitialize(void)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_HCS12_GPIOIRQ
 void hcs12_gpioirqenable(int irq)
 {
   uint16_t regaddr;
@@ -265,7 +265,7 @@ void hcs12_gpioirqenable(int irq)
        leave_critical_section(flags);
     }
 }
-#endif /* CONFIG_GPIO_IRQ */
+#endif /* CONFIG_HCS12_GPIOIRQ */
 
 /****************************************************************************
  * Name: hcs12_gpioirqdisable
@@ -275,7 +275,7 @@ void hcs12_gpioirqenable(int irq)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_HCS12_GPIOIRQ
 void hcs12_gpioirqdisable(int irq)
 {
   uint16_t regaddr;
@@ -290,5 +290,5 @@ void hcs12_gpioirqdisable(int irq)
        leave_critical_section(flags);
     }
 }
-#endif /* CONFIG_GPIO_IRQ */
+#endif /* CONFIG_HCS12_GPIOIRQ */
 

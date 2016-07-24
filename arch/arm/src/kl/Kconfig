@@ -345,12 +345,12 @@ config KL_TPM2_CHANNEL
 
 comment "Kinetis GPIO Interrupt Configuration"
 
-config GPIO_IRQ
+config KL_GPIOIRQ
 	bool "GPIO pin interrupts"
 	---help---
 		Enable support for interrupting GPIO pins
 
-if GPIO_IRQ
+if KL_GPIOIRQ
 
 config KL_PORTAINTS
 	bool "GPIOA interrupts"

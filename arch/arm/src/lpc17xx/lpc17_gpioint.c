@@ -51,7 +51,7 @@
 #include "chip.h"
 #include "lpc17_gpio.h"
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_LPC17_GPIOIRQ
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -543,4 +543,4 @@ void lpc17_gpioirqdisable(int irq)
     }
 }
 
-#endif /* CONFIG_GPIO_IRQ */
+#endif /* CONFIG_LPC17_GPIOIRQ */

@@ -44,9 +44,10 @@
 #include <stdint.h>
 #include <poll.h>
 #include <errno.h>
-#include <stdlib.h>
 #include <string.h>
 #include <debug.h>
+
+#include <nuttx/kmalloc.h>
 
 #ifndef CONFIG_DISABLE_POLL
 
@@ -68,13 +69,17 @@
 int epoll_create(int size)
 {
   FAR struct epoll_head *eph =
-    (FAR struct epoll_head *)malloc(sizeof(struct epoll_head));
+    (FAR struct epoll_head *)kmm_malloc(sizeof(struct epoll_head));
 
   eph->size = size;
   eph->occupied = 0;
-  eph->evs = malloc(sizeof(struct epoll_event) * eph->size);
+  eph->evs = kmm_malloc(sizeof(struct epoll_event) * eph->size);
 
-  return (int)eph;
+  /* REVISIT: This will not work on machines where:
+   * sizeof(struct epoll_head *) > sizeof(int)
+   */
+
+  return (int)((intptr_t)eph);
 }
 
 /****************************************************************************
@@ -90,10 +95,14 @@ int epoll_create(int size)
 
 void epoll_close(int epfd)
 {
-  struct epoll_head *eph = (struct epoll_head *)epfd;
+  /* REVISIT: This will not work on machines where:
+   * sizeof(struct epoll_head *) > sizeof(int)
+   */
 
-  free(eph->evs);
-  free(eph);
+  FAR struct epoll_head *eph = (FAR struct epoll_head *)((intptr_t)epfd);
+
+  kmm_free(eph->evs);
+  kmm_free(eph);
 }
 
 /****************************************************************************
@@ -109,7 +118,11 @@ void epoll_close(int epfd)
 
 int epoll_ctl(int epfd, int op, int fd, struct epoll_event *ev)
 {
-  FAR struct epoll_head *eph = (FAR struct epoll_head *)epfd;
+  /* REVISIT: This will not work on machines where:
+   * sizeof(struct epoll_head *) > sizeof(int)
+   */
+
+  FAR struct epoll_head *eph = (FAR struct epoll_head *)((intptr_t)epfd);
 
   switch (op)
     {
@@ -180,9 +193,13 @@ int epoll_ctl(int epfd, int op, int fd, struct epoll_event *ev)
 int epoll_wait(int epfd, FAR struct epoll_event *evs, int maxevents,
                int timeout)
 {
-  int i;
+  /* REVISIT: This will not work on machines where:
+   * sizeof(struct epoll_head *) > sizeof(int)
+   */
+
+  FAR struct epoll_head *eph = (FAR struct epoll_head *)((intptr_t)epfd);
   int rc;
-  FAR struct epoll_head *eph = (FAR struct epoll_head *)epfd;
+  int i;
 
   rc = poll((FAR struct pollfd *)eph->evs, eph->occupied, timeout);
 

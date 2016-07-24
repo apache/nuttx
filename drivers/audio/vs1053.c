@@ -58,7 +58,7 @@
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/audio/audio.h>
 #include <nuttx/audio/vs1053.h>
-#include <nuttx/math.h>
+#include <nuttx/lib/math.h>
 
 #include "vs1053.h"
 
