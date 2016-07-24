@@ -2537,7 +2537,7 @@ static int usbmsc_cmdstatusstate(FAR struct usbmsc_dev_s *priv)
 
   if (!privreq)
     {
-      usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_CMDSTATUSRDREQLISTEMPTY), 0);
+      usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_CMDSTATUSWRREQLISTEMPTY), 0);
       return -ENOMEM;
     }
 
