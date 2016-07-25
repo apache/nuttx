@@ -774,17 +774,48 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 #endif
+
+      /* Get the number of bytes that are immediately available for reading
+       * from the source pipe.
+       */
+
+      case FIONREAD:
+        {
+          ret = file_ioctl(&dev->pd_src, cmd, arg);
+        }
+        break;
+
+      /* Get the number of bytes waiting in the sink pipe (FIONWRITE) or the
+       * number of unused bytes in the sink pipe (FIONSPACE).
+       */
+
+      case FIONWRITE:
+      case FIONSPACE:
+        {
+          ret = file_ioctl(&dev->pd_sink, cmd, arg);
+        }
+        break;
+
       /* Any unrecognized IOCTL commands will be passed to the contained
        * pipe driver.
+       *
+       * REVISIT:  We know for a fact that the pipe driver only supports
+       * FIONREAD, FIONWRITE, FIONSPACE and PIPEIOC_POLICY.  The first two
+       * are handled above and PIPEIOC_POLICY should not be managed by
+       * applications -- it can break the PTY!
        */
 
       default:
         {
+#if 0
           ret = file_ioctl(&dev->pd_src, cmd, arg);
           if (ret >= 0 || ret == -ENOTTY)
             {
               ret = file_ioctl(&dev->pd_sink, cmd, arg);
             }
+#else
+          ret = ENOTTY;
+#endif
         }
         break;
     }
