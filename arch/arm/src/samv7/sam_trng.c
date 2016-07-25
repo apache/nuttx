@@ -453,3 +453,4 @@ void devurandom_register(void)
 #endif
 
 #endif /* CONFIG_DEV_RANDOM || CONFIG_DEV_URANDOM_ARCH */
+#endif /* CONFIG_SAMV7_TRNG */
