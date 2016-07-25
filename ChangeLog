@@ -12394,3 +12394,9 @@
 	  (2016-07-23).
 
 7.18 2016-xx-xx Gregory Nutt <gnutt@nuttx.org>
+
+	* drivers/serial/pty.c, serial.c, usbdev/cdcacm.c, include/nuttx/fs/ioctl.h:
+	  Fix FIONWRITE and add FIONSPACE.  All implementations of FIONWRITE
+	  were wrong.  FIONWRITE should return the number of bytes waiting in
+	  the outgoing send queue, not the free space.  Rather, FIONSPACE should
+	  return the free space in the send queue (2016-07-25).
