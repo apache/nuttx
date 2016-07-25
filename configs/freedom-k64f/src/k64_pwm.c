@@ -45,7 +45,7 @@
 #include <debug.h>
 
 #include <nuttx/board.h>
-#include <nuttx/pwm.h>
+#include <nuttx/drivers/pwm.h>
 
 #include <arch/board/board.h>
 
@@ -53,22 +53,7 @@
 #include "up_arch.h"
 #include "kinetis_pwm.h"
 
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-/* Configuration *******************************************************************/
-/* PWM
- *
- * The Kinetis Freedom board provides a LED on GPIO.
- */
-
 #ifdef CONFIG_PWM
-
-extern struct pwm_lowerhalf_s *kinetis_pwminitialize(int timer);
-
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
 
 /************************************************************************************
  * Public Functions
@@ -85,8 +70,8 @@ extern struct pwm_lowerhalf_s *kinetis_pwminitialize(int timer);
 
 int board_pwm_setup(void)
 {
+  FAR struct pwm_lowerhalf_s *pwm;
   static bool initialized = false;
-  struct pwm_lowerhalf_s *pwm;
   int ret;
 
   /* Have we already initialized? */

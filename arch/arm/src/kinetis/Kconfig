@@ -418,6 +418,9 @@ config KINETIS_PIT
 
 endmenu
 
+menu "Kinetis FTM PWM Configuration"
+	depends on KINETIS_FTM0 || KINETIS_FTM1 || KINETIS_FTM2
+
 config KINETIS_FTM0_PWM
 	bool "FTM0 PWM"
 	default n
@@ -480,6 +483,8 @@ config KINETIS_FTM2_CHANNEL
 	---help---
 		If FTM2 is enabled for PWM usage, you also need specifies the timer output
 		channel {0,..,1}
+
+endmenu # Kinetis FTM PWM Configuration
 
 menu "Kinetis GPIO Interrupt Configuration"
 
