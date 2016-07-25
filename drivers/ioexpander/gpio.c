@@ -92,7 +92,7 @@ static const struct file_operations g_gpio_drvrops =
  * Name: gpio_handler
  *
  * Description:
- *   Standard character driver open method.
+ *   GPIO interrupt callback function.
  *
  ****************************************************************************/
 
@@ -272,6 +272,12 @@ static int gpio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  *
  * Description:
  *   Register GPIO pin device driver.
+ *
+ *   - Input pin types will be registered at /dev/gpinN
+ *   - Output pin types will be registered at /dev/gpoutN
+ *   - Interrupt pin types will be registered at /dev/gpintN
+ *
+ *   Where N is the provided minor number in the range of 0-99.
  *
  ****************************************************************************/
 
