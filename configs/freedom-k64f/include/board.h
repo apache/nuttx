@@ -137,6 +137,7 @@
 
 /* PWM Configuration */
 /* FTM0 Channels */
+/* Channels can be modified using kinetis_k64pinmux.h */
 
 #define GPIO_FTM0_CH0OUT PIN_FTM0_CH0_1
 #define GPIO_FTM0_CH1OUT PIN_FTM0_CH1_1

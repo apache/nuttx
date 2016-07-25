@@ -64,7 +64,7 @@
 
 #ifdef CONFIG_PWM
 
-extern struct pwm_lowerhalf_s *k64_pwminitialize(int timer);
+extern struct pwm_lowerhalf_s *kinetis_pwminitialize(int timer);
 
 /************************************************************************************
  * Private Functions
@@ -95,7 +95,7 @@ int board_pwm_setup(void)
     {
       /* Call k64_pwminitialize() to get an instance of the PWM interface */
 
-      pwm = k64_pwminitialize(0);
+      pwm = kinetis_pwminitialize(0);
       if (!pwm)
         {
           aerr("ERROR: Failed to get the K64 PWM lower half\n");
