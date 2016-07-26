@@ -122,6 +122,7 @@ static void pipecommon_pollnotify(FAR struct pipe_dev_s *dev,
   for (i = 0; i < CONFIG_DEV_PIPE_NPOLLWAITERS; i++)
     {
       FAR struct pollfd *fds = dev->d_fds[i];
+
       if (fds)
         {
           fds->revents |= eventset & (fds->events | POLLERR | POLLHUP);
@@ -599,6 +600,7 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
                   sem_post(&dev->d_rdsem);
                 }
             }
+
           last = nwritten;
 
           /* If O_NONBLOCK was set, then return partial bytes written or EGAIN */
@@ -609,6 +611,7 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
                 {
                   nwritten = -EAGAIN;
                 }
+
               sem_post(&dev->d_bfsem);
               return nwritten;
             }

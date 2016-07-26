@@ -68,25 +68,6 @@
 #undef CONFIG_PSEUDOTERM_FULLBLOCKS
 
 /****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-static int     pty_open(FAR struct file *filep);
-static int     pty_close(FAR struct file *filep);
-static ssize_t pty_read(FAR struct file *filep, FAR char *buffer,
-                 size_t buflen);
-static ssize_t pty_write(FAR struct file *filep, FAR const char *buffer,
-                 size_t buflen);
-static int     pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
-#ifndef CONFIG_DISABLE_POLL
-static int     pty_poll(FAR struct file *filep, FAR struct pollfd *fds,
-                 bool setup);
-#endif
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-static int     pty_unlink(FAR struct inode *inode);
-#endif
-
-/****************************************************************************
  * Private Types
  ****************************************************************************/
 
@@ -124,6 +105,30 @@ struct pty_devpair_s
   sem_t pp_slavesem;            /* Slave lock semaphore */
   sem_t pp_exclsem;             /* Mutual exclusion */
 };
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+static void    pty_semtake(FAR struct pty_devpair_s *devpair);
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+static void    pty_destroy(FAR struct pty_devpair_s *devpair);
+#endif
+
+static int     pty_open(FAR struct file *filep);
+static int     pty_close(FAR struct file *filep);
+static ssize_t pty_read(FAR struct file *filep, FAR char *buffer,
+                 size_t buflen);
+static ssize_t pty_write(FAR struct file *filep, FAR const char *buffer,
+                 size_t buflen);
+static int     pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+#ifndef CONFIG_DISABLE_POLL
+static int     pty_poll(FAR struct file *filep, FAR struct pollfd *fds,
+                 bool setup);
+#endif
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+static int     pty_unlink(FAR struct inode *inode);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -249,12 +254,6 @@ static int pty_open(FAR struct file *filep)
       sched_lock();
       while (devpair->pp_locked)
         {
-          /* REVISIT: Should no block if the oflags include O_NONBLOCK.
-           * Also, how wouldwbe ripple the O_NONBLOCK characteristic
-           * to the contained drivers?  And how would we change the
-           * O_NONBLOCK characteristic if it is changed via fcntl?
-           */
-
           /* Wait until unlocked.  We will also most certainly suspend here. */
 
           sem_wait(&devpair->pp_slavesem);
@@ -490,6 +489,10 @@ static ssize_t pty_read(FAR struct file *filep, FAR char *buffer, size_t len)
             {
               /* Read one byte from the source the byte.  This call will
                * block if the source pipe is empty.
+               *
+               * REVISIT: Should not block if the oflags include O_NONBLOCK.
+               * How would we ripple the O_NONBLOCK characteristic to the
+               * contained soruce pipe?  file_fcntl()?
                */
 
               nread = file_read(&dev->pd_src, &ch, 1);
@@ -538,6 +541,10 @@ static ssize_t pty_read(FAR struct file *filep, FAR char *buffer, size_t len)
        * the pipe.   Otherwise, it will return data from the pipe.  If
        * there are fewer than 'len' bytes in the, it will return with
        * ntotal < len.
+       *
+       * REVISIT: Should not block if the oflags include O_NONBLOCK.
+       * How would we ripple the O_NONBLOCK characteristic to the
+       * contained source pipe? file_fcntl()?
        */
 
       ntotal = file_read(&dev->pd_src, buffer, len);
@@ -598,7 +605,13 @@ static ssize_t pty_write(FAR struct file *filep, FAR const char *buffer, size_t 
             {
               char cr = '\r';
 
-              /* Transfer the carriage return */
+              /* Transfer the carriage return.  This will block if the
+               * sink pipe is full.
+               *
+               * REVISIT: Should not block if the oflags include O_NONBLOCK.
+               * How would we ripple the O_NONBLOCK characteristic to the
+               * contained sink pipe?  file_fcntl()?
+               */
 
               nwritten = file_write(&dev->pd_sink, &cr, 1);
               if (nwritten < 0)
@@ -612,7 +625,13 @@ static ssize_t pty_write(FAR struct file *filep, FAR const char *buffer, size_t 
               ntotal++;
             }
 
-          /* Transfer the (possibly translated) character. */
+          /* Transfer the (possibly translated) character..  This will block
+           * if the sink pipe is full
+           *
+           * REVISIT: Should not block if the oflags include O_NONBLOCK.
+           * How would we ripple the O_NONBLOCK characteristic to the
+           * contained sink pipe?  file_fcntl()?
+           */
 
           nwritten = file_write(&dev->pd_sink, &ch, 1);
           if (nwritten < 0)
@@ -629,6 +648,14 @@ static ssize_t pty_write(FAR struct file *filep, FAR const char *buffer, size_t 
   else
 #endif
     {
+      /* Write the 'len' bytes to the sink pipe.  This will block until all
+       * 'len' bytes have been written to the pipe.
+       *
+       * REVISIT: Should not block if the oflags include O_NONBLOCK.
+       * How would we ripple the O_NONBLOCK characteristic to the
+       * contained sink pipe?  file_fcntl()?
+       */
+
       ntotal = file_write(&dev->pd_sink, buffer, len);
     }
 
