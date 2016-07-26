@@ -946,7 +946,7 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
               /* Determine the number of bytes waiting in the TX buffer */
 
-              if (dev->xmit.head < dev->xmit.tail)
+              if (dev->xmit.tail <= dev->xmit.head)
                 {
                   count = dev->xmit.head - dev->xmit.tail;
                 }
