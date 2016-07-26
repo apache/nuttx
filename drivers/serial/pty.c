@@ -33,6 +33,42 @@
  *
  ****************************************************************************/
 
+/* TODO:  O_NONBLOCK is not yet supported.  Currently, the pipes are opened
+ * nonblocking so only blocking behavior is supported.  This driver must be
+ * able to support multiple clients that have have a PTY device opened in
+ * blocking and non-blocking modes simultaneously.
+ *
+ * There are two different possible implementations under consideration:
+ *
+ * 1. Keep the pipes in blockingmode, but use a test based on FIONREAD (for
+ *    the source pipe) or FIONSPACE (for the sink pipe) to determine if the
+ *    read or write would block.  There is existing logic like this in
+ *    pty_read() to handle the case of a single byte reads which must never
+ *    block in any case:  Essentially, this logic uses FIONREAD to determine
+ *    if there is anything to read before calling file_read().  Similar
+ *    logic could be replicated for all read cases.
+ *
+ *    Analogous logic could be added for all writes using FIONSPACE to
+ *    assure that there is sufficient free space in the sink pipe to write
+ *    without blocking.  The write length could be adjusted, in necceary,
+ *    to assure that there is no blocking.
+ *
+ *    Locking, perhaps via sched_lock(), would be required to assure the
+ *    test via FIONREAD or FIONWRITE is atomic with respect to the
+ *    file_read() or file_write() operation.
+ *
+ * 2. An alternative that appeals to me is to modify the contained source
+ *    or sink pipe file structures before each file_read() or file_write()
+ *    operation to assure that the O_NONBLOCK is set correctly when the
+ *    pipe read or write operation is performed.
+ *
+ *    This would require (1) the ability to lock each pipe individually,
+ *    setting the blocking mode for the source or sing pipe to match the
+ *    mode in the open flags of the PTY device, and (2) logic to restore
+ *    the default pipe mode after the file_read/write() operation and
+ *    before the pipe is unlocked.
+ */
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -492,7 +528,8 @@ static ssize_t pty_read(FAR struct file *filep, FAR char *buffer, size_t len)
                *
                * REVISIT: Should not block if the oflags include O_NONBLOCK.
                * How would we ripple the O_NONBLOCK characteristic to the
-               * contained soruce pipe?  file_fcntl()?
+               * contained soruce pipe?  file_fcntl()?  Or FIONREAD? See the
+               * TODO comment at the top of this file.
                */
 
               nread = file_read(&dev->pd_src, &ch, 1);
@@ -544,7 +581,8 @@ static ssize_t pty_read(FAR struct file *filep, FAR char *buffer, size_t len)
        *
        * REVISIT: Should not block if the oflags include O_NONBLOCK.
        * How would we ripple the O_NONBLOCK characteristic to the
-       * contained source pipe? file_fcntl()?
+       * contained source pipe? file_fcntl()?  Or FIONREAD?  See the
+       * TODO comment at the top of this file.
        */
 
       ntotal = file_read(&dev->pd_src, buffer, len);
@@ -610,7 +648,8 @@ static ssize_t pty_write(FAR struct file *filep, FAR const char *buffer, size_t 
                *
                * REVISIT: Should not block if the oflags include O_NONBLOCK.
                * How would we ripple the O_NONBLOCK characteristic to the
-               * contained sink pipe?  file_fcntl()?
+               * contained sink pipe?  file_fcntl()?  Or FIONSPACE?  See the
+               * TODO comment at the top of this file.
                */
 
               nwritten = file_write(&dev->pd_sink, &cr, 1);
@@ -630,7 +669,8 @@ static ssize_t pty_write(FAR struct file *filep, FAR const char *buffer, size_t 
            *
            * REVISIT: Should not block if the oflags include O_NONBLOCK.
            * How would we ripple the O_NONBLOCK characteristic to the
-           * contained sink pipe?  file_fcntl()?
+           * contained sink pipe?  file_fcntl()?  Or FIONSPACe?  See the
+           * TODO comment at the top of this file.
            */
 
           nwritten = file_write(&dev->pd_sink, &ch, 1);
@@ -653,7 +693,8 @@ static ssize_t pty_write(FAR struct file *filep, FAR const char *buffer, size_t 
        *
        * REVISIT: Should not block if the oflags include O_NONBLOCK.
        * How would we ripple the O_NONBLOCK characteristic to the
-       * contained sink pipe?  file_fcntl()?
+       * contained sink pipe?  file_fcntl()?  Or FIONSPACE?  See the
+       * TODO comment at the top of this file.
        */
 
       ntotal = file_write(&dev->pd_sink, buffer, len);
