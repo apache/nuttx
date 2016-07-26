@@ -33,14 +33,14 @@
  *
  ****************************************************************************/
 
-/* TODO:  O_NONBLOCK is not yet supported.  Currently, the pipes are opened
- * nonblocking so only blocking behavior is supported.  This driver must be
- * able to support multiple clients that have have a PTY device opened in
- * blocking and non-blocking modes simultaneously.
+/* TODO:  O_NONBLOCK is not yet supported.  Currently, the source and sink
+ * pipes are opened nonblocking so only blocking behavior is supported.
+ * This driver must be able to support multiple clients that have have a PTY
+ * device opened in blocking and non-blocking modes simultaneously.
  *
  * There are two different possible implementations under consideration:
  *
- * 1. Keep the pipes in blockingmode, but use a test based on FIONREAD (for
+ * 1. Keep the pipes in blocking mode, but use a test based on FIONREAD (for
  *    the source pipe) or FIONSPACE (for the sink pipe) to determine if the
  *    read or write would block.  There is existing logic like this in
  *    pty_read() to handle the case of a single byte reads which must never
@@ -67,6 +67,11 @@
  *    mode in the open flags of the PTY device, and (2) logic to restore
  *    the default pipe mode after the file_read/write() operation and
  *    before the pipe is unlocked.
+ *
+ * There are existing locks to support (1) destruction of the driver
+ * (pp_exclsem) and (2) slave PTY locking (pp_slavesem).  Care must be
+ * taken with any new source/sink pipe locking to assure that deadlocks
+ * are not possible.
  */
 
 /****************************************************************************
