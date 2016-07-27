@@ -102,7 +102,7 @@ void lib_dumpbuffer(FAR const char *msg, FAR const uint8_t *buffer,
     {
       FAR char *ptr = buf;
 
-      /* General hex values.  2 * _NITEMS + 1 bytes */
+      /* Generate hex values:  2 * _NITEMS + 1 bytes */
 
       for (j = 0; j < _NITEMS; j++)
         {
@@ -125,9 +125,9 @@ void lib_dumpbuffer(FAR const char *msg, FAR const uint8_t *buffer,
             }
         }
 
-      *ptr++= ' ';
+      *ptr++= ' ';  /* Plus 1 byte */
 
-      /* General hex values.  1 * _NITEMS + 1 bytes */
+      /* Generate printable characters:  Plus 1 * _NITEMS + 1 bytes */
 
       for (j = 0; j < _NITEMS; j++)
         {
@@ -151,7 +151,7 @@ void lib_dumpbuffer(FAR const char *msg, FAR const uint8_t *buffer,
             }
         }
 
-      *ptr = '\0';
+      *ptr = '\0';  /* Plus 1 byte */
       syslog(LOG_INFO, "%04x: %s\n", i, buf);
    }
 }
