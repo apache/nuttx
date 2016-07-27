@@ -70,10 +70,11 @@
  *   any failure to indicate the nature of the failure.
  *
  ****************************************************************************/
-
+#include <stdio.h>
 #ifdef CONFIG_LIB_BOARDCTL
 int board_app_initialize(uintptr_t arg)
 {
+lib_dumpbuffer("stdin", stdin, sizeof(FILE));
 #ifndef CONFIG_BOARD_INITIALIZE
   sim_bringup();
 #endif
