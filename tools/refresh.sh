@@ -1,7 +1,7 @@
 #!/bin/bash
 # refresh.sh
 #
-#   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -104,6 +104,7 @@ WD=${PWD}
 BOARDDIR=configs/$BOARDSUBDIR
 CONFIGDIR=$BOARDDIR/$CONFIGSUBDIR
 DEFCONFIG=$CONFIGDIR/defconfig
+MAKEDEFS=$CONFIGDIR/Make.defs
 
 CMPCONFIG_TARGET=cmpconfig
 CMPCONFIG1=tools/cmpconfig
@@ -124,7 +125,12 @@ if [ ! -d "$CONFIGDIR" ]; then
 fi
 
 if [ ! -r "$DEFCONFIG" ]; then
-  echo "No readable defconfig file in $DEFCONFIG"
+  echo "No readable defconfig file at $DEFCONFIG"
+  exit 1
+fi
+
+if [ ! -r "$MAKEDEFS" ]; then
+  echo "No readable Make.defs file at $MAKEDEFS"
   exit 1
 fi
 
@@ -152,7 +158,7 @@ else
   fi
 fi
 
-# Copy the .config to the toplevel directory
+# Copy the .config and Make.defs to the toplevel directory
 
 rm -f SAVEconfig
 if [ -e .config ]; then
@@ -162,6 +168,15 @@ fi
 
 cp -a $DEFCONFIG .config || \
   { echo "ERROR: Failed to copy $DEFCONFIG to .config"; exit 1; }
+
+rm -f SAVEMake.defs
+if [ -e Make.defs ]; then
+  mv Make.defs SAVEMake.defs || \
+    { echo "ERROR: Failed to move Make.defs to SAVEMake.defs"; exit 1; }
+fi
+
+cp -a $MAKEDEFS Make.defs || \
+  { echo "ERROR: Failed to copy $MAKEDEFS to Make.defs"; exit 1; }
 
 # Then run oldconfig or oldefconfig
 
@@ -195,9 +210,14 @@ else
   fi
 fi
 
-# Restore any previous .config file
+# Restore any previous .config and Make.defs files
 
 if [ -e SAVEconfig ]; then
   mv SAVEconfig .config || \
     { echo "ERROR: Failed to move SAVEconfig to .config"; exit 1; }
+fi
+
+if [ -e SAVEMake.defs ]; then
+  mv SAVEMake.defs Make.defs || \
+    { echo "ERROR: Failed to move SAVEMake.defs to Make.defs"; exit 1; }
 fi
