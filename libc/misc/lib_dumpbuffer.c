@@ -125,7 +125,7 @@ void lib_dumpbuffer(FAR const char *msg, FAR const uint8_t *buffer,
             }
         }
 
-      *ptr++= ' ';  /* Plus 1 byte */
+      *ptr++ = ' ';  /* Plus 1 byte */
 
       /* Generate printable characters:  Plus 1 * _NITEMS + 1 bytes */
 
