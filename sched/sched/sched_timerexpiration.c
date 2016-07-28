@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sched/sched_timerexpiration.c
  *
- *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,6 +52,10 @@
 #include "sched/sched.h"
 #include "wdog/wdog.h"
 #include "clock/clock.h"
+
+#ifdef CONFIG_CLOCK_TIMEKEEPING
+# include "clock/clock_timekeeping.h"
+#endif
 
 #ifdef CONFIG_SCHED_TICKLESS
 
@@ -261,6 +265,12 @@ static unsigned int sched_timer_process(unsigned int ticks, bool noswitches)
   unsigned int cmptime = UINT_MAX;
   unsigned int rettime  = 0;
   unsigned int tmp;
+
+#ifdef CONFIG_CLOCK_TIMEKEEPING
+  /* Process wall time */
+
+  clock_update_wall_time();
+#endif
 
   /* Process watchdogs */
 

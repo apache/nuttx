@@ -83,7 +83,11 @@ systime_t clock_systimer(void)
 
   /* Get the time from the platform specific hardware */
 
+#ifndef CONFIG_CLOCK_TIMEKEEPING
   (void)up_timer_gettime(&ts);
+#else
+  (void)clock_timekeeping_get_monotonic_time(&ts);
+#endif
 
   /* Convert to a 64-bit value in microseconds, then in clock tick units */
 
@@ -96,7 +100,11 @@ systime_t clock_systimer(void)
 
   /* Get the time from the platform specific hardware */
 
+#ifndef CONFIG_CLOCK_TIMEKEEPING
   (void)up_timer_gettime(&ts);
+#else
+  (void)clock_timekeeping_get_monotonic_time(&ts);
+#endif
 
   /* Convert to a 64- then a 32-bit value */
 
