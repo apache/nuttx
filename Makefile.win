@@ -466,22 +466,22 @@ pass2dep: context tools\mkdeps$(HOSTEXEEXT)
 # location: http://ymorin.is-a-geek.org/projects/kconfig-frontends.  See
 # misc\tools\README.txt for additional information.
 
-do_config: context apps_preconfig
+do_config: dirlinks apps_preconfig
 	$(Q) set APPSDIR=$(patsubst "%",%,${CONFIG_APPS_DIR})& kconfig-conf Kconfig
 
 config: do_config clean_context
 
-do_oldconfig: context apps_preconfig
+do_oldconfig: dirlinks apps_preconfig
 	$(Q) set APPSDIR=$(patsubst "%",%,${CONFIG_APPS_DIR})& kconfig-conf --oldconfig Kconfig
 
 oldconfig: do_oldconfig clean_context
 
-do_olddefconfig: context apps_preconfig
+do_olddefconfig: dirlinks apps_preconfig
 	$(Q) set APPSDIR=$(patsubst "%",%,${CONFIG_APPS_DIR})& kconfig-conf --olddefconfig Kconfig
 
 olddefconfig: do_olddefconfig clean_context
 
-do_menuconfig: context configenv apps_preconfig
+do_menuconfig: dirlinks configenv apps_preconfig
 	$(Q) set APPSDIR=$(patsubst "%",%,${CONFIG_APPS_DIR})& kconfig-mconf Kconfig
 
 menuconfig: do_menuconfig clean_context
