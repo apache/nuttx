@@ -12402,3 +12402,8 @@
 	  were wrong.  FIONWRITE should return the number of bytes waiting in
 	  the outgoing send queue, not the free space.  Rather, FIONSPACE should
 	  return the free space in the send queue (2016-07-25).
+	* sched/clock and sched/sched: Add standard adjtime() interface and
+	  basic timekeeping support.  From Max Neklyudov (Merged on
+	  20160-07-28).
+	* arch/arm/src/stm32:  Add timekeeping support for the STM32 tickless
+	  mode.  From Max Neklyudov (Merged on 20160-07-28).
