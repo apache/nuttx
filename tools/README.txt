@@ -104,6 +104,16 @@ kconfig2html.c
     <Kconfig root> is the directory containing the root Kconfig file.
          Default <Kconfig directory>: .
 
+  NOTE: In order to use this tool, some configuration must be in-place will
+  all necessary symbolic links.  You can establish the configured symbolic
+  links with:
+
+    make context
+
+  or more quickly with:
+
+    make dirlinks
+
 mkconfigvars.sh
 ---------------
 

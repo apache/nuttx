@@ -59,7 +59,6 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <arch/board/board.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/analog/adc.h>
@@ -79,6 +78,12 @@
 #include "chip/lpc43_timer.h"
 
 #include "lpc43_pinconfig.h"
+
+/* board.h should be included last because it depends on the previous
+ * inclusions and may need to modify other definitions.
+ */
+
+#include <arch/board/board.h>
 
 #if defined(CONFIG_LPC43_ADC0) /* TODO ADC1 */
 
