@@ -46,6 +46,13 @@
  * Public Functions
  ****************************************************************************/
 
+#define  A1     0.254829592
+#define  A2   (-0.284496736)
+#define  A3     1.421413741
+#define  A4   (-1.453152027)
+#define  A5     1.061405429
+#define  P      0.3275911
+
 #ifdef CONFIG_HAVE_LONG_DOUBLE
 long double erfl(long double x)
 {
@@ -54,19 +61,11 @@ long double erfl(long double x)
    * erf comes from formula 7.1.26
    */
 
-  char sign;
-  long double t;
-  long double a1, a2, a3, a4, a5, p;
+  long double t, z;
 
-  a1 =  0.254829592;
-  a2 = -0.284496736;
-  a3 =  1.421413741;
-  a4 = -1.453152027;
-  a5 =  1.061405429;
-  p  =  0.3275911;
-
-  sign = (x >= 0 ? 1 : -1);
-  t = 1.0/(1.0 + p*x);
-  return sign * (1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * expf(-x * x));
+  z = fabsl(x);
+  t = 1.0 / (1.0 + P * z);
+  t = 1.0 - (((((A5 * t + A4) * t) + A3) * t + A2) * t + A1) * t * expl(-z * z);
+  return copysignl(t, x);
 }
 #endif
