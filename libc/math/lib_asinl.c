@@ -88,4 +88,4 @@ long double asinl(long double x)
   return y;
 }
 
-endif /* CONFIG_HAVE_LONG_DOUBLE */
+#endif /* CONFIG_HAVE_LONG_DOUBLE */
