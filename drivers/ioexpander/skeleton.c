@@ -664,7 +664,6 @@ static void skel_irqworker(void *arg)
  *
  *   Presumably the lower level interface provides an attach() method that
  *   provides both the address of skel_interrupt() as well as the arg value.
- *   provides both the address of skel_interrupt() as well as the arg value.
  *
  ****************************************************************************/
 
