@@ -128,11 +128,6 @@ static int skel_attach(FAR struct ioexpander_dev_s *dev,
  */
 
 static struct skel_dev_s g_skel;
-
-/* Otherwise, we will need to maintain allocated driver instances in a list */
-
-#else
-static struct skel_dev_s *g_skel_list;
 #endif
 
 /* I/O expander vtable */
@@ -659,21 +654,26 @@ static void skel_irqworker(void *arg)
  *   Handle GPIO interrupt events (this function executes in the
  *   context of the interrupt).
  *
+ *   NOTE: A more typical prototype for an interrupt handler would be:
+ *
+ *     int skel_interrupt(int irq, FAR void *context)
+ *
+ *   However, it is assume that the lower half, board specific interface
+ *   can provide intercept the actual interrupt, and call this function with
+ *   the arg that can be mapped to the provide driver structure instance.
+ *
+ *   Presumably the lower level interface provides an attach() method that
+ *   provides both the address of skel_interrupt() as well as the arg value.
+ *   provides both the address of skel_interrupt() as well as the arg value.
+ *
  ****************************************************************************/
 
 #ifdef CONFIG_skeleton_INT_ENABLE
-static int skel_interrupt(int irq, FAR void *context)
+static void skel_interrupt(FAR void *arg)
 {
-#ifdef CONFIG_skeleton_MULTIPLE
-  /* To support multiple devices,
-   * retrieve the priv structure using the irq number.
-   */
+  FAR struct skel_dev_s *priv = (FAR struct skel_dev_s )arg;
 
-#  warning Missing logic
-
-#else
-  register FAR struct skel_dev_s *priv = &g_skel;
-#endif
+  DEBUGASSERT(priv != NULL);
 
   /* Defer interrupt processing to the worker thread.  This is not only
    * much kinder in the use of system resources but is probably necessary
@@ -711,7 +711,14 @@ static int skel_interrupt(int irq, FAR void *context)
  * Description:
  *   Initialize a I/O Expander device.
  *
- * TODO: Actually support more than one device.
+ * NOTE: There are no arguments to the initialization function this
+ * skelton example.  Typical implementations take two arguments:
+ *
+ * 1) A reference to an I2C or SPI interface used to interace with the
+ *    device, and
+ * 2) A read-only configuration structure that provides things like:  I2C
+ *    or SPI characteristics and callbacks to attache, enable, and disable
+ *    interrupts.
  *
  ****************************************************************************/
 
@@ -727,14 +734,6 @@ FAR struct ioexpander_dev_s *skel_initialize(void)
     {
       return NULL;
     }
-
-  /* And save the device structure in the list of I/O Expander so that we can
-   * find it later.
-   */
-
-  priv->flink = g_skel_list;
-  g_skel_list = priv;
-
 #else
   /* Use the one-and-only I/O Expander driver instance */
 
