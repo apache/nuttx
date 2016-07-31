@@ -41,26 +41,32 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/wqueue.h>
+#include <stdint.h>
 
-#if defined(CONFIG_IOEXPANDER)
-
-#ifndef CONFIG_PCA9555_INT_DISABLE
-#ifndef CONFIG_SCHED_WORKQUEUE
-#  error "Work queue support required.  CONFIG_SCHED_WORKQUEUE must be selected."
-#endif
-#endif
+#ifdef CONFIG_IOEXPANDER
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* Configuration ************************************************************/
+
+#ifndef CONFIG_IOEXPANDER_NPINS
+#  define CONFIG_IOEXPANDER_NPINS 16
+#endif
+
+#if CONFIG_IOEXPANDER_NPINS > 64
+#  error No support for devices with more than 64 pins
+#endif
+
+/* Pin definiotions *********************************************************/
 
 #define IOEXPANDER_DIRECTION_IN  0
 #define IOEXPANDER_DIRECTION_OUT 1
 
 /* Pin options */
 
-#define IOEXPANDER_OPTION_INVERT 1 /* set the "active" level for the line */
+#define IOEXPANDER_OPTION_INVERT 1 /* Set the "active" level for the line */
 
 /* Access macros ************************************************************/
 
@@ -221,16 +227,59 @@
  ****************************************************************************/
 
 #define IOEXP_MULTIREADBUF(dev,pins,vals,count) \
-                          ((dev)->ops->ioe_multireadbuf(dev,pin,vals,count))
+                          ((dev)->ops->ioe_multireadbuf(dev,pins,vals,count))
 
 #endif /* CONFIG_IOEXPANDER_MULTIPIN */
+
+/****************************************************************************
+ * Name: IOEP_ATTACH
+ *
+ * Description:
+ *   Attach a pin interrupt callback function.
+ *
+ * Input Parameters:
+ *   dev      - Device-specific state data
+ *   pinset   - The set of pin events that will generate the callback
+ *   callback - The pointer to callback function.  NULL will detach the
+ *              callback.
+ *
+ * Returned Value:
+ *   0 on success, else a negative error code
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_IOEXPANDER_INT_ENABLE
+#define IOEP_ATTACH(dev,pinset,callback) \
+                   ((dev)->ops->ioe_attach(dev,pins,callback))
+#endif
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
-struct ioexpander_dev_s;
+/* This type represents a bitmap of pins */
 
+#ifdef CONFIG_IOEXPANDER_INT_ENABLE
+#if CONFIG_IOEXPANDER_NPINS <= 8
+typedef uint8_t ioe_pinset_t;
+#elif CONFIG_IOEXPANDER_NPINS <= 16
+typedef uint16_t ioe_pinset_t;
+#elif CONFIG_IOEXPANDER_NPINS <= 32
+typedef uint32_t ioe_pinset_t;
+#else /* if CONFIG_IOEXPANDER_NPINS <= 64 */
+typedef uint64_t ioe_pinset_t;
+#endif
+
+/* This type represents a pin interrupt callback function */
+
+struct ioexpander_dev_s;
+typedef int (*ioe_callback_t)(FAR struct ioexpander_dev_s *dev,
+                              ioe_pinset_t pinset);
+#endif /* CONFIG_IOEXPANDER_INT_ENABLE */
+
+/* I/O expander interface methods */
+
+struct ioexpander_dev_s;
 struct ioexpander_ops_s
 {
   CODE int (*ioe_direction)(FAR struct ioexpander_dev_s *dev, uint8_t pin,
@@ -251,16 +300,21 @@ struct ioexpander_ops_s
   CODE int (*ioe_multireadbuf)(FAR struct ioexpander_dev_s *dev,
                                uint8_t *pins, bool *values, int count);
 #endif
+#ifdef CONFIG_IOEXPANDER_INT_ENABLE
+  CODE int (*ioe_attach)(FAR struct ioexpander_dev_s *dev,
+                         ioe_pinset_t pinset, ioe_callback_t callback);
+#endif
 };
 
 struct ioexpander_dev_s
 {
+  /* "Lower half" operations provided by the I/O expander lower half */
+
   FAR const struct ioexpander_ops_s *ops;
-#ifdef CONFIG_IOEXPANDER_INT_ENABLE
-  struct work_s work;   /* Supports the interrupt handling "bottom half" */
-  int sigpid;           /* PID to be signaled in case of interrupt */
-  int sigval;           /* Signal to be sent in case of interrupt */
-#endif
+
+  /* Internal storage used by the I/O expander may (internal to the I/O
+   * expander implementation).
+   */
 };
 
 #endif /* CONFIG_IOEXPANDER */

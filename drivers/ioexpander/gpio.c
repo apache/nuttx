@@ -303,7 +303,7 @@ int gpio_pin_register(FAR struct gpio_dev_s *dev, int minor)
           DEBUGASSERT(dev->gp_ops->go_read != NULL &&
                      dev->gp_ops->go_write != NULL);
           fmt = "/dev/gpout%u";
-          
+
         }
         break;
 
@@ -321,12 +321,12 @@ int gpio_pin_register(FAR struct gpio_dev_s *dev, int minor)
               return ret;
             }
 
-          fmt = "/dev/gpint%u";  
+          fmt = "/dev/gpint%u";
         }
         break;
 
       default:
-        return -EINVAL;      
+        return -EINVAL;
     }
 
   snprintf(devname, 16, fmt, (unsigned int)minor);

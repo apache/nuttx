@@ -92,6 +92,10 @@ static int pca9555_multireadpin(FAR struct ioexpander_dev_s *dev,
 static int pca9555_multireadbuf(FAR struct ioexpander_dev_s *dev,
              FAR uint8_t *pins, FAR bool *values, int count);
 #endif
+#ifdef CONFIG_IOEXPANDER_INT_ENABLE
+static int pca9555_attach(FAR struct ioexpander_dev_s *dev,
+             ioe_pinset_t pinset, ioe_callback_t callback);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -110,17 +114,22 @@ static struct pca9555_dev_s g_pca9555;
 static struct pca9555_dev_s *g_pca9555list;
 #endif
 
+/* I/O expander vtable */
+
 static const struct ioexpander_ops_s g_pca9555_ops =
 {
   pca9555_direction,
   pca9555_option,
   pca9555_writepin,
   pca9555_readpin,
-  pca9555_readbuf,
+  pca9555_readbuf
 #ifdef CONFIG_IOEXPANDER_MULTIPIN
-  pca9555_multiwritepin,
-  pca9555_multireadpin,
-  pca9555_multireadbuf,
+  , pca9555_multiwritepin
+  , pca9555_multireadpin
+  , pca9555_multireadbuf
+#endif
+#ifdef CONFIG_IOEXPANDER_INT_ENABLE
+  , pca9555_attach
 #endif
 };
 
@@ -614,6 +623,57 @@ static int pca9555_multireadbuf(FAR struct ioexpander_dev_s *dev,
 #ifdef CONFIG_PCA9555_INT_ENABLE
 
 /****************************************************************************
+ * Name: pca9555_attach
+ *
+ * Description:
+ *   Attach a pin interrupt callback function.
+ *
+ * Input Parameters:
+ *   dev      - Device-specific state data
+ *   pinset   - The set of pin events that will generate the callback
+ *   callback - The pointer to callback function.  NULL will detach the
+ *              callback.
+ *
+ * Returned Value:
+ *   0 on success, else a negative error code
+ *
+ ****************************************************************************/
+
+static int pca9555_attach(FAR struct ioexpander_dev_s *dev,
+             ioe_pinset_t pinset, ioe_callback_t callback)
+{
+  FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s *)dev;
+  int ret;
+  int i;
+
+  /* Get exclusive access to the PCA555 */
+
+  pca9555_lock(pca);
+
+  /* Find and available in entry in the callback table */
+
+  ret = -ENOSPC;
+  for (i = 0; i < CONFIG_PCA9555_INT_NCALLBACKS; i++)
+    {
+       /* Is this entry available (i.e., no callback attached) */
+
+       if (pca->cb[i].cbfunc == NULL)
+         {
+           /* Yes.. use this entry */
+
+           pca->cb[i].pinset = pinset;
+           pca->cb[i].cbfunc = callback;
+           ret = OK;
+         }
+    }
+
+  /* Add this callback to the table */
+
+  pca9555_unlock(pca);
+  return ret;
+}
+
+/****************************************************************************
  * Name: pca9555_irqworker
  *
  * Description:
@@ -627,8 +687,9 @@ static void pca9555_irqworker(void *arg)
   FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s *)arg;
   uint8_t addr = PCA9555_REG_INPUT;
   uint8_t buf[2];
-  unsigned int bits;
+  ioe_pinset_t pinset;
   int ret;
+  int i;
 
   /* Read inputs */
 
@@ -638,22 +699,33 @@ static void pca9555_irqworker(void *arg)
 #ifdef CONFIG_IOEXPANDER_SHADOW_MODE
       /* Don't forget to update the shadow registers at this point */
 
-      pca->sreg[addr] = buf;
+      pca->sreg[addr]   = buf[0];
+      pca->sreg[addr+1] = buf[1];
 #endif
-      bits = ((unsigned int)buf[0] << 8) | buf[1];
+      /* Create a 16-bit pinset */
 
-      /* If signal PID is registered, enqueue signal. */
+      pinset = ((unsigned int)buf[0] << 8) | buf[1];
 
-      if (pca->dev.sigpid)
+      /* Perform pin interrupt callbacks */
+
+      for (i = 0; i < CONFIG_PCA9555_INT_NCALLBACKS; i++)
         {
-#ifdef CONFIG_CAN_PASS_STRUCTS
-          union sigval value;
-          value.sival_int = (int)bits;
-          ret = sigqueue(pca->dev.sigpid, pca->dev.sigval, value);
-#else
-          ret = sigqueue(pca->dev.sigpid, pca->dev.sigval,
-                         (FAR void *)bits);
-#endif
+          /* Is this entry valid (i.e., callback attached)?  If so, did
+           * any of the requested pin interrupts occur?
+           */
+
+          if (pca->cb[i].cbfunc != NULL)
+            {
+              /* Did any of the requested pin interrupts occur? */
+
+              ioe_pinset_t match = pinset & pca->cb[i].pinset;
+              if (match != 0)
+                {
+                  /* Yes.. perform the callback */
+
+                  (void)pca->cb[i].cbfunc(&pca->dev, match);
+                }
+            }
         }
     }
 
@@ -697,10 +769,10 @@ static int pca9555_interrupt(int irq, FAR void *context)
    * completed.
    */
 
-  if (work_available(&pca->dev.work))
+  if (work_available(&pca->work))
     {
       pca->config->enable(pca->config, FALSE);
-      work_queue(HPWORK, &pca->dev.work, pca9555_irqworker,
+      work_queue(HPWORK, &pca->work, pca9555_irqworker,
                  (FAR void *)pca, 0);
     }
 

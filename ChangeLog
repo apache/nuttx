@@ -12407,3 +12407,17 @@
 	  20160-07-28).
 	* arch/arm/src/stm32:  Add timekeeping support for the STM32 tickless
 	  mode.  From Max Neklyudov (Merged on 20160-07-28).
+	* I/O Expander: Remove hard-coded PCA9555 fields from ioexpander.h
+	  definitons.  Add support for an attach() method that may be used when
+	  any subset of pin interrupts occur (2016-07-31).
+	* PCA9555 Driver:  Replace the signalling logic with a simple callback
+	  using the new definitons of ioexpander.h.  This repartitioning of
+	  functionality is necessary because (1) the I/O expander driver is the
+	  lower-lower part of any driver that uses GPIOs (include the GPIO
+	  driver itself) and should not be interacting directly with the much
+	  higher level application layer.  And (2) in order to be compatible
+	  with the GPIO driver (and any arbitrary upper half driver), the
+	  PCA9555 should not directly signal, but should call back into the
+	  upper half.  The upper half driver that interacts directly with the
+	  application is the appropriate place to be generating signal
+	  (2016-07-31).

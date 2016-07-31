@@ -1340,6 +1340,8 @@ o Libraries (libc/)
 
                UPDATE: 2015-09-01: A fix for the noted problems with asin()
                has been applied.
+               2016-07-30: Numerous fixes and performance improvements from
+               David Alessio.
 
 Status:        Open
 Priority:      Low for casual users but clearly high if you need care about

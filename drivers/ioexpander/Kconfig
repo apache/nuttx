@@ -37,6 +37,13 @@ config PCA9555_INT_ENABLE
 	---help---
 		Enable driver interrupt functionality
 
+config PCA9555_INT_NCALLBACKS
+	int "Max number of interrupt callbacks"
+	default 4
+	depends on IOEXPANDER_INT_ENABLE
+	---help---
+		This is the maximum number of interrupt callbacks supported
+
 endif # IOEXPANDER_PCA9555
 
 config IOEXPANDER_INT_ENABLE
@@ -44,6 +51,12 @@ config IOEXPANDER_INT_ENABLE
 	default y if PCA9555_INT_ENABLE
 	---help---
 		This is the global INT supported flag for io expanders
+
+config IOEXPANDER_NPINS
+	int "Number of pins"
+	default 16
+	---help---
+		Maximum number of pins supported per driver.
 
 config IOEXPANDER_MULTIPIN
 	bool "Support multi-pin access routines"
