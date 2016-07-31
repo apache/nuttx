@@ -319,7 +319,15 @@ static int pca9555_getbit(FAR struct pca9555_dev_s *pca, uint8_t addr,
  * Name: pca9555_direction
  *
  * Description:
- *  See include/nuttx/ioexpander/ioexpander.h
+ *   Set the direction of an ioexpander pin. Required.
+ *
+ * Input Parameters:
+ *   dev - Device-specific state data
+ *   pin - The index of the pin to alter in this call
+ *   dir - One of the IOEXPANDER_DIRECTION_ macros
+ *
+ * Returned Value:
+ *   0 on success, else a negative error code
  *
  ****************************************************************************/
 
@@ -342,7 +350,18 @@ static int pca9555_direction(FAR struct ioexpander_dev_s *dev, uint8_t pin,
  * Name: pca9555_option
  *
  * Description:
- *  See include/nuttx/ioexpander/ioexpander.h
+ *   Set pin options. Required.
+ *   Since all IO expanders have various pin options, this API allows setting
+ *     pin options in a flexible way.
+ *
+ * Input Parameters:
+ *   dev - Device-specific state data
+ *   pin - The index of the pin to alter in this call
+ *   opt - One of the IOEXPANDER_OPTION_ macros
+ *   val - The option's value
+ *
+ * Returned Value:
+ *   0 on success, else a negative error code
  *
  ****************************************************************************/
 
@@ -350,7 +369,7 @@ static int pca9555_option(FAR struct ioexpander_dev_s *dev, uint8_t pin,
                           int opt, FAR void *val)
 {
   FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s *)dev;
-  int ival = (int)val;
+  int ival = (int)((intptr_t)val);
   int ret = -EINVAL;
 
   if (opt == IOEXPANDER_OPTION_INVERT)
@@ -369,7 +388,16 @@ static int pca9555_option(FAR struct ioexpander_dev_s *dev, uint8_t pin,
  * Name: pca9555_writepin
  *
  * Description:
- *  See include/nuttx/ioexpander/ioexpander.h
+ *   Set the pin level. Required.
+ *
+ * Input Parameters:
+ *   dev - Device-specific state data
+ *   pin - The index of the pin to alter in this call
+ *   val - The pin level. Usually TRUE will set the pin high,
+ *         except if OPTION_INVERT has been set on this pin.
+ *
+ * Returned Value:
+ *   0 on success, else a negative error code
  *
  ****************************************************************************/
 
@@ -391,7 +419,17 @@ static int pca9555_writepin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
  * Name: pca9555_readpin
  *
  * Description:
- *  See include/nuttx/ioexpander/ioexpander.h
+ *   Read the actual PIN level. This can be different from the last value written
+ *      to this pin. Required.
+ *
+ * Input Parameters:
+ *   dev    - Device-specific state data
+ *   pin    - The index of the pin
+ *   valptr - Pointer to a buffer where the pin level is stored. Usually TRUE
+ *            if the pin is high, except if OPTION_INVERT has been set on this pin.
+ *
+ * Returned Value:
+ *   0 on success, else a negative error code
  *
  ****************************************************************************/
 
@@ -413,7 +451,16 @@ static int pca9555_readpin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
  * Name: pca9555_readbuf
  *
  * Description:
- *  See include/nuttx/ioexpander/ioexpander.h
+ *   Read the buffered pin level.
+ *   This can be different from the actual pin state. Required.
+ *
+ * Input Parameters:
+ *   dev    - Device-specific state data
+ *   pin    - The index of the pin
+ *   valptr - Pointer to a buffer where the level is stored.
+ *
+ * Returned Value:
+ *   0 on success, else a negative error code
  *
  ****************************************************************************/
 
@@ -490,7 +537,16 @@ static int pca9555_getmultibits(FAR struct pca9555_dev_s *pca, uint8_t addr,
  * Name: pca9555_multiwritepin
  *
  * Description:
- *  See include/nuttx/ioexpander/ioexpander.h
+ *   Set the pin level for multiple pins. This routine may be faster than
+ *   individual pin accesses. Optional.
+ *
+ * Input Parameters:
+ *   dev - Device-specific state data
+ *   pins - The list of pin indexes to alter in this call
+ *   val - The list of pin levels.
+ *
+ * Returned Value:
+ *   0 on success, else a negative error code
  *
  ****************************************************************************/
 
@@ -574,7 +630,16 @@ static int pca9555_multiwritepin(FAR struct ioexpander_dev_s *dev,
  * Name: pca9555_multireadpin
  *
  * Description:
- *  See include/nuttx/ioexpander/ioexpander.h
+ *   Read the actual level for multiple pins. This routine may be faster than
+ *   individual pin accesses. Optional.
+ *
+ * Input Parameters:
+ *   dev    - Device-specific state data
+ *   pin    - The list of pin indexes to read
+ *   valptr - Pointer to a buffer where the pin levels are stored.
+ *
+ * Returned Value:
+ *   0 on success, else a negative error code
  *
  ****************************************************************************/
 
@@ -598,7 +663,16 @@ static int pca9555_multireadpin(FAR struct ioexpander_dev_s *dev,
  * Name: pca9555_multireadbuf
  *
  * Description:
- *  See include/nuttx/ioexpander/ioexpander.h
+ *   Read the buffered level of multiple pins. This routine may be faster than
+ *   individual pin accesses. Optional.
+ *
+ * Input Parameters:
+ *   dev    - Device-specific state data
+ *   pin    - The index of the pin
+ *   valptr - Pointer to a buffer where the buffered levels are stored.
+ *
+ * Returned Value:
+ *   0 on success, else a negative error code
  *
  ****************************************************************************/
 
