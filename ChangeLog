@@ -12421,3 +12421,5 @@
 	  upper half.  The upper half driver that interacts directly with the
 	  application is the appropriate place to be generating signal
 	  (2016-07-31).
+	* drivers/ioexpander/skeleton.c: Add a skeleton I/O Expander driver
+	  (based on the PCA9555 driver) (2016-07-31).
