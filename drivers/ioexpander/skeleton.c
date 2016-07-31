@@ -179,80 +179,6 @@ static void skel_lock(FAR struct skel_dev_s *priv)
 #define skel_unlock(p) sem_post(&(p)->exclsem)
 
 /****************************************************************************
- * Name: skel_setbit
- *
- * Description:
- *  Write a bit in a register pair
- *
- ****************************************************************************/
-
-static int skel_setbit(FAR struct skel_dev_s *priv, uint8_t pin, int bitval)
-{
-  ioe_pinset_t pinset;
-  int ret;
-
-  if (pin >= CONFIG_IOEXPANDER_NPINS)
-    {
-      return -ENXIO;
-    }
-
-  /* Read the pinset from the IO-Expander hardware */
-#warning Missing logic
-
-  /* Set or clear the pin value */
-
-  if (bitval)
-    {
-      pinset |= (1 << pin);
-    }
-  else
-    {
-      pinset &= ~(1 << pin);
-    }
-
-  /* Write the modified value back to the I/O expander */
-#warning Missing logic
-
-#ifdef CONFIG_IOEXPANDER_RETRY
-  if (ret < 0)
-    {
-      /* Try again (only once) */
-#warning Missing logic
-    }
-#endif
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: skel_getbit
- *
- * Description:
- *  Get a bit from a register pair
- *
- ****************************************************************************/
-
-static int skel_getbit(FAR struct skel_dev_s *priv, uint8_t addr,
-                       uint8_t pin, FAR bool *val)
-{
-  ioe_pinset_t pinset;
-  int ret;
-
-  if (pin >= CONFIG_IOEXPANDER_NPINS)
-    {
-      return -ENXIO;
-    }
-
-  /* Read the pinset from the IO-Expander hardware */
-#warning Missing logic
-
-  /* Return true is the corresponding pin is set */
-
-  *val = ((pinset & (1 << pin)) != 0);
-  return OK;
-}
-
-/****************************************************************************
  * Name: skel_direction
  *
  * Description:
@@ -265,6 +191,13 @@ static int skel_direction(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 {
   FAR struct skel_dev_s *priv = (FAR struct skel_dev_s *)dev;
   int ret;
+
+  gpioinfo("pin=%u direction=%s\n",
+           pin, (direction == IOEXPANDER_DIRECTION_IN) ? "IN" : "OUT");
+
+  DEBUGASSERT(priv != NULL && pin < CONFIG_IOEXPANDER_NPINS &&
+              (direction == IOEXPANDER_DIRECTION_IN ||
+               direction == IOEXPANDER_DIRECTION_IN));
 
   /* Get exclusive access to the I/O Expander */
 
@@ -321,6 +254,10 @@ static int skel_writepin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
   FAR struct skel_dev_s *priv = (FAR struct skel_dev_s *)dev;
   int ret;
 
+  gpioinfo("pin=%u value=%u\n", pin, value);
+
+  DEBUGASSERT(priv != NULL && pin < CONFIG_IOEXPANDER_NPINS);
+
   /* Get exclusive access to the I/O Expander */
 
   skel_lock(priv);
@@ -345,6 +282,10 @@ static int skel_readpin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 {
   FAR struct skel_dev_s *priv = (FAR struct skel_dev_s *)dev;
   int ret;
+
+  gpioinfo("pin=%u\n", priv->addr);
+
+  DEBUGASSERT(priv != NULL && pin < CONFIG_IOEXPANDER_NPINS && value != NULL);
 
   /* Get exclusive access to the I/O Expander */
 

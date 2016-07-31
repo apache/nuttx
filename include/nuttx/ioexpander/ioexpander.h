@@ -59,7 +59,7 @@
 #  error No support for devices with more than 64 pins
 #endif
 
-/* Pin definiotions *********************************************************/
+/* Pin definitions **********************************************************/
 
 #define IOEXPANDER_DIRECTION_IN  0
 #define IOEXPANDER_DIRECTION_OUT 1
@@ -259,7 +259,6 @@
 
 /* This type represents a bitmap of pins */
 
-#ifdef CONFIG_IOEXPANDER_INT_ENABLE
 #if CONFIG_IOEXPANDER_NPINS <= 8
 typedef uint8_t ioe_pinset_t;
 #elif CONFIG_IOEXPANDER_NPINS <= 16
@@ -268,8 +267,8 @@ typedef uint16_t ioe_pinset_t;
 typedef uint32_t ioe_pinset_t;
 #else /* if CONFIG_IOEXPANDER_NPINS <= 64 */
 typedef uint64_t ioe_pinset_t;
-#endif
 
+#ifdef CONFIG_IOEXPANDER_INT_ENABLE
 /* This type represents a pin interrupt callback function */
 
 struct ioexpander_dev_s;
