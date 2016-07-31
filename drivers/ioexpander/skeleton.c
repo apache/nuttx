@@ -95,6 +95,8 @@ struct skel_dev_s
  * Private Function Prototypes
  ****************************************************************************/
 
+static void skel_lock(FAR struct skel_dev_s *priv);
+
 static int skel_direction(FAR struct ioexpander_dev_s *dev, uint8_t pin,
              int dir);
 static int skel_option(FAR struct ioexpander_dev_s *dev, uint8_t pin,
@@ -117,6 +119,9 @@ static int skel_multireadbuf(FAR struct ioexpander_dev_s *dev,
 static int skel_attach(FAR struct ioexpander_dev_s *dev,
              ioe_pinset_t pinset, ioe_callback_t callback);
 #endif
+
+static void skel_irqworker(void *arg);
+static void skel_interrupt(FAR void *arg);
 
 /****************************************************************************
  * Private Data
@@ -677,9 +682,8 @@ static void skel_interrupt(FAR void *arg)
   /* Defer interrupt processing to the worker thread.  This is not only
    * much kinder in the use of system resources but is probably necessary
    * to access the I/O expander device.
-   */
-
-  /* Notice that further GPIO interrupts are disabled until the work is
+   *
+   * Notice that further GPIO interrupts are disabled until the work is
    * actually performed.  This is to prevent overrun of the worker thread.
    * Interrupts are re-enabled in skel_irqworker() when the work is
    * completed.
@@ -740,6 +744,9 @@ FAR struct ioexpander_dev_s *skel_initialize(void)
 #endif
 
   /* Initialize the device state structure */
+  /* NOTE: Normally you would also save the I2C/SPI device interface and
+   * any configuration information here as well.
+   */
 
   priv->dev.ops = &g_skel_ops;
 
