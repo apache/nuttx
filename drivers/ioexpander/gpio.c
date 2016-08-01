@@ -268,6 +268,33 @@ static int gpio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           }
         break;
 
+      /* Command:     GPIOC_UNREGISTER
+       * Description: Stop receiving signals for pin interrupts.
+       * Argument:    None.
+       */
+
+      case GPIOC_UNREGISTER:
+        if (dev->gp_pintype == GPIO_INTERRUPT_PIN)
+          {
+            /* Make sure that the pin interrupt is disabled */
+
+            ret = dev->gp_ops->go_enable(dev, false);
+            if (ret >= 0)
+              {
+                /* Detach the handler */
+
+                ret = dev->gp_ops->go_attach(dev, NULL);
+
+                dev->gp_pid   = 0;
+                dev->gp_signo = 0;
+              }
+          }
+        else
+          {
+            ret = -EACCES;
+          }
+        break;
+
       /* Unrecognized command */
 
       default:

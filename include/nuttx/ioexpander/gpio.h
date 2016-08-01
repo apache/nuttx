@@ -70,12 +70,17 @@
  *              depends upon interrupt GPIO support from the platform.
  * Argument:    The number of signal to be generated when the interrupt
  *              occurs.
+ *
+ * Command:     GPIOC_UNREGISTER
+ * Description: Stop receiving signals for pin interrupts.
+ * Argument:    None.
  */
 
-#define GPIOC_WRITE    _GPIOC(1)
-#define GPIOC_READ     _GPIOC(2)
-#define GPIOC_PINTYPE  _GPIOC(3)
-#define GPIOC_REGISTER _GPIOC(4)
+#define GPIOC_WRITE      _GPIOC(1)
+#define GPIOC_READ       _GPIOC(2)
+#define GPIOC_PINTYPE    _GPIOC(3)
+#define GPIOC_REGISTER   _GPIOC(4)
+#define GPIOC_UNREGISTER _GPIOC(5)
 
 /****************************************************************************
  * Public Types
