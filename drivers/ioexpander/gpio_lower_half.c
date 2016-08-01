@@ -309,6 +309,8 @@ static int gplh_enable(FAR struct gpio_dev_s *gpio, bool enable)
  *
  * Description:
  *   Create a GPIO pin device driver instance for an I/O expander pin.
+ *   The I/O expander pin must have already been configured by the caller
+ *   for the particular pintype.
  *
  * Input Parameters:
  *   ioe     - An instance of the I/O expander interface
