@@ -64,4 +64,8 @@ ifeq ($(CONFIG_SIM_TOUCHSCREEN),y)
 endif
 endif
 
+ifeq ($(CONFIG_EXAMPLES_GPIO),y)
+  CSRCS += sim_gpio.c
+endif
+
 include $(TOPDIR)/configs/Board.mk

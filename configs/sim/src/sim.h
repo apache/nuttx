@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/sim/src/sim.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -109,6 +109,18 @@ int sim_bringup(void);
 
 #ifdef CONFIG_LIB_ZONEINFO_ROMFS
 int sim_zoneinfo(int minor);
+#endif
+
+/****************************************************************************
+ * Name: sim_gpio_initialize
+ *
+ * Description:
+ *   Initialize GPIO drivers for use with /apps/examples/gpio
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_EXAMPLES_GPIO
+int sim_gpio_initialize(void);
 #endif
 
 #endif /* __CONFIGS_SIM_SRC_SIM_H */

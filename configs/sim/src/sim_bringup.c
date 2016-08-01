@@ -77,6 +77,12 @@ int sim_bringup(void)
   (void)sim_zoneinfo(3);
 #endif
 
+#ifdef CONFIG_EXAMPLES_GPIO
+  /* Initialize simulated GPIO drivers */
+
+  (void)sim_gpio_initialize();
+#endif
+
 #ifdef CONFIG_AJOYSTICK
   /* Initialize the simulated analog joystick input device */
 
