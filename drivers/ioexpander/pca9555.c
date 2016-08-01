@@ -371,19 +371,14 @@ static int pca9555_option(FAR struct ioexpander_dev_s *dev, uint8_t pin,
   FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s *)dev;
   int ret = -EINVAL;
 
-  if ((opt & IOEXPANDER_OPTION_INVVAL) != 0)
+  if (opt == IOEXPANDER_OPTION_INVERT)
     {
-      unsigned int ival = (unsigned int)((uintptr_t)val);
-      int setting;
-
-      /* Set or clear the bit */
-
-      setting = ((ival & IOEXPANDER_OPTION_INVMASK) == IOEXPANDER_OPTION_INVERT);
+      int ival = (int)((intptr_t)val);
 
       /* Get exclusive access to the PCA555 */
 
       pca9555_lock(pca);
-      ret = pca9555_setbit(pca, PCA9555_REG_POLINV, pin, setting);
+      ret = pca9555_setbit(pca, PCA9555_REG_POLINV, pin, ival);
       pca9555_unlock(pca);
     }
 

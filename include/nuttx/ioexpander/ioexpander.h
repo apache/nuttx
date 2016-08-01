@@ -66,18 +66,17 @@
 
 /* Pin options */
 
-#define IOEXPANDER_OPTION_INVMASK   (3  << 0) /* Bits 0-1: Normal vs Inverted */
-#  define IOEXPANDER_OPTION_INVVAL  (1  << 0) /*   x1: Inversion valid */
-#  define IOEXPANDER_OPTION_INVNONE (1  << 0) /*   01: No inversion */
-#  define IOEXPANDER_OPTION_INVERT  (3  << 0) /*   11: Inverted */
-#define IOEXPANDER_OPTION_INTMASK   (15 << 2) /* Bits 2-5: Interrupt settings */
-#  define IOEXPANDER_OPTION_INTVAL  (1  << 2) /*   xxx1 Interrupt valid */
-#  define IOEXPANDER_OPTION_LEVEL   (2  << 2) /*   xx1x Interrupt on level (vs. edge) */
-#  define IOEXPANDER_OPTION_HIGH    (3  << 2) /*   0011 Interrupt on high level */
-#  define IOEXPANDER_OPTION_LOW     (7  << 2) /*   0111 Interrupt on low level */
-#  define IOEXPANDER_OPTION_RISING  (5  << 2) /*   0101 Interrupt rising edge */
-#  define IOEXPANDER_OPTION_FALLING (9  << 2) /*   1001 Interrupt falling edge */
-#  define IOEXPANDER_OPTION_BOTH    (13 << 2) /*   1101 Interrupt both edges */
+#define IOEXPANDER_OPTION_INVERT 1        /* Set the "active" level for a pin */
+#  define IOEXPANDER_VAL_NORMAL  0        /* Normal, no inversion */
+#  define IOEXPANDER_VAL_INVERT  1        /* Inverted */
+
+#define IOEXPANDER_OPTION_INTCFG 2        /* Configure interrupt for a pin */
+#  define IOEXPANDER_VAL_LEVEL   (1 << 0) /* xx1 Interrupt on level (vs. edge) */
+#  define IOEXPANDER_VAL_HIGH    (1 << 2) /* 001 Interrupt on high level */
+#  define IOEXPANDER_VAL_LOW     (3 << 2) /* 011 Interrupt on low level */
+#  define IOEXPANDER_VAL_RISING  (2 << 2) /* 010 Interrupt on rising edge */
+#  define IOEXPANDER_VAL_FALLING (4 << 2) /* 100 Interrupt on falling edge */
+#  define IOEXPANDER_VAL_BOTH    (6 << 2) /* 110 Interrupt on both edges */
 
 /* Access macros ************************************************************/
 
