@@ -40,15 +40,60 @@ config PCA9555_INT_ENABLE
 config PCA9555_INT_NCALLBACKS
 	int "Max number of interrupt callbacks"
 	default 4
-	depends on IOEXPANDER_INT_ENABLE
+	depends on PCA9555_INT_ENABLE
 	---help---
 		This is the maximum number of interrupt callbacks supported
 
 endif # IOEXPANDER_PCA9555
 
+config IOEXPANDER_TCA64XX
+	bool "TCA64XX I2C IO expander"
+	default n
+	select I2C
+	depends on EXPERIMENTAL
+	---help---
+		Enable support for the NXP TCA64XX IO Expander
+
+if IOEXPANDER_TCA64XX
+
+config TCA64XX_MULTIPLE
+	bool "Multiple TCA64XX Devices"
+	default n
+	---help---
+		Can be defined to support multiple TCA64XX devices on board.
+
+config TCA64XX_INT_ENABLE
+	bool "Enable TCA64XX Interrupt Support"
+	default n
+	select IOEXPANDER_INT_ENABLE
+	---help---
+		Enable driver interrupt functionality
+
+config TCA64XX_INT_NCALLBACKS
+	int "Max number of interrupt callbacks"
+	default 4
+	depends on TCA64XX_INT_ENABLE
+	---help---
+		This is the maximum number of interrupt callbacks supported
+
+config TCA64XX_INT_POLL
+	bool "Enable interrupt poll"
+	default n
+	---help---
+		Enable polling for missed interrupts.
+
+config TCA64XX_INT_POLLDELAY
+	int "Interrupt poll delay (used)"
+	default 500000
+	depends on TCA64XX_INT_POLL
+	---help---
+		This microsecond delay defines the polling rate for missed interrupts.
+
+endif # IOEXPANDER_TCA64XX
+
 config IOEXPANDER_INT_ENABLE
 	bool
-	default y if PCA9555_INT_ENABLE
+	default n
 	---help---
 		This is the global INT supported flag for io expanders
 
