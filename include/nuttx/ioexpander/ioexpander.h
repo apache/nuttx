@@ -66,7 +66,18 @@
 
 /* Pin options */
 
-#define IOEXPANDER_OPTION_INVERT 1 /* Set the "active" level for the line */
+#define IOEXPANDER_OPTION_INVMASK   (3  << 0) /* Bits 0-1: Normal vs Inverted */
+#  define IOEXPANDER_OPTION_INVVAL  (1  << 0) /*   x1: Inversion valid */
+#  define IOEXPANDER_OPTION_INVNONE (1  << 0) /*   01: No inversion */
+#  define IOEXPANDER_OPTION_INVERT  (3  << 0) /*   11: Inverted */
+#define IOEXPANDER_OPTION_INTMASK   (15 << 2) /* Bits 2-5: Interrupt settings */
+#  define IOEXPANDER_OPTION_INTVAL  (1  << 2) /*   xxx1 Interrupt valid */
+#  define IOEXPANDER_OPTION_LEVEL   (2  << 2) /*   xx1x Interrupt on level (vs. edge) */
+#  define IOEXPANDER_OPTION_HIGH    (3  << 2) /*   0011 Interrupt on high level */
+#  define IOEXPANDER_OPTION_LOW     (7  << 2) /*   0111 Interrupt on low level */
+#  define IOEXPANDER_OPTION_RISING  (5  << 2) /*   0101 Interrupt rising edge */
+#  define IOEXPANDER_OPTION_FALLING (9  << 2) /*   1001 Interrupt falling edge */
+#  define IOEXPANDER_OPTION_BOTH    (13 << 2) /*   1101 Interrupt both edges */
 
 /* Access macros ************************************************************/
 
@@ -267,6 +278,7 @@ typedef uint16_t ioe_pinset_t;
 typedef uint32_t ioe_pinset_t;
 #else /* if CONFIG_IOEXPANDER_NPINS <= 64 */
 typedef uint64_t ioe_pinset_t;
+#endif
 
 #ifdef CONFIG_IOEXPANDER_INT_ENABLE
 /* This type represents a pin interrupt callback function */

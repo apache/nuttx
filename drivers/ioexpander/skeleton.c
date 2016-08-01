@@ -735,6 +735,7 @@ FAR struct ioexpander_dev_s *skel_initialize(void)
   priv = (FAR struct skel_dev_s *)kmm_zalloc(sizeof(struct skel_dev_s));
   if (!priv)
     {
+      gpioerr("ERROR: Failed to allocate driver instance\n");
       return NULL;
     }
 #else
