@@ -139,4 +139,12 @@ config DEV_GPIO
 		Enables a simple GPIO input/output driver to support application-
 		space testing of hardware.
 
+config GPIO_LOWER_HALF
+	bool "GPIO Lower Half"
+	default n
+	depends on DEV_GPIO && IOEXPANDER
+	---help---
+		Enable support for a lower half driver that provides GPIO driver
+		support for I/O expander pins.
+
 endmenu # IO Expander/GPIO Support

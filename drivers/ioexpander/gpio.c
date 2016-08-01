@@ -187,7 +187,7 @@ static int gpio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         if (dev->gp_pintype == GPIO_OUTPUT_PIN)
           {
             DEBUGASSERT(arg == 0ul || arg == 1ul);
-            ret = dev->gp_ops->go_write(dev, (int)arg);
+            ret = dev->gp_ops->go_write(dev, (bool)arg);
           }
         else
           {
@@ -197,13 +197,13 @@ static int gpio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       /* Command:     GPIOC_READ
        * Description: Read the value of an input or output GPIO
-       * Argument:    A pointer to an integer value to receive the result:
-       *              0=low value; 1=high value.
+       * Argument:    A pointer to an bool value to receive the result:
+       *              false=low value; true=high value.
        */
 
       case GPIOC_READ:
         {
-          FAR int *ptr = (FAR int *)((uintptr_t)arg);
+          FAR bool *ptr = (FAR bool *)((uintptr_t)arg);
           DEBUGASSERT(ptr != NULL);
 
           ret = dev->gp_ops->go_read(dev, ptr);

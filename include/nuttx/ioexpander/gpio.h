@@ -41,6 +41,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <stdint.h>
+#include <stdbool.h>
+
 #include <nuttx/fs/ioctl.h>
 
 /****************************************************************************
@@ -49,12 +53,12 @@
 
 /* Command:     GPIOC_WRITE
  * Description: Set the value of an output GPIO
- * Argument:    0=output a low value; 1=outut a high value
+ * Argument:    T0=output a low value; 1=outut a high value
  *
  * Command:     GPIOC_READ
  * Description: Read the value of an input or output GPIO
- * Argument:    A pointer to an integer value to receive the result:
- *              0=low value; 1=high value.
+ * Argument:    A pointer to an bool value to receive the result:
+ *              false=low value; true=high value.
  *
  * Command:     GPIOC_REGISTER
  * Description: Register to receive a signal whenever there an interrupt
@@ -78,11 +82,13 @@ enum gpio_pintype_e
 {
   GPIO_INPUT_PIN = 0,
   GPIO_OUTPUT_PIN,
-  GPIO_INTERRUPT_PIN
+  GPIO_INTERRUPT_PIN,
+  GPIO_NPINTYPES
 };
 
 /* Interrupt callback */
 
+struct gpio_dev_s;
 typedef CODE int (*pin_interrupt_t)(FAR struct gpio_dev_s *dev);
 
 /* Pin interface vtable definition.  Instances of this vtable are read-only
@@ -100,8 +106,8 @@ struct gpio_operations_s
 {
   /* Interface methods */
 
-  CODE int (*go_read)(FAR struct gpio_dev_s *dev, FAR int *value);
-  CODE int (*go_write)(FAR struct gpio_dev_s *dev, int value);
+  CODE int (*go_read)(FAR struct gpio_dev_s *dev, FAR bool *value);
+  CODE int (*go_write)(FAR struct gpio_dev_s *dev, bool value);
   CODE int (*go_attach)(FAR struct gpio_dev_s *dev,
                         pin_interrupt_t callback);
   CODE int (*go_enable)(FAR struct gpio_dev_s *dev, bool enable);
@@ -159,6 +165,29 @@ extern "C"
  ****************************************************************************/
 
 int gpio_pin_register(FAR struct gpio_dev_s *dev, int minor);
+
+/****************************************************************************
+ * Name: gpio_lower_half
+ *
+ * Description:
+ *   Create a GPIO pin device driver instance for an I/O expander pin.
+ *
+ * Input Parameters:
+ *   ioe     - An instance of the I/O expander interface
+ *   pin     - The I/O expander pin number for the driver
+ *   pintype - See enum gpio_pintype_e
+ *   minor   - The minor device number to use when registering the device
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_GPIO_LOWER_HALF
+struct ioexpander_dev_s;
+int gpio_lower_half(FAR struct ioexpander_dev_s *ioe, unsigned int pin,
+                    enum gpio_pintype_e pintype, int minor);
+#endif
 
 #ifdef __cplusplus
 }
