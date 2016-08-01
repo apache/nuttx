@@ -427,7 +427,7 @@ static int tca64_direction(FAR struct ioexpander_dev_s *dev, uint8_t pin,
   DEBUGASSERT(priv != NULL && priv->config != NULL &&
               pin < CONFIG_IOEXPANDER_NPINS &&
               (direction == IOEXPANDER_DIRECTION_IN ||
-               direction == IOEXPANDER_DIRECTION_IN));
+               direction == IOEXPANDER_DIRECTION_OUT));
 
   gpioinfo("I2C addr=%02x pin=%u direction=%s\n",
            priv->config->address, pin,
@@ -702,7 +702,7 @@ errout_with_lock:
  *
  * Description:
  *   Read the actual PIN level. This can be different from the last value written
- *      to this pin. Required.
+ *   to this pin. Required.
  *
  * Input Parameters:
  *   dev    - Device-specific state data
@@ -1029,8 +1029,9 @@ static void tca64_int_update(void *handle, ioe_pinset_t input,
                              ioe_pinset_t mask)
 {
   struct tca64_dev_s *priv = handle;
-  uint32_t diff, ngios = tca64_ngpios(priv);
+  ioe_pinset_t diff;
   irqstate_t flags;
+  int ngios = tca64_ngpios(priv);
   int pin;
 
   flags = enter_critical_section();

@@ -48,6 +48,10 @@ ifeq ($(CONFIG_IOEXPANDER_TCA64XX),y)
   CSRCS += tca64xx.c
 endif
 
+ifeq ($(CONFIG_IOEXPANDER_PCF8574),y)
+  CSRCS += pcf8574.c
+endif
+
 endif # CONFIG_IOEXPANDER
 
 # GPIO test device driver (independent of IOEXPANDERS)

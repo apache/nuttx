@@ -144,7 +144,7 @@ struct pca9555_dev_s
 {
   struct ioexpander_dev_s      dev;     /* Nested structure to allow casting as public gpio
                                          * expander. */
-#ifdef CONFIG_IOEXPANDER_SHADOW_MODE
+#ifdef CONFIG_PCA9555_SHADOW_MODE
   uint8_t sreg[8];                      /* Shadowed registers of the PCA9555 */
 #endif
 #ifdef CONFIG_PCA9555_MULTIPLE

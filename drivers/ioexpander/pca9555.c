@@ -235,7 +235,7 @@ static int pca9555_setbit(FAR struct pca9555_dev_s *pca, uint8_t addr,
 
   buf[0] = addr;
 
-#ifdef CONFIG_IOEXPANDER_SHADOW_MODE
+#ifdef CONFIG_PCA9555_SHADOW_MODE
   /* Get the shadowed register value */
 
   buf[1] = pca->sreg[addr];
@@ -259,14 +259,14 @@ static int pca9555_setbit(FAR struct pca9555_dev_s *pca, uint8_t addr,
       buf[1] &= ~(1 << pin);
     }
 
-#ifdef CONFIG_IOEXPANDER_SHADOW_MODE
+#ifdef CONFIG_PCA9555_SHADOW_MODE
   /* Save the new register value in the shadow register */
 
   pca->sreg[addr] = buf[1];
 #endif
 
   ret = pca9555_write(pca, buf, 2);
-#ifdef CONFIG_IOEXPANDER_RETRY
+#ifdef CONFIG_PCA9555_RETRY
   if (ret != OK)
     {
       /* Try again (only once) */
@@ -308,7 +308,7 @@ static int pca9555_getbit(FAR struct pca9555_dev_s *pca, uint8_t addr,
       return ret;
     }
 
-#ifdef CONFIG_IOEXPANDER_SHADOW_MODE
+#ifdef CONFIG_PCA9555_SHADOW_MODE
   /* Save the new register value in the shadow register */
 
   pca->sreg[addr] = buf;
@@ -508,7 +508,7 @@ static int pca9555_getmultibits(FAR struct pca9555_dev_s *pca, uint8_t addr,
       return ret;
     }
 
-#ifdef CONFIG_IOEXPANDER_SHADOW_MODE
+#ifdef CONFIG_PCA9555_SHADOW_MODE
   /* Save the new register value in the shadow register */
 
   pca->sreg[addr]   = buf[0];
@@ -575,7 +575,7 @@ static int pca9555_multiwritepin(FAR struct ioexpander_dev_s *dev,
    * this would not save much.
    */
 
-#ifndef CONFIG_IOEXPANDER_SHADOW_MODE
+#ifndef CONFIG_PCA9555_SHADOW_MODE
   ret = pca9555_writeread(pca, &addr, 1, &buf[1], 2);
   if (ret < 0)
     {
@@ -619,7 +619,7 @@ static int pca9555_multiwritepin(FAR struct ioexpander_dev_s *dev,
   /* Now write back the new pins states */
 
   buf[0] = addr;
-#ifdef CONFIG_IOEXPANDER_SHADOW_MODE
+#ifdef CONFIG_PCA9555_SHADOW_MODE
   /* Save the new register values in the shadow register */
   pca->sreg[addr] = buf[1];
   pca->sreg[addr+1] = buf[2];
@@ -809,7 +809,7 @@ static void pca9555_irqworker(void *arg)
   ret = pca9555_writeread(pca, &addr, 1, buf, 2);
   if (ret == OK)
     {
-#ifdef CONFIG_IOEXPANDER_SHADOW_MODE
+#ifdef CONFIG_PCA9555_SHADOW_MODE
       /* Don't forget to update the shadow registers at this point */
 
       pca->sreg[addr]   = buf[0];
