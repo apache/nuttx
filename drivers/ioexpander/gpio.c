@@ -211,6 +211,21 @@ static int gpio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
+      /* Command:     GPIOC_PINTYPE
+       * Description: Return the GPIO pin type.
+       * Argument:    A pointer to an instance of type enum gpio_pintype_e
+       */
+
+      case GPIOC_PINTYPE:
+        {
+          FAR enum gpio_pintype_e *ptr = (FAR enum gpio_pintype_e *)((uintptr_t)arg);
+          DEBUGASSERT(ptr != NULL);
+
+          *ptr = dev->gp_pintype;
+          ret = OK;
+        }
+        break;
+
       /* Command:     GPIOC_REGISTER
        * Description: Register to receive a signal whenever there an
        *              interrupt is received on an input gpio pin.  This

@@ -60,6 +60,10 @@
  * Argument:    A pointer to an bool value to receive the result:
  *              false=low value; true=high value.
  *
+ * Command:     GPIOC_PINTYPE
+ * Description: Return the GPIO pin type.
+ * Argument:    A pointer to an instance of type enum gpio_pintype_e
+ *
  * Command:     GPIOC_REGISTER
  * Description: Register to receive a signal whenever there an interrupt
  *              is received on an input gpio pin.  This feature, of course,
@@ -70,7 +74,8 @@
 
 #define GPIOC_WRITE    _GPIOC(1)
 #define GPIOC_READ     _GPIOC(2)
-#define GPIOC_REGISTER _GPIOC(3)
+#define GPIOC_PINTYPE  _GPIOC(3)
+#define GPIOC_REGISTER _GPIOC(4)
 
 /****************************************************************************
  * Public Types
