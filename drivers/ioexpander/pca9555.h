@@ -134,6 +134,7 @@ struct pca9555_callback_s
    ioe_pinset_t pinset;                 /* Set of pin interrupts that will generate
                                          * the callback. */
    ioe_callback_t cbfunc;               /* The saved callback function pointer */
+   FAR void *cbarg;                       /* Callback argument */
 };
 #endif
 

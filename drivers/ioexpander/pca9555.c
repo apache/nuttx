@@ -93,8 +93,10 @@ static int pca9555_multireadbuf(FAR struct ioexpander_dev_s *dev,
              FAR uint8_t *pins, FAR bool *values, int count);
 #endif
 #ifdef CONFIG_IOEXPANDER_INT_ENABLE
-static int pca9555_attach(FAR struct ioexpander_dev_s *dev,
-             ioe_pinset_t pinset, ioe_callback_t callback);
+static FAR void *pca9555_attach(FAR struct ioexpander_dev_s *dev,
+             ioe_pinset_t pinset, ioe_callback_t callback, FAR void *arg);
+static int pca9555_detach(FAR struct ioexpander_dev_s *dev,
+             FAR void *handle);
 #endif
 
 /****************************************************************************
@@ -130,6 +132,7 @@ static const struct ioexpander_ops_s g_pca9555_ops =
 #endif
 #ifdef CONFIG_IOEXPANDER_INT_ENABLE
   , pca9555_attach
+  , pca9555_detach
 #endif
 };
 
@@ -701,24 +704,27 @@ static int pca9555_multireadbuf(FAR struct ioexpander_dev_s *dev,
  * Name: pca9555_attach
  *
  * Description:
- *   Attach a pin interrupt callback function.
+ *   Attach and enable a pin interrupt callback function.
  *
  * Input Parameters:
  *   dev      - Device-specific state data
  *   pinset   - The set of pin events that will generate the callback
  *   callback - The pointer to callback function.  NULL will detach the
  *              callback.
+ *   arg      - User-provided callback argument
  *
  * Returned Value:
- *   0 on success, else a negative error code
+ *   A non-NULL handle value is returned on success.  This handle may be
+ *   used later to detach and disable the pin interrupt.
  *
  ****************************************************************************/
 
-static int pca9555_attach(FAR struct ioexpander_dev_s *dev,
-             ioe_pinset_t pinset, ioe_callback_t callback)
+static FAR void *pca9555_attach(FAR struct ioexpander_dev_s *dev,
+                                ioe_pinset_t pinset, ioe_callback_t callback,
+                                FAR void *arg)
 {
   FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s *)dev;
-  int ret;
+  FAR void *handle = NULL;
   int i;
 
   /* Get exclusive access to the PCA555 */
@@ -727,7 +733,6 @@ static int pca9555_attach(FAR struct ioexpander_dev_s *dev,
 
   /* Find and available in entry in the callback table */
 
-  ret = -ENOSPC;
   for (i = 0; i < CONFIG_PCA9555_INT_NCALLBACKS; i++)
     {
        /* Is this entry available (i.e., no callback attached) */
@@ -738,14 +743,47 @@ static int pca9555_attach(FAR struct ioexpander_dev_s *dev,
 
            pca->cb[i].pinset = pinset;
            pca->cb[i].cbfunc = callback;
-           ret = OK;
+           pca->cb[i].cbarg  = arg;
+           handle            = &pca->cb[i];
+           break;
          }
     }
 
   /* Add this callback to the table */
 
   pca9555_unlock(pca);
-  return ret;
+  return handle;
+}
+
+/****************************************************************************
+ * Name: pca9555_detach
+ *
+ * Description:
+ *   Detach and disable a pin interrupt callback function.
+ *
+ * Input Parameters:
+ *   dev      - Device-specific state data
+ *   handle   - The non-NULL opaque value return by pca9555_attch()
+ *
+ * Returned Value:
+ *   0 on success, else a negative error code
+ *
+ ****************************************************************************/
+
+static int pca9555_detach(FAR struct ioexpander_dev_s *dev, FAR void *handle)
+{
+  FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s *)dev;
+  FAR struct pca9555_callback_s *cb = (FAR struct pca9555_callback_s *)handle;
+
+  DEBUGASSERT(pca != NULL && cb != NULL);
+  DEBUGASSERT((uintptr_t)cb >= (uintptr_t)&pca->cb[0] &&
+              (uintptr_t)cb <= (uintptr_t)&pca->cb[CONFIG_TCA64XX_INT_NCALLBACKS-1]);
+  UNUSED(pca);
+
+  cb->pinset = 0;
+  cb->cbfunc = NULL;
+  cb->cbarg  = NULL;
+  return OK;
 }
 
 /****************************************************************************
@@ -798,7 +836,8 @@ static void pca9555_irqworker(void *arg)
                 {
                   /* Yes.. perform the callback */
 
-                  (void)pca->cb[i].cbfunc(&pca->dev, match);
+                  (void)pca->cb[i].cbfunc(&pca->dev, match,
+                                          pca->cb[i].cbarg);
                 }
             }
         }
