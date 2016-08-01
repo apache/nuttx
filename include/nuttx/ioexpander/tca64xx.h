@@ -36,8 +36,8 @@
  *
  ****************************************************************************/
 
-#ifndef _TSB_TCA64XX_H_
-#define _TSB_TCA64XX_H_
+#ifndef __INCLUDE_NUTTX_IOEXPANDER_TCA64XX_H
+#define __INCLUDE_NUTTX_IOEXPANDER_TCA64XX_H
 
 /****************************************************************************
  * Included Files
@@ -45,14 +45,6 @@
 
 #include <nuttx/config.h>
 #include <stdint.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Unused IO line for irq, reset. */
-
-#define TCA64XX_IO_UNUSED   (1 << 31)
 
 /****************************************************************************
  * Public Types

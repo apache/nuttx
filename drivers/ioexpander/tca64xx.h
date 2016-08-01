@@ -1,7 +1,7 @@
 /********************************************************************************************
  * drivers/ioexpander/tca64.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Sebastien Lorquet <sebastien@lorquet.fr>
  *
  * References:
@@ -165,29 +165,6 @@
 
 #define TCA64XX_IRQ_TYPE_EDGE           0x00000000
 #define TCA64XX_IRQ_TYPE_LEVEL          0x00000001
-
-#define tca64xx_irq_type_is_level(handle, gpio) \
-    (tca64xx_get_gpio_triggering_type(handle, gpio) == TCA64XX_IRQ_TYPE_LEVEL)
-#define tca64xx_irq_type_is_edge(handle, gpio) \
-    (tca64xx_get_gpio_triggering_type(handle, gpio) == TCA64XX_IRQ_TYPE_EDGE)
-#define tca64xx_irq_edge_trigger_is_both(handle, gpio) \
-    (tca64xx_get_gpio_triggering_level(handle, gpio) == \
-     TCA64XX_IRQ_TYPE_EDGE_BOTH)
-#define tca64xx_irq_edge_trigger_is_falling(handle, gpio) \
-    (tca64xx_get_gpio_triggering_level(handle, gpio) == \
-     TCA64XX_IRQ_TYPE_EDGE_FALLING)
-#define tca64xx_irq_edge_trigger_is_rising(handle, gpio) \
-    (tca64xx_get_gpio_triggering_level(handle, gpio) == \
-     TCA64XX_IRQ_TYPE_EDGE_RISING)
-#define tca64xx_irq_level_trigger_is_low(handle, gpio) \
-    (tca64xx_get_gpio_triggering_level(handle, gpio) == \
-     TCA64XX_IRQ_TYPE_LEVEL_LOW)
-#define tca64xx_irq_level_trigger_is_high(handle, gpio) \
-    (tca64xx_get_gpio_triggering_level(handle, gpio) == \
-     TCA64XX_IRQ_TYPE_LEVEL_HIGH)
-
-#define WORKER_DEFPRIO          50
-#define WORKER_STACKSIZE        1024
 
 #define TCA64XX_POLLDELAY       (CONFIG_TCA64XX_INT_POLLDELAY / USEC_PER_TICK)
 
