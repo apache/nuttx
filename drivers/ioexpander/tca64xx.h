@@ -192,18 +192,18 @@
 #define TCA64XX_POLLDELAY       (CONFIG_TCA64XX_INT_POLLDELAY / USEC_PER_TICK)
 
 #define TCA64_LEVEL_SENSITIVE(d,p) \
-  (((d)->trigger & (1 << (p))) == 0)
+  (((d)->trigger  & ((ioe_pinset_t)1 << (p))) == 0)
 #define TCA64_LEVEL_HIGH(d,p) \
-  (((d)->level[0] & (1 << (p))) != 0)
+  (((d)->level[0] & ((ioe_pinset_t)1 << (p))) != 0)
 #define TCA64_LEVEL_LOW(d,p) \
-  (((d)->level[1] & (1 << (p))) != 0)
+  (((d)->level[1] & ((ioe_pinset_t)1 << (p))) != 0)
 
 #define TCA64_EDGE_SENSITIVE(d,p) \
-  (((d)->trigger & (1 << (p))) != 0)
+  (((d)->trigger  & ((ioe_pinset_t)1 << (p))) != 0)
 #define TCA64_EDGE_RISING(d,p) \
-  (((d)->level[0] & (1 << (p))) != 0)
+  (((d)->level[0] & ((ioe_pinset_t)1 << (p))) != 0)
 #define TCA64_EDGE_FALLING(d,p) \
-  (((d)->level[1] & (1 << (p))) != 0)
+  (((d)->level[1] & ((ioe_pinset_t)1 << (p))) != 0)
 #define TCA64_EDGE_BOTH(d,p) \
   (TCA64_LEVEL_RISING(d,p) && TCA64_LEVEL_FALLING(d,p))
 
@@ -246,11 +246,11 @@ struct tca64_dev_s
   uint8_t addr;                      /* TCA64xx I2C address */
   sem_t exclsem;                     /* Mutual exclusion */
 
+#ifdef CONFIG_IOEXPANDER_INT_ENABLE
 #ifdef CONFIG_TCA64XX_INT_POLL
   WDOG_ID wdog;                      /* Timer used to poll for missed interrupts */
 #endif
 
-#ifdef CONFIG_IOEXPANDER_INT_ENABLE
   ioe_pinset_t input;                /* Last input registeres */
   ioe_pinset_t intstat;              /* Pending interrupts */
   ioe_pinset_t trigger;              /* Bit encoded: 0=level 1=edge */

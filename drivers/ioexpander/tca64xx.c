@@ -919,7 +919,7 @@ static int tca64_multireadpin(FAR struct ioexpander_dev_s *dev,
 #ifdef CONFIG_TCA64XX_INT_ENABLE
   /* Update the input status with the 32 bits read from the expander */
 
-  tca64_int_update(priv, pinset, ~0);
+  tca64_int_update(priv, pinset, PINSET_ALL);
 #endif
 
 errout_with_lock:
@@ -971,10 +971,9 @@ static int tca64_attach(FAR struct ioexpander_dev_s *dev, ioe_pinset_t pinset,
            priv->cb[i].pinset = pinset;
            priv->cb[i].cbfunc = callback;
            ret = OK;
+           break;
          }
     }
-
-  /* Add this callback to the table */
 
   tca64_unlock(priv);
   return ret;
@@ -1003,10 +1002,12 @@ static void tca64_int_update(void *handle, ioe_pinset_t input,
   /* Check the changed bits from last read */
 
   input = (priv->input & ~mask) | (input & mask);
-  diff = priv->input ^ input;
+  diff  = priv->input ^ input;
 
-  if (!diff)
+  if (diff == 0)
     {
+      /* Nothing has changed */
+
       leave_critical_section(flags);
       return;
     }
@@ -1031,7 +1032,7 @@ static void tca64_int_update(void *handle, ioe_pinset_t input,
         {
           /* Level triggered. Set intstat if in match level type. */
 
-          if (((input & 1) != 0 &&  TCA64_LEVEL_HIGH(priv, pin)) ||
+          if (((input & 1) != 0 && TCA64_LEVEL_HIGH(priv, pin)) ||
               ((input & 1) == 0 && TCA64_LEVEL_LOW(priv, pin)))
             {
               priv->intstat |= 1 << pin;
@@ -1093,7 +1094,7 @@ static void tca64_register_update(FAR struct tca64_dev_s *priv)
 
   /* Update the input status with the 32 bits read from the expander */
 
-  tca64_int_update(priv, pinset, ~0);
+  tca64_int_update(priv, pinset, PINSET_ALL);
 }
 #endif
 
@@ -1119,6 +1120,10 @@ static void tca64_irqworker(void *arg)
 
   DEBUGASSERT(priv != NULL && priv->config != NULL);
 
+  /* Get exclusive access to read inputs and assess pending interrupts. */
+
+  tca64_lock(priv);
+
   /* Read the input register for pin 0 through the number of supported pins.
    *
    * The Input Port Register reflects the incoming logic levels of the pins,
@@ -1136,26 +1141,31 @@ static void tca64_irqworker(void *arg)
     {
       gpioerr("ERROR: Failed to read input %u registers at %u: %d\n",
               nregs, regaddr, ret);
-      return;
+      tca64_unlock(priv);
+      goto errout_with_restart;
     }
 
   /* Update the input status with the 32 bits read from the expander */
 
-  tca64_int_update(priv, pinset, ~0);
+  tca64_int_update(priv, pinset, PINSET_ALL);
+
+  /* Sample and clear the pending interrupts.  */
+
+  pinset        = priv->intstat;
+  priv->intstat = 0;
+  tca64_unlock(priv);
 
   /* Perform pin interrupt callbacks */
 
   for (i = 0; i < CONFIG_TCA64XX_INT_NCALLBACKS; i++)
     {
-      /* Is this entry valid (i.e., callback attached)?  If so, did andy of
-       * the requested pin interrupts occur?
-       */
+      /* Is this entry valid (i.e., callback attached)?  */
 
       if (priv->cb[i].cbfunc != NULL)
         {
           /* Did any of the requested pin interrupts occur? */
 
-          ioe_pinset_t match = priv->intstat & priv->cb[i].pinset;
+          ioe_pinset_t match = pinset & priv->cb[i].pinset;
           if (match != 0)
             {
               /* Yes.. perform the callback */
@@ -1165,7 +1175,7 @@ static void tca64_irqworker(void *arg)
         }
     }
 
-  priv->intstat = 0;
+errout_with_restart:
 
 #ifdef CONFIG_TCA64XX_INT_POLL
   /* Check for pending interrupts */
@@ -1332,6 +1342,12 @@ FAR struct ioexpander_dev_s *tca64_initialize(FAR struct i2c_master_s *i2c,
   priv->config  = config;
 
 #ifdef CONFIG_TCA64XX_INT_ENABLE
+  /* Initial interrupt state:  Edge triggered on both edges */
+
+  priv->trigger  = PINSET_ALL;  /* All edge triggered */
+  priv->level[0] = PINSET_ALL;  /* All rising edge */
+  priv->level[1] = PINSET_ALL;  /* All falling edge */
+
 #ifdef CONFIG_TCA64XX_INT_POLL
   /* Set up a timer to poll for missed interrupts */
 
