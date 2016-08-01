@@ -221,7 +221,6 @@ struct tca64_dev_s
   FAR struct tca64_config_s *config; /* Board configuration data */
   FAR struct i2c_master_s *i2c;      /* Saved I2C driver instance */
   uint8_t part;                      /* TCA64xx part ID (see enum tca64xx_part_e) */
-  uint8_t addr;                      /* TCA64xx I2C address */
   sem_t exclsem;                     /* Mutual exclusion */
 
 #ifdef CONFIG_IOEXPANDER_INT_ENABLE
