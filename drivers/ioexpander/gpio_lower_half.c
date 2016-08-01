@@ -65,23 +65,29 @@ struct gplh_dev_s
 
   uint8_t pin;                      /* I/O expander pin ID */
   FAR struct ioexpander_dev_s *ioe; /* Contain I/O expander interface */
+#ifdef CONFIG_IOEXPANDER_INT_ENABLE
   FAR void *handle;                 /* Interrupt attach handle */
   pin_interrupt_t callback;         /* Interrupt callback */
+#endif
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
+#ifdef CONFIG_IOEXPANDER_INT_ENABLE
 static int gplh_handler(FAR struct ioexpander_dev_s *ioe,
                         ioe_pinset_t pinset, FAR void *arg);
+#endif
 
 /* GPIO Lower Half Interface methods */
 
 static int gplh_read(FAR struct gpio_dev_s *gpio, FAR bool *value);
 static int gplh_write(FAR struct gpio_dev_s *gpio, bool value);
+#ifdef CONFIG_IOEXPANDER_INT_ENABLE
 static int gplh_attach(FAR struct gpio_dev_s *gpio, pin_interrupt_t callback);
 static int gplh_enable(FAR struct gpio_dev_s *gpio, bool enable);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -91,8 +97,13 @@ static const struct gpio_operations_s g_gplh_ops =
 {
   gplh_read,   /* read   */
   gplh_write,  /* write  */
+#ifdef CONFIG_IOEXPANDER_INT_ENABLE
   gplh_attach, /* attach */
   gplh_enable, /* enable */
+#else
+  NULL,        /* attach */
+  NULL,        /* enable */
+#endif
 };
 
 /****************************************************************************
@@ -107,6 +118,7 @@ static const struct gpio_operations_s g_gplh_ops =
  *
  ****************************************************************************/
 
+#ifdef CONFIG_IOEXPANDER_INT_ENABLE
 static int gplh_handler(FAR struct ioexpander_dev_s *ioe,
                         ioe_pinset_t pinset, FAR void *arg)
 {
@@ -123,6 +135,7 @@ static int gplh_handler(FAR struct ioexpander_dev_s *ioe,
 
   return priv->callback(&priv->gpio);
 }
+#endif
 
 /****************************************************************************
  * Name: gplh_read
@@ -175,6 +188,7 @@ static int gplh_write(FAR struct gpio_dev_s *gpio, bool value)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_IOEXPANDER_INT_ENABLE
 static int gplh_attach(FAR struct gpio_dev_s *gpio, pin_interrupt_t callback)
 {
   FAR struct gplh_dev_s *priv = (FAR struct gplh_dev_s *)gpio;
@@ -199,6 +213,7 @@ static int gplh_attach(FAR struct gpio_dev_s *gpio, pin_interrupt_t callback)
   priv->callback = callback;
   return OK;
 }
+#endif
 
 /****************************************************************************
  * Name: gplh_enable
@@ -208,6 +223,7 @@ static int gplh_attach(FAR struct gpio_dev_s *gpio, pin_interrupt_t callback)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_IOEXPANDER_INT_ENABLE
 static int gplh_enable(FAR struct gpio_dev_s *gpio, bool enable)
 {
   FAR struct gplh_dev_s *priv = (FAR struct gplh_dev_s *)gpio;
@@ -282,6 +298,7 @@ static int gplh_enable(FAR struct gpio_dev_s *gpio, bool enable)
 
   return ret;
 }
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -313,6 +330,14 @@ int gpio_lower_half(FAR struct ioexpander_dev_s *ioe, unsigned int pin,
 
   DEBUGASSERT(ioe != NULL && pin < CONFIG_IOEXPANDER_NPINS &&
               (unsigned int)pintype < GPIO_NPINTYPES);
+
+#ifndef CONFIG_IOEXPANDER_INT_ENABLE
+  /* If there is no I/O expander interrupt support, then we cannot handle
+   * interrupting pin types.
+   */
+
+  DEBUGASSERT(pintype != GPIO_INTERRUPT_PIN);
+#endif
 
   /* Allocate an new instance of the GPIO lower half driver */
 
