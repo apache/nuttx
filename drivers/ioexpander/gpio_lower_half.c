@@ -116,7 +116,8 @@ static int gplh_handler(FAR struct ioexpander_dev_s *ioe,
 
   DEBUGASSERT(priv != NULL && priv->callback != NULL);
 
-  gpioinfo("pin%u: pinset: %lx\n", priv->pin, (unsigned long)pinset);
+  gpioinfo("pin%u: pinset: %lx callback=%p\n",
+           priv->pin, (unsigned long)pinset, priv->callback);
 
   /* We received the callback from the I/O expander, forward this to the
    * upper half GPIO driver via its callback.
@@ -188,7 +189,7 @@ static int gplh_attach(FAR struct gpio_dev_s *gpio, pin_interrupt_t callback)
 
   if (priv->handle != NULL)
     {
-      gpioinfo("pin%u: Detaching...\n", priv->pin);
+      gpioinfo("pin%u: Detaching handle %p\n", priv->pin, priv->handle);
       (void)IOEP_DETACH(priv->ioe, priv->handle);
       priv->handle = NULL;
     }
@@ -216,7 +217,9 @@ static int gplh_enable(FAR struct gpio_dev_s *gpio, bool enable)
 
   DEBUGASSERT(priv != NULL && priv->ioe != NULL);
 
-  gpioinfo("pin%u: %s\n", priv->pin, enable ? "Enabling" : "Disabling");
+  gpioinfo("pin%u: %s callback=%p handle=%p\n",
+           priv->pin, enable ? "Enabling" : "Disabling",
+           priv->callback, priv->handle);
 
   /* Are we enabling or disabling the pin interrupt? */
 

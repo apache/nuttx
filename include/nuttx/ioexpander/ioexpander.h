@@ -264,7 +264,7 @@
 
 #ifdef CONFIG_IOEXPANDER_INT_ENABLE
 #define IOEP_ATTACH(dev,pinset,callback,arg) \
-                   ((dev)->ops->ioe_attach(dev,pins,callback,arg))
+                   ((dev)->ops->ioe_attach(dev,pinset,callback,arg))
 #endif
 
 /****************************************************************************
@@ -283,7 +283,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_IOEXPANDER_INT_ENABLE
-#define IOEP_DETACH(dev,handle) (dev)->ops->ioe_detach(dev,handle))
+#define IOEP_DETACH(dev,handle) ((dev)->ops->ioe_detach(dev,handle))
 #endif
 
 /****************************************************************************
