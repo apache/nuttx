@@ -56,8 +56,8 @@ endif
 # Default tools
 
 ifeq ($(DIRLINK),)
-export DIRLINK = $(TOPDIR)/tools/link.sh
-export DIRUNLINK = $(TOPDIR)/tools/unlink.sh
+DIRLINK = $(TOPDIR)/tools/link.sh
+DIRUNLINK = $(TOPDIR)/tools/unlink.sh
 endif
 
 # This define is passed as EXTRADEFINES for kernel-mode builds.  It is also passed

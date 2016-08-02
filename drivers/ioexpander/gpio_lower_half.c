@@ -57,11 +57,11 @@
 
 struct gplh_dev_s
 {
-  /* Publically visiable lower-half state */
+  /* Publically visible lower-half state */
 
   struct gpio_dev_s gpio;
  
-  /* Private driver data follows */
+  /* Private lower half data follows */
 
   uint8_t pin;                      /* I/O expander pin ID */
   FAR struct ioexpander_dev_s *ioe; /* Contain I/O expander interface */
@@ -80,7 +80,7 @@ static int gplh_handler(FAR struct ioexpander_dev_s *ioe,
                         ioe_pinset_t pinset, FAR void *arg);
 #endif
 
-/* GPIO Lower Half Interface methods */
+/* GPIO lower half interface methods */
 
 static int gplh_read(FAR struct gpio_dev_s *gpio, FAR bool *value);
 static int gplh_write(FAR struct gpio_dev_s *gpio, bool value);
@@ -92,6 +92,8 @@ static int gplh_enable(FAR struct gpio_dev_s *gpio, bool enable);
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+/* GPIO Lower Half interface operations */
 
 static const struct gpio_operations_s g_gplh_ops =
 {
@@ -153,7 +155,7 @@ static int gplh_read(FAR struct gpio_dev_s *gpio, FAR bool *value)
 
   gpioinfo("pin%u: value=%p\n", priv->pin, value);
 
-  /* Get the value from the I/O expander */
+  /* Return the value from the I/O expander */
 
   return IOEXP_READPIN(priv->ioe, priv->pin, value);
 }
@@ -352,10 +354,10 @@ int gpio_lower_half(FAR struct ioexpander_dev_s *ioe, unsigned int pin,
 
   /* Initialize the non-zero elements of the newly allocated instance */
 
-  priv->pin              = (uint8_t)pin;
-  gpio                   = &priv->gpio;
-  gpio->gp_pintype       = (uint8_t)pintype;
-  gpio->gp_ops           = &g_gplh_ops;
+  priv->pin        = (uint8_t)pin;
+  gpio             = &priv->gpio;
+  gpio->gp_pintype = (uint8_t)pintype;
+  gpio->gp_ops     = &g_gplh_ops;
 
   /* Register the GPIO driver */
 
