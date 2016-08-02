@@ -195,7 +195,7 @@ static const struct file_operations g_fops =
  * Name: kxtj9_reg_read
  *
  * Description:
- *   Read from an 8-bit register.
+ *   Read from multiple KXTJ9 registers.
  *
  ****************************************************************************/
 
@@ -239,10 +239,10 @@ static int kxtj9_reg_read(FAR struct kxjt9_dev_s *priv, uint8_t regaddr,
 }
 
 /****************************************************************************
- * Name: kxjt9_modifyreg8
+ * Name: kxtj9_reg_write
  *
  * Description:
- *   Modify an 8-bit register.
+ *   Write a value to a single KXTJ9 register
  *
  ****************************************************************************/
 
@@ -529,7 +529,7 @@ static ssize_t kxjt9_read(FAR struct file *filep, FAR char *buffer,
       return (ssize_t)ret;
     }
 
-  return sizeof(struct kxtj9_sensor_data);
+  return (ssize_t)sizeof(struct kxtj9_sensor_data);
 }
 
 /****************************************************************************
@@ -556,19 +556,17 @@ static ssize_t kxjt9_write(FAR struct file *filep, FAR const char *buffer,
 
 static int kxjt9_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-  FAR struct inode         *inode;
+  FAR struct inode *inode;
   FAR struct kxjt9_dev_s *priv;
-  int                       ret;
+  int  ret;
 
   /* Sanity check */
 
-  DEBUGASSERT(filep != NULL);
+  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode = filep->f_inode;
 
-  DEBUGASSERT(inode != NULL);
   priv = (FAR struct kxjt9_dev_s *)inode->i_private;
-
-  DEBUGASSERT(priv != NULL);
+  DEBUGASSERT(priv != NULL && priv->i2c != NULL);
 
   /* Handle ioctl commands */
 
@@ -590,7 +588,7 @@ static int kxjt9_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case SNIOC_CONFIGURE:
         {
-          DEBUGASSERT(arg < UINT8_MAX);
+          DEBUGASSERT(arg <= UINT8_MAX);
           ret = kxtj9_configure(priv, (uint8_t)arg);
           sninfo("SNIOC_CONFIGURE: ODR=%u ret=%d\n",
                  (unsigned int)arg, ret);
