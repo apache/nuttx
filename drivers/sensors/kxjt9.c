@@ -497,17 +497,23 @@ static int kxjt9_close(FAR struct file *filep)
  ****************************************************************************/
 
 static ssize_t kxjt9_read(FAR struct file *filep, FAR char *buffer,
-                            size_t buflen)
+                          size_t buflen)
 {
   FAR struct inode *inode;
   FAR struct kxjt9_dev_s *priv;
+  size_t nsamples;
+  size_t i;
   int ret;
 
-  /* If the provided buffer is not large enough to return a sample, then
-   * return an error.
+  /* How many samples will fit in the buffer? */
+
+  nsamples = buflen / sizeof(struct kxtj9_sensor_data);
+
+  /* If the provided buffer is not large enough to return a single sample,
+   * then return an error.
    */
 
-  if (buflen < sizeof(struct kxtj9_sensor_data))
+  if (nsamples < 1)
     {
       snerr("ERROR: Bufer too small %lu < %u\n",
             buflen, sizeof(struct kxtj9_sensor_data));
@@ -520,16 +526,25 @@ static ssize_t kxjt9_read(FAR struct file *filep, FAR char *buffer,
   priv = (FAR struct kxjt9_dev_s *)inode->i_private;
   DEBUGASSERT(priv != NULL  && priv->i2c != NULL);
 
-  /* Get the sample data */
+  /* Return all of the samples that will fit in the user-provided buffer */
 
-  ret = kxtj9_read_sensor_data(priv, (FAR struct kxtj9_sensor_data *)buffer);
-  if (ret < 0)
+  for (i = 0; i < nsamples; i++)
     {
-      snerr("ERROR: kxtj9_read_sensor_data failed: %d\n", ret);
-      return (ssize_t)ret;
+      /* Get the next sample data */
+
+      ret = kxtj9_read_sensor_data(priv, (FAR struct kxtj9_sensor_data *)buffer);
+      if (ret < 0)
+        {
+          snerr("ERROR: kxtj9_read_sensor_data failed: %d\n", ret);
+          return (ssize_t)ret;
+        }
+
+      /* Set up for the next sample */
+
+      buffer += sizeof(struct kxtj9_sensor_data);
     }
 
-  return (ssize_t)sizeof(struct kxtj9_sensor_data);
+  return (ssize_t)(nsamples * sizeof(struct kxtj9_sensor_data));
 }
 
 /****************************************************************************
