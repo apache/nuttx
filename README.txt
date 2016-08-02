@@ -948,9 +948,13 @@ Native Windows Build
 --------------------
 
   The beginnings of a Windows native build are in place but still not often
-  used as of this writing.  The windows native build logic initiated
-  if CONFIG_WINDOWS_NATIVE=y is defined in the NuttX configuration file:
+  used as of this writing.  The build was functional but because of lack of
+  use may find some issues to be resolved with this build configuration.
 
+  The windows native build logic initiated if CONFIG_WINDOWS_NATIVE=y is
+  defined in the NuttX configuration file:
+
+  
   This build:
 
     - Uses all Windows style paths

@@ -12402,11 +12402,58 @@
 	  were wrong.  FIONWRITE should return the number of bytes waiting in
 	  the outgoing send queue, not the free space.  Rather, FIONSPACE should
 	  return the free space in the send queue (2016-07-25).
+	* lib_dumpbuffer:  Now prints a large on-stack buffer first to avoid
+	  problems when the syslog output is prefixed with time.  From Pierre-
+	  noel Bouteville (2016-07-27).
 	* sched/clock and sched/sched: Add standard adjtime() interface and
-	  basic timekeeping support.  From Max Neklyudov (Merged on
+	  basic timekeeping support.  Normally used with an NTP client to keep
+	  system time in synchronizationi.  From Max Neklyudov (Merged on
 	  20160-07-28).
 	* arch/arm/src/stm32:  Add timekeeping support for the STM32 tickless
 	  mode.  From Max Neklyudov (Merged on 20160-07-28).
+	* Top-Level Makefiles.  Fix a chicken-and-egg problem. In the menuconfig
+	  target, the context dependency was executed before kconfig-mconf.
+	  That was necessary because the link at apps/platform/board needed to
+	  be set up before creating the apps/Kconfig file.  Otherwise, the
+	  platform Kconfig files would not be included.  But this introduces
+	  the chicken-and-egg problem in some configurations.
+	  In particular:  (1) An NX graphics configuration is used that requires
+	  auto-generation of source files using cpp, (2) the configuration is
+	  set for Linux, but (3) we are running under Cygwin with (4) a Windows
+	  native toolchain.  In this case, POSIX-style symbolic links are set
+	  up but the Windows native toolchain cannot follow them.
+	  The reason we are running 'make menuconfig' is to change from Linux
+	  to Cygwin, but the target fails.  During the context phase, NX runs
+	  CPP to generate source files but that fails because the Windows native
+	  toolchain cannot follow the links.  Checkmate.
+	  This was fixed by changing all of the make menuconfig (and related)
+	  targets.  They no longer depend on context being run.  Instead, they
+	  depend only on the dirlinks target.  The dirlinks target only sets
+	  up the directory links but does not try to run all of the context
+	  setup; the compiler is never invoked; no code is autogeneraed; and
+	  things work (2016-07-28).
+	* tools/refresh.sh: Recent complexities added to apps/ means that
+	  configuration needs correct Make.defs file in place in order to
+	  configure properly (2016-07-28).
+	* tools/kconfig2html.c: Update to handle absolute paths when sourcing
+	  Kconfig files (2016-07-29).
+	* libc/math: This fixes the following libc/math issues: (1) asin[f l]()
+	  use Newton’s method to converge on a solution. But Newton’s method
+	  converges very slowly (> 500,000 iterations) for values of x close
+	  to 1.0; and, in the case of asinl(), sometimes fails to converge
+	  (loops forever). The attached patch uses an trig identity for
+	  values of x > sqrt(2). The resultant functions converge in no more
+	  than 5 iterations, 6 for asinl().  (2) The NuttX erf[f l]() functions
+	  are based on Chebyshev fitting to a good guess. The problem there’s a
+	  bug in the implementation that causes the functions to blow up with x
+	  near -3.0. This patch fixes that problem. It should be noted that
+	  this method returns the error function erf(x) with fractional error
+	  less than 1.2E-07 and that’s fine for the float version erff(), but
+	  the same method is used for double and long double version which
+	  will yield only slightly better precision. This patch doesn't address
+	  the issue of lower precision for erf() and erfl(). (3) a faster
+	  version of copysignf() for floats is included. From David S. Alessio
+	  (2016-07-30).
 	* I/O Expander: Remove hard-coded PCA9555 fields from ioexpander.h
 	  definitons.  Add support for an attach() method that may be used when
 	  any subset of pin interrupts occur (2016-07-31).
@@ -12423,3 +12470,20 @@
 	  (2016-07-31).
 	* drivers/ioexpander/skeleton.c: Add a skeleton I/O Expander driver
 	  (based on the PCA9555 driver) (2016-07-31).
+	* I/O Expander Interface:  Encode and extend I/O expander options to
+	  include interrupt configuration (2016-07-31).
+	* drivers/ioexpander: Add an (untested) TCA64XX I/O Expander driver
+	  leveraged from Project Ara (2016-07-31).
+	* I/O Expander Interface:  Add argument to interrupt callback.  Add a
+	  method to detach the interrupt (2016-08-01).
+	* drivers/ioexpander: Add a GPIO lower-half driver that can be used to
+	  register a GPIO character driver for accessing pins on an I/O expander
+	  (2016-08-01).
+	* drivers/ioexpander: Add PCF8574 I/O Expander driver.  Some cleanup
+	  also of other expander drivers (2016-08-01).
+	* drivers/ioexpander: GPIO driver:  Add IOCTLs to get the pin type and
+	  to unregister a signal handler (2016-08-01).
+	* configs/sim: Add simulator-based test support for apps/examples/gpio
+	  2016-08-01).
+	* drivers/sensors:  Add KXJT9 Accelerometer driver from the Motorola
+	  Moto Z MDK (2016-08-02).
