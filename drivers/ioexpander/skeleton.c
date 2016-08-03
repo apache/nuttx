@@ -337,6 +337,9 @@ static int skel_readpin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
   /* Read the pin value */
 #warning Missing logic
 
+  /* Return the pin value via the value pointer */
+#warning Missing logic
+
   skel_unlock(priv);
   return ret;
 }

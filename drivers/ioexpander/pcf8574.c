@@ -515,7 +515,8 @@ static int pcf8574_readpin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 
   /* Return 0 or 1 to indicate the state of pin */
 
-  ret = (regval >> (pin & 7)) & 1;
+  *value = (bool)((regval >> (pin & 7)) & 1);
+  ret = OK;
 
 errout_with_lock:
   pcf8574_unlock(priv);
@@ -811,14 +812,19 @@ static void pcf8574_int_update(void *handle, uint8_t input)
 
   for (pin = 0; pin < 8; pin++)
     {
-      if (PCF8574_EDGE_SENSITIVE(priv, pin) && (diff & 1))
+      if (PCF8574_EDGE_SENSITIVE(priv, pin))
         {
-          /* Edge triggered. Set interrupt in function of edge type */
+          /* Edge triggered. Was there a change in the level? */
 
-          if (((input & 1) == 0 && PCF8574_EDGE_FALLING(priv, pin)) ||
-              ((input & 1) != 0 && PCF8574_EDGE_RISING(priv, pin)))
+          if ((diff & 1) != 0)
             {
-              priv->intstat |= 1 << pin;
+              /* Set interrupt as a function of edge type */
+
+              if (((input & 1) == 0 && PCF8574_EDGE_FALLING(priv, pin)) ||
+                  ((input & 1) != 0 && PCF8574_EDGE_RISING(priv, pin)))
+                {
+                  priv->intstat |= 1 << pin;
+                }
             }
         }
       else /* if (PCF8574_LEVEL_SENSITIVE(priv, pin)) */

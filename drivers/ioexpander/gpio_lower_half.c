@@ -151,7 +151,7 @@ static int gplh_read(FAR struct gpio_dev_s *gpio, FAR bool *value)
 {
   FAR struct gplh_dev_s *priv = (FAR struct gplh_dev_s *)gpio;
 
-  DEBUGASSERT(priv != NULL && priv->ioe != NULL);
+  DEBUGASSERT(priv != NULL && priv->ioe != NULL && value != NULL);
 
   gpioinfo("pin%u: value=%p\n", priv->pin, value);
 
@@ -355,6 +355,7 @@ int gpio_lower_half(FAR struct ioexpander_dev_s *ioe, unsigned int pin,
   /* Initialize the non-zero elements of the newly allocated instance */
 
   priv->pin        = (uint8_t)pin;
+  priv->ioe        = ioe;
   gpio             = &priv->gpio;
   gpio->gp_pintype = (uint8_t)pintype;
   gpio->gp_ops     = &g_gplh_ops;

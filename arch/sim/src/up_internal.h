@@ -300,7 +300,7 @@ int sim_ajoy_initialize(void);
 
 #ifdef CONFIG_SIM_IOEXPANDER
 struct ioexpander_dev_s;
-FAR struct ioexpander_dev_s *sim_initialize(void);
+FAR struct ioexpander_dev_s *sim_ioexpander_initialize(void);
 #endif
 
 /* up_tapdev.c ************************************************************/

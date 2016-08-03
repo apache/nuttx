@@ -757,7 +757,8 @@ static int tca64_readpin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 
   /* Return 0 or 1 to indicate the state of pin */
 
-  ret = (regval >> (pin & 7)) & 1;
+  *value = (bool)((regval >> (pin & 7)) & 1);
+  ret = OK;
 
 errout_with_lock:
   tca64_unlock(priv);
@@ -1054,14 +1055,19 @@ static void tca64_int_update(FAR struct tca64_dev_s *priv, ioe_pinset_t input,
 
   for (pin = 0; pin < ngios; pin++)
     {
-      if (TCA64_EDGE_SENSITIVE(priv, pin) && (diff & 1))
+      if (TCA64_EDGE_SENSITIVE(priv, pin))
         {
-          /* Edge triggered. Set interrupt in function of edge type */
+          /* Edge triggered. Was there a change in the level? */
 
-          if (((input & 1) == 0 && TCA64_EDGE_FALLING(priv, pin)) ||
-              ((input & 1) != 0 && TCA64_EDGE_RISING(priv, pin)))
+          if ((diff & 1) != 0)
             {
-              priv->intstat |= 1 << pin;
+              /* Set interrupt as a function of edge type */
+
+              if (((input & 1) == 0 && TCA64_EDGE_FALLING(priv, pin)) ||
+                  ((input & 1) != 0 && TCA64_EDGE_RISING(priv, pin)))
+                {
+                  priv->intstat |= 1 << pin;
+                }
             }
         }
       else /* if (TCA64_LEVEL_SENSITIVE(priv, pin)) */

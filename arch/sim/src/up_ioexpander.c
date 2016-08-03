@@ -343,7 +343,7 @@ static int sim_writepin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 
   DEBUGASSERT(priv != NULL && pin < CONFIG_IOEXPANDER_NPINS);
 
-  gpioinfo("pin=%u value=%u\n", pin, value);
+  gpioinfo("pin=%u value=%u\n", pin, (unsigned int)value);
 
   /* Set output pins default value (before configuring it as output) The
    * Output Port Register shows the outgoing logic levels of the pins
@@ -405,7 +405,8 @@ static int sim_readpin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
   /* Return 0 or 1 to indicate the state of pin */
 
   retval = (((inval >> pin) & 1) != 0);
-  return ((priv->invert & (1 << pin)) != 0) ? !retval : retval;
+  *value = ((priv->invert & (1 << pin)) != 0) ? !retval : retval;
+  return OK;
 }
 
 /****************************************************************************
@@ -433,6 +434,9 @@ static int sim_multiwritepin(FAR struct ioexpander_dev_s *dev,
   FAR struct sim_dev_s *priv = (FAR struct sim_dev_s *)dev;
   uint8_t pin;
   int i;
+
+  gpioinfo("count=%d\n", count);
+  DEBUGASSERT(priv != NULL && pins != NULL && values != NULL && count > 0);
 
   /* Apply the user defined changes */
 
@@ -483,9 +487,8 @@ static int sim_multireadpin(FAR struct ioexpander_dev_s *dev,
   bool pinval;
   int i;
 
-  DEBUGASSERT(priv != NULL && pins != NULL && values != NULL && count > 0);
-
   gpioinfo("count=%d\n", count);
+  DEBUGASSERT(priv != NULL && pins != NULL && values != NULL && count > 0);
 
   /* Update the input status with the 8 bits read from the expander */
 
@@ -540,6 +543,9 @@ static FAR void *sim_attach(FAR struct ioexpander_dev_s *dev,
   FAR void *handle = NULL;
   int i;
 
+  gpioinfo("pinset=%lx callback=%p arg=%p\n",
+           (unsigned long)pinset, callback, arg);
+
   /* Find and available in entry in the callback table */
 
   for (i = 0; i < CONFIG_SIM_INT_NCALLBACKS; i++)
@@ -581,6 +587,8 @@ static int sim_detach(FAR struct ioexpander_dev_s *dev, FAR void *handle)
   FAR struct sim_dev_s *priv = (FAR struct sim_dev_s *)dev;
   FAR struct sim_callback_s *cb = (FAR struct sim_callback_s *)handle;
 
+  gpioinfo("handle=%p\n", handle);
+
   DEBUGASSERT(priv != NULL && cb != NULL);
   DEBUGASSERT((uintptr_t)cb >= (uintptr_t)&priv->cb[0] &&
               (uintptr_t)cb <= (uintptr_t)&priv->cb[CONFIG_SIM_INT_NCALLBACKS-1]);
@@ -602,11 +610,32 @@ static int sim_detach(FAR struct ioexpander_dev_s *dev, FAR void *handle)
 
 static ioe_pinset_t sim_int_update(FAR struct sim_dev_s *priv)
 {
+  ioe_pinset_t toggles;
   ioe_pinset_t diff;
   ioe_pinset_t input;
   ioe_pinset_t intstat;
   bool pinval;
   int pin;
+  int i;
+
+  /* First, toggle all input bits that have associated, attached interrupt
+   * handler.  This is a crude simulation for toggle interrupt inputs.
+   */
+
+  toggles = 0;
+  for (i = 0; i < CONFIG_SIM_INT_NCALLBACKS; i++)
+    {
+      /* Is there a callback attached?  */
+
+      if (priv->cb[i].cbfunc != NULL)
+        {
+          /* Yes, add the input pins to set of pins to toggle */
+
+          toggles |= (priv->cb[i].pinset & priv->inpins);
+        }
+    }
+
+  priv->inval = (priv->inval & ~toggles) | (~priv->inval & toggles);
 
   /* Check the changed bits from last read (Only applies to input pins) */
 
@@ -619,6 +648,10 @@ static ioe_pinset_t sim_int_update(FAR struct sim_dev_s *priv)
       return 0;
     }
 
+  gpioinfo("toggles=%lx inval=%lx last=%lx diff=%lx\n",
+           (unsigned long)toggles, (unsigned long)priv->inval,
+           (unsigned long)priv->last, (unsigned long)diff);
+
   priv->last = input;
   intstat    = 0;
 
@@ -626,20 +659,27 @@ static ioe_pinset_t sim_int_update(FAR struct sim_dev_s *priv)
 
   for (pin = 0; pin < CONFIG_IOEXPANDER_NPINS; pin++)
     {
-      if (SIM_EDGE_SENSITIVE(priv, pin) && (diff & 1))
+      if (SIM_EDGE_SENSITIVE(priv, pin))
         {
-          pinval = ((input & 1) != 0);
-          if ((priv->invert & (1 << pin)) != 0)
-            {
-              pinval = !pinval;
-            }
+          /* Edge triggered. Was there a change in the level? */
 
-          /* Edge triggered. Set interrupt in function of edge type */
-
-          if ((!pinval && SIM_EDGE_FALLING(priv, pin)) ||
-              ( pinval && SIM_EDGE_RISING(priv, pin)))
+          if ((diff & 1) != 0)
             {
-              intstat |= 1 << pin;
+              /* Get the value of the pin (accounting for inversion) */
+
+              pinval = ((input & 1) != 0);
+              if ((priv->invert & (1 << pin)) != 0)
+                {
+                  pinval = !pinval;
+                }
+
+              /* Set interrupt as a function of edge type */
+
+              if ((!pinval && SIM_EDGE_FALLING(priv, pin)) ||
+                  ( pinval && SIM_EDGE_RISING(priv, pin)))
+                {
+                  intstat |= 1 << pin;
+                }
             }
         }
       else /* if (SIM_LEVEL_SENSITIVE(priv, pin)) */
@@ -681,24 +721,28 @@ static void sim_interrupt_work(void *arg)
   /* Update the input status with the 32 bits read from the expander */
 
   intstat = sim_int_update(priv);
-
-  /* Perform pin interrupt callbacks */
-
-  for (i = 0; i < CONFIG_SIM_INT_NCALLBACKS; i++)
+  if (intstat != 0)
     {
-      /* Is this entry valid (i.e., callback attached)?  */
+      gpioinfo("intstat=%lx\n", (unsigned long)intstat);
 
-      if (priv->cb[i].cbfunc != NULL)
+      /* Perform pin interrupt callbacks */
+
+      for (i = 0; i < CONFIG_SIM_INT_NCALLBACKS; i++)
         {
-          /* Did any of the requested pin interrupts occur? */
+          /* Is this entry valid (i.e., callback attached)?  */
 
-          ioe_pinset_t match = intstat & priv->cb[i].pinset;
-          if (match != 0)
+          if (priv->cb[i].cbfunc != NULL)
             {
-              /* Yes.. perform the callback */
+              /* Did any of the requested pin interrupts occur? */
 
-              (void)priv->cb[i].cbfunc(&priv->dev, match,
-                                       priv->cb[i].cbarg);
+              ioe_pinset_t match = intstat & priv->cb[i].pinset;
+              if (match != 0)
+                {
+                  /* Yes.. perform the callback */
+
+                  (void)priv->cb[i].cbfunc(&priv->dev, match,
+                                           priv->cb[i].cbarg);
+                }
             }
         }
     }
@@ -756,7 +800,7 @@ static void sim_interrupt(int argc, wdparm_t arg1, ...)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sim_initialize
+ * Name: sim_ioexpander_initialize
  *
  * Description:
  *   Instantiate and configure the I/O Expander device driver to use the provided
@@ -772,7 +816,7 @@ static void sim_interrupt(int argc, wdparm_t arg1, ...)
  *
  ****************************************************************************/
 
-FAR struct ioexpander_dev_s *sim_initialize(void)
+FAR struct ioexpander_dev_s *sim_ioexpander_initialize(void)
 {
   FAR struct sim_dev_s *priv = &g_ioexpander;
   int ret;
