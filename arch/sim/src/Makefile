@@ -103,6 +103,10 @@ endif
 endif
 endif
 
+ifeq ($(CONFIG_SIM_IOEXPANDER),y)
+  CSRCS += up_ioexpander.c
+endif
+
 ifeq ($(CONFIG_ELF),y)
   CSRCS += up_elf.c
 endif

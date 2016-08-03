@@ -111,8 +111,8 @@ static int tca64_detach(FAR struct ioexpander_dev_s *dev, FAR void *handle);
 #endif
 
 #ifdef CONFIG_TCA64XX_INT_ENABLE
-static void tca64_int_update(void *handle, ioe_pinset_t input,
-             ioe_pinset_t mask);
+static void tca64_int_update(FAR struct tca64_dev_s *priv,
+             ioe_pinset_t input, ioe_pinset_t mask);
 static void tca64_register_update(FAR struct tca64_dev_s *priv);
 static void tca64_irqworker(void *arg);
 static void tca64_interrupt(FAR void *arg);
@@ -676,11 +676,11 @@ static int tca64_writepin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 
   if (value != 0)
     {
-      regval |= (1 << (pin % 8));
+      regval |= (1 << (pin & 7));
     }
   else
     {
-      regval &= ~(1 << (pin % 8));
+      regval &= ~(1 << (pin & 7));
     }
 
   /* Write the modified output register value */
@@ -1025,10 +1025,9 @@ static int tca64_detach(FAR struct ioexpander_dev_s *dev, FAR void *handle)
  ****************************************************************************/
 
 #ifdef CONFIG_TCA64XX_INT_ENABLE
-static void tca64_int_update(void *handle, ioe_pinset_t input,
+static void tca64_int_update(FAR struct tca64_dev_s *priv, ioe_pinset_t input,
                              ioe_pinset_t mask)
 {
-  struct tca64_dev_s *priv = handle;
   ioe_pinset_t diff;
   irqstate_t flags;
   int ngios = tca64_ngpios(priv);

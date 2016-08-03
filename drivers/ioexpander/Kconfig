@@ -17,7 +17,7 @@ if IOEXPANDER
 config IOEXPANDER_PCA9555
 	bool "PCA9555 I2C IO expander"
 	default n
-	select I2C
+	depends on I2C
 	---help---
 		Enable support for the NXP PCA9555 IO Expander
 
@@ -69,8 +69,7 @@ endif # IOEXPANDER_PCA9555
 config IOEXPANDER_TCA64XX
 	bool "TCA64XX I2C IO expander"
 	default n
-	select I2C
-	depends on EXPERIMENTAL
+	depends on I2C && EXPERIMENTAL
 	---help---
 		Enable support for the TCA64XX IO Expander
 
@@ -114,8 +113,7 @@ endif # IOEXPANDER_TCA64XX
 config IOEXPANDER_PCF8574
 	bool "PCF8574 I2C IO expander"
 	default n
-	select I2C
-	depends on EXPERIMENTAL
+	depends on I2C && EXPERIMENTAL
 	---help---
 		Enable support for the PCF8574 IO Expander
 

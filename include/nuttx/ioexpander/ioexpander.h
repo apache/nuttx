@@ -64,6 +64,9 @@
 #define IOEXPANDER_DIRECTION_IN  0
 #define IOEXPANDER_DIRECTION_OUT 1
 
+#define IOEXPANDER_PINMASK       (((ioe_pinset_t)1 << CONFIG_IOEXPANDER_NPINS) - 1)
+#define PINSET_ALL               (~((ioe_pinset_t)0))
+
 /* Pin options */
 
 #define IOEXPANDER_OPTION_INVERT 1  /* Set the "active" level for a pin */
@@ -77,8 +80,6 @@
 #  define IOEXPANDER_VAL_RISING  2  /* 010 Interrupt on rising edge */
 #  define IOEXPANDER_VAL_FALLING 4  /* 100 Interrupt on falling edge */
 #  define IOEXPANDER_VAL_BOTH    6  /* 110 Interrupt on both edges */
-
-#define PINSET_ALL               (~((ioe_pinset_t)0))
 
 /* Access macros ************************************************************/
 
