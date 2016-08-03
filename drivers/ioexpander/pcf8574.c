@@ -797,15 +797,7 @@ static void pcf8574_int_update(void *handle, uint8_t input)
 
   /* Check the changed bits from last read */
 
-  diff = priv->input ^ input;
-  if (diff == 0)
-    {
-      /* Nothing has changed */
-
-      leave_critical_section(flags);
-      return;
-    }
-
+  diff        = priv->input ^ input;
   priv->input = input;
 
   /* PCF8574 doesn't support irq trigger, we have to do this in software. */
@@ -829,7 +821,7 @@ static void pcf8574_int_update(void *handle, uint8_t input)
         }
       else /* if (PCF8574_LEVEL_SENSITIVE(priv, pin)) */
         {
-          /* Level triggered. Set intstat if in match level type. */
+          /* Level triggered. Set intstat if match in level type. */
 
           if (((input & 1) != 0 && PCF8574_LEVEL_HIGH(priv, pin)) ||
               ((input & 1) == 0 && PCF8574_LEVEL_LOW(priv, pin)))

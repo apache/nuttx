@@ -641,16 +641,12 @@ static ioe_pinset_t sim_int_update(FAR struct sim_dev_s *priv)
 
   input = priv->inval;
   diff  = priv->last ^ input;
-  if (diff == 0)
+  if (diff != 0)
     {
-      /* Nothing has changed */
-
-      return 0;
+      gpioinfo("toggles=%lx inval=%lx last=%lx diff=%lx\n",
+               (unsigned long)toggles, (unsigned long)priv->inval,
+               (unsigned long)priv->last, (unsigned long)diff);
     }
-
-  gpioinfo("toggles=%lx inval=%lx last=%lx diff=%lx\n",
-           (unsigned long)toggles, (unsigned long)priv->inval,
-           (unsigned long)priv->last, (unsigned long)diff);
 
   priv->last = input;
   intstat    = 0;
@@ -684,7 +680,7 @@ static ioe_pinset_t sim_int_update(FAR struct sim_dev_s *priv)
         }
       else /* if (SIM_LEVEL_SENSITIVE(priv, pin)) */
         {
-          /* Level triggered. Set intstat if in match level type. */
+          /* Level triggered. Set intstat if imatch in level type. */
 
           if ((pinval  && SIM_LEVEL_HIGH(priv, pin)) ||
               (!pinval && SIM_LEVEL_LOW(priv, pin)))

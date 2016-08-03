@@ -1038,17 +1038,8 @@ static void tca64_int_update(FAR struct tca64_dev_s *priv, ioe_pinset_t input,
 
   /* Check the changed bits from last read */
 
-  input = (priv->input & ~mask) | (input & mask);
-  diff  = priv->input ^ input;
-
-  if (diff == 0)
-    {
-      /* Nothing has changed */
-
-      leave_critical_section(flags);
-      return;
-    }
-
+  input       = (priv->input & ~mask) | (input & mask);
+  diff        = priv->input ^ input;
   priv->input = input;
 
   /* TCA64XX doesn't support irq trigger, we have to do this in software. */
@@ -1072,7 +1063,7 @@ static void tca64_int_update(FAR struct tca64_dev_s *priv, ioe_pinset_t input,
         }
       else /* if (TCA64_LEVEL_SENSITIVE(priv, pin)) */
         {
-          /* Level triggered. Set intstat if in match level type. */
+          /* Level triggered. Set intstat bit if match in level type. */
 
           if (((input & 1) != 0 && TCA64_LEVEL_HIGH(priv, pin)) ||
               ((input & 1) == 0 && TCA64_LEVEL_LOW(priv, pin)))
