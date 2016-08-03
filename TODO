@@ -819,7 +819,7 @@ o Binary loaders (binfmt/)
                "Read-Only Data in RAM" at
                http://nuttx.org/Documentation/NuttXNxFlat.html#limitations).
 
-               The newer 4.6.3compiler generated PC relative relocations to the strings:
+               The newer 4.6.3 compiler generated PC relative relocations to the strings:
 
                .L2:
                   .word   .LC0-(.LPIC0+4)
