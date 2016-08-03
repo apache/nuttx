@@ -65,7 +65,12 @@ endif
 endif
 
 ifeq ($(CONFIG_EXAMPLES_GPIO),y)
+ifeq ($(CONFIG_GPIO_LOWER_HALF),y)
+  CSRCS += sim_ioexpander.c
+else
   CSRCS += sim_gpio.c
 endif
+endif
+
 
 include $(TOPDIR)/configs/Board.mk

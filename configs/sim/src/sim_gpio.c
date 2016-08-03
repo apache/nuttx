@@ -49,7 +49,7 @@
 
 #include "sim.h"
 
-#ifdef CONFIG_EXAMPLES_GPIO
+#if defined(CONFIG_EXAMPLES_GPIO) && !defined(CONFIG_GPIO_LOWER_HALF)
 
 /****************************************************************************
  * Private Types
@@ -231,4 +231,4 @@ int sim_gpio_initialize(void)
   (void)gpio_pin_register(&g_gpint.simgpio.gpio, 2);
   return 0;
 }
-#endif /* CONFIG_EXAMPLES_GPIO */
+#endif /* CONFIG_EXAMPLES_GPIO && !CONFIG_GPIO_LOWER_HALF */
