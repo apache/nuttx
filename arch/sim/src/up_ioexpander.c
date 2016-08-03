@@ -350,7 +350,7 @@ static int sim_writepin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
    * defined as outputs by the Configuration Register.
    */
 
-  if (value != 0)
+  if (value && (priv->invert & (1 << pin)) == 0)
     {
       priv->outval |= (1 << pin);
     }
@@ -385,6 +385,7 @@ static int sim_readpin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 {
   FAR struct sim_dev_s *priv = (FAR struct sim_dev_s *)dev;
   ioe_pinset_t inval;
+  bool retval;
 
   DEBUGASSERT(priv != NULL && pin < CONFIG_IOEXPANDER_NPINS && value != NULL);
 
@@ -403,7 +404,8 @@ static int sim_readpin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 
   /* Return 0 or 1 to indicate the state of pin */
 
-  return (inval >> pin) & 1;
+  retval = (((inval >> pin) & 1) != 0);
+  return ((priv->invert & (1 << pin)) != 0) ? !retval : retval;
 }
 
 /****************************************************************************
@@ -439,7 +441,7 @@ static int sim_multiwritepin(FAR struct ioexpander_dev_s *dev,
       pin = pins[i];
       DEBUGASSERT(pin < CONFIG_IOEXPANDER_NPINS);
 
-      if (values[i])
+      if (values[i] && (priv->invert & (1 << pin)) == 0)
         {
           priv->outval |= (1 << pin);
         }
@@ -478,6 +480,7 @@ static int sim_multireadpin(FAR struct ioexpander_dev_s *dev,
   FAR struct sim_dev_s *priv = (FAR struct sim_dev_s *)dev;
   ioe_pinset_t inval;
   uint8_t pin;
+  bool pinval;
   int i;
 
   DEBUGASSERT(priv != NULL && pins != NULL && values != NULL && count > 0);
@@ -502,7 +505,8 @@ static int sim_multireadpin(FAR struct ioexpander_dev_s *dev,
           inval = priv->outval;
         }
 
-      values[i] = ((inval & (1 << pin)) != 0);
+      pinval    = ((inval & (1 << pin)) != 0);
+      values[i] = ((priv->invert & (1 << pin)) != 0) ? !pinval : pinval;
     }
 
   return OK;
@@ -601,6 +605,7 @@ static ioe_pinset_t sim_int_update(FAR struct sim_dev_s *priv)
   ioe_pinset_t diff;
   ioe_pinset_t input;
   ioe_pinset_t intstat;
+  bool pinval;
   int pin;
 
   /* Check the changed bits from last read (Only applies to input pins) */
@@ -623,10 +628,16 @@ static ioe_pinset_t sim_int_update(FAR struct sim_dev_s *priv)
     {
       if (SIM_EDGE_SENSITIVE(priv, pin) && (diff & 1))
         {
+          pinval = ((input & 1) != 0);
+          if ((priv->invert & (1 << pin)) != 0)
+            {
+              pinval = !pinval;
+            }
+
           /* Edge triggered. Set interrupt in function of edge type */
 
-          if (((input & 1) == 0 && SIM_EDGE_FALLING(priv, pin)) ||
-              ((input & 1) != 0 && SIM_EDGE_RISING(priv, pin)))
+          if ((!pinval && SIM_EDGE_FALLING(priv, pin)) ||
+              ( pinval && SIM_EDGE_RISING(priv, pin)))
             {
               intstat |= 1 << pin;
             }
@@ -635,8 +646,8 @@ static ioe_pinset_t sim_int_update(FAR struct sim_dev_s *priv)
         {
           /* Level triggered. Set intstat if in match level type. */
 
-          if (((input & 1) != 0 && SIM_LEVEL_HIGH(priv, pin)) ||
-              ((input & 1) == 0 && SIM_LEVEL_LOW(priv, pin)))
+          if ((pinval  && SIM_LEVEL_HIGH(priv, pin)) ||
+              (!pinval && SIM_LEVEL_LOW(priv, pin)))
             {
               intstat |= 1 << pin;
             }
