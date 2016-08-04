@@ -212,7 +212,8 @@ cd $nuttx || { echo "ERROR: failed to cd to $nuttx"; exit 1; }
 make clean_context 1>/dev/null 2>&1
 make olddefconfig 1>/dev/null 2>&1
 
-# Restore any previous .config and Make.defs files
+# Move config file to correct location and restore any previous .config
+# and Make.defs files
 
 if [ "X$dotconfig" != "Xy" ]; then
   sed -i -e "s/^CONFIG_APPS_DIR/# CONFIG_APPS_DIR/g" .config

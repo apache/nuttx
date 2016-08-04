@@ -625,7 +625,6 @@ sethost.sh
       -32|64 selects 32- or 64-bit host (Only for Cygwin).  Default 64
       -h will show this help test and terminate
 
-
 refresh.sh
 ----------
 
