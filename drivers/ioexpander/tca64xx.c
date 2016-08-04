@@ -612,6 +612,9 @@ static int tca64_option(FAR struct ioexpander_dev_s *dev, uint8_t pin,
             priv->level[1] |= bit;
             break;
 
+          case IOEXPANDER_VAL_DISABLE:
+            break;
+
           default:
             ret = -EINVAL;
         }

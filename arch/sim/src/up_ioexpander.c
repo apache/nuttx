@@ -59,6 +59,11 @@
 
 #define SIM_POLLDELAY   (CONFIG_SIM_INT_POLLDELAY / USEC_PER_TICK)
 
+#define SIM_INT_ENABLED(d,p) \
+  (((d)->intenab  & ((ioe_pinset_t)1 << (p))) != 0)
+#define SIM_INT_DISABLED(d,p) \
+  (((d)->intenab  & ((ioe_pinset_t)1 << (p))) == 0)
+
 #define SIM_LEVEL_SENSITIVE(d,p) \
   (((d)->trigger  & ((ioe_pinset_t)1 << (p))) == 0)
 #define SIM_LEVEL_HIGH(d,p) \
@@ -99,6 +104,7 @@ struct sim_dev_s
   ioe_pinset_t invert;               /* Pin value inversion */
   ioe_pinset_t outval;               /* Value of output pins */
   ioe_pinset_t inval;                /* Simulated input register */
+  ioe_pinset_t intenab;              /* Interrupt enable */
   ioe_pinset_t last;                 /* Last pin inputs (for detection of changes) */
   ioe_pinset_t trigger;              /* Bit encoded: 0=level 1=edge */
   ioe_pinset_t level[2];             /* Bit encoded: 01=high/rising, 10 low/falling, 11 both */
@@ -281,33 +287,42 @@ static int sim_option(FAR struct ioexpander_dev_s *dev, uint8_t pin,
       switch ((uintptr_t)value)
         {
           case IOEXPANDER_VAL_HIGH:    /* Interrupt on high level */
+            priv->intenab  |= bit;
             priv->trigger  &= ~bit;
             priv->level[0] |= bit;
             priv->level[1] &= ~bit;
             break;
 
           case IOEXPANDER_VAL_LOW:     /* Interrupt on low level */
+            priv->intenab  |= bit;
             priv->trigger  &= ~bit;
             priv->level[0] &= ~bit;
             priv->level[1] |= bit;
             break;
 
           case IOEXPANDER_VAL_RISING:  /* Interrupt on rising edge */
+            priv->intenab  |= bit;
             priv->trigger  |= bit;
             priv->level[0] |= bit;
             priv->level[1] &= ~bit;
             break;
 
           case IOEXPANDER_VAL_FALLING: /* Interrupt on falling edge */
+            priv->intenab  |= bit;
             priv->trigger  |= bit;
             priv->level[0] &= ~bit;
             priv->level[1] |= bit;
             break;
 
           case IOEXPANDER_VAL_BOTH:    /* Interrupt on both edges */
+            priv->intenab  |= bit;
             priv->trigger  |= bit;
             priv->level[0] |= bit;
             priv->level[1] |= bit;
+            break;
+
+          case IOEXPANDER_VAL_DISABLE:
+            priv->trigger  &= ~bit;
             break;
 
           default:
@@ -655,20 +670,26 @@ static ioe_pinset_t sim_int_update(FAR struct sim_dev_s *priv)
 
   for (pin = 0; pin < CONFIG_IOEXPANDER_NPINS; pin++)
     {
-      if (SIM_EDGE_SENSITIVE(priv, pin))
+      /* Get the value of the pin (accounting for inversion) */
+
+      pinval = ((input & 1) != 0);
+      if ((priv->invert & (1 << pin)) != 0)
+        {
+          pinval = !pinval;
+        }
+
+      if (SIM_INT_DISABLED(priv, pin))
+        {
+          /* Interrupts disabled on this pin.  Do nothing.. just skip to the
+           * next pin.
+           */
+        }
+      else if (SIM_EDGE_SENSITIVE(priv, pin))
         {
           /* Edge triggered. Was there a change in the level? */
 
           if ((diff & 1) != 0)
             {
-              /* Get the value of the pin (accounting for inversion) */
-
-              pinval = ((input & 1) != 0);
-              if ((priv->invert & (1 << pin)) != 0)
-                {
-                  pinval = !pinval;
-                }
-
               /* Set interrupt as a function of edge type */
 
               if ((!pinval && SIM_EDGE_FALLING(priv, pin)) ||
