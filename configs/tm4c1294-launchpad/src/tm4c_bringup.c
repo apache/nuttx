@@ -267,7 +267,7 @@ int tm4c_bringup(void)
  * Name: board_pwm_setup
  *
  * Description:
- *   No implementation for now, it's called by PWM tool via boardctl.h.
+ *   No implementation for now, it's called by PWM tool via boardctl().
  *   See include/nuttx/board.h
  *
  * Input Parameters:

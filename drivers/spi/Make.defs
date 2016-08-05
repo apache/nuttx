@@ -37,6 +37,10 @@
 
 ifeq ($(CONFIG_SPI),y)
 
+ifeq ($(CONFIG_SPI_EXCHANGE),y)
+  CSRCS += spi_transfer.c
+endif
+
 # Include the selected SPI drivers
 
 ifeq ($(CONFIG_SPI_BITBANG),y)
