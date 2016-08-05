@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <unistd.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
@@ -47,22 +48,6 @@
 #include <nuttx/spi/spi_transfer.h>
 
 #ifdef CONFIG_SPI_EXCHANGE
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -142,9 +127,27 @@ int spi_transfer(FAR struct spi_dev_s *spi, FAR struct spi_sequence_s *seq)
         }
 #endif
 
+      /* [Re-]select the SPI device in preparation for the transfer */
+
+      SPI_SELECT(spi, seq->dev, true);
+
       /* Perform the transfer */
 
       SPI_EXCHANGE(spi, trans->txbuffer, trans->rxbuffer, trans->nwords);
+
+      /* Possibly de-select the SPI device after the transfer */
+
+      if (trans->deselect)
+        {
+          SPI_SELECT(spi, seq->dev, false);
+        }
+
+      /* Perform any requested inter-transfer delay */
+
+      if (trans->delay > 0)
+        {
+          usleep(trans->delay);
+        }
     }
 
   SPI_SELECT(spi, seq->dev, false);

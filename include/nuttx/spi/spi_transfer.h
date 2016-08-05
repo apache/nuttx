@@ -76,12 +76,14 @@ struct spi_trans_s
 {
   /* SPI attributes for unique to this transaction */
 
+  bool deselect;            /* De-select after transfer */
 #ifdef CONFIG_SPI_CMDDATA
   bool cmd;                 /* true=command; false=data */
 #endif
 #ifdef CONFIG_SPI_HWFEATURES
   spi_hwfeatures_t hwfeat;  /* Hard features to enable on this transfer */
 #endif
+  uint32_t delay;           /* Microsecond delay after transfer */
 
   /* These describe the single data transfer */
 
