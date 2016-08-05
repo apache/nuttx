@@ -81,9 +81,9 @@ struct spi_trans_s
   bool cmd;                 /* true=command; false=data */
 #endif
 #ifdef CONFIG_SPI_HWFEATURES
-  spi_hwfeatures_t hwfeat;  /* Hard features to enable on this transfer */
+  spi_hwfeatures_t hwfeat;  /* H/W features to enable on this transfer */
 #endif
-  uint32_t delay;           /* Microsecond delay after transfer */
+  useconds_t delay;         /* Microsecond delay after transfer */
 
   /* These describe the single data transfer */
 
