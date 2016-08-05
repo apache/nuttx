@@ -83,9 +83,10 @@
 #define _LOOPBASE       (0x1e00) /* Loop device commands */
 #define _MODEMBASE      (0x1f00) /* Modem ioctl commands */
 #define _I2CBASE        (0x2000) /* I2C driver commands */
-#define _GPIOBASE       (0x2100) /* GPIO driver commands */
+#define _SPIBASE        (0x2100) /* SPI driver commands */
+#define _GPIOBASE       (0x2200) /* GPIO driver commands */
 
-/* boardctl commands share the same number space */
+/* boardctl() commands share the same number space */
 
 #define _BOARDBASE      (0xff00) /* boardctl commands */
 
@@ -385,7 +386,14 @@
 #define _I2CIOCVALID(c)    (_IOC_TYPE(c)==_I2CBASE)
 #define _I2CIOC(nr)        _IOC(_I2CBASE,nr)
 
+/* SPI driver ioctl definitions **********************************************/
+/* see nuttx/include/spi/spi_transfer.h */
+
+#define _SPIIOCVALID(c)    (_IOC_TYPE(c)==_SPIBASE)
+#define _SPIIOC(nr)        _IOC(_SPIBASE,nr)
+
 /* GPIO driver command definitions ******************************************/
+/* see nuttx/include/ioexpander/gpio.h */
 
 #define _GPIOCVALID(c)     (_IOC_TYPE(c)==_GPIOBASE)
 #define _GPIOC(nr)         _IOC(_GPIOBASE,nr)

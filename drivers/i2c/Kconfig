@@ -30,5 +30,10 @@ config I2C_NTRACE
 config I2C_DRIVER
 	bool "I2C character driver"
 	default n
+	---help---
+		Build in support for a character driver at /dev/i2c[N] that may be
+		used to perform I2C bus transfers from applications.  The intent of
+		this driver is to support I2C testing.  It is not suitable for use
+		in any real driver application.
 
 endif # I2C

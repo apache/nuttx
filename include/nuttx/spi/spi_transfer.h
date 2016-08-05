@@ -46,9 +46,25 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include <nuttx/fs/ioctl.h>
 #include <nuttx/spi/spi.h>
 
 #ifdef CONFIG_SPI_EXCHANGE
+
+/* SPI Character Driver IOCTL Commands **************************************/
+/* The SPI driver is intended to support application testing of the SPI bus.
+ * The SPI driver simply provides a user-accessible wrapper around the
+ * OS internal spi_transfer() function.  The following IOCTL commands to
+ * supported by the SPI driver to perform SPI transfers
+ */
+
+/* Command:      SPIIOC_TRANSFER
+ * Description:  Perform a sequence of SPI transfers
+ * Argument:     A reference to an instance of struct spi_sequence_s.
+ * Dependencies: CONFIG_SPI_DRIVER
+ */
+
+#define SPIIOC_TRANSFER _SPIIOC(0x0001)
 
 /****************************************************************************
  * Public Types
@@ -128,6 +144,32 @@ struct spi_sequence_s
  ****************************************************************************/
 
 int spi_transfer(FAR struct spi_dev_s *spi, FAR struct spi_sequence_s *seq);
+
+/****************************************************************************
+ * Name: spi_register
+ *
+ * Description:
+ *   Create and register the SPI character driver.
+ *
+ *   The SPI character driver is a simple character driver that supports SPI
+ *   transfers.  The intent of this driver is to support SPI testing.  It is
+ *   not suitable for use in any real driver application.
+ *
+ * Input Parameters:
+ *   spi - An instance of the lower half SPI driver
+ *   bus - The SPI bus number.  This will be used as the SPI device minor
+ *     number.  The SPI character device will be registered as /dev/spiN
+ *     where N is the minor number
+ *
+ * Returned Value:
+ *   OK if the driver was successfully register; A negated errno value is
+ *   returned on any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SPI_DRIVER
+int spi_register(FAR struct spi_dev_s *spi, int bus);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)
