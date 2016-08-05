@@ -37,13 +37,13 @@
  * Included Files
  ****************************************************************************/
 
-#include <stdio.h>
-#include <stdint.h>
-
 #include <nuttx/config.h>
 
+#include <stdio.h>
+#include <stdint.h>
 #include <debug.h>
 
+#include <nuttx/board.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <arch/board/board.h>
 
@@ -53,7 +53,6 @@
 
 #define PWM_PATH_FMT        "/dev/pwm%d"
 #define PWM_PATH_FMTLEN     (10)
-
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -171,7 +170,7 @@ void tm4c_pwm_register(int channel)
   dev = tiva_pwm_initialize(channel);
   if (dev == NULL)
     {
-      dbg("ERROR: Failed to get PWM%d interface\n", channel);
+      pwmerr("ERROR: Failed to get PWM%d interface\n", channel);
     }
   else
     {
@@ -179,7 +178,8 @@ void tm4c_pwm_register(int channel)
       ret = pwm_register(pwm_path, dev);
       if (ret < 0)
         {
-          dbg("ERROR: Failed to register PWM%d driver: %d\n", channel, ret);
+          pwmerr("ERROR: Failed to register PWM%d driver: %d\n",
+                 channel, ret);
         }
     }
 }
@@ -193,7 +193,6 @@ void tm4c_pwm_register(int channel)
  ****************************************************************************/
 
 #ifdef HAVE_PWM
-
 static void tm4c_pwm(void)
 {
 #ifdef CONFIG_TIVA_PWM0_CHAN0
@@ -221,8 +220,7 @@ static void tm4c_pwm(void)
   tm4c_pwm_register(7);
 #endif
 }
-
-#endif
+#endif # HAVE_PWM
 
 /****************************************************************************
  * Public Functions
@@ -246,9 +244,11 @@ int tm4c_bringup(void)
 
   tm4c_i2ctool();
 
+#ifdef HAVE_PWM
   /* Register PWM drivers */
 
   tm4c_pwm();
+#endif
 
 #ifdef HAVE_TIMER
   /* Initialize the timer driver */
@@ -262,3 +262,26 @@ int tm4c_bringup(void)
 
   return OK;
 }
+
+/****************************************************************************
+ * Name: board_pwm_setup
+ *
+ * Description:
+ *   No implementation for now, it's called by PWM tool via boardctl.h.
+ *   See include/nuttx/board.h
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   Zero on Success.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARDCTL_PWMTEST
+int board_pwm_setup(void)
+{
+  return OK;
+}
+#endif
+
