@@ -73,7 +73,8 @@
  *
  * Description:
  *   This is a helper function that can be used to encapsulate and manage
- *   a sequence of SPI transfers.
+ *   a sequence of SPI transfers.  The SPI bus will be locked and the
+ *   SPI device selected for the duration of the transfers.
  *
  * Input Parameters:
  *   spi - An instance of the SPI device to use for the transfer

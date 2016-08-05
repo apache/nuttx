@@ -43,16 +43,12 @@
 #include <stdint.h>
 #include <debug.h>
 
-#include <nuttx/board.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <arch/board/board.h>
 
 #include "tiva_i2c.h"
 #include "tiva_pwm.h"
 #include "tm4c1294-launchpad.h"
-
-#define PWM_PATH_FMT        "/dev/pwm%d"
-#define PWM_PATH_FMTLEN     (10)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -65,6 +61,9 @@
 #ifdef CONFIG_TM4C1294_LAUNCHPAD_PWM
 #  define HAVE_PWM
 #endif
+
+#define PWM_PATH_FMT        "/dev/pwm%d"
+#define PWM_PATH_FMTLEN     (10)
 
 /****************************************************************************
  * Private Functions
@@ -262,26 +261,3 @@ int tm4c_bringup(void)
 
   return OK;
 }
-
-/****************************************************************************
- * Name: board_pwm_setup
- *
- * Description:
- *   No implementation for now, it's called by PWM tool via boardctl().
- *   See include/nuttx/board.h
- *
- * Input Parameters:
- *   None.
- *
- * Returned Value:
- *   Zero on Success.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_BOARDCTL_PWMTEST
-int board_pwm_setup(void)
-{
-  return OK;
-}
-#endif
-
