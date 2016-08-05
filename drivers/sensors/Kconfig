@@ -25,6 +25,19 @@ config BMP180
 	---help---
 		Enable driver support for the Bosch BMP180 barometer sensor.
 
+config SENSOR_KXTJ9
+	bool "Kionix KXTJ9 Accelerometer support"
+	default n
+	select I2C
+
+if SENSOR_KXTJ9
+
+config SENSOR_KXTJ9_I2C_BUS_SPEED
+	int "Kionix KXTJ9 Bus Speed in Hz"
+	default 400000
+
+endif # SENSOR_KXTJ9
+
 config LIS331DL
 	bool "ST LIS331DL device support"
 	default n

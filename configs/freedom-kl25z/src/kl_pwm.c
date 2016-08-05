@@ -45,7 +45,7 @@
 #include <debug.h>
 
 #include <nuttx/board.h>
-#include <nuttx/pwm.h>
+#include <nuttx/drivers/pwm.h>
 
 #include <arch/board/board.h>
 

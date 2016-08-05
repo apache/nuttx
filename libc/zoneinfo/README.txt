@@ -23,7 +23,7 @@ doing this:
 
   - First, a ROM disk device must be created.  This is done by calling
     the function romdisk_register() as described in
-    nuttx/include/nuttx/fs/ramdisk.h.  This is an OS level operation
+    nuttx/include/nuttx/drivers/ramdisk.h.  This is an OS level operation
     and must be done in the board-level logic before your application
     starts.
 
@@ -114,7 +114,7 @@ Sample Code to Mount the ROMFS Filesystem
 #include <stdlib.h>
 #include <errno.h>
 
-#include <nuttx/fs/ramdisk.h>
+#include <nuttx/drivers/ramdisk.h>
 #include <nuttx/zoneinfo.h>
 
 /****************************************************************************

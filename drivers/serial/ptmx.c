@@ -41,10 +41,18 @@
 
 #include <sys/types.h>
 #include <stdbool.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <stdio.h>
 #include <string.h>
 #include <poll.h>
+#include <assert.h>
 #include <errno.h>
+
 #include <nuttx/fs/fs.h>
+#include <nuttx/serial/pty.h>
+
+#include "pty.h"
 
 /****************************************************************************
  * Private Function Prototypes
@@ -146,7 +154,7 @@ static void ptmx_semtake(void)
  *
  ****************************************************************************/
 
-static int ptmx_minor_allocate(FAR struct ptmx_dev_s *ptmx)
+static int ptmx_minor_allocate(void)
 {
   uint8_t startaddr = g_ptmx.px_next;
   uint8_t minor;
@@ -195,38 +203,6 @@ static int ptmx_minor_allocate(FAR struct ptmx_dev_s *ptmx)
 }
 
 /****************************************************************************
- * Name: ptmx_minor_free
- *
- * Description:
- *   De-allocate a PTY minor number.
- *
- * Assumptions:
- *   Caller hold the px_exclsem
- *
- ****************************************************************************/
-
-static void ptmx_minor_free(uint8_t minor)
-{
-  int index;
-  int bitno;
-
-  /* Free the address by clearing the associated bit in the px_alloctab[]; */
-
-  index = minor >> 5;
-  bitno = minor & 31;
-
-  DEBUGASSERT((g_ptmx.px_alloctab[index] |= (1 << bitno)) != 0);
-  g_ptmx.px_alloctab[index] &= ~(1 << bitno);
-
-  /* Reset the next pointer if the one just released has a lower value */
-
-  if (minor < g_ptmx.px_next)
-    {
-      g_ptmx.px_next = minor;
-    }
-}
-
-/****************************************************************************
  * Name: ptmx_open
  ****************************************************************************/
 
@@ -250,7 +226,13 @@ static int ptmx_open(FAR struct file *filep)
       goto errout_with_sem;
     }
 
-  /* Create the master slave pair */
+  /* Create the master slave pair.  This should create:
+   *
+   *   Slave device:  /dev/pts/N
+   *   Master device: /dev/ptyN
+   *
+   * Where N=minor
+   */
 
   ret = pty_register(minor);
   if (ret < 0)
@@ -258,9 +240,9 @@ static int ptmx_open(FAR struct file *filep)
       goto errout_with_minor;
     }
 
-  /* Open the master side */
+  /* Open the master device:  /dev/ptyN, where N=minor */
 
-  snprintf(devname, 16, "/dev/ttyp%d", minor);
+  snprintf(devname, 16, "/dev/pty%d", minor);
   fd = open(devname, O_RDWR);
   DEBUGASSERT(fd >= 0);  /* open() should never fail */
 
@@ -273,10 +255,11 @@ static int ptmx_open(FAR struct file *filep)
   DEBUGASSERT(ret >= 0);  /* unlink() should never fail */
   UNUSED(ret);
 
-  /* Return the master file descriptor */
+  /* Return the encoded, master file descriptor */
 
   ptmx_semgive();
-  return fd;
+  DEBUGASSERT((unsigned)fd <= OPEN_MAXFD);
+  return (int)OPEN_SETFD(fd);
 
 errout_with_minor:
   ptmx_minor_free(minor);
@@ -311,20 +294,57 @@ static ssize_t ptmx_write(FAR struct file *filep, FAR const char *buffer, size_t
 /****************************************************************************
  * Name: ptmx_register
  *
+ * Input Parameters:
+ *   None
+ *
  * Description:
- *   Register /dev/null
+ *   Register the master pseudo-terminal multiplexor device at /dev/ptmx
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
  *
  ****************************************************************************/
 
-void ptmx_register(void)
+int ptmx_register(void)
 {
-  FAR struct ptmx_dev_s *ptmx;
-
   /* Initialize driver state */
 
   sem_init(&g_ptmx.px_exclsem, 0, 1);
 
   /* Register the PTMX driver */
 
-  (void)register_driver("/dev/ptmx", &g_ptmx_fops, 0666, NULL);
+  return register_driver("/dev/ptmx", &g_ptmx_fops, 0666, NULL);
+}
+
+/****************************************************************************
+ * Name: ptmx_minor_free
+ *
+ * Description:
+ *   De-allocate a PTY minor number.
+ *
+ * Assumptions:
+ *   Caller hold the px_exclsem
+ *
+ ****************************************************************************/
+
+void ptmx_minor_free(uint8_t minor)
+{
+  int index;
+  int bitno;
+
+  /* Free the address by clearing the associated bit in the px_alloctab[]; */
+
+  index = minor >> 5;
+  bitno = minor & 31;
+
+  DEBUGASSERT((g_ptmx.px_alloctab[index] |= (1 << bitno)) != 0);
+  g_ptmx.px_alloctab[index] &= ~(1 << bitno);
+
+  /* Reset the next pointer if the one just released has a lower value */
+
+  if (minor < g_ptmx.px_next)
+    {
+      g_ptmx.px_next = minor;
+    }
 }

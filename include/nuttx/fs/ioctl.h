@@ -137,7 +137,10 @@
                                            * OUT: Bytes readable from this fd
                                            */
 #define FIONWRITE       _FIOC(0x0006)     /* IN:  Location to return value (int *)
-                                           * OUT: Bytes writable to this fd
+                                           * OUT: Number bytes in send queue
+                                           */
+#define FIONSPACE       _FIOC(0x0007)     /* IN:  Location to return value (int *)
+                                           * OUT: Free space in send queue.
                                            */
 
 /* NuttX file system ioctl definitions **************************************/
@@ -251,7 +254,7 @@
                                            * IN: None
                                            * OUT: None */
 
-/* NuttX PWM ioctl definitions (see nuttx/pwm.h) ****************************/
+/* NuttX PWM ioctl definitions (see nuttx/drivers/pwm.h) ****************************/
 
 #define _PWMIOCVALID(c)   (_IOC_TYPE(c)==_PWMIOCBASE)
 #define _PWMIOC(nr)       _IOC(_PWMIOCBASE,nr)
@@ -341,7 +344,7 @@
 #define _RELAYIOC(nr)     _IOC(_RELAYBASE,nr)
 
 /* CAN driver ioctl definitions *********************************************/
-/* (see nuttx/can.h */
+/* (see nuttx/drivers/can.h */
 
 #define _CANIOCVALID(c)   (_IOC_TYPE(c)==_CANBASE)
 #define _CANIOC(nr)       _IOC(_CANBASE,nr)

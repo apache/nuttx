@@ -244,7 +244,7 @@ void up_irqinitialize(void)
    * configured pin interrupts.
    */
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_LPC11_GPIOIRQ
   lpc11_gpioirqinitialize();
 #endif
 

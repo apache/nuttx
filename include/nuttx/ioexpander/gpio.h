@@ -41,70 +41,111 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
+
 #include <nuttx/fs/ioctl.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Command:     GPIO_WRITE
+/* Command:     GPIOC_WRITE
  * Description: Set the value of an output GPIO
- * Argument:    0=output a low value; 1=outut a high value
+ * Argument:    T0=output a low value; 1=outut a high value
  *
- * Command:     GPIO_READ
+ * Command:     GPIOC_READ
  * Description: Read the value of an input or output GPIO
- * Argument:    A pointer to an integer value to receive the result:
- *              0=low value; 1=high value.
+ * Argument:    A pointer to an bool value to receive the result:
+ *              false=low value; true=high value.
+ *
+ * Command:     GPIOC_PINTYPE
+ * Description: Return the GPIO pin type.
+ * Argument:    A pointer to an instance of type enum gpio_pintype_e
+ *
+ * Command:     GPIOC_REGISTER
+ * Description: Register to receive a signal whenever there an interrupt
+ *              is received on an input gpio pin.  This feature, of course,
+ *              depends upon interrupt GPIO support from the platform.
+ * Argument:    The number of signal to be generated when the interrupt
+ *              occurs.
+ *
+ * Command:     GPIOC_UNREGISTER
+ * Description: Stop receiving signals for pin interrupts.
+ * Argument:    None.
  */
 
-#define GPIO_WRITE _GPIOC(1)
-#define GPIO_READ  _GPIOC(2)
+#define GPIOC_WRITE      _GPIOC(1)
+#define GPIOC_READ       _GPIOC(2)
+#define GPIOC_PINTYPE    _GPIOC(3)
+#define GPIOC_REGISTER   _GPIOC(4)
+#define GPIOC_UNREGISTER _GPIOC(5)
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
-/* Common interface definition.  Must be cast-compatible with struct
- * gpio_input_dev_s and struct gpio_output_dev_s
+/* Identifies the type of the GPIO pin */
+
+enum gpio_pintype_e
+{
+  GPIO_INPUT_PIN = 0,
+  GPIO_OUTPUT_PIN,
+  GPIO_INTERRUPT_PIN,
+  GPIO_NPINTYPES
+};
+
+/* Interrupt callback */
+
+struct gpio_dev_s;
+typedef CODE int (*pin_interrupt_t)(FAR struct gpio_dev_s *dev);
+
+/* Pin interface vtable definition.  Instances of this vtable are read-only
+ * and may reside in FLASH.
+ *
+ *   - go_read.  Required for all all pin types.
+ *   - go_write.  Required only for the GPIO_OUTPUT_PIN pin type.  Unused
+ *     for other pin types may be NULL.
+ *   - go_attach and gp_eanble.  Required only the GPIO_INTERRUPT_PIN pin
+ *     type.  Unused for other pin types may be NULL.
  */
 
-struct gpio_common_dev_s
+struct gpio_dev_s;
+struct gpio_operations_s
 {
-  bool gp_output;
-  uint8_t gp_unused[3];
+  /* Interface methods */
+
+  CODE int (*go_read)(FAR struct gpio_dev_s *dev, FAR bool *value);
+  CODE int (*go_write)(FAR struct gpio_dev_s *dev, bool value);
+  CODE int (*go_attach)(FAR struct gpio_dev_s *dev,
+                        pin_interrupt_t callback);
+  CODE int (*go_enable)(FAR struct gpio_dev_s *dev, bool enable);
 };
 
-/* The interface to a GPIO input pin */
+/* Pin interface definition.  Must lie in writable memory. */
 
-struct gpio_input_dev_s
+struct gpio_dev_s
 {
-  /* Common fields */
+  /* Information provided from the lower half driver to the upper half
+   * driver when gpio_pin_register() is called.
+   */
 
-  bool gpin_output;
-  uint8_t gpin_unused[3];
+  uint8_t gp_pintype;  /* See enum gpio_pintype_e */;
 
-  /* Fields unique to input pins */
+  /* Writable storage used by the upper half driver */
 
-  CODE int (*gpin_read)(FAR struct gpio_input_dev_s *dev, FAR int *value);
+  uint8_t gp_signo;    /* signo to use when signaling a GPIO interrupt */
+  pid_t gp_pid;        /* The task to be signalled */
 
-  /* Lower-half private definitions may follow */
-};
+  /* Read-only pointer to GPIO device operations (also provided by the
+   * lower half driver).
+   */
 
-/* The interface to a GPIO input pin */
+  FAR const struct gpio_operations_s *gp_ops;
 
-struct gpio_output_dev_s
-{
-  /* Common fields */
-
-  bool gpout_output;
-  uint8_t gpout_unused[3];
-
-  /* Fields unique to output pins */
-
-  CODE int (*gpout_read)(FAR struct gpio_output_dev_s *dev, FAR int *value);
-  CODE int (*gpout_write)(FAR struct gpio_output_dev_s *dev, int value);
-
-  /* Lower-half private definitions may follow */
+  /* Device specific, lower-half information may follow. */
 };
 
 /****************************************************************************
@@ -120,24 +161,46 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: gpio_input_register
+ * Name: gpio_pin_register
  *
  * Description:
- *   Register GPIO input pin device driver.
+ *   Register GPIO pin device driver.
+ *
+ *   - Input pin types will be registered at /dev/gpinN
+ *   - Output pin types will be registered at /dev/gpoutN
+ *   - Interrupt pin types will be registered at /dev/gpintN
+ *
+ *   Where N is the provided minor number in the range of 0-99.
+ *
  *
  ****************************************************************************/
 
-int gpio_input_register(FAR struct gpio_input_dev_s *dev, int minor);
+int gpio_pin_register(FAR struct gpio_dev_s *dev, int minor);
 
 /****************************************************************************
- * Name: gpio_output_register
+ * Name: gpio_lower_half
  *
  * Description:
- *   Register GPIO output pin device driver.
+ *   Create a GPIO pin device driver instance for an I/O expander pin.
+ *   The I/O expander pin must have already been configured by the caller
+ *   for the particular pintype.
+ *
+ * Input Parameters:
+ *   ioe     - An instance of the I/O expander interface
+ *   pin     - The I/O expander pin number for the driver
+ *   pintype - See enum gpio_pintype_e
+ *   minor   - The minor device number to use when registering the device
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-int gpio_output_register(FAR struct gpio_output_dev_s *dev, int minor);
+#ifdef CONFIG_GPIO_LOWER_HALF
+struct ioexpander_dev_s;
+int gpio_lower_half(FAR struct ioexpander_dev_s *ioe, unsigned int pin,
+                    enum gpio_pintype_e pintype, int minor);
+#endif
 
 #ifdef __cplusplus
 }

@@ -92,6 +92,12 @@ static int pca9555_multireadpin(FAR struct ioexpander_dev_s *dev,
 static int pca9555_multireadbuf(FAR struct ioexpander_dev_s *dev,
              FAR uint8_t *pins, FAR bool *values, int count);
 #endif
+#ifdef CONFIG_IOEXPANDER_INT_ENABLE
+static FAR void *pca9555_attach(FAR struct ioexpander_dev_s *dev,
+             ioe_pinset_t pinset, ioe_callback_t callback, FAR void *arg);
+static int pca9555_detach(FAR struct ioexpander_dev_s *dev,
+             FAR void *handle);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -110,17 +116,23 @@ static struct pca9555_dev_s g_pca9555;
 static struct pca9555_dev_s *g_pca9555list;
 #endif
 
+/* I/O expander vtable */
+
 static const struct ioexpander_ops_s g_pca9555_ops =
 {
   pca9555_direction,
   pca9555_option,
   pca9555_writepin,
   pca9555_readpin,
-  pca9555_readbuf,
+  pca9555_readbuf
 #ifdef CONFIG_IOEXPANDER_MULTIPIN
-  pca9555_multiwritepin,
-  pca9555_multireadpin,
-  pca9555_multireadbuf,
+  , pca9555_multiwritepin
+  , pca9555_multireadpin
+  , pca9555_multireadbuf
+#endif
+#ifdef CONFIG_IOEXPANDER_INT_ENABLE
+  , pca9555_attach
+  , pca9555_detach
 #endif
 };
 
@@ -223,7 +235,7 @@ static int pca9555_setbit(FAR struct pca9555_dev_s *pca, uint8_t addr,
 
   buf[0] = addr;
 
-#ifdef CONFIG_IOEXPANDER_SHADOW_MODE
+#ifdef CONFIG_PCA9555_SHADOW_MODE
   /* Get the shadowed register value */
 
   buf[1] = pca->sreg[addr];
@@ -247,14 +259,14 @@ static int pca9555_setbit(FAR struct pca9555_dev_s *pca, uint8_t addr,
       buf[1] &= ~(1 << pin);
     }
 
-#ifdef CONFIG_IOEXPANDER_SHADOW_MODE
+#ifdef CONFIG_PCA9555_SHADOW_MODE
   /* Save the new register value in the shadow register */
 
   pca->sreg[addr] = buf[1];
 #endif
 
   ret = pca9555_write(pca, buf, 2);
-#ifdef CONFIG_IOEXPANDER_RETRY
+#ifdef CONFIG_PCA9555_RETRY
   if (ret != OK)
     {
       /* Try again (only once) */
@@ -296,7 +308,7 @@ static int pca9555_getbit(FAR struct pca9555_dev_s *pca, uint8_t addr,
       return ret;
     }
 
-#ifdef CONFIG_IOEXPANDER_SHADOW_MODE
+#ifdef CONFIG_PCA9555_SHADOW_MODE
   /* Save the new register value in the shadow register */
 
   pca->sreg[addr] = buf;
@@ -310,7 +322,15 @@ static int pca9555_getbit(FAR struct pca9555_dev_s *pca, uint8_t addr,
  * Name: pca9555_direction
  *
  * Description:
- *  See include/nuttx/ioexpander/ioexpander.h
+ *   Set the direction of an ioexpander pin. Required.
+ *
+ * Input Parameters:
+ *   dev - Device-specific state data
+ *   pin - The index of the pin to alter in this call
+ *   dir - One of the IOEXPANDER_DIRECTION_ macros
+ *
+ * Returned Value:
+ *   0 on success, else a negative error code
  *
  ****************************************************************************/
 
@@ -333,7 +353,18 @@ static int pca9555_direction(FAR struct ioexpander_dev_s *dev, uint8_t pin,
  * Name: pca9555_option
  *
  * Description:
- *  See include/nuttx/ioexpander/ioexpander.h
+ *   Set pin options. Required.
+ *   Since all IO expanders have various pin options, this API allows setting
+ *     pin options in a flexible way.
+ *
+ * Input Parameters:
+ *   dev - Device-specific state data
+ *   pin - The index of the pin to alter in this call
+ *   opt - One of the IOEXPANDER_OPTION_ macros
+ *   val - The option's value
+ *
+ * Returned Value:
+ *   0 on success, else a negative error code
  *
  ****************************************************************************/
 
@@ -341,11 +372,12 @@ static int pca9555_option(FAR struct ioexpander_dev_s *dev, uint8_t pin,
                           int opt, FAR void *val)
 {
   FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s *)dev;
-  int ival = (int)val;
   int ret = -EINVAL;
 
   if (opt == IOEXPANDER_OPTION_INVERT)
     {
+      int ival = (int)((intptr_t)val);
+
       /* Get exclusive access to the PCA555 */
 
       pca9555_lock(pca);
@@ -360,7 +392,16 @@ static int pca9555_option(FAR struct ioexpander_dev_s *dev, uint8_t pin,
  * Name: pca9555_writepin
  *
  * Description:
- *  See include/nuttx/ioexpander/ioexpander.h
+ *   Set the pin level. Required.
+ *
+ * Input Parameters:
+ *   dev - Device-specific state data
+ *   pin - The index of the pin to alter in this call
+ *   val - The pin level. Usually TRUE will set the pin high,
+ *         except if OPTION_INVERT has been set on this pin.
+ *
+ * Returned Value:
+ *   0 on success, else a negative error code
  *
  ****************************************************************************/
 
@@ -382,7 +423,17 @@ static int pca9555_writepin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
  * Name: pca9555_readpin
  *
  * Description:
- *  See include/nuttx/ioexpander/ioexpander.h
+ *   Read the actual PIN level. This can be different from the last value written
+ *      to this pin. Required.
+ *
+ * Input Parameters:
+ *   dev    - Device-specific state data
+ *   pin    - The index of the pin
+ *   valptr - Pointer to a buffer where the pin level is stored. Usually TRUE
+ *            if the pin is high, except if OPTION_INVERT has been set on this pin.
+ *
+ * Returned Value:
+ *   0 on success, else a negative error code
  *
  ****************************************************************************/
 
@@ -404,7 +455,16 @@ static int pca9555_readpin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
  * Name: pca9555_readbuf
  *
  * Description:
- *  See include/nuttx/ioexpander/ioexpander.h
+ *   Read the buffered pin level.
+ *   This can be different from the actual pin state. Required.
+ *
+ * Input Parameters:
+ *   dev    - Device-specific state data
+ *   pin    - The index of the pin
+ *   valptr - Pointer to a buffer where the level is stored.
+ *
+ * Returned Value:
+ *   0 on success, else a negative error code
  *
  ****************************************************************************/
 
@@ -448,7 +508,7 @@ static int pca9555_getmultibits(FAR struct pca9555_dev_s *pca, uint8_t addr,
       return ret;
     }
 
-#ifdef CONFIG_IOEXPANDER_SHADOW_MODE
+#ifdef CONFIG_PCA9555_SHADOW_MODE
   /* Save the new register value in the shadow register */
 
   pca->sreg[addr]   = buf[0];
@@ -481,7 +541,16 @@ static int pca9555_getmultibits(FAR struct pca9555_dev_s *pca, uint8_t addr,
  * Name: pca9555_multiwritepin
  *
  * Description:
- *  See include/nuttx/ioexpander/ioexpander.h
+ *   Set the pin level for multiple pins. This routine may be faster than
+ *   individual pin accesses. Optional.
+ *
+ * Input Parameters:
+ *   dev - Device-specific state data
+ *   pins - The list of pin indexes to alter in this call
+ *   val - The list of pin levels.
+ *
+ * Returned Value:
+ *   0 on success, else a negative error code
  *
  ****************************************************************************/
 
@@ -506,7 +575,7 @@ static int pca9555_multiwritepin(FAR struct ioexpander_dev_s *dev,
    * this would not save much.
    */
 
-#ifndef CONFIG_IOEXPANDER_SHADOW_MODE
+#ifndef CONFIG_PCA9555_SHADOW_MODE
   ret = pca9555_writeread(pca, &addr, 1, &buf[1], 2);
   if (ret < 0)
     {
@@ -550,7 +619,7 @@ static int pca9555_multiwritepin(FAR struct ioexpander_dev_s *dev,
   /* Now write back the new pins states */
 
   buf[0] = addr;
-#ifdef CONFIG_IOEXPANDER_SHADOW_MODE
+#ifdef CONFIG_PCA9555_SHADOW_MODE
   /* Save the new register values in the shadow register */
   pca->sreg[addr] = buf[1];
   pca->sreg[addr+1] = buf[2];
@@ -565,7 +634,16 @@ static int pca9555_multiwritepin(FAR struct ioexpander_dev_s *dev,
  * Name: pca9555_multireadpin
  *
  * Description:
- *  See include/nuttx/ioexpander/ioexpander.h
+ *   Read the actual level for multiple pins. This routine may be faster than
+ *   individual pin accesses. Optional.
+ *
+ * Input Parameters:
+ *   dev    - Device-specific state data
+ *   pin    - The list of pin indexes to read
+ *   valptr - Pointer to a buffer where the pin levels are stored.
+ *
+ * Returned Value:
+ *   0 on success, else a negative error code
  *
  ****************************************************************************/
 
@@ -589,7 +667,16 @@ static int pca9555_multireadpin(FAR struct ioexpander_dev_s *dev,
  * Name: pca9555_multireadbuf
  *
  * Description:
- *  See include/nuttx/ioexpander/ioexpander.h
+ *   Read the buffered level of multiple pins. This routine may be faster than
+ *   individual pin accesses. Optional.
+ *
+ * Input Parameters:
+ *   dev    - Device-specific state data
+ *   pin    - The index of the pin
+ *   valptr - Pointer to a buffer where the buffered levels are stored.
+ *
+ * Returned Value:
+ *   0 on success, else a negative error code
  *
  ****************************************************************************/
 
@@ -614,6 +701,92 @@ static int pca9555_multireadbuf(FAR struct ioexpander_dev_s *dev,
 #ifdef CONFIG_PCA9555_INT_ENABLE
 
 /****************************************************************************
+ * Name: pca9555_attach
+ *
+ * Description:
+ *   Attach and enable a pin interrupt callback function.
+ *
+ * Input Parameters:
+ *   dev      - Device-specific state data
+ *   pinset   - The set of pin events that will generate the callback
+ *   callback - The pointer to callback function.  NULL will detach the
+ *              callback.
+ *   arg      - User-provided callback argument
+ *
+ * Returned Value:
+ *   A non-NULL handle value is returned on success.  This handle may be
+ *   used later to detach and disable the pin interrupt.
+ *
+ ****************************************************************************/
+
+static FAR void *pca9555_attach(FAR struct ioexpander_dev_s *dev,
+                                ioe_pinset_t pinset, ioe_callback_t callback,
+                                FAR void *arg)
+{
+  FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s *)dev;
+  FAR void *handle = NULL;
+  int i;
+
+  /* Get exclusive access to the PCA555 */
+
+  pca9555_lock(pca);
+
+  /* Find and available in entry in the callback table */
+
+  for (i = 0; i < CONFIG_PCA9555_INT_NCALLBACKS; i++)
+    {
+       /* Is this entry available (i.e., no callback attached) */
+
+       if (pca->cb[i].cbfunc == NULL)
+         {
+           /* Yes.. use this entry */
+
+           pca->cb[i].pinset = pinset;
+           pca->cb[i].cbfunc = callback;
+           pca->cb[i].cbarg  = arg;
+           handle            = &pca->cb[i];
+           break;
+         }
+    }
+
+  /* Add this callback to the table */
+
+  pca9555_unlock(pca);
+  return handle;
+}
+
+/****************************************************************************
+ * Name: pca9555_detach
+ *
+ * Description:
+ *   Detach and disable a pin interrupt callback function.
+ *
+ * Input Parameters:
+ *   dev      - Device-specific state data
+ *   handle   - The non-NULL opaque value return by pca9555_attch()
+ *
+ * Returned Value:
+ *   0 on success, else a negative error code
+ *
+ ****************************************************************************/
+
+static int pca9555_detach(FAR struct ioexpander_dev_s *dev, FAR void *handle)
+{
+  FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s *)dev;
+  FAR struct pca9555_callback_s *cb = (FAR struct pca9555_callback_s *)handle;
+
+  DEBUGASSERT(pca != NULL && cb != NULL);
+  DEBUGASSERT((uintptr_t)cb >= (uintptr_t)&pca->cb[0] &&
+              (uintptr_t)cb <= (uintptr_t)&pca->cb[CONFIG_TCA64XX_INT_NCALLBACKS-1]);
+  UNUSED(pca);
+
+  cb->pinset = 0;
+  cb->cbfunc = NULL;
+  cb->cbarg  = NULL;
+  return OK;
+}
+
+/****************************************************************************
  * Name: pca9555_irqworker
  *
  * Description:
@@ -627,33 +800,46 @@ static void pca9555_irqworker(void *arg)
   FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s *)arg;
   uint8_t addr = PCA9555_REG_INPUT;
   uint8_t buf[2];
-  unsigned int bits;
+  ioe_pinset_t pinset;
   int ret;
+  int i;
 
   /* Read inputs */
 
   ret = pca9555_writeread(pca, &addr, 1, buf, 2);
   if (ret == OK)
     {
-#ifdef CONFIG_IOEXPANDER_SHADOW_MODE
+#ifdef CONFIG_PCA9555_SHADOW_MODE
       /* Don't forget to update the shadow registers at this point */
 
-      pca->sreg[addr] = buf;
+      pca->sreg[addr]   = buf[0];
+      pca->sreg[addr+1] = buf[1];
 #endif
-      bits = ((unsigned int)buf[0] << 8) | buf[1];
+      /* Create a 16-bit pinset */
 
-      /* If signal PID is registered, enqueue signal. */
+      pinset = ((unsigned int)buf[0] << 8) | buf[1];
 
-      if (pca->dev.sigpid)
+      /* Perform pin interrupt callbacks */
+
+      for (i = 0; i < CONFIG_PCA9555_INT_NCALLBACKS; i++)
         {
-#ifdef CONFIG_CAN_PASS_STRUCTS
-          union sigval value;
-          value.sival_int = (int)bits;
-          ret = sigqueue(pca->dev.sigpid, pca->dev.sigval, value);
-#else
-          ret = sigqueue(pca->dev.sigpid, pca->dev.sigval,
-                         (FAR void *)bits);
-#endif
+          /* Is this entry valid (i.e., callback attached)?  If so, did
+           * any of the requested pin interrupts occur?
+           */
+
+          if (pca->cb[i].cbfunc != NULL)
+            {
+              /* Did any of the requested pin interrupts occur? */
+
+              ioe_pinset_t match = pinset & pca->cb[i].pinset;
+              if (match != 0)
+                {
+                  /* Yes.. perform the callback */
+
+                  (void)pca->cb[i].cbfunc(&pca->dev, match,
+                                          pca->cb[i].cbarg);
+                }
+            }
         }
     }
 
@@ -697,10 +883,10 @@ static int pca9555_interrupt(int irq, FAR void *context)
    * completed.
    */
 
-  if (work_available(&pca->dev.work))
+  if (work_available(&pca->work))
     {
       pca->config->enable(pca->config, FALSE);
-      work_queue(HPWORK, &pca->dev.work, pca9555_irqworker,
+      work_queue(HPWORK, &pca->work, pca9555_irqworker,
                  (FAR void *)pca, 0);
     }
 

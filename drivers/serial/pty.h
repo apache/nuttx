@@ -1,7 +1,7 @@
 /****************************************************************************
- * include/nuttx/fs/ramdisk.h
+ * drivers/serial/pty.h
  *
- *   Copyright (C) 2008-2009, 2012-2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,33 +33,14 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_FS_RAMDISK_H
-#define __INCLUDE_NUTTX_FS_RAMDISK_H
+#ifndef __DRIVERS_SERIAL_PTY_H
+#define __DRIVERS_SERIAL_PTY_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <stdint.h>
-#include <stdbool.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-/* Values for rdflags */
-
-#define RDFLAG_WRENABLED       (1 << 0) /* Bit 0: 1=Can write to RAM disk */
-#define RDFLAG_FUNLINK         (1 << 1) /* Bit 1: 1=Free memory when unlinked */
-
-/* For internal use by the driver only */
-
-#define RDFLAG_UNLINKED        (1 << 2) /* Bit 2: 1=Driver has been unlinked */
-
-/****************************************************************************
- * Type Definitions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Function Prototypes
@@ -74,30 +55,42 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: ramdisk_register or romdisk_register
+ * Name: ptmx_minor_free
  *
  * Description:
- *   Non-standard function to register a ramdisk or a romdisk
+ *   De-allocate a PTY minor number.
  *
- * Input Parmeters:
- *   minor:         Selects suffix of device named /dev/ramN, N={1,2,3...}
- *   nsectors:      Number of sectors on device
- *   sectize:       The size of one sector
- *   rdflags:       See RDFLAG_* definitions
- *   buffer:        RAM disk backup memory
- *
- * Returned Valued:
- *   Zero on success; a negated errno value on failure.
+ * Assumptions:
+ *   Caller hold the px_exclsem
  *
  ****************************************************************************/
 
-#ifdef CONFIG_FS_WRITABLE
-int ramdisk_register(int minor, FAR uint8_t *buffer, uint32_t nsectors,
-                     uint16_t sectize, uint8_t rdflags);
-#define romdisk_register(m,b,n,s) ramdisk_register(m,(FAR uint8_t *)b,n,s,0)
-#else
-int romdisk_register(int minor, FAR const uint8_t *buffer, uint32_t nsectors,
-                     uint16_t sectize);
+#ifdef CONFIG_PSEUDOTERM_SUSV1
+void ptmx_minor_free(uint8_t minor);
+#endif
+
+/****************************************************************************
+ * Name: pty_register
+ *
+ * Description:
+ *   Create and register PTY master and slave devices.  The master device
+ *   will be registered at /dev/ptyN and slave at /dev/pts/N where N is
+ *   the provided minor number.
+ *
+ *   The slave side of the interface is always locked initially.  The
+ *   master must call unlockpt() before the slave device can be opened.
+ *
+ * Input Parameters:
+ *   minor - The number that qualifies the naming of the created devices.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PSEUDOTERM_SUSV1
+int pty_register(int minor);
 #endif
 
 #undef EXTERN
@@ -105,4 +98,4 @@ int romdisk_register(int minor, FAR const uint8_t *buffer, uint32_t nsectors,
 }
 #endif
 
-#endif /* __INCLUDE_NUTTX_FS_RAMDISK_H */
+#endif /* __DRIVERS_SERIAL_PTY_H */

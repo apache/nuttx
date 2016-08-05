@@ -24,24 +24,16 @@ Development Environment
 ^^^^^^^^^^^^^^^^^^^^^^^
 
   Either Linux or Cygwin on Windows can be used for the development environment.
-  The source has been built only using the GNU toolchain (see below).  Other
-  toolchains will likely cause problems. Testing was performed using the Cygwin
-  environment.
+  The source has been built only using the GNU toolchain.  Testing was performed
+  using the Cygwin environment.
 
 GNU Toolchain Options
 ^^^^^^^^^^^^^^^^^^^^^
 
-  The NuttX make system has been modified to support the following different
-  toolchain options.
-
-  1. The CodeSourcery GNU toolchain,
-  2. The devkitARM GNU toolchain, ok
-  4. The NuttX buildroot Toolchain (see below).
-
   All testing has been conducted using the NuttX buildroot toolchain.  To use
-  the CodeSourcery, devkitARM, Atollic, or AtmelStudio GNU toolchain, you simply
-  need to add one of the following configuration options to your .config (or
-  defconfig) file:
+  other toolchains, such as the CodeSourcery, devkitARM, Atollic, or AtmelStudio
+  GNU toolchain, you simply need to add one of the following configuration options
+  to your .config (or defconfig) file:
 
     CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y  : CodeSourcery under Windows
     CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYL=y  : CodeSourcery under Linux
@@ -51,8 +43,8 @@ GNU Toolchain Options
     CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL=y      : Generic GCC ARM EABI toolchain for Linux
     CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y      : Generic GCC ARM EABI toolchain for Windows
 
-  If you are not using CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT, then you may also have to modify
-  the PATH in the setenv.h file if your make cannot find the tools.
+  You may also have to modify the PATH in the setenv.h file if your make cannot
+  find the tools.
 
   NOTE about Windows native toolchains
   ------------------------------------
@@ -157,11 +149,11 @@ NuttX EABI "buildroot" Toolchain
   details PLUS some special instructions that you will need to follow if you are
   building a Cortex-M3 toolchain for Cygwin under Windows.
 
-  NOTE:  Unfortunately, the 4.6.3 EABI toolchain is not compatible with the
-  the NXFLAT tools.  See the top-level TODO file (under "Binary loaders") for
-  more information about this problem. If you plan to use NXFLAT, please do not
-  use the GCC 4.6.3 EABI toochain; instead use the GCC 4.3.3 OABI toolchain.
-  See instructions below.
+  NOTE:  Unfortunately, the 4.6.3 (and later) GCC toolchain is not compatible
+  with the the NXFLAT tools.  See the top-level TODO file (under "Binary loaders")
+  for more information about this problem. If you plan to use NXFLAT, please do
+  not use the GCC 4.6.3 toochain; instead use an older toolchain (such as the GCC
+  4.3.3 OABI toolchain discussed below).
 
 NuttX OABI "buildroot" Toolchain
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

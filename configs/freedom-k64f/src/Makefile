@@ -69,4 +69,8 @@ ifeq ($(CONFIG_USBMSC),y)
 CSRCS += k64_usbmsc.c
 endif
 
+ifeq ($(CONFIG_PWM),y)
+CSRCS += k64_pwm.c
+endif
+
 include $(TOPDIR)/configs/Board.mk

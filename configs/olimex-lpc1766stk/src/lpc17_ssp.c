@@ -66,8 +66,8 @@
 
 #undef HAVE_SPI_CALLBACK
 #ifdef CONFIG_SPI_CALLBACK
-#  ifndef CONFIG_GPIO_IRQ
-#    warning "CONFIG_GPIO_IRQ is required to support CONFIG_SPI_CALLBACK"
+#  ifndef CONFIG_LPC17_GPIOIRQ
+#    warning "CONFIG_LPC17_GPIOIRQ is required to support CONFIG_SPI_CALLBACK"
 #  else
 #    define HAVE_SPI_CALLBACK 1
 #  endif

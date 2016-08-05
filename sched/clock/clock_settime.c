@@ -48,6 +48,9 @@
 #include <nuttx/irq.h>
 
 #include "clock/clock.h"
+#ifdef CONFIG_CLOCK_TIMEKEEPING
+#  include "clock/clock_timekeeping.h"
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -76,6 +79,7 @@ int clock_settime(clockid_t clock_id, FAR const struct timespec *tp)
 
   if (clock_id == CLOCK_REALTIME)
     {
+#ifndef CONFIG_CLOCK_TIMEKEEPING
       /* Interrupts are disabled here so that the in-memory time
        * representation and the RTC setting will be as close as
        * possible.
@@ -123,6 +127,9 @@ int clock_settime(clockid_t clock_id, FAR const struct timespec *tp)
       sinfo("basetime=(%ld,%lu) bias=(%ld,%lu)\n",
             (long)g_basetime.tv_sec, (unsigned long)g_basetime.tv_nsec,
             (long)bias.tv_sec, (unsigned long)bias.tv_nsec);
+#else
+      ret = clock_timekeeping_set_wall_time(tp);
+#endif
     }
   else
     {

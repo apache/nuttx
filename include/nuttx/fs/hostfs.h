@@ -40,94 +40,156 @@
  * Included Files
  ****************************************************************************/
 
+#ifndef __SIM__
+#  include <sys/types.h>
+#  include <sys/stat.h>
+#  include <sys/statfs.h>
+#  include <dirent.h>
+#  include <time.h>
+#else
+#  include <stdint.h>
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define HOST_ST_MODE_REG        0x01000
-#define HOST_ST_MODE_DIR        0x02000
-#define HOST_ST_MODE_CHR        0x04000
-#define HOST_ST_MODE_BLK        0x08000
-#define HOST_ST_MODE_PIPE       0x10000
-#define HOST_ST_MODE_LINK       0x20000
+#ifdef __SIM__
 
-#define HOSTFS_FLAG_RDOK        0x0001
-#define HOSTFS_FLAG_WROK        0x0002
-#define HOSTFS_FLAG_CREAT       0x0004
-#define HOSTFS_FLAG_EXCL        0x0008
-#define HOSTFS_FLAG_APPEND      0x0010
-#define HOSTFS_FLAG_TRUNC       0x0020
+/* These must exactly match the definitions from include/dirent.h: */
 
-#define HOSTFS_DTYPE_FILE       0x0001
-#define HOSTFS_DTYPE_CHR        0x0002
-#define HOSTFS_DTYPE_BLK        0x0004
-#define HOSTFS_DTYPE_DIRECTORY  0x0008
+#define NUTTX_DTYPE_FILE        0x01
+#define NUTTX_DTYPE_CHR         0x02
+#define NUTTX_DTYPE_BLK         0x04
+#define NUTTX_DTYPE_DIRECTORY   0x08
+
+/* These must exactly match the definitions from include/sys/stat.h: */
+
+#define NUTTX_S_IFIFO           0010000 
+#define NUTTX_S_IFCHR           0020000
+#define NUTTX_S_IFDIR           0040000
+#define NUTTX_S_IFBLK           0060000
+#define NUTTX_S_IFREG           0100000
+#define NUTTX_S_IFLNK           0120000
+
+/* These must exactly match the definitions from include/fctnl.h: */
+
+#define NUTTX_O_RDONLY   (1 << 0)  /* Open for read access (only) */
+#define NUTTX_O_WRONLY   (1 << 1)  /* Open for write access (only) */
+#define NUTTX_O_CREAT    (1 << 2)  /* Create file/sem/mq object */
+#define NUTTX_O_EXCL     (1 << 3)  /* Name must not exist when opened  */
+#define NUTTX_O_APPEND   (1 << 4)  /* Keep contents, append to end */
+#define NUTTX_O_TRUNC    (1 << 5)  /* Delete contents */
+#define NUTTX_O_NONBLOCK (1 << 6)  /* Don't wait for data */
+#define NUTTX_O_SYNC     (1 << 7)  /* Synchronize output on write */
+#define NUTTX_O_BINARY   (1 << 8)  /* Open the file in binary mode. */
+
+#define NUTTX_O_RDWR     (NUTTX_O_RDONLY | NUTTX_O_WRONLY)
+
+/* Should match definition in include/limits.h */
+
+#define NUTTX_NAME_MAX   32
+
+#endif /* __SIM__ */
 
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
 
-struct host_dirent_s
+#ifdef __SIM__
+
+/* These must match the definitions in include/sys/types.h */
+
+typedef uintptr_t    nuttx_size_t;
+typedef int32_t      nuttx_off_t;
+typedef unsigned int nuttx_mode_t;
+typedef int16_t      nuttx_blksize_t;
+typedef uint32_t     nuttx_blkcnt_t;
+
+/* These must match the definition in include/time.h */
+
+typedef uint32_t     nuttx_time_t;
+
+/* These must exactly match the definition from include/dirent.h: */
+
+struct nuttx_dirent_s
 {
-  size_t            d_ino;
-  size_t            d_off;
-  unsigned short    d_reclen;
-  unsigned char     d_type;
-  char              d_name[256];
+  uint8_t      d_type;             /* type of file */
+  char         d_name[NUTTX_NAME_MAX+1]; /* filename */
 };
 
-struct host_statfs_s 
+/* These must exactly match the definition from include/sys/statfs.h: */
+
+struct nuttx_statfs_s
 {
-  size_t            f_type;       /* Type of file system */
-  size_t            f_bsize;      /* Optimal transfer block size */
-  size_t            f_blocks;     /* Total data blocks in the file system */
-  size_t            f_bfree;      /* Free blocks */
-  size_t            f_bavail;     /* Free blocks available */
-  size_t            f_files;      /* Total file nodes in file system */
-  size_t            f_ffree;      /* Free file nodes in fs */
-  size_t            f_fsid;       /* File Systme ID */
-  size_t            f_namelen;    /* Max length of filenames */
-  size_t            f_frsize;     /* Fragment size */
+  uint32_t     f_type;     /* Type of filesystem */
+  nuttx_size_t f_namelen;  /* Maximum length of filenames */
+  nuttx_size_t f_bsize;    /* Optimal block size for transfers */
+  nuttx_off_t  f_blocks;   /* Total data blocks in the file system of this size */
+  nuttx_off_t  f_bfree;    /* Free blocks in the file system */
+  nuttx_off_t  f_bavail;   /* Free blocks avail to non-superuser */
+  nuttx_off_t  f_files;    /* Total file nodes in the file system */
+  nuttx_off_t  f_ffree;    /* Free file nodes in the file system */
 };
 
-struct host_stat_s 
+/* These must exactly match the definition from include/sys/stat.h: */
+
+struct nuttx_stat_s
 {
-  int               st_dev;       /* ID of the device containing file */
-  size_t            st_ino;       /* inode number */
-  size_t            st_mode;      /* protection */
-  size_t            st_nlink;     /* number of hard links */
-  size_t            st_uid;       /* user ID of owner */
-  size_t            st_gid;       /* group ID of owner */
-  size_t            st_rdev;      /* device ID */
-  size_t            st_size;      /* total size, in bytes */
-  size_t            st_blksize;   /* blocksize for file system I/O */
-  size_t            st_blocks;    /* number of 512B blocks allocated */
-  size_t            st_atim;      /* time of last access */
-  size_t            st_mtim;      /* time of last modification */
-  size_t            st_ctim;      /* time of last status change */
+  nuttx_mode_t    st_mode;    /* File type, atributes, and access mode bits */
+  nuttx_off_t     st_size;    /* Size of file/directory, in bytes */
+  nuttx_blksize_t st_blksize; /* Blocksize used for filesystem I/O */
+  nuttx_blkcnt_t  st_blocks;  /* Number of blocks allocated */
+  nuttx_time_t    st_atim;    /* Time of last access */
+  nuttx_time_t    st_mtim;    /* Time of last modification */
+  nuttx_time_t    st_ctim;    /* Time of last status change */
 };
+
+#endif /* __SIM__ */
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
+#ifdef __SIM__
 int           host_open(const char *pathname, int flags, int mode);
 int           host_close(int fd);
-ssize_t       host_read(int fd, void* buf, size_t count);
+ssize_t       host_read(int fd, void *buf, nuttx_size_t count);
+ssize_t       host_write(int fd, const void *buf, nuttx_size_t count);
+off_t         host_lseek(int fd, off_t offset, int whence);
+int           host_ioctl(int fd, int request, unsigned long arg);
+void          host_sync(int fd);
+int           host_dup(int fd);
+void         *host_opendir(const char *name);
+int           host_readdir(void* dirp, struct nuttx_dirent_s* entry);
+void          host_rewinddir(void* dirp);
+int           host_closedir(void* dirp);
+int           host_statfs(const char *path, struct nuttx_statfs_s *buf);
+int           host_unlink(const char *pathname);
+int           host_mkdir(const char *pathname, mode_t mode);
+int           host_rmdir(const char *pathname);
+int           host_rename(const char *oldpath, const char *newpath);
+int           host_stat(const char *path, struct nuttx_stat_s *buf);
+#else
+int           host_open(const char *pathname, int flags, int mode);
+int           host_close(int fd);
+ssize_t       host_read(int fd, void *buf, size_t count);
 ssize_t       host_write(int fd, const void *buf, size_t count);
 off_t         host_lseek(int fd, off_t offset, int whence);
 int           host_ioctl(int fd, int request, unsigned long arg);
 void          host_sync(int fd);
 int           host_dup(int fd);
 void         *host_opendir(const char *name);
-int           host_readdir(void* dirp, struct host_dirent_s* entry);
+int           host_readdir(void* dirp, struct dirent *entry);
 void          host_rewinddir(void* dirp);
 int           host_closedir(void* dirp);
-int           host_statfs(const char *path, struct host_statfs_s *buf);
+int           host_statfs(const char *path, struct statfs *buf);
 int           host_unlink(const char *pathname);
 int           host_mkdir(const char *pathname, mode_t mode);
 int           host_rmdir(const char *pathname);
 int           host_rename(const char *oldpath, const char *newpath);
-int           host_stat(const char *path, struct host_stat_s *buf);
+int           host_stat(const char *path, struct stat *buf);
+
+#endif /* __SIM__ */
 
 #endif /* __INCLUDE_NUTTX_FS_HOSTFS_H */

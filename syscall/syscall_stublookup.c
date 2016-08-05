@@ -154,6 +154,7 @@ uintptr_t STUB_clock_systimer(int nbr);
 uintptr_t STUB_clock_getres(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_clock_gettime(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_clock_settime(int nbr, uintptr_t parm1, uintptr_t parm2);
+uintptr_t STUB_adjtime(int nbr, uintptr_t parm1, uintptr_t parm2);
 
 /* The following are defined only if POSIX timers are supported */
 
@@ -214,7 +215,6 @@ uintptr_t STUB_fcntl(int nbr, uintptr_t parm1, uintptr_t parm2,
             uintptr_t parm6);
 uintptr_t STUB_lseek(int nbr, uintptr_t parm1, uintptr_t parm2,
             uintptr_t parm3);
-uintptr_t STUB_mkfifo(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_mmap(int nbr, uintptr_t parm1, uintptr_t parm2,
             uintptr_t parm3, uintptr_t parm4, uintptr_t parm5,
             uintptr_t parm6);
@@ -222,13 +222,16 @@ uintptr_t STUB_open(int nbr, uintptr_t parm1, uintptr_t parm2,
             uintptr_t parm3, uintptr_t parm4, uintptr_t parm5,
             uintptr_t parm6);
 uintptr_t STUB_opendir(int nbr, uintptr_t parm1);
-uintptr_t STUB_pipe(int nbr, uintptr_t parm1);
 uintptr_t STUB_readdir(int nbr, uintptr_t parm1);
 uintptr_t STUB_rewinddir(int nbr, uintptr_t parm1);
 uintptr_t STUB_seekdir(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_stat(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_statfs(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_telldir(int nbr, uintptr_t parm1);
+
+uintptr_t STUB_pipe2(int nbr, uintptr_t parm1, uintptr_t parm2);
+uintptr_t STUB_mkfifo2(int nbr, uintptr_t parm1, uintptr_t parm2,
+            uintptr_t parm3);
 
 uintptr_t STUB_fs_fdopen(int nbr, uintptr_t parm1, uintptr_t parm2,
             uintptr_t parm3);

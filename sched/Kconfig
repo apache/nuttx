@@ -167,6 +167,17 @@ config CLOCK_MONOTONIC
 
 		The value of the CLOCK_MONOTONIC clock cannot be set via clock_settime().
 
+config ARCH_HAVE_TIMEKEEPING
+	bool
+	default n
+
+config CLOCK_TIMEKEEPING
+	bool "Support timekeeping algorithms"
+	default n
+	depends on EXPERIMENTAL && ARCH_HAVE_TIMEKEEPING
+	---help---
+		CLOCK_TIMEKEEPING enables experimental time management algorithms.
+
 config JULIAN_TIME
 	bool "Enables Julian time conversions"
 	default n

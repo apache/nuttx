@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/lpc43xx/lpc43_emc.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,16 +48,22 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/************************************************************************************
- * Public Types
- ************************************************************************************/
+/* Chip select Definitions **********************************************************/
+
+#define EMC_CS0    0
+#define EMC_CS1    1
+#define EMC_CS2    2
+#define EMC_CS3    3
+
+#define EMC_DYNCS0 0
+#define EMC_DYNCS1 1
+#define EMC_DYNCS2 2
+#define EMC_DYNCS3 3
 
 /************************************************************************************
- * Public Data
+ * Public Function Prototypes
  ************************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+void lpc43_emcinit(uint32_t enable, uint32_t clock_ratio, uint32_t endian_mode);
 
 #endif /* __ARCH_ARM_SRC_LPC43XX_LPC43_EMC_H */

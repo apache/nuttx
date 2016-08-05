@@ -82,6 +82,9 @@
                                         /* 0x4000c000-0x4000ffff: Reserved */
 #define SAM_TC0_BASE         0x40100000 /* 0x40100000-0x4013ffff: Timer Counter 0 */
 #define SAM_TC1_BASE         0x40140000 /* 0x40180000-0x4017ffff: Timer Counter 1 */
+
+#define SAM_TWIMS_BASE       0x40180000 /* 0x40180000-0x401fffff: Two-wire Master/Slave */
+#define SAM_TWIN_BASE(n)     (SAM_TWIMS_BASE + ((n) << 14))
 #define SAM_TWIMS0_BASE      0x40180000 /* 0x40180000-0x401bffff: Two-wire Master/Slave Interface 0 */
 #define SAM_TWIMS1_BASE      0x401c0000 /* 0x401c0000-0x401fffff: Two-wire Master/Slave Interface 1 */
                                         /* 0x40020000-0x40023fff: Reserved */

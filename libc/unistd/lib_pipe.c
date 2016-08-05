@@ -1,8 +1,7 @@
 /****************************************************************************
- * include/nuttx/lib.h
- * Non-standard, internal APIs available in lib/.
+ * libc/unistd/lib_pipe.c
  *
- *   Copyright (C) 2007-2009, 2012-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,53 +33,44 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_LIB_H
-#define __INCLUDE_NUTTX_LIB_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/fs/fs.h>
+
+#include <unistd.h>
+
+#include <nuttx/drivers/drivers.h>
+
+#if defined(CONFIG_PIPES) && CONFIG_DEV_PIPE_SIZE > 0
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
+ * Name: pipe
+ *
+ * Description:
+ *   pipe() creates a pair of file descriptors, pointing to a pipe inode,
+ *   and  places them in the array pointed to by 'fd'. fd[0] is for reading,
+ *   fd[1] is for writing.
+ *
+ * Inputs:
+ *   fd[2] - The user provided array in which to catch the pipe file
+ *   descriptors
+ *
+ * Return:
+ *   0 is returned on success; otherwise, -1 is returned with errno set
+ *   appropriately.
+ *
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
-
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
+int pipe(int fd[2])
 {
-#else
-#define EXTERN extern
-#endif
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-/* Hook for library initialization.  No is needed now, however */
-
-#define lib_initialize()
-
-/* Functions contained in lib_streams.c *************************************/
-
-#if CONFIG_NFILE_STREAMS > 0
-struct task_group_s;
-void lib_stream_initialize(FAR struct task_group_s *group);
-void lib_stream_release(FAR struct task_group_s *group);
-#endif
-
-#undef EXTERN
-#ifdef __cplusplus
+  return pipe2(fd, CONFIG_DEV_PIPE_SIZE);
 }
-#endif
 
-#endif /* __ASSEMBLY__ */
-#endif /* __INCLUDE_NUTTX_LIB_H */
+#endif /* CONFIG_PIPES && CONFIG_DEV_PIPE_SIZE > 0 */
+

@@ -1,7 +1,7 @@
 /************************************************************************************
- * include/nuttx/can.h
+ * include/nuttx/drivers/can.h
  *
- *   Copyright (C) 2008, 2009, 2011-2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2009, 2011-2012, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef _INCLUDE_NUTTX_CAN_H
-#define _INCLUDE_NUTTX_CAN_H
+#ifndef _INCLUDE_NUTTX_DRVERS_CAN_H
+#define _INCLUDE_NUTTX_DRVERS_CAN_H
 
 /************************************************************************************
  * Included Files
@@ -60,9 +60,11 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
 /* Configuration ********************************************************************/
-/* CONFIG_CAN - Enables CAN support (one or both of CONFIG_STM32_CAN1 or
- *   CONFIG_STM32_CAN2 must also be defined)
+/* CONFIG_CAN - Enables CAN support (MCU-specific selections are also required.  For
+ *   STM32, as an example, one or both of CONFIG_STM32_CAN1 or CONFIG_STM32_CAN2
+ *   must also be defined)
  * CONFIG_CAN_EXTID - Enables support for the 29-bit extended ID.  Default
  *   Standard 11-bit IDs.
  * CONFIG_CAN_FD - Enable support for CAN FD mode.  For the upper half driver, this
@@ -794,4 +796,4 @@ int can_txready(FAR struct can_dev_s *dev);
 #endif
 
 #endif /* CONFIG_CAN */
-#endif /* _INCLUDE_NUTTX_CAN_H */
+#endif /* _INCLUDE_NUTTX_DRVERS_CAN_H */

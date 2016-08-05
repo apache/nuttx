@@ -49,7 +49,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <nuttx/pwm.h>
+#include <nuttx/drivers/pwm.h>
 #include <arch/board/board.h>
 
 #include "up_internal.h"
@@ -58,7 +58,7 @@
 #include "chip.h"
 
 #include "kinetis.h"
-#include "chip/kinetis_pwm.h"
+#include "kinetis_pwm.h"
 #include "chip/kinetis_gpio.h"
 #include "chip/kinetis_ftm.h"
 #include "chip/kinetis_sim.h"

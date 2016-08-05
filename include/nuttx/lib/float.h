@@ -1,7 +1,7 @@
 /****************************************************************************
- * include/nuttx/float.h
+ * include/nuttx/lib/float.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Reference: http://pubs.opengroup.org/onlinepubs/009695399/basedefs/float.h.html
@@ -35,8 +35,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_FLOAT_H
-#define __INCLUDE_NUTTX_FLOAT_H
+#ifndef __INCLUDE_NUTTX_LIB_FLOAT_H
+#define __INCLUDE_NUTTX_LIB_FLOAT_H
 
 /* TODO:  These values could vary with architectures toolchains.  This
  * logic should be move at least to the include/arch directory.
@@ -222,4 +222,4 @@
 #  define LDBL_MIN DBL_MIN
 #endif
 
-#endif /* __INCLUDE_NUTTX_FLOAT_H */
+#endif /* __INCLUDE_NUTTX_LIB_FLOAT_H */

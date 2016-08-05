@@ -296,6 +296,13 @@ int up_buttonevent(int x, int y, int buttons);
 int sim_ajoy_initialize(void);
 #endif
 
+/* up_ioexpander.c ********************************************************/
+
+#ifdef CONFIG_SIM_IOEXPANDER
+struct ioexpander_dev_s;
+FAR struct ioexpander_dev_s *sim_ioexpander_initialize(void);
+#endif
+
 /* up_tapdev.c ************************************************************/
 
 #if defined(CONFIG_NET_ETHERNET) && !defined(__CYGWIN__)
@@ -336,7 +343,12 @@ void netdriver_loop(void);
 
 #ifdef CONFIG_SIM_SPIFLASH
 struct spi_dev_s;
-struct spi_dev_s *up_spiflashinitialize(void);
+struct spi_dev_s *up_spiflashinitialize(FAR const char *name);
+#endif
+
+#ifdef CONFIG_SIM_QSPIFLASH
+struct qspi_dev_s;
+struct qspi_dev_s *up_qspiflashinitialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

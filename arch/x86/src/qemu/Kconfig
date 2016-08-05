@@ -25,4 +25,11 @@ config QEMU_VGA
 		graphics subsystem.  Such a conversion to the standard NuttX
 		framebuffer interface would, however, not be a big job.
 
+config QEMU_GPIOIRQ
+	bool "GPIO interrupt support"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		Enable support for GPIO interrupts (not implemented)
+
 endif

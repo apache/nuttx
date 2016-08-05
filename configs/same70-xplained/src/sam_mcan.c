@@ -43,7 +43,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/can.h>
+#include <nuttx/drivers/can.h>
 #include <arch/board/board.h>
 
 #include "sam_mcan.h"

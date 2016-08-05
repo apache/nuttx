@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/math32.h
+ * include/nuttx/lib/math32.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_MATH32_H
-#define __INCLUDE_NUTTX_MATH32_H
+#ifndef __INCLUDE_NUTTX_LIB_MATH32_H
+#define __INCLUDE_NUTTX_LIB_MATH32_H
 
 /****************************************************************************
  * Included Files
@@ -238,4 +238,4 @@ void umul64(FAR const struct uint64_s *factor1,
 }
 #endif
 
-#endif /* __INCLUDE_NUTTX_MATH32_H */
+#endif /* __INCLUDE_NUTTX_LIB_MATH32_H */

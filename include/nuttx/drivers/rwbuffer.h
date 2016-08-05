@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/rwbuffer.h
+ * include/nuttx/drivers/rwbuffer.h
  *
  *   Copyright (C) 2009, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_RWBUFFER_H
-#define __INCLUDE_NUTTX_RWBUFFER_H
+#ifndef __INCLUDE_NUTTX_DRIVERS_RWBUFFER_H
+#define __INCLUDE_NUTTX_DRIVERS_RWBUFFER_H
 
 /****************************************************************************
  * Included Files
@@ -208,4 +208,4 @@ int rwb_invalidate(FAR struct rwbuffer_s *rwb,
 #endif
 
 #endif /* CONFIG_DRVR_WRITEBUFFER || CONFIG_DRVR_READAHEAD */
-#endif /* __INCLUDE_NUTTX_RWBUFFER_H */
+#endif /* __INCLUDE_NUTTX_DRIVERS_RWBUFFER_H */

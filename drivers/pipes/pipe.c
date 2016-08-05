@@ -44,12 +44,15 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <nuttx/fs/fs.h>
+
 #include <stdio.h>
 #include <unistd.h>
 #include <semaphore.h>
 #include <fcntl.h>
 #include <errno.h>
+
+#include <nuttx/fs/fs.h>
+#include <nuttx/drivers/drivers.h>
 
 #include "pipe_common.h"
 
@@ -167,16 +170,21 @@ static int pipe_close(FAR struct file *filep)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pipe
+ * Name: pipe2
  *
  * Description:
  *   pipe() creates a pair of file descriptors, pointing to a pipe inode,
  *   and  places them in the array pointed to by 'fd'. fd[0] is for reading,
  *   fd[1] is for writing.
  *
+ *   NOTE: mkfifo2 is a special, non-standard, NuttX-only interface.  Since
+ *   the NuttX FIFOs are based in in-memory, circular buffers, the ability
+ *   to control the size of those buffers is critical for system tuning.
+ *
  * Inputs:
  *   fd[2] - The user provided array in which to catch the pipe file
  *   descriptors
+ *   bufsize - The size of the in-memory, circular buffer in bytes.
  *
  * Return:
  *   0 is returned on success; otherwise, -1 is returned with errno set
@@ -184,7 +192,7 @@ static int pipe_close(FAR struct file *filep)
  *
  ****************************************************************************/
 
-int pipe(int fd[2])
+int pipe2(int fd[2], size_t bufsize)
 {
   FAR struct pipe_dev_s *dev = NULL;
   char devname[16];
@@ -222,7 +230,7 @@ int pipe(int fd[2])
     {
       /* No.. Allocate and initialize a new device structure instance */
 
-      dev = pipecommon_allocdev();
+      dev = pipecommon_allocdev(bufsize);
       if (!dev)
         {
           (void)sem_post(&g_pipesem);

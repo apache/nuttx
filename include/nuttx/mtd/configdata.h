@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/configdata.h
+ * include/nuttx/mtd/configdata.h
  *
  *   Copyright (C) 2013 Ken Pettit. All rights reserved.
  *   Author: Ken Pettit <pettitkd@gmail.com>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_CONFIGDATA_H
-#define __INCLUDE_NUTTX_CONFIGDATA_H
+#ifndef __INCLUDE_NUTTX_MTD_CONFIGDATA_H
+#define __INCLUDE_NUTTX_MTD_CONFIGDATA_H
 
 /* The configdata device details kernel level services for providing
  * application config data from kernel control objects, such as partitions
@@ -133,4 +133,4 @@ int mtdconfig_register(FAR struct mtd_dev_s *mtd);
 }
 #endif
 
-#endif /* __INCLUDE_NUTTX_CONFIGDATA_H */
+#endif /* __INCLUDE_NUTTX_MTD_CONFIGDATA_H */

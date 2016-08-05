@@ -49,7 +49,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/poff.h>
-#include <nuttx/fs/ramdisk.h>
+#include <nuttx/drivers/ramdisk.h>
 #include <nuttx/binfmt/binfmt.h>
 #include <nuttx/binfmt/pcode.h>
 

@@ -1,7 +1,7 @@
 /****************************************************************************************************
  * arch/arm/src/lpc43xx/chip/lpc43_ccu.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,7 @@
 /****************************************************************************************************
  * Pre-processor Definitions
  ****************************************************************************************************/
+
 /* Register Offsets *********************************************************************************/
 
 #define LPC43_CCU1_PM_OFFSET                 0x0000 /* CCU1 power mode register */
@@ -342,6 +343,23 @@
 #define CCU_CLK_STAT_AUTO                    (1 << 1)  /* Bit 1:  Auto (AHB disable mechanism) enable status */
 #define CCU_CLK_STAT_WAKEUP                  (1 << 2)  /* Bit 2:  Wake-up mechanism enable status */
                                                        /* Bits 3-31:  Reserved */
+
+/* CCU1 Branch Clock EMCDIV Configuration Registers */
+
+#define CCU_CLK_EMCDIV_CFG_RUN               (1 << 0)  /* Bit 0: Run enable */
+#define CCU_CLK_EMCDIV_CFG_AUTO              (1 << 1)  /* Bit 1: Auto (AHB disable mechanism) enable */
+#define CCU_CLK_EMCDIV_CFG_WAKEUP            (1 << 2)  /* Bit 2: Wake-up mechanism enable */
+                                                       /* Bits 3-4: Reserved */
+#define CCU_CLK_EMCDIV_CLOCK_DIV_SHIFT       (5)                                         /* Bits 5-7: Clock divider */
+#define CCU_CLK_EMCDIV_CLOCK_DIV_MASK        (7 << CCU_CLK_EMCDIV_CLOCK_DIV_SHIFT)
+#  define CCU_CLK_EMCDIV_CFG_DIV_FUNC(n)     ((n) << CCU_CLK_EMCDIV_CLOCK_DIV_SHIFT)
+#  define CCU_CLK_EMCDIV_CFG_DIV_NODIV       (0 << CCU_CLK_EMCDIV_CLOCK_DIV_SHIFT) /* Bit 5-7: No division */
+#  define CCU_CLK_EMCDIV_CFG_DIV_BY2         (1 << CCU_CLK_EMCDIV_CLOCK_DIV_SHIFT) /* Bit 5-7: Division by 2 */
+                                                       /* Bits 8-26: Reserved */
+#define CCU_CLK_EMCDIV_CLOCK_DIVSTAT_SHIFT   (27)                                        /* Bits 27-29: Clock divider status */
+#define CCU_CLK_EMCDIV_CLOCK_DIVSTAT_MASK    (7 << CCU_CLK_EMCDIV_CLOCK_DIVSTAT_SHIFT)
+#  define CCU_CLK_EMCDIV_CFG_DIVSTAT_NODIV   (0 << CCU_CLK_EMCDIV_CLOCK_DIVSTAT_SHIFT) /* Bit 27-29: No division */
+#  define CCU_CLK_EMCDIV_CFG_DIVSTAT_BY2     (1 << CCU_CLK_EMCDIV_CLOCK_DIVSTAT_MASK)  /* Bit 26-29: Divistion by 2 */
 
 /****************************************************************************************************
  * Public Types

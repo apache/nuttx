@@ -207,6 +207,21 @@ struct mallinfo mallinfo(void);
 int      mallinfo(FAR struct mallinfo *info);
 #endif
 
+/* Pseudo-Terminals */
+
+#ifdef CONFIG_PSEUDOTERM_SUSV1
+FAR char *ptsname(int fd);
+int ptsname_r(int fd, FAR char *buf, size_t buflen);
+#endif
+
+#ifdef CONFIG_PSEUDOTERM
+int unlockpt(int fd);
+
+/* int grantpt(int fd); Not implemented */
+
+#define grantpt(fd) (0)
+#endif
+
 /* Arithmetic */
 
 int      abs(int j);

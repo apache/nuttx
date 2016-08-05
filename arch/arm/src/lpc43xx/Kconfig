@@ -81,36 +81,43 @@ config ARCH_FAMILY_LPC4320
 	bool
 	default y if ARCH_CHIP_LPC4320FBD144 || ARCH_CHIP_LPC4320FET100
 	select ARCH_HAVE_TICKLESS
+	select ARCH_HAVE_AHB_SRAM_BANK1
 
 config ARCH_FAMILY_LPC4330
 	bool
 	default y if ARCH_CHIP_LPC4330FBD144 || ARCH_CHIP_LPC4330FET100 || ARCH_CHIP_LPC4330FET180 || ARCH_CHIP_LPC4330FET256 || ARCH_CHIP_LPC4337JET100
 	select ARCH_HAVE_TICKLESS
+	select ARCH_HAVE_AHB_SRAM_BANK1
 
 config ARCH_FAMILY_LPC4337
 	bool
 	default y if ARCH_CHIP_LPC4337JBD144
 	select ARCH_HAVE_TICKLESS
+	select ARCH_HAVE_AHB_SRAM_BANK1
 
 config ARCH_FAMILY_LPC4350
 	bool
 	default y if ARCH_CHIP_LPC4350FBD208 || ARCH_CHIP_LPC4350FET180 || ARCH_CHIP_LPC4350FET256
 	select ARCH_HAVE_TICKLESS
+	select ARCH_HAVE_AHB_SRAM_BANK1
 
 config ARCH_FAMILY_LPC4353
 	bool
 	default y if ARCH_CHIP_LPC4353FBD208 || ARCH_CHIP_LPC4353FET180 || ARCH_CHIP_LPC4353FET256
 	select ARCH_HAVE_TICKLESS
+	select ARCH_HAVE_AHB_SRAM_BANK1
 
 config ARCH_FAMILY_LPC4357
 	bool
 	default y if ARCH_CHIP_LPC4357FET180 || ARCH_CHIP_LPC4357FBD208 || ARCH_CHIP_LPC4357FET256
 	select ARCH_HAVE_TICKLESS
+	select ARCH_HAVE_AHB_SRAM_BANK1
 
 config ARCH_FAMILY_LPC4370
 	bool
 	default y if ARCH_CHIP_LPC4370FET100
 	select ARCH_HAVE_TICKLESS
+	select ARCH_HAVE_AHB_SRAM_BANK1
 
 choice
 	prompt "LPC43XX Boot Configuration"
@@ -177,9 +184,15 @@ config LPC43_DAC
 config LPC43_EMC
 	bool "External Memory Controller (EMC)"
 	default n
+	select ARCH_HAVE_EXTSDRAM0
+	select ARCH_HAVE_EXTSDRAM1
+	select ARCH_HAVE_EXTSDRAM2
+	select ARCH_HAVE_EXTSDRAM3
 
 config LPC43_ETHERNET
 	bool "Ethernet"
+	select NETDEVICES
+	select ARCH_HAVE_PHY
 	default n
 
 config LPC43_EVNTMNTR
@@ -319,6 +332,158 @@ config LPC43_GPIO_IRQ
 	default n
 	---help---
 		Enable support for GPIO interrupts
+
+menu "Internal Memory Configuration"
+
+config ARCH_HAVE_AHB_SRAM_BANK1
+	bool
+
+if !LPC43_BOOT_SRAM
+
+config LPC43_USE_LOCSRAM_BANK1
+	bool "Use local SRAM bank 1 memory region"
+	default n
+	---help---
+		Add local SRAM bank 1 memory region.
+
+endif # LPC43_BOOT_SRAM
+
+config LPC43_USE_AHBSRAM_BANK0
+	bool "Use AHB SRAM bank 0 memory region"
+	default n
+	---help---
+		Add local AHB SRAM bank 0 memory region.
+
+config LPC43_USE_AHBSRAM_BANK1
+	bool "Use AHB SRAM bank 1 memory region"
+	default n
+	depends on ARCH_HAVE_AHB_SRAM_BANK1
+	---help---
+		Add local AHB SRAM bank 1 memory region.
+
+config LPC43_HEAP_AHBSRAM_BANK2
+	bool "Use AHB SRAM bank 2 (ETB SRAM) memory region"
+	default n
+	---help---
+		Add local AHB SRAM bank 2 (ETB SRAM) memory region.
+
+endmenu # LPC43xx Internal Memory Configuration
+
+menu "External Memory Configuration"
+
+config ARCH_HAVE_EXTSDRAM0
+	bool
+
+config ARCH_HAVE_EXTSDRAM1
+	bool
+
+config ARCH_HAVE_EXTSDRAM2
+	bool
+
+config ARCH_HAVE_EXTSDRAM3
+	bool
+
+config LPC43_EXTSDRAM0
+	bool "Configure external SDRAM0 (on DYNCS0)"
+	default n
+	depends on ARCH_HAVE_EXTSDRAM0
+	select ARCH_HAVE_EXTSDRAM
+	---help---
+		Configure external SDRAM memory and, if applicable, map then external
+		SDRAM into the memory map.
+
+if LPC43_EXTSDRAM0
+
+config LPC43_EXTSDRAM0_SIZE
+	int "External SDRAM0 size"
+	default 0
+	---help---
+		Size of the external SDRAM on DYNCS0 in bytes.
+
+config LPC43_EXTSDRAM0_HEAP
+	bool "Add external SDRAM on DYNCS0 to the heap"
+	default y
+	---help---
+		Add the external SDRAM on DYNCS0 into the heap.
+
+endif # LCP43_EXTSDRAM0
+
+config LPC43_EXTSDRAM1
+	bool "Configure external SDRAM1 (on DYNCS1)"
+	default n
+	depends on ARCH_HAVE_EXTSDRAM1
+	select ARCH_HAVE_EXTSDRAM
+	---help---
+		Configure external SDRAM memoryand, if applicable, map then external
+		SDRAM into the memory map.
+
+if LPC43_EXTSDRAM1
+
+config LPC43_EXTSDRAM1_SIZE
+	int "External SDRAM1 size"
+	default 0
+	---help---
+		Size of the external SDRAM on DYNCS1 in bytes.
+
+config LPC43_EXTSDRAM1_HEAP
+	bool "Add external SDRAM on DYNCS1 to the heap"
+	default y
+	---help---
+		Add the external SDRAM on DYNCS1 into the heap.
+
+endif # LCP43_EXTSDRAM1
+
+config LPC43_EXTSDRAM2
+	bool "Configure external SDRAM2 (on DYNCS2)"
+	default n
+	depends on ARCH_HAVE_EXTSDRAM2
+	select ARCH_HAVE_EXTSDRAM
+	---help---
+		Configure external SDRAM memoryand, if applicable, map then external
+		SDRAM into the memory map.
+
+if LPC43_EXTSDRAM2
+
+config LPC43_EXTSDRAM2_SIZE
+	int "External SDRAM2 size"
+	default 0
+	---help---
+		Size of the external SDRAM on DYNCS2 in bytes.
+
+config LPC43_EXTSDRAM2_HEAP
+    bool "Add external SDRAM on DYNCS2 to the heap"
+	default y
+	---help---
+	    Add the external SDRAM on DYNCS2 into the heap.
+
+endif # LCP43_EXTSDRAM2
+
+config LPC43_EXTSDRAM3
+	bool "Configure external SDRAM3 (on DYNCS3)"
+	default n
+	depends on ARCH_HAVE_EXTSDRAM3
+	select ARCH_HAVE_EXTSDRAM
+	---help---
+		Configure external SDRAM memoryand, if applicable, map then external
+		SDRAM into the memory map.
+
+if LPC43_EXTSDRAM3
+
+config LPC43_EXTSDRAM3_SIZE
+	int "External SDRAM3 size"
+	default 0
+	---help---
+		Size of the external SDRAM in bytes.
+
+config LPC43_EXTSDRAM3_HEAP
+	bool "Add external SDRAM on DYNCS3 to the heap"
+	default y
+	---help---
+		Add the external SDRAM on DYNCS3 into the heap.
+
+endif # LCP43_EXTSDRAM3
+
+endmenu # External Memory Configuration
 
 if LPC43_ETHERNET
 menu "Ethernet MAC configuration"

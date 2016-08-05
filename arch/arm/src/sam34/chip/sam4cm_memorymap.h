@@ -77,8 +77,12 @@
 #define SAM_TC3_BASE           0x40014000
 #define SAM_TC4_BASE           0x40014040
 #define SAM_TC5_BASE           0x40014080
+
+#define SAM_TWI_BASE           0x40018000
+#define SAM_TWIN_BASE(n)       (SAM_TWI_BASE + ((n) << 14))
 #define SAM_TWI0_BASE          0x40018000
 #define SAM_TWI1_BASE          0x4001C000
+
 #define SAM_USART0_BASE        0x40024000
 #define SAM_USART1_BASE        0x40028000
 #define SAM_USART2_BASE        0x4002C000

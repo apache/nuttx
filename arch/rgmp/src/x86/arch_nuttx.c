@@ -44,7 +44,6 @@
 #include <arch/arch.h>
 #include <nuttx/sched.h>
 
-
 void nuttx_arch_init(void)
 {
     extern void e1000_mod_init(void);
@@ -57,7 +56,6 @@ void nuttx_arch_init(void)
     // setup e1000
     e1000_mod_init();
 #endif
-
 }
 
 void nuttx_arch_exit(void)

@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/sys/time.h
  *
- *   Copyright (C) 2009, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -112,6 +112,7 @@
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
+
 /* struct timeval represents time as seconds plus microseconds */
 
 struct timeval
@@ -189,6 +190,46 @@ int gettimeofday(FAR struct timeval *tv, FAR struct timezone *tz);
  ****************************************************************************/
 
 int settimeofday(FAR const struct timeval *tv, FAR struct timezone *tz);
+
+/****************************************************************************
+ * Name: adjtime
+ *
+ * Description:
+ *   The adjtime() function gradually adjusts the system clock (as returned
+ *   by gettimeofday(2)).  The amount of time by which the clock is to be
+ *   adjusted is specified in the structure pointed to by delta.
+ *
+ *   This structure has the following form:
+ *
+ *     struct timeval
+ *       {
+ *         time_t      tv_sec;     (seconds)
+ *         suseconds_t tv_usec;    (microseconds)
+ *       };
+ *
+ *   If the adjustment in delta is positive, then the system clock is
+ *   speeded up by some small percentage (i.e., by adding a small amount of
+ *   time to the clock value in each second) until the adjustment has been
+ *   completed.  If the adjustment in delta is negative, then the clock is
+ *   slowed down in a similar fashion.
+ *
+ *   If a clock adjustment from an earlier adjtime() call is already in
+ *   progress at the time of a later adjtime() call, and delta is not NULL
+ *   for the later call, then the earlier adjustment is stopped, but any
+ *   already completed part of that adjustment is not undone.
+ *
+ *   If olddelta is not NULL, then the buffer that it points to is used to
+ *   return the amount of time remaining from any previous adjustment that
+ *   has not yet been completed.
+ *
+ *   NOTE: This is not a POSIX interface but derives from 4.3BSD, System V.
+ *   It is also supported for Linux compatibility.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_CLOCK_TIMEKEEPING
+int adjtime(FAR const struct timeval *delta, FAR struct timeval *olddelta);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

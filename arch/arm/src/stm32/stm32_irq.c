@@ -253,15 +253,9 @@ static int stm32_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
 
   if (irq >= STM32_IRQ_FIRST)
     {
-      n = irq - STM32_IRQ_FIRST;
+      n        = irq - STM32_IRQ_FIRST;
       *regaddr = NVIC_IRQ_ENABLE(n) + offset;
-
-      while (n >= 32)
-        {
-          n -= 32;
-        }
-
-      *bit     = 1 << n;
+      *bit     = (uint32_t)1 << (n & 0x1f);
     }
 
   /* Handle processor exceptions.  Only a few can be disabled */

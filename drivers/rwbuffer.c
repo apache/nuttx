@@ -52,7 +52,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
-#include <nuttx/rwbuffer.h>
+#include <nuttx/drivers/rwbuffer.h>
 
 #if defined(CONFIG_DRVR_WRITEBUFFER) || defined(CONFIG_DRVR_READAHEAD)
 

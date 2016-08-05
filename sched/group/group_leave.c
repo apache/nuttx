@@ -47,7 +47,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
-#include <nuttx/lib.h>
+#include <nuttx/lib/lib.h>
 
 #include "environ/environ.h"
 #include "signal/signal.h"

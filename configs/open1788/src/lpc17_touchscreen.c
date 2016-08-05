@@ -71,8 +71,8 @@
 #  error "Touchscreen support requires CONFIG_LPC17_SSP1"
 #endif
 
-#ifndef CONFIG_GPIO_IRQ
-#  error "Touchscreen support requires CONFIG_GPIO_IRQ"
+#ifndef CONFIG_LPC17_GPIOIRQ
+#  error "Touchscreen support requires CONFIG_LPC17_GPIOIRQ"
 #endif
 
 #ifndef CONFIG_ADS7843E_FREQUENCY

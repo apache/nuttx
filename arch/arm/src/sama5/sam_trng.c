@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_trng.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Derives, in part, from Max Holtzberg's STM32 RNG Nuttx driver:
@@ -52,12 +52,17 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/fs/fs.h>
+#include <nuttx/drivers/drivers.h>
 
 #include "up_arch.h"
 #include "up_internal.h"
 
 #include "sam_periphclks.h"
 #include "sam_trng.h"
+
+#if defined(CONFIG_SAMA5_TRNG)
+#if defined(CONFIG_DEV_RANDOM) || defined(CONFIG_DEV_URANDOM_ARCH)
 
 /****************************************************************************
  * Private Function Prototypes
@@ -325,14 +330,10 @@ errout:
 }
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: up_rnginitialize
+ * Name: sam_rng_initialize
  *
  * Description:
- *   Initialize the TRNG hardware and register the /dev/randome driver.
+ *   Initialize the TRNG hardware.
  *
  * Input Parameters:
  *   None
@@ -342,7 +343,7 @@ errout:
  *
  ****************************************************************************/
 
-void up_rnginitialize(void)
+static int sam_rng_initialize(void)
 {
   int ret;
 
@@ -360,10 +361,11 @@ void up_rnginitialize(void)
 
   /* Initialize the TRNG interrupt */
 
-  if (irq_attach(SAM_IRQ_TRNG, sam_interrupt))
+  ret = irq_attach(SAM_IRQ_TRNG, sam_interrupt);
+  if (ret < 0)
     {
       ferr("ERROR: Failed to attach to IRQ%d\n", SAM_IRQ_TRNG);
-      return;
+      return ret;
     }
 
   /* Disable the interrupts at the TRNG */
@@ -374,16 +376,80 @@ void up_rnginitialize(void)
 
   putreg32(TRNG_CR_DISABLE | TRNG_CR_KEY, SAM_TRNG_CR);
 
-  /* Register the character driver */
-
-  ret = register_driver("/dev/random", &g_trngops, 0644, NULL);
-  if (ret < 0)
-    {
-      ferr("ERROR: Failed to register /dev/random\n");
-      return;
-    }
-
   /* Enable the TRNG interrupt at the AIC */
 
   up_enable_irq(SAM_IRQ_TRNG);
+  return OK;
 }
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: devrandom_register
+ *
+ * Description:
+ *   Initialize the TRNG hardware and register the /dev/random driver.
+ *   Must be called BEFORE devurandom_register.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEV_RANDOM
+void devrandom_register(void)
+{
+  int ret;
+
+  ret = sam_rng_initialize();
+  if (ret >= 0)
+    {
+      ret = register_driver("/dev/random", &g_trngops, 0644, NULL);
+      if (ret < 0)
+        {
+          ferr("ERROR: Failed to register /dev/random\n");
+        }
+    }
+}
+#endif
+
+/****************************************************************************
+ * Name: devurandom_register
+ *
+ * Description:
+ *   Register /dev/urandom
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEV_URANDOM_ARCH
+void devurandom_register(void)
+{
+  int ret;
+
+#ifndef CONFIG_DEV_RANDOM
+  ret = sam_rng_initialize();
+  if (ret >= 0)
+#endif
+    {
+      ret = register_driver("/dev/urandom", &g_trngops, 0644, NULL);
+      if (ret < 0)
+        {
+          ferr("ERROR: Failed to register /dev/urandom\n");
+        }
+    }
+}
+#endif
+
+#endif /* CONFIG_DEV_RANDOM || CONFIG_DEV_URANDOM_ARCH */
+#endif /* CONFIG_SAMA5_TRNG */

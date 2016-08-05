@@ -53,23 +53,6 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/************************************************************************************
- * Included Files
- ************************************************************************************/
-
-#include <nuttx/config.h>
-
-#ifndef __ASSEMBLY__
-#  include <stdint.h>
-#  ifdef CONFIG_SAM34_GPIO_IRQ
-#    include <arch/irq.h>
-#  endif
-#endif
-
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-
 /* Clocking *************************************************************************/
 /* After power-on reset, the sam3u device is running on a 4MHz internal RC.  These
  * definitions will configure clocking with MCK = 48MHz, PLLA = 96, and CPU=120MHz.

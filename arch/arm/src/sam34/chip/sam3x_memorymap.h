@@ -91,6 +91,7 @@
 #  define SAM_TC8_BASE         0x40088080 /* 0x40088080-0x400880bf:   Timer Counter 5 */
                                           /* 0x400880c0-0x4008ffff    Reserved */
 #define SAM_TWI_BASE           0x4008c000 /* 0x4008c000-0x4001ffff: Two-Wire Interface */
+#  define SAM_TWIN_BASE(n)     (SAM_TWI_BASE + ((n) << 14))
 #  define SAM_TWI0_BASE        0x4008c000 /* 0x4008c000-0x4008ffff:   Two-Wire Interface 0 */
 #  define SAM_TWI1_BASE        0x40090000 /* 0x40090000-0x40093fff:   Two-Wire Interface 1 */
 #define SAM_PWM_BASE           0x40094000 /* 0x40020000-0x4003ffff: Pulse Width Modulation */

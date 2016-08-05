@@ -305,6 +305,7 @@ struct sam_ep_s
   uint8_t              zlpneeded:1;  /* Zero length packet needed at end of transfer */
   uint8_t              zlpsent:1;    /* Zero length packet has been sent */
   uint8_t              txbusy:1;     /* Write request queue is busy (recursion avoidance kludge) */
+  uint8_t              lastbank:1;   /* Last bank we read data from */
 };
 
 struct sam_usbdev_s
@@ -1188,8 +1189,13 @@ static int sam_req_read(struct sam_usbdev_s *priv, struct sam_ep_s *privep,
 
   /* We get here when an RXDATABK0/1 interrupt occurs.  That interrupt
    * cannot be cleared until all of the data has been taken from the RX
-   * FIFO.  But we can
+   * FIFO.
+   *
+   * Also, we need to remember which bank we read last so the interrupt handler
+   * can determine the correct bank read sequence for future reads.
    */
+
+  privep->lastbank = bank;
 
   sam_csr_clrbits(epno, bank ? UDPEP_CSR_RXDATABK1 : UDPEP_CSR_RXDATABK0);
 
@@ -1873,7 +1879,6 @@ static void sam_ep_bankinterrupt(struct sam_usbdev_s *priv,
        * transferred from the FIFO.
        */
 
-      privep->epstate = UDP_EPSTATE_IDLE;
       (void)sam_req_read(priv, privep, pktsize, bank);
     }
 
@@ -1959,6 +1964,8 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
   struct sam_ep_s *privep;
   uintptr_t regaddr;
   uint32_t csr;
+  bool bk0;
+  bool bk1;
 
   DEBUGASSERT((unsigned)epno < SAM_UDP_NENDPOINTS);
 
@@ -2020,33 +2027,81 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
         }
     }
 
-  /* OUT packet received in data bank 0 */
 
-  if ((csr & UDPEP_CSR_RXDATABK0) != 0)
+  /* OUT packet received.
+   *
+   * OUT packets are received in two banks. The hardware does not provide
+   * information about which bank has been filled last. Therefore we need to
+   * keep track about which bank we read last to figure out which bank(s) we
+   * need to read next.
+   *
+   * When we get here either none, one or both banks can be filled with data.
+   * Depending on which bank we read last and which bank(s) contain data we
+   * need to correctly sequence the FIFO reads:
+   *
+   * case  lastbank      bk0    bk1     read sequence
+   *  1.      0           0      0      No data to read
+   *  2.      0           1      0      Only read bank 0
+   *  3.      0           0      1      Only read bank 1
+   *  4.      0           1      1      Read bank 1, then read bank 0
+   *
+   *  5.      1           0      0      No data to read
+   *  6.      1           1      0      Only read bank 0
+   *  7.      1           0      1      Only read bank 1 (should not happen)
+   *  8.      1           1      1      Read bank 0, then read bank 1
+   *
+   * lastbank will be updated in sam_req_read() after the FIFO has been read
+   * and clear RXDATABKx.
+   */
+
+  bk0 = (csr & UDPEP_CSR_RXDATABK0) != 0;
+  bk1 = (csr & UDPEP_CSR_RXDATABK1) != 0;
+
+  /* 2. and 6. - Only read bank 0 */
+
+  if (bk0 && !bk1)
     {
       usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_RXDATABK0), (uint16_t)csr);
-
-      /* Handle data received on Bank 0.  sam_ep_bankinterrupt will
-       * clear the  RXDATABK0 interrupt once that data has been
-       * transferred from the FIFO.
-       */
-
       sam_ep_bankinterrupt(priv, privep, csr, 0);
     }
 
-  /* OUT packet received in data bank 1 */
+  /* 3. and 7. - Only read bank 1*/
 
-  else if ((csr & UDPEP_CSR_RXDATABK1) != 0)
+  else if (!bk0 && bk1)
     {
+#ifdef CONFIG_DEBUG_USB_WARN
+      if (privep->lastbank == 1)
+        {
+          uwarn("WARNING: Unexpected USB RX case.\n");
+        }
+#endif
+
       usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_RXDATABK1), (uint16_t)csr);
-      DEBUGASSERT(SAM_UDP_NBANKS(epno) > 1);
-
-      /* Handle data received on Bank 1.  sam_ep_bankinterrupt will
-       * clear the  RXDATABK1 interrupt once that data has been
-       * transferred from the FIFO.
-       */
-
       sam_ep_bankinterrupt(priv, privep, csr, 1);
+    }
+  else if (bk0 && bk1)
+    {
+      /* 4. - Read bank 1, then read bank 0 */
+
+      if (privep->lastbank == 0)
+        {
+          usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_RXDATABK1), (uint16_t)csr);
+          sam_ep_bankinterrupt(priv, privep, csr, 1);
+
+          usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_RXDATABK0), (uint16_t)csr);
+          sam_ep_bankinterrupt(priv, privep, csr, 0);
+        }
+
+      /* 8. - Read bank 0, then read bank 1 */
+
+      else
+        {
+          usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_RXDATABK0), (uint16_t)csr);
+          sam_ep_bankinterrupt(priv, privep, csr, 0);
+
+          usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_RXDATABK1), (uint16_t)csr);
+          sam_ep_bankinterrupt(priv, privep, csr, 1);
+        }
     }
 
   /* STALL sent */
@@ -2510,6 +2565,7 @@ static void sam_ep_reset(struct sam_usbdev_s *priv, uint8_t epno)
   privep->zlpneeded = false;
   privep->zlpsent   = false;
   privep->txbusy    = false;
+  privep->lastbank  = 1;
 }
 
 /****************************************************************************

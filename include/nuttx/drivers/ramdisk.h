@@ -1,7 +1,7 @@
 /****************************************************************************
- * include/nuttx/stdarg.h
+ * include/nuttx/drivers/ramdisk.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2012-2013, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_STDARG_H
-#define __INCLUDE_NUTTX_STDARG_H
+#ifndef __INCLUDE_NUTTX_DRIVERS_RAMDISK_H
+#define __INCLUDE_NUTTX_DRIVERS_RAMDISK_H
 
 /****************************************************************************
  * Included Files
@@ -42,16 +42,20 @@
 
 #include <nuttx/config.h>
 
-/* If CONFIG_ARCH_STDARG_H is defined, then the top-level Makefile will copy
- * this header file to include/stdarg.h where it will become the system
- * stdarg.h header file.  In this case, the architecture specific code must
- * provide an arch/<architecture>/include/stdarg.h file which will be
- * included below:
- */
+#include <stdint.h>
+#include <stdbool.h>
 
-#ifdef CONFIG_ARCH_STDARG_H
-#  include <arch/stdarg.h>
-#endif
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+/* Values for rdflags */
+
+#define RDFLAG_WRENABLED       (1 << 0) /* Bit 0: 1=Can write to RAM disk */
+#define RDFLAG_FUNLINK         (1 << 1) /* Bit 1: 1=Free memory when unlinked */
+
+/* For internal use by the driver only */
+
+#define RDFLAG_UNLINKED        (1 << 2) /* Bit 2: 1=Driver has been unlinked */
 
 /****************************************************************************
  * Type Definitions
@@ -61,4 +65,44 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif /* __INCLUDE_NUTTX_STDARG_H */
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+/****************************************************************************
+ * Name: ramdisk_register or romdisk_register
+ *
+ * Description:
+ *   Non-standard function to register a ramdisk or a romdisk
+ *
+ * Input Parmeters:
+ *   minor:         Selects suffix of device named /dev/ramN, N={1,2,3...}
+ *   nsectors:      Number of sectors on device
+ *   sectize:       The size of one sector
+ *   rdflags:       See RDFLAG_* definitions
+ *   buffer:        RAM disk backup memory
+ *
+ * Returned Valued:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_FS_WRITABLE
+int ramdisk_register(int minor, FAR uint8_t *buffer, uint32_t nsectors,
+                     uint16_t sectize, uint8_t rdflags);
+#define romdisk_register(m,b,n,s) ramdisk_register(m,(FAR uint8_t *)b,n,s,0)
+#else
+int romdisk_register(int minor, FAR const uint8_t *buffer, uint32_t nsectors,
+                     uint16_t sectize);
+#endif
+
+#undef EXTERN
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* __INCLUDE_NUTTX_DRIVERS_RAMDISK_H */

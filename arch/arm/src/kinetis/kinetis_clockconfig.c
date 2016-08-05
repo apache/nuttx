@@ -39,8 +39,6 @@
 
 #include <nuttx/config.h>
 
-#include <arch/board/board.h>
-
 #include "up_arch.h"
 
 #include "kinetis.h"
@@ -49,6 +47,8 @@
 #include "chip/kinetis_fmc.h"
 #include "chip/kinetis_llwu.h"
 #include "chip/kinetis_pinmux.h"
+
+#include <arch/board/board.h>
 
 /****************************************************************************
  * Pre-processor Definitions

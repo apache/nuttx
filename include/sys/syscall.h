@@ -215,7 +215,12 @@
 #define SYS_clock_getres               (__SYS_clock+1)
 #define SYS_clock_gettime              (__SYS_clock+2)
 #define SYS_clock_settime              (__SYS_clock+3)
-#define __SYS_timers                   (__SYS_clock+4)
+#ifdef CONFIG_CLOCK_TIMEKEEPING
+#  define SYS_adjtime                  (__SYS_clock+4)
+#  define __SYS_timers                 (__SYS_clock+5)
+#else
+#  define __SYS_timers                 (__SYS_clock+4)
+#endif
 
 /* The following are defined only if POSIX timers are supported */
 
@@ -292,24 +297,36 @@
 #  define SYS_dup2                     (__SYS_filedesc+2)
 #  define SYS_fcntl                    (__SYS_filedesc+3)
 #  define SYS_lseek                    (__SYS_filedesc+4)
-#  define SYS_mkfifo                   (__SYS_filedesc+5)
-#  define SYS_mmap                     (__SYS_filedesc+6)
-#  define SYS_open                     (__SYS_filedesc+7)
-#  define SYS_opendir                  (__SYS_filedesc+8)
-#  define SYS_pipe                     (__SYS_filedesc+9)
-#  define SYS_readdir                  (__SYS_filedesc+10)
-#  define SYS_rewinddir                (__SYS_filedesc+11)
-#  define SYS_seekdir                  (__SYS_filedesc+12)
-#  define SYS_stat                     (__SYS_filedesc+13)
-#  define SYS_statfs                   (__SYS_filedesc+14)
-#  define SYS_telldir                  (__SYS_filedesc+15)
+#  define SYS_mmap                     (__SYS_filedesc+5)
+#  define SYS_open                     (__SYS_filedesc+6)
+#  define SYS_opendir                  (__SYS_filedesc+7)
+#  define SYS_readdir                  (__SYS_filedesc+8)
+#  define SYS_rewinddir                (__SYS_filedesc+9)
+#  define SYS_seekdir                  (__SYS_filedesc+10)
+#  define SYS_stat                     (__SYS_filedesc+11)
+#  define SYS_statfs                   (__SYS_filedesc+12)
+#  define SYS_telldir                  (__SYS_filedesc+13)
+
+#  if defined(CONFIG_PIPES) && CONFIG_DEV_PIPE_SIZE > 0
+#    define SYS_pipe2                  (__SYS_filedesc+14)
+#    define __SYS_mkfifo2              (__SYS_filedesc+15)
+#  else
+#    define __SYS_mkfifo2              (__SYS_filedesc+14)
+#  endif
+
+#  if defined(CONFIG_PIPES) && CONFIG_DEV_FIFO_SIZE > 0
+#    define SYS_mkfifo2                (__SYS_mkfifo2+0)
+#    define __SYS_fs_fdopen            (__SYS_mkfifo2+1)
+#  else
+#    define __SYS_fs_fdopen            (__SYS_mkfifo2+0)
+#  endif
 
 #  if CONFIG_NFILE_STREAMS > 0
-#    define SYS_fs_fdopen              (__SYS_filedesc+16)
-#    define SYS_sched_getstreams       (__SYS_filedesc+17)
-#    define __SYS_sendfile             (__SYS_filedesc+18)
+#    define SYS_fs_fdopen              (__SYS_fs_fdopen+0)
+#    define SYS_sched_getstreams       (__SYS_fs_fdopen+1)
+#    define __SYS_sendfile             (__SYS_fs_fdopen+2)
 #  else
-#    define __SYS_sendfile             (__SYS_filedesc+16)
+#    define __SYS_sendfile             (__SYS_fs_fdopen+0)
 #  endif
 
 #  if defined(CONFIG_NET_SENDFILE)

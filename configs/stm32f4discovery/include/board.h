@@ -267,6 +267,11 @@
 #  define GPIO_USART2_TX GPIO_USART2_TX_1
 #endif
 
+/* UART3: (Used in pseudoterm configuration) */
+
+#define GPIO_USART3_TX GPIO_USART3_TX_1
+#define GPIO_USART3_RX GPIO_USART3_RX_1
+
 /* UART6:
  *
  * The STM32F4DIS-BB base board provides RS-232 drivers and a DB9 connector

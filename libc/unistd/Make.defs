@@ -46,6 +46,10 @@ endif
 ifeq ($(CONFIG_LIBC_EXECFUNCS),y)
 CSRCS += lib_execl.c
 endif
+
+ifeq ($(CONFIG_PIPES),y)
+CSRCS += lib_pipe.c
+endif
 endif
 
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)

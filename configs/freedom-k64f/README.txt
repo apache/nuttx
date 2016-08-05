@@ -445,7 +445,7 @@ SD Card Support
       CONFIG_KINETIS_SDHC=y                 : To enable SDHC0 support
 
     System Type
-      CONFIG_GPIO_IRQ=y                     : GPIO interrupts needed
+      CONFIG_KINETIS_GPIOIRQ=y              : GPIO interrupts needed
       CONFIG_KINETIS_PORTEINTS=y            : Card detect pin is on PTE6
 
     Device Drivers -> MMC/SD Driver Support
@@ -784,7 +784,7 @@ Freedom K64F Configuration Options
 
   PIN Interrupt Support
 
-    CONFIG_GPIO_IRQ          -- Enable pin interrupt support.  Also needs
+    CONFIG_KINETIS_GPIOIRQ   -- Enable pin interrupt support.  Also needs
       one or more of the following:
     CONFIG_KINETIS_PORTAINTS -- Support 32 Port A interrupts
     CONFIG_KINETIS_PORTBINTS -- Support 32 Port B interrupts
@@ -855,13 +855,16 @@ Where <subdir> is one of the following:
     4. SDHC support is not enabled in this configuration.  Refer to the
        configuration settings listed above under "SD Card Support".
 
-    5. No external pullup is available on MDIO signal when MK64FN1M0VLL12 MCU
+    5. Support for NSH built-in applications is enabled, but no built-in
+       applications have been configured in.
+
+    6. No external pullup is available on MDIO signal when MK64FN1M0VLL12 MCU
        is requests status of the Ethernet link connection. Internal pullup is
        required when port configuration for MDIO signal is enabled:
 
        CONFIG_KINETIS_ENET_MDIOPULLUP=y
 
-    6. Configured to use a fixed IPv4 address:
+    7. Configured to use a fixed IPv4 address:
 
        CONFIG_NSH_IPADDR=0x0a000002
        CONFIG_NSH_DRIPADDR=0x0a000001
@@ -891,15 +894,45 @@ Where <subdir> is one of the following:
 
     2. Default platform/toolchain:
 
-       CONFIG_HOST_WINDOWS=y               : Cygwin under Windows
-       CONFIG_WINDOWS_CYGWIN=y
-       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : ARM/mbed toolcahin (arm-none-elf-gcc)
-       CONFIG_INTELHEX_BINARY=y            : Output formats: Intel hex binary
+         CONFIG_HOST_WINDOWS=y               : Cygwin under Windows
+         CONFIG_WINDOWS_CYGWIN=y
+         CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : ARM/mbed toolcahin (arm-none-elf-gcc)
+         CONFIG_INTELHEX_BINARY=y            : Output formats: Intel hex binary
 
-    3. The Serial Console is provided on UART3 with the correct pin
-       configuration for use with an Arduino Serial Shield.
+    3. The Serial Console is provided on UART0 with the correct pin
+       configuration for use with the OpenSDAv2 VCOM.  This can be switched
+       to use a RS-232 shield on UART3 by reconfiguring the serial console.
 
-    4. An SDHC driver is enabled in this configuration but does not yet work.
+         -CONFIG_KINETIS_UART0=y
+         +CONFIG_KINETIS_UART3=y
+         -CONFIG_UART0_SERIALDRIVER=y
+         +CONFIG_UART3_SERIALDRIVER=y
+         -CONFIG_UART0_SERIAL_CONSOLE=y
+         +CONFIG_UART3_SERIAL_CONSOLE=y
+         -CONFIG_UART0_RXBUFSIZE=256
+         +CONFIG_UART3_RXBUFSIZE=256
+         -CONFIG_UART0_TXBUFSIZE=256
+         +CONFIG_UART3_TXBUFSIZE=256
+         -CONFIG_UART0_BAUD=115200
+         +CONFIG_UART3_BAUD=115200
+         -CONFIG_UART0_BITS=8
+         +CONFIG_UART3_BITS=8
+         -CONFIG_UART0_PARITY=0
+         +CONFIG_UART3_PARITY=0
+         -CONFIG_UART0_2STOP=0
+         +CONFIG_UART3_2STOP=0
+
+       NOTE: On my Windows 10 / Cygwin64 system, the OpenSDAv2 VCOM is not
+       recognized.  I probably need to install a driver?
+
+       There is a serial USB driver on the mbed web site.  However, this
+       driver would not install on Windows 10 for me.  I understand that
+       it installs OK on Windows 7.
+
+    4. Support for NSH built-in applications is enabled, but no built-in
+       applications have been configured in.
+
+    5. An SDHC driver is enabled in this configuration but does not yet work.
        The basic problem seems to be that it does not sense the presence of
        the SD card on PTE6.  No interrupts are generated when the SD card is
        inserted or removed.  You might want to disable SDHC and MMC/SD if

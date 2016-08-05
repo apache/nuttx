@@ -41,14 +41,15 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-
 #include <stdint.h>
-#include <nuttx/fs/fs.h>
 #include <errno.h>
+
+#include <nuttx/fs/fs.h>
+#include <nuttx/drivers/drivers.h>
 
 #include "pipe_common.h"
 
-#if CONFIG_DEV_PIPE_SIZE > 0
+#if CONFIG_DEV_FIFO_SIZE > 0
 
 /****************************************************************************
  * Private Data
@@ -75,7 +76,7 @@ static const struct file_operations fifo_fops =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mkfifo
+ * Name: mkfifo2
  *
  * Description:
  *   mkfifo() makes a FIFO device driver file with name 'pathname.'  Unlike
@@ -92,10 +93,15 @@ static const struct file_operations fifo_fops =
  *   If all threads that write to the FIFO have closed, subsequent calls to
  *   read() on the FIFO will return 0 (end-of-file).
  *
+ *   NOTE: mkfifo2 is a special, non-standard, NuttX-only interface.  Since
+ *   the NuttX FIFOs are based in in-memory, circular buffers, the ability
+ *   to control the size of those buffers is critical for system tuning.
+ *
  * Inputs:
  *   pathname - The full path to the FIFO instance to attach to or to create
  *     (if not already created).
  *   mode - Ignored for now
+ *   bufsize - The size of the in-memory, circular buffer in bytes.
  *
  * Return:
  *   0 is returned on success; otherwise, -1 is returned with errno set
@@ -103,14 +109,14 @@ static const struct file_operations fifo_fops =
  *
  ****************************************************************************/
 
-int mkfifo(FAR const char *pathname, mode_t mode)
+int mkfifo2(FAR const char *pathname, mode_t mode, size_t bufsize)
 {
   FAR struct pipe_dev_s *dev;
   int ret;
 
   /* Allocate and initialize a new device structure instance */
 
-  dev = pipecommon_allocdev();
+  dev = pipecommon_allocdev(bufsize);
   if (!dev)
     {
       return -ENOMEM;
@@ -125,4 +131,4 @@ int mkfifo(FAR const char *pathname, mode_t mode)
   return ret;
 }
 
-#endif /* CONFIG_DEV_PIPE_SIZE > 0 */
+#endif /* CONFIG_DEV_FIFO_SIZE > 0 */
