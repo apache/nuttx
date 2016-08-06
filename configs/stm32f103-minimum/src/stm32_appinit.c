@@ -80,5 +80,11 @@
 
 int board_app_initialize(uintptr_t arg)
 {
-  return OK;
+  int ret = OK;
+
+#ifdef CONFIG_WL_MFRC522
+  ret = stm32_mfrc522initialize("/dev/rfid0");
+#endif
+
+  return ret;
 }

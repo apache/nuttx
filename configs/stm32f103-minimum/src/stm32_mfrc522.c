@@ -1,8 +1,8 @@
 /************************************************************************************
- * configs/stm32f103-minimum/src/stm32f103_minimum.h
+ * configs/stm32f4discovery/src/stm32_mfrc522.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Laurent Latil <laurent@latil.nom.fr>
+ *   Copyright (C) 2015 Alan Carvalho de Assis. All rights reserved.
+ *   Author: Alan Carvalho de Assis <acassis@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,87 +33,69 @@
  *
  ************************************************************************************/
 
-#ifndef __CONFIGS_STM32F103_MINIMUM_SRC_STM32F103_MINIMUM_H
-#define __CONFIGS_STM32F103_MINIMUM_SRC_STM32F103_MINIMUM_H
-
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
-#include <stdint.h>
+
+#include <errno.h>
+#include <debug.h>
+
+#include <nuttx/spi/spi.h>
+#include <nuttx/wireless/mfrc522.h>
+
+#include "stm32.h"
+#include "stm32_spi.h"
+#include "stm32f103_minimum.h"
+
+#if defined(CONFIG_SPI) && defined(CONFIG_STM32_SPI1) && defined(CONFIG_WL_MFRC522)
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* How many SPI modules does this chip support? The LM3S6918 supports 2 SPI
- * modules (others may support more -- in such case, the following must be
- * expanded).
- */
-
-#if STM32_NSPI < 1
-#  undef CONFIG_STM32_SPI1
-#  undef CONFIG_STM32_SPI2
-#elif STM32_NSPI < 2
-#  undef CONFIG_STM32_SPI2
-#endif
-
-/* GPIOs **************************************************************/
-/* LEDs */
-
-#define GPIO_LED        (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
-                         GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN13)
-
-/* SPI chip selects */
-
-#define GPIO_CS_MFRC522 (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
-                         GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN4)
-
-/* USB Soft Connect Pullup: PC.13 */
-
-#define GPIO_USB_PULLUP (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
-                         GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN13)
+#define MFRC522_SPI_PORTNO 1   /* On SPI1 */
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
-#ifndef __ASSEMBLY__
-
-/************************************************************************************
- * Name: stm32_spidev_initialize
- *
- * Description:
- *   Called to configure SPI chip select GPIO pins for the Hy-Mini STM32v board.
- *
- ************************************************************************************/
-
-void stm32_spidev_initialize(void);
-
-/************************************************************************************
- * Name: stm32_usbinitialize
- *
- * Description:
- *   Called to setup USB-related GPIO pins for the Hy-Mini STM32v board.
- *
- ************************************************************************************/
-
-void stm32_usbinitialize(void);
-
 /************************************************************************************
  * Name: stm32_mfrc522initialize
  *
  * Description:
- *   Function used to initialize the MFRC522 RFID Transceiver
+ *   Initialize and register the MFRC522 RFID driver.
+ *
+ * Input parameters:
+ *   devpath - The full path to the driver to register. E.g., "/dev/rfid0"
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
  *
  ************************************************************************************/
 
-#ifdef CONFIG_WL_MFRC522
-int stm32_mfrc522initialize(FAR const char *devpath);
-#endif
+int stm32_mfrc522initialize(FAR const char *devpath)
+{
+  FAR struct spi_dev_s *spi;
+  int ret;
 
-#endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_STM32F103_MINIMUM_SRC_STM32F103_MINIMUM_H */
+  spi = stm32_spibus_initialize(MFRC522_SPI_PORTNO);
 
+  if (!spi)
+    {
+      return -ENODEV;
+    }
+
+  /* Then register the MFRC522 */
+  
+  ret = mfrc522_register(devpath, spi);
+  if (ret < 0)
+    {
+      snerr("ERROR: Error registering MFRC522\n");
+    }
+
+  return ret;
+}
+
+#endif /* CONFIG_SPI && CONFIG_MFRC522 */

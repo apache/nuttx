@@ -43,4 +43,8 @@ ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += stm32_appinit.c
 endif
 
+ifeq ($(CONFIG_WL_MFRC522),y)
+CSRCS += stm32_mfrc522.c
+endif
+
 include $(TOPDIR)/configs/Board.mk
