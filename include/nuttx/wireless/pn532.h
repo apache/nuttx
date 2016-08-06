@@ -70,7 +70,7 @@
  * Public Types
  ****************************************************************************/
 
-enum pn532_state_E
+enum pn532_state_e
 {
   PN532_STATE_NOT_INIT,
   PN532_STATE_IDLE,

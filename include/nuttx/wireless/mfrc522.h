@@ -61,7 +61,7 @@
  * Public Types
  ****************************************************************************/
 
-enum mfrc522_state_E
+enum mfrc522_state_e
 {
   MFRC522_STATE_NOT_INIT,
   MFRC522_STATE_IDLE,
