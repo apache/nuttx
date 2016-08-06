@@ -1,8 +1,8 @@
 /****************************************************************************
- * config/stm32f103-minimum/src/stm32_appinit.c
+ * include/wireless/mfrc522.h
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright(C) 2016 Uniquix Ltda. All rights reserved.
+ *   Author: Alan Carvalho de Assis <acassis@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,68 +23,94 @@
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
  * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
  * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES(INCLUDING,
  * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
  * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
  * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ * LIABILITY, OR TORT(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
+#ifndef __NUTTX_WIRELESS_MFRC522_H
+#define __NUTTX_WIRELESS_MFRC522_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/spi/spi.h>
+#include <nuttx/irq.h>
+#include <sys/ioctl.h>
+#include <nuttx/wireless/wireless.h>
 
-#include <stdbool.h>
-#include <stdio.h>
-#include <syslog.h>
-#include <errno.h>
+/****************************************************************************
+ * Pre-Processor Definitions
+ ****************************************************************************/
 
-#include <nuttx/board.h>
+#define MFRC522_MIFARE_ISO14443A          (0x00)
 
-#include "stm32.h"
-#include "stm32f103_minimum.h"
+/* IOCTL Commands ***********************************************************/
+
+#define MFRC522IOC_GET_PICC_UID           _WLIOC_USER(0x0001)
+#define MFRC522IOC_GET_STATE              _WLIOC_USER(0x0002)
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+enum mfrc522_state_E
+{
+  MFRC522_STATE_NOT_INIT,
+  MFRC522_STATE_IDLE,
+  MFRC522_STATE_CMD_SENT,
+  MFRC522_STATE_DATA_READY,
+};
+
+struct mfrc522_dev_s;
+
+struct picc_uid_s
+{
+  uint8_t  size;         /* Number of bytes in the UID. 4, 7 or 10 */
+  uint8_t  uid_data[10];
+  uint8_t  sak;          /* The SAK (Select Acknowledge) return by the PICC */
+};
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
 /****************************************************************************
- * Name: board_app_initialize
+ * Name: mfrc522_register
  *
  * Description:
- *   Perform application specific initialization.  This function is never
- *   called directly from application code, but only indirectly via the
- *   (non-standard) boardctl() interface using the command BOARDIOC_INIT.
+ *   Register the MFRC522 character device as 'devpath'
  *
  * Input Parameters:
- *   arg - The boardctl() argument is passed to the board_app_initialize()
- *         implementation without modification.  The argument has no
- *         meaning to NuttX; the meaning of the argument is a contract
- *         between the board-specific initalization logic and the the
- *         matching application logic.  The value cold be such things as a
- *         mode enumeration value, a set of DIP switch switch settings, a
- *         pointer to configuration data read from a file or serial FLASH,
- *         or whatever you would like to do with it.  Every implementation
- *         should accept zero/NULL as a default configuration.
+ *   devpath - The full path to the driver to register. E.g., "/dev/rfid0"
+ *   spi     - An instance of the SPI interface to use to communicate with MFRC522
+ *   config  - Device persistent board data
  *
  * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure to indicate the nature of the failure.
+ *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-int board_app_initialize(uintptr_t arg)
-{
-  int ret = OK;
+int mfrc522_register(FAR const char *devpath, FAR struct spi_dev_s *spi);
 
-#ifdef CONFIG_WL_MFRC522
-  ret = stm32_mfrc522initialize("/dev/rfid0");
+#undef EXTERN
+#ifdef __cplusplus
+}
 #endif
 
-  return ret;
-}
+#endif /* __NUTTX_WIRELESS_MFRC522_H */

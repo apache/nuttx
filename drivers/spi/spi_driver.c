@@ -402,7 +402,7 @@ int spi_register(FAR struct spi_dev_s *spi, int bus)
 
       /* Return the result of the registration */
 
-      return OK;
+      return ret;
     }
 
   return -ENOMEM;
