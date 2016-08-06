@@ -46,6 +46,8 @@
 #include <nuttx/i2c/i2c_master.h>
 #include <arch/board/board.h>
 
+#include <nuttx/drivers/pwm.h>
+
 #include "tiva_i2c.h"
 #include "tiva_pwm.h"
 #include "tm4c1294-launchpad.h"
@@ -160,6 +162,7 @@ static void tm4c_i2ctool(void)
 *
 ****************************************************************************/
 
+#ifdef HAVE_PWM
 void tm4c_pwm_register(int channel)
 {
   FAR struct pwm_lowerhalf_s *dev;
@@ -182,6 +185,7 @@ void tm4c_pwm_register(int channel)
         }
     }
 }
+#endif
 
 /****************************************************************************
  * Name: tm4c_pwm
@@ -219,7 +223,7 @@ static void tm4c_pwm(void)
   tm4c_pwm_register(7);
 #endif
 }
-#endif # HAVE_PWM
+#endif
 
 /****************************************************************************
  * Public Functions
