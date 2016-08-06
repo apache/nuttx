@@ -150,11 +150,13 @@ arch/arm - ARM-based micro-controllers
     Architecture Support
       arch/arm/include and arch/arm/src/common
       arch/arm/src/arm and arch/arm/include/arm
+      arch/arm/src/armv7-a and arch/arm/include/armv6-m
       arch/arm/src/armv7-a and arch/arm/include/armv7-a
       arch/arm/src/armv7-m and arch/arm/include/armv7-m
-      arch/arm/src/armv7-r and arch/arm/include/armv7-4
+      arch/arm/src/armv7-r and arch/arm/include/armv7-r
 
     MCU support
+      arch/arm/include/a1x and arch/arm/src/a1x
       arch/arm/include/c5471 and arch/arm/src/c5471
       arch/arm/include/calypso and arch/arm/src/calypso
       arch/arm/include/dm320 and arch/arm/src/dm320
