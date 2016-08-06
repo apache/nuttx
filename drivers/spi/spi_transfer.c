@@ -99,7 +99,9 @@ int spi_transfer(FAR struct spi_dev_s *spi, FAR struct spi_sequence_s *seq)
   SPI_SETMODE(spi, seq->mode);
   SPI_SETBITS(spi, seq->nbits);
 
-  /* Select the SPI device in preparation for the transfer */
+  /* Select the SPI device in preparation for the transfer.
+   * REVISIT: This is redundant.
+   */
 
   SPI_SELECT(spi, seq->dev, true);
 
