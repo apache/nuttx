@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sh/include/sh1/types.h
+ * arch/renesas/include/sh1/types.h
  *
  *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -37,8 +37,8 @@
  * through sys/types.h
  */
 
-#ifndef __ARCH_SH_INCLUDE_SH1_TYPES_H
-#define __ARCH_SH_INCLUDE_SH1_TYPES_H
+#ifndef __ARCH_RENESAS_INCLUDE_SH1_TYPES_H
+#define __ARCH_RENESAS_INCLUDE_SH1_TYPES_H
 
 /****************************************************************************
  * Included Files
@@ -93,4 +93,4 @@ typedef unsigned long      irqstate_t;
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_SH_INCLUDE_SH1_TYPES_H */
+#endif /* __ARCH_RENESAS_INCLUDE_SH1_TYPES_H */

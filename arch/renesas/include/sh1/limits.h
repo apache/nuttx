@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sh/include/sh1/limits.h
+ * arch/renesas/include/sh1/limits.h
  *
  *   Copyright (C) 2008, 2009, 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_SH_INCLUDE_SH1_LIMITS_H
-#define __ARCH_SH_INCLUDE_SH1_LIMITS_H
+#ifndef __ARCH_RENESAS_INCLUDE_SH1_LIMITS_H
+#define __ARCH_RENESAS_INCLUDE_SH1_LIMITS_H
 
 /****************************************************************************
  * Included Files
@@ -85,4 +85,4 @@
 #define PTR_MAX     2147483647
 #define UPTR_MAX    4294967295U
 
-#endif /* __ARCH_SH_INCLUDE_SH1_LIMITS_H */
+#endif /* __ARCH_RENESAS_INCLUDE_SH1_LIMITS_H */

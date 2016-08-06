@@ -3,10 +3,10 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-if ARCH_SH
+if ARCH_RENESAS
 
 choice
-	prompt "SH chip selection"
+	prompt "Renesas chip selection"
 	default ARCH_CHIP_SH7032
 
 config ARCH_CHIP_SH7032
@@ -41,4 +41,4 @@ source arch/renesas/src/common/Kconfig
 source arch/renesas/src/m16c/Kconfig
 source arch/renesas/src/sh1/Kconfig
 
-endif # ARCH_SH
+endif # ARCH_RENESAS
