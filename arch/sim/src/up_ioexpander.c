@@ -701,7 +701,7 @@ static ioe_pinset_t sim_int_update(FAR struct sim_dev_s *priv)
         }
       else /* if (SIM_LEVEL_SENSITIVE(priv, pin)) */
         {
-          /* Level triggered. Set intstat if imatch in level type. */
+          /* Level triggered. Set intstat if match in level type. */
 
           if ((pinval  && SIM_LEVEL_HIGH(priv, pin)) ||
               (!pinval && SIM_LEVEL_LOW(priv, pin)))

@@ -43,6 +43,8 @@
 
 #include "tm4c1294-launchpad.h"
 
+#ifdef CONFIG_LIB_BOARDCTL
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -84,3 +86,27 @@ int board_app_initialize(uintptr_t arg)
   return OK;
 #endif
 }
+
+/****************************************************************************
+ * Name: board_pwm_setup
+ *
+ * Description:
+ *   No implementation for now, it's called by PWM tool via boardctl().
+ *   See include/nuttx/board.h
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   Zero on Success.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARDCTL_PWMTEST
+int board_pwm_setup(void)
+{
+  return OK;
+}
+#endif /* CONFIG_BOARDCTL_PWMTEST */
+
+#endif /* CONFIG_LIB_BOARDCTL */

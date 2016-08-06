@@ -37,11 +37,10 @@
  * Included Files
  ****************************************************************************/
 
-#include <stdio.h>
-#include <stdint.h>
-
 #include <nuttx/config.h>
 
+#include <stdio.h>
+#include <stdint.h>
 #include <debug.h>
 
 #include <nuttx/i2c/i2c_master.h>
@@ -50,10 +49,6 @@
 #include "tiva_i2c.h"
 #include "tiva_pwm.h"
 #include "tm4c1294-launchpad.h"
-
-#define PWM_PATH_FMT        "/dev/pwm%d"
-#define PWM_PATH_FMTLEN     (10)
-
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -66,6 +61,9 @@
 #ifdef CONFIG_TM4C1294_LAUNCHPAD_PWM
 #  define HAVE_PWM
 #endif
+
+#define PWM_PATH_FMT        "/dev/pwm%d"
+#define PWM_PATH_FMTLEN     (10)
 
 /****************************************************************************
  * Private Functions
@@ -171,7 +169,7 @@ void tm4c_pwm_register(int channel)
   dev = tiva_pwm_initialize(channel);
   if (dev == NULL)
     {
-      dbg("ERROR: Failed to get PWM%d interface\n", channel);
+      pwmerr("ERROR: Failed to get PWM%d interface\n", channel);
     }
   else
     {
@@ -179,7 +177,8 @@ void tm4c_pwm_register(int channel)
       ret = pwm_register(pwm_path, dev);
       if (ret < 0)
         {
-          dbg("ERROR: Failed to register PWM%d driver: %d\n", channel, ret);
+          pwmerr("ERROR: Failed to register PWM%d driver: %d\n",
+                 channel, ret);
         }
     }
 }
@@ -193,7 +192,6 @@ void tm4c_pwm_register(int channel)
  ****************************************************************************/
 
 #ifdef HAVE_PWM
-
 static void tm4c_pwm(void)
 {
 #ifdef CONFIG_TIVA_PWM0_CHAN0
@@ -221,8 +219,7 @@ static void tm4c_pwm(void)
   tm4c_pwm_register(7);
 #endif
 }
-
-#endif
+#endif # HAVE_PWM
 
 /****************************************************************************
  * Public Functions
@@ -246,9 +243,11 @@ int tm4c_bringup(void)
 
   tm4c_i2ctool();
 
+#ifdef HAVE_PWM
   /* Register PWM drivers */
 
   tm4c_pwm();
+#endif
 
 #ifdef HAVE_TIMER
   /* Initialize the timer driver */

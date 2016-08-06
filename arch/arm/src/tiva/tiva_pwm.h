@@ -47,8 +47,6 @@
  ****************************************************************************/
 
 FAR struct pwm_lowerhalf_s *tiva_pwm_initialize(int channel);
-
 void tm4c_pwm_register(int channel);
-int board_pwm_setup(void);
 
 #endif /* __ARCH_ARM_SRC_TIVA_TIVA_PWM_H */

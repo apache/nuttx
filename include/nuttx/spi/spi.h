@@ -140,7 +140,8 @@
  *   csdelay    - The delay between CS inactive and CS active again
  *
  * Returned Value:
- *   Returns the actual frequency selected
+ *   Returns zero (OK) on success; a negated errno value is return on any
+ *   failure.
  *
  ****************************************************************************/
 
