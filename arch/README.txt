@@ -210,6 +210,16 @@ arch/mips
       arch/mips/include/pic32mx and arch/mips/src/pic32mx
       arch/mips/include/pic32mz and arch/mips/src/pic32mz
 
+arch/renesas - Support for Renesas and legacy Hitachi microcontrollers.
+    This include SuperH and M16C.
+
+    Architecture Support
+      arch/renesas/include and arch/renesas/src/common
+
+    MCU support
+      arch/renesas/include/m16c and arch/renesas/src/m16c
+      arch/renesas/include/sh1 and arch/renesas/src/sh1
+
 arch/rgmp
 
     RGMP stands for RTOS and GPOS on Multi-Processor.  RGMP is a project
@@ -220,15 +230,6 @@ arch/rgmp
 
     See http://rgmp.sourceforge.net/wiki/index.php/Main_Page for further
     information about RGMP.
-
-arch/sh - SuperH and related Hitachi/Renesas microcontrollers
-
-    Architecture Support
-      arch/sh/include and arch/sh/src/common
-
-    MCU support
-      arch/sh/include/m16c and arch/sh/src/m16c
-      arch/sh/include/sh1 and arch/sh/src/sh1
 
 arch/x86 - Intel x86 architectures
     This directory holds related, 32- and 64-bit architectures from Intel.

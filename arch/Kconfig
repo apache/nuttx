@@ -99,7 +99,7 @@ source arch/avr/Kconfig
 source arch/hc/Kconfig
 source arch/mips/Kconfig
 source arch/rgmp/Kconfig
-source arch/sh/Kconfig
+source arch/renesas/Kconfig
 source arch/sim/Kconfig
 source arch/x86/Kconfig
 source arch/z16/Kconfig
