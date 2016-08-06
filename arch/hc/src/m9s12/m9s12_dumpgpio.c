@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/m9s12/m9s12_dumpgpio.c
+ * arch/hc/src/m9s12/m9s12_dumpgpio.c
  *
  *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
