@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/serial.h
+ * arch/z16/include/serial.h
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

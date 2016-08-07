@@ -1,5 +1,5 @@
 /****************************************************************************
- * common/up_allocateheap.c
+ * arch/z80/src/common/up_allocateheap.c
  *
  *   Copyright (C) 2007, 2008, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

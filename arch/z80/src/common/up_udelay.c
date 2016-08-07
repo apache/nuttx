@@ -1,5 +1,5 @@
 /****************************************************************************
- * common/up_udelay.c
+ * arch/z80/src/common/up_udelay.c
  *
  *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

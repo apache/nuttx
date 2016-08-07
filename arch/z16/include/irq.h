@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/irq.h
+ * arch/z16/include/irq.h
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

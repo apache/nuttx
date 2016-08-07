@@ -1,6 +1,5 @@
 /****************************************************************************
- * arch/z8/arch.h
- * arch/chip/arch.h
+ * arch/z80/include/z8/arch.h
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

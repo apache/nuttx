@@ -1,5 +1,5 @@
 /****************************************************************************
- * irq.h
+ * arch/sim/include/irq.h
  *
  *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

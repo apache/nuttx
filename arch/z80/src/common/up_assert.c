@@ -1,5 +1,5 @@
 /****************************************************************************
- * common/up_assert.c
+ * arch/z80/src/common/up_assert.c
  *
  *   Copyright (C) 2007-2009, 2012-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * common/up_mdelay.c
+ * arch/z80/src/common/up_mdelay.c
  *
  *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

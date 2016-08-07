@@ -1,5 +1,5 @@
 /****************************************************************************
- * common/up_idle.c
+ * arch/z80/src/common/up_idle.c
  *
  *   Copyright (C) 2007-2009, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
