@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/wireless/pn532.h
+ * drivers/wireless/pn532.c
  *
  *   Copyright(C) 2012, 2013, 2016 Offcode Ltd. All rights reserved.
  *   Authors: Janne Rosberg <janne@offcode.fi>
