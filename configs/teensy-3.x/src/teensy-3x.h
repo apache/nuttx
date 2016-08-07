@@ -93,6 +93,16 @@
 extern void weak_function kinetis_spidev_initialize(void);
 
 /************************************************************************************
+ * Name: kinetis_i2cdev_initialize
+ *
+ * Description:
+ *   Called to configure I2C
+ *
+ ************************************************************************************/
+
+extern void weak_function kinetis_i2cdev_initialize(void);
+
+/************************************************************************************
  * Name: kinetis_usbinitialize
  *
  * Description:

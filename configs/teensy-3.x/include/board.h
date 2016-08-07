@@ -232,6 +232,20 @@
 #  define PIN_UART0_TX  PIN_UART1_TX_1
 #endif
 
+#ifdef CONFIG_KINETIS_I2C0
+#ifndef CONFIG_TEENSY_3X_I2C_ALT_PINS
+#  define PIN_I2C0_SCL      (PIN_I2C0_SCL_1 | PIN_ALT2_OPENDRAIN | PIN_ALT2_SLOW | PIN_ALT2_HIGHDRIVE)
+#  define PIN_I2C0_SDA      (PIN_I2C0_SDA_1 | PIN_ALT2_OPENDRAIN | PIN_ALT2_SLOW | PIN_ALT2_HIGHDRIVE)
+#else
+#  define PIN_I2C0_SCL      (PIN_I2C0_SCL_2 | PIN_ALT2_OPENDRAIN | PIN_ALT2_SLOW | PIN_ALT2_HIGHDRIVE)
+#  define PIN_I2C0_SDA      (PIN_I2C0_SDA_2 | PIN_ALT2_OPENDRAIN | PIN_ALT2_SLOW | PIN_ALT2_HIGHDRIVE)
+#endif
+#endif
+
+#ifdef CONFIG_KINETIS_I2C1
+#error I2C1 not currently supported
+#endif
+
 /************************************************************************************
  * Public Data
  ************************************************************************************/
