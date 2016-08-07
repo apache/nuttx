@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __UP_INTERNAL_H
-#define __UP_INTERNAL_H
+#ifndef __ARCH_Z16_SRC_COMMON_UP_INTERNAL_H
+#define __ARCH_Z16_SRC_COMMON_UP_INTERNAL_H
 
 /****************************************************************************
  * Included Files
@@ -203,4 +203,4 @@ void up_registerdump(void);
 
 #endif /* __ASSEMBLY__ */
 
-#endif  /* __UP_INTERNAL_H */
+#endif  /* __ARCH_Z16_SRC_COMMON_UP_INTERNAL_H */

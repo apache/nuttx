@@ -37,8 +37,8 @@
  * only indirectly through nuttx/irq.h (via arch/irq.h)
  */
 
-#ifndef __ARCH_Z8_IRQ_H
-#define __ARCH_Z8_IRQ_H
+#ifndef __ARCH_Z80_INCLUDE_Z8_IRQ_H
+#define __ARCH_Z80_INCLUDE_Z8_IRQ_H
 
 /****************************************************************************
  * Included Files
@@ -373,5 +373,5 @@ void up_irq_restore(irqstate_t flags);
 #endif
 #endif
 
-#endif /* __ARCH_Z8_IRQ_H */
+#endif /* __ARCH_Z80_INCLUDE_Z8_IRQ_H */
 

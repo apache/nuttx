@@ -37,8 +37,8 @@
  * only indirectly through nuttx/arch.h
  */
 
-#ifndef __ARCH_ARCH_H
-#define __ARCH_ARCH_H
+#ifndef __ARCH_SIM_INCLUDE_ARCH_H
+#define __ARCH_SIM_INCLUDE_ARCH_H
 
 /****************************************************************************
  * Included Files
@@ -77,5 +77,5 @@ extern "C"
 }
 #endif
 
-#endif /* __ARCH_ARCH_H */
+#endif /* __ARCH_SIM_INCLUDE_ARCH_H */
 

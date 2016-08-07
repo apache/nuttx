@@ -37,8 +37,8 @@
  * through arch/io.h
  */
 
-#ifndef __ARCH_EZ80_IO_H
-#define __ARCH_EZ80_IO_H
+#ifndef __ARCH_Z80_INCLUDE_EZ80_IO_H
+#define __ARCH_Z80_INCLUDE_EZ80_IO_H
 
 /****************************************************************************
  * Included Files
@@ -84,4 +84,4 @@ uint8_t inp(uint16_t p);
 #endif
 #endif
 
-#endif /* __ARCH_EZ80_IO_H */
+#endif /* __ARCH_Z80_INCLUDE_EZ80_IO_H */

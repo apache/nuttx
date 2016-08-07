@@ -1,5 +1,5 @@
 /****************************************************************************
- * c5471/chip.h
+ * arch/arm/src/c5471/chip.h
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __C5471_CHIP_H
-#define __C5471_CHIP_H
+#ifndef __ARCH_ARM_SRC_C5471_CHIP_H
+#define __ARCH_ARM_SRC_C5471_CHIP_H
 
 /****************************************************************************
  * Included Files
@@ -368,4 +368,4 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif  /* __C5471_CHIP_H */
+#endif  /* __ARCH_ARM_SRC_C5471_CHIP_H */

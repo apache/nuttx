@@ -37,8 +37,8 @@
  * through sys/types.h
  */
 
-#ifndef __ARC_Z80_INCLUDE_Z80_TYPES_H
-#define __ARC_Z80_INCLUDE_Z80_TYPES_H
+#ifndef __ARCH_Z80_INCLUDE_Z80_TYPES_H
+#define __ARCH_Z80_INCLUDE_Z80_TYPES_H
 
 /****************************************************************************
  * Included Files
@@ -95,4 +95,4 @@ typedef _uint16_t          irqstate_t;
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif /* __ARC_Z80_INCLUDE_Z80_TYPES_H */
+#endif /* __ARCH_Z80_INCLUDE_Z80_TYPES_H */

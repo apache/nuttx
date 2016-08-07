@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_SERIAL_H
-#define __ARCH_SERIAL_H
+#ifndef __ARCH_Z16_INCLUDE_SERIAL_H
+#define __ARCH_Z16_INCLUDE_SERIAL_H
 
 /****************************************************************************
  * Included Files
@@ -52,4 +52,4 @@
  * Public Functions
  ****************************************************************************/
 
-#endif /* __ARCH_SERIAL_H */
+#endif /* __ARCH_Z16_INCLUDE_SERIAL_H */

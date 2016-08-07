@@ -1,5 +1,5 @@
-#ifndef _CALYPSO_CLK_H
-#define _CALYPSO_CLK_H
+#ifndef __ARCH_ARM_INCLUDE_CALYPSO_CLOCK_H
+#define __ARCH_ARM_INCLUDE_CALYPSO_CLOCK_H
 
 #include <stdint.h>
 
@@ -64,4 +64,4 @@ void calypso_debugunit(int enable);
 void calypso_rhea_cfg(uint8_t fac0, uint8_t fac1, uint8_t timeout,
 		      uint8_t ws_h, uint8_t ws_l, uint8_t w_en0, uint8_t w_en1);
 
-#endif /* _CALYPSO_CLK_H */
+#endif /* __ARCH_ARM_INCLUDE_CALYPSO_CLOCK_H */
