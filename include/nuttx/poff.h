@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUXX_POFF_H
-#define __INCLUDE_NUXX_POFF_H
+#ifndef __INCLUDE_NUTTX_POFF_H
+#define __INCLUDE_NUTTX_POFF_H
 
 /****************************************************************************
  * Included Files
@@ -432,4 +432,4 @@ struct poff_debugarginfo_s
 
 typedef struct poff_debugarginfo_s poff_debugarginfo_t;
 
-#endif /* __INCLUDE_NUXX_POFF_H */
+#endif /* __INCLUDE_NUTTX_POFF_H */

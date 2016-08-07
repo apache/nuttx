@@ -35,8 +35,8 @@
  *
  ****************************************************************************/
 
-#ifndef __NUTTX_WIRELESS_PN532_H
-#define __NUTTX_WIRELESS_PN532_H
+#ifndef __INCLUDE_NUTTX_WIRELESS_PN532_H
+#define __INCLUDE_NUTTX_WIRELESS_PN532_H
 
 /****************************************************************************
  * Included Files
@@ -162,4 +162,4 @@ int pn532_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
 }
 #endif
 
-#endif /* __NUTTX_WIRELESS_PN532_H */
+#endif /* __INCLUDE_NUTTX_WIRELESS_PN532_H */

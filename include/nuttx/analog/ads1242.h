@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef NUTTX_INCLUDE_NUTTX_ANALOG_ADS1242_H_
-#define NUTTX_INCLUDE_NUTTX_ANALOG_ADS1242_H_
+#ifndef __INCLUDE_NUTTX_ANALOG_ADS1242_H
+#define __INCLUDE_NUTTX_ANALOG_ADS1242_H
 
 /****************************************************************************
  * Included Files
@@ -199,4 +199,4 @@ int ads1242_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
 #endif
 
 #endif /* CONFIG_SPI && CONFIG_ADC_ADS1242 */
-#endif /* NUTTX_INCLUDE_NUTTX_ANALOG_ADS1242_H_ */
+#endif /* __INCLUDE_NUTTX_ANALOG_ADS1242_H */

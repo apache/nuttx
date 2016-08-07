@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __NUTTX_INCLUDE_NUTTX_SENSORS_MCP9844_H
-#define __NUTTX_INCLUDE_NUTTX_SENSORS_MCP9844_H
+#ifndef __INCLUDE_NUTTX_SENSORS_MCP9844_H
+#define __INCLUDE_NUTTX_SENSORS_MCP9844_H
 
 /****************************************************************************
  * Included Files
@@ -125,4 +125,4 @@ int mcp9844_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 #endif
 
 #endif /* CONFIG_I2C && CONFIG_MCP9844 */
-#endif /* __NUTTX_INCLUDE_NUTTX_SENSORS_MCP9844_H */
+#endif /* __INCLUDE_NUTTX_SENSORS_MCP9844_H */

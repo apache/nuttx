@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __NUTTX_WIRELESS_MFRC522_H
-#define __NUTTX_WIRELESS_MFRC522_H
+#ifndef __INCLUDE_NUTTX_WIRELESS_MFRC522_H
+#define __INCLUDE_NUTTX_WIRELESS_MFRC522_H
 
 /****************************************************************************
  * Included Files
@@ -113,4 +113,4 @@ int mfrc522_register(FAR const char *devpath, FAR struct spi_dev_s *spi);
 }
 #endif
 
-#endif /* __NUTTX_WIRELESS_MFRC522_H */
+#endif /* __INCLUDE_NUTTX_WIRELESS_MFRC522_H */

@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef _INCLUDE_NUTTX_CLOCK_H
-#define _INCLUDE_NUTTX_CLOCK_H
+#ifndef __INCLUDE_NUTTX_CLOCK_H
+#define __INCLUDE_NUTTX_CLOCK_H
 
 /****************************************************************************
  * Included Files
@@ -334,4 +334,4 @@ int clock_cpuload(int pid, FAR struct cpuload_s *cpuload);
 }
 #endif
 
-#endif /* _INCLUDE_NUTTX_CLOCK_H */
+#endif /* __INCLUDE_NUTTX_CLOCK_H */

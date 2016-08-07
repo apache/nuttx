@@ -127,4 +127,4 @@ struct i2c_master_s;
 FAR struct ioexpander_dev_s *tca64_initialize(FAR struct i2c_master_s *i2c,
                                               FAR struct tca64_config_s *config);
 
-#endif
+#endif /* __INCLUDE_NUTTX_IOEXPANDER_TCA64XX_H */

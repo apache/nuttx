@@ -1,5 +1,5 @@
-#ifndef _SERCOMM_H
-#define _SERCOMM_H
+#ifndef __INCLUDE_NUTTX_SERCOMM_SERCOMM_H
+#define __INCLUDE_NUTTX_SERCOMM_SERCOMM_H
 
 /* SERCOMM layer on UART1 (modem UART) */
 
@@ -54,4 +54,4 @@ static inline struct msgb *sercomm_alloc_msgb(unsigned int len)
 	return msgb_alloc_headroom(len+4, 4, "sercomm_tx");
 }
 
-#endif /* _SERCOMM_H */
+#endif /* __INCLUDE_NUTTX_SERCOMM_SERCOMM_H */

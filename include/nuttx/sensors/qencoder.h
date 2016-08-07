@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __NUTTX_SENSORS_QENCODER_H
-#define __NUTTX_SENSORS_QENCODER_H
+#ifndef __INCLUDE_NUTTX_SENSORS_QENCODER_H
+#define __INCLUDE_NUTTX_SENSORS_QENCODER_H
 
 /****************************************************************************
  * Included Files
@@ -177,4 +177,4 @@ int qe_register(FAR const char *devpath, FAR struct qe_lowerhalf_s *lower);
 #endif
 
 #endif /* CONFIG_QENCODER */
-#endif /* __NUTTX_SENSORS_QENCODER_H */
+#endif /* __INCLUDE_NUTTX_SENSORS_QENCODER_H */
