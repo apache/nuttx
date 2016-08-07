@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/wqueue/work_process.c
+ * sched/wqueue/work_process.c
  *
  *   Copyright (C) 2009-2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

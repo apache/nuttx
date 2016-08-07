@@ -1,4 +1,4 @@
-/********************************************************************************
+/****************************************************************************
  * sched/pthread/pthread_barrieinit.c
  *
  *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -44,44 +44,45 @@
 #include <errno.h>
 #include <debug.h>
 
-/********************************************************************************
+/****************************************************************************
  * Public Functions
- ********************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************
+/****************************************************************************
  * Name: pthread_barrier_init
  *
  * Description:
- *   The pthread_barrier_init() function allocates any resources required to use
- *   the barrier referenced by 'barrier' and initialized the barrier with the
- *   attributes referenced by attr.  If attr is NULL, the default barrier
- *   attributes will be used. The results are undefined if pthread_barrier_init()
- *   is called when any thread is blocked on the barrier. The results are
- *   undefined if a barrier is used without first being initialized. The results
- *   are undefined if pthread_barrier_init() is called specifying an already
- *   initialized barrier.
+ *   The pthread_barrier_init() function allocates any resources required to
+ *   use the barrier referenced by 'barrier' and initialized the barrier
+ *   with the attributes referenced by attr.  If attr is NULL, the default
+ *   barrier attributes will be used. The results are undefined if
+ *   pthread_barrier_init() is called when any thread is blocked on the
+ *   barrier. The results are undefined if a barrier is used without first
+ *   being initialized. The results are undefined if pthread_barrier_init()
+ *   is called specifying an already initialized barrier.
  *
  * Parameters:
  *   barrier - the barrier to be initialized
  *   attr - barrier attributes to be used in the initialization.
- *   count - the count to be associated with the barrier.  The count argument
- *     specifies the number of threads that must call pthread_barrier_wait() before
- *     any of them successfully return from the call.  The value specified by
- *     count must be greater than zero.
+ *   count - the count to be associated with the barrier.  The count
+ *     argument specifies the number of threads that must call
+ *     pthread_barrier_wait() before any of them successfully return from
+ *     the call.  The value specified by count must be greater than zero.
  *
  * Return Value:
  *   0 (OK) on success or on of the following error numbers:
  *
- *   EAGAIN The system lacks the necessary resources to initialize another barrier.
- *   EINVAL The barrier reference is invalid, or the values specified by attr are
- *          invalid, or the value specified by count is equal to zero.
+ *   EAGAIN The system lacks the necessary resources to initialize another
+ *          barrier.  EINVAL The barrier reference is invalid, or the values
+ *          specified by attr are invalid, or the value specified by count
+ *          is equal to zero.
  *   ENOMEM Insufficient memory exists to initialize the barrier.
- *   EBUSY  The implementation has detected an attempt to reinitialize a barrier
- *          while it is in use.
+ *   EBUSY  The implementation has detected an attempt to reinitialize a
+ *          barrier while it is in use.
  *
  * Assumptions:
  *
- ********************************************************************************/
+ ****************************************************************************/
 
 int pthread_barrier_init(FAR pthread_barrier_t *barrier,
                          FAR const pthread_barrierattr_t *attr, unsigned int count)

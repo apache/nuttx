@@ -1,4 +1,4 @@
-/********************************************************************************
+/****************************************************************************
  * sched/pthread/pthread_barriedestroy.c
  *
  *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -44,20 +44,21 @@
 #include <errno.h>
 #include <debug.h>
 
-/********************************************************************************
+/****************************************************************************
  * Public Functions
- ********************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************
+/****************************************************************************
  * Name: pthread_barrier_destroy
  *
  * Description:
- *   The pthread_barrier_destroy() function destroys the barrier referenced by
- *   'barrier' and releases any resources used by the barrier. The effect of
- *   subsequent use of the barrier is undefined until the barrier is
- *   reinitialized by another call to pthread_barrier_init(). The results are
- *   undefined if pthread_barrier_destroy() is called when any thread is blocked
- *   on the barrier, or if this function is called with an uninitialized barrier.
+ *   The pthread_barrier_destroy() function destroys the barrier referenced
+ *   by 'barrier' and releases any resources used by the barrier. The effect
+ *   of subsequent use of the barrier is undefined until the barrier is
+ *   reinitialized by another call to pthread_barrier_init(). The result
+ *   are undefined if pthread_barrier_destroy() is called when any thread is
+ *   blocked on the barrier, or if this function is called with an
+ *   uninitialized barrier.
  *
  * Parameters:
  *   barrier - barrier to be destroyed.
@@ -65,13 +66,13 @@
  * Return Value:
  *   0 (OK) on success or on of the following error numbers:
  *
- *   EBUSY  The implementation has detected an attempt to destroy a barrier while
- *           it is in use.
+ *   EBUSY  The implementation has detected an attempt to destroy a barrier
+ *          while it is in use.
  *   EINVAL The value specified by barrier is invalid.
  *
  * Assumptions:
  *
- ********************************************************************************/
+ ****************************************************************************/
 
 int pthread_barrier_destroy(FAR pthread_barrier_t *barrier)
 {

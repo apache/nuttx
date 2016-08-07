@@ -1,4 +1,4 @@
-/********************************************************************************
+/****************************************************************************
  * sched/timer/timer_create.c
  *
  *   Copyright (C) 2007-2009, 2011, 2014-2016 Gregory Nutt. All rights reserved.
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -53,17 +53,17 @@
 
 #ifndef CONFIG_DISABLE_POSIX_TIMERS
 
-/********************************************************************************
+/****************************************************************************
  * Private Functions
- ********************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************
+/****************************************************************************
  * Name: timer_allocate
  *
  * Description:
  *   Allocate one POSIX timer and place it into the allocated timer list.
  *
- ********************************************************************************/
+ ****************************************************************************/
 
 static FAR struct posix_timer_s *timer_allocate(void)
 {
@@ -112,32 +112,33 @@ static FAR struct posix_timer_s *timer_allocate(void)
   return ret;
 }
 
-/********************************************************************************
+/****************************************************************************
  * Public Functions
- ********************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************
+/****************************************************************************
  * Name: timer_create
  *
  * Description:
- *   The  timer_create() function creates per-thread timer using the specified
- *   clock, clock_id, as the timing base. The timer_create() function returns, in
- *   the location referenced by timerid, a timer ID of type timer_t used to identify
- *   the timer in timer requests. This timer ID is unique until the timer is
- *   deleted. The particular clock, clock_id, is defined in <time.h>. The timer
- *   whose ID is returned will be in a disarmed state upon return from
- *   timer_create().
+ *   The  timer_create() function creates per-thread timer using the
+ *   specified clock, clock_id, as the timing base. The timer_create()
+ *   function returns, in the location referenced by timerid, a timer ID of
+ *   type timer_t used to identify the timer in timer requests. This timer
+ *   ID is unique until the timer is deleted. The particular clock, clock_id,
+ *   is defined in <time.h>. The timer whose ID is returned will be in a
+ *   disarmed state upon return from timer_create().
  *
- *   The evp argument, if non-NULL, points to a sigevent structure. This structure
- *   is allocated by the called and defines the asynchronous notification to occur.
- *   If the evp argument is NULL, the effect is as if the evp argument pointed to
- *   a sigevent structure with the sigev_notify member having the value SIGEV_SIGNAL,
- *   the sigev_signo having a default signal number, and the sigev_value member
- *   having the value of the timer ID.
+ *   The evp argument, if non-NULL, points to a sigevent structure. This
+ *   structure is allocated by the called and defines the asynchronous
+ *   notification to occur.  If the evp argument is NULL, the effect is as
+ *   if the evp argument pointed to a sigevent structure with the
+ *   sigev_notify member having the value SIGEV_SIGNAL, the sigev_signo
+ *   having a default signal number, and the sigev_value member having the
+ *   value of the timer ID.
  *
- *   Each implementation defines a set of clocks that can be used as timing bases
- *   for per-thread timers. All implementations shall support a clock_id of
- *   CLOCK_REALTIME.
+ *   Each implementation defines a set of clocks that can be used as timing
+ *   bases for per-thread timers. All implementations shall support a
+ *   clock_id of CLOCK_REALTIME.
  *
  * Parameters:
  *   clockid - Specifies the clock to use as the timing base.
@@ -148,30 +149,31 @@ static FAR struct posix_timer_s *timer_allocate(void)
  * Return Value:
  *   If the call succeeds, timer_create() will return 0 (OK) and update the
  *   location referenced by timerid to a timer_t, which can be passed to the
- *   other per-thread timer calls.  If an error occurs, the function will return
- *   a value of -1 (ERROR) and set errno to indicate the error.
+ *   other per-thread timer calls.  If an error occurs, the function will
+ *   return a value of -1 (ERROR) and set errno to indicate the error.
  *
- *   EAGAIN - The system lacks sufficient signal queuing resources to honor the
- *    request.
- *   EAGAIN - The calling process has already created all of the timers it is
- *     allowed by this implementation.
+ *   EAGAIN - The system lacks sufficient signal queuing resources to honor
+ *     the request.
+ *   EAGAIN - The calling process has already created all of the timers it
+ *     is allowed by this implementation.
  *   EINVAL - The specified clock ID is not defined.
- *   ENOTSUP - The implementation does not support the creation of a timer attached
- *     to the CPU-time clock that is specified by clock_id and associated with a
- *     thread different thread invoking timer_create().
+ *   ENOTSUP - The implementation does not support the creation of a timer
+ *     attached to the CPU-time clock that is specified by clock_id and
+ *     associated with a thread different thread invoking timer_create().
  *
  * Assumptions:
  *
- ********************************************************************************/
+ ****************************************************************************/
 
-int timer_create(clockid_t clockid, FAR struct sigevent *evp, FAR timer_t *timerid)
+int timer_create(clockid_t clockid, FAR struct sigevent *evp,
+                 FAR timer_t *timerid)
 {
   FAR struct posix_timer_s *ret;
   WDOG_ID wdog;
 
   /* Sanity checks.  Also, we support only CLOCK_REALTIME */
 
-  if (!timerid || clockid != CLOCK_REALTIME)
+  if (timerid == NULL || clockid != CLOCK_REALTIME)
     {
       set_errno(EINVAL);
       return ERROR;

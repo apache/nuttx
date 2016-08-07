@@ -1,5 +1,5 @@
 /****************************************************************************
- * shced/sched_removereadytorun.c
+ * sched/sched_removereadytorun.c
  *
  *   Copyright (C) 2007-2009, 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
