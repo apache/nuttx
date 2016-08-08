@@ -59,7 +59,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration */
+/* H/W features must be enabled in order to support LSB first operation */
+
+#ifndef CONFIG_SPI_HWFEATURES
+#  error CONFIG_SPI_HWFEATURES=y required by this driver
+#endif
 
 /* Cisplay resolution */
 
@@ -103,7 +107,7 @@
 /* Other misc settings */
 
 #define MEMLCD_SPI_FREQUENCY 2250000
-#define MEMLCD_SPI_BITS      (-8)
+#define MEMLCD_SPI_BITS      8
 #define MEMLCD_SPI_MODE      SPIDEV_MODE0
 
 #define LS_BIT               (1 << 0)
@@ -281,12 +285,12 @@ static void memlcd_select(FAR struct spi_dev_s *spi)
 
   SPI_SETMODE(spi, MEMLCD_SPI_MODE);
   SPI_SETBITS(spi, MEMLCD_SPI_BITS);
-  (void)SPI_HWFEATURES(spi, 0);
-#  ifdef CONFIG_MEMLCD_SPI_FREQUENCY
+  (void)SPI_HWFEATURES(spi, HWFEAT_LSBFIRST);
+#ifdef CONFIG_MEMLCD_SPI_FREQUENCY
   (void)SPI_SETFREQUENCY(spi, CONFIG_MEMLCD_SPI_FREQUENCY);
-#  else
+#else
   (void)SPI_SETFREQUENCY(spi, MEMLCD_SPI_FREQUENCY);
-#  endif
+#endif
 }
 
 /****************************************************************************

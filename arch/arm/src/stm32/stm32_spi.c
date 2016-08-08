@@ -222,6 +222,10 @@ static int         spi_lock(FAR struct spi_dev_s *dev, bool lock);
 static uint32_t    spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency);
 static void        spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
 static void        spi_setbits(FAR struct spi_dev_s *dev, int nbits);
+#ifdef CONFIG_SPI_HWFEATURES
+static int         spi_hwfeatures(FAR struct spi_dev_s *dev,
+                                  spi_hwfeatures_t features);
+#endif
 static uint16_t    spi_send(FAR struct spi_dev_s *dev, uint16_t wd);
 static void        spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
                                 FAR void *rxbuffer, size_t nwords);
@@ -249,7 +253,7 @@ static const struct spi_ops_s g_sp1iops =
   .setmode           = spi_setmode,
   .setbits           = spi_setbits,
 #ifdef CONFIG_SPI_HWFEATURES
-  .hwfeatures        = 0,                   /* Not supported */
+  .hwfeatures        = spi_hwfeatures,
 #endif
   .status            = stm32_spi1status,
 #ifdef CONFIG_SPI_CMDDATA
@@ -292,6 +296,9 @@ static const struct spi_ops_s g_sp2iops =
   .setfrequency      = spi_setfrequency,
   .setmode           = spi_setmode,
   .setbits           = spi_setbits,
+#ifdef CONFIG_SPI_HWFEATURES
+  .hwfeatures        = spi_hwfeatures,
+#endif
   .status            = stm32_spi2status,
 #ifdef CONFIG_SPI_CMDDATA
   .cmddata           = stm32_spi2cmddata,
@@ -333,6 +340,9 @@ static const struct spi_ops_s g_sp3iops =
   .setfrequency      = spi_setfrequency,
   .setmode           = spi_setmode,
   .setbits           = spi_setbits,
+#ifdef CONFIG_SPI_HWFEATURES
+  .hwfeatures        = spi_hwfeatures,
+#endif
   .status            = stm32_spi3status,
 #ifdef CONFIG_SPI_CMDDATA
   .cmddata           = stm32_spi3cmddata,
@@ -374,6 +384,9 @@ static const struct spi_ops_s g_sp4iops =
   .setfrequency      = spi_setfrequency,
   .setmode           = spi_setmode,
   .setbits           = spi_setbits,
+#ifdef CONFIG_SPI_HWFEATURES
+  .hwfeatures        = spi_hwfeatures,
+#endif
   .status            = stm32_spi4status,
 #ifdef CONFIG_SPI_CMDDATA
   .cmddata           = stm32_spi4cmddata,
@@ -415,6 +428,9 @@ static const struct spi_ops_s g_sp5iops =
   .setfrequency      = spi_setfrequency,
   .setmode           = spi_setmode,
   .setbits           = spi_setbits,
+#ifdef CONFIG_SPI_HWFEATURES
+  .hwfeatures        = spi_hwfeatures,
+#endif
   .status            = stm32_spi5status,
 #ifdef CONFIG_SPI_CMDDATA
   .cmddata           = stm32_spi5cmddata,
@@ -456,6 +472,9 @@ static const struct spi_ops_s g_sp6iops =
   .setfrequency      = spi_setfrequency,
   .setmode           = spi_setmode,
   .setbits           = spi_setbits,
+#ifdef CONFIG_SPI_HWFEATURES
+  .hwfeatures        = spi_hwfeatures,
+#endif
   .status            = stm32_spi6status,
 #ifdef CONFIG_SPI_CMDDATA
   .cmddata           = stm32_spi3cmddata,
@@ -1136,24 +1155,14 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 
       switch (nbits)
         {
-        case -8:
-          setbits = SPI_CR1_LSBFIRST;
-          clrbits = SPI_CR1_DFF;
-          break;
-
         case 8:
           setbits = 0;
-          clrbits = SPI_CR1_DFF | SPI_CR1_LSBFIRST;
-          break;
-
-        case -16:
-          setbits = SPI_CR1_DFF | SPI_CR1_LSBFIRST;
-          clrbits = 0;
+          clrbits = SPI_CR1_DFF;
           break;
 
         case 16:
           setbits = SPI_CR1_DFF;
-          clrbits = SPI_CR1_LSBFIRST;
+          clrbits = 0;
           break;
 
         default:
@@ -1169,6 +1178,52 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
       priv->nbits = nbits;
     }
 }
+
+/****************************************************************************
+ * Name: spi_hwfeatures
+ *
+ * Description:
+ *   Set hardware-specific feature flags.
+ *
+ * Input Parameters:
+ *   dev   - Device-specific state data
+ *   flags - H/W feature flags
+ *
+ * Returned Value:
+ *   Zero (OK) if the selected H/W features are enabled; A negated errno
+ *   value if any H/W feature is not supportable.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SPI_HWFEATURES
+static int spi_hwfeatures(FAR struct spi_dev_s *dev, spi_hwfeatures_t features)
+{
+  FAR struct stm32_spidev_s *priv = (FAR struct stm32_spidev_s *)dev;
+  uint16_t setbits;
+  uint16_t clrbits;
+
+  spiinfo("features=%08x\n", features);
+
+  /* Transfer data LSB first? */
+
+  if ((hwfeatures & HWFEAT_LSBFIRST) != 0)
+    {
+      setbits = SPI_CR1_LSBFIRST;
+      clrbits = 0;
+    }
+  else
+    {
+      setbits = 0;
+      clrbits = SPI_CR1_LSBFIRST;
+    }
+
+  spi_modifycr1(priv, 0, SPI_CR1_SPE);
+  spi_modifycr1(priv, setbits, clrbits);
+  spi_modifycr1(priv, SPI_CR1_SPE, 0);
+
+  return OK;
+}
+#endif
 
 /************************************************************************************
  * Name: spi_send

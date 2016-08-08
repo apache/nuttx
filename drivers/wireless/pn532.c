@@ -56,6 +56,13 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Configuration ************************************************************/
+/* H/W features must be enabled in order to support LSB first operation */
+
+#ifndef CONFIG_SPI_HWFEATURES
+#  error CONFIG_SPI_HWFEATURES=y required by this driver
+#endif
+
 #ifdef CONFIG_WL_PN532_DEBUG
 #  define pn532err    _err
 #  define pn532info   _info
@@ -145,8 +152,8 @@ static void pn532_lock(FAR struct spi_dev_s *spi)
   (void)SPI_LOCK(spi, true);
 
   SPI_SETMODE(spi, SPIDEV_MODE0);
-  SPI_SETBITS(spi, -8);
-  (void)SPI_HWFEATURES(spi, 0);
+  SPI_SETBITS(spi, 8);
+  (void)SPI_HWFEATURES(spi, HWFEAT_LSBFIRST);
   (void)SPI_SETFREQUENCY(spi, CONFIG_PN532_SPI_FREQ);
 }
 
@@ -160,8 +167,8 @@ static inline void pn532_configspi(FAR struct spi_dev_s *spi)
   /* Configure SPI for the PN532 module. */
 
   SPI_SETMODE(spi, SPIDEV_MODE0);
-  SPI_SETBITS(spi, -8);
-  (void)SPI_HWFEATURES(spi, 0);
+  SPI_SETBITS(spi, 8);
+  (void)SPI_HWFEATURES(spi, HWFEAT_LSBFIRST);
   (void)SPI_SETFREQUENCY(spi, CONFIG_PN532_SPI_FREQ);
 }
 

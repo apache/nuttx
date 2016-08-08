@@ -203,6 +203,10 @@ static int         spi_lock(FAR struct spi_dev_s *dev, bool lock);
 static uint32_t    spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency);
 static void        spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
 static void        spi_setbits(FAR struct spi_dev_s *dev, int nbits);
+#ifdef CONFIG_SPI_HWFEATURES
+static int         spi_hwfeatures(FAR struct spi_dev_s *dev,
+                                  spi_hwfeatures_t features);
+#endif
 static uint16_t    spi_send(FAR struct spi_dev_s *dev, uint16_t wd);
 static void        spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
                                 FAR void *rxbuffer, size_t nwords);
@@ -230,7 +234,7 @@ static const struct spi_ops_s g_spi1ops =
   .setmode           = spi_setmode,
   .setbits           = spi_setbits,
 #ifdef CONFIG_SPI_HWFEATURES
-  .hwfeatures        = 0,                   /* Not supported */
+  .hwfeatures        = spi_hwfeatures,
 #endif
   .status            = stm32l4_spi1status,
 #ifdef CONFIG_SPI_CMDDATA
@@ -274,6 +278,9 @@ static const struct spi_ops_s g_spi2ops =
   .setfrequency      = spi_setfrequency,
   .setmode           = spi_setmode,
   .setbits           = spi_setbits,
+#ifdef CONFIG_SPI_HWFEATURES
+  .hwfeatures        = spi_hwfeatures,
+#endif
   .status            = stm32l4_spi2status,
 #ifdef CONFIG_SPI_CMDDATA
   .cmddata           = stm32l4_spi2cmddata,
@@ -315,6 +322,9 @@ static const struct spi_ops_s g_spi3ops =
   .setfrequency      = spi_setfrequency,
   .setmode           = spi_setmode,
   .setbits           = spi_setbits,
+#ifdef CONFIG_SPI_HWFEATURES
+  .hwfeatures        = spi_hwfeatures,
+#endif
   .status            = stm32l4_spi3status,
 #ifdef CONFIG_SPI_CMDDATA
   .cmddata           = stm32l4_spi3cmddata,
@@ -1092,8 +1102,8 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 {
   FAR struct stm32l4_spidev_s *priv = (FAR struct stm32l4_spidev_s *)dev;
-  uint16_t setbits1, setbits2;
-  uint16_t clrbits1, clrbits2;
+  uint16_t setbits;
+  uint16_t clrbits;
   int savbits = nbits;
 
   spiinfo("nbits=%d\n", nbits);
@@ -1102,21 +1112,7 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 
   if (nbits != priv->nbits)
     {
-      /* Yes... Set CR1/2 appropriately */
-      /* Negative sign means LSBFIRST, set this in CR1*/
-
-      if (nbits < 0)
-        {
-          setbits1 = SPI_CR1_LSBFIRST;
-          clrbits1 = 0;
-          nbits    = -nbits;
-        }
-      else
-        {
-          setbits1 = 0;
-          clrbits1 = SPI_CR1_LSBFIRST;
-        }
-
+      /* Yes... Set CR2 appropriately */
       /* Set the number of bits (valid range 4-16) */
 
       if (nbits < 4 || nbits > 16)
@@ -1124,8 +1120,8 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
           return;
         }
 
-      clrbits2 = SPI_CR2_DS_MASK;
-      setbits2 = SPI_CR2_DS_VAL(nbits);
+      clrbits = SPI_CR2_DS_MASK;
+      setbits = SPI_CR2_DS_VAL(nbits);
 
       /* If nbits is <=8, then we are in byte mode and FRXTH shall be set
        * (else, transaction will not complete).
@@ -1133,16 +1129,15 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 
       if (nbits < 9)
         {
-          setbits2 |= SPI_CR2_FRXTH; /* RX FIFO Threshold = 1 byte */
+          setbits |= SPI_CR2_FRXTH; /* RX FIFO Threshold = 1 byte */
         }
       else
         {
-          clrbits2 |= SPI_CR2_FRXTH; /* RX FIFO Threshold = 2 bytes */
+          clrbits |= SPI_CR2_FRXTH; /* RX FIFO Threshold = 2 bytes */
         }
 
       spi_modifycr(STM32L4_SPI_CR1_OFFSET, priv, 0, SPI_CR1_SPE);
-      spi_modifycr(STM32L4_SPI_CR1_OFFSET, priv, setbits1, clrbits1);
-      spi_modifycr(STM32L4_SPI_CR2_OFFSET, priv, setbits2, clrbits2);
+      spi_modifycr(STM32L4_SPI_CR2_OFFSET, priv, setbits, clrbits);
       spi_modifycr(STM32L4_SPI_CR1_OFFSET, priv, SPI_CR1_SPE, 0);
 
       /* Save the selection so the subsequence re-configurations will be faster */
@@ -1150,6 +1145,52 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
       priv->nbits = savbits; // nbits has been clobbered... save the signed value.
     }
 }
+
+/****************************************************************************
+ * Name: spi_hwfeatures
+ *
+ * Description:
+ *   Set hardware-specific feature flags.
+ *
+ * Input Parameters:
+ *   dev   - Device-specific state data
+ *   flags - H/W feature flags
+ *
+ * Returned Value:
+ *   Zero (OK) if the selected H/W features are enabled; A negated errno
+ *   value if any H/W feature is not supportable.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SPI_HWFEATURES
+static int spi_hwfeatures(FAR struct spi_dev_s *dev, spi_hwfeatures_t features)
+{
+  FAR struct stm32_spidev_s *priv = (FAR struct stm32_spidev_s *)dev;
+  uint16_t setbits;
+  uint16_t clrbits;
+
+  spiinfo("features=%08x\n", features);
+
+  /* Transfer data LSB first? */
+
+  if ((hwfeatures & HWFEAT_LSBFIRST) != 0)
+    {
+      setbits = SPI_CR1_LSBFIRST;
+      clrbits = 0;
+    }
+  else
+    {
+      setbits = 0;
+      clrbits = SPI_CR1_LSBFIRST;
+    }
+
+  spi_modifycr(STM32L4_SPI_CR1_OFFSET, priv, 0, SPI_CR1_SPE);
+  spi_modifycr(STM32L4_SPI_CR1_OFFSET, priv, setbits, clrbits);
+  spi_modifycr(STM32L4_SPI_CR1_OFFSET, priv, SPI_CR1_SPE, 0);
+
+  return OK;
+}
+#endif
 
 /************************************************************************************
  * Name: spi_send

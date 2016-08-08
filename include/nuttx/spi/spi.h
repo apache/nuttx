@@ -175,9 +175,7 @@
  *
  * Input Parameters:
  *   dev -  Device-specific state data
- *   nbits - The number of bits requests.
- *           If value is greater > 0 then it implies MSB first
- *           If value is below < 0, then it implies LSB first with -nbits
+ *   nbits - The number of bits in an SPI word.
  *
  * Returned Value:
  *   none
@@ -225,6 +223,8 @@
    *          Do not set the LASTXFER-Bit at the last word of the next
    *          exchange, Flag is auto-resetting after the next LASTXFER
    *          condition. (see spi_exchange)
+   *   Bit 4: HWFEAT_LSBFIRST
+   *          Data transferred LSB first (default is MSB first)
    */
 
 #  ifdef CONFIG_SPI_CRCGENERATION
@@ -236,6 +236,8 @@
 #    define HWFEAT_FORCE_CS_ACTIVE_AFTER_TRANSFER    (1 << 2)
 #    define HWFEAT_ESCAPE_LASTXFER                   (1 << 3)
 #  endif
+
+#  define HWFEAT_LSBFIRST                            (1 << 4)
 
 #else
   /* Any attempt to select hardware features with CONFIG_SPI_HWFEATURES
