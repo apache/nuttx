@@ -65,6 +65,10 @@
 #  error CONFIG_SPI_HWFEATURES=y and CONFIG_SPI_BITORDER=y required by this driver
 #endif
 
+#ifndef CONFIG_ARCH_HAVE_SPI_BITORDER
+#  warning This platform does not support SPI LSB-bit order
+#endif
+
 #ifdef CONFIG_WL_PN532_DEBUG
 #  define pn532err    _err
 #  define pn532info   _info
