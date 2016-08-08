@@ -1188,7 +1188,7 @@ static int spi_hwfeatures(FAR struct spi_dev_s *dev, spi_hwfeatures_t features)
   spi_modifycr(STM32L4_SPI_CR1_OFFSET, priv, setbits, clrbits);
   spi_modifycr(STM32L4_SPI_CR1_OFFSET, priv, SPI_CR1_SPE, 0);
 
-  return OK;
+  return ((hwfeatures & ~HWFEAT_LSBFIRST) == 0) ? OK : -ENOSYS;
 }
 #endif
 

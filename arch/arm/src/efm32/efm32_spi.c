@@ -1121,7 +1121,7 @@ static int spi_hwfeatures(FAR struct spi_dev_s *dev, spi_hwfeatures_t features)
       priv->lsbfirst = lsbfirst;
     }
 
-  return OK;
+  return ((hwfeatures & ~HWFEAT_LSBFIRST) == 0) ? OK : -ENOSYS;
 }
 #endif
 
