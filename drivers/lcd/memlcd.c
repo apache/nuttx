@@ -59,10 +59,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* H/W features must be enabled in order to support LSB first operation */
+/* Bit order H/W feature must be enabled in order to support LSB first
+ * operation.
+ */
 
-#ifndef CONFIG_SPI_HWFEATURES
-#  error CONFIG_SPI_HWFEATURES=y required by this driver
+#if !defined(CONFIG_SPI_HWFEATURES) || !defined(CONFIG_SPI_BITORDER)
+#  error CONFIG_SPI_HWFEATURES=y and CONFIG_SPI_BITORDER=y required by this driver
 #endif
 
 /* Cisplay resolution */

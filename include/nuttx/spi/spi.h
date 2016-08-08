@@ -232,13 +232,16 @@
 #  endif
 
 #  ifdef CONFIG_SPI_CS_CONTROL
+#    define HWFEAT_FORCE_CS_CONTROL_MASK             (7 << 1)
 #    define HWFEAT_FORCE_CS_INACTIVE_AFTER_TRANSFER  (1 << 1)
 #    define HWFEAT_FORCE_CS_ACTIVE_AFTER_TRANSFER    (1 << 2)
 #    define HWFEAT_ESCAPE_LASTXFER                   (1 << 3)
 #  endif
 
-#  define HWFEAT_MSBFIRST                            (0 << 4)
-#  define HWFEAT_LSBFIRST                            (1 << 4)
+#  ifdef CONFIG_SPI_BITORDER
+#    define HWFEAT_MSBFIRST                          (0 << 4)
+#    define HWFEAT_LSBFIRST                          (1 << 4)
+#  endif
 
 #else
   /* Any attempt to select hardware features with CONFIG_SPI_HWFEATURES

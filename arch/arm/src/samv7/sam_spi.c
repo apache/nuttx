@@ -1221,6 +1221,7 @@ static int spi_setdelay(struct spi_dev_s *dev, uint32_t startdelay,
 #ifdef CONFIG_SPI_HWFEATURES
 static int spi_hwfeatures(struct spi_dev_s *dev, uint8_t features)
 {
+#ifdef CONFIG_SPI_CS_CONTROL
   struct sam_spics_s *spics = (struct sam_spics_s *)dev;
   struct sam_spidev_s *spi = spi_device(spics);
   uint32_t regval;
@@ -1280,7 +1281,10 @@ static int spi_hwfeatures(struct spi_dev_s *dev, uint8_t features)
       spi->escape_lastxfer = false;
     }
 
-  return 0;
+  return ((features & ~HWFEAT_FORCE_CS_CONTROL_MASK) == 0) ? OK : -ENOSYS;
+#else
+  return -ENOSYS;
+#endif
 }
 #endif
 

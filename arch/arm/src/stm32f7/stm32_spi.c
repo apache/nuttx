@@ -1301,6 +1301,7 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 #ifdef CONFIG_SPI_HWFEATURES
 static int spi_hwfeatures(FAR struct spi_dev_s *dev, spi_hwfeatures_t features)
 {
+#ifdef CONFIG_SPI_BITORDER
   FAR struct stm32_spidev_s *priv = (FAR struct stm32_spidev_s *)dev;
   uint16_t setbitscr1;
   uint16_t clrbitscr1;
@@ -1330,6 +1331,9 @@ static int spi_hwfeatures(FAR struct spi_dev_s *dev, spi_hwfeatures_t features)
   /* Other H/W features are not supported */
 
   return ((features & ~HWFEAT_LSBFIRST) == 0) ? OK : -ENOSYS;
+#else
+  return -ENOSYS;
+#endif
 }
 #endif
 
