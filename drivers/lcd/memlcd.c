@@ -272,6 +272,8 @@ static inline int __test_bit(int nr, const volatile uint8_t * addr)
 
 static void memlcd_select(FAR struct spi_dev_s *spi)
 {
+  int ret;
+
   /* Select memlcd (locking the SPI bus in case there are multiple
    * devices competing for the SPI bus
    */
@@ -285,7 +287,13 @@ static void memlcd_select(FAR struct spi_dev_s *spi)
 
   SPI_SETMODE(spi, MEMLCD_SPI_MODE);
   SPI_SETBITS(spi, MEMLCD_SPI_BITS);
-  (void)SPI_HWFEATURES(spi, HWFEAT_LSBFIRST);
+
+  ret = SPI_HWFEATURES(spi, HWFEAT_LSBFIRST);
+  if (ret < 0)
+    {
+      lcderr("ERROR: SPI_HWFEATURES failed to set bit order: %d\n", ret);
+    }
+
 #ifdef CONFIG_MEMLCD_SPI_FREQUENCY
   (void)SPI_SETFREQUENCY(spi, CONFIG_MEMLCD_SPI_FREQUENCY);
 #else

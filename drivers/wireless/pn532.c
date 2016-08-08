@@ -149,11 +149,19 @@ static const uint8_t pn532ack[] =
 
 static void pn532_lock(FAR struct spi_dev_s *spi)
 {
+  int ret;
+
   (void)SPI_LOCK(spi, true);
 
   SPI_SETMODE(spi, SPIDEV_MODE0);
   SPI_SETBITS(spi, 8);
-  (void)SPI_HWFEATURES(spi, HWFEAT_LSBFIRST);
+
+  ret = SPI_HWFEATURES(spi, HWFEAT_LSBFIRST);
+  if (ret < 0)
+    {
+      pn532err("ERROR: SPI_HWFEATURES failed to set bit order: %d\n", ret);
+    }
+
   (void)SPI_SETFREQUENCY(spi, CONFIG_PN532_SPI_FREQ);
 }
 
@@ -164,11 +172,19 @@ static void pn532_unlock(FAR struct spi_dev_s *spi)
 
 static inline void pn532_configspi(FAR struct spi_dev_s *spi)
 {
+  int ret;
+
   /* Configure SPI for the PN532 module. */
 
   SPI_SETMODE(spi, SPIDEV_MODE0);
   SPI_SETBITS(spi, 8);
-  (void)SPI_HWFEATURES(spi, HWFEAT_LSBFIRST);
+
+  ret = SPI_HWFEATURES(spi, HWFEAT_LSBFIRST);
+  if (ret < 0)
+    {
+      pn532err("ERROR: SPI_HWFEATURES failed to set bit order: %d\n", ret);
+    }
+
   (void)SPI_SETFREQUENCY(spi, CONFIG_PN532_SPI_FREQ);
 }
 
