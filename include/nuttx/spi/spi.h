@@ -192,8 +192,8 @@
  *   Set hardware-specific feature flags.
  *
  * Input Parameters:
- *   dev   - Device-specific state data
- *   flags - H/W feature flags
+ *   dev      - Device-specific state data
+ *   features - H/W feature flags
  *
  * Returned Value:
  *   Zero (OK) if the selected H/W features are enabled; A negated errno
@@ -237,6 +237,7 @@
 #    define HWFEAT_ESCAPE_LASTXFER                   (1 << 3)
 #  endif
 
+#  define HWFEAT_MSBFIRST                            (0 << 4)
 #  define HWFEAT_LSBFIRST                            (1 << 4)
 
 #else

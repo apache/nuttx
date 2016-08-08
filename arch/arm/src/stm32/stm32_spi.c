@@ -1186,8 +1186,8 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
  *   Set hardware-specific feature flags.
  *
  * Input Parameters:
- *   dev   - Device-specific state data
- *   flags - H/W feature flags
+ *   dev      - Device-specific state data
+ *   features - H/W feature flags
  *
  * Returned Value:
  *   Zero (OK) if the selected H/W features are enabled; A negated errno
@@ -1206,7 +1206,7 @@ static int spi_hwfeatures(FAR struct spi_dev_s *dev, spi_hwfeatures_t features)
 
   /* Transfer data LSB first? */
 
-  if ((hwfeatures & HWFEAT_LSBFIRST) != 0)
+  if ((features & HWFEAT_LSBFIRST) != 0)
     {
       setbits = SPI_CR1_LSBFIRST;
       clrbits = 0;
@@ -1221,7 +1221,9 @@ static int spi_hwfeatures(FAR struct spi_dev_s *dev, spi_hwfeatures_t features)
   spi_modifycr1(priv, setbits, clrbits);
   spi_modifycr1(priv, SPI_CR1_SPE, 0);
 
-  return ((hwfeatures & ~HWFEAT_LSBFIRST) == 0) ? OK : -ENOSYS;
+  /* Other H/W features are not supported */
+
+  return ((features & ~HWFEAT_LSBFIRST) == 0) ? OK : -ENOSYS;
 }
 #endif
 
