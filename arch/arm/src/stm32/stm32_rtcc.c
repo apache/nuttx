@@ -729,6 +729,12 @@ int up_rtc_initialize(void)
       /* Remember that the RTC is initialized */
 
       putreg32(RTC_MAGIC, RTC_MAGIC_REG);
+
+      /* Disable write access to the backup domain (RTC registers, RTC
+       * backup data registers and backup SRAM).
+       */
+
+      stm32_pwr_enablebkp(false);
     }
   else
     {
@@ -739,12 +745,6 @@ int up_rtc_initialize(void)
       rtc_resume();
       rtc_dumpregs("Did resume");
     }
-
-  /* Disable write access to the backup domain (RTC registers, RTC backup
-   * data registers and backup SRAM).
-   */
-
-  stm32_pwr_enablebkp(false);
 
   if (ret != OK && nretry > 0)
     {

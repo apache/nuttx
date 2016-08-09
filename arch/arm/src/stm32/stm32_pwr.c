@@ -83,6 +83,10 @@ static inline void stm32_pwr_modifyreg(uint8_t offset, uint16_t clearbits, uint1
  *   Enables access to the backup domain (RTC registers, RTC backup data registers
  *   and backup SRAM).
  *
+ *   NOTE: Reference counting is used in order to supported nested calles to this
+ *   function.  As a consequence, every call to stm32_pwr_enablebkp(true) must
+ *   be followed by a call to stm32_pwr_enablebkp(false).
+ *
  * Input Parameters:
  *   writable - True: enable ability to write to backup domain registers
  *
