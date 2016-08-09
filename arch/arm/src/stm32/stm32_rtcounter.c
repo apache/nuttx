@@ -377,7 +377,7 @@ int up_rtc_initialize(void)
    * registers and backup SRAM).
    */
 
-  (void)stm32_pwr_enablebkp(true);
+  stm32_pwr_enablebkp(true);
 
   /* Set access to the peripheral, enable the backup domain (BKP) and the lower
    * power external 32,768Hz (Low-Speed External, LSE) oscillator.  Configure the
@@ -428,7 +428,7 @@ int up_rtc_initialize(void)
    * registers and backup SRAM).
    */
 
-  (void)stm32_pwr_enablebkp(false);
+  stm32_pwr_enablebkp(false);
 
   return OK;
 }
@@ -605,7 +605,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
   /* Enable write access to the backup domain */
 
   flags = enter_critical_section();
-  (void)stm32_pwr_enablebkp(true);
+  stm32_pwr_enablebkp(true);
 
   /* Then write the broken out values to the RTC counter and BKP overflow register
    * (hi-res mode only)
@@ -625,7 +625,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
   putreg16(regvals.ovf, RTC_TIMEMSB_REG);
 #endif
 
-  (void)stm32_pwr_enablebkp(false);
+  stm32_pwr_enablebkp(false);
   leave_critical_section(flags);
   return OK;
 }
