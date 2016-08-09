@@ -123,10 +123,7 @@ static inline int sam_gpiopin(gpio_pinset_t cfgset)
 
 static inline int sam_gpio_enableclk(gpio_pinset_t cfgset)
 {
-  /* Enable the peripheral clock for the GPIO's port controller.
-   * A GPIO input value is only sampled if the peripheral clock for its
-   * controller is enabled.
-   */
+  /* Enable the peripheral clock for the GPIO's port controller. */
 
   switch (cfgset & GPIO_PORT_MASK)
     {
