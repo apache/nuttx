@@ -88,3 +88,13 @@ void kinetis_boardinitialize(void)
   board_autoled_initialize();
 #endif
 }
+
+#if defined(CONFIG_BOARD_INITIALIZE)
+void board_initialize(void)
+{
+#if defined(CONFIG_KINETIS_I2C0) || defined(CONFIG_KINETIS_I2C1)
+  //if (kinetis_i2cdev_initialize)
+    kinetis_i2cdev_initialize();
+#endif
+}
+#endif

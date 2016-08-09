@@ -100,7 +100,7 @@ extern void weak_function kinetis_spidev_initialize(void);
  *
  ************************************************************************************/
 
-extern void weak_function kinetis_i2cdev_initialize(void);
+void kinetis_i2cdev_initialize(void);
 
 /************************************************************************************
  * Name: kinetis_usbinitialize

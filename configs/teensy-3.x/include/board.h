@@ -190,7 +190,7 @@
 #define LED_STACKCREATED             1 /* STATUS LED=ON */
 #define LED_INIRQ                    2 /* STATUS LED=no change */
 #define LED_SIGNAL                   2 /* STATUS LED=no change */
-#define LED_ASSERTION                2 /* STATUS LED=no change */
+#define LED_ASSERTION                3 /* STATUS LED=no change */
 #define LED_PANIC                    3 /* STATUS LED=flashing */
 
 /* Button definitions ***************************************************************/
@@ -233,12 +233,12 @@
 #endif
 
 #ifdef CONFIG_KINETIS_I2C0
-#ifndef CONFIG_TEENSY_3X_I2C_ALT_PINS
+#ifdef CONFIG_TEENSY_3X_I2C_ALT_PINS
 #  define PIN_I2C0_SCL      (PIN_I2C0_SCL_1 | PIN_ALT2_OPENDRAIN | PIN_ALT2_SLOW | PIN_ALT2_HIGHDRIVE)
 #  define PIN_I2C0_SDA      (PIN_I2C0_SDA_1 | PIN_ALT2_OPENDRAIN | PIN_ALT2_SLOW | PIN_ALT2_HIGHDRIVE)
 #else
-#  define PIN_I2C0_SCL      (PIN_I2C0_SCL_2 | PIN_ALT2_OPENDRAIN | PIN_ALT2_SLOW | PIN_ALT2_HIGHDRIVE)
-#  define PIN_I2C0_SDA      (PIN_I2C0_SDA_2 | PIN_ALT2_OPENDRAIN | PIN_ALT2_SLOW | PIN_ALT2_HIGHDRIVE)
+#  define PIN_I2C0_SCL      (PIN_I2C0_SCL_2 | PIN_ALT2_OPENDRAIN | PIN_ALT2_SLOW /*| PIN_ALT2_HIGHDRIVE*/)
+#  define PIN_I2C0_SDA      (PIN_I2C0_SDA_2 | PIN_ALT2_OPENDRAIN | PIN_ALT2_SLOW /*| PIN_ALT2_HIGHDRIVE*/)
 #endif
 #endif
 

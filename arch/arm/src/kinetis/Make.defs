@@ -135,6 +135,10 @@ ifeq ($(CONFIG_I2C),y)
 CHIP_CSRCS += kinetis_i2c.c
 endif
 
+ifeq ($(CONFIG_RTC),y)
+CHIP_CSRCS += kinetis_rtc.c
+endif
+
 ifeq ($(CONFIG_NET),y)
 ifeq ($(CONFIG_KINETIS_ENET),y)
 CHIP_CSRCS += kinetis_enet.c

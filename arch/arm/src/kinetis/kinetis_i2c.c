@@ -42,8 +42,10 @@
 
 #define I2C_DEFAULT_FREQUENCY 400000
 
-#define STATE_OK        0
-#define STATE_ABORTED   1
+#define STATE_OK                0
+#define STATE_ARBITRATION_ERROR 1
+#define STATE_TIMEOUT           2
+#define STATE_NAK               3
 
 /*
  * TODO:
@@ -289,14 +291,23 @@ static void kinetis_i2c_setfrequency(struct kinetis_i2cdev_s *priv,
 static int kinetis_i2c_start(struct kinetis_i2cdev_s *priv)
 {
   struct i2c_msg_s *msg;
+  irqstate_t flags;
 
   msg = priv->msgs;
+
+  i2cinfo("start");
+
+  flags = enter_critical_section();
 
    /* now take control of the bus */
   if (getreg8(KINETIS_I2C0_C1) & I2C_C1_MST)
   {
     /* we are already the bus master, so send a repeated start */
-    putreg8(I2C_C1_IICEN | I2C_C1_MST | I2C_C1_RSTA | I2C_C1_TX, KINETIS_I2C0_C1);
+    putreg8(I2C_C1_IICEN | I2C_C1_IICIE | I2C_C1_MST | I2C_C1_RSTA | I2C_C1_TX, KINETIS_I2C0_C1);
+#if 0
+    putreg8(I2C_C1_IICEN | I2C_C1_IICIE, KINETIS_I2C0_C1); /* DEBUG: stop + start */
+    putreg8(I2C_C1_IICEN | I2C_C1_IICIE | I2C_C1_MST | I2C_C1_TX, KINETIS_I2C0_C1);
+#endif
   }
   else
   {
@@ -304,7 +315,7 @@ static int kinetis_i2c_start(struct kinetis_i2cdev_s *priv)
     while (getreg8(KINETIS_I2C0_S) & I2C_S_BUSY);
                 
     /* become the bus master in transmit mode (send start) */
-    putreg8(I2C_C1_IICEN | I2C_C1_MST | I2C_C1_TX, KINETIS_I2C0_C1);
+    putreg8(I2C_C1_IICEN | I2C_C1_IICIE | I2C_C1_MST | I2C_C1_TX, KINETIS_I2C0_C1);
   }
 
   /* wait until start condition establishes control of the bus */
@@ -317,7 +328,9 @@ static int kinetis_i2c_start(struct kinetis_i2cdev_s *priv)
     I2C_READADDR8(msg->addr) :
     I2C_WRITEADDR8(msg->addr), KINETIS_I2C0_D);
 
- return 0;
+  leave_critical_section(flags);
+
+ return OK;
 }
 
 /****************************************************************************
@@ -347,7 +360,7 @@ static void kinetis_i2c_timeout(int argc, uint32_t arg, ...)
   struct kinetis_i2cdev_s *priv = (struct kinetis_i2cdev_s *)arg;
 
   irqstate_t flags = enter_critical_section();
-  priv->state = STATE_ABORTED;
+  priv->state = STATE_TIMEOUT;
   sem_post(&priv->wait);
   leave_critical_section(flags);
 }
@@ -393,22 +406,22 @@ static int kinetis_i2c_interrupt(int irq, FAR void *context)
 
   if (irq == KINETIS_IRQ_I2C0)
   {
-      priv = &g_i2c_dev;
+    priv = &g_i2c_dev;
   }
   else
   {
-      PANIC();
+    PANIC();
   }
 
   /* get current state */
   state = getreg8(KINETIS_I2C0_S);
-  msg  = priv->msgs;
+  msg = priv->msgs;
 
   /* arbitration lost */
   if (state & I2C_S_ARBL)
   {
     putreg8(I2C_S_IICIF | I2C_S_ARBL, KINETIS_I2C0_S);
-    priv->state = STATE_ABORTED;
+    priv->state = STATE_ARBITRATION_ERROR;
     kinetis_i2c_stop(priv);
   }
   else
@@ -424,7 +437,7 @@ static int kinetis_i2c_interrupt(int irq, FAR void *context)
       /* last write was not acknowledged */
       if (state & I2C_S_RXAK)
       {
-        priv->state = STATE_ABORTED; /* set error flag */
+        priv->state = STATE_NAK; /* set error flag */
         kinetis_i2c_stop(priv); /* send STOP */
       }
       else
@@ -541,7 +554,8 @@ static int kinetis_i2c_transfer(FAR struct i2c_master_s *dev,
     wd_cancel(priv->timeout);
 
     /* Process next message */
-    kinetis_i2c_nextmsg(priv);
+    if (priv->state == STATE_OK)
+      kinetis_i2c_nextmsg(priv);
   }
 
   /* release access to I2C bus */ 
