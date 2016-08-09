@@ -54,6 +54,7 @@
 
 #include "chip.h"
 #include "sam_gpio.h"
+#include "sam_periphclks.h"
 
 #if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
     defined(CONFIG_ARCH_CHIP_SAM3A)
@@ -178,6 +179,31 @@ static inline int sam_configinput(uintptr_t base, uint32_t pin,
 
   putreg32(pin, base + SAM_PIO_ODR_OFFSET);
   putreg32(pin, base + SAM_PIO_PER_OFFSET);
+
+  /* Enable the peripheral clock for the GPIO's port controller.
+   * A GPIO input value is only sampled if the peripheral clock for its
+   * controller is enabled.
+   */
+
+  switch (cfgset & GPIO_PORT_MASK)
+    {
+      case GPIO_PORT_PIOA:
+        sam_pioa_enableclk();
+        break;
+
+      case GPIO_PORT_PIOB:
+        sam_piob_enableclk();
+        break;
+
+#ifdef GPIO_HAVE_PERIPHCD
+      case GPIO_PORT_PIOC:
+        sam_pioc_enableclk();
+        break;
+#endif
+
+      default:
+        return -EINVAL;
+    }
 
   /* To-Do:  If DEGLITCH is selected, need to configure DIFSR, SCIFSR, and
    *         IFDGSR registers.  This would probably best be done with
