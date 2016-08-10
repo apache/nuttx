@@ -1,5 +1,5 @@
 /************************************************************************************
- * common/up_arch.h
+ * arch/z16/src/common/up_arch.h
  *
  *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

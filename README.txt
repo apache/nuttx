@@ -1250,7 +1250,7 @@ nuttx/
  |   |- arm/
  |   |   `- src
  |   |       `- lpc214x/README.txt
- |   |- sh/
+ |   |- renesas/
  |   |   |- include/
  |   |   |   `-README.txt
  |   |   |- src/

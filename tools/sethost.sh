@@ -111,10 +111,10 @@ unset dotconfig
 if [ -z "$configfile" ]; then
   dotconfig=y
 else
-  if [ "X$configfile" = "X.config"]; then
+  if [ "X$configfile" = "X.config" ]; then
     dotconfig=y
   else
-    if [ "X$configfile" = "X$nuttx/.config"]; then
+    if [ "X$configfile" = "X$nuttx/.config" ]; then
       dotconfig=y
     fi
   fi
@@ -142,18 +142,18 @@ else
   configdir=`dirname $configfile`
   makedefs=$configdir/Make.defs
 
-  if [ ! -r $makedefs]; then
+  if [ ! -r $makedefs ]; then
     echo "ERROR: No readable Make.defs file exists at $configdir"
     exit 1
   fi
 
-  if [ -f $nuttx/.config]; then
+  if [ -f $nuttx/.config ]; then
     mv $nuttx/.config $nuttx/SAVEconfig
   fi
   cp $configfile $nuttx/.config || \
     { echo "ERROR: cp to $nuttx/.config failed"; exit 1; }
 
-  if [ -f $nuttx/Make.defs]; then
+  if [ -f $nuttx/Make.defs ]; then
     mv $nuttx/Make.defs $nuttx/SAVEMake.defs
   fi
   cp $makedefs $nuttx/Make.defs || \

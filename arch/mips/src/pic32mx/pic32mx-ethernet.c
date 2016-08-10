@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/pic32mx/pic32mx_ethernet.c
+ * arch/mips/src/pic32mx/pic32mx_ethernet.c
  *
  *   Copyright (C) 2012, 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

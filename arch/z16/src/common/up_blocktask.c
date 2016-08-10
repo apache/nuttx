@@ -1,5 +1,5 @@
 /****************************************************************************
- * common/up_blocktask.c
+ * arch/z16/src/common/up_blocktask.c
  *
  *   Copyright (C) 2008-2009, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

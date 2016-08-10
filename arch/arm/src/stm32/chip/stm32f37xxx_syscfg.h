@@ -113,7 +113,7 @@
 #define SYSCFG_EXTICR_PORTC           (2)       /* 0010: PC[x] pin */
 #define SYSCFG_EXTICR_PORTD           (3)       /* 0011: PD[x] pin */
 #define SYSCFG_EXTICR_PORTE           (4)       /* 0100: Reserved */
-#define SYSCFG_EXTICR_PORTE           (5)       /* 0101: PF[x] pin */
+#define SYSCFG_EXTICR_PORTF           (5)       /* 0101: PF[x] pin */
 
 #define SYSCFG_EXTICR_PORT_MASK       (15)
 #define SYSCFG_EXTICR_EXTI_SHIFT(g)   (((g) & 3) << 2)

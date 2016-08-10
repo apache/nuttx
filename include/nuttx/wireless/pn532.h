@@ -35,8 +35,8 @@
  *
  ****************************************************************************/
 
-#ifndef __NUTTX_WIRELESS_PN532_H
-#define __NUTTX_WIRELESS_PN532_H
+#ifndef __INCLUDE_NUTTX_WIRELESS_PN532_H
+#define __INCLUDE_NUTTX_WIRELESS_PN532_H
 
 /****************************************************************************
  * Included Files
@@ -70,7 +70,7 @@
  * Public Types
  ****************************************************************************/
 
-enum pn532_state_E
+enum pn532_state_e
 {
   PN532_STATE_NOT_INIT,
   PN532_STATE_IDLE,
@@ -162,4 +162,4 @@ int pn532_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
 }
 #endif
 
-#endif /* __NUTTX_WIRELESS_PN532_H */
+#endif /* __INCLUDE_NUTTX_WIRELESS_PN532_H */

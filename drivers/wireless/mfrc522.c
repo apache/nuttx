@@ -1611,6 +1611,6 @@ int mfrc522_register(FAR const char *devpath, FAR struct spi_dev_s *spi)
   return ret;
 
 firmware_error:
-  free(dev);
+  kmm_free(dev);
   return -ENODEV;
 }

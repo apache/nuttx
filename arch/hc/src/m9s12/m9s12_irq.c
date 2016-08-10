@@ -1,6 +1,5 @@
 /****************************************************************************
- * arch/arm/src/m9s12/m9s12_irq.c
- * arch/arm/src/chip/m9s12_irq.c
+ * arch/hc/src/m9s12/m9s12_irq.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

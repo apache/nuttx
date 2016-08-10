@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/ioexpander/pcf8574.h
+ * drivers/ioexpander/pcf8574.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

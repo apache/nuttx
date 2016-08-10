@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/ioexpander/tca64xx.h
+ * drivers/ioexpander/tca64xx.h
  * Supports the following parts: TCA6408, TCA6416, TCA6424
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.

@@ -32,8 +32,8 @@
  *
  ****************************************************************************/
 
-#ifndef _INCLUDE_NUTTX_WIRELESS_CC3000_HCI_H
-#define _INCLUDE_NUTTX_WIRELESS_CC3000_HCI_H
+#ifndef __INCLUDE_NUTTX_WIRELESS_CC3000_HCI_H
+#define __INCLUDE_NUTTX_WIRELESS_CC3000_HCI_H
 
 /****************************************************************************
  * Included Files
@@ -296,4 +296,4 @@ void hci_patch_send(uint8_t ucOpcode, uint8_t *pucBuff, char *patch,
 }
 #endif // __cplusplus
 
-#endif // _INCLUDE_NUTTX_WIRELESS_CC3000_HCI_H
+#endif // __INCLUDE_NUTTX_WIRELESS_CC3000_HCI_H

@@ -2,7 +2,7 @@
  * arch/arm/src/stm32/stm32_pwr.c
  *
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
- *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2015-2016 Gregory Nutt. All rights reserved.
  *   Authors: Uros Platise <uros.platise@isotel.eu>
  *            Gregory Nutt <gnutt@nuttx.org>
  *
@@ -40,20 +40,18 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/arch.h>
 
 #include <stdint.h>
 #include <stdbool.h>
 #include <errno.h>
 
+#include <nuttx/arch.h>
+#include <nuttx/irq.h>
+
 #include "up_arch.h"
 #include "stm32_pwr.h"
 
 #if defined(CONFIG_STM32_PWR)
-
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
 
 /************************************************************************************
  * Private Functions
@@ -85,46 +83,70 @@ static inline void stm32_pwr_modifyreg(uint8_t offset, uint16_t clearbits, uint1
  *   Enables access to the backup domain (RTC registers, RTC backup data registers
  *   and backup SRAM).
  *
+ *   NOTE: Reference counting is used in order to supported nested calls to this
+ *   function.  As a consequence, every call to stm32_pwr_enablebkp(true) must
+ *   be followed by a matching call to stm32_pwr_enablebkp(false).
+ *
  * Input Parameters:
  *   writable - True: enable ability to write to backup domain registers
  *
  * Returned Value:
- *   True: The backup domain was previously writable.
+ *   None
  *
  ************************************************************************************/
 
-bool stm32_pwr_enablebkp(bool writable)
+void stm32_pwr_enablebkp(bool writable)
 {
+  static uint16_t writable_counter = 0;
+  irqstate_t flags;
   uint16_t regval;
   bool waswritable;
+  bool wait = false;
+
+  flags = enter_critical_section();
 
   /* Get the current state of the STM32 PWR control register */
 
   regval      = stm32_pwr_getreg(STM32_PWR_CR_OFFSET);
   waswritable = ((regval & PWR_CR_DBP) != 0);
 
+  if (writable)
+    {
+      DEBUGASSERT(writable_counter < UINT16_MAX);
+      writable_counter++;
+    }
+  else if (writable_counter > 0)
+    {
+      writable_counter--;
+    }
+
   /* Enable or disable the ability to write */
 
-  if (waswritable && !writable)
+  if (waswritable && writable_counter == 0)
     {
       /* Disable backup domain access */
 
       regval &= ~PWR_CR_DBP;
       stm32_pwr_putreg(STM32_PWR_CR_OFFSET, regval);
     }
-  else if (!waswritable && writable)
+  else if (!waswritable && writable_counter > 0)
     {
       /* Enable backup domain access */
 
       regval |= PWR_CR_DBP;
       stm32_pwr_putreg(STM32_PWR_CR_OFFSET, regval);
 
+      wait = true;
+    }
+
+  leave_critical_section(flags);
+
+  if (wait)
+    {
       /* Enable does not happen right away */
 
       up_udelay(4);
     }
-
-  return waswritable;
 }
 
 /************************************************************************************

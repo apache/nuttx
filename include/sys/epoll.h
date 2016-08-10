@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_SYS_EPOLL_H
-#define __INCLUDE_NUTTX_SYS_EPOLL_H
+#ifndef __INCLUDE_SYS_EPOLL_H
+#define __INCLUDE_SYS_EPOLL_H
 
 /****************************************************************************
  * Included Files
@@ -107,4 +107,4 @@ int epoll_wait(int epfd, struct epoll_event *evs, int maxevents, int timeout);
 
 void epoll_close(int epfd);
 
-#endif /* __INCLUDE_NUTTX_SYS_EPOLL_H */
+#endif /* __INCLUDE_SYS_EPOLL_H */

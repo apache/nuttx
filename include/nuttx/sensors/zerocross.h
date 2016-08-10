@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __NUTTX_SENSORS_ZEROCROSS_H
-#define __NUTTX_SENSORS_ZEROCROSS_H
+#ifndef __INCLUDE_NUTTX_SENSORS_ZEROCROSS_H
+#define __INCLUDE_NUTTX_SENSORS_ZEROCROSS_H
 
 /****************************************************************************
  * Included Files
@@ -148,4 +148,4 @@ int zc_register(FAR const char *devpath, FAR struct zc_lowerhalf_s *lower);
 #endif
 
 #endif /* CONFIG_ZEROCROSS */
-#endif /* __NUTTX_SENSORS_ZEROCROSS_H */
+#endif /* __INCLUDE_NUTTX_SENSORS_ZEROCROSS_H */

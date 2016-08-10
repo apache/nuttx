@@ -1,5 +1,5 @@
 /****************************************************************************
- * pthread_getaffinity.c
+ * sched/pthread/pthread_getaffinity.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

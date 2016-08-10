@@ -1,5 +1,5 @@
 /****************************************************************************
- * common/up_exit.c
+ * arch/z80/src/common/up_exit.c
  *
  *   Copyright (C) 2007-2009, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

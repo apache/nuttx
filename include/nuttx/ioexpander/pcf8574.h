@@ -111,4 +111,4 @@ struct i2c_master_s;
 FAR struct ioexpander_dev_s *pcf8574_initialize(FAR struct i2c_master_s *i2c,
                                                 FAR struct pcf8574_config_s *config);
 
-#endif
+#endif /* __INCLUDE_NUTTX_IOEXPANDER_PCF8574_H */

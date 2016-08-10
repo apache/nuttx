@@ -1,5 +1,5 @@
 /****************************************************************************
- * env_getenv.c
+ * sched/environ/env_getenv.c
  *
  *   Copyright (C) 2007, 2008, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

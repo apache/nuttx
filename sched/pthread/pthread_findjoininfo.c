@@ -1,5 +1,5 @@
 /****************************************************************************
- * pthread_findjoininfo.c
+ * sched/pthread/pthread_findjoininfo.c
  *
  *   Copyright (C) 2007, 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

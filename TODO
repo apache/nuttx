@@ -1737,7 +1737,7 @@ o ARM (arch/arm/)
                upon return. This could be improved as well:  If there is no
                context switch, then the static registers need not be restored
                because they will not be modified by the called C code.
-               (see arch/sh/src/sh1/sh1_vector.S for example)
+               (see arch/renesas/src/sh1/sh1_vector.S for example)
   Status:      Open
   Priority:    Low
 

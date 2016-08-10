@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/ioexpander/up_ioexpander.h
+ * arch/sim/src/up_ioexpander.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

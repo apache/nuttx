@@ -1,4 +1,4 @@
-/********************************************************************************
+/****************************************************************************
  * sched/pthread/pthread_once.c
  *
  *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -45,26 +45,26 @@
 #include <errno.h>
 #include <debug.h>
 
-/********************************************************************************
+/****************************************************************************
  * Public Functions
- ********************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************
+/****************************************************************************
  * Name: pthread_once
  *
  * Description:
- *   The  first call to pthread_once() by any thread with a given once_control,
- *   will call the init_routine with no arguments. Subsequent calls to
- *   pthread_once() with the same once_control will have no effect.  On return
- *   from pthread_once(), init_routine will have completed.
+ *   The  first call to pthread_once() by any thread with a given
+ *   once_control, will call the init_routine with no arguments. Subsequent
+ *   calls to pthread_once() with the same once_control will have no effect.
+ *   On return from pthread_once(), init_routine will have completed.
  *
  * Parameters:
- *   once_control - Determines if init_routine should be called.  once_control
- *      should be declared and initializeed as follows:
+ *   once_control - Determines if init_routine should be called.
+ *     once_control should be declared and initializeed as follows:
  *
  *        pthread_once_t once_control = PTHREAD_ONCE_INIT;
  *
- *       PTHREAD_ONCE_INIT is defined in pthread.h
+ *     PTHREAD_ONCE_INIT is defined in pthread.h
  *   init_routine - The initialization routine that will be called once.
  *
  * Return Value:
@@ -73,7 +73,7 @@
  *
  * Assumptions:
  *
- ********************************************************************************/
+ ****************************************************************************/
 
 int pthread_once(FAR pthread_once_t *once_control,
                  CODE void (*init_routine)(void))

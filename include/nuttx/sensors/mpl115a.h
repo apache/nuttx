@@ -33,8 +33,8 @@
  *
  ********************************************************************************************/
 
-#ifndef __DRIVERS_SENSORS_MPL115A_H
-#define __DRIVERS_SENSORS_MPL115A_H
+#ifndef __INCLUDE_NUTTX_SENSORS_MPL115A_H
+#define __INCLUDE_NUTTX_SENSORS_MPL115A_H
 
 #include <nuttx/config.h>
 
@@ -127,4 +127,4 @@ int mpl115a_register(FAR const char *devpath, FAR struct spi_dev_s *spi);
 #endif
 
 #endif /* CONFIG_SPI && CONFIG_MPL115A */
-#endif /* __DRIVERS_SENSORS_MPL115A_H */
+#endif /* __INCLUDE_NUTTX_SENSORS_MPL115A_H */

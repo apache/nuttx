@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __NUTTX_WIRELESS_MFRC522_H
-#define __NUTTX_WIRELESS_MFRC522_H
+#ifndef __INCLUDE_NUTTX_WIRELESS_MFRC522_H
+#define __INCLUDE_NUTTX_WIRELESS_MFRC522_H
 
 /****************************************************************************
  * Included Files
@@ -61,7 +61,7 @@
  * Public Types
  ****************************************************************************/
 
-enum mfrc522_state_E
+enum mfrc522_state_e
 {
   MFRC522_STATE_NOT_INIT,
   MFRC522_STATE_IDLE,
@@ -113,4 +113,4 @@ int mfrc522_register(FAR const char *devpath, FAR struct spi_dev_s *spi);
 }
 #endif
 
-#endif /* __NUTTX_WIRELESS_MFRC522_H */
+#endif /* __INCLUDE_NUTTX_WIRELESS_MFRC522_H */

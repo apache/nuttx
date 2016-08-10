@@ -39,8 +39,8 @@
  *
  ************************************************************************************/
 
-#ifndef _INCLUDE_NUTTX_USB_USBMSC_H
-#define _INCLUDE_NUTTX_USB_USBMSC_H
+#ifndef __INCLUDE_NUTTX_USB_USBMSC_H
+#define __INCLUDE_NUTTX_USB_USBMSC_H
 
 /************************************************************************************
  * Included Files
@@ -255,4 +255,4 @@ void usbmsc_uninitialize(FAR void *handle);
 }
 #endif
 
-#endif /* _INCLUDE_NUTTX_USB_USBMSC_H */
+#endif /* __INCLUDE_NUTTX_USB_USBMSC_H */

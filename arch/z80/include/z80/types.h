@@ -1,6 +1,5 @@
 /****************************************************************************
  * arch/z80/include/z80/types.h
- * include/arch/chip/types.h
  *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -38,8 +37,8 @@
  * through sys/types.h
  */
 
-#ifndef __ARC_Z80_INCLUDE_Z80_TYPES_H
-#define __ARC_Z80_INCLUDE_Z80_TYPES_H
+#ifndef __ARCH_Z80_INCLUDE_Z80_TYPES_H
+#define __ARCH_Z80_INCLUDE_Z80_TYPES_H
 
 /****************************************************************************
  * Included Files
@@ -96,4 +95,4 @@ typedef _uint16_t          irqstate_t;
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif /* __ARC_Z80_INCLUDE_Z80_TYPES_H */
+#endif /* __ARCH_Z80_INCLUDE_Z80_TYPES_H */

@@ -32,8 +32,8 @@
  *
  ****************************************************************************/
 
-#ifndef _INCLUDE_NUTTX_WIRELESS_CC3000_NVMEM_H
-#define _INCLUDE_NUTTX_WIRELESS_CC3000_NVMEM_H
+#ifndef __INCLUDE_NUTTX_WIRELESS_CC3000_NVMEM_H
+#define __INCLUDE_NUTTX_WIRELESS_CC3000_NVMEM_H
 
 /****************************************************************************
  * Included Files
@@ -241,4 +241,4 @@ signed long nvmem_create_entry(unsigned long ulFileId, unsigned long ulNewLen);
 }
 #endif // __cplusplus
 
-#endif // _INCLUDE_NUTTX_WIRELESS_CC3000_NVMEM_H
+#endif // __INCLUDE_NUTTX_WIRELESS_CC3000_NVMEM_H

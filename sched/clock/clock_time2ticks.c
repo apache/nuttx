@@ -1,4 +1,4 @@
-/********************************************************************************
+/****************************************************************************
  * sched/clock/clock_time2ticks.c
  *
  *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -44,17 +44,17 @@
 
 #include "clock/clock.h"
 
-/********************************************************************************
+/****************************************************************************
  * Public Functions
- ********************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************
+/****************************************************************************
  * Name: clock_time2ticks
  *
  * Description:
- *   Convert a timespec delay to system timer ticks.  This function is suitable
- *   for calculating relative time delays and does not depend on the other
- *   clock_* logic.
+ *   Convert a timespec delay to system timer ticks.  This function is
+ *   suitable for calculating relative time delays and does not depend on
+ *   the other clock_* logic.
  *
  * Parameters:
  *   reltime - Convert this relative time to system clock ticks.
@@ -65,15 +65,15 @@
  *
  * Assumptions:
  *
- ********************************************************************************/
+ ****************************************************************************/
 
 int clock_time2ticks(FAR const struct timespec *reltime, FAR int *ticks)
 {
 #ifdef CONFIG_HAVE_LONG_LONG
   int64_t relnsec;
 
-  /* Convert the relative time into nanoseconds.  The range of the int64_t is
-   * sufficiently large that there is no real need for range checking.
+  /* Convert the relative time into nanoseconds.  The range of the int64_t
+   * is sufficiently large that there is no real need for range checking.
    */
 
   relnsec = (int64_t)reltime->tv_sec * NSEC_PER_SEC +
