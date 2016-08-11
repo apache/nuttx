@@ -143,7 +143,8 @@ int sam_oneshot_initialize(struct sam_oneshot_s *oneshot, int chan,
  *           sam_oneshot_initialize();
  *   freerun Caller allocated instance of the freerun state structure. This
  *           structure must have been previously initialized via a call to
- *           sam_freerun_initialize();
+ *           sam_freerun_initialize().  May be NULL if there is no matching
+ *           free-running timer.
  *   handler The function to call when when the oneshot timer expires.
  *   arg     An opaque argument that will accompany the callback.
  *   ts      Provides the duration of the one shot timer.
@@ -175,7 +176,8 @@ int sam_oneshot_start(struct sam_oneshot_s *oneshot,
  *           sam_oneshot_initialize();
  *   freerun Caller allocated instance of the freerun state structure. This
  *           structure must have been previously initialized via a call to
- *           sam_freerun_initialize();
+ *           sam_freerun_initialize().  May be NULL if there is no matching
+ *           free-running timer.
  *   ts      The location in which to return the time remaining on the
  *           oneshot timer.  A time of zero is returned if the timer is
  *           not running.

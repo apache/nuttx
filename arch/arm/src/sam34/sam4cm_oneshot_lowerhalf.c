@@ -42,7 +42,6 @@
 #include <stdint.h>
 #include <time.h>
 #include <assert.h>
-#include <errno.h>
 #include <debug.h>
 
 #include <nuttx/irq.h>
@@ -172,11 +171,11 @@ static void sam_oneshot_handler(void *arg)
 static int sam_max_delay(FAR struct oneshot_lowerhalf_s *lower,
                            FAR uint64_t *usec)
 {
-  DEBUGASSERT(priv != NULL && usec != NULL);
+  FAR struct sam_oneshot_lowerhalf_s *priv =
+    (FAR struct sam_oneshot_lowerhalf_s *)lower;
 
-#warning Missing logic
- *usec = UINT64_MAX;
-  return -ENOSYS;
+  DEBUGASSERT(priv != NULL && usec != NULL);
+  return sam_oneshot_max_delay(&priv->oneshot, usec);
 }
 
 /****************************************************************************
@@ -216,7 +215,7 @@ static int sam_start(FAR struct oneshot_lowerhalf_s *lower,
   priv->callback = callback;
   priv->arg      = arg;
   ret            = sam_oneshot_start(&priv->oneshot, NULL,
-                                       sam_oneshot_handler, priv, ts);
+                                     sam_oneshot_handler, priv, ts);
   leave_critical_section(flags);
 
   if (ret < 0)
@@ -252,7 +251,7 @@ static int sam_start(FAR struct oneshot_lowerhalf_s *lower,
  ****************************************************************************/
 
 static int sam_cancel(FAR struct oneshot_lowerhalf_s *lower,
-                      FAR struct timespec *ts)
+                        FAR struct timespec *ts)
 {
   FAR struct sam_oneshot_lowerhalf_s *priv =
     (FAR struct sam_oneshot_lowerhalf_s *)lower;
