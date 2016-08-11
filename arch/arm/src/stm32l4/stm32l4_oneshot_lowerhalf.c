@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/arm/src/stm32/stm32_oneshot_lowerhalf.c
+ *  arch/arm/src/stm32l4/stm32l4_oneshot_lowerhalf.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -48,7 +48,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/timers/oneshot.h>
 
-#include "stm32_oneshot.h"
+#include "stm32l4_oneshot.h"
 
 /****************************************************************************
  * Private Types
@@ -56,19 +56,19 @@
 
 /* This structure describes the state of the oneshot timer lower-half driver */
 
-struct stm32_oneshot_lowerhalf_s
+struct stm32l4_oneshot_lowerhalf_s
 {
   /* This is the part of the lower half driver that is visible to the upper-
    * half client of the driver.  This must be the first thing in this
    * structure so that pointers to struct oneshot_lowerhalf_s are cast
-   * compatible to struct stm32_oneshot_lowerhalf_s and vice versa.
+   * compatible to struct stm32l4_oneshot_lowerhalf_s and vice versa.
    */
 
   struct oneshot_lowerhalf_s lh;  /* Common lower-half driver fields */
 
   /* Private lower half data follows */
 
-  struct stm32_oneshot_s oneshot; /* STM32-specific oneshot state */
+  struct stm32l4_oneshot_s oneshot; /* STM32-specific oneshot state */
   oneshot_callback_t callback;    /* internal handler that receives callback */
   FAR void *arg;                  /* Argument that is passed to the handler */
 };
@@ -77,14 +77,14 @@ struct stm32_oneshot_lowerhalf_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static void stm32_oneshot_handler(void *arg);
+static void stm32l4_oneshot_handler(void *arg);
 
-static int stm32_max_delay(FAR struct oneshot_lowerhalf_s *lower,
+static int stm32l4_max_delay(FAR struct oneshot_lowerhalf_s *lower,
                            FAR uint64_t *usec);
-static int stm32_start(FAR struct oneshot_lowerhalf_s *lower,
+static int stm32l4_start(FAR struct oneshot_lowerhalf_s *lower,
                        oneshot_callback_t callback, FAR void *arg,
                        FAR const struct timespec *ts);
-static int stm32_cancel(FAR struct oneshot_lowerhalf_s *lower,
+static int stm32l4_cancel(FAR struct oneshot_lowerhalf_s *lower,
                         FAR struct timespec *ts);
 
 /****************************************************************************
@@ -95,9 +95,9 @@ static int stm32_cancel(FAR struct oneshot_lowerhalf_s *lower,
 
 static const struct oneshot_operations_s g_oneshot_ops =
 {
-  .max_delay = stm32_max_delay,
-  .start     = stm32_start,
-  .cancel    = stm32_cancel,
+  .max_delay = stm32l4_max_delay,
+  .start     = stm32l4_start,
+  .cancel    = stm32l4_cancel,
 };
 
 /****************************************************************************
@@ -105,13 +105,13 @@ static const struct oneshot_operations_s g_oneshot_ops =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_oneshot_handler
+ * Name: stm32l4_oneshot_handler
  *
  * Description:
  *   Timer expiration handler
  *
  * Input Parameters:
- *   arg - Should be the same argument provided when stm32_oneshot_start()
+ *   arg - Should be the same argument provided when stm32l4_oneshot_start()
  *         was called.
  *
  * Returned Value:
@@ -119,17 +119,17 @@ static const struct oneshot_operations_s g_oneshot_ops =
  *
  ****************************************************************************/
 
-static void stm32_oneshot_handler(void *arg)
+static void stm32l4_oneshot_handler(void *arg)
 {
-  FAR struct stm32_oneshot_lowerhalf_s *priv =
-    (FAR struct stm32_oneshot_lowerhalf_s *)arg;
+  FAR struct stm32l4_oneshot_lowerhalf_s *priv =
+    (FAR struct stm32l4_oneshot_lowerhalf_s *)arg;
   oneshot_callback_t callback;
   FAR void *cbarg;
 
   DEBUGASSERT(priv != NULL);
 
   /* Perhaps the callback was nullified in a race condition with
-   * stm32_cancel?
+   * stm32l4_cancel?
    */
 
   if (priv->callback)
@@ -150,7 +150,7 @@ static void stm32_oneshot_handler(void *arg)
 }
 
 /****************************************************************************
- * Name: stm32_max_delay
+ * Name: stm32l4_max_delay
  *
  * Description:
  *   Determine the maximum delay of the one-shot timer (in microseconds)
@@ -168,18 +168,18 @@ static void stm32_oneshot_handler(void *arg)
  *
  ****************************************************************************/
 
-static int stm32_max_delay(FAR struct oneshot_lowerhalf_s *lower,
+static int stm32l4_max_delay(FAR struct oneshot_lowerhalf_s *lower,
                            FAR uint64_t *usec)
 {
-  FAR struct stm32_oneshot_lowerhalf_s *priv =
-    (FAR struct stm32_oneshot_lowerhalf_s *)lower;
+  FAR struct stm32l4_oneshot_lowerhalf_s *priv =
+    (FAR struct stm32l4_oneshot_lowerhalf_s *)lower;
 
   DEBUGASSERT(priv != NULL && usec != NULL);
-  return stm32_oneshot_max_delay(&priv->oneshot, usec);
+  return stm32l4_oneshot_max_delay(&priv->oneshot, usec);
 }
 
 /****************************************************************************
- * Name: stm32_start
+ * Name: stm32l4_start
  *
  * Description:
  *   Start the oneshot timer
@@ -198,12 +198,12 @@ static int stm32_max_delay(FAR struct oneshot_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int stm32_start(FAR struct oneshot_lowerhalf_s *lower,
+static int stm32l4_start(FAR struct oneshot_lowerhalf_s *lower,
                        oneshot_callback_t callback, FAR void *arg,
                        FAR const struct timespec *ts)
 {
-  FAR struct stm32_oneshot_lowerhalf_s *priv =
-    (FAR struct stm32_oneshot_lowerhalf_s *)lower;
+  FAR struct stm32l4_oneshot_lowerhalf_s *priv =
+    (FAR struct stm32l4_oneshot_lowerhalf_s *)lower;
   irqstate_t flags;
   int ret;
 
@@ -214,20 +214,20 @@ static int stm32_start(FAR struct oneshot_lowerhalf_s *lower,
   flags          = enter_critical_section();
   priv->callback = callback;
   priv->arg      = arg;
-  ret            = stm32_oneshot_start(&priv->oneshot,
-                                       stm32_oneshot_handler, priv, ts);
+  ret            = stm32l4_oneshot_start(&priv->oneshot,
+                                       stm32l4_oneshot_handler, priv, ts);
   leave_critical_section(flags);
 
   if (ret < 0)
     {
-      tmrerr("ERROR: stm32_oneshot_start failed: %d\n", flags);
+      tmrerr("ERROR: stm32l4_oneshot_start failed: %d\n", flags);
     }
 
   return ret;
 }
 
 /****************************************************************************
- * Name: stm32_cancel
+ * Name: stm32l4_cancel
  *
  * Description:
  *   Cancel the oneshot timer and return the time remaining on the timer.
@@ -250,11 +250,11 @@ static int stm32_start(FAR struct oneshot_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int stm32_cancel(FAR struct oneshot_lowerhalf_s *lower,
+static int stm32l4_cancel(FAR struct oneshot_lowerhalf_s *lower,
                         FAR struct timespec *ts)
 {
-  FAR struct stm32_oneshot_lowerhalf_s *priv =
-    (FAR struct stm32_oneshot_lowerhalf_s *)lower;
+  FAR struct stm32l4_oneshot_lowerhalf_s *priv =
+    (FAR struct stm32l4_oneshot_lowerhalf_s *)lower;
   irqstate_t flags;
   int ret;
 
@@ -263,14 +263,14 @@ static int stm32_cancel(FAR struct oneshot_lowerhalf_s *lower,
   /* Cancel the timer */
 
   flags          = enter_critical_section();
-  ret            = stm32_oneshot_cancel(&priv->oneshot, ts);
+  ret            = stm32l4_oneshot_cancel(&priv->oneshot, ts);
   priv->callback = NULL;
   priv->arg      = NULL;
   leave_critical_section(flags);
 
   if (ret < 0)
     {
-      tmrerr("ERROR: stm32_oneshot_cancel failed: %d\n", flags);
+      tmrerr("ERROR: stm32l4_oneshot_cancel failed: %d\n", flags);
     }
 
   return ret;
@@ -302,13 +302,13 @@ static int stm32_cancel(FAR struct oneshot_lowerhalf_s *lower,
 FAR struct oneshot_lowerhalf_s *oneshot_initialize(int chan,
                                                    uint16_t resolution)
 {
-  FAR struct stm32_oneshot_lowerhalf_s *priv;
+  FAR struct stm32l4_oneshot_lowerhalf_s *priv;
   int ret;
 
   /* Allocate an instance of the lower half driver */
 
-  priv = (FAR struct stm32_oneshot_lowerhalf_s *)
-    kmm_zalloc(sizeof(struct stm32_oneshot_lowerhalf_s));
+  priv = (FAR struct stm32l4_oneshot_lowerhalf_s *)
+    kmm_zalloc(sizeof(struct stm32l4_oneshot_lowerhalf_s));
 
   if (priv == NULL)
     {
@@ -322,7 +322,7 @@ FAR struct oneshot_lowerhalf_s *oneshot_initialize(int chan,
 
   /* Initialize the contained STM32 oneshot timer */
 
-  ret = stm32_oneshot_initialize(&priv->oneshot, chan, resolution);
+  ret = stm32l4_oneshot_initialize(&priv->oneshot, chan, resolution);
   if (ret < 0)
     {
       tmrerr("ERROR: Failed to initialized state structure\n");

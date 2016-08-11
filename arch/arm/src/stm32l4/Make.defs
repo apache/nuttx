@@ -125,7 +125,7 @@ CHIP_CSRCS += stm32l4_tickless.c
 endif
 
 ifeq ($(CONFIG_STM32L4_ONESHOT),y)
-CHIP_CSRCS += stm32l4_oneshot.c
+CHIP_CSRCS += stm32l4_oneshot.c stm32l4_oneshot_lowerhalf.c
 endif
 
 ifeq ($(CONFIG_STM32L4_FREERUN),y)
