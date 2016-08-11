@@ -59,7 +59,9 @@
 struct stm32_oneshot_lowerhalf_s
 {
   /* This is the part of the lower half driver that is visible to the upper-
-   * half client of the driver.
+   * half client of the driver.  This must be the first thing in this
+   * structure so that pointers to struct oneshot_lowerhalf_s are cast
+   * compatible to struct stm32_oneshot_lowerhalf_s and vice versa.
    */
 
   struct oneshot_lowerhalf_s lh;  /* Common lower-half driver fields */
@@ -313,6 +315,12 @@ FAR struct oneshot_lowerhalf_s *oneshot_initialize(int chan,
       tmrerr("ERROR: Failed to initialized state structure\n");
       return NULL;
     }
+
+  /* Initialize the lower-half driver structure */
+
+  priv->lh.ops = &g_oneshot_ops;
+
+  /* Initialize the contained STM32 oneshot timer */
 
   ret = stm32_oneshot_initialize(&priv->oneshot, chan, resolution);
   if (ret < 0)
