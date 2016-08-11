@@ -1600,7 +1600,6 @@ endif # SAMV7_TC3
 
 config SAMV7_ONESHOT
 	bool "TC one-shot wrapper"
-	depends on SAMV7_FREERUN
 	default n if !SCHED_TICKLESS
 	default y if SCHED_TICKLESS
 	---help---
