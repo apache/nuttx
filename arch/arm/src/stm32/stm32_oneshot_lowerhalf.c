@@ -45,6 +45,7 @@
 #include <debug.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/timers/oneshot.h>
 
 #include "stm32_oneshot.h"
@@ -61,7 +62,7 @@ struct stm32_oneshot_lowerhalf_s
    * half client of the driver.
    */
 
-  struct stm32_oneshot_lowerhalf_s lh;
+  struct oneshot_lowerhalf_s lh;  /* Common lower-half driver fields */
 
   /* Private lower half data follows */
 
@@ -119,9 +120,9 @@ static const struct oneshot_operations_s g_oneshot_ops =
 static void stm32_oneshot_handler(void *arg)
 {
   FAR struct stm32_oneshot_lowerhalf_s *priv =
-    (FAR struct stm32_oneshot_lowerhalf_s *)lower;
-  oneshot_handler_t callback;
-  FAR void *arg;
+    (FAR struct stm32_oneshot_lowerhalf_s *)arg;
+  oneshot_callback_t callback;
+  FAR void *cbarg;
 
   DEBUGASSERT(priv != NULL);
 
@@ -136,13 +137,13 @@ static void stm32_oneshot_handler(void *arg)
      */
 
     callback       = priv->callback;
-    arg            = priv->arg;
+    cbarg          = priv->arg;
     priv->callback = NULL;
     priv->arg      = NULL;
 
     /* Then perform the callback */
 
-    callback(&priv->lh, arg);
+    callback(&priv->lh, cbarg);
   }
 }
 
@@ -211,8 +212,8 @@ static int stm32_start(FAR struct oneshot_lowerhalf_s *lower,
   flags          = enter_critical_section();
   priv->callback = callback;
   priv->arg      = arg;
-  ret            = stm32_oneshot_start(&priv->lh, stm32_oneshot_handler,
-                                       priv, ts);
+  ret            = stm32_oneshot_start(&priv->oneshot,
+                                       stm32_oneshot_handler, priv, ts);
   leave_critical_section(flags);
 
   if (ret < 0)
@@ -248,7 +249,7 @@ static int stm32_start(FAR struct oneshot_lowerhalf_s *lower,
  ****************************************************************************/
 
 static int stm32_cancel(struct oneshot_lowerhalf_s *lower,
-                        FAR struct timespec *ts);
+                        FAR struct timespec *ts)
 {
   FAR struct stm32_oneshot_lowerhalf_s *priv =
     (FAR struct stm32_oneshot_lowerhalf_s *)lower;
