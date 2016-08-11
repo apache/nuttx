@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/arm/src/stm32/stm32_waste.c
+ *  arch/arm/src/stm32/stm32_oneshot_lowerhalf.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -84,7 +84,7 @@ static int stm32_max_delay(FAR struct oneshot_lowerhalf_s *lower,
 static int stm32_start(FAR struct oneshot_lowerhalf_s *lower,
                        oneshot_callback_t callback, FAR void *arg,
                        FAR const struct timespec *ts);
-static int stm32_cancel(struct oneshot_lowerhalf_s *lower,
+static int stm32_cancel(FAR struct oneshot_lowerhalf_s *lower,
                         FAR struct timespec *ts);
 
 /****************************************************************************
@@ -250,7 +250,7 @@ static int stm32_start(FAR struct oneshot_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int stm32_cancel(struct oneshot_lowerhalf_s *lower,
+static int stm32_cancel(FAR struct oneshot_lowerhalf_s *lower,
                         FAR struct timespec *ts)
 {
   FAR struct stm32_oneshot_lowerhalf_s *priv =
