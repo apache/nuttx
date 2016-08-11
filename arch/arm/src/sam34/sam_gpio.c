@@ -118,6 +118,7 @@ static inline int sam_gpiopin(gpio_pinset_t cfgset)
  *     - If glitch filtering is enabled
  *     - If necessary to read the input value on an open drain output (this
  *       may be done in TWI logic to detect hangs on the I2C bus).
+ *     - If necessary to read the input value on peripheral pins.
  *
  ****************************************************************************/
 
