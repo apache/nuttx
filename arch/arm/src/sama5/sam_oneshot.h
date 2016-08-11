@@ -46,7 +46,6 @@
 #include <time.h>
 
 #include "sam_tc.h"
-#include "sam_freerun.h"
 
 #ifdef CONFIG_SAMA5_ONESHOT
 
@@ -83,11 +82,13 @@ struct sam_oneshot_s
   volatile oneshot_handler_t handler; /* Oneshot expiration callback */
   volatile void *arg;                 /* The argument that will accompany
                                        * the callback */
+#ifdef CONFIG_SAMA5_FREERUN
   volatile uint32_t start_count;      /* Stores the value of the freerun counter,
                                        * at each start of the onshot timer. Is neccesary
                                        * to find out if the onshot counter was updated
                                        * correctly at the time of the call to
                                        * sam_oneshot_cancel or not. */
+#endif
 };
 
 /****************************************************************************
@@ -153,8 +154,11 @@ int sam_oneshot_initialize(struct sam_oneshot_s *oneshot, int chan,
  *
  ****************************************************************************/
 
-int sam_oneshot_start(struct sam_oneshot_s *oneshot, struct sam_freerun_s *freerun,
-                      oneshot_handler_t handler, void *arg, const struct timespec *ts);
+struct sam_freerun_s;
+int sam_oneshot_start(struct sam_oneshot_s *oneshot,
+                      struct sam_freerun_s *freerun,
+                      oneshot_handler_t handler, void *arg,
+                      const struct timespec *ts);
 
 /****************************************************************************
  * Name: sam_oneshot_cancel
@@ -183,8 +187,9 @@ int sam_oneshot_start(struct sam_oneshot_s *oneshot, struct sam_freerun_s *freer
  *
  ****************************************************************************/
 
-int sam_oneshot_cancel(struct sam_oneshot_s *oneshot, struct sam_freerun_s *freerun,
-                       struct timespec *ts);
+struct sam_freerun_s;
+int sam_oneshot_cancel(struct sam_oneshot_s *oneshot,
+                       struct sam_freerun_s *freerun, struct timespec *ts);
 
 #undef EXTERN
 #ifdef __cplusplus

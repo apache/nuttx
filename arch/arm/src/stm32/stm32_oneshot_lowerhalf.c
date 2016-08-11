@@ -174,7 +174,7 @@ static int stm32_max_delay(FAR struct oneshot_lowerhalf_s *lower,
   FAR struct stm32_oneshot_lowerhalf_s *priv =
     (FAR struct stm32_oneshot_lowerhalf_s *)lower;
 
-  DEBUGASSERT(priv != NULL);
+  DEBUGASSERT(priv != NULL && usec != NULL);
   return stm32_oneshot_max_delay(&priv->oneshot, usec);
 }
 

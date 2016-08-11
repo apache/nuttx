@@ -42,6 +42,7 @@
 #include <stdint.h>
 #include <time.h>
 #include <assert.h>
+#include <errno.h>
 #include <debug.h>
 
 #include <nuttx/irq.h>
@@ -68,7 +69,7 @@ struct sam_oneshot_lowerhalf_s
 
   /* Private lower half data follows */
 
-  struct sam_oneshot_s oneshot;   /* SAMV7-specific oneshot state */
+  struct sam_oneshot_s oneshot; /* STM32-specific oneshot state */
   oneshot_callback_t callback;    /* internal handler that receives callback */
   FAR void *arg;                  /* Argument that is passed to the handler */
 };
@@ -171,11 +172,11 @@ static void sam_oneshot_handler(void *arg)
 static int sam_max_delay(FAR struct oneshot_lowerhalf_s *lower,
                            FAR uint64_t *usec)
 {
-  FAR struct sam_oneshot_lowerhalf_s *priv =
-    (FAR struct sam_oneshot_lowerhalf_s *)lower;
-
   DEBUGASSERT(priv != NULL && usec != NULL);
-  return sam_oneshot_max_delay(&priv->oneshot, usec);
+
+#warning Missing logic
+ *usec = UINT64_MAX;
+  return -ENOSYS;
 }
 
 /****************************************************************************
@@ -215,7 +216,7 @@ static int sam_start(FAR struct oneshot_lowerhalf_s *lower,
   priv->callback = callback;
   priv->arg      = arg;
   ret            = sam_oneshot_start(&priv->oneshot, NULL,
-                                     sam_oneshot_handler, priv, ts);
+                                       sam_oneshot_handler, priv, ts);
   leave_critical_section(flags);
 
   if (ret < 0)
@@ -320,7 +321,7 @@ FAR struct oneshot_lowerhalf_s *oneshot_initialize(int chan,
 
   priv->lh.ops = &g_oneshot_ops;
 
-  /* Initialize the contained SAM oneshot timer */
+  /* Initialize the contained STM32 oneshot timer */
 
   ret = sam_oneshot_initialize(&priv->oneshot, chan, resolution);
   if (ret < 0)
