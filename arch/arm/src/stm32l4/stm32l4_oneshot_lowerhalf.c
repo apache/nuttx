@@ -133,20 +133,20 @@ static void stm32l4_oneshot_handler(void *arg)
    */
 
   if (priv->callback)
-  {
-    /* Sample and nullify BEFORE executing callback (in case the callback
-     * restarts the oneshot).
-     */
+    {
+      /* Sample and nullify BEFORE executing callback (in case the callback
+       * restarts the oneshot).
+       */
 
-    callback       = priv->callback;
-    cbarg          = priv->arg;
-    priv->callback = NULL;
-    priv->arg      = NULL;
+      callback       = priv->callback;
+      cbarg          = priv->arg;
+      priv->callback = NULL;
+      priv->arg      = NULL;
 
-    /* Then perform the callback */
+      /* Then perform the callback */
 
-    callback(&priv->lh, cbarg);
-  }
+      callback(&priv->lh, cbarg);
+    }
 }
 
 /****************************************************************************
