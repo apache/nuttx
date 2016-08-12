@@ -10536,8 +10536,7 @@
 	  nuttx/libc/mqueue to nuttx/sched/mqueue.  Also add syscall support
 	  for mq_setattr() and mq_getattr().  This is necessary in protected and
 	  kernel builds because in those cases the message queue structure is
-	  protected and cannot be accessed directly from user mode code.  Noted
-	  by Jouko Holopainen (2015-06-03).
+	  protected and cannot be accessed directly from user mode code (2015-06-03).
 	* drivers/net/tun.c: TUN driver bug fix.  From Max Neklyudov (2015-06-03.
 	* drivers/net/Kconfig, include/nuttx/net/mii.h, and
 	  arch/arm/src/lpc17xx/lpc17_ethernet.c: Add support for the Micrel
