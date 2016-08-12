@@ -80,7 +80,7 @@ struct sam_oneshot_lowerhalf_s
 static void sam_oneshot_handler(void *arg);
 
 static int sam_max_delay(FAR struct oneshot_lowerhalf_s *lower,
-                         FAR uint64_t *usec);
+                         FAR struct timespec *ts);
 static int sam_start(FAR struct oneshot_lowerhalf_s *lower,
                      oneshot_callback_t callback, FAR void *arg,
                      FAR const struct timespec *ts);
@@ -159,8 +159,7 @@ static void sam_oneshot_handler(void *arg)
  *   lower   An instance of the lower-half oneshot state structure.  This
  *           structure must have been previously initialized via a call to
  *           oneshot_initialize();
- *   usec    The user-provided location in which to return the maxumum delay
- *           in microseconds.
+ *   ts      The location in which to return the maxumum delay.
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned
@@ -169,13 +168,25 @@ static void sam_oneshot_handler(void *arg)
  ****************************************************************************/
 
 static int sam_max_delay(FAR struct oneshot_lowerhalf_s *lower,
-                           FAR uint64_t *usec)
+                         FAR struct timespec *ts)
 {
   FAR struct sam_oneshot_lowerhalf_s *priv =
     (FAR struct sam_oneshot_lowerhalf_s *)lower;
+  uint64_t usecs;
+  int ret;
 
-  DEBUGASSERT(priv != NULL && usec != NULL);
-  return sam_oneshot_max_delay(&priv->oneshot, usec);
+  DEBUGASSERT(priv != NULL && ts != NULL);
+  ret = sam_oneshot_max_delay(&priv->oneshot, &usecs);
+  if (ret >= 0)
+    {
+      uint64_t sec = usecs / 1000000;
+      usecs -= 1000000 * sec;
+
+      ts->tv_sec  = (time_t)sec;
+      ts->tv_nsec = (long)(usecs * 1000);
+    }
+
+  return ret;
 }
 
 /****************************************************************************

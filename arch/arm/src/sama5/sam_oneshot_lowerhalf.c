@@ -41,6 +41,7 @@
 
 #include <stdint.h>
 #include <time.h>
+#include <limits.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
@@ -81,7 +82,7 @@ struct sam_oneshot_lowerhalf_s
 static void sam_oneshot_handler(void *arg);
 
 static int sam_max_delay(FAR struct oneshot_lowerhalf_s *lower,
-                         FAR uint64_t *usec);
+                         FAR struct timespec *ts);
 static int sam_start(FAR struct oneshot_lowerhalf_s *lower,
                      oneshot_callback_t callback, FAR void *arg,
                      FAR const struct timespec *ts);
@@ -160,8 +161,7 @@ static void sam_oneshot_handler(void *arg)
  *   lower   An instance of the lower-half oneshot state structure.  This
  *           structure must have been previously initialized via a call to
  *           oneshot_initialize();
- *   usec    The user-provided location in which to return the maxumum delay
- *           in microseconds.
+ *   ts      The location in which to return the maxumum delay.
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned
@@ -170,12 +170,13 @@ static void sam_oneshot_handler(void *arg)
  ****************************************************************************/
 
 static int sam_max_delay(FAR struct oneshot_lowerhalf_s *lower,
-                           FAR uint64_t *usec)
+                         FAR struct timespec *ts)
 {
-  DEBUGASSERT(priv != NULL && usec != NULL);
+  DEBUGASSERT(priv != NULL && ts != NULL);
 
 #warning Missing logic
- *usec = UINT64_MAX;
+  ts->tv_sec  = INT_MAX;
+  ts->tv_nsec = LONG_MAX;
   return -ENOSYS;
 }
 

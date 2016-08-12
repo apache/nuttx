@@ -188,6 +188,7 @@ static ssize_t oneshot_read(FAR struct file *filep, FAR char *buffer, size_t buf
   /* Return zero -- usually meaning end-of-file */
 
   tmrinfo("buflen=%ld\n", (unsigned long)buflen);
+  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   return 0;
 }
 
@@ -205,6 +206,7 @@ static ssize_t oneshot_write(FAR struct file *filep, FAR const char *buffer,
   /* Return a failure */
 
   tmrinfo("buflen=%ld\n", (unsigned long)buflen);
+  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   return -EPERM;
 }
 
@@ -250,21 +252,10 @@ static int oneshot_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case OSIOC_MAXDELAY:
         {
-          FAR struct timespec *ts;
-          uint64_t usecs;
-
-          ts = (FAR struct timespec *)((uintptr_t)arg);
+          FAR struct timespec *ts = (FAR struct timespec *)((uintptr_t)arg);
           DEBUGASSERT(ts != NULL);
 
-          ret = ONESHOT_MAX_DELAY(priv->od_lower, &usecs);
-          if (ret >= 0)
-            {
-              uint64_t sec = usecs / 1000000;
-              usecs -= 1000000 * sec;
-
-              ts->tv_sec  = (time_t)sec;
-              ts->tv_nsec = (long)(usecs * 1000);
-            }
+          ret = ONESHOT_MAX_DELAY(priv->od_lower, ts);
         }
         break;
 

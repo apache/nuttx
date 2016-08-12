@@ -90,8 +90,7 @@
  *   lower   An instance of the lower-half oneshot state structure.  This
  *           structure must have been previously initialized via a call to
  *           oneshot_initialize();
- *   usec    The user-provided location in which to return the maxumum delay
- *           in microseconds.
+ *   ts      The location in which to return the maxumum delay.
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned
@@ -99,7 +98,7 @@
  *
  ****************************************************************************/
 
-#define ONESHOT_MAX_DELAY(l,u) ((l)->ops->max_delay(l,u))
+#define ONESHOT_MAX_DELAY(l,t) ((l)->ops->max_delay(l,t))
 
 /****************************************************************************
  * Name: ONESHOT_START
@@ -170,7 +169,7 @@ struct timespec;
 struct oneshot_operations_s
 {
   CODE int (*max_delay)(FAR struct oneshot_lowerhalf_s *lower,
-                        FAR uint64_t *usec);
+                        FAR struct timespec *ts);
   CODE int (*start)(FAR struct oneshot_lowerhalf_s *lower,
                     oneshot_callback_t callback, FAR void *arg,
                     FAR const struct timespec *ts);
