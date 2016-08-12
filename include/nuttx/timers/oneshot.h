@@ -45,9 +45,38 @@
 #include <stdint.h>
 #include <time.h>
 
+#include <nuttx/fs/ioctl.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* IOCTL commands ***********************************************************/
+/* These commands are used by applications to access the oneshot lower-half
+ * logic via the oneshot character driver IOCTL command.  Since the oneshot
+ * driver is a device control interface and not a data transfer interface,
+ * the majority of the functionality is implemented in driver IOCTL calls.
+ * The oneshot IOCTL commands are listed below:
+ *
+ * These are detected and handled by the "upper half" timer driver.
+ *
+ * OSIOC_MAXDELAY   - Return the maximum delay that can be supported by
+ *                    this timer.
+ *                    Argument: A referenct to a struct timespec in which
+ *                    the maximum time will be returned.
+ * OSIOC_START      - Start the oneshot timer
+ *                    Argument: A reference to struct oneshot_start_s
+ * OSIOC_CANCEL     - Stop the timer
+ *                    Argument: A reference to a struct timespec in which
+ *                    the time remaining will be returned.
+ *
+ * NOTE: _TCIOC(0x0020) througn _TCIOC(0x003f) are reserved for use by the
+ * oneshot driver to assure that the values are unique.  Other timer drivers
+ * must not use IOCTL commands in this numeric range.
+ */
+
+#define OSIOC_MAXDELAY   _TCIOC(0x0020)
+#define OSIOC_START      _TCIOC(0x0021)
+#define OSIOC_CANCEL     _TCIOC(0x0022)
 
 /* Method access helper macros **********************************************/
 
@@ -162,6 +191,18 @@ struct oneshot_lowerhalf_s
   /* Private lower half data may follow */
 };
 
+#ifdef CONFIG_ONESHOT
+/* Argument to OSIOC_START IOCTL command */
+
+struct oneshot_start_s
+{
+  pid_t pid;          /* PID of task to be signalled (0 means calling task) */
+  int signo;          /* Signal number to use */
+  FAR void *arg;      /* Signal value argument */
+  struct timespec ts; /* Delay until time expiration */
+};
+#endif
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -200,6 +241,32 @@ extern "C"
 
 FAR struct oneshot_lowerhalf_s *oneshot_initialize(int chan,
                                                    uint16_t resolution);
+
+/****************************************************************************
+ * Name: oneshot_register
+ *
+ * Description:
+ *   Register the oneshot device as 'devpath'
+ *
+ * Input Parameters:
+ *   devpath - The full path to the driver to register. E.g., "/dev/oneshot0"
+ *   lower - An instance of the lower half interface
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.  The following
+ *   possible error values may be returned (most are returned by
+ *   register_driver()):
+ *
+ *   EINVAL - 'path' is invalid for this operation
+ *   EEXIST - An inode already exists at 'path'
+ *   ENOMEM - Failed to allocate in-memory resources for the operation
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ONESHOT
+int oneshot_register(FAR const char *devname,
+                     FAR struct oneshot_lowerhalf_s *lower);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

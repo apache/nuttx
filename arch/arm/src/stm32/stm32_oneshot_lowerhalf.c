@@ -69,7 +69,7 @@ struct stm32_oneshot_lowerhalf_s
   /* Private lower half data follows */
 
   struct stm32_oneshot_s oneshot; /* STM32-specific oneshot state */
-  oneshot_callback_t callback;    /* internal handler that receives callback */
+  oneshot_callback_t callback;    /* Internal handler that receives callback */
   FAR void *arg;                  /* Argument that is passed to the handler */
 };
 

@@ -1367,7 +1367,6 @@ endif # DEBUG_SPI
 config DEBUG_TIMER
 	bool "Timer Debug Features"
 	default n
-	depends on TIMER
 	---help---
 		Enable timer debug features.
 
