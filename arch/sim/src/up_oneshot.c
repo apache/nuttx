@@ -77,7 +77,7 @@ struct sim_oneshot_lowerhalf_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static void sim_oneshot_handler(void *arg);
+static void sim_oneshot_handler(int argc, wdparm_t arg1, ...);
 
 static int sim_max_delay(FAR struct oneshot_lowerhalf_s *lower,
                          FAR struct timespec *ts);
@@ -119,14 +119,14 @@ static const struct oneshot_operations_s g_oneshot_ops =
  *
  ****************************************************************************/
 
-static void sim_oneshot_handler(void *arg)
+static void sim_oneshot_handler(int argc, wdparm_t arg1, ...)
 {
   FAR struct sim_oneshot_lowerhalf_s *priv =
-    (FAR struct sim_oneshot_lowerhalf_s *)arg;
+    (FAR struct sim_oneshot_lowerhalf_s *)arg1;
   oneshot_callback_t callback;
   FAR void *cbarg;
 
-  DEBUGASSERT(priv != NULL);
+  DEBUGASSERT(argc == 1 && priv != NULL);
 
   /* Perhaps the callback was nullified in a race condition with
    * sim_cancel?

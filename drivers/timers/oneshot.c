@@ -239,9 +239,8 @@ static int oneshot_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       return ret;
     }
 
-  /* Handle built-in ioctl commands */
+  /* Handle oneshot timer ioctl commands */
 
-  ret = -EINVAL;
   switch (cmd)
     {
       /* OSIOC_MAXDELAY - Return the maximum delay that can be supported
@@ -286,7 +285,7 @@ static int oneshot_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
           /* Start the oneshot timer */
 
-          ret = ONESHOT_START(priv->od_lower, oneshot_callback, start->arg,
+          ret = ONESHOT_START(priv->od_lower, oneshot_callback, priv,
                               &start->ts);
         }
         break;
