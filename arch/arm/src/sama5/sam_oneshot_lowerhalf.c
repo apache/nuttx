@@ -172,7 +172,7 @@ static void sam_oneshot_handler(void *arg)
 static int sam_max_delay(FAR struct oneshot_lowerhalf_s *lower,
                          FAR struct timespec *ts)
 {
-  DEBUGASSERT(priv != NULL && ts != NULL);
+  DEBUGASSERT(lower != NULL && ts != NULL);
 
 #warning Missing logic
   ts->tv_sec  = INT_MAX;
@@ -209,7 +209,7 @@ static int sam_start(FAR struct oneshot_lowerhalf_s *lower,
   irqstate_t flags;
   int ret;
 
-  DEBUGASSERT(priv != NULL);
+  DEBUGASSERT(priv != NULL && callback != NULL && ts != NULL);
 
   /* Save the callback information and start the timer */
 
@@ -327,7 +327,7 @@ FAR struct oneshot_lowerhalf_s *oneshot_initialize(int chan,
   ret = sam_oneshot_initialize(&priv->oneshot, chan, resolution);
   if (ret < 0)
     {
-      tmrerr("ERROR: Failed to initialized state structure\n");
+      tmrerr("ERROR: sam_oneshot_initialize failed: %d\n", ret);
       kmm_free(priv);
       return NULL;
     }

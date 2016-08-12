@@ -45,6 +45,7 @@
 #include <debug.h>
 
 #include <nuttx/board.h>
+#include <nuttx/timers/oneshot.h>
 
 #include "up_internal.h"
 #include "sim.h"
@@ -67,7 +68,10 @@ int trv_mount_world(int minor, FAR const char *mountpoint);
 
 int sim_bringup(void)
 {
-#ifdef CONFIG_FS_PROCFS
+#ifdef CONFIG_ONESHOT
+  FAR struct oneshot_lowerhalf_s *oneshot;
+#endif
+#if defined(CONFIG_FS_PROCFS) || defined(CONFIG_ONESHOT)
   int ret;
 #endif
 
@@ -81,6 +85,25 @@ int sim_bringup(void)
   /* Initialize simulated GPIO drivers */
 
   (void)sim_gpio_initialize();
+#endif
+
+#ifdef CONFIG_ONESHOT
+  /* Initialize the simulated analog joystick input device */
+
+  oneshot = oneshot_initialize(0, 0);
+  if (oneshot == NULL)
+    {
+      _err("ERROR: oneshot_initialize faile\n");
+    }
+  else
+   {
+      ret = oneshot_register("/dev/oneshot", oneshot);
+      if (ret < 0)
+        {
+          _err("ERROR: Failed to register oneshot at /dev/oneshot: %d\n",
+               ret);
+        }
+    }
 #endif
 
 #ifdef CONFIG_AJOYSTICK

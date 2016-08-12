@@ -218,7 +218,7 @@ static int stm32l4_start(FAR struct oneshot_lowerhalf_s *lower,
   irqstate_t flags;
   int ret;
 
-  DEBUGASSERT(priv != NULL);
+  DEBUGASSERT(priv != NULL && callback != NULL && ts != NULL);
 
   /* Save the callback information and start the timer */
 
@@ -336,7 +336,7 @@ FAR struct oneshot_lowerhalf_s *oneshot_initialize(int chan,
   ret = stm32l4_oneshot_initialize(&priv->oneshot, chan, resolution);
   if (ret < 0)
     {
-      tmrerr("ERROR: Failed to initialized state structure\n");
+      tmrerr("ERROR: stm32l4_oneshot_initialize failed: %d\n", ret);
       kmm_free(priv);
       return NULL;
     }
