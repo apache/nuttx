@@ -603,6 +603,20 @@ static inline uint16_t spi_readword(FAR struct stm32_spidev_s *priv)
 
   /* Then return the received byte */
 
+#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
+  /* "When the data frame size fits into one byte (less than or equal to 8 bits),
+   *  data packing is used automatically when any read or write 16-bit access is
+   *  performed on the SPIx_DR register. The double data frame pattern is handled
+   *  in parallel in this case. At first, the SPI operates using the pattern
+   *  stored in the LSB of the accessed word, then with the other half stored in
+   *  the MSB.... The receiver then has to access both data frames by a single
+   *  16-bit read of SPIx_DR as a response to this single RXNE event. The RxFIFO
+   *  threshold setting and the following read access must be always kept aligned
+   *  at the receiver side, as data can be lost if it is not in line."
+   */
+
+  /* REVISIT */
+#endif
   return spi_getreg(priv, STM32_SPI_DR_OFFSET);
 }
 
@@ -631,11 +645,20 @@ static inline void spi_writeword(FAR struct stm32_spidev_s *priv, uint16_t word)
 
 #if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
   /* "When the data frame size fits into one byte (less than or equal to 8 bits),
-   * data packing is used automatically when any read or write 16-bit access is
-   * performed on the SPIx_DR register. The double data frame pattern is handled
-   * in parallel in this case. At first, the SPI operates using the pattern
-   * stored in the LSB of the accessed word, then with the other half stored in
-   * the MSB."
+   *  data packing is used automatically when any read or write 16-bit access is
+   *  performed on the SPIx_DR register. The double data frame pattern is handled
+   *  in parallel in this case. At first, the SPI operates using the pattern
+   *  stored in the LSB of the accessed word, then with the other half stored in
+   *  the MSB...
+   *
+   *  "A specific problem appears if an odd number of such "fit into one byte"
+   *   data frames must be handled. On the transmitter side, writing the last
+   *   data frame of any odd sequence with an 8-bit access to SPIx_DR is enough.
+   *   ..."
+   *
+   * REVISIT: "...The receiver has to change the Rx_FIFO threshold level for the
+   * last data frame received in the odd sequence of frames in order to generate
+   * the RXNE event."
    */
 
   if (priv->nbits < 9)
