@@ -44,6 +44,7 @@
 #include <nuttx/compiler.h>
 #include <stdint.h>
 #include <arch/kinetis/chip.h>
+#include <nuttx/i2c/i2c_master.h>
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -75,6 +76,8 @@
 /************************************************************************************
  * Public data
  ************************************************************************************/
+
+FAR struct i2c_master_s* i2c_dev;
 
 #ifndef __ASSEMBLY__
 
