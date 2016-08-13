@@ -53,6 +53,10 @@
 #if defined(CONFIG_LCD_SSD1306) && defined(CONFIG_LCD_SSD1306_I2C)
 
 /****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
  * Name: ssd1306_sendbyte
  *
  * Description:
@@ -79,8 +83,8 @@ void ssd1306_sendbyte(FAR struct ssd1306_dev_s *priv, uint8_t regval)
    * address followed by one byte of data.
    */
 
-  txbuffer[0] = 0x00;
-  txbuffer[1] = regval;
+  txbuffer[0]   = 0x00;
+  txbuffer[1]   = regval;
 
   /* Setup 8-bit SSD1306 address write message */
 
@@ -108,28 +112,36 @@ void ssd1306_sendbyte(FAR struct ssd1306_dev_s *priv, uint8_t regval)
  *
  ****************************************************************************/
 
-static uint8_t blk_buffer[SSD1306_DEV_XRES + 1];
-
 void ssd1306_sendblk(FAR struct ssd1306_dev_s *priv, uint8_t *data, uint8_t len)
 {
+  struct i2c_msg_s msg[2];
+  uint8_t regaddr;
+  int ret;
+
   /* 8-bit data read sequence:
    *
    *  Start - I2C_Write_Address - SSD1306_Reg_Address - SSD1306_Write_Data - STOP
    */
 
-  struct i2c_msg_s msg;
-  int ret;
+  /* Send the SSD1306 register address */
 
-  blk_buffer[0] = 0x40;
-  memcpy(&blk_buffer[1], data, len);
+  regaddr = 0x40;
 
-  msg.frequency = CONFIG_SSD1306_I2CFREQ;
-  msg.addr      = priv->addr;
-  msg.flags     = 0;
-  msg.buffer    = blk_buffer;
-  msg.length = len + 1;
+  msg[0].frequency = CONFIG_SSD1306_I2CFREQ;  /* I2C frequency */
+  msg[0].addr      = priv->addr;              /* 7-bit address */
+  msg[0].flags     = 0;                       /* Write transaction, beginning with START */
+  msg[0].buffer    = &regaddr;                /* Transfer from this address */
+  msg[0].length    = 1;                       /* Send the one byte register address */
 
-  ret = I2C_TRANSFER(priv->i2c, &msg, 1);
+  /* Followed by the SSD1306 write data (with no RESTART) */
+
+  msg[1].frequency = CONFIG_SSD1306_I2CFREQ;  /* I2C frequency */
+  msg[1].addr      = priv->addr;              /* 7-bit address */
+  msg[1].flags     = I2C_M_NORESTART;         /* Write transaction with no RESTART */
+  msg[1].buffer    = data;                    /* Transfer from this address */
+  msg[1].length    = len;                     /* Send the data, then STOP */
+
+  ret = I2C_TRANSFER(priv->i2c, msg, 2);
   if (ret < 0)
     {
       snerr("ERROR: I2C_TRANSFER failed: %d\n", ret);

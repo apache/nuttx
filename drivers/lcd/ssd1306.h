@@ -64,7 +64,8 @@
 #  define CONFIG_SSD1306_NINTERFACES 1
 #endif
 
-#if !defined(CONFIG_LCD_SH1106_OLED_132) && !defined(CONFIG_LCD_UG2864HSWEG01) && !defined(CONFIG_LCD_UG2832HSWEG04)
+#if !defined(CONFIG_LCD_SH1106_OLED_132) && !defined(CONFIG_LCD_UG2864HSWEG01) && \
+    !defined(CONFIG_LCD_UG2832HSWEG04)
 #  error "Unknown and unsupported SSD1306 LCD"
 #endif
 
@@ -75,6 +76,14 @@
 #  undef CONFIG_LCD_PORTRAIT
 #  undef CONFIG_LCD_RLANDSCAPE
 #  undef CONFIG_LCD_RPORTRAIT
+#endif
+
+/**************************************************************************************
+ * Pre-processor Definitions
+ **************************************************************************************/
+
+#ifndef CONFIG_NX_BGCOLOR
+#  define CONFIG_NX_BGCOLOR SSD1306_Y1_BLACK
 #endif
 
 /* SSD1306 Commands *******************************************************************/
@@ -170,9 +179,9 @@
 /* Bytes per logical row and actual device row */
 
 #if defined(CONFIG_LCD_SH1106_OLED_132)
-#define SSD1306_DEV_XSTRIDE       ((SSD1306_DEV_XRES >> 3) + 4)
+#  define SSD1306_DEV_XSTRIDE     ((SSD1306_DEV_XRES >> 3) + 4)
 #else
-#define SSD1306_DEV_XSTRIDE       (SSD1306_DEV_XRES >> 3)
+#  define SSD1306_DEV_XSTRIDE     (SSD1306_DEV_XRES >> 3)
 #endif
 
 #define SSD1306_DEV_YSTRIDE       (SSD1306_DEV_YRES >> 3)
