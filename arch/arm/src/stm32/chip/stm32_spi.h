@@ -163,6 +163,7 @@
 #ifdef CONFIG_STM32_STM32F30XX
 #define SPI_CR2_DS_SHIFT          (8)       /* Bits 8-11:  Data size */
 #define SPI_CR2_DS_MASK           (15 << SPI_CR2_DS_SHIFT)
+#  define SPI_CR2_DS(n)           ((uint32_t)((n) - 1) << SPI_CR2_DS_SHIFT)
 #  define SPI_CR2_DS_4BIT         (3 << SPI_CR2_DS_SHIFT)
 #  define SPI_CR2_DS_5BIT         (4 << SPI_CR2_DS_SHIFT)
 #  define SPI_CR2_DS_6BIT         (5 << SPI_CR2_DS_SHIFT)
@@ -199,22 +200,22 @@
 
 #if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F30XX) || \
     defined(CONFIG_STM32_STM32F40XX)
-#  define SPI_SR_TIFRFE           (1 << 8)  /* Bit 8: TI frame format error */
+#  define SPI_SR_FRE              (1 << 8)  /* Bit 8: TI frame format error */
 #endif
 
 #ifdef CONFIG_STM32_STM32F30XX
-#define SPI_CR1_FRLVL_SHIFT       (9)       /* Bits 9-10: FIFO reception level */
-#define SPI_CR1_FRLVL_MASK        (3 << SPI_CR1_FRLVL_SHIFT)
-#  define SPI_CR1_FRLVL_EMPTY     (0 << SPI_CR1_FRLVL_SHIFT) /* FIFO empty */
-#  define SPI_CR1_FRLVL_QUARTER   (1 << SPI_CR1_FRLVL_SHIFT) /* 1/4 FIFO */
-#  define SPI_CR1_FRLVL_HALF      (2 << SPI_CR1_FRLVL_SHIFT) /* 1/2 FIFO */
-#  define SPI_CR1_FRLVL_FULL      (3 << SPI_CR1_FRLVL_SHIFT) /* FIFO full */
-#define SPI_CR1_FTLVL_SHIFT       (11)      /* Bits 11-12: FIFO transmission level */
-#define SPI_CR1_FTLVL_MASK        (3 << SPI_CR1_FTLVL_SHIFT)
-#  define SPI_CR1_FTLVL_EMPTY     (0 << SPI_CR1_FTLVL_SHIFT) /* FIFO empty */
-#  define SPI_CR1_FTLVL_QUARTER   (1 << SPI_CR1_FTLVL_SHIFT) /* 1/4 FIFO */
-#  define SPI_CR1_FTLVL_HALF      (2 << SPI_CR1_FTLVL_SHIFT) /* 1/2 FIFO */
-#  define SPI_CR1_FTLVL_FULL      (3 << SPI_CR1_FTLVL_SHIFT) /* FIFO full */
+#define SPI_SR_FRLVL_SHIFT        (9)       /* Bits 9-10: FIFO reception level */
+#define SPI_SR_FRLVL_MASK         (3 << SPI_SR_FRLVL_SHIFT)
+#  define SPI_SR_FRLVL_EMPTY      (0 << SPI_SR_FRLVL_SHIFT) /* FIFO empty */
+#  define SPI_SR_FRLVL_QUARTER    (1 << SPI_SR_FRLVL_SHIFT) /* 1/4 FIFO */
+#  define SPI_SR_FRLVL_HALF       (2 << SPI_SR_FRLVL_SHIFT) /* 1/2 FIFO */
+#  define SPI_SR_FRLVL_FULL       (3 << SPI_SR_FRLVL_SHIFT) /* FIFO full */
+#define SPI_SR_FTLVL_SHIFT        (11)      /* Bits 11-12: FIFO transmission level */
+#define SPI_SR_FTLVL_MASK         (3 << SPI_SR_FTLVL_SHIFT)
+#  define SPI_SR_FTLVL_EMPTY      (0 << SPI_SR_FTLVL_SHIFT) /* FIFO empty */
+#  define SPI_SR_FTLVL_QUARTER    (1 << SPI_SR_FTLVL_SHIFT) /* 1/4 FIFO */
+#  define SPI_SR_FTLVL_HALF       (2 << SPI_SR_FTLVL_SHIFT) /* 1/2 FIFO */
+#  define SPI_SR_FTLVL_FULL       (3 << SPI_SR_FTLVL_SHIFT) /* FIFO full */
 #endif
 
 /* I2S configuration register */

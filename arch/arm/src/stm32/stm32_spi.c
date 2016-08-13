@@ -907,6 +907,33 @@ static void spi_modifycr1(FAR struct stm32_spidev_s *priv, uint16_t setbits, uin
 }
 
 /************************************************************************************
+ * Name: spi_modifycr2
+ *
+ * Description:
+ *   Clear and set bits in the CR2 register
+ *
+ * Input Parameters:
+ *   priv    - Device-specific state data
+ *   clrbits - The bits to clear
+ *   setbits - The bits to set
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_STM32_STM32F30XX
+static void spi_modifycr2(FAR struct stm32_spidev_s *priv, uint16_t setbits, uint16_t clrbits)
+{
+  uint16_t cr2;
+  cr2 = spi_getreg(priv, STM32_SPI_CR2_OFFSET);
+  cr2 &= ~clrbits;
+  cr2 |= setbits;
+  spi_putreg(priv, STM32_SPI_CR2_OFFSET, cr2);
+}
+#endif
+
+/************************************************************************************
  * Name: spi_lock
  *
  * Description:
