@@ -509,10 +509,6 @@ static struct stm32_spidev_s g_spi6dev =
 #endif
 
 /************************************************************************************
- * Public Data
- ************************************************************************************/
-
-/************************************************************************************
  * Private Functions
  ************************************************************************************/
 
@@ -1190,6 +1186,7 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 
       if (nbits < 4 || nbits > 16)
         {
+          spierr("ERROR: nbits out of range: %d\n", nbits);
           return;
         }
 
@@ -1814,7 +1811,7 @@ FAR struct spi_dev_s *stm32_spibus_initialize(int bus)
   else
 #endif
     {
-      spierr("ERROR: Unsupbused SPI bus: %d\n", bus);
+      spierr("ERROR: Unsupported SPI bus: %d\n", bus);
       return NULL;
     }
 
