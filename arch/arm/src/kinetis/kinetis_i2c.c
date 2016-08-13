@@ -290,45 +290,37 @@ static void kinetis_i2c_setfrequency(struct kinetis_i2cdev_s *priv,
 
 static int kinetis_i2c_start(struct kinetis_i2cdev_s *priv)
 {
-  struct i2c_msg_s *msg;
-  irqstate_t flags;
+  struct i2c_msg_s *msg;  
 
   msg = priv->msgs;
-
-  i2cinfo("start");
-
-  flags = enter_critical_section();
 
    /* now take control of the bus */
   if (getreg8(KINETIS_I2C0_C1) & I2C_C1_MST)
   {
     /* we are already the bus master, so send a repeated start */
     putreg8(I2C_C1_IICEN | I2C_C1_IICIE | I2C_C1_MST | I2C_C1_RSTA | I2C_C1_TX, KINETIS_I2C0_C1);
-#if 0
-    putreg8(I2C_C1_IICEN | I2C_C1_IICIE, KINETIS_I2C0_C1); /* DEBUG: stop + start */
-    putreg8(I2C_C1_IICEN | I2C_C1_IICIE | I2C_C1_MST | I2C_C1_TX, KINETIS_I2C0_C1);
-#endif
   }
   else
   {
     /* we are not currently the bus master, so wait for bus ready */
     while (getreg8(KINETIS_I2C0_S) & I2C_S_BUSY);
-                
+
     /* become the bus master in transmit mode (send start) */
     putreg8(I2C_C1_IICEN | I2C_C1_IICIE | I2C_C1_MST | I2C_C1_TX, KINETIS_I2C0_C1);
   }
 
-  /* wait until start condition establishes control of the bus */
-  while (1) {
-    if (getreg8(KINETIS_I2C0_S) & I2C_S_BUSY) break;
+  if  (I2C_M_READ & msg->flags) /* DEBUG: should happen always */
+  {
+    /* wait until start condition establishes control of the bus */
+    while (1) {
+      if (getreg8(KINETIS_I2C0_S) & I2C_S_BUSY) break;
+    }
   }
 
   /* initiate actual transfer (send address) */
   putreg8((I2C_M_READ & msg->flags) == I2C_M_READ ?
     I2C_READADDR8(msg->addr) :
     I2C_WRITEADDR8(msg->addr), KINETIS_I2C0_D);
-
-  leave_critical_section(flags);
 
  return OK;
 }
@@ -459,8 +451,12 @@ static int kinetis_i2c_interrupt(int irq, FAR void *context)
         /* actually intending to read (address was just sent) */
         else
         {
-          regval &= ~I2C_C1_TX;
-          putreg8(regval, KINETIS_I2C0_C1); /* go to RX mode */
+          if (msg->length == 1) /* go to RX mode, do not send ACK */
+            putreg8(I2C_C1_IICEN | I2C_C1_IICIE | I2C_C1_MST | I2C_C1_TXAK, KINETIS_I2C0_C1);
+          else /* go to RX mode */
+            putreg8(I2C_C1_IICEN | I2C_C1_IICIE | I2C_C1_MST, KINETIS_I2C0_C1);
+
+          /* TODO: handle zero-length reads */
 
           dummy = getreg8(KINETIS_I2C0_D); /* dummy read to initiate reception */
         }
@@ -473,8 +469,7 @@ static int kinetis_i2c_interrupt(int irq, FAR void *context)
       if (priv->rdcnt == (msg->length - 1))
       {
         /* go to TX mode before last read, otherwise a new read is triggered */
-        regval |= I2C_C1_TX;
-        putreg8(regval, KINETIS_I2C0_C1);
+        putreg8(I2C_C1_IICEN | I2C_C1_IICIE | I2C_C1_MST | I2C_C1_TX, KINETIS_I2C0_C1); /* go to TX mode */
 
         msg->buffer[priv->rdcnt] = getreg8(KINETIS_I2C0_D);
         priv->rdcnt++;
@@ -485,9 +480,7 @@ static int kinetis_i2c_interrupt(int irq, FAR void *context)
       else if (priv->rdcnt == (msg->length - 2))
       {
         /* Do not ACK any more */
-        regval = getreg8(KINETIS_I2C0_C1);
-        regval |= I2C_C1_TXAK;
-        putreg8(regval, KINETIS_I2C0_C1);
+        putreg8(I2C_C1_IICEN | I2C_C1_IICIE | I2C_C1_MST | I2C_C1_TXAK, KINETIS_I2C0_C1);
 
         msg->buffer[priv->rdcnt] = getreg8(KINETIS_I2C0_D);
         priv->rdcnt++;
@@ -523,9 +516,6 @@ static int kinetis_i2c_transfer(FAR struct i2c_master_s *dev,
   sem_wait(&priv->mutex);
 
   /* Set up for the transfer */
-
-  priv->wrcnt = 0;
-  priv->rdcnt = 0;
   priv->msgs  = msgs;
   priv->nmsg  = count;
   priv->state = STATE_OK;
@@ -544,19 +534,21 @@ static int kinetis_i2c_transfer(FAR struct i2c_master_s *dev,
   /* Process every message */
   while (priv->nmsg && priv->state == STATE_OK)
   {
+    priv->wrcnt = 0;
+    priv->rdcnt = 0;
+
     /* Initiate the transfer */
     kinetis_i2c_start(priv);
 
     /* wait for transfer complete */
     wd_start(priv->timeout, I2C_TIMEOUT, kinetis_i2c_timeout, 1, (uint32_t)priv);
-    sem_wait(&priv->wait);
+    sem_wait(&priv->wait);    
 
     wd_cancel(priv->timeout);
-
-    /* Process next message */
-    if (priv->state == STATE_OK)
-      kinetis_i2c_nextmsg(priv);
   }
+
+  /* disable interrupts */
+  putreg8(I2C_C1_IICEN, KINETIS_I2C0_C1);
 
   /* release access to I2C bus */ 
   sem_post(&priv->mutex);
@@ -636,8 +628,8 @@ struct i2c_master_s *kinetis_i2cbus_initialize(int port)
     kinetis_pinconfig(PIN_I2C0_SCL);
     kinetis_pinconfig(PIN_I2C0_SDA);
 
-    /* Enable (with interrupts) */
-    putreg8(I2C_C1_IICEN | I2C_C1_IICIE, KINETIS_I2C0_C1);
+    /* Enable */
+    putreg8(I2C_C1_IICEN, KINETIS_I2C0_C1);
 
     /* High-drive select (TODO: why)? */
     regval = getreg8(KINETIS_I2C0_C2);
