@@ -66,7 +66,7 @@
 #define STM32_SPI_TXCRCR_OFFSET    0x0018  /* SPI Tx CRC register (16-bit) */
 
 #if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F30XX) || \
-    defined(CONFIG_STM32_STM32F40XX)
+    defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32F40XX)
 #  define STM32_SPI_I2SCFGR_OFFSET 0x001c  /* I2S configuration register */
 #  define STM32_SPI_I2SPR_OFFSET   0x0020  /* I2S prescaler register */
 #endif
@@ -92,7 +92,7 @@
 #  define STM32_SPI2_RXCRCR       (STM32_SPI2_BASE+STM32_SPI_RXCRCR_OFFSET)
 #  define STM32_SPI2_TXCRCR       (STM32_SPI2_BASE+STM32_SPI_TXCRCR_OFFSET)
 #if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F30XX) || \
-    defined(CONFIG_STM32_STM32F40XX)
+    defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32F40XX)
 #    define STM32_SPI2_I2SCFGR    (STM32_SPI2_BASE+STM32_SPI_I2SCFGR_OFFSET)
 #    define STM32_SPI2_I2SPR      (STM32_SPI2_BASE+STM32_SPI_I2SPR_OFFSET)
 #  endif
@@ -107,7 +107,7 @@
 #  define STM32_SPI3_RXCRCR       (STM32_SPI3_BASE+STM32_SPI_RXCRCR_OFFSET)
 #  define STM32_SPI3_TXCRCR       (STM32_SPI3_BASE+STM32_SPI_TXCRCR_OFFSET)
 #if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F30XX) || \
-    defined(CONFIG_STM32_STM32F40XX)
+    defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32F40XX)
 #    define STM32_SPI3_I2SCFGR    (STM32_SPI3_BASE+STM32_SPI_I2SCFGR_OFFSET)
 #    define STM32_SPI3_I2SPR      (STM32_SPI3_BASE+STM32_SPI_I2SPR_OFFSET)
 #  endif
@@ -135,7 +135,7 @@
 #define SPI_CR1_SSI               (1 << 8)  /* Bit 8: Internal slave select */
 #define SPI_CR1_SSM               (1 << 9)  /* Bit 9: Software slave management */
 #define SPI_CR1_RXONLY            (1 << 10) /* Bit 10: Receive only */
-#ifdef CONFIG_STM32_STM32F30XX
+#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
 #  define SPI_CR1_CRCL            (1 << 11) /* Bit 11: CRC length */
 #else
 #  define SPI_CR1_DFF             (1 << 11) /* Bit 11: Data Frame Format */
@@ -152,7 +152,7 @@
 #define SPI_CR2_SSOE              (1 << 2)  /* Bit 2: SS Output Enable */
 
 #if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F30XX) || \
-    defined(CONFIG_STM32_STM32F40XX)
+    defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32F40XX)
 #  define SPI_CR2_FRF             (1 << 4)  /* Bit 4: Frame format */
 #endif
 
@@ -160,7 +160,7 @@
 #define SPI_CR2_RXNEIE            (1 << 6)  /* Bit 6: RX buffer not empty interrupt enable */
 #define SPI_CR2_TXEIE             (1 << 7)  /* Bit 7: Tx buffer empty interrupt enable */
 
-#ifdef CONFIG_STM32_STM32F30XX
+#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
 #define SPI_CR2_DS_SHIFT          (8)       /* Bits 8-11:  Data size */
 #define SPI_CR2_DS_MASK           (15 << SPI_CR2_DS_SHIFT)
 #  define SPI_CR2_DS(n)           ((uint32_t)((n) - 1) << SPI_CR2_DS_SHIFT)
@@ -188,7 +188,7 @@
 #define SPI_SR_TXE                (1 << 1)  /* Bit 1: Transmit buffer empty */
 
 #if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F30XX) || \
-    defined(CONFIG_STM32_STM32F40XX)
+    defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32F40XX)
 #  define SPI_SR_CHSIDE           (1 << 2)  /* Bit 2: Channel side */
 #  define SPI_SR_UDR              (1 << 3)  /* Bit 3: Underrun flag */
 #endif
@@ -199,11 +199,11 @@
 #define SPI_SR_BSY                (1 << 7)  /* Bit 7: Busy flag */
 
 #if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F30XX) || \
-    defined(CONFIG_STM32_STM32F40XX)
+    defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32F40XX)
 #  define SPI_SR_FRE              (1 << 8)  /* Bit 8: TI frame format error */
 #endif
 
-#ifdef CONFIG_STM32_STM32F30XX
+#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
 #define SPI_SR_FRLVL_SHIFT        (9)       /* Bits 9-10: FIFO reception level */
 #define SPI_SR_FRLVL_MASK         (3 << SPI_SR_FRLVL_SHIFT)
 #  define SPI_SR_FRLVL_EMPTY      (0 << SPI_SR_FRLVL_SHIFT) /* FIFO empty */
@@ -221,7 +221,7 @@
 /* I2S configuration register */
 
 #if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F30XX) || \
-    defined(CONFIG_STM32_STM32F40XX)
+    defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32F40XX)
 #  define SPI_I2SCFGR_CHLEN          (1 << 0)  /* Bit 0: Channel length (number of bits per audio channel) */
 #  define SPI_I2SCFGR_DATLEN_SHIFT   (1)       /* Bit 1-2: Data length to be transferred */
 #  define SPI_I2SCFGR_DATLEN_MASK    (3 << SPI_I2SCFGR_DATLEN_SHIFT)
@@ -249,7 +249,7 @@
 /* I2S prescaler register */
 
 #if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F30XX) || \
-    defined(CONFIG_STM32_STM32F40XX)
+    defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32F40XX)
 #    define SPI_I2SPR_I2SDIV_SHIFT   (0)       /* Bit 0-7: I2S Linear prescaler */
 #    define SPI_I2SPR_I2SDIV_MASK    (0xff << SPI_I2SPR_I2SDIV_SHIFT)
 #    define SPI_I2SPR_ODD            (1 << 8)  /* Bit 8: Odd factor for the prescaler */
@@ -257,4 +257,3 @@
 #endif
 
 #endif /* __ARCH_ARM_STC_STM32_CHIP_STM32_SPI_H */
-

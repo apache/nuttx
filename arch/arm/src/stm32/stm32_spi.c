@@ -132,8 +132,8 @@
 
 /* DMA channel configuration */
 
-#if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX) || \
-    defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F37XX)
+#if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32L15XX) || \
+    defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
 #  define SPI_RXDMA16_CONFIG        (SPI_DMA_PRIO|DMA_CCR_MSIZE_16BITS|DMA_CCR_PSIZE_16BITS|DMA_CCR_MINC            )
 #  define SPI_RXDMA8_CONFIG         (SPI_DMA_PRIO|DMA_CCR_MSIZE_8BITS |DMA_CCR_PSIZE_8BITS |DMA_CCR_MINC            )
 #  define SPI_RXDMA16NULL_CONFIG    (SPI_DMA_PRIO|DMA_CCR_MSIZE_8BITS |DMA_CCR_PSIZE_16BITS                         )
@@ -624,7 +624,7 @@ static inline void spi_writeword(FAR struct stm32_spidev_s *priv, uint16_t word)
 
 static inline bool spi_16bitmode(FAR struct stm32_spidev_s *priv)
 {
-#ifdef CONFIG_STM32_STM32F30XX
+#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
   return (priv->nbits > 8);
 #else
   return ((spi_getreg(priv, STM32_SPI_CR1_OFFSET) & SPI_CR1_DFF) != 0);
@@ -901,7 +901,8 @@ static inline void spi_dmatxstart(FAR struct stm32_spidev_s *priv)
  *
  ************************************************************************************/
 
-static void spi_modifycr1(FAR struct stm32_spidev_s *priv, uint16_t setbits, uint16_t clrbits)
+static void spi_modifycr1(FAR struct stm32_spidev_s *priv, uint16_t setbits,
+                          uint16_t clrbits)
 {
   uint16_t cr1;
   cr1 = spi_getreg(priv, STM32_SPI_CR1_OFFSET);
@@ -926,8 +927,9 @@ static void spi_modifycr1(FAR struct stm32_spidev_s *priv, uint16_t setbits, uin
  *
  ************************************************************************************/
 
-#ifdef CONFIG_STM32_STM32F30XX
-static void spi_modifycr2(FAR struct stm32_spidev_s *priv, uint16_t setbits, uint16_t clrbits)
+#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
+static void spi_modifycr2(FAR struct stm32_spidev_s *priv, uint16_t setbits,
+                          uint16_t clrbits)
 {
   uint16_t cr2;
   cr2 = spi_getreg(priv, STM32_SPI_CR2_OFFSET);
@@ -1182,7 +1184,7 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 
   if (nbits != priv->nbits)
     {
-#ifdef CONFIG_STM32_STM32F30XX
+#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
       /* Yes... Set CR2 appropriately */
       /* Set the number of bits (valid range 4-16) */
 
@@ -1567,7 +1569,7 @@ static void spi_bus_initialize(FAR struct stm32_spidev_s *priv)
   uint16_t setbits;
   uint16_t clrbits;
 
-#ifdef CONFIG_STM32_STM32F30XX
+#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
   /* Configure CR1 and CR2. Default configuration:
    *   Mode 0:                        CR1.CPHA=0 and CR1.CPOL=0
    *   Master:                        CR1.MSTR=1
