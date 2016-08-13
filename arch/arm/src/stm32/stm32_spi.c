@@ -1151,6 +1151,13 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 
   if (nbits != priv->nbits)
     {
+#ifdef CONFIG_STM32_STM32F30XX
+      DEBUGASSERT(nbits >= 8 && nbits <= 16)'
+
+      spi_modifycr1(priv, 0, SPI_CR1_SPE);
+      spi_modifycr2(priv, SPI_CR2_DS(nbits), SPI_CR2_DS_MASK);
+      spi_modifycr1(priv, SPI_CR1_SPE, 0);
+#else
       /* Yes... Set CR1 appropriately */
 
       switch (nbits)
@@ -1172,7 +1179,7 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
       spi_modifycr1(priv, 0, SPI_CR1_SPE);
       spi_modifycr1(priv, setbits, clrbits);
       spi_modifycr1(priv, SPI_CR1_SPE, 0);
-
+#endif
       /* Save the selection so the subsequence re-configurations will be faster */
 
       priv->nbits = nbits;
