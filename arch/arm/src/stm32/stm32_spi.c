@@ -932,7 +932,7 @@ static void spi_modifycr2(FAR struct stm32_spidev_s *priv, uint16_t setbits,
                           uint16_t clrbits)
 {
   uint16_t cr2;
-  cr2 = spi_getreg(priv, STM32_SPI_CR2_OFFSET);
+  cr2  = spi_getreg(priv, STM32_SPI_CR2_OFFSET);
   cr2 &= ~clrbits;
   cr2 |= setbits;
   spi_putreg(priv, STM32_SPI_CR2_OFFSET, cr2);
@@ -1196,7 +1196,7 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
       clrbits = SPI_CR2_DS_MASK;
       setbits = SPI_CR2_DS(nbits);
 
-      /* If nbits is <=8, then we are in byte mode and FRXTH shall be set
+      /* If nbits is <=8, then we are in byte mode and FRXTH must be set
        * (else, transaction will not complete).
        */
 
