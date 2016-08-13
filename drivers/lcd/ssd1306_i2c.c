@@ -42,6 +42,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <debug.h>
+#include <string.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/i2c/i2c_master.h>
@@ -67,7 +68,7 @@ void ssd1306_sendbyte(FAR struct ssd1306_dev_s *priv, uint8_t regval)
    */
 
   struct i2c_msg_s msg;
-  uint8_t txbuffer[1];
+  uint8_t txbuffer[2];
   int ret;
 
 #ifdef CONFIG_LCD_SSD1306_REGDEBUG
@@ -78,7 +79,8 @@ void ssd1306_sendbyte(FAR struct ssd1306_dev_s *priv, uint8_t regval)
    * address followed by one byte of data.
    */
 
-  txbuffer[0] = regval;
+  txbuffer[0] = 0x00;
+  txbuffer[1] = regval;
 
   /* Setup 8-bit SSD1306 address write message */
 
@@ -86,7 +88,7 @@ void ssd1306_sendbyte(FAR struct ssd1306_dev_s *priv, uint8_t regval)
   msg.addr      = priv->addr;              /* 7-bit address */
   msg.flags     = 0;                       /* Write transaction, beginning with START */
   msg.buffer    = txbuffer;                /* Transfer from this address */
-  msg.length    = 1;                       /* Send one byte following the address
+  msg.length    = 2;                       /* Send one byte following the address
                                             * (then STOP) */
 
   /* Perform the transfer */
@@ -106,6 +108,8 @@ void ssd1306_sendbyte(FAR struct ssd1306_dev_s *priv, uint8_t regval)
  *
  ****************************************************************************/
 
+static uint8_t blk_buffer[SSD1306_DEV_XRES + 1];
+
 void ssd1306_sendblk(FAR struct ssd1306_dev_s *priv, uint8_t *data, uint8_t len)
 {
   /* 8-bit data read sequence:
@@ -116,16 +120,14 @@ void ssd1306_sendblk(FAR struct ssd1306_dev_s *priv, uint8_t *data, uint8_t len)
   struct i2c_msg_s msg;
   int ret;
 
-  /* Setup 8-bit SSD1306 address write message */
+  blk_buffer[0] = 0x40;
+  memcpy(&blk_buffer[1], data, len);
 
-  msg.frequency = CONFIG_SSD1306_I2CFREQ;  /* I2C frequency */
-  msg.addr      = priv->addr;              /* 7-bit address */
-  msg.flags     = 0;                       /* Write transaction, beginning with START */
-  msg.buffer    = data;                    /* Transfer from this address */
-  msg.length    = len;                     /* Send one byte following the address
-                                            * (then STOP) */
-
-  /* Perform the transfer */
+  msg.frequency = CONFIG_SSD1306_I2CFREQ;
+  msg.addr      = priv->addr;
+  msg.flags     = 0;
+  msg.buffer    = blk_buffer;
+  msg.length = len + 1;
 
   ret = I2C_TRANSFER(priv->i2c, &msg, 1);
   if (ret < 0)
