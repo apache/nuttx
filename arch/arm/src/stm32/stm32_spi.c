@@ -1637,7 +1637,7 @@ static void spi_bus_initialize(FAR struct stm32_spidev_s *priv)
   priv->txdma = stm32_dmachannel(priv->txch);
   DEBUGASSERT(priv->rxdma && priv->txdma);
 
-  spi_putreg(priv, STM32_SPI_CR2_OFFSET, SPI_CR2_RXDMAEN | SPI_CR2_TXDMAEN);
+  spi_modifycr2(priv, SPI_CR2_RXDMAEN | SPI_CR2_TXDMAEN, 0);
 #endif
 
   /* Enable spi */

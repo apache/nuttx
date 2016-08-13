@@ -840,7 +840,8 @@ static inline void spi_dmatxstart(FAR struct stm32l4_spidev_s *priv)
  *
  ************************************************************************************/
 
-static void spi_modifycr(uint32_t addr, FAR struct stm32l4_spidev_s *priv, uint16_t setbits, uint16_t clrbits)
+static void spi_modifycr(uint32_t addr, FAR struct stm32l4_spidev_s *priv,
+                         uint16_t setbits, uint16_t clrbits)
 {
   uint16_t cr;
 
@@ -1533,7 +1534,7 @@ static void spi_bus_initialize(FAR struct stm32l4_spidev_s *priv)
   priv->txdma = stm32l4_dmachannel(priv->txch);
   DEBUGASSERT(priv->rxdma && priv->txdma);
 
-  spi_putreg(priv, STM32L4_SPI_CR2_OFFSET, SPI_CR2_RXDMAEN | SPI_CR2_TXDMAEN);
+  spi_modifycr(STM32L4_SPI_CR2_OFFSET, priv, SPI_CR2_RXDMAEN | SPI_CR2_TXDMAEN, 0);
 #endif
 
   /* Enable spi */
