@@ -1,4 +1,39 @@
 /****************************************************************************
+ * arch/arm/src/kinetis/kinetis_i2c.c
+ *
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Author:  Matias v01d <phreakuencies@gmail.com>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ * 3. Neither the name NuttX nor the names of its contributors may be
+ *    used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
+ ****************************************************************************/
+
+/****************************************************************************
  * Included Files
  ****************************************************************************/
 
@@ -31,14 +66,13 @@
 #include "kinetis.h"
 #include "kinetis_i2c.h"
 
-
 #if defined(CONFIG_KINETIS_I2C0)
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define I2C_TIMEOUT  (20*1000/CONFIG_USEC_PER_TICK) /* 20 mS */
+#define I2C_TIMEOUT  (20*1000/CONFIG_USEC_PER_TICK)   /* 20 mS */
 
 #define I2C_DEFAULT_FREQUENCY 400000
 
@@ -47,34 +81,38 @@
 #define STATE_TIMEOUT           2
 #define STATE_NAK               3
 
-/*
- * TODO:
+/* TODO:
  * - revisar tamanio de todos los registros (getreg/putreg)
  */
 
 /****************************************************************************
- * Private Data
+ * Private Types
  ****************************************************************************/
 
 struct kinetis_i2cdev_s
 {
-  struct i2c_master_s dev;     /* Generic I2C device */
-  unsigned int     base;       /* Base address of registers */
-  uint16_t         irqid;      /* IRQ for this device */
-  uint32_t         baseFreq;   /* branch frequency */
+  struct i2c_master_s dev;    /* Generic I2C device */
+  unsigned int base;          /* Base address of registers */
+  uint16_t irqid;             /* IRQ for this device */
+  uint32_t baseFreq;          /* branch frequency */
 
-  sem_t            mutex;      /* Only one thread can access at a time */
-  sem_t            wait;       /* Place to wait for state machine completion */
-  volatile uint8_t state;      /* State of state machine */
-  WDOG_ID          timeout;    /* watchdog to timeout when bus hung */
-  uint32_t         frequency;  /* Current I2C frequency */
+  sem_t mutex;                /* Only one thread can access at a time */
+  sem_t wait;                 /* Place to wait for state machine completion */
+  volatile uint8_t state;     /* State of state machine */
+  WDOG_ID timeout;            /* watchdog to timeout when bus hung */
+  uint32_t frequency;         /* Current I2C frequency */
 
-  struct i2c_msg_s *msgs;      /* remaining transfers - first one is in progress */
-  unsigned int     nmsg;       /* number of transfer remaining */
+  struct i2c_msg_s *msgs;     /* remaining transfers - first one is in
+                               * progress */
+  unsigned int nmsg;          /* number of transfer remaining */
 
-  uint16_t         wrcnt;      /* number of bytes sent to tx fifo */
-  uint16_t         rdcnt;      /* number of bytes read from rx fifo */
+  uint16_t wrcnt;             /* number of bytes sent to tx fifo */
+  uint16_t rdcnt;             /* number of bytes read from rx fifo */
 };
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
 
 static struct kinetis_i2cdev_s g_i2c_dev;
 
@@ -87,11 +125,11 @@ static void kinetis_i2c_stop(struct kinetis_i2cdev_s *priv);
 static int  kinetis_i2c_interrupt(int irq, FAR void *context);
 static void kinetis_i2c_timeout(int argc, uint32_t arg, ...);
 static void kinetis_i2c_setfrequency(struct kinetis_i2cdev_s *priv,
-              uint32_t frequency);
+                                     uint32_t frequency);
 static int  kinetis_i2c_transfer(FAR struct i2c_master_s *dev,
-              FAR struct i2c_msg_s *msgs, int count);
+                                 FAR struct i2c_msg_s *msgs, int count);
 #ifdef CONFIG_I2C_RESET
-static int kinetis_i2c_reset(FAR struct i2c_master_s * dev);
+static int  kinetis_i2c_reset(FAR struct i2c_master_s *dev);
 #endif
 
 /****************************************************************************
@@ -102,7 +140,7 @@ struct i2c_ops_s kinetis_i2c_ops =
 {
   .transfer = kinetis_i2c_transfer
 #ifdef CONFIG_I2C_RESET
-  , .reset  = kinetis_i2c_reset
+  ,.reset   = kinetis_i2c_reset
 #endif
 };
 
@@ -115,169 +153,270 @@ struct i2c_ops_s kinetis_i2c_ops =
  ****************************************************************************/
 
 static void kinetis_i2c_setfrequency(struct kinetis_i2cdev_s *priv,
-                                   uint32_t frequency)
+                                     uint32_t frequency)
 {
-	if (frequency == priv->frequency) return;
+  if (frequency == priv->frequency)
+    {
+      return;
+    }
 
-	/* TODO: use apropriate definitions */
+  /* TODO: use apropriate definitions */
 
-	#if BOARD_BUS_FREQ == 120000000
-		if (frequency < 400000) {
-			I2C0_F = I2C_F_DIV1152; // 104 kHz
-		} else if (frequency < 1000000) {
-			I2C0_F = I2C_F_DIV288; // 416 kHz
-		} else {
-			I2C0_F = I2C_F_DIV128; // 0.94 MHz
-		}
-		I2C0_FLT = 4;
-	#elif BOARD_BUS_FREQ == 108000000
-		if (frequency < 400000) {
-			I2C0_F = I2C_F_DIV1024; // 105 kHz
-		} else if (frequency < 1000000) {
-			I2C0_F = I2C_F_DIV256; //  422 kHz
-		} else {
-			I2C0_F = I2C_F_DIV112; // 0.96 MHz
-		}
-		I2C0_FLT = 4;
-	#elif BOARD_BUS_FREQ == 96000000
-		if (frequency < 400000) {
-			I2C0_F = I2C_F_DIV960; // 100 kHz
-		} else if (frequency < 1000000) {
-			I2C0_F = I2C_F_DIV240; // 400 kHz
-		} else {
-			I2C0_F = I2C_F_DIV96; // 1.0 MHz
-		}
-		I2C0_FLT = 4;
-	#elif BOARD_BUS_FREQ == 90000000
-		if (frequency < 400000) {
-			I2C0_F = I2C_F_DIV896; // 100 kHz
-		} else if (frequency < 1000000) {
-			I2C0_F = I2C_F_DIV224; // 402 kHz
-		} else {
-			I2C0_F = I2C_F_DIV88; // 1.02 MHz
-		}
-		I2C0_FLT = 4;
-	#elif BOARD_BUS_FREQ == 80000000
-		if (frequency < 400000) {
-			I2C0_F = I2C_F_DIV768; // 104 kHz
-		} else if (frequency < 1000000) {
-			I2C0_F = I2C_F_DIV192; // 416 kHz
-		} else {
-			I2C0_F = I2C_F_DIV80; // 1.0 MHz
-		}
-		I2C0_FLT = 4;
-	#elif BOARD_BUS_FREQ == 72000000
-		if (frequency < 400000) {
-			I2C0_F = I2C_F_DIV640; // 112 kHz
-		} else if (frequency < 1000000) {
-			I2C0_F = I2C_F_DIV192; // 375 kHz
-		} else {
-			I2C0_F = I2C_F_DIV72; // 1.0 MHz
-		}
-		I2C0_FLT = 4;
-	#elif BOARD_BUS_FREQ == 64000000
-		if (frequency < 400000) {
-			I2C0_F = I2C_F_DIV640; // 100 kHz
-		} else if (frequency < 1000000) {
-			I2C0_F = I2C_F_DIV160; // 400 kHz
-		} else {
-			I2C0_F = I2C_F_DIV64; // 1.0 MHz
-		}
-		I2C0_FLT = 4;
-	#elif BOARD_BUS_FREQ == 60000000
-		if (frequency < 400000) {
-			I2C0_F = 0x2C;	// 104 kHz
-		} else if (frequency < 1000000) {
-			I2C0_F = 0x1C; // 416 kHz
-		} else {
-			I2C0_F = 0x12; // 938 kHz
-		}
-		I2C0_FLT = 4;
-	#elif BOARD_BUS_FREQ == 56000000
-		if (frequency < 400000) {
-			I2C0_F = 0x2B;	// 109 kHz
-		} else if (frequency < 1000000) {
-			I2C0_F = 0x1C; // 389 kHz
-		} else {
-			I2C0_F = 0x0E; // 1 MHz
-		}
-		I2C0_FLT = 4;
-	#elif BOARD_BUS_FREQ == 54000000
-		if (frequency < 400000) {
-			I2C0_F = I2C_F_DIV512;	// 105 kHz
-		} else if (frequency < 1000000) {
-			I2C0_F = I2C_F_DIV128; // 422 kHz
-		} else {
-			I2C0_F = I2C_F_DIV56; // 0.96 MHz
-		}
-		I2C0_FLT = 4;
-	#elif BOARD_BUS_FREQ == 48000000
-		if (frequency < 400000) {
-			I2C0_F = 0x27;	// 100 kHz
-		} else if (frequency < 1000000) {
-			I2C0_F = 0x1A; // 400 kHz
-		} else {
-			I2C0_F = 0x0D; // 1 MHz
-		}
-		I2C0_FLT = 4;
-	#elif BOARD_BUS_FREQ == 40000000
-		if (frequency < 400000) {
-			I2C0_F = 0x29;	// 104 kHz
-		} else if (frequency < 1000000) {
-			I2C0_F = 0x19; // 416 kHz
-		} else {
-			I2C0_F = 0x0B; // 1 MHz
-		}
-		I2C0_FLT = 3;
-	#elif BOARD_BUS_FREQ == 36000000
-		if (frequency < 400000) {
-			putreg8(0x28, KINETIS_I2C0_F);	// 113 kHz
-		} else if (frequency < 1000000) {
-			putreg8(0x19, KINETIS_I2C0_F); // 375 kHz
-		} else {
-			putreg8(0x0A, KINETIS_I2C0_F); // 1 MHz
-		}
-		putreg8(3, KINETIS_I2C0_FLT);
-	#elif BOARD_BUS_FREQ == 24000000
-		if (frequency < 400000) {
-			I2C0_F = 0x1F; // 100 kHz
-		} else if (frequency < 1000000) {
-			I2C0_F = 0x12; // 375 kHz
-		} else {
-			I2C0_F = 0x02; // 1 MHz
-		}
-		I2C0_FLT = 2;
-	#elif BOARD_BUS_FREQ == 16000000
-		if (frequency < 400000) {
-			I2C0_F = 0x20; // 100 kHz
-		} else if (frequency < 1000000) {
-			I2C0_F = 0x07; // 400 kHz
-		} else {
-			I2C0_F = 0x00; // 800 MHz
-		}
-		I2C0_FLT = 1;
-	#elif BOARD_BUS_FREQ == 8000000
-		if (frequency < 400000) {
-			I2C0_F = 0x14; // 100 kHz
-		} else {
-			I2C0_F = 0x00; // 400 kHz
-		}
-		I2C0_FLT = 1;
-	#elif BOARD_BUS_FREQ == 4000000
-		if (frequency < 400000) {
-			I2C0_F = 0x07; // 100 kHz
-		} else {
-			I2C0_F = 0x00; // 200 kHz
-		}
-		I2C0_FLT = 1;
-	#elif BOARD_BUS_FREQ == 2000000
-		I2C0_F = 0x00; // 100 kHz
-		I2C0_FLT = 1;
-	#else
-	#error "F_BUS must be 120, 108, 96, 9, 80, 72, 64, 60, 56, 54, 48, 40, 36, 24, 16, 8, 4 or 2 MHz"
-	#endif
+#if BOARD_BUS_FREQ == 120000000
+  if (frequency < 400000)
+    {
+      putreg8(I2C_F_DIV1152, KINETIS_I2C0_F);   /* 104 kHz */
+    }
+  else if (frequency < 1000000)
+    {
+      putreg8(I2C_F_DIV288, KINETIS_I2C0_F);    /* 416 kHz */
+    }
+  else
+    {
+      putreg8(I2C_F_DIV128, KINETIS_I2C0_F);    /* 0.94 MHz */
+    }
 
-	priv->frequency =	frequency;
+  putreg8(4, KINETIS_I2C0_FLT);
+#elif BOARD_BUS_FREQ == 108000000
+  if (frequency < 400000)
+    {
+      putreg8(I2C_F_DIV1024, KINETIS_I2C0_F);   /* 105 kHz */
+    }
+  else if (frequency < 1000000)
+    {
+      putreg8(I2C_F_DIV256, KINETIS_I2C0_F);    /* 422 kHz */
+    }
+  else
+    {
+      putreg8(I2C_F_DIV112, KINETIS_I2C0_F);    /* 0.96 MHz */
+    }
+
+  putreg8(4, KINETIS_I2C0_FLT);
+#elif BOARD_BUS_FREQ == 96000000
+  if (frequency < 400000)
+    {
+      putreg8(I2C_F_DIV960, KINETIS_I2C0_F);    /* 100 kHz */
+    }
+  else if (frequency < 1000000)
+    {
+      putreg8(I2C_F_DIV240, KINETIS_I2C0_F);    /* 400 kHz */
+    }
+  else
+    {
+      putreg8(I2C_F_DIV96, KINETIS_I2C0_F);     /* 1.0 MHz */
+    }
+
+  putreg8(4, KINETIS_I2C0_FLT);
+#elif BOARD_BUS_FREQ == 90000000
+  if (frequency < 400000)
+    {
+      putreg8(I2C_F_DIV896, KINETIS_I2C0_F);    /* 100 kHz */
+    }
+  else if (frequency < 1000000)
+    {
+      putreg8(I2C_F_DIV224, KINETIS_I2C0_F);    /* 402 kHz */
+    }
+  else
+    {
+      putreg8(I2C_F_DIV88, KINETIS_I2C0_F);     /* 1.02 MHz */
+    }
+
+  putreg8(4, KINETIS_I2C0_FLT);
+#elif BOARD_BUS_FREQ == 80000000
+  if (frequency < 400000)
+    {
+      putreg8(I2C_F_DIV768, KINETIS_I2C0_F);    /* 104 kHz */
+    }
+  else if (frequency < 1000000)
+    {
+      putreg8(I2C_F_DIV192, KINETIS_I2C0_F);    /* 416 kHz */
+    }
+  else
+    {
+      putreg8(I2C_F_DIV80, KINETIS_I2C0_F);     /* 1.0 MHz */
+    }
+
+  putreg8(4, KINETIS_I2C0_FLT);
+#elif BOARD_BUS_FREQ == 72000000
+  if (frequency < 400000)
+    {
+      putreg8(I2C_F_DIV640, KINETIS_I2C0_F);    /* 112 kHz */
+    }
+  else if (frequency < 1000000)
+    {
+      putreg8(I2C_F_DIV192, KINETIS_I2C0_F);    /* 375 kHz */
+    }
+  else
+    {
+      putreg8(I2C_F_DIV72, KINETIS_I2C0_F);     /* 1.0 MHz */
+    }
+
+  putreg8(4, KINETIS_I2C0_FLT);
+#elif BOARD_BUS_FREQ == 64000000
+  if (frequency < 400000)
+    {
+      putreg8(I2C_F_DIV640, KINETIS_I2C0_F);    /* 100 kHz */
+    }
+  else if (frequency < 1000000)
+    {
+      putreg8(I2C_F_DIV160, KINETIS_I2C0_F);    /* 400 kHz */
+    }
+  else
+    {
+      putreg8(I2C_F_DIV64, KINETIS_I2C0_F);     /* 1.0 MHz */
+    }
+
+  putreg8(4, KINETIS_I2C0_FLT);
+#elif BOARD_BUS_FREQ == 60000000
+  if (frequency < 400000)
+    {
+      putreg8(0x2C, KINETIS_I2C0_F);            /* 104 kHz */
+    }
+  else if (frequency < 1000000)
+    {
+      putreg8(0x1C, KINETIS_I2C0_F);            /* 416 kHz */
+    }
+  else
+    {
+      putreg8(0x12, KINETIS_I2C0_F);            /* 938 kHz */
+    }
+
+  putreg8(4, KINETIS_I2C0_FLT);
+#elif BOARD_BUS_FREQ == 56000000
+  if (frequency < 400000)
+    {
+      putreg8(0x2B, KINETIS_I2C0_F);            /* 109 kHz */
+    }
+  else if (frequency < 1000000)
+    {
+      putreg8(0x1C, KINETIS_I2C0_F);            /* 389 kHz */
+    }
+  else
+    {
+      putreg8(0x0E, KINETIS_I2C0_F);            /* 1 MHz */
+    }
+
+  putreg8(4, KINETIS_I2C0_FLT);
+#elif BOARD_BUS_FREQ == 54000000
+  if (frequency < 400000)
+    {
+      putreg8(I2C_F_DIV512, KINETIS_I2C0_F);    /* 105 kHz */
+    }
+  else if (frequency < 1000000)
+    {
+      putreg8(I2C_F_DIV128, KINETIS_I2C0_F);    /* 422 kHz */
+    }
+  else
+    {
+      putreg8(I2C_F_DIV56, KINETIS_I2C0_F);     /* 0.96 MHz */
+    }
+
+  putreg8(4, KINETIS_I2C0_FLT);
+#elif BOARD_BUS_FREQ == 48000000
+  if (frequency < 400000)
+    {
+      putreg8(0x27, KINETIS_I2C0_F);            /* 100 kHz */
+    }
+  else if (frequency < 1000000)
+    {
+      putreg8(0x1A, KINETIS_I2C0_F);            /* 400 kHz */
+    }
+  else
+    {
+      putreg8(0x0D, KINETIS_I2C0_F);            /* 1 MHz */
+    }
+
+  putreg8(4, KINETIS_I2C0_FLT);
+#elif BOARD_BUS_FREQ == 40000000
+  if (frequency < 400000)
+    {
+      putreg8(0x29, KINETIS_I2C0_F);            /* 104 kHz */
+    }
+  else if (frequency < 1000000)
+    {
+      putreg8(0x19, KINETIS_I2C0_F);            /* 416 kHz */
+    }
+  else
+    {
+      putreg8(0x0B, KINETIS_I2C0_F);            /* 1 MHz */
+    }
+
+  putreg8(3, KINETIS_I2C0_FLT);
+#elif BOARD_BUS_FREQ == 36000000
+  if (frequency < 400000)
+    {
+      putreg8(0x28, KINETIS_I2C0_F);    /* 113 kHz */
+    }
+  else if (frequency < 1000000)
+    {
+      putreg8(0x19, KINETIS_I2C0_F);    /* 375 kHz */
+    }
+  else
+    {
+      putreg8(0x0A, KINETIS_I2C0_F);    /* 1 MHz */
+    }
+
+  putreg8(3, KINETIS_I2C0_FLT);
+#elif BOARD_BUS_FREQ == 24000000
+  if (frequency < 400000)
+    {
+      putreg8(0x1F, KINETIS_I2C0_F);            /* 100 kHz */
+    }
+  else if (frequency < 1000000)
+    {
+      putreg8(0x12, KINETIS_I2C0_F);            /* 375 kHz */
+    }
+  else
+    {
+      putreg8(0x02, KINETIS_I2C0_F);            /* 1 MHz */
+    }
+
+  putreg8(2, KINETIS_I2C0_FLT);
+#elif BOARD_BUS_FREQ == 16000000
+  if (frequency < 400000)
+    {
+      putreg8(0x20, KINETIS_I2C0_F);            /* 100 kHz */
+    }
+  else if (frequency < 1000000)
+    {
+      putreg8(0x07, KINETIS_I2C0_F);            /* 400 kHz */
+    }
+  else
+    {
+      putreg8(0x00, KINETIS_I2C0_F);            /* 800 MHz */
+    }
+
+  putreg8(1, KINETIS_I2C0_FLT);
+#elif BOARD_BUS_FREQ == 8000000
+  if (frequency < 400000)
+    {
+      putreg8(0x14, KINETIS_I2C0_F);            /* 100 kHz */
+    }
+  else
+    {
+      putreg8(0x00, KINETIS_I2C0_F);            /* 400 kHz */
+    }
+
+  putreg8(1, KINETIS_I2C0_FLT);
+#elif BOARD_BUS_FREQ == 4000000
+  if (frequency < 400000)
+    {
+      putreg8(0x07, KINETIS_I2C0_F);            /* 100 kHz */
+    }
+  else
+    {
+      putreg8(0x00, KINETIS_I2C0_F);            /* 200 kHz */
+    }
+
+  putreg8(1, KINETIS_I2C0_FLT);
+#elif BOARD_BUS_FREQ == 2000000
+  putreg8(0x00, KINETIS_I2C0_F);                /* 100 kHz */
+  putreg8(1, KINETIS_I2C0_FLT);
+#else
+#  error "F_BUS must be 120, 108, 96, 9, 80, 72, 64, 60, 56, 54, 48, 40, 36, 24, 16, 8, 4 or 2 MHz"
+#endif
+
+  priv->frequency = frequency;
 }
 
 /****************************************************************************
@@ -290,39 +429,50 @@ static void kinetis_i2c_setfrequency(struct kinetis_i2cdev_s *priv,
 
 static int kinetis_i2c_start(struct kinetis_i2cdev_s *priv)
 {
-  struct i2c_msg_s *msg;  
+  struct i2c_msg_s *msg;
 
   msg = priv->msgs;
 
-   /* now take control of the bus */
+  /* Now take control of the bus */
+
   if (getreg8(KINETIS_I2C0_C1) & I2C_C1_MST)
-  {
-    /* we are already the bus master, so send a repeated start */
-    putreg8(I2C_C1_IICEN | I2C_C1_IICIE | I2C_C1_MST | I2C_C1_RSTA | I2C_C1_TX, KINETIS_I2C0_C1);
-  }
-  else
-  {
-    /* we are not currently the bus master, so wait for bus ready */
-    while (getreg8(KINETIS_I2C0_S) & I2C_S_BUSY);
+    {
+      /* We are already the bus master, so send a repeated start */
 
-    /* become the bus master in transmit mode (send start) */
-    putreg8(I2C_C1_IICEN | I2C_C1_IICIE | I2C_C1_MST | I2C_C1_TX, KINETIS_I2C0_C1);
-  }
-
-  if  (I2C_M_READ & msg->flags) /* DEBUG: should happen always */
-  {
-    /* wait until start condition establishes control of the bus */
-    while (1) {
-      if (getreg8(KINETIS_I2C0_S) & I2C_S_BUSY) break;
+      putreg8(I2C_C1_IICEN | I2C_C1_IICIE | I2C_C1_MST | I2C_C1_RSTA |
+              I2C_C1_TX, KINETIS_I2C0_C1);
     }
-  }
+  else
+    {
+      /* We are not currently the bus master, so wait for bus ready */
 
-  /* initiate actual transfer (send address) */
+      while (getreg8(KINETIS_I2C0_S) & I2C_S_BUSY);
+
+      /* Become the bus master in transmit mode (send start) */
+
+      putreg8(I2C_C1_IICEN | I2C_C1_IICIE | I2C_C1_MST | I2C_C1_TX,
+              KINETIS_I2C0_C1);
+    }
+
+  if (I2C_M_READ & msg->flags)  /* DEBUG: should happen always */
+    {
+      /* Wait until start condition establishes control of the bus */
+
+      while (1)
+        {
+          if (getreg8(KINETIS_I2C0_S) & I2C_S_BUSY)
+            {
+              break;
+            }
+        }
+    }
+
+  /* Initiate actual transfer (send address) */
+
   putreg8((I2C_M_READ & msg->flags) == I2C_M_READ ?
-    I2C_READADDR8(msg->addr) :
-    I2C_WRITEADDR8(msg->addr), KINETIS_I2C0_D);
+          I2C_READADDR8(msg->addr) : I2C_WRITEADDR8(msg->addr), KINETIS_I2C0_D);
 
- return OK;
+  return OK;
 }
 
 /****************************************************************************
@@ -393,105 +543,138 @@ static int kinetis_i2c_interrupt(int irq, FAR void *context)
   struct kinetis_i2cdev_s *priv;
   struct i2c_msg_s *msg;
   uint32_t state;
-  int regval, dummy;
+  int regval;
+  int dummy;
   UNUSED(dummy);
 
   if (irq == KINETIS_IRQ_I2C0)
-  {
-    priv = &g_i2c_dev;
-  }
+    {
+      priv = &g_i2c_dev;
+    }
   else
-  {
-    PANIC();
-  }
+    {
+      PANIC();
+    }
 
-  /* get current state */
+  /* Get current state */
+
   state = getreg8(KINETIS_I2C0_S);
   msg = priv->msgs;
 
-  /* arbitration lost */
+  /* Arbitration lost */
+
   if (state & I2C_S_ARBL)
-  {
-    putreg8(I2C_S_IICIF | I2C_S_ARBL, KINETIS_I2C0_S);
-    priv->state = STATE_ARBITRATION_ERROR;
-    kinetis_i2c_stop(priv);
-  }
+    {
+      putreg8(I2C_S_IICIF | I2C_S_ARBL, KINETIS_I2C0_S);
+      priv->state = STATE_ARBITRATION_ERROR;
+      kinetis_i2c_stop(priv);
+    }
   else
-  {
-    /* clear interrupt */
-    putreg8(I2C_S_IICIF, KINETIS_I2C0_S);
-
-    regval = getreg8(KINETIS_I2C0_C1);
-
-    /* TX mode */
-    if (regval & I2C_C1_TX)
     {
-      /* last write was not acknowledged */
-      if (state & I2C_S_RXAK)
-      {
-        priv->state = STATE_NAK; /* set error flag */
-        kinetis_i2c_stop(priv); /* send STOP */
-      }
-      else
-      {
-        /* actually intending to write */
-        if ((I2C_M_READ & msg->flags) == 0)
+      /* Clear interrupt */
+
+      putreg8(I2C_S_IICIF, KINETIS_I2C0_S);
+
+      regval = getreg8(KINETIS_I2C0_C1);
+
+      /* TX mode */
+
+      if (regval & I2C_C1_TX)
         {
-          /* wrote everything */
-          if (priv->wrcnt == msg->length)
-          {
-            kinetis_i2c_nextmsg(priv); /* continue with next message */
-          }
+          /* Last write was not acknowledged */
+
+          if (state & I2C_S_RXAK)
+            {
+              priv->state = STATE_NAK;  /* Set error flag */
+              kinetis_i2c_stop(priv);   /* Send STOP */
+            }
           else
-          {
-            putreg8(msg->buffer[priv->wrcnt], KINETIS_I2C0_D); /* Put next byte */
-            priv->wrcnt++;
-          }
+            {
+              /* Actually intending to write */
+
+              if ((I2C_M_READ & msg->flags) == 0)
+                {
+                  /* Wrote everything */
+
+                  if (priv->wrcnt == msg->length)
+                    {
+                      /* Continue with next message */
+
+                      kinetis_i2c_nextmsg(priv);
+                    }
+                  else
+                    {
+                      /* Put next byte */
+
+                      putreg8(msg->buffer[priv->wrcnt], KINETIS_I2C0_D); 
+                      priv->wrcnt++;
+                    }
+                }
+
+              /* Actually intending to read (address was just sent) */
+
+              else
+                {
+                  if (msg->length == 1) /* go to RX mode, do not send ACK */
+                    {
+                      putreg8(I2C_C1_IICEN | I2C_C1_IICIE | I2C_C1_MST |
+                              I2C_C1_TXAK, KINETIS_I2C0_C1);
+                    }
+                  else          /* go to RX mode */
+                    {
+                      putreg8(I2C_C1_IICEN | I2C_C1_IICIE | I2C_C1_MST,
+                              KINETIS_I2C0_C1);
+                    }
+
+                  /* TODO: handle zero-length reads */
+                  /* Dummy read to initiate reception */
+
+                  dummy = getreg8(KINETIS_I2C0_D); 
+                }
+            }
         }
-        /* actually intending to read (address was just sent) */
-        else
-        {
-          if (msg->length == 1) /* go to RX mode, do not send ACK */
-            putreg8(I2C_C1_IICEN | I2C_C1_IICIE | I2C_C1_MST | I2C_C1_TXAK, KINETIS_I2C0_C1);
-          else /* go to RX mode */
-            putreg8(I2C_C1_IICEN | I2C_C1_IICIE | I2C_C1_MST, KINETIS_I2C0_C1);
 
-          /* TODO: handle zero-length reads */
+      /* RX: mode */
 
-          dummy = getreg8(KINETIS_I2C0_D); /* dummy read to initiate reception */
-        }
-      }
-    }
-    /* RX: mode */
-    else
-    {
-      /* if last receiving byte */
-      if (priv->rdcnt == (msg->length - 1))
-      {
-        /* go to TX mode before last read, otherwise a new read is triggered */
-        putreg8(I2C_C1_IICEN | I2C_C1_IICIE | I2C_C1_MST | I2C_C1_TX, KINETIS_I2C0_C1); /* go to TX mode */
-
-        msg->buffer[priv->rdcnt] = getreg8(KINETIS_I2C0_D);
-        priv->rdcnt++;
-
-        kinetis_i2c_nextmsg(priv);
-      }
-      /* second to last receiving byte */
-      else if (priv->rdcnt == (msg->length - 2))
-      {
-        /* Do not ACK any more */
-        putreg8(I2C_C1_IICEN | I2C_C1_IICIE | I2C_C1_MST | I2C_C1_TXAK, KINETIS_I2C0_C1);
-
-        msg->buffer[priv->rdcnt] = getreg8(KINETIS_I2C0_D);
-        priv->rdcnt++;
-      }
       else
-      {
-        msg->buffer[priv->rdcnt] = getreg8(KINETIS_I2C0_D);
-        priv->rdcnt++;
-      }
+        {
+          /* If last receiving byte */
+
+          if (priv->rdcnt == (msg->length - 1))
+            {
+              /* go to TX mode before last read, otherwise a new read is
+               * triggered.
+               */
+
+             /* Go to TX mode */
+
+              putreg8(I2C_C1_IICEN | I2C_C1_IICIE | I2C_C1_MST | I2C_C1_TX, KINETIS_I2C0_C1);
+
+              msg->buffer[priv->rdcnt] = getreg8(KINETIS_I2C0_D);
+              priv->rdcnt++;
+
+              kinetis_i2c_nextmsg(priv);
+            }
+
+          /* Second to last receiving byte */
+
+          else if (priv->rdcnt == (msg->length - 2))
+            {
+              /* Do not ACK any more */
+
+              putreg8(I2C_C1_IICEN | I2C_C1_IICIE | I2C_C1_MST | I2C_C1_TXAK,
+                      KINETIS_I2C0_C1);
+
+              msg->buffer[priv->rdcnt] = getreg8(KINETIS_I2C0_D);
+              priv->rdcnt++;
+            }
+          else
+            {
+              msg->buffer[priv->rdcnt] = getreg8(KINETIS_I2C0_D);
+              priv->rdcnt++;
+            }
+        }
     }
-  }
 
   return OK;
 }
@@ -505,7 +688,7 @@ static int kinetis_i2c_interrupt(int irq, FAR void *context)
  ****************************************************************************/
 
 static int kinetis_i2c_transfer(FAR struct i2c_master_s *dev,
-                              FAR struct i2c_msg_s *msgs, int count)
+                                FAR struct i2c_msg_s *msgs, int count)
 {
   struct kinetis_i2cdev_s *priv = (struct kinetis_i2cdev_s *)dev;
 
@@ -516,47 +699,58 @@ static int kinetis_i2c_transfer(FAR struct i2c_master_s *dev,
   sem_wait(&priv->mutex);
 
   /* Set up for the transfer */
-  priv->msgs  = msgs;
-  priv->nmsg  = count;
+
+  priv->msgs = msgs;
+  priv->nmsg = count;
   priv->state = STATE_OK;
 
-  /* Configure the I2C frequency.
-   * REVISIT: Note that the frequency is set only on the first message.
-   * This could be extended to support different transfer frequencies for
-   * each message segment.
+  /* Configure the I2C frequency. REVISIT: Note that the frequency is set only
+   * on the first message. This could be extended to support different transfer 
+   * frequencies for each message segment.
    */
 
   kinetis_i2c_setfrequency(priv, msgs->frequency);
 
-  /* clear the status flags */
+  /* Clear the status flags */
+
   putreg8(I2C_S_IICIF | I2C_S_ARBL, KINETIS_I2C0_S);
 
   /* Process every message */
+
   while (priv->nmsg && priv->state == STATE_OK)
-  {
-    priv->wrcnt = 0;
-    priv->rdcnt = 0;
+    {
+      priv->wrcnt = 0;
+      priv->rdcnt = 0;
 
-    /* Initiate the transfer */
-    kinetis_i2c_start(priv);
+      /* Initiate the transfer */
 
-    /* wait for transfer complete */
-    wd_start(priv->timeout, I2C_TIMEOUT, kinetis_i2c_timeout, 1, (uint32_t)priv);
-    sem_wait(&priv->wait);    
+      kinetis_i2c_start(priv);
 
-    wd_cancel(priv->timeout);
-  }
+      /* Wait for transfer complete */
 
-  /* disable interrupts */
+      wd_start(priv->timeout, I2C_TIMEOUT, kinetis_i2c_timeout, 1,
+               (uint32_t) priv);
+      sem_wait(&priv->wait);
+
+      wd_cancel(priv->timeout);
+    }
+
+  /* Disable interrupts */
+
   putreg8(I2C_C1_IICEN, KINETIS_I2C0_C1);
 
-  /* release access to I2C bus */ 
+  /* Release access to I2C bus */
+
   sem_post(&priv->mutex);
 
   if (priv->state != STATE_OK)
-    return -1;
+    {
+      return -EIO;
+    }
   else
-    return 0; /* TODO: correct? */
+    {
+      return 0;
+    }
 }
 
 /************************************************************************************
@@ -574,11 +768,11 @@ static int kinetis_i2c_transfer(FAR struct i2c_master_s *dev,
  ************************************************************************************/
 
 #ifdef CONFIG_I2C_RESET
-static int kinetis_i2c_reset(FAR struct i2c_master_s * dev)
+static int kinetis_i2c_reset(FAR struct i2c_master_s *dev)
 {
   return OK;
 }
-#endif /* CONFIG_I2C_RESET */
+#endif  /* CONFIG_I2C_RESET */
 
 /****************************************************************************
  * Public Functions
@@ -597,10 +791,10 @@ struct i2c_master_s *kinetis_i2cbus_initialize(int port)
   struct kinetis_i2cdev_s *priv;
 
   if (port > 1)
-  {
-    i2cerr("ERROR: Kinetis I2C Only suppors ports 0 and 1\n");
-    return NULL;
-  }
+    {
+      i2cerr("ERROR: Kinetis I2C Only suppors ports 0 and 1\n");
+      return NULL;
+    }
 
   irqstate_t flags;
   uint32_t regval;
@@ -608,38 +802,43 @@ struct i2c_master_s *kinetis_i2cbus_initialize(int port)
   flags = enter_critical_section();
 
   if (port == 0)
-  {
-    priv           = &g_i2c_dev;
-    priv->base     = KINETIS_I2C0_BASE;
-    priv->irqid    = KINETIS_IRQ_I2C0;
-    priv->baseFreq = BOARD_BUS_FREQ;
+    {
+      priv = &g_i2c_dev;
+      priv->base = KINETIS_I2C0_BASE;
+      priv->irqid = KINETIS_IRQ_I2C0;
+      priv->baseFreq = BOARD_BUS_FREQ;
 
-    /* Enable clock */
-    regval = getreg32(KINETIS_SIM_SCGC4);
-    regval |= SIM_SCGC4_I2C0;
-    putreg32(regval, KINETIS_SIM_SCGC4);
+      /* Enable clock */
 
-    kinetis_i2c_setfrequency(priv, I2C_DEFAULT_FREQUENCY);
+      regval = getreg32(KINETIS_SIM_SCGC4);
+      regval |= SIM_SCGC4_I2C0;
+      putreg32(regval, KINETIS_SIM_SCGC4);
 
-    /* Disable while configuring */
-    putreg8(0, KINETIS_I2C0_C1);
+      kinetis_i2c_setfrequency(priv, I2C_DEFAULT_FREQUENCY);
 
-    /* Configure pins */
-    kinetis_pinconfig(PIN_I2C0_SCL);
-    kinetis_pinconfig(PIN_I2C0_SDA);
+      /* Disable while configuring */
 
-    /* Enable */
-    putreg8(I2C_C1_IICEN, KINETIS_I2C0_C1);
+      putreg8(0, KINETIS_I2C0_C1);
 
-    /* High-drive select (TODO: why)? */
-    regval = getreg8(KINETIS_I2C0_C2);
-    regval |= I2C_C2_HDRS;
-    putreg8(regval, KINETIS_I2C0_C2);
-  }
+      /* Configure pins */
+
+      kinetis_pinconfig(PIN_I2C0_SCL);
+      kinetis_pinconfig(PIN_I2C0_SDA);
+
+      /* Enable */
+
+      putreg8(I2C_C1_IICEN, KINETIS_I2C0_C1);
+
+      /* High-drive select (TODO: why)? */
+
+      regval = getreg8(KINETIS_I2C0_C2);
+      regval |= I2C_C2_HDRS;
+      putreg8(regval, KINETIS_I2C0_C2);
+    }
   else
-  {
-    return NULL;
-  }
+    {
+      return NULL;
+    }
 
   leave_critical_section(flags);
 
@@ -673,12 +872,12 @@ struct i2c_master_s *kinetis_i2cbus_initialize(int port)
  *
  ****************************************************************************/
 
-int kinetis_i2cbus_uninitialize(FAR struct i2c_master_s * dev)
+int kinetis_i2cbus_uninitialize(FAR struct i2c_master_s *dev)
 {
-  struct kinetis_i2cdev_s *priv = (struct kinetis_i2cdev_s *) dev;
+  struct kinetis_i2cdev_s *priv = (struct kinetis_i2cdev_s *)dev;
 
   putreg8(0, KINETIS_I2C0_C1);
- 
+
   up_disable_irq(priv->irqid);
   irq_detach(priv->irqid);
   return OK;

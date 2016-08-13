@@ -243,7 +243,7 @@
 #endif
 
 #ifdef CONFIG_KINETIS_I2C1
-#error I2C1 not currently supported
+#  error I2C1 not currently supported
 #endif
 
 /************************************************************************************
