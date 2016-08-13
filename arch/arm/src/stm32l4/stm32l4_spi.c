@@ -163,7 +163,7 @@ struct stm32l4_spidev_s
   sem_t            exclsem;    /* Held while chip is selected for mutual exclusion */
   uint32_t         frequency;  /* Requested clock frequency */
   uint32_t         actual;     /* Actual clock frequency */
-  int8_t           nbits;      /* Width of word in bits (8 or 16) */
+  uint8_t          nbits;      /* Width of word in bits (4 through 16) */
   uint8_t          mode;       /* Mode 0,1,2,3 */
 };
 

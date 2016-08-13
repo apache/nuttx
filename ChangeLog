@@ -12393,7 +12393,6 @@
 	  (2016-07-23).
 	* Freedom-K64F:  Add PWM support.  From Jordan MacIntyre (2016-07-25).
 
-
 7.18 2016-xx-xx Gregory Nutt <gnutt@nuttx.org>
 
 	* drivers/serial/pty.c, serial.c, usbdev/cdcacm.c, include/nuttx/fs/ioctl.h:
@@ -12564,7 +12563,8 @@
 	  (2016-08-12).
 	* arch/sim/src: Add a simulated oneshot lowerhalf driver (2016-08-12).
 	* arch/arm/src/stm32: STM32F3 SPI:  Fix the number of bit setting for
-	  the F3.  It works differently than for other STM32 parts (2016-08-12).
+	  the F3.  That and data packing work differently on the STM32F3 than
+	  for other STM32 parts (2016-08-12).
 	* arch/arm/stm32 and stm32l4: Enabling SPI DMA loses other bits in CR2
 	  (2016-08-13).
 	* arch/arm/src/stm32: STM32F3 SPI:  Cannot write always 16-bit value to
