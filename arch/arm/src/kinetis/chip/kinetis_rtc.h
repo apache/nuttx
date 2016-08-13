@@ -59,7 +59,7 @@
 #define KINETIS_RTC_CR_OFFSET    0x0010 /* RTC Control Register */
 #define KINETIS_RTC_SR_OFFSET    0x0014 /* RTC Status Register */
 #define KINETIS_RTC_LR_OFFSET    0x0018 /* RTC Lock Register */
-#if defined(KINETIS_K40) || defined(KINETIS_K64)
+#if defined(KINETIS_K20) || defined(KINETIS_K40) || defined(KINETIS_K64)
 #  define KINETIS_RTC_IER_OFFSET 0x001c /* RTC Interrupt Enable Register (K40) */
 #endif
 #ifdef KINETIS_K60
@@ -77,7 +77,7 @@
 #define KINETIS_RTC_CR           (KINETIS_RTC_BASE+KINETIS_RTC_CR_OFFSET)
 #define KINETIS_RTC_SR           (KINETIS_RTC_BASE+KINETIS_RTC_SR_OFFSET)
 #define KINETIS_RTC_LR           (KINETIS_RTC_BASE+KINETIS_RTC_LR_OFFSET)
-#if defined(KINETIS_K40) || defined(KINETIS_K64)
+#if defined(KINETIS_K20) || defined(KINETIS_K40) || defined(KINETIS_K64)
 #  define KINETIS_RTC_IER        (KINETIS_RTC_BASE+KINETIS_RTC_IER_OFFSET)
 #endif
 #ifdef KINETIS_K60
@@ -135,13 +135,13 @@
 #define RTC_LR_TCL               (1 << 3)  /* Bit 3:  Time Compensation Lock */
 #define RTC_LR_CRL               (1 << 4)  /* Bit 4:  Control Register Lock */
 #define RTC_LR_SRL               (1 << 5)  /* Bit 5:  Status Register Lock */
-#ifdef KINETIS_K40
+#if defined(KINETIS_K20) || defined(KINETIS_K40)
 #  define RTC_LR_LRL             (1 << 6)  /* Bit 6:  Lock Register Lock (K40) */
 #endif
                                            /* Bits 7-31: Reserved */
 /* RTC Interrupt Enable Register (32-bits, K40) */
 
-#if defined(KINETIS_K40) || defined(KINETIS_K64)
+#if defined(KINETIS_K20) || defined(KINETIS_K40) || defined(KINETIS_K64)
 #  define RTC_IER_TIIE           (1 << 0)  /* Bit 0:  Time Invalid Interrupt Enable */
 #  define RTC_IER_TOIE           (1 << 1)  /* Bit 1:  Time Overflow Interrupt Enable */
 #  define RTC_IER_TAIE           (1 << 2)  /* Bit 2:  Time Alarm Interrupt Enable */
