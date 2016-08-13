@@ -1210,7 +1210,7 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
         }
 
       spi_modifycr1(priv, 0, SPI_CR1_SPE);
-      spi_modifycr2(priv, setbits, clearbits);
+      spi_modifycr2(priv, setbits, clrbits);
       spi_modifycr1(priv, SPI_CR1_SPE, 0);
 #else
       /* Yes... Set CR1 appropriately */
