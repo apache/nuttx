@@ -195,6 +195,10 @@ struct stm32_spidev_s
 static inline uint16_t spi_getreg(FAR struct stm32_spidev_s *priv, uint8_t offset);
 static inline void spi_putreg(FAR struct stm32_spidev_s *priv, uint8_t offset,
                                  uint16_t value);
+#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
+static inline void spi_putreg8(FAR struct stm32_spidev_s *priv, uint8_t offset,
+                                 uint8_t value);
+#endif
 static inline uint16_t spi_readword(FAR struct stm32_spidev_s *priv);
 static inline void spi_writeword(FAR struct stm32_spidev_s *priv, uint16_t byte);
 static inline bool spi_16bitmode(FAR struct stm32_spidev_s *priv);
@@ -554,6 +558,30 @@ static inline void spi_putreg(FAR struct stm32_spidev_s *priv, uint8_t offset, u
 }
 
 /************************************************************************************
+ * Name: spi_putreg8
+ *
+ * Description:
+ *   Write an 8-bit value to the SPI register at offset
+ *
+ * Input Parameters:
+ *   priv   - private SPI device structure
+ *   offset - offset to the register of interest
+ *   value  - the 16-bit value to be written
+ *
+ * Returned Value:
+ *   The contents of the 16-bit register
+ *
+ ************************************************************************************/
+
+#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
+static inline void spi_putreg8(FAR struct stm32_spidev_s *priv, uint8_t offset,
+                                 uint8_t value)
+{
+  putreg8(value, priv->spibase + offset);
+}
+#endif
+
+/************************************************************************************
  * Name: spi_readword
  *
  * Description:
@@ -599,9 +627,26 @@ static inline void spi_writeword(FAR struct stm32_spidev_s *priv, uint16_t word)
 
   while ((spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_TXE) == 0);
 
-  /* Then send the byte */
+  /* Then send the word */
 
-  spi_putreg(priv, STM32_SPI_DR_OFFSET, word);
+#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
+  /* "When the data frame size fits into one byte (less than or equal to 8 bits),
+   * data packing is used automatically when any read or write 16-bit access is
+   * performed on the SPIx_DR register. The double data frame pattern is handled
+   * in parallel in this case. At first, the SPI operates using the pattern
+   * stored in the LSB of the accessed word, then with the other half stored in
+   * the MSB."
+   */
+
+  if (priv->nbits < 9)
+    {
+      spi_putreg8(priv, STM32_SPI_DR_OFFSET, (uint8_t)word);
+    }
+  else
+#endif
+    {
+      spi_putreg(priv, STM32_SPI_DR_OFFSET, word);
+    }
 }
 
 /************************************************************************************
