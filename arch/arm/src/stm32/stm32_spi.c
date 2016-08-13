@@ -1401,6 +1401,9 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
  * Description:
  *   Exchange a block of data on SPI without using DMA
  *
+ *   REVISIT: This function could be much more efficient by exploiting (1) RX and TX
+ *   FIFOs and (2) the STM32 F3 data packing.
+ *
  * Input Parameters:
  *   dev      - Device-specific state data
  *   txbuffer - A pointer to the buffer of data to be sent
