@@ -567,22 +567,7 @@ static inline void spi_writebyte(FAR struct stm32l4_spidev_s *priv, uint8_t byte
 
 static inline bool spi_16bitmode(FAR struct stm32l4_spidev_s *priv)
 {
-  uint8_t bits = priv->nbits;
-
-  /* Get the real number of bits */
-
-  if (bits < 0)
-    {
-      bits = -bits;
-    }
-
-  return (bits > 8);
-
-  /* Should we read the hardware regs? seems to be equivalent ~~ sebastien lorquet
-   * (20160413)
-   */
-
-//  return ((spi_getreg(priv, STM32L4_SPI_CR2_OFFSET) & SPI_CR2_DS_MASK) == SPI_CR2_DS_16BIT);
+  return (priv->nbits > 8);
 }
 
 /************************************************************************************

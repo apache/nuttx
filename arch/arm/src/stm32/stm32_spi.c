@@ -624,7 +624,11 @@ static inline void spi_writeword(FAR struct stm32_spidev_s *priv, uint16_t word)
 
 static inline bool spi_16bitmode(FAR struct stm32_spidev_s *priv)
 {
+#ifdef CONFIG_STM32_STM32F30XX
+  return (priv->nbits > 8);
+#else
   return ((spi_getreg(priv, STM32_SPI_CR1_OFFSET) & SPI_CR1_DFF) != 0);
+#endif
 }
 
 /************************************************************************************
@@ -1179,10 +1183,32 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
   if (nbits != priv->nbits)
     {
 #ifdef CONFIG_STM32_STM32F30XX
-      DEBUGASSERT(nbits >= 8 && nbits <= 16)'
+      /* Yes... Set CR2 appropriately */
+      /* Set the number of bits (valid range 4-16) */
+
+      if (nbits < 4 || nbits > 16)
+        {
+          return;
+        }
+
+      clrbits = SPI_CR2_DS_MASK;
+      setbits = SPI_CR2_DS(nbits);
+
+      /* If nbits is <=8, then we are in byte mode and FRXTH shall be set
+       * (else, transaction will not complete).
+       */
+
+      if (nbits < 9)
+        {
+          setbits |= SPI_CR2_FRXTH; /* RX FIFO Threshold = 1 byte */
+        }
+      else
+        {
+          clrbits |= SPI_CR2_FRXTH; /* RX FIFO Threshold = 2 bytes */
+        }
 
       spi_modifycr1(priv, 0, SPI_CR1_SPE);
-      spi_modifycr2(priv, SPI_CR2_DS(nbits), SPI_CR2_DS_MASK);
+      spi_modifycr2(priv, setbits, clearbits);
       spi_modifycr1(priv, SPI_CR1_SPE, 0);
 #else
       /* Yes... Set CR1 appropriately */
@@ -1541,6 +1567,25 @@ static void spi_bus_initialize(FAR struct stm32_spidev_s *priv)
   uint16_t setbits;
   uint16_t clrbits;
 
+#ifdef CONFIG_STM32_STM32F30XX
+  /* Configure CR1 and CR2. Default configuration:
+   *   Mode 0:                        CR1.CPHA=0 and CR1.CPOL=0
+   *   Master:                        CR1.MSTR=1
+   *   8-bit:                         CR2.DS=7
+   *   MSB tranmitted first:          CR1.LSBFIRST=0
+   *   Replace NSS with SSI & SSI=1:  CR1.SSI=1 CR1.SSM=1 (prevents MODF error)
+   *   Two lines full duplex:         CR1.BIDIMODE=0 CR1.BIDIOIE=(Don't care) and CR1.RXONLY=0
+   */
+
+  clrbits = SPI_CR1_CPHA | SPI_CR1_CPOL | SPI_CR1_BR_MASK | SPI_CR1_LSBFIRST |
+            SPI_CR1_RXONLY | SPI_CR1_CRCL | SPI_CR1_BIDIOE | SPI_CR1_BIDIMODE;
+  setbits = SPI_CR1_MSTR | SPI_CR1_SSI | SPI_CR1_SSM;
+  spi_modifycr1(priv, setbits, clrbits);
+
+  clrbits = SPI_CR2_DS_MASK;
+  setbits = SPI_CR2_DS_8BIT | SPI_CR2_FRXTH; /* FRXTH must be high in 8-bit mode */
+  spi_modifycr2(priv, setbits, clrbits);
+#else
   /* Configure CR1. Default configuration:
    *   Mode 0:                        CPHA=0 and CPOL=0
    *   Master:                        MSTR=1
@@ -1554,6 +1599,7 @@ static void spi_bus_initialize(FAR struct stm32_spidev_s *priv)
             SPI_CR1_RXONLY | SPI_CR1_DFF | SPI_CR1_BIDIOE | SPI_CR1_BIDIMODE;
   setbits = SPI_CR1_MSTR | SPI_CR1_SSI | SPI_CR1_SSM;
   spi_modifycr1(priv, setbits, clrbits);
+#endif
 
   priv->frequency = 0;
   priv->nbits     = 8;
