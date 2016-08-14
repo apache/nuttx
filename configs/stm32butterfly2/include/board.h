@@ -148,6 +148,12 @@
  * application if CONFIG_ARCH_LEDS is not defined.
  */
 
+/* ADC configuration. Right now only ADC12_IN10 is supported (potentiometer) */
+
+#ifdef CONFIG_STM32_ADC2
+#  error "CONFIG_STM32_ADC2 is not supported"
+#endif
+
 /*******************************************************************************
  * Public Data
  ******************************************************************************/

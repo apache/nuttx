@@ -38,4 +38,8 @@
 ASRCS =
 CSRCS = stm32_boot.c stm32_leds.c
 
+ifeq ($(CONFIG_STM32_ADC),y)
+CSRCS += stm32_adc.c
+endif
+
 include $(TOPDIR)/configs/Board.mk

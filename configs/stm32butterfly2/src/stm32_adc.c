@@ -1,5 +1,5 @@
 /*******************************************************************************
- * configs/stm32butterfly2/src/boot.c
+ * configs/stm32butterfly2/src/stm32_adc.c
  *
  *   Copyright (C) 2016 Michał Łyszczek. All rights reserved.
  *   Author: Michał Łyszczek <michal.lyszczek@gmail.com>
@@ -37,19 +37,42 @@
  * Included Files
  ******************************************************************************/
 
+#include <chip.h>
+#include <debug.h>
+#include <errno.h>
 #include <nuttx/config.h>
-#include <arch/board/board.h>
+#include <stm32_adc.h>
 
 /*******************************************************************************
  * Public Functions
  ******************************************************************************/
 
-void stm32_boardinitialize(void)
+int board_adc_setup(void)
 {
-  stm32_led_initialize();
-}
+  static bool initialized = false;
+  uint8_t channel[1] = {10};
+  struct adc_dev_s *adc;
+  int rv;
 
-int board_app_initialize(uintptr_t arg)
-{
-  return 0;
+  if (initialized)
+    {
+      return OK;
+    }
+
+  stm32_configgpio(GPIO_ADC12_IN10);
+  adc = stm32_adcinitialize(1, channel, 1);
+  if (adc == NULL)
+    {
+      aerr("ERROR: Failed to get adc interface\n");
+      return -ENODEV;
+    }
+
+  if ((rv = adc_register("/dev/adc0", adc)) < 0)
+    {
+      aerr("ERROR: adc_register failed: %d\n", rv);
+      return rv;
+    }
+
+  initialized = true;
+  return OK;
 }
