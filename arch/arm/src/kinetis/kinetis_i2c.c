@@ -345,15 +345,15 @@ static void kinetis_i2c_setfrequency(struct kinetis_i2cdev_s *priv,
 #elif BOARD_BUS_FREQ == 36000000
   if (frequency < 400000)
     {
-      putreg8(0x28, KINETIS_I2C0_F);    /* 113 kHz */
+      putreg8(0x28, KINETIS_I2C0_F);            /* 113 kHz */
     }
   else if (frequency < 1000000)
     {
-      putreg8(0x19, KINETIS_I2C0_F);    /* 375 kHz */
+      putreg8(0x19, KINETIS_I2C0_F);            /* 375 kHz */
     }
   else
     {
-      putreg8(0x0A, KINETIS_I2C0_F);    /* 1 MHz */
+      putreg8(0x0A, KINETIS_I2C0_F);            /* 1 MHz */
     }
 
   putreg8(3, KINETIS_I2C0_FLT);
@@ -470,7 +470,8 @@ static int kinetis_i2c_start(struct kinetis_i2cdev_s *priv)
   /* Initiate actual transfer (send address) */
 
   putreg8((I2C_M_READ & msg->flags) == I2C_M_READ ?
-          I2C_READADDR8(msg->addr) : I2C_WRITEADDR8(msg->addr), KINETIS_I2C0_D);
+          I2C_READADDR8(msg->addr) : I2C_WRITEADDR8(msg->addr),
+          KINETIS_I2C0_D);
 
   return OK;
 }
@@ -620,7 +621,7 @@ static int kinetis_i2c_interrupt(int irq, FAR void *context)
                       putreg8(I2C_C1_IICEN | I2C_C1_IICIE | I2C_C1_MST |
                               I2C_C1_TXAK, KINETIS_I2C0_C1);
                     }
-                  else          /* go to RX mode */
+                  else /* go to RX mode */
                     {
                       putreg8(I2C_C1_IICEN | I2C_C1_IICIE | I2C_C1_MST,
                               KINETIS_I2C0_C1);
@@ -648,7 +649,8 @@ static int kinetis_i2c_interrupt(int irq, FAR void *context)
 
              /* Go to TX mode */
 
-              putreg8(I2C_C1_IICEN | I2C_C1_IICIE | I2C_C1_MST | I2C_C1_TX, KINETIS_I2C0_C1);
+              putreg8(I2C_C1_IICEN | I2C_C1_IICIE | I2C_C1_MST | I2C_C1_TX,
+                      KINETIS_I2C0_C1);
 
               msg->buffer[priv->rdcnt] = getreg8(KINETIS_I2C0_D);
               priv->rdcnt++;
@@ -704,9 +706,9 @@ static int kinetis_i2c_transfer(FAR struct i2c_master_s *dev,
   priv->nmsg = count;
   priv->state = STATE_OK;
 
-  /* Configure the I2C frequency. REVISIT: Note that the frequency is set only
-   * on the first message. This could be extended to support different transfer 
-   * frequencies for each message segment.
+  /* Configure the I2C frequency. REVISIT: Note that the frequency is set
+   * only on the first message. This could be extended to support
+   * different transfer frequencies for each message segment.
    */
 
   kinetis_i2c_setfrequency(priv, msgs->frequency);
