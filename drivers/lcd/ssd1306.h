@@ -159,7 +159,7 @@
 #  define SSD1306_DEV_PAGES       4    /* 4 pages */
 #  define SSD1306_DEV_CMNPAD      0x02 /* COM configuration */
 #elif defined(CONFIG_LCD_SH1106_OLED_132)
-#  define SSD1306_DEV_NATIVE_XRES 132  /* Full 132 columns used */
+#  define SSD1306_DEV_NATIVE_XRES 128  /* Only 128 columns used, supporting 132 is a bit difficult */
 #  define SSD1306_DEV_NATIVE_YRES 64   /* 8 pages each 8 rows */
 #  define SSD1306_DEV_XOFFSET     0    /* Offset to logical column 0 */
 #  define SSD1306_DEV_PAGES       8    /* 8 pages */
@@ -179,7 +179,7 @@
 /* Bytes per logical row and actual device row */
 
 #if defined(CONFIG_LCD_SH1106_OLED_132)
-#  define SSD1306_DEV_XSTRIDE     ((SSD1306_DEV_XRES >> 3) + 4)
+#define SSD1306_DEV_XSTRIDE       (SSD1306_DEV_XRES >> 3)
 #else
 #  define SSD1306_DEV_XSTRIDE     (SSD1306_DEV_XRES >> 3)
 #endif
