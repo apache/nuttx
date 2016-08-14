@@ -92,8 +92,8 @@ void ssd1306_sendbyte(FAR struct ssd1306_dev_s *priv, uint8_t regval)
   msg.addr      = priv->addr;              /* 7-bit address */
   msg.flags     = 0;                       /* Write transaction, beginning with START */
   msg.buffer    = txbuffer;                /* Transfer from this address */
-  msg.length    = 2;                       /* Send one byte following the address
-                                            * (then STOP) */
+  msg.length    = 2;                       /* Send two bytes following the address
+                                            * then STOP */
 
   /* Perform the transfer */
 
@@ -123,9 +123,9 @@ void ssd1306_sendblk(FAR struct ssd1306_dev_s *priv, uint8_t *data, uint8_t len)
    *  Start - I2C_Write_Address - SSD1306_Reg_Address - SSD1306_Write_Data - STOP
    */
 
-  /* Send the SSD1306 register address */
+  /* Send the SSD1306 register address (with no STOP) */
 
-  regaddr = 0x40;
+  regaddr          = 0x40;
 
   msg[0].frequency = CONFIG_SSD1306_I2CFREQ;  /* I2C frequency */
   msg[0].addr      = priv->addr;              /* 7-bit address */
@@ -133,7 +133,7 @@ void ssd1306_sendblk(FAR struct ssd1306_dev_s *priv, uint8_t *data, uint8_t len)
   msg[0].buffer    = &regaddr;                /* Transfer from this address */
   msg[0].length    = 1;                       /* Send the one byte register address */
 
-  /* Followed by the SSD1306 write data (with no RESTART) */
+  /* Followed by the SSD1306 write data (with no RESTART, then STOP) */
 
   msg[1].frequency = CONFIG_SSD1306_I2CFREQ;  /* I2C frequency */
   msg[1].addr      = priv->addr;              /* 7-bit address */
