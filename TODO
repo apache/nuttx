@@ -927,8 +927,7 @@ o Network (net/, drivers/net)
                CONFIG_NET_NOINTS).  This is really a very bad use of CPU
                resources;  All of the network stack processing should be
                modified to use a work queue (and, all use of CONFIG_NET_NOINTS=n
-               should be eliminated).  This applies to almost all Ethernet
-               drivers:
+               should be eliminated).  This applies to many Ethernet drivers:
 
                ARCHITECTURE   CONFIG_NET_NOINTS?      ADDRESS FILTER SUPPORT?
                C5471          NO                      NO

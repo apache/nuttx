@@ -111,13 +111,7 @@ struct kinetis_i2cdev_s
 };
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-static struct kinetis_i2cdev_s g_i2c_dev;
-
-/****************************************************************************
- * Private Functions
+ * Private Function Prototypes
  ****************************************************************************/
 
 static int  kinetis_i2c_start(struct kinetis_i2cdev_s *priv);
@@ -133,16 +127,22 @@ static int  kinetis_i2c_reset(FAR struct i2c_master_s *dev);
 #endif
 
 /****************************************************************************
- * I2C device operations
+ * Private Data
  ****************************************************************************/
 
-struct i2c_ops_s kinetis_i2c_ops =
+static const struct i2c_ops_s g_i2c_ops =
 {
   .transfer = kinetis_i2c_transfer
 #ifdef CONFIG_I2C_RESET
   ,.reset   = kinetis_i2c_reset
 #endif
 };
+
+static struct kinetis_i2cdev_s g_i2c_dev;
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: kinetis_i2c_setfrequency
@@ -575,7 +575,6 @@ static int kinetis_i2c_interrupt(int irq, FAR void *context)
       /* Clear interrupt */
 
       putreg8(I2C_S_IICIF, KINETIS_I2C0_S);
-
       regval = getreg8(KINETIS_I2C0_C1);
 
       /* TX mode */
@@ -862,7 +861,7 @@ struct i2c_master_s *kinetis_i2cbus_initialize(int port)
 
   /* Install our operations */
 
-  priv->dev.ops = &kinetis_i2c_ops;
+  priv->dev.ops = &g_i2c_ops;
   return &priv->dev;
 }
 
