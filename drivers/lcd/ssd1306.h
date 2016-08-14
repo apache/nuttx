@@ -179,7 +179,7 @@
 /* Bytes per logical row and actual device row */
 
 #if defined(CONFIG_LCD_SH1106_OLED_132)
-#define SSD1306_DEV_XSTRIDE       (SSD1306_DEV_XRES >> 3)
+#  define SSD1306_DEV_XSTRIDE     (SSD1306_DEV_XRES >> 3)
 #else
 #  define SSD1306_DEV_XSTRIDE     (SSD1306_DEV_XRES >> 3)
 #endif
@@ -285,3 +285,4 @@ static inline void ssd1306_configspi(FAR struct spi_dev_s *spi)
 #endif 
 
 #endif /* __DRIVERS_LCD_SSD1306_H */
+

@@ -149,3 +149,4 @@ void ssd1306_sendblk(FAR struct ssd1306_dev_s *priv, uint8_t *data, uint8_t len)
 }
 
 #endif /* CONFIG_LCD_SSD1306 &7 CONFIG_LCD_SSD1306_I2C */
+
