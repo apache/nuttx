@@ -102,6 +102,8 @@ struct kinetis_i2cdev_s
   WDOG_ID timeout;            /* watchdog to timeout when bus hung */
   uint32_t frequency;         /* Current I2C frequency */
 
+  int restart;                /* Should next transfer restart or not */
+
   struct i2c_msg_s *msgs;     /* remaining transfers - first one is in
                                * progress */
   unsigned int nmsg;          /* number of transfer remaining */
@@ -523,7 +525,13 @@ void kinetis_i2c_nextmsg(struct kinetis_i2cdev_s *priv)
   if (priv->nmsg > 0)
     {
       priv->msgs++;
-      sem_post(&priv->wait);
+      priv->wrcnt = 0;
+      priv->rdcnt = 0;
+
+      if (priv->restart)
+        {
+          sem_post(&priv->wait);
+        }
     }
   else
     {
@@ -602,6 +610,16 @@ static int kinetis_i2c_interrupt(int irq, FAR void *context)
                       /* Continue with next message */
 
                       kinetis_i2c_nextmsg(priv);
+
+                      if (!priv->restart)
+                        {
+                          /* Initiate transfer of following message */
+
+                          putreg8(priv->msgs->buffer[priv->wrcnt], KINETIS_I2C0_D);
+                          priv->wrcnt++;
+
+                          sem_post(&priv->wait);
+                        }
                     }
                   else
                     {
@@ -616,7 +634,8 @@ static int kinetis_i2c_interrupt(int irq, FAR void *context)
 
               else
                 {
-                  if (msg->length == 1) /* go to RX mode, do not send ACK */
+                  if (msg->length == 1 && priv->restart) /* go to RX mode,
+                                                            do not send ACK */
                     {
                       putreg8(I2C_C1_IICEN | I2C_C1_IICIE | I2C_C1_MST |
                               I2C_C1_TXAK, KINETIS_I2C0_C1);
@@ -643,14 +662,28 @@ static int kinetis_i2c_interrupt(int irq, FAR void *context)
 
           if (priv->rdcnt == (msg->length - 1))
             {
-              /* go to TX mode before last read, otherwise a new read is
-               * triggered.
-               */
+              if (priv->restart)
+                {
+                  /* go to TX mode before last read, otherwise a new read is
+                   * triggered.
+                   */
 
-             /* Go to TX mode */
+                  /* Go to TX mode */
 
-              putreg8(I2C_C1_IICEN | I2C_C1_IICIE | I2C_C1_MST | I2C_C1_TX,
-                      KINETIS_I2C0_C1);
+                  putreg8(I2C_C1_IICEN | I2C_C1_IICIE | I2C_C1_MST | I2C_C1_TX,
+                          KINETIS_I2C0_C1);
+                }
+              else if ((priv->msgs + 1)->length == 1)
+                {
+                  /* we will continue reception on next message.
+                   * if next message is length == 1, this is actually the 2nd to
+                   * last byte, so do not send ACK */
+
+                  /* Do not ACK any more */
+
+                  putreg8(I2C_C1_IICEN | I2C_C1_IICIE | I2C_C1_MST | I2C_C1_TXAK,
+                          KINETIS_I2C0_C1);
+                }
 
               msg->buffer[priv->rdcnt] = getreg8(KINETIS_I2C0_D);
               priv->rdcnt++;
@@ -662,10 +695,13 @@ static int kinetis_i2c_interrupt(int irq, FAR void *context)
 
           else if (priv->rdcnt == (msg->length - 2))
             {
-              /* Do not ACK any more */
+              if (priv->restart)
+                {
+                  /* Do not ACK any more */
 
-              putreg8(I2C_C1_IICEN | I2C_C1_IICIE | I2C_C1_MST | I2C_C1_TXAK,
-                      KINETIS_I2C0_C1);
+                  putreg8(I2C_C1_IICEN | I2C_C1_IICIE | I2C_C1_MST | I2C_C1_TXAK,
+                          KINETIS_I2C0_C1);
+                }
 
               msg->buffer[priv->rdcnt] = getreg8(KINETIS_I2C0_D);
               priv->rdcnt++;
@@ -693,6 +729,7 @@ static int kinetis_i2c_transfer(FAR struct i2c_master_s *dev,
                                 FAR struct i2c_msg_s *msgs, int count)
 {
   struct kinetis_i2cdev_s *priv = (struct kinetis_i2cdev_s *)dev;
+  int msg_n;
 
   DEBUGASSERT(dev != NULL);
 
@@ -702,9 +739,12 @@ static int kinetis_i2c_transfer(FAR struct i2c_master_s *dev,
 
   /* Set up for the transfer */
 
+  msg_n = 0;
   priv->msgs = msgs;
   priv->nmsg = count;
   priv->state = STATE_OK;
+  priv->wrcnt = 0;
+  priv->rdcnt = 0;
 
   /* Configure the I2C frequency. REVISIT: Note that the frequency is set
    * only on the first message. This could be extended to support
@@ -721,12 +761,37 @@ static int kinetis_i2c_transfer(FAR struct i2c_master_s *dev,
 
   while (priv->nmsg && priv->state == STATE_OK)
     {
-      priv->wrcnt = 0;
-      priv->rdcnt = 0;
+      priv->restart = 1;
 
-      /* Initiate the transfer */
+      /* process NORESTART flag */
 
-      kinetis_i2c_start(priv);
+      if (priv->nmsg > 1)
+        {
+          struct i2c_msg_s* nextmsg = (priv->msgs + 1);
+
+          /* if there is a following message with "norestart" flag of
+           * the same type as the current one, we can avoid the restart
+           */
+
+          if ((nextmsg->flags & I2C_M_NORESTART) &&
+              nextmsg->addr == priv->msgs->addr &&
+              nextmsg->frequency == priv->msgs->frequency &&
+              (nextmsg->flags & I2C_M_READ) == (priv->msgs->flags & I2C_M_READ))
+            {
+              /* "no restart" can be performed */
+
+              priv->restart = 0;
+            }
+        }
+
+      /* only send start when required (we are trusting the flags setting to be correctly used here) */
+
+      if (!(priv->msgs->flags & I2C_M_NORESTART))
+        {
+          /* Initiate the transfer, in case restart is required */
+
+          kinetis_i2c_start(priv);
+        }
 
       /* Wait for transfer complete */
 
@@ -735,6 +800,8 @@ static int kinetis_i2c_transfer(FAR struct i2c_master_s *dev,
       sem_wait(&priv->wait);
 
       wd_cancel(priv->timeout);
+
+      msg_n++;
     }
 
   /* Disable interrupts */
