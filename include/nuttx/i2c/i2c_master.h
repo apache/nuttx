@@ -205,7 +205,7 @@ struct i2c_master_s
 struct i2c_transfer_s
 {
   FAR struct i2c_msg_s *msgv; /* Array of I2C messages for the transfer */
-  size_t msgc;                /* Number of messges in the array. */
+  size_t msgc;                /* Number of messages in the array. */
 };
 
 /****************************************************************************
