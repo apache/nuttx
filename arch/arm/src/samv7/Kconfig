@@ -196,6 +196,10 @@ config SAMV7_HAVE_MCAN1
 	bool
 	default n
 
+config SAMV7_DAC
+	bool
+	default n
+
 config SAMV7_HAVE_DAC1
 	bool
 	default n
@@ -334,10 +338,12 @@ config SAMV7_MCAN1
 config SAMV7_DAC0
 	bool "Digital To Analog Converter 0 (DAC0)"
 	default n
+	select SAMV7_DAC
 
 config SAMV7_DAC1
 	bool "Digital To Analog Converter 1 (DAC1)"
 	default n
+	select SAMV7_DAC
 	depends on SAMV7_HAVE_DAC1
 
 config SAMV7_EBI
@@ -1656,6 +1662,35 @@ config SAMV7_TC_REGDEBUG
 
 endmenu # Timer/counter Configuration
 endif # SAMV7_HAVE_TC
+
+menu "DAC device driver configuration"
+	depends on SAMV7_DAC
+
+config SAMV7_DAC_PRESCAL
+	int "DAC MCK prescaler"
+	---help---
+		Define PRESCALER (Peripheral Clock to DAC Clock Ratio)
+
+config SAMV7_DAC_TRIGGER
+	bool "DAC trigger mode"
+	default n
+	---help---
+		Enable DAC trigger mode
+
+config SAMV7_DAC_TRIGGER_FREQUENCY
+	int "DAC trigger frequency"
+	---help---
+		Define DAC trigger frequency
+
+config SAMV7_DAC_TRIGGER_SELECT
+	int "DAC trigger source"
+	default 1
+	range 1 3
+	---help---
+		Define DAC trigger source (only support for TC0, TC1, TC2 output is
+		currently implemented)
+
+endmenu # DAC device driver configuration
 
 menu "HSMCI device driver options"
 	depends on SAMV7_HSMCI

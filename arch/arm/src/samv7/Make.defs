@@ -215,6 +215,6 @@ ifeq ($(CONFIG_SAMV7_PROGMEM),y)
 CHIP_CSRCS += sam_progmem.c
 endif
 
-ifneq (,$(findstring y,$(CONFIG_SAMV7_DAC0) $(CONFIG_SAMV7_DAC1)))
+ifeq ($(CONFIG_SAMV7_DAC),y)
 CHIP_CSRCS += sam_dac.c
 endif
