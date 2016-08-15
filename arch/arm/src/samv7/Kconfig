@@ -1677,6 +1677,8 @@ config SAMV7_DAC_TRIGGER
 	---help---
 		Enable DAC trigger mode
 
+if SAMV7_DAC_TRIGGER
+
 config SAMV7_DAC_TRIGGER_FREQUENCY
 	int "DAC trigger frequency"
 	---help---
@@ -1690,6 +1692,7 @@ config SAMV7_DAC_TRIGGER_SELECT
 		Define DAC trigger source (only support for TC0, TC1, TC2 output is
 		currently implemented)
 
+endif # SAMV7_DAC_TRIGGER
 endmenu # DAC device driver configuration
 
 menu "HSMCI device driver options"
