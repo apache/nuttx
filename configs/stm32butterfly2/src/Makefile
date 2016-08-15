@@ -30,7 +30,6 @@
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-#
 ############################################################################
 
 -include $(TOPDIR)/Make.defs
@@ -48,6 +47,10 @@ endif
 
 ifeq ($(CONFIG_MMCSD),y)
 CSRCS += stm32_mmcsd.c
+endif
+
+ifeq ($(CONFIG_ARCH_BUTTONS),y)
+CSRCS += stm32_buttons.c
 endif
 
 include $(TOPDIR)/configs/Board.mk
