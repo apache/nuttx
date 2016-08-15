@@ -1,5 +1,5 @@
-/*******************************************************************************
- * configs/stm32butterfly2/src/boot.c
+/*****************************************************************************
+ * configs/stm32butterfly2/src/stm32_butterfly2.h
  *
  *   Copyright (C) 2016 Michał Łyszczek. All rights reserved.
  *   Author: Michał Łyszczek <michal.lyszczek@gmail.com>
@@ -31,37 +31,47 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/*****************************************************************************
  * Included Files
- ******************************************************************************/
-
-#include <nuttx/config.h>
-#include <arch/board/board.h>
-#include <syslog.h>
+ ****************************************************************************/
 
 #include "stm32_gpio.h"
-#include "stm32_butterfly2.h"
 
-/*******************************************************************************
+/*****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define GPIO_SD_CS      (GPIO_OUTPUT | GPIO_CNF_OUTPP | GPIO_MODE_50MHz |\
+                         GPIO_OUTPUT_SET | GPIO_PORTA | GPIO_PIN4)
+#define GPIO_SD_CD      (GPIO_INPUT | GPIO_CNF_INFLOAT | GPIO_EXTI |\
+                         GPIO_PORTB | GPIO_PIN9)
+
+/*****************************************************************************
  * Public Functions
- ******************************************************************************/
+ ****************************************************************************/
 
-void stm32_boardinitialize(void)
-{
-  stm32_led_initialize();
-  stm32_spidev_initialize();
-}
+/*****************************************************************************
+ * Name: stm32_spidev_initialize
+ *
+ * Description:
+ *      Called to configure SPI chip select GPIO pins.
+ *
+ * Note:
+ *      Here only CS pins are configured as SPI pins are configured by driver
+ *      itself.
+ ****************************************************************************/
 
-int board_app_initialize(uintptr_t arg)
-{
-  int rv;
-  if ((rv = stm32_sdinitialize(CONFIG_NSH_MMCSDMINOR)) < 0)
-    {
-      syslog(LOG_ERR, "Failed to initialize SD slot %d: %d\n");
-      return rv;
-    }
+void stm32_spidev_initialize(void);
 
-    return 0;
-}
+/*****************************************************************************
+ * Name: stm32_sdinitialize
+ *
+ * Description:
+ *      Initializes SPI-based SD card
+ *
+ ****************************************************************************/
+
+int stm32_sdinitialize(int minor);
+

@@ -42,4 +42,12 @@ ifeq ($(CONFIG_STM32_ADC),y)
 CSRCS += stm32_adc.c
 endif
 
+ifeq ($(CONFIG_STM32_SPI1),y)
+CSRCS += stm32_spi.c
+endif
+
+ifeq ($(CONFIG_MMCSD),y)
+CSRCS += stm32_mmcsd.c
+endif
+
 include $(TOPDIR)/configs/Board.mk

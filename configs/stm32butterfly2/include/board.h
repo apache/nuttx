@@ -49,7 +49,7 @@
 #include "stm32_rcc.h"
 
 /*******************************************************************************
- * Pre-processor Definitions 
+ * Pre-processor Definitions
  ******************************************************************************/
 
 /* Clocking *******************************************************************/
@@ -100,7 +100,7 @@
 #define STM32_APB1_TIM5_CLKIN   (2*STM32_PCLK1_FREQUENCY)
 #define STM32_APB1_TIM6_CLKIN   (2*STM32_PCLK1_FREQUENCY)
 #define STM32_APB1_TIM7_CLKIN   (2*STM32_PCLK1_FREQUENCY)
- 
+
 /* LED definitions ************************************************************/
 /* There are four LEDs on stm32butterfly2 board that can be controlled by
  * software. All pulled high and van be illuminated by driving the output low.
@@ -154,6 +154,12 @@
 #  error "CONFIG_STM32_ADC2 is not supported"
 #endif
 
+/* SPI configuration. Only SPI1 is supported */
+
+#ifdef CONFIG_STM32_SPI2
+#  error "CONFIG_STM32_SPI2 is not supported"
+#endif
+
 /*******************************************************************************
  * Public Data
  ******************************************************************************/
@@ -178,7 +184,7 @@ extern "C" {
  * Description:
  *      Initializes board specific LEDS
  ******************************************************************************/
- void stm32_led_initialize(void);
+void stm32_led_initialize(void);
 
 /*******************************************************************************
  * Name: stm32_boardinitialize
