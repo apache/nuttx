@@ -66,7 +66,8 @@
 #include "kinetis.h"
 #include "kinetis_i2c.h"
 
-#if defined(CONFIG_KINETIS_I2C0) || defined(CONFIG_KINETIS_I2C1)
+#if defined(CONFIG_KINETIS_I2C0) || defined(CONFIG_KINETIS_I2C1) || \
+    defined(CONFIG_KINETIS_I2C2)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -134,6 +135,9 @@ static int  kinetis_i2c0_interrupt(int irq, void *context);
 #ifdef CONFIG_KINETIS_I2C1
 static int  kinetis_i2c1_interrupt(int irq, void *context);
 #endif
+#ifdef CONFIG_KINETIS_I2C2
+static int  kinetis_i2c2_interrupt(int irq, void *context);
+#endif
 static void kinetis_i2c_timeout(int argc, uint32_t arg, ...);
 static void kinetis_i2c_setfrequency(struct kinetis_i2cdev_s *priv,
                                      uint32_t frequency);
@@ -167,6 +171,9 @@ static struct kinetis_i2cdev_s g_i2c0_dev;
 #endif
 #ifdef CONFIG_KINETIS_I2C1
 static struct kinetis_i2cdev_s g_i2c1_dev;
+#endif
+#ifdef CONFIG_KINETIS_I2C2
+static struct kinetis_i2cdev_s g_i2c2_dev;
 #endif
 
 /****************************************************************************
@@ -829,6 +836,14 @@ static int kinetis_i2c1_interrupt(int irq, void *context)
 }
 #endif
 
+#ifdef CONFIG_KINETIS_I2C2
+static int kinetis_i2c2_interrupt(int irq, void *context)
+{
+  i2cinfo("I2C2 Interrupt...\n");
+  return kinetis_i2c_interrupt(&g_i2c2_dev);
+}
+#endif
+
 /****************************************************************************
  * Name: kinetis_i2c_transfer
  *
@@ -1043,6 +1058,33 @@ struct i2c_master_s *kinetis_i2cbus_initialize(int port)
     }
   else
 #endif
+#ifdef CONFIG_KINETIS_I2C2
+  if (port == 2)
+    {
+      priv           = &g_i2c2_dev;
+      priv->base     = KINETIS_I2C2_BASE;
+      priv->irqid    = KINETIS_IRQ_I2C2;
+      priv->basefreq = BOARD_BUS_FREQ;
+
+      handler        = kinetis_i2c2_interrupt;
+
+      /* Enable clock */
+
+      regval         = getreg32(KINETIS_SIM_SCGC4);
+      regval        |= SIM_SCGC4_I2C2;
+      putreg32(regval, KINETIS_SIM_SCGC4);
+
+      /* Disable while configuring */
+
+      kinetis_i2c_putreg(priv, 0, KINETIS_I2C_C1_OFFSET);
+
+      /* Configure pins */
+
+      kinetis_pinconfig(PIN_I2C2_SCL);
+      kinetis_pinconfig(PIN_I2C2_SDA);
+    }
+  else
+#endif
     {
       leave_critical_section(flags);
       i2cerr("ERROR: Unsupport I2C bus: %d\n", port);
@@ -1108,4 +1150,4 @@ int kinetis_i2cbus_uninitialize(struct i2c_master_s *dev)
   return OK;
 }
 
-#endif /* CONFIG_KINETIS_I2C0 || CONFIG_KINETIS_I2C1 */
+#endif /* CONFIG_KINETIS_I2C0 || CONFIG_KINETIS_I2C1 || CONFIG_KINETIS_I2C2 */
