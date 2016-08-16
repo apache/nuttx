@@ -119,6 +119,7 @@
 
 #define I2C_F_ICR_SHIFT          (0)       /* Bits 0-5: Clock rate */
 #define I2C_F_ICR_MASK           (0x3f << I2C_F_ICR_SHIFT)
+#  define I2C_F_ICR(n)           ((uint8_t)(n) << I2C_F_ICR_SHIFT)
 #define I2C_F_MULT_SHIFT         (6)       /* Bits 6-7: Multiplier factor */
 #define I2C_F_MULT_MASK          (3 << I2C_F_MULT_SHIFT)
 #  define I2C_F_MULT_1           (0 << I2C_F_MULT_SHIFT)
@@ -153,6 +154,7 @@
 
 #define I2C_C2_AD_SHIFT          (0)       /* Bits 0-2: Slave address */
 #define I2C_C2_AD_MASK           (7 << I2C_C2_AD_SHIFT)
+#  define I2C_C2_AD(n)           ((uint8_t)(n) << I2C_C2_AD_SHIFT)
 #define I2C_C2_RMEN              (1 << 3)  /* Bit 3:  Range address matching enable */
 #define I2C_C2_SBRC              (1 << 4)  /* Bit 4:  Slave baud rate control */
 #define I2C_C2_HDRS              (1 << 5)  /* Bit 5:  High drive select */
@@ -160,9 +162,22 @@
 #define I2C_C2_GCAEN             (1 << 7)  /* Bit 7:  General call address enable */
 
 /* I2C Programmable Input Glitch Filter register (8-bit) */
+
+#ifdef KINETIS_K20
+#  define I2C_FLT_SHIFT          (0)       /* Bits 0-4: I2C programmable filter factor */
+#  define I2C_FLT_MASK           (31 << I2C_FLT_SHIFT)
                                            /* Bits 5-7: Reserved */
-#define I2C_FLT_SHIFT            (0)       /* Bits 0-4: I2C programmable filter factor */
-#define I2C_FLT_MASK             (31 << I2C_FLT_SHIFT)
+#endif
+
+#ifdef KINETIS_K64
+#  define I2C_FLT_SHIFT          (0)       /* Bits 0-3: I2C programmable filter factor */
+#  define I2C_FLT_MASK           (15 << I2C_FLT_SHIFT)
+#    define I2C_FLT(n)           ((uint8_t)(n) << I2C_FLT_SHIFT)
+#  define I2C_FLT_STARTF         (1 << 4) /* I2C bus start detect flag */
+#  define I2C_FLT_SSIE           (1 << 5) /* I2C bus stop or start interrupt enable */
+#  define I2C_FLT_STOPF          (1 << 6) /* I2C bus stop detect flag */
+#  define I2C_FLT_SHEN           (1 << 7) /* Stop hold enable */
+#endif
 
 /* I2C Range Address register (8-bit) */
                                            /* Bit 0: Reserved */
