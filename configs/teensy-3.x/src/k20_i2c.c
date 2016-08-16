@@ -78,7 +78,6 @@ void kinetis_i2cdev_initialize(void)
 #endif
 
 #if defined(CONFIG_KINETIS_I2C1)
-#error Not yet supported in kinetis driver
   i2c_dev  = kinetis_i2cbus_initialize(1);
 #if defined(CONFIG_I2C_DRIVER)
   i2c_register(i2c_dev, 1);

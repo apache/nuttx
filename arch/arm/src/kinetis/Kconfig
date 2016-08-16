@@ -255,12 +255,14 @@ config KINETIS_SPI2
 config KINETIS_I2C0
 	bool "I2C0"
 	default n
+	select I2C
 	---help---
 		Support I2C0
 
 config KINETIS_I2C1
 	bool "I2C1"
 	default n
+	select I2C
 	---help---
 		Support I2C1
 

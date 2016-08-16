@@ -242,8 +242,16 @@
 #endif
 #endif
 
+/* REVISIT: Added only for clean compilation with I2C1 enabled. */
+
 #ifdef CONFIG_KINETIS_I2C1
-#  error I2C1 not currently supported
+#ifdef CONFIG_TEENSY_3X_I2C_ALT_PINS
+#  define PIN_I2C1_SCL      (PIN_I2C1_SCL_1 | PIN_ALT2_OPENDRAIN | PIN_ALT2_SLOW)
+#  define PIN_I2C1_SDA      (PIN_I2C1_SDA_1 | PIN_ALT2_OPENDRAIN | PIN_ALT2_SLOW)
+#else
+#  define PIN_I2C1_SCL      (PIN_I2C1_SCL_2 | PIN_ALT2_OPENDRAIN | PIN_ALT2_SLOW)
+#  define PIN_I2C1_SDA      (PIN_I2C1_SDA_2 | PIN_ALT2_OPENDRAIN | PIN_ALT2_SLOW)
+#endif
 #endif
 
 /************************************************************************************
