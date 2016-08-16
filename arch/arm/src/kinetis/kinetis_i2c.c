@@ -93,21 +93,19 @@ struct kinetis_i2cdev_s
 {
   struct i2c_master_s dev;    /* Generic I2C device */
   uintptr_t base;             /* Base address of registers */
-  uint16_t irqid;             /* IRQ for this device */
-  uint32_t basefreq;          /* branch frequency */
-
-  sem_t mutex;                /* Only one thread can access at a time */
-  sem_t wait;                 /* Place to wait for state machine completion */
-  volatile uint8_t state;     /* State of state machine */
-  WDOG_ID timeout;            /* watchdog to timeout when bus hung */
+  uint32_t basefreq;          /* Branch frequency */
   uint32_t frequency;         /* Current I2C frequency */
-  bool restart;               /* Should next transfer restart or not */
-  struct i2c_msg_s *msgs;     /* Remaining transfers - first one is in
-                               * progress */
-  unsigned int nmsg;          /* number of transfer remaining */
-
+  uint16_t irqid;             /* IRQ for this device */
+  uint16_t nmsg;              /* Number of transfer remaining */
   uint16_t wrcnt;             /* number of bytes sent to tx fifo */
   uint16_t rdcnt;             /* number of bytes read from rx fifo */
+  volatile uint8_t state;     /* State of state machine */
+  bool restart;               /* Should next transfer restart or not */
+  sem_t mutex;                /* Only one thread can access at a time */
+  sem_t wait;                 /* Place to wait for state machine completion */
+  WDOG_ID timeout;            /* watchdog to timeout when bus hung */
+  struct i2c_msg_s *msgs;     /* Remaining transfers - first one is in
+                               * progress */
 };
 
 /****************************************************************************
