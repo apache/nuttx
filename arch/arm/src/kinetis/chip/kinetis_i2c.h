@@ -126,6 +126,83 @@
 #  define I2C_F_MULT_2           (1 << I2C_F_MULT_SHIFT)
 #  define I2C_F_MULT_4           (2 << I2C_F_MULT_SHIFT)
 
+/* From Table 51-54. I2C divider and hold values.  Duplicate divider values differ in hold
+ * times
+ */
+
+#define I2C_F_DIV20              ((uint8_t)0x00)
+#define I2C_F_DIV22              ((uint8_t)0x01)
+#define I2C_F_DIV24              ((uint8_t)0x02)
+#define I2C_F_DIV26              ((uint8_t)0x03)
+#define I2C_F_DIV28              ((uint8_t)0x04)
+#define I2C_F_DIV30              ((uint8_t)0x05)
+#define I2C_F_DIV34              ((uint8_t)0x06)
+#define I2C_F_DIV36              ((uint8_t)0x0a)
+#define I2C_F_DIV40_1            ((uint8_t)0x07)
+#define I2C_F_DIV41              ((uint8_t)0x08)
+#define I2C_F_DIV32              ((uint8_t)0x09)
+#define I2C_F_DIV36              ((uint8_t)0x0a)
+
+#define I2C_F_DIV40_2            ((uint8_t)0x0b)
+#define I2C_F_DIV44              ((uint8_t)0x0c)
+#define I2C_F_DIV48_1            ((uint8_t)0x0d)
+#define I2C_F_DIV56_1            ((uint8_t)0x0e)
+#define I2C_F_DIV68              ((uint8_t)0x0f)
+
+#define I2C_F_DIV48_2            ((uint8_t)0x10)
+#define I2C_F_DIV56_2            ((uint8_t)0x11)
+#define I2C_F_DIV64              ((uint8_t)0x12)
+#define I2C_F_DIV72              ((uint8_t)0x13)
+#define I2C_F_DIV80_1            ((uint8_t)0x14)
+#define I2C_F_DIV88              ((uint8_t)0x15)
+#define I2C_F_DIV104             ((uint8_t)0x16)
+#define I2C_F_DIV128_1           ((uint8_t)0x17)
+
+#define I2C_F_DIV80_2            ((uint8_t)0x18)
+#define I2C_F_DIV96              ((uint8_t)0x19)
+#define I2C_F_DIV112             ((uint8_t)0x1a)
+#define I2C_F_DIV128_2           ((uint8_t)0x1b)
+#define I2C_F_DIV144             ((uint8_t)0x1c)
+#define I2C_F_DIV160_1           ((uint8_t)0x1d)
+#define I2C_F_DIV192_1           ((uint8_t)0x1e)
+#define I2C_F_DIV240             ((uint8_t)0x1f)
+
+#define I2C_F_DIV160_2           ((uint8_t)0x20)
+#define I2C_F_DIV192_2           ((uint8_t)0x1e)
+#define I2C_F_DIV224             ((uint8_t)0x22)
+#define I2C_F_DIV256             ((uint8_t)0x23)
+#define I2C_F_DIV288             ((uint8_t)0x24)
+#define I2C_F_DIV320_1           ((uint8_t)0x25)
+#define I2C_F_DIV384_1           ((uint8_t)0x26)
+#define I2C_F_DIV480             ((uint8_t)0x27)
+
+#define I2C_F_DIV320_2           ((uint8_t)0x28)
+#define I2C_F_DIV384_2           ((uint8_t)0x29)
+#define I2C_F_DIV448             ((uint8_t)0x2a)
+#define I2C_F_DIV512             ((uint8_t)0x2b)
+#define I2C_F_DIV576             ((uint8_t)0x2c)
+#define I2C_F_DIV640_1           ((uint8_t)0x2d)
+#define I2C_F_DIV768_1           ((uint8_t)0x2e)
+#define I2C_F_DIV960             ((uint8_t)0x2f)
+
+#define I2C_F_DIV640_2           ((uint8_t)0x30)
+#define I2C_F_DIV768_3           ((uint8_t)0x31)
+#define I2C_F_DIV896             ((uint8_t)0x32)
+#define I2C_F_DIV1024            ((uint8_t)0x33)
+#define I2C_F_DIV1152            ((uint8_t)0x34)
+#define I2C_F_DIV1280_1          ((uint8_t)0x35)
+#define I2C_F_DIV1536_1          ((uint8_t)0x36)
+#define I2C_F_DIV1920            ((uint8_t)0x37)
+
+#define I2C_F_DIV1280_2          ((uint8_t)0x38)
+#define I2C_F_DIV1536_2          ((uint8_t)0x39)
+#define I2C_F_DIV1792            ((uint8_t)0x3a)
+#define I2C_F_DIV2048            ((uint8_t)0x3b)
+#define I2C_F_DIV2304            ((uint8_t)0x3c)
+#define I2C_F_DIV2560            ((uint8_t)0x3d)
+#define I2C_F_DIV3072            ((uint8_t)0x3e)
+#define I2C_F_DIV3840            ((uint8_t)0x3f)
+
 /* I2C Control Register 1 (8-bit) */
 
 #define I2C_C1_DMAEN             (1 << 0)  /* Bit 0:  DMA enable */
@@ -166,6 +243,7 @@
 #ifdef KINETIS_K20
 #  define I2C_FLT_SHIFT          (0)       /* Bits 0-4: I2C programmable filter factor */
 #  define I2C_FLT_MASK           (31 << I2C_FLT_SHIFT)
+#    define I2C_FLT(n)           ((uint8_t)(n) << I2C_FLT_SHIFT)
                                            /* Bits 5-7: Reserved */
 #endif
 

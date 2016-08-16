@@ -226,8 +226,6 @@ static void kinetis_i2c_setfrequency(struct kinetis_i2cdev_s *priv,
       return;
     }
 
-  /* TODO: use apropriate definitions */
-
 #if BOARD_BUS_FREQ == 120000000
   if (frequency < 400000)
     {
@@ -242,7 +240,7 @@ static void kinetis_i2c_setfrequency(struct kinetis_i2cdev_s *priv,
       kinetis_i2c_putreg(priv, I2C_F_DIV128, KINETIS_I2C_F_OFFSET);    /* 0.94 MHz */
     }
 
-  kinetis_i2c_putreg(priv, 4, KINETIS_I2C_FLT_OFFSET);
+  kinetis_i2c_putreg(priv, I2C_FLT(4), KINETIS_I2C_FLT_OFFSET);
 
 #elif BOARD_BUS_FREQ == 108000000
   if (frequency < 400000)
@@ -258,7 +256,7 @@ static void kinetis_i2c_setfrequency(struct kinetis_i2cdev_s *priv,
       kinetis_i2c_putreg(priv, I2C_F_DIV112, KINETIS_I2C_F_OFFSET);    /* 0.96 MHz */
     }
 
-  kinetis_i2c_putreg(priv, 4, KINETIS_I2C_FLT_OFFSET);
+  kinetis_i2c_putreg(priv, I2C_FLT(4), KINETIS_I2C_FLT_OFFSET);
 
 #elif BOARD_BUS_FREQ == 96000000
   if (frequency < 400000)
@@ -274,7 +272,7 @@ static void kinetis_i2c_setfrequency(struct kinetis_i2cdev_s *priv,
       kinetis_i2c_putreg(priv, I2C_F_DIV96, KINETIS_I2C_F_OFFSET);     /* 1.0 MHz */
     }
 
-  kinetis_i2c_putreg(priv, 4, KINETIS_I2C_FLT_OFFSET);
+  kinetis_i2c_putreg(priv, I2C_FLT(4), KINETIS_I2C_FLT_OFFSET);
 
 #elif BOARD_BUS_FREQ == 90000000
   if (frequency < 400000)
@@ -290,7 +288,7 @@ static void kinetis_i2c_setfrequency(struct kinetis_i2cdev_s *priv,
       kinetis_i2c_putreg(priv, I2C_F_DIV88, KINETIS_I2C_F_OFFSET);     /* 1.02 MHz */
     }
 
-  kinetis_i2c_putreg(priv, 4, KINETIS_I2C_FLT_OFFSET);
+  kinetis_i2c_putreg(priv, I2C_FLT(4), KINETIS_I2C_FLT_OFFSET);
 
 #elif BOARD_BUS_FREQ == 80000000
   if (frequency < 400000)
@@ -306,7 +304,7 @@ static void kinetis_i2c_setfrequency(struct kinetis_i2cdev_s *priv,
       kinetis_i2c_putreg(priv, I2C_F_DIV80, KINETIS_I2C_F_OFFSET);     /* 1.0 MHz */
     }
 
-  kinetis_i2c_putreg(priv, 4, KINETIS_I2C_FLT_OFFSET);
+  kinetis_i2c_putreg(priv, I2C_FLT(4), KINETIS_I2C_FLT_OFFSET);
 
 #elif BOARD_BUS_FREQ == 72000000
   if (frequency < 400000)
@@ -322,7 +320,7 @@ static void kinetis_i2c_setfrequency(struct kinetis_i2cdev_s *priv,
       kinetis_i2c_putreg(priv, I2C_F_DIV72, KINETIS_I2C_F_OFFSET);     /* 1.0 MHz */
     }
 
-  kinetis_i2c_putreg(priv, 4, KINETIS_I2C_FLT_OFFSET);
+  kinetis_i2c_putreg(priv, I2C_FLT(4), KINETIS_I2C_FLT_OFFSET);
 
 #elif BOARD_BUS_FREQ == 64000000
   if (frequency < 400000)
@@ -338,39 +336,39 @@ static void kinetis_i2c_setfrequency(struct kinetis_i2cdev_s *priv,
       kinetis_i2c_putreg(priv, I2C_F_DIV64, KINETIS_I2C_F_OFFSET);     /* 1.0 MHz */
     }
 
-  kinetis_i2c_putreg(priv, 4, KINETIS_I2C_FLT_OFFSET);
+  kinetis_i2c_putreg(priv, I2C_FLT(4), KINETIS_I2C_FLT_OFFSET);
 
 #elif BOARD_BUS_FREQ == 60000000
   if (frequency < 400000)
     {
-      kinetis_i2c_putreg(priv, 0x2C, KINETIS_I2C_F_OFFSET);            /* 104 kHz */
+      kinetis_i2c_putreg(priv, I2C_F_DIV576, KINETIS_I2C_F_OFFSET);    /* 104 kHz */
     }
   else if (frequency < 1000000)
     {
-      kinetis_i2c_putreg(priv, 0x1C, KINETIS_I2C_F_OFFSET);            /* 416 kHz */
+      kinetis_i2c_putreg(priv, I2C_F_DIV144, KINETIS_I2C_F_OFFSET);    /* 416 kHz */
     }
   else
     {
-      kinetis_i2c_putreg(priv, 0x12, KINETIS_I2C_F_OFFSET);            /* 938 kHz */
+      kinetis_i2c_putreg(priv, I2C_F_DIV64, KINETIS_I2C_F_OFFSET);     /* 938 kHz */
     }
 
-  kinetis_i2c_putreg(priv, 4, KINETIS_I2C_FLT_OFFSET);
+  kinetis_i2c_putreg(priv, I2C_FLT(4), KINETIS_I2C_FLT_OFFSET);
 
 #elif BOARD_BUS_FREQ == 56000000
   if (frequency < 400000)
     {
-      kinetis_i2c_putreg(priv, 0x2B, KINETIS_I2C_F_OFFSET);            /* 109 kHz */
+      kinetis_i2c_putreg(priv, I2C_F_DIV512, KINETIS_I2C_F_OFFSET);    /* 109 kHz */
     }
   else if (frequency < 1000000)
     {
-      kinetis_i2c_putreg(priv, 0x1C, KINETIS_I2C_F_OFFSET);            /* 389 kHz */
+      kinetis_i2c_putreg(priv, I2C_F_DIV144, KINETIS_I2C_F_OFFSET);    /* 389 kHz */
     }
   else
     {
-      kinetis_i2c_putreg(priv, 0x0E, KINETIS_I2C_F_OFFSET);            /* 1 MHz */
+      kinetis_i2c_putreg(priv, I2C_F_DIV56_1, KINETIS_I2C_F_OFFSET);   /* 1 MHz */
     }
 
-  kinetis_i2c_putreg(priv, 4, KINETIS_I2C_FLT_OFFSET);
+  kinetis_i2c_putreg(priv, I2C_FLT(4), KINETIS_I2C_FLT_OFFSET);
 
 #elif BOARD_BUS_FREQ == 54000000
   if (frequency < 400000)
@@ -386,115 +384,115 @@ static void kinetis_i2c_setfrequency(struct kinetis_i2cdev_s *priv,
       kinetis_i2c_putreg(priv, I2C_F_DIV56, KINETIS_I2C_F_OFFSET);     /* 0.96 MHz */
     }
 
-  kinetis_i2c_putreg(priv, 4, KINETIS_I2C_FLT_OFFSET);
+  kinetis_i2c_putreg(priv, I2C_FLT(4), KINETIS_I2C_FLT_OFFSET);
 
 #elif BOARD_BUS_FREQ == 48000000
   if (frequency < 400000)
     {
-      kinetis_i2c_putreg(priv, 0x27, KINETIS_I2C_F_OFFSET);            /* 100 kHz */
+      kinetis_i2c_putreg(priv, I2C_F_DIV480, KINETIS_I2C_F_OFFSET);    /* 100 kHz */
     }
   else if (frequency < 1000000)
     {
-      kinetis_i2c_putreg(priv, 0x1A, KINETIS_I2C_F_OFFSET);            /* 400 kHz */
+      kinetis_i2c_putreg(priv, I2C_F_DIV112, KINETIS_I2C_F_OFFSET);    /* 400 kHz */
     }
   else
     {
-      kinetis_i2c_putreg(priv, 0x0D, KINETIS_I2C_F_OFFSET);            /* 1 MHz */
+      kinetis_i2c_putreg(priv, I2C_F_DIV48_1, KINETIS_I2C_F_OFFSET);   /* 1 MHz */
     }
 
-  kinetis_i2c_putreg(priv, 4, KINETIS_I2C_FLT_OFFSET);
+  kinetis_i2c_putreg(priv, I2C_FLT(4), KINETIS_I2C_FLT_OFFSET);
 
 #elif BOARD_BUS_FREQ == 40000000
   if (frequency < 400000)
     {
-      kinetis_i2c_putreg(priv, 0x29, KINETIS_I2C_F_OFFSET);            /* 104 kHz */
+      kinetis_i2c_putreg(priv, I2C_F_DIV384_2, KINETIS_I2C_F_OFFSET);  /* 104 kHz */
     }
   else if (frequency < 1000000)
     {
-      kinetis_i2c_putreg(priv, 0x19, KINETIS_I2C_F_OFFSET);            /* 416 kHz */
+      kinetis_i2c_putreg(priv, I2C_F_DIV96, KINETIS_I2C_F_OFFSET);     /* 416 kHz */
     }
   else
     {
-      kinetis_i2c_putreg(priv, 0x0B, KINETIS_I2C_F_OFFSET);            /* 1 MHz */
+      kinetis_i2c_putreg(priv, I2C_F_DIV40_2, KINETIS_I2C_F_OFFSET);   /* 1 MHz */
     }
 
-  kinetis_i2c_putreg(priv, 3, KINETIS_I2C_FLT_OFFSET);
+  kinetis_i2c_putreg(priv, I2C_FLT(3), KINETIS_I2C_FLT_OFFSET);
 
 #elif BOARD_BUS_FREQ == 36000000
   if (frequency < 400000)
     {
-      kinetis_i2c_putreg(priv, 0x28, KINETIS_I2C_F_OFFSET);            /* 113 kHz */
+      kinetis_i2c_putreg(priv, I2C_F_DIV320_2, KINETIS_I2C_F_OFFSET);  /* 113 kHz */
     }
   else if (frequency < 1000000)
     {
-      kinetis_i2c_putreg(priv, 0x19, KINETIS_I2C_F_OFFSET);            /* 375 kHz */
+      kinetis_i2c_putreg(priv, I2C_F_DIV96, KINETIS_I2C_F_OFFSET);     /* 375 kHz */
     }
   else
     {
-      kinetis_i2c_putreg(priv, 0x0A, KINETIS_I2C_F_OFFSET);            /* 1 MHz */
+      kinetis_i2c_putreg(priv, I2C_F_DIV36, KINETIS_I2C_F_OFFSET);     /* 1 MHz */
     }
 
-  kinetis_i2c_putreg(priv, 3, KINETIS_I2C_FLT_OFFSET);
+  kinetis_i2c_putreg(priv, I2C_FLT(3), KINETIS_I2C_FLT_OFFSET);
 
 #elif BOARD_BUS_FREQ == 24000000
   if (frequency < 400000)
     {
-      kinetis_i2c_putreg(priv, 0x1F, KINETIS_I2C_F_OFFSET);            /* 100 kHz */
+      kinetis_i2c_putreg(priv, I2C_F_DIV240, KINETIS_I2C_F_OFFSET);    /* 100 kHz */
     }
   else if (frequency < 1000000)
     {
-      kinetis_i2c_putreg(priv, 0x12, KINETIS_I2C_F_OFFSET);            /* 375 kHz */
+      kinetis_i2c_putreg(priv, I2C_F_DIV64, KINETIS_I2C_F_OFFSET);     /* 375 kHz */
     }
   else
-    {
-      kinetis_i2c_putreg(priv, 0x02, KINETIS_I2C_F_OFFSET);            /* 1 MHz */
+    {161
+      kinetis_i2c_putreg(priv, I2C_F_DIV24, KINETIS_I2C_F_OFFSET);     /* 1 MHz */
     }
 
-  kinetis_i2c_putreg(priv, 2, KINETIS_I2C_FLT_OFFSET);
+  kinetis_i2c_putreg(priv, I2C_FLT(2), KINETIS_I2C_FLT_OFFSET);
 
 #elif BOARD_BUS_FREQ == 16000000
   if (frequency < 400000)
     {
-      kinetis_i2c_putreg(priv, 0x20, KINETIS_I2C_F_OFFSET);            /* 100 kHz */
+      kinetis_i2c_putreg(priv, I2C_F_DIV160_2, KINETIS_I2C_F_OFFSET);  /* 100 kHz */
     }
   else if (frequency < 1000000)
     {
-      kinetis_i2c_putreg(priv, 0x07, KINETIS_I2C_F_OFFSET);            /* 400 kHz */
+      kinetis_i2c_putreg(priv, I2C_F_DIV40_1, KINETIS_I2C_F_OFFSET);   /* 400 kHz */
     }
   else
     {
-      kinetis_i2c_putreg(priv, 0x00, KINETIS_I2C_F_OFFSET);            /* 800 MHz */
+      kinetis_i2c_putreg(priv, I2C_F_DIV20, KINETIS_I2C_F_OFFSET);     /* 800 MHz */
     }
 
-  kinetis_i2c_putreg(priv, 1, KINETIS_I2C_FLT_OFFSET);
+  kinetis_i2c_putreg(priv, I2C_FLT(1), KINETIS_I2C_FLT_OFFSET);
 
 #elif BOARD_BUS_FREQ == 8000000
   if (frequency < 400000)
     {
-      kinetis_i2c_putreg(priv, 0x14, KINETIS_I2C_F_OFFSET);            /* 100 kHz */
+      kinetis_i2c_putreg(priv, I2C_F_DIV80_1, KINETIS_I2C_F_OFFSET);   /* 100 kHz */
     }
   else
     {
-      kinetis_i2c_putreg(priv, 0x00, KINETIS_I2C_F_OFFSET);            /* 400 kHz */
+      kinetis_i2c_putreg(priv, I2C_F_DIV20, KINETIS_I2C_F_OFFSET);     /* 400 kHz */
     }
 
-  kinetis_i2c_putreg(priv, 1, KINETIS_I2C_FLT_OFFSET);
+  kinetis_i2c_putreg(priv, I2C_FLT(1), KINETIS_I2C_FLT_OFFSET);
 
 #elif BOARD_BUS_FREQ == 4000000
   if (frequency < 400000)
     {
-      kinetis_i2c_putreg(priv, 0x07, KINETIS_I2C_F_OFFSET);            /* 100 kHz */
+      kinetis_i2c_putreg(priv, I2C_F_DIV40_1, KINETIS_I2C_F_OFFSET);   /* 100 kHz */
     }
   else
     {
-      kinetis_i2c_putreg(priv, 0x00, KINETIS_I2C_F_OFFSET);            /* 200 kHz */
+      kinetis_i2c_putreg(priv, I2C_F_DIV20, KINETIS_I2C_F_OFFSET);     /* 200 kHz */
     }
 
-  kinetis_i2c_putreg(priv, 1, KINETIS_I2C_FLT_OFFSET);
+  kinetis_i2c_putreg(priv, I2C_FLT(1), KINETIS_I2C_FLT_OFFSET);
 
 #elif BOARD_BUS_FREQ == 2000000
-  kinetis_i2c_putreg(priv, 0x00, KINETIS_I2C_F_OFFSET);                /* 100 kHz */
-  kinetis_i2c_putreg(priv, 1, KINETIS_I2C_FLT_OFFSET);
+  kinetis_i2c_putreg(priv, I2C_F_DIV20, KINETIS_I2C_F_OFFSET);         /* 100 kHz */
+  kinetis_i2c_putreg(priv, I2C_FLT(1), KINETIS_I2C_FLT_OFFSET);
 
 #else
 #  error "F_BUS must be 120, 108, 96, 9, 80, 72, 64, 60, 56, 54, 48, 40, 36, 24, 16, 8, 4 or 2 MHz"
