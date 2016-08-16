@@ -86,6 +86,12 @@ int board_app_initialize(uintptr_t arg)
 #endif
   int ret = OK;
 
+#ifdef CONFIG_AUDIO_TONE
+  /* Configure and initialize the tone generator. */
+
+  ret = stm32_tone_setup();
+#endif
+
 #ifdef CONFIG_WL_MFRC522
   ret = stm32_mfrc522initialize("/dev/rfid0");
 #endif
