@@ -127,7 +127,7 @@
 #  define I2C_F_MULT_4           (2 << I2C_F_MULT_SHIFT)
 
 /* From Table 51-54. I2C divider and hold values.  Duplicate divider values differ in hold
- * times
+ * times.  Refer to the Table 51-54. in the K64 Sub-Family Reference Manual.
  */
 
 #define I2C_F_DIV20              ((uint8_t)0x00)
@@ -140,9 +140,9 @@
 #define I2C_F_DIV36              ((uint8_t)0x0a)
 #define I2C_F_DIV40_1            ((uint8_t)0x07)
 #define I2C_F_DIV41              ((uint8_t)0x08)
+
 #define I2C_F_DIV32              ((uint8_t)0x09)
 #define I2C_F_DIV36              ((uint8_t)0x0a)
-
 #define I2C_F_DIV40_2            ((uint8_t)0x0b)
 #define I2C_F_DIV44              ((uint8_t)0x0c)
 #define I2C_F_DIV48_1            ((uint8_t)0x0d)
@@ -240,7 +240,7 @@
 
 /* I2C Programmable Input Glitch Filter register (8-bit) */
 
-#ifdef KINETIS_K20
+#if defined(KINETIS_K20) || defined(KINETIS_K40) || defined(KINETIS_K60)
 #  define I2C_FLT_SHIFT          (0)       /* Bits 0-4: I2C programmable filter factor */
 #  define I2C_FLT_MASK           (31 << I2C_FLT_SHIFT)
 #    define I2C_FLT(n)           ((uint8_t)(n) << I2C_FLT_SHIFT)
