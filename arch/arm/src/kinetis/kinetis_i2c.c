@@ -89,6 +89,8 @@
  * Private Types
  ****************************************************************************/
 
+/* I2C device state structure */
+
 struct kinetis_i2cdev_s
 {
   struct i2c_master_s dev;    /* Generic I2C device */
@@ -112,11 +114,17 @@ struct kinetis_i2cdev_s
  * Private Function Prototypes
  ****************************************************************************/
 
+/* Register access */
+
 static uint8_t kinetis_i2c_getreg(struct kinetis_i2cdev_s *priv,
                                   uint8_t offset);
 static void kinetis_i2c_putreg(struct kinetis_i2cdev_s *priv,
                                uint8_t value, uint8_t offset);
 
+/* I2C helpers */
+
+static void kinetis_i2c_setfrequency(struct kinetis_i2cdev_s *priv,
+                                     uint32_t frequency);
 static int  kinetis_i2c_start(struct kinetis_i2cdev_s *priv);
 static void kinetis_i2c_stop(struct kinetis_i2cdev_s *priv);
 static int  kinetis_i2c_interrupt(struct kinetis_i2cdev_s *priv);
@@ -129,6 +137,9 @@ static int  kinetis_i2c1_interrupt(int irq, void *context);
 static void kinetis_i2c_timeout(int argc, uint32_t arg, ...);
 static void kinetis_i2c_setfrequency(struct kinetis_i2cdev_s *priv,
                                      uint32_t frequency);
+
+/* I2C lower half driver methods */
+
 static int  kinetis_i2c_transfer(struct i2c_master_s *dev,
                                  struct i2c_msg_s *msgs, int count);
 #ifdef CONFIG_I2C_RESET
@@ -139,6 +150,8 @@ static int  kinetis_i2c_reset(struct i2c_master_s *dev);
  * Private Data
  ****************************************************************************/
 
+/* I2C lower half driver operations */
+
 static const struct i2c_ops_s g_i2c_ops =
 {
   .transfer = kinetis_i2c_transfer
@@ -146,6 +159,8 @@ static const struct i2c_ops_s g_i2c_ops =
   ,.reset   = kinetis_i2c_reset
 #endif
 };
+
+/* I2C device state instances */
 
 #ifdef CONFIG_KINETIS_I2C0
 static struct kinetis_i2cdev_s g_i2c0_dev;
@@ -157,7 +172,6 @@ static struct kinetis_i2cdev_s g_i2c1_dev;
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
 
 /****************************************************************************
  * Name: kinetis_i2c_getreg
@@ -198,6 +212,8 @@ static void kinetis_i2c_putreg(struct kinetis_i2cdev_s *priv, uint8_t offset,
 static void kinetis_i2c_setfrequency(struct kinetis_i2cdev_s *priv,
                                      uint32_t frequency)
 {
+  i2cinfo("frequency=%lu\n", (unsigned long)frequency);
+
   if (frequency == priv->frequency)
     {
       return;
@@ -220,6 +236,7 @@ static void kinetis_i2c_setfrequency(struct kinetis_i2cdev_s *priv,
     }
 
   kinetis_i2c_putreg(priv, 4, KINETIS_I2C_FLT_OFFSET);
+
 #elif BOARD_BUS_FREQ == 108000000
   if (frequency < 400000)
     {
@@ -235,6 +252,7 @@ static void kinetis_i2c_setfrequency(struct kinetis_i2cdev_s *priv,
     }
 
   kinetis_i2c_putreg(priv, 4, KINETIS_I2C_FLT_OFFSET);
+
 #elif BOARD_BUS_FREQ == 96000000
   if (frequency < 400000)
     {
@@ -250,6 +268,7 @@ static void kinetis_i2c_setfrequency(struct kinetis_i2cdev_s *priv,
     }
 
   kinetis_i2c_putreg(priv, 4, KINETIS_I2C_FLT_OFFSET);
+
 #elif BOARD_BUS_FREQ == 90000000
   if (frequency < 400000)
     {
@@ -265,6 +284,7 @@ static void kinetis_i2c_setfrequency(struct kinetis_i2cdev_s *priv,
     }
 
   kinetis_i2c_putreg(priv, 4, KINETIS_I2C_FLT_OFFSET);
+
 #elif BOARD_BUS_FREQ == 80000000
   if (frequency < 400000)
     {
@@ -280,6 +300,7 @@ static void kinetis_i2c_setfrequency(struct kinetis_i2cdev_s *priv,
     }
 
   kinetis_i2c_putreg(priv, 4, KINETIS_I2C_FLT_OFFSET);
+
 #elif BOARD_BUS_FREQ == 72000000
   if (frequency < 400000)
     {
@@ -295,6 +316,7 @@ static void kinetis_i2c_setfrequency(struct kinetis_i2cdev_s *priv,
     }
 
   kinetis_i2c_putreg(priv, 4, KINETIS_I2C_FLT_OFFSET);
+
 #elif BOARD_BUS_FREQ == 64000000
   if (frequency < 400000)
     {
@@ -310,6 +332,7 @@ static void kinetis_i2c_setfrequency(struct kinetis_i2cdev_s *priv,
     }
 
   kinetis_i2c_putreg(priv, 4, KINETIS_I2C_FLT_OFFSET);
+
 #elif BOARD_BUS_FREQ == 60000000
   if (frequency < 400000)
     {
@@ -325,6 +348,7 @@ static void kinetis_i2c_setfrequency(struct kinetis_i2cdev_s *priv,
     }
 
   kinetis_i2c_putreg(priv, 4, KINETIS_I2C_FLT_OFFSET);
+
 #elif BOARD_BUS_FREQ == 56000000
   if (frequency < 400000)
     {
@@ -340,6 +364,7 @@ static void kinetis_i2c_setfrequency(struct kinetis_i2cdev_s *priv,
     }
 
   kinetis_i2c_putreg(priv, 4, KINETIS_I2C_FLT_OFFSET);
+
 #elif BOARD_BUS_FREQ == 54000000
   if (frequency < 400000)
     {
@@ -355,6 +380,7 @@ static void kinetis_i2c_setfrequency(struct kinetis_i2cdev_s *priv,
     }
 
   kinetis_i2c_putreg(priv, 4, KINETIS_I2C_FLT_OFFSET);
+
 #elif BOARD_BUS_FREQ == 48000000
   if (frequency < 400000)
     {
@@ -370,6 +396,7 @@ static void kinetis_i2c_setfrequency(struct kinetis_i2cdev_s *priv,
     }
 
   kinetis_i2c_putreg(priv, 4, KINETIS_I2C_FLT_OFFSET);
+
 #elif BOARD_BUS_FREQ == 40000000
   if (frequency < 400000)
     {
@@ -385,6 +412,7 @@ static void kinetis_i2c_setfrequency(struct kinetis_i2cdev_s *priv,
     }
 
   kinetis_i2c_putreg(priv, 3, KINETIS_I2C_FLT_OFFSET);
+
 #elif BOARD_BUS_FREQ == 36000000
   if (frequency < 400000)
     {
@@ -400,6 +428,7 @@ static void kinetis_i2c_setfrequency(struct kinetis_i2cdev_s *priv,
     }
 
   kinetis_i2c_putreg(priv, 3, KINETIS_I2C_FLT_OFFSET);
+
 #elif BOARD_BUS_FREQ == 24000000
   if (frequency < 400000)
     {
@@ -415,6 +444,7 @@ static void kinetis_i2c_setfrequency(struct kinetis_i2cdev_s *priv,
     }
 
   kinetis_i2c_putreg(priv, 2, KINETIS_I2C_FLT_OFFSET);
+
 #elif BOARD_BUS_FREQ == 16000000
   if (frequency < 400000)
     {
@@ -430,6 +460,7 @@ static void kinetis_i2c_setfrequency(struct kinetis_i2cdev_s *priv,
     }
 
   kinetis_i2c_putreg(priv, 1, KINETIS_I2C_FLT_OFFSET);
+
 #elif BOARD_BUS_FREQ == 8000000
   if (frequency < 400000)
     {
@@ -441,6 +472,7 @@ static void kinetis_i2c_setfrequency(struct kinetis_i2cdev_s *priv,
     }
 
   kinetis_i2c_putreg(priv, 1, KINETIS_I2C_FLT_OFFSET);
+
 #elif BOARD_BUS_FREQ == 4000000
   if (frequency < 400000)
     {
@@ -452,9 +484,11 @@ static void kinetis_i2c_setfrequency(struct kinetis_i2cdev_s *priv,
     }
 
   kinetis_i2c_putreg(priv, 1, KINETIS_I2C_FLT_OFFSET);
+
 #elif BOARD_BUS_FREQ == 2000000
   kinetis_i2c_putreg(priv, 0x00, KINETIS_I2C_F_OFFSET);                /* 100 kHz */
   kinetis_i2c_putreg(priv, 1, KINETIS_I2C_FLT_OFFSET);
+
 #else
 #  error "F_BUS must be 120, 108, 96, 9, 80, 72, 64, 60, 56, 54, 48, 40, 36, 24, 16, 8, 4 or 2 MHz"
 #endif
@@ -474,6 +508,7 @@ static int kinetis_i2c_start(struct kinetis_i2cdev_s *priv)
 {
   struct i2c_msg_s *msg;
 
+  i2cinfo("START msg=%p\n", priv->msgs);
   msg = priv->msgs;
 
   /* Now take control of the bus */
@@ -529,6 +564,8 @@ static int kinetis_i2c_start(struct kinetis_i2cdev_s *priv)
 
 static void kinetis_i2c_stop(struct kinetis_i2cdev_s *priv)
 {
+  i2cinfo("STOP msg=%p\n", priv->msgs);
+
   kinetis_i2c_putreg(priv, I2C_C1_IICEN | I2C_C1_IICIE,
                      KINETIS_I2C_C1_OFFSET);
   sem_post(&priv->wait);
@@ -545,6 +582,9 @@ static void kinetis_i2c_stop(struct kinetis_i2cdev_s *priv)
 static void kinetis_i2c_timeout(int argc, uint32_t arg, ...)
 {
   struct kinetis_i2cdev_s *priv = (struct kinetis_i2cdev_s *)arg;
+
+  DEBUGASSERT(priv != NULL);
+  i2cinfo("Timeout msg=%p\n", priv->msgs);
 
   irqstate_t flags = enter_critical_section();
   priv->state = STATE_TIMEOUT;
@@ -563,10 +603,13 @@ static void kinetis_i2c_timeout(int argc, uint32_t arg, ...)
 void kinetis_i2c_nextmsg(struct kinetis_i2cdev_s *priv)
 {
   priv->nmsg--;
+  i2cinfo("nmsg=%u\n", priv->nmsg);
 
   if (priv->nmsg > 0)
     {
       priv->msgs++;
+      i2cinfo("msg=%p\n", priv->msgs);
+
       priv->wrcnt = 0;
       priv->rdcnt = 0;
 
@@ -773,6 +816,7 @@ static int kinetis_i2c_interrupt(struct kinetis_i2cdev_s *priv)
 #ifdef CONFIG_KINETIS_I2C0
 static int kinetis_i2c0_interrupt(int irq, void *context)
 {
+  i2cinfo("I2C0 Interrupt...\n");
   return kinetis_i2c_interrupt(&g_i2c0_dev);
 }
 #endif
@@ -780,6 +824,7 @@ static int kinetis_i2c0_interrupt(int irq, void *context)
 #ifdef CONFIG_KINETIS_I2C1
 static int kinetis_i2c1_interrupt(int irq, void *context)
 {
+  i2cinfo("I2C1 Interrupt...\n");
   return kinetis_i2c_interrupt(&g_i2c1_dev);
 }
 #endif
@@ -798,7 +843,8 @@ static int kinetis_i2c_transfer(struct i2c_master_s *dev,
   struct kinetis_i2cdev_s *priv = (struct kinetis_i2cdev_s *)dev;
   int msg_n;
 
-  DEBUGASSERT(dev != NULL);
+  i2cinfo("msgs=%p count=%d\n", msgs, count);
+  DEBUGASSERT(dev != NULL && msgs != NULL && (unsigned)count <= UINT16_MAX);
 
   /* Get exclusive access to the I2C bus */
 
@@ -826,7 +872,7 @@ static int kinetis_i2c_transfer(struct i2c_master_s *dev,
 
   /* Process every message */
 
-  while (priv->nmsg && priv->state == STATE_OK)
+  while (priv->nmsg > 0 && priv->state == STATE_OK)
     {
       priv->restart = true;
 
@@ -908,6 +954,7 @@ static int kinetis_i2c_transfer(struct i2c_master_s *dev,
 #ifdef CONFIG_I2C_RESET
 static int kinetis_i2c_reset(struct i2c_master_s *dev)
 {
+  i2cinfo("No reset...\n");
   return OK;
 }
 #endif  /* CONFIG_I2C_RESET */
@@ -928,6 +975,8 @@ struct i2c_master_s *kinetis_i2cbus_initialize(int port)
 {
   struct kinetis_i2cdev_s *priv;
   xcpt_t handler;
+
+  i2cinfo("port=%d\n", port);
 
   if (port > 1)
     {
@@ -1000,6 +1049,8 @@ struct i2c_master_s *kinetis_i2cbus_initialize(int port)
       return NULL;
     }
 
+  /* Set the default I2C frequency */
+
   kinetis_i2c_setfrequency(priv, I2C_DEFAULT_FREQUENCY);
 
   /* Enable */
@@ -1047,6 +1098,8 @@ struct i2c_master_s *kinetis_i2cbus_initialize(int port)
 int kinetis_i2cbus_uninitialize(struct i2c_master_s *dev)
 {
   struct kinetis_i2cdev_s *priv = (struct kinetis_i2cdev_s *)dev;
+
+  DEBUGASSERT(priv != NULL);
 
   kinetis_i2c_putreg(priv, 0, KINETIS_I2C_C1_OFFSET);
 
