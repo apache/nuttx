@@ -1,5 +1,5 @@
 /*****************************************************************************
- * configs/stm32butterfly2/src/stm32_butterfly2.h
+ * configs/stm32butterfly2/src/stm32_usb.c
  *
  *   Copyright (C) 2016 Michał Łyszczek. All rights reserved.
  *   Author: Michał Łyszczek <michal.lyszczek@gmail.com>
@@ -34,66 +34,70 @@
  ****************************************************************************/
 
 /*****************************************************************************
- * Included Files
+ * Include Files
  ****************************************************************************/
 
-#include "stm32_gpio.h"
+#include <assert.h>
+#include <debug.h>
+#include <errno.h>
+#include <nuttx/config.h>
+#include <nuttx/usb/usbhost.h>
+#include <pthread.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <sys/types.h>
+
+#include "stm32.h"
+#include "stm32_butterfly2.h"
+#include "stm32_otgfs.h"
 
 /*****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* SD Card pins */
+#ifndef CONFIG_STM32_OTGFS
+#error "CONFIG_USBHOST requires CONFIG_STM32_OTGFS to be enabled"
+#endif
 
-#define GPIO_SD_CS      (GPIO_OUTPUT | GPIO_CNF_OUTPP | GPIO_MODE_50MHz |\
-                         GPIO_OUTPUT_SET | GPIO_PORTA | GPIO_PIN4)
-#define GPIO_SD_CD      (GPIO_INPUT | GPIO_CNF_INFLOAT | GPIO_EXTI |\
-                         GPIO_PORTB | GPIO_PIN9)
+/*****************************************************************************
+ * Private Data
+ ****************************************************************************/
 
-/* USB pins */
+static struct usbhost_connection_s *g_usbconn;
 
-#define GPIO_OTGFS_PWRON (GPIO_OUTPUT | GPIO_CNF_OUTPP | GPIO_MODE_50MHz |\
-                          GPIO_OUTPUT_SET | GPIO_PORTD | GPIO_PIN15)
+/*****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/*****************************************************************************
+ * Name: usbhost_detect
+ *
+ * Description:
+ *   Wait for USB devices to be connected.
+ ****************************************************************************/
+
+static void* usbhost_detect(void *arg)
+{
+  (void)arg;
+
+  struct usbhost_hubport_s *hport;
+
+  for (;;)
+    {
+      CONN_WAIT(g_usbconn, &hport);
+
+      if (hport->connected)
+        {
+          CONN_ENUMERATE(g_usbconn, hport);
+        }
+    }
+
+  return 0;
+}
 
 /*****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/*****************************************************************************
- * Name: stm32_spidev_initialize
- *
- * Description:
- *   Called to configure SPI chip select GPIO pins.
- *
- * Note:
- *   Here only CS pins are configured as SPI pins are configured by driver
- *   itself.
- ****************************************************************************/
-
-void stm32_spidev_initialize(void);
-
-/*****************************************************************************
- * Name: stm32_sdinitialize
- *
- * Description:
- *   Initializes SPI-based SD card
- *
- ****************************************************************************/
-
-int stm32_sdinitialize(int minor);
-
-/*****************************************************************************
- * Name: stm32_usb_initialize
- *
- * Description:
- *   Initializes USB pins
- ****************************************************************************/
-
-#ifdef CONFIG_STM32_OTGFS
-void stm32_usb_initialize(void);
-#else
-static inline void stm32_usb_initialize(void) {}
-#endif
 
 /*****************************************************************************
  * Name: stm32_usbhost_initialize
@@ -102,9 +106,65 @@ static inline void stm32_usb_initialize(void) {}
  *   Initializes USB host functionality.
  ****************************************************************************/
 
-#ifdef CONFIG_USBHOST
-int stm32_usbhost_initialize(void);
-#else
-static inline int stm32_usbhost_initialize(void) {}
+int stm32_usbhost_initialize(void)
+{
+  int rv;
+
+#ifdef CONFIG_USBHOST_MSC
+  if ((rv = usbhost_msc_initialize()) < 0)
+    {
+      uerr("ERROR: Failed to register mass storage class: %d\n", rv);
+    }
 #endif
+
+#ifdef CONFIG_USBHOST_CDACM
+  if ((rv = usbhost_cdacm_initialize()) < 0)
+    {
+      uerr("ERROR: Failed to register CDC/ACM serial class: %d\n", rv);
+    }
+#endif
+
+#ifdef CONFIG_USBHOST_HIDKBD
+  if ((rv = usbhost_kbdinit()) < 0)
+    {
+      uerr("ERROR: Failed to register the KBD class\n");
+    }
+#endif
+
+
+  if ((g_usbconn = stm32_otgfshost_initialize(0)))
+    {
+      pthread_attr_t pattr;
+      pthread_attr_init(&pattr);
+      pthread_attr_setstacksize(&pattr, 2048);
+      return pthread_create(NULL, &pattr, usbhost_detect, NULL);
+    }
+
+  return -ENODEV;
+}
+
+/*****************************************************************************
+ * Name: stm32_usbhost_vbusdrive
+ *
+ * Description:
+ *   Enable/disable driving of VBUS 5V output.
+ *
+ *   The application uses this field to control power to this port, and the
+ *   core clears this bit on an overcurrent condition.
+ *
+ * Input Parameters:
+ *   iface - For future growth to handle multiple USB host interface.
+ *     Should be zero.
+ *   enable - true: enable VBUS power; false: disable VBUS power
+ *
+ * Returned Value:
+ *   None
+ ****************************************************************************/
+
+void stm32_usbhost_vbusdrive(int iface, bool enable)
+{
+  DEBUGASSERT(iface == 0);
+
+  stm32_gpiowrite(GPIO_OTGFS_PWRON, enable);
+}
 

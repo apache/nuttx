@@ -1,5 +1,5 @@
 /*****************************************************************************
- * configs/stm32butterfly2/src/stm32_butterfly2.h
+ * configs/stm32butterfly2/src/stm32_usb.c
  *
  *   Copyright (C) 2016 Michał Łyszczek. All rights reserved.
  *   Author: Michał Łyszczek <michal.lyszczek@gmail.com>
@@ -34,53 +34,17 @@
  ****************************************************************************/
 
 /*****************************************************************************
- * Included Files
+ * Include Files
  ****************************************************************************/
 
-#include "stm32_gpio.h"
+#include <stm32_gpio.h>
+#include <stm32_otgfs.h>
 
-/*****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* SD Card pins */
-
-#define GPIO_SD_CS      (GPIO_OUTPUT | GPIO_CNF_OUTPP | GPIO_MODE_50MHz |\
-                         GPIO_OUTPUT_SET | GPIO_PORTA | GPIO_PIN4)
-#define GPIO_SD_CD      (GPIO_INPUT | GPIO_CNF_INFLOAT | GPIO_EXTI |\
-                         GPIO_PORTB | GPIO_PIN9)
-
-/* USB pins */
-
-#define GPIO_OTGFS_PWRON (GPIO_OUTPUT | GPIO_CNF_OUTPP | GPIO_MODE_50MHz |\
-                          GPIO_OUTPUT_SET | GPIO_PORTD | GPIO_PIN15)
+#include "stm32_butterfly2.h"
 
 /*****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/*****************************************************************************
- * Name: stm32_spidev_initialize
- *
- * Description:
- *   Called to configure SPI chip select GPIO pins.
- *
- * Note:
- *   Here only CS pins are configured as SPI pins are configured by driver
- *   itself.
- ****************************************************************************/
-
-void stm32_spidev_initialize(void);
-
-/*****************************************************************************
- * Name: stm32_sdinitialize
- *
- * Description:
- *   Initializes SPI-based SD card
- *
- ****************************************************************************/
-
-int stm32_sdinitialize(int minor);
 
 /*****************************************************************************
  * Name: stm32_usb_initialize
@@ -89,22 +53,9 @@ int stm32_sdinitialize(int minor);
  *   Initializes USB pins
  ****************************************************************************/
 
-#ifdef CONFIG_STM32_OTGFS
-void stm32_usb_initialize(void);
-#else
-static inline void stm32_usb_initialize(void) {}
-#endif
-
-/*****************************************************************************
- * Name: stm32_usbhost_initialize
- *
- * Description:
- *   Initializes USB host functionality.
- ****************************************************************************/
-
-#ifdef CONFIG_USBHOST
-int stm32_usbhost_initialize(void);
-#else
-static inline int stm32_usbhost_initialize(void) {}
-#endif
+void stm32_usb_initialize(void)
+{
+  stm32_configgpio(GPIO_OTGFS_VBUS);
+  stm32_configgpio(GPIO_OTGFS_PWRON);
+}
 

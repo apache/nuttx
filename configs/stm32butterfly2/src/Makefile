@@ -45,6 +45,14 @@ ifeq ($(CONFIG_STM32_SPI1),y)
 CSRCS += stm32_spi.c
 endif
 
+ifeq ($(CONFIG_STM32_OTGFS),y)
+CSRCS += stm32_usb.c
+endif
+
+ifeq ($(CONFIG_USBHOST),y)
+CSRCS += stm32_usbhost.c
+endif
+
 ifeq ($(CONFIG_MMCSD),y)
 CSRCS += stm32_mmcsd.c
 endif

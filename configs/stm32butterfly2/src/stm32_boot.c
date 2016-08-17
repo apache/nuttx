@@ -52,6 +52,7 @@ void stm32_boardinitialize(void)
 {
   stm32_led_initialize();
   stm32_spidev_initialize();
+  stm32_usb_initialize();
 }
 
 int board_app_initialize(uintptr_t arg)
@@ -63,5 +64,11 @@ int board_app_initialize(uintptr_t arg)
       return rv;
     }
 
-    return 0;
+  if ((rv = stm32_usbhost_initialize()) < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize USB host: %d\n", rv);
+      return rv;
+    }
+
+  return 0;
 }
