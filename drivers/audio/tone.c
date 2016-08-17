@@ -54,7 +54,6 @@
 #include <unistd.h>
 #include <string.h>
 #include <semaphore.h>
-#include <math.h>
 #include <fcntl.h>
 #include <assert.h>
 #include <errno.h>
@@ -113,6 +112,24 @@ static char tune_buf[MAX_TUNE_LEN];
 /* Semitone offsets from C for the characters 'A'-'G' */
 
 static const uint8_t g_note_tab[] = { 9, 11, 0, 2, 4, 5, 7 };
+
+/* Notes in Frequency */
+
+static const uint16_t g_notes_freq[84] =
+{
+  0x0041, 0x0045, 0x0049, 0x004D, 0x0052, 0x0057, 0x005C,
+  0x0061, 0x0067, 0x006E, 0x0074, 0x007B, 0x0082, 0x008A,
+  0x0092, 0x009B, 0x00A4, 0x00AE, 0x00B8, 0x00C3, 0x00CF,
+  0x00DC, 0x00E9, 0x00F6, 0x0105, 0x0115, 0x0125, 0x0137,
+  0x0149, 0x015D, 0x0171, 0x0187, 0x019F, 0x01B8, 0x01D2,
+  0x01ED, 0x020B, 0x022A, 0x024B, 0x026E, 0x0293, 0x02BA,
+  0x02E3, 0x030F, 0x033E, 0x0370, 0x03A4, 0x03DB, 0x0416,
+  0x0454, 0x0496, 0x04DC, 0x0526, 0x0574, 0x05C7, 0x061F,
+  0x067D, 0x06E0, 0x0748, 0x07B7, 0x082D, 0x08A9, 0x092D,
+  0x09B9, 0x0A4D, 0x0AE9, 0x0B8F, 0x0C3F, 0x0CFA, 0x0DC0,
+  0x0E91, 0x0F6F, 0x105A, 0x1152, 0x125A, 0x1372, 0x149A,
+  0x15D3, 0x171F, 0x187F, 0x19F4, 0x1B80, 0x1D22, 0x1EDE
+};
 
 /* Global variable used by the tone generator */
 
@@ -179,23 +196,6 @@ static void oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
   /* Play the next note */
 
   next_note(upper);
-}
-
-/****************************************************************************
- * Name: note_to_freq
- *
- * Description:
- *   This function converts a note value in the range C1 to B7 to frequency.
- *
- ****************************************************************************/
-
-static uint16_t note_to_freq(uint8_t note)
-{
-  /* Compute the frequency in Hz */
-
-  uint16_t freq = 880.0f * expf(logf(2.0f) * ((int)note - 46) / 12.0f);
-
-  return freq;
 }
 
 /****************************************************************************
@@ -294,7 +294,7 @@ static void start_note(FAR struct tone_upperhalf_s *upper, uint8_t note)
 {
   FAR struct pwm_lowerhalf_s *tone = upper->devtone;
 
-  upper->tone.frequency = note_to_freq(note);
+  upper->tone.frequency = g_notes_freq[note - 1];
   upper->tone.duty = 50;
 
   tone->ops->start(tone, &upper->tone);
@@ -866,7 +866,6 @@ static ssize_t tone_write(FAR struct file *filep, FAR const char *buffer,
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct tone_upperhalf_s *upper = inode->i_private;
-  int ndx;
 
   /* We need to receive a string #RRGGBB = 7 bytes */
 
