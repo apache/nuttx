@@ -36,8 +36,6 @@
  * Included Files
  ****************************************************************************/
 
-#include <debug.h>
-#include <nuttx/config.h>
 #include <nuttx/spi/spi.h>
 
 #include "stm32_butterfly2.h"
@@ -52,11 +50,11 @@
  * Name: stm32_spidev_initialize
  *
  * Description:
- *      Called to configure SPI chip select GPIO pins.
+ *   Called to configure SPI chip select GPIO pins.
  *
  * Note:
- *      Here only CS pins are configured as SPI pins are configured by driver
- *      itself.
+ *   Here only CS pins are configured as SPI pins are configured by driver
+ *   itself.
  ****************************************************************************/
 
 void stm32_spidev_initialize(void)
@@ -69,7 +67,7 @@ void stm32_spidev_initialize(void)
  * Name: stm32_spi1select
  *
  * Description:
- *      Function asserts given devid based on select
+ *   Function asserts given devid based on select
  ****************************************************************************/
 
 void stm32_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
@@ -85,7 +83,7 @@ void stm32_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
  * Name: stm32_spi1status
  *
  * Description:
- *      Return status of devid
+ *   Return status of devid
  ****************************************************************************/
 
 uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)

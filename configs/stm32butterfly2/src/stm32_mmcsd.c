@@ -37,8 +37,6 @@
  * Included Files
  ****************************************************************************/
 
-#include <debug.h>
-#include <fcntl.h>
 #include <nuttx/config.h>
 #include <nuttx/mmcsd.h>
 #include <nuttx/spi/spi.h>
@@ -72,15 +70,15 @@ static const int SD_SLOT_NO = 0;  /* There is only one SD slot */
 
 /* Media changed callback */
 
-static spi_mediachange_t mediachangeclbk;
+static spi_mediachange_t g_chmediaclbk;
 
 /* Argument for media changed callback */
 
-static void *mediachangearg;
+static void *chmediaarg;
 
 /* Semafor to inform stm32_cd_thread that card was inserted or pulled out */
 
-static sem_t cdsem;
+static sem_t g_cdsem;
 
 /*****************************************************************************
  * Private Functions
@@ -90,8 +88,8 @@ static sem_t cdsem;
  * Name: stm32_cd_thread
  *
  * Description:
- *      Working thread to call mediachanged function when card is inserted or
- *      pulled out.
+ *   Working thread to call mediachanged function when card is inserted or
+ *   pulled out.
  ****************************************************************************/
 
 static void *stm32_cd_thread(void *arg)
@@ -100,16 +98,16 @@ static void *stm32_cd_thread(void *arg)
 
   while (1)
     {
-      sem_wait(&cdsem);
+      sem_wait(&g_cdsem);
 
-      if (mediachangeclbk)
+      if (g_chmediaclbk)
         {
           /* Card doesn't seem to initialize properly without letting it to
            * rest for a millsecond or so.
            */
 
           usleep(1 * 1000);
-          mediachangeclbk(mediachangearg);
+          g_chmediaclbk(chmediaarg);
         }
     }
 
@@ -120,7 +118,7 @@ static void *stm32_cd_thread(void *arg)
  * Name: stm32_cd
  *
  * Description:
- *      Card detect interrupt handler.
+ *   Card detect interrupt handler.
  ****************************************************************************/
 
 static int stm32_cd(int irq, FAR void *context)
@@ -128,8 +126,8 @@ static int stm32_cd(int irq, FAR void *context)
   static const int debounce_time = 100; /* [ms] */
   static uint32_t now = 0;
   static uint32_t prev = 0;
-
   struct timespec tp;
+
   clock_gettime(CLOCK_MONOTONIC, &tp);
   now = tp.tv_sec * 1000 + tp.tv_nsec / 1000000;
 
@@ -141,7 +139,7 @@ static int stm32_cd(int irq, FAR void *context)
   if (now - debounce_time > prev)
     {
       prev = now;
-      sem_post(&cdsem);
+      sem_post(&g_cdsem);
     }
 
   return OK;
@@ -155,31 +153,32 @@ static int stm32_cd(int irq, FAR void *context)
  * Name: stm32_spi1register
  *
  * Description:
- *      Registers media change callback
+ *   Registers media change callback
  ****************************************************************************/
 
 int stm32_spi1register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
                        FAR void *arg)
 {
-  mediachangeclbk = callback;
-  mediachangearg = arg;
+  g_chmediaclbk = callback;
+  chmediaarg = arg;
   return OK;
 }
 
 /*****************************************************************************
- * Name: stm32_sdinitialize
+ * Name: stm32_mmcsd_initialize
  *
  * Description:
- *      Initialize SPI-based SD card and card detect thread.
+ *   Initialize SPI-based SD card and card detect thread.
  ****************************************************************************/
 
-int stm32_sdinitialize(int minor)
+int stm32_mmcsd_initialize(int minor)
 {
   FAR struct spi_dev_s *spi;
+  struct sched_param schparam;
+  pthread_attr_t pattr;
   int rv;
 
-  spi = stm32_spibus_initialize(SD_SPI_PORT);
-  if (!spi)
+  if ((spi = stm32_spibus_initialize(SD_SPI_PORT)) == NULL)
     {
       ferr("failed to initialize SPI port %d\n", SD_SPI_PORT);
       return -ENODEV;
@@ -193,15 +192,18 @@ int stm32_sdinitialize(int minor)
     }
 
   stm32_gpiosetevent(GPIO_SD_CD, true, true, true, stm32_cd);
-  sem_init(&cdsem, 0, 0);
 
-  pthread_attr_t pattr;
+  sem_init(&g_cdsem, 0, 0);
   pthread_attr_init(&pattr);
+
 #ifdef CONFIG_DEBUG_FS
   pthread_attr_setstacksize(&pattr, 1024);
 #else
   pthread_attr_setstacksize(&pattr, 256);
 #endif
+
+  schparam.sched_priority = 50;
+  pthread_attr_setschedparam(&pattr, &schedparam);
   pthread_create(NULL, &pattr, stm32_cd_thread, NULL);
 
   return OK;

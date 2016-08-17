@@ -1,5 +1,5 @@
 /*****************************************************************************
- * configs/stm32butterfly2/src/stm32_usb.c
+ * configs/stm32butterfly2/src/stm32_usbhost.c
  *
  *   Copyright (C) 2016 Michał Łyszczek. All rights reserved.
  *   Author: Michał Łyszczek <michal.lyszczek@gmail.com>
@@ -37,8 +37,6 @@
  * Include Files
  ****************************************************************************/
 
-#include <assert.h>
-#include <debug.h>
 #include <errno.h>
 #include <nuttx/config.h>
 #include <nuttx/usb/usbhost.h>
@@ -79,7 +77,6 @@ static struct usbhost_connection_s *g_usbconn;
 static void* usbhost_detect(void *arg)
 {
   (void)arg;
-
   struct usbhost_hubport_s *hport;
 
   for (;;)
@@ -176,8 +173,6 @@ int stm32_usbhost_initialize(void)
 
 void stm32_usbhost_vbusdrive(int iface, bool enable)
 {
-  DEBUGASSERT(iface == 0);
-
   stm32_gpiowrite(GPIO_OTGFS_PWRON, enable);
 }
 

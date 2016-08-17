@@ -1,5 +1,5 @@
-/*******************************************************************************
- * configs/stm32butterfly2/src/led.c
+/*****************************************************************************
+ * configs/stm32butterfly2/src/stm32_led.c
  *
  *   Copyright (C) 2016 Michał Łyszczek. All rights reserved.
  *   Author: Michał Łyszczek <michal.lyszczek@gmail.com>
@@ -31,26 +31,22 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/*****************************************************************************
  * Included Files
- ******************************************************************************/
-
-#include <nuttx/config.h>
-
-#include <stdint.h>
-#include <stdbool.h>
+ ****************************************************************************/
 
 #include <nuttx/board.h>
-#include <arch/board/board.h>
-#include <debug.h>
+#include <nuttx/config.h>
+#include <stdbool.h>
+#include <stdint.h>
 
 #include "stm32_gpio.h"
 
-/*******************************************************************************
+/*****************************************************************************
  * Pre-processor definitions
- ******************************************************************************/
+ ****************************************************************************/
 
 #define GPIO_LED1       (GPIO_OUTPUT | GPIO_CNF_OUTPP | GPIO_MODE_50MHz |\
                          GPIO_OUTPUT_SET | GPIO_PORTB | GPIO_PIN0)
@@ -61,9 +57,9 @@
 #define GPIO_LED4       (GPIO_OUTPUT | GPIO_CNF_OUTPP | GPIO_MODE_50MHz |\
                          GPIO_OUTPUT_SET | GPIO_PORTC | GPIO_PIN5)
 
-/*******************************************************************************
+/*****************************************************************************
  * Private Types
- ******************************************************************************/
+ ****************************************************************************/
 
 /* Identifies led state */
 enum led_state
@@ -72,9 +68,16 @@ enum led_state
   LED_OFF = true
 };
 
-/*******************************************************************************
+/*****************************************************************************
  * Private Functions
- ******************************************************************************/
+ ****************************************************************************/
+
+/*****************************************************************************
+ * Name: led_state
+ *
+ * Description:
+ *   Sets pack of leds to given state
+ ****************************************************************************/
 
 static void led_state(enum led_state state, unsigned int leds)
 {
@@ -87,7 +90,7 @@ static void led_state(enum led_state state, unsigned int leds)
     {
       stm32_gpiowrite(GPIO_LED2, state);
     }
-  
+
   if (leds & BOARD_LED3_BIT)
     {
       stm32_gpiowrite(GPIO_LED3, state);
@@ -99,9 +102,16 @@ static void led_state(enum led_state state, unsigned int leds)
     }
 }
 
-/*******************************************************************************
+/*****************************************************************************
  * Public Functions
- ******************************************************************************/
+ ****************************************************************************/
+
+/*****************************************************************************
+ * Name: stm32_led_initialize
+ *
+ * Description:
+ *   Initializes low level gpio pins for board LEDS
+ ****************************************************************************/
 
 void stm32_led_initialize(void)
 {
@@ -112,6 +122,17 @@ void stm32_led_initialize(void)
 }
 
 #ifdef CONFIG_ARCH_LEDS
+
+/*****************************************************************************
+ * Name: board_autoled_on
+ *
+ * Description:
+ *   Drives board leds when specific RTOS state led occurs.
+ *
+ * Input parameters:
+ *   led - This is actually an RTOS state not led number of anything like that
+ ****************************************************************************/
+
 void board_autoled_on(int led)
 {
   switch (led)
@@ -145,6 +166,16 @@ void board_autoled_on(int led)
     }
 }
 
+/*****************************************************************************
+ * Name: board_autoled_off
+ *
+ * Description:
+ *   Drives board leds when specific RTOS state led ends
+ *
+ * Input parameters:
+ *   led - This is actually an RTOS state not led number of anything like that
+ ****************************************************************************/
+
 void board_autoled_off(int led)
 {
   switch (led)
@@ -172,10 +203,31 @@ void board_autoled_off(int led)
 }
 #endif
 
+/*****************************************************************************
+ * Name: board_userled_initialize
+ *
+ * Description:
+ *   This function should initialize leds for user use, but on RTOS start we
+ *   initialize every led for use by RTOS and at end, when RTOS is fully
+ *   booted up, we give control of these specific leds for user. So that's why
+ *   this function is empty.
+ ****************************************************************************/
+
 void board_userled_initialize(void)
 {
   /* Already initialized by stm32_led_initialize. */
 }
+
+/*****************************************************************************
+ * Name: board_userled
+ *
+ * Description:
+ *   Sets led to ledon state.
+ *
+ * Input parameters:
+ *   led - Led to be set, indexed from 0
+ *   ledon - new state for the led.
+ ****************************************************************************/
 
 void board_userled(int led, bool ledon)
 {
@@ -186,8 +238,18 @@ void board_userled(int led, bool ledon)
     }
 #endif
   unsigned int ledbit = 1 << led;
-  led_state(ledon, ledbit); 
+  led_state(ledon, ledbit);
 }
+
+/*****************************************************************************
+ * Name: board_userled_all
+ *
+ * Description:
+ *   Sets whole ledset to given state.
+ *
+ * Input parameters:
+ *   ledset - Led bits to be set on or off
+ ****************************************************************************/
 
 void board_userled_all(uint8_t ledset)
 {
@@ -199,3 +261,4 @@ void board_userled_all(uint8_t ledset)
   led_state(led_OFF, ~ledset);
 #endif
 }
+

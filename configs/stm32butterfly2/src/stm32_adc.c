@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*****************************************************************************
  * configs/stm32butterfly2/src/stm32_adc.c
  *
  *   Copyright (C) 2016 Michał Łyszczek. All rights reserved.
@@ -30,22 +30,28 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- *
- ******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/*****************************************************************************
  * Included Files
- ******************************************************************************/
+ ****************************************************************************/
 
 #include <chip.h>
 #include <debug.h>
 #include <errno.h>
-#include <nuttx/config.h>
-#include <stm32_adc.h>
 
-/*******************************************************************************
+#include "stm32_adc.h"
+
+/*****************************************************************************
  * Public Functions
- ******************************************************************************/
+ ****************************************************************************/
+
+/*****************************************************************************
+ * Name: board_adc_setup
+ *
+ * Description:
+ *   Function initializes channel 1 of adc1 and registers device as /dev/adc0
+ ****************************************************************************/
 
 int board_adc_setup(void)
 {
@@ -60,8 +66,7 @@ int board_adc_setup(void)
     }
 
   stm32_configgpio(GPIO_ADC12_IN10);
-  adc = stm32_adcinitialize(1, channel, 1);
-  if (adc == NULL)
+  if ((adc = stm32_adcinitialize(1, channel, 1)) == NULL)
     {
       aerr("ERROR: Failed to get adc interface\n");
       return -ENODEV;
@@ -76,3 +81,4 @@ int board_adc_setup(void)
   initialized = true;
   return OK;
 }
+

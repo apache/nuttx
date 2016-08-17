@@ -30,7 +30,6 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- *
  ****************************************************************************/
 
 /*****************************************************************************
@@ -60,6 +59,15 @@
  ****************************************************************************/
 
 /*****************************************************************************
+ * Name: stm32_led_initialize
+ *
+ * Description:
+ *      Initializes low level gpio pins for board LEDS
+ ****************************************************************************/
+
+void stm32_led_initialize(void);
+
+/*****************************************************************************
  * Name: stm32_spidev_initialize
  *
  * Description:
@@ -70,17 +78,25 @@
  *   itself.
  ****************************************************************************/
 
+#ifdef CONFIG_STM32_SPI1
 void stm32_spidev_initialize(void);
+#else
+static inline void stm32_spidev_initialize(void);
+#endif
 
 /*****************************************************************************
- * Name: stm32_sdinitialize
+ * Name: stm32_mmcsd_initialize
  *
  * Description:
  *   Initializes SPI-based SD card
  *
  ****************************************************************************/
 
-int stm32_sdinitialize(int minor);
+#ifdef CONFIG_MMCSD
+int stm32_mmcsd_initialize(int minor);
+#else
+static inline int stm32_mmcsd_initialize(int minor);
+#endif
 
 /*****************************************************************************
  * Name: stm32_usb_initialize

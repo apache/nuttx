@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*****************************************************************************
  * configs/stm32butterfly2/src/boot.c
  *
  *   Copyright (C) 2016 Michał Łyszczek. All rights reserved.
@@ -30,23 +30,28 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- *
- ******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/*****************************************************************************
  * Included Files
- ******************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <arch/board/board.h>
 #include <syslog.h>
 
-#include "stm32_gpio.h"
 #include "stm32_butterfly2.h"
 
-/*******************************************************************************
+/*****************************************************************************
  * Public Functions
- ******************************************************************************/
+ ****************************************************************************/
+
+/*****************************************************************************
+ * Name: stm32_boardinitialize
+ *
+ * Description:
+ *   Initializes low level pins for the drivers.
+ ****************************************************************************/
 
 void stm32_boardinitialize(void)
 {
@@ -55,20 +60,35 @@ void stm32_boardinitialize(void)
   stm32_usb_initialize();
 }
 
+/*****************************************************************************
+ * Name: board_app_initialize
+ *
+ * Description:
+ *   Initializes upper half drivers with board specific settings
+ *
+ * Returned value:
+ *   0 on sucess or errno value of failed init function.
+ ****************************************************************************/
+
 int board_app_initialize(uintptr_t arg)
 {
-  int rv;
-  if ((rv = stm32_sdinitialize(CONFIG_NSH_MMCSDMINOR)) < 0)
+  int rv = 0;
+
+#ifdef CONFIG_MMCSD
+  if ((rv = stm32_mmcsd_initialize(CONFIG_NSH_MMCSDMINOR)) < 0)
     {
       syslog(LOG_ERR, "Failed to initialize SD slot %d: %d\n");
       return rv;
     }
+#endif
 
+#ifdef CONFIG_USBHOST
   if ((rv = stm32_usbhost_initialize()) < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize USB host: %d\n", rv);
       return rv;
     }
+#endif
 
-  return 0;
+  return rv;
 }

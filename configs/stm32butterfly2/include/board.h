@@ -183,14 +183,6 @@ extern "C" {
  ******************************************************************************/
 
 /*******************************************************************************
- * Name: stm32_led_initialize
- *
- * Description:
- *      Initializes board specific LEDS
- ******************************************************************************/
-void stm32_led_initialize(void);
-
-/*******************************************************************************
  * Name: stm32_boardinitialize
  *
  * Description:
@@ -199,6 +191,7 @@ void stm32_led_initialize(void);
  *     has been configured and mapped but before any devices have been
  *     initialized.
  ******************************************************************************/
+
 EXTERN void stm32_boardinitialize(void);
 
 #undef EXTERN

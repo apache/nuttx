@@ -37,8 +37,7 @@
  * Include Files
  ****************************************************************************/
 
-#include <stm32_gpio.h>
-#include <stm32_otgfs.h>
+#include "stm32_gpio.h"
 
 #include "stm32_butterfly2.h"
 
