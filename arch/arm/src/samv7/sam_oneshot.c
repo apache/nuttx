@@ -147,24 +147,29 @@ static void sam_oneshot_handler(TC_HANDLE tch, void *arg, uint32_t sr)
 int sam_oneshot_initialize(struct sam_oneshot_s *oneshot, int chan,
                            uint16_t resolution)
 {
-  uint32_t freq_required;
-  uint32_t freq_actual;
-  uint32_t div;
+  uint32_t frequency;
+  uint32_t actual;
   uint32_t cmr;
+  int ret;
 
   tmrinfo("chan=%d resolution=%d usec\n", chan, resolution);
   DEBUGASSERT(oneshot && resolution > 0);
 
   /* Get the TC frequency the corresponds to the requested resolution */
 
-  freq_required = USEC_PER_SEC / (uint32_t)resolution;
+  frequency = USEC_PER_SEC / (uint32_t)resolution;
 
   /* The pre-calculate values to use when we start the timer */
 
-  freq_actual = sam_tc_clockselect(freq_required, &cmr, &div);
+  ret = sam_tc_clockselect(frequency, &cmr, &actual);
+  if (ret < 0)
+    {
+      tmrerr("ERROR: sam_tc_clockselect failed: %d\n", ret);
+      return ret;
+    }
 
-  tmrinfo("freq required=%lu, freq actual=%lu, TC_CMR.TCCLKS=%08lx\n",
-          (unsigned long)freq_required, (unsigned long)freq_actual,
+  tmrinfo("frequency=%lu, actual=%lu, cmr=%08lx\n",
+          (unsigned long)frequency, (unsigned long)actual,
           (unsigned long)cmr);
 
   /* Allocate the timer/counter and select its mode of operation
