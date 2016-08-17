@@ -37,10 +37,12 @@
  * Include Files
  ****************************************************************************/
 
+#include <debug.h>
 #include <errno.h>
 #include <nuttx/config.h>
 #include <nuttx/usb/usbhost.h>
 #include <pthread.h>
+#include <sched.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <sys/types.h>
@@ -79,6 +81,7 @@ static void* usbhost_detect(void *arg)
   (void)arg;
   struct usbhost_hubport_s *hport;
 
+  uinfo("INFO: Starting usb detect thread\n");
   for (;;)
     {
       CONN_WAIT(g_usbconn, &hport);
@@ -108,6 +111,7 @@ int stm32_usbhost_initialize(void)
   int rv;
 
 #ifdef CONFIG_USBHOST_MSC
+  uinfo("INFO: Initializing USB MSC class\n");
   if ((rv = usbhost_msc_initialize()) < 0)
     {
       uerr("ERROR: Failed to register mass storage class: %d\n", rv);
@@ -115,6 +119,7 @@ int stm32_usbhost_initialize(void)
 #endif
 
 #ifdef CONFIG_USBHOST_CDACM
+  uinfo("INFO: Initializing CDCACM usb class\n");
   if ((rv = usbhost_cdacm_initialize()) < 0)
     {
       uerr("ERROR: Failed to register CDC/ACM serial class: %d\n", rv);
@@ -122,6 +127,7 @@ int stm32_usbhost_initialize(void)
 #endif
 
 #ifdef CONFIG_USBHOST_HIDKBD
+  uinfo("INFO: Initializing HID Keyboard usb class\n");
   if ((rv = usbhost_kbdinit()) < 0)
     {
       uerr("ERROR: Failed to register the KBD class: %d\n", rv);
@@ -129,6 +135,7 @@ int stm32_usbhost_initialize(void)
 #endif
 
 #ifdef CONFIG_USBHOST_HIDMOUSE
+  uinfo("INFO: Initializing HID Mouse usb class\n");
   if ((rv = usbhost_mouse_init()) < 0)
     {
       uerr("ERROR: Failed to register the mouse class: %d\n", rv);
@@ -136,6 +143,7 @@ int stm32_usbhost_initialize(void)
 #endif
 
 #ifdef CONFIG_USBHOST_HUB
+  uinfo("INFO: Initializing USB HUB class\n");
   if ((rv = usbhost_hub_initialize()) < 0)
     {
       uerr("ERROR: Failed to register hub class: %d\n", rv);
@@ -145,8 +153,14 @@ int stm32_usbhost_initialize(void)
   if ((g_usbconn = stm32_otgfshost_initialize(0)))
     {
       pthread_attr_t pattr;
+      struct sched_param schparam;
+
       pthread_attr_init(&pattr);
       pthread_attr_setstacksize(&pattr, 2048);
+
+      schparam.sched_priority = 50;
+      pthread_attr_setschedparam(&pattr, &schparam);
+
       return pthread_create(NULL, &pattr, usbhost_detect, NULL);
     }
 

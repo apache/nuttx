@@ -37,6 +37,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <arch/board/board.h>
 #include <nuttx/board.h>
 #include <nuttx/config.h>
 #include <stdbool.h>

@@ -65,6 +65,7 @@ int board_adc_setup(void)
       return OK;
     }
 
+  ainfo("INFO: Initializing ADC12_IN10\n");
   stm32_configgpio(GPIO_ADC12_IN10);
   if ((adc = stm32_adcinitialize(1, channel, 1)) == NULL)
     {
@@ -79,6 +80,7 @@ int board_adc_setup(void)
     }
 
   initialized = true;
+  ainfo("INFO: ADC12_IN10 initialized succesfully\n");
   return OK;
 }
 

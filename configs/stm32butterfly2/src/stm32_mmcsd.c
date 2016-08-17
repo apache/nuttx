@@ -37,10 +37,12 @@
  * Included Files
  ****************************************************************************/
 
+#include <debug.h>
 #include <nuttx/config.h>
 #include <nuttx/mmcsd.h>
 #include <nuttx/spi/spi.h>
 #include <pthread.h>
+#include <sched.h>
 #include <semaphore.h>
 #include <time.h>
 #include <unistd.h>
@@ -96,9 +98,11 @@ static void *stm32_cd_thread(void *arg)
 {
   (void)arg;
 
+  spiinfo("INFO: Runnig card detect thread\n");
   while (1)
     {
       sem_wait(&g_cdsem);
+      spiinfo("INFO: Card has been inserted, initializing\n");
 
       if (g_chmediaclbk)
         {
@@ -159,6 +163,7 @@ static int stm32_cd(int irq, FAR void *context)
 int stm32_spi1register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
                        FAR void *arg)
 {
+  spiinfo("INFO: Registering spi1 device\n");
   g_chmediaclbk = callback;
   chmediaarg = arg;
   return OK;
@@ -178,6 +183,7 @@ int stm32_mmcsd_initialize(int minor)
   pthread_attr_t pattr;
   int rv;
 
+  spiinfo("INFO: Initializing mmcsd card\n");
   if ((spi = stm32_spibus_initialize(SD_SPI_PORT)) == NULL)
     {
       ferr("failed to initialize SPI port %d\n", SD_SPI_PORT);
@@ -203,9 +209,10 @@ int stm32_mmcsd_initialize(int minor)
 #endif
 
   schparam.sched_priority = 50;
-  pthread_attr_setschedparam(&pattr, &schedparam);
+  pthread_attr_setschedparam(&pattr, &schparam);
   pthread_create(NULL, &pattr, stm32_cd_thread, NULL);
 
+  spiinfo("INFO: mmcsd card has been initialized successfully\n");
   return OK;
 }
 
