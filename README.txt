@@ -908,9 +908,9 @@ Build Targets and Options
 
   distclean
 
-    Does 'clean' then also removes all configuration and context files.
-    This essentially restores the directory structure to its original,
-    unconfigured stated.
+    Does 'clean' then also removes all configuration, dependency, and
+    other context files.  This essentially restores the directory structure
+    to its original, unconfigured stated.
 
   Application housekeeping targets.  The APPDIR variable refers to the user
   application directory.  A sample apps/ directory is included with NuttX,

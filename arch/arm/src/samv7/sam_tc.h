@@ -319,29 +319,20 @@ uint32_t sam_tc_divfreq(TC_HANDLE handle);
  * Name: sam_tc_clockselect
  *
  * Description:
- *   Finds the best MCK divisor given the timer frequency and MCK.  The
- *   result is guaranteed to satisfy the following equation:
- *
- *     (Ftcin / (div * 65536)) <= freq <= (Ftcin / div)
- *
- *   where:
- *     freq  - the desired frequency
- *     Ftcin - The timer/counter input frequency
- *     div   - With DIV being the highest possible value.
+ *   Finds the best clock source and clock divisor to configure required
+ *   frequency.
  *
  * Input Parameters:
- *   frequency  Desired timer frequency.
- *   tcclks     TCCLKS field value for divisor.
- *   actual     The actual freqency of the MCK
+ *   frequency  desired timer frequency
+ *   tcclks     TC_CMRx.TCCLKS bit field (clock selection) value
+ *   div        the divisor value to be configured for the TC
  *
  * Returned Value:
- *   Zero (OK) if a proper divisor has been found, otherwise a negated errno
- *   value indicating the nature of the failure.
+ *   the actual frequency which will be configured with calculated parameters
  *
  ****************************************************************************/
 
-int sam_tc_clockselect(uint32_t frequency, uint32_t *tcclks,
-                       uint32_t *actual);
+uint32_t sam_tc_clockselect(uint32_t frequency, uint32_t *tcclks, uint32_t *div);
 
 #undef EXTERN
 #ifdef __cplusplus

@@ -213,8 +213,8 @@ static int sam_tc11_interrupt(int irq, void *context);
 
 static uint32_t sam_tc_mckfreq_lookup(uint32_t ftcin, int ndx);
 static inline uint32_t sam_tc_tcclks_lookup(int ndx);
-static int sam_tc_mcksrc(uint32_t frequency, uint32_t *tcclks,
-                         uint32_t *actual);
+static uint32_t sam_tc_freq_err_abs(uint32_t freq_required,
+                                    uint32_t freq_input, uint32_t *div);
 static inline struct sam_chan_s *sam_tc_initialize(int channel);
 
 /****************************************************************************
@@ -1019,83 +1019,51 @@ static inline uint32_t sam_tc_tcclks_lookup(int ndx)
 }
 
 /****************************************************************************
- * Name: sam_tc_mcksrc
+ * Name: sam_tc_freq_err_abs
  *
  * Description:
- *   Finds the best MCK divisor given the timer frequency and MCK.  The
- *   result is guaranteed to satisfy the following equation:
- *
- *     (Ftcin / (div * 65536)) <= freq <= (Ftcin / div)
- *
- *   where:
- *     freq  - the desired frequency
- *     Ftcin - The timer/counter input frequency
- *     div   - With DIV being the highest possible value.
+ *   Calculate best possible frequency error given input frequency and
+ *   required frequency knowing that input frequency can be divided by
+ *   integer divisor. The divisor for which the given error was calculated
+ *   is also returned.
  *
  * Input Parameters:
- *   frequency  Desired timer frequency.
- *   tcclks     TCCLKS field value for divisor.
- *   actual     The actual freqency of the MCK
+ *   freq_required  Desired timer frequency
+ *   freq_input     TC module input frequency
+ *   div            Pointer to the divisor for which the error was
+ *                  calculated
  *
  * Returned Value:
- *   Zero (OK) if a proper divisor has been found, otherwise a negated errno
- *   value indicating the nature of the failure.
+ *   Absolute value of the smallest possible frequency error
  *
  ****************************************************************************/
 
-static int sam_tc_mcksrc(uint32_t frequency, uint32_t *tcclks,
-                         uint32_t *actual)
+static uint32_t sam_tc_freq_err_abs(uint32_t freq_required, uint32_t freq_input,
+                                    uint32_t *div)
 {
-  uint32_t fselect;
-  uint32_t fnext;
-  int ndx = 0;
+  uint32_t freq_actual;
+  uint32_t freq_error;
 
-  tmrinfo("frequency=%d\n", frequency);
+  DEBUGASSERT(freq_input >= freq_required);
+  DEBUGASSERT(UINT32_MAX - freq_required/2 > freq_input);
 
-  /* Satisfy lower bound.  That is, the value of the divider such that:
-   *
-   *   frequency >= (tc_input_frequency * 65536) / divider.
+  /* Integer division will truncate result toward zero, make sure the result
+   * is rounded instead.
    */
 
-  for (; ndx < TC_NDIVIDERS; ndx++)
+  *div = (freq_input + freq_required/2) / freq_required;
+  freq_actual = freq_input / *div;
+
+  if (freq_required >= freq_actual)
     {
-      fselect = sam_tc_mckfreq_lookup(BOARD_MCK_FREQUENCY, ndx);
-      if (frequency >= (fselect >> 16))
-        {
-          break;
-        }
+      freq_error = freq_required - freq_actual;
+    }
+  else
+    {
+      freq_error = freq_actual - freq_required;
     }
 
-  if (ndx >= TC_NDIVIDERS)
-    {
-      /* If no divisor can be found, return -ERANGE */
-
-      tmrerr("ERROR: Lower bound search failed\n");
-      return -ERANGE;
-    }
-
-  /* Try to maximize DIV while still satisfying upper bound.  That the
-   * value of the divider such that:
-   *
-   *   frequency < tc_input_frequency / divider.
-   */
-
-  for (; ndx < TC_NDIVIDERS; ndx++)
-    {
-      fnext = sam_tc_mckfreq_lookup(BOARD_MCK_FREQUENCY, ndx + 1);
-      if (frequency > fnext)
-        {
-          break;
-        }
-
-      fselect = fnext;
-    }
-
-  /* Return the actual frequency and the TCCLKS selection */
-
-  *actual = fselect;
-  *tcclks = sam_tc_tcclks_lookup(ndx);
-  return OK;
+  return freq_error;
 }
 
 /****************************************************************************
@@ -1644,120 +1612,80 @@ uint32_t sam_tc_divfreq(TC_HANDLE handle)
  * Name: sam_tc_clockselect
  *
  * Description:
- *   Finds the best MCK divisor given the timer frequency and MCK.  The
- *   result is guaranteed to satisfy the following equation:
- *
- *     (Ftcin / (div * 65536)) <= freq <= (Ftcin / div)
- *
- *   where:
- *     freq  - the desired frequency
- *     Ftcin - The timer/counter input frequency
- *     div   - With DIV being the highest possible value.
+ *   Finds the best clock source and clock divisor to configure required
+ *   frequency.
  *
  * Input Parameters:
- *   frequency  Desired timer frequency.
- *   tcclks     TCCLKS field value for divisor.
- *   actual     The actual freqency of the MCK
+ *   frequency  Desired timer frequency
+ *   tcclks     TC_CMRx.TCCLKS bit field (clock selection) value
+ *   div        The divisor value to be configured for the TC
  *
  * Returned Value:
- *   Zero (OK) if a proper divisor has been found, otherwise a negated errno
- *   value indicating the nature of the failure.
+ *   Rhe actual frequency which will be configured with calculated
+ *   parameters
  *
  ****************************************************************************/
 
-int sam_tc_clockselect(uint32_t frequency, uint32_t *tcclks,
-                       uint32_t *actual)
+uint32_t sam_tc_clockselect(uint32_t frequency, uint32_t *tcclks,
+                            uint32_t *div)
 {
-  uint32_t mck_actual;
-  uint32_t mck_tcclks;
-  uint32_t mck_error;
-  int ret;
+  uint32_t mck8_freq;
+  uint32_t mck8_error;
+  uint32_t tcclks_select;
+  uint32_t div_select;
+  uint32_t freq_actual;
 
-  /* Try to satisfy the requested frequency with the MCK or slow clock */
+  /* Calculate frequency error for MCK clock. Use smallest possible MCK
+   * divisor of 8 to have highest clock resolution and thus smallest
+   * frequency error.  With 32 bit counter the lowest possible frequency
+   * of 1 Hz is easily supported.
+   */
 
-  ret = sam_tc_mcksrc(frequency, &mck_tcclks, &mck_actual);
-  if (ret < 0)
-    {
-      mck_error = UINT32_MAX;
-    }
-  else
-    {
-      /* Get the absolute value of the frequency error */
-
-      if (mck_actual > frequency)
-        {
-          mck_error = mck_actual - frequency;
-        }
-      else
-        {
-          mck_error = frequency - mck_actual;
-        }
-    }
+  mck8_freq = BOARD_MCK_FREQUENCY/8;
+  mck8_error = sam_tc_freq_err_abs(frequency, mck8_freq, &div_select);
+  tcclks_select = TC_CMR_TCCLKS_MCK8;
+  freq_actual = mck8_freq / div_select;
 
   /* See if we do better with PCK6 */
 
   if (sam_pck_isenabled(PCK6))
     {
-      uint32_t pck6_actual;
+      uint32_t pck6_freq;
       uint32_t pck6_error;
+      uint32_t pck6_div;
 
       /* Get the absolute value of the frequency error */
 
-      pck6_actual = sam_pck_frequency(PCK6);
-      if (pck6_actual > frequency)
-        {
-          pck6_error = pck6_actual - frequency;
-        }
-      else
-        {
-          pck6_error = frequency - pck6_actual;
-        }
+      pck6_freq  = sam_pck_frequency(PCK6);
+      pck6_error = sam_tc_freq_err_abs(frequency, pck6_freq, &pck6_div);
 
       /* Return the PCK6 selection if the error is smaller */
 
-      if (pck6_error < mck_error)
+      if (pck6_error < mck8_error)
         {
-          /* Return the PCK selection */
-
-          if (actual)
-            {
-              tmrinfo("return actual=%lu\n", (unsigned long)fselect);
-              *actual = pck6_actual;
-            }
-
-          /* Return the TCCLKS selection */
-
-          if (tcclks)
-            {
-              tmrinfo("return tcclks=%08lx\n", (unsigned long)TC_CMR_TCCLKS_PCK6);
-              *tcclks = TC_CMR_TCCLKS_PCK6;
-            }
-
-          /* Return success */
-
-          return OK;
+          tcclks_select = TC_CMR_TCCLKS_PCK6;
+          div_select    = pck6_div;
+          freq_actual   = pck6_freq / pck6_div;
         }
-    }
-
-  /* Return the MCK/slow clock selection */
-
-  if (actual)
-    {
-      tmrinfo("return actual=%lu\n", (unsigned long)mck_actual);
-      *actual = mck_actual;
     }
 
   /* Return the TCCLKS selection */
 
   if (tcclks)
     {
-      tmrinfo("return tcclks=%08lx\n", (unsigned long)mck_tcclks);
-      *tcclks = mck_tcclks;
+      tmrinfo("return tcclks=%08lx\n", (unsigned long)tcclks_select);
+      *tcclks = tcclks_select;
     }
 
-  /* Return success */
+  /* Return the divider value */
 
-  return ret;
+  if (div)
+    {
+      tmrinfo("return div=%lu\n", (unsigned long)div_select);
+      *div = div_select;
+    }
+
+  return freq_actual;
 }
 
 #endif /* CONFIG_SAMV7_TC0 || CONFIG_SAMV7_TC1 || CONFIG_SAMV7_TC2 || CONFIG_SAMV7_TC3 */

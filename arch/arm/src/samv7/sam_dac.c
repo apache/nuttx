@@ -373,7 +373,8 @@ static int dac_timer_init(struct sam_dac_s *priv, uint32_t freq_required,
                           int channel)
 {
   uint32_t mode;
-  uint32_t regval;
+  uint32_t tcclks;
+  uint32_t div;
   uint32_t freq_actual;
 
   ainfo("required frequency=%ld [Hz], channel=%d\n",
@@ -381,15 +382,11 @@ static int dac_timer_init(struct sam_dac_s *priv, uint32_t freq_required,
 
   DEBUGASSERT(priv && (freq_required > 0) && (channel >= 0 && channel <= 2));
 
-  /* Set the timer/counter waveform mode the the clock input. Use smallest
-   * MCK divisor of 8 to have highest clock resolution thus smallest frequency
-   * error. With 32 bit counter the lowest possible frequency of 1 Hz is easily
-   * supported.
-   */
+  /* Calculate the best possible clock source and clock divisor value */
 
-  /* TODO Add support for TC_CMR_TCCLKS_PCK6 to reduce frequency error */
+  freq_actual = sam_tc_clockselect(freq_required, &tcclks, &div);
 
-  mode = (TC_CMR_TCCLKS_MCK8 |      /* Use MCK/8 clock signal */
+  mode = (tcclks |                  /* Use MCK/8 clock signal */
           TC_CMR_WAVSEL_UPRC |      /* UP mode w/ trigger on RC Compare */
           TC_CMR_WAVE |             /* Wave mode */
           TC_CMR_ACPA_CLEAR |       /* RA Compare Effect on TIOA: Clear */
@@ -404,21 +401,17 @@ static int dac_timer_init(struct sam_dac_s *priv, uint32_t freq_required,
       return -EINVAL;
     }
 
-  /* Calculate the actual counter value from this divider and the tc input
-   * frequency.
-   */
+  /* Set up clock divisor */
 
-  regval = BOARD_MCK_FREQUENCY / 8 / freq_required;
-  DEBUGASSERT(regval > 0); /* Will check for integer underflow */
+  DEBUGASSERT(div >= 2); /* Minimum divider required by implementation */
 
   /* Set up TC_RA and TC_RC.  The frequency is determined by RA and RC:
    * TIOA is cleared on RA match; TIOA is set on RC match.
    */
 
-  sam_tc_setregister(priv->tc, TC_REGA, regval >> 1);
-  sam_tc_setregister(priv->tc, TC_REGC, regval);
+  sam_tc_setregister(priv->tc, TC_REGA, div >> 1);
+  sam_tc_setregister(priv->tc, TC_REGC, div);
 
-  freq_actual = BOARD_MCK_FREQUENCY / 8 / regval;
   ainfo("configured frequency=%ld [Hz]\n", (long)freq_actual);
 
   /* And start the timer */
