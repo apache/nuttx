@@ -125,7 +125,7 @@ static void *stm32_cd_thread(void *arg)
  *   Card detect interrupt handler.
  ****************************************************************************/
 
-static int stm32_cd(int irq, FAR void *context)
+static int stm32_cd(int irq, void *context)
 {
   static const int debounce_time = 100; /* [ms] */
   static uint32_t now = 0;
@@ -160,8 +160,8 @@ static int stm32_cd(int irq, FAR void *context)
  *   Registers media change callback
  ****************************************************************************/
 
-int stm32_spi1register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
-                       FAR void *arg)
+int stm32_spi1register(struct spi_dev_s *dev, spi_mediachange_t callback,
+                       void *arg)
 {
   spiinfo("INFO: Registering spi1 device\n");
   g_chmediaclbk = callback;
@@ -178,7 +178,7 @@ int stm32_spi1register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
 
 int stm32_mmcsd_initialize(int minor)
 {
-  FAR struct spi_dev_s *spi;
+  struct spi_dev_s *spi;
   struct sched_param schparam;
   pthread_attr_t pattr;
   int rv;
