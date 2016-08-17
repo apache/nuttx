@@ -76,7 +76,7 @@ static spi_mediachange_t g_chmediaclbk;
 
 /* Argument for media changed callback */
 
-static void *chmediaarg;
+static void *g_chmediaarg;
 
 /* Semafor to inform stm32_cd_thread that card was inserted or pulled out */
 
@@ -111,7 +111,7 @@ static void *stm32_cd_thread(void *arg)
            */
 
           usleep(1 * 1000);
-          g_chmediaclbk(chmediaarg);
+          g_chmediaclbk(g_chmediaarg);
         }
     }
 
@@ -165,7 +165,7 @@ int stm32_spi1register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
 {
   spiinfo("INFO: Registering spi1 device\n");
   g_chmediaclbk = callback;
-  chmediaarg = arg;
+  g_chmediaarg = arg;
   return OK;
 }
 
