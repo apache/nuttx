@@ -56,7 +56,11 @@
  ****************************************************************************/
 
 #ifndef CONFIG_STM32_OTGFS
-#error "CONFIG_USBHOST requires CONFIG_STM32_OTGFS to be enabled"
+#  error "CONFIG_USBHOST requires CONFIG_STM32_OTGFS to be enabled"
+#endif
+
+#ifdef CONFIG_USBDEV
+#  error "CONFIG_USBHOST cannot be set alongside CONFIG_USBDEV"
 #endif
 
 /*****************************************************************************

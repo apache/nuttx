@@ -32,8 +32,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
 
-#ifndef __CONFIGS_STM32_BUTTERFLY2_SRC_STM32_BUTTERFLY2_H 1
-#define __CONFIGS_STM32_BUTTERFLY2_SRC_STM32_BUTTERFLY2_H
+#ifndef __CONFIGS_STM32_BUTTERFLY2_SRC_STM32_BUTTERFLY2_H
+#define __CONFIGS_STM32_BUTTERFLY2_SRC_STM32_BUTTERFLY2_H 1
 
 /*****************************************************************************
  * Included Files
