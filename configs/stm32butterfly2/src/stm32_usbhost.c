@@ -127,10 +127,23 @@ int stm32_usbhost_initialize(void)
 #ifdef CONFIG_USBHOST_HIDKBD
   if ((rv = usbhost_kbdinit()) < 0)
     {
-      uerr("ERROR: Failed to register the KBD class\n");
+      uerr("ERROR: Failed to register the KBD class: %d\n", rv);
     }
 #endif
 
+#ifdef CONFIG_USBHOST_HIDMOUSE
+  if ((rv = usbhost_mouse_init()) < 0)
+    {
+      uerr("ERROR: Failed to register the mouse class: %d\n", rv);
+    }
+#endif
+
+#ifdef CONFIG_USBHOST_HUB
+  if ((rv = usbhost_hub_initialize()) < 0)
+    {
+      uerr("ERROR: Failed to register hub class: %d\n", rv);
+    }
+#endif
 
   if ((g_usbconn = stm32_otgfshost_initialize(0)))
     {
