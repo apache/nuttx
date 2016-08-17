@@ -172,9 +172,13 @@
 
 #ifndef CONFIG_STM32_VALUELINE
 #  define RCC_CFGR_USBPRE           (1 << 22) /* Bit 22: USB FS prescaler */
+#  define RCC_CFGR_USBPREd0         (0)       /* PLLCLK / 1 */
+#  define RCC_CFGR_USBPREd15        (1)       /* PLLCLK / 1.5 */
 #endif
 #ifdef CONFIG_STM32_CONNECTIVITYLINE
 #  define RCC_CFGR_OTGFSPRE         (1 << 22) /* Bit 22: OTG FS prescaler */
+#  define RCC_CFGR_OTGFSPREd2       (1)       /* PLL_VCO (2x PLLCLK) / 2 */
+#  define RCC_CFGR_OTGFSPREd3       (0)       /* PLL_VCO (3x PLLCLK) / 3 */
 #endif
 #define RCC_CFGR_MCO_SHIFT          (24)      /* Bits 27-24: Microcontroller Clock Output */
 #define RCC_CFGR_MCO_MASK           (15 << RCC_CFGR_MCO_SHIFT)
