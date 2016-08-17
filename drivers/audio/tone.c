@@ -495,6 +495,7 @@ static void next_note(FAR struct tone_upperhalf_s *upper)
 
             case 'B':
               g_repeat = true;
+              break;
 
             default:
               auderr("unknown symbol: %c!\n", c);
@@ -863,9 +864,9 @@ static ssize_t tone_read(FAR struct file *filep, FAR char *buffer,
 static ssize_t tone_write(FAR struct file *filep, FAR const char *buffer,
                           size_t buflen)
 {
-
   FAR struct inode *inode = filep->f_inode;
   FAR struct tone_upperhalf_s *upper = inode->i_private;
+  int ndx;
 
   /* We need to receive a string #RRGGBB = 7 bytes */
 
@@ -876,9 +877,20 @@ static ssize_t tone_write(FAR struct file *filep, FAR const char *buffer,
       return -EINVAL;
     }
 
+  if (buflen >= MAX_TUNE_LEN)
+    {
+      /* Too big to it inside internal buffer (with extra NUL terminator) */
+
+      return -EINVAL;
+    }
+
   /* Copy music to internal buffer */
 
   memcpy(tune_buf, buffer, buflen);
+
+  /* Failsafe NUL terminated string */
+
+  tune_buf[buflen] = '\0';
 
   /* Let the music play */
 
