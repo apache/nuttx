@@ -32,6 +32,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
 
+#ifndef __CONFIGS_STM32_BUTTERFLY2_SRC_STM32_BUTTERFLY2_H 1
+#define __CONFIGS_STM32_BUTTERFLY2_SRC_STM32_BUTTERFLY2_H
+
 /*****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -123,4 +126,6 @@ int stm32_usbhost_initialize(void);
 #else
 static inline int stm32_usbhost_initialize(void) {}
 #endif
+
+#endif // __CONFIGS_STM32_BUTTERFLY2_SRC_STM32_BUTTERFLY2_H
 
