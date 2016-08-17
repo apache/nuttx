@@ -44,6 +44,7 @@ config STM32L4_STM32L476XX
 	select ARCH_HAVE_DPFPU # REVISIT
 	select ARMV7M_HAVE_ITCM
 	select ARMV7M_HAVE_DTCM
+	select STM32L4_HAVE_USART3
 
 config STM32L4_STM32L486XX
 	bool
@@ -416,6 +417,7 @@ config STM32L4_USART2
 config STM32L4_USART3
 	bool "USART3"
 	default n
+	depends on STM32L4_HAVE_USART3
 	select ARCH_HAVE_SERIAL_TERMIOS
 	select USART3_SERIALDRIVER
 	select STM32L4_USART
@@ -423,6 +425,7 @@ config STM32L4_USART3
 config STM32L4_UART4
 	bool "UART4"
 	default n
+	depends on STM32L4_HAVE_USART4
 	select ARCH_HAVE_SERIAL_TERMIOS
 	select UART4_SERIALDRIVER
 	select STM32L4_USART
@@ -430,6 +433,7 @@ config STM32L4_UART4
 config STM32L4_UART5
 	bool "UART5"
 	default n
+	depends on STM32L4_HAVE_USART5
 	select ARCH_HAVE_SERIAL_TERMIOS
 	select UART5_SERIALDRIVER
 	select STM32L4_USART
@@ -2468,6 +2472,18 @@ config STM32L4_DAC_DMA_BUFFER_SIZE
 	default 256
 
 endmenu
+
+config STM32L4_HAVE_USART3
+	bool
+	default n
+
+config STM32L4_HAVE_USART4
+	bool
+	default n
+
+config STM32L4_HAVE_USART5
+	bool
+	default n
 
 menu "U[S]ART Configuration"
 	depends on STM32L4_USART
