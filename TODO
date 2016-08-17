@@ -219,7 +219,7 @@ o Task/Scheduler (sched/)
   Description: Task control information is retained in simple lists.  This
                is completely appropriate for small embedded systems where
                the number of tasks, N, is relatively small.  Most list
-               operations are O(N).  This could become as issue if N gets
+               operations are O(N).  This could become an issue if N gets
                very large.
 
                In that case, these simple lists should be replaced with
