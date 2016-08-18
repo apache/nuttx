@@ -193,6 +193,9 @@ struct stm32_spidev_s
 /* Helpers */
 
 static inline uint16_t spi_getreg(FAR struct stm32_spidev_s *priv, uint8_t offset);
+#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
+static inline uint8_t spi_getreg8(FAR struct stm32_spidev_s *priv, uint8_t offset);
+#endif
 static inline void spi_putreg(FAR struct stm32_spidev_s *priv, uint8_t offset,
                                  uint16_t value);
 #if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
@@ -537,6 +540,28 @@ static inline uint16_t spi_getreg(FAR struct stm32_spidev_s *priv, uint8_t offse
 }
 
 /************************************************************************************
+ * Name: spi_getreg8
+ *
+ * Description:
+ *   Get the contents of the SPI register at offset
+ *
+ * Input Parameters:
+ *   priv   - private SPI device structure
+ *   offset - offset to the register of interest
+ *
+ * Returned Value:
+ *   The contents of the 16-bit register
+ *
+ ************************************************************************************/
+
+#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
+static inline uint8_t spi_getreg8(FAR struct stm32_spidev_s *priv, uint8_t offset)
+{
+  return getreg8(priv->spibase + offset);
+}
+#endif
+
+/************************************************************************************
  * Name: spi_putreg
  *
  * Description:
@@ -615,9 +640,15 @@ static inline uint16_t spi_readword(FAR struct stm32_spidev_s *priv)
    *  at the receiver side, as data can be lost if it is not in line."
    */
 
-  /* REVISIT */
+  if (priv->nbits < 9)
+    {
+      return (uint16_t)spi_getreg8(priv, STM32_SPI_DR_OFFSET);
+    }
+  else
 #endif
-  return spi_getreg(priv, STM32_SPI_DR_OFFSET);
+    {
+      return spi_getreg(priv, STM32_SPI_DR_OFFSET);
+    }
 }
 
 /************************************************************************************
