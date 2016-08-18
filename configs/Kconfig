@@ -937,14 +937,14 @@ config ARCH_BOARD_SPARK
 		MCU from STMicro.
 
 config ARCH_BOARD_STM32_BUTTERFLY2
-        bool "Kamami STM32Butterfly2 development board"
-        depends on ARCH_CHIP_STM32F107VC
-        select ARCH_HAVE_LEDS
-        select ARCH_HAVE_BUTTONS
-        ---help---
-                A configuration for the Kamami STM32Butterfly2 development board
-                based on STM32F107VC micro-controler chip with optional ETH
-                board.
+	bool "Kamami STM32Butterfly2 development board"
+	depends on ARCH_CHIP_STM32F107VC
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	---help---
+		A configuration for the Kamami STM32Butterfly2 development board
+		based on STM32F107VC micro-controler chip with optional ETH
+		board.
 
 config ARCH_BOARD_STM32_TINY
 	bool "STM32-Tiny board"

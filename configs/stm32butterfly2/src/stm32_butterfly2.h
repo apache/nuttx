@@ -127,5 +127,5 @@ int stm32_usbhost_initialize(void);
 static inline int stm32_usbhost_initialize(void) { return 0; }
 #endif
 
-#endif // __CONFIGS_STM32_BUTTERFLY2_SRC_STM32_BUTTERFLY2_H
+#endif /* __CONFIGS_STM32_BUTTERFLY2_SRC_STM32_BUTTERFLY2_H */
 

@@ -59,8 +59,10 @@
  * Private Declarations
  ****************************************************************************/
 
-static const uint32_t buttons[NUM_BUTTONS] = {
-  GPIO_JOY_O, GPIO_JOY_U, GPIO_JOY_D, GPIO_JOY_R, GPIO_JOY_L };
+static const uint32_t buttons[NUM_BUTTONS] =
+{
+  GPIO_JOY_O, GPIO_JOY_U, GPIO_JOY_D, GPIO_JOY_R, GPIO_JOY_L
+};
 
 /*****************************************************************************
  * Public Functions
@@ -76,6 +78,7 @@ static const uint32_t buttons[NUM_BUTTONS] = {
 void board_button_initialize(void)
 {
   int i;
+
   for (i = 0; i != NUM_BUTTONS; ++i)
     {
       stm32_configgpio(buttons[i]);
@@ -104,4 +107,3 @@ uint8_t board_buttons(void)
 
   return rv;
 }
-

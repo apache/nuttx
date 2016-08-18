@@ -83,4 +83,3 @@ int board_adc_setup(void)
   ainfo("INFO: ADC12_IN10 initialized succesfully\n");
   return OK;
 }
-

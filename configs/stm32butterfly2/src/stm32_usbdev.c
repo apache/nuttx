@@ -75,4 +75,3 @@ void stm32_usbsuspend(struct usbdev_s *dev, bool resume)
 {
   uinfo("INFO: usb %s", resume ? "resumed" : "suspended");
 }
-

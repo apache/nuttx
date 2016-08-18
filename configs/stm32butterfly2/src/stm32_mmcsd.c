@@ -135,8 +135,8 @@ static int stm32_cd(int irq, void *context)
   now = tp.tv_sec * 1000 + tp.tv_nsec / 1000000;
 
   /* When inserting card, card detect plate might bounce causing this
-   * interrupt to be called many time on single card insert/deinsert. Thus we
-   * are allowing only one interrupt every 100ms.
+   * interrupt to be called many time on single card insert/deinsert. Thus
+   * we are allowing only one interrupt every 100ms.
    */
 
   if (now - debounce_time > prev)
@@ -214,4 +214,3 @@ int stm32_mmcsd_initialize(int minor)
   spiinfo("INFO: mmcsd card has been initialized successfully\n");
   return OK;
 }
-

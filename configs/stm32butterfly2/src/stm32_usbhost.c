@@ -85,6 +85,7 @@ static void* usbhost_detect(void *arg)
   struct usbhost_hubport_s *hport;
 
   uinfo("INFO: Starting usb detect thread\n");
+
   for (;;)
     {
       CONN_WAIT(g_usbconn, &hport);
@@ -115,6 +116,7 @@ int stm32_usbhost_initialize(void)
 
 #ifdef CONFIG_USBHOST_MSC
   uinfo("INFO: Initializing USB MSC class\n");
+
   if ((rv = usbhost_msc_initialize()) < 0)
     {
       uerr("ERROR: Failed to register mass storage class: %d\n", rv);
@@ -123,6 +125,7 @@ int stm32_usbhost_initialize(void)
 
 #ifdef CONFIG_USBHOST_CDACM
   uinfo("INFO: Initializing CDCACM usb class\n");
+
   if ((rv = usbhost_cdacm_initialize()) < 0)
     {
       uerr("ERROR: Failed to register CDC/ACM serial class: %d\n", rv);
@@ -131,6 +134,7 @@ int stm32_usbhost_initialize(void)
 
 #ifdef CONFIG_USBHOST_HIDKBD
   uinfo("INFO: Initializing HID Keyboard usb class\n");
+
   if ((rv = usbhost_kbdinit()) < 0)
     {
       uerr("ERROR: Failed to register the KBD class: %d\n", rv);
@@ -139,6 +143,7 @@ int stm32_usbhost_initialize(void)
 
 #ifdef CONFIG_USBHOST_HIDMOUSE
   uinfo("INFO: Initializing HID Mouse usb class\n");
+
   if ((rv = usbhost_mouse_init()) < 0)
     {
       uerr("ERROR: Failed to register the mouse class: %d\n", rv);
@@ -147,6 +152,7 @@ int stm32_usbhost_initialize(void)
 
 #ifdef CONFIG_USBHOST_HUB
   uinfo("INFO: Initializing USB HUB class\n");
+
   if ((rv = usbhost_hub_initialize()) < 0)
     {
       uerr("ERROR: Failed to register hub class: %d\n", rv);
@@ -192,4 +198,3 @@ void stm32_usbhost_vbusdrive(int iface, bool enable)
 {
   stm32_gpiowrite(GPIO_OTGFS_PWRON, enable);
 }
-

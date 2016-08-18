@@ -62,6 +62,7 @@
  ****************************************************************************/
 
 /* Identifies led state */
+
 enum led_state
 {
   LED_ON = false,
@@ -231,13 +232,16 @@ void board_userled_initialize(void)
 
 void board_userled(int led, bool ledon)
 {
+  unsigned int ledbit;
+
 #ifndef CONFIG_ARCH_LEDS
   if (led == BOARD_LED4)
     {
       return;
     }
 #endif
-  unsigned int ledbit = 1 << led;
+
+  ledbit = 1 << led;
   led_state(ledon, ledbit);
 }
 
@@ -261,4 +265,3 @@ void board_userled_all(uint8_t ledset)
   led_state(led_OFF, ~ledset);
 #endif
 }
-

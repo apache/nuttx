@@ -56,7 +56,7 @@
 void stm32_usb_initialize(void)
 {
   uinfo("INFO: Initializing usb otgfs gpio pins\n");
+
   stm32_configgpio(GPIO_OTGFS_VBUS);
   stm32_configgpio(GPIO_OTGFS_PWRON);
 }
-

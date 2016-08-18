@@ -61,6 +61,7 @@
 void stm32_spidev_initialize(void)
 {
   spiinfo("INFO: Initializing spi gpio pins\n");
+
   stm32_configgpio(GPIO_SD_CS);
   stm32_configgpio(GPIO_SD_CD);
 }
@@ -76,6 +77,7 @@ void stm32_spi1select(struct spi_dev_s *dev, enum spi_dev_e devid,
                       bool select)
 {
   spiinfo("INFO: Selecting spi dev: %d, state: %d\n", devid, select);
+
   if (devid == SPIDEV_MMCSD)
     {
       stm32_gpiowrite(GPIO_SD_CS, !select);
@@ -92,6 +94,7 @@ void stm32_spi1select(struct spi_dev_s *dev, enum spi_dev_e devid,
 uint8_t stm32_spi1status(struct spi_dev_s *dev, enum spi_dev_e devid)
 {
   spiinfo("INFO: Requesting info from spi dev: %d\n", devid);
+
   if (devid == SPIDEV_MMCSD)
     {
       if (stm32_gpioread(GPIO_SD_CD) == 0)
@@ -100,6 +103,5 @@ uint8_t stm32_spi1status(struct spi_dev_s *dev, enum spi_dev_e devid)
         }
     }
 
-    return 0;
+  return 0;
 }
-

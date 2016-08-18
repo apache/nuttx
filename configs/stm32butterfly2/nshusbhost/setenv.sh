@@ -1,7 +1,7 @@
 #!/bin/bash
-# configs/viewtool-stm32f107/nsh/setenv.sh
+# configs/stm32butterfly2/nsh/setenv.sh
 #
-#   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2016 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
