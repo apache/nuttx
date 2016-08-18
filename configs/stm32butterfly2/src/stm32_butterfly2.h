@@ -84,7 +84,7 @@ void stm32_led_initialize(void);
 #ifdef CONFIG_STM32_SPI1
 void stm32_spidev_initialize(void);
 #else
-static inline void stm32_spidev_initialize(void);
+static inline void stm32_spidev_initialize(void) {}
 #endif
 
 /*****************************************************************************
@@ -98,7 +98,7 @@ static inline void stm32_spidev_initialize(void);
 #ifdef CONFIG_MMCSD
 int stm32_mmcsd_initialize(int minor);
 #else
-static inline int stm32_mmcsd_initialize(int minor);
+static inline int stm32_mmcsd_initialize(int minor) { (void)minor; return 0; }
 #endif
 
 /*****************************************************************************
@@ -124,7 +124,7 @@ static inline void stm32_usb_initialize(void) {}
 #ifdef CONFIG_USBHOST
 int stm32_usbhost_initialize(void);
 #else
-static inline int stm32_usbhost_initialize(void) {}
+static inline int stm32_usbhost_initialize(void) { return 0; }
 #endif
 
 #endif // __CONFIGS_STM32_BUTTERFLY2_SRC_STM32_BUTTERFLY2_H
