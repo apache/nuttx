@@ -374,9 +374,15 @@ static int tiva_pwm_start(FAR struct pwm_lowerhalf_s *dev,
 
   tiva_pwm_putreg(chan, TIVA_PWMn_LOAD_OFFSET, load - 1);
 
-  /* Configure PWM duty (refer to TM4C1294NC 23.4.8-9) */
+  /* Configure PWM duty (refer to TM4C1294NC 23.4.8-9)
+   *
+   * Workaround:
+   *   When comp equals to load, the signal is never pulled down,
+   *   so let comp equals to (comp-1)
+   */
 
   uint32_t comp = (uint32_t)((1 - (float)duty / g_pwm_counter) * load);
+  comp = (duty == 0) ? (comp - 1) : (comp);
   pwminfo("channel %d: comp = %u (%08x)\n", chan->channel_id, comp, comp);
 
   if (chan->channel_id % 2 == 0)
@@ -394,7 +400,10 @@ static int tiva_pwm_start(FAR struct pwm_lowerhalf_s *dev,
 
   /* Enable PWM channel (refer to TM4C1294NC 23.4.11) */
 
-  putreg32((1 << chan->channel_id), chan->controller_base + TIVA_PWM_ENABLE_OFFSET);
+  uint32_t enable = getreg32(chan->controller_base + TIVA_PWM_ENABLE_OFFSET);
+  enable |= (1 << chan->channel_id);
+  putreg32(enable, chan->controller_base + TIVA_PWM_ENABLE_OFFSET);
+
   return OK;
 }
 

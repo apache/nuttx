@@ -33,7 +33,18 @@ config AUDIO_I2SCHAR_TXTIMEOUT
 		transfers.  This is in units of system clock ticks (configurable).
 		The special value of zero disables RX timeouts.  Default: 0
 
-endif #AUDIO_I2SCHAR
+endif # AUDIO_I2SCHAR
+
+config AUDIO_TONE
+        bool "Audio Tone Generator using PWM"
+        default n
+        depends on PWM && AUDIO_DEVICES
+        ---help---
+                This driver enables the Audio Tone Generator for NuttX.
+
+if AUDIO_TONE
+
+endif # AUDIO_TONE
 
 config VS1053
 	bool "VS1053 codec chip"

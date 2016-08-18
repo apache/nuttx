@@ -10536,8 +10536,7 @@
 	  nuttx/libc/mqueue to nuttx/sched/mqueue.  Also add syscall support
 	  for mq_setattr() and mq_getattr().  This is necessary in protected and
 	  kernel builds because in those cases the message queue structure is
-	  protected and cannot be accessed directly from user mode code.  Noted
-	  by Jouko Holopainen (2015-06-03).
+	  protected and cannot be accessed directly from user mode code (2015-06-03).
 	* drivers/net/tun.c: TUN driver bug fix.  From Max Neklyudov (2015-06-03.
 	* drivers/net/Kconfig, include/nuttx/net/mii.h, and
 	  arch/arm/src/lpc17xx/lpc17_ethernet.c: Add support for the Micrel
@@ -12394,7 +12393,6 @@
 	  (2016-07-23).
 	* Freedom-K64F:  Add PWM support.  From Jordan MacIntyre (2016-07-25).
 
-
 7.18 2016-xx-xx Gregory Nutt <gnutt@nuttx.org>
 
 	* drivers/serial/pty.c, serial.c, usbdev/cdcacm.c, include/nuttx/fs/ioctl.h:
@@ -12487,3 +12485,87 @@
 	  2016-08-01).
 	* drivers/sensors:  Add KXJT9 Accelerometer driver from the Motorola
 	  Moto Z MDK (2016-08-02).
+	* arch/arm/sim: Add a simulated I/O Expander driver (2016-08-03).
+	* configs/sim: Add logic to set the simulated I/O expander for testing
+	  with apps/examples/gpio (2016-08-03).
+	* fs/fat: FAT performance improvement. In large files, seeking to a
+	  position from the beginning of the file can be very time consuming.
+	  ftell does lssek(fd, 0, SET_CURR).  In that case, that is wasted time
+	  since we are going to seek to the same position.  This fix short-
+	  circutes fat_seek() in all cases where we attempt to seek to current
+	  position.  Suggested by Nate Weibley (2016-08-03).
+	* tools/sethost.sh: Add sethost.sh.   This is a script that you can use
+	  to quickly change the host platform from Linux to Windows/Cygwin.
+	  Might save you a lot of headaches (2016-08-03).
+	* arch/arm/src/tiva: Add tiva PWM lower-half driver implementation.
+	  From Young  (2016-08-05).
+	* drivers/spi/spi_transfer.c: Add a helper function that encapsulates
+	  and manages a sequence of SPI transfers (2016-08-05).
+	* drivers/spi: Add an SPI character driver that will permit access to
+	  the SPI bus for testing purposes.  This driver is a simple wrapper
+	  around spi_transfer() (2016-08-05).
+	* drivers/wireless: Add MFRC522 RFID ISO14443 and Mifare transceiver
+	  driver.  From Alan Carvalho de Assis (2016-08-06).
+	* configs/stm32f103-minimum: Add board support to MFRC522 driver.  From
+	  Alan Carvalho de Assis (2016-08-06).
+	* arch/renesas: Rename arch/sh to arch/renesas (2016-08-06).
+	* arch/arm/src/efm32, stm32, stm32l4: STM32 and EFM32 SPI drivers
+	  adopted an incompatible conventions somewhere along the line.  The
+	  set the number of bits to negative when calling SPI_SETBITS which had
+	  the magical side-effect of setting LSB first order of bit
+	  transmission.  This is not only a hokey way to pass control
+	  information but is supported by no other SPI drivers.  This change
+	  three things:  (1) It adds HWFEAT_LSBFIRST as a new H/W feature.
+	  (2) It changes the implementations of SPI_SETBITS in the STM32 and
+	  EFM32 derivers so that negated bit numbers are simply errors and it
+	  adds the SPI_HWFEATURES method that can set the LSB bit order, and
+	  (3) It changes all calls with negative number of bits from all
+	  drivers: The number of bits is now always positive and SPI_HWFEATURES
+	  is called with HWFEAT_LSBFIRST to set the bit order (2016-08-08).
+	* arch/arm/src/stm32:  Add missing SPI2 and SPI3 support for STM32F3F3.
+	  Add STM32F37XX DMA channel configuration.  For STM32F37XX,
+	  SYSCFG_EXTICR_PORTE defined twice.  From Alan Carvalho de Assis
+	  (2016-08-08).
+	* arch/arm/src/stm32:  Make stm32_pwr_enablebkp thread safe.  From
+	  Max Neklyudov (2016-08-09).
+	* arch/arm/src/stm32: SAM3/4 GPIO: Enable peripheral clock for GPIO port
+	  when GPIO is configured as input. The value of a GPIO input is only
+	  sampled when the peripheral clock for the port controller the GPIO
+	  resides in is enabled. Therefore we need to enable the clock even when
+	  polling a GPIO.  From Wolfgang Reissnegger (2016-08-09).
+	* arch/arm/src/tiva: Fix two bugs of tiva pwm lower-half driver
+	  implementation. From Young (2016-08-10).
+	* sched/group: Explicitly initialize the group tg_exitsem with
+	  sem_init().  The existing logic worked because the correct
+	  initialization value is all zero, but it is better to initialize the
+	  semaphore explicitly (2016-08-10).
+	* arch/arm/stm32: Fix bad pllmul values for STM32F1XX connectivity line.
+	  STM32F1XX connectivity line supports only x4, x5, x6, x7, x8, x9 and
+	  x6.5 values. From Michał Łyszczek (2016-08-11).
+	* include/nuttx/timers: Add oneshot timer lower half interface
+	  (2016-08-11).
+	* arch/arm/src/stm32: Add a experimental oneshot, lower-half driver for
+	  STM32 (2016-08-11).
+	* arch/arm/src/samv7: Add option to support oneshot timer without free-
+	  running timer.  Add oneshot lower half driver (2016-08-11).
+	* arch/arm/src/sama5: Add option to support oneshot timer without free-
+	  running timer.  Add oneshot lower half driver (2016-08-11).
+	* arch/arm/src/sam34: SAM4CM: Add option to support oneshot timer without
+	  free-running timer.  Add oneshot lower half driver (2016-08-11).
+	* arch/arm/src/stm32l4: Add oneshot lower half driver (2016-08-11).
+	* libc/stdlib: strtod() was not returning endptr on error conditions
+	  (2016-08-11).
+	* libc/math: floor(), floorf(), and floorl(): Fix logic error.  Was not
+	  correctly handling negative integral value (2016-08-11).
+	* configs/sim: Add a configuration useful for testing Mini Basic
+	  (2016-08-12).
+	* drivers/timers: Add an upper-half, oneshot timer character driver
+	  (2016-08-12).
+	* arch/sim/src: Add a simulated oneshot lowerhalf driver (2016-08-12).
+	* arch/arm/src/stm32: STM32F3 SPI:  Fix the number of bit setting for
+	  the F3.  That and data packing work differently on the STM32F3 than
+	  for other STM32 parts (2016-08-12).
+	* arch/arm/stm32 and stm32l4: Enabling SPI DMA loses other bits in CR2
+	  (2016-08-13).
+	* arch/arm/src/stm32: STM32F3 SPI:  Cannot write always 16-bit value to
+	  DR register because of how the F3 implements data packing (2016-08-13).

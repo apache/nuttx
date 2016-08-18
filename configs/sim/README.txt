@@ -490,6 +490,11 @@ cxxtest
      postpone running C++ static initializers until NuttX has been
      initialized.
 
+minibasic
+
+  This configuration was used to test the Mini Basic port at
+  apps/interpreters/minibasic.
+
 mount
 
   Configures to use apps/examples/mount.

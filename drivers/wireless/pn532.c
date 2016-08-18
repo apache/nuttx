@@ -56,6 +56,19 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Configuration ************************************************************/
+/* Bit order H/W feature must be enabled in order to support LSB first
+ * operation.
+ */
+
+#if !defined(CONFIG_SPI_HWFEATURES) || !defined(CONFIG_SPI_BITORDER)
+#  error CONFIG_SPI_HWFEATURES=y and CONFIG_SPI_BITORDER=y required by this driver
+#endif
+
+#ifndef CONFIG_ARCH_HAVE_SPI_BITORDER
+#  warning This platform does not support SPI LSB-bit order
+#endif
+
 #ifdef CONFIG_WL_PN532_DEBUG
 #  define pn532err    _err
 #  define pn532info   _info
@@ -142,11 +155,19 @@ static const uint8_t pn532ack[] =
 
 static void pn532_lock(FAR struct spi_dev_s *spi)
 {
+  int ret;
+
   (void)SPI_LOCK(spi, true);
 
   SPI_SETMODE(spi, SPIDEV_MODE0);
-  SPI_SETBITS(spi, -8);
-  (void)SPI_HWFEATURES(spi, 0);
+  SPI_SETBITS(spi, 8);
+
+  ret = SPI_HWFEATURES(spi, HWFEAT_LSBFIRST);
+  if (ret < 0)
+    {
+      pn532err("ERROR: SPI_HWFEATURES failed to set bit order: %d\n", ret);
+    }
+
   (void)SPI_SETFREQUENCY(spi, CONFIG_PN532_SPI_FREQ);
 }
 
@@ -157,11 +178,19 @@ static void pn532_unlock(FAR struct spi_dev_s *spi)
 
 static inline void pn532_configspi(FAR struct spi_dev_s *spi)
 {
+  int ret;
+
   /* Configure SPI for the PN532 module. */
 
   SPI_SETMODE(spi, SPIDEV_MODE0);
-  SPI_SETBITS(spi, -8);
-  (void)SPI_HWFEATURES(spi, 0);
+  SPI_SETBITS(spi, 8);
+
+  ret = SPI_HWFEATURES(spi, HWFEAT_LSBFIRST);
+  if (ret < 0)
+    {
+      pn532err("ERROR: SPI_HWFEATURES failed to set bit order: %d\n", ret);
+    }
+
   (void)SPI_SETFREQUENCY(spi, CONFIG_PN532_SPI_FREQ);
 }
 

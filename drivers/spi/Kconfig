@@ -55,22 +55,45 @@ config SPI_HWFEATURES
 		basically the OR of any specific hardware feature and eanbles
 		the SPI hwfeatures() interface method.
 
+config ARCH_HAVE_SPI_CRCGENERATION
+	bool
+	default n
+
 config SPI_CRCGENERATION
 	bool
 	default n
 	select SPI_HWFEATURES
+	depends on ARCH_HAVE_SPI_CRCGENERATION
 	---help---
 		Selected by MCU Kconfig logic if implementation supports automatic
 		generation of SPI CRCs.  Enables the HWFEAT_CRCGENERATION option
 		as well as the hwfeartures() interface method.
 
+config ARCH_HAVE_SPI_CS_CONTROL
+	bool
+	default n
+
 config SPI_CS_CONTROL
 	bool "SPI CS Behavior Control"
 	default n
 	select SPI_HWFEATURES
+	depends on ARCH_HAVE_SPI_CS_CONTROL
 	---help---
 		Enables possibilities to define the behavior of CS.
 		Also enables the hwfeatures() interface method.
+
+config ARCH_HAVE_SPI_BITORDER
+	bool
+	default n
+
+config SPI_BITORDER
+	bool "SPI Bit Order Control"
+	default n
+	select SPI_HWFEATURES
+	depends on ARCH_HAVE_SPI_BITORDER
+	---help---
+		Enables capability to select MSB- or LSB-first hardware feature for
+		data transfers.
 
 config SPI_CS_DELAY_CONTROL
 	bool "SPI CS Delay Control"

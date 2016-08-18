@@ -9063,7 +9063,7 @@ detailed bugfix information):
         for mq_setattr() and mq_getattr().  This is necessary in protected
         and kernel builds because in those cases the message queue
         structure is protected and cannot be accessed directly from user
-        mode code.  Noted by Jouko Holopainen.
+        mode code.
 
     * File Systems/Block Drivers/MTD:
 

@@ -114,6 +114,18 @@ void stm32_usbinitialize(void);
 int stm32_mfrc522initialize(FAR const char *devpath);
 #endif
 
+/************************************************************************************
+ * Name: stm32_tone_setup
+ *
+ * Description:
+ *   Function used to initialize a PWM and Oneshot timers to Audio Tone Generator.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_AUDIO_TONE
+int stm32_tone_setup(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_STM32F103_MINIMUM_SRC_STM32F103_MINIMUM_H */
 

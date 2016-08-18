@@ -329,6 +329,14 @@ int sam_bringup(void)
     }
 #endif
 
+#if defined(CONFIG_SAMV7_DAC0) || defined(CONFIG_SAMV7_DAC1)
+  ret = sam_dacdev_initialize();
+  if (ret < 0)
+    {
+      _err("ERROR: Initialization of the DAC module failed: %d\n", ret);
+    }
+#endif
+
   /* If we got here then perhaps not all initialization was successful, but
    * at least enough succeeded to bring-up NSH with perhaps reduced
    * capabilities.

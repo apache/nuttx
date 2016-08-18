@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_lse.c
  *
- *   Copyright (C) 2009, 2011, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.orgr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,18 +46,6 @@
 #include "stm32_waste.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -74,14 +62,12 @@
 
 void stm32_rcc_enablelse(void)
 {
-  bool bkpenabled;
-
   /* The LSE is in the RTC domain and write access is denied to this domain
    * after reset, you have to enable write access using DBP bit in the PWR CR
    * register before to configuring the LSE.
    */
 
-  bkpenabled = stm32_pwr_enablebkp(true);
+  stm32_pwr_enablebkp(true);
 
 #if defined(CONFIG_STM32_STM32L15XX)
   /* Enable the External Low-Speed (LSE) oscillator by setting the LSEON bit
@@ -115,8 +101,5 @@ void stm32_rcc_enablelse(void)
 
   /* Disable backup domain access if it was disabled on entry */
 
-  if (!bkpenabled)
-    {
-      (void)stm32_pwr_enablebkp(false);
-    }
+  stm32_pwr_enablebkp(false);
 }

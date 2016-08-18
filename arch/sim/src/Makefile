@@ -85,6 +85,10 @@ ifeq ($(CONFIG_DEV_CONSOLE),y)
   HOSTSRCS += up_simuart.c
 endif
 
+ifeq ($(CONFIG_ONESHOT),y)
+  CSRCS += up_oneshot.c
+endif
+
 ifeq ($(CONFIG_NX_LCDDRIVER),y)
   CSRCS += board_lcd.c
 else

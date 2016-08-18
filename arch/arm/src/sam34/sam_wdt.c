@@ -554,7 +554,7 @@ static xcpt_t sam34_capture(FAR struct watchdog_lowerhalf_s *lower,
       regval |= WWDG_CFR_EWI;
       sam34_putreg(regval, SAM_WDT_CFR);
 
-      up_enable_irq(STM32_IRQ_WWDG);
+      up_enable_irq(SAM_IRQ_WWDG);
     }
   else
     {
@@ -563,7 +563,7 @@ static xcpt_t sam34_capture(FAR struct watchdog_lowerhalf_s *lower,
       regval &= ~WWDG_CFR_EWI;
       sam34_putreg(regval, SAM_WDT_CFR);
 
-      up_disable_irq(STM32_IRQ_WWDG);
+      up_disable_irq(SAM_IRQ_WWDG);
     }
 
   leave_critical_section(flags);

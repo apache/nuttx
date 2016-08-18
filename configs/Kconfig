@@ -936,6 +936,16 @@ config ARCH_BOARD_SPARK
 		(http://www.spark.io).  This board features the STM32103CBT6
 		MCU from STMicro.
 
+config ARCH_BOARD_STM32_BUTTERFLY2
+	bool "Kamami STM32Butterfly2 development board"
+	depends on ARCH_CHIP_STM32F107VC
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	---help---
+		A configuration for the Kamami STM32Butterfly2 development board
+		based on STM32F107VC micro-controler chip with optional ETH
+		board.
+
 config ARCH_BOARD_STM32_TINY
 	bool "STM32-Tiny board"
 	depends on ARCH_CHIP_STM32F103C8
@@ -1433,6 +1443,7 @@ config ARCH_BOARD
 	default "shenzhou"                 if ARCH_BOARD_SHENZHOU
 	default "skp16c26"                 if ARCH_BOARD_SKP16C26
 	default "spark"                    if ARCH_BOARD_SPARK
+	default "stm32butterfly2"          if ARCH_BOARD_STM32_BUTTERFLY2
 	default "stm32_tiny"               if ARCH_BOARD_STM32_TINY
 	default "stm32f103-minimum"        if ARCH_BOARD_STM32F103_MINIMUM
 	default "stm3210e-eval"            if ARCH_BOARD_STM3210E_EVAL
@@ -1774,6 +1785,9 @@ source "configs/skp16c26/Kconfig"
 endif
 if ARCH_BOARD_SPARK
 source "configs/spark/Kconfig"
+endif
+if ARCH_BOARD_STM32_BUTTERFLY2
+source "configs/stm32butterfly2/Kconfig"
 endif
 if ARCH_BOARD_STM32_TINY
 source "configs/stm32_tiny/Kconfig"

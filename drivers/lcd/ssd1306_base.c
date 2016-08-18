@@ -885,7 +885,7 @@ FAR struct lcd_dev_s *ssd1306_initialize(FAR struct i2c_master_s *dev, unsigned 
   /* Clear the display */
 
   up_mdelay(100);
-  ssd1306_fill(&priv->dev, SSD1306_Y1_BLACK);
+  ssd1306_fill(&priv->dev, CONFIG_NX_BGCOLOR);
   return &priv->dev;
 }
 

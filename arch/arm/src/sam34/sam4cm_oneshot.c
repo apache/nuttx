@@ -111,7 +111,9 @@ static void sam_oneshot_handler(TC_HANDLE tch, void *arg, uint32_t sr)
   oneshot->handler     = NULL;
   oneshot_arg          = (void *)oneshot->arg;
   oneshot->arg         = NULL;
+#ifdef CONFIG_SAM34_FREERUN
   oneshot->start_count = 0;
+#endif
 
   oneshot_handler(oneshot_arg);
 }
@@ -212,7 +214,10 @@ int sam_oneshot_initialize(struct sam_oneshot_s *oneshot, int chan,
   oneshot->running     = false;
   oneshot->handler     = NULL;
   oneshot->arg         = NULL;
+#ifdef CONFIG_SAM34_FREERUN
   oneshot->start_count = 0;
+#endif
+
   return OK;
 }
 
@@ -251,8 +256,10 @@ int sam_oneshot_max_delay(struct sam_oneshot_s *oneshot, uint64_t *usec)
  *
  ****************************************************************************/
 
-int sam_oneshot_start(struct sam_oneshot_s *oneshot, struct sam_freerun_s *freerun,
-                      oneshot_handler_t handler, void *arg, const struct timespec *ts)
+int sam_oneshot_start(struct sam_oneshot_s *oneshot,
+                      struct sam_freerun_s *freerun,
+                      oneshot_handler_t handler, void *arg,
+                      const struct timespec *ts)
 {
   uint64_t usec;
   uint64_t regval;
@@ -309,6 +316,7 @@ int sam_oneshot_start(struct sam_oneshot_s *oneshot, struct sam_freerun_s *freer
 
   sam_tc_start(oneshot->tch);
 
+#ifdef CONFIG_SAM34_FREERUN
   /* The function sam_tc_start() starts the timer/counter by setting the
    * bits TC_CCR_CLKEN and TC_CCR_SWTRG in the channel control register.
    * The first one enables the timer/counter the latter performs an
@@ -327,7 +335,11 @@ int sam_oneshot_start(struct sam_oneshot_s *oneshot, struct sam_freerun_s *freer
    * vanishes at least if compiled with no optimisation.
    */
 
-  oneshot->start_count = sam_tc_getcounter(freerun->tch);
+  if (freerun != NULL)
+    {
+      oneshot->start_count = sam_tc_getcounter(freerun->tch);
+    }
+#endif
 
   /* Enable interrupts.  We should get the callback when the interrupt
    * occurs.
@@ -363,8 +375,8 @@ int sam_oneshot_start(struct sam_oneshot_s *oneshot, struct sam_freerun_s *freer
  *
  ****************************************************************************/
 
-int sam_oneshot_cancel(struct sam_oneshot_s *oneshot, struct sam_freerun_s *freerun,
-                       struct timespec *ts)
+int sam_oneshot_cancel(struct sam_oneshot_s *oneshot,
+                       struct sam_freerun_s *freerun, struct timespec *ts)
 {
   irqstate_t flags;
   uint64_t usec;
@@ -405,16 +417,19 @@ int sam_oneshot_cancel(struct sam_oneshot_s *oneshot, struct sam_freerun_s *free
   count = sam_tc_getcounter(oneshot->tch);
   rc    = sam_tc_getregister(oneshot->tch, TC_REGC);
 
+#ifdef CONFIG_SAM34_FREERUN
   /* In the case the timer/counter was canceled very short after its start,
    * the counter register can hold the wrong value (the value of the last
    * run). To prevent this the counter value is set to zero if not at
    * least on tick passed since the start of the timer/counter.
    */
 
-  if (count > 0 && sam_tc_getcounter(freerun->tch) == oneshot->start_count)
+  if (count > 0 && freerun != NULL &&
+      sam_tc_getcounter(freerun->tch) == oneshot->start_count)
     {
       count = 0;
     }
+#endif
 
   /* Now we can disable the interrupt and stop the timer. */
 
