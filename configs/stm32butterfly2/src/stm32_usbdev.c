@@ -1,5 +1,5 @@
 /*****************************************************************************
- * configs/stm32butterfly2/src/stm32_spi.c
+ * configs/stm32butterfly2/src/stm32_usbdev.c
  *
  *   Copyright (C) 2016 Michał Łyszczek. All rights reserved.
  *   Author: Michał Łyszczek <michal.lyszczek@gmail.com>
@@ -37,69 +37,42 @@
  ****************************************************************************/
 
 #include <debug.h>
-#include <nuttx/spi/spi.h>
+#include <stdbool.h>
+#include <sys/boardctl.h>
 
-#include "stm32_butterfly2.h"
-#include "stm32_gpio.h"
-#include "stm32_spi.h"
+#include "stm32_otgfs.h"
+
+/*****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifndef CONFIG_STM32_OTGFS
+#  error "CONFIG_USBDEV requires CONFIG_STM32_OTGFS to be enabled"
+#endif
+
+#ifdef CONFIG_USBHOST
+#  error "CONFIG_USBDEV cannot be set alongside CONFIG_USBHOST"
+#endif
 
 /*****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /*****************************************************************************
- * Name: stm32_spidev_initialize
+ * Name: stm32_usbsuspend
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins.
+ *   Board logic must provide the stm32_usbsuspend logic if the USBDEV driver
+ *   is used. This function is called whenever the USB enters or leaves
+ *   suspend mode. This is an oportunity for the board logic to shutdown
+ *   clocks, power, etc. while the USB is suspended.
  *
- * Note:
- *   Here only CS pins are configured as SPI pins are configured by driver
- *   itself.
+ * TODO:
+ *   - Well... implement those features like clock shutdown.
  ****************************************************************************/
 
-void stm32_spidev_initialize(void)
+void stm32_usbsuspend(struct usbdev_s *dev, bool resume)
 {
-  spiinfo("INFO: Initializing spi gpio pins\n");
-  stm32_configgpio(GPIO_SD_CS);
-  stm32_configgpio(GPIO_SD_CD);
-}
-
-/*****************************************************************************
- * Name: stm32_spi1select
- *
- * Description:
- *   Function asserts given devid based on select
- ****************************************************************************/
-
-void stm32_spi1select(struct spi_dev_s *dev, enum spi_dev_e devid,
-                      bool select)
-{
-  spiinfo("INFO: Selecting spi dev: %d, state: %d\n", devid, select);
-  if (devid == SPIDEV_MMCSD)
-    {
-      stm32_gpiowrite(GPIO_SD_CS, !select);
-    }
-}
-
-/*****************************************************************************
- * Name: stm32_spi1status
- *
- * Description:
- *   Return status of devid
- ****************************************************************************/
-
-uint8_t stm32_spi1status(struct spi_dev_s *dev, enum spi_dev_e devid)
-{
-  spiinfo("INFO: Requesting info from spi dev: %d\n", devid);
-  if (devid == SPIDEV_MMCSD)
-    {
-      if (stm32_gpioread(GPIO_SD_CD) == 0)
-        {
-          return SPI_STATUS_PRESENT;
-        }
-    }
-
-    return 0;
+  uinfo("INFO: usb %s", resume ? "resumed" : "suspended");
 }
 

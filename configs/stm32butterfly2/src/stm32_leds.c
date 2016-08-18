@@ -1,5 +1,5 @@
 /*****************************************************************************
- * configs/stm32butterfly2/src/stm32_led.c
+ * configs/stm32butterfly2/src/stm32_leds.c
  *
  *   Copyright (C) 2016 Michał Łyszczek. All rights reserved.
  *   Author: Michał Łyszczek <michal.lyszczek@gmail.com>
@@ -30,7 +30,6 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- *
  ****************************************************************************/
 
 /*****************************************************************************

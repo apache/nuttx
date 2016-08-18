@@ -53,6 +53,10 @@ ifeq ($(CONFIG_USBHOST),y)
 CSRCS += stm32_usbhost.c
 endif
 
+ifeq ($(CONFIG_USBDEV),y)
+CSRCS += stm32_usbdev.c
+endif
+
 ifeq ($(CONFIG_MMCSD),y)
 CSRCS += stm32_mmcsd.c
 endif
