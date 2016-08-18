@@ -224,6 +224,32 @@ int sam_oneshot_initialize(struct sam_oneshot_s *oneshot, int chan,
 }
 
 /****************************************************************************
+ * Name: sam_oneshot_max_delay
+ *
+ * Description:
+ *   Return the maximum delay supported by the one shot timer (in
+ *   microseconds).
+ *
+ * Input Parameters:
+ *   oneshot Caller allocated instance of the oneshot state structure.  This
+ *           structure must have been previously initialized via a call to
+ *           sam_oneshot_initialize();
+ *   usec    The location in which to return the maximum delay.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned
+ *   on failure.
+ *
+ ****************************************************************************/
+
+int sam_oneshot_max_delay(struct sam_oneshot_s *oneshot, uint64_t *usec)
+{
+  DEBUGASSERT(oneshot != NULL && usec != NULL);
+  *usec = (0xffffull * USEC_PER_SEC) / (uint64_t)sam_tc_divfreq(oneshot->tch);
+  return OK;
+}
+
+/****************************************************************************
  * Name: sam_oneshot_start
  *
  * Description:
@@ -488,32 +514,6 @@ int sam_oneshot_cancel(struct sam_oneshot_s *oneshot,
               (unsigned long)ts->tv_sec, (unsigned long)ts->tv_nsec);
     }
 
-  return OK;
-}
-
-/****************************************************************************
- * Name: sam_oneshot_max_delay
- *
- * Description:
- *   Return the maximum delay supported by the one shot timer (in
- *   microseconds).
- *
- * Input Parameters:
- *   oneshot Caller allocated instance of the oneshot state structure.  This
- *           structure must have been previously initialized via a call to
- *           sam_oneshot_initialize();
- *   usec    The location in which to return the maximum delay.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned
- *   on failure.
- *
- ****************************************************************************/
-
-int sam_oneshot_max_delay(struct sam_oneshot_s *oneshot, uint64_t *usec)
-{
-  DEBUGASSERT(oneshot && usec);
-  *usec = (0xffffull * USEC_PER_SEC) / (uint64_t)sam_tc_divfreq(oneshot->tch);
   return OK;
 }
 

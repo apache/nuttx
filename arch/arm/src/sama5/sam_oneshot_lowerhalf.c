@@ -172,12 +172,23 @@ static void sam_oneshot_handler(void *arg)
 static int sam_max_delay(FAR struct oneshot_lowerhalf_s *lower,
                          FAR struct timespec *ts)
 {
-  DEBUGASSERT(lower != NULL && ts != NULL);
+  FAR struct sam_oneshot_lowerhalf_s *priv =
+    (FAR struct sam_oneshot_lowerhalf_s *)lower;
+  uint64_t usecs;
+  int ret;
 
-#warning Missing logic
-  ts->tv_sec  = INT_MAX;
-  ts->tv_nsec = LONG_MAX;
-  return -ENOSYS;
+  DEBUGASSERT(priv != NULL && ts != NULL);
+  ret = sam_oneshot_max_delay(&priv->oneshot, &usecs);
+  if (ret >= 0)
+    {
+      uint64_t sec = usecs / 1000000;
+      usecs -= 1000000 * sec;
+
+      ts->tv_sec  = (time_t)sec;
+      ts->tv_nsec = (long)(usecs * 1000);
+    }
+
+  return ret;
 }
 
 /****************************************************************************
