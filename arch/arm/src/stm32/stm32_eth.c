@@ -704,9 +704,8 @@ static void stm32_rxdescinit(FAR struct stm32_ethmac_s *priv);
 #if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
 static int  stm32_phyintenable(FAR struct stm32_ethmac_s *priv);
 #endif
-#if defined(CONFIG_STM32_AUTONEG) ||\
-  defined(CONFIG_NETDEV_PHY_IOCTL) ||\
-  defined(CONFIG_ETH0_PHY_DM9161)
+#if defined(CONFIG_STM32_AUTONEG) || defined(CONFIG_NETDEV_PHY_IOCTL) || \
+    defined(CONFIG_ETH0_PHY_DM9161)
 static int  stm32_phyread(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t *value);
 #endif
 static int  stm32_phywrite(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t value);
@@ -3102,9 +3101,8 @@ static int stm32_phyintenable(struct stm32_ethmac_s *priv)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32_AUTONEG) ||\
-  defined(CONFIG_NETDEV_PHY_IOCTL) ||\
-  defined(CONFIG_ETH0_PHY_DM9161)
+#if defined(CONFIG_STM32_AUTONEG) || defined(CONFIG_NETDEV_PHY_IOCTL) || \
+    defined(CONFIG_ETH0_PHY_DM9161)
 static int stm32_phyread(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t *value)
 {
   volatile uint32_t timeout;
