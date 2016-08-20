@@ -51,6 +51,7 @@
 #include <errno.h>
 
 #include <nuttx/lib/lib.h>
+#include <nuttx/lib/xorshift128.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/drivers/drivers.h>
 
@@ -75,17 +76,13 @@
  * Private Types
  ****************************************************************************/
 
-typedef union
+struct xorshift128_state_s
 {
-  struct
-    {
-      uint32_t x;
-      uint32_t y;
-      uint32_t z;
-      uint32_t w;
-    };
-  uint8_t u[16];
-} xorshift128_state_t;
+  uint32_t x;
+  uint32_t y;
+  uint32_t z;
+  uint32_t w;
+};
 
 /****************************************************************************
  * Private Function Prototypes
@@ -106,7 +103,7 @@ static int devurand_poll(FAR struct file *filep, FAR struct pollfd *fds,
  * Private Data
  ****************************************************************************/
 
-static const struct file_operations devurand_fops =
+static const struct file_operations g_urand_fops =
 {
   NULL,                         /* open */
   NULL,                         /* close */
@@ -122,36 +119,9 @@ static const struct file_operations devurand_fops =
 #endif
 };
 
-#ifdef CONFIG_DEV_URANDOM_XORSHIFT128
-static xorshift128_state_t prng;
-#endif
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: xorshift128
- ****************************************************************************/
-
-#ifdef CONFIG_DEV_URANDOM_XORSHIFT128
-static uint32_t xorshift128(void)
-{
-  uint32_t t = prng.x;
-
-  t ^= t << 11;
-  t ^= t >> 8;
-
-  prng.x = prng.y;
-  prng.y = prng.z;
-  prng.z = prng.w;
-
-  prng.w ^= prng.w >> 19;
-  prng.w ^= t;
-
-  return prng.w;
-}
-#endif
 
 /****************************************************************************
  * Name: congruential
@@ -241,14 +211,26 @@ static ssize_t devurand_write(FAR struct file *filep, FAR const char *buffer,
 #ifdef CONFIG_DEV_URANDOM_CONGRUENTIAL
   unsigned int seed = 0;
 
-  len = min(len, sizeof(unsigned int));
-  memcpy(&seed, buffer, len);
+  if (len < sizeof(unsigned int))
+    {
+      return -ERANGE;
+    }
+
+  memcpy(&seed, buffer, sizeof(unsigned int));
   srand(seed);
-  return len;
+  return sizeof(unsigned int);
+
 #else
-  len = min(len, sizeof(prng.u));
-  memcpy(&prng.u, buffer, len);
-  return len;
+  struct xorshift128_state_s seed;
+
+  if (len < sizeof(struct xorshift128_state_s))
+    {
+      return -ERANGE;
+    }
+
+  memcpy(&seed, buffer, sizeof(struct xorshift128_state_s));
+  xorshift128_seed(seed.w, seed.x, seed.y, seed.z);
+  return sizeof(struct xorshift128_state_s);
 #endif
 }
 
@@ -292,13 +274,10 @@ void devurandom_register(void)
 #else
   /* Seed the PRNG */
 
-  prng.w = 97;
-  prng.x = 101;
-  prng.y = prng.w << 17;
-  prng.z = prng.x << 25;
+  xorshift128_seed(97, 101, 97 << 17, 101 << 25);
 #endif
 
-  (void)register_driver("/dev/urandom", &devurand_fops, 0666, NULL);
+  (void)register_driver("/dev/urandom", &g_urand_fops, 0666, NULL);
 }
 
 #endif /* CONFIG_DEV_URANDOM && CONFIG_DEV_URANDOM_ARCH */

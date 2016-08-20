@@ -51,14 +51,6 @@
 #include "clock/clock.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifndef CONFIG_SCHED_CPULOAD_TIMECONSTANT
-#  define CONFIG_SCHED_CPULOAD_TIMECONSTANT 2
-#endif
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -69,10 +61,10 @@
  *   Check for operations specific to scheduling policy of the currently
  *   active task.
  *
- * Inputs:
+ * Input Parameters:
  *   None
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -134,10 +126,10 @@ static inline void sched_process_scheduler(void)
  *   function periodically -- the calling interval must be
  *   USEC_PER_TICK
  *
- * Inputs:
+ * Input Parameters:
  *   None
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
