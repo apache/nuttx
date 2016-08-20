@@ -45,6 +45,7 @@
 #include <debug.h>
 
 #include <nuttx/board.h>
+#include <nuttx/clock.h>
 #include <nuttx/timers/oneshot.h>
 
 #include "up_internal.h"
@@ -88,7 +89,7 @@ int sim_bringup(void)
 #endif
 
 #ifdef CONFIG_ONESHOT
-  /* Initialize the simulated analog joystick input device */
+  /* Get an instance of the simulated oneshot timer */
 
   oneshot = oneshot_initialize(0, 0);
   if (oneshot == NULL)
@@ -96,13 +97,22 @@ int sim_bringup(void)
       _err("ERROR: oneshot_initialize faile\n");
     }
   else
-   {
+    {
+#ifdef CONFIG_CPULOAD_ONESHOT
+      /* Configure the oneshot timer to support CPU load measurement */
+
+      sched_oneshot_extclk(oneshot);
+
+#else
+      /* Initialize the simulated oneshot driver */
+
       ret = oneshot_register("/dev/oneshot", oneshot);
       if (ret < 0)
         {
           _err("ERROR: Failed to register oneshot at /dev/oneshot: %d\n",
                ret);
         }
+#endif
     }
 #endif
 
