@@ -42,7 +42,19 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <stdint.h>
+#include <sched.h>
+
+#include <nuttx/irq.h>
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+#ifndef CONFIG_CPULOAD_ONESHOT_ENTROPY
+#  define CONFIG_CPULOAD_ONESHOT_ENTROPY 0
+#endif
 
 /****************************************************************************
  * Private Types
@@ -82,12 +94,30 @@ static struct xorshift128_state_s g_prng;
 
 void xorshift128_seed(uint32_t w, uint32_t x, uint32_t y, uint32_t z)
 {
+  /* With CONFIG_CPULOAD_ONESHOT_ENTROPY > 0, this PRNG could be called from
+   * the interrupt handling state (currently is not).
+   */
+
+#if CONFIG_CPULOAD_ONESHOT_ENTROPY > 0
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+#else
+  sched_lock();
+#endif
+
   /* Seed the PRNG */
 
   g_prng.w = w;
   g_prng.x = x;
   g_prng.y = y;
   g_prng.z = z;
+
+#if CONFIG_CPULOAD_ONESHOT_ENTROPY > 0
+  leave_critical_section(flags);
+#else
+  sched_unlock();
+#endif
 }
 
 /****************************************************************************
@@ -106,7 +136,20 @@ void xorshift128_seed(uint32_t w, uint32_t x, uint32_t y, uint32_t z)
 
 uint32_t xorshift128(void)
 {
+  uint32_t ret;
   uint32_t t;
+
+  /* With CONFIG_CPULOAD_ONESHOT_ENTROPY > 0, this PRNG will be called from
+   * the interrupt handling state.
+   */
+
+#if CONFIG_CPULOAD_ONESHOT_ENTROPY > 0
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+#else
+  sched_lock();
+#endif
 
   t        = g_prng.x;
   t       ^= t << 11;
@@ -119,5 +162,13 @@ uint32_t xorshift128(void)
   g_prng.w ^= g_prng.w >> 19;
   g_prng.w ^= t;
 
-  return g_prng.w;
+  ret = g_prng.w;
+
+#if CONFIG_CPULOAD_ONESHOT_ENTROPY > 0
+  leave_critical_section(flags);
+#else
+  sched_unlock();
+#endif
+
+  return ret;
 }
