@@ -599,7 +599,7 @@ config CPULOAD_ONESHOT
 	bool "Use Oneshot timer"
 	default n
 	---help---
-		Use am MCU-specific oneshot timer as the external clock.  The
+		Use an MCU-specific oneshot timer as the external clock.  The
 		oneshot timer must be configured by board specific logic which must
 		then call:
 
