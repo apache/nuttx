@@ -67,21 +67,19 @@
 #endif
 
 #ifdef CONFIG_DEV_URANDOM_XORSHIFT128
-#  define PRNG() xorshift128()
+#  define PRNG() do_xorshift128()
 #else /* CONFIG_DEV_URANDOM_CONGRUENTIAL */
-#  define PRNG() congruential()
+#  define PRNG() do_congruential()
 #endif
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
-struct xorshift128_state_s
+union xorshift128_state_u
 {
-  uint32_t x;
-  uint32_t y;
-  uint32_t z;
-  uint32_t w;
+  struct xorshift128_state_s state;
+  uint8_t u[16];
 };
 
 /****************************************************************************
@@ -119,16 +117,31 @@ static const struct file_operations g_urand_fops =
 #endif
 };
 
+#ifdef CONFIG_DEV_URANDOM_XORSHIFT128
+static union xorshift128_state_u g_prng;
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: congruential
+ * Name: do_xorshift128
+ ****************************************************************************/
+
+#ifdef CONFIG_DEV_URANDOM_XORSHIFT128
+static inline uint32_t do_xorshift128(void)
+{
+  return xorshift128(&g_prng.state);
+}
+#endif
+
+/****************************************************************************
+ * Name: do_congruential
  ****************************************************************************/
 
 #ifdef CONFIG_DEV_URANDOM_CONGRUENTIAL
-static uint32_t congruential(void)
+static inline uint32_t do_congruential(void)
 {
   /* REVISIT:  We could probably generate a 32-bit value with a single
    * call to nrand().
@@ -211,26 +224,14 @@ static ssize_t devurand_write(FAR struct file *filep, FAR const char *buffer,
 #ifdef CONFIG_DEV_URANDOM_CONGRUENTIAL
   unsigned int seed = 0;
 
-  if (len < sizeof(unsigned int))
-    {
-      return -ERANGE;
-    }
-
-  memcpy(&seed, buffer, sizeof(unsigned int));
+  len = min(len, sizeof(unsigned int));
+  memcpy(&seed, buffer, len);
   srand(seed);
-  return sizeof(unsigned int);
-
+  return len;
 #else
-  struct xorshift128_state_s seed;
-
-  if (len < sizeof(struct xorshift128_state_s))
-    {
-      return -ERANGE;
-    }
-
-  memcpy(&seed, buffer, sizeof(struct xorshift128_state_s));
-  xorshift128_seed(seed.w, seed.x, seed.y, seed.z);
-  return sizeof(struct xorshift128_state_s);
+  len = min(len, sizeof(g_prng.u));
+  memcpy(&g_prng.u, buffer, len);
+  return len;
 #endif
 }
 
@@ -269,12 +270,15 @@ static int devurand_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
 void devurandom_register(void)
 {
+  /* Seed the PRNG */
+
 #ifdef CONFIG_DEV_URANDOM_CONGRUENTIAL
   srand(10197);
 #else
-  /* Seed the PRNG */
-
-  xorshift128_seed(97, 101, 97 << 17, 101 << 25);
+  g_prng.state.w = 97;
+  g_prng.state.x = 101;
+  g_prng.state.y = g_prng.state.w << 17;
+  g_prng.state.z = g_prng.state.x << 25;
 #endif
 
   (void)register_driver("/dev/urandom", &g_urand_fops, 0666, NULL);

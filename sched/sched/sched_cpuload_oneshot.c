@@ -91,6 +91,7 @@ struct sched_oneshot_s
 {
   FAR struct oneshot_lowerhalf_s *oneshot;
 #if CONFIG_CPULOAD_ONESHOT_ENTROPY > 0
+  struct xorshift128_state_s prng;
   int32_t maxdelay;
   int32_t error;
 #endif
@@ -153,7 +154,7 @@ static void sched_oneshot_start(void)
 
   /* Add the random value in the range 0..(CPULOAD_ONESHOT_ENTRY - 1) */
 
-  entropy = xorshift128();
+  entropy = xorshift128(&g_sched_oneshot.prng);
   usecs  += (int32_t)(entropy & CPULOAD_ONESHOT_ENTROPY_MASK);
 
   DEBUGASSERT(usecs > 0); /* Check for overflow to negative or zero */
@@ -272,7 +273,10 @@ void sched_oneshot_extclk(FAR struct oneshot_lowerhalf_s *lower)
 
   /* Seed the PRNG */
 
-  xorshift128_seed(97, 101, 97 << 17, 101 << 25);
+  g_sched_oneshot.prng.w = 97;
+  g_sched_oneshot.prng.x = 101;
+  g_sched_oneshot.prng.y = g_sched_oneshot.prng.w << 17;
+  g_sched_oneshot.prng.z = g_sched_oneshot.prng.x << 25;
 #endif
 
   /* Then start the oneshot */

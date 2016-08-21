@@ -47,6 +47,28 @@
 #include <nuttx/config.h>
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Default XorShift128 state initializer */
+
+#define XORSHIFT128_INITIALIZER { 97, 101, 97 << 17, 101 << 25 }
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+/* Provides the state of the XorShift128 PRNG */
+
+struct xorshift128_state_s
+{
+  uint32_t x;
+  uint32_t y;
+  uint32_t z;
+  uint32_t w;
+};
+
+/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
@@ -59,36 +81,26 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: xorshift128_seed
- *
- * Description:
- *   Seed the XorShift128 PRNG
- *
- * Input Parameters:
- *   w, x, y, z:  Values for XorShift128 generation state.
- *
- * Returned Value:
- *   No
- *
- ****************************************************************************/
-
-void xorshift128_seed(uint32_t w, uint32_t x, uint32_t y, uint32_t z);
-
-/****************************************************************************
  * Name: xorshift128
  *
  * Description:
- *   Generate one 32-bit pseudo-random number
+ *   Generate one 32-bit pseudo-random number.
+ *
+ *   NOTE: Because the PRNG state is passed as a parameter, this function is
+ *   fully re-entrant and may be called from an interrupt handler.
+ *
+ *   The downside to this is that users of the PRNG might not get as much
+ *   entropy as if it were a common state structure.
  *
  * Input Parameters:
- *   None
+ *   state - The current XorShift128 state.
  *
  * Returned Value:
  *   The generated pseudo-random number
  *
  ****************************************************************************/
 
-uint32_t xorshift128(void);
+uint32_t xorshift128(FAR struct xorshift128_state_s *state);
 
 #undef EXTERN
 #ifdef __cplusplus

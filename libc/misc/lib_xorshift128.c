@@ -43,10 +43,11 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
 #include <stdint.h>
-#include <sched.h>
+#include <assert.h>
 
-#include <nuttx/irq.h>
+#include <nuttx/lib/xorshift128.h>
 
 /****************************************************************************
  * Private Types
@@ -57,118 +58,45 @@
 #endif
 
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-struct xorshift128_state_s
-{
-  uint32_t x;
-  uint32_t y;
-  uint32_t z;
-  uint32_t w;
-};
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-static struct xorshift128_state_s g_prng;
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: xorshift128_seed
- *
- * Description:
- *   Seed the XorShift128 PRNG
- *
- * Input Parameters:
- *   w, x, y, z:  Values for XorShift128 generation state.
- *
- * Returned Value:
- *   No
- *
- ****************************************************************************/
-
-void xorshift128_seed(uint32_t w, uint32_t x, uint32_t y, uint32_t z)
-{
-  /* With CONFIG_CPULOAD_ONESHOT_ENTROPY > 0, this PRNG could be called from
-   * the interrupt handling state (currently is not).
-   */
-
-#if CONFIG_CPULOAD_ONESHOT_ENTROPY > 0
-  irqstate_t flags;
-
-  flags = enter_critical_section();
-#else
-  sched_lock();
-#endif
-
-  /* Seed the PRNG */
-
-  g_prng.w = w;
-  g_prng.x = x;
-  g_prng.y = y;
-  g_prng.z = z;
-
-#if CONFIG_CPULOAD_ONESHOT_ENTROPY > 0
-  leave_critical_section(flags);
-#else
-  sched_unlock();
-#endif
-}
 
 /****************************************************************************
  * Name: xorshift128
  *
  * Description:
- *   Generate one 32-bit pseudo-random number
+ *   Generate one 32-bit pseudo-random number.
+ *
+ *   NOTE: Because the PRNG state is passed as a parameter, this function is
+ *   fully re-entrant and may be called from an interrupt handler.
+ *
+ *   The downside to this is that users of the PRNG might not get as much
+ *   entropy as if it were a common state structure.
  *
  * Input Parameters:
- *   None
+ *   state - The current XorShift128 state.
  *
  * Returned Value:
  *   The generated pseudo-random number
  *
  ****************************************************************************/
 
-uint32_t xorshift128(void)
+uint32_t xorshift128(FAR struct xorshift128_state_s *state)
 {
-  uint32_t ret;
   uint32_t t;
 
-  /* With CONFIG_CPULOAD_ONESHOT_ENTROPY > 0, this PRNG will be called from
-   * the interrupt handling state.
-   */
+  DEBUGASSERT(state != NULL);
 
-#if CONFIG_CPULOAD_ONESHOT_ENTROPY > 0
-  irqstate_t flags;
-
-  flags = enter_critical_section();
-#else
-  sched_lock();
-#endif
-
-  t        = g_prng.x;
+  t        = state->x;
   t       ^= t << 11;
   t       ^= t >> 8;
 
-  g_prng.x = g_prng.y;
-  g_prng.y = g_prng.z;
-  g_prng.z = g_prng.w;
+  state->x = state->y;
+  state->y = state->z;
+  state->z = state->w;
 
-  g_prng.w ^= g_prng.w >> 19;
-  g_prng.w ^= t;
+  state->w ^= state->w >> 19;
+  state->w ^= t;
 
-  ret = g_prng.w;
-
-#if CONFIG_CPULOAD_ONESHOT_ENTROPY > 0
-  leave_critical_section(flags);
-#else
-  sched_unlock();
-#endif
-
-  return ret;
+  return state->w;
 }
