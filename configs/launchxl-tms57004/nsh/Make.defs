@@ -70,7 +70,7 @@ endif
 
 ARCHCPUFLAGS = -mcpu=cortex-r4 -mbig-endian
 ARCHCFLAGS = -fno-builtin
-ARCHCXXFLAGS = -fno-builtin -fno-exceptions -fno-rtti
+ARCHCXXFLAGS = -fno-builtin -fno-exceptions -fcheck-new -fno-rtti
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
 ARCHDEFINES =

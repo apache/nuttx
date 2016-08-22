@@ -47,7 +47,7 @@ ifneq ($(CONFIG_DEBUG_NOOPT),y)
 endif
 
 ARCHCPUFLAGS = -fno-builtin
-ARCHCPUFLAGSXX = -fno-builtin -fno-exceptions -fno-rtti
+ARCHCPUFLAGSXX = -fno-builtin -fno-exceptions -fcheck-new -fno-rtti
 ARCHPICFLAGS = -fpic
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef

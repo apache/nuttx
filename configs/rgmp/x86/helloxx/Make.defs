@@ -50,7 +50,7 @@ else
   ARCHOPTIMIZATION	= -O2
 endif
 
-ARCHCXXFLAGS    = -fno-builtin -fno-exceptions -fno-rtti
+ARCHCXXFLAGS    = -fno-builtin -fno-exceptions -fcheck-new -fno-rtti
 ARCHCPUFLAGS    = -fno-builtin -nostdinc -fno-stack-protector
 ARCHPICFLAGS    = -fpic
 ARCHWARNINGS    = -Wall -Wstrict-prototypes -Wshadow -Wundef

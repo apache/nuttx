@@ -80,7 +80,7 @@ ifneq ($(CONFIG_DEBUG_NOOPT),y)
 endif
 
 ARCHCFLAGS = -fno-builtin
-ARCHCXXFLAGS = -fno-builtin -fno-exceptions -fno-rtti
+ARCHCXXFLAGS = -fno-builtin -fno-exceptions -fcheck-new -fno-rtti
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
 ARCHDEFINES =
