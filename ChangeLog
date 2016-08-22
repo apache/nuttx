@@ -12569,3 +12569,27 @@
 	  (2016-08-13).
 	* arch/arm/src/stm32: STM32F3 SPI:  Cannot write always 16-bit value to
 	  DR register because of how the F3 implements data packing (2016-08-13).
+	* Kinetis: Add support for I2C and RTC.  From v01d (phreakuencies)
+	  (2016-08-13).
+	* teensy 3.x i2c.  From v01d (phreakuencies) (2016-08-13).
+	* SH1106 0.96 OLED module support (SSD1306 compatible) + I2C fixes.
+	  From v01d (phreakuencies) (2016-08-13).
+	* Add support for SAMV7 DACC module.  From iotr Mienkowski (2016-08-15).
+	* Add oneshot board initialization to stm32f103-minimum.  From Alan
+	  Carvalho de Assis (2016-08-15).
+	* drivers/audio/tone.c: Add Audio Tone Generator for NuttX.  From Alan
+	  Carvalho de Assis (2016-08-16).
+	* configs/stm32f103-minimum: Add board configuration to initialize Audio
+	  Tone Generator.  From Alan Carvalho de Assis (2016-08-16).
+	* STM32F411 and STM32F446 map i2c2_sda_4 to different alternate function
+	  numbers.  From Konstantin Berezenko (2016-08-17).
+	* STM32 DMA Fix: Change stm32 adc dma callback to send channel number
+	  instead of index.  From Konstantin Berezenko (2016-08-17).
+	* SAMA5:  Add missing oneshot max_delay method (2016-08-18).
+	* configs/stm32bufferfly2: Add support for the Kamami stm32butterfly2
+	  development board with optional ETH phy.  From  Michał Łyszczek
+	  (2016-08-19).
+	* libc/misc: Separate XorShift128 PRNG from /dev/urandom and make it
+	  generally available (2016-08-20).
+	* sched/sched_cpuload_oneshot:  Use the oneshot timer with optional
+	  entropy to measure cPU load if so configured (2016-08-20).

@@ -87,7 +87,7 @@ void *operator new[](unsigned int nbytes)
 
   void *alloc = lib_malloc(nbytes);
 
-#ifdef CONFIG_DEBUG_FEATURES
+#ifdef CONFIG_DEBUG_ERROR
   if (alloc == 0)
     {
       // Oh my.. we are required to return a valid pointer and
