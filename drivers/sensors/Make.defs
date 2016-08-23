@@ -113,6 +113,11 @@ endif
 ifeq ($(CONFIG_MPL115A),y)
   CSRCS += mpl115a.c
 endif
+
+ifeq ($(CONFIG_LIS3MDL),y)
+  CSRCS += lis3mdl.c
+endif
+
 endif # CONFIG_SPI
 
 # Quadrature encoder upper half

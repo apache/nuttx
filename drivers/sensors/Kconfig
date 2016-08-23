@@ -173,6 +173,13 @@ config I2C_LM75
 	bool
 	default y if LM75
 
+config LIS3MDL
+	bool "STMicro LIS3MDL 3-Axis magnetometer support"
+	default n
+	select SPI
+	---help---
+		Enable driver support for the ST LIS3MDL 3-axis magnetometer.
+
 config LM75
 	bool "STMicro LM-75 Temperature Sensor support"
 	default n
