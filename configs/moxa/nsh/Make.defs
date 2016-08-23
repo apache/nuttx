@@ -74,7 +74,7 @@ ifneq ($(CONFIG_DEBUG_NOOPT),y)
 endif
 
 ARCHCFLAGS = -fno-builtin -mno-thumb-interwork -march=armv4 -Uarm
-ARCHCXXFLAGS = -fno-builtin -fno-exceptions -mno-thumb-interwork -march=armv4 -Uarm
+ARCHCXXFLAGS = -fno-builtin -fno-exceptions -fcheck-new -mno-thumb-interwork -march=armv4 -Uarm
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
 ARCHDEFINES =
