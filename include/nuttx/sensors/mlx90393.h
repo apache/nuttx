@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/sensors/lis3mdl.h
+ * include/nuttx/sensors/mlx90393.h
  *
  *   Copyright (C) 2016 DS-Automotion GmbH. All rights reserved.
  *   Author: Alexander Entinger <a.entinger@ds-automotion.com>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef NUTTX_INCLUDE_NUTTX_SENSORS_LIS3MDL_H_
-#define NUTTX_INCLUDE_NUTTX_SENSORS_LIS3MDL_H_
+#ifndef NUTTX_INCLUDE_NUTTX_SENSORS_MLX90393_H_
+#define NUTTX_INCLUDE_NUTTX_SENSORS_MLX90393_H_
 
 /****************************************************************************
  * Included Files
@@ -45,70 +45,43 @@
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/spi/spi.h>
 
-#if defined(CONFIG_SPI) && defined(CONFIG_LIS3MDL)
+#if defined(CONFIG_SPI) && defined(CONFIG_MLX90393)
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* LIS3MDL Register Definitions *********************************************/
+/* MLX90393 Command Definitions *********************************************/
 
-#define LIS3MDL_WHO_AM_I_REG    (0x0F)
-#define LIS3MDL_CTRL_REG_1      (0x20)
-#define LIS3MDL_CTRL_REG_2      (0x21)
-#define LIS3MDL_CTRL_REG_3      (0x22)
-#define LIS3MDL_CTRL_REG_4      (0x23)
-#define LIS3MDL_CTRL_REG_5      (0x24)
-#define LIS3MDL_STATUS_REG      (0x27)
-#define LIS3MDL_OUT_X_L_REG     (0x28)
-#define LIS3MDL_OUT_X_H_REG     (0x29)
-#define LIS3MDL_OUT_Y_L_REG     (0x2A)
-#define LIS3MDL_OUT_Y_H_REG     (0x2B)
-#define LIS3MDL_OUT_Z_L_REG     (0x2C)
-#define LIS3MDL_OUT_Z_H_REG     (0x2D)
-#define LIS3MDL_TEMP_OUT_L_REG  (0x2E)
-#define LIS3MDL_TEMP_OUT_H_REG  (0x2F)
-#define LIS3MDL_INT_CFG_REG     (0x30)
-#define LIS3MDL_INT_SRC_REG     (0x31)
-#define LIS3MDL_INT_THS_L_REG   (0x32)
-#define LIS3MDL_INT_THS_H_REG   (0x33)
+#define MLX90393_SB               (0x10)          /* SB = Start Burst Mode */
+#define MLX90393_SW               (0x20)          /* SW = Start Wake-up on Change Mode */
+#define MLX90393_SM               (0x30)          /* SB = Start Single Measurement Mode */
+#define MLX90393_RM               (0x40)          /* RM = Read Measurement */
+#define MLX90393_RR               (0x50)          /* RR = Read Register */
+#define MLX90393_WR               (0x60)          /* WR = Write Register */
+#define MLX90393_EX               (0x80)          /* EX = Exit Mode */
+#define MLX90393_HR               (0xD0)          /* HR = Memory Recall */
+#define MLX90393_HS               (0xE0)          /* HS = Memory Store */
+#define MLX90393_RT               (0xF0)          /* RT = Reset */
 
-/* LIS3MDL CTRL_REG_1 Bit Definitions ***************************************/
+/* MLX90393 Sensor Selection Bit Definitions ********************************/
 
-#define LIS3MDL_CTRL_REG_1_TEMP_EN_bm      (1<<7)   /* Enable the temperature sensor */
-#define LIS3MDL_CTRL_REG_1_OM_1_bm         (1<<6)   /* Select the operating mode of X and Y axis bit 1 */
-#define LIS3MDL_CTRL_REG_1_OM_0_bm         (1<<5)   /* Select the operating mode of X and Y axis bit 0 */
-#define LIS3MDL_CTRL_REG_1_DO2_bm          (1<<4)   /* Output data rate selection bit 2 */
-#define LIS3MDL_CTRL_REG_1_DO1_bm          (1<<3)   /* Output data rate selection bit 1 */
-#define LIS3MDL_CTRL_REG_1_DO0_bm          (1<<2)   /* Output data rate selection bit 2 */
-#define LIS3MDL_CTRL_REG_1_FAST_ODR_bm     (1<<1)   /* Enable higher output data rates */
-
-/* LIS3MDL CTRL_REG_2 Bit Definitions ***************************************/
-
-#define LIS3MDL_CTRL_REG_2_FS_1_bm         (1<<6)   /* Full scale selection bit 1 */
-#define LIS3MDL_CTRL_REG_2_FS_0_bm         (1<<5)   /* Full scale selection bit 0 */
-#define LIS3MDL_CTRL_REG_2_REBOOT_bm       (1<<3)   /* Reboot Memory Content */
-#define LIS3MDL_CTRL_REG_2_SOFT_RST_bm     (1<<2)   /* Soft Reset */
-
-/* LIS3MDL CTRL_REG_4 Bit Definitions ***************************************/
-
-#define LIS3MDL_CTRL_REG_4_OMZ_1_bm        (1<<3)   /* Select the operating mode of Z axis bit 1 */
-#define LIS3MDL_CTRL_REG_4_OMZ_0_bm        (1<<2)   /* Select the operating mode of Z axis bit 0 */
-
-/* LIS3MDL CTRL_REG_5 Bit Definitions ***************************************/
-
-#define LIS3MDL_CTRL_REG_5_BDU_bm          (1<<6)   /* Enable block data update for magnetic data (prevent race conditions while reading) */
+#define MLX90393_T_bm             (1<<0)          /* Temperature Sensor Bitmask  */
+#define MLX90393_X_bm             (1<<1)          /* Magnetometer X-Axis Bitmask */
+#define MLX90393_Y_bm             (1<<2)          /* Magnetometer Y-Axis Bitmask */
+#define MLX90393_Z_bm             (1<<3)          /* Magnetometer Z-Axis Bitmask */
+#define MLX90393_ZYXT_bm          (MLX90393_Z_bm | MLX90393_Y_bm | MLX90393_X_bm | MLX90393_T_bm)
 
 /* SPI BUS PARAMETERS *******************************************************/
 
-#define LIS3MDL_SPI_FREQUENCY    (1000000)        /* 1 MHz */
-#define LIS3MDL_SPI_MODE         (SPIDEV_MODE3)   /* Device uses SPI Mode 3: CPOL=1, CPHA=1 */
+#define MLX90393_SPI_FREQUENCY    (1000000)        /* 1 MHz */
+#define MLX90393_SPI_MODE         (SPIDEV_MODE3)   /* Device uses SPI Mode 3: CPOL=1, CPHA=1 */
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
-/* A reference to a structure of this type must be passed to the LIS3MDL
+/* A reference to a structure of this type must be passed to the MLX90393
  * driver. This structure provides information about the configuration
  * of the sensor and provides some board-specific hooks.
  *
@@ -116,26 +89,26 @@
  * by the driver and is presumed to persist while the driver is active.
  */
 
-struct lis3mdl_config_s
+struct mlx90393_config_s
 {
-  /* Since multiple LIS3MDL can be connected to the same SPI bus we need
+  /* Since multiple MLX90393 can be connected to the same SPI bus we need
    * to use multiple spi device ids which are employed by NuttX to select/
-   * deselect the desired LIS3MDL chip via their chip select inputs.
+   * deselect the desired MLX90393 chip via their chip select inputs.
    */
 
   int spi_devid;
 
-  /* The IRQ number must be provided for each so LIS3MDL device so that
+  /* The IRQ number must be provided for each so MLX90393 device so that
    * their interrupts can be distinguished.
    */
 
   int irq;
 
-  /* Attach the LIS3MDL interrupt handler to the GPIO interrupt of the
-   * concrete LIS3MDL instance.
+  /* Attach the MLX90393 interrupt handler to the GPIO interrupt of the
+   * concrete MLX90393 instance.
    */
 
-  int (*attach)(FAR struct lis3mdl_config_s *, xcpt_t);
+  int (*attach)(FAR struct mlx90393_config_s *, xcpt_t);
 };
 
 /****************************************************************************
@@ -151,30 +124,30 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: lis3mdl_register
+ * Name: mlx90393_register
  *
  * Description:
- *   Register the LIS3MDL character device as 'devpath'
+ *   Register the MLX90393 character device as 'devpath'
  *
  * Input Parameters:
  *   devpath - The full path to the driver to register. E.g., "/dev/mag0"
  *   spi     - An instance of the SPI interface to use to communicate with
- *             LIS3MDL
- *   config  - configuration for the LIS3MDL driver. For details see
- *             description above.
+ *             MLX90393
+ *   config  - Describes the configuration of the MLX90393 part.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-int lis3mdl_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
-                     FAR struct lis3mdl_config_s const *config);
+int mlx90393_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
+                      FAR struct mlx90393_config_s *config);
 
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* CONFIG_SPI && CONFIG_LIS3MDL */
-#endif /* NUTTX_INCLUDE_NUTTX_SENSORS_LIS3MDL_H_ */
+#endif /* CONFIG_SPI && CONFIG_MLX90393 */
+
+#endif /* NUTTX_INCLUDE_NUTTX_SENSORS_MLX90393_H_ */

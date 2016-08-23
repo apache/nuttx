@@ -352,10 +352,10 @@ static int lis3mdl_interrupt_handler(int irq, FAR void *context)
 
   DEBUGASSERT(priv->work.worker == NULL);
   ret = work_queue(HPWORK, &priv->work, lis3mdl_worker, priv, 0);
-  if (ret != 0)
+  if (ret < 0)
     {
       snerr("Failed to queue work: %d\n", ret);
-      return ERROR;
+      return ret;
     }
   else
     {
@@ -435,8 +435,9 @@ static int lis3mdl_open(FAR struct file *filep)
   /* Read back the content of all control registers for debug purposes */
 
   reg_content = 0;
-  eg_addr = LIS3MDL_CTRL_REG_1;
-  for (; reg_addr <= LIS3MDL_CTRL_REG_5; reg_addr++)
+  for (reg_addr = LIS3MDL_CTRL_REG_1;
+       reg_addr <= LIS3MDL_CTRL_REG_5;
+       reg_addr++)
     {
       lis3mdl_read_register(priv, reg_addr, &reg_content);
       snerr("R#%04x = %04x\n", reg_addr, reg_content);
@@ -469,6 +470,7 @@ static int lis3mdl_close(FAR struct file *filep)
 /****************************************************************************
  * Name: lis3mdl_read
  ****************************************************************************/
+
 static ssize_t lis3mdl_read(FAR struct file *filep, FAR char *buffer,
                             size_t buflen)
 {
@@ -490,10 +492,10 @@ static ssize_t lis3mdl_read(FAR struct file *filep, FAR char *buffer,
   /* Aquire the semaphore before the data is copied */
 
   ret = sem_wait(&priv->datasem);
-  if (ret != OK)
+  if (ret < 0)
     {
       snerr("Could not aquire priv->datasem: %d\n", ret);
-      return ERROR;
+      return ret;
     }
 
   /* Copy the sensor data into the buffer */
@@ -556,8 +558,10 @@ static int lis3mdl_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  *
  * Input Parameters:
  *   devpath - The full path to the driver to register. E.g., "/dev/mag0"
- *   spi - An instance of the SPI interface to use to communicate with LIS3MDL
- *   config - configuration for the LIS3MDL driver. For details see description above.
+ *   spi     - An instance of the SPI interface to use to communicate with
+ *             LIS3MDL
+ *   config  - configuration for the LIS3MDL driver. For details see
+ *             description above.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
