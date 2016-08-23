@@ -41,7 +41,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/fs/ioctl.h>
+#include <nuttx/sensors/ioctl.h>
 
 #if defined(CONFIG_I2C) && defined(CONFIG_MS58XX)
 
@@ -57,14 +57,6 @@
  *   Enables support for the MS58XX driver
  * CONFIG_MS58XX_VDD
  */
-
-/* IOCTL Commands ***********************************************************/
-
-#define SNIOC_MEASURE      _SNIOC(0x0001) /* Arg: None */
-#define SNIOC_TEMPERATURE  _SNIOC(0x0002) /* Arg: int32_t* pointer */
-#define SNIOC_PRESSURE     _SNIOC(0x0003) /* Arg: int32_t* pointer */
-#define SNIOC_RESET        _SNIOC(0x0004) /* Arg: None */
-#define SNIOC_OVERSAMPLING _SNIOC(0x0005) /* Arg: uint16_t value */
 
 /* I2C Address **************************************************************/
 
