@@ -38,6 +38,13 @@ config SENSOR_KXTJ9_I2C_BUS_SPEED
 
 endif # SENSOR_KXTJ9
 
+config LIS3DSH
+	bool "STMicro LIS3DSH 3-Axis acclerometer support"
+	default n
+	select SPI
+	---help---
+		Enable driver support for the STMicro LIS3DSH 3-Axis acclerometer.
+
 config LIS331DL
 	bool "ST LIS331DL device support"
 	default n

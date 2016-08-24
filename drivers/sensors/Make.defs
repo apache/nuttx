@@ -53,6 +53,10 @@ ifeq ($(CONFIG_SENSOR_KXTJ9),y)
   CSRCS += kxjt9.c
 endif
 
+ifeq ($(CONFIG_LIS3DSH),y)
+  CSRCS += lis3dsh.c
+endif
+
 ifeq ($(CONFIG_LIS331DL),y)
   CSRCS += lis331dl.c
 endif
