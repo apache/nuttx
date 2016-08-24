@@ -73,6 +73,10 @@ ifeq ($(CONFIG_BH1750FVI),y)
   CSRCS += bh1750fvi.c
 endif
 
+ifeq ($(CONFIG_BMG160),y)
+  CSRCS += bmg160.c
+endif
+
 ifeq ($(CONFIG_BMP180),y)
   CSRCS += bmp180.c
 endif

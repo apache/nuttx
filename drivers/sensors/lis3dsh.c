@@ -230,9 +230,9 @@ static void lis3dsh_read_measurement_data(FAR struct lis3dsh_dev_s *dev)
   /* Aquire the semaphore before the data is copied */
 
   ret = sem_wait(&dev->datasem);
-  if (ret != OK)
+  if (ret < 0)
     {
-      snerr("Could not aquire dev->datasem: %d\n", ret);
+      snerr("ERROR: Could not aquire dev->datasem: %d\n", ret);
       return;
     }
 
@@ -317,7 +317,7 @@ static int lis3dsh_interrupt_handler(int irq, FAR void *context)
   ret = work_queue(HPWORK, &priv->work, lis3dsh_worker, priv, 0);
   if (ret < 0)
     {
-      snerr("Failed to queue work: %d\n", ret);
+      snerr("ERROR: Failed to queue work: %d\n", ret);
       return ret;
     }
 
@@ -382,24 +382,26 @@ static int lis3dsh_open(FAR struct file *filep)
 
   /* Read back the content of all control registers for debug purposes */
 
+#ifdef CONFIG_DEBUG_SENSORS_INFO
   {
     uint8_t reg_content = 0;
 
     lis3dsh_read_register(priv, LIS3DSH_CTRL_REG_1, &reg_content);
-    snerr("LIS3DSH_CTRL_REG_1 = %04x\n", reg_content);
+    sninfo("LIS3DSH_CTRL_REG_1 = %04x\n", reg_content);
     lis3dsh_read_register(priv, LIS3DSH_CTRL_REG_2, &reg_content);
-    snerr("LIS3DSH_CTRL_REG_2 = %04x\n", reg_content);
+    sninfo("LIS3DSH_CTRL_REG_2 = %04x\n", reg_content);
     lis3dsh_read_register(priv, LIS3DSH_CTRL_REG_3, &reg_content);
-    snerr("LIS3DSH_CTRL_REG_3 = %04x\n", reg_content);
+    sninfo("LIS3DSH_CTRL_REG_3 = %04x\n", reg_content);
     lis3dsh_read_register(priv, LIS3DSH_CTRL_REG_4, &reg_content);
-    snerr("LIS3DSH_CTRL_REG_4 = %04x\n", reg_content);
+    sninfo("LIS3DSH_CTRL_REG_4 = %04x\n", reg_content);
     lis3dsh_read_register(priv, LIS3DSH_CTRL_REG_5, &reg_content);
-    snerr("LIS3DSH_CTRL_REG_5 = %04x\n", reg_content);
+    sninfo("LIS3DSH_CTRL_REG_5 = %04x\n", reg_content);
     lis3dsh_read_register(priv, LIS3DSH_CTRL_REG_6, &reg_content);
-    snerr("LIS3DSH_CTRL_REG_6 = %04x\n", reg_content);
+    sninfo("LIS3DSH_CTRL_REG_6 = %04x\n", reg_content);
     lis3dsh_read_register(priv, LIS3DSH_STATUS_REG, &reg_content);
-    snerr("STATUS_REG = %04x\n", reg_content);
+    sninfo("STATUS_REG = %04x\n", reg_content);
   }
+#endif
 
   return OK;
 }
@@ -440,17 +442,17 @@ static ssize_t lis3dsh_read(FAR struct file *filep, FAR char *buffer,
 
   if (buflen < sizeof(FAR struct lis3dsh_sensor_data_s))
     {
-      snerr("Not enough memory for reading out a sensor data sample\n");
+      snerr("ERROR: Not enough memory for reading out a sensor data sample\n");
       return -ENOSYS;
     }
 
   /* Aquire the semaphore before the data is copied */
 
   ret = sem_wait(&priv->datasem);
-  if (ret != OK)
+  if (ret < 0)
     {
-      snerr("Could not aquire priv->datasem: %d\n", ret);
-      return ERROR;
+      snerr("ERROR: Could not aquire priv->datasem: %d\n", ret);
+      return ret;
     }
 
   /* Copy the sensor data into the buffer */
@@ -492,7 +494,7 @@ static int lis3dsh_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       /* Command was not recognized */
 
     default:
-      snerr("Unrecognized cmd: %d\n", cmd);
+      snerr("ERROR: Unrecognized cmd: %d\n", cmd);
       ret = -ENOTTY;
       break;
     }
@@ -537,7 +539,7 @@ int lis3dsh_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
   priv = (FAR struct lis3dsh_dev_s *)kmm_malloc(sizeof(struct lis3dsh_dev_s));
   if (priv == NULL)
     {
-      snerr("Failed to allocate instance\n");
+      snerr("ERROR: Failed to allocate instance\n");
       return -ENOMEM;
     }
 
@@ -558,10 +560,10 @@ int lis3dsh_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
   ret = register_driver(devpath, &g_lis3dsh_fops, 0666, priv);
   if (ret < 0)
     {
-      snerr("Failed to register driver: %d\n", ret);
+      snerr("ERROR: Failed to register driver: %d\n", ret);
       kmm_free(priv);
       sem_destroy(&priv->datasem);
-      return -ENODEV;
+      return ret;
     }
 
   /* Since we support multiple LIS3DSH devices, we will need to add this new
@@ -577,8 +579,8 @@ int lis3dsh_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
   ret = priv->config->attach(priv->config, &lis3dsh_interrupt_handler);
   if (ret < 0)
     {
-      snerr("Failed to attach interrupt\n");
-      return -ENODEV;
+      snerr("ERROR: Failed to attach interrupt: %d\n", ret);
+      return ret;
     }
 
   return OK;

@@ -18,6 +18,13 @@ config BH1750FVI
 	---help---
 		Enable driver support for the Rohm BH1750FVI light sensor.
 
+config BMG160
+	bool "Bosch BMG160 Gyroscope Sensor support"
+	default n
+	select SPI
+	---help---
+		Enable driver support for the Bosch BMG160 gyroscope sensor.
+
 config BMP180
 	bool "Bosch BMP180 Barometer Sensor support"
 	default n

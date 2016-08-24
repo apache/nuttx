@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef NUTTX_INCLUDE_NUTTX_SENSORS_LIS3MDL_H_
-#define NUTTX_INCLUDE_NUTTX_SENSORS_LIS3MDL_H_
+#ifndef __INCLUDE_NUTTX_SENSORS_LIS3MDL_H
+#define __INCLUDE_NUTTX_SENSORS_LIS3MDL_H
 
 /****************************************************************************
  * Included Files
@@ -177,4 +177,4 @@ int lis3mdl_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
 #endif
 
 #endif /* CONFIG_SPI && CONFIG_LIS3MDL */
-#endif /* NUTTX_INCLUDE_NUTTX_SENSORS_LIS3MDL_H_ */
+#endif /* __INCLUDE_NUTTX_SENSORS_LIS3MDL_H */

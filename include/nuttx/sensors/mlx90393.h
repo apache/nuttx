@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef NUTTX_INCLUDE_NUTTX_SENSORS_MLX90393_H_
-#define NUTTX_INCLUDE_NUTTX_SENSORS_MLX90393_H_
+#ifndef __INCLUDE_NUTTX_SENSORS_MLX90393_H
+#define __INCLUDE_NUTTX_SENSORS_MLX90393_H
 
 /****************************************************************************
  * Included Files
@@ -150,4 +150,4 @@ int mlx90393_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
 
 #endif /* CONFIG_SPI && CONFIG_MLX90393 */
 
-#endif /* NUTTX_INCLUDE_NUTTX_SENSORS_MLX90393_H_ */
+#endif /* __INCLUDE_NUTTX_SENSORS_MLX90393_H */

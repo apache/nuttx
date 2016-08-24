@@ -218,7 +218,7 @@ static void mlx90393_read_measurement_data(FAR struct mlx90393_dev_s *dev)
   ret = sem_wait(&dev->datasem);
   if (ret != OK)
     {
-      sndbg("Could not aquire dev->datasem: %d\n", ret);
+      snerr("ERROR: Could not aquire dev->datasem: %d\n", ret);
       return;
     }
 
@@ -381,7 +381,7 @@ static int mlx90393_interrupt_handler(int irq, FAR void *context)
   ret = work_queue(HPWORK, &priv->work, mlx90393_worker, priv, 0);
   if (ret < 0)
     {
-      sndbg("Failed to queue work: %d\n", ret);
+      snerr("ERROR: Failed to queue work: %d\n", ret);
       return ret;
     }
   else
@@ -421,14 +421,16 @@ static int mlx90393_open(FAR struct file *filep)
 
   mlx90393_reset(priv);
 
+#ifdef CONFIG_DEBUG_SENSORS_INFO
   /* Read the content of ALL registers for debug purposes */
 
   for (reg_addr = 0; reg_addr < NUM_REGS; reg_addr++)
     {
       uint16_t reg_content = 0;
       mlx90393_read_register(priv, reg_addr, &reg_content);
-      sndbg("R%d = %x\n", reg_addr, reg_content);
+      sninfo("R%d = %x\n", reg_addr, reg_content);
     }
+#endif
 
   /* Start the burst mode */
 
@@ -473,7 +475,7 @@ static ssize_t mlx90393_read(FAR struct file *filep, FAR char *buffer,
 
   if (buflen < sizeof(FAR struct mlx90393_sensor_data_s))
     {
-      sndbg("Not enough memory for reading out a sensor data sample\n");
+      snerr("ERROR: Not enough memory for reading out a sensor data sample\n");
       return -ENOSYS;
     }
 
@@ -484,7 +486,7 @@ static ssize_t mlx90393_read(FAR struct file *filep, FAR char *buffer,
   ret = sem_wait(&priv->datasem);
   if (ret < 0)
     {
-      sndbg("Could not aquire priv->datasem: %d\n", ret);
+      snerr("ERROR: Could not aquire priv->datasem: %d\n", ret);
       return ret;
     }
 
@@ -526,7 +528,7 @@ static int mlx90393_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       /* Command was not recognized */
 
     default:
-      sndbg("Unrecognized cmd: %d\n", cmd);
+      snerr("ERROR: Unrecognized cmd: %d\n", cmd);
       ret = -ENOTTY;
       break;
     }
@@ -571,7 +573,7 @@ int mlx90393_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
   priv = (FAR struct mlx90393_dev_s *)kmm_malloc(sizeof(struct mlx90393_dev_s));
   if (priv == NULL)
     {
-      dbg("Failed to allocate instance\n");
+      snerr("ERROR: Failed to allocate instance\n");
       return -ENOMEM;
     }
 
@@ -593,7 +595,7 @@ int mlx90393_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
   ret = priv->config->attach(priv->config, &mlx90393_interrupt_handler);
   if (ret < 0)
     {
-      dbg("Failed to attach interrupt\n");
+      snerr("ERROR: Failed to attach interrupt\n");
       return -ENODEV;
     }
 
@@ -602,7 +604,7 @@ int mlx90393_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
   ret = register_driver(devpath, &g_mlx90393_fops, 0666, priv);
   if (ret < 0)
     {
-      dbg("Failed to register driver: %d\n", ret);
+      snerr("ERROR: Failed to register driver: %d\n", ret);
       kmm_free(priv);
       sem_destroy(&priv->datasem);
       return -ENODEV;
