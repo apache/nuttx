@@ -214,6 +214,10 @@ FAR char *ctime_r(FAR const time_t *timep, FAR char *buf);
 
 time_t time(FAR time_t *timep);
 
+#if defined(CONFIG_LIBC_DIFFTIME)
+double difftime(time_t time1, time_t time0);
+#endif
+
 int timer_create(clockid_t clockid, FAR struct sigevent *evp,
                  FAR timer_t *timerid);
 int timer_delete(timer_t timerid);

@@ -49,6 +49,10 @@ CSRCS += lib_ctimer.c
 endif
 endif
 
+ifdef CONFIG_LIBC_DIFFTIME
+CSRCS += lib_difftime.c
+endif
+
 # Add the time directory to the build
 
 DEPPATH += --dep-path time
