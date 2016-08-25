@@ -1,10 +1,11 @@
 /****************************************************************************************************
  * arch/arm/src/stm32/chip/stm32fxxxxx_otgfs.h
  *
- *   Copyright (C) 2012, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014-2016 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2016 Omni Hoverboards Inc. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Paul Alexander Patience <paul-a.patience@polymtl.ca>
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            Paul Alexander Patience <paul-a.patience@polymtl.ca>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -470,44 +471,38 @@
 
 /* Core interrupt and Interrupt mask registers */
 
-#define OTGFS_GINTSTS_CMOD              (1 << 0)  /* Bit 0:  Current mode of operation */
+#define OTGFS_GINTSTS_CMOD              (1 << 0)  /* Bit 0: ro Current mode of operation */
 #  define OTGFS_GINTSTS_DEVMODE         (0)
 #  define OTGFS_GINTSTS_HOSTMODE        (OTGFS_GINTSTS_CMOD)
-#define OTGFS_GINT_MMIS                 (1 << 1)  /* Bit 1:  Mode mismatch interrupt */
-#define OTGFS_GINT_OTG                  (1 << 2)  /* Bit 2:  OTG interrupt */
-#define OTGFS_GINT_SOF                  (1 << 3)  /* Bit 3:  Start of frame */
-#define OTGFS_GINT_RXFLVL               (1 << 4)  /* Bit 4:  RxFIFO non-empty */
-#define OTGFS_GINT_NPTXFE               (1 << 5)  /* Bit 5:  Non-periodic TxFIFO empty */
-#define OTGFS_GINT_GINAKEFF             (1 << 6)  /* Bit 6:  Global IN non-periodic NAK effective */
+#define OTGFS_GINT_MMIS                 (1 << 1)  /* Bit 1:  rc_w1 Mode mismatch interrupt */
+#define OTGFS_GINT_OTG                  (1 << 2)  /* Bit 2:  ro OTG interrupt */
+#define OTGFS_GINT_SOF                  (1 << 3)  /* Bit 3:  rc_w1 Start of frame */
+#define OTGFS_GINT_RXFLVL               (1 << 4)  /* Bit 4:  ro RxFIFO non-empty */
+#define OTGFS_GINT_NPTXFE               (1 << 5)  /* Bit 5:  ro Non-periodic TxFIFO empty */
+#define OTGFS_GINT_GINAKEFF             (1 << 6)  /* Bit 6:  ro Global IN non-periodic NAK effective */
 #define OTGFS_GINT_GONAKEFF             (1 << 7)  /* Bit 7:  Global OUT NAK effective */
-                                                  /* Bits 8-9: Reserved, must be kept at reset value */
-#define OTGFS_GINT_ESUSP                (1 << 10) /* Bit 10: Early suspend */
-#define OTGFS_GINT_USBSUSP              (1 << 11) /* Bit 11: USB suspend */
-#define OTGFS_GINT_USBRST               (1 << 12) /* Bit 12: USB reset */
-#define OTGFS_GINT_ENUMDNE              (1 << 13) /* Bit 13: Enumeration done */
-#define OTGFS_GINT_ISOODRP              (1 << 14) /* Bit 14: Isochronous OUT packet dropped interrupt */
-#define OTGFS_GINT_EOPF                 (1 << 15) /* Bit 15: End of periodic frame interrupt */
-                                                  /* Bits 16 Reserved, must be kept at reset value */
-#define OTGFS_GINTMSK_EPMISM            (1 << 17) /* Bit 17: Endpoint mismatch interrupt mask */
-#define OTGFS_GINT_IEP                  (1 << 18) /* Bit 18: IN endpoint interrupt */
-#define OTGFS_GINT_OEP                  (1 << 19) /* Bit 19: OUT endpoint interrupt */
-#define OTGFS_GINT_IISOIXFR             (1 << 20) /* Bit 20: Incomplete isochronous IN transfer */
-#define OTGFS_GINT_IISOOXFR             (1 << 21) /* Bit 21: Incomplete isochronous OUT transfer (device) */
-#define OTGFS_GINT_IPXFR                (1 << 21) /* Bit 21: Incomplete periodic transfer (host) */
-                                                  /* Bit 22: Reserved, must be kept at reset value */
-#if defined(CONFIG_STM32_STM32F446) || defined(CONFIG_STM32_STM32F469)
-#  define OTGFS_GINT_RSTDET             (1 << 23) /* Bit 23: Reset detected interrupt */
-#endif
-#define OTGFS_GINT_HPRT                 (1 << 24) /* Bit 24: Host port interrupt */
-#define OTGFS_GINT_HC                   (1 << 25) /* Bit 25: Host channels interrupt */
-#define OTGFS_GINT_PTXFE                (1 << 26) /* Bit 26: Periodic TxFIFO empty */
-#if defined(CONFIG_STM32_STM32F446) || defined(CONFIG_STM32_STM32F469)
-#  define OTGFS_GINT_LPMINT             (1 << 27) /* Bit 27: LPM interrupt */
-#endif
-#define OTGFS_GINT_CIDSCHG              (1 << 28) /* Bit 28: Connector ID status change */
-#define OTGFS_GINT_DISC                 (1 << 29) /* Bit 29: Disconnect detected interrupt */
-#define OTGFS_GINT_SRQ                  (1 << 30) /* Bit 30: Session request/new session detected interrupt */
-#define OTGFS_GINT_WKUP                 (1 << 31) /* Bit 31: Resume/remote wakeup detected interrupt */
+#define OTGFS_GINT_RES89                (3 << 8)  /* Bits 8-9: Reserved, must be kept at reset value */
+#define OTGFS_GINT_ESUSP                (1 << 10) /* Bit 10: rc_w1 Early suspend */
+#define OTGFS_GINT_USBSUSP              (1 << 11) /* Bit 11: rc_w1 USB suspend */
+#define OTGFS_GINT_USBRST               (1 << 12) /* Bit 12: rc_w1 USB reset */
+#define OTGFS_GINT_ENUMDNE              (1 << 13) /* Bit 13: rc_w1 Enumeration done */
+#define OTGFS_GINT_ISOODRP              (1 << 14) /* Bit 14: rc_w1 Isochronous OUT packet dropped interrupt */
+#define OTGFS_GINT_EOPF                 (1 << 15) /* Bit 15: rc_w1 End of periodic frame interrupt */
+#define OTGFS_GINT_RES16                (1 << 16) /* Bits 16 Reserved, must be kept at reset value */
+#define OTGFS_GINTMSK_EPMISM            (1 << 17) /* Bit 17: Reserved in GINT rw Endpoint mismatch interrupt mask */
+#define OTGFS_GINT_IEP                  (1 << 18) /* Bit 18: ro IN endpoint interrupt */
+#define OTGFS_GINT_OEP                  (1 << 19) /* Bit 19: ro OUT endpoint interrupt */
+#define OTGFS_GINT_IISOIXFR             (1 << 20) /* Bit 20: rc_w1Incomplete isochronous IN transfer */
+#define OTGFS_GINT_IISOOXFR             (1 << 21) /* Bit 21: rc_w1 Incomplete isochronous OUT transfer */
+#define OTGFS_GINT_RES2223              (3 << 22) /* Bits 22-23: Reserved, must be kept at reset value */
+#define OTGFS_GINT_HPRT                 (1 << 24) /* Bit 24: ro Host port interrupt */
+#define OTGFS_GINT_HC                   (1 << 25) /* Bit 25: ro Host channels interrupt */
+#define OTGFS_GINT_PTXFE                (1 << 26) /* Bit 26: ro Periodic TxFIFO empty */
+#define OTGFS_GINT_RES27                (1 << 27) /* Bit 27 Reserved, must be kept at reset value */
+#define OTGFS_GINT_CIDSCHG              (1 << 28) /* Bit 28: rc_w1 Connector ID status change */
+#define OTGFS_GINT_DISC                 (1 << 29) /* Bit 29: rc_w1 Disconnect detected interrupt */
+#define OTGFS_GINT_SRQ                  (1 << 30) /* Bit 30: rc_w1 Session request/new session detected interrupt */
+#define OTGFS_GINT_WKUP                 (1 << 31) /* Bit 31: rc_w1 Resume/remote wakeup detected interrupt */
 
 /* Receive status debug read/OTG status read and pop registers (host mode) */
 
