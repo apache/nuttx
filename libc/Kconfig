@@ -350,13 +350,6 @@ config TIME_EXTENDED
 
 		Note: tm_isdst is always 0
 
-config LIBC_DIFFTIME
-	bool "Add support for difftime()"
-	default "n"
-	---help---
-		Add POSIX support for computing the difference between two time_t
-		values.
-
 config LIB_SENDFILE_BUFSIZE
 	int "sendfile() buffer size"
 	default 512
