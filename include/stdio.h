@@ -194,6 +194,7 @@ int    vdprintf(int fd, FAR const IPTR char *fmt, va_list ap);
 
 FAR char *tmpnam(FAR char *s);
 FAR char *tempnam(FAR const char *dir, FAR const char *pfx);
+int       remove(FAR const char *path);
 
 #undef EXTERN
 #if defined(__cplusplus)
