@@ -173,10 +173,12 @@ void      _exit(int status); /* See unistd.h */
 /* System() command is not implemented in the NuttX libc because it is so
  * entangled with shell logic.  There is an experimental version at
  * apps/system/system.  system() is prototyped here, however, for
- * compatibility.
+ * standards compatibility.
  */
 
+#ifndef __KERNEL__
 int       system(FAR char *cmd);
+#endif
 
 /* String to binary conversions */
 
