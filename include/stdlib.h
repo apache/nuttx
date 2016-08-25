@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/stdlib.h
  *
- *   Copyright (C) 2007-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -143,9 +143,9 @@ extern "C"
 void      srand(unsigned int seed);
 int       rand(void);
 
+#ifndef CONFIG_DISABLE_ENVIRON
 /* Environment variable support */
 
-#ifndef CONFIG_DISABLE_ENVIRON
 FAR char **get_environ_ptr(void);
 FAR char *getenv(FAR const char *name);
 int       putenv(FAR const char *string);

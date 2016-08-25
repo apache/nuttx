@@ -298,9 +298,9 @@ int sighold(int signo);
 int sigismember(FAR const sigset_t *set, int signo);
 int sigignore(int signo);
 CODE void (*signal(int signo, CODE void (*func)(int signo)))(int signo);
-int sigprocmask(int how, FAR const sigset_t *set, FAR sigset_t *oset);
 int sigpause(int signo);
 int sigpending(FAR sigset_t *set);
+int sigprocmask(int how, FAR const sigset_t *set, FAR sigset_t *oset);
 #ifdef CONFIG_CAN_PASS_STRUCTS
 int sigqueue(int pid, int signo, union sigval value);
 #else
