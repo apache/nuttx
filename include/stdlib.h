@@ -170,6 +170,14 @@ int       on_exit(CODE void (*func)(int, FAR void *), FAR void *arg);
 void      _exit(int status); /* See unistd.h */
 #define   _Exit(s) _exit(s)
 
+/* System() command is not implemented in the NuttX libc because it is so
+ * entangled with shell logic.  There is an experimental version at
+ * apps/system/system.  system() is prototyped here, however, for
+ * compatibility.
+ */
+
+int       system(FAR char *cmd);
+
 /* String to binary conversions */
 
 long      strtol(FAR const char *nptr, FAR char **endptr, int base);
