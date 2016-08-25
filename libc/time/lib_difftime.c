@@ -40,9 +40,8 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 
+#include <stdint.h>
 #include <time.h>
-
-#ifdef CONFIG_HAVE_DOUBLE
 
 /****************************************************************************
  * Public Functions
@@ -53,13 +52,35 @@
  *
  * Description:
  *   The difftime() function returns the number of seconds elapsed
- *   between time time1 and time time0, represented as a double.
+ *   between time time1 and time time0, represented as a double or a float.
+ *   Float is used if the platform does not support double. However, when
+ *   using a float, some precision may be lost for big differences.
  *
  ****************************************************************************/
 
+#ifdef CONFIG_HAVE_DOUBLE
 double difftime(time_t time1, time_t time0)
 {
   return (double)time1 - (double)time0;
 }
+#else
+float difftime(time_t time1, time_t time0)
+{
+  if (time1 >= time2)
+    {
+      /* Result will be positive (even though bit 31 may be set on very large
+       * differences!)
+       */
 
-#endif /* CONFIG_HAVE_DOUBLE */
+      return (float)((uint32_t)(time1 - time0))
+    }
+  else
+    {
+      /* Result will be negative.  REVISIT: Am I missing any case where bit 31
+       * might not be set?
+       */
+
+      return (float)((int32_t)(time1 - time0))
+    }
+}
+#endif
