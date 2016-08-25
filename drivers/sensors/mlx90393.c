@@ -486,8 +486,9 @@ static ssize_t mlx90393_read(FAR struct file *filep, FAR char *buffer,
   ret = sem_wait(&priv->datasem);
   if (ret < 0)
     {
-      snerr("ERROR: Could not aquire priv->datasem: %d\n", ret);
-      return ret;
+      int errcode = errno;
+      snerr("ERROR: Could not aquire priv->datasem: %d\n", errcode);
+      return -errcode;
     }
 
   data = (FAR struct mlx90393_sensor_data_s *)buffer;
