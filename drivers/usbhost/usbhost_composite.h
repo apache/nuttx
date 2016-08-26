@@ -64,7 +64,7 @@
  *                device has been connected.
  *   configdesc - The full configuration descriptor
  *   desclen    - The length of the configuration descriptor
- *   devclass   - If the class driver for the device is successful located
+ *   usbclass   - If the class driver for the device is successful located
  *                and bound to the hub port, the allocated class instance
  *                is returned into this caller-provided memory location.
  *
@@ -80,7 +80,7 @@
 
 int usbhost_composite(FAR struct usbhost_hubport_s *hport,
                       FAR const uint8_t *configdesc, int desclen,
-                      FAR struct usbhost_class_s **devclass);
+                      FAR struct usbhost_class_s **usbclass);
 
 #undef EXTERN
 #if defined(__cplusplus)
