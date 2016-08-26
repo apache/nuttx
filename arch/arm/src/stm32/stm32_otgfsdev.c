@@ -171,7 +171,6 @@
                           OTGFS_GINT_CIDSCHG  | \
                           OTGFS_GINT_DISC     | \
                           OTGFS_GINT_SRQ      | \
-                          OTGFS_GINT_SOF      | \
                           OTGFS_GINT_WKUP)
 
 /* Debug ***********************************************************************/
