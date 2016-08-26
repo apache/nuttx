@@ -289,21 +289,84 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
   FAR struct usbhsot_composite_s *priv;
   FAR struct usbhost_component_s *member;
   FAR const struct usbhost_registry_s *reg;
+  FAR struct usb_desc_s *desc;
+  uint16_t nintfs;
+  uint16_t nmerged;
   uint16_t nclasses;
+  int offset;
   int i;
 
   /* Determine if this a composite device has been connected to the
    * downstream port.
-   */
-#warning Missing logic
-
-  /* Count the number of interfaces.  Scan for IAD descriptors that will be
-   * used when it is necessary to associate multiple interfaces with a single
-   * device.
    *
-   * Save the CLASS ID information in the member structure.
+   * First, count the number of interface descriptors (nintrfs) and the
+   * number of interfaces that are assocated to one device via IAD
+   * descriptor (nmerged).
    */
+
+  for (nintfs = 0, nmerged = 0, offset = 0;
+       offset < desclen - sizeof(struct usb_desc_s);
+      )
+    {
+      desc = (FAR struct usb_desc_s *)&configdesc[offset];
+      int len = desc->len;
+
+      if (offset + len < desclen)
+        {
+          /* Is this an interface descriptor? */
+
+          if (desc->type == USB_DESC_TYPE_INTERFACE)
+            {
+              nintfs++;
+            }
+
+          /* Check for IAD descriptors that will be used when it is
+           * necessary to associate multiple interfaces with a single
+           * device.
+           */
+
+         else if (desc->type == USB_DESC_TYPE_INTERFACEASSOCIATION)
+           {
+             FAR struct usb_iaddesc_s *iad = (FAR struct usb_iaddesc_s *)desc;
+
+             /* Keep count of the number of merged interfaces */
+
+             nmerged += (iad->nifs - 1);
+           }
+        }
+
+      offset += len;
+    }
+
+  if (nintfs < 2)
+    {
+      /* Only one interface.  Can't be a composite device */
+
+      return -ENOENT;
+    }
+
+  /* Special case:  Some NON-composite deveice have more than on interface:  CDC/ACM
+   * and MSC both may have two interfaces.
+   */
+
+  if (nintfs < 3 && nmerged == 0)
+    {
+      /* Do the special case checks */
 #warning Missing logic
+    }
+
+  /* The total number of classes is then the number of interfaces minus the
+   * number of interfaces merged via the IAD descriptor.
+   */
+
+  if (nintfs <= nmerged )
+    {
+      /* Should not happen.  Means a bug. */
+
+      return -EINVAL;
+    }
+
+  nclasses = nintfs - nmerged;
 
   /* Allocate the composite class container */
 
@@ -333,7 +396,16 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
   priv->usbclass.disconnected = usbhost_disconnected;
   priv->nclasses              = nclasses;
 
-  /* Loop, processing each device that we discovered */
+  /* Reparse the configuration descriptor and save the CLASS ID information
+   * in the member structure:  If the interface is defined by an interface
+   * descriptor, then we have to use the info in the interface descriptor;
+   * If the interface has a IAD, we have to use info in the IAD.
+   */
+#warning Missing logic
+
+  /* Now loop, performing the registry lookup on each class in the
+   * composite.
+   */
 
   for (i = 0; i < nclasses; i++)
     {
