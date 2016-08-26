@@ -60,7 +60,9 @@
 
 struct usbhost_component_s
 {
-  /* To be determined */
+  /* This the the classobject returned by each contained class */
+
+  FAR struct usbhost_class_s **usbclass
 };
 
 /* This structure contains the internal, private state of the USB host
@@ -109,6 +111,42 @@ static int  usbhost_disconnected(FAR struct usbhost_class_s *usbclass);
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: usbhost_disconnect_all
+ *
+ * Description:
+ *   Disconnect all contained class instances.
+ *
+ * Input Parameters:
+ *   priv - Reference to private, composite container state stucture.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void usbhost_disconnect_all(FAR struct usbhsot_composite_s *priv)
+{
+  FAR struct usbhost_component_s *member;
+
+  /* Loop, processing each class that has been included into the composite */
+
+  for (i = 0; i < nclasses; i++)
+    {
+      member = &priv->members[i];
+
+      /* Has this member been included to the composite? */
+
+      if (member->usbclass != NULL)
+        {
+          /* Yes.. disconnect it, freeing all of the class resources */
+
+          CLASS_DISCONNECTED(member->usbclass);
+          member->usbclass = NULL;
+        }
+    }
+}
 
 /****************************************************************************
  * Name: usbhost_connect
@@ -216,7 +254,7 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
  *                device has been connected.
  *   configdesc - The full configuration descriptor
  *   desclen    - The length of the configuration descriptor
- *   devclass   - If the class driver for the device is successful located
+ *   usbclass   - If the class driver for the device is successful located
  *                and bound to the hub port, the allocated class instance
  *                is returned into this caller-provided memory location.
  *
@@ -233,7 +271,7 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
 int usbhost_composite(FAR struct usbhost_hubport_s *hport,
                       FAR const uint8_t *configdesc, int desclen,
                       FAR struct usbhost_id_s *id,
-                      FAR struct usbhost_class_s **devclass)
+                      FAR struct usbhost_class_s **usbclass)
 {
   FAR struct usbhsot_composite_s *priv;
   FAR struct usbhost_component_s *member;
@@ -266,8 +304,8 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
   if (priv->members == NULL)
     {
       uerr("ERROR: Failed to allocate class members\n")
-      kmm_free(priv);
-      return -ENOMEM;
+      ret = -ENOMEM;
+      goto errout_with_container;
     }
 
   /* Initialize the non-zero elements of the class container */
@@ -295,18 +333,53 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
               * composite wrapper (not the HCD) */
 
                   /* On failures, call the class disconnect method which
-                   * should then free the allocated devclass instance.
+                   * should then free the allocated usbclass instance.
                    */
+
+                  goto errout_with_members;
     }
 
-  /* All classes have been found, instantiated and boud the the composite class
-   * container.  Now bind the composite class instance to the HCD */
+  /* All classes have been found, instantiated and bound to the composite class
+   * container.  Now bind the composite class continer to the HCD.
+   *
+   * REVISIT: I dont' think this is right.
+   */
 
-     /* On failures, call the class disconnect method which should then free
-      * the allocated devclass instance.
-      */
+  ret = CLASS_CONNECT(usbclass, configdesc, desclen);
+  if (ret < 0)
+    {
+      /* On failure, call the class disconnect method of each contained
+       * class which should then free the allocated usbclass instance.
+       */
 
-  return -ENOSYS;
+      uerr("ERROR: CLASS_CONNECT failed: %d\n", ret);
+      goto errout_with_members;
+    }
+
+  /* Return our USB class structure */
+
+  *usbclass = &priv->usbclass;
+  return OK;
+
+errout_with_members:
+  /* On an failure, call the class disconnect method of each contained
+   * class which should then free the allocated usbclass instance.
+   */
+
+  usbhost_disconnect_all(priv);
+
+  /* Free the allocate array of composite members */
+
+  if (priv->members != NULL)
+    {
+      kmm_free(priv->members);
+    }
+
+errout_with_container:
+  /* Then free the composite container itself */
+
+  kmm_free(priv);
+  return ret;
 }
 
 #endif /* CONFIG_USBHOST_COMPOSITE */
