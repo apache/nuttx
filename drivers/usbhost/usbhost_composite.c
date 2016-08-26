@@ -189,11 +189,10 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
               configdesc != NULL &&
               desclen >= sizeof(struct usb_cfgdesc_s));
 
-  /* Get exclusive access to the device structure */
-
   /* Forward the connection information to each contained class in the
    * composite
    */
+#warning Missing logic
 
   return ret;
 }
@@ -226,11 +225,18 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
 
   DEBUGASSERT(priv != NULL);
 
-  /* Get exclusive access to the device structure */
-
   /* Forward the disconnect event to each contained class in the composite. */
 
-  /* Destroy the composite container */
+  usbhost_disconnect_all(priv);
+
+  /* Free the allocate array of composite members */
+
+  if (priv->members != NULL)
+    {
+      kmm_free(priv->members);
+    }
+
+  /* The destroy the composite container itself */
 
   kmm_free(priv);
   return OK;
@@ -281,11 +287,13 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
   /* Determine if this a composite device has been connected to the
    * downstream port.
    */
+#warning Missing logic
 
   /* Count the number of interfaces.  Scan for IAD descriptors that will be
    * used when it is necessary to associate multiple interfaces with a single
    * device.
    */
+#warning Missing logic
 
   /* Allocate the composite class container */
 
@@ -324,19 +332,26 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
       /* See usbhost_classbind() for similar logic */
 
       /* Is there is a class implementation registered to support this device. */
-
+#warning Missing logic
+        {
           /* Yes.. there is a class for this device.  Get an instance of
            * its interface.
            */
-
-              /* Then bind the newly instantiated class instance to the
-              * composite wrapper (not the HCD) */
-
+#warning Missing logic
+            {
+              /* Then bind the newly instantiated class instance as an
+               * composite class member.
+               */
+#warning Missing logic
+                {
                   /* On failures, call the class disconnect method which
                    * should then free the allocated usbclass instance.
                    */
 
                   goto errout_with_members;
+                }
+            }
+        }
     }
 
   /* All classes have been found, instantiated and bound to the composite class
@@ -345,7 +360,7 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
    * REVISIT: I dont' think this is right.
    */
 
-  ret = CLASS_CONNECT(usbclass, configdesc, desclen);
+  ret = CLASS_CONNECT(&priv->usbclass, configdesc, desclen);
   if (ret < 0)
     {
       /* On failure, call the class disconnect method of each contained
