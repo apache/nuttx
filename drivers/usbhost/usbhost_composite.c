@@ -39,6 +39,9 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
+#include <debug.h>
+
 #include <nuttx/usb/usbhost.h>
 
 #include "usbhost_composite.h"
@@ -53,9 +56,47 @@
  * Private Types
  ****************************************************************************/
 
+/* This structure describes one component class of the composite */
+
+struct usbhost_component_s
+{
+  /* To be determined */
+};
+
+/* This structure contains the internal, private state of the USB host
+ * CDC/ACM class.
+ */
+
+struct usbhsot_composite_s
+{
+  /* This is the externally visible portion of the state.  The usbclass must
+   * the first element of the structure.  It is then cast compatible with
+   * struct usbhsot_composite_s.
+   */
+
+  struct usbhost_class_s usbclass;
+
+  /* Class specific data follows */
+
+  uint16_t nclasses;   /* Number of component classes in the composite */
+
+  /* The following points to an allocated array of type struct
+   * usbhost_component_s.  Element element of the array corresponds to one
+   * component class in the composite.
+   */
+
+  FAR struct usbhost_component_s *members;
+};
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
+/* struct usbhost_class_s methods */
+
+static int  usbhost_connect(FAR struct usbhost_class_s *usbclass,
+              FAR const uint8_t *configdesc, int desclen);
+static int  usbhost_disconnected(FAR struct usbhost_class_s *usbclass);
 
 /****************************************************************************
  * Private Data
@@ -68,6 +109,94 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: usbhost_connect
+ *
+ * Description:
+ *   This function implements the connect() method of struct
+ *   usbhost_class_s.  This method is a callback into the class
+ *   implementation.  It is used to provide the device's configuration
+ *   descriptor to the class so that the class may initialize properly
+ *
+ * Input Parameters:
+ *   usbclass - The USB host class entry previously obtained from a call to
+ *     create().
+ *   configdesc - A pointer to a uint8_t buffer container the configuration
+ *     descriptor.
+ *   desclen - The length in bytes of the configuration descriptor.
+ *
+ * Returned Value:
+ *   On success, zero (OK) is returned. On a failure, a negated errno value is
+ *   returned indicating the nature of the failure
+ *
+ *   NOTE that the class instance remains valid upon return with a failure.  It is
+ *   the responsibility of the higher level enumeration logic to call
+ *   CLASS_DISCONNECTED to free up the class driver resources.
+ *
+ * Assumptions:
+ *   - This function will *not* be called from an interrupt handler.
+ *   - If this function returns an error, the USB host controller driver
+ *     must call to DISCONNECTED method to recover from the error
+ *
+ ****************************************************************************/
+
+static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
+                           FAR const uint8_t *configdesc, int desclen)
+{
+  FAR struct usbhsot_composite_s *priv = (FAR struct usbhsot_composite_s *)usbclass;
+  int ret;
+
+  DEBUGASSERT(priv != NULL &&
+              configdesc != NULL &&
+              desclen >= sizeof(struct usb_cfgdesc_s));
+
+  /* Get exclusive access to the device structure */
+
+  /* Forward the connection information to each contained class in the
+   * composite
+   */
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: usbhost_disconnected
+ *
+ * Description:
+ *   This function implements the disconnected() method of struct
+ *   usbhost_class_s.  This method is a callback into the class
+ *   implementation.  It is used to inform the class that the USB device has
+ *   been disconnected.
+ *
+ * Input Parameters:
+ *   usbclass - The USB host class entry previously obtained from a call to
+ *     create().
+ *
+ * Returned Value:
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure
+ *
+ * Assumptions:
+ *   This function may be called from an interrupt handler.
+ *
+ ****************************************************************************/
+
+static int usbhost_disconnected(struct usbhost_class_s *usbclass)
+{
+  FAR struct usbhsot_composite_s *priv = (FAR struct usbhsot_composite_s *)usbclass;
+
+  DEBUGASSERT(priv != NULL);
+
+  /* Get exclusive access to the device structure */
+
+  /* Forward the disconnect event to each contained class in the composite. */
+
+  /* Destroy the composite container */
+
+  kmm_free(priv);
+  return OK;
+}
 
 /****************************************************************************
  * Public Functions
@@ -106,6 +235,11 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
                       FAR struct usbhost_id_s *id,
                       FAR struct usbhost_class_s **devclass)
 {
+  FAR struct usbhsot_composite_s *priv;
+  FAR struct usbhost_component_s *member;
+  uint16_t nclasses;
+  int i;
+
   /* Determine if this a composite device has been connected to the
    * downstream port.
    */
@@ -117,21 +251,53 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
 
   /* Allocate the composite class container */
 
+  priv = (FAR struct usbhsot_composite_s *)
+    kmm_zalloc(sizeof(struct usbhsot_composite_s));
+
+  if (priv == NULL)
+    {
+      uerr("ERROR: Failed to allocate class container\n")
+      return -ENOMEM;
+    }
+
+  priv->members = (FAR struct usbhost_component_s *)
+    kmm_zalloc(nclasses * sizeof(struct usbhost_component_s));
+
+  if (priv->members == NULL)
+    {
+      uerr("ERROR: Failed to allocate class members\n")
+      kmm_free(priv);
+      return -ENOMEM;
+    }
+
+  /* Initialize the non-zero elements of the class container */
+
+  priv->usbclass.hport        = hport;
+  priv->usbclass.connect      = usbhost_connect;
+  priv->usbclass.disconnected = usbhost_disconnected;
+  priv->nclasses              = nclasses;
+
   /* Loop, processing each device that we discovered */
-  /* See usbhost_classbind() for similar logic */
 
-  /* Is there is a class implementation registered to support this device. */
+  for (i = 0; i < nclasses; i++)
+    {
+       member = &priv->members[i];
 
-      /* Yes.. there is a class for this device.  Get an instance of
-       * its interface.
-       */
+      /* See usbhost_classbind() for similar logic */
 
-          /* Then bind the newly instantiated class instance to the
-           * composite wrapper (not the HCD) */
+      /* Is there is a class implementation registered to support this device. */
 
-              /* On failures, call the class disconnect method which
-               * should then free the allocated devclass instance.
-               */
+          /* Yes.. there is a class for this device.  Get an instance of
+           * its interface.
+           */
+
+              /* Then bind the newly instantiated class instance to the
+              * composite wrapper (not the HCD) */
+
+                  /* On failures, call the class disconnect method which
+                   * should then free the allocated devclass instance.
+                   */
+    }
 
   /* All classes have been found, instantiated and boud the the composite class
    * container.  Now bind the composite class instance to the HCD */
