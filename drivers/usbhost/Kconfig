@@ -77,6 +77,12 @@ config USBHOST_HUB_POLLMSEC
 
 endif # USBHOST_HUB
 
+config USBHOST_COMPOSITE
+	bool "Composite device support"
+	default n
+	---help---
+		Build in USB host support for connected composite devices
+
 config USBHOST_MSC
 	bool "Mass Storage Class Support"
 	default n
