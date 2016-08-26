@@ -63,6 +63,12 @@ struct usbhost_component_s
   /* This the the classobject returned by each contained class */
 
   FAR struct usbhost_class_s **usbclass
+
+  /* This is the information that we need to do the registry lookup for this
+   * class member.
+   */
+
+  struct usbhost_id_s id,
 };
 
 /* This structure contains the internal, private state of the USB host
@@ -190,7 +196,9 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
               desclen >= sizeof(struct usb_cfgdesc_s));
 
   /* Forward the connection information to each contained class in the
-   * composite
+   * composite.
+   * REVIST:  Is that right?  Or should it be forwarded only to the class
+   * matching the configdesc?  I am not sure that is going on here.
    */
 #warning Missing logic
 
@@ -276,7 +284,6 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
 
 int usbhost_composite(FAR struct usbhost_hubport_s *hport,
                       FAR const uint8_t *configdesc, int desclen,
-                      FAR struct usbhost_id_s *id,
                       FAR struct usbhost_class_s **usbclass)
 {
   FAR struct usbhsot_composite_s *priv;
@@ -337,9 +344,8 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
        * REVISIT: This should have been saved in member structure when the
        * number of member classes was counted.
        */
-#warning Missing logic to get id
 
-      reg = usbhost_findclass(id);
+      reg = usbhost_findclass(&priv->id);
       if (reg == NULL)
         {
           uinfo("usbhost_findclass failed\n");
