@@ -281,6 +281,7 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
 {
   FAR struct usbhsot_composite_s *priv;
   FAR struct usbhost_component_s *member;
+  FAR const struct usbhost_registry_s *reg;
   uint16_t nclasses;
   int i;
 
@@ -292,6 +293,8 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
   /* Count the number of interfaces.  Scan for IAD descriptors that will be
    * used when it is necessary to associate multiple interfaces with a single
    * device.
+   *
+   * Save the CLASS ID information in the member structure.
    */
 #warning Missing logic
 
@@ -329,28 +332,31 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
     {
        member = &priv->members[i];
 
-      /* See usbhost_classbind() for similar logic */
+      /* Is there is a class implementation registered to support this
+       * device.
+       * REVISIT: This should have been saved in member structure when the
+       * number of member classes was counted.
+       */
+#warning Missing logic to get id
 
-      /* Is there is a class implementation registered to support this device. */
-#warning Missing logic
+      reg = usbhost_findclass(id);
+      if (reg == NULL)
         {
-          /* Yes.. there is a class for this device.  Get an instance of
-           * its interface.
-           */
-#warning Missing logic
-            {
-              /* Then bind the newly instantiated class instance as an
-               * composite class member.
-               */
-#warning Missing logic
-                {
-                  /* On failures, call the class disconnect method which
-                   * should then free the allocated usbclass instance.
-                   */
+          uinfo("usbhost_findclass failed\n");
+          ret = -EINVAL;
+          goto errour_with_members;
+        }
 
-                  goto errout_with_members;
-                }
-            }
+      /* Yes.. there is a class for this device.  Get an instance of its
+       * interface.
+       */
+
+      member->usbclass = CLASS_CREATE(reg, hport, id);
+      if (member->usbclass == NULL)
+        {
+          uinfo("CLASS_CREATE failed\n");
+          ret = -ENOMEM;
+          goto errour_with_members;
         }
     }
 
