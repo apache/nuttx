@@ -268,6 +268,9 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
  *                device has been connected.
  *   configdesc - The full configuration descriptor
  *   desclen    - The length of the configuration descriptor
+ *   id         - Lookup information extracted from the device descriptor.
+ *                for the case of the composite devices, we need only the
+ *                vid and pid.
  *   usbclass   - If the class driver for the device is successful located
  *                and bound to the hub port, the allocated class instance
  *                is returned into this caller-provided memory location.
@@ -284,12 +287,14 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
 
 int usbhost_composite(FAR struct usbhost_hubport_s *hport,
                       FAR const uint8_t *configdesc, int desclen,
+                      FAR struct usbhost_id_s *id,
                       FAR struct usbhost_class_s **usbclass)
 {
   FAR struct usbhsot_composite_s *priv;
   FAR struct usbhost_component_s *member;
   FAR const struct usbhost_registry_s *reg;
   FAR struct usb_desc_s *desc;
+  uint32_t mergeset;
   uint16_t nintfs;
   uint16_t nmerged;
   uint16_t nclasses;
@@ -304,9 +309,11 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
    * descriptor (nmerged).
    */
 
-  for (nintfs = 0, nmerged = 0, offset = 0;
-       offset < desclen - sizeof(struct usb_desc_s);
-      )
+  mergeset = 0
+  nintfs   = 0;
+  nmerged  = 0;
+
+  for (offset = 0; offset < desclen - sizeof(struct usb_desc_s); )
     {
       desc = (FAR struct usb_desc_s *)&configdesc[offset];
       int len = desc->len;
@@ -317,6 +324,10 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
 
           if (desc->type == USB_DESC_TYPE_INTERFACE)
             {
+              FAR struct usb_ifdesc_s *ifdesc =
+                (FAR struct usb_ifdesc_s *)desc;
+
+              DEBUGASSERT(ifdesc->iif < 32);
               nintfs++;
             }
 
@@ -327,11 +338,18 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
 
          else if (desc->type == USB_DESC_TYPE_INTERFACEASSOCIATION)
            {
-             FAR struct usb_iaddesc_s *iad = (FAR struct usb_iaddesc_s *)desc;
+              FAR struct usb_iaddesc_s *iad = (FAR struct usb_iaddesc_s *)desc;
+              uint32_t mask;
 
-             /* Keep count of the number of merged interfaces */
+              /* Keep count of the number of merged interfaces */
 
-             nmerged += (iad->nifs - 1);
+              nmerged += (iad->nifs - 1);
+
+              /* Keep track of which interfaces have been merged */
+
+              DEBUGASSERT(iad->firstif + iad->nifs < 32);
+              mask     = (1 << iad->nifs) - 1;
+              mergset |= mask << iad->firstif;
            }
         }
 
@@ -396,12 +414,81 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
   priv->usbclass.disconnected = usbhost_disconnected;
   priv->nclasses              = nclasses;
 
-  /* Reparse the configuration descriptor and save the CLASS ID information
+  /* Re-parse the configuration descriptor and save the CLASS ID information
    * in the member structure:  If the interface is defined by an interface
    * descriptor, then we have to use the info in the interface descriptor;
    * If the interface has a IAD, we have to use info in the IAD.
    */
-#warning Missing logic
+
+  for (i = 0, offset = 0; offset < desclen - sizeof(struct usb_desc_s); )
+    {
+      desc = (FAR struct usb_desc_s *)&configdesc[offset];
+      int len = desc->len;
+
+      if (offset + len < desclen)
+        {
+          /* Is this an interface descriptor? */
+
+          if (desc->type == USB_DESC_TYPE_INTERFACE)
+            {
+              FAR struct usb_ifdesc_s *ifdesc =
+                (FAR struct usb_ifdesc_s *)desc;
+
+              /* Was the interface merged via an IAD descriptor? */
+
+              DEBUGASSERT(ifdesc->iif < 32);
+              if ((mergset & (1 << ifdesc->iif)) == 0)
+                {
+                  FAR struct usbhost_id_s *member =
+                    (FAR struct usbhost_id_s *)&priv->members[i];
+
+                  /* No, this interface was not merged.  Save the registry
+                   * lookup information from the interface descriptor.
+                   */
+
+                   member->base     = ifdesc->classid;
+                   member->subclass = ifdesc->subclass;
+                   member->proto    = ifdesc->protocol;
+                   member->vid      = id->vid;
+                   member->pid      = id->pid;
+
+                   /* Increment the member index */
+
+                   i++;
+                }
+            }
+
+          /* Check for IAD descriptors that will be used when it is
+           * necessary to associate multiple interfaces with a single
+           * device.
+           */
+
+          else if (desc->type == USB_DESC_TYPE_INTERFACEASSOCIATION)
+            {
+              FAR struct usb_iaddesc_s *iad = (FAR struct usb_iaddesc_s *)desc;
+
+                  /* Yes.. Save the registry lookup information from the IAD. */
+
+                   member->base     = iad->classid;
+                   member->subclass = iad->subclass;
+                   member->proto    = iad->protocol;
+                   member->vid      = id->vid;
+                   member->pid      = id->pid;
+
+                   /* Increment the member index */
+
+                   i++;
+            }
+        }
+
+      offset += len;
+    }
+
+  /* If everything worked, the final index must be the same as the pre-
+   * calculated number of member classes.
+   */
+
+  DEBUGASSERT(i == nclasses);
 
   /* Now loop, performing the registry lookup on each class in the
    * composite.
