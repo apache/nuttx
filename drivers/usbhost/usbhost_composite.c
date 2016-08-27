@@ -304,7 +304,32 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
   /* Determine if this a composite device has been connected to the
    * downstream port.
    *
-   * First, count the number of interface descriptors (nintrfs) and the
+   * First look at there device descriptor information.  A composite
+   * device is only possible if:
+   *
+   * 1. Manufacturers of composite devices typically assign a value of zero
+   *    to the device class (bDeviceClass), subclass (bDeviceSubClass), and
+   *    protocol (bDeviceProtocol) fields in the device descriptor, as
+   *    specified by the Universal Serial Bus Specification. This allows
+   *    the manufacturer to associate each individual interface with a
+   *    different device class and protocol.
+   *
+   * 2. The USB-IF core team has devised a special class and protocol code
+   *    set that notifies the operating system that one or more IADs are
+   *    present in device firmware. A device's device descriptor must have
+   *    the values that appear in the following table:
+   *
+   *   bDeviceClass    0xEF
+   *   bDeviceSubClass 0x02
+   *   bDeviceProtocol 0x01
+   */
+
+   if (id->base != USB_CLASS_PER_INTERFACE && id->base != USB_CLASS_MISC)
+     {
+       return -ENOENT;
+     }
+
+  /* First, count the number of interface descriptors (nintfs) and the
    * number of interfaces that are assocated to one device via IAD
    * descriptor (nmerged).
    */
@@ -363,7 +388,8 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
       return -ENOENT;
     }
 
-  /* Special case:  Some NON-composite deveice have more than on interface:  CDC/ACM
+#if 0 /* I think not needed, the device descriptor classid check should handle this */
+  /* Special case:  Some NON-composite device have more than on interface:  CDC/ACM
    * and MSC both may have two interfaces.
    */
 
@@ -372,6 +398,7 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
       /* Do the special case checks */
 #warning Missing logic
     }
+#endif
 
   /* The total number of classes is then the number of interfaces minus the
    * number of interfaces merged via the IAD descriptor.
