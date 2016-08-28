@@ -49,10 +49,6 @@
 #ifdef CONFIG_USBHOST_COMPOSITE
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
  * Private Types
  ****************************************************************************/
 
@@ -107,14 +103,6 @@ static int  usbhost_connect(FAR struct usbhost_class_s *usbclass,
 static int  usbhost_disconnected(FAR struct usbhost_class_s *usbclass);
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -160,8 +148,23 @@ static void usbhost_disconnect_all(FAR struct usbhsot_composite_s *priv)
  * Description:
  *   This function implements the connect() method of struct
  *   usbhost_class_s.  This method is a callback into the class
- *   implementation.  It is used to provide the device's configuration
- *   descriptor to the class so that the class may initialize properly
+ *   implementation from the common enumeration logic.  It is normally used
+ *   to provide the device's configuration descriptor to the class so that
+ *   the class may initialize properly.  That calling sequence is:
+ *
+ *   1. usbhost_enumerate()
+ *   2. usbhost_classbind()
+ *   3. CLASS_CONNECT()
+ *
+ *   However, that applies only to the Non-composite device.
+ *   usbhost_classbind() is not called for the composite device and, hence,
+ *   this method is never called.  Rather, the composite logic calls
+ *   CLASS_CONNECT() for each member of the composite in a calling sequence
+ *   like:
+ *
+ *   1. usbhost_enumerate()
+ *   2. usbhost_composite()
+ *   3. Call CLASS_CONNECT() for each composite member
  *
  * Input Parameters:
  *   usbclass - The USB host class entry previously obtained from a call to
@@ -188,21 +191,7 @@ static void usbhost_disconnect_all(FAR struct usbhsot_composite_s *priv)
 static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
                            FAR const uint8_t *configdesc, int desclen)
 {
-  FAR struct usbhsot_composite_s *priv = (FAR struct usbhsot_composite_s *)usbclass;
-  int ret;
-
-  DEBUGASSERT(priv != NULL &&
-              configdesc != NULL &&
-              desclen >= sizeof(struct usb_cfgdesc_s));
-
-  /* Forward the connection information to each contained class in the
-   * composite.
-   * REVIST:  Is that right?  Or should it be forwarded only to the class
-   * matching the configdesc?  I am not sure that is going on here.
-   */
-#warning Missing logic
-
-  return ret;
+  return -ENOSYS;
 }
 
 /****************************************************************************
@@ -383,7 +372,7 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
 
   if (nintfs < 2)
     {
-      /* Only one interface.  Can't be a composite device */
+      /* Only one interface descriptor.  Can't be a composite device */
 
       return -ENOENT;
     }
@@ -527,8 +516,6 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
 
       /* Is there is a class implementation registered to support this
        * device.
-       * REVISIT: This should have been saved in member structure when the
-       * number of member classes was counted.
        */
 
       reg = usbhost_findclass(&priv->id);
@@ -555,7 +542,9 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
   /* All classes have been found, instantiated and bound to the composite class
    * container.  Now bind the composite class continer to the HCD.
    *
-   * REVISIT: I dont' think this is right.
+   * REVISIT: I dont' think this is right.  I am think we will need to construct
+   * a custom configuration + interface descriptors for each member of the
+   * composite.  That might be tricky.  Maybe there is a better way?
    */
 
   ret = CLASS_CONNECT(&priv->usbclass, configdesc, desclen);
