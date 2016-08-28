@@ -80,8 +80,12 @@ endif # USBHOST_HUB
 config USBHOST_COMPOSITE
 	bool "Composite device support"
 	default n
+	depends on EXPERIMENTAL
 	---help---
 		Build in USB host support for connected composite devices
+
+		NOTE: This feature is marked EXPERIMENTAL because it it untested
+		and has some known design issues that must still be be resolved.
 
 config USBHOST_MSC
 	bool "Mass Storage Class Support"
