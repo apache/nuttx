@@ -12593,3 +12593,9 @@
 	  generally available (2016-08-20).
 	* sched/sched_cpuload_oneshot:  Use the oneshot timer with optional
 	  entropy to measure cPU load if so configured (2016-08-20).
+	* drivers/usbhost/usbhost_composite.c: An an EXPERIMENTAL prototype of
+	  how USB host support for composite devices might be implemented.  This
+	  feature is EXPERIMENTAL because (1) it is untested and (2) has some
+	  know design issues that must be addressed before it can be of use
+	  (2016-08-28).
+
