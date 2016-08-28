@@ -506,8 +506,8 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
 
   DEBUGASSERT(i == nclasses);
 
-  /* Now loop, performing the registry lookup on each class in the
-   * composite.
+  /* Now loop, performing the registry lookup and initialization of each
+   * member class in the composite.
    */
 
   for (i = 0; i < nclasses; i++)
@@ -537,25 +537,28 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
           ret = -ENOMEM;
           goto errour_with_members;
         }
-    }
 
-  /* All classes have been found, instantiated and bound to the composite class
-   * container.  Now bind the composite class continer to the HCD.
-   *
-   * REVISIT: I dont' think this is right.  I am think we will need to construct
-   * a custom configuration + interface descriptors for each member of the
-   * composite.  That might be tricky.  Maybe there is a better way?
-   */
-
-  ret = CLASS_CONNECT(&priv->usbclass, configdesc, desclen);
-  if (ret < 0)
-    {
-      /* On failure, call the class disconnect method of each contained
-       * class which should then free the allocated usbclass instance.
+      /* Call the newly instantiated classes connect() method provide it
+       * with the information that it needs to initialize properly, that
+       * is the configuration escriptor and all of the interface descriptors
+       * needed by the member class.
+       *
+       * REVISIT: I dont' think this will work.  I am thinking we will need
+       * to construct a custom configuration + interface + endpoint
+       * descriptors to pass to each member of the composite.  That might be
+       * tricky.  Maybe there is a better way?
        */
 
-      uerr("ERROR: CLASS_CONNECT failed: %d\n", ret);
-      goto errout_with_members;
+      ret = CLASS_CONNECT(member->usbclass, configdesc, desclen);
+      if (ret < 0)
+        {
+          /* On failure, call the class disconnect method of each contained
+           * class which should then free the allocated usbclass instance.
+           */
+
+          uerr("ERROR: CLASS_CONNECT failed: %d\n", ret);
+          goto errout_with_members;
+        }
     }
 
   /* Return our USB class structure */
