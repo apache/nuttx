@@ -51,4 +51,8 @@ ifeq ($(CONFIG_WL_MFRC522),y)
 CSRCS += stm32_mfrc522.c
 endif
 
+ifeq ($(CONFIG_LCD_ST7567),y)
+CSRCS += stm32_lcd.c
+endif
+
 include $(TOPDIR)/configs/Board.mk
