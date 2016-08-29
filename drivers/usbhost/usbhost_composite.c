@@ -67,6 +67,13 @@ struct usbhost_component_s
    */
 
   struct usbhost_id_s id;
+
+  /* This information will be needed to construct a meaningful configuration
+   * for CLASS_CONNSET()
+   */
+
+  uint8_t iff;         /* First interface */
+  uint8_t nifs;        /* Number of interfaces */
 };
 
 /* This structure contains the internal, private state of the USB host
@@ -466,15 +473,18 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
                    * lookup information from the interface descriptor.
                    */
 
-                   member->base     = ifdesc->classid;
-                   member->subclass = ifdesc->subclass;
-                   member->proto    = ifdesc->protocol;
-                   member->vid      = id->vid;
-                   member->pid      = id->pid;
+                  member->base     = ifdesc->classid;
+                  member->subclass = ifdesc->subclass;
+                  member->proto    = ifdesc->protocol;
+                  member->vid      = id->vid;
+                  member->pid      = id->pid;
 
-                   /* Increment the member index */
+                  member->iff      = ifdesc->iff;
+                  member->nifs     = 1;
 
-                   i++;
+                  /* Increment the member index */
+
+                  i++;
                 }
             }
 
@@ -496,6 +506,9 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
               member->proto    = iad->protocol;
               member->vid      = id->vid;
               member->pid      = id->pid;
+
+              member->iff      = iad->firstif;
+              member->nifs     = iad->nifs;
 
               /* Increment the member index */
 
