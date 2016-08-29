@@ -529,6 +529,10 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
    * structure that indexes all interface and endpoint dscriptors in the
    * configuration.  This index table will be used before CLASS_CONNECT()
    * is called to construct a meaning conifuration for the single class.
+   *
+   * An option would be some functions: usbhost_findinterface() and
+   * usbhost_findenpoint() that could do the brute force look-up as
+   * necessary.
    */
 
   /* Now loop, performing the registry lookup and initialization of each
