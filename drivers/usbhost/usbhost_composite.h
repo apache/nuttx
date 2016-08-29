@@ -42,6 +42,7 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbhost.h>
 
 #ifdef CONFIG_USBHOST_COMPOSITE
@@ -80,6 +81,7 @@
 
 int usbhost_composite(FAR struct usbhost_hubport_s *hport,
                       FAR const uint8_t *configdesc, int desclen,
+                      FAR struct usbhost_id_s *id,
                       FAR struct usbhost_class_s **usbclass);
 
 #undef EXTERN

@@ -40,8 +40,10 @@
 #include <nuttx/config.h>
 
 #include <assert.h>
+#include <errno.h>
 #include <debug.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/usb/usbhost.h>
 
 #include "usbhost_composite.h"
@@ -58,24 +60,24 @@ struct usbhost_component_s
 {
   /* This the the classobject returned by each contained class */
 
-  FAR struct usbhost_class_s **usbclass
+  FAR struct usbhost_class_s *usbclass;
 
   /* This is the information that we need to do the registry lookup for this
    * class member.
    */
 
-  struct usbhost_id_s id,
+  struct usbhost_id_s id;
 };
 
 /* This structure contains the internal, private state of the USB host
  * CDC/ACM class.
  */
 
-struct usbhsot_composite_s
+struct usbhost_composite_s
 {
   /* This is the externally visible portion of the state.  The usbclass must
    * the first element of the structure.  It is then cast compatible with
-   * struct usbhsot_composite_s.
+   * struct usbhost_composite_s.
    */
 
   struct usbhost_class_s usbclass;
@@ -120,13 +122,14 @@ static int  usbhost_disconnected(FAR struct usbhost_class_s *usbclass);
  *
  ****************************************************************************/
 
-static void usbhost_disconnect_all(FAR struct usbhsot_composite_s *priv)
+static void usbhost_disconnect_all(FAR struct usbhost_composite_s *priv)
 {
   FAR struct usbhost_component_s *member;
+  int i;
 
   /* Loop, processing each class that has been included into the composite */
 
-  for (i = 0; i < nclasses; i++)
+  for (i = 0; i < priv->nclasses; i++)
     {
       member = &priv->members[i];
 
@@ -218,7 +221,7 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
 
 static int usbhost_disconnected(struct usbhost_class_s *usbclass)
 {
-  FAR struct usbhsot_composite_s *priv = (FAR struct usbhsot_composite_s *)usbclass;
+  FAR struct usbhost_composite_s *priv = (FAR struct usbhost_composite_s *)usbclass;
 
   DEBUGASSERT(priv != NULL);
 
@@ -279,7 +282,7 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
                       FAR struct usbhost_id_s *id,
                       FAR struct usbhost_class_s **usbclass)
 {
-  FAR struct usbhsot_composite_s *priv;
+  FAR struct usbhost_composite_s *priv;
   FAR struct usbhost_component_s *member;
   FAR const struct usbhost_registry_s *reg;
   FAR struct usb_desc_s *desc;
@@ -288,6 +291,7 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
   uint16_t nmerged;
   uint16_t nclasses;
   int offset;
+  int ret;
   int i;
 
   /* Determine if this a composite device has been connected to the
@@ -323,7 +327,7 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
    * descriptor (nmerged).
    */
 
-  mergeset = 0
+  mergeset = 0;
   nintfs   = 0;
   nmerged  = 0;
 
@@ -362,8 +366,8 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
               /* Keep track of which interfaces have been merged */
 
               DEBUGASSERT(iad->firstif + iad->nifs < 32);
-              mask     = (1 << iad->nifs) - 1;
-              mergset |= mask << iad->firstif;
+              mask      = (1 << iad->nifs) - 1;
+              mergeset |= mask << iad->firstif;
            }
         }
 
@@ -404,8 +408,8 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
 
   /* Allocate the composite class container */
 
-  priv = (FAR struct usbhsot_composite_s *)
-    kmm_zalloc(sizeof(struct usbhsot_composite_s));
+  priv = (FAR struct usbhost_composite_s *)
+    kmm_zalloc(sizeof(struct usbhost_composite_s));
 
   if (priv == NULL)
     {
@@ -453,7 +457,7 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
               /* Was the interface merged via an IAD descriptor? */
 
               DEBUGASSERT(ifdesc->iif < 32);
-              if ((mergset & (1 << ifdesc->iif)) == 0)
+              if ((mergeset & (1 << ifdesc->iif)) == 0)
                 {
                   FAR struct usbhost_id_s *member =
                     (FAR struct usbhost_id_s *)&priv->members[i];
@@ -482,18 +486,20 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
           else if (desc->type == USB_DESC_TYPE_INTERFACEASSOCIATION)
             {
               FAR struct usb_iaddesc_s *iad = (FAR struct usb_iaddesc_s *)desc;
+              FAR struct usbhost_id_s *member =
+                (FAR struct usbhost_id_s *)&priv->members[i];
 
-                  /* Yes.. Save the registry lookup information from the IAD. */
+              /* Yes.. Save the registry lookup information from the IAD. */
 
-                   member->base     = iad->classid;
-                   member->subclass = iad->subclass;
-                   member->proto    = iad->protocol;
-                   member->vid      = id->vid;
-                   member->pid      = id->pid;
+              member->base     = iad->classid;
+              member->subclass = iad->subclass;
+              member->proto    = iad->protocol;
+              member->vid      = id->vid;
+              member->pid      = id->pid;
 
-                   /* Increment the member index */
+              /* Increment the member index */
 
-                   i++;
+              i++;
             }
         }
 
@@ -518,12 +524,12 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
        * device.
        */
 
-      reg = usbhost_findclass(&priv->id);
+      reg = usbhost_findclass(&member->id);
       if (reg == NULL)
         {
           uinfo("usbhost_findclass failed\n");
           ret = -EINVAL;
-          goto errour_with_members;
+          goto errout_with_members;
         }
 
       /* Yes.. there is a class for this device.  Get an instance of its
@@ -535,7 +541,7 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
         {
           uinfo("CLASS_CREATE failed\n");
           ret = -ENOMEM;
-          goto errour_with_members;
+          goto errout_with_members;
         }
 
       /* Call the newly instantiated classes connect() method provide it

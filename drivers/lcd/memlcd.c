@@ -562,6 +562,7 @@ static int memlcd_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t * buffer,
  *   Get information about the LCD video controller configuration.
  *
  ****************************************************************************/
+
 static int memlcd_getvideoinfo(FAR struct lcd_dev_s *dev,
                                FAR struct fb_videoinfo_s *vinfo)
 {
@@ -708,6 +709,7 @@ static int memlcd_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
  *   the specified LCD.  NULL is returned on any failure.
  *
  ****************************************************************************/
+
 FAR struct lcd_dev_s *memlcd_initialize(FAR struct spi_dev_s *spi,
                                         FAR struct memlcd_priv_s *priv,
                                         unsigned int devno)
