@@ -512,6 +512,12 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
 
   DEBUGASSERT(i == nclasses);
 
+  /* REVISIT:  Here I think that we need to create an intermediate data
+   * structure that indexes all interface and endpoint dscriptors in the
+   * configuration.  This index table will be used before CLASS_CONNECT()
+   * is called to construct a meaning conifuration for the single class.
+   */
+
   /* Now loop, performing the registry lookup and initialization of each
    * member class in the composite.
    */
