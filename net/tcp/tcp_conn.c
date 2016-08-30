@@ -273,7 +273,8 @@ static FAR struct tcp_conn_s *tcp_listener(uint16_t portno)
  *     selected.
  *
  * Return:
- *   0 on success, negated errno on failure:
+ *   Selected or verified port number in host order on success, a negated
+ *   errno on failure:
  *
  *   EADDRINUSE
  *     The given address is already in use.
@@ -305,6 +306,7 @@ static int tcp_selectport(uint16_t portno)
           /* Guess that the next available port number will be the one after
            * the last port number assigned.
            */
+
           portno = ++g_last_tcp_port;
 
           /* Make sure that the port number is within range */
@@ -338,7 +340,7 @@ static int tcp_selectport(uint16_t portno)
         }
     }
 
-  /* Return the selected or verified port number */
+  /* Return the selected or verified port number (host byte order) */
 
   return portno;
 }
@@ -520,7 +522,7 @@ static inline int tcp_ipv4_bind(FAR struct tcp_conn_s *conn,
 
   flags = net_lock();
 
-  /* Verify or select a local port */
+  /* Verify or select a local port (host byte order) */
 
 #ifdef CONFIG_NETDEV_MULTINIC
   port = tcp_selectport(PF_INET,
@@ -536,9 +538,9 @@ static inline int tcp_ipv4_bind(FAR struct tcp_conn_s *conn,
       return port;
     }
 
-  /* Save the local address in the connection structure. */
+  /* Save the local address in the connection structure (network byte order). */
 
-  conn->lport = addr->sin_port;
+  conn->lport = htons(port);
 #ifdef CONFIG_NETDEV_MULTINIC
   net_ipv4addr_copy(conn->u.ipv4.laddr, addr->sin_addr.s_addr);
 #endif
@@ -595,7 +597,7 @@ static inline int tcp_ipv6_bind(FAR struct tcp_conn_s *conn,
 
   flags = net_lock();
 
-  /* Verify or select a local port */
+  /* Verify or select a local port (host byte order) */
 
 #ifdef CONFIG_NETDEV_MULTINIC
   /* The port number must be unique for this address binding */
@@ -617,9 +619,9 @@ static inline int tcp_ipv6_bind(FAR struct tcp_conn_s *conn,
       return port;
     }
 
-  /* Save the local address in the connection structure. */
+  /* Save the local address in the connection structure (network byte order). */
 
-  conn->lport = addr->sin6_port;
+  conn->lport = htons(port);
 #ifdef CONFIG_NETDEV_MULTINIC
   net_ipv6addr_copy(conn->u.ipv6.laddr, addr->sin6_addr.in6_u.u6_addr16);
 #endif
@@ -1217,7 +1219,9 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
   if (conn->domain == PF_INET)
 #endif
     {
-      /* Select a port that is unique for this IPv4 local address */
+      /* Select a port that is unique for this IPv4 local address (host
+       * order).
+       */
 
       port = tcp_selectport(PF_INET,
                             (FAR const union ip_addr_u *)&conn->u.ipv4.laddr,
@@ -1230,7 +1234,9 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
   else
 #endif
     {
-      /* Select a port that is unique for this IPv6 local address */
+      /* Select a port that is unique for this IPv6 local address (host
+       * order).
+       */
 
       port = tcp_selectport(PF_INET6,
                             (FAR const union ip_addr_u *)conn->u.ipv6.laddr,
