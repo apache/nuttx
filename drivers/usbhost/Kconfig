@@ -84,8 +84,8 @@ config USBHOST_COMPOSITE
 	---help---
 		Build in USB host support for connected composite devices
 
-		NOTE: This feature is marked EXPERIMENTAL because it it untested
-		and has some known design issues that must still be be resolved.
+		NOTE: This feature is marked EXPERIMENTAL because it has not been
+		untested
 
 config USBHOST_MSC
 	bool "Mass Storage Class Support"

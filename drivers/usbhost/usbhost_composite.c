@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <string.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
@@ -51,12 +52,23 @@
 #ifdef CONFIG_USBHOST_COMPOSITE
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* This is the size of a large, allocated temporary buffer that we will use
+ * to constuct custom configuration descriptors for each member class.
+ */
+
+#define CUSTOM_CONFIG_BUFSIZE  \
+  (USB_SIZEOF_CFGDESC + 3 * USB_SIZEOF_IFDESC + 9 * USB_SIZEOF_EPDESC)
+
+/****************************************************************************
  * Private Types
  ****************************************************************************/
 
 /* This structure describes one component class of the composite */
 
-struct usbhost_component_s
+struct usbhost_member_s
 {
   /* This the the classobject returned by each contained class */
 
@@ -72,7 +84,7 @@ struct usbhost_component_s
    * for CLASS_CONNSET()
    */
 
-  uint8_t iff;         /* First interface */
+  uint8_t firstif;     /* First interface */
   uint8_t nifs;        /* Number of interfaces */
 };
 
@@ -94,11 +106,11 @@ struct usbhost_composite_s
   uint16_t nclasses;   /* Number of component classes in the composite */
 
   /* The following points to an allocated array of type struct
-   * usbhost_component_s.  Element element of the array corresponds to one
+   * usbhost_member_s.  Element element of the array corresponds to one
    * component class in the composite.
    */
 
-  FAR struct usbhost_component_s *members;
+  FAR struct usbhost_member_s *members;
 };
 
 /****************************************************************************
@@ -131,7 +143,7 @@ static int  usbhost_disconnected(FAR struct usbhost_class_s *usbclass);
 
 static void usbhost_disconnect_all(FAR struct usbhost_composite_s *priv)
 {
-  FAR struct usbhost_component_s *member;
+  FAR struct usbhost_member_s *member;
   int i;
 
   /* Loop, processing each class that has been included into the composite */
@@ -250,6 +262,198 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
 }
 
 /****************************************************************************
+ * Name: usbhost_copyinterface
+ *
+ * Description:
+ *   Find an interface descriptor and copy it along with all of its
+ *   following encpoint descriptors.
+ *
+ * Input Parameters:
+ *   ifno        - The interface ID to find.
+ *   configdesc - The original configuration descriptor that contains the
+ *                the interface descriptor.
+ *   desclen    - the length of configdesc.
+ *   buffer     - The buffer in which to return the descriptors
+ *   buflen     - The length of buffer
+ *
+ * Returned Value:
+ *   On success, the number of bytes copied is returned. On a failure, a
+ *   negated errno value is returned indicating the nature of the failure:
+ *
+ *   -ENOENT: Did not find interface descriptor
+ *   -EINVAL: Did not find all endpoint descriptors
+ *
+ ****************************************************************************/
+
+static int usbhost_copyinterface(uint8_t ifno, FAR const uint8_t *configdesc,
+                                 int desclen, FAR uint8_t *buffer, int buflen)
+{
+  FAR struct usb_ifdesc_s *ifdesc;
+  FAR struct usb_epdesc_s *epdesc;
+  int retsize;
+  int offset;
+  int neps;
+  int len;
+
+  /* Make sure that the buffer will hold at least the interface descriptor */
+
+  if (buflen < USB_SIZEOF_IFDESC)
+    {
+      return -ENOSPC;
+    }
+
+  /* Search for the interface */
+
+  for (offset = 0, retsize = 0;
+       offset < desclen - sizeof(struct usb_ifdesc_s);
+       offset += len)
+    {
+      ifdesc = (FAR struct usb_ifdesc_s *)&configdesc[offset];
+      len    = ifdesc->len;
+
+      /* Is this an interface descriptor?  Is it the one we are looking for? */
+
+      if (ifdesc->type == USB_DESC_TYPE_INTERFACE && ifdesc->iif == ifno)
+        {
+          /* Yes.. return the interface descriptor */
+
+          memcpy(buffer, ifdesc, len);
+          buffer  += len;
+          buflen  -= len;
+          retsize += len;
+
+          /* Make sure that the buffer will hold at least the endpoint
+           * descriptors.
+           */
+
+          neps = ifdesc->neps;
+          if (buflen < neps * USB_SIZEOF_EPDESC)
+            {
+              return -ENOSPC;
+            }
+
+          /* The endpoint descriptors should immediately follow the
+           * interface descriptor.
+           */
+
+          for (offset += len;
+               offset < desclen - sizeof(struct usb_ifdesc_s);
+               offset += len)
+            {
+              epdesc = (FAR struct usb_epdesc_s *)&configdesc[offset];
+              len    = ifdesc->len;
+
+              /* Is this an endpoint descriptor?  */
+
+              if (ifdesc->type == USB_DESC_TYPE_ENDPOINT)
+                {
+                  /* Yes.. return the endpoint descriptor */
+
+                  memcpy(buffer, epdesc, len);
+                  buffer  += len;
+                  buflen  -= len;
+                  retsize += len;
+
+                  /* And reduce the number of endpoints we are looking for */
+
+                  if (--neps <= 0)
+                    {
+                      /* That is all of them!.  Return the total size copied */
+
+                      return retsize;
+                    }
+                }
+            }
+
+          /* Did not find all of the interface descriptors */
+
+          return -EINVAL;
+        }
+    }
+
+  /* Could not find the interface descriptor */
+
+  return -ENOENT;
+}
+
+/****************************************************************************
+ * Name: usbhost_createconfig
+ *
+ * Description:
+ *   Create a custom configuration for a member class.
+ *
+ * Input Parameters:
+ *   configdesc - The original configuration descriptor that contains the
+ *                the interface descriptor.
+ *   desclen    - the length of configdesc.
+ *   buffer     - The buffer in which to return the descriptors
+ *   buflen     - The length of buffer
+ *
+ * Returned Value:
+ *   On success, the size of the new configuration descriptor is returned.
+ *   On a failure, a negated errno value is returned indicating the nature
+ *   of the failure:
+ *
+ *   -ENOENT: Did not find interface descriptor
+ *   -EINVAL: Did not find all endpoint descriptors
+ *
+ ****************************************************************************/
+
+static int usbhost_createconfig(FAR struct usbhost_member_s *member,
+                                FAR const uint8_t *configdesc, int desclen,
+                                FAR uint8_t *buffer, int buflen)
+{
+  FAR struct usb_cfgdesc_s *cfgdesc;
+  int cfgsize;
+  int ifsize;
+  int ifno;
+  int nifs;
+
+  /* Copy and modify the original configuration descriptor */
+
+  if (buflen < USB_SIZEOF_CFGDESC)
+    {
+      return -ENOSPC;
+    }
+
+  memcpy(buffer, configdesc, USB_SIZEOF_CFGDESC);
+  cfgsize = USB_SIZEOF_CFGDESC;
+  buffer += USB_SIZEOF_CFGDESC;
+  buflen -= USB_SIZEOF_CFGDESC;
+
+  /* Modify the copied configuration descriptor */
+
+  cfgdesc              = (FAR struct usb_cfgdesc_s *)buffer;
+  cfgdesc->len         = USB_SIZEOF_CFGDESC;
+  cfgdesc->ninterfaces = member->nifs;
+
+  /* Then copy all of the interfaces to the configuration buffer */
+
+  for (nifs = 0, ifno = member->firstif; nifs < member->nifs; nifs++, ifno++)
+    {
+      ifsize = usbhost_copyinterface(ifno, configdesc, desclen,
+                                     buffer, buflen);
+      if (ifsize < 0)
+        {
+          uerr("ERROR: Failed to copy inteface: %d\n", ifsize);
+          return ifsize;
+        }
+
+      /* Update sizes and pointers */
+
+      cfgsize += ifsize;
+      buffer  += ifsize;
+      buflen  -= ifsize;
+    }
+
+  /* Set the totallen of the configuration descriptor and return success */
+
+  cfgdesc->totallen[0] = cfgsize & 0xff; /* Little endian always */
+  cfgdesc->totallen[1] = cfgsize >> 8;
+  return cfgsize;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -290,13 +494,15 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
                       FAR struct usbhost_class_s **usbclass)
 {
   FAR struct usbhost_composite_s *priv;
-  FAR struct usbhost_component_s *member;
+  FAR struct usbhost_member_s *member;
   FAR const struct usbhost_registry_s *reg;
   FAR struct usb_desc_s *desc;
+  FAR uint8_t *cfgbuffer;
   uint32_t mergeset;
   uint16_t nintfs;
   uint16_t nmerged;
   uint16_t nclasses;
+  int cfgsize;
   int offset;
   int ret;
   int i;
@@ -349,10 +555,14 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
 
           if (desc->type == USB_DESC_TYPE_INTERFACE)
             {
+#ifdef CONFIG_DEBUG_ASSERTIONS
               FAR struct usb_ifdesc_s *ifdesc =
                 (FAR struct usb_ifdesc_s *)desc;
 
               DEBUGASSERT(ifdesc->iif < 32);
+#endif
+              /* Increment the count of interfaces */
+
               nintfs++;
             }
 
@@ -366,11 +576,11 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
               FAR struct usb_iaddesc_s *iad = (FAR struct usb_iaddesc_s *)desc;
               uint32_t mask;
 
-              /* Keep count of the number of merged interfaces */
+              /* Keep count of the number ofinterfaces that will be merged */
 
               nmerged += (iad->nifs - 1);
 
-              /* Keep track of which interfaces have been merged */
+              /* Keep track of which interfaces will be merged */
 
               DEBUGASSERT(iad->firstif + iad->nifs < 32);
               mask      = (1 << iad->nifs) - 1;
@@ -424,8 +634,8 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
       return -ENOMEM;
     }
 
-  priv->members = (FAR struct usbhost_component_s *)
-    kmm_zalloc(nclasses * sizeof(struct usbhost_component_s));
+  priv->members = (FAR struct usbhost_member_s *)
+    kmm_zalloc(nclasses * sizeof(struct usbhost_member_s));
 
   if (priv->members == NULL)
     {
@@ -466,21 +676,19 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
               DEBUGASSERT(ifdesc->iif < 32);
               if ((mergeset & (1 << ifdesc->iif)) == 0)
                 {
-                  FAR struct usbhost_id_s *member =
-                    (FAR struct usbhost_id_s *)&priv->members[i];
-
                   /* No, this interface was not merged.  Save the registry
                    * lookup information from the interface descriptor.
                    */
 
-                  member->base     = ifdesc->classid;
-                  member->subclass = ifdesc->subclass;
-                  member->proto    = ifdesc->protocol;
-                  member->vid      = id->vid;
-                  member->pid      = id->pid;
+                  member              = (FAR struct usbhost_member_s *)&priv->members[i];
+                  member->id.base     = ifdesc->classid;
+                  member->id.subclass = ifdesc->subclass;
+                  member->id.proto    = ifdesc->protocol;
+                  member->id.vid      = id->vid;
+                  member->id.pid      = id->pid;
 
-                  member->iff      = ifdesc->iff;
-                  member->nifs     = 1;
+                  member->firstif     = ifdesc->iif;
+                  member->nifs        = 1;
 
                   /* Increment the member index */
 
@@ -496,19 +704,18 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
           else if (desc->type == USB_DESC_TYPE_INTERFACEASSOCIATION)
             {
               FAR struct usb_iaddesc_s *iad = (FAR struct usb_iaddesc_s *)desc;
-              FAR struct usbhost_id_s *member =
-                (FAR struct usbhost_id_s *)&priv->members[i];
 
               /* Yes.. Save the registry lookup information from the IAD. */
 
-              member->base     = iad->classid;
-              member->subclass = iad->subclass;
-              member->proto    = iad->protocol;
-              member->vid      = id->vid;
-              member->pid      = id->pid;
+              member              = (FAR struct usbhost_member_s *)&priv->members[i];
+              member->id.base     = iad->classid;
+              member->id.subclass = iad->subclass;
+              member->id.proto    = iad->protocol;
+              member->id.vid      = id->vid;
+              member->id.pid      = id->pid;
 
-              member->iff      = iad->firstif;
-              member->nifs     = iad->nifs;
+              member->firstif     = iad->firstif;
+              member->nifs        = iad->nifs;
 
               /* Increment the member index */
 
@@ -525,15 +732,17 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
 
   DEBUGASSERT(i == nclasses);
 
-  /* REVISIT:  Here I think that we need to create an intermediate data
-   * structure that indexes all interface and endpoint dscriptors in the
-   * configuration.  This index table will be used before CLASS_CONNECT()
-   * is called to construct a meaning conifuration for the single class.
-   *
-   * An option would be some functions: usbhost_findinterface() and
-   * usbhost_findenpoint() that could do the brute force look-up as
-   * necessary.
+  /* Allocate a large buffer in which we can construct a custom configuration
+   * descriptor for each member class.
    */
+
+  cfgbuffer = (FAR uint8_t *)malloc(CUSTOM_CONFIG_BUFSIZE);
+  if (cfgbuffer == NULL)
+    {
+      uerr("ERROR: Failed to allocated configuration buffer");
+      ret = -ENOMEM;
+      goto errout_with_members;
+    }
 
   /* Now loop, performing the registry lookup and initialization of each
    * member class in the composite.
@@ -550,9 +759,9 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
       reg = usbhost_findclass(&member->id);
       if (reg == NULL)
         {
-          uinfo("usbhost_findclass failed\n");
+          uerr("ERROR: usbhost_findclass failed\n");
           ret = -EINVAL;
-          goto errout_with_members;
+          goto errout_with_cfgbuffer;
         }
 
       /* Yes.. there is a class for this device.  Get an instance of its
@@ -562,23 +771,30 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
       member->usbclass = CLASS_CREATE(reg, hport, id);
       if (member->usbclass == NULL)
         {
-          uinfo("CLASS_CREATE failed\n");
+          uerr("ERROR: CLASS_CREATE failed\n");
           ret = -ENOMEM;
-          goto errout_with_members;
+          goto errout_with_cfgbuffer;
+        }
+
+      /* Construct a custom configuration descriptor for this member */
+
+      cfgsize = usbhost_createconfig(member, configdesc, desclen,
+                                     cfgbuffer, CUSTOM_CONFIG_BUFSIZE);
+      if (cfgsize < 0)
+        {
+          uerr("ERROR: Failed to create the custom configuration: %d\n",
+               cfgsize);
+          ret = cfgsize;
+          goto errout_with_cfgbuffer;
         }
 
       /* Call the newly instantiated classes connect() method provide it
        * with the information that it needs to initialize properly, that
        * is the configuration escriptor and all of the interface descriptors
        * needed by the member class.
-       *
-       * REVISIT: I dont' think this will work.  I am thinking we will need
-       * to construct a custom configuration + interface + endpoint
-       * descriptors to pass to each member of the composite.  That might be
-       * tricky.  Maybe there is a better way?
        */
 
-      ret = CLASS_CONNECT(member->usbclass, configdesc, desclen);
+      ret = CLASS_CONNECT(member->usbclass, cfgbuffer, cfgsize);
       if (ret < 0)
         {
           /* On failure, call the class disconnect method of each contained
@@ -586,14 +802,19 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
            */
 
           uerr("ERROR: CLASS_CONNECT failed: %d\n", ret);
-          goto errout_with_members;
+          goto errout_with_cfgbuffer;
         }
     }
+
+  kmm_free(cfgbuffer);
 
   /* Return our USB class structure */
 
   *usbclass = &priv->usbclass;
   return OK;
+
+errout_with_cfgbuffer:
+  kmm_free(cfgbuffer);
 
 errout_with_members:
   /* On an failure, call the class disconnect method of each contained
