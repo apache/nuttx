@@ -341,11 +341,11 @@ static int usbhost_copyinterface(uint8_t ifno, FAR const uint8_t *configdesc,
                offset += len)
             {
               epdesc = (FAR struct usb_epdesc_s *)&configdesc[offset];
-              len    = ifdesc->len;
+              len    = epdesc->len;
 
               /* Is this an endpoint descriptor?  */
 
-              if (ifdesc->type == USB_DESC_TYPE_ENDPOINT)
+              if (epdesc->type == USB_DESC_TYPE_ENDPOINT)
                 {
                   /* Yes.. return the endpoint descriptor */
 
@@ -362,6 +362,17 @@ static int usbhost_copyinterface(uint8_t ifno, FAR const uint8_t *configdesc,
 
                       return retsize;
                     }
+                }
+
+              /* The endpoint descriptors following the interface descriptor
+               * should all be contiguous.  But we will complain only if another
+               * interface descriptor is encountered before all of the endpoint
+               * descriptors have been found.
+               */
+
+              else if (epdesc->type == USB_DESC_TYPE_INTERFACE)
+                {
+                  break;
                 }
             }
 
