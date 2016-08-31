@@ -361,8 +361,8 @@
 /* User LED driver ioctl definitions ****************************************/
 /* (see nuttx/leds/usersled.h */
 
-#define _ULEDIOCVALID(c)   (_IOC_TYPE(c)==_ULEDBASE)
-#define _ULEDIOC(nr)       _IOC(_ULEDBASE,nr)
+#define _ULEDIOCVALID(c)  (_IOC_TYPE(c)==_ULEDBASE)
+#define _ULEDIOC(nr)      _IOC(_ULEDBASE,nr)
 
 /* Zero Cross driver ioctl definitions **************************************/
 /* (see nuttx/include/sensor/zerocross.h */
@@ -379,29 +379,29 @@
 /* Modem driver ioctl definitions ********************************************/
 /* see nuttx/include/modem/*.h */
 
-#define _MODEMIOCVALID(c)  (_IOC_TYPE(c)==_MODEMBASE)
-#define _MODEMIOC(nr)      _IOC(_MODEMBASE,nr)
+#define _MODEMIOCVALID(c) (_IOC_TYPE(c)==_MODEMBASE)
+#define _MODEMIOC(nr)     _IOC(_MODEMBASE,nr)
 
 /* I2C driver ioctl definitions **********************************************/
 /* see nuttx/include/i2c/i2c_master.h */
 
-#define _I2CIOCVALID(c)    (_IOC_TYPE(c)==_I2CBASE)
-#define _I2CIOC(nr)        _IOC(_I2CBASE,nr)
+#define _I2CIOCVALID(c)   (_IOC_TYPE(c)==_I2CBASE)
+#define _I2CIOC(nr)       _IOC(_I2CBASE,nr)
 
 /* SPI driver ioctl definitions **********************************************/
 /* see nuttx/include/spi/spi_transfer.h */
 
-#define _SPIIOCVALID(c)    (_IOC_TYPE(c)==_SPIBASE)
-#define _SPIIOC(nr)        _IOC(_SPIBASE,nr)
+#define _SPIIOCVALID(c)   (_IOC_TYPE(c)==_SPIBASE)
+#define _SPIIOC(nr)       _IOC(_SPIBASE,nr)
 
 /* GPIO driver command definitions ******************************************/
 /* see nuttx/include/ioexpander/gpio.h */
 
-#define _GPIOCVALID(c)     (_IOC_TYPE(c)==_GPIOBASE)
-#define _GPIOC(nr)         _IOC(_GPIOBASE,nr)
+#define _GPIOCVALID(c)    (_IOC_TYPE(c)==_GPIOBASE)
+#define _GPIOC(nr)        _IOC(_GPIOBASE,nr)
 
 /* Contactless driver ioctl definitions ****************************************/
-/* (see nuttx/include/contactless/contactless.h */
+/* (see nuttx/include/contactless/ioctl.h */
 
 #define _CLIOCVALID(c)    (_IOC_TYPE(c)==_CLIOCBASE)
 #define _CLIOC(nr)        _IOC(_CLIOCBASE,nr)

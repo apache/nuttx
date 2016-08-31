@@ -1,10 +1,8 @@
 /****************************************************************************
- * include/wireless/pn532.h
+ * include/wireless/ioclt.h
  *
- *   Copyright(C) 2012, 2013, 2016 Offcode Ltd. All rights reserved.
- *   Authors: Janne Rosberg <janne@offcode.fi>
- *            Teemu Pirinen <teemu@offcode.fi>
- *            Juho Grundström <juho@offcode.fi>
+ *   Copyright(C) 2016 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -35,85 +33,44 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_CONTACTLESS_PN532_H
-#define __INCLUDE_NUTTX_CONTACTLESS_PN532_H
+#ifndef __INCLUDE_NUTTX_CONTACTLESS_IOCTL_H
+#define __INCLUDE_NUTTX_CONTACTLESS_IOCTL_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/spi/spi.h>
-#include <nuttx/irq.h>
 #include <sys/ioctl.h>
 
+#include <nuttx/irq.h>
+#include <nuttx/spi/spi.h>
 #include <nuttx/contactless/ioctl.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
 
-#define PN532_MIFARE_ISO14443A          (0x00)
+/* MFRC522 IOCTL Commands ***************************************************/
+
+#define MFRC522IOC_GET_PICC_UID         _CLIOC(0x0001)
+#define MFRC522IOC_GET_STATE            _CLIOC(0x0002)
+
+/* PN532 IOCTL Commands *****************************************************/
+
+#define PN532IOC_SET_SAM_CONF           _CLIOC(0x0003)
+#define PN532IOC_READ_PASSIVE           _CLIOC(0x0004)
+#define PN532IOC_SET_RF_CONF            _CLIOC(0x0005)
+#define PN532IOC_SEND_CMD_READ_PASSIVE  _CLIOC(0x0006)
+#define PN532IOC_GET_DATA_READY         _CLIOC(0x0007)
+#define PN532IOC_GET_TAG_ID             _CLIOC(0x0008)
+#define PN532IOC_GET_STATE              _CLIOC(0x0009)
+#define PN532IOC_READ_TAG_DATA          _CLIOC(0x000a)
+#define PN532IOC_WRITE_TAG_DATA         _CLIOC(0x000b)
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
-
-enum pn532_state_e
-{
-  PN532_STATE_NOT_INIT,
-  PN532_STATE_IDLE,
-  PN532_STATE_CMD_SENT,
-  PN532_STATE_DATA_READY,
-};
-
-struct pn532_dev_s;
-struct pn532_config_s
-{
-  int (*reset)(uint8_t enable);
-
-  /* External CS, if NULL then SPIDEV_WIRELESS CS is used */
-
-  int (*select)(struct pn532_dev_s *dev, bool sel);
-  int (*irqattach)(void* dev, xcpt_t isr);
-};
-
-enum PN_SAM_MODE
-{
-  PN_SAM_NORMAL_MODE = 0x01,
-  PN_SAM_VIRTUAL_CARD,
-  PN_SAM_WIRED_CARD,
-  SAM_DUAL_CARD
-};
-
-struct pn_sam_settings_s
-{
-  enum PN_SAM_MODE mode;  /* Mode */
-  uint8_t timeout;        /* Timeout: LSB=50ms 0x14*50ms = 1sec */
-  uint8_t irq_en;         /* If 1 - enable P-70, IRQ */
-};
-
-enum PN_RF_CONFIG_ITEM
-{
-  PN_RF_CONFIG_RF_FIELD         = 0x01,
-  PN_RF_CONFIG_VARIOUS_TIMINGS  = 0x02,
-
-  PN_RF_CONFIG_ITEM_ANALOG_106A = 0x0A,
-  PN_RF_CONFIG_ITEM_ANALOG_212  = 0x0B,
-};
-
-struct pn_rf_config_s
-{
-  uint8_t cfg_item;       /* Item */
-  uint8_t data_size;      /* number of config items */
-  uint8_t config[11];     /* Item config data */
-};
-
-struct pn_mifare_tag_data_s
-{
-  uint32_t data;
-  uint8_t address;
-};
 
 /****************************************************************************
  * Public Functions
@@ -127,28 +84,10 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/****************************************************************************
- * Name: pn532_register
- *
- * Description:
- *   Register the PN532 character device as 'devpath'
- *
- * Input Parameters:
- *   devpath - The full path to the driver to register. E.g., "/dev/nfc0"
- *   spi     - An instance of the SPI interface to use to communicate with PN532
- *   config  - Device persistent board data
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-int pn532_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
-                   FAR struct pn532_config_s *config);
 
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __INCLUDE_NUTTX_CONTACTLESS_PN532_H */
+#endif /* __INCLUDE_NUTTX_CONTACTLESS_IOCTL_H */

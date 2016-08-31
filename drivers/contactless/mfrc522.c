@@ -50,7 +50,6 @@
 #include <unistd.h>
 
 #include <nuttx/kmalloc.h>
-#include <nuttx/drivers/contactless.h>
 #include <nuttx/contactless/mfrc522.h>
 
 #include "mfrc522.h"

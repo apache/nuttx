@@ -33,29 +33,25 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_WIRELESS_MFRC522_H
-#define __INCLUDE_NUTTX_WIRELESS_MFRC522_H
+#ifndef __INCLUDE_NUTTX_CONTACTLESS_MFRC522_H
+#define __INCLUDE_NUTTX_CONTACTLESS_MFRC522_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/spi/spi.h>
-#include <nuttx/irq.h>
 #include <sys/ioctl.h>
-#include <nuttx/wireless/wireless.h>
+
+#include <nuttx/irq.h>
+#include <nuttx/spi/spi.h>
+#include <nuttx/contactless/ioctl.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
 
 #define MFRC522_MIFARE_ISO14443A          (0x00)
-
-/* IOCTL Commands ***********************************************************/
-
-#define MFRC522IOC_GET_PICC_UID           _CLIOC_USER(0x0001)
-#define MFRC522IOC_GET_STATE              _CLIOC_USER(0x0002)
 
 /****************************************************************************
  * Public Types
@@ -113,4 +109,4 @@ int mfrc522_register(FAR const char *devpath, FAR struct spi_dev_s *spi);
 }
 #endif
 
-#endif /* __INCLUDE_NUTTX_WIRELESS_MFRC522_H */
+#endif /* __INCLUDE_NUTTX_CONTACTLESS_MFRC522_H */

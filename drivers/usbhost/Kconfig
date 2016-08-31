@@ -95,7 +95,7 @@ config USBHOST_COMPOSITE_STRICT
 		If selected, then the composite device will not be enumerated unless
 		every member class in the composite is supported.  If not selected
 		then, for example, you could use the CDC/ACM interface of the device
-		with not support for the other interfaces.
+		with no support for the other interfaces.
 
 config USBHOST_MSC
 	bool "Mass Storage Class Support"
