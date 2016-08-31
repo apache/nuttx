@@ -43,13 +43,13 @@
 #include <debug.h>
 
 #include <nuttx/spi/spi.h>
-#include <nuttx/wireless/mfrc522.h>
+#include <nuttx/contactless/mfrc522.h>
 
 #include "stm32.h"
 #include "stm32_spi.h"
 #include "stm32f103_minimum.h"
 
-#if defined(CONFIG_SPI) && defined(CONFIG_STM32_SPI1) && defined(CONFIG_WL_MFRC522)
+#if defined(CONFIG_SPI) && defined(CONFIG_STM32_SPI1) && defined(CONFIG_CL_MFRC522)
 
 /************************************************************************************
  * Pre-processor Definitions
