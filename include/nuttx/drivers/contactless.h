@@ -58,7 +58,7 @@
  * commands, beginning with this value:
  */
 
-#define CLIOC_USER              0x0001         /* Lowest, unused CL ioctl command */
+#define CLIOC_USER              0x0003         /* Lowest, unused CL ioctl command */
 
 #define _CLIOC_USER(nr)         _CLIOC(nr + CLIOC_USER)
 

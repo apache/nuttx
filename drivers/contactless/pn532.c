@@ -48,7 +48,7 @@
 #include <unistd.h>
 
 #include <nuttx/kmalloc.h>
-#include <nuttx/contactless/contactless.h>
+#include <nuttx/drivers/contactless.h>
 
 #include "pn532.h"
 
