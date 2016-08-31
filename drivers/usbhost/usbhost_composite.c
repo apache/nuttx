@@ -560,7 +560,7 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
       desc = (FAR struct usb_desc_s *)&configdesc[offset];
       int len = desc->len;
 
-      if (offset + len < desclen)
+      if (offset + len <= desclen)
         {
           /* Is this an interface descriptor? */
 
@@ -673,7 +673,7 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
       desc = (FAR struct usb_desc_s *)&configdesc[offset];
       int len = desc->len;
 
-      if (offset + len < desclen)
+      if (offset + len <= desclen)
         {
           /* Is this an interface descriptor? */
 
@@ -750,7 +750,7 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
   cfgbuffer = (FAR uint8_t *)malloc(CUSTOM_CONFIG_BUFSIZE);
   if (cfgbuffer == NULL)
     {
-      uerr("ERROR: Failed to allocated configuration buffer");
+      uerr("ERROR: Failed to allocate configuration buffer");
       ret = -ENOMEM;
       goto errout_with_members;
     }
