@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/wireless/mfrc522.h
+ * drivers/contactless/mfrc522.h
  *
  *   Copyright(C) 2016 Uniquix Ltda. All rights reserved.
  *   Authors: Alan Carvalho de Assis <acassis@gmail.com>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_WIRELESS_MFRC522_H
-#define __DRIVERS_WIRELESS_MFRC522_H 1
+#ifndef __DRIVERS_CONTACTLESS_MFRC522_H
+#define __DRIVERS_CONTACTLESS_MFRC522_H 1
 
 /****************************************************************************
  * Included Files
@@ -46,7 +46,6 @@
 
 #include <nuttx/spi/spi.h>
 #include <nuttx/wqueue.h>
-#include <nuttx/wireless/mfrc522.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -427,4 +426,4 @@ struct mfrc522_dev_s
 
 bool mfrc522_set_config(struct mfrc522_dev_s *dev, uint8_t flags);
 
-#endif /* __DRIVERS_WIRELESS_MFRC522_H */
+#endif /* __DRIVERS_CONTACTLESS_MFRC522_H */

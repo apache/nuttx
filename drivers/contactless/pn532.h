@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/wireless/pn532.h
+ * drivers/contactless/pn532.h
  *
  *   Copyright(C) 2012, 2013, 2016 Offcode Ltd. All rights reserved.
  *   Authors: Janne Rosberg <janne@offcode.fi>
@@ -35,8 +35,8 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_WIRELESS_PN532_H
-#define __DRIVERS_WIRELESS_PN532_H 1
+#ifndef __DRIVERS_CONTACTLESS_PN532_H
+#define __DRIVERS_CONTACTLESS_PN532_H 1
 
 /****************************************************************************
  * Included Files
@@ -48,7 +48,7 @@
 
 #include <nuttx/spi/spi.h>
 #include <nuttx/wqueue.h>
-#include <nuttx/wireless/pn532.h>
+#include <nuttx/contactless/pn532.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -168,4 +168,4 @@ struct pn532_dev_s
 
 bool pn532_set_config(struct pn532_dev_s *dev, uint8_t flags);
 
-#endif /* __DRIVERS_WIRELESS_PN532_H */
+#endif /* __DRIVERS_CONTACTLESS_PN532_H */

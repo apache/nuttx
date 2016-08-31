@@ -451,6 +451,7 @@ enum spi_dev_e
   SPIDEV_BAROMETER,     /* Select SPI Pressure/Barometer device */
   SPIDEV_TEMPERATURE,   /* Select SPI Temperature sensor device */
   SPIDEV_IEEE802154,    /* Select SPI IEEE 802.15.4 wireless device */
+  SPIDEV_CONTACTLESS,   /* Select SPI Contactless device */
   SPIDEV_USER           /* Board-specific values start here */
 };
 

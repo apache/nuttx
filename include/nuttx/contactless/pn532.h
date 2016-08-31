@@ -1,8 +1,10 @@
 /****************************************************************************
- * include/wireless/mfrc522.h
+ * include/wireless/pn532.h
  *
- *   Copyright(C) 2016 Uniquix Ltda. All rights reserved.
- *   Author: Alan Carvalho de Assis <acassis@gmail.com>
+ *   Copyright(C) 2012, 2013, 2016 Offcode Ltd. All rights reserved.
+ *   Authors: Janne Rosberg <janne@offcode.fi>
+ *            Teemu Pirinen <teemu@offcode.fi>
+ *            Juho Grundström <juho@offcode.fi>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,8 +35,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_WIRELESS_MFRC522_H
-#define __INCLUDE_NUTTX_WIRELESS_MFRC522_H
+#ifndef __INCLUDE_NUTTX_WIRELESS_PN532_H
+#define __INCLUDE_NUTTX_WIRELESS_PN532_H
 
 /****************************************************************************
  * Included Files
@@ -44,38 +46,84 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/irq.h>
 #include <sys/ioctl.h>
-#include <nuttx/wireless/wireless.h>
+#include <nuttx/drivers/contactless.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
 
-#define MFRC522_MIFARE_ISO14443A          (0x00)
+#define PN532_MIFARE_ISO14443A          (0x00)
 
 /* IOCTL Commands ***********************************************************/
 
-#define MFRC522IOC_GET_PICC_UID           _WLIOC_USER(0x0001)
-#define MFRC522IOC_GET_STATE              _WLIOC_USER(0x0002)
+#define PN532IOC_SET_SAM_CONF           _CLIOC_USER(0x0001)
+#define PN532IOC_READ_PASSIVE           _CLIOC_USER(0x0002)
+#define PN532IOC_SET_RF_CONF            _CLIOC_USER(0x0003)
+#define PN532IOC_SEND_CMD_READ_PASSIVE  _CLIOC_USER(0x0004)
+#define PN532IOC_GET_DATA_READY         _CLIOC_USER(0x0005)
+#define PN532IOC_GET_TAG_ID             _CLIOC_USER(0x0006)
+#define PN532IOC_GET_STATE              _CLIOC_USER(0x0007)
+#define PN532IOC_READ_TAG_DATA          _CLIOC_USER(0x0008)
+#define PN532IOC_WRITE_TAG_DATA         _CLIOC_USER(0x0009)
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
-enum mfrc522_state_e
+enum pn532_state_e
 {
-  MFRC522_STATE_NOT_INIT,
-  MFRC522_STATE_IDLE,
-  MFRC522_STATE_CMD_SENT,
-  MFRC522_STATE_DATA_READY,
+  PN532_STATE_NOT_INIT,
+  PN532_STATE_IDLE,
+  PN532_STATE_CMD_SENT,
+  PN532_STATE_DATA_READY,
 };
 
-struct mfrc522_dev_s;
-
-struct picc_uid_s
+struct pn532_dev_s;
+struct pn532_config_s
 {
-  uint8_t  size;         /* Number of bytes in the UID. 4, 7 or 10 */
-  uint8_t  uid_data[10];
-  uint8_t  sak;          /* The SAK (Select Acknowledge) return by the PICC */
+  int (*reset)(uint8_t enable);
+
+  /* External CS, if NULL then SPIDEV_WIRELESS CS is used */
+
+  int (*select)(struct pn532_dev_s *dev, bool sel);
+  int (*irqattach)(void* dev, xcpt_t isr);
+};
+
+enum PN_SAM_MODE
+{
+  PN_SAM_NORMAL_MODE = 0x01,
+  PN_SAM_VIRTUAL_CARD,
+  PN_SAM_WIRED_CARD,
+  SAM_DUAL_CARD
+};
+
+struct pn_sam_settings_s
+{
+  enum PN_SAM_MODE mode;  /* Mode */
+  uint8_t timeout;        /* Timeout: LSB=50ms 0x14*50ms = 1sec */
+  uint8_t irq_en;         /* If 1 - enable P-70, IRQ */
+};
+
+enum PN_RF_CONFIG_ITEM
+{
+  PN_RF_CONFIG_RF_FIELD         = 0x01,
+  PN_RF_CONFIG_VARIOUS_TIMINGS  = 0x02,
+
+  PN_RF_CONFIG_ITEM_ANALOG_106A = 0x0A,
+  PN_RF_CONFIG_ITEM_ANALOG_212  = 0x0B,
+};
+
+struct pn_rf_config_s
+{
+  uint8_t cfg_item;       /* Item */
+  uint8_t data_size;      /* number of config items */
+  uint8_t config[11];     /* Item config data */
+};
+
+struct pn_mifare_tag_data_s
+{
+  uint32_t data;
+  uint8_t address;
 };
 
 /****************************************************************************
@@ -91,14 +139,14 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: mfrc522_register
+ * Name: pn532_register
  *
  * Description:
- *   Register the MFRC522 character device as 'devpath'
+ *   Register the PN532 character device as 'devpath'
  *
  * Input Parameters:
- *   devpath - The full path to the driver to register. E.g., "/dev/rfid0"
- *   spi     - An instance of the SPI interface to use to communicate with MFRC522
+ *   devpath - The full path to the driver to register. E.g., "/dev/nfc0"
+ *   spi     - An instance of the SPI interface to use to communicate with PN532
  *   config  - Device persistent board data
  *
  * Returned Value:
@@ -106,11 +154,12 @@ extern "C"
  *
  ****************************************************************************/
 
-int mfrc522_register(FAR const char *devpath, FAR struct spi_dev_s *spi);
+int pn532_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
+                   FAR struct pn532_config_s *config);
 
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __INCLUDE_NUTTX_WIRELESS_MFRC522_H */
+#endif /* __INCLUDE_NUTTX_WIRELESS_PN532_H */

@@ -1,8 +1,8 @@
 /************************************************************************************
- * configs/stm32f4discovery/src/stm32_mfrc522.c
+ * include/nuttx/contactless/contactless.h
  *
- *   Copyright (C) 2015 Alan Carvalho de Assis. All rights reserved.
- *   Author: Alan Carvalho de Assis <acassis@gmail.com>
+ *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
+ *   Author: Laurent Latil <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,69 +33,35 @@
  *
  ************************************************************************************/
 
+/* This file includes common definitions to be used in all contactless drivers
+ * (when applicable).
+ */
+
+#ifndef __INCLUDE_NUTTX_DRIVERS_CONTACTLESS_H
+#define __INCLUDE_NUTTX_DRIVERS_CONTACTLESS_H
+
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/fs/ioctl.h>
 
-#include <errno.h>
-#include <debug.h>
-
-#include <nuttx/spi/spi.h>
-#include <nuttx/contactless/mfrc522.h>
-
-#include "stm32.h"
-#include "stm32_spi.h"
-#include "stm32f103_minimum.h"
-
-#if defined(CONFIG_SPI) && defined(CONFIG_STM32_SPI1) && defined(CONFIG_CL_MFRC522)
+#ifdef CONFIG_DRIVERS_CONTACTLESS
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+/* IOCTL Commands *******************************************************************/
 
-#define MFRC522_SPI_PORTNO 1   /* On SPI1 */
+/* Contactless drivers can provide additional, device specific ioctl
+ * commands, beginning with this value:
+ */
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+#define CLIOC_USER              0x000A         /* Lowest, unused CL ioctl command */
 
-/************************************************************************************
- * Name: stm32_mfrc522initialize
- *
- * Description:
- *   Initialize and register the MFRC522 RFID driver.
- *
- * Input parameters:
- *   devpath - The full path to the driver to register. E.g., "/dev/rfid0"
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
- *
- ************************************************************************************/
+#define _CLIOC_USER(nr)         _CLIOC(nr + CLIOC_USER)
 
-int stm32_mfrc522initialize(FAR const char *devpath)
-{
-  FAR struct spi_dev_s *spi;
-  int ret;
+#endif
 
-  spi = stm32_spibus_initialize(MFRC522_SPI_PORTNO);
-
-  if (!spi)
-    {
-      return -ENODEV;
-    }
-
-  /* Then register the MFRC522 */
-  
-  ret = mfrc522_register(devpath, spi);
-  if (ret < 0)
-    {
-      snerr("ERROR: Error registering MFRC522\n");
-    }
-
-  return ret;
-}
-
-#endif /* CONFIG_SPI && CONFIG_MFRC522 */
+#endif  /* __INCLUDE_NUTTX_CONTACTLESS_H */

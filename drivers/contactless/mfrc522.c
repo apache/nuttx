@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/wireless/mfrc522.c
+ * drivers/contactless/mfrc522.c
  *
  *   Copyright(C) 2016 Uniquix Ltda. All rights reserved.
  *   Author: Alan Carvalho de Assis <acassis@gmail.com>
@@ -50,7 +50,8 @@
 #include <unistd.h>
 
 #include <nuttx/kmalloc.h>
-#include <nuttx/wireless/wireless.h>
+#include <nuttx/drivers/contactless.h>
+#include <nuttx/contactless/mfrc522.h>
 
 #include "mfrc522.h"
 
@@ -58,7 +59,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_MFRC522_DEBUG
+#ifdef CONFIG_CL_MFRC522_DEBUG
 #  define mfrc522err    _err
 #  define mfrc522info   _info
 #else
@@ -71,13 +72,13 @@
 #  endif
 #endif
 
-#ifdef CONFIG_MFRC522_DEBUG_TX
+#ifdef CONFIG_CL_MFRC522_DEBUG_TX
 #  define tracetx errdumpbuffer
 #else
 #  define tracetx(x...)
 #endif
 
-#ifdef CONFIG_MFRC522_DEBUG_RX
+#ifdef CONFIG_CL_MFRC522_DEBUG_RX
 #  define tracerx errdumpbuffer
 #else
 #  define tracerx(x...)
@@ -173,12 +174,12 @@ static inline void mfrc522_configspi(FAR struct spi_dev_s *spi)
 
 static inline void mfrc522_select(struct mfrc522_dev_s *dev)
 {
-  SPI_SELECT(dev->spi, SPIDEV_WIRELESS, true);
+  SPI_SELECT(dev->spi, SPIDEV_CONTACTLESS, true);
 }
 
 static inline void mfrc522_deselect(struct mfrc522_dev_s *dev)
 {
-  SPI_SELECT(dev->spi, SPIDEV_WIRELESS, false);
+  SPI_SELECT(dev->spi, SPIDEV_CONTACTLESS, false);
 }
 
 /****************************************************************************

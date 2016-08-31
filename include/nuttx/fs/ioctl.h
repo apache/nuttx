@@ -85,6 +85,7 @@
 #define _I2CBASE        (0x2000) /* I2C driver commands */
 #define _SPIBASE        (0x2100) /* SPI driver commands */
 #define _GPIOBASE       (0x2200) /* GPIO driver commands */
+#define _CLIOCBASE      (0x1200) /* Contactless modules ioctl commands */
 
 /* boardctl() commands share the same number space */
 
@@ -398,6 +399,12 @@
 
 #define _GPIOCVALID(c)     (_IOC_TYPE(c)==_GPIOBASE)
 #define _GPIOC(nr)         _IOC(_GPIOBASE,nr)
+
+/* Contactless driver ioctl definitions ****************************************/
+/* (see nuttx/include/contactless/contactless.h */
+
+#define _CLIOCVALID(c)    (_IOC_TYPE(c)==_CLIOCBASE)
+#define _CLIOC(nr)        _IOC(_CLIOCBASE,nr)
 
 /* boardctl() command definitions *******************************************/
 

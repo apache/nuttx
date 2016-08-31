@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/wireless/pn532.c
+ * drivers/contactless/pn532.c
  *
  *   Copyright(C) 2012, 2013, 2016 Offcode Ltd. All rights reserved.
  *   Authors: Janne Rosberg <janne@offcode.fi>
@@ -48,7 +48,7 @@
 #include <unistd.h>
 
 #include <nuttx/kmalloc.h>
-#include <nuttx/wireless/wireless.h>
+#include <nuttx/drivers/contactless.h>
 
 #include "pn532.h"
 
@@ -69,7 +69,7 @@
 #  warning This platform does not support SPI LSB-bit order
 #endif
 
-#ifdef CONFIG_WL_PN532_DEBUG
+#ifdef CONFIG_CL_PN532_DEBUG
 #  define pn532err    _err
 #  define pn532info   _info
 #else
@@ -82,13 +82,13 @@
 #    endif
 #endif
 
-#ifdef CONFIG_WL_PN532_DEBUG_TX
+#ifdef CONFIG_CL_PN532_DEBUG_TX
 #  define tracetx errdumpbuffer
 #else
 #    define tracetx(x...)
 #endif
 
-#ifdef CONFIG_WL_PN532_DEBUG_RX
+#ifdef CONFIG_CL_PN532_DEBUG_RX
 #  define tracerx errdumpbuffer
 #else
 #    define tracerx(x...)
@@ -202,7 +202,7 @@ static inline void pn532_select(struct pn532_dev_s *dev)
     }
   else
     {
-      SPI_SELECT(dev->spi, SPIDEV_WIRELESS, true);
+      SPI_SELECT(dev->spi, SPIDEV_CONTACTLESS, true);
     }
 }
 
@@ -214,7 +214,7 @@ static inline void pn532_deselect(struct pn532_dev_s *dev)
     }
   else
     {
-      SPI_SELECT(dev->spi, SPIDEV_WIRELESS, false);
+      SPI_SELECT(dev->spi, SPIDEV_CONTACTLESS, false);
     }
 }
 
