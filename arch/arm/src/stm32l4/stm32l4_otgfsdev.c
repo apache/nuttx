@@ -225,6 +225,27 @@
 #  error "CONFIG_USBDEV_EP5_TXFIFO_SIZE is out of range"
 #endif
 
+#define OTGFS_GINT_RESERVED (OTGFS_GINT_RES89 | \
+                             OTGFS_GINT_RES1617 | \
+                             OTGFS_GINT_RES22)
+
+#define OTGFS_GINT_RC_W1 (OTGFS_GINT_MMIS     | \
+                          OTGFS_GINT_SOF      | \
+                          OTGFS_GINT_ESUSP    | \
+                          OTGFS_GINT_USBSUSP  | \
+                          OTGFS_GINT_USBRST   | \
+                          OTGFS_GINT_ENUMDNE  | \
+                          OTGFS_GINT_ISOODRP  | \
+                          OTGFS_GINT_EOPF     | \
+                          OTGFS_GINT_IISOIXFR | \
+                          OTGFS_GINT_IISOOXFR | \
+                          OTGFS_GINT_RSTDET   | \
+                          OTGFS_GINT_LPMINT   | \
+                          OTGFS_GINT_CIDSCHG  | \
+                          OTGFS_GINT_DISC     | \
+                          OTGFS_GINT_SRQ      | \
+                          OTGFS_GINT_WKUP)
+
 /* Debug ***********************************************************************/
 /* Trace error codes */
 
@@ -3221,154 +3242,163 @@ static inline void stm32l4_rxinterrupt(FAR struct stm32l4_usbdev_s *priv)
 
   /* Disable the Rx status queue level interrupt */
 
-  regval = stm32l4_getreg(STM32L4_OTGFS_GINTMSK);
-  regval &= ~OTGFS_GINT_RXFLVL;
-  stm32l4_putreg(regval, STM32L4_OTGFS_GINTMSK);
-
-  /* Get the status from the top of the FIFO */
-
-  regval = stm32l4_getreg(STM32L4_OTGFS_GRXSTSP);
-
-  /* Decode status fields */
-
-  epphy  = (regval & OTGFS_GRXSTSD_EPNUM_MASK) >> OTGFS_GRXSTSD_EPNUM_SHIFT;
-
-  if (epphy < STM32L4_NENDPOINTS)
+  while(0 != (stm32l4_getreg(STM32L4_OTGFS_GINTSTS) & OTGFS_GINT_RXFLVL))
     {
-      privep = &priv->epout[epphy];
 
-      /* Handle the RX event according to the packet status field */
+    /* Get the status from the top of the FIFO */
 
-      switch (regval & OTGFS_GRXSTSD_PKTSTS_MASK)
-        {
-        /* Global OUT NAK.  This indicate that the global OUT NAK bit has taken
-         * effect.
-         *
-         * PKTSTS = Global OUT NAK, BCNT = 0, EPNUM = Don't Care, DPID = Don't
-         * Care.
+    regval = stm32l4_getreg(STM32L4_OTGFS_GRXSTSP);
+
+    /* Decode status fields */
+
+    epphy  = (regval & OTGFS_GRXSTSD_EPNUM_MASK) >> OTGFS_GRXSTSD_EPNUM_SHIFT;
+
+        /* Workaround for bad values read from the STM32L4_OTGFS_GRXSTSP register
+         * happens regval is 0xb4e48168 or 0xa80c9367 or 267E781c
+         * All of which provide out of range indexes for  epout[epphy]
          */
 
-        case OTGFS_GRXSTSD_PKTSTS_OUTNAK:
-          {
-            usbtrace(TRACE_INTDECODE(STM32L4_TRACEINTID_OUTNAK), 0);
-          }
-          break;
+    if (epphy < STM32L4_NENDPOINTS)
+      {
+        privep = &priv->epout[epphy];
 
-        /* OUT data packet received.
-         *
-         * PKTSTS = DataOUT, BCNT = size of the received data OUT packet,
-         * EPNUM = EPNUM on which the packet was received, DPID = Actual Data PID.
-         */
+        /* Handle the RX event according to the packet status field */
 
-        case OTGFS_GRXSTSD_PKTSTS_OUTRECVD:
+        switch (regval & OTGFS_GRXSTSD_PKTSTS_MASK)
           {
-            usbtrace(TRACE_INTDECODE(STM32L4_TRACEINTID_OUTRECVD), epphy);
-            bcnt = (regval & OTGFS_GRXSTSD_BCNT_MASK) >> OTGFS_GRXSTSD_BCNT_SHIFT;
-            if (bcnt > 0)
-              {
-                stm32l4_epout_receive(privep, bcnt);
+          /* Global OUT NAK.  This indicate that the global OUT NAK bit has taken
+           * effect.
+           *
+           * PKTSTS = Global OUT NAK, BCNT = 0, EPNUM = Don't Care, DPID = Don't
+           * Care.
+           */
+
+          case OTGFS_GRXSTSD_PKTSTS_OUTNAK:
+            {
+              usbtrace(TRACE_INTDECODE(STM32L4_TRACEINTID_OUTNAK), 0);
+            }
+            break;
+
+          /* OUT data packet received.
+           *
+           * PKTSTS = DataOUT, BCNT = size of the received data OUT packet,
+           * EPNUM = EPNUM on which the packet was received, DPID = Actual Data PID.
+           */
+
+          case OTGFS_GRXSTSD_PKTSTS_OUTRECVD:
+            {
+              usbtrace(TRACE_INTDECODE(STM32L4_TRACEINTID_OUTRECVD), epphy);
+              bcnt = (regval & OTGFS_GRXSTSD_BCNT_MASK) >> OTGFS_GRXSTSD_BCNT_SHIFT;
+              if (bcnt > 0)
+                {
+                  stm32l4_epout_receive(privep, bcnt);
+                }
+            }
+            break;
+
+          /* OUT transfer completed.  This indicates that an OUT data transfer for
+           * the specified OUT endpoint has completed. After this entry is popped
+           * from the receive FIFO, the core asserts a Transfer Completed interrupt
+           * on the specified OUT endpoint.
+           *
+           * PKTSTS = Data OUT Transfer Done, BCNT = 0, EPNUM = OUT EP Num on
+           * which the data transfer is complete, DPID = Don't Care.
+           */
+
+          case OTGFS_GRXSTSD_PKTSTS_OUTDONE:
+            {
+              usbtrace(TRACE_INTDECODE(STM32L4_TRACEINTID_OUTDONE), epphy);
+            }
+            break;
+
+          /* SETUP transaction completed. This indicates that the Setup stage for
+           * the specified endpoint has completed and the Data stage has started.
+           * After this entry is popped from the receive FIFO, the core asserts a
+           * Setup interrupt on the specified control OUT endpoint (triggers an
+           * interrupt).
+           *
+           * PKTSTS = Setup Stage Done, BCNT = 0, EPNUM = Control EP Num,
+           * DPID = Don't Care.
+           */
+
+          case OTGFS_GRXSTSD_PKTSTS_SETUPDONE:
+            {
+              usbtrace(TRACE_INTDECODE(STM32L4_TRACEINTID_SETUPDONE), epphy);
+
+              /* Now that the Setup Phase is complete if it was an OUT enable
+               * the endpoint
+               * (Doing this here prevents the loss of the first FIFO word)
+               */
+
+              if (priv->ep0state == EP0STATE_SETUP_OUT)
+                {
+
+                  /* Clear NAKSTS so that we can receive the data */
+
+                  regval  = stm32l4_getreg(STM32L4_OTGFS_DOEPCTL0);
+                  regval |= OTGFS_DOEPCTL0_CNAK;
+                  stm32l4_putreg(regval, STM32L4_OTGFS_DOEPCTL0);
+
               }
+            }
+            break;
+
+          /* SETUP data packet received.  This indicates that a SETUP packet for the
+           * specified endpoint is now available for reading from the receive FIFO.
+           *
+           * PKTSTS = SETUP, BCNT = 8, EPNUM = Control EP Num, DPID = D0.
+           */
+
+          case OTGFS_GRXSTSD_PKTSTS_SETUPRECVD:
+            {
+              uint16_t datlen;
+
+              usbtrace(TRACE_INTDECODE(STM32L4_TRACEINTID_SETUPRECVD), epphy);
+
+              /* Read EP0 setup data.  NOTE:  If multiple SETUP packets are received,
+               * the last one overwrites the previous setup packets and only that
+               * last SETUP packet will be processed.
+               */
+
+              stm32l4_rxfifo_read(&priv->epout[EP0], (FAR uint8_t *)&priv->ctrlreq,
+                               USB_SIZEOF_CTRLREQ);
+
+              /* Was this an IN or an OUT SETUP packet.  If it is an OUT SETUP,
+               * then we need to wait for the completion of the data phase to
+               * process the setup command.  If it is an IN SETUP packet, then
+               * we must processing the command BEFORE we enter the DATA phase.
+               *
+               * If the data associated with the OUT SETUP packet is zero length,
+               * then, of course, we don't need to wait.
+               */
+
+              datlen = GETUINT16(priv->ctrlreq.len);
+              if (USB_REQ_ISOUT(priv->ctrlreq.type) && datlen > 0)
+                {
+                  /* Wait for the data phase. */
+
+                  priv->ep0state = EP0STATE_SETUP_OUT;
+                }
+              else
+                {
+                  /* We can process the setup data as soon as SETUP done word is
+                   * popped of the RxFIFO.
+                   */
+
+                  priv->ep0state = EP0STATE_SETUP_READY;
+                }
+            }
+            break;
+
+          default:
+            {
+              usbtrace(TRACE_DEVERROR(STM32L4_TRACEERR_INVALIDPARMS),
+                       (regval & OTGFS_GRXSTSD_PKTSTS_MASK) >> OTGFS_GRXSTSD_PKTSTS_SHIFT);
+            }
+            break;
           }
-          break;
-
-        /* OUT transfer completed.  This indicates that an OUT data transfer for
-         * the specified OUT endpoint has completed. After this entry is popped
-         * from the receive FIFO, the core asserts a Transfer Completed interrupt
-         * on the specified OUT endpoint.
-         *
-         * PKTSTS = Data OUT Transfer Done, BCNT = 0, EPNUM = OUT EP Num on
-         * which the data transfer is complete, DPID = Don't Care.
-         */
-
-        case OTGFS_GRXSTSD_PKTSTS_OUTDONE:
-          {
-            usbtrace(TRACE_INTDECODE(STM32L4_TRACEINTID_OUTDONE), epphy);
-          }
-          break;
-
-        /* SETUP transaction completed. This indicates that the Setup stage for
-         * the specified endpoint has completed and the Data stage has started.
-         * After this entry is popped from the receive FIFO, the core asserts a
-         * Setup interrupt on the specified control OUT endpoint (triggers an
-         * interrupt).
-         *
-         * PKTSTS = Setup Stage Done, BCNT = 0, EPNUM = Control EP Num,
-         * DPID = Don't Care.
-         */
-
-        case OTGFS_GRXSTSD_PKTSTS_SETUPDONE:
-          {
-            usbtrace(TRACE_INTDECODE(STM32L4_TRACEINTID_SETUPDONE), epphy);
-          }
-          break;
-
-        /* SETUP data packet received.  This indicates that a SETUP packet for the
-         * specified endpoint is now available for reading from the receive FIFO.
-         *
-         * PKTSTS = SETUP, BCNT = 8, EPNUM = Control EP Num, DPID = D0.
-         */
-
-        case OTGFS_GRXSTSD_PKTSTS_SETUPRECVD:
-          {
-            uint16_t datlen;
-
-            usbtrace(TRACE_INTDECODE(STM32L4_TRACEINTID_SETUPRECVD), epphy);
-
-            /* Read EP0 setup data.  NOTE:  If multiple SETUP packets are received,
-             * the last one overwrites the previous setup packets and only that
-             * last SETUP packet will be processed.
-             */
-
-            stm32l4_rxfifo_read(&priv->epout[EP0], (FAR uint8_t *)&priv->ctrlreq,
-                                USB_SIZEOF_CTRLREQ);
-
-            /* Was this an IN or an OUT SETUP packet.  If it is an OUT SETUP,
-             * then we need to wait for the completion of the data phase to
-             * process the setup command.  If it is an IN SETUP packet, then
-             * we must processing the command BEFORE we enter the DATA phase.
-             *
-             * If the data associated with the OUT SETUP packet is zero length,
-             * then, of course, we don't need to wait.
-             */
-
-            datlen = GETUINT16(priv->ctrlreq.len);
-            if (USB_REQ_ISOUT(priv->ctrlreq.type) && datlen > 0)
-              {
-                /* Clear NAKSTS so that we can receive the data */
-
-                regval  = stm32l4_getreg(STM32L4_OTGFS_DOEPCTL0);
-                regval |= OTGFS_DOEPCTL0_CNAK;
-                stm32l4_putreg(regval, STM32L4_OTGFS_DOEPCTL0);
-
-                /* Wait for the data phase. */
-
-                priv->ep0state = EP0STATE_SETUP_OUT;
-              }
-            else
-              {
-                /* We can process the setup data as soon as SETUP done word is
-                 * popped of the RxFIFO.
-                 */
-
-                priv->ep0state = EP0STATE_SETUP_READY;
-              }
-          }
-          break;
-
-        default:
-          {
-            usbtrace(TRACE_DEVERROR(STM32L4_TRACEERR_INVALIDPARMS),
-                     (regval & OTGFS_GRXSTSD_PKTSTS_MASK) >> OTGFS_GRXSTSD_PKTSTS_SHIFT);
-          }
-          break;
-        }
+      }
     }
-
-  /* Enable the Rx Status Queue Level interrupt */
-
-  regval  = stm32l4_getreg(STM32L4_OTGFS_GINTMSK);
-  regval |= OTGFS_GINT_RXFLVL;
-  stm32l4_putreg(regval, STM32L4_OTGFS_GINTMSK);
 }
 
 /****************************************************************************
@@ -3391,7 +3421,7 @@ static inline void stm32l4_enuminterrupt(FAR struct stm32l4_usbdev_s *priv)
 
   regval  = stm32l4_getreg(STM32L4_OTGFS_GUSBCFG);
   regval &= ~OTGFS_GUSBCFG_TRDT_MASK;
-  regval |=  OTGFS_GUSBCFG_TRDT(5);
+  regval |=  OTGFS_GUSBCFG_TRDT(6);
   stm32l4_putreg(regval, STM32L4_OTGFS_GUSBCFG);
 }
 
@@ -3605,31 +3635,37 @@ static int stm32l4_usbinterrupt(int irq, FAR void *context)
   /* At present, there is only a single OTG FS device support. Hence it is
    * pre-allocated as g_otgfsdev.  However, in most code, the private data
    * structure will be referenced using the 'priv' pointer (rather than the
-   * global data) in order to simplify any future support for multiple
-   * devices.
+   * global data) in order to simplify any future support for multiple devices.
    */
 
   FAR struct stm32l4_usbdev_s *priv = &g_otgfsdev;
   uint32_t regval;
+  uint32_t reserved;
 
   usbtrace(TRACE_INTENTRY(STM32L4_TRACEINTID_USB), 0);
 
   /* Assure that we are in device mode */
 
-  DEBUGASSERT((stm32l4_getreg(STM32L4_OTGFS_GINTSTS) & OTGFS_GINTSTS_CMOD) ==
-              OTGFS_GINTSTS_DEVMODE);
+  DEBUGASSERT((stm32l4_getreg(STM32L4_OTGFS_GINTSTS) & OTGFS_GINTSTS_CMOD) == OTGFS_GINTSTS_DEVMODE);
 
   /* Get the state of all enabled interrupts.  We will do this repeatedly
    * some interrupts (like RXFLVL) will generate additional interrupting
    * events.
    */
-
   for (; ; )
     {
       /* Get the set of pending, un-masked interrupts */
 
       regval  = stm32l4_getreg(STM32L4_OTGFS_GINTSTS);
+      reserved = (regval & OTGFS_GINT_RESERVED);
       regval &= stm32l4_getreg(STM32L4_OTGFS_GINTMSK);
+
+      /* With out modifying the reserved bits, acknowledge all
+       * **Writable** pending irqs we will service below
+       */
+
+      stm32l4_putreg(((regval | reserved) & OTGFS_GINT_RC_W1), STM32L4_OTGFS_GINTSTS);
+
 
       /* Break out of the loop when there are no further pending (and
        * unmasked) interrupts to be processes.
@@ -3639,7 +3675,6 @@ static int stm32l4_usbinterrupt(int irq, FAR void *context)
         {
           break;
         }
-
       usbtrace(TRACE_INTDECODE(STM32L4_TRACEINTID_INTPENDING), (uint16_t)regval);
 
       /* OUT endpoint interrupt. The core sets this bit to indicate that an
@@ -3650,7 +3685,6 @@ static int stm32l4_usbinterrupt(int irq, FAR void *context)
         {
           usbtrace(TRACE_INTDECODE(STM32L4_TRACEINTID_EPOUT), (uint16_t)regval);
           stm32l4_epout_interrupt(priv);
-          stm32l4_putreg(OTGFS_GINT_OEP, STM32L4_OTGFS_GINTSTS);
         }
 
       /* IN endpoint interrupt.  The core sets this bit to indicate that
@@ -3661,7 +3695,6 @@ static int stm32l4_usbinterrupt(int irq, FAR void *context)
         {
           usbtrace(TRACE_INTDECODE(STM32L4_TRACEINTID_EPIN), (uint16_t)regval);
           stm32l4_epin_interrupt(priv);
-          stm32l4_putreg(OTGFS_GINT_IEP, STM32L4_OTGFS_GINTSTS);
         }
 
       /* Host/device mode mismatch error interrupt */
@@ -3670,7 +3703,6 @@ static int stm32l4_usbinterrupt(int irq, FAR void *context)
       if ((regval & OTGFS_GINT_MMIS) != 0)
         {
           usbtrace(TRACE_INTDECODE(STM32L4_TRACEINTID_MISMATCH), (uint16_t)regval);
-          stm32l4_putreg(OTGFS_GINT_MMIS, STM32L4_OTGFS_GINTSTS);
         }
 #endif
 
@@ -3680,7 +3712,6 @@ static int stm32l4_usbinterrupt(int irq, FAR void *context)
         {
           usbtrace(TRACE_INTDECODE(STM32L4_TRACEINTID_WAKEUP), (uint16_t)regval);
           stm32l4_resumeinterrupt(priv);
-          stm32l4_putreg(OTGFS_GINT_WKUP, STM32L4_OTGFS_GINTSTS);
         }
 
       /* USB suspend interrupt */
@@ -3689,7 +3720,6 @@ static int stm32l4_usbinterrupt(int irq, FAR void *context)
         {
           usbtrace(TRACE_INTDECODE(STM32L4_TRACEINTID_SUSPEND), (uint16_t)regval);
           stm32l4_suspendinterrupt(priv);
-          stm32l4_putreg(OTGFS_GINT_USBSUSP, STM32L4_OTGFS_GINTSTS);
         }
 
       /* Start of frame interrupt */
@@ -3698,7 +3728,6 @@ static int stm32l4_usbinterrupt(int irq, FAR void *context)
       if ((regval & OTGFS_GINT_SOF) != 0)
         {
           usbtrace(TRACE_INTDECODE(STM32L4_TRACEINTID_SOF), (uint16_t)regval);
-          stm32l4_putreg(OTGFS_GINT_SOF, STM32L4_OTGFS_GINTSTS);
         }
 #endif
 
@@ -3710,7 +3739,6 @@ static int stm32l4_usbinterrupt(int irq, FAR void *context)
         {
           usbtrace(TRACE_INTDECODE(STM32L4_TRACEINTID_RXFIFO), (uint16_t)regval);
           stm32l4_rxinterrupt(priv);
-          stm32l4_putreg(OTGFS_GINT_RXFLVL, STM32L4_OTGFS_GINTSTS);
         }
 
       /* USB reset interrupt */
@@ -3723,7 +3751,6 @@ static int stm32l4_usbinterrupt(int irq, FAR void *context)
 
           stm32l4_usbreset(priv);
           usbtrace(TRACE_INTEXIT(STM32L4_TRACEINTID_USB), 0);
-          stm32l4_putreg(OTGFS_GINT_USBRST, STM32L4_OTGFS_GINTSTS);
           return OK;
         }
 
@@ -3733,7 +3760,6 @@ static int stm32l4_usbinterrupt(int irq, FAR void *context)
         {
           usbtrace(TRACE_INTDECODE(STM32L4_TRACEINTID_ENUMDNE), (uint16_t)regval);
           stm32l4_enuminterrupt(priv);
-          stm32l4_putreg(OTGFS_GINT_ENUMDNE, STM32L4_OTGFS_GINTSTS);
         }
 
       /* Incomplete isochronous IN transfer interrupt.  When the core finds
@@ -3747,7 +3773,6 @@ static int stm32l4_usbinterrupt(int irq, FAR void *context)
         {
           usbtrace(TRACE_INTDECODE(STM32L4_TRACEINTID_IISOIXFR), (uint16_t)regval);
           stm32l4_isocininterrupt(priv);
-          stm32l4_putreg(OTGFS_GINT_IISOIXFR, STM32L4_OTGFS_GINTSTS);
         }
 
       /* Incomplete isochronous OUT transfer.  For isochronous OUT
@@ -3764,7 +3789,6 @@ static int stm32l4_usbinterrupt(int irq, FAR void *context)
         {
           usbtrace(TRACE_INTDECODE(STM32L4_TRACEINTID_IISOOXFR), (uint16_t)regval);
           stm32l4_isocoutinterrupt(priv);
-          stm32l4_putreg(OTGFS_GINT_IISOOXFR, STM32L4_OTGFS_GINTSTS);
         }
 #endif
 
@@ -3775,7 +3799,6 @@ static int stm32l4_usbinterrupt(int irq, FAR void *context)
         {
           usbtrace(TRACE_INTDECODE(STM32L4_TRACEINTID_SRQ), (uint16_t)regval);
           stm32l4_sessioninterrupt(priv);
-          stm32l4_putreg(OTGFS_GINT_SRQ, STM32L4_OTGFS_GINTSTS);
         }
 
       /* OTG interrupt */
@@ -3784,7 +3807,6 @@ static int stm32l4_usbinterrupt(int irq, FAR void *context)
         {
           usbtrace(TRACE_INTDECODE(STM32L4_TRACEINTID_OTG), (uint16_t)regval);
           stm32l4_otginterrupt(priv);
-          stm32l4_putreg(OTGFS_GINT_OTG, STM32L4_OTGFS_GINTSTS);
         }
 #endif
     }
@@ -5458,7 +5480,9 @@ static void stm32l4_hwinitialize(FAR struct stm32l4_usbdev_s *priv)
 
   /* Clear any pending interrupts */
 
-  stm32l4_putreg(0xbfffffff, STM32L4_OTGFS_GINTSTS);
+  regval = stm32l4_getreg(STM32L4_OTGFS_GINTSTS);
+  regval &=  OTGFS_GINT_RESERVED;
+  stm32l4_putreg(regval | OTGFS_GINT_RC_W1, STM32L4_OTGFS_GINTSTS);
 
   /* Enable the interrupts in the INTMSK */
 
