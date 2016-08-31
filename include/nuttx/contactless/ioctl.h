@@ -41,11 +41,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/ioctl.h>
-
-#include <nuttx/irq.h>
-#include <nuttx/spi/spi.h>
-#include <nuttx/contactless/ioctl.h>
+#include <nuttx/fs/ioctl.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
