@@ -313,7 +313,7 @@ static int usbhost_copyinterface(uint8_t ifno, FAR const uint8_t *configdesc,
 
       /* Is this an interface descriptor?  Is it the one we are looking for? */
 
-      if (ifdesc->type == USB_DESC_TYPE_INTERFACE && ifdesc->iif == ifno)
+      if (ifdesc->type == USB_DESC_TYPE_INTERFACE && ifdesc->ifno == ifno)
         {
           /* Yes.. return the interface descriptor */
 
@@ -570,7 +570,7 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
               FAR struct usb_ifdesc_s *ifdesc =
                 (FAR struct usb_ifdesc_s *)desc;
 
-              DEBUGASSERT(ifdesc->iif < 32);
+              DEBUGASSERT(ifdesc->ifno < 32);
 #endif
               /* Increment the count of interfaces */
 
@@ -684,8 +684,8 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
 
               /* Was the interface merged via an IAD descriptor? */
 
-              DEBUGASSERT(ifdesc->iif < 32);
-              if ((mergeset & (1 << ifdesc->iif)) == 0)
+              DEBUGASSERT(ifdesc->ifno < 32);
+              if ((mergeset & (1 << ifdesc->ifno)) == 0)
                 {
                   /* No, this interface was not merged.  Save the registry
                    * lookup information from the interface descriptor.
@@ -698,7 +698,7 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
                   member->id.vid      = id->vid;
                   member->id.pid      = id->pid;
 
-                  member->firstif     = ifdesc->iif;
+                  member->firstif     = ifdesc->ifno;
                   member->nifs        = 1;
 
                   /* Increment the member index */
