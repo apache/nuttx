@@ -55,6 +55,11 @@ bch/
   performed by loop.c.  See include/nuttx/fs/fs.h for registration
   information.
 
+contactless/
+  Contactless devices are related to wireless devices.  They are not
+  communication devices with other similar peers, but couplers/interfaces
+  to contactless cards and tags.
+
 eeprom/
   An EEPROM is a form of Memory Technology Device (see drivers/mtd).
   EEPROMs are non-volatile memory like FLASH, but differ in underlying
