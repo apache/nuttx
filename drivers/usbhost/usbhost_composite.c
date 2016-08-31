@@ -579,7 +579,7 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
 
           /* Check for IAD descriptors that will be used when it is
            * necessary to associate multiple interfaces with a single
-           * device.
+           * class driver.
            */
 
          else if (desc->type == USB_DESC_TYPE_INTERFACEASSOCIATION)
@@ -587,7 +587,7 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
               FAR struct usb_iaddesc_s *iad = (FAR struct usb_iaddesc_s *)desc;
               uint32_t mask;
 
-              /* Keep count of the number ofinterfaces that will be merged */
+              /* Keep count of the number of interfaces that will be merged */
 
               nmerged += (iad->nifs - 1);
 
@@ -625,7 +625,7 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
    * number of interfaces merged via the IAD descriptor.
    */
 
-  if (nintfs <= nmerged )
+  if (nintfs <= nmerged)
     {
       /* Should not happen.  Means a bug. */
 
@@ -743,8 +743,8 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
 
   DEBUGASSERT(i == nclasses);
 
-  /* Allocate a large buffer in which we can construct a custom configuration
-   * descriptor for each member class.
+  /* Allocate a temporary buffer in which we can construct a custom
+   * configuration descriptor for each member class.
    */
 
   cfgbuffer = (FAR uint8_t *)malloc(CUSTOM_CONFIG_BUFSIZE);
@@ -804,9 +804,8 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
         }
 
       /* Call the newly instantiated classes connect() method provide it
-       * with the information that it needs to initialize properly, that
-       * is the configuration escriptor and all of the interface descriptors
-       * needed by the member class.
+       * with the configuration information that it needs to initialize
+       * properly.
        */
 
       ret = CLASS_CONNECT(member->usbclass, cfgbuffer, cfgsize);
@@ -820,6 +819,8 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
           goto errout_with_cfgbuffer;
         }
     }
+
+  /* Free the temporary buffer */
 
   kmm_free(cfgbuffer);
 
