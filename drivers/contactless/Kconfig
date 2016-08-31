@@ -1,0 +1,69 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if DRIVERS_CONTACTLESS
+
+config CL_MFRC522
+	bool "NXP MFRC522 ISO14443/Mifare Transceiver"
+	default n
+	select SPI
+	---help---
+		This options adds driver support for the MFRC522 ISO14443/Mifare chip.
+
+if CL_MFRC522
+
+config MFRC522_SPI_FREQ
+	int "SPI frequency for MFRC522"
+	default 1000000
+	depends on CL_MFRC522
+
+config CL_MFRC522_DEBUG
+	bool "Enable MFRC522 debug"
+	default n
+	depends on CL_MFRC522
+
+config CL_MFRC522_DEBUG_TX
+	bool "trace TX frames"
+	default n
+	depends on MFRC522_DEBUG
+
+config CL_MFRC522_DEBUG_RX
+	bool "trace RX frames"
+	default n
+	depends on MFRC522_DEBUG
+
+endif # CL_MFRC522
+
+config CL_PN532
+	bool "pn532 NFC-chip support"
+	default n
+	select SPI
+	---help---
+		This options adds driver support for the PN532 NFC chip.
+
+if CL_PN532
+
+config PN532_SPI_FREQ
+	int "SPI frequency for PN532"
+	default 1000000
+	depends on CL_PN532
+
+config CL_PN532_DEBUG
+	bool "Enable PN532 debug"
+	default n
+	depends on CL_PN532
+
+config CL_PN532_DEBUG_TX
+	bool "trace TX frames"
+	default n
+	depends on CL_PN532_DEBUG
+
+config CL_PN532_DEBUG_RX
+	bool "trace RX frames"
+	default n
+	depends on CL_PN532_DEBUG
+
+endif # CL_PN532
+endif # DRIVERS_CONTACTLESS

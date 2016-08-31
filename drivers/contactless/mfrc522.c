@@ -153,7 +153,7 @@ static void mfrc522_lock(FAR struct spi_dev_s *spi)
   SPI_SETMODE(spi, SPIDEV_MODE0);
   SPI_SETBITS(spi, 8);
   (void)SPI_HWFEATURES(spi, 0);
-  (void)SPI_SETFREQUENCY(spi, CONFIG_CL_MFRC522_SPI_FREQ);
+  (void)SPI_SETFREQUENCY(spi, CONFIG_MFRC522_SPI_FREQ);
 }
 
 static void mfrc522_unlock(FAR struct spi_dev_s *spi)
