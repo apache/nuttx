@@ -771,8 +771,12 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
       if (reg == NULL)
         {
           uerr("ERROR: usbhost_findclass failed\n");
+#ifdef CONFIG_USBHOST_COMPOSITE_STRICT
           ret = -EINVAL;
           goto errout_with_cfgbuffer;
+#else
+          continue;
+#endif
         }
 
       /* Yes.. there is a class for this device.  Get an instance of its
