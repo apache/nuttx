@@ -50,7 +50,7 @@
 #include <unistd.h>
 
 #include <nuttx/kmalloc.h>
-#include <nuttx/contactless/contactless.h>
+#include <nuttx/drivers/contactless.h>
 
 #include "mfrc522.h"
 
@@ -168,7 +168,7 @@ static inline void mfrc522_configspi(FAR struct spi_dev_s *spi)
   SPI_SETMODE(spi, SPIDEV_MODE0);
   SPI_SETBITS(spi, 8);
   (void)SPI_HWFEATURES(spi, 0);
-  (void)SPI_SETFREQUENCY(spi, CONFIG_CL_MFRC522_SPI_FREQ);
+  (void)SPI_SETFREQUENCY(spi, CONFIG_MFRC522_SPI_FREQ);
 }
 
 static inline void mfrc522_select(struct mfrc522_dev_s *dev)

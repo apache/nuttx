@@ -37,11 +37,11 @@ ifeq ($(CONFIG_DRIVERS_CONTACTLESS),y)
 
 # Include contactless drivers
 
-ifeq ($(CONFIG_WL_MFRC522),y)
+ifeq ($(CONFIG_CL_MFRC522),y)
 CSRCS += mfrc522.c
 endif
 
-ifeq ($(CONFIG_WL_PN532),y)
+ifeq ($(CONFIG_CL_PN532),y)
 CSRCS += pn532.c
 endif
 
