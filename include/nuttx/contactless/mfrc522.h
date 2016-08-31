@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/wireless/mfrc522.h
+ * include/contactless/mfrc522.h
  *
  *   Copyright(C) 2016 Uniquix Ltda. All rights reserved.
  *   Author: Alan Carvalho de Assis <acassis@gmail.com>
