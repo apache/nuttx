@@ -456,6 +456,41 @@ config M25P_SUBSECTOR_ERASE
 
 endif # MTD_M25P
 
+config MTD_MX25L
+	bool "SPI-based MX25L3233F / MX25L6433F"
+	default n
+	select SPI
+	---help---
+		SPI-based driver for Macronix MX25L3233F or MX25L6433F.
+
+if MTD_MX25L
+
+config MX25L_SPIMODE
+	int "MX25L SPI mode"
+	default 0
+
+config MX25L_SPIFREQUENCY
+	int "MX25L SPI Frequency"
+	default 20000000
+
+config MX25L_SECTOR512
+	bool "Simulate 512 byte Erase Blocks"
+	default n
+
+config MX25L_SUBSECTOR_ERASE
+	bool "Sub-Sector Erase"
+	default n
+	---help---
+		Some devices (such as the EON EN25F80) support a smaller erase block
+		size (4K vs 64K).  This option enables support for sub-sector erase.
+		The SMART file system can take advantage of this option if it is enabled.
+
+config MX25L_DEBUG
+	bool "Enable driver debug features"
+	default n
+
+endif # MTD_MX25L
+
 config MTD_S25FL1
 	bool "QuadSPI-based S25FL1 FLASH"
 	default n
@@ -513,7 +548,6 @@ config MTD_N25QXXX
 	default n
 	---help---
 		Support the N25Q016A, N25Q032A, N25Q064A, N25Q128A, N25Q256A
-
 
 if MTD_N25QXXX
 
