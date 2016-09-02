@@ -80,12 +80,8 @@ endif # USBHOST_HUB
 config USBHOST_COMPOSITE
 	bool "Composite device support"
 	default n
-	depends on EXPERIMENTAL
 	---help---
 		Build in USB host support for connected composite devices
-
-		NOTE: This feature is marked EXPERIMENTAL because it has not been
-		untested
 
 config USBHOST_COMPOSITE_STRICT
 	bool "Strict composite membership"
