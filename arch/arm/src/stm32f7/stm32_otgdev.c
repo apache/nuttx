@@ -209,6 +209,29 @@
 #  error "FIFO allocations exceed FIFO memory size"
 #endif
 
+#define OTG_GINT_RESERVED   (OTG_GINT_RES89   | \
+                            OTG_GINT_RES1617  | \
+                            OTG_GINT_RES22)
+
+
+#define OTG_GINT_RC_W1   (OTG_GINT_MMIS     | \
+                          OTG_GINT_SOF      | \
+                          OTG_GINT_ESUSP    | \
+                          OTG_GINT_USBSUSP  | \
+                          OTG_GINT_USBRST   | \
+                          OTG_GINT_ENUMDNE  | \
+                          OTG_GINT_ISOODRP  | \
+                          OTG_GINT_EOPF     | \
+                          OTG_GINT_IISOIXFR | \
+                          OTG_GINT_IISOOXFR | \
+                          OTG_GINT_RSTDET   | \
+                          OTG_GINT_LPMINT   | \
+                          OTG_GINT_CIDSCHG  | \
+                          OTG_GINT_DISC     | \
+                          OTG_GINT_SRQ      | \
+                          OTG_GINT_WKUP)
+
+
 /* Debug ***********************************************************************/
 /* Trace error codes */
 
@@ -871,7 +894,7 @@ static uint32_t stm32_getreg(uint32_t addr)
         {
           if (count == 4)
             {
-              llerr("...\n");
+              uinfo("...\n");
             }
 
           return val;
@@ -888,7 +911,7 @@ static uint32_t stm32_getreg(uint32_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          llerr("[repeats %d more times]\n", count-3);
+          uinfo("[repeats %d more times]\n", count-3);
         }
 
       /* Save the new address, value, and count */
@@ -900,7 +923,7 @@ static uint32_t stm32_getreg(uint32_t addr)
 
   /* Show the register value read */
 
-  llerr("%08x->%08x\n", addr, val);
+  uinfo("%08x->%08x\n", addr, val);
   return val;
 }
 #endif
@@ -918,7 +941,7 @@ static void stm32_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  llerr("%08x<-%08x\n", addr, val);
+  uinfo("%08x<-%08x\n", addr, val);
 
   /* Write the value */
 
@@ -3171,12 +3194,6 @@ static inline void stm32_rxinterrupt(FAR struct stm32_usbdev_s *priv)
   int bcnt;
   int epphy;
 
-  /* Disable the Rx status queue level interrupt */
-
-  regval = stm32_getreg(STM32_OTG_GINTMSK);
-  regval &= ~OTG_GINT_RXFLVL;
-  stm32_putreg(regval, STM32_OTG_GINTMSK);
-
   /* Get the status from the top of the FIFO */
 
   regval = stm32_getreg(STM32_OTG_GRXSTSP);
@@ -3251,6 +3268,22 @@ static inline void stm32_rxinterrupt(FAR struct stm32_usbdev_s *priv)
         case OTG_GRXSTSD_PKTSTS_SETUPDONE:
           {
             usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_SETUPDONE), epphy);
+
+            /* Now that the Setup Phase is complete if it was an OUT enable
+             * the endpoint
+             * (Doing this here prevents the loss of the first FIFO word)
+             */
+
+            if (priv->ep0state == EP0STATE_SETUP_OUT)
+              {
+
+                /* Clear NAKSTS so that we can receive the data */
+
+                regval  = stm32_getreg(STM32_OTG_DOEPCTL(0));
+                regval |= OTG_DOEPCTL0_CNAK;
+                stm32_putreg(regval, STM32_OTG_DOEPCTL(0));
+
+            }
           }
           break;
 
@@ -3286,14 +3319,6 @@ static inline void stm32_rxinterrupt(FAR struct stm32_usbdev_s *priv)
             datlen = GETUINT16(priv->ctrlreq.len);
             if (USB_REQ_ISOUT(priv->ctrlreq.type) && datlen > 0)
               {
-                /* Clear NAKSTS so that we can receive the data */
-
-                regval  = stm32_getreg(STM32_OTG_DOEPCTL(0));
-                regval |= OTG_DOEPCTL0_CNAK;
-                stm32_putreg(regval, STM32_OTG_DOEPCTL(0));
-
-                /* Wait for the data phase. */
-
                 priv->ep0state = EP0STATE_SETUP_OUT;
               }
             else
@@ -3316,11 +3341,6 @@ static inline void stm32_rxinterrupt(FAR struct stm32_usbdev_s *priv)
         }
     }
 
-  /* Enable the Rx Status Queue Level interrupt */
-
-  regval  = stm32_getreg(STM32_OTG_GINTMSK);
-  regval |= OTG_GINT_RXFLVL;
-  stm32_putreg(regval, STM32_OTG_GINTMSK);
 }
 
 /****************************************************************************
@@ -3343,7 +3363,7 @@ static inline void stm32_enuminterrupt(FAR struct stm32_usbdev_s *priv)
 
   regval  = stm32_getreg(STM32_OTG_GUSBCFG);
   regval &= ~OTG_GUSBCFG_TRDT_MASK;
-  regval |=  OTG_GUSBCFG_TRDT(5);
+  regval |=  OTG_GUSBCFG_TRDT(6);
   stm32_putreg(regval, STM32_OTG_GUSBCFG);
 }
 
@@ -3562,6 +3582,7 @@ static int stm32_usbinterrupt(int irq, FAR void *context)
 
   FAR struct stm32_usbdev_s *priv = &g_otghsdev;
   uint32_t regval;
+  uint32_t reserved;
 
   usbtrace(TRACE_INTENTRY(STM32_TRACEINTID_USB), 0);
 
@@ -3579,7 +3600,14 @@ static int stm32_usbinterrupt(int irq, FAR void *context)
       /* Get the set of pending, un-masked interrupts */
 
       regval  = stm32_getreg(STM32_OTG_GINTSTS);
+      reserved = (regval & OTG_GINT_RESERVED);
       regval &= stm32_getreg(STM32_OTG_GINTMSK);
+
+      /* With out modifying the reserved bits, acknowledge all
+       * **Writable** pending irqs we will service below
+       */
+
+      stm32_putreg(((regval | reserved) & OTG_GINT_RC_W1), STM32_OTG_GINTSTS);
 
       /* Break out of the loop when there are no further pending (and
        * unmasked) interrupts to be processes.
@@ -3599,7 +3627,6 @@ static int stm32_usbinterrupt(int irq, FAR void *context)
         {
           usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_EPOUT), (uint16_t)regval);
           stm32_epout_interrupt(priv);
-          stm32_putreg(OTG_GINT_OEP, STM32_OTG_GINTSTS);
         }
 
       /* IN endpoint interrupt.  The core sets this bit to indicate that
@@ -3610,7 +3637,6 @@ static int stm32_usbinterrupt(int irq, FAR void *context)
         {
           usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_EPIN), (uint16_t)regval);
           stm32_epin_interrupt(priv);
-          stm32_putreg(OTG_GINT_IEP, STM32_OTG_GINTSTS);
         }
 
       /* Host/device mode mismatch error interrupt */
@@ -3619,7 +3645,6 @@ static int stm32_usbinterrupt(int irq, FAR void *context)
       if ((regval & OTG_GINT_MMIS) != 0)
         {
           usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_MISMATCH), (uint16_t)regval);
-          stm32_putreg(OTG_GINT_MMIS, STM32_OTG_GINTSTS);
         }
 #endif
 
@@ -3629,7 +3654,6 @@ static int stm32_usbinterrupt(int irq, FAR void *context)
         {
           usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_WAKEUP), (uint16_t)regval);
           stm32_resumeinterrupt(priv);
-          stm32_putreg(OTG_GINT_WKUP, STM32_OTG_GINTSTS);
         }
 
       /* USB suspend interrupt */
@@ -3638,7 +3662,6 @@ static int stm32_usbinterrupt(int irq, FAR void *context)
         {
           usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_SUSPEND), (uint16_t)regval);
           stm32_suspendinterrupt(priv);
-          stm32_putreg(OTG_GINT_USBSUSP, STM32_OTG_GINTSTS);
         }
 
       /* Start of frame interrupt */
@@ -3647,7 +3670,6 @@ static int stm32_usbinterrupt(int irq, FAR void *context)
       if ((regval & OTG_GINT_SOF) != 0)
         {
           usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_SOF), (uint16_t)regval);
-          stm32_putreg(OTG_GINT_SOF, STM32_OTG_GINTSTS);
         }
 #endif
 
@@ -3659,12 +3681,11 @@ static int stm32_usbinterrupt(int irq, FAR void *context)
         {
           usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_RXFIFO), (uint16_t)regval);
           stm32_rxinterrupt(priv);
-          stm32_putreg(OTG_GINT_RXFLVL, STM32_OTG_GINTSTS);
         }
 
       /* USB reset interrupt */
 
-      if ((regval & OTG_GINT_USBRST) != 0)
+      if ((regval & (OTG_GINT_USBRST | OTG_GINT_RSTDET)) != 0)
         {
           usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_DEVRESET), (uint16_t)regval);
 
@@ -3672,7 +3693,6 @@ static int stm32_usbinterrupt(int irq, FAR void *context)
 
           stm32_usbreset(priv);
           usbtrace(TRACE_INTEXIT(STM32_TRACEINTID_USB), 0);
-          stm32_putreg(OTG_GINT_USBRST, STM32_OTG_GINTSTS);
           return OK;
         }
 
@@ -3682,7 +3702,6 @@ static int stm32_usbinterrupt(int irq, FAR void *context)
         {
           usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_ENUMDNE), (uint16_t)regval);
           stm32_enuminterrupt(priv);
-          stm32_putreg(OTG_GINT_ENUMDNE, STM32_OTG_GINTSTS);
         }
 
       /* Incomplete isochronous IN transfer interrupt.  When the core finds
@@ -3696,7 +3715,6 @@ static int stm32_usbinterrupt(int irq, FAR void *context)
         {
           usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_IISOIXFR), (uint16_t)regval);
           stm32_isocininterrupt(priv);
-          stm32_putreg(OTG_GINT_IISOIXFR, STM32_OTG_GINTSTS);
         }
 
       /* Incomplete isochronous OUT transfer.  For isochronous OUT
@@ -3713,7 +3731,6 @@ static int stm32_usbinterrupt(int irq, FAR void *context)
         {
           usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_IISOOXFR), (uint16_t)regval);
           stm32_isocoutinterrupt(priv);
-          stm32_putreg(OTG_GINT_IISOOXFR, STM32_OTG_GINTSTS);
         }
 #endif
 
@@ -3724,7 +3741,6 @@ static int stm32_usbinterrupt(int irq, FAR void *context)
         {
           usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_SRQ), (uint16_t)regval);
           stm32_sessioninterrupt(priv);
-          stm32_putreg(OTG_GINT_SRQ, STM32_OTG_GINTSTS);
         }
 
       /* OTG interrupt */
@@ -3733,7 +3749,6 @@ static int stm32_usbinterrupt(int irq, FAR void *context)
         {
           usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_OTG), (uint16_t)regval);
           stm32_otginterrupt(priv);
-          stm32_putreg(OTG_GINT_OTG, STM32_OTG_GINTSTS);
         }
 #endif
     }
@@ -5425,7 +5440,9 @@ static void stm32_hwinitialize(FAR struct stm32_usbdev_s *priv)
 
   /* Clear any pending interrupts */
 
-  stm32_putreg(0xbfffffff, STM32_OTG_GINTSTS);
+  regval = stm32_getreg(STM32_OTG_GINTSTS);
+  regval &=  OTG_GINT_RESERVED;
+  stm32_putreg(regval | OTG_GINT_RC_W1, STM32_OTG_GINTSTS);
 
 #if defined(CONFIG_STM32F7_OTGHS)
   /* Disable the ULPI Clock enable in RCC AHB1 Register.  This must
