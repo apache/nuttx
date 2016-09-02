@@ -12598,4 +12598,77 @@
 	  feature is EXPERIMENTAL because (1) it is untested and (2) has some
 	  know design issues that must be addressed before it can be of use
 	  (2016-08-28).
+	* CXXFLAGS: add -fcheck-new whenever -fno-exceptions is used.  From Beat
+	  Küng (2016-08-23).
+	* tools/mkfsdata.pl was still generating the old-style apps/include
+	  inclusion paths (2016-08-23).
+	* drivers/sensors:  Add drvier for the LIS3MDL 3 axis magnetometer. From
+	  Alexander Entinger (2016-08-23).
+	* drivers/sensors: Add driver for the  MLX90393 3 axis magnetometer.
+	  From Alexander Entinger (2016-08-23).
+	* drivers/mtd: Add Fujistu MB85RS256B ramtron support.  From Beat Küng
+	  (2016-08-23).
+	* drivers/sensors: Add driver for the LIS3DSH 3 axis accelerometer. From
+	  Alexander Entinger (2016-08-24).
+	* drivers/sensors: Add driver for the Bosch BMG160 3 axis gyroscope.
+	  From Alexander Entinger (2016-08-24).
+	* STM32: Add IAR-style STM32F1xx vectors. Tested on STM32F103RB and
+	  STM32F107RC.  From Aleksandr Vyhovanec (2016-08-24).
+	* libc/header files: Add POSIX type sig_atomic_t.  From Sebastien
+	  Lorquet (2016-08-24).
+	* libc/header files: isatty() should be prototypes in unstid.h, not
+	  termios.h.  From Sebastien Lorquet (2016-08-24).
+	* Documentation:  Update to NuttX C coding style document with additions
+	  discussing long comments on the right side of a statement or data
+	  definition (2016-08-24).
+	* LPC43xx serial: Fix typos in LPC43 serial driver.  Found by Vytautas
+	  Lukenskas (2016-08-24).
+	* libc/time: This commit adds the difftime() function.  The function
+	  depends on the toolchain-dependent CONFIG_HAVE_DOUBLE so is not
+	  available on tiny platforms.  From Sebastien Lorquet (2016-08-24).
+	* libc/stdio: Add support for remove().  From Sebastien Lorquet
+	  (2016-08-25).
+	* STM32 OTGFS device: Fix for lost first word from FIFO
 
+	    1) Do not overwrite Reserved Bits in GINTSTS (per ref manual)*
+	    2) Acknowledge all pending int on entry to ISR that are Only rc_w1*
+	    3) Do not disable RXFVL*
+	    4) Loop until RXFVL is cleared*
+	    5) Only clear the NAK on the endpoint on the
+	       OTGFS_GRXSTSD_PKTSTS_SETUPDONE to not loose the first WORD of
+	      FIFO all the data  (Bug Fix)
+
+	  Changed marked *are just driver clean up and ensure ints are not lost.
+	  The bug fix is #5
+
+	  Test case open putty and observer the Set/Get LineCoding. Without this
+	  fix #5 the Get will not match the Set, and in fact the data might be
+	  skewed by 4 bytes, that are lost from the FIFO if the
+	  OTGFS_DOEPCTL0_CNAK bit is set in the OTGFS_GRXSTSD_PKTSTS_SETUPRECVD
+	  as opposed to the OTGFS_GRXSTSD_PKTSTS_SETUPDONE
+
+	    Set Line Coding DATA1: 4B | 00 c2 01 00 00 00 08 | c8 1B
+	    Get Line Coding DATA1: 4B | .. .. .. .. 00 00 08   c8 .. 00 00 07 | 7a 72
+
+	  From David Sidrane (2016-08-25).
+	* Add system() to stdlib.h.  Actual implementation is in
+	  apps/system/system (2016-08-25).
+	* include/nuttx/input: Add missing prototype for btn_lower_initialize()
+	  (2016-08-27).
+	* configs/stm32f103-minimum: Add board config support to SPI LCD module
+	  JLX12864G-086.  From Alan Carvalho de Assis (2016-08-28).
+	* net/tcp:  tcp_ipvX_bind() not actually using the ported selected with
+	  port==0.  Also removes duplicate call to pkt_input().  Issues noted by
+	  Pascal Speck (2016-08-30).
+	* STM32 F7: Remove duplicate call to pkt_input from Ethernet driver.
+	  Issues noted by Pascal Speck (2016-08-30).
+	* STM32L4 OTGFS device: Apply stm32 fix to stm32l4.  From Sebastien
+	  Lorquet (2016-08-31).
+	* drivers/contactless:  Remove contactless drivers from drivers/wireless
+	  to drivers contactless.  From Sebastien Lorquet (2016-08-31).
+	* USB host composite is at least partially functional. No longer depends
+	  on CONFIG_EXPERIMENTAL (2016-09-02).
+	* MTD: Fixed cloned typos in several FLASH drivers.  From Aleksandr
+	  Vyhovanec (2016-09-02).
+	* MTD: SPI-based driver for Macronix MX25L3233F or MX25L6433F.  From
+	  Aleksandr Vyhovanec (2016-09-02).
