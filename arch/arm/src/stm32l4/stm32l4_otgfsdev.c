@@ -3743,7 +3743,7 @@ static int stm32l4_usbinterrupt(int irq, FAR void *context)
 
       /* USB reset interrupt */
 
-      if ((regval & OTGFS_GINT_USBRST) != 0)
+      if ((regval & (OTGFS_GINT_USBRST | OTGFS_GINT_RSTDET)) != 0)
         {
           usbtrace(TRACE_INTDECODE(STM32L4_TRACEINTID_DEVRESET), (uint16_t)regval);
 
