@@ -190,6 +190,7 @@ int task_reparent(pid_t ppid, pid_t chpid)
     }
 
 #else /* CONFIG_SCHED_CHILD_STATUS */
+  /* Child task exit status is not retained */
 
   DEBUGASSERT(otcb->nchildren > 0);
 
@@ -302,6 +303,7 @@ int task_reparent(pid_t ppid, pid_t chpid)
     }
 
 #else /* CONFIG_SCHED_CHILD_STATUS */
+  /* Child task exit status is not retained */
 
   DEBUGASSERT(otcb->nchildren > 0);
 

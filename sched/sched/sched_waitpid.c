@@ -383,6 +383,7 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
       /* Get the TCB corresponding to this PID and make sure it is our child. */
 
       ctcb = sched_gettcb(pid);
+
 #ifdef HAVE_GROUP_MEMBERS
       if (!ctcb || ctcb->group->tg_pgid != rtcb->group->tg_gid)
 #else

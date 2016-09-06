@@ -239,6 +239,8 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
         }
     }
 #else
+  /* Child status is not retained. */
+
   if (rtcb->nchildren == 0)
     {
       /* There are no children */

@@ -275,8 +275,17 @@ static inline void task_saveparent(FAR struct tcb_s *tcb, uint8_t ttype)
         }
     }
 #else
-  DEBUGASSERT(rtcb->nchildren < UINT16_MAX);
-  rtcb->nchildren++;
+  /* Child status is not retained.  Simply keep track of the number
+   * child tasks (not pthreads) created.
+   */
+
+#ifndef CONFIG_DISABLE_PTHREAD
+  if ((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD)
+#endif
+    {
+      DEBUGASSERT(rtcb->nchildren < UINT16_MAX);
+      rtcb->nchildren++;
+    }
 #endif
 }
 #else
