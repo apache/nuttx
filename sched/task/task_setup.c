@@ -276,13 +276,11 @@ static inline void task_saveparent(FAR struct tcb_s *tcb, uint8_t ttype)
        * child tasks created.
        */
 
-      DEBUGASSERT(rtcb->group != NULL &&
-                  rtcb->group->tg_nchildren < UINT16_MAX);
-
+      DEBUGASSERT(rtcb->group->tg_nchildren < UINT16_MAX);
       rtcb->group->tg_nchildren++;
-    }
 
 #endif /* CONFIG_SCHED_CHILD_STATUS */
+    }
 }
 #else
 #  define task_saveparent(tcb,ttype)
