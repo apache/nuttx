@@ -204,7 +204,7 @@ static inline void task_saveparent(FAR struct tcb_s *tcb, uint8_t ttype)
   FAR struct tcb_s *rtcb = this_task();
 
 #if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_SCHED_CHILD_STATUS)
-  DEBUGASSERT(tcb && tcb->group && rtcb->group);
+  DEBUGASSERT(tcb != NULL && tcb->group != NULL && rtcb->group != NULL);
 #else
 #endif
 
@@ -228,12 +228,14 @@ static inline void task_saveparent(FAR struct tcb_s *tcb, uint8_t ttype)
 #else
   DEBUGASSERT(tcb);
 
-  /* Save the parent task's ID in the child task's TCB.  I am not sure if
-   * this makes sense for the case of pthreads or not, but I don't think it
-   * is harmful in any event.
-   */
+#ifndef CONFIG_DISABLE_PTHREAD
+  if ((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD)
+#endif
+    {
+      /* Save the parent task's ID in the child task's group. */
 
-  tcb->ppid = rtcb->pid;
+      tcb->group->tg_ppid = rtcb->pid;
+    }
 #endif
 
 #ifdef CONFIG_SCHED_CHILD_STATUS
@@ -283,8 +285,10 @@ static inline void task_saveparent(FAR struct tcb_s *tcb, uint8_t ttype)
   if ((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD)
 #endif
     {
-      DEBUGASSERT(rtcb->nchildren < UINT16_MAX);
-      rtcb->nchildren++;
+      DEBUGASSERT(rtcb->group != NULL &&
+                  rtcb->group->tg_nchildren < UINT16_MAX);
+
+      rtcb->group->tg_nchildren++;
     }
 #endif
 }
