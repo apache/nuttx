@@ -201,10 +201,7 @@ static inline void task_inherit_affinity(FAR struct tcb_s *tcb)
 #ifdef CONFIG_SCHED_HAVE_PARENT
 static inline void task_saveparent(FAR struct tcb_s *tcb, uint8_t ttype)
 {
-  FAR struct tcb_s *rtcb = this_task();
-
-  DEBUGASSERT( tcb != NULL &&  tcb->group != NULL &&
-              rtcb != NULL && rtcb->group != NULL);
+  DEBUGASSERT(tcb != NULL && tcb->group != NULL);
 
   /* Only newly created tasks (and kernel threads) have parents.  None of
    * this logic applies to pthreads with reside in the same group as the
@@ -215,6 +212,12 @@ static inline void task_saveparent(FAR struct tcb_s *tcb, uint8_t ttype)
   if ((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD)
 #endif
     {
+      /* Get the TCB of the parent task.  In this case, the calling task. */
+
+      FAR struct tcb_s *rtcb = this_task();
+
+      DEBUGASSERT(rtcb != NULL && rtcb->group != NULL);
+
 #ifdef HAVE_GROUP_MEMBERS
       /* Save the ID of the parent tasks' task group in the child's task
        * group.  Copy the ID from the parent's task group structure to
@@ -224,8 +227,6 @@ static inline void task_saveparent(FAR struct tcb_s *tcb, uint8_t ttype)
       tcb->group->tg_pgid = rtcb->group->tg_gid;
 
 #else
-      DEBUGASSERT(tcb != NULL && tcb->group != NULL);
-
       /* Save the parent task's ID in the child task's group. */
 
       tcb->group->tg_ppid = rtcb->pid;
