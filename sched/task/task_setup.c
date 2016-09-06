@@ -203,10 +203,8 @@ static inline void task_saveparent(FAR struct tcb_s *tcb, uint8_t ttype)
 {
   FAR struct tcb_s *rtcb = this_task();
 
-#if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_SCHED_CHILD_STATUS)
-  DEBUGASSERT(tcb != NULL && tcb->group != NULL && rtcb->group != NULL);
-#else
-#endif
+  DEBUGASSERT( tcb != NULL &&  tcb->group != NULL &&
+              rtcb != NULL && rtcb->group != NULL);
 
   /* Only newly created tasks (and kernel threads) have parents.  None of
    * this logic applies to pthreads with reside in the same group as the
@@ -226,7 +224,7 @@ static inline void task_saveparent(FAR struct tcb_s *tcb, uint8_t ttype)
       tcb->group->tg_pgid = rtcb->group->tg_gid;
 
 #else
-      DEBUGASSERT(tcb);
+      DEBUGASSERT(tcb != NULL && tcb->group != NULL);
 
       /* Save the parent task's ID in the child task's group. */
 
@@ -247,8 +245,8 @@ static inline void task_saveparent(FAR struct tcb_s *tcb, uint8_t ttype)
            */
 
           child = group_findchild(rtcb->group, tcb->pid);
-          DEBUGASSERT(!child);
-          if (!child)
+          DEBUGASSERT(child == NULL);
+          if (child == NULL)
             {
               /* Allocate a new status structure  */
 
@@ -257,8 +255,8 @@ static inline void task_saveparent(FAR struct tcb_s *tcb, uint8_t ttype)
 
           /* Did we successfully find/allocate the child status structure? */
 
-          DEBUGASSERT(child);
-          if (child)
+          DEBUGASSERT(child != NULL);
+          if (child != NULL)
             {
               /* Yes.. Initialize the structure */
 
@@ -271,7 +269,8 @@ static inline void task_saveparent(FAR struct tcb_s *tcb, uint8_t ttype)
               group_addchild(rtcb->group, child);
             }
         }
-#else
+
+#else /* CONFIG_SCHED_CHILD_STATUS */
       /* Child status is not retained.  Simply keep track of the number
        * child tasks created.
        */
@@ -281,7 +280,8 @@ static inline void task_saveparent(FAR struct tcb_s *tcb, uint8_t ttype)
 
       rtcb->group->tg_nchildren++;
     }
-#endif
+
+#endif /* CONFIG_SCHED_CHILD_STATUS */
 }
 #else
 #  define task_saveparent(tcb,ttype)
