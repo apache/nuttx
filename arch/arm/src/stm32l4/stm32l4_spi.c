@@ -1147,7 +1147,7 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 static int spi_hwfeatures(FAR struct spi_dev_s *dev, spi_hwfeatures_t features)
 {
 #ifdef CONFIG_SPI_BITORDER
-  FAR struct stm32_spidev_s *priv = (FAR struct stm32_spidev_s *)dev;
+  FAR struct stm32l4_spidev_s *priv = (FAR struct stm32l4_spidev_s *)dev;
   uint16_t setbits;
   uint16_t clrbits;
 
