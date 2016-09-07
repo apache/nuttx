@@ -430,6 +430,8 @@ struct task_group_s
 #endif
 
 #ifndef HAVE_GROUP_MEMBERS
+  /* REVISIT: What if parent thread exits?  Should use tg_pgid. */
+
   pid_t    tg_ppid;                 /* This is the ID of the parent thread      */
 #ifndef CONFIG_SCHED_CHILD_STATUS
   uint16_t tg_nchildren;            /* This is the number active children       */
