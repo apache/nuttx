@@ -64,9 +64,16 @@ struct stm32_freerun_s
 {
   uint8_t chan;                    /* The timer/counter in use */
   bool running;                    /* True: the timer is running */
-  uint32_t overflow;               /* Timer counter overflow */
   FAR struct stm32_tim_dev_s *tch; /* Handle returned by stm32_tim_init() */
   uint32_t frequency;
+
+#ifndef CONFIG_CLOCK_TIMEKEEPING
+  uint32_t overflow;               /* Timer counter overflow */
+#endif
+
+#ifdef CONFIG_CLOCK_TIMEKEEPING
+  uint64_t counter_mask;
+#endif
 };
 
 /****************************************************************************
@@ -127,8 +134,17 @@ int stm32_freerun_initialize(struct stm32_freerun_s *freerun, int chan,
  *
  ****************************************************************************/
 
+#ifndef CONFIG_CLOCK_TIMEKEEPING
+
 int stm32_freerun_counter(struct stm32_freerun_s *freerun,
                           struct timespec *ts);
+
+#else /* CONFIG_CLOCK_TIMEKEEPING */
+
+int stm32_freerun_counter(struct stm32_freerun_s *freerun,
+                          uint64_t *counter);
+
+#endif /* CONFIG_CLOCK_TIMEKEEPING */
 
 /****************************************************************************
  * Name: stm32_freerun_uninitialize

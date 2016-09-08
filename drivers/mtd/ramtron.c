@@ -264,6 +264,14 @@ static const struct ramtron_parts_s g_ramtron_parts[] =
     3,                            /* addr_len */
     25000000                      /* speed */
   },
+  {
+    "MB85RS256B",                 /* name */
+    0x05,                         /* id1 */
+    0x09,                         /* id2 */
+    32L*1024L,                    /* size */
+    3,                            /* addr_len */
+    25000000                      /* speed */
+  },
 #ifdef CONFIG_RAMTRON_FRAM_NON_JEDEC
   {
     "FM25H20",                    /* name */

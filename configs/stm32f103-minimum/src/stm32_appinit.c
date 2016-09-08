@@ -45,6 +45,7 @@
 #include <errno.h>
 
 #include <nuttx/board.h>
+#include <nuttx/timers/oneshot.h>
 
 #include "stm32.h"
 #include "stm32f103_minimum.h"
@@ -80,5 +81,28 @@
 
 int board_app_initialize(uintptr_t arg)
 {
-  return OK;
+#ifdef CONFIG_ONESHOT
+  struct oneshot_lowerhalf_s *os = NULL;
+#endif
+  int ret = OK;
+
+#ifdef CONFIG_AUDIO_TONE
+  /* Configure and initialize the tone generator. */
+
+  ret = stm32_tone_setup();
+#endif
+
+#ifdef CONFIG_WL_MFRC522
+  ret = stm32_mfrc522initialize("/dev/rfid0");
+#endif
+
+#ifdef CONFIG_ONESHOT
+  os = oneshot_initialize(1, 10);
+  if (os)
+    {
+      ret = oneshot_register("/dev/oneshot", os);
+    }
+#endif
+
+  return ret;
 }

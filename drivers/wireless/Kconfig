@@ -72,35 +72,4 @@ config WL_NRF24L01_RXFIFO_LEN
 
 endif # WL_NRF24L01_RXSUPPORT
 endif # WL_NRF24L01
-
-config WL_PN532
-	bool "pn532 NFC-chip support"
-	default n
-	select SPI
-	---help---
-		This options adds driver support for the PN532 NFC chip.
-
-if WL_PN532
-
-config PN532_SPI_FREQ
-	int "SPI frequency for PN532"
-	default 1000000
-	depends on WL_PN532
-
-config WL_PN532_DEBUG
-	bool "Enable PN532 debug"
-	default n
-	depends on WL_PN532
-
-config WL_PN532_DEBUG_TX
-	bool "trace TX frames"
-	default n
-	depends on WL_PN532_DEBUG
-
-config WL_PN532_DEBUG_RX
-	bool "trace RX frames"
-	default n
-	depends on WL_PN532_DEBUG
-
-endif # WL_PN532
 endif # DRIVERS_WIRELESS

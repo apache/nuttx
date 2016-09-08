@@ -62,6 +62,10 @@ ifeq ($(CONFIG_AUDIO_I2SCHAR),y)
 CSRCS += i2schar.c
 endif
 
+ifeq ($(CONFIG_AUDIO_TONE),y)
+CSRCS += tone.c
+endif
+
 # Include Audio driver support
 
 DEPPATH += --dep-path audio

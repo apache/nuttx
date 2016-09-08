@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef _INCLUDE_NUTTX_STREAMS_H
-#define _INCLUDE_NUTTX_STREAMS_H
+#ifndef __INCLUDE_NUTTX_STREAMS_H
+#define __INCLUDE_NUTTX_STREAMS_H
 
 /****************************************************************************
  * Included Files
@@ -440,4 +440,4 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj,
 }
 #endif
 
-#endif /* _INCLUDE_NUTTX_STREAMS_H */
+#endif /* __INCLUDE_NUTTX_STREAMS_H */

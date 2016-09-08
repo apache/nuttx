@@ -1054,6 +1054,18 @@ static off_t fat_seek(FAR struct file *filep, off_t offset, int whence)
           return -EINVAL;
     }
 
+  /* Special case:  We are seeking to the current position.  This would
+   * happen normally with ftell() which does lseek(fd, 0, SEEK_CUR) but can
+   * also happen in other situation such as when SEEK_SET is used to assure
+   * assure sequential access in a multi-threaded environment where there
+   * may be are multiple users to the file descriptor.
+   */
+
+  if (position == filep->f_pos)
+    {
+      return OK;
+    }
+
   /* Make sure that the mount is still healthy */
 
   fat_semtake(fs);

@@ -39,8 +39,8 @@
  *
  ************************************************************************************/
 
-#ifndef _INCLUDE_NUTTX_USB_USBDEV_H
-#define _INCLUDE_NUTTX_USB_USBDEV_H
+#ifndef __INCLUDE_NUTTX_USB_USBDEV_H
+#define __INCLUDE_NUTTX_USB_USBDEV_H
 
 /************************************************************************************
  * Included Files
@@ -386,4 +386,4 @@ void usbdev_dma_free(FAR void *memory);
 }
 #endif
 
-#endif /* _INCLUDE_NUTTX_USB_USBDEV_H */
+#endif /* __INCLUDE_NUTTX_USB_USBDEV_H */

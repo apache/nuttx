@@ -33,6 +33,50 @@
  *
  ****************************************************************************/
 
+/* TODO:  O_NONBLOCK is not yet supported.  Currently, the source and sink
+ * pipes are opened in blocking mode on both the slave and master so only
+ * blocking behavior is supported.  This driver must be able to support
+ * multiple slave as well as master clients that may have the PTY device
+ * opened in blocking and non-blocking modes simultaneously.
+ *
+ * There are two different possible implementations under consideration:
+ *
+ * 1. Keep the pipes in blocking mode, but use a test based on FIONREAD (for
+ *    the source pipe) or FIONSPACE (for the sink pipe) to determine if the
+ *    read or write would block.  There is existing logic like this in
+ *    pty_read() to handle the case of a single byte reads which must never
+ *    block in any case:  Essentially, this logic uses FIONREAD to determine
+ *    if there is anything to read before calling file_read().  Similar
+ *    logic could be replicated for all read cases.
+ *
+ *    Analogous logic could be added for all writes using FIONSPACE to
+ *    assure that there is sufficient free space in the sink pipe to write
+ *    without blocking.  The write length could be adjusted, in necceary,
+ *    to assure that there is no blocking.
+ *
+ *    Locking, perhaps via sched_lock(), would be required to assure the
+ *    test via FIONREAD or FIONWRITE is atomic with respect to the
+ *    file_read() or file_write() operation.
+ *
+ * 2. An alternative that appeals to me is to modify the contained source
+ *    or sink pipe file structures before each file_read() or file_write()
+ *    operation to assure that the O_NONBLOCK is set correctly when the
+ *    pipe read or write operation is performed.  This might be done with
+ *    file_vfcntl() (there is no file_fcntl(), yet) or directly into the
+ *    source/sink file structure oflags mode settings.
+ *
+ *    This would require (1) the ability to lock each pipe individually,
+ *    setting the blocking mode for the source or sink pipe to match the
+ *    mode in the open flags of the PTY device file structure, and (2)
+ *    logic to restore the default pipe mode after the file_read/write()
+ *    operation and before the pipe is unlocked.
+ *
+ * There are existing locks to support (1) destruction of the driver
+ * (pp_exclsem) and (2) slave PTY locking (pp_slavesem), as well as (3)
+ * locks within the pipe implementation.  Care must be taken with any new
+ * source/sink pipe locking to assure that deadlocks are not possible.
+ */
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -66,25 +110,6 @@
 /* Should never be set... only for comparison to serial.c */
 
 #undef CONFIG_PSEUDOTERM_FULLBLOCKS
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-static int     pty_open(FAR struct file *filep);
-static int     pty_close(FAR struct file *filep);
-static ssize_t pty_read(FAR struct file *filep, FAR char *buffer,
-                 size_t buflen);
-static ssize_t pty_write(FAR struct file *filep, FAR const char *buffer,
-                 size_t buflen);
-static int     pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
-#ifndef CONFIG_DISABLE_POLL
-static int     pty_poll(FAR struct file *filep, FAR struct pollfd *fds,
-                 bool setup);
-#endif
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-static int     pty_unlink(FAR struct inode *inode);
-#endif
 
 /****************************************************************************
  * Private Types
@@ -124,6 +149,30 @@ struct pty_devpair_s
   sem_t pp_slavesem;            /* Slave lock semaphore */
   sem_t pp_exclsem;             /* Mutual exclusion */
 };
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+static void    pty_semtake(FAR struct pty_devpair_s *devpair);
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+static void    pty_destroy(FAR struct pty_devpair_s *devpair);
+#endif
+
+static int     pty_open(FAR struct file *filep);
+static int     pty_close(FAR struct file *filep);
+static ssize_t pty_read(FAR struct file *filep, FAR char *buffer,
+                 size_t buflen);
+static ssize_t pty_write(FAR struct file *filep, FAR const char *buffer,
+                 size_t buflen);
+static int     pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+#ifndef CONFIG_DISABLE_POLL
+static int     pty_poll(FAR struct file *filep, FAR struct pollfd *fds,
+                 bool setup);
+#endif
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+static int     pty_unlink(FAR struct inode *inode);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -249,12 +298,6 @@ static int pty_open(FAR struct file *filep)
       sched_lock();
       while (devpair->pp_locked)
         {
-          /* REVISIT: Should no block if the oflags include O_NONBLOCK.
-           * Also, how wouldwbe ripple the O_NONBLOCK characteristic
-           * to the contained drivers?  And how would we change the
-           * O_NONBLOCK characteristic if it is changed via fcntl?
-           */
-
           /* Wait until unlocked.  We will also most certainly suspend here. */
 
           sem_wait(&devpair->pp_slavesem);
@@ -490,6 +533,11 @@ static ssize_t pty_read(FAR struct file *filep, FAR char *buffer, size_t len)
             {
               /* Read one byte from the source the byte.  This call will
                * block if the source pipe is empty.
+               *
+               * REVISIT: Should not block if the oflags include O_NONBLOCK.
+               * How would we ripple the O_NONBLOCK characteristic to the
+               * contained soruce pipe?  file_vfcntl()?  Or FIONREAD? See the
+               * TODO comment at the top of this file.
                */
 
               nread = file_read(&dev->pd_src, &ch, 1);
@@ -538,6 +586,11 @@ static ssize_t pty_read(FAR struct file *filep, FAR char *buffer, size_t len)
        * the pipe.   Otherwise, it will return data from the pipe.  If
        * there are fewer than 'len' bytes in the, it will return with
        * ntotal < len.
+       *
+       * REVISIT: Should not block if the oflags include O_NONBLOCK.
+       * How would we ripple the O_NONBLOCK characteristic to the
+       * contained source pipe? file_vfcntl()?  Or FIONREAD?  See the
+       * TODO comment at the top of this file.
        */
 
       ntotal = file_read(&dev->pd_src, buffer, len);
@@ -598,7 +651,14 @@ static ssize_t pty_write(FAR struct file *filep, FAR const char *buffer, size_t 
             {
               char cr = '\r';
 
-              /* Transfer the carriage return */
+              /* Transfer the carriage return.  This will block if the
+               * sink pipe is full.
+               *
+               * REVISIT: Should not block if the oflags include O_NONBLOCK.
+               * How would we ripple the O_NONBLOCK characteristic to the
+               * contained sink pipe?  file_vfcntl()?  Or FIONSPACE?  See the
+               * TODO comment at the top of this file.
+               */
 
               nwritten = file_write(&dev->pd_sink, &cr, 1);
               if (nwritten < 0)
@@ -612,7 +672,14 @@ static ssize_t pty_write(FAR struct file *filep, FAR const char *buffer, size_t 
               ntotal++;
             }
 
-          /* Transfer the (possibly translated) character. */
+          /* Transfer the (possibly translated) character..  This will block
+           * if the sink pipe is full
+           *
+           * REVISIT: Should not block if the oflags include O_NONBLOCK.
+           * How would we ripple the O_NONBLOCK characteristic to the
+           * contained sink pipe?  file_vfcntl()?  Or FIONSPACe?  See the
+           * TODO comment at the top of this file.
+           */
 
           nwritten = file_write(&dev->pd_sink, &ch, 1);
           if (nwritten < 0)
@@ -629,6 +696,15 @@ static ssize_t pty_write(FAR struct file *filep, FAR const char *buffer, size_t 
   else
 #endif
     {
+      /* Write the 'len' bytes to the sink pipe.  This will block until all
+       * 'len' bytes have been written to the pipe.
+       *
+       * REVISIT: Should not block if the oflags include O_NONBLOCK.
+       * How would we ripple the O_NONBLOCK characteristic to the
+       * contained sink pipe?  file_vfcntl()?  Or FIONSPACE?  See the
+       * TODO comment at the top of this file.
+       */
+
       ntotal = file_write(&dev->pd_sink, buffer, len);
     }
 
@@ -774,17 +850,48 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 #endif
+
+      /* Get the number of bytes that are immediately available for reading
+       * from the source pipe.
+       */
+
+      case FIONREAD:
+        {
+          ret = file_ioctl(&dev->pd_src, cmd, arg);
+        }
+        break;
+
+      /* Get the number of bytes waiting in the sink pipe (FIONWRITE) or the
+       * number of unused bytes in the sink pipe (FIONSPACE).
+       */
+
+      case FIONWRITE:
+      case FIONSPACE:
+        {
+          ret = file_ioctl(&dev->pd_sink, cmd, arg);
+        }
+        break;
+
       /* Any unrecognized IOCTL commands will be passed to the contained
        * pipe driver.
+       *
+       * REVISIT:  We know for a fact that the pipe driver only supports
+       * FIONREAD, FIONWRITE, FIONSPACE and PIPEIOC_POLICY.  The first two
+       * are handled above and PIPEIOC_POLICY should not be managed by
+       * applications -- it can break the PTY!
        */
 
       default:
         {
+#if 0
           ret = file_ioctl(&dev->pd_src, cmd, arg);
           if (ret >= 0 || ret == -ENOTTY)
             {
               ret = file_ioctl(&dev->pd_sink, cmd, arg);
             }
+#else
+          ret = ENOTTY;
+#endif
         }
         break;
     }

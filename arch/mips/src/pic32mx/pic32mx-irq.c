@@ -1,6 +1,5 @@
 /****************************************************************************
  * arch/mips/src/pic32mx/pic32mx-irq.c
- * arch/mips/src/chip/pic32mx-irq.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

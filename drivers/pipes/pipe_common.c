@@ -122,6 +122,7 @@ static void pipecommon_pollnotify(FAR struct pipe_dev_s *dev,
   for (i = 0; i < CONFIG_DEV_PIPE_NPOLLWAITERS; i++)
     {
       FAR struct pollfd *fds = dev->d_fds[i];
+
       if (fds)
         {
           fds->revents |= eventset & (fds->events | POLLERR | POLLHUP);
@@ -599,6 +600,7 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
                   sem_post(&dev->d_rdsem);
                 }
             }
+
           last = nwritten;
 
           /* If O_NONBLOCK was set, then return partial bytes written or EGAIN */
@@ -609,6 +611,7 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
                 {
                   nwritten = -EAGAIN;
                 }
+
               sem_post(&dev->d_bfsem);
               return nwritten;
             }
@@ -785,11 +788,18 @@ int pipecommon_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
-      case FIONREAD:
+      case FIONWRITE:  /* Number of bytes waiting in send queue */
+      case FIONREAD:   /* Number of bytes available for reading */
         {
           int count;
 
-          /* Determine the number of bytes available in the buffer */
+          /* Determine the number of bytes written to the buffer.  This is,
+           * of course, also the number of bytes that may be read from the
+           * buffer.
+           *
+           *   d_rdndx - index to remove next byte from the buffer
+           *   d_wrndx - Index to next location to add a byte to the buffer.
+           */
 
           if (dev->d_wrndx < dev->d_rdndx)
             {
@@ -805,11 +815,17 @@ int pipecommon_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
-      case FIONWRITE:
+      /* Free space in buffer */
+
+      case FIONSPACE:
         {
           int count;
 
-          /* Determine the number of bytes free in the buffer */
+          /* Determine the number of bytes free in the buffer.
+           *
+           *   d_rdndx - index to remove next byte from the buffer
+           *   d_wrndx - Index to next location to add a byte to the buffer.
+           */
 
           if (dev->d_wrndx < dev->d_rdndx)
             {

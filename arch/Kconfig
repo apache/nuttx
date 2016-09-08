@@ -45,7 +45,7 @@ config ARCH_RGMP
 		RTOS and GPOS on Multi-Processor (RGMP) architecture.  See
 		http://rgmp.sourceforge.net/wiki/index.php/Main_Page.
 
-config ARCH_SH
+config ARCH_RENESAS
 	bool "Renesas"
 	select ARCH_NOINTC
 	select ARCH_HAVE_INTERRUPTSTACK
@@ -83,23 +83,23 @@ endchoice
 
 config ARCH
 	string
-	default "arm"	if ARCH_ARM
-	default "avr"	if ARCH_AVR
-	default "hc"	if ARCH_HC
-	default "mips"	if ARCH_MIPS
-	default "rgmp"	if ARCH_RGMP
-	default "sh"	if ARCH_SH
-	default "sim"	if ARCH_SIM
-	default "x86"	if ARCH_X86
-	default "z16"	if ARCH_Z16
-	default "z80"	if ARCH_Z80
+	default "arm"     if ARCH_ARM
+	default "avr"     if ARCH_AVR
+	default "hc"      if ARCH_HC
+	default "mips"    if ARCH_MIPS
+	default "rgmp"    if ARCH_RGMP
+	default "renesas" if ARCH_RENESAS
+	default "sim"     if ARCH_SIM
+	default "x86"     if ARCH_X86
+	default "z16"     if ARCH_Z16
+	default "z80"     if ARCH_Z80
 
 source arch/arm/Kconfig
 source arch/avr/Kconfig
 source arch/hc/Kconfig
 source arch/mips/Kconfig
 source arch/rgmp/Kconfig
-source arch/sh/Kconfig
+source arch/renesas/Kconfig
 source arch/sim/Kconfig
 source arch/x86/Kconfig
 source arch/z16/Kconfig

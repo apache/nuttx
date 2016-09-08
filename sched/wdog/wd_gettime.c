@@ -1,4 +1,4 @@
-/********************************************************************************
+/****************************************************************************
  * sched/wdog/wd_gettime.c
  *
  *   Copyright (C) 2007, 2009, 2014-2016 Gregory Nutt. All rights reserved.
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -44,11 +44,11 @@
 
 #include "wdog/wdog.h"
 
-/********************************************************************************
+/****************************************************************************
  * Public Functions
- ********************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************
+/****************************************************************************
  * Name: wd_gettime
  *
  * Description:
@@ -59,12 +59,11 @@
  *   wdog = watchdog ID
  *
  * Return Value:
- *   The time in system ticks remaining until the watchdog time expires.  Zero
- *   means either that wdog is not valid or that the wdog has already expired.
+ *   The time in system ticks remaining until the watchdog time expires.
+ *   Zero means either that wdog is not valid or that the wdog has already
+ *   expired.
  *
- * Assumptions:
- *
- ********************************************************************************/
+ ****************************************************************************/
 
 int wd_gettime(WDOG_ID wdog)
 {
@@ -75,14 +74,16 @@ int wd_gettime(WDOG_ID wdog)
   flags = enter_critical_section();
   if (wdog && WDOG_ISACTIVE(wdog))
     {
-      /* Traverse the watchdog list accumulating lag times until we find the wdog
-       * that we are looking for
+      /* Traverse the watchdog list accumulating lag times until we find the
+       * wdog that we are looking for
        */
 
       FAR struct wdog_s *curr;
       int delay = 0;
 
-      for (curr = (FAR struct wdog_s *)g_wdactivelist.head; curr; curr = curr->next)
+      for (curr = (FAR struct wdog_s *)g_wdactivelist.head;
+           curr != NULL;
+           curr = curr->next)
         {
           delay += curr->lag;
           if (curr == wdog)

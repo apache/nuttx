@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: June 22, 2016</p>
+      <p>Last Updated: August 31, 2016</p>
     </td>
   </tr>
 </table>
@@ -948,22 +948,46 @@ drivers/
 |   |-- Kconfig
 |   |-- Make.defs
 |   `-- <i>(Common ADC and DAC driver source files)</i>
+|-- audio/
+|   |-- Kconfig
+|   |-- Make.defs
+|   `-- <i>(Common audio device source files)</i>
 |-- bch/
 |   |-- Kconfig
 |   |-- Make.defs
 |   `-- <i>(bch driver source files)</i>
+|-- contactless/
+|   |-- Kconfig
+|   |-- Make.defs
+|   `-- <i>(Common contactless device driver source files)</i>
 |-- input/
 |   |-- Kconfig
 |   |-- Make.defs
 |   `-- <i>(Common touchscreen and keypad driver source files)</i>
+|-- ioexpander/
+|   |-- Kconfig
+|   |-- Make.defs
+|   `-- <i>(Common I/O expander and GPIO-related driver source files)</i>
 |-- lcd/
 |   |-- Kconfig
 |   |-- Make.defs
 |   `-- <i>(Common LCD driver source files)</i>
+|-- leds/
+|   |-- Kconfig
+|   |-- Make.defs
+|   `-- <i>(Common LED device driver source files)</i>
+|-- loop/
+|   |-- Kconfig
+|   |-- Make.defs
+|   `-- <i>(Common loop device driver source files)</i>
 |-- mmcsd/
 |   |-- Kconfig
 |   |-- Make.defs
 |   `-- <i>(Common MMC/SD card driver source files)</i>
+|-- modem/
+|   |-- Kconfig
+|   |-- Make.defs
+|   `-- <i>(Common modem driver source files)</i>
 |-- mtd/
 |   |-- Kconfig
 |   |-- Make.defs
@@ -972,11 +996,19 @@ drivers/
 |   |-- Kconfig
 |   |-- Make.defs
 |   `-- <i>(Common network driver source files)</i>
+|-- pipes/
+|   |-- Kconfig
+|   |-- Make.defs
+|   `-- <i>(Common pipe and FIFO driver source files)</i>
+|-- power/
+|   |-- Kconfig
+|   |-- Make.defs
+|   `-- <i>(Common power-related driver source files)</i>
 |-- sensors/
 |   |-- Kconfig
 |   |-- Make.defs
 |   `-- <i>(Common sensor driver source files)</i>
-|-- serial/
+|-- sercomm/
 |   |-- Kconfig
 |   |-- Make.defs
 |   `-- <i>(Files for the Calypso SERCOMM driver)</i>
@@ -984,6 +1016,18 @@ drivers/
 |   |-- Kconfig
 |   |-- Make.defs
 |   `-- <i>(Common front-end character drivers for chip-specific UARTs)</i>
+|-- spi/
+|   |-- Kconfig
+|   |-- Make.defs
+|   `-- <i>(Common SPI-related drivers and helper fuctions)</i>
+|-- syslog/
+|   |-- Kconfig
+|   |-- Make.defs
+|   `-- <i>(System logging device support)</i>
+|-- timers/
+|   |-- Kconfig
+|   |-- Make.defs
+|   `-- <i>(Timer-based device driver support)</i>
 |-- usbdev/
 |   |-- Kconfig
 |   |-- Make.defs
@@ -992,6 +1036,10 @@ drivers/
 |   |-- Kconfig
 |   |-- Make.defs
 |   `-- <i>(Common USB host driver source files)</i>
+|-- usbmonitor/
+|   |-- Kconfig
+|   |-- Make.defs
+|   `-- <i>(USB monitor source files)</i>
 |-- wireless/
 |   |-- Kconfig
 |   |-- Make.defs
@@ -1088,16 +1136,32 @@ include/
 |   |  `-- <i>(Audio driver header files)</i>
 |   |-binfmt/
 |   |  `-- <i>(Binary format header files)</i>
+|   |-contactless/
+|   |  `-- <i>(Contactless driver header files)</i>
+|   |-crypto/
+|   |  `-- <i>(Cryptographic support header files)</i>
+|   |-drivers/
+|   |  `-- <i>(Miscellaneous driver header files)</i>
+|   |-eeprom/
+|   |  `-- <i>(EEPROM driver header files)</i>
 |   |-fs/
 |   |  `-- <i>(File System header files)</i>
 |   |-input/
 |   |  `-- <i>(Input device driver header files)</i>
+|   |-ioexpander/
+|   |  `-- <i>(I/O exander and GPIO drvier header files)</i>
 |   |-lcd/
 |   |  `-- <i>(LCD driver header files)</i>
+|   |-leds/
+|   |  `-- <i>(LED driver header files)</i>
+|   |-lib/
+|   |  `-- <i>(Non-standard C library driver header files)</i>
+|   |-mm/
+|   |  `-- <i>(Memory management header files)</i>
+|   |-modem/
+|   |  `-- <i>(Modem driver header files)</i>
 |   |-mtd/
 |   |  `-- <i>(Memory technology device header files)</i>
-|   |-serial/
-|   |  `-- <i>(Serial driver header files)</i>
 |   |-net/
 |   |  `-- <i>(Networking header files)</i>
 |   |-nx/
@@ -1114,8 +1178,12 @@ include/
 |   |  `-- <i>(SPI driver header files)</i>
 |   |-syslog/
 |   |  `-- <i>(SYSLOG header files)</i>
+|   |-timers/
+|   |  `-- <i>(Timer-related driver header files)</i>
 |   |-usb/
 |   |  `-- <i>(USB driver header files)</i>
+|   |-video/
+|   |  `-- <i>(Video-related driver header files)</i>
 |   `-wireless/
 |      `-- <i>(Wireless device driver header files)</i>
 `- sys/
@@ -1148,16 +1216,28 @@ include/
 </p>
 <ul><pre>
 libc/
+|-- aio/
+|   `-- <i>(Implementation of functions from aio.h)</i>
+|-- audio/
+|   `-- <i>(Implementation of audio-related functions)</i>
+|-- dirent/
+|   `-- <i>(Implementation of functions from dirent.h)</i>
+|-- fixedmath/
+|   `-- <i>(Implementation of functions from fixedmath.h)</i>
+|-- hex2bin/
+|   `-- <i>(Implementation of functions from hex2bin.h)</i>
 |-- libgen/
 |   `-- <i>(Implementation of functions from libgen.h)</i>
 |-- math/
 |   `-- <i>(Implementation of functions from fixedmath.h)</i>
 |-- misc/
 |   `-- <i>(Implementation of miscellaneous library functions)</i>
-|-- mqueue/
-|   `-- <i>(Implementation of some functions from mqueue.h)</i>
 |-- net/
 |   `-- <i>(Implementation of network-related library functions)</i>
+|-- netdb/
+|   `-- <i>(Implementation of functions from netdb.h)</i>
+|-- pthread/
+|   `-- <i>(Implementation of functions from pthread.h)</i>
 |-- queue/
 |   `-- <i>(Implementation of functions from queue.h)</i>
 |-- sched/
@@ -1166,16 +1246,31 @@ libc/
 |   `-- <i>(Implementation of some functions from semaphore.h)</i>
 |-- signal/
 |   `-- <i>(Implementation of some functions from signal.h)</i>
+|-- spawn/
+|   `-- <i>(Implementation of some functions from spawn.h)</i>
 |-- stdio/
 |   `-- <i>(Implementation of functions from stdio.h)</i>
 |-- stdlib/
 |   `-- <i>(Implementation of functions from stdlib.h)</i>
 |-- string/
 |   `-- <i>(Implementation of functions from string.h)</i>
+|-- symtab/
+|   `-- <i>(Implementation of symbol-table library functions)</i>
+|-- syslog/
+|   `-- <i>(Implementation of functions from syslog.h)</i>
+|-- termios/
+|   `-- <i>(Implementation of functions from termios.h)</i>
 |-- time/
 |   `-- <i>(Implementation of some functions from time.h)</i>
-`-- unistd/
-    `-- <i>(Implementation of some functions from unistd.h)</i>
+|-- tls/
+|   `-- <i>(Implementation of some functions from tls.h)</i>
+|-- wqueue/
+|   `-- <i>(Implementation of some functions from wqueue.h)</i>
+|-- unistd/
+|   `-- <i>(Implementation of some functions from unistd.h)</i>
+`-- zoneinfo/
+    `-- <i>(Implementation of timezone database)</i>
+
 </pre></ul>
 
 <h2>2.13 <a name="DirStructLibXX">nuttx/libxx</a></h2>

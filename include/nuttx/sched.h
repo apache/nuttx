@@ -422,11 +422,22 @@ struct task_group_s
 # endif
 #endif
 
-#if defined(CONFIG_SCHED_HAVE_PARENT) && defined(CONFIG_SCHED_CHILD_STATUS)
+#ifdef CONFIG_SCHED_HAVE_PARENT
   /* Child exit status **********************************************************/
 
+#ifdef CONFIG_SCHED_CHILD_STATUS
   FAR struct child_status_s *tg_children; /* Head of a list of child status     */
 #endif
+
+#ifndef HAVE_GROUP_MEMBERS
+  /* REVISIT: What if parent thread exits?  Should use tg_pgid. */
+
+  pid_t    tg_ppid;                 /* This is the ID of the parent thread      */
+#ifndef CONFIG_SCHED_CHILD_STATUS
+  uint16_t tg_nchildren;            /* This is the number active children       */
+#endif
+#endif /* HAVE_GROUP_MEMBERS */
+#endif /* CONFIG_SCHED_HAVE_PARENT */
 
 #if defined(CONFIG_SCHED_WAITPID) && !defined(CONFIG_SCHED_HAVE_PARENT)
   /* waitpid support ************************************************************/
@@ -537,16 +548,6 @@ struct tcb_s
   /* Task Management Fields *****************************************************/
 
   pid_t    pid;                          /* This is the ID of the thread        */
-
-#ifdef CONFIG_SCHED_HAVE_PARENT          /* Support parent-child relationship   */
-#ifndef HAVE_GROUP_MEMBERS               /* Don't know pids of group members    */
-  pid_t    ppid;                         /* This is the ID of the parent thread */
-#ifndef CONFIG_SCHED_CHILD_STATUS        /* Retain child thread status          */
-  uint16_t nchildren;                    /* This is the number active children  */
-#endif
-#endif
-#endif /* CONFIG_SCHED_HAVE_PARENT */
-
   start_t  start;                        /* Thread start function               */
   entry_t  entry;                        /* Entry Point into the thread         */
   uint8_t  sched_priority;               /* Current priority of the thread      */

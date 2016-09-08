@@ -37,94 +37,130 @@ config ARCH_CHIP_MK20DX128VLH5
 config ARCH_CHIP_MK20DX64VLH7
 	bool "MK20DX64VLH7"
 	select ARCH_FAMILY_K20
+	select KINETIS_HAVE_I2C1
 
 config ARCH_CHIP_MK20DX128VLH7
 	bool "MK20DX128VLH7"
 	select ARCH_FAMILY_K20
+	select KINETIS_HAVE_I2C1
 
 config ARCH_CHIP_MK20DX256VLH7
 	bool "MK20DX256VLH7"
 	select ARCH_FAMILY_K20
+	select KINETIS_HAVE_I2C1
 
 config ARCH_CHIP_MK40N512VLQ100
 	bool "MK40N512VLQ100"
 	select ARCH_FAMILY_K40
+	select KINETIS_HAVE_I2C1
 
 config ARCH_CHIP_MK40N512VMD100
 	bool "MK40N512VMD100"
 	select ARCH_FAMILY_K40
+	select KINETIS_HAVE_I2C1
 
 config ARCH_CHIP_MK40X128VLQ100
 	bool "MK40X128VLQ100"
 	select ARCH_FAMILY_K40
+	select KINETIS_HAVE_I2C1
 
 config ARCH_CHIP_MK40X128VMD100
 	bool "MK40X128VMD100"
 	select ARCH_FAMILY_K40
+	select KINETIS_HAVE_I2C1
 
 config ARCH_CHIP_MK40X256VLQ100
 	bool "MK40X256VLQ100"
 	select ARCH_FAMILY_K40
+	select KINETIS_HAVE_I2C1
 
 config ARCH_CHIP_MK40X256VMD100
 	bool "MK40X256VMD100"
 	select ARCH_FAMILY_K40
+	select KINETIS_HAVE_I2C1
 
 config ARCH_CHIP_MK60N256VLQ100
 	bool "MK60N256VLQ100"
 	select ARCH_FAMILY_K60
+	select KINETIS_HAVE_I2C1
 
 config ARCH_CHIP_MK60N256VMD100
 	bool "MK60N256VMD100"
 	select ARCH_FAMILY_K60
+	select KINETIS_HAVE_I2C1
+	select KINETIS_HAVE_I2C2
 
 config ARCH_CHIP_MK60N512VLL100
 	bool "MK60N512VLL100"
 	select ARCH_FAMILY_K60
+	select KINETIS_HAVE_I2C1
+	select KINETIS_HAVE_I2C2
 
 config ARCH_CHIP_MK60N512VLQ100
 	bool "MK60N512VLQ100"
 	select ARCH_FAMILY_K60
+	select KINETIS_HAVE_I2C1
+	select KINETIS_HAVE_I2C2
 
 config ARCH_CHIP_MK60N512VMD100
 	bool "MK60N512VMD100"
 	select ARCH_FAMILY_K60
+	select KINETIS_HAVE_I2C1
+	select KINETIS_HAVE_I2C2
 
 config ARCH_CHIP_MK60X256VLQ100
 	bool "MK60X256VLQ100"
 	select ARCH_FAMILY_K60
+	select KINETIS_HAVE_I2C1
+	select KINETIS_HAVE_I2C2
 
 config ARCH_CHIP_MK60X256VMD100
 	bool "MK60X256VMD100"
 	select ARCH_FAMILY_K60
+	select KINETIS_HAVE_I2C1
+	select KINETIS_HAVE_I2C2
 
 config ARCH_CHIP_MK64FN1M0VLL12
 	bool "MK64FN1M0VLL12"
 	select ARCH_FAMILY_K64
+	select KINETIS_HAVE_I2C1
+	select KINETIS_HAVE_I2C2
 
 config ARCH_CHIP_MK64FX512VLL12
 	bool "MK64FX512VLL12"
 	select ARCH_FAMILY_K64
+	select KINETIS_HAVE_I2C1
+	select KINETIS_HAVE_I2C2
 
 config ARCH_CHIP_MK64FX512VDC12
 	bool "MK64FX512VDC12"
 	select ARCH_FAMILY_K64
+	select KINETIS_HAVE_I2C1
+	select KINETIS_HAVE_I2C2
 
 config ARCH_CHIP_MK64FN1M0VDC12
 	bool "MK64FN1M0VDC12"
 	select ARCH_FAMILY_K64
+	select KINETIS_HAVE_I2C1
+	select KINETIS_HAVE_I2C2
 
 config ARCH_CHIP_MK64FX512VLQ12
 	bool "MK64FX512VLQ12"
 	select ARCH_FAMILY_K64
+	select KINETIS_HAVE_I2C1
+	select KINETIS_HAVE_I2C2
 
 config ARCH_CHIP_MK64FX512VMD12
 	bool "MK64FX512VMD12"
 	select ARCH_FAMILY_K64
+	select KINETIS_HAVE_I2C1
+	select KINETIS_HAVE_I2C2
 
 config ARCH_CHIP_MK64FN1M0VMD12
 	bool "MK64FN1M0VMD12"
 	select ARCH_FAMILY_K64
+	select KINETIS_HAVE_I2C1
+	select KINETIS_HAVE_I2C2
 
 endchoice
 
@@ -147,6 +183,14 @@ config ARCH_FAMILY_K64
 	default n
 
 menu "Kinetis Peripheral Support"
+
+config KINETIS_HAVE_I2C1
+	bool
+	default n
+
+config KINETIS_HAVE_I2C2
+	bool
+	default n
 
 config KINETIS_TRACE
 	bool "Trace"
@@ -255,12 +299,23 @@ config KINETIS_SPI2
 config KINETIS_I2C0
 	bool "I2C0"
 	default n
+	select I2C
 	---help---
 		Support I2C0
 
 config KINETIS_I2C1
 	bool "I2C1"
 	default n
+	select I2C
+	depends on KINETIS_HAVE_I2C1
+	---help---
+		Support I2C1
+
+config KINETIS_I2C2
+	bool "I2C2"
+	default n
+	select I2C
+	depends on KINETIS_HAVE_I2C2
 	---help---
 		Support I2C1
 
@@ -418,6 +473,9 @@ config KINETIS_PIT
 
 endmenu
 
+menu "Kinetis FTM PWM Configuration"
+	depends on KINETIS_FTM0 || KINETIS_FTM1 || KINETIS_FTM2
+
 config KINETIS_FTM0_PWM
 	bool "FTM0 PWM"
 	default n
@@ -480,6 +538,8 @@ config KINETIS_FTM2_CHANNEL
 	---help---
 		If FTM2 is enabled for PWM usage, you also need specifies the timer output
 		channel {0,..,1}
+
+endmenu # Kinetis FTM PWM Configuration
 
 menu "Kinetis GPIO Interrupt Configuration"
 

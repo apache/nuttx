@@ -1,6 +1,5 @@
 /****************************************************************************
  * arch/z80/include/z180/chip.h
- * arch/chip/io.h
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

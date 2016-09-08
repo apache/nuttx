@@ -103,6 +103,8 @@ $(DUMMY_KCONFIG): $(BOARD_KCONFIG)
 	$(call DELFILE, $(DUMMY_KCONFIG))
 	$(Q) cp -f $(BOARD_KCONFIG) $(DUMMY_KCONFIG)
 
+dirlinks: $(DUMMY_KCONFIG)
+
 context: $(DUMMY_KCONFIG)
 
 clean_context:

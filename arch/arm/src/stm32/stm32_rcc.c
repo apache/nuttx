@@ -128,7 +128,7 @@ static inline void rcc_resetbkp(void)
   regval = getreg32(RTC_MAGIC_REG);
   if (regval != RTC_MAGIC)
     {
-      (void)stm32_pwr_enablebkp(true);
+      stm32_pwr_enablebkp(true);
 
       /* We might be changing RTCSEL - to ensure such changes work, we must
        * reset the backup domain (having backed up the RTC_MAGIC token)
@@ -137,7 +137,7 @@ static inline void rcc_resetbkp(void)
       modifyreg32(STM32_RCC_XXX, 0, RCC_XXX_YYYRST);
       modifyreg32(STM32_RCC_XXX, RCC_XXX_YYYRST, 0);
 
-      (void)stm32_pwr_enablebkp(false);
+      stm32_pwr_enablebkp(false);
     }
 }
 #else

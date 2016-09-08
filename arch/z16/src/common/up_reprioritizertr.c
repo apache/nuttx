@@ -1,5 +1,5 @@
 /****************************************************************************
- * common/up_reprioritizertr.c
+ * arch/z16/src/common/up_reprioritizertr.c
  *
  *   Copyright (C) 2008-2009, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

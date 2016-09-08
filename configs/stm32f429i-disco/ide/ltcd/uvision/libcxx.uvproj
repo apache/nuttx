@@ -274,7 +274,7 @@
             <wLevel>1</wLevel>
             <uThumb>1</uThumb>
             <VariousControls>
-              <MiscControls> -fno-builtin -fno-exceptions -fno-rtti -Wall -Wshadow -Wundef -g</MiscControls>
+              <MiscControls> -fno-builtin -fno-exceptions -fcheck-new -fno-rtti -Wall -Wshadow -Wundef -g</MiscControls>
               <Define> CONFIG_WCHAR_BUILTIN</Define>
               <Undefine/>
               <IncludePath>../../../../../libxx;../../../../../include;../../../../../include/cxx</IncludePath>

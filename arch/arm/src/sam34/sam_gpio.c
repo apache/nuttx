@@ -54,6 +54,7 @@
 
 #include "chip.h"
 #include "sam_gpio.h"
+#include "sam_periphclks.h"
 
 #if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
     defined(CONFIG_ARCH_CHIP_SAM3A)
@@ -96,13 +97,74 @@ static inline uintptr_t sam_gpiobase(gpio_pinset_t cfgset)
  * Name: sam_gpiopin
  *
  * Description:
- *   Returun the base address of the GPIO register set
+ *   Return the base address of the GPIO register set
  *
  ****************************************************************************/
 
 static inline int sam_gpiopin(gpio_pinset_t cfgset)
 {
   return 1 << ((cfgset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT);
+}
+
+/****************************************************************************
+ * Name: sam_gpio_enableclk
+ *
+ * Description:
+ *   Enable clocking on the PIO port.  Port clocking is required in the
+ *   following cases:
+ *
+ *     - In order to read values in input pins from the port
+ *     - If the port supports interrupting pins
+ *     - If glitch filtering is enabled
+ *     - If necessary to read the input value on an open drain output (this
+ *       may be done in TWI logic to detect hangs on the I2C bus).
+ *     - If necessary to read the input value on peripheral pins.
+ *
+ ****************************************************************************/
+
+static inline int sam_gpio_enableclk(gpio_pinset_t cfgset)
+{
+  /* Enable the peripheral clock for the GPIO's port controller. */
+
+  switch (cfgset & GPIO_PORT_MASK)
+    {
+      case GPIO_PORT_PIOA:
+        sam_pioa_enableclk();
+        break;
+
+      case GPIO_PORT_PIOB:
+        sam_piob_enableclk();
+        break;
+
+#ifdef GPIO_PORT_PIOC
+      case GPIO_PORT_PIOC:
+        sam_pioc_enableclk();
+        break;
+#endif
+
+#ifdef GPIO_PORT_PIOD
+      case GPIO_PORT_PIOD:
+        sam_piod_enableclk();
+        break;
+#endif
+
+#ifdef GPIO_PORT_PIOE
+      case GPIO_PORT_PIOE:
+        sam_pioe_enableclk();
+        break;
+#endif
+
+#ifdef GPIO_PORT_PIOF
+      case GPIO_PORT_PIOF:
+        sam_piof_enableclk();
+        break;
+#endif
+
+      default:
+        return -EINVAL;
+    }
+
+  return OK;
 }
 
 /****************************************************************************
@@ -171,6 +233,7 @@ static inline int sam_configinput(uintptr_t base, uint32_t pin,
     {
       regval &= ~pin;
     }
+
   putreg32(regval, base + SAM_PIO_SCHMITT_OFFSET);
 #endif
 
@@ -184,7 +247,12 @@ static inline int sam_configinput(uintptr_t base, uint32_t pin,
    *         another, new API... perhaps sam_configfilter()
    */
 
-  return OK;
+  /* Enable the peripheral clock for the GPIO's port controller.
+   * A GPIO input value is only sampled if the peripheral clock for its
+   * controller is enabled.
+   */
+
+  return sam_gpio_enableclk(cfgset);
 }
 
 /****************************************************************************

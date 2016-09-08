@@ -53,13 +53,7 @@
 #include <nuttx/usb/hub.h>
 #include <nuttx/usb/usbhost_devaddr.h>
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
+#include "usbhost_composite.h"
 
 /****************************************************************************
  * Private Function Prototypes
@@ -76,14 +70,6 @@ static inline int usbhost_classbind(FAR struct usbhost_hubport_s *hport,
               FAR const uint8_t *configdesc, int desclen,
               FAR struct usbhost_id_s *id,
               FAR struct usbhost_class_s **devclass);
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -539,15 +525,38 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
 
   usleep(100*1000);
 
-  /* Parse the configuration descriptor and bind to the class instance for the
-   * device.  This needs to be the last thing done because the class driver
-   * will begin configuring the device.
+#ifdef CONFIG_USBHOST_COMPOSITE
+  /* Check if the device attached to the downstream port if a USB composite
+   * device and, if so, create the composite device wrapper and bind it to
+   * the HCD.
+   *
+   * usbhost_composite() will return a negated errno value is on any
+   * failure.  The value -ENOENT, in particular means that the attached
+   * device is not a composite device.  Other values would indicate other
+   * various, unexpected failures.  We make no real distinction here.
    */
 
-  ret = usbhost_classbind(hport, buffer, cfglen, &id, devclass);
-  if (ret < 0)
+  ret = usbhost_composite(hport, buffer, cfglen, &id, devclass);
+  if (ret >= 0)
     {
-      uerr("ERROR: usbhost_classbind failed %d\n", ret);
+      uinfo("usbhost_composite has bound the composite device\n");
+    }
+
+  /* Apparently this is not a composite device */
+
+  else
+#endif
+    {
+      /* Parse the configuration descriptor and bind to the class instance
+       * for the device.  This needs to be the last thing done because the
+       * class driver will begin configuring the device.
+       */
+
+      ret = usbhost_classbind(hport, buffer, cfglen, &id, devclass);
+      if (ret < 0)
+        {
+          uerr("ERROR: usbhost_classbind failed %d\n", ret);
+        }
     }
 
 errout:

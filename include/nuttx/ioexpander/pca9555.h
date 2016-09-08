@@ -69,11 +69,10 @@ struct pca9555_config_s
   uint8_t address;     /* 7-bit I2C address (only bits 0-6 used) */
   uint32_t frequency;  /* I2C or SPI frequency */
 
+#ifdef CONFIG_IOEXPANDER_INT_ENABLE
   /* If multiple PCA9555 devices are supported, then an IRQ number must
    * be provided for each so that their interrupts can be distinguished.
    */
-
-#ifndef CONFIG_PCA9555_INT_DISABLE
 
 #ifdef CONFIG_PCA9555_MULTIPLE
   int irq;             /* IRQ number received by interrupt handler. */

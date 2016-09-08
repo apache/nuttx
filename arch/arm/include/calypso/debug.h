@@ -1,5 +1,5 @@
-#ifndef _DEBUG_H
-#define _DEBUG_H
+#ifndef __ARCH_ARM_INCLUDE_CALYPSO_DEBUG_H
+#define __ARCH_ARM_INCLUDE_CALYPSO_DEBUG_H
 
 #ifndef ARRAY_SIZE
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
@@ -28,4 +28,4 @@
 #define printd(x, args ...)
 #endif
 
-#endif /* _DEBUG_H */
+#endif /* __ARCH_ARM_INCLUDE_CALYPSO_DEBUG_H */

@@ -182,7 +182,7 @@ static inline void task_inherit_affinity(FAR struct tcb_s *tcb)
  * Name: task_saveparent
  *
  * Description:
- *   Save the task ID of the parent task in the child task's TCB and allocate
+ *   Save the task ID of the parent task in the child task's group and allocate
  *   a child status structure to catch the child task's exit status.
  *
  * Parameters:
@@ -201,83 +201,86 @@ static inline void task_inherit_affinity(FAR struct tcb_s *tcb)
 #ifdef CONFIG_SCHED_HAVE_PARENT
 static inline void task_saveparent(FAR struct tcb_s *tcb, uint8_t ttype)
 {
-  FAR struct tcb_s *rtcb = this_task();
+  DEBUGASSERT(tcb != NULL && tcb->group != NULL);
 
-#if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_SCHED_CHILD_STATUS)
-  DEBUGASSERT(tcb && tcb->group && rtcb->group);
-#else
-#endif
-
-#ifdef HAVE_GROUP_MEMBERS
-  /* Save the ID of the parent tasks' task group in the child's task group.
-   * Do nothing for pthreads.  The parent and the child are both members of
-   * the same task group.
+  /* Only newly created tasks (and kernel threads) have parents.  None of
+   * this logic applies to pthreads with reside in the same group as the
+   * parent and share that same child/parent relationships.
    */
 
 #ifndef CONFIG_DISABLE_PTHREAD
   if ((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD)
 #endif
     {
-      /* This is a new task in a new task group, we have to copy the ID from
-       * the parent's task group structure to child's task group.
+      /* Get the TCB of the parent task.  In this case, the calling task. */
+
+      FAR struct tcb_s *rtcb = this_task();
+
+      DEBUGASSERT(rtcb != NULL && rtcb->group != NULL);
+
+#ifdef HAVE_GROUP_MEMBERS
+      /* Save the ID of the parent tasks' task group in the child's task
+       * group.  Copy the ID from the parent's task group structure to
+       * child's task group.
        */
 
       tcb->group->tg_pgid = rtcb->group->tg_gid;
-    }
 
 #else
-  DEBUGASSERT(tcb);
+      /* Save the parent task's ID in the child task's group. */
 
-  /* Save the parent task's ID in the child task's TCB.  I am not sure if
-   * this makes sense for the case of pthreads or not, but I don't think it
-   * is harmful in any event.
-   */
-
-  tcb->ppid = rtcb->pid;
+      tcb->group->tg_ppid = rtcb->pid;
 #endif
 
 #ifdef CONFIG_SCHED_CHILD_STATUS
-  /* Tasks can also suppress retention of their child status by applying
-   * the SA_NOCLDWAIT flag with sigaction().
-   */
-
-  if ((rtcb->group->tg_flags && GROUP_FLAG_NOCLDWAIT) == 0)
-    {
-      FAR struct child_status_s *child;
-
-      /* Make sure that there is not already a structure for this PID in the
-       * parent TCB.  There should not be.
+      /* Tasks can also suppress retention of their child status by applying
+       * the SA_NOCLDWAIT flag with sigaction().
        */
 
-      child = group_findchild(rtcb->group, tcb->pid);
-      DEBUGASSERT(!child);
-      if (!child)
+      if ((rtcb->group->tg_flags && GROUP_FLAG_NOCLDWAIT) == 0)
         {
-          /* Allocate a new status structure  */
+          FAR struct child_status_s *child;
 
-          child = group_allocchild();
+          /* Make sure that there is not already a structure for this PID in
+           * the parent TCB.  There should not be.
+           */
+
+          child = group_findchild(rtcb->group, tcb->pid);
+          DEBUGASSERT(child == NULL);
+          if (child == NULL)
+            {
+              /* Allocate a new status structure  */
+
+              child = group_allocchild();
+            }
+
+          /* Did we successfully find/allocate the child status structure? */
+
+          DEBUGASSERT(child != NULL);
+          if (child != NULL)
+            {
+              /* Yes.. Initialize the structure */
+
+              child->ch_flags  = ttype;
+              child->ch_pid    = tcb->pid;
+              child->ch_status = 0;
+
+              /* Add the entry into the group's list of children */
+
+              group_addchild(rtcb->group, child);
+            }
         }
 
-      /* Did we successfully find/allocate the child status structure? */
+#else /* CONFIG_SCHED_CHILD_STATUS */
+      /* Child status is not retained.  Simply keep track of the number
+       * child tasks created.
+       */
 
-      DEBUGASSERT(child);
-      if (child)
-        {
-          /* Yes.. Initialize the structure */
+      DEBUGASSERT(rtcb->group->tg_nchildren < UINT16_MAX);
+      rtcb->group->tg_nchildren++;
 
-          child->ch_flags  = ttype;
-          child->ch_pid    = tcb->pid;
-          child->ch_status = 0;
-
-          /* Add the entry into the TCB list of children */
-
-          group_addchild(rtcb->group, child);
-        }
+#endif /* CONFIG_SCHED_CHILD_STATUS */
     }
-#else
-  DEBUGASSERT(rtcb->nchildren < UINT16_MAX);
-  rtcb->nchildren++;
-#endif
 }
 #else
 #  define task_saveparent(tcb,ttype)

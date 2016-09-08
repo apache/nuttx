@@ -194,6 +194,12 @@
 typedef uint32_t sigset_t;   /* Bit set of 32 signals */
 #define __SIGSET_T_DEFINED 1
 
+/* Possibly volatile-qualified integer type of an object that can be accessed
+ * as an atomic entity, even in the presence of asynchronous interrupts.
+ */
+
+typedef volatile int sig_atomic_t;
+
 /* This defines the type of the siginfo si_value field */
 
 union sigval
@@ -292,9 +298,9 @@ int sighold(int signo);
 int sigismember(FAR const sigset_t *set, int signo);
 int sigignore(int signo);
 CODE void (*signal(int signo, CODE void (*func)(int signo)))(int signo);
-int sigprocmask(int how, FAR const sigset_t *set, FAR sigset_t *oset);
 int sigpause(int signo);
 int sigpending(FAR sigset_t *set);
+int sigprocmask(int how, FAR const sigset_t *set, FAR sigset_t *oset);
 #ifdef CONFIG_CAN_PASS_STRUCTS
 int sigqueue(int pid, int signo, union sigval value);
 #else

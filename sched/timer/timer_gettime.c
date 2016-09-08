@@ -1,4 +1,4 @@
-/********************************************************************************
+/****************************************************************************
  * sched/timer/timer_gettime.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -47,21 +47,22 @@
 
 #ifndef CONFIG_DISABLE_POSIX_TIMERS
 
-/********************************************************************************
+/****************************************************************************
  * Public Functions
- ********************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************
+/****************************************************************************
  * Name: timer_gettime
  *
  * Description:
- *  The timer_gettime() function will store the amount of time until the
- *  specified timer, timerid, expires and the reload value of the timer into the
- *  space pointed to by the value argument. The it_value member of this structure
- *  will contain the amount of time before the timer expires, or zero if the timer
- *  is disarmed. This value is returned as the interval until timer expiration,
- *  even if the timer was armed with absolute time. The it_interval member of
- *  value will contain the reload value last set by timer_settime().
+ *   The timer_gettime() function will store the amount of time until the
+ *   specified timer, timerid, expires and the reload value of the timer
+ *   into the space pointed to by the value argument. The it_value member
+ *   of this structure will contain the amount of time before the timer
+ *   expires, or zero if the timer is disarmed. This value is returned as
+ *   the interval until timer expiration, even if the timer was armed with
+ *   absolute time. The it_interval member of value will contain the reload
+ *   value last set by timer_settime().
  *
  * Parameters:
  *   timerid - The pre-thread timer, previously created by the call to
@@ -69,8 +70,8 @@
  *
  * Return Value:
  *   If the timer_gettime() succeeds, a value of 0 (OK) will be returned.
- *   If an error occurs, the value -1 (ERROR) will be returned, and errno set to
- *   indicate the error.
+ *   If an error occurs, the value -1 (ERROR) will be returned, and errno
+ *   set to indicate the error.
  *
  *   EINVAL - The timerid argument does not correspond to an ID returned by
  *     timer_create() but not yet deleted by timer_delete().
@@ -80,7 +81,7 @@
  *   by this function could be significantly more than that actual time
  *   remaining on the timer at any time.
  *
- ********************************************************************************/
+ ****************************************************************************/
 
 int timer_gettime(timer_t timerid, FAR struct itimerspec *value)
 {

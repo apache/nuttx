@@ -263,7 +263,7 @@ static void rtc_wprunlock(void)
    * registers and backup SRAM).
    */
 
-  (void)stm32_pwr_enablebkp(true);
+  stm32_pwr_enablebkp(true);
 
   /* The following steps are required to unlock the write protection on all the
    * RTC registers (except for RTC_ISR[13:8], RTC_TAFCR, and RTC_BKPxR).
@@ -302,7 +302,7 @@ static inline void rtc_wprlock(void)
    * data registers and backup SRAM).
    */
 
-  (void)stm32_pwr_enablebkp(false);
+  stm32_pwr_enablebkp(false);
 }
 
 /****************************************************************************
@@ -892,7 +892,7 @@ int up_rtc_initialize(void)
 
   regval = getreg32(RTC_MAGIC_REG);
 
-  (void)stm32_pwr_enablebkp(true);
+  stm32_pwr_enablebkp(true);
 
   if (regval != RTC_MAGIC)
     {
@@ -972,7 +972,7 @@ int up_rtc_initialize(void)
         }
     }
 
-  (void)stm32_pwr_enablebkp(false);
+  stm32_pwr_enablebkp(false);
 
   /* Loop, attempting to initialize/resume the RTC.  This loop is necessary
    * because it seems that occasionally it takes longer to initialize the RTC
@@ -1023,11 +1023,17 @@ int up_rtc_initialize(void)
        * backup data registers and backup SRAM).
        */
 
-      (void)stm32_pwr_enablebkp(true);
+      stm32_pwr_enablebkp(true);
 
       /* Remember that the RTC is initialized */
 
       putreg32(RTC_MAGIC, RTC_MAGIC_REG);
+
+      /* Disable write access to the backup domain (RTC registers, RTC
+       * backup data registers and backup SRAM).
+       */
+
+      stm32_pwr_enablebkp(false);
     }
   else
     {
@@ -1038,12 +1044,6 @@ int up_rtc_initialize(void)
       rtc_resume();
       rtc_dumpregs("Did resume");
     }
-
-  /* Disable write access to the backup domain (RTC registers, RTC backup
-   * data registers and backup SRAM).
-   */
-
-  (void)stm32_pwr_enablebkp(false);
 
   if (ret != OK && nretry > 0)
     {

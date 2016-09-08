@@ -15,6 +15,7 @@ README
     - NuttX Configuration Tool
     - Finding Selections in the Configuration Menus
     - Reveal Hidden Configuration Options
+    - Make Sure that You on on the Right Platform
     - Comparing Two Configurations
     - Incompatibilities with Older Configurations
     - NuttX Configuration Tool under DOS
@@ -576,6 +577,38 @@ Reveal Hidden Configuration Options
   cannot be selected and has no value).  About all you do is to select
   the <Help> option to see what the dependencies are.
 
+Make Sure that You on on the Right Platform
+-------------------------------------------
+
+  Saved configurations may run on Linux, Cygwin (32- or 64-bit), or other
+  platforms.  The platform characteristics can be changed use 'make
+  menuconfig'.  Sometimes this can be confusing due to the differences
+  between the platforms.  Enter sethost.sh
+
+  sethost.sh is a simple script that changes a configuration to your
+  host platform.  This can greatly simplify life if you use many different
+  configurations.  For example, if you are running on Linux and you
+  configure like this:
+
+    $ cd tools
+    $ ./configure.sh board/configuration
+    $ cd ..
+
+  The you can use the following command to both (1) make sure that the
+  configuration is up to date, AND (2) the configuration is set up
+  correctly for Linux:
+
+    $ tools/sethost.sh -l
+
+  Or, if you are on a Windows/Cygwin 64-bit platform:
+
+    $ tools/sethost.sh -w
+
+  Other options are available from the help option built into the
+  script.  You can see all options with:
+
+    $ tools/sethost.sh -h
+
 Comparing Two Configurations
 ----------------------------
 
@@ -948,9 +981,13 @@ Native Windows Build
 --------------------
 
   The beginnings of a Windows native build are in place but still not often
-  used as of this writing.  The windows native build logic initiated
-  if CONFIG_WINDOWS_NATIVE=y is defined in the NuttX configuration file:
+  used as of this writing.  The build was functional but because of lack of
+  use may find some issues to be resolved with this build configuration.
 
+  The windows native build logic initiated if CONFIG_WINDOWS_NATIVE=y is
+  defined in the NuttX configuration file:
+
+  
   This build:
 
     - Uses all Windows style paths
@@ -1213,7 +1250,7 @@ nuttx/
  |   |- arm/
  |   |   `- src
  |   |       `- lpc214x/README.txt
- |   |- sh/
+ |   |- renesas/
  |   |   |- include/
  |   |   |   `-README.txt
  |   |   |- src/

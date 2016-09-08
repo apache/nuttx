@@ -1,5 +1,5 @@
-#ifndef _CAL_TIMER_H
-#define _CAL_TIMER_H
+#ifndef __ARCH_ARM_INCLUDE_CALYPSO_TIMER_H
+#define __ARCH_ARM_INCLUDE_CALYPSO_TIMER_H
 
 /* Enable or Disable a timer */
 void hwtimer_enable(int num, int on);
@@ -22,4 +22,4 @@ void wdog_reset(void);
 /* power up the timers */
 void hwtimer_init(void);
 
-#endif /* _CAL_TIMER_H */
+#endif /* __ARCH_ARM_INCLUDE_CALYPSO_TIMER_H */

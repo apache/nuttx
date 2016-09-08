@@ -73,6 +73,14 @@ void stm32_spidev_initialize(void)
    *       Here, we only initialize chip select pins unique to the board
    *       architecture.
    */
+
+#ifdef CONFIG_WL_MFRC522
+  (void)stm32_configgpio(GPIO_CS_MFRC522);    /* MFRC522 chip select */
+#endif
+
+#ifdef CONFIG_LCD_ST7567
+  (void)stm32_configgpio(STM32_LCD_CS);       /* ST7567 chip select */
+#endif
 }
 
 /****************************************************************************
@@ -101,8 +109,22 @@ void stm32_spidev_initialize(void)
  ****************************************************************************/
 
 #ifdef CONFIG_STM32_SPI1
-void stm32_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+void stm32_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
+                      bool selected)
 {
+#if defined(CONFIG_WL_MFRC522)
+  if (devid == SPIDEV_WIRELESS)
+    {
+      stm32_gpiowrite(GPIO_CS_MFRC522, !selected);
+    }
+#endif
+
+#ifdef CONFIG_LCD_ST7567
+  if (devid == SPIDEV_DISPLAY)
+    {
+      stm32_gpiowrite(GPIO_CS_MFRC522, !selected);
+    }
+#endif
 }
 
 uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
@@ -112,7 +134,8 @@ uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 #endif
 
 #ifdef CONFIG_STM32_SPI2
-void stm32_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+void stm32_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
+                      bool selected)
 {
 }
 
@@ -120,6 +143,53 @@ uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
   return 0;
 }
+#endif
+
+
+/****************************************************************************
+ * Name: stm32_spi1cmddata
+ *
+ * Description:
+ *   Set or clear the SH1101A A0 or SD1306 D/C n bit to select data (true)
+ *   or command (false). This function must be provided by platform-specific
+ *   logic. This is an implementation of the cmddata method of the SPI
+ *   interface defined by struct spi_ops_s (see include/nuttx/spi/spi.h).
+ *
+ * Input Parameters:
+ *
+ *   spi - SPI device that controls the bus the device that requires the CMD/
+ *         DATA selection.
+ *   devid - If there are multiple devices on the bus, this selects which one
+ *         to select cmd or data.  NOTE:  This design restricts, for example,
+ *         one one SPI display per SPI bus.
+ *   cmd - true: select command; false: select data
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SPI_CMDDATA
+#ifdef CONFIG_STM32_SPI1
+int stm32_spi1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
+                      bool cmd)
+{
+#ifdef CONFIG_LCD_ST7567
+  if (devid == SPIDEV_DISPLAY)
+    {
+      /*  This is the Data/Command control pad which determines whether the
+       *  data bits are data or a command.
+       */
+
+      (void)stm32_gpiowrite(STM32_LCD_RS, !cmd);
+
+      return OK;
+    }
+#endif
+
+  return -ENODEV;
+}
+#endif
 #endif
 
 #endif /* CONFIG_STM32_SPI1 || CONFIG_STM32_SPI2 */

@@ -41,19 +41,13 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/fs/ioctl.h>
+#include <nuttx/sensors/ioctl.h>
 
 #if defined(CONFIG_I2C) && defined(CONFIG_SN_LSM9DS1)
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* IOCTL Commands ***********************************************************/
-
-#define SNIOC_START         _SNIOC(0x0001) /* Arg: None */
-#define SNIOC_STOP          _SNIOC(0x0002) /* Arg: None */
-#define SNIOC_SETSAMPLERATE _SNIOC(0x0003) /* Arg: uint32_t value */
-#define SNIOC_SETFULLSCALE  _SNIOC(0x0004) /* Arg: uint32_t value */
 
 /* I2C Addresses ************************************************************/
 /* Accelerometer addresses */

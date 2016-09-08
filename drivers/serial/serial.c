@@ -910,12 +910,16 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     {
       switch (cmd)
         {
+          /* Get the number of bytes that may be read from the RX buffer
+           * (without waiting)
+           */
+
           case FIONREAD:
             {
               int count;
               irqstate_t flags = enter_critical_section();
 
-              /* Determine the number of bytes available in the buffer */
+              /* Determine the number of bytes available in the RX buffer */
 
               if (dev->recv.tail <= dev->recv.head)
                 {
@@ -933,12 +937,39 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             }
             break;
 
+          /* Get the number of bytes that have been written to the TX buffer. */
+
           case FIONWRITE:
             {
               int count;
               irqstate_t flags = enter_critical_section();
 
-              /* Determine the number of bytes free in the buffer */
+              /* Determine the number of bytes waiting in the TX buffer */
+
+              if (dev->xmit.tail <= dev->xmit.head)
+                {
+                  count = dev->xmit.head - dev->xmit.tail;
+                }
+              else
+                {
+                  count = dev->xmit.size - (dev->xmit.tail - dev->xmit.head);
+                }
+
+              leave_critical_section(flags);
+
+              *(FAR int *)((uintptr_t)arg) = count;
+              ret = 0;
+            }
+            break;
+
+          /* Get the number of free bytes in the TX buffer */
+
+          case FIONSPACE:
+            {
+              int count;
+              irqstate_t flags = enter_critical_section();
+
+              /* Determine the number of bytes free in the TX buffer */
 
               if (dev->xmit.head < dev->xmit.tail)
                 {

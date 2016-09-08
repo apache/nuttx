@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/serial.h
+ * arch/z16/include/serial.h
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_SERIAL_H
-#define __ARCH_SERIAL_H
+#ifndef __ARCH_Z16_INCLUDE_SERIAL_H
+#define __ARCH_Z16_INCLUDE_SERIAL_H
 
 /****************************************************************************
  * Included Files
@@ -52,4 +52,4 @@
  * Public Functions
  ****************************************************************************/
 
-#endif /* __ARCH_SERIAL_H */
+#endif /* __ARCH_Z16_INCLUDE_SERIAL_H */

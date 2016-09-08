@@ -130,7 +130,7 @@ UVISION_GCC_PRJ_SETTINGS = {'root_group':'',
                             'ext_remap' : UVISION_GCC_EXT_REMAP,
                             'uv_file_type' : UVISION_FILE_TYPE_MAP,
                             'c_misc' : ('.//Carm', '-fno-builtin -Wall -Wstrict-prototypes -Wshadow -Wundef -g'),
-                            'cxx_misc' : ('.//Carm', '-fno-builtin -fno-exceptions -fno-rtti -Wall -Wshadow -Wundef -g'),
+                            'cxx_misc' : ('.//Carm', '-fno-builtin -fno-exceptions -fcheck-new -fno-rtti -Wall -Wshadow -Wundef -g'),
                             'ld_misc' : ('.//LDarm', '--entry=__start -lgcc'),
                             'cxx_def' : ('.//Carm', ''),}
 

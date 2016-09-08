@@ -1,9 +1,19 @@
 /****************************************************************************
  * libc/math/lib_copysignf.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Dave Marples <dave@marples.net>
+ *
+ * Replaced on 2016-07-30 by David Alession with a faster version of
+ * copysignf() from NetBSD with the following Copyright:
+ *
+ *   Copyright (C) 1993 by Sun Microsystems, Inc. All rights reserved.
+ *
+ *   Developed at SunPro, a Sun Microsystems, Inc. business.
+ *   Permission to use, copy, modify, and distribute this
+ *   software is freely granted, provided that this notice
+ *   is preserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -42,6 +52,44 @@
 #include <nuttx/compiler.h>
 
 #include <math.h>
+#include <stdint.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Get a 32 bit int from a float.  */
+
+#define GET_FLOAT_WORD(i,d) \
+  do \
+    { \
+      ieee_float_shape_type gf_u; \
+      gf_u.value = (d); \
+      (i) = gf_u.word; \
+    } while (0)
+
+/* Set a float from a 32 bit int.  */
+
+#define SET_FLOAT_WORD(d,i) \
+  do \
+    { \
+      ieee_float_shape_type sf_u; \
+      sf_u.word = (i); \
+      (d) = sf_u.value; \
+    } while (0)
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+/* union which permits us to convert between a float and a 32 bit int.  */
+
+typedef union
+{
+  float   value;
+  uint32_t word;
+}
+ieee_float_shape_type;
 
 /****************************************************************************
  * Public Functions
@@ -49,10 +97,12 @@
 
 float copysignf(float x, float y)
 {
-  if (y < 0)
-    {
-      return -fabsf(x);
-    }
+  uint32_t ix;
+  uint32_t iy;
 
-  return fabsf(x);
+  GET_FLOAT_WORD(ix, x);
+  GET_FLOAT_WORD(iy, y);
+  SET_FLOAT_WORD(x, (ix & 0x7fffffff) | (iy & 0x80000000));
+
+  return x;
 }

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/up_modifyreg8.c
+ * arch/z80/src/common/up_modifyreg8.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

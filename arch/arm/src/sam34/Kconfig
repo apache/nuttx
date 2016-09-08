@@ -1060,7 +1060,6 @@ config SAM34_TC5_TIOB
 
 config SAM34_ONESHOT
 	bool "TC one-shot wrapper"
-	depends on SAM34_FREERUN
 	default n if !SCHED_TICKLESS
 	default y if SCHED_TICKLESS
 	---help---

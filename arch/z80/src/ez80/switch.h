@@ -1,6 +1,5 @@
 /************************************************************************************
  * arch/z80/src/ez80/switch.h
- * arch/z80/src/chip/switch.h
  *
  *   Copyright (C) 2008-2009, 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -34,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __EZ80_SWITCH_H
-#define __EZ80_SWITCH_H
+#ifndef __ARCH_Z80_SRC_EZ80_SWITCH_H
+#define __ARCH_Z80_SRC_EZ80_SWITCH_H
 
 /************************************************************************************
  * Included Files
@@ -168,4 +167,4 @@ void ez80_registerdump(void);
 #endif
 #endif
 
-#endif  /* __EZ80_SWITCH_H */
+#endif  /* __ARCH_Z80_SRC_EZ80_SWITCH_H */

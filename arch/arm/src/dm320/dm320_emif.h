@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __DM320_DM320_EMIF_H
-#define __DM320_DM320_EMIF_H
+#ifndef __ARCH_ARM_SRC_DM320_DM320_EMIF_H
+#define __ARCH_ARM_SRC_DM320_DM320_EMIF_H
 
 /************************************************************************************
  * Included Files
@@ -105,4 +105,4 @@
 
 #endif
 
-#endif  /* __DM320_DM320_EMIF_H */
+#endif  /* __ARCH_ARM_SRC_DM320_DM320_EMIF_H */

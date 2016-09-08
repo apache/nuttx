@@ -1,6 +1,7 @@
 /****************************************************************************
- * drivers/wireless/socket_imp.c  - CC3000 Host Driver Implementation.
- *  Copyright (C) 2011 Texas Instruments Incorporated - http://www.ti.com/
+ * drivers/wireless/cc3000/socket_imp.c  - CC3000 Host Driver Implementation.
+ *
+ *   Copyright (C) 2011 Texas Instruments Incorporated - http://www.ti.com/
  *
  *   Port to nuttx:
  *      David Sidrane <david_s5@nscdg.com>

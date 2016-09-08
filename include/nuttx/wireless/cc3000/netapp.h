@@ -32,8 +32,8 @@
  *
  ****************************************************************************/
 
-#ifndef _INCLUDE_NUTTX_WIRELESS_CC3000_NETAPP_H
-#define  _INCLUDE_NUTTX_WIRELESS_CC3000_NETAPP_H
+#ifndef __INCLUDE_NUTTX_WIRELESS_CC3000_NETAPP_H
+#define __INCLUDE_NUTTX_WIRELESS_CC3000_NETAPP_H
 
 /****************************************************************************
  * Included Files
@@ -354,4 +354,4 @@ long netapp_set_debug_level(unsigned long ulLevel);
 }
 #endif // __cplusplus
 
-#endif  // _INCLUDE_NUTTX_WIRELESS_CC3000_NETAPP_H
+#endif  // __INCLUDE_NUTTX_WIRELESS_CC3000_NETAPP_H

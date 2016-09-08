@@ -350,6 +350,18 @@ int sam_bringup(void);
 #endif
 
 /************************************************************************************
+ * Name: sam_dacdev_initialize
+ *
+ * Description:
+ *   Called to configure DAC peripheral module
+ *
+ ************************************************************************************/
+
+#if defined(CONFIG_SAMV7_DAC0) || defined(CONFIG_SAMV7_DAC1)
+int sam_dacdev_initialize(void);
+#endif
+
+/************************************************************************************
  * Name: sam_spidev_initialize
  *
  * Description:

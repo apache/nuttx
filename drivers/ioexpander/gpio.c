@@ -187,7 +187,7 @@ static int gpio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         if (dev->gp_pintype == GPIO_OUTPUT_PIN)
           {
             DEBUGASSERT(arg == 0ul || arg == 1ul);
-            ret = dev->gp_ops->go_write(dev, (int)arg);
+            ret = dev->gp_ops->go_write(dev, (bool)arg);
           }
         else
           {
@@ -197,17 +197,32 @@ static int gpio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       /* Command:     GPIOC_READ
        * Description: Read the value of an input or output GPIO
-       * Argument:    A pointer to an integer value to receive the result:
-       *              0=low value; 1=high value.
+       * Argument:    A pointer to an bool value to receive the result:
+       *              false=low value; true=high value.
        */
 
       case GPIOC_READ:
         {
-          FAR int *ptr = (FAR int *)((uintptr_t)arg);
+          FAR bool *ptr = (FAR bool *)((uintptr_t)arg);
           DEBUGASSERT(ptr != NULL);
 
           ret = dev->gp_ops->go_read(dev, ptr);
           DEBUGASSERT(ret < 0 || *ptr == 0 || *ptr == 1);
+        }
+        break;
+
+      /* Command:     GPIOC_PINTYPE
+       * Description: Return the GPIO pin type.
+       * Argument:    A pointer to an instance of type enum gpio_pintype_e
+       */
+
+      case GPIOC_PINTYPE:
+        {
+          FAR enum gpio_pintype_e *ptr = (FAR enum gpio_pintype_e *)((uintptr_t)arg);
+          DEBUGASSERT(ptr != NULL);
+
+          *ptr = dev->gp_pintype;
+          ret = OK;
         }
         break;
 
@@ -245,6 +260,33 @@ static int gpio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
                     ret = dev->gp_ops->go_enable(dev, true);
                   }
+              }
+          }
+        else
+          {
+            ret = -EACCES;
+          }
+        break;
+
+      /* Command:     GPIOC_UNREGISTER
+       * Description: Stop receiving signals for pin interrupts.
+       * Argument:    None.
+       */
+
+      case GPIOC_UNREGISTER:
+        if (dev->gp_pintype == GPIO_INTERRUPT_PIN)
+          {
+            /* Make sure that the pin interrupt is disabled */
+
+            ret = dev->gp_ops->go_enable(dev, false);
+            if (ret >= 0)
+              {
+                /* Detach the handler */
+
+                ret = dev->gp_ops->go_attach(dev, NULL);
+
+                dev->gp_pid   = 0;
+                dev->gp_signo = 0;
               }
           }
         else
@@ -303,7 +345,7 @@ int gpio_pin_register(FAR struct gpio_dev_s *dev, int minor)
           DEBUGASSERT(dev->gp_ops->go_read != NULL &&
                      dev->gp_ops->go_write != NULL);
           fmt = "/dev/gpout%u";
-          
+
         }
         break;
 
@@ -321,12 +363,12 @@ int gpio_pin_register(FAR struct gpio_dev_s *dev, int minor)
               return ret;
             }
 
-          fmt = "/dev/gpint%u";  
+          fmt = "/dev/gpint%u";
         }
         break;
 
       default:
-        return -EINVAL;      
+        return -EINVAL;
     }
 
   snprintf(devname, 16, fmt, (unsigned int)minor);

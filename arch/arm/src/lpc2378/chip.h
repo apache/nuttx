@@ -38,8 +38,8 @@
  *
  ****************************************************************************************************/
 
-#ifndef _ARCH_ARM_SRC_LPC2378_CHIP_H
-#define _ARCH_ARM_SRC_LPC2378_CHIP_H
+#ifndef __ARCH_ARM_SRC_LPC2378_CHIP_H
+#define __ARCH_ARM_SRC_LPC2378_CHIP_H
 
 /****************************************************************************************************
  * Included Files
@@ -1003,4 +1003,4 @@ are for LPC24xx only. */
  * Public Function Prototypes
  ****************************************************************************************************/
 
-#endif  /* _ARCH_ARM_SRC_LPC2378_CHIP_H */
+#endif  /* __ARCH_ARM_SRC_LPC2378_CHIP_H */

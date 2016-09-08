@@ -1,6 +1,5 @@
-
-#ifndef _DEFINES_H
-#define _DEFINES_H
+#ifndef __ARCH_ARM_INCLUDE_CALYPSO_DEFINES_H
+#define __ARCH_ARM_INCLUDE_CALYPSO_DEFINES_H
 
 #define __attribute_const__	__attribute__((__const__))
 
@@ -15,4 +14,4 @@
 /* force placement in zero-waitstate memory */
 #define __ramtext __section(".ramtext")
 
-#endif /* !_DEFINES_H */
+#endif /* !__ARCH_ARM_INCLUDE_CALYPSO_DEFINES_H */

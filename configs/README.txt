@@ -648,6 +648,9 @@ configs/stm3240g-eval
   microcontroller (ARM Cortex-M4 with FPU).  This port uses a GNU Cortex-M4
   toolchain (such as CodeSourcery).
 
+configs/stm32butterfly2
+  Kamami stm32butterfly2 development board with optional ETH phy.
+
 configs/stm32f103-minimum
   Generic STM32F103C8T6 Minimum ARM Development Board.
 

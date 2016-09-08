@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/net/ez80_emac.c
+ * arch/z80/src/ez80/ez80_emac.c
  *
  *   Copyright (C) 2009-2010, 2012, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

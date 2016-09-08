@@ -296,6 +296,13 @@ int up_buttonevent(int x, int y, int buttons);
 int sim_ajoy_initialize(void);
 #endif
 
+/* up_ioexpander.c ********************************************************/
+
+#ifdef CONFIG_SIM_IOEXPANDER
+struct ioexpander_dev_s;
+FAR struct ioexpander_dev_s *sim_ioexpander_initialize(void);
+#endif
+
 /* up_tapdev.c ************************************************************/
 
 #if defined(CONFIG_NET_ETHERNET) && !defined(__CYGWIN__)

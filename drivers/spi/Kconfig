@@ -47,13 +47,6 @@ config SPI_CALLBACK
 		the SPI-based MMC/SD driver to get a notification of changes in the
 		card status when an SD card is inserted or removed.
 
-config SPI_BITBANG
-	bool "SPI bit-bang device"
-	default n
-	---help---
-		Enable support for a generic SPI bit-bang device.
-		See include/nuttx/spi/spi_bitbang.h for further information.
-
 config SPI_HWFEATURES
 	bool
 	default n
@@ -62,22 +55,45 @@ config SPI_HWFEATURES
 		basically the OR of any specific hardware feature and eanbles
 		the SPI hwfeatures() interface method.
 
+config ARCH_HAVE_SPI_CRCGENERATION
+	bool
+	default n
+
 config SPI_CRCGENERATION
 	bool
 	default n
 	select SPI_HWFEATURES
+	depends on ARCH_HAVE_SPI_CRCGENERATION
 	---help---
 		Selected by MCU Kconfig logic if implementation supports automatic
 		generation of SPI CRCs.  Enables the HWFEAT_CRCGENERATION option
 		as well as the hwfeartures() interface method.
 
+config ARCH_HAVE_SPI_CS_CONTROL
+	bool
+	default n
+
 config SPI_CS_CONTROL
 	bool "SPI CS Behavior Control"
 	default n
 	select SPI_HWFEATURES
+	depends on ARCH_HAVE_SPI_CS_CONTROL
 	---help---
 		Enables possibilities to define the behavior of CS.
 		Also enables the hwfeatures() interface method.
+
+config ARCH_HAVE_SPI_BITORDER
+	bool
+	default n
+
+config SPI_BITORDER
+	bool "SPI Bit Order Control"
+	default n
+	select SPI_HWFEATURES
+	depends on ARCH_HAVE_SPI_BITORDER
+	---help---
+		Enables capability to select MSB- or LSB-first hardware feature for
+		data transfers.
 
 config SPI_CS_DELAY_CONTROL
 	bool "SPI CS Delay Control"
@@ -89,6 +105,23 @@ config SPI_CS_DELAY_CONTROL
 		delay between two ChipSelects.
 
 		This option enables the setdelay() interface method.
+
+config SPI_DRIVER
+	bool "SPI character driver"
+	default n
+	depends on SPI_EXCHANGE
+	---help---
+		Build in support for a character driver at /dev/spi[N] that may be
+		used to perform SPI bus transfers from applications.  The intent of
+		this driver is to support SPI testing.  It is not suitable for use
+		in any real driver application.
+
+config SPI_BITBANG
+	bool "SPI bit-bang device"
+	default n
+	---help---
+		Enable support for a generic SPI bit-bang device.
+		See include/nuttx/spi/spi_bitbang.h for further information.
 
 if SPI_BITBANG
 

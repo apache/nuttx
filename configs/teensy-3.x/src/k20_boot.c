@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/teensy-3.x/src/k20_boot.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,14 +48,6 @@
 #include "teensy-3x.h"
 
 /************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
-
-/************************************************************************************
  * Public Functions
  ************************************************************************************/
 
@@ -88,3 +80,12 @@ void kinetis_boardinitialize(void)
   board_autoled_initialize();
 #endif
 }
+
+#if defined(CONFIG_BOARD_INITIALIZE)
+void board_initialize(void)
+{
+#if defined(CONFIG_KINETIS_I2C0) || defined(CONFIG_KINETIS_I2C1)
+  kinetis_i2cdev_initialize();
+#endif
+}
+#endif

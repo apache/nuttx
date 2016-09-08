@@ -59,8 +59,6 @@
 #define OTGHS_PID_MDATA                 (3) /* Non-control */
 #define OTGHS_PID_SETUP                 (3) /* Control */
 
-/* If OTGHS2 is defined (FS mode of the HS module), then remap the OTGHS base address */
-
 /* Register Offsets *********************************************************************************/
 /* Core global control and status registers */
 

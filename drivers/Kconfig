@@ -595,4 +595,13 @@ menuconfig DRIVERS_WIRELESS
 		Drivers for various wireless devices.
 
 source drivers/wireless/Kconfig
+
+menuconfig DRIVERS_CONTACTLESS
+	bool "Contactless Device Support"
+	default n
+	---help---
+		Drivers for various contactless devices.
+
+source drivers/contactless/Kconfig
+
 source drivers/syslog/Kconfig

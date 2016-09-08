@@ -219,7 +219,7 @@ o Task/Scheduler (sched/)
   Description: Task control information is retained in simple lists.  This
                is completely appropriate for small embedded systems where
                the number of tasks, N, is relatively small.  Most list
-               operations are O(N).  This could become as issue if N gets
+               operations are O(N).  This could become an issue if N gets
                very large.
 
                In that case, these simple lists should be replaced with
@@ -819,7 +819,7 @@ o Binary loaders (binfmt/)
                "Read-Only Data in RAM" at
                http://nuttx.org/Documentation/NuttXNxFlat.html#limitations).
 
-               The newer 4.6.3compiler generated PC relative relocations to the strings:
+               The newer 4.6.3 compiler generated PC relative relocations to the strings:
 
                .L2:
                   .word   .LC0-(.LPIC0+4)
@@ -927,8 +927,7 @@ o Network (net/, drivers/net)
                CONFIG_NET_NOINTS).  This is really a very bad use of CPU
                resources;  All of the network stack processing should be
                modified to use a work queue (and, all use of CONFIG_NET_NOINTS=n
-               should be eliminated).  This applies to almost all Ethernet
-               drivers:
+               should be eliminated).  This applies to many Ethernet drivers:
 
                ARCHITECTURE   CONFIG_NET_NOINTS?      ADDRESS FILTER SUPPORT?
                C5471          NO                      NO
@@ -1340,6 +1339,8 @@ o Libraries (libc/)
 
                UPDATE: 2015-09-01: A fix for the noted problems with asin()
                has been applied.
+               2016-07-30: Numerous fixes and performance improvements from
+               David Alessio.
 
 Status:        Open
 Priority:      Low for casual users but clearly high if you need care about
@@ -1735,7 +1736,7 @@ o ARM (arch/arm/)
                upon return. This could be improved as well:  If there is no
                context switch, then the static registers need not be restored
                because they will not be modified by the called C code.
-               (see arch/sh/src/sh1/sh1_vector.S for example)
+               (see arch/renesas/src/sh1/sh1_vector.S for example)
   Status:      Open
   Priority:    Low
 

@@ -88,6 +88,7 @@ setenv         NXsetenv
 setlogmask     NXsetlogmask
 setsockopt     NXsetsockopt
 sigaction      NXsigaction
+sigaddset      NXsigaddset
 sigdelset      NXsigdelset
 sigemptyset    NXsigemptyset
 sigfillset     NXsigfillset

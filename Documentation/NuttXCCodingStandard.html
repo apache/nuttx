@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX C Coding Standard</i>
       </font></big></h1>
-      <p>Last Updated: July 28, 2015</p>
+      <p>Last Updated: August 24, 2016</p>
     </td>
   </tr>
 </table>
@@ -498,8 +498,8 @@
 
 <p>
   <b>Comments to the Right of Statements</b>.
-  Comments to the right of statements in C source files are discouraged
-  If such comments are used, they should at least be aligned so that the comment begins in the same comment on each line.
+  Comments to the right of statements in C source files are discouraged.
+  If such comments are used, they should be (1) very short so that they do not exceed the line width (typically 78 characters), (2) fit on one line, and (3) be aligned so that the comment begins in the same comment on each line.
 </p>
 <center><table width="60%" border=1>
 <tr><td bgcolor="white">
@@ -538,7 +538,7 @@
 
 <p>
   <b>Comments to the Right of Data Definitions</b>.
-  Comments to the right of a declaration with an enumeration or structure, on the other hand, are encourage.
+  Comments to the right of a declaration with an enumeration or structure, on the other hand, are encouraged, provided that the comments are short and do not exceed the maximum line width (usually 78 characters).
   Columnar alignment of comments is very desireable (but often cannot be achieved without violating the line width).
 </p>
 <center><table width="60%" border=1>
@@ -585,6 +585,40 @@ struct animals_s
 </ul></pre></font>
 </td></tr>
 </table></center>
+
+<p>
+  <b>Long Comments on the Right</b>.
+  Comments on the right of statements or data definitions must be short and fit on the same line without exceeding the maximum line length.
+  If a longer comment is needed, then it should appear above the statement of definition rather than to the right of the definition.
+</p>
+<center><table width="60%" border=1>
+<tr><td bgcolor="white">
+<p><font color="red"><b>Incorrect</b></p>
+<ul><pre>
+  dog = cat; /* This assignment will convert what was at one time a lowly dog into a ferocious feline. */
+</ul></pre></font>
+</td></tr>
+<tr><td bgcolor="white">
+<p><font color="blue"><b>Acceptable</b></p>
+<ul><pre>
+  dog = cat;       /* This assignment will convert what was at one time a
+                    * lowly dog into a ferocious feline. */
+</ul></pre></font>
+</td></tr>
+<tr><td bgcolor="white">
+<p><font color="green"><b>Preferred</b></p>
+<ul><pre>
+  /* This assignment will convert what was at one time a lowly dog into a
+   * ferocious feline.
+   */
+
+  dog = cat;
+</ul></pre></font>
+</td></tr>
+</table></center>
+<p>
+  <b>Note</b> that if the comment is continued on multiple lines, the comment alignment and multi-line comment rules still apply with one exception:  The closing <code>*/</code> appears on the same line as the final text of the comment.  This exception to the rule is enforced to keep the statements and definitions from becoming to spread out.
+</p>
 
 <p>
   <b>Block comments</b>.

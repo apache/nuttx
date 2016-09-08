@@ -1,7 +1,7 @@
 //***************************************************************************
 // include/cxx/cstdlib
 //
-//   Copyright (C) 2009, 2012, 2015 Gregory Nutt. All rights reserved.
+//   Copyright (C) 2009, 2012, 2015-2016 Gregory Nutt. All rights reserved.
 //   Author: Gregory Nutt <gnutt@nuttx.org>
 //
 // Redistribution and use in source and binary forms, with or without
@@ -54,9 +54,9 @@ namespace std
   using ::srand;
   using ::rand;
 
+#ifndef CONFIG_DISABLE_ENVIRON
   // Environment variable support
 
-#ifndef CONFIG_DISABLE_ENVIRON
   using ::get_environ_ptr;
   using ::getenv;
   using ::putenv;
@@ -74,6 +74,12 @@ namespace std
 #endif
 #ifdef CONFIG_SCHED_ONEXIT
   using ::on_exit;
+#endif
+
+#ifndef __KERNEL__
+  // System command
+
+  using ::system;
 #endif
 
   // String to binary conversions
@@ -100,6 +106,16 @@ namespace std
   using ::calloc;
   using ::mallinfo;
 
+#ifdef CONFIG_PSEUDOTERM
+  // Pseudo-Terminals
+
+#ifdef CONFIG_PSEUDOTERM_SUSV1
+  using ::ptsname;
+  using ::ptsname_r;
+#endif
+  using ::unlockpt;
+#endif
+
   // Arithmetic
 
   using ::abs;
@@ -124,6 +140,10 @@ namespace std
   // Sorting
 
   using ::qsort;
+
+  // Binary search
+
+  using ::bsearch;
 }
 
 #endif // __INCLUDE_CXX_CSTDLIB

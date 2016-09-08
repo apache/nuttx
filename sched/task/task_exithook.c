@@ -360,11 +360,12 @@ static inline void task_sigchild(FAR struct tcb_s *ptcb,
       task_exitstatus(ptcb->group, status);
 
 #else /* CONFIG_SCHED_CHILD_STATUS */
+      /* Exit status is not retained.  Just decrement the number of
+       * children from this parent.
+       */
 
-      /* Decrement the number of children from this parent */
-
-      DEBUGASSERT(ptcb->nchildren > 0);
-      ptcb->nchildren--;
+      DEBUGASSERT(ptcb->group != NULL && ptcb->group->tg_nchildren > 0);
+      ptcb->group->tg_nchildren--;
 
 #endif /* CONFIG_SCHED_CHILD_STATUS */
 
@@ -429,13 +430,13 @@ static inline void task_signalparent(FAR struct tcb_s *ctcb, int status)
   sched_lock();
 
   /* Get the TCB of the receiving, parent task.  We do this early to
-   * handle multiple calls to task_signalparent.  ctcb->ppid is set to an
-   * invalid value below and the following call will fail if we are
-   * called again.
+   * handle multiple calls to task_signalparent.  ctcb->group->tg_ppid is
+   * set to an invalid value below and the following call will fail if we
+   * are called again.
    */
 
-  ptcb = sched_gettcb(ctcb->ppid);
-  if (!ptcb)
+  ptcb = sched_gettcb(ctcb->group->tg_ppid);
+  if (ptcb == NULL)
     {
       /* The parent no longer exists... bail */
 
@@ -449,7 +450,7 @@ static inline void task_signalparent(FAR struct tcb_s *ctcb, int status)
 
   /* Forget who our parent was */
 
-  ctcb->ppid = INVALID_PROCESS_ID;
+  ctcb->group->tg_ppid = INVALID_PROCESS_ID;
   sched_unlock();
 #endif
 }

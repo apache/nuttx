@@ -241,15 +241,15 @@
 
 #define IS_VALID(p)                 ((((p)->flags) & N25QXXX_CACHE_VALID) != 0)
 #define IS_DIRTY(p)                 ((((p)->flags) & N25QXXX_CACHE_DIRTY) != 0)
-#define IS_ERASED(p)                ((((p)->flags) & N25QXXX_CACHE_DIRTY) != 0)
+#define IS_ERASED(p)                ((((p)->flags) & N25QXXX_CACHE_ERASED) != 0)
 
 #define SET_VALID(p)                do { (p)->flags |= N25QXXX_CACHE_VALID; } while (0)
 #define SET_DIRTY(p)                do { (p)->flags |= N25QXXX_CACHE_DIRTY; } while (0)
-#define SET_ERASED(p)               do { (p)->flags |= N25QXXX_CACHE_DIRTY; } while (0)
+#define SET_ERASED(p)               do { (p)->flags |= N25QXXX_CACHE_ERASED; } while (0)
 
 #define CLR_VALID(p)                do { (p)->flags &= ~N25QXXX_CACHE_VALID; } while (0)
 #define CLR_DIRTY(p)                do { (p)->flags &= ~N25QXXX_CACHE_DIRTY; } while (0)
-#define CLR_ERASED(p)               do { (p)->flags &= ~N25QXXX_CACHE_DIRTY; } while (0)
+#define CLR_ERASED(p)               do { (p)->flags &= ~N25QXXX_CACHE_ERASED; } while (0)
 
 /* 512 byte sector support **********************************************************/
 
