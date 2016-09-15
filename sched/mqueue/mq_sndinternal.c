@@ -158,7 +158,7 @@ FAR struct mqueue_msg_s *mq_msgalloc(void)
       /* Try the general free list */
 
       mqmsg = (FAR struct mqueue_msg_s *)sq_remfirst(&g_msgfree);
-      if (!mqmsg)
+      if (mqmsg == NULL)
         {
           /* Try the free list reserved for interrupt handlers */
 
@@ -178,16 +178,23 @@ FAR struct mqueue_msg_s *mq_msgalloc(void)
       mqmsg = (FAR struct mqueue_msg_s *)sq_remfirst(&g_msgfree);
       leave_critical_section(flags);
 
-      /* If we cannot a message from the free list, then we will have to allocate one. */
+      /* If we cannot a message from the free list, then we will have to
+       * allocate one.
+       */
 
-      if (!mqmsg)
+      if (mqmsg == NULL)
         {
-          mqmsg = (FAR struct mqueue_msg_s *)kmm_malloc((sizeof (struct mqueue_msg_s)));
+          mqmsg = (FAR struct mqueue_msg_s *)
+            kmm_malloc((sizeof (struct mqueue_msg_s)));
 
-          /* Check if we got an allocated message */
+          /* Check if we allocated the message */
 
-          ASSERT(mqmsg);
-          mqmsg->type = MQ_ALLOC_DYN;
+          if (mqmsg != NULL)
+            {
+              /* Yes... remember that this message was dynamically allocated */
+
+              mqmsg->type = MQ_ALLOC_DYN;
+            }
         }
     }
 

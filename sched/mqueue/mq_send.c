@@ -133,6 +133,15 @@ int mq_send(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio)
 
       leave_critical_section(flags);
       mqmsg = mq_msgalloc();
+
+      /* Check if the message was sucessfully allocated */
+
+      if (mqmsg == NULL)
+        {
+          /* No... mq_msgalloc() does not set the errno value */
+
+          set_errno(ENOMEM);
+        }
     }
   else
     {
@@ -141,6 +150,8 @@ int mq_send(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio)
        * - We are not in an interrupt handler AND
        * - The message queue is full AND
        * - When we tried waiting, the wait was unsuccessful.
+       *
+       * In this case mq_waitsend() has already set the errno value.
        */
 
       leave_critical_section(flags);
@@ -151,9 +162,10 @@ int mq_send(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio)
    * to allocate it) or because the allocation failed.
    */
 
-  if (mqmsg)
+  if (mqmsg != NULL)
     {
-      /* Yes, perform the message send.
+      /* The allocation was successful (implying that we can also send the
+       * message). Perform the message send.
        *
        * NOTE: There is a race condition here: What if a message is added by
        * interrupt related logic so that queue again becomes non-empty.
