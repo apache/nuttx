@@ -194,8 +194,8 @@ int mq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio,
   mqmsg = mq_msgalloc();
   if (mqmsg == NULL)
     {
-      /* Failed to allocate the message. mq_msgalloc() will have set the
-       * errno to ENOMEM.
+      /* Failed to allocate the message. mq_msgalloc() does not set the
+       * errno value.
        */
 
       set_errno(ENOMEM);
