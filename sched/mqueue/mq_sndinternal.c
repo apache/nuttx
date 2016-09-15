@@ -208,7 +208,7 @@ FAR struct mqueue_msg_s *mq_msgalloc(void)
  *   On success, mq_send() returns 0 (OK); on error, -1 (ERROR) is
  *   returned, with errno set to indicate the error:
  *
- *   EAGAIN   The queue was empty, and the O_NONBLOCK flag was set for the
+ *   EAGAIN   The queue was full and the O_NONBLOCK flag was set for the
  *            message queue description referred to by mqdes.
  *   EINTR    The call was interrupted by a signal handler.
  *   ETIMEOUT A timeout expired before the message queue became non-full
