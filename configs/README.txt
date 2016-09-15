@@ -672,6 +672,11 @@ configs/stm32f746g-disco
 configs/stm32f746g-ws
   Waveshare STM32F746 development board featuring the STM32F746IG MCU.
 
+configs/stm32l476-mdk
+  Motorola Mods Development Board (MDK) features  STM32L476ME MCU.
+  The STM32L476ME  is a Cortex-M4 optimised for low-power operation
+  at up to 80MHz operation with 1024Kb Flash memory and 96+32Kb SRAM.
+
 configs/stm32l476vg-disco
   STMicro STM32L476VG_DISCO development board featuring the STM32L476VG
   MCU. The STM32L476VG  is a Cortex-M4 optimised for low-power operation

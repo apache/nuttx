@@ -109,7 +109,7 @@
 #define GPIO_SPI2_SCK    GPIO_SPI2_SCK_2     /* PB13 */
 #define GPIO_SPI2_NSS    GPIO_SPI2_NSS_2     /* PB12 */
 
-/***** BUTTONS ********/
+/* Buttons **************************************************************************/
 /* The board only has one button */
 
 #define BUTTON_POWER       0
@@ -138,9 +138,9 @@ extern "C"
  * Name: stm32l4_boardinitialize
  *
  * Description:
- *   All STM32L4 architectures must provide the following entry point.  This entry point
- *   is called early in the initialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
+ *   All STM32L4 architectures must provide the following entry point.  This entry
+ *   point is called early in the initialization -- after all memory has been
+ *   configured and mapped but before any devices have been initialized.
  *
  ************************************************************************************/
 

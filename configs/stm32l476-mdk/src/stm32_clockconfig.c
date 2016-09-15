@@ -56,11 +56,11 @@
  *
  * Description:
  *   I provided this module when I was doing some debugging of a problem I had with
- *  clocking (it was helpful to do A/B tests).  I'm leaving it here in the config
- *  partially because I expect to have similar problems again as I develop more of
- *  the various peripheral support, but also because it may become necessary in the
- *  end for certain project configurations which have specialized clock configurations
- *  that aren't appropriate to expose in the 'arch' default code.
+ *   clocking (it was helpful to do A/B tests).  I'm leaving it here in the config
+ *   partially because I expect to have similar problems again as I develop more of
+ *   the various peripheral support, but also because it may become necessary in the
+ *   end for certain project configurations which have specialized clock
+ *   configurationsthat aren't appropriate to expose in the 'arch' default code.
  *
  ************************************************************************************/
 

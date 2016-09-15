@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/stm32l476-mdk/scripts/l476rg.ld
+ * configs/stm32l476-mdk/scripts/ld.script
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
