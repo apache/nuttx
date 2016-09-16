@@ -234,6 +234,13 @@ config QENCODER
 	bool "Qencoder"
 	default n
 
+config XEN1210
+	bool "Sensixs XEN1210 Magnetometer"
+	default n
+	select SPI
+	---help---
+		Enable driver support for the Sensixs XEN1210 Magnetometer.
+
 config ZEROCROSS
 	bool "Zero Cross Sensor"
 	default n

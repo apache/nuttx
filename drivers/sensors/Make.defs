@@ -138,6 +138,12 @@ ifeq ($(CONFIG_QENCODER),y)
   CSRCS += qencoder.c
 endif
 
+# Sensixs XEN1210
+
+ifeq ($(CONFIG_XEN1210),y)
+  CSRCS += xen1210.c
+endif
+
 # Zero Cross upper half
 
 ifeq ($(CONFIG_ZEROCROSS),y)
