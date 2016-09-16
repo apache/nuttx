@@ -1,8 +1,8 @@
 /****************************************************************************
- * include/nuttx/modem/u-blox.h
+ * include/nuttx/modem/ioctl.h
  *
- *   Copyright (C) 2016 Vladimir Komendantskiy. All rights reserved.
- *   Author: Vladimir Komendantskiy <vladimir@moixaenergy.com>
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,87 +33,39 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_MODEM_U_BLOX_H
-#define __INCLUDE_NUTTX_MODEM_U_BLOX_H
+#ifndef __INCLUDE_NUTTX_MODEM_IOCTL_H
+#define __INCLUDE_NUTTX_MODEM_IOCTL_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
-
-#include <stdbool.h>
-
-#include <nuttx/modem/ioctl.h>
+#include <nuttx/fs/ioctl.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* See IOCTL definitions in include/nuttx/modem/ioctl.h */
+/* All modem-related IOCTL commands are defined here to assure that they are
+ * globally unique.
+ */
 
-/****************************************************************************
- * Public Types
- ****************************************************************************/
+/* U-Blox Modem IOCTL commands */
 
-struct ubxmdm_regval
-{
-  FAR char name[3];
-  bool val;
-};
+#define MODEM_IOC_POWERON    _MODEMIOC(1)
+#define MODEM_IOC_POWEROFF   _MODEMIOC(2)
+#define MODEM_IOC_RESET      _MODEMIOC(3)
+#define MODEM_IOC_GETSTATUS  _MODEMIOC(4)
 
-struct ubxmdm_status
-{
-  bool on;
-  int register_values_size;
-  FAR struct ubxmdm_regval* register_values;
-};
+/* Unrecognized IOCTL commands are forwarded to the lower half driver.  These
+ * may include the modem commands from include/nuttx/serial/ioctl.h such as
+ * the following:
+ *
+ *   TIOCMGET: Get modem status bits: FAR int
+ *   TIOCMSET: Set modem status bits: FAR const int
+ *   TIOCMBIC: Clear modem bits: FAR const int
+ *   TIOCMBIS: Set modem bits: FAR const int
+ */
 
-struct ubxmdm_lower;
-
-struct ubxmdm_ops
-{
-  CODE int (*poweron)  (FAR struct ubxmdm_lower* lower);
-  CODE int (*poweroff) (FAR struct ubxmdm_lower* lower);
-  CODE int (*reset)    (FAR struct ubxmdm_lower* lower);
-  CODE int (*getstatus)(FAR struct ubxmdm_lower* lower,
-                        FAR struct ubxmdm_status* status);
-  CODE int (*ioctl)    (FAR struct ubxmdm_lower* lower,
-                        int cmd,
-                        unsigned long arg);
-};
-
-struct ubxmdm_lower
-{
-  FAR const struct ubxmdm_ops *ops;
-};
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-/****************************************************************************
- * "Upper-Half" Timer Driver Interfaces
- ****************************************************************************/
-
-FAR void *ubxmdm_register(FAR const char *path,
-                          FAR struct ubxmdm_lower *lower);
-
-void ubxmdm_unregister(FAR void *handle);
-
-#undef EXTERN
-#if defined(__cplusplus)
-}
-#endif
-
-#endif /* __INCLUDE_NUTTX_MODEM_U_BLOX_H */
+#endif /* __INCLUDE_NUTTX_MODEM_IOCTL_H */
