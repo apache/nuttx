@@ -377,7 +377,7 @@
 #define _LOOPIOC(nr)      _IOC(_LOOPBASE,nr)
 
 /* Modem driver ioctl definitions ********************************************/
-/* see nuttx/include/modem/*.h */
+/* see nuttx/include/modem/ioctl.h */
 
 #define _MODEMIOCVALID(c) (_IOC_TYPE(c)==_MODEMBASE)
 #define _MODEMIOC(nr)     _IOC(_MODEMBASE,nr)
