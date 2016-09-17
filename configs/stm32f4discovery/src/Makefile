@@ -96,6 +96,10 @@ ifeq ($(CONFIG_QENCODER),y)
 CSRCS += stm32_qencoder.c
 endif
 
+ifeq ($(CONFIG_XEN1210),y)
+CSRCS += stm32_xen1210.c
+endif
+
 ifeq ($(CONFIG_NSH_LIBRARY),y)
 CSRCS += stm32_appinit.c
 endif
