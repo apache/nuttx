@@ -1,8 +1,8 @@
 /************************************************************************************
- * configs/nanosatc/src/stm32_xen1210.c
+ * configs/stm32f4discovery/src/stm32_xen1210.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Author:  Alan Carvalho de Assis <acassis@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -151,6 +151,7 @@ static struct stm32_xen1210config_s g_xen1210config =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
 /* This is the XEN1210 Interrupt handler */
 
 int xen1210_interrupt(int irq, FAR void *context)
@@ -179,7 +180,8 @@ int xen1210_interrupt(int irq, FAR void *context)
 static int xen1210_attach(FAR struct xen1210_config_s *state,
                            xen1210_handler_t handler, FAR void *arg)
 {
-  FAR struct stm32_xen1210config_s *priv = (FAR struct stm32_xen1210config_s *)state;
+  FAR struct stm32_xen1210config_s *priv =
+    (FAR struct stm32_xen1210config_s *)state;
 
   sninfo("Saving handler %p\n", handler);
   DEBUGASSERT(priv);
@@ -261,7 +263,7 @@ int xen1210_pwm_setup(void)
       /* Define frequency and duty cycle: 2MHz @ 50% */
 
       info.frequency = 2000000; /* 2MHz */
-      info.duty = 32768;        /* this value means 50% */
+      info.duty = 32768;        /* This value means 50% */
 
       /* Initialize PWM */
 
