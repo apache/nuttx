@@ -317,18 +317,7 @@
 #  undef CONFIG_SAMV7_EMAC_REGDEBUG
 #endif
 
-/* EMAC buffer sizes, number of buffers, and number of descriptors ***********
- *
- * REVISIT: The CONFIG_NET_MULTIBUFFER might be useful.  It might be possible
- * to use this option to send and receive messages directly into the DMA
- * buffers, saving a copy.  There might be complications on the receiving
- * side, however, where buffers may wrap and where the size of the received
- * frame will typically be smaller than a full packet.
- */
-
-#ifdef CONFIG_NET_MULTIBUFFER
-#  error CONFIG_NET_MULTIBUFFER must not be set
-#endif
+/* EMAC buffer sizes, number of buffers, and number of descriptors **********/
 
 /* Queue identifiers/indices */
 
@@ -855,6 +844,21 @@ static const struct sam_emacattr_s g_emac0_attr =
 #endif
 };
 
+#ifdef CONFIG_NET_MULTIBUFFER
+/* A single packet buffer is used
+ *
+ * REVISIT:  It might be possible to use this option to send and receive
+ * messages directly into the DMA buffers, saving a copy.  There might be
+ * complications on the receiving side, however, where buffers may wrap
+ * and where the size of the received frame will typically be smaller than
+ * a full packet.
+ */
+
+static uint8_t g_pktbuf0[MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE];
+#endif
+
+/* EMAC0 peripheral state */
+
 static struct sam_emac_s g_emac0;
 #endif
 
@@ -922,6 +926,21 @@ static const struct sam_emacattr_s g_emac1_attr =
   .rxbuffer     = g_emac1_rxbuffer,
 #endif
 };
+
+#ifdef CONFIG_NET_MULTIBUFFER
+/* A single packet buffer is used
+ *
+ * REVISIT:  It might be possible to use this option to send and receive
+ * messages directly into the DMA buffers, saving a copy.  There might be
+ * complications on the receiving side, however, where buffers may wrap
+ * and where the size of the received frame will typically be smaller than
+ * a full packet.
+ */
+
+static uint8_t g_pktbuf1[MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE];
+#endif
+
+/* EMAC1 peripheral state */
 
 static struct sam_emac_s g_emac1;
 #endif
@@ -5081,6 +5100,9 @@ int sam_emac_initialize(int intf)
 {
   struct sam_emac_s *priv;
   const struct sam_emacattr_s *attr;
+#ifdef CONFIG_NET_MULTIBUFFER
+  uint8_t *pktbuf;
+#endif
 #if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
   uint8_t phytype;
 #endif
@@ -5091,6 +5113,10 @@ int sam_emac_initialize(int intf)
     {
       priv    = &g_emac0;
       attr    = &g_emac0_attr;
+
+#ifdef CONFIG_NET_MULTIBUFFER
+      pktbuf  = g_pktbuf0;
+#endif
 
 #if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
       phytype = SAMV7_EMAC0_PHY_TYPE;
@@ -5103,6 +5129,10 @@ int sam_emac_initialize(int intf)
     {
       priv    = &g_emac1;
       attr    = &g_emac1_attr;
+
+#ifdef CONFIG_NET_MULTIBUFFER
+      pktbuf  = g_pktbuf1;
+#endif
 
 #if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
       phytype = SAMV7_EMAC1_PHY_TYPE;
@@ -5119,6 +5149,9 @@ int sam_emac_initialize(int intf)
 
   memset(priv, 0, sizeof(struct sam_emac_s));
   priv->attr          = attr;           /* Save the constant attributes */
+#ifdef CONFIG_NET_MULTIBUFFER
+  priv->dev.d_buf     = pktbuf;         /* Single packet buffer */
+#endif
   priv->dev.d_ifup    = sam_ifup;       /* I/F up (new IP address) callback */
   priv->dev.d_ifdown  = sam_ifdown;     /* I/F down callback */
   priv->dev.d_txavail = sam_txavail;    /* New TX data callback */
