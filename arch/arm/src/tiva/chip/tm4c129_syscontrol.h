@@ -1901,7 +1901,9 @@
 
 /* QE Interface Power Control */
 
-#define SYSCON_PCQEI_P0                (1 << 0)   /* Bit 0: QEI Module 0 Power Control */
+#define SYSCON_PCQEI(n)                (1 << (n)) /* Bit n:  QEI module n Power Control */
+#  define SYSCON_PCQEI_P0              (1 << 0)   /* Bit 0:  QEI Module 0 Power Control */
+#  define SYSCON_PCQEI_P1              (1 << 1)   /* Bit 1:  QEI Module 1 Power Control */
 
 /* EEPROM Power Control */
 
