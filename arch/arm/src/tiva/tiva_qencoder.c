@@ -101,26 +101,26 @@ static int tiva_qe_velocity(struct tiva_qe_s *qe, unsigned long *vel);
 
 static const struct qe_ops_s g_qe_ops =
 {
-  .setup = tiva_qe_setup,
+  .setup    = tiva_qe_setup,
   .shutdown = tiva_qe_shutdown,
   .position = tiva_qe_position,
-  .reset = tiva_qe_reset,
-  .ioctl = tiva_qe_ioctl,
+  .reset    = tiva_qe_reset,
+  .ioctl    = tiva_qe_ioctl,
 };
 
 #ifdef CONFIG_TIVA_QEI0
 static struct tiva_qe_s g_qe0 =
 {
-  .ops    = &g_qe_ops,
-  .id     = 0,
-  .base   = TIVA_QEI0_BASE,
-  .idx    = GPIO_QEI0_IDX,
-  .pha    = GPIO_QEI0_PHA,
-  .phb    = GPIO_QEI0_PHB,
+  .ops      = &g_qe_ops,
+  .id       = 0,
+  .base     = TIVA_QEI0_BASE,
+  .idx      = GPIO_QEI0_IDX,
+  .pha      = GPIO_QEI0_PHA,
+  .phb      = GPIO_QEI0_PHB,
 #  ifdef CONFIG_TIVA_QEI0_PULSES
-  .pulses = CONFIG_TIVA_QEI0_PULSES,
+  .pulses   = CONFIG_TIVA_QEI0_PULSES,
 #  else
-  .pulses = 0,
+  .pulses   = 0,
 #  endif
 };
 #endif
@@ -128,16 +128,16 @@ static struct tiva_qe_s g_qe0 =
 #ifdef CONFIG_TIVA_QEI1
 static struct tiva_qe_s g_qe1 =
 {
-  .ops    = &g_qe_ops,
-  .id     = 1,
-  .base   = TIVA_QEI1_BASE,
-  .idx    = GPIO_QEI1_IDX,
-  .pha    = GPIO_QEI1_PHA,
-  .phb    = GPIO_QEI1_PHB,
+  .ops      = &g_qe_ops,
+  .id       = 1,
+  .base     = TIVA_QEI1_BASE,
+  .idx      = GPIO_QEI1_IDX,
+  .pha      = GPIO_QEI1_PHA,
+  .phb      = GPIO_QEI1_PHB,
 #  ifdef CONFIG_TIVA_QEI1_PULSES
-  .pulses = CONFIG_TIVA_QEI1_PUSLSE,
+  .pulses   = CONFIG_TIVA_QEI1_PUSLSE,
 #  else
-  .pulses = 0,
+  .pulses   = 0,
 #  endif
 };
 #endif
