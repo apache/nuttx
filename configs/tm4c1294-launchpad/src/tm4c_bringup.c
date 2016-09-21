@@ -50,6 +50,7 @@
 
 #include "tiva_i2c.h"
 #include "tiva_pwm.h"
+#include "tiva_qencoder.h"
 #include "tm4c1294-launchpad.h"
 
 /****************************************************************************
@@ -64,8 +65,15 @@
 #  define HAVE_PWM
 #endif
 
+#ifdef CONFIG_TM4C1294_LAUNCHPAD_QEI
+#  define HAVE_QEI
+#endif
+
 #define PWM_PATH_FMT        "/dev/pwm%d"
 #define PWM_PATH_FMTLEN     (10)
+
+#define QEI_PATH_FMT        "/dev/qei%d"
+#define QEI_PATH_FMTLEN     (10)
 
 /****************************************************************************
  * Private Functions
@@ -172,7 +180,7 @@ void tm4c_pwm_register(int channel)
   dev = tiva_pwm_initialize(channel);
   if (dev == NULL)
     {
-      pwmerr("ERROR: Failed to get PWM%d interface\n", channel);
+      _err("ERROR: Failed to get PWM%d interface\n", channel);
     }
   else
     {
@@ -180,7 +188,7 @@ void tm4c_pwm_register(int channel)
       ret = pwm_register(pwm_path, dev);
       if (ret < 0)
         {
-          pwmerr("ERROR: Failed to register PWM%d driver: %d\n",
+          _err("ERROR: Failed to register PWM%d driver: %d\n",
                  channel, ret);
         }
     }
@@ -226,6 +234,62 @@ static void tm4c_pwm(void)
 #endif
 
 /****************************************************************************
+ * Name: tm4c_qei_register
+ *
+ * Description:
+ *   Register a QEI dev file with the upper_level QEI driver.
+ *
+ * Input Parameters:
+ *   id - A number identifying the QEI.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void tm4c_qei_register(int id)
+{
+  FAR struct qe_lowerhalf_s *dev;
+  int ret;
+  char qe_path[QEI_PATH_FMTLEN];
+
+  dev = tiva_qei_initialize(id);
+  if (dev == NULL)
+    {
+      _err("ERROR: Failed to get QEI %d\n", id);
+    }
+  else
+    {
+      snprintf(qe_path, QEI_PATH_FMTLEN, QEI_PATH_FMT, id);
+      ret = qe_register(qe_path, dev);
+      if (ret < 0)
+        {
+          _err("ERROR: Failed to register QEI %d driver: %d\n", id, ret);
+        }
+    }
+}
+
+/****************************************************************************
+ * Name: tm4c_qei
+ *
+ * Description:
+ *   Register QEI drivers for the QEI tool.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_QEI
+static void tm4c_qei(void)
+{
+#ifdef CONFIG_TIVA_QEI0
+  tm4c_qei_register(0);
+#endif
+#ifdef CONFIG_TIVA_QEI1
+  tm4c_qei_register(1);
+#endif
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -251,6 +315,12 @@ int tm4c_bringup(void)
   /* Register PWM drivers */
 
   tm4c_pwm();
+#endif
+
+#ifdef HAVE_QEI
+  /* Register QEI drivers */
+
+  tm4c_qei();
 #endif
 
 #ifdef HAVE_TIMER
