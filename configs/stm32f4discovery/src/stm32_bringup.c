@@ -212,5 +212,9 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_XEN1210
+  ret = xen1210_archinitialize(0);
+#endif
+
   return ret;
 }

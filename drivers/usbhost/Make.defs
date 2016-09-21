@@ -46,6 +46,10 @@ ifeq ($(CONFIG_USBHOST_HUB),y)
 CSRCS += usbhost_hub.c
 endif
 
+ifeq ($(CONFIG_USBHOST_COMPOSITE),y)
+CSRCS += usbhost_composite.c
+endif
+
 ifeq ($(CONFIG_USBHOST_MSC),y)
 CSRCS += usbhost_storage.c
 endif

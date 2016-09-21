@@ -77,13 +77,18 @@
  * NOTE: The TCIOC_SETHANDLER ioctl cannot be supported in the kernel build
  * mode. In that case direct callbacks from kernel space into user space is
  * forbidden.
+ *
+ * NOTE: _TCIOC(0x0001) througn _TCIOC(0x001f) are reserved for use by the
+ * timer driver to assure that the values are unique.  Other timer drivers,
+ * such as the oneshot timer, must not use IOCTL commands in this numeric
+ * range.
  */
 
-#define TCIOC_START      _TCIOC(0x001)
-#define TCIOC_STOP       _TCIOC(0x002)
-#define TCIOC_GETSTATUS  _TCIOC(0x003)
-#define TCIOC_SETTIMEOUT _TCIOC(0x004)
-#define TCIOC_SETHANDLER _TCIOC(0x005)
+#define TCIOC_START      _TCIOC(0x0001)
+#define TCIOC_STOP       _TCIOC(0x0002)
+#define TCIOC_GETSTATUS  _TCIOC(0x0003)
+#define TCIOC_SETTIMEOUT _TCIOC(0x0004)
+#define TCIOC_SETHANDLER _TCIOC(0x0005)
 
 /* Bit Settings *************************************************************/
 /* Bit settings for the struct timer_status_s flags field */

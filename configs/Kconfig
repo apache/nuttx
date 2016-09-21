@@ -936,6 +936,16 @@ config ARCH_BOARD_SPARK
 		(http://www.spark.io).  This board features the STM32103CBT6
 		MCU from STMicro.
 
+config ARCH_BOARD_STM32_BUTTERFLY2
+	bool "Kamami STM32Butterfly2 development board"
+	depends on ARCH_CHIP_STM32F107VC
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	---help---
+		A configuration for the Kamami STM32Butterfly2 development board
+		based on STM32F107VC micro-controler chip with optional ETH
+		board.
+
 config ARCH_BOARD_STM32_TINY
 	bool "STM32-Tiny board"
 	depends on ARCH_CHIP_STM32F103C8
@@ -1047,6 +1057,17 @@ config ARCH_BOARD_STM32L476VG_DISCO
 	---help---
 		STMicro STM32L476VG_DISCO development board featuring the STM32L476VG
 		MCU. The STM32L476VG  is a Cortex-M4 optimised for low-power operation
+		at up to 80MHz operation with 1024Kb Flash memory and 96+32Kb SRAM.
+
+config ARCH_BOARD_STM32L476_MDK
+	bool "Motorola Mods Development Kit (MDK)"
+	depends on ARCH_CHIP_STM32L476RG
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		Motorola Mods Development Board (MDK) features  STM32L476ME MCU.
+		The STM32L476ME  is a Cortex-M4 optimised for low-power operation
 		at up to 80MHz operation with 1024Kb Flash memory and 96+32Kb SRAM.
 
 config ARCH_BOARD_STM32L_DISCOVERY
@@ -1433,6 +1454,7 @@ config ARCH_BOARD
 	default "shenzhou"                 if ARCH_BOARD_SHENZHOU
 	default "skp16c26"                 if ARCH_BOARD_SKP16C26
 	default "spark"                    if ARCH_BOARD_SPARK
+	default "stm32butterfly2"          if ARCH_BOARD_STM32_BUTTERFLY2
 	default "stm32_tiny"               if ARCH_BOARD_STM32_TINY
 	default "stm32f103-minimum"        if ARCH_BOARD_STM32F103_MINIMUM
 	default "stm3210e-eval"            if ARCH_BOARD_STM3210E_EVAL
@@ -1445,6 +1467,7 @@ config ARCH_BOARD
 	default "stm32f746g-disco"         if ARCH_BOARD_STM32F746G_DISCO
 	default "stm32f746-ws"             if ARCH_BOARD_STM32F746_WS
 	default "stm32l476vg-disco"        if ARCH_BOARD_STM32L476VG_DISCO
+	default "stm32l476-mdk"            if ARCH_BOARD_STM32L476_MDK
 	default "stm32ldiscovery"          if ARCH_BOARD_STM32L_DISCOVERY
 	default "stm32vldiscovery"         if ARCH_BOARD_STM32VL_DISCOVERY
 	default "mikroe-stm32f4"           if ARCH_BOARD_MIKROE_STM32F4
@@ -1775,6 +1798,9 @@ endif
 if ARCH_BOARD_SPARK
 source "configs/spark/Kconfig"
 endif
+if ARCH_BOARD_STM32_BUTTERFLY2
+source "configs/stm32butterfly2/Kconfig"
+endif
 if ARCH_BOARD_STM32_TINY
 source "configs/stm32_tiny/Kconfig"
 endif
@@ -1807,6 +1833,9 @@ source "configs/stm32f746-ws/Kconfig"
 endif
 if ARCH_BOARD_STM32L476VG_DISCO
 source "configs/stm32l476vg-disco/Kconfig"
+endif
+if ARCH_BOARD_STM32L476_MDK
+source "configs/stm32l476-mdk/Kconfig"
 endif
 if ARCH_BOARD_STM32L_DISCOVERY
 source "configs/stm32ldiscovery/Kconfig"

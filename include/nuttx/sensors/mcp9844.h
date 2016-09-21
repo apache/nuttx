@@ -41,18 +41,13 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/fs/ioctl.h>
+#include <nuttx/sensors/ioctl.h>
 
 #if defined(CONFIG_I2C) && defined(CONFIG_MCP9844)
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/* IOCTL Commands ***********************************************************/
-
-#define SNIOC_READTEMP      _SNIOC(0x0001)  /* Arg: mcp9844_temp_arg_s* pointer */
-#define SNIOC_SETRESOLUTION _SNIOC(0x0002)  /* Arg: uint16_t value */
 
 /* MCP9844 Register Definitions *********************************************/
 

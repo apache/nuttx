@@ -95,4 +95,4 @@ void sam_wdtinitialize(FAR const char *devpath);
 
 #endif /* __ASSEMBLY__ */
 #endif /* CONFIG_WATCHDOG */
-#endif /* __ARCH_ARM_SRC_STM32_STM32_WDG_H */
+#endif /* __ARCH_ARM_SRC_SAM34_WDT_H */

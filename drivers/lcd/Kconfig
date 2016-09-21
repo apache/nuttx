@@ -285,8 +285,21 @@ config UG9664HSWAG01_POWER
 
 endif
 
+config LCD_SH1106_OLED_132
+	bool "Generic 0.96'' OLED Display Module (SH1106/SSD1306)"
+	default n
+	select LCD_SSD1306
+	---help---
+		0.96'' OLED Display Module, featuring an SH1106, typically advertised as
+		SSD1306. Mostly similar to "UG2864HSWEG01" although it uses the full
+		132x28 pixels.
+
+		Required LCD driver settings:
+		LCD_MAXCONTRAST should be 255, but any value >0 and <=255 will be accepted.
+		LCD_MAXPOWER should be 1:  0=off, 1=on
+
 config LCD_UG2864HSWEG01
-	bool "UG-2864HSWEG01 OLED Display Module"
+	bool "UG-2864HSWEG01 OLED Display Module (SSD1306)"
 	default n
 	select LCD_SSD1306
 	---help---
@@ -301,7 +314,7 @@ config LCD_UG2864HSWEG01
 		SPI_CMDDATA - Include support for cmd/data selection.
 
 config LCD_UG2832HSWEG04
-	bool "UG-2832HSWEG04 OLED Display Module"
+	bool "UG-2832HSWEG04 OLED Display Module (SSD1306)"
 	default n
 	depends on !LCD_UG2864HSWEG01
 	select LCD_SSD1306
@@ -323,22 +336,22 @@ config LCD_SSD1306
 if LCD_SSD1306
 
 choice
-	prompt "UG-2832HSWEG04 Interface"
+	prompt "SSD1306 Interface"
 	default LCD_SSD1306_SPI
 
 config LCD_SSD1306_SPI
-	bool "UG-2832HSWEG04 on SPI Interface"
+	bool "SSD1306 on SPI Interface"
 	select SPI
 	---help---
 		Enables support for the SPI interface.
 
 config LCD_SSD1306_I2C
-	bool "UG-2832HSWEG04 on I2C Interface"
+	bool "SSD1306 on I2C Interface"
 	select I2C
 	---help---
 		Enables support for the I2C interface
 
-endchoice # UG-2832HSWEG04 Interface
+endchoice # SSD1306 Interface
 endif # LCD_SSD1306
 
 if LCD_SSD1306_SPI
@@ -369,13 +382,13 @@ endif # LCD_SSD1306_SPI
 if LCD_SSD1306_I2C
 
 config SSD1306_I2CADDR
-	int "UG-2832HSWEG04 I2C Address"
+	int "SSD1306 I2C Address"
 	default 120
 	---help---
 		I2C Address of SSD1306
 
 config SSD1306_I2CFREQ
-	int "UG-2832HSWEG04 I2C Frequency"
+	int "SSD1306 I2C Frequency"
 	default 400000
 	---help---
 		I2C Frequency to communicate with SSD1306

@@ -210,13 +210,16 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
     }
   else if (idtype == P_PID)
     {
-      /* Get the TCB corresponding to this PID and make sure it is our child. */
+      /* Get the TCB corresponding to this PID and make sure that the
+       * thread it is our child.
+       */
 
       ctcb = sched_gettcb((pid_t)id);
+
 #ifdef HAVE_GROUP_MEMBERS
-      if (!ctcb || ctcb->group->tg_pgid != rtcb->group->tg_gid)
+      if (ctcb == NULL || ctcb->group->tg_pgid != rtcb->group->tg_gid)
 #else
-      if (!ctcb || ctcb->ppid != rtcb->pid)
+      if (ctcb == NULL || ctcb->group>tg_ppid != rtcb->pid)
 #endif
         {
           errcode = ECHILD;
@@ -239,7 +242,9 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
         }
     }
 #else
-  if (rtcb->nchildren == 0)
+  /* Child status is not retained. */
+
+  if (rtcb->group->tg_nchildren == 0)
     {
       /* There are no children */
 
@@ -248,13 +253,16 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
     }
   else if (idtype == P_PID)
     {
-      /* Get the TCB corresponding to this PID and make sure it is our child. */
+      /* Get the TCB corresponding to this PID and make sure that the
+       * thread is our child.
+       */
 
       ctcb = sched_gettcb((pid_t)id);
+
 #ifdef HAVE_GROUP_MEMBERS
-      if (!ctcb || ctcb->group->tg_pgid != rtcb->group->tg_gid)
+      if (ctcb == NULL || ctcb->group->tg_pgid != rtcb->group->tg_gid)
 #else
-      if (!ctcb || ctcb->ppid != rtcb->pid)
+      if (ctcb == NULL || ctcb->group->tg_ppid != rtcb->pid)
 #endif
         {
           errcode = ECHILD;
@@ -338,7 +346,7 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
        * instead).
        */
 
-      if (rtcb->nchildren == 0 ||
+      if (rtcb->group->tg_nchildren == 0 ||
           (idtype == P_PID && (ret = kill((pid_t)id, 0)) < 0))
         {
           /* We know that the child task was running okay we stared,

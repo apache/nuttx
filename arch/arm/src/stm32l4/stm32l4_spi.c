@@ -163,7 +163,7 @@ struct stm32l4_spidev_s
   sem_t            exclsem;    /* Held while chip is selected for mutual exclusion */
   uint32_t         frequency;  /* Requested clock frequency */
   uint32_t         actual;     /* Actual clock frequency */
-  int8_t           nbits;      /* Width of word in bits (8 or 16) */
+  uint8_t          nbits;      /* Width of word in bits (4 through 16) */
   uint8_t          mode;       /* Mode 0,1,2,3 */
 };
 
@@ -357,12 +357,6 @@ static struct stm32l4_spidev_s g_spi3dev =
 #endif
 };
 #endif
-
-/*endif?*/
-
-/************************************************************************************
- * Public Data
- ************************************************************************************/
 
 /************************************************************************************
  * Private Functions
@@ -567,22 +561,7 @@ static inline void spi_writebyte(FAR struct stm32l4_spidev_s *priv, uint8_t byte
 
 static inline bool spi_16bitmode(FAR struct stm32l4_spidev_s *priv)
 {
-  uint8_t bits = priv->nbits;
-
-  /* Get the real number of bits */
-
-  if (bits < 0)
-    {
-      bits = -bits;
-    }
-
-  return (bits > 8);
-
-  /* Should we read the hardware regs? seems to be equivalent ~~ sebastien lorquet
-   * (20160413)
-   */
-
-//  return ((spi_getreg(priv, STM32L4_SPI_CR2_OFFSET) & SPI_CR2_DS_MASK) == SPI_CR2_DS_16BIT);
+  return (priv->nbits > 8);
 }
 
 /************************************************************************************
@@ -855,7 +834,8 @@ static inline void spi_dmatxstart(FAR struct stm32l4_spidev_s *priv)
  *
  ************************************************************************************/
 
-static void spi_modifycr(uint32_t addr, FAR struct stm32l4_spidev_s *priv, uint16_t setbits, uint16_t clrbits)
+static void spi_modifycr(uint32_t addr, FAR struct stm32l4_spidev_s *priv,
+                         uint16_t setbits, uint16_t clrbits)
 {
   uint16_t cr;
 
@@ -1117,6 +1097,7 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 
       if (nbits < 4 || nbits > 16)
         {
+          spierr("ERROR: nbits out of range: %d\n", nbits);
           return;
         }
 
@@ -1166,7 +1147,7 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 static int spi_hwfeatures(FAR struct spi_dev_s *dev, spi_hwfeatures_t features)
 {
 #ifdef CONFIG_SPI_BITORDER
-  FAR struct stm32_spidev_s *priv = (FAR struct stm32_spidev_s *)dev;
+  FAR struct stm32l4_spidev_s *priv = (FAR struct stm32l4_spidev_s *)dev;
   uint16_t setbits;
   uint16_t clrbits;
 
@@ -1548,7 +1529,7 @@ static void spi_bus_initialize(FAR struct stm32l4_spidev_s *priv)
   priv->txdma = stm32l4_dmachannel(priv->txch);
   DEBUGASSERT(priv->rxdma && priv->txdma);
 
-  spi_putreg(priv, STM32L4_SPI_CR2_OFFSET, SPI_CR2_RXDMAEN | SPI_CR2_TXDMAEN);
+  spi_modifycr(STM32L4_SPI_CR2_OFFSET, priv, SPI_CR2_RXDMAEN | SPI_CR2_TXDMAEN, 0);
 #endif
 
   /* Enable spi */
@@ -1653,7 +1634,7 @@ FAR struct spi_dev_s *stm32l4_spibus_initialize(int bus)
   else
 #endif
     {
-      spierr("ERROR: Unsupbused SPI bus: %d\n", bus);
+      spierr("ERROR: Unsupported SPI bus: %d\n", bus);
       return NULL;
     }
 

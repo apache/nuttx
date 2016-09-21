@@ -199,18 +199,7 @@
 
 #endif
 
-/* EMAC buffer sizes, number of buffers, and number of descriptors.
- *
- * REVISIT: The CONFIG_NET_MULTIBUFFER might be useful.  It might be possible
- * to use this option to send and receive messages directly into the DMA
- * buffers, saving a copy.  There might be complications on the receiving
- * side, however, where buffers may wrap and where the size of the received
- * frame will typically be smaller than a full packet.
- */
-
-#ifdef CONFIG_NET_MULTIBUFFER
-#  error CONFIG_NET_MULTIBUFFER must not be set
-#endif
+/* EMAC buffer sizes, number of buffers, and number of descriptors. *********/
 
 #define EMAC_RX_UNITSIZE 128                 /* Fixed size for RX buffer  */
 #define EMAC_TX_UNITSIZE CONFIG_NET_ETH_MTU  /* MAX size for Ethernet packet */
@@ -300,6 +289,19 @@ struct sam_emac_s
 /* The driver state singleton */
 
 static struct sam_emac_s g_emac;
+
+#ifdef CONFIG_NET_MULTIBUFFER
+/* A single packet buffer is used
+ *
+ * REVISIT:  It might be possible to use this option to send and receive
+ * messages directly into the DMA buffers, saving a copy.  There might be
+ * complications on the receiving side, however, where buffers may wrap
+ * and where the size of the received frame will typically be smaller than
+ * a full packet.
+ */
+
+static uint8_t g_pktbuf[MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE];
+#endif
 
 #ifdef CONFIG_SAMA5_EMACA_PREALLOCATE
 /* Preallocated data */
@@ -3484,6 +3486,9 @@ int sam_emac_initialize(void)
   /* Initialize the driver structure */
 
   memset(priv, 0, sizeof(struct sam_emac_s));
+#ifdef CONFIG_NET_MULTIBUFFER
+  priv->dev.d_buf     = g_pktbuf;        /* Single packet buffer */
+#endif
   priv->dev.d_ifup    = sam_ifup;        /* I/F up (new IP address) callback */
   priv->dev.d_ifdown  = sam_ifdown;      /* I/F down callback */
   priv->dev.d_txavail = sam_txavail;     /* New TX data callback */

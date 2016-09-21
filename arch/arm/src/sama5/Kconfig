@@ -3866,7 +3866,6 @@ endif # SAMA5_TC2
 
 config SAMA5_ONESHOT
 	bool "TC one-shot wrapper"
-	depends on SAMA5_FREERUN
 	default n if !SCHED_TICKLESS
 	default y if SCHED_TICKLESS
 	---help---

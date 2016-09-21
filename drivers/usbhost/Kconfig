@@ -77,6 +77,22 @@ config USBHOST_HUB_POLLMSEC
 
 endif # USBHOST_HUB
 
+config USBHOST_COMPOSITE
+	bool "Composite device support"
+	default n
+	---help---
+		Build in USB host support for connected composite devices
+
+config USBHOST_COMPOSITE_STRICT
+	bool "Strict composite membership"
+	default n
+	depends on USBHOST_COMPOSITE
+	---help---
+		If selected, then the composite device will not be enumerated unless
+		every member class in the composite is supported.  If not selected
+		then, for example, you could use the CDC/ACM interface of the device
+		with no support for the other interfaces.
+
 config USBHOST_MSC
 	bool "Mass Storage Class Support"
 	default n

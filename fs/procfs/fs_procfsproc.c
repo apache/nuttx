@@ -447,7 +447,7 @@ static ssize_t proc_status(FAR struct proc_file_s *procfile,
                         group->tg_pgid);
 #else
   linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s%d\n", "PPID:",
-                        tcb->ppid);
+                        group->tg_ppid);
 #endif
 
   copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining, &offset);

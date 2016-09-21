@@ -562,6 +562,12 @@ Where <subdir> is one of the following:
     builtin applications is enabled, but in the base configuration no
     builtin applications are selected.
 
+  jlx12864g:
+  ---------
+    This is a config example to use the JLX12864G-086 LCD module. To use this
+    LCD you need to connect PA5 (SPI1 CLK) to SCK; PA7 (SPI1 MOSI) to SDA; PA4
+    to CS; PA3 to RST; PA2 to RS.
+
   usbnsh:
   -------
 

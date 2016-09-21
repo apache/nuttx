@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/stdlib.h
  *
- *   Copyright (C) 2007-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -143,9 +143,9 @@ extern "C"
 void      srand(unsigned int seed);
 int       rand(void);
 
+#ifndef CONFIG_DISABLE_ENVIRON
 /* Environment variable support */
 
-#ifndef CONFIG_DISABLE_ENVIRON
 FAR char **get_environ_ptr(void);
 FAR char *getenv(FAR const char *name);
 int       putenv(FAR const char *string);
@@ -169,6 +169,16 @@ int       on_exit(CODE void (*func)(int, FAR void *), FAR void *arg);
 
 void      _exit(int status); /* See unistd.h */
 #define   _Exit(s) _exit(s)
+
+/* System() command is not implemented in the NuttX libc because it is so
+ * entangled with shell logic.  There is an experimental version at
+ * apps/system/system.  system() is prototyped here, however, for
+ * standards compatibility.
+ */
+
+#ifndef __KERNEL__
+int       system(FAR char *cmd);
+#endif
 
 /* String to binary conversions */
 

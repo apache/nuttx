@@ -43,7 +43,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/fs/ioctl.h>
+#include <nuttx/sensors/ioctl.h>
 
 #if defined(CONFIG_I2C) && defined(CONFIG_LM92)
 
@@ -60,24 +60,6 @@
 #define CONFIG_LM92_ADDR1 (CONFIG_LM92_BASEADDR + 1)
 #define CONFIG_LM92_ADDR2 (CONFIG_LM92_BASEADDR + 2)
 #define CONFIG_LM92_ADDR3 (CONFIG_LM92_BASEADDR + 3)
-
-/* IOCTL Commands ***********************************************************/
-
-#define SNIOC_READCONF     _SNIOC(0x0001) /* Arg: uint8_t* pointer */
-#define SNIOC_WRITECONF    _SNIOC(0x0002) /* Arg: uint8_t value */
-#define SNIOC_SHUTDOWN     _SNIOC(0x0003) /* Arg: None */
-#define SNIOC_POWERUP      _SNIOC(0x0004) /* Arg: None */
-#define SNIOC_FAHRENHEIT   _SNIOC(0x0005) /* Arg: None */
-#define SNIOC_CENTIGRADE   _SNIOC(0x0006) /* Arg: None */
-#define SNIOC_READTHYS     _SNIOC(0x0007) /* Arg: b16_t* pointer */
-#define SNIOC_WRITETHYS    _SNIOC(0x0008) /* Arg: b16_t value */
-#define SNIOC_READTCRIT    _SNIOC(0x0009) /* Arg: b16_t* pointer */
-#define SNIOC_WRITETCRIT   _SNIOC(0x000a) /* Arg: b16_t value */
-#define SNIOC_READTLOW     _SNIOC(0x000b) /* Arg: b16_t* pointer */
-#define SNIOC_WRITETLOW    _SNIOC(0x000c) /* Arg: b16_t value */
-#define SNIOC_READTHIGH    _SNIOC(0x000d) /* Arg: b16_t* pointer */
-#define SNIOC_WRITETHIGH   _SNIOC(0x000e) /* Arg: b16_t value */
-#define SNIOC_READID       _SNIOC(0x000f) /* Arg: uint16_t* pointer */
 
 /* LM92 Register Definitions ***********************************************/
 /* LM92 Register Addresses */

@@ -2888,6 +2888,7 @@ static void stm32_gint_disconnected(FAR struct stm32_usbhost_s *priv)
       stm32_chan_freeall(priv);
 
       priv->rhport.hport.speed = USB_SPEED_FULL;
+      priv->rhport.hport.funcaddr = 0;
 
       /* Notify any waiters that there is a change in the connection state */
 

@@ -41,7 +41,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/fs/ioctl.h>
+#include <nuttx/sensors/ioctl.h>
 
 #if defined(CONFIG_I2C) && defined(CONFIG_I2C_LM75)
 
@@ -62,19 +62,6 @@
 #define CONFIG_LM75_ADDR5 (CONFIG_LM75_BASEADDR + 5)
 #define CONFIG_LM75_ADDR6 (CONFIG_LM75_BASEADDR + 6)
 #define CONFIG_LM75_ADDR7 (CONFIG_LM75_BASEADDR + 7)
-
-/* IOCTL Commands ***********************************************************/
-
-#define SNIOC_READCONF     _SNIOC(0x0001) /* Arg: uint8_t* pointer */
-#define SNIOC_WRITECONF    _SNIOC(0x0002) /* Arg: uint8_t value */
-#define SNIOC_SHUTDOWN     _SNIOC(0x0003) /* Arg: None */
-#define SNIOC_POWERUP      _SNIOC(0x0004) /* Arg: None */
-#define SNIOC_FAHRENHEIT   _SNIOC(0x0005) /* Arg: None */
-#define SNIOC_CENTIGRADE   _SNIOC(0x0006) /* Arg: None */
-#define SNIOC_READTHYS     _SNIOC(0x0007) /* Arg: b16_t* pointer */
-#define SNIOC_WRITETHYS    _SNIOC(0x0008) /* Arg: b16_t value */
-#define SNIOC_READTOS      _SNIOC(0x0009) /* Arg: b16_t* pointer */
-#define SNIOC_WRITETOS     _SNIOC(0x000a) /* Arg: b16_t value */
 
 /* LM-75 Register Definitions ***********************************************/
 /* LM-75 Registers addresses */

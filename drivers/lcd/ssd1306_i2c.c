@@ -42,6 +42,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <debug.h>
+#include <string.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/i2c/i2c_master.h>
@@ -50,6 +51,10 @@
 #include "ssd1306.h"
 
 #if defined(CONFIG_LCD_SSD1306) && defined(CONFIG_LCD_SSD1306_I2C)
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: ssd1306_sendbyte
@@ -67,7 +72,7 @@ void ssd1306_sendbyte(FAR struct ssd1306_dev_s *priv, uint8_t regval)
    */
 
   struct i2c_msg_s msg;
-  uint8_t txbuffer[1];
+  uint8_t txbuffer[2];
   int ret;
 
 #ifdef CONFIG_LCD_SSD1306_REGDEBUG
@@ -78,7 +83,8 @@ void ssd1306_sendbyte(FAR struct ssd1306_dev_s *priv, uint8_t regval)
    * address followed by one byte of data.
    */
 
-  txbuffer[0] = regval;
+  txbuffer[0]   = 0x00;
+  txbuffer[1]   = regval;
 
   /* Setup 8-bit SSD1306 address write message */
 
@@ -86,8 +92,8 @@ void ssd1306_sendbyte(FAR struct ssd1306_dev_s *priv, uint8_t regval)
   msg.addr      = priv->addr;              /* 7-bit address */
   msg.flags     = 0;                       /* Write transaction, beginning with START */
   msg.buffer    = txbuffer;                /* Transfer from this address */
-  msg.length    = 1;                       /* Send one byte following the address
-                                            * (then STOP) */
+  msg.length    = 2;                       /* Send two bytes following the address
+                                            * then STOP */
 
   /* Perform the transfer */
 
@@ -108,26 +114,34 @@ void ssd1306_sendbyte(FAR struct ssd1306_dev_s *priv, uint8_t regval)
 
 void ssd1306_sendblk(FAR struct ssd1306_dev_s *priv, uint8_t *data, uint8_t len)
 {
-  /* 8-bit data read sequence:
-   *
-   *  Start - I2C_Write_Address - SSD1306_Reg_Address - SSD1306_Write_Data - STOP
-   */
-
-  struct i2c_msg_s msg;
+  struct i2c_msg_s msg[2];
+  uint8_t transfer_mode;
   int ret;
 
-  /* Setup 8-bit SSD1306 address write message */
+  /* 8-bit data read sequence:
+   *
+   *  Start - I2C_Write_Address - Data transfer select - SSD1306_Write_Data - STOP
+   */
 
-  msg.frequency = CONFIG_SSD1306_I2CFREQ;  /* I2C frequency */
-  msg.addr      = priv->addr;              /* 7-bit address */
-  msg.flags     = 0;                       /* Write transaction, beginning with START */
-  msg.buffer    = data;                    /* Transfer from this address */
-  msg.length    = len;                     /* Send one byte following the address
-                                            * (then STOP) */
+  /* Send the SSD1306 register address (with no STOP) */
+  
+  transfer_mode    = 0x40;                    /* Select data transfer */
 
-  /* Perform the transfer */
+  msg[0].frequency = CONFIG_SSD1306_I2CFREQ;  /* I2C frequency */
+  msg[0].addr      = priv->addr;              /* 7-bit address */
+  msg[0].flags     = 0;                       /* Write transaction, beginning with START */
+  msg[0].buffer    = &transfer_mode;          /* Transfer mode send */
+  msg[0].length    = 1;                       /* Send the one byte register address */
 
-  ret = I2C_TRANSFER(priv->i2c, &msg, 1);
+  /* Followed by the SSD1306 write data (with no RESTART, then STOP) */
+
+  msg[1].frequency = CONFIG_SSD1306_I2CFREQ;  /* I2C frequency */
+  msg[1].addr      = priv->addr;              /* 7-bit address */
+  msg[1].flags     = I2C_M_NORESTART;         /* Write transaction with no RESTART */
+  msg[1].buffer    = data;                    /* Transfer from this address */
+  msg[1].length    = len;                     /* Send the data, then STOP */
+
+  ret = I2C_TRANSFER(priv->i2c, msg, 2);
   if (ret < 0)
     {
       snerr("ERROR: I2C_TRANSFER failed: %d\n", ret);
@@ -135,3 +149,4 @@ void ssd1306_sendblk(FAR struct ssd1306_dev_s *priv, uint8_t *data, uint8_t len)
 }
 
 #endif /* CONFIG_LCD_SSD1306 &7 CONFIG_LCD_SSD1306_I2C */
+

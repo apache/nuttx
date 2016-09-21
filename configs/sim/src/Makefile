@@ -72,5 +72,4 @@ else
 endif
 endif
 
-
 include $(TOPDIR)/configs/Board.mk

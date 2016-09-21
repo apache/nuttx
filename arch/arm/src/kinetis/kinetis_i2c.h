@@ -1,8 +1,8 @@
 /****************************************************************************
- * include/wireless/mfrc522.h
+ * arch/arm/src/kinetis/kinetis_i2c.h
  *
- *   Copyright(C) 2016 Uniquix Ltda. All rights reserved.
- *   Author: Alan Carvalho de Assis <acassis@gmail.com>
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Author:  Matias v01d <phreakuencies@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,94 +23,65 @@
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
  * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
  * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES(INCLUDING,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
  * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
  * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
  * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_WIRELESS_MFRC522_H
-#define __INCLUDE_NUTTX_WIRELESS_MFRC522_H
+#ifndef __ARCH_ARM_SRC_KINETIS_KINETIS_I2C_H
+#define __ARCH_ARM_SRC_KINETIS_KINETIS_I2C_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/spi/spi.h>
-#include <nuttx/irq.h>
-#include <sys/ioctl.h>
-#include <nuttx/wireless/wireless.h>
+#include <nuttx/i2c/i2c_master.h>
+#include "chip/kinetis_i2c.h"
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Public Function Prototypes
  ****************************************************************************/
 
-#define MFRC522_MIFARE_ISO14443A          (0x00)
-
-/* IOCTL Commands ***********************************************************/
-
-#define MFRC522IOC_GET_PICC_UID           _WLIOC_USER(0x0001)
-#define MFRC522IOC_GET_STATE              _WLIOC_USER(0x0002)
-
 /****************************************************************************
- * Public Types
- ****************************************************************************/
-
-enum mfrc522_state_e
-{
-  MFRC522_STATE_NOT_INIT,
-  MFRC522_STATE_IDLE,
-  MFRC522_STATE_CMD_SENT,
-  MFRC522_STATE_DATA_READY,
-};
-
-struct mfrc522_dev_s;
-
-struct picc_uid_s
-{
-  uint8_t  size;         /* Number of bytes in the UID. 4, 7 or 10 */
-  uint8_t  uid_data[10];
-  uint8_t  sak;          /* The SAK (Select Acknowledge) return by the PICC */
-};
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-/****************************************************************************
- * Name: mfrc522_register
+ * Name: kinetis_i2cbus_initialize
  *
  * Description:
- *   Register the MFRC522 character device as 'devpath'
+ *   Initialize the selected I2C port. And return a unique instance of struct
+ *   struct i2c_master_s.  This function may be called to obtain multiple
+ *   instances of the interface, each of which may be set up with a
+ *   different frequency and slave address.
  *
- * Input Parameters:
- *   devpath - The full path to the driver to register. E.g., "/dev/rfid0"
- *   spi     - An instance of the SPI interface to use to communicate with MFRC522
- *   config  - Device persistent board data
+ * Input Parameter:
+ *   Port number (for hardware that has multiple I2C interfaces)
  *
  * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
+ *   Valid I2C device structure reference on succcess; a NULL on failure
  *
  ****************************************************************************/
 
-int mfrc522_register(FAR const char *devpath, FAR struct spi_dev_s *spi);
+FAR struct i2c_master_s *kinetis_i2cbus_initialize(int port);
 
-#undef EXTERN
-#ifdef __cplusplus
-}
-#endif
+/****************************************************************************
+ * Name: kinetis_i2cbus_uninitialize
+ *
+ * Description:
+ *   De-initialize the selected I2C port, and power down the device.
+ *
+ * Input Parameter:
+ *   Device structure as returned by the lpc43_i2cbus_initialize()
+ *
+ * Returned Value:
+ *   OK on success, ERROR when internal reference count mismatch or dev
+ *   points to invalid hardware device.
+ *
+ ****************************************************************************/
 
-#endif /* __INCLUDE_NUTTX_WIRELESS_MFRC522_H */
+int kinetis_i2cbus_uninitialize(FAR struct i2c_master_s *dev);
+
+#endif /* __ARCH_ARM_SRC_KINETIS_KINETIS_I2C_H */

@@ -51,6 +51,7 @@
 #include <errno.h>
 
 #include <nuttx/lib/lib.h>
+#include <nuttx/lib/xorshift128.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/drivers/drivers.h>
 
@@ -66,26 +67,20 @@
 #endif
 
 #ifdef CONFIG_DEV_URANDOM_XORSHIFT128
-#  define PRNG() xorshift128()
+#  define PRNG() do_xorshift128()
 #else /* CONFIG_DEV_URANDOM_CONGRUENTIAL */
-#  define PRNG() congruential()
+#  define PRNG() do_congruential()
 #endif
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
-typedef union
+union xorshift128_state_u
 {
-  struct
-    {
-      uint32_t x;
-      uint32_t y;
-      uint32_t z;
-      uint32_t w;
-    };
+  struct xorshift128_state_s state;
   uint8_t u[16];
-} xorshift128_state_t;
+};
 
 /****************************************************************************
  * Private Function Prototypes
@@ -106,7 +101,7 @@ static int devurand_poll(FAR struct file *filep, FAR struct pollfd *fds,
  * Private Data
  ****************************************************************************/
 
-static const struct file_operations devurand_fops =
+static const struct file_operations g_urand_fops =
 {
   NULL,                         /* open */
   NULL,                         /* close */
@@ -123,7 +118,7 @@ static const struct file_operations devurand_fops =
 };
 
 #ifdef CONFIG_DEV_URANDOM_XORSHIFT128
-static xorshift128_state_t prng;
+static union xorshift128_state_u g_prng;
 #endif
 
 /****************************************************************************
@@ -131,34 +126,22 @@ static xorshift128_state_t prng;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: xorshift128
+ * Name: do_xorshift128
  ****************************************************************************/
 
 #ifdef CONFIG_DEV_URANDOM_XORSHIFT128
-static uint32_t xorshift128(void)
+static inline uint32_t do_xorshift128(void)
 {
-  uint32_t t = prng.x;
-
-  t ^= t << 11;
-  t ^= t >> 8;
-
-  prng.x = prng.y;
-  prng.y = prng.z;
-  prng.z = prng.w;
-
-  prng.w ^= prng.w >> 19;
-  prng.w ^= t;
-
-  return prng.w;
+  return xorshift128(&g_prng.state);
 }
 #endif
 
 /****************************************************************************
- * Name: congruential
+ * Name: do_congruential
  ****************************************************************************/
 
 #ifdef CONFIG_DEV_URANDOM_CONGRUENTIAL
-static uint32_t congruential(void)
+static inline uint32_t do_congruential(void)
 {
   /* REVISIT:  We could probably generate a 32-bit value with a single
    * call to nrand().
@@ -246,8 +229,8 @@ static ssize_t devurand_write(FAR struct file *filep, FAR const char *buffer,
   srand(seed);
   return len;
 #else
-  len = min(len, sizeof(prng.u));
-  memcpy(&prng.u, buffer, len);
+  len = min(len, sizeof(g_prng.u));
+  memcpy(&g_prng.u, buffer, len);
   return len;
 #endif
 }
@@ -287,18 +270,18 @@ static int devurand_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
 void devurandom_register(void)
 {
+  /* Seed the PRNG */
+
 #ifdef CONFIG_DEV_URANDOM_CONGRUENTIAL
   srand(10197);
 #else
-  /* Seed the PRNG */
-
-  prng.w = 97;
-  prng.x = 101;
-  prng.y = prng.w << 17;
-  prng.z = prng.x << 25;
+  g_prng.state.w = 97;
+  g_prng.state.x = 101;
+  g_prng.state.y = g_prng.state.w << 17;
+  g_prng.state.z = g_prng.state.x << 25;
 #endif
 
-  (void)register_driver("/dev/urandom", &devurand_fops, 0666, NULL);
+  (void)register_driver("/dev/urandom", &g_urand_fops, 0666, NULL);
 }
 
 #endif /* CONFIG_DEV_URANDOM && CONFIG_DEV_URANDOM_ARCH */

@@ -165,6 +165,10 @@ ssize_t write(int fd, FAR const void *buf, size_t nbytes);
 ssize_t pread(int fd, FAR void *buf, size_t nbytes, off_t offset);
 ssize_t pwrite(int fd, FAR const void *buf, size_t nbytes, off_t offset);
 
+/* Check if a file descriptor corresponds to a terminal I/O file */
+
+int     isatty(int fd);
+
 /* Memory management */
 
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_MM_PGALLOC) && \

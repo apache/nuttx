@@ -55,14 +55,6 @@ ifeq ($(CONFIG_WL_CC3000),y)
 include wireless$(DELIM)cc3000$(DELIM)Make.defs
 endif
 
-ifeq ($(CONFIG_WL_MFRC522),y)
-CSRCS += mfrc522.c
-endif
-
-ifeq ($(CONFIG_WL_PN532),y)
-CSRCS += pn532.c
-endif
-
 # Include wireless devices build support
 
 DEPPATH += --dep-path wireless

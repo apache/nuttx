@@ -34,10 +34,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Compilation Switches
- ****************************************************************************/
-
-/****************************************************************************
  * Included Files
  ****************************************************************************/
 
@@ -64,14 +60,13 @@
 
 #ifdef CONFIG_ZEROCROSS
 
-#ifdef CONFIG_DISABLE_SIGNALS
-#error "This driver needs SIGNAL support, remove CONFIG_DISABLE_SIGNALS"
-#endif
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Debug ********************************************************************/
+
+#ifdef CONFIG_DISABLE_SIGNALS
+#  error "This driver needs SIGNAL support, remove CONFIG_DISABLE_SIGNALS"
+#endif
 
 /****************************************************************************
  * Private Type Definitions
@@ -132,14 +127,17 @@ static void    zerocross_interrupt(FAR const struct zc_lowerhalf_s *lower,
 
 static const struct file_operations g_zcops =
 {
-  zc_open,  /* open */
-  zc_close, /* close */
-  zc_read,  /* read */
-  zc_write, /* write */
+  zc_open,   /* open */
+  zc_close,  /* close */
+  zc_read,   /* read */
+  zc_write,  /* write */
   0,         /* seek */
-  zc_ioctl  /* ioctl */
+  zc_ioctl   /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
   , 0        /* poll */
+#endif
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , 0        /* unlink */
 #endif
 };
 
@@ -467,7 +465,7 @@ static int zc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       default:
         {
-          sninfo("Forwarding unrecognized cmd: %d arg: %ld\n", cmd, arg);
+          snerr("ERROR: Unrecognized cmd: %d arg: %ld\n", cmd, arg);
           ret = -ENOTTY;
         }
         break;
@@ -485,7 +483,7 @@ static int zc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  * Name: zc_register
  *
  * Description:
- *   Register the Zero Cross lower half device as 'devpath'
+ *   Register the Zero Cross character device as 'devpath'
  *
  * Input Parameters:
  *   devpath - The full path to the driver to register. E.g., "/dev/zc0"

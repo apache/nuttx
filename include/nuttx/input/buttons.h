@@ -200,6 +200,19 @@ extern "C"
 int btn_register(FAR const char *devname,
                  FAR const struct btn_lowerhalf_s *lower);
 
+/****************************************************************************
+ * Name: btn_lower_initialize
+ *
+ * Description:
+ *   Initialize the generic button lower half driver, bind it and register
+ *   it with the upper half button driver as devname.
+ *
+ ****************************************************************************/
+
+#if CONFIG_BUTTONS_LOWER
+int btn_lower_initialize(FAR const char *devname);
+#endif
+
 #undef EXTERN
 #ifdef __cplusplus
 }

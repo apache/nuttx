@@ -704,7 +704,10 @@ static void stm32_rxdescinit(FAR struct stm32_ethmac_s *priv);
 #if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
 static int  stm32_phyintenable(FAR struct stm32_ethmac_s *priv);
 #endif
+#if defined(CONFIG_STM32_AUTONEG) || defined(CONFIG_NETDEV_PHY_IOCTL) || \
+    defined(CONFIG_ETH0_PHY_DM9161)
 static int  stm32_phyread(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t *value);
+#endif
 static int  stm32_phywrite(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t value);
 #ifdef CONFIG_ETH0_PHY_DM9161
 static inline int stm32_dm9161(FAR struct stm32_ethmac_s *priv);
@@ -1686,12 +1689,6 @@ static void stm32_receive(FAR struct stm32_ethmac_s *priv)
 
           continue;
         }
-
-#ifdef CONFIG_NET_PKT
-  /* When packet sockets are enabled, feed the frame into the packet tap */
-
-   pkt_input(&priv->dev);
-#endif
 
       /* We only accept IP packets of the configured type and ARP packets */
 
@@ -3098,6 +3095,8 @@ static int stm32_phyintenable(struct stm32_ethmac_s *priv)
  *
  ****************************************************************************/
 
+#if defined(CONFIG_STM32_AUTONEG) || defined(CONFIG_NETDEV_PHY_IOCTL) || \
+    defined(CONFIG_ETH0_PHY_DM9161)
 static int stm32_phyread(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t *value)
 {
   volatile uint32_t timeout;
@@ -3134,6 +3133,7 @@ static int stm32_phyread(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t *val
 
   return -ETIMEDOUT;
 }
+#endif
 
 /****************************************************************************
  * Function: stm32_phywrite
@@ -3278,7 +3278,10 @@ static inline int stm32_dm9161(FAR struct stm32_ethmac_s *priv)
 
 static int stm32_phyinit(FAR struct stm32_ethmac_s *priv)
 {
+#ifdef CONFIG_STM32_AUTOGEN
   volatile uint32_t timeout;
+#endif
+
   uint32_t regval;
   uint16_t phyval;
   int ret;

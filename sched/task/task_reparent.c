@@ -190,11 +190,12 @@ int task_reparent(pid_t ppid, pid_t chpid)
     }
 
 #else /* CONFIG_SCHED_CHILD_STATUS */
+  /* Child task exit status is not retained */
 
-  DEBUGASSERT(otcb->nchildren > 0);
+  DEBUGASSERT(ogrp->tg_nchildren > 0);
 
-  otcb->nchildren--;     /* The orignal parent now has one few children */
-  ptcb->nchildren++;     /* The new parent has one additional child */
+  ogrp->tg_nchildren--;  /* The orignal parent now has one few children */
+  pgrp->tg_nchildren++;  /* The new parent has one additional child */
   ret = OK;
 
 #endif /* CONFIG_SCHED_CHILD_STATUS */
@@ -233,7 +234,7 @@ int task_reparent(pid_t ppid, pid_t chpid)
 
   /* Get the PID of the child task's parent (opid) */
 
-  opid = chtcb->ppid;
+  opid = chtcb->group->tg_ppid;
 
   /* Get the TCB of the child task's parent (otcb) */
 
@@ -244,14 +245,14 @@ int task_reparent(pid_t ppid, pid_t chpid)
       goto errout_with_ints;
     }
 
-  /* If new parent task's PID (ppid) is zero, then new parent is the
+  /* If new parent task's PID (tg_ppid) is zero, then new parent is the
    * grandparent will be the new parent, i.e., the parent of the current
    * parent task.
    */
 
   if (ppid == 0)
     {
-      ppid = otcb->ppid;
+      ppid = otcb->group->tg_ppid;
     }
 
   /* Get the new parent task's TCB (ptcb) */
@@ -263,9 +264,9 @@ int task_reparent(pid_t ppid, pid_t chpid)
       goto errout_with_ints;
     }
 
-  /* Then reparent the child */
+  /* Then reparent the child.  The task specified by ppid is the new parent. */
 
-  chtcb->ppid = ppid;  /* The task specified by ppid is the new parent */
+  chtcb->group->tg_ppid = ppid;
 
 #ifdef CONFIG_SCHED_CHILD_STATUS
   /* Remove the child status entry from old parent TCB */
@@ -302,11 +303,12 @@ int task_reparent(pid_t ppid, pid_t chpid)
     }
 
 #else /* CONFIG_SCHED_CHILD_STATUS */
+  /* Child task exit status is not retained */
 
-  DEBUGASSERT(otcb->nchildren > 0);
+  DEBUGASSERT(otcb->group != NULL && otcb->group->tg_nchildren > 0);
 
-  otcb->nchildren--;     /* The orignal parent now has one few children */
-  ptcb->nchildren++;     /* The new parent has one additional child */
+  otcb->group->tg_nchildren--;  /* The orignal parent now has one few children */
+  ptcb->group->tg_nchildren++;  /* The new parent has one additional child */
   ret = OK;
 
 #endif /* CONFIG_SCHED_CHILD_STATUS */

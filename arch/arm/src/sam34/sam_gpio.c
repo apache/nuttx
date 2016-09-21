@@ -118,6 +118,7 @@ static inline int sam_gpiopin(gpio_pinset_t cfgset)
  *     - If glitch filtering is enabled
  *     - If necessary to read the input value on an open drain output (this
  *       may be done in TWI logic to detect hangs on the I2C bus).
+ *     - If necessary to read the input value on peripheral pins.
  *
  ****************************************************************************/
 
@@ -189,6 +190,14 @@ static inline int sam_configinput(uintptr_t base, uint32_t pin,
 
   if ((cfgset & GPIO_CFG_PULLUP) != 0)
     {
+#ifdef GPIO_HAVE_PULLDOWN
+      /* The pull-up on a pin can not be enabled if its pull-down is still
+       * active. Therefore, we need to disable the pull-down first before
+       * enabling the pull-up.
+       */
+
+      putreg32(pin, base + SAM_PIO_PPDDR_OFFSET);
+#endif
       putreg32(pin, base + SAM_PIO_PUER_OFFSET);
     }
   else
@@ -201,6 +210,12 @@ static inline int sam_configinput(uintptr_t base, uint32_t pin,
 
   if ((cfgset & GPIO_CFG_PULLDOWN) != 0)
     {
+      /* The pull-down on a pin can not be enabled if its pull-up is still
+       * active. Therefore, we need to disable the pull-up first before
+       * enabling the pull-down.
+       */
+
+      putreg32(pin, base + SAM_PIO_PUDR_OFFSET);
       putreg32(pin, base + SAM_PIO_PPDER_OFFSET);
     }
   else
@@ -273,6 +288,14 @@ static inline int sam_configoutput(uintptr_t base, uint32_t pin,
 
   if ((cfgset & GPIO_CFG_PULLUP) != 0)
     {
+#ifdef GPIO_HAVE_PULLDOWN
+      /* The pull-up on a pin can not be enabled if its pull-down is still
+       * active. Therefore, we need to disable the pull-down first before
+       * enabling the pull-up.
+       */
+
+      putreg32(pin, base + SAM_PIO_PPDDR_OFFSET);
+#endif
       putreg32(pin, base + SAM_PIO_PUER_OFFSET);
     }
   else
@@ -285,6 +308,12 @@ static inline int sam_configoutput(uintptr_t base, uint32_t pin,
 
   if ((cfgset & GPIO_CFG_PULLDOWN) != 0)
     {
+      /* The pull-down on a pin can not be enabled if its pull-up is still
+       * active. Therefore, we need to disable the pull-up first before
+       * enabling the pull-down.
+       */
+
+      putreg32(pin, base + SAM_PIO_PUDR_OFFSET);
       putreg32(pin, base + SAM_PIO_PPDER_OFFSET);
     }
   else
@@ -344,6 +373,14 @@ static inline int sam_configperiph(uintptr_t base, uint32_t pin,
 
   if ((cfgset & GPIO_CFG_PULLUP) != 0)
     {
+#ifdef GPIO_HAVE_PULLDOWN
+      /* The pull-up on a pin can not be enabled if its pull-down is still
+       * active. Therefore, we need to disable the pull-down first before
+       * enabling the pull-up.
+       */
+
+      putreg32(pin, base + SAM_PIO_PPDDR_OFFSET);
+#endif
       putreg32(pin, base + SAM_PIO_PUER_OFFSET);
     }
   else
@@ -356,6 +393,12 @@ static inline int sam_configperiph(uintptr_t base, uint32_t pin,
 
   if ((cfgset & GPIO_CFG_PULLDOWN) != 0)
     {
+      /* The pull-down on a pin can not be enabled if its pull-up is still
+       * active. Therefore, we need to disable the pull-up first before
+       * enabling the pull-down.
+       */
+
+      putreg32(pin, base + SAM_PIO_PUDR_OFFSET);
       putreg32(pin, base + SAM_PIO_PPDER_OFFSET);
     }
   else

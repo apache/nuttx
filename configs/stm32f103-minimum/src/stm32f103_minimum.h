@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/stm32f103-minimum/src/stm32f103_minimum.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Laurent Latil <laurent@latil.nom.fr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -71,6 +71,15 @@
 #define GPIO_CS_MFRC522 (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
                          GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN4)
 
+#define STM32_LCD_CS    (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                         GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN4)
+
+#define STM32_LCD_RST   (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                         GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN3)
+
+#define STM32_LCD_RS    (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                         GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN2)
+
 /* USB Soft Connect Pullup: PC.13 */
 
 #define GPIO_USB_PULLUP (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
@@ -114,6 +123,17 @@ void stm32_usbinitialize(void);
 int stm32_mfrc522initialize(FAR const char *devpath);
 #endif
 
+/************************************************************************************
+ * Name: stm32_tone_setup
+ *
+ * Description:
+ *   Function used to initialize a PWM and Oneshot timers to Audio Tone Generator.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_AUDIO_TONE
+int stm32_tone_setup(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_STM32F103_MINIMUM_SRC_STM32F103_MINIMUM_H */
-

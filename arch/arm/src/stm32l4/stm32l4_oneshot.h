@@ -118,7 +118,7 @@ extern "C"
  ****************************************************************************/
 
 int stm32l4_oneshot_initialize(struct stm32l4_oneshot_s *oneshot, int chan,
-                             uint16_t resolution);
+                               uint16_t resolution);
 
 /****************************************************************************
  * Name: stm32l4_oneshot_max_delay
@@ -128,7 +128,8 @@ int stm32l4_oneshot_initialize(struct stm32l4_oneshot_s *oneshot, int chan,
  *
  ****************************************************************************/
 
-int stm32l4_oneshot_max_delay(struct stm32l4_oneshot_s *oneshot, uint64_t *usec);
+int stm32l4_oneshot_max_delay(struct stm32l4_oneshot_s *oneshot,
+                              uint64_t *usec);
 
 /****************************************************************************
  * Name: stm32l4_oneshot_start
@@ -151,8 +152,8 @@ int stm32l4_oneshot_max_delay(struct stm32l4_oneshot_s *oneshot, uint64_t *usec)
  ****************************************************************************/
 
 int stm32l4_oneshot_start(struct stm32l4_oneshot_s *oneshot,
-                        oneshot_handler_t handler, void *arg,
-                        const struct timespec *ts);
+                          oneshot_handler_t handler, void *arg,
+                          const struct timespec *ts);
 
 /****************************************************************************
  * Name: stm32l4_oneshot_cancel
@@ -179,7 +180,7 @@ int stm32l4_oneshot_start(struct stm32l4_oneshot_s *oneshot,
  ****************************************************************************/
 
 int stm32l4_oneshot_cancel(struct stm32l4_oneshot_s *oneshot,
-                         struct timespec *ts);
+                           struct timespec *ts);
 
 #undef EXTERN
 #ifdef __cplusplus

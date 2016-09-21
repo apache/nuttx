@@ -44,18 +44,9 @@
 
 #include <nuttx/config.h>
 #include <stdint.h>
-#include <nuttx/fs/ioctl.h>
+#include <nuttx/sensors/ioctl.h>
 
 #if defined(CONFIG_I2C) && defined(CONFIG_SENSOR_KXTJ9)
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-/* IOCTL Commands ***********************************************************/
-
-#define SNIOC_ENABLE      _SNIOC(0x0001) /* Arg: None */
-#define SNIOC_DISABLE     _SNIOC(0x0002) /* Arg: None */
-#define SNIOC_CONFIGURE   _SNIOC(0x0003) /* Arg: enum kxtj9_odr_e value */
 
 /****************************************************************************
  * Public Types
