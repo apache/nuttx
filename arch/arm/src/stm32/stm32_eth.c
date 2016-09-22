@@ -3683,7 +3683,6 @@ static inline void stm32_ethgpioconfig(FAR struct stm32_ethmac_s *priv)
   stm32_configgpio(GPIO_ETH_RMII_RXD1);
   stm32_configgpio(GPIO_ETH_RMII_TXD0);
   stm32_configgpio(GPIO_ETH_RMII_TXD1);
-  /* stm32_configgpio(GPIO_ETH_RMII_TX_CLK); not needed? */
   stm32_configgpio(GPIO_ETH_RMII_TX_EN);
 
 #endif
