@@ -283,22 +283,19 @@ int mount(FAR const char *source, FAR const char *target,
   mountpt_inode = inode_find(target, NULL);
   if (mountpt_inode != NULL)
     {
-      /* Yes... Is is a directory node (i.e., not a driver or other special
-       * node.
+      /* Successfully found.  The reference count on the inode has been
+       * incremented.
+       *
+       * But is it a directory node (i.e., not a driver or other special
+       * node).
        */
 
       if (INODE_IS_SPECIAL(mountpt_inode))
         {
-          ferr("ERROR: target %s exists and is a special nodes\n", target);
+          ferr("ERROR: target %s exists and is a special node\n", target);
           errcode = -ENOTDIR;
-          goto errout_with_semaphore;
+          goto errout_with_inode;
         }
-
-      /* Successfully found.  The reference count on the inode has been
-       * incremented.
-       */
-
-      DEBUGASSERT(mountpt_inode->u.i_mops != NULL);
     }
   else
 #endif
@@ -422,6 +419,9 @@ errout_with_mountpt:
     }
 #endif
 
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+errout_with_inode:
+#endif
   inode_release(mountpt_inode);
   goto errout;
 
