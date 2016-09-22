@@ -441,6 +441,7 @@ static ssize_t proc_status(FAR struct proc_file_s *procfile,
 #ifdef CONFIG_SCHED_HAVE_PARENT
   group = tcb->group;
   DEBUGASSERT(group);
+
 #ifdef HAVE_GROUPID
   linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s%d\n", "Group:",
                         group->tg_pgid);
