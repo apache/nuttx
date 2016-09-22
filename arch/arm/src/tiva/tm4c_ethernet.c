@@ -3757,7 +3757,6 @@ static inline void tiva_phy_initialize(FAR struct tiva_ethmac_s *priv)
   tiva_configgpio(GPIO_EN0_RMII_RXD1);
   tiva_configgpio(GPIO_EN0_RMII_TXD0);
   tiva_configgpio(GPIO_EN0_RMII_TXD1);
-  /* tiva_configgpio(GPIO_EN0_RMII_TX_CLK); not needed? */
   tiva_configgpio(GPIO_EN0_RMII_TX_EN);
 
 #endif
