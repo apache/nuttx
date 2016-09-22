@@ -287,7 +287,7 @@ int mount(FAR const char *source, FAR const char *target,
        * incremented.
        *
        * But is it a directory node (i.e., not a driver or other special
-       * node).
+       * node)?
        */
 
       if (INODE_IS_SPECIAL(mountpt_inode))
