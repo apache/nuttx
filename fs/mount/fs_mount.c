@@ -294,7 +294,8 @@ int mount(FAR const char *source, FAR const char *target,
         {
           ferr("ERROR: target %s exists and is a special node\n", target);
           errcode = -ENOTDIR;
-          goto errout_with_inode;
+          inode_release(mountpt_inode);
+          goto errout_with_semaphore;
         }
     }
   else
@@ -419,9 +420,6 @@ errout_with_mountpt:
     }
 #endif
 
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-errout_with_inode:
-#endif
   inode_release(mountpt_inode);
   goto errout;
 
