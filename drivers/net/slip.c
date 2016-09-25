@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/net/slip.c
  *
- *   Copyright (C) 2011-2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Reference: RFC 1055
@@ -485,8 +485,8 @@ static void slip_txtask(int argc, FAR char *argv[])
           /* Has a half second elapsed since the last timer poll? */
 
           now_ticks = clock_systimer();
-          hsec = (unsigned int)(now_ticks - start_ticks) / TICK_PER_HSEC;
-          if (hsec)
+          hsec = (unsigned int)((now_ticks - start_ticks) / TICK_PER_HSEC);
+          if (hsec > 0)
             {
               /* Yes, perform the timer poll */
 
