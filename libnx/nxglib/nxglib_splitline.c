@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxglib/nxglib_splitline.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -232,6 +232,42 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector,
       traps[1].bot.y  = line.pt2.y;
 
       ginfo("Vertical traps[1]: (%08x,%08x,%d),(%08x,%08x, %d)\n",
+            traps[1].top.x1, traps[1].top.x2, traps[1].top.y,
+            traps[1].bot.x1, traps[1].bot.x2, traps[1].bot.y);
+
+      return 1;
+    }
+  else if (linewidth == 1)
+    {
+      b16_t pixels_per_row;
+
+      /* Close to horizontal line of width 1 */
+
+      pixels_per_row  = itob16(line.pt2.x - line.pt1.x) /
+                        (line.pt2.y - line.pt1.y);
+
+      traps[1].top.x1 = itob16(line.pt1.x);
+      traps[1].top.x2 = traps[1].top.x1 + pixels_per_row;
+      traps[1].top.y  = line.pt1.y;
+
+      traps[1].bot.x2 = itob16(line.pt2.x);
+      traps[1].bot.x1 = traps[1].bot.x2 - pixels_per_row;
+      traps[1].bot.y  = line.pt2.y;
+
+      if (pixels_per_row < 0)
+        {
+          b16_t tmp;
+
+          tmp             = traps[1].top.x2;
+          traps[1].top.x2 = traps[1].top.x1;
+          traps[1].top.x1 = tmp;
+
+          tmp             = traps[1].bot.x2;
+          traps[1].bot.x2 = traps[1].bot.x1;
+          traps[1].bot.x1 = tmp;
+        }
+
+      ginfo("Horizontal traps[1]: (%08x,%08x,%d),(%08x,%08x, %d)\n",
             traps[1].top.x1, traps[1].top.x2, traps[1].top.y,
             traps[1].bot.x1, traps[1].bot.x2, traps[1].bot.y);
 

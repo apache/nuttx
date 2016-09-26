@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/net/slip.c
  *
- *   Copyright (C) 2011-2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Reference: RFC 1055
@@ -434,8 +434,8 @@ static void slip_txtask(int argc, FAR char *argv[])
   FAR struct slip_driver_s *priv;
   unsigned int index = *(argv[1]) - '0';
   net_lock_t flags;
-  systime_t msec_start;
-  systime_t msec_now;
+  systime_t start_ticks;
+  systime_t now_ticks;
   unsigned int hsec;
 
   nerr("index: %d\n", index);
@@ -450,7 +450,7 @@ static void slip_txtask(int argc, FAR char *argv[])
 
   /* Loop forever */
 
-  msec_start = clock_systimer() * MSEC_PER_TICK;
+  start_ticks = clock_systimer();
   for (;  ; )
     {
       /* Wait for the timeout to expire (or until we are signaled by by  */
@@ -484,14 +484,14 @@ static void slip_txtask(int argc, FAR char *argv[])
 
           /* Has a half second elapsed since the last timer poll? */
 
-          msec_now = clock_systimer() * MSEC_PER_TICK;
-          hsec = (unsigned int)(msec_now - msec_start) / (MSEC_PER_SEC / 2);
-          if (hsec)
+          now_ticks = clock_systimer();
+          hsec = (unsigned int)((now_ticks - start_ticks) / TICK_PER_HSEC);
+          if (hsec > 0)
             {
               /* Yes, perform the timer poll */
 
               (void)devif_timer(&priv->dev, slip_txpoll);
-              msec_start += hsec * (MSEC_PER_SEC / 2);
+              start_ticks += hsec * TICK_PER_HSEC;
             }
           else
             {

@@ -171,11 +171,11 @@ static void tm4c_i2ctool(void)
 ****************************************************************************/
 
 #ifdef HAVE_PWM
-void tm4c_pwm_register(int channel)
+static void tm4c_pwm_register(int channel)
 {
   FAR struct pwm_lowerhalf_s *dev;
-  int ret;
   char pwm_path[PWM_PATH_FMTLEN];
+  int ret;
 
   dev = tiva_pwm_initialize(channel);
   if (dev == NULL)
@@ -247,7 +247,7 @@ static void tm4c_pwm(void)
  *
  ****************************************************************************/
 
-void tm4c_qei_register(int id)
+static void tm4c_qei_register(int id)
 {
   FAR struct qe_lowerhalf_s *dev;
   int ret;

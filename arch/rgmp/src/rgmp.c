@@ -56,7 +56,10 @@
 
 int nest_irq = 0;
 
-// the default time is 10ms
+// The default time is 10ms
+// REVISIT: tick time is given by CONFIG_USEC_PER_TICK.  MSEC_PER_TICK may
+// be zero.
+
 #ifdef MSEC_PER_TICK
 const unsigned int rtos_tick_time = MSEC_PER_TICK;
 #else

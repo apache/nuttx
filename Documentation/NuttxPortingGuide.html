@@ -3915,7 +3915,7 @@ void sched_process_timer(void);
   The timer interrupt logic itself is implemented in the
   architecture specific code, but must call the following OS
   function periodically -- the calling interval must be
-  <code>MSEC_PER_TICK</code>.
+  <code>CONFIG_USEC_PER_TICK</code>.
 </p>
 
 <h3><a name="schedtimerexpiration">4.8.4 <code>sched_timer_expiration()</code></a></h3>

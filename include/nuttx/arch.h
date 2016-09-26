@@ -1934,7 +1934,7 @@ void up_cxxinitialize(void);
  *   CONFIG_SCHED_TICKLESS is *not* defined).  The timer interrupt logic
  *   itself is implemented in the architecture specific code, but must call
  *   the following OS function periodically -- the calling interval must
- *   be MSEC_PER_TICK.
+ *   be CONFIG_USEC_PER_TICK.
  *
  ****************************************************************************/
 
