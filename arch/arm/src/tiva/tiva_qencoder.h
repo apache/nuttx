@@ -48,6 +48,7 @@
 
 #define QEIOC_DIRECTION     _QEIOC(QEIOC_USER)
 #define QEIOC_VELOCITY      _QEIOC(QEIOC_USER+1)
+#define QEIOC_PPR           _QEIOC(QEIOC_USER+2)
 
 /****************************************************************************
 * Public Function Prototypes

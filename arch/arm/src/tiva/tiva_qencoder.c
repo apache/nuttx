@@ -72,7 +72,7 @@ struct tiva_qe_s
   uint32_t idx;
   uint32_t pha;
   uint32_t phb;
-  uint32_t pulses;
+  uint32_t maxpos;
 };
 
 /************************************************************************************
@@ -87,13 +87,14 @@ static inline uint32_t tiva_qe_getreg(struct tiva_qe_s *qe,
 static int tiva_qe_setup(FAR struct qe_lowerhalf_s *lower);
 static int tiva_qe_shutdown(FAR struct qe_lowerhalf_s *lower);
 static int tiva_qe_position(FAR struct qe_lowerhalf_s *lower,
-                            FAR int32_t * pos);
+                            FAR int32_t *pos);
 static int tiva_qe_reset(FAR struct qe_lowerhalf_s *lower);
 static int tiva_qe_ioctl(FAR struct qe_lowerhalf_s *lower, int cmd,
                          unsigned long arg);
 
 static int tiva_qe_direction(struct tiva_qe_s *qe, unsigned long *dir);
 static int tiva_qe_velocity(struct tiva_qe_s *qe, unsigned long *vel);
+static int tiva_qe_ppr(struct tiva_qe_s *qe, unsigned long ppr);
 
 /************************************************************************************
  * Private Data
@@ -117,11 +118,7 @@ static struct tiva_qe_s g_qe0 =
   .idx      = GPIO_QEI0_IDX,
   .pha      = GPIO_QEI0_PHA,
   .phb      = GPIO_QEI0_PHB,
-#  ifdef CONFIG_TIVA_QEI0_PULSES
-  .pulses   = CONFIG_TIVA_QEI0_PULSES,
-#  else
-  .pulses   = 0,
-#  endif
+  .maxpos   = 0,
 };
 #endif
 
@@ -134,11 +131,7 @@ static struct tiva_qe_s g_qe1 =
   .idx      = GPIO_QEI1_IDX,
   .pha      = GPIO_QEI1_PHA,
   .phb      = GPIO_QEI1_PHB,
-#  ifdef CONFIG_TIVA_QEI1_PULSES
-  .pulses   = CONFIG_TIVA_QEI1_PUSLSE,
-#  else
-  .pulses   = 0,
-#  endif
+  .maxpos   = 0,
 };
 #endif
 
@@ -201,7 +194,6 @@ static int tiva_qe_setup(FAR struct qe_lowerhalf_s *lower)
   sninfo("setup QEI %d\n", qe->id);
 
   /* Enable GPIO port, GPIO pin type and GPIO alternate function */
-  /* (refer to TM4C1294NC 24.4.2-4) */
 
   ret = tiva_configgpio(qe->idx);
   if (ret < 0)
@@ -224,31 +216,16 @@ static int tiva_qe_setup(FAR struct qe_lowerhalf_s *lower)
       return -1;
     }
 
-  /* Set reset mode */
-  /* (refer to TM4C1294NC 24.4.5.1) */
+  /* Set reset mode (default as INDEX_PULSE) */
 
-  if (qe->pulses == 0)
-    {
-      ctlreg = RESMODE_BY_INDEX_PULSE << TIVA_QEI_CTL_RESMODE;
-    }
-  else
-    {
-      ctlreg = RESMODE_BY_MAXPOS << TIVA_QEI_CTL_RESMODE;
-    }
-
+  ctlreg = RESMODE_BY_INDEX_PULSE << TIVA_QEI_CTL_RESMODE;
   tiva_qe_putreg(qe, TIVA_QEI_CTL_OFFSET, ctlreg);
 
-  /* Set capture mode (PHA_AND_PHB) */
-  /* (refer to TM4C1294NC 24.4.5.1) */
+  /* Set capture mode (default as PHA_AND_PHB) */
 
   ctlreg = tiva_qe_getreg(qe, TIVA_QEI_CTL_OFFSET);
   ctlreg |= CAPMODE_PHA_AND_PHB << TIVA_QEI_CTL_CAPMODE;
   tiva_qe_putreg(qe, TIVA_QEI_CTL_OFFSET, ctlreg);
-
-  /* Set maxpos */
-  /* (refer to TM4C1294NC 24.4.5.2) */
-
-  tiva_qe_putreg(qe, TIVA_QEI_MAXPOS_OFFSET, qe->pulses * 4);
 
   /* Enable velocity capture */
 
@@ -262,11 +239,11 @@ static int tiva_qe_setup(FAR struct qe_lowerhalf_s *lower)
   ctlreg |= VELDIV_1 << TIVA_QEI_CTL_VELDIV;
   tiva_qe_putreg(qe, TIVA_QEI_CTL_OFFSET, ctlreg);
 
-  /* Set period load (1s for TM4C1294NC) */
-  tiva_qe_putreg(qe, TIVA_QEI_LOAD_OFFSET, 120000000);
+  /* Set period load (10ms for TM4C1294NC) */
+
+  tiva_qe_putreg(qe, TIVA_QEI_LOAD_OFFSET, 1200000);
 
   /* Enable the QEI */
-  /* (refer to TM4C1294NC 24.4.6) */
 
   ctlreg = tiva_qe_getreg(qe, TIVA_QEI_CTL_OFFSET);
   ctlreg |= QEI_ENABLE << TIVA_QEI_CTL_ENABLE;
@@ -344,13 +321,12 @@ static int tiva_qe_reset(FAR struct qe_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int tiva_qe_position(FAR struct qe_lowerhalf_s *lower, FAR int32_t * pos)
+static int tiva_qe_position(FAR struct qe_lowerhalf_s *lower, FAR int32_t *pos)
 {
   FAR struct tiva_qe_s *qe = (FAR struct tiva_qe_s *)lower;
 
   sninfo("get position of QEI %d\n", qe->id);
 
-  /* (refer to TM4C1294NC 24.4.8) */
   *pos = (int32_t) tiva_qe_getreg(qe, TIVA_QEI_POS_OFFSET);
 
   return OK;
@@ -387,6 +363,10 @@ static int tiva_qe_ioctl(FAR struct qe_lowerhalf_s *lower, int cmd,
 
     case QEIOC_VELOCITY:
       tiva_qe_velocity(qe, (unsigned long *)arg);
+      break;
+
+    case QEIOC_PPR:
+      tiva_qe_ppr(qe, arg);
       break;
 
     default:
@@ -432,7 +412,7 @@ static int tiva_qe_direction(FAR struct tiva_qe_s *qe, unsigned long *dir)
  * Name: tiva_qe_direction
  *
  * Description:
- *   Return the velocity mesaured by QEI.
+ *   Return the velocity (A/B pulses per second) mesaured by QEI.
  *
  * Input parameters:
  *   qe - A reference to the TIVA QEI structure
@@ -446,7 +426,58 @@ static int tiva_qe_velocity(FAR struct tiva_qe_s *qe, unsigned long *vel)
 {
   sninfo("get direction of QEI %d\n", qe->id);
 
-  *vel = (int32_t) tiva_qe_getreg(qe, TIVA_QEI_SPEED_OFFSET);
+  *vel = (int32_t) tiva_qe_getreg(qe, TIVA_QEI_SPEED_OFFSET) * 100 / 4;
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: tiva_qe_ppr
+ *
+ * Description:
+ *   Set reset mode as MAXPOS and also set maxpos value
+ *
+ * Input parameters:
+ *   qe - A reference to the TIVA QEI structure
+ *   ppr - pulses per round of encoder
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure
+ *
+ ****************************************************************************/
+
+static int tiva_qe_ppr(FAR struct tiva_qe_s *qe, unsigned long ppr)
+{
+  sninfo("set maxpos reset mode and maxpos value of QEI %d\n", qe->id);
+
+  FAR struct qe_lowerhalf_s *lower;
+  uint32_t ctlreg = 0;
+
+  /* Disable the QEI */
+
+  lower = (FAR struct qe_lowerhalf_s *)qe;
+  tiva_qe_shutdown(lower);
+
+  /* maxpos is 4 times of ppr since we set capture mode as PHA_AND_PHB */
+
+  qe->maxpos = ppr * 4;
+
+  /* Set reset mode as MAXPOS */
+
+  ctlreg = tiva_qe_getreg(qe, TIVA_QEI_CTL_OFFSET);
+  ctlreg &= ~(uint32_t)(1 << TIVA_QEI_CTL_RESMODE);
+  ctlreg |= RESMODE_BY_MAXPOS << TIVA_QEI_CTL_RESMODE;
+  tiva_qe_putreg(qe, TIVA_QEI_CTL_OFFSET, ctlreg);
+
+  /* Set maxpos value */
+
+  tiva_qe_putreg(qe, TIVA_QEI_MAXPOS_OFFSET, qe->maxpos);
+
+  /* Enable the QEI */
+
+  ctlreg = tiva_qe_getreg(qe, TIVA_QEI_CTL_OFFSET);
+  ctlreg |= QEI_ENABLE << TIVA_QEI_CTL_ENABLE;
+  tiva_qe_putreg(qe, TIVA_QEI_CTL_OFFSET, ctlreg);
 
   return OK;
 }
@@ -462,7 +493,7 @@ static int tiva_qe_velocity(FAR struct tiva_qe_s *qe, unsigned long *vel)
  *   id - A number identifying certain QEI.
  *
  * Returned Value:
- *   On success, a pointer to the SAMA5 lower half QEI driver is returned.
+ *   On success, a pointer to the lower half QEI driver is returned.
  *   NULL is returned on any failure.
  *
  ************************************************************************************/
@@ -491,7 +522,7 @@ FAR struct qe_lowerhalf_s *tiva_qei_initialize(int id)
       return NULL;
     }
 
-  /* Enable QEI clock (refer to TM4C1294NC 24.4.1) */
+  /* Enable QEI clock */
 
   tiva_qei_enablepwr(qe->id);
   tiva_qei_enableclk(qe->id);
