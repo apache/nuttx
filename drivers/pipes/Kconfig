@@ -2,3 +2,26 @@
 # For a description of the syntax of this configuration file,
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
+
+config DEV_PIPE_MAXSIZE
+	int "Maximum pipe/FIFO size"
+	default 1024 if !DEFAULT_SMALL
+	default 256 if DEFAULT_SMALL
+	---help---
+		Maximum configurable size of a pipe or FIFO at runtime.
+
+config DEV_PIPE_SIZE
+	int "Default pipe size"
+	default 1024 if !DEFAULT_SMALL
+	default 256 if DEFAULT_SMALL
+	---help---
+		Sets the default size of the pipe ringbuffer in bytes.  A value of
+		zero disables pipe support.
+
+config DEV_FIFO_SIZE
+	int "Default FIFO size"
+	default 1024 if !DEFAULT_SMALL
+	default 256 if DEFAULT_SMALL
+	---help---
+		Sets the default size of the FIFO ringbuffer in bytes.  A value of
+		zero disables FIFO support.

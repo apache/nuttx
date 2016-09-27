@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef _INCLUDE_NUTTX_VIDEO_FB_H
-#define _INCLUDE_NUTTX_VIDEO_FB_H
+#ifndef __INCLUDE_NUTTX_VIDIO_FB_H
+#define __INCLUDE_NUTTX_VIDIO_FB_H
 
 /****************************************************************************
  * Included Files
@@ -426,4 +426,4 @@ void up_fbuninitialize(int display);
 }
 #endif
 
-#endif /* _INCLUDE_NUTTX_VIDEO_FB_H */
+#endif /* __INCLUDE_NUTTX_VIDIO_FB_H */

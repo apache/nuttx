@@ -1,7 +1,7 @@
 ############################################################################
 # arch/arm/src/kinetis/Make.defs
 #
-#   Copyright (C) 2011, 2013-2015 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2011, 2013-2016 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -103,7 +103,7 @@ ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CHIP_CSRCS += kinetis_userspace.c kinetis_mpuinit.c
 endif
 
-ifeq ($(CONFIG_GPIO_IRQ),y)
+ifeq ($(CONFIG_KINETIS_GPIOIRQ),y)
 CHIP_CSRCS += kinetis_pinirq.c
 endif
 
@@ -129,6 +129,14 @@ endif
 
 ifeq ($(CONFIG_PWM),y)
 CHIP_CSRCS += kinetis_pwm.c
+endif
+
+ifeq ($(CONFIG_I2C),y)
+CHIP_CSRCS += kinetis_i2c.c
+endif
+
+ifeq ($(CONFIG_RTC),y)
+CHIP_CSRCS += kinetis_rtc.c
 endif
 
 ifeq ($(CONFIG_NET),y)

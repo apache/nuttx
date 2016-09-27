@@ -1222,9 +1222,9 @@ static void stm32_epin_request(FAR struct stm32_usbdev_s *priv,
       return;
     }
 
-  ullinfo("EP%d req=%p: len=%d xfrd=%d zlp=%d\n",
-          privep->epphy, privreq, privreq->req.len,
-          privreq->req.xfrd, privep->zlp);
+  uinfo("EP%d req=%p: len=%d xfrd=%d zlp=%d\n",
+        privep->epphy, privreq, privreq->req.len,
+        privreq->req.xfrd, privep->zlp);
 
   /* Check for a special case:  If we are just starting a request (xfrd==0) and
    * the class driver is trying to send a zero-length packet (len==0).  Then set
@@ -1488,8 +1488,8 @@ static void stm32_epout_complete(FAR struct stm32_usbdev_s *priv,
       return;
     }
 
-  ullinfo("EP%d: len=%d xfrd=%d\n",
-          privep->epphy, privreq->req.len, privreq->req.xfrd);
+  uinfo("EP%d: len=%d xfrd=%d\n",
+        privep->epphy, privreq->req.len, privreq->req.xfrd);
 
   /* Return the completed read request to the class driver and mark the state
    * IDLE.
@@ -1523,7 +1523,7 @@ static inline void stm32_ep0out_receive(FAR struct stm32_ep_s *privep, int bcnt)
   DEBUGASSERT(privep && privep->ep.priv);
   priv = (FAR struct stm32_usbdev_s *)privep->ep.priv;
 
-  ullinfo("EP0: bcnt=%d\n", bcnt);
+  uinfo("EP0: bcnt=%d\n", bcnt);
   usbtrace(TRACE_READ(EP0), bcnt);
 
   /* Verify that an OUT SETUP request as received before this data was
@@ -1616,7 +1616,8 @@ static inline void stm32_epout_receive(FAR struct stm32_ep_s *privep, int bcnt)
       return;
     }
 
-  ullinfo("EP%d: len=%d xfrd=%d\n", privep->epphy, privreq->req.len, privreq->req.xfrd);
+  uinfo("EP%d: len=%d xfrd=%d\n",
+        privep->epphy, privreq->req.len, privreq->req.xfrd);
   usbtrace(TRACE_READ(privep->epphy), bcnt);
 
   /* Get the number of bytes to transfer from the RxFIFO */
@@ -1700,7 +1701,7 @@ static void stm32_epout_request(FAR struct stm32_usbdev_s *priv,
               return;
             }
 
-          ullinfo("EP%d: len=%d\n", privep->epphy, privreq->req.len);
+          uinfo("EP%d: len=%d\n", privep->epphy, privreq->req.len);
 
           /* Ignore any attempt to receive a zero length packet (this really
            * should not happen.
@@ -2494,8 +2495,8 @@ static inline void stm32_ep0out_setup(struct stm32_usbdev_s *priv)
   ctrlreq.index = GETUINT16(priv->ctrlreq.index);
   ctrlreq.len   = GETUINT16(priv->ctrlreq.len);
 
-  ullinfo("type=%02x req=%02x value=%04x index=%04x len=%04x\n",
-          ctrlreq.type, ctrlreq.req, ctrlreq.value, ctrlreq.index, ctrlreq.len);
+  uinfo("type=%02x req=%02x value=%04x index=%04x len=%04x\n",
+        ctrlreq.type, ctrlreq.req, ctrlreq.value, ctrlreq.index, ctrlreq.len);
 
   /* Check for a standard request */
 
@@ -2629,7 +2630,7 @@ static inline void stm32_epout_interrupt(FAR struct stm32_usbdev_s *priv)
           if ((daint & 1) != 0)
             {
               regval = stm32_getreg(STM32_OTGHS_DOEPINT(epno));
-              ulinfo("DOEPINT(%d) = %08x\n", epno, regval);
+              uinfo("DOEPINT(%d) = %08x\n", epno, regval);
               stm32_putreg(0xFF, STM32_OTGHS_DOEPINT(epno));
             }
 
@@ -2859,8 +2860,8 @@ static inline void stm32_epin_interrupt(FAR struct stm32_usbdev_s *priv)
         {
           if ((daint & 1) != 0)
             {
-              ulinfo("DIEPINT(%d) = %08x\n",
-                     epno, stm32_getreg(STM32_OTGHS_DIEPINT(epno)));
+              uinfo("DIEPINT(%d) = %08x\n",
+                    epno, stm32_getreg(STM32_OTGHS_DIEPINT(epno)));
               stm32_putreg(0xFF, STM32_OTGHS_DIEPINT(epno));
             }
 
@@ -4338,7 +4339,7 @@ static int stm32_ep_submit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *
   if (!req || !req->callback || !req->buf || !ep)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_INVALIDPARMS), 0);
-      ullinfo("req=%p callback=%p buf=%p ep=%p\n", req, req->callback, req->buf, ep);
+      uinfo("req=%p callback=%p buf=%p ep=%p\n", req, req->callback, req->buf, ep);
       return -EINVAL;
     }
 #endif

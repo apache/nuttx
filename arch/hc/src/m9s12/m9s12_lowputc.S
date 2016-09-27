@@ -1,5 +1,5 @@
 /**************************************************************************
- * arch/arm/src/m9s12/m9s12_lowputc.S
+ * arch/hc/src/m9s12/m9s12_lowputc.S
  *
  *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

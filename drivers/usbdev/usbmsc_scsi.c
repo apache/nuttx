@@ -200,13 +200,13 @@ static void usbmsc_dumpdata(const char *msg, const uint8_t *buf, int buflen)
 {
   int i;
 
-  lowsyslog(LOG_DEBUG, "%s:", msg);
+  syslog(LOG_DEBUG, "%s:", msg);
   for (i = 0; i < buflen; i++)
     {
-      lowsyslog(LOG_DEBUG, " %02x", buf[i]);
+      syslog(LOG_DEBUG, " %02x", buf[i]);
     }
 
-  lowsyslog(LOG_DEBUG, "\n");
+  syslog(LOG_DEBUG, "\n");
 }
 #endif
 
@@ -2263,7 +2263,9 @@ static int usbmsc_cmdwritestate(FAR struct usbmsc_dev_s *priv)
        * data to be written.
        */
 
+      irqstate_t flags = enter_critical_section();
       privreq = (FAR struct usbmsc_req_s *)sq_remfirst(&priv->rdreqlist);
+      leave_critical_section(flags);
 
       /* If there no request data available, then just return an error.
        * This will cause us to remain in the CMDWRITE state.  When a filled request is
@@ -2537,7 +2539,7 @@ static int usbmsc_cmdstatusstate(FAR struct usbmsc_dev_s *priv)
 
   if (!privreq)
     {
-      usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_CMDSTATUSRDREQLISTEMPTY), 0);
+      usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_CMDSTATUSWRREQLISTEMPTY), 0);
       return -ENOMEM;
     }
 
@@ -2639,8 +2641,8 @@ int usbmsc_scsi_main(int argc, char *argv[])
   uinfo("Waiting to be signalled\n");
   usbmsc_scsi_lock(priv);
   priv->thstate = USBMSC_STATE_STARTED;
-  while ((priv->theventset & USBMSC_EVENT_READY) != 0 &&
-         (priv->theventset & USBMSC_EVENT_TERMINATEREQUEST) != 0)
+  while ((priv->theventset & USBMSC_EVENT_READY) == 0 &&
+         (priv->theventset & USBMSC_EVENT_TERMINATEREQUEST) == 0)
     {
       usbmsc_scsi_wait(priv);
     }

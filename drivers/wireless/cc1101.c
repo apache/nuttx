@@ -97,11 +97,13 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <assert.h>
+
 #include <stdlib.h>
 #include <string.h>
-#include <errno.h>
 #include <stdio.h>
+#include <assert.h>
+#include <errno.h>
+#include <debug.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/wireless/cc1101.h>
@@ -449,6 +451,8 @@ void cc1101_dumpregs(struct cc1101_dev_s * dev, uint8_t addr, uint8_t length)
   uint8_t buf[0x30], i;
 
   cc1101_access(dev, addr, (FAR uint8_t *)buf, length);
+
+  /* REVISIT: printf() should not be used from within the OS */
 
   printf("CC1101[%2x]: ", addr);
   for (i = 0; i < length; i++)
@@ -814,7 +818,7 @@ int cc1101_read(struct cc1101_dev_s * dev, uint8_t * buf, size_t size)
 
       if (nbytes > size || (nbytes <= size && !(buf[nbytes-1]&0x80)))
         {
-          printf("Flushing RX FIFO\n");
+          ninfo("Flushing RX FIFO\n");
           cc1101_strobe(dev, CC1101_SFRX);
         }
 

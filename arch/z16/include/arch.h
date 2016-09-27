@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arch.h
+ * arch/z16/include/arch/arch.h
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -37,8 +37,8 @@
  * only indirectly through nuttx/arch.h
  */
 
-#ifndef __ARCH_ARCH_H
-#define __ARCH_ARCH_H
+#ifndef __ARCH_Z16_INCLUDE_ARCH_H
+#define __ARCH_Z16_INCLUDE_ARCH_H
 
 /****************************************************************************
  * Included Files
@@ -77,5 +77,5 @@ extern "C"
 }
 #endif
 
-#endif /* __ARCH_ARCH_H */
+#endif /* __ARCH_Z16_INCLUDE_ARCH_H */
 

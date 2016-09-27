@@ -1426,11 +1426,6 @@
               <FilePath>../../../../../libc/syslog/lib_syslog.c</FilePath>
             </File>
             <File>
-              <FileName>lib_lowsyslog.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../../../../../libc/syslog/lib_lowsyslog.c</FilePath>
-            </File>
-            <File>
               <FileName>lib_setlogmask.c</FileName>
               <FileType>1</FileType>
               <FilePath>../../../../../libc/syslog/lib_setlogmask.c</FilePath>

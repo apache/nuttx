@@ -33,8 +33,8 @@
  *
  ****************************************************************************************************/
 
-#ifndef _ARCH_ARM_SRC_LPC214X_PLL_H
-#define _ARCH_ARM_SRC_LPC214X_PLL_H
+#ifndef __ARCH_ARM_SRC_LPC214X_LPC214X_PLL_H
+#define __ARCH_ARM_SRC_LPC214X_LPC214X_PLL_H
 
 /****************************************************************************************************
  * Included Files
@@ -102,4 +102,4 @@
  * Public Function Prototypes
  ****************************************************************************************************/
 
-#endif  /* _ARCH_ARM_SRC_LPC214X_PLL_H */
+#endif  /* __ARCH_ARM_SRC_LPC214X_LPC214X_PLL_H */

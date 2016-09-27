@@ -1,0 +1,44 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_RENESAS
+
+choice
+	prompt "Renesas chip selection"
+	default ARCH_CHIP_SH7032
+
+config ARCH_CHIP_SH7032
+	bool "SH7032"
+	select ARCH_SH1
+	---help---
+		Hitachi/Renesas SH7032 (SH1)
+
+config ARCH_CHIP_M30262F8
+	bool "M30262F8"
+	select ARCH_M16C
+	select MM_SMALL
+	---help---
+		Renesas M30262F8 (M16C)
+
+endchoice
+
+config ARCH_SH1
+	bool
+	default n
+
+config ARCH_M16C
+	bool
+	default n
+
+config ARCH_CHIP
+	string
+	default "sh1"		if ARCH_SH1
+	default "m16c"		if ARCH_M16C
+
+source arch/renesas/src/common/Kconfig
+source arch/renesas/src/m16c/Kconfig
+source arch/renesas/src/sh1/Kconfig
+
+endif # ARCH_RENESAS

@@ -261,6 +261,10 @@ configs/fire-stm32v2
   STM32F103VET6 chip.  See http://firestm32.taobao.com .  Version 2 and 3 of
   the boards are supported but only version 2 has been tested.
 
+configs/freedom-k64f
+  This port uses the FreeScale FREEDOM-K64F development board. This board
+  uses the Kinetis K64 MK64FN1M0VLL12 Cortex-M4 MCU.
+
 configs/freedom-kl25z
 configs/freedom-kl26z
   These configurations are for the Freescale Freedom KL25Z and very similar
@@ -437,6 +441,10 @@ configs/olimex-stm32-h407
   toolchain* under Linux or Cygwin. See the http://www.olimex.com for
   further information. This board features the STMicro STM32F407ZGT6 (144
   pins). Contributed by Neil Hancock.
+
+configs/olimex-stm32-e407
+  Olimex STM32 E407 board based on the STMicro STM32F407ZGT6 (144pins).
+  Contributed by Mateusz Szafoni.
 
 configs/olimex-stm32-p107
   This port uses the Olimex STM32-P107 board (STM32F107VC) and a GNU arm-nuttx-elf
@@ -640,6 +648,9 @@ configs/stm3240g-eval
   microcontroller (ARM Cortex-M4 with FPU).  This port uses a GNU Cortex-M4
   toolchain (such as CodeSourcery).
 
+configs/stm32butterfly2
+  Kamami stm32butterfly2 development board with optional ETH phy.
+
 configs/stm32f103-minimum
   Generic STM32F103C8T6 Minimum ARM Development Board.
 
@@ -660,6 +671,11 @@ configs/stm32f746g-disco
 
 configs/stm32f746g-ws
   Waveshare STM32F746 development board featuring the STM32F746IG MCU.
+
+configs/stm32l476-mdk
+  Motorola Mods Development Board (MDK) features  STM32L476ME MCU.
+  The STM32L476ME  is a Cortex-M4 optimised for low-power operation
+  at up to 80MHz operation with 1024Kb Flash memory and 96+32Kb SRAM.
 
 configs/stm32l476vg-disco
   STMicro STM32L476VG_DISCO development board featuring the STM32L476VG

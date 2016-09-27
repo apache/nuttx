@@ -61,7 +61,7 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-#define ArraySize(x) (sizeof((x)) / sizeof((x)[0]))
+#define ARRAYSIZE(x) (sizeof((x)) / sizeof((x)[0]))
 
 #if defined(CONFIG_NUCLEO_SPI1_TEST)
 #  if defined(CONFIG_NUCLEO_SPI1_TEST_MODE0)
@@ -181,7 +181,7 @@ void weak_function stm32_spidev_initialize(void)
 
   /* Configure SPI CS GPIO for output */
 
-  for (i = 0; i < ArraySize(g_spigpio); i++)
+  for (i = 0; i < ARRAYSIZE(g_spigpio); i++)
     {
       stm32_configgpio(g_spigpio[i]);
     }
@@ -390,7 +390,7 @@ int stm32_spidev_bus_test(void)
   SPI_SETFREQUENCY(spi1, CONFIG_NUCLEO_SPI1_TEST_FREQ);
   SPI_SETBITS(spi1, CONFIG_NUCLEO_SPI1_TEST_BITS);
   SPI_SETMODE(spi1, CONFIG_NUCLEO_SPI1_TEST_MODE);
-  SPI_EXCHANGE(spi1, tx, NULL, ArraySize(CONFIG_NUCLEO_SPI_TEST_MESSAGE));
+  SPI_EXCHANGE(spi1, tx, NULL, ARRAYSIZE(CONFIG_NUCLEO_SPI_TEST_MESSAGE));
 #endif
 
 #if defined(CONFIG_NUCLEO_SPI2_TEST)
@@ -407,7 +407,7 @@ int stm32_spidev_bus_test(void)
   SPI_SETFREQUENCY(spi2, CONFIG_NUCLEO_SPI2_TEST_FREQ);
   SPI_SETBITS(spi2, CONFIG_NUCLEO_SPI2_TEST_BITS);
   SPI_SETMODE(spi2, CONFIG_NUCLEO_SPI2_TEST_MODE);
-  SPI_EXCHANGE(spi2, tx, NULL, ArraySize(CONFIG_NUCLEO_SPI_TEST_MESSAGE));
+  SPI_EXCHANGE(spi2, tx, NULL, ARRAYSIZE(CONFIG_NUCLEO_SPI_TEST_MESSAGE));
 #endif
 
 #if defined(CONFIG_NUCLEO_SPI3_TEST)
@@ -424,7 +424,7 @@ int stm32_spidev_bus_test(void)
   SPI_SETFREQUENCY(spi3, CONFIG_NUCLEO_SPI3_TEST_FREQ);
   SPI_SETBITS(spi3, CONFIG_NUCLEO_SPI3_TEST_BITS);
   SPI_SETMODE(spi3, CONFIG_NUCLEO_SPI3_TEST_MODE);
-  SPI_EXCHANGE(spi3, tx, NULL, ArraySize(CONFIG_NUCLEO_SPI_TEST_MESSAGE));
+  SPI_EXCHANGE(spi3, tx, NULL, ARRAYSIZE(CONFIG_NUCLEO_SPI_TEST_MESSAGE));
 #endif
 
   return OK;

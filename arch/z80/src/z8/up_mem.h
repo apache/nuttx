@@ -34,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef __Z8_UP_MEM_H
-#define __Z8_UP_MEM_H
+#ifndef __ARCH_Z80_SRC_Z8_UP_MEM_H
+#define __ARCH_Z80_SRC_Z8_UP_MEM_H
 
 /************************************************************************************
  * Included Files
@@ -86,4 +86,4 @@ extern "C"
 #endif
 #endif
 
-#endif  /* __Z8_UP_MEM_H */
+#endif  /* __ARCH_Z80_SRC_Z8_UP_MEM_H */

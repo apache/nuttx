@@ -41,12 +41,12 @@
 #include <arch/board/board.h>
 #include <nuttx/config.h>
 
+#include <stdbool.h>
+#include <debug.h>
+
 #include <nuttx/board.h>
 #include <nuttx/power/pm.h>
 #include <arch/irq.h>
-
-#include <stdbool.h>
-#include <debug.h>
 
 #include "up_arch.h"
 #include "nvic.h"
@@ -76,20 +76,12 @@
 #define PM_IDLE_DOMAIN  0 /* Revisit */
 
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_IRQBUTTONS
 static int button_handler(int irq, FAR void *context);
 #endif /* CONFIG_ARCH_IRQBUTTONS */
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -142,9 +134,9 @@ void stm32_pm_buttons(void)
 
       if (oldhandler != NULL)
         {
-          lowsyslog(LOG_WARNING, "WARNING: oldhandler:%p is not NULL!  "
-                   "Button events may be lost or aliased!\n",
-                   oldhandler);
+          _warn("WARNING: oldhandler:%p is not NULL!  "
+                "Button events may be lost or aliased!\n",
+                oldhandler);
         }
 #endif
 }

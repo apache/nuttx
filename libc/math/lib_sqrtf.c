@@ -47,25 +47,25 @@ float sqrtf(float x)
 
   /* Filter out invalid/trivial inputs */
 
-  if (x < 0.0)
+  if (x < 0.0F)
     {
       set_errno(EDOM);
-      return NAN;
+      return NAN_F;
     }
 
   if (isnan(x))
     {
-      return NAN;
+      return NAN_F;
     }
 
-  if (isinf(x))
+  if (isinf_f(x))
     {
-      return INFINITY;
+      return INFINITY_F;
     }
 
-  if (x == 0.0)
+  if (x == 0.0F)
     {
-      return 0.0;
+      return 0.0F;
     }
 
   /* Guess square root (using bit manipulation) */
@@ -76,9 +76,9 @@ float sqrtf(float x)
    * definitely optimal
    */
 
-  y = 0.5 * (y + x / y);
-  y = 0.5 * (y + x / y);
-  y = 0.5 * (y + x / y);
+  y = 0.5F * (y + x / y);
+  y = 0.5F * (y + x / y);
+  y = 0.5F * (y + x / y);
 
   return y;
 }

@@ -59,7 +59,10 @@ endif
 #
 # FSDIRS depend on file descriptor support; NONFSDIRS do not (except for parts
 #   of FSDIRS).  We will exclude FSDIRS from the build if file descriptor
-#   support is disabled
+#   support is disabled.  NOTE that drivers, in general, depends on file
+#   descriptor support but is always built because there are other components
+#   in the drivers directory that are needed even if file descriptors are not
+#   supported.
 # CONTEXTDIRS include directories that have special, one-time pre-build
 #   requirements.  Normally this includes things like auto-generation of
 #   configuration specific files or creation of configurable symbolic links
@@ -69,9 +72,9 @@ endif
 #   be cleaned to prevent garbage from collecting in them when changing
 #   configurations.
 
-NONFSDIRS = sched configs $(ARCH_SRC) $(NUTTX_ADDONS)
-FSDIRS = fs drivers binfmt
-CONTEXTDIRS = $(APPDIR)
+NONFSDIRS = sched drivers configs $(ARCH_SRC) $(NUTTX_ADDONS)
+FSDIRS = fs binfmt
+CONTEXTDIRS = configs $(APPDIR)
 USERDIRS =
 OTHERDIRS = lib
 
@@ -109,6 +112,10 @@ CONTEXTDIRS += syscall
 USERDIRS += syscall
 else
 OTHERDIRS += syscall
+endif
+
+ifeq ($(CONFIG_LIB_ZONEINFO_ROMFS),y)
+CONTEXTDIRS += libc
 endif
 
 ifeq ($(CONFIG_NX),y)

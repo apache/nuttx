@@ -181,18 +181,18 @@ endif
 BIN = nuttx$(EXEEXT)
 
 all: $(BIN)
-.PHONY: context clean_context check_context export subdir_clean clean subdir_distclean distclean apps_clean apps_distclean
+.PHONY: dirlinks context clean_context check_context export subdir_clean clean subdir_distclean distclean apps_clean apps_distclean
 
-# Target used to copy include/nuttx/math.h.  If CONFIG_ARCH_MATH_H is
+# Target used to copy include/nuttx/lib/math.h.  If CONFIG_ARCH_MATH_H is
 # defined, then there is an architecture specific math.h header file
 # that will be included indirectly from include/math.h.  But first, we
 # have to copy math.h from include/nuttx/. to include/.  Logic within
-# include/nuttx/math.h will hand the redirection to the architecture-
+# include/nuttx/lib/math.h will hand the redirection to the architecture-
 # specific math.h header file.
 #
 # If the CONFIG_LIBM is defined, the Rhombus libm will be built at libc/math.
 # Definitions and prototypes for the Rhombus libm are also contained in
-# include/nuttx/math.h and so the file must also be copied in that case.
+# include/nuttx/lib/math.h and so the file must also be copied in that case.
 #
 # If neither CONFIG_ARCH_MATH_H nor CONFIG_LIBM is defined, then no math.h
 # header file will be provided.  You would want that behavior if (1) you
@@ -208,8 +208,8 @@ endif
 endif
 
 ifeq ($(NEED_MATH_H),y)
-include/math.h: include/nuttx/math.h
-	$(Q) cp -f include/nuttx/math.h include/math.h
+include/math.h: include/nuttx/lib/math.h
+	$(Q) cp -f include/nuttx/lib/math.h include/math.h
 else
 include/math.h:
 endif
@@ -221,20 +221,20 @@ endif
 # the settings in this float.h are actually correct for your platform!
 
 ifeq ($(CONFIG_ARCH_FLOAT_H),y)
-include/float.h: include/nuttx/float.h
-	$(Q) cp -f include/nuttx/float.h include/float.h
+include/float.h: include/nuttx/lib/float.h
+	$(Q) cp -f include/nuttx/lib/float.h include/float.h
 else
 include/float.h:
 endif
 
-# Target used to copy include/nuttx/stdarg.h.  If CONFIG_ARCH_STDARG_H is
+# Target used to copy include/nuttx/lib/stdarg.h.  If CONFIG_ARCH_STDARG_H is
 # defined, then there is an architecture specific stdarg.h header file
-# that will be included indirectly from include/stdarg.h.  But first, we
+# that will be included indirectly from include/lib/stdarg.h.  But first, we
 # have to copy stdarg.h from include/nuttx/. to include/.
 
 ifeq ($(CONFIG_ARCH_STDARG_H),y)
-include/stdarg.h: include/nuttx/stdarg.h
-	$(Q) cp -f include/nuttx/stdarg.h include/stdarg.h
+include/stdarg.h: include/nuttx/lib/stdarg.h
+	$(Q) cp -f include/nuttx/lib/stdarg.h include/stdarg.h
 else
 include/stdarg.h:
 endif
@@ -280,16 +280,6 @@ tools/cnvwindeps$(HOSTEXEEXT):
 # setting up symbolic links with 'generic' directory names to specific,
 # configured directories.
 #
-# Link the apps/include directory to include/apps
-
-include/apps: Make.defs
-ifneq ($(APPDIR),)
-	@echo "LN: include/apps to $(APPDIR)/include"
-	$(Q) if [ -d $(TOPDIR)/$(APPDIR)/include ]; then \
-		$(DIRLINK) $(TOPDIR)/$(APPDIR)/include include/apps; \
-	fi
-endif
-
 # Link the arch/<arch-name>/include directory to include/arch
 
 include/arch: Make.defs
@@ -324,7 +314,9 @@ ifneq ($(CONFIG_ARCH_CHIP),)
 	$(Q) $(DIRLINK) $(TOPDIR)/$(ARCH_INC)/$(CONFIG_ARCH_CHIP) include/arch/chip
 endif
 
-dirlinks: include/arch include/arch/board include/arch/chip $(ARCH_SRC)/board $(ARCH_SRC)/chip include/apps
+dirlinks: include/arch include/arch/board include/arch/chip $(ARCH_SRC)/board $(ARCH_SRC)/chip
+	$(Q) $(MAKE) -C configs dirlinks TOPDIR="$(TOPDIR)"
+	$(Q) $(MAKE) -C $(CONFIG_APPS_DIR) dirlinks TOPDIR="$(TOPDIR)"
 
 # context
 #
@@ -344,6 +336,7 @@ context: check_context include/nuttx/config.h include/nuttx/version.h include/ma
 # and symbolic links created by the context target.
 
 clean_context:
+	$(Q) $(MAKE) -C configs TOPDIR="$(TOPDIR)" clean_context
 	$(call DELFILE, include/nuttx/config.h)
 	$(call DELFILE, include/nuttx/version.h)
 	$(call DELFILE, include/math.h)
@@ -353,7 +346,6 @@ clean_context:
 	$(Q) $(DIRUNLINK) include/arch
 	$(Q) $(DIRUNLINK) $(ARCH_SRC)/board
 	$(Q) $(DIRUNLINK) $(ARCH_SRC)/chip
-	$(Q) $(DIRUNLINK) include/apps
 
 # check_context
 #
@@ -480,23 +472,35 @@ pass2dep: context tools/mkdeps$(HOSTEXEEXT) tools/cnvwindeps$(HOSTEXEEXT)
 # location: http://ymorin.is-a-geek.org/projects/kconfig-frontends.  See
 # README.txt file in the NuttX tools GIT repository for additional information.
 
-config: apps_preconfig
+do_config: dirlinks apps_preconfig
 	$(Q) APPSDIR=${CONFIG_APPS_DIR} kconfig-conf Kconfig
 
-oldconfig: apps_preconfig
+config: do_config clean_context
+
+do_oldconfig: dirlinks apps_preconfig
 	$(Q) APPSDIR=${CONFIG_APPS_DIR} kconfig-conf --oldconfig Kconfig
 
-olddefconfig: apps_preconfig
+oldconfig: do_oldconfig clean_context
+
+do_olddefconfig: dirlinks apps_preconfig
 	$(Q) APPSDIR=${CONFIG_APPS_DIR} kconfig-conf --olddefconfig Kconfig
 
-menuconfig: apps_preconfig
+olddefconfig: do_olddefconfig clean_context
+
+do_menuconfig: dirlinks apps_preconfig
 	$(Q) APPSDIR=${CONFIG_APPS_DIR} kconfig-mconf Kconfig
 
-qconfig: apps_preconfig
+menuconfig: do_menuconfig clean_context
+
+do_qconfig: dirlinks apps_preconfig
 	$(Q) APPSDIR=${CONFIG_APPS_DIR} kconfig-qconf Kconfig
 
-gconfig: apps_preconfig
+qconfig: do_qconfig clean_context
+
+gconfig: dirlinks apps_preconfig
 	$(Q) APPSDIR=${CONFIG_APPS_DIR} kconfig-gconf Kconfig
+
+gconfig: do_gconfig clean_context
 
 # export
 #

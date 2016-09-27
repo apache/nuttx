@@ -439,7 +439,7 @@ void up_irqinitialize(void)
    * configured pin interrupts.
    */
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_KINETIS_GPIOIRQ
   kinetis_pinirqinitialize();
 #endif
 

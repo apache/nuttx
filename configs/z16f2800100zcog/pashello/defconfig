@@ -41,7 +41,7 @@ CONFIG_WINDOWS_CYGWIN=y
 #
 # Debug Options
 #
-CONFIG_DEBUG_FEATURES=y
+# CONFIG_DEBUG_FEATURES is not set
 # CONFIG_DEBUG_INFO is not set
 
 
@@ -70,7 +70,7 @@ CONFIG_DEBUG_FEATURES=y
 # CONFIG_ARCH_HC is not set
 # CONFIG_ARCH_MIPS is not set
 # CONFIG_ARCH_RGMP is not set
-# CONFIG_ARCH_SH is not set
+# CONFIG_ARCH_RENESAS is not set
 # CONFIG_ARCH_SIM is not set
 # CONFIG_ARCH_X86 is not set
 CONFIG_ARCH_Z16=y
@@ -280,7 +280,6 @@ CONFIG_UART1_2STOP=0
 #
 # System Logging
 #
-# CONFIG_SYSLOG is not set
 
 #
 # Graphics Support

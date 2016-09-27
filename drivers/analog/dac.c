@@ -478,6 +478,7 @@ static int dac_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 int dac_txdone(FAR struct dac_dev_s *dev)
 {
   int ret = -ENOENT;
+  int sval;
 
   /* Verify that the xmit FIFO is not empty */
 
@@ -497,7 +498,11 @@ int dac_txdone(FAR struct dac_dev_s *dev)
         {
           /* Inform any waiting threads that new xmit space is available */
 
-          ret = sem_post(&dev->ad_xmit.af_sem);
+          ret = sem_getvalue(&dev->ad_xmit.af_sem, &sval);
+          if (ret == OK && sval <= 0)
+            {
+              ret = sem_post(&dev->ad_xmit.af_sem);
+            }
         }
     }
 

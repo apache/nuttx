@@ -521,9 +521,9 @@ void weak_function up_dmainitialize(void)
  *   version.  Feel free to do that if that is what you need.
  *
  * Input parameter:
- *   dmamap - Identifies the stream/channel resource. For the STM32 F4, this
+ *   dmamap - Identifies the stream/channel resource. For the STM32 F7, this
  *     is a bit-encoded  value as provided by the DMAMAP_* definitions
- *     in chip/stm32f40xxx_dma.h
+ *     in chip/stm32f7xxxxxxx_dma.h
  *
  * Returned Value:
  *   Provided that 'dmamap' is valid, this function ALWAYS returns a non-NULL,
@@ -609,7 +609,7 @@ void stm32_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
   dmainfo("paddr: %08x maddr: %08x ntransfers: %d scr: %08x\n",
           paddr, maddr, ntransfers, scr);
 
-#ifdef CONFIG_STM32_DMACAPABLE
+#ifdef CONFIG_STM32F7_DMACAPABLE
   DEBUGASSERT(stm32_dmacapable(maddr, ntransfers, scr));
 #endif
 
@@ -865,7 +865,7 @@ size_t stm32_dmaresidual(DMA_HANDLE handle)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32_DMACAPABLE
+#ifdef CONFIG_STM32F7_DMACAPABLE
 bool stm32_dmacapable(uint32_t maddr, uint32_t count, uint32_t ccr)
 {
   uint32_t transfer_size, burst_length;
@@ -965,29 +965,35 @@ bool stm32_dmacapable(uint32_t maddr, uint32_t count, uint32_t ccr)
       case STM32_FSMC_BANK3:
       case STM32_FSMC_BANK4:
       case STM32_SRAM_BASE:
+
         /* All RAM is supported */
 
         break;
 
       case STM32_CODE_BASE:
-        /* Everything except the CCM ram is supported */
 
-        if (maddr >= STM32_CCMRAM_BASE &&
-            (maddr - STM32_CCMRAM_BASE) < 65536)
+        /* Everything except the ITCM ram is supported per the manual
+         *  The ITCM bus is not accessible on AHBS. So the DMA data transfer
+         *  to/from ITCM RAM is not supported.
+         */
+
+        if (maddr >= STM32_INSTRAM_BASE &&
+            (maddr - STM32_INSTRAM_BASE) < 0x3fff)
           {
-            dmainfo("stm32_dmacapable: transfer targets CCMRAM\n");
+            dmainfo("stm32_dmacapable: transfer targets ITCM RAM\n");
             return false;
           }
         break;
 
       default:
+
         /* Everything else is unsupported by DMA */
 
         dmainfo("stm32_dmacapable: transfer targets unknown/unsupported region\n");
         return false;
     }
 
-    dmainfo("stm32_dmacapable: transfer OK\n");
+  dmainfo("stm32_dmacapable: transfer OK\n");
   return true;
 }
 #endif

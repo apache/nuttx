@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/kinetis/kinetis_sdhc.c
  *
- *   Copyright (C) 2011-2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,9 +61,9 @@
 #include "up_arch.h"
 
 #include "kinetis.h"
-#include "kinetis_pinmux.h"
-#include "kinetis_sim.h"
-#include "kinetis_sdhc.h"
+#include "chip/kinetis_pinmux.h"
+#include "chip/kinetis_sim.h"
+#include "chip/kinetis_sdhc.h"
 
 #ifdef CONFIG_KINETIS_SDHC
 
@@ -83,10 +83,6 @@
 
 #ifndef CONFIG_KINETIS_SDHC_PRIO
 #  define CONFIG_KINETIS_SDHC_PRIO NVIC_SYSH_PRIORITY_DEFAULT
-#endif
-
-#ifndef CONFIG_KINETIS_SDHC_DMAPRIO
-#  define CONFIG_KINETIS_SDHC_DMAPRIO DMA_CCR_PRIMED
 #endif
 
 #ifndef CONFIG_DEBUG_MEMCARD_INFO
@@ -791,8 +787,8 @@ static void kinetis_transmit(struct kinetis_dev_s *priv)
    * ready (BWR)
    */
 
-  mcllinfo("Entry: remaining: %d IRQSTAT: %08x\n",
-           priv->remaining, getreg32(KINETIS_SDHC_IRQSTAT));
+  mcinfo("Entry: remaining: %d IRQSTAT: %08x\n",
+         priv->remaining, getreg32(KINETIS_SDHC_IRQSTAT));
 
   while (priv->remaining > 0 &&
          (getreg32(KINETIS_SDHC_IRQSTAT) & SDHC_INT_BWR) != 0)
@@ -837,8 +833,8 @@ static void kinetis_transmit(struct kinetis_dev_s *priv)
       putreg32(data.w, KINETIS_SDHC_DATPORT);
     }
 
-  mcllinfo("Exit: remaining: %d IRQSTAT: %08x\n",
-           priv->remaining, getreg32(KINETIS_SDHC_IRQSTAT));
+  mcinfo("Exit: remaining: %d IRQSTAT: %08x\n",
+         priv->remaining, getreg32(KINETIS_SDHC_IRQSTAT));
 }
 #endif
 
@@ -876,8 +872,8 @@ static void kinetis_receive(struct kinetis_dev_s *priv)
    * ready (BRR)
    */
 
-  mcllinfo("Entry: remaining: %d IRQSTAT: %08x\n",
-           priv->remaining, getreg32(KINETIS_SDHC_IRQSTAT));
+  mcinfo("Entry: remaining: %d IRQSTAT: %08x\n",
+         priv->remaining, getreg32(KINETIS_SDHC_IRQSTAT));
 
   while (priv->remaining > 0 &&
          (getreg32(KINETIS_SDHC_IRQSTAT) & SDHC_INT_BRR) != 0)
@@ -928,9 +924,9 @@ static void kinetis_receive(struct kinetis_dev_s *priv)
 
   putreg32(watermark << SDHC_WML_RD_SHIFT, KINETIS_SDHC_WML);
 
-  mcllinfo("Exit: remaining: %d IRQSTAT: %08x WML: %08x\n",
-           priv->remaining, getreg32(KINETIS_SDHC_IRQSTAT),
-           getreg32(KINETIS_SDHC_WML));
+  mcinfo("Exit: remaining: %d IRQSTAT: %08x WML: %08x\n",
+         priv->remaining, getreg32(KINETIS_SDHC_IRQSTAT),
+         getreg32(KINETIS_SDHC_WML));
 }
 #endif
 
@@ -971,7 +967,7 @@ static void kinetis_eventtimeout(int argc, uint32_t arg)
       /* Wake up any waiting threads */
 
       kinetis_endwait(priv, SDIOWAIT_TIMEOUT);
-      mcllerr("ERROR: Timeout: remaining: %d\n", priv->remaining);
+      mcerr("ERROR: Timeout: remaining: %d\n", priv->remaining);
     }
 }
 
@@ -1103,8 +1099,8 @@ static int kinetis_interrupt(int irq, void *context)
 
   regval  = getreg32(KINETIS_SDHC_IRQSIGEN);
   enabled = getreg32(KINETIS_SDHC_IRQSTAT) & regval;
-  mcllinfo("IRQSTAT: %08x IRQSIGEN %08x enabled: %08x\n",
-           getreg32(KINETIS_SDHC_IRQSTAT), regval, enabled);
+  mcinfo("IRQSTAT: %08x IRQSIGEN %08x enabled: %08x\n",
+         getreg32(KINETIS_SDHC_IRQSTAT), regval, enabled);
 
   /* Disable card interrupts to clear the card interrupt to the host system. */
 
@@ -1160,7 +1156,7 @@ static int kinetis_interrupt(int irq, void *context)
         {
           /* Terminate the transfer with an error */
 
-          mcllerr("ERROR: Data block CRC failure, remaining: %d\n", priv->remaining);
+          mcerr("ERROR: Data block CRC failure, remaining: %d\n", priv->remaining);
           kinetis_endtransfer(priv, SDIOWAIT_TRANSFERDONE | SDIOWAIT_ERROR);
         }
 
@@ -1170,7 +1166,7 @@ static int kinetis_interrupt(int irq, void *context)
         {
           /* Terminate the transfer with an error */
 
-          mcllerr("ERROR: Data timeout, remaining: %d\n", priv->remaining);
+          mcerr("ERROR: Data timeout, remaining: %d\n", priv->remaining);
           kinetis_endtransfer(priv, SDIOWAIT_TRANSFERDONE | SDIOWAIT_TIMEOUT);
         }
     }

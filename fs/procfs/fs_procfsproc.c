@@ -389,7 +389,7 @@ static ssize_t proc_status(FAR struct proc_file_s *procfile,
                            FAR struct tcb_s *tcb, FAR char *buffer,
                            size_t buflen, off_t offset)
 {
-#ifdef HAVE_GROUPID
+#ifdef CONFIG_SCHED_HAVE_PARENT
   FAR struct task_group_s *group;
 #endif
   FAR const char *policy;
@@ -439,15 +439,15 @@ static ssize_t proc_status(FAR struct proc_file_s *procfile,
     }
 
 #ifdef CONFIG_SCHED_HAVE_PARENT
-#ifdef HAVE_GROUPID
   group = tcb->group;
   DEBUGASSERT(group);
 
+#ifdef HAVE_GROUPID
   linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s%d\n", "Group:",
                         group->tg_pgid);
 #else
   linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s%d\n", "PPID:",
-                        tcb->ppid);
+                        group->tg_ppid);
 #endif
 
   copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining, &offset);

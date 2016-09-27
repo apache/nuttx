@@ -171,15 +171,15 @@
 
 #define IS_VALID(p)                ((((p)->flags) & SST25_CACHE_VALID) != 0)
 #define IS_DIRTY(p)                ((((p)->flags) & SST25_CACHE_DIRTY) != 0)
-#define IS_ERASED(p)                ((((p)->flags) & SST25_CACHE_DIRTY) != 0)
+#define IS_ERASED(p)                ((((p)->flags) & SST25_CACHE_ERASED) != 0)
 
 #define SET_VALID(p)               do { (p)->flags |= SST25_CACHE_VALID; } while (0)
 #define SET_DIRTY(p)               do { (p)->flags |= SST25_CACHE_DIRTY; } while (0)
-#define SET_ERASED(p)              do { (p)->flags |= SST25_CACHE_DIRTY; } while (0)
+#define SET_ERASED(p)              do { (p)->flags |= SST25_CACHE_ERASED; } while (0)
 
 #define CLR_VALID(p)               do { (p)->flags &= ~SST25_CACHE_VALID; } while (0)
 #define CLR_DIRTY(p)               do { (p)->flags &= ~SST25_CACHE_DIRTY; } while (0)
-#define CLR_ERASED(p)              do { (p)->flags &= ~SST25_CACHE_DIRTY; } while (0)
+#define CLR_ERASED(p)              do { (p)->flags &= ~SST25_CACHE_ERASED; } while (0)
 
 /************************************************************************************
  * Private Types
@@ -1208,7 +1208,7 @@ FAR struct mtd_dev_s *sst25_initialize(FAR struct spi_dev_s *dev)
 
           ferr("ERROR: Unrecognized\n");
           kmm_free(priv);
-          priv = NULL;
+          return NULL;
         }
       else
         {
@@ -1228,7 +1228,7 @@ FAR struct mtd_dev_s *sst25_initialize(FAR struct spi_dev_s *dev)
 
               ferr("ERROR: Allocation failed\n");
               kmm_free(priv);
-              priv = NULL;
+              return NULL;
             }
 #endif
         }

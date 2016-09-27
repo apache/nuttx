@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/streams.h
  *
- *   Copyright (C) 2009, 2011-2012, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011-2012, 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef _INCLUDE_NUTTX_STREAMS_H
-#define _INCLUDE_NUTTX_STREAMS_H
+#ifndef __INCLUDE_NUTTX_STREAMS_H
+#define __INCLUDE_NUTTX_STREAMS_H
 
 /****************************************************************************
  * Included Files
@@ -354,23 +354,40 @@ void lib_nullinstream(FAR struct lib_instream_s *nullinstream);
 void lib_nulloutstream(FAR struct lib_outstream_s *nulloutstream);
 
 /****************************************************************************
- * Name: lib_sylogstream
+ * Name: syslogstream
  *
  * Description:
  *   Initializes a stream for use with the configured syslog interface.
+ *   Only accessible from with the OS SYSLOG logic.
  *
  * Input parameters:
- *   lowoutstream - User allocated, uninitialized instance of struct
- *                  lib_lowoutstream_s to be initialized.
+ *   stream - User allocated, uninitialized instance of struct
+ *            lib_lowoutstream_s to be initialized.
  *
  * Returned Value:
  *   None (User allocated instance initialized).
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SYSLOG
-void lib_syslogstream(FAR struct lib_outstream_s *stream);
-#endif
+void syslogstream(FAR struct lib_outstream_s *stream);
+
+/****************************************************************************
+ * Name: emergstream
+ *
+ * Description:
+ *   Initializes a stream for use with the configured emergency syslog
+ *   interface.  Only accessible from with the OS SYSLOG logic.
+ *
+ * Input parameters:
+ *   stream - User allocated, uninitialized instance of struct
+ *            lib_lowoutstream_s to be initialized.
+ *
+ * Returned Value:
+ *   None (User allocated instance initialized).
+ *
+ ****************************************************************************/
+
+void emergstream(FAR struct lib_outstream_s *stream);
 
 /****************************************************************************
  * Name: lib_noflush
@@ -423,4 +440,4 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj,
 }
 #endif
 
-#endif /* _INCLUDE_NUTTX_STREAMS_H */
+#endif /* __INCLUDE_NUTTX_STREAMS_H */

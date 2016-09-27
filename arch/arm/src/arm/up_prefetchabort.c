@@ -99,8 +99,8 @@ void up_prefetchabort(uint32_t *regs)
    * virtual addresses.
    */
 
-  pgllinfo("VADDR: %08x VBASE: %08x VEND: %08x\n",
-           regs[REG_PC], PG_PAGED_VBASE, PG_PAGED_VEND);
+  pginfo("VADDR: %08x VBASE: %08x VEND: %08x\n",
+         regs[REG_PC], PG_PAGED_VBASE, PG_PAGED_VEND);
 
   if (regs[REG_R15] >= PG_PAGED_VBASE && regs[REG_R15] < PG_PAGED_VEND)
     {

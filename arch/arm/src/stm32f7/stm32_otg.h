@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/stm32f7/stm32_otg.h
  *
- *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -146,4 +146,3 @@ void stm32_usbsuspend(FAR struct usbdev_s *dev, bool resume);
 #endif /* __ASSEMBLY__ */
 #endif /* CONFIG_STM32F7_OTGFS */
 #endif /* __ARCH_ARM_SRC_STM32F7_STM32_OTG_H */
-

@@ -34,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef __Z80_SWITCH_H
-#define __Z80_SWITCH_H
+#ifndef __ARCH_Z80_SRC_Z80_SWITCH_H
+#define __ARCH_Z80_SRC_Z80_SWITCH_H
 
 /************************************************************************************
  * Included Files
@@ -167,4 +167,4 @@ void z80_registerdump(void);
 #endif
 #endif
 
-#endif  /* __Z80_SWITCH_H */
+#endif  /* __ARCH_Z80_SRC_Z80_SWITCH_H */

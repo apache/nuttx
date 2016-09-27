@@ -88,7 +88,7 @@ extern "C"
  * lpc11_gpioint.c, and lpc11_gpiodbg.c
  */
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_LPC11_GPIOIRQ
 EXTERN uint64_t g_intedge0;
 EXTERN uint64_t g_intedge2;
 #endif
@@ -108,7 +108,7 @@ EXTERN const uint32_t g_intbase[GPIO_NPORTS];
  *
  ************************************************************************************/
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_LPC11_GPIOIRQ
 void lpc11_gpioirqinitialize(void);
 #else
 #  define lpc11_gpioirqinitialize()
@@ -152,7 +152,7 @@ bool lpc11_gpioread(lpc11_pinset_t pinset);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_LPC11_GPIOIRQ
 void lpc11_gpioirqenable(int irq);
 #else
 #  define lpc11_gpioirqenable(irq)
@@ -166,7 +166,7 @@ void lpc11_gpioirqenable(int irq);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_LPC11_GPIOIRQ
 void lpc11_gpioirqdisable(int irq);
 #else
 #  define lpc11_gpioirqdisable(irq)

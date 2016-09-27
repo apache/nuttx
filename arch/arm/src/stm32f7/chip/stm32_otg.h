@@ -1,7 +1,7 @@
 /****************************************************************************************************
- * arch/arm/src/stm32f7/chip/stm32f_otgfs.h
+ * arch/arm/src/stm32f7/chip/stm32f_otg.h
  *
- *   Copyright (C) 2012, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014-2016 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2016 Omni Hoverboards Inc. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Paul Alexander Patience <paul-a.patience@polymtl.ca>
@@ -324,21 +324,20 @@
 #define OTG_GINT_NPTXFE               (1 << 5)  /* Bit 5:  Non-periodic TxFIFO empty */
 #define OTG_GINT_GINAKEFF             (1 << 6)  /* Bit 6:  Global IN non-periodic NAK effective */
 #define OTG_GINT_GONAKEFF             (1 << 7)  /* Bit 7:  Global OUT NAK effective */
-                                                  /* Bits 8-9: Reserved, must be kept at reset value */
+#define OTG_GINT_RES89                (3 << 8)  /* Bits 8-9: Reserved, must be kept at reset value */
 #define OTG_GINT_ESUSP                (1 << 10) /* Bit 10: Early suspend */
 #define OTG_GINT_USBSUSP              (1 << 11) /* Bit 11: USB suspend */
 #define OTG_GINT_USBRST               (1 << 12) /* Bit 12: USB reset */
 #define OTG_GINT_ENUMDNE              (1 << 13) /* Bit 13: Enumeration done */
 #define OTG_GINT_ISOODRP              (1 << 14) /* Bit 14: Isochronous OUT packet dropped interrupt */
 #define OTG_GINT_EOPF                 (1 << 15) /* Bit 15: End of periodic frame interrupt */
-                                                  /* Bits 16 Reserved, must be kept at reset value */
-#define OTG_GINTMSK_EPMISM            (1 << 17) /* Bit 17: Endpoint mismatch interrupt mask */
+#define OTG_GINT_RES1617              (3 << 16) /* Bits 16-17 Reserved, must be kept at reset value */
 #define OTG_GINT_IEP                  (1 << 18) /* Bit 18: IN endpoint interrupt */
 #define OTG_GINT_OEP                  (1 << 19) /* Bit 19: OUT endpoint interrupt */
 #define OTG_GINT_IISOIXFR             (1 << 20) /* Bit 20: Incomplete isochronous IN transfer */
 #define OTG_GINT_IISOOXFR             (1 << 21) /* Bit 21: Incomplete isochronous OUT transfer (device) */
 #define OTG_GINT_IPXFR                (1 << 21) /* Bit 21: Incomplete periodic transfer (host) */
-                                                  /* Bit 22: Reserved, must be kept at reset value */
+#define OTG_GINT_RES22                (1 << 22) /* Bits 22: Reserved, must be kept at reset value */
 #define OTG_GINT_RSTDET               (1 << 23) /* Bit 23: Reset detected interrupt */
 #define OTG_GINT_HPRT                 (1 << 24) /* Bit 24: Host port interrupt */
 #define OTG_GINT_HC                   (1 << 25) /* Bit 25: Host channels interrupt */

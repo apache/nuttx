@@ -54,19 +54,16 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Debug ********************************************************************/
 /* Non-standard debug that may be enabled just for testing the modem driver */
 
 #ifdef CONFIG_MODEM_U_BLOX_DEBUG
 #  define m_err     _err
 #  define m_info    _info
-#  define m_vllerr  _llerr
-#  define m_vllinfo _llinfo
 #else
 #  define m_err(x...)
 #  define m_info(x...)
-#  define m_llerr(x...)
-#  define m_llinfo(x...)
 #endif
 
 /****************************************************************************

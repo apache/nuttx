@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttShell (NSH)</i></font></big></h1>
-      <p>Last Updated: February 8, 2016</p>
+      <p>Last Updated: August 4, 2016</p>
     </td>
   </tr>
 </table>
@@ -3277,7 +3277,7 @@ nsh&gt;
   </tr>
   <tr>
     <td><b><code>mkfifo</code></b></td>
-    <td><code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0</td>
+    <td><code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_PIPES</code> &amp;&amp; <code>CONFIG_DEV_FIFO_SIZE</code> &gt; 0</td>
     <td><code>CONFIG_NSH_DISABLE_MKFIFO</code></td>
   </tr>
   <tr>

@@ -1192,7 +1192,7 @@ static int uart_interrupt(struct uart_dev_s *dev)
 
           default:
             {
-              _llerr("ERROR: Unexpected IIR: %02x\n", status);
+              _err("ERROR: Unexpected IIR: %02x\n", status);
               break;
             }
         }

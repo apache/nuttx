@@ -884,7 +884,7 @@ static inline void efm32_gpioclock(void)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SYSLOG) || defined(CONFIG_ARMV7M_ITMSYSLOG)
+#ifdef CONFIG_ARMV7M_ITMSYSLOG
 static inline void efm32_itm_syslog(void)
 {
   int regval;
@@ -909,9 +909,6 @@ static inline void efm32_itm_syslog(void)
 
   efm32_enable_auxhfrco();
 
-  /* Then perform ARMv7-M ITM SYSLOG initialization */
-
-  itm_syslog_initialize();
 }
 #else
 #  define efm32_itm_syslog()

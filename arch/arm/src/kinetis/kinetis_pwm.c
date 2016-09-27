@@ -49,7 +49,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <nuttx/pwm.h>
+#include <nuttx/drivers/pwm.h>
 #include <arch/board/board.h>
 
 #include "up_internal.h"
@@ -59,9 +59,9 @@
 
 #include "kinetis.h"
 #include "kinetis_pwm.h"
-#include "kinetis_gpio.h"
-#include "kinetis_ftm.h"
-#include "kinetis_sim.h"
+#include "chip/kinetis_gpio.h"
+#include "chip/kinetis_ftm.h"
+#include "chip/kinetis_sim.h"
 
 /* This module then only compiles if there is at least one enabled timer
  * intended for use with the PWM upper half driver.

@@ -51,7 +51,7 @@
 #include "chip/kl_port.h"
 #include "kl_gpio.h"
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_KL_GPIOIRQ
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -396,4 +396,4 @@ void kl_gpioirqdisable(uint32_t pinset)
     }
 #endif /* HAVE_PORTINTS */
 }
-#endif /* CONFIG_GPIO_IRQ */
+#endif /* CONFIG_KL_GPIOIRQ */

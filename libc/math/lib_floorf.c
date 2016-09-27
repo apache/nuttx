@@ -37,11 +37,25 @@
 
 float floorf(float x)
 {
-  modff(x, &x);
-  if (x < 0.0)
+  float modx;
+
+  /* modf() will return the integer part of X.  The return value of floor
+   * differs for non-integer, negative values.
+   *
+   *  x   modff floor
+   * ---- ----- -----
+   *  2.0  2.0   2.0
+   *  2.4  2.0   2.0
+   *  2.9  2.0   2.0
+   * -2.7 -2.0  -3.0
+   * -2.0 -2.0  -2.0
+   */
+
+  (void)modff(x, &modx);
+  if (x < 0.0F && x < modx)
     {
-      x -= 1.0;
+      modx -= 1.0F;
     }
 
-  return x;
+  return modx;
 }

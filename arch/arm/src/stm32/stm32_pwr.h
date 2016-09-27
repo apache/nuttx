@@ -73,15 +73,19 @@ extern "C"
  *   Enables access to the backup domain (RTC registers, RTC backup data registers
  *   and backup SRAM).
  *
+ *   NOTE: Reference counting is used in order to supported nested calls to this
+ *   function.  As a consequence, every call to stm32_pwr_enablebkp(true) must
+ *   be followed by a matching call to stm32_pwr_enablebkp(false).
+ *
  * Input Parameters:
  *   writable - True: enable ability to write to backup domain registers
  *
  * Returned Value:
- *   True: The backup domain was previously writable.
+ *   None
  *
  ************************************************************************************/
 
-bool stm32_pwr_enablebkp(bool writable);
+void stm32_pwr_enablebkp(bool writable);
 
 /************************************************************************************
  * Name: stm32_pwr_enablebreg

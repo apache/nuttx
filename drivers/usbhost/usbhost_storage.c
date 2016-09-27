@@ -377,7 +377,7 @@ static inline FAR struct usbhost_state_s *usbhost_allocclass(void)
     }
 
   leave_critical_section(flags);
-  ullinfo("Allocated: %p\n", entry);
+  uinfo("Allocated: %p\n", entry);
   return (FAR struct usbhost_state_s *)entry;
 }
 #else
@@ -417,7 +417,7 @@ static inline void usbhost_freeclass(FAR struct usbhost_state_s *usbclass)
   irqstate_t flags;
   DEBUGASSERT(entry != NULL);
 
-  ullinfo("Freeing: %p\n", entry);
+  uinfo("Freeing: %p\n", entry);
 
   /* Just put the pre-allocated class structure back on the freelist */
 
@@ -1161,10 +1161,10 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
 
   if (found != USBHOST_ALLFOUND)
     {
-      ullerr("ERROR: Found IF:%s BIN:%s BOUT:%s\n",
-             (found & USBHOST_IFFOUND) != 0  ? "YES" : "NO",
-             (found & USBHOST_BINFOUND) != 0 ? "YES" : "NO",
-             (found & USBHOST_BOUTFOUND) != 0 ? "YES" : "NO");
+      uerr("ERROR: Found IF:%s BIN:%s BOUT:%s\n",
+           (found & USBHOST_IFFOUND) != 0  ? "YES" : "NO",
+           (found & USBHOST_BINFOUND) != 0 ? "YES" : "NO",
+           (found & USBHOST_BOUTFOUND) != 0 ? "YES" : "NO");
       return -EINVAL;
     }
 
@@ -1185,7 +1185,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
       return ret;
     }
 
-  ullinfo("Endpoints allocated\n");
+  uinfo("Endpoints allocated\n");
   return OK;
 }
 
@@ -1830,7 +1830,7 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
    * block driver.
    */
 
-  ullinfo("crefs: %d\n", priv->crefs);
+  uinfo("crefs: %d\n", priv->crefs);
   if (priv->crefs == 1)
     {
       /* Destroy the class instance.  If we are executing from an interrupt

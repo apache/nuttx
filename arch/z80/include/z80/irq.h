@@ -1,6 +1,5 @@
 /****************************************************************************
  * arch/z80/include/z80/irq.h
- * arch/chip/irq.h
  *
  *   Copyright (C) 2007-2009, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

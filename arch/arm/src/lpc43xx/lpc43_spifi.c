@@ -1,7 +1,7 @@
 /****************************************************************************
  *  arch/arm/src/lpc43/lpc43_spifi.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -779,12 +779,13 @@ static ssize_t lpc43_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t 
   lpc43_cachewrite(priv, buffer, startblock, nblocks);
 
   lpc43_dumpbuffer(__func__, buffer, nblocks << SPIFI_512SHIFT)
-  return nblocks;
+  return (ssize_t)nblocks;
 
 #else
 
   FAR struct lpc43_dev_s *priv = (FAR struct lpc43_dev_s *)dev;
   FAR uint8_t *dest;
+  int ret;
 
   finfo("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
 
@@ -792,19 +793,17 @@ static ssize_t lpc43_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t 
 
   dest = SPIFI_BASE + (startblock << SPIFI_BLKSHIFT);
 
-#if defined(CONFIG_SPIFI_SECTOR512)
   /* Write all of the erase blocks to FLASH */
 
-  ret = lpc43_pagewrite(priv, dest, buffer, nblocks << SPIFI_512SHIFT);
+  ret = lpc43_pagewrite(priv, dest, buffer, nblocks << SPIFI_BLKSHIFT);
   if (ret < 0)
     {
       ferr("ERROR: lpc43_pagewrite failed: %d\n", ret);
       return ret;
     }
-#endif
 
-  lpc43_dumpbuffer(__func__, buffer, nblocks << SPIFI_BLKSHIFT)
-  return nblocks;
+  lpc43_dumpbuffer(__func__, buffer, nblocks << SPIFI_BLKSHIFT);
+  return (ssize_t)nblocks;
 
 #endif
 }

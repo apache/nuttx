@@ -48,5 +48,5 @@
 
 float acoshf(float x)
 {
-  return logf(x + sqrtf(x * x - 1));
+  return logf(x + sqrtf(x * x - 1.0F));
 }

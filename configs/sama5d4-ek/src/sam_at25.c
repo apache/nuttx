@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/sama5d4-ek/src/sam_at25.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,10 +46,10 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/fs/fs.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/fs/nxffs.h>
+#include <nuttx/drivers/drivers.h>
 
 #include "sam_spi.h"
 #include "sama5d4-ek.h"

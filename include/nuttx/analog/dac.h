@@ -5,7 +5,7 @@
  *   Author: Li Zhuoyi <lzyy.cn@gmail.com>
  *   History: 0.1 2011-08-04 initial version
  *
- * Derived from include/nuttx/can.h
+ * Derived from include/nuttx/drivers/can.h
  *
  *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -47,6 +47,7 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
 #include <sys/types.h>
 #include <stdint.h>
@@ -77,7 +78,7 @@ struct dac_msg_s
 {
   uint8_t      am_channel;               /* The 8-bit DAC Channel */
   int32_t      am_data;                  /* DAC convert result (4 bytes) */
-};
+} packed_struct;
 
 struct dac_fifo_s
 {

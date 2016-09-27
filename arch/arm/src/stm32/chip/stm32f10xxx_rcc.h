@@ -148,26 +148,37 @@
 #define RCC_CFGR_PLLXTPRE           (1 << 17) /* Bit 17: HSE divider for PLL entry */
 #define RCC_CFGR_PLLMUL_SHIFT       (18)      /* Bits 21-18: PLL Multiplication Factor */
 #define RCC_CFGR_PLLMUL_MASK        (0x0f << RCC_CFGR_PLLMUL_SHIFT)
-#  define RCC_CFGR_PLLMUL_CLKx2     (0 << RCC_CFGR_PLLMUL_SHIFT)  /* 0000: PLL input clock x 2 */
-#  define RCC_CFGR_PLLMUL_CLKx3     (1 << RCC_CFGR_PLLMUL_SHIFT)  /* 0001: PLL input clock x 3 */
+#ifndef CONFIG_STM32_CONNECTIVITYLINE
+#    define RCC_CFGR_PLLMUL_CLKx2   (0 << RCC_CFGR_PLLMUL_SHIFT)  /* 0000: PLL input clock x 2 */
+#    define RCC_CFGR_PLLMUL_CLKx3   (1 << RCC_CFGR_PLLMUL_SHIFT)  /* 0001: PLL input clock x 3 */
+#endif
 #  define RCC_CFGR_PLLMUL_CLKx4     (2 << RCC_CFGR_PLLMUL_SHIFT)  /* 0010: PLL input clock x 4 */
 #  define RCC_CFGR_PLLMUL_CLKx5     (3 << RCC_CFGR_PLLMUL_SHIFT)  /* 0011: PLL input clock x 5 */
 #  define RCC_CFGR_PLLMUL_CLKx6     (4 << RCC_CFGR_PLLMUL_SHIFT)  /* 0100: PLL input clock x 6 */
 #  define RCC_CFGR_PLLMUL_CLKx7     (5 << RCC_CFGR_PLLMUL_SHIFT)  /* 0101: PLL input clock x 7 */
 #  define RCC_CFGR_PLLMUL_CLKx8     (6 << RCC_CFGR_PLLMUL_SHIFT)  /* 0110: PLL input clock x 8 */
 #  define RCC_CFGR_PLLMUL_CLKx9     (7 << RCC_CFGR_PLLMUL_SHIFT)  /* 0111: PLL input clock x 9 */
-#  define RCC_CFGR_PLLMUL_CLKx10    (8 << RCC_CFGR_PLLMUL_SHIFT)  /* 1000: PLL input clock x 10 */
-#  define RCC_CFGR_PLLMUL_CLKx11    (9 << RCC_CFGR_PLLMUL_SHIFT)  /* 1001: PLL input clock x 11 */
-#  define RCC_CFGR_PLLMUL_CLKx12    (10 << RCC_CFGR_PLLMUL_SHIFT) /* 1010: PLL input clock x 12 */
-#  define RCC_CFGR_PLLMUL_CLKx13    (11 << RCC_CFGR_PLLMUL_SHIFT) /* 1011: PLL input clock x 13 */
-#  define RCC_CFGR_PLLMUL_CLKx14    (12 << RCC_CFGR_PLLMUL_SHIFT) /* 1100: PLL input clock x 14 */
-#  define RCC_CFGR_PLLMUL_CLKx15    (13 << RCC_CFGR_PLLMUL_SHIFT) /* 1101: PLL input clock x 15 */
-#  define RCC_CFGR_PLLMUL_CLKx16    (14 << RCC_CFGR_PLLMUL_SHIFT) /* 111x: PLL input clock x 16 */
+#ifndef CONFIG_STM32_CONNECTIVITYLINE
+#    define RCC_CFGR_PLLMUL_CLKx10  (8 << RCC_CFGR_PLLMUL_SHIFT)  /* 1000: PLL input clock x 10 */
+#    define RCC_CFGR_PLLMUL_CLKx11  (9 << RCC_CFGR_PLLMUL_SHIFT)  /* 1001: PLL input clock x 11 */
+#    define RCC_CFGR_PLLMUL_CLKx12  (10 << RCC_CFGR_PLLMUL_SHIFT) /* 1010: PLL input clock x 12 */
+#    define RCC_CFGR_PLLMUL_CLKx13  (11 << RCC_CFGR_PLLMUL_SHIFT) /* 1011: PLL input clock x 13 */
+#    define RCC_CFGR_PLLMUL_CLKx14  (12 << RCC_CFGR_PLLMUL_SHIFT) /* 1100: PLL input clock x 14 */
+#    define RCC_CFGR_PLLMUL_CLKx15  (13 << RCC_CFGR_PLLMUL_SHIFT) /* 1101: PLL input clock x 15 */
+#    define RCC_CFGR_PLLMUL_CLKx16  (14 << RCC_CFGR_PLLMUL_SHIFT) /* 111x: PLL input clock x 16 */
+#else
+#    define RCC_CFGR_PLLMUL_CLKx65  (13 << RCC_CFGR_PLLMUL_SHIFT) /* 1011: PLL input clock x 6.5 */
+#endif
+
 #ifndef CONFIG_STM32_VALUELINE
 #  define RCC_CFGR_USBPRE           (1 << 22) /* Bit 22: USB FS prescaler */
+#  define RCC_CFGR_USBPREd0         (0)       /* PLLCLK / 1 */
+#  define RCC_CFGR_USBPREd15        (1)       /* PLLCLK / 1.5 */
 #endif
 #ifdef CONFIG_STM32_CONNECTIVITYLINE
 #  define RCC_CFGR_OTGFSPRE         (1 << 22) /* Bit 22: OTG FS prescaler */
+#  define RCC_CFGR_OTGFSPREd2       (1)       /* PLL_VCO (2x PLLCLK) / 2 */
+#  define RCC_CFGR_OTGFSPREd3       (0)       /* PLL_VCO (3x PLLCLK) / 3 */
 #endif
 #define RCC_CFGR_MCO_SHIFT          (24)      /* Bits 27-24: Microcontroller Clock Output */
 #define RCC_CFGR_MCO_MASK           (15 << RCC_CFGR_MCO_SHIFT)

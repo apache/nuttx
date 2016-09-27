@@ -104,6 +104,16 @@ kconfig2html.c
     <Kconfig root> is the directory containing the root Kconfig file.
          Default <Kconfig directory>: .
 
+  NOTE: In order to use this tool, some configuration must be in-place will
+  all necessary symbolic links.  You can establish the configured symbolic
+  links with:
+
+    make context
+
+  or more quickly with:
+
+    make dirlinks
+
 mkconfigvars.sh
 ---------------
 
@@ -575,12 +585,52 @@ indent.sh
     -h
       Show this help message and exit
 
+sethost.sh
+----------
+
+  Saved configurations may run on Linux, Cygwin (32- or 64-bit), or other
+  platforms.  The platform characteristics can be changed use 'make
+  menuconfig'.  Sometimes this can be confusing due to the differences
+  between the platforms.  Enter sethost.sh
+
+  sethost.sh is a simple script that changes a configuration to your
+  host platform.  This can greatly simplify life if you use many different
+  configurations.  For example, if you are running on Linux and you
+  configure like this:
+
+    $ cd tools
+    $ ./configure.sh board/configuration
+    $ cd ..
+
+  The you can use the following command to both (1) make sure that the
+  configuration is up to date, AND (2) the configuration is set up
+  correctly for Linux:
+
+    $ tools/sethost.sh -l
+
+  Or, if you are on a Windows/Cygwin 64-bit platform:
+
+    $ tools/sethost.sh -w
+
+  Other options are available:
+
+    $ tools/sethost.sh -h
+
+    USAGE: tools/sethost.sh [-w|l] [-c|n] [-32|64] [<config>]
+           tools/sethost.sh -h
+
+    Where:
+      -w|l selects Windows (w) or Linux (l).  Default: Linux
+      -c|n selects Windows native (n) or Cygwin (c).  Default Cygwin
+      -32|64 selects 32- or 64-bit host (Only for Cygwin).  Default 64
+      -h will show this help test and terminate
+
 refresh.sh
 ----------
 
   This is a bash script that automatics refreshing of board default
   configuration (defconfig) files.  It does not do anything special
-  thet you cannot do manually, but is useful for me when I have to
+  that you cannot do manually, but is useful for me when I have to
   update dozens of confuration files.
 
   Configuration files have to be updated because over time, the

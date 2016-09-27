@@ -167,6 +167,17 @@ config CLOCK_MONOTONIC
 
 		The value of the CLOCK_MONOTONIC clock cannot be set via clock_settime().
 
+config ARCH_HAVE_TIMEKEEPING
+	bool
+	default n
+
+config CLOCK_TIMEKEEPING
+	bool "Support timekeeping algorithms"
+	default n
+	depends on EXPERIMENTAL && ARCH_HAVE_TIMEKEEPING
+	---help---
+		CLOCK_TIMEKEEPING enables experimental time management algorithms.
+
 config JULIAN_TIME
 	bool "Enables Julian time conversions"
 	default n
@@ -571,10 +582,11 @@ config SCHED_CPULOAD_EXTCLK
 		sched_process_cpuload() at each timer expiration with interrupts
 		disabled.
 
+if SCHED_CPULOAD_EXTCLK
+
 config SCHED_CPULOAD_TICKSPERSEC
 	int "External clock rate"
 	default 100
-	depends on SCHED_CPULOAD_EXTCLK
 	---help---
 		If an external clock is used to drive the sampling for the CPU load
 		calculations, then this value must be provided.  This value provides
@@ -582,6 +594,43 @@ config SCHED_CPULOAD_TICKSPERSEC
 		default value of 100 corresponds to 100Hz clock.  NOTE: that 100Hz
 		is the default frequency of the system time and, hence, the worst
 		possible choice in most cases.
+
+config CPULOAD_ONESHOT
+	bool "Use Oneshot timer"
+	default n
+	---help---
+		Use an MCU-specific oneshot timer as the external clock.  The
+		oneshot timer must be configured by board specific logic which must
+		then call:
+
+			void sched_oneshot_extclk(FAR struct oneshot_lowerhalf_s *lower);
+
+		To start the CPU load measurement. See include/nuttx/clock.h
+
+config CPULOAD_ONESHOT_ENTROPY
+	int "Bits of entropy"
+	default 6
+	range 0 30
+	---help---
+		This is the number of bits of entropy that will be applied. The
+		oneshot will be set to this interval:
+
+			CPULOAD_ONESHOT_NOMINAL - (CPULOAD_ONESHOT_ENTROPY / 2) +
+			error + nrand(CPULOAD_ONESHOT_ENTROPY)
+
+		Where
+
+			CPULOAD_ONESHOT_NOMINAL is CONFIG_SCHED_CPULOAD_TICKSPERSEC in
+			units of microseconds.
+			CPULOAD_ONESHOT_ENTROPY is (1 << CONFIG_CPULOAD_ONESHOT_ENTROPY),
+			and
+			'error' is an error value that is retained from interval to
+			interval so that although individual intervals are randomized,
+			the average will still be CONFIG_SCHED_CPULOAD_TICKSPERSEC.
+
+		This special value of zero disables entropy.
+
+endif # SCHED_CPULOAD_EXTCLK
 
 config SCHED_CPULOAD_TIMECONSTANT
 	int "CPU load time constant"

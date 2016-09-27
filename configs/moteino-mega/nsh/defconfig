@@ -57,7 +57,7 @@ CONFIG_ARCH_AVR=y
 # CONFIG_ARCH_HC is not set
 # CONFIG_ARCH_MIPS is not set
 # CONFIG_ARCH_RGMP is not set
-# CONFIG_ARCH_SH is not set
+# CONFIG_ARCH_RENESAS is not set
 # CONFIG_ARCH_SIM is not set
 # CONFIG_ARCH_X86 is not set
 # CONFIG_ARCH_Z16 is not set
@@ -371,7 +371,6 @@ CONFIG_DISABLE_PSEUDOFS_OPERATIONS=y
 #
 # System Logging
 #
-# CONFIG_SYSLOG is not set
 # CONFIG_SYSLOG_TIMESTAMP is not set
 
 #
@@ -664,7 +663,7 @@ CONFIG_NSH_CONSOLE=y
 #
 # Intel HEX to binary conversion
 #
-# CONFIG_SYSTEM_HEX2BIN is not set
+# CONFIG_LIB_HEX2BIN is not set
 
 #
 # I2C tool

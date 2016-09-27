@@ -501,7 +501,7 @@ static uint32_t lpc31_getreg(uint32_t addr)
         {
           if (count == 4)
             {
-              ullinfo("...\n");
+              uinfo("...\n");
             }
 
           return val;
@@ -518,7 +518,7 @@ static uint32_t lpc31_getreg(uint32_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          ullinfo("[repeats %d more times]\n", count-3);
+          uinfo("[repeats %d more times]\n", count-3);
         }
 
       /* Save the new address, value, and count */
@@ -530,7 +530,7 @@ static uint32_t lpc31_getreg(uint32_t addr)
 
   /* Show the register value read */
 
-  ullinfo("%08x->%08x\n", addr, val);
+  uinfo("%08x->%08x\n", addr, val);
   return val;
 }
 #endif
@@ -548,7 +548,7 @@ static void lpc31_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  ullinfo("%08x<-%08x\n", addr, val);
+  uinfo("%08x<-%08x\n", addr, val);
 
   /* Write the value */
 
@@ -1183,8 +1183,8 @@ static inline void lpc31_ep0setup(struct lpc31_usbdev_s *priv)
   index = GETUINT16(ctrl.index);
   len   = GETUINT16(ctrl.len);
 
-  ullinfo("type=%02x req=%02x value=%04x index=%04x len=%04x\n",
-          ctrl.type, ctrl.req, value, index, len);
+  uinfo("type=%02x req=%02x value=%04x index=%04x len=%04x\n",
+        ctrl.type, ctrl.req, value, index, len);
 
   /* Dispatch any non-standard requests */
   if ((ctrl.type & USB_REQ_TYPE_MASK) != USB_REQ_TYPE_STANDARD)
@@ -1323,7 +1323,7 @@ static inline void lpc31_ep0setup(struct lpc31_usbdev_s *priv)
           if (((ctrl.type & USB_REQ_RECIPIENT_MASK) == USB_REQ_RECIPIENT_DEVICE) &&
               value == USB_FEATURE_TESTMODE)
             {
-              ullinfo("test mode: %d\n", index);
+              uinfo("test mode: %d\n", index);
             }
           else if ((ctrl.type & USB_REQ_RECIPIENT_MASK) != USB_REQ_RECIPIENT_ENDPOINT)
             {
@@ -2083,7 +2083,7 @@ static int lpc31_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *r
   if (!req || !req->callback || !req->buf || !ep)
     {
       usbtrace(TRACE_DEVERROR(LPC31_TRACEERR_INVALIDPARMS), 0);
-      ullinfo("req=%p callback=%p buf=%p ep=%p\n", req, req->callback, req->buf, ep);
+      uinfo("req=%p callback=%p buf=%p ep=%p\n", req, req->callback, req->buf, ep);
       return -EINVAL;
     }
 #endif

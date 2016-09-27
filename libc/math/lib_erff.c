@@ -1,6 +1,7 @@
 /****************************************************************************
  * libc/math/lib_erff.c
  *
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2015 Brennan Ashton. All rights reserved.
  *   Author: Brennan Ashton <bashton@brennanashton.com>
  *
@@ -43,28 +44,37 @@
 #include <math.h>
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define  A1     0.254829592F
+#define  A2   (-0.284496736F)
+#define  A3     1.421413741F
+#define  A4   (-1.453152027F)
+#define  A5     1.061405429F
+#define  P      0.3275911F
+
+/****************************************************************************
  * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: erff
+ *
+ * Description:
+ *   This implementation comes from the Handbook of Mathmatical Functions
+ *   The implementations in this book are not protected by copyright.
+ *   erf comes from formula 7.1.26
+ *
  ****************************************************************************/
 
 float erff(float x)
 {
-  /* This implementation comes from the Handbook of Mathmatical Functions
-   * The implementations in this book are not protected by copyright.
-   * erf comes from formula 7.1.26
-   */
-
-  char sign;
   float t;
-  float a1, a2, a3, a4, a5, p;
+  float z;
 
-  a1 =  0.254829592;
-  a2 = -0.284496736;
-  a3 =  1.421413741;
-  a4 = -1.453152027;
-  a5 =  1.061405429;
-  p  =  0.3275911;
-
-  sign = (x >= 0 ? 1 : -1);
-  t = 1.0/(1.0 + p*x);
-  return sign * (1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * expf(-x * x));
+  z = fabsf(x);
+  t = 1.0F / (1.0F + P * z);
+  t = 1.0F - (((((A5 * t + A4) * t) + A3) * t + A2) * t + A1) * t * expf(-z * z);
+  return copysignf(t, x);
 }

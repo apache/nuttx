@@ -37,8 +37,8 @@
  *
  ****************************************************************************/
 
-#ifndef __CALYPSO_CHIP_H
-#define __CALYPSO_CHIP_H
+#ifndef __ARCH_ARM_SRC_CALYPSO_CHIP_H
+#define __ARCH_ARM_SRC_CALYPSO_CHIP_H
 
 /****************************************************************************
  * Included Files
@@ -208,4 +208,4 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif  /* __CALYPSO_CHIP_H */
+#endif  /* __ARCH_ARM_SRC_CALYPSO_CHIP_H */

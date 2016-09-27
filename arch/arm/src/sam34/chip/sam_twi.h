@@ -143,6 +143,7 @@
 #define TWI_MMR_MREAD              (1 << 12) /* Bit 12: Master Read Direction */
 #define TWI_MMR_DADR_SHIFT         (16)      /* Bits 16-22:  Device Address */
 #define TWI_MMR_DADR_MASK          (0x7f << TWI_MMR_DADR_SHIFT)
+#  define TWI_MMR_DADR(n)          ((uint32_t)(n) << TWI_MMR_DADR_SHIFT)
 
 /* TWI Slave Mode Register */
 
@@ -185,6 +186,9 @@
 #define TWI_INT_ENDTX              (1 << 13) /* Bit 13: End of TX buffer */
 #define TWI_INT_RXBUFF             (1 << 14) /* Bit 14: RX Buffer */
 #define TWI_INT_TXBUFE             (1 << 15) /* Bit 15: TX Buffer Empty */
+
+#define TWI_INT_ERRORS             (0x00000340)
+#define TWI_INT_ALL                (0x0000ffff)
 
 /* TWI Receive Holding Register */
 

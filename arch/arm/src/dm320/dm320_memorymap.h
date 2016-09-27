@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __DM320_MEMORYMAP_H
-#define __DM320_MEMORYMAP_H
+#ifndef __ARCH_ARM_SRC_DM320_DM320_MEMORYMAP_H
+#define __ARCH_ARM_SRC_DM320_DM320_MEMORYMAP_H
 
 /************************************************************************************
  * Included Files
@@ -261,4 +261,4 @@
 
 #endif
 
-#endif  /* __DM320_MEMORYMAP_H */
+#endif  /* __ARCH_ARM_SRC_DM320_DM320_MEMORYMAP_H */

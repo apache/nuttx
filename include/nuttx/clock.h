@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef _INCLUDE_NUTTX_CLOCK_H
-#define _INCLUDE_NUTTX_CLOCK_H
+#ifndef __INCLUDE_NUTTX_CLOCK_H
+#define __INCLUDE_NUTTX_CLOCK_H
 
 /****************************************************************************
  * Included Files
@@ -329,9 +329,31 @@ int clock_systimespec(FAR struct timespec *ts);
 int clock_cpuload(int pid, FAR struct cpuload_s *cpuload);
 #endif
 
+/****************************************************************************
+ * Name:  sched_oneshot_extclk
+ *
+ * Description:
+ *   Configure to use a oneshot timer as described in
+ *   include/nuttx/timers/oneshot.h to provid external clocking to assess
+ *   the CPU load.
+ *
+ * Input Parameters:
+ *   lower - An instance of the oneshot timer interface as defined in
+ *           include/nuttx/timers/oneshot.h
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_CPULOAD_ONESHOT
+struct oneshot_lowerhalf_s;
+void sched_oneshot_extclk(FAR struct oneshot_lowerhalf_s *lower);
+#endif
+
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INCLUDE_NUTTX_CLOCK_H */
+#endif /* __INCLUDE_NUTTX_CLOCK_H */

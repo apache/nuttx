@@ -268,7 +268,7 @@ EXTERN const uint32_t g_gpiobase[STM32L4_NPORTS];
  * Description:
  *   Configure a GPIO pin based on bit-encoded description of the pin.
  *   Once it is configured as Alternative (GPIO_ALT|GPIO_CNF_AFPP|...)
- *   function, it must be unconfigured with stm32_unconfiggpio() with
+ *   function, it must be unconfigured with stm32l4_unconfiggpio() with
  *   the same cfgset first before it can be set to non-alternative function.
  *
  * Returns:

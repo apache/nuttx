@@ -85,7 +85,7 @@ ARCHCFLAGS = -fno-builtin
 ifeq ($(CONFIG_UCLIBCXX_EXCEPTION),y)
   ARCHCPUFLAGSXX = -fno-builtin
 else
-  ARCHCPUFLAGSXX = -fno-builtin -fno-exceptions
+  ARCHCPUFLAGSXX = -fno-builtin -fno-exceptions -fcheck-new
 endif
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef

@@ -43,8 +43,8 @@
  * only indirectly through nuttx/irq.h
  */
 
-#ifndef __ARCH_LPC2378_IRQ_H
-#define __ARCH_LPC2378_IRQ_H
+#ifndef __ARCH_ARM_INCLUDE_LPC2378_IRQ_H
+#define __ARCH_ARM_INCLUDE_LPC2378_IRQ_H
 
 /****************************************************************************
  * Included Files
@@ -149,4 +149,4 @@ void up_detach_vector(int vector);
 #endif
 #endif
 
-#endif /* __ARCH_LPC2378_IRQ_H */
+#endif /* __ARCH_ARM_INCLUDE_LPC2378_IRQ_H */

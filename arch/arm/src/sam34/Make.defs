@@ -199,7 +199,7 @@ ifeq ($(CONFIG_ARCH_CHIP_SAM4CM),y)
 ifeq ($(CONFIG_SAM34_TC),y)
 CHIP_CSRCS += sam4cm_tc.c
 ifeq ($(CONFIG_SAM34_ONESHOT),y)
-CHIP_CSRCS += sam4cm_oneshot.c
+CHIP_CSRCS += sam4cm_oneshot.c sam4cm_oneshot_lowerhalf.c
 endif
 ifeq ($(CONFIG_SAM34_FREERUN),y)
 CHIP_CSRCS += sam4cm_freerun.c

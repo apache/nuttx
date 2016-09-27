@@ -119,7 +119,7 @@ static uint16_t icmpv6_router_interrupt(FAR struct net_driver_s *dev,
 {
   FAR struct icmpv6_router_s *state = (FAR struct icmpv6_router_s *)priv;
 
-  nllinfo("flags: %04x sent: %d\n", flags, state->snd_sent);
+  ninfo("flags: %04x sent: %d\n", flags, state->snd_sent);
 
   if (state)
     {
@@ -127,7 +127,7 @@ static uint16_t icmpv6_router_interrupt(FAR struct net_driver_s *dev,
 
       if ((flags & NETDEV_DOWN) != 0)
         {
-          nllerr("ERROR: Interface is down\n");
+          nerr("ERROR: Interface is down\n");
           icmpv6_router_terminate(state, -ENETUNREACH);
           return flags;
         }

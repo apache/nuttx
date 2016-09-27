@@ -847,7 +847,6 @@ Where <subdir> is one of the following:
        settings do nothing until you enable debug ouput.
 
         Device Drivers -> System Logging Device Options:
-          CONFIG_SYSLOG=y             : Configure SYSLOG output
           CONFIG_SYSLOG_CHAR=y
           CONFIG_SYSLOG_DEVPATH="/dev/ttyS0"
 
@@ -883,15 +882,15 @@ Where <subdir> is one of the following:
           CONFIG_NSH_ARCHINIT=y                   : Automatically start the USB monitor
 
         Application Configuration -> System NSH Add-Ons:
-          CONFIG_SYSTEM_USBMONITOR=y              : Enable the USB monitor daemon
-          CONFIG_SYSTEM_USBMONITOR_STACKSIZE=2048 : USB monitor daemon stack size
-          CONFIG_SYSTEM_USBMONITOR_PRIORITY=50    : USB monitor daemon priority
-          CONFIG_SYSTEM_USBMONITOR_INTERVAL=1     : Dump trace data every second
-          CONFIG_SYSTEM_USBMONITOR_TRACEINIT=y    : Enable TRACE output
-          CONFIG_SYSTEM_USBMONITOR_TRACECLASS=y
-          CONFIG_SYSTEM_USBMONITOR_TRACETRANSFERS=y
-          CONFIG_SYSTEM_USBMONITOR_TRACECONTROLLER=y
-          CONFIG_SYSTEM_USBMONITOR_TRACEINTERRUPTS=y
+          CONFIG_USBMONITOR=y              : Enable the USB monitor daemon
+          CONFIG_USBMONITOR_STACKSIZE=2048 : USB monitor daemon stack size
+          CONFIG_USBMONITOR_PRIORITY=50    : USB monitor daemon priority
+          CONFIG_USBMONITOR_INTERVAL=1     : Dump trace data every second
+          CONFIG_USBMONITOR_TRACEINIT=y    : Enable TRACE output
+          CONFIG_USBMONITOR_TRACECLASS=y
+          CONFIG_USBMONITOR_TRACETRANSFERS=y
+          CONFIG_USBMONITOR_TRACECONTROLLER=y
+          CONFIG_USBMONITOR_TRACEINTERRUPTS=y
 
        NOTE: USB debug output also be enabled in this case.  Both will appear
        on the serial SYSLOG output.  However, the debug output will be
@@ -913,16 +912,12 @@ Where <subdir> is one of the following:
         output will come the USB console, and 2) all debug output prior
         to connecting the USB console will be lost:
 
-        Device Drivers -> System Logging Device Options:
-           CONFIG_SYSLOG=n            : Disable SYSLOG output
-
         The second options is to configure a RAM SYLOG device.  This is
         a circular buffer that accumulated debug output in memory.  The
         contents of the circular buffer can be dumped from the NSH command
         line using the 'dmesg' command.
 
         Device Drivers -> System Logging Device Options:
-          CONFIG_SYSLOG=y             : Enables the System Logging feature.
           CONFIG_RAMLOG=y             : Enable the RAM-based logging feature.
           CONFIG_RAMLOG_CONSOLE=n     : (there is no default console device)
           CONFIG_RAMLOG_SYSLOG=y      : This enables the RAM-based logger as the

@@ -201,6 +201,17 @@ config ARCH_BOARD_FIRE_STM32
 		and 3 of the boards are supported but only version 2 has been
 		tested.
 
+config ARCH_BOARD_FREEDOM_K64F
+	bool "NXP Freedom-k64f development board"
+	depends on ARCH_CHIP_MK64FN1M0VLL12
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		development board.
+		This port uses the FreeScale FREEDOM-K64F development board. This
+		board uses the Kinetis K64 MK64FN1M0VLL12 Cortex-M4 MCU.
+
 config ARCH_BOARD_FREEDOM_KL25Z
 	bool "Freescale Freedom KL25Z"
 	depends on ARCH_CHIP_MKL25Z128
@@ -444,6 +455,12 @@ config ARCH_BOARD_MIRTOO
 		This is the port to the DTX1-4000L "Mirtoo" module.  This module uses MicroChip
 		PIC32MX250F128D.  See http://www.dimitech.com/ for further information.
 
+config ARCH_BOARD_MOXA
+	bool "Moxa board"
+	depends on ARCH_CHIP_MOXART
+	---help---
+		Moxa
+
 config ARCH_BOARD_NUTINY_NUC120
 	bool "Nuvoton NuTiny NUC120"
 	depends on ARCH_CHIP_NUC120LE3AN
@@ -511,6 +528,15 @@ config ARCH_BOARD_OLIMEX_STM32H407
 		This port uses the Olimex STM32 H407 board and a GNU arm-nuttx-elf
 		toolchain* under Linux or Cygwin. See the http://www.olimex.com for
 		further information. This board features the STMicro STM32F407ZGT6 (144pins).
+
+config ARCH_BOARD_OLIMEX_STM32E407
+	bool "Olimex STM32 E407 board"
+	depends on ARCH_CHIP_STM32F407ZG
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		Olimex STM32 E407 board based on the STMicro STM32F407ZGT6 (144pins).
 
 config ARCH_BOARD_OLIMEX_STM32P107
 	bool "Olimex STM32 P107 board"
@@ -910,6 +936,16 @@ config ARCH_BOARD_SPARK
 		(http://www.spark.io).  This board features the STM32103CBT6
 		MCU from STMicro.
 
+config ARCH_BOARD_STM32_BUTTERFLY2
+	bool "Kamami STM32Butterfly2 development board"
+	depends on ARCH_CHIP_STM32F107VC
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	---help---
+		A configuration for the Kamami STM32Butterfly2 development board
+		based on STM32F107VC micro-controler chip with optional ETH
+		board.
+
 config ARCH_BOARD_STM32_TINY
 	bool "STM32-Tiny board"
 	depends on ARCH_CHIP_STM32F103C8
@@ -1021,6 +1057,17 @@ config ARCH_BOARD_STM32L476VG_DISCO
 	---help---
 		STMicro STM32L476VG_DISCO development board featuring the STM32L476VG
 		MCU. The STM32L476VG  is a Cortex-M4 optimised for low-power operation
+		at up to 80MHz operation with 1024Kb Flash memory and 96+32Kb SRAM.
+
+config ARCH_BOARD_STM32L476_MDK
+	bool "Motorola Mods Development Kit (MDK)"
+	depends on ARCH_CHIP_STM32L476RG
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		Motorola Mods Development Board (MDK) features  STM32L476ME MCU.
+		The STM32L476ME  is a Cortex-M4 optimised for low-power operation
 		at up to 80MHz operation with 1024Kb Flash memory and 96+32Kb SRAM.
 
 config ARCH_BOARD_STM32L_DISCOVERY
@@ -1257,12 +1304,6 @@ config ARCH_BOARD_CUSTOM
 		Don't see the board you want?  You must first select the exact MCU part
 		number, then the boards supporting that part will be available for selection.
 
-config ARCH_BOARD_MOXA
-	bool "Moxa board"
-	depends on ARCH_CHIP_MOXART
-	---help---
-		Moxa
-
 endchoice
 
 if ARCH_BOARD_CUSTOM
@@ -1277,6 +1318,7 @@ config ARCH_BOARD_CUSTOM_NAME
 
 config ARCH_BOARD_CUSTOM_DIR
 	string "Custom board directory"
+	default ""
 	---help---
 		If the custom board configuration is selected, then it is necessary
 		to also tell the build system where it can find the board directory
@@ -1289,33 +1331,9 @@ config ARCH_BOARD_CUSTOM_DIR
 
 config ARCH_BOARD_CUSTOM_DIR_RELPATH
 	bool "Relative custom board directory"
+	default y
 	---help---
 		Specifies that the board directory is relative to the NuttX directory.
-
-config BOARD_CRASHDUMP
-	bool "Enable Board level logging of crash dumps"
-	default n
-	---help---
-		If selected up_asseert will call out to board_crashdump, in the case
-		of an assertion failure, prior to calling exit. Or in the
-		case of a hardfault prior to looping indefinitely. board_crashdump
-		then has a chance to save the state of the machine.
-
-		The purpose of board_crashdump is to save as much information as it can
-		about the cause of the fault and then most likely reset the system.
-
-		 N.B. There is limited system resources that can be used, who knows
-		 what memory is trashed? So all we can expect to do is save the
-		"machine state" in a place where on the next reset can write it
-		to more sophisticated storage in a sane operating environment.
-
-config BOARD_RESET_ON_CRASH
-	bool "Eanble Board Reset after the crashdump is saved"
-	default n
-	depends on BOARD_CRASHDUMP
-	---help---
-		If selected the board_crashdump should reset the machine after
-		saveing the state of the machine
 
 config BOARD_CUSTOM_LEDS
 	bool "Custom board LEDs"
@@ -1366,6 +1384,7 @@ config ARCH_BOARD
 	default "ez80f910200kitg"          if ARCH_BOARD_EZ80F910200KITG
 	default "ez80f910200zco"           if ARCH_BOARD_EZ80F910200ZCO
 	default "fire-stm32v2"             if ARCH_BOARD_FIRE_STM32
+	default "freedom-k64f"             if ARCH_BOARD_FREEDOM_K64F
 	default "freedom-kl25z"            if ARCH_BOARD_FREEDOM_KL25Z
 	default "freedom-kl26z"            if ARCH_BOARD_FREEDOM_KL26Z
 	default "hymini-stm32v"            if ARCH_BOARD_HYMINI_STM32V
@@ -1398,6 +1417,7 @@ config ARCH_BOARD
 	default "olimex-lpc-h3131"         if ARCH_BOARD_OLIMEX_LPC_H3131
 	default "olimex-stm32-h405"        if ARCH_BOARD_OLIMEX_STM32H405
 	default "olimex-stm32-h407"        if ARCH_BOARD_OLIMEX_STM32H407
+	default "olimex-stm32-e407"        if ARCH_BOARD_OLIMEX_STM32E407
 	default "olimex-stm32-p107"        if ARCH_BOARD_OLIMEX_STM32P107
 	default "olimex-stm32-p207"        if ARCH_BOARD_OLIMEX_STM32P207
 	default "olimex-strp711"           if ARCH_BOARD_OLIMEX_STRP711
@@ -1434,6 +1454,7 @@ config ARCH_BOARD
 	default "shenzhou"                 if ARCH_BOARD_SHENZHOU
 	default "skp16c26"                 if ARCH_BOARD_SKP16C26
 	default "spark"                    if ARCH_BOARD_SPARK
+	default "stm32butterfly2"          if ARCH_BOARD_STM32_BUTTERFLY2
 	default "stm32_tiny"               if ARCH_BOARD_STM32_TINY
 	default "stm32f103-minimum"        if ARCH_BOARD_STM32F103_MINIMUM
 	default "stm3210e-eval"            if ARCH_BOARD_STM3210E_EVAL
@@ -1446,6 +1467,7 @@ config ARCH_BOARD
 	default "stm32f746g-disco"         if ARCH_BOARD_STM32F746G_DISCO
 	default "stm32f746-ws"             if ARCH_BOARD_STM32F746_WS
 	default "stm32l476vg-disco"        if ARCH_BOARD_STM32L476VG_DISCO
+	default "stm32l476-mdk"            if ARCH_BOARD_STM32L476_MDK
 	default "stm32ldiscovery"          if ARCH_BOARD_STM32L_DISCOVERY
 	default "stm32vldiscovery"         if ARCH_BOARD_STM32VL_DISCOVERY
 	default "mikroe-stm32f4"           if ARCH_BOARD_MIKROE_STM32F4
@@ -1503,33 +1525,8 @@ config ARCH_IRQBUTTONS
 	---help---
 		"Support interrupts on button presses and releases."
 
-config NSH_MMCSDMINOR
-	int "MMC/SD minor number"
-	default 0
-	depends on NSH_LIBRARY && MMCSD
-	---help---
-		If board-specific NSH start-up logic needs to mount an MMC/SD device, then the
-		setting should be provided to identify the MMC/SD minor device number (i.e., the N ini
-		/dev/mmcsdN).  Default 0
-
-config NSH_MMCSDSLOTNO
-	int "MMC/SD slot number"
-	default 0
-	depends on NSH_LIBRARY && MMCSD
-	---help---
-		If board-specific NSH start-up supports more than one MMC/SD slot, then this setting
-		should be provided to indicate which slot should be used.  Default: 0.
-
-config NSH_MMCSDSPIPORTNO
-	int "MMC/SD SPI device number"
-	default 0
-	depends on NSH_LIBRARY && MMCSD && MMCSD_SPI
-	---help---
-		If board-specif NSH start-up logic will mount an SPI-based MMC/SD volume, then this
-		setting may be needed to tell the board logic which SPI bus to use.  Default: 0
-		(meaning is board-specific).
-
 comment "Board-Specific Options"
+
 
 if ARCH_BOARD_AMBER
 source "configs/amber/Kconfig"
@@ -1590,6 +1587,9 @@ source "configs/ez80f910200zco/Kconfig"
 endif
 if ARCH_BOARD_FIRE_STM32
 source "configs/fire-stm32v2/Kconfig"
+endif
+if ARCH_BOARD_FREEDOM_K64F
+source "configs/freedom-k64f/Kconfig"
 endif
 if ARCH_BOARD_FREEDOM_KL25Z
 source "configs/freedom-kl25z/Kconfig"
@@ -1657,6 +1657,9 @@ endif
 if ARCH_BOARD_MOTEINO_MEGA
 source "configs/moteino-mega/Kconfig"
 endif
+if ARCH_BOARD_MOXA
+source "configs/moxa/Kconfig"
+endif
 if ARCH_BOARD_MX1ADS
 source "configs/mx1ads/Kconfig"
 endif
@@ -1686,6 +1689,9 @@ source "configs/olimex-stm32-h405/Kconfig"
 endif
 if ARCH_BOARD_OLIMEX_STM32H407
 source "configs/olimex-stm32-h407/Kconfig"
+endif
+if ARCH_BOARD_OLIMEX_STM32E407
+source "configs/olimex-stm32-e407/Kconfig"
 endif
 if ARCH_BOARD_OLIMEX_STM32P107
 source "configs/olimex-stm32-p107/Kconfig"
@@ -1792,6 +1798,9 @@ endif
 if ARCH_BOARD_SPARK
 source "configs/spark/Kconfig"
 endif
+if ARCH_BOARD_STM32_BUTTERFLY2
+source "configs/stm32butterfly2/Kconfig"
+endif
 if ARCH_BOARD_STM32_TINY
 source "configs/stm32_tiny/Kconfig"
 endif
@@ -1824,6 +1833,9 @@ source "configs/stm32f746-ws/Kconfig"
 endif
 if ARCH_BOARD_STM32L476VG_DISCO
 source "configs/stm32l476vg-disco/Kconfig"
+endif
+if ARCH_BOARD_STM32L476_MDK
+source "configs/stm32l476-mdk/Kconfig"
 endif
 if ARCH_BOARD_STM32L_DISCOVERY
 source "configs/stm32ldiscovery/Kconfig"
@@ -1891,9 +1903,34 @@ endif
 if ARCH_BOARD_SIM
 source "configs/sim/Kconfig"
 endif
-if ARCH_BOARD_MOXA
-source "configs/moxa/Kconfig"
+if ARCH_BOARD_CUSTOM
+source "configs/dummy/Kconfig"
 endif
+
+config BOARD_CRASHDUMP
+	bool "Enable Board level logging of crash dumps"
+	default n
+	---help---
+		If selected up_assert will call out to board_crashdump, in the case
+		of an assertion failure, prior to calling exit. Or in the
+		case of a hardfault prior to looping indefinitely. board_crashdump
+		then has a chance to save the state of the machine.
+
+		The purpose of board_crashdump is to save as much information as it can
+		about the cause of the fault and then most likely reset the system.
+
+		 N.B. There is limited system resources that can be used, who knows
+		 what memory is trashed? So all we can expect to do is save the
+		"machine state" in a place where on the next reset can write it
+		to more sophisticated storage in a sane operating environment.
+
+config BOARD_RESET_ON_CRASH
+	bool "Enable Board Reset after the crashdump is saved"
+	default n
+	depends on BOARD_CRASHDUMP
+	---help---
+		If selected the board_crashdump should reset the machine after
+		saveing the state of the machine
 
 config LIB_BOARDCTL
 	bool "Enable boardctl() interface"

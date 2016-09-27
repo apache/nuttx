@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/sim/src/sim.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -73,7 +73,7 @@ int sim_bringup(void);
  * Name: sim_zoneinfo
  *
  * Description:
- *   Mount the TZ database.  The apps/system/zoneinfo directory contains
+ *   Mount the TZ database.  The nuttx/zoneinfo directory contains
  *   logic to create a version of the TZ/Olson database.
  *   This database is required if localtime() support is selected via
  *   CONFIG_LIBC_LOCALTIME.  This logic in that directory does the following:
@@ -90,7 +90,7 @@ int sim_bringup(void);
  *
  *   - First, a ROM disk device must be created.  This is done by calling
  *     the function romdisk_register() as described in
- *     nuttx/include/nuttx/fs/ramdisk.h.  This is an OS level operation
+ *     nuttx/include/nuttx/drivers/ramdisk.h.  This is an OS level operation
  *     and must be done in the board-level logic before your appliction
  *     starts.
  *
@@ -107,8 +107,20 @@ int sim_bringup(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SYSTEM_ZONEINFO_ROMFS
+#ifdef CONFIG_LIB_ZONEINFO_ROMFS
 int sim_zoneinfo(int minor);
+#endif
+
+/****************************************************************************
+ * Name: sim_gpio_initialize
+ *
+ * Description:
+ *   Initialize GPIO drivers for use with /apps/examples/gpio
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_EXAMPLES_GPIO
+int sim_gpio_initialize(void);
 #endif
 
 #endif /* __CONFIGS_SIM_SRC_SIM_H */

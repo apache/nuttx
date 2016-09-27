@@ -1,6 +1,5 @@
 /****************************************************************************
- * arch/z8/arch.h
- * arch/chip/arch.h
+ * arch/z80/include/z8/arch.h
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -38,8 +37,8 @@
  * only indirectly through nuttx/arch.h (via arch/arch.h)
  */
 
-#ifndef __ARCH_Z8_ARCH_H
-#define __ARCH_Z8_ARCH_H
+#ifndef __ARCH_Z80_INCLUDE_Z8_ARCH_H
+#define __ARCH_Z80_INCLUDE_Z8_ARCH_H
 
 /****************************************************************************
  * Included Files
@@ -74,5 +73,5 @@ extern "C"
 }
 #endif
 
-#endif /* __ARCH_Z8_ARCH_H */
+#endif /* __ARCH_Z80_INCLUDE_Z8_ARCH_H */
 

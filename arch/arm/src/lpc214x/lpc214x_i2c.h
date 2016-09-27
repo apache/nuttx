@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef _ARCH_ARM_SRC_LPC214X_I2C_H
-#define _ARCH_ARM_SRC_LPC214X_I2C_H
+#ifndef __ARCH_ARM_SRC_LPC214X_LPC214X_I2C_H
+#define __ARCH_ARM_SRC_LPC214X_LPC214X_I2C_H
 
 /************************************************************************************
  * Included Files
@@ -138,4 +138,4 @@
  * Public Function Prototypes
  ************************************************************************************/
 
-#endif  /* _ARCH_ARM_SRC_LPC214X_I2C_H */
+#endif  /* __ARCH_ARM_SRC_LPC214X_LPC214X_I2C_H */

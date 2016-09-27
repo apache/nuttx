@@ -39,115 +39,11 @@
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
 #include <syslog.h>
 
-#include <nuttx/init.h>
-#include <nuttx/arch.h>
-#include <nuttx/clock.h>
-#include <nuttx/streams.h>
+#include <nuttx/syslog/syslog.h>
 
 #include "syslog/syslog.h"
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: vsyslog_internal
- *
- * Description:
- *   This is the internal implementation of vsyslog (see the description of
- *   syslog and vsyslog below)
- *
- ****************************************************************************/
-
-static inline int vsyslog_internal(FAR const IPTR char *fmt, va_list ap)
-{
-#if defined(CONFIG_SYSLOG)
-  struct lib_outstream_s stream;
-#elif CONFIG_NFILE_DESCRIPTORS > 0
-  struct lib_rawoutstream_s stream;
-#elif defined(CONFIG_ARCH_LOWPUTC)
-  struct lib_outstream_s stream;
-#endif
-
-#if defined(CONFIG_SYSLOG_TIMESTAMP)
-  struct timespec ts;
-
-  /* Get the current time.  Since debug output may be generated very early
-   * in the start-up sequence, hardware timer support may not yet be
-   * available.
-   */
-
-  if (!OSINIT_HW_READY() || clock_systimespec(&ts) < 0)
-    {
-      /* Timer hardware is not available, or clock_systimespec failed */
-
-      ts.tv_sec  = 0;
-      ts.tv_nsec = 0;
-    }
-#endif
-
-#if defined(CONFIG_SYSLOG)
-  /* Wrap the low-level output in a stream object and let lib_vsprintf
-   * do the work.
-   * REVISIT: lib_syslogstream() is only available in the FLAT build or
-   * the kernel phase of other builds.   
-   */
-
-  lib_syslogstream((FAR struct lib_outstream_s *)&stream);
-
-#if defined(CONFIG_SYSLOG_TIMESTAMP)
-  /* Pre-pend the message with the current time, if available */
-
-  (void)lib_sprintf((FAR struct lib_outstream_s *)&stream,
-                    "[%6d.%06d]", ts.tv_sec, ts.tv_nsec/1000);
-
-#endif
-
-  return lib_vsprintf((FAR struct lib_outstream_s *)&stream, fmt, ap);
-
-#elif CONFIG_NFILE_DESCRIPTORS > 0
-  /* Wrap the stdout in a stream object and let lib_vsprintf
-   * do the work.
-   */
-
-  lib_rawoutstream(&stream, 1);
-
-#if defined(CONFIG_SYSLOG_TIMESTAMP)
-  /* Pre-pend the message with the current time, if available */
-
-  (void)lib_sprintf((FAR struct lib_outstream_s *)&stream,
-                    "[%6d.%06d]",  ts.tv_sec, ts.tv_nsec/1000);
-#endif
-
-  return lib_vsprintf(&stream.public, fmt, ap);
-
-#elif defined(CONFIG_ARCH_LOWPUTC)
-  /* Wrap the low-level output in a stream object and let lib_vsprintf
-   * do the work.
-   * REVISIT: lib_lowoutstream() is only available in the FLAT build or
-   * the kernel phase of other builds.   
-   */
-
-  lib_lowoutstream((FAR struct lib_outstream_s *)&stream);
-
-#if defined(CONFIG_SYSLOG_TIMESTAMP)
-  /* Pre-pend the message with the current time, if available */
-
-  (void)lib_sprintf((FAR struct lib_outstream_s *)&stream,
-                    "[%6d.%06d]", ts.tv_sec, ts.tv_nsec/1000);
-#endif
-
-  return lib_vsprintf((FAR struct lib_outstream_s *)&stream, fmt, ap);
-
-#else /* CONFIG_SYSLOG */
-
-  return 0;
-
-#endif /* CONFIG_SYSLOG */
-}
 
 /****************************************************************************
  * Public Functions
@@ -167,43 +63,18 @@ int vsyslog(int priority, FAR const IPTR char *fmt, va_list ap)
 {
   int ret = 0;
 
-#if defined(CONFIG_BUILD_FLAT) || defined (__KERNEL__)
-  /* up_interrupt_context() and lowvsyslog() are only available in the FLAT
-   * build or during the kernel pass of the protected or kernel two pass
-   * builds.
-   */
+  /* Check if this priority is enabled */
 
-#if !defined(CONFIG_SYSLOG) && CONFIG_NFILE_DESCRIPTORS > 0
-  /* We are generating output on stdout.  So check if this function was
-   * called from an interrupt handler.  We cannot send data to stdout from
-   * an interrupt handler.
-   */
-
-  if (up_interrupt_context())
+  if ((g_syslog_mask & LOG_MASK(priority)) != 0)
     {
-#ifdef CONFIG_ARCH_LOWPUTC
-      /* But the low-level serial interface up_putc() is provided so we may
-       * be able to generate low-level serial output instead.
-       * NOTE: The low-level serial output is not necessarily the same
-       * output destination as stdout!
+      /* Yes.. Perform the _vsyslog system call.
+       *
+       * NOTE:  The va_list parameter is passed by reference.  That is
+       * because the va_list is a structure in some compilers and passing
+       * of structures in the NuttX sycalls does not work.
        */
 
-      ret = lowvsyslog(priority, fmt, ap);
-
-#endif /* CONFIG_ARCH_LOWPUTC */
-    }
-  else
-#endif /* !CONFIG_SYSLOG && CONFIG_NFILE_DESCRIPTORS > 0 */
-#endif /* CONFIG_BUILD_FLAT || __KERNEL */
-    {
-      /* Check if this priority is enabled */
-
-      if ((g_syslog_mask & LOG_MASK(priority)) != 0)
-        {
-          /* Yes.. let vsylog_internal do the deed */
-
-          ret = vsyslog_internal(fmt, ap);
-        }
+      ret = _vsyslog(priority, fmt, &ap);
     }
 
   return ret;

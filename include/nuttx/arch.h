@@ -1496,8 +1496,13 @@ void up_timer_initialize(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SCHED_TICKLESS
+#if defined(CONFIG_SCHED_TICKLESS) && !defined(CONFIG_CLOCK_TIMEKEEPING)
 int up_timer_gettime(FAR struct timespec *ts);
+#endif
+
+#ifdef CONFIG_CLOCK_TIMEKEEPING
+int up_timer_getcounter(FAR uint64_t *cycles);
+void up_timer_getmask(FAR uint64_t *mask);
 #endif
 
 /****************************************************************************
@@ -1929,7 +1934,7 @@ void up_cxxinitialize(void);
  *   CONFIG_SCHED_TICKLESS is *not* defined).  The timer interrupt logic
  *   itself is implemented in the architecture specific code, but must call
  *   the following OS function periodically -- the calling interval must
- *   be MSEC_PER_TICK.
+ *   be CONFIG_USEC_PER_TICK.
  *
  ****************************************************************************/
 

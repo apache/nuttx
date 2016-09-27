@@ -726,14 +726,14 @@ Where <subdir> is one of the following:
 
         - /dev/console still exists and still refers to the serial port. So
           you can still use certain kinds of debug output (see include/debug.h, all
-          of the interfaces based on lowsyslog will work in this configuration).
+          debug output from interrupt handlers will be lost.
 
         - But don't enable USB debug output!  Since USB is console is used for
           USB debug output and you are using a USB console, there will be
           infinite loops and deadlocks:  Debug output generates USB debug
           output which generatates USB debug output, etc.  If you want USB
           debug output, you should consider enabling USB trace
-          (CONFIG_USBDEV_TRACE) and perhaps the USB monitor (CONFIG_SYSTEM_USBMONITOR).
+          (CONFIG_USBDEV_TRACE) and perhaps the USB monitor (CONFIG_USBMONITOR).
 
           See the usbnsh configuration below for more information on configuring
           USB trace output and the USB monitor.

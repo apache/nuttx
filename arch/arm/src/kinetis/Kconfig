@@ -37,66 +37,130 @@ config ARCH_CHIP_MK20DX128VLH5
 config ARCH_CHIP_MK20DX64VLH7
 	bool "MK20DX64VLH7"
 	select ARCH_FAMILY_K20
+	select KINETIS_HAVE_I2C1
 
 config ARCH_CHIP_MK20DX128VLH7
 	bool "MK20DX128VLH7"
 	select ARCH_FAMILY_K20
+	select KINETIS_HAVE_I2C1
 
 config ARCH_CHIP_MK20DX256VLH7
 	bool "MK20DX256VLH7"
 	select ARCH_FAMILY_K20
+	select KINETIS_HAVE_I2C1
 
 config ARCH_CHIP_MK40N512VLQ100
 	bool "MK40N512VLQ100"
 	select ARCH_FAMILY_K40
+	select KINETIS_HAVE_I2C1
 
 config ARCH_CHIP_MK40N512VMD100
 	bool "MK40N512VMD100"
 	select ARCH_FAMILY_K40
+	select KINETIS_HAVE_I2C1
 
 config ARCH_CHIP_MK40X128VLQ100
 	bool "MK40X128VLQ100"
 	select ARCH_FAMILY_K40
+	select KINETIS_HAVE_I2C1
 
 config ARCH_CHIP_MK40X128VMD100
 	bool "MK40X128VMD100"
 	select ARCH_FAMILY_K40
+	select KINETIS_HAVE_I2C1
 
 config ARCH_CHIP_MK40X256VLQ100
 	bool "MK40X256VLQ100"
 	select ARCH_FAMILY_K40
+	select KINETIS_HAVE_I2C1
 
 config ARCH_CHIP_MK40X256VMD100
 	bool "MK40X256VMD100"
 	select ARCH_FAMILY_K40
+	select KINETIS_HAVE_I2C1
 
 config ARCH_CHIP_MK60N256VLQ100
 	bool "MK60N256VLQ100"
 	select ARCH_FAMILY_K60
+	select KINETIS_HAVE_I2C1
 
 config ARCH_CHIP_MK60N256VMD100
 	bool "MK60N256VMD100"
 	select ARCH_FAMILY_K60
+	select KINETIS_HAVE_I2C1
+	select KINETIS_HAVE_I2C2
 
 config ARCH_CHIP_MK60N512VLL100
 	bool "MK60N512VLL100"
 	select ARCH_FAMILY_K60
+	select KINETIS_HAVE_I2C1
+	select KINETIS_HAVE_I2C2
 
 config ARCH_CHIP_MK60N512VLQ100
 	bool "MK60N512VLQ100"
 	select ARCH_FAMILY_K60
+	select KINETIS_HAVE_I2C1
+	select KINETIS_HAVE_I2C2
 
 config ARCH_CHIP_MK60N512VMD100
 	bool "MK60N512VMD100"
 	select ARCH_FAMILY_K60
+	select KINETIS_HAVE_I2C1
+	select KINETIS_HAVE_I2C2
 
 config ARCH_CHIP_MK60X256VLQ100
 	bool "MK60X256VLQ100"
 	select ARCH_FAMILY_K60
+	select KINETIS_HAVE_I2C1
+	select KINETIS_HAVE_I2C2
 
 config ARCH_CHIP_MK60X256VMD100
 	bool "MK60X256VMD100"
 	select ARCH_FAMILY_K60
+	select KINETIS_HAVE_I2C1
+	select KINETIS_HAVE_I2C2
+
+config ARCH_CHIP_MK64FN1M0VLL12
+	bool "MK64FN1M0VLL12"
+	select ARCH_FAMILY_K64
+	select KINETIS_HAVE_I2C1
+	select KINETIS_HAVE_I2C2
+
+config ARCH_CHIP_MK64FX512VLL12
+	bool "MK64FX512VLL12"
+	select ARCH_FAMILY_K64
+	select KINETIS_HAVE_I2C1
+	select KINETIS_HAVE_I2C2
+
+config ARCH_CHIP_MK64FX512VDC12
+	bool "MK64FX512VDC12"
+	select ARCH_FAMILY_K64
+	select KINETIS_HAVE_I2C1
+	select KINETIS_HAVE_I2C2
+
+config ARCH_CHIP_MK64FN1M0VDC12
+	bool "MK64FN1M0VDC12"
+	select ARCH_FAMILY_K64
+	select KINETIS_HAVE_I2C1
+	select KINETIS_HAVE_I2C2
+
+config ARCH_CHIP_MK64FX512VLQ12
+	bool "MK64FX512VLQ12"
+	select ARCH_FAMILY_K64
+	select KINETIS_HAVE_I2C1
+	select KINETIS_HAVE_I2C2
+
+config ARCH_CHIP_MK64FX512VMD12
+	bool "MK64FX512VMD12"
+	select ARCH_FAMILY_K64
+	select KINETIS_HAVE_I2C1
+	select KINETIS_HAVE_I2C2
+
+config ARCH_CHIP_MK64FN1M0VMD12
+	bool "MK64FN1M0VMD12"
+	select ARCH_FAMILY_K64
+	select KINETIS_HAVE_I2C1
+	select KINETIS_HAVE_I2C2
 
 endchoice
 
@@ -114,7 +178,19 @@ config ARCH_FAMILY_K60
 	bool
 	default n
 
+config ARCH_FAMILY_K64
+	bool
+	default n
+
 menu "Kinetis Peripheral Support"
+
+config KINETIS_HAVE_I2C1
+	bool
+	default n
+
+config KINETIS_HAVE_I2C2
+	bool
+	default n
 
 config KINETIS_TRACE
 	bool "Trace"
@@ -173,19 +249,22 @@ config KINETIS_UART5
 config KINETIS_ENET
 	bool "Ethernet"
 	default n
-	depends on ARCH_FAMILY_K60
-	select NET
+	depends on ARCH_FAMILY_K60 || ARCH_FAMILY_K64
+	select ARCH_HAVE_PHY
 	select ARCH_HAVE_NETDEV_STATISTICS
+	select NET
+	select NETDEVICES
+	select NET_MULTIBUFFER
 	---help---
-		Support Ethernet (K60 only)
+		Support Ethernet (K6x only)
 
 config KINETIS_RNGB
 	bool "Random number generator"
 	default n
-	depends on ARCH_FAMILY_K60
+	depends on ARCH_FAMILY_K60 || ARCH_FAMILY_K64
 	select ARCH_HAVE_RNG
 	---help---
-		Support the random number generator(K60 only)
+		Support the random number generator(K6x only)
 
 config KINETIS_FLEXCAN0
 	bool "FlexCAN0"
@@ -220,12 +299,23 @@ config KINETIS_SPI2
 config KINETIS_I2C0
 	bool "I2C0"
 	default n
+	select I2C
 	---help---
 		Support I2C0
 
 config KINETIS_I2C1
 	bool "I2C1"
 	default n
+	select I2C
+	depends on KINETIS_HAVE_I2C1
+	---help---
+		Support I2C1
+
+config KINETIS_I2C2
+	bool "I2C2"
+	default n
+	select I2C
+	depends on KINETIS_HAVE_I2C2
 	---help---
 		Support I2C1
 
@@ -383,6 +473,9 @@ config KINETIS_PIT
 
 endmenu
 
+menu "Kinetis FTM PWM Configuration"
+	depends on KINETIS_FTM0 || KINETIS_FTM1 || KINETIS_FTM2
+
 config KINETIS_FTM0_PWM
 	bool "FTM0 PWM"
 	default n
@@ -446,14 +539,16 @@ config KINETIS_FTM2_CHANNEL
 		If FTM2 is enabled for PWM usage, you also need specifies the timer output
 		channel {0,..,1}
 
-comment "Kinetis GPIO Interrupt Configuration"
+endmenu # Kinetis FTM PWM Configuration
 
-config GPIO_IRQ
+menu "Kinetis GPIO Interrupt Configuration"
+
+config KINETIS_GPIOIRQ
 	bool "GPIO pin interrupts"
 	---help---
 		Enable support for interrupting GPIO pins
 
-if GPIO_IRQ
+if KINETIS_GPIOIRQ
 
 config KINETIS_PORTAINTS
 	bool "GPIOA interrupts"
@@ -481,55 +576,63 @@ config KINETIS_PORTEINTS
 		Enable support for 32 interrupts from GPIO port E pins
 
 endif
+endmenu # Kinetis GPIO Interrupt Configuration
 
-if KINETIS_ENET
+menu "Kinetis Ethernet Configuration"
+	depends on KINETIS_ENET
 
-comment "Kinetis Ethernet Configuration"
-
-config ENET_ENHANCEDBD
+config KINETIS_ENETENHANCEDBD
 	bool "Use enhanced buffer descriptors"
 	default n
 	---help---
 		Use enhanced, 32-byte buffer descriptors
 
-config ENET_NETHIFS
+config KINETIS_ENETNETHIFS
 	int "Number of Ethernet interfaces"
 	default 1
 	---help---
 		Number of Ethernet interfaces supported by the hardware.  Must be
 		one for now.
 
-config ENET_NRXBUFFERS
+config KINETIS_ENETNRXBUFFERS
 	int "Number of Ethernet Rx buffers"
 	default 6
 	---help---
 		Number of Ethernet Rx buffers to use.  The size of one buffer is
 		determined by NET_BUFSIZE
 
-config ENET_NTXBUFFERS
+config KINETIS_ENETNTXBUFFERS
 	int "Number of Ethernet Tx buffers"
 	default 2
 	---help---
 		Number of Ethernet Tx buffers to use. The size of one buffer is
 		determined by NET_BUFSIZE
 
-config ENET_PHYADDR
-	int "PHY address"
-	default 1
-	---help---
-		MII/RMII address of the PHY
-
-config ENET_USEMII
+config KINETIS_ENETUSEMII
 	bool "Use MII interface"
 	default n
 	---help---
 		The the MII PHY interface.  Default:  Use RMII interface
 
-endif
+config KINETIS_ENET_MDIOPULLUP
+	bool "MDIO pull-up"
+	default n
+	---help---
+		If there is no on-board pull-up resister on the MII/RMII MDIO line,
+		then this option may be selected in order to configure an internal
+		pull-up on MDIO.
 
-if KINETIS_SDHC
+config KINETIS_ENET_NORXER
+	bool "Suppress RXER"
+	default n
+	---help---
+		If selected, then the MII/RMII RXER output will be configured as a
+		GPIO and pulled low.
 
-comment "Kinetis SDHC Configuration"
+endmenu # Kinetis Ethernet Configuration
+
+menu "Kinetis SDHC Configuration"
+	depends on KINETIS_SDHC
 
 config KINETIS_SDHC_ABSFREQ
 	bool "Custom transfer frequencies"
@@ -572,18 +675,13 @@ config KINETIS_SD4BIT_FREQ
 		Frequency to use for transferring data to/from an SD card using all four data lines.
 
 endif
+endmenu # Kinetis SDHC Configuration
 
-config KINETIS_SDHC_DMAPRIO
-	int "SDHC DMA priority"
-	depends on SDIO_DMA
-	---help---
-		SDHC DMA priority
-
-endif
-
-comment "Kinetis UART Configuration"
+menu "Kinetis UART Configuration"
 
 config KINETIS_UARTFIFOS
 	bool "Enable UART0 FIFO"
 	default n
 	depends on KINETIS_UART0
+
+endmenu # Kinetis UART Configuration

@@ -138,8 +138,8 @@ static void btn_enable(FAR const struct btn_lowerhalf_s *lower,
   flags = enter_critical_section();
   btn_disable();
 
-  illinfo("press: %02x release: %02x handler: %p arg: %p\n",
-          press, release, handler, arg);
+  iinfo("press: %02x release: %02x handler: %p arg: %p\n",
+        press, release, handler, arg);
 
   /* If no events are indicated or if no handler is provided, then this
    * must really be a request to disable interrupts.

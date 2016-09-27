@@ -1,5 +1,5 @@
 /****************************************************************************
- * common/up_registerdump.c
+ * arch/z16/src/common/up_registerdump.c
  *
  *   Copyright (C) 2008-2009, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -63,7 +63,7 @@ CONFIG_ARCH_ARM=y
 # CONFIG_ARCH_HC is not set
 # CONFIG_ARCH_MIPS is not set
 # CONFIG_ARCH_RGMP is not set
-# CONFIG_ARCH_SH is not set
+# CONFIG_ARCH_RENESAS is not set
 # CONFIG_ARCH_SIM is not set
 # CONFIG_ARCH_X86 is not set
 # CONFIG_ARCH_Z16 is not set
@@ -715,7 +715,7 @@ CONFIG_USART2_2STOP=0
 # System Logging
 #
 # CONFIG_RAMLOG is not set
-# CONFIG_SYSLOG_CONSOLE is not set
+# CONFIG_CONSOLE_SYSLOG is not set
 
 #
 # Networking Support
@@ -749,7 +749,6 @@ CONFIG_FS_MQUEUE_MPATH="/var/mqueue"
 #
 # System Logging
 #
-# CONFIG_SYSLOG is not set
 # CONFIG_SYSLOG_TIMESTAMP is not set
 
 #
@@ -935,7 +934,7 @@ CONFIG_EXAMPLES_OSTEST_RR_RUNS=10
 # CONFIG_SYSTEM_CLE is not set
 # CONFIG_SYSTEM_CUTERM is not set
 # CONFIG_SYSTEM_INSTALL is not set
-# CONFIG_SYSTEM_HEX2BIN is not set
+# CONFIG_LIB_HEX2BIN is not set
 # CONFIG_FSUTILS_INIFILE is not set
 # CONFIG_SYSTEM_RAMTEST is not set
 # CONFIG_READLINE_HAVE_EXTMATCH is not set

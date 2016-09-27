@@ -106,4 +106,4 @@ extern "C"
 }
 #endif
 
-#endif /* _NFS_NFS_H */
+#endif /* __INCLUDE_NUTTX_FS_NFS_H */

@@ -58,7 +58,7 @@
  * occurrence of an interrupt.
  */
 
-extern FAR xcpt_t g_irqvector[NR_IRQS+1];
+extern FAR xcpt_t g_irqvector[NR_IRQS];
 
 #ifdef CONFIG_SMP
 /* This is the spinlock that enforces critical sections when interrupts are

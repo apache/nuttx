@@ -49,7 +49,7 @@
 #include "chip.h"
 #include "chip/stm32l4_can.h"
 
-#include <nuttx/can.h>
+#include <nuttx/drivers/can.h>
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -117,7 +117,7 @@ extern "C"
  ************************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_caninitialize
+ * Name: stm32l4can_initialize
  *
  * Description:
  *   Initialize the selected CAN port
@@ -131,7 +131,7 @@ extern "C"
  ****************************************************************************/
 
 struct can_dev_s;
-FAR struct can_dev_s *stm32l4_caninitialize(int port);
+FAR struct can_dev_s *stm32l4can_initialize(int port);
 
 #undef EXTERN
 #if defined(__cplusplus)

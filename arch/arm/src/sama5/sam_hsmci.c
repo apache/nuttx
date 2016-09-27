@@ -1241,7 +1241,7 @@ static void sam_dmacallback(DMA_HANDLE handle, void *arg, int result)
       if (result < 0)
         {
           wkupevent = (result == -ETIMEDOUT ? SDIOWAIT_TIMEOUT : SDIOWAIT_ERROR);
-          fllerr("ERROR: DMA failed: result=%d wkupevent=%04x\n", result, wkupevent);
+          mcerr("ERROR: DMA failed: result=%d wkupevent=%04x\n", result, wkupevent);
 
           /* sam_endtransfer will terminate the transfer and wait up the waiting
            * client in this case.
@@ -1341,7 +1341,7 @@ static void sam_eventtimeout(int argc, uint32_t arg)
       /* Yes.. wake up any waiting threads */
 
       sam_endwait(priv, SDIOWAIT_TIMEOUT);
-      fllerr("ERROR: Timeout\n");
+      mcerr("ERROR: Timeout\n");
     }
 }
 
@@ -1541,7 +1541,7 @@ static int sam_hsmci_interrupt(struct sam_dev_s *priv)
             {
               /* Yes.. Was it some kind of timeout error? */
 
-              fllerr("ERROR: enabled: %08x pending: %08x\n", enabled, pending);
+              mcerr("ERROR: enabled: %08x pending: %08x\n", enabled, pending);
               if ((pending & HSMCI_DATA_TIMEOUT_ERRORS) != 0)
                 {
                   /* Yes.. Terminate with a timeout. */
@@ -1613,8 +1613,8 @@ static int sam_hsmci_interrupt(struct sam_dev_s *priv)
                 {
                   /* Yes.. Was the error some kind of timeout? */
 
-                  fllinfo("ERROR: events: %08x SR: %08x\n",
-                          priv->cmdrmask, enabled);
+                  mcerr("ERROR: events: %08x SR: %08x\n",
+                        priv->cmdrmask, enabled);
 
                   if ((pending & HSMCI_RESPONSE_TIMEOUT_ERRORS) != 0)
                     {
@@ -2094,7 +2094,7 @@ static int sam_sendcmd(FAR struct sdio_dev_s *dev,
 
   /* Write the fully decorated command to CMDR */
 
-  finfo("cmd: %08x arg: %08x regval: %08x\n", cmd, arg, regval);
+  mcinfo("cmd: %08x arg: %08x regval: %08x\n", cmd, arg, regval);
   sam_putreg(priv, regval, SAM_HSMCI_CMDR_OFFSET);
   sam_cmdsample1(priv, SAMPLENDX_AFTER_CMDR);
   return OK;
@@ -2816,7 +2816,7 @@ static void sam_callbackenable(FAR struct sdio_dev_s *dev,
 {
   struct sam_dev_s *priv = (struct sam_dev_s *)dev;
 
-  finfo("eventset: %02x\n", eventset);
+  mcinfo("eventset: %02x\n", eventset);
   DEBUGASSERT(priv != NULL);
 
   priv->cbevents = eventset;
@@ -2852,7 +2852,7 @@ static int sam_registercallback(FAR struct sdio_dev_s *dev,
 
   /* Disable callbacks and register this callback and is argument */
 
-  finfo("Register %p(%p)\n", callback, arg);
+  mcinfo("Register %p(%p)\n", callback, arg);
   DEBUGASSERT(priv != NULL);
 
   priv->cbevents = 0;
@@ -3099,8 +3099,8 @@ static void sam_callback(void *arg)
   /* Is a callback registered? */
 
   DEBUGASSERT(priv != NULL);
-  finfo("Callback %p(%p) cbevents: %02x cdstatus: %02x\n",
-        priv->callback, priv->cbarg, priv->cbevents, priv->cdstatus);
+  mcinfo("Callback %p(%p) cbevents: %02x cdstatus: %02x\n",
+         priv->callback, priv->cbarg, priv->cbevents, priv->cdstatus);
 
   flags = enter_critical_section();
   if (priv->callback)
@@ -3157,7 +3157,7 @@ static void sam_callback(void *arg)
           lcderr("ERROR: Failed to cancel work: %d\n", ret);
         }
 
-      fllinfo("Queuing callback to %p(%p)\n", priv->callback, priv->cbarg);
+      mcinfo("Queuing callback to %p(%p)\n", priv->callback, priv->cbarg);
       ret = work_queue(LPWORK, &priv->cbwork, (worker_t)priv->callback,
                        priv->cbarg, 0);
       if (ret < 0)
@@ -3327,8 +3327,8 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
       return NULL;
     }
 
-  finfo("priv: %p base: %08x hsmci: %d dmac: %d pid: %d\n",
-        priv, priv->base, priv->hsmci, dmac, pid);
+  mcinfo("priv: %p base: %08x hsmci: %d dmac: %d pid: %d\n",
+         priv, priv->base, priv->hsmci, dmac, pid);
 
   /* Initialize the HSMCI slot structure */
 
@@ -3397,7 +3397,7 @@ void sdio_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot)
       priv->cdstatus &= ~SDIO_STATUS_PRESENT;
     }
 
-  fllinfo("cdstatus OLD: %02x NEW: %02x\n", cdstatus, priv->cdstatus);
+  mcinfo("cdstatus OLD: %02x NEW: %02x\n", cdstatus, priv->cdstatus);
 
   /* Perform any requested callback if the status has changed */
 
@@ -3442,7 +3442,7 @@ void sdio_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect)
       priv->cdstatus &= ~SDIO_STATUS_WRPROTECTED;
     }
 
-  finfo("cdstatus: %02x\n", priv->cdstatus);
+  mcinfo("cdstatus: %02x\n", priv->cdstatus);
   leave_critical_section(flags);
 }
 

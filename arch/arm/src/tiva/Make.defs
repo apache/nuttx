@@ -101,6 +101,14 @@ ifeq ($(CONFIG_TIVA_I2C),y)
 CHIP_CSRCS += tiva_i2c.c
 endif
 
+ifeq ($(CONFIG_TIVA_PWM),y)
+CHIP_CSRCS += tiva_pwm.c
+endif
+
+ifeq ($(CONFIG_TIVA_QEI),y)
+CHIP_CSRCS += tiva_qencoder.c
+endif
+
 ifeq ($(CONFIG_TIVA_TIMER),y)
 CHIP_CSRCS += tiva_timerlib.c
 ifeq ($(CONFIG_TIVA_TIMER32_PERIODIC),y)

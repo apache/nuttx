@@ -94,10 +94,6 @@ volatile uint32_t *g_current_regs[1];
 extern uint32_t _vectors[];
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -251,61 +247,19 @@ static inline void efm32_prioritize_syscall(int priority)
 static int efm32_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
                          uintptr_t offset)
 {
+  int n;
+
   DEBUGASSERT(irq >= EFM32_IRQ_NMI && irq < NR_IRQS);
 
-  /* Check for external interrupt or (a second level GPIO interrupt) */
+  /* Check for external interrupt or a second level GPIO interrupt */
 
   if (irq >= EFM32_IRQ_INTERRUPTS)
     {
-      /* Is this an external interrupt? */
-
       if (irq < NR_VECTORS)
         {
-          /* Yes.. We have support implemented for vectors 0-95 */
-
-          DEBUGASSERT(irq < (EFM32_IRQ_INTERRUPTS + 96));
-
-#if NR_VECTORS >= (EFM32_IRQ_INTERRUPTS + 32)
-          /* Check for vectors 0-31 */
-
-          if (irq < EFM32_IRQ_INTERRUPTS + 32)
-#endif
-            {
-              *regaddr = (NVIC_IRQ0_31_ENABLE + offset);
-              *bit     = 1 << (irq - EFM32_IRQ_INTERRUPTS);
-            }
-#if NR_VECTORS >= (EFM32_IRQ_INTERRUPTS + 32)
-          /* Yes..  Check for vectors 32-63 */
-
-          else
-#if NR_VECTORS >= (EFM32_IRQ_INTERRUPTS + 64)
-          if (irq < EFM32_IRQ_INTERRUPTS + 64)
-#endif
-            {
-              *regaddr = (NVIC_IRQ32_63_ENABLE + offset);
-              *bit     = 1 << (irq - EFM32_IRQ_INTERRUPTS - 32);
-            }
-#if NR_VECTORS >= (EFM32_IRQ_INTERRUPTS + 64)
-          /* Yes..  Check for vectors 64-95 */
-
-          else
-#if NR_VECTORS >= (EFM32_IRQ_INTERRUPTS + 96)
-          /* Yes..  Check for vectors 64-95 */
-
-          if (irq < NR_VECTORS)
-#endif
-            {
-              *regaddr = (NVIC_IRQ64_95_ENABLE + offset);
-              *bit     = 1 << (irq - EFM32_IRQ_INTERRUPTS - 64);
-            }
-#if NR_VECTORS >= (EFM32_IRQ_INTERRUPTS + 96)
-          else
-            {
-              return -EINVAL; /* We should never get here */
-            }
-#endif
-#endif
-#endif
+          n        = irq - EFM32_IRQ_INTERRUPTS;
+          *regaddr = NVIC_IRQ_ENABLE(n) + offset;
+          *bit     = (uint32_t)1 << (n & 0x1f);
         }
       else
         {
@@ -356,16 +310,14 @@ void up_irqinitialize(void)
 {
   uint32_t regaddr;
   int num_priority_registers;
+  int i;
 
   /* Disable all interrupts */
 
-  putreg32(0, NVIC_IRQ0_31_ENABLE);
-#if NR_VECTORS >= (EFM32_IRQ_INTERRUPTS + 32)
-  putreg32(0, NVIC_IRQ32_63_ENABLE);
-#if NR_VECTORS >= (EFM32_IRQ_INTERRUPTS + 64)
-  putreg32(0, NVIC_IRQ64_95_ENABLE);
-#endif
-#endif
+  for (i = 0; i < NR_VECTORS - EFM32_IRQ_INTERRUPTS; i += 32)
+    {
+      putreg32(0xffffffff, NVIC_IRQ_CLEAR(i));
+    }
 
 #if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 3
   /* Colorize the interrupt stack for debug purposes */

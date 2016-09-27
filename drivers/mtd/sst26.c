@@ -209,14 +209,10 @@
 
 #ifdef CONFIG_SST26_DEBUG
 # define ssterr(format, ...)    _err(format, ##__VA_ARGS__)
-# define sstllerr(format, ...)  _llerr(format, ##__VA_ARGS__)
 # define sstinfo(format, ...)   _info(format, ##__VA_ARGS__)
-# define sstllinfo(format, ...) _llinfo(format, ##__VA_ARGS__)
 #else
 # define ssterr(x...)
-# define sstllerr(x...)
 # define sstinfo(x...)
-# define sstllinfo(x...)
 #endif
 
 /************************************************************************************
@@ -249,6 +245,7 @@ static inline void sst26_unlock(FAR struct spi_dev_s *dev);
 static inline int sst26_readid(struct sst26_dev_s *priv);
 static void sst26_waitwritecomplete(struct sst26_dev_s *priv);
 static void sst26_writeenable(struct sst26_dev_s *priv);
+static void sst26_writedisable(struct sst26_dev_s *priv);
 static void sst26_globalunlock(struct sst26_dev_s *priv);
 static inline void sst26_sectorerase(struct sst26_dev_s *priv, off_t offset, uint8_t type);
 static inline int  sst26_chiperase(struct sst26_dev_s *priv);
@@ -340,8 +337,8 @@ static inline int sst26_readid(struct sst26_dev_s *priv)
   SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
   sst26_unlock(priv->dev);
 
-  _llinfo("manufacturer: %02x memory: %02x capacity: %02x\n",
-         manufacturer, memory, capacity);
+  _info("manufacturer: %02x memory: %02x capacity: %02x\n",
+        manufacturer, memory, capacity);
 
   /* Check for a valid manufacturer and memory type */
 
@@ -431,7 +428,7 @@ static void sst26_globalunlock(struct sst26_dev_s *priv)
 
   SPI_SELECT(priv->dev, SPIDEV_FLASH, true);
 
-  /* Send "Write Enable (WREN)" command */
+  /* Send "Global Unlock (ULBPR)" command */
 
   (void)SPI_SEND(priv->dev, SST26_ULBPR);
 
@@ -461,6 +458,27 @@ static void sst26_writeenable(struct sst26_dev_s *priv)
   SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
 
   sstinfo("Enabled\n");
+}
+
+/************************************************************************************
+ * Name:  sst26_writedisable
+ ************************************************************************************/
+
+static void sst26_writedisable(struct sst26_dev_s *priv)
+{
+  /* Select this FLASH part */
+
+  SPI_SELECT(priv->dev, SPIDEV_FLASH, true);
+
+  /* Send "Write Disable (WRDI)" command */
+
+  (void)SPI_SEND(priv->dev, SST26_WRDI);
+
+  /* Deselect the FLASH */
+
+  SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
+
+  sstinfo("Disabled\n");
 }
 
 /************************************************************************************
@@ -938,13 +956,14 @@ FAR struct mtd_dev_s *sst26_initialize_spi(FAR struct spi_dev_s *dev)
 
           ssterr("ERROR: Unrecognized\n");
           kmm_free(priv);
-          priv = NULL;
+          return NULL;
         }
       else
         {
           /* Make sure that the FLASH is unprotected so that we can write into it */
-
+          sst26_writeenable(priv);
           sst26_globalunlock(priv);
+          sst26_writedisable(priv);
 
 #ifdef CONFIG_MTD_REGISTRATION
           /* Register the MTD with the procfs system if enabled */

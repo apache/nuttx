@@ -1,5 +1,5 @@
 /****************************************************************************
- * z16f/z16f_timerisr.c
+ * arch/z16/src/z16f/z16f_timerisr.c
  *
  *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

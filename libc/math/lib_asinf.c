@@ -3,7 +3,7 @@
  *
  * This file is a part of NuttX:
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
  *   Ported by: Darcy Gong
  *
  * It derives from the Rhombs OS math library by Nick Johnson which has
@@ -33,33 +33,58 @@
 #include <float.h>
 
 /****************************************************************************
- * Public Functions
+ * Private Functions
  ****************************************************************************/
 
-float asinf(float x)
+/* This lib uses Newton's method to approximate asin(x).  Newton's Method
+ * converges very slowly for x close to 1.  We can accelerate convergence
+ * with the following identy:  asin(x)=Sign(x)*(Pi/2-asin(sqrt(1-x^2)))
+ */
+
+static float asinf_aux(float x)
 {
-  long double y, y_sin, y_cos;
+  double y;
+  float  y_sin, y_cos;
 
-  y = 0;
+  y = 0.0;
+  y_sin = 0.0F;
 
-  while (1)
+  while (fabsf(y_sin - x) > FLT_EPSILON)
     {
-      y_sin = sinf(y);
       y_cos = cosf(y);
-
-      if (y > M_PI_2 || y < -M_PI_2)
-        {
-          y = fmodf(y, M_PI);
-        }
-
-      if (y_sin + FLT_EPSILON >= x && y_sin - FLT_EPSILON <= x)
-        {
-          break;
-        }
-
-      y = y - (y_sin - x) / y_cos;
+      y -= ((double)y_sin - (double)x) / (double)y_cos;
+      y_sin = sinf(y);
     }
 
   return y;
 }
 
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+float asinf(float x)
+{
+  float y;
+
+  /* Verify that the input value is in the domain of the function */
+
+  if (x < -1.0F || x > 1.0F || isnan(x))
+    {
+      return NAN_F;
+    }
+
+  /* if x is > sqrt(2), use identity for faster convergence */
+
+  if (fabsf(x) > 0.71F)
+    {
+      y = M_PI_2_F - asinf_aux(sqrtf(1.0F - x * x));
+      y = copysignf(y, x);
+    }
+  else
+    {
+      y = asinf_aux(x);
+    }
+
+  return y;
+}

@@ -44,14 +44,16 @@
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <nuttx/sched_note.h>
-#include <nuttx/fs/fs.h>
+#include <nuttx/drivers/drivers.h>
 #include <nuttx/fs/loop.h>
 #include <nuttx/net/loopback.h>
 #include <nuttx/net/tun.h>
 #include <nuttx/net/telnet.h>
-#include <nuttx/syslog/ramlog.h>
+#include <nuttx/syslog/syslog.h>
 #include <nuttx/syslog/syslog_console.h>
+#include <nuttx/serial/pty.h>
 #include <nuttx/crypto/crypto.h>
+#include <nuttx/power/pm.h>
 
 #include <arch/board/board.h>
 
@@ -77,13 +79,13 @@ static void up_calibratedelay(void)
 {
   int i;
 
-  _llwarn("Beginning 100s delay\n");
+  _warn("Beginning 100s delay\n");
   for (i = 0; i < 100; i++)
     {
       up_mdelay(1000);
     }
 
-  _llwarn("End 100s delay\n");
+  _warn("End 100s delay\n");
 }
 #else
 # define up_calibratedelay()
@@ -158,21 +160,21 @@ void up_initialize(void)
 
   up_irqinitialize();
 
+#ifdef CONFIG_PM
   /* Initialize the power management subsystem.  This MCU-specific function
    * must be called *very* early in the initialization sequence *before* any
    * other device drivers are initialized (since they may attempt to register
    * with the power management subsystem).
    */
 
-#ifdef CONFIG_PM
   up_pminitialize();
 #endif
 
+#ifdef CONFIG_ARCH_DMA
   /* Initialize the DMA subsystem if the weak function up_dmainitialize has been
    * brought into the build
    */
 
-#ifdef CONFIG_ARCH_DMA
 #ifdef CONFIG_HAVE_WEAKFUNCTIONS
   if (up_dmainitialize)
 #endif
@@ -194,6 +196,14 @@ void up_initialize(void)
 
 #if defined(CONFIG_DEV_NULL)
   devnull_register();   /* Standard /dev/null */
+#endif
+
+#if defined(CONFIG_DEV_RANDOM)
+  devrandom_register(); /* Standard /dev/random */
+#endif
+
+#if defined(CONFIG_DEV_URANDOM)
+  devurandom_register();   /* Standard /dev/urandom */
 #endif
 
 #if defined(CONFIG_DEV_ZERO)
@@ -222,37 +232,33 @@ void up_initialize(void)
 
 #if defined(CONFIG_DEV_LOWCONSOLE)
   lowconsole_init();
-#elif defined(CONFIG_SYSLOG_CONSOLE)
+#elif defined(CONFIG_CONSOLE_SYSLOG)
   syslog_console_init();
 #elif defined(CONFIG_RAMLOG_CONSOLE)
   ramlog_consoleinit();
 #endif
 
-  /* Initialize the HW crypto and /dev/crypto */
+#if CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_PSEUDOTERM_SUSV1)
+  /* Register the master pseudo-terminal multiplexor device */
+
+  (void)ptmx_register();
+#endif
+
+  /* Early initialization of the system logging device.  Some SYSLOG channel
+   * can be initialized early in the initialization sequence because they
+   * depend on only minimal OS initialization.
+   */
+
+  syslog_initialize(SYSLOG_INIT_EARLY);
 
 #if defined(CONFIG_CRYPTO)
+  /* Initialize the HW crypto and /dev/crypto */
+
   up_cryptoinitialize();
 #endif
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
-#if defined(CONFIG_CRYPTO_CRYPTODEV)
+#if CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_CRYPTO_CRYPTODEV)
   devcrypto_register();
-#endif
-#endif
-
-  /* Initialize the Random Number Generator (RNG)  */
-
-#ifdef CONFIG_DEV_RANDOM
-  up_rnginitialize();
-#endif
-
-  /* Initialize the system logging device */
-
-#ifdef CONFIG_SYSLOG_CHAR
-  syslog_initialize();
-#endif
-#ifdef CONFIG_RAMLOG_SYSLOG
-  ramlog_sysloginit();
 #endif
 
 #ifndef CONFIG_NETDEV_LATEINIT

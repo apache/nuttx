@@ -50,9 +50,9 @@
 #include "up_internal.h"
 
 #include "kinetis.h"
-#include "kinetis_port.h"
+#include "chip/kinetis_port.h"
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_KINETIS_GPIOIRQ
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -450,4 +450,4 @@ void kinetis_pinirqdisable(uint32_t pinset)
     }
 #endif /* HAVE_PORTINTS */
 }
-#endif /* CONFIG_GPIO_IRQ */
+#endif /* CONFIG_KINETIS_GPIOIRQ */

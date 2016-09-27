@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/bch/bchdev_driver.c
  *
- *   Copyright (C) 2008-2009, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,6 +57,7 @@
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
+#include <nuttx/drivers/drivers.h>
 
 #include "bch.h"
 

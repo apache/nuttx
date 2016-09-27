@@ -187,34 +187,22 @@
 #ifdef CONFIG_VNCSERVER_UPDATE_DEBUG
 #  ifdef CONFIG_CPP_HAVE_VARARGS
 #    define upderr(format, ...)    _err(format, ##__VA_ARGS__)
-#    define updllerr(format, ...)  _llerr(format, ##__VA_ARGS__)
 #    define updinfo(format, ...)   _info(format, ##__VA_ARGS__)
-#    define updllinfo(format, ...) _llinfo(format, ##__VA_ARGS__)
 #    define updinfo(format, ...)   _info(format, ##__VA_ARGS__)
-#    define updllinfo(format, ...) _llinfo(format, ##__VA_ARGS__)
 #  else
 #   define upderr                  _err
-#   define updllerr                _llerr
 #   define updwarn                 _warn
-#   define updllwarn               _llwarn
 #   define updinfo                 _info
-#   define updllinfo               _llinfo
 #  endif
 #else
 #  ifdef CONFIG_CPP_HAVE_VARARGS
 #    define upderr(x...)
-#    define updllerr(x...)
 #    define updwarn(x...)
-#    define updllwarn(x...)
 #    define updinfo(x...)
-#    define updllinfo(x...)
 #  else
 #    define upderr                 (void)
-#    define updllerr               (void)
 #    define updwarn                (void)
-#    define updllwarn              (void)
 #    define updinfo                (void)
-#    define updllinfo              (void)
 #  endif
 #endif
 

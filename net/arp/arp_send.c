@@ -102,7 +102,7 @@ static uint16_t arp_send_interrupt(FAR struct net_driver_s *dev,
 {
   FAR struct arp_send_s *state = (FAR struct arp_send_s *)priv;
 
-  nllinfo("flags: %04x sent: %d\n", flags, state->snd_sent);
+  ninfo("flags: %04x sent: %d\n", flags, state->snd_sent);
 
   if (state)
     {
@@ -110,7 +110,7 @@ static uint16_t arp_send_interrupt(FAR struct net_driver_s *dev,
 
       if ((flags & NETDEV_DOWN) != 0)
         {
-          nllerr("ERROR: Interface is down\n");
+          nerr("ERROR: Interface is down\n");
           arp_send_terminate(state, -ENETUNREACH);
           return flags;
         }

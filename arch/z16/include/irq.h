@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/irq.h
+ * arch/z16/include/irq.h
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -37,8 +37,8 @@
  * only indirectly through nuttx/irq.h
  */
 
-#ifndef __ARCH_IRQ_H
-#define __ARCH_IRQ_H
+#ifndef __ARCH_Z16_INCLUDE_IRQ_H
+#define __ARCH_Z16_INCLUDE_IRQ_H
 
 /****************************************************************************
  * Included Files
@@ -78,5 +78,5 @@ extern "C"
 #endif
 #endif
 
-#endif /* __ARCH_IRQ_H */
+#endif /* __ARCH_Z16_INCLUDE_IRQ_H */
 

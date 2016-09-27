@@ -51,7 +51,7 @@
 #include "up_internal.h"
 
 #include "kinetis.h"
-#include "kinetis_smc.h"
+#include "chip/kinetis_smc.h"
 #include "kinetis_userspace.h"
 
 /****************************************************************************
@@ -156,8 +156,8 @@ void __start(void)
 
   /* Show reset status */
 
-  _llwarn("Reset status: %02x:%02x\n",
-          getreg8(KINETIS_SMC_SRSH), getreg8(KINETIS_SMC_SRSL));
+  _warn("Reset status: %02x:%02x\n",
+        getreg8(KINETIS_SMC_SRSH), getreg8(KINETIS_SMC_SRSL));
 
   /* Then start NuttX */
 

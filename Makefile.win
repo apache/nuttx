@@ -174,7 +174,7 @@ endif
 BIN = nuttx$(EXEEXT)
 
 all: $(BIN)
-.PHONY: context clean_context check_context configenv config oldconfig menuconfig export subdir_clean clean subdir_distclean distclean apps_clean apps_distclean
+.PHONY: dirlinks context clean_context check_context configenv config oldconfig menuconfig export subdir_clean clean subdir_distclean distclean apps_clean apps_distclean
 
 # Target used to copy include\nuttx\math.h.  If CONFIG_ARCH_MATH_H is
 # defined, then there is an architecture specific math.h header file
@@ -275,19 +275,6 @@ tools\mkdeps$(HOSTEXEEXT):
 # setting up symbolic links with 'generic' directory names to specific,
 # configured directories.
 #
-# Link the apps\include directory to include\apps
-
-include\apps: Make.defs
-ifneq ($(APPDIR),)
-	@echo LN: include\apps $(APPDIR)\include
-ifeq ($(CONFIG_WINDOWS_MKLINK),y)
-	$(Q) /user:administrator mklink /d include\apps $(APPDIR)\include
-else
-	$(Q) xcopy $(APPDIR)\include include\apps /c /q /s /e /y /i
-	$(Q) echo FAKELNK > include\apps\.fakelnk
-endif
-endif
-
 # Link the arch\<arch-name>\include directory to include\arch
 
 include\arch: Make.defs
@@ -347,7 +334,9 @@ else
 endif
 endif
 
-dirlinks: include\arch include\arch\board include\arch\chip $(ARCH_SRC)\board $(ARCH_SRC)\chip include\apps
+dirlinks: include\arch include\arch\board include\arch\chip $(ARCH_SRC)\board $(ARCH_SRC)\chip
+	$(Q) $(MAKE) -C configs dirlinks TOPDIR="$(TOPDIR)"
+	$(Q) $(MAKE) -C $(CONFIG_APPS_DIR) dirlinks TOPDIR="$(TOPDIR)"
 
 # context
 #
@@ -374,7 +363,6 @@ clean_context:
 	$(call DELDIR, include\arch)
 	$(call DELDIR, $(ARCH_SRC)\board)
 	$(call DELDIR, $(ARCH_SRC)\chip)
-	$(call DELDIR, include\apps)
 
 # check_context
 #
@@ -480,17 +468,25 @@ pass2dep: context tools\mkdeps$(HOSTEXEEXT)
 # location: http://ymorin.is-a-geek.org/projects/kconfig-frontends.  See
 # misc\tools\README.txt for additional information.
 
-config: apps_preconfig
+do_config: dirlinks apps_preconfig
 	$(Q) set APPSDIR=$(patsubst "%",%,${CONFIG_APPS_DIR})& kconfig-conf Kconfig
 
-oldconfig: apps_preconfig
+config: do_config clean_context
+
+do_oldconfig: dirlinks apps_preconfig
 	$(Q) set APPSDIR=$(patsubst "%",%,${CONFIG_APPS_DIR})& kconfig-conf --oldconfig Kconfig
 
-olddefconfig: apps_preconfig
+oldconfig: do_oldconfig clean_context
+
+do_olddefconfig: dirlinks apps_preconfig
 	$(Q) set APPSDIR=$(patsubst "%",%,${CONFIG_APPS_DIR})& kconfig-conf --olddefconfig Kconfig
 
-menuconfig: configenv apps_preconfig
+olddefconfig: do_olddefconfig clean_context
+
+do_menuconfig: dirlinks configenv apps_preconfig
 	$(Q) set APPSDIR=$(patsubst "%",%,${CONFIG_APPS_DIR})& kconfig-mconf Kconfig
+
+menuconfig: do_menuconfig clean_context
 
 # export
 #

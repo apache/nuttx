@@ -51,6 +51,7 @@ config ARCH_CHIP_DM320
 config ARCH_CHIP_EFM32
 	bool "Energy Micro"
 	select ARCH_HAVE_CMNVECTOR
+	select ARCH_HAVE_SPI_BITORDER
 	select ARMV7M_CMNVECTOR
 	---help---
 		Energy Micro EFM32 microcontrollers (ARM Cortex-M).
@@ -206,12 +207,14 @@ config ARCH_CHIP_SAM34
 config ARCH_CHIP_SAMV7
 	bool "Atmel SAMV7"
 	select ARCH_HAVE_CMNVECTOR
-	select ARMV7M_CMNVECTOR
 	select ARCH_CORTEXM7
 	select ARCH_HAVE_MPU
-	select ARM_HAVE_MPU_UNIFIED
 	select ARCH_HAVE_RAMFUNCS
 	select ARCH_HAVE_TICKLESS
+	select ARCH_HAVE_I2CRESET
+	select ARCH_HAVE_SPI_CS_CONTROL
+	select ARM_HAVE_MPU_UNIFIED
+	select ARMV7M_CMNVECTOR
 	select ARMV7M_HAVE_STACKCHECK
 	---help---
 		Atmel SAMV7 (ARM Cortex-M7) architectures
@@ -220,9 +223,12 @@ config ARCH_CHIP_STM32
 	bool "STMicro STM32 F1/F2/F3/F4"
 	select ARCH_HAVE_CMNVECTOR
 	select ARCH_HAVE_MPU
-	select ARM_HAVE_MPU_UNIFIED
 	select ARCH_HAVE_I2CRESET
 	select ARCH_HAVE_HEAPCHECK
+	select ARCH_HAVE_TICKLESS
+	select ARCH_HAVE_TIMEKEEPING
+	select ARCH_HAVE_SPI_BITORDER
+	select ARM_HAVE_MPU_UNIFIED
 	select ARMV7M_HAVE_STACKCHECK
 	---help---
 		STMicro STM32 architectures (ARM Cortex-M3/4).
@@ -230,12 +236,13 @@ config ARCH_CHIP_STM32
 config ARCH_CHIP_STM32F7
 	bool "STMicro STM32 F7"
 	select ARCH_HAVE_CMNVECTOR
-	select ARMV7M_CMNVECTOR
 	select ARCH_CORTEXM7
 	select ARCH_HAVE_MPU
-	select ARM_HAVE_MPU_UNIFIED
 	select ARCH_HAVE_I2CRESET
 	select ARCH_HAVE_HEAPCHECK
+	select ARCH_HAVE_SPI_BITORDER
+	select ARM_HAVE_MPU_UNIFIED
+	select ARMV7M_CMNVECTOR
 	select ARMV7M_HAVE_STACKCHECK
 	---help---
 		STMicro STM32 architectures (ARM Cortex-M7).
@@ -243,12 +250,14 @@ config ARCH_CHIP_STM32F7
 config ARCH_CHIP_STM32L4
 	bool "STMicro STM32 L4"
 	select ARCH_HAVE_CMNVECTOR
-	select ARMV7M_CMNVECTOR
 	select ARCH_CORTEXM4
 	select ARCH_HAVE_MPU
-	select ARM_HAVE_MPU_UNIFIED
 	select ARCH_HAVE_I2CRESET
 	select ARCH_HAVE_HEAPCHECK
+	select ARCH_HAVE_TICKLESS
+	select ARCH_HAVE_SPI_BITORDER
+	select ARM_HAVE_MPU_UNIFIED
+	select ARMV7M_CMNVECTOR
 	select ARMV7M_HAVE_STACKCHECK
 	---help---
 		STMicro STM32 architectures (ARM Cortex-M4).

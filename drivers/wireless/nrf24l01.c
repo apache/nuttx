@@ -495,7 +495,7 @@ static int nrf24l01_irqhandler(int irq, FAR void *context)
 {
   FAR struct nrf24l01_dev_s *dev = g_nrf24l01dev;
 
-  wllinfo("*IRQ*");
+  winfo("*IRQ*");
 
 #ifdef CONFIG_WL_NRF24L01_RXSUPPORT
 

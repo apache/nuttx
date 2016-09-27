@@ -1,5 +1,5 @@
 /****************************************************************************
- * common/up_stackdump.c
+ * arch/z16/src/common/up_stackdump.c
  *
  *   Copyright (C) 2008-2009, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -73,7 +73,7 @@ static void up_stackdump(void)
 
   if (sp >= stack_base || sp < stack_base - stack_size)
     {
-      _llerr("ERROR: Stack pointer is not within allocated stack\n");
+      _err("ERROR: Stack pointer is not within allocated stack\n");
       return;
     }
   else

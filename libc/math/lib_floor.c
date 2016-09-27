@@ -41,12 +41,26 @@
 #ifdef CONFIG_HAVE_DOUBLE
 double floor(double x)
 {
-  modf(x, &x);
-  if (x < 0.0)
+  double modx;
+
+  /* modf() will return the integer part of X.  The return value of floor
+   * differs for non-integer, negative values.
+   *
+   *  x   modf  floor
+   * ---- ----- -----
+   *  2.0  2.0   2.0
+   *  2.4  2.0   2.0
+   *  2.9  2.0   2.0
+   * -2.7 -2.0  -3.0
+   * -2.0 -2.0  -2.0
+   */
+
+  (void)modf(x, &modx);
+  if (x < 0.0 && x < modx)
     {
-      x -= 1.0;
+      modx -= 1.0;
     }
 
-  return x;
+  return modx;
 }
 #endif

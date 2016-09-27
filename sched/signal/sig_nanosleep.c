@@ -167,6 +167,11 @@ int nanosleep(FAR const struct timespec *rqtp, FAR struct timespec *rmtp)
       systime_t remaining;
       int ticks;
 
+      /* REVISIT: The conversion from time to ticks and back could
+       * be avoided.  clock_timespec_subtract() would be used instead
+       * to get the time difference.
+       */
+
       /* First get the number of clock ticks that we were requested to
        * wait.
        */

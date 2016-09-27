@@ -339,10 +339,10 @@ config ARCH_MATH_H
 	default n
 	---help---
 		There is also a re-directing version of math.h in the source tree.
-		However, it resides out-of-the-way at include/nuttx/math.h because it
+		However, it resides out-of-the-way at include/nuttx/lib/math.h because it
 		conflicts too often with the system math.h. If ARCH_MATH_H=y is
 		defined, however, the top-level makefile will copy the redirecting
-		math.h header file from include/nuttx/math.h to include/math.h. math.h
+		math.h header file from include/nuttx/lib/math.h to include/math.h. math.h
 		will then include the architecture-specific version of math.h that you
 		must provide at nuttx/arch/>architecture</include/math.h.
 
@@ -371,7 +371,7 @@ config ARCH_STDARG_H
 	default n
 	---help---
 		There is also a redirecting version of stdarg.h in the source tree
-		as well. It also resides out-of-the-way at include/nuttx/stdarg.h.
+		as well. It also resides out-of-the-way at include/nuttx/lib/stdarg.h.
 		This is because you should normally use your toolchain's stdarg.h
 		file. But sometimes, your toolchain's stdarg.h file may have other
 		header file dependencies and so may not be usable in the NuttX build
@@ -379,7 +379,7 @@ config ARCH_STDARG_H
 		specific stdarg.h header file at nuttx/arch/<architecture>/include/stdarg.h
 
 		If ARCH_STDARG_H=y is defined, the top-level makefile will copy the
-		re-directing stdarg.h header file from include/nuttx/stdarg.h to
+		re-directing stdarg.h header file from include/nuttx/lib/stdarg.h to
 		include/stdarg.h. So for the architectures that cannot use their
 		toolchain's stdarg.h file, they can use this alternative by defining
 		ARCH_STDARG_H=y and providing. If ARCH_STDARG_H, is not defined, then
@@ -395,9 +395,14 @@ endmenu # Customize Header Files
 
 menu "Debug Options"
 
+config DEBUG_ALERT
+	bool
+	default n
+
 config DEBUG_FEATURES
 	bool "Enable Debug Features"
 	default n
+	select DEBUG_ALERT
 	---help---
 		Enables built-in debug features.  Selecting this option will (1) Enable
 		debug assertions in the code, (2) enable extended parameter testing in
@@ -1362,7 +1367,6 @@ endif # DEBUG_SPI
 config DEBUG_TIMER
 	bool "Timer Debug Features"
 	default n
-	depends on TIMER
 	---help---
 		Enable timer debug features.
 

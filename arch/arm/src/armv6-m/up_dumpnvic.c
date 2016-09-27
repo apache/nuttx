@@ -72,27 +72,27 @@ void up_dumpnvic(FAR const char *msg)
 
   flags = enter_critical_section();
 
-  _llinfo("NVIC: %s\n", msg);
-  _llinfo("   ISER: %08x  ICER: %08x  ISPR: %08x  ICPR: %08x\n",
-         getreg32(ARMV6M_NVIC_ISER), getreg32(ARMV6M_NVIC_ICER),
-         getreg32(ARMV6M_NVIC_ISPR), getreg32(ARMV6M_NVIC_ICPR));
+  _info("NVIC: %s\n", msg);
+  _info("   ISER: %08x  ICER: %08x  ISPR: %08x  ICPR: %08x\n",
+       getreg32(ARMV6M_NVIC_ISER), getreg32(ARMV6M_NVIC_ICER),
+       getreg32(ARMV6M_NVIC_ISPR), getreg32(ARMV6M_NVIC_ICPR));
 
   for (i = 0 ; i < 8; i += 4)
     {
-      _llinfo("   IPR%d: %08x  IPR%d: %08x  IPR%d: %08x  IPR%d: %08x\n",
-             i,   getreg32(ARMV6M_NVIC_IPR(i)),
-             i+1, getreg32(ARMV6M_NVIC_IPR(i+1)),
-             i+2, getreg32(ARMV6M_NVIC_IPR(i+2)),
-             i+3, getreg32(ARMV6M_NVIC_IPR(i+3)));
+      _info("   IPR%d: %08x  IPR%d: %08x  IPR%d: %08x  IPR%d: %08x\n",
+           i,   getreg32(ARMV6M_NVIC_IPR(i)),
+           i+1, getreg32(ARMV6M_NVIC_IPR(i+1)),
+           i+2, getreg32(ARMV6M_NVIC_IPR(i+2)),
+           i+3, getreg32(ARMV6M_NVIC_IPR(i+3)));
     }
 
-  _llinfo("SYSCON:\n");
-  _llinfo("  CPUID: %08x  ICSR: %08x AIRCR: %08x   SCR: %08x\n",
-         getreg32(ARMV6M_SYSCON_CPUID), getreg32(ARMV6M_SYSCON_ICSR),
-         getreg32(ARMV6M_SYSCON_AIRCR), getreg32(ARMV6M_SYSCON_SCR));
-  _llinfo("    CCR: %08x SHPR2: %08x SHPR3: %08x\n",
-         getreg32(ARMV6M_SYSCON_CCR),   getreg32(ARMV6M_SYSCON_SHPR2),
-         getreg32(ARMV6M_SYSCON_SHPR3));
+  _info("SYSCON:\n");
+  _info("  CPUID: %08x  ICSR: %08x AIRCR: %08x   SCR: %08x\n",
+       getreg32(ARMV6M_SYSCON_CPUID), getreg32(ARMV6M_SYSCON_ICSR),
+       getreg32(ARMV6M_SYSCON_AIRCR), getreg32(ARMV6M_SYSCON_SCR));
+  _info("    CCR: %08x SHPR2: %08x SHPR3: %08x\n",
+       getreg32(ARMV6M_SYSCON_CCR),   getreg32(ARMV6M_SYSCON_SHPR2),
+       getreg32(ARMV6M_SYSCON_SHPR3));
 
   leave_critical_section(flags);
 #endif

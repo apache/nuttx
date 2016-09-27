@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_KINETISXX_KINETIS_CONFIG_H
-#define __ARCH_ARM_SRC_KINETISXX_KINETIS_CONFIG_H
+#ifndef __ARCH_ARM_SRC_KINETIS_KINETIS_CONFIG_H
+#define __ARCH_ARM_SRC_KINETIS_KINETIS_CONFIG_H
 
 /************************************************************************************
  * Included Files
@@ -232,4 +232,4 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_KINETISXX_KINETIS_CONFIG_H */
+#endif /* __ARCH_ARM_SRC_KINETIS_KINETIS_CONFIG_H */

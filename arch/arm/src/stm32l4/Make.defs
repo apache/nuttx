@@ -112,9 +112,24 @@ CHIP_CSRCS  = stm32l4_allocateheap.c stm32l4_exti_gpio.c stm32l4_gpio.c
 CHIP_CSRCS += stm32l4_idle.c stm32l4_irq.c stm32l4_lowputc.c stm32l4_rcc.c
 CHIP_CSRCS += stm32l4_serial.c stm32l4_start.c stm32l4_waste.c stm32l4_uid.c
 CHIP_CSRCS += stm32l4_spi.c stm32l4_i2c.c stm32l4_lse.c stm32l4_pwr.c
+CHIP_CSRCS += stm32l4_tim.c
+
+ifeq ($(CONFIG_TIMER),y)
+CHIP_CSRCS += stm32l4_tim_lowerhalf.c
+endif
 
 ifneq ($(CONFIG_SCHED_TICKLESS),y)
 CHIP_CSRCS += stm32l4_timerisr.c
+else
+CHIP_CSRCS += stm32l4_tickless.c
+endif
+
+ifeq ($(CONFIG_STM32L4_ONESHOT),y)
+CHIP_CSRCS += stm32l4_oneshot.c stm32l4_oneshot_lowerhalf.c
+endif
+
+ifeq ($(CONFIG_STM32L4_FREERUN),y)
+CHIP_CSRCS += stm32l4_freerun.c
 endif
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
@@ -130,6 +145,28 @@ endif
 
 ifeq ($(CONFIG_STM32L4_DMA),y)
 CHIP_CSRCS += stm32l4_dma.c
+endif
+
+ifeq ($(CONFIG_USBDEV),y)
+ifeq ($(CONFIG_STM32L4_OTGFS),y)
+CHIP_CSRCS += stm32l4_otgfsdev.c
+endif
+endif
+
+ifeq ($(CONFIG_USBHOST),y)
+ifeq ($(CONFIG_STM32L4_OTGFS),y)
+CHIP_CSRCS += stm32l4_otgfshost.c
+endif
+endif
+
+ifeq ($(CONFIG_USBHOST),y)
+ifeq ($(CONFIG_USBHOST_TRACE),y)
+CHIP_CSRCS += stm32l4_usbhost_trace.c
+else
+ifeq ($(CONFIG_DEBUG_USB),y)
+CHIP_CSRCS += stm32l4_usbhost_trace.c
+endif
+endif
 endif
 
 ifeq ($(CONFIG_STM32L4_PWR),y)
@@ -152,6 +189,10 @@ endif
 
 ifeq ($(CONFIG_STM32L4_RNG),y)
 CHIP_CSRCS += stm32l4_rng.c
+endif
+
+ifeq ($(CONFIG_PWM),y)
+CHIP_CSRCS += stm32l4_pwm.c
 endif
 
 ifeq ($(CONFIG_STM32L4_QSPI),y)

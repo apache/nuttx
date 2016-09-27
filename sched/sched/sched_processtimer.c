@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sched/sched_processtimer.c
  *
- *   Copyright (C) 2007, 2009, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,14 +51,6 @@
 #include "clock/clock.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifndef CONFIG_SCHED_CPULOAD_TIMECONSTANT
-#  define CONFIG_SCHED_CPULOAD_TIMECONSTANT 2
-#endif
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -69,10 +61,10 @@
  *   Check for operations specific to scheduling policy of the currently
  *   active task.
  *
- * Inputs:
+ * Input Parameters:
  *   None
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -134,16 +126,22 @@ static inline void sched_process_scheduler(void)
  *   function periodically -- the calling interval must be
  *   USEC_PER_TICK
  *
- * Inputs:
+ * Input Parameters:
  *   None
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
 
 void sched_process_timer(void)
 {
+#ifdef CONFIG_CLOCK_TIMEKEEPING
+  /* Process wall time */
+
+  clock_update_wall_time();
+#endif
+
   /* Increment the system time (if in the link) */
 
 #ifdef CONFIG_HAVE_WEAKFUNCTIONS

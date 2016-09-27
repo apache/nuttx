@@ -1818,7 +1818,7 @@ static int sam_dmac_interrupt(struct sam_dmac_s *dmac)
                 {
                    /* Yes... Terminate the transfer with an error? */
 
-                   dmallerr("ERROR: DMA failed: %08x\n", regval);
+                   dmaerr("ERROR: DMA failed: %08x\n", regval);
                    sam_dmaterminate(dmach, -EIO);
                 }
 
@@ -1920,7 +1920,7 @@ void sam_dmainitialize(struct sam_dmac_s *dmac)
 void weak_function up_dmainitialize(void)
 {
 #ifdef CONFIG_SAMA5_DMAC0
-  dmallinfo("Initialize DMAC0\n");
+  dmainfo("Initialize DMAC0\n");
 
   /* Enable peripheral clock */
 
@@ -1940,7 +1940,7 @@ void weak_function up_dmainitialize(void)
 #endif
 
 #ifdef CONFIG_SAMA5_DMAC1
-  dmallinfo("Initialize DMAC1\n");
+  dmainfo("Initialize DMAC1\n");
 
   /* Enable peripheral clock */
 

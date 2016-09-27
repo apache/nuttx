@@ -1,6 +1,7 @@
 /****************************************************************************
  * libc/math/lib_erf.c
  *
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2015 Brennan Ashton. All rights reserved.
  *   Author: Brennan Ashton <bashton@brennanashton.com>
  *
@@ -42,31 +43,42 @@
 
 #include <math.h>
 
+#ifdef CONFIG_HAVE_DOUBLE
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define  A1     0.254829592
+#define  A2   (-0.284496736)
+#define  A3     1.421413741
+#define  A4   (-1.453152027)
+#define  A5     1.061405429
+#define  P      0.3275911
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-#ifdef CONFIG_HAVE_DOUBLE
+/****************************************************************************
+ * Name: erf
+ *
+ * Description:
+ *   This implementation comes from the Handbook of Mathmatical Functions
+ *   The implementations in this book are not protected by copyright.
+ *   erf comes from formula 7.1.26
+ *
+ ****************************************************************************/
+
 double erf(double x)
 {
-  /* This implementation comes from the Handbook of Mathmatical Functions
-   * The implementations in this book are not protected by copyright.
-   * erf comes from formula 7.1.26
-   */
-
-  char sign;
   double t;
-  double a1, a2, a3, a4, a5, p;
+  double z;
 
-  a1 =  0.254829592;
-  a2 = -0.284496736;
-  a3 =  1.421413741;
-  a4 = -1.453152027;
-  a5 =  1.061405429;
-  p  =  0.3275911;
-
-  sign = (x >= 0 ? 1 : -1);
-  t = 1.0/(1.0 + p*x);
-  return sign * (1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * expf(-x * x));
+  z = fabs(x);
+  t = 1.0 / (1.0 + P * z);
+  t = 1.0 - (((((A5 * t + A4) * t) + A3) * t + A2) * t + A1) * t * exp(-z * z);
+  return copysign(t, x);
 }
-#endif
+
+#endif /* CONFIG_HAVE_DOUBLE */

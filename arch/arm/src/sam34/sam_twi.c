@@ -390,9 +390,9 @@ static int twi_wait(struct twi_dev_s *priv)
 
   do
     {
-      i2cllinfo("TWI%d Waiting...\n", priv->twi);
+      i2cinfo("TWI%d Waiting...\n", priv->twi);
       twi_takesem(&priv->waitsem);
-      i2cllinfo("TWI%d Awakened with result: %d\n", priv->twi, priv->result);
+      i2cinfo("TWI%d Awakened with result: %d\n", priv->twi, priv->result);
     }
   while (priv->result == -EBUSY);
 
@@ -449,7 +449,7 @@ static int twi_interrupt(struct twi_dev_s *priv)
   imr     = twi_getrel(priv, SAM_TWI_IMR_OFFSET);
   pending = sr & imr;
 
-  i2cllinfo("TWI%d pending: %08x\n", priv->twi, pending);
+  i2cinfo("TWI%d pending: %08x\n", priv->twi, pending);
 
   msg = priv->msg;
 
@@ -459,7 +459,7 @@ static int twi_interrupt(struct twi_dev_s *priv)
     {
       /* Wake up the thread with an I/O error indication */
 
-      i2cllerr("ERROR: TWI%d pending: %08x\n", priv->twi, pending);
+      i2cerr("ERROR: TWI%d pending: %08x\n", priv->twi, pending);
       twi_wakeup(priv, -EIO);
     }
 
@@ -582,7 +582,7 @@ static void twi_timeout(int argc, uint32_t arg, ...)
 {
   struct twi_dev_s *priv = (struct twi_dev_s *)arg;
 
-  i2cllerr("ERROR: TWI%d Timeout!\n", priv->twi);
+  i2cerr("ERROR: TWI%d Timeout!\n", priv->twi);
   twi_wakeup(priv, -ETIMEDOUT);
 }
 
@@ -666,7 +666,7 @@ static void twi_startwrite(struct twi_dev_s *priv, struct i2c_msg_s *msg)
 
 static void twi_startmessage(struct twi_dev_s *priv, struct i2c_msg_s *msg)
 {
-  if ((msg->flags & I2C_M_READ) == 0)
+  if ((msg->flags & I2C_M_READ) != 0)
     {
       twi_startread(priv, msg);
     }

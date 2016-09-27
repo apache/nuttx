@@ -258,7 +258,7 @@ static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       {
         /* Stop the timer */
 
-        if (lower->ops->start)
+        if (lower->ops->stop)
           {
             ret = lower->ops->stop(lower);
           }

@@ -35,6 +35,8 @@
 #include <math.h>
 #include <float.h>
 
+#ifdef CONFIG_HAVE_DOUBLE
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -43,15 +45,39 @@
 #define DBL_EPSILON 1e-12
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/* This lib uses Newton's method to approximate asin(x).  Newton's Method
+ * converges very slowly for x close to 1.  We can accelerate convergence
+ * with the following identy:  asin(x)=Sign(x)*(Pi/2-asin(sqrt(1-x^2)))
+ */
+
+static double asin_aux(double x)
+{
+  long double y;
+  double y_cos, y_sin;
+
+  y = 0.0;
+  y_sin = 0.0;
+
+  while (fabs(y_sin - x) > DBL_EPSILON)
+    {
+      y_cos = cos(y);
+      y -= ((long double)y_sin - (long double)x) / (long double)y_cos;
+      y_sin = sin(y);
+    }
+
+  return y;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-#ifdef CONFIG_HAVE_DOUBLE
 double asin(double x)
 {
-  long double y;
-  long double y_sin;
-  long double y_cos;
+  double y;
 
   /* Verify that the input value is in the domain of the function */
 
@@ -60,26 +86,19 @@ double asin(double x)
       return NAN;
     }
 
-  y = 0;
+  /* if x is > sqrt(2), use identity for faster convergence */
 
-  while (1)
+  if (fabs(x) > 0.71)
     {
-      y_sin = sin(y);
-      y_cos = cos(y);
-
-      if (y > M_PI_2 || y < -M_PI_2)
-        {
-          y = fmod(y, M_PI);
-        }
-
-      if (y_sin + DBL_EPSILON >= x && y_sin - DBL_EPSILON <= x)
-        {
-          break;
-        }
-
-      y = y - (y_sin - x) / y_cos;
+      y = M_PI_2 - asin_aux(sqrt(1.0 - x * x));
+      y = copysign(y, x);
+    }
+  else
+    {
+      y = asin_aux(x);
     }
 
   return y;
 }
-#endif
+
+#endif /* CONFIG_HAVE_DOUBLE */

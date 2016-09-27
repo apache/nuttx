@@ -847,12 +847,12 @@ static void ssc_dump_queue(sq_queue_t *queue)
 
       if (!apb)
         {
-          i2sllinfo("    %p: No buffer\n", bfcontainer);
+          i2sinfo("    %p: No buffer\n", bfcontainer);
         }
       else
         {
-          i2sllinfo("    %p: buffer=%p nmaxbytes=%d nbytes=%d\n",
-                    bfcontainer, apb, apb->nmaxbytes, apb->nbytes);
+          i2sinfo("    %p: buffer=%p nmaxbytes=%d nbytes=%d\n",
+                  bfcontainer, apb, apb->nmaxbytes, apb->nbytes);
         }
     }
 }
@@ -862,12 +862,12 @@ static void ssc_dump_queues(struct sam_transport_s *xpt, const char *msg)
   irqstate_t flags;
 
   flags = enter_critical_section();
-  i2sllinfo("%s\n", msg);
-  i2sllinfo("  Pending:\n");
+  i2sinfo("%s\n", msg);
+  i2sinfo("  Pending:\n");
   ssc_dump_queue(&xpt->pend);
-  i2sllinfo("  Active:\n");
+  i2sinfo("  Active:\n");
   ssc_dump_queue(&xpt->act);
-  i2sllinfo("  Done:\n");
+  i2sinfo("  Done:\n");
   ssc_dump_queue(&xpt->done);
   leave_critical_section(flags);
 }
@@ -1377,7 +1377,7 @@ static int ssc_rxdma_setup(struct sam_ssc_s *priv)
 
       if (ret < 0)
         {
-          i2sllerr("ERROR: wd_start failed: %d\n", errno);
+          i2serr("ERROR: wd_start failed: %d\n", errno);
         }
     }
 
@@ -1565,7 +1565,7 @@ static void ssc_rx_schedule(struct sam_ssc_s *priv, int result)
       ret = work_queue(HPWORK, &priv->rx.work, ssc_rx_worker, priv, 0);
       if (ret != 0)
         {
-          i2sllerr("ERROR: Failed to queue RX work: %d\n", ret);
+          i2serr("ERROR: Failed to queue RX work: %d\n", ret);
         }
     }
 }
@@ -1790,7 +1790,7 @@ static int ssc_txdma_setup(struct sam_ssc_s *priv)
 
       if (ret < 0)
         {
-          i2sllerr("ERROR: wd_start failed: %d\n", errno);
+          i2serr("ERROR: wd_start failed: %d\n", errno);
         }
     }
 
@@ -1965,7 +1965,7 @@ static void ssc_tx_schedule(struct sam_ssc_s *priv, int result)
       ret = work_queue(HPWORK, &priv->tx.work, ssc_tx_worker, priv, 0);
       if (ret != 0)
         {
-          i2sllerr("ERROR: Failed to queue TX work: %d\n", ret);
+          i2serr("ERROR: Failed to queue TX work: %d\n", ret);
         }
     }
 }

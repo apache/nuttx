@@ -46,8 +46,8 @@
 #include "up_arch.h"
 
 #include "kinetis.h"
-#include "kinetis_gpio.h"
-#include "kinetis_port.h"
+#include "chip/kinetis_gpio.h"
+#include "chip/kinetis_port.h"
 
 #ifdef CONFIG_DEBUG_GPIO_INFO
 

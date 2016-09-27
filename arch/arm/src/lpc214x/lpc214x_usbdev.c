@@ -539,7 +539,7 @@ static uint32_t lpc214x_getreg(uint32_t addr)
         {
           if (count == 4)
             {
-              ullinfo("...\n");
+              uinfo("...\n");
             }
 
           return val;
@@ -556,7 +556,7 @@ static uint32_t lpc214x_getreg(uint32_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          ullinfo("[repeats %d more times]\n", count-3);
+          uinfo("[repeats %d more times]\n", count-3);
         }
 
       /* Save the new address, value, and count */
@@ -568,7 +568,7 @@ static uint32_t lpc214x_getreg(uint32_t addr)
 
   /* Show the register value read */
 
-  ullinfo("%08x->%08x\n", addr, val);
+  uinfo("%08x->%08x\n", addr, val);
   return val;
 }
 #endif
@@ -586,7 +586,7 @@ static void lpc214x_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  ullinfo("%08x<-%08x\n", addr, val);
+  uinfo("%08x<-%08x\n", addr, val);
 
   /* Write the value */
 
@@ -1021,8 +1021,9 @@ static int lpc214x_wrrequest(struct lpc214x_ep_s *privep)
       return OK;
     }
 
-  ullinfo("epphy=%d req=%p: len=%d xfrd=%d nullpkt=%d\n",
-          privep->epphy, privreq, privreq->req.len, privreq->req.xfrd, privep->txnullpkt);
+  uinfo("epphy=%d req=%p: len=%d xfrd=%d nullpkt=%d\n",
+        privep->epphy, privreq, privreq->req.len, privreq->req.xfrd,
+        privep->txnullpkt);
 
   /* Ignore any attempt to send a zero length packet on anything but EP0IN */
 
@@ -1130,8 +1131,8 @@ static int lpc214x_rdrequest(struct lpc214x_ep_s *privep)
       return OK;
     }
 
-  ullinfo("len=%d xfrd=%d nullpkt=%d\n",
-          privreq->req.len, privreq->req.xfrd, privep->txnullpkt);
+  uinfo("len=%d xfrd=%d nullpkt=%d\n",
+        privreq->req.len, privreq->req.xfrd, privep->txnullpkt);
 
   /* Ignore any attempt to receive a zero length packet */
 
@@ -1552,8 +1553,8 @@ static inline void lpc214x_ep0setup(struct lpc214x_usbdev_s *priv)
   index = GETUINT16(ctrl.index);
   len   = GETUINT16(ctrl.len);
 
-  ullinfo("type=%02x req=%02x value=%04x index=%04x len=%04x\n",
-          ctrl.type, ctrl.req, value, index, len);
+  uinfo("type=%02x req=%02x value=%04x index=%04x len=%04x\n",
+        ctrl.type, ctrl.req, value, index, len);
 
   /* Dispatch any non-standard requests */
 
@@ -1697,7 +1698,7 @@ static inline void lpc214x_ep0setup(struct lpc214x_usbdev_s *priv)
         if (((ctrl.type & USB_REQ_RECIPIENT_MASK) == USB_REQ_RECIPIENT_DEVICE) &&
             value == USB_FEATURE_TESTMODE)
           {
-            ullinfo("test mode: %d\n", index);
+            uinfo("test mode: %d\n", index);
           }
         else if ((ctrl.type & USB_REQ_RECIPIENT_MASK) != USB_REQ_RECIPIENT_ENDPOINT)
           {
@@ -2287,7 +2288,7 @@ static int lpc214x_usbinterrupt(int irq, FAR void *context)
                                 }
                               else
                                 {
-                                  ullinfo("Pending data on OUT endpoint\n");
+                                  uinfo("Pending data on OUT endpoint\n");
                                   priv->rxpending = 1;
                                 }
                             }
@@ -2763,7 +2764,8 @@ static int lpc214x_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s 
   if (!req || !req->callback || !req->buf || !ep)
     {
       usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_INVALIDPARMS), 0);
-      ullinfo("req=%p callback=%p buf=%p ep=%p\n", req, req->callback, req->buf, ep);
+      uinfo("req=%p callback=%p buf=%p ep=%p\n",
+            req, req->callback, req->buf, ep);
       return -EINVAL;
     }
 #endif

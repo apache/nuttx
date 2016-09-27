@@ -84,7 +84,7 @@ ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CHIP_CSRCS += lpc11_userspace.c
 endif
 
-ifeq ($(CONFIG_GPIO_IRQ),y)
+ifeq ($(CONFIG_LPC11_GPIOIRQ),y)
 CHIP_CSRCS += lpc11_gpioint.c
 endif
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * common/up_assert.c
+ * arch/z80/src/common/up_assert.c
  *
  *   Copyright (C) 2007-2009, 2012-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -108,7 +108,7 @@ static int usbtrace_syslog(FAR const char *fmt, ...)
   /* Let vsyslog do the real work */
 
   va_start(ap, fmt);
-  ret = lowvsyslog(LOG_INFO, fmt, ap);
+  ret = vsyslog(LOG_EMERG, fmt, ap);
   va_end(ap);
   return ret;
 }
@@ -134,7 +134,7 @@ void up_assert(const uint8_t *filename, int lineno)
 void up_assert(void)
 #endif
 {
-#if CONFIG_TASK_NAME_SIZE > 0
+#if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_DEBUG_ALERT)
   struct tcb_s *rtcb = this_task();
 #endif
 

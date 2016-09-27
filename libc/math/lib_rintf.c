@@ -105,15 +105,15 @@ float rintf(float x)
   linteger  = (long)x;
   fremainder = x - (float)linteger;
 
-  if (x < 0.0)
+  if (x < 0.0F)
     {
       /* fremainder should be in range 0 .. -1 */
 
-      if (fremainder == -0.5)
+      if (fremainder == -0.5F)
         {
           linteger = ((linteger + 1) & ~1);
         }
-      else if (fremainder < -0.5)
+      else if (fremainder < -0.5F)
         {
           linteger--;
         }
@@ -122,11 +122,11 @@ float rintf(float x)
     {
       /* fremainder should be in range 0 .. 1 */
 
-      if (fremainder == 0.5)
+      if (fremainder == 0.5F)
         {
           linteger = ((linteger + 1) & ~1);
         }
-      else if (fremainder > 0.5)
+      else if (fremainder > 0.5F)
         {
           linteger++;
         }

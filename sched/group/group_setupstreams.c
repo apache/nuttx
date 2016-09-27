@@ -1,5 +1,5 @@
 /****************************************************************************
- * group_setupstreams.c
+ * sched/group/group_setupstreams.c
  *
  *   Copyright (C) 2007-2008, 2010-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -44,7 +44,7 @@
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
-#include <nuttx/lib.h>
+#include <nuttx/lib/lib.h>
 
 #include "group/group.h"
 

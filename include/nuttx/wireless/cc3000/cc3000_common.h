@@ -32,8 +32,8 @@
  *
  ****************************************************************************/
 
-#ifndef _INCLUDE_NUTTX_WIRELESS_CC3000_CC3000_COMMON_H
-#define _INCLUDE_NUTTX_WIRELESS_CC3000_CC3000_COMMON_H
+#ifndef __INCLUDE_NUTTX_WIRELESS_CC3000_CC3300_COMMON_H
+#define __INCLUDE_NUTTX_WIRELESS_CC3000_CC3300_COMMON_H
 
 /****************************************************************************
  * Included files
@@ -391,4 +391,4 @@ unsigned long STREAM_TO_UINT32_f(char* p, uint16_t offset);
 }
 #endif // __cplusplus
 
-#endif // _INCLUDE_NUTTX_WIRELESS_CC3000_CC3000_COMMON_H
+#endif // __INCLUDE_NUTTX_WIRELESS_CC3000_CC3300_COMMON_H

@@ -64,7 +64,8 @@
 #  define CONFIG_SSD1306_NINTERFACES 1
 #endif
 
-#if !defined(CONFIG_LCD_UG2864HSWEG01) && !defined(CONFIG_LCD_UG2832HSWEG04)
+#if !defined(CONFIG_LCD_SH1106_OLED_132) && !defined(CONFIG_LCD_UG2864HSWEG01) && \
+    !defined(CONFIG_LCD_UG2832HSWEG04)
 #  error "Unknown and unsupported SSD1306 LCD"
 #endif
 
@@ -75,6 +76,14 @@
 #  undef CONFIG_LCD_PORTRAIT
 #  undef CONFIG_LCD_RLANDSCAPE
 #  undef CONFIG_LCD_RPORTRAIT
+#endif
+
+/**************************************************************************************
+ * Pre-processor Definitions
+ **************************************************************************************/
+
+#ifndef CONFIG_NX_BGCOLOR
+#  define CONFIG_NX_BGCOLOR SSD1306_Y1_BLACK
 #endif
 
 /* SSD1306 Commands *******************************************************************/
@@ -149,6 +158,12 @@
 #  define SSD1306_DEV_XOFFSET     2    /* Offset to logical column 0 */
 #  define SSD1306_DEV_PAGES       4    /* 4 pages */
 #  define SSD1306_DEV_CMNPAD      0x02 /* COM configuration */
+#elif defined(CONFIG_LCD_SH1106_OLED_132)
+#  define SSD1306_DEV_NATIVE_XRES 128  /* Only 128 columns used, supporting 132 is a bit difficult */
+#  define SSD1306_DEV_NATIVE_YRES 64   /* 8 pages each 8 rows */
+#  define SSD1306_DEV_XOFFSET     0    /* Offset to logical column 0 */
+#  define SSD1306_DEV_PAGES       8    /* 8 pages */
+#  define SSD1306_DEV_CMNPAD      0x12 /* COM configuration */
 #endif
 
 #if defined(CONFIG_LCD_LANDSCAPE) || defined(CONFIG_LCD_RLANDSCAPE)
@@ -163,7 +178,12 @@
 
 /* Bytes per logical row and actual device row */
 
-#define SSD1306_DEV_XSTRIDE       (SSD1306_DEV_XRES >> 3)
+#if defined(CONFIG_LCD_SH1106_OLED_132)
+#  define SSD1306_DEV_XSTRIDE     (SSD1306_DEV_XRES >> 3)
+#else
+#  define SSD1306_DEV_XSTRIDE     (SSD1306_DEV_XRES >> 3)
+#endif
+
 #define SSD1306_DEV_YSTRIDE       (SSD1306_DEV_YRES >> 3)
 
 /* Color depth and format */
@@ -201,6 +221,14 @@
 #  elif defined(CONFIG_LCD_RLANDSCAPE)
 #    undef  SSD1306_DEV_REVERSEX
 #    define SSD1306_DEV_REVERSEY  1
+#  endif
+#elif defined(CONFIG_LCD_SH1106_OLED_132)
+#  if defined(CONFIG_LCD_LANDSCAPE)
+#    undef SSD1306_DEV_REVERSEX
+#    define SSD1306_DEV_REVERSEY  1
+#  elif defined(CONFIG_LCD_RLANDSCAPE)
+#    define SSD1306_DEV_REVERSEX  1
+#    undef  SSD1306_DEV_REVERSEY
 #  endif
 #endif
 
@@ -257,3 +285,4 @@ static inline void ssd1306_configspi(FAR struct spi_dev_s *spi)
 #endif 
 
 #endif /* __DRIVERS_LCD_SSD1306_H */
+

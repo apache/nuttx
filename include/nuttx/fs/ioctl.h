@@ -83,8 +83,11 @@
 #define _LOOPBASE       (0x1e00) /* Loop device commands */
 #define _MODEMBASE      (0x1f00) /* Modem ioctl commands */
 #define _I2CBASE        (0x2000) /* I2C driver commands */
+#define _SPIBASE        (0x2100) /* SPI driver commands */
+#define _GPIOBASE       (0x2200) /* GPIO driver commands */
+#define _CLIOCBASE      (0x1200) /* Contactless modules ioctl commands */
 
-/* boardctl commands share the same number space */
+/* boardctl() commands share the same number space */
 
 #define _BOARDBASE      (0xff00) /* boardctl commands */
 
@@ -136,7 +139,10 @@
                                            * OUT: Bytes readable from this fd
                                            */
 #define FIONWRITE       _FIOC(0x0006)     /* IN:  Location to return value (int *)
-                                           * OUT: Bytes writable to this fd
+                                           * OUT: Number bytes in send queue
+                                           */
+#define FIONSPACE       _FIOC(0x0007)     /* IN:  Location to return value (int *)
+                                           * OUT: Free space in send queue.
                                            */
 
 /* NuttX file system ioctl definitions **************************************/
@@ -249,8 +255,9 @@
 #define ANIOC_TRIGGER     _ANIOC(0x0001)  /* Trigger one conversion
                                            * IN: None
                                            * OUT: None */
-
-/* NuttX PWM ioctl definitions (see nuttx/pwm.h) ****************************/
+#define ANIOC_USER        0x0002          /* Device specific IOCTL commands
+                                           * may follow */
+/* NuttX PWM ioctl definitions (see nuttx/drivers/pwm.h) ********************/
 
 #define _PWMIOCVALID(c)   (_IOC_TYPE(c)==_PWMIOCBASE)
 #define _PWMIOC(nr)       _IOC(_PWMIOCBASE,nr)
@@ -340,7 +347,7 @@
 #define _RELAYIOC(nr)     _IOC(_RELAYBASE,nr)
 
 /* CAN driver ioctl definitions *********************************************/
-/* (see nuttx/can.h */
+/* (see nuttx/drivers/can.h */
 
 #define _CANIOCVALID(c)   (_IOC_TYPE(c)==_CANBASE)
 #define _CANIOC(nr)       _IOC(_CANBASE,nr)
@@ -354,8 +361,8 @@
 /* User LED driver ioctl definitions ****************************************/
 /* (see nuttx/leds/usersled.h */
 
-#define _ULEDIOCVALID(c)   (_IOC_TYPE(c)==_ULEDBASE)
-#define _ULEDIOC(nr)       _IOC(_ULEDBASE,nr)
+#define _ULEDIOCVALID(c)  (_IOC_TYPE(c)==_ULEDBASE)
+#define _ULEDIOC(nr)      _IOC(_ULEDBASE,nr)
 
 /* Zero Cross driver ioctl definitions **************************************/
 /* (see nuttx/include/sensor/zerocross.h */
@@ -370,16 +377,34 @@
 #define _LOOPIOC(nr)      _IOC(_LOOPBASE,nr)
 
 /* Modem driver ioctl definitions ********************************************/
-/* see nuttx/include/modem/*.h */
+/* see nuttx/include/modem/ioctl.h */
 
-#define _MODEMIOCVALID(c)  (_IOC_TYPE(c)==_MODEMBASE)
-#define _MODEMIOC(nr)      _IOC(_MODEMBASE,nr)
+#define _MODEMIOCVALID(c) (_IOC_TYPE(c)==_MODEMBASE)
+#define _MODEMIOC(nr)     _IOC(_MODEMBASE,nr)
 
 /* I2C driver ioctl definitions **********************************************/
 /* see nuttx/include/i2c/i2c_master.h */
 
-#define _I2CIOCVALID(c)    (_IOC_TYPE(c)==_I2CBASE)
-#define _I2CIOC(nr)        _IOC(_I2CBASE,nr)
+#define _I2CIOCVALID(c)   (_IOC_TYPE(c)==_I2CBASE)
+#define _I2CIOC(nr)       _IOC(_I2CBASE,nr)
+
+/* SPI driver ioctl definitions **********************************************/
+/* see nuttx/include/spi/spi_transfer.h */
+
+#define _SPIIOCVALID(c)   (_IOC_TYPE(c)==_SPIBASE)
+#define _SPIIOC(nr)       _IOC(_SPIBASE,nr)
+
+/* GPIO driver command definitions ******************************************/
+/* see nuttx/include/ioexpander/gpio.h */
+
+#define _GPIOCVALID(c)    (_IOC_TYPE(c)==_GPIOBASE)
+#define _GPIOC(nr)        _IOC(_GPIOBASE,nr)
+
+/* Contactless driver ioctl definitions ****************************************/
+/* (see nuttx/include/contactless/ioctl.h */
+
+#define _CLIOCVALID(c)    (_IOC_TYPE(c)==_CLIOCBASE)
+#define _CLIOC(nr)        _IOC(_CLIOCBASE,nr)
 
 /* boardctl() command definitions *******************************************/
 

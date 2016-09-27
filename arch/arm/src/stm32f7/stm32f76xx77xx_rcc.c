@@ -742,7 +742,7 @@ static void stm32_stdclockconfig(void)
       regval |= STM32_RCC_CFGR_PPRE1;
       putreg32(regval, STM32_RCC_CFGR);
 
-#ifdef CONFIG_RTC_HSECLOCK
+#ifdef CONFIG_STM32F7_RTC_HSECLOCK
       /* Set the RTC clock divisor */
 
       regval = getreg32(STM32_RCC_CFGR);
@@ -939,13 +939,13 @@ static void stm32_stdclockconfig(void)
         }
 #endif
 
-#if defined(CONFIG_STM32F7_IWDG) || defined(CONFIG_RTC_LSICLOCK)
+#if defined(CONFIG_STM32F7_IWDG) || defined(CONFIG_STM32F7_RTC_LSICLOCK)
       /* Low speed internal clock source LSI */
 
       stm32_rcc_enablelsi();
 #endif
 
-#if defined(CONFIG_RTC_LSECLOCK)
+#if defined(CONFIG_STM32F7_RTC_LSECLOCK)
       /* Low speed external clock source LSE
        *
        * TODO: There is another case where the LSE needs to

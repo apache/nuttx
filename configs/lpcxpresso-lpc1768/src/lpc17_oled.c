@@ -112,7 +112,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
   spi = lpc17_sspbus_initialize(1);
   if (!spi)
     {
-      gllerr("ERROR: Failed to initialize SPI port 1\n");
+      gerr("ERROR: Failed to initialize SPI port 1\n");
     }
   else
     {
@@ -121,11 +121,11 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
       dev = ug_initialize(spi, devno);
       if (!dev)
         {
-          gllerr("ERROR: Failed to bind SPI port 1 to OLED %d: %d\n", devno);
+          gerr("ERROR: Failed to bind SPI port 1 to OLED %d: %d\n", devno);
         }
      else
         {
-          gllinfo("Bound SPI port 1 to OLED %d\n", devno);
+          ginfo("Bound SPI port 1 to OLED %d\n", devno);
 
           /* And turn the OLED on (dim) */
 
@@ -193,7 +193,7 @@ int lpc17_ssp1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
 #ifdef CONFIG_UG9664HSWAG01_POWER
 void ug_power(unsigned int devno, bool on)
 {
-  gllinfo("power %s\n", on ? "ON" : "OFF");
+  ginfo("power %s\n", on ? "ON" : "OFF");
   (void)lpc17_gpiowrite(LPCXPRESSO_OLED_POWER, on);
 }
 #endif

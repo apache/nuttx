@@ -44,6 +44,7 @@
 
 #include <sys/types.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <nuttx/sched.h>
 
 /********************************************************************************
@@ -254,6 +255,10 @@ int    sched_cpu_count(FAR const cpu_set_t *set);
 int    sched_lock(void);
 int    sched_unlock(void);
 int    sched_lockcount(void);
+
+/* Queries */
+
+bool   sched_idletask(void);
 
 #undef EXTERN
 #if defined(__cplusplus)

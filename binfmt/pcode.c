@@ -1,7 +1,7 @@
 /****************************************************************************
  * binfmt/pcode.c
  *
- *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,15 +47,16 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <apps/prun.h>
-
 #include <nuttx/kmalloc.h>
 #include <nuttx/poff.h>
-#include <nuttx/fs/ramdisk.h>
+#include <nuttx/drivers/ramdisk.h>
 #include <nuttx/binfmt/binfmt.h>
 #include <nuttx/binfmt/pcode.h>
 
-#ifdef CONFIG_PCODE
+#include "pexec.h"
+#include "pedefs.h"
+
+#ifdef CONFIG_BINFMT_PCODE
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -72,23 +73,19 @@
 #  error The binary loader is disabled (CONFIG_BINFMT_DISABLE)!
 #endif
 
-#ifndef CONFIG_PCODE
-#  error You must select CONFIG_PCODE in your configuration file
-#endif
-
 #ifndef CONFIG_SCHED_ONEXIT
 #  error CONFIG_SCHED_ONEXIT is required
 #endif
 
-#ifndef CONFIG_PCODE_VARSTACKSIZE
-# define CONFIG_PCODE_VARSTACKSIZE 1024
+#ifndef CONFIG_BINFMT_PCODE_VARSTACKSIZE
+# define CONFIG_BINFMT_PCODE_VARSTACKSIZE 1024
 #endif
 
-#ifndef CONFIG_PCODE_STRSTACKSIZE
-# define CONFIG_PCODE_STRSTACKSIZE 128
+#ifndef CONFIG_BINFMT_PCODE_STRSTACKSIZE
+# define CONFIG_BINFMT_PCODE_STRSTACKSIZE 128
 #endif
 
-#ifdef CONFIG_PCODE_TEST_FS
+#ifdef CONFIG_BINFMT_PCODE_TEST_FS
 #  ifndef CONFIG_FS_ROMFS
 #    error You must select CONFIG_FS_ROMFS in your configuration file
 #  endif
@@ -97,16 +94,16 @@
 #    error You must not disable mountpoints via CONFIG_DISABLE_MOUNTPOINT in your configuration file
 #  endif
 
-#  ifndef CONFIG_PCODE_TEST_DEVMINOR
-#    define CONFIG_PCODE_TEST_DEVMINOR 0
+#  ifndef CONFIG_BINFMT_PCODE_TEST_DEVMINOR
+#    define CONFIG_BINFMT_PCODE_TEST_DEVMINOR 0
 #  endif
 
-#  ifndef CONFIG_PCODE_TEST_DEVPATH
-#    define CONFIG_PCODE_TEST_DEVPATH "/dev/ram0"
+#  ifndef CONFIG_BINFMT_PCODE_TEST_DEVPATH
+#    define CONFIG_BINFMT_PCODE_TEST_DEVPATH "/dev/ram0"
 #  endif
 
-#  ifndef CONFIG_PCODE_TEST_MOUNTPOINT
-#    define CONFIG_PCODE_TEST_MOUNTPOINT "/bin"
+#  ifndef CONFIG_BINFMT_PCODE_TEST_MOUNTPOINT
+#    define CONFIG_BINFMT_PCODE_TEST_MOUNTPOINT "/bin"
 #  endif
 #endif
 
@@ -130,6 +127,16 @@ struct binfmt_handoff_s
  * Private Function Prototypes
  ****************************************************************************/
 
+static int pcode_run(FAR char *exepath, size_t varsize, size_t strsize);
+#ifdef CONFIG_BINFMT_PCODE_TEST_FS
+static int pcode_mount_testfs(void);
+#endif
+#if !defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_BUILD_KERNEL)
+static void pcode_onexit(int exitcode, FAR void *arg);
+#endif
+#if !defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_BUILD_KERNEL)
+static int pcode_proxy(int argc, char **argv);
+#endif
 static int pcode_load(FAR struct binary_s *binp);
 static int pcode_unload(FAR struct binary_s *binp);
 
@@ -146,13 +153,76 @@ static struct binfmt_s g_pcode_binfmt =
 
 struct binfmt_handoff_s g_pcode_handoff;
 
-#ifdef CONFIG_PCODE_TEST_FS
+#ifdef CONFIG_BINFMT_PCODE_TEST_FS
 #  include "romfs.h"
 #endif
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: pcode_run
+ *
+ * Description:
+ *   Execute/interpret a P-Code file.  This function does not return until
+ *   the P-code program terminates or until a fatal error occurs.
+ *
+ * Input Parameters:
+ *   exepath - The full path to the P-Code binary.
+ *   varsize - Size of the P-Code variable stack
+ *   strsize - the size of the P-Code string stack.
+ *
+ * Returned Value:
+ *   OK if the P-Code program successfully terminated; A negated errno value
+ *   is returned on the event of any failure.
+ *
+ ****************************************************************************/
+
+static int pcode_run(FAR char *exepath, size_t varsize, size_t strsize)
+{
+  FAR struct pexec_s *st;
+  int errcode;
+  int ret = OK;
+
+  /* Load the POFF file into memory */
+
+  st = pload(exepath, varsize, varsize);
+  if (!st)
+    {
+      berr("ERROR: Could not load %s\n", exepath);
+      return -ENOEXEC;
+    }
+
+  binfo("Loaded %s\n", exepath);
+
+  /* Execute the P-Code program until a stopping condition occurs */
+
+  for (;;)
+    {
+      /* Execute the instruction; Check for exceptional conditions */
+
+      errcode = pexec(st);
+      if (errcode != eNOERROR)
+        {
+          break;
+        }
+    }
+
+  if (errcode != eEXIT)
+    {
+      /* REVISIT: Select a more appropriated return errocode */
+
+      berr("ERROR: Runtime error 0x%02x -- Execution Stopped\n", errcode);
+      ret = -ENOEXEC;
+    }
+
+  /* Clean up resources used by the interpreter */
+
+  binfo("Execution terminated\n");
+  pexec_release(st);
+  return ret;
+}
 
 /****************************************************************************
  * Name: pcode_mount_testfs
@@ -162,15 +232,15 @@ struct binfmt_handoff_s g_pcode_handoff;
  *
  ****************************************************************************/
 
-#ifdef CONFIG_PCODE_TEST_FS
+#ifdef CONFIG_BINFMT_PCODE_TEST_FS
 static int pcode_mount_testfs(void)
 {
   int ret;
 
   /* Create a ROM disk for the ROMFS filesystem */
 
-  binfo("Registering romdisk at /dev/ram%d\n", CONFIG_PCODE_TEST_DEVMINOR);
-  ret = romdisk_register(CONFIG_PCODE_TEST_DEVMINOR, (FAR uint8_t *)romfs_img,
+  binfo("Registering romdisk at /dev/ram%d\n", CONFIG_BINFMT_PCODE_TEST_DEVMINOR);
+  ret = romdisk_register(CONFIG_BINFMT_PCODE_TEST_DEVMINOR, (FAR uint8_t *)romfs_img,
                          NSECTORS(ROMFS_IMG_LEN), SECTORSIZE);
   if (ret < 0)
     {
@@ -181,9 +251,11 @@ static int pcode_mount_testfs(void)
   /* Mount the test file system */
 
   binfo("Mounting ROMFS filesystem at target=%s with source=%s\n",
-         CONFIG_PCODE_TEST_MOUNTPOINT, CONFIG_PCODE_TEST_DEVPATH);
+         CONFIG_BINFMT_PCODE_TEST_MOUNTPOINT,
+         CONFIG_BINFMT_PCODE_TEST_DEVPATH);
 
-  ret = mount(CONFIG_PCODE_TEST_DEVPATH, CONFIG_PCODE_TEST_MOUNTPOINT,
+  ret = mount(CONFIG_BINFMT_PCODE_TEST_DEVPATH,
+              CONFIG_BINFMT_PCODE_TEST_MOUNTPOINT,
               "romfs", MS_RDONLY, NULL);
   if (ret < 0)
     {
@@ -191,7 +263,9 @@ static int pcode_mount_testfs(void)
       DEBUGASSERT(errval > 0);
 
       berr("ERROR: mount(%s,%s,romfs) failed: %d\n",
-           CONFIG_PCODE_TEST_DEVPATH, CONFIG_PCODE_TEST_MOUNTPOINT, errval);
+           CONFIG_BINFMT_PCODE_TEST_DEVPATH,
+           CONFIG_BINFMT_PCODE_TEST_MOUNTPOINT, errval);
+
       return -errval;
     }
 
@@ -201,7 +275,7 @@ static int pcode_mount_testfs(void)
    */
 
 #if defined(CONFIG_BINFMT_EXEPATH) && !defined(CONFIG_PATH_INITIAL)
-  (void)setenv("PATH", CONFIG_PCODE_TEST_MOUNTPOINT, 1);
+  (void)setenv("PATH", CONFIG_BINFMT_PCODE_TEST_MOUNTPOINT, 1);
 #endif
 
   return OK;
@@ -273,7 +347,8 @@ static int pcode_proxy(int argc, char **argv)
 
   /* Load the P-code file and execute it */
 
-  ret = prun(fullpath, CONFIG_PCODE_VARSTACKSIZE, CONFIG_PCODE_STRSTACKSIZE);
+  ret = pcode_run(fullpath, CONFIG_BINFMT_PCODE_VARSTACKSIZE,
+                  CONFIG_BINFMT_PCODE_STRSTACKSIZE);
 
   /* We no longer need the fullpath */
 
@@ -324,8 +399,8 @@ static int pcode_load(struct binary_s *binp)
 
   /* Read the POFF file header */
 
-  for (remaining = sizeof(struct poff_fileheader_s), ptr = (FAR uint8_t *)&hdr;
-       remaining > 0; )
+  for (remaining = sizeof(struct poff_fileheader_s),
+       ptr = (FAR uint8_t *)&hdr; remaining > 0; )
     {
       /* Read the next GULP */
 
@@ -358,7 +433,7 @@ static int pcode_load(struct binary_s *binp)
         }
     }
 
-#ifdef CONFIG_PCODE_DUMPBUFFER
+#ifdef CONFIG_BINFMT_PCODE_DUMPBUFFER
   lib_dumpbuffer("POFF File Header", &hdr, sizeof(poff_fileheader_s));
 #endif
 
@@ -377,8 +452,8 @@ static int pcode_load(struct binary_s *binp)
    */
 
   binp->entrypt   = pcode_proxy;
-  binp->stacksize = CONFIG_PCODE_STACKSIZE;
-  binp->priority  = CONFIG_PCODE_PRIORITY;
+  binp->stacksize = CONFIG_BINFMT_PCODE_STACKSIZE;
+  binp->priority  = CONFIG_BINFMT_PCODE_PRIORITY;
 
   /* Get exclusive access to the p-code handoff structure */
 
@@ -517,14 +592,15 @@ void pcode_uninitialize(void)
       UNUSED(errval);
     }
 
-#ifdef CONFIG_PCODE_TEST_FS
-  ret = umount(CONFIG_PCODE_TEST_MOUNTPOINT);
+#ifdef CONFIG_BINFMT_PCODE_TEST_FS
+  ret = umount(CONFIG_BINFMT_PCODE_TEST_MOUNTPOINT);
   if (ret < 0)
     {
       int errval = get_errno();
       DEBUGASSERT(errval > 0);
 
-      berr("ERROR: umount(%s) failed: %d\n", CONFIG_PCODE_TEST_MOUNTPOINT, errval);
+      berr("ERROR: umount(%s) failed: %d\n",
+           CONFIG_BINFMT_PCODE_TEST_MOUNTPOINT, errval);
       UNUSED(errval);
     }
 #endif
@@ -534,4 +610,4 @@ void pcode_uninitialize(void)
   sem_destroy(&g_pcode_handoff.exclsem);
 }
 
-#endif /* CONFIG_PCODE */
+#endif /* CONFIG_BINFMT_PCODE */

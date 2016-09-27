@@ -37,36 +37,15 @@ CONFIG_BUILD_FLAT=y
 # CONFIG_ARCH_MATH_H is not set
 CONFIG_ARCH_FLOAT_H=y
 # CONFIG_ARCH_STDARG_H is not set
+# CONFIG_ARCH_DEBUG_H is not set
 
 #
 # Debug Options
 #
-CONFIG_DEBUG_FEATURES=y
-# CONFIG_ARCH_HAVE_HEAPCHECK is not set
-CONFIG_DEBUG_INFO=y
-
-#
-# Subsystem Debug Options
-#
-# CONFIG_DEBUG_AUDIO is not set
-# CONFIG_DEBUG_BINFMT is not set
-# CONFIG_DEBUG_FS is not set
-# CONFIG_DEBUG_GRAPHICS is not set
-# CONFIG_DEBUG_LIB is not set
-# CONFIG_DEBUG_MM is not set
-# CONFIG_DEBUG_SCHED is not set
-
-#
-# OS Function Debug Options
-#
-# CONFIG_DEBUG_IRQ is not set
-
-#
-# Driver Debug Options
-#
-# CONFIG_DEBUG_ANALOG is not set
-# CONFIG_DEBUG_GPIO is not set
+# CONFIG_DEBUG_ALERT is not set
+# CONFIG_DEBUG_FEATURES is not set
 # CONFIG_ARCH_HAVE_STACKCHECK is not set
+# CONFIG_ARCH_HAVE_HEAPCHECK is not set
 # CONFIG_DEBUG_SYMBOLS is not set
 # CONFIG_ARCH_HAVE_CUSTOMOPT is not set
 # CONFIG_DEBUG_NOOPT is not set
@@ -80,7 +59,7 @@ CONFIG_DEBUG_FULLOPT=y
 # CONFIG_ARCH_HC is not set
 # CONFIG_ARCH_MIPS is not set
 # CONFIG_ARCH_RGMP is not set
-# CONFIG_ARCH_SH is not set
+# CONFIG_ARCH_RENESAS is not set
 CONFIG_ARCH_SIM=y
 # CONFIG_ARCH_X86 is not set
 # CONFIG_ARCH_Z16 is not set
@@ -96,6 +75,8 @@ CONFIG_HOST_X86_64=y
 CONFIG_SIM_X8664_SYSTEMV=y
 # CONFIG_SIM_X8664_MICROSOFT is not set
 # CONFIG_SIM_WALLTIME is not set
+CONFIG_SIM_NET_HOST_ROUTE=y
+# CONFIG_SIM_NET_BRIDGE is not set
 # CONFIG_SIM_FRAMEBUFFER is not set
 # CONFIG_SIM_SPIFLASH is not set
 
@@ -110,6 +91,7 @@ CONFIG_SIM_X8664_SYSTEMV=y
 # CONFIG_ARCH_HAVE_COHERENT_DCACHE is not set
 # CONFIG_ARCH_HAVE_ADDRENV is not set
 # CONFIG_ARCH_NEED_ADDRENV_MAPPING is not set
+CONFIG_ARCH_HAVE_MULTICPU=y
 # CONFIG_ARCH_HAVE_VFORK is not set
 # CONFIG_ARCH_HAVE_MMU is not set
 # CONFIG_ARCH_HAVE_MPU is not set
@@ -165,6 +147,7 @@ CONFIG_ARCH_BOARD="sim"
 #
 # Board-Specific Options
 #
+# CONFIG_BOARD_CRASHDUMP is not set
 # CONFIG_LIB_BOARDCTL is not set
 
 #
@@ -254,9 +237,10 @@ CONFIG_SIG_SIGCONDTIMEDOUT=16
 #
 CONFIG_PREALLOC_MQ_MSGS=32
 CONFIG_MQ_MAXMSGSIZE=32
+# CONFIG_MODULE is not set
 
 #
-# Work Queue Support
+# Work queue support
 #
 # CONFIG_SCHED_WORKQUEUE is not set
 # CONFIG_SCHED_HPWORK is not set
@@ -305,8 +289,27 @@ CONFIG_DEV_NULL=y
 # CONFIG_VIDEO_DEVICES is not set
 # CONFIG_BCH is not set
 # CONFIG_INPUT is not set
+
+#
+# IO Expander/GPIO Support
+#
+# CONFIG_IOEXPANDER is not set
+# CONFIG_DEV_GPIO is not set
+
+#
+# LCD Driver Support
+#
 # CONFIG_LCD is not set
+# CONFIG_SLCD is not set
+
+#
+# LED Support
+#
+# CONFIG_RGBLED is not set
+# CONFIG_PCA9635PW is not set
+# CONFIG_NCP5623C is not set
 # CONFIG_MMCSD is not set
+# CONFIG_MODEM is not set
 # CONFIG_MTD is not set
 # CONFIG_EEPROM is not set
 # CONFIG_PIPES is not set
@@ -316,6 +319,8 @@ CONFIG_DEV_NULL=y
 # CONFIG_SERCOMM_CONSOLE is not set
 CONFIG_SERIAL=y
 # CONFIG_DEV_LOWCONSOLE is not set
+# CONFIG_SERIAL_REMOVABLE is not set
+CONFIG_SERIAL_CONSOLE=y
 # CONFIG_16550_UART is not set
 # CONFIG_UART_SERIALDRIVER is not set
 # CONFIG_UART0_SERIALDRIVER is not set
@@ -339,10 +344,6 @@ CONFIG_SERIAL=y
 # CONFIG_USART7_SERIALDRIVER is not set
 # CONFIG_USART8_SERIALDRIVER is not set
 # CONFIG_OTHER_UART_SERIALDRIVER is not set
-
-#
-# USART Configuration
-#
 # CONFIG_MCU_SERIAL is not set
 # CONFIG_STANDARD_SERIAL is not set
 # CONFIG_SERIAL_IFLOWCONTROL is not set
@@ -351,17 +352,22 @@ CONFIG_SERIAL=y
 # CONFIG_ARCH_HAVE_SERIAL_TERMIOS is not set
 # CONFIG_USBDEV is not set
 # CONFIG_USBHOST is not set
+# CONFIG_HAVE_USBTRACE is not set
 # CONFIG_DRIVERS_WIRELESS is not set
-
-#
-# System Logging Device Options
-#
 
 #
 # System Logging
 #
+# CONFIG_ARCH_SYSLOG is not set
 # CONFIG_RAMLOG is not set
-# CONFIG_SYSLOG_CONSOLE is not set
+# CONFIG_SYSLOG_INTBUFFER is not set
+# CONFIG_SYSLOG_TIMESTAMP is not set
+CONFIG_SYSLOG_SERIAL_CONSOLE=y
+# CONFIG_SYSLOG_CHAR is not set
+CONFIG_SYSLOG_CONSOLE=y
+# CONFIG_SYSLOG_NONE is not set
+# CONFIG_SYSLOG_FILE is not set
+# CONFIG_SYSLOG_CHARDEV is not set
 
 #
 # Networking Support
@@ -400,12 +406,6 @@ CONFIG_FS_MQUEUE_MPATH="/var/mqueue"
 # CONFIG_FS_HOSTFS is not set
 
 #
-# System Logging
-#
-# CONFIG_SYSLOG is not set
-# CONFIG_SYSLOG_TIMESTAMP is not set
-
-#
 # Graphics Support
 #
 # CONFIG_NX is not set
@@ -422,6 +422,10 @@ CONFIG_MM_REGIONS=1
 # Audio Support
 #
 # CONFIG_AUDIO is not set
+
+#
+# Wireless Support
+#
 
 #
 # Binary Loader
@@ -466,13 +470,17 @@ CONFIG_ARCH_LOWPUTC=y
 CONFIG_LIB_SENDFILE_BUFSIZE=512
 # CONFIG_ARCH_ROMGETC is not set
 # CONFIG_ARCH_OPTIMIZED_FUNCTIONS is not set
+CONFIG_ARCH_HAVE_TLS=y
+# CONFIG_TLS is not set
 # CONFIG_LIBC_NETDB is not set
 
 #
 # Non-standard Library Support
 #
+# CONFIG_LIB_CRC64_FAST is not set
 # CONFIG_LIB_KBDCODEC is not set
 # CONFIG_LIB_SLCDCODEC is not set
+# CONFIG_LIB_HEX2BIN is not set
 
 #
 # Basic CXX Support
@@ -501,6 +509,7 @@ CONFIG_UCLIBCXX_HAVE_LIBSUPCXX=y
 #
 # Examples
 #
+# CONFIG_EXAMPLES_CHAT is not set
 # CONFIG_EXAMPLES_CONFIGDATA is not set
 # CONFIG_EXAMPLES_CPUHOG is not set
 CONFIG_EXAMPLES_CXXTEST=y
@@ -510,10 +519,10 @@ CONFIG_EXAMPLES_CXXTEST=y
 # CONFIG_EXAMPLES_FTPD is not set
 # CONFIG_EXAMPLES_HELLO is not set
 # CONFIG_EXAMPLES_HELLOXX is not set
-# CONFIG_EXAMPLES_JSON is not set
 # CONFIG_EXAMPLES_HIDKBD is not set
-# CONFIG_EXAMPLES_KEYPADTEST is not set
 # CONFIG_EXAMPLES_IGMP is not set
+# CONFIG_EXAMPLES_JSON is not set
+# CONFIG_EXAMPLES_KEYPADTEST is not set
 # CONFIG_EXAMPLES_MEDIA is not set
 # CONFIG_EXAMPLES_MM is not set
 # CONFIG_EXAMPLES_MODBUS is not set
@@ -522,18 +531,19 @@ CONFIG_EXAMPLES_CXXTEST=y
 # CONFIG_EXAMPLES_NSH is not set
 # CONFIG_EXAMPLES_NULL is not set
 # CONFIG_EXAMPLES_NX is not set
-# CONFIG_EXAMPLES_NXTERM is not set
 # CONFIG_EXAMPLES_NXFFS is not set
 # CONFIG_EXAMPLES_NXHELLO is not set
 # CONFIG_EXAMPLES_NXIMAGE is not set
 # CONFIG_EXAMPLES_NXLINES is not set
+# CONFIG_EXAMPLES_NXTERM is not set
 # CONFIG_EXAMPLES_NXTEXT is not set
 # CONFIG_EXAMPLES_OSTEST is not set
+# CONFIG_EXAMPLES_PCA9635 is not set
 # CONFIG_EXAMPLES_PIPE is not set
 # CONFIG_EXAMPLES_POLL is not set
-# CONFIG_EXAMPLES_PPPD is not set
 # CONFIG_EXAMPLES_POSIXSPAWN is not set
-# CONFIG_EXAMPLES_QENCODER is not set
+# CONFIG_EXAMPLES_PPPD is not set
+# CONFIG_EXAMPLES_RGBLED is not set
 # CONFIG_EXAMPLES_RGMP is not set
 # CONFIG_EXAMPLES_SENDMAIL is not set
 # CONFIG_EXAMPLES_SERIALBLASTER is not set
@@ -541,18 +551,24 @@ CONFIG_EXAMPLES_CXXTEST=y
 # CONFIG_EXAMPLES_SERLOOP is not set
 # CONFIG_EXAMPLES_SLCD is not set
 # CONFIG_EXAMPLES_SMART is not set
+# CONFIG_EXAMPLES_SMP is not set
 # CONFIG_EXAMPLES_TCPECHO is not set
 # CONFIG_EXAMPLES_TELNETD is not set
 # CONFIG_EXAMPLES_TIFF is not set
 # CONFIG_EXAMPLES_TOUCHSCREEN is not set
-# CONFIG_EXAMPLES_WEBSERVER is not set
-# CONFIG_EXAMPLES_USBSERIAL is not set
 # CONFIG_EXAMPLES_USBTERM is not set
 # CONFIG_EXAMPLES_WATCHDOG is not set
+# CONFIG_EXAMPLES_WEBSERVER is not set
 
 #
 # File System Utilities
 #
+# CONFIG_FSUTILS_INIFILE is not set
+
+#
+# GPS Utilities
+#
+# CONFIG_GPSUTILS_MINMEA_LIB is not set
 
 #
 # Graphics Support
@@ -564,8 +580,8 @@ CONFIG_EXAMPLES_CXXTEST=y
 # Interpreters
 #
 # CONFIG_INTERPRETERS_FICL is not set
-# CONFIG_INTERPRETERS_PCODE is not set
 # CONFIG_INTERPRETERS_MICROPYTHON is not set
+# CONFIG_INTERPRETERS_PCODE is not set
 
 #
 # FreeModBus
@@ -576,6 +592,7 @@ CONFIG_EXAMPLES_CXXTEST=y
 # Network Utilities
 #
 # CONFIG_NETUTILS_CODECS is not set
+# CONFIG_NETUTILS_ESP8266 is not set
 # CONFIG_NETUTILS_FTPC is not set
 # CONFIG_NETUTILS_JSON is not set
 # CONFIG_NETUTILS_SMTP is not set
@@ -597,16 +614,16 @@ CONFIG_EXAMPLES_CXXTEST=y
 #
 # System Libraries and NSH Add-Ons
 #
-# CONFIG_SYSTEM_FREE is not set
 # CONFIG_SYSTEM_CLE is not set
 # CONFIG_SYSTEM_CUTERM is not set
-# CONFIG_SYSTEM_INSTALL is not set
+# CONFIG_SYSTEM_FREE is not set
 # CONFIG_SYSTEM_HEX2BIN is not set
-# CONFIG_FSUTILS_INIFILE is not set
 # CONFIG_SYSTEM_HEXED is not set
+# CONFIG_SYSTEM_INSTALL is not set
 # CONFIG_SYSTEM_RAMTEST is not set
 # CONFIG_READLINE_HAVE_EXTMATCH is not set
 # CONFIG_SYSTEM_READLINE is not set
 # CONFIG_SYSTEM_SUDOKU is not set
+# CONFIG_SYSTEM_UBLOXMODEM is not set
 # CONFIG_SYSTEM_VI is not set
 # CONFIG_SYSTEM_ZMODEM is not set

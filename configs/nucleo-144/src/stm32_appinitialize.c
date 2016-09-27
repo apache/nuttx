@@ -42,6 +42,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <debug.h>
 #include <syslog.h>
 
 #include "nucleo-144.h"
@@ -99,6 +100,12 @@ int board_app_initialize(uintptr_t arg)
     {
       syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
     }
+#endif
+
+#ifdef CONFIG_STM32F7_BBSRAM
+  /* Initialize battery-backed RAM */
+
+  (void)stm32_bbsram_int();
 #endif
 
 #if defined(CONFIG_FAT_DMAMEMORY)

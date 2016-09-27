@@ -41,7 +41,7 @@
 
 #include <errno.h>
 #include <debug.h>
-#include <nuttx/can.h>
+#include <nuttx/drivers/can.h>
 #include <arch/board/board.h>
 #include "stm32.h"
 #include "stm32_can.h"
@@ -83,13 +83,13 @@ int board_can_initialize(void)
   return stm32_can_initialize();
 }
 
-/****************************************************************************************************
+/************************************************************************************
  * Name: stm32_can_initialize
  *
  * Description:
  *   Called at application startup time to initialize the CAN functionality.
  *
- ****************************************************************************************************/
+ ************************************************************************************/
 
 int stm32_can_initialize(void)
 {

@@ -1,8 +1,9 @@
 /****************************************************************************
  * arch/arm/src/stm32f7/stm32_otgdev.c
  *
- *   Copyright (C) 2012-2014 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2012-2014, 2016 Gregory Nutt. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -63,12 +64,14 @@
 #include "up_internal.h"
 
 
-#if defined(CONFIG_USBDEV) && (defined(CONFIG_STM32F7_OTGFS) || defined(CONFIG_STM32F7_OTGHS))
+#if defined(CONFIG_USBDEV) && (defined(CONFIG_STM32F7_OTGFS) || \
+    defined(CONFIG_STM32F7_OTGHS))
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration ***************************************************************/
+
+/* Configuration ************************************************************/
 
 #ifndef CONFIG_USBDEV_EP0_MAXSIZE
 #  define CONFIG_USBDEV_EP0_MAXSIZE 64
@@ -164,7 +167,6 @@
 #  define CONFIG_USBDEV_EP8_TXFIFO_SIZE 0
 #endif
 
-
 /* The actual FIFO addresses that we use must be aligned to 4-byte boundaries;
  * FIFO sizes must be provided in units of 32-bit words.
  */
@@ -202,10 +204,33 @@
 
 #if (STM32_RXFIFO_BYTES + \
      STM32_EP0_TXFIFO_BYTES + STM32_EP1_TXFIFO_BYTES + STM32_EP2_TXFIFO_BYTES + STM32_EP3_TXFIFO_BYTES + \
-	 STM32_EP4_TXFIFO_BYTES + STM32_EP5_TXFIFO_BYTES + STM32_EP6_TXFIFO_BYTES + STM32_EP7_TXFIFO_BYTES + CONFIG_USBDEV_EP8_TXFIFO_SIZE   \
-	) > STM32_OTG_FIFO_SIZE
+     STM32_EP4_TXFIFO_BYTES + STM32_EP5_TXFIFO_BYTES + STM32_EP6_TXFIFO_BYTES + STM32_EP7_TXFIFO_BYTES + CONFIG_USBDEV_EP8_TXFIFO_SIZE   \
+    ) > STM32_OTG_FIFO_SIZE
 #  error "FIFO allocations exceed FIFO memory size"
 #endif
+
+#define OTG_GINT_RESERVED   (OTG_GINT_RES89   | \
+                            OTG_GINT_RES1617  | \
+                            OTG_GINT_RES22)
+
+
+#define OTG_GINT_RC_W1   (OTG_GINT_MMIS     | \
+                          OTG_GINT_SOF      | \
+                          OTG_GINT_ESUSP    | \
+                          OTG_GINT_USBSUSP  | \
+                          OTG_GINT_USBRST   | \
+                          OTG_GINT_ENUMDNE  | \
+                          OTG_GINT_ISOODRP  | \
+                          OTG_GINT_EOPF     | \
+                          OTG_GINT_IISOIXFR | \
+                          OTG_GINT_IISOOXFR | \
+                          OTG_GINT_RSTDET   | \
+                          OTG_GINT_LPMINT   | \
+                          OTG_GINT_CIDSCHG  | \
+                          OTG_GINT_DISC     | \
+                          OTG_GINT_SRQ      | \
+                          OTG_GINT_WKUP)
+
 
 /* Debug ***********************************************************************/
 /* Trace error codes */
@@ -294,7 +319,6 @@
 #define STM32_TRACEINTID_SETUPRECVD         (90 + 4)
 
 /* Endpoints ******************************************************************/
-
 
 /* Odd physical endpoint numbers are IN; even are OUT */
 
@@ -527,7 +551,7 @@ struct stm32_usbdev_s
  * Private Function Prototypes
  ****************************************************************************/
 
-/* Register operations ********************************************************/
+/* Register operations ******************************************************/
 
 #if defined(CONFIG_STM32F7_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static uint32_t    stm32_getreg(uint32_t addr);
@@ -537,13 +561,13 @@ static void        stm32_putreg(uint32_t val, uint32_t addr);
 # define stm32_putreg(val,addr) putreg32(val,addr)
 #endif
 
-/* Request queue operations ****************************************************/
+/* Request queue operations **************************************************/
 
 static FAR struct stm32_req_s *stm32_req_remfirst(FAR struct stm32_ep_s *privep);
 static bool       stm32_req_addlast(FAR struct stm32_ep_s *privep,
                     FAR struct stm32_req_s *req);
 
-/* Low level data transfers and request operations *****************************/
+/* Low level data transfers and request operations ***************************/
 /* Special endpoint 0 data transfer logic */
 
 static void        stm32_ep0in_setupresponse(FAR struct stm32_usbdev_s *priv,
@@ -582,7 +606,7 @@ static void        stm32_req_complete(FAR struct stm32_ep_s *privep,
 static void        stm32_req_cancel(FAR struct stm32_ep_s *privep,
                      int16_t status);
 
-/* Interrupt handling **********************************************************/
+/* Interrupt handling ********************************************************/
 
 static struct      stm32_ep_s *stm32_ep_findbyaddr(struct stm32_usbdev_s *priv,
                      uint16_t eplog);
@@ -605,7 +629,8 @@ static inline void stm32_epout_interrupt(FAR struct stm32_usbdev_s *priv);
 
 static inline void stm32_epin_runtestmode(FAR struct stm32_usbdev_s *priv);
 static inline void stm32_epin(FAR struct stm32_usbdev_s *priv, uint8_t epno);
-static inline void stm32_epin_txfifoempty(FAR struct stm32_usbdev_s *priv, int epno);
+static inline void stm32_epin_txfifoempty(FAR struct stm32_usbdev_s *priv,
+                     int epno);
 static inline void stm32_epin_interrupt(FAR struct stm32_usbdev_s *priv);
 
 /* Other second level interrupt processing */
@@ -658,8 +683,10 @@ static void        stm32_ep_freereq(FAR struct usbdev_ep_s *ep,
 /* Endpoint buffer management */
 
 #ifdef CONFIG_USBDEV_DMA
-static void       *stm32_ep_allocbuffer(FAR struct usbdev_ep_s *ep, unsigned bytes);
-static void        stm32_ep_freebuffer(FAR struct usbdev_ep_s *ep, FAR void *buf);
+static void       *stm32_ep_allocbuffer(FAR struct usbdev_ep_s *ep,
+                     unsigned bytes);
+static void        stm32_ep_freebuffer(FAR struct usbdev_ep_s *ep,
+                     FAR void *buf);
 #endif
 
 /* Endpoint request submission */
@@ -707,6 +734,7 @@ static void        stm32_hwinitialize(FAR struct stm32_usbdev_s *priv);
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* Since there is only a single USB interface, all status information can be
  * be simply retained in a single global instance.
  */
@@ -834,10 +862,6 @@ const struct trace_msg_t g_usb_trace_strings_intdecode[] =
 #endif
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -870,7 +894,7 @@ static uint32_t stm32_getreg(uint32_t addr)
         {
           if (count == 4)
             {
-              llerr("...\n");
+              uinfo("...\n");
             }
 
           return val;
@@ -887,7 +911,7 @@ static uint32_t stm32_getreg(uint32_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          llerr("[repeats %d more times]\n", count-3);
+          uinfo("[repeats %d more times]\n", count-3);
         }
 
       /* Save the new address, value, and count */
@@ -899,7 +923,7 @@ static uint32_t stm32_getreg(uint32_t addr)
 
   /* Show the register value read */
 
-  llerr("%08x->%08x\n", addr, val);
+  uinfo("%08x->%08x\n", addr, val);
   return val;
 }
 #endif
@@ -917,7 +941,7 @@ static void stm32_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  llerr("%08x<-%08x\n", addr, val);
+  uinfo("%08x<-%08x\n", addr, val);
 
   /* Write the value */
 
@@ -975,6 +999,7 @@ static bool stm32_req_addlast(FAR struct stm32_ep_s *privep,
       privep->tail->flink = req;
       privep->tail        = req;
     }
+
   return is_empty;
 }
 
@@ -1275,7 +1300,7 @@ static void stm32_epin_request(FAR struct stm32_usbdev_s *priv,
       return;
     }
 
-  ullinfo("EP%d req=%p: len=%d xfrd=%d zlp=%d\n",
+  uinfo("EP%d req=%p: len=%d xfrd=%d zlp=%d\n",
           privep->epphy, privreq, privreq->req.len,
           privreq->req.xfrd, privep->zlp);
 
@@ -1541,7 +1566,7 @@ static void stm32_epout_complete(FAR struct stm32_usbdev_s *priv,
       return;
     }
 
-  ullinfo("EP%d: len=%d xfrd=%d\n",
+  uinfo("EP%d: len=%d xfrd=%d\n",
           privep->epphy, privreq->req.len, privreq->req.xfrd);
 
   /* Return the completed read request to the class driver and mark the state
@@ -1576,7 +1601,7 @@ static inline void stm32_ep0out_receive(FAR struct stm32_ep_s *privep, int bcnt)
   DEBUGASSERT(privep && privep->ep.priv);
   priv = (FAR struct stm32_usbdev_s *)privep->ep.priv;
 
-  ullinfo("EP0: bcnt=%d\n", bcnt);
+  uinfo("EP0: bcnt=%d\n", bcnt);
   usbtrace(TRACE_READ(EP0), bcnt);
 
   /* Verify that an OUT SETUP request as received before this data was
@@ -1669,7 +1694,7 @@ static inline void stm32_epout_receive(FAR struct stm32_ep_s *privep, int bcnt)
       return;
     }
 
-  ullinfo("EP%d: len=%d xfrd=%d\n", privep->epphy, privreq->req.len, privreq->req.xfrd);
+  uinfo("EP%d: len=%d xfrd=%d\n", privep->epphy, privreq->req.len, privreq->req.xfrd);
   usbtrace(TRACE_READ(privep->epphy), bcnt);
 
   /* Get the number of bytes to transfer from the RxFIFO */
@@ -1753,7 +1778,7 @@ static void stm32_epout_request(FAR struct stm32_usbdev_s *priv,
               return;
             }
 
-          ullinfo("EP%d: len=%d\n", privep->epphy, privreq->req.len);
+          uinfo("EP%d: len=%d\n", privep->epphy, privreq->req.len);
 
           /* Ignore any attempt to receive a zero length packet (this really
            * should not happen.
@@ -2547,7 +2572,7 @@ static inline void stm32_ep0out_setup(struct stm32_usbdev_s *priv)
   ctrlreq.index = GETUINT16(priv->ctrlreq.index);
   ctrlreq.len   = GETUINT16(priv->ctrlreq.len);
 
-  ullinfo("type=%02x req=%02x value=%04x index=%04x len=%04x\n",
+  uinfo("type=%02x req=%02x value=%04x index=%04x len=%04x\n",
           ctrlreq.type, ctrlreq.req, ctrlreq.value, ctrlreq.index, ctrlreq.len);
 
   /* Check for a standard request */
@@ -2682,7 +2707,7 @@ static inline void stm32_epout_interrupt(FAR struct stm32_usbdev_s *priv)
           if ((daint & 1) != 0)
             {
               regval = stm32_getreg(STM32_OTG_DOEPINT(epno));
-              ullerr("DOEPINT(%d) = %08x\n", epno, regval);
+              uerr("DOEPINT(%d) = %08x\n", epno, regval);
               stm32_putreg(0xFF, STM32_OTG_DOEPINT(epno));
             }
 
@@ -2912,7 +2937,7 @@ static inline void stm32_epin_interrupt(FAR struct stm32_usbdev_s *priv)
         {
           if ((daint & 1) != 0)
             {
-              ullerr("DIEPINT(%d) = %08x\n",
+              uerr("DIEPINT(%d) = %08x\n",
                      epno, stm32_getreg(STM32_OTG_DIEPINT(epno)));
               stm32_putreg(0xFF, STM32_OTG_DIEPINT(epno));
             }
@@ -3169,12 +3194,6 @@ static inline void stm32_rxinterrupt(FAR struct stm32_usbdev_s *priv)
   int bcnt;
   int epphy;
 
-  /* Disable the Rx status queue level interrupt */
-
-  regval = stm32_getreg(STM32_OTG_GINTMSK);
-  regval &= ~OTG_GINT_RXFLVL;
-  stm32_putreg(regval, STM32_OTG_GINTMSK);
-
   /* Get the status from the top of the FIFO */
 
   regval = stm32_getreg(STM32_OTG_GRXSTSP);
@@ -3249,6 +3268,22 @@ static inline void stm32_rxinterrupt(FAR struct stm32_usbdev_s *priv)
         case OTG_GRXSTSD_PKTSTS_SETUPDONE:
           {
             usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_SETUPDONE), epphy);
+
+            /* Now that the Setup Phase is complete if it was an OUT enable
+             * the endpoint
+             * (Doing this here prevents the loss of the first FIFO word)
+             */
+
+            if (priv->ep0state == EP0STATE_SETUP_OUT)
+              {
+
+                /* Clear NAKSTS so that we can receive the data */
+
+                regval  = stm32_getreg(STM32_OTG_DOEPCTL(0));
+                regval |= OTG_DOEPCTL0_CNAK;
+                stm32_putreg(regval, STM32_OTG_DOEPCTL(0));
+
+            }
           }
           break;
 
@@ -3284,14 +3319,6 @@ static inline void stm32_rxinterrupt(FAR struct stm32_usbdev_s *priv)
             datlen = GETUINT16(priv->ctrlreq.len);
             if (USB_REQ_ISOUT(priv->ctrlreq.type) && datlen > 0)
               {
-                /* Clear NAKSTS so that we can receive the data */
-
-                regval  = stm32_getreg(STM32_OTG_DOEPCTL(0));
-                regval |= OTG_DOEPCTL0_CNAK;
-                stm32_putreg(regval, STM32_OTG_DOEPCTL(0));
-
-                /* Wait for the data phase. */
-
                 priv->ep0state = EP0STATE_SETUP_OUT;
               }
             else
@@ -3314,11 +3341,6 @@ static inline void stm32_rxinterrupt(FAR struct stm32_usbdev_s *priv)
         }
     }
 
-  /* Enable the Rx Status Queue Level interrupt */
-
-  regval  = stm32_getreg(STM32_OTG_GINTMSK);
-  regval |= OTG_GINT_RXFLVL;
-  stm32_putreg(regval, STM32_OTG_GINTMSK);
 }
 
 /****************************************************************************
@@ -3341,7 +3363,7 @@ static inline void stm32_enuminterrupt(FAR struct stm32_usbdev_s *priv)
 
   regval  = stm32_getreg(STM32_OTG_GUSBCFG);
   regval &= ~OTG_GUSBCFG_TRDT_MASK;
-  regval |=  OTG_GUSBCFG_TRDT(5);
+  regval |=  OTG_GUSBCFG_TRDT(6);
   stm32_putreg(regval, STM32_OTG_GUSBCFG);
 }
 
@@ -3560,6 +3582,7 @@ static int stm32_usbinterrupt(int irq, FAR void *context)
 
   FAR struct stm32_usbdev_s *priv = &g_otghsdev;
   uint32_t regval;
+  uint32_t reserved;
 
   usbtrace(TRACE_INTENTRY(STM32_TRACEINTID_USB), 0);
 
@@ -3577,7 +3600,14 @@ static int stm32_usbinterrupt(int irq, FAR void *context)
       /* Get the set of pending, un-masked interrupts */
 
       regval  = stm32_getreg(STM32_OTG_GINTSTS);
+      reserved = (regval & OTG_GINT_RESERVED);
       regval &= stm32_getreg(STM32_OTG_GINTMSK);
+
+      /* With out modifying the reserved bits, acknowledge all
+       * **Writable** pending irqs we will service below
+       */
+
+      stm32_putreg(((regval | reserved) & OTG_GINT_RC_W1), STM32_OTG_GINTSTS);
 
       /* Break out of the loop when there are no further pending (and
        * unmasked) interrupts to be processes.
@@ -3597,7 +3627,6 @@ static int stm32_usbinterrupt(int irq, FAR void *context)
         {
           usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_EPOUT), (uint16_t)regval);
           stm32_epout_interrupt(priv);
-          stm32_putreg(OTG_GINT_OEP, STM32_OTG_GINTSTS);
         }
 
       /* IN endpoint interrupt.  The core sets this bit to indicate that
@@ -3608,7 +3637,6 @@ static int stm32_usbinterrupt(int irq, FAR void *context)
         {
           usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_EPIN), (uint16_t)regval);
           stm32_epin_interrupt(priv);
-          stm32_putreg(OTG_GINT_IEP, STM32_OTG_GINTSTS);
         }
 
       /* Host/device mode mismatch error interrupt */
@@ -3617,7 +3645,6 @@ static int stm32_usbinterrupt(int irq, FAR void *context)
       if ((regval & OTG_GINT_MMIS) != 0)
         {
           usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_MISMATCH), (uint16_t)regval);
-          stm32_putreg(OTG_GINT_MMIS, STM32_OTG_GINTSTS);
         }
 #endif
 
@@ -3627,7 +3654,6 @@ static int stm32_usbinterrupt(int irq, FAR void *context)
         {
           usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_WAKEUP), (uint16_t)regval);
           stm32_resumeinterrupt(priv);
-          stm32_putreg(OTG_GINT_WKUP, STM32_OTG_GINTSTS);
         }
 
       /* USB suspend interrupt */
@@ -3636,7 +3662,6 @@ static int stm32_usbinterrupt(int irq, FAR void *context)
         {
           usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_SUSPEND), (uint16_t)regval);
           stm32_suspendinterrupt(priv);
-          stm32_putreg(OTG_GINT_USBSUSP, STM32_OTG_GINTSTS);
         }
 
       /* Start of frame interrupt */
@@ -3645,7 +3670,6 @@ static int stm32_usbinterrupt(int irq, FAR void *context)
       if ((regval & OTG_GINT_SOF) != 0)
         {
           usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_SOF), (uint16_t)regval);
-          stm32_putreg(OTG_GINT_SOF, STM32_OTG_GINTSTS);
         }
 #endif
 
@@ -3657,12 +3681,11 @@ static int stm32_usbinterrupt(int irq, FAR void *context)
         {
           usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_RXFIFO), (uint16_t)regval);
           stm32_rxinterrupt(priv);
-          stm32_putreg(OTG_GINT_RXFLVL, STM32_OTG_GINTSTS);
         }
 
       /* USB reset interrupt */
 
-      if ((regval & OTG_GINT_USBRST) != 0)
+      if ((regval & (OTG_GINT_USBRST | OTG_GINT_RSTDET)) != 0)
         {
           usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_DEVRESET), (uint16_t)regval);
 
@@ -3670,7 +3693,6 @@ static int stm32_usbinterrupt(int irq, FAR void *context)
 
           stm32_usbreset(priv);
           usbtrace(TRACE_INTEXIT(STM32_TRACEINTID_USB), 0);
-          stm32_putreg(OTG_GINT_USBRST, STM32_OTG_GINTSTS);
           return OK;
         }
 
@@ -3680,7 +3702,6 @@ static int stm32_usbinterrupt(int irq, FAR void *context)
         {
           usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_ENUMDNE), (uint16_t)regval);
           stm32_enuminterrupt(priv);
-          stm32_putreg(OTG_GINT_ENUMDNE, STM32_OTG_GINTSTS);
         }
 
       /* Incomplete isochronous IN transfer interrupt.  When the core finds
@@ -3694,7 +3715,6 @@ static int stm32_usbinterrupt(int irq, FAR void *context)
         {
           usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_IISOIXFR), (uint16_t)regval);
           stm32_isocininterrupt(priv);
-          stm32_putreg(OTG_GINT_IISOIXFR, STM32_OTG_GINTSTS);
         }
 
       /* Incomplete isochronous OUT transfer.  For isochronous OUT
@@ -3711,7 +3731,6 @@ static int stm32_usbinterrupt(int irq, FAR void *context)
         {
           usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_IISOOXFR), (uint16_t)regval);
           stm32_isocoutinterrupt(priv);
-          stm32_putreg(OTG_GINT_IISOOXFR, STM32_OTG_GINTSTS);
         }
 #endif
 
@@ -3722,7 +3741,6 @@ static int stm32_usbinterrupt(int irq, FAR void *context)
         {
           usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_SRQ), (uint16_t)regval);
           stm32_sessioninterrupt(priv);
-          stm32_putreg(OTG_GINT_SRQ, STM32_OTG_GINTSTS);
         }
 
       /* OTG interrupt */
@@ -3731,7 +3749,6 @@ static int stm32_usbinterrupt(int irq, FAR void *context)
         {
           usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_OTG), (uint16_t)regval);
           stm32_otginterrupt(priv);
-          stm32_putreg(OTG_GINT_OTG, STM32_OTG_GINTSTS);
         }
 #endif
     }
@@ -3822,8 +3839,8 @@ static void stm32_disablegonak(FAR struct stm32_ep_s *privep)
  *
  ****************************************************************************/
 
-static int stm32_epout_configure(FAR struct stm32_ep_s *privep, uint8_t eptype,
-                                 uint16_t maxpacket)
+static int stm32_epout_configure(FAR struct stm32_ep_s *privep,
+                                 uint8_t eptype, uint16_t maxpacket)
 {
   uint32_t mpsiz;
   uint32_t regaddr;
@@ -3917,8 +3934,8 @@ static int stm32_epout_configure(FAR struct stm32_ep_s *privep, uint8_t eptype,
  *
  ****************************************************************************/
 
-static int stm32_epin_configure(FAR struct stm32_ep_s *privep, uint8_t eptype,
-                                uint16_t maxpacket)
+static int stm32_epin_configure(FAR struct stm32_ep_s *privep,
+                                uint8_t eptype, uint16_t maxpacket)
 {
   uint32_t mpsiz;
   uint32_t regaddr;
@@ -3979,7 +3996,8 @@ static int stm32_epin_configure(FAR struct stm32_ep_s *privep, uint8_t eptype,
           regval |= OTG_DIEPCTL_CNAK;
         }
 
-      regval &= ~(OTG_DIEPCTL_MPSIZ_MASK | OTG_DIEPCTL_EPTYP_MASK | OTG_DIEPCTL_TXFNUM_MASK);
+      regval &= ~(OTG_DIEPCTL_MPSIZ_MASK | OTG_DIEPCTL_EPTYP_MASK |
+                  OTG_DIEPCTL_TXFNUM_MASK);
       regval |= mpsiz;
       regval |= (eptype << OTG_DIEPCTL_EPTYP_SHIFT);
       regval |= (eptype << OTG_DIEPCTL_TXFNUM_SHIFT);
@@ -4391,7 +4409,7 @@ static int stm32_ep_submit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *
   if (!req || !req->callback || !req->buf || !ep)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_INVALIDPARMS), 0);
-      ullinfo("req=%p callback=%p buf=%p ep=%p\n", req, req->callback, req->buf, ep);
+      uinfo("req=%p callback=%p buf=%p ep=%p\n", req, req->callback, req->buf, ep);
       return -EINVAL;
     }
 #endif
@@ -5422,7 +5440,9 @@ static void stm32_hwinitialize(FAR struct stm32_usbdev_s *priv)
 
   /* Clear any pending interrupts */
 
-  stm32_putreg(0xbfffffff, STM32_OTG_GINTSTS);
+  regval = stm32_getreg(STM32_OTG_GINTSTS);
+  regval &=  OTG_GINT_RESERVED;
+  stm32_putreg(regval | OTG_GINT_RC_W1, STM32_OTG_GINTSTS);
 
 #if defined(CONFIG_STM32F7_OTGHS)
   /* Disable the ULPI Clock enable in RCC AHB1 Register.  This must
@@ -5493,7 +5513,8 @@ void up_usbinitialize(void)
   /* At present, there is only a single OTG device support. Hence it is
    * pre-allocated as g_otghsdev.  However, in most code, the private data
    * structure will be referenced using the 'priv' pointer (rather than the
-   * global data) in order to simplify any future support for multiple devices.
+   * global data) in order to simplify any future support for multiple
+   * devices.
    */
 
   FAR struct stm32_usbdev_s *priv = &g_otghsdev;

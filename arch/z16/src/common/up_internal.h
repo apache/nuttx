@@ -1,5 +1,5 @@
 /****************************************************************************
- * common/up_internal.h
+ * arch/z16/src/common/up_internal.h
  *
  *   Copyright (C) 2008-2009, 2011-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __UP_INTERNAL_H
-#define __UP_INTERNAL_H
+#ifndef __ARCH_Z16_SRC_COMMON_UP_INTERNAL_H
+#define __ARCH_Z16_SRC_COMMON_UP_INTERNAL_H
 
 /****************************************************************************
  * Included Files
@@ -100,13 +100,6 @@
 
 #if !defined(USE_SERIALDRIVER) && defined(CONFIG_STANDARD_SERIAL)
 #  define USE_SERIALDRIVER 1
-#endif
-
-/* Determine which device to use as the system logging device */
-
-#ifndef CONFIG_SYSLOG
-#  undef CONFIG_SYSLOG_CHAR
-#  undef CONFIG_RAMLOG_SYSLOG
 #endif
 
 /* Macros for portability */
@@ -210,4 +203,4 @@ void up_registerdump(void);
 
 #endif /* __ASSEMBLY__ */
 
-#endif  /* __UP_INTERNAL_H */
+#endif  /* __ARCH_Z16_SRC_COMMON_UP_INTERNAL_H */

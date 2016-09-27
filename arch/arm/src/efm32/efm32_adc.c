@@ -1191,7 +1191,7 @@ static int adc_interrupt(FAR struct adc_dev_s *dev)
   adcsr = adc_getreg(priv, EFM32_ADC_SR_OFFSET);
   if ((adcsr & ADC_SR_AWD) != 0)
     {
-      allwarn("WARNING: Analog Watchdog, Value converted out of range!\n");
+      awarn("WARNING: Analog Watchdog, Value converted out of range!\n");
     }
 
   /* EOC: End of conversion */

@@ -102,7 +102,7 @@ config ARCH_CHIP_SAME70Q
 	default n
 	select ARCH_CHIP_SAME70
 	select SAMV7_HAVE_MCAN1
-	select SAMV7_HAVE_DAC1
+	select SAMV7_HAVE_DAC1 if !SAMV7_EMAC0
 	select SAMV7_HAVE_EBI
 	select SAMV7_HAVE_HSMCI0
 	select SAMV7_HAVE_SDRAMC
@@ -119,7 +119,7 @@ config ARCH_CHIP_SAME70N
 	default n
 	select ARCH_CHIP_SAME70
 	select SAMV7_HAVE_MCAN1
-	select SAMV7_HAVE_DAC1
+	select SAMV7_HAVE_DAC1 if !SAMV7_EMAC0
 	select SAMV7_HAVE_HSMCI0
 	select SAMV7_HAVE_SPI0
 	select SAMV7_HAVE_TWIHS2
@@ -152,7 +152,7 @@ config ARCH_CHIP_SAMV71Q
 	default n
 	select ARCH_CHIP_SAMV71
 	select SAMV7_HAVE_MCAN1
-	select SAMV7_HAVE_DAC1
+	select SAMV7_HAVE_DAC1 if !SAMV7_EMAC0
 	select SAMV7_HAVE_EBI
 	select SAMV7_HAVE_HSMCI0
 	select SAMV7_HAVE_SDRAMC
@@ -169,7 +169,7 @@ config ARCH_CHIP_SAMV71N
 	default n
 	select ARCH_CHIP_SAMV71
 	select SAMV7_HAVE_MCAN1
-	select SAMV7_HAVE_DAC1
+	select SAMV7_HAVE_DAC1 if !SAMV7_EMAC0
 	select SAMV7_HAVE_HSMCI0
 	select SAMV7_HAVE_SPI0
 	select SAMV7_HAVE_TWIHS2
@@ -193,6 +193,10 @@ config SAMV7_MCAN
 	default n
 
 config SAMV7_HAVE_MCAN1
+	bool
+	default n
+
+config SAMV7_DAC
 	bool
 	default n
 
@@ -334,10 +338,12 @@ config SAMV7_MCAN1
 config SAMV7_DAC0
 	bool "Digital To Analog Converter 0 (DAC0)"
 	default n
+	select SAMV7_DAC
 
 config SAMV7_DAC1
 	bool "Digital To Analog Converter 1 (DAC1)"
 	default n
+	select SAMV7_DAC
 	depends on SAMV7_HAVE_DAC1
 
 config SAMV7_EBI
@@ -957,15 +963,84 @@ config SAMV7_TWIHS0_FREQUENCY
 	default 100000
 	depends on SAMV7_TWIHS0
 
+config SAMV7_TWIHS0_GLITCH_FILTER
+	int "TWIHS0 Glitch Filter Time"
+	default 1
+	range 0 7
+	depends on SAMV7_TWIHS0
+	---help---
+		Apply filtering on TWIHS Inputs. Given number is the maximum pulse width
+		(defined in peripheral CLKs) of spikes to be suppressed by the input filter.
+		Setting this value to zero will disable glitch filtering.
+
+config SAMV7_TWIHS0_SINGLE_MASTER
+	bool "TWIHS0 Single Master Mode"
+	default y
+	depends on SAMV7_TWIHS0
+	depends on I2C_RESET
+	---help---
+		Enables a mode, where errors on the I2C-Bus (e.g. by EMC or
+		stuck slaves) are automatically handled by the driver.
+		In an error-case the I2C-Bus is reset so further communication
+		on the bus can take place.
+		This option is default on because the TWI-Driver can't handle
+		Multi-Master I2C anyways.
+
 config SAMV7_TWIHS1_FREQUENCY
 	int "TWIHS1 Frequency"
 	default 100000
 	depends on SAMV7_TWIHS1
 
+config SAMV7_TWIHS1_GLITCH_FILTER
+	int "TWIHS1 Glitch Filter Time"
+	default 1
+	range 0 7
+	depends on SAMV7_TWIHS1
+	---help---
+		Apply filtering on TWIHS Inputs. Given number is the maximum pulse width
+		(defined in peripheral CLKs) of spikes to be suppressed by the input filter.
+		Setting this value to zero will disable glitch filtering.
+
+config SAMV7_TWIHS1_SINGLE_MASTER
+	bool "TWIHS1 Single Master Mode"
+	default y
+	depends on SAMV7_TWIHS1
+	depends on I2C_RESET
+	---help---
+		Enables a mode, where errors on the I2C-Bus (e.g. by EMC or
+		stuck slaves) are automatically handled by the driver.
+		In an error-case the I2C-Bus is reset so further communication
+		on the bus can take place.
+		This option is default on because the TWI-Driver can't handle
+		Multi-Master I2C anyways.
+
 config SAMV7_TWIHS2_FREQUENCY
 	int "TWIHS2 Frequency"
 	default 100000
 	depends on SAMV7_TWIHS2
+
+config SAMV7_TWIHS2_GLITCH_FILTER
+	int "TWIHS2 Glitch Filter Time"
+	default 1
+	range 0 7
+	depends on SAMV7_TWIHS2
+	---help---
+		Apply filtering on TWIHS Inputs. Given number is the maximum pulse width
+		(defined in peripheral CLKs) of spikes to be suppressed by the input filter.
+		Setting this value to zero will disable glitch filtering.
+
+config SAMV7_TWIHS2_SINGLE_MASTER
+	bool "TWIHS2 Single Master Mode"
+	default y
+	depends on SAMV7_TWIHS2
+	depends on I2C_RESET
+	---help---
+		Enables a mode, where errors on the I2C-Bus (e.g. by EMC or
+		stuck slaves) are automatically handled by the driver.
+		In an error-case the I2C-Bus is reset so further communication
+		on the bus can take place.
+		This option is default on because the TWI-Driver can't handle
+		Multi-Master I2C anyways.
 
 config SAMV7_TWIHS_REGDEBUG
 	bool "TWIHS register level debug"
@@ -1531,7 +1606,6 @@ endif # SAMV7_TC3
 
 config SAMV7_ONESHOT
 	bool "TC one-shot wrapper"
-	depends on SAMV7_FREERUN
 	default n if !SCHED_TICKLESS
 	default y if SCHED_TICKLESS
 	---help---
@@ -1588,6 +1662,62 @@ config SAMV7_TC_REGDEBUG
 
 endmenu # Timer/counter Configuration
 endif # SAMV7_HAVE_TC
+
+menu "DAC device driver configuration"
+	depends on SAMV7_DAC
+
+config SAMV7_DAC_PRESCAL
+	int "DAC MCK prescaler"
+	default 7
+	range 0 15
+	---help---
+		Define PRESCALER (Peripheral Clock to DAC Clock Ratio)
+
+		 0 -> 2 periods of DAC Clock
+		 1 -> 3 periods of DAC Clock
+		 2 -> 4 periods of DAC Clock
+		 3 -> 5 periods of DAC Clock
+		 4 -> 6 periods of DAC Clock
+		 5 -> 7 periods of DAC Clock
+		 6 -> 8 periods of DAC Clock
+		 7 -> 9 periods of DAC Clock
+		 8 -> 10 periods of DAC Clock
+		 9 -> 11 periods of DAC Clock
+		10 -> 12 periods of DAC Clock
+		11 -> 13 periods of DAC Clock
+		12 -> 14 periods of DAC Clock
+		13 -> 15 periods of DAC Clock
+		14 -> 16 periods of DAC Clock
+		15 -> 17 periods of DAC Clock
+
+config SAMV7_DAC_TRIGGER
+	bool "DAC trigger mode"
+	default n
+	---help---
+		Enable DAC trigger mode
+
+if SAMV7_DAC_TRIGGER
+
+config SAMV7_DAC_TRIGGER_FREQUENCY
+	int "DAC trigger frequency"
+	default 1000
+	---help---
+		Define DAC trigger frequency
+
+config SAMV7_DAC_TRIGGER_SELECT
+	int "DAC trigger source"
+	default 3
+	range 1 3
+	---help---
+		Define DAC trigger source.  Snly support for TC0, TC1, TC2 output is
+		currently implemented:
+
+		1 -> TC0
+		2 -> TC1
+		3 -> TC2
+
+endif # SAMV7_DAC_TRIGGER
+endmenu # DAC device driver configuration
 
 menu "HSMCI device driver options"
 	depends on SAMV7_HSMCI

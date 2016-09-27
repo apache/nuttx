@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/pic32mx/pic32mx_ethernet.c
+ * arch/mips/src/pic32mx/pic32mx_ethernet.c
  *
  *   Copyright (C) 2012, 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -438,7 +438,7 @@ static void pic32mx_ethreset(struct pic32mx_driver_s *priv);
 #ifdef CONFIG_NET_REGDEBUG
 static void pic32mx_printreg(uint32_t addr, uint32_t val, bool iswrite)
 {
-  nllinfo("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
+  ninfo("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
 }
 #endif
 
@@ -488,7 +488,7 @@ static void pic32mx_checkreg(uint32_t addr, uint32_t val, bool iswrite)
             {
               /* No.. More than one. */
 
-              nllinfo("[repeats %d more times]\n", count);
+              ninfo("[repeats %d more times]\n", count);
             }
         }
 
@@ -567,12 +567,12 @@ static void pic32mx_putreg(uint32_t val, uint32_t addr)
 #ifdef CONFIG_NET_DESCDEBUG
 static void pic32mx_dumptxdesc(struct pic32mx_txdesc_s *txdesc, const char *msg)
 {
-  nllinfo("TX Descriptor [%p]: %s\n", txdesc, msg);
-  nllinfo("   status: %08x\n", txdesc->status);
-  nllinfo("  address: %08x [%08x]\n", txdesc->address, VIRT_ADDR(txdesc->address));
-  nllinfo("     tsv1: %08x\n", txdesc->tsv1);
-  nllinfo("     tsv2: %08x\n", txdesc->tsv2);
-  nllinfo("   nexted: %08x [%08x]\n", txdesc->nexted, VIRT_ADDR(txdesc->nexted));
+  ninfo("TX Descriptor [%p]: %s\n", txdesc, msg);
+  ninfo("   status: %08x\n", txdesc->status);
+  ninfo("  address: %08x [%08x]\n", txdesc->address, VIRT_ADDR(txdesc->address));
+  ninfo("     tsv1: %08x\n", txdesc->tsv1);
+  ninfo("     tsv2: %08x\n", txdesc->tsv2);
+  ninfo("   nexted: %08x [%08x]\n", txdesc->nexted, VIRT_ADDR(txdesc->nexted));
 }
 #endif
 
@@ -594,12 +594,12 @@ static void pic32mx_dumptxdesc(struct pic32mx_txdesc_s *txdesc, const char *msg)
 #ifdef CONFIG_NET_DESCDEBUG
 static void pic32mx_dumprxdesc(struct pic32mx_rxdesc_s *rxdesc, const char *msg)
 {
-  nllinfo("RX Descriptor [%p]: %s\n", rxdesc, msg);
-  nllinfo("   status: %08x\n", rxdesc->status);
-  nllinfo("  address: %08x [%08x]\n", rxdesc->address, VIRT_ADDR(rxdesc->address));
-  nllinfo("     rsv1: %08x\n", rxdesc->rsv1);
-  nllinfo("     rsv2: %08x\n", rxdesc->rsv2);
-  nllinfo("   nexted: %08x [%08x]\n", rxdesc->nexted, VIRT_ADDR(rxdesc->nexted));
+  ninfo("RX Descriptor [%p]: %s\n", rxdesc, msg);
+  ninfo("   status: %08x\n", rxdesc->status);
+  ninfo("  address: %08x [%08x]\n", rxdesc->address, VIRT_ADDR(rxdesc->address));
+  ninfo("     rsv1: %08x\n", rxdesc->rsv1);
+  ninfo("     rsv2: %08x\n", rxdesc->rsv2);
+  ninfo("   nexted: %08x [%08x]\n", rxdesc->nexted, VIRT_ADDR(rxdesc->nexted));
 }
 #endif
 
@@ -1357,8 +1357,8 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv)
 
       if ((rxdesc->rsv2 & RXDESC_RSV2_OK) == 0)
         {
-          nllerr("ERROR. rsv1: %08x rsv2: %08x\n",
-                 rxdesc->rsv1, rxdesc->rsv2);
+          nerr("ERROR. rsv1: %08x rsv2: %08x\n",
+               rxdesc->rsv1, rxdesc->rsv2);
           NETDEV_RXERRORS(&priv->pd_dev);
           pic32mx_rxreturn(rxdesc);
         }
@@ -1371,8 +1371,8 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv)
 
       else if (priv->pd_dev.d_len > CONFIG_NET_ETH_MTU)
         {
-          nllerr("ERROR: Too big. packet length: %d rxdesc: %08x\n",
-                 priv->pd_dev.d_len, rxdesc->status);
+          nerr("ERROR: Too big. packet length: %d rxdesc: %08x\n",
+               priv->pd_dev.d_len, rxdesc->status);
           NETDEV_RXERRORS(&priv->pd_dev);
           pic32mx_rxreturn(rxdesc);
         }
@@ -1382,8 +1382,8 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv)
       else if ((rxdesc->status & (RXDESC_STATUS_EOP | RXDESC_STATUS_SOP)) !=
                (RXDESC_STATUS_EOP | RXDESC_STATUS_SOP))
         {
-          nllerr("ERROR: Fragment. packet length: %d rxdesc: %08x\n",
-                  priv->pd_dev.d_len, rxdesc->status);
+          nerr("ERROR: Fragment. packet length: %d rxdesc: %08x\n",
+               priv->pd_dev.d_len, rxdesc->status);
           NETDEV_RXFRAGMENTS(&priv->pd_dev);
           pic32mx_rxreturn(rxdesc);
         }
@@ -1421,7 +1421,7 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv)
 #ifdef CONFIG_NET_IPv4
           if (BUF->type == HTONS(ETHTYPE_IP))
             {
-              nllinfo("IPv4 frame\n");
+              ninfo("IPv4 frame\n");
               NETDEV_RXIPV4(&priv->pd_dev);
 
               /* Handle ARP on input then give the IPv4 packet to the network
@@ -1463,7 +1463,7 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv)
 #ifdef CONFIG_NET_IPv6
           if (BUF->type == HTONS(ETHTYPE_IP6))
             {
-              nllinfo("Iv6 frame\n");
+              ninfo("Iv6 frame\n");
               NETDEV_RXIPV6(&priv->pd_dev);
 
               /* Give the IPv6 packet to the network layer */
@@ -1522,8 +1522,8 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv)
             {
               /* Unrecognized... drop it. */
 
-              nllerr("ERROR: Unrecognized packet type dropped: %04x\n",
-                     ntohs(BUF->type));
+              nerr("ERROR: Unrecognized packet type dropped: %04x\n",
+                   ntohs(BUF->type));
               NETDEV_RXDROPPED(&priv->pd_dev);
             }
 
@@ -1685,7 +1685,7 @@ static int pic32mx_interrupt(int irq, void *context)
 
       if ((status & ETH_INT_RXOVFLW) != 0)
         {
-          nllerr("ERROR: RX Overrun. status: %08x\n", status);
+          nerr("ERROR: RX Overrun. status: %08x\n", status);
           NETDEV_RXERRORS(&priv->pd_dev);
         }
 
@@ -1696,7 +1696,7 @@ static int pic32mx_interrupt(int irq, void *context)
 
       if ((status & ETH_INT_RXBUFNA) != 0)
         {
-          nllerr("ERROR: RX buffer descriptor overrun. status: %08x\n", status);
+          nerr("ERROR: RX buffer descriptor overrun. status: %08x\n", status);
           NETDEV_RXERRORS(&priv->pd_dev);
         }
 
@@ -1707,7 +1707,7 @@ static int pic32mx_interrupt(int irq, void *context)
 
       if ((status & ETH_INT_RXBUSE) != 0)
         {
-          nllerr("ERROR: RX BVCI bus error. status: %08x\n", status);
+          nerr("ERROR: RX BVCI bus error. status: %08x\n", status);
           NETDEV_RXERRORS(&priv->pd_dev);
         }
 
@@ -1750,7 +1750,7 @@ static int pic32mx_interrupt(int irq, void *context)
 
       if ((status & ETH_INT_TXABORT) != 0)
         {
-          nllerr("ERROR: TX abort. status: %08x\n", status);
+          nerr("ERROR: TX abort. status: %08x\n", status);
           NETDEV_TXERRORS(&priv->pd_dev);
         }
 
@@ -1761,7 +1761,7 @@ static int pic32mx_interrupt(int irq, void *context)
 
       if ((status & ETH_INT_TXBUSE) != 0)
         {
-          nllerr("ERROR: TX BVCI bus error. status: %08x\n", status);
+          nerr("ERROR: TX BVCI bus error. status: %08x\n", status);
           NETDEV_TXERRORS(&priv->pd_dev);
         }
 
@@ -2367,14 +2367,14 @@ static int pic32mx_rmmac(struct net_driver_s *dev, const uint8_t *mac)
 #if defined(CONFIG_NET_REGDEBUG) && defined(PIC32MX_HAVE_PHY)
 static void pic32mx_showmii(uint8_t phyaddr, const char *msg)
 {
-  nllinfo("PHY " PIC32MX_PHYNAME ": %s\n", msg);
-  nllinfo("  MCR:       %04x\n", pic32mx_phyread(phyaddr, MII_MCR));
-  nllinfo("  MSR:       %04x\n", pic32mx_phyread(phyaddr, MII_MSR));
-  nllinfo("  ADVERTISE: %04x\n", pic32mx_phyread(phyaddr, MII_ADVERTISE));
-  nllinfo("  LPA:       %04x\n", pic32mx_phyread(phyaddr, MII_LPA));
-  nllinfo("  EXPANSION: %04x\n", pic32mx_phyread(phyaddr, MII_EXPANSION));
+  ninfo("PHY " PIC32MX_PHYNAME ": %s\n", msg);
+  ninfo("  MCR:       %04x\n", pic32mx_phyread(phyaddr, MII_MCR));
+  ninfo("  MSR:       %04x\n", pic32mx_phyread(phyaddr, MII_MSR));
+  ninfo("  ADVERTISE: %04x\n", pic32mx_phyread(phyaddr, MII_ADVERTISE));
+  ninfo("  LPA:       %04x\n", pic32mx_phyread(phyaddr, MII_LPA));
+  ninfo("  EXPANSION: %04x\n", pic32mx_phyread(phyaddr, MII_EXPANSION));
 #ifdef CONFIG_ETH0_PHY_KS8721
-  nllinfo("  10BTCR:    %04x\n", pic32mx_phyread(phyaddr, MII_KS8721_10BTCR));
+  ninfo("  10BTCR:    %04x\n", pic32mx_phyread(phyaddr, MII_KS8721_10BTCR));
 #endif
 }
 #endif

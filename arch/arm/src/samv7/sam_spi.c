@@ -436,7 +436,7 @@ static bool spi_checkreg(struct sam_spidev_s *spi, bool wr, uint32_t value,
         {
           /* Yes... show how many times we did it */
 
-          spillinfo("...[Repeats %d times]...\n", spi->ntimes);
+          spiinfo("...[Repeats %d times]...\n", spi->ntimes);
         }
 
       /* Save information about the new access */
@@ -470,7 +470,7 @@ static inline uint32_t spi_getreg(struct sam_spidev_s *spi,
 #ifdef CONFIG_SAMV7_SPI_REGDEBUG
   if (spi_checkreg(spi, false, value, address))
     {
-      spillinfo("%08x->%08x\n", address, value);
+      spiinfo("%08x->%08x\n", address, value);
     }
 #endif
 
@@ -493,7 +493,7 @@ static inline void spi_putreg(struct sam_spidev_s *spi, uint32_t value,
 #ifdef CONFIG_SAMV7_SPI_REGDEBUG
   if (spi_checkreg(spi, true, value, address))
     {
-      spillinfo("%08x<-%08x\n", address, value);
+      spiinfo("%08x<-%08x\n", address, value);
     }
 #endif
 
@@ -1221,6 +1221,7 @@ static int spi_setdelay(struct spi_dev_s *dev, uint32_t startdelay,
 #ifdef CONFIG_SPI_HWFEATURES
 static int spi_hwfeatures(struct spi_dev_s *dev, uint8_t features)
 {
+#ifdef CONFIG_SPI_CS_CONTROL
   struct sam_spics_s *spics = (struct sam_spics_s *)dev;
   struct sam_spidev_s *spi = spi_device(spics);
   uint32_t regval;
@@ -1280,7 +1281,10 @@ static int spi_hwfeatures(struct spi_dev_s *dev, uint8_t features)
       spi->escape_lastxfer = false;
     }
 
-  return 0;
+  return ((features & ~HWFEAT_FORCE_CS_CONTROL_MASK) == 0) ? OK : -ENOSYS;
+#else
+  return -ENOSYS;
+#endif
 }
 #endif
 

@@ -280,9 +280,9 @@ struct uart_dev_s
 #endif
   bool                 isconsole;    /* true: This is the serial console */
 
+#ifdef CONFIG_SERIAL_TERMIOS
   /* Terminal control flags */
 
-#ifdef CONFIG_SERIAL_TERMIOS
   tcflag_t             tc_iflag;     /* Input modes */
   tcflag_t             tc_oflag;     /* Output modes */
   tcflag_t             tc_lflag;     /* Local modes */

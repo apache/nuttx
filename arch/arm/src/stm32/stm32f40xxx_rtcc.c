@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/stm32f40xxx_rtcc.c
  *
  *   Copyright (C) 2012-2016 Gregory Nutt. All rights reserved.
@@ -32,11 +32,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -60,10 +60,11 @@
 
 #ifdef CONFIG_RTC
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Configuration ********************************************************************/
+ ****************************************************************************/
+
+/* Configuration ************************************************************/
 /* This RTC implementation supports
  *  - date/time RTC hardware
  *  - extended functions Alarm A and B for STM32F4xx and onwards
@@ -81,12 +82,12 @@
 #  error "CONFIG_STM32_PWR must selected to use this driver"
 #endif
 
-/* Constants ************************************************************************/
+/* Constants ****************************************************************/
 
 #define SYNCHRO_TIMEOUT      (0x00020000)
 #define INITMODE_TIMEOUT     (0x00010000)
 
-/* Proxy definitions to make the same code work for all the STM32 series ************/
+/* Proxy definitions to make the same code work for all the STM32 series ****/
 
 # define STM32_RCC_XXX       STM32_RCC_BDCR
 # define RCC_XXX_YYYRST      RCC_BDCR_BDRST
@@ -101,10 +102,6 @@
 #define MINUTES_IN_HOUR 60
 #define HOURS_IN_DAY 24
 
-/* Can't exceed 24hours-2min without providing extra logic for carry over for day. */
-
-#define MAX_RTC_ALARM_REL_MINUTES (24*MINUTES_IN_HOUR)-2
-
 #define hours_add(parm_hrs) \
   time->tm_hour += parm_hrs;\
   if ((HOURS_IN_DAY-1) < (time->tm_hour))\
@@ -117,9 +114,9 @@
 #define RTC_ALRMR_DIS_DATE_MASK       (RTC_ALRMR_MSK4)
 #define RTC_ALRMR_ENABLE              (0)
 
-/************************************************************************************
+/****************************************************************************
  * Private Types
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
 typedef unsigned int rtc_alarmreg_t;
@@ -131,27 +128,28 @@ struct alm_cbinfo_s
 };
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
 /* Callback to use when an EXTI is activated  */
 
 static struct alm_cbinfo_s g_alarmcb[RTC_ALARM_LAST];
+static bool g_alarm_enabled;  /* True: Alarm interrupts are enabled */
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 /* g_rtc_enabled is set true after the RTC has successfully initialized */
 
 volatile bool g_rtc_enabled = false;
 
-/************************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
 static int rtchw_check_alrawf(void);
@@ -160,13 +158,14 @@ static int rtchw_set_alrmar(rtc_alarmreg_t alarmreg);
 static int rtchw_check_alrbwf(void);
 static int rtchw_set_alrmbr(rtc_alarmreg_t alarmreg);
 #endif
+static inline void rtc_enable_alarm(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: rtc_dumpregs
  *
  * Description:
@@ -178,7 +177,7 @@ static int rtchw_set_alrmbr(rtc_alarmreg_t alarmreg);
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_RTC_INFO
 static void rtc_dumpregs(FAR const char *msg)
@@ -215,7 +214,7 @@ static void rtc_dumpregs(FAR const char *msg)
 #  define rtc_dumpregs(msg)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: rtc_dumptime
  *
  * Description:
@@ -227,7 +226,7 @@ static void rtc_dumpregs(FAR const char *msg)
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_RTC_INFO
 static void rtc_dumptime(FAR const struct tm *tp, FAR const char *msg)
@@ -244,7 +243,7 @@ static void rtc_dumptime(FAR const struct tm *tp, FAR const char *msg)
 #  define rtc_dumptime(tp, msg)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: rtc_wprunlock
  *
  * Description:
@@ -256,7 +255,7 @@ static void rtc_dumptime(FAR const struct tm *tp, FAR const char *msg)
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static void rtc_wprunlock(void)
 {
@@ -264,7 +263,7 @@ static void rtc_wprunlock(void)
    * registers and backup SRAM).
    */
 
-  (void)stm32_pwr_enablebkp(true);
+  stm32_pwr_enablebkp(true);
 
   /* The following steps are required to unlock the write protection on all the
    * RTC registers (except for RTC_ISR[13:8], RTC_TAFCR, and RTC_BKPxR).
@@ -279,7 +278,7 @@ static void rtc_wprunlock(void)
   putreg32(0x53, STM32_RTC_WPR);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: rtc_wprlock
  *
  * Description:
@@ -291,7 +290,7 @@ static void rtc_wprunlock(void)
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void rtc_wprlock(void)
 {
@@ -299,14 +298,14 @@ static inline void rtc_wprlock(void)
 
   putreg32(0xff, STM32_RTC_WPR);
 
-  /* Disable write access to the backup domain (RTC registers, RTC backup data
-   * registers and backup SRAM).
+  /* Disable write access to the backup domain (RTC registers, RTC backup
+   * data registers and backup SRAM).
    */
 
-  (void)stm32_pwr_enablebkp(false);
+  stm32_pwr_enablebkp(false);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: rtc_synchwait
  *
  * Description:
@@ -319,7 +318,7 @@ static inline void rtc_wprlock(void)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int rtc_synchwait(void)
 {
@@ -358,7 +357,7 @@ static int rtc_synchwait(void)
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: rtc_enterinit
  *
  * Description:
@@ -370,7 +369,7 @@ static int rtc_synchwait(void)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int rtc_enterinit(void)
 {
@@ -406,7 +405,7 @@ static int rtc_enterinit(void)
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: rtc_exitinit
  *
  * Description:
@@ -418,7 +417,7 @@ static int rtc_enterinit(void)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static void rtc_exitinit(void)
 {
@@ -429,7 +428,7 @@ static void rtc_exitinit(void)
   putreg32(regval, STM32_RTC_ISR);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: rtc_bin2bcd
  *
  * Description:
@@ -441,7 +440,7 @@ static void rtc_exitinit(void)
  * Returned Value:
  *   The value in BCD representation
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static uint32_t rtc_bin2bcd(int value)
 {
@@ -456,7 +455,7 @@ static uint32_t rtc_bin2bcd(int value)
   return (msbcd << 4) | value;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: rtc_bin2bcd
  *
  * Description:
@@ -468,7 +467,7 @@ static uint32_t rtc_bin2bcd(int value)
  * Returned Value:
  *   The value in binary representation
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int rtc_bcd2bin(uint32_t value)
 {
@@ -476,13 +475,13 @@ static int rtc_bcd2bin(uint32_t value)
   return (int)(tens + (value & 0x0f));
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: rtc_setup
  *
  * Description:
- *   Performs first time configuration of the RTC.  A special value written into
- *   back-up register 0 will prevent this function from being called on sub-sequent
- *   resets or power up.
+ *   Performs first time configuration of the RTC.  A special value written
+ *   into back-up register 0 will prevent this function from being called on
+ *   sub-sequent resets or power up.
  *
  * Input Parameters:
  *   None
@@ -490,7 +489,7 @@ static int rtc_bcd2bin(uint32_t value)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int rtc_setup(void)
 {
@@ -544,12 +543,12 @@ static int rtc_setup(void)
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: rtc_resume
  *
  * Description:
- *   Called when the RTC was already initialized on a previous power cycle.  This
- *   just brings the RTC back into full operation.
+ *   Called when the RTC was already initialized on a previous power cycle.
+ *   This just brings the RTC back into full operation.
  *
  * Input Parameters:
  *   None
@@ -557,7 +556,7 @@ static int rtc_setup(void)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static void rtc_resume(void)
 {
@@ -576,7 +575,7 @@ static void rtc_resume(void)
 #endif
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_rtc_alarm_handler
  *
  * Description:
@@ -589,7 +588,7 @@ static void rtc_resume(void)
  * Returned Value:
  *   Zero (OK) on success; A negated errno value on failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
 static int stm32_rtc_alarm_handler(int irq, void *context)
@@ -659,7 +658,7 @@ static int stm32_rtc_alarm_handler(int irq, void *context)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: rtchw_check_alrXwf X= a or B
  *
  * Description:
@@ -671,7 +670,7 @@ static int stm32_rtc_alarm_handler(int irq, void *context)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
 static int rtchw_check_alrawf(void)
@@ -725,12 +724,12 @@ static int rtchw_check_alrbwf(void)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_rtchw_set_alrmXr X is a or b
  *
  * Description:
- *   Set the alarm (A or B) hardware registers, using the required hardware access
- *   protocol
+ *   Set the alarm (A or B) hardware registers, using the required hardware
+ *   access protocol
  *
  * Input Parameters:
  *   alarmreg - the register
@@ -738,7 +737,7 @@ static int rtchw_check_alrbwf(void)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
 static int rtchw_set_alrmar(rtc_alarmreg_t alarmreg)
@@ -814,16 +813,56 @@ rtchw_set_alrmbr_exit:
 }
 #endif
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Name: rtc_enable_alarm
+ *
+ * Description:
+ *   Enable ALARM interrupts
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
 
-/************************************************************************************
+#ifdef CONFIG_RTC_ALARM
+static inline void rtc_enable_alarm(void)
+{
+  /* Is the alarm already enabled? */
+
+  if (!g_alarm_enabled)
+    {
+      /* Configure RTC interrupt to catch alarm interrupts. All RTC
+       * interrupts are connected to the EXTI controller.  To enable the
+       * RTC Alarm interrupt, the following sequence is required:
+       *
+       * 1. Configure and enable the EXTI Line 17 RTC ALARM in interrupt
+       *    mode and select the rising edge sensitivity.
+       *    For STM32F4xx
+       *    EXTI line 21 RTC Tamper & Timestamp
+       *    EXTI line 22 RTC Wakeup
+       * 2. Configure and enable the RTC_Alarm IRQ channel in the NVIC.
+       * 3. Configure the RTC to generate RTC alarms (Alarm A or Alarm B).
+       */
+
+      stm32_exti_alarm(true, false, true, stm32_rtc_alarm_handler);
+      g_alarm_enabled = true;
+    }
+}
+#endif
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
  * Name: up_rtc_initialize
  *
  * Description:
- *   Initialize the hardware RTC per the selected configuration.  This function is
- *   called once during the OS initialization sequence
+ *   Initialize the hardware RTC per the selected configuration.  This
+ *   function is called once during the OS initialization sequence
  *
  * Input Parameters:
  *   None
@@ -831,7 +870,7 @@ rtchw_set_alrmbr_exit:
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int up_rtc_initialize(void)
 {
@@ -843,9 +882,9 @@ int up_rtc_initialize(void)
   int nretry = 0;
 
   /* Clocking for the PWR block must be provided.  However, this is done
-   * unconditionally in stm32f40xxx_rcc.c on power up.  This done unconditionally
-   * because the PWR block is also needed to set the internal voltage regulator for
-   * maximum performance.
+   * unconditionally in stm32f40xxx_rcc.c on power up.  This done
+   * unconditionally because the PWR block is also needed to set the
+   * internal voltage regulator for maximum performance.
    */
 
   /* Select the clock source */
@@ -853,13 +892,13 @@ int up_rtc_initialize(void)
 
   regval = getreg32(RTC_MAGIC_REG);
 
-  (void)stm32_pwr_enablebkp(true);
+  stm32_pwr_enablebkp(true);
 
   if (regval != RTC_MAGIC)
     {
-      /* Some boards do not have the external 32khz oscillator installed, for those
-       * boards we must fallback to the crummy internal RC clock or the external high
-       * rate clock
+      /* Some boards do not have the external 32khz oscillator installed,
+       * for those boards we must fallback to the crummy internal RC clock
+       * or the external high rate clock
        */
 
 #ifdef CONFIG_RTC_HSECLOCK
@@ -933,7 +972,7 @@ int up_rtc_initialize(void)
         }
     }
 
-  (void)stm32_pwr_enablebkp(false);
+  stm32_pwr_enablebkp(false);
 
   /* Loop, attempting to initialize/resume the RTC.  This loop is necessary
    * because it seems that occasionally it takes longer to initialize the RTC
@@ -942,8 +981,8 @@ int up_rtc_initialize(void)
 
   do
     {
-      /* Wait for the RTC Time and Date registers to be synchronized with RTC APB
-       * clock.
+      /* Wait for the RTC Time and Date registers to be synchronized with RTC
+       * APB clock.
        */
 
       ret = rtc_synchwait();
@@ -954,13 +993,13 @@ int up_rtc_initialize(void)
         {
           case OK:
             {
-              rtcllinfo("rtc_syncwait() okay\n");
+              rtcinfo("rtc_syncwait() okay\n");
               break;
             }
 
           default:
             {
-              rtcllerr("ERROR: rtc_syncwait() failed (%d)\n", ret);
+              rtcerr("ERROR: rtc_syncwait() failed (%d)\n", ret);
               break;
             }
         }
@@ -974,7 +1013,7 @@ int up_rtc_initialize(void)
 
   if (regval != RTC_MAGIC)
     {
-      rtcllinfo("Do setup\n");
+      rtcinfo("Do setup\n");
 
       /* Perform the one-time setup of the LSE clocking to the RTC */
 
@@ -984,15 +1023,21 @@ int up_rtc_initialize(void)
        * backup data registers and backup SRAM).
        */
 
-      (void)stm32_pwr_enablebkp(true);
+      stm32_pwr_enablebkp(true);
 
       /* Remember that the RTC is initialized */
 
       putreg32(RTC_MAGIC, RTC_MAGIC_REG);
+
+      /* Disable write access to the backup domain (RTC registers, RTC
+       * backup data registers and backup SRAM).
+       */
+
+      stm32_pwr_enablebkp(false);
     }
   else
     {
-      rtcllinfo("Do resume\n");
+      rtcinfo("Do resume\n");
 
       /* RTC already set-up, just resume normal operation */
 
@@ -1000,55 +1045,31 @@ int up_rtc_initialize(void)
       rtc_dumpregs("Did resume");
     }
 
-  /* Disable write access to the backup domain (RTC registers, RTC backup
-   * data registers and backup SRAM).
-   */
-
-  (void)stm32_pwr_enablebkp(false);
-
   if (ret != OK && nretry > 0)
     {
-      rtcllinfo("setup/resume ran %d times and failed with %d\n",
-                nretry, ret);
+      rtcinfo("setup/resume ran %d times and failed with %d\n",
+              nretry, ret);
       return -ETIMEDOUT;
     }
 
-#ifdef CONFIG_RTC_ALARM
-  /* Configure RTC interrupt to catch alarm interrupts. All RTC interrupts are
-   * connected to the EXTI controller.  To enable the RTC Alarm interrupt, the
-   * following sequence is required:
-   *
-   * 1. Configure and enable the EXTI Line 17 RTC ALARM in interrupt mode and select the
-   *    rising edge sensitivity.
-   *    For STM32F4xx
-   *    EXTI line 21 RTC Tamper & Timestamp
-   *    EXTI line 22 RTC Wakeup
-   * 2. Configure and enable the RTC_Alarm IRQ channel in the NVIC.
-   * 3. Configure the RTC to generate RTC alarms (Alarm A or Alarm B).
-   */
-
-  stm32_exti_alarm(true, false, true, stm32_rtc_alarm_handler);
-  rtc_dumpregs("After InitExtiAlarm");
-#else
   rtc_dumpregs("After Initialization");
-#endif
 
   g_rtc_enabled = true;
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_rtc_getdatetime_with_subseconds
  *
  * Description:
  *   Get the current date and time from the date/time RTC.  This interface
  *   is only supported by the date/time RTC hardware implementation.
- *   It is used to replace the system timer.  It is only used by the RTOS during
- *   initialization to set up the system time when CONFIG_RTC and CONFIG_RTC_DATETIME
- *   are selected (and CONFIG_RTC_HIRES is not).
+ *   It is used to replace the system timer.  It is only used by the RTOS
+ *   during initialization to set up the system time when CONFIG_RTC and
+ *   CONFIG_RTC_DATETIME are selected (and CONFIG_RTC_HIRES is not).
  *
- *   NOTE: Some date/time RTC hardware is capability of sub-second accuracy.  That
- *   sub-second accuracy is returned through 'nsec'.
+ *   NOTE: Some date/time RTC hardware is capability of sub-second accuracy.
+ *   That sub-second accuracy is returned through 'nsec'.
  *
  * Input Parameters:
  *   tp - The location to return the high resolution time value.
@@ -1057,7 +1078,7 @@ int up_rtc_initialize(void)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_STM32_HAVE_RTC_SUBSECONDS
 int stm32_rtc_getdatetime_with_subseconds(FAR struct tm *tp, FAR long *nsec)
@@ -1072,9 +1093,9 @@ int up_rtc_getdatetime(FAR struct tm *tp)
   uint32_t tr;
   uint32_t tmp;
 
-  /* Sample the data time registers.  There is a race condition here... If we sample
-   * the time just before midnight on December 31, the date could be wrong because
-   * the day rolled over while were sampling.
+  /* Sample the data time registers.  There is a race condition here... If
+   * we sample the time just before midnight on December 31, the date could
+   * be wrong because the day rolled over while were sampling.
    */
 
   do
@@ -1158,20 +1179,20 @@ int up_rtc_getdatetime(FAR struct tm *tp)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_rtc_getdatetime
  *
  * Description:
  *   Get the current date and time from the date/time RTC.  This interface
  *   is only supported by the date/time RTC hardware implementation.
- *   It is used to replace the system timer.  It is only used by the RTOS during
- *   initialization to set up the system time when CONFIG_RTC and CONFIG_RTC_DATETIME
- *   are selected (and CONFIG_RTC_HIRES is not).
+ *   It is used to replace the system timer.  It is only used by the RTOS
+ *   during initialization to set up the system time when CONFIG_RTC and
+ *   CONFIG_RTC_DATETIME are selected (and CONFIG_RTC_HIRES is not).
  *
- *   NOTE: Some date/time RTC hardware is capability of sub-second accuracy.  That
- *   sub-second accuracy is lost in this interface.  However, since the system time
- *   is reinitialized on each power-up/reset, there will be no timing inaccuracy in
- *   the long run.
+ *   NOTE: Some date/time RTC hardware is capability of sub-second accuracy.
+ *   That sub-second accuracy is lost in this interface.  However, since the
+ *   system time is reinitialized on each power-up/reset, there will be no
+ *   timing inaccuracy in the long run.
  *
  * Input Parameters:
  *   tp - The location to return the high resolution time value.
@@ -1179,7 +1200,7 @@ int up_rtc_getdatetime(FAR struct tm *tp)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_STM32_HAVE_RTC_SUBSECONDS
 int up_rtc_getdatetime(FAR struct tm *tp)
@@ -1188,13 +1209,13 @@ int up_rtc_getdatetime(FAR struct tm *tp)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_rtc_setdatetime
  *
  * Description:
  *   Set the RTC to the provided time. RTC implementations which provide
- *   up_rtc_getdatetime() (CONFIG_RTC_DATETIME is selected) should provide this
- *   function.
+ *   up_rtc_getdatetime() (CONFIG_RTC_DATETIME is selected) should provide
+ *   this function.
  *
  * Input Parameters:
  *   tp - the time to use
@@ -1202,7 +1223,7 @@ int up_rtc_getdatetime(FAR struct tm *tp)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int stm32_rtc_setdatetime(FAR const struct tm *tp)
 {
@@ -1223,11 +1244,14 @@ int stm32_rtc_setdatetime(FAR const struct tm *tp)
        (rtc_bin2bcd(tp->tm_min)  << RTC_TR_MNU_SHIFT) |
        (rtc_bin2bcd(tp->tm_hour) << RTC_TR_HU_SHIFT);
 
-  /* Now convert the fields in struct tm format to the RTC date register fields:
-   * Days: 1-31 match in both cases.
-   * Month: STM32 is 1-12, struct tm is 0-11.
-   * Years: STM32 is 00-99, struct tm is years since 1900.
-   * WeekDay: STM32 is 1 = Mon - 7 = Sun
+  /* Now convert the fields in struct tm format to the RTC date register
+   * fields:
+   *
+   *   Days: 1-31 match in both cases.
+   *   Month: STM32 is 1-12, struct tm is 0-11.
+   *   Years: STM32 is 00-99, struct tm is years since 1900.
+   *   WeekDay: STM32 is 1 = Mon - 7 = Sun
+   *
    * Issue:  I am not sure what the STM32 years mean.  Are these the
    * years 2000-2099?  I'll assume so.
    */
@@ -1270,12 +1294,12 @@ int stm32_rtc_setdatetime(FAR const struct tm *tp)
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_rtc_settime
  *
  * Description:
- *   Set the RTC to the provided time.  All RTC implementations must be able to
- *   set their time based on a standard timespec.
+ *   Set the RTC to the provided time.  All RTC implementations must be able
+ *   to set their time based on a standard timespec.
  *
  * Input Parameters:
  *   tp - the time to use
@@ -1283,13 +1307,15 @@ int stm32_rtc_setdatetime(FAR const struct tm *tp)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int up_rtc_settime(FAR const struct timespec *tp)
 {
   FAR struct tm newtime;
 
-  /* Break out the time values (not that the time is set only to units of seconds) */
+  /* Break out the time values (not that the time is set only to units of
+   * seconds)
+   */
 
   (void)gmtime_r(&tp->tv_sec, &newtime);
   return stm32_rtc_setdatetime(&newtime);
@@ -1319,6 +1345,10 @@ int stm32_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
   ASSERT(alminfo != NULL);
   DEBUGASSERT(RTC_ALARM_LAST > alminfo->as_id);
 
+  /* Make sure the the alarm interrupt is enabled at the NVIC */
+
+  rtc_enable_alarm();
+
   /* REVISIT:  Should test that the time is in the future */
 
   rtc_dumptime(&alminfo->as_time, "New alarm time");
@@ -1333,7 +1363,7 @@ int stm32_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
              (rtc_bin2bcd(alminfo->as_time.tm_hour) << RTC_ALRMR_HU_SHIFT) |
              (rtc_bin2bcd(alminfo->as_time.tm_mday) << RTC_ALRMR_DU_SHIFT);
  
-  /* Set the alarm in hardware and enable interrupts */
+  /* Set the alarm in hardware and enable interrupts from the RTC */
 
   switch (alminfo->as_id)
     {
@@ -1374,7 +1404,7 @@ int stm32_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
 #endif
 
       default:
-        rtcinfo("ERROR: Invalid ALARM%d\n", alminfo->as_id);
+        rtcerr("ERROR: Invalid ALARM%d\n", alminfo->as_id);
         break;
     }
 
@@ -1472,7 +1502,7 @@ int stm32_rtc_cancelalarm(enum alm_id_e alarmid)
 #endif
 
       default:
-        rtcinfo("ERROR: Invalid ALARM%d\n", alarmid);
+        rtcerr("ERROR: Invalid ALARM%d\n", alarmid);
         break;
     }
 

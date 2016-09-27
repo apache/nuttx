@@ -1,8 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32l4/stm32l4_irq.c
- * arch/arm/src/chip/stm32l4_irq.c
  *
- *   Copyright (C) 2009-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -89,10 +88,6 @@ volatile uint32_t *g_current_regs[1];
  */
 
 extern uint32_t _vectors[];
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -244,31 +239,17 @@ static inline void stm32l4_prioritize_syscall(int priority)
 static int stm32l4_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
                          uintptr_t offset)
 {
+  int n;
+
   DEBUGASSERT(irq >= STM32L4_IRQ_NMI && irq < NR_IRQS);
 
   /* Check for external interrupt */
 
   if (irq >= STM32L4_IRQ_FIRST)
     {
-      if (irq < STM32L4_IRQ_FIRST + 32)
-        {
-           *regaddr = (NVIC_IRQ0_31_ENABLE + offset);
-           *bit     = 1 << (irq - STM32L4_IRQ_FIRST);
-        }
-      else if (irq < STM32L4_IRQ_FIRST + 64)
-        {
-           *regaddr = (NVIC_IRQ32_63_ENABLE + offset);
-           *bit     = 1 << (irq - STM32L4_IRQ_FIRST - 32);
-        }
-      else if (irq < NR_IRQS)
-        {
-           *regaddr = (NVIC_IRQ64_95_ENABLE + offset);
-           *bit     = 1 << (irq - STM32L4_IRQ_FIRST - 64);
-        }
-      else
-        {
-          return ERROR; /* Invalid interrupt */
-        }
+      n        = irq - STM32L4_IRQ_FIRST;
+      *regaddr = NVIC_IRQ_ENABLE(n) + offset;
+      *bit     = (uint32_t)1 << (n & 0x1f);
     }
 
   /* Handle processor exceptions.  Only a few can be disabled */
@@ -314,11 +295,14 @@ void up_irqinitialize(void)
 {
   uint32_t regaddr;
   int num_priority_registers;
+  int i;
 
   /* Disable all interrupts */
 
-  putreg32(0, NVIC_IRQ0_31_ENABLE);
-  putreg32(0, NVIC_IRQ32_63_ENABLE);
+  for (i = 0; i < NR_IRQS - STM32L4_IRQ_FIRST; i += 32)
+    {
+      putreg32(0xffffffff, NVIC_IRQ_CLEAR(i));
+    }
 
   /* Colorize the interrupt stack for debug purposes */
 

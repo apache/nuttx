@@ -107,7 +107,7 @@ void up_dataabort(uint32_t *regs, uint32_t far, uint32_t fsr)
    * fatal error.
    */
 
-  pgllinfo("FSR: %08x FAR: %08x\n", fsr, far);
+  pginfo("FSR: %08x FAR: %08x\n", fsr, far);
   if ((fsr & FSR_MASK) != FSR_PAGE)
     {
       goto segfault;
@@ -118,7 +118,7 @@ void up_dataabort(uint32_t *regs, uint32_t far, uint32_t fsr)
    * (It has not yet been saved in the register context save area).
    */
 
-  pgllinfo("VBASE: %08x VEND: %08x\n", PG_PAGED_VBASE, PG_PAGED_VEND);
+  pginfo("VBASE: %08x VEND: %08x\n", PG_PAGED_VBASE, PG_PAGED_VEND);
   if (far < PG_PAGED_VBASE || far >= PG_PAGED_VEND)
     {
       goto segfault;

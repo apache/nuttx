@@ -74,26 +74,18 @@
 #ifdef CONFIG_CPP_HAVE_VARARGS
 #  ifdef IGMP_GTMRDEBUG
 #    define gtmrerr(format, ...)    nerr(format, ##__VA_ARGS__)
-#    define gtmrllerr(format, ...)  nllerr(format, ##__VA_ARGS__)
 #    define gtmrinfo(format, ...)   ninfo(format, ##__VA_ARGS__)
-#    define gtmrllinfo(format, ...) nllinfo(format, ##__VA_ARGS__)
 #  else
 #    define gtmrerr(x...)
-#    define gtmrllerr(x...)
 #    define gtmrinfo(x...)
-#    define gtmrllinfo(x...)
 #  endif
 #else
 #  ifdef IGMP_GTMRDEBUG
 #    define gtmrerr    nerr
-#    define gtmrllerr  nllerr
 #    define gtmrinfo   ninfo
-#    define gtmrllinfo nllinfo
 #  else
 #    define gtmrerr    (void)
-#    define gtmrllerr  (void)
 #    define gtmrinfo   (void)
-#    define gtmrllinfo (void)
 #  endif
 #endif
 
@@ -119,7 +111,7 @@ static void igmp_timeout(int argc, uint32_t arg, ...)
 
   /* If the state is DELAYING_MEMBER then we send a report for this group */
 
-  nllinfo("Timeout!\n");
+  ninfo("Timeout!\n");
   group = (FAR struct igmp_group_s *)arg;
   DEBUGASSERT(argc == 1 && group);
 
@@ -170,7 +162,7 @@ void igmp_startticks(FAR struct igmp_group_s *group, unsigned int ticks)
 
   /* Start the timer */
 
-  gtmrllinfo("ticks: %d\n", ticks);
+  gtmrinfo("ticks: %d\n", ticks);
 
   ret = wd_start(group->wdog, ticks, igmp_timeout, 1, (uint32_t)group);
 

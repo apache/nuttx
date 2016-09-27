@@ -208,29 +208,48 @@ static int uart_putxmitchar(FAR uart_dev_t *dev, int ch, bool oktoblock)
       nexthead = 0;
     }
 
-  /* Loop until we are able to add the character to the TX buffer */
+  /* Loop until we are able to add the character to the TX buffer. */
 
   for (; ; )
     {
+      /* Check if the TX buffer is full */
+
       if (nexthead != dev->xmit.tail)
         {
+          /* No.. not full.  Add the character to the TX buffer and return. */
+
           dev->xmit.buffer[dev->xmit.head] = ch;
           dev->xmit.head = nexthead;
           return OK;
         }
 
-      /* The buffer is full and no data is available now.  Should be block,
-       * waiting for the hardware to remove some data from the TX
-       * buffer?
+      /* The TX buffer is full.  Should be block, waiting for the hardware
+       * to remove some data from the TX buffer?
        */
 
       else if (oktoblock)
         {
-          /* Inform the interrupt level logic that we are waiting. This and
-           * the following steps must be atomic.
+          /* The following steps must be atomic with respect to serial
+           * interrupt handling.
            */
 
           flags = enter_critical_section();
+
+          /* Check again...  In certain race conditions an interrupt may
+           * have occurred between the test at the top of the loop and
+           * entering the critical section and the TX buffer may no longer
+           * be full.
+           *
+           * NOTE: On certain devices, such as USB CDC/ACM, the entire TX
+           * buffer may have been emptied in this race condition.  In that
+           * case, the logic would hang below waiting for space in the TX
+           * buffer without this test.
+           */
+
+          if (nexthead != dev->xmit.tail)
+            {
+              ret = OK;
+            }
 
 #ifdef CONFIG_SERIAL_REMOVABLE
           /* Check if the removable device is no longer connected while we
@@ -238,20 +257,26 @@ static int uart_putxmitchar(FAR uart_dev_t *dev, int ch, bool oktoblock)
            * as a race condition before we begin the wait.
            */
 
-          if (dev->disconnected)
+          else if (dev->disconnected)
             {
               ret = -ENOTCONN;
             }
-          else
 #endif
+          else
             {
-              /* Wait for some characters to be sent from the buffer with
-               * the TX interrupt enabled.  When the TX interrupt is
-               * enabled, uart_xmitchars should execute and remove some
-               * of the data from the TX buffer.
-               */
+              /* Inform the interrupt level logic that we are waiting. */
 
               dev->xmitwaiting = true;
+
+              /* Wait for some characters to be sent from the buffer with
+               * the TX interrupt enabled.  When the TX interrupt is enabled,
+               * uart_xmitchars() should execute and remove some of the data
+               * from the TX buffer.
+               *
+               * NOTE that interrupts will be re-enabled while we wait for
+               * the semaphore.
+               */
+
 #ifdef CONFIG_SERIAL_DMA
               uart_dmatxavail(dev);
 #endif
@@ -885,12 +910,16 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     {
       switch (cmd)
         {
+          /* Get the number of bytes that may be read from the RX buffer
+           * (without waiting)
+           */
+
           case FIONREAD:
             {
               int count;
               irqstate_t flags = enter_critical_section();
 
-              /* Determine the number of bytes available in the buffer */
+              /* Determine the number of bytes available in the RX buffer */
 
               if (dev->recv.tail <= dev->recv.head)
                 {
@@ -908,12 +937,39 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             }
             break;
 
+          /* Get the number of bytes that have been written to the TX buffer. */
+
           case FIONWRITE:
             {
               int count;
               irqstate_t flags = enter_critical_section();
 
-              /* Determine the number of bytes free in the buffer */
+              /* Determine the number of bytes waiting in the TX buffer */
+
+              if (dev->xmit.tail <= dev->xmit.head)
+                {
+                  count = dev->xmit.head - dev->xmit.tail;
+                }
+              else
+                {
+                  count = dev->xmit.size - (dev->xmit.tail - dev->xmit.head);
+                }
+
+              leave_critical_section(flags);
+
+              *(FAR int *)((uintptr_t)arg) = count;
+              ret = 0;
+            }
+            break;
+
+          /* Get the number of free bytes in the TX buffer */
+
+          case FIONSPACE:
+            {
+              int count;
+              irqstate_t flags = enter_critical_section();
+
+              /* Determine the number of bytes free in the TX buffer */
 
               if (dev->xmit.head < dev->xmit.tail)
                 {

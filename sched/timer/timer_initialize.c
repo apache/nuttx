@@ -1,4 +1,4 @@
-/********************************************************************************
+/****************************************************************************
  * sched/timer/timer_initialize.c
  *
  *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
@@ -51,9 +51,9 @@
 
 #ifndef CONFIG_DISABLE_POSIX_TIMERS
 
-/********************************************************************************
+/****************************************************************************
  * Private Data
- ********************************************************************************/
+ ****************************************************************************/
 
 /* These are the preallocated times */
 
@@ -61,28 +61,28 @@
 static struct posix_timer_s g_prealloctimers[CONFIG_PREALLOC_TIMERS];
 #endif
 
-/********************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************/
-
-/* This is a list of free, preallocated timer structures */
+ ****************************************************************************/
 
 #if CONFIG_PREALLOC_TIMERS > 0
+/* This is a list of free, preallocated timer structures */
+
 volatile sq_queue_t g_freetimers;
 #endif
 
-/* This is a list of instantiated timer structures -- active and inactive.  The
- * timers are place on this list by timer_create() and removed from the list by
- * timer_delete() or when the owning thread exits.
+/* This is a list of instantiated timer structures -- active and inactive.
+ * The timers are place on this list by timer_create() and removed from the
+ * list by timer_delete() or when the owning thread exits.
  */
 
 volatile sq_queue_t g_alloctimers;
 
-/********************************************************************************
+/****************************************************************************
  * Public Functions
- ********************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************
+/****************************************************************************
  * Name: timer_initialize
  *
  * Description:
@@ -94,9 +94,7 @@ volatile sq_queue_t g_alloctimers;
  * Return Value:
  *   None
  *
- * Assumptions:
- *
- ********************************************************************************/
+ ****************************************************************************/
 
 void weak_function timer_initialize(void)
 {
@@ -120,12 +118,12 @@ void weak_function timer_initialize(void)
   sq_init((FAR sq_queue_t *)&g_alloctimers);
 }
 
-/********************************************************************************
+/****************************************************************************
  * Name: timer_deleteall
  *
  * Description:
- *   This function is called whenever a thread exits.  Any timers owned by that
- *   thread are deleted as though called by timer_delete().
+ *   This function is called whenever a thread exits.  Any timers owned by
+ *   that thread are deleted as though called by timer_delete().
  *
  *   It is provided in this file so that it can be weakly defined but also,
  *   like timer_intitialize(), be brought into the link whenever the timer
@@ -137,9 +135,7 @@ void weak_function timer_initialize(void)
  * Return Value:
  *   None
  *
- * Assumptions:
- *
- ********************************************************************************/
+ ****************************************************************************/
 
 void weak_function timer_deleteall(pid_t pid)
 {
@@ -148,7 +144,9 @@ void weak_function timer_deleteall(pid_t pid)
   irqstate_t flags;
 
   flags = enter_critical_section();
-  for (timer = (FAR struct posix_timer_s *)g_alloctimers.head; timer; timer = next)
+  for (timer = (FAR struct posix_timer_s *)g_alloctimers.head;
+       timer != NULL;
+       timer = next)
     {
       next = timer->flink;
       if (timer->pt_owner == pid)

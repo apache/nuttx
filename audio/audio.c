@@ -704,7 +704,7 @@ static inline void audio_dequeuebuffer(FAR struct audio_upperhalf_s *upper,
 {
   struct audio_msg_s    msg;
 
-  audllinfo("Entry\n");
+  audinfo("Entry\n");
 
   /* Send a dequeue message to the user if a message queue is registered */
 
@@ -742,7 +742,7 @@ static inline void audio_complete(FAR struct audio_upperhalf_s *upper,
 {
   struct audio_msg_s    msg;
 
-  audllinfo("Entry\n");
+  audinfo("Entry\n");
 
   /* Send a dequeue message to the user if a message queue is registered */
 
@@ -791,7 +791,7 @@ static void audio_callback(FAR void *handle, uint16_t reason,
 {
   FAR struct audio_upperhalf_s *upper = (FAR struct audio_upperhalf_s *)handle;
 
-  audllinfo("Entry\n");
+  audinfo("Entry\n");
 
   /* Perform operation based on reason code */
 

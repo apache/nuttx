@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/net/ez80_emac.c
+ * arch/z80/src/ez80/ez80_emac.c
  *
  *   Copyright (C) 2009-2010, 2012, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -960,9 +960,9 @@ static int ez80emac_transmit(struct ez80emac_driver_s *priv)
    * handler and, therefore, may be suspended when debug output is generated!
    */
 
-  nllinfo("txnext=%p {%06x, %u, %04x} trp=%02x%02x\n",
-          priv->txnext, priv->txnext->np, priv->txnext->pktsize, priv->txnext->stat,
-          inp(EZ80_EMAC_TRP_H), inp(EZ80_EMAC_TRP_L));
+  ninfo("txnext=%p {%06x, %u, %04x} trp=%02x%02x\n",
+        priv->txnext, priv->txnext->np, priv->txnext->pktsize, priv->txnext->stat,
+        inp(EZ80_EMAC_TRP_H), inp(EZ80_EMAC_TRP_L));
 
   /* Increment statistics */
 
@@ -1039,11 +1039,11 @@ static int ez80emac_transmit(struct ez80emac_driver_s *priv)
   outp(EZ80_EMAC_PTMR, EMAC_PTMR);
   leave_critical_section(flags);
 
-  nllinfo("txdesc=%p {%06x, %u, %04x}\n",
-          txdesc, txdesc->np, txdesc->pktsize, txdesc->stat);
-  nllinfo("txnext=%p {%06x, %u, %04x} trp=%02x%02x\n",
-          txnext, txnext->np, txnext->pktsize, txnext->stat,
-          inp(EZ80_EMAC_TRP_H), inp(EZ80_EMAC_TRP_L));
+  ninfo("txdesc=%p {%06x, %u, %04x}\n",
+        txdesc, txdesc->np, txdesc->pktsize, txdesc->stat);
+  ninfo("txnext=%p {%06x, %u, %04x} trp=%02x%02x\n",
+        txnext, txnext->np, txnext->pktsize, txnext->stat,
+        inp(EZ80_EMAC_TRP_H), inp(EZ80_EMAC_TRP_L));
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
@@ -1304,7 +1304,7 @@ static int ez80emac_receive(struct ez80emac_driver_s *priv)
 #ifdef CONFIG_NET_IPv4
       if (ETHBUF->type == HTONS(ETHTYPE_IP))
         {
-          nllinfo("IPv4 frame\n");
+          ninfo("IPv4 frame\n");
 
           /* Handle ARP on input then give the IPv4 packet to the network
            * layer
@@ -1345,7 +1345,7 @@ static int ez80emac_receive(struct ez80emac_driver_s *priv)
 #ifdef CONFIG_NET_IPv6
       if (ETHBUF->type == HTONS(ETHTYPE_IP6))
         {
-          nllinfo("Iv6 frame\n");
+          ninfo("Iv6 frame\n");
 
           /* Give the IPv6 packet to the network layer */
 
@@ -2200,7 +2200,7 @@ int up_netinitialize(void)
   ret = irq_attach(EZ80_EMACSYS_IRQ, ez80emac_sysinterrupt);
   if (ret < 0)
     {
-      nllerr("ERROR: Unable to attach IRQ %d\n", EZ80_EMACSYS_IRQ);
+      nerr("ERROR: Unable to attach IRQ %d\n", EZ80_EMACSYS_IRQ);
       ret = -EAGAIN;
       goto errout;
     }
@@ -2208,7 +2208,7 @@ int up_netinitialize(void)
   ret = irq_attach(EZ80_EMACRX_IRQ, ez80emac_rxinterrupt);
   if (ret < 0)
     {
-      nllerr("ERROR: Unable to attach IRQ %d\n", EZ80_EMACRX_IRQ);
+      nerr("ERROR: Unable to attach IRQ %d\n", EZ80_EMACRX_IRQ);
       ret = -EAGAIN;
       goto errout;
     }
@@ -2216,7 +2216,7 @@ int up_netinitialize(void)
   ret = irq_attach(EZ80_EMACTX_IRQ, ez80emac_txinterrupt);
   if (ret < 0)
     {
-      nllerr("ERROR: Unable to attach IRQ %d\n", EZ80_EMACTX_IRQ);
+      nerr("ERROR: Unable to attach IRQ %d\n", EZ80_EMACTX_IRQ);
       ret = -EAGAIN;
       goto errout;
     }

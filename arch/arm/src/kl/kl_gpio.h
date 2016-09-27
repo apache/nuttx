@@ -386,7 +386,7 @@ xcpt_t kl_gpioirqattach(uint32_t pinset, xcpt_t pinisr);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_KL_GPIOIRQ
 void kl_gpioirqenable(uint32_t pinset);
 #else
 #  define kl_gpioirqenable(pinset)
@@ -400,7 +400,7 @@ void kl_gpioirqenable(uint32_t pinset);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_KL_GPIOIRQ
 void kl_gpioirqdisable(uint32_t pinset);
 #else
 #  define kl_gpioirqdisable(pinset)

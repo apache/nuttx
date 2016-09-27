@@ -52,7 +52,7 @@
 #include "up_internal.h"
 #include "kinetis_config.h"
 #include "chip.h"
-#include "kinetis_port.h"
+#include "chip/kinetis_port.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -476,7 +476,7 @@ bool kinetis_gpioread(uint32_t pinset);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_KINETIS_GPIOIRQ
 void kinetis_pinirqinitialize(void);
 #else
 #  define kinetis_pinirqinitialize()
@@ -514,7 +514,7 @@ xcpt_t kinetis_pinirqattach(uint32_t pinset, xcpt_t pinisr);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_KINETIS_GPIOIRQ
 void kinetis_pinirqenable(uint32_t pinset);
 #else
 #  define kinetis_pinirqenable(pinset)
@@ -528,7 +528,7 @@ void kinetis_pinirqenable(uint32_t pinset);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_KINETIS_GPIOIRQ
 void kinetis_pinirqdisable(uint32_t pinset);
 #else
 #  define kinetis_pinirqdisable(pinset)

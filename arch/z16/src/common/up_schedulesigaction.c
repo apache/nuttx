@@ -1,5 +1,5 @@
 /****************************************************************************
- * common/up_schedulesigaction.c
+ * arch/z16/src/common/up_schedulesigaction.c
  *
  *   Copyright (C) 2008-2010, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

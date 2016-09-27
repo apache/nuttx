@@ -270,7 +270,7 @@ void weak_function up_dmainitialize(void)
   uint32_t regval;
   int i;
 
-  dmallinfo("Initialize XDMAC0\n");
+  dmainfo("Initialize XDMAC0\n");
 
   /* Initialize the channel list  */
 

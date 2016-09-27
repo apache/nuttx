@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef _ARCH_ARM_SRC_LPC214X_SPI_H
-#define _ARCH_ARM_SRC_LPC214X_SPI_H
+#ifndef __ARCH_ARM_SRC_LPC214X_LPC214X_SPI_H
+#define __ARCH_ARM_SRC_LPC214X_LPC214X_SPI_H
 
 /************************************************************************************
  * Included Files
@@ -181,4 +181,4 @@ struct spi_dev_s; /* Forward reference */
 
 FAR struct spi_dev_s *lpc214x_spibus_initialize(int port);
 
-#endif  /* _ARCH_ARM_SRC_LPC214X_SPI_H */
+#endif  /* __ARCH_ARM_SRC_LPC214X_LPC214X_SPI_H */

@@ -35,6 +35,28 @@
 
 -include $(TOPDIR)/Make.defs
 
+# Determine if there is a Kconfig file for any custom board configuration
+
+ifeq ($(CONFIG_ARCH_BOARD_CUSTOM),y)
+  CUSTOM_DIR = $(patsubst "%",%,$(CONFIG_ARCH_BOARD_CUSTOM_DIR))
+  ifeq ($(CONFIG_ARCH_BOARD_CUSTOM_DIR_RELPATH),y)
+    CUSTOM_KPATH = $(TOPDIR)$(DELIM)$(CUSTOM_DIR)$(DELIM)Kconfig
+  else
+    CUSTOM_KPATH = $(CUSTOM_DIR)$(DELIM)Kconfig
+  endif
+  CUSTOM_KCONFIG = $(if $(wildcard $(CUSTOM_KPATH)),y,)
+else
+  CUSTOM_KCONFIG =
+endif
+
+ifeq ($(CUSTOM_KCONFIG),y)
+  BOARD_KCONFIG = $(CUSTOM_KPATH)
+else
+  BOARD_KCONFIG = $(TOPDIR)$(DELIM)configs$(DELIM)dummy$(DELIM)dummy_kconfig
+endif
+
+DUMMY_KCONFIG = $(TOPDIR)$(DELIM)configs$(DELIM)dummy$(DELIM)Kconfig
+
 # Basic
 
 CONFIG_ASRCS =
@@ -58,7 +80,7 @@ OBJS = $(AOBJS) $(COBJS)
 BIN = libconfigs$(LIBEXT)
 
 all: $(BIN)
-.PHONY: depend clean distclean
+.PHONY: depend ccontext clean_context clean distclean
 
 $(AOBJS): %$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
@@ -77,7 +99,18 @@ endif
 
 depend: .depend
 
-clean:
+$(DUMMY_KCONFIG): $(BOARD_KCONFIG)
+	$(call DELFILE, $(DUMMY_KCONFIG))
+	$(Q) cp -f $(BOARD_KCONFIG) $(DUMMY_KCONFIG)
+
+dirlinks: $(DUMMY_KCONFIG)
+
+context: $(DUMMY_KCONFIG)
+
+clean_context:
+	$(call DELFILE, $(DUMMY_KCONFIG))
+
+clean: clean_context
 	$(call DELFILE, $(BIN))
 	$(call CLEAN)
 

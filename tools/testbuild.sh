@@ -116,13 +116,11 @@ fi
 
 if [ ! -r "$testfile" ]; then
     echo "ERROR: No readable file exists at $testfile"
-    echo $USAGE
     showusage
 fi
 
 if [ ! -d "$nuttx" ]; then
     echo "ERROR: Expected to find nuttx/ at $nuttx"
-    echo $USAGE
     showusage
 fi
 

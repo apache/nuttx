@@ -1162,14 +1162,6 @@ static void cdcacm_unbind(FAR struct usbdevclass_driver_s *driver,
           priv->epintin = NULL;
         }
 
-      /* Free the bulk IN endpoint */
-
-      if (priv->epbulkin)
-        {
-          DEV_FREEEP(dev, priv->epbulkin);
-          priv->epbulkin = NULL;
-        }
-
       /* Free the pre-allocated control request */
 
       if (priv->ctrlreq != NULL)
@@ -1219,6 +1211,14 @@ static void cdcacm_unbind(FAR struct usbdevclass_driver_s *driver,
 
       DEBUGASSERT(priv->nwrq == 0);
       leave_critical_section(flags);
+
+      /* Free the bulk IN endpoint */
+
+      if (priv->epbulkin)
+        {
+          DEV_FREEEP(dev, priv->epbulkin);
+          priv->epbulkin = NULL;
+        }
 
       /* Clear out all data in the circular buffer */
 
@@ -1982,12 +1982,16 @@ static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       break;
 #endif
 
+    /* Get the number of bytes that may be read from the RX buffer (without
+     * waiting)
+     */
+
     case FIONREAD:
       {
         int count;
         irqstate_t flags = enter_critical_section();
 
-        /* Determine the number of bytes available in the buffer. */
+        /* Determine the number of bytes available in the RX buffer. */
 
         if (serdev->recv.tail <= serdev->recv.head)
           {
@@ -2005,12 +2009,39 @@ static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       }
       break;
 
+    /* Get the number of bytes that have been written to the TX buffer. */
+
     case FIONWRITE:
       {
         int count;
         irqstate_t flags = enter_critical_section();
 
-        /* Determine the number of bytes free in the buffer. */
+        /* Determine the number of bytes waiting in the TX buffer. */
+
+        if (serdev->xmit.tail <= serdev->xmit.head)
+          {
+            count = serdev->xmit.head - serdev->xmit.tail;
+          }
+        else
+          {
+            count = serdev->xmit.size - (serdev->xmit.tail - serdev->xmit.head);
+          }
+
+        leave_critical_section(flags);
+
+        *(int *)arg = count;
+        ret = 0;
+      }
+      break;
+
+    /* Get the number of free bytes in the TX buffer */
+
+    case FIONSPACE:
+      {
+        int count;
+        irqstate_t flags = enter_critical_section();
+
+        /* Determine the number of bytes free in the TX buffer */
 
         if (serdev->xmit.head < serdev->xmit.tail)
           {

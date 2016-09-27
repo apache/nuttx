@@ -908,7 +908,6 @@ Where <subdir> is one of the following:
     3. This configuration does have UART2 output enabled and set up as
        the system logging device:
 
-       CONFIG_SYSLOG=y                    : Enable output to syslog, not console
        CONFIG_SYSLOG_CHAR=y               : Use a character device for system logging
        CONFIG_SYSLOG_DEVPATH="/dev/ttyS0" : UART2 will be /dev/ttyS0
 
@@ -926,16 +925,16 @@ Where <subdir> is one of the following:
        CONFIG_USBDEV_TRACE_NRECORDS=128        : Buffer 128 records in memory
        CONFIG_NSH_USBDEV_TRACE=n               : No builtin tracing from NSH
        CONFIG_NSH_ARCHINIT=y                   : Automatically start the USB monitor
-       CONFIG_SYSTEM_USBMONITOR=y              : Enable the USB monitor daemon
-       CONFIG_SYSTEM_USBMONITOR_STACKSIZE=2048 : USB monitor daemon stack size
-       CONFIG_SYSTEM_USBMONITOR_PRIORITY=50    : USB monitor daemon priority
-       CONFIG_SYSTEM_USBMONITOR_INTERVAL=2     : Dump trace data every 2 seconds
+       CONFIG_USBMONITOR=y              : Enable the USB monitor daemon
+       CONFIG_USBMONITOR_STACKSIZE=2048 : USB monitor daemon stack size
+       CONFIG_USBMONITOR_PRIORITY=50    : USB monitor daemon priority
+       CONFIG_USBMONITOR_INTERVAL=2     : Dump trace data every 2 seconds
 
-       CONFIG_SYSTEM_USBMONITOR_TRACEINIT=y    : Enable TRACE output
-       CONFIG_SYSTEM_USBMONITOR_TRACECLASS=y
-       CONFIG_SYSTEM_USBMONITOR_TRACETRANSFERS=y
-       CONFIG_SYSTEM_USBMONITOR_TRACECONTROLLER=y
-       CONFIG_SYSTEM_USBMONITOR_TRACEINTERRUPTS=y
+       CONFIG_USBMONITOR_TRACEINIT=y    : Enable TRACE output
+       CONFIG_USBMONITOR_TRACECLASS=y
+       CONFIG_USBMONITOR_TRACETRANSFERS=y
+       CONFIG_USBMONITOR_TRACECONTROLLER=y
+       CONFIG_USBMONITOR_TRACEINTERRUPTS=y
 
     5. By default, this project assumes that you are *NOT* using the DFU
        bootloader.

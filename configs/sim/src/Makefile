@@ -48,12 +48,12 @@ endif
 
 ifeq ($(CONFIG_BOARD_INITIALIZE),y)
   CSRCS += sim_bringup.c
-ifeq ($(CONFIG_SYSTEM_ZONEINFO_ROMFS),y)
+ifeq ($(CONFIG_LIB_ZONEINFO_ROMFS),y)
   CSRCS += sim_zoneinfo.c
 endif
 else ifeq ($(CONFIG_LIB_BOARDCTL),y)
   CSRCS += sim_bringup.c
-ifeq ($(CONFIG_SYSTEM_ZONEINFO_ROMFS),y)
+ifeq ($(CONFIG_LIB_ZONEINFO_ROMFS),y)
   CSRCS += sim_zoneinfo.c
 endif
 endif
@@ -61,6 +61,14 @@ endif
 ifeq ($(CONFIG_SIM_X11FB),y)
 ifeq ($(CONFIG_SIM_TOUCHSCREEN),y)
   CSRCS += sim_touchscreen.c
+endif
+endif
+
+ifeq ($(CONFIG_EXAMPLES_GPIO),y)
+ifeq ($(CONFIG_GPIO_LOWER_HALF),y)
+  CSRCS += sim_ioexpander.c
+else
+  CSRCS += sim_gpio.c
 endif
 endif
 

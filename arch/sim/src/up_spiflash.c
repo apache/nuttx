@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/sim/src/up_spiflash.c
  *
- *   Copyright (C) 2014 Ken Pettit. All rights reserved.
+ *   Copyright (C) 2014, 2016 Ken Pettit. All rights reserved.
  *   Author: Ken Pettit <pettitkd@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -63,33 +63,37 @@
 /* Define the FLASH SIZE in bytes */
 
 #ifdef CONFIG_SIM_SPIFLASH_1M
-#  define CONFIG_SPIFLASH_SIZE        (128 * 1024)
-#  define CONFIG_SPIFLASH_CAPACITY    0x11
+#  define CONFIG_SPIFLASH_SIZE            (128 * 1024)
+#  define CONFIG_SPIFLASH_CAPACITY        0x11
 
 #ifndef CONFIG_SIM_SPIFLASH_SECTORSIZE
-#  define CONFIG_SIM_SPIFLASH_SECTORSIZE    2048
+#  define CONFIG_SIM_SPIFLASH_SECTORSIZE  2048
 #endif
 
 #endif
 
 #ifdef CONFIG_SIM_SPIFLASH_8M
-#  define CONFIG_SPIFLASH_SIZE        (1024 * 1024)
-#  define CONFIG_SPIFLASH_CAPACITY    0x14
+#  define CONFIG_SPIFLASH_SIZE            (1024 * 1024)
+#  define CONFIG_SPIFLASH_CAPACITY_SST26  0x3F
+#  define CONFIG_SPIFLASH_CAPACITY        0x14
 #endif
 
 #ifdef CONFIG_SIM_SPIFLASH_32M
-#  define CONFIG_SPIFLASH_SIZE        (4 * 1024 * 1024)
-#  define CONFIG_SPIFLASH_CAPACITY    0x16
+#  define CONFIG_SPIFLASH_SIZE            (4 * 1024 * 1024)
+#  define CONFIG_SPIFLASH_CAPACITY_SST26  0x42
+#  define CONFIG_SPIFLASH_CAPACITY        0x16
 #endif
 
 #ifdef CONFIG_SIM_SPIFLASH_64M
-#  define CONFIG_SPIFLASH_SIZE        (8 * 1024 * 1024)
-#  define CONFIG_SPIFLASH_CAPACITY    0x17
+#  define CONFIG_SPIFLASH_SIZE            (8 * 1024 * 1024)
+#  define CONFIG_SPIFLASH_CAPACITY_SST26  0x43
+#  define CONFIG_SPIFLASH_CAPACITY        0x17
 #endif
 
 #ifdef CONFIG_SIM_SPIFLASH_128M
-#  define CONFIG_SPIFLASH_SIZE        (16 * 1024 * 1024)
-#  define CONFIG_SPIFLASH_CAPACITY    0x18
+#  define CONFIG_SPIFLASH_SIZE            (16 * 1024 * 1024)
+#  define CONFIG_SPIFLASH_CAPACITY_SST26  0x44
+#  define CONFIG_SPIFLASH_CAPACITY        0x18
 #endif
 
 #ifndef CONFIG_SIM_SPIFLASH_MANUFACTURER
@@ -169,14 +173,18 @@
 
 struct sim_spiflashdev_s
 {
-  struct spi_dev_s spidev;     /* Externally visible part of the SPI interface */
-  uint32_t         selected;   /* SPIn base address */
-  int              wren;
-  int              state;
-  uint16_t         read_data;
-  uint8_t          last_cmd;
-  unsigned long    address;
-  unsigned char    data[CONFIG_SPIFLASH_SIZE];
+  struct spi_dev_s  spidev;     /* Externally visible part of the SPI interface */
+  uint32_t          selected;   /* SPIn base address */
+  FAR char *        name;       /* Name of the flash type (m25p, w25, etc.) */
+  int               wren;
+  int               state;
+  uint16_t          read_data;
+  uint8_t           last_cmd;
+  uint8_t           capacity;
+  uint8_t           manuf;
+  uint8_t           type;
+  unsigned long     address;
+  unsigned char     data[CONFIG_SPIFLASH_SIZE];
 };
 
 /************************************************************************************
@@ -236,9 +244,72 @@ static const struct spi_ops_s g_spiops =
   .registercallback  = 0,
 };
 
-struct sim_spiflashdev_s g_spidev =
+#ifdef CONFIG_SIM_SPIFLASH_M25P
+struct sim_spiflashdev_s g_spidev_m25p =
 {
   .spidev   = { &g_spiops },
+  .name     = "m25p",
+  .manuf    = 0x20,
+  .type     = 0x20,
+  .capacity = CONFIG_SPIFLASH_CAPACITY
+};
+#endif
+
+#ifdef CONFIG_SIM_SPIFLASH_SST26
+struct sim_spiflashdev_s g_spidev_sst26 =
+{
+  .spidev   = { &g_spiops },
+  .name     = "sst26",
+  .manuf    = 0xBF,
+#ifdef CONFIG_SST26_MEMORY_TYPE
+  .type     = CONFIG_SST26_MEMORY_TYPE,
+#else
+  .type     = 0x25,
+#endif
+  .capacity = CONFIG_SPIFLASH_CAPACITY_SST26
+};
+#endif
+
+#ifdef CONFIG_SIM_SPIFLASH_W25
+struct sim_spiflashdev_s g_spidev_w25 =
+{
+  .spidev   = { &g_spiops },
+  .name     = "w25",
+  .manuf    = 0xef,
+  .type     = 0x30,
+  .capacity = CONFIG_SPIFLASH_CAPACITY
+};
+#endif
+
+#ifdef CONFIG_SIM_SPIFLASH_CUSTOM
+struct sim_spiflashdev_s g_spidev_custom =
+{
+  .spidev   = { &g_spiops },
+  .name     = "custom",
+  .manuf    = CONFIG_SIM_SPIFLASH_MANUFACTURER,
+  .type     = CONFIG_SIM_SPIFLASH_MEMORY_TYPE,
+  .capacity = CONFIG_SIM_SPIFLASH_CAPACITY
+};
+#endif
+
+struct sim_spiflashdev_s *gp_spidev[] =
+{
+#ifdef CONFIG_SIM_SPIFLASH_M25P
+  &g_spidev_m25p,
+#endif
+#ifdef CONFIG_SIM_SPIFLASH_SST26
+  &g_spidev_sst26,
+#endif
+#ifdef CONFIG_SIM_SPIFLASH_W25
+  &g_spidev_w25,
+#endif
+#ifdef CONFIG_SIM_SPIFLASH_CUSTOM
+  &g_spidev_custom,
+#endif
+
+  /* Null termination pointer at end of list */
+
+  NULL
 };
 
 /************************************************************************************
@@ -662,17 +733,17 @@ static void spiflash_writeword(FAR struct sim_spiflashdev_s *priv, uint16_t data
       /* Read ID States */
 
       case SPIFLASH_STATE_RDID1:
-        priv->read_data = CONFIG_SIM_SPIFLASH_MANUFACTURER;
+        priv->read_data = priv->manuf;    /* CONFIG_SIM_SPIFLASH_MANUFACTURER; */
         priv->state = SPIFLASH_STATE_RDID2;
         break;
 
       case SPIFLASH_STATE_RDID2:
-        priv->read_data = CONFIG_SIM_SPIFLASH_MEMORY_TYPE;
+        priv->read_data = priv->type;     /* CONFIG_SIM_SPIFLASH_MEMORY_TYPE; */
         priv->state = SPIFLASH_STATE_RDID3;
         break;
 
       case SPIFLASH_STATE_RDID3:
-        priv->read_data = CONFIG_SPIFLASH_CAPACITY;
+        priv->read_data = priv->capacity; /* CONFIG_SPIFLASH_CAPACITY; */
         priv->state = SPIFLASH_STATE_IDLE;
         break;
 
@@ -834,13 +905,44 @@ static uint16_t spiflash_readword(FAR struct sim_spiflashdev_s *priv)
  *
  ************************************************************************************/
 
-FAR struct spi_dev_s *up_spiflashinitialize()
+FAR struct spi_dev_s *up_spiflashinitialize(FAR const char *name)
 {
   FAR struct sim_spiflashdev_s *priv = NULL;
+  int  x;
 
   irqstate_t flags = enter_critical_section();
 
-  priv = &g_spidev;
+  /* Loop through all supported flash devices */
+
+  /* Default to custom FLASH if not specified */
+
+  if (name == NULL)
+    {
+      name = "custom";
+    }
+
+  for (x = 0; gp_spidev[x] != NULL; x++)
+    {
+      /* Search for the specified flash by name */
+
+      if (strcmp(name, gp_spidev[x]->name) == 0)
+        {
+          break;
+        }
+    }
+
+  /* Test if flash device found */
+
+  if (gp_spidev[x] == NULL)
+    {
+      /* Specified device not supported */
+
+      return NULL;
+    }
+
+  /* Configure the selected flash device */
+
+  priv = gp_spidev[x];
   priv->selected = 0;
   priv->wren = 0;
   priv->address = 0;

@@ -39,5 +39,5 @@
 
 float atanf(float x)
 {
-  return asinf(x / sqrtf(x * x + 1));
+  return asinf(x / sqrtf(x * x + 1.0F));
 }

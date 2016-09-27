@@ -87,7 +87,6 @@
 #  define CONFIG_N25QXXX_DUMMIES 6
 #endif
 
-
 /* N25QXXX Commands *****************************************************************/
 /* Configuration, Status, Erase, Program Commands ***********************************/
 /*      Command                    Value    Description:                            */
@@ -98,7 +97,7 @@
                                           *   0x01 | SR                             */
 #define N25QXXX_READ_VOLCFG        0x85  /* Read volatile configuration register:   *
                                           *   0x85 | VCR                            */
-#define N25QXXX_WRITE_VOLCFG       0x81  /* Write status register:                  *
+#define N25QXXX_WRITE_VOLCFG       0x81  /* Write svolatile configuration register: *
                                           *   0x81 | VCR                            */
 #define N25QXXX_WRITE_ENABLE       0x06  /* Write enable:                           *
                                           *   0x06                                  */
@@ -123,7 +122,7 @@
 /*      Command                    Value    Description:                            */
 /*                                            Data sequence                         */
 
-/* ID/Security Commands *************************&***********************************/
+/* ID/Security Commands *************************************************************/
 /*      Command                    Value    Description:                            */
 /*                                            Data sequence                         */
 #define N25QXXX_JEDEC_ID           0x9f  /* JEDEC ID:                               *
@@ -141,8 +140,8 @@
 
 /* N25QXXX JEDIC IDs */
 
-#define N25QXXX3V_JEDEC_DEVICE_TYPE   0xba  /* 3v memory device type */
-#define N25QXXX2V_JEDEC_DEVICE_TYPE   0xbb  /* 2v memory device type */
+#define N25QXXX3V_JEDEC_DEVICE_TYPE 0xba  /* 3v memory device type */
+#define N25QXXX2V_JEDEC_DEVICE_TYPE 0xbb  /* 2v memory device type */
 
 #define N25Q016_JEDEC_CAPACITY      0x15  /* N25Q016 (2 MB) memory capacity */
 #define N25Q032_JEDEC_CAPACITY      0x16  /* N25Q032 (4 MB) memory capacity */
@@ -168,7 +167,7 @@
 #define STATUS_TB_MASK             (1 << 5) /* Bit 5: Top / Bottom Protect          */
 #  define STATUS_TB_TOP            (0 << 5) /*   0 = BP2-BP0 protect Top down       */
 #  define STATUS_TB_BOTTOM         (1 << 5) /*   1 = BP2-BP0 protect Bottom up      */
-#define STATUS_BP3_MASK             (1 << 5) /* Bit 6: BP3                          */
+#define STATUS_BP3_MASK            (1 << 5) /* Bit 6: BP3                           */
 #define STATUS_SRP0_MASK           (1 << 7) /* Bit 7: Status register protect 0     */
 #  define STATUS_SRP0_UNLOCKED     (0 << 7) /*   0 = WP# no effect / PS Lock Down   */
 #  define STATUS_SRP0_LOCKED       (1 << 7) /*   1 = WP# protect / OTP Lock Down    */
@@ -242,15 +241,15 @@
 
 #define IS_VALID(p)                 ((((p)->flags) & N25QXXX_CACHE_VALID) != 0)
 #define IS_DIRTY(p)                 ((((p)->flags) & N25QXXX_CACHE_DIRTY) != 0)
-#define IS_ERASED(p)                ((((p)->flags) & N25QXXX_CACHE_DIRTY) != 0)
+#define IS_ERASED(p)                ((((p)->flags) & N25QXXX_CACHE_ERASED) != 0)
 
 #define SET_VALID(p)                do { (p)->flags |= N25QXXX_CACHE_VALID; } while (0)
 #define SET_DIRTY(p)                do { (p)->flags |= N25QXXX_CACHE_DIRTY; } while (0)
-#define SET_ERASED(p)               do { (p)->flags |= N25QXXX_CACHE_DIRTY; } while (0)
+#define SET_ERASED(p)               do { (p)->flags |= N25QXXX_CACHE_ERASED; } while (0)
 
 #define CLR_VALID(p)                do { (p)->flags &= ~N25QXXX_CACHE_VALID; } while (0)
 #define CLR_DIRTY(p)                do { (p)->flags &= ~N25QXXX_CACHE_DIRTY; } while (0)
-#define CLR_ERASED(p)               do { (p)->flags &= ~N25QXXX_CACHE_DIRTY; } while (0)
+#define CLR_ERASED(p)               do { (p)->flags &= ~N25QXXX_CACHE_ERASED; } while (0)
 
 /* 512 byte sector support **********************************************************/
 
@@ -979,7 +978,7 @@ static int n25qxxx_flush_cache(struct n25qxxx_dev_s *priv)
           ferr("ERROR: n25qxxx_write_page failed: %d\n", ret);
         }
 
-      /* The case is no long dirty and the FLASH is no longer erased */
+      /* The cache is no long dirty and the FLASH is no longer erased */
 
       CLR_DIRTY(priv);
       CLR_ERASED(priv);
@@ -1002,7 +1001,7 @@ static FAR uint8_t *n25qxxx_read_cache(struct n25qxxx_dev_s *priv, off_t sector)
   int   ret;
 
   /* Convert from the 512 byte sector to the erase sector size of the device.  For
-   * exmample, if the actual erase sector size if 4Kb (1 << 12), then we first
+   * example, if the actual erase sector size is 4Kb (1 << 12), then we first
    * shift to the right by 3 to get the sector number in 4096 increments.
    */
 
@@ -1218,11 +1217,11 @@ static ssize_t n25qxxx_bread(FAR struct mtd_dev_s *dev, off_t startblock,
       nbytes >>= N25QXXX_SECTOR512_SHIFT;
     }
 #else
-  nbytes = n25qxxx_read(dev, startblock << priv->sectorshift,
-                       nblocks << priv->sectorshift, buffer);
+  nbytes = n25qxxx_read(dev, startblock << priv->pageshift,
+                       nblocks << priv->pageshift, buffer);
   if (nbytes > 0)
     {
-      nbytes >>= priv->sectorshift;
+      nbytes >>= priv->pageshift;
     }
 #endif
 
@@ -1253,8 +1252,8 @@ static ssize_t n25qxxx_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
     }
 
 #else
-  ret = n25qxxx_write_page(priv, buffer, startblock << priv->sectorshift,
-                          nblocks << priv->sectorshift);
+  ret = n25qxxx_write_page(priv, buffer, startblock << priv->pageshift,
+                          nblocks << priv->pageshift);
   if (ret < 0)
     {
       ferr("ERROR: n25qxxx_write_page failed: %d\n", ret);
@@ -1328,7 +1327,7 @@ static int n25qxxx_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
               geo->erasesize    = (1 << N25QXXX_SECTOR512_SHIFT);
               geo->neraseblocks = priv->nsectors << (priv->sectorshift - N25QXXX_SECTOR512_SHIFT);
 #else
-              geo->blocksize    = (1 << priv->sectorshift);
+              geo->blocksize    = (1 << priv->pageshift);
               geo->erasesize    = (1 << priv->sectorshift);
               geo->neraseblocks = priv->nsectors;
 #endif

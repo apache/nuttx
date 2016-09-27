@@ -1,5 +1,5 @@
-#ifndef _MEMORY_H
-#define _MEMORY_H
+#ifndef __ARCH_ARM_INCLUDE_CALYPSO_MEMORY_H
+#define __ARCH_ARM_INCLUDE_CALYPSO_MEMORY_H
 
 #define __arch_getb(a)			(*(volatile unsigned char *)(a))
 #define __arch_getw(a)			(*(volatile unsigned short *)(a))
@@ -25,4 +25,4 @@
 #define readw(a)			__arch_getw(a)
 #define readl(a)			__arch_getl(a)
 
-#endif /* _MEMORY_H */
+#endif /* __ARCH_ARM_INCLUDE_CALYPSO_MEMORY_H */

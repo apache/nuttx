@@ -63,7 +63,6 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-/* fs_findblockdriver.c *****************************************************/
 /****************************************************************************
  * Name: find_blockdriver
  *
@@ -92,7 +91,6 @@ int find_blockdriver(FAR const char *pathname, int mountflags,
                      FAR struct inode **ppinode);
 #endif
 
-/* fs/drivers/fs_blockproxy.c ***********************************************/
 /****************************************************************************
  * Name: block_proxy
  *

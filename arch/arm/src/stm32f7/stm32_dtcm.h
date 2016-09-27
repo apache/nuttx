@@ -1,8 +1,9 @@
 /****************************************************************************
  * arch/arm/src/stm32f7/stm32_dtcm.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *           David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -52,14 +53,14 @@
 
 #define HAVE_DTCM_HEAP 1
 
-/* Only the STM32 F2, F3, and F4 have DTCM memory */
+/* The STM32 F7 have DTCM memory */
 
-#if defined(CONFIG_STM32_STM32F30XX)
-#  define DTCM_START 0x10000000
-#  define DTCM_END   0x10002000
-#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
-#  define DTCM_START 0x10000000
-#  define DTCM_END   0x10010000
+#if defined(CONFIG_STM32F7_STM32F74XX) || defined(CONFIG_STM32F7_STM32F75XX)
+#  define DTCM_START 0x20000000
+#  define DTCM_END   0x20010000
+#elif defined(CONFIG_STM32F7_STM32F76XX) || defined(CONFIG_STM32F7_STM32F77XX)
+#  define DTCM_START 0x20000000
+#  define DTCM_END   0x20020000
 #else
 #  undef HAVE_DTCM_HEAP
 #endif
@@ -68,7 +69,7 @@
  * heap.
  */
 
-#ifndef CONFIG_STM32_DTCMEXCLUDE
+#ifndef CONFIG_STM32F7_DTCMEXCLUDE
 #  undef HAVE_DTCM_HEAP
 #endif
 

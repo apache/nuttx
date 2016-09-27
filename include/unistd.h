@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/unistd.h
  *
- *   Copyright (C) 2007-2009, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013-2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -164,6 +164,10 @@ ssize_t read(int fd, FAR void *buf, size_t nbytes);
 ssize_t write(int fd, FAR const void *buf, size_t nbytes);
 ssize_t pread(int fd, FAR void *buf, size_t nbytes, off_t offset);
 ssize_t pwrite(int fd, FAR const void *buf, size_t nbytes, off_t offset);
+
+/* Check if a file descriptor corresponds to a terminal I/O file */
+
+int     isatty(int fd);
 
 /* Memory management */
 

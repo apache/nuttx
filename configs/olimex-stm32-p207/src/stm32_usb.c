@@ -311,7 +311,7 @@ void stm32_usbhost_vbusdrive(int iface, bool enable)
 #ifdef CONFIG_USBDEV
 void stm32_usbsuspend(FAR struct usbdev_s *dev, bool resume)
 {
-  ullinfo("resume: %d\n", resume);
+  uinfo("resume: %d\n", resume);
 }
 #endif
 

@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef NUTTX_INCLUDE_NUTTX_ANALOG_ADS1242_H_
-#define NUTTX_INCLUDE_NUTTX_ANALOG_ADS1242_H_
+#ifndef __INCLUDE_NUTTX_ANALOG_ADS1242_H
+#define __INCLUDE_NUTTX_ANALOG_ADS1242_H
 
 /****************************************************************************
  * Included Files
@@ -51,13 +51,20 @@
  ****************************************************************************/
 
 /* IOCTL Commands ***********************************************************/
+/* Cmd: ANIOC_ADS2142_READ                    Arg: uint32_t *value
+ * Cmd: ANIOC_ADS2142_SET_GAIN                Arg: uint8_t value
+ * Cmd: ANIOC_ADS2142_SET_POSITIVE_INPUT      Arg: uint8_t value
+ * Cmd: ANIOC_ADS2142_SET_NEGATIVE_INPUT      Arg: uint8_t value
+ * Cmd: ANIOC_ADS2142_IS_DATA_READY           Arg: bool *value
+ * Cmd: ANIOC_ADS2142_DO_SYSTEM_OFFSET_CALIB  Arg: None
+ */
 
-#define ANIOC_ADS2142_READ                    _ANIOC(0x0001)  /* Arg: uint32_t *value */
-#define ANIOC_ADS2142_SET_GAIN                _ANIOC(0x0002)  /* Arg: uint8_t value */
-#define ANIOC_ADS2142_SET_POSITIVE_INPUT      _ANIOC(0x0003)  /* Arg: uint8_t value */
-#define ANIOC_ADS2142_SET_NEGATIVE_INPUT      _ANIOC(0x0004)  /* Arg: uint8_t value */
-#define ANIOC_ADS2142_IS_DATA_READY           _ANIOC(0x0005)  /* Arg: bool *value */
-#define ANIOC_ADS2142_DO_SYSTEM_OFFSET_CALIB  _ANIOC(0x0006)  /* Arg: None */
+#define ANIOC_ADS2142_READ                    _ANIOC(ANIOC_USER + 0)
+#define ANIOC_ADS2142_SET_GAIN                _ANIOC(ANIOC_USER + 1)
+#define ANIOC_ADS2142_SET_POSITIVE_INPUT      _ANIOC(ANIOC_USER + 2)
+#define ANIOC_ADS2142_SET_NEGATIVE_INPUT      _ANIOC(ANIOC_USER + 3)
+#define ANIOC_ADS2142_IS_DATA_READY           _ANIOC(ANIOC_USER + 4)
+#define ANIOC_ADS2142_DO_SYSTEM_OFFSET_CALIB  _ANIOC(ANIOC_USER + 5)
 
 /* ADS1242 REGISTER *********************************************************/
 
@@ -199,4 +206,4 @@ int ads1242_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
 #endif
 
 #endif /* CONFIG_SPI && CONFIG_ADC_ADS1242 */
-#endif /* NUTTX_INCLUDE_NUTTX_ANALOG_ADS1242_H_ */
+#endif /* __INCLUDE_NUTTX_ANALOG_ADS1242_H */

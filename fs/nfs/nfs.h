@@ -54,7 +54,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define NFS_TICKINTVL      MSEC_PER_TICK  /* Smallest that we can get */
 #define NFS_TICKS          1              /* Number of system ticks */
 #define NFS_HZ             CLOCKS_PER_SEC /* Ticks/sec */
 #define NFS_TIMEO          (1 * NFS_HZ)   /* Default timeout = 1 second */

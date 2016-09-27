@@ -999,7 +999,7 @@ static uint32_t nand_nfc_poll(void)
   sr = nand_getreg(SAM_HSMC_SR);
 
 #ifndef CONFIG_SAMA5_NAND_REGDEBUG
-  // fllinfo("sr=%08x\n", sr);
+  // finfo("sr=%08x\n", sr);
 #endif
 
   /* When set to one, this XFRDONE indicates that the NFC has terminated
@@ -1065,7 +1065,7 @@ static int hsmc_interrupt(int irq, void *context)
   uint32_t pending = sr & imr;
 
 #ifndef CONFIG_SAMA5_NAND_REGDEBUG
-  fllinfo("sr=%08x imr=%08x\n", sr, imr);
+  finfo("sr=%08x imr=%08x\n", sr, imr);
 #endif
 
   /* When set to one, this XFRDONE indicates that the NFC has terminated

@@ -1,6 +1,5 @@
 /****************************************************************************
  * arch/z80/include/io.h
- * arch/chip/io.h
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

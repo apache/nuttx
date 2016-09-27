@@ -425,4 +425,5 @@ struct usb_iaddesc_s
  * Public Functions
  ************************************************************************************/
 
-#endif // __INCLUDE_NUTTX_USB_USB_H
+#endif /* __INCLUDE_NUTTX_USB_USB_H */
+

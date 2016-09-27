@@ -1,5 +1,5 @@
 /****************************************************************************
- * common/up_reprioritizertr.c
+ * arch/z16/src/common/up_reprioritizertr.c
  *
  *   Copyright (C) 2008-2009, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -96,7 +96,7 @@ void up_reprioritize_rtr(FAR struct tcb_s *tcb, uint8_t priority)
       FAR struct tcb_s *rtcb = this_task();
       bool switch_needed;
 
-      sllinfo("TCB=%p PRI=%d\n", tcb, priority);
+      sinfo("TCB=%p PRI=%d\n", tcb, priority);
 
       /* Remove the tcb task from the ready-to-run list.
        * sched_removereadytorun will return true if we just

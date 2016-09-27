@@ -704,7 +704,7 @@ static uint32_t lpc43_getreg(uint32_t addr)
         {
           if (count == 4)
             {
-              nllinfo("...\n");
+              ninfo("...\n");
             }
 
           return val;
@@ -721,7 +721,7 @@ static uint32_t lpc43_getreg(uint32_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          nllinfo("[repeats %d more times]\n", count-3);
+          ninfo("[repeats %d more times]\n", count-3);
         }
 
       /* Save the new address, value, and count */
@@ -733,7 +733,7 @@ static uint32_t lpc43_getreg(uint32_t addr)
 
   /* Show the register value read */
 
-  nllinfo("%08x->%08x\n", addr, val);
+  ninfo("%08x->%08x\n", addr, val);
   return val;
 }
 #endif
@@ -760,7 +760,7 @@ static void lpc43_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  nllinfo("%08x<-%08x\n", addr, val);
+  ninfo("%08x<-%08x\n", addr, val);
 
   /* Write the value */
 
@@ -947,8 +947,8 @@ static int lpc43_transmit(FAR struct lpc43_ethmac_s *priv)
   txdesc  = priv->txhead;
   txfirst = txdesc;
 
-  nllinfo("d_len: %d d_buf: %p txhead: %p tdes0: %08x\n",
-          priv->dev.d_len, priv->dev.d_buf, txdesc, txdesc->tdes0);
+  ninfo("d_len: %d d_buf: %p txhead: %p tdes0: %08x\n",
+        priv->dev.d_len, priv->dev.d_buf, txdesc, txdesc->tdes0);
 
   DEBUGASSERT(txdesc && (txdesc->tdes0 & ETH_TDES0_OWN) == 0);
 
@@ -964,7 +964,7 @@ static int lpc43_transmit(FAR struct lpc43_ethmac_s *priv)
       bufcount = (priv->dev.d_len + (CONFIG_LPC43_ETH_BUFSIZE-1)) / CONFIG_LPC43_ETH_BUFSIZE;
       lastsize = priv->dev.d_len - (bufcount - 1) * CONFIG_LPC43_ETH_BUFSIZE;
 
-      nllinfo("bufcount: %d lastsize: %d\n", bufcount, lastsize);
+      ninfo("bufcount: %d lastsize: %d\n", bufcount, lastsize);
 
       /* Set the first segment bit in the first TX descriptor */
 
@@ -1074,8 +1074,8 @@ static int lpc43_transmit(FAR struct lpc43_ethmac_s *priv)
 
   priv->inflight++;
 
-  nllinfo("txhead: %p txtail: %p inflight: %d\n",
-          priv->txhead, priv->txtail, priv->inflight);
+  ninfo("txhead: %p txtail: %p inflight: %d\n",
+        priv->txhead, priv->txtail, priv->inflight);
 
   /* If all TX descriptors are in-flight, then we have to disable receive interrupts
    * too.  This is because receive events can trigger more un-stoppable transmit
@@ -1373,7 +1373,7 @@ static void lpc43_freesegment(FAR struct lpc43_ethmac_s *priv,
   struct eth_rxdesc_s *rxdesc;
   int i;
 
-  nllinfo("rxfirst: %p segments: %d\n", rxfirst, segments);
+  ninfo("rxfirst: %p segments: %d\n", rxfirst, segments);
 
   /* Set OWN bit in RX descriptors.  This gives the buffers back to DMA */
 
@@ -1431,8 +1431,8 @@ static int lpc43_recvframe(FAR struct lpc43_ethmac_s *priv)
   uint8_t *buffer;
   int i;
 
-  nllinfo("rxhead: %p rxcurr: %p segments: %d\n",
-          priv->rxhead, priv->rxcurr, priv->segments);
+  ninfo("rxhead: %p rxcurr: %p segments: %d\n",
+        priv->rxhead, priv->rxcurr, priv->segments);
 
   /* Check if there are free buffers.  We cannot receive new frames in this
    * design unless there is at least one free buffer.
@@ -1440,7 +1440,7 @@ static int lpc43_recvframe(FAR struct lpc43_ethmac_s *priv)
 
   if (!lpc43_isfreebuffer(priv))
     {
-      nllerr("ERROR: No free buffers\n");
+      nerr("ERROR: No free buffers\n");
       return -ENOMEM;
     }
 
@@ -1497,7 +1497,7 @@ static int lpc43_recvframe(FAR struct lpc43_ethmac_s *priv)
               rxcurr = priv->rxcurr;
             }
 
-          nllinfo("rxhead: %p rxcurr: %p segments: %d\n",
+          ninfo("rxhead: %p rxcurr: %p segments: %d\n",
               priv->rxhead, priv->rxcurr, priv->segments);
 
           /* Check if any errors are reported in the frame */
@@ -1536,8 +1536,8 @@ static int lpc43_recvframe(FAR struct lpc43_ethmac_s *priv)
               priv->rxhead   = (struct eth_rxdesc_s *)rxdesc->rdes3;
               lpc43_freesegment(priv, rxcurr, priv->segments);
 
-              nllinfo("rxhead: %p d_buf: %p d_len: %d\n",
-                      priv->rxhead, dev->d_buf, dev->d_len);
+              ninfo("rxhead: %p d_buf: %p d_len: %d\n",
+                    priv->rxhead, dev->d_buf, dev->d_len);
 
               return OK;
             }
@@ -1547,7 +1547,7 @@ static int lpc43_recvframe(FAR struct lpc43_ethmac_s *priv)
                * scanning logic, and continue scanning with the next frame.
                */
 
-              nllwarn("WARNING: Dropped, RX descriptor errors: %08x\n", rxdesc->rdes0);
+              nwarn("WARNING: Dropped, RX descriptor errors: %08x\n", rxdesc->rdes0);
               lpc43_freesegment(priv, rxcurr, priv->segments);
             }
         }
@@ -1563,8 +1563,8 @@ static int lpc43_recvframe(FAR struct lpc43_ethmac_s *priv)
 
   priv->rxhead = rxdesc;
 
-  nllinfo("rxhead: %p rxcurr: %p segments: %d\n",
-          priv->rxhead, priv->rxcurr, priv->segments);
+  ninfo("rxhead: %p rxcurr: %p segments: %d\n",
+        priv->rxhead, priv->rxcurr, priv->segments);
 
   return -EAGAIN;
 }
@@ -1608,7 +1608,7 @@ static void lpc43_receive(FAR struct lpc43_ethmac_s *priv)
 
       if (dev->d_len > CONFIG_NET_ETH_MTU)
         {
-          nllwarn("WARNING: Dropped, Too big: %d\n", dev->d_len);
+          nwarn("WARNING: Dropped, Too big: %d\n", dev->d_len);
           /* Free dropped packet buffer */
 
           if (dev->d_buf)
@@ -1632,7 +1632,7 @@ static void lpc43_receive(FAR struct lpc43_ethmac_s *priv)
 #ifdef CONFIG_NET_IPv4
       if (BUF->type == HTONS(ETHTYPE_IP))
         {
-          nllinfo("IPv4 frame\n");
+          ninfo("IPv4 frame\n");
 
           /* Handle ARP on input then give the IPv4 packet to the network
            * layer
@@ -1672,7 +1672,7 @@ static void lpc43_receive(FAR struct lpc43_ethmac_s *priv)
 #ifdef CONFIG_NET_IPv6
       if (BUF->type == HTONS(ETHTYPE_IP6))
         {
-          nllinfo("Iv6 frame\n");
+          ninfo("Iv6 frame\n");
 
           /* Give the IPv6 packet to the network layer */
 
@@ -1709,7 +1709,7 @@ static void lpc43_receive(FAR struct lpc43_ethmac_s *priv)
 #ifdef CONFIG_NET_ARP
       if (BUF->type == htons(ETHTYPE_ARP))
         {
-          nllinfo("ARP frame\n");
+          ninfo("ARP frame\n");
 
           /* Handle ARP packet */
 
@@ -1727,7 +1727,7 @@ static void lpc43_receive(FAR struct lpc43_ethmac_s *priv)
       else
 #endif
         {
-          nllwarn("WARNING: Dropped, Unknown type: %04x\n", BUF->type);
+          nwarn("WARNING: Dropped, Unknown type: %04x\n", BUF->type);
         }
 
       /* We are finished with the RX buffer.  NOTE:  If the buffer is
@@ -1768,8 +1768,8 @@ static void lpc43_freeframe(FAR struct lpc43_ethmac_s *priv)
   struct eth_txdesc_s *txdesc;
   int i;
 
-  nllinfo("txhead: %p txtail: %p inflight: %d\n",
-          priv->txhead, priv->txtail, priv->inflight);
+  ninfo("txhead: %p txtail: %p inflight: %d\n",
+        priv->txhead, priv->txtail, priv->inflight);
 
   /* Scan for "in-flight" descriptors owned by the CPU */
 
@@ -1784,8 +1784,8 @@ static void lpc43_freeframe(FAR struct lpc43_ethmac_s *priv)
            * TX descriptors.
            */
 
-          nllinfo("txtail: %p tdes0: %08x tdes2: %08x tdes3: %08x\n",
-                  txdesc, txdesc->tdes0, txdesc->tdes2, txdesc->tdes3);
+          ninfo("txtail: %p tdes0: %08x tdes2: %08x tdes3: %08x\n",
+                txdesc, txdesc->tdes0, txdesc->tdes2, txdesc->tdes3);
 
           DEBUGASSERT(txdesc->tdes2 != 0);
 
@@ -1837,8 +1837,8 @@ static void lpc43_freeframe(FAR struct lpc43_ethmac_s *priv)
 
       priv->txtail = txdesc;
 
-      nllinfo("txhead: %p txtail: %p inflight: %d\n",
-              priv->txhead, priv->txtail, priv->inflight);
+      ninfo("txhead: %p txtail: %p inflight: %d\n",
+            priv->txhead, priv->txtail, priv->inflight);
     }
 }
 
@@ -1975,7 +1975,7 @@ static inline void lpc43_interrupt_process(FAR struct lpc43_ethmac_s *priv)
     {
       /* Just let the user know what happened */
 
-      nllerr("ERROR: Abnormal event(s): %08x\n", dmasr);
+      nerr("ERROR: Abnormal event(s): %08x\n", dmasr);
 
       /* Clear all pending abnormal events */
 
@@ -2179,7 +2179,7 @@ static void lpc43_txtimeout_expiry(int argc, uint32_t arg, ...)
 {
   FAR struct lpc43_ethmac_s *priv = (FAR struct lpc43_ethmac_s *)arg;
 
-  nllinfo("Timeout!\n");
+  ninfo("Timeout!\n");
 
 #ifdef CONFIG_NET_NOINTS
   /* Disable further Ethernet interrupts.  This will prevent some race
@@ -2647,8 +2647,8 @@ static int lpc43_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
   uint32_t temp;
   uint32_t registeraddress;
 
-  nllinfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
-          mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+  ninfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+        mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
   /* Add the MAC address to the hardware multicast hash table */
 
@@ -2704,8 +2704,8 @@ static int lpc43_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
   uint32_t temp;
   uint32_t registeraddress;
 
-  nllinfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
-          mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+  ninfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+        mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
   /* Remove the MAC address to the hardware multicast hash table */
 
@@ -3392,6 +3392,9 @@ static int lpc43_phyinit(FAR struct lpc43_ethmac_s *priv)
       priv->mbps100 = 1;
     }
 #endif
+#endif
+
+#else /* Auto-negotion not selected */
 
 #ifdef CONFIG_LPC43_ETHFD
   priv->mbps100 = 1;
@@ -3400,11 +3403,9 @@ static int lpc43_phyinit(FAR struct lpc43_ethmac_s *priv)
 #ifdef CONFIG_LPC43_ETH100MBPS
   priv->fduplex = 1;
 #endif
-#endif
-
-  /* However we got here, commit to the hardware */
 
   phyval = 0;
+
   if (priv->mbps100)
     {
       phyval |= MII_MCR_FULLDPLX;
@@ -3718,11 +3719,11 @@ static void lpc43_macaddress(FAR struct lpc43_ethmac_s *priv)
   FAR struct net_driver_s *dev = &priv->dev;
   uint32_t regval;
 
-  nllinfo("%s MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
-          dev->d_ifname,
-          dev->d_mac.ether_addr_octet[0], dev->d_mac.ether_addr_octet[1],
-          dev->d_mac.ether_addr_octet[2], dev->d_mac.ether_addr_octet[3],
-          dev->d_mac.ether_addr_octet[4], dev->d_mac.ether_addr_octet[5]);
+  ninfo("%s MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+        dev->d_ifname,
+        dev->d_mac.ether_addr_octet[0], dev->d_mac.ether_addr_octet[1],
+        dev->d_mac.ether_addr_octet[2], dev->d_mac.ether_addr_octet[3],
+        dev->d_mac.ether_addr_octet[4], dev->d_mac.ether_addr_octet[5]);
 
   /* Set the MAC address high register */
 
@@ -3925,12 +3926,12 @@ static int lpc43_ethconfig(FAR struct lpc43_ethmac_s *priv)
 
   /* Reset the Ethernet block */
 
-  nllinfo("Reset the Ethernet block\n");
+  ninfo("Reset the Ethernet block\n");
   lpc43_ethreset(priv);
 
   /* Initialize the PHY */
 
-  nllinfo("Initialize the PHY\n");
+  ninfo("Initialize the PHY\n");
   ret = lpc43_phyinit(priv);
   if (ret < 0)
     {
@@ -3945,7 +3946,7 @@ static int lpc43_ethconfig(FAR struct lpc43_ethmac_s *priv)
 
   /* Initialize the MAC and DMA */
 
-  nllinfo("Initialize the MAC and DMA\n");
+  ninfo("Initialize the MAC and DMA\n");
   ret = lpc43_macconfig(priv);
   if (ret < 0)
     {
@@ -3966,7 +3967,7 @@ static int lpc43_ethconfig(FAR struct lpc43_ethmac_s *priv)
 
   /* Enable normal MAC operation */
 
-  nllinfo("Enable normal operation\n");
+  ninfo("Enable normal operation\n");
   return lpc43_macenable(priv);
 }
 

@@ -37,12 +37,15 @@ CONFIG_RRLOAD_BINARY=y
 # CONFIG_ARCH_MATH_H is not set
 # CONFIG_ARCH_FLOAT_H is not set
 # CONFIG_ARCH_STDARG_H is not set
+# CONFIG_ARCH_DEBUG_H is not set
 
 #
 # Debug Options
 #
+CONFIG_DEBUG_ALERT=y
 # CONFIG_DEBUG_FEATURES is not set
 CONFIG_ARCH_HAVE_STACKCHECK=y
+# CONFIG_STACK_COLORATION is not set
 # CONFIG_ARCH_HAVE_HEAPCHECK is not set
 # CONFIG_DEBUG_SYMBOLS is not set
 CONFIG_ARCH_HAVE_CUSTOMOPT=y
@@ -58,7 +61,7 @@ CONFIG_ARCH_ARM=y
 # CONFIG_ARCH_HC is not set
 # CONFIG_ARCH_MIPS is not set
 # CONFIG_ARCH_RGMP is not set
-# CONFIG_ARCH_SH is not set
+# CONFIG_ARCH_RENESAS is not set
 # CONFIG_ARCH_SIM is not set
 # CONFIG_ARCH_X86 is not set
 # CONFIG_ARCH_Z16 is not set
@@ -74,10 +77,12 @@ CONFIG_ARCH_CHIP_C5471=y
 # CONFIG_ARCH_CHIP_DM320 is not set
 # CONFIG_ARCH_CHIP_EFM32 is not set
 # CONFIG_ARCH_CHIP_IMX1 is not set
+# CONFIG_ARCH_CHIP_IMX6 is not set
 # CONFIG_ARCH_CHIP_KINETIS is not set
 # CONFIG_ARCH_CHIP_KL is not set
 # CONFIG_ARCH_CHIP_LM is not set
 # CONFIG_ARCH_CHIP_TIVA is not set
+# CONFIG_ARCH_CHIP_LPC11XX is not set
 # CONFIG_ARCH_CHIP_LPC17XX is not set
 # CONFIG_ARCH_CHIP_LPC214X is not set
 # CONFIG_ARCH_CHIP_LPC2378 is not set
@@ -86,20 +91,39 @@ CONFIG_ARCH_CHIP_C5471=y
 # CONFIG_ARCH_CHIP_NUC1XX is not set
 # CONFIG_ARCH_CHIP_SAMA5 is not set
 # CONFIG_ARCH_CHIP_SAMD is not set
+# CONFIG_ARCH_CHIP_SAML is not set
 # CONFIG_ARCH_CHIP_SAM34 is not set
+# CONFIG_ARCH_CHIP_SAMV7 is not set
 # CONFIG_ARCH_CHIP_STM32 is not set
+# CONFIG_ARCH_CHIP_STM32F7 is not set
+# CONFIG_ARCH_CHIP_STM32L4 is not set
 # CONFIG_ARCH_CHIP_STR71X is not set
+# CONFIG_ARCH_CHIP_TMS570 is not set
+# CONFIG_ARCH_CHIP_MOXART is not set
 CONFIG_ARCH_ARM7TDMI=y
 # CONFIG_ARCH_ARM926EJS is not set
 # CONFIG_ARCH_ARM920T is not set
 # CONFIG_ARCH_CORTEXM0 is not set
 # CONFIG_ARCH_CORTEXM3 is not set
 # CONFIG_ARCH_CORTEXM4 is not set
+# CONFIG_ARCH_CORTEXM7 is not set
 # CONFIG_ARCH_CORTEXA5 is not set
 # CONFIG_ARCH_CORTEXA8 is not set
+# CONFIG_ARCH_CORTEXA9 is not set
+# CONFIG_ARCH_CORTEXR4 is not set
+# CONFIG_ARCH_CORTEXR4F is not set
+# CONFIG_ARCH_CORTEXR5 is not set
+# CONFIG_ARCH_CORTEX5F is not set
+# CONFIG_ARCH_CORTEXR7 is not set
+# CONFIG_ARCH_CORTEXR7F is not set
 CONFIG_ARCH_FAMILY="arm"
 CONFIG_ARCH_CHIP="c5471"
+# CONFIG_ARM_TOOLCHAIN_IAR is not set
+# CONFIG_ARM_TOOLCHAIN_GNU is not set
 # CONFIG_ARCH_HAVE_FPU is not set
+# CONFIG_ARCH_HAVE_DPFPU is not set
+# CONFIG_ARCH_HAVE_TRUSTZONE is not set
+# CONFIG_ARM_HAVE_MPU_UNIFIED is not set
 CONFIG_ARCH_HAVE_LOWVECTORS=y
 # CONFIG_ARCH_LOWVECTORS is not set
 
@@ -153,11 +177,14 @@ CONFIG_C5471_AUTONEGOTIATION=y
 # CONFIG_ARCH_HAVE_COHERENT_DCACHE is not set
 # CONFIG_ARCH_HAVE_ADDRENV is not set
 # CONFIG_ARCH_NEED_ADDRENV_MAPPING is not set
+# CONFIG_ARCH_HAVE_MULTICPU is not set
 CONFIG_ARCH_HAVE_VFORK=y
 # CONFIG_ARCH_HAVE_MMU is not set
 # CONFIG_ARCH_HAVE_MPU is not set
 # CONFIG_ARCH_NAND_HWECC is not set
 # CONFIG_ARCH_HAVE_EXTCLK is not set
+# CONFIG_ARCH_HAVE_POWEROFF is not set
+# CONFIG_ARCH_HAVE_RESET is not set
 CONFIG_ARCH_STACKDUMP=y
 # CONFIG_ENDIAN_BIG is not set
 # CONFIG_ARCH_IDLE_CUSTOM is not set
@@ -209,6 +236,7 @@ CONFIG_ARCH_LEDS=y
 #
 # Board-Specific Options
 #
+# CONFIG_LIB_BOARDCTL is not set
 
 #
 # RTOS Features
@@ -243,6 +271,7 @@ CONFIG_INIT_ENTRYPOINT=y
 # CONFIG_INIT_FILEPATH is not set
 CONFIG_USER_ENTRYPOINT="webserver_main"
 CONFIG_RR_INTERVAL=200
+# CONFIG_SCHED_SPORADIC is not set
 CONFIG_TASK_NAME_SIZE=0
 CONFIG_MAX_TASKS=64
 # CONFIG_SCHED_HAVE_PARENT is not set
@@ -287,9 +316,10 @@ CONFIG_SIG_SIGUSR1=1
 CONFIG_SIG_SIGUSR2=2
 CONFIG_SIG_SIGALARM=3
 CONFIG_SIG_SIGCONDTIMEDOUT=16
+# CONFIG_MODULE is not set
 
 #
-# Work Queue Support
+# Work queue support
 #
 # CONFIG_SCHED_WORKQUEUE is not set
 # CONFIG_SCHED_HPWORK is not set
@@ -320,22 +350,42 @@ CONFIG_DEV_NULL=y
 # CONFIG_RAMDISK is not set
 # CONFIG_CAN is not set
 # CONFIG_ARCH_HAVE_PWM_PULSECOUNT is not set
+# CONFIG_ARCH_HAVE_PWM_MULTICHAN is not set
 # CONFIG_PWM is not set
 # CONFIG_ARCH_HAVE_I2CRESET is not set
 # CONFIG_I2C is not set
 # CONFIG_SPI is not set
 # CONFIG_I2S is not set
+
+#
+# Timer Driver Support
+#
+# CONFIG_TIMER is not set
 # CONFIG_RTC is not set
 CONFIG_WATCHDOG=y
 CONFIG_WATCHDOG_DEVPATH="/dev/watchdog0"
-# CONFIG_TIMER is not set
 # CONFIG_ANALOG is not set
 # CONFIG_AUDIO_DEVICES is not set
 # CONFIG_VIDEO_DEVICES is not set
 # CONFIG_BCH is not set
 # CONFIG_INPUT is not set
+# CONFIG_IOEXPANDER is not set
+
+#
+# LCD Driver Support
+#
 # CONFIG_LCD is not set
+# CONFIG_SLCD is not set
+
+#
+# LED Support
+#
+# CONFIG_USERLED is not set
+# CONFIG_RGBLED is not set
+# CONFIG_PCA9635PW is not set
+# CONFIG_NCP5623C is not set
 # CONFIG_MMCSD is not set
+# CONFIG_MODEM is not set
 # CONFIG_MTD is not set
 # CONFIG_EEPROM is not set
 # CONFIG_NETDEVICES is not set
@@ -347,6 +397,8 @@ CONFIG_WATCHDOG_DEVPATH="/dev/watchdog0"
 # CONFIG_SERCOMM_CONSOLE is not set
 CONFIG_SERIAL=y
 # CONFIG_DEV_LOWCONSOLE is not set
+# CONFIG_SERIAL_REMOVABLE is not set
+CONFIG_SERIAL_CONSOLE=y
 # CONFIG_16550_UART is not set
 # CONFIG_UART_SERIALDRIVER is not set
 # CONFIG_UART0_SERIALDRIVER is not set
@@ -370,14 +422,11 @@ CONFIG_SERIAL=y
 # CONFIG_USART7_SERIALDRIVER is not set
 # CONFIG_USART8_SERIALDRIVER is not set
 CONFIG_OTHER_UART_SERIALDRIVER=y
-
-#
-# USART Configuration
-#
 CONFIG_MCU_SERIAL=y
 # CONFIG_STANDARD_SERIAL is not set
 # CONFIG_SERIAL_IFLOWCONTROL is not set
 # CONFIG_SERIAL_OFLOWCONTROL is not set
+# CONFIG_SERIAL_DMA is not set
 # CONFIG_ARCH_HAVE_SERIAL_TERMIOS is not set
 CONFIG_OTHER_SERIAL_CONSOLE=y
 # CONFIG_NO_SERIAL_CONSOLE is not set
@@ -386,13 +435,17 @@ CONFIG_OTHER_SERIAL_CONSOLE=y
 # CONFIG_DRIVERS_WIRELESS is not set
 
 #
-# System Logging Device Options
-#
-
-#
 # System Logging
 #
+# CONFIG_ARCH_SYSLOG is not set
 # CONFIG_RAMLOG is not set
+# CONFIG_SYSLOG_INTBUFFER is not set
+# CONFIG_SYSLOG_TIMESTAMP is not set
+CONFIG_SYSLOG_SERIAL_CONSOLE=y
+# CONFIG_SYSLOG_CHAR is not set
+CONFIG_SYSLOG_CONSOLE=y
+# CONFIG_SYSLOG_NONE is not set
+# CONFIG_SYSLOG_FILE is not set
 
 #
 # Networking Support
@@ -406,7 +459,6 @@ CONFIG_NET=y
 #
 # Driver buffer configuration
 #
-CONFIG_NET_IPv4=y
 # CONFIG_NET_MULTIBUFFER is not set
 CONFIG_NET_ETH_MTU=590
 CONFIG_NET_ETH_TCP_RECVWNDO=536
@@ -417,6 +469,19 @@ CONFIG_NET_GUARDSIZE=2
 #
 # CONFIG_NET_MULTILINK is not set
 CONFIG_NET_ETHERNET=y
+# CONFIG_NET_LOOPBACK is not set
+# CONFIG_NET_TUN is not set
+
+#
+# Network Device Operations
+#
+# CONFIG_NETDEV_PHY_IOCTL is not set
+
+#
+# Internet Protocol Selection
+#
+CONFIG_NET_IPv4=y
+# CONFIG_NET_IPv6 is not set
 
 #
 # Socket Support
@@ -427,14 +492,14 @@ CONFIG_NET_SOCKOPTS=y
 # CONFIG_NET_SOLINGER is not set
 
 #
-# Network Device Operations
-#
-# CONFIG_NETDEV_PHY_IOCTL is not set
-
-#
 # Raw Socket Support
 #
 # CONFIG_NET_PKT is not set
+
+#
+# Unix Domain Socket Support
+#
+# CONFIG_NET_LOCAL is not set
 
 #
 # TCP/IP Networking
@@ -490,6 +555,7 @@ CONFIG_IOB_NCHAINS=8
 # Routing Table Configuration
 #
 # CONFIG_NET_ROUTE is not set
+CONFIG_NET_HOSTNAME=""
 
 #
 # Crypto API
@@ -510,12 +576,7 @@ CONFIG_DISABLE_MOUNTPOINT=y
 # CONFIG_FS_NAMED_SEMAPHORES is not set
 # CONFIG_FS_RAMMAP is not set
 # CONFIG_FS_PROCFS is not set
-
-#
-# System Logging
-#
-# CONFIG_SYSLOG is not set
-# CONFIG_SYSLOG_TIMESTAMP is not set
+# CONFIG_FS_UNIONFS is not set
 
 #
 # Graphics Support
@@ -534,6 +595,10 @@ CONFIG_MM_REGIONS=1
 # Audio Support
 #
 # CONFIG_AUDIO is not set
+
+#
+# Wireless Support
+#
 
 #
 # Binary Loader
@@ -571,13 +636,18 @@ CONFIG_TASK_SPAWN_DEFAULT_STACKSIZE=2048
 # CONFIG_LIBC_STRERROR is not set
 # CONFIG_LIBC_PERROR_STDOUT is not set
 CONFIG_ARCH_LOWPUTC=y
+# CONFIG_TIME_EXTENDED is not set
 CONFIG_LIB_SENDFILE_BUFSIZE=512
 # CONFIG_ARCH_ROMGETC is not set
 # CONFIG_ARCH_OPTIMIZED_FUNCTIONS is not set
+CONFIG_ARCH_HAVE_TLS=y
+# CONFIG_TLS is not set
+# CONFIG_LIBC_NETDB is not set
 
 #
 # Non-standard Library Support
 #
+# CONFIG_LIB_CRC64_FAST is not set
 # CONFIG_LIB_KBDCODEC is not set
 # CONFIG_LIB_SLCDCODEC is not set
 
@@ -592,14 +662,13 @@ CONFIG_LIB_SENDFILE_BUFSIZE=512
 #
 
 #
-# Built-In Applications
+# CAN Utilities
 #
 
 #
 # Examples
 #
-# CONFIG_EXAMPLES_BUTTONS is not set
-# CONFIG_EXAMPLES_CAN is not set
+# CONFIG_EXAMPLES_CHAT is not set
 # CONFIG_EXAMPLES_CONFIGDATA is not set
 # CONFIG_EXAMPLES_CPUHOG is not set
 # CONFIG_EXAMPLES_DHCPD is not set
@@ -607,11 +676,11 @@ CONFIG_LIB_SENDFILE_BUFSIZE=512
 # CONFIG_EXAMPLES_FTPC is not set
 # CONFIG_EXAMPLES_FTPD is not set
 # CONFIG_EXAMPLES_HELLO is not set
-# CONFIG_EXAMPLES_HELLOXX is not set
-# CONFIG_EXAMPLES_JSON is not set
 # CONFIG_EXAMPLES_HIDKBD is not set
-# CONFIG_EXAMPLES_KEYPADTEST is not set
 # CONFIG_EXAMPLES_IGMP is not set
+# CONFIG_EXAMPLES_JSON is not set
+# CONFIG_EXAMPLES_KEYPADTEST is not set
+# CONFIG_EXAMPLES_MEDIA is not set
 # CONFIG_EXAMPLES_MM is not set
 # CONFIG_EXAMPLES_MODBUS is not set
 # CONFIG_EXAMPLES_MOUNT is not set
@@ -620,41 +689,49 @@ CONFIG_LIB_SENDFILE_BUFSIZE=512
 # CONFIG_EXAMPLES_NSH is not set
 # CONFIG_EXAMPLES_NULL is not set
 # CONFIG_EXAMPLES_NX is not set
-# CONFIG_EXAMPLES_NXTERM is not set
 # CONFIG_EXAMPLES_NXFFS is not set
-# CONFIG_EXAMPLES_NXFLAT is not set
 # CONFIG_EXAMPLES_NXHELLO is not set
 # CONFIG_EXAMPLES_NXIMAGE is not set
 # CONFIG_EXAMPLES_NXLINES is not set
+# CONFIG_EXAMPLES_NXTERM is not set
 # CONFIG_EXAMPLES_NXTEXT is not set
 # CONFIG_EXAMPLES_OSTEST is not set
+# CONFIG_EXAMPLES_PCA9635 is not set
 # CONFIG_EXAMPLES_PIPE is not set
 # CONFIG_EXAMPLES_POLL is not set
 # CONFIG_EXAMPLES_POSIXSPAWN is not set
-# CONFIG_EXAMPLES_QENCODER is not set
+# CONFIG_EXAMPLES_PPPD is not set
+# CONFIG_EXAMPLES_RGBLED is not set
 # CONFIG_EXAMPLES_RGMP is not set
-# CONFIG_EXAMPLES_ROMFS is not set
 # CONFIG_EXAMPLES_SENDMAIL is not set
 # CONFIG_EXAMPLES_SERIALBLASTER is not set
 # CONFIG_EXAMPLES_SERIALRX is not set
 # CONFIG_EXAMPLES_SERLOOP is not set
 # CONFIG_EXAMPLES_SLCD is not set
 # CONFIG_EXAMPLES_SMART is not set
+# CONFIG_EXAMPLES_SMP is not set
 # CONFIG_EXAMPLES_TCPECHO is not set
 # CONFIG_EXAMPLES_TELNETD is not set
-# CONFIG_EXAMPLES_THTTPD is not set
 # CONFIG_EXAMPLES_TIFF is not set
 # CONFIG_EXAMPLES_TOUCHSCREEN is not set
-# CONFIG_EXAMPLES_UDP is not set
+# CONFIG_EXAMPLES_USBTERM is not set
+# CONFIG_EXAMPLES_WATCHDOG is not set
 CONFIG_EXAMPLES_WEBSERVER=y
 CONFIG_EXAMPLES_WEBSERVER_IPADDR=0x0a000002
 CONFIG_EXAMPLES_WEBSERVER_DRIPADDR=0x0a000001
 CONFIG_EXAMPLES_WEBSERVER_NETMASK=0xffffff00
 CONFIG_EXAMPLES_WEBSERVER_NOMAC=y
-# CONFIG_EXAMPLES_USBSERIAL is not set
-# CONFIG_EXAMPLES_USBTERM is not set
-# CONFIG_EXAMPLES_WATCHDOG is not set
 # CONFIG_EXAMPLES_WGET is not set
+
+#
+# File System Utilities
+#
+# CONFIG_FSUTILS_INIFILE is not set
+
+#
+# GPS Utilities
+#
+# CONFIG_GPSUTILS_MINMEA_LIB is not set
 
 #
 # Graphics Support
@@ -666,25 +743,24 @@ CONFIG_EXAMPLES_WEBSERVER_NOMAC=y
 # Interpreters
 #
 # CONFIG_INTERPRETERS_FICL is not set
+# CONFIG_INTERPRETERS_MICROPYTHON is not set
 # CONFIG_INTERPRETERS_PCODE is not set
+
+#
+# FreeModBus
+#
+# CONFIG_MODBUS is not set
 
 #
 # Network Utilities
 #
-
-#
-# Networking Utilities
-#
 # CONFIG_NETUTILS_CODECS is not set
-# CONFIG_NETUTILS_DHCPD is not set
+# CONFIG_NETUTILS_ESP8266 is not set
 # CONFIG_NETUTILS_FTPC is not set
-# CONFIG_NETUTILS_FTPD is not set
 # CONFIG_NETUTILS_JSON is not set
+CONFIG_NETUTILS_NETLIB=y
 # CONFIG_NETUTILS_SMTP is not set
 # CONFIG_NETUTILS_TELNETD is not set
-# CONFIG_NETUTILS_TFTPC is not set
-# CONFIG_NETUTILS_THTTPD is not set
-CONFIG_NETUTILS_NETLIB=y
 # CONFIG_NETUTILS_WEBCLIENT is not set
 CONFIG_NETUTILS_WEBSERVER=y
 # CONFIG_NETUTILS_HTTPD_SINGLECONNECT is not set
@@ -699,11 +775,6 @@ CONFIG_NETUTILS_HTTPD_CLASSIC=y
 # CONFIG_NETUTILS_HTTPD_SENDFILE is not set
 CONFIG_NETUTILS_HTTPD_KEEPALIVE_DISABLE=y
 # CONFIG_NETUTILS_XMLRPC is not set
-
-#
-# FreeModBus
-#
-# CONFIG_MODBUS is not set
 
 #
 # NSH Library
@@ -722,115 +793,16 @@ CONFIG_NETUTILS_HTTPD_KEEPALIVE_DISABLE=y
 #
 # System Libraries and NSH Add-Ons
 #
-
-#
-# Custom Free Memory Command
-#
-# CONFIG_SYSTEM_FREE is not set
-
-#
-# EMACS-like Command Line Editor
-#
 # CONFIG_SYSTEM_CLE is not set
-
-#
-# CU Minimal Terminal
-#
 # CONFIG_SYSTEM_CUTERM is not set
-
-#
-# FLASH Program Installation
-#
+# CONFIG_SYSTEM_FREE is not set
+# CONFIG_LIB_HEX2BIN is not set
+# CONFIG_SYSTEM_HEXED is not set
 # CONFIG_SYSTEM_INSTALL is not set
-
-#
-# FLASH Erase-all Command
-#
-
-#
-# Intel HEX to binary conversion
-#
-# CONFIG_SYSTEM_HEX2BIN is not set
-
-#
-# I2C tool
-#
-
-#
-# INI File Parser
-#
-# CONFIG_FSUTILS_INIFILE is not set
-
-#
-# NxPlayer media player library / command Line
-#
-
-#
-# RAM test
-#
 # CONFIG_SYSTEM_RAMTEST is not set
-
-#
-# readline()
-#
+# CONFIG_READLINE_HAVE_EXTMATCH is not set
 # CONFIG_SYSTEM_READLINE is not set
-
-#
-# P-Code Support
-#
-
-#
-# PHY Tool
-#
-
-#
-# Power Off
-#
-# CONFIG_SYSTEM_POWEROFF is not set
-
-#
-# RAMTRON
-#
-
-#
-# SD Card
-#
-
-#
-# Sudoku
-#
 # CONFIG_SYSTEM_SUDOKU is not set
-
-#
-# Sysinfo
-#
-
-#
-# VI Work-Alike Editor
-#
+# CONFIG_SYSTEM_UBLOXMODEM is not set
 # CONFIG_SYSTEM_VI is not set
-
-#
-# Stack Monitor
-#
-
-#
-# USB CDC/ACM Device Commands
-#
-
-#
-# USB Composite Device Commands
-#
-
-#
-# USB Mass Storage Device Commands
-#
-
-#
-# USB Monitor
-#
-
-#
-# Zmodem Commands
-#
 # CONFIG_SYSTEM_ZMODEM is not set

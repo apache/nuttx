@@ -301,6 +301,11 @@ Where <subdir> is one of the following:
     configuration.  This configuration has far fewer features than the nsh
     configuration but is also a fraction of the size.
 
+    2016-06-21:
+    $ arm-none-eabi-size nuttx
+       text    data     bss     dec     hex filename
+      12282     196     736   13214    339e nuttx
+
     This minnsh configuration is a "proof-of-concept" and not very usable in
     its current state.  This configuration was created by disabling
     everything possible INCLUDING file system support.  Without file system

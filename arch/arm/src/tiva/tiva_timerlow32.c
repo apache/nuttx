@@ -511,7 +511,7 @@ static int tiva_ioctl(struct timer_lowerhalf_s *lower, int cmd,
 {
   int ret = -ENOTTY;
 
-  DEBUGASSERT(priv);
+  DEBUGASSERT(lower);
   tmrinfo("Entry: cmd=%d arg=%ld\n", cmd, arg);
 
   return ret;

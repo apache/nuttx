@@ -101,13 +101,6 @@
 #  define USE_SERIALDRIVER 1
 #endif
 
-/* Determine which device to use as the system logging device */
-
-#ifndef CONFIG_SYSLOG
-#  undef CONFIG_SYSLOG_CHAR
-#  undef CONFIG_RAMLOG_SYSLOG
-#endif
-
 /* Check if an interrupt stack size is configured */
 
 #ifndef CONFIG_ARCH_INTERRUPTSTACK
@@ -550,12 +543,6 @@ void up_usbuninitialize(void);
 #else
 # define up_usbinitialize()
 # define up_usbuninitialize()
-#endif
-
-/* Random Number Generator (RNG) ********************************************/
-
-#ifdef CONFIG_DEV_RANDOM
-void up_rnginitialize(void);
 #endif
 
 /* Debug ********************************************************************/

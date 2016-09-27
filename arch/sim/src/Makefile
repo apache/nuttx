@@ -57,7 +57,7 @@ CSRCS  = up_initialize.c up_idle.c up_interruptcontext.c up_initialstate.c
 CSRCS += up_createstack.c up_usestack.c up_releasestack.c up_stackframe.c
 CSRCS += up_unblocktask.c up_blocktask.c up_releasepending.c
 CSRCS += up_reprioritizertr.c up_exit.c up_schedulesigaction.c up_spiflash.c
-CSRCS += up_allocateheap.c up_devconsole.c
+CSRCS += up_allocateheap.c up_devconsole.c up_qspiflash.c
 
 HOSTSRCS = up_hostusleep.c
 
@@ -85,6 +85,10 @@ ifeq ($(CONFIG_DEV_CONSOLE),y)
   HOSTSRCS += up_simuart.c
 endif
 
+ifeq ($(CONFIG_ONESHOT),y)
+  CSRCS += up_oneshot.c
+endif
+
 ifeq ($(CONFIG_NX_LCDDRIVER),y)
   CSRCS += board_lcd.c
 else
@@ -101,6 +105,10 @@ ifeq ($(CONFIG_SIM_AJOYSTICK),y)
 endif
 endif
 endif
+endif
+
+ifeq ($(CONFIG_SIM_IOEXPANDER),y)
+  CSRCS += up_ioexpander.c
 endif
 
 ifeq ($(CONFIG_ELF),y)

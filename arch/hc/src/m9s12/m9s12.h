@@ -266,7 +266,7 @@ bool hcs12_gpioread(uint16_t pinset);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_HCS12_GPIOIRQ
 void hcs12_gpioirqenable(int irq);
 #else
 #  define hcs12_gpioirqenable(irq)
@@ -280,7 +280,7 @@ void hcs12_gpioirqenable(int irq);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_HCS12_GPIOIRQ
 void hcs12_gpioirqdisable(int irq);
 #else
 #  define hcs12_gpioirqdisable(irq)

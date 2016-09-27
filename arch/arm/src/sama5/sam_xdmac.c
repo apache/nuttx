@@ -1860,7 +1860,7 @@ static int sam_xdmac_interrupt(struct sam_xdmac_s *xdmac)
             {
               /* Yes... Terminate the transfer with an error? */
 
-              dmallerr("ERROR: DMA failed: %08x\n", chpending);
+              dmaerr("ERROR: DMA failed: %08x\n", chpending);
               sam_dmaterminate(xdmach, -EIO);
             }
 
@@ -1877,7 +1877,7 @@ static int sam_xdmac_interrupt(struct sam_xdmac_s *xdmac)
 
           else
             {
-              dmallerr("ERROR: Unexpected interrupt: %08x\n", chpending);
+              dmaerr("ERROR: Unexpected interrupt: %08x\n", chpending);
               DEBUGPANIC();
             }
 
@@ -1957,7 +1957,7 @@ void sam_dmainitialize(struct sam_xdmac_s *xdmac)
 void weak_function up_dmainitialize(void)
 {
 #ifdef CONFIG_SAMA5_XDMAC0
-  dmallinfo("Initialize XDMAC0\n");
+  dmainfo("Initialize XDMAC0\n");
 
   /* Enable peripheral clock */
 
@@ -1977,7 +1977,7 @@ void weak_function up_dmainitialize(void)
 #endif
 
 #ifdef CONFIG_SAMA5_XDMAC1
-  dmallinfo("Initialize XDMAC1\n");
+  dmainfo("Initialize XDMAC1\n");
 
   /* Enable peripheral clock */
 

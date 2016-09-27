@@ -58,7 +58,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/arch.h>
-#include <nuttx/pwm.h>
+#include <nuttx/drivers/pwm.h>
 
 #include <nuttx/irq.h>
 
@@ -652,7 +652,7 @@ void pwm_expired(FAR void *handle)
 {
   FAR struct pwm_upperhalf_s *upper = (FAR struct pwm_upperhalf_s *)handle;
 
-  pwmllinfo("started: %d waiting: %d\n", upper->started, upper->waiting);
+  pwminfo("started: %d waiting: %d\n", upper->started, upper->waiting);
 
   /* Make sure that the PWM is started */
 

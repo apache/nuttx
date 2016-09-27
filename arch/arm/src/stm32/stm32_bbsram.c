@@ -256,7 +256,7 @@ static void stm32_bbsram_semtake(FAR struct stm32_bbsram_s *priv)
 
 static inline void stm32_bbsram_unlock(void)
 {
-  (void)stm32_pwr_enablebkp(true);
+  stm32_pwr_enablebkp(true);
 }
 
 /****************************************************************************
@@ -276,7 +276,7 @@ static inline void stm32_bbsram_unlock(void)
 
 static inline void stm32_bbsram_lock(void)
 {
-  (void)stm32_pwr_enablebkp(false);
+  stm32_pwr_enablebkp(false);
 }
 
 /****************************************************************************
@@ -593,8 +593,9 @@ static int stm32_bbsram_ioctl(FAR struct file *filep, int cmd,
           bbrr->fileno = bbr->bbf->fileno;
           bbrr->lastwrite = bbr->bbf->lastwrite;
           bbrr->len = bbr->bbf->len;
-          bbrr->flags = (bbr->bbf->crc == stm32_bbsram_crc(bbr->bbf)) ? eCRCValid : 0;
-          bbrr->flags = (bbr->bbf->dirty) ? eDirty : 0;
+          bbrr->flags = ((bbr->bbf->crc == stm32_bbsram_crc(bbr->bbf))
+                          ? BBSRAM_CRC_VALID : 0);
+          bbrr->flags |= ((bbr->bbf->dirty) ? BBSRAM_DIRTY : 0);
           ret = OK;
         }
 

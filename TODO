@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated June 6, 2016)
+NuttX TODO List (Last updated July 20, 2016)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -17,7 +17,7 @@ nuttx/:
   (9)  Kernel/Protected Build
   (3)  C++ Support
   (6)  Binary loaders (binfmt/)
- (12)  Network (net/, drivers/net)
+ (11)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
   (0)  Other drivers (drivers/)
  (11)  Libraries (libc/, libm/)
@@ -219,7 +219,7 @@ o Task/Scheduler (sched/)
   Description: Task control information is retained in simple lists.  This
                is completely appropriate for small embedded systems where
                the number of tasks, N, is relatively small.  Most list
-               operations are O(N).  This could become as issue if N gets
+               operations are O(N).  This could become an issue if N gets
                very large.
 
                In that case, these simple lists should be replaced with
@@ -447,6 +447,7 @@ o Kernel/Protected Build
                mkfatfs  mkfatfs
                mkrd     ramdisk_register()
                ping     icmp_ping()
+               mount    foreach_mountpoint()
 
                The busybox mkfatfs does not involve any OS calls; it does
                its job by simply opening the block driver (using open/xopen)
@@ -818,7 +819,7 @@ o Binary loaders (binfmt/)
                "Read-Only Data in RAM" at
                http://nuttx.org/Documentation/NuttXNxFlat.html#limitations).
 
-               The newer 4.6.3compiler generated PC relative relocations to the strings:
+               The newer 4.6.3 compiler generated PC relative relocations to the strings:
 
                .L2:
                   .word   .LC0-(.LPIC0+4)
@@ -926,8 +927,7 @@ o Network (net/, drivers/net)
                CONFIG_NET_NOINTS).  This is really a very bad use of CPU
                resources;  All of the network stack processing should be
                modified to use a work queue (and, all use of CONFIG_NET_NOINTS=n
-               should be eliminated).  This applies to almost all Ethernet
-               drivers:
+               should be eliminated).  This applies to many Ethernet drivers:
 
                ARCHITECTURE   CONFIG_NET_NOINTS?      ADDRESS FILTER SUPPORT?
                C5471          NO                      NO
@@ -937,7 +937,9 @@ o Network (net/, drivers/net)
                  LM3S         NO                      NO
                  TM4C         YES                     YES
                eZ80           NO                      NO
+               Kinetis        YES                     YES (not tested)
                LPC17xx        YES                     YES (not tested)
+               LPC43xx        YES                     YES (not tested)
                DMxxx NIC      NO                      NO
                PIC32          NO                      NO
                RGMP           ???                     ???
@@ -1337,6 +1339,8 @@ o Libraries (libc/)
 
                UPDATE: 2015-09-01: A fix for the noted problems with asin()
                has been applied.
+               2016-07-30: Numerous fixes and performance improvements from
+               David Alessio.
 
 Status:        Open
 Priority:      Low for casual users but clearly high if you need care about
@@ -1349,12 +1353,6 @@ o File system / Generic drivers (fs/, drivers/)
 
   Title:       CHMOD(), TRUNCATE(), AND FSTAT()
   Description: Implement chmod(), truncate(), and fstat().
-  Status:      Open
-  Priority:    Low
-
-  Title:       CAN POLL SUPPORT
-  Description: At present, the CAN driver does not support the poll() method.
-               See drivers/can.c
   Status:      Open
   Priority:    Low
 
@@ -1403,6 +1401,15 @@ o File system / Generic drivers (fs/, drivers/)
                socket structures.  There really should be one array that
                is a union of file and socket descriptors.  Then socket and
                file descriptors could lie in the same range.
+
+               Another example of how the current implementation limits
+               functionality:  I recently started an implement of the FILEMAX
+               (using pctl() instead sysctl()).  My objective was to be able
+               to control the number of available file descriptors on a task-
+               by-task basis.  The complexity due to the partitioning of
+               desciptor space in a range for file descriptors and a range
+               for socket descriptors made this feature nearly impossible to
+               implement.
   Status:      Open
   Priority:    Low
 
@@ -1602,7 +1609,7 @@ o Build system
   Priority:    Low.
 
   Title:       NATIVE WINDOWS BUILD BROKEN
-  Description: The way that apps/ no generates Kmenu files depends on changes added
+  Description: The way that apps/ now generates Kmenu files depends on changes added
                to apps/tools/mkkconfig.sh.  Similar changes need to be made to
                apps/tools/mkkconfig.bat to restore the Windows Native build.
                UPDATE: The mkkconfig.bat script has been updated and appears to work.
@@ -1729,7 +1736,7 @@ o ARM (arch/arm/)
                upon return. This could be improved as well:  If there is no
                context switch, then the static registers need not be restored
                because they will not be modified by the called C code.
-               (see arch/sh/src/sh1/sh1_vector.S for example)
+               (see arch/renesas/src/sh1/sh1_vector.S for example)
   Status:      Open
   Priority:    Low
 

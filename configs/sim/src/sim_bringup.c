@@ -45,24 +45,14 @@
 #include <debug.h>
 
 #include <nuttx/board.h>
+#include <nuttx/clock.h>
+#include <nuttx/timers/oneshot.h>
 
 #include "up_internal.h"
 #include "sim.h"
 
 #ifdef CONFIG_GRAPHICS_TRAVELER_ROMFSDEMO
 int trv_mount_world(int minor, FAR const char *mountpoint);
-#endif
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_BOARD_INITIALIZE
-#  define SYSLOG  _llerr
-#else
-#  define SYSLOG  _err
 #endif
 
 /****************************************************************************
@@ -79,14 +69,51 @@ int trv_mount_world(int minor, FAR const char *mountpoint);
 
 int sim_bringup(void)
 {
-#ifdef CONFIG_FS_PROCFS
+#ifdef CONFIG_ONESHOT
+  FAR struct oneshot_lowerhalf_s *oneshot;
+#endif
+#if defined(CONFIG_FS_PROCFS) || defined(CONFIG_ONESHOT)
   int ret;
 #endif
 
-#ifdef CONFIG_SYSTEM_ZONEINFO_ROMFS
+#ifdef CONFIG_LIB_ZONEINFO_ROMFS
   /* Mount the TZ database */
 
   (void)sim_zoneinfo(3);
+#endif
+
+#ifdef CONFIG_EXAMPLES_GPIO
+  /* Initialize simulated GPIO drivers */
+
+  (void)sim_gpio_initialize();
+#endif
+
+#ifdef CONFIG_ONESHOT
+  /* Get an instance of the simulated oneshot timer */
+
+  oneshot = oneshot_initialize(0, 0);
+  if (oneshot == NULL)
+    {
+      _err("ERROR: oneshot_initialize faile\n");
+    }
+  else
+    {
+#ifdef CONFIG_CPULOAD_ONESHOT
+      /* Configure the oneshot timer to support CPU load measurement */
+
+      sched_oneshot_extclk(oneshot);
+
+#else
+      /* Initialize the simulated oneshot driver */
+
+      ret = oneshot_register("/dev/oneshot", oneshot);
+      if (ret < 0)
+        {
+          _err("ERROR: Failed to register oneshot at /dev/oneshot: %d\n",
+               ret);
+        }
+#endif
+    }
 #endif
 
 #ifdef CONFIG_AJOYSTICK
@@ -107,8 +134,8 @@ int sim_bringup(void)
   ret = mount(NULL, SIM_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
   if (ret < 0)
     {
-      SYSLOG("ERROR: Failed to mount procfs at %s: %d\n",
-             SIM_PROCFS_MOUNTPOINT, ret);
+      _err("ERROR: Failed to mount procfs at %s: %d\n",
+           SIM_PROCFS_MOUNTPOINT, ret);
     }
 #endif
 

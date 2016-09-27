@@ -39,16 +39,16 @@
 
 #include <nuttx/config.h>
 
-#include <arch/board/board.h>
-
 #include "up_arch.h"
 
 #include "kinetis.h"
-#include "kinetis_mcg.h"
-#include "kinetis_sim.h"
-#include "kinetis_fmc.h"
-#include "kinetis_llwu.h"
-#include "kinetis_pinmux.h"
+#include "chip/kinetis_mcg.h"
+#include "chip/kinetis_sim.h"
+#include "chip/kinetis_fmc.h"
+#include "chip/kinetis_llwu.h"
+#include "chip/kinetis_pinmux.h"
+
+#include <arch/board/board.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -373,6 +373,3 @@ kinesis_setdividers(uint32_t div1, uint32_t div2, uint32_t div3, uint32_t div4)
 
   putreg32(regval, KINETIS_FMC_PFAPR);
 }
-
-
-

@@ -15,6 +15,7 @@ README
     - NuttX Configuration Tool
     - Finding Selections in the Configuration Menus
     - Reveal Hidden Configuration Options
+    - Make Sure that You on on the Right Platform
     - Comparing Two Configurations
     - Incompatibilities with Older Configurations
     - NuttX Configuration Tool under DOS
@@ -321,13 +322,13 @@ Notes about Header Files
 
     If you have a custom, architecture specific math.h header file, then
     that header file should be placed at arch/<cpu>/include/math.h.  There
-    is a stub math.h header file located at include/nuttx/math.h.  This stub
+    is a stub math.h header file located at include/nuttx/lib/math.h.  This stub
     header file can be used to "redirect" the inclusion to an architecture-
     specific math.h header file.  If you add an architecture specific math.h
     header file then you should also define CONFIG_ARCH_MATH_H=y in your
     NuttX Configuration file.  If CONFIG_ARCH_MATH_H is selected, then the
     top-level Makefile will copy the stub math.h header file from
-    include/nuttx/math.h to include/math.h where it will become the system
+    include/nuttx/lib/math.h to include/math.h where it will become the system
     math.h header file.  The stub math.h header file does nothing other
     than to include that architecture-specific math.h header file as the
     system math.h header file.
@@ -575,6 +576,38 @@ Reveal Hidden Configuration Options
   will be shown the '-' for the selection and for the value (since it
   cannot be selected and has no value).  About all you do is to select
   the <Help> option to see what the dependencies are.
+
+Make Sure that You on on the Right Platform
+-------------------------------------------
+
+  Saved configurations may run on Linux, Cygwin (32- or 64-bit), or other
+  platforms.  The platform characteristics can be changed use 'make
+  menuconfig'.  Sometimes this can be confusing due to the differences
+  between the platforms.  Enter sethost.sh
+
+  sethost.sh is a simple script that changes a configuration to your
+  host platform.  This can greatly simplify life if you use many different
+  configurations.  For example, if you are running on Linux and you
+  configure like this:
+
+    $ cd tools
+    $ ./configure.sh board/configuration
+    $ cd ..
+
+  The you can use the following command to both (1) make sure that the
+  configuration is up to date, AND (2) the configuration is set up
+  correctly for Linux:
+
+    $ tools/sethost.sh -l
+
+  Or, if you are on a Windows/Cygwin 64-bit platform:
+
+    $ tools/sethost.sh -w
+
+  Other options are available from the help option built into the
+  script.  You can see all options with:
+
+    $ tools/sethost.sh -h
 
 Comparing Two Configurations
 ----------------------------
@@ -948,9 +981,13 @@ Native Windows Build
 --------------------
 
   The beginnings of a Windows native build are in place but still not often
-  used as of this writing.  The windows native build logic initiated
-  if CONFIG_WINDOWS_NATIVE=y is defined in the NuttX configuration file:
+  used as of this writing.  The build was functional but because of lack of
+  use may find some issues to be resolved with this build configuration.
 
+  The windows native build logic initiated if CONFIG_WINDOWS_NATIVE=y is
+  defined in the NuttX configuration file:
+
+  
   This build:
 
     - Uses all Windows style paths
@@ -1213,7 +1250,7 @@ nuttx/
  |   |- arm/
  |   |   `- src
  |   |       `- lpc214x/README.txt
- |   |- sh/
+ |   |- renesas/
  |   |   |- include/
  |   |   |   `-README.txt
  |   |   |- src/
@@ -1283,6 +1320,8 @@ nuttx/
  |   |   `- README.txt
  |   |- fire-stm32v2/
  |   |   `- README.txt
+ |   |- freedom-k64f/
+ |   |   `- README.txt
  |   |- freedom-kl25z/
  |   |   `- README.txt
  |   |- freedom-kl26z/
@@ -1324,8 +1363,6 @@ nuttx/
  |   |- mikroe-stm32f/
  |   |   `- README.txt
  |   |- mirtoo/
- |   |   `- README.txt
- |   |- mt-db-x3/
  |   |   `- README.txt
  |   |- moteino-mega/
  |   |   `- README.txt
@@ -1444,6 +1481,8 @@ nuttx/
  |   |   `- README.txt
  |   |- stm32f746g-disco/
  |   |   `- README.txt
+ |   |- stm32l476-mdk/
+ |   |   `- README.txt
  |   |- stm32l476vg-disco/
  |   |   `- README.txt
  |   |- stm32ldiscovery/
@@ -1524,6 +1563,8 @@ nuttx/
  |- lib/
  |   `- README.txt
  |- libc/
+ |   |- zoneinfo
+ |   |   `- README.txt
  |   `- README.txt
  |- libnx/
  |   `- README.txt
@@ -1590,9 +1631,7 @@ apps/
  |   |   `- README.txt
  |   |- usbmsc
  |   |  `- README.txt
- |   |- zmodem
- |   |  `- README.txt
- |   `- zoneinfo
+ |   `- zmodem
  |      `- README.txt
  `- README.txt
 

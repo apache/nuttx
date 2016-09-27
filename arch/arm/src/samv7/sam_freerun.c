@@ -61,7 +61,7 @@
 
 #include "sam_freerun.h"
 
-#ifdef CONFIG_SAMV7_ONESHOT
+#ifdef CONFIG_SAMV7_FREERUN
 
 /****************************************************************************
  * Private Functions
@@ -319,4 +319,4 @@ int sam_freerun_uninitialize(struct sam_freerun_s *freerun)
   return OK;
 }
 
-#endif /* CONFIG_SAMV7_ONESHOT */
+#endif /* CONFIG_SAMV7_FREERUN */

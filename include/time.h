@@ -41,6 +41,7 @@
  ********************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
 #include <sys/types.h>
 #include <stdint.h>
@@ -103,6 +104,7 @@
 /********************************************************************************
  * Public Types
  ********************************************************************************/
+
 /* Scalar types */
 
 typedef uint32_t  time_t;         /* Holds time in seconds */
@@ -213,6 +215,12 @@ FAR char *ctime_r(FAR const time_t *timep, FAR char *buf);
 #endif
 
 time_t time(FAR time_t *timep);
+
+#ifdef CONFIG_HAVE_DOUBLE
+double difftime(time_t time1, time_t time0);
+#else
+float difftime(time_t time1, time_t time0);
+#endif
 
 int timer_create(clockid_t clockid, FAR struct sigevent *evp,
                  FAR timer_t *timerid);

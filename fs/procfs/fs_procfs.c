@@ -60,7 +60,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/procfs.h>
 #include <nuttx/fs/dirent.h>
-#include <nuttx/regex.h>
+#include <nuttx/lib/regex.h>
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_PROCFS)
 

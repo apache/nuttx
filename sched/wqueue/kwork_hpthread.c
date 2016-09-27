@@ -165,7 +165,7 @@ int work_hpstart(void)
       int errcode = errno;
       DEBUGASSERT(errcode > 0);
 
-      sllerr("ERROR: kernel_thread failed: %d\n", errcode);
+      serr("ERROR: kernel_thread failed: %d\n", errcode);
       return -errcode;
     }
 

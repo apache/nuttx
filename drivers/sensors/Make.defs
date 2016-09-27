@@ -49,6 +49,14 @@ ifeq ($(CONFIG_AS5048B),y)
   CSRCS += as5048b.c
 endif
 
+ifeq ($(CONFIG_SENSOR_KXTJ9),y)
+  CSRCS += kxjt9.c
+endif
+
+ifeq ($(CONFIG_LIS3DSH),y)
+  CSRCS += lis3dsh.c
+endif
+
 ifeq ($(CONFIG_LIS331DL),y)
   CSRCS += lis331dl.c
 endif
@@ -63,6 +71,10 @@ endif
 
 ifeq ($(CONFIG_BH1750FVI),y)
   CSRCS += bh1750fvi.c
+endif
+
+ifeq ($(CONFIG_BMG160),y)
+  CSRCS += bmg160.c
 endif
 
 ifeq ($(CONFIG_BMP180),y)
@@ -83,6 +95,10 @@ endif
 
 ifeq ($(CONFIG_MCP9844),y)
   CSRCS += mcp9844.c
+endif
+
+ifeq ($(CONFIG_MLX90393),y)
+  CSRCS += mlx90393.c
 endif
 
 ifeq ($(CONFIG_MS58XX),y)
@@ -109,12 +125,23 @@ endif
 ifeq ($(CONFIG_MPL115A),y)
   CSRCS += mpl115a.c
 endif
+
+ifeq ($(CONFIG_LIS3MDL),y)
+  CSRCS += lis3mdl.c
+endif
+
 endif # CONFIG_SPI
 
 # Quadrature encoder upper half
 
 ifeq ($(CONFIG_QENCODER),y)
   CSRCS += qencoder.c
+endif
+
+# Sensixs XEN1210
+
+ifeq ($(CONFIG_XEN1210),y)
+  CSRCS += xen1210.c
 endif
 
 # Zero Cross upper half
