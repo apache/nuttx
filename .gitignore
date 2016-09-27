@@ -28,3 +28,5 @@ cscope.out
 /*.hex
 /pcode
 /tags
+.cproject
+.project
