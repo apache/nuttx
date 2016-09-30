@@ -113,7 +113,7 @@
 #endif
 
 #ifdef CONFIG_STM32F7_SDMMC1
-#  ifndef CONFIG_SDMMC1_PRI
+#  if defined(CONFIG_ARCH_IRQPRIO) && !defined(CONFIG_SDMMC1_PRI)
 #    define CONFIG_SDMMC1_PRI        NVIC_SYSH_PRIORITY_DEFAULT
 #  endif
 
@@ -130,7 +130,7 @@
 #endif
 
 #ifdef CONFIG_STM32F7_SDMMC2
-#  ifndef CONFIG_SDMMC2_PRI
+#  if defined(CONFIG_ARCH_IRQPRIO) && !defined(CONFIG_SDMMC2_PRI)
 #    define CONFIG_SDMMC2_PRI        NVIC_SYSH_PRIORITY_DEFAULT
 #  endif
 
