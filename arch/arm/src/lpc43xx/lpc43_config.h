@@ -73,7 +73,6 @@
 #ifndef CONFIG_LPC43_USART0
 #  undef CONFIG_USART0_SERIAL_CONSOLE
 #  undef CONFIG_USART0_RS485MODE
-#  undef CONFIG_USART0_RS485_DTRDIR
 #endif
 
 #ifndef CONFIG_LPC43_UART1
@@ -85,13 +84,11 @@
 #ifndef CONFIG_LPC43_USART2
 #  undef CONFIG_USART2_SERIAL_CONSOLE
 #  undef CONFIG_USART2_RS485MODE
-#  undef CONFIG_USART2_RS485_DTRDIR
 #endif
 
 #ifndef CONFIG_LPC43_USART3
 #  undef CONFIG_USART3_SERIAL_CONSOLE
 #  undef CONFIG_USART3_RS485MODE
-#  undef CONFIG_USART3_RS485_DTRDIR
 #endif
 
 /* Is there a serial console? There should be at most one defined.  It could be on

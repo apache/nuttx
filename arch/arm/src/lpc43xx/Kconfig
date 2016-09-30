@@ -638,11 +638,16 @@ config USART0_RS485MODE
 	---help---
 		Enable RS-485 interface on USART0.
 
-config USART0_RS485_DTRDIR
-	bool "USART0 DTR for DIR"
+if USART0_RS485_MODE
+	config USART0_RS485DIROIN
+	bool "Invert direction control pin polarity"
 	default n
 	---help---
-		Use the USART DTR pin for the DIR pin
+		If disabled, control pin will be driven to logic 0 when the
+		transmitter has data to be sent.  It will be driven to logic 1 after
+		the last bit of data has been transmitted.
+
+endif # USART0_RS485MODE
 
 endif # LPC43_USART0
 
@@ -670,11 +675,15 @@ config USART2_RS485MODE
 	---help---
 		Enable RS-485 interface on USART2.
 
-config USART2_RS485_DTRDIR
-	bool "USART2 DTR for DIR"
+if USART2_RS485MODE
+	config USART0_RS485DIROIN
+	bool "Invert direction control pin polarity"
 	default n
 	---help---
-		Use the USART DTR pin for the DIR pin
+		If disabled, control pin will be driven to logic 0 when the transmitter has data to be sent.
+		It will be driven to logic 1 after the last bit of data has been transmitted.
+
+endif # USART2_RS485MODE
 
 endif # LPC43_USART2
 
@@ -686,11 +695,15 @@ config USART3_RS485MODE
 	---help---
 		Enable RS-485 interface on USART3.
 
-config USART3_RS485_DTRDIR
-	bool "USART3 DTR for DIR"
+if USART3_RS485MODE
+config USART3_RS485DIROIN
+	bool "Invert direction control pin polarity"
 	default n
 	---help---
-		Use the USART DTR pin for the DIR pin
+		If disabled, control pin will be driven to logic 0 when the transmitter has data to be sent.
+		It will be driven to logic 1 after the last bit of data has been transmitted.
+
+endif # USART3_RS485MODE
 
 endif # LPC43_USART3
 endmenu # RS-485 Configuration

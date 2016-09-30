@@ -169,9 +169,6 @@ static struct up_dev_s g_uart0priv =
   .parity         = CONFIG_USART0_PARITY,
   .bits           = CONFIG_USART0_BITS,
   .stopbits2      = CONFIG_USART0_2STOP,
-#if defined(CONFIG_USART0_RS485MODE) && defined(CONFIG_USART0_RS485_DTRDIR)
-  .dtrdir         = true,
-#endif
 };
 
 static uart_dev_t g_uart0port =
@@ -239,9 +236,6 @@ static struct up_dev_s g_uart2priv =
   .parity         = CONFIG_USART2_PARITY,
   .bits           = CONFIG_USART2_BITS,
   .stopbits2      = CONFIG_USART2_2STOP,
-#if defined(CONFIG_USART2_RS485MODE) && defined(CONFIG_USART2_RS485_DTRDIR)
-  .dtrdir         = true,
-#endif
 };
 
 static uart_dev_t g_uart2port =
@@ -274,9 +268,6 @@ static struct up_dev_s g_uart3priv =
   .parity         = CONFIG_USART3_PARITY,
   .bits           = CONFIG_USART3_BITS,
   .stopbits2      = CONFIG_USART3_2STOP,
-#if defined(CONFIG_USART3_RS485MODE) && defined(CONFIG_USART3_RS485_DTRDIR)
-  .dtrdir         = true,
-#endif
 };
 
 static uart_dev_t g_uart3port =
