@@ -3278,7 +3278,7 @@ static inline int stm32_dm9161(FAR struct stm32_ethmac_s *priv)
 
 static int stm32_phyinit(FAR struct stm32_ethmac_s *priv)
 {
-#ifdef CONFIG_STM32_AUTOGEN
+#ifdef CONFIG_STM32_AUTONEG
   volatile uint32_t timeout;
 #endif
 
