@@ -551,6 +551,7 @@ struct tcb_s
   start_t  start;                        /* Thread start function               */
   entry_t  entry;                        /* Entry Point into the thread         */
   uint8_t  sched_priority;               /* Current priority of the thread      */
+  uint8_t  init_priority;                /* Initial priority of the thread      */
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
 #if CONFIG_SEM_NNESTPRIO > 0
@@ -654,9 +655,8 @@ struct task_tcb_s
   FAR void *starthookarg;                /* The argument passed to the function */
 #endif
 
-  /* Values needed to restart a task ********************************************/
+  /* [Re-]start name + start-up parameters **************************************/
 
-  uint8_t  init_priority;                /* Initial priority of the task        */
   FAR char **argv;                       /* Name+start-up parameters            */
 };
 

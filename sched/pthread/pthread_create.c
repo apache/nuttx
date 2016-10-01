@@ -183,6 +183,16 @@ static void pthread_start(void)
   pjoin->started = true;
   (void)pthread_givesemaphore(&pjoin->data_sem);
 
+  /* The priority of this thread may have been boosted to avoid priority
+   * inversion problems.  If that is the case, then drop to the correct
+   * execution priority.
+   */
+
+  if (ptcb->cmn.sched_priority > ptcb->cmn.init_priority)
+    {
+      DEBUGVERIFY(sched_setpriority(&ptcb->cmn, ptcb->cmn.init_priority));
+    }
+
   /* Pass control to the thread entry point. In the kernel build this has to
    * be handled differently if we are starting a user-space pthread; we have
    * to switch to user-mode before calling into the pthread.
@@ -488,7 +498,27 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
       ret = sem_init(&pjoin->exit_sem, 0, 0);
     }
 
-  /* Activate the task */
+  /* If the priority of the new pthread is lower than the priority of the
+   * parent thread, then starting the pthread could result in both the
+   * parent and the pthread to be blocked.  This is a recipe for priority
+   * inversion issues.
+   *
+   * We avoid this here by boosting the priority of the (inactive) pthread
+   * so it has the same priority as the parent thread.
+   */
+
+  if (ret == OK)
+    {
+      FAR struct tcb_s *parent = this_task();
+      DEBUGASSERT(parent != NULL);
+
+      if (ptcb->cmn.sched_priority < parent->sched_priority)
+        {
+          ret = sched_setpriority(&ptcb->cmn, parent->sched_priority);
+        }
+    }
+
+  /* Then activate the task */
 
   sched_lock();
   if (ret == OK)

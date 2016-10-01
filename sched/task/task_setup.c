@@ -363,6 +363,7 @@ static int thread_schedsetup(FAR struct tcb_s *tcb, int priority,
       /* Save task priority and entry point in the TCB */
 
       tcb->sched_priority = (uint8_t)priority;
+      tcb->init_priority  = (uint8_t)priority;
 #ifdef CONFIG_PRIORITY_INHERITANCE
       tcb->base_priority  = (uint8_t)priority;
 #endif
@@ -633,20 +634,10 @@ static inline int task_stackargsetup(FAR struct task_tcb_s *tcb,
 int task_schedsetup(FAR struct task_tcb_s *tcb, int priority, start_t start,
                     main_t main, uint8_t ttype)
 {
-  int ret;
-
   /* Perform common thread setup */
 
-  ret = thread_schedsetup((FAR struct tcb_s *)tcb, priority, start,
-                          (CODE void *)main, ttype);
-  if (ret == OK)
-    {
-      /* Save task restart priority */
-
-      tcb->init_priority  = (uint8_t)priority;
-    }
-
-  return ret;
+  return thread_schedsetup((FAR struct tcb_s *)tcb, priority, start,
+                           (CODE void *)main, ttype);
 }
 
 /****************************************************************************

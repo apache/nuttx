@@ -169,12 +169,12 @@ int task_restart(pid_t pid)
 
   /* Reset the current task priority  */
 
-  tcb->cmn.sched_priority = tcb->init_priority;
+  tcb->cmn.sched_priority = tcb->cmn.init_priority;
 
   /* Reset the base task priority and the number of pending reprioritizations */
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
-  tcb->cmn.base_priority = tcb->init_priority;
+  tcb->cmn.base_priority = tcb->cmn.init_priority;
 #  if CONFIG_SEM_NNESTPRIO > 0
   tcb->cmn.npend_reprio = 0;
 #  endif
