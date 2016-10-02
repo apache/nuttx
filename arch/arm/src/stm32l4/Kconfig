@@ -721,8 +721,7 @@ if STM32L4_TIM1_CHANNEL1
 config STM32L4_TIM1_CH1MODE
 	int "TIM1 Channel 1 Mode"
 	default 0
-	range 0 5 if STM32L4_STM32F30XX
-	range 0 1 if !STM32L4_STM32F30XX
+	range 0 5
 	---help---
 		Specifies the channel mode.
 
@@ -745,8 +744,7 @@ if STM32L4_TIM1_CHANNEL2
 config STM32L4_TIM1_CH2MODE
 	int "TIM1 Channel 2 Mode"
 	default 0
-	range 0 5 if STM32L4_STM32F30XX
-	range 0 1 if !STM32L4_STM32F30XX
+	range 0 5
 	---help---
 		Specifies the channel mode.
 
@@ -769,8 +767,7 @@ if STM32L4_TIM1_CHANNEL3
 config STM32L4_TIM1_CH3MODE
 	int "TIM1 Channel 3 Mode"
 	default 0
-	range 0 5 if STM32L4_STM32F30XX
-	range 0 1 if !STM32L4_STM32F30XX
+	range 0 5
 	---help---
 		Specifies the channel mode.
 
@@ -793,8 +790,7 @@ if STM32L4_TIM1_CHANNEL4
 config STM32L4_TIM1_CH4MODE
 	int "TIM1 Channel 4 Mode"
 	default 0
-	range 0 5 if STM32L4_STM32F30XX
-	range 0 1 if !STM32L4_STM32F30XX
+	range 0 5
 	---help---
 		Specifies the channel mode.
 
@@ -821,8 +817,7 @@ config STM32L4_TIM1_CHANNEL
 config STM32L4_TIM1_CHMODE
 	int "TIM1 Channel Mode"
 	default 0
-	range 0 5 if STM32L4_STM32F30XX
-	range 0 1 if !STM32L4_STM32F30XX
+	range 0 5
 	---help---
 		Specifies the channel mode.
 
@@ -865,8 +860,7 @@ if STM32L4_TIM2_CHANNEL1
 config STM32L4_TIM2_CH1MODE
 	int "TIM2 Channel 1 Mode"
 	default 0
-	range 0 5 if STM32L4_STM32F30XX
-	range 0 1 if !STM32L4_STM32F30XX
+	range 0 5
 	---help---
 		Specifies the channel mode.
 
@@ -889,8 +883,7 @@ if STM32L4_TIM2_CHANNEL2
 config STM32L4_TIM2_CH2MODE
 	int "TIM2 Channel 2 Mode"
 	default 0
-	range 0 5 if STM32L4_STM32F30XX
-	range 0 1 if !STM32L4_STM32F30XX
+	range 0 5
 	---help---
 		Specifies the channel mode.
 
@@ -913,8 +906,7 @@ if STM32L4_TIM2_CHANNEL3
 config STM32L4_TIM2_CH3MODE
 	int "TIM2 Channel 3 Mode"
 	default 0
-	range 0 5 if STM32L4_STM32F30XX
-	range 0 1 if !STM32L4_STM32F30XX
+	range 0 5
 	---help---
 		Specifies the channel mode.
 
@@ -937,8 +929,7 @@ if STM32L4_TIM2_CHANNEL4
 config STM32L4_TIM2_CH4MODE
 	int "TIM2 Channel 4 Mode"
 	default 0
-	range 0 5 if STM32L4_STM32F30XX
-	range 0 1 if !STM32L4_STM32F30XX
+	range 0 5
 	---help---
 		Specifies the channel mode.
 
@@ -965,8 +956,7 @@ config STM32L4_TIM2_CHANNEL
 config STM32L4_TIM2_CHMODE
 	int "TIM2 Channel Mode"
 	default 0
-	range 0 5 if STM32L4_STM32F30XX
-	range 0 1 if !STM32L4_STM32F30XX
+	range 0 5
 	---help---
 		Specifies the channel mode.
 
@@ -1009,8 +999,7 @@ if STM32L4_TIM3_CHANNEL1
 config STM32L4_TIM3_CH1MODE
 	int "TIM3 Channel 1 Mode"
 	default 0
-	range 0 5 if STM32L4_STM32F30XX
-	range 0 1 if !STM32L4_STM32F30XX
+	range 0 5
 	---help---
 		Specifies the channel mode.
 
@@ -1033,8 +1022,7 @@ if STM32L4_TIM3_CHANNEL2
 config STM32L4_TIM3_CH2MODE
 	int "TIM3 Channel 2 Mode"
 	default 0
-	range 0 5 if STM32L4_STM32F30XX
-	range 0 1 if !STM32L4_STM32F30XX
+	range 0 5
 	---help---
 		Specifies the channel mode.
 
@@ -1057,8 +1045,7 @@ if STM32L4_TIM3_CHANNEL3
 config STM32L4_TIM3_CH3MODE
 	int "TIM3 Channel 3 Mode"
 	default 0
-	range 0 5 if STM32L4_STM32F30XX
-	range 0 1 if !STM32L4_STM32F30XX
+	range 0 5
 	---help---
 		Specifies the channel mode.
 
@@ -1081,8 +1068,7 @@ if STM32L4_TIM3_CHANNEL4
 config STM32L4_TIM3_CH4MODE
 	int "TIM3 Channel 4 Mode"
 	default 0
-	range 0 5 if STM32L4_STM32F30XX
-	range 0 1 if !STM32L4_STM32F30XX
+	range 0 5
 	---help---
 		Specifies the channel mode.
 
@@ -1109,8 +1095,7 @@ config STM32L4_TIM3_CHANNEL
 config STM32L4_TIM3_CHMODE
 	int "TIM3 Channel Mode"
 	default 0
-	range 0 5 if STM32L4_STM32F30XX
-	range 0 1 if !STM32L4_STM32F30XX
+	range 0 5
 	---help---
 		Specifies the channel mode.
 
@@ -1153,8 +1138,7 @@ if STM32L4_TIM4_CHANNEL1
 config STM32L4_TIM4_CH1MODE
 	int "TIM4 Channel 1 Mode"
 	default 0
-	range 0 5 if STM32L4_STM32F30XX
-	range 0 1 if !STM32L4_STM32F30XX
+	range 0 5
 	---help---
 		Specifies the channel mode.
 
@@ -1177,8 +1161,7 @@ if STM32L4_TIM4_CHANNEL2
 config STM32L4_TIM4_CH2MODE
 	int "TIM4 Channel 2 Mode"
 	default 0
-	range 0 5 if STM32L4_STM32F30XX
-	range 0 1 if !STM32L4_STM32F30XX
+	range 0 5
 	---help---
 		Specifies the channel mode.
 
@@ -1201,8 +1184,7 @@ if STM32L4_TIM4_CHANNEL3
 config STM32L4_TIM4_CH3MODE
 	int "TIM4 Channel 3 Mode"
 	default 0
-	range 0 5 if STM32L4_STM32F30XX
-	range 0 1 if !STM32L4_STM32F30XX
+	range 0 5
 	---help---
 		Specifies the channel mode.
 
@@ -1225,8 +1207,7 @@ if STM32L4_TIM4_CHANNEL4
 config STM32L4_TIM4_CH4MODE
 	int "TIM4 Channel 4 Mode"
 	default 0
-	range 0 5 if STM32L4_STM32F30XX
-	range 0 1 if !STM32L4_STM32F30XX
+	range 0 5
 	---help---
 		Specifies the channel mode.
 
@@ -1253,8 +1234,7 @@ config STM32L4_TIM4_CHANNEL
 config STM32L4_TIM4_CHMODE
 	int "TIM4 Channel Mode"
 	default 0
-	range 0 5 if STM32L4_STM32F30XX
-	range 0 1 if !STM32L4_STM32F30XX
+	range 0 5
 	---help---
 		Specifies the channel mode.
 
@@ -1297,8 +1277,7 @@ if STM32L4_TIM5_CHANNEL1
 config STM32L4_TIM5_CH1MODE
 	int "TIM5 Channel 1 Mode"
 	default 0
-	range 0 5 if STM32L4_STM32F30XX
-	range 0 1 if !STM32L4_STM32F30XX
+	range 0 5
 	---help---
 		Specifies the channel mode.
 
@@ -1321,8 +1300,7 @@ if STM32L4_TIM5_CHANNEL2
 config STM32L4_TIM5_CH2MODE
 	int "TIM5 Channel 2 Mode"
 	default 0
-	range 0 5 if STM32L4_STM32F30XX
-	range 0 1 if !STM32L4_STM32F30XX
+	range 0 5
 	---help---
 		Specifies the channel mode.
 
@@ -1345,8 +1323,7 @@ if STM32L4_TIM5_CHANNEL3
 config STM32L4_TIM5_CH3MODE
 	int "TIM5 Channel 3 Mode"
 	default 0
-	range 0 5 if STM32L4_STM32F30XX
-	range 0 1 if !STM32L4_STM32F30XX
+	range 0 5
 	---help---
 		Specifies the channel mode.
 
@@ -1369,8 +1346,7 @@ if STM32L4_TIM5_CHANNEL4
 config STM32L4_TIM5_CH4MODE
 	int "TIM5 Channel 4 Mode"
 	default 0
-	range 0 5 if STM32L4_STM32F30XX
-	range 0 1 if !STM32L4_STM32F30XX
+	range 0 5
 	---help---
 		Specifies the channel mode.
 
@@ -1397,8 +1373,7 @@ config STM32L4_TIM5_CHANNEL
 config STM32L4_TIM5_CHMODE
 	int "TIM5 Channel Mode"
 	default 0
-	range 0 5 if STM32L4_STM32F30XX
-	range 0 1 if !STM32L4_STM32F30XX
+	range 0 5
 	---help---
 		Specifies the channel mode.
 
@@ -1441,8 +1416,7 @@ if STM32L4_TIM8_CHANNEL1
 config STM32L4_TIM8_CH1MODE
 	int "TIM8 Channel 1 Mode"
 	default 0
-	range 0 5 if STM32L4_STM32F30XX
-	range 0 1 if !STM32L4_STM32F30XX
+	range 0 5
 	---help---
 		Specifies the channel mode.
 
@@ -1465,8 +1439,7 @@ if STM32L4_TIM8_CHANNEL2
 config STM32L4_TIM8_CH2MODE
 	int "TIM8 Channel 2 Mode"
 	default 0
-	range 0 5 if STM32L4_STM32F30XX
-	range 0 1 if !STM32L4_STM32F30XX
+	range 0 5
 	---help---
 		Specifies the channel mode.
 
@@ -1489,8 +1462,7 @@ if STM32L4_TIM8_CHANNEL3
 config STM32L4_TIM8_CH3MODE
 	int "TIM8 Channel 3 Mode"
 	default 0
-	range 0 5 if STM32L4_STM32F30XX
-	range 0 1 if !STM32L4_STM32F30XX
+	range 0 5
 	---help---
 		Specifies the channel mode.
 
@@ -1513,8 +1485,7 @@ if STM32L4_TIM8_CHANNEL4
 config STM32L4_TIM8_CH4MODE
 	int "TIM8 Channel 4 Mode"
 	default 0
-	range 0 5 if STM32L4_STM32F30XX
-	range 0 1 if !STM32L4_STM32F30XX
+	range 0 5
 	---help---
 		Specifies the channel mode.
 
@@ -1541,8 +1512,7 @@ config STM32L4_TIM8_CHANNEL
 config STM32L4_TIM8_CHMODE
 	int "TIM8 Channel Mode"
 	default 0
-	range 0 5 if STM32L4_STM32F30XX
-	range 0 1 if !STM32L4_STM32F30XX
+	range 0 5
 	---help---
 		Specifies the channel mode.
 
@@ -1577,8 +1547,7 @@ if STM32L4_TIM15_CHANNEL1
 config STM32L4_TIM15_CH1MODE
 	int "TIM15 Channel 1 Mode"
 	default 0
-	range 0 3 if STM32L4_STM32F30XX
-	range 0 1 if !STM32L4_STM32F30XX
+	range 0 3
 	---help---
 		Specifies the channel mode.
 
@@ -1601,8 +1570,7 @@ if STM32L4_TIM15_CHANNEL2
 config STM32L4_TIM15_CH2MODE
 	int "TIM15 Channel 2 Mode"
 	default 0
-	range 0 3 if STM32L4_STM32F30XX
-	range 0 1 if !STM32L4_STM32F30XX
+	range 0 3
 	---help---
 		Specifies the channel mode.
 
@@ -1629,8 +1597,7 @@ config STM32L4_TIM15_CHANNEL
 config STM32L4_TIM15_CHMODE
 	int "TIM15 Channel Mode"
 	default 0
-	range 0 3 if STM32L4_STM32F30XX
-	range 0 1 if !STM32L4_STM32F30XX
+	range 0 3
 	---help---
 		Specifies the channel mode.
 
