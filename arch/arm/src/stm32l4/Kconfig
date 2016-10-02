@@ -721,8 +721,8 @@ if STM32L4_TIM1_CHANNEL1
 config STM32L4_TIM1_CH1MODE
 	int "TIM1 Channel 1 Mode"
 	default 0
-	range 0 5 if STM32_STM32F30XX
-	range 0 1 if !STM32_STM32F30XX
+	range 0 5 if STM32L4_STM32F30XX
+	range 0 1 if !STM32L4_STM32F30XX
 	---help---
 		Specifies the channel mode.
 
@@ -745,8 +745,8 @@ if STM32L4_TIM1_CHANNEL2
 config STM32L4_TIM1_CH2MODE
 	int "TIM1 Channel 2 Mode"
 	default 0
-	range 0 5 if STM32_STM32F30XX
-	range 0 1 if !STM32_STM32F30XX
+	range 0 5 if STM32L4_STM32F30XX
+	range 0 1 if !STM32L4_STM32F30XX
 	---help---
 		Specifies the channel mode.
 
@@ -769,8 +769,8 @@ if STM32L4_TIM1_CHANNEL3
 config STM32L4_TIM1_CH3MODE
 	int "TIM1 Channel 3 Mode"
 	default 0
-	range 0 5 if STM32_STM32F30XX
-	range 0 1 if !STM32_STM32F30XX
+	range 0 5 if STM32L4_STM32F30XX
+	range 0 1 if !STM32L4_STM32F30XX
 	---help---
 		Specifies the channel mode.
 
@@ -793,8 +793,8 @@ if STM32L4_TIM1_CHANNEL4
 config STM32L4_TIM1_CH4MODE
 	int "TIM1 Channel 4 Mode"
 	default 0
-	range 0 5 if STM32_STM32F30XX
-	range 0 1 if !STM32_STM32F30XX
+	range 0 5 if STM32L4_STM32F30XX
+	range 0 1 if !STM32L4_STM32F30XX
 	---help---
 		Specifies the channel mode.
 
@@ -821,8 +821,8 @@ config STM32L4_TIM1_CHANNEL
 config STM32L4_TIM1_CHMODE
 	int "TIM1 Channel Mode"
 	default 0
-	range 0 5 if STM32_STM32F30XX
-	range 0 1 if !STM32_STM32F30XX
+	range 0 5 if STM32L4_STM32F30XX
+	range 0 1 if !STM32L4_STM32F30XX
 	---help---
 		Specifies the channel mode.
 
@@ -865,8 +865,8 @@ if STM32L4_TIM2_CHANNEL1
 config STM32L4_TIM2_CH1MODE
 	int "TIM2 Channel 1 Mode"
 	default 0
-	range 0 5 if STM32_STM32F30XX
-	range 0 1 if !STM32_STM32F30XX
+	range 0 5 if STM32L4_STM32F30XX
+	range 0 1 if !STM32L4_STM32F30XX
 	---help---
 		Specifies the channel mode.
 
@@ -889,8 +889,8 @@ if STM32L4_TIM2_CHANNEL2
 config STM32L4_TIM2_CH2MODE
 	int "TIM2 Channel 2 Mode"
 	default 0
-	range 0 5 if STM32_STM32F30XX
-	range 0 1 if !STM32_STM32F30XX
+	range 0 5 if STM32L4_STM32F30XX
+	range 0 1 if !STM32L4_STM32F30XX
 	---help---
 		Specifies the channel mode.
 
@@ -913,8 +913,8 @@ if STM32L4_TIM2_CHANNEL3
 config STM32L4_TIM2_CH3MODE
 	int "TIM2 Channel 3 Mode"
 	default 0
-	range 0 5 if STM32_STM32F30XX
-	range 0 1 if !STM32_STM32F30XX
+	range 0 5 if STM32L4_STM32F30XX
+	range 0 1 if !STM32L4_STM32F30XX
 	---help---
 		Specifies the channel mode.
 
@@ -937,8 +937,8 @@ if STM32L4_TIM2_CHANNEL4
 config STM32L4_TIM2_CH4MODE
 	int "TIM2 Channel 4 Mode"
 	default 0
-	range 0 5 if STM32_STM32F30XX
-	range 0 1 if !STM32_STM32F30XX
+	range 0 5 if STM32L4_STM32F30XX
+	range 0 1 if !STM32L4_STM32F30XX
 	---help---
 		Specifies the channel mode.
 
@@ -965,8 +965,8 @@ config STM32L4_TIM2_CHANNEL
 config STM32L4_TIM2_CHMODE
 	int "TIM2 Channel Mode"
 	default 0
-	range 0 5 if STM32_STM32F30XX
-	range 0 1 if !STM32_STM32F30XX
+	range 0 5 if STM32L4_STM32F30XX
+	range 0 1 if !STM32L4_STM32F30XX
 	---help---
 		Specifies the channel mode.
 
@@ -1009,8 +1009,8 @@ if STM32L4_TIM3_CHANNEL1
 config STM32L4_TIM3_CH1MODE
 	int "TIM3 Channel 1 Mode"
 	default 0
-	range 0 5 if STM32_STM32F30XX
-	range 0 1 if !STM32_STM32F30XX
+	range 0 5 if STM32L4_STM32F30XX
+	range 0 1 if !STM32L4_STM32F30XX
 	---help---
 		Specifies the channel mode.
 
@@ -1033,8 +1033,8 @@ if STM32L4_TIM3_CHANNEL2
 config STM32L4_TIM3_CH2MODE
 	int "TIM3 Channel 2 Mode"
 	default 0
-	range 0 5 if STM32_STM32F30XX
-	range 0 1 if !STM32_STM32F30XX
+	range 0 5 if STM32L4_STM32F30XX
+	range 0 1 if !STM32L4_STM32F30XX
 	---help---
 		Specifies the channel mode.
 
@@ -1057,8 +1057,8 @@ if STM32L4_TIM3_CHANNEL3
 config STM32L4_TIM3_CH3MODE
 	int "TIM3 Channel 3 Mode"
 	default 0
-	range 0 5 if STM32_STM32F30XX
-	range 0 1 if !STM32_STM32F30XX
+	range 0 5 if STM32L4_STM32F30XX
+	range 0 1 if !STM32L4_STM32F30XX
 	---help---
 		Specifies the channel mode.
 
@@ -1081,8 +1081,8 @@ if STM32L4_TIM3_CHANNEL4
 config STM32L4_TIM3_CH4MODE
 	int "TIM3 Channel 4 Mode"
 	default 0
-	range 0 5 if STM32_STM32F30XX
-	range 0 1 if !STM32_STM32F30XX
+	range 0 5 if STM32L4_STM32F30XX
+	range 0 1 if !STM32L4_STM32F30XX
 	---help---
 		Specifies the channel mode.
 
@@ -1109,8 +1109,8 @@ config STM32L4_TIM3_CHANNEL
 config STM32L4_TIM3_CHMODE
 	int "TIM3 Channel Mode"
 	default 0
-	range 0 5 if STM32_STM32F30XX
-	range 0 1 if !STM32_STM32F30XX
+	range 0 5 if STM32L4_STM32F30XX
+	range 0 1 if !STM32L4_STM32F30XX
 	---help---
 		Specifies the channel mode.
 
@@ -1153,8 +1153,8 @@ if STM32L4_TIM4_CHANNEL1
 config STM32L4_TIM4_CH1MODE
 	int "TIM4 Channel 1 Mode"
 	default 0
-	range 0 5 if STM32_STM32F30XX
-	range 0 1 if !STM32_STM32F30XX
+	range 0 5 if STM32L4_STM32F30XX
+	range 0 1 if !STM32L4_STM32F30XX
 	---help---
 		Specifies the channel mode.
 
@@ -1177,8 +1177,8 @@ if STM32L4_TIM4_CHANNEL2
 config STM32L4_TIM4_CH2MODE
 	int "TIM4 Channel 2 Mode"
 	default 0
-	range 0 5 if STM32_STM32F30XX
-	range 0 1 if !STM32_STM32F30XX
+	range 0 5 if STM32L4_STM32F30XX
+	range 0 1 if !STM32L4_STM32F30XX
 	---help---
 		Specifies the channel mode.
 
@@ -1201,8 +1201,8 @@ if STM32L4_TIM4_CHANNEL3
 config STM32L4_TIM4_CH3MODE
 	int "TIM4 Channel 3 Mode"
 	default 0
-	range 0 5 if STM32_STM32F30XX
-	range 0 1 if !STM32_STM32F30XX
+	range 0 5 if STM32L4_STM32F30XX
+	range 0 1 if !STM32L4_STM32F30XX
 	---help---
 		Specifies the channel mode.
 
@@ -1225,8 +1225,8 @@ if STM32L4_TIM4_CHANNEL4
 config STM32L4_TIM4_CH4MODE
 	int "TIM4 Channel 4 Mode"
 	default 0
-	range 0 5 if STM32_STM32F30XX
-	range 0 1 if !STM32_STM32F30XX
+	range 0 5 if STM32L4_STM32F30XX
+	range 0 1 if !STM32L4_STM32F30XX
 	---help---
 		Specifies the channel mode.
 
@@ -1253,8 +1253,8 @@ config STM32L4_TIM4_CHANNEL
 config STM32L4_TIM4_CHMODE
 	int "TIM4 Channel Mode"
 	default 0
-	range 0 5 if STM32_STM32F30XX
-	range 0 1 if !STM32_STM32F30XX
+	range 0 5 if STM32L4_STM32F30XX
+	range 0 1 if !STM32L4_STM32F30XX
 	---help---
 		Specifies the channel mode.
 
@@ -1297,8 +1297,8 @@ if STM32L4_TIM5_CHANNEL1
 config STM32L4_TIM5_CH1MODE
 	int "TIM5 Channel 1 Mode"
 	default 0
-	range 0 5 if STM32_STM32F30XX
-	range 0 1 if !STM32_STM32F30XX
+	range 0 5 if STM32L4_STM32F30XX
+	range 0 1 if !STM32L4_STM32F30XX
 	---help---
 		Specifies the channel mode.
 
@@ -1321,8 +1321,8 @@ if STM32L4_TIM5_CHANNEL2
 config STM32L4_TIM5_CH2MODE
 	int "TIM5 Channel 2 Mode"
 	default 0
-	range 0 5 if STM32_STM32F30XX
-	range 0 1 if !STM32_STM32F30XX
+	range 0 5 if STM32L4_STM32F30XX
+	range 0 1 if !STM32L4_STM32F30XX
 	---help---
 		Specifies the channel mode.
 
@@ -1345,8 +1345,8 @@ if STM32L4_TIM5_CHANNEL3
 config STM32L4_TIM5_CH3MODE
 	int "TIM5 Channel 3 Mode"
 	default 0
-	range 0 5 if STM32_STM32F30XX
-	range 0 1 if !STM32_STM32F30XX
+	range 0 5 if STM32L4_STM32F30XX
+	range 0 1 if !STM32L4_STM32F30XX
 	---help---
 		Specifies the channel mode.
 
@@ -1369,8 +1369,8 @@ if STM32L4_TIM5_CHANNEL4
 config STM32L4_TIM5_CH4MODE
 	int "TIM5 Channel 4 Mode"
 	default 0
-	range 0 5 if STM32_STM32F30XX
-	range 0 1 if !STM32_STM32F30XX
+	range 0 5 if STM32L4_STM32F30XX
+	range 0 1 if !STM32L4_STM32F30XX
 	---help---
 		Specifies the channel mode.
 
@@ -1397,8 +1397,8 @@ config STM32L4_TIM5_CHANNEL
 config STM32L4_TIM5_CHMODE
 	int "TIM5 Channel Mode"
 	default 0
-	range 0 5 if STM32_STM32F30XX
-	range 0 1 if !STM32_STM32F30XX
+	range 0 5 if STM32L4_STM32F30XX
+	range 0 1 if !STM32L4_STM32F30XX
 	---help---
 		Specifies the channel mode.
 
@@ -1441,8 +1441,8 @@ if STM32L4_TIM8_CHANNEL1
 config STM32L4_TIM8_CH1MODE
 	int "TIM8 Channel 1 Mode"
 	default 0
-	range 0 5 if STM32_STM32F30XX
-	range 0 1 if !STM32_STM32F30XX
+	range 0 5 if STM32L4_STM32F30XX
+	range 0 1 if !STM32L4_STM32F30XX
 	---help---
 		Specifies the channel mode.
 
@@ -1465,8 +1465,8 @@ if STM32L4_TIM8_CHANNEL2
 config STM32L4_TIM8_CH2MODE
 	int "TIM8 Channel 2 Mode"
 	default 0
-	range 0 5 if STM32_STM32F30XX
-	range 0 1 if !STM32_STM32F30XX
+	range 0 5 if STM32L4_STM32F30XX
+	range 0 1 if !STM32L4_STM32F30XX
 	---help---
 		Specifies the channel mode.
 
@@ -1489,8 +1489,8 @@ if STM32L4_TIM8_CHANNEL3
 config STM32L4_TIM8_CH3MODE
 	int "TIM8 Channel 3 Mode"
 	default 0
-	range 0 5 if STM32_STM32F30XX
-	range 0 1 if !STM32_STM32F30XX
+	range 0 5 if STM32L4_STM32F30XX
+	range 0 1 if !STM32L4_STM32F30XX
 	---help---
 		Specifies the channel mode.
 
@@ -1513,8 +1513,8 @@ if STM32L4_TIM8_CHANNEL4
 config STM32L4_TIM8_CH4MODE
 	int "TIM8 Channel 4 Mode"
 	default 0
-	range 0 5 if STM32_STM32F30XX
-	range 0 1 if !STM32_STM32F30XX
+	range 0 5 if STM32L4_STM32F30XX
+	range 0 1 if !STM32L4_STM32F30XX
 	---help---
 		Specifies the channel mode.
 
@@ -1541,8 +1541,8 @@ config STM32L4_TIM8_CHANNEL
 config STM32L4_TIM8_CHMODE
 	int "TIM8 Channel Mode"
 	default 0
-	range 0 5 if STM32_STM32F30XX
-	range 0 1 if !STM32_STM32F30XX
+	range 0 5 if STM32L4_STM32F30XX
+	range 0 1 if !STM32L4_STM32F30XX
 	---help---
 		Specifies the channel mode.
 
@@ -1577,8 +1577,8 @@ if STM32L4_TIM15_CHANNEL1
 config STM32L4_TIM15_CH1MODE
 	int "TIM15 Channel 1 Mode"
 	default 0
-	range 0 3 if STM32_STM32F30XX
-	range 0 1 if !STM32_STM32F30XX
+	range 0 3 if STM32L4_STM32F30XX
+	range 0 1 if !STM32L4_STM32F30XX
 	---help---
 		Specifies the channel mode.
 
@@ -1601,8 +1601,8 @@ if STM32L4_TIM15_CHANNEL2
 config STM32L4_TIM15_CH2MODE
 	int "TIM15 Channel 2 Mode"
 	default 0
-	range 0 3 if STM32_STM32F30XX
-	range 0 1 if !STM32_STM32F30XX
+	range 0 3 if STM32L4_STM32F30XX
+	range 0 1 if !STM32L4_STM32F30XX
 	---help---
 		Specifies the channel mode.
 
@@ -1629,8 +1629,8 @@ config STM32L4_TIM15_CHANNEL
 config STM32L4_TIM15_CHMODE
 	int "TIM15 Channel Mode"
 	default 0
-	range 0 3 if STM32_STM32F30XX
-	range 0 1 if !STM32_STM32F30XX
+	range 0 3 if STM32L4_STM32F30XX
+	range 0 1 if !STM32L4_STM32F30XX
 	---help---
 		Specifies the channel mode.
 
@@ -2747,6 +2747,177 @@ config STM32L4_CAN_REGDEBUG
 	---help---
 		Output detailed register-level CAN device debug information.
 		Requires also CONFIG_DEBUG_CAN_INFO.
+
+endmenu
+
+menu "QEncoder Driver"
+	depends on QENCODER
+	depends on STM32L4_TIM1 || STM32L4_TIM2 || STM32L4_TIM3 || STM32L4_TIM4 || STM32L4_TIM5 || STM32L4_TIM8
+
+config STM32L4_TIM1_QE
+	bool "TIM1"
+	default n
+	depends on STM32L4_TIM1
+	---help---
+		Reserve TIM1 for use by QEncoder.
+
+if STM32L4_TIM1_QE
+
+config STM32L4_TIM1_QECLKOUT
+	int "TIM1 output clock"
+	default 2800000
+	---help---
+		The output clock of TIM1.
+
+endif
+
+config STM32L4_TIM2_QE
+	bool "TIM2"
+	default n
+	depends on STM32L4_TIM2
+	---help---
+		Reserve TIM2 for use by QEncoder.
+
+if STM32L4_TIM2_QE
+
+config STM32L4_TIM2_QECLKOUT
+	int "TIM2 output clock"
+	default 2800000
+	---help---
+		The output clock of TIM2.
+
+endif
+
+config STM32L4_TIM3_QE
+	bool "TIM3"
+	default n
+	depends on STM32L4_TIM3
+	---help---
+		Reserve TIM3 for use by QEncoder.
+
+if STM32L4_TIM3_QE
+
+config STM32L4_TIM3_QECLKOUT
+	int "TIM3 output clock"
+	default 2800000
+	---help---
+		The output clock of TIM3.
+
+endif
+
+config STM32L4_TIM4_QE
+	bool "TIM4"
+	default n
+	depends on STM32L4_TIM4
+	---help---
+		Reserve TIM4 for use by QEncoder.
+
+if STM32L4_TIM4_QE
+
+config STM32L4_TIM4_QECLKOUT
+	int "TIM4 output clock"
+	default 2800000
+	---help---
+		The output clock of TIM4.
+
+endif
+
+config STM32L4_TIM5_QE
+	bool "TIM5"
+	default n
+	depends on STM32L4_TIM5
+	---help---
+		Reserve TIM5 for use by QEncoder.
+
+if STM32L4_TIM5_QE
+
+config STM32L4_TIM5_QECLKOUT
+	int "TIM5 output clock"
+	default 2800000
+	---help---
+		The output clock of TIM5.
+
+endif
+
+config STM32L4_TIM8_QE
+	bool "TIM8"
+	default n
+	depends on STM32L4_TIM8
+	---help---
+		Reserve TIM8 for use by QEncoder.
+
+if STM32L4_TIM8_QE
+
+config STM32L4_TIM8_QECLKOUT
+	int "TIM8 output clock"
+	default 2800000
+	---help---
+		The output clock of TIM8.
+
+endif
+
+config STM32L4_QENCODER_FILTER
+	bool "Enable filtering on STM32 QEncoder input"
+	default y
+
+choice
+	depends on STM32L4_QENCODER_FILTER
+	prompt "Input channel sampling frequency"
+	default STM32L4_QENCODER_SAMPLE_FDTS_4
+
+config STM32L4_QENCODER_SAMPLE_FDTS
+	bool "fDTS"
+
+config STM32L4_QENCODER_SAMPLE_CKINT
+	bool "fCK_INT"
+
+config STM32L4_QENCODER_SAMPLE_FDTS_2
+	bool "fDTS/2"
+
+config STM32L4_QENCODER_SAMPLE_FDTS_4
+	bool "fDTS/4"
+
+config STM32L4_QENCODER_SAMPLE_FDTS_8
+	bool "fDTS/8"
+
+config STM32L4_QENCODER_SAMPLE_FDTS_16
+	bool "fDTS/16"
+
+config STM32L4_QENCODER_SAMPLE_FDTS_32
+	bool "fDTS/32"
+
+endchoice
+
+choice
+	depends on STM32L4_QENCODER_FILTER
+	prompt "Input channel event count"
+	default STM32L4_QENCODER_SAMPLE_EVENT_6
+
+config STM32L4_QENCODER_SAMPLE_EVENT_1
+	depends on STM32L4_QENCODER_SAMPLE_FDTS
+	bool "1"
+
+config STM32L4_QENCODER_SAMPLE_EVENT_2
+	depends on STM32L4_QENCODER_SAMPLE_CKINT
+	bool "2"
+
+config STM32L4_QENCODER_SAMPLE_EVENT_4
+	depends on STM32L4_QENCODER_SAMPLE_CKINT
+	bool "4"
+
+config STM32L4_QENCODER_SAMPLE_EVENT_5
+	depends on STM32L4_QENCODER_SAMPLE_FDTS_16 || STM32L4_QENCODER_SAMPLE_FDTS_32
+	bool "5"
+
+config STM32L4_QENCODER_SAMPLE_EVENT_6
+	depends on !STM32L4_QENCODER_SAMPLE_FDTS && !STM32L4_QENCODER_SAMPLE_CKINT
+	bool "6"
+
+config STM32L4_QENCODER_SAMPLE_EVENT_8
+	depends on !STM32L4_QENCODER_SAMPLE_FDTS
+	bool "8"
+
+endchoice
 
 endmenu
 
