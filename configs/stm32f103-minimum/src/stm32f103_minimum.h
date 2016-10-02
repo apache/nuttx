@@ -63,7 +63,7 @@
 /* GPIOs **************************************************************/
 /* LEDs */
 
-#define GPIO_LED        (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+#define GPIO_LED1       (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
                          GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN13)
 
 /* SPI chip selects */
@@ -90,6 +90,26 @@
  ************************************************************************************/
 
 #ifndef __ASSEMBLY__
+
+/****************************************************************************
+ * Name: stm32_bringup
+ *
+ * Description:
+ *   Perform architecture specific initialization
+ *
+ *   CONFIG_LIB_BOARDCTL=y:
+ *     If CONFIG_NSH_ARCHINITIALIZE=y:
+ *       Called from the NSH library (or other application)
+ *     Otherse, assumed to be called from some other application.
+ *
+ *   Otherwise CONFIG_BOARD_INITIALIZE=y:
+ *     Called from board_initialize().
+ *
+ *   Otherise, bad news:  Never called
+ *
+ ****************************************************************************/
+
+int stm32_bringup(void);
 
 /************************************************************************************
  * Name: stm32_spidev_initialize

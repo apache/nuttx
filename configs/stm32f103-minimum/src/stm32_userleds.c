@@ -1,8 +1,8 @@
 /****************************************************************************
- * configs/stm32f103-minimum/src/stm32_autoleds.c
+ * configs/stm32f103-minimum/src/stm32_userleds.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Laurent Latil <laurent@latil.nom.fr>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -43,82 +43,70 @@
 #include <stdbool.h>
 #include <debug.h>
 
-#include <nuttx/board.h>
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "up_arch.h"
-#include "up_internal.h"
 #include "stm32.h"
 #include "stm32f103_minimum.h"
 
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#ifndef CONFIG_ARCH_LEDS
 
-static inline void set_led(bool v)
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+/* This array maps an LED number to GPIO pin configuration */
+
+static const uint32_t g_ledcfg[BOARD_NLEDS] =
 {
-  ledinfo("Turn LED %s\n", v? "on":"off");
-  stm32_gpiowrite(GPIO_LED1, !v);
-}
+  GPIO_LED1,
+};
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_autoled_initialize
+ * Name: board_userled_initialize
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_LEDS
-void board_autoled_initialize(void)
+void board_userled_initialize(void)
 {
-  /* Configure LED GPIO for output */
+  int i;
 
-  stm32_configgpio(GPIO_LED1);
-}
+  /* Configure LED1-8 GPIOs for output */
 
-/****************************************************************************
- * Name: board_autoled_on
- ****************************************************************************/
-
-void board_autoled_on(int led)
-{
-  ledinfo("board_autoled_on(%d)\n",led);
-
-  switch (led)
+  for (i = 0; i < BOARD_NLEDS; i++)
     {
-    case LED_STARTED:
-    case LED_HEAPALLOCATE:
-      /* As the board provides only one soft controllable LED, we simply
-       * turn it on when the board boots.
-       */
-
-      set_led(true);
-      break;
-
-    case LED_PANIC:
-      /* For panic state, the LED is blinking */
-
-      set_led(true);
-      break;
+      stm32_configgpio(g_ledcfg[i]);
     }
 }
 
 /****************************************************************************
- * Name: board_autoled_off
+ * Name: board_userled
  ****************************************************************************/
 
-void board_autoled_off(int led)
+void board_userled(int led, bool ledon)
 {
-  switch (led)
+  if ((unsigned)led < BOARD_NLEDS)
     {
-    case LED_PANIC:
-      /* For panic state, the LED is blinking */
-
-      set_led(false);
-      break;
+      stm32_gpiowrite(g_ledcfg[led], ledon);
     }
 }
 
-#endif /* CONFIG_ARCH_LEDS */
+/****************************************************************************
+ * Name: board_userled_all
+ ****************************************************************************/
+
+void board_userled_all(uint8_t ledset)
+{
+  int i;
+
+  /* Configure LED1-8 GPIOs for output */
+
+  for (i = 0; i < BOARD_NLEDS; i++)
+    {
+      stm32_gpiowrite(g_ledcfg[i], (ledset & (1 << i)) != 0);
+    }
+}
+
+#endif /* !CONFIG_ARCH_LEDS */

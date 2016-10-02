@@ -1,8 +1,8 @@
 /****************************************************************************
- * configs/stm32f103-minimum/src/stm32_autoleds.c
+ * config/stm32f103-minimum/src/stm32_bringup.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Laurent Latil <laurent@latil.nom.fr>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,86 +39,104 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
+#include <sys/mount.h>
 #include <stdbool.h>
+#include <stdio.h>
+#include <syslog.h>
 #include <debug.h>
+#include <errno.h>
 
 #include <nuttx/board.h>
-#include <arch/board/board.h>
+#include <nuttx/timers/oneshot.h>
 
-#include "chip.h"
-#include "up_arch.h"
-#include "up_internal.h"
+#ifdef CONFIG_USBMONITOR
+#  include <nuttx/usb/usbmonitor.h>
+#endif
+
+#include <nuttx/binfmt/elf.h>
+
 #include "stm32.h"
+
+#ifdef CONFIG_STM32_OTGFS
+#  include "stm32_usbhost.h"
+#endif
+
+#ifdef CONFIG_USERLED
+#  include <nuttx/leds/userled.h>
+#endif
+
 #include "stm32f103_minimum.h"
 
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+/* Conditional logic in stm32f103_minimum.h will determine if certain features
+ * are supported.  Tests for these features need to be made after including
+ * stm32f103_minimum.h.
+ */
 
-static inline void set_led(bool v)
-{
-  ledinfo("Turn LED %s\n", v? "on":"off");
-  stm32_gpiowrite(GPIO_LED1, !v);
-}
+#ifdef HAVE_RTC_DRIVER
+#  include <nuttx/timers/rtc.h>
+#  include "stm32_rtc.h"
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_autoled_initialize
+ * Name: stm32_bringup
+ *
+ * Description:
+ *   Perform architecture-specific initialization
+ *
+ *   CONFIG_BOARD_INITIALIZE=y :
+ *     Called from board_initialize().
+ *
+ *   CONFIG_BOARD_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y :
+ *     Called from the NSH library
+ *
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_LEDS
-void board_autoled_initialize(void)
+int stm32_bringup(void)
 {
-  /* Configure LED GPIO for output */
+#ifdef CONFIG_ONESHOT
+  struct oneshot_lowerhalf_s *os = NULL;
+#endif
+  int ret = OK;
 
-  stm32_configgpio(GPIO_LED1);
-}
+#ifdef CONFIG_AUDIO_TONE
+  /* Configure and initialize the tone generator. */
 
-/****************************************************************************
- * Name: board_autoled_on
- ****************************************************************************/
-
-void board_autoled_on(int led)
-{
-  ledinfo("board_autoled_on(%d)\n",led);
-
-  switch (led)
+  ret = stm32_tone_setup();
+  if (ret < 0)
     {
-    case LED_STARTED:
-    case LED_HEAPALLOCATE:
-      /* As the board provides only one soft controllable LED, we simply
-       * turn it on when the board boots.
-       */
-
-      set_led(true);
-      break;
-
-    case LED_PANIC:
-      /* For panic state, the LED is blinking */
-
-      set_led(true);
-      break;
+      syslog(LOG_ERR, "ERROR: stm32_tone_setup() failed: %d\n", ret);
     }
-}
+#endif
 
-/****************************************************************************
- * Name: board_autoled_off
- ****************************************************************************/
-
-void board_autoled_off(int led)
-{
-  switch (led)
+#ifdef CONFIG_WL_MFRC522
+  ret = stm32_mfrc522initialize("/dev/rfid0");
+  if (ret < 0)
     {
-    case LED_PANIC:
-      /* For panic state, the LED is blinking */
-
-      set_led(false);
-      break;
+      syslog(LOG_ERR, "ERROR: stm32_mfrc522initialize() failed: %d\n", ret);
     }
-}
+#endif
 
-#endif /* CONFIG_ARCH_LEDS */
+#ifdef CONFIG_ONESHOT
+  os = oneshot_initialize(1, 10);
+  if (os)
+    {
+      ret = oneshot_register("/dev/oneshot", os);
+    }
+#endif
+
+#ifdef CONFIG_USERLED
+  /* Register the LED driver */
+
+  ret = userled_lower_initialize("/dev/userleds");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+    }
+#endif
+
+  return ret;
+}

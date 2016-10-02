@@ -43,11 +43,14 @@
 
 #include <nuttx/config.h>
 #ifndef __ASSEMBLY__
-# include <stdint.h>
+#  include <stdint.h>
 #endif
-#include "stm32_rcc.h"
-#include "stm32_sdio.h"
-#include "stm32.h"
+
+#ifdef __KERNEL__
+#  include "stm32_rcc.h"
+#  include "stm32_sdio.h"
+#  include "stm32.h"
+#endif
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -150,6 +153,10 @@
 #endif
 
 /* LED definitions ******************************************************************/
+
+/* Define how many LEDs this board has (needed by userleds) */
+
+#define BOARD_NLEDS       1
 
 /* The board has only one controllable LED */
 
