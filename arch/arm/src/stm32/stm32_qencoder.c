@@ -1029,6 +1029,8 @@ static int stm32_setup(FAR struct qe_lowerhalf_s *lower)
   cr1 |= GTIM_CR1_CEN;
   stm32_putreg16(priv, STM32_GTIM_CR1_OFFSET, cr1);
 
+  stm32_dumpregs(priv, "After setup");
+
   return OK;
 }
 

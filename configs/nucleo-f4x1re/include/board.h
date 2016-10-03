@@ -216,6 +216,9 @@
 
 #define BUTTON_USER_BIT    (1 << BUTTON_USER)
 
+#define GPIO_TIM2_CH1IN (GPIO_TIM2_CH1IN_1 | GPIO_PULLUP)
+#define GPIO_TIM2_CH2IN (GPIO_TIM2_CH2IN_1 | GPIO_PULLUP)
+
 /************************************************************************************
  * Public Data
  ************************************************************************************/
