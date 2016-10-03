@@ -579,26 +579,27 @@ static void stm32l4_dumpregs(FAR struct stm32l4_lowerhalf_s *priv,
                              FAR const char *msg)
 {
   sninfo("%s:\n", msg);
-  sninfo("  CR1: %04x CR2:  %04x SMCR:  %04x DIER:  %04x\n",
+  sninfo("  CR1: %04x CR2:  %04x SMCR:  %08x DIER:  %04x\n",
          stm32l4_getreg16(priv, STM32L4_GTIM_CR1_OFFSET),
          stm32l4_getreg16(priv, STM32L4_GTIM_CR2_OFFSET),
-         stm32l4_getreg16(priv, STM32L4_GTIM_SMCR_OFFSET),
+         stm32l4_getreg32(priv, STM32L4_GTIM_SMCR_OFFSET),
          stm32l4_getreg16(priv, STM32L4_GTIM_DIER_OFFSET));
-  sninfo("   SR: %04x EGR:  %04x CCMR1: %04x CCMR2: %04x\n",
+  sninfo("   SR: %04x EGR:  %04x CCMR1: %08x CCMR2: %08x\n",
          stm32l4_getreg16(priv, STM32L4_GTIM_SR_OFFSET),
          stm32l4_getreg16(priv, STM32L4_GTIM_EGR_OFFSET),
-         stm32l4_getreg16(priv, STM32L4_GTIM_CCMR1_OFFSET),
-         stm32l4_getreg16(priv, STM32L4_GTIM_CCMR2_OFFSET));
-  sninfo(" CCER: %04x CNT:  %04x PSC:   %04x ARR:   %04x\n",
+         stm32l4_getreg32(priv, STM32L4_GTIM_CCMR1_OFFSET),
+         stm32l4_getreg32(priv, STM32L4_GTIM_CCMR2_OFFSET));
+  sninfo(" CCER: %04x CNT:  %08x PSC:   %04x ARR:   %08x\n",
          stm32l4_getreg16(priv, STM32L4_GTIM_CCER_OFFSET),
-         stm32l4_getreg16(priv, STM32L4_GTIM_CNT_OFFSET),
+         stm32l4_getreg32(priv, STM32L4_GTIM_CNT_OFFSET),
          stm32l4_getreg16(priv, STM32L4_GTIM_PSC_OFFSET),
-         stm32l4_getreg16(priv, STM32L4_GTIM_ARR_OFFSET));
-  sninfo(" CCR1: %04x CCR2: %04x CCR3:  %04x CCR4:  %04x\n",
-         stm32l4_getreg16(priv, STM32L4_GTIM_CCR1_OFFSET),
-         stm32l4_getreg16(priv, STM32L4_GTIM_CCR2_OFFSET),
-         stm32l4_getreg16(priv, STM32L4_GTIM_CCR3_OFFSET),
-         stm32l4_getreg16(priv, STM32L4_GTIM_CCR4_OFFSET));
+         stm32l4_getreg32(priv, STM32L4_GTIM_ARR_OFFSET));
+  sninfo(" CCR1: %08x CCR2: %08x\n",
+         stm32l4_getreg32(priv, STM32L4_GTIM_CCR1_OFFSET),
+         stm32l4_getreg32(priv, STM32L4_GTIM_CCR2_OFFSET));
+  sninfo(" CCR3: %08x CCR4: %08x\n",
+         stm32l4_getreg32(priv, STM32L4_GTIM_CCR3_OFFSET),
+         stm32l4_getreg32(priv, STM32L4_GTIM_CCR4_OFFSET));
 #if defined(CONFIG_STM32L4_TIM1_QE) || defined(CONFIG_STM32L4_TIM8_QE)
   if (priv->config->timid == 1 || priv->config->timid == 8)
     {
@@ -764,8 +765,8 @@ static int stm32l4_setup(FAR struct qe_lowerhalf_s *lower)
 {
   FAR struct stm32l4_lowerhalf_s *priv = (FAR struct stm32l4_lowerhalf_s *)lower;
   uint16_t dier;
-  uint16_t smcr;
-  uint16_t ccmr1;
+  uint32_t smcr;
+  uint32_t ccmr1;
   uint16_t ccer;
   uint16_t cr1;
 #ifdef HAVE_16BIT_TIMERS
@@ -833,10 +834,10 @@ static int stm32l4_setup(FAR struct qe_lowerhalf_s *lower)
 
   /* Set the encoder Mode 3 */
 
-  smcr = stm32l4_getreg16(priv, STM32L4_GTIM_SMCR_OFFSET);
+  smcr = stm32l4_getreg32(priv, STM32L4_GTIM_SMCR_OFFSET);
   smcr &= ~GTIM_SMCR_SMS_MASK;
   smcr |= GTIM_SMCR_ENCMD3;
-  stm32l4_putreg16(priv, STM32L4_GTIM_SMCR_OFFSET, smcr);
+  stm32l4_putreg32(priv, STM32L4_GTIM_SMCR_OFFSET, smcr);
 
   /* TI1 Channel Configuration */
   /* Disable the Channel 1: Reset the CC1E Bit */
@@ -845,7 +846,7 @@ static int stm32l4_setup(FAR struct qe_lowerhalf_s *lower)
   ccer &= ~GTIM_CCER_CC1E;
   stm32l4_putreg16(priv, STM32L4_GTIM_CCER_OFFSET, ccer);
 
-  ccmr1 = stm32l4_getreg16(priv, STM32L4_GTIM_CCMR1_OFFSET);
+  ccmr1 = stm32l4_getreg32(priv, STM32L4_GTIM_CCMR1_OFFSET);
   ccer = stm32l4_getreg16(priv, STM32L4_GTIM_CCER_OFFSET);
 
   /* Select the Input IC1=TI1 and set the filter fSAMPLING=fDTS/4, N=6 */
@@ -861,17 +862,17 @@ static int stm32l4_setup(FAR struct qe_lowerhalf_s *lower)
 
   /* Write to TIM CCMR1 and CCER registers */
 
-  stm32l4_putreg16(priv, STM32L4_GTIM_CCMR1_OFFSET, ccmr1);
+  stm32l4_putreg32(priv, STM32L4_GTIM_CCMR1_OFFSET, ccmr1);
   stm32l4_putreg16(priv, STM32L4_GTIM_CCER_OFFSET, ccer);
 
   /* Set the Input Capture Prescaler value: Capture performed each time an
    * edge is detected on the capture input.
    */
 
-  ccmr1  = stm32l4_getreg16(priv, STM32L4_GTIM_CCMR1_OFFSET);
+  ccmr1  = stm32l4_getreg32(priv, STM32L4_GTIM_CCMR1_OFFSET);
   ccmr1 &= ~GTIM_CCMR1_IC1PSC_MASK;
   ccmr1 |= (GTIM_CCMR_ICPSC_NOPSC << GTIM_CCMR1_IC1PSC_SHIFT);
-  stm32l4_putreg16(priv, STM32L4_GTIM_CCMR1_OFFSET, ccmr1);
+  stm32l4_putreg32(priv, STM32L4_GTIM_CCMR1_OFFSET, ccmr1);
 
   /* TI2 Channel Configuration */
   /* Disable the Channel 2: Reset the CC2E Bit */
@@ -880,7 +881,7 @@ static int stm32l4_setup(FAR struct qe_lowerhalf_s *lower)
   ccer &= ~GTIM_CCER_CC2E;
   stm32l4_putreg16(priv, STM32L4_GTIM_CCER_OFFSET, ccer);
 
-  ccmr1 = stm32l4_getreg16(priv, STM32L4_GTIM_CCMR1_OFFSET);
+  ccmr1 = stm32l4_getreg32(priv, STM32L4_GTIM_CCMR1_OFFSET);
   ccer  = stm32l4_getreg16(priv, STM32L4_GTIM_CCER_OFFSET);
 
   /* Select the Input IC2=TI2 and set the filter fSAMPLING=fDTS/4, N=6 */
@@ -896,17 +897,17 @@ static int stm32l4_setup(FAR struct qe_lowerhalf_s *lower)
 
   /* Write to TIM CCMR1 and CCER registers */
 
-  stm32l4_putreg16(priv, STM32L4_GTIM_CCMR1_OFFSET, ccmr1);
+  stm32l4_putreg32(priv, STM32L4_GTIM_CCMR1_OFFSET, ccmr1);
   stm32l4_putreg16(priv, STM32L4_GTIM_CCER_OFFSET, ccer);
 
   /* Set the Input Capture Prescaler value: Capture performed each time an
    * edge is detected on the capture input.
    */
 
-  ccmr1  = stm32l4_getreg16(priv, STM32L4_GTIM_CCMR1_OFFSET);
+  ccmr1  = stm32l4_getreg32(priv, STM32L4_GTIM_CCMR1_OFFSET);
   ccmr1 &= ~GTIM_CCMR1_IC2PSC_MASK;
   ccmr1 |= (GTIM_CCMR_ICPSC_NOPSC << GTIM_CCMR1_IC2PSC_SHIFT);
-  stm32l4_putreg16(priv, STM32L4_GTIM_CCMR1_OFFSET, ccmr1);
+  stm32l4_putreg32(priv, STM32L4_GTIM_CCMR1_OFFSET, ccmr1);
 
   /* Disable the update interrupt */
 
@@ -972,6 +973,8 @@ static int stm32l4_setup(FAR struct qe_lowerhalf_s *lower)
   cr1 = stm32l4_getreg16(priv, STM32L4_GTIM_CR1_OFFSET);
   cr1 |= GTIM_CR1_CEN;
   stm32l4_putreg16(priv, STM32L4_GTIM_CR1_OFFSET, cr1);
+
+  stm32l4_dumpregs(priv, "After setup");
 
   return OK;
 }

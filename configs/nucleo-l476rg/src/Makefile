@@ -62,6 +62,10 @@ CSRCS += stm32_ajoystick.c
 endif
 endif
 
+ifeq ($(CONFIG_QENCODER),y)
+CSRCS += stm32_qencoder.c
+endif
+
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += stm32_appinit.c
 endif

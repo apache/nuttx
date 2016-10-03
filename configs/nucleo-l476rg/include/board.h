@@ -202,6 +202,16 @@
 
 #define BUTTON_USER_BIT    (1 << BUTTON_USER)
 
+/* Quadrature encoder
+ * Default is to use timer 5 (32-bit) and encoder on PA0/PA1
+ */
+
+#define GPIO_TIM5_CH1IN GPIO_TIM5_CH1IN_1
+#define GPIO_TIM5_CH2IN GPIO_TIM5_CH2IN_1
+
+#define GPIO_TIM2_CH1IN GPIO_TIM2_CH1IN_1
+#define GPIO_TIM2_CH2IN GPIO_TIM2_CH2IN_1
+
 /************************************************************************************
  * Public Data
  ************************************************************************************/
