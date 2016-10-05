@@ -3321,20 +3321,10 @@ static inline void stm32l4_rxinterrupt(FAR struct stm32l4_usbdev_s *priv)
             {
               usbtrace(TRACE_INTDECODE(STM32L4_TRACEINTID_SETUPDONE), epphy);
 
-              /* Now that the Setup Phase is complete if it was an OUT enable
-               * the endpoint
-               * (Doing this here prevents the loss of the first FIFO word)
+              /* On the L4 This event does not occur on the next SETUP
+               * after a SETUP OUT.
                */
 
-              if (priv->ep0state == EP0STATE_SETUP_OUT)
-                {
-
-                  /* Clear NAKSTS so that we can receive the data */
-                  regval  = stm32l4_getreg(STM32L4_OTGFS_DOEPCTL(0));
-                  regval |= OTGFS_DOEPCTL0_CNAK;
-                  stm32l4_putreg(regval, STM32L4_OTGFS_DOEPCTL(0));
-
-                }
             }
             break;
 
@@ -3370,17 +3360,23 @@ static inline void stm32l4_rxinterrupt(FAR struct stm32l4_usbdev_s *priv)
               datlen = GETUINT16(priv->ctrlreq.len);
               if (USB_REQ_ISOUT(priv->ctrlreq.type) && datlen > 0)
                 {
+                   /* Reset the endpoint and Stop NAK-ing */
+
+                   stm32l4_ep0out_ctrlsetup(priv);
+
                   /* Wait for the data phase. */
 
                   priv->ep0state = EP0STATE_SETUP_OUT;
                 }
               else
                 {
-                  /* We can process the setup data as soon as SETUP done word is
-                   * popped of the RxFIFO.
+                  /* We can process the setup data Now no need to wait for SETUP done word
+                   * to be popped of the RxFIFO.
                    */
 
                   priv->ep0state = EP0STATE_SETUP_READY;
+                  stm32l4_ep0out_setup(priv);
+
                 }
             }
             break;
