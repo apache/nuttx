@@ -228,7 +228,7 @@
 /* Ethernet *************************************************************************/
 
 #if defined(CONFIG_STM32_ETHMAC)
-/* RMII interface to the LAN8720 PHY */
+/* RMII interface to the LAN8710 PHY (works with LAN8720 driver)*/
 
 #  ifndef CONFIG_STM32_RMII
 #    error CONFIG_STM32_RMII must be defined

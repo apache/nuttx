@@ -49,7 +49,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration from stm32f4discovert*/
+/* Configuration from stm32f4discovery */
 
 /* Assume that we have everything */
 
@@ -103,16 +103,6 @@
 #if !defined(CONFIG_NSH_NETINIT_THREAD) || !defined(CONFIG_ARCH_PHY_INTERRUPT) || \
     !defined(CONFIG_NETDEV_PHY_IOCTL) || !defined(CONFIG_NET_UDP) || \
      defined(CONFIG_DISABLE_SIGNALS)
-#  undef HAVE_NETMONITOR
-#endif
-
-/* The NSH Network Monitor cannot be used with the STM32F4DIS-BB base board.
- * That is because the LAN8720 is configured in REF_CLK OUT mode.  In that
- * mode, the PHY interrupt is not supported.  The NINT pin serves instead as
- * REFLCK0.
- */
-
-#ifdef CONFIG_STM32F4DISBB
 #  undef HAVE_NETMONITOR
 #endif
 
@@ -177,6 +167,31 @@
 
 #else
 #  define GPIO_OTGHS_OVER  (GPIO_INPUT|GPIO_FLOAT|GPIO_SPEED_100MHz|GPIO_PUSHPULL|GPIO_PORTF|GPIO_PIN11)
+#endif
+
+/* LAN8710 works with LAN8720 driver
+ *
+ * ---------- ------------- ------------
+ * PIO        SIGNAL        Comments
+ * ---------- ------------- ------------
+ * PG11       TXEN
+ * PG13       TXD0
+ * PG14       TXD1
+ * PC4        RXD0/MODE0
+ * PC5        RXD1/MODE1
+ * PA7        CRS_DIV/MODE2
+ * PA2        MDIO
+ * PC1        MDC
+ * PA3        NINT/REFCLK0
+ * PG6        NRST
+ * ---------- ------------- ------------
+ */
+
+#if defined(CONFIG_STM32_ETHMAC)
+#  define GPIO_EMAC_NINT  (GPIO_INPUT|GPIO_PULLUP|GPIO_EXTI|    \
+                         GPIO_PORTA|GPIO_PIN3)
+#  define GPIO_EMAC_NRST  (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|    \
+                         GPIO_OUTPUT_SET|GPIO_PORTG|GPIO_PIN6)
 #endif
 
 /****************************************************************************
