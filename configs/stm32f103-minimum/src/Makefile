@@ -53,7 +53,7 @@ ifeq ($(CONFIG_AUDIO_TONE),y)
 CSRCS += stm32_tone.c
 endif
 
-ifeq ($(CONFIG_CL_MRFC522),y)
+ifeq ($(CONFIG_CL_MFRC522),y)
 CSRCS += stm32_mfrc522.c
 endif
 
