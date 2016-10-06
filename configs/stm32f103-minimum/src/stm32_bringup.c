@@ -112,7 +112,7 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_WL_MFRC522
+#ifdef CONFIG_CL_MRFC522
   ret = stm32_mfrc522initialize("/dev/rfid0");
   if (ret < 0)
     {

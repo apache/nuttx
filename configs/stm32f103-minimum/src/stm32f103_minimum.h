@@ -139,7 +139,7 @@ void stm32_usbinitialize(void);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_WL_MFRC522
+#ifdef CONFIG_CL_MRFC522
 int stm32_mfrc522initialize(FAR const char *devpath);
 #endif
 
