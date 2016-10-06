@@ -147,8 +147,6 @@ static ssize_t xen1210_read(FAR struct file *filep, FAR char *buffer,
 {
   FAR struct inode         *inode;
   FAR struct xen1210_dev_s *priv;
-  struct xen1210_sample_s   sample;
-  uint32_t                  regval;
   int                       ret;
 
   sninfo("len=%d\n", len);
@@ -290,7 +288,6 @@ XEN1210_HANDLE xen1210_instantiate(FAR struct spi_dev_s *dev,
 {
   FAR struct xen1210_dev_s *priv;
   uint32_t regval;
-  int ret;
 
   /* Allocate the XEN1210 driver instance */
 
@@ -445,7 +442,6 @@ void xen1210_getdata(FAR struct xen1210_dev_s *priv)
 #ifdef CONFIG_XEN1210_REGDEBUG
   _err("%02x->%02x\n", regaddr, regval);
 #endif
-  return regval;
 }
 
 /****************************************************************************
