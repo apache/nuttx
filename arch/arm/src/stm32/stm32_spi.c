@@ -1022,7 +1022,8 @@ static void spi_modifycr1(FAR struct stm32_spidev_s *priv, uint16_t setbits,
  *
  ************************************************************************************/
 
-#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
+#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX) || \
+    defined(CONFIG_STM32_SPI_DMA)
 static void spi_modifycr2(FAR struct stm32_spidev_s *priv, uint16_t setbits,
                           uint16_t clrbits)
 {
