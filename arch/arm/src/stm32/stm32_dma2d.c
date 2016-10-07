@@ -2069,6 +2069,7 @@ FAR struct dma2d_layer_s *up_dma2dcreatelayer(fb_coord_t width,
               /* free the layer struture */
 
               kmm_free(layer);
+              layer = NULL;
               lcderr("ERROR: ENOMEM, Unable to allocate layer buffer\n");
               errno = ENOMEM;
             }
