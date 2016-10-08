@@ -12393,7 +12393,7 @@
 	  (2016-07-23).
 	* Freedom-K64F:  Add PWM support.  From Jordan MacIntyre (2016-07-25).
 
-7.18 2016-10-09 Gregory Nutt <gnutt@nuttx.org>
+7.18 2016-10-08 Gregory Nutt <gnutt@nuttx.org>
 
 	* drivers/serial/pty.c, serial.c, usbdev/cdcacm.c, include/nuttx/fs/ioctl.h:
 	  Fix FIONWRITE and add FIONSPACE.  All implementations of FIONWRITE
