@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: September 30, 2016</p>
+      <p>Last Updated: October 8, 2016</p>
     </td>
   </tr>
 </table>
@@ -1339,11 +1339,11 @@
 <h2>Released Versions</h2>
 <p>
   In addition to the ever-changing GIT repository, there are frozen released versions of NuttX available.
-  The current release is NuttX 7.17.
-  NuttX 7.17 is the 117<sup>th</sup> release of NuttX.
-  It was released on June 1, 2016, and is available for download from the
+  The current release is NuttX 7.18.
+  NuttX 7.18 is the 118<sup>th</sup> release of NuttX.
+  It was released on October 8, 2016, and is available for download from the
   <a href="https://bitbucket.org/nuttx/nuttx/downloads/">Bitbucket.org</a> website.
-  Note that the release consists of two tarballs:  <code>nuttx-7.17.tar.gz</code> and <code>apps-7.17.tar.gz</code>.
+  Note that the release consists of two tarballs:  <code>nuttx-7.18.tar.gz</code> and <code>apps-7.18.tar.gz</code>.
   Both may be needed (see the top-level <code>nuttx/README.txt</code> file for build information).
 </p>
 
@@ -1352,7 +1352,7 @@
 <ul>
   <li><b>nuttx</b>.
     <ul><p>
-      Release notes for NuttX 7.17 are available <a href="https://bitbucket.org/nuttx/nuttx/downloads/">here</a>.
+      Release notes for NuttX 7.18 are available <a href="https://bitbucket.org/nuttx/nuttx/downloads/">here</a>.
       Release notes for all released versions on NuttX are available in the <a href="https://bitbucket.org/nuttx/nuttx/src/master/ReleaseNotes" target="_blank">Bitbucket GIT</a>.
       The ChangeLog for all releases of NuttX is available in the ChangeLog file that can viewed in the <a href="https://bitbucket.org/nuttx/nuttx/src/master/ChangeLog" target="_blank">Bitbucket GIT</a>.
       The ChangeLog for the current release is at the bottom of that file.
@@ -1360,7 +1360,7 @@
   </li></ul>
   <li><b>apps</b>.
     <ul><p>
-      Release notes for NuttX 7.17 are available <a href="https://bitbucket.org/nuttx/apps/downloads/">here</a>.
+      Release notes for NuttX 7.18 are available <a href="https://bitbucket.org/nuttx/apps/downloads/">here</a>.
       Release notes for all released versions on NuttX are available in the <a href="https://bitbucket.org/nuttx/nuttx/src/master/ReleaseNotes" target="_blank">Bitbucket GIT</a>
       The ChangeLog for the all releases of <code>apps/</code> is available in the ChangeLog file that can viewed in the <a href="https://bitbucket.org/nuttx/apps/src/master/ChangeLog.txt" target="_blank">Bitbucket GIT</a>.
       The ChangeLog for the current release is at the bottom of that file.
@@ -2926,6 +2926,7 @@ nsh>
       <li>
         <p>
           The other port is for a generic minimual STM32F103CBT6 &quot;blue&quot; board contributed by Alan Carvalho de Assis.
+          Alan added support for numerous sensors, tone generators, user LEDs, and LCD support in NuttX 7.18.
         </p>
       </li>
     </ul>
@@ -3099,7 +3100,7 @@ nsh>
   <td>
     <p>
       <a name="stm32f107x"><b>STMicro STM32F107x (STM32 F1 &quot;Connectivity Line&quot; family)</b>.</a>
-      Chip support for the STM32 F1 &quot;Connectivity Line&quot; family has been present in NuttX for some time and users have reported that they have successful brought up NuttX on there proprietary boards using this logic.
+      Chip support for the STM32 F1 &quot;Connectivity Line&quot; family has been present in NuttX for some time and users have reported that they have successful brought up NuttX on theor proprietary boards using this logic.
     </p>
     <ul>
     <li>
@@ -3153,7 +3154,17 @@ nsh>
         <b>STATUS:</b>
         Networking and touchscreen support are well test.
         But, at present, neither USB nor LCD functionality have been verified.
-        Refer to the SViewtool STM32F103/F107 <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/viewtool-stm32f107/README.txt" target="_blank">README</a> file for further information.
+        Refer to the Viewtool STM32F103/F107 <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/viewtool-stm32f107/README.txt" target="_blank">README</a> file for further information.
+      </p>
+    </li>
+    <li>
+      <p>
+        <b>Kamami STM32 Butterfly 2</b>
+        Support for the <a href="https://kamami.pl/wycofane-z-oferty/93172-stm32butterfly.html">Kamami STM32 Butterfly 2</a> was contributed by Michał Łyszczek in NuttX-7/18.  That port features the STMicro STM32F107VC MCU.
+      </p>
+      <p>
+        <b>STATUS:</b>
+        A configuration for the  NuttShell (NSH), NSH with networking, and NSH with USB host are available and verified.
       </p>
     </li>
   </td>
@@ -3803,6 +3814,7 @@ nsh>
     <p>
       <b>Olimex STM32 E407</b>.
       Support for the Olimex STM32 E407 development board was contributed by Mateusz Szafoni and appeared in NuttX-7.17.
+      Networking configurations were added in NuttX-7.18.
       See the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/olimex-stm32-e407/README.txt" target="_blank">README</a> file for further information about the NuttX port.
     </p>
   </td>
@@ -3904,7 +3916,7 @@ nsh>
   <td>
     <p>
       <a name="stm32l476"><b>STMicro STM32 L476</b>.</a>
-      Two boards are supported in this family:
+      Three boards are supported in this family:
     </p>
     <ul>
       <li>
@@ -3917,6 +3929,14 @@ nsh>
         <p>
           <b>STM32L476VG Discovery</b>.
           Board support for the STMicro STM32L476VG Discovery board from ST Micro was contributed by Dave in NuttX-7.15.  See the <a href="http://www.st.com/stm32l476g-disco" target="_blank">STMicro website</a> and the board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/stm32l476vg-disco/README.txt" target="_blank">README</a> file for further information.
+        </p>
+      </li>
+      <li>
+        <p>
+          <b>STM32L476 MDK</b>.
+          Very basic support for NuttX on the Motorola Moto Z MDK was contributed by Jim Wylder in NuttX 7.18.
+          A simple NSH configuration is available for the STM32L476 chip.
+          See the <a href="http://developer.motorola.com/buy/" target="_blank">Moto Mods Development Kit</a> and the board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/stm32l476-mdk/README.txt" target="_blank">README</a> file for further information.
         </p>
       </li>
     </ul>
@@ -3941,6 +3961,22 @@ nsh>
       <li>QSPI with DMA and memory mapped support.  From Dave (ziggurat29).</li>
       <li>CAN contributed by Sebastien Lorquet.</li>
       <li>I2C made functional by  Dave (ziggurat29).</li>
+    </ul>
+    <p>
+      <b>NuttX-7.17</b>.
+      Additional drivers/features were contributed:
+    </p>
+    <ul>
+      <li>Support for tickless mode.</li>
+      <li>CAN driver enhancements.</li>
+    </ul>
+    <p>
+      <b>NuttX-7.18</b>.
+      Additional drivers were contributed:
+    </p>
+    <ul>
+      <li>Oneshot timer driver.</li>
+      <li>Quadrature encode contributed by Sebastien Lorquet.</li>
     </ul>
   </td>
 </tr>
@@ -4154,6 +4190,7 @@ nsh>
           <li>
             Support for the EK-TM4C1294XL was contributed by Frank Sautter and was released in NuttX 7.9.
             This basic board support included a configuration for the NuttShell <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH</a>) and a configuration for testing IPv6.
+            See drivers for the <a href="#titm4c129x">TI Tiva TM4C129X</a>.
            </li>
         </ul>
       </p>
@@ -4188,6 +4225,9 @@ nsh>
             This board supports included two configurations for the NuttShell (<a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH</a>).
             Both are networked enabled:  One configured to support IPv4 and one configured to supported IPv6.
             Instructions are included in the board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/dk-tm4c129x/README.txt" target="_blank">README</a> file for configuring both IPv4 and IPv6 simultaneously..
+          </li>
+          <li>
+            Tiva PWM and Quadrature Encoder drivers were contributed to NuttX in 7.18 by Young.
           </li>
         </ul>
       </p>
