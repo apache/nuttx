@@ -12393,7 +12393,7 @@
 	  (2016-07-23).
 	* Freedom-K64F:  Add PWM support.  From Jordan MacIntyre (2016-07-25).
 
-7.18 2016-xx-xx Gregory Nutt <gnutt@nuttx.org>
+7.18 2016-10-09 Gregory Nutt <gnutt@nuttx.org>
 
 	* drivers/serial/pty.c, serial.c, usbdev/cdcacm.c, include/nuttx/fs/ioctl.h:
 	  Fix FIONWRITE and add FIONSPACE.  All implementations of FIONWRITE
@@ -12672,3 +12672,105 @@
 	  Vyhovanec (2016-09-02).
 	* MTD: SPI-based driver for Macronix MX25L3233F or MX25L6433F.  From
 	  Aleksandr Vyhovanec (2016-09-02).
+	* sched/: The TCB nchildren field should not be incremented when
+	  pthreads are created (2016-09-06).
+	* sched/: Move fields related to parent/child task relationship out of
+	  TCB into group structure (2016-09-06).
+	* STM32L4: Add support for USART3-USART5.  For STM32L4 parts, the higher
+	  number USART ports supported varies.  Add the HAVE_USARTx definitions
+	  to the configuration to allow enabling the higher numbered USART ports.
+	  From Jim Wylder (2016-09-15).
+	* configs/stm32l476-mdk: Support basic booting and nsh on Motorola MDK.
+	  The Motorola MDK is based off of an earlier version of NuttX.  This
+	  only provides a basic NSH shell.  From Jim Wylder (2016-09-15).
+	* STM32 USB: Set USB address to avoid a failed assertion.  From Pierre-noel
+	  Bouteville (2016-09-15).
+	* STM32 L4 and L7 USB: Pierre's assertion-avoidance change should also be
+	  applied to STM32 F7 and L4 (2016-09-15).
+	* sched/: mq_send() was not setting the errno value on certain failures
+	  to allocate a message (2016-09-15).
+	* include/nuttx/modem:  Move all modem-related IOCTL commands to a common
+	  file to assure that they will be unique (2016-09-16).
+	* STM32 F4 Discovery:  Add support for XEN1210 3D-board.  From Alan
+	  Carvalho de Assis (2016-09-17).
+	* drivers/sensors: Adds support for the  Sensixs XEN1210 3D-board.  This
+	  sensor is used on NANOSATC-BR2 a Brazillian CUBESAT project.  From
+	  Alan Carvalho de Assis (2016-09-16).
+	* include/analog/dac.h: Make DAC structure packed.  From Marc Rechté
+	  (2016-09-20).
+	* All SAM Ethernet Drivers: Add support so that the drivers can be built
+	  with CONFIG_NET_MULTIBUFFER=y (2016-09-20).
+	* Tiva Ethernet:  Needs support for CONFIG_NET_MULTIBUFFER=y (2016-09-20).
+	* drivers/net: NET_TUN=y => NET_MULTIBUFFER=y.  From Vladimir
+	  Komendantskiy (2016-09-20).
+	* SAM3/4: Fix GPIO pull-up/down code. Enabling the pull-down resistor
+	  while the pull-up resistor is still enabled is not possible. In this
+	  case, the write of PIO_PPDER for the relevant I/O line is discarded.
+	  Likewise, enabling the pull-up resistor while the pull-down resistor
+	  is still enabled is not possible. In this case, the write of PIO_PUER
+	  for the relevant I/O line is discarded.  From Wolfgang Reißnegger
+	  (2016-09-20).
+	* SAM GPIO: Apply Wolfgang's change for SAM3/4 to SAMA5 and SAMV7
+	  (2016-09-20).
+	* Tiva QEI: Add QEI lower-half driver impl. for Tiva series chip.  From
+	  Young (2016-09-21).
+	* STM32, L4, and F7: Remove GPIO_ETH_RMII_TX_CLK. TX_CLK is not present
+	  in RMII. Mateusz Szafoni (2016-09-22).
+	* sched/: Define 'group' even if HAVE_GROUPID is not set.  From Mateusz
+	  Szafoni (2016-09-22).
+	* sched/: vector table should have dimension NR_IRQS, not NR_IRQS+1.
+	  From Sagitta Li (2016-09-22).
+	* fs/mount: Corrects a bad assertion noted by Pierre-noel Bouteville.
+	  Also fixes a reference counting problem in an error condition:  When
+	  the mountpoint inode is found but is not an appropriate mountpoint,
+	  the reference count on the inode was not being decremented (2016-09-22).
+	* libnx/nxglib: Fix handling of near-horizontal lines of width 1 in
+	  nxgl_splitline().  Missing handling for degenerate condition caused
+	  width 1 lines such as (0, 0) - (100, 10) to have gaps in the drawing.
+	  From Petteri Aimonen (2016-09-22).
+	* drivers/net/slip.c: Fix calculations using MSEC_PER_TICK.  If
+	  USEC_PER_TICK is less than 1000, then MSEC_PER_TICK will be zero.  It
+	  will be inaccurate in any case (2016-09-25).
+	* Tiva QEI: Add a new ioctl command (set MAXPOS) for tiva QEI.  From
+	  Young (2016-09-26).
+	* LPC43xx Serial: There are some small problems in LPC43xx RS485 mode
+	  configuration. In particular: (1) UART0,2,3 do not have DTR pins
+	  (different from UART1), so, Kconfig needs to be adjusted. (2)
+	  lpc43_uart.c in RS485 mode only configures DIR pin, but doesn't enable
+	  pin output for UART0,2,3. (3) should be option to reverse DIR control
+	  pin output polarity. (4) lpc43xx/chip/lpc43_uart.h doesn't have USART3
+	  definitions.  NOTE: I didn't modified and didn't tested USART1, as it
+	  has different hardware.  From Vytautas Lukenskas.  From Vytautas
+	  Lukenskas (2016-09-30).
+	* STM32 Ethernet: Correct typo in conditional logic.  From Neil Hancock
+	  (2016-10-01).
+	* sched/pthread and task:  When a pthread is started, there is a small
+	  bit of logic that will run on the thread of execution of the new
+	  pthread.  In the case where the new pthread has a lower priority than
+	  the parent thread, then this could cause both the parent thread and
+	  the new pthread to be blocked at the priority of the lower priority
+	  pthread (assuming that CONFIG_PRIORITY_INHERITANCE is not selected).
+	  This change temporarily boosts the priority of the new pthread to at
+	  least the priority of the new pthread to at least the priority of the
+	  parent thread.  When that bit of logic has executed on the thread of
+	  execution of the new pthread, it will then drop to the correct
+	  priority (if necessary) before calling into the new pthread's entry
+	  point (2016-10-01).
+	* configs/stm32f103-minimum: Add stm32_bringup support and userled
+	  example to STM32F103 Minimum board.  From Alan Carvalho de Assis
+	  (2016-10-02).
+	* STM32 L4: Add support for quadrature encoders on STM32L4. Sebastien
+	  Lorquet (2016-10-02).
+	* configs: Add support for qencoders on various nucleo boards.  From
+	  Sebastien Lorquet (2016-10-03).
+	* STM32 L4 USB Device: Fixed L4 USB Driver by avoiding SETUPDONE and
+	  EPOUT_SETUP.  From David Sidrane (2016-10-04).
+	* configs/olimex-stm32-e407: Add some networking configurations.  From
+	  Mateusz Szafoni (2016-10-06).
+	* STM32 SPI: stm32_modifycr2 should be available on all platforms if DMA
+	  is enabled. (2016-10-06).
+	* STM32 DMA2D: fix an error in up_dma2dcreatelayer where an invalid
+	  pointer was returned when a certain underlying function failed.  From
+	  Jens Gräf (2016-10-07).
+
+7.19 2016-xx-xx Gregory Nutt <gnutt@nuttx.org>
