@@ -41,6 +41,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <stdbool.h>
+
 #include <nuttx/fs/fs.h>
 
 /****************************************************************************
@@ -134,6 +137,7 @@ extern "C"
  *
  ****************************************************************************/
 
+struct mtd_dev_s;
 int nxffs_initialize(FAR struct mtd_dev_s *mtd);
 
 /****************************************************************************
@@ -154,6 +158,7 @@ int nxffs_initialize(FAR struct mtd_dev_s *mtd);
  *
  ****************************************************************************/
 
+struct mtd_dev_s;
 int nxffs_dump(FAR struct mtd_dev_s *mtd, bool verbose);
 
 #undef EXTERN
