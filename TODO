@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated July 20, 2016)
+NuttX TODO List (Last updated October 9, 2016)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -11,18 +11,19 @@ nuttx/:
 
  (13)  Task/Scheduler (sched/)
   (1)  Memory Management (mm/)
+  (1)  Power Management (drivers/pm)
   (3)  Signals (sched/signal, arch/)
   (2)  pthreads (sched/pthread)
   (0)  Message Queues (sched/mqueue)
   (9)  Kernel/Protected Build
   (3)  C++ Support
   (6)  Binary loaders (binfmt/)
- (11)  Network (net/, drivers/net)
+ (12)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
   (0)  Other drivers (drivers/)
  (11)  Libraries (libc/, libm/)
  (11)  File system/Generic drivers (fs/, drivers/)
-  (8)  Graphics subsystem (graphics/)
+  (9)  Graphics Subsystem (graphics/)
   (2)  Build system / Toolchains
   (3)  Linux/Cywgin simulation (arch/sim)
   (4)  ARM (arch/arm/)
@@ -323,6 +324,34 @@ o Memory Management (mm/)
   Priority:    Medium/Low, a good feature to prevent memory leaks but would
                have negative impact on memory usage and code size.
 
+o Power Management (drivers/pm)
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  Title:       PM CALLBACKS AREN'T BASED ON DOMAIN
+  Description: Recently support for different power domains was added.  Prior
+               to this, only a single domain (the "IDLE" domain was supported).
+               Having multiple power domains extends the basic concept to
+               support power management for different functionality.  For
+               example, a UI may be managed separately from, say, some network
+               functionality.
+
+               One thing that was missed when the PM domains was added was
+               support for domain-specific driver callbacks:  Currently, all
+               callbacks will be invoked for all PM domain events making it
+               impossible to distinguish the domain in the driver.
+
+               Possibilities:
+               - Add a domain value to the PM registration function.  In this
+                 case, callbacks would be retained separately for each domain
+                 and those callbacks would be invoked only for domain-specific
+                 events.
+               - Add a domain value to the PM callback functions.  In this case,
+                 each driver would receive events from all domains and could
+                 respond different (or ignore) events from other domains.
+  Status:      Open
+  Priority:    Currently low because I know of no use of the multiple PM
+               domains.  But, obviously, this would become important if the
+               features were used.
 o Signals (sched/signal, arch/)
   ^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -1032,6 +1061,15 @@ o Network (net/, drivers/net)
   Status:      Open
   Priority:    Low
 
+  Title:       REMOVE CONFIG_NET_MULTIBUFFER
+  Description: The CONFIG_NET_MULTIBUFFER controls some details in the layout
+               of the network device structure. This is really a unnecessary
+               complexity and should be removed.  The cost for those network
+               drivers that currently do not support CONFIG_NET_MULTIBUFFER
+               is the size of one pointer.
+  Status:      Open
+  Priority:    Low
+
 o USB (drivers/usbdev, drivers/usbhost)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -1501,7 +1539,7 @@ o File system / Generic drivers (fs/, drivers/)
                   ignored by readder() logic.  This the file does not
                   appear in the 'ls'.
 
-o Graphics subsystem (graphics/)
+o Graphics Subsystem (graphics/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   See also the NxWidgets TODO list file for related issues.
@@ -1620,6 +1658,21 @@ o Build system
   Status:      Open
   Priority:    Low, since I am not aware of anyone using the Windows Native build.
                But, of course, very high if you want to use it.
+
+  Title:       REMOVE SINGLE USER MODE
+  Description: The graphics sub-system can operate in either a single-user mode or
+               in a multi-user mode.  In the multiple-user mode, a kernel thread
+               is used to support a graphics server.  Multiple applications may then
+               communicate with the server using a message queue.  This users only
+               standard POSIX interfaces and works in all build modes (FLAT,
+               PROTECTED, and KERNEL builds).
+
+               The single-user mode, on the hand, uses inappropriate calls directly
+               into the OS.  This violates the POSIX interface and must, eventually,
+               be eliminated.  These inappropriate calls can only be supported in
+               the FLAT build mode.
+  Status:      Open
+  Priority:    Medium-High
 
 o Other drivers (drivers/)
   ^^^^^^^^^^^^^^^^^^^^^^^^
