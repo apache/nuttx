@@ -652,7 +652,7 @@ int kinetis_spi2cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cm
  *
  ****************************************************************************/
 
-#if defined(CONFIG_KINETIS_SPI0) || defined(CONFIG_KINETIS_SPI0) || defined(CONFIG_KINETIS_SPI2)
+#if defined(CONFIG_KINETIS_SPI0) || defined(CONFIG_KINETIS_SPI1) || defined(CONFIG_KINETIS_SPI2)
 struct spi_dev_s;
 void spi_flush(FAR struct spi_dev_s *dev);
 #endif
