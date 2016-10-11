@@ -449,7 +449,7 @@ f Application Configuration -> Network Utilities
 Timers
 ======
 
-  Tiva timers may be enbled in 32-bit periodic mode using these settings.
+  Tiva timers may be enabled in 32-bit periodic mode using these settings.
 
   This settings enables the "upper half" timer driver:
 
