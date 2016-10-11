@@ -1501,7 +1501,7 @@ config ARCH_HAVE_LEDS
 	bool
 
 config ARCH_LEDS
-	bool "Board LED support"
+	bool "Board LED Status support"
 	default y
 	depends on ARCH_HAVE_LEDS
 	---help---
