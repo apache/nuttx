@@ -152,6 +152,15 @@
 #  define SDIO_SDXFR_CLKDIV     (3 << SDIO_CLKCR_CLKDIV_SHIFT)
 #endif
 
+/* BUTTON definitions ***************************************************************/
+
+#define NUM_BUTTONS       2
+
+#define BUTTON_USER1      0
+#define BUTTON_USER2      1
+#define BUTTON_USER1_BIT  (1 << BUTTON_USER1)
+#define BUTTON_USER2_BIT  (1 << BUTTON_USER2)
+
 /* LED definitions ******************************************************************/
 
 /* Define how many LEDs this board has (needed by userleds) */

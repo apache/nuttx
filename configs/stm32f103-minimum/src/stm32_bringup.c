@@ -61,6 +61,10 @@
 #  include "stm32_usbhost.h"
 #endif
 
+#ifdef CONFIG_BUTTONS
+#  include <nuttx/input/buttons.h>
+#endif
+
 #ifdef CONFIG_USERLED
 #  include <nuttx/leds/userled.h>
 #endif
@@ -125,6 +129,16 @@ int stm32_bringup(void)
   if (os)
     {
       ret = oneshot_register("/dev/oneshot", os);
+    }
+#endif
+
+#ifdef CONFIG_BUTTONS
+  /* Register the BUTTON driver */
+
+  ret = btn_lower_initialize("/dev/buttons");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
     }
 #endif
 
