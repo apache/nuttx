@@ -959,6 +959,8 @@ config ARCH_BOARD_STM32F103_MINIMUM
 	bool "STM32F103C8T6 Minimum ARM Development Board"
 	depends on ARCH_CHIP_STM32F103C8
 	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		A configuration for the STM32F103 Minimum board.
 
