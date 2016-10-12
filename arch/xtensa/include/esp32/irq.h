@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/include/irq.h
+ * arch/xtensa/include/esp32/irq.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -37,33 +37,14 @@
  * through nuttx/irq.h
  */
 
-#ifndef __ARCH_XTENSA_INCLUDE_IRQ_H
-#define __ARCH_XTENSA_INCLUDE_IRQ_H
+#ifndef __ARCH_XTENSA_INCLUDE_ESP32_IRQ_H
+#define __ARCH_XTENSA_INCLUDE_ESP32_IRQ_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-/* Include NuttX-specific IRQ definitions */
-
-#include <nuttx/irq.h>
-
-/* Include architecture-specific IRQ definitions */
-
-#ifdef CONFIG_ARCH_CHIP_LX6
-#  include <arch/lx6/irq.h>
-
-/* Include implementation-specific IRQ definitions (including IRQ numbers) */
-
-#  ifdef CONFIG_ARCH_CHIP_ESP32
-#    include <arch/esp32/irq.h>
-#  else
-#    error Unknown LX6 implementation
-#  endif
-
-#else
-#  error Unknown XTENSA architecture
-#endif
+#include <arch/esp32/chip.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -101,4 +82,4 @@ extern "C"
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_XTENSA_INCLUDE_IRQ_H */
+#endif /* __ARCH_XTENSA_INCLUDE_ESP32_IRQ_H */
