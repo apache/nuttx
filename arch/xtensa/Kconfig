@@ -1,0 +1,31 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_XTENSA
+
+choice
+	prompt "XTENSA architecture selection"
+	default ARCH_CHIP_LX6
+
+config ARCH_CHIP_LX6
+	bool "LX6 DPU"
+	select ARCH_LX6
+	---help---
+		Cadence® Tensilica® Xtensa® LX6 data plane processing unit (DPU).
+		The LX6 is a configurable and extensible processor core.
+
+endchoice # XTENSA chip selection
+
+config ARCH_LX6
+	bool
+	default n
+
+config ARCH_CHIP
+	string
+	default "lx6"		if ARCH_LX6
+
+source arch/xtensa/src/lx6/Kconfig
+
+endif # ARCH_XTENSA
