@@ -246,6 +246,14 @@ configs/ekk-lm3s9b96
   TI/Stellaris EKK-LM3S9B96 board.  This board is based on the
   an EKK-LM3S9B96 which is a Cortex-M3.
 
+configs/esp-core
+  The ESP32 is a dual-core system from Expressif with two Harvard
+  architecture Xtensa LX6 CPUs. All embedded memory, external memory and
+  nd peripherals are located on the data bus and/or the instruction bus of
+  bus of these CPUs. With some minor exceptions, the address mapping of two
+  CPUs is symmetric, meaning they use the same addresses to access the same
+  memory.
+
 configs/ez80f0910200kitg
   ez80Acclaim! Microcontroller.  This port use the Zilog ez80f0910200kitg
   development kit, eZ80F091 part, and the Zilog ZDS-II Windows command line
