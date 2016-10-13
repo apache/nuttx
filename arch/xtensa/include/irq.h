@@ -50,7 +50,7 @@
 
 /* Include architecture-specific IRQ definitions */
 
-#ifdef CONFIG_ARCH_CHIP_LX6
+#ifdef CONFIG_ARCH_FAMILY_LX6
 #  include <arch/lx6/irq.h>
 
 /* Include implementation-specific IRQ definitions (including IRQ numbers) */

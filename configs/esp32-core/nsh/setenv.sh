@@ -49,7 +49,7 @@ fi
 
 # This is the path to the location where I installed the Expressif crosstools-NG
 # toolchaing
-export TOOLCHAIN_BIN="home/patacongo/projects/nuttx/crosstool-NG/builds/xtensa-esp32-elf/bin"
+export TOOLCHAIN_BIN="/home/patacongo/projects/nuttx/crosstool-NG/builds/xtensa-esp32-elf/bin"
 
 # Add the path to the toolchain to the PATH variable
 export PATH="${TOOLCHAIN_BIN}:/sbin:/usr/sbin:${PATH_ORIG}"
