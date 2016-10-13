@@ -70,7 +70,7 @@ config ARCH_X86
 config ARCH_XTENSA
 	bool "Xtensa"
 	---help---
-		Cadence Cadence® Tensilica® Xtensa® actictures.
+		Cadence® Tensilica® Xtensa® actictures.
 
 config ARCH_Z16
 	bool "ZNEO"
