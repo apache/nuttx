@@ -131,6 +131,10 @@ ifeq ($(CONFIG_PWM),y)
 CHIP_CSRCS += kinetis_pwm.c
 endif
 
+ifeq ($(CONFIG_PWM),y)
+CHIP_CSRCS += kinetis_dma.c
+endif
+
 ifeq ($(CONFIG_I2C),y)
 CHIP_CSRCS += kinetis_i2c.c
 endif
