@@ -39,3 +39,21 @@ README for the Expressif ESP32 Core board (V2)
     - 41 peripherals
   * DMA
     - 13 modules are capable of DMA operation
+
+ESP32 Toolchain
+===============
+
+  The steps to build toolchain with crosstool-NG on Linux are as follows:
+
+    git clone -b xtensa-1.22.x https://github.com/espressif/crosstool-NG.git
+    cd crosstool-NG
+    ./bootstrap && ./configure --prefix=$PWD && make install
+    ./ct-ng xtensa-esp32-elf
+    ./ct-ng build
+    chmod -R u+w builds/xtensa-esp32-elf
+
+  These steps are given in setup guide in ESP-IDF repository:
+  https://github.com/espressif/esp-idf/blob/master/docs/linux-setup.rst#alternative-step-1-compile-the-toolchain-from-source-using-crosstool-ng
+
+  NOTE: the xtensa-esp32-elf configuration is only available in the
+  xtensa-1.22.x branch.
