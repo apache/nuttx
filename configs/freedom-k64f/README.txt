@@ -56,6 +56,8 @@ OpenSDAv2
   HDK-compatible debug interface preloaded with the open-source CMSIS-DAP
   Interface firmware (mbed interface) for rapid prototyping and product
   development.
+  
+  To use set raw binary output for nuttx.bin
 
 Serial Console
 ==============

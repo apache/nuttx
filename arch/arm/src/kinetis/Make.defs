@@ -90,7 +90,7 @@ CHIP_ASRCS  =
 CHIP_CSRCS  = kinetis_allocateheap.c kinetis_clockconfig.c
 CHIP_CSRCS += kinetis_clrpend.c kinetis_idle.c kinetis_irq.c
 CHIP_CSRCS += kinetis_lowputc.c kinetis_pin.c kinetis_pingpio.c
-CHIP_CSRCS += kinetis_serial.c kinetis_start.c kinetis_wdog.c
+CHIP_CSRCS += kinetis_serial.c kinetis_start.c kinetis_uid.c kinetis_wdog.c
 CHIP_CSRCS += kinetis_cfmconfig.c
 
 # Configuration-dependent Kinetis files
