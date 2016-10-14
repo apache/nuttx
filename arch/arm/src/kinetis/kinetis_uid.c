@@ -36,7 +36,7 @@
  * Included Files
  ************************************************************************************/
 
-//#include <nuttx/config.h>
+#include <nuttx/config.h>
 
 #include <chip/kinetis_k64memorymap.h>
 #include <chip/kinetis_sim.h>
