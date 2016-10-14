@@ -128,7 +128,7 @@ struct stm32l4_pwmchan_s
   uint8_t channel;                     /* Timer output channel: {1,..4} */
   uint32_t pincfg;                     /* Output pin configuration */
   enum stm32l4_chanmode_e mode;
-  uint32_t npincfg;                 /* Complementary output pin configuration (only TIM1/8 CH1-3)*/
+  uint32_t npincfg;                    /* Complementary output pin configuration (only TIM1/8 CH1-3)*/
 };
 
 /* This structure represents the state of one PWM timer */
@@ -996,10 +996,10 @@ static int stm32l4pwm_timer(FAR struct stm32l4_pwmtimer_s *priv,
 
   /* Handle channel specific setup */
 
-  ccenable = 0;
+  ccenable  = 0;
   ccnenable = 0;
-  ocmode1  = 0;
-  ocmode2  = 0;
+  ocmode1   = 0;
+  ocmode2   = 0;
 
 #ifdef CONFIG_PWM_MULTICHAN
   for (i = 0; i < CONFIG_PWM_NCHANNELS; i++)
@@ -1104,7 +1104,7 @@ static int stm32l4pwm_timer(FAR struct stm32l4_pwmtimer_s *priv,
 
               /* Conditionnaly enable the complementary output */
 
-              if(compout)
+              if (compout)
                 {
                   ccnenable |= ATIM_CCER_CC1NE;
                 }
@@ -1134,7 +1134,7 @@ static int stm32l4pwm_timer(FAR struct stm32l4_pwmtimer_s *priv,
 
               /* Conditionnaly enable the complementary output */
 
-              if(compout)
+              if (compout)
                 {
                   ccnenable |= ATIM_CCER_CC2NE;
                 }
@@ -1164,7 +1164,7 @@ static int stm32l4pwm_timer(FAR struct stm32l4_pwmtimer_s *priv,
 
               /* Conditionnaly enable the complementary output */
 
-              if(compout)
+              if (compout)
                 {
                   ccnenable |= ATIM_CCER_CC3NE;
                 }
@@ -1289,14 +1289,13 @@ static int stm32l4pwm_timer(FAR struct stm32l4_pwmtimer_s *priv,
        */
 
       ccer &= ~(ATIM_CCER_CC1NE | ATIM_CCER_CC1NP);
-
       ccer |= ccnenable;
     }
   else
 #endif
 #endif
     {
-      ccer &= ~(GTIM_CCER_CC1NP | GTIM_CCER_CC2NP | GTIM_CCER_CC3NP); //Not sure why ??
+      ccer &= ~(GTIM_CCER_CC1NP | GTIM_CCER_CC2NP | GTIM_CCER_CC3NP); /* Not sure why? */
     }
 
   /* Save the modified register values */
@@ -1783,7 +1782,6 @@ static int stm32l4pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
           pwminfo("pincfg: %08x\n", pincfg);
 
           pincfg &= (GPIO_PORT_MASK | GPIO_PIN_MASK);
-
           pincfg |= GPIO_INPUT | GPIO_FLOAT;
 
           stm32l4_configgpio(pincfg);
@@ -1795,7 +1793,6 @@ static int stm32l4pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
           pwminfo("npincfg: %08x\n", pincfg);
 
           pincfg &= (GPIO_PORT_MASK | GPIO_PIN_MASK);
-
           pincfg |= GPIO_INPUT | GPIO_FLOAT;
 
           stm32l4_configgpio(pincfg);

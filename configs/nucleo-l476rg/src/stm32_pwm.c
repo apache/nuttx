@@ -96,14 +96,15 @@ int board_pwm_setup(void)
   if (!initialized)
     {
       /* Call stm32l4_pwminitialize() to get an instance of the PWM interface */
-/* PWM
- *
- * The Nucleo-l476rg has no real on-board PWM devices, but the board can be
- * configured to output a pulse train using TIM1 or 8, or others (see board.h).
- * Let's figure out which the user has configured.
- */
 
-# if defined(CONFIG_STM32L4_TIM1_PWM)
+      /* PWM
+       *
+       * The Nucleo-l476rg has no real on-board PWM devices, but the board can be
+       * configured to output a pulse train using TIM1 or 8, or others (see board.h).
+       * Let's figure out which the user has configured.
+       */
+
+#if defined(CONFIG_STM32L4_TIM1_PWM)
       pwm = stm32l4_pwminitialize(1);
       if (!pwm)
         {
@@ -121,7 +122,7 @@ int board_pwm_setup(void)
         }
 #endif
 
-# if defined(CONFIG_STM32L4_TIM2_PWM)
+#if defined(CONFIG_STM32L4_TIM2_PWM)
       pwm = stm32l4_pwminitialize(2);
       if (!pwm)
         {
@@ -139,7 +140,7 @@ int board_pwm_setup(void)
         }
 #endif
 
-# if defined(CONFIG_STM32L4_TIM3_PWM)
+#if defined(CONFIG_STM32L4_TIM3_PWM)
       pwm = stm32l4_pwminitialize(3);
       if (!pwm)
         {
@@ -157,7 +158,7 @@ int board_pwm_setup(void)
         }
 #endif
 
-# if defined(CONFIG_STM32L4_TIM4_PWM)
+#if defined(CONFIG_STM32L4_TIM4_PWM)
       pwm = stm32l4_pwminitialize(4);
       if (!pwm)
         {
@@ -175,7 +176,7 @@ int board_pwm_setup(void)
         }
 #endif
 
-# if defined(CONFIG_STM32L4_TIM5_PWM)
+#if defined(CONFIG_STM32L4_TIM5_PWM)
       pwm = stm32l4_pwminitialize(5);
       if (!pwm)
         {
@@ -193,7 +194,7 @@ int board_pwm_setup(void)
         }
 #endif
 
-# if defined(CONFIG_STM32L4_TIM8_PWM)
+#if defined(CONFIG_STM32L4_TIM8_PWM)
       pwm = stm32l4_pwminitialize(8);
       if (!pwm)
         {
@@ -211,7 +212,7 @@ int board_pwm_setup(void)
         }
 #endif
 
-# if defined(CONFIG_STM32L4_TIM15_PWM)
+#if defined(CONFIG_STM32L4_TIM15_PWM)
       pwm = stm32l4_pwminitialize(15);
       if (!pwm)
         {
@@ -229,7 +230,7 @@ int board_pwm_setup(void)
         }
 #endif
 
-# if defined(CONFIG_STM32L4_TIM16_PWM)
+#if defined(CONFIG_STM32L4_TIM16_PWM)
       pwm = stm32l4_pwminitialize(16);
       if (!pwm)
         {
@@ -247,7 +248,7 @@ int board_pwm_setup(void)
         }
 #endif
 
-# if defined(CONFIG_STM32L4_TIM17_PWM)
+#if defined(CONFIG_STM32L4_TIM17_PWM)
       pwm = stm32l4_pwminitialize(17);
       if (!pwm)
         {
@@ -273,3 +274,4 @@ int board_pwm_setup(void)
 }
 
 #endif /* CONFIG_PWM */
+
