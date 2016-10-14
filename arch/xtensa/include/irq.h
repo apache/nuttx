@@ -69,11 +69,108 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* IRQ Stack Frame Format.  Each value is a uint32_t register index */
+
+#define REG_EXIT            (0)  /* Exit point for dispatch */
+#define REG_PC              (1)  /* Return PC */
+#define REG_PS              (2)  /* Return PS */
+#define REG_A0              (3)
+#define REG_A1              (4)  /* Stack pointer before interrupt */
+#define REG_A2              (5)
+#define REG_A3              (6)
+#define REG_A4              (7)
+#define REG_A5              (8)
+#define REG_A6              (9)
+#define REG_A7              (10)
+#define REG_A8              (11)
+#define REG_A9              (12)
+#define REG_A10             (13)
+#define REG_A11             (14)
+#define REG_A12             (15)
+#define REG_A13             (16)
+#define REG_A14             (17)
+#define REG_A15             (18)
+#define REG_SAR             (19)
+#define REG_EXCCAUSE        (20)
+#define REG_EXCVADDR        (21)
+#define _REG_LOOPS_START    (22)
+
+#if CONFIG_XTENSA_HAVE_LOOPS
+#  define REG_LBEG          (_REG_LOOPS_START + 0)
+#  define REG_LEND          (_REG_LOOPS_START + 1)
+#  define REG_LCOUNT        (_REG_LOOPS_START + 2)
+#  define _REG_CALL0_START  (_REG_LOOPS_START + 3)
+#else
+#  define _REG_CALL0_START  _REG_LOOPS_START
+#endif
+
+#ifndef CONFIG_XTENSA_CALL0_ABI
+  /* Temporary space for saving stuff during window spill */
+
+#  define REG_TMP0          (_REG_CALL0_START + 0)
+#  define REG_TMP1          (_REG_CALL0_START + 1)
+#  define REG_TMP2          (_REG_CALL0_START + 2)
+#  define _REG_SWPRI_START  (_REG_CALL0_START + 3)
+#else
+#  define _REG_SWPRI_START  _REG_CALL0_START
+#endif
+
+#ifdef CONFIG_XTENSA_USE_SWPRI
+  /* Storage for virtual priority mask */
+
+#  define REG_VPRI          (_REG_SWPRI_START + 0)
+#  define _REG_OVLY_START   (_REG_SWPRI_START + 1)
+#else
+#  define _REG_OVLY_START   _REG_SWPRI_START
+#endif
+
+#ifdef CONFIG_XTENSA_USE_OVLY
+/* Storage for overlay state */
+
+#  define REG_OVLY          (_REG_OVLY_START + 0)
+#  define XCPTCONTEXT_REGS  (_REG_OVLY_START + 1)
+#else
+#  define XCPTCONTEXT_REGS   _REG_OVLY_START
+#endif
+
+#define XCPTCONTEXT_SIZE    (4 * XCPTCONTEXT_REGS)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
+
+/* This struct defines the way the registers are stored. */
+
+struct xcptcontext
+{
+  /* The following function pointer is non-zero if there are pending signals
+   * to be processed.
+   */
+
+#ifndef CONFIG_DISABLE_SIGNALS
+  void *sigdeliver; /* Actual type is sig_deliver_t */
+
+  /* These are saved copies of registers used during signal processing. */
+
+  uint32_t saved_pc;
+  uint32_t saved_cpsr;
+#endif
+
+  /* Register save area */
+
+  uint32_t regs[XCPTCONTEXT_REGS];
+
+#ifdef CONFIG_LIB_SYSCALL
+  /* The following array holds the return address and the exc_return value
+   * needed to return from each nested system call.
+   */
+
+  uint8_t nsyscalls;
+  struct xcpt_syscall_s syscall[CONFIG_SYS_NNEST];
+#endif
+};
 
 /****************************************************************************
  * Inline functions

@@ -29,6 +29,22 @@ config ARCH_FAMILY_LX6
 		Cadence® Tensilica® Xtensa® LX6 data plane processing unit (DPU).
 		The LX6 is a configurable and extensible processor core.
 
+config XTENSA_HAVE_LOOPS
+	bool "Zero overhead loops"
+	default n
+
+config XTENSA_USE_SWPRI
+	bool "Use SWPRI"
+	default n
+
+config XTENSA_CALL0_ABI
+	bool "CALL0 ABI"
+	default y
+
+config XTENSA_USE_OVLY
+	bool "Use overlay"
+	default n
+
 config ARCH_CHIP
 	string
 	default "esp32"		if ARCH_CHIP_ESP32
