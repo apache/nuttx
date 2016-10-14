@@ -114,6 +114,11 @@
 #  else
 #    define PWM_TIM1_CH1CFG 0
 #  endif
+#  ifdef CONFIG_STM32L4_TIM1_CH1NOUT
+#    define PWM_TIM1_CH1NCFG GPIO_TIM1_CH1NOUT
+#  else
+#    define PWM_TIM1_CH1NCFG 0
+#  endif
 #  define PWM_TIM1_CHANNEL1 1
 #else
 #  define PWM_TIM1_CHANNEL1 0
@@ -124,6 +129,11 @@
 #  else
 #    define PWM_TIM1_CH2CFG 0
 #  endif
+#  ifdef CONFIG_STM32L4_TIM1_CH2NOUT
+#    define PWM_TIM1_CH2NCFG GPIO_TIM1_CH2NOUT
+#  else
+#    define PWM_TIM1_CH2NCFG 0
+#  endif
 #  define PWM_TIM1_CHANNEL2 1
 #else
 #  define PWM_TIM1_CHANNEL2 0
@@ -133,6 +143,11 @@
 #    define PWM_TIM1_CH3CFG GPIO_TIM1_CH3OUT
 #  else
 #    define PWM_TIM1_CH3CFG 0
+#  endif
+#  ifdef CONFIG_STM32L4_TIM1_CH3NOUT
+#    define PWM_TIM1_CH3NCFG GPIO_TIM1_CH3NOUT
+#  else
+#    define PWM_TIM1_CH3NCFG 0
 #  endif
 #  define PWM_TIM1_CHANNEL3 1
 #else
@@ -329,6 +344,11 @@
 #  else
 #    define PWM_TIM8_CH1CFG 0
 #  endif
+#  ifdef CONFIG_STM32L4_TIM8_CH1OUT
+#    define PWM_TIM8_CH1NCFG GPIO_TIM8_CH1NOUT
+#  else
+#    define PWM_TIM8_CH1NCFG 0
+#  endif
 #  define PWM_TIM8_CHANNEL1 1
 #else
 #  define PWM_TIM8_CHANNEL1 0
@@ -339,6 +359,11 @@
 #  else
 #    define PWM_TIM8_CH2CFG 0
 #  endif
+#  ifdef CONFIG_STM32L4_TIM8_CH2NOUT
+#    define PWM_TIM8_CH2NCFG GPIO_TIM8_CH2NOUT
+#  else
+#    define PWM_TIM8_CH2NCFG 0
+#  endif
 #  define PWM_TIM8_CHANNEL2 1
 #else
 #  define PWM_TIM8_CHANNEL2 0
@@ -348,6 +373,11 @@
 #    define PWM_TIM8_CH3CFG GPIO_TIM8_CH3OUT
 #  else
 #    define PWM_TIM8_CH3CFG 0
+#  endif
+#  ifdef CONFIG_STM32L4_TIM8_CH3NOUT
+#    define PWM_TIM8_CH3NCFG GPIO_TIM8_CH3NOUT
+#  else
+#    define PWM_TIM8_CH3NCFG 0
 #  endif
 #  define PWM_TIM8_CHANNEL3 1
 #else
@@ -372,6 +402,11 @@
 #  else
 #    define PWM_TIM15_CH1CFG 0
 #  endif
+#  ifdef CONFIG_STM32L4_TIM15_CH1NOUT
+#    define PWM_TIM15_CH1NCFG GPIO_TIM15_CH1NOUT
+#  else
+#    define PWM_TIM15_CH1NCFG 0
+#  endif
 #  define PWM_TIM15_CHANNEL1 1
 #else
 #  define PWM_TIM15_CHANNEL1 0
@@ -394,6 +429,11 @@
 #  else
 #    define PWM_TIM16_CH1CFG 0
 #  endif
+#  ifdef CONFIG_STM32L4_TIM16_CH1NOUT
+#    define PWM_TIM16_CH1NCFG GPIO_TIM16_CH1NOUT
+#  else
+#    define PWM_TIM16_CH1NCFG 0
+#  endif
 #  define PWM_TIM16_CHANNEL1 1
 #else
 #  define PWM_TIM16_CHANNEL1 0
@@ -405,6 +445,11 @@
 #    define PWM_TIM17_CH1CFG GPIO_TIM17_CH1OUT
 #  else
 #    define PWM_TIM17_CH1CFG 0
+#  endif
+#  ifdef CONFIG_STM32L4_TIM17_CH1NOUT
+#    define PWM_TIM17_CH1NCFG GPIO_TIM17_CH1NOUT
+#  else
+#    define PWM_TIM17_CH1NCFG 0
 #  endif
 #  define PWM_TIM17_CHANNEL1 1
 #else

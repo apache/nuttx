@@ -207,3 +207,24 @@ int board_app_initialize(uintptr_t arg)
 
   return OK;
 }
+
+#ifdef CONFIG_BOARDCTL_IOCTL
+int board_ioctl(unsigned int cmd, uintptr_t arg)
+{
+  return -ENOTTY;
+}
+#endif
+
+#if defined(CONFIG_BOARDCTL_UNIQUEID)
+int board_uniqueid(uint8_t *uniqueid)
+{
+  if (uniqueid == 0)
+    {
+      return -EINVAL;
+    }
+
+  stm32l4_get_uniqueid(uniqueid);
+  return OK;
+}
+#endif
+
