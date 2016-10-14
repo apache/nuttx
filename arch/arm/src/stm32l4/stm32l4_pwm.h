@@ -422,7 +422,7 @@
                       PWM_MAX(PWM_TIM8_NCHANNELS, \
                       PWM_MAX(PWM_TIM15_NCHANNELS, \
                       PWM_MAX(PWM_TIM16_NCHANNELS, \
-                              PWM_TIM17_NCHANNELS))))))))))))))
+                              PWM_TIM17_NCHANNELS))))))))
 
 #else
 
