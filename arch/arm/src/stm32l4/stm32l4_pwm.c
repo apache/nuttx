@@ -1206,7 +1206,7 @@ static int stm32l4pwm_timer(FAR struct stm32l4_pwmtimer_s *priv,
        */
 
       ccer &= ~(ATIM_CCER_CC1NE | ATIM_CCER_CC1NP | ATIM_CCER_CC2NE | ATIM_CCER_CC2NP |
-                ATIM_CCER_CC3NE | ATIM_CCER_CC3NP | ATIM_CCER_CC4NP);
+                ATIM_CCER_CC3NE | ATIM_CCER_CC3NP);
 
       /* Reset the output compare and output compare N IDLE State */
 
@@ -1225,7 +1225,7 @@ static int stm32l4pwm_timer(FAR struct stm32l4_pwmtimer_s *priv,
   else
 #endif
     {
-      ccer &= ~(GTIM_CCER_CC1NP | GTIM_CCER_CC2NP | GTIM_CCER_CC3NP | ATIM_CCER_CC4NP);
+      ccer &= ~(GTIM_CCER_CC1NP | GTIM_CCER_CC2NP | GTIM_CCER_CC3NP);
     }
 
   /* Save the modified register values */
