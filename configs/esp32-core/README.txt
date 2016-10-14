@@ -1,5 +1,5 @@
 README for the Expressif ESP32 Core board (V2)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+==============================================
 
   The ESP32 is a dual-core system from Expressif with two Harvard
   architecture Xtensa LX6 CPUs. All embedded memory, external memory and
@@ -13,7 +13,8 @@ README for the Expressif ESP32 Core board (V2)
   "application"), however for most purposes the two CPUs are
   interchangeable.
 
-  Features:
+ESP32 Features
+==============
 
   * Address Space
     - Symmetric address mapping
@@ -43,7 +44,9 @@ README for the Expressif ESP32 Core board (V2)
 ESP32 Toolchain
 ===============
 
-  The steps to build toolchain with crosstool-NG on Linux are as follows:
+  You must use the custom Xtensa toolchain in order to build the ESP32 Core
+  BSP.  The steps to build toolchain with crosstool-NG on Linux are as
+  follows:
 
     git clone -b xtensa-1.22.x https://github.com/espressif/crosstool-NG.git
     cd crosstool-NG
@@ -55,5 +58,5 @@ ESP32 Toolchain
   These steps are given in setup guide in ESP-IDF repository:
   https://github.com/espressif/esp-idf/blob/master/docs/linux-setup.rst#alternative-step-1-compile-the-toolchain-from-source-using-crosstool-ng
 
-  NOTE: the xtensa-esp32-elf configuration is only available in the
+  NOTE: The xtensa-esp32-elf configuration is only available in the
   xtensa-1.22.x branch.
