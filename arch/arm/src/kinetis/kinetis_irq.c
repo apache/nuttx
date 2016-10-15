@@ -258,27 +258,27 @@ static int kinetis_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
 
   /* Check for external interrupt */
 
-  if (irq >= KINETIS_IRQ_EXTINT)
+  if (irq >= KINETIS_IRQ_FIRST)
     {
-      if (irq < (KINETIS_IRQ_EXTINT+32))
+      if (irq < (KINETIS_IRQ_FIRST+32))
         {
            *regaddr = (NVIC_IRQ0_31_ENABLE + offset);
-           *bit     = 1 << (irq - KINETIS_IRQ_EXTINT);
+           *bit     = 1 << (irq - KINETIS_IRQ_FIRST);
         }
-      else if (irq < (KINETIS_IRQ_EXTINT+64))
+      else if (irq < (KINETIS_IRQ_FIRST+64))
         {
            *regaddr = (NVIC_IRQ32_63_ENABLE + offset);
-           *bit     = 1 << (irq - KINETIS_IRQ_EXTINT - 32);
+           *bit     = 1 << (irq - KINETIS_IRQ_FIRST - 32);
         }
-      else if (irq < (KINETIS_IRQ_EXTINT+96))
+      else if (irq < (KINETIS_IRQ_FIRST+96))
         {
            *regaddr = (NVIC_IRQ64_95_ENABLE + offset);
-           *bit     = 1 << (irq - KINETIS_IRQ_EXTINT - 64);
+           *bit     = 1 << (irq - KINETIS_IRQ_FIRST - 64);
         }
       else if (irq < NR_IRQS)
         {
            *regaddr = (NVIC_IRQ96_127_ENABLE + offset);
-           *bit     = 1 << (irq - KINETIS_IRQ_EXTINT - 96);
+           *bit     = 1 << (irq - KINETIS_IRQ_FIRST - 96);
         }
       else
         {
@@ -472,7 +472,7 @@ void up_disable_irq(int irq)
        * clear the bit in the System Handler Control and State Register.
        */
 
-      if (irq >= KINETIS_IRQ_EXTINT)
+      if (irq >= KINETIS_IRQ_FIRST)
         {
           putreg32(bit, regaddr);
         }
@@ -509,7 +509,7 @@ void up_enable_irq(int irq)
        * set the bit in the System Handler Control and State Register.
        */
 
-      if (irq >= KINETIS_IRQ_EXTINT)
+      if (irq >= KINETIS_IRQ_FIRST)
         {
           putreg32(bit, regaddr);
         }
@@ -560,7 +560,7 @@ int up_prioritize_irq(int irq, int priority)
   DEBUGASSERT(irq >= KINETIS_IRQ_MEMFAULT && irq < NR_IRQS &&
               (unsigned)priority <= NVIC_SYSH_PRIORITY_MIN);
 
-  if (irq < KINETIS_IRQ_EXTINT)
+  if (irq < KINETIS_IRQ_FIRST)
     {
       /* NVIC_SYSH_PRIORITY() maps {0..15} to one of three priority
        * registers (0-3 are invalid)
@@ -573,7 +573,7 @@ int up_prioritize_irq(int irq, int priority)
     {
       /* NVIC_IRQ_PRIORITY() maps {0..} to one of many priority registers */
 
-      irq    -= KINETIS_IRQ_EXTINT;
+      irq    -= KINETIS_IRQ_FIRST;
       regaddr = NVIC_IRQ_PRIORITY(irq);
     }
 

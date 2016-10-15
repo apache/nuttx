@@ -46,8 +46,17 @@
  * should then include this file for the proper setup.
  */
 
+#include <arch/irq.h>
 #include <arch/kinetis/chip.h>
 #include "chip/kinetis_memorymap.h"
+
+/* If the common ARMv7-M vector handling logic is used, then it expects the
+ * following definition in this file that provides the number of supported external
+ * interrupts which, for this architecture, is provided in the arch/stm32f7/chip.h
+ * header file.
+ */
+
+#define ARMV7M_PERIPHERAL_INTERRUPTS NR_INTERRUPTS
 
 /************************************************************************************
  * Pre-processor Definitions
