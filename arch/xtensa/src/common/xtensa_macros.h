@@ -30,7 +30,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
-#ifdef __ARCH_XTENSA_SRC_COMMON_XTENSA_MACROS_H
+#ifndef __ARCH_XTENSA_SRC_COMMON_XTENSA_MACROS_H
 #define __ARCH_XTENSA_SRC_COMMON_XTENSA_MACROS_H 1
 
 /****************************************************************************

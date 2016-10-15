@@ -39,7 +39,7 @@ HEAD_ASRC =
 
 # Common XTENSA files (arch/xtensa/src/common)
 
-CMN_ASRCS  =
+CMN_ASRCS  = xtensa_irq.S
 CMN_CSRCS  = xtensa_allocateheap.c xtensa_createstack.c xtensa_exit.c
 CMN_CSRCS += xtensa_idle.c xtensa_initialize.c xtensa_interruptcontext.c
 CMN_CSRCS += xtensa_lowputs.c xtensa_mdelay.c xtensa_modifyreg8.c
