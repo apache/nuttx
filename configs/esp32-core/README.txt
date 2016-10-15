@@ -13,6 +13,21 @@ README for the Expressif ESP32 Core board (V2)
   "application"), however for most purposes the two CPUs are
   interchangeable.
 
+Contents
+========
+
+  o STATUS
+  o ESP32 Features
+  o ESP32 Toolchain
+  o Serial Console
+  o Buttons and LEDs
+  o Configurations
+
+STATUS
+======
+
+  The basic port is underway.  No testing has yet been performed.
+
 ESP32 Features
 ==============
 
@@ -60,3 +75,97 @@ ESP32 Toolchain
 
   NOTE: The xtensa-esp32-elf configuration is only available in the
   xtensa-1.22.x branch.
+
+Serial Console
+==============
+
+  To be provided
+
+Buttons and LEDs
+================
+
+  NOTE: As of this writing, I have no schematic for the ESP32 Core board.
+  The following information derives only from examining the parts visible
+  on the board.
+
+  Buttons
+  -------
+  I see two buttons labelled Boot and EN.  I suspect that neither is
+  available to software.
+
+  LEDs
+  A single LED labelled D1 is available.
+
+  When CONFIG_ARCH_LEDS is defined in the NuttX configuration, NuttX will
+  control the LED as follows:
+
+    SYMBOL              Meaning                 LED
+    ------------------- ----------------------- ------
+    LED_STARTED         NuttX has been started  OFF
+    LED_HEAPALLOCATE    Heap has been allocated OFF
+    LED_IRQSENABLED     Interrupts enabled      OFF
+    LED_STACKCREATED    Idle stack created      ON
+    LED_INIRQ           In an interrupt         N/C
+    LED_SIGNAL          In a signal handler     N/C
+    LED_ASSERTION       An assertion failed     N/C
+    LED_PANIC           The system has crashed  FLASH
+
+  Thus is LED is statically on, NuttX has successfully  booted and is,
+  apparently, running normally.  If LED is flashing at approximately
+  2Hz, then a fatal error has been detected and the system has halted.
+
+Configurations
+==============
+
+  Common Configuration Information
+  --------------------------------
+  Each ESP32 core configuration is maintained in sub-directories and
+  can be selected as follow:
+
+    cd tools
+    ./configure.sh esp32-core/<subdir>
+    cd -
+    make oldconfig
+    . ./setenv.sh
+
+  Before sourcing the setenv.sh file above, you should examine it and
+  perform edits as necessary so that TOOLCHAIN_BIN is the correct path to
+  the directory than holds your toolchain binaries.
+
+  If this is a Windows native build, then configure.bat should be used
+  instead of configure.sh:
+
+    configure.bat esp32-core\<subdir>
+
+  And then build NuttX by simply typing the following.  At the conclusion of
+  the make, the nuttx binary will reside in an ELF file called, simply,
+  nuttx.
+
+    make oldconfig
+    make
+
+  The <subdir> that is provided above as an argument to the
+  tools/configure.sh must be is one of the directories listed below.
+
+NOTES:
+
+  1. These configurations use the mconf-based configuration tool.  To
+     change any of these configurations using that tool, you should:
+
+    a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+       see additional README.txt files in the NuttX tools repository.
+
+    b. Execute 'make menuconfig' in nuttx/ in order to start the
+       reconfiguration process.
+
+  2. Unless stated otherwise, all configurations generate console
+     output on [To be provided].
+
+  Configuration sub-directories
+  -----------------------------
+
+  nsh:
+
+    Configures the NuttShell (nsh) located at apps/examples/nsh.
+
+    NOTES:

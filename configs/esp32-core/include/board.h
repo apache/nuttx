@@ -36,4 +36,29 @@
 #ifndef __CONFIGS_ESP32_CORE_INCLUDE_BOARD_H
 #define __CONFIGS_ESP32_CORE_INCLUDE_BOARD_H
 
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* A single LED labelled D1 is available.
+ *
+ *  When CONFIG_ARCH_LEDS is defined in the NuttX configuration, NuttX will
+ *  control the LED as follows:
+ *
+ *    SYMBOL              Value Meaning                 LED
+ *    ------------------- ----- ----------------------- ------ */
+#define LED_STARTED        0   /* NuttX has been started  OFF */
+#define LED_HEAPALLOCATE   0   /* Heap has been allocated OFF */
+#define LED_IRQSENABLED    0   /* Interrupts enabled      OFF */
+#define LED_STACKCREATED   1   /* Idle stack created      ON */
+#define LED_INIRQ          2   /* In an interrupt         N/C */
+#define LED_SIGNAL         2   /* In a signal handler     N/C */
+#define LED_ASSERTION      2   /* An assertion failed     N/C */
+#define LED_PANIC          3   /* The system has crashed  FLASH */
+
+/* Thus if the LED is statically on, NuttX has successfully  booted and is,
+ * apparently, running normally.  If LED is flashing at approximately
+ * 2Hz, then a fatal error has been detected and the system has halted.
+ */
+
 #endif /* __CONFIGS_ESP32_CORE_INCLUDE_BOARD_H */
