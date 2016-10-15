@@ -41,7 +41,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
-#include "up_internal.h"
+#include "xtensa.h"
 
 /****************************************************************************
  * Public Functions

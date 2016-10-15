@@ -45,7 +45,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 
-#include "up_internal.h"
+#include "xtensa.h"
 
 /****************************************************************************
  * Private Types

@@ -52,7 +52,7 @@
 #include "task/task.h"
 #include "sched/sched.h"
 #include "group/group.h"
-#include "up_internal.h"
+#include "xtensa.h"
 
 /****************************************************************************
  * Pre-processor Definitions

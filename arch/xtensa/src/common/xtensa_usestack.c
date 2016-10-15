@@ -47,7 +47,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
 
-#include "up_internal.h"
+#include "xtensa.h"
 
 /****************************************************************************
  * Pre-processor Definitions

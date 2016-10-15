@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/xtensa/common/xtensa_internal.h
+ * arch/xtensa/common/xtensa.h
  *
- *   Copyright (C) 2011, 2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_XTENSA_SRC_COMMON_XTENSA_INTERNAL_H
-#define __ARCH_XTENSA_SRC_COMMON_XTENSA_INTERNAL_H
+#ifndef __ARCH_XTENSA_SRC_COMMON_XTENSA_H
+#define __ARCH_XTENSA_SRC_COMMON_XTENSA_H
 
 /****************************************************************************
  * Included Files
@@ -104,12 +104,12 @@
 # define CONFIG_ARCH_INTERRUPTSTACK 0
 #endif
 
-/* In the XTENSA model, the state is copied from the stack to the TCB, but
- * only a referenced is passed to get the state from the TCB.
+/* In the XTENSA model, only a pointer to register state on the stack is
+ * saved in the TCB.
  */
 
-#define up_savestate(regs)    up_copystate(regs, (uint32_t*)g_current_regs)
-#define up_restorestate(regs) (g_current_regs = regs)
+#define up_savestate(regs)     do { reg = g_current_regs; } while (0)
+#define up_restorestate(regs)  do { g_current_regs = regs; } while (0)
 
 /****************************************************************************
  * Public Types
@@ -183,7 +183,7 @@ extern uint32_t _bmxdupba_address;  /* BMX register setting */
 
 #ifndef __ASSEMBLY__
 /* Common Functions *********************************************************/
-/* Common functions define in arch/xtensa/src/common.  These may be replaced
+/* Common functions define in arch/mips/src/common.  These may be replaced
  * with chip-specific functions of the same name if needed.  See also
  * functions prototyped in include/nuttx/arch.h.
  */
@@ -213,21 +213,21 @@ void up_dumpstate(void);
 #  define up_dumpstate()
 #endif
 
-/* Common XTENSA32 functions defined in arch/xtensa/src/XTENSA32 */
+/* Common XTENSA functions */
 /* IRQs */
 
 uint32_t *up_doirq(int irq, uint32_t *regs);
 
-/* Software interrupt 0 handler */
+/* Software interrupt handler */
 
-int up_swint0(int irq, FAR void *context);
+int up_swint(int irq, FAR void *context);
 
 /* Signals */
 
 void up_sigdeliver(void);
 
 /* Chip-specific functions **************************************************/
-/* Chip specific functions defined in arch/xtensa/src/<chip> */
+/* Chip specific functions defined in arch/mips/src/<chip> */
 /* IRQs */
 
 void up_irqinitialize(void);
@@ -282,4 +282,4 @@ void up_usbuninitialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __ARCH_XTENSA_SRC_COMMON_XTENSA_INTERNAL_H */
+#endif  /* __ARCH_XTENSA_SRC_COMMON_XTENSA_H */

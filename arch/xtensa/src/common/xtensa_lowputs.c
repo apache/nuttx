@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include "up_internal.h"
+#include "xtensa.h"
 
 /****************************************************************************
  * Pre-processor Definitions
