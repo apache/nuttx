@@ -93,7 +93,8 @@ static int findwidth(FAR const char *buf, FAR const char *fmt)
   FAR const char *next = fmt + 1;
 
   /* No... is there a space after the format? Or does the format string end
-   * here? */
+   * here?
+   */
 
   if (isspace(*next) || *next == 0)
     {
@@ -103,12 +104,14 @@ static int findwidth(FAR const char *buf, FAR const char *fmt)
     }
 
   /* No.. Another possibility is the format character is followed by some
-   * recognizable delimiting value. */
+   * recognizable delimiting value.
+   */
 
   if (*next != '%')
     {
       /* If so we will say that the string ends there if we can find that
-       * delimiter in the input string. */
+       * delimiter in the input string.
+       */
 
       FAR const char *ptr = strchr(buf, *next);
       if (ptr)
@@ -124,7 +127,8 @@ static int findwidth(FAR const char *buf, FAR const char *fmt)
    * format may be concatenated with the first. This is a bug.  We have no
    * generic way of determining the width of the data if there is no
    * fieldwidth, no space separating the input, and no usable delimiter
-   * character. */
+   * character.
+   */
 
   return strcspn(buf, spaces);
 }
@@ -176,7 +180,8 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
   linfo("vsscanf: buf=\"%s\" fmt=\"%s\"\n", buf, fmt);
 
   /* Remember the start of the input buffer.  We will need this for %n
-   * calculations. */
+   * calculations.
+   */
 
   bufstart = buf;
 
@@ -189,7 +194,8 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
 
   /* Loop until all characters in the fmt string have been processed.  We may
    * have to continue loop after reaching the end the input data in order to
-   * handle trailing %n format specifiers. */
+   * handle trailing %n format specifiers.
+   */
 
   while (*fmt)
     {
@@ -246,7 +252,8 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
 
               /* Get a pointer to the char * value.  We need to do this even if
                * we have reached the end of the input data in order to update
-               * the 'ap' variable. */
+               * the 'ap' variable.
+               */
 
               tv = NULL;        /* To avoid warnings about begin uninitialized */
               if (!noassign)
@@ -256,7 +263,8 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
                 }
 
               /* But we only perform the data conversion is we still have bytes
-               * remaining in the input data stream. */
+               * remaining in the input data stream.
+               */
 
               if (*buf)
                 {
@@ -273,7 +281,8 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
 
                   /* Use the actual field's width if 1) no fieldwidth specified
                    * or 2) the actual field's width is smaller than fieldwidth
-                   * specified */
+                   * specified
+                   */
 
                   if (!width || fwidth < width)
                     {
@@ -305,7 +314,8 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
 
               /* Get a pointer to the char * value.  We need to do this even if
                * we have reached the end of the input data in order to update
-               * the 'ap' variable. */
+               * the 'ap' variable.
+               */
 
               tv = NULL;        /* To avoid warnings about beign uninitialized */
               if (!noassign)
@@ -315,7 +325,8 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
                 }
 
               /* But we only perform the data conversion is we still have bytes
-               * remaining in the input data stream. */
+               * remaining in the input data stream.
+               */
 
               if (*buf)
                 {
@@ -338,7 +349,8 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
                     }
 
                   /* Update the buffer pointer past the character(s) in the
-                   * input */
+                   * input.
+                   */
 
                   buf += width;
                 }
@@ -356,12 +368,14 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
 
               /* Get a pointer to the integer value.  We need to do this even
                * if we have reached the end of the input data in order to
-               * update the 'ap' variable. */
+               * update the 'ap' variable.
+               */
 
               if (!noassign)
                 {
                   /* We have to check whether we need to return a long or an
-                   * int. */
+                   * int.
+                   */
 
                   if (lflag)
                     {
@@ -376,7 +390,8 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
                 }
 
               /* But we only perform the data conversion if we still have bytes
-               * remaining in the input data stream. */
+               * remaining in the input data stream.
+               */
 
               if (*buf)
                 {
@@ -392,7 +407,8 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
                     }
 
                   /* The base of the integer conversion depends on the specific
-                   * conversion specification. */
+                   * conversion specification.
+                   */
 
                   sign = false;
                   switch (*fmt)
@@ -464,7 +480,8 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
                     {
 
                       /* We have to check whether we need to return a long or
-                       * an int. */
+                       * an int.
+                       */
 
                       if (lflag)
                         {
@@ -484,7 +501,8 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
             }
 
           /* Process %a, %A, %f, %F, %e, %E, %g, and %G: Floating point
-           * conversions */
+           * conversions.
+           */
 
           else if (strchr("aAfFeEgG", *fmt) != NULL)
             {
@@ -497,12 +515,14 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
 
               /* Get a pointer to the double value.  We need to do this even if
                * we have reached the end of the input data in order to update
-               * the 'ap' variable. */
+               * the 'ap' variable.
+               */
 
               if (!noassign)
                 {
                   /* We have to check whether we need to return a float or a
-                   * double. */
+                   * double.
+                   */
 
 #ifdef CONFIG_HAVE_DOUBLE
                   if (lflag)
@@ -520,7 +540,8 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
 
 #ifdef CONFIG_LIBC_FLOATINGPOINT
               /* But we only perform the data conversion is we still have bytes
-               * remaining in the input data stream. */
+               * remaining in the input data stream.
+               */
 
               if (*buf)
                 {
@@ -574,16 +595,17 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
                       set_errno(errsave);
 
                       /* We have to check whether we need to return a float or
-                       * a double. */
+                       * a double.
+                       */
 
-#  ifdef CONFIG_HAVE_DOUBLE
+#ifdef CONFIG_HAVE_DOUBLE
                       if (lflag)
                         {
                           linfo("vsscanf: Return %f to %p\n", dvalue, pd);
                           *pd = dvalue;
                         }
                       else
-#  endif
+#endif
                         {
                           linfo("vsscanf: Return %f to %p\n", dvalue, pf);
                           *pf = (float)dvalue;
@@ -659,7 +681,8 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
     }
 
   /* sscanf is required to return EOF if the input ends before the first
-   * matching failure or conversion. */
+   * matching failure or conversion.
+   */
 
   return count ? count : EOF;
 }
