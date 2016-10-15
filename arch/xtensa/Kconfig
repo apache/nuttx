@@ -12,6 +12,7 @@ choice
 config ARCH_CHIP_ESP32
 	bool "Expressif ESP32"
 	select ARCH_FAMILY_LX6
+	select XTENSA_HAVE_INTERRUPTS
 	---help---
 		The ESP32 is a dual-core system from Expressif with two Harvard
 		architecture Xtensa LX6 CPUs. All embedded memory, external memory
@@ -31,6 +32,10 @@ config ARCH_FAMILY_LX6
 
 config XTENSA_HAVE_LOOPS
 	bool "Zero overhead loops"
+	default n
+
+config XTENSA_HAVE_INTERRUPTS
+	bool
 	default n
 
 config XTENSA_USE_SWPRI
