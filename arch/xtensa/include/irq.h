@@ -47,6 +47,7 @@
 /* Include NuttX-specific IRQ definitions */
 
 #include <nuttx/irq.h>
+#include <arch/types.h>
 
 /* Include architecture-specific IRQ definitions */
 
@@ -180,10 +181,6 @@ struct xcptcontext
  * Public Data
  ****************************************************************************/
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
 #ifdef __cplusplus
 #define EXTERN extern "C"
 extern "C"
@@ -191,6 +188,34 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: xtensa_enable_interrupts
+ *
+ * Description:
+ *   Enables a set of interrupts. Does not simply set INTENABLE directly,
+ *   but computes it as a function of the current virtual priority.
+ *   Can be called from interrupt handlers.
+ *
+ ****************************************************************************/
+
+irqstate_t xtensa_enable_interrupts(irqstate_t mask);
+
+/****************************************************************************
+ * Name: xtensa_disable_interrupts
+ *
+ * Description:
+ *   Disables a set of interrupts. Does not simply set INTENABLE directly,
+ *   but computes it as a function of the current virtual priority.
+ *   Can be called from interrupt handlers.
+ *
+ ****************************************************************************/
+
+irqstate_t xtensa_disable_interrupts(irqstate_t mask);
 
 #undef EXTERN
 #ifdef __cplusplus

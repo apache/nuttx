@@ -83,7 +83,7 @@ typedef unsigned long      _uintptr_t;
 
 /* This is the size of the interrupt state save returned by up_irq_save(). */
 
-typedef unsigned long      irqstate_t;
+typedef unsigned int       irqstate_t;
 
 #endif /* __ASSEMBLY__ */
 
