@@ -159,7 +159,7 @@ int sscanf(FAR const char *buf, FAR const char *fmt, ...)
  *    ANSI standard vsscanf implementation.
  *
  ****************************************************************************/
-#pragma GCC optimize ("O0")
+
 int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
 {
   FAR const char *bufstart;
