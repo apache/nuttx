@@ -335,12 +335,6 @@ _xtensa_context_restore:
  * Name: _xt_coproc_init
  *
  * Description:
- *
- *
- ****************************************************************************/
-
-
-
  *   Initializes global co-processor management data, setting all co-
  * processors to "unowned". Leaves CPENABLE as it found it (does NOT clear
  * it).
