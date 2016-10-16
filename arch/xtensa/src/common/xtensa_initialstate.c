@@ -49,6 +49,11 @@
 #include "xtensa.h"
 #include "xtensa_corebits.h"
 
+/* Temporary for clean compile */
+
+#warning REVISIT _xt_user_exit
+void _xt_user_exit(void);
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -74,7 +79,6 @@ void up_initial_state(struct tcb_s *tcb)
   uint32_t *ptr;
 #endif
 #endif /* REVISIT */
-  uint32_t regval;
 
   /* Initialize the initial exception register context structure */
 
@@ -106,7 +110,7 @@ void up_initial_state(struct tcb_s *tcb)
   xcp->regs[REG_VPRI] = 0xffffffff;
 #endif
 
-# warning Revisit co-processor support
+# warning REVISIT co-processor support
 #if 0 /* REVISIT */
 #if CONFIG_XTENSA_NCOPROCESSORS > 0
   /* Init the coprocessor save area (see xtensa_context.h)
