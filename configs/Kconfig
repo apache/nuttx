@@ -673,6 +673,14 @@ config ARCH_BOARD_PIRELLI_DPL10
 		This directory contains the board support for Pirelli dpl10 phones.  The
 		additions were made by Craig Comstock (with help form Alan Carvalho de Assis).
 
+config ARCH_BOARD_NR5M100_NEXYS4
+	bool "NEXT RISC-V NR5M100 on Nexys-4 board"
+	depends on ARCH_CHIP_NR5M100
+	select UART_SERIALDRIVER
+	---help---
+		This is the port NuttX to the NEXT RISC-V processor runnining on a Digilent
+		Nexys-4 (non DDR version) FPGA board.
+
 config ARCH_BOARD_NUCLEO_144
 	bool "STMicro NUCLEO-144"
 	depends on ARCH_CHIP_STM32F746ZG || ARCH_CHIP_STM32F767ZI
@@ -1413,6 +1421,7 @@ config ARCH_BOARD
 	default "ne64badge"                if ARCH_BOARD_NE64BADGE
 	default "ntosd-dm320"              if ARCH_BOARD_NTOSD_DM320
 	default "nutiny-nuc120"            if ARCH_BOARD_NUTINY_NUC120
+	default "nr5m100-nexys4"           if ARCH_BOARD_NR5M100_NEXYS4
 	default "olimex-efm32g880f128-stk" if ARCH_BOARD_OLIMEX_EFM32G880F128_STK
 	default "olimex-lpc1766stk"        if ARCH_BOARD_LPC1766STK
 	default "olimex-lpc2378"           if ARCH_BOARD_OLIMEXLPC2378

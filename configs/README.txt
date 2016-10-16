@@ -551,6 +551,9 @@ configs/rgmp
   See http://rgmp.sourceforge.net/wiki/index.php/Main_Page for further
   information about RGMP.
 
+configs/nr5m100-nexys4
+  Port of NuttX to RISC-V platform on IQ-Analog NR5M100 RISC-V FPGA platform.
+
 configs/sabre-6quad
   This directory holds a port of NuttX to the NXP/Freescale Sabre board
   featuring the iMX 6Quad CPU.

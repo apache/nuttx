@@ -233,6 +233,15 @@ arch/rgmp
     See http://rgmp.sourceforge.net/wiki/index.php/Main_Page for further
     information about RGMP.
 
+arch/risc-v
+    This directory is dedicated to ports to the RISC-V family.
+
+    Architecture Support
+      arch/risc-v/include/rv32im
+
+    MCU support
+      arch/risc-v/include/nr5m100
+
 arch/x86 - Intel x86 architectures
     This directory holds related, 32- and 64-bit architectures from Intel.
     At present, this includes the following subdirectories:

@@ -52,6 +52,13 @@ config ARCH_RENESAS
 	---help---
 		Renesas architectures (SH and M16C).
 
+config ARCH_RISCV
+	bool "RISC-V"
+	select ARCH_HAVE_INTERRUPTSTACK
+	select ARCH_HAVE_CUSTOMOPT
+	---help---
+		RISC-V 32 and 64-bit RV32 / RV64 architectures.
+
 config ARCH_SIM
 	bool "Simulation"
 	select ARCH_HAVE_MULTICPU
@@ -89,6 +96,7 @@ config ARCH
 	default "mips"    if ARCH_MIPS
 	default "rgmp"    if ARCH_RGMP
 	default "renesas" if ARCH_RENESAS
+	default "risc-v"  if ARCH_RISCV
 	default "sim"     if ARCH_SIM
 	default "x86"     if ARCH_X86
 	default "z16"     if ARCH_Z16
@@ -100,6 +108,7 @@ source arch/hc/Kconfig
 source arch/mips/Kconfig
 source arch/rgmp/Kconfig
 source arch/renesas/Kconfig
+source arch/risc-v/Kconfig
 source arch/sim/Kconfig
 source arch/x86/Kconfig
 source arch/z16/Kconfig
@@ -540,6 +549,7 @@ config ARCH_USBDUMP
 config ENDIAN_BIG
 	bool "Big Endian Architecture"
 	default n
+	depends on !ARCH_RISCV
 	---help---
 		Select if architecture operates using big-endian byte ordering.
 

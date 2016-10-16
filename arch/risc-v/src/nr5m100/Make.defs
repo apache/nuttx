@@ -1,0 +1,74 @@
+############################################################################
+# arch/risc-v/src/nr5m100/Make.defs
+#
+#   Copyright (C) 2016 Ken Pettit. All rights reserved.
+#   Author: Ken Pettit <pettitkd@gmail.com>
+#
+# # Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in
+#    the documentation and/or other materials provided with the
+#    distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+# OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+# AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+############################################################################
+
+# Specify our HEAD assembly file.  This will be linked as
+# the first object file, so it will appear at address 0
+HEAD_ASRC = nr5_vectors.S
+
+# Specify our general Assembly files
+CHIP_ASRCS = nr5_head.S nr5_csr.S up_syscall.S
+
+# If we are compiling the NELIB library, then specify it
+# in AFLAGS so we can change up our startup behavior
+ifeq ($(CONFIG_LIB_NEWLIB),y)
+AFLAGS += -DCONFIG_LIB_NEWLIB
+endif
+
+# Override the arch to enable hardware MUL during assembly.
+# This is to support our hardware mul test.  For that test,
+# we have to disable hardware mul for C code so the soft 
+# math libs will be used to compare software mul vs hw mul.
+# But hw mul must be enabled to compile the .S file, or we
+# will get an illegal instruction error.
+ASARCHCPUFLAGS += -march=RV32IMXcustom
+
+# Specify C code within the common directory to be included
+CMN_CSRCS  += up_initialize.c up_swint.c
+CMN_CSRCS  += up_allocateheap.c up_createstack.c up_dumpstate.c up_exit.c up_idle.c
+CMN_CSRCS  += up_assert.c up_blocktask.c up_copystate.c up_initialstate.c
+CMN_CSRCS  += up_interruptcontext.c up_releasepending.c up_reprioritizertr.c
+CMN_CSRCS  += up_releasestack.c up_stackframe.c up_schedulesigaction.c up_sigdeliver.c
+CMN_CSRCS  += up_unblocktask.c up_usestack.c
+
+ifeq ($(CONFIG_ARCH_HAVE_VFORK),y)
+CMN_CSRCS  += up_vfork.c
+endif
+
+# Specify our C code within this directory to be included
+CHIP_CSRCS  = nr5_init.c nr5_arch.c
+CHIP_CSRCS += nr5_lowputc.c nr5_allocateheap.c nr5_serial.c
+CHIP_CSRCS += nr5_timerisr.c nr5_irq.c nr5_irq_dispatch.c
+
+ifeq ($(CONFIG_TIMER),y)
+CHIP_CSRCS += nr5_tim_lowerhalf.c
+endif
+

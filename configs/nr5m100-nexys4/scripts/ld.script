@@ -1,0 +1,305 @@
+/****************************************************************************
+ * configs/nr5m100-nexys4/scripts/ld.script
+ *
+ *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Ken Pettit.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *           Ken Pettit <pettitkd@gmail.com>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ * 3. Neither the name NuttX nor the names of its contributors may be
+ *    used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
+ ****************************************************************************/
+
+/*======================================================================*/
+/* Linker script for nr5m100_nexys board                                */
+/*======================================================================*/
+
+/*----------------------------------------------------------------------*/
+/* Setup                                                                */
+/*----------------------------------------------------------------------*/
+
+/* The OUTPUT_ARCH command specifies the machine architecture where the
+   argument is one of the names used in the BFD library. More
+   specifically one of the entires in bfd/cpu-mips.c */
+
+OUTPUT_ARCH( "riscv" )
+
+/* Define the memory regions were we put stuff */
+MEMORY
+{
+  sram (rwx) : ORIGIN = 0x20000000, LENGTH = 384K
+}
+
+stack_size = 4096;
+
+/* Define the beginning and ending stack */
+__stack_start = ORIGIN(sram) + LENGTH(sram);
+__stack_end   = __stack_start - stack_size;
+
+
+/* The ENTRY command specifies the entry point (ie. first instruction to
+   execute). The symbol _start is defined in crt0.S */
+
+ENTRY( __reset )
+
+/* The GROUP command is special since the listed archives will be
+   searched repeatedly until there are no new undefined references. We
+   need this since -lc depends on -lgloss and -lgloss depends on -lc. I
+   thought gcc would automatically include -lgcc when needed, but
+   idt32.ld includes it explicitly here and I was seeing link errors
+   without it. */
+
+/*GROUP( -lc -lgloss -lgcc ) */
+GROUP( -lc )
+
+/*----------------------------------------------------------------------*/
+/* Sections                                                             */
+/*----------------------------------------------------------------------*/
+/* This is where we specify how the input sections map to output
+   sections. The .= commands set the location counter, and the
+   sections are inserted in increasing address order according to the
+   location counter. The following statement will take all of the .bar
+   input sections and reloate them into the .foo output section which
+   starts at address 0x1000.
+
+    . = 0.x1000;
+    .foo : { *(.bar) }
+
+   If we wrap an input specification with a KEEP command then it
+   prevents it from being eliminted during "link-time garbage
+   collection". I'm not sure what this is, so I just followed what was
+   done in idt32.ld.
+
+   We can also set a global external symbol to a specific address in the
+   output binary with this syntax:
+
+    _etext = .;
+    PROVIDE( etext = . );
+
+   This will set the global symbol _ftext to the current location. If we
+   wrap this in a PROVIDE commad, the symbol will only be set if it is
+   not defined. We do this with symbols which don't begin with an
+   underscore since technically in ansi C someone might have a function
+   with the same name (eg. etext).
+
+   If we need to label the beginning of a section we need to make sure
+   that the linker doesn't insert an orphan section inbetween where we
+   set the symbol and the actual begining of the section. We can do that
+   by assigning the location dot to itself.
+
+    . = .
+    _ftext = .;
+    .text :
+    { }
+
+   */
+
+SECTIONS
+{
+
+  /*--------------------------------------------------------------------*/
+  /* Startup vectors
+  /*--------------------------------------------------------------------*/
+  . = 0x20000000;
+  _vectors = .;
+
+  /* vectors: Program code section */
+  .vectors : 
+  {
+    *(.text.vec)
+    *(.text.vec.*)
+    *(.gnu.linkonce.t.*)
+  }
+  _evectors = .;
+
+  /*--------------------------------------------------------------------*/
+  /* Code and read-only segment                                         */
+  /*--------------------------------------------------------------------*/
+
+  /* Begining of code and text segment */
+  . = 0x20000030;
+  _ftext = .;
+  PROVIDE( eprol = . );
+
+  /* text: Program code section */
+  .text : 
+  {
+    _stext = ABSOLUTE(.);
+    *(.text)
+    *(.text.*)
+    *(.gnu.linkonce.t.*)
+  }
+
+  /* init: Code to execute before main (called by crt0.S) */
+  .init : 
+  {
+    KEEP( *(.init) )
+  }
+
+  /* fini: Code to execute after main (called by crt0.S) */
+  .fini : 
+  {
+    KEEP( *(.fini) )
+  }
+
+  /* rodata: Read-only data */
+  _rodata = .;
+  .rodata : 
+  {
+    *(.rdata)
+    *(.rodata)
+    *(.rodata.*)
+    *(.gnu.linkonce.r.*)
+  }
+
+  /* End of code and read-only segment */
+  PROVIDE( etext = . );
+  _etext = .;
+
+  /*--------------------------------------------------------------------*/
+  /* Global constructor/destructor segement                             */
+  /*--------------------------------------------------------------------*/
+
+  .preinit_array     :
+  {
+    PROVIDE_HIDDEN (__preinit_array_start = .);
+    KEEP (*(.preinit_array))
+    PROVIDE_HIDDEN (__preinit_array_end = .);
+  }
+
+  .init_array     :
+  {
+    PROVIDE_HIDDEN (__init_array_start = .);
+    KEEP (*(SORT(.init_array.*)))
+    KEEP (*(.init_array ))
+    PROVIDE_HIDDEN (__init_array_end = .);
+  }
+
+  .fini_array     :
+  {
+    PROVIDE_HIDDEN (__fini_array_start = .);
+    KEEP (*(SORT(.fini_array.*)))
+    KEEP (*(.fini_array ))
+    PROVIDE_HIDDEN (__fini_array_end = .);
+  }
+
+  /*--------------------------------------------------------------------*/
+  /* Other misc gcc segments (this was in idt32.ld)                     */
+  /*--------------------------------------------------------------------*/
+  /* I am not quite sure about these sections but it seems they are for
+     C++ exception handling. I think .jcr is for "Java Class
+     Registration" but it seems to end up in C++ binaries as well. */
+
+  .eh_frame_hdr     : { *(.eh_frame_hdr)     }
+  .eh_frame         : { KEEP( *(.eh_frame) ) }
+  .gcc_except_table : { *(.gcc_except_table) }
+  .jcr              : { KEEP (*(.jcr))       } 
+
+  /*--------------------------------------------------------------------*/
+  /* Initialized data segment                                           */
+  /*--------------------------------------------------------------------*/
+
+  /* Start of initialized data segment */
+  . = ALIGN(16);
+   _fdata = .;
+
+  /* data: Writable data */
+  _sdata = .;
+  .data : 
+  {
+    *(.data)
+    *(.data.*)
+    *(.gnu.linkonce.d.*)
+  }
+
+  /* End of initialized data segment */
+  PROVIDE( edata = . );
+  _edata = .;
+
+  /* Have _gp point to middle of sdata/sbss to maximize displacement range */
+  . = ALIGN(16);
+  _gp = . + 0x7FF0;
+
+  /* Writable small data segment */
+  .sdata : 
+  {
+    *(.sdata)
+    *(.sdata.*)
+    *(.srodata.*)
+  . = ALIGN(16);
+    *(.gnu.linkonce.s.*)
+  }
+
+  /*--------------------------------------------------------------------*/
+  /* Uninitialized data segment                                         */
+  /*--------------------------------------------------------------------*/
+
+  /* Start of uninitialized data segment */
+  . = ALIGN(8);
+  _fbss = .;
+
+  /* Writable uninitialized small data segment */
+  .sbss : 
+  {
+    *(.sbss)
+    *(.sbss.*)
+    *(.gnu.linkonce.sb.*)
+  }
+
+  /* bss: Uninitialized writeable data section */
+  . = .;
+  _bss_start = .;
+  .bss : 
+  {
+    *(.bss)
+    *(.bss.*)
+    *(.gnu.linkonce.b.*)
+    *(COMMON)
+  }
+  _bss_end = .;
+  _ebss = .;
+
+  /* End of uninitialized data segment (used by syscalls.c for heap) */
+  . = ALIGN(16);
+  PROVIDE( end = . );
+  _end = ALIGN(16);
+
+	/* Stabs debugging sections. */
+	.stab 0 : { *(.stab) }
+	.stabstr 0 : { *(.stabstr) }
+	.stab.excl 0 : { *(.stab.excl) }
+	.stab.exclstr 0 : { *(.stab.exclstr) }
+	.stab.index 0 : { *(.stab.index) }
+	.stab.indexstr 0 : { *(.stab.indexstr) }
+	.comment 0 : { *(.comment) }
+	.debug_abbrev 0 : { *(.debug_abbrev) }
+	.debug_info 0 : { *(.debug_info) }
+	.debug_line 0 : { *(.debug_line) }
+	.debug_pubnames 0 : { *(.debug_pubnames) }
+	.debug_aranges 0 : { *(.debug_aranges) }
+}
