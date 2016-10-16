@@ -107,3 +107,5 @@ void board_userled_all(uint8_t ledset)
   kinetis_gpiowrite(GPIO_LED_G, (ledset & BOARD_LED_G_BIT) == 0);
   kinetis_gpiowrite(GPIO_LED_B, (ledset & BOARD_LED_B_BIT) == 0);
 }
+
+#endif /* CONFIG_ARCH_LEDS */

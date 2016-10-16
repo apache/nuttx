@@ -1,0 +1,51 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "RV32IM Configuration Options"
+
+choice
+	prompt "Toolchain Selection"
+	default RV32IM_TOOLCHAIN_GNU_RVGW if HOST_WINDOWS
+	default RV32IM_TOOLCHAIN_GNU_RVGL if !HOST_WINDOWS
+
+config RV32IM_TOOLCHAIN_GNU_RVGL
+	bool "Generic GNU RVG toolchain under Linux (or other POSIX environment)"
+	---help---
+		This option should work for any modern GNU toolchain (GCC 5.2 or newer)
+		configured for riscv32-unknown-elf.
+
+config RV32IM_TOOLCHAIN_GNU_RVGW
+	bool "Generic GNU RVG toolchain under Windows"
+	depends on HOST_WINDOWS
+	---help---
+		This option should work for any modern GNU toolchain (GCC 5.2 or newer)
+		configured for riscv32-unknown-elf.
+
+endchoice
+
+config RV32IM_HW_MULDIV
+	bool "Supports Hardware MUL and DIV"
+	default n
+	---help---
+		Specifies if the architecture supports hardware multiply and
+		hardware division instructions.  Selecting this will cause the
+		generated code to natively use mul / div instructions for any
+		math operations.
+
+config RV32IM_SYSTEM_CSRRS_SUPPORT
+	bool "Supports RV core feature identification via CSRRS opcode"
+	default n
+	---help---
+		Specifies if the architecture supports the SYSTEM opcode for reading
+		Control Status Registers to obtain the RV core option flags.
+
+config RV32IM_CUSTOM_IRQ_SUPPORT
+	bool "Has custom implementation for IRQ handling"
+	default n
+	---help---
+		Allows overriding the standard IRQ processing as described
+		in the RISC-V architecture documents.  This allows architecture
+		specific code to support non-standard IRQ processing in the core.
+

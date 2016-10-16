@@ -1189,18 +1189,27 @@ static int up_dma_nextrx(struct up_dev_s *priv)
 static void up_set_format(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
+  uint32_t usartdiv8;
+#else
+  uint32_t usartdiv32;
+  uint32_t mantissa;
+  uint32_t fraction;
+#endif
   uint32_t regval;
+  uint32_t brr;
+
+  /* Load CR1 */
+
+  regval = up_serialin(priv, STM32_USART_CR1_OFFSET);
 
 #if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
   /* This first implementation is for U[S]ARTs that support oversampling
    * by 8 in additional to the standard oversampling by 16.
-   */
-
-  uint32_t usartdiv8;
-  uint32_t cr1;
-  uint32_t brr;
-
-  /* In case of oversampling by 8, the equation is:
+   * With baud rate of fCK / Divider for oversampling by 16.
+   * and baud rate of  2 * fCK / Divider for oversampling by 8
+   *
+   * In case of oversampling by 8, the equation is:
    *
    *   baud      = 2 * fCK / usartdiv8
    *   usartdiv8 = 2 * fCK / baud
@@ -1214,11 +1223,10 @@ static void up_set_format(struct uart_dev_s *dev)
    *   baud       = fCK / usartdiv16
    *   usartdiv16 = fCK / baud
    *              = 2 * usartdiv8
+   *
+   * Use oversamply by 8 only if the divisor is small.  But what is small?
    */
 
-  /* Use oversamply by 8 only if the divisor is small.  But what is small? */
-
-  cr1 = up_serialin(priv, STM32_USART_CR1_OFFSET);
   if (usartdiv8 > 100)
     {
       /* Use usartdiv16 */
@@ -1227,7 +1235,7 @@ static void up_set_format(struct uart_dev_s *dev)
 
       /* Clear oversampling by 8 to enable oversampling by 16 */
 
-      cr1 &= ~USART_CR1_OVER8;
+      regval &= ~USART_CR1_OVER8;
     }
   else
     {
@@ -1239,24 +1247,14 @@ static void up_set_format(struct uart_dev_s *dev)
 
       /* Set oversampling by 8 */
 
-      cr1 |= USART_CR1_OVER8;
+      regval |= USART_CR1_OVER8;
     }
 
-   up_serialout(priv, STM32_USART_CR1_OFFSET, cr1);
-   up_serialout(priv, STM32_USART_BRR_OFFSET, brr);
-
 #else
-
   /* This second implementation is for U[S]ARTs that support fractional
    * dividers.
-   */
-
-  uint32_t usartdiv32;
-  uint32_t mantissa;
-  uint32_t fraction;
-  uint32_t brr;
-
-  /* Configure the USART Baud Rate.  The baud rate for the receiver and
+   *
+   * Configure the USART Baud Rate.  The baud rate for the receiver and
    * transmitter (Rx and Tx) are both set to the same value as programmed
    * in the Mantissa and Fraction values of USARTDIV.
    *
@@ -1272,23 +1270,55 @@ static void up_set_format(struct uart_dev_s *dev)
    *   usartdiv32 = 32 * usartdiv = fCK / (baud/2)
    */
 
-   usartdiv32 = priv->apbclock / (priv->baud >> 1);
+  usartdiv32 = priv->apbclock / (priv->baud >> 1);
 
   /* The mantissa part is then */
 
   mantissa   = usartdiv32 >> 5;
-  brr        = mantissa << USART_BRR_MANT_SHIFT;
 
   /* The fractional remainder (with rounding) */
 
   fraction   = (usartdiv32 - (mantissa << 5) + 1) >> 1;
-  brr       |= fraction << USART_BRR_FRAC_SHIFT;
-  up_serialout(priv, STM32_USART_BRR_OFFSET, brr);
+
+#if defined(CONFIG_STM32_STM32F40XX)
+  /* The F4 supports 8 X in oversampling additional to the
+   * standard oversampling by 16.
+   *
+   * With baud rate of fCK / (16 * Divider) for oversampling by 16.
+   * and baud rate of  fCK /  (8 * Divider) for oversampling by 8
+   */
+
+  /* Check if 8x oversampling is necessary */
+
+  if (mantissa == 0)
+    {
+      regval |= USART_CR1_OVER8;
+
+      /* Rescale the mantissa */
+
+      mantissa = usartdiv32 >> 4;
+
+      /* The fractional remainder (with rounding) */
+
+      fraction = (usartdiv32 - (mantissa << 4) + 1) >> 1;
+    }
+  else
+    {
+      /* Use 16x Oversampling */
+
+      regval &= ~USART_CR1_OVER8;
+    }
 #endif
+
+  brr  = mantissa << USART_BRR_MANT_SHIFT;
+  brr |= fraction << USART_BRR_FRAC_SHIFT;
+#endif
+
+  up_serialout(priv, STM32_USART_CR1_OFFSET, regval);
+  up_serialout(priv, STM32_USART_BRR_OFFSET, brr);
 
   /* Configure parity mode */
 
-  regval  = up_serialin(priv, STM32_USART_CR1_OFFSET);
   regval &= ~(USART_CR1_PCE | USART_CR1_PS | USART_CR1_M);
 
   if (priv->parity == 1)       /* Odd parity */
@@ -1334,7 +1364,8 @@ static void up_set_format(struct uart_dev_s *dev)
   regval  = up_serialin(priv, STM32_USART_CR3_OFFSET);
   regval &= ~(USART_CR3_CTSE | USART_CR3_RTSE);
 
-#if defined(CONFIG_SERIAL_IFLOWCONTROL) && !defined(CONFIG_STM32_FLOWCONTROL_BROKEN)
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) && \
+   !defined(CONFIG_STM32_FLOWCONTROL_BROKEN)
   if (priv->iflow && (priv->rts_gpio != 0))
     {
       regval |= USART_CR3_RTSE;

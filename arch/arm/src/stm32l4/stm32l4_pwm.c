@@ -128,6 +128,7 @@ struct stm32l4_pwmchan_s
   uint8_t channel;                     /* Timer output channel: {1,..4} */
   uint32_t pincfg;                     /* Output pin configuration */
   enum stm32l4_chanmode_e mode;
+  uint32_t npincfg;                    /* Complementary output pin configuration (only TIM1/8 CH1-3)*/
 };
 
 /* This structure represents the state of one PWM timer */
@@ -229,6 +230,7 @@ static struct stm32l4_pwmtimer_s g_pwm1dev =
       .channel = 1,
       .pincfg  = PWM_TIM1_CH1CFG,
       .mode    = CONFIG_STM32L4_TIM1_CH1MODE,
+      .npincfg = PWM_TIM1_CH1NCFG,
     },
 #endif
 #ifdef CONFIG_STM32L4_TIM1_CHANNEL2
@@ -236,6 +238,7 @@ static struct stm32l4_pwmtimer_s g_pwm1dev =
       .channel = 2,
       .pincfg  = PWM_TIM1_CH2CFG,
       .mode    = CONFIG_STM32L4_TIM1_CH2MODE,
+      .npincfg = PWM_TIM1_CH2NCFG,
     },
 #endif
 #ifdef CONFIG_STM32L4_TIM1_CHANNEL3
@@ -243,6 +246,7 @@ static struct stm32l4_pwmtimer_s g_pwm1dev =
       .channel = 3,
       .pincfg  = PWM_TIM1_CH3CFG,
       .mode    = CONFIG_STM32L4_TIM1_CH3MODE,
+      .npincfg = PWM_TIM1_CH3NCFG,
     },
 #endif
 #ifdef CONFIG_STM32L4_TIM1_CHANNEL4
@@ -250,6 +254,7 @@ static struct stm32l4_pwmtimer_s g_pwm1dev =
       .channel = 4,
       .pincfg  = PWM_TIM1_CH4CFG,
       .mode    = CONFIG_STM32L4_TIM1_CH4MODE,
+      .npincfg = 0,
     },
 #endif
   },
@@ -275,6 +280,7 @@ static struct stm32l4_pwmtimer_s g_pwm2dev =
       .channel = 1,
       .pincfg  = PWM_TIM2_CH1CFG,
       .mode    = CONFIG_STM32L4_TIM2_CH1MODE,
+      .npincfg = 0,
     },
 #endif
 #ifdef CONFIG_STM32L4_TIM2_CHANNEL2
@@ -282,6 +288,7 @@ static struct stm32l4_pwmtimer_s g_pwm2dev =
       .channel = 2,
       .pincfg  = PWM_TIM2_CH2CFG,
       .mode    = CONFIG_STM32L4_TIM2_CH2MODE,
+      .npincfg = 0,
     },
 #endif
 #ifdef CONFIG_STM32L4_TIM2_CHANNEL3
@@ -289,6 +296,7 @@ static struct stm32l4_pwmtimer_s g_pwm2dev =
       .channel = 3,
       .pincfg  = PWM_TIM2_CH3CFG,
       .mode    = CONFIG_STM32L4_TIM2_CH3MODE,
+      .npincfg = 0,
     },
 #endif
 #ifdef CONFIG_STM32L4_TIM2_CHANNEL4
@@ -296,6 +304,7 @@ static struct stm32l4_pwmtimer_s g_pwm2dev =
       .channel = 4,
       .pincfg  = PWM_TIM2_CH4CFG,
       .mode    = CONFIG_STM32L4_TIM2_CH4MODE,
+      .npincfg = 0,
     },
 #endif
   },
@@ -321,6 +330,7 @@ static struct stm32l4_pwmtimer_s g_pwm3dev =
       .channel = 1,
       .pincfg  = PWM_TIM3_CH1CFG,
       .mode    = CONFIG_STM32L4_TIM3_CH1MODE,
+      .npincfg = 0,
     },
 #endif
 #ifdef CONFIG_STM32L4_TIM3_CHANNEL2
@@ -328,6 +338,7 @@ static struct stm32l4_pwmtimer_s g_pwm3dev =
       .channel = 2,
       .pincfg  = PWM_TIM3_CH2CFG,
       .mode    = CONFIG_STM32L4_TIM3_CH2MODE,
+      .npincfg = 0,
     },
 #endif
 #ifdef CONFIG_STM32L4_TIM3_CHANNEL3
@@ -335,6 +346,7 @@ static struct stm32l4_pwmtimer_s g_pwm3dev =
       .channel = 3,
       .pincfg  = PWM_TIM3_CH3CFG,
       .mode    = CONFIG_STM32L4_TIM3_CH3MODE,
+      .npincfg = 0,
     },
 #endif
 #ifdef CONFIG_STM32L4_TIM3_CHANNEL4
@@ -342,6 +354,7 @@ static struct stm32l4_pwmtimer_s g_pwm3dev =
       .channel = 4,
       .pincfg  = PWM_TIM3_CH4CFG,
       .mode    = CONFIG_STM32L4_TIM3_CH4MODE,
+      .npincfg = 0,
     },
 #endif
   },
@@ -367,6 +380,7 @@ static struct stm32l4_pwmtimer_s g_pwm4dev =
       .channel = 1,
       .pincfg  = PWM_TIM4_CH1CFG,
       .mode    = CONFIG_STM32L4_TIM4_CH1MODE,
+      .npincfg = 0,
     },
 #endif
 #ifdef CONFIG_STM32L4_TIM4_CHANNEL2
@@ -374,6 +388,7 @@ static struct stm32l4_pwmtimer_s g_pwm4dev =
       .channel = 2,
       .pincfg  = PWM_TIM4_CH2CFG,
       .mode    = CONFIG_STM32L4_TIM4_CH2MODE,
+      .npincfg = 0,
     },
 #endif
 #ifdef CONFIG_STM32L4_TIM4_CHANNEL3
@@ -381,6 +396,7 @@ static struct stm32l4_pwmtimer_s g_pwm4dev =
       .channel = 3,
       .pincfg  = PWM_TIM4_CH3CFG,
       .mode    = CONFIG_STM32L4_TIM4_CH3MODE,
+      .npincfg = 0,
     },
 #endif
 #ifdef CONFIG_STM32L4_TIM4_CHANNEL4
@@ -388,6 +404,7 @@ static struct stm32l4_pwmtimer_s g_pwm4dev =
       .channel = 4,
       .pincfg  = PWM_TIM4_CH4CFG,
       .mode    = CONFIG_STM32L4_TIM4_CH4MODE,
+      .npincfg = 0,
     },
 #endif
   },
@@ -413,6 +430,7 @@ static struct stm32l4_pwmtimer_s g_pwm5dev =
       .channel = 1,
       .pincfg  = PWM_TIM5_CH1CFG,
       .mode    = CONFIG_STM32L4_TIM5_CH1MODE,
+      .npincfg = 0,
     },
 #endif
 #ifdef CONFIG_STM32L4_TIM5_CHANNEL2
@@ -420,6 +438,7 @@ static struct stm32l4_pwmtimer_s g_pwm5dev =
       .channel = 2,
       .pincfg  = PWM_TIM5_CH2CFG,
       .mode    = CONFIG_STM32L4_TIM5_CH2MODE,
+      .npincfg = 0,
     },
 #endif
 #ifdef CONFIG_STM32L4_TIM5_CHANNEL3
@@ -427,6 +446,7 @@ static struct stm32l4_pwmtimer_s g_pwm5dev =
       .channel = 3,
       .pincfg  = PWM_TIM5_CH3CFG,
       .mode    = CONFIG_STM32L4_TIM5_CH3MODE,
+      .npincfg = 0,
     },
 #endif
 #ifdef CONFIG_STM32L4_TIM5_CHANNEL4
@@ -434,6 +454,7 @@ static struct stm32l4_pwmtimer_s g_pwm5dev =
       .channel = 4,
       .pincfg  = PWM_TIM5_CH4CFG,
       .mode    = CONFIG_STM32L4_TIM5_CH4MODE,
+      .npincfg = 0,
     },
 #endif
   },
@@ -459,6 +480,7 @@ static struct stm32l4_pwmtimer_s g_pwm8dev =
       .channel = 1,
       .pincfg  = PWM_TIM8_CH1CFG,
       .mode    = CONFIG_STM32L4_TIM8_CH1MODE,
+      .npincfg = PWM_TIM8_CH1NCFG,
     },
 #endif
 #ifdef CONFIG_STM32L4_TIM8_CHANNEL2
@@ -466,6 +488,7 @@ static struct stm32l4_pwmtimer_s g_pwm8dev =
       .channel = 2,
       .pincfg  = PWM_TIM8_CH2CFG,
       .mode    = CONFIG_STM32L4_TIM8_CH2MODE,
+      .npincfg = PWM_TIM8_CH2NCFG,
     },
 #endif
 #ifdef CONFIG_STM32L4_TIM8_CHANNEL3
@@ -473,6 +496,7 @@ static struct stm32l4_pwmtimer_s g_pwm8dev =
       .channel = 3,
       .pincfg  = PWM_TIM8_CH3CFG,
       .mode    = CONFIG_STM32L4_TIM8_CH3MODE,
+      .npincfg = PWM_TIM8_CH3NCFG,
     },
 #endif
 #ifdef CONFIG_STM32L4_TIM8_CHANNEL4
@@ -480,6 +504,7 @@ static struct stm32l4_pwmtimer_s g_pwm8dev =
       .channel = 4,
       .pincfg  = PWM_TIM8_CH4CFG,
       .mode    = CONFIG_STM32L4_TIM8_CH4MODE,
+      .npincfg = 0,
     },
 #endif
   },
@@ -505,6 +530,7 @@ static struct stm32l4_pwmtimer_s g_pwm15dev =
       .channel = 1,
       .pincfg  = PWM_TIM15_CH1CFG,
       .mode    = CONFIG_STM32L4_TIM15_CH1MODE,
+      .npincfg = PWM_TIM15_CH1NCFG,
     },
 #endif
 #ifdef CONFIG_STM32L4_TIM15_CHANNEL2
@@ -512,6 +538,7 @@ static struct stm32l4_pwmtimer_s g_pwm15dev =
       .channel = 2,
       .pincfg  = PWM_TIM15_CH2CFG,
       .mode    = CONFIG_STM32L4_TIM15_CH2MODE,
+      .npincfg = 0,
     },
 #endif
   },
@@ -537,6 +564,7 @@ static struct stm32l4_pwmtimer_s g_pwm16dev =
       .channel = 1,
       .pincfg  = PWM_TIM16_CH1CFG,
       .mode    = CONFIG_STM32L4_TIM16_CH1MODE,
+      .npincfg = PWM_TIM16_CH1NCFG,
     },
 #endif
   },
@@ -562,6 +590,7 @@ static struct stm32l4_pwmtimer_s g_pwm17dev =
       .channel = 1,
       .pincfg  = PWM_TIM17_CH1CFG,
       .mode    = CONFIG_STM32L4_TIM17_CH1MODE,
+      .npincfg = PWM_TIM17_CH1NCFG,
     },
 #endif
   },
@@ -737,6 +766,7 @@ static int stm32l4pwm_timer(FAR struct stm32l4_pwmtimer_s *priv,
   /* New timer register bit settings */
 
   uint16_t ccenable;
+  uint16_t ccnenable;
   uint32_t ocmode1;
   uint32_t ocmode2;
 
@@ -966,9 +996,10 @@ static int stm32l4pwm_timer(FAR struct stm32l4_pwmtimer_s *priv,
 
   /* Handle channel specific setup */
 
-  ccenable = 0;
-  ocmode1  = 0;
-  ocmode2  = 0;
+  ccenable  = 0;
+  ccnenable = 0;
+  ocmode1   = 0;
+  ocmode2   = 0;
 
 #ifdef CONFIG_PWM_MULTICHAN
   for (i = 0; i < CONFIG_PWM_NCHANNELS; i++)
@@ -976,6 +1007,7 @@ static int stm32l4pwm_timer(FAR struct stm32l4_pwmtimer_s *priv,
     {
       ub16_t                duty;
       uint32_t              chanmode;
+      uint32_t              compout; /* Complementary output config */
       bool                  ocmbit = false;
       uint8_t               channel;
 #ifdef CONFIG_PWM_MULTICHAN
@@ -1001,6 +1033,7 @@ static int stm32l4pwm_timer(FAR struct stm32l4_pwmtimer_s *priv,
           if (priv->channels[j].channel == channel)
             {
               mode = priv->channels[j].mode;
+              compout = priv->channels[j].npincfg;
               break;
             }
         }
@@ -1014,6 +1047,7 @@ static int stm32l4pwm_timer(FAR struct stm32l4_pwmtimer_s *priv,
       duty = info->duty;
       channel = priv->channels[0].channel;
       mode = priv->channels[0].mode;
+      compout = priv->channels[0].npincfg;
 #endif
 
       /* Duty cycle:
@@ -1068,6 +1102,13 @@ static int stm32l4pwm_timer(FAR struct stm32l4_pwmtimer_s *priv,
 
               ccenable |= ATIM_CCER_CC1E;
 
+              /* Conditionnaly enable the complementary output */
+
+              if (compout)
+                {
+                  ccnenable |= ATIM_CCER_CC1NE;
+                }
+
               /* Set the CCMR1 mode values (leave CCMR2 zero) */
 
               ocmode1  |= (ATIM_CCMR_CCS_CCOUT << ATIM_CCMR1_CC1S_SHIFT) |
@@ -1091,6 +1132,13 @@ static int stm32l4pwm_timer(FAR struct stm32l4_pwmtimer_s *priv,
 
               ccenable |= ATIM_CCER_CC2E;
 
+              /* Conditionnaly enable the complementary output */
+
+              if (compout)
+                {
+                  ccnenable |= ATIM_CCER_CC2NE;
+                }
+
               /* Set the CCMR1 mode values (leave CCMR2 zero) */
 
               ocmode1  |= (ATIM_CCMR_CCS_CCOUT << ATIM_CCMR1_CC2S_SHIFT) |
@@ -1113,6 +1161,13 @@ static int stm32l4pwm_timer(FAR struct stm32l4_pwmtimer_s *priv,
               /* Select the CCER enable bit for this channel */
 
               ccenable |= ATIM_CCER_CC3E;
+
+              /* Conditionnaly enable the complementary output */
+
+              if (compout)
+                {
+                  ccnenable |= ATIM_CCER_CC3NE;
+                }
 
               /* Set the CCMR2 mode values (leave CCMR1 zero) */
 
@@ -1206,7 +1261,9 @@ static int stm32l4pwm_timer(FAR struct stm32l4_pwmtimer_s *priv,
        */
 
       ccer &= ~(ATIM_CCER_CC1NE | ATIM_CCER_CC1NP | ATIM_CCER_CC2NE | ATIM_CCER_CC2NP |
-                ATIM_CCER_CC3NE | ATIM_CCER_CC3NP | ATIM_CCER_CC4NP);
+                ATIM_CCER_CC3NE | ATIM_CCER_CC3NP);
+
+      ccer |= ccnenable;
 
       /* Reset the output compare and output compare N IDLE State */
 
@@ -1223,9 +1280,22 @@ static int stm32l4pwm_timer(FAR struct stm32l4_pwmtimer_s *priv,
       stm32l4pwm_putreg(priv, STM32L4_ATIM_BDTR_OFFSET, bdtr);
     }
   else
+#if defined(CONFIG_STM32L4_TIM15_PWM) || defined(CONFIG_STM32L4_TIM15_PWM) || defined(CONFIG_STM32L4_TIM15_PWM)
+  if (priv->timtype == TIMTYPE_COUNTUP16)
+    {
+
+      /* Reset output N polarity level, output N state, output compare state,
+       * output compare N idle state.
+       */
+
+      ccer &= ~(ATIM_CCER_CC1NE | ATIM_CCER_CC1NP);
+      ccer |= ccnenable;
+    }
+  else
+#endif
 #endif
     {
-      ccer &= ~(GTIM_CCER_CC1NP | GTIM_CCER_CC2NP | GTIM_CCER_CC3NP | ATIM_CCER_CC4NP);
+      ccer &= ~(GTIM_CCER_CC1NP | GTIM_CCER_CC2NP | GTIM_CCER_CC3NP); /* Not sure why? */
     }
 
   /* Save the modified register values */
@@ -1646,14 +1716,24 @@ static int stm32l4pwm_setup(FAR struct pwm_lowerhalf_s *dev)
   for (i = 0; i < PWM_NCHANNELS; i++)
     {
       pincfg = priv->channels[i].pincfg;
-      if (pincfg == 0)
+      if (pincfg != 0)
         {
-          continue;
+          pwminfo("pincfg: %08x\n", pincfg);
+
+          stm32l4_configgpio(pincfg);
         }
 
-      pwminfo("pincfg: %08x\n", pincfg);
 
-      stm32l4_configgpio(pincfg);
+      /* Enable complementary channel if available */
+
+      pincfg = priv->channels[i].npincfg;
+      if (pincfg != 0)
+        {
+          pwminfo("npincfg: %08x\n", pincfg);
+
+          stm32l4_configgpio(pincfg);
+        }
+
       pwm_dumpgpio(pincfg, "PWM setup");
     }
 
@@ -1697,18 +1777,27 @@ static int stm32l4pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
   for (i = 0; i < PWM_NCHANNELS; i++)
     {
       pincfg = priv->channels[i].pincfg;
-      if (pincfg == 0)
+      if (pincfg != 0)
         {
-          continue;
+          pwminfo("pincfg: %08x\n", pincfg);
+
+          pincfg &= (GPIO_PORT_MASK | GPIO_PIN_MASK);
+          pincfg |= GPIO_INPUT | GPIO_FLOAT;
+
+          stm32l4_configgpio(pincfg);
         }
 
-      pwminfo("pincfg: %08x\n", pincfg);
+      pincfg = priv->channels[i].npincfg;
+      if (pincfg != 0)
+        {
+          pwminfo("npincfg: %08x\n", pincfg);
 
-      pincfg &= (GPIO_PORT_MASK | GPIO_PIN_MASK);
+          pincfg &= (GPIO_PORT_MASK | GPIO_PIN_MASK);
+          pincfg |= GPIO_INPUT | GPIO_FLOAT;
 
-      pincfg |= GPIO_INPUT | GPIO_FLOAT;
+          stm32l4_configgpio(pincfg);
+        }
 
-      stm32l4_configgpio(pincfg);
     }
 
   return OK;

@@ -731,6 +731,13 @@ config STM32L4_TIM1_CH1OUT
 	---help---
 		Enables channel 1 output.
 
+config STM32L4_TIM1_CH1NOUT
+	bool "TIM1 Channel 1 Complementary Output"
+	default n
+	depends on STM32L4_TIM1_CH1OUT
+	---help---
+		Enables channel 1 complementary output.
+
 endif # STM32L4_TIM1_CHANNEL1
 
 config STM32L4_TIM1_CHANNEL2
@@ -754,6 +761,13 @@ config STM32L4_TIM1_CH2OUT
 	---help---
 		Enables channel 2 output.
 
+config STM32L4_TIM1_CH2NOUT
+	bool "TIM1 Channel 2 Complemenrary Output"
+	default n
+	depends on STM32L4_TIM1_CH2OUT
+	---help---
+		Enables channel 2 complementary output.
+
 endif # STM32L4_TIM1_CHANNEL2
 
 config STM32L4_TIM1_CHANNEL3
@@ -776,6 +790,13 @@ config STM32L4_TIM1_CH3OUT
 	default n
 	---help---
 		Enables channel 3 output.
+
+config STM32L4_TIM1_CH3NOUT
+	bool "TIM1 Channel 3 Complementary Output"
+	default n
+	depends on STM32L4_TIM1_CH3OUT
+	---help---
+		Enables channel 3 complementary output.
 
 endif # STM32L4_TIM1_CHANNEL3
 
@@ -1426,6 +1447,13 @@ config STM32L4_TIM8_CH1OUT
 	---help---
 		Enables channel 1 output.
 
+config STM32L4_TIM8_CH1NOUT
+	bool "TIM8 Channel 1 Complementary Output"
+	default n
+	depends on STM32L4_TIM8_CH1OUT
+	---help---
+		Enables channel 1 complementary output.
+
 endif # STM32L4_TIM8_CHANNEL1
 
 config STM32L4_TIM8_CHANNEL2
@@ -1449,6 +1477,13 @@ config STM32L4_TIM8_CH2OUT
 	---help---
 		Enables channel 2 output.
 
+config STM32L4_TIM8_CH2NOUT
+	bool "TIM8 Channel 2 Complementary Output"
+	default n
+	depends on STM32L4_TIM8_CH2OUT
+	---help---
+		Enables channel 2 complementary output.
+
 endif # STM32L4_TIM8_CHANNEL2
 
 config STM32L4_TIM8_CHANNEL3
@@ -1471,6 +1506,13 @@ config STM32L4_TIM8_CH3OUT
 	default n
 	---help---
 		Enables channel 3 output.
+
+config STM32L4_TIM8_CH3NOUT
+	bool "TIM8 Channel 3 Complementary Output"
+	default n
+	depends on STM32L4_TIM8_CH3OUT
+	---help---
+		Enables channel 3 complementary output.
 
 endif # STM32L4_TIM8_CHANNEL3
 
@@ -1557,6 +1599,13 @@ config STM32L4_TIM15_CH1OUT
 	---help---
 		Enables channel 1 output.
 
+config STM32L4_TIM15_CH1NOUT
+	bool "TIM15 Channel 1 Complementary Output"
+	default n
+	depends on STM32L4_TIM15_CH1OUT
+	---help---
+		Enables channel 1 complementary output.
+
 endif # STM32L4_TIM15_CHANNEL1
 
 config STM32L4_TIM15_CHANNEL2
@@ -1642,6 +1691,13 @@ config STM32L4_TIM16_CH1OUT
 	---help---
 		Enables channel 1 output.
 
+config STM32L4_TIM16_CH1NOUT
+	bool "TIM16 Channel 1 Complementary Output"
+	default n
+	depends on STM32L4_TIM16_CH1OUT
+	---help---
+		Enables channel 1 complementary output.
+
 endif # STM32L4_TIM16_CHANNEL1
 
 endif # STM32L4_PWM_MULTICHAN
@@ -1703,6 +1759,13 @@ config STM32L4_TIM17_CH1OUT
 	default n
 	---help---
 		Enables channel 1 output.
+
+config STM32L4_TIM17_CH1NOUT
+	bool "TIM17 Channel 1 Complementary Output"
+	default n
+	depends on STM32L4_TIM17_CH1OUT
+	---help---
+		Enables channel 1 complementary output.
 
 endif # STM32L4_TIM17_CHANNEL1
 
