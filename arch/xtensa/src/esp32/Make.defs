@@ -40,12 +40,12 @@ HEAD_ASRC =
 # Common XTENSA files (arch/xtensa/src/common)
 
 CMN_ASRCS  = xtensa_irq.S
-CMN_CSRCS  = xtensa_allocateheap.c xtensa_createstack.c xtensa_exit.c
-CMN_CSRCS += xtensa_idle.c xtensa_initialize.c xtensa_interruptcontext.c
-CMN_CSRCS += xtensa_lowputs.c xtensa_mdelay.c xtensa_modifyreg8.c
-CMN_CSRCS += xtensa_modifyreg16.c xtensa_modifyreg32.c xtensa_puts.c
-CMN_CSRCS += xtensa_releasestack.c xtensa_stackframe.c xtensa_udelay.c
-CMN_CSRCS += xtensa_usestack.c
+CMN_CSRCS  = xtensa_allocateheap.c xtensa_copystate.c xtensa_createstack.c
+CMN_CSRCS += xtensa_exit.c xtensa_idle.c xtensa_initialize.c
+CMN_CSRCS += xtensa_interruptcontext.c xtensa_lowputs.c xtensa_mdelay.c
+CMN_CSRCS += xtensa_modifyreg8.c xtensa_modifyreg16.c xtensa_modifyreg32.c
+CMN_CSRCS += xtensa_puts.c xtensa_releasestack.c xtensa_stackframe.c
+CMN_CSRCS += xtensa_udelay.c xtensa_usestack.c
 
 # Configuration-dependent common XTENSA files
 

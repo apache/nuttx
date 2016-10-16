@@ -94,6 +94,7 @@
 #define REG_SAR             (19)
 #define REG_EXCCAUSE        (20)
 #define REG_EXCVADDR        (21)
+
 #define _REG_LOOPS_START    (22)
 
 #if CONFIG_XTENSA_HAVE_LOOPS

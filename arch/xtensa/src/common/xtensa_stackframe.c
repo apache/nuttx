@@ -68,14 +68,6 @@
 #define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
 
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -132,12 +124,11 @@ FAR void *up_stack_frame(FAR struct tcb_s *tcb, size_t frame_size)
   tcb->adj_stack_ptr    = (FAR void *)topaddr;
   tcb->adj_stack_size  -= frame_size;
 
-  /* Reset the initial stack pointer */
+  /* Reset the initial stack pointer (A1) */
 
-  tcb->xcp.regs[REG_SP] = (uint32_t)tcb->adj_stack_ptr;
+  tcb->xcp.regs[REG_A1] = (uint32_t)tcb->adj_stack_ptr;
 
   /* And return the pointer to the allocated region */
 
   return (FAR void *)(topaddr + sizeof(uint32_t));
 }
-

@@ -365,7 +365,7 @@ _xtensa_context_restore:
  *
  ****************************************************************************/
 
-#if XCHAL_CP_NUM > 0
+#if CONFIG_XTENSA_NCOPROCESSORS > 0
 	.global	_xt_coproc_init
 	.type	_xt_coproc_init,@function
 	.align	4
@@ -412,7 +412,7 @@ _xt_coproc_init:
  *
  ****************************************************************************/
 
-#if XCHAL_CP_NUM > 0
+#if CONFIG_XTENSA_NCOPROCESSORS > 0
 	.global	_xt_coproc_release
 	.type	_xt_coproc_release,@function
 	.align	4
@@ -465,7 +465,7 @@ _xt_coproc_release:
  *
  ****************************************************************************/
 
-#if XCHAL_CP_NUM > 0
+#if CONFIG_XTENSA_NCOPROCESSORS > 0
 	.extern	_xt_coproc_sa_offset   /* external reference */
 	.global	_xt_coproc_savecs
 	.type	_xt_coproc_savecs,@function
@@ -578,7 +578,7 @@ _xt_coproc_savecs:
  *
  ****************************************************************************/
 
-#if XCHAL_CP_NUM > 0
+#if CONFIG_XTENSA_NCOPROCESSORS > 0
 	.global	_xt_coproc_restorecs
 	.type	_xt_coproc_restorecs,@function
 	.align	4
