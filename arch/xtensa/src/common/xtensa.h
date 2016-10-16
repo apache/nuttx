@@ -104,19 +104,28 @@
 # define CONFIG_ARCH_INTERRUPTSTACK 0
 #endif
 
-/* In the XTENSA model, only a pointer to register state on the stack is
- * saved in the TCB.
+/* In the XTENSA model, the state is copied from the stack to the TCB, but
+ * only a referenced is passed to get the state from the TCB.
  */
 
-#define up_savestate(regs)     do { reg = g_current_regs; } while (0)
-#define up_restorestate(regs)  do { g_current_regs = regs; } while (0)
+#define xtensa_savestate(regs)    xtensa_copystate(regs, (uint32_t*)g_current_regs)
+#define xtensa_restorestate(regs) do { g_current_regs = regs; } while (0)
+
+/* Register access macros */
+
+# define getreg8(a)       (*(volatile uint8_t *)(a))
+# define putreg8(v,a)     (*(volatile uint8_t *)(a) = (v))
+# define getreg16(a)      (*(volatile uint16_t *)(a))
+# define putreg16(v,a)    (*(volatile uint16_t *)(a) = (v))
+# define getreg32(a)      (*(volatile uint32_t *)(a))
+# define putreg32(v,a)    (*(volatile uint32_t *)(a) = (v))
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-typedef void (*up_vector_t)(void);
+typedef void (*xtensa_vector_t)(void);
 #endif
 
 /****************************************************************************
@@ -130,7 +139,7 @@ typedef void (*up_vector_t)(void);
 
 extern volatile uint32_t *g_current_regs;
 
-/* This is the beginning of heap as provided from up_head.S. This is the
+/* This is the beginning of heap as provided from *_head.S. This is the
  * first address in DRAM after the loaded program+bss+idle stack.  The end
  * of the heap is CONFIG_RAM_END
  */
@@ -183,14 +192,20 @@ extern uint32_t _bmxdupba_address;  /* BMX register setting */
 
 #ifndef __ASSEMBLY__
 /* Common Functions *********************************************************/
-/* Common functions define in arch/mips/src/common.  These may be replaced
+/* Common functions defined in arch/mips/src/common.  These may be replaced
  * with chip-specific functions of the same name if needed.  See also
  * functions prototyped in include/nuttx/arch.h.
  */
 
+/* Atomic modification of registers */
+
+void modifyreg8(unsigned int addr, uint8_t clearbits, uint8_t setbits);
+void modifyreg16(unsigned int addr, uint16_t clearbits, uint16_t setbits);
+void modifyreg32(unsigned int addr, uint32_t clearbits, uint32_t setbits);
+
 /* Context switching */
 
-void up_copystate(uint32_t *dest, uint32_t *src);
+void xtensa_copystate(uint32_t *dest, uint32_t *src);
 
 /* Serial output */
 
@@ -208,36 +223,36 @@ void lowconsole_init(void);
 /* Debug */
 
 #ifdef CONFIG_ARCH_STACKDUMP
-void up_dumpstate(void);
+void xtensa_dumpstate(void);
 #else
-#  define up_dumpstate()
+#  define xtensa_dumpstate()
 #endif
 
 /* Common XTENSA functions */
 /* IRQs */
 
-uint32_t *up_doirq(int irq, uint32_t *regs);
+uint32_t *xtensa_doirq(int irq, uint32_t *regs);
 
 /* Software interrupt handler */
 
-int up_swint(int irq, FAR void *context);
+int xtensa_swint(int irq, FAR void *context);
 
 /* Signals */
 
-void up_sigdeliver(void);
+void xtensa_sigdeliver(void);
 
 /* Chip-specific functions **************************************************/
 /* Chip specific functions defined in arch/mips/src/<chip> */
 /* IRQs */
 
-void up_irqinitialize(void);
-bool up_pending_irq(int irq);
-void up_clrpend_irq(int irq);
+void xtensa_irq_initialize(void);
+bool xtensa_pending_irq(int irq);
+void xtensa_clrpend_irq(int irq);
 
 /* DMA */
 
 #ifdef CONFIG_ARCH_DMA
-void weak_function up_dmainitialize(void);
+void weak_function xtensa_dma_initialize(void);
 #endif
 
 /* Memory management */
@@ -261,7 +276,7 @@ void up_serialinit(void);
 
 /* System timer */
 
-void up_timer_initialize(void);
+void xtensa_timer_initialize(void);
 
 /* Network */
 

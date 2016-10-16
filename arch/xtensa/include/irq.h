@@ -159,9 +159,9 @@ struct xcptcontext
   uint32_t saved_cpsr;
 #endif
 
-  /* Pointer to the register save area on the stack*/
+  /* Register save area */
 
-  uint32_t *regs;
+  uint32_t regs[XCPTCONTEXT_REGS];
 
 #ifdef CONFIG_LIB_SYSCALL
   /* The following array holds the return address and the exc_return value

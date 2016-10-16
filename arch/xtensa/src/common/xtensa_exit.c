@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/xtensa/src/common/xtensa_exit.c
  *
- *   Copyright (C) 2011, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -67,7 +67,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: _up_dumponexit
+ * Name: _xtensa_dumponexit
  *
  * Description:
  *   Dump the state of all tasks whenever on task exits.  This is debug
@@ -77,7 +77,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_DUMP_ON_EXIT
-static void _up_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
+static void _xtensa_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
 {
 #if CONFIG_NFILE_DESCRIPTORS > 0
   FAR struct filelist *filelist;
@@ -152,7 +152,7 @@ void _exit(int status)
 
 #ifdef CONFIG_DUMP_ON_EXIT
   sinfo("Other tasks:\n");
-  sched_foreach(_up_dumponexit, NULL);
+  sched_foreach(_xtensa_dumponexit, NULL);
 #endif
 
   /* Destroy the task at the head of the ready to run list. */
@@ -185,4 +185,3 @@ void _exit(int status)
 
   PANIC();
 }
-

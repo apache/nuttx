@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/xtensa/src/common/xtensa_arch.h
+ * arch/xtensa/src/common/xtensa_copystate.c
  *
- *   Copyright (C) 2010, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,58 +33,42 @@
  *
  ****************************************************************************/
 
-#ifndef ___ARCH_XTENSA_SRC_COMMON_XTENSA_ARCH_H
-#define ___ARCH_XTENSA_SRC_COMMON_XTENSA_ARCH_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#ifndef __ASSEMBLY__
-# include <stdint.h>
-#endif
+
+#include <stdint.h>
+#include <arch/irq.h>
+
+#include "xtensa.h"
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Inline Functions
+ * Name: up_copystate
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
+/* A little faster than most memcpy's */
 
-# define getreg8(a)           (*(volatile uint8_t *)(a))
-# define putreg8(v,a)         (*(volatile uint8_t *)(a) = (v))
-# define getreg16(a)          (*(volatile uint16_t *)(a))
-# define putreg16(v,a)        (*(volatile uint16_t *)(a) = (v))
-# define getreg32(a)          (*(volatile uint32_t *)(a))
-# define putreg32(v,a)        (*(volatile uint32_t *)(a) = (v))
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
+void xtensa_copystate(uint32_t *dest, uint32_t *src)
 {
-#else
-#define EXTERN extern
-#endif
+  int i;
 
-/* Atomic modification of registers */
+  /* In the XTENSA model, the state is copied from the stack to the TCB,
+   * but only a reference is passed to get the state from the TCB.  So the
+   * following check avoids copying the TCB save area onto itself:
+   */
 
-void modifyreg8(unsigned int addr, uint8_t clearbits, uint8_t setbits);
-void modifyreg16(unsigned int addr, uint16_t clearbits, uint16_t setbits);
-void modifyreg32(unsigned int addr, uint32_t clearbits, uint32_t setbits);
-
-#undef EXTERN
-#if defined(__cplusplus)
+  if (src != dest)
+    {
+      for (i = 0; i < XCPTCONTEXT_REGS; i++)
+        {
+          *dest++ = *src++;
+        }
+    }
 }
-#endif
 
-#endif /* __ASSEMBLY__ */
-#endif  /* ___ARCH_XTENSA_SRC_COMMON_XTENSA_ARCH_H */

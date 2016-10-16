@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/xtensa/src/common/xtensa_initialize.c
  *
- *   Copyright (C) 2011-2013, 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,7 +57,6 @@
 
 #include <arch/board/board.h>
 
-#include "up_arch.h"
 #include "xtensa.h"
 
 /****************************************************************************
@@ -128,7 +127,7 @@ void up_initialize(void)
 
   /* Initialize the interrupt subsystem */
 
-  up_irqinitialize();
+  xtensa_irq_initialize();
 
 #ifdef CONFIG_PM
   /* Initialize the power management subsystem.  This MCU-specific function
@@ -141,22 +140,22 @@ void up_initialize(void)
 #endif
 
 #ifdef CONFIG_ARCH_DMA
-  /* Initialize the DMA subsystem if the weak function up_dmainitialize has been
-   * brought into the build
+  /* Initialize the DMA subsystem if the weak function xtensa_dma_initialize
+   * has been brought into the build
    */
 
 #ifdef CONFIG_HAVE_WEAKFUNCTIONS
-  if (up_dmainitialize)
+  if (xtensa_dma_initialize)
 #endif
     {
-      up_dmainitialize();
+      xtensa_dma_initialize();
     }
 #endif
 
   /* Initialize the system timer interrupt */
 
 #if !defined(CONFIG_SUPPRESS_INTERRUPTS) && !defined(CONFIG_SUPPRESS_TIMER_INTS)
-  up_timer_initialize();
+  xtensa_timer_initialize();
 #endif
 
   /* Register devices */
