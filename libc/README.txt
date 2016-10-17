@@ -31,6 +31,7 @@ we have:
   audio     - This part of he audio system: nuttx/audio/audio.h
   hex2bin   - hex2bin.h
   libgen    - libgen.h
+  locale    - locale.h
   fixedmath - fixedmath.h
   math      - math.h
   net       - Various network-related header files: netinet/ether.h, arpa/inet.h
