@@ -110,7 +110,7 @@ void up_initial_state(struct tcb_s *tcb)
   xcp->regs[REG_VPRI] = 0xffffffff;
 #endif
 
-# warning REVISIT co-processor support
+#warning REVISIT co-processor support
 #if 0 /* REVISIT */
 #if CONFIG_XTENSA_NCOPROCESSORS > 0
   /* Init the coprocessor save area (see xtensa_context.h)
