@@ -35,7 +35,7 @@
 
 # The start-up, "head", file
 
-HEAD_ASRC =
+HEAD_ASRC = esp32_start.c
 
 # Common XTENSA files (arch/xtensa/src/common)
 
@@ -50,8 +50,9 @@ CMN_CSRCS += xtensa_stackframe.c xtensa_udelay.c xtensa_usestack.c
 # Configuration-dependent common XTENSA files
 
 # Use of common/xtensa_etherstub.c is deprecated.  The preferred mechanism
-# is to use CONFIG_NETDEV_LATEINIT=y to suppress the call to up_netinitialize()
-# in xtensa_initialize.c.  Then this stub would not be needed.
+# is to use CONFIG_NETDEV_LATEINIT=y to suppress the call to
+# up_netinitialize() in xtensa_initialize.c.  Then this stub would not be
+# needed.
 
 ifneq ($(CONFIG_LX6_ETHERNET),y)
 ifeq ($(CONFIG_NET),y)
@@ -59,9 +60,15 @@ ifeq ($(CONFIG_NET),y)
 endif
 endif
 
-# Required LX6 files (arch/xtensa/src/lx6)
+# Required ESP32 files (arch/xtensa/src/lx6)
 
 CHIP_ASRCS  =
 CHIP_CSRCS  =
 
-# Configuration-dependent LX6 files
+# Configuration-dependent ESP32 files
+
+ifeq ($(CONFIG_SMP),y)
+#CMN_CSRCS += esp32_cpuindex.c esp32_cpustart.c esp32_cpupause.c
+#CMN_CSRCS += esp32_cpuidlestack.c
+CMN_CSRCS += esp32_cpustart.c
+endif

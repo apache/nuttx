@@ -66,20 +66,20 @@ void IRAM_ATTR __start()
   /* Kill the watchdog timer */
 
   regval  = getreg32(RTC_CNTL_WDTCONFIG0_REG);
-  regval ~= RTC_CNTL_WDT_FLASHBOOT_MOD_EN;
+  regval &= ~RTC_CNTL_WDT_FLASHBOOT_MOD_EN;
   putreg32(regval, RTC_CNTL_WDTCONFIG0_REG);
 
   regval  = getreg32(0x6001f048); /* DR_REG_BB_BASE+48 */
-  regval ~= (1 << 14);
+  regval &= ~(1 << 14);
   putreg32(regval, 0x6001f048);
 
   /* Make page 0 access raise an exception */
 
   cpu_configure_region_protection();
 
-  /* Move exception vectors to IRAM */
+  /* Move CPU0 exception vectors to IRAM */
 
-  asm volatile ("wsr    %0, vecbase\n"::"r" (&_init_start));
+  asm volatile ("wsr %0, vecbase\n"::"r" (&_init_start));
 
   /* Set .bss to zero */
 
