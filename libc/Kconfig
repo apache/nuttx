@@ -104,6 +104,12 @@ config LIBC_IOCTL_VARIADIC
 		this should just result in a garbage value for arg.  But you may
 		discover cases where something worse happens!
 
+config LIBC_WCHAR
+	bool "Enable wide-characters (Unicode) support"
+	default n
+	---help---
+		By default, wide-characters support is disabled.
+
 config LIB_RAND_ORDER
 	int "Order of the random number generate"
 	default 1
