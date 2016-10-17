@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/common/exp32_dport.h
+ * arch/xtensa/src/common/esp32_dport.h
  *
  * Adapted from use in NuttX by:
  *
@@ -24,8 +24,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_XTENSA_SRC_ESP32_CHIP_XTENSA_DPORT_H
-#define __ARCH_XTENSA_SRC_ESP32_CHIP_XTENSA_DPORT_H
+#ifndef __ARCH_XTENSA_SRC_ESP32_CHIP_ESP32_DPORT_H
+#define __ARCH_XTENSA_SRC_ESP32_CHIP_ESP32_DPORT_H
 
 /****************************************************************************
  * Included Files
@@ -3851,4 +3851,4 @@
 #define DPORT_DATE_S  0
 #define DPORT_DPORT_DATE_VERSION 0x1605190
 
-#endif /*__ARCH_XTENSA_SRC_ESP32_CHIP_XTENSA_DPORT_H */
+#endif /*__ARCH_XTENSA_SRC_ESP32_CHIP_ESP32_DPORT_H */

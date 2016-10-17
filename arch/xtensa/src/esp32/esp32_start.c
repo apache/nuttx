@@ -37,6 +37,8 @@
 #include "xtensa_attr.h"
 #include "chip/esp32_dport.h"
 #include "chip/esp32_rtccntl.h"
+#include "esp32_clockconfig.h"
+#include "esp32_start.h"
 #include "xtensa.h"
 
 #warning REVISIT Need cpu_configure_region_protection() prototype
@@ -59,7 +61,7 @@ void cpu_configure_region_protection(void);
  *
  ****************************************************************************/
 
-void IRAM_ATTR __start()
+void IRAM_ATTR __start(void)
 {
   uint32_t regval;
 
@@ -83,7 +85,7 @@ void IRAM_ATTR __start()
 
   /* Set .bss to zero */
 
-  memset(&_bss_start, 0, (&_bss_end - &_bss_start) * sizeof(_bss_start));
+  memset(&_sbss, 0, (&_ebss - &_sbss) * sizeof(_sbss));
 
 #warning Missing logic: Initialize .data
 
@@ -98,12 +100,12 @@ void IRAM_ATTR __start()
   /* Make sure that the APP_CPU is disabled for now */
 
   regval  = getreg32(DPORT_APPCPU_CTRL_B_REG);
-  regval &= ~DPORT_APPCPU_CLKGATE_EN
+  regval &= ~DPORT_APPCPU_CLKGATE_EN;
   putreg32(regval, DPORT_APPCPU_CTRL_B_REG);
 
   /* Set CPU frequency configured in board.h */
 
-  esp_set_cpu_freq();
+  esp32_clockconfig();
 
 #ifdef USE_EARLYSERIALINIT
  /* Perform early serial initialization */

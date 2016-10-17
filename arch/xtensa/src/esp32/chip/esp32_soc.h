@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/common/xtensa_att.h
+ * arch/xtensa/src/esp32/chip/esp32_soc.h
  *
  * Adapted from use in NuttX by:
  *
@@ -19,12 +19,12 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License./*
+ * limitations under the License.
  *
  ****************************************************************************/
 
-#ifndef __ARCH_XTENSA_SRC_COMMON_XTENSA_ATTR_H
-#define __ARCH_XTENSA_SRC_COMMON_XTENSA_ATTR_H
+#ifndef __ARCH_XTENSA_SRC_ESP32_CHIP_ESP32_SOC_H
+#define __ARCH_XTENSA_SRC_ESP32_CHIP_ESP32_SOC_H
 
 /****************************************************************************
  * Included Files
@@ -125,7 +125,7 @@
 
 #define VALUE_SET_FIELD(_r, _f, _v) ((_r)=(((_r) & ~((_f) << (_f##_S)))|((_v)<<(_f##_S))))
 
-/* Set field value to a variable, used when _f is left shifted by _f##_S
+/* Set field value to a variable, used when _f is left shifted by _f##_S */
 
 #define VALUE_SET_FIELD2(_r, _f, _v) ((_r)=(((_r) & ~(_f))|((_v)<<(_f##_S))))
 
@@ -149,11 +149,11 @@
 
 #define CLEAR_PERI_REG_MASK(reg, mask) WRITE_PERI_REG((reg), (READ_PERI_REG(reg)&(~(mask))))
 
-/* Set bits of register controlled by mask
+/* Set bits of register controlled by mask */
 
-#define SET_PERI_REG_MASK(reg, mask)   WRITE_PERI_REG((reg), (READ_PERI_REG(reg)|(mask)))
+#define SET_PERI_REG_MASK(reg, mask)   WRITE_PERI_REG((reg), (READ_PERI_REG(reg)|(mask))) */
 
-/* Get bits of register controlled by mask
+/* Get bits of register controlled by mask */
 
 #define GET_PERI_REG_MASK(reg, mask)   (READ_PERI_REG(reg) & (mask))
 
@@ -353,4 +353,4 @@
 
 /* Other interrupt numbers should be managed by the user */
 
-#endif /* __ARCH_XTENSA_SRC_COMMON_XTENSA_ATTR_H */
+#endif /* __ARCH_XTENSA_SRC_ESP32_CHIP_ESP32_SOC_H */

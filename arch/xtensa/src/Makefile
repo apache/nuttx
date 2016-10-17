@@ -68,8 +68,9 @@ else
 endif
 endif
 
-HEAD_OBJ = $(HEAD_ASRC:.S=$(OBJEXT))
-STARTUP_OBJS ?= $(HEAD_OBJ)
+HEAD_AOBJ = $(HEAD_ASRC:.S=$(OBJEXT))
+HEAD_COBJ = $(HEAD_CSRC:.c=$(OBJEXT))
+STARTUP_OBJS ?= $(HEAD_AOBJ) $(HEAD_COBJ)
 
 ASRCS = $(CHIP_ASRCS) $(CMN_ASRCS)
 AOBJS = $(ASRCS:.S=$(OBJEXT))
@@ -122,14 +123,14 @@ LIBGCC = "${shell "$(CC)" $(ARCHCPUFLAGS) -print-libgcc-file-name}"
 
 VPATH = chip:common:$(ARCH_SUBDIR)
 
-all: $(HEAD_OBJ) libarch$(LIBEXT)
+all: $(STARTUP_OBJS) libarch$(LIBEXT)
 
 .PHONY: board/libboard$(LIBEXT)
 
-$(AOBJS) $(HEAD_OBJ): %$(OBJEXT): %.S
+$(AOBJS) $(HEAD_AOBJ): %$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
 
-$(COBJS): %$(OBJEXT): %.c
+$(COBJS) $(HEAD_COBJ): %$(OBJEXT): %.c
 	$(call COMPILE, $<, $@)
 
 libarch$(LIBEXT): $(OBJS)
@@ -138,9 +139,9 @@ libarch$(LIBEXT): $(OBJS)
 board/libboard$(LIBEXT):
 	$(Q) $(MAKE) -C board TOPDIR="$(TOPDIR)" libboard$(LIBEXT) EXTRADEFINES=$(EXTRADEFINES)
 
-nuttx$(EXEEXT): $(HEAD_OBJ) board/libboard$(LIBEXT)
+nuttx$(EXEEXT): $(STARTUP_OBJS) board/libboard$(LIBEXT)
 	@echo "LD: nuttx"
-	$(Q) $(LD) --entry=__start $(LDFLAGS) $(LIBPATHS) -o $(NUTTX)$(EXEEXT) $(HEAD_OBJ) $(EXTRA_OBJS) \
+	$(Q) $(LD) --entry=__start $(LDFLAGS) $(LIBPATHS) -o $(NUTTX)$(EXEEXT) $(STARTUP_OBJS) $(EXTRA_OBJS) \
 		$(LDSTARTGROUP) $(LDLIBS) $(EXTRA_LIBS) $(LIBGCC) $(LDENDGROUP)
 ifneq ($(CONFIG_WINDOWS_NATIVE),y)
 	$(Q) $(NM) $(NUTTX)$(EXEEXT) | \

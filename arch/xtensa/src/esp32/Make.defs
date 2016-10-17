@@ -33,9 +33,10 @@
 #
 ############################################################################
 
-# The start-up, "head", file
+# The start-up, "head", file.  May be either a .S or a .c file.
 
-HEAD_ASRC = esp32_start.c
+HEAD_ASRC =
+HEAD_CSRC = esp32_start.c
 
 # Common XTENSA files (arch/xtensa/src/common)
 

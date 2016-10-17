@@ -24,8 +24,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_XTENSA_SRC_ESP32_CHIP_XTENSA_RTCCNTL_H
-#define __ARCH_XTENSA_SRC_ESP32_CHIP_XTENSA_RTCCNTL_H
+#ifndef __ARCH_XTENSA_SRC_ESP32_CHIP_XTENSA_ESP32_H
+#define __ARCH_XTENSA_SRC_ESP32_CHIP_XTENSA_ESP32_H
 
 /****************************************************************************
  * Included Files
@@ -2001,9 +2001,4 @@
 #define RTC_CNTL_CNTL_DATE_S  0
 #define RTC_CNTL_RTC_CNTL_DATE_VERSION 0x1604280
 
-
-
-
-#endif /*__ARCH_XTENSA_SRC_ESP32_CHIP_XTENSA_RTCCNTL_H */
-
-
+#endif /*__ARCH_XTENSA_SRC_ESP32_CHIP_XTENSA_ESP32_H */

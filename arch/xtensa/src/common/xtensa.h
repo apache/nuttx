@@ -164,6 +164,7 @@ extern void g_intstackbase;
  *    of _data.  like:  uint32_t *pdata = &_sdata;
  */
 
+extern uint32_t _init_start;        /* Start of initialization logic */
 extern uint32_t _stext;             /* Start of .text */
 extern uint32_t _etext;             /* End+1 of .text + .rodata */
 extern const uint32_t _data_loaddr; /* Start of .data in FLASH */
@@ -176,9 +177,6 @@ extern uint32_t _sramfunc;          /* Start of ramfuncs */
 extern uint32_t _eramfunc;          /* End+1 of ramfuncs */
 extern uint32_t _ramfunc_loadaddr;  /* Start of ramfuncs in FLASH */
 extern uint32_t _ramfunc_sizeof;    /* Size of ramfuncs */
-extern uint32_t _bmxdkpba_address;  /* BMX register setting */
-extern uint32_t _bmxdudba_address;  /* BMX register setting */
-extern uint32_t _bmxdupba_address;  /* BMX register setting */
 #endif /* CONFIG_ARCH_RAMFUNCS */
 #endif /* __ASSEMBLY__ */
 
