@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/fixedmath/lib_usub64x32.c
+ * libc/misc/lib_usub64x32.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
