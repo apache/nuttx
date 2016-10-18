@@ -469,6 +469,14 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
   cfglen = (unsigned int)usbhost_getle16(((struct usb_cfgdesc_s *)buffer)->totallen);
   uinfo("sizeof config data: %d\n", cfglen);
 
+  if (cfglen > maxlen)
+    {
+      uerr("ERROR: Configuration doesn't fit in buffer, length=%d, maxlen=%d\n",
+           cfglen, maxlen);
+      ret = -E2BIG;
+      goto errout;
+    }
+
   /* Get all of the configuration descriptor data, index == 0 (Should not be
    * hard-coded!)
    */
