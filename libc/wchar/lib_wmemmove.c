@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/wchar/lib_wmemcmp.c
+ * libc/wchar/lib_wmemmove.c
  *
  *   Copyright (c)1999 Citrus Project,
  *   All rights reserved.
@@ -41,33 +41,18 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: wmemcmp
+ * Name: wmemmove
  *
  * Description:
- *   The wmemcmp() function is the wide-character equivalent of the memcmp()
- *   function. It compares the n wide-characters starting at s1 and the n
- *   wide-characters starting at s2.
+ *   The wmemmove() function is the wide-character equivalent of the memmove()
+ *   function. It copies n wide characters from the array starting at src to
+ *   the array starting at dest.  The arrays may overlap.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_LIBC_WCHAR
-int wmemcmp(FAR const wchar_t *s1, FAR const wchar_t *s2, size_t n)
+FAR wchar_t *wmemmove(FAR wchar_t *d, FAR const wchar_t *s, size_t n)
 {
-  size_t i;
-
-  for (i = 0; i < n; i++)
-    {
-      if (*s1 != *s2)
-        {
-          /* wchar might be unsigned */
-
-          return *s1 > *s2 ? 1 : -1;
-        }
-
-      s1++;
-      s2++;
-    }
-
-  return 0;
+  return (FAR wchar_t *) memmove(d, s, n * sizeof(wchar_t));
 }
 #endif

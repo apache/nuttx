@@ -35,9 +35,11 @@
 
 # Add the internal C files to the build
 
-CSRCS += lib_wcslen.c lib_wmemchr.c lib_wmemcmp.c lib_wmemcpy.c lib_wmemset.c
+CSRCS += lib_wcscmp.c lib_wcslen.c lib_wmemchr.c lib_wmemcmp.c lib_wmemcpy.c
+CSRCS += lib_wmemmove.c lib_wmemset.c lib_mbtowc.c lib_btowc.c lib_mbrtowc.c
 
 # Add the wchar directory to the build
 
 DEPPATH += --dep-path wchar
 VPATH += :wchar
+

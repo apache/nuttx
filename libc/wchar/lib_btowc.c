@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/wchar/lib_wmemcmp.c
+ * libc/wchar/lib_btowc.c
  *
  *   Copyright (c)1999 Citrus Project,
  *   All rights reserved.
@@ -33,41 +33,44 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <string.h>
 #include <wchar.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: wmemcmp
+ * Name: btowc
  *
  * Description:
- *   The wmemcmp() function is the wide-character equivalent of the memcmp()
- *   function. It compares the n wide-characters starting at s1 and the n
- *   wide-characters starting at s2.
+ *   Minimal byte to wide char converter
  *
  ****************************************************************************/
 
 #ifdef CONFIG_LIBC_WCHAR
-int wmemcmp(FAR const wchar_t *s1, FAR const wchar_t *s2, size_t n)
+wint_t btowc(int c)
 {
-  size_t i;
+  int retval = 0;
+  wchar_t pwc;
+  unsigned char b;
 
-  for (i = 0; i < n; i++)
+  if (c == EOF)
     {
-      if (*s1 != *s2)
-        {
-          /* wchar might be unsigned */
-
-          return *s1 > *s2 ? 1 : -1;
-        }
-
-      s1++;
-      s2++;
+      return WEOF;
     }
 
-  return 0;
+  b = (unsigned char)c;
+
+  retval = mbtowc(&pwc, &b, 1);
+
+  if (retval != 0 && retval != 1)
+    {
+      return WEOF;
+    }
+
+  return (wint_t)pwc;
 }
 #endif

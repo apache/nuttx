@@ -1,13 +1,13 @@
-
 /****************************************************************************
  * libc/wchar/lib_wmemchr.c
  *
- * Copyright (c)1999 Citrus Project,
- * All rights reserved.
+ *   Copyright (c)1999 Citrus Project,
+ *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
+ *
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
@@ -26,8 +26,6 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- *	citrus Id: wmemchr.c,v 1.2 2000/12/20 14:08:31 itojun Exp
- *
  ****************************************************************************/
 
 /****************************************************************************
@@ -37,18 +35,6 @@
 #include <nuttx/config.h>
 #include <string.h>
 #include <wchar.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -65,7 +51,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_LIBC_WCHAR
-FAR wchar_t *wmemchr(FAR wchar_t * s, wchar_t c, size_t n)
+FAR wchar_t *wmemchr(FAR wchar_t *s, wchar_t c, size_t n)
 {
   size_t i;
 
@@ -74,7 +60,8 @@ FAR wchar_t *wmemchr(FAR wchar_t * s, wchar_t c, size_t n)
       if (*s == c)
         {
           /* LINTED const castaway */
-          return (wchar_t *) s;
+
+          return (FAR wchar_t *) s;
         }
       s++;
     }

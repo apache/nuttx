@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/wchar/lib_wmemcmp.c
+ * libc/wchar/lib_mbtowc.c
  *
  *   Copyright (c)1999 Citrus Project,
  *   All rights reserved.
@@ -33,7 +33,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <string.h>
+#include <stdlib.h>
 #include <wchar.h>
 
 /****************************************************************************
@@ -41,33 +41,31 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: wmemcmp
+ * Name: mbtowc.c
  *
  * Description:
- *   The wmemcmp() function is the wide-character equivalent of the memcmp()
- *   function. It compares the n wide-characters starting at s1 and the n
- *   wide-characters starting at s2.
+ *   Minimal multibyte to wide char converter
  *
  ****************************************************************************/
 
 #ifdef CONFIG_LIBC_WCHAR
-int wmemcmp(FAR const wchar_t *s1, FAR const wchar_t *s2, size_t n)
+int mbtowc(FAR wchar_t * pwc, FAR const char *s, size_t n)
 {
-  size_t i;
-
-  for (i = 0; i < n; i++)
+  if (s == NULL)
     {
-      if (*s1 != *s2)
-        {
-          /* wchar might be unsigned */
-
-          return *s1 > *s2 ? 1 : -1;
-        }
-
-      s1++;
-      s2++;
+      return 0;
     }
 
-  return 0;
+  if (n == 0)
+    {
+      return -1;
+    }
+
+  if (pwc)
+    {
+      *pwc = (wchar_t) * s;
+    }
+
+  return (*s != '\0');
 }
 #endif
