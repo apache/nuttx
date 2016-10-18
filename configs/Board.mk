@@ -124,6 +124,9 @@ endif
 
 depend: .depend
 
+context: $(EXTRA_CONTEXT_DEPENDENCY)
+	$(EXTRA_CONTEXT)
+
 clean:
 	$(call DELFILE, libboard$(LIBEXT))
 	$(call CLEAN)
