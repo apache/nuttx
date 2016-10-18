@@ -110,7 +110,7 @@ void IRAM_ATTR __start(void)
 #ifdef USE_EARLYSERIALINIT
  /* Perform early serial initialization */
 
-  up_earlyserialinit();
+  xtensa_earlyserialinit();
 #endif
 
   /* Initialize onboard resources */

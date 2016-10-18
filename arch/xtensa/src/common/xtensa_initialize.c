@@ -191,7 +191,7 @@ void up_initialize(void)
   /* Initialize the serial device driver */
 
 #ifdef USE_SERIALDRIVER
-  up_serialinit();
+  xtensa_serial_initialize();
 #endif
 
   /* Initialize the console device driver (if it is other than the standard

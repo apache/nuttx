@@ -190,7 +190,7 @@ extern uint32_t _ramfunc_sizeof;    /* Size of ramfuncs */
 
 #ifndef __ASSEMBLY__
 /* Common Functions *********************************************************/
-/* Common functions defined in arch/mips/src/common.  These may be replaced
+/* Common functions defined in arch/xtensa/src/common.  These may be replaced
  * with chip-specific functions of the same name if needed.  See also
  * functions prototyped in include/nuttx/arch.h.
  */
@@ -240,7 +240,7 @@ int xtensa_swint(int irq, FAR void *context);
 void xtensa_sigdeliver(void);
 
 /* Chip-specific functions **************************************************/
-/* Chip specific functions defined in arch/mips/src/<chip> */
+/* Chip specific functions defined in arch/xtensa/src/<chip> */
 /* IRQs */
 
 void xtensa_irq_initialize(void);
@@ -265,11 +265,11 @@ void up_addregion(void);
 
 void up_lowputc(char ch);
 #if CONFIG_NFILE_DESCRIPTORS > 0
-void up_earlyserialinit(void);
-void up_serialinit(void);
+void xtensa_earlyserialinit(void);
+void xtensa_serial_initialize(void);
 #else
-# define up_earlyserialinit()
-# define up_serialinit()
+# define xtensa_earlyserialinit()
+# define xtensa_serial_initialize()
 #endif
 
 /* System timer */
