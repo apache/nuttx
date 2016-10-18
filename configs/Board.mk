@@ -124,8 +124,9 @@ endif
 
 depend: .depend
 
-context: $(EXTRA_CONTEXT_DEPENDENCY)
-	$(EXTRA_CONTEXT)
+ifneq ($(BOARD_CONTEXT),y)
+context:
+endif
 
 clean:
 	$(call DELFILE, libboard$(LIBEXT))

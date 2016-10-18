@@ -41,13 +41,19 @@ CONFIGFILE = $(TOPDIR)$(DELIM)include$(DELIM)nuttx$(DELIM)config.h
 ASRCS =
 CSRCS =
 
-SCRIPTIN = esp32.ld
-SCRIPTOUT = esp32_out.ld
+SCRIPTIN = $(SCRIPTDIR)$(DELIM)esp32.template
+SCRIPTOUT = $(SCRIPTDIR)$(DELIM)esp32_out.ld
 
+BOARD_CONTEXT = y
 EXTRA_CLEAN =
 EXTRA_DISTCLEAN = $(call DELFILE, $(SCRIPTOUT))
+
+.PHONY = context
 
 include $(TOPDIR)/configs/Board.mk
 
 $(SCRIPTOUT): $(SCRIPTIN) $(CONFIGFILE)
-	$(call PREPROCESS, $<, $(SCRIPTIN))
+	# $(call PREPROCESS, $(SCRIPTIN), $@)
+	$(Q) $(CC) -isystem $(TOPDIR)/include -C -P -x c -E $(SCRIPTIN) -o $@
+
+context: $(SCRIPTOUT)
