@@ -97,7 +97,7 @@
 
 #define _REG_LOOPS_START    (22)
 
-#if CONFIG_XTENSA_HAVE_LOOPS
+#ifdef CONFIG_XTENSA_HAVE_LOOPS
 #  define REG_LBEG          (_REG_LOOPS_START + 0)
 #  define REG_LEND          (_REG_LOOPS_START + 1)
 #  define REG_LCOUNT        (_REG_LOOPS_START + 2)

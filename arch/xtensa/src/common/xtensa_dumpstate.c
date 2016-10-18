@@ -66,7 +66,7 @@
 static inline uint32_t xtensa_getsp(void)
 {
   register uint32_t sp;
-#waning Missing logic
+#warning Missing logic
   return sp;
 }
 
@@ -125,7 +125,7 @@ static inline void xtensa_registerdump(void)
              (unsigned long)g_current_regs[REG_EXIT],
              (unsigned long)g_current_regs[REG_EXCCAUSE],
              (unsigned long)g_current_regs[REG_EXCVADDR]);
-#if CONFIG_XTENSA_HAVE_LOOPS
+#ifdef CONFIG_XTENSA_HAVE_LOOPS
       _alert(" LBEG: %08lx  LEND: %08lx  LCNT: %08lx\n",
              (unsigned long)g_current_regs[REG_LBEG],
              (unsigned long)g_current_regs[REG_LEND],
@@ -137,7 +137,6 @@ static inline void xtensa_registerdump(void)
              (unsigned long)g_current_regs[REG_TMP1],
              (unsigned long)g_current_regs[REG_TMP2]);
 #endif
-
 #ifdef CONFIG_XTENSA_USE_SWPRI
       _alert(" VPRI: %08lx\n",
              (unsigned long)g_current_regs[REG_VPRI]);
