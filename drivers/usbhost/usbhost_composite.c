@@ -641,7 +641,7 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
 
   if (priv == NULL)
     {
-      uerr("ERROR: Failed to allocate class container\n")
+      uerr("ERROR: Failed to allocate class container\n");
       return -ENOMEM;
     }
 
@@ -650,7 +650,7 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
 
   if (priv->members == NULL)
     {
-      uerr("ERROR: Failed to allocate class members\n")
+      uerr("ERROR: Failed to allocate class members\n");
       ret = -ENOMEM;
       goto errout_with_container;
     }
