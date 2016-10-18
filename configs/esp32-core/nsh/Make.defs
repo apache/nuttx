@@ -37,7 +37,10 @@ include ${TOPDIR}/.config
 include ${TOPDIR}/tools/Config.mk
 include ${TOPDIR}/arch/xtensa/src/lx6/Toolchain.defs
 
-LDSCRIPT += -T esp32_out.ld -T esp32_common.ld -T esp32_rom.ld -T esp32_peripherals.ld
+LDSCRIPT1 = $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/scripts/esp32_out.ld
+LDSCRIPT2 = $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/scripts/esp32_common.ld
+LDSCRIPT3 = $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/scripts/esp32_rom.ld
+LDSCRIPT4 = $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/scripts/esp32_peripherals.ld
 
 ifeq ($(WINTOOL),y)
   # Windows-native toolchains
@@ -46,13 +49,16 @@ ifeq ($(WINTOOL),y)
   MKDEP = $(TOPDIR)/tools/mkwindeps.sh
   ARCHINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}"
   ARCHXXINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}" -isystem "${shell cygpath -w $(TOPDIR)/include/cxx}"
-  ARCHSCRIPT = -T "${shell cygpath -w $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/scripts/$(LDSCRIPT)}"
+  ARCHSCRIPT = -T "${shell cygpath -w $(LDSCRIPT1)}"
+  ARCHSCRIPT += -T "${shell cygpath -w $(LDSCRIPT2)}"
+  ARCHSCRIPT += -T "${shell cygpath -w $(LDSCRIPT3)}"
+  ARCHSCRIPT += -T "${shell cygpath -w $(LDSCRIPT4)}"
 else
   # Linux/Cygwin-native toolchain
   MKDEP = $(TOPDIR)/tools/mkdeps$(HOSTEXEEXT)
   ARCHINCLUDES = -I. -isystem $(TOPDIR)/include
   ARCHXXINCLUDES = -I. -isystem $(TOPDIR)/include -isystem $(TOPDIR)/include/cxx
-  ARCHSCRIPT = -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/scripts/$(LDSCRIPT)
+  ARCHSCRIPT = -T$(LDSCRIPT1) -T$(LDSCRIPT2) -T$(LDSCRIPT3) -T$(LDSCRIPT4)
 endif
 
 CC = $(CROSSDEV)gcc
