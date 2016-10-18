@@ -41,7 +41,7 @@ HEAD_CSRC = esp32_start.c
 # Common XTENSA files (arch/xtensa/src/common)
 
 CMN_ASRCS  = xtensa_irq.S
-CMN_CSRCS  = xtensa_allocateheap.c xtensa_assert.c xtensa_copystate.c
+CMN_CSRCS  = xtensa_assert.c xtensa_copystate.c
 CMN_CSRCS += xtensa_createstack.c xtensa_exit.c xtensa_idle.c 
 CMN_CSRCS += xtensa_initialize.c xtensa_initialstate.c
 CMN_CSRCS += xtensa_interruptcontext.c xtensa_lowputs.c xtensa_mdelay.c
@@ -70,7 +70,7 @@ endif
 # Required ESP32 files (arch/xtensa/src/lx6)
 
 CHIP_ASRCS  =
-CHIP_CSRCS  =
+CHIP_CSRCS  = esp32_allocateheap.c esp32_start.c
 
 # Configuration-dependent ESP32 files
 

@@ -256,9 +256,9 @@ void weak_function xtensa_dma_initialize(void);
 /* Memory management */
 
 #if CONFIG_MM_REGIONS > 1
-void up_addregion(void);
+void xtensa_add_region(void);
 #else
-# define up_addregion()
+# define xtensa_add_region()
 #endif
 
 /* Serial output */

@@ -39,7 +39,11 @@ SCRIPTDIR = $(TOPDIR)$(DELIM)configs$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)scripts
 CONFIGFILE = $(TOPDIR)$(DELIM)include$(DELIM)nuttx$(DELIM)config.h
 
 ASRCS =
-CSRCS =
+CSRCS = esp32_boot.c esp32_bringup.c
+
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
+CONFIG_CSRCS += esp32_appinit.c
+endif
 
 SCRIPTIN = $(SCRIPTDIR)$(DELIM)esp32.template
 SCRIPTOUT = $(SCRIPTDIR)$(DELIM)esp32_out.ld

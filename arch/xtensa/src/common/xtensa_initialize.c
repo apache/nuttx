@@ -123,7 +123,7 @@ void up_initialize(void)
 
   /* Add any extra memory fragments to the memory manager */
 
-  up_addregion();
+  xtensa_add_region();
 
   /* Initialize the interrupt subsystem */
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/common/xtensa_allocateheap.c
+ * config/esp32-core/src/esp32_bringup.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,37 +39,31 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <debug.h>
+#include "esp32-core.h"
 
-#include <nuttx/arch.h>
-#include <nuttx/board.h>
-#include <arch/board/board.h>
-
-#include "xtensa.h"
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_allocate_heap
+ * Name: esp32_bringup
  *
  * Description:
- *   This function will be called to dynamically set aside the heap region.
+ *   Perform architecture-specific initialization
  *
- *   For the kernel build (CONFIG_BUILD_KERNEL=y) with both kernel- and
- *   user-space heaps (CONFIG_MM_KERNEL_HEAP=y), this function provides the
- *   size of the unprotected, user-space heap.
+ *   CONFIG_BOARD_INITIALIZE=y :
+ *     Called from board_initialize().
  *
- *   If a protected kernel-space heap is provided, the kernel heap must be
- *   allocated (and protected) by an analogous up_allocate_kheap().
+ *   CONFIG_BOARD_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y :
+ *     Called from the NSH library
  *
  ****************************************************************************/
 
-void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
+int esp32_bringup(void)
 {
-  board_autoled_on(LED_HEAPALLOCATE);
-  *heap_start = (FAR void *)g_idle_topstack;
-  *heap_size = CONFIG_RAM_END - g_idle_topstack;
+  return OK;
 }
