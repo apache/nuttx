@@ -37,7 +37,7 @@ include ${TOPDIR}/.config
 include ${TOPDIR}/tools/Config.mk
 include ${TOPDIR}/arch/xtensa/src/lx6/Toolchain.defs
 
-LDSCRIPT = ld.script
+LDSCRIPT += -T esp32_out.ld -T esp32_common.ld -T esp32_rom.ld -T esp32_peripherals.ld
 
 ifeq ($(WINTOOL),y)
   # Windows-native toolchains

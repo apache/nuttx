@@ -35,7 +35,15 @@
 
 -include $(TOPDIR)/Make.defs
 
+SCRIPTDIR = $(TOPDIR)$(DELIM)configs$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)scripts
+CONFIGFILE = $(TOPDIR)$(DELIM)include$(DELIM)nuttx$(DELIM)config.h
+SCRIPTIN = esp32.ld
+SCRIPTOUT = esp32_out.ld
+
 ASRCS =
 CSRCS =
 
 include $(TOPDIR)/configs/Board.mk
+
+$(SCRIPTOUT): $(SCRIPTIN) $(CONFIGFILE)
+	$(call PREPROCESS, $<, $(SCRIPTIN))

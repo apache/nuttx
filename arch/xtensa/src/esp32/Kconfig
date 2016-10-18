@@ -5,5 +5,16 @@
 
 if ARCH_CHIP_ESP32
 
-endif # ARCH_CHIP_ESP32
+config ESP32_BT_RESERVE_DRAM
+	int "Reserved BT DRAM"
+	default 0
 
+config ESP32_TRACEMEM_RESERVE_DRAM
+	int "Reserved trace memory DRAM"
+	default 0
+
+config ESP32_ULP_COPROC_RESERVE_MEM
+	int "Reserved ULP co-processor DRAM"
+	default 0
+
+endif # ARCH_CHIP_ESP32
