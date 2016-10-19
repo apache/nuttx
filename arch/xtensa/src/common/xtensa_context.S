@@ -476,21 +476,21 @@ _xt_coproc_savecs:
 	call0	XT_RTOS_CP_STATE			/* get address of CP save area		*/
 	mov		a0, a14						/* restore return address			*/
 	beqz	a15, .Ldone					/* if none then nothing to do		*/
-	s16i	a2, a15, XT_CP_CS_ST		/* save mask of CPs being stored   */
-	movi	a13, _xt_coproc_sa_offset   /* array of CP save offsets		*/
-	l32i	a15, a15, XT_CP_ASA			/* a15 = base of aligned save area */
+	s16i	a2, a15, XT_CP_CS_ST		/* save mask of CPs being stored	*/
+	movi	a13, _xt_coproc_sa_offset   /* array of CP save offsets			*/
+	l32i	a15, a15, XT_CP_ASA			/* a15 = base of aligned save area	*/
 
 #if XCHAL_CP0_SA_SIZE
-	bbci.l	a2, 0, 2f					/* CP 0 not enabled				*/
-	l32i	a14, a13, 0					/* a14 = _xt_coproc_sa_offset[0]   */
+	bbci.l	a2, 0, 2f					/* CP 0 not enabled					*/
+	l32i	a14, a13, 0					/* a14 = _xt_coproc_sa_offset[0]	*/
 	add		a3, a14, a15				/* a3 = save area for CP 0			*/
 	xchal_cp0_store a3, a4, a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
 2:
 #endif
 
 #if XCHAL_CP1_SA_SIZE
-	bbci.l	a2, 1, 2f					/* CP 1 not enabled				*/
-	l32i	a14, a13, 4					/* a14 = _xt_coproc_sa_offset[1]   */
+	bbci.l	a2, 1, 2f					/* CP 1 not enabled					*/
+	l32i	a14, a13, 4					/* a14 = _xt_coproc_sa_offset[1]	*/
 	add		a3, a14, a15				/* a3 = save area for CP 1			*/
 	xchal_cp1_store a3, a4, a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
 2:
@@ -584,23 +584,23 @@ _xt_coproc_restorecs:
 	call0	XT_RTOS_CP_STATE			/* Get address of CP save area		*/
 	mov		a0, a14						/* Restore return address			*/
 	beqz	a15, .Ldone2				/* If none then nothing to do		*/
-	l16ui   a3, a15, XT_CP_CS_ST		/* a3 = which CPs have been saved  */
-	xor		a3, a3, a2					/* Clear the ones being restored   */
-	s32i	a3, a15, XT_CP_CS_ST		/* Update saved CP mask			*/
-	movi	a13, _xt_coproc_sa_offset   /* Array of CP save offsets		*/
-	l32i	a15, a15, XT_CP_ASA			/* a15 = base of aligned save area */
+	l16ui   a3, a15, XT_CP_CS_ST		/* a3 = which CPs have been saved	*/
+	xor		a3, a3, a2					/* Clear the ones being restored	*/
+	s32i	a3, a15, XT_CP_CS_ST		/* Update saved CP mask				*/
+	movi	a13, _xt_coproc_sa_offset   /* Array of CP save offsets			*/
+	l32i	a15, a15, XT_CP_ASA			/* a15 = base of aligned save area	*/
 	
 #if XCHAL_CP0_SA_SIZE
-	bbci.l	a2, 0, 2f					/* CP 0 not enabled				*/
-	l32i	a14, a13, 0					/* a14 = _xt_coproc_sa_offset[0]   */
+	bbci.l	a2, 0, 2f					/* CP 0 not enabled					*/
+	l32i	a14, a13, 0					/* a14 = _xt_coproc_sa_offset[0]	*/
 	add		a3, a14, a15				/* a3 = save area for CP 0			*/
 	xchal_cp0_load a3, a4, a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
 2:
 #endif
 
 #if XCHAL_CP1_SA_SIZE
-	bbci.l	a2, 1, 2f					/* CP 1 not enabled				*/
-	l32i	a14, a13, 4					/* a14 = _xt_coproc_sa_offset[1]   */
+	bbci.l	a2, 1, 2f					/* CP 1 not enabled					*/
+	l32i	a14, a13, 4					/* a14 = _xt_coproc_sa_offset[1]	*/
 	add		a3, a14, a15				/* a3 = save area for CP 1			*/
 	xchal_cp1_load a3, a4, a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
 2:
