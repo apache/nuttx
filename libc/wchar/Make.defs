@@ -37,9 +37,10 @@ ifeq ($(CONFIG_LIBC_WCHAR),y)
 
 # Add the internal C files to the build
 
-CSRCS += lib_wcscmp.c lib_wcslen.c lib_wmemchr.c lib_wmemcmp.c lib_wmemcpy.c
-CSRCS += lib_wmemmove.c lib_wmemset.c lib_btowc.c lib_mbrtowc.c lib_wctob.c
-CSRCS +=lib_wcslcpy.c lib_wcsxfrm.c lib_wcrtomb.c
+CSRCS += lib_wcscmp.c lib_wcslen.c lib_wmemchr.c lib_wmemcmp.c
+CSRCS += lib_wmemcpy.c lib_wmemmove.c lib_wmemset.c lib_btowc.c
+CSRCS += lib_mbrtowc.c lib_wctob.c lib_wcslcpy.c lib_wcsxfrm.c
+CSRCS += lib_wcrtomb.c lib_wcsftime.c lib_wcscoll.c
 
 # Add the wchar directory to the build
 

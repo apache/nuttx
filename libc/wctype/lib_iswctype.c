@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/wctype/wctype.c
+ * libc/wctype/lib_iswctype.c
  *
  *    Copyright (c) 2002 Red Hat Incorporated.
  *    All rights reserved.
@@ -26,7 +26,7 @@
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
  * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS   
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
@@ -38,6 +38,7 @@
 #include <nuttx/config.h>
 
 #include <string.h>
+#include <ctype.h>
 #include <wctype.h>
 #include <errno.h>
 
@@ -47,98 +48,113 @@
  * Public Functions
  ****************************************************************************/
 
-wctype_t wctype(FAR const char *c)
+int iswalnum(wint_t c)
 {
-  switch (*c)
+  return (iswalpha(c) || iswdigit(c));
+}
+
+int iswalpha(wint_t c)
+{
+  return (c < (wint_t)0x100 ? isalpha(c) : 0);
+}
+
+int iswblank(wint_t c)
+{
+  return (c < (wint_t)0x100 ? isblank(c) : 0);
+}
+
+int iswcntrl(wint_t c)
+{
+  return (c < (wint_t)0x100 ? iscntrl(c) : 0);
+}
+
+int iswdigit(wint_t c)
+{
+  return (c >= (wint_t)'0' && c <= (wint_t)'9');
+}
+
+int iswgraph(wint_t c)
+{
+  return (iswprint(c) && !iswspace(c));
+}
+
+int iswlower(wint_t c)
+{
+  return (towupper(c) != c);
+}
+
+int iswprint(wint_t c)
+{
+  return (c < (wint_t) 0x100 ? isprint(c) : 0);
+}
+
+int iswpunct(wint_t c)
+{
+  return (!iswalnum(c) && iswgraph(c));
+}
+
+int iswspace(wint_t c)
+{
+  return (c < 0x100 ? isspace(c) : 0);
+}
+
+int iswupper(wint_t c)
+{
+  return (towlower(c) != c);
+}
+
+int iswxdigit(wint_t c)
+{
+  return ((c >= (wint_t)'0' && c <= (wint_t)'9') ||
+          (c >= (wint_t)'a' && c <= (wint_t)'f') ||
+          (c >= (wint_t)'A' && c <= (wint_t)'F'));
+}
+
+int iswctype(wint_t c, wctype_t desc)
+{
+  switch (desc)
     {
-    case 'a':
-      if (!strcmp(c, "alnum"))
-        {
-          return WC_ALNUM;
-        }
-      else if (!strcmp(c, "alpha"))
-        {
-          return WC_ALPHA;
-        }
+    case WC_ALNUM:
+      return iswalnum(c);
 
-      break;
+    case WC_ALPHA:
+      return iswalpha(c);
 
-    case 'b':
-      if (!strcmp(c, "blank"))
-        {
-          return WC_BLANK;
-        }
+    case WC_BLANK:
+      return iswblank(c);
 
-      break;
+    case WC_CNTRL:
+      return iswcntrl(c);
 
-    case 'c':
-      if (!strcmp(c, "cntrl"))
-        {
-          return WC_CNTRL;
-        }
+    case WC_DIGIT:
+      return iswdigit(c);
 
-      break;
+    case WC_GRAPH:
+      return iswgraph(c);
 
-    case 'd':
-      if (!strcmp(c, "digit"))
-        {
-          return WC_DIGIT;
-        }
+    case WC_LOWER:
+      return iswlower(c);
 
-      break;
+    case WC_PRINT:
+      return iswprint(c);
 
-    case 'g':
-      if (!strcmp(c, "graph"))
-        {
-          return WC_GRAPH;
-        }
+    case WC_PUNCT:
+      return iswpunct(c);
 
-      break;
+    case WC_SPACE:
+      return iswspace(c);
 
-    case 'l':
-      if (!strcmp(c, "lower"))
-        {
-          return WC_LOWER;
-        }
+    case WC_UPPER:
+      return iswupper(c);
 
-      break;
+    case WC_XDIGIT:
+      return iswxdigit(c);
 
-    case 'p':
-      if (!strcmp(c, "print"))
-        {
-          return WC_PRINT;
-        }
-      else if (!strcmp(c, "punct"))
-        {
-          return WC_PUNCT;
-        }
-
-      break;
-
-    case 's':
-      if (!strcmp(c, "space"))
-        {
-          return WC_SPACE;
-        }
-
-      break;
-
-    case 'u':
-      if (!strcmp(c, "upper"))
-        {
-          return WC_UPPER;
-        }
-
-      break;
-
-    case 'x':
-      if (!strcmp(c, "xdigit"))
-        {
-          return WC_XDIGIT;
-        }
-
-      break;
+    default:
+      return 0;                 /* eliminate warning */
     }
+
+  /* Otherwise unknown */
 
   return 0;
 }

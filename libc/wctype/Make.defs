@@ -37,7 +37,7 @@ ifeq ($(CONFIG_LIBC_WCHAR),y)
 
 # Add the internal C files to the build
 
-CSRCS += lib_wctype.c
+CSRCS += lib_wctype.c lib_iswctype.c lib_towlower.c lib_towupper.c
 
 # Add the wctype directory to the build
 
@@ -45,4 +45,3 @@ DEPPATH += --dep-path wctype
 VPATH += :wctype
 
 endif
-

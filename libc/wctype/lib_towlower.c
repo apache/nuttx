@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/wctype/wctype.c
+ * libc/wchar/lib_towlower.c
  *
  *    Copyright (c) 2002 Red Hat Incorporated.
  *    All rights reserved.
@@ -26,7 +26,7 @@
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
  * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS   
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
@@ -38,8 +38,9 @@
 #include <nuttx/config.h>
 
 #include <string.h>
+#include <wchar.h>
+#include <ctype.h>
 #include <wctype.h>
-#include <errno.h>
 
 #ifdef CONFIG_LIBC_WCHAR
 
@@ -47,99 +48,19 @@
  * Public Functions
  ****************************************************************************/
 
-wctype_t wctype(FAR const char *c)
+/****************************************************************************
+ * Name: towlower
+ *
+ * Description:
+ *   The  towlower() function is the wide-character equivalent of the
+ *   tolower() function.  If c is an uppercase wide character, and there
+ *   exists a lowercase equivalent in the current locale, it returns the
+ *   lowercase  equivalent  of c. This current code don't use locale.
+ *
+ ****************************************************************************/
+
+wint_t towlower(wint_t c)
 {
-  switch (*c)
-    {
-    case 'a':
-      if (!strcmp(c, "alnum"))
-        {
-          return WC_ALNUM;
-        }
-      else if (!strcmp(c, "alpha"))
-        {
-          return WC_ALPHA;
-        }
-
-      break;
-
-    case 'b':
-      if (!strcmp(c, "blank"))
-        {
-          return WC_BLANK;
-        }
-
-      break;
-
-    case 'c':
-      if (!strcmp(c, "cntrl"))
-        {
-          return WC_CNTRL;
-        }
-
-      break;
-
-    case 'd':
-      if (!strcmp(c, "digit"))
-        {
-          return WC_DIGIT;
-        }
-
-      break;
-
-    case 'g':
-      if (!strcmp(c, "graph"))
-        {
-          return WC_GRAPH;
-        }
-
-      break;
-
-    case 'l':
-      if (!strcmp(c, "lower"))
-        {
-          return WC_LOWER;
-        }
-
-      break;
-
-    case 'p':
-      if (!strcmp(c, "print"))
-        {
-          return WC_PRINT;
-        }
-      else if (!strcmp(c, "punct"))
-        {
-          return WC_PUNCT;
-        }
-
-      break;
-
-    case 's':
-      if (!strcmp(c, "space"))
-        {
-          return WC_SPACE;
-        }
-
-      break;
-
-    case 'u':
-      if (!strcmp(c, "upper"))
-        {
-          return WC_UPPER;
-        }
-
-      break;
-
-    case 'x':
-      if (!strcmp(c, "xdigit"))
-        {
-          return WC_XDIGIT;
-        }
-
-      break;
-    }
-
-  return 0;
+  return (c < (wint_t)0x00ff ? (wint_t)tolower((int)c) : c);
 }
 #endif

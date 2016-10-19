@@ -48,7 +48,7 @@
 #include <stddef.h>
 
 /* REVISIT: Moving the idempotence to this location resolves a circular
- * dependency problem with stdlib.h which gets included indirectory and
+ * dependency problem with stdlib.h which gets included indirectly and
  * needs wchar_t.
  */
 
