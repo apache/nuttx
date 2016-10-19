@@ -40,6 +40,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
 #include <nuttx/compiler.h>
 
 #ifdef CONFIG_LIBC_LOCALE

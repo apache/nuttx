@@ -102,27 +102,14 @@ typedef int wint_t;
  *   A scalar type of a data object that can hold values which represent
  *   locale-specific character classification.
  *
+ *   Ddefined in wctype.h.  Should be defined here.
+ *
  * mbstate_t
  *   An object type other than an array type that can hold the conversion
  *   state information necessary to convert between sequences of (possibly
  *   multibyte) characters and wide-characters. If a codeset is being used
  *   such that an mbstate_t needs to preserve more than 2 levels of reserved
  *   state, the results are unspecified.
- */
-
-/* Commented out because this is dangerous.  This defines a type that would
- * be internal to some wchar implementation.  NuttX does not implement the
- * wchar functions.  Having this definition is a time bomb:  If this header
- * file is inadvertently included in code that interacts with an external
- * library and if the definition of mbstate_t does not EXACTLY match the
- * usage in that external library, then a potentially fatal error could
- * occur.
- *
- * It is better to let the build error out due to the lack of the mbstate_t
- * definition.  At least that way, the problem can be avoided and the user
- * can come up with some alternative way of dealing with the interfacing
- * issue that does not require NuttX to be in lock-step with some external
- * implementation.
  */
 
 struct mbstate_s

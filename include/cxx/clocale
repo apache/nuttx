@@ -46,9 +46,11 @@
 // Namespace
 //***************************************************************************
 
+#ifdef CONFIG_LIBC_LOCALE
 namespace std
 {
   using ::setlocale;
 }
+#endif
 
 #endif // __INCLUDE_CXX_CLOCALE
