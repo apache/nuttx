@@ -1689,7 +1689,7 @@ int up_timer_start(FAR const struct timespec *ts);
  * Name: up_testset
  *
  * Description:
- *   Perform and atomic test and set operation on the provided spinlock.
+ *   Perform an atomic test and set operation on the provided spinlock.
  *
  * Input Parameters:
  *   lock - The address of spinlock object.
