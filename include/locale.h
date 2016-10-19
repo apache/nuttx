@@ -43,8 +43,6 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 
-#ifdef CONFIG_LIBC_LOCALE
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -109,5 +107,4 @@ FAR struct lconv *localeconv(void);
 }
 #endif
 
-#endif /* CONFIG_LIBC_LOCALE */
 #endif /* __INCLUDE_LOCALE_H */
