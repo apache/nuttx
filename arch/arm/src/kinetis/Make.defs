@@ -33,11 +33,14 @@
 #
 ############################################################################
 
-# The start-up, "head", file
-
+ifeq ($(CONFIG_ARMV7M_CMNVECTOR),y)
+HEAD_ASRC =
+else
 HEAD_ASRC = kinetis_vectors.S
+endif
 
-# Common ARM and Cortex-M3 files
+CMN_UASRCS =
+CMN_UCSRCS =
 
 CMN_ASRCS  = up_saveusercontext.S up_fullcontextrestore.S up_switchcontext.S
 CMN_ASRCS += up_testset.S vfork.S
@@ -48,8 +51,21 @@ CMN_CSRCS += up_initialstate.c up_interruptcontext.c up_modifyreg8.c
 CMN_CSRCS += up_modifyreg16.c up_modifyreg32.c up_releasestack.c
 CMN_CSRCS += up_reprioritizertr.c up_schedulesigaction.c up_releasepending.c
 CMN_CSRCS += up_sigdeliver.c up_stackframe.c up_unblocktask.c up_usestack.c
-CMN_CSRCS += up_doirq.c up_hardfault.c up_svcall.c up_checkstack.c up_vfork.c
+CMN_CSRCS += up_doirq.c up_hardfault.c up_svcall.c up_vfork.c
 CMN_CSRCS += up_systemreset.c
+
+ifeq ($(CONFIG_ARMV7M_STACKCHECK),y)
+CMN_CSRCS += up_stackcheck.c
+endif
+
+ifeq ($(CONFIG_ARMV7M_CMNVECTOR),y)
+ifeq ($(CONFIG_ARMV7M_LAZYFPU),y)
+CMN_ASRCS += up_lazyexception.S
+else
+CMN_ASRCS += up_exception.S
+endif
+CMN_CSRCS += up_vectors.c
+endif
 
 ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
 CMN_CSRCS += up_ramvec_initialize.c up_ramvec_attach.c
@@ -67,6 +83,10 @@ CMN_UASRCS += up_signal_handler.S
 endif
 endif
 
+ifeq ($(CONFIG_STACK_COLORATION),y)
+CMN_CSRCS += up_checkstack.c
+endif
+
 # Use of common/up_etherstub.c is deprecated.  The preferred mechanism is to
 # use CONFIG_NETDEV_LATEINIT=y to suppress the call to up_netinitialize() in
 # up_initialize().  Then this stub would not be needed.
@@ -81,6 +101,19 @@ ifeq ($(CONFIG_ELF),y)
 CMN_CSRCS += up_elf.c
 else ifeq ($(CONFIG_MODULE),y)
 CMN_CSRCS += up_elf.c
+endif
+
+ifeq ($(CONFIG_ARCH_FPU),y)
+CMN_ASRCS += up_fpu.S
+ifneq ($(CONFIG_ARMV7M_CMNVECTOR),y)
+CMN_CSRCS += up_copyarmstate.c
+else ifeq ($(CONFIG_ARMV7M_LAZYFPU),y)
+CMN_CSRCS += up_copyarmstate.c
+endif
+endif
+
+ifeq ($(CONFIG_ARMV7M_ITMSYSLOG),y)
+CMN_CSRCS += up_itm_syslog.c
 endif
 
 # Required Kinetis files
@@ -129,6 +162,10 @@ endif
 
 ifeq ($(CONFIG_PWM),y)
 CHIP_CSRCS += kinetis_pwm.c
+endif
+
+ifeq ($(CONFIG_PWM),y)
+CHIP_CSRCS += kinetis_dma.c
 endif
 
 ifeq ($(CONFIG_I2C),y)

@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/wchar/lib_mbtowc.c
+ * libc/stdlib/lib_mbtowc.c
  *
  *   Copyright (c)1999 Citrus Project,
  *   All rights reserved.
@@ -36,6 +36,8 @@
 #include <stdlib.h>
 #include <wchar.h>
 
+#ifdef CONFIG_LIBC_WCHAR
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -48,7 +50,6 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_LIBC_WCHAR
 int mbtowc(FAR wchar_t * pwc, FAR const char *s, size_t n)
 {
   if (s == NULL)

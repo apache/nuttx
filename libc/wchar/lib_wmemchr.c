@@ -33,8 +33,11 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <string.h>
 #include <wchar.h>
+
+#ifdef CONFIG_LIBC_WCHAR
 
 /****************************************************************************
  * Public Functions
@@ -50,8 +53,7 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_LIBC_WCHAR
-FAR wchar_t *wmemchr(FAR wchar_t *s, wchar_t c, size_t n)
+FAR wchar_t *wmemchr(FAR const wchar_t *s, wchar_t c, size_t n)
 {
   size_t i;
 

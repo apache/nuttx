@@ -80,7 +80,7 @@
  *   codes for all members of the largest character set specified among the
  *   locales supported by the compilation environment: the null character has
  *   the code value 0 and each member of the portable character set has a
- *   code value equal to its value when used as the lone character in an\
+ *   code value equal to its value when used as the lone character in an
  *   integer character constant.
  *
  * size_t

@@ -33,10 +33,13 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <wchar.h>
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <wchar.h>
+
+#ifdef CONFIG_LIBC_WCHAR
 
 /****************************************************************************
  * Public Functions
@@ -50,21 +53,20 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_LIBC_WCHAR
 wint_t btowc(int c)
 {
-  int retval = 0;
   wchar_t pwc;
-  unsigned char b;
+  char b;
+  int retval = 0;
 
   if (c == EOF)
     {
       return WEOF;
     }
 
-  b = (unsigned char)c;
+  b = (char)c;
 
-  retval = mbtowc(&pwc, &b, 1);
+  retval = mbtowc(&pwc, (FAR const char *)&b, 1);
 
   if (retval != 0 && retval != 1)
     {

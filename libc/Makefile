@@ -88,6 +88,7 @@ include time/Make.defs
 include tls/Make.defs
 include unistd/Make.defs
 include wchar/Make.defs
+include wctype/Make.defs
 include wqueue/Make.defs
 
 # REVISIT: Backslash causes problems in $(COBJS) target

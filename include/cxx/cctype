@@ -55,6 +55,7 @@
 #undef isprint
 #undef ispunct
 #undef isspace
+#undef isblank
 #undef isupper
 #undef isxdigit
 #undef tolower

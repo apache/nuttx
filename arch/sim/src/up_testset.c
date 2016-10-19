@@ -71,7 +71,7 @@ static pthread_mutex_t g_tsmutex = PTHREAD_MUTEX_INITIALIZER;
  * Name: up_testset
  *
  * Description:
- *   Perform and atomic test and set operation on the provided spinlock.
+ *   Perform an atomic test and set operation on the provided spinlock.
  *
  *   This function must be provided via the architecture-specific logoic.
  *

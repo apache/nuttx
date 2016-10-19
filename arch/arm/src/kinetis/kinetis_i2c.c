@@ -202,8 +202,8 @@ static uint8_t kinetis_i2c_getreg(struct kinetis_i2cdev_s *priv,
  *
  ****************************************************************************/
 
-static void kinetis_i2c_putreg(struct kinetis_i2cdev_s *priv, uint8_t offset,
-                               uint8_t value)
+static void kinetis_i2c_putreg(struct kinetis_i2cdev_s *priv, uint8_t value,
+                               uint8_t offset)
 {
   putreg8(value, priv->base + offset);
 }

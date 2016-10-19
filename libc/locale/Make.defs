@@ -33,11 +33,15 @@
 #
 ############################################################################
 
+ifeq ($(CONFIG_LIBC_LOCALE),y)
+
 # Add the locale files to the build
 
-CSRCS += lib_setlocale.c
+CSRCS += lib_setlocale.c lib_localeconv.c
 
 # Add the locale directory to the build
 
 DEPPATH += --dep-path locale
 VPATH += :locale
+
+endif

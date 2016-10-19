@@ -36,6 +36,8 @@
 #include <string.h>
 #include <wchar.h>
 
+#ifdef CONFIG_LIBC_WCHAR
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -50,7 +52,6 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_LIBC_WCHAR
 int wmemcmp(FAR const wchar_t *s1, FAR const wchar_t *s2, size_t n)
 {
   size_t i;

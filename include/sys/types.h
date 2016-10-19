@@ -191,6 +191,7 @@ typedef int16_t      key_t;
 
 typedef intptr_t     ptrdiff_t;
 
+#ifndef CONFIG_WCHAR_BUILTIN
 /* Wide, 16-bit character types.  wchar_t is a built-in type in C++ and
  * its declaration here may cause compilation errors on some compilers
  * if -DCONFIG_WCHAR_BUILTIN is not included in the CXXFLAGS.
@@ -198,7 +199,6 @@ typedef intptr_t     ptrdiff_t;
  * REVISIT: wchar_t belongs in stddef.h
  */
 
-#ifndef CONFIG_WCHAR_BUILTIN
 typedef uint16_t     wchar_t;
 #endif
 
@@ -215,9 +215,9 @@ typedef uint32_t     blkcnt_t;
 typedef int32_t      off_t;
 typedef off_t        fpos_t;
 
+#ifdef CONFIG_HAVE_LONG_LONG
 /* Large file versions */
 
-#ifdef CONFIG_HAVE_LONG_LONG
 typedef int64_t      off64_t;
 typedef int64_t      fpos64_t;
 #endif

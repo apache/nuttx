@@ -85,6 +85,7 @@ config ARCH_CHIP_KINETIS
 	select ARM_HAVE_MPU_UNIFIED
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_RAMFUNCS
+	select ARCH_HAVE_CMNVECTOR
 	---help---
 		Freescale Kinetis Architectures (ARM Cortex-M4)
 

@@ -135,6 +135,16 @@
 #define isalpha(c)   (islower(c) || isupper(c))
 
 /****************************************************************************
+ * Name: isblank
+ *
+ * Description:
+ *   Checks for blank characters (space or tab)
+ *
+ ****************************************************************************/
+
+#define isblank(c)   (isspace(c) || (c) == '\t')
+
+/****************************************************************************
  * Name: isdigit
  *
  * Description:
