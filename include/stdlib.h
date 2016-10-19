@@ -42,8 +42,10 @@
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
+
 #include <sys/types.h>
 #include <stdint.h>
+#include <wchar.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -201,6 +203,13 @@ double_t  strtod(FAR const char *str, FAR char **endptr);
 /* Binary to string conversions */
 
 FAR char *itoa(int val, FAR char *str, int base);
+
+/* Wide character operations */
+
+#ifdef CONFIG_LIBC_WCHAR
+int       mbtowc(FAR wchar_t *pwc, FAR const char *s, size_t n);
+int       wctomb(FAR char *s, wchar_t wchar);
+#endif
 
 /* Memory Management */
 

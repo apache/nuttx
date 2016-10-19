@@ -33,9 +33,6 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_WCHAR_H
-#define __INCLUDE_WCHAR_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -49,6 +46,14 @@
 
 #include <stdio.h>
 #include <stddef.h>
+
+/* REVISIT: Moving the idempotence to this location resolves a circular
+ * dependency problem with stdlib.h which gets included indirectory and
+ * needs wchar_t.
+ */
+
+#ifndef __INCLUDE_WCHAR_H
+#define __INCLUDE_WCHAR_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -105,7 +110,6 @@ typedef int wint_t;
  *   state, the results are unspecified.
  */
 
-#if 0 /* Not used */
 /* Commented out because this is dangerous.  This defines a type that would
  * be internal to some wchar implementation.  NuttX does not implement the
  * wchar functions.  Having this definition is a time bomb:  If this header
@@ -127,7 +131,6 @@ struct mbstate_s
 };
 
 typedef struct mbstate_s mbstate_t;
-#endif
 
 /* FILE
  *   As described in <stdio.h>.
@@ -218,6 +221,8 @@ size_t            wcscspn(const wchar_t *, const wchar_t *);
 size_t            wcsftime(wchar_t *, size_t, const wchar_t *,
                       const struct tm *);
 size_t            wcslen(const wchar_t *);
+size_t            wcslcpy(FAR wchar_t *, FAR const wchar_t *, size_t);
+size_t            wcslcat(FAR wchar_t *, FAR const wchar_t *, size_t);
 wchar_t          *wcsncat(wchar_t *, const wchar_t *, size_t);
 int               wcsncmp(const wchar_t *, const wchar_t *, size_t);
 wchar_t          *wcsncpy(wchar_t *, const wchar_t *, size_t);

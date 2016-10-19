@@ -35,9 +35,11 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <wchar.h>
+
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <wchar.h>
 #include <limits.h>
 
 #ifdef CONFIG_LIBC_WCHAR

@@ -60,7 +60,7 @@
  *
  ****************************************************************************/
 
-FAR struct lconv *localeconv(void);
+FAR struct lconv *localeconv(void)
 {
   /* NULL indicates the the locale was not changed */
 

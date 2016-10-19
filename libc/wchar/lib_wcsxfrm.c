@@ -32,6 +32,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <string.h>
 #include <wchar.h>
 
