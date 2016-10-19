@@ -45,6 +45,7 @@ we have:
   time      - time.h
   unistd    - unistd.h
   wchar     - wchar.h
+  wctype    - wctype.h
 
 Most of these are "standard" header files; some are not: hex2bin.h and
 fixemath.h are non-standard.
