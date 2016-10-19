@@ -80,6 +80,19 @@
 #  define environ get_environ_ptr()
 #endif
 
+/* The functions strtof() and strtold() are not currently implemented in
+ * NuttX.  Ideally, custom implementations of these functions to be provided:
+ *
+ *   strtof() - Some MCUs, such as the Cortex-M4F, have built in 32-bit FPU.
+ *     A true implementation could exploit the improved performance by the
+ *     the FPU.
+ *   strtold() - Of course, there is a lost of 32-bits of accuracy in this
+ *     conversion.
+ */
+
+#define strtof(a,b)  (float)strtod(a,b)
+#define strtold(a,b) (long double)strtod(a,b)
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
