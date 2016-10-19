@@ -31,7 +31,7 @@
  *
  ****************************************************************************/
 
-/*			XTENSA CONTEXT SAVE AND RESTORE ROUTINES
+/* XTENSA CONTEXT SAVE AND RESTORE ROUTINES
  *
  * Low-level Call0 functions for handling generic context save and restore of
  * registers not specifically addressed by the interrupt vectors and handlers.
@@ -160,7 +160,7 @@ _xtensa_context_save:
 	/* To spill the reg windows, temp. need pre-interrupt stack ptr and
 	 * a4-15.  Need to save a9,12,13 temporarily (in frame temps) and
 	 * recover originals.  Interrupts need to be disabled below
-	 * XCHAL_EXCM_LEVEL and window overflow and underflow exceptions
+	 * CONFIG_XTENSA_EXCM_LEVEL and window overflow and underflow exceptions
 	 * disabled (assured by PS.EXCM == 1).
 	 */
 
@@ -373,7 +373,7 @@ _xt_coproc_init:
 	movi	a2, _xt_coproc_owner_sa			/* a2 = base of owner array */
 	addi	a3, a2, (XCHAL_CP_MAX*portNUM_PROCESSORS) << 2	/* a3 = top+1 of owner array */
 	movi	a4, 0							/* a4 = 0 (unowned) */
-1:  s32i	a4, a2, 0
+1:	s32i	a4, a2, 0
 	addi	a2, a2, 4
 	bltu	a2, a3, 1b
 
@@ -424,15 +424,15 @@ _xt_coproc_release:
 	addi	a4, a3, XCHAL_CP_MAX << 2		/* a4 = top+1 of owner array */
 	movi	a5, 0							/* a5 = 0 (unowned) */
 
-	rsil	a6, XCHAL_EXCM_LEVEL			/* lock interrupts */
+	rsil	a6, CONFIG_XTENSA_EXCM_LEVEL	/* Lock interrupts */
 
-1:  l32i	a7, a3, 0						/* a7 = owner at a3 */
+1:	l32i	a7, a3, 0						/* a7 = owner at a3 */
 	bne		a2, a7, 2f						/* if (coproc_sa_base == owner) */
 	s32i	a5, a3, 0						/*   owner = unowned */
-2:  addi	a3, a3, 1<<2					/* a3 = next entry in owner array */
-	bltu	a3, a4, 1b						/* repeat until end of array */
+2:	addi	a3, a3, 1 << 2					/* a3 = next entry in owner array */
+	bltu	a3, a4, 1b						/* Repeat until end of array */
 
-3:  wsr		a6, PS							/* restore interrupts */
+3:	wsr		a6, PS							/* Restore interrupts */
 
 	RET0
 #endif

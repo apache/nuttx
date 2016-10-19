@@ -21,13 +21,13 @@ SECTIONS
     . = 0x0;
     KEEP(*(.WindowVectors.text));
     . = 0x180;
-    KEEP(*(.Level2InterruptVector.text));
+    KEEP(*(.xtensa_level2_vector.text));
     . = 0x1c0;
-    KEEP(*(.Level3InterruptVector.text));
+    KEEP(*(.xtensa_level3_vector.text));
     . = 0x200;
-    KEEP(*(.Level4InterruptVector.text));
+    KEEP(*(.xtensa_level4_vector.text));
     . = 0x240;
-    KEEP(*(.Level5InterruptVector.text));
+    KEEP(*(.xtensa_level5_vector.text));
     . = 0x280;
     KEEP(*(.DebugExceptionVector.text));
     . = 0x2c0;

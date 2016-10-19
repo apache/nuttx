@@ -35,6 +35,14 @@ config XTENSA_NCOPROCESSORS
 	int "Number of co-processors"
 	default 1
 
+config XTENSA_INT_NLEVELS
+	int "Number of interrupt levels"
+	default 5
+
+config XTENSA_EXCM_LEVEL
+	int "Level masked by PS.EXCM"
+	default 3
+
 config XTENSA_HAVE_LOOPS
 	bool "Zero overhead loops"
 	default n
