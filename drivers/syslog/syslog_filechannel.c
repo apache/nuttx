@@ -149,7 +149,7 @@ int syslog_file_channel(FAR const char *devpath)
 
   sched_lock();
   saved_channel = g_syslog_channel;
-  ret = syslog_channel(&g_default_syslog_channel);
+  ret = syslog_channel(&g_default_channel);
   if (ret < 0)
     {
       goto errout_with_lock;
