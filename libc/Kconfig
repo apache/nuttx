@@ -110,6 +110,12 @@ config LIBC_WCHAR
 	---help---
 		By default, wide-characters support is disabled.
 
+config LIBC_LOCALE
+	bool "Enable I18N (LOCALE) support"
+	default n
+	---help---
+		By default, i18n (locale) support is disabled.
+
 config LIB_RAND_ORDER
 	int "Order of the random number generate"
 	default 1

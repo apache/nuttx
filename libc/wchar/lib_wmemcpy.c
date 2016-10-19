@@ -36,6 +36,8 @@
 #include <string.h>
 #include <wchar.h>
 
+#ifdef CONFIG_LIBC_WCHAR
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -50,7 +52,6 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_LIBC_WCHAR
 FAR wchar_t *wmemcpy(FAR wchar_t *d, FAR wchar_t *s, size_t n)
 {
   return (FAR wchar_t *) memcpy(d, s, n * sizeof(wchar_t));

@@ -42,6 +42,8 @@
 #include <sys/types.h>
 #include <locale.h>
 
+#ifdef CONFIG_LIBC_LOCALE
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -64,3 +66,4 @@ FAR char *setlocale(int category, FAR const char *locale)
 
   return NULL;
 }
+#endif

@@ -39,6 +39,8 @@
 #include <errno.h>
 #include <string.h>
 
+#ifdef CONFIG_LIBC_WCHAR
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -51,7 +53,6 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_LIBC_WCHAR
 size_t mbrtowc(FAR wchar_t *pwc, FAR const char *s, size_t n, mbstate_t *ps)
 {
   int retval = 0;

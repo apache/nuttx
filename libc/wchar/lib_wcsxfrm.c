@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/wchar/lib_wmemcmp.c
+ * libc/wchar/lib_wcsxfrm.c
  *
  *   Copyright (c)1999 Citrus Project,
  *   All rights reserved.
@@ -7,7 +7,6 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
- *
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
@@ -43,32 +42,21 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: wmemcmp
+ * Name: wcsxfrm
  *
  * Description:
- *   The wmemcmp() function is the wide-character equivalent of the memcmp()
- *   function. It compares the n wide-characters starting at s1 and the n
- *   wide-characters starting at s2.
+ *   The wcsxfrm() transforms the wide-character string pointed to by b to the
+ *   wide-character string pointed to by a, comparing two transformed wide
+ *   strings with wcscmp() should return the same result as comparing the
+ *   original strings with wcscoll().
+ *   No more than n wide characters are transformed, including the trailing
+ *   null character. The current implementation of wcsxfrm() simply uses
+ *   wcslcpy() and does not support any language-specific transformations.
  *
  ****************************************************************************/
 
-int wmemcmp(FAR const wchar_t *s1, FAR const wchar_t *s2, size_t n)
+size_t wcsxfrm(FAR wchar_t *a, FAR const wchar_t *b, size_t n)
 {
-  size_t i;
-
-  for (i = 0; i < n; i++)
-    {
-      if (*s1 != *s2)
-        {
-          /* wchar might be unsigned */
-
-          return *s1 > *s2 ? 1 : -1;
-        }
-
-      s1++;
-      s2++;
-    }
-
-  return 0;
+  return wcslcpy(a, b, n);
 }
 #endif

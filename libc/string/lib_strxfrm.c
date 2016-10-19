@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/wchar/lib_wmemcmp.c
+ * libc/string/lib_strxfrm.c
  *
  *   Copyright (c)1999 Citrus Project,
  *   All rights reserved.
@@ -7,7 +7,6 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
- *
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
@@ -34,41 +33,48 @@
 
 #include <nuttx/config.h>
 #include <string.h>
-#include <wchar.h>
 
-#ifdef CONFIG_LIBC_WCHAR
+#ifdef CONFIG_LIBC_LOCALE
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: wmemcmp
+ * Name: strxfrm
  *
  * Description:
- *   The wmemcmp() function is the wide-character equivalent of the memcmp()
- *   function. It compares the n wide-characters starting at s1 and the n
- *   wide-characters starting at s2.
+ *   This function transforms the string pointed to by s2 and places the
+ *   resulting string into the array pointed to by s1. The transformation is
+ *   such that if the strcmp() function is applied to the two transformed
+ *   strings, it returns a value greater than, equal to, or less than zero,
+ *   correspoinding to the result of a <<strcoll>> function applied to the
+ *   same two original strings.
+ *   With a C locale, this function just copies.
  *
  ****************************************************************************/
 
-int wmemcmp(FAR const wchar_t *s1, FAR const wchar_t *s2, size_t n)
+size_t strxfrm(FAR char *s1, FAR const char *s2, size_t n)
 {
-  size_t i;
-
-  for (i = 0; i < n; i++)
+  size_t res;
+  res = 0;
+  while (n-- > 0)
     {
-      if (*s1 != *s2)
+      if ((*s1++ = *s2++) != '\0')
         {
-          /* wchar might be unsigned */
-
-          return *s1 > *s2 ? 1 : -1;
+          ++res;
         }
-
-      s1++;
-      s2++;
+      else
+        {
+          return res;
+        }
+    }
+  while (*s2)
+    {
+      ++s2;
+      ++res;
     }
 
-  return 0;
+  return res;
 }
 #endif

@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/locale.h
+ * libc/locale/lib_localeconv.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,42 +33,37 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_LOCALE_H
-#define __INCLUDE_LOCALE_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/compiler.h>
+#include <nuttx/config.h>
+
+#include <sys/types.h>
+#include <locale.h>
 
 #ifdef CONFIG_LIBC_LOCALE
 
 /****************************************************************************
- * Type Definitions
+ * Public Functions
  ****************************************************************************/
-
-struct lconv;
 
 /****************************************************************************
- * Public Function Prototypes
+ * Name: localeconv
+ *
+ * Description:
+ *   locales are not supported by NuttX
+ *
+ * Input Parameters:
+ *   category and locale - Select the appropriate piece of the program's
+ *     locale.
+ *
  ****************************************************************************/
 
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-FAR char *setlocale(int category, FAR const char *locale);
 FAR struct lconv *localeconv(void);
+{
+  /* NULL indicates the the locale was not changed */
 
-#undef EXTERN
-#ifdef __cplusplus
+  return NULL;
 }
 #endif
-
-#endif /* CONFIG_LIBC_LOCALE */
-#endif /* __INCLUDE_LOCALE_H */
