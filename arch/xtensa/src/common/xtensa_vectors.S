@@ -152,5 +152,3 @@ _xtensa_level6_vector:
 
 	.size	_xtensa_level6_vector, . - _xtensa_level6_vector
 #endif
-
-	.end
