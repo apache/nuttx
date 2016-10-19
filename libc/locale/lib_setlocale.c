@@ -43,6 +43,7 @@
 #include <locale.h>
 
 #ifdef CONFIG_LIBC_LOCALE
+#include <string.h>
 
 /****************************************************************************
  * Public Functions
@@ -62,8 +63,8 @@
 
 FAR char *setlocale(int category, FAR const char *locale)
 {
-  /* NULL indicates the the locale was not changed */
 
-  return NULL;
+  return ((strcmp (locale, "POSIX") == 0 || strcmp (locale, "C") == 0 ||
+           strcmp (locale, "") == 0) ? "C" :  NULL);
 }
 #endif
