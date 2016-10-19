@@ -55,6 +55,9 @@ ifeq ($(CONFIG_DEBUG_ALERT),y)
   CMN_CSRCS += xtensa_dumpstate.c
 endif
 
+ifeq ($(CONFIG_SPINLOCK),y)
+  CMN_CSRCS += xtensa_testset.c
+endif
 
 # Use of common/xtensa_etherstub.c is deprecated.  The preferred mechanism
 # is to use CONFIG_NETDEV_LATEINIT=y to suppress the call to

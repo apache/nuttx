@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/include/spinlock.h
+ * arch/xtensa/src/common/xtensa_testset.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,46 +33,54 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_INCLUDE_SPINLOCK_H
-#define __ARCH_ARM_INCLUDE_SPINLOCK_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
-#  include <stdint.h>
-#endif /* __ASSEMBLY__ */
+#include <nuttx/config.h>
+
+#include <spinlock.h>
+
+#include <arch/spinlock.h>
+
+#include "xtensa.h"
+
+#ifdef CONFIG_SPINLOCK
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Private Functions
  ****************************************************************************/
-
-#define SP_UNLOCKED 0  /* The Un-locked state */
-#define SP_LOCKED   1  /* The Locked state */
 
 /****************************************************************************
- * Public Types
+ * Name: xtensa_compareset
+ *
+ * Description:
+ *   Wrapper for the Xtensa compare-and-set instruction. This function will
+ *   atomically compare *addr to compare, and if it's the same, will set
+ *   *addr to set. It will return the old value of *addr.
+ *
+ *   Warning: From the ISA docs: in some (unspecified) cases, the s32c1i
+ *   instruction may return the *bitwise inverse* of the old mem if the
+ *   mem wasn't written. This doesn't seem to happen on the ESP32, though.
+ *   (Would show up directly if it did because the magic wouldn't match.)
+ *
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
+static inline uint32_t xtensa_compareset(FAR volatile uint32_t *addr,
+                                         uint32_t compare,
+                                         uint32_t set)
+{
+  __asm__ __volatile__
+  (
+    "WSR    %2, SCOMPARE1\n" /* Initialize SCOMPARE1 */
+    "ISYNC\n"                /* Wait sync */
+    "S32C1I %0, %1, 0\n"     /* Store id into the lock, if the lock is the
+                              * same as comparel. Otherwise, no write-access */
+    : "=r"(set) : "r"(addr), "r"(compare), "0"(set)
+  );
 
-/* The Type of a spinlock.
- *
- * ARMv6 architecture introuced the concept of exclusive accesses to memory
- * locations in the form of the Load-Exclusive (LDREX) and Store-Exclusive
- * (STREX) instructions in ARM and Thumb instruction sets.  ARMv6K extended
- * this to included byte, halfword, and doubleword variants of LDREX and
- * STREX.  ARMv7-M supports byte and halfwor, but not the doudleword varient
- * (ARMv6-M does not support exlusive access)
- *
- * ARM architectures prior to ARMv6 supported SWP and SWPB instructions that
- * atomically swap a 32-bit word for byte value between a register and a
- * memory location.  From the ARMv6 architecture, ARM deprecates the use
- * of SWP and SWPB.
- */
-
-typedef uint8_t spinlock_t;
+  return set;
+}
 
 /****************************************************************************
  * Public Functions
@@ -92,13 +100,42 @@ typedef uint8_t spinlock_t;
  * Returned Value:
  *   The spinlock is always locked upon return.  The value of previous value
  *   of the spinlock variable is returned, either SP_LOCKED if the spinlock
- *   as previously locked (meaning that the test-and-set operation failed to
+ *   was previously locked (meaning that the test-and-set operation failed to
  *   obtain the lock) or SP_UNLOCKED if the spinlock was previously unlocked
  *   (meaning that we successfully obtained the lock)
  *
  ****************************************************************************/
 
-/* See prototype in nuttx/include/nuttx/spinlock.h */
+spinlock_t up_testset(volatile FAR spinlock_t *lock)
+{
+  spinlock_t prev;
 
-#endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_INCLUDE_SPINLOCK_H */
+  /* Perform the 32-bit compare and set operation */
+
+  prev = xtensa_compareset((FAR volatile uint32_t *)lock,
+                           SP_UNLOCKED, SP_LOCKED);
+
+  /* xtensa_compareset() should return either SP_UNLOCKED if the spinlock
+   * was locked or SP_LOCKED or possibly ~SP_UNLOCKED if the spinlock was
+   * not locked:
+   *
+   * "In the RE-2013.0 release and after, there is a slight change in the
+   *  semantics of the S32C1I instruction.  Nothing is changed about the
+   *  operation on memory.  In rare cases the resulting value in register
+   *  at can be different in this and later releases. The rule still holds
+   *  that memory has been written if and only if the register result
+   *  equals SCOMPARE1.
+   *
+   * "The difference is that in some cases where memory has not been
+   *  written, the instruction returns ~SCOMPARE1 instead of the current
+   *  value of memory.  Although this change can, in principle, affect
+   *  the operation of code, scanning all internal Cadence code produced
+   *  no examples where this change would change the operation of the
+   *  code."
+   *
+   * In any case, the return value of SP_UNLOCKED can be trusted and will
+   * always mean that the the spinlock was set.
+   */
+
+  return (prev == SP_UNLOCKED) ? SP_UNLOCKED : SP_LOCKED;
+}
