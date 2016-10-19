@@ -45,7 +45,6 @@
 
 #include <sys/types.h>
 #include <stdint.h>
-#include <wchar.h>
 
 /****************************************************************************
  * Pre-processor Definitions

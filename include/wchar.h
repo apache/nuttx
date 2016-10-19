@@ -33,6 +33,9 @@
  *
  ****************************************************************************/
 
+#ifndef __INCLUDE_WCHAR_H
+#define __INCLUDE_WCHAR_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -46,14 +49,6 @@
 
 #include <stdio.h>
 #include <stddef.h>
-
-/* REVISIT: Moving the idempotence to this location resolves a circular
- * dependency problem with stdlib.h which gets included indirectly and
- * needs wchar_t.
- */
-
-#ifndef __INCLUDE_WCHAR_H
-#define __INCLUDE_WCHAR_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -101,10 +96,11 @@ typedef int wint_t;
 /* wctype_t
  *   A scalar type of a data object that can hold values which represent
  *   locale-specific character classification.
- *
- *   Ddefined in wctype.h.  Should be defined here.
- *
- * mbstate_t
+ */
+
+typedef int wctype_t;
+
+/* mbstate_t
  *   An object type other than an array type that can hold the conversion
  *   state information necessary to convert between sequences of (possibly
  *   multibyte) characters and wide-characters. If a codeset is being used
@@ -158,10 +154,9 @@ extern "C"
  * Reference: Opengroup.org
  */
 
-#if 0 /* Not yet implemented */
 wint_t            btowc(int);
-int               fwprintf(FILE *, const wchar_t *, ...);
-int               fwscanf(FILE *, const wchar_t *, ...);
+int               fwprintf(FILE *, FAR const wchar_t *, ...);
+int               fwscanf(FILE *, FAR const wchar_t *, ...);
 int               iswalnum(wint_t);
 int               iswalpha(wint_t);
 int               iswcntrl(wint_t);
@@ -175,68 +170,67 @@ int               iswupper(wint_t);
 int               iswxdigit(wint_t);
 int               iswctype(wint_t, wctype_t);
 wint_t            fgetwc(FILE *);
-wchar_t          *fgetws(wchar_t *, int, FILE *);
+FAR wchar_t      *fgetws(wchar_t *, int, FILE *);
 wint_t            fputwc(wchar_t, FILE *);
-int               fputws(const wchar_t *, FILE *);
+int               fputws(FAR const wchar_t *, FILE *);
 int               fwide(FILE *, int);
 wint_t            getwc(FILE *);
 wint_t            getwchar(void);
-int               mbsinit(const mbstate_t *);
-size_t            mbrlen(const char *, size_t, mbstate_t *);
-size_t            mbrtowc(wchar_t *, const char *, size_t,
+int               mbsinit(FAR const mbstate_t *);
+size_t            mbrlen(FAR const char *, size_t, FAR mbstate_t *);
+size_t            mbrtowc(wchar_t *, FAR const char *, size_t,
                       mbstate_t *);
-size_t            mbsrtowcs(wchar_t *, const char **, size_t,
+size_t            mbsrtowcs(wchar_t *, FAR const char **, size_t,
                       mbstate_t *);
 wint_t            putwc(wchar_t, FILE *);
 wint_t            putwchar(wchar_t);
-int               swprintf(wchar_t *, size_t, const wchar_t *, ...);
-int               swscanf(const wchar_t *, const wchar_t *, ...);
+int               swprintf(FAR wchar_t *, size_t, FAR const wchar_t *, ...);
+int               swscanf(FAR const wchar_t *, FAR const wchar_t *, ...);
 wint_t            towlower(wint_t);
 wint_t            towupper(wint_t);
 wint_t            ungetwc(wint_t, FILE *);
-int               vfwprintf(FILE *, const wchar_t *, va_list);
-int               vwprintf(const wchar_t *, va_list);
-int               vswprintf(wchar_t *, size_t, const wchar_t *,
+int               vfwprintf(FILE *, FAR const wchar_t *, va_list);
+int               vwprintf(FAR const wchar_t *, va_list);
+int               vswprintf(wchar_t *, size_t, FAR const wchar_t *,
                       va_list);
-size_t            wcrtomb(char *, wchar_t, mbstate_t *);
-wchar_t          *wcscat(wchar_t *, const wchar_t *);
-wchar_t          *wcschr(const wchar_t *, wchar_t);
-int               wcscmp(const wchar_t *, const wchar_t *);
-int               wcscoll(const wchar_t *, const wchar_t *);
-wchar_t          *wcscpy(wchar_t *, const wchar_t *);
-size_t            wcscspn(const wchar_t *, const wchar_t *);
-size_t            wcsftime(wchar_t *, size_t, const wchar_t *,
-                      const struct tm *);
-size_t            wcslen(const wchar_t *);
+size_t            wcrtomb(FAR char *, wchar_t, FAR mbstate_t *);
+FAR wchar_t      *wcscat(FAR wchar_t *, FAR const wchar_t *);
+FAR wchar_t      *wcschr(FAR const wchar_t *, wchar_t);
+int               wcscmp(FAR const wchar_t *, FAR const wchar_t *);
+int               wcscoll(FAR const wchar_t *, FAR const wchar_t *);
+FAR wchar_t      *wcscpy(FAR wchar_t *, FAR const wchar_t *);
+size_t            wcscspn(FAR const wchar_t *, FAR const wchar_t *);
+size_t            wcsftime(FAR wchar_t *, size_t, FAR const wchar_t *,
+                      FAR const struct tm *);
+size_t            wcslen(FAR const wchar_t *);
 size_t            wcslcpy(FAR wchar_t *, FAR const wchar_t *, size_t);
 size_t            wcslcat(FAR wchar_t *, FAR const wchar_t *, size_t);
-wchar_t          *wcsncat(wchar_t *, const wchar_t *, size_t);
-int               wcsncmp(const wchar_t *, const wchar_t *, size_t);
-wchar_t          *wcsncpy(wchar_t *, const wchar_t *, size_t);
-wchar_t          *wcspbrk(const wchar_t *, const wchar_t *);
-wchar_t          *wcsrchr(const wchar_t *, wchar_t);
-size_t            wcsrtombs(char *, const wchar_t **, size_t,
-                      mbstate_t *);
-size_t            wcsspn(const wchar_t *, const wchar_t *);
-wchar_t          *wcsstr(const wchar_t *, const wchar_t *);
-double            wcstod(const wchar_t *, wchar_t **);
-wchar_t          *wcstok(wchar_t *, const wchar_t *, wchar_t **);
-long int          wcstol(const wchar_t *, wchar_t **, int);
-unsigned long int wcstoul(const wchar_t *, wchar_t **, int);
-wchar_t          *wcswcs(const wchar_t *, const wchar_t *);
-int               wcswidth(const wchar_t *, size_t);
-size_t            wcsxfrm(wchar_t *, const wchar_t *, size_t);
+FAR wchar_t      *wcsncat(FAR wchar_t *, FAR const wchar_t *, size_t);
+int               wcsncmp(FAR const wchar_t *, FAR const wchar_t *, size_t);
+FAR wchar_t      *wcsncpy(FAR wchar_t *, FAR const wchar_t *, size_t);
+FAR wchar_t      *wcspbrk(FAR const wchar_t *, FAR const wchar_t *);
+FAR wchar_t      *wcsrchr(FAR const wchar_t *, wchar_t);
+size_t            wcsrtombs(FAR char *, FAR const wchar_t **, size_t,
+                      FAR mbstate_t *);
+size_t            wcsspn(FAR const wchar_t *, FAR const wchar_t *);
+FAR wchar_t      *wcsstr(FAR const wchar_t *, FAR const wchar_t *);
+double            wcstod(FAR const wchar_t *, FAR wchar_t **);
+FAR wchar_t      *wcstok(FAR wchar_t *, FAR const wchar_t *, FAR wchar_t **);
+long int          wcstol(FAR const wchar_t *, FAR wchar_t **, int);
+unsigned long int wcstoul(FAR const wchar_t *, FAR wchar_t **, int);
+FAR wchar_t      *wcswcs(FAR const wchar_t *, FAR const wchar_t *);
+int               wcswidth(FAR const wchar_t *, size_t);
+size_t            wcsxfrm(wchar_t *, FAR const wchar_t *, size_t);
 int               wctob(wint_t);
-wctype_t          wctype(const char *);
+wctype_t          wctype(FAR const char *);
 int               wcwidth(wchar_t);
-wchar_t          *wmemchr(const wchar_t *, wchar_t, size_t);
-int               wmemcmp(const wchar_t *, const wchar_t *, size_t);
-wchar_t          *wmemcpy(wchar_t *, const wchar_t *, size_t);
-wchar_t          *wmemmove(wchar_t *, const wchar_t *, size_t);
-wchar_t          *wmemset(wchar_t *, wchar_t, size_t);
-int               wprintf(const wchar_t *, ...);
-int               wscanf(const wchar_t *, ...);
-#endif
+FAR wchar_t      *wmemchr(FAR const wchar_t *, wchar_t, size_t);
+int               wmemcmp(FAR const wchar_t *, FAR const wchar_t *, size_t);
+FAR wchar_t      *wmemcpy(FAR wchar_t *, FAR const wchar_t *, size_t);
+FAR wchar_t      *wmemmove(FAR wchar_t *, FAR const wchar_t *, size_t);
+FAR wchar_t      *wmemset(FAR wchar_t *, wchar_t, size_t);
+int               wprintf(FAR const wchar_t *, ...);
+int               wscanf(FAR const wchar_t *, ...);
 
 #undef EXTERN
 #ifdef __cplusplus

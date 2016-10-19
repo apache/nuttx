@@ -33,6 +33,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <string.h>
 #include <wchar.h>
 
@@ -52,7 +53,7 @@
  *
  ****************************************************************************/
 
-FAR wchar_t *wmemcpy(FAR wchar_t *d, FAR wchar_t *s, size_t n)
+FAR wchar_t *wmemcpy(FAR wchar_t *d, FAR const wchar_t *s, size_t n)
 {
   return (FAR wchar_t *) memcpy(d, s, n * sizeof(wchar_t));
 }

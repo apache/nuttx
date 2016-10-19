@@ -71,15 +71,11 @@
  * Public Types
  ****************************************************************************/
 
-#ifndef _WCTYPE_T
-#  define _WCTYPE_T
-typedef int wctype_t;
-#endif
+/* A scalar type that can hold values which represent locale-specific
+ * character mappings.
+ */
 
-#ifndef _WCTRANS_T
-#  define _WCTRANS_T
 typedef int wctrans_t;
-#endif
 
 /****************************************************************************
  * Public Function Prototypes
