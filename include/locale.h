@@ -45,10 +45,48 @@
 #ifdef CONFIG_LIBC_LOCALE
 
 /****************************************************************************
- * Type Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
-struct lconv;
+#define LC_ALL      0
+#define LC_COLLATE  1
+#define LC_CTYPE    2
+#define LC_MONETARY 3
+#define LC_NUMERIC  4
+#define LC_TIME     5
+#define LC_MESSAGES 6
+
+/****************************************************************************
+ * Public Type Definitions
+ ****************************************************************************/
+
+struct lconv
+{
+  FAR char *decimal_point;
+  FAR char *thousands_sep;
+  FAR char *grouping;
+  FAR char *int_curr_symbol;
+  FAR char *currency_symbol;
+  FAR char *mon_decimal_point;
+  FAR char *mon_thousands_sep;
+  FAR char *mon_grouping;
+  FAR char *positive_sign;
+  FAR char *negative_sign;
+  FAR char int_frac_digits;
+  FAR char frac_digits;
+  FAR char p_cs_precedes;
+  FAR char p_sep_by_space;
+  FAR char n_cs_precedes;
+  FAR char n_sep_by_space;
+  FAR char p_sign_posn;
+  FAR char n_sign_posn;
+  FAR char int_n_cs_precedes;
+  FAR char int_n_sep_by_space;
+  FAR char int_n_sign_posn;
+  FAR char int_p_cs_precedes;
+  FAR char int_p_sep_by_space;
+  FAR char int_p_sign_posn;
+};
 
 /****************************************************************************
  * Public Function Prototypes
