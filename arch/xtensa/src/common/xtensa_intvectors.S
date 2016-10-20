@@ -38,6 +38,8 @@
 
 #include <nuttx/config.h>
 
+#include <arch/chip/core-isa.h>
+
 #include "xtensa_specregs.h"
 #include "xtensa_macros.h"
 
