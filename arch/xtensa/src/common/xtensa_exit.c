@@ -142,8 +142,8 @@ void _exit(int status)
 {
   struct tcb_s *tcb;
 
-  /* Disable interrupts.  They will be restored when the next
-   * task is started.
+  /* Disable interrupts.  They will be restored when the next task is
+   * started.
    */
 
   (void)up_irq_save();
@@ -177,7 +177,7 @@ void _exit(int status)
 
   /* Then switch contexts */
 
-  up_fullcontextrestore(tcb->xcp.regs);
+  xtensa_full_context_restore(tcb->xcp.regs);
 
   /* up_fullcontextrestore() should not return but could if the software
    * interrupts are disabled.

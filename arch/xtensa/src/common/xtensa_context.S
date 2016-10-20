@@ -76,8 +76,8 @@
 	.text
 
 /****************************************************************************
- * Name: _xtensa_context_save
- *       _xtensa_full_context_save
+ * Name: xtensa_context_save
+ *       xtensa_full_context_save
  *
  * Description:
  *
@@ -85,14 +85,14 @@
  *
  *   These functions save Xtensa processor state:
  *
- *   - _xtensa_full_context_save saves all registers except PC, PS, A0, and
+ *   - xtensa_full_context_save saves all registers except PC, PS, A0, and
  *     A1 (SP)
- *   - _xtensa_context_save, in addition, does not save A12-A15 which
+ *   - xtensa_context_save, in addition, does not save A12-A15 which
  *     are preserved by the callee).
  *
  *   Caller is expected to have saved PC, PS, A0, and A1 (SP).
  *
- *   The counterparts to these functions are _xtensa_context_restore() and
+ *   The counterparts to these functions are xtensa_context_restore() and
  *   xtensa_full_context_restore().
  *
  * Entry Conditions:
@@ -110,16 +110,16 @@
  *
  ****************************************************************************/
 
-	.global	_xtensa_full_context_save
-	.global	_xtensa_context_save
-	.type	_xtensa_full_context_save, @function
-	.type	_xtensa_context_save, @function
+	.global	xtensa_full_context_save
+	.global	xtensa_context_save
+	.type	xtensa_full_context_save, @function
+	.type	xtensa_context_save, @function
 
 	.align	4
 	.literal_position
 	.align	4
 
-_xtensa_full_context_save:
+xtensa_full_context_save:
 
 #ifndef CONFIG_XTENSA_CALL0_ABI
 	/* Save Call0 ABI callee-saved regs a12-15. */
@@ -130,7 +130,7 @@ _xtensa_full_context_save:
 	s32i	a15, sp, (4 * REG_A15)
 #endif
 
-_xtensa_context_save:
+xtensa_context_save:
 
 	s32i	a2,  sp, (4 * REG_A2)
 	s32i	a3,  sp, (4 * REG_A3)
@@ -238,8 +238,8 @@ _xtensa_context_save:
 	ret
 
 /****************************************************************************
- * Name: _xtensa_context_restore
- *       _xtensa_full_context_restore
+ * Name: xtensa_context_restore
+ *       xtensa_full_context_restore
  *
  * Description:
  *
@@ -248,14 +248,14 @@ _xtensa_context_save:
  *   These functions restores Xtensa processor state and differ in which
  *   registers are saved:
  *
- *   - _xtensa_full_context_restore restores all registers except PC, PS,
+ *   - xtensa_full_context_restore restores all registers except PC, PS,
  *     A0, and A1 (SP)
- *   - _xtensa_context_restore, in addition, does not restore A12-A15 which
+ *   - xtensa_context_restore, in addition, does not restore A12-A15 which
  *     are preserved by the callee).
  *
  *   The caller is responsible for restoring PC, PS, A0, A1 (SP) in both cases.
  *
- *   _xtensa_context_save and _xtensa_full_context_save are the counterparts
+ *   xtensa_context_save and xtensa_full_context_save are the counterparts
  *   to these functions.
  *
  * Entry Conditions:
@@ -269,16 +269,16 @@ _xtensa_context_save:
  *
  ****************************************************************************/
 
-	.global _xtensa_full_context_restore
-	.global _xtensa_context_restore
-	.type   _xtensa_full_context_restore,@function
-	.type   _xtensa_context_restore,@function
+	.global xtensa_full_context_restore
+	.global xtensa_context_restore
+	.type   xtensa_full_context_restore,@function
+	.type   xtensa_context_restore,@function
 
 	.align  4
 	.literal_position
 	.align  4
 
-_xtensa_full_context_restore:
+xtensa_full_context_restore:
 
 #ifndef CONFIG_XTENSA_CALL0_ABI
 	/* Restore Call0 ABI callee-saved regs a12-15. */
@@ -289,7 +289,7 @@ _xtensa_full_context_restore:
 	l32i	a15, sp, (4 * REG_A15)
 #endif
 
-_xtensa_context_restore:
+xtensa_context_restore:
 
 #if XTENSA_EXTRA_SA_SIZE > 0
 	/* NOTE: Normally the xthal_restore_extra_nw macro only affects address

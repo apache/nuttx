@@ -272,7 +272,7 @@
  *   a CALL0 instruction.  See "NOTES on the use of call0 ..." above.
  *
  *   The corresponding handler sets up the appropriate stack frame, saves
- *   a few vector-specific registers and calls _xtensa_full_context_save()
+ *   a few vector-specific registers and calls xtensa_full_context_save()
  *   to save the rest of the interrupted context.  It then calls the C
  *   logic to decode the specific interrupt source and dispatch to the
  *   appropriate C interrupt handler.
@@ -296,7 +296,7 @@ _xtensa_level2_handler:
 
 	/* Save rest of interrupt context and enter RTOS. */
 
-	call0	_xtensa_full_context_save		/* Save full register state */
+	call0	xtensa_full_context_save		/* Save full register state */
 
 	/* Set up PS for C, enable interrupts above this level and clear EXCM. */
 

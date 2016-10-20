@@ -95,7 +95,8 @@ static void xtensa_stackdump(uint32_t sp, uint32_t stack_base)
 
 static inline void xtensa_registerdump(void)
 {
-  uint32_ *regs = CURRENT_REGS;
+  uint32_t *regs = (uint32_t *)CURRENT_REGS; /* Don't need volatile here */
+
   /* Are user registers available from interrupt processing? */
 
   if (regs != NULL)

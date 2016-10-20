@@ -39,6 +39,9 @@
 
 #include <nuttx/config.h>
 
+#include <arch/chip/irq.h>
+
+#include "chip/esp32_dport.h"
 #include "xtensa.h"
 
 /****************************************************************************
@@ -70,7 +73,6 @@ uint32_t *xtensa_int_decode(uint32_t *regs)
   int regndx;
   int bit;
   int baseirq;
-  int irq;
 
 #ifdef CONFIG_SMP
   int cpu;
