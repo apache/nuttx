@@ -56,12 +56,15 @@
  * Included Files
  ****************************************************************************/
 
-#include "xtensa_rtos.h"
-#include "xtensa_context.h"
+#include <nuttx/config.h>
+#include <arch/irq.h>
 
 #ifdef CONFIG_XTENSA_USE_OVLY
 #  include <xtensa/overlay_os_asm.h>
 #endif
+
+#warning REVIST XCHAL_EXTRA_SA_SIZE is not yet provided
+#define XCHAL_EXTRA_SA_SIZE 0 /* REMOVE ME */
 
 /****************************************************************************
  * Public Functions
