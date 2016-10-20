@@ -31,6 +31,8 @@
  *
  ****************************************************************************/
 
+	.file	"xtensa_context.S"
+
 /* XTENSA CONTEXT SAVE AND RESTORE ROUTINES
  *
  * Low-level Call0 functions for handling generic context save and restore
@@ -57,14 +59,15 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <arch/chip/core-isa.h>
 #include <arch/irq.h>
 
 #ifdef CONFIG_XTENSA_USE_OVLY
 #  include <xtensa/overlay_os_asm.h>
 #endif
 
-#warning REVIST XCHAL_EXTRA_SA_SIZE is not yet provided
-#define XCHAL_EXTRA_SA_SIZE 0 /* REMOVE ME */
+#warning REVIST XTENSA_EXTRA_SA_SIZE is not yet provided
+#define XTENSA_EXTRA_SA_SIZE 0 /* REMOVE ME */
 
 /****************************************************************************
  * Public Functions
@@ -155,7 +158,7 @@ _xtensa_context_save:
 	rsr		a3, SAR
 	s32i	a3, sp, (4 * REG_SAR)
 
-#ifdef CONFIG_XTENSA_HAVE_LOOPS
+#ifdef XTENSA_HAVE_LOOPS
 	rsr		a3, LBEG
 	s32i	a3, sp, (4 * REG_LBEG)
 	rsr		a3, LEND
@@ -172,7 +175,7 @@ _xtensa_context_save:
 	s32i	a3, sp, (4 * REG_VPRI)
 #endif
 
-#if XCHAL_EXTRA_SA_SIZE > 0 || !defined(CONFIG_XTENSA_CALL0_ABI)
+#if XTENSA_EXTRA_SA_SIZE > 0 || !defined(CONFIG_XTENSA_CALL0_ABI)
 	mov		a9,  a0						/* Preserve ret addr */
 	#endif
 
@@ -180,7 +183,7 @@ _xtensa_context_save:
 	/* To spill the reg windows, temp. need pre-interrupt stack ptr and
 	 * a4-15.  Need to save a9,12,13 temporarily (in frame temps) and
 	 * recover originals.  Interrupts need to be disabled below
-	 * CONFIG_XTENSA_EXCM_LEVEL and window overflow and underflow exceptions
+	 * XTENSA_EXCM_LEVEL and window overflow and underflow exceptions
 	 * disabled (assured by PS.EXCM == 1).
 	 */
 
@@ -210,7 +213,7 @@ _xtensa_context_save:
 	l32i	a9,  sp, (4 * REG_TMP2)
 #endif
 
-#if XCHAL_EXTRA_SA_SIZE > 0
+#if XTENSA_EXTRA_SA_SIZE > 0
 	/* NOTE: Normally the xthal_save_extra_nw macro only affects address
 	 * registers a2-a5. It is theoretically possible for Xtensa processor
 	 * designers to write TIE that causes more address registers to be
@@ -221,14 +224,14 @@ _xtensa_context_save:
 	 */
 
 	addi	a2,  sp, (4 * REG_EXTRA)		/* Where to save it */
-#if XCHAL_EXTRA_SA_ALIGN > 16
-	movi	a3, -XCHAL_EXTRA_SA_ALIGN
+#if XTENSA_EXTRA_SA_ALIGN > 16
+	movi	a3, -XTENSA_EXTRA_SA_ALIGN
 	and		a2, a2, a3						/* Align dynamically >16 bytes */
 #endif
 	call0   xthal_save_extra_nw				/* Destroys a0,2,3,4,5 */
 #endif
 
-#if XCHAL_EXTRA_SA_SIZE > 0 || !defined(CONFIG_XTENSA_CALL0_ABI)
+#if XTENSA_EXTRA_SA_SIZE > 0 || !defined(CONFIG_XTENSA_CALL0_ABI)
 	mov		a0, a9							/* Retrieve ret addr */
 #endif
 
@@ -288,7 +291,7 @@ _xtensa_full_context_restore:
 
 _xtensa_context_restore:
 
-#if XCHAL_EXTRA_SA_SIZE > 0
+#if XTENSA_EXTRA_SA_SIZE > 0
 	/* NOTE: Normally the xthal_restore_extra_nw macro only affects address
 	 * registers a2-a5. It is theoretically possible for Xtensa processor
 	 * designers to write TIE that causes more address registers to be
@@ -301,15 +304,15 @@ _xtensa_context_restore:
 	mov		a13, a0							/* Preserve ret addr */
 	addi	a2, sp, (4 * REG_EXTRA)			/* Where to find it */
 
-#if XCHAL_EXTRA_SA_ALIGN > 16
-	movi	a3, -XCHAL_EXTRA_SA_ALIGN
+#if XTENSA_EXTRA_SA_ALIGN > 16
+	movi	a3, -XTENSA_EXTRA_SA_ALIGN
 	and		a2, a2, a3						/* Align dynamically >16 bytes */
 #endif
 	call0   xthal_restore_extra_nw			/* Destroys a0,2,3,4,5 */
 	mov		a0, a13							/* Retrieve ret addr */
 #endif
 
-#ifdef CONFIG_XTENSA_HAVE_LOOPS
+#ifdef XTENSA_HAVE_LOOPS
 	l32i	a2, sp, (4 * REG_LBEG)
 	l32i	a3, sp, (4 * REG_LEND)
 	wsr		a2, LBEG

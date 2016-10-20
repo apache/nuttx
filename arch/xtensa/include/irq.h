@@ -48,6 +48,7 @@
 
 #include <nuttx/irq.h>
 #include <arch/types.h>
+#include <arch/chip/core-isa.h>
 
 /* Include architecture-specific IRQ definitions */
 
@@ -72,32 +73,31 @@
 
 /* IRQ Stack Frame Format.  Each value is a uint32_t register index */
 
-#define REG_EXIT            (0)  /* Exit point for dispatch */
-#define REG_PC              (1)  /* Return PC */
-#define REG_PS              (2)  /* Return PS */
-#define REG_A0              (3)
-#define REG_A1              (4)  /* Stack pointer before interrupt */
-#define REG_A2              (5)
-#define REG_A3              (6)
-#define REG_A4              (7)
-#define REG_A5              (8)
-#define REG_A6              (9)
-#define REG_A7              (10)
-#define REG_A8              (11)
-#define REG_A9              (12)
-#define REG_A10             (13)
-#define REG_A11             (14)
-#define REG_A12             (15)
-#define REG_A13             (16)
-#define REG_A14             (17)
-#define REG_A15             (18)
-#define REG_SAR             (19)
-#define REG_EXCCAUSE        (20)
-#define REG_EXCVADDR        (21)
+#define REG_PC              (0)  /* Return PC */
+#define REG_PS              (1)  /* Return PS */
+#define REG_A0              (2)
+#define REG_A1              (3)  /* Stack pointer before interrupt */
+#define REG_A2              (4)
+#define REG_A3              (5)
+#define REG_A4              (6)
+#define REG_A5              (7)
+#define REG_A6              (8)
+#define REG_A7              (9)
+#define REG_A8              (10)
+#define REG_A9              (11)
+#define REG_A10             (12)
+#define REG_A11             (13)
+#define REG_A12             (14)
+#define REG_A13             (15)
+#define REG_A14             (16)
+#define REG_A15             (17)
+#define REG_SAR             (18)
+#define REG_EXCCAUSE        (19)
+#define REG_EXCVADDR        (20)
 
-#define _REG_LOOPS_START    (22)
+#define _REG_LOOPS_START    (21)
 
-#ifdef CONFIG_XTENSA_HAVE_LOOPS
+#ifdef XTENSA_HAVE_LOOPS
 #  define REG_LBEG          (_REG_LOOPS_START + 0)
 #  define REG_LEND          (_REG_LOOPS_START + 1)
 #  define REG_LCOUNT        (_REG_LOOPS_START + 2)

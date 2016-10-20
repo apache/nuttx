@@ -58,7 +58,7 @@
  *
  ****************************************************************************/
 
-#if CONFIG_XTENSA_EXCM_LEVEL >= 2
+#if XTENSA_EXCM_LEVEL >= 2
 	.begin		literal_prefix .xtensa_level2_vector
 	.section	.xtensa_level2_vector.text, "ax"
 	.global		_xtensa_level2_vector
@@ -77,7 +77,7 @@ _xtensa_level2_vector:
 	.size	_xtensa_level2_vector, . - _xtensa_level2_vector
 #endif
 
-#if CONFIG_XTENSA_EXCM_LEVEL >= 3
+#if XTENSA_EXCM_LEVEL >= 3
 	.begin		literal_prefix .xtensa_level3_vector
 	.section	.xtensa_level3_vector.text, "ax"
 	.global		_xtensa_level3_vector
@@ -96,7 +96,7 @@ _xtensa_level3_vector:
 	.size	_xtensa_level3_vector, . - _xtensa_level3_vector
 #endif
 
-#if CONFIG_XTENSA_EXCM_LEVEL >= 4
+#if XTENSA_EXCM_LEVEL >= 4
 	.begin		literal_prefix .xtensa_level4_vector
 	.section	.xtensa_level4_vector.text, "ax"
 	.global		_xtensa_level4_vector
@@ -115,7 +115,7 @@ _xtensa_level4_vector:
 	.size	_xtensa_level5_vector, . - _xtensa_level5_vector
 #endif
 
-#if CONFIG_XTENSA_EXCM_LEVEL >= 5
+#if XTENSA_EXCM_LEVEL >= 5
 	.begin		literal_prefix .xtensa_level5_vector
 	.section	.xtensa_level5_vector.text, "ax"
 	.global		_xtensa_level5_vector
@@ -134,7 +134,7 @@ _xtensa_level5_vector:
 	.size	_xtensa_level5_vector, . - _xtensa_level5_vector
 #endif
 
-#if CONFIG_XTENSA_EXCM_LEVEL >= 6
+#if XTENSA_EXCM_LEVEL >= 6
 	.begin		literal_prefix .xtensa_level6_vector
 	.section	.xtensa_level6_vector.text, "ax"
 	.global		_xtensa_level6_vector

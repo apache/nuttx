@@ -45,14 +45,10 @@
 
 #include <nuttx/arch.h>
 #include <arch/irq.h>
+#include <arch/chip/core-isa.h>
 
 #include "xtensa.h"
 #include "xtensa_corebits.h"
-
-/* Temporary for clean compile */
-
-#warning REVISIT _xt_user_exit
-void _xt_user_exit(void);
 
 /****************************************************************************
  * Public Functions
@@ -89,7 +85,6 @@ void up_initial_state(struct tcb_s *tcb)
   xcp->regs[REG_PC]   = (uint32_t)tcb->start;         /* Task entrypoint                */
   xcp->regs[REG_A0]   = 0;                            /* To terminate GDB backtrace     */
   xcp->regs[REG_A1]   = (uint32_t)tcb->adj_stack_ptr; /* Physical top of stack frame    */
-  xcp->regs[REG_EXIT] = (uint32_t)_xt_user_exit;      /* User exception exit dispatcher */
 
   /* Set initial PS to int level 0, EXCM disabled ('rfe' will enable), user
    * mode.
@@ -122,7 +117,7 @@ void up_initial_state(struct tcb_s *tcb)
   ptr = (uint32_t *)(((uint32_t)tcb->adj_stack_ptr - XT_CP_SIZE) & ~0xf);
   ptr[0] = 0;
   ptr[1] = 0;
-  ptr[2] = (((uint32_t)ptr) + 12 + XCHAL_TOTAL_SA_ALIGN - 1) & -XCHAL_TOTAL_SA_ALIGN;
+  ptr[2] = (((uint32_t)ptr) + 12 + XTENSA_TOTAL_SA_ALIGN - 1) & -XTENSA_TOTAL_SA_ALIGN;
 #endif
 #endif /* REVISIT */
 }

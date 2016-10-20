@@ -46,7 +46,9 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+
 #include <arch/board/board.h>
+#include <arch/chip/core-isa.h>
 
 #include "sched/sched.h"
 #include "xtensa.h"
@@ -125,7 +127,7 @@ static inline void xtensa_registerdump(void)
              (unsigned long)g_current_regs[REG_EXIT],
              (unsigned long)g_current_regs[REG_EXCCAUSE],
              (unsigned long)g_current_regs[REG_EXCVADDR]);
-#ifdef CONFIG_XTENSA_HAVE_LOOPS
+#ifdef XTENSA_HAVE_LOOPS
       _alert(" LBEG: %08lx  LEND: %08lx  LCNT: %08lx\n",
              (unsigned long)g_current_regs[REG_LBEG],
              (unsigned long)g_current_regs[REG_LEND],
