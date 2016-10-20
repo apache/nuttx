@@ -32,8 +32,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 /* Note:  Macros of the form XTENSA_HAVE_*** have a value of 1 if the option
- * is configured, and a value of 0 otherwise (or undefined if 0 is a valid
- * numeric option.  These macros are always defined.
+ * is configured, and a value of 0 otherwise.  These macros are always
+ * defined.
  */
 
 /* ISA **********************************************************************/
@@ -445,7 +445,7 @@
 #define XTENSA_TIMER0_INTERRUPT           6     /* CCOMPARE0 */
 #define XTENSA_TIMER1_INTERRUPT           15    /* CCOMPARE1 */
 #define XTENSA_TIMER2_INTERRUPT           16    /* CCOMPARE2 */
-#undef XTENSA_TIMER3_INTERRUPT
+#define XTENSA_TIMER3_INTERRUPT           XTHAL_TIMER_UNCONFIGURED
 #define XTENSA_NMI_INTERRUPT              14    /* non-maskable interrupt */
 #define XTENSA_PROFILING_INTERRUPT        11    /* profiling interrupt */
 
