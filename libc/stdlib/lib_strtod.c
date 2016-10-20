@@ -92,7 +92,7 @@ double_t strtod(FAR const char *str, FAR char **endptr)
   double_t number;
   int exponent;
   int negative;
-  char *p = (char *) str;
+  FAR char *p = (FAR char *) str;
   double p10;
   int n;
   int num_digits;
