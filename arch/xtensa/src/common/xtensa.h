@@ -108,8 +108,8 @@
  * only a referenced is passed to get the state from the TCB.
  */
 
-#define xtensa_savestate(regs)    xtensa_copystate(regs, (uint32_t*)g_current_regs)
-#define xtensa_restorestate(regs) do { g_current_regs = regs; } while (0)
+#define xtensa_savestate(regs)    xtensa_copystate(regs, (uint32_t*)CURRENT_REGS)
+#define xtensa_restorestate(regs) do { CURRENT_REGS = regs; } while (0)
 
 /* Register access macros */
 
@@ -133,11 +133,27 @@ typedef void (*xtensa_vector_t)(void);
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-/* This holds a references to the current interrupt level register storage
- * structure.  If is non-NULL only during interrupt processing.
+/* g_current_regs[] holds a references to the current interrupt level
+ * register storage structure.  If is non-NULL only during interrupt
+ * processing.  Access to g_current_regs[] must be through the macro
+ * CURRENT_REGS for portability.
  */
 
-extern volatile uint32_t *g_current_regs;
+#ifdef CONFIG_SMP
+/* For the case of architectures with multiple CPUs, then there must be one
+ * such value for each processor that can receive an interrupt.
+ */
+
+int up_cpu_index(void); /* See include/nuttx/arch.h */
+extern volatile uint32_t *g_current_regs[CONFIG_SMP_NCPUS];
+#  define CURRENT_REGS (g_current_regs[up_cpu_index()])
+
+#else
+
+extern volatile uint32_t *g_current_regs[1];
+#  define CURRENT_REGS (g_current_regs[0])
+
+#endif
 
 /* This is the beginning of heap as provided from *_head.S. This is the
  * first address in DRAM after the loaded program+bss+idle stack.  The end
@@ -229,7 +245,8 @@ void xtensa_dumpstate(void);
 /* Common XTENSA functions */
 /* IRQs */
 
-uint32_t *xtensa_doirq(int irq, uint32_t *regs);
+uint32_t *xtensa_int_decode(uint32_t *regs);
+uint32_t *xtensa_irq_dispatch(int irq, uint32_t *regs);
 
 /* Software interrupt handler */
 

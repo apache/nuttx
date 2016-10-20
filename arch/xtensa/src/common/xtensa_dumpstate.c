@@ -95,52 +95,41 @@ static void xtensa_stackdump(uint32_t sp, uint32_t stack_base)
 
 static inline void xtensa_registerdump(void)
 {
+  uint32_ *regs = CURRENT_REGS;
   /* Are user registers available from interrupt processing? */
 
-  if (g_current_regs != NULL)
+  if (regs != NULL)
     {
       _alert("   PC: %08lx    PS: %08lx\n",
-             (unsigned long)g_current_regs[REG_PC],
-             (unsigned long)g_current_regs[REG_PS]);
+             (unsigned long)regs[REG_PC], (unsigned long)regs[REG_PS]);
       _alert("   A0: %08lx    A1: %08lx    A2: %08lx    A3: %08lx\n",
-             (unsigned long)g_current_regs[REG_A0],
-             (unsigned long)g_current_regs[REG_A1],
-             (unsigned long)g_current_regs[REG_A2],
-             (unsigned long)g_current_regs[REG_A3]);
+             (unsigned long)regs[REG_A0], (unsigned long)regs[REG_A1],
+             (unsigned long)regs[REG_A2], (unsigned long)regs[REG_A3]);
       _alert("   A4: %08lx    A5: %08lx    A6: %08lx    A7: %08lx\n",
-             (unsigned long)g_current_regs[REG_A4],
-             (unsigned long)g_current_regs[REG_A5],
-             (unsigned long)g_current_regs[REG_A6],
-             (unsigned long)g_current_regs[REG_A7]);
+             (unsigned long)regs[REG_A4], (unsigned long)regs[REG_A5],
+             (unsigned long)regs[REG_A6], (unsigned long)regs[REG_A7]);
       _alert("   A8: %08lx    A9: %08lx   A10: %08lx   A11: %08lx\n",
-             (unsigned long)g_current_regs[REG_A8],
-             (unsigned long)g_current_regs[REG_A9],
-             (unsigned long)g_current_regs[REG_A10],
-             (unsigned long)g_current_regs[REG_A11]);
+             (unsigned long)regs[REG_A8], (unsigned long)regs[REG_A9],
+             (unsigned long)regs[REG_A10], (unsigned long)regs[REG_A11]);
       _alert("  A12: %08lx   A13: %08lx   A14: %08lx   A15: %08lx\n",
-             (unsigned long)g_current_regs[REG_A12],
-             (unsigned long)g_current_regs[REG_A13],
-             (unsigned long)g_current_regs[REG_A14],
-             (unsigned long)g_current_regs[REG_A15]);
+             (unsigned long)regs[REG_A12], (unsigned long)regs[REG_A13],
+             (unsigned long)regs[REG_A14], (unsigned long)regs[REG_A15]);
       _alert("  SAR: %08lx CAUSE: %08lx VADDR: %08lx\n",
-             (unsigned long)g_current_regs[REG_SAR],
-             (unsigned long)g_current_regs[REG_EXCCAUSE],
-             (unsigned long)g_current_regs[REG_EXCVADDR]);
+             (unsigned long)regs[REG_SAR], (unsigned long)regs[REG_EXCCAUSE],
+             (unsigned long)regs[REG_EXCVADDR]);
 #ifdef XTENSA_HAVE_LOOPS
       _alert(" LBEG: %08lx  LEND: %08lx  LCNT: %08lx\n",
-             (unsigned long)g_current_regs[REG_LBEG],
-             (unsigned long)g_current_regs[REG_LEND],
-             (unsigned long)g_current_regs[REG_LCOUNT]);
+             (unsigned long)regs[REG_LBEG], (unsigned long)regs[REG_LEND],
+             (unsigned long)regs[REG_LCOUNT]);
 #endif
 #ifndef CONFIG_XTENSA_CALL0_ABI
       _alert(" TMP0: %08lx  TMP1: %08lx  TMP2: %08lx\n",
-             (unsigned long)g_current_regs[REG_TMP0],
-             (unsigned long)g_current_regs[REG_TMP1],
-             (unsigned long)g_current_regs[REG_TMP2]);
+             (unsigned long)regs[REG_TMP0], (unsigned long)regs[REG_TMP1],
+             (unsigned long)regs[REG_TMP2]);
 #endif
 #ifdef CONFIG_XTENSA_USE_SWPRI
       _alert(" VPRI: %08lx\n",
-             (unsigned long)g_current_regs[REG_VPRI]);
+             (unsigned long)regs[REG_VPRI]);
 #endif
     }
 }

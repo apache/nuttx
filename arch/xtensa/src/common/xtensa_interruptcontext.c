@@ -52,11 +52,12 @@
 /****************************************************************************
  * Name: up_interrupt_context
  *
- * Description: Return true is we are currently executing in
- * the interrupt handler context.
+ * Description:  Return true is we are currently executing in
+ * the interrupt handler context on this CPU.
+ *
  ****************************************************************************/
 
 bool up_interrupt_context(void)
 {
-   return g_current_regs != NULL;
+   return CURRENT_REGS != NULL;
 }

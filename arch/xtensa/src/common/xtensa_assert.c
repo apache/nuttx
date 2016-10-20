@@ -76,7 +76,7 @@ static void xtensa_assert(int errorcode)
 {
   /* Are we in an interrupt handler or the idle task? */
 
-  if (g_current_regs || this_task()->pid == 0)
+  if (CURRENT_REGS || this_task()->pid == 0)
     {
        (void)up_irq_save();
         for (; ; )

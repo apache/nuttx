@@ -113,9 +113,18 @@ static void up_calibratedelay(void)
 
 void up_initialize(void)
 {
+#ifdef CONFIG_SMP
+  int i;
+
   /* Initialize global variables */
 
-  g_current_regs = NULL;
+  for (i = 0; i < CONFIG_SMP_NCPUS; i++)
+    {
+      g_current_regs[i] = NULL;
+    }
+#else
+  CURRENT_REGS = NULL;
+#endif
 
   /* Calibrate the timing loop */
 
