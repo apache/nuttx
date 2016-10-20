@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/common/xtensa_intdecode.c
+ * arch/xtensa/src/esp32/esp32_intdecode.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -64,6 +64,67 @@
 
 uint32_t *xtensa_int_decode(uint32_t *regs)
 {
-#warning Missing implementation
+  uintptr_t regaddr;
+  uint32_t regval;
+  uint32_t mask;
+  int regndx;
+  int bit;
+  int baseirq;
+  int irq;
+
+#ifdef CONFIG_SMP
+  int cpu;
+
+  /* Select PRO or APP interrupt status registers */
+
+  cpu = up_cpu_index();
+  if (cpu == 0)
+    {
+      regaddr = DPORT_PRO_INTR_STATUS_0_REG;
+    }
+  else
+#endif
+    {
+      regaddr = DPORT_APP_INTR_STATUS_0_REG;
+    }
+
+  /* Process each pending interrupt in each of the three interrupt status
+   * registers.
+   */
+
+  for (regndx = 0, baseirq = XTENSA_IRQ_SREG0;
+       regndx < 3;
+       regndx++, baseirq += 32, regaddr += sizeof(uint32_t))
+    {
+      /* Fetch the next register status register */
+
+      regval = getreg32(regaddr);
+
+      /* Decode and dispatch each pending bit in the interrupt status
+       * register.
+       */
+
+      for (bit = 0; regval != 0 && bit < 32; bit++)
+        {
+          /* Check if this interrupt is pending */
+
+          mask = (1 << bit);
+          if ((regval & mask) != 0)
+            {
+              /* Yes.. Dispatch the interrupt.  Note that regs may be
+               * altered in the case of an interrupt level context switch.
+               */
+
+              regs = xtensa_irq_dispatch(baseirq + bit, regs);
+
+              /* Clear this bit in the sampled status register so that
+               * perhaps we can exit this loop sooner.
+               */
+
+              regval &= ~mask;
+            }
+        }
+    }
+
   return regs;
 }
