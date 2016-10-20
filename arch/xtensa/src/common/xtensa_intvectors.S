@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/common/xtensa_vectors.S
+ * arch/xtensa/src/common/xtensa_intvectors.S
  *
  * Adapted from use in NuttX by:
  *
