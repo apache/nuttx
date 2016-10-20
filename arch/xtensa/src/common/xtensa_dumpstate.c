@@ -99,8 +99,7 @@ static inline void xtensa_registerdump(void)
 
   if (g_current_regs != NULL)
     {
-      _alert(" EXIT: %08lx    PC: %08lx    PS: %08lx\n",
-             (unsigned long)g_current_regs[REG_EXIT],
+      _alert("   PC: %08lx    PS: %08lx\n",
              (unsigned long)g_current_regs[REG_PC],
              (unsigned long)g_current_regs[REG_PS]);
       _alert("   A0: %08lx    A1: %08lx    A2: %08lx    A3: %08lx\n",
@@ -124,7 +123,7 @@ static inline void xtensa_registerdump(void)
              (unsigned long)g_current_regs[REG_A14],
              (unsigned long)g_current_regs[REG_A15]);
       _alert("  SAR: %08lx CAUSE: %08lx VADDR: %08lx\n",
-             (unsigned long)g_current_regs[REG_EXIT],
+             (unsigned long)g_current_regs[REG_SAR],
              (unsigned long)g_current_regs[REG_EXCCAUSE],
              (unsigned long)g_current_regs[REG_EXCVADDR]);
 #ifdef XTENSA_HAVE_LOOPS
