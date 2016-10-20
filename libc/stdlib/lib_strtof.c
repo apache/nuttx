@@ -75,7 +75,7 @@
 
 static inline int is_real(float x)
 {
-  const float infinite = 1.0/0.0;
+  const float infinite = 1.0F/0.0F;
   return (x < infinite) && (x >= -infinite);
 }
 
@@ -101,7 +101,7 @@ float strtof(FAR const char *str, FAR char **endptr)
   int n;
   int num_digits;
   int num_decimals;
-  const float infinite = 1.0/0.0;
+  const float infinite = 1.0F/0.0F;
 
   /* Skip leading whitespace */
 
@@ -123,7 +123,7 @@ float strtof(FAR const char *str, FAR char **endptr)
       break;
     }
 
-  number       = 0.;
+  number       = 0.0F;
   exponent     = 0;
   num_digits   = 0;
   num_decimals = 0;
@@ -132,7 +132,7 @@ float strtof(FAR const char *str, FAR char **endptr)
 
   while (isdigit(*p))
     {
-      number = number * 10. + (*p - '0');
+      number = number * 10.0F + (*p - '0');
       p++;
       num_digits++;
     }
@@ -145,7 +145,7 @@ float strtof(FAR const char *str, FAR char **endptr)
 
       while (isdigit(*p))
       {
-        number = number * 10. + (*p - '0');
+        number = number * 10.0F + (*p - '0');
         p++;
         num_digits++;
         num_decimals++;
@@ -157,7 +157,7 @@ float strtof(FAR const char *str, FAR char **endptr)
   if (num_digits == 0)
     {
       set_errno(ERANGE);
-      number = 0.0;
+      number = 0.0F;
       goto errout;
     }
 
@@ -214,7 +214,7 @@ float strtof(FAR const char *str, FAR char **endptr)
 
   /* Scale the result */
 
-  p10 = 10.;
+  p10 = 10.0F;
   n = exponent;
   if (n < 0) n = -n;
   while (n)
