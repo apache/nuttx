@@ -132,7 +132,7 @@ float strtof(FAR const char *str, FAR char **endptr)
 
   while (isdigit(*p))
     {
-      number = number * 10.0F + (*p - '0');
+      number = number * 10.0F + (float)(*p - '0');
       p++;
       num_digits++;
     }
@@ -145,7 +145,7 @@ float strtof(FAR const char *str, FAR char **endptr)
 
       while (isdigit(*p))
       {
-        number = number * 10.0F + (*p - '0');
+        number = number * 10.0F + (float)(*p - '0');
         p++;
         num_digits++;
         num_decimals++;
