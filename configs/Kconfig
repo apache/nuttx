@@ -952,7 +952,8 @@ config ARCH_BOARD_STM32_BUTTERFLY2
 	---help---
 		A configuration for the Kamami STM32Butterfly2 development board
 		based on STM32F107VC micro-controler chip with optional ETH
-		board.
+		board.  See
+		https://kamami.pl/zestawy-uruchomieniowe-stm32/178507-stm32butterfly2.html
 
 config ARCH_BOARD_STM32_TINY
 	bool "STM32-Tiny board"

@@ -652,7 +652,8 @@ configs/stm3240g-eval
   toolchain (such as CodeSourcery).
 
 configs/stm32butterfly2
-  Kamami stm32butterfly2 development board with optional ETH phy.
+  Kamami stm32butterfly2 development board with optional ETH phy.  See
+  https://kamami.pl/zestawy-uruchomieniowe-stm32/178507-stm32butterfly2.html
 
 configs/stm32f103-minimum
   Generic STM32F103C8T6 Minimum ARM Development Board.
