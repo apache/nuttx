@@ -78,10 +78,10 @@
 
 	.macro	extract_msb	aout ain
 1:
-	addi	\aout, \ain, -1			/* aout = ain - 1 */
-	and		\ain, \ain, \aout		/* ain  = ain & aout */
-	bnez	\ain, 1b				/* repeat until ain == 0 */
-	addi	\aout, \aout, 1			/* return aout + 1 */
+	addi	\aout, \ain, -1				/* aout = ain - 1 */
+	and		\ain, \ain, \aout			/* ain  = ain & aout */
+	bnez	\ain, 1b					/* Repeat until ain == 0 */
+	addi	\aout, \aout, 1				/* Return aout + 1 */
 	.endm
 
 /* Macro dispatch_c_isr - dispatch interrupts to user ISRs.
@@ -148,7 +148,6 @@
 2:
 #endif
 
-	/* Now look up in the dispatch table and call user ISR if any. */
 	/* If multiple bits are set then MSB has highest priority. */
 
 	extract_msb	a4, a2					/* a4 = MSB of a2, a2 trashed */
@@ -179,23 +178,28 @@
 	wsr		a4, INTCLEAR				/* Clear sw or edge-triggered interrupt */
 	beq		a3, a4, 7f					/* If timer interrupt then skip table */
 
-	find_ms_setbit	a3, a4, a3, 0		/* a3 = interrupt number */
+	/* Call xtensa_int_decode with, passing that address of the register save
+	 * area as a parameter (A2).
+	 */
 
-	movi	a4, _xt_interrupt_table
-	addx8	a3, a3, a4					/* a3 = address of interrupt table entry */
-	l32i	a4, a3, XIE_HANDLER			/* a4 = handler address */
+	mov		a2, sp						/* Argument: Top of stack = register save area */
+	call0	xtensa_int_decode			/* Call xtensa_int_decode */
 
-#ifdef CONFIG_XTENSA_CALL0_ABI
-	mov		a12, a6						/* Save in callee-saved reg */
-	l32i	a2, a3, XIE_ARG				/* a2 = handler arg */
-	callx0	a4							/* call handler */
-	mov		a2, a12
-#else
-	mov		a2, a6						/* Save in windowed reg */
-	l32i	a6, a3, XIE_ARG				/* a6 = handler arg */
-	callx4	a4							/* Call handler */
-#endif
+	/* On return from xtensa_int_decode, A2 will contain the address of the new
+	 * register save area.  Usually this would be the same as the current SP.
+	 * But in the event of a context switch, A2 will instead refer to the TCB
+	 * register save area.
+	 */
 
+	beq		a2, sp, 3f					/* If timer interrupt then skip table */
+
+	/* Switch stacks */
+#warning REVIST: Should use register save are on stack.
+
+	l32i	a4, sp, (4 * REG_A1)		/* Retrieve stack ptr and replace */
+	addi	sp,  a4, -(4 * XCPTCONTEXT_SIZE)
+
+3:
 #ifdef CONFIG_XTENSA_USE_SWPRI
 	j		8f
 #else
@@ -212,7 +216,7 @@
 	*/
 
 #ifdef CONFIG_XTENSA_CALL0_ABI
-	mov	a12, a6
+	mov		a12, a6
 	call0	XT_RTOS_TIMER_INT
 	mov	a2, a12
 #else
@@ -236,8 +240,8 @@
 	movi	a3, _xt_intdata
 	l32i	a4, a3, 0					/* a4 = _xt_intenable */
 	s32i	a2, a3, 4					/* update _xt_vpri_mask */
-	and	a4, a4, a2					/* a4 = masked intenable */
-	wsr	a4, INTENABLE				/* update INTENABLE */
+	and		a4, a4, a2					/* a4 = masked intenable */
+	wsr		a4, INTENABLE				/* update INTENABLE */
 #endif
 
 9:
@@ -277,17 +281,17 @@
 
 #if XTENSA_EXCM_LEVEL >= 2
 	.section .iram1,"ax"
-	.type		_xtensa_level2_handler,@function
-	.align		4
+	.type	_xtensa_level2_handler,@function
+	.align	4
 _xtensa_level2_handler:
-	mov	a0, sp						/* sp == a1 */
-	addi	sp, sp, -(4 * REG_FRMSZ)		/* Allocate interrupt stack frame */
+	mov		a0, sp							/* sp == a1 */
+	addi	sp, sp, -(4 * XCPTCONTEXT_SIZE)	/* Allocate interrupt stack frame */
 	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
-	rsr	a0, EPS_2					/* Save interruptee's PS */
+	rsr		a0, EPS_2						/* Save interruptee's PS */
 	s32i	a0, sp, (4 * REG_PS)
-	rsr	a0, EPC_2					/* Save interruptee's PC */
+	rsr		a0, EPC_2						/* Save interruptee's PC */
 	s32i	a0, sp, (4 * REG_PC)
-	rsr	a0, EXCSAVE_2				/* Save interruptee's a0 */
+	rsr		a0, EXCSAVE_2					/* Save interruptee's a0 */
 	s32i	a0, sp, (4 * REG_A0)
 
 	/* Save rest of interrupt context and enter RTOS. */
@@ -301,69 +305,71 @@ _xtensa_level2_handler:
 	#else
 	movi	a0, PS_INTLEVEL(2) | PS_UM | PS_WOE
 #endif
-	wsr	a0, PS
+	wsr		a0, PS
 	rsync
 
 	/* Decode and dispatch the interrupt.  In the event of an interrupt
-	 * level context xtensa_int_decode() will return a pointer to the new
-	 * register state in A2.
+	 * level context dispatch_c_isr() will switch stacks to the new task's
+	 * context save area.
 	 */
 
-	dispatch_c_isr 2 XTENSA_INTLEVEL2_MASK
+	dispatch_c_isr	2 XTENSA_INTLEVEL2_MASK
 
 	/* Restore registers in preparation to return from interrupt */
 
-	call0	_xtensa_int_exit				/* does not return directly here */
+	call0	_xtensa_int_exit
 
 	/* Restore only level-specific regs (the rest were already restored) */
 
 	l32i	a0, sp, (4 * REG_PS)			/* retrieve interruptee's PS */
-	wsr	a0, EPS_2
+	wsr		a0, EPS_2
 	l32i	a0, sp, (4 * REG_PC)			/* retrieve interruptee's PC */
-	wsr	a0, EPC_2
+	wsr		a0, EPC_2
 	l32i	a0, sp, (4 * REG_A0)			/* retrieve interruptee's A0 */
 	l32i	sp, sp, (4 * REG_A1)			/* remove interrupt stack frame */
-	rsync							/* Ensure EPS and EPC written */
+	rsync									/* Ensure EPS and EPC written */
 
 	/* Return from interrupt.  RFI  restores the PS from EPS_2 and jumps to
 	 * the address in EPC_2.
 	 */
 
-	rfi	2
+	rfi		2
 
 #endif /* XTENSA_EXCM_LEVEL >= 2 */
 
-/*******************************************************************************
-
-HIGH PRIORITY (LEVEL > XTENSA_EXCM_LEVEL) INTERRUPT VECTORS AND HANDLERS
-
-High priority interrupts are by definition those with priorities greater
-than XTENSA_EXCM_LEVEL. This includes non-maskable (NMI). High priority
-interrupts cannot interact with the RTOS, that is they must save all regs
-they use and not call any RTOS function.
-
-A further restriction imposed by the Xtensa windowed architecture is that
-high priority interrupts must not modify the stack area even logically
-"above" the top of the interrupted stack (they need to provide their
-own stack or static save area).
-
-Cadence Design Systems recommends high priority interrupt handlers be coded in assembly
-and used for purposes requiring very short service times.
-
-Here are templates for high priority (level 2+) interrupt vectors.
-They assume only one interrupt per level to avoid the burden of identifying
-which interrupts at this level are pending and enabled. This allows for 
-minimum latency and avoids having to save/restore a2 in addition to a0.
-If more than one interrupt per high priority level is configured, this burden
-is on the handler which in any case must provide a way to save and restore
-registers it uses without touching the interrupted stack.
-
-Each vector goes at a predetermined location according to the Xtensa
-hardware configuration, which is ensured by its placement in a special
-section known to the Xtensa linker support package (LSP). It performs
-the minimum necessary before jumping to the handler in the .text section.
-
-*******************************************************************************/
+/****************************************************************************
+ *
+ * HIGH PRIORITY (LEVEL > XTENSA_EXCM_LEVEL) INTERRUPT VECTORS AND HANDLERS
+ *
+ * High priority interrupts are by definition those with priorities greater
+ * than XTENSA_EXCM_LEVEL. This includes non-maskable (NMI). High priority
+ * interrupts cannot interact with the RTOS, that is they must save all regs
+ * they use and not call any RTOS function.
+ *
+ * A further restriction imposed by the Xtensa windowed architecture is that
+ * high priority interrupts must not modify the stack area even logically
+ * "above" the top of the interrupted stack (they need to provide their
+ * own stack or static save area).
+ *
+ * Cadence Design Systems recommends high priority interrupt handlers be
+ * coded in assembly and used for purposes requiring very short service
+ * times.
+ *
+ * Here are templates for high priority (level 2+) interrupt vectors.
+ * They assume only one interrupt per level to avoid the burden of
+ * identifying which interrupts at this level are pending and enabled. This
+ * allows for  minimum latency and avoids having to save/restore a2 in
+ * addition to a0.  If more than one interrupt per high priority level is
+ * configured, this burden is on the handler which in any case must provide
+ * a way to save and restore registers it uses without touching the
+ * interrupted stack.
+ *
+ * Each vector goes at a predetermined location according to the Xtensa
+ * hardware configuration, which is ensured by its placement in a special
+ * section known to the Xtensa linker support package (LSP). It performs
+ * the minimum necessary before jumping to the handler in the .text section.
+ *
+ ****************************************************************************/
 
 /*
 Currently only shells for high priority interrupt handlers are provided
@@ -372,7 +378,7 @@ documentation: "Microprocessor Programmer's Guide".
 */
 
 #if XTENSA_INT_NLEVELS >=2 && XTENSA_EXCM_LEVEL < 2 && XTENSA_DEBUGLEVEL !=2
-	.section .iram1,"ax"
+	.section	.iram1,"ax"
 	.type		_xtensa_level2_handler, @function
 	.align		4
 _xtensa_level2_handler:
@@ -384,24 +390,24 @@ _xtensa_level2_handler:
 	l32i	a0, a0, 2<<2
 	beqz	a0, 1f
 .Ln_xtensa_level2_handler_call_hook:
-	callx0	a0						/* must NOT disturb stack! */
+	callx0	a0							/* Must NOT disturb stack! */
 1:
 #endif
 
 	/* USER_EDIT:
-	ADD HIGH PRIORITY LEVEL 2 INTERRUPT HANDLER CODE HERE.
-	*/
+	 * ADD HIGH PRIORITY LEVEL 2 INTERRUPT HANDLER CODE HERE.
+	 */
 
 	.align	4
 .L_xtensa_level2_handler_exit:
-	rsr	a0, EXCSAVE_2				/* restore a0 */
-	rfi	2
+	rsr		a0, EXCSAVE_2				/* Restore a0 */
+	rfi		2
 
 #endif  /* XTENSA_INT_NLEVELS >=2 && XTENSA_EXCM_LEVEL < 2 && XTENSA_DEBUGLEVEL !=2 */
 
 #if XTENSA_INT_NLEVELS >=3 && XTENSA_EXCM_LEVEL < 3 && XTENSA_DEBUGLEVEL !=3
-	.section .iram1,"ax"
-	.type		_xtensa_level3_handler,@function
+	.section	.iram1,"ax"
+	.type		_xtensa_level3_handler, @function
 	.align		4
 _xtensa_level3_handler:
 
@@ -412,23 +418,23 @@ _xtensa_level3_handler:
 	l32i	a0, a0, 3<<2
 	beqz	a0, 1f
 .Ln_xtensa_level3_handler_call_hook:
-	callx0	a0						/* must NOT disturb stack! */
+	callx0	a0							/* Must NOT disturb stack! */
 1:
 #endif
 
 	/* USER_EDIT:
-	ADD HIGH PRIORITY LEVEL 3 INTERRUPT HANDLER CODE HERE.
-	*/
+	 * ADD HIGH PRIORITY LEVEL 3 INTERRUPT HANDLER CODE HERE.
+	 */
 
 	.align	4
 .L_xtensa_level3_handler_exit:
-	rsr	a0, EXCSAVE_3				/* restore a0 */
-	rfi	3
+	rsr		a0, EXCSAVE_3				/* Restore a0 */
+	rfi		3
 
 #endif /* XTENSA_INT_NLEVELS >=3 && XTENSA_EXCM_LEVEL < 3 && XTENSA_DEBUGLEVEL !=3 */
 
 #if XTENSA_INT_NLEVELS >=4 && XTENSA_EXCM_LEVEL < 4 && XTENSA_DEBUGLEVEL !=4
-	.section .iram1,"ax"
+	.section	.iram1,"ax"
 	.type		_xtensa_level4_handler,@function
 	.align		4
 _xtensa_level4_handler:
@@ -437,26 +443,26 @@ _xtensa_level4_handler:
 	/* Call interrupt hook if present to (pre)handle interrupts. */
 
 	movi	a0, _xt_intexc_hooks
-	l32i	a0, a0, 4<<2
+	l32i	a0, a0, 4 << 2
 	beqz	a0, 1f
 .Ln_xtensa_level4_handler_call_hook:
-	callx0	a0						/* must NOT disturb stack! */
+	callx0	a0							/* Must NOT disturb stack! */
 1:
 #endif
 
 	/* USER_EDIT:
-	ADD HIGH PRIORITY LEVEL 4 INTERRUPT HANDLER CODE HERE.
-	*/
+	 * ADD HIGH PRIORITY LEVEL 4 INTERRUPT HANDLER CODE HERE.
+	 */
 
 	.align	4
 .L_xtensa_level4_handler_exit:
-	rsr	a0, EXCSAVE_4				/* restore a0 */
-	rfi	4
+	rsr		a0, EXCSAVE_4				/* Restore a0 */
+	rfi		4
 
 #endif /* XTENSA_INT_NLEVELS >=4 && XTENSA_EXCM_LEVEL < 4 && XTENSA_DEBUGLEVEL !=4 */
 
 #if XTENSA_INT_NLEVELS >=5 && XTENSA_EXCM_LEVEL < 5 && XTENSA_DEBUGLEVEL !=5
-	.section .iram1,"ax"
+	.section	.iram1,"ax"
 	.type		_xtensa_level5_handler,@function
 	.align		4
 _xtensa_level5_handler:
@@ -465,26 +471,26 @@ _xtensa_level5_handler:
 	/* Call interrupt hook if present to (pre)handle interrupts. */
 
 	movi	a0, _xt_intexc_hooks
-	l32i	a0, a0, 5<<2
+	l32i	a0, a0, 5 << 2
 	beqz	a0, 1f
 .Ln_xtensa_level5_handler_call_hook:
-	callx0	a0						/* must NOT disturb stack! */
+	callx0	a0							/* Must NOT disturb stack! */
 1:
 #endif
 
 	/* USER_EDIT:
-	ADD HIGH PRIORITY LEVEL 5 INTERRUPT HANDLER CODE HERE.
-	*/
+	 * ADD HIGH PRIORITY LEVEL 5 INTERRUPT HANDLER CODE HERE.
+	 */
 
 	.align	4
 .L_xtensa_level5_handler_exit:
-	rsr	a0, EXCSAVE_5				/* restore a0 */
-	rfi	5
+	rsr		a0, EXCSAVE_5				/* restore a0 */
+	rfi		5
 
 #endif /* XTENSA_INT_NLEVELS >=5 && XTENSA_EXCM_LEVEL < 5 && XTENSA_DEBUGLEVEL !=5 */
 
 #if XTENSA_INT_NLEVELS >=6 && XTENSA_EXCM_LEVEL < 6 && XTENSA_DEBUGLEVEL !=6
-	.section .iram1,"ax"
+	.section	.iram1,"ax"
 	.type		_xtensa_level6_handler, @function
 	.align		4
 _xtensa_level6_handler:
@@ -493,20 +499,20 @@ _xtensa_level6_handler:
 	/* Call interrupt hook if present to (pre)handle interrupts. */
 
 	movi	a0, _xt_intexc_hooks
-	l32i	a0, a0, 6<<2
+	l32i	a0, a0, 6 << 2
 	beqz	a0, 1f
 .Ln_xtensa_level6_handler_call_hook:
-	callx0	a0						/* must NOT disturb stack! */
+	callx0	a0							/* Must NOT disturb stack! */
 1:
 #endif
 
 	/* USER_EDIT:
-	ADD HIGH PRIORITY LEVEL 6 INTERRUPT HANDLER CODE HERE.
-	*/
+	 * ADD HIGH PRIORITY LEVEL 6 INTERRUPT HANDLER CODE HERE.
+	 */
 
 	.align	4
 .L_xtensa_level6_handler_exit:
-	rsr	a0, EXCSAVE_6				/* restore a0 */
-	rfi	6
+	rsr		a0, EXCSAVE_6				/* Restore a0 */
+	rfi		6
 
 #endif /* XTENSA_INT_NLEVELS >=6 && XTENSA_EXCM_LEVEL < 6 && XTENSA_DEBUGLEVEL !=6 */

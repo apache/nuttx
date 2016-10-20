@@ -205,9 +205,9 @@ _xtensa_context_save:
 	l32i	a12, sp, (4 * REG_A12)			/* Recover original a9,12,13 */
 	l32i	a13, sp, (4 * REG_A13)
 	l32i	a9,  sp, (4 * REG_A9)
-	addi	sp,  sp, (4 * REG_FRMSZ)		/* Restore the interruptee's SP */
+	addi	sp,  sp, (4 * XCPTCONTEXT_SIZE)	/* Restore the interruptee's SP */
 	call0   xthal_window_spill_nw			/* Preserves only a4,5,8,9,12,13 */
-	addi	sp,  sp, -(4 * REG_FRMSZ)
+	addi	sp,  sp, -(4 * XCPTCONTEXT_SIZE)
 	l32i	a12, sp, (4 * REG_TMP0)			/* Recover stuff from stack frame */
 	l32i	a13, sp, (4 * REG_TMP1)
 	l32i	a9,  sp, (4 * REG_TMP2)
