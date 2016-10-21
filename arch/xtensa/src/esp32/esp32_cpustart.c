@@ -137,7 +137,7 @@ int xtensa_start_handler(int irq, FAR void *context)
    * be the CPUs NULL task.
    */
 
-  up_restorestate(tcb->xcp.regs);
+  xtensa_context_restore(tcb->xcp.regs);
   return OK;
 }
 

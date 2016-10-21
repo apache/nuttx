@@ -272,7 +272,7 @@
  *   a CALL0 instruction.  See "NOTES on the use of call0 ..." above.
  *
  *   The corresponding handler sets up the appropriate stack frame, saves
- *   a few vector-specific registers and calls xtensa_full_context_save()
+ *   a few vector-specific registers and calls _xtensa_context_save()
  *   to save the rest of the interrupted context.  It then calls the C
  *   logic to decode the specific interrupt source and dispatch to the
  *   appropriate C interrupt handler.
@@ -283,7 +283,9 @@
 	.section .iram1,"ax"
 	.type	_xtensa_level2_handler,@function
 	.align	4
+
 _xtensa_level2_handler:
+
 	mov		a0, sp							/* sp == a1 */
 	addi	sp, sp, -(4 * XCPTCONTEXT_SIZE)	/* Allocate interrupt stack frame */
 	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
@@ -296,7 +298,9 @@ _xtensa_level2_handler:
 
 	/* Save rest of interrupt context and enter RTOS. */
 
-	call0	xtensa_full_context_save		/* Save full register state */
+	s32i	a2, sp, (4 * REG_A2)
+	movi	a2, sp							/* Address of state save on stack */
+	call0	_xtensa_context_save			/* Save full register state */
 
 	/* Set up PS for C, enable interrupts above this level and clear EXCM. */
 
@@ -317,16 +321,17 @@ _xtensa_level2_handler:
 
 	/* Restore registers in preparation to return from interrupt */
 
-	call0	_xtensa_int_exit
+	call0	_xtensa_context_restore
 
 	/* Restore only level-specific regs (the rest were already restored) */
 
-	l32i	a0, sp, (4 * REG_PS)			/* retrieve interruptee's PS */
+	l32i	a0, sp, (4 * REG_PS)			/* Retrieve interruptee's PS */
 	wsr		a0, EPS_2
-	l32i	a0, sp, (4 * REG_PC)			/* retrieve interruptee's PC */
+	l32i	a0, sp, (4 * REG_PC)			/* Retrieve interruptee's PC */
 	wsr		a0, EPC_2
-	l32i	a0, sp, (4 * REG_A0)			/* retrieve interruptee's A0 */
-	l32i	sp, sp, (4 * REG_A1)			/* remove interrupt stack frame */
+	l32i	a0, sp, (4 * REG_A0)			/* Retrieve interruptee's A0 */
+	l32i	a2, sp, (4 * REG_A2)			/* Retrieve interruptee's A2 */
+	l32i	sp, sp, (4 * REG_A1)			/* Remove interrupt stack frame */
 	rsync									/* Ensure EPS and EPC written */
 
 	/* Return from interrupt.  RFI  restores the PS from EPS_2 and jumps to
@@ -381,6 +386,7 @@ documentation: "Microprocessor Programmer's Guide".
 	.section	.iram1,"ax"
 	.type		_xtensa_level2_handler, @function
 	.align		4
+
 _xtensa_level2_handler:
 
 #ifdef XT_INTEXC_HOOKS
@@ -389,8 +395,11 @@ _xtensa_level2_handler:
 	movi	a0, _xt_intexc_hooks
 	l32i	a0, a0, 2<<2
 	beqz	a0, 1f
+
 .Ln_xtensa_level2_handler_call_hook:
+
 	callx0	a0							/* Must NOT disturb stack! */
+
 1:
 #endif
 
@@ -399,7 +408,7 @@ _xtensa_level2_handler:
 	 */
 
 	.align	4
-.L_xtensa_level2_handler_exit:
+
 	rsr		a0, EXCSAVE_2				/* Restore a0 */
 	rfi		2
 
@@ -409,6 +418,7 @@ _xtensa_level2_handler:
 	.section	.iram1,"ax"
 	.type		_xtensa_level3_handler, @function
 	.align		4
+
 _xtensa_level3_handler:
 
 #ifdef XT_INTEXC_HOOKS
@@ -417,7 +427,9 @@ _xtensa_level3_handler:
 	movi	a0, _xt_intexc_hooks
 	l32i	a0, a0, 3<<2
 	beqz	a0, 1f
+
 .Ln_xtensa_level3_handler_call_hook:
+
 	callx0	a0							/* Must NOT disturb stack! */
 1:
 #endif
@@ -427,7 +439,7 @@ _xtensa_level3_handler:
 	 */
 
 	.align	4
-.L_xtensa_level3_handler_exit:
+
 	rsr		a0, EXCSAVE_3				/* Restore a0 */
 	rfi		3
 
@@ -437,6 +449,7 @@ _xtensa_level3_handler:
 	.section	.iram1,"ax"
 	.type		_xtensa_level4_handler,@function
 	.align		4
+
 _xtensa_level4_handler:
 
 #ifdef XT_INTEXC_HOOKS
@@ -445,7 +458,9 @@ _xtensa_level4_handler:
 	movi	a0, _xt_intexc_hooks
 	l32i	a0, a0, 4 << 2
 	beqz	a0, 1f
+
 .Ln_xtensa_level4_handler_call_hook:
+
 	callx0	a0							/* Must NOT disturb stack! */
 1:
 #endif
@@ -455,7 +470,7 @@ _xtensa_level4_handler:
 	 */
 
 	.align	4
-.L_xtensa_level4_handler_exit:
+
 	rsr		a0, EXCSAVE_4				/* Restore a0 */
 	rfi		4
 
@@ -465,6 +480,7 @@ _xtensa_level4_handler:
 	.section	.iram1,"ax"
 	.type		_xtensa_level5_handler,@function
 	.align		4
+
 _xtensa_level5_handler:
 
 #ifdef XT_INTEXC_HOOKS
@@ -473,7 +489,9 @@ _xtensa_level5_handler:
 	movi	a0, _xt_intexc_hooks
 	l32i	a0, a0, 5 << 2
 	beqz	a0, 1f
+
 .Ln_xtensa_level5_handler_call_hook:
+
 	callx0	a0							/* Must NOT disturb stack! */
 1:
 #endif
@@ -482,8 +500,6 @@ _xtensa_level5_handler:
 	 * ADD HIGH PRIORITY LEVEL 5 INTERRUPT HANDLER CODE HERE.
 	 */
 
-	.align	4
-.L_xtensa_level5_handler_exit:
 	rsr		a0, EXCSAVE_5				/* restore a0 */
 	rfi		5
 
@@ -493,6 +509,7 @@ _xtensa_level5_handler:
 	.section	.iram1,"ax"
 	.type		_xtensa_level6_handler, @function
 	.align		4
+
 _xtensa_level6_handler:
 
 #ifdef XT_INTEXC_HOOKS
@@ -501,7 +518,9 @@ _xtensa_level6_handler:
 	movi	a0, _xt_intexc_hooks
 	l32i	a0, a0, 6 << 2
 	beqz	a0, 1f
+
 .Ln_xtensa_level6_handler_call_hook:
+
 	callx0	a0							/* Must NOT disturb stack! */
 1:
 #endif
@@ -510,8 +529,6 @@ _xtensa_level6_handler:
 	 * ADD HIGH PRIORITY LEVEL 6 INTERRUPT HANDLER CODE HERE.
 	 */
 
-	.align	4
-.L_xtensa_level6_handler_exit:
 	rsr		a0, EXCSAVE_6				/* Restore a0 */
 	rfi		6
 

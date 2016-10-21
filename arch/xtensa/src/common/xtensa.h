@@ -248,14 +248,14 @@ void xtensa_dumpstate(void);
 uint32_t *xtensa_int_decode(uint32_t *regs);
 uint32_t *xtensa_irq_dispatch(int irq, uint32_t *regs);
 
-void xtensa_context_save(uint32_t *regs);
-void xtensa_full_context_save(uint32_t *regs);
-void xtensa_context_restore(uint32_t *regs);
-void xtensa_full_context_restore(uint32_t *regs);
-
 /* Software interrupt handler */
 
 int xtensa_swint(int irq, FAR void *context);
+
+/* Synchronous context switching */
+
+int xtensa_context_save(uint32_t *regs);
+int xtensa_context_restore(uint32_t *regs);
 
 /* Signals */
 

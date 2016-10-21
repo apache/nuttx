@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/common/xtensa_copystate.c
+ * arch/xtensa/src/common/arm_sigdeliver.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -40,35 +40,87 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <arch/irq.h>
+#include <sched.h>
+#include <debug.h>
 
+#include <nuttx/irq.h>
+#include <nuttx/arch.h>
+#include <nuttx/board.h>
+#include <arch/board/board.h>
+
+#include "sched/sched.h"
 #include "xtensa.h"
+
+#ifndef CONFIG_DISABLE_SIGNALS
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: xtensa_copystate
+ * Name: up_sigdeliver
+ *
+ * Description:
+ *   This is the a signal handling trampoline.  When a signal action was
+ *   posted.  The task context was mucked with and forced to branch to this
+ *   location with interrupts disabled.
+ *
  ****************************************************************************/
 
-/* A little faster than most memcpy's */
-
-void xtensa_copystate(uint32_t *dest, uint32_t *src)
+void up_sigdeliver(void)
 {
-  int i;
+  struct tcb_s  *rtcb = this_task();
+  uint32_t regs[XCPTCONTEXT_REGS];
+  sig_deliver_t sigdeliver;
 
-  /* In the XTENSA model, the state is copied from the stack to the TCB,
-   * but only a reference is passed to get the state from the TCB.  So the
-   * following check avoids copying the TCB save area onto itself:
+  /* Save the errno.  This must be preserved throughout the signal handling
+   * so that the user code final gets the correct errno value (probably
+   * EINTR).
    */
 
-  if (src != dest)
-    {
-      for (i = 0; i < XCPTCONTEXT_REGS; i++)
-        {
-          *dest++ = *src++;
-        }
-    }
+  int saved_errno = rtcb->pterrno;
+
+  board_autoled_on(LED_SIGNAL);
+
+  sinfo("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
+        rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);
+  ASSERT(rtcb->xcp.sigdeliver != NULL);
+
+  /* Save the real return state on the stack. */
+
+  xtensa_copystate(regs, rtcb->xcp.regs);
+  regs[REG_PC]         = rtcb->xcp.saved_pc;
+#warbing Missing Logic... Need to restore the correct interrupt here
+
+  /* Get a local copy of the sigdeliver function pointer. we do this so that
+   * we can nullify the sigdeliver function pointer in the TCB and accept
+   * more signal deliveries while processing the current pending signals.
+   */
+
+  sigdeliver           = rtcb->xcp.sigdeliver;
+  rtcb->xcp.sigdeliver = NULL;
+
+  /* Then restore the task interrupt state */
+
+  up_irq_restore(regs[REG_CPSR]);
+
+  /* Deliver the signals */
+
+  sigdeliver(rtcb);
+
+  /* Output any debug messages BEFORE restoring errno (because they may
+   * alter errno), then disable interrupts again and restore the original
+   * errno that is needed by the user logic (it is probably EINTR).
+   */
+
+  sinfo("Resuming\n");
+  (void)up_irq_save();
+  rtcb->pterrno = saved_errno;
+
+  /* Then restore the correct state for this thread of execution. */
+
+  board_autoled_off(LED_SIGNAL);
+  xtensa_context_restore(regs);
 }
 
+#endif /* !CONFIG_DISABLE_SIGNALS */

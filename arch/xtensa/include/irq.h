@@ -157,7 +157,6 @@ struct xcptcontext
   /* These are saved copies of registers used during signal processing. */
 
   uint32_t saved_pc;
-  uint32_t saved_cpsr;
 #endif
 
   /* Register save area */
