@@ -64,8 +64,6 @@
 #define NR5_HCLK_FREQUENCY      100000000ul
 #define NR5_SCLK_FREQUENCY      100000000ul
 
-//#define STM32_SYSCLK_FREQUENCY  168000000ul
-
 /* Timer Frequencies are the same as the HCLK frequency
  */
 

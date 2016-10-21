@@ -175,10 +175,6 @@ __start:
 #endif
 	bltu	t0, t1, 1b
 
-	/* Call the nr5_init_array routine to initialize C variables  */
-
-	//call __nr5_init_array
-
 	lw		a0, 0(sp)				# a0 = argc
 	addi	a1, sp, _RISCV_SZPTR/8	# a1 = argv
 	li		a2, 0					# a2 = envp = NULL
