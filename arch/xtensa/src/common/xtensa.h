@@ -255,7 +255,7 @@ int xtensa_swint(int irq, FAR void *context);
 /* Synchronous context switching */
 
 int xtensa_context_save(uint32_t *regs);
-int xtensa_context_restore(uint32_t *regs);
+void xtensa_context_restore(uint32_t *regs) noreturn_function;
 
 /* Signals */
 

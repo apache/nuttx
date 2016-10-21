@@ -59,8 +59,11 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <arch/chip/core-isa.h>
 #include <arch/irq.h>
+
+#include "xtensa_specregs.h"
 
 #ifdef CONFIG_XTENSA_USE_OVLY
 #  include <xtensa/overlay_os_asm.h>
@@ -262,7 +265,7 @@ xtensa_context_save:
 
 	/* Set up for call to _xtensa_context_save() */
 
-	rsr		a12, EPS_2						/* Save callee's PS */
+	rsr		a12, PS							/* Save callee's PS */
 	s32i	a12, a2, (4 * REG_PS)
 	s32i	a0, a2, (4 * REG_PC)			/* Save Return address as PC */
 
@@ -290,9 +293,9 @@ xtensa_context_save:
  *
  *   These functions restores Xtensa processor state and differ in which
  *   registers are saved: _xtensa_context_restore() restores all registers
- *   except PC, PS, and A0
+ *   except PC, PS, A0, and A2
  *
- *   The caller is responsible for restoring PC, PS, and A0 in both cases.
+ *   The caller is responsible for restoring PC, PS, A0, and A2.
  *
  *   _xtensa_context_save is the counterpart to this function.
  *
@@ -418,9 +421,6 @@ _xtensa_context_restore:
  *   - A2  = Pointer to the processor state save area
  *
  * Exit conditions:
- *   - A0  = Return address in caller.
- *   - A2  = 1
- *
  *   NOTE: That this function does NOT return to the caller but rather
  *   to a new threading context.
  *
@@ -442,21 +442,12 @@ xtensa_context_restore:
 
 	call0	_xtensa_context_restore			/* Restore full register state */
 
-	/* Restore PC, PS, and A0. */
+	/* Restore PC, PS, A0, and A2. */
 
-	s32i	a0, sp, (4 * REG_PS)
-
-	rsr		a12, EPS_2						/* Save callee's PS */
-	s32i	a12, sp, (4 * REG_PS)
-	s32i	a0, a2, (4 * REG_PC)			/* Save Return address as PC */
-
-	s32i	a0, a2, (4 * REG_A0)			/* Save callee's a0 */
-	s32i	sp, a2, (4 * REG_A1)			/* Save callee's SP */
-	movi	a12, 1							/* Set saved A2 to 1 */
-	s32i	a12, a2, (4 * REG_A2)
-
-
-	l32i	a0, a2, (4 * REG_A0)			/* Recover return addess */
-	movi	a2, 0							/* Return zero */
-	ret
-
+	l32i	a0, a2, (4 * REG_PS)			/* Restore PS */
+	wsr		a0, PS
+	l32i	a0, a2, (4 * REG_PC)			/* Set up for RFE */
+	rsr		a0, EPC
+	l32i	a0, a2, (4 * REG_A0)			/* Restore a0 */
+	l32i	a2, a2, (4 * REG_A2)			/* Restore A2 */
+	rfe										/* And return from "exception" */

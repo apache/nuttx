@@ -148,7 +148,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                * disabled
                */
 
-              CURRENT_REGS[REG_PC]      = (uint32_t)up_sigdeliver;
+              CURRENT_REGS[REG_PC]      = (uint32_t)xtensa_sigdeliver;
 #warning REVISIT: Missing logic... need to set interrupt state with interrupts disabled
 
               /* And make sure that the saved context in the TCB is the same
@@ -179,7 +179,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * disabled
            */
 
-          tcb->xcp.regs[REG_PC]      = (uint32_t)up_sigdeliver;
+          tcb->xcp.regs[REG_PC]      = (uint32_t)xtensa_sigdeliver;
 #warning REVISIT: Missing logic... need to set interrupt state with interrupts disabled
         }
     }

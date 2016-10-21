@@ -58,7 +58,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_sigdeliver
+ * Name: xtensa_sigdeliver
  *
  * Description:
  *   This is the a signal handling trampoline.  When a signal action was
@@ -67,7 +67,7 @@
  *
  ****************************************************************************/
 
-void up_sigdeliver(void)
+void xtensa_sigdeliver(void)
 {
   struct tcb_s  *rtcb = this_task();
   uint32_t regs[XCPTCONTEXT_REGS];
@@ -90,7 +90,7 @@ void up_sigdeliver(void)
 
   xtensa_copystate(regs, rtcb->xcp.regs);
   regs[REG_PC]         = rtcb->xcp.saved_pc;
-#warbing Missing Logic... Need to restore the correct interrupt here
+#warning Missing Logic... Need to save the correct interrupt state
 
   /* Get a local copy of the sigdeliver function pointer. we do this so that
    * we can nullify the sigdeliver function pointer in the TCB and accept
@@ -101,8 +101,8 @@ void up_sigdeliver(void)
   rtcb->xcp.sigdeliver = NULL;
 
   /* Then restore the task interrupt state */
-
-  up_irq_restore(regs[REG_CPSR]);
+#warning Missing Logic... Need to restore the correct interrupt state
+  //up_irq_restore(regs[REG_CPSR]);
 
   /* Deliver the signals */
 
