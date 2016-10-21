@@ -178,6 +178,14 @@
 #define LED_ASSERTION     6  /* LED1 + LED2 */
 #define LED_PANIC         7  /* LED1 / LED2 blinking */
 
+/* PWM
+ *
+ * The STM32F103-Minimum has no real on-board PWM devices, but the board can
+ * be configured to output a pulse train using TIM3 CH3 on PB0.
+ *
+ * Note: we don't need redefine GPIO_TIM3_CH3OUT because PB0 is not remap pin.
+ */
+
 /************************************************************************************
  * Public Data
  ************************************************************************************/

@@ -53,6 +53,10 @@ else
 CSRCS += stm32_userleds.c
 endif
 
+ifeq ($(CONFIG_PWM),y)
+CSRCS += stm32_pwm.c
+endif
+
 ifeq ($(CONFIG_AUDIO_TONE),y)
 CSRCS += stm32_tone.c
 endif
