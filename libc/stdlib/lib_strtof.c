@@ -1,6 +1,10 @@
 /****************************************************************************
- * libc/stdlib/lib_strtod.c
- * Convert string to double
+ * libc/stdlib/lib_strtof.c
+ * Convert string to float
+ *
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *
+ * A pretty straight forward conversion fo strtod():
  *
  *   Copyright (C) 2002 Michael Ringgaard. All rights reserved.
  *   Copyright (C) 2006-2007 H. Peter Anvin.
@@ -55,23 +59,23 @@
  * added to nuttx/compiler for your compiler.
  */
 
-#if !defined(__DBL_MIN_EXP__) || !defined(__DBL_MAX_EXP__)
+#if !defined(__FLT_MIN_EXP__) || !defined(__FLT_MAX_EXP__)
 #  ifdef CONFIG_CPP_HAVE_WARNING
 #    warning "Size of exponent is unknown"
 #  endif
-#  undef  __DBL_MIN_EXP__
-#  define __DBL_MIN_EXP__ (-1021)
-#  undef  __DBL_MAX_EXP__
-#  define __DBL_MAX_EXP__ (1024)
+#  undef  __FLT_MIN_EXP__
+#  define __FLT_MIN_EXP__ (-125)
+#  undef  __FLT_MAX_EXP__
+#  define __FLT_MAX_EXP__ (128)
 #endif
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-static inline int is_real(double x)
+static inline int is_real(float x)
 {
-  const double_t infinite = 1.0/0.0;
+  const float infinite = 1.0F/0.0F;
   return (x < infinite) && (x >= -infinite);
 }
 
@@ -80,24 +84,24 @@ static inline int is_real(double x)
  ****************************************************************************/
 
 /***************************************************(************************
- * Name: strtod
+ * Name: strtof
  *
  * Description:
- *   Convert a string to a double value
+ *   Convert a string to a float value
  *
  ****************************************************************************/
 
-double_t strtod(FAR const char *str, FAR char **endptr)
+float strtof(FAR const char *str, FAR char **endptr)
 {
-  double_t number;
+  float number;
   int exponent;
   int negative;
   FAR char *p = (FAR char *) str;
-  double p10;
+  float p10;
   int n;
   int num_digits;
   int num_decimals;
-  const double_t infinite = 1.0/0.0;
+  const float infinite = 1.0F/0.0F;
 
   /* Skip leading whitespace */
 
@@ -119,7 +123,7 @@ double_t strtod(FAR const char *str, FAR char **endptr)
       break;
     }
 
-  number       = 0.;
+  number       = 0.0F;
   exponent     = 0;
   num_digits   = 0;
   num_decimals = 0;
@@ -128,7 +132,7 @@ double_t strtod(FAR const char *str, FAR char **endptr)
 
   while (isdigit(*p))
     {
-      number = number * 10. + (*p - '0');
+      number = number * 10.0F + (float)(*p - '0');
       p++;
       num_digits++;
     }
@@ -141,7 +145,7 @@ double_t strtod(FAR const char *str, FAR char **endptr)
 
       while (isdigit(*p))
       {
-        number = number * 10. + (*p - '0');
+        number = number * 10.0F + (float)(*p - '0');
         p++;
         num_digits++;
         num_decimals++;
@@ -153,7 +157,7 @@ double_t strtod(FAR const char *str, FAR char **endptr)
   if (num_digits == 0)
     {
       set_errno(ERANGE);
-      number = 0.0;
+      number = 0.0F;
       goto errout;
     }
 
@@ -200,8 +204,8 @@ double_t strtod(FAR const char *str, FAR char **endptr)
         }
     }
 
-  if (exponent < __DBL_MIN_EXP__ ||
-      exponent > __DBL_MAX_EXP__)
+  if (exponent < __FLT_MIN_EXP__ ||
+      exponent > __FLT_MAX_EXP__)
     {
       set_errno(ERANGE);
       number = infinite;
@@ -210,7 +214,7 @@ double_t strtod(FAR const char *str, FAR char **endptr)
 
   /* Scale the result */
 
-  p10 = 10.;
+  p10 = 10.0F;
   n = exponent;
   if (n < 0) n = -n;
   while (n)

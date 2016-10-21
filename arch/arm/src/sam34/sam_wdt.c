@@ -695,7 +695,9 @@ void sam_wdtinitialize(FAR const char *devpath)
 
   priv->window = priv->reload;
 
-  /* Register the watchdog driver as /dev/watchdog0 */
+  /* Register the watchdog driver, usually at CONFIG_WATCHDOG_DEVPATH
+   * (default /dev/watchdog0).
+   */
 
   (void)watchdog_register(devpath, (FAR struct watchdog_lowerhalf_s *)priv);
 
