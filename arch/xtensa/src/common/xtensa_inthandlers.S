@@ -60,6 +60,7 @@
 #include <nuttx/config.h>
 
 #include <arch/chip/core-isa.h>
+#include <arch/irq.h>
 
 #include "xtensa_specregs.h"
 #include "xtensa_macros.h"
@@ -209,20 +210,17 @@
 7:
 
 	.ifeq XT_TIMER_INTPRI - \level
-.L_xt_user_int_timer_&level&:
-	/* Interrupt handler for the RTOS tick timer if at this level.
-	We'll be reading the interrupt state again after this call
-	so no need to preserve any registers except a6 (vpri_mask).
-	*/
 
-#ifdef CONFIG_XTENSA_CALL0_ABI
-	mov		a12, a6
-	call0	XT_RTOS_TIMER_INT
-	mov	a2, a12
-#else
-	mov	a2, a6
-	call4	XT_RTOS_TIMER_INT
-#endif
+	/* Interrupt handler for the RTOS tick timer if at this level.
+	 * We'll be reading the interrupt state again after this call
+	 * so no need to preserve any registers except a6 (vpri_mask).
+	 */
+
+	mov		a12, a6						/* Preserve a6 */
+	movi	a2, XTENSA_IRQ_TIMER&level& /* Arg 1: IRQ number */
+	mov		a3, sp						/* Arg 2: Top of stack = register save area */
+	call0	xtensa_irq_dispatch			/* Call xtensa_int_decode */
+	mov		a6, a12						/* Preserve a6 */
 	.endif
 
 #ifdef CONFIG_XTENSA_USE_SWPRI
