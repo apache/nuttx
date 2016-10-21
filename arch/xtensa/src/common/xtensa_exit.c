@@ -179,7 +179,7 @@ void _exit(int status)
 
   xtensa_full_context_restore(tcb->xcp.regs);
 
-  /* up_fullcontextrestore() should not return but could if the software
+  /* xtensa_full_context_restore() should not return but could if the software
    * interrupts are disabled.
    */
 

@@ -84,35 +84,20 @@ Serial Console
 Buttons and LEDs
 ================
 
-  NOTE: As of this writing, I have no schematic for the ESP32 Core board.
-  The following information derives only from examining the parts visible
-  on the board.
-
   Buttons
   -------
-  I see two buttons labelled Boot and EN.  I suspect that neither is
-  available to software.
+  There are two buttons labeled Boot and EN.  The EN button is not available
+  to software.  It pulls the chip enable line that doubles as a reset line.
+
+  The BOOT button is connected to IO0.  On reset it is used as a strapping
+  pin to determine whether the chip boots normally or into the serial
+  bootloader.  After reset, however, the BOOT button can be used for software
+  input.
 
   LEDs
-  A single LED labelled D1 is available.
-
-  When CONFIG_ARCH_LEDS is defined in the NuttX configuration, NuttX will
-  control the LED as follows:
-
-    SYMBOL              Meaning                 LED
-    ------------------- ----------------------- ------
-    LED_STARTED         NuttX has been started  OFF
-    LED_HEAPALLOCATE    Heap has been allocated OFF
-    LED_IRQSENABLED     Interrupts enabled      OFF
-    LED_STACKCREATED    Idle stack created      ON
-    LED_INIRQ           In an interrupt         N/C
-    LED_SIGNAL          In a signal handler     N/C
-    LED_ASSERTION       An assertion failed     N/C
-    LED_PANIC           The system has crashed  FLASH
-
-  Thus is LED is statically on, NuttX has successfully  booted and is,
-  apparently, running normally.  If LED is flashing at approximately
-  2Hz, then a fatal error has been detected and the system has halted.
+  ----
+  There are several on-board LEDs for that indicate the presence of power
+  and USB activity.  None of these are available for use by sofware.
 
 Configurations
 ==============
