@@ -140,12 +140,12 @@ double strtod(FAR const char *str, FAR char **endptr)
       p++;
 
       while (isdigit(*p))
-      {
-        number = number * 10. + (*p - '0');
-        p++;
-        num_digits++;
-        num_decimals++;
-      }
+        {
+          number = number * 10. + (*p - '0');
+          p++;
+          num_digits++;
+          num_decimals++;
+        }
 
       exponent -= num_decimals;
     }
@@ -212,7 +212,11 @@ double strtod(FAR const char *str, FAR char **endptr)
 
   p10 = 10.;
   n = exponent;
-  if (n < 0) n = -n;
+  if (n < 0)
+    {
+      n = -n;
+    }
+
   while (n)
     {
       if (n & 1)
