@@ -259,7 +259,7 @@
  *
  * Description:
  *   Medium priority interrupts are by definition those with priority greater
- *   than 1 and not greater than XTENSA_EXCM_LEVEL. These are disabled
+ *   than 1 and not greater than XCHAL_EXCM_LEVEL. These are disabled
  *   by setting PS.EXCM and therefore can easily support a C environment for
  *   handlers in C, and interact safely with NuttX.
  *
@@ -277,7 +277,7 @@
  *
  ****************************************************************************/
 
-#if XTENSA_EXCM_LEVEL >= 2
+#if XCHAL_EXCM_LEVEL >= 2
 	.section .iram1,"ax"
 	.type	_xtensa_level2_handler,@function
 	.align	4
@@ -315,7 +315,7 @@ _xtensa_level2_handler:
 	 * context save area.
 	 */
 
-	dispatch_c_isr	2 XTENSA_INTLEVEL2_MASK
+	dispatch_c_isr	2 XCHAL_INTLEVEL2_MASK
 
 	/* Restore registers in preparation to return from interrupt */
 
@@ -338,14 +338,14 @@ _xtensa_level2_handler:
 
 	rfi		2
 
-#endif /* XTENSA_EXCM_LEVEL >= 2 */
+#endif /* XCHAL_EXCM_LEVEL >= 2 */
 
 /****************************************************************************
  *
- * HIGH PRIORITY (LEVEL > XTENSA_EXCM_LEVEL) INTERRUPT VECTORS AND HANDLERS
+ * HIGH PRIORITY (LEVEL > XCHAL_EXCM_LEVEL) INTERRUPT VECTORS AND HANDLERS
  *
  * High priority interrupts are by definition those with priorities greater
- * than XTENSA_EXCM_LEVEL. This includes non-maskable (NMI). High priority
+ * than XCHAL_EXCM_LEVEL. This includes non-maskable (NMI). High priority
  * interrupts cannot interact with the RTOS, that is they must save all regs
  * they use and not call any RTOS function.
  *
@@ -380,7 +380,7 @@ here. However a template and example can be found in the Cadence Design Systems 
 documentation: "Microprocessor Programmer's Guide".
 */
 
-#if XTENSA_INT_NLEVELS >=2 && XTENSA_EXCM_LEVEL < 2 && XTENSA_DEBUGLEVEL !=2
+#if XCHAL_INT_NLEVELS >=2 && XCHAL_EXCM_LEVEL < 2 && XCHAL_DEBUGLEVEL !=2
 	.section	.iram1,"ax"
 	.type		_xtensa_level2_handler, @function
 	.align		4
@@ -410,9 +410,9 @@ _xtensa_level2_handler:
 	rsr		a0, EXCSAVE_2				/* Restore a0 */
 	rfi		2
 
-#endif  /* XTENSA_INT_NLEVELS >=2 && XTENSA_EXCM_LEVEL < 2 && XTENSA_DEBUGLEVEL !=2 */
+#endif  /* XCHAL_INT_NLEVELS >=2 && XCHAL_EXCM_LEVEL < 2 && XCHAL_DEBUGLEVEL !=2 */
 
-#if XTENSA_INT_NLEVELS >=3 && XTENSA_EXCM_LEVEL < 3 && XTENSA_DEBUGLEVEL !=3
+#if XCHAL_INT_NLEVELS >=3 && XCHAL_EXCM_LEVEL < 3 && XCHAL_DEBUGLEVEL !=3
 	.section	.iram1,"ax"
 	.type		_xtensa_level3_handler, @function
 	.align		4
@@ -441,9 +441,9 @@ _xtensa_level3_handler:
 	rsr		a0, EXCSAVE_3				/* Restore a0 */
 	rfi		3
 
-#endif /* XTENSA_INT_NLEVELS >=3 && XTENSA_EXCM_LEVEL < 3 && XTENSA_DEBUGLEVEL !=3 */
+#endif /* XCHAL_INT_NLEVELS >=3 && XCHAL_EXCM_LEVEL < 3 && XCHAL_DEBUGLEVEL !=3 */
 
-#if XTENSA_INT_NLEVELS >=4 && XTENSA_EXCM_LEVEL < 4 && XTENSA_DEBUGLEVEL !=4
+#if XCHAL_INT_NLEVELS >=4 && XCHAL_EXCM_LEVEL < 4 && XCHAL_DEBUGLEVEL !=4
 	.section	.iram1,"ax"
 	.type		_xtensa_level4_handler,@function
 	.align		4
@@ -472,9 +472,9 @@ _xtensa_level4_handler:
 	rsr		a0, EXCSAVE_4				/* Restore a0 */
 	rfi		4
 
-#endif /* XTENSA_INT_NLEVELS >=4 && XTENSA_EXCM_LEVEL < 4 && XTENSA_DEBUGLEVEL !=4 */
+#endif /* XCHAL_INT_NLEVELS >=4 && XCHAL_EXCM_LEVEL < 4 && XCHAL_DEBUGLEVEL !=4 */
 
-#if XTENSA_INT_NLEVELS >=5 && XTENSA_EXCM_LEVEL < 5 && XTENSA_DEBUGLEVEL !=5
+#if XCHAL_INT_NLEVELS >=5 && XCHAL_EXCM_LEVEL < 5 && XCHAL_DEBUGLEVEL !=5
 	.section	.iram1,"ax"
 	.type		_xtensa_level5_handler,@function
 	.align		4
@@ -501,9 +501,9 @@ _xtensa_level5_handler:
 	rsr		a0, EXCSAVE_5				/* restore a0 */
 	rfi		5
 
-#endif /* XTENSA_INT_NLEVELS >=5 && XTENSA_EXCM_LEVEL < 5 && XTENSA_DEBUGLEVEL !=5 */
+#endif /* XCHAL_INT_NLEVELS >=5 && XCHAL_EXCM_LEVEL < 5 && XCHAL_DEBUGLEVEL !=5 */
 
-#if XTENSA_INT_NLEVELS >=6 && XTENSA_EXCM_LEVEL < 6 && XTENSA_DEBUGLEVEL !=6
+#if XCHAL_INT_NLEVELS >=6 && XCHAL_EXCM_LEVEL < 6 && XCHAL_DEBUGLEVEL !=6
 	.section	.iram1,"ax"
 	.type		_xtensa_level6_handler, @function
 	.align		4
@@ -530,4 +530,4 @@ _xtensa_level6_handler:
 	rsr		a0, EXCSAVE_6				/* Restore a0 */
 	rfi		6
 
-#endif /* XTENSA_INT_NLEVELS >=6 && XTENSA_EXCM_LEVEL < 6 && XTENSA_DEBUGLEVEL !=6 */
+#endif /* XCHAL_INT_NLEVELS >=6 && XCHAL_EXCM_LEVEL < 6 && XCHAL_DEBUGLEVEL !=6 */

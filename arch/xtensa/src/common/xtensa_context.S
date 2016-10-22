@@ -142,7 +142,7 @@ _xtensa_context_save:
 	rsr		a3, SAR
 	s32i	a3, a2, (4 * REG_SAR)
 
-#ifdef XTENSA_HAVE_LOOPS
+#ifdef XCHAL_HAVE_LOOPS
 	rsr		a3, LBEG
 	s32i	a3, a2, (4 * REG_LBEG)
 	rsr		a3, LEND
@@ -167,7 +167,7 @@ _xtensa_context_save:
 	/* To spill the reg windows, temp. need pre-interrupt stack ptr and
 	 * a4-15.  Need to save a9,12,13 temporarily (in frame temps) and
 	 * recover originals.  Interrupts need to be disabled below
-	 * XTENSA_EXCM_LEVEL and window overflow and underflow exceptions
+	 * XCHAL_EXCM_LEVEL and window overflow and underflow exceptions
 	 * disabled (assured by PS.EXCM == 1).
 	 */
 
@@ -339,7 +339,7 @@ _xtensa_context_restore:
 	mov		a0, a13							/* Retrieve ret addr */
 #endif
 
-#ifdef XTENSA_HAVE_LOOPS
+#ifdef XCHAL_HAVE_LOOPS
 	l32i	a2, a2, (4 * REG_LBEG)
 	l32i	a3, a2, (4 * REG_LEND)
 	wsr		a2, LBEG

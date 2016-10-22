@@ -43,7 +43,7 @@
  * Public Data
  ****************************************************************************/
 
-#ifdef CONFIG_XTENSA_HAVE_INTERRUPTS
+#ifdef CONFIG_XCHAL_HAVE_INTERRUPTS
 
 /* INTENABLE virtualization information. */
 
@@ -64,7 +64,7 @@ _xtensa_vprimask:
 	.word	0xffffffff				/* Virtual priority mask */
 	.size	_xtensa_vprimask, 4
 
-#endif /* CONFIG_XTENSA_HAVE_INTERRUPTS */
+#endif /* CONFIG_XCHAL_HAVE_INTERRUPTS */
 
 /****************************************************************************
  * Public Functions
@@ -89,7 +89,7 @@ _xtensa_vprimask:
 xtensa_enable_interrupts:
 
 	ENTRY0
-#ifdef CONFIG_XTENSA_HAVE_INTERRUPTS
+#ifdef CONFIG_XCHAL_HAVE_INTERRUPTS
 	movi	a3, 0
 	movi	a4, _xtensa_intdata
 	xsr		a3, INTENABLE			/* Disables all interrupts */
@@ -127,7 +127,7 @@ xtensa_enable_interrupts:
 xtensa_disable_interrupts:
 
 	ENTRY0
-#ifdef CONFIG_XTENSA_HAVE_INTERRUPTS
+#ifdef CONFIG_XCHAL_HAVE_INTERRUPTS
 	movi	a3, 0
 	movi	a4, _xtensa_intdata
 	xsr		a3, INTENABLE			/* Disables all interrupts */

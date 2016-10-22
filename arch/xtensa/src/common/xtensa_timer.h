@@ -47,33 +47,33 @@
  * Otherwise select the first low or medium priority interrupt timer available.
  */
 
-#if XTENSA_NUM_TIMERS == 0
+#if XCHAL_NUM_TIMERS == 0
 
 #  error "This Xtensa configuration is unsupported, it has no timers."
 
 #else
 
 #ifndef XT_TIMER_INDEX
-#  if XTENSA_TIMER3_INTERRUPT != XTHAL_TIMER_UNCONFIGURED
-#    if XTENSA_INT_LEVEL(XTENSA_TIMER3_INTERRUPT) <= XTENSA_EXCM_LEVEL
+#  if XCHAL_TIMER3_INTERRUPT != XTHAL_TIMER_UNCONFIGURED
+#    if XTENSA_INT_LEVEL(XCHAL_TIMER3_INTERRUPT) <= XCHAL_EXCM_LEVEL
 #      undef  XT_TIMER_INDEX
 #      define XT_TIMER_INDEX    3
 #    endif
 #  endif
-#  if XTENSA_TIMER2_INTERRUPT != XTHAL_TIMER_UNCONFIGURED
-#    if XTENSA_INT_LEVEL(XTENSA_TIMER2_INTERRUPT) <= XTENSA_EXCM_LEVEL
+#  if XCHAL_TIMER2_INTERRUPT != XTHAL_TIMER_UNCONFIGURED
+#    if XTENSA_INT_LEVEL(XCHAL_TIMER2_INTERRUPT) <= XCHAL_EXCM_LEVEL
 #      undef  XT_TIMER_INDEX
 #      define XT_TIMER_INDEX    2
 #    endif
 #  endif
-#  if XTENSA_TIMER1_INTERRUPT != XTHAL_TIMER_UNCONFIGURED
-#    if XTENSA_INT_LEVEL(XTENSA_TIMER1_INTERRUPT) <= XTENSA_EXCM_LEVEL
+#  if XCHAL_TIMER1_INTERRUPT != XTHAL_TIMER_UNCONFIGURED
+#    if XTENSA_INT_LEVEL(XCHAL_TIMER1_INTERRUPT) <= XCHAL_EXCM_LEVEL
 #      undef  XT_TIMER_INDEX
 #      define XT_TIMER_INDEX    1
 #    endif
 #  endif
-#  if XTENSA_TIMER0_INTERRUPT != XTHAL_TIMER_UNCONFIGURED
-#    if XTENSA_INT_LEVEL(XTENSA_TIMER0_INTERRUPT) <= XTENSA_EXCM_LEVEL
+#  if XCHAL_TIMER0_INTERRUPT != XTHAL_TIMER_UNCONFIGURED
+#    if XTENSA_INT_LEVEL(XCHAL_TIMER0_INTERRUPT) <= XCHAL_EXCM_LEVEL
 #      undef  XT_TIMER_INDEX
 #      define XT_TIMER_INDEX    0
 #    endif
@@ -90,11 +90,11 @@
 
 #if XT_TIMER_INTNUM == XTHAL_TIMER_UNCONFIGURED
 #  error "The timer selected by XT_TIMER_INDEX does not exist in this core."
-#elif XT_TIMER_INTPRI > XTENSA_EXCM_LEVEL
+#elif XT_TIMER_INTPRI > XCHAL_EXCM_LEVEL
 #  error "The timer interrupt cannot be high priority (use medium or low)."
 #endif
 
-#endif /* XTENSA_NUM_TIMERS */
+#endif /* XCHAL_NUM_TIMERS */
 
 /* Set processor clock frequency, used to determine clock divisor for timer
  * tick. User should BE SURE TO ADJUST THIS for the Xtensa platform being
