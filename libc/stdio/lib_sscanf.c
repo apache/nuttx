@@ -511,9 +511,9 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
           else if (strchr("aAfFeEgG", *fmt) != NULL)
             {
 #ifdef CONFIG_HAVE_DOUBLE
-              FAR double_t *pd = NULL;
+              FAR double *pd = NULL;
 #endif
-              FAR float    *pf = NULL;
+              FAR float  *pf = NULL;
 
               linfo("vsscanf: Performing floating point conversion\n");
 
@@ -531,7 +531,7 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
 #ifdef CONFIG_HAVE_DOUBLE
                   if (lflag)
                     {
-                      pd  = va_arg(ap, FAR double_t *);
+                      pd  = va_arg(ap, FAR double *);
                       *pd = 0.0;
                     }
                   else
@@ -581,22 +581,11 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
 
                       FAR char *endptr;
                       int       errsave;
-                      double_t  dvalue;
 
                       /* Preserve the errno value */
 
                       errsave = get_errno();
                       set_errno(0);
-                      dvalue  = strtod(tmp, &endptr);
-
-                      /* Check if the number was successfully converted */
-
-                      if (tmp == endptr || get_errno() == ERANGE)
-                        {
-                          return count;
-                        }
-
-                      set_errno(errsave);
 
                       /* We have to check whether we need to return a float
                        * or a double.
@@ -605,14 +594,44 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
 #ifdef CONFIG_HAVE_DOUBLE
                       if (lflag)
                         {
+                          /* Get the converted double value */
+
+                          double dvalue = strtod(tmp, &endptr);
+
+                          /* Check if the number was successfully converted */
+
+                          if (tmp == endptr || get_errno() == ERANGE)
+                            {
+                              return count;
+                            }
+
+                          set_errno(errsave);
+
+                          /* Return the double value */
+
                           linfo("vsscanf: Return %f to %p\n", dvalue, pd);
                           *pd = dvalue;
                         }
                       else
 #endif
                         {
-                          linfo("vsscanf: Return %f to %p\n", dvalue, pf);
-                          *pf = (float)dvalue;
+                          /* Get the converted float value */
+
+                          float fvalue = strtof(tmp, &endptr);
+
+                          /* Check if the number was successfully converted */
+
+                          if (tmp == endptr || get_errno() == ERANGE)
+                            {
+                              return count;
+                            }
+
+                          set_errno(errsave);
+
+                          /* Return the float value */
+
+                          linfo("vsscanf: Return %f to %p\n", (double)fvalue, pf);
+                          *pf = fvalue;
                         }
 
                       count++;
