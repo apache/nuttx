@@ -160,7 +160,7 @@ _xtensa_context_save:
 #endif
 
 #if XTENSA_EXTRA_SA_SIZE > 0 || !defined(CONFIG_XTENSA_CALL0_ABI)
-	mov		a9,  a0						/* Preserve ret addr */
+	mov		a9,  a0							/* Preserve ret addr */
 	#endif
 
 #ifndef CONFIG_XTENSA_CALL0_ABI
@@ -171,7 +171,7 @@ _xtensa_context_save:
 	 * disabled (assured by PS.EXCM == 1).
 	 */
 
-	s32i	a12, a2, (4 * REG_TMP0)		/* Temp. save stuff in stack frame */
+	s32i	a12, a2, (4 * REG_TMP0)			/* Temp. save stuff in stack frame */
 	s32i	a13, a2, (4 * REG_TMP1)
 	s32i	a9,  a2, (4 * REG_TMP2)
 
@@ -181,9 +181,9 @@ _xtensa_context_save:
 	 */
 
 #ifdef CONFIG_XTENSA_USE_OVLY
-	l32i	a9,  a2, (4 * REG_PC)		/* Recover saved PC */
+	l32i	a9,  a2, (4 * REG_PC)			/* Recover saved PC */
 	_xt_overlay_get_state	a9, a12, a13
-	s32i	a9,  a2, (4 * REG_OVLY)		/* Save overlay state */
+	s32i	a9,  a2, (4 * REG_OVLY)			/* Save overlay state */
 #endif
 
 	l32i	a12, a2, (4 * REG_A12)			/* Recover original a9,12,13 */

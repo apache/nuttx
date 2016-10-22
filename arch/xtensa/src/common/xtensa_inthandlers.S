@@ -167,12 +167,12 @@
 	l32i	a6, a3, 4					/* a6 = _xt_vpri_mask */
 	neg		a2, a2
 	addi	a2, a2, -1					/* a2 = mask to apply */
-	and		a5, a6, a2					/* mask off all bits <= a4 bit */
-	s32i	a5, a3, 4					/* update _xt_vpri_mask */
+	and		a5, a6, a2					/* Mask off all bits <= a4 bit */
+	s32i	a5, a3, 4					/* Update _xt_vpri_mask */
 	rsr		a3, INTENABLE
-	and		a3, a3, a2					/* mask off all bits <= a4 bit */
+	and		a3, a3, a2					/* Mask off all bits <= a4 bit */
 	wsr		a3, INTENABLE
-	rsil	a3, \level - 1				/* lower interrupt level by 1 */
+	rsil	a3, \level - 1				/* Lower interrupt level by 1 */
 #endif
 
 	movi	a3, XT_TIMER_INTEN			/* a3 = timer interrupt bit */
@@ -226,7 +226,7 @@
 #ifdef CONFIG_XTENSA_USE_SWPRI
 	j		8f
 #else
-	j		.L_xt_user_int_&level&		/* check for more interrupts */
+	j		.L_xt_user_int_&level&		/* Check for more interrupts */
 #endif
 
 #ifdef CONFIG_XTENSA_USE_SWPRI
@@ -237,9 +237,9 @@
 
 	movi	a3, _xt_intdata
 	l32i	a4, a3, 0					/* a4 = _xt_intenable */
-	s32i	a2, a3, 4					/* update _xt_vpri_mask */
+	s32i	a2, a3, 4					/* Update _xt_vpri_mask */
 	and		a4, a4, a2					/* a4 = masked intenable */
-	wsr		a4, INTENABLE				/* update INTENABLE */
+	wsr		a4, INTENABLE				/* Update INTENABLE */
 #endif
 
 9:
@@ -498,7 +498,7 @@ _xtensa_level5_handler:
 	 * ADD HIGH PRIORITY LEVEL 5 INTERRUPT HANDLER CODE HERE.
 	 */
 
-	rsr		a0, EXCSAVE_5				/* restore a0 */
+	rsr		a0, EXCSAVE_5				/* Restore a0 */
 	rfi		5
 
 #endif /* XCHAL_INT_NLEVELS >=5 && XCHAL_EXCM_LEVEL < 5 && XCHAL_DEBUGLEVEL !=5 */
