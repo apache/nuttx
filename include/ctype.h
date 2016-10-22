@@ -318,7 +318,6 @@ static inline int tolower(int c)
 #else
 #  define tolower(c) \
     (((c) >= 'A' && (c) <= 'Z') ? ((c) - 'A' + 'a') : (c))
-#  define 
 #endif
 
 /****************************************************************************
