@@ -1,7 +1,7 @@
 //***************************************************************************
 // include/cxx/cctype
 //
-//   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+//   Copyright (C) 2009, 2016 Gregory Nutt. All rights reserved.
 //   Author: Gregory Nutt <gnutt@nuttx.org>
 //
 // Redistribution and use in source and binary forms, with or without
@@ -42,29 +42,27 @@
 
 #include <ctype.h>
 
-// Remove macros in favor of builtin implementations
-
-#if !defined(CONFIG_UCLIBCXX)
-
-#undef isalnum
-#undef isalpha
-#undef iscntrl
-#undef isdigit
-#undef isgraph
-#undef islower
-#undef isprint
-#undef ispunct
-#undef isspace
-#undef isblank
-#undef isupper
-#undef isxdigit
-#undef tolower
-#undef toupper
-
-#endif
-
 //***************************************************************************
 // Namespace
 //***************************************************************************
+
+namespace std
+{
+  using ::isspace;
+  using ::isascii;
+  using ::isprint;
+  using ::isgraph;
+  using ::iscntrl;
+  using ::islower;
+  using ::isupper;
+  using ::isalpha;
+  using ::isblank;
+  using ::isdigit;
+  using ::isalnum;
+  using ::ispunct;
+  using ::isxdigit;
+  using ::toupper;
+  using ::tolower;
+}
 
 #endif // __INCLUDE_CXX_CCTYPE
