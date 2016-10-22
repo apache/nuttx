@@ -65,10 +65,6 @@
 
 #include "xtensa_specregs.h"
 
-#ifdef CONFIG_XTENSA_USE_OVLY
-#  include <xtensa/overlay_os_asm.h>
-#endif
-
 #warning REVIST XTENSA_EXTRA_SA_SIZE is not yet provided
 #define XTENSA_EXTRA_SA_SIZE 0 /* REMOVE ME */
 
@@ -175,15 +171,13 @@ _xtensa_context_save:
 	s32i	a13, a2, (4 * REG_TMP1)
 	s32i	a9,  a2, (4 * REG_TMP2)
 
+#ifdef CONFIG_XTENSA_USE_OVLY
 	/* Save the overlay state if we are supporting overlays. Since we just
 	 * saved three registers, we can conveniently use them here. Note that
 	 * as of now, overlays only work for windowed calling ABI.
 	 */
 
-#ifdef CONFIG_XTENSA_USE_OVLY
-	l32i	a9,  a2, (4 * REG_PC)			/* Recover saved PC */
-	_xt_overlay_get_state	a9, a12, a13
-	s32i	a9,  a2, (4 * REG_OVLY)			/* Save overlay state */
+#error Overly support is not implemented
 #endif
 
 	l32i	a12, a2, (4 * REG_A12)			/* Recover original a9,12,13 */
@@ -356,13 +350,7 @@ _xtensa_context_restore:
 	 * to be restored.
 	 */
 
-	l32i	a2, a2, (4 * REG_PC)			/* Retrieve PC */
-	l32i	a3, a2, (4 * REG_PS)			/* Retrieve PS */
-	l32i	a4, a2, (4 * REG_OVLY)			/* Retrieve overlay state */
-	l32i	a5, a2, (4 * REG_A1)			/* Retrieve stack ptr */
-	_xt_overlay_check_map	a2, a3, a4, a5, a6
-	s32i	a2, a2, (4 * REG_PC)			/* Save updated PC */
-	s32i	a3, a2, (4 * REG_PS)			/* Save updated PS */
+#error Overly support is not implemented
 #endif
 
 #ifdef CONFIG_XTENSA_USE_SWPRI

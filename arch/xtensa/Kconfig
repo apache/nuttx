@@ -35,10 +35,6 @@ config XTENSA_NCOPROCESSORS
 	int "Number of co-processors"
 	default 1
 
-config XTENSA_HAVE_INTERRUPTS
-	bool
-	default n
-
 config XTENSA_USE_SWPRI
 	bool "Use SWPRI"
 	default n
@@ -46,10 +42,15 @@ config XTENSA_USE_SWPRI
 config XTENSA_CALL0_ABI
 	bool "CALL0 ABI"
 	default y
+	---help---
+		The Window ABI is not supported.  Only the CALL0 ABI is supported in the
+		current implementation.
 
 config XTENSA_USE_OVLY
-	bool "Use overlay"
+	bool
 	default n
+	---help---
+		Enable code overlay support. This option is currently unsupported.
 
 config ARCH_CHIP
 	string
