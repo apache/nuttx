@@ -80,13 +80,6 @@
 #  define environ get_environ_ptr()
 #endif
 
-/* The function strtold() is not currently implemented in NuttX.  Ideally, a
- * custom implementation should be provided because, of course, there is a
- * loss of 32-bits of accuracy in this conversion.
- */
-
-#define strtold(a,b) (long double)strtod(a,b)
-
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
@@ -197,8 +190,13 @@ long long strtoll(FAR const char *nptr, FAR char **endptr, int base);
 unsigned long long strtoull(FAR const char *nptr, FAR char **endptr,
                             int base);
 #endif
-double_t  strtod(FAR const char *str, FAR char **endptr);
 float     strtof(FAR const char *str, FAR char **endptr);
+#ifdef CONFIG_HAVE_DOUBLE
+double    strtod(FAR const char *str, FAR char **endptr);
+#endif
+#ifdef CONFIG_HAVE_LONG_DOUBLE
+long double strtold(FAR const char *str, FAR char **endptr);
+#endif
 
 #define atoi(nptr)  ((int)strtol((nptr), NULL, 10))
 #define atol(nptr)  strtol((nptr), NULL, 10)

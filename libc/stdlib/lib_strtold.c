@@ -1,6 +1,6 @@
 /****************************************************************************
  * libc/stdlib/lib_strtod.c
- * Convert string to double
+ * Convert string to long double
  *
  *   Copyright (C) 2002 Michael Ringgaard. All rights reserved.
  *   Copyright (C) 2006-2007 H. Peter Anvin.
@@ -44,7 +44,7 @@
 #include <ctype.h>
 #include <errno.h>
 
-#ifdef CONFIG_HAVE_DOUBLE
+#ifdef CONFIG_HAVE_LONG_DOUBLE
 
 /****************************************************************************
  * Pre-processor definitions
@@ -55,23 +55,23 @@
  * added to nuttx/compiler for your compiler.
  */
 
-#if !defined(__DBL_MIN_EXP__) || !defined(__DBL_MAX_EXP__)
+#if !defined(__LDBL_MIN_EXP__) || !defined(__LDBL_MAX_EXP__)
 #  ifdef CONFIG_CPP_HAVE_WARNING
 #    warning "Size of exponent is unknown"
 #  endif
-#  undef  __DBL_MIN_EXP__
-#  define __DBL_MIN_EXP__ (-1021)
-#  undef  __DBL_MAX_EXP__
-#  define __DBL_MAX_EXP__ (1024)
+#  undef  __LDBL_MIN_EXP__
+#  define __LDBL_MIN_EXP__ (-1021)
+#  undef  __LDBL_MAX_EXP__
+#  define __LDBL_MAX_EXP__ (1024)
 #endif
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-static inline int is_real(double x)
+static inline int is_real(long double x)
 {
-  const double infinite = 1.0/0.0;
+  const long double infinite = 1.0L/0.0L;
   return (x < infinite) && (x >= -infinite);
 }
 
@@ -80,24 +80,24 @@ static inline int is_real(double x)
  ****************************************************************************/
 
 /***************************************************(************************
- * Name: strtod
+ * Name: strtold
  *
  * Description:
- *   Convert a string to a double value
+ *   Convert a string to a long double value
  *
  ****************************************************************************/
 
-double strtod(FAR const char *str, FAR char **endptr)
+long double strtold(FAR const char *str, FAR char **endptr)
 {
-  double number;
+  long double number;
   int exponent;
   int negative;
   FAR char *p = (FAR char *) str;
-  double p10;
+  long double p10;
   int n;
   int num_digits;
   int num_decimals;
-  const double infinite = 1.0/0.0;
+  const long double infinite = 1.0L/0.0L;
 
   /* Skip leading whitespace */
 
@@ -119,7 +119,7 @@ double strtod(FAR const char *str, FAR char **endptr)
       break;
     }
 
-  number       = 0.;
+  number       = 0.0L;
   exponent     = 0;
   num_digits   = 0;
   num_decimals = 0;
@@ -128,7 +128,7 @@ double strtod(FAR const char *str, FAR char **endptr)
 
   while (isdigit(*p))
     {
-      number = number * 10. + (*p - '0');
+      number = number * 10.0L + (long double)(*p - '0');
       p++;
       num_digits++;
     }
@@ -141,7 +141,7 @@ double strtod(FAR const char *str, FAR char **endptr)
 
       while (isdigit(*p))
       {
-        number = number * 10. + (*p - '0');
+        number = number * 10.0L + (long double)(*p - '0');
         p++;
         num_digits++;
         num_decimals++;
@@ -153,7 +153,7 @@ double strtod(FAR const char *str, FAR char **endptr)
   if (num_digits == 0)
     {
       set_errno(ERANGE);
-      number = 0.0;
+      number = 0.0L;
       goto errout;
     }
 
@@ -200,8 +200,8 @@ double strtod(FAR const char *str, FAR char **endptr)
         }
     }
 
-  if (exponent < __DBL_MIN_EXP__ ||
-      exponent > __DBL_MAX_EXP__)
+  if (exponent < __LDBL_MIN_EXP__ ||
+      exponent > __LDBL_MAX_EXP__)
     {
       set_errno(ERANGE);
       number = infinite;
@@ -245,4 +245,4 @@ errout:
   return number;
 }
 
-#endif /* CONFIG_HAVE_DOUBLE */
+#endif /* CONFIG_HAVE_LONG_DOUBLE */

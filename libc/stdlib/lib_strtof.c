@@ -48,8 +48,6 @@
 #include <ctype.h>
 #include <errno.h>
 
-#ifdef CONFIG_HAVE_DOUBLE
-
 /****************************************************************************
  * Pre-processor definitions
  ****************************************************************************/
@@ -248,5 +246,3 @@ errout:
 
   return number;
 }
-
-#endif /* CONFIG_HAVE_DOUBLE */
