@@ -112,18 +112,9 @@
 #  define REG_TMP0          (_REG_CALL0_START + 0)
 #  define REG_TMP1          (_REG_CALL0_START + 1)
 #  define REG_TMP2          (_REG_CALL0_START + 2)
-#  define _REG_SWPRI_START  (_REG_CALL0_START + 3)
+#  define _REG_OVLY_START  (_REG_CALL0_START + 3)
 #else
-#  define _REG_SWPRI_START  _REG_CALL0_START
-#endif
-
-#ifdef CONFIG_XTENSA_USE_SWPRI
-  /* Storage for virtual priority mask */
-
-#  define REG_VPRI          (_REG_SWPRI_START + 0)
-#  define _REG_OVLY_START   (_REG_SWPRI_START + 1)
-#else
-#  define _REG_OVLY_START   _REG_SWPRI_START
+#  define _REG_OVLY_START  _REG_CALL0_START
 #endif
 
 #ifdef CONFIG_XTENSA_USE_OVLY

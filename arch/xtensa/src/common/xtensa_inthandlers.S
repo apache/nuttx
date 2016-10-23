@@ -114,7 +114,7 @@
 	movi	a4, \mask
 	and		a2, a2, a3
 	and		a2, a2, a4
-	beqz	a2, 9f						/* Nothing to do */
+	beqz	a2, 5f						/* Nothing to do */
 
 	/* This bit of code provides a nice debug backtrace in the debugger.
 	 * It does take a few more instructions, so undef XT_DEBUG_BACKTRACE
@@ -139,11 +139,11 @@
 
 #ifdef CONFIG_XTENSA_CALL0_ABI
 	callx0	a4
-	beqz	a2, 9f
+	beqz	a2, 5f
 #else
 	mov		a6, a2
 	callx4	a4
-	beqz	a6, 9f
+	beqz	a6, 5f
 	mov		a2, a6
 #endif
 2:
@@ -153,31 +153,9 @@
 
 	extract_msb	a4, a2					/* a4 = MSB of a2, a2 trashed */
 
-#ifdef CONFIG_XTENSA_USE_SWPRI
-	/* Enable all interrupts at this level that are numerically higher
-	 * than the one we just selected, since they are treated as higher
-	 * priority.
-	 */
-
-	movi	a3, \mask					/* a3 = all interrupts at this level */
-	add		a2, a4, a4					/* a2 = a4 << 1 */
-	addi	a2, a2, -1					/* a2 = mask of 1's <= a4 bit */
-	and		a2, a2, a3					/* a2 = mask of all bits <= a4 at this level */
-	movi	a3, _xt_intdata
-	l32i	a6, a3, 4					/* a6 = _xt_vpri_mask */
-	neg		a2, a2
-	addi	a2, a2, -1					/* a2 = mask to apply */
-	and		a5, a6, a2					/* Mask off all bits <= a4 bit */
-	s32i	a5, a3, 4					/* Update _xt_vpri_mask */
-	rsr		a3, INTENABLE
-	and		a3, a3, a2					/* Mask off all bits <= a4 bit */
-	wsr		a3, INTENABLE
-	rsil	a3, \level - 1				/* Lower interrupt level by 1 */
-#endif
-
 	movi	a3, XT_TIMER_INTEN			/* a3 = timer interrupt bit */
 	wsr		a4, INTCLEAR				/* Clear sw or edge-triggered interrupt */
-	beq		a3, a4, 7f					/* If timer interrupt then skip table */
+	beq		a3, a4, 4f					/* If timer interrupt then skip table */
 
 	/* Call xtensa_int_decode with, passing that address of the register save
 	 * area as a parameter (A2).
@@ -201,13 +179,9 @@
 	addi	sp,  a4, -(4 * XCPTCONTEXT_SIZE)
 
 3:
-#ifdef CONFIG_XTENSA_USE_SWPRI
-	j		8f
-#else
 	j		.L_xt_user_int_&level&		/* Check for more interrupts */
-#endif
 
-7:
+4:
 
 	.ifeq XT_TIMER_INTPRI - \level
 
@@ -223,26 +197,9 @@
 	mov		a6, a12						/* Preserve a6 */
 	.endif
 
-#ifdef CONFIG_XTENSA_USE_SWPRI
-	j		8f
-#else
 	j		.L_xt_user_int_&level&		/* Check for more interrupts */
-#endif
 
-#ifdef CONFIG_XTENSA_USE_SWPRI
-8:
-	/* Restore old value of _xt_vpri_mask from a2. Also update INTENABLE from
-		virtual _xt_intenable which _could_ have changed during interrupt
-		processing. */
-
-	movi	a3, _xt_intdata
-	l32i	a4, a3, 0					/* a4 = _xt_intenable */
-	s32i	a2, a3, 4					/* Update _xt_vpri_mask */
-	and		a4, a4, a2					/* a4 = masked intenable */
-	wsr		a4, INTENABLE				/* Update INTENABLE */
-#endif
-
-9:
+5:
 	/* done */
 
 	.endm

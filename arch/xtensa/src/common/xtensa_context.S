@@ -147,14 +147,6 @@ _xtensa_context_save:
 	s32i	a3, a2, (4 * REG_LCOUNT)
 #endif
 
-#ifdef CONFIG_XTENSA_USE_SWPRI
-	/* Save virtual priority mask */
-
-	movi	a3, _xtensa_vprimask
-	l32i	a3, a3, 0
-	s32i	a3, a2, (4 * REG_VPRI)
-#endif
-
 #if XTENSA_EXTRA_SA_SIZE > 0 || !defined(CONFIG_XTENSA_CALL0_ABI)
 	mov		a9,  a0							/* Preserve ret addr */
 	#endif
@@ -352,17 +344,6 @@ _xtensa_context_restore:
 
 #error Overly support is not implemented
 #endif
-
-#ifdef CONFIG_XTENSA_USE_SWPRI
-	/* Restore virtual interrupt priority and interrupt enable */
-
-	movi	a3, _xtensa_intdata
-	l32i	a4, a3, 0						/* a4 = _xtensa_intenable */
-	l32i	a5, a2, (4 * REG_VPRI)			/* a5 = saved _xtensa_vprimask */
-	and		a4, a4, a5
-	wsr		a4, INTENABLE					/* Update INTENABLE */
-	s32i	a5, a3, 4						/* Restore _xtensa_vprimask */
-	#endif
 
 	l32i	a3, a2, (4 * REG_SAR)
 	l32i	sp, a2, (4 * REG_A1)

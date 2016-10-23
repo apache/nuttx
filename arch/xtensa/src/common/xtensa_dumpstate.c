@@ -128,10 +128,6 @@ static inline void xtensa_registerdump(void)
              (unsigned long)regs[REG_TMP0], (unsigned long)regs[REG_TMP1],
              (unsigned long)regs[REG_TMP2]);
 #endif
-#ifdef CONFIG_XTENSA_USE_SWPRI
-      _alert(" VPRI: %08lx\n",
-             (unsigned long)regs[REG_VPRI]);
-#endif
     }
 }
 

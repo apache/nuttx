@@ -99,12 +99,6 @@ void up_initial_state(struct tcb_s *tcb)
   xcp->regs[REG_PS]   = PS_UM | PS_EXCM | PS_WOE | PS_CALLINC(1);
 #endif
 
-#ifdef CONFIG_XTENSA_USE_SWPRI
-  /* Set the initial virtual priority mask value to all 1's. */
-
-  xcp->regs[REG_VPRI] = 0xffffffff;
-#endif
-
 #warning REVISIT co-processor support
 #if 0 /* REVISIT */
 #if CONFIG_XTENSA_NCOPROCESSORS > 0

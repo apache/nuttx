@@ -35,10 +35,6 @@ config XTENSA_NCOPROCESSORS
 	int "Number of co-processors"
 	default 1
 
-config XTENSA_USE_SWPRI
-	bool "Use SWPRI"
-	default n
-
 config XTENSA_CALL0_ABI
 	bool "CALL0 ABI"
 	default y
