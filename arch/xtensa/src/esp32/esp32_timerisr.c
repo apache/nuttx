@@ -79,7 +79,7 @@ static int esp32_timerisr(int irq, uint32_t *regs)
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  up_timer_initialize
+ * Function:  xtensa_timer_initialize
  *
  * Description:
  *   This function is called during start-up to initialize
@@ -87,7 +87,7 @@ static int esp32_timerisr(int irq, uint32_t *regs)
  *
  ****************************************************************************/
 
-void up_timer_initialize(void)
+void xtensa_timer_initialize(void)
 {
   uint32_t regval;
 

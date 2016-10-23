@@ -112,10 +112,10 @@ static int esp32_nmi(int irq, FAR void *context)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_irqinitialize
+ * Name: xtensa_irq_initialize
  ****************************************************************************/
 
-void up_irqinitialize(void)
+void xtensa_irq_initialize(void)
 {
   int i;
 

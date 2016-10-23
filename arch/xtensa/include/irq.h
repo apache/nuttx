@@ -50,8 +50,8 @@
 #include <nuttx/irq.h>
 #include <arch/types.h>
 #include <arch/chip/core-isa.h>
-#include <arch/xtensa/specregs.h>
-#include <arch/xtensa/corebits.h>
+#include <arch/xtensa/xtensa_specregs.h>
+#include <arch/xtensa/xtensa_corebits.h>
 
 /* Include architecture-specific IRQ definitions */
 
@@ -191,7 +191,7 @@ static inline void xtensa_setps(uint32_t ps)
 {
   __asm__ __volatile__
   (
-    "wsr %0, PS"  : : "=r"(ps)
+    "wsr %0, PS"  : : "r"(ps)
   );
 }
 
@@ -201,7 +201,7 @@ static inline void up_irq_restore(uint32_t ps)
 {
   __asm__ __volatile__
   (
-    "wsr %0, PS"  : : "=r"(ps)
+    "wsr %0, PS"  : : "r"(ps)
   );
 }
 
@@ -232,6 +232,28 @@ static inline uint32_t up_irq_save(void)
    */
 
   return ps;
+}
+
+/* Enable interrupts at all levels */
+
+static inline void up_irq_enable(void)
+{
+#ifdef CONFIG_XTENSA_CALL0_ABI
+  xtensa_setps(PS_INTLEVEL(0) | PS_UM);
+#else
+  xtensa_setps(PS_INTLEVEL(0) | PS_UM | PS_WOE);
+#endif
+}
+
+/* Disable low- and medium- priority interrupts */
+
+static inline void up_irq_disable(void)
+{
+#ifdef CONFIG_XTENSA_CALL0_ABI
+  xtensa_setps(PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM);
+#else
+  xtensa_setps(PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_WOE);
+#endif
 }
 
 /****************************************************************************
