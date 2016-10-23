@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/common/xtensa_macros.h
+ * arch/xtensa/include/xtensa/xtensa_specregs.h
  * Xtensa Special Register symbolic names
  *
  * Adapted from use in NuttX by:
@@ -32,8 +32,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_XTENSA_SRC_COMMON_XTENSA_SPECREGS_H
-#define __ARCH_XTENSA_SRC_COMMON_XTENSA_SPECREGS_H
+#ifndef __ARCH_XTENSA_INCLUDE_XTENSA_XTENSA_SPECREGS_H
+#define __ARCH_XTENSA_INCLUDE_XTENSA_XTENSA_SPECREGS_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -151,4 +151,4 @@
 #define CEND          247    /* VectraLX */
 #endif
 
-#endif /* __ARCH_XTENSA_SRC_COMMON_XTENSA_SPECREGS_H */
+#endif /* __ARCH_XTENSA_INCLUDE_XTENSA_XTENSA_SPECREGS_H */

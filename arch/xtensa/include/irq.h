@@ -46,9 +46,12 @@
 
 /* Include NuttX-specific IRQ definitions */
 
+#include <nuttx/config.h>
 #include <nuttx/irq.h>
 #include <arch/types.h>
 #include <arch/chip/core-isa.h>
+#include <arch/xtensa/specregs.h>
+#include <arch/xtensa/corebits.h>
 
 /* Include architecture-specific IRQ definitions */
 
@@ -167,6 +170,69 @@ struct xcptcontext
 /****************************************************************************
  * Inline functions
  ****************************************************************************/
+
+/* Return the current value of the PS register */
+
+static inline uint32_t xtensa_getps(void)
+{
+  uint32_t ps;
+
+  __asm__ __volatile__
+  (
+    "rsr %0, PS"  : "=r"(ps)
+  );
+
+  return ps;
+}
+
+/* Set the value of the PS register */
+
+static inline void xtensa_setps(uint32_t ps)
+{
+  __asm__ __volatile__
+  (
+    "wsr %0, PS"  : : "=r"(ps)
+  );
+}
+
+/* Restore the value of the PS register */
+
+static inline void up_irq_restore(uint32_t ps)
+{
+  __asm__ __volatile__
+  (
+    "wsr %0, PS"  : : "=r"(ps)
+  );
+}
+
+/* Disable interrupts and return the previous value of the PS register */
+
+static inline uint32_t up_irq_save(void)
+{
+  /* Get the current value of the PS for return */
+
+  uint32_t ps = xtensa_getps();
+
+  /* Disable all low- and medium-priority interrupts.  High priority
+   * interrupts should not interfere with ongoing RTOS operations and
+   * are not disabled.
+   *
+   * NOTE: We also assume that since we were called from C logic, the
+   * EXCM must already be cleared.
+   */
+
+#ifdef CONFIG_XTENSA_CALL0_ABI
+  xtensa_setps(PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM);
+#else
+  xtensa_setps(PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_WOE);
+#endif
+
+  /* Return the previous PS value so that it can be restored with
+   * up_irq_restore().
+   */
+
+  return ps;
+}
 
 /****************************************************************************
  * Public Data

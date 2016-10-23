@@ -37,7 +37,7 @@
 #include    <xtensa/coreasm.h>
 #endif
 
-#include    <xtensa/corebits.h>
+#include    <arch/xtensa/xtensa_corebits.h>
 #include    <xtensa/config/system.h>
 
 /* Select timer to use for periodic tick, and determine its interrupt number

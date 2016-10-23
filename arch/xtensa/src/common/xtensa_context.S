@@ -60,10 +60,9 @@
 
 #include <nuttx/config.h>
 
-#include <arch/chip/core-isa.h>
 #include <arch/irq.h>
-
-#include "xtensa_specregs.h"
+#include <arch/chip/core-isa.h>
+#include <arch/xtensa/xtensa_specregs.h>
 
 #warning REVIST XTENSA_EXTRA_SA_SIZE is not yet provided
 #define XTENSA_EXTRA_SA_SIZE 0 /* REMOVE ME */

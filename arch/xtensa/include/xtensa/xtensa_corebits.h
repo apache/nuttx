@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/common/xtensa_corebits.h
+ * arch/xtensa/include/xtensa/xtensa_corebits.h
  * Xtensa Special Register field positions, masks, values.
  * NOTE: This file may be processor configuration dependent.
  *
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_EXTENSA_SRC_COMMON_XTENSA_COREBITS_H
-#define __ARCH_EXTENSA_SRC_COMMON_XTENSA_COREBITS_H
+#ifndef __ARCH_EXTENSA_INCLUDE_XTENSA_XTENSA_COREBITS_H
+#define __ARCH_EXTENSA_INCLUDE_XTENSA_XTENSA_COREBITS_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -203,4 +203,4 @@
 #define MEMCTL_DCW_CLR_MASK        (MEMCTL_DCWU_CLR_MASK | MEMCTL_DCWA_CLR_MASK)
 #define MEMCTL_IDCW_CLR_MASK       (MEMCTL_DCW_CLR_MASK | MEMCTL_ICWU_CLR_MASK)
 
-#endif /*__ARCH_EXTENSA_SRC_COMMON_XTENSA_COREBITS_H*/
+#endif /*__ARCH_EXTENSA_INCLUDE_XTENSA_XTENSA_COREBITS_H*/

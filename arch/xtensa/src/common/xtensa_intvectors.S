@@ -39,8 +39,8 @@
 #include <nuttx/config.h>
 
 #include <arch/chip/core-isa.h>
+#include <arch/xtensa/xtensa_specreg.h>
 
-#include "xtensa_specregs.h"
 #include "xtensa_macros.h"
 
 /****************************************************************************
