@@ -90,24 +90,6 @@ static void esp32_irq_dump(const char *msg, int irq)
 #endif
 
 /****************************************************************************
- * Name: esp32_nmi
- *
- * Description:
- *   Handlers for various execptions.  None are handled and all are fatal
- *   error conditions.  The only advantage these provided over the default
- *   unexpected interrupt handler is that they provide a diagnostic output.
- *
- ****************************************************************************/
-
-static int esp32_nmi(int irq, FAR void *context)
-{
-  (void)up_irq_save();
-  _err("PANIC!!! NMI received\n");
-  PANIC();
-  return 0;
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 

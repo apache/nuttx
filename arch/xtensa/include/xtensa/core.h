@@ -1130,7 +1130,7 @@
  * Exit:  any register a2-a15 (?) may have been clobbered.
  */
 
-        .macro  xchal_cpi_store_funcbody
+	.macro	xchal_cpi_store_funcbody
 #if (XCHAL_CP_MASK & ~XCHAL_CP_PORT_MASK)
 # if XCHAL_CP0_SA_SIZE
 	bnez	a3, 99f
@@ -1182,6 +1182,7 @@
 # endif
 90:
 #endif
+	.endm
 
 /* Macro that expands to the body of a function that loads the selected coprocessor's state
  * (registers etc).

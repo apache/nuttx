@@ -126,20 +126,6 @@
 	and		a2, a2, a4
 	beqz	a2, 5f						/* Nothing to do */
 
-	/* This bit of code provides a nice debug backtrace in the debugger.
-	 * It does take a few more instructions, so undef XT_DEBUG_BACKTRACE
-	 * if you want to save the cycles.
-	* /
-
-#if XT_DEBUG_BACKTRACE
-#ifndef CONFIG_XTENSA_CALL0_ABI
-	rsr		a0, EPC_1 + \level - 1		/* Return address */
-	movi	a4, 0xC0000000				/* Constant with top 2 bits set (call size) */
-	or		a0, a0, a4					/* Set top 2 bits */
-	addx2	a0, a4, a0					/* Clear top bit -- simulating call4 size	*/
-#endif
-#endif
-
 #ifdef XT_INTEXC_HOOKS
 	/* Call interrupt hook if present to (pre)handle interrupts. */
 

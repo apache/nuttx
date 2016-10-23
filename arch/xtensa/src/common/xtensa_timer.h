@@ -34,7 +34,7 @@
 #define __ARCH_XTENSA_SRC_COMMON_XTENSA_TIMER_H
 
 #ifdef __ASSEMBLER__
-#  include <xtensa/coreasm.h>
+//#  include <xtensa/coreasm.h>
 #endif
 
 #include <arch/xtensa/core.h>
