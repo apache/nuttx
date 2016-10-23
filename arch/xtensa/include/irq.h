@@ -219,7 +219,7 @@ static inline uint32_t up_irq_save(void)
 
   __asm__ __volatile__
   (
-    "psil %0, %1" : "=r"(ps) : "I"(XCHAL_EXCM_LEVEL)
+    "rsil %0, %1" : "=r"(ps) : "I"(XCHAL_EXCM_LEVEL)
   );
 
   /* Return the previous PS value so that it can be restored with

@@ -33,4 +33,26 @@
 #
 ############################################################################
 
+
+# Supported toolchains
+#
+# Each toolchain definition should set:
+#
+#  CROSSDEV         The GNU toolchain triple (command prefix)
+#  ARCROSSDEV       If required, an alternative prefix used when
+#                   invoking ar and nm.
+#  ARCHCPUFLAGS     CPU-specific flags selecting the instruction set
+#                   FPU options, etc.
+#  MAXOPTIMIZATION  The maximum optimization level that results in
+#                   reliable code generation.
+#
+
 CROSSDEV = xtensa-esp32-elf-
+
+ARCHCPUFLAGS =
+
+ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
+  MAXOPTIMIZATION := $(CONFIG_DEBUG_OPTLEVEL)
+else
+ MAXOPTIMIZATION := -Os
+endif
