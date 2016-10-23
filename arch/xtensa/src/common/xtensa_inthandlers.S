@@ -294,7 +294,7 @@ _xtensa_level2_handler:
 	rsr		a0, EXCSAVE_2					/* Save interruptee's a0 */
 	s32i	a0, sp, (4 * REG_A0)
 
-	/* Save rest of interrupt context and enter RTOS. */
+	/* Save rest of interrupt context. */
 
 	s32i	a2, sp, (4 * REG_A2)
 	movi	a2, sp							/* Address of state save on stack */

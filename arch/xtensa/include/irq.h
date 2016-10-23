@@ -129,8 +129,8 @@
 #ifdef CONFIG_XTENSA_USE_OVLY
 /* Storage for overlay state */
 
-#  define REG_OVLY          (_REG_OVLY_START + 0)
-#  define XCPTCONTEXT_REGS  (_REG_OVLY_START + 1)
+#  error Overlays not supported
+#  define XCPTCONTEXT_REGS   _REG_OVLY_START
 #else
 #  define XCPTCONTEXT_REGS   _REG_OVLY_START
 #endif

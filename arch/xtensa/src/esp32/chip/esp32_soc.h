@@ -308,7 +308,7 @@
  *      3                       1               extern level            TG0_WDT                 Reserved
  *      4                       1               extern level            WBB
  *      5                       1               extern level            BT Controller
- *      6                       1               timer                   FreeRTOS Tick(L1)       FreeRTOS Tick(L1)
+ *      6                       1               timer                   RTOS Tick               RTOS Tick
  *      7                       1               software                Reserved                Reserved
  *      8                       1               extern level            BLE Controller
  *      9                       1               extern level
@@ -317,7 +317,7 @@
  *      12                      1               extern level
  *      13                      1               extern level
  *      14                      7               nmi                     Reserved                Reserved
- *      15                      3               timer                   FreeRTOS Tick(L3)       FreeRTOS Tick(L3)
+ *      15                      3               timer                   Internal Timer
  *      16                      5               timer
  *      17                      1               extern level
  *      18                      1               extern level
