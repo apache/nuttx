@@ -31,7 +31,7 @@ SECTIONS
     . = 0x280;
     KEEP(*(.DebugExceptionVector.text));
     . = 0x2c0;
-    KEEP(*(.NMIExceptionVector.text));
+    KEEP(*(.nmi_vector.text));
     . = 0x300;
     KEEP(*(.KernelExceptionVector.text));
     . = 0x340;

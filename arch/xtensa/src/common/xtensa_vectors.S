@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/common/xtensa_intvectors.S
+ * arch/xtensa/src/common/xtensa_vectors.S
  *
  * Adapted from use in NuttX by:
  *
@@ -131,9 +131,8 @@ _xtensa_level5_vector:
 
 	/* Never returns here - call0 is used as a jump */
 
-	.end        literal_prefix
-
 	.size	_xtensa_level5_vector, . - _xtensa_level5_vector
+	.end        literal_prefix
 #endif
 
 #if XCHAL_EXCM_LEVEL >= 6
@@ -150,7 +149,36 @@ _xtensa_level6_vector:
 
 	/* Never returns here - call0 is used as a jump */
 
-	.end        literal_prefix
+	.size		_xtensa_level6_vector, . - _xtensa_level6_vector
+	.end		literal_prefix
+#endif
 
-	.size	_xtensa_level6_vector, . - _xtensa_level6_vector
+/****************************************************************************
+ * C Prototype:
+ *   void _xtensa_nmi_vector(void)
+ *
+ * Description:
+ *   Xtensa NMI  vectors.  This vector goes at a predetermined location
+ *   according to the Xtensa hardware configuration, which is ensured by its
+ *   placement in a special section known to the NuttX linker script.  The
+ *   vector logic performs the minimum necessary operations before jumping
+ *   to the handler.
+ *
+ ****************************************************************************/
+
+#if XCHAL_HAVE_NMI
+	.begin		literal_prefix .nmi_vector
+	.section	.nmi_vector.text, "ax"
+	.global		_xtensa_nmi_vector
+	.type		_xtensa_nmi_vector, @function
+	.align		4
+
+_xtensa_nmi_vector:
+	wsr			a0, EXCSAVE + XCHAL_NMILEVEL  _ /* preserve a0 */
+	call0		_xt_nmi                         /* load interrupt handler */
+
+	/* Never returns here - call0 is used as a jump */
+
+	.size		_xtensa_nmi_vector, . - _xtensa_nmi_vector
+	.end		literal_prefix
 #endif
