@@ -40,4 +40,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Clocking ****************************************************************/
+
+#define BOARD_CLOCK_FREQUENCY 80000000
+
 #endif /* __CONFIGS_ESP32_CORE_INCLUDE_BOARD_H */

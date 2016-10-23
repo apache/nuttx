@@ -685,10 +685,10 @@
 
 /* Internal I/D RAMS/ROMS and XLMI ******************************************/
 
-#define  XCHAL_NUM_IROM                 XCHAL_NUM_INSTROM     /* (DEPRECATED) */
-#define  XCHAL_NUM_IRAM                 XCHAL_NUM_INSTRAM     /* (DEPRECATED) */
-#define  XCHAL_NUM_DROM                 XCHAL_NUM_DATAROM     /* (DEPRECATED) */
-#define  XCHAL_NUM_DRAM                 XCHAL_NUM_DATARAM     /* (DEPRECATED) */
+#define XCHAL_NUM_IROM                  XCHAL_NUM_INSTROM     /* (DEPRECATED) */
+#define XCHAL_NUM_IRAM                  XCHAL_NUM_INSTRAM     /* (DEPRECATED) */
+#define XCHAL_NUM_DROM                  XCHAL_NUM_DATAROM     /* (DEPRECATED) */
+#define XCHAL_NUM_DRAM                  XCHAL_NUM_DATARAM     /* (DEPRECATED) */
 
 #define XCHAL_IROM0_VADDR               XCHAL_INSTROM0_VADDR  /* (DEPRECATED) */
 #define XCHAL_IROM0_PADDR               XCHAL_INSTROM0_PADDR  /* (DEPRECATED) */

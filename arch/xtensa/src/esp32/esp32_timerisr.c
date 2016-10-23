@@ -44,19 +44,12 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
-#include <arch/board/board.h>
 #include <arch/xtensa/xtensa_specregs.h>
+#include <arch/board/board.h>
 
 #include "clock/clock.h"
 #include "xtensa_timer.h"
 #include "xtensa.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#warning REVISIT .. Need XT_CLOCK_FREQ
-#define XT_CLOCK_FREQ       80000000
 
 /****************************************************************************
  * Private data
@@ -99,7 +92,7 @@ static inline uint32_t xtensa_getcompare(void)
 
   __asm__ __volatile__
   (
-    "rsr %0, XT_CCOMPARE"  : "=r"(compare)
+    "rsr %0, %1"  : "=r"(compare) : "I"(XT_CCOMPARE)
   );
 
   return compare;
@@ -111,7 +104,7 @@ static inline void xtensa_setcompare(uint32_t compare)
 {
   __asm__ __volatile__
   (
-    "wsr %0, XT_CCOMPARE"  : : "r"(compare)
+    "wsr %0, %1" : : "r"(compare), "I"(XT_CCOMPARE)
   );
 }
 
@@ -123,10 +116,11 @@ static inline void xtensa_enable_timer(void)
 {
   __asm__ __volatile__
   (
-    "rsr a2, INTENABLE\n"
-    "ori a2, XT_TIMER_INTEN\n"
-    "wsr a2, INTENABLE\n"
-    :  : : "a2"
+    "movi a3, %0\n"
+    "rsr  a2, INTENABLE\n"
+    "or   a2, a2, a3\n"
+    "wsr  a2, INTENABLE\n"
+    :  : "I"(XT_TIMER_INTEN) : "a2", "a3"
   );
 }
 
@@ -198,14 +192,14 @@ void xtensa_timer_initialize(void)
 
   /* Configured the timer0 as the system timer.
    *
-   * divisor = XT_CLOCK_FREQ / ticks_per_sec
-   *         = XT_CLOCK_FREQ / (ticks_per_usec * 1000000)
-   *         = (1000000 * XT_CLOCK_FREQ) / ticks_per_usec
+   * divisor = BOARD_CLOCK_FREQUENCY / ticks_per_sec
+   *         = BOARD_CLOCK_FREQUENCY / (ticks_per_usec * 1000000)
+   *         = (1000000 * BOARD_CLOCK_FREQUENCY) / ticks_per_usec
    *
    * A long long calculation is used to preserve accuracy in all cases.
    */
 
-  divisor = (1000000ull * (uint64_t)XT_CLOCK_FREQ) / CONFIG_USEC_PER_TICK;
+  divisor = (1000000ull * (uint64_t)BOARD_CLOCK_FREQUENCY) / CONFIG_USEC_PER_TICK;
   DEBUGASSERT(divisor <= UINT32_MAX)
   g_tick_divisor = divisor;
 

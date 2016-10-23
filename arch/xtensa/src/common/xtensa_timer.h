@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/common/xtensa_irq.S
+ * arch/xtensa/src/common/xtensa_timer.h
  *
  * Adapted from use in NuttX by:
  *
@@ -34,12 +34,12 @@
 #define __ARCH_XTENSA_SRC_COMMON_XTENSA_TIMER_H
 
 #ifdef __ASSEMBLER__
-#include <xtensa/coreasm.h>
+#  include <xtensa/coreasm.h>
 #endif
 
 #include <arch/xtensa/core.h>
 #include <arch/xtensa/xtensa_corebits.h>
-//#include <xtensa/config/system.h>
+#include <arch/board/board.h>
 
 /* Select timer to use for periodic tick, and determine its interrupt number
  * and priority. User may specify a timer by defining XT_TIMER_INDEX with -D,
@@ -85,7 +85,7 @@
 #endif
 
 #define XT_CCOMPARE             (CCOMPARE + XT_TIMER_INDEX)
-#define XT_TIMER_INTNUM         XTENSA_TIMER_INTERRUPT(XT_TIMER_INDEX)
+#define XT_TIMER_INTNUM         XCHAL_TIMER_INTERRUPT(XT_TIMER_INDEX)
 #define XT_TIMER_INTPRI         XCHAL_INT_LEVEL(XT_TIMER_INTNUM)
 #define XT_TIMER_INTEN          (1 << XT_TIMER_INTNUM)
 
@@ -115,12 +115,12 @@
  * anyway!).
  */
 
-#if defined(XT_SIMULATOR) && !defined(XT_CLOCK_FREQ)
-#  define XT_CLOCK_FREQ
+#if defined(XT_SIMULATOR) && !defined(BOARD_CLOCK_FREQUENCY)
+#  define BOARD_CLOCK_FREQUENCY
 #endif
 
-#if !defined(XT_CLOCK_FREQ) && !defined(XT_BOARD)
-#  error "XT_CLOCK_FREQ must be defined for the target platform."
+#if !defined(BOARD_CLOCK_FREQUENCY) && !defined(XT_BOARD)
+#  warning "BOARD_CLOCK_FREQUENCY must be defined for the target platform."
 #endif
 
 /* Default number of timer "ticks" per second (default 100 for 10ms tick).
@@ -136,8 +136,8 @@
 
 /* Derivation of clock divisor for timer tick and interrupt (one per tick). */
 
-#ifdef XT_CLOCK_FREQ
-#  define XT_TICK_DIVISOR   (XT_CLOCK_FREQ / XT_TICK_PER_SEC)
+#ifdef BOARD_CLOCK_FREQUENCY
+#  define XT_TICK_DIVISOR   (BOARD_CLOCK_FREQUENCY / XT_TICK_PER_SEC)
 #endif
 
 #ifndef __ASSEMBLER__
