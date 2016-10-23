@@ -200,7 +200,6 @@ extern uint32_t _eheap;             /* End+1 of heap */
  * Public Functions
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
 /* Common Functions *********************************************************/
 /* Common functions defined in arch/xtensa/src/common.  These may be replaced
  * with chip-specific functions of the same name if needed.  See also
