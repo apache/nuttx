@@ -138,18 +138,24 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
               /* Save the return lr and cpsr and one scratch register
                * These will be restored by the signal trampoline after
                * the signals have been delivered.
+               *
+               * NOTE: that hi-priority interrupts are not disabled.
                */
 
               tcb->xcp.sigdeliver       = sigdeliver;
               tcb->xcp.saved_pc         = CURRENT_REGS[REG_PC];
-#warning REVISIT: Missing logic... need to save interrupt state
+              tcb->xcp.saved_ps         = CURRENT_REGS[REG_PS];
 
               /* Then set up to vector to the trampoline with interrupts
                * disabled
                */
 
               CURRENT_REGS[REG_PC]      = (uint32_t)xtensa_sigdeliver;
-#warning REVISIT: Missing logic... need to set interrupt state with interrupts disabled
+#ifdef CONFIG_XTENSA_CALL0_ABI
+              CURRENT_REGS[REG_PS]      = (uint32_t)(PS_INTLEVEL(0) | PS_UM);
+#else
+              CURRENT_REGS[REG_PS]      = (uint32_t)(PS_INTLEVEL(0) | PS_UM | PS_WOE);
+#endif
 
               /* And make sure that the saved context in the TCB is the same
                * as the interrupt return context.
@@ -173,14 +179,18 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
           tcb->xcp.sigdeliver       = sigdeliver;
           tcb->xcp.saved_pc         = tcb->xcp.regs[REG_PC];
-#warning REVISIT: Missing logic... need to save interrupt state
+          tcb->xcp.saved_ps         = tcb->xcp.regs[REG_PS];
 
           /* Then set up to vector to the trampoline with interrupts
            * disabled
            */
 
           tcb->xcp.regs[REG_PC]      = (uint32_t)xtensa_sigdeliver;
-#warning REVISIT: Missing logic... need to set interrupt state with interrupts disabled
+#ifdef CONFIG_XTENSA_CALL0_ABI
+          tcb->xcp.regs[REG_PS]      = (uint32_t)(PS_INTLEVEL(0) | PS_UM);
+#else
+          tcb->xcp.regs[REG_PS]      = (uint32_t)(PS_INTLEVEL(0) | PS_UM | PS_WOE);
+#endif
         }
     }
 

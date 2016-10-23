@@ -38,11 +38,9 @@
 #include "chip/esp32_dport.h"
 #include "chip/esp32_rtccntl.h"
 #include "esp32_clockconfig.h"
+#include "esp32_region.h"
 #include "esp32_start.h"
 #include "xtensa.h"
-
-#warning REVISIT Need cpu_configure_region_protection() prototype
-void cpu_configure_region_protection(void);
 
 /****************************************************************************
  * Public Functions
@@ -77,7 +75,7 @@ void IRAM_ATTR __start(void)
 
   /* Make page 0 access raise an exception */
 
-  cpu_configure_region_protection();
+  esp32_region_protection();
 
   /* Move CPU0 exception vectors to IRAM */
 

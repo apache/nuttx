@@ -1,8 +1,8 @@
 /****************************************************************************
- * arch/xtensa/src/common/arm_sigdeliver.c
+ * arch/xtensa/src/esp32/esp32_region.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -37,90 +37,31 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <stdint.h>
-#include <sched.h>
-#include <debug.h>
-
-#include <nuttx/irq.h>
-#include <nuttx/arch.h>
-#include <nuttx/board.h>
-#include <arch/board/board.h>
-
-#include "sched/sched.h"
-#include "xtensa.h"
-
-#ifndef CONFIG_DISABLE_SIGNALS
+#ifndef __ARCH_XTENSA_SRC_ESP32_ESP32_REGION_H
+#define __ARCH_XTENSA_SRC_ESP32_ESP32_REGION_H
 
 /****************************************************************************
- * Public Functions
+ * Included Files
  ****************************************************************************/
 
 /****************************************************************************
- * Name: xtensa_sigdeliver
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: esp32_region_protection
  *
  * Description:
- *   This is the a signal handling trampoline.  When a signal action was
- *   posted.  The task context was mucked with and forced to branch to this
- *   location with interrupts disabled.
+ *   Make page 0 access raise an exception.  Also protect some other unused
+ *   pages so we can catch weirdness.
+ *
+ *   Useful attribute values:
+ *     0  — cached, RW
+ *     2  — bypass cache, RWX (default value after CPU reset)
+ *     15 — no access, raise exception
  *
  ****************************************************************************/
 
-void xtensa_sigdeliver(void)
-{
-  struct tcb_s  *rtcb = this_task();
-  uint32_t regs[XCPTCONTEXT_REGS];
-  sig_deliver_t sigdeliver;
+void esp32_region_protection(void);
 
-  /* Save the errno.  This must be preserved throughout the signal handling
-   * so that the user code final gets the correct errno value (probably
-   * EINTR).
-   */
-
-  int saved_errno = rtcb->pterrno;
-
-  board_autoled_on(LED_SIGNAL);
-
-  sinfo("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
-        rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);
-  ASSERT(rtcb->xcp.sigdeliver != NULL);
-
-  /* Save the real return state on the stack. */
-
-  xtensa_copystate(regs, rtcb->xcp.regs);
-  regs[REG_PC]         = rtcb->xcp.saved_pc;
-  regs[REG_PS]         = rtcb->xcp.saved_ps;
-
-  /* Get a local copy of the sigdeliver function pointer. we do this so that
-   * we can nullify the sigdeliver function pointer in the TCB and accept
-   * more signal deliveries while processing the current pending signals.
-   */
-
-  sigdeliver           = rtcb->xcp.sigdeliver;
-  rtcb->xcp.sigdeliver = NULL;
-
-  /* Then restore the task interrupt state */
-
-  up_irq_restore(regs[REG_PS]);
-
-  /* Deliver the signals */
-
-  sigdeliver(rtcb);
-
-  /* Output any debug messages BEFORE restoring errno (because they may
-   * alter errno), then disable interrupts again and restore the original
-   * errno that is needed by the user logic (it is probably EINTR).
-   */
-
-  sinfo("Resuming\n");
-  (void)up_irq_save();
-  rtcb->pterrno = saved_errno;
-
-  /* Then restore the correct state for this thread of execution. */
-
-  board_autoled_off(LED_SIGNAL);
-  xtensa_context_restore(regs);
-}
-
-#endif /* !CONFIG_DISABLE_SIGNALS */
+#endif /* __ARCH_XTENSA_SRC_ESP32_ESP32_REGION_H */

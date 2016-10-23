@@ -49,11 +49,10 @@
 
 #include "sched/sched.h"
 #include "xtensa.h"
+#include "esp32_region.h"
 
 #ifdef CONFIG_SMP
 
-#warning REVISIT Need cpu_configure_region_protection() prototype
-void cpu_configure_region_protection(void);
 #warning REVISIT Need ets_set_appcpu_boot_addr() prototype
 void ets_set_appcpu_boot_addr(uint32_t);
 
@@ -126,7 +125,7 @@ int xtensa_start_handler(int irq, FAR void *context)
 
   /* Make page 0 access raise an exception */
 
-  cpu_configure_region_protection();
+  esp32_region_protection();
 
   /* Dump registers so that we can see what is going to happen on return */
 
