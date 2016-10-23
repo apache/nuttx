@@ -55,7 +55,7 @@
 
 #include <arch/chip/core-isa.h>
 //#include <arch/chip/core-matmap.h>
-//#include <arch/chip/tie.h>
+#include <arch/chip/tie.h>
 
 #ifdef __ASSEMBLY__
 //#  include <arch/chip/tie-asm.h>

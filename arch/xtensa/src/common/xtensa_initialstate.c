@@ -45,6 +45,7 @@
 
 #include <nuttx/arch.h>
 #include <arch/irq.h>
+#include <arch/xtensa/core.h>
 #include <arch/chip/core-isa.h>
 #include <arch/xtensa/xtensa_corebits.h>
 
@@ -71,7 +72,7 @@ void up_initial_state(struct tcb_s *tcb)
 {
   struct xcptcontext *xcp = &tcb->xcp;
 #if 0 /* REVISIT */
-#if CONFIG_XTENSA_NCOPROCESSORS > 0
+#if XCHAL_CP_NUM > 0
   uint32_t *ptr;
 #endif
 #endif /* REVISIT */
@@ -101,7 +102,7 @@ void up_initial_state(struct tcb_s *tcb)
 
 #warning REVISIT co-processor support
 #if 0 /* REVISIT */
-#if CONFIG_XTENSA_NCOPROCESSORS > 0
+#if XCHAL_CP_NUM > 0
   /* Init the coprocessor save area (see xtensa_context.h)
    *
    * No access to TCB here, so derive indirectly. Stack growth is top to bottom.
