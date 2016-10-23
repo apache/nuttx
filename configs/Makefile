@@ -57,6 +57,11 @@ endif
 
 DUMMY_KCONFIG = $(TOPDIR)$(DELIM)configs$(DELIM)dummy$(DELIM)Kconfig
 
+# The board configuration should be installed in the arch/ directory
+
+BOARD_DIR = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board
+BOARD_INSTALLED = $(if $(wildcard $(BOARD_DIR)$(DELIM)Makefile),y,)
+
 # Basic
 
 CONFIG_ASRCS =
@@ -106,6 +111,9 @@ $(DUMMY_KCONFIG): $(BOARD_KCONFIG)
 dirlinks: $(DUMMY_KCONFIG)
 
 context: $(DUMMY_KCONFIG)
+ifeq ($(BOARD_INSTALLED),y)
+	$(Q) $(MAKE) -C $(BOARD_DIR) TOPDIR="$(TOPDIR)" context
+endif
 
 clean_context:
 	$(call DELFILE, $(DUMMY_KCONFIG))

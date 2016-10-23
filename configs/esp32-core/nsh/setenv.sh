@@ -1,7 +1,7 @@
-############################################################################
-# configs/skp16c26/src/Makefile
+#!/bin/bash
+# configs/esp32-core/nsh/setenv.sh
 #
-#   Copyright (C) 2009, 2012 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -31,48 +31,27 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-############################################################################
 
--include $(TOPDIR)/Make.defs
+if [ "$_" = "$0" ] ; then
+  echo "You must source this script, not run it!" 1>&2
+  exit 1
+fi
 
-CFLAGS += -I$(TOPDIR)/sched
+WD=`pwd`
+if [ ! -x "setenv.sh" ]; then
+  echo "This script must be executed from the top-level NuttX build directory"
+  exit 1
+fi
 
-ASRCS =
-AOBJS = $(ASRCS:.S=$(OBJEXT))
-CSRCS = m16c_leds.c m16c_buttons.c m16c_lcd.c m16c_lcdconsole.c
-COBJS = $(CSRCS:.c=$(OBJEXT))
+if [ -z "${PATH_ORIG}" ]; then
+  export PATH_ORIG="${PATH}"
+fi
 
-SRCS = $(ASRCS) $(CSRCS)
-OBJS = $(AOBJS) $(COBJS)
+# This is the path to the location where I installed the Expressif crosstools-NG
+# toolchaing
+export TOOLCHAIN_BIN="/home/patacongo/projects/nuttx/crosstool-NG/builds/xtensa-esp32-elf/bin"
 
-ARCH_SRCDIR = $(TOPDIR)/arch/$(CONFIG_ARCH)/src
-CFLAGS += -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common
+# Add the path to the toolchain to the PATH variable
+export PATH="${TOOLCHAIN_BIN}:/sbin:/usr/sbin:${PATH_ORIG}"
 
-all: libboard$(LIBEXT)
-
-$(AOBJS): %$(OBJEXT): %.S
-	$(call ASSEMBLE, $<, $@)
-
-$(COBJS) $(LINKOBJS): %$(OBJEXT): %.c
-	$(call COMPILE, $<, $@)
-
-libboard$(LIBEXT): $(OBJS)
-	$(call ARCHIVE, $@, $(OBJS))
-
-.depend: Makefile $(SRCS)
-	$(Q) $(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
-	$(Q) touch $@
-
-depend: .depend
-
-context:
-
-clean:
-	$(call DELFILE, libboard$(LIBEXT))
-	$(call CLEAN)
-
-distclean: clean
-	$(call DELFILE, Make.dep)
-	$(call DELFILE, .depend)
-
--include Make.dep
+echo "PATH : ${PATH}"

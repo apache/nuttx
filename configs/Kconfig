@@ -170,14 +170,16 @@ config ARCH_BOARD_EKKLM3S9B96
 		TI/Stellaris EKK-LM3S9B96 board.  This board is based on the
 		an EKK-LM3S9B96 which is a Cortex-M3.
 
-config ARCH_BOARD_EZ80F910200KITG
-	bool "ZiLOG ez80f910200kitg development kit"
-	depends on ARCH_CHIP_EZ80F91
-	select ARCH_HAVE_LEDS
+config ARCH_BOARD_ESP32CORE
+	bool "Expressif ESP32 Core board V2"
+	depends on ARCH_CHIP_ESP32
 	---help---
-		ez80Acclaim! Microcontroller.  This port use the ZiLOG ez80f910200kitg
-		development kit, eZ80F091 part, and the Zilog ZDS-II Windows command line
-		tools.  The development environment is Cygwin under WinXP.
+		The ESP32 is a dual-core system from Expressif with two Harvard
+		architecture Xtensa LX6 CPUs. All embedded memory, external memory
+		and peripherals are located on the data bus and/or the instruction
+		bus of these CPUs. With some minor exceptions, the address mapping
+		of two CPUs is symmetric, meaning they use the same addresses to
+		access the same memory.
 
 config ARCH_BOARD_EZ80F910200ZCO
 	bool "ZiLOG ez80f910200zco development kit"
@@ -1392,6 +1394,7 @@ config ARCH_BOARD
 	default "efm32-g8xx-stk"           if ARCH_BOARD_EFM32G8XXSTK
 	default "efm32gg-stk3700"          if ARCH_BOARD_EFM32GG_STK3700
 	default "ekk-lm3s9b96"             if ARCH_BOARD_EKKLM3S9B96
+	default "esp32-core"               if ARCH_BOARD_ESP32CORE
 	default "ez80f910200kitg"          if ARCH_BOARD_EZ80F910200KITG
 	default "ez80f910200zco"           if ARCH_BOARD_EZ80F910200ZCO
 	default "fire-stm32v2"             if ARCH_BOARD_FIRE_STM32
@@ -1590,6 +1593,9 @@ source "configs/efm32gg-stk3700/Kconfig"
 endif
 if ARCH_BOARD_EKKLM3S9B96
 source "configs/ekk-lm3s9b96/Kconfig"
+endif
+if ARCH_BOARD_ESP32CORE
+source "configs/esp32-core/Kconfig"
 endif
 if ARCH_BOARD_EZ80F910200KITG
 source "configs/ez80f910200kitg/Kconfig"

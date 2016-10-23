@@ -124,12 +124,18 @@ endif
 
 depend: .depend
 
+ifneq ($(BOARD_CONTEXT),y)
+context:
+endif
+
 clean:
 	$(call DELFILE, libboard$(LIBEXT))
 	$(call CLEAN)
+	$(EXTRA_CLEAN)
 
 distclean: clean
 	$(call DELFILE, Make.dep)
 	$(call DELFILE, .depend)
+	$(EXTRA_DISTCLEAN)
 
 -include Make.dep

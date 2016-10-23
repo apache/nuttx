@@ -1,7 +1,7 @@
 ############################################################################
-# configs/arduino-mega2560/src/Makefile
+# configs//srp32-core/Makefile
 #
-#   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2016 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -35,66 +35,29 @@
 
 -include $(TOPDIR)/Make.defs
 
-ASRCS		=
-CSRCS		= avr_boot.c
+SCRIPTDIR = $(TOPDIR)$(DELIM)configs$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)scripts
+CONFIGFILE = $(TOPDIR)$(DELIM)include$(DELIM)nuttx$(DELIM)config.h
 
-ifeq ($(CONFIG_ARCH_LEDS),y)
-CSRCS		+= avr_leds.c
+ASRCS =
+CSRCS = esp32_boot.c esp32_bringup.c
+
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
+CONFIG_CSRCS += esp32_appinit.c
 endif
 
-AOBJS		= $(ASRCS:.S=$(OBJEXT))
-COBJS		= $(CSRCS:.c=$(OBJEXT))
+SCRIPTIN = $(SCRIPTDIR)$(DELIM)esp32.template
+SCRIPTOUT = $(SCRIPTDIR)$(DELIM)esp32_out.ld
 
-SRCS		= $(ASRCS) $(CSRCS)
-OBJS		= $(AOBJS) $(COBJS)
+BOARD_CONTEXT = y
+EXTRA_CLEAN =
+EXTRA_DISTCLEAN = $(call DELFILE, $(SCRIPTOUT))
 
-ARCH_SRCDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src
-ifeq ($(CONFIG_ARCH_AVR32),y)
-ARCH_SUBDIR	= avr32
-endif
-ifeq ($(CONFIG_ARCH_AVR),y)
-ARCH_SUBDIR	= avr
-endif
+.PHONY = context
 
-ifeq ($(WINTOOL),y)
-  CFLAGS	+= -I "${shell cygpath -w $(TOPDIR)/sched}"
-  CFLAGS	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}"
-  CFLAGS	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/common}"
-  CFLAGS	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/$(ARCH_SUBDIR)}"
-  CFLAGS	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/$(ARCH_SUBDIR)/atmega2560}"
-else
-  CFLAGS	+= -I "$(TOPDIR)/sched"
-  CFLAGS	+= -I "$(ARCH_SRCDIR)/chip"
-  CFLAGS	+= -I "$(ARCH_SRCDIR)/common"
-  CFLAGS	+= -I "$(ARCH_SRCDIR)/$(ARCH_SUBDIR)"
-  CFLAGS	+= -I "$(ARCH_SRCDIR)/$(ARCH_SUBDIR)/atmega2560"
-endif
+include $(TOPDIR)/configs/Board.mk
 
-all: libboard$(LIBEXT)
+$(SCRIPTOUT): $(SCRIPTIN) $(CONFIGFILE)
+	# $(call PREPROCESS, $(SCRIPTIN), $@)
+	$(Q) $(CC) -isystem $(TOPDIR)/include -C -P -x c -E $(SCRIPTIN) -o $@
 
-$(AOBJS): %$(OBJEXT): %.S
-	$(call ASSEMBLE, $<, $@)
-
-$(COBJS) $(LINKOBJS): %$(OBJEXT): %.c
-	$(call COMPILE, $<, $@)
-
-libboard$(LIBEXT): $(OBJS)
-	$(call ARCHIVE, $@, $(OBJS))
-
-.depend: Makefile $(SRCS)
-	$(Q) $(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
-	$(Q) touch $@
-
-depend: .depend
-
-context:
-
-clean:
-	$(call DELFILE, libboard$(LIBEXT))
-	$(call CLEAN)
-
-distclean: clean
-	$(call DELFILE, Make.dep)
-	$(call DELFILE, .depend)
-
--include Make.dep
+context: $(SCRIPTOUT)

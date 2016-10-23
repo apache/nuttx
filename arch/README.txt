@@ -253,6 +253,21 @@ arch/x86 - Intel x86 architectures
       arch/x86/include/i486 and arch/x86/src/i486
       arch/x86/include/qemu and arch/x86/src/qemu
 
+arch/xtensa
+
+    Implementations based on the Cadence® Tensilica® Xtensa® processors,
+    such as the Xtensa LX6 dataplane processing units (DPUs).  At
+    present, this includes the following subdirectories:
+
+    Common XTENSA support:
+      arch/xtensa/include and arch/xtensa/src/common
+
+    LX6 DPU support:
+      arch/xtensa/include/lx6 and arch/xtensa/xtensa/lx6
+
+    Expressif ESP32 implemenation of the LX6 DPU:
+      arch/xtensa/include/esp32 and arch/xtensa/xtensa/esp32
+
 arch/z16 - ZiLOG 16-bit processors
     This directory holds related, 16-bit architectures from ZiLOG.  At
     present, this includes the following subdirectories:

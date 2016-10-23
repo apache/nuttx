@@ -74,6 +74,11 @@ config ARCH_X86
 	---help---
 		Intel x86 architectures.
 
+config ARCH_XTENSA
+	bool "Xtensa"
+	---help---
+		Cadence® Tensilica® Xtensa® actictures.
+
 config ARCH_Z16
 	bool "ZNEO"
 	select ARCH_HAVE_HEAP2
@@ -99,6 +104,7 @@ config ARCH
 	default "risc-v"  if ARCH_RISCV
 	default "sim"     if ARCH_SIM
 	default "x86"     if ARCH_X86
+	default "xtensa"  if ARCH_XTENSA
 	default "z16"     if ARCH_Z16
 	default "z80"     if ARCH_Z80
 
@@ -111,6 +117,7 @@ source arch/renesas/Kconfig
 source arch/risc-v/Kconfig
 source arch/sim/Kconfig
 source arch/x86/Kconfig
+source arch/xtensa/Kconfig
 source arch/z16/Kconfig
 source arch/z80/Kconfig
 

@@ -1,0 +1,60 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_XTENSA
+
+choice
+	prompt "XTENSA architecture selection"
+	default ARCH_CHIP_ESP32
+
+config ARCH_CHIP_ESP32
+	bool "Expressif ESP32"
+	select ARCH_FAMILY_LX6
+	select XTENSA_HAVE_INTERRUPTS
+	select ARCH_HAVE_MULTICPU
+	---help---
+		The ESP32 is a dual-core system from Expressif with two Harvard
+		architecture Xtensa LX6 CPUs. All embedded memory, external memory
+		and peripherals are located on the data bus and/or the instruction
+		bus of these CPUs. With some minor exceptions, the address mapping
+		of two CPUs is symmetric, meaning they use the same addresses to
+		access the same memory.
+
+endchoice # XTENSA chip selection
+
+config ARCH_FAMILY_LX6
+	bool
+	default n
+	---help---
+		Cadence® Tensilica® Xtensa® LX6 data plane processing unit (DPU).
+		The LX6 is a configurable and extensible processor core.
+
+config XTENSA_NCOPROCESSORS
+	int "Number of co-processors"
+	default 1
+
+config XTENSA_CALL0_ABI
+	bool "CALL0 ABI"
+	default y
+	---help---
+		The Window ABI is not supported.  Only the CALL0 ABI is supported in the
+		current implementation.
+
+config XTENSA_USE_OVLY
+	bool
+	default n
+	---help---
+		Enable code overlay support. This option is currently unsupported.
+
+config ARCH_CHIP
+	string
+	default "esp32"		if ARCH_CHIP_ESP32
+
+source arch/xtensa/src/lx6/Kconfig
+if ARCH_CHIP_ESP32
+source arch/xtensa/src/esp32/Kconfig
+endif
+
+endif # ARCH_XTENSA

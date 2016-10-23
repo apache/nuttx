@@ -1,0 +1,31 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_LX6
+
+choice
+	prompt "LX6 implementation"
+	default ARCH_CHIP_ESP32
+
+config ARCH_CHIP_ESP32
+	bool "Expressif ESP32"
+	---help---
+		The ESP32 is a dual-core system with two Harvard Architecture Xtensa
+		LX6 CPUs. All embedded memory, external memory and peripherals are
+		located on the data bus and/or the instruction bus of these CPUs.
+		With some minor exceptions the address mapping of two CPUs is
+		symmetric, meaning they use the same addresses to access the same
+		memory. Multiple peripherals in the system can access embedded
+		memory via DMA.
+
+		The two CPUs are named "PRO_CPU" and "APP_CPU" (for "protocol" and
+		"application"), however for most purposes the two CPUs are
+		interchangeable.
+
+endchoice # LX6 implementation
+
+source arch/xtensa/src/esp32/Kconfig
+
+endif # ARCH_CHIP_LX6
