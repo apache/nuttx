@@ -48,6 +48,7 @@
 #include <arch/xtensa/xtensa_specregs.h>
 
 #include "clock/clock.h"
+#include "xtensa_timer.h"
 #include "xtensa.h"
 
 /****************************************************************************
@@ -106,7 +107,7 @@ static inline uint32_t xtensa_getcompare(void)
 
 /* Set the value of the compare register */
 
-static inline void xtensa_setps(uint32_t compare)
+static inline void xtensa_setcompare(uint32_t compare)
 {
   __asm__ __volatile__
   (
@@ -122,10 +123,10 @@ static inline void xtensa_enable_timer(void)
 {
   __asm__ __volatile__
   (
-    "rsr a2, INTENABLE"
-    "ori a2, XT_TIMER_INTEN"
-    "wsr a2, INTENABLE"
-    :  : "a2"
+    "rsr a2, INTENABLE\n"
+    "ori a2, XT_TIMER_INTEN\n"
+    "wsr a2, INTENABLE\n"
+    :  : : "a2"
   );
 }
 
@@ -150,15 +151,17 @@ static inline void xtensa_enable_timer(void)
 
 static int esp32_timerisr(int irq, uint32_t *regs)
 {
+  uint32_t divisor;
   uint32_t compare;
   uint32_t diff;
 
+  divisor = g_tick_divisor;
   do
     {
       /* Increment the compare register for the next tick */
 
       compare = xtensa_getcompare();
-      xtensa_setcompare(count + g_tick_divisor);
+      xtensa_setcompare(compare + divisor);
 
       /* Process one timer tick */
 
@@ -168,7 +171,7 @@ static int esp32_timerisr(int irq, uint32_t *regs)
        * interrupts.
        */
 
-      diff = xtensa_readcount() - compare;
+      diff = xtensa_getcount() - compare;
     }
   while (diff < divisor);
 
