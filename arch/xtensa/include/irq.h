@@ -210,23 +210,17 @@ static inline void up_irq_restore(uint32_t ps)
 
 static inline uint32_t up_irq_save(void)
 {
-  /* Get the current value of the PS for return */
-
-  uint32_t ps = xtensa_getps();
+  uint32_t ps;
 
   /* Disable all low- and medium-priority interrupts.  High priority
    * interrupts should not interfere with ongoing RTOS operations and
    * are not disabled.
-   *
-   * NOTE: We also assume that since we were called from C logic, the
-   * EXCM must already be cleared.
    */
 
-#ifdef CONFIG_XTENSA_CALL0_ABI
-  xtensa_setps(PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM);
-#else
-  xtensa_setps(PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_WOE);
-#endif
+  __asm__ __volatile__
+  (
+    "psil %0, %1" : "=r"(ps) : "I"(XCHAL_EXCM_LEVEL)
+  );
 
   /* Return the previous PS value so that it can be restored with
    * up_irq_restore().
