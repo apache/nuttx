@@ -43,11 +43,11 @@
  *     This allows more flexibility in locating code without the performance
  *     overhead of the 'l32r' literal data load in cases where the destination
  *     is in range of 'call0'. There is an additional benefit in that 'call0'
- *     has a longer range than 'j' due to the target being word-aligned, so 
+ *     has a longer range than 'j' due to the target being word-aligned, so
  *     the 'l32r' sequence is less likely needed.
  *
- *  3. The use of 'call0' with -mlongcalls requires that register a0 not be 
- *     live at the time of the call, which is always the case for a function 
+ *  3. The use of 'call0' with -mlongcalls requires that register a0 not be
+ *     live at the time of the call, which is always the case for a function
  *     call but needs to be ensured if 'call0' is used as a jump in lieu of 'j'.
  *
  *  4. This use of 'call0' is independent of the C function call ABI.
@@ -70,12 +70,16 @@
  * Assembly Language Macros
  ****************************************************************************/
 
-/* Macro extract_msb - return the input with only the highest bit set.
+/****************************************************************************
+ * Macro extract_msb - return the input with only the highest bit set.
  *
- * Input  : "ain"  - Input value, clobbered.
- * Output : "aout" - Output value, has only one bit set, MSB of "ain".
+ * Entry Conditions/Side Effects:
+ *   Input  : "ain"  - Input value, clobbered.
+ *   Output : "aout" - Output value, has only one bit set, MSB of "ain".
+ *
  * The two arguments must be different AR registers.
- */
+ *
+ ****************************************************************************/
 
 	.macro	extract_msb	aout ain
 1:
@@ -85,7 +89,11 @@
 	addi	\aout, \aout, 1				/* Return aout + 1 */
 	.endm
 
-/* Macro dispatch_c_isr - dispatch interrupts to user ISRs.
+/****************************************************************************
+ * Macro dispatch_c_isr level mask
+ *
+ * Description:
+ *
  * This will dispatch to user handlers (if any) that are registered in the
  * XTOS dispatch table (_xtos_interrupt_table). These handlers would have
  * been registered by calling _xtos_set_interrupt_handler(). There is one
@@ -95,14 +103,16 @@
  * Level triggered and software interrupts are automatically deasserted by
  * this code.
  *
- * ASSUMPTIONS:
+ * Assumptions:
  *   - PS.INTLEVEL is set to "level" at entry
  *   - PS.EXCM = 0, C calling enabled
  *
- * NOTE: This macro will use registers a0 and a2-a6. The arguments are:
- *   level -- interrupt level
- *   mask  -- interrupt bitmask for this level
- */
+ * Entry Conditions/Side Effects:
+ *   This macro will use registers a0 and a2-a6. The arguments are:
+ *     level - interrupt level
+ *     mask  - interrupt bitmask for this level
+ *
+ ****************************************************************************/
 
 	.macro	dispatch_c_isr	level mask
 
@@ -205,11 +215,62 @@
 	.endm
 
 /****************************************************************************
+ * Macro: ps_setup
+ *
+ * Description:
+ *   Set up PS for C, enable interrupts above this level and clear EXCM.
+ *
+ * Entry Conditions:
+ *   level - interrupt level
+ *   tmp   - scratch register
+ *
+ * Side Effects:
+ *   PS and scratch register modified
+ *
+ * Assumptions:
+ *   - PS.EXCM = 1, C calling disabled
+ *
+ ****************************************************************************/
+
+	.macro	ps_setup	level tmp
+
+#if 0 /* Nested interrupts no yet supported */
+#  ifdef CONFIG_XTENSA_CALL0_ABI
+	/* Disable interrupts at level and below */
+
+	movi	\tmp, PS_INTLEVEL(\level) | PS_UM
+#  else
+	movi	\tmp, PS_INTLEVEL(\level) | PS_UM | PS_WOE
+#  endif
+#else
+#  ifdef CONFIG_XTENSA_CALL0_ABI
+	/* Disable all low- and medium-priority interrupts.  Nested are not yet
+	 * supported.
+	 */
+
+	movi	\tmp, PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM
+#  else
+	movi	\tmp, PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_WOE
+#  endif
+#endif
+
+	wsr		\tmp, PS
+	rsync
+
+	.endm
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * MEDIUM PRIORITY (LEVEL 2+) INTERRUPT VECTORS AND LOW LEVEL HANDLERS.
+ * LOW PRIORITY (LEVEL 1) LOW LEVEL HANDLER.
+ ****************************************************************************/
+
+#warning REVISIT level 1 interrupt handlers
+
+/****************************************************************************
+ * MEDIUM PRIORITY (LEVEL 2+) INTERRUPT LOW LEVEL HANDLERS.
  *
  * C Prototype:
  *   void _xtensa_levelN_handler(void)
@@ -259,13 +320,7 @@ _xtensa_level2_handler:
 
 	/* Set up PS for C, enable interrupts above this level and clear EXCM. */
 
-#ifdef CONFIG_XTENSA_CALL0_ABI
-	movi	a0, PS_INTLEVEL(2) | PS_UM
-	#else
-	movi	a0, PS_INTLEVEL(2) | PS_UM | PS_WOE
-#endif
-	wsr		a0, PS
-	rsync
+	ps_setup	2 a0
 
 	/* Decode and dispatch the interrupt.  In the event of an interrupt
 	 * level context dispatch_c_isr() will switch stacks to the new task's
@@ -297,9 +352,236 @@ _xtensa_level2_handler:
 
 #endif /* XCHAL_EXCM_LEVEL >= 2 */
 
+#if XCHAL_EXCM_LEVEL >= 3
+	.section .iram1,"ax"
+	.type	_xtensa_level3_handler,@function
+	.align	4
+
+_xtensa_level3_handler:
+
+	mov		a0, sp							/* sp == a1 */
+	addi	sp, sp, -(4 * XCPTCONTEXT_SIZE)	/* Allocate interrupt stack frame */
+	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
+	rsr		a0, EPS_3						/* Save interruptee's PS */
+	s32i	a0, sp, (4 * REG_PS)
+	rsr		a0, EPC_3						/* Save interruptee's PC */
+	s32i	a0, sp, (4 * REG_PC)
+	rsr		a0, EXCSAVE_3					/* Save interruptee's a0 */
+	s32i	a0, sp, (4 * REG_A0)
+
+	/* Save rest of interrupt context. */
+
+	s32i	a2, sp, (4 * REG_A2)
+	movi	a2, sp							/* Address of state save on stack */
+	call0	_xtensa_context_save			/* Save full register state */
+
+	/* Set up PS for C, enable interrupts above this level and clear EXCM. */
+
+	ps_setup	3 a0
+
+	/* Decode and dispatch the interrupt.  In the event of an interrupt
+	 * level context dispatch_c_isr() will switch stacks to the new task's
+	 * context save area.
+	 */
+
+	dispatch_c_isr	3 XCHAL_INTLEVEL3_MASK
+
+	/* Restore registers in preparation to return from interrupt */
+
+	call0	_xtensa_context_restore
+
+	/* Restore only level-specific regs (the rest were already restored) */
+
+	l32i	a0, sp, (4 * REG_PS)			/* Retrieve interruptee's PS */
+	wsr		a0, EPS_3
+	l32i	a0, sp, (4 * REG_PC)			/* Retrieve interruptee's PC */
+	wsr		a0, EPC_3
+	l32i	a0, sp, (4 * REG_A0)			/* Retrieve interruptee's A0 */
+	l32i	a2, sp, (4 * REG_A2)			/* Retrieve interruptee's A2 */
+	l32i	sp, sp, (4 * REG_A1)			/* Remove interrupt stack frame */
+	rsync									/* Ensure EPS and EPC written */
+
+	/* Return from interrupt.  RFI  restores the PS from EPS_3 and jumps to
+	 * the address in EPC_3.
+	 */
+
+	rfi		3
+
+#endif /* XCHAL_EXCM_LEVEL >= 3 */
+
+#if XCHAL_EXCM_LEVEL >= 4
+	.section .iram1,"ax"
+	.type	_xtensa_level4_handler,@function
+	.align	4
+
+_xtensa_level4_handler:
+
+	mov		a0, sp							/* sp == a1 */
+	addi	sp, sp, -(4 * XCPTCONTEXT_SIZE)	/* Allocate interrupt stack frame */
+	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
+	rsr		a0, EPS_4						/* Save interruptee's PS */
+	s32i	a0, sp, (4 * REG_PS)
+	rsr		a0, EPC_4						/* Save interruptee's PC */
+	s32i	a0, sp, (4 * REG_PC)
+	rsr		a0, EXCSAVE_4					/* Save interruptee's a0 */
+	s32i	a0, sp, (4 * REG_A0)
+
+	/* Save rest of interrupt context. */
+
+	s32i	a2, sp, (4 * REG_A2)
+	movi	a2, sp							/* Address of state save on stack */
+	call0	_xtensa_context_save			/* Save full register state */
+
+	/* Set up PS for C, enable interrupts above this level and clear EXCM. */
+
+	ps_setup	4 a0
+
+	/* Decode and dispatch the interrupt.  In the event of an interrupt
+	 * level context dispatch_c_isr() will switch stacks to the new task's
+	 * context save area.
+	 */
+
+	dispatch_c_isr	4 XCHAL_INTLEVEL4_MASK
+
+	/* Restore registers in preparation to return from interrupt */
+
+	call0	_xtensa_context_restore
+
+	/* Restore only level-specific regs (the rest were already restored) */
+
+	l32i	a0, sp, (4 * REG_PS)			/* Retrieve interruptee's PS */
+	wsr		a0, EPS_4
+	l32i	a0, sp, (4 * REG_PC)			/* Retrieve interruptee's PC */
+	wsr		a0, EPC_4
+	l32i	a0, sp, (4 * REG_A0)			/* Retrieve interruptee's A0 */
+	l32i	a2, sp, (4 * REG_A2)			/* Retrieve interruptee's A2 */
+	l32i	sp, sp, (4 * REG_A1)			/* Remove interrupt stack frame */
+	rsync									/* Ensure EPS and EPC written */
+
+	/* Return from interrupt.  RFI  restores the PS from EPS_4 and jumps to
+	 * the address in EPC_4.
+	 */
+
+	rfi		4
+
+#endif /* XCHAL_EXCM_LEVEL >= 4 */
+
+#if XCHAL_EXCM_LEVEL >= 5
+	.section .iram1,"ax"
+	.type	_xtensa_level5_handler,@function
+	.align	4
+
+_xtensa_level5_handler:
+
+	mov		a0, sp							/* sp == a1 */
+	addi	sp, sp, -(4 * XCPTCONTEXT_SIZE)	/* Allocate interrupt stack frame */
+	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
+	rsr		a0, EPS_5						/* Save interruptee's PS */
+	s32i	a0, sp, (4 * REG_PS)
+	rsr		a0, EPC_5						/* Save interruptee's PC */
+	s32i	a0, sp, (4 * REG_PC)
+	rsr		a0, EXCSAVE_5					/* Save interruptee's a0 */
+	s32i	a0, sp, (4 * REG_A0)
+
+	/* Save rest of interrupt context. */
+
+	s32i	a2, sp, (4 * REG_A2)
+	movi	a2, sp							/* Address of state save on stack */
+	call0	_xtensa_context_save			/* Save full register state */
+
+	/* Set up PS for C, enable interrupts above this level and clear EXCM. */
+
+	ps_setup	5 a0
+
+	/* Decode and dispatch the interrupt.  In the event of an interrupt
+	 * level context dispatch_c_isr() will switch stacks to the new task's
+	 * context save area.
+	 */
+
+	dispatch_c_isr	5 XCHAL_INTLEVEL5_MASK
+
+	/* Restore registers in preparation to return from interrupt */
+
+	call0	_xtensa_context_restore
+
+	/* Restore only level-specific regs (the rest were already restored) */
+
+	l32i	a0, sp, (4 * REG_PS)			/* Retrieve interruptee's PS */
+	wsr		a0, EPS_5
+	l32i	a0, sp, (4 * REG_PC)			/* Retrieve interruptee's PC */
+	wsr		a0, EPC_5
+	l32i	a0, sp, (4 * REG_A0)			/* Retrieve interruptee's A0 */
+	l32i	a2, sp, (4 * REG_A2)			/* Retrieve interruptee's A2 */
+	l32i	sp, sp, (4 * REG_A1)			/* Remove interrupt stack frame */
+	rsync									/* Ensure EPS and EPC written */
+
+	/* Return from interrupt.  RFI  restores the PS from EPS_5 and jumps to
+	 * the address in EPC_5.
+	 */
+
+	rfi		5
+
+#endif /* XCHAL_EXCM_LEVEL >= 2 */
+
+#if XCHAL_EXCM_LEVEL >= 6
+	.section .iram1,"ax"
+	.type	_xtensa_level6_handler,@function
+	.align	4
+
+_xtensa_level6_handler:
+
+	mov		a0, sp							/* sp == a1 */
+	addi	sp, sp, -(4 * XCPTCONTEXT_SIZE)	/* Allocate interrupt stack frame */
+	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
+	rsr		a0, EPS_6						/* Save interruptee's PS */
+	s32i	a0, sp, (4 * REG_PS)
+	rsr		a0, EPC_6						/* Save interruptee's PC */
+	s32i	a0, sp, (4 * REG_PC)
+	rsr		a0, EXCSAVE_6					/* Save interruptee's a0 */
+	s32i	a0, sp, (4 * REG_A0)
+
+	/* Save rest of interrupt context. */
+
+	s32i	a2, sp, (4 * REG_A2)
+	movi	a2, sp							/* Address of state save on stack */
+	call0	_xtensa_context_save			/* Save full register state */
+
+	/* Set up PS for C, enable interrupts above this level and clear EXCM. */
+
+	ps_setup	6 a0
+
+	/* Decode and dispatch the interrupt.  In the event of an interrupt
+	 * level context dispatch_c_isr() will switch stacks to the new task's
+	 * context save area.
+	 */
+
+	dispatch_c_isr	6 XCHAL_INTLEVEL6_MASK
+
+	/* Restore registers in preparation to return from interrupt */
+
+	call0	_xtensa_context_restore
+
+	/* Restore only level-specific regs (the rest were already restored) */
+
+	l32i	a0, sp, (4 * REG_PS)			/* Retrieve interruptee's PS */
+	wsr		a0, EPS_6
+	l32i	a0, sp, (4 * REG_PC)			/* Retrieve interruptee's PC */
+	wsr		a0, EPC_6
+	l32i	a0, sp, (4 * REG_A0)			/* Retrieve interruptee's A0 */
+	l32i	a2, sp, (4 * REG_A2)			/* Retrieve interruptee's A2 */
+	l32i	sp, sp, (4 * REG_A1)			/* Remove interrupt stack frame */
+	rsync									/* Ensure EPS and EPC written */
+
+	/* Return from interrupt.  RFI  restores the PS from EPS_6 and jumps to
+	 * the address in EPC_6.
+	 */
+
+	rfi		6
+
+#endif /* XCHAL_EXCM_LEVEL >= 6 */
+
 /****************************************************************************
- *
- * HIGH PRIORITY (LEVEL > XCHAL_EXCM_LEVEL) INTERRUPT VECTORS AND HANDLERS
+ * HIGH PRIORITY (LEVEL > XCHAL_EXCM_LEVEL) LOW-LEVEL HANDLERS
  *
  * High priority interrupts are by definition those with priorities greater
  * than XCHAL_EXCM_LEVEL. This includes non-maskable (NMI). High priority
