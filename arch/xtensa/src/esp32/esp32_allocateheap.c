@@ -67,11 +67,13 @@
  *
  ****************************************************************************/
 
+#warning REVISIT heap.  Do what with non-heterogeneous memory?
+
 void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 {
   board_autoled_on(LED_HEAPALLOCATE);
-  *heap_start = (FAR void *)g_idle_topstack;
-  *heap_size = CONFIG_RAM_END - g_idle_topstack;
+  *heap_start = (FAR void *)&_sheap;
+  *heap_size = (size_t)((uintptr_t)&_eheap - (uintptr_t)&_sheap);
 }
 
 /****************************************************************************

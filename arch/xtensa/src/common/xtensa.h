@@ -183,18 +183,14 @@ extern void g_intstackbase;
 extern uint32_t _init_start;        /* Start of initialization logic */
 extern uint32_t _stext;             /* Start of .text */
 extern uint32_t _etext;             /* End+1 of .text + .rodata */
-extern const uint32_t _data_loaddr; /* Start of .data in FLASH */
 extern uint32_t _sdata;             /* Start of .data */
 extern uint32_t _edata;             /* End+1 of .data */
+extern uint32_t _srodata;           /* Start of .rodata */
+extern uint32_t _erodata;           /* End+1 of .rodata */
 extern uint32_t _sbss;              /* Start of .bss */
 extern uint32_t _ebss;              /* End+1 of .bss */
-#ifdef CONFIG_ARCH_RAMFUNCS
-extern uint32_t _sramfunc;          /* Start of ramfuncs */
-extern uint32_t _eramfunc;          /* End+1 of ramfuncs */
-extern uint32_t _ramfunc_loadaddr;  /* Start of ramfuncs in FLASH */
-extern uint32_t _ramfunc_sizeof;    /* Size of ramfuncs */
-#endif /* CONFIG_ARCH_RAMFUNCS */
-#endif /* __ASSEMBLY__ */
+extern uint32_t _sheap;             /* Start of heap */
+extern uint32_t _eheap;             /* End+1 of heap */
 
 /****************************************************************************
  * Inline Functions

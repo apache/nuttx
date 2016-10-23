@@ -85,16 +85,6 @@ void IRAM_ATTR __start(void)
 
   memset(&_sbss, 0, (&_ebss - &_sbss) * sizeof(_sbss));
 
-#warning Missing logic: Initialize .data
-
-#warning REVISIT heap.  Do what with non-heterogeneous memory?
-#warning REVISIT belongs in up_allocateheap()
-#if 0
-  /* Initialize heap allocator */
-
-  heap_alloc_caps_init();
-#endif
-
   /* Make sure that the APP_CPU is disabled for now */
 
   regval  = getreg32(DPORT_APPCPU_CTRL_B_REG);

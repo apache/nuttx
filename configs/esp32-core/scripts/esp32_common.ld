@@ -56,7 +56,6 @@ SECTIONS
 
     _iram_text_start = ABSOLUTE(.);
     *(.iram1 .iram1.*)
-    *libfreertos.a:(.literal .text .literal.* .text.*)
     *libphy.a:(.literal .text .literal.* .text.*)
     *librtc.a:(.literal .text .literal.* .text.*)
     *libpp.a:(.literal .text .literal.* .text.*)
@@ -90,7 +89,7 @@ SECTIONS
 
   .dram0.data :
   {
-    _data_start = ABSOLUTE(.);
+    _sdata = ABSOLUTE(.);
     KEEP(*(.data))
     KEEP(*(.data.*))
     KEEP(*(.gnu.linkonce.d.*))
@@ -103,14 +102,14 @@ SECTIONS
     KEEP(*(.gnu.linkonce.s2.*))
     KEEP(*(.jcr))
     *(.dram1 .dram1.*)
-    _data_end = ABSOLUTE(.);
+    _edata = ABSOLUTE(.);
     . = ALIGN(4);
-    _heap_start = ABSOLUTE(.);
+    _sheap = ABSOLUTE(.);
   } >dram0_0_seg
 
   .flash.rodata :
   {
-    _rodata_start = ABSOLUTE(.);
+    _srodata = ABSOLUTE(.);
     *(.rodata)
     *(.rodata.*)
     *(.irom1.text) /* catch stray ICACHE_RODATA_ATTR */
@@ -122,7 +121,9 @@ SECTIONS
     *(.gnu.linkonce.e.*)
     *(.gnu.version_r)
     *(.eh_frame)
+
     . = (. + 3) & ~ 3;
+
     /*  C++ constructor and destructor tables, properly ordered:  */
     __init_array_start = ABSOLUTE(.);
     KEEP (*crtbegin.o(.ctors))
@@ -134,7 +135,9 @@ SECTIONS
     KEEP (*(EXCLUDE_FILE (*crtend.o) .dtors))
     KEEP (*(SORT(.dtors.*)))
     KEEP (*(.dtors))
+
     /*  C++ exception handlers table:  */
+
     __XT_EXCEPTION_DESCS_ = ABSOLUTE(.);
     *(.xt_except_desc)
     *(.gnu.linkonce.h.*)
@@ -142,7 +145,7 @@ SECTIONS
     *(.xt_except_desc_end)
     *(.dynamic)
     *(.gnu.version_d)
-    _rodata_end = ABSOLUTE(.);
+    _erodata = ABSOLUTE(.);
     /* Literals are also RO data. */
     _lit4_start = ABSOLUTE(.);
     *(*.lit4)
