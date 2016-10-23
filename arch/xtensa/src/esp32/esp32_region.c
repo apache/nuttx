@@ -61,7 +61,7 @@ static inline void xtensa_write_dtlb(uint32_t vpn, unsigned int attr)
    (
      "wdtlb  %1, %0\n"
      "dsync\n"
-     : : "r" (vpn), "r" (attr));
+     : : "r" (vpn), "r" (attr)
    );
 }
 
@@ -71,7 +71,7 @@ static inline void xtensa_write_itlb(unsigned vpn, unsigned int attr)
    (
      "witlb  %1, %0\n"
      "isync\n"
-     : : "r" (vpn), "r" (attr));
+     : : "r" (vpn), "r" (attr)
    );
 }
 
@@ -95,7 +95,9 @@ static inline void xtensa_write_itlb(unsigned vpn, unsigned int attr)
 
 void esp32_region_protection(void)
 {
-  for (int i = 0; i < NPROTECTED_PAGES; ++i)
+  int i;
+
+  for (i = 0; i < NPROTECTED_PAGES; ++i)
     {
       xtensa_write_dtlb(g_protected_pages[i], 0xf);
       xtensa_write_itlb(g_protected_pages[i], 0xf);

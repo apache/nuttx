@@ -117,8 +117,6 @@ static int esp32_nmi(int irq, FAR void *context)
 
 void xtensa_irq_initialize(void)
 {
-  int i;
-
   /* Disable all interrupts */
 #warning Missing logic
 

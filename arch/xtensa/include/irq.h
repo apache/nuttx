@@ -115,18 +115,18 @@
 #  define REG_TMP0          (_REG_CALL0_START + 0)
 #  define REG_TMP1          (_REG_CALL0_START + 1)
 #  define REG_TMP2          (_REG_CALL0_START + 2)
-#  define _REG_OVLY_START  (_REG_CALL0_START + 3)
+#  define _REG_OVLY_START   (_REG_CALL0_START + 3)
 #else
-#  define _REG_OVLY_START  _REG_CALL0_START
+#  define _REG_OVLY_START   _REG_CALL0_START
 #endif
 
 #ifdef CONFIG_XTENSA_USE_OVLY
 /* Storage for overlay state */
 
 #  error Overlays not supported
-#  define XCPTCONTEXT_REGS   _REG_OVLY_START
+#  define XCPTCONTEXT_REGS  _REG_OVLY_START
 #else
-#  define XCPTCONTEXT_REGS   _REG_OVLY_START
+#  define XCPTCONTEXT_REGS  _REG_OVLY_START
 #endif
 
 #define XCPTCONTEXT_SIZE    (4 * XCPTCONTEXT_REGS)

@@ -39,7 +39,7 @@
 
 #include <arch/xtensa/core.h>
 #include <arch/xtensa/xtensa_corebits.h>
-#include <xtensa/config/system.h>
+//#include <xtensa/config/system.h>
 
 /* Select timer to use for periodic tick, and determine its interrupt number
  * and priority. User may specify a timer by defining XT_TIMER_INDEX with -D,
