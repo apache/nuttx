@@ -5,6 +5,194 @@
 
 if ARCH_CHIP_ESP32
 
+menu "ESP32 Peripheral Selection"
+
+config ESP32_BT
+	bool "Bluetooth"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		No yet implemented
+
+config ESP32_EMAC
+	bool "Ethernet MAC"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		No yet implemented
+
+config ESP32_I2C
+	bool "I2C"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		No yet implemented
+
+config ESP32_I2S0
+	bool "I2S 0"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		No yet implemented
+
+config ESP32_I2S1
+	bool "I2S 2"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		No yet implemented
+
+config ESP32_LEDC
+	bool "LED PWM (LEDC)"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		No yet implemented
+
+config ESP32_PCNT
+	bool "Pulse Count Module (PCNT)"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		No yet implemented
+
+config ESP32_RMT
+	bool "Remote Control Module (RMT)"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		No yet implemented
+
+config ESP32_SDIO_SAVE
+	bool "SDIO Slave"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		No yet implemented
+
+config ESP32_SDMMC
+	bool "SD/MMC card support"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		No yet implemented
+
+config ESP32_SPI0
+	bool "SPI 0"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		No yet implemented
+
+config ESP32_SPI1
+	bool "SPI 1"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		No yet implemented
+
+config ESP32_SPI2
+	bool "SPI 2"
+	default n
+	---help---
+		No yet implemented
+
+config XTENSA_TIMER1
+	bool "Xtensa Timer 1"
+	default n
+
+config XTENSA_TIMER2
+	bool "Xtensa Timer 2"
+	default n
+
+config ESP32_TIMER0
+	bool "64-bit Timer 0"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		No yet implemented
+
+config ESP32_TIMER1
+	bool "64-bit Timer 1"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		No yet implemented
+
+config ESP32_TIMER2
+	bool "64-bit Timer 2"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		No yet implemented
+
+config ESP32_TIMER3
+	bool "64-bit Timer 3"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		No yet implemented
+
+config ESP32_MWDT0
+	bool "Timer 0 Watchdog"
+	default n
+	depends on EXPERIMENTAL
+	select ESP32_TIMER0
+	---help---
+		No yet implemented
+
+config ESP32_MWDT1
+	bool "Timer 1 Watchdog"
+	default n
+	depends on EXPERIMENTAL
+	select ESP32_TIMER1
+	---help---
+		No yet implemented
+
+config ESP32_MWDT2
+	bool "Timer 2 Watchdog"
+	default n
+	depends on EXPERIMENTAL
+	select ESP32_TIMER2
+	---help---
+		No yet implemented
+
+config ESP32_MWDT3
+	bool "Timer 3 Watchdog"
+	default n
+	depends on EXPERIMENTAL
+	select ESP32_TIMER3
+	---help---
+		No yet implemented
+
+config ESP32_RWDT
+	bool "RTC Watchdog"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		No yet implemented
+
+config ESP32_UART0
+	bool "UART 0"
+	default n
+
+config ESP32_UART1
+	bool "UART 1"
+	default n
+
+config ESP32_UART2
+	bool "UART 2"
+	default n
+
+config ESP32_WIRELESS
+	bool "Wireless"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		No yet implemented
+
+endmenu # ESP32 Peripheral Selection
+
 config ESP32_BT_RESERVE_DRAM
 	int "Reserved BT DRAM"
 	default 0

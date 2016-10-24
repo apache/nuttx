@@ -79,7 +79,8 @@ ESP32 Toolchain
 Serial Console
 ==============
 
-  To be provided
+  USART0 is, by default, the serial console.  It connects to the on-board
+  CP2102 converter and is available on the USB connector USB CON8 (J1).
 
 Buttons and LEDs
 ================

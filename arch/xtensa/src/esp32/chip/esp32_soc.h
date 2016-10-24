@@ -7,7 +7,8 @@
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Derives from logic originally provided by Espressif Systems:
- * Copyright 2010-2016 Espressif Systems (Shanghai) PTE LTD
+ *
+ *   Copyright 2010-2016 Espressif Systems (Shanghai) PTE LTD
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
