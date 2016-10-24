@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/net/tun.c
  *
- *   Copyright (C) 2015 Max Nekludov. All rights reserved.
+ *   Copyright (C) 2015-2016 Max Nekludov. All rights reserved.
  *   Author: Max Nekludov <macscomp@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -149,12 +149,12 @@ static void tun_unlock(FAR struct tun_device_s *priv);
 
 /* Common TX logic */
 
-static int  tun_transmit(FAR struct tun_device_s *priv);
+static int  tun_fd_transmit(FAR struct tun_device_s *priv);
 static int  tun_txpoll(struct net_driver_s *dev);
 
 /* Interrupt handling */
 
-static void tun_receive(FAR struct tun_device_s *priv);
+static void tun_net_receive(FAR struct tun_device_s *priv);
 static void tun_txdone(FAR struct tun_device_s *priv);
 
 /* Watchdog timer expirations */
@@ -211,7 +211,7 @@ static const struct file_operations g_tun_file_ops =
   tun_close,    /* close */
   tun_read,     /* read */
   tun_write,    /* write */
-  0,                 /* seek */
+  0,            /* seek */
   tun_ioctl,    /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
   tun_poll,     /* poll */
@@ -322,7 +322,7 @@ static void tun_pollnotify(FAR struct tun_device_s *priv, pollevent_t eventset)
  *
  ****************************************************************************/
 
-static int tun_transmit(FAR struct tun_device_s *priv)
+static int tun_fd_transmit(FAR struct tun_device_s *priv)
 {
   NETDEV_TXPACKETS(&priv->dev);
 
@@ -379,7 +379,7 @@ static int tun_txpoll(struct net_driver_s *dev)
       /* Send the packet */
 
       priv->read_d_len = priv->dev.d_len;
-      tun_transmit(priv);
+      tun_fd_transmit(priv);
 
       return 1;
     }
@@ -408,8 +408,10 @@ static int tun_txpoll(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static void tun_receive(FAR struct tun_device_s *priv)
+static void tun_net_receive(FAR struct tun_device_s *priv)
 {
+  int ret;
+
   /* Copy the data data from the hardware to priv->dev.d_buf.  Set amount of
    * data in priv->dev.d_len
    */
@@ -736,7 +738,7 @@ static int tun_txavail(struct net_driver_s *dev)
 
   /* Check if there is room to hold another network packet. */
 
-  if (priv->read_d_len)
+  if (priv->read_d_len != 0 || priv->write_d_len != 0)
     {
       tun_unlock(priv);
       return OK;
@@ -1000,7 +1002,7 @@ static ssize_t tun_write(FAR struct file *filep, FAR const char *buffer,
       priv->dev.d_buf = priv->write_buf;
       priv->dev.d_len = buflen;
 
-      tun_receive(priv);
+      tun_net_receive(priv);
 
       ret = (ssize_t)buflen;
     }
@@ -1047,6 +1049,14 @@ static ssize_t tun_read(FAR struct file *filep, FAR char *buffer,
 
       priv->write_d_len = 0;
       tun_pollnotify(priv, POLLOUT);
+
+      if (priv->read_d_len == 0)
+        {
+          state = net_lock();
+          tun_txdone(priv);
+          net_unlock(state);
+        }
+
       goto out;
     }
 
