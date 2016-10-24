@@ -72,7 +72,9 @@ enum xtal_freq_e
 
 void esp32_clockconfig(void)
 {
-#ifndef CONFIG_SUPPRESS_CLOCK_CONFIG
+#ifdef CONFIG_SUPPRESS_CLOCK_CONFIG
+#  warning WARNING: Clock coniguration disabled
+#else
   uint32_t freq_mhz = CONFIG_ESP32_DEFAULT_CPU_FREQ_MHZ;
   enum xtal_freq_e freq;
 

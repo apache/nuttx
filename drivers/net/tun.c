@@ -429,24 +429,34 @@ static void tun_net_receive(FAR struct tun_device_s *priv)
 #if defined(CONFIG_NET_IPv4)
   ninfo("IPv4 frame\n");
   NETDEV_RXIPV4(&priv->dev);
+#################################################################################
+@@ -429,20 +431,27 @@ static void tun_receive(FAR struct tun_device_s *priv)
 
-  /* Give the IPv4 packet to the network layer */
+      /* Give the IPv4 packet to the network layer */
 
-  ipv4_input(&priv->dev);
+      ret = ipv4_input(&priv->dev);
 
-  /* If the above function invocation resulted in data that should be
-   * sent out on the network, the field  d_len will set to a value > 0.
-   */
+      if (ret == OK)
+        {
+          /* If the above function invocation resulted in data that should be
+           * sent out on the network, the field d_len will set to a value > 0.
+           */
 
-  if (priv->dev.d_len > 0)
-    {
-      priv->write_d_len = priv->dev.d_len;
-      tun_transmit(priv);
-    }
-  else
-    {
-      priv->write_d_len = 0;
-      tun_pollnotify(priv, POLLOUT);
+          if (priv->dev.d_len > 0)
+            {
+              priv->write_d_len = priv->dev.d_len;
+              tun_fd_transmit(priv);
+            }
+          else
+            {
+              tun_pollnotify(priv, POLLOUT);
+            }
+        }
+      else
+        {
+          priv->dev.d_len = 0;
+          tun_pollnotify(priv, POLLOUT);
+        }
     }
 
 #elif defined(CONFIG_NET_IPv6)
@@ -464,7 +474,7 @@ static void tun_net_receive(FAR struct tun_device_s *priv)
   if (priv->dev.d_len > 0)
     {
       priv->write_d_len = priv->dev.d_len;
-      tun_transmit(priv);
+      tun_fd_transmit(priv);
     }
   else
     {
