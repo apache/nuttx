@@ -312,8 +312,6 @@ nullreturn:
  *         yet.  Currently useful for UDP when a packet arrives before a recv
  *         call is in place.
  *
- * Assumptions:
- *
  ****************************************************************************/
 
 int ipv4_input(FAR struct net_driver_s *dev)

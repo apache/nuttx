@@ -212,11 +212,9 @@ void xtensa_timer_initialize(void)
 
   (void)irq_attach(XTENSA_IRQ_TIMER0, (xcpt_t)esp32_timerisr);
 
-  /* Enable the timer interrupt at the device level */
+  /* Enable the timer interrupt at the device level.  NOTE: It is un-necessary
+   * to call up_enable_irq() for timers.
+   */
 
   xtensa_enable_timer();
-
-  /* And enable the timer interrupt */
-
-  up_enable_irq(XTENSA_IRQ_TIMER0);
 }

@@ -66,7 +66,7 @@
  *
  * REVISIT: In more architectures supported by NuttX, exception errors
  * tie into the normal interrupt handling via special IRQ numbers.  I
- * is still to be determined what will be done for the the ESP32.
+ * is still to be determined what will be done for the ESP32.
  */
 
 #define XTENSA_IRQ_TIMER0        0  /* INTERRUPT, bit 6 */
