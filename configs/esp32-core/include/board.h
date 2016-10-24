@@ -47,7 +47,7 @@
 
 /* Clock reconfiguration is currently disabled, so the CPU will be running
  * at the XTAL frequency.
- *.
+ */
 
 #if 0
 #  define BOARD_CLOCK_FREQUENCY 80000000
