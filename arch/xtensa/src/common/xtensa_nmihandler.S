@@ -61,6 +61,7 @@
 
 #include <arch/chip/core-isa.h>
 #include <arch/xtensa/xtensa_specregs.h>
+#include <arch/chip/chip_macros.h>
 
 #include "xtensa_macros.h"
 
@@ -101,8 +102,8 @@
  ****************************************************************************/
 
 #if XCHAL_HAVE_NMI
-	.section	.iram1,"ax"
-	.type		_xt_nmi,@function
+	.section	HANDLER_SECTION, "ax"
+	.type		_xt_nmi, @function
 	.align		4
 _xt_nmi:
 

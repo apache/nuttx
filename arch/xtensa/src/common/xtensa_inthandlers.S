@@ -62,6 +62,7 @@
 #include <arch/irq.h>
 #include <arch/chip/core-isa.h>
 #include <arch/xtensa/xtensa_specregs.h>
+#include <arch/chip/chip_macros.h>
 
 #include "xtensa_macros.h"
 #include "xtensa_timer.h"
@@ -282,8 +283,8 @@
  ****************************************************************************/
 
 #if XCHAL_EXCM_LEVEL >= 2
-	.section .iram1,"ax"
-	.type	_xtensa_level2_handler,@function
+	.section HANDLER_SECTION, "ax"
+	.type	_xtensa_level2_handler, @function
 	.align	4
 
 _xtensa_level2_handler:
@@ -339,8 +340,8 @@ _xtensa_level2_handler:
 #endif /* XCHAL_EXCM_LEVEL >= 2 */
 
 #if XCHAL_EXCM_LEVEL >= 3
-	.section .iram1,"ax"
-	.type	_xtensa_level3_handler,@function
+	.section HANDLER_SECTION, "ax"
+	.type	_xtensa_level3_handler, @function
 	.align	4
 
 _xtensa_level3_handler:
@@ -396,8 +397,8 @@ _xtensa_level3_handler:
 #endif /* XCHAL_EXCM_LEVEL >= 3 */
 
 #if XCHAL_EXCM_LEVEL >= 4
-	.section .iram1,"ax"
-	.type	_xtensa_level4_handler,@function
+	.section HANDLER_SECTION, "ax"
+	.type	_xtensa_level4_handler, @function
 	.align	4
 
 _xtensa_level4_handler:
@@ -453,8 +454,8 @@ _xtensa_level4_handler:
 #endif /* XCHAL_EXCM_LEVEL >= 4 */
 
 #if XCHAL_EXCM_LEVEL >= 5
-	.section .iram1,"ax"
-	.type	_xtensa_level5_handler,@function
+	.section HANDLER_SECTION, "ax"
+	.type	_xtensa_level5_handler, @function
 	.align	4
 
 _xtensa_level5_handler:
@@ -510,8 +511,8 @@ _xtensa_level5_handler:
 #endif /* XCHAL_EXCM_LEVEL >= 2 */
 
 #if XCHAL_EXCM_LEVEL >= 6
-	.section .iram1,"ax"
-	.type	_xtensa_level6_handler,@function
+	.section HANDLER_SECTION, "ax"
+	.type	_xtensa_level6_handler, @function
 	.align	4
 
 _xtensa_level6_handler:
@@ -603,7 +604,7 @@ _xtensa_level6_handler:
  ****************************************************************************/
 
 #if XCHAL_INT_NLEVELS >=2 && XCHAL_EXCM_LEVEL < 2 && XCHAL_DEBUGLEVEL !=2
-	.section	.iram1,"ax"
+	.section	HANDLER_SECTION, "ax"
 	.type		_xtensa_level2_handler, @function
 	.align		4
 
@@ -635,7 +636,7 @@ _xtensa_level2_handler:
 #endif  /* XCHAL_INT_NLEVELS >=2 && XCHAL_EXCM_LEVEL < 2 && XCHAL_DEBUGLEVEL !=2 */
 
 #if XCHAL_INT_NLEVELS >=3 && XCHAL_EXCM_LEVEL < 3 && XCHAL_DEBUGLEVEL !=3
-	.section	.iram1,"ax"
+	.section	HANDLER_SECTION, "ax"
 	.type		_xtensa_level3_handler, @function
 	.align		4
 
@@ -666,8 +667,8 @@ _xtensa_level3_handler:
 #endif /* XCHAL_INT_NLEVELS >=3 && XCHAL_EXCM_LEVEL < 3 && XCHAL_DEBUGLEVEL !=3 */
 
 #if XCHAL_INT_NLEVELS >=4 && XCHAL_EXCM_LEVEL < 4 && XCHAL_DEBUGLEVEL !=4
-	.section	.iram1,"ax"
-	.type		_xtensa_level4_handler,@function
+	.section	HANDLER_SECTION, "ax"
+	.type		_xtensa_level4_handler, @function
 	.align		4
 
 _xtensa_level4_handler:
@@ -697,8 +698,8 @@ _xtensa_level4_handler:
 #endif /* XCHAL_INT_NLEVELS >=4 && XCHAL_EXCM_LEVEL < 4 && XCHAL_DEBUGLEVEL !=4 */
 
 #if XCHAL_INT_NLEVELS >=5 && XCHAL_EXCM_LEVEL < 5 && XCHAL_DEBUGLEVEL !=5
-	.section	.iram1,"ax"
-	.type		_xtensa_level5_handler,@function
+	.section	HANDLER_SECTION, "ax"
+	.type		_xtensa_level5_handler, @function
 	.align		4
 
 _xtensa_level5_handler:
@@ -726,7 +727,7 @@ _xtensa_level5_handler:
 #endif /* XCHAL_INT_NLEVELS >=5 && XCHAL_EXCM_LEVEL < 5 && XCHAL_DEBUGLEVEL !=5 */
 
 #if XCHAL_INT_NLEVELS >=6 && XCHAL_EXCM_LEVEL < 6 && XCHAL_DEBUGLEVEL !=6
-	.section	.iram1,"ax"
+	.section	HANDLER_SECTION, "ax"
 	.type		_xtensa_level6_handler, @function
 	.align		4
 

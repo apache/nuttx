@@ -41,7 +41,18 @@
  ****************************************************************************/
 
 /* Clocking ****************************************************************/
+/* The ESP32 Core board V2 is fitted with a 40MHz crystal */
 
-#define BOARD_CLOCK_FREQUENCY 80000000
+#define BOARD_XTAL_FREQUENCY    40000000
+
+/* Clock reconfiguration is currently disabled, so the CPU will be running
+ * at the XTAL frequency.
+ *.
+
+#if 0
+#  define BOARD_CLOCK_FREQUENCY 80000000
+#else
+#  define BOARD_CLOCK_FREQUENCY BOARD_XTAL_FREQUENCY
+#endif
 
 #endif /* __CONFIGS_ESP32_CORE_INCLUDE_BOARD_H */

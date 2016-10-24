@@ -49,16 +49,17 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Bring-up debug configurations.  These are here (vs defconfig)
+/* Bring-up debug configurations.  These are here (vs Kconfig)
  * because these should only be controlled during low level
  * board bring-up and not part of normal platform configuration.
  */
 
-#undef  CONFIG_SUPPRESS_INTERRUPTS    /* DEFINED: Do not enable interrupts */
-#undef  CONFIG_SUPPRESS_TIMER_INTS    /* DEFINED: No timer */
-#undef  CONFIG_SUPPRESS_SERIAL_INTS   /* DEFINED: Console will poll */
-#undef  CONFIG_SUPPRESS_UART_CONFIG   /* DEFINED: Do not reconfig UART */
-#undef  CONFIG_DUMP_ON_EXIT           /* DEFINED: Dump task state on exit */
+#undef  CONFIG_SUPPRESS_INTERRUPTS     /* DEFINED: Do not enable interrupts */
+#undef  CONFIG_SUPPRESS_TIMER_INTS     /* DEFINED: No timer */
+#undef  CONFIG_SUPPRESS_SERIAL_INTS    /* DEFINED: Console will poll */
+#undef  CONFIG_SUPPRESS_UART_CONFIG    /* DEFINED: Do not reconfigure UART */
+#define CONFIG_SUPPRESS_CLOCK_CONFIG 1 /* DEFINED: Do not reconfigure clocking */
+#undef  CONFIG_DUMP_ON_EXIT            /* DEFINED: Dump task state on exit */
 
 #ifndef CONFIG_DEBUG_SCHED_INFO
 #  undef CONFIG_DUMP_ON_EXIT          /* Needs CONFIG_DEBUG_SCHED_INFO */
