@@ -302,3 +302,44 @@ void esp32_free_edgeint(int cpuint)
   g_edge_ints |= mask;
   leave_critical_section(flags);
 }
+
+/****************************************************************************
+ * Name:  esp32_attach_peripheral
+ *
+ * Description:
+ *   Attach a peripheral interupt to a CPU interrupt.
+ *
+ * Input Parameters:
+ *   cpu      - The CPU to receive the interrupt 0=PRO CPU 1=APP CPU
+ *   periphid - The peripheral number from ira.h to be assigned.
+ *   cpuint   - The CPU interrupt to receive the peripheral interrupt
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp32_attach_peripheral(int cpu, int periphid, int cpuint)
+{
+# warning Missing logic
+}
+
+/****************************************************************************
+ * Name:  esp32_detach_peripheral
+ *
+ * Description:
+ *   Detach a peripheral interupt from a CPU interrupt.
+ *
+ * Input Parameters:
+ *   cpu    - The CPU to receive the interrupt 0=PRO CPU 1=APP CPU
+ *   cpuint - The CPU interrupt to receive the peripheral interrupt
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp32_detach_peripheral(int cpu, int cpuint)
+{
+# warning Missing logic
+}
