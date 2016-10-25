@@ -41,6 +41,7 @@
 
 #include <stdint.h>
 #include <assert.h>
+#include <errno.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>
@@ -67,18 +68,18 @@
 
 #ifdef CONFIG_SMP
 
-static uint32_t *g_intenable[CONFIG_SMP_NCPUS];
+static uint32_t g_intenable[CONFIG_SMP_NCPUS];
 
 #else
 
-static uint32_t *g_intenable[1];
+static uint32_t g_intenable[1];
 
 #endif
 
 /* Bitsets for free, unallocated CPU interrupts */
 
-status uint32_t g_level_ints = ESP32_LEVEL_SET;
-status uint32_t g_edge_ints  = ESP32_EDGE_SET;
+static uint32_t g_level_ints = ESP32_LEVEL_SET;
+static uint32_t g_edge_ints  = ESP32_EDGE_SET;
 
 /****************************************************************************
  * Private Functions
@@ -106,9 +107,9 @@ void up_disable_irq(int cpuint)
 
 #ifdef CONFIG_SMP
   cpu = up_cpu_index();
-  (void)xtensa_disable_cpuint(&g_intenable[cpu], (1ul << cpuint))
+  (void)xtensa_disable_cpuint(&g_intenable[cpu], (1ul << cpuint));
 #else
-  (void)xtensa_disable_cpuint(&g_intenable[0], (1ul << cpuint))
+  (void)xtensa_disable_cpuint(&g_intenable[0], (1ul << cpuint));
 #endif
 }
 
@@ -130,9 +131,9 @@ void up_enable_irq(int cpuint)
 
 #ifdef CONFIG_SMP
   cpu = up_cpu_index();
-  (void)xtensa_enable_cpuint(&g_intenable[cpu], (1ul << cpuint))
+  (void)xtensa_enable_cpuint(&g_intenable[cpu], (1ul << cpuint));
 #else
-  (void)xtensa_enable_cpuint(&g_intenable[0], (1ul << cpuint))
+  (void)xtensa_enable_cpuint(&g_intenable[0], (1ul << cpuint));
 #endif
 }
 

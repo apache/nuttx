@@ -13,7 +13,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
-
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -26,21 +26,24 @@
 
 /****************************************************************************
  * Included Files
- ****************************************************************************
+ ****************************************************************************/
 
 #include <stdint.h>
 #include "xtensa.h"
 
+#ifndef CONFIG_SUPPRESS_CLOCK_CONFIG
 #warning REVISIT ... function prototypes
 
 void phy_get_romfunc_addr(void);
 void rtc_init_lite(void);
 void rtc_set_cpu_freq(xtal_freq_t xtal_freq, enum xtal_freq_e cpu_freq);
+#endif
 
 /****************************************************************************
  * Private Types
- ****************************************************************************
+ ****************************************************************************/
 
+#ifndef CONFIG_SUPPRESS_CLOCK_CONFIG
 enum xtal_freq_e
 {
   XTAL_40M = 40,
@@ -55,10 +58,11 @@ enum xtal_freq_e
   CPU_160M = 2,
   CPU_240M = 3,
 };
+#endif
 
 /****************************************************************************
  * Public Functions
- ****************************************************************************
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: esp32_clockconfig

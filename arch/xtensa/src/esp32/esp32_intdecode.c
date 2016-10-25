@@ -91,6 +91,7 @@ uint32_t *xtensa_int_decode(uint32_t *regs)
   int regndx;
   int bit;
   int baseirq;
+  int nirqs;
 
 #ifdef CONFIG_SMP
   int cpu;
@@ -122,7 +123,7 @@ uint32_t *xtensa_int_decode(uint32_t *regs)
       /* Set up the search */
 
       baseirq = g_baseirq[regndx];
-      nirqs   = g_nirqs[regndx]
+      nirqs   = g_nirqs[regndx];
 
       /* Decode and dispatch each pending bit in the interrupt status
        * register.

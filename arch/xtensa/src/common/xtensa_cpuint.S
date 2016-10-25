@@ -37,10 +37,8 @@
  * Included Files
  ****************************************************************************/
 
-#include <xtensa/hal.h>
-#include <xtensa/config/core.h>
-
-#include "xtensa_context.h"
+#include <nuttx/config.h>
+#include <arch/chip/core-isa.h>
 
 #if XCHAL_HAVE_INTERRUPTS
 
@@ -104,7 +102,7 @@ xtensa_enable_cpuint:
  ****************************************************************************/
 
 	.text
-	.globa	xtensa_disable_cpuint
+	.global	xtensa_disable_cpuint
 	.type	xtensa_disable_cpuint, @function
 	.align	4
 

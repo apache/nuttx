@@ -150,12 +150,24 @@ void xtensa_dumpstate(void)
   uint32_t istacksize;
 #endif
 
+#ifdef CONFIG_SMP
+  /* Show the CPU number */
+
+  _alert("CPU%d:\n", up_cpu_index());
+#endif
+
   /* Get the limits on the user stack memory */
 
   if (rtcb->pid == 0)
     {
+#warning REVISIT: Need top of IDLE stack
+#if 0
       ustackbase = g_idle_topstack - 4;
       ustacksize = CONFIG_IDLETHREAD_STACKSIZE;
+#else
+      ustackbase = sp + 128;
+      ustacksize = 128;
+#endif
     }
   else
     {

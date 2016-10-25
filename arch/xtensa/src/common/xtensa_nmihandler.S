@@ -61,8 +61,8 @@
 
 #include <arch/chip/core-isa.h>
 #include <arch/xtensa/xtensa_specregs.h>
-#include <arch/chip/chip_macros.h>
 
+#include "chip_macros.h"
 #include "xtensa_macros.h"
 
 /****************************************************************************
