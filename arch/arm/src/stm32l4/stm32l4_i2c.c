@@ -356,8 +356,8 @@ struct stm32l4_i2c_priv_s stm32l4_i2c1_priv =
 static const struct stm32l4_i2c_config_s stm32l4_i2c2_config =
 {
   .base       = STM32L4_I2C2_BASE,
-  .clk_bit    = RCC_APB1ENR_I2C2EN,
-  .reset_bit  = RCC_APB1RSTR_I2C2RST,
+  .clk_bit    = RCC_APB1ENR1_I2C2EN,
+  .reset_bit  = RCC_APB1RSTR1_I2C2RST,
   .scl_pin    = GPIO_I2C2_SCL,
   .sda_pin    = GPIO_I2C2_SDA,
 #ifndef CONFIG_I2C_POLLED
@@ -386,8 +386,8 @@ struct stm32l4_i2c_priv_s stm32l4_i2c2_priv =
 static const struct stm32l4_i2c_config_s stm32l4_i2c3_config =
 {
   .base       = STM32L4_I2C3_BASE,
-  .clk_bit    = RCC_APB1ENR_I2C3EN,
-  .reset_bit  = RCC_APB1RSTR_I2C3RST,
+  .clk_bit    = RCC_APB1ENR1_I2C3EN,
+  .reset_bit  = RCC_APB1RSTR1_I2C3RST,
   .scl_pin    = GPIO_I2C3_SCL,
   .sda_pin    = GPIO_I2C3_SDA,
 #ifndef CONFIG_I2C_POLLED
