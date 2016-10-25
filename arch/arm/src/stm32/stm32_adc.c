@@ -79,8 +79,8 @@
 /* This implementation is for the STM32 F1, F2, F4 and STM32L15XX only */
 
 #if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F20XX) || \
-    defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F40XX) || \
-    defined(CONFIG_STM32_STM32L15XX)
+    defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX) || \
+    defined(CONFIG_STM32_STM32F40XX) || defined(CONFIG_STM32_STM32L15XX)
 
 /* At the moment there is no proper implementation for timers external
  * trigger in STM32L15XX May be added latter
@@ -107,6 +107,9 @@
 #  define RCC_RSTR_ADC2RST RCC_AHBRSTR_ADC12RST
 #  define RCC_RSTR_ADC3RST RCC_AHBRSTR_ADC34RST
 #  define RCC_RSTR_ADC4RST RCC_AHBRSTR_ADC34RST
+#elif defined(CONFIG_STM32_STM32F37XX)
+#  define STM32_RCC_RSTR   STM32_RCC_APB2RSTR
+#  define RCC_RSTR_ADC1RST RCC_APB2RSTR_ADCRST
 #elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
 #  define STM32_RCC_RSTR   STM32_RCC_APB2RSTR
 #  define RCC_RSTR_ADC1RST RCC_APB2RSTR_ADCRST
@@ -148,7 +151,7 @@
 #  define ADC_IER_AWD                ADC_CR1_AWDIE
 #  define ADC_ISR_JEOC               ADC_SR_JEOC
 #  define ADC_IER_JEOC               ADC_CR1_JEOCIE
-#  ifdef CONFIG_STM32_STM32F10XX
+#  if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F37XX)
 #    define ADC_EXTREG_EXTEN_MASK    ADC_CR2_EXTTRIG
 #    define ADC_EXTREG_EXTEN_NONE    0
 #    define ADC_EXTREG_EXTEN_DEFAULT ADC_CR2_EXTTRIG
@@ -180,7 +183,11 @@
 #ifdef ADC_HAVE_DMA
 #  define ADC_MAX_SAMPLES ADC_MAX_CHANNELS_DMA
 #else
-#  define ADC_MAX_SAMPLES ADC_MAX_CHANNELS_NODMA
+#  if defined(CONFIG_STM32_STM32F30XX)
+#    define ADC_MAX_SAMPLES ADC_MAX_CHANNELS_DMA /* Works without DMA should sampling frequency be reduced */
+#  else
+#    define ADC_MAX_SAMPLES ADC_MAX_CHANNELS_NODMA
+#  endif
 #endif
 
 #if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
@@ -219,7 +226,12 @@
                                (ADC_SMPR_DEFAULT << ADC_SMPR2_SMP8_SHIFT) | \
                                (ADC_SMPR_DEFAULT << ADC_SMPR2_SMP9_SHIFT))
 #elif defined(CONFIG_STM32_STM32F30XX)
-#  define ADC_SMPR_DEFAULT    ADC_SMPR_61p5
+#  ifdef ADC_HAVE_DMA || (ADC_MAX_SAMPLES == 1)
+#    define ADC_SMPR_DEFAULT    ADC_SMPR_61p5
+#  else /* Slow down sampling frequency */
+#    define ADC_SMPR_DEFAULT    ADC_SMPR_601p5
+#  endif
+
 #  define ADC_SMPR1_DEFAULT   ((ADC_SMPR_DEFAULT << ADC_SMPR1_SMP1_SHIFT) | \
                                (ADC_SMPR_DEFAULT << ADC_SMPR1_SMP2_SHIFT) | \
                                (ADC_SMPR_DEFAULT << ADC_SMPR1_SMP3_SHIFT) | \
@@ -238,8 +250,13 @@
                                (ADC_SMPR_DEFAULT << ADC_SMPR2_SMP16_SHIFT) | \
                                (ADC_SMPR_DEFAULT << ADC_SMPR2_SMP17_SHIFT) | \
                                (ADC_SMPR_DEFAULT << ADC_SMPR2_SMP18_SHIFT))
-#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
-#  define ADC_SMPR_DEFAULT    ADC_SMPR_112
+#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F37XX) || \
+    defined(CONFIG_STM32_STM32F40XX)
+#  if defined(CONFIG_STM32_STM32F37XX)
+#    define ADC_SMPR_DEFAULT    ADC_SMPR_239p5 /* TODO choose 1p5? */
+#  else
+#    define ADC_SMPR_DEFAULT    ADC_SMPR_112
+#  endif
 #  define ADC_SMPR1_DEFAULT   ((ADC_SMPR_DEFAULT << ADC_SMPR1_SMP10_SHIFT) | \
                                (ADC_SMPR_DEFAULT << ADC_SMPR1_SMP11_SHIFT) | \
                                (ADC_SMPR_DEFAULT << ADC_SMPR1_SMP12_SHIFT) | \
@@ -320,7 +337,8 @@ struct stm32_dev_s
 /* ADC Register access */
 
 #if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F30XX) || \
-    defined(CONFIG_STM32_STM32F40XX) || defined(CONFIG_STM32_STM32L15XX)
+    defined(CONFIG_STM32_STM32F37XX) ||defined(CONFIG_STM32_STM32F40XX) || \
+    defined(CONFIG_STM32_STM32L15XX)
 static void stm32_modifyreg32(unsigned int addr, uint32_t clrbits,
                               uint32_t setbits);
 #endif
@@ -587,7 +605,8 @@ static struct adc_dev_s g_adcdev4 =
  ****************************************************************************/
 
 #if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F30XX) || \
-    defined(CONFIG_STM32_STM32F40XX) || defined(CONFIG_STM32_STM32L15XX)
+    defined(CONFIG_STM32_STM32F37XX) ||defined(CONFIG_STM32_STM32F40XX) || \
+    defined(CONFIG_STM32_STM32L15XX)
 static void stm32_modifyreg32(unsigned int addr, uint32_t clrbits,
                               uint32_t setbits)
 {
@@ -1626,7 +1645,7 @@ static void adc_write_sample_time_registers(FAR struct adc_dev_s *dev)
 #endif
 
 /****************************************************************************
- * Name: adc_dmacovcallback
+ * Name: adc_dmaconvcallback
  *
  * Description:
  *   Callback for DMA.  Called from the DMA transfer complete interrupt after
@@ -1850,7 +1869,7 @@ static void adc_reset(FAR struct adc_dev_s *dev)
 
   adc_modifyreg(priv, STM32_ADC_IER_OFFSET, clrbits, setbits);
 
-#else
+#else /* ifdef CONFIG_STM32_STM32F30XX */
 
   /* Enable the analog watchdog */
 
@@ -1864,7 +1883,7 @@ static void adc_reset(FAR struct adc_dev_s *dev)
   clrbits |= ADC_CR1_DUALMOD_MASK;
   setbits |= ADC_CR1_IND;
 
-#else
+#elif (! defined(CONFIG_STM32_STM32F37XX))
 
   /* Set the resolution of the conversion */
 
@@ -1880,10 +1899,16 @@ static void adc_reset(FAR struct adc_dev_s *dev)
     }
 #endif
 
-  /* Enable interrupt flags, but disable overrun interrupt */
+  /* Enable interrupt flags, but disable overrun interrupt: TODO this is
+   * done later by upper half when opening device by adc_rxint().
+   */
 
+#ifndef CONFIG_STM32_STM32F37XX
   clrbits |= ADC_IER_OVR;
   setbits |= ADC_IER_ALLINTS & ~ADC_IER_OVR;
+#else
+  /* TODO NON DMA mode */
+#endif
 
   /* Set CR1 configuration */
 
@@ -1915,6 +1940,13 @@ static void adc_reset(FAR struct adc_dev_s *dev)
 
   clrbits |= ADC_EXTREG_EXTEN_MASK;
   setbits |= ADC_EXTREG_EXTEN_NONE;
+
+  /* Enable software trigger for regular channels */
+
+#ifdef CONFIG_STM32_STM32F37XX
+  clrbits |= ADC_CR2_EXTSEL_MASK;
+  setbits |= ADC_CR2_EXTSEL_SWSTART | ADC_CR2_EXTTRIG; /* SW is considered as external trigger */
+#endif
 
 #ifdef ADC_HAVE_DMA
   if (priv->hasdma)
@@ -2176,9 +2208,12 @@ static void adc_rxint(FAR struct adc_dev_s *dev, bool enable)
 
   if (enable)
     {
-      /* Enable the end-of-conversion ADC and analog watchdog interrupts */
+      /* Enable the analog watchdog / overrun interrupts, and if no DMA,
+       * end-of-conversion ADC.
+       */
 
-      adc_modifyreg(priv, STM32_ADC_IER_OFFSET, 0, ADC_IER_ALLINTS);
+      adc_modifyreg(priv, STM32_ADC_IER_OFFSET, 0,
+                    priv->hasdma ? ADC_IER_AWD | ADC_ISR_OVR : ADC_IER_ALLINTS);
     }
   else
     {
@@ -2766,8 +2801,10 @@ static int adc_interrupt(FAR struct adc_dev_s *dev)
         }
     }
 
-  regval &= ~pending;
-  adc_putreg(priv, STM32_ADC_ISR_OFFSET, regval);
+  /* by MR regval &= ~pending; */
+  /* by MR adc_putreg(priv, STM32_ADC_ISR_OFFSET, regval);
+ 
+  adc_putreg(priv, STM32_ADC_ISR_OFFSET, pending); */
   return OK;
 }
 
@@ -3039,8 +3076,8 @@ struct adc_dev_s *stm32_adcinitialize(int intf, FAR const uint8_t *chanlist,
 }
 
 #endif /* CONFIG_STM32_STM32F10XX || CONFIG_STM32_STM32F20XX ||
-        * CONFIG_STM32_STM32F30XX || CONFIG_STM32_STM32F40XX ||
-        * CONFIG_STM32_STM32L15XX
+        * CONFIG_STM32_STM32F30XX || CONFIG_STM32_STM32F47XX ||
+        * CONFIG_STM32_STM32F40XX || CONFIG_STM32_STM32L15XX
         */
 #endif /* CONFIG_STM32_ADC1 || CONFIG_STM32_ADC2 ||
         * CONFIG_STM32_ADC3 || CONFIG_STM32_ADC4

@@ -61,6 +61,7 @@
 #include "stm32_can.h"
 #include "stm32_dbgmcu.h"
 #include "stm32_dma.h"
+#include "stm32_dac.h"
 #include "stm32_exti.h"
 #include "stm32_flash.h"
 #include "stm32_fsmc.h"

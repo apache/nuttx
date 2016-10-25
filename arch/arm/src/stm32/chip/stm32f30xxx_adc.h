@@ -60,8 +60,8 @@
 #define STM32_ADC_SMPR1_OFFSET       0x0014  /* ADC sample time register 1 */
 #define STM32_ADC_SMPR2_OFFSET       0x0018  /* ADC sample time register 2 */
 #define STM32_ADC_TR1_OFFSET         0x0020  /* ADC watchdog threshold register 1 */
-#define STM32_ADC_TR2_OFFSET         0x0020  /* ADC watchdog threshold register 2 */
-#define STM32_ADC_TR3_OFFSET         0x0020  /* ADC watchdog threshold register 3 */
+#define STM32_ADC_TR2_OFFSET         0x0024  /* ADC watchdog threshold register 2 */
+#define STM32_ADC_TR3_OFFSET         0x0028  /* ADC watchdog threshold register 3 */
 #define STM32_ADC_SQR1_OFFSET        0x0030  /* ADC regular sequence register 1 */
 #define STM32_ADC_SQR2_OFFSET        0x0034  /* ADC regular sequence register 2 */
 #define STM32_ADC_SQR3_OFFSET        0x0038  /* ADC regular sequence register 3 */
