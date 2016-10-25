@@ -120,6 +120,7 @@ static inline void xtensa_disable_all(void)
 int xtensa_start_handler(int irq, FAR void *context)
 {
   FAR struct tcb_s *tcb;
+  int i;
 
   sinfo("CPU%d Started\n", up_cpu_index());
 
@@ -145,8 +146,12 @@ int xtensa_start_handler(int irq, FAR void *context)
 
   xtensa_disable_all();
 
-  /* Disable peripheral sources from all PRO CPU interrupt */
-#warning Missing logic
+  /* Detach all peripheral sources APP CPU interrupts */
+
+  for (i = 0; i < NR_PERIPHERALS)
+    {
+      esp32_detach_peripheral(1, i);;
+    }
 
   /* Dump registers so that we can see what is going to happen on return */
 

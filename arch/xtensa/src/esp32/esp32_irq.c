@@ -120,21 +120,24 @@ static inline void xtensa_disable_all(void)
 
 void xtensa_irq_initialize(void)
 {
+  int i;
+
   /* Disable all PRO CPU interrupts */
 
   xtensa_disable_all();
 
-  /* Disable peripheral sources from all PRO CPU interrupt */
-#warning Missing logic
+  /* Detach all peripheral sources PRO CPU interrupts */
+
+  for (i = 0; i < NR_PERIPHERALS)
+    {
+      esp32_detach_peripheral(0, i);;
+    }
 
 #if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 3
   /* Colorize the interrupt stack for debug purposes */
 
 #warning Missing logic
 #endif
-
-  /* Set all interrupts (and exceptions) to the default priority */
-#warning Missing logic
 
   /* Attach all processor exceptions */
 #warning Missing logic

@@ -191,6 +191,10 @@ void xtensa_timer_initialize(void)
   count = xtensa_getcount();
   xtensa_setcompare(count + divisor);
 
+  /* NOTE: Timer 0 is an internal interrupt source so we do not need to
+   * attach any peripheral ID to the dedicated CPU interrupt.
+   */
+
   /* Attach the timer interrupt vector */
 
   (void)irq_attach(XTENSA_IRQ_TIMER0, (xcpt_t)esp32_timerisr);

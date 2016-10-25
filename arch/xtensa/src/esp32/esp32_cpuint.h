@@ -124,7 +124,7 @@ void esp32_free_edgeint(int cpuint);
  *
  * Input Parameters:
  *   cpu      - The CPU to receive the interrupt 0=PRO CPU 1=APP CPU
- *   periphid - The peripheral number from ira.h to be assigned.
+ *   periphid - The peripheral number from ira.h to be attached.
  *   cpuint   - The CPU interrupt to receive the peripheral interrupt
  *
  * Returned Value:
@@ -142,13 +142,13 @@ void esp32_attach_peripheral(int cpu, int periphid, int cpuint);
  *
  * Input Parameters:
  *   cpu    - The CPU to receive the interrupt 0=PRO CPU 1=APP CPU
- *   cpuint - The CPU interrupt to receive the peripheral interrupt
+ *   periphid - The peripheral number from ira.h to be detached.
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void esp32_detach_peripheral(int cpu, int cpuint);
+void esp32_detach_peripheral(int cpu, int periphid);
 
 #endif /* __ARCH_XTENSA_SRC_ESP32_ESP32_CPUINT_H */
