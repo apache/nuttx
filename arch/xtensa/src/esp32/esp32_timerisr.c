@@ -52,6 +52,14 @@
 #include "xtensa.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#if XT_TIMER_INTEN != ESP32_CPUINT_TIMER0
+#  error Mismatch in irq.h and xtensa_timer.h
+#endif
+
+/****************************************************************************
  * Private data
  ****************************************************************************/
 
@@ -62,8 +70,7 @@ static uint32_t g_tick_divisor;
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  xtensa_getcount, xtensa_getcompare, xtensa_setcompare, and
- *            xtensa_enable_timer
+ * Function:  xtensa_getcount, xtensa_getcompare, and xtensa_setcompare
  *
  * Description:
  *   Lower level operations on Xtensa special registers.
@@ -105,22 +112,6 @@ static inline void xtensa_setcompare(uint32_t compare)
   __asm__ __volatile__
   (
     "wsr %0, %1" : : "r"(compare), "I"(XT_CCOMPARE)
-  );
-}
-
-/* Enable the timer interrupt.  NOTE: This is non-atomic but safe in this
- * context because this occurs early in the initialization sequence.
- */
-
-static inline void xtensa_enable_timer(void)
-{
-  __asm__ __volatile__
-  (
-    "movi a3, %0\n"
-    "rsr  a2, INTENABLE\n"
-    "or   a2, a2, a3\n"
-    "wsr  a2, INTENABLE\n"
-    :  : "I"(XT_TIMER_INTEN) : "a2", "a3"
   );
 }
 
@@ -212,9 +203,7 @@ void xtensa_timer_initialize(void)
 
   (void)irq_attach(XTENSA_IRQ_TIMER0, (xcpt_t)esp32_timerisr);
 
-  /* Enable the timer interrupt at the device level.  NOTE: It is un-necessary
-   * to call up_enable_irq() for timers.
-   */
+  /* Enable the timer 0 CPU interrupt. */
 
-  xtensa_enable_timer();
+  up_enable_irq(ESP32_CPUINT_TIMER0);
 }

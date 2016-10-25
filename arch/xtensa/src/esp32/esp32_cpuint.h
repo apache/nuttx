@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/esp32/esp32_irq.c
+ * arch/xtensa/src/esp32/esp32_cpuint.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,117 +33,87 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_XTENSA_SRC_ESP32_ESP32_CPUINT_H
+#define __ARCH_XTENSA_SRC_ESP32_ESP32_CPUINT_H 1
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <debug.h>
-
-#include <nuttx/irq.h>
-#include <nuttx/arch.h>
-#include <arch/irq.h>
-
-#include "xtensa.h"
-
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/* g_current_regs[] holds a references to the current interrupt level
- * register storage structure.  If is non-NULL only during interrupt
- * processing.  Access to g_current_regs[] must be through the macro
- * CURRENT_REGS for portability.
- */
-
-#ifdef CONFIG_SMP
-/* For the case of architectures with multiple CPUs, then there must be one
- * such value for each processor that can receive an interrupt.
- */
-
-volatile uint32_t *g_current_regs[CONFIG_SMP_NCPUS];
-
-#else
-
-volatile uint32_t *g_current_regs[1];
-
-#endif
-
-/****************************************************************************
- * Private Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp32_irq_dump
+ * Name:  esp32_alloc_levelint
  *
  * Description:
- *   Dump some interesting NVIC registers
+ *   Allocate a level CPU interrupt
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   On success, the allocated level-sensitive, CPU interrupt numbr is
+ *   returned.  A negated errno is returned on failure.  The only possible
+ *   failure is that all level-sensitive CPU interrupts have already been
+ *   allocated.
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_IRQ_INFO)
-static void esp32_irq_dump(const char *msg, int irq)
-{
-  irqstate_t flags;
-
-  flags = enter_critical_section();
-#warning Missing logic
-  leave_critical_section(flags);
-}
-#else
-#  define esp32_irq_dump(msg, irq)
-#endif
+int esp32_alloc_levelint(void);
 
 /****************************************************************************
- * Name: xtensa_disable_all
+ * Name:  esp32_free_levelint
+ *
+ * Description:
+ *   Free a previoulsy allocated level CPU interrupt
+ *
+ * Input Parameters:
+ *   The CPU interrupt number to be freed
+ *
+ * Returned Value:
+ *   None
+ *
  ****************************************************************************/
 
-static inline void xtensa_disable_all(void)
-{
-  __asm__ __volatile__
-  (
-    "movi a2, 0\n"
-    "xsr a2, INTENABLE\n"
-    : : : "a2"
-  );
-}
+void esp32_free_levelint(int cpuint);
 
 /****************************************************************************
- * Public Functions
+ * Name:  esp32_alloc_edgeint
+ *
+ * Description:
+ *   Allocate an edge CPU interrupt
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   On success, the allocated edge-sensitive, CPU interrupt numbr is
+ *   returned.  A negated errno is returned on failure.  The only possible
+ *   failure is that all edge-sensitive CPU interrupts have already been
+ *   allocated.
+ *
  ****************************************************************************/
+
+int esp32_alloc_edgeint(void);
 
 /****************************************************************************
- * Name: xtensa_irq_initialize
+ * Name:  esp32_free_edgeint
+ *
+ * Description:
+ *   Free a previoulsy allocated edge CPU interrupt
+ *
+ * Input Parameters:
+ *   The CPU interrupt number to be freed
+ *
+ * Returned Value:
+ *   None
+ *
  ****************************************************************************/
 
-void xtensa_irq_initialize(void)
-{
-  /* Disable all PRO CPU interrupts */
+void esp32_free_edgeint(int cpuint);
 
-  xtensa_disable_all();
-
-  /* Disable peripheral sources from all PRO CPU interrupt */
-#warning Missing logic
-
-#if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 3
-  /* Colorize the interrupt stack for debug purposes */
-
-#warning Missing logic
-#endif
-
-  /* Set all interrupts (and exceptions) to the default priority */
-#warning Missing logic
-
-  /* Attach all processor exceptions */
-#warning Missing logic
-
-  esp32_irq_dump("initial", NR_IRQS);
-
-#ifndef CONFIG_SUPPRESS_INTERRUPTS
-  /* And finally, enable interrupts */
-
-  up_irq_enable();
-#endif
-}
+#endif /* __ARCH_XTENSA_SRC_ESP32_ESP32_CPUINT_H */

@@ -156,13 +156,6 @@ extern volatile uint32_t *g_current_regs[1];
 
 #endif
 
-/* This is the beginning of heap as provided from *_head.S. This is the
- * first address in DRAM after the loaded program+bss+idle stack.  The end
- * of the heap is CONFIG_RAM_END
- */
-
-extern uint32_t g_idle_topstack;
-
 /* Address of the saved user stack pointer */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
@@ -243,6 +236,8 @@ void xtensa_dumpstate(void);
 
 uint32_t *xtensa_int_decode(uint32_t *regs);
 uint32_t *xtensa_irq_dispatch(int irq, uint32_t *regs);
+uint32_t xtensa_enable_cpuint(uint32_t *shadow, uint32_t intmask);
+uint32_t xtensa_disable_cpuint(uint32_t *shadow, uint32_t intmask);
 
 /* Software interrupt handler */
 

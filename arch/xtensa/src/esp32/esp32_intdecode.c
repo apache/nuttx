@@ -45,6 +45,24 @@
 #include "xtensa.h"
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static const uint8_t g_baseirq[3] =
+{
+  ESP32_IRQ_SREG0,
+  ESP32_IRQ_SREG1,
+  ESP32_IRQ_SREG2
+};
+
+static const uint8_t g_nirqs[3] =
+{
+  ESP32_NIRQS_SREG0,
+  ESP32_NIRQS_SREG1,
+  ESP32_NIRQS_SREG2
+};
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -94,19 +112,23 @@ uint32_t *xtensa_int_decode(uint32_t *regs)
    * registers.
    */
 
-  for (regndx = 0, baseirq = XTENSA_IRQ_SREG0;
-       regndx < 3;
-       regndx++, baseirq += 32, regaddr += sizeof(uint32_t))
+  for (regndx = 0; regndx < 3; regndx++)
     {
       /* Fetch the next register status register */
 
-      regval = getreg32(regaddr);
+      regval   = getreg32(regaddr);
+      regaddr += sizeof(uint32_t);
+
+      /* Set up the search */
+
+      baseirq = g_baseirq[regndx];
+      nirqs   = g_nirqs[regndx]
 
       /* Decode and dispatch each pending bit in the interrupt status
        * register.
        */
 
-      for (bit = 0; regval != 0 && bit < 32; bit++)
+      for (bit = 0; regval != 0 && bit < nirqs; bit++)
         {
           /* Check if this interrupt is pending */
 

@@ -84,6 +84,20 @@ static inline void xtensa_registerdump(FAR struct tcb_s *tcb)
 #endif
 
 /****************************************************************************
+ * Name: xtensa_disable_all
+ ****************************************************************************/
+
+static inline void xtensa_disable_all(void)
+{
+  __asm__ __volatile__
+  (
+    "movi a2, 0\n"
+    "xsr a2, INTENABLE\n"
+    : : : "a2"
+  );
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -126,6 +140,13 @@ int xtensa_start_handler(int irq, FAR void *context)
   /* Make page 0 access raise an exception */
 
   esp32_region_protection();
+
+  /* Disable all PRO CPU interrupts */
+
+  xtensa_disable_all();
+
+  /* Disable peripheral sources from all PRO CPU interrupt */
+#warning Missing logic
 
   /* Dump registers so that we can see what is going to happen on return */
 
