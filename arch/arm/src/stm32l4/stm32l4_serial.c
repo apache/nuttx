@@ -96,7 +96,7 @@
 
 #  if defined(CONFIG_UART4_RXDMA) || defined(CONFIG_UART5_RXDMA)
 #    ifndef CONFIG_STM32L4_DMA2
-#      error STM32L4 USART4/5 receive DMA requires CONFIG_STM32L4_DMA2
+#      error STM32L4 UART4/5 receive DMA requires CONFIG_STM32L4_DMA2
 #    endif
 #  endif
 
