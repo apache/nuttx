@@ -297,11 +297,17 @@
  * 26 can be mapped to peripheral interrupts:
  *
  *   Level triggered peripherals (21 total):
- *     0-5, 8-9, 12-13, 17-21, 23-27, 31
+ *     0-5, 8-9, 12-13, 17-18 - Priority 1
+ *     19-21                  - Priority 2
+ *     23, 27                 - Priority 3
+ *     24-25                  - Priority 4
+ *     26, 31                 - Priority 5
  *   Edge triggered peripherals (4 total):
- *     10, 22, 28, 30
+ *     10                     - Priority 1
+ *     22                     - Priority 3
+ *     28, 30                 - Priority 4
  *   NMI (1 total):
- *     14
+ *     14                     - NMI
  *
  * CPU peripheral interrupts can be a assigned to a CPU interrupt using the
  * PRO_*_MAP_REG or APP_*_MAP_REG.  There are a pair of these registers for
@@ -310,11 +316,12 @@
  *
  * The remaining, five, internal CPU interrupts are:
  *
- *   6   Timer0
- *   7   Software
- *   15  Timer1
- *   16  Timer2
- *   29  Software
+ *   6   Timer0    - Priority 1
+ *   7   Software  - Priority 1
+ *   11  Profiling - Priority 3
+ *   15  Timer1    - Priority 3
+ *   16  Timer2    - Priority 5
+ *   29  Software  - Priority 3
  *
  * A peripheral interrupt can be disabled
  */
@@ -358,6 +365,21 @@
 #define ESP32_CPUINT_MAX            31
 #define EPS32_CPUINT_PERIPHSET      0xdffe7f3f
 #define EPS32_CPUINT_INTERNALSET    0x200180c0
+
+/* Priority 1:   0-10, 12-13, 17-18    (15)
+ * Priority 2:   19-21                 (3)
+ * Priority 3:   11, 15, 22-23, 27, 29 (6)
+ * Priority 4:   24-25, 28, 30         (4)
+ * Priority 5:   16, 26, 31            (3)
+ * Priority NMI: 14                    (1)
+ */
+
+#define ESP32_INTPRI1_MASK          0x000637ff
+#define ESP32_INTPRI2_MASK          0x00380000
+#define ESP32_INTPRI3_MASK          0x28c08800
+#define ESP32_INTPRI4_MASK          0x53000000
+#define ESP32_INTPRI5_MASK          0x84010000
+#define ESP32_INTNMI_MASK           0x00004000
 
 /****************************************************************************
  * Public Types

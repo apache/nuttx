@@ -143,6 +143,12 @@
 
 #define NO_CPUINT  ESP32_CPUINT_TIMER0
 
+/* Priority range is 1-5 */
+
+#define ESP32_MIN_PRIORITY     1
+#define ESP32_MAX_PRIORITY     5
+#define ESP32_PRIO_INDEX(p)    ((p) - ESP32_MIN_PRIORITY)
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -165,6 +171,17 @@ static uint32_t g_intenable[1];
 
 static uint32_t g_level_ints = ESP32_LEVEL_SET;
 static uint32_t g_edge_ints  = ESP32_EDGE_SET;
+
+/* Bitsets for each interrupt priority 1-5 */
+
+static uint32_t g_priority[5] =
+{
+  ESP32_INTPRI1_MASK,
+  ESP32_INTPRI2_MASK,
+  ESP32_INTPRI3_MASK,
+  ESP32_INTPRI4_MASK,
+  ESP32_INTPRI5_MASK
+};
 
 /****************************************************************************
  * Private Functions
@@ -229,7 +246,7 @@ void up_enable_irq(int cpuint)
  *   Allocate a level CPU interrupt
  *
  * Input Parameters:
- *   None
+ *   priority - Priority of the CPU interrupt (1-5)
  *
  * Returned Value:
  *   On success, the allocated level-sensitive, CPU interrupt numbr is
@@ -239,28 +256,39 @@ void up_enable_irq(int cpuint)
  *
  ****************************************************************************/
 
-int esp32_alloc_levelint(void)
+int esp32_alloc_levelint(int priority)
 {
   irqstate_t flags;
   uint32_t mask;
+  uint32_t intset;
   int cpuint;
   int ret = -ENOMEM;
+
+  DEBUGASSERT(priority >= ESP32_MIN_PRIORITY && priority <= ESP32_MAX_PRIORITY)
 
   /* Check if there are any level CPU interrupts available */
 
   flags = enter_critical_section();
-  if ((g_level_ints & ESP32_LEVEL_SET) != 0)
-    {
-      /* Search for an unallocated CPU interrupt number in g_level_ints. */
 
-      for (cpuint = 0; cpuint < ESP32_CPUINT_NLEVELPERIPHS; cpuint++)
+  intset = g_level_ints & g_priority[ESP32_PRIO_INDEX(priority)] & ESP32_LEVEL_SET;
+  if (intset != 0)
+    {
+      /* Skip over initial zeroes as quickly in groups of 8 bits. */
+
+      for (cpuint = 0, mask = 0xff;
+           cpuint <= ESP32_CPUINT_MAX && (intset & mask) == 0;
+           cpuint += 8, mask <<= 8);
+
+      /* Search for an unallocated CPU interrupt number in the remaining intset. */
+
+      for (; cpuint <= ESP32_CPUINT_MAX && intset != 0; cpuint++)
         {
           /* If the bit corresponding to the CPU interrupt is '1', then
            * that CPU interrupt is available.
            */
 
           mask = (1ul << cpuint);
-          if ((g_level_ints & mask) != 0)
+          if ((intset & mask) != 0)
             {
               /* Got it! */
 
@@ -268,6 +296,10 @@ int esp32_alloc_levelint(void)
               ret = cpuint;
               break;
             }
+
+          /* Clear the bit in intset so that we may exit the loop sooner */
+
+          intset &= ~mask;
         }
     }
 
@@ -312,7 +344,7 @@ void esp32_free_levelint(int cpuint)
  *   Allocate an edge CPU interrupt
  *
  * Input Parameters:
- *   None
+ *   priority - Priority of the CPU interrupt (1-5)
  *
  * Returned Value:
  *   On success, the allocated edge-sensitive, CPU interrupt numbr is
@@ -322,28 +354,39 @@ void esp32_free_levelint(int cpuint)
  *
  ****************************************************************************/
 
-int esp32_alloc_edgeint(void)
+int esp32_alloc_edgeint(int priority)
 {
   irqstate_t flags;
   uint32_t mask;
+  uint32_t intset;
   int cpuint;
   int ret = -ENOMEM;
+
+  DEBUGASSERT(priority >= ESP32_MIN_PRIORITY && priority <= ESP32_MAX_PRIORITY)
 
   /* Check if there are any level CPU interrupts available */
 
   flags = enter_critical_section();
-  if ((g_edge_ints & ESP32_EDGE_SET) != 0)
-    {
-      /* Search for an unallocated CPU interrupt number in g_edge_ints. */
 
-      for (cpuint = 0; cpuint < ESP32_CPUINT_NEDGEPERIPHS; cpuint++)
+  intset = g_edge_ints & g_priority[ESP32_PRIO_INDEX(priority)] & ESP32_EDGE_SET;
+  if (intset != 0)
+    {
+      /* Skip over initial zeroes as quickly in groups of 8 bits. */
+
+      for (cpuint = 0, mask = 0xff;
+           cpuint <= ESP32_CPUINT_MAX && (intset & mask) == 0;
+           cpuint += 8, mask <<= 8);
+
+      /* Search for an unallocated CPU interrupt number in the remaining intset. */
+
+      for (; cpuint <= ESP32_CPUINT_MAX && intset != 0; cpuint++)
         {
           /* If the bit corresponding to the CPU interrupt is '1', then
            * that CPU interrupt is available.
            */
 
           mask = (1ul << cpuint);
-          if ((g_edge_ints & mask) != 0)
+          if ((intset & mask) != 0)
             {
               /* Got it! */
 
@@ -351,6 +394,10 @@ int esp32_alloc_edgeint(void)
               ret = cpuint;
               break;
             }
+
+          /* Clear the bit in intset so that we may exit the loop sooner */
+
+          intset &= ~mask;
         }
     }
 

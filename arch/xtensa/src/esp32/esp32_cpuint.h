@@ -53,7 +53,7 @@
  *   Allocate a level CPU interrupt
  *
  * Input Parameters:
- *   None
+ *   priority - Priority of the CPU interrupt (1-5)
  *
  * Returned Value:
  *   On success, the allocated level-sensitive, CPU interrupt numbr is
@@ -63,7 +63,7 @@
  *
  ****************************************************************************/
 
-int esp32_alloc_levelint(void);
+int esp32_alloc_levelint(int priority);
 
 /****************************************************************************
  * Name:  esp32_free_levelint
@@ -72,7 +72,7 @@ int esp32_alloc_levelint(void);
  *   Free a previoulsy allocated level CPU interrupt
  *
  * Input Parameters:
- *   The CPU interrupt number to be freed
+ *   cpuint - The CPU interrupt number to be freed
  *
  * Returned Value:
  *   None
@@ -88,7 +88,7 @@ void esp32_free_levelint(int cpuint);
  *   Allocate an edge CPU interrupt
  *
  * Input Parameters:
- *   None
+ *   priority - Priority of the CPU interrupt (1-5)
  *
  * Returned Value:
  *   On success, the allocated edge-sensitive, CPU interrupt numbr is
@@ -98,7 +98,7 @@ void esp32_free_levelint(int cpuint);
  *
  ****************************************************************************/
 
-int esp32_alloc_edgeint(void);
+int esp32_alloc_edgeint(int priority);
 
 /****************************************************************************
  * Name:  esp32_free_edgeint
@@ -107,14 +107,14 @@ int esp32_alloc_edgeint(void);
  *   Free a previoulsy allocated edge CPU interrupt
  *
  * Input Parameters:
- *   The CPU interrupt number to be freed
+ *   cpuint - The CPU interrupt number to be freed
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void esp32_free_edgeint(int cpuint);
+void esp32_free_edgeint(int cpuint, int priority);
 
 /****************************************************************************
  * Name:  esp32_attach_peripheral
