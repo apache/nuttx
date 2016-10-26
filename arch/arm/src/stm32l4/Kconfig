@@ -1277,7 +1277,6 @@ config STM32L4_TIM5_PWM
 	default n
 	depends on STM32L4_TIM5
 	select PWM
-	select PWM
 	select ARCH_HAVE_PWM_PULSECOUNT
 	---help---
 		Reserve timer 5 for use by PWM
