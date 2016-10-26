@@ -105,13 +105,6 @@ void IRAM_ATTR __start(void)
 
   esp32_board_initialize();
 
-#warning These belong elsewhere
-#if 0
-  ets_setup_syscalls();
-  esp_ipc_init();
-  spi_flash_init();
-#endif
-
   /* Bring up NuttX */
 
   os_start();

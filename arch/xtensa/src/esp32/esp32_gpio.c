@@ -34,13 +34,14 @@
 #include <stdint.h>
 #include <assert.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include <arch/irq.h>
 
+#include "xtensa.h"
 #include "chip/esp32_iomux.h"
 #include "chip/esp32_gpio.h"
-#include "xtensa.h"
-
+#include "esp32_cpuint.h"
 #include "esp32_gpio.h"
 
 /****************************************************************************
@@ -121,7 +122,6 @@ static void gpio_dispatch(int irq, uint32_t status, uint32_t *regs)
 static int gpio_interrupt(int irq, FAR void *context)
 {
   uint32_t status;
-  uint32_t gpio_intr_status_h = 0;
 
   /* Read and clear the lower GPIO interrupt status */
 
@@ -140,7 +140,7 @@ static int gpio_interrupt(int irq, FAR void *context)
   /* Dispatch pending interrupts in the lower GPIO status register */
 
   gpio_dispatch(ESP32_FIRST_GPIOIRQ + 32, status, (uint32_t *)context);
-  reutnr OK;
+  return OK;
 }
 #endif
 
@@ -386,7 +386,7 @@ void esp32_gpioirqenable(int irq, gpio_intrtype_t intrtype)
     }
 
   regval |= (intrtype << GPIO_PIN_INT_TYPE_S);
-  puttreg32(regval, regaddr);
+  putreg32(regval, regaddr);
 
   up_enable_irq(g_gpio_cpuint);
 }
@@ -420,7 +420,7 @@ void esp32_gpioirqdisable(int irq)
   regaddr = GPIO_REG(pin);
   regval  = getreg32(regaddr);
   regval &= ~(GPIO_PIN_INT_ENA_M | GPIO_PIN_INT_TYPE_M);
-  puttreg32(regval, regaddr);
+  putreg32(regval, regaddr);
 
   up_enable_irq(g_gpio_cpuint);
 }
