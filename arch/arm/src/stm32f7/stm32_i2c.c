@@ -2245,6 +2245,10 @@ static int stm32_i2c_init(FAR struct stm32_i2c_priv_s *priv)
    * - Provide means to set peripheral clock source via RCC_CFGR3_I2CxSW
    * - Set to HSI by default, make Kconfig option
    */
+   
+  /* Force a frequency update */
+
+  priv->frequency = 0;
 
   stm32_i2c_setclock(priv, 100000);
 
