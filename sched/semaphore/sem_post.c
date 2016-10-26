@@ -131,8 +131,14 @@ int sem_post(FAR sem_t *sem)
                (stcb && stcb->waitsem != sem);
                stcb = stcb->flink);
 
-          if (stcb)
+          if (stcb != NULL)
             {
+              /* The task will be the new holder of the semaphore when
+               * it is awakened.
+               */
+
+              sem_addholder_tcb(stcb, sem);
+
               /* It is, let the task take the semaphore */
 
               stcb->waitsem = NULL;

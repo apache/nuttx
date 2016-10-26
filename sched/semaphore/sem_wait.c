@@ -173,9 +173,12 @@ int sem_wait(FAR sem_t *sem)
 
           if (get_errno() != EINTR && get_errno() != ETIMEDOUT)
             {
-              /* Not awakened by a signal or a timeout... We hold the semaphore */
+              /* Not awakened by a signal or a timeout...
+               *
+               * NOTE that in this case sem_addholder() was called by logic
+               * in sem_wait() fore this thread was restarted.
+               */
 
-              sem_addholder(sem);
               ret = OK;
             }
 

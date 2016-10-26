@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/semaphore/sem_holder.c
  *
- *   Copyright (C) 2009-2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2011, 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -833,6 +833,43 @@ void sem_destroyholder(FAR sem_t *sem)
 }
 
 /****************************************************************************
+ * Name: sem_addholder_tcb
+ *
+ * Description:
+ *   Called from sem_wait() when the calling thread obtains the semaphore;
+ *   Called from sem_post() when the waiting thread obtains the semaphore.
+ *
+ * Parameters:
+ *   htcb - TCB of the thread that just obtained the semaphore
+ *   sem  - A reference to the incremented semaphore
+ *
+ * Return Value:
+ *   0 (OK) or -1 (ERROR) if unsuccessful
+ *
+ * Assumptions:
+ *   Interrupts are disabled.
+ *
+ ****************************************************************************/
+
+void sem_addholder_tcb(FAR struct tcb_s *htcb, FAR sem_t *sem)
+{
+  FAR struct semholder_s *pholder;
+
+  /* Find or allocate a container for this new holder */
+
+  pholder = sem_findorallocateholder(sem, htcb);
+  if (pholder != NULL)
+    {
+      /* Then set the holder and increment the number of counts held by this
+       * holder
+       */
+
+      pholder->htcb = htcb;
+      pholder->counts++;
+    }
+}
+
+/****************************************************************************
  * Name: sem_addholder
  *
  * Description:
@@ -845,26 +882,13 @@ void sem_destroyholder(FAR sem_t *sem)
  *   0 (OK) or -1 (ERROR) if unsuccessful
  *
  * Assumptions:
+ *   Interrupts are disabled.
  *
  ****************************************************************************/
 
 void sem_addholder(FAR sem_t *sem)
 {
-  FAR struct tcb_s *rtcb = this_task();
-  FAR struct semholder_s *pholder;
-
-  /* Find or allocate a container for this new holder */
-
-  pholder = sem_findorallocateholder(sem, rtcb);
-  if (pholder)
-    {
-      /* Then set the holder and increment the number of counts held by this
-       * holder
-       */
-
-      pholder->htcb = rtcb;
-      pholder->counts++;
-    }
+  sem_addholder_tcb(this_task(), sem);
 }
 
 /****************************************************************************
