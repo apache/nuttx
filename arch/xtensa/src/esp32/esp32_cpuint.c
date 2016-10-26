@@ -54,10 +54,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define ESP32_INTSET(n)  ((1 << (n)) - 1)
-#define ESP32_LEVEL_SET  ESP32_INTSET(ESP32_CPUINT_NLEVELPERIPHS)
-#define ESP32_EDGE_SET   ESP32_INTSET(ESP32_CPUINT_NEDGEPERIPHS)
-
 /* Mapping Peripheral IDs to map register addresses
  *
  * PERIPHERAL ID                  DPORT REGISTER OFFSET
@@ -169,12 +165,11 @@ static uint32_t g_intenable[1];
 
 /* Bitsets for free, unallocated CPU interrupts */
 
-static uint32_t g_level_ints = ESP32_LEVEL_SET;
-static uint32_t g_edge_ints  = ESP32_EDGE_SET;
+static uint32_t g_free_cpuints = 0xffffffff;
 
 /* Bitsets for each interrupt priority 1-5 */
 
-static uint32_t g_priority[5] =
+static const uint32_t g_priority[5] =
 {
   ESP32_INTPRI1_MASK,
   ESP32_INTPRI2_MASK,
@@ -186,6 +181,75 @@ static uint32_t g_priority[5] =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name:  esp32_alloc_cpuint
+ *
+ * Description:
+ *   Allocate a CPU interrupt
+ *
+ * Input Parameters:
+ *   mask - mask of candidate CPU interrupts.  The CPU interrupt will be
+ *          be allocated from free interrupts within this set
+ *
+ * Returned Value:
+ *   On success, the allocated level-sensitive, CPU interrupt numbr is
+ *   returned.  A negated errno is returned on failure.  The only possible
+ *   failure is that all level-sensitive CPU interrupts have already been
+ *   allocated.
+ *
+ ****************************************************************************/
+
+int esp32_alloc_levelint(uint32_t mask)
+{
+  irqstate_t flags;
+  uint32_t mask;
+  uint32_t intset;
+  int cpuint;
+  int ret = -ENOMEM;
+
+  /* Check if there are is CPU interrupts with the requrested properties
+   * available.
+   */
+
+  flags = enter_critical_section();
+
+  intset = g_free_cpuints & mask;
+  if (intset != 0)
+    {
+      /* Skip over initial unavailable CPU interrupts quickly in groups
+       * of 8 interrupt.
+       */
+
+      for (cpuint = 0, mask = 0xff;
+           cpuint <= ESP32_CPUINT_MAX;
+           cpuint += 8, mask <<= 8);
+
+      /* Search for an unallocated CPU interrupt number in the remaining
+       * intset.
+       */
+
+      for (; cpuint <= ESP32_CPUINT_MAX; cpuint++)
+        {
+          /* If the bit corresponding to the CPU interrupt is '1', then
+           * that CPU interrupt is available.
+           */
+
+          mask = (1ul << cpuint);
+          if ((intset & mask) != 0)
+            {
+              /* Got it! */
+
+              g_free_cpuints &= ~mask;
+              ret = cpuint;
+              break;
+            }
+        }
+    }
+
+  leave_critical_section(flags);
+  return ret;
+}
 
 /****************************************************************************
  * Public Functions
@@ -258,83 +322,17 @@ void up_enable_irq(int cpuint)
 
 int esp32_alloc_levelint(int priority)
 {
-  irqstate_t flags;
-  uint32_t mask;
-  uint32_t intset;
-  int cpuint;
-  int ret = -ENOMEM;
-
-  DEBUGASSERT(priority >= ESP32_MIN_PRIORITY && priority <= ESP32_MAX_PRIORITY)
-
-  /* Check if there are any level CPU interrupts available */
-
-  flags = enter_critical_section();
-
-  intset = g_level_ints & g_priority[ESP32_PRIO_INDEX(priority)] & ESP32_LEVEL_SET;
-  if (intset != 0)
-    {
-      /* Skip over initial zeroes as quickly in groups of 8 bits. */
-
-      for (cpuint = 0, mask = 0xff;
-           cpuint <= ESP32_CPUINT_MAX && (intset & mask) == 0;
-           cpuint += 8, mask <<= 8);
-
-      /* Search for an unallocated CPU interrupt number in the remaining intset. */
-
-      for (; cpuint <= ESP32_CPUINT_MAX && intset != 0; cpuint++)
-        {
-          /* If the bit corresponding to the CPU interrupt is '1', then
-           * that CPU interrupt is available.
-           */
-
-          mask = (1ul << cpuint);
-          if ((intset & mask) != 0)
-            {
-              /* Got it! */
-
-              g_level_ints &= ~mask;
-              ret = cpuint;
-              break;
-            }
-
-          /* Clear the bit in intset so that we may exit the loop sooner */
-
-          intset &= ~mask;
-        }
-    }
-
-  leave_critical_section(flags);
-  return ret;
-}
-
-/****************************************************************************
- * Name:  esp32_free_levelint
- *
- * Description:
- *   Free a previoulsy allocated level CPU interrupt
- *
- * Input Parameters:
- *   The CPU interrupt number to be freed
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void esp32_free_levelint(int cpuint)
-{
-  irqstate_t flags;
   uint32_t mask;
 
-  DEBUGASSERT(cpuint >= 0 && cpuint < ESP32_CPUINT_NLEVELPERIPHS);
+  DEBUGASSERT(priority >= ESP32_MIN_PRIORITY &&
+              priority <= ESP32_MAX_PRIORITY)
 
-  /* Mark the CPU interrupt as available */
+  /* Check if there are any level CPU interrupts available at the requested
+   * interrupt priority.
+   */
 
-  mask  = (1ul << cpuint);
-  flags = enter_critical_section();
-  DEBUGASSERT((g_level_ints & mask) == 0);
-  g_level_ints |= mask;
-  leave_critical_section(flags);
+  mask = g_priority[ESP32_PRIO_INDEX(priority)] & EPS32_CPUINT_LEVELSET;
+  return esp_alloc_cpuint(mask);
 }
 
 /****************************************************************************
@@ -356,60 +354,24 @@ void esp32_free_levelint(int cpuint)
 
 int esp32_alloc_edgeint(int priority)
 {
-  irqstate_t flags;
   uint32_t mask;
-  uint32_t intset;
-  int cpuint;
-  int ret = -ENOMEM;
 
-  DEBUGASSERT(priority >= ESP32_MIN_PRIORITY && priority <= ESP32_MAX_PRIORITY)
+  DEBUGASSERT(priority >= ESP32_MIN_PRIORITY &&
+              priority <= ESP32_MAX_PRIORITY)
 
-  /* Check if there are any level CPU interrupts available */
+  /* Check if there are any edge CPU interrupts available at the requested
+   * interrupt priority.
+   */
 
-  flags = enter_critical_section();
-
-  intset = g_edge_ints & g_priority[ESP32_PRIO_INDEX(priority)] & ESP32_EDGE_SET;
-  if (intset != 0)
-    {
-      /* Skip over initial zeroes as quickly in groups of 8 bits. */
-
-      for (cpuint = 0, mask = 0xff;
-           cpuint <= ESP32_CPUINT_MAX && (intset & mask) == 0;
-           cpuint += 8, mask <<= 8);
-
-      /* Search for an unallocated CPU interrupt number in the remaining intset. */
-
-      for (; cpuint <= ESP32_CPUINT_MAX && intset != 0; cpuint++)
-        {
-          /* If the bit corresponding to the CPU interrupt is '1', then
-           * that CPU interrupt is available.
-           */
-
-          mask = (1ul << cpuint);
-          if ((intset & mask) != 0)
-            {
-              /* Got it! */
-
-              g_edge_ints &= ~mask;
-              ret = cpuint;
-              break;
-            }
-
-          /* Clear the bit in intset so that we may exit the loop sooner */
-
-          intset &= ~mask;
-        }
-    }
-
-  leave_critical_section(flags);
-  return ret;
+  mask = g_priority[ESP32_PRIO_INDEX(priority)] & EPS32_CPUINT_EDGESET;
+  return esp_alloc_cpuint(mask);
 }
 
 /****************************************************************************
- * Name:  esp32_free_edgeint
+ * Name:  esp32_free_cpuint
  *
  * Description:
- *   Free a previoulsy allocated edge CPU interrupt
+ *   Free a previoulsy allocated CPU interrupt
  *
  * Input Parameters:
  *   The CPU interrupt number to be freed
@@ -419,7 +381,7 @@ int esp32_alloc_edgeint(int priority)
  *
  ****************************************************************************/
 
-void esp32_free_edgeint(int cpuint)
+void esp32_free_cpuint(int cpuint)
 {
   irqstate_t flags;
   uint32_t mask;
@@ -430,8 +392,8 @@ void esp32_free_edgeint(int cpuint)
 
   mask  = (1ul << cpuint);
   flags = enter_critical_section();
-  DEBUGASSERT((g_edge_ints & mask) == 0);
-  g_edge_ints |= mask;
+  DEBUGASSERT((g_free_cpuints & mask) == 0);
+  g_free_cpuints |= mask;
   leave_critical_section(flags);
 }
 
@@ -455,7 +417,7 @@ void esp32_attach_peripheral(int cpu, int periphid, int cpuint)
 {
   uintptr_t regaddr;
 
-  DEBUGASSERT(periphid >= 0 && periphid < NR_PERIPHERALS);
+  DEBUGASSERT(periphid >= 0 && periphid < ESP32_NPERIPHERALS);
   DEBUGASSERT(cpuint >= 0 && cpuint <= ESP32_CPUINT_MAX);
 #ifdef CONFIG_SMP
   DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS);
@@ -492,7 +454,7 @@ void esp32_detach_peripheral(int cpu, int periphid)
 {
   uintptr_t regaddr;
 
-  DEBUGASSERT(periphid >= 0 && periphid < NR_PERIPHERALS);
+  DEBUGASSERT(periphid >= 0 && periphid < ESP32_NPERIPHERALS);
 #ifdef CONFIG_SMP
   DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS);
 

@@ -163,7 +163,7 @@
 
 /* Total number of peripherals */
 
-#define NR_PERIPHERALS              69
+#define ESP32_NPERIPHERALS          69
 
 /* Exceptions
  *
@@ -192,6 +192,7 @@
 #define XTENSA_IRQ_TIMER1           1  /* INTERRUPT, bit 15 */
 #define XTENSA_IRQ_TIMER2           2  /* INTERRUPT, bit 16 */
 
+#define XTENSA_NIRQ_INTERNAL        3  /* Number of dispatch internal interrupts */
 #define XTENSA_IRQ_FIRSTPERIPH      3  /* First peripheral IRQ number */
 
 /* IRQ numbers for peripheral interrupts coming throught the Interrupt
@@ -287,9 +288,26 @@
 #define ESP32_IRQ_SREG2             ESP32_IRQ_TG1_WDT_EDGE
 #define ESP32_NIRQS_SREG2           5
 
+#define ESP32_NIRQ_PERIPH           ESP32_NPERIPHERALS
+
+/* Second level GPIO interrupts.  GPIO interrupts are decoded and dispatched as
+ * a second level of decoding:  The first level dispatches to the GPIO interrupt
+ * handler.  The second to the decoded GPIO interrupt handler.
+ */
+
+#ifdef CONFIG_ESP32_GPIO_IRQ
+#  define ESP32_NIRQ_GPIO           40
+#  define ESP32_FIRST_GPIOIRQ       (XTENSA_NIRQ_INTERNAL+ESP32_NIRQ_PERIPH)
+#  define ESP32_LAST_GPIOIRQ        (ESP32_FIRST_GPIOIRQ+ESP32_NIRQ_GPIO-1)
+#  define ESP32_PIN2IRQ(p)          ((p) + ESP32_FIRST_GPIOIRQ)
+#  define ESP32_IRQ2PIN(i)          ((i) - ESP32_FIRST_GPIOIRQ)
+#else
+#  define ESP32_NIRQ_GPIO           0
+#endif
+
 /* Total number of interrupts */
 
-#define NR_IRQS                     (ESP32_IRQ_CACHE_IA+1)
+#define NR_IRQS                     (XTENSA_NIRQ_INTERNAL+ESP32_NIRQ_PERIPH+ESP32_NIRQ_GPIO)
 
 /* CPU Interrupts.
  *
@@ -347,23 +365,32 @@
 #define ESP32_CPUINT_LEVELPERIPH_18 26
 #define ESP32_CPUINT_LEVELPERIPH_19 27
 #define ESP32_CPUINT_LEVELPERIPH_20 31
+
 #define ESP32_CPUINT_NLEVELPERIPHS  21
+#define EPS32_CPUINT_LEVELSET       0x8fbe333f
 
 #define ESP32_CPUINT_EDGEPERIPH_0   10
 #define ESP32_CPUINT_EDGEPERIPH_1   22
 #define ESP32_CPUINT_EDGEPERIPH_2   28
 #define ESP32_CPUINT_EDGEPERIPH_3   30
+
 #define ESP32_CPUINT_NEDGEPERIPHS   4
+#define EPS32_CPUINT_EDGESET        0x50400400
+
+#define ESP32_CPUINT_NNMIPERIPHS    4
+#define EPS32_CPUINT_NMISET         0x00004000
 
 #define ESP32_CPUINT_TIMER0         6
 #define ESP32_CPUINT_SOFTWARE0      7
+#define ESP32_CPUINT_PROFILING      11
 #define ESP32_CPUINT_TIMER1         15
 #define ESP32_CPUINT_TIMER2         16
 #define ESP32_CPUINT_SOFTWARE1      29
+
 #define ESP32_CPUINT_NINTERNAL      5
 
 #define ESP32_CPUINT_MAX            31
-#define EPS32_CPUINT_PERIPHSET      0xdffe7f3f
+#define EPS32_CPUINT_PERIPHSET      0xdffe6f3f
 #define EPS32_CPUINT_INTERNALSET    0x200180c0
 
 /* Priority 1:   0-10, 12-13, 17-18    (15)

@@ -148,7 +148,7 @@ int xtensa_start_handler(int irq, FAR void *context)
 
   /* Detach all peripheral sources APP CPU interrupts */
 
-  for (i = 0; i < NR_PERIPHERALS)
+  for (i = 0; i < ESP32_NPERIPHERALS; i++)
     {
       esp32_detach_peripheral(1, i);;
     }

@@ -419,3 +419,4 @@ xtensa_context_restore:
 	l32i	a0, a2, (4 * REG_A0)			/* Restore a0 */
 	l32i	a2, a2, (4 * REG_A2)			/* Restore A2 */
 	rfe										/* And return from "exception" */
+

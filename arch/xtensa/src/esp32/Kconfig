@@ -193,6 +193,11 @@ config ESP32_WIRELESS
 
 endmenu # ESP32 Peripheral Selection
 
+config ESP32_GPIO_IRQ
+	bool "GPIO pin interrupts"
+	---help---
+		Enable support for interrupting GPIO pins
+
 config ESP32_BT_RESERVE_DRAM
 	int "Reserved BT DRAM"
 	default 0
