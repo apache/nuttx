@@ -186,6 +186,20 @@
  * Note: we don't need redefine GPIO_TIM3_CH3OUT because PB0 is not remap pin.
  */
 
+/* RGB LED
+ *
+ * R = TIM1 CH1 on PA8 | G = TIM2 CH2 on PA1 | B = TIM4 CH4 on PB9
+ *
+ * Note: Pin configs: GPIO_TIM1_CH1OUT ; GPIO_TIM2_CH2OUT ; GPIO_TIM4_CH4OUT
+ */
+
+#define RGBLED_RPWMTIMER   1
+#define RGBLED_RPWMCHANNEL 1
+#define RGBLED_GPWMTIMER   2
+#define RGBLED_GPWMCHANNEL 2
+#define RGBLED_BPWMTIMER   4
+#define RGBLED_BPWMCHANNEL 4
+
 /************************************************************************************
  * Public Data
  ************************************************************************************/

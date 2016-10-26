@@ -57,6 +57,10 @@ ifeq ($(CONFIG_PWM),y)
 CSRCS += stm32_pwm.c
 endif
 
+ifeq ($(CONFIG_RGBLED),y)
+CSRCS += stm32_rgbled.c
+endif
+
 ifeq ($(CONFIG_AUDIO_TONE),y)
 CSRCS += stm32_tone.c
 endif

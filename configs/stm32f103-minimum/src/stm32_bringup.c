@@ -116,6 +116,17 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_RGBLED
+  /* Configure and initialize the RGB LED. */
+
+  ret = stm32_rgbled_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_rgbled_setup() failed: %d\n", ret);
+    }
+#endif
+
+
 #ifdef CONFIG_CL_MFRC522
   ret = stm32_mfrc522initialize("/dev/rfid0");
   if (ret < 0)
