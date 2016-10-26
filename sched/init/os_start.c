@@ -219,8 +219,8 @@ volatile pid_t g_lastpid;
  * 1. This hash table greatly speeds the determination of a new unique
  *    process ID for a task, and
  * 2. Is used to quickly map a process ID into a TCB.
- * It has the side effects of using more memory and limiting
  *
+ * It has the side effects of using more memory and limiting
  * the number of tasks to CONFIG_MAX_TASKS.
  */
 
