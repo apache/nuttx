@@ -78,8 +78,8 @@ endif
 
 CHIP_ASRCS  =
 CHIP_CSRCS  = esp32_allocateheap.c esp32_clockconfig.c esp32_cpuint.c
-CHIP_CSRCS += esp32_intdecode.c esp32_irq.c esp32_region.c esp32_start.c
-CHIP_CSRCS += esp32_timerisr.c
+CHIP_CSRCS += esp32_gpio.c esp32_intdecode.c esp32_irq.c esp32_region.c
+CHIP_CSRCS += esp32_start.c esp32_timerisr.c
 
 # Configuration-dependent ESP32 files
 

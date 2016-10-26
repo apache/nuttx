@@ -98,7 +98,7 @@ int esp32_alloc_edgeint(int priority);
  *
  ****************************************************************************/
 
-void esp32_free_cpuint(int cpuint, int priority);
+void esp32_free_cpuint(int cpuint);
 
 /****************************************************************************
  * Name:  esp32_attach_peripheral

@@ -31,6 +31,15 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
+#include <stdint.h>
+#include <stdbool.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
 /* Bit-encoded input to esp32_configgpio() **********************************/
 
 /* Encoded pin attributes used with esp32_configgpio() */

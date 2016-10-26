@@ -48,6 +48,8 @@
 #include <nuttx/irq.h>
 #include <arch/irq.h>
 
+#include "chip/esp32_dport.h"
+#include "esp32_cpuint.h"
 #include "xtensa.h"
 
 /****************************************************************************
@@ -189,8 +191,8 @@ static const uint32_t g_priority[5] =
  *   Allocate a CPU interrupt
  *
  * Input Parameters:
- *   mask - mask of candidate CPU interrupts.  The CPU interrupt will be
- *          be allocated from free interrupts within this set
+ *   intmask - mask of candidate CPU interrupts.  The CPU interrupt will be
+ *             be allocated from free interrupts within this set
  *
  * Returned Value:
  *   On success, the allocated level-sensitive, CPU interrupt numbr is
@@ -200,10 +202,10 @@ static const uint32_t g_priority[5] =
  *
  ****************************************************************************/
 
-int esp32_alloc_levelint(uint32_t mask)
+int esp32_alloc_cpuint(uint32_t intmask)
 {
   irqstate_t flags;
-  uint32_t mask;
+  uint32_t bitmask;
   uint32_t intset;
   int cpuint;
   int ret = -ENOMEM;
@@ -214,16 +216,16 @@ int esp32_alloc_levelint(uint32_t mask)
 
   flags = enter_critical_section();
 
-  intset = g_free_cpuints & mask;
+  intset = g_free_cpuints & intmask;
   if (intset != 0)
     {
       /* Skip over initial unavailable CPU interrupts quickly in groups
        * of 8 interrupt.
        */
 
-      for (cpuint = 0, mask = 0xff;
+      for (cpuint = 0, bitmask = 0xff;
            cpuint <= ESP32_CPUINT_MAX;
-           cpuint += 8, mask <<= 8);
+           cpuint += 8, bitmask <<= 8);
 
       /* Search for an unallocated CPU interrupt number in the remaining
        * intset.
@@ -235,12 +237,12 @@ int esp32_alloc_levelint(uint32_t mask)
            * that CPU interrupt is available.
            */
 
-          mask = (1ul << cpuint);
-          if ((intset & mask) != 0)
+          bitmask = (1ul << cpuint);
+          if ((intset & bitmask) != 0)
             {
               /* Got it! */
 
-              g_free_cpuints &= ~mask;
+              g_free_cpuints &= ~bitmask;
               ret = cpuint;
               break;
             }
@@ -322,7 +324,7 @@ void up_enable_irq(int cpuint)
 
 int esp32_alloc_levelint(int priority)
 {
-  uint32_t mask;
+  uint32_t intmask;
 
   DEBUGASSERT(priority >= ESP32_MIN_PRIORITY &&
               priority <= ESP32_MAX_PRIORITY)
@@ -331,8 +333,8 @@ int esp32_alloc_levelint(int priority)
    * interrupt priority.
    */
 
-  mask = g_priority[ESP32_PRIO_INDEX(priority)] & EPS32_CPUINT_LEVELSET;
-  return esp_alloc_cpuint(mask);
+  intmask = g_priority[ESP32_PRIO_INDEX(priority)] & EPS32_CPUINT_LEVELSET;
+  return esp32_alloc_cpuint(intmask);
 }
 
 /****************************************************************************
@@ -354,7 +356,7 @@ int esp32_alloc_levelint(int priority)
 
 int esp32_alloc_edgeint(int priority)
 {
-  uint32_t mask;
+  uint32_t intmask;
 
   DEBUGASSERT(priority >= ESP32_MIN_PRIORITY &&
               priority <= ESP32_MAX_PRIORITY)
@@ -363,8 +365,8 @@ int esp32_alloc_edgeint(int priority)
    * interrupt priority.
    */
 
-  mask = g_priority[ESP32_PRIO_INDEX(priority)] & EPS32_CPUINT_EDGESET;
-  return esp_alloc_cpuint(mask);
+  intmask = g_priority[ESP32_PRIO_INDEX(priority)] & EPS32_CPUINT_EDGESET;
+  return esp32_alloc_cpuint(intmask);
 }
 
 /****************************************************************************
@@ -384,16 +386,16 @@ int esp32_alloc_edgeint(int priority)
 void esp32_free_cpuint(int cpuint)
 {
   irqstate_t flags;
-  uint32_t mask;
+  uint32_t bitmask;
 
   DEBUGASSERT(cpuint >= 0 && cpuint < ESP32_CPUINT_NEDGEPERIPHS);
 
   /* Mark the CPU interrupt as available */
 
-  mask  = (1ul << cpuint);
+  bitmask  = (1ul << cpuint);
   flags = enter_critical_section();
-  DEBUGASSERT((g_free_cpuints & mask) == 0);
-  g_free_cpuints |= mask;
+  DEBUGASSERT((g_free_cpuints & bitmask) == 0);
+  g_free_cpuints |= bitmask;
   leave_critical_section(flags);
 }
 
@@ -432,7 +434,7 @@ void esp32_attach_peripheral(int cpu, int periphid, int cpuint)
       regaddr = DPORT_PRO_MAP_REGADDR(periphid);
     }
 
-  putreg(cpuint, regaddr);
+  putreg32(cpuint, regaddr);
 }
 
 /****************************************************************************
@@ -468,5 +470,5 @@ void esp32_detach_peripheral(int cpu, int periphid)
       regaddr = DPORT_PRO_MAP_REGADDR(periphid);
     }
 
-  putreg(NO_CPUINT, regaddr);
+  putreg32(NO_CPUINT, regaddr);
 }

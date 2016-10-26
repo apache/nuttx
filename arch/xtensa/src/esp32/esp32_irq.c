@@ -144,6 +144,13 @@ void xtensa_irq_initialize(void)
 
   esp32_irq_dump("initial", NR_IRQS);
 
+#ifdef CONFIG_ESP32_GPIO_IRQ
+  /* Initialize GPIO interrupt support */
+
+  esp32_gpioirqinitialize();
+#endif
+
+
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
   /* And finally, enable interrupts */
 

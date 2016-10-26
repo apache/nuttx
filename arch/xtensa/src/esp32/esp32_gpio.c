@@ -30,6 +30,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
 #include <stdint.h>
 #include <assert.h>
 
@@ -38,6 +39,8 @@
 
 #include "chip/esp32_iomux.h"
 #include "chip/esp32_gpio.h"
+#include "xtensa.h"
+
 #include "esp32_gpio.h"
 
 /****************************************************************************
@@ -52,7 +55,9 @@
  * Private Data
  ****************************************************************************/
 
+#ifdef CONFIG_ESP32_GPIO_IRQ
 static uint8_t g_gpio_cpuint;
+#endif
 
 static const uint8_t g_pin2func[40] =
 {
@@ -155,9 +160,8 @@ int esp32_configgpio(int pin, gpio_pinattr_t attr)
 {
   uintptr_t regaddr;
   uint32_t func;
-  uint32_t cntl;
+  uint32_t cntrl;
 
-  DEBUGASSERT(pin >=0 && pin <= ESP32_NIRQ_GPIO);
   DEBUGASSERT(pin >=0 && pin <= ESP32_NIRQ_GPIO);
 
   /* Handle input pins */
@@ -173,7 +177,7 @@ int esp32_configgpio(int pin, gpio_pinattr_t attr)
         }
       else
         {
-          putreg32((1ul << (pin - 32), GPIO_ENABLE1_DATA_W1TC);
+          putreg32((1ul << (pin - 32)), GPIO_ENABLE1_DATA_W1TC);
         }
 
       if ((attr & PULLUP) != 0)
@@ -196,42 +200,42 @@ int esp32_configgpio(int pin, gpio_pinattr_t attr)
         }
       else
         {
-          putreg32((1ul << (pin - 32), GPIO_ENABLE1_DATA_W1TS);
+          putreg32((1ul << (pin - 32)), GPIO_ENABLE1_DATA_W1TS);
         }
     }
 
   /* Add drivers */
 
-  func |= ((uint32_t)(2ul << FUN_DRV_S);
+  func |= (uint32_t)(2ul << FUN_DRV_S);
 
   /* Input enable... Required for output as well? */
 
   func |= FUN_IE;
 
-  
   if  ((attr & (INPUT | OUTPUT)) != 0)
     {
-      func |= ((uint32_t)(2 << MCU_SEL_S);
+      func |= (uint32_t)(2 << MCU_SEL_S);
     }
   else if (attr == SPECIAL)
     {
-      func |= ((uint32_t)(((pin) == 1 || (pin) == 3) ? 0 : 1) << MCU_SEL_S);
+      func |= (uint32_t)((((pin) == 1 || (pin) == 3) ? 0 : 1) << MCU_SEL_S);
     }
   else
     {
-      func |= ((uint32_t)(attr >> 5) << MCU_SEL_S);
+      func |= (uint32_t)((attr >> 5) << MCU_SEL_S);
     }
 
   if ((attr & OPEN_DRAIN) != 0)
     {
-      cntl = (1 << GPIO_PIN_PAD_DRIVER_S);
+      cntrl = (1 << GPIO_PIN_PAD_DRIVER_S);
     }
 
   regaddr = DR_REG_IO_MUX_BASE + g_pin2func[pin];
   putreg32(func, regaddr);
 
   regaddr = GPIO_REG(pin);
-  putreg32(cntl, regaddr);
+  putreg32(cntrl, regaddr);
+  return OK;
 }
 
 /****************************************************************************
@@ -244,30 +248,28 @@ int esp32_configgpio(int pin, gpio_pinattr_t attr)
 
 void esp32_gpiowrite(int pin, bool value)
 {
-  if (pin > 39)
-    {
-      return;
-    }
+  DEBUGASSERT(pin >=0 && pin <= ESP32_NIRQ_GPIO);
+
   if (value)
     {
       if (pin < 32)
         {
-          GPIO.out_w1ts = ((uint32_t) 1 << pin);
+          putreg32((uint32_t)(1ul << pin), GPIO_OUT_W1TS_REG);
         }
       else
         {
-          GPIO.out1_w1ts.val = ((uint32_t) 1 << (pin - 32));
+          putreg32((uint32_t)(1ul << (pin - 32)), GPIO_OUT1_W1TS_REG);
         }
     }
   else
     {
       if (pin < 32)
         {
-          GPIO.out_w1tc = ((uint32_t) 1 << pin);
+          putreg32((uint32_t)(1ul << pin), GPIO_OUT_W1TC_REG);
         }
       else
         {
-          GPIO.out1_w1tc.val = ((uint32_t) 1 << (pin - 32));
+          putreg32((uint32_t)(1ul << (pin - 32)), GPIO_OUT1_W1TC_REG);
         }
     }
 }
@@ -282,17 +284,19 @@ void esp32_gpiowrite(int pin, bool value)
 
 bool esp32_gpioread(int pin)
 {
-  if (pin > 39)
-    {
-      return false;
-    }
+  uint32_t regval;
+ 
+  DEBUGASSERT(pin >=0 && pin <= ESP32_NIRQ_GPIO);
+
   if (pin < 32)
     {
-      return ((GPIO.in >> pin) & 1) != 0;
+      regval = getreg32(GPIO_IN_REG);
+      return ((regval >> pin) & 1) != 0;
     }
   else
     {
-      return ((GPIO.in1.val >> (pin - 32)) & 1) != 0;
+      regval = getreg32(GPIO_IN1_REG);
+      return ((regval >> (pin - 32)) & 1) != 0;
     }
 }
 

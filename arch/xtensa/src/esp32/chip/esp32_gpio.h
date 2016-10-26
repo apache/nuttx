@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/esp32/chip/esp32_uart.h
+ * arch/xtensa/src/esp32/chip/esp32_gpio.h
  *
  * Adapted from use in NuttX by:
  *
@@ -37,7 +37,6 @@
  * Pre-preprocessor Definitions
  ****************************************************************************/
 
-#include "soc.h"
 #define GPIO_BT_SELECT_REG          (DR_REG_GPIO_BASE + 0x0000)
 
 /* GPIO_BT_SEL : R/W ;bitpos:[31:0] ;default: x ; */
