@@ -2249,7 +2249,6 @@ static int stm32_i2c_init(FAR struct stm32_i2c_priv_s *priv)
   /* Force a frequency update */
 
   priv->frequency = 0;
-
   stm32_i2c_setclock(priv, 100000);
 
   /* Enable I2C peripheral */
