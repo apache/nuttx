@@ -42,8 +42,12 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <syslog.h>
 
 #include <nuttx/board.h>
+#include <nuttx/leds/userled.h>
+
+#include "nucleo-f303re.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -80,5 +84,31 @@
 
 int board_app_initialize(uintptr_t arg)
 {
+  int ret;
+
+#if !defined(CONFIG_ARCH_LEDS) && defined(CONFIG_USERLED_LOWER)
+  /* Register the LED driver */
+
+  ret = userled_lower_initialize(LED_DRIVER_PATH);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+      return ret;
+    }
+#endif
+
+  /* Contrairement à l'ADC, il n'y a pas de BOARDIOC_DAC_SETUP spécifique. Il
+   * faut le faire ici
+   */
+
+#if defined(CONFIG_DAC)
+  ret = board_dac_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_dac_setup() failed: %d\n", ret);
+      return ret;
+    }
+#endif
+
   return OK;
 }

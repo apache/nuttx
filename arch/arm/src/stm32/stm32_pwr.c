@@ -77,6 +77,46 @@ static inline void stm32_pwr_modifyreg(uint8_t offset, uint16_t clearbits, uint1
  ************************************************************************************/
 
 /************************************************************************************
+ * Name: stm32_pwr_enablesdadc
+ *
+ * Description:
+ *   Enables SDADC power
+ *
+ * Input Parameters:
+ *   sdadc - SDADC number 1-3
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
+
+#if defined(CONFIG_STM32_STM32F37XX)
+void stm32_pwr_enablesdadc(uint8_t sdadc)
+{
+  uint32_t setbits = 0;
+
+  switch (sdadc)
+    {
+      case 1:
+        setbits = PWR_CR_ENSD1;
+        break;
+
+      case 2:
+        setbits = PWR_CR_ENSD2;
+        break;
+
+      case 3:
+        setbits = PWR_CR_ENSD3;
+        break;
+    }
+
+  stm32_pwr_modifyreg(STM32_PWR_CR_OFFSET, 0, setbits);
+
+}
+#endif
+
+
+/************************************************************************************
  * Name: stm32_pwr_enablebkp
  *
  * Description:

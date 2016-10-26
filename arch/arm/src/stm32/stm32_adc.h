@@ -48,6 +48,8 @@
 
 #if defined(CONFIG_STM32_STM32F30XX)
 #  include "chip/stm32f30xxx_adc.h"
+#elif defined(CONFIG_STM32_STM32F37XX)
+#  include "chip/stm32f37xxx_adc.h"
 #else
 #  include "chip/stm32_adc.h"
 #endif

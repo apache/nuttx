@@ -67,6 +67,24 @@ extern "C"
  ************************************************************************************/
 
 /************************************************************************************
+ * Name: stm32_pwr_enablesdadc
+ *
+ * Description:
+ *   Enables SDADC power
+ *
+ * Input Parameters:
+ *   sdadc - SDADC number 1-3
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
+
+#if defined(CONFIG_STM32_STM32F37XX)
+void stm32_pwr_enablesdadc(uint8_t sdadc);
+#endif
+
+/************************************************************************************
  * Name: stm32_pwr_enablebkp
  *
  * Description:

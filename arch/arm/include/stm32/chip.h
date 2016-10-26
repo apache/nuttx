@@ -1101,7 +1101,6 @@
  *     c   = C (48pins) R (68 pins) V (100 pins)
  *     c   = K (32 pins), C (48 pins), R (68 pins), V (100 pins)
  *     f   = 6 (32KB FLASH), 8 (64KB FLASH), B (128KB FLASH), C (256KB FLASH)
- *     f   = 8 (64KB FLASH), B (128KB FLASH), C (256KB FLASH)
  *     xxx = Package, temperature range, options (ignored here)
  */
 
@@ -1534,7 +1533,8 @@
 #  define STM32_NLCD                     0   /* (0) No LCD */
 #  define STM32_NUSBOTG                  0   /* USB FS device, but no USB OTG FS/HS */
 #  define STM32_NGPIO                    87  /* GPIOA-F */
-#  define STM32_NADC                     1   /* (3) 12-bit ADC1 */
+#  define STM32_NADC                     1   /* (1) 12-bit ADC1 */
+#  define STM32_NSDADC                   3   /* (3) 16-bit SDADC1-3 */
 #  define STM32_NDAC                     2   /* (2) 12-bit DAC1-2 */
 #  define STM32_NCAPSENSE                0   /* (0) No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* (1) CRC calculation unit */

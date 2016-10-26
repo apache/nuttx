@@ -148,6 +148,8 @@ ifeq ($(CONFIG_STM32_I2C_ALT),y)
 CHIP_CSRCS += stm32_i2c_alt.c
 else ifeq ($(CONFIG_STM32_STM32F30XX),y)
 CHIP_CSRCS += stm32f30xxx_i2c.c
+else ifeq ($(CONFIG_STM32_STM32F37XX),y)
+CHIP_CSRCS += stm32f30xxx_i2c.c
 else ifeq ($(CONFIG_STM32_STM32F40XX),y)
 CHIP_CSRCS += stm32f40xxx_i2c.c
 else
@@ -215,6 +217,10 @@ endif
 
 ifeq ($(CONFIG_STM32_ADC),y)
 CHIP_CSRCS += stm32_adc.c
+endif
+
+ifeq ($(CONFIG_STM32_SDADC),y)
+CHIP_CSRCS += stm32_sdadc.c
 endif
 
 ifeq ($(CONFIG_DAC),y)

@@ -101,7 +101,7 @@
 #if defined(CONFIG_STM32_I2C1) || defined(CONFIG_STM32_I2C2) || defined(CONFIG_STM32_I2C3)
 /* This implementation is for the STM32 F1, F2, and F4 only */
 
-#if defined(CONFIG_STM32_STM32F30XX)
+#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -1949,7 +1949,7 @@ out:
 FAR struct i2c_master_s *stm32_i2cbus_initialize(int port)
 {
   struct stm32_i2c_priv_s * priv = NULL;  /* private data of device with multiple instances */
-  irqtate_t flags;
+  irqstate_t flags;
 
 #if STM32_PCLK1_FREQUENCY < 4000000
 #   warning STM32_I2C_INIT: Peripheral clock must be at least 4 MHz to support 400 kHz operation.
