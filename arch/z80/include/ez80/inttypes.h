@@ -226,6 +226,7 @@
 #  define PRIdFAST32  "ld"
 
 #  define PRIdMAX     "ld"
+#  define PRIdPTR     "d"
 
 #  define PRIi8       "i"
 #  define PRIi16      "i"
@@ -240,6 +241,7 @@
 #  define PRIiFAST32  "li"
 
 #  define PRIiMAX     "li"
+#  define PRIiPTR     "i"
 
 #  define PRIo8       "o"
 #  define PRIo16      "o"
@@ -254,6 +256,7 @@
 #  define PRIoFAST32  "lo"
 
 #  define PRIoMAX     "lo"
+#  define PRIoPTR     "o"
 
 #  define PRIu8       "u"
 #  define PRIu16      "u"
@@ -268,6 +271,7 @@
 #  define PRIuFAST32  "lu"
 
 #  define PRIuMAX     "lu"
+#  define PRIuPTR     "u"
 
 #  define PRIx8       "x"
 #  define PRIx16      "x"
@@ -282,6 +286,7 @@
 #  define PRIxFAST32  "lx"
 
 #  define PRIxMAX     "lx"
+#  define PRIxPTR     "x"
 
 #  define PRIX8       "X"
 #  define PRIX16      "X"
@@ -296,6 +301,7 @@
 #  define PRIXFAST32  "lX"
 
 #  define PRIXMAX     "lX"
+#  define PRIXPTR     "X"
 
 #  define SCNd8       "hhd"
 #  define SCNd16      "hd"
@@ -310,6 +316,7 @@
 #  define SCNdFAST32  "ld"
 
 #  define SCNdMAX     "ld"
+#  define SCNdPTR     "d"
 
 #  define SCNi8       "hhi"
 #  define SCNi16      "hi"
@@ -324,6 +331,7 @@
 #  define SCNiFAST32  "li"
 
 #  define SCNiMAX     "li"
+#  define SCNiPTR     "i"
 
 #  define SCNo8       "hho"
 #  define SCNo16      "ho"
@@ -338,6 +346,7 @@
 #  define SCNoFAST32  "lo"
 
 #  define SCNoMAX     "lo"
+#  define SCNoPTR     "o"
 
 #  define SCNu8       "hhu"
 #  define SCNu16      "hu"
@@ -352,6 +361,7 @@
 #  define SCNuFAST32  "lu"
 
 #  define SCNuMAX     "lu"
+#  define SCNuPTR     "u"
 
 #  define SCNx8       "hhx"
 #  define SCNx16      "hx"
@@ -366,6 +376,7 @@
 #  define SCNxFAST32  "lx"
 
 #  define SCNxMAX     "lx"
+#  define SCNxPTR     "x"
 
 #endif
 
