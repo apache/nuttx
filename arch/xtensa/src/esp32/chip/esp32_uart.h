@@ -39,7 +39,8 @@
 
 #define REG_UART_BASE(i)                 (DR_REG_UART_BASE + (i) * 0x10000 + (i > 1 ? 0xe000 : 0))
 
-#define UART_FIFO_REG(i)                 (REG_UART_BASE(i) + 0x0)
+#define UART_FIFO_OFFSET                 0x00
+#define UART_FIFO_REG(i)                 (REG_UART_BASE(i) + UART_FIFO_OFFSET)
 
 /* UART_RXFIFO_RD_BYTE : RO ;bitpos:[7:0] ;default: 8'b0 ; */
 /* Description: This register stores one byte data  read by rx fifo.*/
@@ -49,7 +50,8 @@
 #define UART_RXFIFO_RD_BYTE_V            0xFF
 #define UART_RXFIFO_RD_BYTE_S            0
 
-#define UART_INT_RAW_REG(i)              (REG_UART_BASE(i) + 0x4)
+#define UART_INT_RAW_OFFSET              0x04
+#define UART_INT_RAW_REG(i)              (REG_UART_BASE(i) + UART_INT_RAW_OFFSET)
 
 /* UART_AT_CMD_CHAR_DET_INT_RAW : RO ;bitpos:[18] ;default: 1'b0 ; */
 /* Description: This interrupt raw bit turns to high level when receiver
@@ -241,7 +243,8 @@
 #define UART_RXFIFO_FULL_INT_RAW_V      0x1
 #define UART_RXFIFO_FULL_INT_RAW_S      0
 
-#define UART_INT_ST_REG(i)              (REG_UART_BASE(i) + 0x8)
+#define UART_INT_ST_OFFSET              0x08
+#define UART_INT_ST_REG(i)              (REG_UART_BASE(i) + UART_INT_ST_OFFSET)
 
 /* UART_AT_CMD_CHAR_DET_INT_ST : RO ;bitpos:[18] ;default: 1'b0 ; */
 /* Description: This is the status bit for at_cmd_det_int_raw when
@@ -432,7 +435,8 @@
 #define UART_RXFIFO_FULL_INT_ST_V       0x1
 #define UART_RXFIFO_FULL_INT_ST_S       0
 
-#define UART_INT_ENA_REG(i)             (REG_UART_BASE(i) + 0xC)
+#define UART_INT_ENA_OFFSET             0x0c
+#define UART_INT_ENA_REG(i)             (REG_UART_BASE(i) + UART_INT_ENA_OFFSET)
 
 /* UART_AT_CMD_CHAR_DET_INT_ENA : R/W ;bitpos:[18] ;default: 1'b0 ; */
 /* Description: This is the enable bit for at_cmd_char_det_int_st register.*/
@@ -586,7 +590,8 @@
 #define UART_RXFIFO_FULL_INT_ENA_V      0x1
 #define UART_RXFIFO_FULL_INT_ENA_S      0
 
-#define UART_INT_CLR_REG(i)             (REG_UART_BASE(i) + 0x10)
+#define UART_INT_CLR_OFFSET             0x10
+#define UART_INT_CLR_REG(i)             (REG_UART_BASE(i) + UART_INT_CLR_OFFSET)
 
 /* UART_AT_CMD_CHAR_DET_INT_CLR : WO ;bitpos:[18] ;default: 1'b0 ; */
 /* Description: Set this bit to clear the at_cmd_char_det_int_raw interrupt.*/
@@ -744,7 +749,8 @@
 #define UART_RXFIFO_FULL_INT_CLR_V      0x1
 #define UART_RXFIFO_FULL_INT_CLR_S      0
 
-#define UART_CLKDIV_REG(i)              (REG_UART_BASE(i) + 0x14)
+#define UART_CLKDIV_OFFSET              0x14
+#define UART_CLKDIV_REG(i)              (REG_UART_BASE(i) + UART_CLKDIV_OFFSET)
 
 /* UART_CLKDIV_FRAG : R/W ;bitpos:[23:20] ;default: 4'h0 ; */
 /* Description: The register  value is the decimal part of the frequency
@@ -766,7 +772,8 @@
 #define UART_CLKDIV_V                   0xFFFFF
 #define UART_CLKDIV_S                   0
 
-#define UART_AUTOBAUD_REG(i)            (REG_UART_BASE(i) + 0x18)
+#define UART_AUTOBAUD_OFFSET            0x18
+#define UART_AUTOBAUD_REG(i)            (REG_UART_BASE(i) + UART_AUTOBAUD_OFFSET)
 
 /* UART_GLITCH_FILT : R/W ;bitpos:[15:8] ;default: 8'h10 ; */
 /* Description: when input pulse width is lower then this value igore this
@@ -786,7 +793,8 @@
 #define UART_AUTOBAUD_EN_V              0x1
 #define UART_AUTOBAUD_EN_S              0
 
-#define UART_STATUS_REG(i)              (REG_UART_BASE(i) + 0x1C)
+#define UART_STATUS_OFFSET              0x1c
+#define UART_STATUS_REG(i)              (REG_UART_BASE(i) + UART_STATUS_OFFSET)
 
 /* UART_TXD : RO ;bitpos:[31] ;default: 8'h0 ; */
 /* Description: This register represent the  level value of the internal
@@ -895,7 +903,8 @@
 #define UART_RXFIFO_CNT_V               0xFF
 #define UART_RXFIFO_CNT_S               0
 
-#define UART_CONF0_REG(i)               (REG_UART_BASE(i) + 0x20)
+#define UART_CONF0_OFFSET               0x20
+#define UART_CONF0_REG(i)               (REG_UART_BASE(i) + UART_CONF0_OFFSET)
 
 /* UART_TICK_REF_ALWAYS_ON : R/W ;bitpos:[27] ;default: 1'b1 ; */
 /* Description: This register is used to select the clock.1.apb clock
@@ -1127,7 +1136,8 @@
 #define UART_PARITY_V                   0x1
 #define UART_PARITY_S                   0
 
-#define UART_CONF1_REG(i)               (REG_UART_BASE(i) + 0x24)
+#define UART_CONF1_OFFSET               0x24
+#define UART_CONF1_REG(i)               (REG_UART_BASE(i) + UART_CONF1_OFFSET)
 
 /* UART_RX_TOUT_EN : R/W ;bitpos:[31] ;default: 1'b0 ; */
 /* Description: This is the enble bit for uart receiver's timeout function.*/
@@ -1190,7 +1200,8 @@
 #define UART_RXFIFO_FULL_THRHD_V        0x7F
 #define UART_RXFIFO_FULL_THRHD_S        0
 
-#define UART_LOWPULSE_REG(i)            (REG_UART_BASE(i) + 0x28)
+#define UART_LOWPULSE_OFFSET            0x28
+#define UART_LOWPULSE_REG(i)            (REG_UART_BASE(i) + UART_LOWPULSE_OFFSET)
 
 /* UART_LOWPULSE_MIN_CNT : RO ;bitpos:[19:0] ;default: 20'hFFFFF ; */
 /* Description: This register stores the value of the minimum duration time
@@ -1202,7 +1213,8 @@
 #define UART_LOWPULSE_MIN_CNT_V         0xFFFFF
 #define UART_LOWPULSE_MIN_CNT_S         0
 
-#define UART_HIGHPULSE_REG(i)           (REG_UART_BASE(i) + 0x2C)
+#define UART_HIGHPULSE_OFFSET           0x2c
+#define UART_HIGHPULSE_REG(i)           (REG_UART_BASE(i) + UART_HIGHPULSE_OFFSET)
 
 /* UART_HIGHPULSE_MIN_CNT : RO ;bitpos:[19:0] ;default: 20'hFFFFF ; */
 /* Description: This register stores  the value of the maxinum duration time
@@ -1214,7 +1226,8 @@
 #define UART_HIGHPULSE_MIN_CNT_V        0xFFFFF
 #define UART_HIGHPULSE_MIN_CNT_S        0
 
-#define UART_RXD_CNT_REG(i)             (REG_UART_BASE(i) + 0x30)
+#define UART_RXD_CNT_OFFSET             0x30
+#define UART_RXD_CNT_REG(i)             (REG_UART_BASE(i) + UART_RXD_CNT_OFFSET)
 
 /* UART_RXD_EDGE_CNT : RO ;bitpos:[9:0] ;default: 10'h0 ; */
 /* Description: This register stores the count of rxd edge change. it is
@@ -1226,7 +1239,8 @@
 #define UART_RXD_EDGE_CNT_V             0x3FF
 #define UART_RXD_EDGE_CNT_S             0
 
-#define UART_FLOW_CONF_REG(i)           (REG_UART_BASE(i) + 0x34)
+#define UART_FLOW_CONF_OFFSET           0x34
+#define UART_FLOW_CONF_REG(i)           (REG_UART_BASE(i) + UART_FLOW_CONF_OFFSET)
 
 /* UART_SEND_XOFF : R/W ;bitpos:[5] ;default: 1'b0 ; */
 /* Description: Set this bit to send xoff char. it is cleared by hardware
@@ -1288,7 +1302,8 @@
 #define UART_SW_FLOW_CON_EN_V           0x1
 #define UART_SW_FLOW_CON_EN_S           0
 
-#define UART_SLEEP_CONF_REG(i)          (REG_UART_BASE(i) + 0x38)
+#define UART_SLEEP_CONF_OFFSET          0x38
+#define UART_SLEEP_CONF_REG(i)          (REG_UART_BASE(i) + UART_SLEEP_CONF_OFFSET)
 
 /* UART_ACTIVE_THRESHOLD : R/W ;bitpos:[9:0] ;default: 10'hf0 ; */
 /* Description: When the input rxd edge changes more than this register
@@ -1300,7 +1315,8 @@
 #define UART_ACTIVE_THRESHOLD_V         0x3FF
 #define UART_ACTIVE_THRESHOLD_S         0
 
-#define UART_SWFC_CONF_REG(i)           (REG_UART_BASE(i) + 0x3C)
+#define UART_SWFC_CONF_OFFSET           0x3c
+#define UART_SWFC_CONF_REG(i)           (REG_UART_BASE(i) + UART_SWFC_CONF_OFFSET)
 
 /* UART_XOFF_CHAR : R/W ;bitpos:[31:24] ;default: 8'h13 ; */
 /* Description: This register stores the xoff flow control char.*/
@@ -1340,7 +1356,8 @@
 #define UART_XON_THRESHOLD_V            0xFF
 #define UART_XON_THRESHOLD_S            0
 
-#define UART_IDLE_CONF_REG(i)           (REG_UART_BASE(i) + 0x40)
+#define UART_IDLE_CONF_OFFSET           0x40
+#define UART_IDLE_CONF_REG(i)           (REG_UART_BASE(i) + UART_IDLE_CONF_OFFSET)
 
 /* UART_TX_BRK_NUM : R/W ;bitpos:[27:20] ;default: 8'ha ; */
 /* Description: This register is used to configure the num of 0 send after
@@ -1374,7 +1391,8 @@
 #define UART_RX_IDLE_THRHD_V            0x3FF
 #define UART_RX_IDLE_THRHD_S            0
 
-#define UART_RS485_CONF_REG(i)          (REG_UART_BASE(i) + 0x44)
+#define UART_RS485_CONF_OFFSET          0x44
+#define UART_RS485_CONF_REG(i)          (REG_UART_BASE(i) + UART_RS485_CONF_OFFSET)
 
 /* UART_RS485_TX_DLY_NUM : R/W ;bitpos:[9:6] ;default: 4'b0 ; */
 /* Description: This register is used to delay the transmitter's internal
@@ -1441,6 +1459,7 @@
 #define UART_RS485_EN_V                 0x1
 #define UART_RS485_EN_S                 0
 
+#define UART_AT_CMD_PRECNT_OFFSET       0x48
 #define UART_AT_CMD_PRECNT_REG(i)       (REG_UART_BASE(i) + 0x48)
 
 /* UART_PRE_IDLE_NUM : R/W ;bitpos:[23:0] ;default: 24'h186a00 ; */
@@ -1455,7 +1474,8 @@
 #define UART_PRE_IDLE_NUM_V             0xFFFFFF
 #define UART_PRE_IDLE_NUM_S             0
 
-#define UART_AT_CMD_POSTCNT_REG(i)      (REG_UART_BASE(i) + 0x4c)
+#define UART_AT_CMD_POSTCNT_OFFSET      0x4c
+#define UART_AT_CMD_POSTCNT_REG(i)      (REG_UART_BASE(i) + UART_AT_CMD_POSTCNT_OFFSET)
 
 /* UART_POST_IDLE_NUM : R/W ;bitpos:[23:0] ;default: 24'h186a00 ; */
 /* Description: This register is used to configure the duration time between
@@ -1468,6 +1488,7 @@
 #define UART_POST_IDLE_NUM_V            0xFFFFFF
 #define UART_POST_IDLE_NUM_S            0
 
+#define UART_AT_CMD_GAPTOUT_OFFSET      0x50
 #define UART_AT_CMD_GAPTOUT_REG(i)      (REG_UART_BASE(i) + 0x50)
 
 /* UART_RX_GAP_TOUT : R/W ;bitpos:[23:0] ;default: 24'h1e00 ; */
@@ -1481,7 +1502,8 @@
 #define UART_RX_GAP_TOUT_V              0xFFFFFF
 #define UART_RX_GAP_TOUT_S              0
 
-#define UART_AT_CMD_CHAR_REG(i)         (REG_UART_BASE(i) + 0x54)
+#define UART_AT_CMD_CHAR_OFFSET         0x54
+#define UART_AT_CMD_CHAR_REG(i)         (REG_UART_BASE(i) + UART_AT_CMD_CHAR_OFFSET)
 
 /* UART_CHAR_NUM : R/W ;bitpos:[15:8] ;default: 8'h3 ; */
 /* Description: This register is used to configure the num of continous
@@ -1503,7 +1525,8 @@
 #define UART_AT_CMD_CHAR_V              0xFF
 #define UART_AT_CMD_CHAR_S              0
 
-#define UART_MEM_CONF_REG(i)            (REG_UART_BASE(i) + 0x58)
+#define UART_MEM_CONF_OFFSET            0x58
+#define UART_MEM_CONF_REG(i)            (REG_UART_BASE(i) + UART_MEM_CONF_OFFSET)
 
 /* UART_TX_MEM_EMPTY_THRHD : R/W ;bitpos:[30:28] ;default: 3'h0 ; */
 /* Description: refer to txfifo_empty_thrhd 's describtion.*/
@@ -1583,7 +1606,8 @@
 #define UART_MEM_PD_V                   0x1
 #define UART_MEM_PD_S                   0
 
-#define UART_MEM_TX_STATUS_REG(i)       (REG_UART_BASE(i) + 0x5c)
+#define UART_MEM_TX_STATUS_OFFSET       0x5c
+#define UART_MEM_TX_STATUS_REG(i)       (REG_UART_BASE(i) + UART_MEM_TX_STATUS_OFFSET)
 
 /* UART_MEM_TX_STATUS : RO ;bitpos:[23:0] ;default: 24'h0 ; */
 /* Description: */
@@ -1593,7 +1617,8 @@
 #define UART_MEM_TX_STATUS_V            0xFFFFFF
 #define UART_MEM_TX_STATUS_S            0
 
-#define UART_MEM_RX_STATUS_REG(i)       (REG_UART_BASE(i) + 0x60)
+#define UART_MEM_RX_STATUS_OFFSET       0x60
+#define UART_MEM_RX_STATUS_REG(i)       (REG_UART_BASE(i) + UART_MEM_RX_STATUS_OFFSET)
 
 /* UART_MEM_RX_STATUS : RO ;bitpos:[23:0] ;default: 24'h0 ; */
 /* Description: */
@@ -1603,7 +1628,8 @@
 #define UART_MEM_RX_STATUS_V            0xFFFFFF
 #define UART_MEM_RX_STATUS_S            0
 
-#define UART_MEM_CNT_STATUS_REG(i)      (REG_UART_BASE(i) + 0x64)
+#define UART_MEM_CNT_STATUS_OFFSET      0x64
+#define UART_MEM_CNT_STATUS_REG(i)      (REG_UART_BASE(i) + UART_MEM_CNT_STATUS_OFFSET)
 
 /* UART_TX_MEM_CNT : RO ;bitpos:[5:3] ;default: 3'b0 ; */
 /* Description: refer to the txfifo_cnt's describtion.*/
@@ -1621,6 +1647,7 @@
 #define UART_RX_MEM_CNT_V               0x7
 #define UART_RX_MEM_CNT_S               0
 
+#define UART_POSPULSE_OFFSET            0x68
 #define UART_POSPULSE_REG(i)            (REG_UART_BASE(i) + 0x68)
 
 /* UART_POSEDGE_MIN_CNT : RO ;bitpos:[19:0] ;default: 20'hFFFFF ; */
@@ -1633,7 +1660,8 @@
 #define UART_POSEDGE_MIN_CNT_V          0xFFFFF
 #define UART_POSEDGE_MIN_CNT_S          0
 
-#define UART_NEGPULSE_REG(i)            (REG_UART_BASE(i) + 0x6c)
+#define UART_NEGPULSE_OFFSET            0x6c
+#define UART_NEGPULSE_REG(i)            (REG_UART_BASE(i) + UART_NEGPULSE_OFFSET)
 
 /* UART_NEGEDGE_MIN_CNT : RO ;bitpos:[19:0] ;default: 20'hFFFFF ; */
 /* Description: This register stores the count of rxd negedge edge. it is
@@ -1645,6 +1673,7 @@
 #define UART_NEGEDGE_MIN_CNT_V          0xFFFFF
 #define UART_NEGEDGE_MIN_CNT_S          0
 
+#define UART_DATE_OFFSET                0x78
 #define UART_DATE_REG(i)                (REG_UART_BASE(i) + 0x78)
 
 /* UART_DATE : R/W ;bitpos:[31:0] ;default: 32'h15122500 ; */
@@ -1655,7 +1684,8 @@
 #define UART_DATE_V                     0xFFFFFFFF
 #define UART_DATE_S                     0
 
-#define UART_ID_REG(i)                  (REG_UART_BASE(i) + 0x7C)
+#define UART_ID_OFFSET                  0x7c
+#define UART_ID_REG(i)                  (REG_UART_BASE(i) + UART_ID_OFFSET)
 
 /* UART_ID : R/W ;bitpos:[31:0] ;default: 32'h0500 ; */
 /* Description: */

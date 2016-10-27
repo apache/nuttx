@@ -39,6 +39,14 @@
 #include "chip/gpio_reg.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define MATRIX_DETACH_OUT_SIG     0x100  /* Detach an OUTPUT signal */
+#define MATRIX_DETACH_IN_LOW_PIN  0x30   /* Detach non-inverted INPUT signal */
+#define MATRIX_DETACH_IN_LOW_HIGH 0x38   /* Detach inverted INPUT signal */
+
+/****************************************************************************
  * Public Types
  ****************************************************************************/
 

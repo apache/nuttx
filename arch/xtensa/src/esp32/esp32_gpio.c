@@ -161,6 +161,7 @@ int esp32_configgpio(int pin, gpio_pinattr_t attr)
   uintptr_t regaddr;
   uint32_t func;
   uint32_t cntrl;
+  unsigned int pinmode;
 
   DEBUGASSERT(pin >=0 && pin <= ESP32_NIRQ_GPIO);
 
@@ -212,17 +213,18 @@ int esp32_configgpio(int pin, gpio_pinattr_t attr)
 
   func |= FUN_IE;
 
-  if  ((attr & (INPUT | OUTPUT)) != 0)
+  pinmode = (attr & PINMODE_MASK);
+  if (pinmode == INPUT | pinmode == OUTPUT)
     {
       func |= (uint32_t)(2 << MCU_SEL_S);
     }
-  else if (attr == SPECIAL)
+  else if ((attr & FUNCTION_MASK) == SPECIAL)
     {
       func |= (uint32_t)((((pin) == 1 || (pin) == 3) ? 0 : 1) << MCU_SEL_S);
     }
-  else
+  else /* if ((attr & FUNCTION) != 0) */
     {
-      func |= (uint32_t)((attr >> 5) << MCU_SEL_S);
+      func |= (uint32_t)((attr >> FUNCTION_SHIFT) << MCU_SEL_S);
     }
 
   if ((attr & OPEN_DRAIN) != 0)

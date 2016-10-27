@@ -42,22 +42,46 @@
 
 /* Bit-encoded input to esp32_configgpio() **********************************/
 
-/* Encoded pin attributes used with esp32_configgpio() */
+/* Encoded pin attributes used with esp32_configgpio()
+ *
+ * 8  7  6  5  4  3  2  1  0
+ * -- -- -- -- -- -- -- -- --
+ * FN FN FN OD PD PU F  O  I
+ */
 
-#define INPUT             0x01
-#define OUTPUT            0x02
-#define PULLUP            0x04
-#define INPUT_PULLUP      0x05
-#define PULLDOWN          0x08
-#define INPUT_PULLDOWN    0x09
-#define OPEN_DRAIN        0x10
-#define OUTPUT_OPEN_DRAIN 0x12
-#define SPECIAL           0xf0
-#define FUNCTION_0        0x00
-#define FUNCTION_1        0x20
-#define FUNCTION_2        0x40
-#define FUNCTION_3        0x70
-#define FUNCTION_4        0x80
+#define PINMODE_SHIFT       0
+#define PINMODE_MASK        (7 << PINMODE_SHIFT)
+#  define INPUT             (1 << 0)
+#  define OUTPUT            (1 << 1)
+#  define FUNCTION          (1 << 2)
+
+#define PULLUP              (1 << 3)
+#define PULLDOWN            (1 << 4)
+#define OPEN_DRAIN          (1 << 5)
+#define FUNCTION_SHIFT      6
+#define FUNCTION_MASK       (7 << FUNCTION_SHIFT)
+#  define FUNCTION_0        (0 << FUNCTION_SHIFT)
+#  define FUNCTION_1        (1 << FUNCTION_SHIFT)
+#  define FUNCTION_2        (2 << FUNCTION_SHIFT)
+#  define FUNCTION_3        (3 << FUNCTION_SHIFT)
+#  define FUNCTION_4        (4 << FUNCTION_SHIFT)
+#  define SPECIAL           (7 << FUNCTION_SHIFT)
+
+#define INPUT_PULLUP        (INPUT | PULLUP)
+#define INPUT_PULLDOWN      (INPUT | PULLDOWN)
+#define OUTPUT_OPEN_DRAIN   (OUTPUT | OPEN_DRAIN)
+#define INPUT_FUNCTION      (INPUT | FUNCTION)
+#  define INPUT_FUNCTION_0  (INPUT_FUNCTION | FUNCTION_0)
+#  define INPUT_FUNCTION_1  (INPUT_FUNCTION | FUNCTION_1)
+#  define INPUT_FUNCTION_2  (INPUT_FUNCTION | FUNCTION_2)
+#  define INPUT_FUNCTION_3  (INPUT_FUNCTION | FUNCTION_3)
+#  define INPUT_FUNCTION_4  (INPUT_FUNCTION | FUNCTION_4)
+#define OUTPUT_FUNCTION     (OUTPUT | FUNCTION)
+#  define OUTPUT_FUNCTION_0 (OUTPUT_FUNCTION | FUNCTION_0)
+#  define OUTPUT_FUNCTION_1 (OUTPUT_FUNCTION | FUNCTION_1)
+#  define OUTPUT_FUNCTION_2 (OUTPUT_FUNCTION | FUNCTION_2)
+#  define OUTPUT_FUNCTION_3 (OUTPUT_FUNCTION | FUNCTION_3)
+#  define OUTPUT_FUNCTION_4 (OUTPUT_FUNCTION | FUNCTION_4)
 
 /* Interrupt type used with esp32_gpioirqenable() */
 
@@ -78,7 +102,7 @@
 
 /* Must be big enough to hold the the above encodings */
 
-typedef uint8_t gpio_pinattr_t;
+typedef uint16_t gpio_pinattr_t;
 typedef uint8_t gpio_intrtype_t;
 
 /****************************************************************************
