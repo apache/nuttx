@@ -237,8 +237,8 @@ config ESP32_UART0_TXPIN
 	default 0
 	range 0 39
 
-config ESP32_UART0_TXPIN
-	int "UART0 Tx Pin"
+config ESP32_UART0_RXPIN
+	int "UART0 Rx Pin"
 	default 0
 	range 0 39
 
@@ -263,8 +263,8 @@ config ESP32_UART1_TXPIN
 	default 0
 	range 0 39
 
-config ESP32_UART1_TXPIN
-	int "UART1 Tx Pin"
+config ESP32_UART1_RXPIN
+	int "UART1 Rx Pin"
 	default 0
 	range 0 39
 
@@ -289,8 +289,8 @@ config ESP32_UART2_TXPIN
 	default 0
 	range 0 39
 
-config ESP32_UART2_TXPIN
-	int "UART2 Tx Pin"
+config ESP32_UART2_RXPIN
+	int "UART2 Rx Pin"
 	default 0
 	range 0 39
 

@@ -36,7 +36,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "chip/gpio_reg.h"
+#include "chip/esp32_gpio.h"
 
 /****************************************************************************
  * Pre-processor Definitions

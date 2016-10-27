@@ -214,7 +214,7 @@ int esp32_configgpio(int pin, gpio_pinattr_t attr)
   func |= FUN_IE;
 
   pinmode = (attr & PINMODE_MASK);
-  if (pinmode == INPUT | pinmode == OUTPUT)
+  if (pinmode == INPUT || pinmode == OUTPUT)
     {
       func |= (uint32_t)(2 << MCU_SEL_S);
     }
