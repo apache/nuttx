@@ -713,12 +713,11 @@ static void esp32_detach(struct uart_dev_s *dev)
 static int esp32_interrupt(struct uart_dev_s *dev)
 {
   struct esp32_dev_s *priv;
-  uint32_t          pending;
-  uint32_t          intena;
-  int               passes;
-  bool              handled;
+  uint32_t regval;
+  int passes;
+  bool handled;
 
-  DEBUGASSERT(dev && dev->priv);
+  DEBUGASSERT(dev != NULL && dev->priv != NULL);
   priv = (struct esp32_dev_s *)dev->priv;
 
   /* Loop until there are no characters to be transferred or, until we have
@@ -730,31 +729,24 @@ static int esp32_interrupt(struct uart_dev_s *dev)
     {
       handled = false;
 
-      /* Get the UART status (we are only interested in the unmasked interrupts). */
+      /* Clear pending interrupts */
 
-      priv->sr = esp32_serialin(priv, ESP32_UART_SR_OFFSET);
-      intena   = esp32_serialin(priv, ESP32_UART_IMR_OFFSET);
-      pending  = priv->sr & intena;
+      regval = (UART_RXFIFO_FULL_INT_CLR_S | UART_FRM_ERR_INT_CLR_S |
+                UART_RXFIFO_TOUT_INT_CLR_S | UART_TX_DONE_INT_CLR_S |
+                UART_TXFIFO_EMPTY_INT_CLR_S);
+      esp32_serialout(priv, UART_INT_CLR_OFFSET, regval);
 
-      /* Handle an incoming, receive byte.  RXRDY: At least one complete character
-       * has been received and US_RHR has not yet been read.
-       */
-
-      if ((pending & UART_INT_RXRDY) != 0)
+      if ((esp32_serialin(priv, UART_STATUS_OFFSET) & UART_RXFIFO_CNT_M) > 0)
         {
-          /* Received data ready... process incoming bytes */
+          /* Received data in the RXFIFO ... process incoming bytes */
 
           uart_recvchars(dev);
           handled = true;
         }
 
-      /* Handle outgoing, transmit bytes. TXRDY: There is no character in the
-       * US_THR.
-       */
-
-      if ((pending & UART_INT_TXRDY) != 0)
+      if ((esp32_serialin(priv, UART_STATUS_OFFSET) & UART_TXFIFO_CNT_M) < 0x7f)
         {
-          /* Transmit data register empty ... process outgoing bytes */
+          /* The TXFIFO is not full ... process outgoing bytes */
 
           uart_xmitchars(dev);
           handled = true;
@@ -1055,7 +1047,8 @@ static void esp32_rxint(struct uart_dev_s *dev, bool enable)
 static bool esp32_rxavailable(struct uart_dev_s *dev)
 {
   struct esp32_dev_s *priv = (struct esp32_dev_s *)dev->priv;
-  return ((esp32_serialin(priv, ESP32_UART_SR_OFFSET) & UART_INT_RXRDY) != 0);
+
+  return ((esp32_serialin(priv, UART_STATUS_OFFSET) & UART_RXFIFO_CNT_M) > 0);
 }
 
 /****************************************************************************
@@ -1069,7 +1062,8 @@ static bool esp32_rxavailable(struct uart_dev_s *dev)
 static void esp32_send(struct uart_dev_s *dev, int ch)
 {
   struct esp32_dev_s *priv = (struct esp32_dev_s *)dev->priv;
-  esp32_serialout(priv, ESP32_UART_THR_OFFSET, (uint32_t)ch);
+
+  esp32_serialout(priv, UART_FIFO_OFFSET, (uint32_t)ch);
 }
 
 /****************************************************************************
@@ -1086,28 +1080,33 @@ static void esp32_txint(struct uart_dev_s *dev, bool enable)
   irqstate_t flags;
 
   flags = enter_critical_section();
+
   if (enable)
     {
+      uint32_t regval;
+
       /* Set to receive an interrupt when the TX holding register register
        * is empty
        */
 
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
-      esp32_serialout(priv, ESP32_UART_IER_OFFSET, UART_INT_TXRDY);
+      regval  = esp32_serialin(priv, UART_INT_ENA_OFFSET);
+      regval |= (UART_TX_DONE_INT_S | UART_TXFIFO_EMPTY_INT_RAW);
+      esp32_serialout(priv, UART_INT_ENA_OFFSET, regval);
 
       /* Fake a TX interrupt here by just calling uart_xmitchars() with
        * interrupts disabled (note this may recurse).
        */
 
       uart_xmitchars(dev);
-
 #endif
     }
   else
     {
       /* Disable the TX interrupt */
 
-      esp32_serialout(priv, ESP32_UART_IDR_OFFSET, UART_INT_TXRDY);
+      esp32_serialout(priv, UART_INT_CLR_OFFSET,
+                      (UART_TX_DONE_INT_CLR_S | UART_TXFIFO_EMPTY_INT_CLR_S));
     }
 
   leave_critical_section(flags);
@@ -1124,7 +1123,8 @@ static void esp32_txint(struct uart_dev_s *dev, bool enable)
 static bool esp32_txready(struct uart_dev_s *dev)
 {
   struct esp32_dev_s *priv = (struct esp32_dev_s *)dev->priv;
-  return ((esp32_serialin(priv, ESP32_UART_SR_OFFSET) & UART_INT_TXRDY) != 0);
+
+  return ((esp32_serialin(priv, UART_STATUS_OFFSET) & UART_TXFIFO_CNT_M) < 0x7f);
 }
 
 /****************************************************************************
@@ -1138,7 +1138,8 @@ static bool esp32_txready(struct uart_dev_s *dev)
 static bool esp32_txempty(struct uart_dev_s *dev)
 {
   struct esp32_dev_s *priv = (struct esp32_dev_s *)dev->priv;
-  return ((esp32_serialin(priv, ESP32_UART_SR_OFFSET) & UART_INT_TXEMPTY) != 0);
+
+  return ((esp32_serialin(priv, UART_STATUS_OFFSET) & UART_TXFIFO_CNT_M) > 0);
 }
 
 /****************************************************************************

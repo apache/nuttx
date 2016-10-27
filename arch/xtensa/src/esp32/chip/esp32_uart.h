@@ -43,10 +43,10 @@
 #define UART_FIFO_REG(i)                 (REG_UART_BASE(i) + UART_FIFO_OFFSET)
 
 /* UART_RXFIFO_RD_BYTE : RO ;bitpos:[7:0] ;default: 8'b0 ; */
-/* Description: This register stores one byte data  read by rx fifo.*/
+/* Description: This register stores one byte data read by rx fifo.*/
 
 #define UART_RXFIFO_RD_BYTE              0x000000FF
-#define UART_RXFIFO_RD_BYTE_M            ((UART_RXFIFO_RD_BYTE_V)<<(UART_RXFIFO_RD_BYTE_S))
+#define UART_RXFIFO_RD_BYTE_M            ((UART_RXFIFO_RD_BYTE_V) << (UART_RXFIFO_RD_BYTE_S))
 #define UART_RXFIFO_RD_BYTE_V            0xFF
 #define UART_RXFIFO_RD_BYTE_S            0
 
@@ -55,7 +55,7 @@
 
 /* UART_AT_CMD_CHAR_DET_INT_RAW : RO ;bitpos:[18] ;default: 1'b0 ; */
 /* Description: This interrupt raw bit turns to high level when receiver
- *  detects the configured at_cmd chars.
+ * detects the configured at_cmd chars.
  */
 
 #define UART_AT_CMD_CHAR_DET_INT_RAW     (BIT(18))
@@ -575,7 +575,7 @@
 #define UART_PARITY_ERR_INT_ENA_S       2
 
 /* UART_TXFIFO_EMPTY_INT_ENA : R/W ;bitpos:[1] ;default: 1'b0 ; */
-/* Description: This is the enable bit for rxfifo_full_int_st register.*/
+/* Description: This is the enable bit for txfifo_fifo_int_st register.*/
 
 #define UART_TXFIFO_EMPTY_INT_ENA       (BIT(1))
 #define UART_TXFIFO_EMPTY_INT_ENA_M     (BIT(1))
@@ -758,7 +758,7 @@
  */
 
 #define UART_CLKDIV_FRAG                0x0000000F
-#define UART_CLKDIV_FRAG_M              ((UART_CLKDIV_FRAG_V)<<(UART_CLKDIV_FRAG_S))
+#define UART_CLKDIV_FRAG_M              ((UART_CLKDIV_FRAG_V) << (UART_CLKDIV_FRAG_S))
 #define UART_CLKDIV_FRAG_V              0xF
 #define UART_CLKDIV_FRAG_S              20
 
@@ -768,7 +768,7 @@
  */
 
 #define UART_CLKDIV                     0x000FFFFF
-#define UART_CLKDIV_M                   ((UART_CLKDIV_V)<<(UART_CLKDIV_S))
+#define UART_CLKDIV_M                   ((UART_CLKDIV_V) << (UART_CLKDIV_S))
 #define UART_CLKDIV_V                   0xFFFFF
 #define UART_CLKDIV_S                   0
 
@@ -781,7 +781,7 @@
  */
 
 #define UART_GLITCH_FILT                0x000000FF
-#define UART_GLITCH_FILT_M              ((UART_GLITCH_FILT_V)<<(UART_GLITCH_FILT_S))
+#define UART_GLITCH_FILT_M              ((UART_GLITCH_FILT_V) << (UART_GLITCH_FILT_S))
 #define UART_GLITCH_FILT_V              0xFF
 #define UART_GLITCH_FILT_S              8
 
@@ -797,7 +797,7 @@
 #define UART_STATUS_REG(i)              (REG_UART_BASE(i) + UART_STATUS_OFFSET)
 
 /* UART_TXD : RO ;bitpos:[31] ;default: 8'h0 ; */
-/* Description: This register represent the  level value of the internal
+/* Description: This register represent the level value of the internal
  * uart rxd signal.
  */
 
@@ -834,7 +834,7 @@
  */
 
 #define UART_ST_UTX_OUT                 0x0000000F
-#define UART_ST_UTX_OUT_M               ((UART_ST_UTX_OUT_V)<<(UART_ST_UTX_OUT_S))
+#define UART_ST_UTX_OUT_M               ((UART_ST_UTX_OUT_V) << (UART_ST_UTX_OUT_S))
 #define UART_ST_UTX_OUT_V               0xF
 #define UART_ST_UTX_OUT_S               24
 
@@ -845,7 +845,7 @@
  */
 
 #define UART_TXFIFO_CNT                 0x000000FF
-#define UART_TXFIFO_CNT_M               ((UART_TXFIFO_CNT_V)<<(UART_TXFIFO_CNT_S))
+#define UART_TXFIFO_CNT_M               ((UART_TXFIFO_CNT_V) << (UART_TXFIFO_CNT_S))
 #define UART_TXFIFO_CNT_V               0xFF
 #define UART_TXFIFO_CNT_S               16
 
@@ -888,7 +888,7 @@
  */
 
 #define UART_ST_URX_OUT                 0x0000000F
-#define UART_ST_URX_OUT_M               ((UART_ST_URX_OUT_V)<<(UART_ST_URX_OUT_S))
+#define UART_ST_URX_OUT_M               ((UART_ST_URX_OUT_V) << (UART_ST_URX_OUT_S))
 #define UART_ST_URX_OUT_V               0xF
 #define UART_ST_URX_OUT_S               8
 
@@ -899,7 +899,7 @@
  */
 
 #define UART_RXFIFO_CNT                 0x000000FF
-#define UART_RXFIFO_CNT_M               ((UART_RXFIFO_CNT_V)<<(UART_RXFIFO_CNT_S))
+#define UART_RXFIFO_CNT_M               ((UART_RXFIFO_CNT_V) << (UART_RXFIFO_CNT_S))
 #define UART_RXFIFO_CNT_V               0xFF
 #define UART_RXFIFO_CNT_S               0
 
@@ -1104,7 +1104,7 @@
  */
 
 #define UART_STOP_BIT_NUM               0x00000003
-#define UART_STOP_BIT_NUM_M             ((UART_STOP_BIT_NUM_V)<<(UART_STOP_BIT_NUM_S))
+#define UART_STOP_BIT_NUM_M             ((UART_STOP_BIT_NUM_V) << (UART_STOP_BIT_NUM_S))
 #define UART_STOP_BIT_NUM_V             0x3
 #define UART_STOP_BIT_NUM_S             4
 
@@ -1114,7 +1114,7 @@
  */
 
 #define UART_BIT_NUM                    0x00000003
-#define UART_BIT_NUM_M                  ((UART_BIT_NUM_V)<<(UART_BIT_NUM_S))
+#define UART_BIT_NUM_M                  ((UART_BIT_NUM_V) << (UART_BIT_NUM_S))
 #define UART_BIT_NUM_V                  0x3
 #define UART_BIT_NUM_S                  2
 
@@ -1153,7 +1153,7 @@
  */
 
 #define UART_RX_TOUT_THRHD              0x0000007F
-#define UART_RX_TOUT_THRHD_M            ((UART_RX_TOUT_THRHD_V)<<(UART_RX_TOUT_THRHD_S))
+#define UART_RX_TOUT_THRHD_M            ((UART_RX_TOUT_THRHD_V) << (UART_RX_TOUT_THRHD_S))
 #define UART_RX_TOUT_THRHD_V            0x7F
 #define UART_RX_TOUT_THRHD_S            24
 
@@ -1174,7 +1174,7 @@
  */
 
 #define UART_RX_FLOW_THRHD              0x0000007F
-#define UART_RX_FLOW_THRHD_M            ((UART_RX_FLOW_THRHD_V)<<(UART_RX_FLOW_THRHD_S))
+#define UART_RX_FLOW_THRHD_M            ((UART_RX_FLOW_THRHD_V) << (UART_RX_FLOW_THRHD_S))
 #define UART_RX_FLOW_THRHD_V            0x7F
 #define UART_RX_FLOW_THRHD_S            16
 
@@ -1185,7 +1185,7 @@
  */
 
 #define UART_TXFIFO_EMPTY_THRHD         0x0000007F
-#define UART_TXFIFO_EMPTY_THRHD_M       ((UART_TXFIFO_EMPTY_THRHD_V)<<(UART_TXFIFO_EMPTY_THRHD_S))
+#define UART_TXFIFO_EMPTY_THRHD_M       ((UART_TXFIFO_EMPTY_THRHD_V) << (UART_TXFIFO_EMPTY_THRHD_S))
 #define UART_TXFIFO_EMPTY_THRHD_V       0x7F
 #define UART_TXFIFO_EMPTY_THRHD_S       8
 
@@ -1196,7 +1196,7 @@
  */
 
 #define UART_RXFIFO_FULL_THRHD          0x0000007F
-#define UART_RXFIFO_FULL_THRHD_M        ((UART_RXFIFO_FULL_THRHD_V)<<(UART_RXFIFO_FULL_THRHD_S))
+#define UART_RXFIFO_FULL_THRHD_M        ((UART_RXFIFO_FULL_THRHD_V) << (UART_RXFIFO_FULL_THRHD_S))
 #define UART_RXFIFO_FULL_THRHD_V        0x7F
 #define UART_RXFIFO_FULL_THRHD_S        0
 
@@ -1209,7 +1209,7 @@
  */
 
 #define UART_LOWPULSE_MIN_CNT           0x000FFFFF
-#define UART_LOWPULSE_MIN_CNT_M         ((UART_LOWPULSE_MIN_CNT_V)<<(UART_LOWPULSE_MIN_CNT_S))
+#define UART_LOWPULSE_MIN_CNT_M         ((UART_LOWPULSE_MIN_CNT_V) << (UART_LOWPULSE_MIN_CNT_S))
 #define UART_LOWPULSE_MIN_CNT_V         0xFFFFF
 #define UART_LOWPULSE_MIN_CNT_S         0
 
@@ -1222,7 +1222,7 @@
  */
 
 #define UART_HIGHPULSE_MIN_CNT          0x000FFFFF
-#define UART_HIGHPULSE_MIN_CNT_M        ((UART_HIGHPULSE_MIN_CNT_V)<<(UART_HIGHPULSE_MIN_CNT_S))
+#define UART_HIGHPULSE_MIN_CNT_M        ((UART_HIGHPULSE_MIN_CNT_V) << (UART_HIGHPULSE_MIN_CNT_S))
 #define UART_HIGHPULSE_MIN_CNT_V        0xFFFFF
 #define UART_HIGHPULSE_MIN_CNT_S        0
 
@@ -1235,7 +1235,7 @@
  */
 
 #define UART_RXD_EDGE_CNT               0x000003FF
-#define UART_RXD_EDGE_CNT_M             ((UART_RXD_EDGE_CNT_V)<<(UART_RXD_EDGE_CNT_S))
+#define UART_RXD_EDGE_CNT_M             ((UART_RXD_EDGE_CNT_V) << (UART_RXD_EDGE_CNT_S))
 #define UART_RXD_EDGE_CNT_V             0x3FF
 #define UART_RXD_EDGE_CNT_S             0
 
@@ -1311,7 +1311,7 @@
  */
 
 #define UART_ACTIVE_THRESHOLD           0x000003FF
-#define UART_ACTIVE_THRESHOLD_M         ((UART_ACTIVE_THRESHOLD_V)<<(UART_ACTIVE_THRESHOLD_S))
+#define UART_ACTIVE_THRESHOLD_M         ((UART_ACTIVE_THRESHOLD_V) << (UART_ACTIVE_THRESHOLD_S))
 #define UART_ACTIVE_THRESHOLD_V         0x3FF
 #define UART_ACTIVE_THRESHOLD_S         0
 
@@ -1322,7 +1322,7 @@
 /* Description: This register stores the xoff flow control char.*/
 
 #define UART_XOFF_CHAR                  0x000000FF
-#define UART_XOFF_CHAR_M                ((UART_XOFF_CHAR_V)<<(UART_XOFF_CHAR_S))
+#define UART_XOFF_CHAR_M                ((UART_XOFF_CHAR_V) << (UART_XOFF_CHAR_S))
 #define UART_XOFF_CHAR_V                0xFF
 #define UART_XOFF_CHAR_S                24
 
@@ -1330,7 +1330,7 @@
 /* Description: This register stores the xon flow control char.*/
 
 #define UART_XON_CHAR                   0x000000FF
-#define UART_XON_CHAR_M                 ((UART_XON_CHAR_V)<<(UART_XON_CHAR_S))
+#define UART_XON_CHAR_M                 ((UART_XON_CHAR_V) << (UART_XON_CHAR_S))
 #define UART_XON_CHAR_V                 0xFF
 #define UART_XON_CHAR_S                 16
 
@@ -1341,7 +1341,7 @@
  */
 
 #define UART_XOFF_THRESHOLD             0x000000FF
-#define UART_XOFF_THRESHOLD_M           ((UART_XOFF_THRESHOLD_V)<<(UART_XOFF_THRESHOLD_S))
+#define UART_XOFF_THRESHOLD_M           ((UART_XOFF_THRESHOLD_V) << (UART_XOFF_THRESHOLD_S))
 #define UART_XOFF_THRESHOLD_V           0xFF
 #define UART_XOFF_THRESHOLD_S           8
 
@@ -1352,7 +1352,7 @@
  */
 
 #define UART_XON_THRESHOLD              0x000000FF
-#define UART_XON_THRESHOLD_M            ((UART_XON_THRESHOLD_V)<<(UART_XON_THRESHOLD_S))
+#define UART_XON_THRESHOLD_M            ((UART_XON_THRESHOLD_V) << (UART_XON_THRESHOLD_S))
 #define UART_XON_THRESHOLD_V            0xFF
 #define UART_XON_THRESHOLD_S            0
 
@@ -1366,7 +1366,7 @@
  */
 
 #define UART_TX_BRK_NUM                 0x000000FF
-#define UART_TX_BRK_NUM_M               ((UART_TX_BRK_NUM_V)<<(UART_TX_BRK_NUM_S))
+#define UART_TX_BRK_NUM_M               ((UART_TX_BRK_NUM_V) << (UART_TX_BRK_NUM_S))
 #define UART_TX_BRK_NUM_V               0xFF
 #define UART_TX_BRK_NUM_S               20
 
@@ -1376,7 +1376,7 @@
  */
 
 #define UART_TX_IDLE_NUM                0x000003FF
-#define UART_TX_IDLE_NUM_M              ((UART_TX_IDLE_NUM_V)<<(UART_TX_IDLE_NUM_S))
+#define UART_TX_IDLE_NUM_M              ((UART_TX_IDLE_NUM_V) << (UART_TX_IDLE_NUM_S))
 #define UART_TX_IDLE_NUM_V              0x3FF
 #define UART_TX_IDLE_NUM_S              10
 
@@ -1387,7 +1387,7 @@
  */
 
 #define UART_RX_IDLE_THRHD              0x000003FF
-#define UART_RX_IDLE_THRHD_M            ((UART_RX_IDLE_THRHD_V)<<(UART_RX_IDLE_THRHD_S))
+#define UART_RX_IDLE_THRHD_M            ((UART_RX_IDLE_THRHD_V) << (UART_RX_IDLE_THRHD_S))
 #define UART_RX_IDLE_THRHD_V            0x3FF
 #define UART_RX_IDLE_THRHD_S            0
 
@@ -1400,7 +1400,7 @@
  */
 
 #define UART_RS485_TX_DLY_NUM           0x0000000F
-#define UART_RS485_TX_DLY_NUM_M         ((UART_RS485_TX_DLY_NUM_V)<<(UART_RS485_TX_DLY_NUM_S))
+#define UART_RS485_TX_DLY_NUM_M         ((UART_RS485_TX_DLY_NUM_V) << (UART_RS485_TX_DLY_NUM_S))
 #define UART_RS485_TX_DLY_NUM_V         0xF
 #define UART_RS485_TX_DLY_NUM_S         6
 
@@ -1470,7 +1470,7 @@
  */
 
 #define UART_PRE_IDLE_NUM               0x00FFFFFF
-#define UART_PRE_IDLE_NUM_M             ((UART_PRE_IDLE_NUM_V)<<(UART_PRE_IDLE_NUM_S))
+#define UART_PRE_IDLE_NUM_M             ((UART_PRE_IDLE_NUM_V) << (UART_PRE_IDLE_NUM_S))
 #define UART_PRE_IDLE_NUM_V             0xFFFFFF
 #define UART_PRE_IDLE_NUM_S             0
 
@@ -1484,7 +1484,7 @@
  */
 
 #define UART_POST_IDLE_NUM              0x00FFFFFF
-#define UART_POST_IDLE_NUM_M            ((UART_POST_IDLE_NUM_V)<<(UART_POST_IDLE_NUM_S))
+#define UART_POST_IDLE_NUM_M            ((UART_POST_IDLE_NUM_V) << (UART_POST_IDLE_NUM_S))
 #define UART_POST_IDLE_NUM_V            0xFFFFFF
 #define UART_POST_IDLE_NUM_S            0
 
@@ -1498,7 +1498,7 @@
  */
 
 #define UART_RX_GAP_TOUT                0x00FFFFFF
-#define UART_RX_GAP_TOUT_M              ((UART_RX_GAP_TOUT_V)<<(UART_RX_GAP_TOUT_S))
+#define UART_RX_GAP_TOUT_M              ((UART_RX_GAP_TOUT_V) << (UART_RX_GAP_TOUT_S))
 #define UART_RX_GAP_TOUT_V              0xFFFFFF
 #define UART_RX_GAP_TOUT_S              0
 
@@ -1511,7 +1511,7 @@
  */
 
 #define UART_CHAR_NUM                   0x000000FF
-#define UART_CHAR_NUM_M                 ((UART_CHAR_NUM_V)<<(UART_CHAR_NUM_S))
+#define UART_CHAR_NUM_M                 ((UART_CHAR_NUM_V) << (UART_CHAR_NUM_S))
 #define UART_CHAR_NUM_V                 0xFF
 #define UART_CHAR_NUM_S                 8
 
@@ -1521,7 +1521,7 @@
  */
 
 #define UART_AT_CMD_CHAR                0x000000FF
-#define UART_AT_CMD_CHAR_M              ((UART_AT_CMD_CHAR_V)<<(UART_AT_CMD_CHAR_S))
+#define UART_AT_CMD_CHAR_M              ((UART_AT_CMD_CHAR_V) << (UART_AT_CMD_CHAR_S))
 #define UART_AT_CMD_CHAR_V              0xFF
 #define UART_AT_CMD_CHAR_S              0
 
@@ -1532,7 +1532,7 @@
 /* Description: refer to txfifo_empty_thrhd 's describtion.*/
 
 #define UART_TX_MEM_EMPTY_THRHD         0x00000007
-#define UART_TX_MEM_EMPTY_THRHD_M       ((UART_TX_MEM_EMPTY_THRHD_V)<<(UART_TX_MEM_EMPTY_THRHD_S))
+#define UART_TX_MEM_EMPTY_THRHD_M       ((UART_TX_MEM_EMPTY_THRHD_V) << (UART_TX_MEM_EMPTY_THRHD_S))
 #define UART_TX_MEM_EMPTY_THRHD_V       0x7
 #define UART_TX_MEM_EMPTY_THRHD_S       28
 
@@ -1540,7 +1540,7 @@
 /* Description: refer to the rxfifo_full_thrhd's describtion.*/
 
 #define UART_RX_MEM_FULL_THRHD          0x00000007
-#define UART_RX_MEM_FULL_THRHD_M        ((UART_RX_MEM_FULL_THRHD_V)<<(UART_RX_MEM_FULL_THRHD_S))
+#define UART_RX_MEM_FULL_THRHD_M        ((UART_RX_MEM_FULL_THRHD_V) << (UART_RX_MEM_FULL_THRHD_S))
 #define UART_RX_MEM_FULL_THRHD_V        0x7
 #define UART_RX_MEM_FULL_THRHD_S        25
 
@@ -1548,7 +1548,7 @@
 /* Description: refer to the uart_xoff_threshold's describtion.*/
 
 #define UART_XOFF_THRESHOLD_H2          0x00000003
-#define UART_XOFF_THRESHOLD_H2_M        ((UART_XOFF_THRESHOLD_H2_V)<<(UART_XOFF_THRESHOLD_H2_S))
+#define UART_XOFF_THRESHOLD_H2_M        ((UART_XOFF_THRESHOLD_H2_V) << (UART_XOFF_THRESHOLD_H2_S))
 #define UART_XOFF_THRESHOLD_H2_V        0x3
 #define UART_XOFF_THRESHOLD_H2_S        23
 
@@ -1556,7 +1556,7 @@
 /* Description: refer to the uart_xon_threshold's describtion.*/
 
 #define UART_XON_THRESHOLD_H2           0x00000003
-#define UART_XON_THRESHOLD_H2_M         ((UART_XON_THRESHOLD_H2_V)<<(UART_XON_THRESHOLD_H2_S))
+#define UART_XON_THRESHOLD_H2_M         ((UART_XON_THRESHOLD_H2_V) << (UART_XON_THRESHOLD_H2_S))
 #define UART_XON_THRESHOLD_H2_V         0x3
 #define UART_XON_THRESHOLD_H2_S         21
 
@@ -1564,7 +1564,7 @@
 /* Description: refer to the rx_tout_thrhd's describtion.*/
 
 #define UART_RX_TOUT_THRHD_H3           0x00000007
-#define UART_RX_TOUT_THRHD_H3_M         ((UART_RX_TOUT_THRHD_H3_V)<<(UART_RX_TOUT_THRHD_H3_S))
+#define UART_RX_TOUT_THRHD_H3_M         ((UART_RX_TOUT_THRHD_H3_V) << (UART_RX_TOUT_THRHD_H3_S))
 #define UART_RX_TOUT_THRHD_H3_V         0x7
 #define UART_RX_TOUT_THRHD_H3_S         18
 
@@ -1572,7 +1572,7 @@
 /* Description: refer to the rx_flow_thrhd's describtion.*/
 
 #define UART_RX_FLOW_THRHD_H3           0x00000007
-#define UART_RX_FLOW_THRHD_H3_M         ((UART_RX_FLOW_THRHD_H3_V)<<(UART_RX_FLOW_THRHD_H3_S))
+#define UART_RX_FLOW_THRHD_H3_M         ((UART_RX_FLOW_THRHD_H3_V) << (UART_RX_FLOW_THRHD_H3_S))
 #define UART_RX_FLOW_THRHD_H3_V         0x7
 #define UART_RX_FLOW_THRHD_H3_S         15
 
@@ -1582,7 +1582,7 @@
  */
 
 #define UART_TX_SIZE                    0x0000000F
-#define UART_TX_SIZE_M                  ((UART_TX_SIZE_V)<<(UART_TX_SIZE_S))
+#define UART_TX_SIZE_M                  ((UART_TX_SIZE_V) << (UART_TX_SIZE_S))
 #define UART_TX_SIZE_V                  0xF
 #define UART_TX_SIZE_S                  7
 
@@ -1592,7 +1592,7 @@
  */
 
 #define UART_RX_SIZE                    0x0000000F
-#define UART_RX_SIZE_M                  ((UART_RX_SIZE_V)<<(UART_RX_SIZE_S))
+#define UART_RX_SIZE_M                  ((UART_RX_SIZE_V) << (UART_RX_SIZE_S))
 #define UART_RX_SIZE_V                  0xF
 #define UART_RX_SIZE_S                  3
 
@@ -1613,7 +1613,7 @@
 /* Description: */
 
 #define UART_MEM_TX_STATUS              0x00FFFFFF
-#define UART_MEM_TX_STATUS_M            ((UART_MEM_TX_STATUS_V)<<(UART_MEM_TX_STATUS_S))
+#define UART_MEM_TX_STATUS_M            ((UART_MEM_TX_STATUS_V) << (UART_MEM_TX_STATUS_S))
 #define UART_MEM_TX_STATUS_V            0xFFFFFF
 #define UART_MEM_TX_STATUS_S            0
 
@@ -1624,7 +1624,7 @@
 /* Description: */
 
 #define UART_MEM_RX_STATUS              0x00FFFFFF
-#define UART_MEM_RX_STATUS_M            ((UART_MEM_RX_STATUS_V)<<(UART_MEM_RX_STATUS_S))
+#define UART_MEM_RX_STATUS_M            ((UART_MEM_RX_STATUS_V) << (UART_MEM_RX_STATUS_S))
 #define UART_MEM_RX_STATUS_V            0xFFFFFF
 #define UART_MEM_RX_STATUS_S            0
 
@@ -1635,7 +1635,7 @@
 /* Description: refer to the txfifo_cnt's describtion.*/
 
 #define UART_TX_MEM_CNT                 0x00000007
-#define UART_TX_MEM_CNT_M               ((UART_TX_MEM_CNT_V)<<(UART_TX_MEM_CNT_S))
+#define UART_TX_MEM_CNT_M               ((UART_TX_MEM_CNT_V) << (UART_TX_MEM_CNT_S))
 #define UART_TX_MEM_CNT_V               0x7
 #define UART_TX_MEM_CNT_S               3
 
@@ -1643,7 +1643,7 @@
 /* Description: refer to the rxfifo_cnt's describtion.*/
 
 #define UART_RX_MEM_CNT                 0x00000007
-#define UART_RX_MEM_CNT_M               ((UART_RX_MEM_CNT_V)<<(UART_RX_MEM_CNT_S))
+#define UART_RX_MEM_CNT_M               ((UART_RX_MEM_CNT_V) << (UART_RX_MEM_CNT_S))
 #define UART_RX_MEM_CNT_V               0x7
 #define UART_RX_MEM_CNT_S               0
 
@@ -1656,7 +1656,7 @@
  */
 
 #define UART_POSEDGE_MIN_CNT            0x000FFFFF
-#define UART_POSEDGE_MIN_CNT_M          ((UART_POSEDGE_MIN_CNT_V)<<(UART_POSEDGE_MIN_CNT_S))
+#define UART_POSEDGE_MIN_CNT_M          ((UART_POSEDGE_MIN_CNT_V) << (UART_POSEDGE_MIN_CNT_S))
 #define UART_POSEDGE_MIN_CNT_V          0xFFFFF
 #define UART_POSEDGE_MIN_CNT_S          0
 
@@ -1669,7 +1669,7 @@
  */
 
 #define UART_NEGEDGE_MIN_CNT            0x000FFFFF
-#define UART_NEGEDGE_MIN_CNT_M          ((UART_NEGEDGE_MIN_CNT_V)<<(UART_NEGEDGE_MIN_CNT_S))
+#define UART_NEGEDGE_MIN_CNT_M          ((UART_NEGEDGE_MIN_CNT_V) << (UART_NEGEDGE_MIN_CNT_S))
 #define UART_NEGEDGE_MIN_CNT_V          0xFFFFF
 #define UART_NEGEDGE_MIN_CNT_S          0
 
@@ -1680,7 +1680,7 @@
 /* Description: */
 
 #define UART_DATE                       0xFFFFFFFF
-#define UART_DATE_M                     ((UART_DATE_V)<<(UART_DATE_S))
+#define UART_DATE_M                     ((UART_DATE_V) << (UART_DATE_S))
 #define UART_DATE_V                     0xFFFFFFFF
 #define UART_DATE_S                     0
 
@@ -1691,7 +1691,7 @@
 /* Description: */
 
 #define UART_ID                         0xFFFFFFFF
-#define UART_ID_M                       ((UART_ID_V)<<(UART_ID_S))
+#define UART_ID_M                       ((UART_ID_V) << (UART_ID_S))
 #define UART_ID_V                       0xFFFFFFFF
 #define UART_ID_S                       0
 
