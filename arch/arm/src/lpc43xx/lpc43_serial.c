@@ -933,7 +933,7 @@ static inline int up_set_rs485_mode(struct up_dev_s *priv,
 
   /* Are we enabling or disabling RS-485 support? */
 
-  if ((mode->flags && SER_RS485_RTS_ON_SEND) != 0)
+  if ((mode->flags & SER_RS485_ENABLED) == 0)
     {
       /* Disable all RS-485 features */
 
@@ -961,7 +961,7 @@ static inline int up_set_rs485_mode(struct up_dev_s *priv,
        * be inverted.
        */
 
-      if ((mode->flags && SER_RS485_RTS_ON_SEND) != 0)
+      if ((mode->flags & SER_RS485_RTS_ON_SEND) != 0)
         {
           regval |= UART_RS485CTRL_OINV;
         }
