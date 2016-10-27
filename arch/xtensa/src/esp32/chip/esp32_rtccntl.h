@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/common/esp32_rtccnt.h
+ * arch/xtensa/src/esp32/chip/esp32_rtccnt.h
  *
  * Adapted from use in NuttX by:
  *

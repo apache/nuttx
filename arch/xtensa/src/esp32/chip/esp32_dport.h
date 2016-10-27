@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/common/esp32_dport.h
+ * arch/xtensa/src/esp32/chip/esp32_dport.h
  *
  * Adapted from use in NuttX by:
  *

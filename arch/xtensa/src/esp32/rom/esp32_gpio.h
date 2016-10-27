@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/esp32/esp32_gpio.c
+ * arch/xtensa/src/esp32/rom/esp32_gpio.h
  *
  * Developed for NuttX by:
  *
