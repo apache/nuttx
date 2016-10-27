@@ -278,7 +278,7 @@ void xtensa_add_region(void);
 
 void up_lowputc(char ch);
 #if CONFIG_NFILE_DESCRIPTORS > 0
-void xtensa_earlyserialinit(void);
+void xtensa_early_serial_initialize(void);
 void xtensa_serial_initialize(void);
 #else
 # define xtensa_earlyserialinit()

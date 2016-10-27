@@ -47,6 +47,7 @@
 #include <arch/irq.h>
 
 #include "xtensa.h"
+#include "esp32_cpuint.h"
 
 /****************************************************************************
  * Public Data

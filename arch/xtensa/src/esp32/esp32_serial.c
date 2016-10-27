@@ -1178,7 +1178,7 @@ static bool esp32_txempty(struct uart_dev_s *dev)
  ****************************************************************************/
 
 #ifdef USE_EARLYSERIALINIT
-void up_earlyserialinit(void)
+void xtensa_early_serial_initialize(void)
 {
   /* NOTE:  All GPIO configuration for the UARTs was performed in
    * esp32_lowsetup
