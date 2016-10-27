@@ -7,6 +7,10 @@ if ARCH_CHIP_ESP32
 
 menu "ESP32 Peripheral Selection"
 
+config ESP32_UART
+	bool
+	default n
+
 config ESP32_BT
 	bool "Bluetooth"
 	default n
@@ -175,14 +179,23 @@ config ESP32_RWDT
 config ESP32_UART0
 	bool "UART 0"
 	default n
+	select ESP32_UART
+	select UART0_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config ESP32_UART1
 	bool "UART 1"
 	default n
+	select ESP32_UART
+	select UART1_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config ESP32_UART2
 	bool "UART 2"
 	default n
+	select ESP32_UART
+	select UART2_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config ESP32_WIRELESS
 	bool "Wireless"
@@ -193,10 +206,7 @@ config ESP32_WIRELESS
 
 endmenu # ESP32 Peripheral Selection
 
-config ESP32_GPIO_IRQ
-	bool "GPIO pin interrupts"
-	---help---
-		Enable support for interrupting GPIO pins
+menu "Memory Configuration"
 
 config ESP32_BT_RESERVE_DRAM
 	int "Reserved BT DRAM"
@@ -210,4 +220,93 @@ config ESP32_ULP_COPROC_RESERVE_MEM
 	int "Reserved ULP co-processor DRAM"
 	default 0
 
+endmenu # Memory Configuration
+
+config ESP32_GPIO_IRQ
+	bool "GPIO pin interrupts"
+	---help---
+		Enable support for interrupting GPIO pins
+
+menu "UART configuration"
+	depends on ESP32_UART
+
+if ESP32_UART0
+
+config ESP32_UART0_TXPIN
+	int "UART0 Tx Pin"
+	default 0
+	range 0 39
+
+config ESP32_UART0_TXPIN
+	int "UART0 Tx Pin"
+	default 0
+	range 0 39
+
+if SERIAL_IFLOWCONTROL || SERIAL_OFLOWCONTROL
+config ESP32_UART0_RTSPIN
+	int "UART0 RTS Pin"
+	default 0
+	range 0 39
+
+config ESP32_UART0_CTSPIN
+	int "UART0 CTS Pin"
+	default 0
+	range 0 39
+
+endif # SERIAL_IFLOWCONTROL || SERIAL_OFLOWCONTROL
+endif # ESP32_UART0
+
+if ESP32_UART1
+
+config ESP32_UART1_TXPIN
+	int "UART1 Tx Pin"
+	default 0
+	range 0 39
+
+config ESP32_UART1_TXPIN
+	int "UART1 Tx Pin"
+	default 0
+	range 0 39
+
+if SERIAL_IFLOWCONTROL || SERIAL_OFLOWCONTROL
+config ESP32_UART1_RTSPIN
+	int "UART1 RTS Pin"
+	default 0
+	range 0 39
+
+config ESP32_UART1_CTSPIN
+	int "UART1 CTS Pin"
+	default 0
+	range 0 39
+
+endif # SERIAL_IFLOWCONTROL || SERIAL_OFLOWCONTROL
+endif # ESP32_UART1
+
+if ESP32_UART2
+
+config ESP32_UART2_TXPIN
+	int "UART2 Tx Pin"
+	default 0
+	range 0 39
+
+config ESP32_UART2_TXPIN
+	int "UART2 Tx Pin"
+	default 0
+	range 0 39
+
+if SERIAL_IFLOWCONTROL || SERIAL_OFLOWCONTROL
+config ESP32_UART2_RTSPIN
+	int "UART2 RTS Pin"
+	default 0
+	range 0 39
+
+config ESP32_UART2_CTSPIN
+	int "UART2 CTS Pin"
+	default 0
+	range 0 39
+
+endif # SERIAL_IFLOWCONTROL || SERIAL_OFLOWCONTROL
+endif # ESP32_UART2
+
+endmenu # UART configuration
 endif # ARCH_CHIP_ESP32

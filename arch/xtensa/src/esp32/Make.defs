@@ -88,3 +88,7 @@ CHIP_ASRCS  = esp32_cpuindex.S
 #CMN_CSRCS += esp32_cpustart.c esp32_cpupause.c esp32_cpuidlestack.c
 CMN_CSRCS += esp32_cpustart.c
 endif
+
+ifeq ($(CONFIG_ESP32_UART),y)
+CMN_CSRCS += esp32_serial.c
+endif
