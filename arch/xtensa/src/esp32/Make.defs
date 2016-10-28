@@ -40,11 +40,11 @@ HEAD_CSRC = esp32_start.c
 
 # Common XTENSA files (arch/xtensa/src/common)
 
-CMN_ASRCS  = xtensa_context.S xtensa_cpuint.S xtensa_vectors.S
-CMN_ASRCS += xtensa_inthandlers.S xtensa_nmihandler.S
+CMN_ASRCS  = xtensa_context.S xtensa_coproc.S xtensa_cpuint.S
+CMN_ASRCS += xtensa_inthandlers.S xtensa_nmihandler.S xtensa_vectors.S
 
 CMN_CSRCS  = xtensa_assert.c xtensa_blocktask.c xtensa_copystate.c
-CMN_CSRCS += xtensa_createstack.c xtensa_exit.c xtensa_idle.c
+CMN_CSRCS += xtensa_cpsave.c xtensa_createstack.c xtensa_exit.c xtensa_idle.c
 CMN_CSRCS += xtensa_initialize.c xtensa_initialstate.c xtensa_interruptcontext.c
 CMN_CSRCS += xtensa_irqdispatch.c xtensa_lowputs.c xtensa_mdelay.c
 CMN_CSRCS += xtensa_modifyreg8.c xtensa_modifyreg16.c xtensa_modifyreg32.c
