@@ -46,6 +46,7 @@
 
 #include <nuttx/board.h>
 #include <arch/board/board.h>
+#include <arch/chip/core-isa.h>
 
 #include "xtensa.h"
 
@@ -57,10 +58,19 @@
 
 uint32_t *xtensa_irq_dispatch(int irq, uint32_t *regs)
 {
-  board_autoled_on(LED_INIRQ);
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
+  board_autoled_on(LED_INIRQ);
   PANIC();
+
 #else
+#if XCHAL_CP_NUM > 0
+  /* Save the TCB of in case we need to save co-processor state */
+
+  struct tcb_s *tcb = this_task();
+#endif
+
+  board_autoled_on(LED_INIRQ);
+
   /* Nested interrupts are not supported */
 
   DEBUGASSERT(CURRENT_REGS == NULL);
@@ -71,24 +81,45 @@ uint32_t *xtensa_irq_dispatch(int irq, uint32_t *regs)
 
   CURRENT_REGS = regs;
 
+#if XCHAL_CP_NUM > 0 && !defined(CONFIG_XTENSA_CP_LAZY)
+   /* Save the current co processor state on entry int each interrupt. */
+
+   esp32_coproc_savestate(tcb->xcp.cpstate);
+#endif
+
   /* Deliver the IRQ */
 
   irq_dispatch(irq, regs);
 
 #if defined(CONFIG_ARCH_FPU) || defined(CONFIG_ARCH_ADDRENV)
   /* Check for a context switch.  If a context switch occurred, then
-   * CURRENT_REGS will have a different value than it did on entry.  If an
-   * interrupt level context switch has occurred, then restore the floating
-   * point state and the establish the correct address environment before
-   * returning from the interrupt.
+   * CURRENT_REGS will have a different value than it did on entry.
    */
 
   if (regs != CURRENT_REGS)
     {
-#ifdef CONFIG_ARCH_FPU
-      /* Restore floating point registers */
+#if XCHAL_CP_NUM > 0
+#ifdef CONFIG_XTENSA_CP_LAZY
+      /* If an interrupt level context switch has occurred, then save the
+       * co-processor state in in the suspended thread's co-processor save
+       * area.
+       *
+       * NOTE 1. The state of the co-processor has not been altered and
+       *         still represents the to-be-suspended thread.
+       * NOTE 2. We saved a reference  TCB of the original thread on entry.
+       */
 
-      up_restorefpu((uint32_t *)CURRENT_REGS);
+       esp32_coproc_savestate(tcb->xcp.cpstate);
+#endif
+
+       /* Set up the co-processor state for the to-be-started thread.
+        *
+        * NOTE: The current thread for this CPU is the to-be-started
+        * thread.
+        */
+
+       tcb = this_task();
+       esp32_coproc_restorestate(tcb->xcp.cpstate);
 #endif
 
 #ifdef CONFIG_ARCH_ADDRENV

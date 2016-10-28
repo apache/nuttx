@@ -170,7 +170,6 @@
 	beq		a2, sp, 3f					/* If timer interrupt then skip table */
 
 	/* Switch stacks */
-#warning REVIST: Should use register save are on stack.
 
 	l32i	a4, sp, (4 * REG_A1)		/* Retrieve stack ptr and replace */
 	addi	sp,  a4, -(4 * XCPTCONTEXT_SIZE)

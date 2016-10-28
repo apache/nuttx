@@ -226,12 +226,16 @@ void lowconsole_init(void);
 /* Debug */
 
 #ifdef CONFIG_ARCH_STACKDUMP
-void xtensa_dumpstate(void);
+void xtensa_dumpstate(void);s
 #else
 #  define xtensa_dumpstate()
 #endif
 
 /* Common XTENSA functions */
+/* Initialization */
+
+void xtensa_coproc_init(void);
+
 /* IRQs */
 
 uint32_t *xtensa_int_decode(uint32_t *regs);

@@ -148,7 +148,7 @@ _xtensa_context_save:
 
 #if XTENSA_EXTRA_SA_SIZE > 0 || !defined(CONFIG_XTENSA_CALL0_ABI)
 	mov		a9,  a0							/* Preserve ret addr */
-	#endif
+#endif
 
 #ifndef CONFIG_XTENSA_CALL0_ABI
 	/* To spill the reg windows, temp. need pre-interrupt stack ptr and
@@ -207,6 +207,8 @@ _xtensa_context_save:
 #endif
 
 	ret
+
+	.size	_xtensa_context_save, . - _xtensa_context_save
 
 /****************************************************************************
  * Name: xtensa_context_save
@@ -267,7 +269,10 @@ xtensa_context_save:
 
 	l32i	a0, a2, (4 * REG_A0)			/* Recover return addess */
 	movi	a2, 0							/* Return zero */
+
 	ret
+
+	.size	xtensa_context_save, . - xtensa_context_save
 
 /****************************************************************************
  * Name: _xtensa_context_restore
@@ -370,6 +375,8 @@ _xtensa_context_restore:
 
 	ret
 
+	.size	_xtensa_context_restore, . - _xtensa_context_restore
+
 /****************************************************************************
  * Name: xtensa_context_restore
  *
@@ -418,5 +425,7 @@ xtensa_context_restore:
 	rsr		a0, EPC
 	l32i	a0, a2, (4 * REG_A0)			/* Restore a0 */
 	l32i	a2, a2, (4 * REG_A2)			/* Restore A2 */
+
 	rfe										/* And return from "exception" */
 
+	.size	xtensa_context_restore, . - xtensa_context_restore
