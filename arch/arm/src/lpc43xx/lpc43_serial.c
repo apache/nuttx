@@ -92,6 +92,8 @@ struct up_dev_s
   uint8_t   bits;      /* Number of bits (7 or 8) */
   bool      stopbits2; /* true: Configure with 2 stop bits instead of 1 */
 #ifdef HAVE_RS485
+  bool      dctrl;     /* Hardware RS485 direction control */
+  bool      diroinv;   /* Direction pin polarity invert */
   bool      dtrdir;    /* DTR pin is the direction bit */
 #endif
 };
@@ -106,6 +108,13 @@ static int  up_attach(struct uart_dev_s *dev);
 static void up_detach(struct uart_dev_s *dev);
 static int  up_interrupt(int irq, void *context);
 static int  up_ioctl(struct file *filep, int cmd, unsigned long arg);
+#ifdef HAVE_RS485
+static inline int up_set_rs485_mode(struct up_dev_s *priv,
+                                    const struct serial_rs485 *mode);
+
+static inline int up_get_rs485_mode(struct up_dev_s *priv,
+                                    struct serial_rs485 *mode);
+#endif
 static int  up_receive(struct uart_dev_s *dev, uint32_t *status);
 static void up_rxint(struct uart_dev_s *dev, bool enable);
 static bool up_rxavailable(struct uart_dev_s *dev);
@@ -169,6 +178,16 @@ static struct up_dev_s g_uart0priv =
   .parity         = CONFIG_USART0_PARITY,
   .bits           = CONFIG_USART0_BITS,
   .stopbits2      = CONFIG_USART0_2STOP,
+#if defined(CONFIG_USART0_RS485MODE)
+  .dctrl          = true,
+#  if defined(CONFIG_USART0_RS485DIROIN)
+  .diroinv        = true,
+#  else
+  .diroinv        = false,
+#  endif
+#elif defined(HAVE_RS485) /* RS485 supported, but not on USART0 */
+  .dctrl          = false,
+#endif
 };
 
 static uart_dev_t g_uart0port =
@@ -236,6 +255,16 @@ static struct up_dev_s g_uart2priv =
   .parity         = CONFIG_USART2_PARITY,
   .bits           = CONFIG_USART2_BITS,
   .stopbits2      = CONFIG_USART2_2STOP,
+#if defined(CONFIG_USART2_RS485MODE)
+  .dctrl          = true,
+#  if defined(CONFIG_USART2_RS485DIROIN)
+  .diroinv        = true,
+#  else
+  .diroinv        = false,
+#  endif
+#elif defined(HAVE_RS485) /* RS485 supported, but not on USART2 */
+  .dctrl          = false,
+#endif
 };
 
 static uart_dev_t g_uart2port =
@@ -268,6 +297,16 @@ static struct up_dev_s g_uart3priv =
   .parity         = CONFIG_USART3_PARITY,
   .bits           = CONFIG_USART3_BITS,
   .stopbits2      = CONFIG_USART3_2STOP,
+#if defined(CONFIG_USART3_RS485MODE)
+  .dctrl          = true,
+#  if defined(CONFIG_USART3_RS485DIROIN)
+  .diroinv        = true,
+#  else
+  .diroinv        = false,
+#  endif
+#elif defined(HAVE_RS485) /* RS485 supported, but not on USART3 */
+  .dctrl          = false,
+#endif
 };
 
 static uart_dev_t g_uart3port =
@@ -572,6 +611,9 @@ static int up_setup(struct uart_dev_s *dev)
 {
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+#ifdef HAVE_RS485
+  struct serial_rs485 rs485mode;
+#endif
   uint32_t lcr;
 
   /* Clear fifos */
@@ -633,6 +675,24 @@ static int up_setup(struct uart_dev_s *dev)
   if (priv->id == 1)
     {
       up_serialout(priv, LPC43_UART_MCR_OFFSET, (UART_MCR_RTSEN | UART_MCR_CTSEN));
+    }
+#endif
+
+  /* Setup initial RS485 settings */
+
+#ifdef HAVE_RS485
+  if (priv->dctrl)
+    {
+      rs485mode.flags                 = SER_RS485_ENABLED;
+      rs485mode.delay_rts_after_send  = 0;
+      rs485mode.delay_rts_before_send = 0;
+
+      if (priv->diroinv)
+        {
+          rs485mode.flags |= SER_RS485_RTS_ON_SEND;
+        }
+
+      up_set_rs485_mode(priv, &rs485mode);
     }
 #endif
 
