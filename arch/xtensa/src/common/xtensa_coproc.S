@@ -167,6 +167,7 @@ xtensa_coproc_release:
 
 1:  l32i	a7, a3, 0						/* a7 = owner at a3 */
 	bne		a2, a7, 2f						/* if (coproc_sa_base == owner) */
+
 	s32i	a5, a3, 0						/*   owner = unowned */
 2:  addi	a3, a3, 1<<2					/* a3 = next entry in owner array */
 	bltu	a3, a4, 1b						/* repeat until end of array */

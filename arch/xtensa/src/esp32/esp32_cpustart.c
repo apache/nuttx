@@ -146,6 +146,8 @@ int xtensa_start_handler(int irq, FAR void *context)
 
   xtensa_disable_all();
 
+#warning REVISIT: Do we need to disable co-processors here?
+
   /* Detach all peripheral sources APP CPU interrupts */
 
   for (i = 0; i < ESP32_NPERIPHERALS; i++)

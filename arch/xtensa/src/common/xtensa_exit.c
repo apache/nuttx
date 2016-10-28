@@ -155,6 +155,13 @@ void _exit(int status)
   sched_foreach(_xtensa_dumponexit, NULL);
 #endif
 
+#if XCHAL_CP_NUM > 0
+  /* Disable preprocessor support fo the task that is exit-ing. */
+
+  tcb = this_task();
+  xtensa_coproc_release(&tcb->xcp.cpstate);
+#endif
+
   /* Destroy the task at the head of the ready to run list. */
 
   (void)task_exit();
@@ -164,6 +171,12 @@ void _exit(int status)
    */
 
   tcb = this_task();
+
+#if XCHAL_CP_NUM > 0
+  /* Set up the co-processor state for the newly started thread. */
+
+  xtensa_coproc_restorestate(tcb);
+#endif
 
 #ifdef CONFIG_ARCH_ADDRENV
   /* Make sure that the address environment for the previously running

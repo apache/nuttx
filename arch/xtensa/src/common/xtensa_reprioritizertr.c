@@ -43,8 +43,10 @@
 #include <stdbool.h>
 #include <sched.h>
 #include <debug.h>
+
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
+#include <arch/chip/core-isa.h>
 
 #include "sched/sched.h"
 #include "group/group.h"
@@ -170,11 +172,24 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
 
           else if (!xtensa_context_save(rtcb->xcp.regs))
             {
+#if XCHAL_CP_NUM > 0
+              /* Save the co-processor state in in the suspended thread's co-
+               * processor save area.
+               */
+
+              xtensa_coproc_savestate(rtcb);
+#endif
               /* Restore the exception context of the rtcb at the (new) head
                * of the ready-to-run task list.
                */
 
               rtcb = this_task();
+
+#if XCHAL_CP_NUM > 0
+              /* Set up the co-processor state for the newly started thread. */
+
+              xtensa_coproc_restorestate(rtcb);
+#endif
 
 #ifdef CONFIG_ARCH_ADDRENV
               /* Make sure that the address environment for the previously

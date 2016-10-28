@@ -117,7 +117,9 @@ void xtensa_sigdeliver(void)
   (void)up_irq_save();
   rtcb->pterrno = saved_errno;
 
-  /* Then restore the correct state for this thread of execution. */
+  /* Then restore the correct state for this thread of execution.
+   * NOTE: The co-processor state should already be correct.
+   */
 
   board_autoled_off(LED_SIGNAL);
   xtensa_context_restore(regs);

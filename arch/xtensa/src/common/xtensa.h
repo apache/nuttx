@@ -236,7 +236,12 @@ void xtensa_dumpstate(void);
 /* Common XTENSA functions */
 /* Initialization */
 
+#if XCHAL_CP_NUM > 0
 void xtensa_coproc_init(void);
+
+struct xtensa_cpstate_s;
+void xtensa_coproc_release(struct xtensa_cpstate_s *cpstate);
+#endif
 
 /* IRQs */
 

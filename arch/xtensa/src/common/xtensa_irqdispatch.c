@@ -111,7 +111,7 @@ uint32_t *xtensa_irq_dispatch(int irq, uint32_t *regs)
         */
 
        tcb = this_task();
-       esp32_coproc_restorestate(tcb);
+       xtensa_coproc_restorestate(tcb);
 #endif
 
 #ifdef CONFIG_ARCH_ADDRENV
