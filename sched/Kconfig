@@ -188,15 +188,21 @@ if !RTC
 
 config START_YEAR
 	int "Start year"
-	default 2014
+	default 2016
+	range 1970 2106
+	---help---
+		NuttX uses an unsigned 32-bit integer for time_t which provides a
+		range from 1970 to 2106.
 
 config START_MONTH
 	int "Start month"
 	default 1
+	range 1 12
 
 config START_DAY
 	int "Start day"
 	default 1
+	range 1 31
 
 endif # !RTC
 

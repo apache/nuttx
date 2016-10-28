@@ -1168,7 +1168,7 @@ static bool esp32_txempty(struct uart_dev_s *dev)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_earlyserialinit
+ * Name: xtensa_serial_initialize
  *
  * Description:
  *   Performs the low level UART initialization early in debug so that the
@@ -1178,7 +1178,7 @@ static bool esp32_txempty(struct uart_dev_s *dev)
  ****************************************************************************/
 
 #ifdef USE_EARLYSERIALINIT
-void up_earlyserialinit(void)
+void xtensa_serial_initialize(void)
 {
   /* NOTE:  All GPIO configuration for the UARTs was performed in
    * esp32_lowsetup
@@ -1204,7 +1204,7 @@ void up_earlyserialinit(void)
 #endif
 
 /****************************************************************************
- * Name: up_serialinit
+ * Name: xtensa_serial_initialize
  *
  * Description:
  *   Register serial console and serial ports.  This assumes
