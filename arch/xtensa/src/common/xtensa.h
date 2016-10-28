@@ -226,7 +226,7 @@ void lowconsole_init(void);
 /* Debug */
 
 #ifdef CONFIG_ARCH_STACKDUMP
-void xtensa_dumpstate(void);s
+void xtensa_dumpstate(void);
 #else
 #  define xtensa_dumpstate()
 #endif

@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <arch/chip/core-isa.h>
+#include <arch/chip/tie-asm.h>
 #include <arch/xtensa/xtensa_specregs.h>
 
 #if XCHAL_CP_NUM > 0
