@@ -146,7 +146,6 @@ xtensa_coproc_init:
  *
  ****************************************************************************/
 
-#if 0 /* Not used in current design */
 	.global	xtensa_coproc_release
 	.type	xtensa_coproc_release, @function
 
@@ -177,7 +176,6 @@ xtensa_coproc_release:
 	ret
 
 	.size	xtensa_coproc_release, . - xtensa_coproc_release
-#endif
 
 /****************************************************************************
  * Name: _xtensa_coproc_savestate
@@ -188,7 +186,12 @@ xtensa_coproc_release:
  *   called from the solicited context switch handler. It calls a system-
  *   specific function to get the coprocessor save area base address.
  *
+ *   It is also called from xtensa_coproc_savestate() for synchronous
+ *   context switches.  xtensa_coproc_savestate() is simply a C wrapper
+ *   around the assembly language call to _xtensa_coproc_savestate.
+ *
  * Entry Conditions:
+ *   - A2 holds the address of the threads state save area
  *   - The thread being switched out is still the current thread.
  *   - CPENABLE state reflects which coprocessors are active.
  *   - Registers have been saved/spilled already.
@@ -210,18 +213,17 @@ xtensa_coproc_release:
 
 _xtensa_coproc_savestate:
 
-	/* At entry, CPENABLE should be showing which CPs are enabled. */
+	/* Move the address of the thread state save area to R15 */
+
+	mov		a15, a2						/* A15 is now the address of the save area */
+
+	/* CPENABLE should show which CPs are enabled. */
 
 	rsr		a2, CPENABLE				/* a2 = which CPs are enabled */
-	beqz	a2, .Ldone					/* Quick exit if none */
-
-	mov		a14, a0						/* Save return address */
-	call0	XT_RTOS_CP_STATE			/* Get address of CP save area */
-	mov		a0, a14						/* Restore return address */
-	beqz	a15, .Ldone					/* if none then nothing to do */
+	beqz	a2, .Ldone1					/* Quick exit if none */
 
 	s16i	a2, a15, XTENSA_CPCSST		/* Save mask of CPs being stored */
-	movi	a13, _xtensa_coproc_saoffsets   /* Array of CP save offsets */
+	movi	a13, _xtensa_coproc_saoffsets	/* Array of CP save offsets */
 	l32i	a15, a15, XTENSA_CPASA		/* a15 = base of aligned save area */
 
 #if XTENSA_CP0_SA_SIZE > 0
@@ -288,7 +290,7 @@ _xtensa_coproc_savestate:
 2:
 #endif
 
-.Ldone:
+.Ldone1:
 	ret
 
 	.size	_xtensa_coproc_savestate, . - _xtensa_coproc_savestate
@@ -300,12 +302,17 @@ _xtensa_coproc_savestate:
  *   Restore any callee-saved coprocessor state for the incoming thread.
  *   This function is called from coprocessor exception handling, when
  *   giving ownership to a thread that solicited a context switch earlier.
- *   It calls a system-specific function to get the coprocessor save area base address.
+ *   It calls a system-specific function to get the coprocessor save area
+ *   base address.
+ *
+ *   It is also called from xtensa_coproc_restorestate() for synchronous
+ *   context switches.  xtensa_coproc_restorestate() is simply a C wrapper
+ *   around the assembly language call to _xtensa_coproc_restorestate.
  *
  * Entry Conditions:
+ *   - A2 holds the address of the threads state save area
  *   - The incoming thread is set as the current thread.
  *   - CPENABLE is set up correctly for all required coprocessors.
- *   - a2 = mask of coprocessors to be restored.
  *
  * Exit conditions:
  *   - All necessary CP callee-saved state has been restored.
@@ -325,16 +332,14 @@ _xtensa_coproc_savestate:
 
 _xtensa_coproc_restorestate:
 
-	mov		a14, a0						/* Save return address */
-	call0	XT_RTOS_CP_STATE			/* Get address of CP save area */
-	mov		a0, a14						/* Restore return address */
-	beqz	a15, .Ldone2				/* if none then nothing to do */
+	/* Move the address of the thread state save area to R15 */
 
-	l16ui	a3, a15, XTENSA_CPCSST		/* a3 = which CPs have been saved */
-	xor		a3, a3, a2					/* Clear the ones being restored */
+	mov		a15, a2						/* A15 is now the address of the save area */
+	l16ui	a2, a15, XTENSA_CPCSST		/* a3 = which CPs have been saved */
+	movi	a3, 0						/* Clear the ones being restored (all of them) */
 	s32i	a3, a15, XTENSA_CPCSST		/* Update saved CP mask */
 
-	movi	a13, _xtensa_coproc_saoffsets   /* Array of CP save offsets */
+	movi	a13, _xtensa_coproc_saoffsets	/* Array of CP save offsets */
 	l32i	a15, a15, XTENSA_CPASA		/* a15 = base of aligned save area */
 
 #if XTENSA_CP0_SA_SIZE
@@ -401,7 +406,6 @@ _xtensa_coproc_restorestate:
 2:
 #endif
 
-.Ldone2:
 	ret
 
 	.size	_xtensa_coproc_restorestate, . - _xtensa_coproc_restorestate

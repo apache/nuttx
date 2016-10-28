@@ -102,7 +102,7 @@ uint32_t *xtensa_irq_dispatch(int irq, uint32_t *regs)
        * NOTE 2. We saved a reference  TCB of the original thread on entry.
        */
 
-       esp32_coproc_savestate(tcb->xcp.cpstate);
+       xtensa_coproc_savestate(tcb);
 
        /* Then set up the co-processor state for the to-be-started thread.
         *
@@ -111,7 +111,7 @@ uint32_t *xtensa_irq_dispatch(int irq, uint32_t *regs)
         */
 
        tcb = this_task();
-       esp32_coproc_restorestate(tcb->xcp.cpstate);
+       esp32_coproc_restorestate(tcb);
 #endif
 
 #ifdef CONFIG_ARCH_ADDRENV

@@ -45,6 +45,8 @@
 #  include <stdbool.h>
 #endif
 
+#include <arch/chip/core-isa.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -251,6 +253,11 @@ int xtensa_swint(int irq, FAR void *context);
 
 int xtensa_context_save(uint32_t *regs);
 void xtensa_context_restore(uint32_t *regs) noreturn_function;
+
+#if XCHAL_CP_NUM > 0
+void xtensa_coproc_savestate(struct tcb_s *tcb);
+void xtensa_coproc_restorestate(struct tcb_s *tcb);
+#endif
 
 /* Signals */
 

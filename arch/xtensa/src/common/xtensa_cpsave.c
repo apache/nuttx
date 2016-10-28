@@ -39,8 +39,78 @@
 
 #include <nuttx/config.h>
 
+#include <arch/chip/core-isa.h>
+
 #include "xtensa.h"
+
+#if XCHAL_CP_NUM > 0
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: xtensa_coproc_savestate
+ *
+ * Description:
+ *   If there is a current thread and it has a coprocessor state save area,
+ *   then save all callee-saved state into this area. xtensa_coproc_savestate()
+ *   is simply a C wrapper around the assembly language call to
+ *   _xtensa_coproc_savestate.
+ *
+ * Entry Conditions:
+ *   - The thread being switched out is still the current thread.
+ *   - CPENABLE state reflects which coprocessors are active.
+ *
+ * Exit conditions:
+ *   - All necessary CP callee-saved state has been saved.
+ *
+ ****************************************************************************/
+
+void xtensa_coproc_savestate(struct tcb_s *tcb)
+{
+  uint32_t cpsave = (uint32_t)((uintptr_t)&tcp->xcp.cpsave);
+
+    __asm__ __volatile__
+    (
+      "mov a2, %0\n"
+      "call0 _xtensa_coproc_savestate\n"
+      :
+      : "r" (cpsave)
+      : "a0", "a2", "a3", "a4", "a5", "a6", "a7", "a13", "a14", "a15"
+    )
+}
+
+/****************************************************************************
+ * Name: xtensa_coproc_restorestate
+ *
+ * Description:
+ *   Restore any callee-saved coprocessor state for the incoming thread.
+ *   xtensa_coproc_restorestate() is simply a C wrapper around the assembly
+ *   language call to _xtensa_coproc_restorestate.
+ *
+ * Entry Conditions:
+ *   - CPENABLE is set up correctly for all required coprocessors.
+ *
+ * Exit conditions:
+ *   - All necessary CP callee-saved state has been restored.
+ *   - CPENABLE - unchanged.
+ *
+ ****************************************************************************/
+
+void xtensa_coproc_restorestate(struct tcb_s *tcb)
+{
+  uint32_t cpsave = (uint32_t)((uintptr_t)&tcp->xcp.cpsave);
+
+    __asm__ __volatile__
+    (
+      "mov a2, %0\n"
+      "mov a3, %1\n"
+      "call0 _xtensa_coproc_restorestate\n"
+      :
+      : "r" (cpmask) "r" (cpsave)
+      : "a0", "a2", "a3", "a4", "a5", "a6", "a7", "a13", "a14", "a15"
+    )
+}
+
+#endif /* XCHAL_CP_NUM */
