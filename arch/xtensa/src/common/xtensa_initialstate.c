@@ -71,11 +71,6 @@
 void up_initial_state(struct tcb_s *tcb)
 {
   struct xcptcontext *xcp = &tcb->xcp;
-#if 0 /* REVISIT */
-#if XCHAL_CP_NUM > 0
-  uint32_t *ptr;
-#endif
-#endif /* REVISIT */
 
   /* Initialize the initial exception register context structure */
 
@@ -99,20 +94,4 @@ void up_initial_state(struct tcb_s *tcb)
 
   xcp->regs[REG_PS]   = PS_UM | PS_EXCM | PS_WOE | PS_CALLINC(1);
 #endif
-
-#warning REVISIT co-processor support
-#if 0 /* REVISIT */
-#if XCHAL_CP_NUM > 0
-  /* Init the coprocessor save area (see xtensa_context.h)
-   *
-   * No access to TCB here, so derive indirectly. Stack growth is top to bottom.
-   * //ptr = (uint32_t *) xMPUSettings->coproc_area;
-   */
-
-  ptr = (uint32_t *)(((uint32_t)tcb->adj_stack_ptr - XT_CP_SIZE) & ~0xf);
-  ptr[0] = 0;
-  ptr[1] = 0;
-  ptr[2] = (((uint32_t)ptr) + 12 + XTENSA_TOTAL_SA_ALIGN - 1) & -XTENSA_TOTAL_SA_ALIGN;
-#endif
-#endif /* REVISIT */
 }

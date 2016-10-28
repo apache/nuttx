@@ -38,17 +38,6 @@ config XTENSA_CALL0_ABI
 		The Window ABI is not supported.  Only the CALL0 ABI is supported in the
 		current implementation.
 
-config XTENSA_CP_LAZY
-	bool "Lazy Co-processor Save"
-	default y
-	---help---
-		If this option is selected, then the co-processor state will be saved
-		only on context switches.  As a consequency of this, co-processors
-		may NOT be used within interrupt handlers.  If you must use co-
-		processors in interrupt handling, then disable this option.  There
-		will be a significant interrupt latency performance impact if this
-		option is disabled.
-
 config XTENSA_USE_OVLY
 	bool
 	default n

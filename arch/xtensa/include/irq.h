@@ -52,6 +52,7 @@
 #include <arch/chip/core-isa.h>
 #include <arch/xtensa/xtensa_specregs.h>
 #include <arch/xtensa/xtensa_corebits.h>
+#include <arch/xtensa/xtensa_coproc.h>
 
 /* Include architecture-specific IRQ definitions */
 
@@ -157,6 +158,12 @@ struct xcptcontext
   /* Register save area */
 
   uint32_t regs[XCPTCONTEXT_REGS];
+
+#if XCHAL_CP_NUM > 0
+  /* Co-processor save area */
+
+  struct struct xtensa_cpstate_s cpstate;
+#endif
 
 #ifdef CONFIG_LIB_SYSCALL
   /* The following array holds the return address and the exc_return value

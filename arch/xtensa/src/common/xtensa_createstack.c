@@ -47,6 +47,8 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
+
+#include <arch/xtensa/xtensa_coproc.h>
 #include <arch/board/board.h>
 
 #include "xtensa.h"
@@ -57,13 +59,11 @@
 
 /* XTENSA requires at least a 4-byte stack alignment.  For floating point use,
  * however, the stack must be aligned to 8-byte addresses.
+ *
+ * REVIST: Is this true?  Comes from ARM EABI
  */
 
-#ifdef CONFIG_LIBC_FLOATINGPOINT
-#  define STACK_ALIGNMENT   8
-#else
-#  define STACK_ALIGNMENT   4
-#endif
+#define STACK_ALIGNMENT     8
 
 /* Stack alignment macros */
 
@@ -114,6 +114,12 @@
 
 int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 {
+#if XCHAL_CP_NUM > 0
+  uintptr_t cpstart;
+  uintptr_t cpend;
+  size_t cpsize;
+#endif
+
   /* Is there already a stack allocated of a different size?  Because of
    * alignment issues, stack_size might erroneously appear to be of a
    * different size.  Fortunately, this is not a critical operation.
@@ -125,6 +131,16 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
       up_release_stack(tcb, ttype);
     }
+
+#if XCHAL_CP_NUM > 0
+  /* Add the size of the co-processor save area to the stack allocation.
+   * REVISIT:  This may waste memory.  Increasing the caller's requested
+   * stack size should only be necessary if the requested size could not
+   * hold the co-processor save area.
+   */
+
+  stack_size += XTENSA_CP_SA_SIZE;
+#endif
 
   /* Do we need to allocate a new stack? */
 
@@ -163,15 +179,15 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
   if (tcb->stack_alloc_ptr)
     {
-      size_t top_of_stack;
+      uintptr_t top_of_stack;
       size_t size_of_stack;
 
+#ifdef CONFIG_STACK_COLORATION
       /* Yes.. If stack debug is enabled, then fill the stack with a
        * recognizable value that we can use later to test for high
        * water marks.
        */
 
-#ifdef CONFIG_STACK_COLORATION
       memset(tcb->stack_alloc_ptr, 0xaa, stack_size);
 #endif
 
@@ -181,15 +197,36 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
        * the stack are referenced as positive word offsets from sp.
        */
 
-      top_of_stack = (uint32_t)tcb->stack_alloc_ptr + stack_size - 4;
+      top_of_stack = (uintptr_t)tcb->stack_alloc_ptr + stack_size - 4;
 
-      /* The XTENSA stack must be aligned at word (4 byte) boundaries; for
-       * floating point use, the stack must be aligned to 8-byte addresses.
-       * If necessary top_of_stack must be rounded down to the next
-       * boundary to meet these alignment requirements.
+#if XCHAL_CP_NUM > 0
+      /* Allocate the co-processor save area at the top of the (push down)
+       * stack.
+       *
+       * REVISIT:  This is not secure.  In secure built configurations it
+       * be more appropriate to use kmm_memalign() to allocte protected
+       * memory rather than using the stack.
        */
 
-      top_of_stack = STACK_ALIGN_DOWN(top_of_stack);
+      cpstart      = (uintptr_t)_CP_ALIGNDOWN(top_of_stack - XCHAL_CP1_SA_ALIGN);
+      top_of_stack = cpstart;
+
+      /* Initialize the coprocessor save area (see xtensa_coproc.h) */
+
+      xcp->cpstate.cpenable = 0;  /* No coprocessors active for this thread */
+      xcp->cpstate.cpstored = 0;  /* No coprocessors saved for this thread */
+      xcp->cpstate.cpcsst   = 0;  /* No oprocessor callee-saved regs stored for this thread */
+      xcp->cpstate.unused   = 0;  /* unused */
+      xcp->cpstate.cpasa    = (uint32_t *)cpstart; /* Start of aligned save area */
+#endif
+
+      /* The XTENSA stack must be aligned.  If necessary top_of_stack must be
+       * rounded down to the next boundary to meet this alignment requirement.
+       *
+       * NOTE: Co-processor save area not included in the size of the stack.
+       */
+
+      top_of_stack  = STACK_ALIGN_DOWN(top_of_stack);
       size_of_stack = top_of_stack - (uint32_t)tcb->stack_alloc_ptr + 4;
 
       /* Save the adjusted stack values in the struct tcb_s */

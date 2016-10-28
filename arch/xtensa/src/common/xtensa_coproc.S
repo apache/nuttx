@@ -195,13 +195,15 @@ _xtensa_coproc_savestate:
 
 	rsr		a2, CPENABLE				/* a2 = which CPs are enabled */
 	beqz	a2, .Ldone					/* Quick exit if none */
+
 	mov		a14, a0						/* Save return address */
 	call0	XT_RTOS_CP_STATE			/* Get address of CP save area */
 	mov		a0, a14						/* Restore return address */
 	beqz	a15, .Ldone					/* if none then nothing to do */
-	s16i	a2, a15, XT_CP_CS_ST		/* Save mask of CPs being stored */
+
+	s16i	a2, a15, XTENSA_CPCSST		/* Save mask of CPs being stored */
 	movi	a13, _xt_coproc_sa_offset   /* Array of CP save offsets */
-	l32i	a15, a15, XT_CP_ASA			/* a15 = base of aligned save area */
+	l32i	a15, a15, XTENSA_CPASA		/* a15 = base of aligned save area */
 
 #if XTENSA_CP0_SA_SIZE > 0
 	bbci.l	a2, 0, 2f					/* CP 0 not enabled */
@@ -308,11 +310,13 @@ _xtensa_coproc_restorestate:
 	call0	XT_RTOS_CP_STATE			/* Get address of CP save area */
 	mov		a0, a14						/* Restore return address */
 	beqz	a15, .Ldone2				/* if none then nothing to do */
-	l16ui	a3, a15, XT_CP_CS_ST		/* a3 = which CPs have been saved */
+
+	l16ui	a3, a15, XTENSA_CPCSST		/* a3 = which CPs have been saved */
 	xor		a3, a3, a2					/* Clear the ones being restored */
-	s32i	a3, a15, XT_CP_CS_ST		/* Update saved CP mask */
+	s32i	a3, a15, XTENSA_CPCSST		/* Update saved CP mask */
+
 	movi	a13, _xt_coproc_sa_offset   /* Array of CP save offsets */
-	l32i	a15, a15, XT_CP_ASA			/* a15 = base of aligned save area */
+	l32i	a15, a15, XTENSA_CPASA		/* a15 = base of aligned save area */
 
 #if XTENSA_CP0_SA_SIZE
 	bbci.l	a2, 0, 2f					/* CP 0 not enabled */

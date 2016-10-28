@@ -81,12 +81,6 @@ uint32_t *xtensa_irq_dispatch(int irq, uint32_t *regs)
 
   CURRENT_REGS = regs;
 
-#if XCHAL_CP_NUM > 0 && !defined(CONFIG_XTENSA_CP_LAZY)
-   /* Save the current co processor state on entry int each interrupt. */
-
-   esp32_coproc_savestate(tcb->xcp.cpstate);
-#endif
-
   /* Deliver the IRQ */
 
   irq_dispatch(irq, regs);
@@ -99,7 +93,6 @@ uint32_t *xtensa_irq_dispatch(int irq, uint32_t *regs)
   if (regs != CURRENT_REGS)
     {
 #if XCHAL_CP_NUM > 0
-#ifdef CONFIG_XTENSA_CP_LAZY
       /* If an interrupt level context switch has occurred, then save the
        * co-processor state in in the suspended thread's co-processor save
        * area.
@@ -110,9 +103,8 @@ uint32_t *xtensa_irq_dispatch(int irq, uint32_t *regs)
        */
 
        esp32_coproc_savestate(tcb->xcp.cpstate);
-#endif
 
-       /* Set up the co-processor state for the to-be-started thread.
+       /* Then set up the co-processor state for the to-be-started thread.
         *
         * NOTE: The current thread for this CPU is the to-be-started
         * thread.
