@@ -1231,4 +1231,37 @@ void xtensa_serial_initialize(void)
 #endif
 }
 
+/****************************************************************************
+ * Name: up_putc
+ *
+ * Description:
+ *   Provide priority, low-level access to support OS debug writes
+ *
+ ****************************************************************************/
+
+int up_putc(int ch)
+{
+#ifdef HAVE_SERIAL_CONSOLE
+  uint32_t intena;
+
+  esp32_disableallints(CONSOLE_DEV.priv, &intena);
+
+  /* Check for LF */
+
+  if (ch == '\n')
+    {
+      /* Add CR */
+
+      while(!esp32_txready(&CONSOLE_DEV));
+      esp32_send(&CONSOLE_DEV, 'r');
+    }
+
+  while(!esp32_txready(&CONSOLE_DEV));
+  esp32_send(&CONSOLE_DEV, ch);
+
+  esp32_restoreuartint(CONSOLE_DEV.priv, intena);
+#endif
+
+  return ch;
+}
 #endif /* USE_SERIALDRIVER */
