@@ -113,6 +113,7 @@ xtensa_coproc_init:
 	movi	a2, _xt_coproc_owner_sa			/* a2 = base of owner array */
 	addi	a3, a2, (XTENSA_CP_MAX*portNUM_PROCESSORS) << 2		/* a3 = top+1 of owner array */
 	movi	a4, 0							/* a4 = 0 (unowned) */
+
 1:	s32i	a4, a2, 0
 	addi	a2, a2, 4
 	bltu	a2, a3, 1b
@@ -223,7 +224,7 @@ _xtensa_coproc_savestate:
 	rsr		a2, CPENABLE				/* a2 = which CPs are enabled */
 	beqz	a2, .Ldone1					/* Quick exit if none */
 
-	s16i	a2, a15, XTENSA_CPCSST		/* Save mask of CPs being stored */
+	s16i	a2, a15, XTENSA_CPSTORED	/* Save mask of CPs being stored */
 	movi	a13, _xtensa_coproc_saoffsets	/* Array of CP save offsets */
 	l32i	a15, a15, XTENSA_CPASA		/* a15 = base of aligned save area */
 
@@ -336,9 +337,9 @@ _xtensa_coproc_restorestate:
 	/* Move the address of the thread state save area to R15 */
 
 	mov		a15, a2						/* A15 is now the address of the save area */
-	l16ui	a2, a15, XTENSA_CPCSST		/* a3 = which CPs have been saved */
+	l16ui	a2, a15, XTENSA_CPSTORED		/* a2 = which CPs have been saved */
 	movi	a3, 0						/* Clear the ones being restored (all of them) */
-	s32i	a3, a15, XTENSA_CPCSST		/* Update saved CP mask */
+	s16i	a3, a15, XTENSA_CPSTORED		/* Clear saved CP mask */
 
 	movi	a13, _xtensa_coproc_saoffsets	/* Array of CP save offsets */
 	l32i	a15, a15, XTENSA_CPASA		/* a15 = base of aligned save area */

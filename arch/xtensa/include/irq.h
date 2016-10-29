@@ -162,7 +162,7 @@ struct xcptcontext
 #if XCHAL_CP_NUM > 0
   /* Co-processor save area */
 
-  struct struct xtensa_cpstate_s cpstate;
+  struct xtensa_cpstate_s cpstate;
 #endif
 
 #ifdef CONFIG_LIB_SYSCALL

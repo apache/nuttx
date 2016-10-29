@@ -156,10 +156,11 @@ void _exit(int status)
 #endif
 
 #if XCHAL_CP_NUM > 0
-  /* Disable preprocessor support fo the task that is exit-ing. */
+  /* Disable co-processor support for the task that is exit-ing. */
 
   tcb = this_task();
   xtensa_coproc_release(&tcb->xcp.cpstate);
+  xtensa_coproc_disable(&tcb->xcp.cpstate, XTENSA_CP_ALLSET);
 #endif
 
   /* Destroy the task at the head of the ready to run list. */

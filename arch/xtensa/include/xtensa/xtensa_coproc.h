@@ -52,6 +52,10 @@
 #define _CP_ALIGNUP(n,val)   (((val) + _CP_MASK(n)) & ~_CP_MASK(n))
 #define _CP_ALIGNDOWN(n,val) ((val) & ~_CP_MASK(n))
 
+/* A set of all co-processors */
+
+#define XTENSA_CP_ALLSET     ((1 << XCHAL_CP_NUM) - 1)
+
 /* CO-PROCESSOR STATE SAVE AREA FOR A THREAD
  *
  * NuttX provides an area per thread to save the state of co-processors when
@@ -93,18 +97,11 @@
  * XTENSA_CPSTORED
  *   A bitmask with the same layout as CPENABLE, a bit per co-processor.
  *   Indicates whether the state of each co-processor is saved in the state
- *   save area. When a thread enters the kernel, only the state of co-procs
- *   still enabled in CPENABLE is saved. When the co-processor exception
- *   handler assigns ownership of a co-processor to a thread, it restores
- *   the saved state only if this bit is set, and clears this bit.
- *
- * XTENSA_CPCSST
- *   A bitmask with the same layout as CPENABLE, a bit per co-processor.
- *   Indicates whether callee-saved state is saved in the state save area.
- *   Callee-saved state is saved by itself on a solicited context switch,
- *   and restored when needed by the coprocessor exception handler.
- *   Unsolicited switches will cause the entire coprocessor to be saved
- *   when necessary.
+ *   save area. When the state of a thread is saved, only the state of co-procs
+ *   still enabled in CPENABLE is saved. When the co-processor state is
+ *   is restored, the state is only resotred for a co-processor if this bit
+ *   is set.  This bist set is cleared after after co-processor state has
+ *   been restored.
  *
  * XTENSA_CPASA
  *   Pointer to the aligned save area.  Allows it to be aligned more than
@@ -129,8 +126,7 @@
 
 #define XTENSA_CPENABLE   0  /* (2 bytes) coprocessors active for this thread */
 #define XTENSA_CPSTORED   2  /* (2 bytes) coprocessors saved for this thread */
-#define XTENSA_CPCSST     4  /* (2 bytes) coprocessor callee-saved regs stored for this thread */
-#define XTENSA_CPASA      8  /* (4 bytes) ptr to aligned save area */
+#define XTENSA_CPASA      4  /* (4 bytes) ptr to aligned save area */
 
 /****************************************************************************
  * Public Types
@@ -140,11 +136,33 @@
 
 struct xtensa_cpstate_s
 {
-  uint16_t cpenable;  /* (2 bytes) coprocessors active for this thread */
-  uint16_t cpstored;  /* (2 bytes) coprocessors saved for this thread */
-  uint16_t cpcsst     /* (2 bytes) coprocessor callee-saved regs stored for this thread */
-  uint16_t unused;    /* (2 bytes) unused */
-  uint32_t *cpasa;    /* (4 bytes) ptr to aligned save area */
+  uint16_t cpenable;  /* (2 bytes) Co-processors active for this thread */
+  uint16_t cpstored;  /* (2 bytes) Co-processors saved for this thread */
+  uint32_t *cpasa;    /* (4 bytes) Pointer to aligned save area */
+}
+
+/* Return the current value of the CPENABLE register */
+
+static inline uint32_t xtensa_get_cpenable(void)
+{
+  uint32_t cpenable;
+
+  __asm__ __volatile__
+  (
+    "rsr %0, CPENABLE"  : "=r"(cpenable)
+  );
+
+  return cpenable;
+}
+
+/* Set the value of the CPENABLE register */
+
+static inline void xtensa_set_cpenable(uint32_t cpenable)
+{
+  __asm__ __volatile__
+  (
+    "wsr %0, PS"  : : "r"(cpenable)
+  );
 }
 
 #endif /* __ASSEMBLY__ */

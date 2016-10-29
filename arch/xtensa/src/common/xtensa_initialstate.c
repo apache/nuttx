@@ -94,4 +94,13 @@ void up_initial_state(struct tcb_s *tcb)
 
   xcp->regs[REG_PS]   = PS_UM | PS_EXCM | PS_WOE | PS_CALLINC(1);
 #endif
+
+#if XCHAL_CP_NUM > 0
+  /* Set up the co-processors that will be enabled initially when the thread
+   * starts (see xtensa_coproc.h)
+   */
+
+  xcp->cpstate.cpenable = CONFIG_XTENSA_CP_INITSET;
+  xcp->cpstate.cpstored = 0;  /* No coprocessors haved statee saved for this thread */
+#endif
 }

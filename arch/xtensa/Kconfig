@@ -44,6 +44,17 @@ config XTENSA_USE_OVLY
 	---help---
 		Enable code overlay support. This option is currently unsupported.
 
+config XTENSA_CP_INITSET
+	bool "Default co-processor enables"
+	default 1
+	range 0 65535
+	---help---
+		Co-processors may be enabled on a thread by calling xtensa_coproc_enable()
+		and disabled by calling xtensa_coproc_disable().  Some co-processors
+		should be enabled on all threads by default.  That set of co-processors
+		is provided by CONFIG_XTENSA_CP_INITSET.  Each bit corresponds to one
+		coprocessor with the same bit layout as for the CPENABLE register.
+
 config ARCH_CHIP
 	string
 	default "esp32"		if ARCH_CHIP_ESP32

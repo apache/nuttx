@@ -215,8 +215,6 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
       xcp->cpstate.cpenable = 0;  /* No coprocessors active for this thread */
       xcp->cpstate.cpstored = 0;  /* No coprocessors saved for this thread */
-      xcp->cpstate.cpcsst   = 0;  /* No oprocessor callee-saved regs stored for this thread */
-      xcp->cpstate.unused   = 0;  /* unused */
       xcp->cpstate.cpasa    = (uint32_t *)cpstart; /* Start of aligned save area */
 #endif
 

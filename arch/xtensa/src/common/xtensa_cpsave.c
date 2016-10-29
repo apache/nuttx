@@ -39,6 +39,8 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/irq.h>
+#include <arch/xtensa/xtensa_coproc.h>
 #include <arch/chip/core-isa.h>
 
 #include "xtensa.h"
@@ -58,12 +60,22 @@
  *   is simply a C wrapper around the assembly language call to
  *   _xtensa_coproc_savestate.
  *
- * Entry Conditions:
- *   - The thread being switched out is still the current thread.
- *   - CPENABLE state reflects which coprocessors are active.
+ *   Entry Conditions:
+ *     - The thread being switched out is still the current thread.
+ *     - CPENABLE state reflects which coprocessors are active.
  *
- * Exit conditions:
- *   - All necessary CP callee-saved state has been saved.
+ *   Exit conditions:
+ *     - All necessary CP callee-saved state has been saved.
+ *
+ * Input Parameters:
+ *   tcb - A pointer to the TCB of thread whose co-processor state is to
+ *         be saved.
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Called with interrupts disabled.
  *
  ****************************************************************************/
 
@@ -89,12 +101,22 @@ void xtensa_coproc_savestate(struct tcb_s *tcb)
  *   xtensa_coproc_restorestate() is simply a C wrapper around the assembly
  *   language call to _xtensa_coproc_restorestate.
  *
- * Entry Conditions:
- *   - CPENABLE is set up correctly for all required coprocessors.
+ *   Entry Conditions:
+ *     - CPENABLE is set up correctly for all required coprocessors.
  *
- * Exit conditions:
- *   - All necessary CP callee-saved state has been restored.
- *   - CPENABLE - unchanged.
+ *   Exit conditions:
+ *     - All necessary CP callee-saved state has been restored.
+ *     - CPENABLE - unchanged.
+ *
+ * Input Parameters:
+ *   tcb - A pointer to the TCB of thread whose co-processor state is to
+ *         be restored.
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Called with interrupts disabled.
  *
  ****************************************************************************/
 
@@ -112,5 +134,108 @@ void xtensa_coproc_restorestate(struct tcb_s *tcb)
       : "a0", "a2", "a3", "a4", "a5", "a6", "a7", "a13", "a14", "a15"
     )
 }
+
+/****************************************************************************
+ * Name: xtensa_coproc_enable
+ *
+ * Description:
+ *   Enable a set of co-processors.
+ *
+ * Input Parameters:
+ *   cpstate - A pointer to the Co-processor state save structure.
+ *   cpset   - A bit set of co-processors to be enabled.  Matches bit layout
+ *             of the CPENABLE register.  Bit 0-XCHAL_CP_NUM:  0 = no change
+ *             1 = enable
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void xtensa_coproc_enable(struct xtensa_cpstate_s *cpstate, int cpset)
+{
+  irqstate_t flags;
+  uint32_t cpenable;
+
+  /* These operations must be atomic */
+
+  flags = enter_critical_section();
+
+  /* Don't enable co-processors that may already be enabled
+   *
+   *          cpenable
+   *            0   1
+   *          --- ---
+   *  cpset 0 | 0   0
+   *        1 | 1   0
+   */
+
+  cpset ^= (cpset & cpstate->cpenable);
+  if (cpset != 0)
+    {
+      /* Enable the co-processors */
+
+      cpenable = xtensa_get_cpenable();
+      cpenable |= cpset;
+      xtensa_put_cpenable(cpenable);
+
+      cpstate->cpenable  = cpenable;
+      cpsates->cpstored &= ~cpset;
+    }
+
+  leave_critical_section();
+}
+
+/****************************************************************************
+ * Name: xtensa_coproc_disable
+ *
+ * Description:
+ *   Enable a set of co-processors.
+ *
+ * Input Parameters:
+ *   cpstate - A pointer to the Co-processor state save structure.
+ *   cpset   - A bit set of co-processors to be enabled.  Matches bit layout
+ *             of the CPENABLE register.  Bit 0-XCHAL_CP_NUM:  0 = no change
+ *             1 = disable
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void xtensa_coproc_disable(struct xtensa_cpstate_s *cpstate, int cpset)
+{
+  irqstate_t flags;
+  uint32_t cpenable;
+
+  /* These operations must be atomic */
+
+  flags = enter_critical_section();
+
+  /* Don't disable co-processors that are already be disabled.
+   *
+   *          cpenable
+   *            0   1
+   *          --- ---
+   *  cpset 0 | 0   0
+   *        1 | 0   1
+   */
+
+  cpset &= cpstate->cpenable;
+  if (cpset != 0)
+    {
+      /* Disable the co-processors */
+
+      cpenable = xtensa_get_cpenable();
+      cpenable &= ~cpset;
+      xtensa_put_cpenable(cpenable);
+
+      cpstate->cpenable  = cpenable;
+      cpsates->cpstored &= ~cpset;
+    }
+
+  leave_critical_section();
+}
+
 
 #endif /* XCHAL_CP_NUM */
