@@ -19,7 +19,7 @@ SECTIONS
     /* Vectors according to builds/RF-2015.2-win32/esp108_v1_2_s5_512int_2/config.html */
 
     . = 0x0;
-    KEEP(*(.WindowVectors.text));
+    KEEP(*(.window_vectors.text));
     . = 0x180;
     KEEP(*(.xtensa_level2_vector.text));
     . = 0x1c0;
