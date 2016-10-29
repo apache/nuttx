@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/common/xtensa_inthandlers.S
+ * arch/xtensa/src/common/xtensa_int_handlers.S
  *
  * Adapted from use in NuttX by:
  *
@@ -30,7 +30,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
-	.file	"xtensa_inthandlers.S"
+	.file	"xtensa_int_handlers.S"
 
 /* NOTES on the use of 'call0' for long jumps instead of 'j':
  *

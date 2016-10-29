@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/common/xtensa_nmihandler.S
+ * arch/xtensa/src/common/xtensa_nmi_handler.S
  *
  * Adapted from use in NuttX by:
  *
@@ -30,7 +30,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
-	.file	"xtensa_nmihandler.S"
+	.file	"xtensa_nmi_handler.S"
 
 /* NOTES on the use of 'call0' for long jumps instead of 'j':
  *
