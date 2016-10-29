@@ -134,12 +134,6 @@ void up_initialize(void)
 
   xtensa_add_region();
 
-#if XCHAL_CP_NUM > 0
-  /* Initialize co-processor management. */
-
-  xtensa_coproc_init();
-#endif
-
   /* Initialize the interrupt subsystem */
 
   xtensa_irq_initialize();

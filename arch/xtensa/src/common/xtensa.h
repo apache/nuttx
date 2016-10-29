@@ -237,10 +237,7 @@ void xtensa_dumpstate(void);
 /* Initialization */
 
 #if XCHAL_CP_NUM > 0
-void xtensa_coproc_init(void);
-
 struct xtensa_cpstate_s;
-void xtensa_coproc_release(struct xtensa_cpstate_s *cpstate);
 void xtensa_coproc_enable(struct xtensa_cpstate_s *cpstate, int cpset);
 void xtensa_coproc_disable(struct xtensa_cpstate_s *cpstate, int cpset);
 #endif

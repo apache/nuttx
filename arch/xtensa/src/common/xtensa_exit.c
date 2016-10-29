@@ -159,7 +159,6 @@ void _exit(int status)
   /* Disable co-processor support for the task that is exit-ing. */
 
   tcb = this_task();
-  xtensa_coproc_release(&tcb->xcp.cpstate);
   xtensa_coproc_disable(&tcb->xcp.cpstate, XTENSA_CP_ALLSET);
 #endif
 
