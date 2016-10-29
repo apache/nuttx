@@ -3560,7 +3560,7 @@ static inline void stm32_otginterrupt(FAR struct stm32_usbdev_s *priv)
 
   /* Clear OTG interrupt */
 
-  stm32_putreg(retval, STM32_OTG_GOTGINT);
+  stm32_putreg(regval, STM32_OTG_GOTGINT);
 }
 #endif
 
