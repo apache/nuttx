@@ -49,7 +49,9 @@
 
 #include "sched/sched.h"
 #include "xtensa.h"
+#include "chip/esp32_dport.h"
 #include "esp32_region.h"
+#include "esp32_cpuint.h"
 
 #ifdef CONFIG_SMP
 
@@ -60,7 +62,7 @@ void ets_set_appcpu_boot_addr(uint32_t);
  * Private Data
  ****************************************************************************/
 
-static bool g_appcpu_started;
+static volatile bool g_appcpu_started;
 static sem_t g_appcpu_interlock;
 
 /****************************************************************************
@@ -207,14 +209,14 @@ int up_cpu_start(int cpu)
       /* Start CPU1 */
 
       sinfo("Starting CPU%d\n", cpu);
-      sem_init(&g_appcpu_interlock, 0, 0)
+      sem_init(&g_appcpu_interlock, 0, 0);
 
       regval  = getreg32(DPORT_APPCPU_CTRL_B_REG);
       regval |= DPORT_APPCPU_CLKGATE_EN;
       putreg32(regval, DPORT_APPCPU_CTRL_B_REG);
 
       regval  = getreg32(DPORT_APPCPU_CTRL_C_REG);
-      regval ~= DPORT_APPCPU_RUNSTALL;
+      regval &= ~DPORT_APPCPU_RUNSTALL;
       putreg32(regval, DPORT_APPCPU_CTRL_C_REG);
 
       regval  = getreg32(DPORT_APPCPU_CTRL_A_REG);
@@ -231,7 +233,7 @@ int up_cpu_start(int cpu)
 
       /* And way for the initial task to run on CPU1 */
 
-      while (!app_cpu_started)
+      while (!g_appcpu_started)
         {
           ret = sem_wait(&g_appcpu_interlock);
           if (ret < 0)
@@ -241,6 +243,7 @@ int up_cpu_start(int cpu)
         }
 
       sem_destroy(&g_appcpu_interlock);
+      return OK;
     }
 }
 

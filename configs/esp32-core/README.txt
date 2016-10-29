@@ -155,3 +155,10 @@ NOTES:
     Configures the NuttShell (nsh) located at apps/examples/nsh.
 
     NOTES:
+
+  smp:
+
+    Another NSH configuration, similar to nsh, but also enables
+    SMP operation.
+
+    NOTES:

@@ -39,8 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <spinlock.h>
-
+#include <nuttx/spinlock.h>
 #include <arch/spinlock.h>
 
 #include "xtensa.h"
@@ -139,3 +138,5 @@ spinlock_t up_testset(volatile FAR spinlock_t *lock)
 
   return (prev == SP_UNLOCKED) ? SP_UNLOCKED : SP_LOCKED;
 }
+
+#endif /* CONFIG_SPINLOCK */
