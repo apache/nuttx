@@ -40,6 +40,8 @@
 #include <nuttx/config.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/sched.h>
+
 #include <arch/xtensa/xtensa_coproc.h>
 #include <arch/chip/core-isa.h>
 
@@ -81,16 +83,16 @@
 
 void xtensa_coproc_savestate(struct tcb_s *tcb)
 {
-  uint32_t cpsave = (uint32_t)((uintptr_t)&tcp->xcp.cpsave);
+  uint32_t cpstate = (uint32_t)((uintptr_t)&tcb->xcp.cpstate);
 
     __asm__ __volatile__
     (
       "mov a2, %0\n"
       "call0 _xtensa_coproc_savestate\n"
       :
-      : "r" (cpsave)
+      : "r" (cpstate)
       : "a0", "a2", "a3", "a4", "a5", "a6", "a7", "a13", "a14", "a15"
-    )
+    );
 }
 
 /****************************************************************************
@@ -122,17 +124,16 @@ void xtensa_coproc_savestate(struct tcb_s *tcb)
 
 void xtensa_coproc_restorestate(struct tcb_s *tcb)
 {
-  uint32_t cpsave = (uint32_t)((uintptr_t)&tcp->xcp.cpsave);
+  uint32_t cpstate = (uint32_t)((uintptr_t)&tcb->xcp.cpstate);
 
     __asm__ __volatile__
     (
       "mov a2, %0\n"
-      "mov a3, %1\n"
       "call0 _xtensa_coproc_restorestate\n"
       :
-      : "r" (cpmask) "r" (cpsave)
+      : "r" (cpstate)
       : "a0", "a2", "a3", "a4", "a5", "a6", "a7", "a13", "a14", "a15"
-    )
+    );
 }
 
 /****************************************************************************
@@ -177,13 +178,13 @@ void xtensa_coproc_enable(struct xtensa_cpstate_s *cpstate, int cpset)
 
       cpenable = xtensa_get_cpenable();
       cpenable |= cpset;
-      xtensa_put_cpenable(cpenable);
+      xtensa_set_cpenable(cpenable);
 
       cpstate->cpenable  = cpenable;
-      cpsates->cpstored &= ~cpset;
+      cpstate->cpstored &= ~cpset;
     }
 
-  leave_critical_section();
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -228,13 +229,13 @@ void xtensa_coproc_disable(struct xtensa_cpstate_s *cpstate, int cpset)
 
       cpenable = xtensa_get_cpenable();
       cpenable &= ~cpset;
-      xtensa_put_cpenable(cpenable);
+      xtensa_set_cpenable(cpenable);
 
       cpstate->cpenable  = cpenable;
-      cpsates->cpstored &= ~cpset;
+      cpstate->cpstored &= ~cpset;
     }
 
-  leave_critical_section();
+  leave_critical_section(flags);
 }
 
 

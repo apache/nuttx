@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/sched.h>
 #include <arch/chip/irq.h>
 
 #include "chip/esp32_dport.h"

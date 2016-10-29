@@ -48,8 +48,11 @@
 
 #include <nuttx/config.h>
 #include <nuttx/irq.h>
+
 #include <arch/types.h>
+#include <arch/chip/tie.h>
 #include <arch/chip/core-isa.h>
+
 #include <arch/xtensa/xtensa_specregs.h>
 #include <arch/xtensa/xtensa_corebits.h>
 #include <arch/xtensa/xtensa_coproc.h>

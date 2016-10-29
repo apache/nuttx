@@ -38,7 +38,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <arch/exp32/core-isa.h>
+#include <arch/esp32/core-isa.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -139,7 +139,11 @@ struct xtensa_cpstate_s
   uint16_t cpenable;  /* (2 bytes) Co-processors active for this thread */
   uint16_t cpstored;  /* (2 bytes) Co-processors saved for this thread */
   uint32_t *cpasa;    /* (4 bytes) Pointer to aligned save area */
-}
+};
+
+/****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
 
 /* Return the current value of the CPENABLE register */
 

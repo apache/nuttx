@@ -39,10 +39,12 @@
 
 #include <nuttx/config.h>
 
-#include <arch/chip/core-isa.h>
-#include <arch/chip/tie-asm.h>
+#include <arch/xtensa/core.h>
 #include <arch/xtensa/xtensa_coproc.h>
 #include <arch/xtensa/xtensa_specregs.h>
+#include <arch/chip/core-isa.h>
+#include <arch/chip/tie.h>
+#include <arch/chip/tie-asm.h>
 
 #if XCHAL_CP_NUM > 0
 
@@ -120,7 +122,7 @@ _xtensa_coproc_savestate:
 	movi	a13, _xtensa_coproc_saoffsets	/* Array of CP save offsets */
 	l32i	a15, a15, XTENSA_CPASA		/* a15 = base of aligned save area */
 
-#if XTENSA_CP0_SA_SIZE > 0
+#if XCHAL_CP0_SA_SIZE > 0
 	bbci.l	a2, 0, 2f					/* CP 0 not enabled */
 	l32i	a14, a13, 0					/* a14 = _xtensa_coproc_saoffsets[0] */
 	add		a3, a14, a15				/* a3 = save area for CP 0 */
@@ -128,7 +130,7 @@ _xtensa_coproc_savestate:
 2:
 #endif
 
-#if XTENSA_CP1_SA_SIZE > 0
+#if XCHAL_CP1_SA_SIZE > 0
 	bbci.l	a2, 1, 2f					/* CP 1 not enabled */
 	l32i	a14, a13, 4					/* a14 = _xtensa_coproc_saoffsets[1] */
 	add		a3, a14, a15				/* a3 = save area for CP 1 */
@@ -136,7 +138,7 @@ _xtensa_coproc_savestate:
 2:
 #endif
 
-#if XTENSA_CP2_SA_SIZE > 0
+#if XCHAL_CP2_SA_SIZE > 0
 	bbci.l	a2, 2, 2f
 	l32i	a14, a13, 8
 	add		a3, a14, a15
@@ -144,7 +146,7 @@ _xtensa_coproc_savestate:
 2:
 #endif
 
-#if XTENSA_CP3_SA_SIZE > 0
+#if XCHAL_CP3_SA_SIZE > 0
 	bbci.l	a2, 3, 2f
 	l32i	a14, a13, 12
 	add		a3, a14, a15
@@ -152,7 +154,7 @@ _xtensa_coproc_savestate:
 2:
 #endif
 
-#if XTENSA_CP4_SA_SIZE > 0
+#if XCHAL_CP4_SA_SIZE > 0
 	bbci.l	a2, 4, 2f
 	l32i	a14, a13, 16
 	add		a3, a14, a15
@@ -160,7 +162,7 @@ _xtensa_coproc_savestate:
 2:
 #endif
 
-#if XTENSA_CP5_SA_SIZE > 0
+#if XCHAL_CP5_SA_SIZE > 0
 	bbci.l	a2, 5, 2f
 	l32i	a14, a13, 20
 	add		a3, a14, a15
@@ -168,7 +170,7 @@ _xtensa_coproc_savestate:
 2:
 #endif
 
-#if XTENSA_CP6_SA_SIZE > 0
+#if XCHAL_CP6_SA_SIZE > 0
 	bbci.l	a2, 6, 2f
 	l32i	a14, a13, 24
 	add		a3, a14, a15
@@ -176,7 +178,7 @@ _xtensa_coproc_savestate:
 2:
 #endif
 
-#if XTENSA_CP7_SA_SIZE > 0
+#if XCHAL_CP7_SA_SIZE > 0
 	bbci.l	a2, 7, 2f
 	l32i	a14, a13, 28
 	add		a3, a14, a15
@@ -236,7 +238,7 @@ _xtensa_coproc_restorestate:
 	movi	a13, _xtensa_coproc_saoffsets	/* Array of CP save offsets */
 	l32i	a15, a15, XTENSA_CPASA		/* a15 = base of aligned save area */
 
-#if XTENSA_CP0_SA_SIZE
+#if XCHAL_CP0_SA_SIZE
 	bbci.l	a2, 0, 2f					/* CP 0 not enabled */
 	l32i	a14, a13, 0					/* a14 = _xtensa_coproc_saoffsets[0] */
 	add		a3, a14, a15				/* a3 = save area for CP 0 */
@@ -244,7 +246,7 @@ _xtensa_coproc_restorestate:
 2:
 #endif
 
-#if XTENSA_CP1_SA_SIZE
+#if XCHAL_CP1_SA_SIZE
 	bbci.l	a2, 1, 2f					/* CP 1 not enabled */
 	l32i	a14, a13, 4					/* a14 = _xtensa_coproc_saoffsets[1] */
 	add		a3, a14, a15				/* a3 = save area for CP 1 */
@@ -252,7 +254,7 @@ _xtensa_coproc_restorestate:
 2:
 #endif
 
-#if XTENSA_CP2_SA_SIZE
+#if XCHAL_CP2_SA_SIZE
 	bbci.l	a2, 2, 2f
 	l32i	a14, a13, 8
 	add		a3, a14, a15
@@ -260,7 +262,7 @@ _xtensa_coproc_restorestate:
 2:
 #endif
 
-#if XTENSA_CP3_SA_SIZE
+#if XCHAL_CP3_SA_SIZE
 	bbci.l	a2, 3, 2f
 	l32i	a14, a13, 12
 	add		a3, a14, a15
@@ -268,7 +270,7 @@ _xtensa_coproc_restorestate:
 2:
 #endif
 
-#if XTENSA_CP4_SA_SIZE
+#if XCHAL_CP4_SA_SIZE
 	bbci.l	a2, 4, 2f
 	l32i	a14, a13, 16
 	add		a3, a14, a15
@@ -276,7 +278,7 @@ _xtensa_coproc_restorestate:
 2:
 #endif
 
-#if XTENSA_CP5_SA_SIZE
+#if XCHAL_CP5_SA_SIZE
 	bbci.l	a2, 5, 2f
 	l32i	a14, a13, 20
 	add		a3, a14, a15
@@ -284,7 +286,7 @@ _xtensa_coproc_restorestate:
 2:
 #endif
 
-#if XTENSA_CP6_SA_SIZE
+#if XCHAL_CP6_SA_SIZE
 	bbci.l	a2, 6, 2f
 	l32i	a14, a13, 24
 	add		a3, a14, a15
@@ -292,7 +294,7 @@ _xtensa_coproc_restorestate:
 2:
 #endif
 
-#if XTENSA_CP7_SA_SIZE
+#if XCHAL_CP7_SA_SIZE
 	bbci.l	a2, 7, 2f
 	l32i	a14, a13, 28
 	add		a3, a14, a15

@@ -51,6 +51,7 @@
 #include "xtensa.h"
 
 #include "group/group.h"
+#include "sched/sched.h"
 
 /****************************************************************************
  * Public Functions

@@ -48,6 +48,7 @@
 #include <arch/xtensa/core.h>
 #include <arch/chip/core-isa.h>
 #include <arch/xtensa/xtensa_corebits.h>
+#include <arch/xtensa/xtensa_coproc.h>
 
 #include "xtensa.h"
 
@@ -100,7 +101,7 @@ void up_initial_state(struct tcb_s *tcb)
    * starts (see xtensa_coproc.h)
    */
 
-  xcp->cpstate.cpenable = CONFIG_XTENSA_CP_INITSET;
+  xcp->cpstate.cpenable = (CONFIG_XTENSA_CP_INITSET & XTENSA_CP_ALLSET);
   xcp->cpstate.cpstored = 0;  /* No coprocessors haved statee saved for this thread */
 #endif
 }

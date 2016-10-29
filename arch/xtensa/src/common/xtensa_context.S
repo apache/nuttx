@@ -62,6 +62,7 @@
 
 #include <arch/irq.h>
 #include <arch/chip/core-isa.h>
+#include <arch/chip/tie.h>
 #include <arch/xtensa/xtensa_specregs.h>
 
 #warning REVIST XTENSA_EXTRA_SA_SIZE is not yet provided

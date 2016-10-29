@@ -45,9 +45,9 @@ config XTENSA_USE_OVLY
 		Enable code overlay support. This option is currently unsupported.
 
 config XTENSA_CP_INITSET
-	bool "Default co-processor enables"
-	default 1
-	range 0 65535
+	hex "Default co-processor enables"
+	default 0x0001
+	range 0 0xffff
 	---help---
 		Co-processors may be enabled on a thread by calling xtensa_coproc_enable()
 		and disabled by calling xtensa_coproc_disable().  Some co-processors

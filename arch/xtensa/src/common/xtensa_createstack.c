@@ -49,6 +49,7 @@
 #include <nuttx/board.h>
 
 #include <arch/xtensa/xtensa_coproc.h>
+#include <arch/chip/tie.h>
 #include <arch/board/board.h>
 
 #include "xtensa.h"
@@ -115,9 +116,8 @@
 int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 {
 #if XCHAL_CP_NUM > 0
+  struct xcptcontext *xcp;
   uintptr_t cpstart;
-  uintptr_t cpend;
-  size_t cpsize;
 #endif
 
   /* Is there already a stack allocated of a different size?  Because of
@@ -208,11 +208,13 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
        * memory rather than using the stack.
        */
 
-      cpstart      = (uintptr_t)_CP_ALIGNDOWN(top_of_stack - XCHAL_CP1_SA_ALIGN);
+      cpstart      = (uintptr_t)_CP_ALIGNDOWN(XCHAL_CP0_SA_ALIGN,
+                                              top_of_stack - XCHAL_CP1_SA_ALIGN);
       top_of_stack = cpstart;
 
       /* Initialize the coprocessor save area (see xtensa_coproc.h) */
 
+      xcp                   = &tcb->xcp;
       xcp->cpstate.cpenable = 0;  /* No coprocessors active for this thread */
       xcp->cpstate.cpstored = 0;  /* No coprocessors saved for this thread */
       xcp->cpstate.cpasa    = (uint32_t *)cpstart; /* Start of aligned save area */
