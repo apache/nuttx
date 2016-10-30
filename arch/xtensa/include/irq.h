@@ -113,7 +113,7 @@
 #  define _REG_CALL0_START  _REG_LOOPS_START
 #endif
 
-#ifndef CONFIG_XTENSA_CALL0_ABI
+#ifndef __XTENSA_CALL0_ABI__
   /* Temporary space for saving stuff during window spill */
 
 #  define REG_TMP0          (_REG_CALL0_START + 0)
@@ -243,7 +243,7 @@ static inline uint32_t up_irq_save(void)
 
 static inline void up_irq_enable(void)
 {
-#ifdef CONFIG_XTENSA_CALL0_ABI
+#ifdef __XTENSA_CALL0_ABI__
   xtensa_setps(PS_INTLEVEL(0) | PS_UM);
 #else
   xtensa_setps(PS_INTLEVEL(0) | PS_UM | PS_WOE);
@@ -254,7 +254,7 @@ static inline void up_irq_enable(void)
 
 static inline void up_irq_disable(void)
 {
-#ifdef CONFIG_XTENSA_CALL0_ABI
+#ifdef __XTENSA_CALL0_ABI__
   xtensa_setps(PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM);
 #else
   xtensa_setps(PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_WOE);

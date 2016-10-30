@@ -151,7 +151,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                */
 
               CURRENT_REGS[REG_PC]      = (uint32_t)xtensa_sigdeliver;
-#ifdef CONFIG_XTENSA_CALL0_ABI
+#ifdef __XTENSA_CALL0_ABI__
               CURRENT_REGS[REG_PS]      = (uint32_t)(PS_INTLEVEL(0) | PS_UM);
 #else
               CURRENT_REGS[REG_PS]      = (uint32_t)(PS_INTLEVEL(0) | PS_UM | PS_WOE);
@@ -186,7 +186,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            */
 
           tcb->xcp.regs[REG_PC]      = (uint32_t)xtensa_sigdeliver;
-#ifdef CONFIG_XTENSA_CALL0_ABI
+#ifdef __XTENSA_CALL0_ABI__
           tcb->xcp.regs[REG_PS]      = (uint32_t)(PS_INTLEVEL(0) | PS_UM);
 #else
           tcb->xcp.regs[REG_PS]      = (uint32_t)(PS_INTLEVEL(0) | PS_UM | PS_WOE);

@@ -31,13 +31,6 @@ config ARCH_FAMILY_LX6
 		Cadence® Tensilica® Xtensa® LX6 data plane processing unit (DPU).
 		The LX6 is a configurable and extensible processor core.
 
-config XTENSA_CALL0_ABI
-	bool
-	default y
-	---help---
-		The Window ABI is not supported.  Only the CALL0 ABI is supported in the
-		current implementation.
-
 config XTENSA_USE_OVLY
 	bool
 	default n

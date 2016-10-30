@@ -146,11 +146,11 @@ _xtensa_context_save:
 	s32i	a3, a2, (4 * REG_LCOUNT)
 #endif
 
-#ifndef CONFIG_XTENSA_CALL0_ABI
+#ifndef __XTENSA_CALL0_ABI__
 	mov		a9,  a0							/* Preserve ret addr */
 #endif
 
-#ifndef CONFIG_XTENSA_CALL0_ABI
+#ifndef __XTENSA_CALL0_ABI__
 	/* To spill the reg windows, temp. need pre-interrupt stack ptr and
 	 * a4-15.  Need to save a9,12,13 temporarily (in frame temps) and
 	 * recover originals.  Interrupts need to be disabled below

@@ -36,31 +36,53 @@
 
 /* Windowed ABI
  *
- *   Windowed Register Usage
- *   Callee Register  Usage
- *   Register Name
- *   a0               Return address
- *   a1/sp            Stack pointer
- *   a2..a7 In, out, inout, and return values
+ *   The Windowed Register Option replaces the simple 16-entry AR register
+ *   file with a larger register file from which a window of 16 entries is
+ *   visible at any given time.  The window is rotated on subroutine entry
+ *   and exit, automatically saving and restoring some registers.  When the
+ *   window is rotated far enough to require registers to be saved to or
+ *   restored from the program stack, an exception is raised to move some
+ *   of the register values between the register file and the program stack.
+ *
+ *   Windowed Register Usage:
+ *     ---------------- ----------------------------------
+ *     Callee Register  Usage
+ *     Register Name
+ *     ---------------- ----------------------------------
+ *     a0               Return address
+ *     a1/sp            Stack pointer
+ *     a2..a7           In, out, inout, and return values
+ *     ---------------- ----------------------------------
  *
  *   Calls to routines that use only a2..a3 as parameters may use the CALL4,
  *   CALL8, or CALL12 instructions to save 4, 8, or 12 live registers. Calls
  *   to routines that use a2..a7 for parameters may use only CALL8 or CALL12.
  *
+ *   The stack pointer SP should only be modified by ENTRY and MOVSP
+ *   instructions (except for initialization and restoration). If some other
+ *   instruction modifies SP, any values in the register-spill area will not
+ *   be moved.
+ *
  * Call 0 ABI
  *
- *  CALL0 AR Register Usage
- *   Callee Register  Usage
- *   Register Name
- *   a0               Return Address
- *   a1/sp            Stack pointer
- *   a2..a7 In, out,  inout, and return values
- *   a8               Static Chain
- *   a12..a15         Callee-saved
- *   a15              Stack-Frame Pointer (optional)
+ *   CALL0 AR Register Usage
+ *     ---------------- ----------------------------------
+ *     Callee Register  Usage
+ *     Register Name
+ *     ---------------- ----------------------------------
+ *     a0               Return Address
+ *     a1/sp            Stack pointer
+ *     a2..a7           In, out, inout, and return values
+ *     a8               Static Chain
+ *     a12..a15         Callee-saved
+ *     a15              Stack-Frame Pointer (optional)
  *
- * CALL0 is used.  The return address is placed in A0 and the CPU simply
- * jumps to the CALL0 function entry point.
+ *     a0, a2-a11       Caller-saved
+ *     a1, a12..a15     Callee-saved
+ *     ---------------- ----------------------------------
+ *
+ *   CALL0 is used.  The return address is placed in A0 and the CPU simply
+ *   jumps to the CALL0 function entry point.
  */
 
 /****************************************************************************
@@ -82,7 +104,7 @@
  */
 
 #ifdef __ASSEMBLY__
-#ifdef CONFIG_XTENSA_CALL0_ABI
+#ifdef __XTENSA_CALL0_ABI__
   /* Call0 */
 
 	.macro	entry1 size=0x10

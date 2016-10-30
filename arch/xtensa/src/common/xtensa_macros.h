@@ -59,7 +59,7 @@
  * expansions are implemented as assembler macros.
  */
 
-#ifdef CONFIG_XTENSA_CALL0_ABI
+#ifdef __XTENSA_CALL0_ABI__
   /* Call0 */
 
 	.macro	entry1 size=0x10
@@ -86,7 +86,7 @@
 #  define RET(sz)     retw
 #  define RET0        retw
 
-#endif /* CONFIG_XTENSA_CALL0_ABI */
+#endif /* __XTENSA_CALL0_ABI__ */
 
 #endif /* __ASSEMBLY */
 #endif /* __ARCH_XTENSA_SRC_COMMON_XTENSA_MACROS_H */

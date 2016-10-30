@@ -87,7 +87,7 @@ void up_initial_state(struct tcb_s *tcb)
    * mode.
    */
 
-#ifdef CONFIG_XTENSA_CALL0_ABI
+#ifdef __XTENSA_CALL0_ABI__
   xcp->regs[REG_PS]   = PS_UM | PS_EXCM;
 
 #else
