@@ -158,3 +158,38 @@ void up_assert(const uint8_t *filename, int lineno)
 
   xtensa_assert(EXIT_FAILURE);
 }
+
+/****************************************************************************
+ * Name: xtensa_panic
+ ****************************************************************************/
+
+void xtensa_panic(int xptcode, uint32_t *regs)
+{
+#if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_DEBUG_ALERT)
+  struct tcb_s *rtcb = this_task();
+#endif
+
+  /* We get here when a un-dispatch-able, irrecoverable excpetion occurs */
+
+  board_autoled_on(LED_ASSERTION);
+
+#if CONFIG_TASK_NAME_SIZE > 0
+  _alert("Unhandled Exception %d task: %s\n", xptcode, rtcb->name);
+#else
+  _alert("Unhandled Exception %d\n", xptcode);
+#endif
+
+  xtensa_dumpstate();
+
+#ifdef CONFIG_ARCH_USBDUMP
+  /* Dump USB trace data */
+
+  (void)usbtrace_enumerate(assert_tracecallback, NULL);
+#endif
+
+#ifdef CONFIG_BOARD_CRASHDUMP
+  board_crashdump(up_getsp(), this_task(), filename, lineno);
+#endif
+
+  xtensa_assert(EXIT_FAILURE);
+}

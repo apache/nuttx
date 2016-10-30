@@ -127,25 +127,6 @@
 	and		a2, a2, a4
 	beqz	a2, 5f						/* Nothing to do */
 
-#ifdef XT_INTEXC_HOOKS
-	/* Call interrupt hook if present to (pre)handle interrupts. */
-
-	movi	a4, _xt_intexc_hooks
-	l32i	a4, a4, \level << 2
-	beqz	a4, 2f
-
-#ifdef __XTENSA_CALL0_ABI__
-	callx0	a4
-	beqz	a2, 5f
-#else
-	mov		a6, a2
-	callx4	a4
-	beqz	a6, 5f
-	mov		a2, a6
-#endif
-2:
-#endif
-
 	/* If multiple bits are set then MSB has highest priority. */
 
 	extract_msb	a4, a2					/* a4 = MSB of a2, a2 trashed */
@@ -259,10 +240,63 @@
  ****************************************************************************/
 
 /****************************************************************************
- * LOW PRIORITY (LEVEL 1) LOW LEVEL HANDLER.
+ * LEVEL 1 INTERRUPT HANDLER
  ****************************************************************************/
+/* The level1 interrupt vector is invoked via the User exception vector. */
 
-#warning REVISIT level 1 interrupt handlers
+	.section HANDLER_SECTION, "ax"
+	.type	_xtensa_level1_handler, @function
+	.align	4
+
+_xtensa_level1_handler:
+
+	mov		a0, sp							/* sp == a1 */
+	addi	sp, sp, -(4 * XCPTCONTEXT_SIZE)	/* Allocate interrupt stack frame */
+	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
+	rsr		a0, PS							/* Save interruptee's PS */
+	s32i	a0, sp, (4 * REG_PS)
+	rsr		a0, EPC_1						/* Save interruptee's PC */
+	s32i	a0, sp, (4 * REG_PC)
+	rsr		a0, EXCSAVE_1					/* Save interruptee's a0 */
+	s32i	a0, sp, (4 * REG_A0)
+
+	/* Save rest of interrupt context. */
+
+	s32i	a2, sp, (4 * REG_A2)
+	mov		a2, sp							/* Address of state save on stack */
+	call0	_xtensa_context_save			/* Save full register state */
+
+	/* Set up PS for C, enable interrupts above this level and clear EXCM. */
+
+	ps_setup	1 a0
+
+	/* Decode and dispatch the interrupt.  In the event of an interrupt
+	 * level context dispatch_c_isr() will switch stacks to the new task's
+	 * context save area.
+	 */
+
+	dispatch_c_isr	1 XCHAL_INTLEVEL1_MASK
+
+	/* Restore registers in preparation to return from interrupt */
+
+	call0	_xtensa_context_restore
+
+	/* Restore only level-specific regs (the rest were already restored) */
+
+	l32i	a0, sp, (4 * REG_PS)			/* Retrieve interruptee's PS */
+	wsr		a0, EPS_1
+	l32i	a0, sp, (4 * REG_PC)			/* Retrieve interruptee's PC */
+	wsr		a0, EPC_1
+	l32i	a0, sp, (4 * REG_A0)			/* Retrieve interruptee's A0 */
+	l32i	a2, sp, (4 * REG_A2)			/* Retrieve interruptee's A2 */
+	l32i	sp, sp, (4 * REG_A1)			/* Remove interrupt stack frame */
+	rsync									/* Ensure EPS and EPC written */
+
+	/* Return from interrupt.  RFI  restores the PS from EPS_1 and jumps to
+	 * the address in EPC_1.
+	 */
+
+	rfi		1
 
 /****************************************************************************
  * MEDIUM PRIORITY (LEVEL 2+) INTERRUPT LOW LEVEL HANDLERS.
@@ -310,7 +344,7 @@ _xtensa_level2_handler:
 	/* Save rest of interrupt context. */
 
 	s32i	a2, sp, (4 * REG_A2)
-	movi	a2, sp							/* Address of state save on stack */
+	mov		a2, sp							/* Address of state save on stack */
 	call0	_xtensa_context_save			/* Save full register state */
 
 	/* Set up PS for C, enable interrupts above this level and clear EXCM. */
@@ -367,7 +401,7 @@ _xtensa_level3_handler:
 	/* Save rest of interrupt context. */
 
 	s32i	a2, sp, (4 * REG_A2)
-	movi	a2, sp							/* Address of state save on stack */
+	mov		a2, sp							/* Address of state save on stack */
 	call0	_xtensa_context_save			/* Save full register state */
 
 	/* Set up PS for C, enable interrupts above this level and clear EXCM. */
@@ -424,7 +458,7 @@ _xtensa_level4_handler:
 	/* Save rest of interrupt context. */
 
 	s32i	a2, sp, (4 * REG_A2)
-	movi	a2, sp							/* Address of state save on stack */
+	mov		a2, sp							/* Address of state save on stack */
 	call0	_xtensa_context_save			/* Save full register state */
 
 	/* Set up PS for C, enable interrupts above this level and clear EXCM. */
@@ -481,7 +515,7 @@ _xtensa_level5_handler:
 	/* Save rest of interrupt context. */
 
 	s32i	a2, sp, (4 * REG_A2)
-	movi	a2, sp							/* Address of state save on stack */
+	mov		a2, sp							/* Address of state save on stack */
 	call0	_xtensa_context_save			/* Save full register state */
 
 	/* Set up PS for C, enable interrupts above this level and clear EXCM. */
@@ -538,7 +572,7 @@ _xtensa_level6_handler:
 	/* Save rest of interrupt context. */
 
 	s32i	a2, sp, (4 * REG_A2)
-	movi	a2, sp							/* Address of state save on stack */
+	mov		a2, sp							/* Address of state save on stack */
 	call0	_xtensa_context_save			/* Save full register state */
 
 	/* Set up PS for C, enable interrupts above this level and clear EXCM. */
@@ -618,29 +652,30 @@ _xtensa_level6_handler:
 
 _xtensa_level2_handler:
 
-#ifdef XT_INTEXC_HOOKS
-	/* Call interrupt hook if present to (pre)handle interrupts. */
+#if 1
+	/* For now, just panic */
 
-	movi	a0, _xt_intexc_hooks
-	l32i	a0, a0, 2 << 2
-	beqz	a0, 1f
+	mov		a0, sp							/* sp == a1 */
+	addi	sp, sp, -(4 * XCPTCONTEXT_SIZE)	/* Allocate interrupt stack frame */
+	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
+	rsr		a0, EPS_2						/* Save interruptee's PS */
+	s32i	a0, sp, (4 * REG_PS)
+	rsr		a0, EPC_2						/* Save interruptee's PC */
+	s32i	a0, sp, (4 * REG_PC)
+	rsr		a0, EXCSAVE_2					/* Save interruptee's a0 */
+	s32i	a0, sp, (4 * REG_A0)
 
-.Ln_xtensa_level2_handler_call_hook:
+	s32i	a2, sp, (4 * REG_A2)
+	movi	a2, XTENSA_LEVEL2_EXCEPTION	/* Address of state save on stack */
+	call0	_xtensa_panic				/* Does not return */
 
-	callx0	a0							/* Must NOT disturb stack! */
-
-1:
-#endif
-
-	/* USER_EDIT:
-	 * ADD HIGH PRIORITY LEVEL 2 INTERRUPT HANDLER CODE HERE.
-	 */
-
-	.align	4
+#else
+	/* Add high priority level 2 interrupt handler code here. */
 
 	rsr		a0, EXCSAVE_2				/* Restore a0 */
 	rfi		2
 
+#endif
 #endif  /* XCHAL_INT_NLEVELS >=2 && XCHAL_EXCM_LEVEL < 2 && XCHAL_DEBUGLEVEL !=2 */
 
 #if XCHAL_INT_NLEVELS >=3 && XCHAL_EXCM_LEVEL < 3 && XCHAL_DEBUGLEVEL !=3
@@ -650,28 +685,32 @@ _xtensa_level2_handler:
 
 _xtensa_level3_handler:
 
-#ifdef XT_INTEXC_HOOKS
-	/* Call interrupt hook if present to (pre)handle interrupts. */
+#if 1
+	/* For now, just panic */
 
-	movi	a0, _xt_intexc_hooks
-	l32i	a0, a0, 3 << 2
-	beqz	a0, 1f
+	mov		a0, sp							/* sp == a1 */
+	addi	sp, sp, -(4 * XCPTCONTEXT_SIZE)	/* Allocate interrupt stack frame */
+	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
+	rsr		a0, EPS_3						/* Save interruptee's PS */
+	s32i	a0, sp, (4 * REG_PS)
+	rsr		a0, EPC_3						/* Save interruptee's PC */
+	s32i	a0, sp, (4 * REG_PC)
+	rsr		a0, EXCSAVE_3					/* Save interruptee's a0 */
+	s32i	a0, sp, (4 * REG_A0)
 
-.Ln_xtensa_level3_handler_call_hook:
+	s32i	a2, sp, (4 * REG_A2)
+	movi	a2, XTENSA_LEVEL3_EXCEPTION	/* Address of state save on stack */
+	call0	_xtensa_panic				/* Does not return */
 
-	callx0	a0							/* Must NOT disturb stack! */
-1:
-#endif
+#else
+	wsr		a0, EXCSAVE_3				/* Save a0 */
 
-	/* USER_EDIT:
-	 * ADD HIGH PRIORITY LEVEL 3 INTERRUPT HANDLER CODE HERE.
-	 */
-
-	.align	4
+	/* Add high priority level 2 interrupt handler code here. */
 
 	rsr		a0, EXCSAVE_3				/* Restore a0 */
 	rfi		3
 
+#endif
 #endif /* XCHAL_INT_NLEVELS >=3 && XCHAL_EXCM_LEVEL < 3 && XCHAL_DEBUGLEVEL !=3 */
 
 #if XCHAL_INT_NLEVELS >=4 && XCHAL_EXCM_LEVEL < 4 && XCHAL_DEBUGLEVEL !=4
@@ -681,28 +720,32 @@ _xtensa_level3_handler:
 
 _xtensa_level4_handler:
 
-#ifdef XT_INTEXC_HOOKS
-	/* Call interrupt hook if present to (pre)handle interrupts. */
+#if 1
+	/* For now, just panic */
 
-	movi	a0, _xt_intexc_hooks
-	l32i	a0, a0, 4 << 2
-	beqz	a0, 1f
+	mov		a0, sp							/* sp == a1 */
+	addi	sp, sp, -(4 * XCPTCONTEXT_SIZE)	/* Allocate interrupt stack frame */
+	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
+	rsr		a0, EPS_4						/* Save interruptee's PS */
+	s32i	a0, sp, (4 * REG_PS)
+	rsr		a0, EPC_4						/* Save interruptee's PC */
+	s32i	a0, sp, (4 * REG_PC)
+	rsr		a0, EXCSAVE_4					/* Save interruptee's a0 */
+	s32i	a0, sp, (4 * REG_A0)
 
-.Ln_xtensa_level4_handler_call_hook:
+	s32i	a2, sp, (4 * REG_A2)
+	movi	a2, XTENSA_LEVEL4_EXCEPTION	/* Address of state save on stack */
+	call0	_xtensa_panic				/* Does not return */
 
-	callx0	a0							/* Must NOT disturb stack! */
-1:
-#endif
+#else
+	wsr		a0, EXCSAVE_4				/* Save a0 */
 
-	/* USER_EDIT:
-	 * ADD HIGH PRIORITY LEVEL 4 INTERRUPT HANDLER CODE HERE.
-	 */
-
-	.align	4
+	/* Add high priority level 2 interrupt handler code here. */
 
 	rsr		a0, EXCSAVE_4				/* Restore a0 */
 	rfi		4
 
+#endif
 #endif /* XCHAL_INT_NLEVELS >=4 && XCHAL_EXCM_LEVEL < 4 && XCHAL_DEBUGLEVEL !=4 */
 
 #if XCHAL_INT_NLEVELS >=5 && XCHAL_EXCM_LEVEL < 5 && XCHAL_DEBUGLEVEL !=5
@@ -712,26 +755,32 @@ _xtensa_level4_handler:
 
 _xtensa_level5_handler:
 
-#ifdef XT_INTEXC_HOOKS
-	/* Call interrupt hook if present to (pre)handle interrupts. */
+#if 1
+	/* For now, just panic */
 
-	movi	a0, _xt_intexc_hooks
-	l32i	a0, a0, 5 << 2
-	beqz	a0, 1f
+	mov		a0, sp							/* sp == a1 */
+	addi	sp, sp, -(4 * XCPTCONTEXT_SIZE)	/* Allocate interrupt stack frame */
+	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
+	rsr		a0, EPS_5						/* Save interruptee's PS */
+	s32i	a0, sp, (4 * REG_PS)
+	rsr		a0, EPC_5						/* Save interruptee's PC */
+	s32i	a0, sp, (4 * REG_PC)
+	rsr		a0, EXCSAVE_5					/* Save interruptee's a0 */
+	s32i	a0, sp, (4 * REG_A0)
 
-.Ln_xtensa_level5_handler_call_hook:
+	s32i	a2, sp, (4 * REG_A2)
+	movi	a2, XTENSA_LEVEL5_EXCEPTION	/* Address of state save on stack */
+	call0	_xtensa_panic				/* Does not return */
 
-	callx0	a0							/* Must NOT disturb stack! */
-1:
-#endif
+#else
+	wsr		a0, EXCSAVE_5				/* Save a0 */
 
-	/* USER_EDIT:
-	 * ADD HIGH PRIORITY LEVEL 5 INTERRUPT HANDLER CODE HERE.
-	 */
+	/* Add high priority level 2 interrupt handler code here. */
 
 	rsr		a0, EXCSAVE_5				/* Restore a0 */
 	rfi		5
 
+#endif
 #endif /* XCHAL_INT_NLEVELS >=5 && XCHAL_EXCM_LEVEL < 5 && XCHAL_DEBUGLEVEL !=5 */
 
 #if XCHAL_INT_NLEVELS >=6 && XCHAL_EXCM_LEVEL < 6 && XCHAL_DEBUGLEVEL !=6
@@ -741,24 +790,30 @@ _xtensa_level5_handler:
 
 _xtensa_level6_handler:
 
-#ifdef XT_INTEXC_HOOKS
-	/* Call interrupt hook if present to (pre)handle interrupts. */
+#if 1
+	/* For now, just panic */
 
-	movi	a0, _xt_intexc_hooks
-	l32i	a0, a0, 6 << 2
-	beqz	a0, 1f
+	mov		a0, sp							/* sp == a1 */
+	addi	sp, sp, -(4 * XCPTCONTEXT_SIZE)	/* Allocate interrupt stack frame */
+	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
+	rsr		a0, EPS_6						/* Save interruptee's PS */
+	s32i	a0, sp, (4 * REG_PS)
+	rsr		a0, EPC_6						/* Save interruptee's PC */
+	s32i	a0, sp, (4 * REG_PC)
+	rsr		a0, EXCSAVE_6					/* Save interruptee's a0 */
+	s32i	a0, sp, (4 * REG_A0)
 
-.Ln_xtensa_level6_handler_call_hook:
+	s32i	a2, sp, (4 * REG_A2)
+	movi	a2, XTENSA_LEVEL6_EXCEPTION	/* Address of state save on stack */
+	call0	_xtensa_panic				/* Does not return */
 
-	callx0	a0							/* Must NOT disturb stack! */
-1:
-#endif
+#else
+	wsr		a0, EXCSAVE_6				/* Save a0 */
 
-	/* USER_EDIT:
-	 * ADD HIGH PRIORITY LEVEL 6 INTERRUPT HANDLER CODE HERE.
-	 */
+	/* Add high priority level 2 interrupt handler code here. */
 
 	rsr		a0, EXCSAVE_6				/* Restore a0 */
 	rfi		6
 
+#endif
 #endif /* XCHAL_INT_NLEVELS >=6 && XCHAL_EXCM_LEVEL < 6 && XCHAL_DEBUGLEVEL !=6 */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/common/xtensa_nmi_handler.S
+ * arch/xtensa/src/common/xtensa_panic.S
  *
  * Adapted from use in NuttX by:
  *
@@ -28,9 +28,10 @@
  * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
  ****************************************************************************/
 
-	.file	"xtensa_nmi_handler.S"
+	.file	"xtensa_panic.S"
 
 /* NOTES on the use of 'call0' for long jumps instead of 'j':
  *
@@ -58,79 +59,71 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
 #include <arch/irq.h>
-#include <arch/chip/core-isa.h>
+#include <arch/xtensa/core.h>
 #include <arch/xtensa/xtensa_specregs.h>
 
-#include "chip_macros.h"
-#include "xtensa_abi.h"
-
 /****************************************************************************
- * Assembly Language Macros
+ * Assembly Language Marcros
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * HIGH PRIORITY NMI LOW-LEVEL HANDLER
+ * Name: _xtensa_panic
  *
- * High priority interrupts are by definition those with priorities greater
- * than XCHAL_EXCM_LEVEL.  This includes non-maskable (NMI).  High priority
- * interrupts cannot interact with the RTOS, that is they must save all regs
- * they use and not call any RTOS function.
+ * Description:
+ *   Should be reached by call0 (preferable) or jump only. If call0, a0 says
+ *   where from. If on simulator, display panic message and abort, else loop
+ *   indefinitely.
  *
- * A further restriction imposed by the Xtensa windowed architecture is that
- * high priority interrupts must not modify the stack area even logically
- * "above" the top of the interrupted stack (they need to provide their
- * own stack or static save area).
+ * Entry Conditions:
+ *   - A1 = Stack frame already allocated.  SP points to beginning of the
+ *          register frame.
+ *   - A0, A1, A2, PC and PS  = Already saved in the stack frame
+ *   - A2  = Exception code
  *
- * Cadence Design Systems recommends high priority interrupt handlers be
- * coded in assembly and used for purposes requiring very short service
- * times.
- *
- * The NMI vector goes at a predetermined location according to the Xtensa
- * hardware configuration, which is ensured by its placement in a special
- * section known to the Xtensa linker support package (LSP).  It performs
- * the minimum necessary before jumping to the NMI andler.
- *
- * Below is a template for the high priority NMI interrupt handler.
- * A template and example can be found in the Cadence Design Systems tools
- * documentation: "Microprocessor Programmer's Guide".
+ * Exit conditions:
+ *   Does not return.
  *
  ****************************************************************************/
 
-#if XCHAL_HAVE_NMI
-	.section	HANDLER_SECTION, "ax"
-	.type		_xtensa_nmi, @function
-	.align		4
+	.section HANDLER_SECTION, "ax"
+	.global	_xtensa_panic
+	.type	_xtensa_panic, @function
 
-_xtensa_nmi:
+	.align	4
+	.literal_position
+	.align	4
 
-#if 1
-	/* For now, just panic */
+_xtensa_panic:
+	/* Save rest of interrupt context (A2=address of state save area on
+	 * stack.
+	 */
 
-	mov		a0, sp							/* sp == a1 */
-	addi	sp, sp, -(4 * XCPTCONTEXT_SIZE)	/* Allocate interrupt stack frame */
-	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
-	rsr		a0, EPS_2						/* Save interruptee's PS */
-	s32i	a0, sp, (4 * REG_PS)
-	rsr		a0, EPC_2						/* Save interruptee's PC */
-	s32i	a0, sp, (4 * REG_PC)
-	rsr		a0, EXCSAVE_2					/* Save interruptee's a0 */
-	s32i	a0, sp, (4 * REG_A0)
+	mov		a2, sp							/* Address of state save on stack */
+	call0	_xtensa_context_save			/* Save full register state */
 
-	s32i	a2, sp, (4 * REG_A2)
-	movi	a2, XTENSA_NMI_EXCEPTION		/* Address of state save on stack */
-	call0	_xtensa_panic					/* Does not return */
+	/* Save exc cause and vaddr into exception frame */
 
+	rsr		a0, EXCCAUSE
+	s32i	a0, sp, (4 * REG_EXCCAUSE)
+	rsr		a0, EXCVADDR
+	s32i	a0, sp, (4 * REG_EXCVADDR)
+
+	/* Set up PS for C, reenable hi-pri interrupts, and clear EXCM. */
+
+	mov		a0, PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_WOE
+	wsr		a0, PS
+
+	/* Call C panic handler:  Arg1 (A2) = Exception code; Arg 2 (A3) = start
+	 * of the register save area.
+	 */
+
+	mov		a3, sp
+#ifdef __XTENSA_CALL0_ABI__
+	call0	xtensa_panic					/* Call xtensa_panic. Should not return */
 #else
-	/* Add high priority non-maskable interrupt (NMI) handler code here. */
-
-	rsr		a0, EXCSAVE + XCHAL_NMILEVEL    /* Restore a0 */
-	rfi		XCHAL_NMILEVEL
-
+	call4	xtensa_panic					/* Call xtensa_panic. Should not return */
 #endif
-#endif /* XCHAL_HAVE_NMI */
+
+1:	j		1b								/* loop infinitely */
+	retw

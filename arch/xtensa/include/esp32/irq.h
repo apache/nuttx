@@ -50,6 +50,19 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Exception Codes */
+
+#define XTENSA_NMI_EXCEPTION    0
+#define XTENSA_DEBUG_EXCEPTION  1
+#define XTENSA_DOUBLE_EXCEPTION 2
+#define XTENSA_KERNEL_EXCEPTION 3
+#define XTENSA_COPROC_EXCEPTION 4
+#define XTENSA_LEVEL2_EXCEPTION 5
+#define XTENSA_LEVEL3_EXCEPTION 6
+#define XTENSA_LEVEL4_EXCEPTION 7
+#define XTENSA_LEVEL5_EXCEPTION 8
+#define XTENSA_LEVEL6_EXCEPTION 9
+
 /* Interrupt Matrix
  *
  * The Interrupt Matrix embedded in the ESP32 independently allocates

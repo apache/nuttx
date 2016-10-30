@@ -175,8 +175,8 @@ _xtensa_level6_vector:
 
 _xtensa_nmi_vector:
 
-	wsr			a0, EXCSAVE + XCHAL_NMILEVEL  _ /* preserve a0 */
-	call0		_xt_nmi                         /* load interrupt handler */
+	wsr			a0, EXCSAVE + XCHAL_NMILEVEL	/* Preserve a0 */
+	call0		_xtensa_nmi						/* Load interrupt handler */
 
 	/* Never returns here - call0 is used as a jump */
 
