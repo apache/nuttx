@@ -86,7 +86,7 @@ uint32_t *xtensa_irq_dispatch(int irq, uint32_t *regs)
 
   irq_dispatch(irq, regs);
 
-#if defined(CONFIG_ARCH_FPU) || defined(CONFIG_ARCH_ADDRENV)
+#if XCHAL_CP_NUM > 0 || defined(CONFIG_ARCH_ADDRENV)
   /* Check for a context switch.  If a context switch occurred, then
    * CURRENT_REGS will have a different value than it did on entry.
    */

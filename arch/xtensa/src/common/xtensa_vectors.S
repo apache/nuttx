@@ -38,6 +38,7 @@
 
 #include <nuttx/config.h>
 
+#include <arch/irq.h>
 #include <arch/chip/core-isa.h>
 #include <arch/xtensa/xtensa_specregs.h>
 
@@ -272,7 +273,7 @@ _double_exception_vector:
 	mov		a0, sp							/* sp == a1 */
 	addi	sp, sp, -(4 * XCPTCONTEXT_SIZE)	/* Allocate interrupt stack frame */
 	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
-	rsr		a0, EPS_1						/* Save interruptee's PS -- REVISIT */
+	rsr		a0, EPS							/* Save interruptee's PS -- REVISIT */
 	s32i	a0, sp, (4 * REG_PS)
 	rsr		a0, DEPC						/* Save interruptee's PC */
 	s32i	a0, sp, (4 * REG_PC)
@@ -309,7 +310,7 @@ _kernel_exception_vector:
 	mov		a0, sp							/* sp == a1 */
 	addi	sp, sp, -(4 * XCPTCONTEXT_SIZE)	/* Allocate interrupt stack frame */
 	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
-	rsr		a0, EPS_1						/* Save interruptee's PS */
+	rsr		a0, EPS							/* Save interruptee's PS */
 	s32i	a0, sp, (4 * REG_PS)
 	rsr		a0, EPC_1						/* Save interruptee's PC */
 	s32i	a0, sp, (4 * REG_PC)

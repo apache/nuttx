@@ -63,6 +63,10 @@ ifeq ($(CONFIG_SPINLOCK),y)
   CMN_CSRCS += xtensa_testset.c
 endif
 
+ifeq ($(CONFIG_SMP),y)
+  CMN_CSRCS += xtensa_cpu_pause.c
+endif
+
 # Use of common/xtensa_etherstub.c is deprecated.  The preferred mechanism
 # is to use CONFIG_NETDEV_LATEINIT=y to suppress the call to
 # up_netinitialize() in xtensa_initialize.c.  Then this stub would not be
@@ -85,8 +89,8 @@ CHIP_CSRCS += esp32_start.c esp32_timerisr.c
 
 ifeq ($(CONFIG_SMP),y)
 CHIP_ASRCS  = esp32_cpuindex.S
-#CMN_CSRCS += esp32_cpustart.c esp32_cpupause.c esp32_cpuidlestack.c
-CMN_CSRCS += esp32_cpustart.c
+CMN_CSRCS  += esp32_cpustart.c esp32_cpu_interrupt.c
+#CMN_CSRCS += esp32_cpuidlestack.c
 endif
 
 ifeq ($(CONFIG_ESP32_UART),y)

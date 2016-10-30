@@ -110,27 +110,30 @@
 
 /* In the XTENSA model, the state is copied from the stack to the TCB, but
  * only a referenced is passed to get the state from the TCB.
+ *
+ * REVISIT: It would not be too difficult to save only a pointer to the
+ * state save area in the TCB and thus avoid the copy.
  */
 
 #define xtensa_savestate(regs)    xtensa_copystate(regs, (uint32_t*)CURRENT_REGS)
 #define xtensa_restorestate(regs) do { CURRENT_REGS = regs; } while (0)
 
+/* Interrupt codes from other CPUs: */
+
+#define CPU_INTCODE_PAUSE 0
+
 /* Register access macros */
 
-# define getreg8(a)       (*(volatile uint8_t *)(a))
-# define putreg8(v,a)     (*(volatile uint8_t *)(a) = (v))
-# define getreg16(a)      (*(volatile uint16_t *)(a))
-# define putreg16(v,a)    (*(volatile uint16_t *)(a) = (v))
-# define getreg32(a)      (*(volatile uint32_t *)(a))
-# define putreg32(v,a)    (*(volatile uint32_t *)(a) = (v))
+#define getreg8(a)        (*(volatile uint8_t *)(a))
+#define putreg8(v,a)      (*(volatile uint8_t *)(a) = (v))
+#define getreg16(a)       (*(volatile uint16_t *)(a))
+#define putreg16(v,a)     (*(volatile uint16_t *)(a) = (v))
+#define getreg32(a)       (*(volatile uint32_t *)(a))
+#define putreg32(v,a)     (*(volatile uint32_t *)(a) = (v))
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-typedef void (*xtensa_vector_t)(void);
-#endif
 
 /****************************************************************************
  * Public Data
@@ -253,7 +256,10 @@ void xtensa_panic(int xptcode, uint32_t *regs) noreturn_function;
 
 /* Software interrupt handler */
 
-int xtensa_swint(int irq, FAR void *context);
+#ifdef CONFIG_SMP
+int xtensa_cpu_interrupt(int cpu, int intcode);
+void xtensa_pause_handler(void);
+#endif
 
 /* Synchronous context switching */
 

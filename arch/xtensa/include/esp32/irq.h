@@ -322,7 +322,7 @@
 
 #define NR_IRQS                     (XTENSA_NIRQ_INTERNAL+ESP32_NIRQ_PERIPH+ESP32_NIRQ_GPIO)
 
-/* CPU Interrupts.
+/* Xtensa CPU Interrupts.
  *
  * Each of the two CPUs (PRO and APP) have 32 interrupts each, of which
  * 26 can be mapped to peripheral interrupts:
