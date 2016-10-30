@@ -65,8 +65,7 @@
 #include <arch/chip/tie.h>
 #include <arch/xtensa/xtensa_specregs.h>
 
-#warning REVIST XTENSA_EXTRA_SA_SIZE is not yet provided
-#define XTENSA_EXTRA_SA_SIZE 0 /* REMOVE ME */
+#include "xtensa_abi.h"
 
 /****************************************************************************
  * Public Functions
@@ -147,7 +146,7 @@ _xtensa_context_save:
 	s32i	a3, a2, (4 * REG_LCOUNT)
 #endif
 
-#if XTENSA_EXTRA_SA_SIZE > 0 || !defined(CONFIG_XTENSA_CALL0_ABI)
+#ifndef CONFIG_XTENSA_CALL0_ABI
 	mov		a9,  a0							/* Preserve ret addr */
 #endif
 
@@ -183,28 +182,6 @@ _xtensa_context_save:
 	l32i	a12, sp, (4 * REG_TMP0)			/* Recover stuff from stack frame */
 	l32i	a13, sp, (4 * REG_TMP1)
 	l32i	a9,  sp, (4 * REG_TMP2)
-#endif
-
-#if XTENSA_EXTRA_SA_SIZE > 0
-	/* NOTE: Normally the xthal_save_extra_nw macro only affects address
-	 * registers a2-a5. It is theoretically possible for Xtensa processor
-	 * designers to write TIE that causes more address registers to be
-	 * affected, but it is generally unlikely. If that ever happens,
-	 * more registers need to be saved/restored around this macro invocation.
-	 * Here we assume a9,12,13 are preserved.
-	 * Future Xtensa tools releases might limit the regs that can be affected.
-	 */
-
-	addi	a2,  a2, (4 * REG_EXTRA)		/* Where to save it */
-#if XTENSA_EXTRA_SA_ALIGN > 16
-	movi	a3, -XTENSA_EXTRA_SA_ALIGN
-	and		a2, a2, a3						/* Align dynamically >16 bytes */
-#endif
-	call0   xthal_save_extra_nw				/* Destroys a0,2,3,4,5 */
-#endif
-
-#if XTENSA_EXTRA_SA_SIZE > 0 || !defined(CONFIG_XTENSA_CALL0_ABI)
-	mov		a0, a9							/* Retrieve ret addr */
 #endif
 
 	ret
@@ -309,27 +286,6 @@ xtensa_context_save:
 
 _xtensa_context_restore:
 
-#if XTENSA_EXTRA_SA_SIZE > 0
-	/* NOTE: Normally the xthal_restore_extra_nw macro only affects address
-	 * registers a2-a5. It is theoretically possible for Xtensa processor
-	 * designers to write TIE that causes more address registers to be
-	 * affected, but it is generally unlikely. If that ever happens,
-	 * more registers need to be saved/restored around this macro invocation.
-	 * Here we only assume a13 is preserved.
-	 * Future Xtensa tools releases might limit the regs that can be affected.
-	 */
-
-	mov		a13, a0							/* Preserve ret addr */
-	addi	a2, a2, (4 * REG_EXTRA)			/* Where to find it */
-
-#if XTENSA_EXTRA_SA_ALIGN > 16
-	movi	a3, -XTENSA_EXTRA_SA_ALIGN
-	and		a2, a2, a3						/* Align dynamically >16 bytes */
-#endif
-	call0   xthal_restore_extra_nw			/* Destroys a0,2,3,4,5 */
-	mov		a0, a13							/* Retrieve ret addr */
-#endif
-
 #ifdef XCHAL_HAVE_LOOPS
 	l32i	a2, a2, (4 * REG_LBEG)
 	l32i	a3, a2, (4 * REG_LEND)
@@ -387,8 +343,10 @@ _xtensa_context_restore:
  *
  *   This functions implements the moral equivalent of longjmp().  It is
  *   called from user code (with interrupts disabled) to restor the current
- *   state of the running thread.  This function always returns 1 because
- *   the saved value of A2 was set to 1 in xtensa_context_save().
+ *   state of the running thread.  This function always appears to be a
+ *   second return from xtensa_context_save except that that it returns the
+ *   value 1 (because the saved value of A2 was set to 1
+ *   inxtensa_context_save()).
  *
  *   The counterpart to this function is xtensa_context_save().
  *
@@ -398,7 +356,8 @@ _xtensa_context_restore:
  *
  * Exit conditions:
  *   NOTE: That this function does NOT return to the caller but rather
- *   to a new threading context.
+ *   to a new threading context.  It is not necessary to save any of the
+ *   caller's registers.
  *
  * Assumptions:
  *   - Interrupts are disabled.
