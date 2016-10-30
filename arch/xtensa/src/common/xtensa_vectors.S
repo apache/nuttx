@@ -48,15 +48,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * C Prototype:
- *   void _xtensa_levelN_vector(void)
+ * Name: _xtensa_level[n]_vector, n=2..6
  *
  * Description:
- *   Xtensa interrupt vectors.  Each vector goes at a predetermined location
- *   according to the Xtensa hardware configuration, which is ensured by its
- *   placement in a special section known to the NuttX linker script.  The
- *   vector logic performs the minimum necessary operations before jumping
- *   to the handler.
+ *   Xtensa medium/nigh priority interrupt vectors.  Each vector goes at a
+ *   predetermined location according to the Xtensa hardware configuration,
+ *   which is ensured by its placement in a special section known to the
+ *   NuttX linker script.  The vector logic performs the minimum necessary
+ *   operations before jumping to the handler.
  *
  ****************************************************************************/
 
@@ -154,15 +153,26 @@ _xtensa_level6_vector:
 #endif
 
 /****************************************************************************
- * C Prototype:
- *   void _xtensa_nmi_vector(void)
+ * Exception Vectors (except User, Co-processor and window exception
+ * vectors).
+ *
+ * Each vector goes at a predetermined location according to the Xtensa
+ * hardware configuration, which is ensured by its placement in a special
+ * section known to the Xtensa linker support package (LSP). It performs
+ * the minimum necessary before jumping to the handler in the .text section.
+ *
+ * The corresponding handler goes in the normal .text section. It sets up
+ * the appropriate stack frame, saves a few vector-specific registers and
+ * calls _xtensa_panic() to save the rest of the interrupted context
+ * and enter the NuttX panic handler
+ *
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: _xtensa_nmi_vector
  *
  * Description:
- *   Xtensa NMI  vectors.  This vector goes at a predetermined location
- *   according to the Xtensa hardware configuration, which is ensured by its
- *   placement in a special section known to the NuttX linker script.  The
- *   vector logic performs the minimum necessary operations before jumping
- *   to the handler.
+ *   NMI Exception
  *
  ****************************************************************************/
 
@@ -175,11 +185,141 @@ _xtensa_level6_vector:
 
 _xtensa_nmi_vector:
 
-	wsr			a0, EXCSAVE + XCHAL_NMILEVEL	/* Preserve a0 */
-	call0		_xtensa_nmi						/* Load interrupt handler */
+#if 1
+	/* For now, just panic */
 
-	/* Never returns here - call0 is used as a jump */
+	wsr		a0, EXCSAVE + XCHAL_NMILEVEL	/* Preserve a0 */
+
+	mov		a0, sp							/* sp == a1 */
+	addi	sp, sp, -(4 * XCPTCONTEXT_SIZE)	/* Allocate interrupt stack frame */
+	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
+	rsr		a0, EPS + XCHAL_NMILEVEL		/* Save interruptee's PS */
+	s32i	a0, sp, (4 * REG_PS)
+	rsr		a0, EPC_2						/* Save interruptee's PC */
+	s32i	a0, sp, (4 * REG_PC)
+	rsr		a0, EXCSAVE + XCHAL_NMILEVEL	/* Save interruptee's a0 */
+	s32i	a0, sp, (4 * REG_A0)
+
+	s32i	a2, sp, (4 * REG_A2)
+	movi	a2, XTENSA_NMI_EXCEPTION		/* Address of state save on stack */
+	call0	_xtensa_panic					/* Does not return */
+
+#else
+	/* Add high priority non-maskable interrupt (NMI) handler code here. */
+
+	rfi		XCHAL_NMILEVEL
+
+#endif
 
 	.size		_xtensa_nmi_vector, . - _xtensa_nmi_vector
 	.end		literal_prefix
+
+/****************************************************************************
+ * Name: _debug_exception_vector
+ *
+ * Description:
+ *   Debug exception vector
+ *
+ ****************************************************************************/
+
+#if XCHAL_HAVE_DEBUG
+	.begin      literal_prefix .debug_exception_vector
+	.section    .debug_exception_vector.text, "ax"
+	.global     _debug_exception_vector
+	.align      4
+
+_debug_exception_vector:
+
+	mov		a0, sp							/* sp == a1 */
+	addi	sp, sp, -(4 * XCPTCONTEXT_SIZE)	/* Allocate interrupt stack frame */
+	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
+	rsr		a0, EPS + XCHAL_DEBUGLEVEL		/* Save interruptee's PS */
+	s32i	a0, sp, (4 * REG_PS)
+	rsr		a0, EPC + XCHAL_DEBUGLEVEL		/* Save interruptee's PC */
+	s32i	a0, sp, (4 * REG_PC)
+	rsr		a0, EXCSAVE + XCHAL_DEBUGLEVEL	/* Save interruptee's a0 */
+	s32i	a0, sp, (4 * REG_A0)
+
+	s32i	a2, sp, (4 * REG_A2)
+	movi	a2, XTENSA_DEBUG_EXCEPTION		/* Address of state save on stack */
+	call0	_xtensa_panic					/* Does not return */
+
+	.end	literal_prefix
+
+#endif /* XCHAL_HAVE_DEBUG */
+
+/****************************************************************************
+ * Name: _double_exception_vector
+ *
+ * Description:
+ *   Double Exception Vector. Double exceptions are not a normal occurrence.
+ *   They indicate a bug of some kind.
+ *
+ ****************************************************************************/
+
+#ifdef XCHAL_DOUBLEEXC_VECTOR_VADDR
+	.begin	literal_prefix .double_exception_vector
+	.section .double_exception_vector.text, "ax"
+	.global	_double_exception_vector
+	.align	4
+
+_double_exception_vector:
+
+#if XCHAL_HAVE_DEBUG
+	break	1, 4							/* Unhandled double exception */
+#endif
+
+	mov		a0, sp							/* sp == a1 */
+	addi	sp, sp, -(4 * XCPTCONTEXT_SIZE)	/* Allocate interrupt stack frame */
+	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
+	rsr		a0, EPS_1						/* Save interruptee's PS -- REVISIT */
+	s32i	a0, sp, (4 * REG_PS)
+	rsr		a0, DEPC						/* Save interruptee's PC */
+	s32i	a0, sp, (4 * REG_PC)
+	rsr		a0, EXCSAVE_1					/* Save interruptee's a0 -- REVISIT */
+	s32i	a0, sp, (4 * REG_A0)
+
+	s32i	a2, sp, (4 * REG_A2)
+	movi	a2, XTENSA_DOUBLE_EXCEPTION		/* Address of state save on stack */
+	call0	_xtensa_panic					/* Does not return */
+
+	.end        literal_prefix
+
+#endif /* XCHAL_DOUBLEEXC_VECTOR_VADDR */
+
+/****************************************************************************
+ * Name: _kernel_exception_vector
+ *
+ * Description:
+ *   Kernel Exception (including Level 1 Interrupt from kernel mode).
+ *
+ ****************************************************************************/
+
+	.begin	literal_prefix .kernel_exception_vector
+	.section .kernel_exception_vector.text, "ax"
+	.global	_kernel_exception_vector
+	.align	4
+
+_kernel_exception_vector:
+
+#if XCHAL_HAVE_DEBUG
+	break	1, 0							/* Unhandled kernel exception */
+#endif
+
+	mov		a0, sp							/* sp == a1 */
+	addi	sp, sp, -(4 * XCPTCONTEXT_SIZE)	/* Allocate interrupt stack frame */
+	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
+	rsr		a0, EPS_1						/* Save interruptee's PS */
+	s32i	a0, sp, (4 * REG_PS)
+	rsr		a0, EPC_1						/* Save interruptee's PC */
+	s32i	a0, sp, (4 * REG_PC)
+	rsr		a0, EXCSAVE_1					/* Save interruptee's a0 */
+	s32i	a0, sp, (4 * REG_A0)
+
+	s32i	a2, sp, (4 * REG_A2)
+	movi	a2, XTENSA_KERNEL_EXCEPTION		/* Address of state save on stack */
+	call0	_xtensa_panic					/* Does not return */
+
+	.end	literal_prefix
+
 #endif

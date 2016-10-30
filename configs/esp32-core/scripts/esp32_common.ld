@@ -29,15 +29,15 @@ SECTIONS
     . = 0x240;
     KEEP(*(.xtensa_level5_vector.text));
     . = 0x280;
-    KEEP(*(.DebugExceptionVector.text));
+    KEEP(*(.debug_exception_vector.text));
     . = 0x2c0;
     KEEP(*(.nmi_vector.text));
     . = 0x300;
-    KEEP(*(.KernelExceptionVector.text));
+    KEEP(*(.kernel_exception_vector.text));
     . = 0x340;
     KEEP(*(.UserExceptionVector.text));
     . = 0x3C0;
-    KEEP(*(.DoubleExceptionVector.text));
+    KEEP(*(.double_exception_vector.text));
     . = 0x400;
     *(.*Vector.literal)
 

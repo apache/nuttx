@@ -64,7 +64,7 @@
 #include <arch/xtensa/xtensa_specregs.h>
 
 /****************************************************************************
- * Assembly Language Marcros
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -111,7 +111,7 @@ _xtensa_panic:
 
 	/* Set up PS for C, reenable hi-pri interrupts, and clear EXCM. */
 
-	mov		a0, PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_WOE
+	movi	a0, PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_WOE
 	wsr		a0, PS
 
 	/* Call C panic handler:  Arg1 (A2) = Exception code; Arg 2 (A3) = start
