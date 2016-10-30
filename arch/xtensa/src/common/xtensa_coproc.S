@@ -256,9 +256,9 @@ xtensa_coproc_savestate:
 
 	/* Restore a13-15 and return */
 
-	132i	a13, sp, LOCAL_OFFSET(1)
-	132i	a14, sp, LOCAL_OFFSET(2)
-	132i	a15, sp, LOCAL_OFFSET(3)
+	l32i	a13, sp, LOCAL_OFFSET(1)
+	l32i	a14, sp, LOCAL_OFFSET(2)
+	l32i	a15, sp, LOCAL_OFFSET(3)
 
 	RET(16)
 
@@ -443,9 +443,9 @@ xtensa_coproc_restorestate:
 
 	/* Restore a13-15 and return */
 
-	132i	a13, sp, LOCAL_OFFSET(1)
-	132i	a14, sp, LOCAL_OFFSET(2)
-	132i	a15, sp, LOCAL_OFFSET(3)
+	l32i	a13, sp, LOCAL_OFFSET(1)
+	l32i	a14, sp, LOCAL_OFFSET(2)
+	l32i	a15, sp, LOCAL_OFFSET(3)
 
 	RET(16)
 

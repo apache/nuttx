@@ -284,7 +284,7 @@ _xtensa_level1_handler:
 	/* Restore only level-specific regs (the rest were already restored) */
 
 	l32i	a0, sp, (4 * REG_PS)			/* Retrieve interruptee's PS */
-	wsr		a0, EPS_1
+	wsr		a0, PS
 	l32i	a0, sp, (4 * REG_PC)			/* Retrieve interruptee's PC */
 	wsr		a0, EPC_1
 	l32i	a0, sp, (4 * REG_A0)			/* Retrieve interruptee's A0 */
