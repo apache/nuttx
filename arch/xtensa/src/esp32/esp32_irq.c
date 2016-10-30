@@ -48,6 +48,7 @@
 
 #include "xtensa.h"
 #include "esp32_cpuint.h"
+#include "esp32_cpu_interrupt.h"
 
 /****************************************************************************
  * Public Data
@@ -112,6 +113,35 @@ static inline void xtensa_disable_all(void)
 }
 
 /****************************************************************************
+ * Name: xtensa_attach_cpu_interrupt
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+static inline void xtensa_attach_cpu_interrupt(void)
+{
+  int cpuint;
+
+  /* Allocate a level-sensitive, priority 1 CPU interrupt for the UART */
+
+  cpuint = esp32_alloc_levelint(1);
+  DEBUGASSERT(cpuint >= 0);
+
+  /* Connect all CPU peripheral source to allocated CPU interrupt */
+
+  up_disable_irq(cpuint);
+  esp32_attach_peripheral(0, ESP32_PERIPH_CPU_CPU1, cpuint);
+
+  /* Attach the inter-CPU interrupt. */
+
+  (void)irq_attach(ESP32_IRQ_CPU_CPU1, (xcpt_t)esp32_cpu_interrupt);
+
+  /* Enable the inter 0 CPU interrupt. */
+
+  up_enable_irq(cpuint);
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -140,8 +170,13 @@ void xtensa_irq_initialize(void)
 #warning Missing logic
 #endif
 
-  /* Attach all processor exceptions */
-#warning Missing logic
+  /* Attach and emable internal interrupts */
+
+#ifdef CONFIG_SMP
+  /* Attach and enable the inter-CPU interrupt */
+
+  xtensa_attach_cpu_interrupt();
+#endif
 
   esp32_irq_dump("initial", NR_IRQS);
 

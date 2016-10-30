@@ -64,7 +64,7 @@ ifeq ($(CONFIG_SPINLOCK),y)
 endif
 
 ifeq ($(CONFIG_SMP),y)
-  CMN_CSRCS += xtensa_cpu_pause.c
+  CMN_CSRCS += xtensa_cpupause.c
 endif
 
 # Use of common/xtensa_etherstub.c is deprecated.  The preferred mechanism

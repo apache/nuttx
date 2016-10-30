@@ -39,8 +39,10 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
 #include <stdint.h>
 #include <assert.h>
+#include <errno.h>
 
 #include <arch/irq.h>
 
@@ -56,7 +58,7 @@
  * Name: esp32_cpu_interrupt
  *
  * Description:
- *   Called to handle the CPU0-4 interrupts.
+ *   Called to handle the CPU0/1 interrupts.
  *
  ****************************************************************************/
 
@@ -82,6 +84,20 @@ int esp32_cpu_interrupt(int irq, FAR void *context)
     }
 
   return OK;
+}
+
+/****************************************************************************
+ * Name: xtensa_cpu_interrupt
+ *
+ * Description:
+ *   Called to trigger a CPU interrupt
+ *
+ ****************************************************************************/
+
+int xtensa_cpu_interrupt(int cpu, int intcode)
+{
+#warning Missing logic -- How do we do this?
+  return -ENOSYS;
 }
 
 #endif /* CONFIG_SMP */

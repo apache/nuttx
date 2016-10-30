@@ -195,7 +195,7 @@ void xtensa_timer_initialize(void)
    * attach any peripheral ID to the dedicated CPU interrupt.
    */
 
-  /* Attach the timer interrupt vector */
+  /* Attach the timer interrupt */
 
   (void)irq_attach(XTENSA_IRQ_TIMER0, (xcpt_t)esp32_timerisr);
 

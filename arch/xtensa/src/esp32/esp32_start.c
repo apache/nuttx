@@ -85,8 +85,6 @@ void IRAM_ATTR __start(void)
 
   memset(&_sbss, 0, (&_ebss - &_sbss) * sizeof(_sbss));
 
-#warning REVISIT: Do we need to disable co-processors here?
-
   /* Make sure that the APP_CPU is disabled for now */
 
   regval  = getreg32(DPORT_APPCPU_CTRL_B_REG);

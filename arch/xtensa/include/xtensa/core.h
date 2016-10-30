@@ -45,21 +45,8 @@
  * Included Files
  ****************************************************************************/
 
-/* Configuration independent definitions: */
-
-#warning REVISIT: Missing header files:
-//#include <arch/xtensa/hal.h>
-//#include <arch/xtensa/xtensa-versions.h>
-
-/* Configuration specific definitions: */
-
 #include <arch/chip/core-isa.h>
-//#include <arch/chip/core-matmap.h>
 #include <arch/chip/tie.h>
-
-#ifdef __ASSEMBLY__
-//#  include <arch/chip/tie-asm.h>
-#endif
 
 /****************************************************************************
  * Pre-processor Definitions

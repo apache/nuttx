@@ -52,6 +52,7 @@
 #include "chip/esp32_dport.h"
 #include "esp32_region.h"
 #include "esp32_cpuint.h"
+#include "esp32_cpu_interrupt.h"
 
 #ifdef CONFIG_SMP
 
@@ -98,6 +99,35 @@ static inline void xtensa_disable_all(void)
     : : : "a2"
   );
 }
+
+/****************************************************************************
+ * Name: xtensa_attach_cpu_interrupt
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+static inline void xtensa_attach_cpu_interrupt(void)
+{
+  int cpuint;
+
+  /* Allocate a level-sensitive, priority 1 CPU interrupt for the UART */
+
+  cpuint = esp32_alloc_levelint(1);
+  DEBUGASSERT(cpuint >= 0);
+
+  /* Connect all CPU peripheral source to allocated CPU interrupt */
+
+  up_disable_irq(cpuint);
+  esp32_attach_peripheral(1, ESP32_PERIPH_CPU_CPU0, cpuint);
+
+  /* Attach the inter-CPU interrupt. */
+
+  (void)irq_attach(ESP32_IRQ_CPU_CPU0, (xcpt_t)esp32_cpu_interrupt);
+
+  /* Enable the inter 0 CPU interrupts. */
+
+  up_enable_irq(cpuint);
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -148,7 +178,13 @@ int xtensa_start_handler(int irq, FAR void *context)
 
   xtensa_disable_all();
 
-#warning REVISIT: Do we need to disable co-processors here?
+  /* Attach and emable internal interrupts */
+
+#ifdef CONFIG_SMP
+  /* Attach and enable the inter-CPU interrupt */
+
+  xtensa_attach_cpu_interrupt();
+#endif
 
   /* Detach all peripheral sources APP CPU interrupts */
 
@@ -243,8 +279,9 @@ int up_cpu_start(int cpu)
         }
 
       sem_destroy(&g_appcpu_interlock);
-      return OK;
     }
+
+  return OK;
 }
 
 #endif /* CONFIG_SMP */
