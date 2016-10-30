@@ -159,7 +159,11 @@
 	 */
 
 	mov		a2, sp						/* Argument: Top of stack = register save area */
+#ifdef __XTENSA_CALL0_ABI__
 	call0	xtensa_int_decode			/* Call xtensa_int_decode */
+#else
+	call4	xtensa_int_decode			/* Call xtensa_int_decode */
+#endif
 
 	/* On return from xtensa_int_decode, A2 will contain the address of the new
 	 * register save area.  Usually this would be the same as the current SP.
@@ -189,7 +193,12 @@
 	mov		a12, a6						/* Preserve a6 */
 	movi	a2, XTENSA_IRQ_TIMER&level& /* Arg 1: IRQ number */
 	mov		a3, sp						/* Arg 2: Top of stack = register save area */
+#ifdef __XTENSA_CALL0_ABI__
 	call0	xtensa_irq_dispatch			/* Call xtensa_int_decode */
+#else
+	call4	xtensa_irq_dispatch			/* Call xtensa_int_decode */
+#endif
+
 	mov		a6, a12						/* Preserve a6 */
 	.endif
 
