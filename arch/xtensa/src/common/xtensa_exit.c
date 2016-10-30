@@ -175,7 +175,7 @@ void _exit(int status)
 #if XCHAL_CP_NUM > 0
   /* Set up the co-processor state for the newly started thread. */
 
-  xtensa_coproc_restorestate(tcb);
+  xtensa_coproc_restorestate(&tcb->xcp.cpstate);
 #endif
 
 #ifdef CONFIG_ARCH_ADDRENV

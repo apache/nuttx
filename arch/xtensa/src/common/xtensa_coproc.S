@@ -46,6 +46,8 @@
 #include <arch/chip/tie.h>
 #include <arch/chip/tie-asm.h>
 
+#include "xtensa_abi.h"
+
 #if XCHAL_CP_NUM > 0
 
 /****************************************************************************
@@ -87,7 +89,7 @@ _xtensa_coproc_saoffsets:
  *   around the assembly language call to _xtensa_coproc_savestate.
  *
  * Entry Conditions:
- *   - A2 holds the address of the threads state save area
+ *   - A2 holds the address of the co-processor state save area
  *   - The thread being switched out is still the current thread.
  *   - CPENABLE state reflects which coprocessors are active.
  *   - Registers have been saved/spilled already.
@@ -192,6 +194,79 @@ _xtensa_coproc_savestate:
 	.size	_xtensa_coproc_savestate, . - _xtensa_coproc_savestate
 
 /****************************************************************************
+ * Name: xtensa_coproc_savestate
+ *
+ * Description:
+ *   If there is a current thread and it has a coprocessor state save area,
+ *   then save all callee-saved state into this area. xtensa_coproc_savestate()
+ *   is simply a C wrapper around the assembly language call to
+ *   _xtensa_coproc_savestate.
+ *
+ * Input Parameters:
+ *   A2 - Address of co-processor save area
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Called with interrupts disabled.
+ *
+ ****************************************************************************/
+
+	.global	xtensa_coproc_savestate
+	.type	xtensa_coproc_savestate, @function
+
+	.align	4
+	.literal_position
+	.align	4
+
+xtensa_coproc_savestate:
+
+#ifdef __XTENSA_CALL0_ABI__
+
+	/* Need to preserve a8-11.  _xtensa_coproc_savestate modifies a2-a7,
+	 * a13-a15.  So no registers need be saved.
+	 */
+
+	ENTRY(16)
+
+	/* Call _xtensa_coproc_savestate() with A2=address of co-processor
+	 * save area.
+	 */
+
+	call0 _xtensa_coproc_savestate
+	RET(16)
+
+#else
+
+	/* Need to preserve a8-15.  _xtensa_coproc_savestate modifies a2-a7,
+	 * a13-a15.  So only a13-a15 need be preserved.
+	 */
+
+	ENTRY(16)
+	s32i	a13, sp, LOCAL_OFFSET(1)
+	s32i	a14, sp, LOCAL_OFFSET(2)
+	s32i	a15, sp, LOCAL_OFFSET(3)
+
+	/* Call _xtensa_coproc_savestate() with A2=address of co-processor
+	 * save area.
+	 */
+
+	call0 _xtensa_coproc_savestate
+
+	/* Restore a13-15 and return */
+
+	132i	a13, sp, LOCAL_OFFSET(1)
+	132i	a14, sp, LOCAL_OFFSET(2)
+	132i	a15, sp, LOCAL_OFFSET(3)
+
+	RET(16)
+
+#endif
+
+	.size	xtensa_coproc_savestate, . - xtensa_coproc_savestate
+
+/****************************************************************************
  * Name: _xtensa_coproc_restorestate
  *
  * Description:
@@ -206,7 +281,7 @@ _xtensa_coproc_savestate:
  *   around the assembly language call to _xtensa_coproc_restorestate.
  *
  * Entry Conditions:
- *   - A2 holds the address of the threads state save area
+ *   - A2 holds the address of the co-processor state save area
  *   - The incoming thread is set as the current thread.
  *   - CPENABLE is set up correctly for all required coprocessors.
  *
@@ -305,5 +380,77 @@ _xtensa_coproc_restorestate:
 	ret
 
 	.size	_xtensa_coproc_restorestate, . - _xtensa_coproc_restorestate
+
+/****************************************************************************
+ * Name: xtensa_coproc_restorestate
+ *
+ * Description:
+ *   Restore any callee-saved coprocessor state for the incoming thread.
+ *   xtensa_coproc_restorestate() is simply a C wrapper around the assembly
+ *   language call to _xtensa_coproc_restorestate.
+ *
+ * Input Parameters:
+ *   - A2 holds the address of the threads state save area
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Called with interrupts disabled.
+ *
+ ****************************************************************************/
+
+	.global	xtensa_coproc_restorestate
+	.type	xtensa_coproc_restorestate, @function
+
+	.align	4
+	.literal_position
+	.align	4
+
+xtensa_coproc_restorestate:
+
+#ifdef __XTENSA_CALL0_ABI__
+
+	/* Need to preserve a8-11.  _xtensa_coproc_restorestate modifies a2-a7,
+	 * a13-a15.  So no registers need be saved.
+	 */
+
+	ENTRY(16)
+
+	/* Call _xtensa_coproc_restorestate() with A2=address of co-processor
+	 * save area.
+	 */
+
+	call0 _xtensa_coproc_restorestate
+	RET(16)
+
+#else
+
+	/* Need to preserve a8-15.  _xtensa_coproc_savestate modifies a2-a7,
+	 * a13-a15.  So only a13-a15 need be preserved.
+	 */
+
+	ENTRY(16)
+	s32i	a13, sp, LOCAL_OFFSET(1)
+	s32i	a14, sp, LOCAL_OFFSET(2)
+	s32i	a15, sp, LOCAL_OFFSET(3)
+
+	/* Call _xtensa_coproc_restorestate() with A2=address of co-processor
+	 * save area.
+	 */
+
+	call0 _xtensa_coproc_restorestate
+
+	/* Restore a13-15 and return */
+
+	132i	a13, sp, LOCAL_OFFSET(1)
+	132i	a14, sp, LOCAL_OFFSET(2)
+	132i	a15, sp, LOCAL_OFFSET(3)
+
+	RET(16)
+
+#endif
+
+	.size	xtensa_coproc_restorestate, . - xtensa_coproc_restorestate
 
 #endif /* XCHAL_CP_NUM > 0 */

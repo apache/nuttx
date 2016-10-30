@@ -104,6 +104,8 @@
  */
 
 #ifdef __ASSEMBLY__
+/* Function prologues and epilogues */
+
 #ifdef __XTENSA_CALL0_ABI__
   /* Call0 */
 
@@ -130,7 +132,13 @@
 #  define ENTRY0        entry   sp, 0x10
 #  define RET(sz)       retw
 #  define RET0          retw
+
 #endif
+
+/* Index into stack frame (skipping over saved A0) */
+
+#define LOCAL_OFFSET(n) ((n) << 2)  /* n = 1 .. ((size >> 2) - 1) */
+
 #endif /*  __ASSEMBLY_ */
 
 #endif /* __ARCH_XTENSA_SRC_COMMON_XTENSA_ABI_H */

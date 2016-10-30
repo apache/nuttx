@@ -154,7 +154,7 @@ void up_block_task(struct tcb_s *tcb, tstate_t task_state)
            * processor save area.
            */
 
-          xtensa_coproc_savestate(rtcb);
+          xtensa_coproc_savestate(&rtcb->xcp.cpstate);
 #endif
 
           /* Restore the exception context of the rtcb at the (new) head
@@ -166,7 +166,7 @@ void up_block_task(struct tcb_s *tcb, tstate_t task_state)
 #if XCHAL_CP_NUM > 0
           /* Set up the co-processor state for the newly started thread. */
 
-          xtensa_coproc_restorestate(rtcb);
+          xtensa_coproc_restorestate(&rtcb->xcp.cpstate);
 #endif
 
 #ifdef CONFIG_ARCH_ADDRENV

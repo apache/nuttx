@@ -152,9 +152,9 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
               CURRENT_REGS[REG_PC]      = (uint32_t)xtensa_sigdeliver;
 #ifdef __XTENSA_CALL0_ABI__
-              CURRENT_REGS[REG_PS]      = (uint32_t)(PS_INTLEVEL(0) | PS_UM);
+              CURRENT_REGS[REG_PS]      = (uint32_t)(PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM);
 #else
-              CURRENT_REGS[REG_PS]      = (uint32_t)(PS_INTLEVEL(0) | PS_UM | PS_WOE);
+              CURRENT_REGS[REG_PS]      = (uint32_t)(PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_WOE);
 #endif
 
               /* And make sure that the saved context in the TCB is the same
@@ -187,9 +187,9 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
           tcb->xcp.regs[REG_PC]      = (uint32_t)xtensa_sigdeliver;
 #ifdef __XTENSA_CALL0_ABI__
-          tcb->xcp.regs[REG_PS]      = (uint32_t)(PS_INTLEVEL(0) | PS_UM);
+          tcb->xcp.regs[REG_PS]      = (uint32_t)(PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM);
 #else
-          tcb->xcp.regs[REG_PS]      = (uint32_t)(PS_INTLEVEL(0) | PS_UM | PS_WOE);
+          tcb->xcp.regs[REG_PS]      = (uint32_t)(PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_WOE);
 #endif
         }
     }
