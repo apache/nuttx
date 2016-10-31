@@ -323,4 +323,23 @@ _kernel_exception_vector:
 
 	.end	literal_prefix
 
-#endif
+/****************************************************************************
+ * Name: _user_exception_vector
+ *
+ * Description:
+ *   User Exception (including Level 1 Interrupt from user mode).
+ *
+ ****************************************************************************/
+
+	.begin	literal_prefix .user_exception_vector
+	.section .user_exception_vector.text, "ax"
+	.global	_user_exception_vector
+	.type	_user_exception_vector, @function
+	.align	4
+
+_user_exception_vector:
+
+	wsr		a0, EXCSAVE_1					/* Preserve a0 */
+	call0	xtensa_user_handler				/* And jump to user exception handler */
+
+	.end	literal_prefix

@@ -123,6 +123,19 @@
 #define CPU_INTCODE_NONE  0
 #define CPU_INTCODE_PAUSE 1
 
+/* Exception Codes that may be received by xtensa_panic(). */
+
+#define XTENSA_NMI_EXCEPTION     0
+#define XTENSA_DEBUG_EXCEPTION   1
+#define XTENSA_DOUBLE_EXCEPTION  2
+#define XTENSA_KERNEL_EXCEPTION  3
+#define XTENSA_COPROC_EXCEPTION  4
+#define XTENSA_LEVEL2_EXCEPTION  5
+#define XTENSA_LEVEL3_EXCEPTION  6
+#define XTENSA_LEVEL4_EXCEPTION  7
+#define XTENSA_LEVEL5_EXCEPTION  8
+#define XTENSA_LEVEL6_EXCEPTION  9
+
 /* Register access macros */
 
 #define getreg8(a)        (*(volatile uint8_t *)(a))
@@ -254,6 +267,7 @@ uint32_t *xtensa_irq_dispatch(int irq, uint32_t *regs);
 uint32_t xtensa_enable_cpuint(uint32_t *shadow, uint32_t intmask);
 uint32_t xtensa_disable_cpuint(uint32_t *shadow, uint32_t intmask);
 void xtensa_panic(int xptcode, uint32_t *regs) noreturn_function;
+void xtensa_user(int exccause, uint32_t *regs) noreturn_function;
 
 /* Software interrupt handler */
 

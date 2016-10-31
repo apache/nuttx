@@ -50,19 +50,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Exception Codes */
-
-#define XTENSA_NMI_EXCEPTION    0
-#define XTENSA_DEBUG_EXCEPTION  1
-#define XTENSA_DOUBLE_EXCEPTION 2
-#define XTENSA_KERNEL_EXCEPTION 3
-#define XTENSA_COPROC_EXCEPTION 4
-#define XTENSA_LEVEL2_EXCEPTION 5
-#define XTENSA_LEVEL3_EXCEPTION 6
-#define XTENSA_LEVEL4_EXCEPTION 7
-#define XTENSA_LEVEL5_EXCEPTION 8
-#define XTENSA_LEVEL6_EXCEPTION 9
-
 /* Interrupt Matrix
  *
  * The Interrupt Matrix embedded in the ESP32 independently allocates
@@ -204,9 +191,10 @@
 #define XTENSA_IRQ_TIMER0           0  /* INTERRUPT, bit 6 */
 #define XTENSA_IRQ_TIMER1           1  /* INTERRUPT, bit 15 */
 #define XTENSA_IRQ_TIMER2           2  /* INTERRUPT, bit 16 */
+#define XTENSA_IRQ_SYSCALL          3  /* User interrupt w/EXCCAUSE=syscall */
 
-#define XTENSA_NIRQ_INTERNAL        3  /* Number of dispatch internal interrupts */
-#define XTENSA_IRQ_FIRSTPERIPH      3  /* First peripheral IRQ number */
+#define XTENSA_NIRQ_INTERNAL        4  /* Number of dispatch internal interrupts */
+#define XTENSA_IRQ_FIRSTPERIPH      4  /* First peripheral IRQ number */
 
 /* IRQ numbers for peripheral interrupts coming throught the Interrupt
  * Matrix.

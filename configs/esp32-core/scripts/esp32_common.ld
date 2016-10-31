@@ -35,14 +35,12 @@ SECTIONS
     . = 0x300;
     KEEP(*(.kernel_exception_vector.text));
     . = 0x340;
-    KEEP(*(.UserExceptionVector.text));
-    . = 0x3C0;
+    KEEP(*(.user_exception_vector.text));
+    . = 0x3c0;
     KEEP(*(.double_exception_vector.text));
     . = 0x400;
-    *(.*Vector.literal)
+    *(.*_vector.literal)
 
-    *(.UserEnter.literal);
-    *(.UserEnter.text);
     . = ALIGN (16);
     *(.entry.text)
     *(.init.literal)

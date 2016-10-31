@@ -47,12 +47,12 @@
 
 /* WINDOW OVERFLOW AND UNDERFLOW EXCEPTION VECTORS AND ALLOCA EXCEPTION HANDLER
  *
- * Here is the code for each window overflow/underflow exception vector and 
+ * Here is the code for each window overflow/underflow exception vector and
  * (interspersed) efficient code for handling the alloca exception cause.
  * Window exceptions are handled entirely in the vector area and are very
- * tight for performance. The alloca exception is also handled entirely in 
+ * tight for performance. The alloca exception is also handled entirely in
  * the window vector area so comes at essentially no cost in code size.
- * Users should never need to modify them and Cadence Design Systems recommends 
+ * Users should never need to modify them and Cadence Design Systems recommends
  * they do not.
  *
  * Window handlers go at predetermined vector locations according to the
@@ -132,8 +132,8 @@ _window_underflow4:
  */
 
 	.align	4
-	.global	_xt_alloca_exc
-_xt_alloca_exc:
+	.global	_xtensa_alloca_handler
+_xtensa_alloca_handler:
 
 	rsr		a0, WINDOWBASE	/* Grab WINDOWBASE before rotw changes it */
 	rotw	-1				/* WINDOWBASE goes to a4, new a0-a3 are scratch */
