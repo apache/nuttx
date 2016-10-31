@@ -52,7 +52,7 @@
 #include "chip/esp32_dport.h"
 #include "esp32_region.h"
 #include "esp32_cpuint.h"
-#include "esp32_intercpu_interrupt.h"
+#include "esp32_smp.h"
 
 #ifdef CONFIG_SMP
 
@@ -192,6 +192,14 @@ int xtensa_start_handler(int irq, FAR void *context)
     {
       esp32_detach_peripheral(1, i);;
     }
+
+#if 0 /* Does it make since to have co-processors enabled on the IDLE thread? */
+#if XTENSA_CP_ALLSET != 0
+  /* Set initial co-processor state */
+
+  xtensa_coproc_enable(struct xtensa_cpstate_s *cpstate, int cpset);
+#endif
+#endif
 
   /* Dump registers so that we can see what is going to happen on return */
 

@@ -215,6 +215,8 @@ _xtensa_nmi_vector:
 	.size		_xtensa_nmi_vector, . - _xtensa_nmi_vector
 	.end		literal_prefix
 
+#endif /* XCHAL_HAVE_NMI */
+
 /****************************************************************************
  * Name: _debug_exception_vector
  *

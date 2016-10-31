@@ -274,7 +274,7 @@ _xtensa_syscall_handler:
 
 	/* Save EPC */
 
-#ifidef XCHAL_HAVE_LOOPS
+#ifdef XCHAL_HAVE_LOOPS
 	/* Save A2 and A3 now to give us some registers to work with.  A0, A2
 	 * and A3 are now available.  NOTE that A3 will get saved again in
 	 * _xtensa_context_save().

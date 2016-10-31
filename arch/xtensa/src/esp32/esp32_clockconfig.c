@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/esp32/exp32_cpuindex.S
+ * arch/xtensa/src/esp32/esp32_clockconfig.C
  *
  * Mofidifed by use in NuttX by:
  *

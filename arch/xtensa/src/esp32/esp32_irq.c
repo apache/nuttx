@@ -48,7 +48,7 @@
 
 #include "xtensa.h"
 #include "esp32_cpuint.h"
-#include "esp32_intercpu_interrupt.h"
+#include "esp32_smp.h"
 
 /****************************************************************************
  * Public Data

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/esp32/esp32_intercpu_interrupt.h
+ * arch/xtensa/src/esp32/esp32_smp.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_XTENSA_SRC_ESP32_ESP32_INTERCPU_INTERRUPT_H
-#define __ARCH_XTENSA_SRC_ESP32_ESP32_INTERCPU_INTERRUPT_H
+#ifndef __ARCH_XTENSA_SRC_ESP32_ESP32_SMP_H
+#define __ARCH_XTENSA_SRC_ESP32_ESP32_SMP_H
 
 /****************************************************************************
  * Included Files
@@ -44,8 +44,18 @@
 
 #ifdef CONFIG_SMP
 
+
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Data
+ ****************************************************************************/
+
+/* This is the CPU1 IDLE stack */
+
+#define CPU1_IDLETHREAD_STACKSIZE (CONFIG_SMP_IDLETHREAD_STACKSIZE & ~15)
+extern uint32_t g_cpu1_idlestack[CPU1_IDLETHREAD_STACKSIZE / 34];
+
+/****************************************************************************
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -60,4 +70,4 @@ int esp32_fromcpu0_interrupt(int irq, FAR void *context);
 int esp32_fromcpu1_interrupt(int irq, FAR void *context);
 
 #endif /* CONFIG_SMP */
-#endif /* __ARCH_XTENSA_SRC_ESP32_ESP32_INTERCPU_INTERRUPT_H */
+#endif /* __ARCH_XTENSA_SRC_ESP32_ESP32_SMP_H */

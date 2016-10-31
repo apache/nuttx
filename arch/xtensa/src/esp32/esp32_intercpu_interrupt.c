@@ -41,11 +41,14 @@
 
 #include <sys/types.h>
 #include <stdint.h>
+#include <sched.h>
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/spinlock.h>
 #include <arch/irq.h>
 
+#include "chip/esp32_dport.h"
 #include "xtensa.h"
 
 #ifdef CONFIG_SMP

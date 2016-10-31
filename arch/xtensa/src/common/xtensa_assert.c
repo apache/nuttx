@@ -164,7 +164,6 @@ void up_assert(const uint8_t *filename, int lineno)
         filename, lineno);
 #endif
 
-  CURRENT_REGS = regs;
   xtensa_assert(EXIT_FAILURE);
 }
 

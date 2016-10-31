@@ -41,7 +41,7 @@ HEAD_CSRC = esp32_start.c
 # Common XTENSA files (arch/xtensa/src/common)
 
 CMN_ASRCS  = xtensa_context.S xtensa_coproc.S xtensa_cpuint.S
-CMN_ASRCS += xtensa_int_handlers.S xtensa_panic.S xtensa_user_handlers.S
+CMN_ASRCS += xtensa_int_handlers.S xtensa_panic.S xtensa_user_handler.S
 CMN_ASRCS += xtensa_vectors.S
 
 CMN_CSRCS  = xtensa_assert.c xtensa_blocktask.c xtensa_copystate.c
@@ -81,7 +81,7 @@ endif
 
 # Required ESP32 files (arch/xtensa/src/lx6)
 
-CHIP_ASRCS  = esp32_cpuhead.S
+CHIP_ASRCS  =
 CHIP_CSRCS  = esp32_allocateheap.c esp32_clockconfig.c esp32_cpuint.c
 CHIP_CSRCS += esp32_gpio.c esp32_intdecode.c esp32_irq.c esp32_region.c
 CHIP_CSRCS += esp32_start.c esp32_timerisr.c
@@ -89,9 +89,8 @@ CHIP_CSRCS += esp32_start.c esp32_timerisr.c
 # Configuration-dependent ESP32 files
 
 ifeq ($(CONFIG_SMP),y)
-CHIP_ASRCS  = esp32_cpuindex.S
-CMN_CSRCS  += esp32_cpustart.c esp32_intercpu_interrupt.c
-#CMN_CSRCS += esp32_cpuidlestack.c
+CHIP_ASRCS  = esp32_cpuhead.S esp32_cpuindex.S
+CMN_CSRCS  += esp32_cpuidlestack.c esp32_cpustart.c esp32_intercpu_interrupt.c
 endif
 
 ifeq ($(CONFIG_ESP32_UART),y)

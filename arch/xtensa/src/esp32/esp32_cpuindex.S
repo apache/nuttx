@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/esp32/exp32_cpuindex.S
+ * arch/xtensa/src/esp32/esp32_cpuindex.S
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

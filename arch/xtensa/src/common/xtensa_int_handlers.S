@@ -125,7 +125,7 @@
 	 * a consequence of context switching.
 	 */
 
-	mov		s12, sp						/* a12 = address of save area */
+	mov		a12, sp						/* a12 = address of save area */
 
 ._xtensa_dispatch_level&level&:
 

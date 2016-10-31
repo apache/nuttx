@@ -40,15 +40,19 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <arch/xtensa/xtensa_corebits.h>
+#include <arch/esp32/core-isa.h>
+
+#ifdef CONFIG_SMP
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-	section	.noinit, "aw"
-	.align	16
+	.section .noinit, "aw"
 	.global	g_cpu1_idlestack
 	.type	g_cpu1_idlestack, @object
+	.align	16
 
 g_cpu1_idlestack:
 	.space	(CONFIG_SMP_IDLETHREAD_STACKSIZE & ~15)
@@ -79,30 +83,36 @@ g_cpu1_idlestack:
  *
  ****************************************************************************/
 
-#if CONFIG_SMP_NCPUS > 1
-
 	.global	__cpu1_start
-	.type	__cpu1_start, #function
+	.type	__cpu1_start, @function
+
+	.align	4
 
 .Lcpu1_bottomofstack:
-	long	.Lcpu1_stacktop
+	.long	.Lcpu1_stacktop
 	.size	.Lcpu1_bottomofstack, . - .Lcpu1_bottomofstack
 
 #ifdef CONFIG_STACK_COLORATION
 .Lcpu1_bottomofstack:
-	long	.Lcpu1_stacktop
+	.long	.Lcpu1_stacktop
 	.size	.Lcpu1_bottomofstack, . - .Lcpu1_bottomofstack
 
 .Lcpu1_stackcolor:
-	long	STACK_COLOR
+	.long	STACK_COLOR
 	.size	.Lcpu1_stackcolor, . - .Lcpu1_stackcolor
 #endif
+
+	.align	4
 
 __cpu1_start:
 
 	/* Set up the stack pointer and the CPU index */
 
-	l32r	.Lcpu1_bottomofstack
+	l32r	sp, .Lcpu1_bottomofstack
+
+	/* Does it make since to have co-processors enabled on the IDLE thread? */
+
+//#warning REVISIT: Must set aside co-processor save ares
 
 #ifdef CONFIG_STACK_COLORATION
 	/* Write a known value to the IDLE thread stack to support stack
@@ -122,9 +132,9 @@ __cpu1_start:
 	/* Set up the intiali PS */
 
 #ifdef __XTENSA_CALL0_ABI__
-	movi	a0, PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_EXCM;
+	movi	a0, (PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_EXCM)
 #else
-	movi	a0, PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_EXCM | PS_WOE | PS_CALLINC(1);
+	movi	a0, (PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_EXCM | PS_WOE | PS_CALLINC(1))
 #endif
 	wsr		a0, PS
 
@@ -135,5 +145,6 @@ __cpu1_start:
 
 	/* xtensa_start_handler() does not return */
 
-2:	b		2b
+2:	j		2b
 	.size	__cpu1_start, . - __cpu1_start
+#endif /* CONFIG_SMP */
