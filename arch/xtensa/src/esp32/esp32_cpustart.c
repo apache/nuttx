@@ -197,6 +197,12 @@ int xtensa_start_handler(int irq, FAR void *context)
 
   xtensa_registerdump(tcb);
 
+#ifndef CONFIG_SUPPRESS_INTERRUPTS
+  /* And Enable interrupts */
+
+  up_irq_enable();
+#endif
+
   /* Then switch contexts. This instantiates the exception context of the
    * tcb at the head of the assigned task list.  In this case, this should
    * be the CPUs NULL task.
@@ -265,7 +271,7 @@ int up_cpu_start(int cpu)
 
       /* Set the CPU1 start address */
 
-      ets_set_appcpu_boot_addr((uint32_t)xtensa_start_handler);
+      ets_set_appcpu_boot_addr((uint32_t)__cpu1_start);
 
       /* And way for the initial task to run on CPU1 */
 

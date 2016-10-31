@@ -186,7 +186,6 @@ void xtensa_irq_initialize(void)
   esp32_gpioirqinitialize();
 #endif
 
-
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
   /* And finally, enable interrupts */
 

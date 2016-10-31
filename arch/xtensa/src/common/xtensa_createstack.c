@@ -183,12 +183,20 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
       size_t size_of_stack;
 
 #ifdef CONFIG_STACK_COLORATION
+      uint32_t *ptr;
+      int i;
+
       /* Yes.. If stack debug is enabled, then fill the stack with a
        * recognizable value that we can use later to test for high
        * water marks.
        */
 
-      memset(tcb->stack_alloc_ptr, 0xaa, stack_size);
+      for (i = 0, ptr = (uint32_t *)tcb->stack_alloc_ptr;
+           i < stack_size;
+           i += sizeof(uint32_t))
+        {
+          *ptr++ = STACK_COLOR;
+        }
 #endif
 
       /* XTENSA uses a push-down stack:  the stack grows toward lower

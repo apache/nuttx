@@ -108,6 +108,10 @@
 # define CONFIG_ARCH_INTERRUPTSTACK 0
 #endif
 
+/* Used for stack usage measurements */
+
+#define STACK_COLOR 0xdeadbeef
+
 /* In the XTENSA model, the state is copied from the stack to the TCB, but
  * only a referenced is passed to get the state from the TCB.
  *
