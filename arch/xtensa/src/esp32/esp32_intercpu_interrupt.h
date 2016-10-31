@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/esp32/esp32_cpu_interrupt.c
+ * arch/xtensa/src/esp32/esp32_intercpu_interrupt.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>>
@@ -33,20 +33,14 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_XTENSA_SRC_ESP32_ESP32_INTERCPU_INTERRUPT_H
+#define __ARCH_XTENSA_SRC_ESP32_ESP32_INTERCPU_INTERRUPT_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <sys/types.h>
-#include <stdint.h>
-#include <assert.h>
-#include <errno.h>
-
-#include <arch/irq.h>
-
-#include "xtensa.h"
 
 #ifdef CONFIG_SMP
 
@@ -55,49 +49,15 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp32_cpu_interrupt
+ * Name: esp32_fromcpu[0,1]_interrupt
  *
  * Description:
- *   Called to handle the CPU0/1 interrupts.
+ *   Called to handle the from CPU0/1 interrupts.
  *
  ****************************************************************************/
 
-int esp32_cpu_interrupt(int irq, FAR void *context)
-{
-  uint32_t *regs = (uint32_t *)context;
-  int intcode;
-
-  DEBUGASSERT(regs != NULL);
-  intcode = regs[REG_A2];
-
-  /* Dispatch the inter-CPU interrupt based on the intcode value */
-
-  switch (intcode)
-    {
-      case CPU_INTCODE_PAUSE:
-        xtensa_pause_handler();
-        break;
-
-      default:
-        DEBUGPANIC();
-        break;
-    }
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: xtensa_cpu_interrupt
- *
- * Description:
- *   Called to trigger a CPU interrupt
- *
- ****************************************************************************/
-
-int xtensa_cpu_interrupt(int cpu, int intcode)
-{
-#warning Missing logic -- How do we do this?
-  return -ENOSYS;
-}
+int esp32_fromcpu0_interrupt(int irq, FAR void *context);
+int esp32_fromcpu1_interrupt(int irq, FAR void *context);
 
 #endif /* CONFIG_SMP */
+#endif /* __ARCH_XTENSA_SRC_ESP32_ESP32_INTERCPU_INTERRUPT_H */

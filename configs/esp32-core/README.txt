@@ -21,6 +21,7 @@ Contents
   o ESP32 Toolchain
   o Serial Console
   o Buttons and LEDs
+  o SMP
   o Configurations
 
 STATUS
@@ -99,6 +100,39 @@ Buttons and LEDs
   ----
   There are several on-board LEDs for that indicate the presence of power
   and USB activity.  None of these are available for use by sofware.
+
+SMP
+===
+
+  The ESP32 has 2 CPUs.  Support is included for testing an SMP configuration.
+  That configuration is still not yet ready for usage but can be enabled with
+  the following configuration settings:
+
+    RTOS Features -> Tasks and Scheduling
+      CONFIG_SPINLOCK=y
+      CONFIG_SMP=y
+      CONFIG_SMP_NCPUS=2
+      CONFIG_SMP_IDLETHREAD_STACKSIZE=2048
+
+  Open Issues:
+
+ 1. Currently all device interrupts are handled on the PRO CPU only.  Critical
+     sections will attempt to disable interrupts but will now disable interrupts
+     only on the current CPU (which may not be CPU0).  Perhaps that should be a
+     spinlock to prohibit execution of interrupts on CPU0 when other CPUs are in
+     a critical section?
+
+  2. Cache Issues.  I have not though about this yet, but certainly caching is
+     an issue in an SMP system:
+
+     - Cache coherency.  Are there separate caches for each CPU?  Or a single
+       shared cache?  If the are separate then keep the caches coherent will
+       be an issue.
+     - Caching MAY interfere with spinlocks as they are currently implemented.
+       Waiting on a cached copy of the spinlock may result in a hang or a
+       failure to wait.
+
+  3. Assertions.  On a fatal assertions, other CPUs need to be stopped.
 
 Configurations
 ==============

@@ -68,34 +68,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: xtensa_assert
- ****************************************************************************/
-
-static void xtensa_assert(int errorcode) noreturn_function;
-static void xtensa_assert(int errorcode)
-{
-  /* Are we in an interrupt handler or the idle task? */
-
-  if (CURRENT_REGS || this_task()->pid == 0)
-    {
-       (void)up_irq_save();
-        for (; ; )
-          {
-#ifdef CONFIG_ARCH_LEDS
-            board_autoled_on(LED_PANIC);
-            up_mdelay(250);
-            board_autoled_off(LED_PANIC);
-            up_mdelay(250);
-#endif
-          }
-    }
-  else
-    {
-      exit(errorcode);
-    }
-}
-
-/****************************************************************************
  * Name: assert_tracecallback
  ****************************************************************************/
 
@@ -121,6 +93,54 @@ static int assert_tracecallback(FAR struct usbtrace_s *trace, FAR void *arg)
 #endif
 
 /****************************************************************************
+ * Name: xtensa_assert
+ ****************************************************************************/
+
+static void xtensa_assert(int errorcode) noreturn_function;
+static void xtensa_assert(int errorcode)
+{
+  /* Dump the processor state */
+
+  xtensa_dumpstate();
+
+#ifdef CONFIG_ARCH_USBDUMP
+  /* Dump USB trace data */
+
+  (void)usbtrace_enumerate(assert_tracecallback, NULL);
+#endif
+
+#ifdef CONFIG_BOARD_CRASHDUMP
+  /* Perform board-specific crash dump */
+
+  board_crashdump(up_getsp(), this_task(), filename, lineno);
+#endif
+
+  /* Are we in an interrupt handler or the idle task? */
+
+  if (CURRENT_REGS || this_task()->pid == 0)
+    {
+       /* Blink the LEDs forever */
+
+       (void)up_irq_save();
+        for (; ; )
+          {
+#ifdef CONFIG_ARCH_LEDS
+            board_autoled_on(LED_PANIC);
+            up_mdelay(250);
+            board_autoled_off(LED_PANIC);
+            up_mdelay(250);
+#endif
+          }
+    }
+  else
+    {
+      /* Assertions in other contexts only cause the thread to exit */
+
+      exit(errorcode);
+    }
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -142,18 +162,6 @@ void up_assert(const uint8_t *filename, int lineno)
 #else
   _alert("Assertion failed at file:%s line: %d\n",
         filename, lineno);
-#endif
-
-  xtensa_dumpstate();
-
-#ifdef CONFIG_ARCH_USBDUMP
-  /* Dump USB trace data */
-
-  (void)usbtrace_enumerate(assert_tracecallback, NULL);
-#endif
-
-#ifdef CONFIG_BOARD_CRASHDUMP
-  board_crashdump(up_getsp(), this_task(), filename, lineno);
 #endif
 
   xtensa_assert(EXIT_FAILURE);
@@ -179,17 +187,5 @@ void xtensa_panic(int xptcode, uint32_t *regs)
   _alert("Unhandled Exception %d\n", xptcode);
 #endif
 
-  xtensa_dumpstate();
-
-#ifdef CONFIG_ARCH_USBDUMP
-  /* Dump USB trace data */
-
-  (void)usbtrace_enumerate(assert_tracecallback, NULL);
-#endif
-
-#ifdef CONFIG_BOARD_CRASHDUMP
-  board_crashdump(up_getsp(), this_task(), filename, lineno);
-#endif
-
-  xtensa_assert(EXIT_FAILURE);
+  xtensa_assert(EXIT_FAILURE); /* Should not return */
 }

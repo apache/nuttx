@@ -89,7 +89,7 @@ CHIP_CSRCS += esp32_start.c esp32_timerisr.c
 
 ifeq ($(CONFIG_SMP),y)
 CHIP_ASRCS  = esp32_cpuindex.S
-CMN_CSRCS  += esp32_cpustart.c esp32_cpu_interrupt.c
+CMN_CSRCS  += esp32_cpustart.c esp32_intercpu_interrupt.c
 #CMN_CSRCS += esp32_cpuidlestack.c
 endif
 

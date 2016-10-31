@@ -75,8 +75,8 @@
 
 /* Total save area for optional and custom state (NCP + CPn): */
 
-#define XCHAL_TOTAL_SA_SIZE        128     /* with 16-byte align padding */
-#define XCHAL_TOTAL_SA_ALIGN       4       /* actual minimum alignment */
+#define XCHAL_TOTAL_SA_SIZE        128     /* With 16-byte align padding */
+#define XCHAL_TOTAL_SA_ALIGN       4       /* Actual minimum alignment */
 
 /* Detailed contents of save areas.
  * NOTE:  caller must define the XCHAL_SA_REG macro (not defined here)

@@ -48,7 +48,7 @@
 
 #include "xtensa.h"
 #include "esp32_cpuint.h"
-#include "esp32_cpu_interrupt.h"
+#include "esp32_intercpu_interrupt.h"
 
 /****************************************************************************
  * Public Data
@@ -113,11 +113,11 @@ static inline void xtensa_disable_all(void)
 }
 
 /****************************************************************************
- * Name: xtensa_attach_cpu_interrupt
+ * Name: xtensa_attach_fromcpu1_interrupt
  ****************************************************************************/
 
 #ifdef CONFIG_SMP
-static inline void xtensa_attach_cpu_interrupt(void)
+static inline void xtensa_attach_fromcpu1_interrupt(void)
 {
   int cpuint;
 
@@ -133,7 +133,7 @@ static inline void xtensa_attach_cpu_interrupt(void)
 
   /* Attach the inter-CPU interrupt. */
 
-  (void)irq_attach(ESP32_IRQ_CPU_CPU1, (xcpt_t)esp32_cpu_interrupt);
+  (void)irq_attach(ESP32_IRQ_CPU_CPU1, (xcpt_t)esp32_fromcpu1_interrupt);
 
   /* Enable the inter 0 CPU interrupt. */
 
@@ -175,7 +175,7 @@ void xtensa_irq_initialize(void)
 #ifdef CONFIG_SMP
   /* Attach and enable the inter-CPU interrupt */
 
-  xtensa_attach_cpu_interrupt();
+  xtensa_attach_fromcpu1_interrupt();
 #endif
 
   esp32_irq_dump("initial", NR_IRQS);

@@ -120,7 +120,8 @@
 
 /* Interrupt codes from other CPUs: */
 
-#define CPU_INTCODE_PAUSE 0
+#define CPU_INTCODE_NONE  0
+#define CPU_INTCODE_PAUSE 1
 
 /* Register access macros */
 
@@ -257,7 +258,7 @@ void xtensa_panic(int xptcode, uint32_t *regs) noreturn_function;
 /* Software interrupt handler */
 
 #ifdef CONFIG_SMP
-int xtensa_cpu_interrupt(int cpu, int intcode);
+int xtensa_intercpu_interrupt(int tocpu, int intcode);
 void xtensa_pause_handler(void);
 #endif
 

@@ -168,7 +168,7 @@ int up_cpu_pause(int cpu)
 
   /* Execute SGI2 */
 
-  ret = xtensa_cpu_interrupt(cpu, CPU_INTCODE_PAUSE);
+  ret = xtensa_intercpu_interrupt(cpu, CPU_INTCODE_PAUSE);
   if (ret < 0)
     {
       /* What happened?  Unlock the g_cpu_wait spinlock */

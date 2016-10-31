@@ -52,7 +52,7 @@
 #include "chip/esp32_dport.h"
 #include "esp32_region.h"
 #include "esp32_cpuint.h"
-#include "esp32_cpu_interrupt.h"
+#include "esp32_intercpu_interrupt.h"
 
 #ifdef CONFIG_SMP
 
@@ -101,11 +101,11 @@ static inline void xtensa_disable_all(void)
 }
 
 /****************************************************************************
- * Name: xtensa_attach_cpu_interrupt
+ * Name: xtensa_attach_fromcpu0_interrupt
  ****************************************************************************/
 
 #ifdef CONFIG_SMP
-static inline void xtensa_attach_cpu_interrupt(void)
+static inline void xtensa_attach_fromcpu0_interrupt(void)
 {
   int cpuint;
 
@@ -121,7 +121,7 @@ static inline void xtensa_attach_cpu_interrupt(void)
 
   /* Attach the inter-CPU interrupt. */
 
-  (void)irq_attach(ESP32_IRQ_CPU_CPU0, (xcpt_t)esp32_cpu_interrupt);
+  (void)irq_attach(ESP32_IRQ_CPU_CPU0, (xcpt_t)esp32_fromcpu0_interrupt);
 
   /* Enable the inter 0 CPU interrupts. */
 
@@ -183,7 +183,7 @@ int xtensa_start_handler(int irq, FAR void *context)
 #ifdef CONFIG_SMP
   /* Attach and enable the inter-CPU interrupt */
 
-  xtensa_attach_cpu_interrupt();
+  xtensa_attach_fromcpu0_interrupt();
 #endif
 
   /* Detach all peripheral sources APP CPU interrupts */
