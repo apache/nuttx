@@ -82,7 +82,12 @@ uint32_t *xtensa_irq_dispatch(int irq, uint32_t *regs)
 
   CURRENT_REGS = regs;
 
-  /* Deliver the IRQ */
+  /* Deliver the IRQ
+   *
+   * NOTE: Co-process state has not been saved yet (see below).  As a
+   * consequence, no interrupt level logic may perform co-processor
+   * operations.  This includes use of the FPU.
+   */
 
   irq_dispatch(irq, regs);
 

@@ -2,7 +2,7 @@
  * configs/elf32-core/scripts/esp32_common.ld
  ****************************************************************************/
 
-/*  Default entry point:  */
+/* Default entry point: */
 
 ENTRY(__start);
 
@@ -65,6 +65,8 @@ SECTIONS
 
   .dram0.bss (NOLOAD) :
   {
+    /* .bss initialized on power-up */
+
     . = ALIGN (8);
     _sbss = ABSOLUTE(.);
     *(.dynsbss)
@@ -83,10 +85,16 @@ SECTIONS
     *(COMMON)
     . = ALIGN (8);
     _ebss = ABSOLUTE(.);
+
+    /* Uninitialized .bss */
+
+    *(.noinit)
   } >dram0_0_seg
 
   .dram0.data :
   {
+    /* .data initialized on power-up in ROMed configurations. */
+
     _sdata = ABSOLUTE(.);
     KEEP(*(.data))
     KEEP(*(.data.*))
@@ -102,6 +110,9 @@ SECTIONS
     *(.dram1 .dram1.*)
     _edata = ABSOLUTE(.);
     . = ALIGN(4);
+
+    /* Heap starts at the end of .data */
+
     _sheap = ABSOLUTE(.);
   } >dram0_0_seg
 
@@ -122,7 +133,8 @@ SECTIONS
 
     . = (. + 3) & ~ 3;
 
-    /*  C++ constructor and destructor tables, properly ordered:  */
+    /* C++ constructor and destructor tables, properly ordered: */
+
     __sinit = ABSOLUTE(.);
     KEEP (*crtbegin.o(.ctors))
     KEEP (*(EXCLUDE_FILE (*crtend.o) .ctors))
@@ -134,7 +146,7 @@ SECTIONS
     KEEP (*(SORT(.dtors.*)))
     KEEP (*(.dtors))
 
-    /*  C++ exception handlers table:  */
+    /* C++ exception handlers table: */
 
     __XT_EXCEPTION_DESCS_ = ABSOLUTE(.);
     *(.xt_except_desc)

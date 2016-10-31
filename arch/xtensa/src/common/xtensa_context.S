@@ -177,7 +177,7 @@ _xtensa_context_save:
 
 #warning REVISIT: The following is probably not correct due to changes in registers
 	addi	sp,  sp, (4 * XCPTCONTEXT_SIZE)	/* Restore the interruptee's SP */
-	call0   xthal_window_spill_nw			/* Preserves only a4,5,8,9,12,13 */
+	call0	_xtensa_window_spill			/* Preserves only a4,5,8,9,12,13 */
 	addi	sp,  sp, -(4 * XCPTCONTEXT_SIZE)
 	l32i	a12, sp, (4 * REG_TMP0)			/* Recover stuff from stack frame */
 	l32i	a13, sp, (4 * REG_TMP1)
