@@ -1279,6 +1279,8 @@ nuttx/
  |   |   `- README.txt
  |   |- avr32dev1/
  |   |   `- README.txt
+ |   |- bambino-200e/
+ |   |   `- README.txt
  |   |- c5471evm/
  |   |   `- README.txt
  |   |- cc3200-launchpad/
