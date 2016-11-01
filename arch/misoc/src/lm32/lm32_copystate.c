@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/misoc/src/lm32/lm32_allocateheap.c
+ * arch/misoc/src/lm32/lm32_copystate.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -40,12 +40,8 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <debug.h>
-
-#include <nuttx/arch.h>
-#include <nuttx/board.h>
-#include <arch/board/board.h>
+#include <stdint.h>
+#include <arch/irq.h>
 
 #include "lm32.h"
 
@@ -66,39 +62,26 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_allocate_heap
- *
- * Description:
- *   This function will be called to dynamically set aside the heap region.
- *
- *   For the kernel build (CONFIG_BUILD_KERNEL=y) with both kernel- and
- *   user-space heaps (CONFIG_MM_KERNEL_HEAP=y), this function provides the
- *   size of the unprotected, user-space heap.
- *
- *   If a protected kernel-space heap is provided, the kernel heap must be
- *   allocated (and protected) by an analogous up_allocate_kheap().
- *
+ * Name: lm32_copystate
  ****************************************************************************/
 
-void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
+/* A little faster than most memcpy's */
+
+void lm32_copystate(uint32_t *dest, uint32_t *src)
 {
-  board_autoled_on(LED_HEAPALLOCATE);
-  *heap_start = (FAR void *)g_idle_topstack;
-  *heap_size = CONFIG_RAM_END - g_idle_topstack;
+  int i;
+
+  /* In the LM32 model, the state is copied from the stack to the TCB,
+   * but only a reference is passed to get the state from the TCB.  So the
+   * following check avoids copying the TCB save area onto itself:
+   */
+
+  if (src != dest)
+    {
+      for (i = 0; i < XCPTCONTEXT_REGS; i++)
+        {
+          *dest++ = *src++;
+        }
+    }
 }
 
-/****************************************************************************
- * Name: lm32_add_region
- *
- * Description:
- *   Memory may be added in non-contiguous chunks.  Additional chunks are
- *   added by calling this function.
- *
- ****************************************************************************/
-
-#if CONFIG_MM_REGIONS > 1
-void lm32_add_region(void)
-{
-#warning Missing logic
-}
-#endif

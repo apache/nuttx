@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/misoc/src/lm32/lm32_allocateheap.c
+ * arch/misoc/src/lm32/lm32_stackframe.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -41,64 +41,96 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <stdint.h>
+#include <sched.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/board.h>
-#include <arch/board/board.h>
 
 #include "lm32.h"
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Pre-processor Macros
  ****************************************************************************/
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
+/* LM32 requires at least a 4-byte stack alignment.  For floating point use,
+ * however, the stack must be aligned to 8-byte addresses.
+ */
 
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#ifdef CONFIG_LIBC_FLOATINGPOINT
+#  define STACK_ALIGNMENT   8
+#else
+#  define STACK_ALIGNMENT   4
+#endif
+
+/* Stack alignment macros */
+
+#define STACK_ALIGN_MASK    (STACK_ALIGNMENT-1)
+#define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
+#define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_allocate_heap
+ * Name: up_stack_frame
  *
  * Description:
- *   This function will be called to dynamically set aside the heap region.
+ *   Allocate a stack frame in the TCB's stack to hold thread-specific data.
+ *   This function may be called anytime after up_create_stack() or
+ *   up_use_stack() have been called but before the task has been started.
  *
- *   For the kernel build (CONFIG_BUILD_KERNEL=y) with both kernel- and
- *   user-space heaps (CONFIG_MM_KERNEL_HEAP=y), this function provides the
- *   size of the unprotected, user-space heap.
+ *   Thread data may be kept in the stack (instead of in the TCB) if it is
+ *   accessed by the user code directly.  This includes such things as
+ *   argv[].  The stack memory is guaranteed to be in the same protection
+ *   domain as the thread.
  *
- *   If a protected kernel-space heap is provided, the kernel heap must be
- *   allocated (and protected) by an analogous up_allocate_kheap().
+ *   The following TCB fields will be re-initialized:
+ *
+ *   - adj_stack_size: Stack size after removal of the stack frame from
+ *     the stack
+ *   - adj_stack_ptr: Adjusted initial stack pointer after the frame has
+ *     been removed from the stack.  This will still be the initial value
+ *     of the stack pointer when the task is started.
+ *
+ * Inputs:
+ *   - tcb:  The TCB of new task
+ *   - frame_size:  The size of the stack frame to allocate.
+ *
+ *  Returned Value:
+ *   - A pointer to bottom of the allocated stack frame.  NULL will be
+ *     returned on any failures.  The alignment of the returned value is
+ *     the same as the alignment of the stack itself.
  *
  ****************************************************************************/
 
-void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
+FAR void *up_stack_frame(FAR struct tcb_s *tcb, size_t frame_size)
 {
-  board_autoled_on(LED_HEAPALLOCATE);
-  *heap_start = (FAR void *)g_idle_topstack;
-  *heap_size = CONFIG_RAM_END - g_idle_topstack;
-}
+  uintptr_t topaddr;
 
-/****************************************************************************
- * Name: lm32_add_region
- *
- * Description:
- *   Memory may be added in non-contiguous chunks.  Additional chunks are
- *   added by calling this function.
- *
- ****************************************************************************/
+  /* Align the frame_size */
 
-#if CONFIG_MM_REGIONS > 1
-void lm32_add_region(void)
-{
-#warning Missing logic
+  frame_size = STACK_ALIGN_UP(frame_size);
+
+  /* Is there already a stack allocated? Is it big enough? */
+
+  if (!tcb->stack_alloc_ptr || tcb->adj_stack_size <= frame_size)
+    {
+      return NULL;
+    }
+
+  /* Save the adjusted stack values in the struct tcb_s */
+
+  topaddr               = (uintptr_t)tcb->adj_stack_ptr - frame_size;
+  tcb->adj_stack_ptr    = (FAR void *)topaddr;
+  tcb->adj_stack_size  -= frame_size;
+
+  /* Reset the initial stack pointer */
+
+  tcb->xcp.regs[REG_SP] = (uint32_t)tcb->adj_stack_ptr;
+
+  /* And return the pointer to the allocated region */
+
+  return (FAR void *)(topaddr + sizeof(uint32_t));
 }
-#endif

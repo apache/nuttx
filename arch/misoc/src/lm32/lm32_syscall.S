@@ -1,9 +1,13 @@
 /****************************************************************************
- * arch/misoc/src/lm32/lm32_allocateheap.c
+ * arch/misoc/src/lm32/lm32_syscall.S
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Ramtin Amin <keytwo@gmail.com>
+ *   Author: Ramtin Amin <keytwo@gmail.com>
+ *
+ * Derives from RISC-V version:
+ *
+ *   Copyright (C) 2016 Ken Pettit. All rights reserved.
+ *   Author: Ken Pettit <pettitkd@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -40,65 +44,60 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <debug.h>
-
-#include <nuttx/arch.h>
-#include <nuttx/board.h>
-#include <arch/board/board.h>
-
-#include "lm32.h"
-
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Symbols
  ****************************************************************************/
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+	.file	"up_syscall.S"
+	.global sys_call0
+	.global sys_call1
+	.global sys_call2
+	.global sys_call3
+	.global sys_call4
+	.global sys_call5
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_allocate_heap
+ * Name: up_syscall0, up_syscall1, up_syscall2, up_syscall3
  *
  * Description:
- *   This function will be called to dynamically set aside the heap region.
+ *   up_syscall0 - System call SYS_ argument and no additional parameters.
+ *   up_syscall1 - System call SYS_ argument and one additional parameter.
+ *   up_syscall2 - System call SYS_ argument and two additional parameters.
+ *   up_syscall3 - System call SYS_ argument and three additional parameters.
+ *   up_syscall4 - System call SYS_ argument and four additional parameters.
+ *   up_syscall5 - System call SYS_ argument and five additional parameters.
  *
- *   For the kernel build (CONFIG_BUILD_KERNEL=y) with both kernel- and
- *   user-space heaps (CONFIG_MM_KERNEL_HEAP=y), this function provides the
- *   size of the unprotected, user-space heap.
- *
- *   If a protected kernel-space heap is provided, the kernel heap must be
- *   allocated (and protected) by an analogous up_allocate_kheap().
+ * Assumption:
+ *   All interrupts are disabled except for the software interrupts.
  *
  ****************************************************************************/
 
-void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
-{
-  board_autoled_on(LED_HEAPALLOCATE);
-  *heap_start = (FAR void *)g_idle_topstack;
-  *heap_size = CONFIG_RAM_END - g_idle_topstack;
-}
+	.text
 
-/****************************************************************************
- * Name: lm32_add_region
- *
- * Description:
- *   Memory may be added in non-contiguous chunks.  Additional chunks are
- *   added by calling this function.
- *
- ****************************************************************************/
+sys_call0:	/* a0 holds the syscall number */
+sys_call1:	/* a0 holds the syscall number, argument in a1 */
+sys_call2:	/* a0 holds the syscall number, arguments in a1 and a2 */
+sys_call3:	/* a0 holds the syscall number, arguments in a1, a2, and a3 */
+sys_call4:	/* a0 holds the syscall number, arguments in a1, a2, a3 and a4 */
+sys_call5:	/* a0 holds the syscall number, arguments in a1, a2, a3, a4 and a5 */
 
-#if CONFIG_MM_REGIONS > 1
-void lm32_add_region(void)
-{
-#warning Missing logic
-}
-#endif
+	/* Issue the ECALL opcode to perform a SW interrupt to the OS */
+
+   scall
+
+	/* The actual interrupt may not a occur for a few more cycles.  Let's
+	 * put a few nop's here in hope that the SW interrupt occurs during
+	 * the sequence of nops.
+	 */
+
+	nop
+	nop
+
+	/* Then return with the result of the software interrupt in v0 */
+
+	ret
+	nop

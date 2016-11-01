@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/misoc/src/common/lm32.h
+ * arch/misoc/src/lm32/lm32.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -144,7 +144,6 @@ void lm32_irq_initialize(void);
 /* System timer *************************************************************/
 
 void lm32_timer_initialize(void);
-int  lm32_timerisr(int irq, void *context);
 
 /* Software interrupts ******************************************************/
 

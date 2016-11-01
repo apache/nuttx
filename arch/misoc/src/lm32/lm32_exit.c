@@ -1,9 +1,9 @@
 /****************************************************************************
- * arch/misoc/src/lm32/lm32_allocateheap.c
+ * arch/misoc/src/lm32/lm32_exit.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Ramtin Amin <keytwo@gmail.com>
+ *          Ramtin Amin <keytwo@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -40,21 +40,21 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <sched.h>
 #include <debug.h>
-
 #include <nuttx/arch.h>
-#include <nuttx/board.h>
-#include <arch/board/board.h>
 
+#ifdef CONFIG_DUMP_ON_EXIT
+#  include <nuttx/fs/fs.h>
+#endif
+
+#include "task/task.h"
+#include "sched/sched.h"
+#include "group/group.h"
 #include "lm32.h"
 
 /****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -66,39 +66,17 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_allocate_heap
+ * Name: _exit
  *
  * Description:
- *   This function will be called to dynamically set aside the heap region.
- *
- *   For the kernel build (CONFIG_BUILD_KERNEL=y) with both kernel- and
- *   user-space heaps (CONFIG_MM_KERNEL_HEAP=y), this function provides the
- *   size of the unprotected, user-space heap.
- *
- *   If a protected kernel-space heap is provided, the kernel heap must be
- *   allocated (and protected) by an analogous up_allocate_kheap().
+ *   This function causes the currently executing task to cease
+ *   to exist.  This is a special case of task_delete() where the task to
+ *   be deleted is the currently executing task.  It is more complex because
+ *   a context switch must be perform to the next ready to run task.
  *
  ****************************************************************************/
 
-void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
-{
-  board_autoled_on(LED_HEAPALLOCATE);
-  *heap_start = (FAR void *)g_idle_topstack;
-  *heap_size = CONFIG_RAM_END - g_idle_topstack;
-}
-
-/****************************************************************************
- * Name: lm32_add_region
- *
- * Description:
- *   Memory may be added in non-contiguous chunks.  Additional chunks are
- *   added by calling this function.
- *
- ****************************************************************************/
-
-#if CONFIG_MM_REGIONS > 1
-void lm32_add_region(void)
+void _exit(int status)
 {
 #warning Missing logic
 }
-#endif

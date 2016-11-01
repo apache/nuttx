@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/misoc/src/lm32/lm32_allocateheap.c
+ * arch/misoc/src/lm32/up_initialstate.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -41,11 +41,11 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <debug.h>
+#include <stdint.h>
+#include <string.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/board.h>
-#include <arch/board/board.h>
+#include <arch/irq.h>
 
 #include "lm32.h"
 
@@ -66,39 +66,55 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_allocate_heap
+ * Name: up_initial_state
  *
  * Description:
- *   This function will be called to dynamically set aside the heap region.
+ *   A new thread is being started and a new TCB
+ *   has been created. This function is called to initialize
+ *   the processor specific portions of the new TCB.
  *
- *   For the kernel build (CONFIG_BUILD_KERNEL=y) with both kernel- and
- *   user-space heaps (CONFIG_MM_KERNEL_HEAP=y), this function provides the
- *   size of the unprotected, user-space heap.
- *
- *   If a protected kernel-space heap is provided, the kernel heap must be
- *   allocated (and protected) by an analogous up_allocate_kheap().
+ *   This function must setup the intial architecture registers
+ *   and/or  stack so that execution will begin at tcb->start
+ *   on the next context switch.
  *
  ****************************************************************************/
 
-void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
+void up_initial_state(struct tcb_s *tcb)
 {
-  board_autoled_on(LED_HEAPALLOCATE);
-  *heap_start = (FAR void *)g_idle_topstack;
-  *heap_size = CONFIG_RAM_END - g_idle_topstack;
-}
+  struct xcptcontext *xcp = &tcb->xcp;
 
-/****************************************************************************
- * Name: lm32_add_region
- *
- * Description:
- *   Memory may be added in non-contiguous chunks.  Additional chunks are
- *   added by calling this function.
- *
- ****************************************************************************/
+  /* Initialize the initial exception register context structure */
 
-#if CONFIG_MM_REGIONS > 1
-void lm32_add_region(void)
-{
-#warning Missing logic
-}
+  memset(xcp, 0, sizeof(struct xcptcontext));
+
+  /* Save the initial stack pointer.  Hmmm.. the stack is set to the very
+   * beginning of the stack region.  Some functions may want to store data on
+   * the caller's stack and it might be good to reserve some space.  However,
+   * only the start function would do that and we have control over that one
+   */
+
+  xcp->regs[REG_SP]      = (uint32_t)tcb->adj_stack_ptr;
+
+  /* Save the task entry point */
+
+  xcp->regs[REG_EPC]     = (uint32_t)tcb->start;
+
+  /* If this task is running PIC, then set the PIC base register to the
+   * address of the allocated D-Space region.
+   */
+
+#ifdef CONFIG_PIC
+#  warning "Missing logic"
 #endif
+
+  /* Set privileged- or unprivileged-mode, depending on how NuttX is
+   * configured and what kind of thread is being started.
+   *
+   * If the kernel build is not selected, then all threads run in
+   * privileged thread mode.
+   */
+
+#ifdef CONFIG_BUILD_KERNEL
+#  warning "Missing logic"
+#endif
+}

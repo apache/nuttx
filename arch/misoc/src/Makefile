@@ -3,6 +3,7 @@
 #
 #   Copyright (C) 2016 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
+#           Ramtin Amin <keytwo@gmail.com>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -43,7 +44,6 @@ ifeq ($(CONFIG_WINDOWS_NATIVE),y)
   NUTTX = "$(TOPDIR)\nuttx$(EXEEXT)"
   INCLUDES += -I "$(ARCH_SRCDIR)\chip"
   INCLUDES += -I "$(ARCH_SRCDIR)\common"
-  INCLUDES += -I "$(ARCH_SRCDIR)\generated"
   INCLUDES += -I "$(ARCH_SRCDIR)\$(ARCH_SUBDIR)"
   INCLUDES += -I "$(TOPDIR)\sched"
 else
@@ -52,14 +52,12 @@ ifeq ($(WINTOOL),y)
   NUTTX = "${shell cygpath -w $(TOPDIR)/nuttx$(EXEEXT)}"
   INCLUDES += -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}"
   INCLUDES += -I "${shell cygpath -w $(ARCH_SRCDIR)/common}"
-  INCLUDES += -I "${shell cygpath -w $(ARCH_SRCDIR)/generated}"
   INCLUDES += -I "${shell cygpath -w $(ARCH_SRCDIR)/$(ARCH_SUBDIR)}"
   INCLUDES += -I "${shell cygpath -w $(TOPDIR)/sched}"
 else
   NUTTX = "$(TOPDIR)/nuttx$(EXEEXT)"
   INCLUDES += -I "$(ARCH_SRCDIR)/chip"
   INCLUDES += -I "$(ARCH_SRCDIR)/common"
-  INCLUDES += -I "$(ARCH_SRCDIR)/generated"
   INCLUDES += -I "$(ARCH_SRCDIR)/$(ARCH_SUBDIR)"
   INCLUDES += -I "$(TOPDIR)/sched"
 endif

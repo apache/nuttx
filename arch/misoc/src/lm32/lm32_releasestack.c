@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/misoc/src/lm32/lm32_allocateheap.c
+ *  arch/misoc/src/lm32/up_releasestack.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -40,65 +40,76 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <sched.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/board.h>
-#include <arch/board/board.h>
+#include <nuttx/kmalloc.h>
 
 #include "lm32.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_allocate_heap
+ * Name: up_release_stack
  *
  * Description:
- *   This function will be called to dynamically set aside the heap region.
+ *   A task has been stopped. Free all stack related resources retained in
+ *   the defunct TCB.
  *
- *   For the kernel build (CONFIG_BUILD_KERNEL=y) with both kernel- and
- *   user-space heaps (CONFIG_MM_KERNEL_HEAP=y), this function provides the
- *   size of the unprotected, user-space heap.
+ * Input Parmeters
+ *   - dtcb:  The TCB containing information about the stack to be released
+ *   - ttype:  The thread type.  This may be one of following (defined in
+ *     include/nuttx/sched.h):
  *
- *   If a protected kernel-space heap is provided, the kernel heap must be
- *   allocated (and protected) by an analogous up_allocate_kheap().
+ *       TCB_FLAG_TTYPE_TASK     Normal user task
+ *       TCB_FLAG_TTYPE_PTHREAD  User pthread
+ *       TCB_FLAG_TTYPE_KERNEL   Kernel thread
+ *
+ *     This thread type is normally available in the flags field of the TCB,
+ *     however, there are certain error recovery contexts where the TCB may
+ *     not be fully initialized when up_release_stack is called.
+ *
+ *     If CONFIG_BUILD_KERNEL is defined, then this thread type may affect
+ *     how the stack is freed.  For example, kernel thread stacks may have
+ *     been allocated from protected kernel memory.  Stacks for user tasks
+ *     and threads must have come from memory that is accessible to user
+ *     code.
+ *
+ * Returned Value:
+ *   None
  *
  ****************************************************************************/
 
-void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
+void up_release_stack(FAR struct tcb_s *dtcb, uint8_t ttype)
 {
-  board_autoled_on(LED_HEAPALLOCATE);
-  *heap_start = (FAR void *)g_idle_topstack;
-  *heap_size = CONFIG_RAM_END - g_idle_topstack;
-}
+  /* Is there a stack allocated? */
 
-/****************************************************************************
- * Name: lm32_add_region
- *
- * Description:
- *   Memory may be added in non-contiguous chunks.  Additional chunks are
- *   added by calling this function.
- *
- ****************************************************************************/
+  if (dtcb->stack_alloc_ptr)
+    {
+#if defined(CONFIG_BUILD_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+      /* Use the kernel allocator if this is a kernel thread */
 
-#if CONFIG_MM_REGIONS > 1
-void lm32_add_region(void)
-{
-#warning Missing logic
-}
+      if (ttype == TCB_FLAG_TTYPE_KERNEL)
+        {
+          sched_kfree(dtcb->stack_alloc_ptr);
+        }
+      else
 #endif
+        {
+          /* Use the user-space allocator if this is a task or pthread */
+
+          sched_ufree(dtcb->stack_alloc_ptr);
+        }
+
+      /* Mark the stack freed */
+
+      dtcb->stack_alloc_ptr = NULL;
+    }
+
+  /* The size of the allocated stack is now zero */
+
+  dtcb->adj_stack_size = 0;
+}

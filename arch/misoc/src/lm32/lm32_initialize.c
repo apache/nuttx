@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/misoc/src/lm32/lm32_allocateheap.c
+ * arch/misoc/src/lm32/lm32_initialize.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -40,65 +40,38 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/board.h>
+#include <nuttx/sched_note.h>
+#include <nuttx/drivers/drivers.h>
+#include <nuttx/fs/loop.h>
+#include <nuttx/net/loopback.h>
+#include <nuttx/net/tun.h>
+#include <nuttx/net/telnet.h>
+#include <nuttx/syslog/syslog.h>
+#include <nuttx/syslog/syslog_console.h>
+#include <nuttx/serial/pty.h>
+#include <nuttx/crypto/crypto.h>
+#include <nuttx/power/pm.h>
+
 #include <arch/board/board.h>
 
 #include "lm32.h"
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Functionis
  ****************************************************************************/
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: up_allocate_heap
- *
- * Description:
- *   This function will be called to dynamically set aside the heap region.
- *
- *   For the kernel build (CONFIG_BUILD_KERNEL=y) with both kernel- and
- *   user-space heaps (CONFIG_MM_KERNEL_HEAP=y), this function provides the
- *   size of the unprotected, user-space heap.
- *
- *   If a protected kernel-space heap is provided, the kernel heap must be
- *   allocated (and protected) by an analogous up_allocate_kheap().
- *
- ****************************************************************************/
-
-void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
+void up_initialize(void)
 {
-  board_autoled_on(LED_HEAPALLOCATE);
-  *heap_start = (FAR void *)g_idle_topstack;
-  *heap_size = CONFIG_RAM_END - g_idle_topstack;
-}
+  /* Initialize the System Timer */
 
-/****************************************************************************
- * Name: lm32_add_region
- *
- * Description:
- *   Memory may be added in non-contiguous chunks.  Additional chunks are
- *   added by calling this function.
- *
- ****************************************************************************/
+  lm32_irq_initialize();
 
-#if CONFIG_MM_REGIONS > 1
-void lm32_add_region(void)
-{
-#warning Missing logic
+  /* Initialize the serial driver */
+
+#warning REVISIT:  Here you should all lm32_serial_initialize().  That initializes the entire serial driver, a part of the operation is the uart initialization.
+
+  uart_init();
 }
-#endif

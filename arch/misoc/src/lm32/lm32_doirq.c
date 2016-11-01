@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/misoc/src/lm32/lm32_allocateheap.c
+ * arch/misoc/src/lm32/lm32_doirq.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -40,17 +40,23 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <debug.h>
+#include <stdint.h>
+#include <assert.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
+#include "group/group.h"
 #include "lm32.h"
 
 /****************************************************************************
  * Pre-processor Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -65,40 +71,77 @@
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: up_allocate_heap
- *
- * Description:
- *   This function will be called to dynamically set aside the heap region.
- *
- *   For the kernel build (CONFIG_BUILD_KERNEL=y) with both kernel- and
- *   user-space heaps (CONFIG_MM_KERNEL_HEAP=y), this function provides the
- *   size of the unprotected, user-space heap.
- *
- *   If a protected kernel-space heap is provided, the kernel heap must be
- *   allocated (and protected) by an analogous up_allocate_kheap().
- *
- ****************************************************************************/
-
-void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
+uint32_t *up_doirq(int irq, uint32_t *regs)
 {
-  board_autoled_on(LED_HEAPALLOCATE);
-  *heap_start = (FAR void *)g_idle_topstack;
-  *heap_size = CONFIG_RAM_END - g_idle_topstack;
-}
+  board_autoled_on(LED_INIRQ);
+#ifdef CONFIG_SUPPRESS_INTERRUPTS
+  PANIC();
+#else
+  /* Current regs non-zero indicates that we are processing an interrupt;
+   * g_current_regs is also used to manage interrupt level context switches.
+   *
+   * Nested interrupts are not supported
+   */
 
-/****************************************************************************
- * Name: lm32_add_region
- *
- * Description:
- *   Memory may be added in non-contiguous chunks.  Additional chunks are
- *   added by calling this function.
- *
- ****************************************************************************/
+  DEBUGASSERT(g_current_regs == NULL);
+  g_current_regs = regs;
 
-#if CONFIG_MM_REGIONS > 1
-void lm32_add_region(void)
-{
-#warning Missing logic
-}
+  /* Disable further occurrences of this interrupt (until the interrupt sources
+   * have been clear by the driver).
+   */
+
+  up_disable_irq(irq);
+
+  /* Deliver the IRQ */
+
+  irq_dispatch(irq, regs);
+
+#if defined(CONFIG_ARCH_FPU) || defined(CONFIG_ARCH_ADDRENV)
+  /* Check for a context switch.  If a context switch occurred, then
+   * g_current_regs will have a different value than it did on entry.  If an
+   * interrupt level context switch has occurred, then restore the floating
+   * point state and the establish the correct address environment before
+   * returning from the interrupt.
+   */
+
+  if (regs != g_current_regs)
+    {
+#ifdef CONFIG_ARCH_FPU
+      /* Restore floating point registers */
+
+      up_restorefpu((uint32_t *)g_current_regs);
 #endif
+
+#ifdef CONFIG_ARCH_ADDRENV
+      /* Make sure that the address environment for the previously
+       * running task is closed down gracefully (data caches dump,
+       * MMU flushed) and set up the address environment for the new
+       * thread at the head of the ready-to-run list.
+       */
+
+      (void)group_addrenv(NULL);
+#endif
+    }
+#endif
+
+  /* If a context switch occurred while processing the interrupt then
+   * g_current_regs may have change value.  If we return any value different
+   * from the input regs, then the lower level will know that a context
+   * switch occurred during interrupt processing.
+   */
+
+  regs = (uint32_t *)g_current_regs;
+
+  /* Set g_current_regs to NULL to indicate that we are no longer in an
+   * interrupt handler.
+   */
+
+  g_current_regs = NULL;
+
+  /* Unmask the last interrupt (global interrupts are still disabled) */
+
+  up_enable_irq(irq);
+#endif
+  board_autoled_off(LED_INIRQ);
+  return regs;
+}

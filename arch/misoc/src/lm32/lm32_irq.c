@@ -1,9 +1,8 @@
 /****************************************************************************
- * arch/misoc/src/lm32/lm32_allocateheap.c
+ *  arch/misoc/src/lm32/_irq.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Ramtin Amin <keytwo@gmail.com>
+ *   Author: Ramtin Amin <keytwo@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,66 +38,84 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <sys/types.h>
+#include <stdint.h>
+#include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <nuttx/board.h>
-#include <arch/board/board.h>
+#include <arch/irq.h>
 
+#include "misoc_irqasm.h"
 #include "lm32.h"
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Data
  ****************************************************************************/
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+volatile uint32_t *g_current_regs;
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_allocate_heap
- *
- * Description:
- *   This function will be called to dynamically set aside the heap region.
- *
- *   For the kernel build (CONFIG_BUILD_KERNEL=y) with both kernel- and
- *   user-space heaps (CONFIG_MM_KERNEL_HEAP=y), this function provides the
- *   size of the unprotected, user-space heap.
- *
- *   If a protected kernel-space heap is provided, the kernel heap must be
- *   allocated (and protected) by an analogous up_allocate_kheap().
- *
+ * Name: lm32_irq_initialize
  ****************************************************************************/
 
-void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
+void lm32_irq_initialize(void)
 {
-  board_autoled_on(LED_HEAPALLOCATE);
-  *heap_start = (FAR void *)g_idle_topstack;
-  *heap_size = CONFIG_RAM_END - g_idle_topstack;
+  /* currents_regs is non-NULL only while processing an interrupt */
+
+  g_current_regs = NULL;
+
+  /* Enable interrupt */
+
+  irq_setie(1);
+}
+
+irqstate_t up_irq_save(void)
+{
+  irqstate_t flags;
+  irq_setie(0);
+
+#warning Return value MUST be the previous IE value.  Returning 1 will not work.
+  return 1;
+}
+
+void up_irq_restore(irqstate_t flags)
+{
+  irq_setie(1);
 }
 
 /****************************************************************************
- * Name: lm32_add_region
+ * Name: up_disable_irq
  *
  * Description:
- *   Memory may be added in non-contiguous chunks.  Additional chunks are
- *   added by calling this function.
+ *   Disable the IRQ specified by 'irq'
  *
  ****************************************************************************/
 
-#if CONFIG_MM_REGIONS > 1
-void lm32_add_region(void)
+void up_disable_irq(int irq)
 {
-#warning Missing logic
+  irqstate_t flags;
+  flags = irq_getmask();
+  flags &= ~(1 <<irq);
+  irq_setmask(flags);
 }
-#endif
+
+/****************************************************************************
+ * Name: up_enable_irq
+ *
+ * Description:
+ *   Enable the IRQ specified by 'irq'
+ *
+ ****************************************************************************/
+
+void up_enable_irq(int irq)
+{
+  irqstate_t flags;
+  flags = irq_getmask();
+  flags |= (1 << irq);
+  irq_setmask(flags);
+}
