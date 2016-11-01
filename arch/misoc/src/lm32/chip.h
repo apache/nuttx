@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/misoc/src/lm32/_irq.c
+ * arch/misoc/src/lm32/chip.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Ramtin Amin <keytwo@gmail.com>
@@ -33,89 +33,60 @@
  *
  ****************************************************************************/
 
-/****************************************************************************
- * Included Files
- ****************************************************************************/
-
-#include <nuttx/config.h>
-#include <stdint.h>
-#include <errno.h>
-#include <debug.h>
-
-#include <nuttx/irq.h>
-#include <nuttx/arch.h>
-#include <arch/irq.h>
-
-#include "chip_irqasm.h"
-#include "lm32.h"
+#ifndef __ARCH_MISOC_SRC_LM32_CHIP_H
+#define __ARCH_MISOC_SRC_LM32_CHIP_H 1
 
 /****************************************************************************
- * Public Data
+ * Inline Functions
  ****************************************************************************/
 
-volatile uint32_t *g_current_regs;
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: lm32_irq_initialize
- ****************************************************************************/
-
-void lm32_irq_initialize(void)
+#ifdef __cplusplus
+extern "C"
 {
-  /* currents_regs is non-NULL only while processing an interrupt */
+#endif
 
-  g_current_regs = NULL;
-
-  /* Enable interrupt */
-
-  irq_setie(1);
+static inline unsigned int irq_getie(void)
+{
+  unsigned int ie;
+  __asm__ __volatile__("rcsr %0, IE" : "=r" (ie));
+  return ie;
 }
 
-irqstate_t up_irq_save(void)
+static inline void irq_setie(unsigned int ie)
 {
-  irqstate_t flags;
-  irq_setie(0);
-
-#warning Return value MUST be the previous IE value.  Returning 1 will not work.
-  return 1;
+  __asm__ __volatile__("wcsr IE, %0" : : "r" (ie));
 }
 
-void up_irq_restore(irqstate_t flags)
+static inline unsigned int irq_getmask(void)
 {
-  irq_setie(1);
+
+  unsigned int mask;
+  __asm__ __volatile__("rcsr %0, IM" : "=r" (mask));
+  return mask;
 }
+
+static inline void irq_setmask(unsigned int mask)
+{
+  __asm__ __volatile__("wcsr IM, %0" : : "r" (mask));
+}
+
+static inline unsigned int irq_pending(void)
+{
+  
+  unsigned int pending;
+  __asm__ __volatile__("rcsr %0, IP" : "=r" (pending));
+  return pending;
+}
+
+#ifdef __cplusplus
+}
+#endif
 
 /****************************************************************************
- * Name: up_disable_irq
- *
- * Description:
- *   Disable the IRQ specified by 'irq'
- *
+ * Public Function Prototypes
  ****************************************************************************/
 
-void up_disable_irq(int irq)
-{
-  irqstate_t flags;
-  flags = irq_getmask();
-  flags &= ~(1 <<irq);
-  irq_setmask(flags);
-}
+void uart_isr(void);
+void isr(void);
 
-/****************************************************************************
- * Name: up_enable_irq
- *
- * Description:
- *   Enable the IRQ specified by 'irq'
- *
- ****************************************************************************/
-
-void up_enable_irq(int irq)
-{
-  irqstate_t flags;
-  flags = irq_getmask();
-  flags |= (1 << irq);
-  irq_setmask(flags);
-}
+#endif /* __ARCH_MISOC_SRC_LM32_CHIP_H */

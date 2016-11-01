@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/misoc/src/lm32/_irq.c
+ *  arch/misoc/src/common/hw/emac_mem.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Ramtin Amin <keytwo@gmail.com>
@@ -33,89 +33,22 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_MISOC_SRC_COMMON_HW_EMAC_MEM_H
+#define __ARCH_MISOC_SRC_COMMON_HW_EMAC_MEM_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-#include <stdint.h>
-#include <errno.h>
-#include <debug.h>
-
-#include <nuttx/irq.h>
-#include <nuttx/arch.h>
-#include <arch/irq.h>
-
-#include "chip_irqasm.h"
-#include "lm32.h"
+#include <arch/board/generated/mem.h>
 
 /****************************************************************************
- * Public Data
+ * Pre-processor Definitions
  ****************************************************************************/
 
-volatile uint32_t *g_current_regs;
+#define ETHMAC_RX0_BASE	ETHMAC_BASE
+#define ETHMAC_RX1_BASE	(ETHMAC_BASE+0x0800)
+#define ETHMAC_TX0_BASE	(ETHMAC_BASE+0x1000)
+#define ETHMAC_TX1_BASE	(ETHMAC_BASE+0x1800)
 
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: lm32_irq_initialize
- ****************************************************************************/
-
-void lm32_irq_initialize(void)
-{
-  /* currents_regs is non-NULL only while processing an interrupt */
-
-  g_current_regs = NULL;
-
-  /* Enable interrupt */
-
-  irq_setie(1);
-}
-
-irqstate_t up_irq_save(void)
-{
-  irqstate_t flags;
-  irq_setie(0);
-
-#warning Return value MUST be the previous IE value.  Returning 1 will not work.
-  return 1;
-}
-
-void up_irq_restore(irqstate_t flags)
-{
-  irq_setie(1);
-}
-
-/****************************************************************************
- * Name: up_disable_irq
- *
- * Description:
- *   Disable the IRQ specified by 'irq'
- *
- ****************************************************************************/
-
-void up_disable_irq(int irq)
-{
-  irqstate_t flags;
-  flags = irq_getmask();
-  flags &= ~(1 <<irq);
-  irq_setmask(flags);
-}
-
-/****************************************************************************
- * Name: up_enable_irq
- *
- * Description:
- *   Enable the IRQ specified by 'irq'
- *
- ****************************************************************************/
-
-void up_enable_irq(int irq)
-{
-  irqstate_t flags;
-  flags = irq_getmask();
-  flags |= (1 << irq);
-  irq_setmask(flags);
-}
+#endif /* __ARCH_MISOC_SRC_COMMON_HW_EMAC_MEM_H */

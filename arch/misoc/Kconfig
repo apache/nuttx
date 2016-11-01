@@ -62,7 +62,6 @@ config MISOC_UART_TX_BUF_SIZE
 	---help---
 		Size of TX buffers for MISOC UARTs
 
-source arch/misoc/src/common/Kconfig
 ifdef ARCH_CHIP_LM32
 source arch/misoc/src/lm32/Kconfig
 endif

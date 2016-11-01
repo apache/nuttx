@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/misoc/src/lm32/_irq.c
+ * arch/misoc/src/lm32/lm32_isr.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Ramtin Amin <keytwo@gmail.com>
@@ -37,85 +37,25 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-#include <stdint.h>
-#include <errno.h>
-#include <debug.h>
-
-#include <nuttx/irq.h>
-#include <nuttx/arch.h>
-#include <arch/irq.h>
-
+#include <arch/board/generated/csr.h>
 #include "chip_irqasm.h"
-#include "lm32.h"
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-volatile uint32_t *g_current_regs;
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: lm32_irq_initialize
- ****************************************************************************/
-
-void lm32_irq_initialize(void)
+void uart_isr()
 {
-  /* currents_regs is non-NULL only while processing an interrupt */
-
-  g_current_regs = NULL;
-
-  /* Enable interrupt */
-
-  irq_setie(1);
 }
 
-irqstate_t up_irq_save(void)
+void isr(void)
 {
-  irqstate_t flags;
-  irq_setie(0);
-
-#warning Return value MUST be the previous IE value.  Returning 1 will not work.
-  return 1;
-}
-
-void up_irq_restore(irqstate_t flags)
-{
-  irq_setie(1);
-}
-
-/****************************************************************************
- * Name: up_disable_irq
- *
- * Description:
- *   Disable the IRQ specified by 'irq'
- *
- ****************************************************************************/
-
-void up_disable_irq(int irq)
-{
-  irqstate_t flags;
-  flags = irq_getmask();
-  flags &= ~(1 <<irq);
-  irq_setmask(flags);
-}
-
-/****************************************************************************
- * Name: up_enable_irq
- *
- * Description:
- *   Enable the IRQ specified by 'irq'
- *
- ****************************************************************************/
-
-void up_enable_irq(int irq)
-{
-  irqstate_t flags;
-  flags = irq_getmask();
-  flags |= (1 << irq);
-  irq_setmask(flags);
+  unsigned int irqs;
+  
+  irqs = irq_pending() & irq_getmask();
+  
+  if (irqs & (1 << UART_INTERRUPT))
+    {
+      uart_isr();
+    }
 }
