@@ -987,7 +987,7 @@ Native Windows Build
   The windows native build logic initiated if CONFIG_WINDOWS_NATIVE=y is
   defined in the NuttX configuration file:
 
-  
+
   This build:
 
     - Uses all Windows style paths
