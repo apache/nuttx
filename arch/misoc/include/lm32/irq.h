@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/misoc/include/lm32/syscall.h
+ * arch/misoc/include/lm32/irq.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
