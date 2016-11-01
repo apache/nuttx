@@ -25,6 +25,7 @@ endchoice # Misoc Chip Selection
 config ARCH_CHIP
 	string
 	default "lm32"		if ARCH_CHIP_LM32
+	default "mor1k"		if ARCH_CHIP_MOR1K
 
 menu "MISOC Peripheral Support"
 
@@ -60,5 +61,13 @@ config MISOC_UART_TX_BUF_SIZE
 	depends on MISOC_UART
 	---help---
 		Size of TX buffers for MISOC UARTs
+
+source arch/misoc/src/common/Kconfig
+ifdef ARCH_CHIP_LM32
+source arch/misoc/src/lm32/Kconfig
+endif
+ifdef ARCH_CHIP_MOR1K
+source arch/misoc/src/mor1k/Kconfig
+endif
 
 endif # ARCH_MISOC
