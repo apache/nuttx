@@ -59,10 +59,9 @@
 #include <arch/board/generated/csr.h>
 
 #include "hw/flags.h"
-#include "chip.h"
 #include "misoc_uart.h"
 
-#include "lm32.h"
+#include "chip.h"
 
 /****************************************************************************
  * Pre-processor Definitions
