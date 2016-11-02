@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/pthread/pthread_mutexinit.c
+ * libc/pthread/pthread_mutexattr_setprotocol.c
  *
- *   Copyright (C) 2007-2009, 2011, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,97 +39,41 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
 #include <pthread.h>
+#include <assert.h>
 #include <errno.h>
 #include <debug.h>
-
-#include "pthread/pthread.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pthread_mutex_init
+ * Function: pthread_mutexattr_setprotocol
  *
  * Description:
- *   Create a mutex
+ *    Set mutex protocol attribute.
  *
  * Parameters:
- *   None
+ *    attr     - A pointer to the mutex attributes to be modified
+ *    protocol - The new protocol to use
  *
  * Return Value:
- *   None
- *
- * Assumptions:
+ *   0 if successful.  Otherwise, an error code.
  *
  ****************************************************************************/
 
-int pthread_mutex_init(FAR pthread_mutex_t *mutex,
-                       FAR const pthread_mutexattr_t *attr)
+int pthread_mutexattr_setprotocol(FAR pthread_mutexattr_t *attr,
+                                  int protocol)
 {
-  int pshared = 0;
-#ifdef CONFIG_MUTEX_TYPES
-  uint8_t type = PTHREAD_MUTEX_DEFAULT;
-#endif
-#ifdef CONFIG_PRIORITY_INHERITANCE
-  uint8_t proto = PTHREAD_PRIO_INHERIT;
-#endif
-  int ret = OK;
-  int status;
+  linfo("attr=0x%p protocol=%d\n", attr, protocol);
+  DEBUGASSERT(attr != NULL);
 
-  sinfo("mutex=0x%p attr=0x%p\n", mutex, attr);
-
-  if (!mutex)
+  if (protocol >= PTHREAD_PRIO_NONE && protocol <= PTHREAD_PRIO_PROTECT)
     {
-      ret = EINVAL;
-    }
-  else
-    {
-      /* Were attributes specified?  If so, use them */
-
-      if (attr)
-        {
-          pshared = attr->pshared;
-#ifdef CONFIG_PRIORITY_INHERITANCE
-          proto   = attr->proto;
-#endif
-#ifdef CONFIG_MUTEX_TYPES
-          type    = attr->type;
-#endif
-        }
-
-      /* Indicate that the semaphore is not held by any thread. */
-
-      mutex->pid = -1;
-
-      /* Initialize the mutex like a semaphore with initial count = 1 */
-
-      status = sem_init((FAR sem_t *)&mutex->sem, pshared, 1);
-      if (status != OK)
-        {
-          ret = get_errno();
-        }
-
-#ifdef CONFIG_PRIORITY_INHERITANCE
-      /* Initialize the semaphore protocol */
-
-      status = sem_setprotocol((FAR sem_t *)&mutex->sem, proto);
-      if (status != OK)
-        {
-          ret = get_errno();
-        }
-#endif
-
-      /* Set up attributes unique to the mutex type */
-
-#ifdef CONFIG_MUTEX_TYPES
-      mutex->type   = type;
-      mutex->nlocks = 0;
-#endif
+      attr->proto = protocol;
+      return OK;
     }
 
-  sinfo("Returning %d\n", ret);
-  return ret;
+  return EINVAL;
 }

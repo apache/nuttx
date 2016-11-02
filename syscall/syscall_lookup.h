@@ -61,11 +61,16 @@ SYSCALL_LOOKUP(uname,                     1, STUB_uname)
 
 /* Semaphores */
 
-SYSCALL_LOOKUP(sem_destroy,               2, STUB_sem_destroy)
+SYSCALL_LOOKUP(sem_destroy,               1, STUB_sem_destroy)
 SYSCALL_LOOKUP(sem_post,                  1, STUB_sem_post)
 SYSCALL_LOOKUP(sem_timedwait,             2, STUB_sem_timedwait)
 SYSCALL_LOOKUP(sem_trywait,               1, STUB_sem_trywait)
 SYSCALL_LOOKUP(sem_wait,                  1, STUB_sem_wait)
+
+#ifdef CONFIG_PRIORITY_INHERITANCE
+SYSCALL_LOOKUP(sem_getprotocol,           2, STUB_sem_getprotocol)
+SYSCALL_LOOKUP(sem_setprotocol,           2, STUB_sem_setprotocol)
+#endif
 
 /* Named semaphores */
 

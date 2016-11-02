@@ -57,6 +57,17 @@ extern "C"
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Values for protocol attribute */
+
+#define SEM_PRIO_NONE             0
+#define SEM_PRIO_INHERIT          1
+#define SEM_PRIO_PROTECT          2
+
+/* Bit definitions for the struct sem_s flags field */
+
+#define PRIOINHERIT_FLAGS_DISABLE (1 << 0)  /* Bit 0: Priority inheritance
+                                             * is disabled for this semaphore. */
+
 /****************************************************************************
  * Public Type Declarations
  ****************************************************************************/
@@ -92,6 +103,7 @@ struct sem_s
    */
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
+  uint8_t flags;                 /* See PRIOINHERIT_FLAGS_* definitions */
 # if CONFIG_SEM_PREALLOCHOLDERS > 0
   FAR struct semholder_s *hhead; /* List of holders of semaphore counts */
 # else
@@ -106,9 +118,9 @@ typedef struct sem_s sem_t;
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
 # if CONFIG_SEM_PREALLOCHOLDERS > 0
-#  define SEM_INITIALIZER(c) {(c), NULL}  /* semcount, hhead */
+#  define SEM_INITIALIZER(c) {(c), 0, NULL}  /* semcount, flags, hhead */
 # else
-#  define SEM_INITIALIZER(c) {(c), SEMHOLDER_INITIALIZER} /* semcount, holder */
+#  define SEM_INITIALIZER(c) {(c), 0, SEMHOLDER_INITIALIZER} /* semcount, flags, holder */
 # endif
 #else
 #  define SEM_INITIALIZER(c) {(c)} /* semcount */
@@ -139,6 +151,13 @@ int        sem_getvalue(FAR sem_t *sem, FAR int *sval);
 FAR sem_t *sem_open(FAR const char *name, int oflag, ...);
 int        sem_close(FAR sem_t *sem);
 int        sem_unlink(FAR const char *name);
+#endif
+
+#ifdef CONFIG_PRIORITY_INHERITANCE
+/* Non-standard interfaces to manage priority inheritance */
+
+int        sem_getprotocol(FAR sem_t *sem, FAR int *protocol);
+int        sem_setprotocol(FAR sem_t *sem, int protocol);
 #endif
 
 #undef EXTERN

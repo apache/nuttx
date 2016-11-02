@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/sem/sem_init.c
  *
- *   Copyright (C) 2007-2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,26 +43,6 @@
 #include <limits.h>
 #include <semaphore.h>
 #include <errno.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -108,6 +88,7 @@ int sem_init(FAR sem_t *sem, int pshared, unsigned int value)
       /* Initialize to support priority inheritance */
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
+      sem->flags         = 0;
 #  if CONFIG_SEM_PREALLOCHOLDERS > 0
       sem->hhead         = NULL;
 #  else

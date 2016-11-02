@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/pthread/pthread_mutexinit.c
+ * sched/semaphore/sem_getprotocol.c
  *
- *   Copyright (C) 2007-2009, 2011, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,97 +39,47 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <pthread.h>
-#include <errno.h>
-#include <debug.h>
+#include <semaphore.h>
+#include <assert.h>
 
-#include "pthread/pthread.h"
+#include "semaphore/semaphore.h"
+
+#ifdef CONFIG_PRIORITY_INHERITANCE
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pthread_mutex_init
+ * Function: sem_getprotocol
  *
  * Description:
- *   Create a mutex
+ *    Return the value of the semaphore protocol attribute.
  *
  * Parameters:
- *   None
+ *    sem      - A pointer to the semaphore whose attributes are to be
+ *               queried.
+ *    protocol - The user provided location in which to store the protocol
+ *               value.
  *
  * Return Value:
- *   None
- *
- * Assumptions:
+ *   0 if successful.  Otherwise, -1 is returned and the errno value is set
+ *   appropriately.
  *
  ****************************************************************************/
 
-int pthread_mutex_init(FAR pthread_mutex_t *mutex,
-                       FAR const pthread_mutexattr_t *attr)
+int sem_getprotocol(FAR sem_t *sem, FAR int *protocol)
 {
-  int pshared = 0;
-#ifdef CONFIG_MUTEX_TYPES
-  uint8_t type = PTHREAD_MUTEX_DEFAULT;
-#endif
-#ifdef CONFIG_PRIORITY_INHERITANCE
-  uint8_t proto = PTHREAD_PRIO_INHERIT;
-#endif
-  int ret = OK;
-  int status;
+  DEBUGASSERT(sem != NULL);
 
-  sinfo("mutex=0x%p attr=0x%p\n", mutex, attr);
-
-  if (!mutex)
+  if ((sem->flags & PRIOINHERIT_FLAGS_DISABLE) != 0)
     {
-      ret = EINVAL;
+      return SEM_PRIO_NONE;
     }
   else
     {
-      /* Were attributes specified?  If so, use them */
-
-      if (attr)
-        {
-          pshared = attr->pshared;
-#ifdef CONFIG_PRIORITY_INHERITANCE
-          proto   = attr->proto;
-#endif
-#ifdef CONFIG_MUTEX_TYPES
-          type    = attr->type;
-#endif
-        }
-
-      /* Indicate that the semaphore is not held by any thread. */
-
-      mutex->pid = -1;
-
-      /* Initialize the mutex like a semaphore with initial count = 1 */
-
-      status = sem_init((FAR sem_t *)&mutex->sem, pshared, 1);
-      if (status != OK)
-        {
-          ret = get_errno();
-        }
-
-#ifdef CONFIG_PRIORITY_INHERITANCE
-      /* Initialize the semaphore protocol */
-
-      status = sem_setprotocol((FAR sem_t *)&mutex->sem, proto);
-      if (status != OK)
-        {
-          ret = get_errno();
-        }
-#endif
-
-      /* Set up attributes unique to the mutex type */
-
-#ifdef CONFIG_MUTEX_TYPES
-      mutex->type   = type;
-      mutex->nlocks = 0;
-#endif
+      return SEM_PRIO_INHERIT;
     }
-
-  sinfo("Returning %d\n", ret);
-  return ret;
 }
+
+#endif /* CONFIG_PRIORITY_INHERITANCE */

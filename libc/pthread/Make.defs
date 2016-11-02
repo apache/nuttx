@@ -54,6 +54,10 @@ ifeq ($(CONFIG_MUTEX_TYPES),y)
 CSRCS += pthread_mutexattr_settype.c pthread_mutexattr_gettype.c
 endif
 
+ifeq ($(CONFIG_PRIORITY_INHERITANCE),y)
+CSRCS += pthread_mutexattr_setprotocol.c pthread_mutexattr_getprotocol.c
+endif
+
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CSRCS += pthread_startup.c
 endif

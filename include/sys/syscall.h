@@ -91,15 +91,23 @@
 #define SYS_sem_trywait                (CONFIG_SYS_RESERVED+18)
 #define SYS_sem_wait                   (CONFIG_SYS_RESERVED+19)
 
+#ifdef CONFIG_PRIORITY_INHERITANCE
+#  define SYS_sem_getprotocol          (CONFIG_SYS_RESERVED+20)
+#  define SYS_sem_setprotocol          (CONFIG_SYS_RESERVED+21)
+#  define __SYS_named_sem              (CONFIG_SYS_RESERVED+22)
+#else
+#  define __SYS_named_sem              (CONFIG_SYS_RESERVED+20)
+#endif
+
 /* Named semaphores */
 
 #ifdef CONFIG_FS_NAMED_SEMAPHORES
-#  define SYS_sem_open                 (CONFIG_SYS_RESERVED+20)
-#  define SYS_sem_close                (CONFIG_SYS_RESERVED+21)
-#  define SYS_sem_unlink               (CONFIG_SYS_RESERVED+22)
-#  define __SYS_task_create            (CONFIG_SYS_RESERVED+23)
+#  define SYS_sem_open                 __SYS_named_sem
+#  define SYS_sem_close                (__SYS_named_sem+1)
+#  define SYS_sem_unlink               (__SYS_named_sem+2)
+#  define __SYS_task_create            (__SYS_named_sem+3)
 #else
-#  define __SYS_task_create            (CONFIG_SYS_RESERVED+20)
+#  define __SYS_task_create            __SYS_named_sem
 #endif
 
 /* Task creation APIs based on global entry points cannot be use with
