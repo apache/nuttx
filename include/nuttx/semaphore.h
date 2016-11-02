@@ -67,9 +67,7 @@ struct nsem_inode_s
 
   sem_t ns_sem;                     /* The contained semaphore */
 
-  /* Inode payload unique to named semaphores.  ns_inode must appear first
-   * in this structure in order to support casting between type sem_t and
-   * types of struct nsem_inode_s. */
+  /* Inode payload unique to named semaphores. */
 
   FAR struct inode *ns_inode;       /* Containing inode */
 };
