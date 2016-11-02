@@ -138,6 +138,49 @@ int sem_tickwait(FAR sem_t *sem, systime_t start, uint32_t delay);
 
 int sem_reset(FAR sem_t *sem, int16_t count);
 
+/****************************************************************************
+ * Function: sem_getprotocol
+ *
+ * Description:
+ *    Return the value of the semaphore protocol attribute.
+ *
+ * Parameters:
+ *    sem      - A pointer to the semaphore whose attributes are to be
+ *               queried.
+ *    protocol - The user provided location in which to store the protocol
+ *               value.
+ *
+ * Return Value:
+ *   0 if successful.  Otherwise, -1 is returned and the errno value is set
+ *   appropriately.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PRIORITY_INHERITANCE
+int sem_getprotocol(FAR sem_t *sem, FAR int *protocol);
+#endif
+
+/****************************************************************************
+ * Function: sem_setprotocol
+ *
+ * Description:
+ *    Set semaphore protocol attribute.
+ *
+ * Parameters:
+ *    sem      - A pointer to the semaphore whose attributes are to be
+ *               modified
+ *    protocol - The new protocol to use
+ *
+ * Return Value:
+ *   0 if successful.  Otherwise, -1 is returned and the errno value is set
+ *   appropriately.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PRIORITY_INHERITANCE
+int sem_setprotocol(FAR sem_t *sem, int protocol);
+#endif
+
 #undef EXTERN
 #ifdef __cplusplus
 }

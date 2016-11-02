@@ -44,6 +44,8 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/semaphore.h>
+
 #include "pthread/pthread.h"
 
 /****************************************************************************

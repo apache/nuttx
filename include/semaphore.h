@@ -153,13 +153,6 @@ int        sem_close(FAR sem_t *sem);
 int        sem_unlink(FAR const char *name);
 #endif
 
-#ifdef CONFIG_PRIORITY_INHERITANCE
-/* Non-standard interfaces to manage priority inheritance */
-
-int        sem_getprotocol(FAR sem_t *sem, FAR int *protocol);
-int        sem_setprotocol(FAR sem_t *sem, int protocol);
-#endif
-
 #undef EXTERN
 #ifdef __cplusplus
 }
