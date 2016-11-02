@@ -313,7 +313,7 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
       addr -= STM32_FLASH_BASE;
     }
 
-  if ((addr+count) > STM32_FLASH_SIZE)
+  if ((addr+count) >= STM32_FLASH_SIZE)
     {
       return -EFAULT;
     }

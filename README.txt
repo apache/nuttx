@@ -987,7 +987,7 @@ Native Windows Build
   The windows native build logic initiated if CONFIG_WINDOWS_NATIVE=y is
   defined in the NuttX configuration file:
 
-  
+
   This build:
 
     - Uses all Windows style paths
@@ -1278,6 +1278,8 @@ nuttx/
  |   |- arduino-due/
  |   |   `- README.txt
  |   |- avr32dev1/
+ |   |   `- README.txt
+ |   |- bambino-200e/
  |   |   `- README.txt
  |   |- c5471evm/
  |   |   `- README.txt

@@ -280,8 +280,9 @@ static int at24c_eraseall(FAR struct at24c_dev_s *priv)
           finfo("wait\n");
           if (!wait--) 
             {
-              return ERROR;
+              return -ETIMEDOUT;
             }
+
           usleep(1000);
         }
 
@@ -345,8 +346,9 @@ static ssize_t at24c_read_internal(FAR struct at24c_dev_s *priv, off_t offset,
       finfo("wait\n");
       if (!wait--) 
         {
-          return ERROR;
+          return -ETIMEDOUT;
         }
+
       usleep(1000);
     }
 
@@ -467,8 +469,9 @@ static ssize_t at24c_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t 
           finfo("wait\n");
           if (!wait--) 
             {
-              return ERROR;
+              return -ETIMEDOUT;
             }
+
           usleep(1000);
         }
 
