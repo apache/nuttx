@@ -61,6 +61,10 @@
 struct inode;
 struct nsem_inode_s
 {
+  /* This must be the first element of the structure.  In sem_close() this
+   * structure must be cast compatible with sem_t.
+   */
+
   sem_t ns_sem;                     /* The contained semaphore */
 
   /* Inode payload unique to named semaphores.  ns_inode must appear first
