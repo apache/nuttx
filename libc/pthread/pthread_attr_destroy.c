@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/pthread/pthread_attrinit.c
+ * libc/pthread/pthread_attr_destroy.c
  *
  *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -44,65 +44,45 @@
 #include <debug.h>
 #include <errno.h>
 
-#include <nuttx/pthread.h>
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/* Default pthread attributes (see include/nuttx/pthread.h).  When configured
- * to build separate kernel- and user-address spaces, this global is
- * duplicated in each address spaced.  This copy can only be shared within
- * the user address space.
- */
-
-#if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && \
-    !defined(__KERNEL__)
-const pthread_attr_t g_default_pthread_attr = PTHREAD_ATTR_INITIALIZER;
-#endif
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  pthread_attr_init
+ * Function:  pthread_attr_destroy
  *
  * Description:
- *   Initializes a thread attributes object (attr) with
- *   default values for all of the individual attributes
- *   used by a given implementation.
+ *    An attributes object can be deleted when it is no longer
+ *     needed.
  *
  * Parameters:
  *   attr
  *
  * Return Value:
- *   0 on success, otherwise an error number
+ *   0 meaning success
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-int pthread_attr_init(FAR pthread_attr_t *attr)
+int pthread_attr_destroy(FAR pthread_attr_t *attr)
 {
-  int ret = OK;
+  int ret;
 
   linfo("attr=0x%p\n", attr);
+
   if (!attr)
     {
-      ret = ENOMEM;
+      ret = EINVAL;
     }
   else
     {
-      /* Set the child thread priority to be the default
-       * priority. Set the child stack size to some arbitrary
-       * default value.
-       */
-
-      memcpy(attr, &g_default_pthread_attr, sizeof(pthread_attr_t));
+      memset(attr, 0, sizeof(pthread_attr_t));
+      ret = OK;
     }
 
   linfo("Returning %d\n", ret);
   return ret;
 }
+
 

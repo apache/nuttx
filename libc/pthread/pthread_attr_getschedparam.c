@@ -1,7 +1,7 @@
-/********************************************************************************
- * libc/pthread/pthread_barrierattrgetpshared.c
+/****************************************************************************
+ * libc/pthread/pthread_attr_getschedparam.c
  *
- *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,51 +31,65 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include <pthread.h>
-#include <errno.h>
+#include <string.h>
+#include <sched.h>
 #include <debug.h>
+#include <errno.h>
 
-/********************************************************************************
+/****************************************************************************
  * Public Functions
- ********************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************
- * Function: pthread_barrierattr_getpshared
+/****************************************************************************
+ * Function:  pthread_attr_getschedparam
  *
  * Description:
- *   The pthread_barrierattr_getpshared() function will obtain the value of the
- *   process-shared attribute from the attributes object referenced by attr.
  *
  * Parameters:
- *   attr - barrier attributes to be queried.
- *   pshared - the location to stored the current value of the pshared attribute.
+ *   attr
+ *   param
  *
  * Return Value:
- *   0 (OK) on success or EINVAL if either attr or pshared is invalid.
+ *   0 if successful.  Otherwise, an error code.
  *
  * Assumptions:
  *
- ********************************************************************************/
+ ****************************************************************************/
 
-int pthread_barrierattr_getpshared(FAR const pthread_barrierattr_t *attr, FAR int *pshared)
+int pthread_attr_getschedparam(FAR const pthread_attr_t *attr,
+                               FAR struct sched_param *param)
 {
-  int ret = OK;
+  int ret;
 
-  if (!attr || !pshared)
+  linfo("attr=0x%p param=0x%p\n", attr, param);
+
+  if (!attr || !param)
     {
       ret = EINVAL;
     }
   else
     {
-      *pshared = attr->pshared;
+      param->sched_priority               = (int)attr->priority;
+#ifdef CONFIG_SCHED_SPORADIC
+      param->sched_ss_low_priority        = (int)attr->low_priority;
+      param->sched_ss_max_repl            = (int)attr->max_repl;
+      param->sched_ss_repl_period.tv_sec  = attr->repl_period.tv_sec;
+      param->sched_ss_repl_period.tv_nsec = attr->repl_period.tv_nsec;
+      param->sched_ss_init_budget.tv_sec  = attr->budget.tv_sec;
+      param->sched_ss_init_budget.tv_nsec = attr->budget.tv_nsec;
+#endif
+      ret = OK;
     }
+
+  linfo("Returning %d\n", ret);
   return ret;
 }

@@ -1,7 +1,7 @@
 /****************************************************************************
- * libc/pthread/pthread_attrgetschedpolicy.c
+ * libc/pthread/pthread_condattr_destroy.c
  *
- *   Copyright (C) 2007, 2008, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,9 +37,9 @@
  * Included Files
  ****************************************************************************/
 
-#include <sys/types.h>
+#include <nuttx/config.h>
+
 #include <pthread.h>
-#include <string.h>
 #include <debug.h>
 #include <errno.h>
 
@@ -48,38 +48,35 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  pthread_attr_getschedpolicy
+ * Function:  pthread_condattr_destroy
  *
  * Description:
- *   Obtain the scheduling algorithm attribute.
+ *   Operations on condition variable attributes
  *
  * Parameters:
- *   attr
- *   policy
+ *   None
  *
  * Return Value:
- *   0 if successful.  Otherwise, an error code.
+ *   None
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-int pthread_attr_getschedpolicy(FAR const pthread_attr_t *attr, int *policy)
+int pthread_condattr_destroy(FAR pthread_condattr_t *attr)
 {
-  int ret;
+  int ret = OK;
 
-  linfo("attr=0x%p policy=0x%p\n", attr, policy);
+  linfo("attr=0x%p\n", attr);
 
-  if (!attr || !policy)
+  if (!attr)
     {
       ret = EINVAL;
-    }
-  else
-    {
-      *policy = attr->policy;
-      ret = OK;
     }
 
   linfo("Returning %d\n", ret);
   return ret;
 }
+
+
+

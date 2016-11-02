@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/pthread/pthread_mutexattrgettype.c
+ * libc/pthread/pthread_mutexattr_gettype.c
  *
  *   Copyright (C) 2008, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -72,6 +72,7 @@ int pthread_mutexattr_gettype(const pthread_mutexattr_t *attr, int *type)
       *type = attr->type;
       return 0;
     }
+
   return EINVAL;
 }
 

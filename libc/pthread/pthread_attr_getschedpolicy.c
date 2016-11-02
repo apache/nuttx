@@ -1,7 +1,7 @@
 /****************************************************************************
- * libc/pthread/pthread_mutexattrsettype.c
+ * libc/pthread/pthread_attr_getschedpolicy.c
  *
- *   Copyright (C) 2008, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,42 +37,49 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#include <sys/types.h>
 #include <pthread.h>
+#include <string.h>
+#include <debug.h>
 #include <errno.h>
-
-#ifdef CONFIG_MUTEX_TYPES
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function: pthread_mutexattr_settype
+ * Function:  pthread_attr_getschedpolicy
  *
  * Description:
- *   Set the mutex type in the mutex attributes.
+ *   Obtain the scheduling algorithm attribute.
  *
  * Parameters:
- *   attr - The mutex attributes in which to set the mutex type.
- *   type - The mutex type value to set.
+ *   attr
+ *   policy
  *
  * Return Value:
- *   0, if the mutex type was successfully set in 'attr', or
- *   EINVAL, if 'attr' is NULL or 'type' unrecognized.
+ *   0 if successful.  Otherwise, an error code.
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-int pthread_mutexattr_settype(pthread_mutexattr_t *attr, int type)
+int pthread_attr_getschedpolicy(FAR const pthread_attr_t *attr, int *policy)
 {
-  if (attr && type >= PTHREAD_MUTEX_NORMAL && type <= PTHREAD_MUTEX_RECURSIVE)
-    {
-      attr->type = type;
-      return OK;
-    }
-  return EINVAL;
-}
+  int ret;
 
-#endif /* CONFIG_MUTEX_TYPES */
+  linfo("attr=0x%p policy=0x%p\n", attr, policy);
+
+  if (!attr || !policy)
+    {
+      ret = EINVAL;
+    }
+  else
+    {
+      *policy = attr->policy;
+      ret = OK;
+    }
+
+  linfo("Returning %d\n", ret);
+  return ret;
+}

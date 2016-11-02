@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/pthread/pthread_mutexattrinit.c
+ * libc/pthread/pthread_condattr_init.c
  *
  *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -40,30 +40,30 @@
 #include <nuttx/config.h>
 
 #include <pthread.h>
-#include <errno.h>
 #include <debug.h>
+#include <errno.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  pthread_mutexattr_init
+ * Function:  pthread_condattr_init
  *
  * Description:
- *    Create mutex attributes.
+ *   Operations on condition variable attributes
  *
  * Parameters:
- *    attr
+ *   None
  *
  * Return Value:
- *   0 if successful.  Otherwise, an error code.
+ *   None
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-int pthread_mutexattr_init(FAR pthread_mutexattr_t *attr)
+int pthread_condattr_init(FAR pthread_condattr_t *attr)
 {
   int ret = OK;
 
@@ -75,12 +75,11 @@ int pthread_mutexattr_init(FAR pthread_mutexattr_t *attr)
     }
   else
     {
-      attr->pshared = 0;
-#ifdef CONFIG_MUTEX_TYPES
-      attr->type    = PTHREAD_MUTEX_DEFAULT;
-#endif
+      *attr = 0;
     }
 
   linfo("Returning %d\n", ret);
   return ret;
 }
+
+

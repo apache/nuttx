@@ -1,5 +1,5 @@
-/****************************************************************************
- * libc/pthread/pthread_attrsetinheritsched.c
+/********************************************************************************
+ * libc/pthread/pthread_barrierattr_destroy.c
  *
  *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,63 +31,52 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************/
+ ********************************************************************************/
 
-/****************************************************************************
+/********************************************************************************
  * Included Files
- ****************************************************************************/
+ ********************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
 #include <pthread.h>
-#include <string.h>
-#include <debug.h>
 #include <errno.h>
+#include <debug.h>
 
-/****************************************************************************
+/********************************************************************************
  * Public Functions
- ****************************************************************************/
+ ********************************************************************************/
 
-/****************************************************************************
- * Function:  pthread_attr_setinheritsched
+/********************************************************************************
+ * Function: pthread_barrierattr_destroy
  *
  * Description:
- *   Indicate whether the scheduling info in the pthread
- *   attributes will be used or if the thread will
- *   inherit the properties of the parent.
+ *   The pthread_barrierattr_destroy() function will destroy a barrier attributes
+ *   object.  A destroyed attr attributes object can be reinitialized using
+ *   pthread_barrierattr_init(); the results of otherwise referencing the object
+ *   after it has been destroyed are undefined.
  *
  * Parameters:
- *   attr
- *   policy
+ *   attr - barrier attributes to be destroyed.
  *
  * Return Value:
- *   0 if successful.  Otherwise, an error code.
+ *   0 (OK) on success or EINVAL if attr is invalid.
  *
  * Assumptions:
  *
- ****************************************************************************/
+ ********************************************************************************/
 
-int pthread_attr_setinheritsched(FAR pthread_attr_t *attr,
-                                 int inheritsched)
+int pthread_barrierattr_destroy(FAR pthread_barrierattr_t *attr)
 {
-  int ret;
+  int ret = OK;
 
-  linfo("inheritsched=%d\n", inheritsched);
-
-  if (!attr ||
-      (inheritsched != PTHREAD_INHERIT_SCHED &&
-       inheritsched != PTHREAD_EXPLICIT_SCHED))
+  if (!attr)
     {
       ret = EINVAL;
     }
   else
     {
-      attr->inheritsched = (uint8_t)inheritsched;
-      ret = OK;
+      attr->pshared = PTHREAD_PROCESS_PRIVATE;
     }
-
-  linfo("Returning %d\n", ret);
   return ret;
 }
-

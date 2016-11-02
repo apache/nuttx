@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/pthread/pthread_mutexattrgetpshared.c
+ * libc/pthread/pthread_mutexattr_destroy.c
  *
  *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -48,10 +48,10 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  pthread_mutexattr_getpshared
+ * Function:  pthread_mutexattr_destroy
  *
  * Description:
- *    Get pshared mutex attribute.
+ *    Destroy mutex attributes.
  *
  * Parameters:
  *    attr
@@ -64,19 +64,19 @@
  *
  ****************************************************************************/
 
-int pthread_mutexattr_getpshared(FAR const pthread_mutexattr_t *attr, FAR int *pshared)
+int pthread_mutexattr_destroy(FAR pthread_mutexattr_t *attr)
 {
   int ret = OK;
 
-  linfo("attr=0x%p pshared=0x%p\n", attr, pshared);
+  linfo("attr=0x%p\n", attr);
 
-  if (!attr || !pshared)
+  if (!attr)
     {
       ret = EINVAL;
     }
   else
     {
-      *pshared = attr->pshared;
+      attr->pshared = 0;
     }
 
   linfo("Returning %d\n", ret);

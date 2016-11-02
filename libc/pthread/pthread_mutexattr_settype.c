@@ -1,7 +1,7 @@
-/********************************************************************************
- * libc/pthread/pthread_barrierattrdestroy.c
+/****************************************************************************
+ * libc/pthread/pthread_mutexattr_settype.c
  *
- *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,52 +31,48 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
-
 #include <pthread.h>
 #include <errno.h>
-#include <debug.h>
 
-/********************************************************************************
+#ifdef CONFIG_MUTEX_TYPES
+
+/****************************************************************************
  * Public Functions
- ********************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************
- * Function: pthread_barrierattr_destroy
+/****************************************************************************
+ * Function: pthread_mutexattr_settype
  *
  * Description:
- *   The pthread_barrierattr_destroy() function will destroy a barrier attributes
- *   object.  A destroyed attr attributes object can be reinitialized using
- *   pthread_barrierattr_init(); the results of otherwise referencing the object
- *   after it has been destroyed are undefined.
+ *   Set the mutex type in the mutex attributes.
  *
  * Parameters:
- *   attr - barrier attributes to be destroyed.
+ *   attr - The mutex attributes in which to set the mutex type.
+ *   type - The mutex type value to set.
  *
  * Return Value:
- *   0 (OK) on success or EINVAL if attr is invalid.
+ *   0, if the mutex type was successfully set in 'attr', or
+ *   EINVAL, if 'attr' is NULL or 'type' unrecognized.
  *
  * Assumptions:
  *
- ********************************************************************************/
+ ****************************************************************************/
 
-int pthread_barrierattr_destroy(FAR pthread_barrierattr_t *attr)
+int pthread_mutexattr_settype(pthread_mutexattr_t *attr, int type)
 {
-  int ret = OK;
-
-  if (!attr)
+  if (attr && type >= PTHREAD_MUTEX_NORMAL && type <= PTHREAD_MUTEX_RECURSIVE)
     {
-      ret = EINVAL;
+      attr->type = type;
+      return OK;
     }
-  else
-    {
-      attr->pshared = PTHREAD_PROCESS_PRIVATE;
-    }
-  return ret;
+  return EINVAL;
 }
+
+#endif /* CONFIG_MUTEX_TYPES */

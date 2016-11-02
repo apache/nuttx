@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/pthread/pthread_attrgetstacksize.c
+ * libc/pthread/pthread_attr_setstacksize.c
  *
  *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -37,7 +37,8 @@
  * Included Files
  ****************************************************************************/
 
-#include <sys/types.h>
+#include <nuttx/config.h>
+
 #include <pthread.h>
 #include <string.h>
 #include <debug.h>
@@ -48,7 +49,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  pthread_attr_getstacksize
+ * Function:  pthread_attr_setstacksize
  *
  * Description:
  *
@@ -63,24 +64,23 @@
  *
  ****************************************************************************/
 
-int pthread_attr_getstacksize(FAR const pthread_attr_t *attr, FAR long *stacksize)
+int pthread_attr_setstacksize(FAR pthread_attr_t *attr, long stacksize)
 {
   int ret;
 
-  linfo("attr=0x%p stacksize=0x%p\n", attr, stacksize);
+  linfo("attr=0x%p stacksize=%ld\n", attr, stacksize);
 
-  if (!stacksize)
+  if (!attr || stacksize < PTHREAD_STACK_MIN)
     {
       ret = EINVAL;
     }
   else
     {
-      *stacksize = attr->stacksize;
+      attr->stacksize = stacksize;
       ret = OK;
     }
 
   linfo("Returning %d\n", ret);
   return ret;
 }
-
 

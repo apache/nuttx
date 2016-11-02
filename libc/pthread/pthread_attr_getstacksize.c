@@ -1,7 +1,7 @@
 /****************************************************************************
- * libc/pthread/pthread_attrsetschedpolicy.c
+ * libc/pthread/pthread_attr_getstacksize.c
  *
- *   Copyright (C) 2007-2009, 2011, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,11 +37,9 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
+#include <sys/types.h>
 #include <pthread.h>
 #include <string.h>
-#include <sched.h>
 #include <debug.h>
 #include <errno.h>
 
@@ -50,14 +48,13 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  pthread_attr_setschedpolicy
+ * Function:  pthread_attr_getstacksize
  *
  * Description:
- *   Set the scheduling algorithm attribute.
  *
  * Parameters:
  *   attr
- *   policy
+ *   stacksize
  *
  * Return Value:
  *   0 if successful.  Otherwise, an error code.
@@ -66,30 +63,24 @@
  *
  ****************************************************************************/
 
-int pthread_attr_setschedpolicy(FAR pthread_attr_t *attr, int policy)
+int pthread_attr_getstacksize(FAR const pthread_attr_t *attr, FAR long *stacksize)
 {
   int ret;
 
-  linfo("attr=0x%p policy=%d\n", attr, policy);
+  linfo("attr=0x%p stacksize=0x%p\n", attr, stacksize);
 
-  if (!attr ||
-      (policy != SCHED_FIFO
-#if CONFIG_RR_INTERVAL > 0
-       && policy != SCHED_RR
-#endif
-#ifdef CONFIG_SCHED_SPORADIC
-       && policy != SCHED_SPORADIC
-#endif
-    ))
+  if (!stacksize)
     {
       ret = EINVAL;
     }
   else
     {
-      attr->policy = policy;
+      *stacksize = attr->stacksize;
       ret = OK;
     }
 
   linfo("Returning %d\n", ret);
   return ret;
 }
+
+

@@ -1,7 +1,7 @@
 /****************************************************************************
- * libc/pthread/pthread_attrdestroy.c
+ * libc/pthread/pthread_attr_setschedpolicy.c
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,7 @@
 
 #include <pthread.h>
 #include <string.h>
+#include <sched.h>
 #include <debug.h>
 #include <errno.h>
 
@@ -49,40 +50,46 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  pthread_attr_destroy
+ * Function:  pthread_attr_setschedpolicy
  *
  * Description:
- *    An attributes object can be deleted when it is no longer
- *     needed.
+ *   Set the scheduling algorithm attribute.
  *
  * Parameters:
  *   attr
+ *   policy
  *
  * Return Value:
- *   0 meaning success
+ *   0 if successful.  Otherwise, an error code.
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-int pthread_attr_destroy(FAR pthread_attr_t *attr)
+int pthread_attr_setschedpolicy(FAR pthread_attr_t *attr, int policy)
 {
   int ret;
 
-  linfo("attr=0x%p\n", attr);
+  linfo("attr=0x%p policy=%d\n", attr, policy);
 
-  if (!attr)
+  if (!attr ||
+      (policy != SCHED_FIFO
+#if CONFIG_RR_INTERVAL > 0
+       && policy != SCHED_RR
+#endif
+#ifdef CONFIG_SCHED_SPORADIC
+       && policy != SCHED_SPORADIC
+#endif
+    ))
     {
       ret = EINVAL;
     }
   else
     {
-      memset(attr, 0, sizeof(pthread_attr_t));
+      attr->policy = policy;
       ret = OK;
     }
 
   linfo("Returning %d\n", ret);
   return ret;
 }
-
-

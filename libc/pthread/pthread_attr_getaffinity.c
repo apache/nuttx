@@ -1,7 +1,7 @@
 /****************************************************************************
- * libc/pthread/pthread_condattrinit.c
+ * libc/pthread/pthread_attr_getaffinity.c
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,10 +37,10 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
+#include <sys/types.h>
 #include <pthread.h>
 #include <debug.h>
+#include <assert.h>
 #include <errno.h>
 
 /****************************************************************************
@@ -48,38 +48,28 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  pthread_condattr_init
+ * Function:  pthread_attr_getaffinity
  *
  * Description:
- *   Operations on condition variable attributes
  *
  * Parameters:
- *   None
+ *   attr
+ *   cpuset
  *
  * Return Value:
- *   None
+ *   0 if successful.  Otherwise, an error code.
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-int pthread_condattr_init(FAR pthread_condattr_t *attr)
+int pthread_attr_getaffinity_np(FAR const pthread_attr_t *attr,
+                                size_t cpusetsize, cpu_set_t *cpuset)
 {
-  int ret = OK;
+  linfo("attr=0x%p cpusetsize=%d cpuset=0x%p\n", attr, (int)cpusetsize, cpuset);
 
-  linfo("attr=0x%p\n", attr);
+  DEBUGASSERT(attr != NULL && cpusetsize == sizeof(cpu_set_t) && cpuset != NULL);
 
-  if (!attr)
-    {
-      ret = EINVAL;
-    }
-  else
-    {
-      *attr = 0;
-    }
-
-  linfo("Returning %d\n", ret);
-  return ret;
+  *cpuset = attr->affinity;
+  return OK;
 }
-
-

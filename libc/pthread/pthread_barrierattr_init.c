@@ -1,7 +1,7 @@
-/****************************************************************************
- * libc/pthread/pthread_attrgetaffinity.c
+/********************************************************************************
+ * libc/pthread/pthread_barrierattr_init.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,45 +31,51 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************/
+ ********************************************************************************/
 
-/****************************************************************************
+/********************************************************************************
  * Included Files
- ****************************************************************************/
+ ********************************************************************************/
 
-#include <sys/types.h>
+#include <nuttx/config.h>
+
 #include <pthread.h>
-#include <debug.h>
-#include <assert.h>
 #include <errno.h>
+#include <debug.h>
 
-/****************************************************************************
+/********************************************************************************
  * Public Functions
- ****************************************************************************/
+ ********************************************************************************/
 
-/****************************************************************************
- * Function:  pthread_attr_getaffinity
+/********************************************************************************
+ * Function: pthread_barrierattr_init
  *
  * Description:
+ *   The pthread_barrierattr_init() function will initialize a barrier attribute
+ *   object attr with the default value for all of the attributes defined by the
+ *   implementation.
  *
  * Parameters:
- *   attr
- *   cpuset
+ *   attr - barrier attributes to be initialized.
  *
  * Return Value:
- *   0 if successful.  Otherwise, an error code.
+ *   0 (OK) on success or EINVAL if attr is invalid.
  *
  * Assumptions:
  *
- ****************************************************************************/
+ ********************************************************************************/
 
-int pthread_attr_getaffinity_np(FAR const pthread_attr_t *attr,
-                                size_t cpusetsize, cpu_set_t *cpuset)
+int pthread_barrierattr_init(FAR pthread_barrierattr_t *attr)
 {
-  linfo("attr=0x%p cpusetsize=%d cpuset=0x%p\n", attr, (int)cpusetsize, cpuset);
+  int ret = OK;
 
-  DEBUGASSERT(attr != NULL && cpusetsize == sizeof(cpu_set_t) && cpuset != NULL);
-
-  *cpuset = attr->affinity;
-  return OK;
+  if (!attr)
+    {
+      ret = EINVAL;
+    }
+  else
+    {
+      attr->pshared = PTHREAD_PROCESS_PRIVATE;
+    }
+  return ret;
 }

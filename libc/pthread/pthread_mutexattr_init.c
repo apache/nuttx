@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/pthread/pthread_attrgetinheritsched.c
+ * libc/pthread/pthread_mutexattr_init.c
  *
  *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -40,25 +40,21 @@
 #include <nuttx/config.h>
 
 #include <pthread.h>
-#include <string.h>
-#include <debug.h>
 #include <errno.h>
+#include <debug.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  pthread_attr_getinheritsched
+ * Function:  pthread_mutexattr_init
  *
  * Description:
- *   Report whether the scheduling info in the pthread
- *   attributes will be used or if the thread will
- *   inherit the properties of the parent.
+ *    Create mutex attributes.
  *
  * Parameters:
- *   attr
- *   inheritsched
+ *    attr
  *
  * Return Value:
  *   0 if successful.  Otherwise, an error code.
@@ -67,21 +63,22 @@
  *
  ****************************************************************************/
 
-int pthread_attr_getinheritsched(FAR const pthread_attr_t *attr,
-                                 FAR int *inheritsched)
+int pthread_mutexattr_init(FAR pthread_mutexattr_t *attr)
 {
-  int ret;
+  int ret = OK;
 
-  linfo("attr=0x%p inheritsched=0x%p\n", attr, inheritsched);
+  linfo("attr=0x%p\n", attr);
 
-  if (!attr || !inheritsched)
+  if (!attr)
     {
       ret = EINVAL;
     }
   else
     {
-      *inheritsched = (int)attr->inheritsched;
-      ret = OK;
+      attr->pshared = 0;
+#ifdef CONFIG_MUTEX_TYPES
+      attr->type    = PTHREAD_MUTEX_DEFAULT;
+#endif
     }
 
   linfo("Returning %d\n", ret);

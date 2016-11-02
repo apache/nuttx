@@ -1,7 +1,7 @@
 /****************************************************************************
- * libc/pthread/pthread_attrsetstacksize.c
+ * libc/pthread/pthread_mutexattr_getpshared.c
  *
- *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,22 +40,22 @@
 #include <nuttx/config.h>
 
 #include <pthread.h>
-#include <string.h>
-#include <debug.h>
 #include <errno.h>
+#include <debug.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  pthread_attr_setstacksize
+ * Function:  pthread_mutexattr_getpshared
  *
  * Description:
+ *    Get pshared mutex attribute.
  *
  * Parameters:
- *   attr
- *   stacksize
+ *    attr
+ *    pshared
  *
  * Return Value:
  *   0 if successful.  Otherwise, an error code.
@@ -64,23 +64,21 @@
  *
  ****************************************************************************/
 
-int pthread_attr_setstacksize(FAR pthread_attr_t *attr, long stacksize)
+int pthread_mutexattr_getpshared(FAR const pthread_mutexattr_t *attr, FAR int *pshared)
 {
-  int ret;
+  int ret = OK;
 
-  linfo("attr=0x%p stacksize=%ld\n", attr, stacksize);
+  linfo("attr=0x%p pshared=0x%p\n", attr, pshared);
 
-  if (!attr || stacksize < PTHREAD_STACK_MIN)
+  if (!attr || !pshared)
     {
       ret = EINVAL;
     }
   else
     {
-      attr->stacksize = stacksize;
-      ret = OK;
+      *pshared = attr->pshared;
     }
 
   linfo("Returning %d\n", ret);
   return ret;
 }
-

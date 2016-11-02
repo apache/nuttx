@@ -1,7 +1,7 @@
 /****************************************************************************
- * libc/pthread/pthread_attrsetschedparam.c
+ * libc/pthread/pthread_attr_setaffinity.c
  *
- *   Copyright (C) 2007-2009, 2011, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,9 +40,8 @@
 #include <nuttx/config.h>
 
 #include <pthread.h>
-#include <string.h>
-#include <sched.h>
 #include <debug.h>
+#include <assert.h>
 #include <errno.h>
 
 /****************************************************************************
@@ -50,13 +49,13 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  pthread_attr_setschedparam
+ * Function:  pthread_attr_setaffinity
  *
  * Description:
  *
  * Parameters:
  *   attr
- *   param
+ *   stacksize
  *
  * Return Value:
  *   0 if successful.  Otherwise, an error code.
@@ -65,31 +64,15 @@
  *
  ****************************************************************************/
 
-int pthread_attr_setschedparam(FAR pthread_attr_t *attr,
-                               FAR const struct sched_param *param)
+int pthread_attr_setaffinity_np(FAR pthread_attr_t *attr,
+                                size_t cpusetsize,
+                                FAR const cpu_set_t *cpuset)
 {
-  int ret;
+  linfo("attr=0x%p cpusetsize=%d cpuset=0x%p\n", attr, (int)cpusetsize, cpuset);
 
-  linfo("attr=0x%p param=0x%p\n", attr, param);
+  DEBUGASSERT(attr != NULL && cpusetsize == sizeof(cpu_set_t) &&
+              cpuset != NULL && *cpuset != 0);
 
-  if (!attr || !param)
-    {
-      ret = EINVAL;
-    }
-  else
-    {
-      attr->priority            = (short)param->sched_priority;
-#ifdef CONFIG_SCHED_SPORADIC
-      attr->low_priority        = (uint8_t)param->sched_ss_low_priority;
-      attr->max_repl            = (uint8_t)param->sched_ss_max_repl;
-      attr->repl_period.tv_sec  = param->sched_ss_repl_period.tv_sec;
-      attr->repl_period.tv_nsec = param->sched_ss_repl_period.tv_nsec;
-      attr->budget.tv_sec       = param->sched_ss_init_budget.tv_sec;
-      attr->budget.tv_nsec      = param->sched_ss_init_budget.tv_nsec;
-#endif
-      ret = OK;
-    }
-
-  linfo("Returning %d\n", ret);
-  return ret;
+  attr->affinity = *cpuset;
+  return OK;
 }

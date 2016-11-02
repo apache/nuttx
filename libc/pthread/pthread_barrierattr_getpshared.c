@@ -1,7 +1,7 @@
-/****************************************************************************
- * libc/pthread/pthread_condattrdestroy.c
+/********************************************************************************
+ * libc/pthread/pthread_barrierattr_getpshared.c
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,52 +31,51 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************/
+ ********************************************************************************/
 
-/****************************************************************************
+/********************************************************************************
  * Included Files
- ****************************************************************************/
+ ********************************************************************************/
 
 #include <nuttx/config.h>
 
 #include <pthread.h>
-#include <debug.h>
 #include <errno.h>
+#include <debug.h>
 
-/****************************************************************************
+/********************************************************************************
  * Public Functions
- ****************************************************************************/
+ ********************************************************************************/
 
-/****************************************************************************
- * Function:  pthread_condattr_destroy
+/********************************************************************************
+ * Function: pthread_barrierattr_getpshared
  *
  * Description:
- *   Operations on condition variable attributes
+ *   The pthread_barrierattr_getpshared() function will obtain the value of the
+ *   process-shared attribute from the attributes object referenced by attr.
  *
  * Parameters:
- *   None
+ *   attr - barrier attributes to be queried.
+ *   pshared - the location to stored the current value of the pshared attribute.
  *
  * Return Value:
- *   None
+ *   0 (OK) on success or EINVAL if either attr or pshared is invalid.
  *
  * Assumptions:
  *
- ****************************************************************************/
+ ********************************************************************************/
 
-int pthread_condattr_destroy(FAR pthread_condattr_t *attr)
+int pthread_barrierattr_getpshared(FAR const pthread_barrierattr_t *attr, FAR int *pshared)
 {
   int ret = OK;
 
-  linfo("attr=0x%p\n", attr);
-
-  if (!attr)
+  if (!attr || !pshared)
     {
       ret = EINVAL;
     }
-
-  linfo("Returning %d\n", ret);
+  else
+    {
+      *pshared = attr->pshared;
+    }
   return ret;
 }
-
-
-
