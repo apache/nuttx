@@ -135,6 +135,12 @@
 
 #define PTHREAD_BARRIER_SERIAL_THREAD 0x1000
 
+/* Values for protocol attribute */
+
+#define PTHREAD_PRIO_NONE             SEM_PRIO_NONE
+#define PTHREAD_PRIO_INHERIT          SEM_PRIO_INHERIT
+#define PTHREAD_PRIO_PROTECT          SEM_PRIO_PROTECT
+
 /* Definitions to map some non-standard, BSD thread management interfaces to
  * the non-standard Linux-like prctl() interface.  Since these are simple
  * mappings to prctl, they will return 0 on success and -1 on failure with the
@@ -212,6 +218,9 @@ typedef struct pthread_cond_s pthread_cond_t;
 struct pthread_mutexattr_s
 {
   uint8_t pshared;  /* PTHREAD_PROCESS_PRIVATE or PTHREAD_PROCESS_SHARED */
+#ifdef CONFIG_PRIORITY_INHERITANCE
+  uint8_t proto;    /* See PTHREAD_PRIO_* definitions */
+#endif
 #ifdef CONFIG_MUTEX_TYPES
   uint8_t type;     /* Type of the mutex.  See PTHREAD_MUTEX_* definitions */
 #endif
@@ -222,11 +231,11 @@ typedef struct pthread_mutexattr_s pthread_mutexattr_t;
 
 struct pthread_mutex_s
 {
-  int   pid;      /* ID of the holder of the mutex */
-  sem_t sem;      /* Semaphore underlying the implementation of the mutex */
+  int pid;          /* ID of the holder of the mutex */
+  sem_t sem;        /* Semaphore underlying the implementation of the mutex */
 #ifdef CONFIG_MUTEX_TYPES
-  uint8_t type;   /* Type of the mutex.  See PTHREAD_MUTEX_* definitions */
-  int   nlocks;   /* The number of recursive locks held */
+  uint8_t type;     /* Type of the mutex.  See PTHREAD_MUTEX_* definitions */
+  int nlocks;       /* The number of recursive locks held */
 #endif
 };
 
@@ -394,6 +403,15 @@ int pthread_mutex_destroy(FAR pthread_mutex_t *mutex);
 int pthread_mutex_lock(FAR pthread_mutex_t *mutex);
 int pthread_mutex_trylock(FAR pthread_mutex_t *mutex);
 int pthread_mutex_unlock(FAR pthread_mutex_t *mutex);
+
+#ifdef CONFIG_PRIORITY_INHERITANCE
+/* Manage priority inheritance */
+
+int pthread_mutexattr_getprotocol(FAR const pthread_mutexattr_t *attr,
+                                  FAR int *protocol);
+int pthread_mutexattr_setprotocol(FAR pthread_mutexattr_t *attr,
+                                  int protocol);
+#endif
 
 /* Operations on condition variables */
 

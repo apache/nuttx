@@ -23,6 +23,7 @@ Contents
   o Buttons and LEDs
   o SMP
   o Configurations
+  o Things to Do
 
 STATUS
 ======
@@ -116,7 +117,7 @@ SMP
 
   Open Issues:
 
- 1. Currently all device interrupts are handled on the PRO CPU only.  Critical
+  1. Currently all device interrupts are handled on the PRO CPU only.  Critical
      sections will attempt to disable interrupts but will now disable interrupts
      only on the current CPU (which may not be CPU0).  Perhaps that should be a
      spinlock to prohibit execution of interrupts on CPU0 when other CPUs are in
@@ -196,3 +197,19 @@ NOTES:
     SMP operation.
 
     NOTES:
+
+Things to Do
+============
+
+  1. There is no support for an interrupt stack yet.
+  2. I did not implement the lazy co-processor save logic supported by Xtensa.  That logic works like this:
+
+     a. CPENABLE is set to zero on each context switch, disabling all co-processors.
+     b. If/when the task attempts to use the disabled co-processor, an exception occurs
+     c. The co-processor exception handler re-enables the co-processor.
+
+     Instead, the NuttX logic saves and restores CPENABLE on each context switch.
+
+  3. Currently the Xtensa port copies register state save information from the stack into the TCB.  A more efficient alternative would be to just save a pointer to a register state save area in the TCB.  This would add some complexity to signal handling and also also the the up_initialstate().  But the performance improvement might be worth the effort.
+
+  4. See SMP-related issues above

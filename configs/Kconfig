@@ -318,6 +318,15 @@ config ARCH_BOARD_LPCXPRESSO
 		Embedded Artists base board with NXP LPCExpresso LPC1768.  This board
 		is based on the NXP LPC1768.  The Code Red toolchain is used by default.
 
+config ARCH_BOARD_BAMBINO_200E
+	bool "Micromint Bambino 200E"
+	depends on ARCH_CHIP_LPC4330FBD144
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		Micromint Bambino board. This board is based on the LPC4330FBD144.
+
 config ARCH_BOARD_LPC4330_XPLORER
 	bool "NXG LPC4330-Xplorer"
 	depends on ARCH_CHIP_LPC4330FET100
@@ -1381,6 +1390,7 @@ config ARCH_BOARD
 	default "arduino-mega2560"         if ARCH_BOARD_ARDUINO_MEGA2560
 	default "arduino-due"              if ARCH_BOARD_ARDUINO_DUE
 	default "avr32dev1"                if ARCH_BOARD_AVR32DEV1
+	default "bambino-200e"             if ARCH_BOARD_BAMBINO_200E
 	default "c5471evm"                 if ARCH_BOARD_C5471EVM
 	default "cloudctrl"                if ARCH_BOARD_CLOUDCTRL
 	default "compal_e86"               if ARCH_BOARD_COMPALE86
@@ -1554,6 +1564,9 @@ source "configs/arduino-due/Kconfig"
 endif
 if ARCH_BOARD_AVR32DEV1
 source "configs/avr32dev1/Kconfig"
+endif
+if ARCH_BOARD_BAMBINO_200E
+source "configs/bambino-200e/Kconfig"
 endif
 if ARCH_BOARD_C5471EVM
 source "configs/c5471evm/Kconfig"

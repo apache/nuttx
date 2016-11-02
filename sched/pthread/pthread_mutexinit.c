@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/pthread/pthread_mutexinit.c
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,13 +66,17 @@
  *
  ****************************************************************************/
 
-int pthread_mutex_init(FAR pthread_mutex_t *mutex, FAR const pthread_mutexattr_t *attr)
+int pthread_mutex_init(FAR pthread_mutex_t *mutex,
+                       FAR const pthread_mutexattr_t *attr)
 {
   int pshared = 0;
 #ifdef CONFIG_MUTEX_TYPES
-  uint8_t type  = PTHREAD_MUTEX_DEFAULT;
+  uint8_t type = PTHREAD_MUTEX_DEFAULT;
 #endif
-  int ret       = OK;
+#ifdef CONFIG_PRIORITY_INHERITANCE
+  uint8_t proto = PTHREAD_PRIO_INHERIT;
+#endif
+  int ret = OK;
   int status;
 
   sinfo("mutex=0x%p attr=0x%p\n", mutex, attr);
@@ -88,6 +92,9 @@ int pthread_mutex_init(FAR pthread_mutex_t *mutex, FAR const pthread_mutexattr_t
       if (attr)
         {
           pshared = attr->pshared;
+#ifdef CONFIG_PRIORITY_INHERITANCE
+          proto   = attr->proto;
+#endif
 #ifdef CONFIG_MUTEX_TYPES
           type    = attr->type;
 #endif
@@ -102,8 +109,18 @@ int pthread_mutex_init(FAR pthread_mutex_t *mutex, FAR const pthread_mutexattr_t
       status = sem_init((FAR sem_t *)&mutex->sem, pshared, 1);
       if (status != OK)
         {
-          ret = EINVAL;
+          ret = get_errno();
         }
+
+#ifdef CONFIG_PRIORITY_INHERITANCE
+      /* Initialize the semaphore protocol */
+
+      status = sem_setprotocol((FAR sem_t *)&mutex->sem, proto);
+      if (status != OK)
+        {
+          ret = get_errno();
+        }
+#endif
 
       /* Set up attributes unique to the mutex type */
 

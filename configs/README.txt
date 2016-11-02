@@ -191,6 +191,9 @@ configs/avr32dev1
   Atmel website.  STATUS: This port is functional but very basic.  There
   are configurations for NSH and the OS test.
 
+configs/bambino-200e
+  Micromint Bambino board. This board is based on the LPC4330FBD144.
+
 configs/c5471evm
   This is a port to the Spectrum Digital C5471 evaluation board.  The
   TMS320C5471 is a dual core processor from TI with an ARM7TDMI general
