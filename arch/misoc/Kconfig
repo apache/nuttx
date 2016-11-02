@@ -62,11 +62,11 @@ config MISOC_UART_TX_BUF_SIZE
 	---help---
 		Size of TX buffers for MISOC UARTs
 
-ifdef ARCH_CHIP_LM32
+if ARCH_CHIP_LM32
 source arch/misoc/src/lm32/Kconfig
 endif
-ifdef ARCH_CHIP_MOR1K
-source arch/misoc/src/mor1k/Kconfig
+if ARCH_CHIP_MOR1K
+#source arch/misoc/src/mor1k/Kconfig
 endif
 
 endif # ARCH_MISOC

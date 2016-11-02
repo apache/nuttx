@@ -92,7 +92,4 @@ static inline unsigned int irq_pending(void)
  * Public Function Prototypes
  ****************************************************************************/
 
-void uart_isr(void);
-void isr(void);
-
 #endif /* __ARCH_MISOC_SRC_LM32_CHIP_H */

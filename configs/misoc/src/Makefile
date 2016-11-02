@@ -37,6 +37,6 @@
 -include $(TOPDIR)/Make.defs
 
 ASRCS =
-CSRCS = atmega_boot.c
+CSRCS = lm32_boot.c
 
 include $(TOPDIR)/configs/Board.mk

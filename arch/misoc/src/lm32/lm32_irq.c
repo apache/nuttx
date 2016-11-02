@@ -46,7 +46,7 @@
 #include <nuttx/arch.h>
 #include <arch/irq.h>
 
-#include "chip_irqasm.h"
+#include "chip.h"
 #include "lm32.h"
 
 /****************************************************************************

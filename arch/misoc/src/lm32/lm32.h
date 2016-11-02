@@ -147,7 +147,7 @@ void lm32_timer_initialize(void);
 
 /* Software interrupts ******************************************************/
 
-uint32_t lm32_swint(int irq, FAR void *context);
+uint32_t *lm32_swint(int irq, FAR void *context);
 
 /* Signal handling **********************************************************/
 

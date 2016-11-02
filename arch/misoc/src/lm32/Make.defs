@@ -39,11 +39,11 @@ HEAD_ASRC   = lm32_vectors.S
 CMN_ASRCS   =
 CMN_CSRCS   = misoc_uart.c
 
-CHIP_ASRCS  = lm32_start.S lm32_syscall.S
+CHIP_ASRCS  = lm32_syscall.S
 
 CHIP_CSRCS  = lm32_allocateheap.c lm32_assert.c lm32_blocktask.c
 CHIP_CSRCS += lm32_copystate.c lm32_createstack.c lm32_doirq.c lm32_dumpstate.c
 CHIP_CSRCS += lm32_dumpstate.c lm32_exit.c lm32_idle.c lm32_initialize.c
 CHIP_CSRCS += lm32_initialstate.c lm32_interruptcontext.c lm32_irq.c
-CHIP_CSRCS += lm32_isr.c lm32_releasepending.c lm32_releasestack.c
+CHIP_CSRCS += lm32_releasepending.c lm32_releasestack.c
 CHIP_CSRCS += lm32_stackframe.c lm32_swint.c lm32_unblocktask.c
