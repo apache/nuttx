@@ -68,7 +68,6 @@ SYSCALL_LOOKUP(sem_trywait,               1, STUB_sem_trywait)
 SYSCALL_LOOKUP(sem_wait,                  1, STUB_sem_wait)
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
-SYSCALL_LOOKUP(sem_getprotocol,           2, STUB_sem_getprotocol)
 SYSCALL_LOOKUP(sem_setprotocol,           2, STUB_sem_setprotocol)
 #endif
 

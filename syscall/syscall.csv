@@ -117,7 +117,6 @@
 "sem_close","semaphore.h","defined(CONFIG_FS_NAMED_SEMAPHORES)","int","FAR sem_t*"
 "sem_destroy","semaphore.h","","int","FAR sem_t*"
 "sem_open","semaphore.h","defined(CONFIG_FS_NAMED_SEMAPHORES)","FAR sem_t*","FAR const char*","int","..."
-"sem_getprotocol","semaphore.h","defined(CONFIG_PRIORITY_INHERITANCE)","int","FAR sem_t*","FAR int*"
 "sem_post","semaphore.h","","int","FAR sem_t*"
 "sem_setprotocol","semaphore.h","defined(CONFIG_PRIORITY_INHERITANCE)","int","FAR sem_t*","int"
 "sem_timedwait","semaphore.h","","int","FAR sem_t*","FAR const struct timespec *"

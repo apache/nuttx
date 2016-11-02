@@ -92,9 +92,8 @@
 #define SYS_sem_wait                   (CONFIG_SYS_RESERVED+19)
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
-#  define SYS_sem_getprotocol          (CONFIG_SYS_RESERVED+20)
-#  define SYS_sem_setprotocol          (CONFIG_SYS_RESERVED+21)
-#  define __SYS_named_sem              (CONFIG_SYS_RESERVED+22)
+#  define SYS_sem_setprotocol          (CONFIG_SYS_RESERVED+20)
+#  define __SYS_named_sem              (CONFIG_SYS_RESERVED+21)
 #else
 #  define __SYS_named_sem              (CONFIG_SYS_RESERVED+20)
 #endif
