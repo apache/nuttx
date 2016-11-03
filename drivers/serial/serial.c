@@ -43,7 +43,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <unistd.h>
-#include <semaphore.h>
 #include <string.h>
 #include <fcntl.h>
 #include <poll.h>
@@ -52,6 +51,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/serial/serial.h>
 #include <nuttx/fs/ioctl.h>
@@ -111,16 +111,6 @@ static const struct file_operations g_serialops =
 /************************************************************************************
  * Private Functions
  ************************************************************************************/
-
-/************************************************************************************
- * Name: sem_reinit
- ************************************************************************************/
-
-static int sem_reinit(FAR sem_t *sem, int pshared, unsigned int value)
-{
-  sem_destroy(sem);
-  return sem_init(sem, pshared, value);
-}
 
 /************************************************************************************
  * Name: uart_takesem
@@ -1253,19 +1243,14 @@ static int uart_close(FAR struct file *filep)
   /* We need to re-initialize the semaphores if this is the last close
    * of the device, as the close might be caused by pthread_cancel() of
    * a thread currently blocking on any of them.
-   *
-   * REVISIT:  This logic *only* works in the case where the cancelled
-   * thread had the only reference to the serial driver.  If there other
-   * references, then the this logic will not be executed and the
-   * semaphore count will still be incorrect.
    */
 
-  sem_reinit(&dev->xmitsem,  0, 0);
-  sem_reinit(&dev->recvsem,  0, 0);
-  sem_reinit(&dev->xmit.sem, 0, 1);
-  sem_reinit(&dev->recv.sem, 0, 1);
+  sem_reset(&dev->xmitsem,  0);
+  sem_reset(&dev->recvsem,  0);
+  sem_reset(&dev->xmit.sem, 1);
+  sem_reset(&dev->recv.sem, 1);
 #ifndef CONFIG_DISABLE_POLL
-  sem_reinit(&dev->pollsem,  0, 1);
+  sem_reset(&dev->pollsem,  1);
 #endif
 
   uart_givesem(&dev->closesem);
@@ -1416,6 +1401,8 @@ errout_with_sem:
 
 int uart_register(FAR const char *path, FAR uart_dev_t *dev)
 {
+  /* Initialize semaphores */
+
   sem_init(&dev->xmit.sem, 0, 1);
   sem_init(&dev->recv.sem, 0, 1);
   sem_init(&dev->closesem, 0, 1);
@@ -1424,6 +1411,15 @@ int uart_register(FAR const char *path, FAR uart_dev_t *dev)
 #ifndef CONFIG_DISABLE_POLL
   sem_init(&dev->pollsem,  0, 1);
 #endif
+
+  /* The recvsem and xmitsem are used for signaling and, hence, should not have
+   * priroity inheritance enabled.
+   */
+
+  sem_setprotocol(&dev->xmitsem, SEM_PRIO_NONE);
+  sem_setprotocol(&dev->recvsem, SEM_PRIO_NONE);
+
+  /* Register the serial driver */
 
   _info("Registering %s\n", path);
   return register_driver(path, &g_serialops, 0666, dev);
