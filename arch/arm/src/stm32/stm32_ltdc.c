@@ -49,8 +49,9 @@
 #include <debug.h>
 
 #include <nuttx/irq.h>
-#include <nuttx/video/fb.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/semaphore.h>
+#include <nuttx/video/fb.h>
 
 #include <arch/chip/ltdc.h>
 #include <arch/chip/dma2d.h>
@@ -1287,9 +1288,13 @@ static void stm32_global_configure(void)
 
   sem_init(&g_lock, 0, 1);
 
-  /* Initialize the semaphore for interrupt handling */
+  /* Initialize the semaphore for interrupt handling.  This waitsem
+   * semaphore is used for signaling and, hence, should not have priority
+   * inheritance enabled.
+   */
 
   sem_init(g_interrupt.sem, 0, 0);
+  sem_setprotocol(g_interrupt.sem, SEM_PRIO_NONE);
 
   /* Attach LTDC interrupt vector */
 
