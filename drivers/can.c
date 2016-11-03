@@ -1178,7 +1178,7 @@ int can_register(FAR const char *path, FAR struct can_dev_s *dev)
 
   for (i = 0; i < CONFIG_CAN_NPENDINGRTR; i++)
     {
-      /* Initialize wait semahores.  These semaphores are used for signaling
+      /* Initialize wait semaphores.  These semaphores are used for signaling
        * and should not have priority inheritance enabled.
        */
 

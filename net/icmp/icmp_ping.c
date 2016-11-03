@@ -51,7 +51,7 @@
 #include <net/if.h>
 
 #include <nuttx/clock.h>
-#include <nuttx/semahore.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
