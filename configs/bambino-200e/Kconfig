@@ -4,4 +4,13 @@
 #
 
 if ARCH_BOARD_BAMBINO_200E
+
+config CXX_LINK_GNUTOOL_LIB
+	bool "Link to GNU Toolchain Libraries"
+	default n
+	depends on ARM_TOOLCHAIN_GNU
+	---help---
+		This option enable NuttX build system to link with GNU Toolchain
+		libraries. Mainly stdlib++ and newlib nano.
+
 endif
