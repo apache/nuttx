@@ -75,6 +75,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>
 #include <nuttx/arch.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/storage.h>
@@ -1339,11 +1340,20 @@ int usbmsc_configure(unsigned int nluns, void **handle)
   priv = &alloc->dev;
   memset(priv, 0, sizeof(struct usbmsc_dev_s));
 
+  /* Initialize semaphores */
+
   sem_init(&priv->thsynch, 0, 0);
   sem_init(&priv->thlock, 0, 1);
   sem_init(&priv->thwaitsem, 0, 0);
-  sq_init(&priv->wrreqlist);
 
+  /* The thsynch and thwaitsem semaphores are used for signaling and, hence,
+   * should not have priority inheritance enabled.
+   */
+
+  sem_setprotocol(&priv->thsynch, SEM_PRIO_NONE);
+  sem_setprotocol(&priv->thwaitsem, SEM_PRIO_NONE);
+
+  sq_init(&priv->wrreqlist);
   priv->nluns = nluns;
 
   /* Allocate the LUN table */

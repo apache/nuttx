@@ -1413,7 +1413,7 @@ int uart_register(FAR const char *path, FAR uart_dev_t *dev)
 #endif
 
   /* The recvsem and xmitsem are used for signaling and, hence, should not have
-   * priroity inheritance enabled.
+   * priority inheritance enabled.
    */
 
   sem_setprotocol(&dev->xmitsem, SEM_PRIO_NONE);

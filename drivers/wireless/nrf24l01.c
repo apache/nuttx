@@ -1224,7 +1224,8 @@ int nrf24l01_register(FAR struct spi_dev_s *spi, FAR struct nrf24l01_config_s *c
   dev->pfd = NULL;
 #endif
 
-  sem_init(&(dev->sem_tx), 0, 0);
+  sem_init(&dev->sem_tx, 0, 0);
+  sem_setprotocol(&dev->sem_tx, SEM_PRIO_NONE);
 
 #ifdef CONFIG_WL_NRF24L01_RXSUPPORT
   if ((rx_fifo = kmm_malloc(CONFIG_WL_NRF24L01_RXFIFO_LEN)) == NULL)
@@ -1240,6 +1241,7 @@ int nrf24l01_register(FAR struct spi_dev_s *spi, FAR struct nrf24l01_config_s *c
 
   sem_init(&(dev->sem_fifo), 0, 1);
   sem_init(&(dev->sem_rx), 0, 0);
+  sem_setprotocol(&dev->sem_rx, SEM_PRIO_NONE);
 #endif
 
   /* Set the global reference */

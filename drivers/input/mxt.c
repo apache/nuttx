@@ -65,6 +65,7 @@
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/wqueue.h>
 
+#include <nuttx/semaphore.h>
 #include <nuttx/input/touchscreen.h>
 #include <nuttx/input/mxt.h>
 
@@ -1884,8 +1885,16 @@ int mxt_register(FAR struct i2c_master_s *i2c,
   priv->i2c   = i2c;              /* Save the SPI device handle */
   priv->lower = lower;            /* Save the board configuration */
 
+  /* Initialize semaphores */
+
   sem_init(&priv->devsem, 0, 1);  /* Initialize device semaphore */
   sem_init(&priv->waitsem, 0, 0); /* Initialize event wait semaphore */
+
+  /* The event wait semaphore is used for signaling and, hence, should not
+   * have priority inheritance enabled.
+   */
+
+  sem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
 
   /* Make sure that interrupts are disabled */
 

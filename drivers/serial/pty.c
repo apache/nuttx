@@ -97,6 +97,7 @@
 #include <errno.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/drivers/drivers.h>
 #include <nuttx/serial/pty.h>
@@ -1016,8 +1017,17 @@ int pty_register(int minor)
       return -ENOMEM;
     }
 
+  /* Initialize semaphores */
+
   sem_init(&devpair->pp_slavesem, 0, 0);
   sem_init(&devpair->pp_exclsem, 0, 1);
+
+  /* The pp_slavesem semaphore is used for signaling and, hence, should not
+   * have priority inheritance enabled.
+   */
+
+  sem_setprotocol(&devpair->pp_slavesem, SEM_PRIO_NONE);
+
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   devpair->pp_minor             = minor;
 #endif
