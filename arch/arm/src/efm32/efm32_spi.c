@@ -53,6 +53,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
 #include <nuttx/clock.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/spi/spi.h>
 
 #include <arch/board/board.h>
@@ -1640,6 +1641,13 @@ static int spi_portinitialize(struct efm32_spidev_s *priv)
 
   (void)sem_init(&priv->rxdmasem, 0, 0);
   (void)sem_init(&priv->txdmasem, 0, 0);
+
+  /* These semaphores are used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
+   sem_setprotocol(&priv->rxdmasem, SEM_PRIO_NONE);
+   sem_setprotocol(&priv->txdmasem, SEM_PRIO_NONE);
 #endif
 
   /* Enable SPI */

@@ -50,6 +50,7 @@
 #include <nuttx/spi/spi.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/semaphore.h>
 #include <arch/board/board.h>
 
 #include "up_internal.h"
@@ -1116,7 +1117,13 @@ FAR struct spi_dev_s *imx_spibus_initialize(int port)
   /* Initialize the state structure */
 
 #ifndef CONFIG_SPI_POLLWAIT
+  /* Initialize the semaphore that is used to wake up the waiting
+   * thread when the DMA transfer completes.  This semaphore is used for
+   * signaling and, hence, should not have priority inheritance enabled.
+   */
+
    sem_init(&priv->waitsem, 0, 0);
+   sem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
 #endif
    sem_init(&priv->exclsem, 0, 1);
 

@@ -72,6 +72,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/spi/spi.h>
 
 #include <arch/board/board.h>
@@ -1665,15 +1666,21 @@ static void spi_bus_initialize(FAR struct stm32_spidev_s *priv)
 
   spi_putreg(priv, STM32_SPI_CRCPR_OFFSET, 7);
 
-  /* Initialize the SPI semaphore that enforces mutually exclusive access */
+  /* Initialize the SPI semaphore that enforces mutually exclusive access. */
 
   sem_init(&priv->exclsem, 0, 1);
 
-  /* Initialize the SPI semaphores that is used to wait for DMA completion */
-
 #ifdef CONFIG_STM32F7_SPI_DMA
+  /* Initialize the SPI semaphores that is used to wait for DMA completion.
+   * This semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
   sem_init(&priv->rxsem, 0, 0);
   sem_init(&priv->txsem, 0, 0);
+
+  sem_setprotocol(&priv->rxsem, SEM_PRIO_NONE);
+  sem_setprotocol(&priv->txsem, SEM_PRIO_NONE);
 
   /* Get DMA channels.  NOTE: stm32_dmachannel() will always assign the DMA channel.
    * if the channel is not available, then stm32_dmachannel() will block and wait

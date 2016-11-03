@@ -56,6 +56,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
 #include <nuttx/clock.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/spi/spi.h>
 
 #include "up_internal.h"
@@ -2164,10 +2165,12 @@ FAR struct spi_dev_s *sam_spibus_initialize(int port)
 
 #ifdef CONFIG_SAMV7_SPI_DMA
       /* Initialize the SPI semaphore that is used to wake up the waiting
-       * thread when the DMA transfer completes.
+       * thread when the DMA transfer completes.  This semaphore is used for
+       * signaling and, hence, should not have priority inheritance enabled.
        */
 
       sem_init(&spics->dmawait, 0, 0);
+      sem_setprotocol(&spics->dmawait, SEM_PRIO_NONE);
 
       /* Create a watchdog time to catch DMA timeouts */
 
