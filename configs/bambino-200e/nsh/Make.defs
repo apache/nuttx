@@ -117,12 +117,6 @@ OBJEXT = .o
 LIBEXT = .a
 EXEEXT =
 
-ifeq ($(CONFIG_CXX_LINK_GNUTOOL_LIB),y)
-  EXTRA_LIBS = "${shell "$(CXX)" $(ARCHCPUFLAGS) -print-file-name=$(LIBSTDCXX)}"
-  GXX_LIBDIR := ${shell dirname $(LIBGXX)}
-  EXTRA_LIBPATHS = -L"$(GXX_LIBDIR)"
-endif
-
 ifneq ($(CROSSDEV),arm-nuttx-elf-)
   LDFLAGS += -nostartfiles -nodefaultlibs
 endif
