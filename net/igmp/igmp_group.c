@@ -2,7 +2,7 @@
  * net/igmp/igmp_group.c
  * IGMP group data structure management logic
  *
- *   Copyright (C) 2010, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2013-2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * The NuttX implementation of IGMP was inspired by the IGMP add-on for the
@@ -55,6 +55,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/igmp.h>
@@ -240,7 +241,13 @@ FAR struct igmp_group_s *igmp_grpalloc(FAR struct net_driver_s *dev,
       /* Initialize the non-zero elements of the group structure */
 
       net_ipv4addr_copy(group->grpaddr, *addr);
+
+      /* This semaphore is used for signaling and, hence, should not have
+       * priority inheritance enabled.
+       */
+
       sem_init(&group->sem, 0, 0);
+      sem_setprotocol(&group->sem, SEM_PRIO_NONE);
 
       /* Initialize the group timer (but don't start it yet) */
 

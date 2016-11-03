@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/icmpv6/icmpv6_rnotify.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,9 +47,10 @@
 
 #include <netinet/in.h>
 
+#include <nuttx/irq.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
-#include <nuttx/irq.h>
 
 #include "netdev/netdev.h"
 #include "utils/utils.h"
@@ -166,7 +167,13 @@ void icmpv6_rwait_setup(FAR struct net_driver_s *dev,
 
   memcpy(notify->rn_ifname, dev->d_ifname, IFNAMSIZ);
   notify->rn_result = -ETIMEDOUT;
+
+  /* This semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
   (void)sem_init(&notify->rn_sem, 0, 0);
+  sem_setprotocol(&notify->rn_sem, SEM_PRIO_NONE);
 
   /* Add the wait structure to the list with interrupts disabled */
 
@@ -183,7 +190,13 @@ void icmpv6_rwait_setup(FAR struct net_driver_s *dev,
   /* Initialize and remember wait structure */
 
   notify->rn_result = -ETIMEDOUT;
+
+  /* This semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
   (void)sem_init(&notify->rn_sem, 0, 0);
+  sem_setprotocol(&notify->rn_sem, SEM_PRIO_NONE);
 
   DEBUGASSERT(g_icmpv6_rwaiters == NULL);
   g_icmpv6_rwaiters = notify;

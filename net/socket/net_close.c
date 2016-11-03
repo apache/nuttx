@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/socket/net_close.c
  *
- *   Copyright (C) 2007-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,6 +49,8 @@
 #include <assert.h>
 
 #include <arch/irq.h>
+
+#include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/tcp.h>
@@ -388,7 +390,13 @@ static inline int netclose_disconnect(FAR struct socket *psock)
 
           state.cl_psock     = psock;
           state.cl_result    = -EBUSY;
+
+          /* This semaphore is used for signaling and, hence, should not have
+           * priority inheritance enabled.
+           */
+
           sem_init(&state.cl_sem, 0, 0);
+          sem_setprotocol(&state.cl_sem, SEM_PRIO_NONE);
 
           /* Record the time that we started the wait (in ticks) */
 

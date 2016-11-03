@@ -56,6 +56,7 @@
 #include <arch/irq.h>
 
 #include <nuttx/clock.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/iob.h>
 #include <nuttx/net/netdev.h>
@@ -1217,7 +1218,14 @@ static void recvfrom_init(FAR struct socket *psock, FAR void *buf,
   /* Initialize the state structure. */
 
   memset(pstate, 0, sizeof(struct recvfrom_s));
+
+  /* This semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
   (void)sem_init(&pstate->rf_sem, 0, 0); /* Doesn't really fail */
+  (void)sem_setprotocol(&pstate->rf_sem, SEM_PRIO_NONE);
+
   pstate->rf_buflen    = len;
   pstate->rf_buffer    = buf;
   pstate->rf_from      = infrom;

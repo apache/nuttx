@@ -47,6 +47,7 @@
 #include <debug.h>
 #include <assert.h>
 
+#include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/udp.h>
@@ -391,7 +392,14 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
 
   save = net_lock();
   memset(&state, 0, sizeof(struct sendto_s));
+
+  /* This semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
   sem_init(&state.st_sem, 0, 0);
+  sem_setprotocol(&state.st_sem, SEM_PRIO_NONE);
+
   state.st_buflen = len;
   state.st_buffer = buf;
 

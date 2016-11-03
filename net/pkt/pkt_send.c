@@ -1,7 +1,8 @@
 /****************************************************************************
  * net/pkt/pkt_send.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,6 +53,7 @@
 #include <arch/irq.h>
 
 #include <nuttx/clock.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/ip.h>
@@ -245,7 +247,14 @@ ssize_t psock_pkt_send(FAR struct socket *psock, FAR const void *buf,
 
   save                = net_lock();
   memset(&state, 0, sizeof(struct send_s));
+
+  /* This semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
   (void)sem_init(&state.snd_sem, 0, 0); /* Doesn't really fail */
+  (void)sem_setprotocol(&state.snd_sem, SEM_PRIO_NONE);
+
   state.snd_sock      = psock;          /* Socket descriptor to use */
   state.snd_buflen    = len;            /* Number of bytes to send */
   state.snd_buffer    = buf;            /* Buffer to send from */
