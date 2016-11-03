@@ -48,7 +48,7 @@
 
 namespace std
 {
-#if __cplusplus >= 201103L
+#if 0 // Not defined
   using ::mbstate_t;
 #endif
   using ::wint_t;
