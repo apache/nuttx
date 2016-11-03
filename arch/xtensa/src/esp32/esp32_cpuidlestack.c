@@ -102,9 +102,7 @@ int up_cpu_idlestack(int cpu, FAR struct tcb_s *tcb, size_t stack_size)
   tcb->adj_stack_ptr   = (uint32_t *)topofstack;
 
 #if XCHAL_CP_NUM > 0
-	/* Does it make since to have co-processors enabled on the IDLE thread? */
-
-//#warning REVISIT: Need to set co-processor save are in TCB
+  /* REVISIT: Does it make since to have co-processors enabled on the IDLE thread? */
 #endif
 
   return OK;
