@@ -36,7 +36,7 @@
 
 include ${TOPDIR}/.config
 include ${TOPDIR}/tools/Config.mk
-CROSSDEV = lm32-elf-
+include ${TOPDIR}/arch/misoc/src/lm32/Toolchain.defs
 
 LDSCRIPT = ld.script
 
