@@ -59,6 +59,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/i2c/i2c_master.h>
 
 #include <nuttx/irq.h>
@@ -589,8 +590,16 @@ struct i2c_master_s *lpc17_i2cbus_initialize(int port)
 
   putreg32(I2C_CONSET_I2EN, priv->base + LPC17_I2C_CONSET_OFFSET);
 
+  /* Initialize semaphores */
+
   sem_init(&priv->mutex, 0, 1);
   sem_init(&priv->wait, 0, 0);
+
+  /* The wait semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
+  sem_setprotocol(&priv->wait, SEM_PRIO_NONE);
 
   /* Allocate a watchdog timer */
 

@@ -56,6 +56,7 @@
 
 #include <nuttx/wdog.h>
 #include <nuttx/arch.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/i2c/i2c_master.h>
 
 #include <nuttx/irq.h>
@@ -982,8 +983,16 @@ struct i2c_master_s *sam_i2cbus_initialize(int bus)
 
   priv->dev.ops = &g_twiops;
 
+  /* Initialize semaphores */
+
   sem_init(&priv->exclsem, 0, 1);
   sem_init(&priv->waitsem, 0, 0);
+
+  /* The waitsem semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
+  sem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
 
   /* Allocate a watchdog timer */
 
