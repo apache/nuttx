@@ -50,7 +50,7 @@
 #include <queue.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/sempahore.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/pthread.h>
 
