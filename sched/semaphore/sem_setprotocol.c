@@ -46,8 +46,6 @@
 
 #include "semaphore/semaphore.h"
 
-#ifdef CONFIG_PRIORITY_INHERITANCE
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -97,6 +95,7 @@ int sem_setprotocol(FAR sem_t *sem, int protocol)
   switch (protocol)
     {
       case SEM_PRIO_NONE:
+#ifdef CONFIG_PRIORITY_INHERITANCE
         /* Disable priority inheritance */
 
         sem->flags |= PRIOINHERIT_FLAGS_DISABLE;
@@ -104,13 +103,16 @@ int sem_setprotocol(FAR sem_t *sem, int protocol)
         /* Remove any current holders */
 
         sem_destroyholder(sem);
+#endif
         return OK;
 
       case SEM_PRIO_INHERIT:
+#ifdef CONFIG_PRIORITY_INHERITANCE
         /* Enable priority inheritance (dangerous) */
 
         sem->flags &= ~PRIOINHERIT_FLAGS_DISABLE;
         return OK;
+#endif
 
       case SEM_PRIO_PROTECT:
         /* Not yet supported */
@@ -126,5 +128,3 @@ int sem_setprotocol(FAR sem_t *sem, int protocol)
   set_errno(errcode);
   return ERROR;
 }
-
-#endif /* CONFIG_PRIORITY_INHERITANCE */
