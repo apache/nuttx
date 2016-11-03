@@ -38,6 +38,14 @@ config CXX_NEWLONG
 		C++ library routines because the NuttX size_t might not have
 		the same underlying type as your toolchain's size_t.
 
+config CXX_LINK_GNUTOOL_LIB
+	bool "Link to GNU Toolchain Libraries"
+	default n
+	depends on ARM_TOOLCHAIN_GNU
+	---help---
+		This option enable NuttX build system to link with GNU Toolchain
+		libraries. Mainly stdlib++ and newlib nano.
+
 comment "uClibc++ Standard C++ Library"
 
 config UCLIBCXX

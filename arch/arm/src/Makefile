@@ -168,6 +168,14 @@ endif
 LIBGCC = "${shell "$(CC)" $(ARCHCPUFLAGS) -print-libgcc-file-name}"
 GCC_LIBDIR := ${shell dirname $(LIBGCC)}
 
+ifeq ($(CONFIG_CXX_LINK_GNUTOOL_LIB),y)
+  LIBGXX = "${shell "$(CXX)" $(ARCHCPUFLAGS) -print-file-name=$(LIBSTDCXX)}"
+  GXX_LIBDIR := ${shell dirname $(LIBGXX)}
+  LIBCXXPATH = -L"$(GXX_LIBDIR)"
+else
+  LIBCXXPATH ?=
+endif
+
 VPATH += chip
 VPATH += common
 VPATH += $(ARCH_SUBDIR)
@@ -201,9 +209,9 @@ board$(DELIM)libboard$(LIBEXT):
 
 nuttx$(EXEEXT): $(HEAD_OBJ) board$(DELIM)libboard$(LIBEXT)
 	$(Q) echo "LD: nuttx"
-	$(Q) $(LD) --entry=__start $(LDFLAGS) $(LIBPATHS) $(EXTRA_LIBPATHS) \
+	$(Q) $(LD) --entry=__start $(LDFLAGS) $(LIBPATHS) $(LIBCXXPATH) $(EXTRA_LIBPATHS) \
 		-o $(NUTTX) $(HEAD_OBJ) $(EXTRA_OBJS) \
-		$(LDSTARTGROUP) $(LDLIBS) $(EXTRA_LIBS) $(LIBGCC) $(LDENDGROUP)
+		$(LDSTARTGROUP) $(LDLIBS) $(LDLIBSCXX) $(EXTRA_LIBS) $(LIBGCC) $(LDENDGROUP)
 ifneq ($(CONFIG_WINDOWS_NATIVE),y)
 	$(Q) $(NM) $(NUTTX) | \
 	grep -v '\(compiled\)\|\(\$(OBJEXT)$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \
