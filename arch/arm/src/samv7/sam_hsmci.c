@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/samv7/sam_hsmci.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,6 +52,7 @@
 #include <nuttx/wdog.h>
 #include <nuttx/sdio.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/mmcsd.h>
 
 #include <nuttx/irq.h>
@@ -3352,8 +3353,18 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
         priv, priv->base, priv->hsmci, pid);
 
   /* Initialize the HSMCI slot structure */
+  /* Initialize semaphores */
 
   sem_init(&priv->waitsem, 0, 0);
+
+  /* The waitsem semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
+  sem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
+
+  /* Create a watchdog timer */
+
   priv->waitwdog = wd_create();
   DEBUGASSERT(priv->waitwdog);
 

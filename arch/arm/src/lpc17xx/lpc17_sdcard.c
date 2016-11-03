@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc17xx/lpc17_sdcard.c
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,6 +52,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/sdio.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/mmcsd.h>
 
 #include <nuttx/irq.h>
@@ -2699,8 +2700,18 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
   putreg32(regval, LPC17_SYSCON_PCONP);
 
   /* Initialize the SD card slot structure */
+  /* Initialize semaphores */
 
   sem_init(&priv->waitsem, 0, 0);
+
+  /* The waitsem semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
+  sem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
+
+  /* Create a watchdog timer */
+
   priv->waitwdog = wd_create();
   DEBUGASSERT(priv->waitwdog);
 
