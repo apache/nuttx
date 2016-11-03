@@ -205,7 +205,7 @@ int sem_getprotocol(FAR sem_t *sem, FAR int *protocol);
 #ifdef CONFIG_PRIORITY_INHERITANCE
 int sem_setprotocol(FAR sem_t *sem, int protocol);
 #else
-#  define sem_setprotocol(s,p)  DEBUGASSERT((p) == SEM_PRIO_NONE);
+#  define sem_setprotocol(s,p)  ((p) == SEM_PRIO_NONE ? 0 : -ENOSYS);
 #endif
 
 #undef EXTERN
