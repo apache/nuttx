@@ -1,7 +1,7 @@
 /****************************************************************************
  * libnx/nxmu/nx_getrectangle.c
  *
- *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,25 +47,7 @@
 #include <nuttx/nx/nxbe.h>
 #include <nuttx/nx/nxmu.h>
 
-/****************************************************************************
- * Pre-Processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#include <nuttx/semaphore.h>
 
 /****************************************************************************
  * Public Functions
@@ -130,6 +112,12 @@ int nx_getrectangle(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
       gerr("ERROR: sem_init failed: %d\n", errno);
       return ret;
     }
+
+  /* The sem_done semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
+  (void)sem_setprotocol(&sem_done, SEM_PRIO_NONE);
 
   /* Forward the fill command to the server */
 
