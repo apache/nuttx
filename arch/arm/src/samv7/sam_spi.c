@@ -626,7 +626,7 @@ static inline uint32_t spi_cs2pcs(struct sam_spics_s *spics)
 #ifndef CONFIG_SAMV7_SPI_CS_DECODING
   return ((uint32_t)1 << (spics->cs)) - 1;
 #else
-  return spics->cs;
+  return spics->cs - 1;
 #endif
 }
 
