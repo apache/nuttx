@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated October 9, 2016)
+NuttX TODO List (Last updated November 2, 2016)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -9,7 +9,7 @@ issues related to each board port.
 
 nuttx/:
 
- (13)  Task/Scheduler (sched/)
+ (14)  Task/Scheduler (sched/)
   (1)  Memory Management (mm/)
   (1)  Power Management (drivers/pm)
   (3)  Signals (sched/signal, arch/)
@@ -215,6 +215,60 @@ o Task/Scheduler (sched/)
                exists.
   Status:      Open
   Priority:    Medium-ish
+
+  Title:       ISSUES WITH PRIORITY INHERITANCE WHEN SEMAPHORE USED AS IPC
+  Description: Semaphores have multiple uses.  The typical usage is where
+               the semaphore is used as lock on one or more resources.  In
+               this typical case, priority inheritance works perfectly:  The
+               holder of a semaphore count must be remembered so that its
+               priority can be boosted if a higher priority task requires a
+               count from the semaphore.  It remains the holder until the
+               same task calls sem_post() to release the count on the
+               semaphore.
+
+               But a different usage model for semaphores is for signalling
+               events.  In this case, the semaphore count is initialized to
+               zero and the receiving task calls sem_wait() to wait for the
+               next event of interest.  When an event of interest is
+               detected by another task (or even an interrupt handler),
+               sem_post() is called which increments the count to 1 and
+               wakes up the receiving task.
+
+               For example, in the following TASK A waits for events and
+               TASK B (or perhaps an interrupt handler) signals task A of
+               the occurence of the events by posting the semaphore:
+
+                 ---------------------- ---------------
+                 TASK A                 TASK B
+                 ---------------------- ---------------
+                 sem_init(sem, 0, 0);
+                 sem_wait(sem);
+                                        sem_post(sem);
+                 Awakens as holder
+                 ---------------------- ---------------
+
+               These two usage models are really very different and priority
+               inheritance simply does not apply when the semaphore is used for
+               signalling rather than locking.  In this signalling case
+               priority inheritance can interfere with the operation of the
+               semaphore.  The problem is that when TASK A is awakened it is
+               a holder of the semaphore.  Normally, a task is removed from
+               the holder list when it finally releases the semaphore via
+               sem_post().
+              
+               However, TASK A never calls sem_post(sem) so it becomes
+               *permanently* a holder of the semaphore and may have its
+               priority boosted at any time when any other task tries to
+               acquire the semaphore.
+
+               The fix is to call sem_setprotocol(SEM_PRIO_NONE) immediately
+               after the sem_init() call so that there will be no priority
+               inheritance operations on this semaphore used for signalling.
+  Status:      Open
+  Priority:    High.  If you have priority inheritance enabled and you use
+               semaphores for signalling events, then you *must* call
+               sem_setprotocol(SEM_PRIO_NONE) immediately after initializing
+               the semaphore.
 
   Title:       SCALABILITY
   Description: Task control information is retained in simple lists.  This

@@ -39,8 +39,9 @@
 
 #include <nuttx/config.h>
 
-#include <semaphore.h>
 #include <assert.h>
+
+#include <nuttx/semaphore.h>
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
 

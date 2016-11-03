@@ -51,6 +51,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Values for protocol attribute */
+
+#define SEM_PRIO_NONE             0
+#define SEM_PRIO_INHERIT          1
+#define SEM_PRIO_PROTECT          2
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
@@ -61,11 +67,13 @@
 struct inode;
 struct nsem_inode_s
 {
+  /* This must be the first element of the structure.  In sem_close() this
+   * structure must be cast compatible with sem_t.
+   */
+
   sem_t ns_sem;                     /* The contained semaphore */
 
-  /* Inode payload unique to named semaphores.  ns_inode must appear first
-   * in this structure in order to support casting between type sem_t and
-   * types of struct nsem_inode_s. */
+  /* Inode payload unique to named semaphores. */
 
   FAR struct inode *ns_inode;       /* Containing inode */
 };
@@ -133,6 +141,72 @@ int sem_tickwait(FAR sem_t *sem, systime_t start, uint32_t delay);
  ****************************************************************************/
 
 int sem_reset(FAR sem_t *sem, int16_t count);
+
+/****************************************************************************
+ * Function: sem_getprotocol
+ *
+ * Description:
+ *    Return the value of the semaphore protocol attribute.
+ *
+ * Parameters:
+ *    sem      - A pointer to the semaphore whose attributes are to be
+ *               queried.
+ *    protocol - The user provided location in which to store the protocol
+ *               value.
+ *
+ * Return Value:
+ *   0 if successful.  Otherwise, -1 is returned and the errno value is set
+ *   appropriately.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PRIORITY_INHERITANCE
+int sem_getprotocol(FAR sem_t *sem, FAR int *protocol);
+#else
+#  define sem_getprotocol(s,p) do { *(p) == SEM_PRIO_NONE); } while (0)
+#endif
+
+/****************************************************************************
+ * Function: sem_setprotocol
+ *
+ * Description:
+ *    Set semaphore protocol attribute.
+ *
+ *    One particularly important use of this function is when a semaphore
+ *    is used for inter-task communication like:
+ *
+ *      TASK A                 TASK B
+ *      sem_init(sem, 0, 0);
+ *      sem_wait(sem);
+ *                             sem_post(sem);
+ *      Awakens as holder
+ *
+ *    In this case priority inheritance can interfere with the operation of
+ *    the semaphore.  The problem is that when TASK A is restarted it is a
+ *    holder of the semaphore.  However, it never calls sem_post(sem) so it
+ *    becomes *permanently* a holder of the semaphore and may have its
+ *    priority boosted when any other task tries to acquire the semaphore.
+ *
+ *    The fix is to call sem_setprotocol(SEM_PRIO_NONE) immediately after
+ *    the sem_init() call so that there will be no priority inheritance
+ *    operations on this semaphore.
+ *
+ * Parameters:
+ *    sem      - A pointer to the semaphore whose attributes are to be
+ *               modified
+ *    protocol - The new protocol to use
+ *
+ * Return Value:
+ *   0 if successful.  Otherwise, -1 is returned and the errno value is set
+ *   appropriately.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PRIORITY_INHERITANCE
+int sem_setprotocol(FAR sem_t *sem, int protocol);
+#else
+#  define sem_setprotocol(s,p)  DEBUGASSERT((p) == SEM_PRIO_NONE);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

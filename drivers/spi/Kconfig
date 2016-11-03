@@ -3,6 +3,18 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+config ARCH_HAVE_SPI_CRCGENERATION
+	bool
+	default n
+
+config ARCH_HAVE_SPI_CS_CONTROL
+	bool
+	default n
+
+config ARCH_HAVE_SPI_BITORDER
+	bool
+	default n
+
 if SPI
 
 config SPI_SLAVE
@@ -55,10 +67,6 @@ config SPI_HWFEATURES
 		basically the OR of any specific hardware feature and eanbles
 		the SPI hwfeatures() interface method.
 
-config ARCH_HAVE_SPI_CRCGENERATION
-	bool
-	default n
-
 config SPI_CRCGENERATION
 	bool
 	default n
@@ -69,10 +77,6 @@ config SPI_CRCGENERATION
 		generation of SPI CRCs.  Enables the HWFEAT_CRCGENERATION option
 		as well as the hwfeartures() interface method.
 
-config ARCH_HAVE_SPI_CS_CONTROL
-	bool
-	default n
-
 config SPI_CS_CONTROL
 	bool "SPI CS Behavior Control"
 	default n
@@ -81,10 +85,6 @@ config SPI_CS_CONTROL
 	---help---
 		Enables possibilities to define the behavior of CS.
 		Also enables the hwfeatures() interface method.
-
-config ARCH_HAVE_SPI_BITORDER
-	bool
-	default n
 
 config SPI_BITORDER
 	bool "SPI Bit Order Control"
