@@ -57,7 +57,7 @@
 #include <arch/board/generated/csr.h>
 
 #include "chip.h"
-#include "hw/flags.h
+#include "hw/flags.h"
 #include "misoc.h"
 
 /****************************************************************************

@@ -92,15 +92,6 @@
 #  endif
 #endif
 
-/* Low-level register access */
-
-#define getreg8(a)            (*(volatile uint8_t *)(a))
-#define putreg8(v,a)          (*(volatile uint8_t *)(a) = (v))
-#define getreg16(a)           (*(volatile uint16_t *)(a))
-#define putreg16(v,a)         (*(volatile uint16_t *)(a) = (v))
-#define getreg32(a)           (*(volatile uint32_t *)(a))
-#define putreg32(v,a)         (*(volatile uint32_t *)(a) = (v))
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -143,6 +134,7 @@ void lm32_irq_initialize(void);
 /* Interrupt decode *********************************************************/
 
 uint32_t *lm32_decodeirq(uint32_t intstat, uint32_t *regs);
+uint32_t *lm32_doirq(int irq, uint32_t *regs);
 
 /* Software interrupts ******************************************************/
 

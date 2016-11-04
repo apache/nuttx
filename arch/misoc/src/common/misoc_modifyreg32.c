@@ -45,7 +45,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
-#include "misoc_arch.h"
+#include "misoc.h"
 
 /****************************************************************************
  * Public Functions

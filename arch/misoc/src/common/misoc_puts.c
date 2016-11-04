@@ -58,6 +58,6 @@ void misoc_puts(const char *str)
 {
   while (*str)
     {
-      misoc_putc(*str++);
+      up_putc(*str++);
     }
 }

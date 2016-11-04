@@ -57,6 +57,6 @@ void misoc_lowputs(const char *str)
 {
   while (*str)
     {
-      up_lowputc(*str++);
+      misoc_lowputc(*str++);
     }
 }

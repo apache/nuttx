@@ -126,7 +126,6 @@ uint32_t *lm32_doirq(int irq, uint32_t *regs)
   /* Unmask the last interrupt (global interrupts are still disabled) */
 
   up_enable_irq(irq);
-#endif
   board_autoled_off(LED_INIRQ);
   return regs;
 }
