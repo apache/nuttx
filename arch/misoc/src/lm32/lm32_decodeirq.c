@@ -77,7 +77,7 @@ uint32_t *lm32_decodeirq(uint32_t *regs)
 
   /* Decode and dispatch interrupts */
 
-  for (irq = 0; irq < NR_IRQS & instat != 0; i++)
+  for (irq = 0; irq < MISOC_NINTERRUPTS & instat != 0; i++)
     {
       uint32_t bit = (1 << irq);
 

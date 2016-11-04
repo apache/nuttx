@@ -74,6 +74,13 @@ void lm32_irq_initialize(void)
   irq_setie(1);
 }
 
+/****************************************************************************
+ * Name: up_irq_save
+ *
+ * Description:
+ *
+ ****************************************************************************/
+
 irqstate_t up_irq_save(void)
 {
   irqstate_t flags;
@@ -87,6 +94,13 @@ irqstate_t up_irq_save(void)
   irq_setie(0);
   return flags;
 }
+
+/****************************************************************************
+ * Name: up_irq_restore
+ *
+ * Description:
+ *
+ ****************************************************************************/
 
 void up_irq_restore(irqstate_t flags)
 {
@@ -109,11 +123,16 @@ void up_disable_irq(int irq)
 
   DEBUGASSERT(irq >= 0 && irq < NR_IRQS);
 
-  /* Disable interrupts by clearing the bit that corresponds to the irq */
+  /* Ignore any attempt to disable software interrupts */
 
-  flags  = irq_getmask();
-  flags &= ~(1 << irq);
-  irq_setmask(flags);
+  if (irq < MISOC_NINTERRUPTS)
+    {
+      /* Disable interrupts by clearing the bit that corresponds to the irq */
+
+      flags  = irq_getmask();
+      flags &= ~(1 << irq);
+      irq_setmask(flags);
+    }
 }
 
 /****************************************************************************
@@ -129,9 +148,14 @@ void up_enable_irq(int irq)
   irqstate_t flags;
   DEBUGASSERT(irq >= 0 && irq < NR_IRQS);
 
-  /* Enable interrupts by setting the bit that corresponds to the irq */
+  /* Ignore any attempt to enable software interrupts */
 
-  flags  = irq_getmask();
-  flags |= (1 << irq);
-  irq_setmask(flags);
+  if (irq < MISOC_NINTERRUPTS)
+    {
+      /* Enable interrupts by setting the bit that corresponds to the irq */
+
+      flags  = irq_getmask();
+      flags |= (1 << irq);
+      irq_setmask(flags);
+    }
 }
