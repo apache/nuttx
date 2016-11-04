@@ -884,10 +884,16 @@ static int tun_dev_init(FAR struct tun_device_s *priv, FAR struct file *filep,
 #endif
   priv->dev.d_private = (FAR void *)priv; /* Used to recover private state from dev */
 
-  /* Initialize the wait semaphore */
+  /* Initialize the mutual exlcusion and wait semaphore */
 
   sem_init(&priv->waitsem, 0, 1);
   sem_init(&priv->read_wait_sem, 0, 0);
+
+  /* The wait semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
+  sem_setprotocol(&priv->read_wait_sem, SEM_PRIO_NONE);
 
   /* Create a watchdog for timing polling for and timing of transmisstions */
 

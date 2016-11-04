@@ -66,6 +66,7 @@
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/clock.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/input/touchscreen.h>
 
 #include <arch/board/board.h>
@@ -1669,7 +1670,12 @@ int sam_tsd_register(struct sam_adc_s *adc, int minor)
   priv->threshx = INVALID_THRESHOLD; /* Initialize thresholding logic */
   priv->threshy = INVALID_THRESHOLD; /* Initialize thresholding logic */
 
-  sem_init(&priv->waitsem, 0, 0);    /* Initialize pen event wait semaphore */
+  /* Initialize pen event wait semaphore.  This semaphore is used for
+   * signaling and, hence, should not have priority inheritance enabled.
+   */
+
+  sem_init(&priv->waitsem, 0, 0);
+  sem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
 
   /* Register the device as an input device */
 

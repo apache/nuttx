@@ -55,6 +55,7 @@
 #include <nuttx/wdog.h>
 #include <nuttx/clock.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/spi/qspi.h>
 
 #include "up_internal.h"
@@ -2501,10 +2502,12 @@ struct qspi_dev_s *stm32l4_qspi_initialize(int intf)
         }
 
       /* Initialize the QSPI semaphore that is used to wake up the waiting
-       * thread when the DMA transfer completes.
+       * thread when the DMA transfer completes.  This semaphore is used for
+       * signaling and, hence, should not have priority inheritance enabled.
        */
 
       sem_init(&priv->dmawait, 0, 0);
+      sem_setprotocol(&priv->dmawait, SEM_PRIO_NONE);
 
       /* Create a watchdog time to catch DMA timeouts */
 
@@ -2526,10 +2529,13 @@ struct qspi_dev_s *stm32l4_qspi_initialize(int intf)
           goto errout_with_dmadog;
         }
 
-      /* Initialize the semaphore that blocks until the operation completes */
+      /* Initialize the semaphore that blocks until the operation completes.
+       * This semaphore is used for signaling and, hence, should not have
+       * priority inheritance enabled.
+       */
 
       sem_init(&priv->op_sem, 0, 0);
-
+      sem_setprotocol(&priv->op_sem, SEM_PRIO_NONE);
 #endif
 
       /* Perform hardware initialization.  Puts the QSPI into an active

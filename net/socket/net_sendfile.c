@@ -57,6 +57,7 @@
 
 #include <arch/irq.h>
 #include <nuttx/clock.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
@@ -673,9 +674,15 @@ ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset,
    */
 
   save  = net_lock();
-
   memset(&state, 0, sizeof(struct sendfile_s));
-  sem_init(&state. snd_sem, 0, 0);          /* Doesn't really fail */
+
+  /* This semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
+  sem_init(&state.snd_sem, 0, 0);           /* Doesn't really fail */
+  sem_setprotocol(&state.snd_sem, SEM_PRIO_NONE);
+
   state.snd_sock    = psock;                /* Socket descriptor to use */
   state.snd_foffset = offset ? *offset : 0; /* Input file offset */
   state.snd_flen    = count;                /* Number of bytes to send */

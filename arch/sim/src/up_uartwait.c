@@ -39,6 +39,8 @@
 
 #include <semaphore.h>
 
+#include <nuttx/sermaphore.h>
+
 #include "up_internal.h"
 
 /****************************************************************************
@@ -57,7 +59,12 @@ static sem_t g_uartavail;
 
 void simuart_initialize(void)
 {
+  /* The g_uartavail semaphore is used for signaling and, hence, should not
+   * have priority inheritance enabled.
+   */
+
   sem_init(&g_uartavail, 0, 0);
+  sem_setprotocol(&g_uartavail, SEM_PRIO_NONE);
 }
 
 /****************************************************************************

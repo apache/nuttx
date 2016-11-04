@@ -47,6 +47,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/spi/spi.h>
 
 #include <nuttx/irq.h>
@@ -1635,7 +1636,12 @@ FAR struct spi_dev_s *tiva_ssibus_initialize(int port)
   /* Initialize the state structure */
 
 #ifndef CONFIG_SSI_POLLWAIT
+  /* The xfrsem semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
   sem_init(&priv->xfrsem, 0, 0);
+  sem_setprotocol(&priv->xfrsem, SEM_PRIO_NONE);
 #endif
   sem_init(&priv->exclsem, 0, 1);
 

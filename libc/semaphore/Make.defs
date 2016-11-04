@@ -35,11 +35,7 @@
 
 # Add the semaphore C files to the build
 
-CSRCS += sem_init.c sem_getvalue.c
-
-ifeq ($(CONFIG_PRIORITY_INHERITANCE),y)
-CSRCS += sem_getprotocol.c
-endif
+CSRCS += sem_init.c sem_getprotocol.c sem_getvalue.c
 
 # Add the semaphore directory to the build
 

@@ -56,6 +56,7 @@
 #include <nuttx/board.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/nx/nx.h>
 
@@ -657,8 +658,17 @@ int board_tsc_setup(int minor)
   /* Initialize the touchscreen device driver instance */
 
   memset(priv, 0, sizeof(struct up_dev_s));
+
+  /* Initialize semaphores */
+
   sem_init(&priv->devsem,  0, 1); /* Initialize device structure semaphore */
   sem_init(&priv->waitsem, 0, 0); /* Initialize pen event wait semaphore */
+
+  /* The waitsem semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
+  sem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
 
   priv->minor = minor;
 

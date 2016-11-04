@@ -56,6 +56,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/clock.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/drivers/1wire.h>
 
 #include <arch/board/board.h>
@@ -744,6 +745,12 @@ static inline void stm32_1wire_sem_init(FAR struct stm32_1wire_priv_s *priv)
 {
   sem_init(&priv->sem_excl, 0, 1);
   sem_init(&priv->sem_isr, 0, 0);
+
+  /* The sem_isr semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
+  sem_setprotocol(&priv->sem_isr, SEM_PRIO_NONE);
 }
 
 /****************************************************************************
