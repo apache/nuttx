@@ -82,10 +82,11 @@
 #define REG_X29_NDX   29     /* General-purpose/return address */
 #define REG_X30_NDX   30     /* Exception address */
 #define REG_X31_NDX   31     /* Breakpoint address */
+#define REG_X32_NDX   32     /* Reg IE */
 
 /* Interrupt Context register */
 
-#define XCPTCONTEXT_REGS  32
+#define XCPTCONTEXT_REGS  33
 #define XCPTCONTEXT_SIZE  (4 * XCPTCONTEXT_REGS)
 
 #ifdef __ASSEMBLY__
@@ -121,6 +122,7 @@
 #  define REG_X29     (4*REG_X29_NDX)
 #  define REG_X30     (4*REG_X30_NDX)
 #  define REG_X31     (4*REG_X31_NDX)
+#  define REG_INT_CTX (4*REG_X32_NDX)
 #else
 #  define REG_X0       REG_X0_NDX
 #  define REG_X1       REG_X1_NDX
@@ -154,6 +156,7 @@
 #  define REG_X29      REG_X29_NDX
 #  define REG_X30      REG_X30_NDX
 #  define REG_X31      REG_X31_NDX
+#  define REG_INT_CTX  REG_X32_NDX
 #endif
 
 /* Register aliases */
@@ -175,6 +178,8 @@
 #define REG_A5         REG_X6
 #define REG_A6         REG_X7
 #define REG_A7         REG_X8
+
+#define REG_IE         REG_INT_CTX
 
 /****************************************************************************
  * Public Types

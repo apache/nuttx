@@ -58,9 +58,7 @@
 uint32_t *lm32_doirq(int irq, uint32_t *regs)
 {
   board_autoled_on(LED_INIRQ);
-#ifdef CONFIG_SUPPRESS_INTERRUPTS
-  PANIC();
-#else
+
   /* Current regs non-zero indicates that we are processing an interrupt;
    * g_current_regs is also used to manage interrupt level context switches.
    *

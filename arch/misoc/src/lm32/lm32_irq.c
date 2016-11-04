@@ -69,7 +69,7 @@ void lm32_irq_initialize(void)
 
   g_current_regs = NULL;
 
-  /* Enable interrupt */
+  /* Enable interrupts */
 
   irq_setie(1);
 }
@@ -77,15 +77,22 @@ void lm32_irq_initialize(void)
 irqstate_t up_irq_save(void)
 {
   irqstate_t flags;
-  irq_setie(0);
 
-#warning Return value MUST be the previous IE value.  Returning 1 will not work.
-  return 1;
+  /* Get the previous value of IE */
+
+  flags = irq_getie();
+
+  /* Disable interrupts and return the previous interrupt state */
+
+  irq_setie(0);
+  return flags;
 }
 
 void up_irq_restore(irqstate_t flags)
 {
-  irq_setie(1);
+  /* Restore the interrupt state returned by up_save_irq() */
+
+  irq_setie(flags);
 }
 
 /****************************************************************************
@@ -99,8 +106,13 @@ void up_irq_restore(irqstate_t flags)
 void up_disable_irq(int irq)
 {
   irqstate_t flags;
-  flags = irq_getmask();
-  flags &= ~(1 <<irq);
+
+  DEBUGASSERT(irq >= 0 && irq < NR_IRQS);
+
+  /* Disable interrupts by clearing the bit that corresponds to the irq */
+
+  flags  = irq_getmask();
+  flags &= ~(1 << irq);
   irq_setmask(flags);
 }
 
@@ -115,7 +127,11 @@ void up_disable_irq(int irq)
 void up_enable_irq(int irq)
 {
   irqstate_t flags;
-  flags = irq_getmask();
+  DEBUGASSERT(irq >= 0 && irq < NR_IRQS);
+
+  /* Enable interrupts by setting the bit that corresponds to the irq */
+
+  flags  = irq_getmask();
   flags |= (1 << irq);
   irq_setmask(flags);
 }

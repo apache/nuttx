@@ -326,5 +326,6 @@ uint32_t *lm32_swint(int irq, FAR void *context)
    */
 
   g_current_regs = NULL;
+
   return regs;
 }

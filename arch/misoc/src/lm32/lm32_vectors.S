@@ -151,7 +151,7 @@ _do_reset:
 	bi      os_start
 
 .save_all:
-	addi    sp, sp, -132
+	addi    sp, sp, -136
 	sw      (sp+REG_X0), r0
 	sw      (sp+REG_X1), r1
 	sw      (sp+REG_X2), r2
@@ -190,11 +190,14 @@ _do_reset:
 
 	/* ra needs to be moved from initial stack location */
 
-	lw      r1, (sp+ 132)
+	lw      r1, (sp+ 136)
 	sw      (sp+REG_RA), r1
 
-	/* the 2nd argument is the regs pointer */
+	/* get IE/REG_INT_CTX */
+	rcsr	r1, IE
+	sw	(sp+REG_INT_CTX), r1
 
+	/* the 2nd argument is the regs pointer */
 	addi    r2, sp, 0
 	ret
 
@@ -231,8 +234,10 @@ _do_reset:
 	lw      r29,  (r1+REG_RA)
 	lw      r30,  (r1+REG_EA)
 	lw      r31,  (r1+REG_BA)
+	lw	r1, (r1+REG_INT_CTX)
+	wcsr	IE, r1
 	lw      r1,  (r1+REG_X1)
-	addi    sp, sp, 132
+	addi    sp, sp, 136
 	eret
 
 	/* This global variable is unsigned long g_idle_topstack and is
