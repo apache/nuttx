@@ -53,6 +53,17 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#undef HAVE_LEDS
+#undef HAVE_DAC
+
+#if !defined(CONFIG_ARCH_LEDS) && defined(CONFIG_USERLED_LOWER)
+#  define HAVE_LEDS 1
+#endif
+
+#if defined(CONFIG_DAC)
+#  define HAVE_DAC 1
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -84,9 +95,11 @@
 
 int board_app_initialize(uintptr_t arg)
 {
+#if defined(HAVE_LEDS) || defined(HAVE_DAC)
   int ret;
+#endif
 
-#if !defined(CONFIG_ARCH_LEDS) && defined(CONFIG_USERLED_LOWER)
+#ifdef HAVE_LEDS
   /* Register the LED driver */
 
   ret = userled_lower_initialize(LED_DRIVER_PATH);
@@ -101,7 +114,7 @@ int board_app_initialize(uintptr_t arg)
    * faut le faire ici
    */
 
-#if defined(CONFIG_DAC)
+#ifdef HAVE_DAC
   ret = board_dac_setup();
   if (ret < 0)
     {

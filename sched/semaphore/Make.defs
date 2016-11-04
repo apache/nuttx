@@ -37,10 +37,10 @@
 
 CSRCS += sem_destroy.c sem_wait.c sem_trywait.c sem_tickwait.c
 CSRCS += sem_timedwait.c sem_timeout.c sem_post.c sem_recover.c
-CSRCS += sem_reset.c sem_setprotocol.c sem_waitirq.c
+CSRCS += sem_reset.c sem_waitirq.c
 
 ifeq ($(CONFIG_PRIORITY_INHERITANCE),y)
-CSRCS += sem_initialize.c sem_holder.c
+CSRCS += sem_initialize.c sem_holder.c sem_setprotocol.c
 endif
 
 ifeq ($(CONFIG_SPINLOCK),y)

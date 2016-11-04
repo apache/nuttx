@@ -58,12 +58,22 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Configuration ************************************************************/
+
+#if defined(ADC1_HAVE_DMA) && defined(CONFIG_STM32_ADC1)
+#  warning "ADC1 with DMA support is not fully implemented"
+#  undef CONFIG_STM32_ADC1
+#endif
+
+#if defined(ADC2_HAVE_DMA) && defined(CONFIG_STM32_ADC2)
+#  warning "ADC2 with DMA support is not fully implemented"
+#  undef CONFIG_STM32_ADC2
+#endif
+
 #if (defined(CONFIG_STM32_ADC1) && defined(CONFIG_STM32_ADC2)) || \
     (defined(CONFIG_STM32_ADC3) && defined(CONFIG_STM32_ADC4))
 # error "will not work with this combination of ADCs"
 #endif
-
-/* Configuration ************************************************************/
 
 /* 1 or 2 ADC devices (DEV1, DEV2) */
 
@@ -106,16 +116,8 @@
 /* The number of ADC channels in the conversion list */
 /* TODO DMA */
 
-#if defined(ADC1_HAVE_DMA)
-#  error "ADC1 with DMA support is not fully implemented"
-#else
-#  define ADC1_NCHANNELS 4
-#endif
-#if defined(ADC2_HAVE_DMA)
-#  error "ADC2 with DMA support is not fully implemented"
-#else
-#  define ADC2_NCHANNELS 3
-#endif
+#define ADC1_NCHANNELS 4
+#define ADC2_NCHANNELS 3
 #define ADC3_NCHANNELS 3
 #define ADC4_NCHANNELS 1
 

@@ -2268,7 +2268,7 @@ static int lpc17_epalloc(struct usbhost_driver_s *drvr,
        */
 
       sem_init(&ed->wdhsem, 0, 0);
-      sem_setprotocol(&priv->wdhsem, SEM_PRIO_NONE);
+      sem_setprotocol(&ed->wdhsem, SEM_PRIO_NONE);
 
       /* Link the common tail TD to the ED's TD list */
 
@@ -3308,7 +3308,9 @@ errout_with_sem:
 
 static int lpc17_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 {
+#ifdef CONFIG_USBHOST_ASYNCH
   struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
+#endif
   struct lpc17_ed_s *ed = (struct lpc17_ed_s *)ep;
   struct lpc17_gtd_s *td;
   struct lpc17_gtd_s *next;
@@ -3316,7 +3318,7 @@ static int lpc17_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
   uint32_t ctrl;
   irqstate_t flags;
 
-  DEBUGASSERT(priv != NULL && ed != NULL);
+  DEBUGASSERT(drvr != NULL && ed != NULL);
 
   /* These first steps must be atomic as possible */
 
