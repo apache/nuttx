@@ -44,7 +44,7 @@
  * Included Files
  ****************************************************************************/
 
-/* Include RISC-V architecture-specific syscall macros */
+/* Include LM32 architecture-specific syscall macros */
 
 #ifdef CONFIG_ARCH_MISOC
 # include <arch/lm32/syscall.h>

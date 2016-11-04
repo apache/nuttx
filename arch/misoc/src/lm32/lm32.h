@@ -61,7 +61,7 @@
 #define INTSTACK_COLOR        0xdeadbeef
 #define HEAP_COLOR            'h'
 
-/* In the RISC_V model, the state is copied from the stack to the TCB, but
+/* In the LM32 model, the state is copied from the stack to the TCB, but
  * only a referenced is passed to get the state from the TCB.
  */
 
