@@ -1366,6 +1366,8 @@ nuttx/
  |   |   `- README.txt
  |   |- mirtoo/
  |   |   `- README.txt
+ |   |- misoc/
+ |   |   `- README.txt
  |   |- moteino-mega/
  |   |   `- README.txt
  |   |- mx1ads/

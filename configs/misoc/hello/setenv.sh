@@ -48,17 +48,11 @@ if [ -z "${PATH_ORIG}" ]; then
   export PATH_ORIG="${PATH}"
 fi
 
-# This is the Cygwin path to the location where I installed the WinAVR
-# toolchain under windows.  This is *not* the default install
-# location so you will probably have to edit this.  You will also have
-# to edit this if you install the Linux AVR toolchain as well
-#export TOOLCHAIN_BIN="/cygdrive/c/WinAVR/bin"
-
 # This is the Cygwin path to the location where I build the buildroot
 # toolchain.
-#export TOOLCHAIN_BIN="${WD}/../buildroot/build_avr/staging_dir/bin"
+export TOOLCHAIN_BIN="${WD}/../buildroot/build_lm32/staging_dir/bin"
 
 # Add the path to the toolchain to the PATH varialble
-#export PATH="${TOOLCHAIN_BIN}:/sbin:/usr/sbin:${PATH_ORIG}"
+export PATH="${TOOLCHAIN_BIN}:/sbin:/usr/sbin:${PATH_ORIG}"
 
 echo "PATH : ${PATH}"
