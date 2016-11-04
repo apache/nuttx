@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/semaphore/sem_setprotocol.c
+ * libc/semaphore/sem_setprotocol.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -44,9 +44,7 @@
 
 #include <nuttx/semaphore.h>
 
-#include "semaphore/semaphore.h"
-
-#ifdef CONFIG_PRIORITY_INHERITANCE
+#ifndef CONFIG_PRIORITY_INHERITANCE
 
 /****************************************************************************
  * Public Functions
@@ -97,24 +95,10 @@ int sem_setprotocol(FAR sem_t *sem, int protocol)
   switch (protocol)
     {
       case SEM_PRIO_NONE:
-        /* Disable priority inheritance */
-
-        sem->flags |= PRIOINHERIT_FLAGS_DISABLE;
-
-        /* Remove any current holders */
-
-        sem_destroyholder(sem);
         return OK;
 
       case SEM_PRIO_INHERIT:
-        /* Enable priority inheritance (dangerous) */
-
-        sem->flags &= ~PRIOINHERIT_FLAGS_DISABLE;
-        return OK;
-
       case SEM_PRIO_PROTECT:
-        /* Not yet supported */
-
         errcode = ENOSYS;
         break;
 
@@ -127,4 +111,4 @@ int sem_setprotocol(FAR sem_t *sem, int protocol)
   return ERROR;
 }
 
-endif /* CONFIG_PRIORITY_INHERITANCE */
+#endif /* !CONFIG_PRIORITY_INHERITANCE */

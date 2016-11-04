@@ -37,6 +37,10 @@
 
 CSRCS += sem_init.c sem_getprotocol.c sem_getvalue.c
 
+ifneq ($(CONFIG_PRIORITY_INHERITANCE),y)
+CSRCS += sem_setprotocol.c
+endif
+
 # Add the semaphore directory to the build
 
 DEPPATH += --dep-path semaphore
