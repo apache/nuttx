@@ -1,9 +1,8 @@
 /****************************************************************************
- * arch/misoc/src/common/serial.h
+ * arch/misoc/src/common/misoc_lowputs.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Ramtin Amin <keytwo@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,51 +33,17 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_MISOC_SRC_COMMON_MISOC_H
-#define __ARCH_MISOC_SRC_COMMON_MISOC_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
+#include "misoc.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-/****************************************************************************
- * Name: up_serialinit
- *
- * Description:
- *   Register serial console and serial ports.  This assumes that
- *   misoc_earlyserialinit was called previously.
- *
- ****************************************************************************/
-
-void misoc_serial_initialize(void);
-
-/****************************************************************************
- * Name: misoc_puts
- *
- * Description:
- *   This is a low-level helper function used to support debug.
- *
- ****************************************************************************/
-
-void misoc_puts(const char *str);
-
-/****************************************************************************
- * Name: misoc_lowputc
- *
- * Description:
- *   Low-level, blocking character output the the serial console.
- *
- ****************************************************************************/
-
-void misoc_lowputc(char ch);
 
 /****************************************************************************
  * Name: misoc_lowputs
@@ -88,19 +53,10 @@ void misoc_lowputc(char ch);
  *
  ****************************************************************************/
 
-void misoc_lowputs(const char *str);
-
-/****************************************************************************
- * Name: modifyreg[N]
- *
- * Description:
- *   Atomic modification of registers.
- *
- ****************************************************************************/
-
-void modifyreg8(unsigned int addr, uint8_t clearbits, uint8_t setbits);
-void modifyreg16(unsigned int addr, uint16_t clearbits, uint16_t setbits);
-void modifyreg32(unsigned int addr, uint32_t clearbits, uint32_t setbits);
-
-#endif /* __ASSEMBLY__ */
-#endif /* __ARCH_MISOC_SRC_COMMON_MISOC_H */
+void misoc_lowputs(const char *str)
+{
+  while (*str)
+    {
+      up_lowputc(*str++);
+    }
+}

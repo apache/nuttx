@@ -1,9 +1,8 @@
 /****************************************************************************
- * arch/misoc/src/common/serial.h
+ * arch/misoc/src/common/misoc_modifyreg16.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Ramtin Amin <keytwo@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,73 +33,41 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_MISOC_SRC_COMMON_MISOC_H
-#define __ARCH_MISOC_SRC_COMMON_MISOC_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
+#include <debug.h>
+
+#include <nuttx/irq.h>
+#include <nuttx/arch.h>
+
+#include "misoc.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
-
 /****************************************************************************
- * Name: up_serialinit
+ * Name: modifyreg16
  *
  * Description:
- *   Register serial console and serial ports.  This assumes that
- *   misoc_earlyserialinit was called previously.
+ *   Atomically modify the specified bits in a memory mapped register
  *
  ****************************************************************************/
 
-void misoc_serial_initialize(void);
+void modifyreg16(unsigned int addr, uint16_t clearbits, uint16_t setbits)
+{
+  irqstate_t flags;
+  uint16_t   regval;
 
-/****************************************************************************
- * Name: misoc_puts
- *
- * Description:
- *   This is a low-level helper function used to support debug.
- *
- ****************************************************************************/
-
-void misoc_puts(const char *str);
-
-/****************************************************************************
- * Name: misoc_lowputc
- *
- * Description:
- *   Low-level, blocking character output the the serial console.
- *
- ****************************************************************************/
-
-void misoc_lowputc(char ch);
-
-/****************************************************************************
- * Name: misoc_lowputs
- *
- * Description:
- *   This is a low-level helper function used to support debug.
- *
- ****************************************************************************/
-
-void misoc_lowputs(const char *str);
-
-/****************************************************************************
- * Name: modifyreg[N]
- *
- * Description:
- *   Atomic modification of registers.
- *
- ****************************************************************************/
-
-void modifyreg8(unsigned int addr, uint8_t clearbits, uint8_t setbits);
-void modifyreg16(unsigned int addr, uint16_t clearbits, uint16_t setbits);
-void modifyreg32(unsigned int addr, uint32_t clearbits, uint32_t setbits);
-
-#endif /* __ASSEMBLY__ */
-#endif /* __ARCH_MISOC_SRC_COMMON_MISOC_H */
+  flags   = enter_critical_section();
+  regval  = getreg16(addr);
+  regval &= ~clearbits;
+  regval |= setbits;
+  putreg16(regval, addr);
+  leave_critical_section(flags);
+}

@@ -1,9 +1,8 @@
 /****************************************************************************
- * arch/misoc/src/common/serial.h
+ *  arch/misoc/src/common/up_udelay.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Ramtin Amin <keytwo@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,73 +33,85 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_MISOC_SRC_COMMON_MISOC_H
-#define __ARCH_MISOC_SRC_COMMON_MISOC_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <sys/types.h>
+#include <nuttx/arch.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define CONFIG_BOARD_LOOPSPER100USEC ((CONFIG_BOARD_LOOPSPERMSEC+5)/10)
+#define CONFIG_BOARD_LOOPSPER10USEC  ((CONFIG_BOARD_LOOPSPERMSEC+50)/100)
+#define CONFIG_BOARD_LOOPSPERUSEC    ((CONFIG_BOARD_LOOPSPERMSEC+500)/1000)
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
-
 /****************************************************************************
- * Name: up_serialinit
+ * Name: up_udelay
  *
  * Description:
- *   Register serial console and serial ports.  This assumes that
- *   misoc_earlyserialinit was called previously.
+ *   Delay inline for the requested number of microseconds.  NOTE:  Because
+ *   of all of the setup, several microseconds will be lost before the actual
+ *   timing looop begins.  Thus, the delay will always be a few microseconds
+ *   longer than requested.
+ *
+ *   *** NOT multi-tasking friendly ***
+ *
+ * ASSUMPTIONS:
+ *   The setting CONFIG_BOARD_LOOPSPERMSEC has been calibrated
  *
  ****************************************************************************/
 
-void misoc_serial_initialize(void);
+void up_udelay(useconds_t microseconds)
+{
+  volatile int i;
 
-/****************************************************************************
- * Name: misoc_puts
- *
- * Description:
- *   This is a low-level helper function used to support debug.
- *
- ****************************************************************************/
+  /* We'll do this a little at a time because we expect that the
+   * CONFIG_BOARD_LOOPSPERUSEC is very inaccurate during to truncation in
+   * the divisions of its calculation.  We'll use the largest values that
+   * we can in order to prevent significant error buildup in the loops.
+   */
 
-void misoc_puts(const char *str);
+  while (microseconds > 1000)
+    {
+      for (i = 0; i < CONFIG_BOARD_LOOPSPERMSEC; i++)
+        {
+        }
 
-/****************************************************************************
- * Name: misoc_lowputc
- *
- * Description:
- *   Low-level, blocking character output the the serial console.
- *
- ****************************************************************************/
+      microseconds -= 1000;
+    }
 
-void misoc_lowputc(char ch);
+  while (microseconds > 100)
+    {
+      for (i = 0; i < CONFIG_BOARD_LOOPSPER100USEC; i++)
+        {
+        }
 
-/****************************************************************************
- * Name: misoc_lowputs
- *
- * Description:
- *   This is a low-level helper function used to support debug.
- *
- ****************************************************************************/
+      microseconds -= 100;
+    }
 
-void misoc_lowputs(const char *str);
+  while (microseconds > 10)
+    {
+      for (i = 0; i < CONFIG_BOARD_LOOPSPER10USEC; i++)
+        {
+        }
 
-/****************************************************************************
- * Name: modifyreg[N]
- *
- * Description:
- *   Atomic modification of registers.
- *
- ****************************************************************************/
+      microseconds -= 10;
+    }
 
-void modifyreg8(unsigned int addr, uint8_t clearbits, uint8_t setbits);
-void modifyreg16(unsigned int addr, uint16_t clearbits, uint16_t setbits);
-void modifyreg32(unsigned int addr, uint32_t clearbits, uint32_t setbits);
+  while (microseconds > 0)
+    {
+      for (i = 0; i < CONFIG_BOARD_LOOPSPERUSEC; i++)
+        {
+        }
 
-#endif /* __ASSEMBLY__ */
-#endif /* __ARCH_MISOC_SRC_COMMON_MISOC_H */
+      microseconds--;
+    }
+}
