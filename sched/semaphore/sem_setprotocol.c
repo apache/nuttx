@@ -127,4 +127,4 @@ int sem_setprotocol(FAR sem_t *sem, int protocol)
   return ERROR;
 }
 
-endif /* CONFIG_PRIORITY_INHERITANCE */
+#endif /* CONFIG_PRIORITY_INHERITANCE */
