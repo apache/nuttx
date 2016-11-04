@@ -69,6 +69,10 @@ void lm32_irq_initialize(void)
 
   g_current_regs = NULL;
 
+  /* Attach the software interrupt */
+
+  (void)irq_attach(MISOC_IRQ_SWINT, lm32_swint);
+
   /* Enable interrupts */
 
   irq_setie(1);
