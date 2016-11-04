@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_MISOC_SRC_COMMON_LM32_H
-#define __ARCH_MISOC_SRC_COMMON_LM32_H
+#ifndef __ARCH_MISOC_SRC_LM32_LM32_H
+#define __ARCH_MISOC_SRC_LM32_LM32_H
 
 /****************************************************************************
  * Included Files
@@ -141,13 +141,17 @@ void lm32_copystate(uint32_t *dest, uint32_t *src);
 
 void lm32_irq_initialize(void);
 
-/* System timer *************************************************************/
+/* Interrupt decode *********************************************************/
 
-void lm32_timer_initialize(void);
+uint32_t *lm32_decodeirq(uint32_t intstat, uint32_t *regs);
 
 /* Software interrupts ******************************************************/
 
-uint32_t *lm32_swint(int irq, FAR void *context);
+int lm32_swint(int irq, FAR void *context);
+
+/* System timer *************************************************************/
+
+void lm32_timer_initialize(void);
 
 /* Signal handling **********************************************************/
 
@@ -163,10 +167,5 @@ void modifyreg32(unsigned int addr, uint32_t clearbits, uint32_t setbits);
 
 void lm32_dumpstate(void);
 
-#undef EXTERN
-#ifdef __cplusplus
-}
-#endif
 #endif /* __ASSEMBLY__ */
-
-#endif /* __ARCH_MISOC_SRC_COMMON_LM32_H */
+#endif /* __ARCH_MISOC_SRC_LM32_LM32_H */

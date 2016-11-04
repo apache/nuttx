@@ -61,17 +61,9 @@
  *
  ****************************************************************************/
 
-uint32_t *lm32_decodeirq(uint32_t *regs)
+uint32_t *lm32_decodeirq(uint32_t intstat, uint32_t *regs)
 {
-  uint32_t intstat;
   int irq;
-
-  /* Read the pending interrupts */
-  /* REVISIT: How do I get the interupt status */
-#warning Missing logic
-  intstat = 0;
-
-  /* REVIST: Do I need to mask the interrupt status with the IM? */
 
   irqinfo("intstat=%08lx\n", (unsigned long)intstat);
 

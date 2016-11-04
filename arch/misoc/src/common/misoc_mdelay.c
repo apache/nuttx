@@ -1,9 +1,8 @@
 /****************************************************************************
- * arch/misoc/src/lm32/lm32_initialize.c
+ *  arch/misoc/src/common/misoc_mdelay.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Ramtin Amin <keytwo@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,40 +38,33 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <debug.h>
-
 #include <nuttx/arch.h>
-#include <nuttx/sched_note.h>
-#include <nuttx/drivers/drivers.h>
-#include <nuttx/fs/loop.h>
-#include <nuttx/net/loopback.h>
-#include <nuttx/net/tun.h>
-#include <nuttx/net/telnet.h>
-#include <nuttx/syslog/syslog.h>
-#include <nuttx/syslog/syslog_console.h>
-#include <nuttx/serial/pty.h>
-#include <nuttx/crypto/crypto.h>
-#include <nuttx/power/pm.h>
-
-#include <arch/board/board.h>
-
-#include "misoc.h"
-#include "lm32.h"
 
 /****************************************************************************
- * Public Functionis
+ * Public Functions
  ****************************************************************************/
 
-void up_initialize(void)
+/****************************************************************************
+ * Name: up_mdelay
+ *
+ * Description:
+ *   Delay inline for the requested number of milliseconds.
+ *   *** NOT multi-tasking friendly ***
+ *
+ * ASSUMPTIONS:
+ *   The setting CONFIG_BOARD_LOOPSPERMSEC has been calibrated
+ *
+ ****************************************************************************/
+
+void up_mdelay(unsigned int milliseconds)
 {
-  /* Initialize the System Timer */
+  volatile int i;
+  volatile int j;
 
-  lm32_irq_initialize();
-
-  /* Initialize the serial driver */
-
-#warning REVISIT:  Here you should all misoc_serial_initialize().  That initializes the entire serial driver, a part of the operation is the uart initialization.
-
-  misoc_serial_initialize();
+  for (i = 0; i < milliseconds; i++)
+    {
+      for (j = 0; j < CONFIG_BOARD_LOOPSPERMSEC; j++)
+        {
+        }
+    }
 }

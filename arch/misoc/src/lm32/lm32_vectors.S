@@ -143,101 +143,103 @@ _do_reset:
 
 .clearBSS:
 	be      r1, r3, .callMain
-	sw      (r1+0), r0
-	addi    r1, r1, 4
+	sw		(r1+0), r0
+	addi	r1, r1, 4
 	bi      .clearBSS
 
 .callMain:
 	bi      os_start
 
 .save_all:
-	addi    sp, sp, -136
-	sw      (sp+REG_X0), r0
-	sw      (sp+REG_X1), r1
-	sw      (sp+REG_X2), r2
-	sw      (sp+REG_X3), r3
-	sw      (sp+REG_X4), r4
-	sw      (sp+REG_X5), r5
-	sw      (sp+REG_X6), r6
-	sw      (sp+REG_X7), r7
-	sw      (sp+REG_X8), r8
-	sw      (sp+REG_X9), r9
-	sw      (sp+REG_X10), r10
-	sw      (sp+REG_X11), r11
-	sw      (sp+REG_X12), r12
-	sw      (sp+REG_X13), r13
-	sw      (sp+REG_X14), r14
-	sw      (sp+REG_X15), r15
-	sw      (sp+REG_X16), r16
-	sw      (sp+REG_X17), r17
-	sw      (sp+REG_X18), r18
-	sw      (sp+REG_X19), r19
-	sw      (sp+REG_X20), r20
-	sw      (sp+REG_X21), r21
-	sw      (sp+REG_X22), r22
-	sw      (sp+REG_X23), r23
-	sw      (sp+REG_X24), r24
-	sw      (sp+REG_X25), r25
+	addi	sp, sp, -136
+	sw		(sp+REG_X0), r0
+	sw		(sp+REG_X1), r1
+	sw		(sp+REG_X2), r2
+	sw		(sp+REG_X3), r3
+	sw		(sp+REG_X4), r4
+	sw		(sp+REG_X5), r5
+	sw		(sp+REG_X6), r6
+	sw		(sp+REG_X7), r7
+	sw		(sp+REG_X8), r8
+	sw		(sp+REG_X9), r9
+	sw		(sp+REG_X10), r10
+	sw		(sp+REG_X11), r11
+	sw		(sp+REG_X12), r12
+	sw		(sp+REG_X13), r13
+	sw		(sp+REG_X14), r14
+	sw		(sp+REG_X15), r15
+	sw		(sp+REG_X16), r16
+	sw		(sp+REG_X17), r17
+	sw		(sp+REG_X18), r18
+	sw		(sp+REG_X19), r19
+	sw		(sp+REG_X20), r20
+	sw		(sp+REG_X21), r21
+	sw		(sp+REG_X22), r22
+	sw		(sp+REG_X23), r23
+	sw		(sp+REG_X24), r24
+	sw		(sp+REG_X25), r25
 
-	sw      (sp+REG_GP), r26
-	sw      (sp+REG_FP), r27
-	sw      (sp+REG_SP), r28
+	sw		(sp+REG_GP), r26
+	sw		(sp+REG_FP), r27
+	sw		(sp+REG_SP), r28
 
 	/* reg RA done later */
 
-	sw      (sp+REG_EA), r30
-	sw      (sp+REG_BA), r31
+	sw		(sp+REG_EA), r30
+	sw		(sp+REG_BA), r31
 
 	/* ra needs to be moved from initial stack location */
 
-	lw      r1, (sp+ 136)
-	sw      (sp+REG_RA), r1
+	w		r1, (sp+ 136)
+	sw		(sp+REG_RA), r1
 
-	/* get IE/REG_INT_CTX */
+	/* Get IE/REG_INT_CTX */
+
 	rcsr	r1, IE
-	sw	(sp+REG_INT_CTX), r1
+	sw		(sp+REG_INT_CTX), r1
 
-	/* the 2nd argument is the regs pointer */
-	addi    r2, sp, 0
+	/* The 2nd argument is the regs pointer */
+
+	addi	r2, sp, 0
 	ret
 
 .restore_all_and_eret:
 	/* r1 should have the place where we restore ! */
 
-	lw      r2,  (r1+REG_X2)
-	lw      r3,  (r1+REG_X3)
-	lw      r4,  (r1+REG_X4)
-	lw      r5,  (r1+REG_X5)
-	lw      r6,  (r1+REG_X6)
-	lw      r7,  (r1+REG_X7)
-	lw      r8,  (r1+REG_X8)
-	lw      r9,  (r1+REG_X9)
-	lw      r10, (r1+REG_X10)
-	lw      r11,  (r1+REG_X11)
-	lw      r12,  (r1+REG_X12)
-	lw      r13,  (r1+REG_X13)
-	lw      r14,  (r1+REG_X14)
-	lw      r15,  (r1+REG_X15)
-	lw      r16,  (r1+REG_X16)
-	lw      r17,  (r1+REG_X17)
-	lw      r18,  (r1+REG_X18)
-	lw      r19,  (r1+REG_X19)
-	lw      r20,  (r1+REG_X20)
-	lw      r21,  (r1+REG_X21)
-	lw      r22,  (r1+REG_X22)
-	lw      r23,  (r1+REG_X23)
-	lw      r24,  (r1+REG_X24)
-	lw      r25,  (r1+REG_X25)
-	lw      r26,  (r1+REG_GP)
-	lw      r27,  (r1+REG_FP)
-	lw      r28,  (r1+REG_SP)
-	lw      r29,  (r1+REG_RA)
-	lw      r30,  (r1+REG_EA)
-	lw      r31,  (r1+REG_BA)
-	lw	r1, (r1+REG_INT_CTX)
+	w		r2,  (r1+REG_X2)
+	w		r3,  (r1+REG_X3)
+	w		r4,  (r1+REG_X4)
+	w		r5,  (r1+REG_X5)
+	w		r6,  (r1+REG_X6)
+	w		r7,  (r1+REG_X7)
+	w		r8,  (r1+REG_X8)
+	w		r9,  (r1+REG_X9)
+	w		r10, (r1+REG_X10)
+	w		r11,  (r1+REG_X11)
+	w		r12,  (r1+REG_X12)
+	w		r13,  (r1+REG_X13)
+	w		r14,  (r1+REG_X14)
+	w		r15,  (r1+REG_X15)
+	w		r16,  (r1+REG_X16)
+	w		r17,  (r1+REG_X17)
+	w		r18,  (r1+REG_X18)
+	w		r19,  (r1+REG_X19)
+	w		r20,  (r1+REG_X20)
+	w		r21,  (r1+REG_X21)
+	w		r22,  (r1+REG_X22)
+	w		r23,  (r1+REG_X23)
+	w		r24,  (r1+REG_X24)
+	w		r25,  (r1+REG_X25)
+	w		r26,  (r1+REG_GP)
+	w		r27,  (r1+REG_FP)
+	w		r28,  (r1+REG_SP)
+	w		r29,  (r1+REG_RA)
+	w		r30,  (r1+REG_EA)
+	w		r31,  (r1+REG_BA)
+	lw		r1, (r1+REG_INT_CTX)
 	wcsr	IE, r1
-	lw      r1,  (r1+REG_X1)
-	addi    sp, sp, 136
+	w		r1,  (r1+REG_X1)
+	addi	sp, sp, 136
 	eret
 
 	/* This global variable is unsigned long g_idle_topstack and is

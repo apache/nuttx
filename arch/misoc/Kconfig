@@ -11,7 +11,7 @@ choice
 
 config ARCH_CHIP_LM32
 	bool "LM32"
-	select MISOC_HAVE_UART0
+	select MISOC_HAVE_UART1
 	---help---
 		LM32 Chip Selected
 
@@ -32,15 +32,15 @@ menu "MISOC Peripheral Support"
 # These "hidden" settings determine is a peripheral option is available for the
 # selection MCU
 
-config MISOC_HAVE_UART0
+config MISOC_HAVE_UART1
 	bool
 	default n
-	select UART0_SERIALDRIVER
+	select UART1_SERIALDRIVER
 
-config MISOC_UART0
-	bool "UART0"
+config MISOC_UART1
+	bool "UART1"
 	default n
-	select ARCH_HAVE_UART0
+	select ARCH_HAVE_UART1
 	select MISOC_UART
 
 endmenu # MISOC Peripheral Support

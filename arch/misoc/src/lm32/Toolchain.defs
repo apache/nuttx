@@ -87,8 +87,8 @@ endif
 # Generic GNU toolchain on OS X, Linux or any typical Posix system
 
 ifeq ($(CONFIG_LM32_TOOLCHAIN),GNUL)
-  CROSSDEV ?= lm32-elf--
-  ARCROSSDEV ?= lm32-elf--
+  CROSSDEV ?= lm32-elf-
+  ARCROSSDEV ?= lm32-elf-
   MAXOPTIMIZATION ?= -Os
 endif
 

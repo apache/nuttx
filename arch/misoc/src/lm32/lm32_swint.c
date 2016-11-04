@@ -130,7 +130,7 @@ static void dispatch_syscall(void)
  *
  ****************************************************************************/
 
-uint32_t *lm32_swint(int irq, FAR void *context)
+int lm32_swint(int irq, FAR void *context)
 {
   uint32_t *regs = (uint32_t *)context;
 
@@ -313,19 +313,5 @@ uint32_t *lm32_swint(int irq, FAR void *context)
     }
 #endif
 
-  /* If a context switch occurred while processing the interrupt then
-   * g_current_regs may have change value.  If we return any value different
-   * from the input regs, then the lower level will know that a context
-   * switch occurred during interrupt processing.
-   */
-
-  regs = (uint32_t *)g_current_regs;
-
-  /* Set g_current_regs to NULL to indicate that we are no longer in an
-   * interrupt handler.
-   */
-
-  g_current_regs = NULL;
-
-  return regs;
+  return OK;
 }

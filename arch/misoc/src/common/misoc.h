@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/misoc/src/lm32/lm32_initialize.c
+ * arch/misoc/src/common/serial.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -34,45 +34,31 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_MISOC_SRC_COMMON_MISOC_H
+#define __ARCH_MISOC_SRC_COMMON_MISOC_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <debug.h>
-
-#include <nuttx/arch.h>
-#include <nuttx/sched_note.h>
-#include <nuttx/drivers/drivers.h>
-#include <nuttx/fs/loop.h>
-#include <nuttx/net/loopback.h>
-#include <nuttx/net/tun.h>
-#include <nuttx/net/telnet.h>
-#include <nuttx/syslog/syslog.h>
-#include <nuttx/syslog/syslog_console.h>
-#include <nuttx/serial/pty.h>
-#include <nuttx/crypto/crypto.h>
-#include <nuttx/power/pm.h>
-
-#include <arch/board/board.h>
-
-#include "misoc.h"
-#include "lm32.h"
-
 /****************************************************************************
- * Public Functionis
+ * Public Functions
  ****************************************************************************/
 
-void up_initialize(void)
-{
-  /* Initialize the System Timer */
+#ifndef __ASSEMBLY__
 
-  lm32_irq_initialize();
+/****************************************************************************
+ * Name: up_serialinit
+ *
+ * Description:
+ *   Register serial console and serial ports.  This assumes that
+ *   misoc_earlyserialinit was called previously.
+ *
+ ****************************************************************************/
 
-  /* Initialize the serial driver */
+void misoc_serial_initialize(void);
 
-#warning REVISIT:  Here you should all misoc_serial_initialize().  That initializes the entire serial driver, a part of the operation is the uart initialization.
-
-  misoc_serial_initialize();
-}
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_MISOC_SRC_COMMON_MISOC_H */
