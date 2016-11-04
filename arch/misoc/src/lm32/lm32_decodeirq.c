@@ -63,30 +63,47 @@
 
 uint32_t *lm32_decodeirq(uint32_t *regs)
 {
-  uint32_t im;
+  uint32_t intstat;
   int irq;
 
-  /* Read the interrupt acknowledge register and get the interrupt ID */
+  /* Read the pending interrupts */
+  /* REVISIT: How do I get the interupt status */
+#warning Missing logic
+  intstat = 0;
 
-  im = getreg32(GIC_ICCIAR);
-  irq    = (im & GIC_ICCIAR_INTID_MASK) >> GIC_ICCIAR_INTID_SHIFT;
+  /* REVIST: Do I need to mask the interrupt status with the IM? */
 
-  irqinfo("irq=%d\n", irq);
+  irqinfo("intstat=%08lx\n", (unsigned long)intstat);
 
-  /* Ignore spurions IRQs.  ICCIAR will report 1023 if there is no pending
-   * interrupt.
-   */
+  /* Decode and dispatch interrupts */
 
-  DEBUGASSERT(irq < NR_IRQS || irq == 1023);
-  if (irq < NR_IRQS)
+  for (irq = 0; irq < NR_IRQS & instat != 0; i++)
     {
-      /* Dispatch the interrupt */
+      uint32_t bit = (1 << irq);
 
-      regs = lm32_doirq(irq, regs);
+      /* Is this interrupt pending? */
+
+      if ((instat & bit) != 0)
+        {
+          /* Yes.. Dispatch the interrupt */
+          /* REVIST: Do I need to acknowledge the interrupt first? */
+
+          irqinfo("irq=%d\n", irq);
+          regs = lm32_doirq(irq, regs);
+
+          /* Clear the bit in the interrupt status copy so that maybe we can
+           * break out of the loop early.
+           */
+
+          instat &= ~bit;
+        }
     }
 
-  /* Write to the end-of-interrupt register */
+  /* Return the final task register save area.  This will typically be the
+   * same as the value of regs on input.  In the event of a context switch,
+   * however, it will differ.  It will refere to the register save are in the
+   * TCB of the new thread.
+   */
 
-  putreg32(im, GIC_ICCEOIR);
   return regs;
 }
