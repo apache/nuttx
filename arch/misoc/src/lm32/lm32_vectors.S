@@ -112,7 +112,7 @@ _interrupt_handler:
 	sw		(sp+0), ra
 	calli	.save_all
 	rcsr	r1, IP
-	calli	up_doirq
+	calli	lm32_doirq
 	bi		.restore_all_and_eret
 	nop
 	nop
