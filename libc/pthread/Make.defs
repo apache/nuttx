@@ -35,27 +35,24 @@
 
 # Add the pthread C files to the build
 
-CSRCS += pthread_attr_init.c pthread_attr_destroy.c \
-		  pthread_attr_setschedpolicy.c pthread_attr_getschedpolicy.c \
-		  pthread_attr_setinheritsched.c pthread_attr_getinheritsched.c \
-		  pthread_attr_setstacksize.c pthread_attr_getstacksize.c \
-		  pthread_attr_setschedparam.c pthread_attr_getschedparam.c \
-		  pthread_barrierattr_init.c pthread_barrierattr_destroy.c \
-		  pthread_barrierattr_getpshared.c pthread_barrierattr_setpshared.c \
-		  pthread_condattr_init.c pthread_condattr_destroy.c \
-		  pthread_mutexattr_init.c pthread_mutexattr_destroy.c \
-		  pthread_mutexattr_getpshared.c pthread_mutexattr_setpshared.c
+CSRCS += pthread_attr_init.c pthread_attr_destroy.c
+CSRCS += pthread_attr_setschedpolicy.c pthread_attr_getschedpolicy.c
+CSRCS += pthread_attr_setinheritsched.c pthread_attr_getinheritsched.c
+CSRCS += pthread_attr_setstacksize.c pthread_attr_getstacksize.c
+CSRCS += pthread_attr_setschedparam.c pthread_attr_getschedparam.c
+CSRCS += pthread_barrierattr_init.c pthread_barrierattr_destroy.c
+CSRCS += pthread_barrierattr_getpshared.c pthread_barrierattr_setpshared.c
+CSRCS += pthread_condattr_init.c pthread_condattr_destroy.c
+CSRCS += pthread_mutexattr_init.c pthread_mutexattr_destroy.c
+CSRCS += pthread_mutexattr_getpshared.c pthread_mutexattr_setpshared.c
+CSRCS += pthread_mutexattr_setprotocol.c pthread_mutexattr_getprotocol.c
+CSRCS += pthread_mutexattr_settype.c pthread_mutexattr_gettype.c
 
 ifeq ($(CONFIG_SMP),y)
 CSRCS += pthread_attr_getaffinity.c pthread_attr_setaffinity.c
 endif
 
 ifeq ($(CONFIG_MUTEX_TYPES),y)
-CSRCS += pthread_mutexattr_settype.c pthread_mutexattr_gettype.c
-endif
-
-ifeq ($(CONFIG_PRIORITY_INHERITANCE),y)
-CSRCS += pthread_mutexattr_setprotocol.c pthread_mutexattr_getprotocol.c
 endif
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)

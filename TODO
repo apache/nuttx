@@ -216,7 +216,7 @@ o Task/Scheduler (sched/)
   Status:      Open
   Priority:    Medium-ish
 
-  Title:       ISSUES WITH PRIORITY INHERITANCE WHEN SEMAPHORE USED AS IPC
+  Title:       ISSUES WITH PRIORITY INHERITANCE WHEN SEMAPHORE/MUTX IS USED AS IPC
   Description: Semaphores have multiple uses.  The typical usage is where
                the semaphore is used as lock on one or more resources.  In
                this typical case, priority inheritance works perfectly:  The
@@ -264,6 +264,20 @@ o Task/Scheduler (sched/)
                The fix is to call sem_setprotocol(SEM_PRIO_NONE) immediately
                after the sem_init() call so that there will be no priority
                inheritance operations on this semaphore used for signalling.
+
+               NOTE also that in NuttX, pthread mutexes are build on top of
+               binary semaphores.  As a result, the above recommendation also
+               applies when pthread mutexes are used for inter-thread
+               signaling.  That is, a mutex that is used for signaling should
+               be initialize like this (simplified, no error checking here):
+
+                  pthread_mutexattr_t attr;
+                  pthread_mutex_t mutex;
+
+                  pthread_mutexattr_init(&attr);
+                  pthread_mutexattr_settype(&attr, PTHREAD_PRIO_NONE);
+                  pthread_mutex_init(&mutex, &attr);
+
   Status:      Open
   Priority:    High.  If you have priority inheritance enabled and you use
                semaphores for signalling events, then you *must* call

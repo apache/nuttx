@@ -41,8 +41,6 @@
 #include <pthread.h>
 #include <errno.h>
 
-#ifdef CONFIG_MUTEX_TYPES
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -67,13 +65,15 @@
 
 int pthread_mutexattr_gettype(const pthread_mutexattr_t *attr, int *type)
 {
-  if (attr && type)
+  if (attr != NULL && type != NULL)
     {
+#ifdef CONFIG_MUTEX_TYPES
       *type = attr->type;
+#else
+      *type = PTHREAD_MUTEX_NORMAL;
+#endif
       return 0;
     }
 
   return EINVAL;
 }
-
-#endif /* CONFIG_MUTEX_TYPES */
