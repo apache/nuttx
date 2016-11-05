@@ -120,6 +120,7 @@ _interrupt_handler:
 
 _syscall_handler:
 	sw		(sp+0), ra
+	addi	ea, ea, 4
 	calli	.save_all
 	mvi		r1, MISOC_IRQ_SWINT
 	rcsr	r2, IP
