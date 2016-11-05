@@ -123,9 +123,9 @@ _syscall_handler:
 	addi	ea, ea, 4
 	calli	.save_all
 	mvi		r1, MISOC_IRQ_SWINT
-	rcsr	r2, IP
 	calli	lm32_doirq
 	bi		.restore_all_and_eret
+	nop
 	nop
 
 _do_reset:
