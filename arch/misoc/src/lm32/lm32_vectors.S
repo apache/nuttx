@@ -38,7 +38,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <arch/lm32/irq.h>
+#include <arch/irq.h>
 
 /****************************************************************************
  * Exception handlers - Must be 32 bytes long.
@@ -121,11 +121,10 @@ _interrupt_handler:
 _syscall_handler:
 	sw		(sp+0), ra
 	calli	.save_all
-	rcsr	r1, IP
-	calli	lm32_swint
+	mvi		r1, MISOC_IRQ_SWINT
+	rcsr	r2, IP
+	calli	lm32_doirq
 	bi		.restore_all_and_eret
-	nop
-	nop
 	nop
 
 _do_reset:
