@@ -90,4 +90,9 @@ void exec_getsymtab(FAR const struct symtab_s **symtab, FAR int *nsymbols);
 
 void exec_setsymtab(FAR const struct symtab_s *symtab, int nsymbols);
 
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
 #endif /* __INCLUDE_NUTTX_BINFMT_SYMTAB_H */

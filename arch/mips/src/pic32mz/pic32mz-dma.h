@@ -224,5 +224,10 @@ void pic32mx_dmadump(DMA_HANDLE handle, const struct pic32mx_dmaregs_s *regs,
 #endif
 #endif
 
+#if defined(__cplusplus)
+}
+#endif
+#undef EXTERN
+
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_MIPS_SRC_PIC32MZ_PIC32MZ_DMA_H */

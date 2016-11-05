@@ -104,13 +104,17 @@
  * Public Variables
  ****************************************************************************/
 
-extern volatile uint32_t *g_current_regs;
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
 
-extern uint32_t g_idle_topstack;
-
-/****************************************************************************
- * Inline Functions
- ****************************************************************************/
+EXTERN volatile uint32_t *g_current_regs;
+EXTERN uint32_t g_idle_topstack;
 
 /****************************************************************************
  * Public Functions

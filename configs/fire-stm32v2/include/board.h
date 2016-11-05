@@ -371,7 +371,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -405,6 +406,11 @@ void stm32_boardinitialize(void);
 #ifdef CONFIG_STM32_FSMC
 void fire_lcdclear(uint16_t color);
 #endif
+
+#if defined(__cplusplus)
+}
+#endif
+#undef EXTERN
 
 #endif /* __ASSEMBLY__ */
 #endif  /* __CONFIGS_FIRE_STM32V2_INCLUDE_BOARD_H */
