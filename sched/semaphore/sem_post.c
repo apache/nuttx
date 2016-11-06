@@ -98,7 +98,22 @@ int sem_post(FAR sem_t *sem)
 
       flags = enter_critical_section();
 
-      /* Perform the semaphore unlock operation. */
+      /* Perform the semaphore unlock operation, releasing this task as a
+       * holder then also incrementing the count on the semaphore.
+       *
+       * NOTE:  When semaphores are used for signaling purposes, the holder
+       * of the semaphore may not be this thread!  In this case,
+       * sem_releaseholder() will do nothing.
+       *
+       * In the case of a mutex this could be simply resolved since there is
+       * only one holder but for the case of counting semaphores, there may
+       * be many holders and if the holder is not this thread, then it is
+       * not possible to know which thread/holder should be released.
+       *
+       * For this reason, it is recommended that priority inheritance be
+       * disabled via sem_setprotocol(SEM_PRIO_NONE) when the semahore is
+       * initialixed if the semaphore is to used for signaling purposes.
+       */
 
       ASSERT(sem->semcount < SEM_VALUE_MAX);
       sem_releaseholder(sem);

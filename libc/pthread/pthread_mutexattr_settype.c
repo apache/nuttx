@@ -41,8 +41,6 @@
 #include <pthread.h>
 #include <errno.h>
 
-#ifdef CONFIG_MUTEX_TYPES
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -69,10 +67,17 @@ int pthread_mutexattr_settype(pthread_mutexattr_t *attr, int type)
 {
   if (attr && type >= PTHREAD_MUTEX_NORMAL && type <= PTHREAD_MUTEX_RECURSIVE)
     {
+#ifdef CONFIG_MUTEX_TYPES
       attr->type = type;
+#else
+      if (type != PTHREAD_MUTEX_NORMAL)
+        {
+          return ENOSYS;
+        }
+#endif
+
       return OK;
     }
+
   return EINVAL;
 }
-
-#endif /* CONFIG_MUTEX_TYPES */

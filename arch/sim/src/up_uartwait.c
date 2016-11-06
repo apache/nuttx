@@ -39,7 +39,7 @@
 
 #include <semaphore.h>
 
-#include <nuttx/sermaphore.h>
+#include <nuttx/semaphore.h>
 
 #include "up_internal.h"
 

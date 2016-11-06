@@ -199,13 +199,6 @@ void esp32_gpioirqdisable(int irq);
 #  define esp32_gpioirqdisable(irq)
 #endif
 
-#undef EXTERN
-#if defined(__cplusplus)
-}
-#endif
-
-#endif /* __ASSEMBLY__ */
-
 int digitalRead(uint8_t pin);
 
 void attachInterrupt(uint8_t pin, void (*)(void), int mode);
@@ -214,5 +207,7 @@ void detachInterrupt(uint8_t pin);
 #ifdef __cplusplus
 }
 #endif
+#undef EXTERN
 
+#endif /* __ASSEMBLY__ */
 #endif /* __ARCH_XTENSA_SRC_ESP32_ESP32_GPIO_H */

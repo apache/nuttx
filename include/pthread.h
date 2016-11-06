@@ -96,12 +96,10 @@
  *  An implementation is allowed to map this mutex to one of the other mutex types.
  */
 
-#ifdef CONFIG_MUTEX_TYPES
-#  define PTHREAD_MUTEX_NORMAL        0
-#  define PTHREAD_MUTEX_ERRORCHECK    1
-#  define PTHREAD_MUTEX_RECURSIVE     2
-#  define PTHREAD_MUTEX_DEFAULT       PTHREAD_MUTEX_NORMAL
-#endif
+#define PTHREAD_MUTEX_NORMAL          0
+#define PTHREAD_MUTEX_ERRORCHECK      1
+#define PTHREAD_MUTEX_RECURSIVE       2
+#define PTHREAD_MUTEX_DEFAULT         PTHREAD_MUTEX_NORMAL
 
 /* Valid ranges for the pthread stacksize attribute */
 
@@ -389,10 +387,12 @@ int pthread_mutexattr_getpshared(FAR const pthread_mutexattr_t *attr,
                                  FAR int *pshared);
 int pthread_mutexattr_setpshared(FAR pthread_mutexattr_t *attr,
                                  int pshared);
-#ifdef CONFIG_MUTEX_TYPES
 int pthread_mutexattr_gettype(const pthread_mutexattr_t *attr, int *type);
 int pthread_mutexattr_settype(pthread_mutexattr_t *attr, int type);
-#endif
+int pthread_mutexattr_getprotocol(FAR const pthread_mutexattr_t *attr,
+                                  FAR int *protocol);
+int pthread_mutexattr_setprotocol(FAR pthread_mutexattr_t *attr,
+                                  int protocol);
 
 /* The following routines create, delete, lock and unlock mutexes. */
 
@@ -402,15 +402,6 @@ int pthread_mutex_destroy(FAR pthread_mutex_t *mutex);
 int pthread_mutex_lock(FAR pthread_mutex_t *mutex);
 int pthread_mutex_trylock(FAR pthread_mutex_t *mutex);
 int pthread_mutex_unlock(FAR pthread_mutex_t *mutex);
-
-#ifdef CONFIG_PRIORITY_INHERITANCE
-/* Manage priority inheritance */
-
-int pthread_mutexattr_getprotocol(FAR const pthread_mutexattr_t *attr,
-                                  FAR int *protocol);
-int pthread_mutexattr_setprotocol(FAR pthread_mutexattr_t *attr,
-                                  int protocol);
-#endif
 
 /* Operations on condition variables */
 
