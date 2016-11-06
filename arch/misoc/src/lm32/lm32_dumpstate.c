@@ -77,7 +77,6 @@ static inline uint32_t up_getsp(void)
 
 static void up_stackdump(uint32_t sp, uint32_t stack_base)
 {
-# if 0
   uint32_t stack ;
 
   for (stack = sp & ~0x1f; stack < stack_base; stack += 32)
@@ -87,7 +86,6 @@ static void up_stackdump(uint32_t sp, uint32_t stack_base)
              stack, ptr[0], ptr[1], ptr[2], ptr[3],
              ptr[4], ptr[5], ptr[6], ptr[7]);
     }
-#endif
 }
 
 /****************************************************************************
@@ -96,39 +94,35 @@ static void up_stackdump(uint32_t sp, uint32_t stack_base)
 
 static inline void up_registerdump(void)
 {
-#if 0
   /* Are user registers available from interrupt processing? */
 
   if (g_current_regs)
     {
       _alert("EPC:%08x \n",
             g_current_regs[REG_EPC]);
-      _alert("A0:%08x A1:%08x A2:%08x A3:%08x A4:%08x A5:%08x A6:%08x A7:%08x\n",
-            g_current_regs[REG_A0], g_current_regs[REG_A1], g_current_regs[REG_A2],
-            g_current_regs[REG_A3], g_current_regs[REG_A4], g_current_regs[REG_A5],
-            g_current_regs[REG_A6], g_current_regs[REG_A7]);
-      _alert("T0:%08x T1:%08x T2:%08x T3:%08x T4:%08x T5:%08x T6:%08x\n",
-            g_current_regs[REG_T0], g_current_regs[REG_T1], g_current_regs[REG_T2],
-            g_current_regs[REG_T3], g_current_regs[REG_T4], g_current_regs[REG_T5],
-            g_current_regs[REG_T6]);
-      _alert("S0:%08x S1:%08x S2:%08x S3:%08x S4:%08x S5:%08x S6:%08x S7:%08x\n",
-            g_current_regs[REG_S0], g_current_regs[REG_S1], g_current_regs[REG_S2],
-            g_current_regs[REG_S3], g_current_regs[REG_S4], g_current_regs[REG_S5],
-            g_current_regs[REG_S6], g_current_regs[REG_S7]);
-      _alert("S8:%08x S9:%08x S10:%08x S11:%08x\n",
-            g_current_regs[REG_S8], g_current_regs[REG_S9], g_current_regs[REG_S10],
-            g_current_regs[REG_S11]);
-#ifdef RISCV_SAVE_GP
-      _alert("GP:%08x SP:%08x FP:%08x TP:%08x RA:%08x\n",
-            g_current_regs[REG_GP], g_current_regs[REG_SP], g_current_regs[REG_FP],
-            g_current_regs[REG_TP], g_current_regs[REG_RA]);
-#else
-      _alert("SP:%08x FP:%08x TP:%08x RA:%08x\n",
-            g_current_regs[REG_SP], g_current_regs[REG_FP], g_current_regs[REG_TP],
-            g_current_regs[REG_RA]);
-#endif
+      _alert(" X0:%08x  A0:%08x  A1:%08x  A2:%08x  A3:%08x  A4:%08x  A5:%08x  A6:%08x\n",
+            g_current_regs[REG_X0_NDX], g_current_regs[REG_X1_NDX],
+            g_current_regs[REG_X2_NDX], g_current_regs[REG_X3_NDX],
+            g_current_regs[REG_X4_NDX], g_current_regs[REG_X5_NDX],
+            g_current_regs[REG_X6_NDX], g_current_regs[REG_X7_NDX]);
+      _alert(" A7:%08x  X9:%08x X10:%08x X11:%08x X12:%08x X13:%08x X14:%08x X15:%08x\n",
+            g_current_regs[REG_X8_NDX], g_current_regs[REG_X9_NDX],
+            g_current_regs[REG_X10_NDX], g_current_regs[REG_X11_NDX],
+            g_current_regs[REG_X12_NDX], g_current_regs[REG_X13_NDX],
+            g_current_regs[REG_X14_NDX], g_current_regs[REG_X15_NDX]);
+      _alert("X16:%08x X17:%08x X18:%08x X19:%08x X20:%08x X21:%08x X22:%08x X23:%08x\n",
+            g_current_regs[REG_X16_NDX], g_current_regs[REG_X17_NDX],
+            g_current_regs[REG_X18_NDX], g_current_regs[REG_X19_NDX],
+            g_current_regs[REG_X20_NDX], g_current_regs[REG_X21_NDX],
+            g_current_regs[REG_X22_NDX], g_current_regs[REG_X23_NDX]);
+      _alert("X24:%08x X25:%08x  GP:%08x  FP:%08x  SP:%08x  RA:%08x  EA:%08x  BA:%08x\n",
+            g_current_regs[REG_X24_NDX], g_current_regs[REG_X25_NDX],
+            g_current_regs[REG_X26_NDX], g_current_regs[REG_X27_NDX],
+            g_current_regs[REG_X28_NDX], g_current_regs[REG_X29_NDX],
+            g_current_regs[REG_X30_NDX], g_current_regs[REG_X31_NDX]);
+      _alert(" IE:%08x\n",
+            g_current_regs[REG_X32_NDX]);
     }
-#endif
 }
 
 /****************************************************************************
