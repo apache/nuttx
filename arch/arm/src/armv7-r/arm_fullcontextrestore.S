@@ -60,7 +60,6 @@
 	.cpu	cortex-r4f
 #endif
 	.syntax	unified
-	.file	"arm_fullcontextrestore.S"
 
 /****************************************************************************
  * Public Functions
@@ -160,6 +159,7 @@ up_fullcontextrestore:
 	msr		spsr_cxsf, r1				/* Set the SPSR */
 
 	/* Now recover r0-r1, pc and cpsr, destroying the stack frame */
+
 	ldmia		sp!, {r0-r1, pc}^
 #endif
 
