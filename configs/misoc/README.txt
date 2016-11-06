@@ -16,16 +16,17 @@ Buildroot Toolchain
 
      cd tools
      ./configure.sh misoc/<sub-dir>
+     make oldconfig context
 
-  2. Clone the latest buildroot package into <some-dir>
+  2. Clone the latest buildroot package into <some-dir>/buildroot
 
-       git clone git@bitbucket.org:nuttx/buildroot.git <some-dir>
+       git clone git@bitbucket.org:nuttx/buildroot.git <some-dir>/buildroot
 
      or
 
-       git clone https://patacongo@bitbucket.org/nuttx/buildroot.git <some-dir>
+       git clone https://patacongo@bitbucket.org/nuttx/buildroot.git <some-dir>/buildroot
 
-  3. cd <some-dir>
+  3. cd <some-dir>/buildroot
 
   4. cp lm32-elf-defconfig-6.1.0 .config
 
@@ -33,14 +34,18 @@ Buildroot Toolchain
 
   6. make
 
-  7. Edit setenv.h, if necessary, so that the PATH variable includes
-     the path to the newly built binaries.
+  7. By default, the tools will be at the absolute path:
 
-     By default, the tools will be at:
+       <some-dir>/buildroot/build_lm32/staging_dir/bin
 
-       <some-dir>/build_lm32/staging_dir/bin
+     Or the NuttX relative path:
 
-     That location can be changed by reconfiguring the .config file.
+       ../buildroot/build_lm32/staging_dir/bin
+
+     The setenv.sh files in these sub-directories are already set to use
+     the relative path.  It you choose to install the buildroot package
+     in some other location, you may need to edit the setenv.h file so
+     that the PATH variable includes the path to the newly built binaries.
 
   See the file configs/README.txt in the buildroot source tree.  That has more
   detailed PLUS some special instructions that you will need to follow if you
