@@ -278,11 +278,11 @@ o Task/Scheduler (sched/)
                   pthread_mutexattr_settype(&attr, PTHREAD_PRIO_NONE);
                   pthread_mutex_init(&mutex, &attr);
 
-  Status:      Open
-  Priority:    High.  If you have priority inheritance enabled and you use
+  Status:      Closed.  If you have priority inheritance enabled and you use
                semaphores for signalling events, then you *must* call
                sem_setprotocol(SEM_PRIO_NONE) immediately after initializing
                the semaphore.
+  Priority:    High.
 
   Title:       SCALABILITY
   Description: Task control information is retained in simple lists.  This
@@ -466,7 +466,7 @@ o pthreads (sched/pthreads)
   Priority:    Low, probably not that useful
 
   Title:       PTHREAD_PRIO_PROTECT
-  Description: Extended pthread_mutexattr_setprotocol() support PTHREAD_PRIO_PROTECT:
+  Description: Extend pthread_mutexattr_setprotocol() support PTHREAD_PRIO_PROTECT:
                "When a thread owns one or more mutexes initialized with the
                PTHREAD_PRIO_PROTECT protocol, it shall execute at the higher of its
                priority  or  the  highest  of the priority ceilings of all the mutexes
