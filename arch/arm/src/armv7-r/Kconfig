@@ -3,7 +3,7 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-comment "ARMv7-A Configuration Options"
+comment "ARMv7-R Configuration Options"
 
 config ARMV7R_MEMINIT
 	bool
@@ -18,6 +18,29 @@ config ARMV7R_MEMINIT
 		and the platform-specific implementation of arm_boot() must perform
 		the memory initialization first, then explicitly call
 		arm_data_initialize().
+
+config ARMV7R_HAVE_ICACHE
+	bool
+	default n
+
+config ARMV7R_HAVE_DCACHE
+	bool
+	default n
+
+config ARMV7R_ICACHE
+	bool "Use I-Cache"
+	default n
+	depends on ARMV7R_HAVE_ICACHE
+
+config ARMV7R_DCACHE
+	bool "Use D-Cache"
+	default n
+	depends on ARMV7R_HAVE_DCACHE
+
+config ARMV7R_DCACHE_WRITETHROUGH
+	bool "D-Cache Write-Through"
+	default n
+	depends on ARMV7R_DCACHE
 
 config ARMV7R_HAVE_L2CC
 	bool
