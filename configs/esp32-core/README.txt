@@ -22,6 +22,7 @@ Contents
   o Serial Console
   o Buttons and LEDs
   o SMP
+  o Debug Issues
   o Configurations
   o Things to Do
 
@@ -135,6 +136,51 @@ SMP
 
   3. Assertions.  On a fatal assertions, other CPUs need to be stopped.
 
+Debug Issues
+============
+
+  I basically need the debug environment and a step-by-step procedure.
+
+    - First in need some debug environment which would be a JTAG emulator
+      and software.
+
+    - I don't see any way to connect JTAG to the ESP32 Core V2 board. There
+      is a USB/Serial converter chip, but that does not look it supports JTAG.
+
+    - I need to understand how to use the secondary bootloader.  My
+      understanding is that it will configure hardware, read a partition
+      table at address 0x5000, and then load code into memory.  I do need to
+      download and build the bootloader?
+
+    - Do I need to create a partition table at 0x5000?  Should this be part
+      of the NuttX build?
+
+  I see https://github.com/espressif/esp-idf/tree/master/components/bootloader
+  and https://github.com/espressif/esp-idf/tree/master/components/partition_table.
+  I suppose some of what I need is in there, but I am not sure what I am
+  looking at right now.
+
+  There is an OpenOCD port here: https://github.com/espressif/openocd-esp32
+  and I see some additional OpenOCD documentation in
+  https://github.com/espressif/esp-idf/tree/master/docs.  This documentation
+  raises some more questions.    It says I need to use and external JTAG like
+  the TIAO USB Multi-protocol Adapter and the Flyswatter2.  I don't have
+  either of those.  I am not sure if I have any USB serial JTAG.  I have some
+  older ones that might work, however.
+
+  My understanding when I started this was that I could use my trusty Segger
+  J-Link.  But that won't work with OpenOCD.  Is the J-Link that also a
+  possibility?
+
+  I also see that I can now get an ESP32 board from Sparkfun:
+  https://www.sparkfun.com/products/13907 But I don't see JTAG there either:
+  https://cdn.sparkfun.com/assets/learn_tutorials/5/0/7/esp32-thing-schematic.pdf
+
+  Right now, the NuttX port depends on the bootloader to initialize hardware,
+  including basic (slow) clocking.    If I had the clock configuration logic,
+  would I be able to run directly out of IRAM without a bootloader?  That
+  might be a simpler bring-up.
+
 Configurations
 ==============
 
@@ -202,14 +248,29 @@ Things to Do
 ============
 
   1. There is no support for an interrupt stack yet.
-  2. I did not implement the lazy co-processor save logic supported by Xtensa.  That logic works like this:
+  2. There is no clock intialization logic in place.  This depends on logic in
+     Expressif libriaries.  The board comes up using that basic 40 Mhz crystal
+     for clocking.  Getting to 80 MHz will require clocking initialization in
+     esp32_clockconfig.c.
+  3. I did not implement the lazy co-processor save logic supported by Xtensa.
+     That logic works like this:
 
-     a. CPENABLE is set to zero on each context switch, disabling all co-processors.
-     b. If/when the task attempts to use the disabled co-processor, an exception occurs
+     a. CPENABLE is set to zero on each context switch, disabling all co-
+        processors.
+     b. If/when the task attempts to use the disabled co-processor, an
+        exception  occurs
      c. The co-processor exception handler re-enables the co-processor.
 
-     Instead, the NuttX logic saves and restores CPENABLE on each context switch.
+     Instead, the NuttX logic saves and restores CPENABLE on each context
+     switch.
 
-  3. Currently the Xtensa port copies register state save information from the stack into the TCB.  A more efficient alternative would be to just save a pointer to a register state save area in the TCB.  This would add some complexity to signal handling and also also the the up_initialstate().  But the performance improvement might be worth the effort.
+  4. Currently the Xtensa port copies register state save information from
+     the stack into the TCB.  A more efficient alternative would be to just
+     save a pointer to a register state save area in the TCB.  This would
+     add some complexity to signal handling and also also the the
+     up_initialstate().  But the performance improvement might be worth
+     the effort.
 
-  4. See SMP-related issues above
+  5. See SMP-related issues above
+
+  6. See Debug Issues above
