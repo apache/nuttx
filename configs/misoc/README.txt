@@ -1,6 +1,9 @@
 Misoc README
 ============
 
+  This README applies to a port to NuttX running on a Qemu LM32 system.  You
+  can find the Qemu setup at https://bitbucket.org/key2/qemu
+
 Buildroot Toolchain
 ===================
 
