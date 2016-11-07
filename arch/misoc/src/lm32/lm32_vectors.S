@@ -152,7 +152,7 @@ _syscall_handler:
 	sw		(sp+0), ra
 	addi	ea, ea, 4
 	calli	.save_all
-	mvi		r1, MISOC_IRQ_SWINT
+	mvi		r1, LM32_IRQ_SWINT
 	calli	lm32_doirq
 	bi		.restore_all_and_eret
 	nop

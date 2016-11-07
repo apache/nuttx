@@ -53,11 +53,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* 32 True interrupts plus the sofware interrupt */
 
-#define MISOC_NINTERRUPTS 32
-#define MISOC_IRQ_SWINT   32
-#define NR_IRQS           33
 
 /****************************************************************************
  * Public Function Prototypes

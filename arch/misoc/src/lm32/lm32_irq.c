@@ -71,7 +71,7 @@ void lm32_irq_initialize(void)
 
   /* Attach the software interrupt */
 
-  (void)irq_attach(MISOC_IRQ_SWINT, lm32_swint);
+  (void)irq_attach(LM32_IRQ_SWINT, lm32_swint);
 
   /* Enable interrupts */
 
@@ -129,7 +129,7 @@ void up_disable_irq(int irq)
 
   /* Ignore any attempt to disable software interrupts */
 
-  if (irq < MISOC_NINTERRUPTS)
+  if (irq < LM32_NINTERRUPTS)
     {
       /* Disable interrupts by clearing the bit that corresponds to the irq */
 
@@ -154,7 +154,7 @@ void up_enable_irq(int irq)
 
   /* Ignore any attempt to enable software interrupts */
 
-  if (irq < MISOC_NINTERRUPTS)
+  if (irq < LM32_NINTERRUPTS)
     {
       /* Enable interrupts by setting the bit that corresponds to the irq */
 

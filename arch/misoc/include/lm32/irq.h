@@ -48,6 +48,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* 32 True interrupts plus the sofware interrupt */
+
+#define LM32_NINTERRUPTS 32
+#define LM32_IRQ_SWINT   32
+#define NR_IRQS          33
+
 /* Registers */
 
 #define REG_X0_NDX    0      /* Holds the value zero */
