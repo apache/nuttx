@@ -82,11 +82,11 @@
 
 #define GPIO_BTN_USER      (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | GPIO_PORTC | GPIO_PIN13)
 
-#define GPIO_OTGFS_VBUS   (GPIO_INPUT|GPIO_FLOAT|GPIO_SPEED_100MHz|\
-                           GPIO_OPENDRAIN|GPIO_PORTA|GPIO_PIN9)
+#define GPIO_OTGFS_VBUS    (GPIO_INPUT|GPIO_FLOAT|GPIO_SPEED_100MHz|\
+                            GPIO_OPENDRAIN|GPIO_PORTA|GPIO_PIN9)
 
-#define SDIO_SLOTNO 0
-#define SDIO_MINOR 0
+#define SDIO_SLOTNO        0
+#define SDIO_MINOR         0
 
 /****************************************************************************************************
  * Public data
@@ -108,32 +108,32 @@
 
 void weak_function stm32_spidev_initialize(void);
 
- /****************************************************************************
-  * Name: stm32_sdio_initialize
-  *
-  * Description:
-  *   Initialize SDIO-based MMC/SD card support
-  *
-  ****************************************************************************/
+/****************************************************************************
+ * Name: stm32_sdio_initialize
+ *
+ * Description:
+ *   Initialize SDIO-based MMC/SD card support
+ *
+ ****************************************************************************/
 
- #if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_STM32F7_SDMMC1)
- int stm32_sdio_initialize(void);
- #endif
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_STM32F7_SDMMC1)
+int stm32_sdio_initialize(void);
+#endif
 
- /************************************************************************************
-  * Name: stm32_dma_alloc_init
-  *
-  * Description:
-  *   Called to create a FAT DMA allocator
-  *
-  * Returned Value:
-  *   0 on success or -ENOMEM
-  *
-  ************************************************************************************/
+/************************************************************************************
+ * Name: stm32_dma_alloc_init
+ *
+ * Description:
+ *   Called to create a FAT DMA allocator
+ *
+ * Returned Value:
+ *   0 on success or -ENOMEM
+ *
+ ************************************************************************************/
 
-  #if defined (CONFIG_FAT_DMAMEMORY)
- int stm32_dma_alloc_init(void);
- #endif
+#if defined (CONFIG_FAT_DMAMEMORY)
+int stm32_dma_alloc_init(void);
+#endif
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_STM32F746_WS_SRC_STM32F746_WS_H */

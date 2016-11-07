@@ -4234,7 +4234,6 @@ static void stm32_epin_disable(FAR struct stm32_ep_s *privep)
   regval |= OTG_DIEPINT_EPDISD;
   stm32_putreg(regval, regaddr);
 
-
   /* Flush any data remaining in the TxFIFO */
 
   stm32_txfifo_flush(OTG_GRSTCTL_TXFNUM_D(privep->epphy));

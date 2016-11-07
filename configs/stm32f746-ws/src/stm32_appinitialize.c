@@ -108,9 +108,9 @@ int board_app_initialize(void)
   ret = stm32_sdio_initialize();
   if (ret != OK)
     {
-	  ferr("ERROR: Failed to initialize MMC/SD driver: %d\n", ret);
-	  return ret;
-	}
+      ferr("ERROR: Failed to initialize MMC/SD driver: %d\n", ret);
+      return ret;
+    }
 #endif
 
   return OK;
