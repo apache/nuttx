@@ -48,6 +48,8 @@
 #  include <nuttx/fs/fs.h>
 #endif
 
+#include <arch/syscall.h>
+
 #include "task/task.h"
 #include "sched/sched.h"
 #include "group/group.h"
@@ -60,6 +62,63 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: _up_dumponexit
+ *
+ * Description:
+ *   Dump the state of all tasks whenever on task exits.  This is debug
+ *   instrumentation that was added to check file-related reference counting
+ *   but could be useful again sometime in the future.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DUMP_ON_EXIT
+static void _up_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
+{
+#if CONFIG_NFILE_DESCRIPTORS > 0
+  FAR struct filelist *filelist;
+#if CONFIG_NFILE_STREAMS > 0
+  FAR struct streamlist *streamlist;
+#endif
+  int i;
+#endif
+
+  sinfo("  TCB=%p name=%s pid=%d\n", tcb, tcb->argv[0], tcb->pid);
+  sinfo("    priority=%d state=%d\n", tcb->sched_priority, tcb->task_state);
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+  filelist = tcb->group->tg_filelist;
+  for (i = 0; i < CONFIG_NFILE_DESCRIPTORS; i++)
+    {
+      struct inode *inode = filelist->fl_files[i].f_inode;
+      if (inode)
+        {
+          sinfo("      fd=%d refcount=%d\n",
+                i, inode->i_crefssinfo);
+        }
+    }
+#endif
+
+#if CONFIG_NFILE_STREAMS > 0
+  streamlist = tcb->group->tg_streamlist;
+  for (i = 0; i < CONFIG_NFILE_STREAMS; i++)
+    {
+      struct file_struct *filep = &streamlist->sl_streams[i];
+      if (filep->fs_fd >= 0)
+        {
+#if CONFIG_STDIO_BUFFER_SIZE > 0
+          sinfo("      fd=%d nbytes=%d\n",
+                filep->fs_fd,
+                filep->fs_bufpos - filep->fs_bufstart);
+#else
+          sinfo("      fd=%d\n", filep->fs_fd);
+#endif
+        }
+    }
+#endif
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -78,5 +137,42 @@
 
 void _exit(int status)
 {
-#warning Missing logic
+  struct tcb_s *tcb;
+
+  /* Disable interrupts.  They will be restored when the next
+   * task is started.
+   */
+
+  (void)up_irq_save();
+
+  sinfo("TCB=%p exiting\n", this_task());
+
+#ifdef CONFIG_DUMP_ON_EXIT
+  sinfo("Other tasks:\n");
+  sched_foreach(_up_dumponexit, NULL);
+#endif
+
+  /* Destroy the task at the head of the ready to run list. */
+
+  (void)task_exit();
+
+  /* Now, perform the context switch to the new ready-to-run task at the
+   * head of the list.
+   */
+
+  tcb = this_task();
+
+#ifdef CONFIG_ARCH_ADDRENV
+  /* Make sure that the address environment for the previously running
+   * task is closed down gracefully (data caches dump, MMU flushed) and
+   * set up the address environment for the new thread at the head of
+   * the ready-to-run list.
+   */
+
+  (void)group_addrenv(tcb);
+#endif
+
+  /* Then switch contexts */
+
+  up_fullcontextrestore(tcb->xcp.regs);
 }
