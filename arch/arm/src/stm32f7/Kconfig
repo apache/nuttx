@@ -1751,7 +1751,7 @@ menu "SDMMC1 Configuration"
 config SDMMC1_DMA
 	bool "Support DMA data transfers on SDMMC1"
 	default y if STM32F7_DMA2
-	depends on STM32F7_DMA2
+	depends on STM32F7_SDMMC_DMA && STM32F7_DMA2
 	---help---
 		Support DMA data transfers on SDMMC1.  Requires STM32F7_SDMMC1 and config STM32F7_DMA2.
 
@@ -1785,7 +1785,7 @@ menu "SDMMC2 Configuration"
 config SDMMC2_DMA
 	bool "Support DMA data transfers on SDMMC2"
 	default y if STM32F7_DMA2
-	depends on STM32F7_DMA2
+	depends on STM32F7_SDMMC_DMA && STM32F7_DMA2
 	---help---
 		Support DMA data transfers on SDMMC2.  Requires STM32F7_SDMMC2 and config STM32F7_DMA2.
 
