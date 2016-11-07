@@ -38,13 +38,43 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
 #include <arch/irq.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+/* Linker memory organization ***********************************************/
+/* Data memory is organized as follows:
+ *
+ * 1) Initialized data (.data):
+ *    Start:   _sdata
+ *    End(+1): _edata
+ * 2) Uninitialized data (.bss):
+ *    Start:   _sbss
+ *    End(+1): _ebss
+ *
+ * The following are placed outside of the "normal" memory segments -- mostly
+ * so that they do not have to be cleared on power up.
+ *
+ * 3) Idle thread stack:
+ *    Start:   _ebss
+ *    End(+1): _ebss+CONFIG_IDLETHREAD_STACKSIZE
+ * 4) Heap:
+ *    Start:   _ebss+CONFIG_IDLETHREAD_STACKSIZE
+ *    End(+1): to the end of memory
+ */
+
+#define LM32_STACK_BASE    _ebss
+#define LM32_STACK_TOP     _ebss+CONFIG_IDLETHREAD_STACKSIZE
+#define LM32_HEAP_BASE     LM32_STACK_TOP
 
 /****************************************************************************
  * Exception handlers - Must be 32 bytes long.
  ****************************************************************************/
 
 	.section	.text, "ax", @progbits
+	.global		g_idle_topstack
 	.global		__start
 
 __start:
@@ -131,24 +161,24 @@ _syscall_handler:
 _do_reset:
 	/* Setup stack and global pointer */
 
-	mvhi    sp, hi(_fstack)
-	ori     sp, sp, lo(_fstack)
+	mvhi	sp, hi(LM32_STACK_TOP)
+	ori		sp, sp, lo(LM32_STACK_TOP)
 
 	/* Clear BSS */
 
-	mvhi    r1, hi(_sbss)
-	ori     r1, r1, lo(_sbss)
-	mvhi    r3, hi(_ebss)
-	ori     r3, r3, lo(_ebss)
+	mvhi	r1, hi(_sbss)
+	ori		r1, r1, lo(_sbss)
+	mvhi	r3, hi(_ebss)
+	ori		r3, r3, lo(_ebss)
 
 .clearBSS:
-	be      r1, r3, .callMain
+	be		r1, r3, .callMain
 	sw		(r1+0), r0
 	addi	r1, r1, 4
-	bi      .clearBSS
+	bi		.clearBSS
 
 .callMain:
-	bi      os_start
+	bi		os_start
 
 .save_all:
 	addi	sp, sp, -136
@@ -181,7 +211,11 @@ _do_reset:
 
 	sw		(sp+REG_GP), r26
 	sw		(sp+REG_FP), r27
-	sw		(sp+REG_SP), r28
+
+	/* Save SP before we add 136 */
+
+	addi	r1, sp, 136
+	sw		(sp+REG_SP), r1
 
 	/* reg RA done later */
 
@@ -239,7 +273,7 @@ _do_reset:
 	lw		r1, (r1+REG_INT_CTX)
 	wcsr	IE, r1
 	lw		r1, (r1+REG_X1)
-	addi	sp, sp, 136
+
 	eret
 
 	/* This global variable is unsigned long g_idle_topstack and is
@@ -249,10 +283,9 @@ _do_reset:
 
 	.data
 	.align	4
-	.globl	g_idle_topstack
 	.type	g_idle_topstack, object
 
 g_idle_topstack:
-	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE
+	.long	_LM32_STACK_TOP
 	.size	g_idle_topstack, .-g_idle_topstack
 	.end
