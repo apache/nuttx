@@ -1,5 +1,5 @@
 #!/bin/bash
-# configs/misoc/hello/setenv.sh
+# configs/misoc/nsh/setenv.sh
 #
 #   Copyright (C) 2016 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
