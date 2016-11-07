@@ -93,5 +93,25 @@ int board_app_initialize(void)
 
   stm32_i2ctool();
 
+#if defined(CONFIG_FAT_DMAMEMORY)
+  if (stm32_dma_alloc_init() < 0)
+    {
+      syslog(LOG_ERR, "DMA alloc FAILED");
+    }
+#endif
+
+#ifdef CONFIG_STM32F7_SDMMC1
+  /* Initialize the SDIO block driver */
+
+  int ret = OK;
+
+  ret = stm32_sdio_initialize();
+  if (ret != OK)
+    {
+	  ferr("ERROR: Failed to initialize MMC/SD driver: %d\n", ret);
+	  return ret;
+	}
+#endif
+
   return OK;
 }

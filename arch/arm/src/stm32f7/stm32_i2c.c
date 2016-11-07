@@ -1313,17 +1313,17 @@ static void stm32_i2c_setclock(FAR struct stm32_i2c_priv_s *priv, uint32_t frequ
         if (frequency == 100000)
           {
             presc        = 0;
-            scl_delay    = 3;
+            scl_delay    = 5;
             sda_delay    = 0;
-            scl_h_period = 30;
-            scl_l_period = 120;
+            scl_h_period = 61;
+            scl_l_period = 89;
 
           }
         else if (frequency == 400000)
            {
              presc        = 0;
              scl_delay    = 3;
-             sda_delay    = 9;
+             sda_delay    = 0;
              scl_h_period = 6;
              scl_l_period = 24;
            }
