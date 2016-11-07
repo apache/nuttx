@@ -39,6 +39,13 @@ config ARCH_MIPS
 	---help---
 		MIPS architectures (PIC32)
 
+config ARCH_MISOC
+	bool "MISOC"
+	select ARCH_HAVE_INTERRUPTSTACK
+	select ARCH_HAVE_CUSTOMOPT
+	---help---
+		MISOC
+
 config ARCH_RGMP
 	bool "RGMP"
 	---help---
@@ -99,6 +106,7 @@ config ARCH
 	default "avr"     if ARCH_AVR
 	default "hc"      if ARCH_HC
 	default "mips"    if ARCH_MIPS
+	default "misoc"   if ARCH_MISOC
 	default "rgmp"    if ARCH_RGMP
 	default "renesas" if ARCH_RENESAS
 	default "risc-v"  if ARCH_RISCV
@@ -112,6 +120,7 @@ source arch/arm/Kconfig
 source arch/avr/Kconfig
 source arch/hc/Kconfig
 source arch/mips/Kconfig
+source arch/misoc/Kconfig
 source arch/rgmp/Kconfig
 source arch/renesas/Kconfig
 source arch/risc-v/Kconfig

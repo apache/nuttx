@@ -1,0 +1,32 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_LM32
+
+choice
+	prompt "Toolchain Selection"
+	default LM32_TOOLCHAIN_GNUW if HOST_WINDOWS
+	default LM32_TOOLCHAIN_GNUL if !HOST_WINDOWS
+
+config LM32_TOOLCHAIN_BUILDROOT
+	bool "Buildroot (Cygwin or Linux)"
+	depends on !WINDOWS_NATIVE
+
+config LM32_TOOLCHAIN_GNUL
+	bool "Generic GNU toolchain under Linux (or other POSIX environment)"
+	---help---
+		This option should work for any modern GNU toolchain (GCC 4.5 or newer)
+		configured for lm32-elf-.
+
+config LM32_TOOLCHAIN_GNUW
+	bool "Generic GNU toolchain under Windows"
+	depends on HOST_WINDOWS
+	---help---
+		This option should work for any modern GNU toolchain (GCC 4.5 or newer)
+		configured for lm32-elf-.
+
+endchoice # Toolchain Selection
+
+endif # ARCH_CHIP_LM32
