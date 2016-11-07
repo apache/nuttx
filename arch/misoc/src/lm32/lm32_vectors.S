@@ -286,6 +286,6 @@ _do_reset:
 	.type	g_idle_topstack, object
 
 g_idle_topstack:
-	.long	_LM32_STACK_TOP
+	.long	LM32_STACK_TOP
 	.size	g_idle_topstack, .-g_idle_topstack
 	.end

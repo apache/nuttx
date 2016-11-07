@@ -147,9 +147,6 @@ struct misoc_dev_s
 
 /* Low-level helpers */
 
-static inline uint32_t misoc_serialin(struct misoc_dev_s *priv, int offset);
-static inline void misoc_serialout(struct misoc_dev_s *priv, int offset,
-                                   uint32_t value);
 static void misoc_restoreuartint(struct uart_dev_s *dev, uint8_t im);
 static void misoc_disableuartint(struct uart_dev_s *dev, uint8_t *im);
 
@@ -261,8 +258,6 @@ static void misoc_restoreuartint(struct uart_dev_s *dev, uint8_t im)
 
 static void misoc_disableuartint(struct uart_dev_s *dev, uint8_t *im)
 {
-  struct misoc_dev_s *priv = (struct misoc_dev_s *)dev->priv;
-
   if (im)
    {
      *im = uart_ev_enable_read();
@@ -371,7 +366,6 @@ static int misoc_uart_interrupt(int irq, void *context)
 {
   uint32_t stat;
   struct uart_dev_s *dev = NULL;
-  int i;
 
   dev = &g_uart1port;
 
@@ -504,7 +498,6 @@ static void misoc_send(struct uart_dev_s *dev, int ch)
 static void misoc_txint(struct uart_dev_s *dev, bool enable)
 {
   uint8_t im;
-  int i;
 
   im = uart_ev_enable_read();
   if (enable)
