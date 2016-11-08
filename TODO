@@ -467,21 +467,23 @@ o pthreads (sched/pthreads)
 
   Title:       PTHREAD_PRIO_PROTECT
   Description: Extend pthread_mutexattr_setprotocol() support PTHREAD_PRIO_PROTECT:
+
                "When a thread owns one or more mutexes initialized with the
                PTHREAD_PRIO_PROTECT protocol, it shall execute at the higher of its
                priority  or  the  highest  of the priority ceilings of all the mutexes
                owned by this thread and initialized with this attribute, regardless of
                whether other threads are blocked on any of these mutexes or not.
 
-               "While  a  thread is holding a mutex which has been initialized with
+               "While a thread is holding a mutex which has been initialized with
                the PTHREAD_PRIO_INHERIT or PTHREAD_PRIO_PROTECT protocol attributes,
                it shall not be subject to being moved to the tail of the scheduling queue
                at its priority in the event that its original priority is changed,
                such as by a call to sched_setparam(). Likewise, when a thread unlocks
                a mutex that has been initialized with the PTHREAD_PRIO_INHERIT or
                PTHREAD_PRIO_PROTECT protocol attributes, it shall not be subject to
-               being moved to the tail of the scheduling queue at its priority in  the
+               being moved to the tail of the scheduling queue at its priority in the
                event that its original priority is changed."
+
   Status:      Open.  No changes planned.
   Priority:    Low -- about zero, probably not that useful. Priority inheritance is
                already supported and is a much better solution.  And it turns out
@@ -489,39 +491,39 @@ o pthreads (sched/pthreads)
                Excerpted from my post in a Linked-In discussion:
 
                "I started to implement this HLS/"PCP" semaphore in an RTOS that I
-               work with (http://www.nuttx.org) and I discovered after doing the
-               analysis and basic code framework that a complete solution for the
-               case of a counting semaphore is still quite complex -- essentially
-               as complex as is priority inheritance.
+                work with (http://www.nuttx.org) and I discovered after doing the
+                analysis and basic code framework that a complete solution for the
+                case of a counting semaphore is still quite complex -- essentially
+                as complex as is priority inheritance.
 
                "For example, suppose that a thread takes 3 different HLS semaphores
-               A, B, and C. Suppose that they are prioritized in that order with
-               A the lowest and C the highest. Suppose the thread takes 5 counts
-               from A, 3 counts from B, and 2 counts from C. What priority should
-               it run at? It would have to run at the priority of the highest
-               priority semaphore C. This means that the RTOS must maintain
-               internal information of the priority of every semaphore held by
-               the thread.
+                A, B, and C. Suppose that they are prioritized in that order with
+                A the lowest and C the highest. Suppose the thread takes 5 counts
+                from A, 3 counts from B, and 2 counts from C. What priority should
+                it run at? It would have to run at the priority of the highest
+                priority semaphore C. This means that the RTOS must maintain
+                internal information of the priority of every semaphore held by
+                the thread.
 
                "Now suppose it releases one count on semaphore B. How does the
-               RTOS know that it still holds 2 counts on B? With some complex
-               internal data structure. The RTOS would have to maintain internal
-               information about how many counts from each semaphore are held
-               by each thread.
+                RTOS know that it still holds 2 counts on B? With some complex
+                internal data structure. The RTOS would have to maintain internal
+                information about how many counts from each semaphore are held
+                by each thread.
 
                "How does the RTOS know that it should not decrement the priority
-               from the priority of C? Again, only with internal complexity. It
-               would have to know the priority of every semaphore held by
-               every thread.
+                from the priority of C? Again, only with internal complexity. It
+                would have to know the priority of every semaphore held by
+                every thread.
 
                "Providing the HLS capability on a simple pthread mutex would not
-               be such quite such a complex job if you allow only one mutex per
-               thread. However, the more general case seems almost as complex
-               as priority inheritance. I decided that the implementation does
-               not have value to me. I only wanted it for its reduced
-               complexity; in all other ways I believe that it is the inferior
-               solution. So I discarded a few hours of programming. Not a
-               big loss from the experience I gained."
+                be such quite such a complex job if you allow only one mutex per
+                thread. However, the more general case seems almost as complex
+                as priority inheritance. I decided that the implementation does
+                not have value to me. I only wanted it for its reduced
+                complexity; in all other ways I believe that it is the inferior
+                solution. So I discarded a few hours of programming. Not a
+                big loss from the experience I gained."
 
 o Message Queues (sched/mqueue)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

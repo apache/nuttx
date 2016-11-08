@@ -145,7 +145,12 @@ Debug Issues
       and software.
 
     - I don't see any way to connect JTAG to the ESP32 Core V2 board. There
-      is a USB/Serial converter chip, but that does not look it supports JTAG.
+      is a USB/Serial converter chip, but that does not look like it
+      supports JTAG.
+
+      It may be necessary to make cable.  Refer to
+      http://www.esp32.com/viewtopic.php?t=381 "How to debug ESP32 with
+      JTAG / OpenOCD / GDB 1st part connect the hardware."
 
     - I need to understand how to use the secondary bootloader.  My
       understanding is that it will configure hardware, read a partition
