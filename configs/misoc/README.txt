@@ -4,6 +4,9 @@ Misoc README
   This README applies to a port to NuttX running on a Qemu LM32 system.  You
   can find the Qemu setup at https://bitbucket.org/key2/qemu
 
+  This initial release supports two UARTs, but does not have a system timer
+  or other peripherals.  More to come.
+
 Buildroot Toolchain
 ===================
 
