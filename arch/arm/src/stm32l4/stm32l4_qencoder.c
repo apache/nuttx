@@ -66,31 +66,6 @@
  * Pre-processor Definitions
  ************************************************************************************/
 /* Clocking *************************************************************************/
-/* The CLKOUT value should not exceed the CLKIN value */
-
-#if defined(CONFIG_STM32L4_TIM1_QE) && CONFIG_STM32L4_TIM1_QECLKOUT > STM32L4_APB2_TIM1_CLKIN
-#  warning "CONFIG_STM32L4_TIM1_QECLKOUT exceeds STM32L4_APB2_TIM1_CLKIN"
-#endif
-
-#if defined(CONFIG_STM32L4_TIM2_QE) && CONFIG_STM32L4_TIM2_QECLKOUT > STM32L4_APB1_TIM2_CLKIN
-#  warning "CONFIG_STM32L4_TIM2_QECLKOUT exceeds STM32L4_APB2_TIM2_CLKIN"
-#endif
-
-#if defined(CONFIG_STM32L4_TIM3_QE) && CONFIG_STM32L4_TIM3_QECLKOUT >  STM32L4_APB1_TIM3_CLKIN
-#  warning "CONFIG_STM32L4_TIM3_QECLKOUT exceeds STM32L4_APB2_TIM3_CLKIN"
-#endif
-
-#if defined(CONFIG_STM32L4_TIM4_QE) && CONFIG_STM32L4_TIM4_QECLKOUT > STM32L4_APB1_TIM4_CLKIN
-#  warning "CONFIG_STM32L4_TIM4_QECLKOUT exceeds STM32L4_APB2_TIM4_CLKIN"
-#endif
-
-#if defined(CONFIG_STM32L4_TIM5_QE) && CONFIG_STM32L4_TIM5_QECLKOUT > STM32L4_APB1_TIM5_CLKIN
-#  warning "CONFIG_STM32L4_TIM5_QECLKOUT exceeds STM32L4_APB2_TIM5_CLKIN"
-#endif
-
-#if defined(CONFIG_STM32L4_TIM8_QE) && CONFIG_STM32L4_TIM8_QECLKOUT > STM32L4_APB2_TIM8_CLKIN
-#  warning "CONFIG_STM32L4_TIM8_QECLKOUT exceeds STM32L4_APB2_TIM8_CLKIN"
-#endif
 
 /* Timers ***************************************************************************/
 
@@ -223,7 +198,7 @@ struct stm32l4_qeconfig_s
   uint32_t ti1cfg;  /* TI1 input pin configuration (20-bit encoding) */
   uint32_t ti2cfg;  /* TI2 input pin configuration (20-bit encoding) */
   uint32_t base;    /* Register base address */
-  uint32_t psc;     /* Timer input clock prescaler */
+  uint32_t psc;     /* Encoder pulses prescaler */
   xcpt_t   handler; /* Interrupt handler for this IRQ */
 };
 
@@ -323,7 +298,7 @@ static const struct stm32l4_qeconfig_s g_tim1config =
   .width    = TIM1_BITWIDTH,
 #endif
   .base     = STM32L4_TIM1_BASE,
-  .psc      = (STM32L4_APB2_TIM1_CLKIN / CONFIG_STM32L4_TIM1_QECLKOUT) - 1,
+  .psc      = CONFIG_STM32L4_TIM1_QEPSC,
   .ti1cfg   = GPIO_TIM1_CH1IN,
   .ti2cfg   = GPIO_TIM1_CH2IN,
 #if TIM1_BITWIDTH == 16
@@ -349,7 +324,7 @@ static const struct stm32l4_qeconfig_s g_tim2config =
   .width    = TIM2_BITWIDTH,
 #endif
   .base     = STM32L4_TIM2_BASE,
-  .psc      = (STM32L4_APB1_TIM2_CLKIN / CONFIG_STM32L4_TIM2_QECLKOUT) - 1,
+  .psc      = CONFIG_STM32L4_TIM2_QEPSC,
   .ti1cfg   = GPIO_TIM2_CH1IN,
   .ti2cfg   = GPIO_TIM2_CH2IN,
 #if TIM2_BITWIDTH == 16
@@ -375,7 +350,7 @@ static const struct stm32l4_qeconfig_s g_tim3config =
   .width    = TIM3_BITWIDTH,
 #endif
   .base     = STM32L4_TIM3_BASE,
-  .psc      = (STM32L4_APB1_TIM3_CLKIN / CONFIG_STM32L4_TIM3_QECLKOUT) - 1,
+  .psc      = CONFIG_STM32L4_TIM3_QEPSC,
   .ti1cfg   = GPIO_TIM3_CH1IN,
   .ti2cfg   = GPIO_TIM3_CH2IN,
 #if TIM3_BITWIDTH == 16
@@ -401,7 +376,7 @@ static const struct stm32l4_qeconfig_s g_tim4config =
   .width    = TIM4_BITWIDTH,
 #endif
   .base     = STM32L4_TIM4_BASE,
-  .psc      = (STM32L4_APB1_TIM4_CLKIN / CONFIG_STM32L4_TIM4_QECLKOUT) - 1,
+  .psc      = CONFIG_STM32L4_TIM4_QEPSC,
   .ti1cfg   = GPIO_TIM4_CH1IN,
   .ti2cfg   = GPIO_TIM4_CH2IN,
 #if TIM4_BITWIDTH == 16
@@ -427,7 +402,7 @@ static const struct stm32l4_qeconfig_s g_tim5config =
   .width    = TIM5_BITWIDTH,
 #endif
   .base     = STM32L4_TIM5_BASE,
-  .psc      = (STM32L4_APB1_TIM5_CLKIN / CONFIG_STM32L4_TIM5_QECLKOUT) - 1,
+  .psc      = CONFIG_STM32L4_TI55_QEPSC,
   .ti1cfg   = GPIO_TIM5_CH1IN,
   .ti2cfg   = GPIO_TIM5_CH2IN,
 #if TIM5_BITWIDTH == 16
@@ -453,7 +428,7 @@ static const struct stm32l4_qeconfig_s g_tim8config =
   .width    = TIM8_BITWIDTH,
 #endif
   .base     = STM32L4_TIM8_BASE,
-  .psc      = (STM32L4_APB2_TIM8_CLKIN / CONFIG_STM32L4_TIM8_QECLKOUT) - 1,
+  .psc      = CONFIG_STM32L4_TIM8_QEPSC,
   .ti1cfg   = GPIO_TIM8_CH1IN,
   .ti2cfg   = GPIO_TIM8_CH2IN,
 #if TIM8_BITWIDTH == 16
@@ -804,10 +779,23 @@ static int stm32l4_setup(FAR struct qe_lowerhalf_s *lower)
   stm32l4_putreg16(priv, STM32L4_GTIM_ARR_OFFSET, 0xffff);
 #endif
 
-  /* Set the timer prescaler value.  The clock input value (CLKIN) is based on the
-   * peripheral clock (PCLK) and a multiplier.  These CLKIN values are provided in
-   * the board.h file.  The prescaler value is then that CLKIN value divided by the
-   * configured CLKOUT value (minus one)
+  /* Set the timer prescaler value.
+   *
+   * Previously, and still in the stm32fx driver, the clock input value (CLKIN)
+   * was based on the peripheral clock (PCLK) and a multiplier.
+   * These CLKIN values are provided in the board.h file.
+   * The prescaler value is then that CLKIN value divided by the configured
+   * CLKOUT value (minus one).
+   *
+   * It was determined that this configration makes no sense for a qencoder.
+   * If we are doing precise shaft positioning, each qe pulse is important.
+   * So the STM32L4 has direct config control on the pulse count prescaler,
+   * instead of deriving this value from an obscure "output"setting AND the
+   * timer input clock. This input clock just limits the incoming pulse rate,
+   * which should be lower than the peripheral clock due to resynchronization,
+   * but it is the responsibility of the system designer to decide the
+   * correct prescaler value, because it has a direct influence on the
+   * encoder resolution.
    */
 
   stm32l4_putreg16(priv, STM32L4_GTIM_PSC_OFFSET, (uint16_t)priv->config->psc);
@@ -1183,6 +1171,8 @@ static int stm32l4_reset(FAR struct qe_lowerhalf_s *lower)
 static int stm32l4_ioctl(FAR struct qe_lowerhalf_s *lower, int cmd, unsigned long arg)
 {
   /* No ioctl commands supported */
+
+  /* TODO add an IOCTL to control the encoder pulse count prescaler */
 
   return -ENOTTY;
 }
