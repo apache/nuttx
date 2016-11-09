@@ -84,25 +84,15 @@ int sem_trywait(FAR sem_t *sem)
 
   /* This API should not be called from interrupt handlers */
 
-  DEBUGASSERT(up_interrupt_context() == false);
+  DEBUGASSERT(sem != NULL && up_interrupt_context() == false);
 
-  /* Assume any errors reported are due to invalid arguments. */
-
-  set_errno(EINVAL);
-
-  if (sem)
+  if (sem != NULL)
     {
       /* The following operations must be performed with interrupts disabled
        * because sem_post() may be called from an interrupt handler.
        */
 
       flags = enter_critical_section();
-
-      /* Any further errors could only occurr because the semaphore is not
-       * available.
-       */
-
-      set_errno(EAGAIN);
 
       /* If the semaphore is available, give it to the requesting task */
 
@@ -114,10 +104,20 @@ int sem_trywait(FAR sem_t *sem)
           rtcb->waitsem = NULL;
           ret = OK;
         }
+      else
+        {
+          /* Semaphore is not available */
+
+          set_errno(EAGAIN);
+        }
 
       /* Interrupts may now be enabled. */
 
       leave_critical_section(flags);
+    }
+  else
+    {
+      set_errno(EINVAL);
     }
 
   return ret;
