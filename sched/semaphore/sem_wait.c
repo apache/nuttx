@@ -84,11 +84,11 @@ int sem_wait(FAR sem_t *sem)
 
   /* This API should not be called from interrupt handlers */
 
-  DEBUGASSERT(up_interrupt_context() == false);
+  DEBUGASSERT(sem != NULL && up_interrupt_context() == false);
 
   /* Make sure we were supplied with a valid semaphore. */
 
-  if (sem)
+  if (sem != NULL)
     {
       /* The following operations must be performed with interrupts
        * disabled because sem_post() may be called from an interrupt
