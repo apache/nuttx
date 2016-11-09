@@ -402,7 +402,7 @@ static const struct stm32l4_qeconfig_s g_tim5config =
   .width    = TIM5_BITWIDTH,
 #endif
   .base     = STM32L4_TIM5_BASE,
-  .psc      = CONFIG_STM32L4_TI55_QEPSC,
+  .psc      = CONFIG_STM32L4_TIM5_QEPSC,
   .ti1cfg   = GPIO_TIM5_CH1IN,
   .ti2cfg   = GPIO_TIM5_CH2IN,
 #if TIM5_BITWIDTH == 16
@@ -787,10 +787,10 @@ static int stm32l4_setup(FAR struct qe_lowerhalf_s *lower)
    * The prescaler value is then that CLKIN value divided by the configured
    * CLKOUT value (minus one).
    *
-   * It was determined that this configration makes no sense for a qencoder.
+   * It was determined that this configuration makes no sense for a qencoder.
    * If we are doing precise shaft positioning, each qe pulse is important.
    * So the STM32L4 has direct config control on the pulse count prescaler,
-   * instead of deriving this value from an obscure "output"setting AND the
+   * instead of deriving this value from an obscure "output" setting AND the
    * timer input clock. This input clock just limits the incoming pulse rate,
    * which should be lower than the peripheral clock due to resynchronization,
    * but it is the responsibility of the system designer to decide the
