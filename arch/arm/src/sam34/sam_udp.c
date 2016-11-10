@@ -893,8 +893,8 @@ static void sam_req_wrsetup(struct sam_usbdev_s *priv,
   privep->epstate = UDP_EPSTATE_SENDING;
 
   /* Set TXPKTRDY to notify the USB hardware that there is TX data in the
-   * endpoint FIFO.  We will be notified that the endpoint’s FIFO has been
-   * released by the USB device when TXCOMP in the endpoint’s UDPEP_CSRx
+   * endpoint FIFO.  We will be notified that the endpoint's FIFO has been
+   * released by the USB device when TXCOMP in the endpoint's UDPEP_CSRx
    * register has been set.
    */
 
@@ -3180,7 +3180,7 @@ static int sam_ep_submit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
       if ((privep->epstate == UDP_EPSTATE_STALLED) || privep->pending)
         {
           /* Yes.. in this case, save the request in a special "pending"
-           * queue. They will stay queuee until the stall is cleared.
+           * queue. They will stay queued until the stall is cleared.
            */
 
           uinfo("Pending stall clear\n");
