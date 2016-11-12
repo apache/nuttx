@@ -19,6 +19,7 @@ Contents
   o STATUS
   o ESP32 Features
   o ESP32 Toolchain
+  o Memory Map
   o Serial Console
   o Buttons and LEDs
   o SMP
@@ -78,6 +79,61 @@ ESP32 Toolchain
 
   NOTE: The xtensa-esp32-elf configuration is only available in the
   xtensa-1.22.x branch.
+
+Memory Map
+==========
+
+  Embedded Memory
+  ---------------
+  BUS TYPE    START      LAST       DESCRIPTION     NOTES
+  Data        0x3ff80000 0x3ff81fff RTC FAST Memory PRO_CPU Only
+              0x3ff82000 0x3ff8ffff                 Reserved
+  Data        0x3ff90000 0x3ff9ffff Internal ROM 1
+              0x3ffa0000 0x3ffadfff                 Reserved
+  Data        0x3ffae000 0x3ffdffff Internal SRAM 2 DMA
+  Data        0x3ffe0000 0x3fffffff Internal SRAM 1 DMA
+
+  Boundary Address
+  ----------------
+  BUS TYPE    START      LAST       DESCRIPTION     NOTES
+  Instruction 0x40000000 0x40007fff Internal ROM 0  Remap
+  Instruction 0x40008000 0x4005ffff Internal ROM 0
+              0x40060000 0x4006ffff                 Reserved
+  Instruction 0x40070000 0x4007ffff Internal SRAM 0 Cache
+  Instruction 0x40080000 0x4009ffff Internal SRAM 0
+  Instruction 0x400a0000 0x400affff Internal SRAM 1
+  Instruction 0x400b0000 0x400b7FFF Internal SRAM 1 Remap
+  Instruction 0x400b8000 0x400bffff Internal SRAM 1
+  Instruction 0x400c0000 0x400c1FFF RTC FAST Memory PRO_CPU Only
+  Data /      0x50000000 0x50001fff RTC SLOW Memory
+  Instruction
+
+  External Memory
+  ---------------
+  BUS TYPE    START      LAST       DESCRIPTION     NOTES
+  Data        0x3f400000 0x3f7fffff External Flash  Read
+  Data        0x3f800000 0x3fbfffff External SRAM   Read and Write
+
+  Boundary Address
+  ----------------
+  Instruction 0x400c2000 0x40bfffff 11512 KB External Flash Read
+
+  Linker Segments
+  ---------------
+  DESCRIPTION        START        END        ATTR LINKER SEGMENT NAME
+  FLASH mapped data: 0x3f400010 - 0x3fc00010  R   dram_0_seg
+  COMMON data RAM:   0x3ffb0000 - 0x40000000  RW  dram_0_seg (NOTE 1,2)
+  IRAM for PRO cpu:  0x40080000 - 0x400a0000  RX  iram0_0_seg
+  RTC fast memory:   0x400c0000 - 0x400c2000  RWX rtc_iram_seg
+  FLASH:             0x400d0018 - 0x40400018  RX  iram0_2_seg (actually FLASH)
+  RTC slow memory:   0x50000000 - 0x50001000  RW  rtc_slow_seg (NOTE 3)
+
+  NOTE 1: Linker script will reserved space at the beginning of the segment
+          for BT and at the end for trace memory.
+  NOTE 2: Heap enads at the top of dram0_0_seg
+  NOTE 3: Linker script will reserved space at the beginning of the segment
+          for co-processor reserve memory and at the end for ULP coprocessor
+          reserve memory.
 
 Serial Console
 ==============
