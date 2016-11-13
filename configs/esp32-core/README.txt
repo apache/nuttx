@@ -149,10 +149,10 @@ Memory Map
   FLASH:             0x400d0018 0x40400018  RX  iram0_2_seg (actually FLASH)
   RTC slow memory:   0x50000000 0x50001000  RW  rtc_slow_seg (NOTE 3)
 
-  NOTE 1: Linker script will reserved space at the beginning of the segment
+  NOTE 1: Linker script will reserve space at the beginning of the segment
           for BT and at the end for trace memory.
   NOTE 2: Heap enads at the top of dram0_0_seg
-  NOTE 3: Linker script will reserved space at the beginning of the segment
+  NOTE 3: Linker script will reserve space at the beginning of the segment
           for co-processor reserve memory and at the end for ULP coprocessor
           reserve memory.
 
@@ -330,10 +330,12 @@ Things to Do
 ============
 
   1. There is no support for an interrupt stack yet.
+
   2. There is no clock intialization logic in place.  This depends on logic in
      Expressif libriaries.  The board comes up using that basic 40 Mhz crystal
      for clocking.  Getting to 80 MHz will require clocking initialization in
      esp32_clockconfig.c.
+
   3. I did not implement the lazy co-processor save logic supported by Xtensa.
      That logic works like this:
 
@@ -344,7 +346,9 @@ Things to Do
      c. The co-processor exception handler re-enables the co-processor.
 
      Instead, the NuttX logic saves and restores CPENABLE on each context
-     switch.
+     switch.  This has disadvantages in that (1) co-processor context will
+     be saved and restored even if the co-processor was never used, and (2)
+     tasks must explicitly enable and disable co-processors.
 
   4. Currently the Xtensa port copies register state save information from
      the stack into the TCB.  A more efficient alternative would be to just
