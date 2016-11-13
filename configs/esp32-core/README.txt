@@ -142,16 +142,25 @@ Memory Map
   ------------------ ---------- ---------- ---- ----------------------------
   DESCRIPTION        START      END        ATTR LINKER SEGMENT NAME
   ------------------ ---------- ---------- ---- ----------------------------
-  FLASH mapped data: 0x3f400010 0x3fc00010  R   dram_0_seg
-  COMMON data RAM:   0x3ffb0000 0x40000000  RW  dram_0_seg (NOTE 1,2)
+  FLASH mapped data: 0x3f400010 0x3fc00010  R   drom0_0_seg
+    - .rodata
+    - Constructors/destructors
+  COMMON data RAM:   0x3ffb0000 0x40000000  RW  dram0_0_seg  (NOTE 1,2)
+    - .bss/.data
   IRAM for PRO cpu:  0x40080000 0x400a0000  RX  iram0_0_seg
-  RTC fast memory:   0x400c0000 0x400c2000  RWX rtc_iram_seg
-  FLASH:             0x400d0018 0x40400018  RX  iram0_2_seg (actually FLASH)
+    - Interrupt Vectors
+    - Low level handlers
+    - Xtensa/Expressif libraries
+  RTC fast memory:   0x400c0000 0x400c2000  RWX rtc_iram_seg (PRO_CPU only)
+    - .rtc.text (unused?)
+  FLASH:             0x400d0018 0x40400018  RX  iram0_2_seg  (actually FLASH)
+    - .text
   RTC slow memory:   0x50000000 0x50001000  RW  rtc_slow_seg (NOTE 3)
+    - .rtc.data/rodata (unused?)
 
   NOTE 1: Linker script will reserve space at the beginning of the segment
           for BT and at the end for trace memory.
-  NOTE 2: Heap enads at the top of dram0_0_seg
+  NOTE 2: Heap enads at the top of dram_0_seg
   NOTE 3: Linker script will reserve space at the beginning of the segment
           for co-processor reserve memory and at the end for ULP coprocessor
           reserve memory.
@@ -216,18 +225,50 @@ SMP
 Debug Issues
 ============
 
-  I basically need the debug environment and a step-by-step procedure.
+  You basically need the debug environment and a step-by-step procedure.
 
     - First in need some debug environment which would be a JTAG emulator
-      and software.
+      and the ESP32 OpenOCD software which is available here:
+      https://github.com/espressif/openocd-esp32
 
-    - I don't see any way to connect JTAG to the ESP32 Core V2 board. There
-      is a USB/Serial converter chip, but that does not look like it
-      supports JTAG.
+    - There is on overiew of the use of OpenOCD here:
+      https://dl.espressif.com/doc/esp-idf/latest/openocd.html
+      This document is also available in ESP-IDF source tree in docs
+      directory (https://github.com/espressif/esp-idf).
 
-      It may be necessary to make cable.  Refer to
-      http://www.esp32.com/viewtopic.php?t=381 "How to debug ESP32 with
-      JTAG / OpenOCD / GDB 1st part connect the hardware."
+      A template ESP32 OpenOCD configuration file is provided in
+      ESP-IDF docs directory (esp32.cfg).  Since you are not using
+      FreeRTOS, you will need to uncomment the "set ESP32_RTOS none"
+      line in OpenOCD configuration file.
+
+      The documentation indicates that you need to use an external JTAG
+      like the TIAO USB Multi-protocol Adapter and the Flyswatter2.
+      The instructions at http://www.esp32.com/viewtopic.php?t=381 show
+      use of an FTDI C232HM-DDHSL-0 USB 2.0 high speed to MPSSE cable.
+
+    - The ESP32 Core v2 board has no on board JTAG connector.  It will
+      be necessary to make a cable or some other board to connect a JTAG
+      emulator.  Refer to http://www.esp32.com/viewtopic.php?t=381 "How
+      to debug ESP32 with JTAG / OpenOCD / GDB 1st part connect the
+      hardware."
+
+      Relevant pin-out:
+
+        -------- ----------
+        PIN      JTAG
+        LABEL    FUNCTION
+        -------- ----------
+        IO14     TMS
+        IO12     TDI
+        GND      GND
+        IO13     TCK
+        -------- ----------
+        IO15     TDO
+        -------- ----------
+
+      You can find the mapping of JTAG signals to ESP32 GPIO numbers in
+      "ESP32 Pin List" document found here:
+      http://espressif.com/en/support/download/documents?keys=&field_type_tid%5B%5D=13
 
     - I need to understand how to use the secondary bootloader.  My
       understanding is that it will configure hardware, read a partition
@@ -237,26 +278,47 @@ Debug Issues
     - Do I need to create a partition table at 0x5000?  Should this be part
       of the NuttX build?
 
-  I see https://github.com/espressif/esp-idf/tree/master/components/bootloader
-  and https://github.com/espressif/esp-idf/tree/master/components/partition_table.
-  I suppose some of what I need is in there, but I am not sure what I am
-  looking at right now.
+      See https://github.com/espressif/esp-idf/tree/master/components/bootloader
+      and https://github.com/espressif/esp-idf/tree/master/components/partition_table.
+      I suppose some of what I need is in there, but I am not sure what I am
+      looking at right now.
 
-  There is an OpenOCD port here: https://github.com/espressif/openocd-esp32
-  and I see some additional OpenOCD documentation in
-  https://github.com/espressif/esp-idf/tree/master/docs.  This documentation
-  raises some more questions.    It says I need to use and external JTAG like
-  the TIAO USB Multi-protocol Adapter and the Flyswatter2.  I don't have
-  either of those.  I am not sure if I have any USB serial JTAG.  I have some
-  older ones that might work, however.
+  It is possible to skip the secondary bootloader and run out of IRAM using
+  only the primary bootloader if your application of small enough (< 128KiB code,
+  <180KiB data), then you can simplify initial bring-up by avoiding second stage
+  bootloader. Your application will be loaded into IRAM using first stage
+  bootloader present in ESP32 ROM. To achieve this, you need two things:
 
-  My understanding when I started this was that I could use my trusty Segger
-  J-Link.  But that won't work with OpenOCD.  Is the J-Link that also a
-  possibility?
+    1. Have a linker script which places all code into IRAM and all data into DRAM
 
-  I also see that I can now get an ESP32 board from Sparkfun:
-  https://www.sparkfun.com/products/13907 But I don't see JTAG there either:
-  https://cdn.sparkfun.com/assets/learn_tutorials/5/0/7/esp32-thing-schematic.pdf
+    2. Use "esptool.py" utility found in ESP-IDF to convert application .elf file
+       into binary format which can be loaded by first stage bootloader.
+
+  The default linker script in ESP-IDF places most code into memory-mapped flash:
+  https://github.com/espressif/esp-idf/blob/master/components/esp32/ld/esp32.common.ld#L178-L186
+
+  You would need to remove this section and move its contents into the end of .iram0.text section:
+  https://github.com/espressif/esp-idf/blob/master/components/esp32/ld/esp32.common.ld#L85
+
+  Same with constant data: move contents of .flash.rodata section:
+  https://github.com/espressif/esp-idf/blob/master/components/esp32/ld/esp32.common.ld#L134-L173
+
+  into the end of .dram0.data section (before _heap_start):
+  https://github.com/espressif/esp-idf/blob/master/components/esp32/ld/esp32.common.ld#L128
+
+  With these modifications, all code and data should be moved into IRAM/DRAM.  Next, you would
+  need to link the ELF file and convert it to binary format suitable for flashing into the
+  board.  The xommand should to convert ELF file to binary image looks as follows:
+
+    python esp-idf/components/esptool_py/esptool/esptool.py --chip esp32 elf2image --flash_mode "dio" --flash_freq "40m" --flash_size "2MB" -o app.bin app.elf
+
+  To flash binary image to your development board, use the same esptool.py utility:
+
+    python esp-idf/components/esptool_py/esptool/esptool.py --chip esp32 --port /dev/ttyUSB0 --baud 921600 write_flash -z --flash_mode dio --flash_freq 40m --flash_size 2MB 0x1000 app.bin
+
+  The argument before app.bin (0x1000) indicates the offset in flash where binary
+  will be written. ROM bootloader expects to find an application (or second stage
+  bootloader) image at offset 0x1000, so we are writing the binary there.
 
   Right now, the NuttX port depends on the bootloader to initialize hardware,
   including basic (slow) clocking.    If I had the clock configuration logic,
