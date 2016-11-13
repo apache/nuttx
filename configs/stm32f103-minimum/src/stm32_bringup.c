@@ -163,5 +163,15 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_VEML6070
+  /* Register the UV-A light sensor */
+
+  ret = stm32_veml6070initialize("/dev/uvlight0");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_veml6070initialize() failed: %d\n", ret);
+    }
+#endif
+
   return ret;
 }

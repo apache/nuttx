@@ -192,5 +192,18 @@ int stm32_mfrc522initialize(FAR const char *devpath);
 int stm32_tone_setup(void);
 #endif
 
+/***********************************************************************************
+ * Name: stm32_veml6070initialize
+ *
+ * Description:
+ *   Called to configure an I2C and to register VEML6070 for the stm32f103-minimum
+ *   board.
+ *
+ ***********************************************************************************/
+
+#ifdef CONFIG_VEML6070
+int stm32_veml6070initialize(FAR const char *devpath);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_STM32F103_MINIMUM_SRC_STM32F103_MINIMUM_H */

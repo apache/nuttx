@@ -234,6 +234,13 @@ config QENCODER
 	bool "Qencoder"
 	default n
 
+config VEML6070
+	bool "Vishay VEML6070 UV-A Light Sensor support"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the Vishay VEML6070 UV-A light sensor.
+
 config XEN1210
 	bool "Sensixs XEN1210 Magnetometer"
 	default n

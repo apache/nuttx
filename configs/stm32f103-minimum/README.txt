@@ -636,3 +636,9 @@ Where <subdir> is one of the following:
       CONFIG_CDCACM_CONSOLE=y       : The CDC/ACM serial device is NOT the console
       CONFIG_PL2303=y               : The Prolifics PL2303 emulation is enabled
       CONFIG_PL2303_CONSOLE=y       : The PL2303 serial device is the console
+
+  veml6070:
+  --------
+    This is a config example to use the Vishay VEML6070 UV-A sensor. To use this
+    sensor you need to connect PB6 (I2C1 CLK) to SCL; PB7 (I2C1 SDA) to SDA of
+    sensor module. I used a GY-VEML6070 module to test this driver.
