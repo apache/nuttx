@@ -240,19 +240,25 @@ Debug Issues
   --------------------------
   A template ESP32 OpenOCD configuration file is provided in
   ESP-IDF docs directory (esp32.cfg).  Since you are not using
-  FreeRTOS, you will need to uncomment the "set ESP32_RTOS none"
-  line in OpenOCD configuration file.
+  FreeRTOS, you will need to uncomment the line:
 
-  You will still need to change the source line from:
+    set ESP32_RTOS none
 
-    find interface/ftdi/tumpa.cfg line
+  in the OpenOCD configuration file.  You will also need to change
+  the source line from:
+
+    find interface/ftdi/tumpa.cfg
 
   to reflect the physical JTAG adapter connected.
 
-  NOTE: A copy of this OpenOCD configuration file (with the referenced
-  line RTOS uncommented but with no change to JTAG interface).  Is
-  available in the NuttX source tree at
-  nuttx/config/esp32-core/scripts/esp32.cfg.
+  NOTE: A copy of this OpenOCD configuration file available in the NuttX
+  source tree at nuttx/config/esp32-core/scripts/esp32.cfg..  It has these
+  modifications:
+
+    - The referenced "set ESP32_RTOS none" line has been uncommented
+    - The "ind interface/ftdi/tumpa.cfg".  This means that you will
+      need to specify the interface configuration file on the OpenOCD
+      command line.
 
   General OpenOCD build instructions
   ----------------------------------
@@ -265,14 +271,37 @@ Debug Issues
     git submodule init
     git submodule update
 
-  Then look at the README file in the openocd-esp32 directory.
+  Then look at the README and the docs/INSTALL.txt files in the
+  openocd-esp32 directory for further instructions.  There area
+  separate README files for Linux/Cygwin, OSX, and Windows.  Here
+  is what I ended up doing (under Linux):
+
+    cd openocd-esp32
+    ./bootstrap
+    ./configure
+    make
+
+   If you do not do the install step, then you will have a localhost
+   version of the OpenOCD binary at openocd-esp32/src.
 
   Running OpenOCD
   --------------
 
-    cd to openocd-esp32 directory
-    copy the modified esp32.cfg script to this directory
-    Run ./src/openocd -s ./tcl -f ./esp32.cfg to start OpenOCD
+    - cd to openocd-esp32 directory
+    - copy the modified esp32.cfg script to this directory
+
+  Then start OpenOCD by executing a command like the following.  Here
+  I assume that:
+
+    - You did not install OpenOCD; binararies are avalable at
+      openocd-esp32/src and interface scripts are in
+      openocd-eps32/tcl/interface
+    - I select the configuration for the Olimex ARM-USB-OCD
+      debugger.
+
+  Then the command to start OpenOCD is:
+
+    sudo ./src/openocd -s ./tcl -f tcl/interface/ftdi/olimex-arm-usb-ocd.cfg -f ./esp32.cfg
 
   Connecting a debugger to OpenOCD
   --------------------------------
