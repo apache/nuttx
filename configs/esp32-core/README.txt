@@ -23,7 +23,8 @@ Contents
   o Serial Console
   o Buttons and LEDs
   o SMP
-  o Debug Issues
+  o OpenOCD for the ESP32
+  o Executing and Debugging from FLASH and IRAM
   o Configurations
   o Things to Do
 
@@ -222,8 +223,8 @@ SMP
 
   3. Assertions.  On a fatal assertions, other CPUs need to be stopped.
 
-Debug Issues
-============
+OpenOCD for the ESP32
+=====================
 
   First you in need some debug environment which would be a JTAG emulator
   and the ESP32 OpenOCD software which is available here:
@@ -335,6 +336,16 @@ Debug Issues
 
   This should give you a gdb prompt.
 
+  Breakpoints
+  -----------
+  You can set up to 2 hardware breakpoints, which can be anywhere in the
+  address space. Also 2 hardware watchpoints.
+
+  The openocd esp32.cfg file currently forces gdb to use hardware
+  breakpoints, I believe because software breakpoints (or, at least, the
+  memory map for automatically choosing them) aren't implemented yet
+  (as of 2016-11-14).
+
   JTAG Emulator
   -------------
   The documentation indicates that you need to use an external JTAG
@@ -397,49 +408,74 @@ Debug Issues
     20 GND   N/A      GND
     ------------ ----------
 
+ Executing and Debugging from FLASH and IRAM
+ ===========================================
+
+  FLASH
+  -----
+  OpenOCD currently doesn't have a FLASH driver for ESP32, so you can load
+  code into IRAM only via JTAG. FLASH-resident sections like .FLASH.rodata
+  will fail to load.  The bootloader in ROM doesn't parse ELF, so any imag
+  which is bootloaded from FLASH has to be converted into a custom image
+  format first.
+
+  The tool esp-idf uses for flashing is a command line Python tool called
+  "esptool.py" which talks to a serial bootloader in ROM.  A version is
+  supplied in the esp-idf codebase in components/esptool_py/esptool, the
+  "upstream" for that tool is here:
+
+    https://github.com/espressif/esptool/pull/121
+
+  The master branch for esptool.py is currently ESP8266-only (as of 2016-11-14),
+  this PR has the ESP32 support which still needs some final tidying up before
+  it's
+  merged.
+
+  To FLASH an ELF via the command line is a two step process, something like
+  this:
+
+    esptool.py --chip esp32 elf2image --flash_mode dio --flash_size 4MB -o ./nuttx.bin nuttx.elf
+    esptool.py --chip esp32 --port COMx write_flash 0x1000 bootloader.bin 0x4000 partition_table.bin 0x10000 nuttx.bin
+
+  The first step converts an ELF image into an ESP32-compatible binary
+  image format, and the second step flashes it (along with bootloader image and
+  partition table binary.)
+
+  To put the ESP32 into serial flashing mode, it needs to be reset with IO0 held
+  low.  On the Core boards this can be accomplished by holding the button marked
+  "Boot" and pressing then releasing the button marked "EN".  Actually, esptool.py
+  can enter bootloader mode automatically (via RTS/DTR control lines), but
+  unfortunately a timing interaction between the Windows CP2012 driver and the
+  hardware means this doesn't currently work on Windows.
+
   Secondary Boot Loader / Partition Table
   ---------------------------------------
-  I need to understand how to use the secondary bootloader.  My
-  understanding is that it will configure hardware, read a partition
-  table at address 0x5000, and then load code into memory.  I do need to
-  download and build the bootloader?
-
-  Do I need to create a partition table at 0x5000?  Should this be part
-  of the NuttX build?
-
   See https://github.com/espressif/esp-idf/tree/master/components/bootloader
   and https://github.com/espressif/esp-idf/tree/master/components/partition_table.
-  I suppose some of what I need is in there, but I am not sure what I am
-  looking at right now.
 
   Running from IRAM
   -----------------
+  Running from IRAM is a good debug option.  You should be able to load the ELF directly via JTAG in this case, and you may not need the bootloader.  The one "gotcha" for needing the bootloader is disabling the initial watchdog, there is code in bootloader_start.c that does this.
+
   It is possible to skip the secondary bootloader and run out of IRAM using
   only the primary bootloader if your application of small enough (< 128KiB code,
   <180KiB data), then you can simplify initial bring-up by avoiding second stage
   bootloader. Your application will be loaded into IRAM using first stage
   bootloader present in ESP32 ROM. To achieve this, you need two things:
 
-    1. Have a linker script which places all code into IRAM and all data into DRAM
+    1. Have a linker script which places all code into IRAM and all data into
+       IRAM/DRAM
 
-    2. Use "esptool.py" utility found in ESP-IDF to convert application .elf file
-       into binary format which can be loaded by first stage bootloader.
+    2. Use "esptool.py" utility found in ESP-IDF to convert application .elf
+       file into binary format which can be loaded by first stage bootloader.
 
-  The default linker script in ESP-IDF places most code into memory-mapped flash:
-  https://github.com/espressif/esp-idf/blob/master/components/esp32/ld/esp32.common.ld#L178-L186
+  NuttX supports a configuration option, CONFIG_ESP32CORE_RUN_IRAM, that may be
+  selected for execution from IRAM.  This option simply selects the correct
+  linker script for IRAM execution.
 
-  You would need to remove this section and move its contents into the end of .iram0.text section:
-  https://github.com/espressif/esp-idf/blob/master/components/esp32/ld/esp32.common.ld#L85
-
-  Same with constant data: move contents of .flash.rodata section:
-  https://github.com/espressif/esp-idf/blob/master/components/esp32/ld/esp32.common.ld#L134-L173
-
-  into the end of .dram0.data section (before _heap_start):
-  https://github.com/espressif/esp-idf/blob/master/components/esp32/ld/esp32.common.ld#L128
-
-  With these modifications, all code and data should be moved into IRAM/DRAM.  Next, you would
-  need to link the ELF file and convert it to binary format suitable for flashing into the
-  board.  The xommand should to convert ELF file to binary image looks as follows:
+  Again you would need to link the ELF file and convert it to binary format suitable
+  for flashing into the board.  The command should to convert ELF file to binary
+  image looks as follows:
 
     python esp-idf/components/esptool_py/esptool/esptool.py --chip esp32 elf2image --flash_mode "dio" --flash_freq "40m" --flash_size "2MB" -o app.bin app.elf
 
@@ -554,4 +590,4 @@ Things to Do
 
   5. See SMP-related issues above
 
-  6. See Debug Issues above
+  6. See OpenOCD for the ESP32 above

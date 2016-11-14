@@ -38,9 +38,14 @@ include ${TOPDIR}/tools/Config.mk
 include ${TOPDIR}/arch/xtensa/src/lx6/Toolchain.defs
 
 LDSCRIPT1 = $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/scripts/esp32_out.ld
-LDSCRIPT2 = $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/scripts/esp32_common.ld
 LDSCRIPT3 = $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/scripts/esp32_rom.ld
 LDSCRIPT4 = $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/scripts/esp32_peripherals.ld
+
+ifeq ($(CONFIG_ESP32CORE_RUN_IRAM),y)
+  LDSCRIPT2 = $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/scripts/esp32_iram.ld
+else
+  LDSCRIPT2 = $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/scripts/esp32_flash.ld
+endif
 
 ifeq ($(WINTOOL),y)
   # Windows-native toolchains

@@ -16,4 +16,15 @@ config ESP32CORE_XTAL_26MHz
 	bool "26MHz"
 
 endchoice # On-board Crystal Frequency
+
+config ESP32CORE_RUN_IRAM
+	bool "Run from IRAM"
+	default n
+	---help---
+		The default configuration is set up run from IRAM.  However, the
+		current (2016-11-14) OpenOCD for ESP32 does not support writing to
+		FLASH.  This option sets up the liner scripts to support execution
+		from IRAM.  In this case, OpenOCD can be used to load directly into
+		IRAM.
+
 endif # ARCH_BOARD_ESP32CORE
