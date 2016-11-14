@@ -5,4 +5,15 @@
 
 if ARCH_BOARD_ESP32CORE
 
+choice
+	prompt "On-board Crystal Frequency"
+	default ESP32CORE_XTAL_40MZ
+
+config ESP32CORE_XTAL_40MZ
+	bool "40MHz"
+
+config ESP32CORE_XTAL_26MHz
+	bool "26MHz"
+
+endchoice # On-board Crystal Frequency
 endif # ARCH_BOARD_ESP32CORE

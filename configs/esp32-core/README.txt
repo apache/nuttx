@@ -303,6 +303,20 @@ Debug Issues
 
     sudo ./src/openocd -s ./tcl -f tcl/interface/ftdi/olimex-arm-usb-ocd.cfg -f ./esp32.cfg
 
+  I then see:
+
+    Open On-Chip Debugger 0.10.0-dev-g3098897 (2016-11-14-12:19)
+    Licensed under GNU GPL v2
+    For bug reports, read
+            http://openocd.org/doc/doxygen/bugs.html
+    adapter speed: 200 kHz
+    force hard breakpoints
+    Info : clock speed 200 kHz
+    Info : JTAG tap: esp32.cpu0 tap/device found: 0x120034e5 (mfg: 0x272 (Tensilica), part: 0x2003, ver: 0x1)
+    Info : JTAG tap: esp32.cpu1 tap/device found: 0x120034e5 (mfg: 0x272 (Tensilica), part: 0x2003, ver: 0x1)
+    Info : esp32.cpu0: Debug controller was reset (pwrstat=0x5F, after clear 0x0F).
+    Info : esp32.cpu0: Core was reset (pwrstat=0x5F, after clear 0x0F).
+
   Connecting a debugger to OpenOCD
   --------------------------------
   OpenOCD should now be ready to accept gdb connections. If you have
@@ -318,7 +332,8 @@ Debug Issues
 
     cd esp-idf-template
     xtensa-esp32-elf-gdb -ex 'target remote localhost:3333' ./build/app-template.elf
-    This should give you a gdb prompt.
+
+  This should give you a gdb prompt.
 
   JTAG Emulator
   -------------
