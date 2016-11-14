@@ -240,7 +240,6 @@ _do_reset:
 .restore_all_and_eret:
 	/* r1 should have the place where we restore ! */
 
-	lw		r2, (r1+REG_X2)
 	lw		r3, (r1+REG_X3)
 	lw		r4, (r1+REG_X4)
 	lw		r5, (r1+REG_X5)
@@ -270,8 +269,9 @@ _do_reset:
 	lw		r29, (r1+REG_RA)
 	lw		r30, (r1+REG_EA)
 	lw		r31, (r1+REG_BA)
-	lw		r1, (r1+REG_INT_CTX)
-	wcsr	IE, r1
+	lw		r2, (r1+REG_INT_CTX)
+	wcsr	IE, r2
+	lw		r2, (r1+REG_X2)
 	lw		r1, (r1+REG_X1)
 
 	eret
