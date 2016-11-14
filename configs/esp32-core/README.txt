@@ -330,8 +330,8 @@ Debug Issues
   than OpenOCD is running in, invoke gdb. For example, for the
   template app, you would do this like such:
 
-    cd esp-idf-template
-    xtensa-esp32-elf-gdb -ex 'target remote localhost:3333' ./build/app-template.elf
+    cd nuttx
+    xtensa-esp32-elf-gdb -ex 'target remote localhost:3333' nuttx
 
   This should give you a gdb prompt.
 

@@ -135,7 +135,7 @@ SECTIONS
 
     /* C++ constructor and destructor tables, properly ordered: */
 
-    __sinit = ABSOLUTE(.);
+    _sinit = ABSOLUTE(.);
     KEEP (*crtbegin.o(.ctors))
     KEEP (*(EXCLUDE_FILE (*crtend.o) .ctors))
     KEEP (*(SORT(.ctors.*)))
