@@ -225,99 +225,151 @@ SMP
 Debug Issues
 ============
 
-  You basically need the debug environment and a step-by-step procedure.
+  First you in need some debug environment which would be a JTAG emulator
+  and the ESP32 OpenOCD software which is available here:
+  https://github.com/espressif/openocd-esp32
 
-    - First in need some debug environment which would be a JTAG emulator
-      and the ESP32 OpenOCD software which is available here:
-      https://github.com/espressif/openocd-esp32
+  OpenOCD Documentation
+  ---------------------
+  There is on overiew of the use of OpenOCD here:
+  https://dl.espressif.com/doc/esp-idf/latest/openocd.html
+  This document is also available in ESP-IDF source tree in docs
+  directory (https://github.com/espressif/esp-idf).
 
-    - There is on overiew of the use of OpenOCD here:
-      https://dl.espressif.com/doc/esp-idf/latest/openocd.html
-      This document is also available in ESP-IDF source tree in docs
-      directory (https://github.com/espressif/esp-idf).
+  OpenOCD Configuration File
+  --------------------------
+  A template ESP32 OpenOCD configuration file is provided in
+  ESP-IDF docs directory (esp32.cfg).  Since you are not using
+  FreeRTOS, you will need to uncomment the "set ESP32_RTOS none"
+  line in OpenOCD configuration file.
 
-      A template ESP32 OpenOCD configuration file is provided in
-      ESP-IDF docs directory (esp32.cfg).  Since you are not using
-      FreeRTOS, you will need to uncomment the "set ESP32_RTOS none"
-      line in OpenOCD configuration file.
+  You will still need to change the source line from:
 
-      NOTE: A copy of this OpenOCD configuration file (with the referenced
-      line uncommented).  Is available in the NuttX source tree at
-      nuttx/config/esp32-core/scripts/esp32.cfg.
+    find interface/ftdi/tumpa.cfg line
 
-      The documentation indicates that you need to use an external JTAG
-      like the TIAO USB Multi-protocol Adapter and the Flyswatter2.
-      The instructions at http://www.esp32.com/viewtopic.php?t=381 show
-      use of an FTDI C232HM-DDHSL-0 USB 2.0 high speed to MPSSE cable.
+  to reflect the physical JTAG adapter connected.
 
-    - The ESP32 Core v2 board has no on board JTAG connector.  It will
-      be necessary to make a cable or some other board to connect a JTAG
-      emulator.  Refer to http://www.esp32.com/viewtopic.php?t=381 "How
-      to debug ESP32 with JTAG / OpenOCD / GDB 1st part connect the
-      hardware."
+  NOTE: A copy of this OpenOCD configuration file (with the referenced
+  line RTOS uncommented but with no change to JTAG interface).  Is
+  available in the NuttX source tree at
+  nuttx/config/esp32-core/scripts/esp32.cfg.
 
-      Relevant pin-out:
+  General OpenOCD build instructions
+  ----------------------------------
+  Installing OpenOCD.  The sources for the ESP32-enabled variant of
+  OpenOCD are available from Espressifs Github. To download the source,
+  use the following commands:
 
-        -------- ----------
-        PIN      JTAG
-        LABEL    FUNCTION
-        -------- ----------
-        IO14     TMS
-        IO12     TDI
-        GND      GND
-        IO13     TCK
-        -------- ----------
-        IO15     TDO
-        -------- ----------
+    git clone https://github.com/espressif/openocd-esp32.git
+    cd openocd-esp32
+    git submodule init
+    git submodule update
 
-      You can find the mapping of JTAG signals to ESP32 GPIO numbers in
-      "ESP32 Pin List" document found here:
-      http://espressif.com/en/support/download/documents?keys=&field_type_tid%5B%5D=13
+  Then look at the README file in the openocd-esp32 directory.
 
-      I put the ESP32 on a prototyping board and used a standard JTAG 20-pin
-      connector with an older Olimex JTAG that I had.  Here is how I wired
-      the 20-pin connector:
+  Running OpenOCD
+  --------------
 
-        ----------------- ----------
-        20-PIN JTAG       ESP32 PIN
-        CONNECTOR         LABEL
-        ----------------- ----------
-         1 VREF  INPUT    3V3
-         3 nTRST OUTPUT   N/C
-         5 TDI   OUTPUT   IO12
-         7 TMS   OUTPUT   IO14
-         9 TCLK  OUTPUT   IO13
-        11 RTCK  INPUT    N/C
-        13 TDO   INPUT    IO15
-        15 RESET I/O      N/C
-        17 DBGRQ OUTPUT   N/C
-        19 5V    OUTPUT   N/C
-        ------------ ----------
-         2 VCC   INPUT    3V3
-         4 GND   N/A      GND
-         6 GND   N/A      GND
-         8 GND   N/A      GND
-        10 GND   N/A      GND
-        12 GND   N/A      GND
-        14 GND   N/A      GND
-        16 GND   N/A      GND
-        18 GND   N/A      GND
-        20 GND   N/A      GND
-        ------------ ----------
+    cd to openocd-esp32 directory
+    copy the modified esp32.cfg script to this directory
+    Run ./src/openocd -s ./tcl -f ./esp32.cfg to start OpenOCD
 
-    - I need to understand how to use the secondary bootloader.  My
-      understanding is that it will configure hardware, read a partition
-      table at address 0x5000, and then load code into memory.  I do need to
-      download and build the bootloader?
+  Connecting a debugger to OpenOCD
+  --------------------------------
+  OpenOCD should now be ready to accept gdb connections. If you have
+  compiled the ESP32 toolchain using Crosstool-NG, or if you have
+  downloaded a precompiled toolchain from the Espressif website, you
+  should already have xtensa-esp32-elf-gdb, a version of gdb that can
+  be used for this
 
-    - Do I need to create a partition table at 0x5000?  Should this be part
-      of the NuttX build?
+  First, make sure the project you want to debug is compiled and
+  flashed into the ESP32’s SPI flash. Then, in a different console
+  than OpenOCD is running in, invoke gdb. For example, for the
+  template app, you would do this like such:
 
-      See https://github.com/espressif/esp-idf/tree/master/components/bootloader
-      and https://github.com/espressif/esp-idf/tree/master/components/partition_table.
-      I suppose some of what I need is in there, but I am not sure what I am
-      looking at right now.
+    cd esp-idf-template
+    xtensa-esp32-elf-gdb -ex 'target remote localhost:3333' ./build/app-template.elf
+    This should give you a gdb prompt.
 
+  JTAG Emulator
+  -------------
+  The documentation indicates that you need to use an external JTAG
+  like the TIAO USB Multi-protocol Adapter and the Flyswatter2.
+  The instructions at http://www.esp32.com/viewtopic.php?t=381 show
+  use of an FTDI C232HM-DDHSL-0 USB 2.0 high speed to MPSSE cable.
+
+  The ESP32 Core v2 board has no on board JTAG connector.  It will
+  be necessary to make a cable or some other board to connect a JTAG
+  emulator.  Refer to http://www.esp32.com/viewtopic.php?t=381 "How
+  to debug ESP32 with JTAG / OpenOCD / GDB 1st part connect the
+  hardware."
+
+  Relevant pin-out:
+
+    -------- ----------
+    PIN      JTAG
+    LABEL    FUNCTION
+    -------- ----------
+    IO14     TMS
+    IO12     TDI
+    GND      GND
+    IO13     TCK
+    -------- ----------
+    IO15     TDO
+    -------- ----------
+
+  You can find the mapping of JTAG signals to ESP32 GPIO numbers in
+  "ESP32 Pin List" document found here:
+  http://espressif.com/en/support/download/documents?keys=&field_type_tid%5B%5D=13
+
+  I put the ESP32 on a prototyping board and used a standard JTAG 20-pin
+  connector with an older Olimex JTAG that I had.  Here is how I wired
+  the 20-pin connector:
+
+    ----------------- ----------
+    20-PIN JTAG       ESP32 PIN
+    CONNECTOR         LABEL
+    ----------------- ----------
+     1 VREF  INPUT    3V3
+     3 nTRST OUTPUT   N/C
+     5 TDI   OUTPUT   IO12
+     7 TMS   OUTPUT   IO14
+     9 TCLK  OUTPUT   IO13
+    11 RTCK  INPUT    N/C
+    13 TDO   INPUT    IO15
+    15 RESET I/O      N/C
+    17 DBGRQ OUTPUT   N/C
+    19 5V    OUTPUT   N/C
+    ------------ ----------
+     2 VCC   INPUT    3V3
+     4 GND   N/A      GND
+     6 GND   N/A      GND
+     8 GND   N/A      GND
+    10 GND   N/A      GND
+    12 GND   N/A      GND
+    14 GND   N/A      GND
+    16 GND   N/A      GND
+    18 GND   N/A      GND
+    20 GND   N/A      GND
+    ------------ ----------
+
+  Secondary Boot Loader / Partition Table
+  ---------------------------------------
+  I need to understand how to use the secondary bootloader.  My
+  understanding is that it will configure hardware, read a partition
+  table at address 0x5000, and then load code into memory.  I do need to
+  download and build the bootloader?
+
+  Do I need to create a partition table at 0x5000?  Should this be part
+  of the NuttX build?
+
+  See https://github.com/espressif/esp-idf/tree/master/components/bootloader
+  and https://github.com/espressif/esp-idf/tree/master/components/partition_table.
+  I suppose some of what I need is in there, but I am not sure what I am
+  looking at right now.
+
+  Running from IRAM
+  -----------------
   It is possible to skip the secondary bootloader and run out of IRAM using
   only the primary bootloader if your application of small enough (< 128KiB code,
   <180KiB data), then you can simplify initial bring-up by avoiding second stage
@@ -355,6 +407,8 @@ Debug Issues
   will be written. ROM bootloader expects to find an application (or second stage
   bootloader) image at offset 0x1000, so we are writing the binary there.
 
+  Clocking
+  --------
   Right now, the NuttX port depends on the bootloader to initialize hardware,
   including basic (slow) clocking.    If I had the clock configuration logic,
   would I be able to run directly out of IRAM without a bootloader?  That
