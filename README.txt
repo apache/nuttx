@@ -1597,7 +1597,8 @@ apps/
  |- gpsutils/
  |   `- minmea/README.txt
  |- graphics/
- |   `- tiff/README.txt
+ |   |- tiff/README.txt
+ |   `- traveler/tools/tcledit/README.txt
  |- interpreters/
  |   |- bas
  |   |  `- README.txt
