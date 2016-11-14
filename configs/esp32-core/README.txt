@@ -270,6 +270,37 @@ Debug Issues
       "ESP32 Pin List" document found here:
       http://espressif.com/en/support/download/documents?keys=&field_type_tid%5B%5D=13
 
+      I put the ESP32 on a prototyping board and used a standard JTAG 20-pin
+      connector with an older Olimex JTAG that I had.  Here is how I wired
+      the 20-pin connector:
+
+        ----------------- ----------
+        20-PIN JTAG       ESP32 PIN
+        CONNECTOR         LABEL
+        ----------------- ----------
+         1 VREF  INPUT    3V3
+         3 nTRST OUTPUT   N/C
+         5 TDI   OUTPUT   IO12
+         7 TMS   OUTPUT   IO14
+         9 TCLK  OUTPUT   IO13
+        11 RTCK  INPUT    N/C
+        13 TDO   INPUT    IO15
+        15 RESET I/O      N/C
+        17 DBGRQ OUTPUT   N/C
+        19 5V    OUTPUT   N/C
+        ------------ ----------
+         2 VCC   INPUT    3V3
+         4 GND   N/A      GND
+         6 GND   N/A      GND
+         8 GND   N/A      GND
+        10 GND   N/A      GND
+        12 GND   N/A      GND
+        14 GND   N/A      GND
+        16 GND   N/A      GND
+        18 GND   N/A      GND
+        20 GND   N/A      GND
+        ------------ ----------
+
     - I need to understand how to use the secondary bootloader.  My
       understanding is that it will configure hardware, read a partition
       table at address 0x5000, and then load code into memory.  I do need to
