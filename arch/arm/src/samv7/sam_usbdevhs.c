@@ -3333,6 +3333,17 @@ static void sam_ep_reset(struct sam_usbdev_s *priv, uint8_t epno)
 
   sam_putreg(USBHS_DEVINT_PEP(epno), SAM_USBHS_DEVIDR);
 
+  /* Clear all pending interrupts */
+
+  sam_putreg(USBHS_DEVEPTICR_ALLINTS, SAM_USBHS_DEVEPTICR(epno));
+
+  /* Set DMA control register to a defined state */
+
+  if ((SAM_EPSET_DMA & SAM_EP_BIT(epno)) != 0)
+    {
+      sam_putreg(0, SAM_USBHS_DEVDMACTRL(epno));
+    }
+
   /* Cancel any queued requests.  Since they are cancelled with status
    * -ESHUTDOWN, then will not be requeued until the configuration is reset.
    * NOTE:  This should not be necessary... the CLASS_DISCONNECT above
