@@ -241,6 +241,10 @@ Debug Issues
       FreeRTOS, you will need to uncomment the "set ESP32_RTOS none"
       line in OpenOCD configuration file.
 
+      NOTE: A copy of this OpenOCD configuration file (with the referenced
+      line uncommented).  Is available in the NuttX source tree at
+      nuttx/config/esp32-core/scripts/esp32.cfg.
+
       The documentation indicates that you need to use an external JTAG
       like the TIAO USB Multi-protocol Adapter and the Flyswatter2.
       The instructions at http://www.esp32.com/viewtopic.php?t=381 show
