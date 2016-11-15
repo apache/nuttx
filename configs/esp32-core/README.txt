@@ -285,8 +285,8 @@ OpenOCD for the ESP32
    If you do not do the install step, then you will have a localhost
    version of the OpenOCD binary at openocd-esp32/src.
 
-  Running OpenOCD
-  --------------
+  Starting the OpenOCD Server
+  ---------------------------
 
     - cd to openocd-esp32 directory
     - copy the modified esp32.cfg script to this directory
@@ -411,6 +411,18 @@ OpenOCD for the ESP32
  Executing and Debugging from FLASH and IRAM
  ===========================================
 
+  Enable Debug Symbols
+  --------------------
+  To debug with GDB, you will need to enable symbols in the build.  You do this
+  with 'make menuconfig' then selecting:
+
+    - "Build Setup" -> "Debug Options" -> "Generate Debug Symbols"
+
+  And, to make debugging easier, also disable optimizations.  This will make
+  your code a lot bigger:
+
+    - "Build Setup" -> "Optimization Level" -> "Suppress Optimization"
+
   FLASH
   -----
   OpenOCD currently doesn't have a FLASH driver for ESP32, so you can load
@@ -477,11 +489,11 @@ OpenOCD for the ESP32
   for flashing into the board.  The command should to convert ELF file to binary
   image looks as follows:
 
-    python esp-idf/components/esptool_py/esptool/esptool.py --chip esp32 elf2image --flash_mode "dio" --flash_freq "40m" --flash_size "2MB" -o app.bin app.elf
+    python esp-idf/components/esptool_py/esptool/esptool.py --chip esp32 elf2image --flash_mode "dio" --flash_freq "40m" --flash_size "2MB" -o nuttx.bin nuttx
 
   To flash binary image to your development board, use the same esptool.py utility:
 
-    python esp-idf/components/esptool_py/esptool/esptool.py --chip esp32 --port /dev/ttyUSB0 --baud 921600 write_flash -z --flash_mode dio --flash_freq 40m --flash_size 2MB 0x1000 app.bin
+    python esp-idf/components/esptool_py/esptool/esptool.py --chip esp32 --port /dev/ttyUSB0 --baud 921600 write_flash -z --flash_mode dio --flash_freq 40m --flash_size 2MB 0x1000 nuttx.bin
 
   The argument before app.bin (0x1000) indicates the offset in flash where binary
   will be written. ROM bootloader expects to find an application (or second stage
@@ -550,6 +562,9 @@ NOTES:
   4. Default configurations are set to run from FLASH.  You will need
      to set CONFIG_ESP32CORE_RUN_IRAM=y for now (see the " Executing
      and Debugging from FLASH and IRAM" section above).
+
+     To select this option, do 'make menuconfig'.  Then you can find
+     the selection under the "Board Selection" menu as "Run from IRAM".
 
   Configuration sub-directories
   -----------------------------
