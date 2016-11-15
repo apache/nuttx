@@ -498,6 +498,15 @@ Open Issues:
    CPU (which may not be CPU0).  Perhaps that should be a spinlock to prohibit
    execution of interrupts on CPU0 when other CPUs are in a critical section?
 
+   2016-11-15:  When the critical section is used to lock a resource that is also
+   used by interupt handling, I believe that what is required is that the interrupt
+   handling logic must also take the spinlock.  This will cause the interrupt handlers
+   on other CPUs to spin until leave_critical_section() is called.
+
+   NOTE: Currently enter_critical section takes the spinlock before disabling
+   (local) interrupts.  That orderwould have to change or you could potentially get
+   deadlocks if the interrupt handler on the same CPU tries to take the spinlock.
+
 2. Cache Concurency.  This is a complex problem.  There is logic in place now to
    clean CPU0 D-cache before starting a new CPU and for invalidating the D-Cache
    when the new CPU is started.  REVISIT:  Seems that this should not be necessary.
