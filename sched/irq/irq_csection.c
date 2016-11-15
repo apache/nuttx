@@ -214,34 +214,38 @@ void leave_critical_section(irqstate_t flags)
 
   if (g_os_initstate >= OSINIT_TASKLISTS)
     {
-      /* If called from an interrupt handler, then just take the spinlock.
-       * If we are already in a critical section, this will lock the CPU
-       * in the interrupt handler.  Sounds worse than it is.
+      /* If called from an interrupt handler, then just release the
+       * spinlock.  The interrupt handling logic should already hold the
+       * spinlock if enter_critical_section() has been called.  Unlocking
+       * the spinlock will allow interrupt handlers on other CPUs to execute
+       * again.
        */
 
       if (up_interrupt_context())
         {
-          /* We are in an interrupt handler but within a critical section.
-           * Wait until we can get the spinlock (meaning that we are no
-           * longer in the critical section).
-           */
+          /* We are in an interrupt handler. Release the spinlock. */
 
           DEBUGASSERT(g_cpu_irqlock == SP_LOCKED);
-          spin_unlock(&g_cpu_irqlock);
+          if (g_cpu_irqset == 0)
+            {
+              spin_unlock(&g_cpu_irqlock);
+            }
         }
       else
         {
           FAR struct tcb_s *rtcb = this_task();
           DEBUGASSERT(rtcb != 0 && rtcb->irqcount > 0);
 
-          /* Normal tasking context */
-          /* Will we still have interrupts disabled after decrementing the
+          /* Normal tasking context.  We need to coordinate with other
+           * tasks.
+           *
+           * Will we still have interrupts disabled after decrementing the
            * count?
-          */
+           */
 
           if (rtcb->irqcount > 1)
             {
-              /* Yes... make sure that the spinlock is set */
+              /* Yes... the spinlock should remain set */
 
               DEBUGASSERT(g_cpu_irqlock == SP_LOCKED);
               rtcb->irqcount--;
