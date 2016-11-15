@@ -86,6 +86,21 @@ volatile cpu_set_t g_cpu_irqset;
 irqstate_t enter_critical_section(void)
 {
   FAR struct tcb_s *rtcb;
+  irqstate_t ret;
+
+  /* Disable interrupts.
+   *
+   * NOTE 1: Ideally this should disable interrupts on all CPUs, but most
+   * architectures only support disabling interrupts on the local CPU.
+   * NOTE 2: Interrupts may already be disabled, but we call up_irq_save()
+   * unconditionally because we need to return valid interrupt status in any
+   * event.
+   * NOTE 3: We disable local interrupts BEFORE taking the spinlock in order
+   * to prevent possible waits on the spinlock from interrupt handling on
+   * the local CPU.
+   */
+
+  ret = up_irq_save();
 
   /* Check if we were called from an interrupt handler and that the tasks
    * lists have been initialized.
@@ -133,11 +148,9 @@ irqstate_t enter_critical_section(void)
         }
     }
 
-  /* Then disable interrupts (they may already be disabled, be we need to
-   * return valid interrupt status in any event).
-   */
+  /* Return interrupt status */
 
-  return up_irq_save();
+  return ret;
 }
 #else /* defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION) */
 irqstate_t enter_critical_section(void)
