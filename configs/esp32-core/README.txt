@@ -169,7 +169,7 @@ Memory Map
 Serial Console
 ==============
 
-  USART0 is, by default, the serial console.  It connects to the on-board
+  UART0 is, by default, the serial console.  It connects to the on-board
   CP2102 converter and is available on the USB connector USB CON8 (J1).
 
 Buttons and LEDs
@@ -532,14 +532,24 @@ NOTES:
   1. These configurations use the mconf-based configuration tool.  To
      change any of these configurations using that tool, you should:
 
-    a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
-       see additional README.txt files in the NuttX tools repository.
+     a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+        see additional README.txt files in the NuttX tools repository.
 
-    b. Execute 'make menuconfig' in nuttx/ in order to start the
-       reconfiguration process.
+     b. Execute 'make menuconfig' in nuttx/ in order to start the
+        reconfiguration process.
 
   2. Unless stated otherwise, all configurations generate console
-     output on [To be provided].
+     output on UART0 (see the "Serial Console" section above).
+
+  3. By default, these configurations assume a 40MHz crystal on-
+     board:
+
+     CONFIG_ESP32CORE_XTAL_40MZ=y
+     # CONFIG_ESP32CORE_XTAL_26MHz is not set
+
+  4. Default configurations are set to run from FLASH.  You will need
+     to set CONFIG_ESP32CORE_RUN_IRAM=y for now (see the " Executing
+     and Debugging from FLASH and IRAM" section above).
 
   Configuration sub-directories
   -----------------------------
