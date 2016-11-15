@@ -253,7 +253,7 @@ void leave_critical_section(irqstate_t flags)
           else
             {
 #ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
-              /* No.. Note that we have entered the critical section */
+              /* No.. Note that we have left the critical section */
 
               sched_note_csection(rtcb, false);
 #endif
