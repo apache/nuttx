@@ -202,7 +202,7 @@ void leave_critical_section(irqstate_t flags)
 
       if (rtcb->irqcount > 1)
         {
-          /* Yes... make sure that the spinlock is set */
+          /* Yes... Just decrement the count leaving the spinlock set */
 
           DEBUGASSERT(g_cpu_irqlock == SP_LOCKED);
           rtcb->irqcount--;
@@ -210,7 +210,7 @@ void leave_critical_section(irqstate_t flags)
       else
         {
 #ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
-          /* No.. Note that we have entered the critical section */
+          /* No.. Note that we have left the critical section */
 
           sched_note_csection(rtcb, false);
 #endif
@@ -222,7 +222,7 @@ void leave_critical_section(irqstate_t flags)
           spin_clrbit(&g_cpu_irqset, this_cpu(), &g_cpu_irqsetlock,
                       &g_cpu_irqlock);
 
-          /* Have all CPUs release the lock? */
+          /* Have all CPUs released the lock? */
 
           if (!spin_islocked(&g_cpu_irqlock))
             {
