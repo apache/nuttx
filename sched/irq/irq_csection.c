@@ -102,72 +102,51 @@ irqstate_t enter_critical_section(void)
 
   ret = up_irq_save();
 
-  /* Verify that the system has sufficient initialized so that the task lists
-   * are valid.
+  /* Check if we were called from an interrupt handler and that the tasks
+   * lists have been initialized.
    */
 
-  if (g_os_initstate >= OSINIT_TASKLISTS)
+  if (!up_interrupt_context() && g_os_initstate >= OSINIT_TASKLISTS)
     {
-      /* If called from an interrupt handler, then just take the spinlock.
-       * If we are already in a critical section, this will lock the CPU
-       * in the interrupt handler.  Sounds worse than it is.
-       */
+      /* Do we already have interrupts disabled? */
 
-      if (up_interrupt_context())
+      rtcb = this_task();
+      DEBUGASSERT(rtcb != NULL);
+
+      if (rtcb->irqcount > 0)
         {
-          /* We are in an interrupt handler but within a critical section.
-           * Wait until we can get the spinlock (meaning that we are no
-           * longer in the critical section).
+          /* Yes... make sure that the spinlock is set and increment the IRQ
+           * lock count.
            */
 
-          spin_lock(&g_cpu_irqlock);
+          DEBUGASSERT(g_cpu_irqlock == SP_LOCKED && rtcb->irqcount < INT16_MAX);
+          rtcb->irqcount++;
         }
       else
         {
-          /* Normal tasking environment. */
-          /* Do we already have interrupts disabled? */
+          /* NO.. Take the spinlock to get exclusive access and set the lock
+           * count to 1.
+           *
+           * We must avoid that case where a context occurs between taking the
+           * g_cpu_irqlock and disabling interrupts.  Also interrupts disables
+           * must follow a stacked order.  We cannot other context switches to
+           * re-order the enabling/disabling of interrupts.
+           *
+           * The scheduler accomplishes this by treating the irqcount like
+           * lockcount:  Both will disable pre-emption.
+           */
 
-          rtcb = this_task();
-          DEBUGASSERT(rtcb != NULL);
-
-          if (rtcb->irqcount > 0)
-            {
-              /* Yes... make sure that the spinlock is set and increment the
-               * IRQ lock count.
-               */
-
-              DEBUGASSERT(g_cpu_irqlock == SP_LOCKED &&
-                          rtcb->irqcount < INT16_MAX);
-              rtcb->irqcount++;
-            }
-          else
-            {
-              /* NO.. Take the spinlock to get exclusive access and set the
-               * lock count to 1.
-               *
-               * We must avoid that case where a context occurs between
-               * taking the g_cpu_irqlock and disabling interrupts.  Also
-               * interrupts disables must follow a stacked order.  We
-               * cannot other context switches to re-order the enabling/
-               * disabling of interrupts.
-               *
-               * The scheduler accomplishes this by treating the irqcount
-               * like lockcount:  Both will disable pre-emption.
-               */
-
-              spin_setbit(&g_cpu_irqset, this_cpu(), &g_cpu_irqsetlock,
-                          &g_cpu_irqlock);
-              rtcb->irqcount = 1;
+          spin_setbit(&g_cpu_irqset, this_cpu(), &g_cpu_irqsetlock,
+                      &g_cpu_irqlock);
+          rtcb->irqcount = 1;
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
-              /* Note that we have entered the critical section */
+          /* Note that we have entered the critical section */
 
-              sched_note_csection(rtcb, true);
+          sched_note_csection(rtcb, true);
 #endif
-            }
         }
-   }
-
+    }
 
   /* Return interrupt status */
 
@@ -208,83 +187,59 @@ irqstate_t enter_critical_section(void)
 #ifdef CONFIG_SMP
 void leave_critical_section(irqstate_t flags)
 {
-  /* Verify that the system has sufficient initialized so that the task lists
-   * are valid.
+  /* Check if we were called from an interrupt handler and that the tasks
+   * lists have been initialized.
    */
 
-  if (g_os_initstate >= OSINIT_TASKLISTS)
+  if (!up_interrupt_context() && g_os_initstate >= OSINIT_TASKLISTS)
     {
-      /* If called from an interrupt handler, then just release the
-       * spinlock.  The interrupt handling logic should already hold the
-       * spinlock if enter_critical_section() has been called.  Unlocking
-       * the spinlock will allow interrupt handlers on other CPUs to execute
-       * again.
+      FAR struct tcb_s *rtcb = this_task();
+      DEBUGASSERT(rtcb != 0 && rtcb->irqcount > 0);
+
+      /* Will we still have interrupts disabled after decrementing the
+       * count?
        */
 
-      if (up_interrupt_context())
+      if (rtcb->irqcount > 1)
         {
-          /* We are in an interrupt handler. Release the spinlock. */
+          /* Yes... make sure that the spinlock is set */
 
           DEBUGASSERT(g_cpu_irqlock == SP_LOCKED);
-          if (g_cpu_irqset == 0)
-            {
-              spin_unlock(&g_cpu_irqlock);
-            }
+          rtcb->irqcount--;
         }
       else
         {
-          FAR struct tcb_s *rtcb = this_task();
-          DEBUGASSERT(rtcb != 0 && rtcb->irqcount > 0);
+#ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
+          /* No.. Note that we have entered the critical section */
 
-          /* Normal tasking context.  We need to coordinate with other
-           * tasks.
-           *
-           * Will we still have interrupts disabled after decrementing the
-           * count?
+          sched_note_csection(rtcb, false);
+#endif
+          /* Decrement our count on the lock.  If all CPUs have released,
+           * then unlock the spinlock.
            */
 
-          if (rtcb->irqcount > 1)
-            {
-              /* Yes... the spinlock should remain set */
+          rtcb->irqcount = 0;
+          spin_clrbit(&g_cpu_irqset, this_cpu(), &g_cpu_irqsetlock,
+                      &g_cpu_irqlock);
 
-              DEBUGASSERT(g_cpu_irqlock == SP_LOCKED);
-              rtcb->irqcount--;
-            }
-          else
-            {
-#ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
-              /* No.. Note that we have left the critical section */
+          /* Have all CPUs release the lock? */
 
-              sched_note_csection(rtcb, false);
-#endif
-              /* Decrement our count on the lock.  If all CPUs have
-               * released, then unlock the spinlock.
+          if (!spin_islocked(&g_cpu_irqlock))
+            {
+              /* Check if there are pending tasks and that pre-emption is
+               * also enabled.
                */
 
-              rtcb->irqcount = 0;
-              spin_clrbit(&g_cpu_irqset, this_cpu(), &g_cpu_irqsetlock,
-                          &g_cpu_irqlock);
-
-              /* Have all CPUs release the lock? */
-
-              if (!spin_islocked(&g_cpu_irqlock))
+              if (g_pendingtasks.head != NULL && !spin_islocked(&g_cpu_schedlock))
                 {
-                  /* Check if there are pending tasks and that pre-emption
-                   * is also enabled.
+                  /* Release any ready-to-run tasks that have collected in
+                   * g_pendingtasks if the scheduler is not locked.
+                   *
+                   * NOTE: This operation has a very high likelihood of causing
+                   * this task to be switched out!
                    */
 
-                  if (g_pendingtasks.head != NULL &&
-                      !spin_islocked(&g_cpu_schedlock))
-                    {
-                      /* Release any ready-to-run tasks that have collected
-                       * in g_pendingtasks if the scheduler is not locked.
-                       *
-                       * NOTE: This operation has a very high likelihood of
-                       * causing this task to be switched out!
-                       */
-
-                      up_release_pending();
-                    }
+                  up_release_pending();
                 }
             }
         }
