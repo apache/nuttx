@@ -31,6 +31,30 @@ config ARCH_FAMILY_LX6
 		Cadence® Tensilica® Xtensa® LX6 data plane processing unit (DPU).
 		The LX6 is a configurable and extensible processor core.
 
+config ARCH_CHIP
+	string
+	default "esp32"		if ARCH_CHIP_ESP32
+
+config XTENSA_CP_LAZY
+	bool "Lazy co-processor state restoration"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		NuttX logic saves and restores the co-processor enabled (CPENABLE)
+		register on each context switch.  This has disadvantages in that (1)
+		co-processor context will be saved and restored even if the co-
+		processor was never used, and (2) tasks must explicitly enable and
+		disable co-processors.
+
+		An alternative, "lazy" co-processor state restore is enabled with 
+		this option.  That logic works like as follows:
+
+		a. CPENABLE is set to zero on each context switch, disabling all co-
+		   processors.
+		b. If/when the task attempts to use the disabled co-processor, an
+		   exception occurs
+		c. The co-processor exception handler re-enables the co-processor.
+
 config XTENSA_USE_OVLY
 	bool
 	default n
@@ -41,16 +65,13 @@ config XTENSA_CP_INITSET
 	hex "Default co-processor enables"
 	default 0x0001
 	range 0 0xffff
+	depends on !XTENSA_CP_LAZY
 	---help---
 		Co-processors may be enabled on a thread by calling xtensa_coproc_enable()
 		and disabled by calling xtensa_coproc_disable().  Some co-processors
 		should be enabled on all threads by default.  That set of co-processors
 		is provided by CONFIG_XTENSA_CP_INITSET.  Each bit corresponds to one
 		coprocessor with the same bit layout as for the CPENABLE register.
-
-config ARCH_CHIP
-	string
-	default "esp32"		if ARCH_CHIP_ESP32
 
 source arch/xtensa/src/lx6/Kconfig
 if ARCH_CHIP_ESP32

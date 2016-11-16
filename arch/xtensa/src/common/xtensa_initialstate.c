@@ -98,10 +98,15 @@ void up_initial_state(struct tcb_s *tcb)
 
 #if XCHAL_CP_NUM > 0
   /* Set up the co-processors that will be enabled initially when the thread
-   * starts (see xtensa_coproc.h)
+   * starts (see xtensa_coproc.h).  If the lazy co-processor state restore
+   * logic is selected, that would be the empty set.
    */
 
+#ifdef CONFIG_XTENSA_CP_LAZY
+  xcp->cpstate.cpenable = 0;  /* No co-processors are enabled */
+#else
   xcp->cpstate.cpenable = (CONFIG_XTENSA_CP_INITSET & XTENSA_CP_ALLSET);
-  xcp->cpstate.cpstored = 0;  /* No coprocessors haved statee saved for this thread */
+#endif
+  xcp->cpstate.cpstored = 0;  /* No co-processors haved state saved */
 #endif
 }
