@@ -68,5 +68,10 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
+#undef EXTERN
+#ifdef __cplusplus
+}
+#endif
+
 #endif /* CONFIG_NET_LOOPBACK */
 #endif /* __NET_LOOPBACK_LOOBACK_H */

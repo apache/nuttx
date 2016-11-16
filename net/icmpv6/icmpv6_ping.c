@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/icmpv6/icmpv6_ping.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,6 +50,7 @@
 #include <net/if.h>
 
 #include <nuttx/clock.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
@@ -437,7 +438,13 @@ int icmpv6_ping(net_ipv6addr_t addr, uint16_t id, uint16_t seqno,
 
   /* Initialize the state structure */
 
+  /* This semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
   sem_init(&state.png_sem, 0, 0);
+  sem_setprotocol(&state.png_sem, SEM_PRIO_NONE);
+
   state.png_ticks  = DSEC2TICK(dsecs);     /* System ticks to wait */
   state.png_result = -ENOMEM;              /* Assume allocation failure */
   state.png_id     = id;                   /* The ID to use in the ECHO request */

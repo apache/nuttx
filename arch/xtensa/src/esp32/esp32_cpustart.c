@@ -46,6 +46,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
+#include <nuttx/semaphore.h>
 
 #include "sched/sched.h"
 #include "xtensa.h"
@@ -259,7 +260,13 @@ int up_cpu_start(int cpu)
       /* Start CPU1 */
 
       sinfo("Starting CPU%d\n", cpu);
+
+      /* The waitsem semaphore is used for signaling and, hence, should not
+       * have priority inheritance enabled.
+       */
+
       sem_init(&g_appcpu_interlock, 0, 0);
+      sem_setprotocol(&g_appcpu_interlock, SEM_PRIO_NONE);
 
       regval  = getreg32(DPORT_APPCPU_CTRL_B_REG);
       regval |= DPORT_APPCPU_CLKGATE_EN;

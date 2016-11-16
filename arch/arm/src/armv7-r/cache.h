@@ -43,12 +43,23 @@
 #include <nuttx/config.h>
 #include <nuttx/irq.h>
 
+#include "sctlr.h"
 #include "cp15_cacheops.h"
 #include "l2cc.h"
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
+/* intrinsics are used in these inline functions */
+
+#define arm_isb(n) __asm__ __volatile__ ("isb " #n : : : "memory")
+#define arm_dsb(n) __asm__ __volatile__ ("dsb " #n : : : "memory")
+#define arm_dmb(n) __asm__ __volatile__ ("dmb " #n : : : "memory")
+
+#define ARM_DSB()  arm_dsb(15)
+#define ARM_ISB()  arm_isb(15)
+#define ARM_DMB()  arm_dmb(15)
 
  /************************************************************************************
  * Inline Functions
@@ -181,6 +192,70 @@ static inline void arch_flush_dcache(uintptr_t start, uintptr_t end)
 {
   cp15_flush_dcache(start, end);
   l2cc_flush(start, end);
+}
+
+/****************************************************************************
+ * Name: arch_enable_icache
+ *
+ * Description:
+ *   Enable the I-Cache
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline void arch_enable_icache(void)
+{
+#ifdef CONFIG_ARMV7R_ICACHE
+  uint32_t regval;
+
+  ARM_DSB();
+  ARM_ISB();
+
+  /* Enable the I-Cache */
+
+  regval = cp15_rdsctlr();
+  if ((regval & SCTLR_I) == 0)
+    {
+      cp15_wrsctlr(regval | SCTLR_I);
+    }
+
+  ARM_DSB();
+  ARM_ISB();
+#endif
+}
+
+/****************************************************************************
+* Name: arch_enable_dcache
+*
+* Description:
+*   Enable the D-Cache
+*
+* Input Parameters:
+*   None
+*
+* Returned Value:
+*   None
+*
+****************************************************************************/
+
+static inline void arch_enable_dcache(void)
+{
+#ifdef CONFIG_ARMV7R_DCACHE
+  uint32_t regval;
+
+  /* Enable the D-Cache */
+
+  regval = cp15_rdsctlr();
+  if ((regval & SCTLR_C) == 0)
+    {
+      cp15_wrsctlr(regval | SCTLR_C);
+    }
+#endif
 }
 
 /****************************************************************************

@@ -40,7 +40,7 @@
  ****************************************************************************/
 
 #include <arch/esp32/core-isa.h>
-#include <arch/xtensa_specregs.h>
+#include <arch/xtensa/xtensa_specregs.h>
 #include "xtensa_abi.h"
 
 /****************************************************************************
@@ -148,7 +148,7 @@ _xtensa_window_spill:
 	rsr		a3, WINDOWSTART
 	srl		a2, a3					/* a2 is 0... | 000000xxxxxxxxxx = WINDOWSTART >> sar */
 	sll		a3, a3					/* a3 is 1yyyyy0000000000 | 0... = WINDOWSTART << (32 - sar) */
-	bgez	a3, .Linvalid_ws		/* verify that msbit is indeed set
+	bgez	a3, .Linvalid_ws		/* verify that msbit is indeed set */
 
 	srli	a3, a3, 32-WSBITS		/* a3 is 0... | 1yyyyy0000000000 = a3 >> (32-NAREG/4) */
 	or		a2, a2, a3				/* a2 is 0... | 1yyyyyxxxxxxxxxx */
@@ -202,7 +202,7 @@ _xtensa_window_spill:
 	add		a3, a2, a3				/* a3 = WINDOWBASE + index */
 #endif /* XCHAL_HAVE_NSA */
 
-	wsr		a	3, WINDOWBASE		/* Effectively do:  rotw index */
+	wsr		a3, WINDOWBASE			/* Effectively do:  rotw index */
 	rsync							/* Wait for write to WINDOWBASE to complete */
 
 	/* Now our registers have changed! */

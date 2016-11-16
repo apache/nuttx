@@ -803,6 +803,18 @@ menuconfig PRIORITY_INHERITANCE
 	default n
 	---help---
 		Set to enable support for priority inheritance on mutexes and semaphores.
+		When this option is enabled, the initial configuration of all seamphores
+		and mutexes will be with priority inheritance enabled.  That configuration
+		may not be appropriate in all cases (such as when the semaphore or mutex
+		is used for signaling).  In such cases, priority inheritance be be
+		disabled for individual semaphores by calling:
+
+			int ret = sem_setprotocol(&sem, SEM_PRIO_NONE);
+
+		And for individual pthread mutexes by setting the protocol attribute
+		before initializing the mutex:
+
+			int ret = pthread_mutexattr_setprotocol(&attr, PTHREAD_PRIO_NONE);
 
 if PRIORITY_INHERITANCE
 

@@ -226,7 +226,7 @@
                                (ADC_SMPR_DEFAULT << ADC_SMPR2_SMP8_SHIFT) | \
                                (ADC_SMPR_DEFAULT << ADC_SMPR2_SMP9_SHIFT))
 #elif defined(CONFIG_STM32_STM32F30XX)
-#  ifdef ADC_HAVE_DMA || (ADC_MAX_SAMPLES == 1)
+#  if defined(ADC_HAVE_DMA) || (ADC_MAX_SAMPLES == 1)
 #    define ADC_SMPR_DEFAULT    ADC_SMPR_61p5
 #  else /* Slow down sampling frequency */
 #    define ADC_SMPR_DEFAULT    ADC_SMPR_601p5
@@ -2203,6 +2203,7 @@ static void adc_shutdown(FAR struct adc_dev_s *dev)
 static void adc_rxint(FAR struct adc_dev_s *dev, bool enable)
 {
   FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
+  uint32_t regval;
 
   ainfo("intf: %d enable: %d\n", priv->intf, enable ? 1 : 0);
 
@@ -2212,8 +2213,15 @@ static void adc_rxint(FAR struct adc_dev_s *dev, bool enable)
        * end-of-conversion ADC.
        */
 
-      adc_modifyreg(priv, STM32_ADC_IER_OFFSET, 0,
-                    priv->hasdma ? ADC_IER_AWD | ADC_ISR_OVR : ADC_IER_ALLINTS);
+      regval = ADC_IER_ALLINTS;
+#ifdef ADC_HAVE_DMA
+      if (priv->hasdma)
+        {
+          regval &= ~(ADC_IER_EOC | ADC_IER_JEOC);
+        }
+#endif
+
+      adc_modifyreg(priv, STM32_ADC_IER_OFFSET, 0, regval);
     }
   else
     {
@@ -2803,7 +2811,7 @@ static int adc_interrupt(FAR struct adc_dev_s *dev)
 
   /* by MR regval &= ~pending; */
   /* by MR adc_putreg(priv, STM32_ADC_ISR_OFFSET, regval);
- 
+
   adc_putreg(priv, STM32_ADC_ISR_OFFSET, pending); */
   return OK;
 }

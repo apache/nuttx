@@ -57,6 +57,7 @@
 #include <nuttx/kthread.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/semaphore.h>
 
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbhost.h>
@@ -1934,6 +1935,12 @@ static FAR struct usbhost_class_s *
           sem_init(&priv->exclsem, 0, 1);
           sem_init(&priv->waitsem, 0, 0);
 
+          /* The waitsem semaphore is used for signaling and, hence, should
+           * not have priority inheritance enabled.
+           */
+
+          sem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
+
           /* Return the instance of the USB mouse class driver */
 
           return &priv->usbclass;
@@ -2552,6 +2559,12 @@ int usbhost_mouse_init(void)
 
   sem_init(&g_exclsem, 0, 1);
   sem_init(&g_syncsem, 0, 0);
+
+  /* The g_syncsem semaphore is used for signaling and, hence, should not
+   * have priority inheritance enabled.
+   */
+
+  sem_setprotocol(&g_syncsem, SEM_PRIO_NONE);
 
   /* Advertise our availability to support (certain) mouse devices */
 

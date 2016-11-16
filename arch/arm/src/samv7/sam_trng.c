@@ -53,6 +53,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/drivers/drivers.h>
 
@@ -353,8 +354,17 @@ static int sam_rng_initialize(void)
   /* Initialize the device structure */
 
   memset(&g_trngdev, 0, sizeof(struct trng_dev_s));
+
+  /* Initialize semaphores */
+
   sem_init(&g_trngdev.exclsem, 0, 1);
   sem_init(&g_trngdev.waitsem, 0, 0);
+
+  /* The waitsem semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
+  sem_setprotocol(&g_trngdev.waitsem, SEM_PRIO_NONE);
 
   /* Enable clocking to the TRNG */
 

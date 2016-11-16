@@ -84,7 +84,7 @@ void esp32_clockconfig(void)
 
   phy_get_romfunc_addr();
 
-  // freq will be changed to 40MHz in rtc_init_lite
+  /* Frequency will be changed to 40MHz in rtc_init_lite */
 
   rtc_init_lite();
 
@@ -105,7 +105,7 @@ void esp32_clockconfig(void)
       break;
     }
 
-  // freq will be changed to freq in rtc_set_cpu_freq,
+  /* Frequency will be changed to freq in rtc_set_cpu_freq */
 
   rtc_set_cpu_freq(XTAL_AUTO, freq);
   ets_update_cpu_frequency(freq_mhz);

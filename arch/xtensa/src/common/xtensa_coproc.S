@@ -113,29 +113,29 @@ _xtensa_coproc_savestate:
 
 	/* Move the address of the thread state save area to R15 */
 
-	mov		a15, a2						/* A15 is now the address of the save area */
+	mov		a15, a2							/* A15 is now the address of the save area */
 
 	/* CPENABLE should show which CPs are enabled. */
 
-	rsr		a2, CPENABLE				/* a2 = which CPs are enabled */
-	beqz	a2, .Ldone1					/* Quick exit if none */
+	rsr		a2, CPENABLE					/* a2 = which CPs are enabled */
+	beqz	a2, .Ldone1						/* Quick exit if none */
 
-	s16i	a2, a15, XTENSA_CPSTORED	/* Save mask of CPs being stored */
+	s16i	a2, a15, XTENSA_CPSTORED		/* Save mask of CPs being stored */
 	movi	a13, _xtensa_coproc_saoffsets	/* Array of CP save offsets */
-	l32i	a15, a15, XTENSA_CPASA		/* a15 = base of aligned save area */
+	l32i	a15, a15, XTENSA_CPASA			/* a15 = base of aligned save area */
 
 #if XCHAL_CP0_SA_SIZE > 0
-	bbci.l	a2, 0, 2f					/* CP 0 not enabled */
-	l32i	a14, a13, 0					/* a14 = _xtensa_coproc_saoffsets[0] */
-	add		a3, a14, a15				/* a3 = save area for CP 0 */
+	bbci.l	a2, 0, 2f						/* CP 0 not enabled */
+	l32i	a14, a13, 0						/* a14 = _xtensa_coproc_saoffsets[0] */
+	add		a3, a14, a15					/* a3 = save area for CP 0 */
 	xchal_cp0_store	a3, a4, a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
 2:
 #endif
 
 #if XCHAL_CP1_SA_SIZE > 0
-	bbci.l	a2, 1, 2f					/* CP 1 not enabled */
-	l32i	a14, a13, 4					/* a14 = _xtensa_coproc_saoffsets[1] */
-	add		a3, a14, a15				/* a3 = save area for CP 1 */
+	bbci.l	a2, 1, 2f						/* CP 1 not enabled */
+	l32i	a14, a13, 4						/* a14 = _xtensa_coproc_saoffsets[1] */
+	add		a3, a14, a15					/* a3 = save area for CP 1 */
 	xchal_cp1_store	a3, a4, a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
 2:
 #endif
@@ -283,11 +283,10 @@ xtensa_coproc_savestate:
  * Entry Conditions:
  *   - A2 holds the address of the co-processor state save area
  *   - The incoming thread is set as the current thread.
- *   - CPENABLE is set up correctly for all required coprocessors.
  *
  * Exit conditions:
  *   - All necessary CP callee-saved state has been restored.
- *   - CPENABLE - unchanged.
+ *   - CPENABLE - Set up correctly for the current thread.
  *   - Registers a2-a7, a13-a15 have been trashed.
  *
  * Must be called from assembly code only, using CALL0.
@@ -305,26 +304,29 @@ _xtensa_coproc_restorestate:
 
 	/* Move the address of the thread state save area to R15 */
 
-	mov		a15, a2						/* A15 is now the address of the save area */
-	l16ui	a2, a15, XTENSA_CPSTORED		/* a2 = which CPs have been saved */
-	movi	a3, 0						/* Clear the ones being restored (all of them) */
+	mov		a15, a2							/* A15 is now the address of the save area */
+
+	l16ui	a2, a15, XTENSA_CPENABLE		/* a2 = Which CPs have been enable for this thread? */
+	wsr		a2, CPENABLE					/* Set CPENABLE correctly for this thread */
+	l16ui	a2, a15, XTENSA_CPSTORED		/* a2 = Which CPs have been saved for this thread? */
+	movi	a3, 0							/* Clear the ones being restored (all of them) */
 	s16i	a3, a15, XTENSA_CPSTORED		/* Clear saved CP mask */
 
 	movi	a13, _xtensa_coproc_saoffsets	/* Array of CP save offsets */
-	l32i	a15, a15, XTENSA_CPASA		/* a15 = base of aligned save area */
+	l32i	a15, a15, XTENSA_CPASA			/* a15 = base of aligned save area */
 
 #if XCHAL_CP0_SA_SIZE
-	bbci.l	a2, 0, 2f					/* CP 0 not enabled */
-	l32i	a14, a13, 0					/* a14 = _xtensa_coproc_saoffsets[0] */
-	add		a3, a14, a15				/* a3 = save area for CP 0 */
+	bbci.l	a2, 0, 2f						/* CP 0 not enabled */
+	l32i	a14, a13, 0						/* a14 = _xtensa_coproc_saoffsets[0] */
+	add		a3, a14, a15					/* a3 = save area for CP 0 */
 	xchal_cp0_load	a3, a4, a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
 2:
 #endif
 
 #if XCHAL_CP1_SA_SIZE
-	bbci.l	a2, 1, 2f					/* CP 1 not enabled */
-	l32i	a14, a13, 4					/* a14 = _xtensa_coproc_saoffsets[1] */
-	add		a3, a14, a15				/* a3 = save area for CP 1 */
+	bbci.l	a2, 1, 2f						/* CP 1 not enabled */
+	l32i	a14, a13, 4						/* a14 = _xtensa_coproc_saoffsets[1] */
+	add		a3, a14, a15					/* a3 = save area for CP 1 */
 	xchal_cp1_load	a3, a4, a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
 2:
 #endif
@@ -376,7 +378,9 @@ _xtensa_coproc_restorestate:
 	xchal_cp7_load	a3, a4, a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
 2:
 #endif
+	/* Ensure wsr.CPENABLE has completed. */
 
+	rsync
 	ret
 
 	.size	_xtensa_coproc_restorestate, . - _xtensa_coproc_restorestate

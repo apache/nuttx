@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/pipes/pipe_common.c
  *
- *   Copyright (C) 2008-2009, 2011, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,12 +53,13 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/kmalloc.h>
-#include <nuttx/fs/fs.h>
-#include <nuttx/fs/ioctl.h>
 #ifdef CONFIG_DEBUG_FEATURES
 #  include <nuttx/arch.h>
 #endif
+#include <nuttx/kmalloc.h>
+#include <nuttx/semaphore.h>
+#include <nuttx/fs/fs.h>
+#include <nuttx/fs/ioctl.h>
 
 #include "pipe_common.h"
 
@@ -171,6 +172,13 @@ FAR struct pipe_dev_s *pipecommon_allocdev(size_t bufsize)
       sem_init(&dev->d_bfsem, 0, 1);
       sem_init(&dev->d_rdsem, 0, 0);
       sem_init(&dev->d_wrsem, 0, 0);
+
+     /* The read/write wait semaphores are used for signaling and, hence,
+      * should not have priority inheritance enabled.
+      */
+
+     sem_setprotocol(&dev->d_rdsem, SEM_PRIO_NONE);
+     sem_setprotocol(&dev->d_wrsem, SEM_PRIO_NONE);
 
       dev->d_bufsize = bufsize;
     }

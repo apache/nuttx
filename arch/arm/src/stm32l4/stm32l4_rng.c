@@ -47,6 +47,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/drivers/drivers.h>
 
@@ -259,11 +260,14 @@ static ssize_t stm32l4_rngread(struct file *filep, char *buffer, size_t buflen)
     {
       /* We've got the device semaphore, proceed with reading */
 
-      /* Initialize the operation semaphore with 0 for blocking until
-       * the buffer is filled from interrupts.
+      /* Initialize the operation semaphore with 0 for blocking until the
+       * buffer is filled from interrupts.  The waitsem semaphore is used
+       * for signaling and, hence, should not have priority inheritance
+       * enabled.
        */
 
       sem_init(&g_rngdev.rd_readsem, 0, 0);
+      sem_setprotocol(&g_rngdev.rd_readsem, SEM_PRIO_NONE);
 
       g_rngdev.rd_buflen = buflen;
       g_rngdev.rd_buf = buffer;

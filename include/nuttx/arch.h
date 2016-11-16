@@ -2294,9 +2294,8 @@ void arch_sporadic_resume(FAR struct tcb_s *tcb);
 #endif
 
 #undef EXTERN
-#ifdef __cplusplus
+#if defined(__cplusplus)
 }
 #endif
 
 #endif /* __INCLUDE_NUTTX_ARCH_H */
-

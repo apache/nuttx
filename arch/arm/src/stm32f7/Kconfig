@@ -992,6 +992,10 @@ config STM32F7_SAI
 	bool
 	default n
 
+config STM32F7_SDMMC
+	bool
+	default n
+
 config STM32F7_SPI
 	bool
 	default n
@@ -1005,7 +1009,6 @@ config STM32F7_USART
 	default n
 
 # These are the peripheral selections proper
-
 
 config STM32F7_ADC1
 	bool "ADC1"
@@ -1218,6 +1221,7 @@ config STM32F7_SAI2
 config STM32F7_SDMMC1
 	bool "SDMMC1"
 	default n
+	select STM32F7_SDMMC
 	select ARCH_HAVE_SDIO
 	select ARCH_HAVE_SDIOWAIT_WRCOMPLETE
 	select SDIO_PREFLIGHT
@@ -1226,6 +1230,7 @@ config STM32F7_SDMMC2
 	bool "SDMMC2"
 	default n
 	depends on STM32F7_HAVE_SDMMC2
+	select STM32F7_SDMMC
 	select ARCH_HAVE_SDIO
 	select ARCH_HAVE_SDIOWAIT_WRCOMPLETE
 	select SDIO_PREFLIGHT
@@ -1718,9 +1723,12 @@ config STM32F7_I2C_DUTY16_9
 
 endmenu # "I2C Configuration"
 
+menu "SD/MMC Configuration"
+	depends on STM32F7_SDMMC
+
 config STM32F7_SDMMC_XFRDEBUG
 	bool "SDMMC transfer debug"
-	depends on DEBUG_FS_INFO && (STM32F7_SDMMC1 || STM32F7_SDMMC2)
+	depends on DEBUG_FS_INFO
 	default n
 	---help---
 		Enable special debug instrumentation analyze SDMMC data transfers.
@@ -1730,13 +1738,20 @@ config STM32F7_SDMMC_XFRDEBUG
 		enabled, then DMA register will be collected as well.  Requires also
 		DEBUG_FS and CONFIG_DEBUG_INFO.
 
+config STM32F7_SDMMC_DMA
+	bool "Support DMA data transfers"
+	default n
+	depends on STM32F7_DMA
+	---help---
+		Support DMA data transfers.
+
 menu "SDMMC1 Configuration"
 	depends on STM32F7_SDMMC1
 
 config SDMMC1_DMA
 	bool "Support DMA data transfers on SDMMC1"
 	default y if STM32F7_DMA2
-	depends on STM32F7_DMA2
+	depends on STM32F7_SDMMC_DMA && STM32F7_DMA2
 	---help---
 		Support DMA data transfers on SDMMC1.  Requires STM32F7_SDMMC1 and config STM32F7_DMA2.
 
@@ -1770,7 +1785,7 @@ menu "SDMMC2 Configuration"
 config SDMMC2_DMA
 	bool "Support DMA data transfers on SDMMC2"
 	default y if STM32F7_DMA2
-	depends on STM32F7_DMA2
+	depends on STM32F7_SDMMC_DMA && STM32F7_DMA2
 	---help---
 		Support DMA data transfers on SDMMC2.  Requires STM32F7_SDMMC2 and config STM32F7_DMA2.
 
@@ -1797,6 +1812,7 @@ config SDMMC2_WIDTH_D1_ONLY
 		Select 1-bit transfer mode.  Default: 4-bit transfer mode.
 
 endmenu # "SDMMC2 Configuration"
+endmenu # "SD/MMC Configuration"
 
 if STM32F7_BKPSRAM
 

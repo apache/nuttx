@@ -36,10 +36,18 @@
 -include $(TOPDIR)/Make.defs
 
 ASRCS =
-CSRCS = stm32_boot.c stm32_spi.c
+CSRCS = stm32_boot.c stm32_spi.c stm32_dma_alloc.c
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += stm32_appinitialize.c
+endif
+
+ifeq ($(CONFIG_STM32F7_OTGFS),y)
+CSRCS += stm32_usb.c
+endif
+
+ifeq ($(CONFIG_STM32F7_SDMMC1),y)
+CSRCS += stm32_sdmmc.c
 endif
 
 include $(TOPDIR)/configs/Board.mk

@@ -47,6 +47,7 @@
 #include <string.h>
 
 #include "uart.h"
+#include <nuttx/semaphore.h>
 #include <nuttx/sercomm/sercomm.h>
 
 /************************************************************************************
@@ -186,6 +187,9 @@ int sercomm_register(FAR const char *path, FAR uart_dev_t *dev)
 #ifndef CONFIG_DISABLE_POLL
   sem_init(&dev->pollsem,  0, 1);
 #endif
+
+  sem_setprotocol(&dev->xmitsem, SEM_PRIO_NONE);
+  sem_setprotocol(&dev->recvsem, SEM_PRIO_NONE);
 
   _info("Registering %s\n", path);
   return register_driver(path, &g_sercom_console_ops, 0666, NULL);

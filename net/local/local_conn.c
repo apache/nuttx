@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/local/local_conn.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,6 +48,7 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/semaphore.h>
 
 #include "local/local.h"
 
@@ -92,8 +93,15 @@ FAR struct local_conn_s *local_alloc(void)
 
       conn->lc_infd  = -1;
       conn->lc_outfd = -1;
+
 #ifdef CONFIG_NET_LOCAL_STREAM
+      /* This semaphore is used for signaling and, hence, should not have
+       * priority inheritance enabled.
+       */
+
       sem_init(&conn->lc_waitsem, 0, 0);
+      sem_setprotocol(&conn->lc_waitsem, SEM_PRIO_NONE);
+
 #ifdef HAVE_LOCAL_POLL
       memset(conn->lc_accept_fds, 0, sizeof(conn->lc_accept_fds));
 #endif

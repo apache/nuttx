@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/arp/arp_notify.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,8 +47,9 @@
 
 #include <netinet/in.h>
 
-#include <nuttx/net/net.h>
 #include <nuttx/irq.h>
+#include <nuttx/semaphore.h>
+#include <nuttx/net/net.h>
 
 #include "arp/arp.h"
 
@@ -88,7 +89,13 @@ void arp_wait_setup(in_addr_t ipaddr, FAR struct arp_notify_s *notify)
 
   notify->nt_ipaddr = ipaddr;
   notify->nt_result = -ETIMEDOUT;
+
+  /* This semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
   (void)sem_init(&notify->nt_sem, 0, 0);
+  sem_setprotocol(&notify->nt_sem, SEM_PRIO_NONE);
 
   /* Add the wait structure to the list with interrupts disabled */
 

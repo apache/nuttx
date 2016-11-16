@@ -51,6 +51,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/spi/spi.h>
 
@@ -1370,8 +1371,18 @@ FAR struct ieee802154_dev_s *mrf24j40_init(FAR struct spi_dev_s *spi,
     }
 
   dev->ieee.ops = &mrf24j40_devops;
+
+  /* Initialize semaphores */
+
   sem_init(&dev->ieee.rxsem, 0, 0);
   sem_init(&dev->ieee.txsem, 0, 0);
+
+  /* These semaphores are all used for signaling and, hence, should
+   * not have priority inheritance enabled.
+   */
+
+  sem_setprotocol(&dev->ieee.rxsem, SEM_PRIO_NONE);
+  sem_setprotocol(&dev->ieee.txsem, SEM_PRIO_NONE);
 
   dev->lower    = lower;
   dev->spi      = spi;

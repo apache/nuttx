@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/icmpv6/icmpv6_neighbor.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,6 +48,7 @@
 #include <netinet/in.h>
 #include <net/if.h>
 
+#include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/ip.h>
@@ -307,8 +308,14 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr)
    * disabled
    */
 
+  /* This semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
   (void)sem_init(&state.snd_sem, 0, 0);        /* Doesn't really fail */
-  state.snd_retries = 0;                       /* No retries yet */
+  sem_setprotocol(&state.snd_sem, SEM_PRIO_NONE);
+
+ state.snd_retries = 0;                       /* No retries yet */
   net_ipv6addr_copy(state.snd_ipaddr, lookup); /* IP address to query */
 
 #ifdef CONFIG_NETDEV_MULTINIC

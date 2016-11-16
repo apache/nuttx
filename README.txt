@@ -1366,6 +1366,8 @@ nuttx/
  |   |   `- README.txt
  |   |- mirtoo/
  |   |   `- README.txt
+ |   |- misoc/
+ |   |   `- README.txt
  |   |- moteino-mega/
  |   |   `- README.txt
  |   |- mx1ads/
@@ -1595,7 +1597,8 @@ apps/
  |- gpsutils/
  |   `- minmea/README.txt
  |- graphics/
- |   `- tiff/README.txt
+ |   |- tiff/README.txt
+ |   `- traveler/tools/tcledit/README.txt
  |- interpreters/
  |   |- bas
  |   |  `- README.txt

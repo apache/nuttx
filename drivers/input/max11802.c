@@ -65,6 +65,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/spi/spi.h>
 
+#include <nuttx/semaphore.h>
 #include <nuttx/input/touchscreen.h>
 #include <nuttx/input/max11802.h>
 
@@ -1187,8 +1188,16 @@ int max11802_register(FAR struct spi_dev_s *spi,
   priv->threshx = INVALID_THRESHOLD; /* Initialize thresholding logic */
   priv->threshy = INVALID_THRESHOLD; /* Initialize thresholding logic */
 
+  /* Initialize semaphores */
+
   sem_init(&priv->devsem,  0, 1);    /* Initialize device structure semaphore */
   sem_init(&priv->waitsem, 0, 0);    /* Initialize pen event wait semaphore */
+
+  /* The pen event semaphore is used for signaling and, hence, should not
+   * have priority inheritance enabled.
+   */
+
+  sem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
 
   /* Make sure that interrupts are disabled */
 

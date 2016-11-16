@@ -110,9 +110,7 @@ __cpu1_start:
 
 	l32r	sp, .Lcpu1_bottomofstack
 
-	/* Does it make since to have co-processors enabled on the IDLE thread? */
-
-//#warning REVISIT: Must set aside co-processor save ares
+	/* REVIST: Does it make since to have co-processors enabled on the IDLE thread? */
 
 #ifdef CONFIG_STACK_COLORATION
 	/* Write a known value to the IDLE thread stack to support stack

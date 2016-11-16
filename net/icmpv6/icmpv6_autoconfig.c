@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/icmpv6/icmpv6_autoconfig.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,7 @@
 
 #include <net/ethernet.h>
 
+#include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 
@@ -208,7 +209,12 @@ static int icmpv6_send_message(FAR struct net_driver_s *dev, bool advertise)
    * disabled
    */
 
+  /* This semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
   (void)sem_init(&state.snd_sem, 0, 0); /* Doesn't really fail */
+  sem_setprotocol(&state.snd_sem, SEM_PRIO_NONE);
 
 #ifdef CONFIG_NETDEV_MULTINIC
   /* Remember the routing device name */

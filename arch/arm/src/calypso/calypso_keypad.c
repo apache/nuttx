@@ -36,6 +36,7 @@
 #include <nuttx/config.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/irq.h>
 #include <nuttx/fs/fs.h>
 
@@ -360,9 +361,13 @@ int calypso_kbd_irq(int irq, uint32_t * regs)
 
 void up_keypad(void)
 {
-  /* Semaphore; helps leaving IRQ ctx as soon as possible */
+  /* kbssem semaphore helps leaving IRQ ctx as soon as possible.  This
+   * semaphore is used for signaling and, hence, should not have priority
+   * inheritance enabled.
+   */
 
   sem_init(&kbdsem, 0, 0);
+  sem_setprotocol(&kbdsem, SEM_PRIO_NONE);
 
   /* Drive cols low in idle state such that all buttons cause events */
 

@@ -52,6 +52,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbhost.h>
 #include <nuttx/usb/ehci.h>
@@ -3931,7 +3932,13 @@ static int lpc31_epalloc(FAR struct usbhost_driver_s *drvr,
   epinfo->maxpacket = epdesc->mxpacketsize;
   epinfo->xfrtype   = epdesc->xfrtype;
   epinfo->speed     = hport->speed;
+
+  /* The iocsem semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
   sem_init(&epinfo->iocsem, 0, 0);
+  sem_setprotocol(&epinfo->iocsem, SEM_PRIO_NONE);
 
   /* Success.. return an opaque reference to the endpoint information structure
    * instance
@@ -4916,6 +4923,12 @@ FAR struct usbhost_connection_s *lpc31_ehci_initialize(int controller)
   sem_init(&g_ehci.exclsem, 0, 1);
   sem_init(&g_ehci.pscsem,  0, 0);
 
+  /* The pscsem semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
+  sem_setprotocol(&g_ehci.pscsem, SEM_PRIO_NONE);
+
   /* Initialize EP0 */
 
   sem_init(&g_ehci.ep0.iocsem, 0, 1);
@@ -4952,7 +4965,13 @@ FAR struct usbhost_connection_s *lpc31_ehci_initialize(int controller)
       rhport->ep0.xfrtype         = USB_EP_ATTR_XFER_CONTROL;
       rhport->ep0.speed           = USB_SPEED_FULL;
       rhport->ep0.maxpacket       = 8;
+
+      /* The port iocsem semaphore is used for signaling and, hence,
+       * should not have priority inheritance enabled.
+       */
+
       sem_init(&rhport->ep0.iocsem, 0, 0);
+      sem_setprotocol(&rhport->iocsem, SEM_PRIO_NONE);
 
       /* Initialize the public port representation */
 

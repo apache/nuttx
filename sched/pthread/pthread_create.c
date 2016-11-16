@@ -49,9 +49,10 @@
 #include <errno.h>
 #include <queue.h>
 
+#include <nuttx/arch.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/pthread.h>
-#include <nuttx/arch.h>
 
 #include "sched/sched.h"
 #include "group/group.h"
@@ -496,6 +497,20 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
   if (ret == OK)
     {
       ret = sem_init(&pjoin->exit_sem, 0, 0);
+    }
+
+  /* Thse semaphores are used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
+  if (ret == OK)
+    {
+      ret = sem_setprotocol(&pjoin->data_sem, SEM_PRIO_NONE);
+    }
+
+  if (ret == OK)
+    {
+      ret = sem_setprotocol(&pjoin->exit_sem, SEM_PRIO_NONE);
     }
 
   /* If the priority of the new pthread is lower than the priority of the
