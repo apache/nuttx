@@ -127,7 +127,7 @@ irqstate_t enter_critical_section(void)
            */
 
           DEBUGASSERT(!spin_islocked(&g_cpu_irqlock) ||
-                      (g_cpu_set & (1 << this_cpu())) == 0);
+                      (g_cpu_irqset & (1 << this_cpu())) == 0);
 
           /* Wait until we can get the spinlock (meaning that we are no
            * longer in the critical section).
@@ -153,7 +153,7 @@ irqstate_t enter_critical_section(void)
                */
 
               DEBUGASSERT(spin_islocked(&g_cpu_irqlock) &&
-                          (g_cpu_set & (1 << this_cpu())) != 0 &&
+                          (g_cpu_irqset & (1 << this_cpu())) != 0 &&
                           rtcb->irqcount < INT16_MAX);
               rtcb->irqcount++;
             }
@@ -166,7 +166,7 @@ irqstate_t enter_critical_section(void)
                * the spinlock.
                */
 
-              DEBUGASSERT((g_cpu_set & (1 << this_cpu())) != 0); /* Really requires g_cpu_irqsetlock */
+              DEBUGASSERT((g_cpu_irqset & (1 << this_cpu())) != 0); /* Really requires g_cpu_irqsetlock */
               spin_lock(&g_cpu_irqset);
 
               /* The set the lock count to 1.
@@ -289,7 +289,7 @@ void leave_critical_section(irqstate_t flags)
                */
 
               DEBUGASSERT(spin_islocked(&g_cpu_irqlock) &&
-                          (g_cpu_set & (1 << this_cpu())) != 0);
+                          (g_cpu_irqset & (1 << this_cpu())) != 0);
               rtcb->irqcount = 0;
               spin_clrbit(&g_cpu_irqset, this_cpu(), &g_cpu_irqsetlock,
                           &g_cpu_irqlock);
