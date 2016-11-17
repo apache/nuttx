@@ -164,7 +164,7 @@ irqstate_t enter_critical_section(void)
             }
           else
             {
-              /* First call enter_critical_section.  Test assumptions, then
+              /* First call to enter_critical_section.  Test assumptions, then
                * wait until we have the lock.
                */
 

@@ -550,17 +550,16 @@ void timer_unregister(FAR void *handle)
  *   and may NOT be used by appliction code.
  *
  * Input parameters:
- *   handle      - This is the handle that was returned by timer_register()
- *   newcallback - The new timer interrupt callback
- *   oldcallback - The previous timer interrupt callback (if any)
- *   arg         - Argument to be provided with the callback
+ *   handle   - This is the handle that was returned by timer_register()
+ *   callback - The new timer interrupt callback
+ *   arg      - Argument to be provided with the callback
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-int timer_setcallback(FAR void *handle, tccb_t newcallback, FAR void *arg)
+int timer_setcallback(FAR void *handle, tccb_t callback, FAR void *arg)
 {
   FAR struct timer_upperhalf_s *upper;
   FAR struct timer_lowerhalf_s *lower;
@@ -578,7 +577,7 @@ int timer_setcallback(FAR void *handle, tccb_t newcallback, FAR void *arg)
     {
       /* Yes.. Defer the hander attachment to the lower half driver */
 
-      lower->ops->setcallback(lower, newcallback, arg);
+      lower->ops->setcallback(lower, callback, arg);
       return OK;
     }
 
