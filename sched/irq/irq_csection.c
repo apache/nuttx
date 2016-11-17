@@ -135,7 +135,10 @@ irqstate_t enter_critical_section(void)
            *      g_cpu_nestcount = 0
            *      All CPU bits in g_cpu_irqset should be zero
            *
-           *   2. We were in critical section, but up_irq_restore only
+           *   2. We were in a critical section and interrupts on this
+           *      this CPU were disabled -- this is an impossible case.
+           *
+           *   3. We were in critical section, but up_irq_save() only
            *      disabled local interrupts on a different CPU;
            *      Interrupts could still be enabled on this CPU.
            *
@@ -143,8 +146,8 @@ irqstate_t enter_critical_section(void)
            *      g_cpu_nestcount = 0
            *      The CPU bit in g_cpu_irqset should be zero
            *
-           *   3. An extension of 2 is that we may be re-entered numerous
-           *      times from the interrupt handler.  In that case:
+           *   4. An extension of 2 is that we may be re-entered numerous
+           *      times from the same interrupt handler.  In that case:
            *
            *      g_cpu_irqlock = SP_LOCKED.
            *      g_cpu_nestcount > 0

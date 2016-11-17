@@ -144,7 +144,7 @@ static bool timer_notifier(FAR uint32_t *next_interval_us, FAR void *arg)
   ret = sigqueue(upper->pid, upper->signo, upper->arg);
 #endif
 
-  return ret == OK;
+  return true;
 }
 
 /************************************************************************************
