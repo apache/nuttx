@@ -55,8 +55,8 @@
  * Private Data
  ****************************************************************************/
 
-static spinlock_t g_cpu_wait[CONFIG_SMP_NCPUS];
-static spinlock_t g_cpu_paused[CONFIG_SMP_NCPUS];
+static volatile spinlock_t g_cpu_wait[CONFIG_SMP_NCPUS];
+static volatile spinlock_t g_cpu_paused[CONFIG_SMP_NCPUS];
 
 /****************************************************************************
  * Public Functions
