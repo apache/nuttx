@@ -166,7 +166,7 @@ irqstate_t enter_critical_section(void)
                * the spinlock.
                */
 
-              DEBUGASSERT((g_cpu_irqset & (1 << this_cpu())) != 0); /* Really requires g_cpu_irqsetlock */
+              DEBUGASSERT((g_cpu_irqset & (1 << this_cpu())) == 0); /* Really requires g_cpu_irqsetlock */
               spin_lock(&g_cpu_irqset);
 
               /* The set the lock count to 1.
@@ -261,7 +261,7 @@ void leave_critical_section(irqstate_t flags)
       else
         {
           FAR struct tcb_s *rtcb = this_task();
-          DEBUGASSERT(rtcb != 0 && rtcb->irqcount > 0);
+          DEBUGASSERT(rtcb != NULL && rtcb->irqcount > 0);
 
           /* Normal tasking context.  We need to coordinate with other
            * tasks.
