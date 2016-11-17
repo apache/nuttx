@@ -144,14 +144,14 @@ irqstate_t enter_critical_section(void)
            *
            *      g_cpu_irqlock = SP_LOCKED.
            *      g_cpu_nestcount = 0
-           *      The CPU bit in g_cpu_irqset should be zero
+           *      The bit in g_cpu_irqset for this CPU hould be zero
            *
-           *   4. An extension of 2 is that we may be re-entered numerous
+           *   4. An extension of 3 is that we may be re-entered numerous
            *      times from the same interrupt handler.  In that case:
            *
            *      g_cpu_irqlock = SP_LOCKED.
            *      g_cpu_nestcount > 0
-           *      The CPU bit in g_cpu_irqset should be zero
+           *      The bit in g_cpu_irqset for this CPU hould be zero
            */
 
           /* Handle nested calls to enter_critical_section() from the same
