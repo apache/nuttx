@@ -46,6 +46,7 @@
 #include <string.h>
 #include <semaphore.h>
 #include <fcntl.h>
+#include <signal.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
@@ -66,11 +67,9 @@
 struct timer_upperhalf_s
 {
   uint8_t   crefs;         /* The number of times the device has been opened */
-#ifdef HAVE_NOTIFICATION
-  uint8_t   signal;        /* The signal number to use in the notification */
+  uint8_t   signo;         /* The signal number to use in the notification */
   pid_t     pid;           /* The ID of the task/thread to receive the signal */
   FAR void *arg;           /* An argument to pass with the signal */
-#endif
   FAR char *path;          /* Registration path */
 
   /* The contained lower-half driver */
@@ -82,12 +81,7 @@ struct timer_upperhalf_s
  * Private Function Prototypes
  ****************************************************************************/
 
-#ifdef HAVE_NOTIFICATION
-  /* REVISIT: This function prototype is insufficient to support signaling */
-
-static bool    timer_notifier(FAR uint32_t *next_interval_us);
-#endif
-
+static bool    timer_notifier(FAR uint32_t *next_interval_us, FAR void *arg);
 static int     timer_open(FAR struct file *filep);
 static int     timer_close(FAR struct file *filep);
 static ssize_t timer_read(FAR struct file *filep, FAR char *buffer,
@@ -131,14 +125,17 @@ static const struct file_operations g_timerops =
  *
  ************************************************************************************/
 
-#ifdef HAVE_NOTIFICATION
-static bool timer_notifier(FAR uint32_t *next_interval_us)
+static bool timer_notifier(FAR uint32_t *next_interval_us, FAR void *arg)
 {
-  FAR struct timer_upperhalf_s *upper = HOW?;
+  FAR struct timer_upperhalf_s *upper = (FAR struct timer_upperhalf_s *)arg;
 #ifdef CONFIG_CAN_PASS_STRUCTS
   union sigval value;
 #endif
   int ret;
+
+  DEBUGASSERT(upper != NULL);
+
+  /* Signal the waiter.. if there is one */
 
 #ifdef CONFIG_CAN_PASS_STRUCTS
   value.sival_ptr = upper->arg;
@@ -149,7 +146,6 @@ static bool timer_notifier(FAR uint32_t *next_interval_us)
 
   return ret == OK;
 }
-#endif
 
 /************************************************************************************
  * Name: timer_open
@@ -363,7 +359,6 @@ static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       }
       break;
 
-#ifdef HAVE_NOTIFICATION
     /* cmd:         TCIOC_NOTIFICATION
      * Description: Notify application via a signal when the timer expires.
      * Argument:    signal number
@@ -375,15 +370,15 @@ static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     case TCIOC_NOTIFICATION:
       {
         FAR struct timer_notify_s *notify =
-          (FAR struct timer_notify_s *)((uintptr_t)arg)
+          (FAR struct timer_notify_s *)((uintptr_t)arg);
 
         if (notify != NULL)
           {
-            upper->signo = notify->signal;
-            upper->get   = notify->signal;
-            upper->arg   = noify->arg;
+            upper->signo = notify->signo;
+            upper->pid   = notify->pid;
+            upper->arg   = notify->arg;
 
-            ret = timer_sethandler((FAR void *handle)upper, timer_notifier, NULL);
+            ret = timer_setcallback((FAR void *)upper, timer_notifier, upper);
           }
         else
           {
@@ -391,7 +386,6 @@ static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           }
       }
       break;
-#endif
 
     /* Any unrecognized IOCTL commands might be platform-specific ioctl commands */
 
@@ -548,7 +542,7 @@ void timer_unregister(FAR void *handle)
 }
 
 /****************************************************************************
- * Name: timer_sethandler
+ * Name: timer_setcallback
  *
  * Description:
  *   This function can be called to add a callback into driver-related code
@@ -556,21 +550,20 @@ void timer_unregister(FAR void *handle)
  *   and may NOT be used by appliction code.
  *
  * Input parameters:
- *   handle     - This is the handle that was returned by timer_register()
- *   newhandler - The new timer interrupt handler
- *   oldhandler - The previous timer interrupt handler (if any)
+ *   handle      - This is the handle that was returned by timer_register()
+ *   newcallback - The new timer interrupt callback
+ *   oldcallback - The previous timer interrupt callback (if any)
+ *   arg         - Argument to be provided with the callback
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-int timer_sethandler(FAR void *handle, tccb_t newhandler,
-                     FAR tccb_t *oldhandler)
+int timer_setcallback(FAR void *handle, tccb_t newcallback, FAR void *arg)
 {
   FAR struct timer_upperhalf_s *upper;
   FAR struct timer_lowerhalf_s *lower;
-  tccb_t tmphandler;
 
   /* Recover the pointer to the upper-half driver state */
 
@@ -579,21 +572,13 @@ int timer_sethandler(FAR void *handle, tccb_t newhandler,
   lower = upper->lower;
   DEBUGASSERT(lower->ops != NULL);
 
-  /* Check if the lower half driver supports the sethandler method */
+  /* Check if the lower half driver supports the setcallback method */
 
-  if (lower->ops->sethandler != NULL) /* Optional */
+  if (lower->ops->setcallback != NULL) /* Optional */
     {
       /* Yes.. Defer the hander attachment to the lower half driver */
 
-      tmphandler = lower->ops->sethandler(lower, newhandler);
-
-      /* Return the oldhandler if a location to return it was provided */
-
-      if (oldhandler != NULL)
-        {
-          *oldhandler = tmphandler;
-        }
-
+      lower->ops->setcallback(lower, newcallback, arg);
       return OK;
     }
 

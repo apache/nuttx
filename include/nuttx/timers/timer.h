@@ -52,11 +52,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* It would require some interface modifcations in order to support
- * notifications.
- */
-
-#undef HAVE_NOTIFICATION
 
 /* IOCTL Commands ***********************************************************/
 /* The timer driver uses a standard character driver framework.  However,
@@ -96,9 +91,7 @@
 #define TCIOC_STOP         _TCIOC(0x0002)
 #define TCIOC_GETSTATUS    _TCIOC(0x0003)
 #define TCIOC_SETTIMEOUT   _TCIOC(0x0004)
-#ifdef HAVE_NOTIFICATION
 #define TCIOC_NOTIFICATION _TCIOC(0x0005)
-#endif
 
 /* Bit Settings *************************************************************/
 /* Bit settings for the struct timer_status_s flags field */
@@ -111,11 +104,11 @@
  * Public Types
  ****************************************************************************/
 
-/* User function prototype. Returns true to reload the timer, and the
+/* Upper half callback prototype. Returns true to reload the timer, and the
  * function can modify the next interval if desired.
  */
 
-typedef CODE bool (*tccb_t)(FAR uint32_t *next_interval_us);
+typedef CODE bool (*tccb_t)(FAR uint32_t *next_interval_us, FAR void *arg);
 
 /* This is the type of the argument passed to the TCIOC_GETSTATUS ioctl and
  * and returned by the "lower half" getstatus() method.
@@ -129,16 +122,14 @@ struct timer_status_s
                              * (in microseconds) */
 };
 
-#ifdef HAVE_NOTIFICATION
 /* This is the type of the argument passed to the TCIOC_NOTIFICATION ioctl */
 
 struct timer_notify_s
 {
   FAR void *arg;            /* An argument to pass with the signal */
   pid_t     pid;            /* The ID of the task/thread to receive the signal */
-  uint8_t   signal;         /* The signal number to use in the notification */
+  uint8_t   signo;          /* The signal number to use in the notification */
 };
-#endif
 
 /* This structure provides the "lower-half" driver operations available to
  * the "upper-half" driver.
@@ -166,12 +157,13 @@ struct timer_ops_s
   CODE int (*settimeout)(FAR struct timer_lowerhalf_s *lower,
                          uint32_t timeout);
 
-  /* Call this user provider timeout handler on timeout.
-   * NOTE:  Providing handler==NULL disable.
+  /* Call the NuttX INTERNAL timeout callback on timeout.
+   * NOTE:  Providing callback==NULL disable.
+   * NOT to call back into applications.
    */
 
-  CODE tccb_t (*sethandler)(FAR struct timer_lowerhalf_s *lower,
-                            CODE tccb_t handler);
+  CODE void (*setcallback)(FAR struct timer_lowerhalf_s *lower,
+                           CODE tccb_t callback, FAR void *arg);
 
   /* Any ioctl commands that are not recognized by the "upper-half" driver
    * are forwarded to the lower half driver through this method.
@@ -272,7 +264,7 @@ void timer_unregister(FAR void *handle);
  ****************************************************************************/
 
 /****************************************************************************
- * Name: timer_sethandler
+ * Name: timer_setcallback
  *
  * Description:
  *   This function can be called to add a callback into driver-related code
@@ -280,9 +272,9 @@ void timer_unregister(FAR void *handle);
  *   and may NOT be used by appliction code.
  *
  * Input parameters:
- *   handle     - This is the handle that was returned by timer_register()
- *   newhandler - The new timer interrupt handler
- *   oldhandler - The previous timer interrupt handler (if any)
+ *   handle   - This is the handle that was returned by timer_register()
+ *   callback - The new timer interrupt callback
+ *   arg      - Argument provided when the callback is called.
  *
  * Returned Value:
  *   None
@@ -290,8 +282,7 @@ void timer_unregister(FAR void *handle);
  ****************************************************************************/
 
 #ifdef __KERNEL__
-int timer_sethandler(FAR void *handle, tccb_t newhandler,
-                     FAR tccb_t *oldhandler);
+int timer_setcallback(FAR void *handle, tccb_t callback, FAR void *arg);
 #endif
 
 /****************************************************************************
