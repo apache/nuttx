@@ -68,8 +68,6 @@
  *                    Argument:  A writeable pointer to struct timer_status_s.
  * TCIOC_SETTIMEOUT - Reset the timer timeout to this value
  *                    Argument: A 32-bit timeout value in microseconds.
- * TCIOC_SETHANDLER - Call this handler on timer expiration
- *                    Argument: A pointer to struct timer_sethandler_s.
  *
  * WARNING: May change TCIOC_SETTIMEOUT to pass pointer to 64bit nanoseconds
  * or timespec structure.
@@ -105,15 +103,7 @@
  * function can modify the next interval if desired.
  */
 
-typedef bool (*tccb_t)(FAR uint32_t *next_interval_us);
-
-/* This is the type of the argument passed to the TCIOC_SETHANDLER ioctl */
-
-struct timer_sethandler_s
-{
-  CODE tccb_t newhandler;   /* The new timer interrupt handler */
-  CODE tccb_t oldhandler;   /* The previous timer interrupt handler (if any) */
-};
+typedef CODE bool (*tccb_t)(FAR uint32_t *next_interval_us);
 
 /* This is the type of the argument passed to the TCIOC_GETSTATUS ioctl and
  * and returned by the "lower half" getstatus() method.
@@ -253,6 +243,33 @@ FAR void *timer_register(FAR const char *path,
  ****************************************************************************/
 
 void timer_unregister(FAR void *handle);
+
+/****************************************************************************
+ * Kernal internal interfaces.  Thse may not be used by application logic
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: timer_sethandler
+ *
+ * Description:
+ *   This function can be called to add a callback into driver-related code
+ *   to handle timer expirations.  This is a strictly OS internal interface
+ *   and may NOT be used by appliction code.
+ *
+ * Input parameters:
+ *   handle     - This is the handle that was returned by timer_register()
+ *   newhandler - The new timer interrupt handler
+ *   oldhandler - The previous timer interrupt handler (if any)
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef __KERNEL__
+int timer_sethandler(FAR void *handle, tccb_t newhandler,
+                     FAR tccb_t *oldhandler);
+#endif
 
 /****************************************************************************
  * Platform-Independent "Lower-Half" Timer Driver Interfaces

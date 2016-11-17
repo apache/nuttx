@@ -322,46 +322,6 @@ static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       }
       break;
 
-    /* cmd:         TCIOC_SETHANDLER
-     * Description: Call this handler on timeout
-     * Argument:    A pointer to struct timer_sethandler_s.
-     *
-     * NOTE: This ioctl cannot be support in the kernel build mode. In that
-     * case direct callbacks from kernel space into user space is forbidden.
-     */
-
-#if !defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_BUILD_KERNEL)
-    case TCIOC_SETHANDLER:
-      {
-        FAR struct timer_sethandler_s *sethandler;
-
-        /* Don't reset on timer timeout; instead, call this user
-         * provider timeout handler.  NOTE:  Providing handler==NULL will
-         * restore the reset behavior.
-         */
-
-        if (lower->ops->sethandler) /* Optional */
-          {
-            sethandler = (FAR struct timer_sethandler_s *)((uintptr_t)arg);
-            if (sethandler)
-              {
-                sethandler->oldhandler =
-                  lower->ops->sethandler(lower, sethandler->newhandler);
-                ret = OK;
-              }
-            else
-              {
-                ret = -EINVAL;
-              }
-          }
-        else
-          {
-            ret = -ENOSYS;
-          }
-      }
-      break;
-#endif
-
     /* Any unrecognized IOCTL commands might be platform-specific ioctl commands */
 
     default:
@@ -496,8 +456,8 @@ void timer_unregister(FAR void *handle)
   /* Recover the pointer to the upper-half driver state */
 
   upper = (FAR struct timer_upperhalf_s *)handle;
+  DEBUGASSERT(upper != NULL && upper->lower != NULL);
   lower = upper->lower;
-  DEBUGASSERT(upper && lower);
 
   tmrinfo("Unregistering: %s\n", upper->path);
 
@@ -514,6 +474,59 @@ void timer_unregister(FAR void *handle)
 
   kmm_free(upper->path);
   kmm_free(upper);
+}
+
+/****************************************************************************
+ * Name: timer_sethandler
+ *
+ * Description:
+ *   This function can be called to add a callback into driver-related code
+ *   to handle timer expirations.  This is a strictly OS internal interface
+ *   and may NOT be used by appliction code.
+ *
+ * Input parameters:
+ *   handle     - This is the handle that was returned by timer_register()
+ *   newhandler - The new timer interrupt handler
+ *   oldhandler - The previous timer interrupt handler (if any)
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+int timer_sethandler(FAR void *handle, tccb_t newhandler,
+                     FAR tccb_t *oldhandler)
+{
+  FAR struct timer_upperhalf_s *upper;
+  FAR struct timer_lowerhalf_s *lower;
+  tccb_t tmphandler;
+ 
+  /* Recover the pointer to the upper-half driver state */
+
+  upper = (FAR struct timer_upperhalf_s *)handle;
+  DEBUGASSERT(upper != NULL && upper->lower != NULL);
+  lower = upper->lower;
+  DEBUGASSERT(lower->ops != NULL);
+
+  /* Check if the lower half driver supports the sethandler method */
+
+  if (lower->ops->sethandler != NULL) /* Optional */
+    {
+      /* Yes.. Defer the hander attachment to the lower half driver */
+
+      tmphandler = lower->ops->sethandler(lower, newhandler);
+
+      /* Return the oldhandler if a location to return it was provided */
+
+      if (oldhandler != NULL)
+        {
+          *oldhandler = tmphandler;
+        }
+
+      return OK;
+    }
+
+  return -ENOSYS;
 }
 
 #endif /* CONFIG_TIMER */
