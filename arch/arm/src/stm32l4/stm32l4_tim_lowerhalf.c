@@ -148,8 +148,8 @@ static int stm32l4_start(FAR struct timer_lowerhalf_s *lower);
 static int stm32l4_stop(FAR struct timer_lowerhalf_s *lower);
 static int stm32l4_settimeout(FAR struct timer_lowerhalf_s *lower,
                               uint32_t timeout);
-static tccb_t stm32l4_setcallback(FAR struct timer_lowerhalf_s *lower,
-                                  tccb_t callback, FAR void *arg);
+static void stm32l4_setcallback(FAR struct timer_lowerhalf_s *lower,
+                                tccb_t callback, FAR void *arg);
 
 /****************************************************************************
  * Private Data

@@ -92,12 +92,13 @@ struct sam34_lowerhalf_s
 
   /* Private data */
 
-  tccb_t   handler;         /* Current user interrupt handler */
-  uint32_t timeout;         /* The current timeout value (us) */
-  uint32_t clkticks;        /* actual clock ticks for current interval */
-  uint32_t val;             /* rtt value of current timeout */
-  uint32_t adjustment;      /* time lost due to clock resolution truncation (us) */
-  bool     started;         /* The timer has been started */
+  tccb_t    callback;        /* Current user interrupt callback */
+  FAR void *arg;             /* Argument that accompanies the callback */
+  uint32_t  timeout;         /* The current timeout value (us) */
+  uint32_t  clkticks;        /* Actual clock ticks for current interval */
+  uint32_t  val;             /* rtt value of current timeout */
+  uint32_t  adjustment;      /* Time lost due to clock resolution truncation (us) */
+  bool      started;         /* The timer has been started */
 };
 
 /****************************************************************************
@@ -125,8 +126,8 @@ static int      sam34_getstatus(FAR struct timer_lowerhalf_s *lower,
                   FAR struct timer_status_s *status);
 static int      sam34_settimeout(FAR struct timer_lowerhalf_s *lower,
                   uint32_t timeout);
-static tccb_t   sam34_sethandler(FAR struct timer_lowerhalf_s *lower,
-                  tccb_t handler);
+static void    sam34_setcallback(FAR struct timer_lowerhalf_s *lower,
+                  tccb_t callback, FAR void *arg);
 static int      sam34_ioctl(FAR struct timer_lowerhalf_s *lower, int cmd,
                   unsigned long arg);
 
@@ -137,12 +138,12 @@ static int      sam34_ioctl(FAR struct timer_lowerhalf_s *lower, int cmd,
 
 static const struct timer_ops_s g_tcops =
 {
-  .start      = sam34_start,
-  .stop       = sam34_stop,
-  .getstatus  = sam34_getstatus,
-  .settimeout = sam34_settimeout,
-  .sethandler = sam34_sethandler,
-  .ioctl      = sam34_ioctl,
+  .start       = sam34_start,
+  .stop        = sam34_stop,
+  .getstatus   = sam34_getstatus,
+  .settimeout  = sam34_settimeout,
+  .setcallback = sam34_setcallback,
+  .ioctl       = sam34_ioctl,
 };
 
 /* "Lower half" driver state */
@@ -160,6 +161,7 @@ static struct sam34_lowerhalf_s g_tcdev;
  *   Get the contents of the value register.
  *
  ****************************************************************************/
+
 static inline uint32_t sam34_readvr(void)
 {
   register uint32_t v;
@@ -289,9 +291,9 @@ static int sam34_interrupt(int irq, FAR void *context)
       uint32_t vr;
       uint32_t lateticks;
 
-      /* Is there a registered handler? */
+      /* Is there a registered callback? */
 
-      if (priv->handler && priv->handler(&priv->timeout))
+      if (priv->callback && priv->callback(&priv->timeout, priv->arg))
         {
           /* Disable int before writing new alarm */
 
@@ -388,7 +390,7 @@ static int sam34_start(FAR struct timer_lowerhalf_s *lower)
   priv->val = vr + priv->clkticks;       /* value at end of interval */
   sam34_putreg(priv->val-1, SAM_RTT_AR); /* Set interval */
 
-  if (priv->handler)
+  if (priv->callback)
     {
       /* Clear status and enable interrupt */
 
@@ -475,7 +477,7 @@ static int sam34_getstatus(FAR struct timer_lowerhalf_s *lower,
       status->flags |= TCFLAGS_ACTIVE;
     }
 
-  if (priv->handler)
+  if (priv->callback)
     {
       status->flags |= TCFLAGS_HANDLER;
     }
@@ -544,17 +546,18 @@ static int sam34_settimeout(FAR struct timer_lowerhalf_s *lower,
 }
 
 /****************************************************************************
- * Name: sam34_sethandler
+ * Name: sam34_setcallback
  *
  * Description:
- *   Call this user provided timeout handler.
+ *   Call this user provided timeout callback.
  *
  * Input Parameters:
- *   lower      - A pointer the publicly visible representation of the "lower-half"
- *                driver state structure.
- *   newhandler - The new timer expiration function pointer.  If this
- *                function pointer is NULL, then the reset-on-expiration
- *                behavior is restored,
+ *   lower    - A pointer the publicly visible representation of the "lower-half"
+ *              driver state structure.
+ *   callback - The new timer expiration function pointer.  If this
+ *              function pointer is NULL, then the reset-on-expiration
+ *              behavior is restored,
+ *   arg      - Argument that will be provided in the callback
  *
  * Returned Values:
  *   The previous timer expiration function pointer or NULL is there was
@@ -562,28 +565,23 @@ static int sam34_settimeout(FAR struct timer_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static tccb_t sam34_sethandler(FAR struct timer_lowerhalf_s *lower,
-                               tccb_t handler)
+static void sam34_setcallback(FAR struct timer_lowerhalf_s *lower,
+                              tccb_t callback, FAR void *arg)
 {
   FAR struct sam34_lowerhalf_s *priv = (FAR struct sam34_lowerhalf_s *)lower;
   irqstate_t flags;
-  tccb_t oldhandler;
 
   flags = enter_critical_section();
 
   DEBUGASSERT(priv);
-  tmrinfo("Entry: handler=%p\n", handler);
+  tmrinfo("Entry: callback=%p\n", callback);
 
-  /* Get the old handler return value */
+  /* Save the new callback and argument */
 
-  oldhandler = priv->handler;
-
-  /* Save the new handler */
-
-   priv->handler = handler;
+  priv->callback = callback;
+  priv->arg      = arg;
 
   leave_critical_section(flags);
-  return oldhandler;
 }
 
 /****************************************************************************
