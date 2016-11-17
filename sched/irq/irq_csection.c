@@ -129,10 +129,26 @@ irqstate_t enter_critical_section(void)
           /* We are in an interrupt handler.  How can this happen?
            *
            *   1. We were not in a critical section when the interrupt
-           *      occurred, OR
+           *      occurred.  In this case:
+           *
+           *      g_cpu_irqlock = SP_UNLOCKED.
+           *      g_cpu_nestcount = 0
+           *      All CPU bits in g_cpu_irqset should be zero
+           *
            *   2. We were in critical section, but up_irq_restore only
            *      disabled local interrupts on a different CPU;
            *      Interrupts could still be enabled on this CPU.
+           *
+           *      g_cpu_irqlock = SP_LOCKED.
+           *      g_cpu_nestcount = 0
+           *      The CPU bit in g_cpu_irqset should be zero
+           *
+           *   3. An extension of 2 is that we may be re-entered numerous
+           *      times from the interrupt handler.  In that case:
+           *
+           *      g_cpu_irqlock = SP_LOCKED.
+           *      g_cpu_nestcount > 0
+           *      The CPU bit in g_cpu_irqset should be zero
            */
 
           /* Handle nested calls to enter_critical_section() from the same
@@ -152,8 +168,7 @@ irqstate_t enter_critical_section(void)
                * wait until we have the lock.
                */
 
-              DEBUGASSERT(!spin_islocked(&g_cpu_irqlock) ||
-                          (g_cpu_irqset & (1 << cpu)) == 0);
+              DEBUGASSERT((g_cpu_irqset & (1 << cpu)) == 0);
 
               /* Wait until we can get the spinlock (meaning that we are no
                * longer in the critical section).
