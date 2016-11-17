@@ -65,8 +65,13 @@
 
 struct timer_upperhalf_s
 {
-  uint8_t   crefs;    /* The number of times the device has been opened */
-  FAR char *path;     /* Registration path */
+  uint8_t   crefs;         /* The number of times the device has been opened */
+#ifdef HAVE_NOTIFICATION
+  uint8_t   signal;        /* The signal number to use in the notification */
+  pid_t     pid;           /* The ID of the task/thread to receive the signal */
+  FAR void *arg;           /* An argument to pass with the signal */
+#endif
+  FAR char *path;          /* Registration path */
 
   /* The contained lower-half driver */
 
@@ -76,6 +81,12 @@ struct timer_upperhalf_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
+#ifdef HAVE_NOTIFICATION
+  /* REVISIT: This function prototype is insufficient to support signaling */
+
+static bool    timer_notifier(FAR uint32_t *next_interval_us);
+#endif
 
 static int     timer_open(FAR struct file *filep);
 static int     timer_close(FAR struct file *filep);
@@ -111,6 +122,36 @@ static const struct file_operations g_timerops =
  ****************************************************************************/
 
 /************************************************************************************
+ * Name: timer_notifier
+ *
+ * Description:
+ *   Notify the application via a signal when the timer interrupt occurs
+ *
+ * REVISIT: This function prototype is insufficient to support signaling
+ *
+ ************************************************************************************/
+
+#ifdef HAVE_NOTIFICATION
+static bool timer_notifier(FAR uint32_t *next_interval_us)
+{
+  FAR struct timer_upperhalf_s *upper = HOW?;
+#ifdef CONFIG_CAN_PASS_STRUCTS
+  union sigval value;
+#endif
+  int ret;
+
+#ifdef CONFIG_CAN_PASS_STRUCTS
+  value.sival_ptr = upper->arg;
+  ret = sigqueue(upper->pid, upper->signo, value);
+#else
+  ret = sigqueue(upper->pid, upper->signo, upper->arg);
+#endif
+
+  return ret == OK;
+}
+#endif
+
+/************************************************************************************
  * Name: timer_open
  *
  * Description:
@@ -120,10 +161,10 @@ static const struct file_operations g_timerops =
 
 static int timer_open(FAR struct file *filep)
 {
-  FAR struct inode                *inode = filep->f_inode;
+  FAR struct inode             *inode = filep->f_inode;
   FAR struct timer_upperhalf_s *upper = inode->i_private;
-  uint8_t                          tmp;
-  int                              ret;
+  uint8_t                       tmp;
+  int                           ret;
 
   tmrinfo("crefs: %d\n", upper->crefs);
 
@@ -322,6 +363,36 @@ static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       }
       break;
 
+#ifdef HAVE_NOTIFICATION
+    /* cmd:         TCIOC_NOTIFICATION
+     * Description: Notify application via a signal when the timer expires.
+     * Argument:    signal number
+     *
+     * NOTE: This ioctl cannot be support in the kernel build mode. In that
+     * case direct callbacks from kernel space into user space is forbidden.
+     */
+
+    case TCIOC_NOTIFICATION:
+      {
+        FAR struct timer_notify_s *notify =
+          (FAR struct timer_notify_s *)((uintptr_t)arg)
+
+        if (notify != NULL)
+          {
+            upper->signo = notify->signal;
+            upper->get   = notify->signal;
+            upper->arg   = noify->arg;
+
+            ret = timer_sethandler((FAR void *handle)upper, timer_notifier, NULL);
+          }
+        else
+          {
+            ret = -EINVAL;
+          }
+      }
+      break;
+#endif
+
     /* Any unrecognized IOCTL commands might be platform-specific ioctl commands */
 
     default:
@@ -500,7 +571,7 @@ int timer_sethandler(FAR void *handle, tccb_t newhandler,
   FAR struct timer_upperhalf_s *upper;
   FAR struct timer_lowerhalf_s *lower;
   tccb_t tmphandler;
- 
+
   /* Recover the pointer to the upper-half driver state */
 
   upper = (FAR struct timer_upperhalf_s *)handle;
