@@ -188,7 +188,7 @@ irqstate_t enter_critical_section(void)
           else
             {
               /* If we get here with irqcount == 0, then we know that the
-               * current task running on this CPU is not in a current
+               * current task running on this CPU is not in a critical
                * section.  However other tasks on other CPUs may be in a
                * critical section.  If so, we must wait until they release
                * the spinlock.
