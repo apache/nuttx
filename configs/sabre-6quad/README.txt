@@ -498,10 +498,11 @@ Open Issues:
    CPU (which may not be CPU0).  Perhaps that should be a spinlock to prohibit
    execution of interrupts on CPU0 when other CPUs are in a critical section?
 
-   2016-11-15:  When the critical section is used to lock a resource that is also
-   used by interupt handling, I believe that what is required is that the interrupt
-   handling logic must also take the spinlock.  This will cause the interrupt handlers
-   on other CPUs to spin until leave_critical_section() is called.
+   2016-11-17:  A fix was added to sched/irq/irq_csection that should correct this
+   problem.  When the critical section is used to lock a resource that is also used by
+   interupt handling, the interrupt handling logic must also take the spinlock.  This
+   will cause the interrupt handlers on other CPUs to spin until leave_critical_section()
+   is called.  More verification is needed, however.
 
 2. Cache Concurency.  This is a complex problem.  There is logic in place now to
    clean CPU0 D-cache before starting a new CPU and for invalidating the D-Cache
@@ -536,6 +537,19 @@ Open Issues:
      #define MMU_IOFLAGS          (PMD_TYPE_SECT | PMD_SECT_AP_RW1 | PMD_DEVICE | \
                                    PMD_SECT_DOM(0) | PMD_SECT_XN)
      #define MMU_STRONGLY_ORDERED (PMD_TYPE_SECT | PMD_SECT_AP_RW1 | \
+
+   Another alternative would be to place all spinlocks in a non-cachable memory
+   region.  That is problem what will have to be done.
+
+   This is a VERIFIED PROBLEM:  I have seen cases where CPU0 sets a spinlock=1 then
+   tries to lock the spinlock.  CPU0 will wait in this case until CPU1 unlocks the
+   spinlock.  Most of this happens correctly; I can see that CPU1 does set the
+   spinlock=0, but CPU0 never sees the change and spins forever.  That is surely
+   a consequence of cache issues.
+
+   This was observed between up_cpu_pause() and arm_pause_handler() with the
+   spinlock "g_cpu_paused[cpu]".  CPU1 correctly sets g_cpu_paused[cpu] to zero
+   but CPU0 never sees the change.
 
 3. Assertions.  On a fatal assertions, other CPUs need to be stopped.  The SCR,
    however, only supports disabling CPUs 1 through 3.  Perhaps if the assertion
