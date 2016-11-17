@@ -52,6 +52,12 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* It would require some interface modifcations in order to support
+ * notifications.
+ */
+
+#undef HAVE_NOTIFICATION
+
 /* IOCTL Commands ***********************************************************/
 /* The timer driver uses a standard character driver framework.  However,
  * since the timer driver is a device control interface and not a data
@@ -60,16 +66,18 @@
  *
  * These are detected and handled by the "upper half" timer driver.
  *
- * TCIOC_START      - Start the timer
- *                    Argument: Ignored
- * TCIOC_STOP       - Stop the timer
- *                    Argument: Ignored
- * TCIOC_GETSTATUS  - Get the status of the timer.
- *                    Argument:  A writeable pointer to struct timer_status_s.
- * TCIOC_SETTIMEOUT - Reset the timer timeout to this value
- *                    Argument: A 32-bit timeout value in microseconds.
- * TCIOC_SETHANDLER - Call this handler on timer expiration
- *                    Argument: A pointer to struct timer_sethandler_s.
+ * TCIOC_START        - Start the timer
+ *                      Argument: Ignored
+ * TCIOC_STOP         - Stop the timer
+ *                      Argument: Ignored
+ * TCIOC_GETSTATUS    - Get the status of the timer.
+ *                      Argument:  A writeable pointer to struct timer_status_s.
+ * TCIOC_SETTIMEOUT   - Reset the timer timeout to this value
+ *                      Argument: A 32-bit timeout value in microseconds.
+ * TCIOC_NOTIFICATION - Set up to notify an application via a signal when
+ *                      the timer expires.
+ *                      Argument: A read-only pointer to an instance of
+ *                      stuct timer_notify_s.
  *
  * WARNING: May change TCIOC_SETTIMEOUT to pass pointer to 64bit nanoseconds
  * or timespec structure.
@@ -84,18 +92,20 @@
  * range.
  */
 
-#define TCIOC_START      _TCIOC(0x0001)
-#define TCIOC_STOP       _TCIOC(0x0002)
-#define TCIOC_GETSTATUS  _TCIOC(0x0003)
-#define TCIOC_SETTIMEOUT _TCIOC(0x0004)
-#define TCIOC_SETHANDLER _TCIOC(0x0005)
+#define TCIOC_START        _TCIOC(0x0001)
+#define TCIOC_STOP         _TCIOC(0x0002)
+#define TCIOC_GETSTATUS    _TCIOC(0x0003)
+#define TCIOC_SETTIMEOUT   _TCIOC(0x0004)
+#ifdef HAVE_NOTIFICATION
+#define TCIOC_NOTIFICATION _TCIOC(0x0005)
+#endif
 
 /* Bit Settings *************************************************************/
 /* Bit settings for the struct timer_status_s flags field */
 
-#define TCFLAGS_ACTIVE   (1 << 0) /* 1=The timer is running */
-#define TCFLAGS_HANDLER  (1 << 1) /* 1=Call the user function when the
-                                   *   timer expires */
+#define TCFLAGS_ACTIVE     (1 << 0) /* 1=The timer is running */
+#define TCFLAGS_HANDLER    (1 << 1) /* 1=Call the user function when the
+                                     *   timer expires */
 
 /****************************************************************************
  * Public Types
@@ -105,15 +115,7 @@
  * function can modify the next interval if desired.
  */
 
-typedef bool (*tccb_t)(FAR uint32_t *next_interval_us);
-
-/* This is the type of the argument passed to the TCIOC_SETHANDLER ioctl */
-
-struct timer_sethandler_s
-{
-  CODE tccb_t newhandler;   /* The new timer interrupt handler */
-  CODE tccb_t oldhandler;   /* The previous timer interrupt handler (if any) */
-};
+typedef CODE bool (*tccb_t)(FAR uint32_t *next_interval_us);
 
 /* This is the type of the argument passed to the TCIOC_GETSTATUS ioctl and
  * and returned by the "lower half" getstatus() method.
@@ -126,6 +128,17 @@ struct timer_status_s
   uint32_t  timeleft;       /* Time left until the timer expiration
                              * (in microseconds) */
 };
+
+#ifdef HAVE_NOTIFICATION
+/* This is the type of the argument passed to the TCIOC_NOTIFICATION ioctl */
+
+struct timer_notify_s
+{
+  FAR void *arg;            /* An argument to pass with the signal */
+  pid_t     pid;            /* The ID of the task/thread to receive the signal */
+  uint8_t   signal;         /* The signal number to use in the notification */
+};
+#endif
 
 /* This structure provides the "lower-half" driver operations available to
  * the "upper-half" driver.
@@ -253,6 +266,33 @@ FAR void *timer_register(FAR const char *path,
  ****************************************************************************/
 
 void timer_unregister(FAR void *handle);
+
+/****************************************************************************
+ * Kernal internal interfaces.  Thse may not be used by application logic
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: timer_sethandler
+ *
+ * Description:
+ *   This function can be called to add a callback into driver-related code
+ *   to handle timer expirations.  This is a strictly OS internal interface
+ *   and may NOT be used by appliction code.
+ *
+ * Input parameters:
+ *   handle     - This is the handle that was returned by timer_register()
+ *   newhandler - The new timer interrupt handler
+ *   oldhandler - The previous timer interrupt handler (if any)
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef __KERNEL__
+int timer_sethandler(FAR void *handle, tccb_t newhandler,
+                     FAR tccb_t *oldhandler);
+#endif
 
 /****************************************************************************
  * Platform-Independent "Lower-Half" Timer Driver Interfaces

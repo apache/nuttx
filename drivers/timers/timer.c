@@ -65,8 +65,13 @@
 
 struct timer_upperhalf_s
 {
-  uint8_t   crefs;    /* The number of times the device has been opened */
-  FAR char *path;     /* Registration path */
+  uint8_t   crefs;         /* The number of times the device has been opened */
+#ifdef HAVE_NOTIFICATION
+  uint8_t   signal;        /* The signal number to use in the notification */
+  pid_t     pid;           /* The ID of the task/thread to receive the signal */
+  FAR void *arg;           /* An argument to pass with the signal */
+#endif
+  FAR char *path;          /* Registration path */
 
   /* The contained lower-half driver */
 
@@ -76,6 +81,12 @@ struct timer_upperhalf_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
+#ifdef HAVE_NOTIFICATION
+  /* REVISIT: This function prototype is insufficient to support signaling */
+
+static bool    timer_notifier(FAR uint32_t *next_interval_us);
+#endif
 
 static int     timer_open(FAR struct file *filep);
 static int     timer_close(FAR struct file *filep);
@@ -111,6 +122,36 @@ static const struct file_operations g_timerops =
  ****************************************************************************/
 
 /************************************************************************************
+ * Name: timer_notifier
+ *
+ * Description:
+ *   Notify the application via a signal when the timer interrupt occurs
+ *
+ * REVISIT: This function prototype is insufficient to support signaling
+ *
+ ************************************************************************************/
+
+#ifdef HAVE_NOTIFICATION
+static bool timer_notifier(FAR uint32_t *next_interval_us)
+{
+  FAR struct timer_upperhalf_s *upper = HOW?;
+#ifdef CONFIG_CAN_PASS_STRUCTS
+  union sigval value;
+#endif
+  int ret;
+
+#ifdef CONFIG_CAN_PASS_STRUCTS
+  value.sival_ptr = upper->arg;
+  ret = sigqueue(upper->pid, upper->signo, value);
+#else
+  ret = sigqueue(upper->pid, upper->signo, upper->arg);
+#endif
+
+  return ret == OK;
+}
+#endif
+
+/************************************************************************************
  * Name: timer_open
  *
  * Description:
@@ -120,10 +161,10 @@ static const struct file_operations g_timerops =
 
 static int timer_open(FAR struct file *filep)
 {
-  FAR struct inode                *inode = filep->f_inode;
+  FAR struct inode             *inode = filep->f_inode;
   FAR struct timer_upperhalf_s *upper = inode->i_private;
-  uint8_t                          tmp;
-  int                              ret;
+  uint8_t                       tmp;
+  int                           ret;
 
   tmrinfo("crefs: %d\n", upper->crefs);
 
@@ -322,41 +363,31 @@ static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       }
       break;
 
-    /* cmd:         TCIOC_SETHANDLER
-     * Description: Call this handler on timeout
-     * Argument:    A pointer to struct timer_sethandler_s.
+#ifdef HAVE_NOTIFICATION
+    /* cmd:         TCIOC_NOTIFICATION
+     * Description: Notify application via a signal when the timer expires.
+     * Argument:    signal number
      *
      * NOTE: This ioctl cannot be support in the kernel build mode. In that
      * case direct callbacks from kernel space into user space is forbidden.
      */
 
-#if !defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_BUILD_KERNEL)
-    case TCIOC_SETHANDLER:
+    case TCIOC_NOTIFICATION:
       {
-        FAR struct timer_sethandler_s *sethandler;
+        FAR struct timer_notify_s *notify =
+          (FAR struct timer_notify_s *)((uintptr_t)arg)
 
-        /* Don't reset on timer timeout; instead, call this user
-         * provider timeout handler.  NOTE:  Providing handler==NULL will
-         * restore the reset behavior.
-         */
-
-        if (lower->ops->sethandler) /* Optional */
+        if (notify != NULL)
           {
-            sethandler = (FAR struct timer_sethandler_s *)((uintptr_t)arg);
-            if (sethandler)
-              {
-                sethandler->oldhandler =
-                  lower->ops->sethandler(lower, sethandler->newhandler);
-                ret = OK;
-              }
-            else
-              {
-                ret = -EINVAL;
-              }
+            upper->signo = notify->signal;
+            upper->get   = notify->signal;
+            upper->arg   = noify->arg;
+
+            ret = timer_sethandler((FAR void *handle)upper, timer_notifier, NULL);
           }
         else
           {
-            ret = -ENOSYS;
+            ret = -EINVAL;
           }
       }
       break;
@@ -496,8 +527,8 @@ void timer_unregister(FAR void *handle)
   /* Recover the pointer to the upper-half driver state */
 
   upper = (FAR struct timer_upperhalf_s *)handle;
+  DEBUGASSERT(upper != NULL && upper->lower != NULL);
   lower = upper->lower;
-  DEBUGASSERT(upper && lower);
 
   tmrinfo("Unregistering: %s\n", upper->path);
 
@@ -514,6 +545,59 @@ void timer_unregister(FAR void *handle)
 
   kmm_free(upper->path);
   kmm_free(upper);
+}
+
+/****************************************************************************
+ * Name: timer_sethandler
+ *
+ * Description:
+ *   This function can be called to add a callback into driver-related code
+ *   to handle timer expirations.  This is a strictly OS internal interface
+ *   and may NOT be used by appliction code.
+ *
+ * Input parameters:
+ *   handle     - This is the handle that was returned by timer_register()
+ *   newhandler - The new timer interrupt handler
+ *   oldhandler - The previous timer interrupt handler (if any)
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+int timer_sethandler(FAR void *handle, tccb_t newhandler,
+                     FAR tccb_t *oldhandler)
+{
+  FAR struct timer_upperhalf_s *upper;
+  FAR struct timer_lowerhalf_s *lower;
+  tccb_t tmphandler;
+
+  /* Recover the pointer to the upper-half driver state */
+
+  upper = (FAR struct timer_upperhalf_s *)handle;
+  DEBUGASSERT(upper != NULL && upper->lower != NULL);
+  lower = upper->lower;
+  DEBUGASSERT(lower->ops != NULL);
+
+  /* Check if the lower half driver supports the sethandler method */
+
+  if (lower->ops->sethandler != NULL) /* Optional */
+    {
+      /* Yes.. Defer the hander attachment to the lower half driver */
+
+      tmphandler = lower->ops->sethandler(lower, newhandler);
+
+      /* Return the oldhandler if a location to return it was provided */
+
+      if (oldhandler != NULL)
+        {
+          *oldhandler = tmphandler;
+        }
+
+      return OK;
+    }
+
+  return -ENOSYS;
 }
 
 #endif /* CONFIG_TIMER */

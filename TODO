@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated November 2, 2016)
+NuttX TODO List (Last updated November 17, 2016)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -15,7 +15,7 @@ nuttx/:
   (3)  Signals (sched/signal, arch/)
   (2)  pthreads (sched/pthread)
   (0)  Message Queues (sched/mqueue)
-  (9)  Kernel/Protected Build
+  (8)  Kernel/Protected Build
   (3)  C++ Support
   (6)  Binary loaders (binfmt/)
  (12)  Network (net/, drivers/net)
@@ -682,14 +682,6 @@ o Kernel/Protected Build
   Priority:    Low.  This is a good idea and certainly an architectural
                improvement.  However, there is no strong motivation now do
                do that partitioning work.
-
-  Title:       TIMER INTERRUPT CALLBACK
-  Description: The timer upper half driver at drivers/timers/timer.c performs
-               interrupt level callbacks into applications.  This, of course,
-               will never work in anything but a non-secure, flat build.
-  Status:      Open
-  Priority:    Medium.  The driver is only usable with all of its features
-               in a FLAT build.
 
   Title:       USER MODE TASKS CAN MODIFY PRIVILEGED TASKS
   Description: Certain interfaces, such as sched_setparam(),
