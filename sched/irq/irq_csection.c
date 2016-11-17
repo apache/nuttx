@@ -66,6 +66,10 @@ volatile spinlock_t g_cpu_irqlock = SP_UNLOCKED;
 
 volatile spinlock_t g_cpu_irqsetlock;
 volatile cpu_set_t g_cpu_irqset;
+
+/* Handles nested calls to enter_critical section from interrupt handlers */
+
+volatile uint8_t g_cpu_nestcount[CONFIG_SMP_NCPUS];
 #endif
 
 /****************************************************************************
@@ -115,6 +119,8 @@ irqstate_t enter_critical_section(void)
 
       if (up_interrupt_context())
         {
+          int cpu = this_cpu();
+
           /* We are in an interrupt handler.  How can this happen?
            *
            *   1. We were not in a critical section when the interrupt
@@ -122,18 +128,34 @@ irqstate_t enter_critical_section(void)
            *   2. We were in critical section, but up_irq_restore only
            *      disabled local interrupts on a different CPU;
            *      Interrupts could still be enabled on this CPU.
-           *
-           * Assert if these conditions are not true.
            */
 
-          DEBUGASSERT(!spin_islocked(&g_cpu_irqlock) ||
-                      (g_cpu_irqset & (1 << this_cpu())) == 0);
-
-          /* Wait until we can get the spinlock (meaning that we are no
-           * longer in the critical section).
+          /* Handle nested calls to enter_critical_section() from the same
+           * interrupt.
            */
 
-          spin_lock(&g_cpu_irqlock);
+          if (g_cpu_nestcount[cpu] > 0)
+            {
+              DEBUGASSERT(spin_islocked(&g_cpu_irqlock) &&
+                          g_cpu_nestcount[cpu] < UINT8_MAX);
+              g_cpu_nestcount[cpu]++;
+            }
+          else
+            {
+              /* First call enter_critical_section.  Test assumptions, then
+               * wait until we have the lock.
+               */
+
+              DEBUGASSERT(!spin_islocked(&g_cpu_irqlock) ||
+                          (g_cpu_irqset & (1 << this_cpu())) == 0);
+
+              /* Wait until we can get the spinlock (meaning that we are no
+               * longer in the critical section).
+               */
+
+              spin_lock(&g_cpu_irqlock);
+              g_cpu_nestcount[cpu] = 1;
+            }
         }
       else
         {
@@ -246,17 +268,35 @@ void leave_critical_section(irqstate_t flags)
 
       if (up_interrupt_context())
         {
-          /* We are in an interrupt handler. Release the spinlock. */
+          int cpu = this_cpu();
 
-          DEBUGASSERT(spin_islocked(&g_cpu_irqlock));
+          /* We are in an interrupt handler. Check if the last call to
+           * enter_critical_section() was nested.
+           */
 
-          spin_lock(&g_cpu_irqsetlock); /* Protects g_cpu_irqset */
-          if (g_cpu_irqset == 0)
+          if (g_cpu_nestcount[cpu] > 1)
             {
-              spin_unlock(&g_cpu_irqlock);
-            }
+              /* Yes.. then just decrement the nesting count */
 
-          spin_unlock(&g_cpu_irqsetlock);
+              DEBUGASSERT(spin_islocked(&g_cpu_irqlock));
+              g_cpu_nestcount[cpu]--;
+            }
+          else
+            {
+              /* No, not nested. Release the spinlock. */
+
+              DEBUGASSERT(spin_islocked(&g_cpu_irqlock) &&
+                          g_cpu_nestcount[cpu] == 1);
+
+              spin_lock(&g_cpu_irqsetlock); /* Protects g_cpu_irqset */
+              if (g_cpu_irqset == 0)
+                {
+                  spin_unlock(&g_cpu_irqlock);
+                }
+
+              spin_unlock(&g_cpu_irqsetlock);
+              g_cpu_nestcount[cpu] = 0;
+            }
         }
       else
         {
