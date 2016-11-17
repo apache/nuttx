@@ -70,7 +70,7 @@ struct tiva_lowerhalf_s
   const struct timer_ops_s *ops;     /* Lower half operations */
   struct tiva_gptm32config_s config; /* Persistent timer configuration */
   TIMER_HANDLE handle;               /* Contained timer handle */
-  tccb_t handler;                    /* Current user interrupt handler */
+  tccb_t callback;                    /* Current user interrupt callback */
   uint32_t clkin;                    /* Input clock frequency */
   uint32_t timeout;                  /* The current timeout value (us) */
   uint32_t clkticks;                 /* Actual clock ticks for current interval */
@@ -99,8 +99,8 @@ static int      tiva_getstatus(struct timer_lowerhalf_s *lower,
                   struct timer_status_s *status);
 static int      tiva_settimeout(struct timer_lowerhalf_s *lower,
                   uint32_t timeout);
-static tccb_t   tiva_sethandler(struct timer_lowerhalf_s *lower,
-                  tccb_t handler);
+static void     tiva_setcallback(struct timer_lowerhalf_s *lower,
+                  tccb_t callback, FAR void *arg);
 static int      tiva_ioctl(struct timer_lowerhalf_s *lower, int cmd,
                   unsigned long arg);
 
@@ -111,12 +111,12 @@ static int      tiva_ioctl(struct timer_lowerhalf_s *lower, int cmd,
 
 static const struct timer_ops_s g_timer_ops =
 {
-  .start      = tiva_start,
-  .stop       = tiva_stop,
-  .getstatus  = tiva_getstatus,
-  .settimeout = tiva_settimeout,
-  .sethandler = tiva_sethandler,
-  .ioctl      = tiva_ioctl,
+  .start       = tiva_start,
+  .stop        = tiva_stop,
+  .getstatus   = tiva_getstatus,
+  .settimeout  = tiva_settimeout,
+  .setcallback = tiva_setcallback,
+  .ioctl       = tiva_ioctl,
 };
 
 /****************************************************************************
@@ -242,11 +242,11 @@ static void tiva_timer_handler(TIMER_HANDLE handle, void *arg, uint32_t status)
     {
       uint32_t timeout;
 
-      /* Is there a registered handler?  If the handler has been nullified,
+      /* Is there a registered callback?  If the callback has been nullified,
        * the timer will be stopped.
        */
 
-      if (priv->handler && priv->handler(&priv->timeout))
+      if (priv->callback && priv->callback(&priv->timeout, priv->arg))
         {
           /* Calculate new ticks / dither adjustment */
 
@@ -269,7 +269,7 @@ static void tiva_timer_handler(TIMER_HANDLE handle, void *arg, uint32_t status)
         }
       else
         {
-          /* No handler or the handler returned false.. stop the timer */
+          /* No callback or the callback returned false.. stop the timer */
 
           tiva_timer32_stop(priv->handle);
           tmrinfo("Stopped\n");
@@ -384,7 +384,7 @@ static int tiva_getstatus(struct timer_lowerhalf_s *lower,
       status->flags |= TCFLAGS_ACTIVE;
     }
 
-  if (priv->handler)
+  if (priv->callback)
     {
       status->flags |= TCFLAGS_HANDLER;
     }
@@ -444,17 +444,17 @@ static int tiva_settimeout(struct timer_lowerhalf_s *lower, uint32_t timeout)
 }
 
 /****************************************************************************
- * Name: tiva_sethandler
+ * Name: tiva_setcallback
  *
  * Description:
- *   Call this user provided timeout handler.
+ *   Call this user provided timeout callback.
  *
  * Input Parameters:
- *   lower      - A pointer the publicly visible representation of the "lower-half"
- *                driver state structure.
- *   newhandler - The new timer expiration function pointer.  If this
- *                function pointer is NULL, then the reset-on-expiration
- *                behavior is restored,
+ *   lower    - A pointer the publicly visible representation of the "lower-half"
+ *              driver state structure.
+ *   callback - The new timer expiration function pointer.  If this
+ *              function pointer is NULL, then the reset-on-expiration
+ *              behavior is restored,
  *
  * Returned Values:
  *   The previous timer expiration function pointer or NULL is there was
@@ -462,28 +462,23 @@ static int tiva_settimeout(struct timer_lowerhalf_s *lower, uint32_t timeout)
  *
  ****************************************************************************/
 
-static tccb_t tiva_sethandler(struct timer_lowerhalf_s *lower,
-                              tccb_t handler)
+static void tiva_setcallback(struct timer_lowerhalf_s *lower,
+                             tccb_t callback, FAR void *arg)
 {
   struct tiva_lowerhalf_s *priv = (struct tiva_lowerhalf_s *)lower;
   irqstate_t flags;
-  tccb_t oldhandler;
 
   flags = enter_critical_section();
 
   DEBUGASSERT(priv);
-  tmrinfo("Entry: handler=%p\n", handler);
+  tmrinfo("Entry: callback=%p\n", callback);
 
-  /* Get the old handler return value */
+  /* Save the new callback */
 
-  oldhandler = priv->handler;
-
-  /* Save the new handler */
-
-  priv->handler = handler;
+  priv->callback = callback;
+  priv->arg      = arg;
 
   leave_critical_section(flags);
-  return oldhandler;
 }
 
 /****************************************************************************
