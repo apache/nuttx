@@ -66,10 +66,16 @@ volatile spinlock_t g_cpu_irqlock = SP_UNLOCKED;
 
 volatile spinlock_t g_cpu_irqsetlock;
 volatile cpu_set_t g_cpu_irqset;
+#endif
 
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
 /* Handles nested calls to enter_critical section from interrupt handlers */
 
-volatile uint8_t g_cpu_nestcount[CONFIG_SMP_NCPUS];
+static uint8_t g_cpu_nestcount[CONFIG_SMP_NCPUS];
 #endif
 
 /****************************************************************************
@@ -91,6 +97,7 @@ irqstate_t enter_critical_section(void)
 {
   FAR struct tcb_s *rtcb;
   irqstate_t ret;
+  int cpu;
 
   /* Disable interrupts.
    *
@@ -119,8 +126,6 @@ irqstate_t enter_critical_section(void)
 
       if (up_interrupt_context())
         {
-          int cpu = this_cpu();
-
           /* We are in an interrupt handler.  How can this happen?
            *
            *   1. We were not in a critical section when the interrupt
@@ -134,6 +139,7 @@ irqstate_t enter_critical_section(void)
            * interrupt.
            */
 
+          cpu = this_cpu();
           if (g_cpu_nestcount[cpu] > 0)
             {
               DEBUGASSERT(spin_islocked(&g_cpu_irqlock) &&
@@ -147,7 +153,7 @@ irqstate_t enter_critical_section(void)
                */
 
               DEBUGASSERT(!spin_islocked(&g_cpu_irqlock) ||
-                          (g_cpu_irqset & (1 << this_cpu())) == 0);
+                          (g_cpu_irqset & (1 << cpu)) == 0);
 
               /* Wait until we can get the spinlock (meaning that we are no
                * longer in the critical section).
@@ -188,8 +194,9 @@ irqstate_t enter_critical_section(void)
                * the spinlock.
                */
 
-              DEBUGASSERT((g_cpu_irqset & (1 << this_cpu())) == 0); /* Really requires g_cpu_irqsetlock */
-              spin_lock(&g_cpu_irqset);
+              cpu = this_cpu();
+              DEBUGASSERT((g_cpu_irqset & (1 << cpu)) == 0);
+              spin_lock(&g_cpu_irqlock);
 
               /* The set the lock count to 1.
                *
@@ -201,7 +208,7 @@ irqstate_t enter_critical_section(void)
                * like lockcount:  Both will disable pre-emption.
                */
 
-              spin_setbit(&g_cpu_irqset, this_cpu(), &g_cpu_irqsetlock,
+              spin_setbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock,
                           &g_cpu_irqlock);
               rtcb->irqcount = 1;
 
@@ -253,6 +260,8 @@ irqstate_t enter_critical_section(void)
 #ifdef CONFIG_SMP
 void leave_critical_section(irqstate_t flags)
 {
+  int cpu;
+
   /* Verify that the system has sufficiently initialized so that the task
    * lists are valid.
    */
@@ -268,12 +277,11 @@ void leave_critical_section(irqstate_t flags)
 
       if (up_interrupt_context())
         {
-          int cpu = this_cpu();
-
           /* We are in an interrupt handler. Check if the last call to
            * enter_critical_section() was nested.
            */
 
+          cpu = this_cpu();
           if (g_cpu_nestcount[cpu] > 1)
             {
               /* Yes.. then just decrement the nesting count */
@@ -328,10 +336,12 @@ void leave_critical_section(irqstate_t flags)
                * released, then unlock the spinlock.
                */
 
+              cpu = this_cpu();
               DEBUGASSERT(spin_islocked(&g_cpu_irqlock) &&
-                          (g_cpu_irqset & (1 << this_cpu())) != 0);
+                          (g_cpu_irqset & (1 << cpu)) != 0);
+
               rtcb->irqcount = 0;
-              spin_clrbit(&g_cpu_irqset, this_cpu(), &g_cpu_irqsetlock,
+              spin_clrbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock,
                           &g_cpu_irqlock);
 
               /* Have all CPUs released the lock? */
