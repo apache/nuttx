@@ -102,8 +102,8 @@ irqstate_t enter_critical_section(void)
 
   ret = up_irq_save();
 
-  /* Verify that the system has sufficient initialized so that the task lists
-   * are valid.
+  /* Verify that the system has sufficiently initialized so that the task
+   * lists are valid.
    */
 
   if (g_os_initstate >= OSINIT_TASKLISTS)
@@ -115,12 +115,13 @@ irqstate_t enter_critical_section(void)
 
       if (up_interrupt_context())
         {
-          /* We are in an interrupt handler but within a critical section.  How
-           * can this happen?
+          /* We are in an interrupt handler.  How can this happen?
            *
-           *   1. We are not in a critical section, OR
-           *   2. We are in critical section, but up_irq_restore only disables
-           *      interrupts and this interrupt is from the other CPU.
+           *   1. We were not in a critical section when the interrupt
+           *      occurred, OR
+           *   2. We were in critical section, but up_irq_restore only
+           *      disabled local interrupts on a different CPU;
+           *      Interrupts could still be enabled on this CPU.
            *
            * Assert if these conditions are not true.
            */
@@ -148,7 +149,7 @@ irqstate_t enter_critical_section(void)
                * IRQ lock count.
                *
                * NOTE: If irqcount > 0 then (1) we are in a critical section, and
-               * this CPU should hold the lock.
+               * (2) this CPU should hold the lock.
                */
 
               DEBUGASSERT(spin_islocked(&g_cpu_irqlock) &&
@@ -161,7 +162,7 @@ irqstate_t enter_critical_section(void)
               /* If we get here with irqcount == 0, then we know that the
                * current task running on this CPU is not in a current
                * section.  However other tasks on other CPUs may be in a
-               * critical setion.  If so, we must wait until they release
+               * critical section.  If so, we must wait until they release
                * the spinlock.
                */
 
@@ -198,7 +199,7 @@ irqstate_t enter_critical_section(void)
 #else /* defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION) */
 irqstate_t enter_critical_section(void)
 {
-  /* Check if we were called from an interrupt handler and that the tasks
+  /* Check if we were called from an interrupt handler and that the task
    * lists have been initialized.
    */
 
@@ -230,8 +231,8 @@ irqstate_t enter_critical_section(void)
 #ifdef CONFIG_SMP
 void leave_critical_section(irqstate_t flags)
 {
-  /* Verify that the system has sufficient initialized so that the task lists
-   * are valid.
+  /* Verify that the system has sufficiently initialized so that the task
+   * lists are valid.
    */
 
   if (g_os_initstate >= OSINIT_TASKLISTS)
@@ -247,7 +248,7 @@ void leave_critical_section(irqstate_t flags)
         {
           /* We are in an interrupt handler. Release the spinlock. */
 
-          DEBUGASSERT(g_cpu_irqlock == SP_LOCKED);
+          DEBUGASSERT(spin_islocked(&g_cpu_irqlock));
 
           spin_lock(&g_cpu_irqsetlock); /* Protects g_cpu_irqset */
           if (g_cpu_irqset == 0)
@@ -273,7 +274,7 @@ void leave_critical_section(irqstate_t flags)
             {
               /* Yes... the spinlock should remain set */
 
-              DEBUGASSERT(g_cpu_irqlock == SP_LOCKED);
+              DEBUGASSERT(spin_islocked(&g_cpu_irqlock));
               rtcb->irqcount--;
             }
           else
