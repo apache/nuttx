@@ -263,6 +263,12 @@ irqstate_t enter_critical_section(void)
 #else /* defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION) */
 irqstate_t enter_critical_section(void)
 {
+  irqstate_t ret;
+
+  /* Disable interrupts */
+
+  ret = up_irq_save();
+
   /* Check if we were called from an interrupt handler and that the task
    * lists have been initialized.
    */
@@ -272,14 +278,14 @@ irqstate_t enter_critical_section(void)
       FAR struct tcb_s *rtcb = this_task();
       DEBUGASSERT(rtcb != NULL);
 
-      /* No.. note that we have entered the critical section */
+      /* Yes.. Note that we have entered the critical section */
 
       sched_note_csection(rtcb, true);
     }
 
-  /* And disable interrupts */
+  /* Return interrupt status */
 
-  return up_irq_save();
+  return ret;
 }
 #endif
 
@@ -386,9 +392,10 @@ void leave_critical_section(irqstate_t flags)
                   /* Check if there are pending tasks and that pre-emption
                    * is also enabled.
                    *
-                   * REVISIT: There is an issue here!  up_release_pending()
+                   * REVISIT: Is there an issue here?  up_release_pending()
                    * must be called from within a critical section but here
-                   * we have just left the critical section.
+                   * we have just left the critical section.  At least we
+                   * still have interrupts disabled on this CPU.
                    */
 
                   if (g_pendingtasks.head != NULL &&
@@ -429,7 +436,7 @@ void leave_critical_section(irqstate_t flags)
       FAR struct tcb_s *rtcb = this_task();
       DEBUGASSERT(rtcb != NULL);
 
-      /* Note that we have left the critical section */
+      /* Yes.. Note that we have left the critical section */
 
       sched_note_csection(rtcb, false);
     }
