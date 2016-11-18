@@ -218,6 +218,24 @@ config ENC28J60_FREQUENCY
 	---help---
 		Define to use a different bus frequency
 
+choice
+	prompt "Work queue"
+	default ENC28J60_LPWORK if SCHED_LPWORK
+	default ENC28J60_HPWORK if !SCHED_LPWORK && SCHED_HPWORK
+	depends on SCHED_WORKQUEUE
+	---help---
+		Work queue support is required to use the ENC28J60 driver.  If the low priority work queue is available, then it should be used by the ENC28J60.
+
+config ENC28J60_HPWORK
+	bool "High priority"
+	depends on SCHED_HPWORK
+
+config ENC28J60_LPWORK
+	bool "Low priority"
+	depends on SCHED_LPWORK
+
+endchoice # Work queue
+
 config ENC28J60_HALFDUPPLEX
 	bool "Enable half dupplex"
 	default n
