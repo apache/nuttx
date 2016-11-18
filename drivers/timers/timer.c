@@ -131,7 +131,6 @@ static bool timer_notifier(FAR uint32_t *next_interval_us, FAR void *arg)
 #ifdef CONFIG_CAN_PASS_STRUCTS
   union sigval value;
 #endif
-  int ret;
 
   DEBUGASSERT(upper != NULL);
 
@@ -139,9 +138,9 @@ static bool timer_notifier(FAR uint32_t *next_interval_us, FAR void *arg)
 
 #ifdef CONFIG_CAN_PASS_STRUCTS
   value.sival_ptr = upper->arg;
-  ret = sigqueue(upper->pid, upper->signo, value);
+  (void)sigqueue(upper->pid, upper->signo, value);
 #else
-  ret = sigqueue(upper->pid, upper->signo, upper->arg);
+  (void)sigqueue(upper->pid, upper->signo, upper->arg);
 #endif
 
   return true;
