@@ -301,7 +301,6 @@ struct sam_ep_s
   volatile uint8_t     epstate;      /* State of the endpoint (see enum sam_epstate_e) */
   uint8_t              stalled:1;    /* true: Endpoint is stalled */
   uint8_t              pending:1;    /* true: IN Endpoint stall is pending */
-  uint8_t              halted:1;     /* true: Endpoint feature halted */
   uint8_t              zlpneeded:1;  /* Zero length packet needed at end of transfer */
   uint8_t              zlpsent:1;    /* Zero length packet has been sent */
   uint8_t              txbusy:1;     /* Write request queue is busy (recursion avoidance kludge) */
@@ -1547,7 +1546,6 @@ static void sam_ep0_setup(struct sam_usbdev_s *priv)
                 value.w == USB_FEATURE_ENDPOINTHALT && len.w == 0)
               {
                 privep         = &priv->eplist[epno];
-                privep->halted = false;
 
                 ret = sam_ep_resume(privep);
                 if (ret < 0)
@@ -1596,7 +1594,6 @@ static void sam_ep0_setup(struct sam_usbdev_s *priv)
                 value.w == USB_FEATURE_ENDPOINTHALT && len.w == 0)
               {
                 privep         = &priv->eplist[epno];
-                privep->halted = true;
 
                 ret = sam_ep_stall(privep);
                 if (ret < 0)
@@ -2561,7 +2558,6 @@ static void sam_ep_reset(struct sam_usbdev_s *priv, uint8_t epno)
   privep->epstate   = UDP_EPSTATE_DISABLED;
   privep->stalled   = false;
   privep->pending   = false;
-  privep->halted    = false;
   privep->zlpneeded = false;
   privep->zlpsent   = false;
   privep->txbusy    = false;
@@ -3668,7 +3664,6 @@ static void sam_reset(struct sam_usbdev_s *priv)
 
       privep->stalled   = false;
       privep->pending   = false;
-      privep->halted    = false;
       privep->zlpneeded = false;
       privep->zlpsent   = false;
       privep->txbusy    = false;
