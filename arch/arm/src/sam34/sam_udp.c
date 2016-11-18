@@ -299,7 +299,6 @@ struct sam_ep_s
   struct sam_rqhead_s  reqq;         /* Read/write request queue */
   struct sam_rqhead_s  pendq;        /* Write requests pending stall sent */
   volatile uint8_t     epstate;      /* State of the endpoint (see enum sam_epstate_e) */
-  uint8_t              stalled:1;    /* true: Endpoint is stalled */
   uint8_t              pending:1;    /* true: IN Endpoint stall is pending */
   uint8_t              zlpneeded:1;  /* Zero length packet needed at end of transfer */
   uint8_t              zlpsent:1;    /* Zero length packet has been sent */
@@ -819,7 +818,7 @@ static void sam_req_complete(struct sam_ep_s *privep, int16_t result)
       privreq->flink = NULL;
       privreq->req.callback(&privep->ep, &privreq->req);
 
-      /* Reset the endpoint state and restore the stalled indication */
+      /* Reset the endpoint state */
 
       privep->epstate   = UDP_EPSTATE_IDLE;
       privep->zlpneeded = false;
@@ -1403,7 +1402,6 @@ static void sam_ep0_setup(struct sam_usbdev_s *priv)
 
   /* Assume NOT stalled; no TX in progress */
 
-  ep0->stalled  = false;
   ep0->pending  = false;
   ep0->epstate  = UDP_EPSTATE_IDLE;
 
@@ -1469,7 +1467,7 @@ static void sam_ep0_setup(struct sam_usbdev_s *priv)
                       response.w = 0; /* Not stalled */
                       nbytes     = 2; /* Response size: 2 bytes */
 
-                      if (privep->stalled)
+                      if (privep->epstate == UDP_EPSTATE_STALLED)
                         {
                           /* Endpoint stalled */
 
@@ -2556,7 +2554,6 @@ static void sam_ep_reset(struct sam_usbdev_s *priv, uint8_t epno)
   /* Reset endpoint status */
 
   privep->epstate   = UDP_EPSTATE_DISABLED;
-  privep->stalled   = false;
   privep->pending   = false;
   privep->zlpneeded = false;
   privep->zlpsent   = false;
@@ -2629,7 +2626,6 @@ static int sam_ep_stall(struct sam_ep_s *privep)
       /* Put endpoint into stalled state */
 
       privep->epstate = UDP_EPSTATE_STALLED;
-      privep->stalled = true;
       privep->pending = false;
 
       sam_csr_setbits(epno, UDPEP_CSR_FORCESTALL);
@@ -2667,7 +2663,6 @@ static int sam_ep_resume(struct sam_ep_s *privep)
 
       /* Return endpoint to Idle state */
 
-      privep->stalled = false;
       privep->pending = false;
       privep->epstate = UDP_EPSTATE_IDLE;
 
@@ -3182,7 +3177,7 @@ static int sam_ep_submit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
     {
       /* Check if the endpoint is stalled (or there is a stall pending) */
 
-      if (privep->stalled || privep->pending)
+      if ((privep->epstate == UDP_EPSTATE_STALLED) || privep->pending)
         {
           /* Yes.. in this case, save the request in a special "pending"
            * queue. They will stay queuee until the stall is cleared.
@@ -3662,7 +3657,6 @@ static void sam_reset(struct sam_usbdev_s *priv)
 
       /* Reset endpoint status */
 
-      privep->stalled   = false;
       privep->pending   = false;
       privep->zlpneeded = false;
       privep->zlpsent   = false;
