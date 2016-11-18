@@ -16,6 +16,27 @@ config NETDEV_LOOPBACK
 		networking devices that are enabled must be compatible with
 		CONFIG_NET_NOINTS.
 
+if NETDEV_LOOPBACK
+
+choice
+	prompt "Work queue"
+	default LOOPBACK_LPWORK if SCHED_LPWORK
+	default LOOPBACK_HPWORK if !SCHED_LPWORK && SCHED_HPWORK
+	depends on SCHED_WORKQUEUE
+	---help---
+		Work queue support is required to use the LOOPBACK driver.  If the low priority work queue is available, then it should be used by the LOOPBACK.
+
+config LOOPBACK_HPWORK
+	bool "High priority"
+	depends on SCHED_HPWORK
+
+config LOOPBACK_LPWORK
+	bool "Low priority"
+	depends on SCHED_LPWORK
+
+endchoice # Work queue
+endif # NETDEV_LOOPBACK
+
 config NETDEV_TELNET
 	bool "Telnet driver"
 	default n
@@ -305,6 +326,24 @@ config ENCX24J600_NRXDESCR
 		The ENC has a relative large packet buffer of 24kB which can
 		be used to buffer multiple packets silmutaneously
 
+choice
+	prompt "Work queue"
+	default ENCX24J600_LPWORK if SCHED_LPWORK
+	default ENCX24J600_HPWORK if !SCHED_LPWORK && SCHED_HPWORK
+	depends on SCHED_WORKQUEUE
+	---help---
+		Work queue support is required to use the ENCX24J600 driver.  If the low priority work queue is available, then it should be used by the ENCX24J600.
+
+config ENCX24J600_HPWORK
+	bool "High priority"
+	depends on SCHED_HPWORK
+
+config ENCX24J600_LPWORK
+	bool "Low priority"
+	depends on SCHED_LPWORK
+
+endchoice # Work queue
+
 config ENCX24J600_DUMPPACKET
 	bool "Dump Packets"
 	default n
@@ -398,6 +437,24 @@ config FTMAC100_TX_DESC
 config FTMAC100_MAC0_ENV_ADDR
 	hex "MAC0 address location"
 	default 0
+
+choice
+	prompt "Work queue"
+	default FTMAC100_LPWORK if SCHED_LPWORK
+	default FTMAC100_HPWORK if !SCHED_LPWORK && SCHED_HPWORK
+	depends on SCHED_WORKQUEUE
+	---help---
+		Work queue support is required to use the FTMAC100 driver.  If the low priority work queue is available, then it should be used by the FTMAC100.
+
+config FTMAC100_HPWORK
+	bool "High priority"
+	depends on SCHED_HPWORK
+
+config FTMAC100_LPWORK
+	bool "Low priority"
+	depends on SCHED_LPWORK
+
+endchoice # Work queue
 
 endif # NET_FTMAC100
 

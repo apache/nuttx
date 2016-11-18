@@ -117,17 +117,6 @@ config NET_SLIP_TCP_RECVWNDO
 		incoming data, or high (32768 bytes) if the application processes
 		data quickly.
 
-config NET_TUN_MTU
-	int "TUN packet buffer size (MTU)"
-	default 296
-	depends on NET_TUN
-	range 296 1518
-
-config NET_TUN_TCP_RECVWNDO
-	int "TUN TCP receive window size"
-	default 256
-	depends on NET_TUN && NET_TCP
-
 config NET_GUARDSIZE
 	int "Driver I/O guard size"
 	default 2
@@ -242,6 +231,33 @@ config TUN_NINTERFACES
 		interfaces to support.
 		Default: 1
 
+config NET_TUN_MTU
+	int "TUN packet buffer size (MTU)"
+	default 296
+	range 296 1518
+
+config NET_TUN_TCP_RECVWNDO
+	int "TUN TCP receive window size"
+	default 256
+	depends on NET_TCP
+
+choice
+	prompt "Work queue"
+	default LOOPBACK_LPWORK if SCHED_LPWORK
+	default TUN_HPWORK if !SCHED_LPWORK && SCHED_HPWORK
+	depends on SCHED_WORKQUEUE
+	---help---
+		Work queue support is required to use the TUN driver.  If the low priority work queue is available, then it should be used by the TUN.
+
+config TUN_HPWORK
+	bool "High priority"
+	depends on SCHED_HPWORK
+
+config TUN_LPWORK
+	bool "Low priority"
+	depends on SCHED_LPWORK
+
+endchoice # Work queue
 endif # NET_TUN
 
 endmenu # Data link support

@@ -138,7 +138,7 @@
 /* The ENC28J60 will not do interrupt level processing */
 
 #ifndef CONFIG_NET_NOINTS
-#  warrning "CONFIG_NET_NOINTS should be set"
+#  warning "CONFIG_NET_NOINTS should be set"
 #endif
 
 /* Low-level register debug */
