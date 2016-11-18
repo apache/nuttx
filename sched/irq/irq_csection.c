@@ -129,7 +129,7 @@ irqstate_t enter_critical_section(void)
           /* We are in an interrupt handler.  How can this happen?
            *
            *   1. We were not in a critical section when the interrupt
-           *      occurred.  In this case:
+           *      occurred.  In this case, the interrupt was entered with:
            *
            *      g_cpu_irqlock = SP_UNLOCKED.
            *      g_cpu_nestcount = 0
@@ -152,6 +152,11 @@ irqstate_t enter_critical_section(void)
            *      g_cpu_irqlock = SP_LOCKED.
            *      g_cpu_nestcount > 0
            *      The bit in g_cpu_irqset for this CPU hould be zero
+           *
+           * NOTE: However, the interrupt entry conditions can change due
+           * to previous processing by the interrupt handler that may
+           * instantiate a new thread that has irqcount > 0 and may then
+           * set the bit in g_cpu_irqset and g_cpu_irqlock = SP_LOCKED
            */
 
           /* Handle nested calls to enter_critical_section() from the same
@@ -165,19 +170,29 @@ irqstate_t enter_critical_section(void)
                           g_cpu_nestcount[cpu] < UINT8_MAX);
               g_cpu_nestcount[cpu]++;
             }
+
+          /* This is the first call to enter_critical_section from the
+           * interrupt handler.
+           */
+
           else
             {
-              /* First call to enter_critical_section.  Test assumptions, then
-               * wait until we have the lock.
+              /* Make sure that the g_cpu_irqlock() was not already set
+               * by previous logic on this CPU that was executed by the
+               * interrupt handler.
                */
 
-              DEBUGASSERT((g_cpu_irqset & (1 << cpu)) == 0);
+              if ((g_cpu_irqset & (1 << cpu)) == 0)
+                {
+                  /* Wait until we can get the spinlock (meaning that we are
+                   * no longer in the critical section).
+                   */
 
-              /* Wait until we can get the spinlock (meaning that we are no
-               * longer in the critical section).
-               */
+                  spin_lock(&g_cpu_irqlock);
+                }
 
-              spin_lock(&g_cpu_irqlock);
+              /* In any event, the nesting count is now one */
+
               g_cpu_nestcount[cpu] = 1;
             }
         }
