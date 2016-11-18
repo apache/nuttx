@@ -206,11 +206,14 @@
  * Default is to use timer 5 (32-bit) and encoder on PA0/PA1
  */
 
-#define GPIO_TIM5_CH1IN GPIO_TIM5_CH1IN_1
-#define GPIO_TIM5_CH2IN GPIO_TIM5_CH2IN_1
-
 #define GPIO_TIM2_CH1IN GPIO_TIM2_CH1IN_1
 #define GPIO_TIM2_CH2IN GPIO_TIM2_CH2IN_1
+
+#define GPIO_TIM3_CH1IN GPIO_TIM3_CH1IN_3
+#define GPIO_TIM3_CH2IN GPIO_TIM3_CH2IN_3
+
+#define GPIO_TIM5_CH1IN GPIO_TIM5_CH1IN_1
+#define GPIO_TIM5_CH2IN GPIO_TIM5_CH2IN_1
 
 /* PWM output for full bridge, uses config 1, because port E is N/A on QFP64
  * CH1     | 1(A8) 2(E9)
