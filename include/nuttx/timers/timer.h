@@ -46,6 +46,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/fs/ioctl.h>
 #include <stdbool.h>
+#include <sys/types.h>
 
 #ifdef CONFIG_TIMER
 
