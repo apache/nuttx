@@ -179,7 +179,9 @@ irqstate_t enter_critical_section(void)
             {
               /* Make sure that the g_cpu_irqlock() was not already set
                * by previous logic on this CPU that was executed by the
-               * interrupt handler.
+               * interrupt handler.  We know that the bit in g_cpu_irqset
+               * for this CPU was zero on entry into the interrupt handler,
+               * so if it is non-zero now then we know that was the case.
                */
 
               if ((g_cpu_irqset & (1 << cpu)) == 0)
@@ -383,6 +385,10 @@ void leave_critical_section(irqstate_t flags)
                 {
                   /* Check if there are pending tasks and that pre-emption
                    * is also enabled.
+                   *
+                   * REVISIT: There is an issue here!  up_release_pending()
+                   * must be called from within a critical section but here
+                   * we have just left the critical section.
                    */
 
                   if (g_pendingtasks.head != NULL &&
