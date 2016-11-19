@@ -108,7 +108,7 @@ systime_t clock_systimer(void)
 
   /* Convert to a 64- then a 32-bit value */
 
-  tmp = MSEC2TICK(1000 * (uint64_t)ts.tv_sec + (uint64_t)ts.tv_nsec / 1000000);
+  tmp = USEC2TICK(1000000 * (uint64_t)ts.tv_sec + (uint64_t)ts.tv_nsec / 1000);
   return (systime_t)(tmp & 0x00000000ffffffff);
 
 # endif /* CONFIG_SYSTEM_TIME64 */
