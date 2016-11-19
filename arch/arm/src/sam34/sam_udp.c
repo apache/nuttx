@@ -2674,8 +2674,7 @@ static int sam_ep_resume(struct sam_ep_s *privep)
 
       sam_putreg(UDP_RSTEP(epno), SAM_UDP_RSTEP);
 
-      /*
-       * We need to add a delay between setting and clearing the endpoint reset
+      /* We need to add a delay between setting and clearing the endpoint reset
        * bit in SAM_UDP_RSTEP. Without the delay the USB controller will (may?)
        * not reset the endpoint.
        *
