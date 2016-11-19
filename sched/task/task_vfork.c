@@ -417,18 +417,19 @@ pid_t task_vforkstart(FAR struct task_tcb_s *child)
 
   /* The child task has not yet ran because pre-emption is disabled.
    * The child task has the same priority as the parent task, so that
-   * would be the case anyway.  However, in the SMP case, the child
-   * thread may have already ran on another CPU.
+   * would typically be the case anyway.  However, in the SMP
+   * configuration, the child thread might have already ran on
+   * another CPU if pre-emption were not disabled.
    *
    * It is a requirement that the parent environment be stable while
    * vfork runs; the child thread is still dependent on things in the
    * parent thread... like the pointers into parent thread's stack
    * which will still appear in the child's registers and environment.
-   */
-
-  /* Now wait for the child thread to exit before returning to the
-   * parent thread.  NOTE that pre-emption will be re-enabled while
-   * we are waiting.
+   *
+   * We assure that by waiting for the child thread to exit before
+   * returning to the parent thread.  NOTE that pre-emption will be
+   * re-enabled while we are waiting, giving the child thread the
+   * opportunity to run.
    */
 
   rc = 0;
