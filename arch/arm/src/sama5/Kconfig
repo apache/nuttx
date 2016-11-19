@@ -1685,13 +1685,11 @@ config SAMA5_EMACA_REGDEBUG
 endmenu # EMAC device driver options
 endif # SAMA5_EMACA
 
-if SAMA5_EMACB
-
 menu "EMAC device driver options"
-
-if SAMA5_EMAC0
+	depends on SAMA5_EMACB
 
 menu "EMAC0 device driver options"
+	depends on SAMA5_EMAC0
 
 config SAMA5_EMAC0_NRXBUFFERS
 	int "Number of RX buffers"
@@ -1871,11 +1869,9 @@ config SAMA5_EMAC0_PHYSR_FULLDUPLEX
 endif # !SAMA5_EMAC0_PHYSR_ALTCONFIG
 endif # SAMA5_EMAC0_AUTONEG
 endmenu # EMAC0 device driver options
-endif # SAMA5_EMAC0
-
-if SAMA5_EMAC1
 
 menu "EMAC1 device driver options"
+	depends on SAMA5_EMAC1
 
 config SAMA5_EMAC1_NRXBUFFERS
 	int "Number of RX buffers"
@@ -2055,7 +2051,6 @@ config SAMA5_EMAC1_PHYSR_FULLDUPLEX
 endif # !SAMA5_EMAC1_PHYSR_ALTCONFIG
 endif # SAMA5_EMAC1_AUTONEG
 endmenu # EMAC1 device driver options
-endif # SAMA5_EMAC1
 
 # These apply to both EMAC0 and EMAC1
 
@@ -2072,6 +2067,26 @@ config SAMA5_EMACB_NBC
 	default n
 	---help---
 		Select to disable receipt of broadcast packets.
+
+choice
+	prompt "Work queue"
+	default SAMA5_EMACB_LPWORK if SCHED_LPWORK
+	default SAMA5_EMACB_HPWORK if !SCHED_LPWORK && SCHED_HPWORK
+	depends on SCHED_WORKQUEUE
+	---help---
+		Work queue support is required to use the Ethernet driver.  If the
+		low priority work queue is available, then it should be used by the
+		driver.
+
+config SAMA5_EMACB_HPWORK
+	bool "High priority"
+	depends on SCHED_HPWORK
+
+config SAMA5_EMACB_LPWORK
+	bool "Low priority"
+	depends on SCHED_LPWORK
+
+endchoice # Work queue
 
 config SAMA5_EMACB_DEBUG
 	bool "Force EMAC0/1 DEBUG"
@@ -2092,7 +2107,6 @@ config SAMA5_EMACB_REGDEBUG
 		Enable very low-level register access debug.  Depends on CONFIG_DEBUG_NET_INFO.
 
 endmenu # EMAC device driver options
-endif # SAMA5_EMACB
 
 if SAMA5_EMACA || SAMA5_EMAC0 || SAMA5_EMAC1 || SAMA5_GMAC
 choice

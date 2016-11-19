@@ -103,12 +103,24 @@
  ****************************************************************************/
 /* Configuration ************************************************************/
 
-/* If processing is not done at the interrupt level, then high priority
- * work queue support is required.
+/* If processing is not done at the interrupt level, then work queue support
+ * is required.
  */
 
-#if defined(CONFIG_NET_NOINTS) && !defined(CONFIG_SCHED_HPWORK)
-#  error High priority work queue support is required
+#if defined(CONFIG_NET_NOINTS) && !defined(CONFIG_SCHED_WORKQUEUE)
+#  error Work queue support is required
+#endif
+
+/* Select work queue */
+
+#if defined(CONFIG_SCHED_WORKQUEUE)
+#  if defined(CONFIG_SAMV7_EMAC_HPWORK)
+#    define ETHWORK HPWORK
+#  elif defined(CONFIG_SAMV7_EMAC_LPWORK)
+#    define ETHWORK LPWORK
+#  else
+#    error Neither CONFIG_SAMV7_EMAC_HPWORK nor CONFIG_SAMV7_EMAC_LPWORK defined
+#  endif
 #endif
 
 /* EMAC0 Configuration ******************************************************/
@@ -2544,11 +2556,11 @@ static int sam_emac_interrupt(struct sam_emac_s *priv)
 
   /* Cancel any pending poll work */
 
-  work_cancel(HPWORK, &priv->work);
+  work_cancel(ETHWORK, &priv->work);
 
   /* Schedule to perform the interrupt processing on the worker thread. */
 
-  work_queue(HPWORK, &priv->work, sam_interrupt_work, priv, 0);
+  work_queue(ETHWORK, &priv->work, sam_interrupt_work, priv, 0);
 
 #else
   /* Process the interrupt now */
@@ -2691,11 +2703,11 @@ static void sam_txtimeout_expiry(int argc, uint32_t arg, ...)
    * on work that has already been started.
    */
 
-  work_cancel(HPWORK, &priv->work);
+  work_cancel(ETHWORK, &priv->work);
 
   /* Schedule to perform the TX timeout processing on the worker thread. */
 
-  work_queue(HPWORK, &priv->work, sam_txtimeout_work, priv, 0);
+  work_queue(ETHWORK, &priv->work, sam_txtimeout_work, priv, 0);
 #else
   /* Process the timeout now */
 
@@ -2802,7 +2814,7 @@ static void sam_poll_expiry(int argc, uint32_t arg, ...)
     {
       /* Schedule to perform the interrupt processing on the worker thread. */
 
-      work_queue(HPWORK, &priv->work, sam_poll_work, priv, 0);
+      work_queue(ETHWORK, &priv->work, sam_poll_work, priv, 0);
     }
   else
     {
@@ -3050,7 +3062,7 @@ static int sam_txavail(struct net_driver_s *dev)
     {
       /* Schedule to serialize the poll on the worker thread. */
 
-      work_queue(HPWORK, &priv->work, sam_txavail_work, priv, 0);
+      work_queue(ETHWORK, &priv->work, sam_txavail_work, priv, 0);
     }
 
 #else

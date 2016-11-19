@@ -80,12 +80,24 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* If processing is not done at the interrupt level, then high priority
- * work queue support is required.
+/* If processing is not done at the interrupt level, then work queue support
+ * is required.
  */
 
-#if defined(CONFIG_NET_NOINTS) && !defined(CONFIG_SCHED_HPWORK)
-#  error High priority work queue support is required
+#if defined(CONFIG_NET_NOINTS) && !defined(CONFIG_SCHED_WORKQUEUE)
+#  error Work queue support is required
+#endif
+
+/* Select work queue */
+
+#if defined(CONFIG_SCHED_WORKQUEUE)
+#  if defined(CONFIG_KINETIS_EMAC_HPWORK)
+#    define ETHWORK HPWORK
+#  elif defined(CONFIG_KINETIS_EMAC_LPWORK)
+#    define ETHWORK LPWORK
+#  else
+#    error Neither CONFIG_KINETIS_EMAC_HPWORK nor CONFIG_KINETIS_EMAC_LPWORK defined
+#  endif
 #endif
 
 /* CONFIG_KINETIS_ENETNETHIFS determines the number of physical interfaces
@@ -974,11 +986,11 @@ static int kinetis_interrupt(int irq, FAR void *context)
 
   /* Cancel any pending poll work */
 
-  work_cancel(HPWORK, &priv->work);
+  work_cancel(ETHWORK, &priv->work);
 
   /* Schedule to perform the interrupt processing on the worker thread. */
 
-  work_queue(HPWORK, &priv->work, kinetis_interrupt_work, priv, 0);
+  work_queue(ETHWORK, &priv->work, kinetis_interrupt_work, priv, 0);
 
 #else
   /* Process the interrupt now */
@@ -1093,11 +1105,11 @@ static void kinetis_txtimeout_expiry(int argc, uint32_t arg, ...)
    * on work that has already been started.
    */
 
-  work_cancel(HPWORK, &priv->work);
+  work_cancel(ETHWORK, &priv->work);
 
   /* Schedule to perform the TX timeout processing on the worker thread. */
 
-  work_queue(HPWORK, &priv->work, kinetis_txtimeout_work, priv, 0);
+  work_queue(ETHWORK, &priv->work, kinetis_txtimeout_work, priv, 0);
 #else
   /* Process the timeout now */
 
@@ -1206,7 +1218,7 @@ static void kinetis_polltimer_expiry(int argc, uint32_t arg, ...)
     {
       /* Schedule to perform the interrupt processing on the worker thread. */
 
-      work_queue(HPWORK, &priv->work, kinetis_poll_work, priv, 0);
+      work_queue(ETHWORK, &priv->work, kinetis_poll_work, priv, 0);
     }
   else
     {
@@ -1513,7 +1525,7 @@ static int kinetis_txavail(struct net_driver_s *dev)
     {
       /* Schedule to serialize the poll on the worker thread. */
 
-      work_queue(HPWORK, &priv->work, kinetis_txavail_work, priv, 0);
+      work_queue(ETHWORK, &priv->work, kinetis_txavail_work, priv, 0);
     }
 
 #else

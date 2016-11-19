@@ -1136,9 +1136,8 @@ config SAM34_SPI_REGDEBUG
 endmenu # AT91SAM3/4 SPI device driver options
 endif # SAM34_SPI0 || SAM34_SPI1
 
-if SAM34_EMAC
-
 menu "AT91SAM3/4 EMAC device driver options"
+	depends on SAM34_EMAC
 
 config SAM34_EMAC_NRXBUFFERS
 	int "Number of RX buffers"
@@ -1332,6 +1331,30 @@ config SAM34_EMAC_PHYSR_100FD
 		This must be provided if SAM34_EMAC_AUTONEG is defined.  This is the value
 		under the bit mask that represents the 100Mbps, full duplex setting.
 
+config SAM34_EMAC_ISETH0
+	bool
+	default y
+
+choice
+	prompt "Work queue"
+	default SAM34_EMAC_LPWORK if SCHED_LPWORK
+	default SAM34_EMAC_HPWORK if !SCHED_LPWORK && SCHED_HPWORK
+	depends on SCHED_WORKQUEUE
+	---help---
+		Work queue support is required to use the Ethernet driver.  If the
+		low priority work queue is available, then it should be used by the
+		driver.
+
+config SAM34_EMAC_HPWORK
+	bool "High priority"
+	depends on SCHED_HPWORK
+
+config SAM34_EMAC_LPWORK
+	bool "Low priority"
+	depends on SCHED_LPWORK
+
+endchoice # Work queue
+
 config SAM34_EMAC_REGDEBUG
 	bool "Register-Level Debug"
 	default n
@@ -1339,13 +1362,7 @@ config SAM34_EMAC_REGDEBUG
 	---help---
 		Enable very low-level register access debug.  Depends on CONFIG_DEBUG_NET_INFO.
 
-config SAM34_EMAC_ISETH0
-	bool
-	default y if !SAM34_EMAC || !SAM34_GMAC_ISETH0
-	default n if SAM34_EMAC && SAM34_GMAC_ISETH0
-
 endmenu # EMAC device driver options
-endif # SAM34_EMAC
 
 if SAM34_HSMCI
 menu "AT91SAM3/4 HSMCI device driver options"

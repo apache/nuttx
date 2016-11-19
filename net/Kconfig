@@ -247,7 +247,9 @@ choice
 	default TUN_HPWORK if !SCHED_LPWORK && SCHED_HPWORK
 	depends on SCHED_WORKQUEUE
 	---help---
-		Work queue support is required to use the TUN driver.  If the low priority work queue is available, then it should be used by the TUN.
+		Work queue support is required to use the TUN driver.  If the
+		low priority work queue is available, then it should be used by the
+		TUN driver.
 
 config TUN_HPWORK
 	bool "High priority"

@@ -98,12 +98,24 @@
 #  error Logic to support multiple Ethernet interfaces is incomplete
 #endif
 
-/* If processing is not done at the interrupt level, then high priority
- * work queue support is required.
+/* If processing is not done at the interrupt level, then work queue support
+ * is required.
  */
 
-#if defined(CONFIG_NET_NOINTS) && !defined(CONFIG_SCHED_HPWORK)
-#  error High priority work queue support is required
+#if defined(CONFIG_NET_NOINTS) && !defined(CONFIG_SCHED_WORKQUEUE)
+#  error Work queue support is required
+#endif
+
+/* Select work queue */
+
+#if defined(CONFIG_SCHED_WORKQUEUE)
+#  if defined(CONFIG_TIVA_ETHERNET_HPWORK)
+#    define ETHWORK HPWORK
+#  elif defined(CONFIG_TIVA_ETHERNET_LPWORK)
+#    define ETHWORK LPWORK
+#  else
+#    error Neither CONFIG_TIVA_ETHERNET_HPWORK nor CONFIG_TIVA_ETHERNET_LPWORK defined
+#  endif
 #endif
 
 /* Are we using the internal PHY or an external PHY? */
@@ -2167,11 +2179,11 @@ static int tiva_interrupt(int irq, FAR void *context)
 
       /* Cancel any pending poll work */
 
-      work_cancel(HPWORK, &priv->work);
+      work_cancel(ETHWORK, &priv->work);
 
       /* Schedule to perform the interrupt processing on the worker thread. */
 
-      work_queue(HPWORK, &priv->work, tiva_interrupt_work, priv, 0);
+      work_queue(ETHWORK, &priv->work, tiva_interrupt_work, priv, 0);
     }
 
 #else
@@ -2303,11 +2315,11 @@ static void tiva_txtimeout_expiry(int argc, uint32_t arg, ...)
    * on work that has already been started.
    */
 
-  work_cancel(HPWORK, &priv->work);
+  work_cancel(ETHWORK, &priv->work);
 
   /* Schedule to perform the TX timeout processing on the worker thread. */
 
-  work_queue(HPWORK, &priv->work, tiva_txtimeout_work, priv, 0);
+  work_queue(ETHWORK, &priv->work, tiva_txtimeout_work, priv, 0);
 
 #else
   /* Process the timeout now */
@@ -2447,7 +2459,7 @@ static void tiva_poll_expiry(int argc, uint32_t arg, ...)
     {
       /* Schedule to perform the interrupt processing on the worker thread. */
 
-      work_queue(HPWORK, &priv->work, tiva_poll_work, priv, 0);
+      work_queue(ETHWORK, &priv->work, tiva_poll_work, priv, 0);
     }
   else
     {
@@ -2662,7 +2674,7 @@ static int tiva_txavail(struct net_driver_s *dev)
     {
       /* Schedule to serialize the poll on the worker thread. */
 
-      work_queue(HPWORK, &priv->work, tiva_txavail_work, priv, 0);
+      work_queue(ETHWORK, &priv->work, tiva_txavail_work, priv, 0);
     }
 
 #else

@@ -4436,8 +4436,8 @@ config STM32F7_ADC3_DMA
 
 endmenu # "ADC Configuration"
 
-if STM32F7_ETHMAC
 menu "Ethernet MAC configuration"
+	depends on STM32F7_ETHMAC
 
 config STM32F7_PHYADDR
 	int "PHY address"
@@ -4619,7 +4619,27 @@ config STM32F7_RMII_EXTCLK
 	---help---
 		Clocking is provided by external logic.
 
-endchoice
+endchoice # RMII clock configuration
+
+choice
+	prompt "Work queue"
+	default STM32F7_ETHMAC_LPWORK if SCHED_LPWORK
+	default STM32F7_ETHMAC_HPWORK if !SCHED_LPWORK && SCHED_HPWORK
+	depends on SCHED_WORKQUEUE
+	---help---
+		Work queue support is required to use the Ethernet driver.  If the
+		low priority work queue is available, then it should be used by the
+		driver.
+
+config STM32F7_ETHMAC_HPWORK
+	bool "High priority"
+	depends on SCHED_HPWORK
+
+config STM32F7_ETHMAC_LPWORK
+	bool "Low priority"
+	depends on SCHED_LPWORK
+
+endchoice # Work queue
 
 config STM32F7_ETHMAC_REGDEBUG
 	bool "Register-Level Debug"
@@ -4628,6 +4648,5 @@ config STM32F7_ETHMAC_REGDEBUG
 	---help---
 		Enable very low-level register access debug.  Depends on CONFIG_DEBUG_FEATURES.
 
-endmenu
-endif # STM32F7_ETHMAC
+endmenu # Ethernet MAC configuration
 endif # ARCH_CHIP_STM32F7

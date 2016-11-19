@@ -6146,8 +6146,8 @@ config RTC_HSECLOCK
 
 endchoice
 
-if STM32_ETHMAC
 menu "Ethernet MAC configuration"
+	depends on STM32_ETHMAC
 
 config STM32_PHYADDR
 	int "PHY address"
@@ -6351,6 +6351,26 @@ config STM32_RMII_EXTCLK
 
 endchoice
 
+choice
+	prompt "Work queue"
+	default STM32_ETHMAC_LPWORK if SCHED_LPWORK
+	default STM32_ETHMAC_HPWORK if !SCHED_LPWORK && SCHED_HPWORK
+	depends on SCHED_WORKQUEUE
+	---help---
+		Work queue support is required to use the Ethernet driver.  If the
+		low priority work queue is available, then it should be used by the
+		driver.
+
+config STM32_ETHMAC_HPWORK
+	bool "High priority"
+	depends on SCHED_HPWORK
+
+config STM32_ETHMAC_LPWORK
+	bool "Low priority"
+	depends on SCHED_LPWORK
+
+endchoice # Work queue
+
 config STM32_ETHMAC_REGDEBUG
 	bool "Register-Level Debug"
 	default n
@@ -6358,8 +6378,7 @@ config STM32_ETHMAC_REGDEBUG
 	---help---
 		Enable very low-level register access debug.  Depends on CONFIG_DEBUG_FEATURES.
 
-endmenu
-endif
+endmenu # Ethernet MAC configuration
 
 menu "USB FS Host Configuration"
 

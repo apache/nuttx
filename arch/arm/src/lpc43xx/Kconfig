@@ -485,8 +485,8 @@ endif # LCP43_EXTSDRAM3
 
 endmenu # External Memory Configuration
 
-if LPC43_ETHERNET
 menu "Ethernet MAC configuration"
+	depends on LPC43_ETHERNET
 
 config LPC43_PHYADDR
 	int "PHY address"
@@ -619,6 +619,26 @@ config LPC43_RMII
 	bool
 	default y if !LPC43_MII
 
+choice
+	prompt "Work queue"
+	default LPC43_ETHERNET_LPWORK if SCHED_LPWORK
+	default LPC43_ETHERNET_HPWORK if !SCHED_LPWORK && SCHED_HPWORK
+	depends on SCHED_WORKQUEUE
+	---help---
+		Work queue support is required to use the Ethernet driver.  If the
+		low priority work queue is available, then it should be used by the
+		driver.
+
+config LPC43_ETHERNET_HPWORK
+	bool "High priority"
+	depends on SCHED_HPWORK
+
+config LPC43_ETHERNET_LPWORK
+	bool "Low priority"
+	depends on SCHED_LPWORK
+
+endchoice # Work queue
+
 config LPC43_ETHERNET_REGDEBUG
 	bool "Register-Level Debug"
 	default n
@@ -627,7 +647,6 @@ config LPC43_ETHERNET_REGDEBUG
 		Enable very low-level register access debug.  Depends on CONFIG_DEBUG_NET_INFO.
 
 endmenu # Ethernet MAC configuration
-endif # LPC43_ETHERNET
 
 menu "RS-485 Configuration"
 if LPC43_USART0

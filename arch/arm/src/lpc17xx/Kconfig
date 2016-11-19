@@ -724,6 +724,26 @@ config LPC17_MULTICAST
 	---help---
 		Enable receipt of multicast (and unicast) frames. Automatically set
 		if NET_IGMP is selected.
+
+choice
+	prompt "Work queue"
+	default LPC17_ETHERNET_LPWORK if SCHED_LPWORK
+	default LPC17_ETHERNET_HPWORK if !SCHED_LPWORK && SCHED_HPWORK
+	depends on SCHED_WORKQUEUE
+	---help---
+		Work queue support is required to use the Ethernet driver.  If the
+		low priority work queue is available, then it should be used by the
+		driver.
+
+config LPC17_ETHERNET_HPWORK
+	bool "High priority"
+	depends on SCHED_HPWORK
+
+config LPC17_ETHERNET_LPWORK
+	bool "Low priority"
+	depends on SCHED_LPWORK
+
+endchoice # Work queue
 endmenu
 
 menu "LCD device driver options"

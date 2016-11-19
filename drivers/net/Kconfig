@@ -24,7 +24,9 @@ choice
 	default LOOPBACK_HPWORK if !SCHED_LPWORK && SCHED_HPWORK
 	depends on SCHED_WORKQUEUE
 	---help---
-		Work queue support is required to use the LOOPBACK driver.  If the low priority work queue is available, then it should be used by the LOOPBACK.
+		Work queue support is required to use the loopback driver.  If the
+		low priority work queue is available, then it should be used by the
+		loopback driver.
 
 config LOOPBACK_HPWORK
 	bool "High priority"
@@ -245,7 +247,9 @@ choice
 	default ENC28J60_HPWORK if !SCHED_LPWORK && SCHED_HPWORK
 	depends on SCHED_WORKQUEUE
 	---help---
-		Work queue support is required to use the ENC28J60 driver.  If the low priority work queue is available, then it should be used by the ENC28J60.
+		Work queue support is required to use the ENC28J60 driver.  If the
+		low priority work queue is available, then it should be used by the
+		ENC28J60 driver.
 
 config ENC28J60_HPWORK
 	bool "High priority"
@@ -332,7 +336,9 @@ choice
 	default ENCX24J600_HPWORK if !SCHED_LPWORK && SCHED_HPWORK
 	depends on SCHED_WORKQUEUE
 	---help---
-		Work queue support is required to use the ENCX24J600 driver.  If the low priority work queue is available, then it should be used by the ENCX24J600.
+		Work queue support is required to use the ENCX24J600 driver.  If the
+		low priority work queue is available, then it should be used by the
+		ENCX24J600 driver.
 
 config ENCX24J600_HPWORK
 	bool "High priority"
@@ -444,7 +450,9 @@ choice
 	default FTMAC100_HPWORK if !SCHED_LPWORK && SCHED_HPWORK
 	depends on SCHED_WORKQUEUE
 	---help---
-		Work queue support is required to use the FTMAC100 driver.  If the low priority work queue is available, then it should be used by the FTMAC100.
+		Work queue support is required to use the FTMAC100 driver.  If the
+		low priority work queue is available, then it should be used by the
+		FTMAC100 driver.
 
 config FTMAC100_HPWORK
 	bool "High priority"
