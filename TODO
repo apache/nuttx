@@ -9,7 +9,7 @@ issues related to each board port.
 
 nuttx/:
 
- (14)  Task/Scheduler (sched/)
+ (15)  Task/Scheduler (sched/)
   (1)  Memory Management (mm/)
   (1)  Power Management (drivers/pm)
   (3)  Signals (sched/signal, arch/)
@@ -332,6 +332,29 @@ o Task/Scheduler (sched/)
                built (but probably should not be).
   Status:      Open
   Priority:    Low.  I do not plan to do anything with this in the near future.
+
+  Title:       SPINLOCKS AND DATA CACHES
+  Description: If spinlocks are used in a system with a data cache, then there
+               may be a problem with cache coherency in some CPU architectures:
+               When one CPU modifies the spinlock, the changes may not be
+               visible to another CPU if it does not share the data cache.
+               That would cause failure in the spinlock logic.
+
+               Flushing the D-cache on writes and invalidating before a read is
+               not really an option.  spinlocks are normally 8-bits in size and
+               cache lines are typically 32-bytes so that would have side effects
+               unless the spinlocks were made to be the same size as one cache
+               line.
+
+               The better option is to add compiler independent "ornmentation"
+               to the spinlock so that the spinlocks are all linked together
+               into a separate, non-cacheable memory regions.  Because of
+               region aligment and minimum region mapping sizes.  This would
+               work in systems that have both data cache and either an MPU or
+               an MMU.
+  Status:      Open
+  Priority:    High.  spinlocks, and hence SMP, will not work on such systems
+               without this change.
 
 o Memory Management (mm/)
   ^^^^^^^^^^^^^^^^^^^^^^^
