@@ -163,6 +163,6 @@ void leave_critical_section(irqstate_t flags);
 #ifdef __cplusplus
 }
 #endif
-#endif
 
+#endif /* __ASSEMBLY__ */
 #endif /* __INCLUDE_NUTTX_IRQ_H */

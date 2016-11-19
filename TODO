@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated November 17, 2016)
+NuttX TODO List (Last updated November 19, 2016)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -303,6 +303,35 @@ o Task/Scheduler (sched/)
   Status:      Open
   Priority:    Low.  Things are just the way that we want them for the way
                that NuttX is used today.
+
+  Title:       SMP ISSUES
+  Description: The interface task_restart() (and probably task_delete()) are
+               not usable in the SMP configuration in the current design.  In
+               the non-SMP case, these are relatively simple:  If the task is
+               are not restarting/deleting itself, then the task to-be-restarted/
+               deleted is is supended and the restart/delete operation is a
+               simple operation on data structures.
+
+               In the SMP configuration, on the other hand, the task to be
+               restarted/deleted my in fact be executing concurrently on
+               another CPU and the existing logic cannot support those
+               operations on the running another CPU.
+
+               There might be a simple way to handler this; perhaps using
+               up_cpu_pause(), you could pause all of the other CPUs, perform
+               the restart/delete operation, then restart all other CPUs.  But
+               this seems like a lot of work to support some garbage interfaces
+               that really should be removed anyway.  These are unsafe, non-
+               standard interfaces that really have no place in an RTOS (unsafe
+               because you don't know what resources were held by the task when
+               it was restarted or deleted).
+
+               NOTE: Currently task_restart() is not even built if CONFIG_SMP=y.
+               The task_restart() test is also disabled in apps/examples/ostest
+               in this configuration.  task_delete(), on the other hand, is
+               built (but probably should not be).
+  Status:      Open
+  Priority:    Low.  I do not plan to do anything with this in the near future.
 
 o Memory Management (mm/)
   ^^^^^^^^^^^^^^^^^^^^^^^
