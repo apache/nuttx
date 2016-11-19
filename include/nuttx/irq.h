@@ -108,8 +108,21 @@ int irq_attach(int irq, xcpt_t isr);
  *     Take the CPU IRQ lock and disable interrupts on all CPUs.  A thread-
  *     specific counter is increment to indicate that the thread has IRQs
  *     disabled and to support nested calls to enter_critical_section().
+ *
+ *     NOTE: Most architectures do not support disabling all CPUs from one
+ *     CPU.  ARM is an example.  In such cases, logic in
+ *     enter_critical_section() will still manage entrance into the
+ *     protected logic using spinlocks.
+ *
  *   If SMP is not enabled:
  *     This function is equivalent to up_irq_save().
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   An opaque, architecture-specific value that represents the state of
+ *   the interrupts prior to the call to enter_critical_section();
  *
  ****************************************************************************/
 
@@ -125,9 +138,18 @@ irqstate_t enter_critical_section(void);
  * Description:
  *   If SMP is enabled:
  *     Decrement the IRQ lock count and if it decrements to zero then release
- *     the spinlock.
+ *     the spinlock and restore the interrupt state as it was prior to the
+ *     previous call to enter_critical_section().
+ *
  *   If SMP is not enabled:
  *     This function is equivalent to up_irq_restore().
+ *
+ * Input Parameters:
+ *   flags - The architecture-specific value that represents the state of
+ *           the interrupts prior to the call to enter_critical_section();
+ *
+ * Returned Value:
+ *   None
  *
  ****************************************************************************/
 
