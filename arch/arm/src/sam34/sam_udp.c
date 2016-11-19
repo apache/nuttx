@@ -299,9 +299,7 @@ struct sam_ep_s
   struct sam_rqhead_s  reqq;         /* Read/write request queue */
   struct sam_rqhead_s  pendq;        /* Write requests pending stall sent */
   volatile uint8_t     epstate;      /* State of the endpoint (see enum sam_epstate_e) */
-  uint8_t              stalled:1;    /* true: Endpoint is stalled */
   uint8_t              pending:1;    /* true: IN Endpoint stall is pending */
-  uint8_t              halted:1;     /* true: Endpoint feature halted */
   uint8_t              zlpneeded:1;  /* Zero length packet needed at end of transfer */
   uint8_t              zlpsent:1;    /* Zero length packet has been sent */
   uint8_t              txbusy:1;     /* Write request queue is busy (recursion avoidance kludge) */
@@ -820,7 +818,7 @@ static void sam_req_complete(struct sam_ep_s *privep, int16_t result)
       privreq->flink = NULL;
       privreq->req.callback(&privep->ep, &privreq->req);
 
-      /* Reset the endpoint state and restore the stalled indication */
+      /* Reset the endpoint state */
 
       privep->epstate   = UDP_EPSTATE_IDLE;
       privep->zlpneeded = false;
@@ -895,8 +893,8 @@ static void sam_req_wrsetup(struct sam_usbdev_s *priv,
   privep->epstate = UDP_EPSTATE_SENDING;
 
   /* Set TXPKTRDY to notify the USB hardware that there is TX data in the
-   * endpoint FIFO.  We will be notified that the endpoint’s FIFO has been
-   * released by the USB device when TXCOMP in the endpoint’s UDPEP_CSRx
+   * endpoint FIFO.  We will be notified that the endpoint's FIFO has been
+   * released by the USB device when TXCOMP in the endpoint's UDPEP_CSRx
    * register has been set.
    */
 
@@ -1404,7 +1402,6 @@ static void sam_ep0_setup(struct sam_usbdev_s *priv)
 
   /* Assume NOT stalled; no TX in progress */
 
-  ep0->stalled  = false;
   ep0->pending  = false;
   ep0->epstate  = UDP_EPSTATE_IDLE;
 
@@ -1470,7 +1467,7 @@ static void sam_ep0_setup(struct sam_usbdev_s *priv)
                       response.w = 0; /* Not stalled */
                       nbytes     = 2; /* Response size: 2 bytes */
 
-                      if (privep->stalled)
+                      if (privep->epstate == UDP_EPSTATE_STALLED)
                         {
                           /* Endpoint stalled */
 
@@ -1547,7 +1544,6 @@ static void sam_ep0_setup(struct sam_usbdev_s *priv)
                 value.w == USB_FEATURE_ENDPOINTHALT && len.w == 0)
               {
                 privep         = &priv->eplist[epno];
-                privep->halted = false;
 
                 ret = sam_ep_resume(privep);
                 if (ret < 0)
@@ -1596,7 +1592,6 @@ static void sam_ep0_setup(struct sam_usbdev_s *priv)
                 value.w == USB_FEATURE_ENDPOINTHALT && len.w == 0)
               {
                 privep         = &priv->eplist[epno];
-                privep->halted = true;
 
                 ret = sam_ep_stall(privep);
                 if (ret < 0)
@@ -2559,9 +2554,7 @@ static void sam_ep_reset(struct sam_usbdev_s *priv, uint8_t epno)
   /* Reset endpoint status */
 
   privep->epstate   = UDP_EPSTATE_DISABLED;
-  privep->stalled   = false;
   privep->pending   = false;
-  privep->halted    = false;
   privep->zlpneeded = false;
   privep->zlpsent   = false;
   privep->txbusy    = false;
@@ -2633,7 +2626,6 @@ static int sam_ep_stall(struct sam_ep_s *privep)
       /* Put endpoint into stalled state */
 
       privep->epstate = UDP_EPSTATE_STALLED;
-      privep->stalled = true;
       privep->pending = false;
 
       sam_csr_setbits(epno, UDPEP_CSR_FORCESTALL);
@@ -2671,7 +2663,6 @@ static int sam_ep_resume(struct sam_ep_s *privep)
 
       /* Return endpoint to Idle state */
 
-      privep->stalled = false;
       privep->pending = false;
       privep->epstate = UDP_EPSTATE_IDLE;
 
@@ -2682,7 +2673,23 @@ static int sam_ep_resume(struct sam_ep_s *privep)
       /* Reset the endpoint FIFO */
 
       sam_putreg(UDP_RSTEP(epno), SAM_UDP_RSTEP);
+
+      /*
+       * We need to add a delay between setting and clearing the endpoint reset
+       * bit in SAM_UDP_RSTEP. Without the delay the USB controller will (may?)
+       * not reset the endpoint.
+       *
+       * If the endpoint is not being reset, the Data Toggle (DTGLE) bit will
+       * not to be cleared which will cause the next transaction to fail if
+       * DTGLE is 1. If that happens the host will time-out and reset the bus.
+       *
+       * Adding this delay may also fix the USBMSC_STALL_RACEWAR in
+       * usbmsc_scsi.c, however this has not been verified yet.
+       */
+
+      up_udelay(10);
       sam_putreg(0, SAM_UDP_RSTEP);
+
 
       /* Copy any requests in the pending request queue to the working
        * request queue.
@@ -3170,10 +3177,10 @@ static int sam_ep_submit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
     {
       /* Check if the endpoint is stalled (or there is a stall pending) */
 
-      if (privep->stalled || privep->pending)
+      if ((privep->epstate == UDP_EPSTATE_STALLED) || privep->pending)
         {
           /* Yes.. in this case, save the request in a special "pending"
-           * queue. They will stay queuee until the stall is cleared.
+           * queue. They will stay queued until the stall is cleared.
            */
 
           uinfo("Pending stall clear\n");
@@ -3650,9 +3657,7 @@ static void sam_reset(struct sam_usbdev_s *priv)
 
       /* Reset endpoint status */
 
-      privep->stalled   = false;
       privep->pending   = false;
-      privep->halted    = false;
       privep->zlpneeded = false;
       privep->zlpsent   = false;
       privep->txbusy    = false;
