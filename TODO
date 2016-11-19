@@ -322,12 +322,17 @@ o SMP
 
                There might be a simple way to handler this; perhaps using
                up_cpu_pause(), you could pause all of the other CPUs, perform
-               the restart/delete operation, then restart all other CPUs.  But
-               this seems like a lot of work to support some garbage interfaces
-               that really should be removed anyway.  These are unsafe, non-
-               standard interfaces that really have no place in an RTOS (unsafe
-               because you don't know what resources were held by the task when
-               it was restarted or deleted).
+               the restart/delete operation, then restart all other CPUs.  A
+               better solution would be a new interface like up_cpu_stop().
+               This would be sent to all CPUs and if the task is running on
+               any of them, it would suspend the task and put it in the INVALID
+               state.
+
+               But this seems like a lot of work to support some garbage
+               interfaces that really should be removed anyway.  These are
+               unsafe, non-standard interfaces that really have no place in an
+               RTOS (unsafe because you don't know what resources were held
+               by the task when it was restarted or deleted).
 
                NOTE: Currently task_restart() is not even built if CONFIG_SMP=y.
                The task_restart() test is also disabled in apps/examples/ostest
