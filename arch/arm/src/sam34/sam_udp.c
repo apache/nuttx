@@ -2682,7 +2682,23 @@ static int sam_ep_resume(struct sam_ep_s *privep)
       /* Reset the endpoint FIFO */
 
       sam_putreg(UDP_RSTEP(epno), SAM_UDP_RSTEP);
+
+      /*
+       * We need to add a delay between setting and clearing the endpoint reset
+       * bit in SAM_UDP_RSTEP. Without the delay the USB controller will (may?)
+       * not reset the endpoint.
+       *
+       * If the endpoint is not being reset, the Data Toggle (DTGLE) bit will
+       * not to be cleared which will cause the next transaction to fail if
+       * DTGLE is 1. If that happens the host will time-out and reset the bus.
+       *
+       * Adding this delay may also fix the USBMSC_STALL_RACEWAR in
+       * usbmsc_scsi.c, however this has not been verified yet.
+       */
+
+      up_udelay(10);
       sam_putreg(0, SAM_UDP_RSTEP);
+
 
       /* Copy any requests in the pending request queue to the working
        * request queue.
