@@ -35,9 +35,12 @@
 
 CSRCS += task_create.c task_init.c task_setup.c task_activate.c
 CSRCS += task_start.c task_delete.c task_exit.c task_exithook.c
-CSRCS += task_recover.c task_restart.c task_spawnparms.c
-CSRCS += task_terminate.c task_getgroup.c task_prctl.c task_getpid.c
-CSRCS += exit.c
+CSRCS += task_recover.c task_spawnparms.c task_terminate.c
+CSRCS += task_getgroup.c task_prctl.c task_getpid.c exit.c
+
+ifneq ($(CONFIG_SMP),y)
+CSRCS +=  task_restart.c
+endif
 
 ifeq ($(CONFIG_ARCH_HAVE_VFORK),y)
 ifeq ($(CONFIG_SCHED_WAITPID),y)

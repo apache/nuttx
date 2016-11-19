@@ -1,7 +1,7 @@
 /********************************************************************************
  * include/sched.h
  *
- *   Copyright (C) 2007-2009, 2011, 2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2013, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -227,7 +227,9 @@ int    task_create(FAR const char *name, int priority, int stack_size,
                    main_t entry, FAR char * const argv[]);
 #endif
 int    task_delete(pid_t pid);
+#ifndef CONFIG_SMP /* Not yet supported for the SMP case */
 int    task_restart(pid_t pid);
+#endif
 
 /* Task Scheduling Interfaces (based on POSIX APIs) */
 

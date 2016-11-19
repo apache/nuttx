@@ -51,6 +51,8 @@
 #include "signal/signal.h"
 #include "task/task.h"
 
+#ifndef CONFIG_SMP /* Not yet supported for the SMP case */
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -209,3 +211,5 @@ errout_with_lock:
   sched_unlock();
   return ERROR;
 }
+
+#endif /* CONFIG_SMP */
