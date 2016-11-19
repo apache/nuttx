@@ -41,6 +41,7 @@
 
 #include <sys/wait.h>
 #include <stdint.h>
+#include <sched.h>
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
@@ -396,36 +397,38 @@ pid_t task_vforkstart(FAR struct task_tcb_s *child)
 
   pid = (int)child->cmn.pid;
 
+  /* Eliminate a race condition by disabling pre-emption.  The child task
+   * can be instantiated, but cannot run until we call waitpid().  This
+   * assures us that we cannot miss the the death-of-child signal (only
+   * needed in the SMP case).
+   */
+
+  sched_lock();
+
   /* Activate the task */
 
   ret = task_activate((FAR struct tcb_s *)child);
   if (ret < OK)
     {
       task_vforkabort(child, -ret);
+      sched_unlock();
       return ERROR;
     }
 
-  /* Since the child task has the same priority as the parent task, it is
-   * now ready to run, but has not yet ran.  It is a requirement that
-   * the parent environment be stable while vfork runs; the child thread
-   * is still dependent on things in the parent thread... like the pointers
-   * into parent thread's stack which will still appear in the child's
-   * registers and environment.
+  /* The child task has not yet ran because pre-emption is disabled.
+   * The child task has the same priority as the parent task, so that
+   * would be the case anyway.  However, in the SMP case, the child
+   * thread may have already ran on another CPU.
    *
-   * We do not have SIG_CHILD, so we have to do some silly things here.
-   * The simplest way to make sure that the child thread runs to completion
-   * is simply to yield here.  Since the child can only do exit() or
-   * execv/l(), that should be all that is needed.
-   *
-   * Hmmm.. this is probably not sufficient.  What if we are running
-   * SCHED_RR?  What if the child thread is suspended and rescheduled
-   * after the parent thread again?
+   * It is a requirement that the parent environment be stable while
+   * vfork runs; the child thread is still dependent on things in the
+   * parent thread... like the pointers into parent thread's stack
+   * which will still appear in the child's registers and environment.
    */
 
-  /* We can also exploit a bug in the execv() implementation:  The PID
-   * of the task exec'ed by the child will not be the same as the PID of
-   * the child task.  Therefore, waitpid() on the child task's PID will
-   * accomplish what we need to do.
+  /* Now wait for the child thread to exit before returning to the
+   * parent thread.  NOTE that pre-emption will be re-enabled while
+   * we are waiting.
    */
 
   rc = 0;
@@ -440,6 +443,7 @@ pid_t task_vforkstart(FAR struct task_tcb_s *child)
   (void)waitpid(pid, &rc, 0);
 #endif
 
+  sched_unlock();
   return pid;
 }
 
