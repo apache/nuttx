@@ -321,6 +321,11 @@ o SMP
                unless the spinlocks were made to be the same size as one cache
                line.
 
+               This might be doable if a write-through cache is used.  Then you
+               could always safely invalidate the cache line before reading the
+               spinlock because there should never be any dirty cache lines in
+               this case.
+
                The better option is to add compiler independent "ornamentation"
                to the spinlock so that the spinlocks are all linked together
                into a separate, non-cacheable memory regions.  Because of

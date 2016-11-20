@@ -116,4 +116,3 @@ int sched_cpu_pause(FAR struct tcb_s *tcb)
 }
 
 #endif /* CONFIG_SMP */
-
