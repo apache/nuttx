@@ -10,7 +10,7 @@ issues related to each board port.
 nuttx/:
 
  (13)  Task/Scheduler (sched/)
-  (3)  SMP
+  (1)  SMP
   (1)  Memory Management (mm/)
   (1)  Power Management (drivers/pm)
   (3)  Signals (sched/signal, arch/)
@@ -307,69 +307,6 @@ o Task/Scheduler (sched/)
 
 o SMP
   ^^^
-  Title:       SMP ISSUES WITH task_restart() AND task_delete()
-  Description: The interface task_restart() (and probably task_delete()) are
-               not usable in the SMP configuration in the current design.  In
-               the non-SMP case, these are relatively simple:  If the task is
-               are not restarting/deleting itself, then the task to-be-restarted/
-               deleted is is supended and the restart/delete operation is a
-               simple operation on data structures.
-
-               In the SMP configuration, on the other hand, the task to be
-               restarted/deleted my in fact be executing concurrently on
-               another CPU and the existing logic cannot support those
-               operations on the running another CPU.
-
-               There might be a simple way to handler this; perhaps using
-               up_cpu_pause(), you could pause all of the other CPUs, perform
-               the restart/delete operation, then restart all other CPUs.  A
-               better solution would be a new interface like up_cpu_stop().
-               This would be sent to all CPUs and if the task is running on
-               any of them, it would suspend the task and put it in the INVALID
-               state.
-
-               But this seems like a lot of work to support some garbage
-               interfaces that really should be removed anyway.  These are
-               unsafe, non-standard interfaces that really have no place in an
-               RTOS (unsafe because you don't know what resources were held
-               by the task when it was restarted or deleted).
-
-               NOTE: Currently task_restart() is not even built if CONFIG_SMP=y.
-               The task_restart() test is also disabled in apps/examples/ostest
-               in this configuration.  task_delete(), on the other hand, is
-               built (but probably should not be).
-
-  Status:      Open
-  Priority:    Low.  I do not plan to do anything with this in the near future.
-
-  Title:       SMP AND SIGNAL ACTIONS
-  Description: Suppose a task task is running on CPU1 and it is signaled from
-               another task running on CPU0.  How does the signal handler run
-               on CPU1?  I think it does not; I think that the signal will be
-               lost.  I think all testing up to this point has used a task
-               waiting for a signal vs. a running task receiving a signal.
-               This case has never been tested, but I suspect an issues.
-               Here is why... this is the signal handling sequence:
-
-               - sigueue() will set up the siginfo data structure and call
-                 sig_dipatch().
-               - sig_tcbdispach() or group_signal() depending on the
-                 configuration.  Let's assume the simpler sig_tcbdispatch().
-               - sig_tcbdispatch() will call queue the signal action (via
-                 sig_queueaction()) and then call the architecture-specific
-                 up_schedule_signaction set up the invoke the signal handler
-                 (for example in arch/arm/src/armv7-m/up_schedulesigaction.c).
-               - sig_queueaction() will assume that the other task is not
-                 running and will simply modify data structures in the TCB.
-                 This, will have no effect if the task is running and the
-                 signal action will not be performed.
-
-               This is really a variant of the problem described above under
-               "SMP ISSUES WITH task_restart() AND task_delete()" and the
-               same proposed solution applies:  Call up_cpu_pause() to stop
-               all other CPUs before up_schedule_signaction runs.
-  Status:      Open
-  Priority:    High.  This must be fixed.
 
   Title:       SPINLOCKS AND DATA CACHES
   Description: If spinlocks are used in a system with a data cache, then there

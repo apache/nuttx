@@ -103,12 +103,17 @@ int task_terminate(pid_t pid, bool nonblocking)
   FAR struct tcb_s *dtcb;
   FAR dq_queue_t *tasklist;
   irqstate_t flags;
+#ifdef CONFIG_SMP
+  int cpu;
+#endif
+  int ret;
 
-  /* Make sure the task does not become ready-to-run while we are futzing with
-   * its TCB by locking ourselves as the executing task.
+  /* Make sure the task does not become ready-to-run while we are futzing
+   * with its TCB.  Within the critical section, no new task may be started
+   * or terminated (even in the SMP case).
    */
 
-  sched_lock();
+  flags = enter_critical_section();
 
   /* Find for the TCB associated with matching PID */
 
@@ -117,26 +122,60 @@ int task_terminate(pid_t pid, bool nonblocking)
     {
       /* This PID does not correspond to any known task */
 
-      sched_unlock();
-      return -ESRCH;
+      ret = -ESRCH;
+      goto errout_with_lock;
     }
-
-#ifdef CONFIG_SMP
-  /* We will need some interlocks to assure that no tasks are rescheduled
-   * on any other CPU while we do this.
-   */
-
-#  warning Missing SMP logic
-#endif
 
   /* Verify our internal sanity */
 
-  if (dtcb->task_state == TSTATE_TASK_RUNNING ||
-      dtcb->task_state >= NUM_TASK_STATES)
+#ifdef CONFIG_SMP
+  DEBUGASSERT(dtcb->task_state < NUM_TASK_STATES);
+#else
+  DEBUGASSERT(dtcb->task_state != TSTATE_TASK_RUNNING &&
+              dtcb->task_state < NUM_TASK_STATES);
+#endif
+
+  /* Remove the task from the OS's task lists.  We must be in a critical
+   * section and the must must not be running to do this.
+   */
+
+#ifdef CONFIG_SMP
+  /* In the SMP case, the thread may be running on another CPU.  If that is
+   * the case, then we will pause the CPU that the thread is running on.
+   */
+
+  cpu = sched_cpu_pause(dtcb);
+
+  /* Get the task list associated with the the thread's state and CPU */
+
+  tasklist = TLIST_HEAD(dtcb->task_state, cpu);
+#else
+  /* In the non-SMP case, we can be assured that the task to be terminated
+   * is not running.  get the task list associated with the task state.
+   */
+
+  tasklist = TLIST_HEAD(dtcb->task_state);
+#endif
+
+  /* Remove the task from the task list */
+
+  dq_rem((FAR dq_entry_t *)dtcb, tasklist);
+  dtcb->task_state = TSTATE_TASK_INVALID;
+
+  /* At this point, the TCB should no longer be accessible to the system */
+
+#ifdef CONFIG_SMP
+  /* Resume the paused CPU (if any) */
+
+  if (cpu >= 0)
     {
-      sched_unlock();
-      PANIC();
+      /* I am not yet sure how to handle a failure here. */
+
+      DEBUGVERIFY(up_cpu_resume(cpu));
     }
+#endif /* CONFIG_SMP */
+
+  leave_critical_section(flags);
 
   /* Perform common task termination logic (flushing streams, calling
    * functions registered by at_exit/on_exit, etc.).  We need to do
@@ -151,23 +190,6 @@ int task_terminate(pid_t pid, bool nonblocking)
 
   task_exithook(dtcb, EXIT_SUCCESS, nonblocking);
 
-  /* Remove the task from the OS's task lists. */
-
-#ifdef CONFIG_SMP
-  tasklist = TLIST_HEAD(dtcb->task_state, dtcb->cpu);
-#else
-  tasklist = TLIST_HEAD(dtcb->task_state);
-#endif
-
-  flags = enter_critical_section();
-  dq_rem((FAR dq_entry_t *)dtcb, tasklist);
-  dtcb->task_state = TSTATE_TASK_INVALID;
-  leave_critical_section(flags);
-
-  /* At this point, the TCB should no longer be accessible to the system */
-
-  sched_unlock();
-
   /* Since all tasks pass through this function as the final step in their
    * exit sequence, this is an appropriate place to inform any instrumentation
    * layer that the task no longer exists.
@@ -178,4 +200,8 @@ int task_terminate(pid_t pid, bool nonblocking)
   /* Deallocate its TCB */
 
   return sched_releasetcb(dtcb, dtcb->flags & TCB_FLAG_TTYPE_MASK);
+
+errout_with_lock:
+  leave_critical_section(flags);
+  return ret;
 }
