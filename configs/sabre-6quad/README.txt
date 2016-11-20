@@ -555,34 +555,13 @@ Open Issues:
 
    Should all spinlocks go into a special "strongly ordered" memory region?
 
+   Update: Cache inconsistencies seem to be the root cause of all current SMP
+   issues.
+
 5. Assertions.  On a fatal assertions, other CPUs need to be stopped.  The SCR,
    however, only supports disabling CPUs 1 through 3.  Perhaps if the assertion
    occurs on CPUn, n > 0, then it should use and SGI to perform the assertion
    on CPU0 always.  From CPU0, CPU1-3 can be disabled.
-
-6. I think there is a possibilty for a hang in up_cpu_pause().  Suppose this
-   situation:
-
-   - CPU1 is in a critical section and has the g_cpu_irqlock spinlock.
-   - CPU0 takes an interrupt and attempts to enter the critical section.  It
-     spins waiting on g_cpu_irqlock with interrupt disabled.
-   - CPU1 calls up_cpu_pause() to pause operation on CPU1.  This will issue
-     an inter-CPU interrupt to CPU0
-   - But interrupts are disabled.  What will happen?  I think that this is
-     a deadlock:  Interrupts will stay disabled on CPU0 because it is spinning
-     in the interrupt handler; up_cpu_pause() will hang becuase the inter-
-     CPU interrupt is pending.
-
-   Are inter-CPU interrupts maskable in the same way as other interrupts?  If
-   the are not-maskable, then we must also handle them as nested interrupts
-   in some fashion.
-
-   A work-around might be to check the state of other-CPU interrupt handler
-   inside the spin loop of up_cpu_pause().  Having the other CPU spinning and
-   waiting for  up_cpu_pause() provided that (1) the pending interrupt can be
-   cleared, and (2) leave_critical_section() is not called prior to the point
-   where up_cpu_resume() is called, and (3) up_cpu_resume() is smart enough
-   to know that it should not attempt to resume a non-paused CPU.
 
 Configurations
 ==============
