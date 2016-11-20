@@ -10,7 +10,7 @@ issues related to each board port.
 nuttx/:
 
  (13)  Task/Scheduler (sched/)
-  (1)  SMP
+  (2)  SMP
   (1)  Memory Management (mm/)
   (1)  Power Management (drivers/pm)
   (3)  Signals (sched/signal, arch/)
@@ -324,12 +324,49 @@ o SMP
                The better option is to add compiler independent "ornamentation"
                to the spinlock so that the spinlocks are all linked together
                into a separate, non-cacheable memory regions.  Because of
-               region aligment and minimum region mapping sizes this could
+               region alignment and minimum region mapping sizes this could
                still be wasteful of memory.  This would work in systems that
                have both data cache and either an MPU or an MMU.
   Status:      Open
   Priority:    High.  spinlocks, and hence SMP, will not work on such systems
                without this change.
+
+  Title:       DEADLOCK SCENARIO WITH up_cpu_pause().
+  Description: I think there is a possibilty for a hang in up_cpu_pause().
+               Suppose this situation:
+
+               - CPU1 is in a critical section and has the g_cpu_irqlock 
+                 spinlock.
+               - CPU0 takes an interrupt and attempts to enter the critical
+                 section.  It spins waiting on g_cpu_irqlock with interrupt
+                 disabled.
+               - CPU1 calls up_cpu_pause() to pause operation on CPU1.  This
+                 will issue an inter-CPU interrupt to CPU0
+               - But interrupts are disabled.  What will happen?  I think
+                 that this is a deadlock:  Interrupts will stay disabled on
+                 CPU0 because it is spinning in the interrupt handler;
+                 up_cpu_pause() will hang becuase the inter-CPU interrupt
+                 is pending.
+
+               Are inter-CPU interrupts maskable in the same way as other
+               interrupts?  If the are not-maskable, then we must also handle
+               them as nested interrupts in some fashion.
+
+               A work-around might be to check the state of other-CPU
+               interrupt handler inside the spin loop of up_cpu_pause().
+               Having the other CPU spinning and waiting for  up_cpu_pause()
+               provided that (1) the pending interrupt can be cleared, and
+               (2) leave_critical_section() is not called prior to the point
+               where up_cpu_resume() is called, and (3) up_cpu_resume() is
+               smart enough to know that it should not attempt to resume a
+               non-paused CPU.
+
+               This would require some kind of information about each
+               interrupt handler:  In an interrupt, waiting for spinlock,
+               have spinlock, etc.
+
+  Status:      Open
+  Priority:    Medium-High.  I don't know for certain that this is a problem but it seems like it could 
 
 o Memory Management (mm/)
   ^^^^^^^^^^^^^^^^^^^^^^^

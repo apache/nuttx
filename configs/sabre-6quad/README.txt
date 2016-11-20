@@ -495,14 +495,12 @@ Open Issues:
 
 1. Currently all device interrupts are handled on CPU0 only.  Critical sections will
    attempt to disable interrupts but will now disable interrupts only on the current
-   CPU (which may not be CPU0).  Perhaps that should be a spinlock to prohibit
-   execution of interrupts on CPU0 when other CPUs are in a critical section?
+   CPU (which may not be CPU0).  There is a spinlock to prohibit entrance into these critical sections in interrupt handlers of other CPUs.
 
-   2016-11-17:  A fix was added to sched/irq/irq_csection that should correct this
-   problem.  When the critical section is used to lock a resource that is also used by
-   interupt handling, the interrupt handling logic must also take the spinlock.  This
-   will cause the interrupt handlers on other CPUs to spin until leave_critical_section()
-   is called.  More verification is needed, however.
+   When the critical section is used to lock a resource that is also used by
+   interupt handling, the interrupt handling logic must also take the spinlock.
+   This will cause the interrupt handlers on other CPUs to spin until
+   leave_critical_section() is called.  More verification is needed, however.
 
 2. Cache Concurency.  This is a complex problem.  There is logic in place now to
    clean CPU0 D-cache before starting a new CPU and for invalidating the D-Cache
@@ -551,16 +549,40 @@ Open Issues:
    spinlock "g_cpu_paused[cpu]".  CPU1 correctly sets g_cpu_paused[cpu] to zero
    but CPU0 never sees the change.
 
-3. Assertions.  On a fatal assertions, other CPUs need to be stopped.  The SCR,
+3. Caching probabaly interferes with spinlocks as they are currently implemented.
+   Waiting on a cached copy of the spinlock may result in a hang or a failure to
+   wait.
+
+   Should all spinlocks go into a special "strongly ordered" memory region?
+
+5. Assertions.  On a fatal assertions, other CPUs need to be stopped.  The SCR,
    however, only supports disabling CPUs 1 through 3.  Perhaps if the assertion
    occurs on CPUn, n > 0, then it should use and SGI to perform the assertion
    on CPU0 always.  From CPU0, CPU1-3 can be disabled.
 
-4. Caching probabaly interferes with spinlocks as they are currently implemented.
-   Waiting on a cached copy of the spinlock may result in a hang or a failure to
-   wait.
+6. I think there is a possibilty for a hang in up_cpu_pause().  Suppose this
+   situation:
 
-5. Do spinlocks need to go into a special "strongly ordered" memory region?
+   - CPU1 is in a critical section and has the g_cpu_irqlock spinlock.
+   - CPU0 takes an interrupt and attempts to enter the critical section.  It
+     spins waiting on g_cpu_irqlock with interrupt disabled.
+   - CPU1 calls up_cpu_pause() to pause operation on CPU1.  This will issue
+     an inter-CPU interrupt to CPU0
+   - But interrupts are disabled.  What will happen?  I think that this is
+     a deadlock:  Interrupts will stay disabled on CPU0 because it is spinning
+     in the interrupt handler; up_cpu_pause() will hang becuase the inter-
+     CPU interrupt is pending.
+
+   Are inter-CPU interrupts maskable in the same way as other interrupts?  If
+   the are not-maskable, then we must also handle them as nested interrupts
+   in some fashion.
+
+   A work-around might be to check the state of other-CPU interrupt handler
+   inside the spin loop of up_cpu_pause().  Having the other CPU spinning and
+   waiting for  up_cpu_pause() provided that (1) the pending interrupt can be
+   cleared, and (2) leave_critical_section() is not called prior to the point
+   where up_cpu_resume() is called, and (3) up_cpu_resume() is smart enough
+   to know that it should not attempt to resume a non-paused CPU.
 
 Configurations
 ==============
