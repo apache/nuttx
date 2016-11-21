@@ -53,25 +53,29 @@
 #define SP_UNLOCKED 0  /* The Un-locked state */
 #define SP_LOCKED   1  /* The Locked state */
 
-/* Memory barriers for use with NuttX spinlock logic */
+/* Memory barriers for use with NuttX spinlock logic
+ *
+ * Data Memory Barrier (DMB) acts as a memory barrier. It ensures that all
+ * explicit memory accesses that appear in program order before the DMB
+ * instruction are observed before any explicit memory accesses that appear
+ * in program order after the DMB instruction. It does not affect the
+ * ordering of any other instructions executing on the processor
+ *
+ *   dmb st - Data memory barrier.  Wait for stores to complete.
+ *
+ * Data Synchronization Barrier (DSB) acts as a special kind of memory
+ * barrier. No instruction in program order after this instruction executes
+ * until this instruction completes. This instruction completes when: (1) All
+ * explicit memory accesses before this instruction complete, and (2) all
+ * Cache, Branch predictor and TLB maintenance operations before this
+ * instruction complete.
+ *
+ *   dsb sy - Data syncrhonization barrier.  Assures that the CPU waits until
+ *            all memory accesses are complete
+ */
 
-#ifndef arm_isb
-#  define arm_isb(n) __asm__ __volatile__ ("isb " #n : : : "memory")
-#endif
-
-#define SP_ISB() arm_isb(15)
-
-#ifndef arm_dsb
-#  define arm_dsb(n) __asm__ __volatile__ ("dsb " #n : : : "memory")
-#endif
-
-#define SP_DSB() arm_dsb(15)
-
-#ifndef arm_dmb
-#  define arm_dmb(n) __asm__ __volatile__ ("dmb " #n : : : "memory")
-#endif
-
-#define SP_DMB() arm_dmb(15)
+#define SP_DSB(n) __asm__ __volatile__ ("dsb sy" : : : "memory")
+#define SP_DMB(n) __asm__ __volatile__ ("dmb st" : : : "memory")
 
 /****************************************************************************
  * Public Types
