@@ -513,7 +513,6 @@
  * NMRR registers.  For the simple case where TEX[2:0] = 0b000, the control
  * is as follows:
  *
- *
  *       MEMORY     INNER         OUTER        OUTER SHAREABLE
  *   C B TYPE       CACHEABILITY  CACHEABILITY ATTRIBUTE
  *   - - ---------- ------------- ------------ -----------------
