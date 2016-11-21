@@ -116,7 +116,7 @@ spinlock_t up_testset(volatile FAR spinlock_t *lock);
  ****************************************************************************/
 
 /* void spin_initialize(FAR spinlock_t *lock); */
-#define spin_initialize(i) do { (l) = SPI_UNLOCKED; } while (0)
+#define spin_initialize(i) do { (l) = SP_UNLOCKED; } while (0)
 
 /****************************************************************************
  * Name: spin_initializer
