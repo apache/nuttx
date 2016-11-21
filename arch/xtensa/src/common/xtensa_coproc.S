@@ -306,7 +306,11 @@ _xtensa_coproc_restorestate:
 
 	mov		a15, a2							/* A15 is now the address of the save area */
 
+#ifdef CONFIG_XTENSA_CP_LAZY
+	movi	a2, 0							/* a2 = Will disable all coprocessors */
+#else
 	l16ui	a2, a15, XTENSA_CPENABLE		/* a2 = Which CPs have been enable for this thread? */
+#endif
 	wsr		a2, CPENABLE					/* Set CPENABLE correctly for this thread */
 	l16ui	a2, a15, XTENSA_CPSTORED		/* a2 = Which CPs have been saved for this thread? */
 	movi	a3, 0							/* Clear the ones being restored (all of them) */

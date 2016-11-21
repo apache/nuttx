@@ -120,8 +120,16 @@
 
 /* We need to have the work queue to handle SPI interrupts */
 
-#ifndef CONFIG_SCHED_WORKQUEUE
+#if !defined(CONFIG_SCHED_WORKQUEUE)
 #  error "Worker thread support is required (CONFIG_SCHED_WORKQUEUE)"
+#else
+#  if defined(CONFIG_ENCX24J600_HPWORK)
+#    define ENCWORK HPWORK
+#  elif defined(CONFIG_ENCX24J600_LPWORK)
+#    define ENCWORK LPWORK
+#  else
+#    error "Neither CONFIG_ENCX24J600_HPWORK nor CONFIG_ENCX24J600_LPWORK defined"
+#  endif
 #endif
 
 /* CONFIG_ENCX24J600_DUMPPACKET will dump the contents of each packet to the console. */
@@ -482,7 +490,7 @@ static inline void enc_setethrst(FAR struct enc_driver_s *priv)
 {
   DEBUGASSERT(priv && priv->spi);
 
-  /* Select ENC28J60 chip */
+  /* Select ENCX24J600 chip */
 
   SPI_SELECT(priv->spi, SPIDEV_ETHERNET, true);
 
@@ -492,7 +500,7 @@ static inline void enc_setethrst(FAR struct enc_driver_s *priv)
 
   up_udelay(25);
 
-  /* De-select ENC28J60 chip. */
+  /* De-select ENCX24J600 chip. */
 
   SPI_SELECT(priv->spi, SPIDEV_ETHERNET, false);
   enc_cmddump(ENC_SETETHRST);
@@ -2017,7 +2025,7 @@ static int enc_interrupt(int irq, FAR void *context)
    */
 
   priv->lower->disable(priv->lower);
-  return work_queue(HPWORK, &priv->irqwork, enc_irqworker, (FAR void *)priv, 0);
+  return work_queue(ENCWORK, &priv->irqwork, enc_irqworker, (FAR void *)priv, 0);
 }
 
 /****************************************************************************
@@ -2109,7 +2117,7 @@ static void enc_txtimeout(int argc, uint32_t arg, ...)
    * can occur until we restart the Tx timeout watchdog.
    */
 
-  ret = work_queue(HPWORK, &priv->towork, enc_toworker, (FAR void *)priv, 0);
+  ret = work_queue(ENCWORK, &priv->towork, enc_toworker, (FAR void *)priv, 0);
   (void)ret;
   DEBUGASSERT(ret == OK);
 }
@@ -2204,7 +2212,7 @@ static void enc_polltimer(int argc, uint32_t arg, ...)
    * occur until we restart the poll timeout watchdog.
    */
 
-  ret = work_queue(HPWORK, &priv->pollwork, enc_pollworker, (FAR void *)priv, 0);
+  ret = work_queue(ENCWORK, &priv->pollwork, enc_pollworker, (FAR void *)priv, 0);
   (void)ret;
   DEBUGASSERT(ret == OK);
 }

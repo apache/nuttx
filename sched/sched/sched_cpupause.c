@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/clock/clock_systimer.c
+ * sched/sched/sched_cpupause.c
  *
- *   Copyright (C) 2011, 2014-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,98 +39,80 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
+#include <sys/types.h>
+#include <assert.h>
+#include <errno.h>
 
-#include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <nuttx/clock.h>
 
-#include "clock/clock.h"
+#include "sched/sched.h"
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-/* See nuttx/clock.h */
-
-#undef clock_systimer
+#ifdef CONFIG_SMP
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: clock_systimer
+ * Name: sched_cpu_pause
  *
  * Description:
- *   Return the current value of the 32/64-bit system timer counter
+ *   Check if task associated with 'tcb' is running on a different CPU.  If
+ *   so then pause that CPU and return its CPU index.
  *
- * Parameters:
- *   None
+ * Input Parameters:
+ *   tcb - The TCB of the task to be conditionally paused.
  *
- * Return Value:
- *   The current value of the system timer counter
+ * Returned Value:
+ *   If a CPU is pauses its non-negative CPU index is returned.  This index
+ *   may then be used to resume the CPU.  If the task is not running at all
+ *   (or if an error occurs), then a negated errno value is returned.  -ESRCH
+ *   is returned in the case where the task is not running on any CPU.
  *
  * Assumptions:
+ *   This function was called in a critical section.  In that case, no tasks
+ *   may started or may exit until the we leave the critical section.  This
+ *   critical section should extend until up_cpu_resume() is called in the
+ *   typical case.
  *
  ****************************************************************************/
 
-systime_t clock_systimer(void)
+int sched_cpu_pause(FAR struct tcb_s *tcb)
 {
-#ifdef CONFIG_SCHED_TICKLESS
-# ifdef CONFIG_SYSTEM_TIME64
+  int cpu;
+  int ret;
 
-  struct timespec ts;
+  DEBUGASSERT(tcb != NULL);
 
-  /* Get the time from the platform specific hardware */
+  /* If the task is not running at all then our job is easy */
 
-#ifndef CONFIG_CLOCK_TIMEKEEPING
-  (void)up_timer_gettime(&ts);
-#else
-  (void)clock_timekeeping_get_monotonic_time(&ts);
-#endif
+  cpu = tcb->cpu;
+  if (tcb->task_state != TSTATE_TASK_RUNNING)
+    {
+      return -ESRCH;
+    }
 
-  /* Convert to a 64-bit value in microseconds, then in clock tick units */
+  /* Check the CPU that the task is running on */
 
-  return USEC2TICK(1000000 * (uint64_t)ts.tv_sec + (uint64_t)ts.tv_nsec / 1000);
+  DEBUGASSERT(cpu != this_cpu() && (unsigned int)cpu < CONFIG_SMP_NCPUS);
+  if (cpu == this_cpu())
+    {
+      /* We can't pause ourself */
 
-# else /* CONFIG_SYSTEM_TIME64 */
+      return -EACCES;
+    }
 
-  struct timespec ts;
-  uint64_t tmp;
+  /* Pause the CPU that the task is running on */
 
-  /* Get the time from the platform specific hardware */
+  ret = up_cpu_pause(cpu);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
-#ifndef CONFIG_CLOCK_TIMEKEEPING
-  (void)up_timer_gettime(&ts);
-#else
-  (void)clock_timekeeping_get_monotonic_time(&ts);
-#endif
+  /* Return the CPU that the task is running on */
 
-  /* Convert to a 64- then a 32-bit value */
-
-  tmp = USEC2TICK(1000000 * (uint64_t)ts.tv_sec + (uint64_t)ts.tv_nsec / 1000);
-  return (systime_t)(tmp & 0x00000000ffffffff);
-
-# endif /* CONFIG_SYSTEM_TIME64 */
-#else /* CONFIG_SCHED_TICKLESS */
-# ifdef CONFIG_SYSTEM_TIME64
-
-  irqstate_t flags;
-  systime_t sample;
-
-  /* 64-bit accesses are not atomic on most architectures. */
-
-  flags  = enter_critical_section();
-  sample = g_system_timer;
-  leave_critical_section(flags);
-  return sample;
-
-# else /* CONFIG_SYSTEM_TIME64 */
-
-  /* Return the current system time */
-
-  return g_system_timer;
-
-# endif /* CONFIG_SYSTEM_TIME64 */
-#endif /* CONFIG_SCHED_TICKLESS */
+  return cpu;
 }
+
+#endif /* CONFIG_SMP */

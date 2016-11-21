@@ -351,4 +351,16 @@ int board_adc_initialize(void);
 int board_ajoy_initialize(void);
 #endif
 
+/****************************************************************************
+ * Name: board_timer_driver_initialize
+ *
+ * Description:
+ *   Initialize and register a timer
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_TIMER
+int board_timer_driver_initialize(FAR const char *devpath, int timer);
+#endif
+
 #endif /* __CONFIGS_NUCLEO_L476RG_SRC_NUCLEO_L476RG_H */

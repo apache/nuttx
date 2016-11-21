@@ -495,13 +495,12 @@ Open Issues:
 
 1. Currently all device interrupts are handled on CPU0 only.  Critical sections will
    attempt to disable interrupts but will now disable interrupts only on the current
-   CPU (which may not be CPU0).  Perhaps that should be a spinlock to prohibit
-   execution of interrupts on CPU0 when other CPUs are in a critical section?
+   CPU (which may not be CPU0).  There is a spinlock to prohibit entrance into these critical sections in interrupt handlers of other CPUs.
 
-   2016-11-15:  When the critical section is used to lock a resource that is also
-   used by interupt handling, I believe that what is required is that the interrupt
-   handling logic must also take the spinlock.  This will cause the interrupt handlers
-   on other CPUs to spin until leave_critical_section() is called.
+   When the critical section is used to lock a resource that is also used by
+   interupt handling, the interrupt handling logic must also take the spinlock.
+   This will cause the interrupt handlers on other CPUs to spin until
+   leave_critical_section() is called.  More verification is needed, however.
 
 2. Cache Concurency.  This is a complex problem.  There is logic in place now to
    clean CPU0 D-cache before starting a new CPU and for invalidating the D-Cache
@@ -537,16 +536,32 @@ Open Issues:
                                    PMD_SECT_DOM(0) | PMD_SECT_XN)
      #define MMU_STRONGLY_ORDERED (PMD_TYPE_SECT | PMD_SECT_AP_RW1 | \
 
-3. Assertions.  On a fatal assertions, other CPUs need to be stopped.  The SCR,
-   however, only supports disabling CPUs 1 through 3.  Perhaps if the assertion
-   occurs on CPUn, n > 0, then it should use and SGI to perform the assertion
-   on CPU0 always.  From CPU0, CPU1-3 can be disabled.
+   Another alternative would be to place all spinlocks in a non-cachable memory
+   region.  That is problem what will have to be done.
 
-4. Caching probabaly interferes with spinlocks as they are currently implemented.
+   This is a VERIFIED PROBLEM:  I have seen cases where CPU0 sets a spinlock=1 then
+   tries to lock the spinlock.  CPU0 will wait in this case until CPU1 unlocks the
+   spinlock.  Most of this happens correctly; I can see that CPU1 does set the
+   spinlock=0, but CPU0 never sees the change and spins forever.  That is surely
+   a consequence of cache issues.
+
+   This was observed between up_cpu_pause() and arm_pause_handler() with the
+   spinlock "g_cpu_paused[cpu]".  CPU1 correctly sets g_cpu_paused[cpu] to zero
+   but CPU0 never sees the change.
+
+3. Caching probabaly interferes with spinlocks as they are currently implemented.
    Waiting on a cached copy of the spinlock may result in a hang or a failure to
    wait.
 
-5. Do spinlocks need to go into a special "strongly ordered" memory region?
+   Should all spinlocks go into a special "strongly ordered" memory region?
+
+   Update: Cache inconsistencies seem to be the root cause of all current SMP
+   issues.
+
+5. Assertions.  On a fatal assertions, other CPUs need to be stopped.  The SCR,
+   however, only supports disabling CPUs 1 through 3.  Perhaps if the assertion
+   occurs on CPUn, n > 0, then it should use and SGI to perform the assertion
+   on CPU0 always.  From CPU0, CPU1-3 can be disabled.
 
 Configurations
 ==============

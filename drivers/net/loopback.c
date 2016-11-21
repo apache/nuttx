@@ -67,12 +67,24 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Non-network-driven configuration is required */
+
 #ifndef CONFIG_NET_NOINTS
 #  error CONFIG_NET_NOINTS must be selected
 #endif
 
-#ifndef CONFIG_SCHED_HPWORK
-#  error High priority work queue support is required (CONFIG_SCHED_HPWORK)
+/* We need to have the work queue to handle SPI interrupts */
+
+#if !defined(CONFIG_SCHED_WORKQUEUE)
+#  error Worker thread support is required (CONFIG_SCHED_WORKQUEUE)
+#else
+#  if defined(CONFIG_LOOPBACK_HPWORK)
+#    define LPBKWORK HPWORK
+#  elif defined(CONFIG_LOOPBACK_LPWORK)
+#    define LPBKWORK LPWORK
+#  else
+#    error Neither CONFIG_LOOPBACK_HPWORK nor CONFIG_LOOPBACK_LPWORK defined
+#  endif
 #endif
 
 /* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per second */
@@ -289,7 +301,7 @@ static void lo_poll_expiry(int argc, wdparm_t arg, ...)
     {
       /* Schedule to perform the interrupt processing on the worker thread. */
 
-      work_queue(HPWORK, &priv->lo_work, lo_poll_work, priv, 0);
+      work_queue(LPBKWORK, &priv->lo_work, lo_poll_work, priv, 0);
     }
   else
     {
@@ -444,7 +456,7 @@ static int lo_txavail(FAR struct net_driver_s *dev)
     {
       /* Schedule to serialize the poll on the worker thread. */
 
-      work_queue(HPWORK, &priv->lo_work, lo_txavail_work, priv, 0);
+      work_queue(LPBKWORK, &priv->lo_work, lo_txavail_work, priv, 0);
     }
 
   return OK;

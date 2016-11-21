@@ -79,8 +79,18 @@
  * work queue support is required.
  */
 
-#if defined(CONFIG_NET_NOINTS) && !defined(CONFIG_SCHED_HPWORK)
-#  error High priority work queue support is required
+#if defined(CONFIG_NET_NOINTS) && !defined(CONFIG_SCHED_WORKQUEUE)
+#  error Work queue support is required in this configuration (CONFIG_SCHED_WORKQUEUE)
+#endif
+
+#if defined(CONFIG_SCHED_WORKQUEUE)
+#  if defined(CONFIG_TUN_HPWORK)
+#    define TUNWORK HPWORK
+#  elif defined(CONFIG_TUN_LPWORK)
+#    define TUNWORK LPWORK
+#  else
+#    error "Neither CONFIG_TUN_HPWORK nor CONFIG_TUN_LPWORK defined"
+#  endif
 #endif
 
 /* CONFIG_TUN_NINTERFACES determines the number of physical interfaces
@@ -622,9 +632,9 @@ static void tun_poll_expiry(int argc, wdparm_t arg, ...)
 
   if (work_available(&priv->work))
     {
-      /* Schedule to perform the interrupt processing on the worker thread. */
+      /* Schedule to perform the timer expiration on the worker thread. */
 
-      work_queue(HPWORK, &priv->work, tun_poll_work, priv, 0);
+      work_queue(TUNWORK, &priv->work, tun_poll_work, priv, 0);
     }
   else
     {

@@ -67,12 +67,24 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* If processing is not done at the interrupt level, then high priority
- * work queue support is required.
+/* If processing is not done at the interrupt level, then work queue support
+ * is required.
  */
 
-#if defined(CONFIG_NET_NOINTS) && !defined(CONFIG_SCHED_HPWORK)
-#  error High priority work queue support is required
+#if defined(CONFIG_NET_NOINTS) && !defined(CONFIG_SCHED_WORKQUEUE)
+#  error Work queue support is required in this configuration (CONFIG_SCHED_WORKQUEUE)
+#endif
+
+/* Use the low priority work queue if possible */
+
+#if defined(CONFIG_SCHED_WORKQUEUE)
+#  if defined(CONFIG_skeleton_HPWORK)
+#    define skelWORK HPWORK
+#  elif defined(CONFIG_skeleton_LPWORK)
+#    define skelWORK LPWORK
+#  else
+#    error Neither CONFIG_skeleton_HPWORK nor CONFIG_skeleton_LPWORK defined
+#  endif
 #endif
 
 /* CONFIG_skeleton_NINTERFACES determines the number of physical interfaces
@@ -598,7 +610,7 @@ static int skel_interrupt(int irq, FAR void *context)
 
   /* Schedule to perform the interrupt processing on the worker thread. */
 
-  work_queue(HPWORK, &priv->sk_work, skel_interrupt_work, priv, 0);
+  work_queue(skelWORK, &priv->sk_work, skel_interrupt_work, priv, 0);
 
 #else
   /* Process the interrupt now */
@@ -705,11 +717,11 @@ static void skel_txtimeout_expiry(int argc, wdparm_t arg, ...)
    * on work that has already been started.
    */
 
-  work_cancel(HPWORK, &priv->sk_work);
+  work_cancel(skelWORK, &priv->sk_work);
 
   /* Schedule to perform the TX timeout processing on the worker thread. */
 
-  work_queue(HPWORK, &priv->sk_work, skel_txtimeout_work, priv, 0);
+  work_queue(skelWORK, &priv->sk_work, skel_txtimeout_work, priv, 0);
 #else
   /* Process the timeout now */
 
@@ -815,7 +827,7 @@ static void skel_poll_expiry(int argc, wdparm_t arg, ...)
     {
       /* Schedule to perform the interrupt processing on the worker thread. */
 
-      work_queue(HPWORK, &priv->sk_work, skel_poll_work, priv, 0);
+      work_queue(skelWORK, &priv->sk_work, skel_poll_work, priv, 0);
     }
   else
     {
@@ -1026,7 +1038,7 @@ static int skel_txavail(FAR struct net_driver_s *dev)
     {
       /* Schedule to serialize the poll on the worker thread. */
 
-      work_queue(HPWORK, &priv->sk_work, skel_txavail_work, priv, 0);
+      work_queue(skelWORK, &priv->sk_work, skel_txavail_work, priv, 0);
     }
 
 #else

@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated November 2, 2016)
+NuttX TODO List (Last updated November 19, 2016)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -9,13 +9,14 @@ issues related to each board port.
 
 nuttx/:
 
- (14)  Task/Scheduler (sched/)
+ (13)  Task/Scheduler (sched/)
+  (2)  SMP
   (1)  Memory Management (mm/)
   (1)  Power Management (drivers/pm)
   (3)  Signals (sched/signal, arch/)
   (2)  pthreads (sched/pthread)
   (0)  Message Queues (sched/mqueue)
-  (9)  Kernel/Protected Build
+  (8)  Kernel/Protected Build
   (3)  C++ Support
   (6)  Binary loaders (binfmt/)
  (12)  Network (net/, drivers/net)
@@ -255,7 +256,7 @@ o Task/Scheduler (sched/)
                a holder of the semaphore.  Normally, a task is removed from
                the holder list when it finally releases the semaphore via
                sem_post().
-              
+
                However, TASK A never calls sem_post(sem) so it becomes
                *permanently* a holder of the semaphore and may have its
                priority boosted at any time when any other task tries to
@@ -303,6 +304,74 @@ o Task/Scheduler (sched/)
   Status:      Open
   Priority:    Low.  Things are just the way that we want them for the way
                that NuttX is used today.
+
+o SMP
+  ^^^
+
+  Title:       SPINLOCKS AND DATA CACHES
+  Description: If spinlocks are used in a system with a data cache, then there
+               may be a problem with cache coherency in some CPU architectures:
+               When one CPU modifies the spinlock, the changes may not be
+               visible to another CPU if it does not share the data cache.
+               That would cause failure in the spinlock logic.
+
+               Flushing the D-cache on writes and invalidating before a read is
+               not really an option.  spinlocks are normally 8-bits in size and
+               cache lines are typically 32-bytes so that would have side effects
+               unless the spinlocks were made to be the same size as one cache
+               line.
+
+               This might be doable if a write-through cache is used.  Then you
+               could always safely invalidate the cache line before reading the
+               spinlock because there should never be any dirty cache lines in
+               this case.
+
+               The better option is to add compiler independent "ornamentation"
+               to the spinlock so that the spinlocks are all linked together
+               into a separate, non-cacheable memory regions.  Because of
+               region alignment and minimum region mapping sizes this could
+               still be wasteful of memory.  This would work in systems that
+               have both data cache and either an MPU or an MMU.
+  Status:      Open
+  Priority:    High.  spinlocks, and hence SMP, will not work on such systems
+               without this change.
+
+  Title:       DEADLOCK SCENARIO WITH up_cpu_pause().
+  Description: I think there is a possibilty for a hang in up_cpu_pause().
+               Suppose this situation:
+
+               - CPU1 is in a critical section and has the g_cpu_irqlock 
+                 spinlock.
+               - CPU0 takes an interrupt and attempts to enter the critical
+                 section.  It spins waiting on g_cpu_irqlock with interrupt
+                 disabled.
+               - CPU1 calls up_cpu_pause() to pause operation on CPU1.  This
+                 will issue an inter-CPU interrupt to CPU0
+               - But interrupts are disabled.  What will happen?  I think
+                 that this is a deadlock:  Interrupts will stay disabled on
+                 CPU0 because it is spinning in the interrupt handler;
+                 up_cpu_pause() will hang becuase the inter-CPU interrupt
+                 is pending.
+
+               Are inter-CPU interrupts maskable in the same way as other
+               interrupts?  If the are not-maskable, then we must also handle
+               them as nested interrupts in some fashion.
+
+               A work-around might be to check the state of other-CPU
+               interrupt handler inside the spin loop of up_cpu_pause().
+               Having the other CPU spinning and waiting for  up_cpu_pause()
+               provided that (1) the pending interrupt can be cleared, and
+               (2) leave_critical_section() is not called prior to the point
+               where up_cpu_resume() is called, and (3) up_cpu_resume() is
+               smart enough to know that it should not attempt to resume a
+               non-paused CPU.
+
+               This would require some kind of information about each
+               interrupt handler:  In an interrupt, waiting for spinlock,
+               have spinlock, etc.
+
+  Status:      Open
+  Priority:    Medium-High.  I don't know for certain that this is a problem but it seems like it could 
 
 o Memory Management (mm/)
   ^^^^^^^^^^^^^^^^^^^^^^^
@@ -682,14 +751,6 @@ o Kernel/Protected Build
   Priority:    Low.  This is a good idea and certainly an architectural
                improvement.  However, there is no strong motivation now do
                do that partitioning work.
-
-  Title:       TIMER INTERRUPT CALLBACK
-  Description: The timer upper half driver at drivers/timers/timer.c performs
-               interrupt level callbacks into applications.  This, of course,
-               will never work in anything but a non-secure, flat build.
-  Status:      Open
-  Priority:    Medium.  The driver is only usable with all of its features
-               in a FLAT build.
 
   Title:       USER MODE TASKS CAN MODIFY PRIVILEGED TASKS
   Description: Certain interfaces, such as sched_setparam(),
@@ -1316,8 +1377,8 @@ o USB (drivers/usbdev, drivers/usbhost)
   Status:      Open
   Priority:    Medium-Low unless you really need host CDC/ACM support.
 
-o Libraries (libc/)
-  ^^^^^^^^^^^^^^^^^
+o Libraries (libc/, libm/)
+  ^^^^^^^^^^^^^^^^^^^^^^^^
 
   Title:       SIGNED time_t
   Description: The NuttX time_t is type uint32_t. I think this is consistent
@@ -2036,3 +2097,4 @@ o Other Applications & Tests (apps/examples/)
                the artifact is larger.
   Status:      Open
   Priority:    Medium.
+

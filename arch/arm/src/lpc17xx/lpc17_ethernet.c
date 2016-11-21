@@ -83,12 +83,24 @@
  * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
-/* If processing is not done at the interrupt level, then high priority
- * work queue support is required.
+/* If processing is not done at the interrupt level, then work queue support
+ * is required.
  */
 
-#if defined(CONFIG_NET_NOINTS) && !defined(CONFIG_SCHED_HPWORK)
-#  error High priority work queue support is required
+#if defined(CONFIG_NET_NOINTS) && !defined(CONFIG_SCHED_WORKQUEUE)
+#  error Work queue support is required
+#endif
+
+/* Select work queue */
+
+#if defined(CONFIG_SCHED_WORKQUEUE)
+#  if defined(CONFIG_LPC17_ETHERNET_HPWORK)
+#    define ETHWORK HPWORK
+#  elif defined(CONFIG_LPC17_ETHERNET_LPWORK)
+#    define ETHWORK LPWORK
+#  else
+#    error Neither CONFIG_LPC17_ETHERNET_HPWORK nor CONFIG_LPC17_ETHERNET_LPWORK defined
+#  endif
 #endif
 
 /* CONFIG_LPC17_NINTERFACES determines the number of physical interfaces
@@ -1259,11 +1271,11 @@ static int lpc17_interrupt(int irq, void *context)
 
               /* Cancel any pending RX done work */
 
-              work_cancel(HPWORK, &priv->lp_rxwork);
+              work_cancel(ETHWORK, &priv->lp_rxwork);
 
               /* Schedule RX-related work to be performed on the work thread */
 
-              work_queue(HPWORK, &priv->lp_rxwork, (worker_t)lpc17_rxdone_work,
+              work_queue(ETHWORK, &priv->lp_rxwork, (worker_t)lpc17_rxdone_work,
                          priv, 0);
 
 #else /* CONFIG_NET_NOINTS */
@@ -1323,7 +1335,7 @@ static int lpc17_interrupt(int irq, void *context)
                * to avoid race conditions with the TX timeout work)
                */
 
-              work_cancel(HPWORK, &priv->lp_txwork);
+              work_cancel(ETHWORK, &priv->lp_txwork);
 
               /* Then make sure that the TX poll timer is running (if it is
                * already running, the following would restart it).  This is
@@ -1336,7 +1348,7 @@ static int lpc17_interrupt(int irq, void *context)
 
               /* Schedule TX-related work to be performed on the work thread */
 
-              work_queue(HPWORK, &priv->lp_txwork, (worker_t)lpc17_txdone_work,
+              work_queue(ETHWORK, &priv->lp_txwork, (worker_t)lpc17_txdone_work,
                          priv, 0);
 
 #else /* CONFIG_NET_NOINTS */
@@ -1468,7 +1480,7 @@ static void lpc17_txtimeout_expiry(int argc, uint32_t arg, ...)
     {
       /* Schedule to perform the interrupt processing on the worker thread. */
 
-      work_queue(HPWORK, &priv->lp_txwork, lpc17_txtimeout_work, priv, 0);
+      work_queue(ETHWORK, &priv->lp_txwork, lpc17_txtimeout_work, priv, 0);
     }
 
 #else
@@ -1526,7 +1538,7 @@ static void lpc17_poll_process(FAR struct lpc17_driver_s *priv)
   if (considx != prodidx)
     {
 #ifdef CONFIG_NET_NOINTS
-      work_queue(HPWORK, &priv->lp_rxwork, (worker_t)lpc17_rxdone_work,
+      work_queue(ETHWORK, &priv->lp_rxwork, (worker_t)lpc17_rxdone_work,
                  priv, 0);
 
 #else /* CONFIG_NET_NOINTS */
@@ -1606,7 +1618,7 @@ static void lpc17_poll_expiry(int argc, uint32_t arg, ...)
     {
       /* Schedule to perform the interrupt processing on the worker thread. */
 
-      work_queue(HPWORK, &priv->lp_pollwork, lpc17_poll_work, priv, 0);
+      work_queue(ETHWORK, &priv->lp_pollwork, lpc17_poll_work, priv, 0);
     }
   else
     {
@@ -2013,7 +2025,7 @@ static int lpc17_txavail(struct net_driver_s *dev)
     {
       /* Schedule to serialize the poll on the worker thread. */
 
-      work_queue(HPWORK, &priv->lp_pollwork, lpc17_txavail_work, priv, 0);
+      work_queue(ETHWORK, &priv->lp_pollwork, lpc17_txavail_work, priv, 0);
     }
 
 #else

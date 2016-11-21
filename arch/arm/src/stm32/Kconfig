@@ -636,6 +636,7 @@ config ARCH_CHIP_STM32F303CB
 	select STM32_STM32F303
 	select ARCH_HAVE_FPU
 	select STM32_HAVE_ADC3
+	select STM32_HAVE_ADC4
 	select STM32_HAVE_I2C2
 	select STM32_HAVE_SPI2
 	select STM32_HAVE_SPI3
@@ -651,6 +652,7 @@ config ARCH_CHIP_STM32F303CC
 	select STM32_STM32F303
 	select ARCH_HAVE_FPU
 	select STM32_HAVE_ADC3
+	select STM32_HAVE_ADC4
 	select STM32_HAVE_I2C2
 	select STM32_HAVE_SPI2
 	select STM32_HAVE_SPI3
@@ -666,6 +668,7 @@ config ARCH_CHIP_STM32F303RB
 	select STM32_STM32F303
 	select ARCH_HAVE_FPU
 	select STM32_HAVE_ADC3
+	select STM32_HAVE_ADC4
 	select STM32_HAVE_I2C2
 	select STM32_HAVE_SPI2
 	select STM32_HAVE_SPI3
@@ -683,6 +686,7 @@ config ARCH_CHIP_STM32F303RC
 	select STM32_STM32F303
 	select ARCH_HAVE_FPU
 	select STM32_HAVE_ADC3
+	select STM32_HAVE_ADC4
 	select STM32_HAVE_I2C2
 	select STM32_HAVE_SPI2
 	select STM32_HAVE_SPI3
@@ -740,6 +744,7 @@ config ARCH_CHIP_STM32F303VB
 	select STM32_STM32F303
 	select ARCH_HAVE_FPU
 	select STM32_HAVE_ADC3
+	select STM32_HAVE_ADC4
 	select STM32_HAVE_I2C2
 	select STM32_HAVE_SPI2
 	select STM32_HAVE_SPI3
@@ -757,6 +762,7 @@ config ARCH_CHIP_STM32F303VC
 	select STM32_STM32F303
 	select ARCH_HAVE_FPU
 	select STM32_HAVE_ADC3
+	select STM32_HAVE_ADC4
 	select STM32_HAVE_I2C2
 	select STM32_HAVE_SPI2
 	select STM32_HAVE_SPI3
@@ -6140,8 +6146,8 @@ config RTC_HSECLOCK
 
 endchoice
 
-if STM32_ETHMAC
 menu "Ethernet MAC configuration"
+	depends on STM32_ETHMAC
 
 config STM32_PHYADDR
 	int "PHY address"
@@ -6345,6 +6351,26 @@ config STM32_RMII_EXTCLK
 
 endchoice
 
+choice
+	prompt "Work queue"
+	default STM32_ETHMAC_LPWORK if SCHED_LPWORK
+	default STM32_ETHMAC_HPWORK if !SCHED_LPWORK && SCHED_HPWORK
+	depends on SCHED_WORKQUEUE
+	---help---
+		Work queue support is required to use the Ethernet driver.  If the
+		low priority work queue is available, then it should be used by the
+		driver.
+
+config STM32_ETHMAC_HPWORK
+	bool "High priority"
+	depends on SCHED_HPWORK
+
+config STM32_ETHMAC_LPWORK
+	bool "Low priority"
+	depends on SCHED_LPWORK
+
+endchoice # Work queue
+
 config STM32_ETHMAC_REGDEBUG
 	bool "Register-Level Debug"
 	default n
@@ -6352,8 +6378,7 @@ config STM32_ETHMAC_REGDEBUG
 	---help---
 		Enable very low-level register access debug.  Depends on CONFIG_DEBUG_FEATURES.
 
-endmenu
-endif
+endmenu # Ethernet MAC configuration
 
 menu "USB FS Host Configuration"
 

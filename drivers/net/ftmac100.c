@@ -72,12 +72,24 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* If processing is not done at the interrupt level, then high priority
- * work queue support is required.
+/* If processing is not done at the interrupt level, then work queue support
+ * is required.
  */
 
-#if defined(CONFIG_NET_NOINTS) && !defined(CONFIG_SCHED_HPWORK)
-#  error High priority work queue support is required
+#if defined(CONFIG_NET_NOINTS) && !defined(CONFIG_SCHED_WORKQUEUE)
+#  error Work queue support is required in this configuration (CONFIG_SCHED_WORKQUEUE)
+#endif
+
+/* Use the low priority work queue if possible */
+
+#if defined(CONFIG_SCHED_WORKQUEUE)
+#  if defined(CONFIG_FTMAC100_HPWORK)
+#    define FTMAWORK HPWORK
+#  elif defined(CONFIG_FTMAC100_LPWORK)
+#    define FTMAWORK LPWORK
+#  else
+#    error Neither CONFIG_FTMAC100_HPWORK nor CONFIG_FTMAC100_LPWORK defined
+#  endif
 #endif
 
 /* CONFIG_FTMAC100_NINTERFACES determines the number of physical interfaces
@@ -1049,11 +1061,11 @@ static int ftmac100_interrupt(int irq, FAR void *context)
 
   /* Cancel any pending poll work */
 
-  work_cancel(HPWORK, &priv->ft_work);
+  work_cancel(FTMAWORK, &priv->ft_work);
 
   /* Schedule to perform the interrupt processing on the worker thread. */
 
-  work_queue(HPWORK, &priv->ft_work, ftmac100_interrupt_work, priv, 0);
+  work_queue(FTMAWORK, &priv->ft_work, ftmac100_interrupt_work, priv, 0);
 
   leave_critical_section(flags);
 #else
@@ -1160,11 +1172,11 @@ static void ftmac100_txtimeout_expiry(int argc, uint32_t arg, ...)
    * on work that has already been started.
    */
 
-  work_cancel(HPWORK, &priv->ft_work);
+  work_cancel(FTMAWORK, &priv->ft_work);
 
   /* Schedule to perform the TX timeout processing on the worker thread. */
 
-  work_queue(HPWORK, &priv->ft_work, ftmac100_txtimeout_work, priv, 0);
+  work_queue(FTMAWORK, &priv->ft_work, ftmac100_txtimeout_work, priv, 0);
 #else
   /* Process the timeout now */
 
@@ -1270,7 +1282,7 @@ static void ftmac100_poll_expiry(int argc, uint32_t arg, ...)
     {
       /* Schedule to perform the interrupt processing on the worker thread. */
 
-      work_queue(HPWORK, &priv->ft_work, ftmac100_poll_work, priv, 0);
+      work_queue(FTMAWORK, &priv->ft_work, ftmac100_poll_work, priv, 0);
     }
   else
     {
@@ -1491,7 +1503,7 @@ static int ftmac100_txavail(struct net_driver_s *dev)
     {
       /* Schedule to serialize the poll on the worker thread. */
 
-      work_queue(HPWORK, &priv->ft_work, ftmac100_txavail_work, priv, 0);
+      work_queue(FTMAWORK, &priv->ft_work, ftmac100_txavail_work, priv, 0);
     }
 
 #else

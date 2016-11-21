@@ -50,7 +50,8 @@ CSRCS += sched_reprioritize.c
 endif
 
 ifeq ($(CONFIG_SMP),y)
-CSRCS += sched_getaffinity.c sched_setaffinity.c sched_cpuselect.c
+CSRCS += sched_cpuselect.c sched_cpupause.c
+CSRCS += sched_getaffinity.c sched_setaffinity.c
 endif
 
 ifeq ($(CONFIG_SCHED_WAITPID),y)

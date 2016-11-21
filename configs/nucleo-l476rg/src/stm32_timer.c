@@ -1,8 +1,10 @@
 /****************************************************************************
- * sched/clock/clock_systimer.c
+ * config/nucleo-l476rg/src/stm32_timer.c
  *
- *   Copyright (C) 2011, 2014-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *
+ *   Copied from nucleo-f303 by Sebastien Lorquet
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -38,99 +40,43 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/timers/timer.h>
 
-#include <stdint.h>
+#include <debug.h>
 
-#include <nuttx/irq.h>
-#include <nuttx/arch.h>
-#include <nuttx/clock.h>
+#include "stm32l4_tim.h"
+#include "nucleo-l476rg.h"
 
-#include "clock/clock.h"
+#ifdef CONFIG_TIMER
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* See nuttx/clock.h */
-
-#undef clock_systimer
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: clock_systimer
+ * Name: board_timer_driver_initialize
  *
  * Description:
- *   Return the current value of the 32/64-bit system timer counter
+ *   Configure the timer driver.
  *
- * Parameters:
- *   None
+ * Input Parameters:
+ *   devpath - The full path to the timer device.  This should be of the
+ *             form /dev/timer0
+ *   timer   - The timer's number.
  *
- * Return Value:
- *   The current value of the system timer counter
- *
- * Assumptions:
+ * Returned Values:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
  *
  ****************************************************************************/
 
-systime_t clock_systimer(void)
+int board_timer_driver_initialize(FAR const char *devpath, int timer)
 {
-#ifdef CONFIG_SCHED_TICKLESS
-# ifdef CONFIG_SYSTEM_TIME64
-
-  struct timespec ts;
-
-  /* Get the time from the platform specific hardware */
-
-#ifndef CONFIG_CLOCK_TIMEKEEPING
-  (void)up_timer_gettime(&ts);
-#else
-  (void)clock_timekeeping_get_monotonic_time(&ts);
-#endif
-
-  /* Convert to a 64-bit value in microseconds, then in clock tick units */
-
-  return USEC2TICK(1000000 * (uint64_t)ts.tv_sec + (uint64_t)ts.tv_nsec / 1000);
-
-# else /* CONFIG_SYSTEM_TIME64 */
-
-  struct timespec ts;
-  uint64_t tmp;
-
-  /* Get the time from the platform specific hardware */
-
-#ifndef CONFIG_CLOCK_TIMEKEEPING
-  (void)up_timer_gettime(&ts);
-#else
-  (void)clock_timekeeping_get_monotonic_time(&ts);
-#endif
-
-  /* Convert to a 64- then a 32-bit value */
-
-  tmp = USEC2TICK(1000000 * (uint64_t)ts.tv_sec + (uint64_t)ts.tv_nsec / 1000);
-  return (systime_t)(tmp & 0x00000000ffffffff);
-
-# endif /* CONFIG_SYSTEM_TIME64 */
-#else /* CONFIG_SCHED_TICKLESS */
-# ifdef CONFIG_SYSTEM_TIME64
-
-  irqstate_t flags;
-  systime_t sample;
-
-  /* 64-bit accesses are not atomic on most architectures. */
-
-  flags  = enter_critical_section();
-  sample = g_system_timer;
-  leave_critical_section(flags);
-  return sample;
-
-# else /* CONFIG_SYSTEM_TIME64 */
-
-  /* Return the current system time */
-
-  return g_system_timer;
-
-# endif /* CONFIG_SYSTEM_TIME64 */
-#endif /* CONFIG_SCHED_TICKLESS */
+  return stm32l4_timer_initialize(devpath, timer);
 }
+
+#endif
