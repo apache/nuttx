@@ -164,6 +164,15 @@ int task_restart(pid_t pid)
 
   tcb->cmn.sched_priority = tcb->cmn.init_priority;
 
+  /* The task should restart with pre-emption disabled and not in a critical
+   * secton.
+   */
+
+  tcb->cmn.lockcount = 0;
+#ifdef CONFIG_SMP
+  tcb->cmn.irqcount  = 0;
+#endif
+
   /* Reset the base task priority and the number of pending reprioritizations */
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
@@ -198,7 +207,9 @@ int task_restart(pid_t pid)
     }
 #endif /* CONFIG_SMP */
 
-  /* Activate the task */
+  leave_critical_section(flags);
+
+  /* Activate the task. */
 
   ret = task_activate((FAR struct tcb_s *)tcb);
   if (ret != OK)
@@ -208,7 +219,6 @@ int task_restart(pid_t pid)
       goto errout_with_lock;
     }
 
-  leave_critical_section(flags);
   return OK;
 
 errout_with_lock:
