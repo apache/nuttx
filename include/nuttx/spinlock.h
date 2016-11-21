@@ -203,8 +203,11 @@ void spin_lockr(FAR struct spinlock_s *lock);
  *
  ****************************************************************************/
 
-/* void spin_unlock(FAR spinlock_t *lock); */
-#define spin_unlock(l)  do { *(l) = SP_UNLOCKED; } while (0)
+#ifdef SP_DMB
+void spin_unlock(FAR volatile spinlock_t *lock);
+#else
+#  define spin_unlock(l)  do { *(l) = SP_UNLOCKED; } while (0)
+#endif
 
 /****************************************************************************
  * Name: spin_unlockr

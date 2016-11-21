@@ -65,6 +65,22 @@
 
 #undef CONFIG_SPINLOCK_LOCKDOWN /* Feature not yet available */
 
+/* Memory barriers may be provided in arch/spinlock.h
+ *
+ *   DMB - Data memory barrier.  Assures writes are completed to memory.
+ *   DSB - Data syncrhonization barrier.
+ */
+
+#define HAVE_DMB 1
+#ifndef SP_DMB
+#  define SP_DMB()
+#  undef HAVE_DMB
+#endif
+
+#ifndef SP_DSB
+#  define SP_DSB()
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -121,11 +137,36 @@ void spin_lock(FAR volatile spinlock_t *lock)
 {
   while (up_testset(lock) == SP_LOCKED)
     {
-#if 0 /* Would recurse */
-      sched_yield();
-#endif
+      SP_DSB();
     }
+
+  SP_DMB();
 }
+
+/****************************************************************************
+ * Name: spin_unlock
+ *
+ * Description:
+ *   Release one count on a non-reentrant spinlock.
+ *
+ * Input Parameters:
+ *   lock - A reference to the spinlock object to unlock.
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions:
+ *   Not running at the interrupt level.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_DMB
+void spin_unlock(FAR volatile spinlock_t *lock)
+{
+  *lock = SP_UNLOCKED;
+  SP_DMB();
+}
+#endif
 
 /****************************************************************************
  * Name: spin_lockr

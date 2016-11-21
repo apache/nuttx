@@ -48,8 +48,30 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Spinlock states */
+
 #define SP_UNLOCKED 0  /* The Un-locked state */
 #define SP_LOCKED   1  /* The Locked state */
+
+/* Memory barriers for use with NuttX spinlock logic */
+
+#ifndef arm_isb
+#  define arm_isb(n) __asm__ __volatile__ ("isb " #n : : : "memory")
+#endif
+
+#define SP_ISB() arm_isb(15)
+
+#ifndef arm_dsb
+#  define arm_dsb(n) __asm__ __volatile__ ("dsb " #n : : : "memory")
+#endif
+
+#define SP_DSB() arm_dsb(15)
+
+#ifndef arm_dmb
+#  define arm_dmb(n) __asm__ __volatile__ ("dmb " #n : : : "memory")
+#endif
+
+#define SP_DMB() arm_dmb(15)
 
 /****************************************************************************
  * Public Types
