@@ -99,6 +99,8 @@
  * Private Functions
  ****************************************************************************/
 
+#if 0 /* Cannot be used -- needs to be updated to current, signal based interface */
+
 #if defined(CONFIG_SYSTEMTICK_EXTCLK) && !defined(CONFIG_SUPPRESS_INTERRUPTS) && \
     !defined(CONFIG_SUPPRESS_TIMER_INTS)
 
@@ -119,6 +121,7 @@ static bool calc_cpuload(FAR uint32_t *next_interval_us)
 }
 
 #endif /* CONFIG_SCHED_CPULOAD && CONFIG_SCHED_CPULOAD_EXTCLK */
+#endif /* 0 */
 
 /****************************************************************************
  * Public Functions
@@ -134,6 +137,7 @@ static bool calc_cpuload(FAR uint32_t *next_interval_us)
 
 int sam_timerinitialize(void)
 {
+#if 0 /* Cannot be used -- needs to be updated to current, signal based interface */
   int fd;
   int ret;
 
@@ -200,14 +204,14 @@ int sam_timerinitialize(void)
 
   /* install user callback */
   {
-    struct timer_sethandler_s tccb;
-    tccb.newhandler = systemtick;
-    tccb.oldhandler = NULL;
+    struct timer_notify_s notify;
+    notify.newhandler = systemtick;
+    notify.oldhandler = NULL;
 
-    ret = ioctl(fd, TCIOC_SETHANDLER, (unsigned long)&tccb);
+    ret = ioctl(fd, TCIOC_NOTIFICATION, (unsigned long)&notify);
     if (ret < 0)
       {
-        tmrerr("ERROR: ioctl(TCIOC_SETHANDLER) failed: %d\n", errno);
+        tmrerr("ERROR: ioctl(TCIOC_NOTIFICATION) failed: %d\n", errno);
         goto errout_with_dev;
       }
   }
@@ -251,14 +255,14 @@ int sam_timerinitialize(void)
   /* Install user callback */
 
   {
-    struct timer_sethandler_s tccb;
-    tccb.newhandler = calc_cpuload;
-    tccb.oldhandler = NULL;
+    struct timer_notify_s notify;
+    notify.newhandler = calc_cpuload;
+    notify.oldhandler = NULL;
 
-    ret = ioctl(fd, TCIOC_SETHANDLER, (unsigned long)&tccb);
+    ret = ioctl(fd, TCIOC_NOTIFICATION, (unsigned long)&notify);
     if (ret < 0)
       {
-        tmrerr("ERROR: ioctl(TCIOC_SETHANDLER) failed: %d\n", errno);
+        tmrerr("ERROR: ioctl(TCIOC_NOTIFICATION) failed: %d\n", errno);
         goto errout_with_dev;
       }
   }
@@ -282,6 +286,9 @@ errout:
 
 success:
   return OK;
+#else
+  return -ENOSYS;
+#endif
 
 }
 
