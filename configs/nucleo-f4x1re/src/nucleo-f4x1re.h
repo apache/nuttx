@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/nucleo-f4x1re/src/nucleo-f4x1re.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Authors: Frank Bennett
  *            Gregory Nutt <gnutt@nuttx.org>
  *
@@ -318,6 +318,18 @@ void stm32_usbinitialize(void);
 
 #ifdef CONFIG_ADC
 int board_adc_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_qencoder_initialize
+ *
+ * Description:
+ *   Initialize and register a qencoder
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_QENCODER
+int stm32_qencoder_initialize(FAR const char *devpath, int timer);
 #endif
 
 /****************************************************************************

@@ -2,7 +2,7 @@
  * configs/stm32f3discovery/src/stm32f3discovery.h
  * arch/arm/src/board/stm32f3discovery.n
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -160,6 +160,18 @@ void weak_function stm32_spidev_initialize(void);
 
 #ifdef CONFIG_STM32_USB
 void weak_function stm32_usbinitialize(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_qencoder_initialize
+ *
+ * Description:
+ *   Initialize and register a qencoder
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_QENCODER
+int stm32_qencoder_initialize(FAR const char *devpath, int timer);
 #endif
 
 #endif /* __ASSEMBLY__ */
