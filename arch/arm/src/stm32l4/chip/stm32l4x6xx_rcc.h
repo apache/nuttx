@@ -381,6 +381,7 @@
 
 /* AHB2 peripheral reset register */
 
+#define RCC_AHB1ENR_GPIOEN(port)    (1 << port)
 #define RCC_AHB2RSTR_GPIOARST       (1 << 0)  /* Bit 0:  IO port A reset */
 #define RCC_AHB2RSTR_GPIOBRST       (1 << 1)  /* Bit 1:  IO port B reset */
 #define RCC_AHB2RSTR_GPIOCRST       (1 << 2)  /* Bit 2:  IO port C reset */
