@@ -215,20 +215,6 @@ bool sam_writeprotected(int slotno);
 #  define sam_writeprotected(slotno) (false)
 #endif
 
-/************************************************************************************
- * Name: sam_timerinitialize()
- *
- * Description:
- *   Perform architecture-specific initialization of the timer hardware.
- *
- ************************************************************************************/
-
-#ifdef CONFIG_TIMER
-int sam_timerinitialize(void);
-#else
-#  define sam_timerinitialize() (0)
-#endif
-
 /****************************************************************************
  * Name: sam_watchdog_initialize()
  *

@@ -334,7 +334,6 @@ static void misoc_detach(struct uart_dev_s *dev)
   struct misoc_dev_s *priv = (struct misoc_dev_s *)dev->priv;
 
   up_disable_irq(priv->irq);
-
   irq_detach(priv->irq);
 }
 
