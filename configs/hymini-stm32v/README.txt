@@ -561,14 +561,6 @@ can be selected as follow:
 
 Where <subdir> is one of the following:
 
-  buttons:
-  --------
-
-    Uses apps/examples/buttons to exercise HY-MiniSTM32V buttons and
-    button interrupts.
-
-    CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL=y  : Generic GNU EABI toolchain
-
   nsh and nsh2:
   ------------
     Configure the NuttShell (nsh) located at examples/nsh.
