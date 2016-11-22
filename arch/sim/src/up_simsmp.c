@@ -78,16 +78,30 @@ struct sim_cpuinfo_s
 
 static pthread_key_t          g_cpukey;
 static pthread_t              g_sim_cputhread[CONFIG_SMP_NCPUS];
-static volatile unsigned char g_sim_cpupaused[CONFIG_SMP_NCPUS];
-static volatile spinlock_t    g_sim_cpuwait[CONFIG_SMP_NCPUS];
+
+/* These spinlocks are used in the SMP configuration in order to implement
+ * up_cpu_pause().  The protocol for CPUn to pause CPUm is as follows
+ *
+ * 1. The up_cpu_pause() implementation on CPUn locks both g_cpu_wait[m]
+ *    and g_cpu_paused[m].  CPUn then waits spinning on g_cpu_wait[m].
+ * 2. CPUm receives the interrupt it (1) unlocks g_cpu_paused[m] and
+ *    (2) locks g_cpu_wait[m].  The first unblocks CPUn and the second
+ *    blocks CPUm in the interrupt handler.
+ *
+ * When CPUm resumes, CPUn unlocks g_cpu_wait[m] and the interrupt handler
+ * on CPUm continues.  CPUm must, of course, also then unlock g_cpu_wait[m]
+ * so that it will be ready for the next pause operation.
+ */
+
+volatile spinlock_t g_cpu_wait[CONFIG_SMP_NCPUS];
+volatile spinlock_t g_cpu_paused[CONFIG_SMP_NCPUS];
 
 /****************************************************************************
  * NuttX domain function prototypes
  ****************************************************************************/
 
 void os_start(void) __attribute__ ((noreturn));
-void sim_cpu_pause(int cpu, volatile spinlock_t *wait,
-                   volatile unsigned char *paused);
+void up_cpu_paused(int cpu);
 void sim_smp_hook(void);
 
 /****************************************************************************
@@ -222,9 +236,7 @@ static void sim_handle_signal(int signo, siginfo_t *info, void *context)
 {
   int cpu = (int)((uintptr_t)pthread_getspecific(g_cpukey));
 
-  /* We need to perform the actual tasking operations in the NuttX domain */
-
-  sim_cpu_pause(cpu, &g_sim_cpuwait[cpu], &g_sim_cpupaused[cpu]);
+  (void)up_cpu_paused(cpu);
 }
 
 /****************************************************************************
@@ -446,7 +458,8 @@ int up_cpu_pause(int cpu)
 {
   /* Take the spinlock that will prevent the CPU thread from running */
 
-  g_sim_cpuwait[cpu] = SP_LOCKED;
+  g_cpu_wait[cpu]   = SP_LOCKED;
+  g_cpu_paused[cpu] = SP_LOCKED;
 
   /* Signal the CPU thread */
 
@@ -454,7 +467,7 @@ int up_cpu_pause(int cpu)
 
   /* Spin, waiting for the thread to pause */
 
-  while (!g_sim_cpupaused[cpu])
+  while (g_cpu_paused[cpu] != 0)
     {
       pthread_yield();
     }
@@ -485,6 +498,6 @@ int up_cpu_resume(int cpu)
 {
   /* Release the spinlock that will alloc the CPU thread to continue */
 
-  g_sim_cpuwait[cpu] = SP_UNLOCKED;
+  g_cpu_wait[cpu] = SP_UNLOCKED;
   return 0;
 }

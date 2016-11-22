@@ -97,7 +97,7 @@ int task_restart(pid_t pid)
       /* Not implemented */
 
       errcode = ENOSYS;
-      goto errout_with_lock;
+      goto errout;
     }
 
   /* We are restarting some other task than ourselves.  Make sure that the
@@ -222,7 +222,8 @@ int task_restart(pid_t pid)
   return OK;
 
 errout_with_lock:
-  set_errno(errcode);
   leave_critical_section(flags);
+errout:
+  set_errno(errcode);
   return ERROR;
 }

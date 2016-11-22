@@ -60,6 +60,26 @@
 #include <arch/spinlock.h>
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Memory barriers may be provided in arch/spinlock.h
+ *
+ *   DMB - Data memory barrier.  Assures writes are completed to memory.
+ *   DSB - Data syncrhonization barrier.
+ */
+
+#define HAVE_DMB 1
+#ifndef SP_DMB
+#  define SP_DMB()
+#  undef HAVE_DMB
+#endif
+
+#ifndef SP_DSB
+#  define SP_DSB()
+#endif
+
+/****************************************************************************
  * Public Types
  ****************************************************************************/
 
@@ -203,7 +223,7 @@ void spin_lockr(FAR struct spinlock_s *lock);
  *
  ****************************************************************************/
 
-#ifdef SP_DMB
+#ifdef HAVE_DMB
 void spin_unlock(FAR volatile spinlock_t *lock);
 #else
 #  define spin_unlock(l)  do { *(l) = SP_UNLOCKED; } while (0)

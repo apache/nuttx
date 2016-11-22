@@ -65,22 +65,6 @@
 
 #undef CONFIG_SPINLOCK_LOCKDOWN /* Feature not yet available */
 
-/* Memory barriers may be provided in arch/spinlock.h
- *
- *   DMB - Data memory barrier.  Assures writes are completed to memory.
- *   DSB - Data syncrhonization barrier.
- */
-
-#define HAVE_DMB 1
-#ifndef SP_DMB
-#  define SP_DMB()
-#  undef HAVE_DMB
-#endif
-
-#ifndef SP_DSB
-#  define SP_DSB()
-#endif
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
