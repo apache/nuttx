@@ -104,10 +104,8 @@ static uint8_t g_cpu_nestcount[CONFIG_SMP_NCPUS];
  ****************************************************************************/
 
 #ifdef CONFIG_SMP
-static void irq_waitlock(void)
+static inline void irq_waitlock(int cpu)
 {
-  int cpu = this_cpu();
-
   /* Duplicate the spin_lock() logic from spinlock.c, but adding the check
    * for the deadlock condition.
    */
@@ -262,10 +260,10 @@ irqstate_t enter_critical_section(void)
               if ((g_cpu_irqset & (1 << cpu)) == 0)
                 {
                   /* Wait until we can get the spinlock (meaning that we are
-                   * no longer in the critical section).
+                   * no longer blocked by the critical section).
                    */
 
-                  irq_waitlock();
+                  irq_waitlock(cpu);
                 }
 
               /* In any event, the nesting count is now one */

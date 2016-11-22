@@ -83,7 +83,7 @@ static pthread_t              g_sim_cputhread[CONFIG_SMP_NCPUS];
  * up_cpu_pause().  The protocol for CPUn to pause CPUm is as follows
  *
  * 1. The up_cpu_pause() implementation on CPUn locks both g_cpu_wait[m]
- *    and g_cpu_paused[m].  CPUn then waits spinning on g_cpu_wait[m].
+ *    and g_cpu_paused[m].  CPUn then waits spinning on g_cpu_paused[m].
  * 2. CPUm receives the interrupt it (1) unlocks g_cpu_paused[m] and
  *    (2) locks g_cpu_wait[m].  The first unblocks CPUn and the second
  *    blocks CPUm in the interrupt handler.
