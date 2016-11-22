@@ -63,13 +63,13 @@
  * system clock ticks per second.  That value is a user configurable setting
  * that defaults to 100 (100 ticks per second = 10 MS interval).
  *
- * The RCC feeds the Cortex System Timer (SysTick) with the AHB clock (HCLK)
- * divided by 8.  The SysTick can work either with this clock or with the
- * Cortex clock (HCLK), configurable in the SysTick Control and Status
- * register.
+ * What clock feeds the timer?  What rate does the timer increment by.  The
+ * correct reload value is:
+ *
+ *   reload = Finput / CLOCKS_PER_SEC
  */
 
-#define SYSTICK_RELOAD ((MISOC_CLK_FREQUENCY / CLOCKS_PER_SEC) - 1)
+#warning Missing logic
 
 /****************************************************************************
  * Public Functions
@@ -118,6 +118,7 @@ void misoc_timer_initialize(void)
   timer0_en_write(0);
 
   /* FIX ME, PUT PROPER VALUE */
+#warning Missing logic
 
   timer0_reload_write(80000);
   timer0_load_write(80000);
