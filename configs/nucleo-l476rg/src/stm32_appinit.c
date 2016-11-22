@@ -221,7 +221,7 @@ int board_app_initialize(uintptr_t arg)
 #ifdef CONFIG_QENCODER
   /* Initialize and register the qencoder driver */
 
-  ret = stm32l4_qencoder_initialize("/dev/qe0", 3);
+  ret = stm32l4_qencoder_initialize("/dev/qe0", CONFIG_NUCLEO_L476RG_QETIMER);
   if (ret != OK)
     {
       syslog(LOG_ERR,

@@ -76,6 +76,11 @@ config MIKROE_RAMMTD_SIZE
 	---help---
 		Sets the size of static RAM allocation for the SMART RAM device
 
+config MIKROE_QETIMER
+	int "Timer to use with QE encoder"
+	default 3
+	depends on QENCODER
+
 config PM_ALARM_SEC
 	int "PM_STANDBY delay (seconds)"
 	default 15

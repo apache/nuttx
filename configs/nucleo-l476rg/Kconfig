@@ -5,6 +5,11 @@
 
 if ARCH_BOARD_NUCLEO_L476RG
 
+config NUCLEO_L476RG_QETIMER
+	int "Timer to use with QE encoder"
+	default 3
+	depends on QENCODER
+
 config NUCLEO_L476RG_AJOY_MINBUTTONS
 	bool "Minimal Joystick Buttons"
 	default n if !STM32_USART1
