@@ -205,13 +205,13 @@ static char g_uart1txbuffer[CONFIG_UART1_TXBUFSIZE];
 
 static struct misoc_dev_s g_uart1priv =
 {
-  .uartbase     = CSR_UART_BASE,
-  .irq          = UART_INTERRUPT,
-  .rxtx_addr    = CSR_UART_RXTX_ADDR,
-  .rxempty_addr = CSR_UART_RXEMPTY_ADDR,
-  .txfull_addr  = CSR_UART_TXFULL_ADDR,
-  .ev_status_addr    = CSR_UART_EV_STATUS_ADDR,
-  .ev_pending_addr   = CSR_UART_EV_PENDING_ADDR,
+  .uartbase        = CSR_UART_BASE,
+  .irq             = UART_INTERRUPT,
+  .rxtx_addr       = CSR_UART_RXTX_ADDR,
+  .rxempty_addr    = CSR_UART_RXEMPTY_ADDR,
+  .txfull_addr     = CSR_UART_TXFULL_ADDR,
+  .ev_status_addr  = CSR_UART_EV_STATUS_ADDR,
+  .ev_pending_addr = CSR_UART_EV_PENDING_ADDR,
   .ev_enable_addr  = CSR_UART_EV_ENABLE_ADDR,
 };
 
@@ -312,16 +312,9 @@ static void misoc_shutdown(struct uart_dev_s *dev)
 static int misoc_attach(struct uart_dev_s *dev)
 {
   struct misoc_dev_s *priv = (struct misoc_dev_s *)dev->priv;
-  uint32_t im;
 
-  irq_attach(priv->irq, misoc_uart_interrupt);
-
-  /* enable interrupt */
-  /* TODO: move that somewhere proper ! */
-
-  im  = irq_getmask();
-  im |= (1 << UART_INTERRUPT);
-  irq_setmask(im);
+  (void)irq_attach(priv->irq, misoc_uart_interrupt);
+  up_enable_irq(priv->irq);
 
   return OK;
 }
@@ -339,13 +332,8 @@ static int misoc_attach(struct uart_dev_s *dev)
 static void misoc_detach(struct uart_dev_s *dev)
 {
   struct misoc_dev_s *priv = (struct misoc_dev_s *)dev->priv;
-  uint32_t im;
 
-  /* TODO: move that somewhere proper */
-
-  im  = irq_getmask();
-  im &= ~(1 << UART_INTERRUPT);
-  irq_setmask(im);
+  up_disable_irq(priv->irq);
 
   irq_detach(priv->irq);
 }
