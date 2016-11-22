@@ -591,7 +591,6 @@ Where <subdir> is one of the following:
     Built-in    None                    apps/examples/nx
     Apps                                apps/examples/nxhello
                                         apps/system/usbmsc (4)
-                                        apps/examples/buttons
                                         apps/examples/nximage
     =========== ======================= ================================
 

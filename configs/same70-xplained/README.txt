@@ -1363,36 +1363,7 @@ Configuration sub-directories
          RAMTest: Address-in-address test: 70000000 2097152
          nsh>
 
-    5. The button test at apps/examples/buttons is included in the
-       configuration.  This configuration illustrates (1) use of the buttons
-       on the evaluation board, and (2) the use of PIO interrupts.  Example
-       usage:
-
-       NuttShell (NSH) NuttX-7.8
-       nsh> help
-       help usage:  help [-v] [<cmd>]
-       ...
-       Builtin Apps:
-         buttons
-       nsh> buttons 3
-       maxbuttons: 3
-       Attached handler at 4078f7 to button 0 [SW0], oldhandler:0
-       Attached handler at 4078e9 to button 1 [SW1], oldhandler:0
-       IRQ:125 Button 1:SW1 SET:00:
-         SW1 released
-       IRQ:125 Button 1:SW1 SET:02:
-         SW1 depressed
-       IRQ:125 Button 1:SW1 SET:00:
-         SW1 released
-       IRQ:90 Button 0:SW0 SET:01:
-         SW0 depressed
-       IRQ:90 Button 0:SW0 SET:00:
-         SW0 released
-       IRQ:125 Button 1:SW1 SET:02:
-         SW1 depressed
-       nsh>
-
-    6. TWI/I2C
+    5. TWI/I2C
 
        TWIHS0 is enabled in this configuration.  The SAM E70 Xplained
        supports one device on the one on-board I2C device on the TWIHS0 bus:
@@ -1464,11 +1435,11 @@ Configuration sub-directories
        0x5f are the addresses of the AT24 EEPROM (I am not sure what the
        other address, 0x37, is as this writing).
 
-    7. TWIHS0 is also used to support 256 byte non-volatile storage for
+    6. TWIHS0 is also used to support 256 byte non-volatile storage for
        configuration data using the MTD configuration as described above
        under the heading, "MTD Configuration Data".
 
-    8. Support for HSMCI is built-in by default. The SAME70-XPLD provides
+    7. Support for HSMCI is built-in by default. The SAME70-XPLD provides
        one full-size SD memory card slot.  Refer to the section entitled
        "SD card" for configuration-related information.
 
@@ -1477,7 +1448,7 @@ Configuration sub-directories
        The auto-mounter is not enabled.  See the section above entitled
        "Auto-Mounter".
 
-    9. Performance-related Configuration settings:
+    8. Performance-related Configuration settings:
 
        CONFIG_ARMV7M_ICACHE=y                : Instruction cache is enabled
        CONFIG_ARMV7M_DCACHE=y                : Data cache is enabled
