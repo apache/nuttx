@@ -109,6 +109,7 @@ extern "C"
  *
  ****************************************************************************/
 
+struct i2c_master_s;
 int veml6070_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
                        uint8_t addr);
 
