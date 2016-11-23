@@ -72,7 +72,9 @@ void up_initialize(void)
 
   /* Initialize the serial driver */
 
-#warning REVISIT:  Here you should all misoc_serial_initialize().  That initializes the entire serial driver, a part of the operation is the uart initialization.
-
   misoc_serial_initialize();
+
+  /* Initialize the system timer */
+
+  misoc_timer_initialize();
 }

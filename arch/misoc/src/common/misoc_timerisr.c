@@ -47,10 +47,12 @@
 #include <stdint.h>
 #include <time.h>
 #include <debug.h>
+
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include <arch/board/board.h>
 #include <arch/board/generated/csr.h>
+
 #include "chip.h"
 #include "misoc.h"
 
@@ -59,17 +61,26 @@
  ****************************************************************************/
 
 /* The desired timer interrupt frequency is provided by the definition
- * CLK_TCK (see include/time.h).  CLK_TCK defines the desired number of
- * system clock ticks per second.  That value is a user configurable setting
- * that defaults to 100 (100 ticks per second = 10 MS interval).
+ * CLOCKS_PER_SEC (see include/time.h).  CLOCKS_PER_SEC defines the desired
+ * number of system clock ticks per second.  That value is a user
+ * configurable setting based on CONFIG_USEC_PER_TICK.  It defaults to 100
+ * (100 ticks per second = 10 MS interval).
  *
- * What clock feeds the timer?  What rate does the timer increment by.  The
- * correct reload value is:
+ * Given the timer input frequency (Finput).  The timer correct reload
+ * value is:
  *
  *   reload = Finput / CLOCKS_PER_SEC
  */
 
-#warning Missing logic
+#define SYSTICK_RELOAD ((SYSTEM_CLOCK_FREQUENCY / CLOCKS_PER_SEC) - 1)
+
+/* The size of the reload field is 30 bits.  Verify that the reload value
+ * will fit in the reload register.
+ */
+
+#if SYSTICK_RELOAD > 0x3fffffff
+#  error SYSTICK_RELOAD exceeds the range of the RELOAD register
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -107,8 +118,6 @@ int up_timerisr(int irq, void *context)
 
 void misoc_timer_initialize(void)
 {
-  uint32_t im;
-
   /* Clear event pending */
 
   timer0_ev_pending_write(timer0_ev_pending_read());
@@ -117,11 +126,12 @@ void misoc_timer_initialize(void)
 
   timer0_en_write(0);
 
-  /* FIX ME, PUT PROPER VALUE */
-#warning Missing logic
+  /* Setup the timer reload register to generate interrupts at the rate of
+   * CLOCKS_PER_SEC.
+   */
 
-  timer0_reload_write(80000);
-  timer0_load_write(80000);
+  timer0_reload_write(SYSTICK_RELOAD);
+  timer0_load_write(SYSTICK_RELOAD);
 
   /* Enable timer */
 
