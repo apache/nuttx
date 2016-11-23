@@ -260,7 +260,7 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
         }
       else
         {
-          /* No.. we may need to perform release our hold on the irq state. */
+          /* No.. we may need to release our hold on the irq state. */
 
           spin_clrbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock,
                       &g_cpu_irqlock);
