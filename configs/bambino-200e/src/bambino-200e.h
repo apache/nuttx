@@ -123,5 +123,19 @@
 
 void weak_function lpc43_sspdev_initialize(void);
 
+/************************************************************************************
+ * Name: lpc43xx_timerinitialize()
+ *
+ * Description:
+ *   Perform architecture-specific initialization of the timer hardware.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_TIMER
+int lpc43_timerinitialize(void);
+#else
+#  define lpc43_timerinitialize() (0)
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* _CONFIGS_BAMBINO_200E_SRC_BAMBINO_H */
