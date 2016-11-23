@@ -112,31 +112,32 @@ static inline void irq_waitlock(int cpu)
 
   while (up_testset(&g_cpu_irqlock) == SP_LOCKED)
     {
-      /* The deadlock condition would occur if CPUn:
+      /* A deadlock condition would occur if CPUn:
        *
-       * 1. Holds the g_cpu_irqlock, and
-       * 2. Is trying to interrupt CPUm
+       *   1. Holds the g_cpu_irqlock, and
+       *   2. Is trying to interrupt CPUm, but
+       *   3. CPUm is spinning trying acquaire the g_cpu_irqlock.
        *
        * The protocol for CPUn to pause CPUm is as follows
        *
-       * 1. The up_cpu_pause() implementation on CPUn locks both
-       *    g_cpu_wait[m] and g_cpu_paused[m].  CPUn then waits
-       *    spinning on g_cpu_wait[m].
-       * 2. When CPUm receives the interrupt it (1) unlocks
-       *    g_cpu_paused[m] and (2) locks g_cpu_wait[m].  The
-       *    first unblocks CPUn and the second blocks CPUm in the
-       *    interrupt handler.
+       *   1. The up_cpu_pause() implementation on CPUn locks both
+       *      g_cpu_wait[m] and g_cpu_paused[m].  CPUn then waits
+       *      spinning on g_cpu_wait[m].
+       *   2. When CPUm receives the interrupt it (1) unlocks
+       *      g_cpu_paused[m] and (2) locks g_cpu_wait[m].  The
+       *      first unblocks CPUn and the second blocks CPUm in the
+       *      interrupt handler.
        *
        * The problem in the deadlock case is that CPUm cannot receive
-       * the interrupt because it is locked up spinning.  He we break
+       * the interrupt because it is locked up spinning.  Here we break
        * the deadlock here be handling the pause interrupt request
        * while waiting.
        */
 
       if (up_cpu_pausereq(cpu))
         {
-          /* Yes.. some CPU is requesting to pause us!  Handle the
-           * pause interrupt now.
+          /* Yes.. some other CPU is requesting to pause this CPU!  Handle
+           * the pause interrupt now.
            */
 
           DEBUGVERIFY(up_cpu_paused(cpu));
