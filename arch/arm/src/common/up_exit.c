@@ -50,6 +50,7 @@
 #include "task/task.h"
 #include "sched/sched.h"
 #include "group/group.h"
+#include "irq/irq.h"
 #include "up_internal.h"
 
 /****************************************************************************
@@ -140,11 +141,14 @@ void _exit(int status)
 {
   struct tcb_s *tcb;
 
-  /* Disable interrupts.  They will be restored when the next
-   * task is started.
+  /* Disable interrupts.  They will be restored when the next task is
+   * started.
    */
 
   (void)up_irq_save();
+#ifdef SMP
+  (void)spin_trylock(&g_cpu_irqlock);
+#endif
 
   sinfo("TCB=%p exiting\n", this_task());
 
@@ -177,4 +181,3 @@ void _exit(int status)
 
   up_fullcontextrestore(tcb->xcp.regs);
 }
-

@@ -555,11 +555,6 @@ Open Issues:
    Update: Cache inconsistencies seem to be the root cause of all current SMP
    issues.
 
-5. Assertions.  On a fatal assertions, other CPUs need to be stopped.  The SCR,
-   however, only supports disabling CPUs 1 through 3.  Perhaps if the assertion
-   occurs on CPUn, n > 0, then it should use and SGI to perform the assertion
-   on CPU0 always.  From CPU0, CPU1-3 can be disabled.
-
 Configurations
 ==============
 

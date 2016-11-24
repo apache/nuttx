@@ -117,6 +117,9 @@ void up_sigdeliver(void)
    * on the local CPU.  We do not want to call enter_critical_section()
    * here, however, because we don't want this state to stick after the
    * call to up_fullcontextrestore().
+   *
+   * I would prefer that all interrupts are disabled when
+   * up_fullcontextrestore() is called, but that may not be necessary.
    */
 
   sinfo("Resuming\n");

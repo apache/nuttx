@@ -53,6 +53,7 @@
 
 #include "up_arch.h"
 #include "sched/sched.h"
+#include "irq/irq.h"
 #include "up_internal.h"
 
 /****************************************************************************
@@ -346,6 +347,10 @@ static void _up_assert(int errorcode)
   if (CURRENT_REGS || this_task()->pid == 0)
     {
       (void)up_irq_save();
+#ifdef SMP
+      (void)spin_trylock(&g_cpu_irqlock);
+#endif
+
       for (; ; )
         {
 #ifdef CONFIG_ARCH_LEDS

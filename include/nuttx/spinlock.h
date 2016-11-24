@@ -180,6 +180,27 @@ void spin_initializer(FAR struct spinlock_s *lock);
 void spin_lock(FAR volatile spinlock_t *lock);
 
 /****************************************************************************
+ * Name: spin_trylock
+ *
+ * Description:
+ *   Try once to lock the spinlock.  Do not wait if the spinlock is already
+ *   locked.
+ *
+ * Input Parameters:
+ *   lock - A reference to the spinlock object to lock.
+ *
+ * Returned Value:
+ *   SP_LOCKED   - Failure, the spinlock was already locked
+ *   SP_UNLOCKED - Success, the spinlock was successfully locked
+ *
+ * Assumptions:
+ *   Not running at the interrupt level.
+ *
+ ****************************************************************************/
+
+#define spin_trylock(l) up_testset(l)
+
+/****************************************************************************
  * Name: spin_lockr
  *
  * Description:
