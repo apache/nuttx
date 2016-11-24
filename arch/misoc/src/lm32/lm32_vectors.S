@@ -208,7 +208,6 @@ _do_reset:
 	sw		(sp+REG_X23), r23
 	sw		(sp+REG_X24), r24
 	sw		(sp+REG_X25), r25
-
 	sw		(sp+REG_GP), r26
 	sw		(sp+REG_FP), r27
 
@@ -217,7 +216,7 @@ _do_reset:
 	addi	r1, sp, 136
 	sw		(sp+REG_SP), r1
 
-	/* reg RA done later */
+	/* Reg RA done later */
 
 	sw		(sp+REG_EA), r30
 	sw		(sp+REG_BA), r31
@@ -235,6 +234,10 @@ _do_reset:
 	/* The 2nd argument is the regs pointer */
 
 	addi	r2, sp, 0
+
+	/* Move sp away from X0 */
+
+	addi	sp, sp, -4
 	ret
 
 .restore_all_and_eret:

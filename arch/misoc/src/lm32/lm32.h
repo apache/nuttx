@@ -57,16 +57,17 @@
  * logic.
  */
 
-#define STACK_COLOR           0xdeadbeef
-#define INTSTACK_COLOR        0xdeadbeef
-#define HEAP_COLOR            'h'
+#define STACK_COLOR             0xdeadbeef
+#define INTSTACK_COLOR          0xdeadbeef
+#define HEAP_COLOR              'h'
 
 /* In the LM32 model, the state is copied from the stack to the TCB, but
  * only a referenced is passed to get the state from the TCB.
  */
 
-#define up_savestate(regs)    lm32_copystate(regs, (uint32_t*)g_current_regs)
-#define up_restorestate(regs) (g_current_regs = regs)
+#define up_savestate(regs)      lm32_copystate(regs, (uint32_t*)g_current_regs)
+#define up_copystate(rega,regb) lm32_copystate(rega, regb)
+#define up_restorestate(regs)   (g_current_regs = regs)
 
 /* Determine which (if any) console driver to use.  If a console is enabled
  * and no other console device is specified, then a serial console is

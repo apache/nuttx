@@ -1,9 +1,8 @@
 /****************************************************************************
- * arch/misoc/src/lm32/up_initialstate.c
+ * arch/misoc/src/lm32/lm32_sigdeliver.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Ramtin Amin <keytwo@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -40,85 +39,98 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
 #include <stdint.h>
-#include <string.h>
+#include <sched.h>
+#include <syscall.h>
+#include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <arch/irq.h>
+#include <nuttx/board.h>
+#include <arch/board/board.h>
 
+#include "sched/sched.h"
 #include "lm32.h"
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#ifndef CONFIG_DISABLE_SIGNALS
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_initial_state
+ * Name: up_sigdeliver
  *
  * Description:
- *   A new thread is being started and a new TCB
- *   has been created. This function is called to initialize
- *   the processor specific portions of the new TCB.
- *
- *   This function must setup the intial architecture registers
- *   and/or  stack so that execution will begin at tcb->start
- *   on the next context switch.
+ *   This is the a signal handling trampoline.  When a signal action was
+ *   posted.  The task context was mucked with and forced to branch to this
+ *   location with interrupts disabled.
  *
  ****************************************************************************/
 
-void up_initial_state(struct tcb_s *tcb)
+void up_sigdeliver(void)
 {
-  struct xcptcontext *xcp = &tcb->xcp;
+  struct tcb_s *rtcb = this_task();
+  uint32_t regs[XCPTCONTEXT_REGS];
+  sig_deliver_t sigdeliver;
 
-  /* Initialize the initial exception register context structure */
-
-  memset(xcp, 0, sizeof(struct xcptcontext));
-
-  /* Save the initial stack pointer.  Hmmm.. the stack is set to the very
-   * beginning of the stack region.  Some functions may want to store data on
-   * the caller's stack and it might be good to reserve some space.  However,
-   * only the start function would do that and we have control over that one
+  /* Save the errno.  This must be preserved throughout the signal handling
+   * so that the user code final gets the correct errno value (probably
+   * EINTR).
    */
 
-  xcp->regs[REG_SP]      = (uint32_t)tcb->adj_stack_ptr;
+  int saved_errno = rtcb->pterrno;
 
-  /* Save the task entry point */
+  board_autoled_on(LED_SIGNAL);
 
-  xcp->regs[REG_EPC]     = (uint32_t)tcb->start;
+  sinfo("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
+        rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);
+  ASSERT(rtcb->xcp.sigdeliver != NULL);
 
-  /* Initial state of IE:  Interrupts enabled */
+  /* Save the real return state on the stack. */
 
-  xcp->regs[REG_INT_CTX] = 2;
+  up_copystate(regs, rtcb->xcp.regs);
+  regs[REG_EPC]        = rtcb->xcp.saved_epc;
+  regs[REG_INT_CTX]    = rtcb->xcp.saved_int_ctx;
 
-  /* If this task is running PIC, then set the PIC base register to the
-   * address of the allocated D-Space region.
+  /* Get a local copy of the sigdeliver function pointer. We do this so that
+   * we can nullify the sigdeliver function pointer in the TCB and accept
+   * more signal deliveries while processing the current pending signals.
    */
 
-#ifdef CONFIG_PIC
-#  warning "Missing logic"
-#endif
+  sigdeliver           = rtcb->xcp.sigdeliver;
+  rtcb->xcp.sigdeliver = NULL;
 
-  /* Set privileged- or unprivileged-mode, depending on how NuttX is
-   * configured and what kind of thread is being started.
-   *
-   * If the kernel build is not selected, then all threads run in
-   * privileged thread mode.
+  /* Then restore the task interrupt state */
+
+  up_irq_restore((irqstate_t)regs[REG_INT_CTX]);
+
+  /* Deliver the signals */
+
+  sigdeliver(rtcb);
+
+  /* Output any debug messages BEFORE restoring errno (because they may
+   * alter errno), then disable interrupts again and restore the original
+   * errno that is needed by the user logic (it is probably EINTR).
    */
 
-#ifdef CONFIG_BUILD_KERNEL
-#  warning "Missing logic"
-#endif
+  sinfo("Resuming EPC: %08x INT_CTX: %08x\n", regs[REG_EPC], regs[REG_INT_CTX]);
+
+  (void)up_irq_save();
+  rtcb->pterrno = saved_errno;
+
+  /* Then restore the correct state for this thread of
+   * execution.
+   */
+
+  board_autoled_off(LED_SIGNAL);
+  up_fullcontextrestore(regs);
+
+  /* up_fullcontextrestore() should not return but could if the software
+   * interrupts are disabled.
+   */
+
+  PANIC();
 }
+
+#endif /* !CONFIG_DISABLE_SIGNALS */
