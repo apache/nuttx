@@ -189,7 +189,7 @@ int arm_pause_handler(int irq, FAR void *context)
   /* Check for false alarms.  Such false could occur as a consequence of
    * some deadlock breaking logic that might have already serviced the SG2
    * interrupt by calling up_cpu_paused().  If the pause event has already
-   * been processed with g_cpu_paused[cpu] will not be locked.
+   * been processed then g_cpu_paused[cpu] will not be locked.
    */
 
   if (!spin_islocked(&g_cpu_paused[cpu]))
