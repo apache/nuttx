@@ -146,7 +146,7 @@ void _exit(int status)
    */
 
   (void)up_irq_save();
-#ifdef SMP
+#ifdef CONFIG_SMP
   (void)spin_trylock(&g_cpu_irqlock);
 #endif
 

@@ -346,14 +346,21 @@ static void _up_assert(int errorcode)
 
   if (CURRENT_REGS || this_task()->pid == 0)
     {
+      /* Disable interrupts on this CPU */
+
       (void)up_irq_save();
-#ifdef SMP
-      (void)spin_trylock(&g_cpu_irqlock);
-#endif
 
       for (; ; )
         {
+#ifdef CONFIG_SMP
+          /* Try (again) to stop activity on other CPUs */
+
+          (void)spin_trylock(&g_cpu_irqlock);
+#endif
+
 #ifdef CONFIG_ARCH_LEDS
+          /* FLASH LEDs a 2Hz */
+
           board_autoled_on(LED_PANIC);
           up_mdelay(250);
           board_autoled_off(LED_PANIC);
