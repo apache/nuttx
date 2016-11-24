@@ -145,7 +145,7 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
   cpu      = rtcb->cpu;
   tasklist = TLIST_HEAD(rtcb->task_state, cpu);
 
-  /* Check if the TCB to be removed is at the head of a ready to run list.
+  /* Check if the TCB to be removed is at the head of a ready-to-run list.
    * For the case of SMP, there are two lists involved:  (1) the
    * g_readytorun list that holds non-running tasks that have not been
    * assigned to a CPU, and (2) and the g_assignedtasks[] lists which hold
@@ -154,9 +154,12 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
    * only only removing the head of that list can result in a context
    * switch.
    *
-   * The tasklist RUNNABLE attribute will inform us if the list holds the
-   * currently executing and task and, hence, if a context switch could
-   * occur.
+   * rtcb->blink == NULL will tell us if the TCB is at the head of the
+   * ready-to-run list and, hence, a candidate for the new running task.
+   *
+   * If so, then the tasklist RUNNABLE attribute will inform us if the list
+   * holds the currently executing task and, hence, if a context switch
+   * should occur.
    */
 
   if (rtcb->blink == NULL && TLIST_ISRUNNABLE(rtcb->task_state))
@@ -205,7 +208,10 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
            rtrtcb = (FAR struct tcb_s *)rtrtcb->flink);
 
       /* Did we find a task in the g_readytorun list?  Which task should
-       * we use? We decide strictly by the priority of the two tasks.
+       * we use?  We decide strictly by the priority of the two tasks:
+       * Either (1) the task currently at the head of the g_assignedtasks[cpu]
+       * list (nexttcb) or (2) the highest priority task from the
+       * g_readytorun list with matching affinity (rtrtcb).
        */
 
       if (rtrtcb != NULL && rtrtcb->sched_priority >= nxttcb->sched_priority)
