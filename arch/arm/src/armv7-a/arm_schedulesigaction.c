@@ -153,6 +153,18 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
               CURRENT_REGS[REG_PC]      = (uint32_t)up_sigdeliver;
               CURRENT_REGS[REG_CPSR]    = (PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT);
 
+#ifdef CONFIG_SMP
+              /* In an SMP configuration, the interrupt disable logic also
+               * involves spinlocks that are configured per the TCB irqcount
+               * field.  This is logically equivalent to enter_critical_section().
+               * The matching call to leave_critical_section() will be
+               * performed in up_sigdeliver().
+               */
+
+              DEBUGASSERT(tcb->irqcount < INT16_MAX);
+              tcb->irqcount++;
+#endif
+
               /* And make sure that the saved context in the TCB is the same
                * as the interrupt return context.
                */
@@ -183,6 +195,19 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
           tcb->xcp.regs[REG_PC]      = (uint32_t)up_sigdeliver;
           tcb->xcp.regs[REG_CPSR]    = (PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT);
+
+#ifdef CONFIG_SMP
+          /* In an SMP configuration, the interrupt disable logic also
+           * involves spinlocks that are configured per the TCB irqcount
+           * field.  This is logically equivalent to enter_critical_section();
+           * The matching leave_critical_section will be performed in
+           * The matching call to leave_critical_section() will be performed
+           * in up_sigdeliver().
+           */
+
+          DEBUGASSERT(tcb->irqcount < INT16_MAX);
+          tcb->irqcount++;
+#endif
         }
     }
 
