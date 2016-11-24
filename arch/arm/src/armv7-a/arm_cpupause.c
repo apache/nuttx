@@ -192,7 +192,7 @@ int arm_pause_handler(int irq, FAR void *context)
    * been processed then g_cpu_paused[cpu] will not be locked.
    */
 
-  if (!spin_islocked(&g_cpu_paused[cpu]))
+  if (spin_islocked(&g_cpu_paused[cpu]))
     {
       return up_cpu_paused(cpu);
     }
