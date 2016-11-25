@@ -363,4 +363,16 @@ int board_ajoy_initialize(void);
 int board_timer_driver_initialize(FAR const char *devpath, int timer);
 #endif
 
+/****************************************************************************
+ * Name: stm32l4_qencoder_initialize
+ *
+ * Description:
+ *   Initialize and register a qencoder
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_QENCODER
+int stm32l4_qencoder_initialize(FAR const char *devpath, int timer);
+#endif
+
 #endif /* __CONFIGS_NUCLEO_L476RG_SRC_NUCLEO_L476RG_H */

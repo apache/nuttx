@@ -1,8 +1,9 @@
 /****************************************************************************
- * sched/task/task_start.c
+ * configs/bambino-200e/src/lpc43_timer.c
  *
- *   Copyright (C) 2007-2010, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *           Bob Doiron
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -38,100 +39,87 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <sys/types.h>
+#include <sys/ioctl.h>
 
-#include <stdlib.h>
-#include <sched.h>
+#include <errno.h>
 #include <debug.h>
+#include <sched.h>
+#include <stdio.h>
+#include <fcntl.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/sched.h>
+#include <nuttx/timers/timer.h>
+#include <nuttx/clock.h>
+#include <nuttx/kthread.h>
 
-#include "sched/sched.h"
-#include "task/task.h"
+#include <arch/board/board.h>
+#include "lpc43_timer.h"
+
+#ifdef CONFIG_TIMER
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* This is an artificial limit to detect error conditions where an argv[]
- * list is not properly terminated.
- */
+/* Configuration ************************************************************/
 
-#define MAX_START_ARGS 256
+#if !(defined(CONFIG_LPC43_TMR0) || defined(CONFIG_LPC43_TMR1) || defined(CONFIG_LPC43_TMR2) \
+     || defined(CONFIG_LPC43_TMR3) )
+#  warning "CONFIG_LPC43_TMRx must be defined"
+#endif
+
+/* Select the path to the registered watchdog timer device */
+
+#ifndef CONFIG_TIMER0_DEVPATH
+#  define CONFIG_TIMER0_DEVPATH "/dev/timer0"
+#endif
+#ifndef CONFIG_TIMER1_DEVPATH
+#  define CONFIG_TIMER1_DEVPATH "/dev/timer1"
+#endif
+#ifndef CONFIG_TIMER2_DEVPATH
+#  define CONFIG_TIMER2_DEVPATH "/dev/timer2"
+#endif
+#ifndef CONFIG_TIMER3_DEVPATH
+#  define CONFIG_TIMER3_DEVPATH "/dev/timer3"
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: task_start
+ * Name: lpc43_timerinitialize()
  *
  * Description:
- *   This function is the low level entry point into the main thread of
- *   execution of a task.  It receives initial control when the task is
- *   started and calls main entry point of the newly started task.
- *
- * Inputs:
- *   None
- *
- * Return:
- *   None
+ *   Perform architecture-specific initialization of the timer hardware.
  *
  ****************************************************************************/
 
-void task_start(void)
+int lpc43_timerinitialize(void)
 {
-  FAR struct task_tcb_s *tcb = (FAR struct task_tcb_s *)this_task();
-  int exitcode;
-  int argc;
+  /* Initialize and register the timer devices */
 
-  DEBUGASSERT((tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD);
-
-  /* Execute the start hook if one has been registered */
-
-#ifdef CONFIG_SCHED_STARTHOOK
-  if (tcb->starthook)
-    {
-      tcb->starthook(tcb->starthookarg);
-    }
+#if defined(CONFIG_LPC43_TMR0)
+  tmrinfo("Initializing %s...\n", CONFIG_TIMER0_DEVPATH);
+  lpc43_tmrinitialize(CONFIG_TIMER0_DEVPATH, LPC43M4_IRQ_TIMER0);
 #endif
 
-  /* Count how many non-null arguments we are passing. The first non-null
-   * argument terminates the list .
-   */
-
-  argc = 1;
-  while (tcb->argv[argc])
-    {
-      /* Increment the number of args.  Here is a sanity check to
-       * prevent running away with an unterminated argv[] list.
-       * MAX_START_ARGS should be sufficiently large that this never
-       * happens in normal usage.
-       */
-
-      if (++argc > MAX_START_ARGS)
-        {
-          exit(EXIT_FAILURE);
-        }
-    }
-
-  /* Call the 'main' entry point passing argc and argv.  In the kernel build
-   * this has to be handled differently if we are starting a user-space task;
-   * we have to switch to user-mode before calling the task.
-   */
-
-#if defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)
-  if ((tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
-    {
-      up_task_start(tcb->cmn.entry.main, argc, tcb->argv);
-      exitcode = EXIT_FAILURE; /* Should not get here */
-    }
-  else
+#if defined(CONFIG_LPC43_TMR1)
+  tmrinfo("Initializing %s...\n", CONFIG_TIMER1_DEVPATH);
+  lpc43_tmrinitialize(CONFIG_TIMER1_DEVPATH, LPC43M4_IRQ_TIMER1);
 #endif
-    {
-      exitcode = tcb->cmn.entry.main(argc, tcb->argv);
-    }
 
-  /* Call exit() if/when the task returns */
+#if defined(CONFIG_LPC43_TMR2)
+  tmrinfo("Initializing %s...\n", CONFIG_TIMER2_DEVPATH);
+  lpc43_tmrinitialize(CONFIG_TIMER2_DEVPATH, LPC43M4_IRQ_TIMER2);
+#endif
 
-  exit(exitcode);
+#if defined(CONFIG_LPC43_TMR3)
+  tmrinfo("Initializing %s...\n", CONFIG_TIMER3_DEVPATH);
+  lpc43_tmrinitialize(CONFIG_TIMER3_DEVPATH, LPC43M4_IRQ_TIMER3);
+#endif
+
+  return OK;
 }
+
+#endif /* CONFIG_TIMER */

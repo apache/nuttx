@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/task/task_start.c
+ * arch/misoc/src/lm32/lm32_sigdeliver.c
  *
- *   Copyright (C) 2007-2010, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,99 +39,98 @@
 
 #include <nuttx/config.h>
 
-#include <stdlib.h>
+#include <stdint.h>
 #include <sched.h>
+#include <syscall.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <nuttx/sched.h>
+#include <nuttx/board.h>
+#include <arch/board/board.h>
 
 #include "sched/sched.h"
-#include "task/task.h"
+#include "lm32.h"
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-/* This is an artificial limit to detect error conditions where an argv[]
- * list is not properly terminated.
- */
-
-#define MAX_START_ARGS 256
+#ifndef CONFIG_DISABLE_SIGNALS
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: task_start
+ * Name: up_sigdeliver
  *
  * Description:
- *   This function is the low level entry point into the main thread of
- *   execution of a task.  It receives initial control when the task is
- *   started and calls main entry point of the newly started task.
- *
- * Inputs:
- *   None
- *
- * Return:
- *   None
+ *   This is the a signal handling trampoline.  When a signal action was
+ *   posted.  The task context was mucked with and forced to branch to this
+ *   location with interrupts disabled.
  *
  ****************************************************************************/
 
-void task_start(void)
+void up_sigdeliver(void)
 {
-  FAR struct task_tcb_s *tcb = (FAR struct task_tcb_s *)this_task();
-  int exitcode;
-  int argc;
+  struct tcb_s *rtcb = this_task();
+  uint32_t regs[XCPTCONTEXT_REGS];
+  sig_deliver_t sigdeliver;
 
-  DEBUGASSERT((tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD);
-
-  /* Execute the start hook if one has been registered */
-
-#ifdef CONFIG_SCHED_STARTHOOK
-  if (tcb->starthook)
-    {
-      tcb->starthook(tcb->starthookarg);
-    }
-#endif
-
-  /* Count how many non-null arguments we are passing. The first non-null
-   * argument terminates the list .
+  /* Save the errno.  This must be preserved throughout the signal handling
+   * so that the user code final gets the correct errno value (probably
+   * EINTR).
    */
 
-  argc = 1;
-  while (tcb->argv[argc])
-    {
-      /* Increment the number of args.  Here is a sanity check to
-       * prevent running away with an unterminated argv[] list.
-       * MAX_START_ARGS should be sufficiently large that this never
-       * happens in normal usage.
-       */
+  int saved_errno = rtcb->pterrno;
 
-      if (++argc > MAX_START_ARGS)
-        {
-          exit(EXIT_FAILURE);
-        }
-    }
+  board_autoled_on(LED_SIGNAL);
 
-  /* Call the 'main' entry point passing argc and argv.  In the kernel build
-   * this has to be handled differently if we are starting a user-space task;
-   * we have to switch to user-mode before calling the task.
+  sinfo("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
+        rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);
+  ASSERT(rtcb->xcp.sigdeliver != NULL);
+
+  /* Save the real return state on the stack. */
+
+  up_copystate(regs, rtcb->xcp.regs);
+  regs[REG_EPC]        = rtcb->xcp.saved_epc;
+  regs[REG_INT_CTX]    = rtcb->xcp.saved_int_ctx;
+
+  /* Get a local copy of the sigdeliver function pointer. We do this so that
+   * we can nullify the sigdeliver function pointer in the TCB and accept
+   * more signal deliveries while processing the current pending signals.
    */
 
-#if defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)
-  if ((tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
-    {
-      up_task_start(tcb->cmn.entry.main, argc, tcb->argv);
-      exitcode = EXIT_FAILURE; /* Should not get here */
-    }
-  else
-#endif
-    {
-      exitcode = tcb->cmn.entry.main(argc, tcb->argv);
-    }
+  sigdeliver           = rtcb->xcp.sigdeliver;
+  rtcb->xcp.sigdeliver = NULL;
 
-  /* Call exit() if/when the task returns */
+  /* Then restore the task interrupt state */
 
-  exit(exitcode);
+  up_irq_restore((irqstate_t)regs[REG_INT_CTX]);
+
+  /* Deliver the signals */
+
+  sigdeliver(rtcb);
+
+  /* Output any debug messages BEFORE restoring errno (because they may
+   * alter errno), then disable interrupts again and restore the original
+   * errno that is needed by the user logic (it is probably EINTR).
+   */
+
+  sinfo("Resuming EPC: %08x INT_CTX: %08x\n", regs[REG_EPC], regs[REG_INT_CTX]);
+
+  (void)up_irq_save();
+  rtcb->pterrno = saved_errno;
+
+  /* Then restore the correct state for this thread of
+   * execution.
+   */
+
+  board_autoled_off(LED_SIGNAL);
+  up_fullcontextrestore(regs);
+
+  /* up_fullcontextrestore() should not return but could if the software
+   * interrupts are disabled.
+   */
+
+  PANIC();
 }
+
+#endif /* !CONFIG_DISABLE_SIGNALS */

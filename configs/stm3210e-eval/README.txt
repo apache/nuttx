@@ -705,14 +705,6 @@ can be selected as follow:
 
 Where <subdir> is one of the following:
 
-  buttons:
-  --------
-
-    Uses apps/examples/buttons to exercise STM3210E-EVAL buttons and
-    button interrupts.
-
-    CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y  : CodeSourcery under Windows
-
   composite
   ---------
 

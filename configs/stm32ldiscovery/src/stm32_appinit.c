@@ -48,10 +48,6 @@
 #include "stm32ldiscovery.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -82,11 +78,30 @@
 
 int board_app_initialize(uintptr_t arg)
 {
+  int ret = OK;
+
 #ifdef CONFIG_STM32_LCD
   /* Initialize the SLCD and register the SLCD device as /dev/slcd */
 
-  return stm32_slcd_initialize();
-#else
-  return OK;
+  ret = stm32_slcd_initialize();
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_slcd_initialize failed: %d\n", ret);
+      return ret;
+    }
 #endif
+
+#ifdef CONFIG_QENCODER
+  /* Initialize and register the qencoder driver */
+
+  ret = stm32_qencoder_initialize("/dev/qe0", CONFIG_STM32LDISCO_QETIMER);
+  if (ret != OK)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to register the qencoder: %d\n",
+             ret);
+    }
+#endif
+
+  return ret;
 }

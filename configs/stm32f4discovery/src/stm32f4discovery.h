@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/stm32f4discovery/src/stm32f4discovery.h
  *
- *   Copyright (C) 2011-2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -562,6 +562,18 @@ int stm32_sdio_initialize(void);
 
 #ifdef HAVE_NETMONITOR
 void weak_function stm32_netinitialize(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_qencoder_initialize
+ *
+ * Description:
+ *   Initialize and register a qencoder
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_QENCODER
+int stm32_qencoder_initialize(FAR const char *devpath, int timer);
 #endif
 
 /****************************************************************************

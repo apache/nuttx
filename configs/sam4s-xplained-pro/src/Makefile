@@ -64,8 +64,4 @@ ifeq ($(CONFIG_SAM34_WDT),y)
 CSRCS += sam_wdt.c
 endif
 
-ifeq ($(CONFIG_TIMER),y)
-CSRCS += sam_tc.c
-endif
-
 include $(TOPDIR)/configs/Board.mk

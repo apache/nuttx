@@ -456,6 +456,8 @@ pins PA15 and PA1 for CH1 and CH2, respectively).  If TIM8 is selected, then
 PC6 and PI5 will be used for CH1 and CH2  (see include board.h for pin
 definitions).
 
+Selected via CONFIG_STM32F4DISCO_QETIMER
+
 FPU
 ===
 

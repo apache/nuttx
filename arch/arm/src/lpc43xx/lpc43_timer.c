@@ -1,9 +1,9 @@
 /****************************************************************************
- * arch/arm/src/sam34/sam_tc.c
+ * arch/arm/src/lpc43/lpc43_timer.c
  *
- *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            Bob Dioron
+ *            Alan Carvalho de Assis <acassis@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -52,13 +52,11 @@
 #include <arch/board/board.h>
 
 #include "up_arch.h"
-#include "sam_tc.h"
-#include "sam_periphclks.h"
+#include "lpc43_timer.h"
 
-#if defined(CONFIG_TIMER) && (defined(CONFIG_SAM34_TC0) || \
-    defined(CONFIG_SAM34_TC1) || defined(CONFIG_SAM34_TC2) || \
-    defined(CONFIG_SAM34_TC3) || defined(CONFIG_SAM34_TC4) || \
-    defined(CONFIG_SAM34_TC5))
+#if defined(CONFIG_TIMER) && (defined(CONFIG_LPC43_TMR0) || \
+    defined(CONFIG_LPC43_TMR1) || defined(CONFIG_LPC43_TMR2) || \
+    defined(CONFIG_LPC43_TMR3) )
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -66,15 +64,15 @@
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_DEBUG_TIMER_INFO
-#  undef CONFIG_SAM34_TC_REGDEBUG
+#  undef CONFIG_LPC43_TMR_REGDEBUG
 #endif
 
 /* Clocking *****************************************************************/
 
 /* TODO: Allow selection of any of the input clocks */
 
-#define TC_FCLK        (BOARD_SCLK_FREQUENCY)
-#define TC_MAXTIMEOUT  ((1000000ULL * (1ULL + TC_RVALUE_MASK)) / TC_FCLK)
+#define TMR_FCLK        (BOARD_FCLKOUT_FREQUENCY)
+#define TMR_MAXTIMEOUT  ((1000000ULL * (1ULL + TMR_RVALUE_MASK)) / TMR_FCLK)
 
 /****************************************************************************
  * Private Types
@@ -84,20 +82,20 @@
  * timer_lowerhalf_s structure.
  */
 
-struct sam34_lowerhalf_s
+struct lpc43_lowerhalf_s
 {
   FAR const struct timer_ops_s  *ops;  /* Lower half operations */
 
   /* Private data */
 
-  uint32_t  base;           /* Base address of the timer */
-  tccb_t    callback;       /* Current user interrupt callback */
+  uint32_t base;            /* Base address of the timer */
+  tccb_t   callback;        /* Current user interrupt callback */
   FAR void *arg;            /* Argument passed to the callback function */
-  uint32_t  timeout;        /* The current timeout value (us) */
-  uint32_t  adjustment;     /* time lost due to clock resolution truncation (us) */
-  uint32_t  clkticks;       /* actual clock ticks for current interval */
-  bool      started;        /* The timer has been started */
-  uint16_t  periphid;       /* peripheral id */
+  uint32_t timeout;         /* The current timeout value (us) */
+  uint32_t adjustment;      /* time lost due to clock resolution truncation (us) */
+  uint32_t clkticks;        /* actual clock ticks for current interval */
+  bool     started;         /* The timer has been started */
+  uint16_t tmrid;           /* Timer id */
 };
 
 /****************************************************************************
@@ -105,44 +103,45 @@ struct sam34_lowerhalf_s
  ****************************************************************************/
 /* Register operations ******************************************************/
 
-#ifdef CONFIG_SAM34_TC_REGDEBUG
-static uint32_t sam34_getreg(uint32_t addr);
-static void     sam34_putreg(uint32_t val, uint32_t addr);
+#ifdef CONFIG_LPC43_TMR_REGDEBUG
+static uint32_t lpc43_getreg(uint32_t addr);
+static void     lpc43_putreg(uint32_t val, uint32_t addr);
 #else
-# define        sam34_getreg(addr)     getreg32(addr)
-# define        sam34_putreg(val,addr) putreg32(val,addr)
+# define        lpc43_getreg(addr)     getreg32(addr)
+# define        lpc43_putreg(val,addr) putreg32(val,addr)
 #endif
 
 /* Interrupt handling *******************************************************/
 
-static int      sam34_interrupt(int irq, FAR void *context);
+static int      lpc43_interrupt(int irq, FAR void *context);
 
 /* "Lower half" driver methods **********************************************/
 
-static int      sam34_start(FAR struct timer_lowerhalf_s *lower);
-static int      sam34_stop(FAR struct timer_lowerhalf_s *lower);
-static int      sam34_getstatus(FAR struct timer_lowerhalf_s *lower,
+static int      lpc43_start(FAR struct timer_lowerhalf_s *lower);
+static int      lpc43_stop(FAR struct timer_lowerhalf_s *lower);
+static int      lpc43_getstatus(FAR struct timer_lowerhalf_s *lower,
                   FAR struct timer_status_s *status);
-static int      sam34_settimeout(FAR struct timer_lowerhalf_s *lower,
+static int      lpc43_settimeout(FAR struct timer_lowerhalf_s *lower,
                   uint32_t timeout);
-static void     sam34_setcallback(FAR struct timer_lowerhalf_s *lower,
+static void     lpc43_setcallback(FAR struct timer_lowerhalf_s *lower,
                   tccb_t callback, FAR void *arg);
-static int      sam34_ioctl(FAR struct timer_lowerhalf_s *lower, int cmd,
+static int      lpc43_ioctl(FAR struct timer_lowerhalf_s *lower, int cmd,
                   unsigned long arg);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* "Lower half" driver methods */
 
-static const struct timer_ops_s g_tcops =
+static const struct timer_ops_s g_tmrops =
 {
-  .start       = sam34_start,
-  .stop        = sam34_stop,
-  .getstatus   = sam34_getstatus,
-  .settimeout  = sam34_settimeout,
-  .setcallback = sam34_setcallback,
-  .ioctl       = sam34_ioctl,
+  .start      = lpc43_start,
+  .stop       = lpc43_stop,
+  .getstatus  = lpc43_getstatus,
+  .settimeout = lpc43_settimeout,
+  .setcallback = lpc43_setcallback,
+  .ioctl      = lpc43_ioctl,
 };
 
 /* "Lower half" driver state */
@@ -151,22 +150,22 @@ static const struct timer_ops_s g_tcops =
  *        May want to allocate the right number to not be wasteful.
  */
 
-static struct sam34_lowerhalf_s g_tcdevs[6];
+static struct lpc43_lowerhalf_s g_tmrdevs[4];
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam34_getreg
+ * Name: lpc43_getreg
  *
  * Description:
  *   Get the contents of a register
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SAM34_TC_REGDEBUG
-static uint32_t sam34_getreg(uint32_t addr)
+#ifdef CONFIG_LPC43_TMR_REGDEBUG
+static uint32_t lpc43_getreg(uint32_t addr)
 {
   static uint32_t prevaddr = 0;
   static uint32_t count = 0;
@@ -176,8 +175,8 @@ static uint32_t sam34_getreg(uint32_t addr)
 
   uint32_t val = getreg32(addr);
 
-  /* Is this the same value that we read from the same registe last time?  Are
-   * we polling the register?  If so, suppress some of the output.
+  /* Is this the same value that we read from the same registe last time?
+   * Are we polling the register?  If so, suppress some of the output.
    */
 
   if (addr == prevaddr && val == preval)
@@ -221,15 +220,15 @@ static uint32_t sam34_getreg(uint32_t addr)
 #endif
 
 /****************************************************************************
- * Name: sam34_putreg
+ * Name: lpc43_putreg
  *
  * Description:
- *   Set the contents of an SAM34 register to a value
+ *   Set the contents of an LPC43 register to a value
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SAM34_TC_REGDEBUG
-static void sam34_putreg(uint32_t val, uint32_t addr)
+#ifdef CONFIG_LPC43_TMR_REGDEBUG
+static void lpc43_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
@@ -241,66 +240,159 @@ static void sam34_putreg(uint32_t val, uint32_t addr)
 }
 #endif
 
+void tmr_clk_enable(uint16_t tmrid)
+{
+  uint32_t regval;
+
+  /* Enable Timer 0 */
+
+  if (tmrid == 0)
+    {
+      regval  = getreg32(LPC43_CCU1_M4_TIMER0_CFG);
+      regval |= CCU_CLK_CFG_RUN;
+      putreg32(regval, LPC43_CCU1_M4_TIMER0_CFG);
+    }
+
+  /* Enable Timer 1 */
+
+  if (tmrid == 1)
+    {
+      regval  = getreg32(LPC43_CCU1_M4_TIMER1_CFG);
+      regval |= CCU_CLK_CFG_RUN;
+      putreg32(regval, LPC43_CCU1_M4_TIMER1_CFG);
+    }
+
+  /* Enable Timer 2 */
+
+  if (tmrid == 2)
+    {
+      regval  = getreg32(LPC43_CCU1_M4_TIMER2_CFG);
+      regval |= CCU_CLK_CFG_RUN;
+      putreg32(regval, LPC43_CCU1_M4_TIMER2_CFG);
+    }
+
+  /* Enable Timer 3 */
+
+  if (tmrid == 3)
+    {
+      regval  = getreg32(LPC43_CCU1_M4_TIMER3_CFG);
+      regval |= CCU_CLK_CFG_RUN;
+      putreg32(regval, LPC43_CCU1_M4_TIMER3_CFG);
+    }
+}
+
+void tmr_clk_disable(uint16_t tmrid)
+{
+  uint32_t regval;
+
+  /* Enable Timer 0 */
+
+  if (tmrid == 0)
+    {
+      regval  = getreg32(LPC43_CCU1_M4_TIMER0_CFG);
+      regval &= ~CCU_CLK_CFG_RUN;
+      putreg32(regval, LPC43_CCU1_M4_TIMER0_CFG);
+    }
+
+  /* Enable Timer 1 */
+
+  if (tmrid == 1)
+    {
+      regval  = getreg32(LPC43_CCU1_M4_TIMER1_CFG);
+      regval &= ~CCU_CLK_CFG_RUN;
+      putreg32(regval, LPC43_CCU1_M4_TIMER1_CFG);
+    }
+
+  /* Enable Timer 2 */
+
+  if (tmrid == 2)
+    {
+      regval  = getreg32(LPC43_CCU1_M4_TIMER2_CFG);
+      regval &= ~CCU_CLK_CFG_RUN;
+      putreg32(regval, LPC43_CCU1_M4_TIMER2_CFG);
+    }
+
+  /* Enable Timer 3 */
+
+  if (tmrid == 3)
+    {
+      regval  = getreg32(LPC43_CCU1_M4_TIMER3_CFG);
+      regval &= ~CCU_CLK_CFG_RUN;
+      putreg32(regval, LPC43_CCU1_M4_TIMER3_CFG);
+    }
+}
+
 /****************************************************************************
- * Name: sam34_interrupt
+ * Name: lpc43_interrupt
  *
  * Description:
  *   TC interrupt
  *
  * Input Parameters:
- *   Usual interrupt handler arguments.
+ *   Usual interrupt callback arguments.
  *
  * Returned Values:
  *   Always returns OK.
  *
  ****************************************************************************/
 
-static int sam34_interrupt(int irq, FAR void *context)
+static int lpc43_interrupt(int irq, FAR void *context)
 {
-  FAR struct sam34_lowerhalf_s *priv = &g_tcdevs[irq-SAM_IRQ_TC0];
+  uint8_t chan_int = 0x0f;
+  FAR struct lpc43_lowerhalf_s *priv = &g_tmrdevs[irq-LPC43M4_IRQ_TIMER0];
 
   tmrinfo("Entry\n");
-  DEBUGASSERT((irq >= SAM_IRQ_TC0) && (irq <= SAM_IRQ_TC5));
+  DEBUGASSERT((irq >= LPC43M4_IRQ_TIMER0) && (irq <= LPC43M4_IRQ_TIMER3));
 
   /* Check if the interrupt is really pending */
 
-  if ((sam34_getreg(priv->base + SAM_TC_SR_OFFSET) & TC_INT_CPCS) != 0)
+  if ((lpc43_getreg(priv->base + LPC43_TMR_IR_OFFSET) & chan_int) != 0)
     {
       uint32_t timeout;
 
-      /* Is there a registered callback?  If the callback has been nullified,
-       * the timer will be stopped.
+      /* Is there a registered callback?  If the callback has been
+       * nullified, the timer will be stopped.
        */
 
       if (priv->callback && priv->callback(&priv->timeout, priv->arg))
         {
           /* Calculate new ticks / dither adjustment */
 
-          priv->clkticks = ((uint64_t)(priv->adjustment + priv->timeout))*TC_FCLK / 1000000;
+          priv->clkticks =((uint64_t)(priv->adjustment + priv->timeout)) *
+            TMR_FCLK / 1000000;
 
-          /* Set next interval interval. TODO: make sure the interval is not so soon it will be missed! */
+          /* Set next interval interval. TODO: make sure the interval is not
+           * so soon it will be missed!
+           */
 
-          sam34_putreg(priv->clkticks, priv->base + SAM_TC_RC_OFFSET);
+          lpc43_putreg(priv->clkticks, priv->base + LPC43_TMR_PR_OFFSET);
 
-          timeout = (1000000ULL * priv->clkticks) / TC_FCLK;    /* trucated timeout */
-          priv->adjustment = (priv->adjustment + priv->timeout) - timeout;  /* truncated time to be added to next interval (dither) */
+          /* Truncated timeout */
+
+          timeout = (1000000ULL * priv->clkticks) / TMR_FCLK;
+
+          /* Truncated time to be added to next interval (dither) */
+
+          priv->adjustment = (priv->adjustment + priv->timeout) - timeout;
         }
       else
         {
           /* No callback or the callback returned false.. stop the timer */
 
-          sam34_stop((FAR struct timer_lowerhalf_s *)priv);
+          lpc43_stop((FAR struct timer_lowerhalf_s *)priv);
           tmrinfo("Stopped\n");
         }
 
-      /* TC_INT_CPCS is cleared by reading SAM_TCx_SR */
+      /* Clear the interrupts */
+
+      lpc43_putreg(chan_int, priv->base + LPC43_TMR_IR_OFFSET);
     }
 
   return OK;
 }
 
 /****************************************************************************
- * Name: sam34_start
+ * Name: lpc43_start
  *
  * Description:
  *   Start the timer, resetting the time to the current timeout,
@@ -314,10 +406,10 @@ static int sam34_interrupt(int irq, FAR void *context)
  *
  ****************************************************************************/
 
-static int sam34_start(FAR struct timer_lowerhalf_s *lower)
+static int lpc43_start(FAR struct timer_lowerhalf_s *lower)
 {
-  FAR struct sam34_lowerhalf_s *priv = (FAR struct sam34_lowerhalf_s *)lower;
-  uint32_t mr_val;
+  FAR struct lpc43_lowerhalf_s *priv = (FAR struct lpc43_lowerhalf_s *)lower;
+  uint32_t presc_val;
 
   tmrinfo("Entry\n");
   DEBUGASSERT(priv);
@@ -327,36 +419,44 @@ static int sam34_start(FAR struct timer_lowerhalf_s *lower)
       return -EINVAL;
     }
 
-  sam_enableperiph0(priv->periphid);                            /* Enable peripheral clock */
-  sam34_putreg(TC_CCR_CLKDIS, priv->base + SAM_TC_CCR_OFFSET);  /* Disable counter */
-  sam34_putreg(0, priv->base + SAM_TC_CV_OFFSET);               /* clear counter */
+  /* Enable timer clock */
 
-  /* TC_CMR_WAVE - waveform mode
-   * TC_CMR_WAVSEL_UPAUTO - reset on RC compare (interval timer)
-   * TC_CMR_TCCLKS_TIMERCLOCK5 = SCLK
-   */
+  tmr_clk_enable(priv->tmrid);
 
-  mr_val = (TC_CMR_WAVE + TC_CMR_WAVSEL_UPAUTO + TC_CMR_TCCLKS_TIMERCLOCK5);
-  sam34_putreg(mr_val, priv->base + SAM_TC_CMR_OFFSET);
+  /* Set it to Timer Mode */
 
-  sam34_putreg(priv->clkticks, priv->base + SAM_TC_RC_OFFSET);   /* Set interval */
+  lpc43_putreg(0, priv->base + LPC43_TMR_CTCR_OFFSET);
+
+  /* Disable the timer */
+
+  lpc43_putreg(0, priv->base + LPC43_TMR_TCR_OFFSET);
+
+  /* Set prescaler to increase TC each 1 us */
+
+  presc_val = TMR_FCLK / 1000000;
+  lpc43_putreg(presc_val - 1, priv->base + LPC43_TMR_PR_OFFSET);
+
+  /* Set MR0 with a large enough initial value */
+
+  lpc43_putreg(10000000, priv->base + LPC43_TMR_MR0_OFFSET);
 
   if (priv->callback)
     {
-      /* Clear status and enable interrupt */
+      /* Enable Match on MR0 generate interrupt and auto-restart */
 
-      sam34_getreg(priv->base + SAM_TC_SR_OFFSET);               /* Clear status */
-      sam34_putreg(TC_INT_CPCS, priv->base + SAM_TC_IER_OFFSET); /* Enable interrupt */
+      lpc43_putreg(3, priv->base + LPC43_TMR_MCR_OFFSET);
     }
 
-  sam34_putreg(TC_CCR_SWTRG + TC_CCR_CLKEN, priv->base + SAM_TC_CCR_OFFSET); /* Start counter */
+  /* Enable the timer */
+
+  lpc43_putreg(TMR_TCR_EN, priv->base + LPC43_TMR_TCR_OFFSET);
 
   priv->started = true;
   return OK;
 }
 
 /****************************************************************************
- * Name: sam34_stop
+ * Name: lpc43_stop
  *
  * Description:
  *   Stop the timer
@@ -370,9 +470,9 @@ static int sam34_start(FAR struct timer_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int sam34_stop(FAR struct timer_lowerhalf_s *lower)
+static int lpc43_stop(FAR struct timer_lowerhalf_s *lower)
 {
-  FAR struct sam34_lowerhalf_s *priv = (FAR struct sam34_lowerhalf_s *)lower;
+  FAR struct lpc43_lowerhalf_s *priv = (FAR struct lpc43_lowerhalf_s *)lower;
   tmrinfo("Entry\n");
   DEBUGASSERT(priv);
 
@@ -381,9 +481,17 @@ static int sam34_stop(FAR struct timer_lowerhalf_s *lower)
       return -EINVAL;
     }
 
-  sam34_putreg(TC_CCR_CLKDIS, priv->base + SAM_TC_CCR_OFFSET); /* Disable counter */
-  sam34_putreg(TC_INT_ALL, priv->base + SAM_TC_IDR_OFFSET);    /* Disable all ints */
-  sam_disableperiph0(priv->periphid);                          /* Disable peripheral clock */
+  /* Disable timer */
+
+  lpc43_putreg(0, priv->base + LPC43_TMR_TCR_OFFSET);
+
+  /* Disable interrupt */
+
+  lpc43_putreg(0, priv->base + LPC43_TMR_MCR_OFFSET);
+
+  /* Disable timer clock */
+
+  tmr_clk_disable(priv->tmrid);
 
   priv->started = false;
 
@@ -391,14 +499,14 @@ static int sam34_stop(FAR struct timer_lowerhalf_s *lower)
 }
 
 /****************************************************************************
- * Name: sam34_getstatus
+ * Name: lpc43_getstatus
  *
  * Description:
  *   Get the current timer status
  *
  * Input Parameters:
- *   lower  - A pointer the publicly visible representation of the "lower-half"
- *            driver state structure.
+ *   lower  - A pointer the publicly visible representation of the "lower-
+ *            half" driver state structure.
  *   status - The location to return the status information.
  *
  * Returned Values:
@@ -406,10 +514,10 @@ static int sam34_stop(FAR struct timer_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int sam34_getstatus(FAR struct timer_lowerhalf_s *lower,
+static int lpc43_getstatus(FAR struct timer_lowerhalf_s *lower,
                            FAR struct timer_status_s *status)
 {
-  FAR struct sam34_lowerhalf_s *priv = (FAR struct sam34_lowerhalf_s *)lower;
+  FAR struct lpc43_lowerhalf_s *priv = (FAR struct lpc43_lowerhalf_s *)lower;
   uint32_t elapsed;
 
   tmrinfo("Entry\n");
@@ -433,9 +541,11 @@ static int sam34_getstatus(FAR struct timer_lowerhalf_s *lower,
   status->timeout = priv->timeout;
 
   /* Get the time remaining until the timer expires (in microseconds) */
+  /* TODO - check on the +1 in the time left calculation */
 
-  elapsed = sam34_getreg(priv->base + SAM_TC_CV_OFFSET);
-  status->timeleft = ((uint64_t)priv->timeout * elapsed) / (priv->clkticks + 1); /* TODO - check on this +1 */
+  elapsed = lpc43_getreg(priv->base + LPC43_TMR_TC_OFFSET);
+  status->timeleft = ((uint64_t)priv->timeout * elapsed) /
+    (priv->clkticks + 1);
 
   tmrinfo("  flags    : %08x\n", status->flags);
   tmrinfo("  timeout  : %d\n", status->timeout);
@@ -444,14 +554,14 @@ static int sam34_getstatus(FAR struct timer_lowerhalf_s *lower,
 }
 
 /****************************************************************************
- * Name: sam34_settimeout
+ * Name: lpc43_settimeout
  *
  * Description:
  *   Set a new timeout value (and reset the timer)
  *
  * Input Parameters:
- *   lower   - A pointer the publicly visible representation of the "lower-half"
- *             driver state structure.
+ *   lower   - A pointer the publicly visible representation of the "lower
+ *             half" driver state structure.
  *   timeout - The new timeout value in milliseconds.
  *
  * Returned Values:
@@ -459,10 +569,10 @@ static int sam34_getstatus(FAR struct timer_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int sam34_settimeout(FAR struct timer_lowerhalf_s *lower,
+static int lpc43_settimeout(FAR struct timer_lowerhalf_s *lower,
                             uint32_t timeout)
 {
-  FAR struct sam34_lowerhalf_s *priv = (FAR struct sam34_lowerhalf_s *)lower;
+  FAR struct lpc43_lowerhalf_s *priv = (FAR struct lpc43_lowerhalf_s *)lower;
 
   DEBUGASSERT(priv);
 
@@ -475,37 +585,47 @@ static int sam34_settimeout(FAR struct timer_lowerhalf_s *lower,
 
   /* Can this timeout be represented? */
 
-  if (timeout < 1 || timeout > TC_MAXTIMEOUT)
+  if (timeout < 1 || timeout > TMR_MAXTIMEOUT)
     {
       tmrerr("ERROR: Cannot represent timeout=%lu > %lu\n",
-             timeout, TC_MAXTIMEOUT);
+             timeout, TMR_MAXTIMEOUT);
       return -ERANGE;
     }
 
-  priv->timeout = timeout;                                    /* Intended timeout */
-  priv->clkticks = (((uint64_t)timeout * TC_FCLK) / 1000000); /* Actual clock ticks */
-  timeout = (1000000ULL * priv->clkticks) / TC_FCLK;          /* Truncated timeout */
-  priv->adjustment = priv->timeout - timeout;                 /* Truncated time to be added to next interval (dither) */
+  /* Intended timeout */
+
+  priv->timeout = timeout;
+
+  /* Actual clock ticks */
+
+  priv->clkticks = (((uint64_t)timeout * TMR_FCLK) / 1000000);
+
+  /* Truncated timeout */
+
+  timeout = (1000000ULL * priv->clkticks) / TMR_FCLK;
+
+  /* Truncated time to be added to next interval (dither) */
+
+  priv->adjustment = priv->timeout - timeout;
 
   tmrinfo("fclk=%d clkticks=%d timout=%d, adjustment=%d\n",
-          TC_FCLK, priv->clkticks, priv->timeout, priv->adjustment);
+          TMR_FCLK, priv->clkticks, priv->timeout, priv->adjustment);
 
   return OK;
 }
 
 /****************************************************************************
- * Name: sam34_setcallback
+ * Name: lpc43_setcallback
  *
  * Description:
  *   Call this user provided timeout callback.
  *
  * Input Parameters:
- *   lower    - A pointer the publicly visible representation of the "lower-half"
- *              driver state structure.
- *   callback - The new timer expiration function pointer.  If this
- *              function pointer is NULL, then the reset-on-expiration
- *              behavior is restored,
- *   arg      - Argument to be provided with the callback.
+ *   lower      - A pointer the publicly visible representation of the "lower-half"
+ *                driver state structure.
+ *   newcallback - The new timer expiration function pointer.  If this
+ *                function pointer is NULL, then the reset-on-expiration
+ *                behavior is restored,
  *
  * Returned Values:
  *   The previous timer expiration function pointer or NULL is there was
@@ -513,10 +633,10 @@ static int sam34_settimeout(FAR struct timer_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static void sam34_setcallback(FAR struct timer_lowerhalf_s *lower,
-                              tccb_t callback, FAR void *arg)
+static void lpc43_setcallback(FAR struct timer_lowerhalf_s *lower,
+                               tccb_t callback, FAR void *arg)
 {
-  FAR struct sam34_lowerhalf_s *priv = (FAR struct sam34_lowerhalf_s *)lower;
+  FAR struct lpc43_lowerhalf_s *priv = (FAR struct lpc43_lowerhalf_s *)lower;
   irqstate_t flags;
 
   flags = enter_critical_section();
@@ -533,7 +653,7 @@ static void sam34_setcallback(FAR struct timer_lowerhalf_s *lower,
 }
 
 /****************************************************************************
- * Name: sam34_ioctl
+ * Name: lpc43_ioctl
  *
  * Description:
  *   Any ioctl commands that are not recognized by the "upper-half" driver
@@ -552,10 +672,10 @@ static void sam34_setcallback(FAR struct timer_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int sam34_ioctl(FAR struct timer_lowerhalf_s *lower, int cmd,
+static int lpc43_ioctl(FAR struct timer_lowerhalf_s *lower, int cmd,
                     unsigned long arg)
 {
-  FAR struct sam34_lowerhalf_s *priv = (FAR struct sam34_lowerhalf_s *)lower;
+  FAR struct lpc43_lowerhalf_s *priv = (FAR struct lpc43_lowerhalf_s *)lower;
   int ret = -ENOTTY;
 
   DEBUGASSERT(priv);
@@ -570,7 +690,7 @@ static int sam34_ioctl(FAR struct timer_lowerhalf_s *lower, int cmd,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam_tcinitialize
+ * Name: lpc43_tmrinitialize
  *
  * Description:
  *   Initialize the timer.  The timer is initialized and
@@ -578,19 +698,19 @@ static int sam34_ioctl(FAR struct timer_lowerhalf_s *lower, int cmd,
  *
  * Input Parameters:
  *   devpath - The full path to the timer.  This should be of the form
- *     /dev/tc0
+ *     /dev/tmr0
  *
  * Returned Values:
  *   None
  *
  ****************************************************************************/
 
-void sam_tcinitialize(FAR const char *devpath, int irq)
+void lpc43_tmrinitialize(FAR const char *devpath, int irq)
 {
-  FAR struct sam34_lowerhalf_s *priv = &g_tcdevs[irq-SAM_IRQ_TC0];
+  FAR struct lpc43_lowerhalf_s *priv = &g_tmrdevs[irq-LPC43M4_IRQ_TIMER0];
 
   tmrinfo("Entry: devpath=%s\n", devpath);
-  DEBUGASSERT((irq >= SAM_IRQ_TC0) && (irq <= SAM_IRQ_TC5));
+  DEBUGASSERT((irq >= LPC43M4_IRQ_TIMER0) && (irq <= LPC43M4_IRQ_TIMER3));
 
   /* Initialize the driver state structure.  Here we assume: (1) the state
    * structure lies in .bss and was zeroed at reset time.  (2) This function
@@ -599,45 +719,35 @@ void sam_tcinitialize(FAR const char *devpath, int irq)
 
   switch (irq)
     {
-#if defined(CONFIG_SAM34_TC0)
-    case SAM_IRQ_TC0:
-      priv->base = SAM_TC0_BASE;
-      priv->periphid = SAM_PID_TC0;
+#if defined(CONFIG_LPC43_TMR0)
+    case LPC43M4_IRQ_TIMER0:
+      priv->base = LPC43_TIMER0_BASE;
+      priv->tmrid = 0;
+      tmrinfo("Using: Timer 0");
       break;
 #endif
 
-#if defined(CONFIG_SAM34_TC1)
-    case SAM_IRQ_TC1:
-      priv->base = SAM_TC1_BASE;
-      priv->periphid = SAM_PID_TC1;
+#if defined(CONFIG_LPC43_TMR1)
+    case LPC43M4_IRQ_TIMER1:
+      priv->base = LPC43_TIMER1_BASE;
+      priv->tmrid = 1;
+      tmrinfo("Using: Timer 1");
       break;
 #endif
 
-#if defined(CONFIG_SAM34_TC2)
-    case SAM_IRQ_TC2:
-      priv->base = SAM_TC2_BASE;
-      priv->periphid = SAM_PID_TC2;
+#if defined(CONFIG_LPC43_TMR2)
+    case LPC43M4_IRQ_TIMER2:
+      priv->base = LPC43_TIMER2_BASE;
+      priv->tmrid = 2;
+      tmrinfo("Using: Timer 2");
       break;
 #endif
 
-#if defined(CONFIG_SAM34_TC3)
-    case SAM_IRQ_TC3:
-      priv->base = SAM_TC3_BASE;
-      priv->periphid = SAM_PID_TC3;
-      break;
-#endif
-
-#if defined(CONFIG_SAM34_TC4)
-    case SAM_IRQ_TC4:
-      priv->base = SAM_TC4_BASE;
-      priv->periphid = SAM_PID_TC4;
-      break;
-#endif
-
-#if defined(CONFIG_SAM34_TC5)
-    case SAM_IRQ_TC5:
-      priv->base = SAM_TC5_BASE;
-      priv->periphid = SAM_PID_TC5;
+#if defined(CONFIG_LPC43_TMR3)
+    case LPC43M4_IRQ_TIMER3:
+      priv->base = LPC43_TIMER3_BASE;
+      priv->tmrid = 3;
+      tmrinfo("Using: Timer 3");
       break;
 #endif
 
@@ -645,9 +755,9 @@ void sam_tcinitialize(FAR const char *devpath, int irq)
       ASSERT(0);
     }
 
-  priv->ops = &g_tcops;
+  priv->ops = &g_tmrops;
 
-  (void)irq_attach(irq, sam34_interrupt);
+  (void)irq_attach(irq, lpc43_interrupt);
 
   /* Enable NVIC interrupt. */
 
@@ -658,4 +768,4 @@ void sam_tcinitialize(FAR const char *devpath, int irq)
   (void)timer_register(devpath, (FAR struct timer_lowerhalf_s *)priv);
 }
 
-#endif /* CONFIG_TIMER && CONFIG_SAM34_TCx */
+#endif /* CONFIG_TIMER && CONFIG_LPC43_TMRx */

@@ -57,6 +57,10 @@ ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS += lpc43_buttons.c
 endif
 
+ifeq ($(CONFIG_TIMER),y)
+CSRCS += lpc43_timer.c
+endif
+
 ifeq ($(CONFIG_USBMSC),y)
 CSRCS += lpc43_usbmsc.c
 endif

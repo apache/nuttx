@@ -101,7 +101,7 @@ void up_initial_state(struct tcb_s *tcb)
 
   /* Initial state of IE:  Interrupts enabled */
 
-  xcp->regs[REG_INT_CTX] = 1;
+  xcp->regs[REG_INT_CTX] = 2;
 
   /* If this task is running PIC, then set the PIC base register to the
    * address of the allocated D-Space region.

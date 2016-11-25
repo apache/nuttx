@@ -60,6 +60,26 @@
 #include <arch/spinlock.h>
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Memory barriers may be provided in arch/spinlock.h
+ *
+ *   DMB - Data memory barrier.  Assures writes are completed to memory.
+ *   DSB - Data syncrhonization barrier.
+ */
+
+#define HAVE_DMB 1
+#ifndef SP_DMB
+#  define SP_DMB()
+#  undef HAVE_DMB
+#endif
+
+#ifndef SP_DSB
+#  define SP_DSB()
+#endif
+
+/****************************************************************************
  * Public Types
  ****************************************************************************/
 
@@ -116,7 +136,7 @@ spinlock_t up_testset(volatile FAR spinlock_t *lock);
  ****************************************************************************/
 
 /* void spin_initialize(FAR spinlock_t *lock); */
-#define spin_initialize(i) do { (l) = SPI_UNLOCKED; } while (0)
+#define spin_initialize(i) do { (l) = SP_UNLOCKED; } while (0)
 
 /****************************************************************************
  * Name: spin_initializer
@@ -158,6 +178,27 @@ void spin_initializer(FAR struct spinlock_s *lock);
  ****************************************************************************/
 
 void spin_lock(FAR volatile spinlock_t *lock);
+
+/****************************************************************************
+ * Name: spin_trylock
+ *
+ * Description:
+ *   Try once to lock the spinlock.  Do not wait if the spinlock is already
+ *   locked.
+ *
+ * Input Parameters:
+ *   lock - A reference to the spinlock object to lock.
+ *
+ * Returned Value:
+ *   SP_LOCKED   - Failure, the spinlock was already locked
+ *   SP_UNLOCKED - Success, the spinlock was successfully locked
+ *
+ * Assumptions:
+ *   Not running at the interrupt level.
+ *
+ ****************************************************************************/
+
+#define spin_trylock(l) up_testset(l)
 
 /****************************************************************************
  * Name: spin_lockr
@@ -203,8 +244,11 @@ void spin_lockr(FAR struct spinlock_s *lock);
  *
  ****************************************************************************/
 
-/* void spin_unlock(FAR spinlock_t *lock); */
-#define spin_unlock(l)  do { *(l) = SP_UNLOCKED; } while (0)
+#ifdef HAVE_DMB
+void spin_unlock(FAR volatile spinlock_t *lock);
+#else
+#  define spin_unlock(l)  do { *(l) = SP_UNLOCKED; } while (0)
+#endif
 
 /****************************************************************************
  * Name: spin_unlockr

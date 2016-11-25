@@ -54,73 +54,6 @@
 #include "nucleo-l476rg.h"
 
 /************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-/* Configuration *******************************************************************/
-/* Check if we have a timer configured for quadrature encoder -- assume YES. */
-
-#define HAVE_QENCODER 1
-
-/* If TIMn is not enabled (via CONFIG_STM32L4_TIMn), then the configuration cannot
- * specify TIMn as a quadrature encoder (via CONFIG_STM32L4_TIMn_QE).
- */
-
-#ifndef CONFIG_STM32L4_TIM1
-#  undef CONFIG_STM32L4_TIM1_QE
-#endif
-#ifndef CONFIG_STM32L4_TIM2
-#  undef CONFIG_STM32L4_TIM2_QE
-#endif
-#ifndef CONFIG_STM32L4_TIM3
-#  undef CONFIG_STM32L4_TIM3_QE
-#endif
-#ifndef CONFIG_STM32L4_TIM4
-#  undef CONFIG_STM32L4_TIM4_QE
-#endif
-#ifndef CONFIG_STM32L4_TIM5
-#  undef CONFIG_STM32L4_TIM5_QE
-#endif
-#ifndef CONFIG_STM32L4_TIM8
-#  undef CONFIG_STM32L4_TIM8_QE
-#endif
-
-/* If the upper-half quadrature encoder driver is not enabled, then we cannot
- * support the quadrature encoder.
- */
-
-#ifndef CONFIG_QENCODER
-#  undef HAVE_QENCODER
-#endif
-
-/* Which Timer should we use, TIMID={1,2,3,4,5,8}.  If multiple timers are
- * configured as quadrature encoders, this logic will arbitrarily select
- * the lowest numbered timer.
- *
- * At least one TIMn, n={1,2,3,4,5,8}, must be both enabled and configured
- * as a quadrature encoder in order to support the lower half quadrature
- * encoder driver.  The above check assures that if CONFIG_STM32L4_TIMn_QE
- * is defined, then the correspdonding TIMn is also enabled.
- */
-
-#if defined CONFIG_STM32L4_TIM1_QE
-#  define TIMID 1
-#elif defined CONFIG_STM32L4_TIM2_QE
-#  define TIMID 2
-#elif defined CONFIG_STM32L4_TIM3_QE
-#  define TIMID 3
-#elif defined CONFIG_STM32L4_TIM4_QE
-#  define TIMID 4
-#elif defined CONFIG_STM32L4_TIM5_QE
-#  define TIMID 5
-#elif defined CONFIG_STM32L4_TIM8_QE
-#  define TIMID 8
-#else
-#  undef HAVE_QENCODER
-#endif
-
-#ifdef HAVE_QENCODER
-
-/************************************************************************************
  * Public Functions
  ************************************************************************************/
 
@@ -133,29 +66,18 @@
  *
  ************************************************************************************/
 
-int qe_devinit(void)
+int stm32l4_qencoder_initialize(FAR const char *devpath, int timer)
 {
-  static bool initialized = false;
   int ret;
 
-  /* Check if we are already initialized */
+  /* Initialize a quadrature encoder interface. */
 
-  if (!initialized)
+  sninfo("Initializing the quadrature encoder using TIM%d\n", timer);
+  ret = stm32l4_qeinitialize(devpath, timer);
+  if (ret < 0)
     {
-      /* Initialize a quadrature encoder interface. */
-
-      sninfo("Initializing the quadrature encoder using TIM%d\n", TIMID);
-      ret = stm32l4_qeinitialize("/dev/qe0", TIMID);
-      if (ret < 0)
-        {
-          snerr("ERROR: stm32_qeinitialize failed: %d\n", ret);
-          return ret;
-        }
-
-      initialized = true;
+      snerr("ERROR: stm32l4_qeinitialize failed: %d\n", ret);
     }
 
-  return OK;
+  return ret;
 }
-
-#endif /* HAVE_QENCODER */

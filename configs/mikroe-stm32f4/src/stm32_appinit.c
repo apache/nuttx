@@ -180,11 +180,7 @@ int board_app_initialize(uintptr_t arg)
   FAR struct spi_dev_s *spi;
   FAR struct mtd_dev_s *mtd;
 #endif
-#if defined(NSH_HAVEMMCSD) || defined(HAVE_USBHOST) || \
-    defined(HAVE_USBMONITOR) || defined(CONFIG_LCD_MIO283QT2) || \
-    defined(CONFIG_LCD_MIO283QT9A)
-  int ret;
-#endif
+  int ret = OK;
 
   /* Configure SPI-based devices */
 
@@ -367,13 +363,24 @@ int board_app_initialize(uintptr_t arg)
 
 #endif
 
-  /* Configure the Audio sub-system if enabled and bind it to SPI 3 */
+#ifdef CONFIG_QENCODER
+  /* Initialize and register the qencoder driver */
 
-#ifdef CONFIG_AUDIO
-
-  up_vs1053initialize(spi);
-
+  ret = stm32_qencoder_initialize("/dev/qe0", CONFIG_MIKROE_QETIMER);
+  if (ret != OK)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to register the qencoder: %d\n",
+             ret);
+      return ret;
+    }
 #endif
 
-  return OK;
+#ifdef CONFIG_AUDIO
+  /* Configure the Audio sub-system if enabled and bind it to SPI 3 */
+
+  up_vs1053initialize(spi);
+#endif
+
+  return ret;
 }

@@ -1,9 +1,13 @@
 /****************************************************************************
- * arch/misoc/src/common/serial.h
+ * arch/risc-v/src/nr5m100/nr5_timerisr.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Ramtin Amin <keytwo@gmail.com>
+ *
+ *   Modified for MISOC:
+ *
+ *   Copyright (C) 2016 Ramtin Amin. All rights reserved.
+ *   Author: Ramtin Amin <keytwo@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,97 +38,114 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_MISOC_SRC_COMMON_MISOC_H
-#define __ARCH_MISOC_SRC_COMMON_MISOC_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <stdint.h>
+#include <time.h>
+#include <debug.h>
+
+#include <nuttx/arch.h>
+#include <nuttx/irq.h>
+#include <arch/board/board.h>
+#include <arch/board/generated/csr.h>
+
+#include "chip.h"
+#include "misoc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Low-level register access */
+/* The desired timer interrupt frequency is provided by the definition
+ * CLOCKS_PER_SEC (see include/time.h).  CLOCKS_PER_SEC defines the desired
+ * number of system clock ticks per second.  That value is a user
+ * configurable setting based on CONFIG_USEC_PER_TICK.  It defaults to 100
+ * (100 ticks per second = 10 MS interval).
+ *
+ * Given the timer input frequency (Finput).  The timer correct reload
+ * value is:
+ *
+ *   reload = Finput / CLOCKS_PER_SEC
+ */
 
-#define getreg8(a)            (*(volatile uint8_t *)(a))
-#define putreg8(v,a)          (*(volatile uint8_t *)(a) = (v))
-#define getreg16(a)           (*(volatile uint16_t *)(a))
-#define putreg16(v,a)         (*(volatile uint16_t *)(a) = (v))
-#define getreg32(a)           (*(volatile uint32_t *)(a))
-#define putreg32(v,a)         (*(volatile uint32_t *)(a) = (v))
+#define SYSTICK_RELOAD ((SYSTEM_CLOCK_FREQUENCY / CLOCKS_PER_SEC) - 1)
+
+/* The size of the reload field is 30 bits.  Verify that the reload value
+ * will fit in the reload register.
+ */
+
+#if SYSTICK_RELOAD > 0x3fffffff
+#  error SYSTICK_RELOAD exceeds the range of the RELOAD register
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
-
 /****************************************************************************
- * Name: misoc_timer_initialize
+ * Function:  up_timerisr
  *
  * Description:
- *   Initialize and start the system timer.
+ *   The timer ISR will perform a variety of services for various portions
+ *   of the systems.
  *
  ****************************************************************************/
 
-void misoc_timer_initialize(void);
+int up_timerisr(int irq, void *context)
+{
+  /* Clear event pending */
+
+  timer0_ev_pending_write(timer0_ev_pending_read());
+
+  /* Process timer interrupt */
+
+  sched_process_timer();
+  return 0;
+}
 
 /****************************************************************************
- * Name: up_serialinit
+ * Function:  up_timer_initialize
  *
  * Description:
- *   Register serial console and serial ports.  This assumes that
- *   misoc_earlyserialinit was called previously.
+ *   This function is called during start-up to initialize
+ *   the timer interrupt.
  *
  ****************************************************************************/
 
-void misoc_serial_initialize(void);
+void misoc_timer_initialize(void)
+{
+  /* Clear event pending */
 
-/****************************************************************************
- * Name: misoc_puts
- *
- * Description:
- *   This is a low-level helper function used to support debug.
- *
- ****************************************************************************/
+  timer0_ev_pending_write(timer0_ev_pending_read());
 
-void misoc_puts(const char *str);
+  /* Disable timer*/
 
-/****************************************************************************
- * Name: misoc_lowputc
- *
- * Description:
- *   Low-level, blocking character output the the serial console.
- *
- ****************************************************************************/
+  timer0_en_write(0);
 
-void misoc_lowputc(char ch);
+  /* Setup the timer reload register to generate interrupts at the rate of
+   * CLOCKS_PER_SEC.
+   */
 
-/****************************************************************************
- * Name: misoc_lowputs
- *
- * Description:
- *   This is a low-level helper function used to support debug.
- *
- ****************************************************************************/
+  timer0_reload_write(SYSTICK_RELOAD);
+  timer0_load_write(SYSTICK_RELOAD);
 
-void misoc_lowputs(const char *str);
+  /* Enable timer */
 
-/****************************************************************************
- * Name: modifyreg[N]
- *
- * Description:
- *   Atomic modification of registers.
- *
- ****************************************************************************/
+  timer0_en_write(1);
 
-void modifyreg8(unsigned int addr, uint8_t clearbits, uint8_t setbits);
-void modifyreg16(unsigned int addr, uint16_t clearbits, uint16_t setbits);
-void modifyreg32(unsigned int addr, uint32_t clearbits, uint32_t setbits);
+  /* Attach the timer interrupt vector */
 
-#endif /* __ASSEMBLY__ */
-#endif /* __ARCH_MISOC_SRC_COMMON_MISOC_H */
+  (void)irq_attach(TIMER0_INTERRUPT, up_timerisr);
+
+  /* And enable the timer interrupt */
+
+  up_enable_irq(TIMER0_INTERRUPT);
+
+  /* Enable IRQ of the timer core */
+
+  timer0_ev_enable_write(1);
+}

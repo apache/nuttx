@@ -482,9 +482,6 @@ The i.MX6 6Quad has 4 CPUs.  Support is included for testing an SMP
 configuration.  That configuration is still not yet ready for usage but can
 be enabled with the following configuration settings:
 
-  Build Setup:
-    CONFIG_EXPERIMENTAL=y
-
   RTOS Features -> Tasks and Scheduling
     CONFIG_SPINLOCK=y
     CONFIG_SMP=y
@@ -557,11 +554,6 @@ Open Issues:
 
    Update: Cache inconsistencies seem to be the root cause of all current SMP
    issues.
-
-5. Assertions.  On a fatal assertions, other CPUs need to be stopped.  The SCR,
-   however, only supports disabling CPUs 1 through 3.  Perhaps if the assertion
-   occurs on CPUn, n > 0, then it should use and SGI to perform the assertion
-   on CPU0 always.  From CPU0, CPU1-3 can be disabled.
 
 Configurations
 ==============

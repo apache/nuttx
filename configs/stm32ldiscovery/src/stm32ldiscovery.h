@@ -2,7 +2,7 @@
  * configs/stm32ldiscovery/src/stm32ldiscovery.h
  * arch/arm/src/board/stm32ldiscovery.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -242,6 +242,18 @@
  ****************************************************************************************************/
 
 void weak_function stm32_spidev_initialize(void);
+
+/****************************************************************************
+ * Name: stm32_qencoder_initialize
+ *
+ * Description:
+ *   Initialize and register a qencoder
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_QENCODER
+int stm32_qencoder_initialize(FAR const char *devpath, int timer);
+#endif
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_STM32F3DISCOVERY_SRC_STM32F3DISCOVERY_H */
