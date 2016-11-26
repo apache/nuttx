@@ -191,6 +191,11 @@
 #  define _DATA_INIT   &_eronly
 #  define _START_DATA  &_sdata
 #  define _END_DATA    &_edata
+
+#ifdef CONFIG_SMP
+#  define _START_NOCACHE &_snocache
+#  define _END_NOCACHE   &_enocache
+#endif
 #endif
 
 /* This is the value used to mark the stack for subsequent stack monitoring
@@ -278,6 +283,11 @@ EXTERN uint32_t _sdata;           /* Start of .data */
 EXTERN uint32_t _edata;           /* End+1 of .data */
 EXTERN uint32_t _sbss;            /* Start of .bss */
 EXTERN uint32_t _ebss;            /* End+1 of .bss */
+
+#ifdef CONFIG_SMP
+EXTERN uint32_t _snocache;        /* Start of .nocache */
+EXTERN uint32_t _enocache;        /* End+1 of .nocache */
+#endif
 
 /* Sometimes, functions must be executed from RAM.  In this case, the following
  * macro may be used (with GCC!) to specify a function that will execute from

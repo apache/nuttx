@@ -601,10 +601,12 @@
 #define MMU_L2_PGTABFLAGS     (PTE_TYPE_SMALL | PTE_WRITE_THROUGH | PTE_AP_RW1)
 
 #define MMU_L1_VECTORFLAGS    (PMD_TYPE_PTE | PMD_PTE_PXN | PMD_PTE_DOM(0))
-
 #define MMU_L2_VECTRWFLAGS    (PTE_TYPE_SMALL | PTE_WRITE_THROUGH | PTE_AP_RW1)
 #define MMU_L2_VECTROFLAGS    (PTE_TYPE_SMALL | PTE_WRITE_THROUGH | PTE_AP_R1)
 #define MMU_L2_VECTORFLAGS    MMU_L2_VECTRWFLAGS
+
+#define MMU_L1_INTERCPUFLAGS  (PMD_TYPE_PTE | PMD_PTE_PXN | PMD_PTE_DOM(0))
+#define MMU_L2_INTERCPUFLAGS  (PTE_TYPE_SMALL | PTE_DEVICE | PTE_AP_RW1)
 
 /* Mapped section size */
 
@@ -1421,6 +1423,28 @@ void mmu_l1_restore(uintptr_t vaddr, uint32_t l1entry);
 
 #if !defined (CONFIG_ARCH_ROMPGTABLE) && defined(CONFIG_ARCH_ADDRENV)
 #  define mmu_l1_clrentry(v) mmu_l1_restore(v,0)
+#endif
+
+/****************************************************************************
+ * Name: mmu_l2_setentry
+ *
+ * Description:
+ *   Set one small (4096B) entry in a level2 translation table.
+ *
+ * Input Parameters:
+ *   l2vaddr - the virtual address of the beginning of the L2 translation
+ *     table.
+ *   paddr - The physical address to be mapped.  Must be aligned to a 4KB
+ *     address boundary
+ *   vaddr - The virtual address to be mapped.  Must be aligned to a 4KB
+ *     address boundary
+ *   mmuflags - The MMU flags to use in the mapping.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_ARCH_ROMPGTABLE
+void mmu_l2_setentry(uint32_t l2vaddr, uint32_t paddr, uint32_t vaddr,
+                     uint32_t mmuflags);
 #endif
 
 /************************************************************************************

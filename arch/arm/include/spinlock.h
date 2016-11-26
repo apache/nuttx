@@ -44,6 +44,26 @@
 #  include <stdint.h>
 #endif /* __ASSEMBLY__ */
 
+/* Include ARM architecture-specific IRQ definitions (including register
+ * save structure and up_irq_save()/up_irq_restore() functions)
+ */
+
+#if defined(CONFIG_ARCH_CORTEXA5) || defined(CONFIG_ARCH_CORTEXA8) || \
+    defined(CONFIG_ARCH_CORTEXA9)
+#  include <arch/armv7-a/spinlock.h>
+#elif defined(CONFIG_ARCH_CORTEXR4) || defined(CONFIG_ARCH_CORTEXR4F) || \
+      defined(CONFIG_ARCH_CORTEXR5) || defined(CONFIG_ARCH_CORTEXR5F) || \
+      defined(CONFIG_ARCH_CORTEXR7) || defined(CONFIG_ARCH_CORTEXR7F)
+#  include <arch/armv7-r/spinlock.h>
+#elif defined(CONFIG_ARCH_CORTEXM3) || defined(CONFIG_ARCH_CORTEXM4) || \
+      defined(CONFIG_ARCH_CORTEXM7)
+#  include <arch/armv7-m/spinlock.h>
+#elif defined(CONFIG_ARCH_CORTEXM0)
+#  include <arch/armv6-m/spinlock.h>
+#else
+#  include <arch/arm/spinlock.h>
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
