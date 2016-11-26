@@ -254,9 +254,9 @@ static void imx_intercpu_mapping(void)
 
   /* Now set the level 1 descriptor to refer to the level 2 page table. */
 
-  mmu_l1_setentry(VECTOR_L2_PBASE & PMD_PTE_PADDR_MASK,
+  mmu_l1_setentry(INTERCPU_PBASE & PMD_PTE_PADDR_MASK,
                   INTERCPU_VADDR & PMD_PTE_PADDR_MASK,
-                  MMU_L1_PGTABFLAGS);
+                  MMU_L1_INTERCPUFLAGS);
 }
 #else
   /* No inter-cpu communications area */
@@ -428,8 +428,10 @@ static inline void imx_wdtdisable(void)
 
 void arm_boot(void)
 {
-#ifdef CONFIG_ARCH_RAMFUNCS
+#if defined(CONFIG_ARCH_RAMFUNCS)
   const uint32_t *src;
+#endif
+#if defined(CONFIG_ARCH_RAMFUNCS) || defined(CONFIG_SMP)
   uint32_t *dest;
 #endif
 
@@ -541,10 +543,21 @@ void arm_boot(void)
   imx_lowputc('L');
 #endif
 
+#ifdef CONFIG_SMP
+  /* Initialize the uncached, inter-CPU communications area */
+
+  for (dest = &_snocache; dest < &_enocache; )
+    {
+      *dest++ = 0;
+    }
+
+  imx_lowputc('M');
+#endif
+
   /* Perform common, low-level chip initialization (might do nothing) */
 
   imx_lowsetup();
-  imx_lowputc('M');
+  imx_lowputc('N');
 
 #ifdef USE_EARLYSERIALINIT
   /* Perform early serial initialization if we are going to use the serial
@@ -552,7 +565,7 @@ void arm_boot(void)
    */
 
   imx_earlyserialinit();
-  imx_lowputc('N');
+  imx_lowputc('O');
 #endif
 
   /* Now we can enable all other CPUs.  The enabled CPUs will start execution
@@ -561,6 +574,6 @@ void arm_boot(void)
    */
 
   imx_cpu_enable();
-  imx_lowputc('O');
+  imx_lowputc('P');
   imx_lowputc('\n');
 }

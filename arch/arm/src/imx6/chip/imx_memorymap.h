@@ -927,9 +927,9 @@
    * 0x80000000 0x803fffff 0x000002000 0x000000400  Vectors (1MiB)
    * 0x80100000 0x806fffff 0x000002400 0x000001800  Paging  (6MiB)
    *
-   * If SMP is enabled, then INTERCPU_L2_PAGES pages are taken from the end
-   * of the Paging L2 page table to hold non-cacheable, inter-processor
-   * communication data.
+   * If SMP is enabled, then 1MiB of address spaces for the INTERCPU_L2_PAGES
+   * pages are taken from the end of the Paging L2 page table to hold non-
+   * cacheable, inter-processor communication data.
    */
 
   /* Vector L2 page table offset/size */
@@ -951,7 +951,7 @@
     /* Paging L2 page table offset/size */
 
 #    define PGTABLE_L2_OFFSET     0x000002400
-#    define PGTABLE_L2_SIZE       (0x000001800 - 4*INTERCPU_L2_PAGES)
+#    define PGTABLE_L2_SIZE       0x000001400
 
 #  else
     /* Paging L2 page table offset/size */
@@ -967,16 +967,16 @@
    * ---------- ---------- ------------ ----------------------------
    * 0x80000000 0x806fffff 0x000002000 0x000001c00  Paging  (7MiB)
    *
-   * If SMP is enabled, then INTERCPU_L2_PAGES pages are taken from the end
-   * of the Paging L2 page table to hold non-cacheable, inter-processor
-   * communication data.
+   * If SMP is enabled, then 1MiB of address spaces for the INTERCPU_L2_PAGES
+   * pages are taken from the end of the Paging L2 page table to hold non-
+   * cacheable, inter-processor communication data.
    */
 
 #  ifdef CONFIG_SMP
     /* Paging L2 page table offset/size */
 
 #    define PGTABLE_L2_OFFSET     0x000002000
-#    define PGTABLE_L2_SIZE       (0x000001c00 - 4*INTERCPU_L2_PAGES)
+#    define PGTABLE_L2_SIZE       0x000001800
 
 #  else
     /* Paging L2 page table offset/size */
@@ -1005,7 +1005,7 @@
 /* Non-cached inter-processor communication data */
 
 #  define INTERCPU_L2_OFFSET      (PGTABLE_L2_OFFSET + PGTABLE_L2_SIZE)
-#  define INTERCPU_L2_SIZE        (4*INTERCPU_L2_PAGES)
+#  define INTERCPU_L2_SIZE        (0x00000400)
 
 /* Inter-processor communications L2 page table virtual base addresse */
 
