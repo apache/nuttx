@@ -959,7 +959,7 @@
 #  define VECTOR_L2_END_PADDR     (VECTOR_L2_PBASE + VECTOR_L2_SIZE)
 #  define VECTOR_L2_END_VADDR     (VECTOR_L2_VBASE + VECTOR_L2_SIZE)
 
-#  ifdef CONFIG_SMP
+#  if defined(CONFIG_SMP) && defined(SMP_INTERCPU_NONCACHED)
     /* Paging L2 page table offset/size */
 
 #    define PGTABLE_L2_OFFSET     0x000002400
@@ -984,7 +984,7 @@
    * cacheable, inter-processor communication data.
    */
 
-#  ifdef CONFIG_SMP
+#  if defined(CONFIG_SMP) && defined(SMP_INTERCPU_NONCACHED)
   /* Paging L2 page table offset/size */
 
 #    define PGTABLE_L2_OFFSET     0x000002000
@@ -1013,7 +1013,7 @@
 #define PGTABLE_L2_END_PADDR      (PGTABLE_L2_PBASE + PGTABLE_L2_SIZE)
 #define PGTABLE_L2_END_VADDR      (PGTABLE_L2_VBASE + PGTABLE_L2_SIZE)
 
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP) && defined(SMP_INTERCPU_NONCACHED)
 /* Non-cached inter-processor communication data */
 
 #  define INTERCPU_L2_OFFSET      (PGTABLE_L2_OFFSET + PGTABLE_L2_SIZE)
@@ -1061,7 +1061,7 @@
 #  define IMX_VECTOR_VSRAM        IMX_OCRAM_VBASE
 #  define IMX_VECTOR_VADDR        0x00000000
 
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP) && defined(SMP_INTERCPU_NONCACHED)
 /* Inter-processor communications.
  *
  * NOTICE that we use the unused virtual address space at 0x00400000 for
@@ -1089,7 +1089,7 @@
 #  define IMX_VECTOR_VSRAM        (IMX_OCRAM_VBASE + IMX_OCRAM_SIZE - VECTOR_TABLE_SIZE)
 #  define IMX_VECTOR_VADDR        0xffff0000
 
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP) && defined(SMP_INTERCPU_NONCACHED)
 /* Inter-processor communications
  *
  * NOTICE that we use the unused virtual address space at 0x00400000 for

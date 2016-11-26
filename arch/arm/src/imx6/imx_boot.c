@@ -233,7 +233,7 @@ static void imx_vectormapping(void)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP) && defined(SMP_INTERCPU_NONCACHED)
 static void imx_intercpu_mapping(void)
 {
   uint32_t intercpu_paddr = INTERCPU_PADDR & PTE_SMALL_PADDR_MASK;
@@ -433,7 +433,7 @@ void arm_boot(void)
 #if defined(CONFIG_ARCH_RAMFUNCS)
   const uint32_t *src;
 #endif
-#if defined(CONFIG_ARCH_RAMFUNCS) || defined(CONFIG_SMP)
+#if defined(CONFIG_ARCH_RAMFUNCS) || defined(CONFIG_SMP) && defined(SMP_INTERCPU_NONCACHED)
   uint32_t *dest;
 #endif
 
@@ -458,7 +458,7 @@ void arm_boot(void)
   imx_vectormapping();
   imx_lowputc('B');
 
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP) && defined(SMP_INTERCPU_NONCACHED)
   /* Provide a special mapping for the OCRAM interrupt vector positioned in
    * high memory.
    */
@@ -545,7 +545,7 @@ void arm_boot(void)
   imx_lowputc('L');
 #endif
 
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP) && defined(SMP_INTERCPU_NONCACHED)
   /* Initialize the uncached, inter-CPU communications area */
 
   for (dest = &_snocache; dest < &_enocache; )

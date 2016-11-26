@@ -45,8 +45,11 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* Not a useful feature */
 
-#ifdef CONFIG_SMP
+#undef SMP_INTERCPU_NONCACHED
+
+#if defined(CONFIG_SMP) && defined(SMP_INTERCPU_NONCACHED)
   /* In SMP configurations, save spinlocks and other inter-CPU communications
    * data in a non-cached memory region.
    */
