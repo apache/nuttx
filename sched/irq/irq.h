@@ -65,12 +65,12 @@ extern FAR xcpt_t g_irqvector[NR_IRQS];
  * disabled.
  */
 
-extern volatile spinlock_t g_cpu_irqlock;
+extern volatile spinlock_t g_cpu_irqlock SP_SECTION;
 
 /* Used to keep track of which CPU(s) hold the IRQ lock. */
 
-extern volatile spinlock_t g_cpu_irqsetlock;
-extern volatile cpu_set_t g_cpu_irqset;
+extern volatile spinlock_t g_cpu_irqsetlock SP_SECTION;
+extern volatile cpu_set_t g_cpu_irqset SP_SECTION;
 #endif
 
 /****************************************************************************

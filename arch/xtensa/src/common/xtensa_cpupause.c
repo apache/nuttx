@@ -54,39 +54,64 @@
  * Private Data
  ****************************************************************************/
 
-static spinlock_t g_cpu_wait[CONFIG_SMP_NCPUS];
-static spinlock_t g_cpu_paused[CONFIG_SMP_NCPUS];
+static spinlock_t g_cpu_wait[CONFIG_SMP_NCPUS] SP_SECTION;
+static spinlock_t g_cpu_paused[CONFIG_SMP_NCPUS] SP_SECTION;
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: xtensa_pause_handler
+ * Name: up_cpu_pausereq
  *
  * Description:
- *   This is the handler for CPU_INTCODE_PAUSE CPU interrupt.  This
- *   implements up_cpu_pause() by performing the following operations:
- *
- *   1. The current task state at the head of the current assigned task
- *      list was saved when the interrupt was entered.
- *   2. This function simply waits on a spinlock, then returns.
- *   3. Upon return, the interrupt exit logic will restore the state of
- *      the new task at the head of the ready to run list.
+ *   Return true if a pause request is pending for this CPU.
  *
  * Input Parameters:
- *   None
+ *   cpu - The index of the CPU to be queried
  *
  * Returned Value:
- *   None
+ *   true   = a pause request is pending.
+ *   false = no pasue request is pending.
  *
  ****************************************************************************/
 
-void xtensa_pause_handler(void)
+bool up_cpu_pausereq(int cpu)
+{
+  return spin_islocked(&g_cpu_paused[cpu]);
+}
+
+/****************************************************************************
+ * Name: up_cpu_paused
+ *
+ * Description:
+ *   Handle a pause request from another CPU.  Normally, this logic is
+ *   executed from interrupt handling logic within the architecture-specific
+ *   However, it is sometimes necessary necessary to perform the pending
+ *   pause operation in other contexts where the interrupt cannot be taken
+ *   in order to avoid deadlocks.
+ *
+ *   This function performs the following operations:
+ *
+ *   1. It saves the current task state at the head of the current assigned
+ *      task list.
+ *   2. It waits on a spinlock, then
+ *   3. Returns from interrupt, restoring the state of the new task at the
+ *      head of the ready to run list.
+ *
+ * Input Parameters:
+ *   cpu - The index of the CPU to be paused
+ *
+ * Returned Value:
+ *   On success, OK is returned.  Otherwise, a negated errno value indicating
+ *   the nature of the failure is returned.
+ *
+ ****************************************************************************/
+
+int up_cpu_paused(int cpu)
 {
   FAR struct tcb_s *otcb = this_task();
   FAR struct tcb_s *ntcb;
-  int cpu = up_cpu_index();
 
   /* Update scheduler parameters */
 
@@ -126,6 +151,32 @@ void xtensa_pause_handler(void)
     }
 
   spin_unlock(&g_cpu_wait[cpu]);
+}
+
+/****************************************************************************
+ * Name: xtensa_pause_handler
+ *
+ * Description:
+ *   This is the handler for CPU_INTCODE_PAUSE CPU interrupt.  This
+ *   implements up_cpu_pause() by performing the following operations:
+ *
+ *   1. The current task state at the head of the current assigned task
+ *      list was saved when the interrupt was entered.
+ *   2. This function simply waits on a spinlock, then returns.
+ *   3. Upon return, the interrupt exit logic will restore the state of
+ *      the new task at the head of the ready to run list.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void xtensa_pause_handler(void)
+{
+  (void)up_cpu_paused(up_cpu_index());
 }
 
 /****************************************************************************

@@ -69,8 +69,8 @@
  * so that it will be ready for the next pause operation.
  */
 
-static volatile spinlock_t g_cpu_wait[CONFIG_SMP_NCPUS];
-static volatile spinlock_t g_cpu_paused[CONFIG_SMP_NCPUS];
+static volatile spinlock_t g_cpu_wait[CONFIG_SMP_NCPUS] SP_SECTION;
+static volatile spinlock_t g_cpu_paused[CONFIG_SMP_NCPUS] SP_SECTION;
 
 /****************************************************************************
  * Public Functions

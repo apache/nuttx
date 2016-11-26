@@ -69,14 +69,27 @@
  *   DSB - Data syncrhonization barrier.
  */
 
-#define HAVE_DMB 1
-#ifndef SP_DMB
+#undef __SP_UNLOCK_FUNCTION
+#if !defined(SP_DMB)
 #  define SP_DMB()
-#  undef HAVE_DMB
+#else
+#  define __SP_UNLOCK_FUNCTION 1
 #endif
 
-#ifndef SP_DSB
+#if !defined(SP_DSB)
 #  define SP_DSB()
+#endif
+
+/* If the target CPU supports a data cache then it may be necessary to
+ * manage spinlocks in a special way, perhaps linking them all into a
+ * special non-cacheable memory region.
+ *
+ *   SP_SECTION - Special storage attributes may be required to force
+ *      spinlocks into a special, non-cacheable section.
+ */
+
+#if !defined(SP_SECTION)
+#  define SP_SECTION
 #endif
 
 /****************************************************************************
@@ -244,7 +257,7 @@ void spin_lockr(FAR struct spinlock_s *lock);
  *
  ****************************************************************************/
 
-#ifdef HAVE_DMB
+#ifdef __SP_UNLOCK_FUNCTION
 void spin_unlock(FAR volatile spinlock_t *lock);
 #else
 #  define spin_unlock(l)  do { *(l) = SP_UNLOCKED; } while (0)

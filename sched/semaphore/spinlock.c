@@ -144,7 +144,7 @@ void spin_lock(FAR volatile spinlock_t *lock)
  *
  ****************************************************************************/
 
-#ifdef HAVE_DMB
+#ifdef __SP_UNLOCK_FUNCTION
 void spin_unlock(FAR volatile spinlock_t *lock)
 {
   *lock = SP_UNLOCKED;
@@ -218,7 +218,10 @@ void spin_lockr(FAR struct spinlock_s *lock)
           up_irq_restore(flags);
           sched_yield();
           flags = up_irq_save();
+          SP_DSB();
         }
+
+      SP_DMB();
 
       /* Take one count on the lock */
 
@@ -238,8 +241,10 @@ void spin_lockr(FAR struct spinlock_s *lock)
   while (up_testset(&lock->sp_lock) == SP_LOCKED)
     {
       sched_yield();
+      SP_DSB()
     }
 
+  SP_DMB();
 #endif /* CONFIG_SMP */
 }
 
