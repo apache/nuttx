@@ -993,7 +993,7 @@
  *
  * OCRAM Memory Map:
  * ---------- ---------- ---------------------------
- * OFFSET     SIZE       CONTENT
+ * START      END        CONTENT
  * ---------- ---------- ---------------------------
  * 0x00000000 0x00010000 Vectors (VECTOR_TABLE_SIZE)
  * 0x00010000 0x0003c000 Unused
@@ -1007,7 +1007,7 @@
 #else  /* Vectors located at 0xffff:0000 -- this probably does not work */
 /* OCRAM Memory Map:
  * ---------- ---------- ---------------------------
- * OFFSET     SIZE       CONTENT
+ * START      END        CONTENT
  * ---------- ---------- ---------------------------
  * 0x00000000 0x00004000 Page table (PGTABLE_SIZE)
  * 0x00004000 0x00030000 Unused
