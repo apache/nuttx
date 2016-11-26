@@ -46,7 +46,7 @@ MEMORY
 {
 	oscram (W!RX) : ORIGIN = 0x00900000, LENGTH = 256K - 16K
 	ddr3 (W!RX)   : ORIGIN = 0x10800000, LENGTH = 1024M - 8M
-	nocache (WR)  : ORIGIN = 0x80600000, LENGTH = 4K
+	nocache (WR)  : ORIGIN = 0xe0000000, LENGTH = 4K
 }
 
 OUTPUT_FORMAT("elf32-littlearm", "elf32-littlearm", "elf32-littlearm")
@@ -128,7 +128,7 @@ SECTIONS
 		_snocache = ABSOLUTE(.);
 		*(.nocache)
 		_enocache = ABSOLUTE(.);
-	} > nocahce
+	} > nocache
 
 	/* Stabs debugging sections. */
 	.stab 0 : { *(.stab) }

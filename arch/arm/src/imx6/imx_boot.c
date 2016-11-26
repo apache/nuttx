@@ -233,7 +233,7 @@ static void imx_vectormapping(void)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SMP
+#ifdef CONFIG_SMP
 static void imx_intercpu_mapping(void)
 {
   uint32_t intercpu_paddr = INTERCPU_PADDR & PTE_SMALL_PADDR_MASK;
@@ -256,7 +256,7 @@ static void imx_intercpu_mapping(void)
 
   /* Now set the level 1 descriptor to refer to the level 2 page table. */
 
-  mmu_l1_setentry(INTERCPU_PBASE & PMD_PTE_PADDR_MASK,
+  mmu_l1_setentry(INTERCPU_PADDR & PMD_PTE_PADDR_MASK,
                   INTERCPU_VADDR & PMD_PTE_PADDR_MASK,
                   MMU_L1_INTERCPUFLAGS);
 }

@@ -917,7 +917,8 @@
  *    the address space.
  */
 
-#define INTERCPU_L2_PAGES 1 /* Pages allowed for inter-processor communications */
+#define INTERCPU_L2_PAGES 1          /* Pages allowed for inter-processor communications */
+#define L2_BASE           0x80000000 /* Beginning of L2 page table */
 
 #ifndef CONFIG_ARCH_LOWVECTORS
   /* Memory map
@@ -1007,9 +1008,15 @@
 #  define INTERCPU_L2_OFFSET      (PGTABLE_L2_OFFSET + PGTABLE_L2_SIZE)
 #  define INTERCPU_L2_SIZE        (0x00000400)
 
-/* Inter-processor communications L2 page table virtual base addresse */
+  /* on-cached inter-processor communication page table base addresses */
 
+#  define INTERCPU_L2_PBASE       (PGTABLE_BASE_PADDR + INTERCPU_L2_OFFSET)
 #  define INTERCPU_L2_VBASE       (PGTABLE_BASE_VADDR + INTERCPU_L2_OFFSET)
+
+  /* on-cached inter-processor communication end addresses */
+
+#  define INTERCPU_L2_END_PADDR   (INTERCPU_L2_PBASE + INTERCPU_L2_SIZE)
+#  define INTERCPU_L2_END_VADDR   (INTERCPU_L2_VBASE + INTERCPU_L2_SIZE)
 #endif
 
 /* Base address of the interrupt vector table.

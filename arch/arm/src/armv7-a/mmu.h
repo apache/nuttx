@@ -1426,6 +1426,28 @@ void mmu_l1_restore(uintptr_t vaddr, uint32_t l1entry);
 #  define mmu_l1_clrentry(v) mmu_l1_restore(v,0)
 #endif
 
+/****************************************************************************
+ * Name: mmu_l2_setentry
+ *
+ * Description:
+ *   Set one small (4096B) entry in a level2 translation table.
+ *
+ * Input Parameters:
+ *   l2vaddr - the virtual address of the beginning of the L2 translation
+ *     table.
+ *   paddr - The physical address to be mapped.  Must be aligned to a 4KB
+ *     address boundary
+ *   vaddr - The virtual address to be mapped.  Must be aligned to a 4KB
+ *     address boundary
+ *   mmuflags - The MMU flags to use in the mapping.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_ARCH_ROMPGTABLE
+void mmu_l2_setentry(uint32_t l2vaddr, uint32_t paddr, uint32_t vaddr,
+                     uint32_t mmuflags);
+#endif
+
 /************************************************************************************
  * Name: mmu_l1_map_region
  *
