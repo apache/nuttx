@@ -917,8 +917,7 @@
  *    the address space.
  */
 
-#define INTERCPU_L2_PAGES 1          /* Pages allowed for inter-processor communications */
-#define L2_BASE           0x80000000 /* Beginning of L2 page table */
+#define INTERCPU_L2_PAGES 1 /* Pages allowed for inter-processor communications */
 
 #ifndef CONFIG_ARCH_LOWVECTORS
   /* Memory map
@@ -1051,10 +1050,14 @@
 #  define IMX_VECTOR_VADDR        0x00000000
 
 #ifdef CONFIG_SMP
-/* Inter-processor communications  */
+/* Inter-processor communications.
+ *
+ * NOTICE that we use the unused virtual address space at 0x00400000 for
+ * the inter-CPU virtual communication area.
+ */
 
 #  define INTERCPU_PADDR          (IMX_VECTOR_PADDR + VECTOR_TABLE_SIZE)
-#  define INTERCPU_VADDR          (INTERCPU_L2_VBASE << 18)
+#  define INTERCPU_VADDR          (0x00400000)
 #  define INTERCPU_SIZE           (INTERCPU_L2_PAGES << 12)
 #  define INTERCPU_VSRAM          (IMX_VECTOR_VSRAM + VECTOR_TABLE_SIZE)
 #endif
@@ -1075,10 +1078,14 @@
 #  define IMX_VECTOR_VADDR        0xffff0000
 
 #ifdef CONFIG_SMP
-/* Inter-processor communications  */
+/* Inter-processor communications
+ *
+ * NOTICE that we use the unused virtual address space at 0x00400000 for
+ * the inter-CPU virtual communication area.
+ */
 
 #  define INTERCPU_PADDR          (IMX_VECTOR_PADDR - INTERCPU_L2_SIZE)
-#  define INTERCPU_VADDR          (INTERCPU_L2_VBASE << 18)
+#  define INTERCPU_VADDR          (0x00400000)
 #  define INTERCPU_SIZE           (INTERCPU_L2_PAGES << 12)
 #  define INTERCPU_VSRAM          (IMX_VECTOR_VSRAM - INTERCPU_L2_SIZE)
 #endif

@@ -256,7 +256,7 @@ static void imx_intercpu_mapping(void)
 
   /* Now set the level 1 descriptor to refer to the level 2 page table. */
 
-  mmu_l1_setentry(INTERCPU_PADDR & PMD_PTE_PADDR_MASK,
+  mmu_l1_setentry(INTERCPU_L2_PBASE & PMD_PTE_PADDR_MASK,
                   INTERCPU_VADDR & PMD_PTE_PADDR_MASK,
                   MMU_L1_INTERCPUFLAGS);
 }
