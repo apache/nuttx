@@ -897,7 +897,7 @@
  *   0x80000000-0xefffffff: Undefined (1.75 GB)
  *
  * That is the offset where the main L2 page tables will be positioned.  This
- * corresponds to page table offsets 0x000002000 up to 0x000003c00.  That
+ * corresponds to page table offsets 0x00002000 up to 0x00003c00.  That
  * is 1792 entries, each mapping 4KB of address for a total of 7MB of virtual
  * address space)
  *
@@ -989,8 +989,7 @@
  */
 
 #ifdef CONFIG_ARCH_LOWVECTORS  /* Vectors located at 0x0000:0000  */
-
-  /* Vectors will always lie at the beginnin of OCRAM */
+/* Vectors will always lie at the beginning of OCRAM */
 
 #  define IMX_VECTOR_PADDR        IMX_OCRAM_PBASE
 #  define IMX_VECTOR_VSRAM        IMX_OCRAM_VBASE
