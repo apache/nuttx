@@ -88,7 +88,8 @@ static uint8_t g_cpu_nestcount[CONFIG_SMP_NCPUS];
  * Description:
  *   Spin to get g_irq_waitlock, handling a known deadlock condition:
  *
- *   Suppose this situation:
+ *   A deadlock may occur if enter_critical_section is called from an
+ *   interrupt handler.  Suppose:
  *
  *   - CPUn is in a critical section and has the g_cpu_irqlock spinlock.
  *   - CPUm takes an interrupt and attempts to enter the critical section.
@@ -98,83 +99,34 @@ static uint8_t g_cpu_nestcount[CONFIG_SMP_NCPUS];
  *   - But interrupts are disabled on CPUm so the up_cpu_pause() is never
  *     handled, causing the deadlock.
  *
- *   This function detects this deadlock condition while spinning in an
- *   interrupt and calls up_cpu_pause() handler, breaking the deadlock.
+ *   This same deadlock can occur in the normal tasking case:
  *
- ****************************************************************************/
-
-#ifdef CONFIG_SMP
-static inline void irq_waitlock(int cpu)
-{
-  /* Duplicate the spin_lock() logic from spinlock.c, but adding the check
-   * for the deadlock condition.
-   */
-
-  while (spin_trylock(&g_cpu_irqlock) == SP_LOCKED)
-    {
-      /* A deadlock condition would occur if CPUn:
-       *
-       *   1. Holds the g_cpu_irqlock, and
-       *   2. Is trying to interrupt CPUm, but
-       *   3. CPUm is spinning trying acquire the g_cpu_irqlock.
-       *
-       * The protocol for CPUn to pause CPUm is as follows
-       *
-       *   1. The up_cpu_pause() implementation on CPUn locks both
-       *      g_cpu_wait[m] and g_cpu_paused[m].  CPUn then waits
-       *      spinning on g_cpu_wait[m].
-       *   2. When CPUm receives the interrupt it (1) unlocks
-       *      g_cpu_paused[m] and (2) locks g_cpu_wait[m].  The
-       *      first unblocks CPUn and the second blocks CPUm in the
-       *      interrupt handler.
-       *
-       * The problem in the deadlock case is that CPUm cannot receive
-       * the interrupt because it is locked up spinning.  Here we break
-       * the deadlock here be handling the pause interrupt request
-       * while waiting.
-       */
-
-      if (up_cpu_pausereq(cpu))
-        {
-          /* Yes.. some other CPU is requesting to pause this CPU!  Handle
-           * the pause interrupt now.
-           */
-
-          DEBUGVERIFY(up_cpu_paused(cpu));
-        }
-
-      SP_DSB();
-    }
-
-  /* We have g_cpu_irqlock! */
-
-  SP_DMB();
-}
-#endif
-
-/****************************************************************************
- * Name: task_waitlock
- *
- * Description:
- *   Spin to get g_irq_waitlock, handling a known deadlock condition:
- *
- *   Suppose this situation:
- *
- *   - CPUn enters a critical section and has the g_cpu_irqlock spinlock.
- *   - CPUn causes a task to become ready to run and scheduler selects
- *     CPUm.  CPUm is requested to pause.
- *   - But CPUm is in a normal task and is also attempting to enter a
- *     critical section.  So it is also spinning to get g_cpu_irqlock
- *     with interrupts disabled and cannot respond to the pause request,
- *     causing the deadlock.
+ *   - A task on CPUn enters a critical section and has the g_cpu_irqlock
+ *     spinlock.
+ *   - Another task on CPUm attempts to enter the critical section but has
+ *     to wait, spinning to get g_cpu_irqlock with interrupts disabled.
+ *   - The task on CPUn causes a new task to become ready-torun and the
+ *     scheduler selects CPUm.  CPUm is requested to pause via a pause
+ *     interrupt.
+ *   - But the task on CPUm is also attempting to enter the critical
+ *     section.  Since it is spinning with interrupts disabled, CPUm cannot
+ *     process the pending pause interrupt, causing the deadlock.
  *
  *   This function detects this deadlock condition while spinning with \
  *   interrupts disabled.
  *
+ * Input Parameters:
+ *   cpu - The index of CPU that is trying to enter the critical section.
+ *
+ * Returned Value:
+ *   True:  The g_cpu_irqlock spinlock has been taken.
+ *   False: The g_cpu_irqlock spinlock has not been taken yet, but there is
+ *          a pending pause interrupt request.
+ *
  ****************************************************************************/
 
 #ifdef CONFIG_SMP
-static inline bool task_waitlock(int cpu)
+static inline bool irq_waitlock(int cpu)
 {
   /* Duplicate the spin_lock() logic from spinlock.c, but adding the check
    * for the deadlock condition.
@@ -317,7 +269,15 @@ try_again:
                    * no longer blocked by the critical section).
                    */
 
-                  irq_waitlock(cpu);
+                  if (!irq_waitlock(cpu))
+                    {
+                      /* We are in a deadlock condition due to a pending
+                       * pause request interrupt request.  Break the
+                       * deadlock by handling the pause interrupt now.
+                       */
+
+                      DEBUGVERIFY(up_cpu_paused(cpu));
+                    }
                 }
 
               /* In any event, the nesting count is now one */
@@ -359,13 +319,13 @@ try_again:
               cpu = this_cpu();
               DEBUGASSERT((g_cpu_irqset & (1 << cpu)) == 0);
 
-              if (!task_waitlock(cpu))
+              if (!irq_waitlock(cpu))
                 {
-                  /* We are in a potential deadlock condition due to a
-                   * pending pause request interrupt.  Re-enable interrupts
-                   * on this CPU and try again.  Briefly re-enabling
-                   * interrupts should be sufficient to permit processing
-                   * the pending pause request.
+                  /* We are in a deadlock condition due to a pending pause
+                   * request interrupt.  Re-enable interrupts on this CPU
+                   * and try again.  Briefly re-enabling interrupts should
+                   * be sufficient to permit processing the pending pause
+                   * request.
                    */
 
                   up_irq_restore(ret);
