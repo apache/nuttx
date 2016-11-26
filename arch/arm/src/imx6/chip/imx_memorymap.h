@@ -918,6 +918,14 @@
  */
 
 #ifndef CONFIG_ARCH_LOWVECTORS
+  /* Memory map
+   * VIRTUAL ADDRESS RANGE L1 PG TABLE L2 PG TABLE  DESCRIPTION
+   * START      END        OFFSET      SIZE
+   * ---------- ---------- ------------ ----------------------------
+   * 0x80000000 0x803fffff 0x000002000 0x000000400  Vectors (1MiB)
+   * 0x80100000 0x806fffff 0x000002400 0x000001800  Paging  (6MiB)
+   */
+
   /* Vector L2 page table offset/size */
 
 #  define VECTOR_L2_OFFSET        0x000002000
@@ -939,6 +947,13 @@
 #  define PGTABLE_L2_SIZE         0x000001800
 
 #else
+  /* Memory map
+   * VIRTUAL ADDRESS RANGE L1 PG TABLE L2 PG TABLE  DESCRIPTION
+   * START      END        OFFSET      SIZE
+   * ---------- ---------- ------------ ----------------------------
+   * 0x80000000 0x806fffff 0x000002000 0x000001c00  Paging  (7MiB)
+   */
+
   /* Paging L2 page table offset/size */
 
 #  define PGTABLE_L2_OFFSET       0x000002000
