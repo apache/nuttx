@@ -101,6 +101,14 @@ Status
 
     +if (up_cpu_index() == 0) return 17; // REMOVE ME
 
+2016-11-26: With regard to SMP, the major issue is cache coherency.  I added
+  some special build logic to move spinlock data into the separate, non-
+  cached section.  That gives an improvement in performance but there are
+  still hangs.  These, I have determined are to other kinds of cache
+  coherency problems.  Semaphores, message queues, etc.  basically all
+  shared data must be made coherent.  I am not sure how to do that.  See
+  the SMP sectin below for more information.
+
 Platform Features
 =================
 
@@ -492,12 +500,13 @@ Open Issues:
 
 1. Currently all device interrupts are handled on CPU0 only.  Critical sections will
    attempt to disable interrupts but will now disable interrupts only on the current
-   CPU (which may not be CPU0).  There is a spinlock to prohibit entrance into these critical sections in interrupt handlers of other CPUs.
+   CPU (which may not be CPU0).  There is a spinlock to prohibit entrance into these
+   critical sections in interrupt handlers of other CPUs.
 
    When the critical section is used to lock a resource that is also used by
    interupt handling, the interrupt handling logic must also take the spinlock.
    This will cause the interrupt handlers on other CPUs to spin until
-   leave_critical_section() is called.  More verification is needed, however.
+   leave_critical_section() is called.  More verification is needed.
 
 2. Cache Concurency.  This is a complex problem.  There is logic in place now to
    clean CPU0 D-cache before starting a new CPU and for invalidating the D-Cache
@@ -536,7 +545,10 @@ Open Issues:
    Another alternative would be to place all spinlocks in a non-cachable memory
    region.  That is problem what will have to be done.
 
-   This is a VERIFIED PROBLEM:  I have seen cases where CPU0 sets a spinlock=1 then
+   This is a VERIFIED PROBLEM:  Cache inconsistencies appear to be the root
+   cause of all current SMP issues.
+
+   I have seen cases where CPU0 sets a spinlock=1 then
    tries to lock the spinlock.  CPU0 will wait in this case until CPU1 unlocks the
    spinlock.  Most of this happens correctly; I can see that CPU1 does set the
    spinlock=0, but CPU0 never sees the change and spins forever.  That is surely
@@ -546,14 +558,20 @@ Open Issues:
    spinlock "g_cpu_paused[cpu]".  CPU1 correctly sets g_cpu_paused[cpu] to zero
    but CPU0 never sees the change.
 
-3. Caching probabaly interferes with spinlocks as they are currently implemented.
+   Caching probably interferes with spinlocks as they are currently implemented.
    Waiting on a cached copy of the spinlock may result in a hang or a failure to
    wait.
 
    Should all spinlocks go into a special "strongly ordered" memory region?
 
-   Update: Cache inconsistencies seem to be the root cause of all current SMP
-   issues.
+   No... that is not sufficient:
+
+   2016-11-26: With regard to SMP, the major issue is cache coherency.  I added
+     some special build logic to move spinlock data into the separate, non-
+     cached section.  That gives an improvement in performance but there are
+     still hangs.  These, I have determined are to other kinds of cache
+     coherency problems.  Semaphores, message queues, etc.  basically all
+     shared data must be made coherent.  I am not sure how to do that.
 
 Configurations
 ==============
@@ -643,7 +661,6 @@ Configuration sub-directories
        command.  To disable this RAMLOG feature, disable the following:
 
        Device Drivers:  CONFIG_RAMLOG
-
 
   smp
   ---

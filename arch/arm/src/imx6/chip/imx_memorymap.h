@@ -122,6 +122,18 @@
 #define IMX_MMDCDDR_PSECTION     0x10000000  /* 10000000-ffffffff 3840 MB MMDC-DDR Controller */
                                              /* 10000000-7fffffff 1792 MB */
 
+/* By default, NuttX uses a 1-1 memory mapping.  So the unused, reserved
+ * address in the top-level memory map are candidates for other mapping uses:
+ *
+ *  00018000-000fffff Reserved -- Not used
+ *  00400000-007fffff Reserved -- Used as the virtual address an inter-CPU,
+ *                                un-cached memory region in SMP
+ *                                configurations
+ *  00d00000-00ffffff Reserved -- Not used
+ *  0220c000-023fffff Reserved -- Not used
+ *  80000000-efffffff Reserved -- Level 2 page table (See below)
+ */
+
 /* i.MX6 DMA PSECTION Offsets */
 
 #define IMX_CAAMRAM_OFFSET       0x00000000  /* 00000000-00003fff  16 KB CAAM (16K secure RAM) */
@@ -973,13 +985,13 @@
    */
 
 #  ifdef CONFIG_SMP
-    /* Paging L2 page table offset/size */
+  /* Paging L2 page table offset/size */
 
 #    define PGTABLE_L2_OFFSET     0x000002000
 #    define PGTABLE_L2_SIZE       0x000001800
 
 #  else
-    /* Paging L2 page table offset/size */
+  /* Paging L2 page table offset/size */
 
 #    define PGTABLE_L2_OFFSET     0x000002000
 #    define PGTABLE_L2_SIZE       0x000001c00
@@ -1007,12 +1019,12 @@
 #  define INTERCPU_L2_OFFSET      (PGTABLE_L2_OFFSET + PGTABLE_L2_SIZE)
 #  define INTERCPU_L2_SIZE        (0x00000400)
 
-  /* on-cached inter-processor communication page table base addresses */
+/* Non-cached inter-processor communication page table base addresses */
 
 #  define INTERCPU_L2_PBASE       (PGTABLE_BASE_PADDR + INTERCPU_L2_OFFSET)
 #  define INTERCPU_L2_VBASE       (PGTABLE_BASE_VADDR + INTERCPU_L2_OFFSET)
 
-  /* on-cached inter-processor communication end addresses */
+/* Non-cached inter-processor communication end addresses */
 
 #  define INTERCPU_L2_END_PADDR   (INTERCPU_L2_PBASE + INTERCPU_L2_SIZE)
 #  define INTERCPU_L2_END_VADDR   (INTERCPU_L2_VBASE + INTERCPU_L2_SIZE)
