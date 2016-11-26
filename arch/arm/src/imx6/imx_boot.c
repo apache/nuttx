@@ -225,6 +225,46 @@ static void imx_vectormapping(void)
 #endif
 
 /****************************************************************************
+ * Name: imx_intercpu_mapping
+ *
+ * Description:
+ *   Setup a special mapping for the non-cached, inter-cpu communications
+ *   area.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_SMP
+static void imx_intercpu_mapping(void)
+{
+  uint32_t intercpu_paddr = INTERCPU_PADDR & PTE_SMALL_PADDR_MASK;
+  uint32_t intercpu_vaddr = INTERCPU_VADDR & PTE_SMALL_PADDR_MASK;
+  uint32_t end_paddr      = INTERCPU_PADDR + INTERCPU_SIZE;
+
+  /* We want to keep the inter-cpu region in on-chip RAM (OCRAM).  The 
+   * i.MX6 has 256Kb of OCRAM positioned at physical address 0x0090:0000.
+   */
+
+  while (intercpu_paddr < end_paddr)
+    {
+      mmu_l2_setentry(INTERCPU_L2_VBASE,  intercpu_paddr, intercpu_vaddr,
+                      MMU_L2_INTERCPUFLAGS);
+      intercpu_paddr += 4096;
+      intercpu_vaddr += 4096;
+    }
+
+  /* Now set the level 1 descriptor to refer to the level 2 page table. */
+
+  mmu_l1_setentry(VECTOR_L2_PBASE & PMD_PTE_PADDR_MASK,
+                  INTERCPU_VADDR & PMD_PTE_PADDR_MASK,
+                  MMU_L1_PGTABFLAGS);
+}
+#else
+  /* No inter-cpu communications area */
+
+#  define imx_intercpu_mapping()
+#endif
+
+/****************************************************************************
  * Name: imx_copyvectorblock
  *
  * Description:
@@ -414,6 +454,15 @@ void arm_boot(void)
   imx_vectormapping();
   imx_lowputc('B');
 
+#ifdef CONFIG_SMP
+  /* Provide a special mapping for the OCRAM interrupt vector positioned in
+   * high memory.
+   */
+
+  imx_intercpu_mapping();
+  imx_lowputc('C');
+#endif
+
 #ifdef CONFIG_ARCH_RAMFUNCS
   /* Copy any necessary code sections from FLASH to RAM.  The correct
    * destination in OCRAM is given by _sramfuncs and _eramfuncs.  The
@@ -426,14 +475,14 @@ void arm_boot(void)
       *dest++ = *src++;
     }
 
-  imx_lowputc('C');
+  imx_lowputc('D');
 
   /* Flush the copied RAM functions into physical RAM so that will
    * be available when fetched into the I-Cache.
    */
 
   arch_clean_dcache((uintptr_t)&_sramfuncs, (uintptr_t)&_eramfuncs)
-  imx_lowputc('D');
+  imx_lowputc('E');
 #endif
 
   /* Setup up vector block.  _vector_start and _vector_end are exported from
@@ -441,23 +490,23 @@ void arm_boot(void)
    */
 
   imx_copyvectorblock();
-  imx_lowputc('E');
+  imx_lowputc('F');
 
   /* Disable the watchdog timer */
 
   imx_wdtdisable();
-  imx_lowputc('F');
+  imx_lowputc('G');
 
   /* Initialize clocking to settings provided by board-specific logic */
 
   imx_clockconfig();
-  imx_lowputc('G');
+  imx_lowputc('H');
 
 #ifdef CONFIG_ARCH_FPU
   /* Initialize the FPU */
 
   arm_fpuconfig();
-  imx_lowputc('H');
+  imx_lowputc('I');
 #endif
 
   /* Perform board-specific initialization,  This must include:
@@ -471,7 +520,7 @@ void arm_boot(void)
    */
 
   imx_board_initialize();
-  imx_lowputc('I');
+  imx_lowputc('J');
 
 #ifdef NEED_SDRAM_REMAPPING
   /* SDRAM was configured in a temporary state to support low-level
@@ -480,7 +529,7 @@ void arm_boot(void)
    */
 
   imx_remap();
-  imx_lowputc('J');
+  imx_lowputc('K');
 #endif
 
 #ifdef CONFIG_BOOT_SDRAM_DATA
@@ -489,13 +538,13 @@ void arm_boot(void)
    */
 
   arm_data_initialize();
-  imx_lowputc('K');
+  imx_lowputc('L');
 #endif
 
   /* Perform common, low-level chip initialization (might do nothing) */
 
   imx_lowsetup();
-  imx_lowputc('L');
+  imx_lowputc('M');
 
 #ifdef USE_EARLYSERIALINIT
   /* Perform early serial initialization if we are going to use the serial
@@ -503,7 +552,7 @@ void arm_boot(void)
    */
 
   imx_earlyserialinit();
-  imx_lowputc('M');
+  imx_lowputc('N');
 #endif
 
   /* Now we can enable all other CPUs.  The enabled CPUs will start execution
@@ -512,6 +561,6 @@ void arm_boot(void)
    */
 
   imx_cpu_enable();
-  imx_lowputc('N');
+  imx_lowputc('O');
   imx_lowputc('\n');
 }
