@@ -92,6 +92,7 @@
 #  define SCU_CONFIG_NCPUS(r)        ((((uint32_t)(r) &  SCU_CONFIG_NCPUS_MASK) >> SCU_CONFIG_NCPUS_SHIFT) + 1)
 #define SCU_CONFIG_SMPCPUS_SHIFT     4         /* Processors that are in SMP or AMP mode */
 #define SCU_CONFIG_SMPCPUS_MASK      (15 << SCU_CONFIG_SMPCPUS_SHIFT)
+#  define SCU_CONFIG_CPU_SMP(n)      (1 << ((n)+4))
 #  define SCU_CONFIG_CPU0_SMP        (1 << 4)
 #  define SCU_CONFIG_CPU1_SMP        (1 << 5)
 #  define SCU_CONFIG_CPU2_SMP        (1 << 6)
@@ -155,5 +156,20 @@
 #define SCU_SNSAC_COMP_CPU(n)        (1 << (n))     /* CPUn has non-secure access to components */
 #define SCU_SNSAC_PTIM_CPU(n)        (1 << ((n)+4)) /* CPUn has non-secure access to private timers */
 #define SCU_SNSAC_GTIM_CPU(n)        (1 << ((n)+8)) /* CPUn has non-secure access to global timer */
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: arm_enable_smp
+ *
+ * Description:
+ *   Enable the SCU and make certain that current CPU is participating in
+ *   the SMP cache coherency.
+ *
+ ****************************************************************************/
+
+void arm_enable_smp(int cpu);
 
 #endif /* __ARCH_ARM_SRC_ARMV7_A_SCU_H */

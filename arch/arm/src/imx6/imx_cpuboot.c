@@ -52,6 +52,7 @@
 #include "sctlr.h"
 #include "smp.h"
 #include "fpu.h"
+#include "scu.h"
 #include "gic.h"
 #include "cp15_cacheops.h"
 
@@ -264,6 +265,12 @@ void arm_cpu_boot(int cpu)
   /* Initialize the FPU */
 
   arm_fpuconfig();
+#endif
+
+#ifdef CONFIG_SMP
+  /* Enable SMP cache coherency for CPU0 */
+
+  arm_enable_smp(cpu);
 #endif
 
   /* Initialize the Generic Interrupt Controller (GIC) for CPUn (n != 0) */

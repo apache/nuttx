@@ -45,6 +45,7 @@
 
 #include "up_internal.h"
 #include "sctlr.h"
+#include "scu.h"
 #include "gic.h"
 
 /****************************************************************************
@@ -107,6 +108,12 @@ void up_irqinitialize(void)
 
   arm_gic0_initialize();  /* Initialization unique to CPU0 */
   arm_gic_initialize();   /* Initialization common to all CPUs */
+
+#ifdef CONFIG_SMP
+  /* Enable SMP cache coherency for CPU0 */
+
+  arm_enable_smp(0);
+#endif
 
 #ifdef CONFIG_ARCH_LOWVECTORS
   /* If CONFIG_ARCH_LOWVECTORS is defined, then the vectors located at the

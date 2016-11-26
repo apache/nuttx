@@ -107,7 +107,10 @@ Status
   still hangs.  These, I have determined are to other kinds of cache
   coherency problems.  Semaphores, message queues, etc.  basically all
   shared data must be made coherent.  I am not sure how to do that.  See
-  the SMP sectin below for more information.
+  the SMP section below for more information.
+
+  I also added some SCU controls that should enable cache consistency for SMP
+  CPUs, but I don't think I have that working right yet.
 
 Platform Features
 =================
@@ -508,70 +511,21 @@ Open Issues:
    This will cause the interrupt handlers on other CPUs to spin until
    leave_critical_section() is called.  More verification is needed.
 
-2. Cache Concurency.  This is a complex problem.  There is logic in place now to
-   clean CPU0 D-cache before starting a new CPU and for invalidating the D-Cache
-   when the new CPU is started.  REVISIT:  Seems that this should not be necessary.
-   If the Shareable bit set in the MMU mappings and my understanding is that this
-   should keep cache coherency at least within a cluster.  I need to study more
-   how the inner and outer shareable attribute works to control cacheing
+2. Cache Concurency.  Cache coherency in SMP configurations is managed by the the
+   CPU.  I don't think I have the set up correctly yet.
 
-   But there may are many, many more such cache coherency issues if I cannot find
-   a systematic way to manage cache coherency.
-
-   http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dht0008a/CJABEHDA.html
-   http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.den0024a/CEGDBEJE.html
-
-   Try:
-
-    --- mmu.h.orig  2016-05-20 13:09:34.773462000 -0600
-    +++ mmu.h       2016-05-20 13:03:13.261978100 -0600
-    @@ -572,8 +572,14 @@
-
-     #define MMU_ROMFLAGS         (PMD_TYPE_SECT | PMD_SECT_AP_R1 | PMD_CACHEABLE | \
-                                   PMD_SECT_DOM(0))
-    -#define MMU_MEMFLAGS         (PMD_TYPE_SECT | PMD_SECT_AP_RW1 | PMD_CACHEABLE | \
-    +#ifdef CONFIG_SMP
-    +
-    +#  define MMU_MEMFLAGS       (PMD_TYPE_SECT | PMD_SECT_AP_RW1 | PMD_CACHEABLE | \
-    +                              PMD_SECT_S | PMD_SECT_DOM(0))
-    +#else
-    +#  define MMU_MEMFLAGS       (PMD_TYPE_SECT | PMD_SECT_AP_RW1 | PMD_CACHEABLE | \
-                                   PMD_SECT_DOM(0))
-    +#endif
-     #define MMU_IOFLAGS          (PMD_TYPE_SECT | PMD_SECT_AP_RW1 | PMD_DEVICE | \
-                                   PMD_SECT_DOM(0) | PMD_SECT_XN)
-     #define MMU_STRONGLY_ORDERED (PMD_TYPE_SECT | PMD_SECT_AP_RW1 | \
-
-   Another alternative would be to place all spinlocks in a non-cachable memory
-   region.  That is problem what will have to be done.
-
-   This is a VERIFIED PROBLEM:  Cache inconsistencies appear to be the root
-   cause of all current SMP issues.
-
-   I have seen cases where CPU0 sets a spinlock=1 then
-   tries to lock the spinlock.  CPU0 will wait in this case until CPU1 unlocks the
-   spinlock.  Most of this happens correctly; I can see that CPU1 does set the
-   spinlock=0, but CPU0 never sees the change and spins forever.  That is surely
-   a consequence of cache issues.
-
-   This was observed between up_cpu_pause() and arm_pause_handler() with the
-   spinlock "g_cpu_paused[cpu]".  CPU1 correctly sets g_cpu_paused[cpu] to zero
-   but CPU0 never sees the change.
-
-   Caching probably interferes with spinlocks as they are currently implemented.
-   Waiting on a cached copy of the spinlock may result in a hang or a failure to
-   wait.
-
-   Should all spinlocks go into a special "strongly ordered" memory region?
-
-   No... that is not sufficient:
+   Currently cache inconsistencies appear to be the root cause of all current SMP
+   issues.
 
    2016-11-26: With regard to SMP, the major issue is cache coherency.  I added
      some special build logic to move spinlock data into the separate, non-
      cached section.  That gives an improvement in performance but there are
      still hangs.  These, I have determined are to other kinds of cache
      coherency problems.  Semaphores, message queues, etc.  basically all
-     shared data must be made coherent.  I am not sure how to do that.
+     shared data must be made coherent.
+
+     I also added some SCU controls that should enable cache consistency for SMP
+     CPUs, but I don't think I have that working right yet.
 
 Configurations
 ==============
