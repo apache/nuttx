@@ -110,13 +110,13 @@ static inline void irq_waitlock(int cpu)
    * for the deadlock condition.
    */
 
-  while (up_testset(&g_cpu_irqlock) == SP_LOCKED)
+  while (spin_trylock(&g_cpu_irqlock) == SP_LOCKED)
     {
       /* A deadlock condition would occur if CPUn:
        *
        *   1. Holds the g_cpu_irqlock, and
        *   2. Is trying to interrupt CPUm, but
-       *   3. CPUm is spinning trying acquaire the g_cpu_irqlock.
+       *   3. CPUm is spinning trying acquire the g_cpu_irqlock.
        *
        * The protocol for CPUn to pause CPUm is as follows
        *
@@ -153,6 +153,57 @@ static inline void irq_waitlock(int cpu)
 #endif
 
 /****************************************************************************
+ * Name: task_waitlock
+ *
+ * Description:
+ *   Spin to get g_irq_waitlock, handling a known deadlock condition:
+ *
+ *   Suppose this situation:
+ *
+ *   - CPUn enters a critical section and has the g_cpu_irqlock spinlock.
+ *   - CPUn causes a task to become ready to run and scheduler selects
+ *     CPUm.  CPUm is requested to pause.
+ *   - But CPUm is in a normal task and is also attempting to enter a
+ *     critical section.  So it is also spinning to get g_cpu_irqlock
+ *     with interrupts disabled and cannot respond to the pause request,
+ *     causing the deadlock.
+ *
+ *   This function detects this deadlock condition while spinning with \
+ *   interrupts disabled.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+static inline bool task_waitlock(int cpu)
+{
+  /* Duplicate the spin_lock() logic from spinlock.c, but adding the check
+   * for the deadlock condition.
+   */
+
+  while (spin_trylock(&g_cpu_irqlock) == SP_LOCKED)
+    {
+      /* Is a pause request pending? */
+
+      if (up_cpu_pausereq(cpu))
+        {
+          /* Yes.. some other CPU is requesting to pause this CPU!
+           * Abort the wait and return false.
+           */
+
+          return false;
+        }
+
+      SP_DSB();
+    }
+
+  /* We have g_cpu_irqlock! */
+
+  SP_DMB();
+  return true;
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -184,6 +235,8 @@ irqstate_t enter_critical_section(void)
    * to prevent possible waits on the spinlock from interrupt handling on
    * the local CPU.
    */
+
+try_again:
 
   ret = up_irq_save();
 
@@ -218,14 +271,14 @@ irqstate_t enter_critical_section(void)
            *
            *      g_cpu_irqlock = SP_LOCKED.
            *      g_cpu_nestcount = 0
-           *      The bit in g_cpu_irqset for this CPU hould be zero
+           *      The bit in g_cpu_irqset for this CPU should be zero
            *
            *   4. An extension of 3 is that we may be re-entered numerous
            *      times from the same interrupt handler.  In that case:
            *
            *      g_cpu_irqlock = SP_LOCKED.
            *      g_cpu_nestcount > 0
-           *      The bit in g_cpu_irqset for this CPU hould be zero
+           *      The bit in g_cpu_irqset for this CPU should be zero
            *
            * NOTE: However, the interrupt entry conditions can change due
            * to previous processing by the interrupt handler that may
@@ -305,7 +358,19 @@ irqstate_t enter_critical_section(void)
 
               cpu = this_cpu();
               DEBUGASSERT((g_cpu_irqset & (1 << cpu)) == 0);
-              spin_lock(&g_cpu_irqlock);
+
+              if (!task_waitlock(cpu))
+                {
+                  /* We are in a potential deadlock condition due to a
+                   * pending pause request interrupt.  Re-enable interrupts
+                   * on this CPU and try again.  Briefly re-enabling
+                   * interrupts should be sufficient to permit processing
+                   * the pending pause request.
+                   */
+
+                  up_irq_restore(ret);
+                  goto try_again;
+                }
 
               /* The set the lock count to 1.
                *
