@@ -36,4 +36,22 @@
 #ifndef __ARCH_ARM_INCLUDE_ARMV7_A_SPINLOCK_H
 #define __ARCH_ARM_INCLUDE_ARMV7_A_SPINLOCK_H
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/config.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+  /* In SMP configurations, save spinlocks and other inter-CPU communications
+   * data in a non-cached memory region.
+   */
+
+#  define SP_SECTION __attribute__((section(".nocache")))
+#endif
+
 #endif /* __ARCH_ARM_INCLUDE_ARMV7_A_SPINLOCK_H */

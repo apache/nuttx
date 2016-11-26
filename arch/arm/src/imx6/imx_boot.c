@@ -240,6 +240,8 @@ static void imx_intercpu_mapping(void)
   uint32_t intercpu_vaddr = INTERCPU_VADDR & PTE_SMALL_PADDR_MASK;
   uint32_t end_paddr      = INTERCPU_PADDR + INTERCPU_SIZE;
 
+  DEBUGASSERT(intercpu_vaddr == (uint32_t)&_snocache);
+
   /* We want to keep the inter-cpu region in on-chip RAM (OCRAM).  The 
    * i.MX6 has 256Kb of OCRAM positioned at physical address 0x0090:0000.
    */
