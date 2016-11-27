@@ -44,6 +44,7 @@
 #include <errno.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/sched_note.h>
 
 #include "sched/sched.h"
 

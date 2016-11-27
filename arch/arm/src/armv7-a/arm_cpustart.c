@@ -105,9 +105,8 @@ static inline void arm_registerdump(FAR struct tcb_s *tcb)
 int arm_start_handler(int irq, FAR void *context)
 {
   FAR struct tcb_s *tcb;
-  int cpu = up_cpu_index();
 
-  sinfo("CPU%d Started\n", cpu);
+  sinfo("CPU%d Started\n", this_cpu());
 
   /* Reset scheduler parameters */
 

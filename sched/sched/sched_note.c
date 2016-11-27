@@ -369,6 +369,62 @@ void sched_note_resume(FAR struct tcb_s *tcb)
   note_add((FAR const uint8_t *)&note, sizeof(struct note_resume_s));
 }
 
+#ifdef CONFIG_SMP
+void sched_note_cpu_pause(FAR struct tcb_s *tcb, int cpu)
+{
+  struct note_cpu_pause_s note;
+
+  /* Format the note */
+
+  note_common(tcb, &note.ncp_cmn, sizeof(struct note_cpu_pause_s), NOTE_CPU_PAUSE);
+  note.ncp_target = (uint8_t)cpu;
+
+  /* Add the note to circular buffer */
+
+  note_add((FAR const uint8_t *)&note, sizeof(struct note_cpu_pause_s));
+}
+
+void sched_note_cpu_paused(FAR struct tcb_s *tcb)
+{
+  struct note_cpu_paused_s note;
+
+  /* Format the note */
+
+  note_common(tcb, &note.ncp_cmn, sizeof(struct note_cpu_paused_s), NOTE_CPU_PAUSED);
+
+  /* Add the note to circular buffer */
+
+  note_add((FAR const uint8_t *)&note, sizeof(struct note_cpu_paused_s));
+}
+
+void sched_note_cpu_resume(FAR struct tcb_s *tcb, int cpu)
+{
+  struct note_cpu_resume_s note;
+
+  /* Format the note */
+
+  note_common(tcb, &note.ncr_cmn, sizeof(struct note_cpu_resume_s), NOTE_CPU_RESUME);
+  note.ncr_target = (uint8_t)cpu;
+
+  /* Add the note to circular buffer */
+
+  note_add((FAR const uint8_t *)&note, sizeof(struct note_cpu_resume_s));
+}
+
+void sched_note_cpu_resumed(FAR struct tcb_s *tcb)
+{
+  struct note_cpu_resumed_s note;
+
+  /* Format the note */
+
+  note_common(tcb, &note.ncr_cmn, sizeof(struct note_cpu_resumed_s), NOTE_CPU_RESUMED);
+
+  /* Add the note to circular buffer */
+
+  note_add((FAR const uint8_t *)&note, sizeof(struct note_cpu_resumed_s));
+}
+#endif
+
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
 void sched_note_premption(FAR struct tcb_s *tcb, bool locked)
 {

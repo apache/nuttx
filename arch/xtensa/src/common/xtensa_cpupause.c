@@ -44,6 +44,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
 #include <nuttx/spinlock.h>
+#include <nuttx/sched_note.h>
 
 #include "xtensa.h"
 #include "sched/sched.h"
@@ -117,6 +118,12 @@ int up_cpu_paused(int cpu)
 
   sched_suspend_scheduler(otcb);
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION
+  /* Notify that we are paused */
+
+  sched_note_cpu_paused(otcb);
+#endif
+
   /* Copy the CURRENT_REGS into the OLD TCB (otcb).  The co-processor state
    * will be saved as part of the return from xtensa_irq_dispatch().
    */
@@ -133,6 +140,12 @@ int up_cpu_paused(int cpu)
    */
 
   ntcb = this_task();
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION
+  /* Notify that we have resumed */
+
+  sched_note_cpu_resumed(ntcb);
+#endif
 
   /* Reset scheduler parameters */
 
@@ -203,6 +216,12 @@ int up_cpu_pause(int cpu)
 {
   int ret;
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION
+  /* Notify of the pause event */
+
+  sched_note_cpu_pause(this_task(), cpu);
+#endif
+
   DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS && cpu != this_cpu());
 
   /* Take the both spinlocks.  The g_cpu_wait spinlock will prevent the SGI2
@@ -266,6 +285,12 @@ int up_cpu_pause(int cpu)
 
 int up_cpu_resume(int cpu)
 {
+#ifdef CONFIG_SCHED_INSTRUMENTATION
+  /* Notify of the resume event */
+
+  sched_note_cpu_resume(this_task(), cpu);
+#endif
+
   DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS && cpu != this_cpu());
 
   /* Release the spinlock.  Releasing the spinlock will cause the SGI2

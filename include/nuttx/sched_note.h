@@ -64,6 +64,13 @@ enum note_type_e
   NOTE_STOP,
   NOTE_SUSPEND,
   NOTE_RESUME
+#ifdef CONFIG_SMP
+  ,
+  NOTE_CPU_PAUSE,
+  NOTE_CPU_PAUSED,
+  NOTE_CPU_RESUME,
+  NOTE_CPU_RESUMED
+#endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
   ,
   NOTE_PREEMPT_LOCK,
@@ -122,6 +129,38 @@ struct note_resume_s
   struct note_common_s nre_cmn; /* Common note parameters */
 };
 
+#ifdef CONFIG_SMP
+/* This is the specific form of the NOTE_CPU_PAUSE note */
+
+struct note_cpu_pause_s
+{
+  struct note_common_s ncp_cmn; /* Common note parameters */
+  uint8_t ncp_target;           /* CPU being paused */
+};
+
+/* This is the specific form of the NOTE_CPU_PAUSED note */
+
+struct note_cpu_paused_s
+{
+  struct note_common_s ncp_cmn; /* Common note parameters */
+};
+
+/* This is the specific form of the NOTE_CPU_RESUME note */
+
+struct note_cpu_resume_s
+{
+  struct note_common_s ncr_cmn; /* Common note parameters */
+  uint8_t ncr_target;           /* CPU being resumed */
+};
+
+/* This is the specific form of the NOTE_CPU_RESUMED note */
+
+struct note_cpu_resumed_s
+{
+  struct note_common_s ncr_cmn; /* Common note parameters */
+};
+#endif
+
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
 /* This is the specific form of the NOTE_PREEMPT_LOCK/UNLOCK note */
 
@@ -174,12 +213,28 @@ void sched_note_stop(FAR struct tcb_s *tcb);
 void sched_note_suspend(FAR struct tcb_s *tcb);
 void sched_note_resume(FAR struct tcb_s *tcb);
 
+#ifdef CONFIG_SMP
+void sched_note_cpu_pause(FAR struct tcb_s *tcb, int cpu);
+void sched_note_cpu_paused(FAR struct tcb_s *tcb);
+void sched_note_cpu_resume(FAR struct tcb_s *tcb, int cpu);
+void sched_note_cpu_resumed(FAR struct tcb_s *tcb);
+#else
+#  define sched_note_cpu_pause(t,c)
+#  define sched_note_cpu_paused(t)
+#  define sched_note_cpu_resume(t,c)
+#  define sched_note_cpu_resumed(t)
+#endif
+
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
 void sched_note_premption(FAR struct tcb_s *tcb, bool locked);
+#else
+#  define sched_note_premption(t,l)
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
 void sched_note_csection(FAR struct tcb_s *tcb, bool enter);
+#else
+#  define sched_note_csection(t,e)
 #endif
 
 /****************************************************************************
@@ -250,6 +305,10 @@ int note_register(void);
 #  define sched_note_stop(t)
 #  define sched_note_suspend(t)
 #  define sched_note_resume(t)
+#  define sched_note_cpu_pause(t,c)
+#  define sched_note_cpu_paused(t)
+#  define sched_note_cpu_resume(t,c)
+#  define sched_note_cpu_resumed(t)
 #  define sched_note_premption(t,l)
 #  define sched_note_csection(t,e)
 
