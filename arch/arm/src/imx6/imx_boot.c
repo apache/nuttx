@@ -52,6 +52,7 @@
 #include "chip.h"
 #include "arm.h"
 #include "mmu.h"
+#include "scu.h"
 #include "cache.h"
 #include "fpu.h"
 #include "up_internal.h"
@@ -450,13 +451,21 @@ void arm_boot(void)
    */
 
   imx_cpu_disable();
+  imx_lowputc('B');
+
+#ifdef CONFIG_SMP
+  /* Enable SMP cache coherency for CPU0 */
+
+  arm_enable_smp(0);
+  imx_lowputc('C');
+#endif
 
   /* Provide a special mapping for the OCRAM interrupt vector positioned in
    * high memory.
    */
 
   imx_vectormapping();
-  imx_lowputc('B');
+  imx_lowputc('D');
 
 #if defined(CONFIG_SMP) && defined(SMP_INTERCPU_NONCACHED)
   /* Provide a special mapping for the OCRAM interrupt vector positioned in
@@ -464,7 +473,7 @@ void arm_boot(void)
    */
 
   imx_intercpu_mapping();
-  imx_lowputc('C');
+  imx_lowputc('E');
 #endif
 
 #ifdef CONFIG_ARCH_RAMFUNCS
@@ -479,14 +488,14 @@ void arm_boot(void)
       *dest++ = *src++;
     }
 
-  imx_lowputc('D');
+  imx_lowputc('F');
 
   /* Flush the copied RAM functions into physical RAM so that will
    * be available when fetched into the I-Cache.
    */
 
   arch_clean_dcache((uintptr_t)&_sramfuncs, (uintptr_t)&_eramfuncs)
-  imx_lowputc('E');
+  imx_lowputc('G');
 #endif
 
   /* Setup up vector block.  _vector_start and _vector_end are exported from
@@ -494,37 +503,35 @@ void arm_boot(void)
    */
 
   imx_copyvectorblock();
-  imx_lowputc('F');
+  imx_lowputc('H');
 
   /* Disable the watchdog timer */
 
   imx_wdtdisable();
-  imx_lowputc('G');
+  imx_lowputc('I');
 
   /* Initialize clocking to settings provided by board-specific logic */
 
   imx_clockconfig();
-  imx_lowputc('H');
+  imx_lowputc('J');
 
 #ifdef CONFIG_ARCH_FPU
   /* Initialize the FPU */
 
   arm_fpuconfig();
-  imx_lowputc('I');
+  imx_lowputc('K');
 #endif
 
-  /* Perform board-specific initialization,  This must include:
-   *
-   * - Initialization of board-specific memory resources (e.g., SDRAM)
-   * - Configuration of board specific resources (PIOs, LEDs, etc).
+  /* Perform board-specific memroy initialization,  This must include
+   * initialization of board-specific memory resources (e.g., SDRAM)
    *
    * NOTE: We must use caution prior to this point to make sure that
    * the logic does not access any global variables that might lie
    * in SDRAM.
    */
 
-  imx_board_initialize();
-  imx_lowputc('J');
+  imx_memory_initialize();
+  imx_lowputc('L');
 
 #ifdef NEED_SDRAM_REMAPPING
   /* SDRAM was configured in a temporary state to support low-level
@@ -533,7 +540,7 @@ void arm_boot(void)
    */
 
   imx_remap();
-  imx_lowputc('K');
+  imx_lowputc('M');
 #endif
 
 #ifdef CONFIG_BOOT_SDRAM_DATA
@@ -542,8 +549,15 @@ void arm_boot(void)
    */
 
   arm_data_initialize();
-  imx_lowputc('L');
+  imx_lowputc('N');
 #endif
+
+  /* Perform board-specific device initialization. This would include
+   * configuration of board specific resources such as GPIOs, LEDs, etc.
+   */
+
+  imx_board_initialize();
+  imx_lowputc('O');
 
 #if defined(CONFIG_SMP) && defined(SMP_INTERCPU_NONCACHED)
   /* Initialize the uncached, inter-CPU communications area */
@@ -553,13 +567,13 @@ void arm_boot(void)
       *dest++ = 0;
     }
 
-  imx_lowputc('M');
+  imx_lowputc('P');
 #endif
 
   /* Perform common, low-level chip initialization (might do nothing) */
 
   imx_lowsetup();
-  imx_lowputc('N');
+  imx_lowputc('Q');
 
 #ifdef USE_EARLYSERIALINIT
   /* Perform early serial initialization if we are going to use the serial
@@ -567,7 +581,7 @@ void arm_boot(void)
    */
 
   imx_earlyserialinit();
-  imx_lowputc('O');
+  imx_lowputc('R');
 #endif
 
   /* Now we can enable all other CPUs.  The enabled CPUs will start execution
@@ -576,6 +590,6 @@ void arm_boot(void)
    */
 
   imx_cpu_enable();
-  imx_lowputc('P');
+  imx_lowputc('S');
   imx_lowputc('\n');
 }

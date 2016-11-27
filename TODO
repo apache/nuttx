@@ -308,33 +308,33 @@ o Task/Scheduler (sched/)
 o SMP
   ^^^
 
-  Title:       SPINLOCKS AND DATA CACHES
-  Description: If spinlocks are used in a system with a data cache, then there
-               may be a problem with cache coherency in some CPU architectures:
-               When one CPU modifies the spinlock, the changes may not be
-               visible to another CPU if it does not share the data cache.
-               That would cause failure in the spinlock logic.
+  Title:       SMP AND DATA CACHES
+  Description: When spinlocks, semaphores, etc. are used in an SMP system with
+               a data cache, then there may be problems with cache coherency
+               in some CPU architectures:  When one CPU modifies the shared
+               object, the changes may not be visible to another CPU if it
+               does not share the data cache. That would cause failure in
+               the IPC logic.
 
                Flushing the D-cache on writes and invalidating before a read is
-               not really an option.  spinlocks are normally 8-bits in size and
-               cache lines are typically 32-bytes so that would have side effects
-               unless the spinlocks were made to be the same size as one cache
-               line.
+               not really an option.  That would essentially effect every memory
+               access and there may be side-effects due to cache line sizes
+               and alignment.
 
-               This might be doable if a write-through cache is used.  Then you
-               could always safely invalidate the cache line before reading the
-               spinlock because there should never be any dirty cache lines in
-               this case.
+               For the same reason a separate, non-cacheable memory region is
+               not an option.  Essentially all data would have to go in the
+               non-cached region and you would have no benefit from the data
+               cache.
 
-               The better option is to add compiler independent "ornamentation"
-               to the spinlock so that the spinlocks are all linked together
-               into a separate, non-cacheable memory regions.  Because of
-               region alignment and minimum region mapping sizes this could
-               still be wasteful of memory.  This would work in systems that
-               have both data cache and either an MPU or an MMU.
-  Status:      Open
-  Priority:    High.  spinlocks, and hence SMP, will not work on such systems
-               without this change.
+               On ARM Cortex-A, each CPU has a separate data cache.  However,
+               the MPCore's Snoop Controller Unit supports coherency among
+               the different caches.  The SCU is enabled by the SCU control
+               register and each CPU participates in the SMP coherency by
+               setting the ACTLR_SMP bit in the auxiliary control register
+               (ACTLR).
+
+  Status:      Closed
+  Priority:    High on platforms that may have the issue.
 
 o Memory Management (mm/)
   ^^^^^^^^^^^^^^^^^^^^^^^

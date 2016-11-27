@@ -41,17 +41,58 @@
 
 #include <stdint.h>
 
-#include <nuttx/irq.h>
-
 #include "up_arch.h"
+#include "cp15_cacheops.h"
 #include "sctlr.h"
 #include "scu.h"
 
 #ifdef CONFIG_SMP
 
 /****************************************************************************
- * Public Functions
+ * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: arm_get_sctlr
+ *
+ * Description:
+ *   Get the contents of the SCTLR register
+ *
+ ****************************************************************************/
+
+static inline uint32_t arm_get_sctlr(void)
+{
+  uint32_t sctlr;
+
+  __asm__ __volatile__
+  (
+    "\tmrc   p15, 0, %0, c1, c0, 0\n"  /* Read SCTLR */
+    : "=r"(sctlr)
+    :
+    :
+  );
+
+  return sctlr;
+}
+
+/****************************************************************************
+ * Name: arm_set_sctlr
+ *
+ * Description:
+ *   Set the contents of the SCTLR register
+ *
+ ****************************************************************************/
+
+static inline void arm_set_sctlr(uint32_t sctlr)
+{
+  __asm__ __volatile__
+  (
+    "\tmcr  p15, 0, %0, c1, c0, 0\n" /* Write SCTLR */
+    :
+    : "r"(sctlr)
+    :
+  );
+}
 
 /****************************************************************************
  * Name: arm_get_actlr
@@ -96,22 +137,6 @@ static inline void arm_set_actlr(uint32_t actlr)
 }
 
 /****************************************************************************
- * Name: arm_modify_actlr
- *
- * Description:
- *   Set the bits in the ACTLR register
- *
- ****************************************************************************/
-
-static inline void arm_modify_actlr(uint32_t setbits)
-{
-  irqstate_t flags = enter_critical_section();
-  uint32_t actlr = arm_get_actlr();
-  arm_set_actlr(actlr | setbits);
-  leave_critical_section(flags);
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -122,13 +147,17 @@ static inline void arm_modify_actlr(uint32_t setbits)
  *   Enable the SCU and make certain that current CPU is participating in
  *   the SMP cache coherency.
  *
+ * Assumption:
+ *   Called early in the CPU start-up.  No special critical sections are
+ *   needed if only CPU-private registers are modified.
+ *
  ****************************************************************************/
 
 void arm_enable_smp(int cpu)
 {
-  /* Invalidate the data cache -- Missing logic. */
+  uint32_t regval;
 
-  /* Handle actions unique to CPU0 */
+  /* Handle actions unique to CPU0 which comes up first */
 
   if (cpu == 0)
     {
@@ -140,18 +169,45 @@ void arm_enable_smp(int cpu)
                (SCU_INVALIDATE_ALL_WAYS << SCU_INVALIDATE_CPU3_SHIFT),
                SCU_INVALIDATE);
 
+      /* Invalidate CPUn L1 data cache so that is will we be reloaded from
+       * coherent L2.
+       */
+
+      cp15_invalidate_dcache_all();
+
       /* Invalidate the L2C-310 -- Missing logic. */
 
       /* Enable the SCU */
 
-      modifyreg32(SCU_CTRL, 0, SCU_CTRL_ENABLE); /* CPU0 only */
+      regval  = getreg32(SCU_CTRL);
+      regval |= SCU_CTRL_ENABLE;
+      putreg32(regval, SCU_CTRL);
     }
 
-  /* Enable the data cache -- Missing logic. */
+  /* Actions for other CPUs */
 
-  /* This CPU now participates the SMP cache coherency */
+  else
+    {
+      /* Invalidate CPUn L1 data cache so that is will we be reloaded from
+       * coherent L2.
+       */
 
-  arm_modify_actlr(ACTLR_SMP);
+      cp15_invalidate_dcache_all();
+
+      /* Wait for the SCU to be enabled by the primary processor -- should
+       * not be necessary.
+       */
+    }
+
+  /* Enable the data cache, set the SMP mode with ACTLR.SMP=1. */
+
+  regval  = arm_get_actlr();
+  regval |= ACTLR_SMP;
+  arm_set_actlr(regval);
+
+  regval  = arm_get_sctlr();
+  regval |= SCTLR_C;
+  arm_set_sctlr(regval);
 }
 
 #endif

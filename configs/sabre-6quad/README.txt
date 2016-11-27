@@ -104,13 +104,13 @@ Status
 2016-11-26: With regard to SMP, the major issue is cache coherency.  I added
   some special build logic to move spinlock data into the separate, non-
   cached section.  That gives an improvement in performance but there are
-  still hangs.  These, I have determined are to other kinds of cache
+  still hangs.  These, I have determined, are to other kinds of cache
   coherency problems.  Semaphores, message queues, etc.  basically all
-  shared data must be made coherent.  I am not sure how to do that.  See
-  the SMP section below for more information.
+  shared data must be made coherent.
 
   I also added some SCU controls that should enable cache consistency for SMP
-  CPUs, but I don't think I have that working right yet.
+  CPUs, but I don't think I have that working right yet.  See the SMP section
+  below for more information.
 
 Platform Features
 =================
@@ -511,21 +511,12 @@ Open Issues:
    This will cause the interrupt handlers on other CPUs to spin until
    leave_critical_section() is called.  More verification is needed.
 
-2. Cache Concurency.  Cache coherency in SMP configurations is managed by the the
-   CPU.  I don't think I have the set up correctly yet.
+2. Cache Concurency.  Cache coherency in SMP configurations is managed by the
+   MPCore snoop control unit (SCU).  But I don't think I have the set up
+   correctly yet.
 
    Currently cache inconsistencies appear to be the root cause of all current SMP
    issues.
-
-   2016-11-26: With regard to SMP, the major issue is cache coherency.  I added
-     some special build logic to move spinlock data into the separate, non-
-     cached section.  That gives an improvement in performance but there are
-     still hangs.  These, I have determined are to other kinds of cache
-     coherency problems.  Semaphores, message queues, etc.  basically all
-     shared data must be made coherent.
-
-     I also added some SCU controls that should enable cache consistency for SMP
-     CPUs, but I don't think I have that working right yet.
 
 Configurations
 ==============

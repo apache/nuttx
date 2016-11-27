@@ -111,13 +111,36 @@ void imx_cpu_enable(void);
 #endif
 
 /****************************************************************************
+ * Name: imx_memory_initialize
+ *
+ * Description:
+ *   All i.MX6 architectures must provide the following entry point.  This
+ *   entry point is called early in the initialization before memory has
+ *   been configured.  This board-specific function is responsible for
+ *   configuring any on-board memories.
+ *
+ *   Logic in imx_memory_initialize must be careful to avoid using any
+ *   global variables because those will be uninitialized at the time this
+ *   function is called.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void imx_memory_initialize(void);
+
+/****************************************************************************
  * Name: imx_board_initialize
  *
  * Description:
  *   All i.MX6 architectures must provide the following entry point.  This
- *   entry point is called early in the initialization -- after all memory
- *   has been configured and mapped but before any devices have been
- *   initialized.
+ *   entry point is called in the initialization phase -- after
+ *   imx_memory_initialize and after all memory has been configured and
+ *   mapped but before any devices have been initialized.
  *
  * Input Parameters:
  *   None

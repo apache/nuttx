@@ -45,8 +45,9 @@
 #include <nuttx/sched.h>
 
 #include "up_internal.h"
-#include "gic.h"
 #include "cp15_cacheops.h"
+#include "gic.h"
+#include "scu.h"
 #include "sched/sched.h"
 
 #ifdef CONFIG_SMP
@@ -105,8 +106,13 @@ static inline void arm_registerdump(FAR struct tcb_s *tcb)
 int arm_start_handler(int irq, FAR void *context)
 {
   FAR struct tcb_s *tcb;
+  int cpu = up_cpu_index();
 
-  sinfo("CPU%d Started\n", up_cpu_index());
+  sinfo("CPU%d Started\n", cpu);
+
+  /* Enable SMP cache coherency for the CPU */
+
+  arm_enable_smp(cpu);
 
   /* Reset scheduler parameters */
 

@@ -450,7 +450,11 @@ __start:
 	orr		r0, r0, #(SCTLR_RR)
 #endif
 
-#ifndef CPU_DCACHE_DISABLE
+	/* In SMP configurations, the data cache will not be enabled until later
+	 * after SMP cache coherency has been setup.
+	 */
+
+#if !defined(CPU_DCACHE_DISABLE) && !defined(CONFIG_SMP)
 	/* Dcache enable
 	 *
 	 *   SCTLR_C    Bit 2:  DCache enable
@@ -638,7 +642,7 @@ __start:
 #endif
 
 	/* Perform early C-level, platform-specific initialization.  Logic
-	 * within arm_boot() must configure SDRAM and call arm_ram_initailize.
+	 * within arm_boot() must configure SDRAM and call arm_data_initialize().
 	 */
 
 	bl		arm_boot
