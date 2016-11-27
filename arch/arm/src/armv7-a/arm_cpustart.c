@@ -47,7 +47,6 @@
 #include "up_internal.h"
 #include "cp15_cacheops.h"
 #include "gic.h"
-#include "scu.h"
 #include "sched/sched.h"
 
 #ifdef CONFIG_SMP
@@ -109,10 +108,6 @@ int arm_start_handler(int irq, FAR void *context)
   int cpu = up_cpu_index();
 
   sinfo("CPU%d Started\n", cpu);
-
-  /* Enable SMP cache coherency for the CPU */
-
-  arm_enable_smp(cpu);
 
   /* Reset scheduler parameters */
 

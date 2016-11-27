@@ -51,6 +51,7 @@
 #include "chip/imx_src.h"
 #include "sctlr.h"
 #include "smp.h"
+#include "scu.h"
 #include "fpu.h"
 #include "gic.h"
 
@@ -259,6 +260,10 @@ void imx_cpu_enable(void)
 
 void arm_cpu_boot(int cpu)
 {
+  /* Enable SMP cache coherency for the CPU */
+
+  arm_enable_smp(cpu);
+
 #ifdef CONFIG_ARCH_FPU
   /* Initialize the FPU */
 
