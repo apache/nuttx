@@ -128,6 +128,7 @@
 
 /* SCU Invalidate All Registers in Secure State */
 
+#define SCU_INVALIDATE_ALL_WAYS      15
 #define SCU_INVALIDATE_CPU0_SHIFT    0         /* Ways that must be invalidated for CPU0 */
 #define SCU_INVALIDATE_CPU0_MASK     (15 << SCU_INVALIDATE_CPU0_SHIFT)
 #define SCU_INVALIDATE_CPU1_SHIFT    4         /* Ways that must be invalidated for CPU1 */
