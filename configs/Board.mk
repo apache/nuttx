@@ -43,6 +43,7 @@ else
 AOBJS = $(ASRCS:$(ASMEXT)=$(OBJEXT))
 endif
 COBJS = $(CSRCS:.c=$(OBJEXT))
+CXXOBJS = $(CXXSRCS:.cxx=$(OBJEXT))
 
 SRCS = $(ASRCS) $(CSRCS)
 OBJS = $(AOBJS) $(COBJS)
@@ -108,17 +109,23 @@ $(AOBJS): %$(OBJEXT): %$(ASMEXT)
 $(COBJS) $(LINKOBJS): %$(OBJEXT): %.c
 	$(call COMPILE, $<, $@)
 
-libboard$(LIBEXT): $(OBJS)
+$(CXXOBJS) $(LINKOBJS): %$(OBJEXT): %.cxx
+	$(call COMPILEXX, $<, $@)
+
+libboard$(LIBEXT): $(OBJS) $(CXXOBJS)
 	$(Q) $(AR) $@ # Create an empty archive
 ifneq ($(OBJS),)
-	$(call ARCHIVE, $@, $(OBJS))
+	$(call ARCHIVE, $@, $(OBJS) $(CXXOBJS))
 endif
 
-.depend: Makefile $(SRCS)
+.depend: Makefile $(SRCS) $(CXXSRCS)
 ifneq ($(ZDSVERSION),)
 	$(Q) $(MKDEP) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
 else
 	$(Q) $(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
+endif
+ifneq ($(CXXSRCS),)
+	$(Q) $(MKDEP) "$(CXX)" -- $(CXXFLAGS) -- $(CXXSRCS) >>Make.dep
 endif
 	$(Q) touch $@
 
