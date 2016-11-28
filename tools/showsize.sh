@@ -3,7 +3,8 @@
 # tools/showsize.sh
 #
 #   Copyright (C) 2016 Gregory Nutt. All rights reserved.
-#   Author: Lorenz Meier
+#   Author: Lorenz Meier (Original concept)
+#           Gregory Nutt (This instantiation)
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -37,7 +38,8 @@
 # set -x
 
 # Host nm should always work
-#NM=arm-none-eabi-nm
+# vs. NM=arm-none-eabi-nm
+
 NM=nm
 
 # This should be executed from the top-level NuttX directory
@@ -60,8 +62,10 @@ else
   fi
 fi
 
+# Show what we were asked for
 
 echo "TOP 10 BIG DATA"
 $NM --print-size --size-sort --radix dec -C $NUTTX | grep ' [DdBb] ' | tail -20
+
 echo "TOP 10 BIG CODE"
 $NM --print-size --size-sort --radix dec -C $NUTTX | grep ' [TtWw] ' | tail -20
