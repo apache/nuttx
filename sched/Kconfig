@@ -678,6 +678,13 @@ config SCHED_INSTRUMENTATION
 
 if SCHED_INSTRUMENTATION
 
+config SCHED_INSTRUMENTATION_CPUSET
+	hex "CPU bit set"
+	default 0xffff
+	depends on SMP
+	---help---
+		Monitor only CPUs in the bitset.  Bit 0=CPU0, Bit1=CPU1, etc.
+
 config SCHED_INSTRUMENTATION_PREEMPTION
 	bool "Preemption monitor hooks"
 	default n
@@ -687,10 +694,15 @@ config SCHED_INSTRUMENTATION_PREEMPTION
 
 			void sched_note_premption(FAR struct tcb_s *tcb, bool state);
 
+config SCHED_INSTRUMENTATION_FAUXPAS
+	bool
+	default y if !EXPERIMENTAL && SCHED_INSTRUMENTATION_BUFFER
+	default n if EXPERIMENTAL || !SCHED_INSTRUMENTATION_BUFFER
+
 config SCHED_INSTRUMENTATION_CSECTION
 	bool "Critical section monitor hooks"
 	default n
-	depends on EXPERIMENTAL || !SCHED_INSTRUMENTATION_BUFFER
+	depends on !SCHED_INSTRUMENTATION_FAUXPAS
 	---help---
 		Enables additional hooks for entry and exit from critical sections.
 		Interrupts are disabled while within a critical section.  Board-
@@ -705,6 +717,27 @@ config SCHED_INSTRUMENTATION_CSECTION
 		means that each call to sched_note_get() causes two entries to be
 		added from the note buffer in order to remove one entry.  Not
 		very useful in its current state!
+
+config SCHED_INSTRUMENTATION_SPINLOCK
+	bool "Spinlock monitor hooks"
+	default n
+	depends on SPINLOCK && (!SMP || !SCHED_INSTRUMENTATION_FAUXPAS)
+	---help---
+		Enables additional hooks for spinlock state.  Board-specific logic
+		must provide this additional logic.
+
+			void sched_note_spinlock(FAR struct tcb_s *tcb, bool state);
+			void sched_note_spinlocked(FAR struct tcb_s *tcb, bool state);
+			void sched_note_spinunlock(FAR struct tcb_s *tcb, bool state);
+			void sched_note_spinabort(FAR struct tcb_s *tcb, bool state);
+
+		NOTE: This option is marked EXPERIMENTAL because there is a logical
+		error in the design when this feature is used with
+		CONFIG_SCHED_INSTRUMENTATION_BUFFER.  That error is that
+		sched_note_get() calls enter_ and leave_critical_section which use
+		spinlocks in SMP mode.  That means that each call to sched_note_get()
+		causes several additional entries to be added from the note buffer in
+		order to remove one entry.  Not very useful in its current state!
 
 config SCHED_INSTRUMENTATION_BUFFER
 	bool "Buffer instrumentation data in memory"

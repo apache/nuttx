@@ -80,6 +80,10 @@
 #  define SP_DSB()
 #endif
 
+#if defined(CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS) && !defined(__SP_UNLOCK_FUNCTION)
+#  define __SP_UNLOCK_FUNCTION 1
+#endif
+
 /* If the target CPU supports a data cache then it may be necessary to
  * manage spinlocks in a special way, perhaps linking them all into a
  * special non-cacheable memory region.

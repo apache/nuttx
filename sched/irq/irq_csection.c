@@ -128,6 +128,14 @@ static uint8_t g_cpu_nestcount[CONFIG_SMP_NCPUS];
 #ifdef CONFIG_SMP
 static inline bool irq_waitlock(int cpu)
 {
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
+  FAR struct tcb_s *tcb = this_task();
+
+  /* Notify that we are waiting for a spinlock */
+
+  sched_note_spinlock(tcb, &g_cpu_irqlock);
+#endif
+
   /* Duplicate the spin_lock() logic from spinlock.c, but adding the check
    * for the deadlock condition.
    */
@@ -142,6 +150,12 @@ static inline bool irq_waitlock(int cpu)
            * Abort the wait and return false.
            */
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
+          /* Notify that we are waiting for a spinlock */
+
+          sched_note_spinabort(tcb, &g_cpu_irqlock);
+#endif
+
           return false;
         }
 
@@ -149,6 +163,12 @@ static inline bool irq_waitlock(int cpu)
     }
 
   /* We have g_cpu_irqlock! */
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
+  /* Notify that we have the spinlock */
+
+  sched_note_spinlocked(tcb, &g_cpu_irqlock);
+#endif
 
   SP_DMB();
   return true;
