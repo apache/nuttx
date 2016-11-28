@@ -74,6 +74,16 @@
 void misoc_timer_initialize(void);
 
 /****************************************************************************
+ * Name: flush_cpu_dcache
+ *
+ * Description:
+ *  flush cpu cache Data cache
+ *
+ ****************************************************************************/
+
+void flush_cpu_dcache(void);
+
+/****************************************************************************
  * Name: up_serialinit
  *
  * Description:

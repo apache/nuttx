@@ -39,7 +39,7 @@ HEAD_ASRC   = lm32_vectors.S
 CMN_ASRCS   =
 CMN_CSRCS   = misoc_lowputs.c misoc_serial.c misoc_mdelay.c
 CMN_CSRCS  += misoc_modifyreg8.c misoc_modifyreg16.c misoc_modifyreg32.c
-CMN_CSRCS  += misoc_puts.c misoc_udelay.c misoc_timerisr.c
+CMN_CSRCS  += misoc_puts.c misoc_udelay.c misoc_timerisr.c misoc_net.c
 
 CHIP_ASRCS  = lm32_syscall.S
 
