@@ -63,3 +63,10 @@ Buildroot Toolchain
 
     CONFIG_LM3S_TOOLCHAIN_BUILDROOT=y
 
+configs/misoc/include/generated
+===============================
+
+  In order to build this configuration, you must provide this directory.
+  It contains the generated Misoc files.  The base configurtion will NOT
+  build without this directory!
+
