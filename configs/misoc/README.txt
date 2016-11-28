@@ -66,7 +66,16 @@ Buildroot Toolchain
 configs/misoc/include/generated
 ===============================
 
-  In order to build this configuration, you must provide this directory.
-  It contains the generated Misoc files.  The base configurtion will NOT
+  In order to build this configuration, you must provide the
+  configs/misoc/include/generated directory.  It contains the generated
+  Misoc files and may be a symbolic link.  The base configurtion will NOT
   build without this directory!
+
+  There is a sample generated directory at configs/misoc/include/generated-sample.
+  If you want to do a test build without generating the architecture, then
+  you can simply link this sample directory like:
+
+    $ ln -s configs/misoc/include/generated-sample configs/misoc/include/generated
+
+  That should permit a test build.
 
