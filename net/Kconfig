@@ -40,17 +40,6 @@ config NET_PROMISCUOUS
 
 menu "Driver buffer configuration"
 
-config NET_MULTIBUFFER
-	bool "Use multiple device-side I/O buffers"
-	default n
-	---help---
-		Traditionally, the uIP-based stack has used a single buffer for all
-		incoming and outgoing traffic.  If this configuration is selected,
-		then the driver can manage multiple I/O buffers and can, for
-		example, be filling one input buffer while sending another output
-		buffer.  Or, as another example, the driver may support queuing of
-		concurrent input/ouput and output transfers for better performance.
-
 config NET_ETH_MTU
 	int "Ethernet packet buffer size (MTU)"
 	default 1294 if NET_IPv6
@@ -171,8 +160,7 @@ config NET_SLIP
 	select NET_MULTILINK if NET_ETHERNET || NET_LOOPBACK || NET_TUN
 	---help---
 		Enables building of the SLIP driver. SLIP requires
-		at least one IP protocol selected and the following additional
-		network settings: NET_NOINTS and NET_MULTIBUFFER.
+		at least one IP protocol selected and CONFIG_NET_NOINTS.
 
 		SLIP supports point-to-point IP communications over a serial port.
 		The default data link layer for network layer is Ethernet. If
@@ -217,7 +205,6 @@ config NET_TUN
 	default n
 	select NETDEV_MULTINIC if NET_ETHERNET || NET_LOOPBACK || NET_SLIP
 	select NET_MULTILINK if NET_ETHERNET || NET_LOOPBACK || NET_SLIP
-	select NET_MULTIBUFFER
 	select ARCH_HAVE_NETDEV_STATISTICS
 
 if NET_TUN
