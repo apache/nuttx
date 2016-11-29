@@ -58,11 +58,11 @@
  * old configuration files)
  */
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION_CPUSET
+#ifndef CONFIG_SCHED_INSTRUMENTATION_CPUSET
 #  define CONFIG_SCHED_INSTRUMENTATION_CPUSET 0xffff
 #endif
 
-#ifdef CONFIG_SCHED_NOTE_BUFSIZE
+#ifndef CONFIG_SCHED_NOTE_BUFSIZE
 #  define CONFIG_SCHED_NOTE_BUFSIZE 2048
 #endif
 
@@ -301,7 +301,8 @@ void sched_note_spinabort(FAR struct tcb_s *tcb, FAR volatile void *spinlock);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION_BUFFER
+#if defined(CONFIG_SCHED_INSTRUMENTATION_BUFFER) && \
+    defined(CONFIG_SCHED_NOTE_GET)
 ssize_t sched_note_get(FAR uint8_t *buffer, size_t buflen);
 #endif
 
@@ -320,7 +321,8 @@ ssize_t sched_note_get(FAR uint8_t *buffer, size_t buflen);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION_BUFFER
+#if defined(CONFIG_SCHED_INSTRUMENTATION_BUFFER) && \
+    defined(CONFIG_SCHED_NOTE_GET)
 ssize_t sched_note_size(void);
 #endif
 

@@ -551,6 +551,7 @@ void sched_note_spinabort(FAR struct tcb_s *tcb, FAR volatile void *spinlock);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_SCHED_NOTE_GET
 ssize_t sched_note_get(FAR uint8_t *buffer, size_t buflen)
 {
   FAR struct note_common_s *note;
@@ -618,6 +619,7 @@ errout_with_csection:
   leave_critical_section(flags);
   return notelen;
 }
+#endif
 
 /****************************************************************************
  * Name: sched_note_size
@@ -634,6 +636,7 @@ errout_with_csection:
  *
  ****************************************************************************/
 
+#ifdef CONFIG_SCHED_NOTE_GET
 ssize_t sched_note_size(void)
 {
   FAR struct note_common_s *note;
@@ -668,5 +671,6 @@ errout_with_csection:
   leave_critical_section(flags);
   return notelen;
 }
+#endif
 
 #endif /* CONFIG_SCHED_INSTRUMENTATION_BUFFER */

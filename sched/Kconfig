@@ -694,15 +694,9 @@ config SCHED_INSTRUMENTATION_PREEMPTION
 
 			void sched_note_premption(FAR struct tcb_s *tcb, bool state);
 
-config SCHED_INSTRUMENTATION_FAUXPAS
-	bool
-	default y if !EXPERIMENTAL && SCHED_INSTRUMENTATION_BUFFER
-	default n if EXPERIMENTAL || !SCHED_INSTRUMENTATION_BUFFER
-
 config SCHED_INSTRUMENTATION_CSECTION
 	bool "Critical section monitor hooks"
 	default n
-	depends on !SCHED_INSTRUMENTATION_FAUXPAS
 	---help---
 		Enables additional hooks for entry and exit from critical sections.
 		Interrupts are disabled while within a critical section.  Board-
@@ -710,18 +704,9 @@ config SCHED_INSTRUMENTATION_CSECTION
 
 			void sched_note_csection(FAR struct tcb_s *tcb, bool state);
 
-		NOTE: This option is marked EXPERIMENTAL because there is a logical
-		error in the design when this feature is used with
-		CONFIG_SCHED_INSTRUMENTATION_BUFFER.  That error is that
-		sched_note_get() calls enter_ and leave_critical_section.  That
-		means that each call to sched_note_get() causes two entries to be
-		added from the note buffer in order to remove one entry.  Not
-		very useful in its current state!
-
 config SCHED_INSTRUMENTATION_SPINLOCK
 	bool "Spinlock monitor hooks"
 	default n
-	depends on SPINLOCK && (!SMP || !SCHED_INSTRUMENTATION_FAUXPAS)
 	---help---
 		Enables additional hooks for spinlock state.  Board-specific logic
 		must provide this additional logic.
@@ -730,14 +715,6 @@ config SCHED_INSTRUMENTATION_SPINLOCK
 			void sched_note_spinlocked(FAR struct tcb_s *tcb, bool state);
 			void sched_note_spinunlock(FAR struct tcb_s *tcb, bool state);
 			void sched_note_spinabort(FAR struct tcb_s *tcb, bool state);
-
-		NOTE: This option is marked EXPERIMENTAL because there is a logical
-		error in the design when this feature is used with
-		CONFIG_SCHED_INSTRUMENTATION_BUFFER.  That error is that
-		sched_note_get() calls enter_ and leave_critical_section which use
-		spinlocks in SMP mode.  That means that each call to sched_note_get()
-		causes several additional entries to be added from the note buffer in
-		order to remove one entry.  Not very useful in its current state!
 
 config SCHED_INSTRUMENTATION_BUFFER
 	bool "Buffer instrumentation data in memory"
@@ -763,14 +740,35 @@ config SCHED_INSTRUMENTATION_BUFFER
 		does not occur.  See include/nuttx/sched_note.h for additional
 		information.
 
+if SCHED_INSTRUMENTATION_BUFFER
+
 config SCHED_NOTE_BUFSIZE
 	int "Instrumentation buffer size"
 	default 2048
-	depends on SCHED_INSTRUMENTATION_BUFFER
 	---help---
 		The size of the in-memory, circular instrumentation buffer (in
 		bytes).
 
+config SCHED_NOTE_GET
+	int "Callable interface to get instrumentatin data"
+	default 2048
+	depends on !SCHED_INSTRUMENTATION_CSECTION && (!SCHED_INSTRUMENTATION_SPINLOCK || !SMP)
+	---help---
+		Add support for interfaces to get the size of the next note and also
+		to extract the next note from the instrumentation buffer:
+
+			ssize_t sched_note_get(FAR uint8_t *buffer, size_t buflen);
+			ssize_t sched_note_size(void);
+
+		NOTE: This option is not available if critical sections are being
+		monitor (nor if spinlocks are being monitored in SMP configuration)
+		because there would be a logical error in the design in those cases.
+		That error is that these interfaces call enter_ and leave_critical_section
+		(and which us spinlocks in SMP mode).  That means that each call to
+		sched_note_get() causes several additional entries to be added from
+		the note buffer in order to remove one entry.
+
+endif # SCHED_INSTRUMENTATION_BUFFER
 endif # SCHED_INSTRUMENTATION
 endmenu # Performance Monitoring
 
