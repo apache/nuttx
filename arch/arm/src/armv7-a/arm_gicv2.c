@@ -107,6 +107,7 @@ void arm_gic0_initialize(void)
 
   /* Registers with 2-bits per interrupt */
 
+  putreg32(0x5555ffff, GIC_ICDICFR(GIC_IRQ_SGI0));  /* SGIs are edge sensitive */
   for (irq = GIC_IRQ_SPI; irq < nlines; irq += 16)
     {
     //putreg32(0xffffffff, GIC_ICDICFR(irq));  /* SPIs edge sensitive */
@@ -573,6 +574,5 @@ int arm_gic_irq_trigger(int irq, bool edge)
 
   return -EINVAL;
 }
-
 
 #endif /* CONFIG_ARMV7A_HAVE_GICv2 */
