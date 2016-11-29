@@ -391,7 +391,7 @@ static void misoc_net_receive(FAR struct misoc_net_driver_s *priv)
        * amount of data in priv->misoc_net_dev.d_len
        */
 
-      flush_cpu_dcache();
+      misoc_flush_dcache();
 
       if (rxslot)
         {

@@ -95,6 +95,16 @@ void flush_cpu_dcache(void);
 void misoc_serial_initialize(void);
 
 /****************************************************************************
+ * Name: up_net_initialize
+ *
+ * Description:
+ *   Register Network
+ *
+ ****************************************************************************/
+
+int misoc_net_initialize(int intf);
+
+/****************************************************************************
  * Name: misoc_puts
  *
  * Description:
@@ -135,6 +145,26 @@ void misoc_lowputs(const char *str);
 void modifyreg8(unsigned int addr, uint8_t clearbits, uint8_t setbits);
 void modifyreg16(unsigned int addr, uint16_t clearbits, uint16_t setbits);
 void modifyreg32(unsigned int addr, uint32_t clearbits, uint32_t setbits);
+
+/****************************************************************************
+ * Name: misoc_flush_dcache
+ *
+ * Description:
+ *   Flush the data cache of the cpu
+ *
+ ****************************************************************************/
+
+void misoc_flush_dcache(void);
+
+/****************************************************************************
+ * Name: misoc_flush_icache
+ *
+ * Description:
+ *   Flush the instruction cache of the cpu
+ *
+ ****************************************************************************/
+
+void misoc_flush_icache(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_MISOC_SRC_COMMON_MISOC_H */

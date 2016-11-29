@@ -1,9 +1,8 @@
 /****************************************************************************
- * arch/misoc/src/lm32/lm32_initialize.c
+ *  arch/misoc/src/lm32/lm32_flushcache.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Ramtin Amin <keytwo@gmail.com>
+ *   Author: Ramtin Amin <keytwo@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,47 +38,49 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <debug.h>
-
 #include <nuttx/arch.h>
-#include <nuttx/sched_note.h>
-#include <nuttx/drivers/drivers.h>
-#include <nuttx/fs/loop.h>
-#include <nuttx/net/loopback.h>
-#include <nuttx/net/tun.h>
-#include <nuttx/net/telnet.h>
-#include <nuttx/syslog/syslog.h>
-#include <nuttx/syslog/syslog_console.h>
-#include <nuttx/serial/pty.h>
-#include <nuttx/crypto/crypto.h>
-#include <nuttx/power/pm.h>
 
-#include <arch/board/board.h>
-
-#include "misoc.h"
+#include "chip.h"
 #include "lm32.h"
 
 /****************************************************************************
- * Public Functionis
+ * Public Functions
  ****************************************************************************/
 
-void up_initialize(void)
+/****************************************************************************
+ * Name: lm32_flush_dcache
+ *
+ * Description:
+ *   Flush the data cache of the cpu
+ *
+ ****************************************************************************/
+
+void lm32_flush_dcache(void)
 {
-  /* Initialize the System Timer */
+  asm volatile(
+    "wcsr DCC, r0\n"
+    "nop\n"
+    "nop\n"
+    "nop\n"
+    "nop\n"
+    );
+}
 
-  lm32_irq_initialize();
+/****************************************************************************
+ * Name: lm32_flush_icache
+ *
+ * Description:
+ *   Flush the instruction cache of the cpu
+ *
+ ****************************************************************************/
 
-  /* Initialize the serial driver */
-
-  misoc_serial_initialize();
-
-  /* Initialize the system timer */
-
-  misoc_timer_initialize();
-
-  /* Initialize the network cores */
-
-  misoc_net_initialize(0);
-
+void lm32_flush_icache(void)
+{
+  asm volatile(
+    "wcsr ICC, r0\n"
+    "nop\n"
+    "nop\n"
+    "nop\n"
+    "nop\n"
+    );
 }

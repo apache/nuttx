@@ -1,9 +1,9 @@
 /****************************************************************************
- * arch/misoc/src/lm32/lm32_initialize.c
+ * arch/misoc/src/common/misoc_flushcache.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Ramtin Amin <keytwo@gmail.com>
+ *   Author: Ramtin Amin <keytwo@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,47 +39,43 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <debug.h>
-
 #include <nuttx/arch.h>
-#include <nuttx/sched_note.h>
-#include <nuttx/drivers/drivers.h>
-#include <nuttx/fs/loop.h>
-#include <nuttx/net/loopback.h>
-#include <nuttx/net/tun.h>
-#include <nuttx/net/telnet.h>
-#include <nuttx/syslog/syslog.h>
-#include <nuttx/syslog/syslog_console.h>
-#include <nuttx/serial/pty.h>
-#include <nuttx/crypto/crypto.h>
-#include <nuttx/power/pm.h>
-
-#include <arch/board/board.h>
-
 #include "misoc.h"
+
+#ifdef CONFIG_ARCH_CHIP_LM32
 #include "lm32.h"
+#endif
 
 /****************************************************************************
- * Public Functionis
+ * Public Functions
  ****************************************************************************/
 
-void up_initialize(void)
+/****************************************************************************
+ * Name: misoc_flush_dcache
+ *
+ * Description:
+ *   Flush the data cache of the cpu
+ *
+ ****************************************************************************/
+
+void misoc_flush_dcache()
 {
-  /* Initialize the System Timer */
+#ifdef CONFIG_ARCH_CHIP_LM32
+  lm32_flush_dcache();
+#endif
+}
 
-  lm32_irq_initialize();
+/****************************************************************************
+ * Name: misoc_flush_icache
+ *
+ * Description:
+ *   Flush the instruction cache of the cpu
+ *
+ ****************************************************************************/
 
-  /* Initialize the serial driver */
-
-  misoc_serial_initialize();
-
-  /* Initialize the system timer */
-
-  misoc_timer_initialize();
-
-  /* Initialize the network cores */
-
-  misoc_net_initialize(0);
-
+void misoc_flush_icache()
+{
+#ifdef CONFIG_ARCH_CHIP_LM32
+  lm32_flush_icache();
+#endif
 }

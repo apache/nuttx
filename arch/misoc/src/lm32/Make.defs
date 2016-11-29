@@ -40,6 +40,7 @@ CMN_ASRCS   =
 CMN_CSRCS   = misoc_lowputs.c misoc_serial.c misoc_mdelay.c
 CMN_CSRCS  += misoc_modifyreg8.c misoc_modifyreg16.c misoc_modifyreg32.c
 CMN_CSRCS  += misoc_puts.c misoc_udelay.c misoc_timerisr.c misoc_net.c
+CMN_CSRCS  += misoc_flushcache.c
 
 CHIP_ASRCS  = lm32_syscall.S
 
@@ -50,3 +51,4 @@ CHIP_CSRCS += lm32_initialize.c lm32_initialstate.c lm32_interruptcontext.c
 CHIP_CSRCS += lm32_irq.c lm32_releasepending.c lm32_releasestack.c
 CHIP_CSRCS += lm32_stackframe.c lm32_swint.c lm32_unblocktask.c
 CHIP_CSRCS += lm32_reprioritizertr.c lm32_schedulesigaction.c lm32_sigdeliver.c
+CHIP_CSRCS += lm32_flushcache.c
