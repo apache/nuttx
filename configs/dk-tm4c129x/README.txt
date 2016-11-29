@@ -228,7 +228,6 @@ Networking Support
     CONFIG_NET_ETHERNET=y               : Support Ethernet data link
     CONFIG_NET_NOINTS=y                 : Should operative at non-interrupt level
     CONFIG_NET_SOCKOPTS=y               : Enable socket operations
-    CONFIG_NET_MULTIBUFFER=y            : Multi-packet buffer option required
     CONFIG_NET_ETH_MTU=590              : Maximum packet size (MTU) 1518 is more standard
     CONFIG_NET_ETH_TCP_RECVWNDO=536     : Should be the same as CONFIG_NET_ETH_MTU
     CONFIG_NET_ARP=y                    : Enable ARP
