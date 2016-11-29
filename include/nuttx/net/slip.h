@@ -54,7 +54,6 @@
 /* Dependencies:
  *
  *   CONFIG_NET_NOINTS - Required.
- *   CONFIG_NET_MULTIBUFFER - Required.
  *
  * SLIP Configuration:
  *
