@@ -137,7 +137,7 @@ extern "C"
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ARP_IPIN
-void arp_ipin(FAR struct net_driver_s **dev);
+void arp_ipin(FAR struct net_driver_s *dev);
 #else
 # define arp_ipin(dev)
 #endif
@@ -165,7 +165,7 @@ void arp_ipin(FAR struct net_driver_s **dev);
  *
  ****************************************************************************/
 
-void arp_arpin(FAR struct net_driver_s **dev);
+void arp_arpin(FAR struct net_driver_s *dev);
 
 /****************************************************************************
  * Name: arp_out
