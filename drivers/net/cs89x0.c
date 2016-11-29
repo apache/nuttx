@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/net/cs89x0.c
  *
- *   Copyright (C) 2009-2011, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2011, 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -93,9 +93,7 @@
 #  define cs89x0_mapirq(irq) g_cs89x0[0]
 #endif
 
-/****************************************************************************
- * Private Types
- ****************************************************************************/
+#define PKTBUF_SIZE (MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE)
 
 /****************************************************************************
  * Private Data
@@ -1008,6 +1006,8 @@ static int cs89x0_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 
 int cs89x0_initialize(FAR const cs89x0_driver_s *cs89x0, int devno)
 {
+  FAR uint8_t *pktbuf;
+
   /* Sanity checks -- only performed with debug enabled */
 
 #ifdef CONFIG_DEBUG_FEATURES
@@ -1030,9 +1030,18 @@ int cs89x0_initialize(FAR const cs89x0_driver_s *cs89x0, int devno)
       return -EAGAIN;
     }
 
+  /* Allocate a packet buffer */
+
+  pktbuf = (FAR uint_t *)kmm_alloc(MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE);
+  if (pktbuf == NULL)
+    {
+      return -ENOMEM;
+    }
+
   /* Initialize the driver structure */
 
   g_cs89x[devno]           = cs89x0;             /* Used to map IRQ back to instance */
+  cs89x0->cs_dev.d_buf     = g_pktbuf;           /* Single packet buffer */
   cs89x0->cs_dev.d_ifup    = cs89x0_ifup;        /* I/F down callback */
   cs89x0->cs_dev.d_ifdown  = cs89x0_ifdown;      /* I/F up (new IP address) callback */
   cs89x0->cs_dev.d_txavail = cs89x0_txavail;     /* New TX data callback */
@@ -1056,4 +1065,3 @@ int cs89x0_initialize(FAR const cs89x0_driver_s *cs89x0, int devno)
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_CS89x0 */
-

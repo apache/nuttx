@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/net/skeleton.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -132,6 +132,19 @@ struct skel_driver_s
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+/* These statically allocated structur would mean that only a single
+ * instance of the device could be supported.  In order to support multiple
+ * devices instances, this data would have to be allocated dynamically.
+ */
+
+/* A single packet buffer per device is used here.  There might be multiple
+ * packet buffers in a more complex, pipelined design.
+ */
+
+static uint8_t g_pktbuf[MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE];
+
+/* Driver state structure */
 
 static struct skel_driver_s g_skel[CONFIG_skeleton_NINTERFACES];
 
@@ -1234,6 +1247,7 @@ int skel_initialize(int intf)
   /* Initialize the driver structure */
 
   memset(priv, 0, sizeof(struct skel_driver_s));
+  priv->sk_dev.d_buf     = g_pktbuf;      /* Single packet buffer */
   priv->sk_dev.d_ifup    = skel_ifup;     /* I/F up (new IP address) callback */
   priv->sk_dev.d_ifdown  = skel_ifdown;   /* I/F down callback */
   priv->sk_dev.d_txavail = skel_txavail;  /* New TX data callback */

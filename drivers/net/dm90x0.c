@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/net/dm9x.c
  *
- *   Copyright (C) 2007-2010, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010, 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References: Davicom data sheets (DM9000-DS-F03-041906.pdf,
@@ -317,6 +317,10 @@ struct dm9x_driver_s
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+/* A single packet buffer is used */
+
+static uint8_t g_pktbuf[MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE];
 
 /* At present, only a single DM90x0 device is supported. */
 
@@ -1746,6 +1750,7 @@ int dm9x_initialize(void)
   /* Initialize the driver structure */
 
   memset(g_dm9x, 0, CONFIG_DM9X_NINTERFACES*sizeof(struct dm9x_driver_s));
+  g_dm9x[0].dm_dev.d_buf     = g_pktbuf;      /* Single packet buffer */
   g_dm9x[0].dm_dev.d_ifup    = dm9x_ifup;     /* I/F down callback */
   g_dm9x[0].dm_dev.d_ifdown  = dm9x_ifdown;   /* I/F up (new IP address) callback */
   g_dm9x[0].dm_dev.d_txavail = dm9x_txavail;  /* New TX data callback */

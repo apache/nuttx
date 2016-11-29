@@ -192,6 +192,12 @@ struct ftmac100_driver_s
  * Private Data
  ****************************************************************************/
 
+/* A single packet buffer is used */
+
+static uint8_t g_pktbuf[MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE];
+
+/* Driver state structure. */
+
 static struct ftmac100_driver_s g_ftmac100[CONFIG_FTMAC100_NINTERFACES]
   __attribute__((aligned(16)));
 
@@ -1738,6 +1744,7 @@ int ftmac100_initialize(int intf)
   /* Initialize the driver structure */
 
   memset(priv, 0, sizeof(struct ftmac100_driver_s));
+  priv->ft_dev.d_buf     = g_pktbuf;          /* Single packet buffer */
   priv->ft_dev.d_ifup    = ftmac100_ifup;     /* I/F up (new IP address) callback */
   priv->ft_dev.d_ifdown  = ftmac100_ifdown;   /* I/F down callback */
   priv->ft_dev.d_txavail = ftmac100_txavail;  /* New TX data callback */

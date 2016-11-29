@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/net/loopback.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -121,10 +121,7 @@ struct lo_driver_s
  ****************************************************************************/
 
 static struct lo_driver_s g_loopback;
-
-#ifdef CONFIG_NET_MULTIBUFFER
 static uint8_t g_iobuffer[MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE];
-#endif
 
 /****************************************************************************
  * Private Function Prototypes
@@ -555,9 +552,7 @@ int localhost_initialize(void)
   priv->lo_dev.d_addmac  = lo_addmac;    /* Add multicast MAC address */
   priv->lo_dev.d_rmmac   = lo_rmmac;     /* Remove multicast MAC address */
 #endif
-#ifdef CONFIG_NET_MULTIBUFFER
   priv->lo_dev.d_buf     = g_iobuffer;   /* Attach the IO buffer */
-#endif
   priv->lo_dev.d_private = (FAR void *)priv; /* Used to recover private state from dev */
 
   /* Create a watchdog for timing polling for and timing of transmissions */

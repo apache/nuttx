@@ -80,10 +80,6 @@
 #  warning "CONFIG_NET_NOINTS must be set"
 #endif
 
-#ifndef CONFIG_NET_MULTIBUFFER
-#  warning "CONFIG_NET_MULTIBUFFER must be set"
-#endif
-
 #ifndef CONFIG_NET_SLIP_STACKSIZE
 #  define CONFIG_NET_SLIP_STACKSIZE 2048
 #endif

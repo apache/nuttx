@@ -6,7 +6,7 @@
  *
  * This file is a part of NuttX:
  *
- *   Copyright (C) 2011, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2014, 2016 Gregory Nutt. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -82,6 +82,10 @@
 /* TX timeout = 1 minute */
 
 #define E1000_TXTIMEOUT (60*CLK_TCK)
+
+/* Size of one packet */
+
+#define PKTBUF_SIZE (MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE)
 
 /* This is a helper pointer for accessing the contents of the Ethernet header */
 
@@ -1087,18 +1091,26 @@ static pci_id_t e1000_id_table[] =
 
 static int e1000_probe(uint16_t addr, pci_id_t id)
 {
-  uint32_t mmio_base, mmio_size;
+  FAR struct e1000_dev *dev;
+  uint32_t mmio_base;
+  uint32_t mmio_size;
   uint32_t size;
+  FAR uint8_t *pktbuf
+  FAR void *kmem;
+  FAR void *omem;
   int errcode;
-  void *kmem;
-  void *omem;
-  struct e1000_dev *dev;
 
-  /* alloc e1000_dev memory */
+  /* Allocate e1000_dev memory */
 
-  if ((dev = kmm_zalloc(sizeof(struct e1000_dev))) == NULL)
+  if ((dev = (FAR struct e1000_dev *)kmm_zalloc(sizeof(struct e1000_dev))) == NULL)
     {
-      return -1;
+      return -ENOMEM;
+    }
+
+  if ((pktbuf = (FAR uint8_t *)kmm_zalloc(PKTBUF_SIZE)) == NULL)
+    {
+      errcode = -ENOMEM;
+      goto errout_with_dev;
     }
 
   /* save pci addr */
@@ -1109,7 +1121,7 @@ static int e1000_probe(uint16_t addr, pci_id_t id)
 
   if ((errcode = pci_enable_device(addr, PCI_BUS_MASTER)) < 0)
     {
-      goto error;
+      goto errout_with_pktbuf;
     }
 
   /* get e1000 device type */
@@ -1123,12 +1135,12 @@ static int e1000_probe(uint16_t addr, pci_id_t id)
   errcode = rgmp_memmap_nocache(mmio_base, mmio_size, mmio_base);
   if (errcode)
     {
-      goto error;
+      goto errout_with_pktbuf;
     }
 
   dev->phy_mem_base = mmio_base;
-  dev->io_mem_base = mmio_base;
-  dev->mem_size = mmio_size;
+  dev->io_mem_base  = mmio_base;
+  dev->mem_size     = mmio_size;
 
   /* MAC address */
 
@@ -1141,7 +1153,7 @@ static int e1000_probe(uint16_t addr, pci_id_t id)
   dev->int_desc.dev_id = dev;
   if ((errcode = pci_request_irq(addr, &dev->int_desc, 0)) < 0)
     {
-      goto err0;
+      goto errout_with_memmap;
     }
 
   /* Here we alloc a big block of memory once and make it
@@ -1161,11 +1173,12 @@ static int e1000_probe(uint16_t addr, pci_id_t id)
          CONFIG_E1000_N_RX_DESC * sizeof(struct rx_desc) +
          CONFIG_E1000_N_RX_DESC * CONFIG_E1000_BUFF_SIZE;
   size = ROUNDUP(size, PGSIZE);
+
   omem = kmem = memalign(PGSIZE, size);
   if (kmem == NULL)
     {
       errcode = -ENOMEM;
-      goto err1;
+      goto errout_with_pci;
     }
 
   rgmp_memremap_nocache((uintptr_t)kmem, size);
@@ -1185,6 +1198,7 @@ static int e1000_probe(uint16_t addr, pci_id_t id)
 
   /* Initialize the driver structure */
 
+  dev->netdev.d_buf     = pktbuf;         /* Single packet buffer */
   dev->netdev.d_ifup    = e1000_ifup;     /* I/F up (new IP address) callback */
   dev->netdev.d_ifdown  = e1000_ifdown;   /* I/F down callback */
   dev->netdev.d_txavail = e1000_txavail;  /* New TX data callback */
@@ -1214,7 +1228,7 @@ static int e1000_probe(uint16_t addr, pci_id_t id)
   errcode = netdev_register(&dev->netdev, NET_LL_ETHERNET);
   if (errcode)
     {
-      goto err2;
+      goto errout_with_omem;
     }
 
   /* insert into e1000_list */
@@ -1225,14 +1239,16 @@ static int e1000_probe(uint16_t addr, pci_id_t id)
 
   return 0;
 
-err2:
+errout_with_omem:
   rgmp_memremap((uintptr_t)omem, size);
   free(omem);
-err1:
+errout_with_pci:
   pci_free_irq(addr);
-err0:
+errout_with_memmap:
   rgmp_memunmap(mmio_base, mmio_size);
-error:
+errout_with_pktbuf:
+  kmm_free(pktbuf);
+errout_with_dev:
   kmm_free(dev);
   cprintf("e1000 device probe fail: %d\n", errcode);
   return errcode;
@@ -1268,6 +1284,7 @@ void e1000_mod_exit(void)
       free(dev->tx_ring.desc);
       pci_free_irq(dev->pci_addr);
       rgmp_memunmap((uintptr_t)dev->io_mem_base, dev->mem_size);
+      kmm_free(dev->netdev.d_buf);
       kmm_free(dev);
     }
 
