@@ -112,6 +112,9 @@ Status
   CPUs, but I don't think I have that working right yet.  See the SMP section
   below for more information.
 
+2016-11-28:  SMP is unusable until the SCU cache coherency logic is fixed.
+  I do not know how to do that now.
+
 Platform Features
 =================
 
