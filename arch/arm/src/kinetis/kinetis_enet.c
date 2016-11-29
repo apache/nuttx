@@ -119,10 +119,6 @@
 #define NENET_NBUFFERS \
   (CONFIG_KINETIS_ENETNTXBUFFERS+CONFIG_KINETIS_ENETNRXBUFFERS)
 
-#ifndef CONFIG_NET_MULTIBUFFER
-#  error "CONFIG_NET_MULTIBUFFER is required in the configuration"
-#endif
-
 /* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per
  * second.
  */

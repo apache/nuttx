@@ -279,6 +279,10 @@
  * Private Types
  ****************************************************************************/
 
+/* A single packet buffer is used */
+
+static uint8_t g_pktbuf[MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE];
+
 /* The c5471_driver_s encapsulates all state information for a single c5471
  * hardware interface
  */
@@ -2248,6 +2252,7 @@ void up_netinitialize(void)
   /* Initialize the driver structure */
 
   memset(g_c5471, 0, CONFIG_C5471_NET_NINTERFACES*sizeof(struct c5471_driver_s));
+  g_c5471[0].c_dev.d_buf     = g_pktbuf;        /* Single packet buffer */
   g_c5471[0].c_dev.d_ifup    = c5471_ifup;      /* I/F down callback */
   g_c5471[0].c_dev.d_ifdown  = c5471_ifdown;    /* I/F up (new IP address) callback */
   g_c5471[0].c_dev.d_txavail = c5471_txavail;   /* New TX data callback */

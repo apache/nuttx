@@ -219,10 +219,6 @@
 
 /* Ethernet buffer sizes, number of buffers, and number of descriptors */
 
-#ifndef CONFIG_NET_MULTIBUFFER
-#  error CONFIG_NET_MULTIBUFFER is required
-#endif
-
 #ifndef CONFIG_TIVA_EMAC_NRXDESC
 #  define CONFIG_TIVA_EMAC_NRXDESC 8
 #endif

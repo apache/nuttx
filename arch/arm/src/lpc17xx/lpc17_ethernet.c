@@ -138,6 +138,8 @@
 #  define CONFIG_NET_PRIORITY NVIC_SYSH_PRIORITY_DEFAULT
 #endif
 
+#define PKTBUF_SIZE (MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE)
+
 /* Debug Configuration *****************************************************/
 /* Register debug -- can only happen of CONFIG_DEBUG_NET_INFO is selected */
 
@@ -289,6 +291,10 @@ struct lpc17_driver_s
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+/* A single packet buffer per interface is used */
+
+static uint8_t g_pktbuf[PKTBUF_SIZE * CONFIG_LPC17_NINTERFACES];
 
 /* Array of ethernet driver status structures */
 
@@ -3206,6 +3212,7 @@ static inline int lpc17_ethinitialize(int intf)
 #endif
 {
   struct lpc17_driver_s *priv;
+  uint8_t *pktbuf;
   uint32_t regval;
   int ret;
   int i;
@@ -3225,11 +3232,17 @@ static inline int lpc17_ethinitialize(int intf)
     {
       (void)lpc17_configgpio(g_enetpins[i]);
     }
+
   lpc17_showpins();
+
+  /* Select the packet buffer */
+
+  pktbuf = &g_pktbuf[PKTBUF_SIZE * intf];
 
   /* Initialize the driver structure */
 
   memset(priv, 0, sizeof(struct lpc17_driver_s));
+  priv->lp_dev.d_buf     = pktbuf;        /* Single packet buffer */
   priv->lp_dev.d_ifup    = lpc17_ifup;    /* I/F down callback */
   priv->lp_dev.d_ifdown  = lpc17_ifdown;  /* I/F up (new IP address) callback */
   priv->lp_dev.d_txavail = lpc17_txavail; /* New TX data callback */
@@ -3237,7 +3250,7 @@ static inline int lpc17_ethinitialize(int intf)
   priv->lp_dev.d_addmac  = lpc17_addmac;  /* Add multicast MAC address */
   priv->lp_dev.d_rmmac   = lpc17_rmmac;   /* Remove multicast MAC address */
 #endif
-  priv->lp_dev.d_private = (void *)priv;   /* Used to recover private state from dev */
+  priv->lp_dev.d_private = (void *)priv;  /* Used to recover private state from dev */
 
 #if CONFIG_LPC17_NINTERFACES > 1
 # error "A mechanism to associate base address an IRQ with an interface is needed"

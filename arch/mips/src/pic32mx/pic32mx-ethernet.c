@@ -102,12 +102,6 @@
 #  define CONFIG_PIC32MX_NINTERFACES 1
 #endif
 
-/* CONFIG_NET_MULTIBUFFER is required */
-
-#ifndef CONFIG_NET_MULTIBUFFER
-#  error "CONFIG_NET_MULTIBUFFER=y is required"
-#endif
-
 /* If IGMP is enabled, then accept multi-cast frames. */
 
 #if defined(CONFIG_NET_IGMP) && !defined(CONFIG_PIC32MX_MULTICAST)

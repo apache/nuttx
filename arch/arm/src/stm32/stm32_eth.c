@@ -207,12 +207,6 @@
 #undef CONFIG_STM32_ETH_ENHANCEDDESC
 #undef CONFIG_STM32_ETH_HWCHECKSUM
 
-/* Ethernet buffer sizes, number of buffers, and number of descriptors */
-
-#ifndef CONFIG_NET_MULTIBUFFER
-#  error "CONFIG_NET_MULTIBUFFER is required"
-#endif
-
 /* Add 4 to the configured buffer size to account for the 2 byte checksum
  * memory needed at the end of the maximum size packet.  Buffer sizes must
  * be an even multiple of 4, 8, or 16 bytes (depending on buswidth).  We

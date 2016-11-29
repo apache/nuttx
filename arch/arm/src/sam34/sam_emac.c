@@ -313,7 +313,6 @@ struct sam_emac_s
 
 static struct sam_emac_s g_emac;
 
-#ifdef CONFIG_NET_MULTIBUFFER
 /* A single packet buffer is used
  *
  * REVISIT:  It might be possible to use this option to send and receive
@@ -324,7 +323,6 @@ static struct sam_emac_s g_emac;
  */
 
 static uint8_t g_pktbuf[MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE];
-#endif
 
 #ifdef CONFIG_SAM34_EMAC_PREALLOCATE
 /* Preallocated data */
@@ -3820,9 +3818,7 @@ void up_netinitialize(void)
   /* Initialize the driver structure */
 
   memset(priv, 0, sizeof(struct sam_emac_s));
-#ifdef CONFIG_NET_MULTIBUFFER
   priv->dev.d_buf     = g_pktbuf;        /* Single packet buffer */
-#endif
   priv->dev.d_ifup    = sam_ifup;        /* I/F up (new IP address) callback */
   priv->dev.d_ifdown  = sam_ifdown;      /* I/F down callback */
   priv->dev.d_txavail = sam_txavail;     /* New TX data callback */

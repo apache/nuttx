@@ -191,11 +191,9 @@ struct tiva_driver_s
  * Private Data
  ****************************************************************************/
 
-#ifdef CONFIG_NET_MULTIBUFFER
 /* A single packet buffer is used */
 
 static uint8_t g_pktbuf[MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE];
-#endif
 
 /* Ethernet peripheral state */
 
@@ -1472,9 +1470,7 @@ static inline int tiva_ethinitialize(int intf)
   /* Initialize the driver structure */
 
   memset(priv, 0, sizeof(struct tiva_driver_s));
-#ifdef CONFIG_NET_MULTIBUFFER
   priv->ld_dev.d_buf     = g_pktbuf;      /* Single packet buffer */
-#endif
   priv->ld_dev.d_ifup    = tiva_ifup;     /* I/F down callback */
   priv->ld_dev.d_ifdown  = tiva_ifdown;   /* I/F up (new IP address) callback */
   priv->ld_dev.d_txavail = tiva_txavail;  /* New TX data callback */

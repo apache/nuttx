@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z80/src/ez80/ez80_emac.c
  *
- *   Copyright (C) 2009-2010, 2012, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2012, 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -333,6 +333,10 @@ struct ez80emac_driver_s
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+/* A single packet buffer is used */
+
+static uint8_t g_pktbuf[MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE];
 
 /* There is only a single instance of driver private data (because there is
  * only one EMAC interface.
@@ -2224,6 +2228,7 @@ int up_netinitialize(void)
   /* Initialize the driver structure */
 
   memset(&g_emac, 0, sizeof(struct ez80emac_driver_s));
+  priv->dev.d_buf     = g_pktbuf;           /* Single packet buffer */
   priv->dev.d_ifup    = ez80emac_ifup;      /* I/F down callback */
   priv->dev.d_ifdown  = ez80emac_ifdown;    /* I/F up (new IP address) callback */
   priv->dev.d_txavail = ez80emac_txavail;   /* New TX data callback */
