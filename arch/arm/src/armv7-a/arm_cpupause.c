@@ -144,13 +144,20 @@ int up_cpu_paused(int cpu)
 
   up_savestate(tcb->xcp.regs);
 
-  /* Wait for the spinlock to be released */
+  /* Release the g_cpu_puased spinlock to synchronize with the
+   * requesting CPU.
+   */
 
   spin_unlock(&g_cpu_paused[cpu]);
+
+  /* Wait for the spinlock to be released.  The requesting CPU will release
+   * the spinlcok when the CPU is resumed.
+   */
+
   spin_lock(&g_cpu_wait[cpu]);
 
-  /* Restore the exception context of the tcb at the (new) head of the
-   * assigned task list.
+  /* This CPU has been resumed. Restore the exception context of the TCB at
+   * the (new) head of the assigned task list.
    */
 
   tcb = this_task();
