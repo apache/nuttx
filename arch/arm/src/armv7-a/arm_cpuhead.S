@@ -312,7 +312,7 @@ __cpu3_start:
 	 * after SMP cache coherency has been setup.
 	 */
 
-#if !defined(CPU_DCACHE_DISABLE) && !defined(CONFIG_SMP)
+#if 0 /* !defined(CPU_DCACHE_DISABLE) && !defined(CONFIG_SMP) */
 	/* Dcache enable
 	 *
 	 *   SCTLR_C    Bit 2:  DCache enable
