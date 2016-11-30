@@ -660,6 +660,7 @@ static int lpc17_transmit(struct lpc17_driver_s *priv)
 
       prodidx = 0;
     }
+
   lpc17_putreg(prodidx, LPC17_ETH_TXPRODIDX);
 
   /* Enable Tx interrupts */
