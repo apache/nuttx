@@ -281,7 +281,9 @@ static void note_add(FAR const uint8_t *note, uint8_t notelen)
 {
   unsigned int head;
   unsigned int next;
+#if 0 /* Backed out for now. */
   unsigned int nxthd;
+#endif
 
 #ifdef CONFIG_SMP
   /* Ignore notes that are not in the set of monitored CPUs */
@@ -293,6 +295,11 @@ static void note_add(FAR const uint8_t *note, uint8_t notelen)
       return;
     }
 #endif
+
+#if 0 /* Backed out for now.  This could advance the head index and wrap
+       * past the tail index.  I am not sure how this would interact with
+       * note_remove().  Needs time to test and verify.
+       */
 
   DEBUGASSERT(note != NULL && notelen < CONFIG_SCHED_NOTE_BUFSIZE);
 
@@ -325,6 +332,12 @@ static void note_add(FAR const uint8_t *note, uint8_t notelen)
       g_note_info.ni_head = nxthd;
     }
   while (nxthd != g_note_info.ni_head);
+#else
+  /* Get the index to the head of the circular buffer */
+
+  DEBUGASSERT(note != NULL && notelen < CONFIG_SCHED_NOTE_BUFSIZE);
+  head = g_note_info.ni_head;
+#endif
 
   /* Loop until all bytes have been transferred to the circular buffer */
 
@@ -350,7 +363,11 @@ static void note_add(FAR const uint8_t *note, uint8_t notelen)
       notelen--;
     }
 
+#if 0 /* Backed out for now. */
   DEBUGASSERT(head == nxthd);
+#else
+  g_note_info.ni_head = head;
+#endif
 }
 
 /****************************************************************************
