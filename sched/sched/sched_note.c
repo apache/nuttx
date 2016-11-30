@@ -63,8 +63,8 @@
 
 struct note_info_s
 {
-  unsigned int ni_head;
-  unsigned int ni_tail;
+  volatile unsigned int ni_head;
+  volatile unsigned int ni_tail;
   uint8_t ni_buffer[CONFIG_SCHED_NOTE_BUFSIZE];
 };
 
@@ -281,6 +281,7 @@ static void note_add(FAR const uint8_t *note, uint8_t notelen)
 {
   unsigned int head;
   unsigned int next;
+  unsigned int nxthd;
 
 #ifdef CONFIG_SMP
   /* Ignore notes that are not in the set of monitored CPUs */
@@ -293,10 +294,37 @@ static void note_add(FAR const uint8_t *note, uint8_t notelen)
     }
 #endif
 
-  /* Get the index to the head of the circular buffer */
-
   DEBUGASSERT(note != NULL && notelen < CONFIG_SCHED_NOTE_BUFSIZE);
-  head = g_note_info.ni_head;
+
+  do
+    {
+      /* Get the index to the head of the circular buffer */
+
+      head = g_note_info.ni_head;
+
+      /* Pre-calculate the next head index.  We do this in advance to
+       * protect note as it is written.  In the single CPU case, this is not
+       * a problem because this logic is always called within a critical
+       * section, but in the SMP case we have less protection.  pre-
+       * calculating the next head indexed does not eliminate all
+       * possibility of conflict; it is possible that one note could be lost
+       * or corrupted.  But the integrity of the overal buffer should be
+       * retained.
+       */
+
+      nxthd = note_next(head, notelen);
+
+      /* Write the next head.  There are two possible race conditions: (1)
+       * some other CPU wrote the head after we fetched it above.  That
+       * note from the other CPU will be lost (and this one may be
+       * corrupted), or (2) some other CPU will write the head after we
+       * write it and the write the same value.  Again, one note will be
+       * lost or corrupted.
+       */
+
+      g_note_info.ni_head = nxthd;
+    }
+  while (nxthd != g_note_info.ni_head);
 
   /* Loop until all bytes have been transferred to the circular buffer */
 
@@ -322,7 +350,7 @@ static void note_add(FAR const uint8_t *note, uint8_t notelen)
       notelen--;
     }
 
-  g_note_info.ni_head = head;
+  DEBUGASSERT(head == nxthd);
 }
 
 /****************************************************************************
