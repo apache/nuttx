@@ -236,6 +236,11 @@ static int misoc_net_transmit(FAR struct misoc_net_driver_s *priv)
 
   /* Send the packet: address=priv->misoc_net_dev.d_buf,
    * length=priv->misoc_net_dev.d_len
+   *
+   * NOTE: This memcpy could be avoided by setting tx_buf
+   * to the d_buf pointer and setting d_buf to an alternate
+   * buffer.  Some additional buffer management logic would
+   * be required.
    */
 
   memcpy(priv->tx_buf, priv->misoc_net_dev.d_buf,
@@ -395,6 +400,10 @@ static void misoc_net_receive(FAR struct misoc_net_driver_s *priv)
 
       /* Copy the data data from the hardware to priv->misoc_net_dev.d_buf.  Set
        * amount of data in priv->misoc_net_dev.d_len
+       *
+       * NOTE: These memcpy's could be avoided by simply setting the d_buf
+       * pointer to the rx*_buf containing the received data.  Some additional
+       * buffer management logic would also be required.
        */
 
       misoc_flush_dcache();
