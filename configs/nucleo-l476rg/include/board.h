@@ -102,6 +102,9 @@
 #define GPIO_USART2_RTS  GPIO_USART2_RTS_2
 #define GPIO_USART2_CTS  GPIO_USART2_CTS_2
 
+#define GPIO_UART4_RX   GPIO_UART4_RX_1    /* PA1 */
+#define GPIO_UART4_TX   GPIO_UART4_TX_1    /* PA0 */
+
 /* I2C
  *
  * The optional _GPIO configurations allow the I2C driver to manually
