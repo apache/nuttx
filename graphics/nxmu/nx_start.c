@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <sched.h>
@@ -50,6 +51,12 @@
 #include <nuttx/nx/nx.h>
 
 #include "nxfe.h"
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static bool g_nxserver_started;
 
 /****************************************************************************
  * Private Functions
@@ -114,14 +121,14 @@ int nx_server(int argc, char *argv[])
    * REVISIT: display == 0 is assumed.
    */
 
-  ret = up_fbinitialize(0);
+  ret = up_fbinitialize(CONFIG_NXSTART_DISPLAYNO);
   if (ret < 0)
     {
       gerr("ERROR: up_fbinitialize failed: %d\n", ret);
       return EXIT_FAILURE;
     }
 
-  dev = up_fbgetvplane(0, CONFIG_NXSTART_VPLANE);
+  dev = up_fbgetvplane(CONFIG_NXSTART_DISPLAYNO, CONFIG_NXSTART_VPLANE);
   if (!dev)
     {
       gerr("ERROR: up_fbgetvplane failed, vplane=%d\n", CONFIG_NXSTART_VPLANE);
@@ -171,26 +178,34 @@ int nx_server(int argc, char *argv[])
 
 int nx_start(void)
 {
-  pid_t server;
+  /* Do nothing is the server has already been started */
 
-  /* Start the server kernel thread */
-
-  ginfo("Starting server task\n");
-  server = kernel_thread("NX Server", CONFIG_NXSTART_SERVERPRIO,
-                         CONFIG_NXSTART_SERVERSTACK, nx_server, NULL);
-  if (server < 0)
+  if (!g_nxserver_started)
     {
-      int errcode = errno;
-      DEBUGASSERT(errcode > 0);
+      pid_t server;
 
-      gerr("ERROR: Failed to create nx_server kernel thread: %d\n", errcode);
-      return -errcode;
+      /* Start the server kernel thread */
+
+      ginfo("Starting server task\n");
+      server = kernel_thread("NX Server", CONFIG_NXSTART_SERVERPRIO,
+                             CONFIG_NXSTART_SERVERSTACK, nx_server, NULL);
+      if (server < 0)
+        {
+          int errcode = errno;
+          DEBUGASSERT(errcode > 0);
+
+          gerr("ERROR: Failed to create nx_server kernel thread: %d\n", errcode);
+          return -errcode;
+        }
+
+      g_nxserver_started = true;
+
+      /* Wait a bit to make sure that the server get started.  NOTE that
+       * this operation cannot be done from the IDLE thread!
+       */
+
+      usleep(50*1000);
     }
 
-  /* Wait a bit to make sure that the server get started.  NOTE that this
-   * operation cannot be done from the IDLE thread!
-   */
-
-  usleep(50*1000);
   return OK;
 }

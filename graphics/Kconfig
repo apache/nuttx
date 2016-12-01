@@ -726,6 +726,14 @@ config NXSTART_DEVNO
 		LCD device number (in case there are more than one LCDs connected).
 		Default: 0
 
+config NXSTART_DISPLAYNO
+	int "Display Number"
+	default 0
+	depends on !NX_LCDDRIVER && !NXSTART_EXTERNINIT
+	---help---
+		Framebuffer display number (in case there are more than one framebuffers).
+		Default: 0
+
 config NXSTART_VPLANE
 	int "Plane Number"
 	default 0

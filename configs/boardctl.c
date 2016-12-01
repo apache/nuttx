@@ -392,7 +392,7 @@ int boardctl(unsigned int cmd, uintptr_t arg)
 
       case BOARDIOC_NX_START:
         {
-          ret = nx_start(ctrl);
+          ret = nx_start();
         }
         break;
 #endif
