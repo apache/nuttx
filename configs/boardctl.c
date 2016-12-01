@@ -48,6 +48,7 @@
 #include <nuttx/board.h>
 #include <nuttx/module.h>
 #include <nuttx/binfmt/symtab.h>
+#include <nuttx/nx/nx.h>
 
 #ifdef CONFIG_BOARDCTL_USBDEVCTRL
 #  include <nuttx/usb/cdcacm.h>
@@ -377,6 +378,21 @@ int boardctl(unsigned int cmd, uintptr_t arg)
 
           DEBUGASSERT(ctrl != NULL);
           ret = boardctl_usbdevctrl(ctrl);
+        }
+        break;
+#endif
+
+#ifdef CONFIG_NX_MULTIUSER
+      /* CMD:           BOARDIOC_NX_START
+       * DESCRIPTION:   Start the NX servier
+       * ARG:           None
+       * CONFIGURATION: CONFIG_NX_MULTIUSER
+       * DEPENDENCIES:  Base graphics logic provides nx_start()
+       */
+
+      case BOARDIOC_NX_START:
+        {
+          ret = nx_start(ctrl);
         }
         break;
 #endif

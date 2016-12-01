@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/sys/boardctl.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -109,6 +109,12 @@
  * CONFIGURATION: CONFIG_LIB_BOARDCTL && CONFIG_BOARDCTL_USBDEVCTRL
  * DEPENDENCIES:  Board logic must provide board_<usbdev>_initialize()
  *
+ * CMD:           BOARDIOC_NX_START
+ * DESCRIPTION:   Start the NX servier
+ * ARG:           None
+ * CONFIGURATION: CONFIG_NX_MULTIUSER
+ * DEPENDENCIES:  Base graphics logic provides nx_start()
+ *
  * CMD:           BOARDIOC_TSCTEST_SETUP
  * DESCRIPTION:   Touchscreen controller test configuration
  * ARG:           Touch controller device minor number
@@ -154,12 +160,13 @@
 #define BOARDIOC_APP_SYMTAB        _BOARDIOC(0x0005)
 #define BOARDIOC_OS_SYMTAB         _BOARDIOC(0x0006)
 #define BOARDIOC_USBDEV_CONTROL    _BOARDIOC(0x0007)
-#define BOARDIOC_TSCTEST_SETUP     _BOARDIOC(0x0008)
-#define BOARDIOC_TSCTEST_TEARDOWN  _BOARDIOC(0x0009)
-#define BOARDIOC_ADCTEST_SETUP     _BOARDIOC(0x000a)
-#define BOARDIOC_PWMTEST_SETUP     _BOARDIOC(0x000b)
-#define BOARDIOC_CAN_INITIALIZE    _BOARDIOC(0x000c)
-#define BOARDIOC_GRAPHICS_SETUP    _BOARDIOC(0x000d)
+#define BOARDIOC_NX_START          _BOARDIOC(0x0008)
+#define BOARDIOC_TSCTEST_SETUP     _BOARDIOC(0x0009)
+#define BOARDIOC_TSCTEST_TEARDOWN  _BOARDIOC(0x000a)
+#define BOARDIOC_ADCTEST_SETUP     _BOARDIOC(0x000b)
+#define BOARDIOC_PWMTEST_SETUP     _BOARDIOC(0x000c)
+#define BOARDIOC_CAN_INITIALIZE    _BOARDIOC(0x000d)
+#define BOARDIOC_GRAPHICS_SETUP    _BOARDIOC(0x000e)
 
 /* If CONFIG_BOARDCTL_IOCTL=y, then boad-specific commands will be support.
  * In this case, all commands not recognized by boardctl() will be forwarded
