@@ -51,8 +51,6 @@
 
 #include "nxfe.h"
 
-#ifdef CONFIG_NX_NXSTART
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -155,6 +153,9 @@ int nx_server(int argc, char *argv[])
  *   work in the NuttX kernel build because the resources required by the
  *   NX server are private to the kernel mode logic.
  *
+ *   nx_start() can be called (indirectly) from applications via the
+ *   boardctl() interface with the BOARDIOC_NX_START command.
+ *
  * Input Parameters:
  *   None
  *
@@ -193,5 +194,3 @@ int nx_start(void)
   usleep(50*1000);
   return OK;
 }
-
-#endif /* CONFIG_NX_NXSTART */
