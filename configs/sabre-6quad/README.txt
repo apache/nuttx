@@ -115,6 +115,9 @@ Status
 2016-11-28:  SMP is unusable until the SCU cache coherency logic is fixed.
   I do not know how to do that now.
 
+2016-12-01:  I committed a completely untest SPI driver.  This was taken
+  directly from the i.MX1 and is most certainly not ready for use yet.
+
 Platform Features
 =================
 
