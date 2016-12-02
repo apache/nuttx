@@ -61,7 +61,6 @@ CONFIG_ARCH_ARM=y
 # CONFIG_ARCH_HC is not set
 # CONFIG_ARCH_MIPS is not set
 # CONFIG_ARCH_MISOC is not set
-# CONFIG_ARCH_RGMP is not set
 # CONFIG_ARCH_RENESAS is not set
 # CONFIG_ARCH_RISCV is not set
 # CONFIG_ARCH_SIM is not set
@@ -530,10 +529,9 @@ CONFIG_ARCH_HAVE_NETDEV_STATISTICS=y
 # CONFIG_NET_DM90x0 is not set
 # CONFIG_ENC28J60 is not set
 # CONFIG_ENCX24J600 is not set
-# CONFIG_NET_E1000 is not set
+
 # CONFIG_NET_SLIP is not set
 # CONFIG_NET_FTMAC100 is not set
-# CONFIG_NET_VNET is not set
 
 #
 # External Ethernet PHY Device Support
@@ -921,7 +919,6 @@ CONFIG_EXAMPLES_NSH=y
 # CONFIG_EXAMPLES_PPPD is not set
 # CONFIG_EXAMPLES_RFID_READUID is not set
 # CONFIG_EXAMPLES_RGBLED is not set
-# CONFIG_EXAMPLES_RGMP is not set
 # CONFIG_EXAMPLES_SENDMAIL is not set
 # CONFIG_EXAMPLES_SERIALBLASTER is not set
 # CONFIG_EXAMPLES_SERIALRX is not set

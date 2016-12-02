@@ -552,16 +552,6 @@ configs/qemu-i486
   Port of NuttX to QEMU in i486 mode.  This port will also run on real i486
   hardwared (Google the Bifferboard).
 
-configs/rgmp
-  RGMP stands for RTOS and GPOS on Multi-Processor.  RGMP is a project for
-  running GPOS and RTOS simultaneously on multi-processor platforms. You can
-  port your favorite RTOS to RGMP together with an unmodified Linux to form a
-  hybrid operating system. This makes your application able to use both RTOS
-  and GPOS features.
-
-  See http://rgmp.sourceforge.net/wiki/index.php/Main_Page for further
-  information about RGMP.
-
 configs/nr5m100-nexys4
   Port of NuttX to RISC-V platform on IQ-Analog NR5M100 RISC-V FPGA platform.
 

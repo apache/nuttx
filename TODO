@@ -1065,7 +1065,6 @@ o Network (net/, drivers/net)
                LPC43xx        YES                     YES (not tested)
                DMxxx NIC      NO                      NO
                PIC32          NO                      NO
-               RGMP           ???                     ???
                SAM3/4         YES                     YES
                SAMA5D         ----------------------- ------
                  EMACA        NO                      YES (not tested)

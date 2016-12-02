@@ -761,19 +761,6 @@ config ARCH_BOARD_QEMU_I486
 		Port of NuttX to QEMU in i486 mode.  This port will also run on real i486
 		hardwared (Google the Bifferboard).
 
-config ARCH_BOARD_RGMP
-	bool "RGMP"
-	depends on ARCH_RGMP
-	---help---
-		RGMP stands for RTOS and GPOS on Multi-Processor.  RGMP is a project for
-		running GPOS and RTOS simultaneously on multi-processor platforms. You can
-		port your favorite RTOS to RGMP together with an unmodified Linux to form a
-		hybrid operating system. This makes your application able to use both RTOS
-		and GPOS features.
-
-		See http://rgmp.sourceforge.net/wiki/index.php/Main_Page for further information
-		about RGMP.
-
 config ARCH_BOARD_SABRE_6QUAD
 	bool "NXP/Freescale i.MX6 Sabre-6Quad board"
 	depends on ARCH_CHIP_IMX6_6QUAD
@@ -1460,7 +1447,6 @@ config ARCH_BOARD
 	default "nucleo-f4x1re"            if ARCH_BOARD_NUCLEO_F401RE || ARCH_BOARD_NUCLEO_F411RE
 	default "nucleo-l476rg"            if ARCH_BOARD_NUCLEO_L476RG
 	default "qemu-i486"                if ARCH_BOARD_QEMU_I486
-	default "rgmp"                     if ARCH_BOARD_RGMP
 	default "sabre-6quad"              if ARCH_BOARD_SABRE_6QUAD
 	default "sama5d2-xult"             if ARCH_BOARD_SAMA5D2_XULT
 	default "sama5d3x-ek"              if ARCH_BOARD_SAMA5D3X_EK
@@ -1771,9 +1757,6 @@ source "configs/nucleo-l476rg/Kconfig"
 endif
 if ARCH_BOARD_QEMU_I486
 source "configs/qemu-i486/Kconfig"
-endif
-if ARCH_BOARD_RGMP
-source "configs/rgmp/Kconfig"
 endif
 if ARCH_BOARD_SABRE_6QUAD
 source "configs/sabre-6quad/Kconfig"

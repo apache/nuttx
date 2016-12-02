@@ -367,26 +367,6 @@ config ENCX24J600_REGDEBUG
 
 endif # ENCX24J600
 
-menuconfig NET_E1000
-	bool "E1000 support"
-	default n
-
-if NET_E1000
-
-config E1000_N_TX_DESC
-	int "Number of TX descriptors"
-	default 128
-
-config E1000_N_RX_DESC
-	int "Number of RX descriptors"
-	default 128
-
-config E1000_BUFF_SIZE
-	int "Buffer size"
-	default 2048
-
-endif # NET_E1000
-
 menuconfig NET_SLIP
 	bool "SLIP (serial line) support"
 	default n
@@ -465,18 +445,6 @@ config FTMAC100_LPWORK
 endchoice # Work queue
 
 endif # NET_FTMAC100
-
-menuconfig NET_VNET
-	bool "VNET support"
-	default n
-
-if NET_VNET
-
-config VNET_NINTERFACES
-	int "Number of VNET interfaces"
-	default 1
-
-endif # NET_VNET
 
 if ARCH_HAVE_PHY
 

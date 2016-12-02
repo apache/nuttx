@@ -1419,8 +1419,6 @@ nuttx/
  |   |   `- README.txt
  |   |- qemu-i486/
  |   |   `- README.txt
- |   |- rgmp/
- |   |   `- README.txt
  |   |- sabre-6quad/
  |   |   `- README.txt
  |   |- sama5d2-xult/
