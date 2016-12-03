@@ -3174,6 +3174,7 @@ static inline int pic32mz_phyinit(struct pic32mz_driver_s *priv)
       nerr("ERROR: No PHY detected\n");
       return -ENODEV;
     }
+
   ninfo("phyaddr: %d\n", phyaddr);
 
   /* Save the discovered PHY device address */
@@ -3187,6 +3188,7 @@ static inline int pic32mz_phyinit(struct pic32mz_driver_s *priv)
     {
       return ret;
     }
+
   pic32mz_showmii(phyaddr, "After reset");
 
   /* Set the MII/RMII operation mode. This usually requires access to a

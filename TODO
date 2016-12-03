@@ -1059,12 +1059,12 @@ o Network (net/, drivers/net)
                TIVA           ----------------------- ------
                  LM3S         YES                     NO
                  TM4C         YES                     YES
-               eZ80           NO                      NO
+               eZ80           YES                     NO
                Kinetis        YES                     YES (not tested)
                LPC17xx        YES                     YES (not tested)
                LPC43xx        YES                     YES (not tested)
                DMxxx NIC      NO                      NO
-               PIC32          NO                      NO
+               PIC32          YES                     NO
                SAM3/4         YES                     YES
                SAMA5D         ----------------------- ------
                  EMACA        YES                     YES (not tested)

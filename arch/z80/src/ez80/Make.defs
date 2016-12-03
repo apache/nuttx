@@ -44,7 +44,7 @@ CMN_CSRCS += up_reprioritizertr.c up_idle.c up_assert.c up_doirq.c
 CMN_CSRCS += up_mdelay.c up_stackframe.c up_udelay.c up_usestack.c
 CMN_CSRCS += up_puts.c
 
-CHIP_ASRCS  = ez80_startup.asm ez80_io.asm ez80_up_irq_save.asm
+CHIP_ASRCS  = ez80_startup.asm ez80_io.asm ez80_irqsave.asm
 CHIP_ASRCS += ez80_saveusercontext.asm ez80_restorecontext.asm
 ifeq ($(CONFIG_ARCH_CHIP_EZ80F91),y)
 CHIP_ASRCS += ez80f91_init.asm
