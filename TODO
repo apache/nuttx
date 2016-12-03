@@ -1057,7 +1057,7 @@ o Network (net/, drivers/net)
                STM32          YES                     YES
                STM32F7        YES                     YES
                TIVA           ----------------------- ------
-                 LM3S         NO                      NO
+                 LM3S         YES                     NO
                  TM4C         YES                     YES
                eZ80           NO                      NO
                Kinetis        YES                     YES (not tested)

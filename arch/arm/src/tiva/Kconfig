@@ -911,6 +911,26 @@ config TIVA_BADCRC
 	---help---
 		Set to enable bad CRC rejection.
 
+choice
+	prompt "Work queue"
+	default TIVA_ETHERNET_LPWORK if SCHED_LPWORK
+	default TIVA_ETHERNET_HPWORK if !SCHED_LPWORK && SCHED_HPWORK
+	depends on SCHED_WORKQUEUE
+	---help---
+		Work queue support is required to use the Ethernet driver.  If the
+		low priority work queue is available, then it should be used by the
+		driver.
+
+config TIVA_ETHERNET_HPWORK
+	bool "High priority"
+	depends on SCHED_HPWORK
+
+config TIVA_ETHERNET_LPWORK
+	bool "Low priority"
+	depends on SCHED_LPWORK
+
+endchoice # Work queue
+
 config TIVA_DUMPPACKET
 	bool "Dump Packets"
 	default n

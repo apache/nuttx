@@ -79,9 +79,9 @@
 
 #if defined(CONFIG_SCHED_WORKQUEUE)
 #  if defined(CONFIG_skeleton_HPWORK)
-#    define skelWORK HPWORK
+#    define ETHWORK HPWORK
 #  elif defined(CONFIG_skeleton_LPWORK)
-#    define skelWORK LPWORK
+#    define ETHWORK LPWORK
 #  else
 #    error Neither CONFIG_skeleton_HPWORK nor CONFIG_skeleton_LPWORK defined
 #  endif
@@ -623,7 +623,7 @@ static int skel_interrupt(int irq, FAR void *context)
 
   /* Schedule to perform the interrupt processing on the worker thread. */
 
-  work_queue(skelWORK, &priv->sk_work, skel_interrupt_work, priv, 0);
+  work_queue(ETHWORK, &priv->sk_work, skel_interrupt_work, priv, 0);
 
 #else
   /* Process the interrupt now */
@@ -730,11 +730,11 @@ static void skel_txtimeout_expiry(int argc, wdparm_t arg, ...)
    * on work that has already been started.
    */
 
-  work_cancel(skelWORK, &priv->sk_work);
+  work_cancel(ETHWORK, &priv->sk_work);
 
   /* Schedule to perform the TX timeout processing on the worker thread. */
 
-  work_queue(skelWORK, &priv->sk_work, skel_txtimeout_work, priv, 0);
+  work_queue(ETHWORK, &priv->sk_work, skel_txtimeout_work, priv, 0);
 #else
   /* Process the timeout now */
 
@@ -840,7 +840,7 @@ static void skel_poll_expiry(int argc, wdparm_t arg, ...)
     {
       /* Schedule to perform the interrupt processing on the worker thread. */
 
-      work_queue(skelWORK, &priv->sk_work, skel_poll_work, priv, 0);
+      work_queue(ETHWORK, &priv->sk_work, skel_poll_work, priv, 0);
     }
   else
     {
@@ -1051,7 +1051,7 @@ static int skel_txavail(FAR struct net_driver_s *dev)
     {
       /* Schedule to serialize the poll on the worker thread. */
 
-      work_queue(skelWORK, &priv->sk_work, skel_txavail_work, priv, 0);
+      work_queue(ETHWORK, &priv->sk_work, skel_txavail_work, priv, 0);
     }
 
 #else
