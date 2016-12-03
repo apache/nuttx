@@ -53,12 +53,13 @@
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include <nuttx/wdog.h>
-#include <nuttx/net/arp.h>
-#include <nuttx/net/netdev.h>
 
 #ifdef CONFIG_NET_NOINTS
 #  include <nuttx/wqueue.h>
 #endif
+
+#include <nuttx/net/arp.h>
+#include <nuttx/net/netdev.h>
 
 #ifdef CONFIG_NET_PKT
 #  include <nuttx/net/pkt.h>
@@ -185,11 +186,13 @@ static void skel_poll_expiry(int argc, wdparm_t arg, ...);
 
 static int skel_ifup(FAR struct net_driver_s *dev);
 static int skel_ifdown(FAR struct net_driver_s *dev);
+
 static inline void skel_txavail_process(FAR struct skel_driver_s *priv);
 #ifdef CONFIG_NET_NOINTS
 static void skel_txavail_work(FAR void *arg);
 #endif
 static int skel_txavail(FAR struct net_driver_s *dev);
+
 #if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
 static int skel_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
 #ifdef CONFIG_NET_IGMP
@@ -610,7 +613,7 @@ static int skel_interrupt(int irq, FAR void *context)
 
     {
       /* If a TX transfer just completed, then cancel the TX timeout so
-       * there will be do race condition between any subsequent timeout
+       * there will be no race condition between any subsequent timeout
        * expiration and the deferred interrupt processing.
        */
 
