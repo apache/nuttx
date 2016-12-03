@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated December 2, 2016)
+NuttX TODO List (Last updated December 3, 2016)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -1043,40 +1043,18 @@ o Network (net/, drivers/net)
   Priority:    Medium.  Important on slow applications that will not accept
                connections promptly.
 
-  Title:       INTERRUPT LEVEL PROCESSING IN ETHERNET DRIVERS
-  Description: Too many Ethernet drivers do interrupt-level processing with
-               the network stack.  The network stack supports either interrupt
-               level processing or normal task level processing (depending on
-               CONFIG_NET_NOINTS).  This is really a very bad use of CPU
-               resources;  All of the network stack processing should be
-               modified to use a work queue (and, all use of CONFIG_NET_NOINTS=n
-               should be eliminated).  This applies to many Ethernet drivers:
+  Title:       IPv6 REQUIRES ADDRESS FILTER SUPPORT
+  Description: IPv6 requires that the Ethernet driver support NuttX address
+               filter interfaces.  Several Ethernet drivers do support there,
+               however.  Others support the address filtering interfaces but
+               have never been verifed:
 
-               ARCHITECTURE   CONFIG_NET_NOINTS?      ADDRESS FILTER SUPPORT?
-               C5471          NO                      NO
-               STM32          YES                     YES
-               STM32F7        YES                     YES
-               TIVA           ----------------------- ------
-                 LM3S         YES                     NO
-                 TM4C         YES                     YES
-               eZ80           YES                     NO
-               Kinetis        YES                     YES (not tested)
-               LPC17xx        YES                     YES (not tested)
-               LPC43xx        YES                     YES (not tested)
-               DMxxx NIC      YES                     NO
-               PIC32          YES                     NO
-               SAM3/4         YES                     YES
-               SAMA5D         ----------------------- ------
-                 EMACA        YES                     YES (not tested)
-                 EMACB        YES                     YES
-                 GMAC         YES                     YES (not tested)
-               SAMV7          YES                     YES
-               SIM            N/A  (No interrupts)    NO
+               C5471, LM3X, ez80, DM0x90 NIC, PIC: Do not support address
+                 filteringing.
+               Kinetis, LPC17xx, LPC43xx:  Untested address filter support
 
-               The general outline of how this might be done is included in
-               drivers/net/skeleton.c
   Status:      Open
-  Priority:    Pretty high if you want a well behaved system.
+  Priority:    Pretty high if you want a to use IPv6 on these platforms.
 
   Title:       UDP MULTICAST RECEPTION
   Description: The logic in udp_input() expects either a single receive socket or
