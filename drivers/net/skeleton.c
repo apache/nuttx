@@ -622,7 +622,7 @@ static int skel_interrupt(int irq, FAR void *context)
 
   /* Cancel any pending poll work */
 
-  work_cancel(HPWORK, &priv->sk_work);
+  work_cancel(ETHWORK, &priv->sk_work);
 
   /* Schedule to perform the interrupt processing on the worker thread. */
 

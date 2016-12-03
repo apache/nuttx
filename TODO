@@ -1063,7 +1063,7 @@ o Network (net/, drivers/net)
                Kinetis        YES                     YES (not tested)
                LPC17xx        YES                     YES (not tested)
                LPC43xx        YES                     YES (not tested)
-               DMxxx NIC      NO                      NO
+               DMxxx NIC      YES                     NO
                PIC32          YES                     NO
                SAM3/4         YES                     YES
                SAMA5D         ----------------------- ------

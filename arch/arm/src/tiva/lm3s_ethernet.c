@@ -1140,7 +1140,7 @@ static int tiva_interrupt(int irq, void *context)
 
   /* Cancel any pending poll work */
 
-  work_cancel(HPWORK, &priv->ld_work);
+  work_cancel(ETHWORK, &priv->ld_work);
 
   /* Schedule to perform the interrupt processing on the worker thread. */
 

@@ -1634,6 +1634,7 @@ static void ez80emac_txinterrupt_work(FAR void *arg)
 static int ez80emac_txinterrupt(int irq, FAR void *context)
 {
   FAR struct ez80emac_driver_s *priv = &g_emac;
+  uint8_t istat;
 
 #ifdef CONFIG_NET_NOINTS
   /* Disable further Ethernet Tx interrupts.  Because Ethernet interrupts are
@@ -1643,8 +1644,10 @@ static int ez80emac_txinterrupt(int irq, FAR void *context)
 
   up_disable_irq(EZ80_EMACTX_IRQ);
 
-  /* TODO: Determine if a TX transfer just completed */
+  /* Determine if a TX transfer just completed */
 
+  istat = inp(EZ80_EMAC_ISTAT);
+  if ((istat & EMAC_ISTAT_TXDONE) != 0)
     {
       /* If a TX transfer just completed, then cancel the TX timeout so
        * there will be no race condition between any subsequent timeout
@@ -1955,7 +1958,7 @@ static int ez80emac_sysinterrupt(int irq, FAR void *context)
 
   /* Cancel any pending poll work */
 
-  work_cancel(HPWORK, &priv->syswork);
+  work_cancel(ETHWORK, &priv->syswork);
 
   /* Schedule to perform the interrupt processing on the worker thread. */
 

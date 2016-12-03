@@ -81,6 +81,8 @@
  */
 
 #if defined(CONFIG_NET_NOINTS) && !defined(CONFIG_SCHED_HPWORK)
+/* REVISIT: The low priority work queue would be preferred if it is avaiable */
+
 #  error High priority work queue support is required
 #endif
 
