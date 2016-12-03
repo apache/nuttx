@@ -110,3 +110,23 @@ config C5471_BASET10
 	bool "10BaseT FullDuplex"
 
 endchoice
+
+choice
+	prompt "Ethernet work queue"
+	default C5471_LPWORK if SCHED_LPWORK
+	default C5471_HPWORK if !SCHED_LPWORK && SCHED_HPWORK
+	depends on SCHED_WORKQUEUE
+	---help---
+		Work queue support is required to use the Ethernet driver.  If the
+		low priority work queue is available, then it should be used by the
+		driver.
+
+config C5471_HPWORK
+	bool "High priority"
+	depends on SCHED_HPWORK
+
+config C5471_LPWORK
+	bool "Low priority"
+	depends on SCHED_LPWORK
+
+endchoice # Work queue

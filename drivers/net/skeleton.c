@@ -162,6 +162,7 @@ static int  skel_txpoll(FAR struct net_driver_s *dev);
 
 static void skel_receive(FAR struct skel_driver_s *priv);
 static void skel_txdone(FAR struct skel_driver_s *priv);
+
 static inline void skel_interrupt_process(FAR struct skel_driver_s *priv);
 #ifdef CONFIG_NET_NOINTS
 static void skel_interrupt_work(FAR void *arg);
