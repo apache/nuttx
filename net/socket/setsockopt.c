@@ -105,7 +105,6 @@
 int psock_setsockopt(FAR struct socket *psock, int level, int option,
                      FAR const void *value, socklen_t value_len)
 {
-  net_lock_t flags;
   int errcode;
 
   /* Verify that the socket option if valid (but might not be supported ) */
@@ -153,7 +152,7 @@ int psock_setsockopt(FAR struct socket *psock, int level, int option,
            * level access to options.
            */
 
-           flags = net_lock();
+           net_lock();
 
           /* Set or clear the option bit */
 
@@ -166,7 +165,7 @@ int psock_setsockopt(FAR struct socket *psock, int level, int option,
               _SO_CLROPT(psock->s_options, option);
             }
 
-          net_unlock(flags);
+          net_unlock();
         }
         break;
 
@@ -235,7 +234,7 @@ int psock_setsockopt(FAR struct socket *psock, int level, int option,
            * level access to options.
            */
 
-           flags = net_lock();
+           net_lock();
 
           /* Set or clear the linger option bit and linger time (in deciseconds) */
 
@@ -250,7 +249,7 @@ int psock_setsockopt(FAR struct socket *psock, int level, int option,
               psock->s_linger = 0;
             }
 
-          net_unlock(flags);
+          net_unlock();
         }
         break;
 #endif

@@ -66,12 +66,11 @@
 
 int net_clone(FAR struct socket *psock1, FAR struct socket *psock2)
 {
-  net_lock_t flags;
   int ret = OK;
 
   /* Parts of this operation need to be atomic */
 
-  flags = net_lock();
+  net_lock();
 
   /* Duplicate the socket state */
 
@@ -120,7 +119,7 @@ int net_clone(FAR struct socket *psock1, FAR struct socket *psock2)
       ret = -EBADF;
     }
 
-  net_unlock(flags);
+  net_unlock();
   return ret;
 }
 

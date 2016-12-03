@@ -161,7 +161,6 @@ int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
   FAR struct udp_conn_s *conn = psock->s_conn;
   FAR struct udp_poll_s *info;
   FAR struct devif_callback_s *cb;
-  net_lock_t flags;
   int ret;
 
   /* Sanity check */
@@ -183,7 +182,7 @@ int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
 
   /* Some of the  following must be atomic */
 
-  flags = net_lock();
+  net_lock();
 
   /* Get the device that will provide the provide the NETDEV_DOWN event.
    * NOTE: in the event that the local socket is bound to INADDR_ANY, the
@@ -262,12 +261,12 @@ int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
       sem_post(fds->sem);
     }
 
-  net_unlock(flags);
+  net_unlock();
   return OK;
 
 errout_with_lock:
   kmm_free(info);
-  net_unlock(flags);
+  net_unlock();
   return ret;
 }
 
@@ -291,7 +290,6 @@ int udp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
 {
   FAR struct udp_conn_s *conn = psock->s_conn;
   FAR struct udp_poll_s *info;
-  net_lock_t flags;
 
   /* Sanity check */
 
@@ -310,9 +308,9 @@ int udp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
     {
       /* Release the callback */
 
-      flags = net_lock();
+      net_lock();
       udp_callback_free(info->dev, conn, info->cb);
-      net_unlock(flags);
+      net_unlock();
 
       /* Release the poll/select data slot */
 

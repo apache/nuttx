@@ -84,11 +84,7 @@ struct timeval;           /* Forward reference */
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_NOINTS
 void net_lockinitialize(void);
-#else
-#  define net_lockinitialize()
-#endif
 
 /****************************************************************************
  * Function: net_dsec2timeval

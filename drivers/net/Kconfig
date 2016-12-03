@@ -9,12 +9,9 @@ config NETDEV_LOOPBACK
 	bool
 	default n if !NET_LOOPBACK
 	default y if NET_LOOPBACK
-	select NET_NOINTS
 	select ARCH_HAVE_NETDEV_STATISTICS
 	---help---
-		Add support for the local network loopback device, lo.  Any additional
-		networking devices that are enabled must be compatible with
-		CONFIG_NET_NOINTS.
+		Add support for the local network loopback device, lo.
 
 if NETDEV_LOOPBACK
 

@@ -604,7 +604,6 @@ ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset,
   FAR struct socket *psock = sockfd_socket(outfd);
   FAR struct tcp_conn_s *conn;
   struct sendfile_s state;
-  net_lock_t save;
   int errcode;
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
@@ -673,7 +672,7 @@ ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset,
    * are ready.
    */
 
-  save  = net_lock();
+  net_lock();
   memset(&state, 0, sizeof(struct sendfile_s));
 
   /* This semaphore is used for signaling and, hence, should not have
@@ -757,7 +756,7 @@ errout_datacb:
 errout_locked:
 
   sem_destroy(&state. snd_sem);
-  net_unlock(save);
+  net_unlock();
 
 errout:
 

@@ -54,19 +54,17 @@
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include <nuttx/wdog.h>
+#include <nuttx/wqueue.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
 
 #include <arch/board/board.h>
 #include <arch/board/generated/csr.h>
+
 #include "chip.h"
 #include "hw/flags.h"
 #include "hw/ethmac_mem.h"
 #include "misoc.h"
-
-#ifdef CONFIG_NET_NOINTS
-#  include <nuttx/wqueue.h>
-#endif
 
 #ifdef CONFIG_NET_PKT
 #  include <nuttx/net/pkt.h>
@@ -80,8 +78,8 @@
  * work queue support is required.
  */
 
-#if defined(CONFIG_NET_NOINTS) && !defined(CONFIG_SCHED_HPWORK)
-/* REVISIT: The low priority work queue would be preferred if it is avaiable */
+#if !defined(CONFIG_SCHED_HPWORK)
+  /* REVISIT: The low priority work queue would be preferred if it is avaiable */
 
 #  error High priority work queue support is required
 #endif
@@ -119,9 +117,7 @@ struct misoc_net_driver_s
   bool misoc_net_bifup;               /* true:ifup false:ifdown */
   WDOG_ID misoc_net_txpoll;           /* TX poll timer */
   WDOG_ID misoc_net_txtimeout;        /* TX timeout timer */
-#ifdef CONFIG_NET_NOINTS
   struct work_s misoc_net_work;       /* For deferring work to the work queue */
-#endif
 
   uint8_t *rx0_buf;                   /* 2 RX and 2 TX buffer */
   uint8_t *rx1_buf;
@@ -163,35 +159,26 @@ static int  misoc_net_txpoll(FAR struct net_driver_s *dev);
 
 static void misoc_net_receive(FAR struct misoc_net_driver_s *priv);
 static void misoc_net_txdone(FAR struct misoc_net_driver_s *priv);
-static inline void misoc_net_interrupt_process(FAR struct misoc_net_driver_s *priv);
-#ifdef CONFIG_NET_NOINTS
+
 static void misoc_net_interrupt_work(FAR void *arg);
-#endif
 static int  misoc_net_interrupt(int irq, FAR void *context);
 
 /* Watchdog timer expirations */
 
-static inline void misoc_net_txtimeout_process(FAR struct misoc_net_driver_s *priv);
-#ifdef CONFIG_NET_NOINTS
 static void misoc_net_txtimeout_work(FAR void *arg);
-#endif
 static void misoc_net_txtimeout_expiry(int argc, wdparm_t arg, ...);
 
-static inline void misoc_net_poll_process(FAR struct misoc_net_driver_s *priv);
-#ifdef CONFIG_NET_NOINTS
 static void misoc_net_poll_work(FAR void *arg);
-#endif
 static void misoc_net_poll_expiry(int argc, wdparm_t arg, ...);
 
 /* NuttX callback functions */
 
 static int misoc_net_ifup(FAR struct net_driver_s *dev);
 static int misoc_net_ifdown(FAR struct net_driver_s *dev);
-static inline void misoc_net_txavail_process(FAR struct misoc_net_driver_s *priv);
-#ifdef CONFIG_NET_NOINTS
+
 static void misoc_net_txavail_work(FAR void *arg);
-#endif
 static int misoc_net_txavail(FAR struct net_driver_s *dev);
+
 #if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
 static int misoc_net_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
 #ifdef CONFIG_NET_IGMP
@@ -586,28 +573,29 @@ static void misoc_net_txdone(FAR struct misoc_net_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: misoc_net_interrupt_process
+ * Function: misoc_net_interrupt_work
  *
  * Description:
- *   Interrupt processing.  This may be performed either within the interrupt
- *   handler or on the worker thread, depending upon the configuration
+ *   Perform interrupt related work from the worker thread
  *
  * Parameters:
- *   priv - Reference to the driver state structure
+ *   arg - The argument passed when work_queue() was called.
  *
  * Returned Value:
- *   None
+ *   OK on success
  *
  * Assumptions:
  *   The network is locked.
  *
  ****************************************************************************/
 
-static inline void misoc_net_interrupt_process(FAR struct misoc_net_driver_s *priv)
+static void misoc_net_interrupt_work(FAR void *arg)
 {
-  /* Get and clear interrupt status bits */
+  FAR struct misoc_net_driver_s *priv = (FAR struct misoc_net_driver_s *)arg;
 
-  /* Handle interrupts according to status bit settings */
+  /* Process pending Ethernet interrupts */
+
+  net_lock();
 
   /* Check if we received an incoming packet, if so, call misoc_net_receive() */
 
@@ -626,42 +614,13 @@ static inline void misoc_net_interrupt_process(FAR struct misoc_net_driver_s *pr
       misoc_net_txdone(priv);
       ethmac_sram_reader_ev_pending_write(1);
     }
-}
 
-/****************************************************************************
- * Function: misoc_net_interrupt_work
- *
- * Description:
- *   Perform interrupt related work from the worker thread
- *
- * Parameters:
- *   arg - The argument passed when work_queue() was called.
- *
- * Returned Value:
- *   OK on success
- *
- * Assumptions:
- *   The network is locked.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_NOINTS
-static void misoc_net_interrupt_work(FAR void *arg)
-{
-  FAR struct misoc_net_driver_s *priv = (FAR struct misoc_net_driver_s *)arg;
-  net_lock_t state;
-
-  /* Process pending Ethernet interrupts */
-
-  state = net_lock();
-  misoc_net_interrupt_process(priv);
-  net_unlock(state);
+  net_unlock();
 
   /* Re-enable Ethernet interrupts */
 
   up_enable_irq(ETHMAC_INTERRUPT);
 }
-#endif
 
 /****************************************************************************
  * Function: misoc_net_interrupt
@@ -684,7 +643,6 @@ static int misoc_net_interrupt(int irq, FAR void *context)
 {
   FAR struct misoc_net_driver_s *priv = &g_misoc_net[0];
 
-#ifdef CONFIG_NET_NOINTS
   /* Disable further Ethernet interrupts.  Because Ethernet interrupts are
    * also disabled if the TX timeout event occurs, there can be no race
    * condition here.
@@ -709,45 +667,7 @@ static int misoc_net_interrupt(int irq, FAR void *context)
   /* Schedule to perform the interrupt processing on the worker thread. */
 
   work_queue(HPWORK, &priv->misoc_net_work, misoc_net_interrupt_work, priv, 0);
-
-#else
-  /* Process the interrupt now */
-
-  misoc_net_interrupt_process(priv);
-
-#endif
-
   return OK;
-}
-
-/****************************************************************************
- * Function: misoc_net_txtimeout_process
- *
- * Description:
- *   Process a TX timeout.  Called from the either the watchdog timer
- *   expiration logic or from the worker thread, depending upon the
- *   configuration.  The timeout means that the last TX never completed.
- *   Reset the hardware and start again.
- *
- * Parameters:
- *   priv - Reference to the driver state structure
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static inline void misoc_net_txtimeout_process(FAR struct misoc_net_driver_s *priv)
-{
-  /* Increment statistics and dump debug info */
-
-  NETDEV_TXTIMEOUTS(priv->misoc_net_dev);
-
-  /* Then reset the hardware */
-
-  /* Then poll the network for new XMIT data */
-
-  (void)devif_poll(&priv->misoc_net_dev, misoc_net_txpoll);
 }
 
 /****************************************************************************
@@ -767,19 +687,22 @@ static inline void misoc_net_txtimeout_process(FAR struct misoc_net_driver_s *pr
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_NOINTS
 static void misoc_net_txtimeout_work(FAR void *arg)
 {
   FAR struct misoc_net_driver_s *priv = (FAR struct misoc_net_driver_s *)arg;
-  net_lock_t state;
 
-  /* Process pending Ethernet interrupts */
+  /* Increment statistics and dump debug info */
 
-  state = net_lock();
-  misoc_net_txtimeout_process(priv);
-  net_unlock(state);
+  net_lock();
+  NETDEV_TXTIMEOUTS(priv->misoc_net_dev);
+
+  /* Then reset the hardware */
+
+  /* Then poll the network for new XMIT data */
+
+  (void)devif_poll(&priv->misoc_net_dev, misoc_net_txpoll);
+  net_unlock();
 }
-#endif
 
 /****************************************************************************
  * Function: misoc_net_txtimeout_expiry
@@ -804,7 +727,6 @@ static void misoc_net_txtimeout_expiry(int argc, wdparm_t arg, ...)
 {
   FAR struct misoc_net_driver_s *priv = (FAR struct misoc_net_driver_s *)arg;
 
-#ifdef CONFIG_NET_NOINTS
   /* Disable further Ethernet interrupts.  This will prevent some race
    * conditions with interrupt work.  There is still a potential race
    * condition with interrupt work that is already queued and in progress.
@@ -821,47 +743,6 @@ static void misoc_net_txtimeout_expiry(int argc, wdparm_t arg, ...)
   /* Schedule to perform the TX timeout processing on the worker thread. */
 
   work_queue(HPWORK, &priv->misoc_net_work, misoc_net_txtimeout_work, priv, 0);
-#else
-  /* Process the timeout now */
-
-  misoc_net_txtimeout_process(priv);
-#endif
-}
-
-/****************************************************************************
- * Function: misoc_net_poll_process
- *
- * Description:
- *   Perform the periodic poll.  This may be called either from watchdog
- *   timer logic or from the worker thread, depending upon the configuration.
- *
- * Parameters:
- *   priv - Reference to the driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-static inline void misoc_net_poll_process(FAR struct misoc_net_driver_s *priv)
-{
-  /* Check if there is room in the send another TX packet.  We cannot perform
-   * the TX poll if he are unable to accept another packet for transmission.
-   */
-
-  /* If so, update TCP timing states and poll the network for new XMIT data.
-   * Hmmm.. might be bug here.  Does this mean if there is a transmit in
-   * progress, we will missing TCP time state updates?
-   */
-
-  (void)devif_timer(&priv->misoc_net_dev, misoc_net_txpoll);
-
-  /* Setup the watchdog poll timer again */
-
-  (void)wd_start(priv->misoc_net_txpoll, MISOC_NET_WDDELAY, misoc_net_poll_expiry, 1,
-                 (wdparm_t)priv);
 }
 
 /****************************************************************************
@@ -881,19 +762,32 @@ static inline void misoc_net_poll_process(FAR struct misoc_net_driver_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_NOINTS
 static void misoc_net_poll_work(FAR void *arg)
 {
   FAR struct misoc_net_driver_s *priv = (FAR struct misoc_net_driver_s *)arg;
-  net_lock_t state;
 
   /* Perform the poll */
 
-  state = net_lock();
-  misoc_net_poll_process(priv);
-  net_unlock(state);
+  net_lock();
+
+  /* Check if there is room in the send another TX packet.  We cannot perform
+   * the TX poll if he are unable to accept another packet for transmission.
+   */
+
+  /* If so, update TCP timing states and poll the network for new XMIT data.
+   * Hmmm.. might be bug here.  Does this mean if there is a transmit in
+   * progress, we will missing TCP time state updates?
+   */
+
+  (void)devif_timer(&priv->misoc_net_dev, misoc_net_txpoll);
+
+  /* Setup the watchdog poll timer again */
+
+  (void)wd_start(priv->misoc_net_txpoll, MISOC_NET_WDDELAY, misoc_net_poll_expiry, 1,
+                 (wdparm_t)priv);
+
+  net_unlock();
 }
-#endif
 
 /****************************************************************************
  * Function: misoc_net_poll_expiry
@@ -917,7 +811,6 @@ static void misoc_net_poll_expiry(int argc, wdparm_t arg, ...)
 {
   FAR struct misoc_net_driver_s *priv = (FAR struct misoc_net_driver_s *)arg;
 
-#ifdef CONFIG_NET_NOINTS
   /* Is our single work structure available?  It may not be if there are
    * pending interrupt actions.
    */
@@ -934,14 +827,9 @@ static void misoc_net_poll_expiry(int argc, wdparm_t arg, ...)
        * cycle.
        */
 
-      (void)wd_start(priv->misoc_net_txpoll, MISOC_NET_WDDELAY, misoc_net_poll_expiry, 1, arg);
+      (void)wd_start(priv->misoc_net_txpoll, MISOC_NET_WDDELAY,
+                     misoc_net_poll_expiry, 1, arg);
     }
-
-#else
-  /* Process the interrupt now */
-
-  misoc_net_poll_process(priv);
-#endif
 }
 
 /****************************************************************************
@@ -1045,40 +933,6 @@ static int misoc_net_ifdown(FAR struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: misoc_net_txavail_process
- *
- * Description:
- *   Perform an out-of-cycle poll.
- *
- * Parameters:
- *   dev - Reference to the NuttX driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Called in normal user mode
- *
- ****************************************************************************/
-
-static inline void misoc_net_txavail_process(FAR struct misoc_net_driver_s *priv)
-{
-  /* Ignore the notification if the interface is not yet up */
-
-  if (priv->misoc_net_bifup)
-    {
-      /* Check if there is room in the hardware to hold another outgoing packet. */
-
-      if (!ethmac_sram_reader_ready_read())
-        {
-          /* If so, then poll the network for new XMIT data */
-
-          (void)devif_poll(&priv->misoc_net_dev, misoc_net_txpoll);
-        }
-    }
-}
-
-/****************************************************************************
  * Function: misoc_net_txavail_work
  *
  * Description:
@@ -1095,19 +949,27 @@ static inline void misoc_net_txavail_process(FAR struct misoc_net_driver_s *priv
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_NOINTS
 static void misoc_net_txavail_work(FAR void *arg)
 {
   FAR struct misoc_net_driver_s *priv = (FAR struct misoc_net_driver_s *)arg;
-  net_lock_t state;
 
-  /* Perform the poll */
+  /* Ignore the notification if the interface is not yet up */
 
-  state = net_lock();
-  misoc_net_txavail_process(priv);
-  net_unlock(state);
+  net_lock();
+  if (priv->misoc_net_bifup)
+    {
+      /* Check if there is room in the hardware to hold another outgoing packet. */
+
+      if (!ethmac_sram_reader_ready_read())
+        {
+          /* If so, then poll the network for new XMIT data */
+
+          (void)devif_poll(&priv->misoc_net_dev, misoc_net_txpoll);
+        }
+    }
+
+  net_unlock();
 }
-#endif
 
 /****************************************************************************
  * Function: misoc_net_txavail
@@ -1132,7 +994,6 @@ static int misoc_net_txavail(FAR struct net_driver_s *dev)
 {
   FAR struct misoc_net_driver_s *priv = (FAR struct misoc_net_driver_s *)dev->d_private;
 
-#ifdef CONFIG_NET_NOINTS
   /* Is our single work structure available?  It may not be if there are
    * pending interrupt actions and we will have to ignore the Tx
    * availability action.
@@ -1144,21 +1005,6 @@ static int misoc_net_txavail(FAR struct net_driver_s *dev)
 
       work_queue(HPWORK, &priv->misoc_net_work, misoc_net_txavail_work, priv, 0);
     }
-
-#else
-  irqstate_t flags;
-
-  /* Disable interrupts because this function may be called from interrupt
-   * level processing.
-   */
-
-  flags = enter_critical_section();
-
-  /* Perform the out-of-cycle poll now */
-
-  misoc_net_txavail_process(priv);
-  leave_critical_section(flags);
-#endif
 
   return OK;
 }

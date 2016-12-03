@@ -72,12 +72,11 @@ int net_foreachroute(route_handler_t handler, FAR void *arg)
 {
   FAR struct net_route_s *route;
   FAR struct net_route_s *next;
-  net_lock_t save;
   int ret = 0;
 
   /* Prevent concurrent access to the routing table */
 
-  save = net_lock();
+  net_lock();
 
   /* Visit each entry in the routing table */
 
@@ -93,7 +92,7 @@ int net_foreachroute(route_handler_t handler, FAR void *arg)
 
   /* Unlock the network */
 
-  net_unlock(save);
+  net_unlock();
   return ret;
 }
 #endif
@@ -103,12 +102,11 @@ int net_foreachroute_ipv6(route_handler_ipv6_t handler, FAR void *arg)
 {
   FAR struct net_route_ipv6_s *route;
   FAR struct net_route_ipv6_s *next;
-  net_lock_t save;
   int ret = 0;
 
   /* Prevent concurrent access to the routing table */
 
-  save = net_lock();
+  net_lock();
 
   /* Visit each entry in the routing table */
 
@@ -124,7 +122,7 @@ int net_foreachroute_ipv6(route_handler_ipv6_t handler, FAR void *arg)
 
   /* Unlock the network */
 
-  net_unlock(save);
+  net_unlock();
   return ret;
 }
 #endif

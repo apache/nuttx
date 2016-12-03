@@ -207,7 +207,6 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr)
   struct timespec delay;
   struct icmpv6_neighbor_s state;
   FAR const uint16_t *lookup;
-  net_lock_t save;
   int ret;
 
   /* First check if destination is a local broadcast or a multicast address.
@@ -295,7 +294,7 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr)
    * want anything to happen until we are ready.
    */
 
-  save = net_lock();
+  net_lock();
   state.snd_cb = icmpv6_callback_alloc(dev);
   if (!state.snd_cb)
     {
@@ -404,7 +403,7 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr)
   sem_destroy(&state.snd_sem);
   icmpv6_callback_free(dev, state.snd_cb);
 errout_with_lock:
-  net_unlock(save);
+  net_unlock();
 errout:
   return ret;
 }

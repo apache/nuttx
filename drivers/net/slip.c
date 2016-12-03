@@ -76,10 +76,6 @@
 
 /* Configuration ************************************************************/
 
-#ifndef CONFIG_NET_NOINTS
-#  warning "CONFIG_NET_NOINTS must be set"
-#endif
-
 #ifndef CONFIG_NET_SLIP_STACKSIZE
 #  define CONFIG_NET_SLIP_STACKSIZE 2048
 #endif
@@ -430,7 +426,6 @@ static void slip_txtask(int argc, FAR char *argv[])
 {
   FAR struct slip_driver_s *priv;
   unsigned int index = *(argv[1]) - '0';
-  net_lock_t flags;
   systime_t start_ticks;
   systime_t now_ticks;
   unsigned int hsec;
@@ -476,7 +471,7 @@ static void slip_txtask(int argc, FAR char *argv[])
 
           /* Poll the networking layer for new XMIT data. */
 
-          flags = net_lock();
+          net_lock();
           priv->dev.d_buf = priv->txbuf;
 
           /* Has a half second elapsed since the last timer poll? */
@@ -497,7 +492,7 @@ static void slip_txtask(int argc, FAR char *argv[])
               (void)devif_poll(&priv->dev, slip_txpoll);
             }
 
-          net_unlock(flags);
+          net_unlock();
           slip_semgive(priv);
         }
     }
@@ -655,7 +650,6 @@ static int slip_rxtask(int argc, FAR char *argv[])
 {
   FAR struct slip_driver_s *priv;
   unsigned int index = *(argv[1]) - '0';
-  net_lock_t flags;
   int ch;
 
   nerr("index: %d\n", index);
@@ -728,7 +722,7 @@ static int slip_rxtask(int argc, FAR char *argv[])
           priv->dev.d_buf = priv->rxbuf;
           priv->dev.d_len = priv->rxlen;
 
-          flags = net_lock();
+          net_lock();
           ipv4_input(&priv->dev);
 
           /* If the above function invocation resulted in data that should
@@ -741,7 +735,8 @@ static int slip_rxtask(int argc, FAR char *argv[])
               slip_transmit(priv);
               kill(priv->txpid, SIGALRM);
             }
-          net_unlock(flags);
+
+          net_unlock();
           slip_semgive(priv);
         }
       else

@@ -56,11 +56,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include <nuttx/wdog.h>
-
-#ifdef CONFIG_NET_NOINTS
-#  include <nuttx/wqueue.h>
-#endif
-
+#include <nuttx/wqueue.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/ftmac100.h>
@@ -76,13 +72,12 @@
  * is required.
  */
 
-#if defined(CONFIG_NET_NOINTS) && !defined(CONFIG_SCHED_WORKQUEUE)
+#if !defined(CONFIG_SCHED_WORKQUEUE)
 #  error Work queue support is required in this configuration (CONFIG_SCHED_WORKQUEUE)
-#endif
+#else
 
-/* Use the low priority work queue if possible */
+  /* Use the low priority work queue if possible */
 
-#if defined(CONFIG_SCHED_WORKQUEUE)
 #  if defined(CONFIG_FTMAC100_HPWORK)
 #    define FTMAWORK HPWORK
 #  elif defined(CONFIG_FTMAC100_LPWORK)
@@ -178,10 +173,8 @@ struct ftmac100_driver_s
   bool ft_bifup;               /* true:ifup false:ifdown */
   WDOG_ID ft_txpoll;           /* TX poll timer */
   WDOG_ID ft_txtimeout;        /* TX timeout timer */
-#ifdef CONFIG_NET_NOINTS
   unsigned int status;         /* Last ISR status */
   struct work_s ft_work;       /* For deferring work to the work queue */
-#endif
 
   /* This holds the information visible to the NuttX network */
 
@@ -215,35 +208,26 @@ static int  ftmac100_txpoll(struct net_driver_s *dev);
 static void ftmac100_reset(FAR struct ftmac100_driver_s *priv);
 static void ftmac100_receive(FAR struct ftmac100_driver_s *priv);
 static void ftmac100_txdone(FAR struct ftmac100_driver_s *priv);
-static inline void ftmac100_interrupt_process(FAR struct ftmac100_driver_s *priv);
-#ifdef CONFIG_NET_NOINTS
+
 static void ftmac100_interrupt_work(FAR void *arg);
-#endif
 static int  ftmac100_interrupt(int irq, FAR void *context);
 
 /* Watchdog timer expirations */
 
-static inline void ftmac100_txtimeout_process(FAR struct ftmac100_driver_s *priv);
-#ifdef CONFIG_NET_NOINTS
 static void ftmac100_txtimeout_work(FAR void *arg);
-#endif
 static void ftmac100_txtimeout_expiry(int argc, uint32_t arg, ...);
 
-static inline void ftmac100_poll_process(FAR struct ftmac100_driver_s *priv);
-#ifdef CONFIG_NET_NOINTS
 static void ftmac100_poll_work(FAR void *arg);
-#endif
 static void ftmac100_poll_expiry(int argc, uint32_t arg, ...);
 
 /* NuttX callback functions */
 
 static int ftmac100_ifup(FAR struct net_driver_s *dev);
 static int ftmac100_ifdown(FAR struct net_driver_s *dev);
-static inline void ftmac100_txavail_process(FAR struct ftmac100_driver_s *priv);
-#ifdef CONFIG_NET_NOINTS
+
 static void ftmac100_txavail_work(FAR void *arg);
-#endif
 static int ftmac100_txavail(FAR struct net_driver_s *dev);
+
 #if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
 static int ftmac100_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
 #ifdef CONFIG_NET_IGMP
@@ -873,34 +857,33 @@ static void ftmac100_txdone(FAR struct ftmac100_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: ftmac100_interrupt_process
+ * Function: ftmac100_interrupt_work
  *
  * Description:
- *   Interrupt processing.  This may be performed either within the interrupt
- *   handler or on the worker thread, depending upon the configuration
+ *   Perform interrupt related work from the worker thread
  *
  * Parameters:
- *   priv - Reference to the driver state structure
+ *   arg - The argument passed when work_queue() was called.
  *
  * Returned Value:
- *   None
+ *   OK on success
  *
  * Assumptions:
  *   Ethernet interrupts are disabled
  *
  ****************************************************************************/
 
-static inline void ftmac100_interrupt_process(FAR struct ftmac100_driver_s *priv)
+static void ftmac100_interrupt_work(FAR void *arg)
 {
+  FAR struct ftmac100_driver_s *priv = (FAR struct ftmac100_driver_s *)arg;
   FAR struct ftmac100_register_s *iobase = (FAR struct ftmac100_register_s *)priv->iobase;
   unsigned int status;
   unsigned int phycr;
 
-#ifdef CONFIG_NET_NOINTS
+  /* Process pending Ethernet interrupts */
+
+  net_lock();
   status = priv->status;
-#else
-  status = getreg32 (&iobase->isr);
-#endif
 
   ninfo("status=%08x(%08x) BASE=%p ISR=%p PHYCR=%p\n",
         status, getreg32(&iobase->isr), iobase, &iobase->isr, &iobase->phycr);
@@ -970,47 +953,12 @@ out:
   putreg32 (INT_MASK_ALL_ENABLED, &iobase->imr);
 
   ninfo("ISR-done\n");
-}
-
-/****************************************************************************
- * Function: ftmac100_interrupt_work
- *
- * Description:
- *   Perform interrupt related work from the worker thread
- *
- * Parameters:
- *   arg - The argument passed when work_queue() was called.
- *
- * Returned Value:
- *   OK on success
- *
- * Assumptions:
- *   Ethernet interrupts are disabled
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_NOINTS
-static void ftmac100_interrupt_work(FAR void *arg)
-{
-  FAR struct ftmac100_driver_s *priv = (FAR struct ftmac100_driver_s *)arg;
-  net_lock_t state;
-//irqstate_t flags;
-
-  /* Process pending Ethernet interrupts */
-
-  state = net_lock();
-//flags = enter_critical_section();
-
-  ftmac100_interrupt_process(priv);
-
-//leave_critical_section(flags);
-  net_unlock(state);
+  net_unlock();
 
   /* Re-enable Ethernet interrupts */
 
   up_enable_irq(CONFIG_FTMAC100_IRQ);
 }
-#endif
 
 /****************************************************************************
  * Function: ftmac100_interrupt
@@ -1034,17 +982,12 @@ static int ftmac100_interrupt(int irq, FAR void *context)
   FAR struct ftmac100_driver_s *priv = &g_ftmac100[0];
   FAR struct ftmac100_register_s *iobase = (FAR struct ftmac100_register_s *)priv->iobase;
 
-#ifdef CONFIG_NET_NOINTS
-  irqstate_t flags;
-
   /* Disable further Ethernet interrupts.  Because Ethernet interrupts are
    * also disabled if the TX timeout event occurs, there can be no race
    * condition here.
    */
 
-  flags = enter_critical_section();
-
-  priv->status = getreg32 (&iobase->isr);
+  priv->status = getreg32(&iobase->isr);
 
   up_disable_irq(CONFIG_FTMAC100_IRQ);
 
@@ -1073,43 +1016,7 @@ static int ftmac100_interrupt(int irq, FAR void *context)
 
   work_queue(FTMAWORK, &priv->ft_work, ftmac100_interrupt_work, priv, 0);
 
-  leave_critical_section(flags);
-#else
-  /* Process the interrupt now */
-  putreg32 (INT_MASK_ALL_DISABLED, &iobase->imr);
-
-  ftmac100_interrupt_process(priv);
-#endif
-
   return OK;
-}
-
-/****************************************************************************
- * Function: ftmac100_txtimeout_process
- *
- * Description:
- *   Process a TX timeout.  Called from the either the watchdog timer
- *   expiration logic or from the worker thread, depending upon the
- *   configuration.  The timeout means that the last TX never completed.
- *   Reset the hardware and start again.
- *
- * Parameters:
- *   priv - Reference to the driver state structure
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static inline void ftmac100_txtimeout_process(FAR struct ftmac100_driver_s *priv)
-{
-  /* Then reset the hardware */
-
-  ninfo("TXTIMEOUT\n");
-
-  /* Then poll the network for new XMIT data */
-
-  (void)devif_poll(&priv->ft_dev, ftmac100_txpoll);
 }
 
 /****************************************************************************
@@ -1129,19 +1036,21 @@ static inline void ftmac100_txtimeout_process(FAR struct ftmac100_driver_s *priv
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_NOINTS
 static void ftmac100_txtimeout_work(FAR void *arg)
 {
   FAR struct ftmac100_driver_s *priv = (FAR struct ftmac100_driver_s *)arg;
-  net_lock_t state;
+
+  ninfo("TXTIMEOUT\n");
 
   /* Process pending Ethernet interrupts */
 
-  state = net_lock();
-  ftmac100_txtimeout_process(priv);
-  net_unlock(state);
+  net_lock();
+
+  /* Then poll the network for new XMIT data */
+
+  (void)devif_poll(&priv->ft_dev, ftmac100_txpoll);
+  net_unlock();
 }
-#endif
 
 /****************************************************************************
  * Function: ftmac100_txtimeout_expiry
@@ -1166,7 +1075,6 @@ static void ftmac100_txtimeout_expiry(int argc, uint32_t arg, ...)
 {
   FAR struct ftmac100_driver_s *priv = (FAR struct ftmac100_driver_s *)arg;
 
-#ifdef CONFIG_NET_NOINTS
   /* Disable further Ethernet interrupts.  This will prevent some race
    * conditions with interrupt work.  There is still a potential race
    * condition with interrupt work that is already queued and in progress.
@@ -1183,49 +1091,7 @@ static void ftmac100_txtimeout_expiry(int argc, uint32_t arg, ...)
   /* Schedule to perform the TX timeout processing on the worker thread. */
 
   work_queue(FTMAWORK, &priv->ft_work, ftmac100_txtimeout_work, priv, 0);
-#else
-  /* Process the timeout now */
-
-  ftmac100_txtimeout_process(priv);
-#endif
 }
-
-/****************************************************************************
- * Function: ftmac100_poll_process
- *
- * Description:
- *   Perform the periodic poll.  This may be called either from watchdog
- *   timer logic or from the worker thread, depending upon the configuration.
- *
- * Parameters:
- *   priv - Reference to the driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-static inline void ftmac100_poll_process(FAR struct ftmac100_driver_s *priv)
-{
-  /* Check if there is room in the send another TX packet.  We cannot perform
-   * the TX poll if he are unable to accept another packet for transmission.
-   */
-
-  /* If so, update TCP timing states and poll the network for new XMIT data. Hmmm..
-   * might be bug here.  Does this mean if there is a transmit in progress,
-   * we will missing TCP time state updates?
-   */
-
-  (void)devif_timer(&priv->ft_dev, ftmac100_txpoll);
-
-  /* Setup the watchdog poll timer again */
-
-  (void)wd_start(priv->ft_txpoll, FTMAC100_WDDELAY, ftmac100_poll_expiry, 1,
-                 (wdparm_t)priv);
-}
-
 /****************************************************************************
  * Function: ftmac100_poll_work
  *
@@ -1243,19 +1109,31 @@ static inline void ftmac100_poll_process(FAR struct ftmac100_driver_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_NOINTS
 static void ftmac100_poll_work(FAR void *arg)
 {
   FAR struct ftmac100_driver_s *priv = (FAR struct ftmac100_driver_s *)arg;
-  net_lock_t state;
 
   /* Perform the poll */
 
-  state = net_lock();
-  ftmac100_poll_process(priv);
-  net_unlock(state);
+  net_lock();
+
+  /* Check if there is room in the send another TX packet.  We cannot perform
+   * the TX poll if he are unable to accept another packet for transmission.
+   */
+
+  /* If so, update TCP timing states and poll the network for new XMIT data. Hmmm..
+   * might be bug here.  Does this mean if there is a transmit in progress,
+   * we will missing TCP time state updates?
+   */
+
+  (void)devif_timer(&priv->ft_dev, ftmac100_txpoll);
+
+  /* Setup the watchdog poll timer again */
+
+  (void)wd_start(priv->ft_txpoll, FTMAC100_WDDELAY, ftmac100_poll_expiry, 1,
+                 (wdparm_t)priv);
+  net_unlock();
 }
-#endif
 
 /****************************************************************************
  * Function: ftmac100_poll_expiry
@@ -1279,7 +1157,6 @@ static void ftmac100_poll_expiry(int argc, uint32_t arg, ...)
 {
   FAR struct ftmac100_driver_s *priv = (FAR struct ftmac100_driver_s *)arg;
 
-#ifdef CONFIG_NET_NOINTS
   /* Is our single work structure available?  It may not be if there are
    * pending interrupt actions.
    */
@@ -1299,12 +1176,6 @@ static void ftmac100_poll_expiry(int argc, uint32_t arg, ...)
       (void)wd_start(priv->ft_txpoll, FTMAC100_WDDELAY, ftmac100_poll_expiry,
                      1, (wdparm_t)arg);
     }
-
-#else
-  /* Process the interrupt now */
-
-  ftmac100_poll_process(priv);
-#endif
 }
 
 /****************************************************************************
@@ -1415,37 +1286,6 @@ static int ftmac100_ifdown(struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: ftmac100_txavail_process
- *
- * Description:
- *   Perform an out-of-cycle poll.
- *
- * Parameters:
- *   dev - Reference to the NuttX driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Called in normal user mode
- *
- ****************************************************************************/
-
-static inline void ftmac100_txavail_process(FAR struct ftmac100_driver_s *priv)
-{
-  /* Ignore the notification if the interface is not yet up */
-
-  if (priv->ft_bifup)
-    {
-      /* Check if there is room in the hardware to hold another outgoing packet. */
-
-      /* If so, then poll the network for new XMIT data */
-
-      (void)devif_poll(&priv->ft_dev, ftmac100_txpoll);
-    }
-}
-
-/****************************************************************************
  * Function: ftmac100_txavail_work
  *
  * Description:
@@ -1462,19 +1302,27 @@ static inline void ftmac100_txavail_process(FAR struct ftmac100_driver_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_NOINTS
 static void ftmac100_txavail_work(FAR void *arg)
 {
   FAR struct ftmac100_driver_s *priv = (FAR struct ftmac100_driver_s *)arg;
-  net_lock_t state;
 
   /* Perform the poll */
 
-  state = net_lock();
-  ftmac100_txavail_process(priv);
-  net_unlock(state);
+  net_lock();
+
+  /* Ignore the notification if the interface is not yet up */
+
+  if (priv->ft_bifup)
+    {
+      /* Check if there is room in the hardware to hold another outgoing packet. */
+
+      /* If so, then poll the network for new XMIT data */
+
+      (void)devif_poll(&priv->ft_dev, ftmac100_txpoll);
+    }
+
+  net_unlock();
 }
-#endif
 
 /****************************************************************************
  * Function: ftmac100_txavail
@@ -1499,7 +1347,6 @@ static int ftmac100_txavail(struct net_driver_s *dev)
 {
   FAR struct ftmac100_driver_s *priv = (FAR struct ftmac100_driver_s *)dev->d_private;
 
-#ifdef CONFIG_NET_NOINTS
   /* Is our single work structure available?  It may not be if there are
    * pending interrupt actions and we will have to ignore the Tx
    * availability action.
@@ -1511,21 +1358,6 @@ static int ftmac100_txavail(struct net_driver_s *dev)
 
       work_queue(FTMAWORK, &priv->ft_work, ftmac100_txavail_work, priv, 0);
     }
-
-#else
-  irqstate_t flags;
-
-  /* Disable interrupts because this function may be called from interrupt
-   * level processing.
-   */
-
-  flags = enter_critical_section();
-
-  /* Perform the out-of-cycle poll now */
-
-  ftmac100_txavail_process(priv);
-  leave_critical_section(flags);
-#endif
 
   return OK;
 }

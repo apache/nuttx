@@ -20,17 +20,6 @@ config NET
 
 if NET
 
-config NET_NOINTS
-	bool "Not interrupt driven"
-	default n
-	---help---
-		NET_NOINT indicates that network layer is not called from the
-		interrupt level.  If NET_NOINTS is defined, critical sections
-		will be managed with semaphores; Otherwise, it assumed that
-		network layer will be called from interrupt level handling
-		and critical sections will be managed by enabling and disabling
-		interrupts.
-
 config NET_PROMISCUOUS
 	bool "Promiscuous mode"
 	default n
@@ -149,9 +138,7 @@ config NET_LOOPBACK
 	select NETDEV_MULTINIC if NET_ETHERNET || NET_SLIP || NET_TUN
 	select NET_MULTILINK if NET_ETHERNET || NET_SLIP || NET_TUN
 	---help---
-		Add support for the local network loopback device, lo.  Any additional
-		networking devices that are enabled must be compatible with
-		CONFIG_NET_NOINTS.
+		Add support for the local network loopback device, lo.
 
 config NET_SLIP
 	bool "SLIP support"
@@ -160,7 +147,7 @@ config NET_SLIP
 	select NET_MULTILINK if NET_ETHERNET || NET_LOOPBACK || NET_TUN
 	---help---
 		Enables building of the SLIP driver. SLIP requires
-		at least one IP protocol selected and CONFIG_NET_NOINTS.
+		at least one IP protocol selected.
 
 		SLIP supports point-to-point IP communications over a serial port.
 		The default data link layer for network layer is Ethernet. If

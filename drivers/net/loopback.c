@@ -67,12 +67,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Non-network-driven configuration is required */
-
-#ifndef CONFIG_NET_NOINTS
-#  error CONFIG_NET_NOINTS must be selected
-#endif
-
 /* We need to have the work queue to handle SPI interrupts */
 
 #if !defined(CONFIG_SCHED_WORKQUEUE)
@@ -244,11 +238,10 @@ static int lo_txpoll(FAR struct net_driver_s *dev)
 static void lo_poll_work(FAR void *arg)
 {
   FAR struct lo_driver_s *priv = (FAR struct lo_driver_s *)arg;
-  net_lock_t state;
 
   /* Perform the poll */
 
-  state = net_lock();
+  net_lock();
   priv->lo_txdone = false;
   (void)devif_timer(&priv->lo_dev, lo_txpoll);
 
@@ -265,7 +258,7 @@ static void lo_poll_work(FAR void *arg)
   /* Setup the watchdog poll timer again */
 
   (void)wd_start(priv->lo_polldog, LO_WDDELAY, lo_poll_expiry, 1, priv);
-  net_unlock(state);
+  net_unlock();
 }
 
 /****************************************************************************
@@ -401,11 +394,10 @@ static int lo_ifdown(FAR struct net_driver_s *dev)
 static void lo_txavail_work(FAR void *arg)
 {
   FAR struct lo_driver_s *priv = (FAR struct lo_driver_s *)arg;
-  net_lock_t state;
 
   /* Ignore the notification if the interface is not yet up */
 
-  state = net_lock();
+  net_lock();
   if (priv->lo_bifup)
     {
       do
@@ -418,7 +410,7 @@ static void lo_txavail_work(FAR void *arg)
       while (priv->lo_txdone);
     }
 
-  net_unlock(state);
+  net_unlock();
 }
 
 /****************************************************************************

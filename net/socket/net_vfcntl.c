@@ -76,7 +76,6 @@
 int net_vfcntl(int sockfd, int cmd, va_list ap)
 {
   FAR struct socket *psock = sockfd_socket(sockfd);
-  net_lock_t flags;
   int errcode = 0;
   int ret = 0;
 
@@ -92,7 +91,7 @@ int net_vfcntl(int sockfd, int cmd, va_list ap)
 
   /* Interrupts must be disabled in order to perform operations on socket structures */
 
-  flags = net_lock();
+  net_lock();
   switch (cmd)
     {
       case F_DUPFD:
@@ -271,7 +270,7 @@ int net_vfcntl(int sockfd, int cmd, va_list ap)
          break;
   }
 
-  net_unlock(flags);
+  net_unlock();
 
 errout:
   if (errcode != 0)

@@ -52,10 +52,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
 #include <nuttx/irq.h>
-
-#ifdef CONFIG_NET_NOINTS
-#  include <nuttx/wqueue.h>
-#endif
+#include <nuttx/wqueue.h>
 
 #include <arch/board/board.h>
 #include <nuttx/net/arp.h>
@@ -80,13 +77,12 @@
  * is required.
  */
 
-#if defined(CONFIG_NET_NOINTS) && !defined(CONFIG_SCHED_WORKQUEUE)
+#if !defined(CONFIG_SCHED_WORKQUEUE)
 #  error Work queue support is required in this configuration (CONFIG_SCHED_WORKQUEUE)
-#endif
+#else
 
-/* Use the low priority work queue if possible */
+  /* Use the low priority work queue if possible */
 
-#if defined(CONFIG_SCHED_WORKQUEUE)
 #  if defined(CONFIG_TIVA_ETHERNET_HPWORK)
 #    define ETHWORK HPWORK
 #  elif defined(CONFIG_TIVA_ETHERNET_LPWORK)
@@ -206,9 +202,7 @@ struct tiva_driver_s
   bool     ld_bifup;           /* true:ifup false:ifdown */
   WDOG_ID  ld_txpoll;          /* TX poll timer */
   WDOG_ID  ld_txtimeout;       /* TX timeout timer */
-#ifdef CONFIG_NET_NOINTS
   struct work_s ld_work;       /* For deferring work to the work queue */
-#endif
 
   /* This holds the information visible to the NuttX network */
 
@@ -256,24 +250,15 @@ static int  tiva_txpoll(struct net_driver_s *dev);
 static void tiva_receive(struct tiva_driver_s *priv);
 static void tiva_txdone(struct tiva_driver_s *priv);
 
-static inline void tiva_interrupt_process(struct tiva_driver_s *priv);
-#ifdef CONFIG_NET_NOINTS
 static void tiva_interrupt_work(void *arg);
-#endif
 static int  tiva_interrupt(int irq, void *context);
 
 /* Watchdog timer expirations */
 
-static inline void tiva_txtimeout_process(struct tiva_driver_s *priv);
-#ifdef CONFIG_NET_NOINTS
 static void tiva_txtimeout_work(void *arg);
-#endif
 static void tiva_txtimeout_expiry(int argc, uint32_t arg, ...);
 
-static inline void tiva_poll_process(struct tiva_driver_s *priv);
-#ifdef CONFIG_NET_NOINTS
 static void tiva_poll_work(void *arg);
-#endif
 static void tiva_poll_expiry(int argc, uint32_t arg, ...);
 
 /* NuttX callback functions */
@@ -281,11 +266,7 @@ static void tiva_poll_expiry(int argc, uint32_t arg, ...);
 static int  tiva_ifup(struct net_driver_s *dev);
 static int  tiva_ifdown(struct net_driver_s *dev);
 
-
-static inline void tiva_txavail_process(struct tiva_driver_s *priv);
-#ifdef CONFIG_NET_NOINTS
 static void tiva_txavail_work(void *arg);
-#endif
 static int  tiva_txavail(struct net_driver_s *dev);
 
 #ifdef CONFIG_NET_IGMP
@@ -963,26 +944,30 @@ static void tiva_txdone(struct tiva_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: tiva_interrupt_process
+ * Function: tiva_interrupt_work
  *
  * Description:
- *   Interrupt processing.  This may be performed either within the interrupt
- *   handler or on the worker thread, depending upon the configuration
+ *   Perform interrupt related work from the worker thread
  *
  * Parameters:
- *   priv - Reference to the driver state structure
+ *   arg - The argument passed when work_queue() was called.
  *
  * Returned Value:
- *   None
+ *   OK on success
  *
  * Assumptions:
  *   The network is locked.
  *
  ****************************************************************************/
 
-static inline void tiva_interrupt_process(struct tiva_driver_s *priv)
+static void tiva_interrupt_work(void *arg)
 {
+  struct tiva_driver_s *priv = (struct tiva_driver_s *)arg;
   uint32_t ris;
+
+  /* Process pending Ethernet interrupts */
+
+  net_lock();
 
   /* Read the raw interrupt status register */
 
@@ -1038,36 +1023,8 @@ static inline void tiva_interrupt_process(struct tiva_driver_s *priv)
 
       tiva_txdone(priv);
     }
-}
 
-/****************************************************************************
- * Function: tiva_interrupt_work
- *
- * Description:
- *   Perform interrupt related work from the worker thread
- *
- * Parameters:
- *   arg - The argument passed when work_queue() was called.
- *
- * Returned Value:
- *   OK on success
- *
- * Assumptions:
- *   The network is locked.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_NOINTS
-static void tiva_interrupt_work(void *arg)
-{
-  struct tiva_driver_s *priv = (struct tiva_driver_s *)arg;
-  net_lock_t state;
-
-  /* Process pending Ethernet interrupts */
-
-  state = net_lock();
-  tiva_interrupt_process(priv);
-  net_unlock(state);
+  net_unlock();
 
   /* Re-enable Ethernet interrupts */
 
@@ -1077,7 +1034,6 @@ static void tiva_interrupt_work(void *arg)
   up_disable_irq(TIVA_IRQ_ETHCON);
 #endif
 }
-#endif
 
 /****************************************************************************
  * Function: tiva_interrupt
@@ -1107,7 +1063,6 @@ static int tiva_interrupt(int irq, void *context)
   priv = &g_lm3sdev[0];
 #endif
 
-#ifdef CONFIG_NET_NOINTS
   /* Disable further Ethernet interrupts.  Because Ethernet interrupts are
    * also disabled if the TX timeout event occurs, there can be no race
    * condition here.
@@ -1145,49 +1100,7 @@ static int tiva_interrupt(int irq, void *context)
   /* Schedule to perform the interrupt processing on the worker thread. */
 
   work_queue(ETHWORK, &priv->ld_work, tiva_interrupt_work, priv, 0);
-
-#else
-  /* Process the interrupt now */
-
-  tiva_interrupt_process(priv);
-#endif
-
   return OK;
-}
-
-/****************************************************************************
- * Function: tiva_txtimeout_process
- *
- * Description:
- *   Process a TX timeout.  Called from the either the watchdog timer
- *   expiration logic or from the worker thread, depending upon the
- *   configuration.  The timeout means that the last TX never completed.
- *   Reset the hardware and start again.
- *
- * Parameters:
- *   priv - Reference to the driver state structure
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static inline void tiva_txtimeout_process(struct tiva_driver_s *priv)
-{
-  /* Increment statistics */
-
-  nerr("ERROR: Tx timeout\n");
-  NETDEV_TXTIMEOUTS(&priv->ld_dev);
-
-  /* Then reset the hardware */
-
-  DEBUGASSERT(priv->ld_bifup);
-  tiva_ifdown(&priv->ld_dev);
-  tiva_ifup(&priv->ld_dev);
-
-  /* Then poll the network for new XMIT data */
-
-  (void)devif_poll(&priv->ld_dev, tiva_txpoll);
 }
 
 /****************************************************************************
@@ -1207,19 +1120,27 @@ static inline void tiva_txtimeout_process(struct tiva_driver_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_NOINTS
 static void tiva_txtimeout_work(void *arg)
 {
   struct tiva_driver_s *priv = (struct tiva_driver_s *)arg;
-  net_lock_t state;
 
-  /* Process pending Ethernet interrupts */
+  /* Increment statistics */
 
-  state = net_lock();
-  tiva_txtimeout_process(priv);
-  net_unlock(state);
+  net_lock();
+  nerr("ERROR: Tx timeout\n");
+  NETDEV_TXTIMEOUTS(&priv->ld_dev);
+
+  /* Then reset the hardware */
+
+  DEBUGASSERT(priv->ld_bifup);
+  tiva_ifdown(&priv->ld_dev);
+  tiva_ifup(&priv->ld_dev);
+
+  /* Then poll the network for new XMIT data */
+
+  (void)devif_poll(&priv->ld_dev, tiva_txpoll);
+  net_unlock();
 }
-#endif
 
 /****************************************************************************
  * Function: tiva_txtimeout_expiry
@@ -1244,7 +1165,6 @@ static void tiva_txtimeout_expiry(int argc, wdparm_t arg, ...)
 {
   struct tiva_driver_s *priv = (struct tiva_driver_s *)arg;
 
-#ifdef CONFIG_NET_NOINTS
   /* Disable further Ethernet interrupts.  This will prevent some race
    * conditions with interrupt work.  There is still a potential race
    * condition with interrupt work that is already queued and in progress.
@@ -1265,53 +1185,6 @@ static void tiva_txtimeout_expiry(int argc, wdparm_t arg, ...)
   /* Schedule to perform the TX timeout processing on the worker thread. */
 
   work_queue(ETHWORK, &priv->ld_work, tiva_txtimeout_work, priv, 0);
-#else
-  /* Process the timeout now */
-
-  tiva_txtimeout_process(priv);
-#endif
-}
-
-/****************************************************************************
- * Function: tiva_poll_process
- *
- * Description:
- *   Perform the periodic poll.  This may be called either from watchdog
- *   timer logic or from the worker thread, depending upon the configuration.
- *
- * Parameters:
- *   priv - Reference to the driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-static inline void tiva_poll_process(struct tiva_driver_s *priv)
-{
-  /* Check if we can send another Tx packet now.  The NEWTX bit initiates an
-   * Ethernet transmission once the packet has been placed in the TX FIFO.
-   * This bit is cleared once the transmission has been completed.
-   *
-   * NOTE: This can cause missing poll cycles and, hence, some timing
-   * inaccuracies.
-   */
-
-  if ((tiva_ethin(priv, TIVA_MAC_TR_OFFSET) & MAC_TR_NEWTX) == 0)
-    {
-      /* If so, update TCP timing states and poll the network for new XMIT
-       * data.
-       */
-
-      (void)devif_timer(&priv->ld_dev, tiva_txpoll);
-
-      /* Setup the watchdog poll timer again */
-
-      (void)wd_start(priv->ld_txpoll, TIVA_WDDELAY, tiva_poll_expiry,
-                     1, priv);
-    }
 }
 
 /****************************************************************************
@@ -1331,19 +1204,35 @@ static inline void tiva_poll_process(struct tiva_driver_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_NOINTS
 static void tiva_poll_work(void *arg)
 {
   struct tiva_driver_s *priv = (struct tiva_driver_s *)arg;
-  net_lock_t state;
 
-  /* Perform the poll */
+  /* Check if we can send another Tx packet now.  The NEWTX bit initiates an
+   * Ethernet transmission once the packet has been placed in the TX FIFO.
+   * This bit is cleared once the transmission has been completed.
+   *
+   * NOTE: This can cause missing poll cycles and, hence, some timing
+   * inaccuracies.
+   */
 
-  state = net_lock();
-  tiva_poll_process(priv);
-  net_unlock(state);
+  net_lock();
+  if ((tiva_ethin(priv, TIVA_MAC_TR_OFFSET) & MAC_TR_NEWTX) == 0)
+    {
+      /* If so, update TCP timing states and poll the network for new XMIT
+       * data.
+       */
+
+      (void)devif_timer(&priv->ld_dev, tiva_txpoll);
+
+      /* Setup the watchdog poll timer again */
+
+      (void)wd_start(priv->ld_txpoll, TIVA_WDDELAY, tiva_poll_expiry,
+                     1, priv);
+    }
+
+  net_unlock();
 }
-#endif
 
 /****************************************************************************
  * Function: tiva_poll_expiry
@@ -1367,7 +1256,6 @@ static void tiva_poll_expiry(int argc, wdparm_t arg, ...)
 {
   struct tiva_driver_s *priv = (struct tiva_driver_s *)arg;
 
-#ifdef CONFIG_NET_NOINTS
   /* Is our single work structure available?  It may not be if there are
    * pending interrupt actions.
    */
@@ -1386,12 +1274,6 @@ static void tiva_poll_expiry(int argc, wdparm_t arg, ...)
 
       (void)wd_start(priv->ld_txpoll, TIVA_WDDELAY, tiva_poll_expiry, 1, arg);
     }
-
-#else
-  /* Process the interrupt now */
-
-  tiva_poll_process(priv);
-#endif
 }
 
 /****************************************************************************
@@ -1634,43 +1516,6 @@ static int tiva_ifdown(struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: tiva_txavail_process
- *
- * Description:
- *   Perform an out-of-cycle poll.
- *
- * Parameters:
- *   dev - Reference to the NuttX driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Called in normal user mode
- *
- ****************************************************************************/
-
-static inline void tiva_txavail_process(struct tiva_driver_s *priv)
-{
-  /* Ignore the notification if the interface is not yet up or if the Tx FIFO
-   * hardware is not available at this time.  The NEWTX bit initiates an
-   * Ethernet transmission once the packet has been placed in the TX FIFO.
-   * This bit is cleared once the transmission has been completed.  When the
-   * transmission completes, tiva_txdone() will be called and the Tx polling
-   * will occur at that time.
-   */
-
-  if (priv->ld_bifup && (tiva_ethin(priv, TIVA_MAC_TR_OFFSET) & MAC_TR_NEWTX) == 0)
-    {
-      /* If the interface is up and we can use the Tx FIFO, then poll the network
-       * for new Tx data
-       */
-
-      (void)devif_poll(&priv->ld_dev, tiva_txpoll);
-    }
-}
-
-/****************************************************************************
  * Function: tiva_txavail_work
  *
  * Description:
@@ -1687,19 +1532,30 @@ static inline void tiva_txavail_process(struct tiva_driver_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_NOINTS
 static void tiva_txavail_work(void *arg)
 {
   struct tiva_driver_s *priv = (struct tiva_driver_s *)arg;
-  net_lock_t state;
 
-  /* Perform the poll */
+  /* Ignore the notification if the interface is not yet up or if the Tx FIFO
+   * hardware is not available at this time.  The NEWTX bit initiates an
+   * Ethernet transmission once the packet has been placed in the TX FIFO.
+   * This bit is cleared once the transmission has been completed.  When the
+   * transmission completes, tiva_txdone() will be called and the Tx polling
+   * will occur at that time.
+   */
 
-  state = net_lock();
-  tiva_txavail_process(priv);
-  net_unlock(state);
+  net_lock();
+  if (priv->ld_bifup && (tiva_ethin(priv, TIVA_MAC_TR_OFFSET) & MAC_TR_NEWTX) == 0)
+    {
+      /* If the interface is up and we can use the Tx FIFO, then poll the network
+       * for new Tx data
+       */
+
+      (void)devif_poll(&priv->ld_dev, tiva_txpoll);
+    }
+
+  net_unlock();
 }
-#endif
 
 /****************************************************************************
  * Function: tiva_txavail
@@ -1724,7 +1580,6 @@ static int tiva_txavail(struct net_driver_s *dev)
 {
   struct tiva_driver_s *priv = (struct tiva_driver_s *)dev->d_private;
 
-#ifdef CONFIG_NET_NOINTS
   /* Is our single work structure available?  It may not be if there are
    * pending interrupt actions and we will have to ignore the Tx
    * availability action.
@@ -1736,21 +1591,6 @@ static int tiva_txavail(struct net_driver_s *dev)
 
       work_queue(ETHWORK, &priv->ld_work, tiva_txavail_work, priv, 0);
     }
-
-#else
-  irqstate_t flags;
-
-  /* Disable interrupts because this function may be called from interrupt
-   * level processing.
-   */
-
-  flags = enter_critical_section();
-
-  /* Perform the out-of-cycle poll now */
-
-  tiva_txavail_process(priv);
-  leave_critical_section(flags);
-#endif
 
   return OK;
 }

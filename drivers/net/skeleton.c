@@ -53,11 +53,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include <nuttx/wdog.h>
-
-#ifdef CONFIG_NET_NOINTS
-#  include <nuttx/wqueue.h>
-#endif
-
+#include <nuttx/wqueue.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
 
@@ -72,13 +68,12 @@
  * is required.
  */
 
-#if defined(CONFIG_NET_NOINTS) && !defined(CONFIG_SCHED_WORKQUEUE)
+#if !defined(CONFIG_SCHED_WORKQUEUE)
 #  error Work queue support is required in this configuration (CONFIG_SCHED_WORKQUEUE)
-#endif
+#else
 
-/* Use the low priority work queue if possible */
+  /* Use the low priority work queue if possible */
 
-#if defined(CONFIG_SCHED_WORKQUEUE)
 #  if defined(CONFIG_skeleton_HPWORK)
 #    define ETHWORK HPWORK
 #  elif defined(CONFIG_skeleton_LPWORK)
@@ -121,9 +116,7 @@ struct skel_driver_s
   bool sk_bifup;               /* true:ifup false:ifdown */
   WDOG_ID sk_txpoll;           /* TX poll timer */
   WDOG_ID sk_txtimeout;        /* TX timeout timer */
-#ifdef CONFIG_NET_NOINTS
   struct work_s sk_work;       /* For deferring work to the work queue */
-#endif
 
   /* This holds the information visible to the NuttX network */
 
@@ -163,24 +156,15 @@ static int  skel_txpoll(FAR struct net_driver_s *dev);
 static void skel_receive(FAR struct skel_driver_s *priv);
 static void skel_txdone(FAR struct skel_driver_s *priv);
 
-static inline void skel_interrupt_process(FAR struct skel_driver_s *priv);
-#ifdef CONFIG_NET_NOINTS
 static void skel_interrupt_work(FAR void *arg);
-#endif
 static int  skel_interrupt(int irq, FAR void *context);
 
 /* Watchdog timer expirations */
 
-static inline void skel_txtimeout_process(FAR struct skel_driver_s *priv);
-#ifdef CONFIG_NET_NOINTS
 static void skel_txtimeout_work(FAR void *arg);
-#endif
 static void skel_txtimeout_expiry(int argc, wdparm_t arg, ...);
 
-static inline void skel_poll_process(FAR struct skel_driver_s *priv);
-#ifdef CONFIG_NET_NOINTS
 static void skel_poll_work(FAR void *arg);
-#endif
 static void skel_poll_expiry(int argc, wdparm_t arg, ...);
 
 /* NuttX callback functions */
@@ -188,10 +172,7 @@ static void skel_poll_expiry(int argc, wdparm_t arg, ...);
 static int skel_ifup(FAR struct net_driver_s *dev);
 static int skel_ifdown(FAR struct net_driver_s *dev);
 
-static inline void skel_txavail_process(FAR struct skel_driver_s *priv);
-#ifdef CONFIG_NET_NOINTS
 static void skel_txavail_work(FAR void *arg);
-#endif
 static int skel_txavail(FAR struct net_driver_s *dev);
 
 #if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
@@ -511,42 +492,6 @@ static void skel_txdone(FAR struct skel_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: skel_interrupt_process
- *
- * Description:
- *   Interrupt processing.  This may be performed either within the interrupt
- *   handler or on the worker thread, depending upon the configuration
- *
- * Parameters:
- *   priv - Reference to the driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   The network is locked.
- *
- ****************************************************************************/
-
-static inline void skel_interrupt_process(FAR struct skel_driver_s *priv)
-{
-  /* Get and clear interrupt status bits */
-
-  /* Handle interrupts according to status bit settings */
-
-  /* Check if we received an incoming packet, if so, call skel_receive() */
-
-  skel_receive(priv);
-
-  /* Check if a packet transmission just completed.  If so, call skel_txdone.
-   * This may disable further Tx interrupts if there are no pending
-   * transmissions.
-   */
-
-  skel_txdone(priv);
-}
-
-/****************************************************************************
  * Function: skel_interrupt_work
  *
  * Description:
@@ -563,23 +508,33 @@ static inline void skel_interrupt_process(FAR struct skel_driver_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_NOINTS
 static void skel_interrupt_work(FAR void *arg)
 {
   FAR struct skel_driver_s *priv = (FAR struct skel_driver_s *)arg;
-  net_lock_t state;
 
   /* Process pending Ethernet interrupts */
 
-  state = net_lock();
-  skel_interrupt_process(priv);
-  net_unlock(state);
+  /* Get and clear interrupt status bits */
+
+  /* Handle interrupts according to status bit settings */
+
+  /* Check if we received an incoming packet, if so, call skel_receive() */
+
+  net_lock();
+  skel_receive(priv);
+
+  /* Check if a packet transmission just completed.  If so, call skel_txdone.
+   * This may disable further Tx interrupts if there are no pending
+   * transmissions.
+   */
+
+  skel_txdone(priv);
+  net_unlock();
 
   /* Re-enable Ethernet interrupts */
 
   up_enable_irq(CONFIG_skeleton_IRQ);
 }
-#endif
 
 /****************************************************************************
  * Function: skel_interrupt
@@ -602,7 +557,6 @@ static int skel_interrupt(int irq, FAR void *context)
 {
   FAR struct skel_driver_s *priv = &g_skel[0];
 
-#ifdef CONFIG_NET_NOINTS
   /* Disable further Ethernet interrupts.  Because Ethernet interrupts are
    * also disabled if the TX timeout event occurs, there can be no race
    * condition here.
@@ -628,44 +582,7 @@ static int skel_interrupt(int irq, FAR void *context)
   /* Schedule to perform the interrupt processing on the worker thread. */
 
   work_queue(ETHWORK, &priv->sk_work, skel_interrupt_work, priv, 0);
-
-#else
-  /* Process the interrupt now */
-
-  skel_interrupt_process(priv);
-#endif
-
   return OK;
-}
-
-/****************************************************************************
- * Function: skel_txtimeout_process
- *
- * Description:
- *   Process a TX timeout.  Called from the either the watchdog timer
- *   expiration logic or from the worker thread, depending upon the
- *   configuration.  The timeout means that the last TX never completed.
- *   Reset the hardware and start again.
- *
- * Parameters:
- *   priv - Reference to the driver state structure
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static inline void skel_txtimeout_process(FAR struct skel_driver_s *priv)
-{
-  /* Increment statistics and dump debug info */
-
-  NETDEV_TXTIMEOUTS(priv->sk_dev);
-
-  /* Then reset the hardware */
-
-  /* Then poll the network for new XMIT data */
-
-  (void)devif_poll(&priv->sk_dev, skel_txpoll);
 }
 
 /****************************************************************************
@@ -685,19 +602,22 @@ static inline void skel_txtimeout_process(FAR struct skel_driver_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_NOINTS
 static void skel_txtimeout_work(FAR void *arg)
 {
   FAR struct skel_driver_s *priv = (FAR struct skel_driver_s *)arg;
-  net_lock_t state;
 
-  /* Process pending Ethernet interrupts */
+  /* Increment statistics and dump debug info */
 
-  state = net_lock();
-  skel_txtimeout_process(priv);
-  net_unlock(state);
+  NETDEV_TXTIMEOUTS(priv->sk_dev);
+
+  /* Then reset the hardware */
+
+  /* Then poll the network for new XMIT data */
+
+  net_lock();
+  (void)devif_poll(&priv->sk_dev, skel_txpoll);
+  net_unlock();
 }
-#endif
 
 /****************************************************************************
  * Function: skel_txtimeout_expiry
@@ -722,7 +642,6 @@ static void skel_txtimeout_expiry(int argc, wdparm_t arg, ...)
 {
   FAR struct skel_driver_s *priv = (FAR struct skel_driver_s *)arg;
 
-#ifdef CONFIG_NET_NOINTS
   /* Disable further Ethernet interrupts.  This will prevent some race
    * conditions with interrupt work.  There is still a potential race
    * condition with interrupt work that is already queued and in progress.
@@ -739,11 +658,6 @@ static void skel_txtimeout_expiry(int argc, wdparm_t arg, ...)
   /* Schedule to perform the TX timeout processing on the worker thread. */
 
   work_queue(ETHWORK, &priv->sk_work, skel_txtimeout_work, priv, 0);
-#else
-  /* Process the timeout now */
-
-  skel_txtimeout_process(priv);
-#endif
 }
 
 /****************************************************************************
@@ -765,21 +679,6 @@ static void skel_txtimeout_expiry(int argc, wdparm_t arg, ...)
 
 static inline void skel_poll_process(FAR struct skel_driver_s *priv)
 {
-  /* Check if there is room in the send another TX packet.  We cannot perform
-   * the TX poll if he are unable to accept another packet for transmission.
-   */
-
-  /* If so, update TCP timing states and poll the network for new XMIT data.
-   * Hmmm.. might be bug here.  Does this mean if there is a transmit in
-   * progress, we will missing TCP time state updates?
-   */
-
-  (void)devif_timer(&priv->sk_dev, skel_txpoll);
-
-  /* Setup the watchdog poll timer again */
-
-  (void)wd_start(priv->sk_txpoll, skeleton_WDDELAY, skel_poll_expiry, 1,
-                 (wdparm_t)priv);
 }
 
 /****************************************************************************
@@ -799,19 +698,30 @@ static inline void skel_poll_process(FAR struct skel_driver_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_NOINTS
 static void skel_poll_work(FAR void *arg)
 {
   FAR struct skel_driver_s *priv = (FAR struct skel_driver_s *)arg;
-  net_lock_t state;
 
   /* Perform the poll */
 
-  state = net_lock();
-  skel_poll_process(priv);
-  net_unlock(state);
+  /* Check if there is room in the send another TX packet.  We cannot perform
+   * the TX poll if he are unable to accept another packet for transmission.
+   */
+
+  /* If so, update TCP timing states and poll the network for new XMIT data.
+   * Hmmm.. might be bug here.  Does this mean if there is a transmit in
+   * progress, we will missing TCP time state updates?
+   */
+
+  net_lock();
+  (void)devif_timer(&priv->sk_dev, skel_txpoll);
+
+  /* Setup the watchdog poll timer again */
+
+  (void)wd_start(priv->sk_txpoll, skeleton_WDDELAY, skel_poll_expiry, 1,
+                 (wdparm_t)priv);
+  net_unlock();
 }
-#endif
 
 /****************************************************************************
  * Function: skel_poll_expiry
@@ -835,7 +745,6 @@ static void skel_poll_expiry(int argc, wdparm_t arg, ...)
 {
   FAR struct skel_driver_s *priv = (FAR struct skel_driver_s *)arg;
 
-#ifdef CONFIG_NET_NOINTS
   /* Is our single work structure available?  It may not be if there are
    * pending interrupt actions.
    */
@@ -854,12 +763,6 @@ static void skel_poll_expiry(int argc, wdparm_t arg, ...)
 
       (void)wd_start(priv->sk_txpoll, skeleton_WDDELAY, skel_poll_expiry, 1, arg);
     }
-
-#else
-  /* Process the interrupt now */
-
-  skel_poll_process(priv);
-#endif
 }
 
 /****************************************************************************
@@ -961,37 +864,6 @@ static int skel_ifdown(FAR struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: skel_txavail_process
- *
- * Description:
- *   Perform an out-of-cycle poll.
- *
- * Parameters:
- *   dev - Reference to the NuttX driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Called in normal user mode
- *
- ****************************************************************************/
-
-static inline void skel_txavail_process(FAR struct skel_driver_s *priv)
-{
-  /* Ignore the notification if the interface is not yet up */
-
-  if (priv->sk_bifup)
-    {
-      /* Check if there is room in the hardware to hold another outgoing packet. */
-
-      /* If so, then poll the network for new XMIT data */
-
-      (void)devif_poll(&priv->sk_dev, skel_txpoll);
-    }
-}
-
-/****************************************************************************
  * Function: skel_txavail_work
  *
  * Description:
@@ -1008,19 +880,24 @@ static inline void skel_txavail_process(FAR struct skel_driver_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_NOINTS
 static void skel_txavail_work(FAR void *arg)
 {
   FAR struct skel_driver_s *priv = (FAR struct skel_driver_s *)arg;
-  net_lock_t state;
 
-  /* Perform the poll */
+  /* Ignore the notification if the interface is not yet up */
 
-  state = net_lock();
-  skel_txavail_process(priv);
-  net_unlock(state);
+  net_lock();
+  if (priv->sk_bifup)
+    {
+      /* Check if there is room in the hardware to hold another outgoing packet. */
+
+      /* If so, then poll the network for new XMIT data */
+
+      (void)devif_poll(&priv->sk_dev, skel_txpoll);
+    }
+
+  net_unlock();
 }
-#endif
 
 /****************************************************************************
  * Function: skel_txavail
@@ -1045,7 +922,6 @@ static int skel_txavail(FAR struct net_driver_s *dev)
 {
   FAR struct skel_driver_s *priv = (FAR struct skel_driver_s *)dev->d_private;
 
-#ifdef CONFIG_NET_NOINTS
   /* Is our single work structure available?  It may not be if there are
    * pending interrupt actions and we will have to ignore the Tx
    * availability action.
@@ -1057,21 +933,6 @@ static int skel_txavail(FAR struct net_driver_s *dev)
 
       work_queue(ETHWORK, &priv->sk_work, skel_txavail_work, priv, 0);
     }
-
-#else
-  irqstate_t flags;
-
-  /* Disable interrupts because this function may be called from interrupt
-   * level processing.
-   */
-
-  flags = enter_critical_section();
-
-  /* Perform the out-of-cycle poll now */
-
-  skel_txavail_process(priv);
-  leave_critical_section(flags);
-#endif
 
   return OK;
 }

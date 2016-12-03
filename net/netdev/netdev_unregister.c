@@ -91,11 +91,10 @@ int netdev_unregister(FAR struct net_driver_s *dev)
 {
   struct net_driver_s *prev;
   struct net_driver_s *curr;
-  net_lock_t save;
 
   if (dev)
     {
-      save = net_lock();
+      net_lock();
 
       /* Find the device in the list of known network devices */
 
@@ -125,7 +124,7 @@ int netdev_unregister(FAR struct net_driver_s *dev)
           curr->flink = NULL;
         }
 
-      net_unlock(save);
+      net_unlock();
 
 #ifdef CONFIG_NET_ETHERNET
       ninfo("Unregistered MAC: %02x:%02x:%02x:%02x:%02x:%02x as dev: %s\n",

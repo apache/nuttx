@@ -84,7 +84,6 @@ dq_queue_t g_local_listeners;
 
 int local_listen(FAR struct local_conn_s *server, int backlog)
 {
-  net_lock_t state;
 
   /* Some sanity checks */
 
@@ -118,9 +117,9 @@ int local_listen(FAR struct local_conn_s *server, int backlog)
 
       /* Add the connection structure to the list of listeners */
 
-      state = net_lock();
+      net_lock();
       dq_addlast(&server->lc_node, &g_local_listeners);
-      net_unlock(state);
+      net_unlock();
 
       /* And change the server state to listing */
 

@@ -65,11 +65,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include <nuttx/wdog.h>
-
-#ifdef CONFIG_NET_NOINTS
-#  include <nuttx/wqueue.h>
-#endif
-
+#include <nuttx/wqueue.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
 
@@ -84,13 +80,12 @@
  * is required.
  */
 
-#if defined(CONFIG_NET_NOINTS) && !defined(CONFIG_SCHED_WORKQUEUE)
+#if !defined(CONFIG_SCHED_WORKQUEUE)
 #  error Work queue support is required in this configuration (CONFIG_SCHED_WORKQUEUE)
-#endif
+#else
 
-/* Use the low priority work queue if possible */
+  /* Use the low priority work queue if possible */
 
-#if defined(CONFIG_SCHED_WORKQUEUE)
 #  if defined(CONFIG_DM9X_HPWORK)
 #    define ETHWORK HPWORK
 #  elif defined(CONFIG_DM9X_LPWORK)
@@ -326,9 +321,7 @@ struct dm9x_driver_s
   uint8_t ncrxpackets;         /* Number of continuous rx packets  */
   WDOG_ID dm_txpoll;           /* TX poll timer */
   WDOG_ID dm_txtimeout;        /* TX timeout timer */
-#ifdef CONFIG_NET_NOINTS
   struct work_s dm_work;       /* For deferring work to the work queue */
-#endif
 
   /* Mode-dependent function to move data in 8/16/32 I/O modes */
 
@@ -391,24 +384,15 @@ static int  dm9x_txpoll(struct net_driver_s *dev);
 static void dm9x_receive(struct dm9x_driver_s *priv);
 static void dm9x_txdone(struct dm9x_driver_s *priv);
 
-static inline void dm9x_interrupt_process(FAR struct dm9x_driver_s *priv);
-#ifdef CONFIG_NET_NOINTS
 static void dm9x_interrupt_work(FAR void *arg);
-#endif
 static int  dm9x_interrupt(int irq, FAR void *context);
 
 /* Watchdog timer expirations */
 
-static inline void dm9x_txtimeout_process(FAR struct dm9x_driver_s *priv);
-#ifdef CONFIG_NET_NOINTS
 static void dm9x_txtimeout_work(FAR void *arg);
-#endif
 static void dm9x_txtimeout_expiry(int argc, uint32_t arg, ...);
 
-static inline void dm9x_poll_process(FAR struct dm9x_driver_s *priv);
-#ifdef CONFIG_NET_NOINTS
 static void dm9x_poll_work(FAR void *arg);
-#endif
 static void dm9x_poll_expiry(int argc, uint32_t arg, ...);
 
 /* NuttX callback functions */
@@ -416,10 +400,7 @@ static void dm9x_poll_expiry(int argc, uint32_t arg, ...);
 static int dm9x_ifup(struct net_driver_s *dev);
 static int dm9x_ifdown(struct net_driver_s *dev);
 
-static inline void dm9x_txavail_process(FAR struct dm9x_driver_s *priv);
-#ifdef CONFIG_NET_NOINTS
 static void dm9x_txavail_work(FAR void *arg);
-#endif
 static int dm9x_txavail(struct net_driver_s *dev);
 
 #ifdef CONFIG_NET_IGMP
@@ -1122,28 +1103,32 @@ static void dm9x_txdone(struct dm9x_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: dm9x_interrupt_process
+ * Function: dm9x_interrupt_work
  *
  * Description:
- *   Interrupt processing.  This may be performed either within the interrupt
- *   handler or on the worker thread, depending upon the configuration
+ *   Perform interrupt related work from the worker thread
  *
  * Parameters:
- *   priv - Reference to the driver state structure
+ *   arg - The argument passed when work_queue() was called.
  *
  * Returned Value:
- *   None
+ *   OK on success
  *
  * Assumptions:
  *   The network is locked.
  *
  ****************************************************************************/
 
-static inline void dm9x_interrupt_process(FAR struct dm9x_driver_s *priv)
+static void dm9x_interrupt_work(FAR void *arg)
 {
+  FAR struct dm9x_driver_s *priv = (FAR struct dm9x_driver_s *)arg;
   uint8_t isr;
   uint8_t save;
   int i;
+
+  /* Process pending Ethernet interrupts */
+
+  net_lock();
 
   /* Save previous register address */
 
@@ -1229,42 +1214,12 @@ static inline void dm9x_interrupt_process(FAR struct dm9x_driver_s *priv)
   /* Restore previous register address */
 
   DM9X_INDEX = save;
-}
-
-/****************************************************************************
- * Function: dm9x_interrupt_work
- *
- * Description:
- *   Perform interrupt related work from the worker thread
- *
- * Parameters:
- *   arg - The argument passed when work_queue() was called.
- *
- * Returned Value:
- *   OK on success
- *
- * Assumptions:
- *   The network is locked.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_NOINTS
-static void dm9x_interrupt_work(FAR void *arg)
-{
-  FAR struct dm9x_driver_s *priv = (FAR struct dm9x_driver_s *)arg;
-  net_lock_t state;
-
-  /* Process pending Ethernet interrupts */
-
-  state = net_lock();
-  dm9x_interrupt_process(priv);
-  net_unlock(state);
+  net_unlock();
 
   /* Re-enable Ethernet interrupts */
 
   up_enable_irq(CONFIG_DM9X_IRQ);
 }
-#endif
 
 /****************************************************************************
  * Function: dm9x_interrupt
@@ -1290,8 +1245,6 @@ static int dm9x_interrupt(int irq, FAR void *context)
 #else
 # error "Additional logic needed to support multiple interfaces"
 #endif
-
-#ifdef CONFIG_NET_NOINTS
   uint8_t isr;
 
   /* Disable further Ethernet interrupts.  Because Ethernet interrupts are
@@ -1321,54 +1274,7 @@ static int dm9x_interrupt(int irq, FAR void *context)
   /* Schedule to perform the interrupt processing on the worker thread. */
 
   work_queue(ETHWORK, &priv->dm_work, dm9x_interrupt_work, priv, 0);
-
-#else
-  /* Process the interrupt now */
-
-  dm9x_interrupt_process(priv);
-#endif
-
   return OK;
-}
-
-/****************************************************************************
- * Function: dm9x_txtimeout_process
- *
- * Description:
- *   Process a TX timeout.  Called from the either the watchdog timer
- *   expiration logic or from the worker thread, depending upon the
- *   configuration.  The timeout means that the last TX never completed.
- *   Reset the hardware and start again.
- *
- * Parameters:
- *   priv - Reference to the driver state structure
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static inline void dm9x_txtimeout_process(FAR struct dm9x_driver_s *priv)
-{
-  nerr("ERROR: TX timeout\n");
-
-  /* Increment statistics and dump debug info */
-
-  NETDEV_TXTIMEOUTS(priv->dm_dev);
-
-  ninfo("  TX packet count:           %d\n", priv->dm_ntxpending);
-  ninfo("  TX read pointer address:   0x%02x:%02x\n",
-        getreg(DM9X_TRPAH), getreg(DM9X_TRPAL));
-  ninfo("  Memory data write address: 0x%02x:%02x (DM9010)\n",
-        getreg(DM9X_MDWAH), getreg(DM9X_MDWAL));
-
-  /* Then reset the DM90x0 */
-
-  dm9x_reset(priv);
-
-  /* Then poll the network for new XMIT data */
-
-  (void)devif_poll(&priv->dm_dev, dm9x_txpoll);
 }
 
 /****************************************************************************
@@ -1388,19 +1294,32 @@ static inline void dm9x_txtimeout_process(FAR struct dm9x_driver_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_NOINTS
 static void dm9x_txtimeout_work(FAR void *arg)
 {
   FAR struct dm9x_driver_s *priv = (FAR struct dm9x_driver_s *)arg;
-  net_lock_t state;
 
-  /* Process pending Ethernet interrupts */
+  nerr("ERROR: TX timeout\n");
 
-  state = net_lock();
-  dm9x_txtimeout_process(priv);
-  net_unlock(state);
+  /* Increment statistics and dump debug info */
+
+  net_lock();
+  NETDEV_TXTIMEOUTS(priv->dm_dev);
+
+  ninfo("  TX packet count:           %d\n", priv->dm_ntxpending);
+  ninfo("  TX read pointer address:   0x%02x:%02x\n",
+        getreg(DM9X_TRPAH), getreg(DM9X_TRPAL));
+  ninfo("  Memory data write address: 0x%02x:%02x (DM9010)\n",
+        getreg(DM9X_MDWAH), getreg(DM9X_MDWAL));
+
+  /* Then reset the DM90x0 */
+
+  dm9x_reset(priv);
+
+  /* Then poll the network for new XMIT data */
+
+  (void)devif_poll(&priv->dm_dev, dm9x_txpoll);
+  net_unlock();
 }
-#endif
 
 /****************************************************************************
  * Function: dm9x_txtimeout_expiry
@@ -1425,7 +1344,6 @@ static void dm9x_txtimeout_expiry(int argc, wdparm_t arg, ...)
 {
   FAR struct dm9x_driver_s *priv = (FAR struct dm9x_driver_s *)arg;
 
-#ifdef CONFIG_NET_NOINTS
   /* Disable further Ethernet interrupts.  This will prevent some race
    * conditions with interrupt work.  There is still a potential race
    * condition with interrupt work that is already queued and in progress.
@@ -1442,32 +1360,33 @@ static void dm9x_txtimeout_expiry(int argc, wdparm_t arg, ...)
   /* Schedule to perform the TX timeout processing on the worker thread. */
 
   work_queue(ETHWORK, &priv->dm_work, dm9x_txtimeout_work, priv, 0);
-#else
-  /* Process the timeout now */
-
-  dm9x_txtimeout_process(priv);
-#endif
 }
 
 /****************************************************************************
- * Function: dm9x_poll_process
+ * Function: dm9x_poll_work
  *
  * Description:
- *   Perform the periodic poll.  This may be called either from watchdog
- *   timer logic or from the worker thread, depending upon the configuration.
+ *   Perform periodic polling from the worker thread
  *
  * Parameters:
- *   priv - Reference to the driver state structure
+ *   arg - The argument passed when work_queue() as called.
  *
  * Returned Value:
- *   None
+ *   OK on success
  *
  * Assumptions:
+ *   The network is locked.
  *
  ****************************************************************************/
 
-static inline void dm9x_poll_process(FAR struct dm9x_driver_s *priv)
+static void dm9x_poll_work(FAR void *arg)
 {
+  FAR struct dm9x_driver_s *priv = (FAR struct dm9x_driver_s *)arg;
+
+  /* Perform the poll */
+
+  net_lock();
+
   /* If the number of contiguous RX packets exceeds a threshold, reset the counter and
    * re-enable RX interrupts
    */
@@ -1493,38 +1412,8 @@ static inline void dm9x_poll_process(FAR struct dm9x_driver_s *priv)
 
   (void)wd_start(priv->dm_txpoll, DM9X_WDDELAY, dm9x_poll_expiry, 1,
                  (wdparm_t)priv);
+  net_unlock();
 }
-
-/****************************************************************************
- * Function: dm9x_poll_work
- *
- * Description:
- *   Perform periodic polling from the worker thread
- *
- * Parameters:
- *   arg - The argument passed when work_queue() as called.
- *
- * Returned Value:
- *   OK on success
- *
- * Assumptions:
- *   The network is locked.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_NOINTS
-static void dm9x_poll_work(FAR void *arg)
-{
-  FAR struct dm9x_driver_s *priv = (FAR struct dm9x_driver_s *)arg;
-  net_lock_t state;
-
-  /* Perform the poll */
-
-  state = net_lock();
-  dm9x_poll_process(priv);
-  net_unlock(state);
-}
-#endif
 
 /****************************************************************************
  * Function: dm9x_poll_expiry
@@ -1548,7 +1437,6 @@ static void dm9x_poll_expiry(int argc, wdparm_t arg, ...)
 {
   FAR struct dm9x_driver_s *priv = (FAR struct dm9x_driver_s *)arg;
 
-#ifdef CONFIG_NET_NOINTS
   /* Is our single work structure available?  It may not be if there are
    * pending interrupt actions.
    */
@@ -1567,12 +1455,6 @@ static void dm9x_poll_expiry(int argc, wdparm_t arg, ...)
 
       (void)wd_start(priv->dm_txpoll, DM9X_WDDELAY, dm9x_poll_expiry, 1, arg);
     }
-
-#else
-  /* Process the interrupt now */
-
-  dm9x_poll_process(priv);
-#endif
 }
 
 /****************************************************************************
@@ -1733,45 +1615,6 @@ static int dm9x_ifdown(struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: dm9x_txavail_process
- *
- * Description:
- *   Perform an out-of-cycle poll.
- *
- * Parameters:
- *   dev - Reference to the NuttX driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Called in normal user mode
- *
- ****************************************************************************/
-
-static inline void dm9x_txavail_process(FAR struct dm9x_driver_s *priv)
-{
-  ninfo("Polling\n");
-
-  /* Ignore the notification if the interface is not yet up */
-
-  if (priv->dm_bifup)
-    {
-
-      /* Check if there is room in the DM90x0 to hold another packet.  In 100M
-       * mode, that can be 2 packets, otherwise it is a single packet.
-       */
-
-      if (priv->dm_ntxpending < 1 || (priv->dm_b100M && priv->dm_ntxpending < 2))
-        {
-          /* If so, then poll the network for new XMIT data */
-
-          (void)devif_poll(&priv->dm_dev, dm9x_txpoll);
-        }
-    }
-}
-
-/****************************************************************************
  * Function: dm9x_txavail_work
  *
  * Description:
@@ -1788,19 +1631,32 @@ static inline void dm9x_txavail_process(FAR struct dm9x_driver_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_NOINTS
 static void dm9x_txavail_work(FAR void *arg)
 {
   FAR struct dm9x_driver_s *priv = (FAR struct dm9x_driver_s *)arg;
-  net_lock_t state;
 
-  /* Perform the poll */
+  ninfo("Polling\n");
 
-  state = net_lock();
-  dm9x_txavail_process(priv);
-  net_unlock(state);
+  /* Ignore the notification if the interface is not yet up */
+
+  net_lock();
+  if (priv->dm_bifup)
+    {
+
+      /* Check if there is room in the DM90x0 to hold another packet.  In 100M
+       * mode, that can be 2 packets, otherwise it is a single packet.
+       */
+
+      if (priv->dm_ntxpending < 1 || (priv->dm_b100M && priv->dm_ntxpending < 2))
+        {
+          /* If so, then poll the network for new XMIT data */
+
+          (void)devif_poll(&priv->dm_dev, dm9x_txpoll);
+        }
+    }
+
+  net_unlock();
 }
-#endif
 
 /****************************************************************************
  * Function: dm9x_txavail
@@ -1825,7 +1681,6 @@ static int dm9x_txavail(FAR struct net_driver_s *dev)
 {
   FAR struct dm9x_driver_s *priv = (FAR struct dm9x_driver_s *)dev->d_private;
 
-#ifdef CONFIG_NET_NOINTS
   /* Is our single work structure available?  It may not be if there are
    * pending interrupt actions and we will have to ignore the Tx
    * availability action.
@@ -1837,21 +1692,6 @@ static int dm9x_txavail(FAR struct net_driver_s *dev)
 
       work_queue(ETHWORK, &priv->dm_work, dm9x_txavail_work, priv, 0);
     }
-
-#else
-  irqstate_t flags;
-
-  /* Disable interrupts because this function may be called from interrupt
-   * level processing.
-   */
-
-  flags = enter_critical_section();
-
-  /* Perform the out-of-cycle poll now */
-
-  dm9x_txavail_process(priv);
-  leave_critical_section(flags);
-#endif
 
   return OK;
 }

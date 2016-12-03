@@ -279,7 +279,6 @@ errout_with_semaphore:
  * Parameters:
  *   dev    - The device to use to send the solicitation
  *   notify - The pre-initialized notification structure
- *   save   - We will need this to temporarily release the net lock
  *
  * Returned Value:
  *   Zero (OK) is returned on success; On error a negated errno value is
@@ -291,8 +290,7 @@ errout_with_semaphore:
  ****************************************************************************/
 
 static int icmpv6_wait_radvertise(FAR struct net_driver_s *dev,
-                                  FAR struct icmpv6_rnotify_s *notify,
-                                  net_lock_t *save)
+                                  FAR struct icmpv6_rnotify_s *notify)
 {
   struct timespec delay;
   int ret;
@@ -353,7 +351,6 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
 #else /* CONFIG_NET_ETHERNET */
   struct icmpv6_rnotify_s notify;
   net_ipv6addr_t lladdr;
-  net_lock_t save;
   int retries;
   int ret;
 
@@ -374,9 +371,9 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
 
   /* The interface should be in the down state */
 
-  save = net_lock();
+  net_lock();
   netdev_ifdown(dev);
-  net_unlock(save);
+  net_unlock();
 
   /* IPv6 Stateless Autoconfiguration
    * Reference: http://www.tcpipguide.com/free/t_IPv6AutoconfigurationandRenumbering.htm
@@ -415,9 +412,9 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
 #ifdef CONFIG_NET_ICMPv6_NEIGHBOR
   /* Bring the interface up with no IP address */
 
-  save = net_lock();
+  net_lock();
   netdev_ifup(dev);
-  net_unlock(save);
+  net_unlock();
 
   /* 2. Link-Local Address Uniqueness Test: The node tests to ensure that
    *    the address it generated isn't for some reason already in use on the
@@ -435,9 +432,9 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
 
   /* Take the interface back down */
 
-  save = net_lock();
+  net_lock();
   netdev_ifdown(dev);
-  net_unlock(save);
+  net_unlock();
 
   if (ret == OK)
     {
@@ -456,7 +453,7 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
    *    on the wider Internet (since link-local addresses are not routed).
    */
 
-  save = net_lock();
+  net_lock();
   net_ipv6addr_copy(dev->d_ipv6addr, lladdr);
 
   /* Bring the interface up with the new, temporary IP address */
@@ -489,7 +486,7 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
 
       /* Wait to receive the Router Advertisement message */
 
-      ret = icmpv6_wait_radvertise(dev, &notify, &save);
+      ret = icmpv6_wait_radvertise(dev, &notify);
       if (ret != -ETIMEDOUT)
         {
           /* ETIMEDOUT is the only expected failure.  We will retry on that
@@ -534,7 +531,7 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
        * work out quite the way we wanted).
        */
 
-      net_unlock(save);
+      net_unlock();
       return ret;
     }
 
@@ -557,7 +554,7 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
    */
 
   netdev_ifup(dev);
-  net_unlock(save);
+  net_unlock();
   return OK;
 #endif /* CONFIG_NET_ETHERNET */
 }

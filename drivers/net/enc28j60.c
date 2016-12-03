@@ -135,12 +135,6 @@
 #  define enc_dumppacket(m,a,n)
 #endif
 
-/* The ENC28J60 will not do interrupt level processing */
-
-#ifndef CONFIG_NET_NOINTS
-#  warning "CONFIG_NET_NOINTS should be set"
-#endif
-
 /* Low-level register debug */
 
 #if !defined(CONFIG_DEBUG_FEATURES) || !defined(CONFIG_DEBUG_NET)
@@ -1629,14 +1623,13 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
 static void enc_irqworker(FAR void *arg)
 {
   FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)arg;
-  net_lock_t lock;
   uint8_t eir;
 
   DEBUGASSERT(priv);
 
   /* Get exclusive access to both the network and the SPI bus. */
 
-  lock = net_lock();
+  net_lock();
   enc_lock(priv);
 
   /* Disable further interrupts by clearing the global interrupt enable bit.
@@ -1827,7 +1820,7 @@ static void enc_irqworker(FAR void *arg)
   /* Release lock on the SPI bus and the network */
 
   enc_unlock(priv);
-  net_unlock(lock);
+  net_unlock();
 }
 
 /****************************************************************************
@@ -1889,7 +1882,6 @@ static int enc_interrupt(int irq, FAR void *context)
 static void enc_toworker(FAR void *arg)
 {
   FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)arg;
-  net_lock_t lock;
   int ret;
 
   nerr("ERROR: Tx timeout\n");
@@ -1897,7 +1889,7 @@ static void enc_toworker(FAR void *arg)
 
   /* Get exclusive access to the network */
 
-  lock = net_lock();
+  net_lock();
 
   /* Increment statistics and dump debug info */
 
@@ -1919,7 +1911,7 @@ static void enc_toworker(FAR void *arg)
 
   /* Release lock on the network */
 
-  net_unlock(lock);
+  net_unlock();
 }
 
 /****************************************************************************
@@ -1983,13 +1975,12 @@ static void enc_txtimeout(int argc, uint32_t arg, ...)
 static void enc_pollworker(FAR void *arg)
 {
   FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)arg;
-  net_lock_t lock;
 
   DEBUGASSERT(priv);
 
   /* Get exclusive access to both the network and the SPI bus. */
 
-  lock = net_lock();
+  net_lock();
   enc_lock(priv);
 
   /* Verify that the hardware is ready to send another packet.  The driver
@@ -2011,7 +2002,7 @@ static void enc_pollworker(FAR void *arg)
   /* Release lock on the SPI bus and the network */
 
   enc_unlock(priv);
-  net_unlock(lock);
+  net_unlock();
 
   /* Setup the watchdog poll timer again */
 

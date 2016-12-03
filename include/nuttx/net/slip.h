@@ -51,11 +51,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ***********************************************************/
-/* Dependencies:
- *
- *   CONFIG_NET_NOINTS - Required.
- *
- * SLIP Configuration:
+/* SLIP Configuration:
  *
  *   CONFIG_NET_SLIP - Enables building of the SLIP driver
  *   CONFIG_NET_SLIP_STACKSIZE - Provides the stack size for SLIP RX and TX

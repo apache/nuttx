@@ -55,11 +55,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
-
-#ifdef CONFIG_NET_NOINTS
-#  include <nuttx/wqueue.h>
-#endif
-
+#include <nuttx/wqueue.h>
 #include <nuttx/net/mii.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/arp.h>
@@ -90,13 +86,12 @@
  * is required.
  */
 
-#if defined(CONFIG_NET_NOINTS) && !defined(CONFIG_SCHED_WORKQUEUE)
+#if !defined(CONFIG_SCHED_WORKQUEUE)
 #  error Work queue support is required in this configuration (CONFIG_SCHED_WORKQUEUE)
-#endif
+#else
 
-/* Use the low priority work queue if possible */
+  /* Use the low priority work queue if possible */
 
-#if defined(CONFIG_SCHED_WORKQUEUE)
 #  if defined(CONFIG_PIC32MX_ETHERNET_HPWORK)
 #    define ETHWORK HPWORK
 #  elif defined(CONFIG_PIC32MX_ETHERNET_LPWORK)
@@ -326,9 +321,7 @@ struct pic32mx_driver_s
   uint32_t   pd_inten;          /* Shadow copy of INTEN register */
   WDOG_ID    pd_txpoll;         /* TX poll timer */
   WDOG_ID    pd_txtimeout;      /* TX timeout timer */
-#ifdef CONFIG_NET_NOINTS
   struct work_s pd_work;        /* For deferring work to the work queue */
-#endif
 
   sq_queue_t pd_freebuffers;    /* The free buffer list */
 
@@ -401,24 +394,15 @@ static void pic32mx_response(struct pic32mx_driver_s *priv);
 static void pic32mx_rxdone(struct pic32mx_driver_s *priv);
 static void pic32mx_txdone(struct pic32mx_driver_s *priv);
 
-static inline void pic32mx_interrupt_process(struct pic32mx_driver_s *priv);
-#ifdef CONFIG_NET_NOINTS
 static void pic32mx_interrupt_work(void *arg);
-#endif
 static int  pic32mx_interrupt(int irq, void *context);
 
 /* Watchdog timer expirations */
 
-static inline void pic32mx_txtimeout_process(struct pic32mx_driver_s *priv);
-#ifdef CONFIG_NET_NOINTS
 static void pic32mx_txtimeout_work(void *arg);
-#endif
 static void pic32mx_txtimeout_expiry(int argc, uint32_t arg, ...);
 
-static inline void pic32mx_poll_process(struct pic32mx_driver_s *priv);
-#ifdef CONFIG_NET_NOINTS
 static void pic32mx_poll_work(void *arg);
-#endif
 static void pic32mx_poll_expiry(int argc, uint32_t arg, ...);
 
 /* NuttX callback functions */
@@ -426,10 +410,7 @@ static void pic32mx_poll_expiry(int argc, uint32_t arg, ...);
 static int pic32mx_ifup(struct net_driver_s *dev);
 static int pic32mx_ifdown(struct net_driver_s *dev);
 
-static inline void pic32mx_txavail_process(struct pic32mx_driver_s *priv);
-#ifdef CONFIG_NET_NOINTS
 static void pic32mx_txavail_work(void *arg);
-#endif
 static int pic32mx_txavail(struct net_driver_s *dev);
 
 #ifdef CONFIG_NET_IGMP
@@ -1682,26 +1663,30 @@ static void pic32mx_txdone(struct pic32mx_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: pic32mx_interrupt_process
+ * Function: pic32mx_interrupt_work
  *
  * Description:
- *   Interrupt processing.  This may be performed either within the interrupt
- *   handler or on the worker thread, depending upon the configuration
+ *   Perform interrupt related work from the worker thread
  *
  * Parameters:
- *   priv - Reference to the driver state structure
+ *   arg - The argument passed when work_queue() was called.
  *
  * Returned Value:
- *   None
+ *   OK on success
  *
  * Assumptions:
  *   The network is locked.
  *
  ****************************************************************************/
 
-static inline void pic32mx_interrupt_process(struct pic32mx_driver_s *priv)
+static void pic32mx_interrupt_work(void *arg)
 {
+  struct pic32mx_driver_s *priv = (struct pic32mx_driver_s *)arg;
   uint32_t status;
+
+  /* Process pending Ethernet interrupts */
+
+  net_lock();
 
   /* Get the interrupt status (zero means no interrupts pending). */
 
@@ -1840,36 +1825,7 @@ static inline void pic32mx_interrupt_process(struct pic32mx_driver_s *priv)
 #else
   up_clrpend_irq(PIC32MX_IRQSRC_ETH);
 #endif
-}
-
-/****************************************************************************
- * Function: pic32mx_interrupt_work
- *
- * Description:
- *   Perform interrupt related work from the worker thread
- *
- * Parameters:
- *   arg - The argument passed when work_queue() was called.
- *
- * Returned Value:
- *   OK on success
- *
- * Assumptions:
- *   The network is locked.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_NOINTS
-static void pic32mx_interrupt_work(void *arg)
-{
-  struct pic32mx_driver_s *priv = (struct pic32mx_driver_s *)arg;
-  net_lock_t state;
-
-  /* Process pending Ethernet interrupts */
-
-  state = net_lock();
-  pic32mx_interrupt_process(priv);
-  net_unlock(state);
+  net_unlock();
 
   /* Re-enable Ethernet interrupts */
 
@@ -1879,7 +1835,6 @@ static void pic32mx_interrupt_work(void *arg)
   up_enable_irq(PIC32MX_IRQSRC_ETH);
 #endif
 }
-#endif
 
 /****************************************************************************
  * Function: pic32mx_interrupt
@@ -1909,7 +1864,6 @@ static int pic32mx_interrupt(int irq, void *context)
   priv = &g_ethdrvr[0];
 #endif
 
-#ifdef CONFIG_NET_NOINTS
   /* Disable further Ethernet interrupts.  Because Ethernet interrupts are
    * also disabled if the TX timeout event occurs, there can be no race
    * condition here.
@@ -1944,52 +1898,7 @@ static int pic32mx_interrupt(int irq, void *context)
   /* Schedule to perform the interrupt processing on the worker thread. */
 
   work_queue(ETHWORK, &priv->pd_work, pic32mx_interrupt_work, priv, 0);
-
-#else
-  /* Process the interrupt now */
-
-  pic32mx_interrupt_process(priv);
-#endif
-
   return OK;
-}
-
-/****************************************************************************
- * Function: pic32mx_txtimeout_process
- *
- * Description:
- *   Process a TX timeout.  Called from the either the watchdog timer
- *   expiration logic or from the worker thread, depending upon the
- *   configuration.  The timeout means that the last TX never completed.
- *   Reset the hardware and start again.
- *
- * Parameters:
- *   priv - Reference to the driver state structure
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static inline void pic32mx_txtimeout_process(struct pic32mx_driver_s *priv)
-{
-  /* Increment statistics and dump debug info */
-
-  NETDEV_TXTIMEOUTS(&priv->pd_dev);
-  if (priv->pd_ifup)
-    {
-      /* Then reset the hardware. ifup() will reset the interface, then bring
-       * it back up.
-       */
-
-      (void)pic32mx_ifup(&priv->pd_dev);
-
-      /* Then poll the network for new XMIT data (We are guaranteed to have
-       * a free buffer here).
-       */
-
-      pic32mx_poll(priv);
-    }
 }
 
 /****************************************************************************
@@ -2009,19 +1918,31 @@ static inline void pic32mx_txtimeout_process(struct pic32mx_driver_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_NOINTS
 static void pic32mx_txtimeout_work(void *arg)
 {
   struct pic32mx_driver_s *priv = (struct pic32mx_driver_s *)arg;
-  net_lock_t state;
 
-  /* Process pending Ethernet interrupts */
+  /* Increment statistics and dump debug info */
 
-  state = net_lock();
-  pic32mx_txtimeout_process(priv);
-  net_unlock(state);
+  net_lock();
+  NETDEV_TXTIMEOUTS(&priv->pd_dev);
+  if (priv->pd_ifup)
+    {
+      /* Then reset the hardware. ifup() will reset the interface, then bring
+       * it back up.
+       */
+
+      (void)pic32mx_ifup(&priv->pd_dev);
+
+      /* Then poll the network for new XMIT data (We are guaranteed to have
+       * a free buffer here).
+       */
+
+      pic32mx_poll(priv);
+    }
+
+  net_unlock();
 }
-#endif
 
 /****************************************************************************
  * Function: pic32mx_txtimeout_expiry
@@ -2046,7 +1967,6 @@ static void pic32mx_txtimeout_expiry(int argc, wdparm_t arg, ...)
 {
   struct pic32mx_driver_s *priv = (struct pic32mx_driver_s *)arg;
 
-#ifdef CONFIG_NET_NOINTS
   /* Disable further Ethernet interrupts.  This will prevent some race
    * conditions with interrupt work.  There is still a potential race
    * condition with interrupt work that is already queued and in progress.
@@ -2067,50 +1987,6 @@ static void pic32mx_txtimeout_expiry(int argc, wdparm_t arg, ...)
   /* Schedule to perform the TX timeout processing on the worker thread. */
 
   work_queue(ETHWORK, &priv->pd_work, pic32mx_txtimeout_work, priv, 0);
-#else
-  /* Process the timeout now */
-
-  pic32mx_txtimeout_process(priv);
-#endif
-}
-
-/****************************************************************************
- * Function: pic32mx_poll_process
- *
- * Description:
- *   Perform the periodic poll.  This may be called either from watchdog
- *   timer logic or from the worker thread, depending upon the configuration.
- *
- * Parameters:
- *   priv - Reference to the driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-static inline void pic32mx_poll_process(struct pic32mx_driver_s *priv)
-{
-  /* Check if the next Tx descriptor is available.  We cannot perform the Tx
-   * poll if we are unable to accept another packet for transmission.
-   */
-
-  if (pic32mx_txdesc(priv) != NULL)
-    {
-      /* If so, update TCP timing states and poll the network for new XMIT data. Hmmm..
-       * might be bug here.  Does this mean if there is a transmit in progress,
-       * we will missing TCP time state updates?
-       */
-
-      pic32mx_timerpoll(priv);
-    }
-
-  /* Setup the watchdog poll timer again */
-
-  (void)wd_start(priv->pd_txpoll, PIC32MX_WDDELAY, pic32mx_poll_expiry,
-                 1, priv);
 }
 
 /****************************************************************************
@@ -2130,19 +2006,31 @@ static inline void pic32mx_poll_process(struct pic32mx_driver_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_NOINTS
 static void pic32mx_poll_work(void *arg)
 {
   struct pic32mx_driver_s *priv = (struct pic32mx_driver_s *)arg;
-  net_lock_t state;
 
-  /* Perform the poll */
+  /* Check if the next Tx descriptor is available.  We cannot perform the Tx
+   * poll if we are unable to accept another packet for transmission.
+   */
 
-  state = net_lock();
-  pic32mx_poll_process(priv);
-  net_unlock(state);
+  net_lock();
+  if (pic32mx_txdesc(priv) != NULL)
+    {
+      /* If so, update TCP timing states and poll the network for new XMIT data. Hmmm..
+       * might be bug here.  Does this mean if there is a transmit in progress,
+       * we will missing TCP time state updates?
+       */
+
+      pic32mx_timerpoll(priv);
+    }
+
+  /* Setup the watchdog poll timer again */
+
+  (void)wd_start(priv->pd_txpoll, PIC32MX_WDDELAY, pic32mx_poll_expiry,
+                 1, priv);
+  net_unlock();
 }
-#endif
 
 /****************************************************************************
  * Function: pic32mx_poll_expiry
@@ -2166,7 +2054,6 @@ static void pic32mx_poll_expiry(int argc, wdparm_t arg, ...)
 {
   struct pic32mx_driver_s *priv = (struct pic32mx_driver_s *)arg;
 
-#ifdef CONFIG_NET_NOINTS
   /* Is our single work structure available?  It may not be if there are
    * pending interrupt actions.
    */
@@ -2186,12 +2073,6 @@ static void pic32mx_poll_expiry(int argc, wdparm_t arg, ...)
       (void)wd_start(priv->pd_txpoll, PIC32MX_WDDELAY, pic32mx_poll_expiry,
                      1, arg);
     }
-
-#else
-  /* Process the interrupt now */
-
-  pic32mx_poll_process(priv);
-#endif
 }
 
 /****************************************************************************
@@ -2542,42 +2423,6 @@ static int pic32mx_ifdown(struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: pic32mx_txavail_process
- *
- * Description:
- *   Perform an out-of-cycle poll.
- *
- * Parameters:
- *   dev - Reference to the NuttX driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Called in normal user mode
- *
- ****************************************************************************/
-
-static inline void pic32mx_txavail_process(struct pic32mx_driver_s *priv)
-{
-  /* Ignore the notification if the interface is not yet up */
-
-  if (priv->pd_ifup)
-    {
-      /* Check if the next Tx descriptor is available. */
-
-      if (pic32mx_txdesc(priv) != NULL)
-        {
-          /* If so, then poll the network for new XMIT data.  First allocate a buffer
-           * to perform the poll
-           */
-
-          pic32mx_poll(priv);
-        }
-    }
-}
-
-/****************************************************************************
  * Function: pic32mx_txavail_work
  *
  * Description:
@@ -2594,19 +2439,29 @@ static inline void pic32mx_txavail_process(struct pic32mx_driver_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_NOINTS
 static void pic32mx_txavail_work(void *arg)
 {
   struct pic32mx_driver_s *priv = (struct pic32mx_driver_s *)arg;
-  net_lock_t state;
 
-  /* Perform the poll */
+  /* Ignore the notification if the interface is not yet up */
 
-  state = net_lock();
-  pic32mx_txavail_process(priv);
-  net_unlock(state);
+  net_lock();
+  if (priv->pd_ifup)
+    {
+      /* Check if the next Tx descriptor is available. */
+
+      if (pic32mx_txdesc(priv) != NULL)
+        {
+          /* If so, then poll the network for new XMIT data.  First allocate a buffer
+           * to perform the poll
+           */
+
+          pic32mx_poll(priv);
+        }
+    }
+
+  net_unlock();
 }
-#endif
 
 /****************************************************************************
  * Function: pic32mx_txavail
@@ -2631,7 +2486,6 @@ static int pic32mx_txavail(struct net_driver_s *dev)
 {
   struct pic32mx_driver_s *priv = (struct pic32mx_driver_s *)dev->d_private;
 
-#ifdef CONFIG_NET_NOINTS
   /* Is our single work structure available?  It may not be if there are
    * pending interrupt actions and we will have to ignore the Tx
    * availability action.
@@ -2643,21 +2497,6 @@ static int pic32mx_txavail(struct net_driver_s *dev)
 
       work_queue(ETHWORK, &priv->pd_work, pic32mx_txavail_work, priv, 0);
     }
-
-#else
-  irqstate_t flags;
-
-  /* Disable interrupts because this function may be called from interrupt
-   * level processing.
-   */
-
-  flags = enter_critical_section();
-
-  /* Perform the out-of-cycle poll now */
-
-  pic32mx_txavail_process(priv);
-  leave_critical_section(flags);
-#endif
 
   return OK;
 }

@@ -51,8 +51,6 @@
 
 #include "utils/utils.h"
 
-#if defined(CONFIG_NET) && defined(CONFIG_NET_NOINTS)
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -116,7 +114,7 @@ void net_lockinitialize(void)
  *
  ****************************************************************************/
 
-net_lock_t net_lock(void)
+void net_lock(void)
 {
   pid_t me = getpid();
 
@@ -139,8 +137,6 @@ net_lock_t net_lock(void)
       g_holder = me;
       g_count  = 1;
     }
-
-  return 0;
 }
 
 /****************************************************************************
@@ -151,7 +147,7 @@ net_lock_t net_lock(void)
  *
  ****************************************************************************/
 
-void net_unlock(net_lock_t flags)
+void net_unlock(void)
 {
   DEBUGASSERT(g_holder == getpid() && g_count > 0);
 
@@ -261,4 +257,3 @@ int net_lockedwait(sem_t *sem)
   return net_timedwait(sem, NULL);
 }
 
-#endif /* CONFIG_NET */

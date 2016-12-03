@@ -53,11 +53,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include <nuttx/wdog.h>
-
-#ifdef CONFIG_NET_NOINTS
-#  include <nuttx/wqueue.h>
-#endif
-
+#include <nuttx/wqueue.h>
 #include <nuttx/net/mii.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
@@ -87,13 +83,12 @@
  * is required.
  */
 
-#if defined(CONFIG_NET_NOINTS) && !defined(CONFIG_SCHED_WORKQUEUE)
+#if !defined(CONFIG_SCHED_WORKQUEUE)
 #  error Work queue support is required
-#endif
+#else
 
-/* Select work queue */
+  /* Select work queue */
 
-#if defined(CONFIG_SCHED_WORKQUEUE)
 #  if defined(CONFIG_LPC43_ETHERNET_HPWORK)
 #    define ETHWORK HPWORK
 #  elif defined(CONFIG_LPC43_ETHERNET_LPWORK)
@@ -524,9 +519,7 @@ struct lpc43_ethmac_s
   uint8_t              fduplex : 1; /* Full (vs. half) duplex */
   WDOG_ID              txpoll;      /* TX poll timer */
   WDOG_ID              txtimeout;   /* TX timeout timer */
-#ifdef CONFIG_NET_NOINTS
   struct work_s        work;        /* For deferring work to the work queue */
-#endif
 
   /* This holds the information visible to the NuttX network */
 
@@ -599,34 +592,26 @@ static int  lpc43_recvframe(FAR struct lpc43_ethmac_s *priv);
 static void lpc43_receive(FAR struct lpc43_ethmac_s *priv);
 static void lpc43_freeframe(FAR struct lpc43_ethmac_s *priv);
 static void lpc43_txdone(FAR struct lpc43_ethmac_s *priv);
-#ifdef CONFIG_NET_NOINTS
+
 static void lpc43_interrupt_work(FAR void *arg);
-#endif
 static int  lpc43_interrupt(int irq, FAR void *context);
 
 /* Watchdog timer expirations */
 
-static inline void lpc43_txtimeout_process(FAR struct lpc43_ethmac_s *priv);
-#ifdef CONFIG_NET_NOINTS
 static void lpc43_txtimeout_work(FAR void *arg);
-#endif
 static void lpc43_txtimeout_expiry(int argc, uint32_t arg, ...);
 
-static inline void lpc43_poll_process(FAR struct lpc43_ethmac_s *priv);
-#ifdef CONFIG_NET_NOINTS
 static void lpc43_poll_work(FAR void *arg);
-#endif
 static void lpc43_poll_expiry(int argc, uint32_t arg, ...);
 
 /* NuttX callback functions */
 
 static int  lpc43_ifup(struct net_driver_s *dev);
 static int  lpc43_ifdown(struct net_driver_s *dev);
-static inline void lpc43_txavail_process(FAR struct lpc43_ethmac_s *priv);
-#ifdef CONFIG_NET_NOINTS
+
 static void lpc43_txavail_work(FAR void *arg);
-#endif
 static int  lpc43_txavail(struct net_driver_s *dev);
+
 #if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
 static int  lpc43_addmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif
@@ -1900,29 +1885,32 @@ static void lpc43_txdone(FAR struct lpc43_ethmac_s *priv)
 }
 
 /****************************************************************************
- * Function: lpc43_interrupt_process
+ * Function: lpc43_interrupt_work
  *
  * Description:
- *   Interrupt processing.  This may be performed either within the interrupt
- *   handler or on the worker thread, depending upon the configuration
+ *   Perform interrupt related work from the worker thread
  *
  * Parameters:
- *   priv  - Reference to the driver state structure
+ *   arg - The argument passed when work_queue() was called.
  *
  * Returned Value:
- *   None
+ *   OK on success
  *
  * Assumptions:
  *   Ethernet interrupts are disabled
  *
  ****************************************************************************/
 
-static inline void lpc43_interrupt_process(FAR struct lpc43_ethmac_s *priv)
+static void lpc43_interrupt_work(FAR void *arg)
 {
+  FAR struct lpc43_ethmac_s *priv = (FAR struct lpc43_ethmac_s *)arg;
   uint32_t dmasr;
+
+  DEBUGASSERT(priv);
 
   /* Get the DMA interrupt status bits (no MAC interrupts are expected) */
 
+  net_lock();
   dmasr = lpc43_getreg(LPC43_ETH_DMASTAT);
 
   /* Mask only enabled interrupts.  This depends on the fact that the interrupt
@@ -1974,7 +1962,6 @@ static inline void lpc43_interrupt_process(FAR struct lpc43_ethmac_s *priv)
   /* Handle error interrupt only if CONFIG_DEBUG_NET is eanbled */
 
 #ifdef CONFIG_DEBUG_NET
-
   /* Check if there are pending "abnormal" interrupts */
 
   if ((dmasr & ETH_DMAINT_AIS) != 0)
@@ -1991,45 +1978,13 @@ static inline void lpc43_interrupt_process(FAR struct lpc43_ethmac_s *priv)
 
       lpc43_putreg(ETH_DMAINT_AIS, LPC43_ETH_DMASTAT);
     }
-#endif
-}
 
-/****************************************************************************
- * Function: lpc43_interrupt_work
- *
- * Description:
- *   Perform interrupt related work from the worker thread
- *
- * Parameters:
- *   arg - The argument passed when work_queue() was called.
- *
- * Returned Value:
- *   OK on success
- *
- * Assumptions:
- *   Ethernet interrupts are disabled
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_NOINTS
-static void lpc43_interrupt_work(FAR void *arg)
-{
-  FAR struct lpc43_ethmac_s *priv = (FAR struct lpc43_ethmac_s *)arg;
-  net_lock_t state;
-
-  DEBUGASSERT(priv);
-
-  /* Process pending Ethernet interrupts */
-
-  state = net_lock();
-  lpc43_interrupt_process(priv);
-  net_unlock(state);
+  net_unlock();
 
   /* Re-enable Ethernet interrupts at the NVIC */
 
   up_enable_irq(LPC43M4_IRQ_ETHERNET);
 }
-#endif
 
 /****************************************************************************
  * Function: lpc43_interrupt
@@ -2051,8 +2006,6 @@ static void lpc43_interrupt_work(FAR void *arg)
 static int lpc43_interrupt(int irq, FAR void *context)
 {
   FAR struct lpc43_ethmac_s *priv = &g_lpc43ethmac;
-
-#ifdef CONFIG_NET_NOINTS
   uint32_t dmasr;
 
   /* Get the DMA interrupt status bits (no MAC interrupts are expected) */
@@ -2088,47 +2041,7 @@ static int lpc43_interrupt(int irq, FAR void *context)
       work_queue(ETHWORK, &priv->work, lpc43_interrupt_work, priv, 0);
     }
 
-#else
-  /* Process the interrupt now */
-
-  lpc43_interrupt_process(priv);
-#endif
-
   return OK;
-}
-
-/****************************************************************************
- * Function: lpc43_txtimeout_process
- *
- * Description:
- *   Process a TX timeout.  Called from the either the watchdog timer
- *   expiration logic or from the worker thread, depending upon the
- *   configuration.  The timeout means that the last TX never completed.
- *   Reset the hardware and start again.
- *
- * Parameters:
- *   priv  - Reference to the driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Global interrupts are disabled by the watchdog logic.
- *
- ****************************************************************************/
-
-static inline void lpc43_txtimeout_process(FAR struct lpc43_ethmac_s *priv)
-{
-  /* Then reset the hardware.  Just take the interface down, then back
-   * up again.
-   */
-
-  lpc43_ifdown(&priv->dev);
-  lpc43_ifup(&priv->dev);
-
-  /* Then poll the network for new XMIT data */
-
-  lpc43_dopoll(priv);
 }
 
 /****************************************************************************
@@ -2148,19 +2061,23 @@ static inline void lpc43_txtimeout_process(FAR struct lpc43_ethmac_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_NOINTS
 static void lpc43_txtimeout_work(FAR void *arg)
 {
   FAR struct lpc43_ethmac_s *priv = (FAR struct lpc43_ethmac_s *)arg;
-  net_lock_t state;
 
-  /* Process pending Ethernet interrupts */
+  /* Then reset the hardware.  Just take the interface down, then back
+   * up again.
+   */
 
-  state = net_lock();
-  lpc43_txtimeout_process(priv);
-  net_unlock(state);
+  net_lock();
+  lpc43_ifdown(&priv->dev);
+  lpc43_ifup(&priv->dev);
+
+  /* Then poll the network for new XMIT data */
+
+  lpc43_dopoll(priv);
+  net_unlock();
 }
-#endif
 
 /****************************************************************************
  * Function: lpc43_txtimeout_expiry
@@ -2187,7 +2104,6 @@ static void lpc43_txtimeout_expiry(int argc, uint32_t arg, ...)
 
   ninfo("Timeout!\n");
 
-#ifdef CONFIG_NET_NOINTS
   /* Disable further Ethernet interrupts.  This will prevent some race
    * conditions with interrupt work.  There is still a potential race
    * condition with interrupt work that is already queued and in progress.
@@ -2206,33 +2122,28 @@ static void lpc43_txtimeout_expiry(int argc, uint32_t arg, ...)
   /* Schedule to perform the TX timeout processing on the worker thread. */
 
   work_queue(ETHWORK, &priv->work, lpc43_txtimeout_work, priv, 0);
-
-#else
-  /* Process the timeout now */
-
-  lpc43_txtimeout_process(priv);
-#endif
 }
 
 /****************************************************************************
- * Function: lpc43_poll_process
+ * Function: lpc43_poll_work
  *
  * Description:
- *   Perform the periodic poll.  This may be called either from watchdog
- *   timer logic or from the worker thread, depending upon the configuration.
+ *   Perform periodic polling from the worker thread
  *
  * Parameters:
- *   priv  - Reference to the driver state structure
+ *   arg - The argument passed when work_queue() as called.
  *
  * Returned Value:
- *   None
+ *   OK on success
  *
  * Assumptions:
+ *   Ethernet interrupts are disabled
  *
  ****************************************************************************/
 
-static inline void lpc43_poll_process(FAR struct lpc43_ethmac_s *priv)
+static void lpc43_poll_work(FAR void *arg)
 {
+  FAR struct lpc43_ethmac_s *priv = (FAR struct lpc43_ethmac_s *)arg;
   FAR struct net_driver_s   *dev  = &priv->dev;
 
   /* Check if the next TX descriptor is owned by the Ethernet DMA or CPU.  We
@@ -2246,6 +2157,7 @@ static inline void lpc43_poll_process(FAR struct lpc43_ethmac_s *priv)
    * CONFIG_LPC43_ETH_NTXDESC).
    */
 
+  net_lock();
   if ((priv->txhead->tdes0 & ETH_TDES0_OWN) == 0 &&
        priv->txhead->tdes2 == 0)
     {
@@ -2281,38 +2193,8 @@ static inline void lpc43_poll_process(FAR struct lpc43_ethmac_s *priv)
   /* Setup the watchdog poll timer again */
 
   (void)wd_start(priv->txpoll, LPC43_WDDELAY, lpc43_poll_expiry, 1, priv);
+  net_unlock();
 }
-
-/****************************************************************************
- * Function: lpc43_poll_work
- *
- * Description:
- *   Perform periodic polling from the worker thread
- *
- * Parameters:
- *   arg - The argument passed when work_queue() as called.
- *
- * Returned Value:
- *   OK on success
- *
- * Assumptions:
- *   Ethernet interrupts are disabled
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_NOINTS
-static void lpc43_poll_work(FAR void *arg)
-{
-  FAR struct lpc43_ethmac_s *priv = (FAR struct lpc43_ethmac_s *)arg;
-  net_lock_t state;
-
-  /* Perform the poll */
-
-  state = net_lock();
-  lpc43_poll_process(priv);
-  net_unlock(state);
-}
-#endif
 
 /****************************************************************************
  * Function: lpc43_poll_expiry
@@ -2336,7 +2218,6 @@ static void lpc43_poll_expiry(int argc, uint32_t arg, ...)
 {
   FAR struct lpc43_ethmac_s *priv = (FAR struct lpc43_ethmac_s *)arg;
 
-#ifdef CONFIG_NET_NOINTS
   /* Is our single work structure available?  It may not be if there are
    * pending interrupt actions.
    */
@@ -2356,12 +2237,6 @@ static void lpc43_poll_expiry(int argc, uint32_t arg, ...)
       (void)wd_start(priv->txpoll, LPC43_WDDELAY, lpc43_poll_expiry, 1,
                      (uint32_t)priv);
     }
-
-#else
-  /* Process the interrupt now */
-
-  lpc43_poll_process(priv);
-#endif
 }
 
 /****************************************************************************
@@ -2468,37 +2343,6 @@ static int lpc43_ifdown(struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: lpc43_txavail_process
- *
- * Description:
- *   Perform an out-of-cycle poll.
- *
- * Parameters:
- *   priv - Reference to the NuttX driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Called in normal user mode
- *
- ****************************************************************************/
-
-static inline void lpc43_txavail_process(FAR struct lpc43_ethmac_s *priv)
-{
-  ninfo("ifup: %d\n", priv->ifup);
-
-  /* Ignore the notification if the interface is not yet up */
-
-  if (priv->ifup)
-    {
-      /* Poll for new XMIT data */
-
-      lpc43_dopoll(priv);
-    }
-}
-
-/****************************************************************************
  * Function: lpc43_txavail_work
  *
  * Description:
@@ -2515,19 +2359,23 @@ static inline void lpc43_txavail_process(FAR struct lpc43_ethmac_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_NOINTS
 static void lpc43_txavail_work(FAR void *arg)
 {
   FAR struct lpc43_ethmac_s *priv = (FAR struct lpc43_ethmac_s *)arg;
-  net_lock_t state;
 
-  /* Perform the poll */
+  /* Ignore the notification if the interface is not yet up */
 
-  state = net_lock();
-  lpc43_txavail_process(priv);
-  net_unlock(state);
+  net_lock();
+  ninfo("ifup: %d\n", priv->ifup);
+  if (priv->ifup)
+    {
+      /* Poll for new XMIT data */
+
+      lpc43_dopoll(priv);
+    }
+
+  net_unlock();
 }
-#endif
 
 /****************************************************************************
  * Function: lpc43_txavail
@@ -2552,7 +2400,6 @@ static int lpc43_txavail(struct net_driver_s *dev)
 {
   FAR struct lpc43_ethmac_s *priv = (FAR struct lpc43_ethmac_s *)dev->d_private;
 
-#ifdef CONFIG_NET_NOINTS
   /* Is our single work structure available?  It may not be if there are
    * pending interrupt actions and we will have to ignore the Tx
    * availability action.
@@ -2564,21 +2411,6 @@ static int lpc43_txavail(struct net_driver_s *dev)
 
       work_queue(ETHWORK, &priv->work, lpc43_txavail_work, priv, 0);
     }
-
-#else
-  irqstate_t flags;
-
-  /* Disable interrupts because this function may be called from interrupt
-   * level processing.
-   */
-
-  flags = enter_critical_section();
-
-  /* Perform the out-of-cycle poll now */
-
-  lpc43_txavail_process(priv);
-  leave_critical_section(flags);
-#endif
 
   return OK;
 }

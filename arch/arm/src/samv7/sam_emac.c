@@ -69,11 +69,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/wdog.h>
 #include <nuttx/kmalloc.h>
-
-#ifdef CONFIG_NET_NOINTS
-#  include <nuttx/wqueue.h>
-#endif
-
+#include <nuttx/wqueue.h>
 #include <nuttx/net/mii.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
@@ -107,13 +103,12 @@
  * is required.
  */
 
-#if defined(CONFIG_NET_NOINTS) && !defined(CONFIG_SCHED_WORKQUEUE)
+#if !defined(CONFIG_SCHED_WORKQUEUE)
 #  error Work queue support is required
-#endif
+#else
 
-/* Select work queue */
+  /* Select work queue */
 
-#if defined(CONFIG_SCHED_WORKQUEUE)
 #  if defined(CONFIG_SAMV7_EMAC_HPWORK)
 #    define ETHWORK HPWORK
 #  elif defined(CONFIG_SAMV7_EMAC_LPWORK)
@@ -523,9 +518,7 @@ struct sam_emac_s
   uint8_t               ifup    : 1; /* true:ifup false:ifdown */
   WDOG_ID               txpoll;      /* TX poll timer */
   WDOG_ID               txtimeout;   /* TX timeout timer */
-#ifdef CONFIG_NET_NOINTS
   struct work_s         work;        /* For deferring work to the work queue */
-#endif
 
   /* This holds the information visible to the NuttX network */
 
@@ -588,11 +581,8 @@ static int  sam_recvframe(struct sam_emac_s *priv, int qid);
 static void sam_receive(struct sam_emac_s *priv, int qid);
 static void sam_txdone(struct sam_emac_s *priv, int qid);
 static void sam_txerr_interrupt(FAR struct sam_emac_s *priv, int qid);
-static inline void sam_interrupt_process(FAR struct sam_emac_s *priv,
-                                         int qid);
-#ifdef CONFIG_NET_NOINTS
+
 static void sam_interrupt_work(FAR void *arg);
-#endif
 static int  sam_emac_interrupt(struct sam_emac_s *priv);
 #ifdef CONFIG_SAMV7_EMAC0
 static int sam_emac0_interrupt(int irq, void *context);
@@ -603,16 +593,10 @@ static int sam_emac1_interrupt(int irq, void *context);
 
 /* Watchdog timer expirations */
 
-static inline void sam_txtimeout_process(FAR struct sam_emac_s *priv);
-#ifdef CONFIG_NET_NOINTS
 static void sam_txtimeout_work(FAR void *arg);
-#endif
 static void sam_txtimeout_expiry(int argc, uint32_t arg, ...);
 
-static inline void sam_poll_process(FAR struct sam_emac_s *priv);
-#ifdef CONFIG_NET_NOINTS
 static void sam_poll_work(FAR void *arg);
-#endif
 static void sam_poll_expiry(int argc, uint32_t arg, ...);
 
 /* NuttX callback functions */
@@ -620,10 +604,7 @@ static void sam_poll_expiry(int argc, uint32_t arg, ...);
 static int  sam_ifup(struct net_driver_s *dev);
 static int  sam_ifdown(struct net_driver_s *dev);
 
-static inline void sam_txavail_process(FAR struct sam_emac_s *priv);
-#ifdef CONFIG_NET_NOINTS
 static void sam_txavail_work(FAR void *arg);
-#endif
 static int  sam_txavail(struct net_driver_s *dev);
 
 #if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
@@ -2272,26 +2253,25 @@ static void sam_txerr_interrupt(FAR struct sam_emac_s *priv, int qid)
 }
 
 /****************************************************************************
- * Function: sam_interrupt_process
+ * Function: sam_interrupt_work
  *
  * Description:
- *   Interrupt processing.  This may be performed either within the interrupt
- *   handler or on the worker thread, depending upon the configuration
+ *   Perform interrupt related work from the worker thread
  *
  * Parameters:
- *   priv - Reference to the driver state structure
- *   quid - Index of the transfer queue that generated the interrupt
+ *   arg - The argument passed when work_queue() was called.
  *
  * Returned Value:
- *   None
+ *   OK on success
  *
  * Assumptions:
  *   Ethernet interrupts are disabled
  *
  ****************************************************************************/
 
-static inline void sam_interrupt_process(FAR struct sam_emac_s *priv, int qid)
+static void sam_interrupt_work(FAR void *arg)
 {
+  FAR struct sam_emac_s *priv = (FAR struct sam_emac_s *)arg;
   uint32_t isr;
   uint32_t rsr;
   uint32_t tsr;
@@ -2299,6 +2279,10 @@ static inline void sam_interrupt_process(FAR struct sam_emac_s *priv, int qid)
   uint32_t regval;
   uint32_t pending;
   uint32_t clrbits;
+
+  /* Process pending Ethernet interrupts */
+
+  net_lock();
 
   /* Read the interrupt status, RX status, and TX status registers.
    * NOTE that the interrupt status register is cleared by this read.
@@ -2458,42 +2442,13 @@ static inline void sam_interrupt_process(FAR struct sam_emac_s *priv, int qid)
       ninfo("Pause TO!\n");
     }
 #endif
-}
 
-/****************************************************************************
- * Function: sam_interrupt_work
- *
- * Description:
- *   Perform interrupt related work from the worker thread
- *
- * Parameters:
- *   arg - The argument passed when work_queue() was called.
- *
- * Returned Value:
- *   OK on success
- *
- * Assumptions:
- *   Ethernet interrupts are disabled
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_NOINTS
-static void sam_interrupt_work(FAR void *arg)
-{
-  FAR struct sam_emac_s *priv = (FAR struct sam_emac_s *)arg;
-  net_lock_t state;
-
-  /* Process pending Ethernet interrupts */
-
-  state = net_lock();
-  sam_interrupt_process(priv, EMAC_QUEUE_0);
-  net_unlock(state);
+  net_unlock();
 
   /* Re-enable Ethernet interrupts */
 
   up_enable_irq(priv->attr->irq);
 }
-#endif
 
 /****************************************************************************
  * Function: sam_emac_interrupt
@@ -2513,7 +2468,6 @@ static void sam_interrupt_work(FAR void *arg)
 
 static int sam_emac_interrupt(struct sam_emac_s *priv)
 {
-#ifdef CONFIG_NET_NOINTS
   uint32_t tsr;
 
   /* Disable further Ethernet interrupts.  Because Ethernet interrupts are
@@ -2557,13 +2511,6 @@ static int sam_emac_interrupt(struct sam_emac_s *priv)
   /* Schedule to perform the interrupt processing on the worker thread. */
 
   work_queue(ETHWORK, &priv->work, sam_interrupt_work, priv, 0);
-
-#else
-  /* Process the interrupt now */
-
-  sam_interrupt_process(priv, EMAC_QUEUE_0);
-#endif
-
   return OK;
 }
 
@@ -2599,41 +2546,6 @@ static int sam_emac1_interrupt(int irq, void *context)
 #endif
 
 /****************************************************************************
- * Function: sam_txtimeout_process
- *
- * Description:
- *   Process a TX timeout.  Called from the either the watchdog timer
- *   expiration logic or from the worker thread, depending upon the
- *   configuration.  The timeout means that the last TX never completed.
- *   Reset the hardware and start again.
- *
- * Parameters:
- *   priv - Reference to the driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Global interrupts are disabled by the watchdog logic.
- *
- ****************************************************************************/
-
-static inline void sam_txtimeout_process(FAR struct sam_emac_s *priv)
-{
-  nerr("ERROR: Timeout!\n");
-  NETDEV_TXTIMEOUTS(&priv->dev);
-
-  /* Reset the hardware.  Just take the interface down, then back up again. */
-
-  sam_ifdown(&priv->dev);
-  sam_ifup(&priv->dev);
-
-  /* Then poll the network for new XMIT data */
-
-  sam_dopoll(priv, EMAC_QUEUE_0);
-}
-
-/****************************************************************************
  * Function: sam_txtimeout_work
  *
  * Description:
@@ -2650,19 +2562,25 @@ static inline void sam_txtimeout_process(FAR struct sam_emac_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_NOINTS
 static void sam_txtimeout_work(FAR void *arg)
 {
   FAR struct sam_emac_s *priv = (FAR struct sam_emac_s *)arg;
-  net_lock_t state;
 
-  /* Process pending Ethernet interrupts */
+  nerr("ERROR: Timeout!\n");
 
-  state = net_lock();
-  sam_txtimeout_process(priv);
-  net_unlock(state);
+  net_lock();
+  NETDEV_TXTIMEOUTS(&priv->dev);
+
+  /* Reset the hardware.  Just take the interface down, then back up again. */
+
+  sam_ifdown(&priv->dev);
+  sam_ifup(&priv->dev);
+
+  /* Then poll the network for new XMIT data */
+
+  sam_dopoll(priv, EMAC_QUEUE_0);
+  net_unlock();
 }
-#endif
 
 /****************************************************************************
  * Function: sam_txtimeout_expiry
@@ -2687,7 +2605,6 @@ static void sam_txtimeout_expiry(int argc, uint32_t arg, ...)
 {
   FAR struct sam_emac_s *priv = (FAR struct sam_emac_s *)arg;
 
-#ifdef CONFIG_NET_NOINTS
   /* Disable further Ethernet interrupts.  This will prevent some race
    * conditions with interrupt work.  There is still a potential race
    * condition with interrupt work that is already queued and in progress.
@@ -2704,48 +2621,6 @@ static void sam_txtimeout_expiry(int argc, uint32_t arg, ...)
   /* Schedule to perform the TX timeout processing on the worker thread. */
 
   work_queue(ETHWORK, &priv->work, sam_txtimeout_work, priv, 0);
-#else
-  /* Process the timeout now */
-
-  sam_txtimeout_process(priv);
-#endif
-}
-
-/****************************************************************************
- * Function: sam_poll_process
- *
- * Description:
- *   Perform the periodic poll.  This may be called either from watchdog
- *   timer logic or from the worker thread, depending upon the configuration.
- *
- * Parameters:
- *   priv - Reference to the driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-static inline void sam_poll_process(FAR struct sam_emac_s *priv)
-{
-  struct net_driver_s *dev  = &priv->dev;
-
-  /* Check if the there are any free TX descriptors.  We cannot perform the
-   * TX poll if we do not have buffering for another packet.
-   */
-
-  if (sam_txfree(priv, EMAC_QUEUE_0) > 0)
-    {
-      /* Update TCP timing states and poll the network for new XMIT data. */
-
-      (void)devif_timer(dev, sam_txpoll);
-    }
-
-  /* Setup the watchdog poll timer again */
-
-  (void)wd_start(priv->txpoll, SAM_WDDELAY, sam_poll_expiry, 1, priv);
 }
 
 /****************************************************************************
@@ -2765,19 +2640,28 @@ static inline void sam_poll_process(FAR struct sam_emac_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_NOINTS
 static void sam_poll_work(FAR void *arg)
 {
   FAR struct sam_emac_s *priv = (FAR struct sam_emac_s *)arg;
-  net_lock_t state;
+  struct net_driver_s *dev  = &priv->dev;
 
-  /* Perform the poll */
+  /* Check if the there are any free TX descriptors.  We cannot perform the
+   * TX poll if we do not have buffering for another packet.
+   */
 
-  state = net_lock();
-  sam_poll_process(priv);
-  net_unlock(state);
+  net_lock();
+  if (sam_txfree(priv, EMAC_QUEUE_0) > 0)
+    {
+      /* Update TCP timing states and poll the network for new XMIT data. */
+
+      (void)devif_timer(dev, sam_txpoll);
+    }
+
+  /* Setup the watchdog poll timer again */
+
+  (void)wd_start(priv->txpoll, SAM_WDDELAY, sam_poll_expiry, 1, priv);
+  net_unlock();
 }
-#endif
 
 /****************************************************************************
  * Function: sam_poll_expiry
@@ -2801,7 +2685,6 @@ static void sam_poll_expiry(int argc, uint32_t arg, ...)
 {
   FAR struct sam_emac_s *priv = (FAR struct sam_emac_s *)arg;
 
-#ifdef CONFIG_NET_NOINTS
   /* Is our single work structure available?  It may not be if there are
    * pending interrupt actions.
    */
@@ -2820,12 +2703,6 @@ static void sam_poll_expiry(int argc, uint32_t arg, ...)
 
       (void)wd_start(priv->txpoll, SAM_WDDELAY, sam_poll_expiry, 1, arg);
     }
-
-#else
-  /* Process the interrupt now */
-
-  sam_poll_process(priv);
-#endif
 }
 
 /****************************************************************************
@@ -2964,37 +2841,6 @@ static int sam_ifdown(struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: sam_txavail_process
- *
- * Description:
- *   Perform an out-of-cycle poll.
- *
- * Parameters:
- *   dev - Reference to the NuttX driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Called in normal user mode
- *
- ****************************************************************************/
-
-static inline void sam_txavail_process(FAR struct sam_emac_s *priv)
-{
-  ninfo("ifup: %d\n", priv->ifup);
-
-  /* Ignore the notification if the interface is not yet up */
-
-  if (priv->ifup)
-    {
-      /* Poll the network for new XMIT data */
-
-      sam_dopoll(priv, EMAC_QUEUE_0);
-    }
-}
-
-/****************************************************************************
  * Function: sam_txavail_work
  *
  * Description:
@@ -3011,19 +2857,24 @@ static inline void sam_txavail_process(FAR struct sam_emac_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_NOINTS
 static void sam_txavail_work(FAR void *arg)
 {
   FAR struct sam_emac_s *priv = (FAR struct sam_emac_s *)arg;
-  net_lock_t state;
 
-  /* Perform the poll */
+  ninfo("ifup: %d\n", priv->ifup);
 
-  state = net_lock();
-  sam_txavail_process(priv);
-  net_unlock(state);
+  /* Ignore the notification if the interface is not yet up */
+
+  net_lock();
+  if (priv->ifup)
+    {
+      /* Poll the network for new XMIT data */
+
+      sam_dopoll(priv, EMAC_QUEUE_0);
+    }
+
+  net_unlock();
 }
-#endif
 
 /****************************************************************************
  * Function: sam_txavail
@@ -3048,7 +2899,6 @@ static int sam_txavail(struct net_driver_s *dev)
 {
   FAR struct sam_emac_s *priv = (FAR struct sam_emac_s *)dev->d_private;
 
-#ifdef CONFIG_NET_NOINTS
   /* Is our single work structure available?  It may not be if there are
    * pending interrupt actions and we will have to ignore the Tx
    * availability action.
@@ -3060,21 +2910,6 @@ static int sam_txavail(struct net_driver_s *dev)
 
       work_queue(ETHWORK, &priv->work, sam_txavail_work, priv, 0);
     }
-
-#else
-  irqstate_t flags;
-
-  /* Disable interrupts because this function may be called from interrupt
-   * level processing.
-   */
-
-  flags = enter_critical_section();
-
-  /* Perform the out-of-cycle poll now */
-
-  sam_txavail_process(priv);
-  leave_critical_section(flags);
-#endif
 
   return OK;
 }
