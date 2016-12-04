@@ -240,6 +240,7 @@ config ARCH_CHIP_SAM3A
 config ARCH_CHIP_SAM4CM
 	bool
 	default n
+	select ARCH_HAVE_MULTICPU
 	select ARCH_HAVE_TICKLESS
 
 config ARCH_CHIP_SAM4L
