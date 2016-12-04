@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_pwm.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -1163,18 +1163,19 @@ static unsigned int pwm_clk_prescaler_log2(uint32_t mck, uint32_t fclk)
   unscaled = mck / fclk;
   prelog2  = 0;
 
-  while (unscaled >= 256 && prelog2 < 11)
+  /* Loop, incrementing the log2(prescaler) value.  Exit with either:
+   *
+   *   1) unscaled < 256 and prelog2 <= 10, or with
+   *   2) unscaled >= 256 and prelog2 == 10
+   */
+
+  while (unscaled >= 256 && prelog2 < 10)
     {
       unscaled >>= 1;
       prelog2++;
     }
 
-  DEBUGASSERT(prelog2 <= 10);
-  if (prelog2 > 10)
-    {
-      prelog2 = 10;
-    }
-
+  DEBUGASSERT(unscaled < 256);
   return prelog2;
 }
 
