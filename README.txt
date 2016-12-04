@@ -1437,6 +1437,8 @@ nuttx/
  |   |   `- README.txt
  |   |- sam3u-ek/
  |   |   `- README.txt
+ |   |- sam4cmp-db
+ |   |   `- README.txt
  |   |- sam4e-ek/
  |   |   `- README.txt
  |   |- sam4l-xplained/
