@@ -53,6 +53,7 @@
 
 #include "up_arch.h"
 #include "sched/sched.h"
+#include "irq/irq.h"
 #include "up_internal.h"
 
 /****************************************************************************
@@ -319,6 +320,12 @@ static void up_dumpstate(void)
 
 #endif
 
+#ifdef CONFIG_SMP
+  /* Show the CPU number */
+
+  _alert("CPU%d:\n", up_cpu_index());
+#endif
+
   /* Then dump the registers (if available) */
 
   up_registerdump();
@@ -351,6 +358,12 @@ static void _up_assert(int errorcode)
       (void)up_irq_save();
       for (; ; )
         {
+#ifdef CONFIG_SMP
+          /* Try (again) to stop activity on other CPUs */
+
+          (void)spin_trylock(&g_cpu_irqlock);
+#endif
+
 #ifdef CONFIG_ARCH_LEDS
           board_autoled_on(LED_PANIC);
           up_mdelay(250);
