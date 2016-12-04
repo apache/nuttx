@@ -600,6 +600,9 @@ configs/samd21-xplained
 configs/sam3u-ek
   The port of NuttX to the Atmel SAM3U-EK development board.
 
+configs/sam4cmp-db
+  The port of NuttX to the Atmel SAM4CMP-DB development board.
+
 configs/sam4e-ek
   The port of NuttX to the Atmel SAM4E-EK development board.  This board
   features the SAM4E16 MCU running at up to 120MHz.

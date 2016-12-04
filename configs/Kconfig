@@ -852,6 +852,12 @@ config ARCH_BOARD_SAM3UEK
 	---help---
 		The port of NuttX to the Atmel SAM3U-EK development board.
 
+config ARCH_BOARD_SAM4CMP_DB
+	bool "Atmel SAM4CMP-DB development board"
+	depends on ARCH_CHIP_ATSAM4CMP16B
+	---help---
+		The port of NuttX to the Atmel SAM4CMP-DB development board.
+
 config ARCH_BOARD_SAM4EEK
 	bool "Atmel SAM4E-EK development board"
 	depends on ARCH_CHIP_ATSAM4E16E
@@ -1456,6 +1462,7 @@ config ARCH_BOARD
 	default "samd21-xplained"          if ARCH_BOARD_SAMD21_XPLAINED
 	default "saml21-xplained"          if ARCH_BOARD_SAML21_XPLAINED
 	default "sam3u-ek"                 if ARCH_BOARD_SAM3UEK
+	default "sam4cmp-db"               if ARCH_BOARD_SAM4CMP_DB
 	default "sam4e-ek"                 if ARCH_BOARD_SAM4EEK
 	default "sam4l-xplained"           if ARCH_BOARD_SAM4L_XPLAINED
 	default "sam4s-xplained"           if ARCH_BOARD_SAM4S_XPLAINED
@@ -1784,6 +1791,9 @@ source "configs/saml21-xplained/Kconfig"
 endif
 if ARCH_BOARD_SAM3UEK
 source "configs/sam3u-ek/Kconfig"
+endif
+if ARCH_BOARD_SAM4CMP_DB
+source "configs/sam4cmp-db/Kconfig"
 endif
 if ARCH_BOARD_SAM4EEK
 source "configs/sam4e-ek/Kconfig"
