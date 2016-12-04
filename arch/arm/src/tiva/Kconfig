@@ -913,19 +913,19 @@ config TIVA_BADCRC
 
 choice
 	prompt "Work queue"
-	default TIVA_ETHERNET_LPWORK if SCHED_LPWORK
-	default TIVA_ETHERNET_HPWORK if !SCHED_LPWORK && SCHED_HPWORK
+	default LM3S_ETHERNET_LPWORK if SCHED_LPWORK
+	default LM3S_ETHERNET_HPWORK if !SCHED_LPWORK && SCHED_HPWORK
 	depends on SCHED_WORKQUEUE
 	---help---
 		Work queue support is required to use the Ethernet driver.  If the
 		low priority work queue is available, then it should be used by the
 		driver.
 
-config TIVA_ETHERNET_HPWORK
+config LM3S_ETHERNET_HPWORK
 	bool "High priority"
 	depends on SCHED_HPWORK
 
-config TIVA_ETHERNET_LPWORK
+config LM3S_ETHERNET_LPWORK
 	bool "Low priority"
 	depends on SCHED_LPWORK
 
@@ -1139,6 +1139,7 @@ config TIVA_ETHERNET_LPWORK
 	depends on SCHED_LPWORK
 
 endchoice # Work queue
+
 config TIVA_ETHERNET_REGDEBUG
 	bool "Register-Level Debug"
 	default n

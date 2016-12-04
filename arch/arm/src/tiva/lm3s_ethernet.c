@@ -83,12 +83,12 @@
 
   /* Use the low priority work queue if possible */
 
-#  if defined(CONFIG_TIVA_ETHERNET_HPWORK)
+#  if defined(CONFIG_LM3S_ETHERNET_HPWORK)
 #    define ETHWORK HPWORK
-#  elif defined(CONFIG_TIVA_ETHERNET_LPWORK)
+#  elif defined(CONFIG_LM3S_ETHERNET_LPWORK)
 #    define ETHWORK LPWORK
 #  else
-#    error Neither CONFIG_TIVA_ETHERNET_HPWORK nor CONFIG_TIVA_ETHERNET_LPWORK defined
+#    error Neither CONFIG_LM3S_ETHERNET_HPWORK nor CONFIG_LM3S_ETHERNET_LPWORK defined
 #  endif
 #endif
 
