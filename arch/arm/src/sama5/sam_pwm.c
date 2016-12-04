@@ -1161,9 +1161,9 @@ static unsigned int pwm_clk_prescaler_log2(uint32_t mck, uint32_t fclk)
   unsigned int prelog2;
 
   unscaled = mck / fclk;
-  prelog2     = 0;
+  prelog2  = 0;
 
-  while (unscaled >= 256)
+  while (unscaled >= 256 && prelog2 < 11)
     {
       unscaled >>= 1;
       prelog2++;
