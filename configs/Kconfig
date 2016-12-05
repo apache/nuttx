@@ -2037,14 +2037,6 @@ config BOARDCTL_ADCTEST
 		Architecture specific logic must provide board_adc_setup()
 		interface.
 
-config BOARDCTL_PWMTEST
-	bool "Enable PWM test interfaces"
-	default n
-	---help---
-		Enables support for the BOARDIOC_PWMTEST_SETUP boardctl() command.
-		Architecture specific logic must provide board_pwm_setup()
-		interface.
-
 config BOARDCTL_CANINIT
 	bool "Enable CAN initialize interface"
 	default n

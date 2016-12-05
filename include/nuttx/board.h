@@ -333,23 +333,6 @@ void board_tsc_teardown(void);
 int board_adc_setup(void);
 
 /****************************************************************************
- * Name: board_pwm_setup
- *
- * Description:
- *   All architectures must provide the following interface in order to
- *   work with examples/pwm.
- *
- *   This is an internal OS interface but may be invoked indirectly from
- *   application-level graphics logic.  If CONFIG_LIB_BOARDCTL=y and
- *   CONFIG_BOARDCTL_PWMTEST=y, then this functions will be invoked via the
- *   (non-standard) boardctl() interface using the commands
- *   BOARDIOC_PWMTEST_SETUP command.
- *
- ****************************************************************************/
-
-int board_pwm_setup(void);
-
-/****************************************************************************
  * Name: board_graphics_setup
  *
  * Description:

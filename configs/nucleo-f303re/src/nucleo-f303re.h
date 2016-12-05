@@ -167,4 +167,16 @@ int stm32_timer_driver_setup(FAR const char *devpath, int timer);
 int stm32_dac_setup(void);
 #endif
 
+/************************************************************************************
+ * Name: stm32_pwm_setup
+ *
+ * Description:
+ *   Initialize PWM and register the PWM device.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_PWM
+int stm32_pwm_setup(void);
+#endif
+
 #endif /* __CONFIGS_NUCLEO_F303RE_SRC_NUCLEO_F303RE_H */

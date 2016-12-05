@@ -441,21 +441,6 @@ int boardctl(unsigned int cmd, uintptr_t arg)
         break;
 #endif
 
-#ifdef CONFIG_BOARDCTL_PWMTEST
-      /* CMD:           BOARDIOC_PWMTEST_SETUP
-       * DESCRIPTION:   PWM controller test configuration
-       * ARG:           None
-       * CONFIGURATION: CONFIG_LIB_BOARDCTL && CONFIG_BOARDCTL_PWMTEST
-       * DEPENDENCIES:  Board logic must provide board_pwm_setup()
-       */
-
-      case BOARDIOC_PWMTEST_SETUP:
-        {
-          ret = board_pwm_setup();
-        }
-        break;
-#endif
-
 #ifdef CONFIG_BOARDCTL_CANINIT
       /* CMD:           BOARDIOC_CAN_INITIALIZE
        * DESCRIPTION:   CAN device initialization

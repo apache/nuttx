@@ -88,23 +88,18 @@
 #ifdef HAVE_PWM
 
 /************************************************************************************
- * Private Functions
- ************************************************************************************/
-
-/************************************************************************************
  * Public Functions
  ************************************************************************************/
 
 /************************************************************************************
- * Name: board_pwm_setup
+ * Name: stm32_pwm_setup
  *
  * Description:
- *   All STM32 architectures must provide the following interface to work with
- *   examples/pwm.
+ *   Initialize PWM and register the PWM device.
  *
  ************************************************************************************/
 
-int board_pwm_setup(void)
+int stm32_pwm_setup(void)
 {
   static bool initialized = false;
   struct pwm_lowerhalf_s *pwm;

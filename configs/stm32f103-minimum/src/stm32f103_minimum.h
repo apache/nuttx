@@ -169,6 +169,18 @@ int stm32_rgbled_setup(void);
 void stm32_usbinitialize(void);
 
 /************************************************************************************
+ * Name: stm32_pwm_setup
+ *
+ * Description:
+ *   Initialize PWM and register the PWM device.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_PWM
+int stm32_pwm_setup(void);
+#endif
+
+/************************************************************************************
  * Name: stm32_mfrc522initialize
  *
  * Description:
