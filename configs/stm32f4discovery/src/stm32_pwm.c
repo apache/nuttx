@@ -83,8 +83,6 @@
 #  undef HAVE_PWM
 #endif
 
-#ifdef HAVE_PWM
-
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
@@ -99,6 +97,7 @@
 
 int stm32_pwm_setup(void)
 {
+#ifdef HAVE_PWM
   static bool initialized = false;
   struct pwm_lowerhalf_s *pwm;
   int ret;
@@ -131,6 +130,7 @@ int stm32_pwm_setup(void)
     }
 
   return OK;
+#else
+  return -ENOSYS;
+#endif
 }
-
-#endif /* HAVE_PWM */
