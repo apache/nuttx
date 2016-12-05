@@ -832,6 +832,18 @@ int sam_usbhost_initialize(void);
 void weak_function sam_netinitialize(void);
 #endif
 
+/************************************************************************************
+ * Name: sam_pwm_setup
+ *
+ * Description:
+ *   Initialize PWM and register the PWM device.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_PWM
+int sam_pwm_setup(void);
+#endif
+
 /****************************************************************************
  * Name: sam_wm8904_initialize
  *

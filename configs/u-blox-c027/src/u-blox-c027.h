@@ -90,14 +90,29 @@
 
 void weak_function c027_sspdev_initialize(void);
 
+/************************************************************************************
+ * Name: lpc17_ubxmdm_init
+ *
+ * Description:
+ *   Initialisation function for the u-blox modem.
+ *
+ ************************************************************************************/
+
 #if defined(CONFIG_MODEM_U_BLOX)
-
-/*
- * Initialisation function for the u-blox modem.
- */
 void lpc17_ubxmdm_init(bool usb_used);
-
 #endif /* CONFIG_MODEM_U_BLOX */
+
+/************************************************************************************
+ * Name: lpc17_pwm_setup
+ *
+ * Description:
+ *   Initialize PWM and register the PWM device.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_PWM
+int lpc17_pwm_setup(void);
+#endif
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_U_BLOX_C027_SRC_U_BLOX_C027_H */

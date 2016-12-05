@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/nucleo-l476rg/src/stm32_pwm.c
  *
- *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  *   Copyright (C) 2016 Sebastien Lorquet. All rights reserved.
@@ -69,23 +69,18 @@
 #ifdef CONFIG_PWM
 
 /************************************************************************************
- * Private Functions
- ************************************************************************************/
-
-/************************************************************************************
  * Public Functions
  ************************************************************************************/
 
 /************************************************************************************
- * Name: board_pwm_setup
+ * Name: stm32_pwm_setup
  *
  * Description:
- *   All STM32L4 architectures must provide the following interface to work with
- *   examples/pwm.
+ *   Initialize PWM and register the PWM device.
  *
  ************************************************************************************/
 
-int board_pwm_setup(void)
+int stm32_pwm_setup(void)
 {
   static bool initialized = false;
   struct pwm_lowerhalf_s *pwm;

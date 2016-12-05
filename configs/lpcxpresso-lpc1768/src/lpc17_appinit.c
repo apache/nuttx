@@ -139,9 +139,10 @@
 
 int board_app_initialize(uintptr_t arg)
 {
+  int ret;
+
 #ifdef NSH_HAVEMMCSD
   FAR struct spi_dev_s *ssp;
-  int ret;
 
   /* Get the SSP port */
 
@@ -169,5 +170,17 @@ int board_app_initialize(uintptr_t arg)
   syslog(LOG_INFO, "Successfuly bound SSP port %d to MMC/SD slot %d\n",
          CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO);
 #endif
+
+#ifdef CONFIG_PWM
+  /* Initialize PWM and register the PWM device. */
+
+  ret = lpcexpresso_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: lpcexpresso_pwm_setup() failed: %d\n", ret);
+    }
+#endif
+
+  UNUSED(ret);
   return OK;
 }

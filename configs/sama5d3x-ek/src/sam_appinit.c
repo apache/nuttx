@@ -89,11 +89,7 @@
 
 int board_app_initialize(uintptr_t arg)
 {
-#if defined(HAVE_NAND)   || defined(HAVE_AT25)    || defined(HAVE_AT24)       || \
-    defined(HAVE_HSMCI)  || defined(HAVE_USBHOST) || defined(HAVE_USBMONITOR) ||\
-    defined(HAVE_WM8904) || defined(CONFIG_FS_PROCFS)
   int ret;
-#endif
 
 #ifdef HAVE_NAND
   /* Initialize the NAND driver */
@@ -188,6 +184,16 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
+#ifdef CONFIG_PWM
+  /* Initialize PWM and register the PWM device. */
+
+  ret = sam_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: sam_pwm_setup() failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
 
@@ -199,5 +205,6 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
+  UNUSED(ret);
   return OK;
 }

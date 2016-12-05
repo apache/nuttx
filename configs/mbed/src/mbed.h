@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/mbed/src/mbed.h
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -87,6 +87,18 @@
  ************************************************************************************/
 
 void weak_function mbed_sspdev_initialize(void);
+
+/************************************************************************************
+ * Name: mbed_pwm_setup
+ *
+ * Description:
+ *   Initialize PWM and register the PWM device.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_PWM
+int mbed_pwm_setup(void);
+#endif
 
 #endif /* __ASSEMBLY__ */
 #endif /* _CONFIGS_MBED_SRC_MBED_H */

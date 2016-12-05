@@ -725,17 +725,30 @@ bool sam_writeprotected(int slotno);
 void weak_function sam_usbinitialize(void);
 #endif
 
-/****************************************************************************************************
+/************************************************************************************
  * Name: stm32_usbhost_initialize
  *
  * Description:
- *   Called at application startup time to initialize the USB host functionality. This function will
- *   start a thread that will monitor for device connection/disconnection events.
+ *   Called at application startup time to initialize the USB host functionality.
+ *   This function will start a thread that will monitor for device connection/
+ *   disconnection events.
  *
- ****************************************************************************************************/
+ ************************************************************************************/
 
 #ifdef HAVE_USBHOST
 int sam_usbhost_initialize(void);
+#endif
+
+/************************************************************************************
+ * Name: sam_pwm_setup
+ *
+ * Description:
+ *   Initialize PWM and register the PWM device.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_PWM
+int sam_pwm_setup(void);
 #endif
 
 /************************************************************************************

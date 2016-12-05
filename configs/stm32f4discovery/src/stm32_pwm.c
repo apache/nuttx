@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/stm32f4discovery/src/stm32_pwm.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,9 +56,9 @@
 /* Configuration *******************************************************************/
 /* PWM
  *
- * The stm32f4discovery has no real on-board PWM devices, but the board can be configured to output
- * a pulse train using TIM4 CH2.  This pin is used by FSMC is connect to CN5 just for this
- * purpose:
+ * The stm32f4discovery has no real on-board PWM devices, but the board can be
+ * configured to output a pulse train using TIM4 CH2.  This pin is used by FSMC is
+ * connected to CN5 just for this purpose:
  *
  * PD13 FSMC_A18 / MC_TIM4_CH2OUT pin 33 (EnB)
  *
@@ -86,23 +86,18 @@
 #ifdef HAVE_PWM
 
 /************************************************************************************
- * Private Functions
- ************************************************************************************/
-
-/************************************************************************************
  * Public Functions
  ************************************************************************************/
 
 /************************************************************************************
- * Name: board_pwm_setup
+ * Name: stm32_pwm_setup
  *
  * Description:
- *   All STM32 architectures must provide the following interface to work with
- *   examples/pwm.
+ *   Initialize PWM and register the PWM device.
  *
  ************************************************************************************/
 
-int board_pwm_setup(void)
+int stm32_pwm_setup(void)
 {
   static bool initialized = false;
   struct pwm_lowerhalf_s *pwm;

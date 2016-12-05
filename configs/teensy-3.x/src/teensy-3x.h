@@ -115,6 +115,18 @@ void kinetis_i2cdev_initialize(void);
 
 extern void weak_function kinetis_usbinitialize(void);
 
+/************************************************************************************
+ * Name: kinetis_pwm_setup
+ *
+ * Description:
+ *   Initialize PWM and register the PWM device.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_PWM
+int kinetis_pwm_setup(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_TEENSY_3X_SRC_TEENSY_3X_H */
 

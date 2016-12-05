@@ -1,7 +1,7 @@
 /****************************************************************************************************
  * configs/stm3220g_eval/src/stm3220g.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -247,6 +247,18 @@ void weak_function stm32_usbinitialize(void);
 
 #if defined(CONFIG_STM32_OTGFS) && defined(CONFIG_USBHOST)
 int stm32_usbhost_initialize(void);
+#endif
+
+/************************************************************************************
+ * Name: stm32_pwm_setup
+ *
+ * Description:
+ *   Initialize PWM and register the PWM device.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_PWM
+int stm32_pwm_setup(void);
 #endif
 
 /****************************************************************************************************

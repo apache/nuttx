@@ -47,6 +47,8 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/mmcsd.h>
 
+#include "mbed.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -97,5 +99,18 @@
 
 int board_app_initialize(uintptr_t arg)
 {
+  int ret;
+
+#ifdef CONFIG_PWM
+  /* Initialize PWM and register the PWM device. */
+
+  ret = mbed_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: mbed_pwm_setup() failed: %d\n", ret);
+    }
+#endif
+
+  UNUSED(ret);
   return OK;
 }

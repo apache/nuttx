@@ -1,7 +1,7 @@
 /****************************************************************************************************
  * configs/stm3240g_eval/src/stm3240g_eval.h
  *
- *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -260,6 +260,18 @@ int stm32_usbhost_initialize(void);
 
 #ifdef CONFIG_ARCH_LEDS
 void stm32_led_initialize(void);
+#endif
+
+/************************************************************************************
+ * Name: stm32_pwm_setup
+ *
+ * Description:
+ *   Initialize PWM and register the PWM device.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_PWM
+int stm32_pwm_setup(void);
 #endif
 
 /****************************************************************************************************

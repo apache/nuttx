@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/sama5d4-ek/src/sam_bringup.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -146,12 +146,7 @@ static void sam_i2ctool(void)
 
 int sam_bringup(void)
 {
-#if defined(HAVE_NAND) || defined(HAVE_AT25) || defined(HAVE_HSMCI)  || \
-    defined(HAVE_USBHOST) || defined(HAVE_USBMONITOR) || defined(HAVE_WM8904) || \
-    defined(HAVE_AUTOMOUNTER) || defined(HAVE_ELF) || defined(HAVE_ROMFS) || \
-    defined(CONFIG_FS_PROCFS)
   int ret;
-#endif
 
   /* Register I2C drivers on behalf of the I2C tool */
 
@@ -293,6 +288,16 @@ int sam_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_PWM
+  /* Initialize PWM and register the PWM device. */
+
+  ret = sam_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: sam_pwm_setup() failed: %d\n", ret);
+    }
+#endif
+
 #ifdef HAVE_WM8904
   /* Configure WM8904 audio */
 
@@ -340,5 +345,6 @@ int sam_bringup(void)
    * capabilities.
    */
 
+  UNUSED(ret);
   return OK;
 }
