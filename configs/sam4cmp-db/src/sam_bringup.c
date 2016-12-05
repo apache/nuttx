@@ -1,8 +1,8 @@
-/************************************************************************************
- * configs/sam4cmp-db/src/sam4cmp-db.h
+/****************************************************************************
+ * config/sam4cmp-db/src/sam_bringup.c
  *
- *   Copyright (C) 2016 Masayuki Ishikawa. All rights reserved.
- *   Author: Masayuki Ishikawa <masayuki.ishikawa@gmail.com>
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -31,50 +31,51 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __CONFIGS_SAM4CMP_DB_SRC_SAM4CMP_DB_H
-#define __CONFIGS_SAM4CMP_DB_SRC_SAM4CMP_DB_H
-
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
 
-#include <stdint.h>
+#include <sys/types.h>
+#include <sys/mount.h>
 
-#include <arch/irq.h>
-#include <nuttx/irq.h>
+#include <stdbool.h>
+#include <syslog.h>
 
-#include "chip/sam_pinmap.h"
-
-/************************************************************************************
- * Public Types
- ************************************************************************************/
-
-/************************************************************************************
- * Public data
- ************************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_bringup
  *
  * Description:
  *   Bring up board features
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#if defined(CONFIG_LIB_BOARDCTL) || defined(CONFIG_BOARD_INITIALIZE)
-int sam_bringup(void);
+int sam_bringup(void)
+{
+  int ret;
+
+#ifdef CONFIG_FS_PROCFS
+  /* Mount the procfs file system */
+
+  ret = mount(NULL, "/proc", "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
+    }
 #endif
 
-#endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_SAM4CMP_DB_SRC_SAM4CMP_DB_H */
+  /* If we got here then perhaps not all initialization was successful, but
+   * at least enough succeeded to bring-up NSH with perhaps reduced
+   * capabilities.
+   */
+
+  UNUSED(ret);
+  return OK;
+}
