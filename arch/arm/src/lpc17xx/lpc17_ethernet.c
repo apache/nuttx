@@ -844,7 +844,7 @@ static void lpc17_rxdone_work(FAR void *arg)
       pktlen   = (*rxstat & RXSTAT_INFO_RXSIZE_MASK) - 3;
 
       /* Check for errors.  NOTE:  The DMA engine reports bogus length errors,
-       * making this a pretty useless check.
+       * making this a pretty useless (as well as annoying) check.
        */
 
       if ((*rxstat & RXSTAT_INFO_ERROR) != 0)
@@ -1190,7 +1190,7 @@ static int lpc17_interrupt(int irq, void *context)
            * or Overrun.  NOTE:  (1) We will still need to call lpc17_rxdone_process
            * on RX errors to bump the considx over the bad packet.  (2) The
            * DMA engine reports bogus length errors, making this a pretty
-           * useless check anyway.
+           * useless (as well as annoying) check anyway.
            */
 
           if ((status & ETH_INT_RXERR) != 0)

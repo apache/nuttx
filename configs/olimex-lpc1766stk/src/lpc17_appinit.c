@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/mount.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <syslog.h>
@@ -348,12 +349,28 @@ int board_app_initialize(uintptr_t arg)
   /* Initialize SPI-based microSD */
 
   ret = nsh_sdinitialize();
-  if (ret == OK)
+  if (ret < 0)
     {
-      /* Initialize USB host */
-
-      ret = nsh_usbhostinitialize();
+      syslog(LOG_ERR, "ERROR: Failed to initialize SPI-based SD card: %d\n", ret);
     }
+
+  /* Initialize USB host */
+
+  ret = nsh_usbhostinitialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize USB host: %d\n", ret);
+    }
+
+#ifdef CONFIG_FS_PROCFS
+  /* Mount the procfs file system */
+
+  ret = mount(NULL, "/proc", "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
+    }
+#endif
 
   return ret;
 }

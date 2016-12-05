@@ -346,6 +346,10 @@ try_again:
                    * and try again.  Briefly re-enabling interrupts should
                    * be sufficient to permit processing the pending pause
                    * request.
+                   *
+                   * NOTE: This should never happen on architectures like
+                   * the Cortex-A; the inter-CPU interrupt (SGI) is not
+                   * maskable.
                    */
 
                   up_irq_restore(ret);
