@@ -114,5 +114,17 @@ void lpc17_ubxmdm_init(bool usb_used);
 int lpc17_pwm_setup(void);
 #endif
 
+/************************************************************************************
+ * Name: lpc17_adc_setup
+ *
+ * Description:
+ *   Initialize ADC and register the ADC driver.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_ADC
+int lpc17_adc_setup(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_U_BLOX_C027_SRC_U_BLOX_C027_H */

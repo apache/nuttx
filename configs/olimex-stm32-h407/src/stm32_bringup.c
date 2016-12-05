@@ -94,10 +94,7 @@ int stm32_bringup(void)
 #ifdef HAVE_RTC_DRIVER
   FAR struct rtc_lowerhalf_s *lower;
 #endif
-#if defined(CONFIG_CAN) || defined(CONFIG_ADC) || defined(HAVE_SDIO) || \
-    defined(HAVE_RTC_DRIVER)
   int ret;
-#endif
 
 #ifdef CONFIG_CAN
   /* Configure on-board CAN if CAN support has been selected. */
@@ -112,14 +109,12 @@ int stm32_bringup(void)
 #endif
 
 #ifdef CONFIG_ADC
-  /* Configure on-board ADCs if ADC support has been selected. */
+  /* Initialize ADC and register the ADC driver. */
 
-  ret = stm32_adc_initialize();
-  if (ret != OK)
+  ret = stm32_adc_setup();
+  if (ret < 0)
     {
-      syslog(LOG_ERR,
-             "ERROR: Failed to initialize ADC: %d\n",
-             ret);
+      syslog(LOG_ERR, "ERROR: stm32_adc_setup failed: %d\n", ret);
     }
 #endif
 
@@ -186,5 +181,6 @@ int stm32_bringup(void)
     }
 #endif
 
+  UNUSED(ret);
   return OK;
 }

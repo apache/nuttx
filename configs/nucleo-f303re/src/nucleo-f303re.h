@@ -179,4 +179,16 @@ int stm32_dac_setup(void);
 int stm32_pwm_setup(void);
 #endif
 
+/************************************************************************************
+ * Name: stm32_adc_setup
+ *
+ * Description:
+ *   Initialize ADC and register the ADC driver.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_ADC
+int stm32_adc_setup(void);
+#endif
+
 #endif /* __CONFIGS_NUCLEO_F303RE_SRC_NUCLEO_F303RE_H */

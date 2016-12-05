@@ -127,9 +127,7 @@
 
 int board_app_initialize(uintptr_t arg)
 {
-#if defined(HAVE_USBHOST) || defined(HAVE_W25)
   int ret;
-#endif
 
   /* Initialize and register the W25 FLASH file system. */
 
@@ -156,5 +154,17 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
+#ifdef CONFIG_ADC
+  /* Initialize ADC and register the ADC driver. */
+
+  ret = stm32_adc_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_adc_setup failed: %d\n", ret);
+      return ret;
+    }
+#endif
+
+  UNUSED(ret);
   return OK;
 }

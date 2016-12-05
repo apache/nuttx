@@ -120,9 +120,9 @@ int board_app_initialize(uintptr_t arg)
 
   (void)ret;
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION
   /* Configure CPU load estimation */
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION
   cpuload_initialize_once();
 #endif
 
@@ -203,6 +203,16 @@ int board_app_initialize(uintptr_t arg)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: stm32_pwm_setup() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ADC
+  /* Initialize ADC and register the ADC driver. */
+
+  ret = stm32_adc_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_adc_setup failed: %d\n", ret);
     }
 #endif
 
@@ -311,6 +321,8 @@ int board_app_initialize(uintptr_t arg)
 #endif
 
 #endif
+
+  UNUSED(ret);
   return OK;
 }
 

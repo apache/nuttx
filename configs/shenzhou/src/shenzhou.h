@@ -448,6 +448,18 @@ void weak_function stm32_usbinitialize(void);
 int stm32_usbhost_initialize(void);
 #endif
 
+/************************************************************************************
+ * Name: stm32_adc_setup
+ *
+ * Description:
+ *   Initialize ADC and register the ADC driver.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_ADC
+int stm32_adc_setup(void);
+#endif
+
 /****************************************************************************
  * Name: stm32_sdinitialize
  *

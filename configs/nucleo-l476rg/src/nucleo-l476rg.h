@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/nucleo-l476rg/src/nucleo-l476rg.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Authors: Frank Bennett
  *            Gregory Nutt <gnutt@nuttx.org>
  *            Sebastien Lorquet <sebastien@lorquet.fr>
@@ -340,15 +340,15 @@ int stm32_pwm_setup(void);
 #endif
 
 /************************************************************************************
- * Name: board_adc_initialize
+ * Name: stm32_adc_setup
  *
  * Description:
- *   Initialize and register the ADC driver(s)
+ *   Initialize ADC and register the ADC driver.
  *
  ************************************************************************************/
 
 #ifdef CONFIG_ADC
-int board_adc_initialize(void);
+int stm32_adc_setup(void);
 #endif
 
 /****************************************************************************

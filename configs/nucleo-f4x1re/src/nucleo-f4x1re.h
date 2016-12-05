@@ -309,15 +309,15 @@ void stm32_spidev_initialize(void);
 void stm32_usbinitialize(void);
 
 /************************************************************************************
- * Name: board_adc_initialize
+ * Name: stm32_adc_setup
  *
  * Description:
- *   Initialize and register the ADC driver(s)
+ *   Initialize ADC and register the ADC driver.
  *
  ************************************************************************************/
 
 #ifdef CONFIG_ADC
-int board_adc_initialize(void);
+int stm32_adc_setup(void);
 #endif
 
 /****************************************************************************

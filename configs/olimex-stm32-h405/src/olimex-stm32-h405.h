@@ -89,15 +89,15 @@ void weak_function stm32_usbinitialize(void);
 #endif
 
 /************************************************************************************
- * Name: stm32_adc_initialize
+ * Name: stm32_adc_setup
  *
  * Description:
- *   Called at application startup time to initialize the ADC functionality.
+ *   Initialize ADC and register the ADC driver.
  *
  ************************************************************************************/
 
 #ifdef CONFIG_ADC
-int stm32_adc_initialize(void);
+int stm32_adc_setup(void);
 #endif
 
 /************************************************************************************

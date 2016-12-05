@@ -240,9 +240,7 @@ int board_app_initialize(uintptr_t arg)
 #ifdef HAVE_MMCSD
   FAR struct sdio_dev_s *sdio;
 #endif
-#if defined(HAVE_MMCSD) || defined(HAVE_USBHOST) || defined(HAVE_RTC_DRIVER)
   int ret;
-#endif
 
   /* Register I2C drivers on behalf of the I2C tool */
 
@@ -355,5 +353,16 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
+#ifdef CONFIG_ADC
+  /* Initialize ADC and register the ADC driver. */
+
+  ret = stm32_adc_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_adc_setup failed: %d\n", ret);
+    }
+#endif
+
+  UNUSED(ret);
   return OK;
 }

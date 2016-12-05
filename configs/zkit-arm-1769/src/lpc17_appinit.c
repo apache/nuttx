@@ -6,7 +6,7 @@
  *
  * Based on config/lpcxpresso-lpc1768/src/lpc17_appinit.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -160,9 +160,10 @@
 
 int board_app_initialize(uintptr_t arg)
 {
+  int ret;
+
 #ifdef CONFIG_NSH_HAVEMMCSD
   FAR struct spi_dev_s *spi;
-  int ret;
 
   /* Get the SPI port */
 
@@ -190,5 +191,17 @@ int board_app_initialize(uintptr_t arg)
   message("Successfuly bound SPI port %d to MMC/SD slot %d\n",
           CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO);
 #endif
+
+#ifdef CONFIG_ADC
+  /* Initialize ADC and register the ADC driver. */
+
+  ret = zkit_adc_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: zkit_adc_setup failed: %d\n", ret);
+    }
+#endif
+
+  UNUSED(ret);
   return OK;
 }

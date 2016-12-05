@@ -194,6 +194,16 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
+#ifdef CONFIG_ADC
+  /* Initialize ADC and register the ADC driver. */
+
+  ret = sam_adc_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: sam_adc_setup failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
 

@@ -206,9 +206,7 @@ int board_app_initialize(uintptr_t arg)
 #ifdef NSH_HAVEMMCSD
   FAR struct sdio_dev_s *sdio;
 #endif
-#if defined(NSH_HAVEMMCSD) || defined(CONFIG_DJOYSTICK)
   int ret;
-#endif
 
   /* Register I2C drivers on behalf of the I2C tool */
 
@@ -286,6 +284,16 @@ int board_app_initialize(uintptr_t arg)
    sdio_mediachange(sdio, true);
 #endif
 
+#ifdef CONFIG_ADC
+  /* Initialize ADC and register the ADC driver. */
+
+  ret = stm32_adc_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_adc_setup failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_DJOYSTICK
   /* Initialize and register the joystick driver */
 
@@ -299,5 +307,6 @@ int board_app_initialize(uintptr_t arg)
   syslog(LOG_INFO, "Successfully registered the joystick driver\n");
 #endif
 
+  UNUSED(ret);
   return OK;
 }

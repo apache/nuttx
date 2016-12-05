@@ -6,7 +6,7 @@
  *
  * Based on configs/lpcxpresso-lpc1768/src/lpcxpresso.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -248,6 +248,18 @@ void weak_function zkit_sspdev_initialize(void);
  ************************************************************************************/
 
 void weak_function zkit_spidev_initialize(void);
+
+/************************************************************************************
+ * Name: zkit_adc_setup
+ *
+ * Description:
+ *   Initialize ADC and register the ADC driver.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_ADC
+int zkit_adc_setup(void);
+#endif
 
 #endif /* __ASSEMBLY__ */
 #endif /* _CONFIGS_ZKITARM_LPC1768_SRC_ZKITARM_H */

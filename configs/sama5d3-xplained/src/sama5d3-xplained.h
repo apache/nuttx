@@ -752,6 +752,18 @@ int sam_pwm_setup(void);
 #endif
 
 /************************************************************************************
+ * Name: sam_adc_setup
+ *
+ * Description:
+ *   Initialize ADC and register the ADC driver.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_ADC
+int sam_adc_setup(void);
+#endif
+
+/************************************************************************************
  * Name: sam_netinitialize
  *
  * Description:
@@ -761,18 +773,6 @@ int sam_pwm_setup(void);
 
 #ifdef HAVE_NETWORK
 void weak_function sam_netinitialize(void);
-#endif
-
-/************************************************************************************
- * Name: board_adc_initialize
- *
- * Description:
- *   Initialize and register the ADC driver
- *
- ************************************************************************************/
-
-#ifdef CONFIG_SAMA5_ADC
-int board_adc_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

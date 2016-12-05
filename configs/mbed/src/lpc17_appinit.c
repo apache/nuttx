@@ -111,6 +111,16 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
+#ifdef CONFIG_ADC
+  /* Initialize ADC and register the ADC driver. */
+
+  ret = mbed_adc_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: mbed_adc_setup failed: %d\n", ret);
+    }
+#endif
+
   UNUSED(ret);
   return OK;
 }

@@ -261,6 +261,18 @@ int stm32_usbhost_initialize(void);
 int stm32_pwm_setup(void);
 #endif
 
+/************************************************************************************
+ * Name: stm32_adc_setup
+ *
+ * Description:
+ *   Initialize ADC and register the ADC driver.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_ADC
+int stm32_adc_setup(void);
+#endif
+
 /****************************************************************************************************
  * Name: stm32_extmemgpios
  *

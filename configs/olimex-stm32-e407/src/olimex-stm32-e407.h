@@ -221,6 +221,18 @@
 void weak_function stm32_usbinitialize(void);
 #endif
 
+/************************************************************************************
+ * Name: stm32_adc_setup
+ *
+ * Description:
+ *   Initialize ADC and register the ADC driver.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_ADC
+int stm32_adc_setup(void);
+#endif
+
 /****************************************************************************
  * Name: stm32_sdio_initialize
  *
@@ -231,18 +243,6 @@ void weak_function stm32_usbinitialize(void);
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_STM32_SDIO)
 int stm32_sdio_initialize(void);
-#endif
-
-/****************************************************************************
- * Name: stm32_adc_initialize
- *
- * Description:
- *   Called at application startup time to initialize the ADC functionality.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ADC
-int stm32_adc_initialize(void);
 #endif
 
 /****************************************************************************

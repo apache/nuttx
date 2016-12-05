@@ -844,6 +844,18 @@ void weak_function sam_netinitialize(void);
 int sam_pwm_setup(void);
 #endif
 
+/************************************************************************************
+ * Name: sam_adc_setup
+ *
+ * Description:
+ *   Initialize ADC and register the ADC driver.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_ADC
+int sam_adc_setup(void);
+#endif
+
 /****************************************************************************
  * Name: sam_wm8904_initialize
  *

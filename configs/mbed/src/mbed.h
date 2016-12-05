@@ -100,6 +100,18 @@ void weak_function mbed_sspdev_initialize(void);
 int mbed_pwm_setup(void);
 #endif
 
+/************************************************************************************
+ * Name: mbed_adc_setup
+ *
+ * Description:
+ *   Initialize ADC and register the ADC driver.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_ADC
+int mbed_adc_setup(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* _CONFIGS_MBED_SRC_MBED_H */
 

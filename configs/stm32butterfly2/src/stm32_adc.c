@@ -46,14 +46,15 @@
  * Public Functions
  ****************************************************************************/
 
-/*****************************************************************************
- * Name: board_adc_setup
+/************************************************************************************
+ * Name: stm32_adc_setup
  *
  * Description:
- *   Function initializes channel 1 of adc1 and registers device as /dev/adc0
- ****************************************************************************/
+ *   Initialize ADC and register the ADC driver.
+ *
+ ************************************************************************************/
 
-int board_adc_setup(void)
+int stm32_adc_setup(void)
 {
   static bool initialized = false;
   uint8_t channel[1] = {10};

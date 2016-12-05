@@ -188,7 +188,6 @@ int board_app_initialize(uintptr_t arg)
 
   stm32_i2ctool();
 
-
 #ifdef CONFIG_CAN
   /* Configure on-board CAN if CAN support has been selected. */
 
@@ -200,12 +199,12 @@ int board_app_initialize(uintptr_t arg)
 #endif
 
 #ifdef CONFIG_ADC
-  /* Configure on-board ADCs if ADC support has been selected. */
+  /* Initialize ADC and register the ADC driver. */
 
-  ret = stm32_adc_initialize();
-  if (ret != OK)
+  ret = stm32_adc_setup();
+  if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Failed to initialize ADC: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: stm32_adc_setup failed: %d\n", ret);
     }
 #endif
 
