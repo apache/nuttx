@@ -2029,14 +2029,6 @@ config BOARDCTL_TSCTEST
 		specific logic must provide board_tsc_setup() and
 		board_tsc_teardown() interfaces.
 
-config BOARDCTL_ADCTEST
-	bool "Enable ADC test interfaces"
-	default n
-	---help---
-		Enables support for the BOARDIOC_ADCTEST_SETUP boardctl() command.
-		Architecture specific logic must provide board_adc_setup()
-		interface.
-
 config BOARDCTL_CANINIT
 	bool "Enable CAN initialize interface"
 	default n

@@ -426,21 +426,6 @@ int boardctl(unsigned int cmd, uintptr_t arg)
         break;
 #endif
 
-#ifdef CONFIG_BOARDCTL_ADCTEST
-      /* CMD:           BOARDIOC_ADCTEST_SETUP
-       * DESCRIPTION:   ADC controller test configuration
-       * ARG:           None
-       * CONFIGURATION: CONFIG_LIB_BOARDCTL && CONFIG_BOARDCTL_ADCTEST
-       * DEPENDENCIES:  Board logic must provide board_adc_setup()
-       */
-
-      case BOARDIOC_ADCTEST_SETUP:
-        {
-          ret = board_adc_setup();
-        }
-        break;
-#endif
-
 #ifdef CONFIG_BOARDCTL_CANINIT
       /* CMD:           BOARDIOC_CAN_INITIALIZE
        * DESCRIPTION:   CAN device initialization
@@ -462,7 +447,7 @@ int boardctl(unsigned int cmd, uintptr_t arg)
        *                procedures
        * ARG:           A pointer to an instance of struct boardioc_graphics_s
        * CONFIGURATION: CONFIG_LIB_BOARDCTL && CONFIG_BOARDCTL_GRAPHICS
-       * DEPENDENCIES:  Board logic must provide board_adc_setup()
+       * DEPENDENCIES:  Board logic must provide board_graphics_setup()
        */
 
       case BOARDIOC_GRAPHICS_SETUP:

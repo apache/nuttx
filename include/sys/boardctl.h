@@ -127,12 +127,6 @@
  * CONFIGURATION: CONFIG_LIB_BOARDCTL && CONFIG_BOARDCTL_TSCTEST
  * DEPENDENCIES:  Board logic must provide board_tsc_teardown()
  *
- * CMD:           BOARDIOC_ADCTEST_SETUP
- * DESCRIPTION:   ADC controller test configuration
- * ARG:           None
- * CONFIGURATION: CONFIG_LIB_BOARDCTL && CONFIG_BOARDCTL_ADCTEST
- * DEPENDENCIES:  Board logic must provide board_adc_setup()
- *
  * CMD:           BOARDIOC_CAN_INITIALIZE
  * DESCRIPTION:   CAN device initialization
  * ARG:           None
@@ -144,7 +138,7 @@
  *                procedures
  * ARG:           A pointer to an instance of struct boardioc_graphics_s
  * CONFIGURATION: CONFIG_LIB_BOARDCTL && CONFIG_BOARDCTL_GRAPHICS
- * DEPENDENCIES:  Board logic must provide board_adc_setup()
+ * DEPENDENCIES:  Board logic must provide board_graphics_setup()
  */
 
 #define BOARDIOC_INIT              _BOARDIOC(0x0001)
@@ -157,9 +151,8 @@
 #define BOARDIOC_NX_START          _BOARDIOC(0x0008)
 #define BOARDIOC_TSCTEST_SETUP     _BOARDIOC(0x0009)
 #define BOARDIOC_TSCTEST_TEARDOWN  _BOARDIOC(0x000a)
-#define BOARDIOC_ADCTEST_SETUP     _BOARDIOC(0x000b)
 #define BOARDIOC_CAN_INITIALIZE    _BOARDIOC(0x000c)
-#define BOARDIOC_GRAPHICS_SETUP    _BOARDIOC(0x000d)
+#define BOARDIOC_GRAPHICS_SETUP    _BOARDIOC(0x000c)
 
 /* If CONFIG_BOARDCTL_IOCTL=y, then boad-specific commands will be support.
  * In this case, all commands not recognized by boardctl() will be forwarded
