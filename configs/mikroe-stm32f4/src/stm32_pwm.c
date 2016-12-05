@@ -133,7 +133,7 @@ int stm32_pwm_setup(void)
 
   return OK;
 #else
-  return -ENOSYS;
+  return -ENODEV;
 #endif
 }
 
