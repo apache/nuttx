@@ -46,8 +46,9 @@
 #include <nuttx/board.h>
 #include <nuttx/i2c/i2c_master.h>
 
-#include "lpc43_i2c.h"
 #include "chip.h"
+#include "lpc43_i2c.h"
+#include "lpc4337-ws.h"
 
 /****************************************************************************
  * Private Functions
