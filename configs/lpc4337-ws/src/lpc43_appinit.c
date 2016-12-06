@@ -141,7 +141,7 @@ int board_app_initialize(uintptr_t arg)
 
   lpc43_i2ctool();
 
-#ifdef CONFIG_ADC
+#ifdef CONFIG_LPC43_ADC0
   /* Initialize ADC and register the ADC driver. */
 
   ret = lpc43_adc_setup();
