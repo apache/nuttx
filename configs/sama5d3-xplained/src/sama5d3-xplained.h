@@ -764,6 +764,18 @@ int sam_adc_setup(void);
 #endif
 
 /************************************************************************************
+ * Name: sam_can_setup
+ *
+ * Description:
+ *  Initialize CAN and register the CAN device
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_CAN
+int sam_can_setup(void);
+#endif
+
+/************************************************************************************
  * Name: sam_netinitialize
  *
  * Description:

@@ -180,21 +180,19 @@ static void stm32_i2ctool(void)
 
 int board_app_initialize(uintptr_t arg)
 {
-#if defined(CONFIG_CAN) || defined(CONFIG_ADC)
   int ret;
-#endif
 
   /* Register I2C drivers on behalf of the I2C tool */
 
   stm32_i2ctool();
 
 #ifdef CONFIG_CAN
-  /* Configure on-board CAN if CAN support has been selected. */
+  /* Initialize CAN and register the CAN driver. */
 
-  ret = stm32_can_initialize();
-  if (ret != OK)
+  ret = stm32_can_setup();
+  if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Failed to initialize CAN: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: stm32_can_setup failed: %d\n", ret);
     }
 #endif
 
@@ -231,5 +229,6 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
+  UNUSED(ret);
   return OK;
 }

@@ -732,10 +732,6 @@ MCAN1 Loopback Test
        CONFIG_SAMV7_MCAN1_TXFIFOQ_SIZE=8       # There are 8 queue elements
        CONFIG_SAMV7_MCAN1_TXEVENTFIFO_SIZE=0   # The event FIFO is not used
 
-    Board Selection
-       CONFIG_LIB_BOARDCTL=y                   # Needed for CAN initialization
-       CONFIG_BOARDCTL_CANINIT=y               # Enabled CAN initialization
-
     Enabling the CAN Loopback Test
     ------------------------------
     Application Configuration -> Examples -> CAN Example

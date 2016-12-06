@@ -807,14 +807,15 @@ bool sam_writeprotected(int slotno);
 void weak_function sam_usbinitialize(void);
 #endif
 
-/****************************************************************************************************
+/************************************************************************************
  * Name: stm32_usbhost_initialize
  *
  * Description:
- *   Called at application startup time to initialize the USB host functionality. This function will
- *   start a thread that will monitor for device connection/disconnection events.
+ *   Called at application startup time to initialize the USB host functionality. 
+ *   This function will start a thread that will monitor for device connection/
+ *   disconnection events.
  *
- ****************************************************************************************************/
+ ************************************************************************************/
 
 #ifdef HAVE_USBHOST
 int sam_usbhost_initialize(void);
@@ -856,7 +857,19 @@ int sam_pwm_setup(void);
 int sam_adc_setup(void);
 #endif
 
-/****************************************************************************
+/************************************************************************************
+ * Name: sam_can_setup
+ *
+ * Description:
+ *  Initialize CAN and register the CAN device
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_CAN
+int sam_can_setup(void);
+#endif
+
+/************************************************************************************
  * Name: sam_wm8904_initialize
  *
  * Description:
@@ -871,7 +884,7 @@ int sam_adc_setup(void);
  *   Zero is returned on success.  Otherwise, a negated errno value is
  *   returned to indicate the nature of the failure.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef HAVE_WM8904
 int sam_wm8904_initialize(int minor);

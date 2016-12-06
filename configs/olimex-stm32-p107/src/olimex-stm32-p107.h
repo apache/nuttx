@@ -32,6 +32,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
 #ifndef __CONFIGS_OLIMEX_STM32_P107_SRC_H
 #define __CONFIGS_OLIMEX_STM32_P107_SRC_H
 
@@ -83,6 +84,18 @@
  ************************************************************************************/
 
 void weak_function stm32_spidev_initialize(void);
+
+/****************************************************************************
+ * Name: stm32_can_setup
+ *
+ * Description:
+ *  Initialize CAN and register the CAN device
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_CAN
+int stm32_can_setup(void);
+#endif
 
 #endif  /* __ASSEMBLY__ */
 #endif /* __CONFIGS_OLIMEX_STM32_P107_SRC_H */

@@ -127,12 +127,6 @@
  * CONFIGURATION: CONFIG_LIB_BOARDCTL && CONFIG_BOARDCTL_TSCTEST
  * DEPENDENCIES:  Board logic must provide board_tsc_teardown()
  *
- * CMD:           BOARDIOC_CAN_INITIALIZE
- * DESCRIPTION:   CAN device initialization
- * ARG:           None
- * CONFIGURATION: CONFIG_LIB_BOARDCTL && CONFIG_BOARDCTL_CANINIT
- * DEPENDENCIES:  Board logic must provide board_can_initialize()
- *
  * CMD:           BOARDIOC_GRAPHICS_SETUP
  * DESCRIPTION:   Configure graphics that require special initialization
  *                procedures
@@ -151,8 +145,7 @@
 #define BOARDIOC_NX_START          _BOARDIOC(0x0008)
 #define BOARDIOC_TSCTEST_SETUP     _BOARDIOC(0x0009)
 #define BOARDIOC_TSCTEST_TEARDOWN  _BOARDIOC(0x000a)
-#define BOARDIOC_CAN_INITIALIZE    _BOARDIOC(0x000c)
-#define BOARDIOC_GRAPHICS_SETUP    _BOARDIOC(0x000c)
+#define BOARDIOC_GRAPHICS_SETUP    _BOARDIOC(0x000b)
 
 /* If CONFIG_BOARDCTL_IOCTL=y, then boad-specific commands will be support.
  * In this case, all commands not recognized by boardctl() will be forwarded

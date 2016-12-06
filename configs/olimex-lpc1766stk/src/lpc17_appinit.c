@@ -362,6 +362,16 @@ int board_app_initialize(uintptr_t arg)
       syslog(LOG_ERR, "ERROR: Failed to initialize USB host: %d\n", ret);
     }
 
+#ifdef CONFIG_CAN
+  /* Initialize CAN and register the CAN driver. */
+
+  ret = lpc1766stk_can_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: lpc1766stk_can_setup failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
 

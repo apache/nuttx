@@ -100,16 +100,16 @@ void weak_function stm32_usbinitialize(void);
 int stm32_adc_setup(void);
 #endif
 
-/************************************************************************************
- * Name: stm32_can_initialize
+/****************************************************************************
+ * Name: stm32_can_setup
  *
  * Description:
- *   Called at application startup time to initialize the CAN functionality.
+ *  Initialize CAN and register the CAN device
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#if defined(CONFIG_CAN) && (defined(CONFIG_STM32_CAN1) || defined(CONFIG_STM32_CAN2))
-int stm32_can_initialize(void);
+#ifdef CONFIG_CAN
+int stm32_can_setup(void);
 #endif
 
 #endif  /* __ASSEMBLY__ */

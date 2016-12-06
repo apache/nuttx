@@ -134,13 +134,13 @@ int board_app_initialize(uintptr_t arg)
 {
   int ret;
 
-#if defined(CONFIG_CAN) && (defined(CONFIG_STM32_CAN1) || defined(CONFIG_STM32_CAN2))
-  /* Configure on-board CAN if CAN support has been selected. */
+#ifdef CONFIG_CAN
+  /* Initialize CAN and register the CAN driver. */
 
-  ret = stm32_can_initialize();
-  if (ret != OK)
+  ret = stm32_can_setup();
+  if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Failed to initialize CAN: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: stm32_can_setup failed: %d\n", ret);
     }
 #endif
 
