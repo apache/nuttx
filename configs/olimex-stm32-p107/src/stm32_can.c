@@ -84,7 +84,7 @@
 
 int stm32_can_setup(void)
 {
-#if defined(CONFIG_STM32_CAN1) || defined(CONFIG_STM32_CAN2))
+#if defined(CONFIG_STM32_CAN1) || defined(CONFIG_STM32_CAN2)
   struct can_dev_s *can;
   int ret;
 
