@@ -261,5 +261,17 @@ void weak_function zkit_spidev_initialize(void);
 int zkit_adc_setup(void);
 #endif
 
+/************************************************************************************
+ * Name: zkit_can_setup
+ *
+ * Description:
+ *  Initialize CAN and register the CAN device
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_CAN
+int zkit_can_setup(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* _CONFIGS_ZKITARM_LPC1768_SRC_ZKITARM_H */

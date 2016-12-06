@@ -294,6 +294,16 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
+#ifdef CONFIG_CAN
+  /* Initialize CAN and register the CAN driver. */
+
+  ret = stm32_can_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_can_setup failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_DJOYSTICK
   /* Initialize and register the joystick driver */
 

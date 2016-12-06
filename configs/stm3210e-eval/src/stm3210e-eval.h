@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/stm3210e_eval/src/stm3210e-eval.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -202,6 +202,18 @@ void weak_function stm32_usbinitialize(void);
 
 #ifdef CONFIG_ADC
 int stm32_adc_setup(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_can_setup
+ *
+ * Description:
+ *  Initialize CAN and register the CAN device
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_CAN
+int stm32_can_setup(void);
 #endif
 
 /************************************************************************************

@@ -43,6 +43,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
+#include <syslog.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -97,14 +98,14 @@ static void sam_i2c_register(int bus)
   i2c = sam_i2cbus_initialize(bus);
   if (i2c == NULL)
     {
-      _err("ERROR: Failed to get I2C%d interface\n", bus);
+      syslog(LOG_ERR, "ERROR: Failed to get I2C%d interface\n", bus);
     }
   else
     {
       ret = i2c_register(i2c, bus);
       if (ret < 0)
         {
-          _err("ERROR: Failed to register I2C%d driver: %d\n", bus, ret);
+          syslog(LOG_ERR, "ERROR: Failed to register I2C%d driver: %d\n", bus, ret);
           sam_i2cbus_uninitialize(i2c);
         }
     }
@@ -169,7 +170,7 @@ int sam_bringup(void)
   ret = sam_emac0_setmac();
   if (ret < 0)
     {
-      _err("ERROR: sam_emac0_setmac() failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: sam_emac0_setmac() failed: %d\n", ret);
     }
 #endif
 
@@ -179,8 +180,8 @@ int sam_bringup(void)
   ret = mount(NULL, SAME70_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
   if (ret < 0)
     {
-      _err("ERROR: Failed to mount procfs at %s: %d\n",
-           SAME70_PROCFS_MOUNTPOINT, ret);
+      syslog(LOG_ERR, "ERROR: Failed to mount procfs at %s: %d\n",
+             SAME70_PROCFS_MOUNTPOINT, ret);
     }
 #endif
 
@@ -192,7 +193,7 @@ int sam_bringup(void)
   ret = sam_at24config();
   if (ret < 0)
     {
-      _err("ERROR: sam_at24config() failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: sam_at24config() failed: %d\n", ret);
     }
 #endif
 
@@ -202,8 +203,8 @@ int sam_bringup(void)
   ret = sam_hsmci_initialize(HSMCI0_SLOTNO, HSMCI0_MINOR);
   if (ret < 0)
     {
-      _err("ERROR: sam_hsmci_initialize(%d,%d) failed: %d\n",
-           HSMCI0_SLOTNO, HSMCI0_MINOR, ret);
+      syslog(LOG_ERR, "ERROR: sam_hsmci_initialize(%d,%d) failed: %d\n",
+             HSMCI0_SLOTNO, HSMCI0_MINOR, ret);
     }
 
 #ifdef CONFIG_SAME70XPLAINED_HSMCI0_MOUNT
@@ -219,8 +220,8 @@ int sam_bringup(void)
 
       if (ret < 0)
         {
-          _err("ERROR: Failed to mount %s: %d\n",
-               CONFIG_SAME70XPLAINED_HSMCI0_MOUNT_MOUNTPOINT, errno);
+          syslog(LOG_ERR, "ERROR: Failed to mount %s: %d\n",
+                 CONFIG_SAME70XPLAINED_HSMCI0_MOUNT_MOUNTPOINT, errno);
         }
     }
 
@@ -241,7 +242,7 @@ int sam_bringup(void)
                          CONFIG_SAME70XPLAINED_ROMFS_ROMDISK_SECTSIZE);
   if (ret < 0)
     {
-      _err("ERROR: romdisk_register failed: %d\n", -ret);
+      syslog(LOG_ERR, "ERROR: romdisk_register failed: %d\n", -ret);
     }
   else
     {
@@ -252,9 +253,9 @@ int sam_bringup(void)
                   "romfs", MS_RDONLY, NULL);
       if (ret < 0)
         {
-          _err("ERROR: mount(%s,%s,romfs) failed: %d\n",
-               CONFIG_SAME70XPLAINED_ROMFS_ROMDISK_DEVNAME,
-               CONFIG_SAME70XPLAINED_ROMFS_MOUNT_MOUNTPOINT, errno);
+          syslog(LOG_ERR, "ERROR: mount(%s,%s,romfs) failed: %d\n",
+                 CONFIG_SAME70XPLAINED_ROMFS_ROMDISK_DEVNAME,
+                 CONFIG_SAME70XPLAINED_ROMFS_MOUNT_MOUNTPOINT, errno);
         }
     }
 #endif
@@ -269,7 +270,7 @@ int sam_bringup(void)
   mtd = progmem_initialize();
   if (!mtd)
     {
-      _err("ERROR: progmem_initialize failed\n");
+      syslog(LOG_ERR, "ERROR: progmem_initialize failed\n");
     }
 
   /* Use the FTL layer to wrap the MTD driver as a block driver */
@@ -277,7 +278,7 @@ int sam_bringup(void)
   ret = ftl_initialize(PROGMEM_MTD_MINOR, mtd);
   if (ret < 0)
     {
-      _err("ERROR: Failed to initialize the FTL layer: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: Failed to initialize the FTL layer: %d\n", ret);
       return ret;
     }
 
@@ -291,7 +292,7 @@ int sam_bringup(void)
   ret = bchdev_register(blockdev, chardev, false);
   if (ret < 0)
     {
-      _err("ERROR: bchdev_register %s failed: %d\n", chardev, ret);
+      syslog(LOG_ERR, "ERROR: bchdev_register %s failed: %d\n", chardev, ret);
       return ret;
     }
 #endif
@@ -304,7 +305,7 @@ int sam_bringup(void)
   ret = sam_usbhost_initialize();
   if (ret != OK)
     {
-      _err("ERROR: Failed to initialize USB host: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: Failed to initialize USB host: %d\n", ret);
     }
 #endif
 
@@ -314,18 +315,28 @@ int sam_bringup(void)
   ret = usbmonitor_start();
   if (ret != OK)
     {
-      _err("ERROR: Failed to start the USB monitor: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: Failed to start the USB monitor: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SAMV7_MCAN
+  /* Initialize CAN and register the CAN driver. */
+
+  ret = sam_can_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: sam_can_setup failed: %d\n", ret);
     }
 #endif
 
 #ifdef HAVE_ELF
   /* Initialize the ELF binary loader */
 
-  _err("Initializing the ELF binary loader\n");
+  syslog(LOG_ERR, "Initializing the ELF binary loader\n");
   ret = elf_initialize();
   if (ret < 0)
     {
-      _err("ERROR: Initialization of the ELF loader failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: Initialization of the ELF loader failed: %d\n", ret);
     }
 #endif
 
@@ -333,7 +344,7 @@ int sam_bringup(void)
   ret = sam_dacdev_initialize();
   if (ret < 0)
     {
-      _err("ERROR: Initialization of the DAC module failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: Initialization of the DAC module failed: %d\n", ret);
     }
 #endif
 

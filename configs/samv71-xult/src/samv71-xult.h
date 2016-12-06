@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/samv71-xult/src/samv71-xult.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -595,6 +595,18 @@ int sam_bringup(void);
 
 #ifdef CONFIG_SAMV7_SPI
 void sam_spidev_initialize(void);
+#endif
+
+/************************************************************************************
+ * Name: sam_can_setup
+ *
+ * Description:
+ *  Initialize CAN and register the CAN device
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_SAMV7_MCAN
+int sam_can_setup(void);
 #endif
 
 /************************************************************************************

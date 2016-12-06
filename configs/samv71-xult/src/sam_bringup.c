@@ -253,6 +253,16 @@ int sam_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_SAMV7_MCAN
+  /* Initialize CAN and register the CAN driver. */
+
+  ret = sam_can_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: sam_can_setup failed: %d\n", ret);
+    }
+#endif
+
 #ifdef HAVE_MACADDR
   /* Read the Ethernet MAC address from the AT24 FLASH and configure the
    * Ethernet driver with that address.

@@ -438,16 +438,28 @@ void weak_function stm32_usbinitialize(void);
 int stm32_usbhost_initialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_pwm_setup
  *
  * Description:
  *   Initialize PWM and register the PWM device.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_PWM
 int stm32_pwm_setup(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_can_setup
+ *
+ * Description:
+ *  Initialize CAN and register the CAN device
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_CAN
+int stm32_can_setup(void);
 #endif
 
 /****************************************************************************
@@ -535,22 +547,6 @@ void stm32_led_pminitialize(void);
 #if defined(CONFIG_PM) && defined(CONFIG_ARCH_IDLE_CUSTOM) && defined(CONFIG_PM_BUTTONS)
 void stm32_pm_buttons(void);
 #endif
-
-/****************************************************************************
- * Name: stm32_bringup
- *
- * Description:
- *   Perform architecture-specific initialization
- *
- *   CONFIG_BOARD_INITIALIZE=y :
- *     Called from board_initialize().
- *
- *   CONFIG_BOARD_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y :
- *     Called from the NSH library
- *
- ****************************************************************************/
-
-int stm32_bringup(void);
 
 /****************************************************************************
  * Name: stm32_sdio_initialize

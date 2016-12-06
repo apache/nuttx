@@ -400,6 +400,18 @@ int sam_hsmci_initialize(int slot, int minor);
 void sam_usbinitialize(void);
 #endif
 
+/****************************************************************************
+ * Name: sam_can_setup
+ *
+ * Description:
+ *  Initialize CAN and register the CAN device
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SAMV7_MCAN
+int sam_can_setup(void);
+#endif
+
 /************************************************************************************
  * Name: sam_netinitialize
  *

@@ -426,21 +426,6 @@ int boardctl(unsigned int cmd, uintptr_t arg)
         break;
 #endif
 
-#ifdef CONFIG_BOARDCTL_CANINIT
-      /* CMD:           BOARDIOC_CAN_INITIALIZE
-       * DESCRIPTION:   CAN device initialization
-       * ARG:           None
-       * CONFIGURATION: CONFIG_LIB_BOARDCTL && CONFIG_BOARDCTL_CANINIT
-       * DEPENDENCIES:  Board logic must provide board_can_initialize()
-       */
-
-      case BOARDIOC_CAN_INITIALIZE:
-        {
-          ret = board_can_initialize();
-        }
-        break;
-#endif
-
 #ifdef CONFIG_BOARDCTL_GRAPHICS
       /* CMD:           BOARDIOC_GRAPHICS_SETUP
        * DESCRIPTION:   Configure graphics that require special initialization

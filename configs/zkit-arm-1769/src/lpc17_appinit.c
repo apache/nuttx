@@ -53,6 +53,7 @@
 #include <nuttx/mmcsd.h>
 
 #include "lpc17_spi.h"
+#include "zkit-arm-1769.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -199,6 +200,16 @@ int board_app_initialize(uintptr_t arg)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: zkit_adc_setup failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_CAN
+  /* Initialize CAN and register the CAN driver. */
+
+  ret = zkit_can_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: zkit_can_setup failed: %d\n", ret);
     }
 #endif
 
