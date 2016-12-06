@@ -493,7 +493,7 @@
 #define OTGFS_GINT_IEP                  (1 << 18) /* Bit 18: ro    IN endpoint interrupt */
 #define OTGFS_GINT_OEP                  (1 << 19) /* Bit 19: ro    OUT endpoint interrupt */
 #define OTGFS_GINT_IISOIXFR             (1 << 20) /* Bit 20: rc_w1 Incomplete isochronous IN transfer */
-#define OTGFS_GINT_IISOOXFR             (1 << 21) /* Bit 21: rc_w1 Incomplete isochronous OUT transfer */
+#define OTGFS_GINT_IISOOXFR             (1 << 21) /* Bit 21: rc_w1 Incomplete isochronous OUT transfer (device) */
 #define OTGFS_GINT_IPXFR                (1 << 21) /* Bit 21:       Incomplete periodic transfer (host) */
 #if defined(CONFIG_STM32_STM32F446) || defined(CONFIG_STM32_STM32F469)
 #  define OTGFS_GINT_RES22              (1 << 22) /* Bits 22: Reserved, must be kept at reset value */
