@@ -494,11 +494,20 @@
 #define OTGFS_GINT_OEP                  (1 << 19) /* Bit 19: ro OUT endpoint interrupt */
 #define OTGFS_GINT_IISOIXFR             (1 << 20) /* Bit 20: rc_w1Incomplete isochronous IN transfer */
 #define OTGFS_GINT_IISOOXFR             (1 << 21) /* Bit 21: rc_w1 Incomplete isochronous OUT transfer */
-#define OTGFS_GINT_RES2223              (3 << 22) /* Bits 22-23: Reserved, must be kept at reset value */
+#if defined(CONFIG_STM32_STM32F446) || defined(CONFIG_STM32_STM32F469)
+#  define OTGFS_GINT_RES22              (1 << 22) /* Bits 22: Reserved, must be kept at reset value */
+#  define OTGFS_GINT_RSTDET             (1 << 23) /* Bits 23: asserted when a reset is detected on the USB in partial */
+#else
+#  define OTGFS_GINT_RES2223            (3 << 22) /* Bits 22-23: Reserved, must be kept at reset value */
+#endif
 #define OTGFS_GINT_HPRT                 (1 << 24) /* Bit 24: ro Host port interrupt */
 #define OTGFS_GINT_HC                   (1 << 25) /* Bit 25: ro Host channels interrupt */
 #define OTGFS_GINT_PTXFE                (1 << 26) /* Bit 26: ro Periodic TxFIFO empty */
+#if defined(CONFIG_STM32_STM32F446) || defined(CONFIG_STM32_STM32F469)
+#define OTGFS_GINT_LPMINT               (1 << 27) /* Bit 27 LPM interrupt */
+#else
 #define OTGFS_GINT_RES27                (1 << 27) /* Bit 27 Reserved, must be kept at reset value */
+#endif
 #define OTGFS_GINT_CIDSCHG              (1 << 28) /* Bit 28: rc_w1 Connector ID status change */
 #define OTGFS_GINT_DISC                 (1 << 29) /* Bit 29: rc_w1 Disconnect detected interrupt */
 #define OTGFS_GINT_SRQ                  (1 << 30) /* Bit 30: rc_w1 Session request/new session detected interrupt */
