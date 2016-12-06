@@ -45,6 +45,8 @@
 
 #include <nuttx/board.h>
 
+#include "teensy-lc.h"
+
 #ifdef CONFIG_LIB_BOARDCTL
 
 /****************************************************************************
