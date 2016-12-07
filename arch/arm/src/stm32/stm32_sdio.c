@@ -153,6 +153,7 @@
  * that does not have the errata, to override the edge the SDIO
  * command and data is changed on.
  */
+
 #if !defined(SDIO_CLKCR_EDGE)
 #  define SDIO_CLKCR_EDGE SDIO_CLKCR_RISINGEDGE
 #endif

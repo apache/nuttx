@@ -160,6 +160,7 @@
  * that does not have the errata, to override the edge the SDIO
  * command and data is changed on.
  */
+
 #if !defined(STM32_SDMMC_CLKCR_EDGE)
 #  define STM32_SDMMC_CLKCR_EDGE STM32_CLKCR_RISINGEDGE
 #endif
