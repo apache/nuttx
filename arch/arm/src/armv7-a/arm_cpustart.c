@@ -43,6 +43,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
+#include <nuttx/sched_note.h>
 
 #include "up_internal.h"
 #include "cp15_cacheops.h"
@@ -104,13 +105,18 @@ static inline void arm_registerdump(FAR struct tcb_s *tcb)
 
 int arm_start_handler(int irq, FAR void *context)
 {
-  FAR struct tcb_s *tcb;
+  FAR struct tcb_s *tcb = this_task();
 
   sinfo("CPU%d Started\n", this_cpu());
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION
+  /* Notify that this CPU has started */
+
+  sched_note_cpu_started(tcb);
+#endif
+
   /* Reset scheduler parameters */
 
-  tcb = this_task();
   sched_resume_scheduler(tcb);
 
   /* Dump registers so that we can see what is going to happen on return */
@@ -158,6 +164,12 @@ int up_cpu_start(int cpu)
   sinfo("Starting CPU%d\n", cpu);
 
   DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS && cpu != this_cpu());
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION
+  /* Notify of the start event */
+
+  sched_note_cpu_start(this_task(), cpu);
+#endif
 
   /* Make the content of CPU0 L1 cache has been written to coherent L2 */
 

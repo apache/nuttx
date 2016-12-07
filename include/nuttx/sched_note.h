@@ -82,6 +82,8 @@ enum note_type_e
   NOTE_RESUME
 #ifdef CONFIG_SMP
   ,
+  NOTE_CPU_START,
+  NOTE_CPU_STARTED,
   NOTE_CPU_PAUSE,
   NOTE_CPU_PAUSED,
   NOTE_CPU_RESUME,
@@ -153,6 +155,22 @@ struct note_resume_s
 };
 
 #ifdef CONFIG_SMP
+
+/* This is the specific form of the NOTE_CPU_START note */
+
+struct note_cpu_start_s
+{
+  struct note_common_s ncs_cmn; /* Common note parameters */
+  uint8_t ncs_target;           /* CPU being started */
+};
+
+/* This is the specific form of the NOTE_CPU_STARTED note */
+
+struct note_cpu_started_s
+{
+  struct note_common_s ncs_cmn; /* Common note parameters */
+};
+
 /* This is the specific form of the NOTE_CPU_PAUSE note */
 
 struct note_cpu_pause_s
@@ -248,11 +266,15 @@ void sched_note_suspend(FAR struct tcb_s *tcb);
 void sched_note_resume(FAR struct tcb_s *tcb);
 
 #ifdef CONFIG_SMP
+void sched_note_cpu_start(FAR struct tcb_s *tcb, int cpu);
+void sched_note_cpu_started(FAR struct tcb_s *tcb);
 void sched_note_cpu_pause(FAR struct tcb_s *tcb, int cpu);
 void sched_note_cpu_paused(FAR struct tcb_s *tcb);
 void sched_note_cpu_resume(FAR struct tcb_s *tcb, int cpu);
 void sched_note_cpu_resumed(FAR struct tcb_s *tcb);
 #else
+#  define sched_note_cpu_start(t,c)
+#  define sched_note_cpu_started(t)
 #  define sched_note_cpu_pause(t,c)
 #  define sched_note_cpu_paused(t)
 #  define sched_note_cpu_resume(t,c)
@@ -353,6 +375,8 @@ int note_register(void);
 #  define sched_note_stop(t)
 #  define sched_note_suspend(t)
 #  define sched_note_resume(t)
+#  define sched_note_cpu_start(t,c)
+#  define sched_note_cpu_started(t)
 #  define sched_note_cpu_pause(t,c)
 #  define sched_note_cpu_paused(t)
 #  define sched_note_cpu_resume(t,c)

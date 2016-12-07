@@ -118,6 +118,9 @@ Status
 2016-12-01:  I committed a completely untest SPI driver.  This was taken
   directly from the i.MX1 and is most certainly not ready for use yet.
 
+2016-12-07:  Just a note to remind myself.  The PL310 L2 cache has *not*
+  yet been enbled.
+
 Platform Features
 =================
 

@@ -435,6 +435,33 @@ void sched_note_resume(FAR struct tcb_s *tcb)
 }
 
 #ifdef CONFIG_SMP
+void sched_note_cpu_start(FAR struct tcb_s *tcb, int cpu)
+{
+  struct note_cpu_start_s note;
+
+  /* Format the note */
+
+  note_common(tcb, &note.ncs_cmn, sizeof(struct note_cpu_start_s), NOTE_CPU_START);
+  note.ncs_target = (uint8_t)cpu;
+
+  /* Add the note to circular buffer */
+
+  note_add((FAR const uint8_t *)&note, sizeof(struct note_cpu_start_s));
+}
+
+void sched_note_cpu_started(FAR struct tcb_s *tcb)
+{
+  struct note_cpu_started_s note;
+
+  /* Format the note */
+
+  note_common(tcb, &note.ncs_cmn, sizeof(struct note_cpu_started_s), NOTE_CPU_STARTED);
+
+  /* Add the note to circular buffer */
+
+  note_add((FAR const uint8_t *)&note, sizeof(struct note_cpu_started_s));
+}
+
 void sched_note_cpu_pause(FAR struct tcb_s *tcb, int cpu)
 {
   struct note_cpu_pause_s note;

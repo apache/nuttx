@@ -47,6 +47,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/spinlock.h>
+#include <nuttx/sched_note.h>
 
 #include "nvic.h"
 #include "up_arch.h"
@@ -124,6 +125,12 @@ static void cpu1_boot(void)
 
   spin_unlock(&g_cpu1_boot);
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION
+  /* Notify that this CPU has started */
+
+  sched_note_cpu_started(this_task());
+#endif
+
   /* Then transfer control to the IDLE task */
 
   (void)os_idle_task(0, NULL);
@@ -163,7 +170,15 @@ int up_cpu_start(int cpu)
   DPRINTF("cpu=%d\n",cpu);
 
   if (cpu != 1)
-    return -1;
+    {
+      return -EINVAL;
+    }
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION
+  /* Notify of the start event */
+
+  sched_note_cpu_start(this_task(), cpu);
+#endif
 
   /* Reset coprocessor */
 
