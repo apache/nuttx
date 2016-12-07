@@ -44,6 +44,7 @@
 #include "up_arch.h"
 #include "cp15_cacheops.h"
 #include "sctlr.h"
+#include "cache.h"
 #include "scu.h"
 
 #ifdef CONFIG_SMP
@@ -174,6 +175,7 @@ void arm_enable_smp(int cpu)
        */
 
       cp15_invalidate_dcache_all();
+      ARM_DSB();
 
       /* Invalidate the L2C-310 -- Missing logic. */
 
@@ -193,16 +195,28 @@ void arm_enable_smp(int cpu)
        */
 
       cp15_invalidate_dcache_all();
+      ARM_DSB();
 
       /* Wait for the SCU to be enabled by the primary processor -- should
        * not be necessary.
        */
     }
 
-  /* Enable the data cache, set the SMP mode with ACTLR.SMP=1. */
+  /* Enable the data cache, set the SMP mode with ACTLR.SMP=1.
+   *
+   *   SMP - Sgnals if the Cortex-A9 processor is taking part in coherency
+   *         or not.
+   *
+   * Cortex-A9 also needs  ACTLR.FW=1
+   *
+   *   FW  - Cache and TLB maintenance broadcast.
+   */
 
   regval  = arm_get_actlr();
   regval |= ACTLR_SMP;
+#ifdef CONFIG_ARCH_CORTEXA9
+  regval |= ACTLR_FW;
+#endif
   arm_set_actlr(regval);
 
   regval  = arm_get_sctlr();

@@ -51,7 +51,7 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* intrinsics are used in these inline functions */
+/* Intrinsics are used in these inline functions */
 
 #define arm_isb(n) __asm__ __volatile__ ("isb " #n : : : "memory")
 #define arm_dsb(n) __asm__ __volatile__ ("dsb " #n : : : "memory")
@@ -61,7 +61,7 @@
 #define ARM_ISB()  arm_isb(15)
 #define ARM_DMB()  arm_dmb(15)
 
- /************************************************************************************
+/************************************************************************************
  * Inline Functions
  ************************************************************************************/
 
