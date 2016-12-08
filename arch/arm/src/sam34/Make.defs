@@ -50,12 +50,16 @@ CMN_ASRCS  = up_saveusercontext.S up_fullcontextrestore.S up_switchcontext.S
 CMN_ASRCS += up_testset.S vfork.S
 
 CMN_CSRCS  = up_assert.c up_blocktask.c up_copyfullstate.c up_createstack.c
-CMN_CSRCS += up_mdelay.c up_udelay.c up_exit.c up_idle.c up_initialize.c
+CMN_CSRCS += up_mdelay.c up_udelay.c up_exit.c up_initialize.c
 CMN_CSRCS += up_initialstate.c up_interruptcontext.c up_memfault.c up_modifyreg8.c
 CMN_CSRCS += up_modifyreg16.c up_modifyreg32.c up_releasepending.c
 CMN_CSRCS += up_releasestack.c up_reprioritizertr.c up_schedulesigaction.c
 CMN_CSRCS += up_sigdeliver.c up_stackframe.c up_unblocktask.c up_usestack.c
 CMN_CSRCS += up_doirq.c up_hardfault.c up_svcall.c up_vfork.c
+
+ifneq ($(CONFIG_SMP),y)
+CMN_CSRCS += up_idle.c
+endif
 
 # Configuration-dependent common files
 
@@ -198,14 +202,22 @@ endif
 ifeq ($(CONFIG_ARCH_CHIP_SAM4CM),y)
 ifeq ($(CONFIG_SAM34_TC),y)
 CHIP_CSRCS += sam4cm_tc.c
+
 ifeq ($(CONFIG_SAM34_ONESHOT),y)
 CHIP_CSRCS += sam4cm_oneshot.c sam4cm_oneshot_lowerhalf.c
-endif
+endif # CONFIG_SAM34_ONESHOT
+
 ifeq ($(CONFIG_SAM34_FREERUN),y)
 CHIP_CSRCS += sam4cm_freerun.c
-endif
+endif # CONFIG_SAM34_FREERUN
+
 ifeq ($(CONFIG_SCHED_TICKLESS),y)
 CHIP_CSRCS += sam4cm_tickless.c
-endif
-endif
-endif
+endif # CONFIG_SCHED_TICKLESS
+endif # CONFIG_SAM34_TC
+
+ifeq ($(CONFIG_SMP),y)
+CHIP_CSRCS += sam4cm_cpuindex.c sam4cm_cpuidlestack.c
+CHIP_CSRCS += sam4cm_cpupause.c sam4cm_cpustart.c sam4cm_idle.c
+endif # CONFIG_SMP
+endif # CONFIG_ARCH_CHIP_SAM4CM

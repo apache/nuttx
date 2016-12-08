@@ -233,15 +233,13 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
   else
 #endif
     {
-      net_lock_t state;
-
       /* Perform the local accept operation (with the network locked) */
 
-      state = net_lock();
+      net_lock();
       ret = psock_tcp_accept(psock, addr, addrlen, &newsock->s_conn);
       if (ret < 0)
         {
-          net_unlock(state);
+          net_unlock();
           errcode = -ret;
           goto errout;
         }
@@ -258,12 +256,12 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
            * called.  Undo everything we have done and return a failure.
            */
 
-          net_unlock(state);
+          net_unlock();
           errcode = -ret;
           goto errout_after_accept;
         }
 
-      net_unlock(state);
+      net_unlock();
     }
 #endif /* CONFIG_NET_TCP */
 

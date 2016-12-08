@@ -86,7 +86,7 @@ int k64_bringup(void)
   ret = k64_sdhc_initialize();
   if (ret < 0)
     {
-      mcerr("ERROR: k64_sdhc_initialize() failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: k64_sdhc_initialize() failed: %d\n", ret);
     }
 
 #ifdef CONFIG_FRDMK64F_SDHC_MOUNT
@@ -102,13 +102,23 @@ int k64_bringup(void)
 
       if (ret < 0)
         {
-          mcerr("ERROR: Failed to mount %s: %d\n",
-                CONFIG_FRDMK64F_SDHC_MOUNT_MOUNTPOINT, errno);
+          syslog(LOG_ERR,"ERROR: Failed to mount %s: %d\n",
+                 CONFIG_FRDMK64F_SDHC_MOUNT_MOUNTPOINT, errno);
         }
     }
 
 #endif /* CONFIG_FRDMK64F_SDHC_MOUNT */
 #endif /* HAVE_MMCSD */
+
+#ifdef CONFIG_PWM
+  /* Initialize PWM and register the PWM device. */
+
+  ret = k64_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: k64_pwm_setup() failed: %d\n", ret);
+    }
+#endif
 
 #ifdef HAVE_AUTOMOUNTER
   /* Initialize the auto-mounter */

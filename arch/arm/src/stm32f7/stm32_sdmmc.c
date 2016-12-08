@@ -154,7 +154,16 @@
 /* Friendly CLKCR bit re-definitions ****************************************/
 
 #define STM32_CLKCR_RISINGEDGE    (0)
-#define STM32_CLKCR_FALLINGEDGE   STM32_CLKCR_NEGEDGE
+#define STM32_CLKCR_FALLINGEDGE   STM32_SDMMC_CLKCR_NEGEDGE
+
+/* Use the default of the rising edge but allow a configuration,
+ * that does not have the errata, to override the edge the SDIO
+ * command and data is changed on.
+ */
+
+#if !defined(STM32_SDMMC_CLKCR_EDGE)
+#  define STM32_SDMMC_CLKCR_EDGE STM32_CLKCR_RISINGEDGE
+#endif
 
 /* Mode dependent settings.  These depend on clock divisor settings that must
  * be defined in the board-specific board.h header file: STM32_SDMMC_INIT_CLKDIV,
@@ -162,16 +171,16 @@
  */
 
 #define STM32_CLCKCR_INIT           (STM32_SDMMC_INIT_CLKDIV      | \
-                                     STM32_CLKCR_RISINGEDGE | \
+                                     STM32_SDMMC_CLKCR_EDGE | \
                                      STM32_SDMMC_CLKCR_WIDBUS_D1)
 #define STM32_SDMMC_CLKCR_MMCXFR    (STM32_SDMMC_MMCXFR_CLKDIV    | \
-                                     STM32_CLKCR_RISINGEDGE | \
+                                     STM32_SDMMC_CLKCR_EDGE | \
                                      STM32_SDMMC_CLKCR_WIDBUS_D1)
 #define STM32_SDMMC_CLCKR_SDXFR     (STM32_SDMMC_SDXFR_CLKDIV     | \
-                                     STM32_CLKCR_RISINGEDGE | \
+                                     STM32_SDMMC_CLKCR_EDGE | \
                                      STM32_SDMMC_CLKCR_WIDBUS_D1)
 #define STM32_SDMMC_CLCKR_SDWIDEXFR (STM32_SDMMC_SDXFR_CLKDIV     | \
-                                     STM32_CLKCR_RISINGEDGE | \
+                                     STM32_SDMMC_CLKCR_EDGE | \
                                      STM32_SDMMC_CLKCR_WIDBUS_D4)
 
 /* Timing */

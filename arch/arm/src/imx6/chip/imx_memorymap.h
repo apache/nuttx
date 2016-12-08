@@ -122,6 +122,18 @@
 #define IMX_MMDCDDR_PSECTION     0x10000000  /* 10000000-ffffffff 3840 MB MMDC-DDR Controller */
                                              /* 10000000-7fffffff 1792 MB */
 
+/* By default, NuttX uses a 1-1 memory mapping.  So the unused, reserved
+ * address in the top-level memory map are candidates for other mapping uses:
+ *
+ *  00018000-000fffff Reserved -- Not used
+ *  00400000-007fffff Reserved -- Used as the virtual address an inter-CPU,
+ *                                un-cached memory region in SMP
+ *                                configurations
+ *  00d00000-00ffffff Reserved -- Not used
+ *  0220c000-023fffff Reserved -- Not used
+ *  80000000-efffffff Reserved -- Level 2 page table (See below)
+ */
+
 /* i.MX6 DMA PSECTION Offsets */
 
 #define IMX_CAAMRAM_OFFSET       0x00000000  /* 00000000-00003fff  16 KB CAAM (16K secure RAM) */
@@ -897,7 +909,7 @@
  *   0x80000000-0xefffffff: Undefined (1.75 GB)
  *
  * That is the offset where the main L2 page tables will be positioned.  This
- * corresponds to page table offsets 0x000002000 up to 0x000003c00.  That
+ * corresponds to page table offsets 0x00002000 up to 0x00003c00.  That
  * is 1792 entries, each mapping 4KB of address for a total of 7MB of virtual
  * address space)
  *
@@ -917,7 +929,21 @@
  *    the address space.
  */
 
+#define INTERCPU_L2_PAGES 1 /* Pages allowed for inter-processor communications */
+
 #ifndef CONFIG_ARCH_LOWVECTORS
+  /* Memory map
+   * VIRTUAL ADDRESS RANGE L1 PG TABLE L2 PG TABLE  DESCRIPTION
+   * START      END        OFFSET      SIZE
+   * ---------- ---------- ------------ ----------------------------
+   * 0x80000000 0x803fffff 0x000002000 0x000000400  Vectors (1MiB)
+   * 0x80100000 0x806fffff 0x000002400 0x000001800  Paging  (6MiB)
+   *
+   * If SMP is enabled, then 1MiB of address spaces for the INTERCPU_L2_PAGES
+   * pages are taken from the end of the Paging L2 page table to hold non-
+   * cacheable, inter-processor communication data.
+   */
+
   /* Vector L2 page table offset/size */
 
 #  define VECTOR_L2_OFFSET        0x000002000
@@ -933,16 +959,44 @@
 #  define VECTOR_L2_END_PADDR     (VECTOR_L2_PBASE + VECTOR_L2_SIZE)
 #  define VECTOR_L2_END_VADDR     (VECTOR_L2_VBASE + VECTOR_L2_SIZE)
 
-  /* Paging L2 page table offset/size */
+#  if defined(CONFIG_SMP) && defined(SMP_INTERCPU_NONCACHED)
+    /* Paging L2 page table offset/size */
 
-#  define PGTABLE_L2_OFFSET       0x000002400
-#  define PGTABLE_L2_SIZE         0x000001800
+#    define PGTABLE_L2_OFFSET     0x000002400
+#    define PGTABLE_L2_SIZE       0x000001400
+
+#  else
+    /* Paging L2 page table offset/size */
+
+#    define PGTABLE_L2_OFFSET     0x000002400
+#    define PGTABLE_L2_SIZE       0x000001800
+#  endif
 
 #else
+  /* Memory map
+   * VIRTUAL ADDRESS RANGE L1 PG TABLE L2 PG TABLE  DESCRIPTION
+   * START      END        OFFSET      SIZE
+   * ---------- ---------- ------------ ----------------------------
+   * 0x80000000 0x806fffff 0x000002000 0x000001c00  Paging  (7MiB)
+   *
+   * If SMP is enabled, then 1MiB of address spaces for the INTERCPU_L2_PAGES
+   * pages are taken from the end of the Paging L2 page table to hold non-
+   * cacheable, inter-processor communication data.
+   */
+
+#  if defined(CONFIG_SMP) && defined(SMP_INTERCPU_NONCACHED)
   /* Paging L2 page table offset/size */
 
-#  define PGTABLE_L2_OFFSET       0x000002000
-#  define PGTABLE_L2_SIZE         0x000001c00
+#    define PGTABLE_L2_OFFSET     0x000002000
+#    define PGTABLE_L2_SIZE       0x000001800
+
+#  else
+  /* Paging L2 page table offset/size */
+
+#    define PGTABLE_L2_OFFSET     0x000002000
+#    define PGTABLE_L2_SIZE       0x000001c00
+#  endif
+
 #endif
 
 /* Paging L2 page table base addresses
@@ -959,6 +1013,23 @@
 #define PGTABLE_L2_END_PADDR      (PGTABLE_L2_PBASE + PGTABLE_L2_SIZE)
 #define PGTABLE_L2_END_VADDR      (PGTABLE_L2_VBASE + PGTABLE_L2_SIZE)
 
+#if defined(CONFIG_SMP) && defined(SMP_INTERCPU_NONCACHED)
+/* Non-cached inter-processor communication data */
+
+#  define INTERCPU_L2_OFFSET      (PGTABLE_L2_OFFSET + PGTABLE_L2_SIZE)
+#  define INTERCPU_L2_SIZE        (0x00000400)
+
+/* Non-cached inter-processor communication page table base addresses */
+
+#  define INTERCPU_L2_PBASE       (PGTABLE_BASE_PADDR + INTERCPU_L2_OFFSET)
+#  define INTERCPU_L2_VBASE       (PGTABLE_BASE_VADDR + INTERCPU_L2_OFFSET)
+
+/* Non-cached inter-processor communication end addresses */
+
+#  define INTERCPU_L2_END_PADDR   (INTERCPU_L2_PBASE + INTERCPU_L2_SIZE)
+#  define INTERCPU_L2_END_VADDR   (INTERCPU_L2_VBASE + INTERCPU_L2_SIZE)
+#endif
+
 /* Base address of the interrupt vector table.
  *
  *   IMX_VECTOR_PADDR - Unmapped, physical address of vector table in SRAM
@@ -974,19 +1045,62 @@
  */
 
 #ifdef CONFIG_ARCH_LOWVECTORS  /* Vectors located at 0x0000:0000  */
-
-  /* Vectors will always lie at the beginnin of OCRAM */
+/* Vectors will always lie at the beginning of OCRAM
+ *
+ * OCRAM Memory Map:
+ * ---------- ---------- ---------------------------
+ * START      END        CONTENT
+ * ---------- ---------- ---------------------------
+ * 0x00000000 0x00010000 Vectors (VECTOR_TABLE_SIZE)
+ * 0x00010000 0x00011000 Inter-CPU communications
+ * 0x00011000 0x0003c000 Unused
+ * 0x0003c000 0x00004000 Page table (PGTABLE_SIZE)
+ */
 
 #  define IMX_VECTOR_PADDR        IMX_OCRAM_PBASE
 #  define IMX_VECTOR_VSRAM        IMX_OCRAM_VBASE
 #  define IMX_VECTOR_VADDR        0x00000000
 
+#if defined(CONFIG_SMP) && defined(SMP_INTERCPU_NONCACHED)
+/* Inter-processor communications.
+ *
+ * NOTICE that we use the unused virtual address space at 0x00400000 for
+ * the inter-CPU virtual communication area.
+ */
+
+#  define INTERCPU_PADDR          (IMX_VECTOR_PADDR + VECTOR_TABLE_SIZE)
+#  define INTERCPU_VADDR          (0x00400000)
+#  define INTERCPU_SIZE           (INTERCPU_L2_PAGES << 12)
+#  define INTERCPU_VSRAM          (IMX_VECTOR_VSRAM + VECTOR_TABLE_SIZE)
+#endif
+
 #else  /* Vectors located at 0xffff:0000 -- this probably does not work */
+/* OCRAM Memory Map:
+ * ---------- ---------- ---------------------------
+ * START      END        CONTENT
+ * ---------- ---------- ---------------------------
+ * 0x00000000 0x00004000 Page table (PGTABLE_SIZE)
+ * 0x00004000 0x0002f000 Unused
+ * 0x0002f000 0x00030000 Inter-CPU communications
+ * 0x00030000 0x00010000 Vectors (VECTOR_TABLE_SIZE)
+ */
 
 #  define IMX_VECTOR_PADDR        (IMX_OCRAM_PBASE + IMX_OCRAM_SIZE - VECTOR_TABLE_SIZE)
 #  define IMX_VECTOR_VSRAM        (IMX_OCRAM_VBASE + IMX_OCRAM_SIZE - VECTOR_TABLE_SIZE)
 #  define IMX_VECTOR_VADDR        0xffff0000
 
+#if defined(CONFIG_SMP) && defined(SMP_INTERCPU_NONCACHED)
+/* Inter-processor communications
+ *
+ * NOTICE that we use the unused virtual address space at 0x00400000 for
+ * the inter-CPU virtual communication area.
+ */
+
+#  define INTERCPU_PADDR          (IMX_VECTOR_PADDR - INTERCPU_L2_SIZE)
+#  define INTERCPU_VADDR          (0x00400000)
+#  define INTERCPU_SIZE           (INTERCPU_L2_PAGES << 12)
+#  define INTERCPU_VSRAM          (IMX_VECTOR_VSRAM - INTERCPU_L2_SIZE)
+#endif
 #endif
 
 /************************************************************************************

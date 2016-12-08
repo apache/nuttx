@@ -77,4 +77,9 @@ void up_initialize(void)
   /* Initialize the system timer */
 
   misoc_timer_initialize();
+
+  /* Initialize the network cores */
+
+  misoc_net_initialize(0);
+
 }

@@ -67,6 +67,17 @@
  * Public Functions
  ****************************************************************************/
 
-#endif /* __ASSEMBLY__ */
+/************************************************************************************
+ * Name: lpc43_adc_setup
+ *
+ * Description:
+ *   Initialize ADC and register the ADC driver.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_LPC43_ADC0
+int lpc43_adc_setup(void);
 #endif
 
+#endif /* __ASSEMBLY__ */
+#endif

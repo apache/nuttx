@@ -161,18 +161,17 @@ void net_initroute(void)
 FAR struct net_route_s *net_allocroute(void)
 {
   FAR struct net_route_s *route;
-  net_lock_t save;
 
   /* Get exclusive address to the networking data structures */
 
-  save = net_lock();
+  net_lock();
 
   /* Then add the new entry to the table */
 
   route = (FAR struct net_route_s *)
     sq_remfirst((FAR sq_queue_t *)&g_freeroutes);
 
-  net_unlock(save);
+  net_unlock();
   return route;
 }
 #endif
@@ -181,24 +180,23 @@ FAR struct net_route_s *net_allocroute(void)
 FAR struct net_route_ipv6_s *net_allocroute_ipv6(void)
 {
   FAR struct net_route_ipv6_s *route;
-  net_lock_t save;
 
   /* Get exclusive address to the networking data structures */
 
-  save = net_lock();
+  net_lock();
 
   /* Then add the new entry to the table */
 
   route = (FAR struct net_route_ipv6_s *)
     sq_remfirst((FAR sq_queue_t *)&g_freeroutes_ipv6);
 
-  net_unlock(save);
+  net_unlock();
   return route;
 }
 #endif
 
 /****************************************************************************
- * Function: net_allocroute
+ * Function: net_freeroute
  *
  * Description:
  *   Free one route by adding it from the free list
@@ -214,36 +212,32 @@ FAR struct net_route_ipv6_s *net_allocroute_ipv6(void)
 #ifdef CONFIG_NET_IPv4
 void net_freeroute(FAR struct net_route_s *route)
 {
-  net_lock_t save;
-
   DEBUGASSERT(route);
 
   /* Get exclusive address to the networking data structures */
 
-  save = net_lock();
+  net_lock();
 
   /* Then add the new entry to the table */
 
   sq_addlast((FAR sq_entry_t *)route, (FAR sq_queue_t *)&g_freeroutes);
-  net_unlock(save);
+  net_unlock();
 }
 #endif
 
 #ifdef CONFIG_NET_IPv6
 void net_freeroute_ipv6(FAR struct net_route_ipv6_s *route)
 {
-  net_lock_t save;
-
   DEBUGASSERT(route);
 
   /* Get exclusive address to the networking data structures */
 
-  save = net_lock();
+  net_lock();
 
   /* Then add the new entry to the table */
 
   sq_addlast((FAR sq_entry_t *)route, (FAR sq_queue_t *)&g_freeroutes_ipv6);
-  net_unlock(save);
+  net_unlock();
 }
 #endif
 

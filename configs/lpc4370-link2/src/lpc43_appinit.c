@@ -135,8 +135,22 @@ static void lpc43_i2ctool(void)
 
 int board_app_initialize(uintptr_t arg)
 {
+  int ret;
+
   /* Register I2C drivers on behalf of the I2C tool */
 
   lpc43_i2ctool();
+
+#ifdef CONFIG_ADC
+  /* Initialize ADC and register the ADC driver. */
+
+  ret = lpc43_adc_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: lpc43_adc_setup failed: %d\n", ret);
+    }
+#endif
+
+  UNUSED(ret);
   return OK;
 }

@@ -334,7 +334,6 @@ int icmp_ping(in_addr_t addr, uint16_t id, uint16_t seqno, uint16_t datalen,
 {
   FAR struct net_driver_s *dev;
   struct icmp_ping_s state;
-  net_lock_t save;
 #ifdef CONFIG_NET_ARP_SEND
   int ret;
 #endif
@@ -380,7 +379,7 @@ int icmp_ping(in_addr_t addr, uint16_t id, uint16_t seqno, uint16_t datalen,
   state.png_datlen = datalen;          /* The length of data to send in the ECHO request */
   state.png_sent   = false;            /* ECHO request not yet sent */
 
-  save             = net_lock();
+  net_lock();
   state.png_time   = clock_systimer();
 
   /* Set up the callback */
@@ -410,7 +409,7 @@ int icmp_ping(in_addr_t addr, uint16_t id, uint16_t seqno, uint16_t datalen,
       icmp_callback_free(dev, state.png_cb);
     }
 
-  net_unlock(save);
+  net_unlock();
 
   /* Return the negated error number in the event of a failure, or the
    * sequence number of the ECHO reply on success.

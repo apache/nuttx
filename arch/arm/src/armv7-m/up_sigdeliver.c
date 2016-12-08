@@ -124,9 +124,9 @@ void up_sigdeliver(void)
   /* Then restore the task interrupt state */
 
 #ifdef CONFIG_ARMV7M_USEBASEPRI
-  up_irq_restore((uint8_t)regs[REG_BASEPRI]);
+  leave_critical_section((uint8_t)regs[REG_BASEPRI]);
 #else
-  up_irq_restore((uint16_t)regs[REG_PRIMASK]);
+  leave_critical_section((uint16_t)regs[REG_PRIMASK]);
 #endif
 
   /* Deliver the signal */
@@ -136,9 +136,18 @@ void up_sigdeliver(void)
   /* Output any debug messages BEFORE restoring errno (because they may
    * alter errno), then disable interrupts again and restore the original
    * errno that is needed by the user logic (it is probably EINTR).
+   *
+   * REVISIT: In SMP mode up_irq_save() probably only disables interrupts
+   * on the local CPU.  We do not want to call enter_critical_section()
+   * here, however, because we don't want this state to stick after the
+   * call to up_fullcontextrestore().
+   *
+   * I would prefer that all interrupts are disabled when
+   * up_fullcontextrestore() is called, but that may not be necessary.
    */
 
   sinfo("Resuming\n");
+
   (void)up_irq_save();
   rtcb->pterrno = saved_errno;
 

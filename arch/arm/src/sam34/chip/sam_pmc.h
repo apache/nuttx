@@ -402,10 +402,10 @@
 #  define PMC_MCKR_CPCSS_SHIFT           (16)
 #  define PMC_MCKR_CPCSS_MASK            (0x7 << PMC_MCKR_CPCSS_SHIFT)
 #    define PMC_MCKR_CPCSS_SLOW          (0 << PMC_MCKR_CPCSS_SHIFT) /* Slow Clock */
-#    define PMC_MCKR_CCPSS_MAIN          (1 << PMC_MCKR_CPCSS_SHIFT) /* Main Clock */
-#    define PMC_MCKR_CCPSS_PLLA          (2 << PMC_MCKR_CPCSS_SHIFT) /* PLLA Clock */
-#    define PMC_MCKR_CCPSS_PLLB          (3 << PMC_MCKR_CPCSS_SHIFT) /* PLLB Clock */
-#    define PMC_MCKR_CCPSS_MCK           (4 << PMC_MCKR_CPCSS_SHIFT) /* Master Clock */
+#    define PMC_MCKR_CPCSS_MAIN          (1 << PMC_MCKR_CPCSS_SHIFT) /* Main Clock */
+#    define PMC_MCKR_CPCSS_PLLA          (2 << PMC_MCKR_CPCSS_SHIFT) /* PLLA Clock */
+#    define PMC_MCKR_CPCSS_PLLB          (3 << PMC_MCKR_CPCSS_SHIFT) /* PLLB Clock */
+#    define PMC_MCKR_CPCSS_MCK           (4 << PMC_MCKR_CPCSS_SHIFT) /* Master Clock */
 #  define PMC_MCKR_CPPRES_SHIFT          (20)
 #  define PMC_MCKR_CPPRES_MASK           (0xF << PMC_MCKR_CPPRES_SHIFT)
 #    define PMC_MCKR_CPPRES(D)           (((D) - 1) << PMC_MCKR_CPPRES_SHIFT)
@@ -547,13 +547,14 @@
 /* Peripheral Clock Status Register 1 */
 
 #if defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
-    defined(CONFIG_ARCH_CHIP_SAM4S) || defined(CONFIG_ARCH_CHIP_SAM4E)
+    defined(CONFIG_ARCH_CHIP_SAM4S) || defined(CONFIG_ARCH_CHIP_SAM4E) || \
+    defined(CONFIG_ARCH_CHIP_SAM4CM)
 #  define PMC_PIDH(n)                    (1 << ((n) - 32))
 #  define PMC_PID32                      (1 << 0)  /* Bit 0:  PID32 */
 #  define PMC_PID33                      (1 << 1)  /* Bit 1:  PID33 */
 #  define PMC_PID34                      (1 << 2)  /* Bit 2:  PID34 */
 #  if defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
-   defined(CONFIG_ARCH_CHIP_SAM4E)
+    defined(CONFIG_ARCH_CHIP_SAM4E) || defined(CONFIG_ARCH_CHIP_SAM4CM)
 #    define PMC_PID35                    (1 << 3)  /* Bit 3:  PID35 */
 #    define PMC_PID36                    (1 << 4)  /* Bit 4:  PID36 */
 #    define PMC_PID37                    (1 << 5)  /* Bit 5:  PID37 */

@@ -81,6 +81,7 @@ CMN_CSRCS += arm_unblocktask.c arm_undefinedinsn.c
 
 ifeq ($(CONFIG_SMP),y)
 CMN_CSRCS += arm_cpuindex.c arm_cpustart.c arm_cpupause.c arm_cpuidlestack.c
+CMN_CSRCS += arm_scu.c
 endif
 
 ifeq ($(CONFIG_DEBUG_IRQ_INFO),y)

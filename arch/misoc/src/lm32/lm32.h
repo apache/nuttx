@@ -149,6 +149,11 @@ void lm32_timer_initialize(void);
 
 void lm32_sigdeliver(void);
 
+/* Cache flushing ***********************************************************/
+
+void lm32_flush_dcache(void);
+void lm32_flush_icache(void);
+
 /* Debug ********************************************************************/
 
 void lm32_dumpstate(void);

@@ -200,18 +200,6 @@ void stm32_usb_set_pwr_callback(xcpt_t pwr_changed_handler);
 void stm32_led_initialize(void);
 #endif
 
-/************************************************************************************
- * Name: stm32_can_initialize
- *
- * Description:
- *   Called at application startup time to initialize the CAN functionality.
- *
- ************************************************************************************/
-
-#if defined(CONFIG_CAN) && (defined(CONFIG_STM32_CAN1) || defined(CONFIG_STM32_CAN2))
-int stm32_can_initialize(void);
-#endif
-
 /****************************************************************************
  * Name: board_usbmsc_initialize
  *
@@ -226,6 +214,18 @@ int stm32_can_initialize(void);
 
 #ifndef CONFIG_BOARDCTL_USBDEVCTRL
 int board_usbmsc_initialize(int port);
+#endif
+
+/****************************************************************************
+ * Name: stm32_can_setup
+ *
+ * Description:
+ *  Initialize CAN and register the CAN device
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_CAN
+int stm32_can_setup(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

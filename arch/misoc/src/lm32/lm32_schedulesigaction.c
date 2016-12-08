@@ -97,7 +97,6 @@
 void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 {
   irqstate_t flags;
-  uint32_t int_ctx;
 
   sinfo("tcb=0x%p sigdeliver=0x%p\n", tcb, sigdeliver);
 
@@ -155,7 +154,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                * disabled
                */
 
-              g_current_regs[REG_EPC]     = (uint32_t)up_sigdeliver;
+              g_current_regs[REG_EPC]     = (uint32_t)lm32_sigdeliver;
               g_current_regs[REG_INT_CTX] = 0;
 
 
@@ -192,7 +191,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * disabled
            */
 
-          tcb->xcp.regs[REG_EPC]      = (uint32_t)up_sigdeliver;
+          tcb->xcp.regs[REG_EPC]      = (uint32_t)lm32_sigdeliver;
           tcb->xcp.regs[REG_INT_CTX]  = 0;
 
           sinfo("PC/STATUS Saved: %08x/%08x New: %08x/%08x\n",

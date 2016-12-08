@@ -340,5 +340,17 @@ void k64_automount_initialize(void);
 void k64_automount_event(bool inserted);
 #endif
 
+/************************************************************************************
+ * Name: k64_pwm_setup
+ *
+ * Description:
+ *   Initialize PWM and register the PWM device.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_PWM
+int k64_pwm_setup(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_FREEDOM_K64F_SRC_FREEDOM_K64F_H */

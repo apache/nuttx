@@ -408,7 +408,6 @@ int icmpv6_ping(net_ipv6addr_t addr, uint16_t id, uint16_t seqno,
 {
   FAR struct net_driver_s *dev;
   struct icmpv6_ping_s state;
-  net_lock_t save;
 
 #ifdef CONFIG_NET_ICMPv6_NEIGHBOR
   int ret;
@@ -454,7 +453,7 @@ int icmpv6_ping(net_ipv6addr_t addr, uint16_t id, uint16_t seqno,
 
   net_ipv6addr_copy(state.png_addr, addr); /* Address of the peer to be ping'ed */
 
-  save             = net_lock();
+  net_lock();
   state.png_time   = clock_systimer();
 
   /* Set up the callback */
@@ -484,7 +483,7 @@ int icmpv6_ping(net_ipv6addr_t addr, uint16_t id, uint16_t seqno,
       icmpv6_callback_free(dev, state.png_cb);
     }
 
-  net_unlock(save);
+  net_unlock();
 
   /* Return the negated error number in the event of a failure, or the
    * sequence number of the ECHO reply on success.

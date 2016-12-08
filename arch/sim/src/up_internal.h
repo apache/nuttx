@@ -214,8 +214,8 @@ extern volatile int g_uart_data_available;
  * so that it will be ready for the next pause operation.
  */
 
-volatile spinlock_t g_cpu_wait[CONFIG_SMP_NCPUS];
-volatile spinlock_t g_cpu_paused[CONFIG_SMP_NCPUS];
+volatile spinlock_t g_cpu_wait[CONFIG_SMP_NCPUS] SP_SECTION;
+volatile spinlock_t g_cpu_paused[CONFIG_SMP_NCPUS] SP_SECTION;
 #endif
 
 /****************************************************************************

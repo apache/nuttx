@@ -58,6 +58,8 @@
 #  endif
 #endif
 
+#include "bambino-200e.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -162,7 +164,7 @@ int board_app_initialize(uintptr_t arg)
 {
   /* Initialize the SPIFI block device */
 
-  nsh_spifi_initialize();
+  (void)nsh_spifi_initialize();
 
 #ifdef CONFIG_TIMER
   /* Registers the timers */

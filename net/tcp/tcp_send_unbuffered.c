@@ -720,7 +720,6 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
 {
   FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)psock->s_conn;
   struct send_s state;
-  net_lock_t save;
   int errcode;
   int ret = OK;
 
@@ -792,7 +791,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
    * are ready.
    */
 
-  save                = net_lock();
+  net_lock();
   memset(&state, 0, sizeof(struct send_s));
 
   /* This semaphore is used for signaling and, hence, should not have
@@ -854,7 +853,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
     }
 
   sem_destroy(&state.snd_sem);
-  net_unlock(save);
+  net_unlock();
 
   /* Set the socket state to idle */
 

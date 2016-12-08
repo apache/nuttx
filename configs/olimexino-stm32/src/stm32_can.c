@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/olimexino-stm32/src/stm32_can.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           David Sidrane <david_s5@nscdg.com>
  *
@@ -48,13 +48,12 @@
 
 #include "chip.h"
 #include "up_arch.h"
-
-#include "olimexino-stm32.h"
-
 #include "stm32.h"
 #include "stm32_can.h"
 
-#if defined(CONFIG_CAN) && (defined(CONFIG_STM32_CAN1) || defined(CONFIG_STM32_CAN2))
+#include "olimexino-stm32.h"
+
+#ifdef CONFIG_CAN
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -62,55 +61,57 @@
 /* Configuration ********************************************************************/
 /* The STM32F107VC supports CAN1 and CAN2 */
 
-#define CAN_PORT 1
+#if defined(CONFIG_STM32_CAN1) && defined(CONFIG_STM32_CAN2)
+#  warning "Both CAN1 and CAN2 are enabled.  Only CAN1 is connected."
+#  undef CONFIG_STM32_CAN2
+#endif
+
+#ifdef CONFIG_STM32_CAN1
+#  define CAN_PORT 1
+#else
+#  define CAN_PORT 2
+#endif
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
 /************************************************************************************
- * Name: board_can_initialize
+ * Name: stm32_can_setup
  *
  * Description:
- *   All STM32 architectures must provide the following interface to work with
- *   examples/can.
+ *  Initialize CAN and register the CAN device
  *
  ************************************************************************************/
 
-int board_can_initialize(void)
+int stm32_can_setup(void)
 {
-  static bool initialized = false;
+#if defined(CONFIG_STM32_CAN1) || defined(CONFIG_STM32_CAN2)
   struct can_dev_s *can;
   int ret;
 
-  /* Check if we have already initialized */
+  /* Call stm32_caninitialize() to get an instance of the CAN interface */
 
-  if (!initialized)
+  can = stm32_caninitialize(CAN_PORT);
+  if (can == NULL)
     {
-      /* Call stm32_caninitialize() to get an instance of the CAN interface */
+      canerr("ERROR:  Failed to get CAN interface\n");
+      return -ENODEV;
+    }
 
-      can = stm32_caninitialize(CAN_PORT);
-      if (can == NULL)
-        {
-          canerr("ERROR:  Failed to get CAN interface\n");
-          return -ENODEV;
-        }
+  /* Register the CAN driver at "/dev/can0" */
 
-      /* Register the CAN driver at "/dev/can0" */
-
-      ret = can_register("/dev/can0", can);
-      if (ret < 0)
-        {
-          canerr("ERROR: can_register failed: %d\n", ret);
-          return ret;
-        }
-
-      /* Now we are initialized */
-
-      initialized = true;
+  ret = can_register("/dev/can0", can);
+  if (ret < 0)
+    {
+      canerr("ERROR: can_register failed: %d\n", ret);
+      return ret;
     }
 
   return OK;
+#else
+  return -ENODEV;
+#endif
 }
 
-#endif /* CONFIG_CAN && CONFIG_STM32_CAN1 */
+#endif /* CONFIG_CAN */

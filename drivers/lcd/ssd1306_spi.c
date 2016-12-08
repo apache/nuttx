@@ -45,7 +45,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/lcd/ssd1306.h>
-
+#include <nuttx/spi/spi.h>
 #include "ssd1306.h"
 
 #if defined(CONFIG_LCD_SSD1306) && defined(CONFIG_LCD_SSD1306_SPI)
@@ -109,7 +109,7 @@ void ssd1306_sendblk(FAR struct ssd1306_dev_s *priv, uint8_t *data, uint8_t len)
 {
   /* Send byte value to display */
 
-  (void)SPI_SNDBLOCK(priv, data, len);
+  (void)SPI_SNDBLOCK(priv->spi, data, len);
 }
 
 /****************************************************************************

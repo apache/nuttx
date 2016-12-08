@@ -77,7 +77,7 @@
 #  define STM32L4_NBTIM                    2   /* Two basic timers, TIM6-7 */
 #  define STM32L4_NLPTIM                   2   /* Two low-power timers, LPTIM1-2 */
 #  define STM32L4_NRNG                     1   /* Random number generator (RNG) */
-#  define STM32L4_NUART                    4   /* UART 4-5 */
+#  define STM32L4_NUART                    2   /* UART 4-5 */
 #  define STM32L4_NUSART                   3   /* USART 1-3 */
 #  define STM32L4_NLPUART                  1   /* LPUART 1 */
 #  define STM32L4_NSPI                     3   /* SPI1-3 */

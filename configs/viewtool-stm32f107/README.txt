@@ -365,7 +365,6 @@ ViewTool DP83848 Ethernet Module
 
     Networking (required)
       CONFIG_NET=y                           : Enabled networking support
-      CONFIG_NET_MULTIBUFFER=y               : Required by driver
       CONFIG_NSH_NOMAC=y
 
     Networking (recommended/typical)

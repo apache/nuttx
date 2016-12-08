@@ -44,6 +44,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
 #include <nuttx/spinlock.h>
+#include <nuttx/sched_note.h>
 
 #include "up_internal.h"
 #include "gic.h"
@@ -69,8 +70,8 @@
  * so that it will be ready for the next pause operation.
  */
 
-static volatile spinlock_t g_cpu_wait[CONFIG_SMP_NCPUS];
-static volatile spinlock_t g_cpu_paused[CONFIG_SMP_NCPUS];
+static volatile spinlock_t g_cpu_wait[CONFIG_SMP_NCPUS] SP_SECTION;
+static volatile spinlock_t g_cpu_paused[CONFIG_SMP_NCPUS] SP_SECTION;
 
 /****************************************************************************
  * Public Functions
@@ -131,22 +132,41 @@ int up_cpu_paused(int cpu)
 
   sched_suspend_scheduler(tcb);
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION
+  /* Notify that we are paused */
+
+  sched_note_cpu_paused(tcb);
+#endif
+
   /* Save the current context at CURRENT_REGS into the TCB at the head
    * of the assigned task list for this CPU.
    */
 
   up_savestate(tcb->xcp.regs);
 
-  /* Wait for the spinlock to be released */
+  /* Release the g_cpu_puased spinlock to synchronize with the
+   * requesting CPU.
+   */
 
   spin_unlock(&g_cpu_paused[cpu]);
+
+  /* Wait for the spinlock to be released.  The requesting CPU will release
+   * the spinlcok when the CPU is resumed.
+   */
+
   spin_lock(&g_cpu_wait[cpu]);
 
-  /* Restore the exception context of the tcb at the (new) head of the
-   * assigned task list.
+  /* This CPU has been resumed. Restore the exception context of the TCB at
+   * the (new) head of the assigned task list.
    */
 
   tcb = this_task();
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION
+  /* Notify that we have resumed */
+
+  sched_note_cpu_resumed(tcb);
+#endif
 
   /* Reset scheduler parameters */
 
@@ -224,6 +244,12 @@ int up_cpu_pause(int cpu)
 {
   int ret;
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION
+  /* Notify of the pause event */
+
+  sched_note_cpu_pause(this_task(), cpu);
+#endif
+
   DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS && cpu != this_cpu());
 
   /* Take the both spinlocks.  The g_cpu_wait spinlock will prevent the SGI2
@@ -287,6 +313,12 @@ int up_cpu_pause(int cpu)
 
 int up_cpu_resume(int cpu)
 {
+#ifdef CONFIG_SCHED_INSTRUMENTATION
+  /* Notify of the resume event */
+
+  sched_note_cpu_resume(this_task(), cpu);
+#endif
+
   DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS && cpu != this_cpu());
 
   /* Release the spinlock.  Releasing the spinlock will cause the SGI2

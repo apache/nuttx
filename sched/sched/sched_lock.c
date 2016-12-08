@@ -109,12 +109,12 @@
  *    least one CPU has pre-emption disabled.
  */
 
-volatile spinlock_t g_cpu_schedlock = SP_UNLOCKED;
+volatile spinlock_t g_cpu_schedlock SP_SECTION = SP_UNLOCKED;
 
 /* Used to keep track of which CPU(s) hold the IRQ lock. */
 
-volatile spinlock_t g_cpu_locksetlock;
-volatile cpu_set_t g_cpu_lockset;
+volatile spinlock_t g_cpu_locksetlock SP_SECTION;
+volatile cpu_set_t g_cpu_lockset SP_SECTION;
 
 #endif /* CONFIG_SMP */
 

@@ -196,14 +196,13 @@ void igmp_starttimer(FAR struct igmp_group_s *group, uint8_t decisecs)
 
 bool igmp_cmptimer(FAR struct igmp_group_s *group, int maxticks)
 {
-  net_lock_t flags;
   int remaining;
 
   /* Disable interrupts so that there is no race condition with the actual
    * timer expiration.
    */
 
-  flags = net_lock();
+  net_lock();
 
   /* Get the timer remaining on the watchdog.  A time of <= zero means that
    * the watchdog was never started.
@@ -222,11 +221,11 @@ bool igmp_cmptimer(FAR struct igmp_group_s *group, int maxticks)
       /* Cancel the watchdog timer and return true */
 
       wd_cancel(group->wdog);
-      net_unlock(flags);
+      net_unlock();
       return true;
     }
 
-  net_unlock(flags);
+  net_unlock();
   return false;
 }
 

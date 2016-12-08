@@ -79,6 +79,18 @@
 
 void weak_function kl_spidev_initialize(void);
 
+/************************************************************************************
+ * Name: kl_pwm_setup
+ *
+ * Description:
+ *   Initialize PWM and register the PWM device.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_PWM
+int kl_pwm_setup(void);
+#endif
+
 /****************************************************************************
  * Name: kl_led_initialize
  *

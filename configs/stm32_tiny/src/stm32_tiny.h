@@ -121,7 +121,7 @@
  *
  ************************************************************************************/
 
-extern void stm32_spidev_initialize(void);
+void stm32_spidev_initialize(void);
 
 /************************************************************************************
  * Name: stm32_usbinitialize
@@ -131,7 +131,19 @@ extern void stm32_spidev_initialize(void);
  *
  ************************************************************************************/
 
-extern void stm32_usbinitialize(void);
+void stm32_usbinitialize(void);
+
+/************************************************************************************
+ * Name: stm32_pwm_setup
+ *
+ * Description:
+ *   Initialize PWM and register the PWM device.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_PWM
+int stm32_pwm_setup(void);
+#endif
 
 /************************************************************************************
  * Name: stm32_wlinitialize
@@ -141,7 +153,7 @@ extern void stm32_usbinitialize(void);
  *
  ************************************************************************************/
 
-extern void stm32_wlinitialize(void);
+void stm32_wlinitialize(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_HYMINI_STM32V_H */

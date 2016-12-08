@@ -46,7 +46,10 @@
 
 #include <nuttx/sched.h>
 #include <nuttx/clock.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/sched_note.h>
+
+#include "sched/sched.h"
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_BUFFER
 
@@ -60,8 +63,8 @@
 
 struct note_info_s
 {
-  unsigned int ni_head;
-  unsigned int ni_tail;
+  volatile unsigned int ni_head;
+  volatile unsigned int ni_tail;
   uint8_t ni_buffer[CONFIG_SCHED_NOTE_BUFSIZE];
 };
 
@@ -122,8 +125,10 @@ static inline unsigned int note_next(unsigned int ndx, unsigned int offset)
  *   Fill in some of the common fields in the note structure.
  *
  * Input Parameters:
- *   tcb  - The TCB containing the information
- *   note - The common note structure to use
+ *   tcb    - The TCB containing the information
+ *   note   - The common note structure to use
+ *   length - The total lengthof the note structure
+ *   type   - The type of the note
  *
  * Returned Value:
  *   None
@@ -153,6 +158,39 @@ static void note_common(FAR struct tcb_s *tcb, FAR struct note_common_s *note,
   note->nc_systime[2] = (uint8_t)((systime >> 16) & 0xff);
   note->nc_systime[3] = (uint8_t)((systime >> 24) & 0xff);
 }
+
+/****************************************************************************
+ * Name: note_spincommon
+ *
+ * Description:
+ *   Common logic for NOTE_SPINLOCK, NOTE_SPINLOCKED, and NOTE_SPINUNLOCK
+ *
+ * Input Parameters:
+ *   tcb  - The TCB containing the information
+ *   note - The common note structure to use
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
+void note_spincommon(FAR struct tcb_s *tcb, FAR volatile spinlock_t *spinlock,
+                     int type)
+{
+  struct note_spinlock_s note;
+
+  /* Format the note */
+
+  note_common(tcb, &note.nsp_cmn, sizeof(struct note_spinlock_s), type);
+  note.nsp_spinlock = (FAR void *)spinlock;
+  note.nsp_value    = (uint8_t)*spinlock;
+
+  /* Add the note to circular buffer */
+
+  note_add((FAR const uint8_t *)&note, sizeof(struct note_spinlock_s));
+}
+#endif
 
 /****************************************************************************
  * Name: note_length
@@ -243,6 +281,33 @@ static void note_add(FAR const uint8_t *note, uint8_t notelen)
 {
   unsigned int head;
   unsigned int next;
+
+#ifdef CONFIG_SMP
+  /* Ignore notes that are not in the set of monitored CPUs */
+
+  if ((CONFIG_SCHED_INSTRUMENTATION_CPUSET & (1 << this_cpu())) == 0)
+    {
+      /* Not in the set of monitored CPUs.  Do not log the note. */
+
+      return;
+    }
+#endif
+
+  /* REVISIT: In the single CPU case, the following should be safe because
+   * the logic is always called within a critical section, but in the SMP
+   * case we have protection.  One option would be to precalculate and
+   * advancing the new head entry before writing the data into the buffer.
+   * That will eliminate fatal race conditions (although could result in
+   * single notes being corrupted harmlessly).
+   *
+   * But there is a complexity: Advancing the head pointer where the note
+   * buffer is almost full could advance the head to wrap beyond the tail
+   * leaving the buffer in a bad state.  A solution to this would be to pre-
+   * remove entries at the tail of the buffer as necessary to make certain
+   * that there will be space for the new note at the beginning of the
+   * buffer.  I am less certain that this can be done safely in the SMP
+   * case.
+   */
 
   /* Get the index to the head of the circular buffer */
 
@@ -369,6 +434,89 @@ void sched_note_resume(FAR struct tcb_s *tcb)
   note_add((FAR const uint8_t *)&note, sizeof(struct note_resume_s));
 }
 
+#ifdef CONFIG_SMP
+void sched_note_cpu_start(FAR struct tcb_s *tcb, int cpu)
+{
+  struct note_cpu_start_s note;
+
+  /* Format the note */
+
+  note_common(tcb, &note.ncs_cmn, sizeof(struct note_cpu_start_s), NOTE_CPU_START);
+  note.ncs_target = (uint8_t)cpu;
+
+  /* Add the note to circular buffer */
+
+  note_add((FAR const uint8_t *)&note, sizeof(struct note_cpu_start_s));
+}
+
+void sched_note_cpu_started(FAR struct tcb_s *tcb)
+{
+  struct note_cpu_started_s note;
+
+  /* Format the note */
+
+  note_common(tcb, &note.ncs_cmn, sizeof(struct note_cpu_started_s), NOTE_CPU_STARTED);
+
+  /* Add the note to circular buffer */
+
+  note_add((FAR const uint8_t *)&note, sizeof(struct note_cpu_started_s));
+}
+
+void sched_note_cpu_pause(FAR struct tcb_s *tcb, int cpu)
+{
+  struct note_cpu_pause_s note;
+
+  /* Format the note */
+
+  note_common(tcb, &note.ncp_cmn, sizeof(struct note_cpu_pause_s), NOTE_CPU_PAUSE);
+  note.ncp_target = (uint8_t)cpu;
+
+  /* Add the note to circular buffer */
+
+  note_add((FAR const uint8_t *)&note, sizeof(struct note_cpu_pause_s));
+}
+
+void sched_note_cpu_paused(FAR struct tcb_s *tcb)
+{
+  struct note_cpu_paused_s note;
+
+  /* Format the note */
+
+  note_common(tcb, &note.ncp_cmn, sizeof(struct note_cpu_paused_s), NOTE_CPU_PAUSED);
+
+  /* Add the note to circular buffer */
+
+  note_add((FAR const uint8_t *)&note, sizeof(struct note_cpu_paused_s));
+}
+
+void sched_note_cpu_resume(FAR struct tcb_s *tcb, int cpu)
+{
+  struct note_cpu_resume_s note;
+
+  /* Format the note */
+
+  note_common(tcb, &note.ncr_cmn, sizeof(struct note_cpu_resume_s), NOTE_CPU_RESUME);
+  note.ncr_target = (uint8_t)cpu;
+
+  /* Add the note to circular buffer */
+
+  note_add((FAR const uint8_t *)&note, sizeof(struct note_cpu_resume_s));
+}
+
+void sched_note_cpu_resumed(FAR struct tcb_s *tcb)
+{
+  struct note_cpu_resumed_s note;
+
+  /* Format the note */
+
+  note_common(tcb, &note.ncr_cmn, sizeof(struct note_cpu_resumed_s), NOTE_CPU_RESUMED);
+
+  /* Add the note to circular buffer */
+
+  note_add((FAR const uint8_t *)&note, sizeof(struct note_cpu_resumed_s));
+}
+#endif
+
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
 void sched_note_premption(FAR struct tcb_s *tcb, bool locked)
 {
@@ -407,6 +555,27 @@ void sched_note_csection(FAR struct tcb_s *tcb, bool enter)
 }
 #endif
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
+void sched_note_spinlock(FAR struct tcb_s *tcb, FAR volatile void *spinlock)
+{
+  note_spincommon(tcb, spinlock, NOTE_SPINLOCK_LOCK)
+}
+
+void sched_note_spinlocked(FAR struct tcb_s *tcb, FAR volatile void *spinlock);
+{
+  note_spincommon(tcb, spinlock, NOTE_SPINLOCK_LOCKED)
+}
+
+void sched_note_spinunlock(FAR struct tcb_s *tcb, FAR volatile void *spinlock);
+{
+  note_spincommon(tcb, spinlock, NOTE_SPINLOCK_UNLOCK)
+}
+void sched_note_spinabort(FAR struct tcb_s *tcb, FAR volatile void *spinlock);
+{
+  note_spincommon(tcb, spinlock, NOTE_SPINLOCK_ABORT)
+}
+#endif
+
 /****************************************************************************
  * Name: sched_note_get
  *
@@ -425,6 +594,7 @@ void sched_note_csection(FAR struct tcb_s *tcb, bool enter)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_SCHED_NOTE_GET
 ssize_t sched_note_get(FAR uint8_t *buffer, size_t buflen)
 {
   FAR struct note_common_s *note;
@@ -492,6 +662,7 @@ errout_with_csection:
   leave_critical_section(flags);
   return notelen;
 }
+#endif
 
 /****************************************************************************
  * Name: sched_note_size
@@ -508,6 +679,7 @@ errout_with_csection:
  *
  ****************************************************************************/
 
+#ifdef CONFIG_SCHED_NOTE_GET
 ssize_t sched_note_size(void)
 {
   FAR struct note_common_s *note;
@@ -542,5 +714,6 @@ errout_with_csection:
   leave_critical_section(flags);
   return notelen;
 }
+#endif
 
 #endif /* CONFIG_SCHED_INSTRUMENTATION_BUFFER */

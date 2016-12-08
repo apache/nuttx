@@ -46,12 +46,6 @@ config ARCH_MISOC
 	---help---
 		MISOC
 
-config ARCH_RGMP
-	bool "RGMP"
-	---help---
-		RTOS and GPOS on Multi-Processor (RGMP) architecture.  See
-		http://rgmp.sourceforge.net/wiki/index.php/Main_Page.
-
 config ARCH_RENESAS
 	bool "Renesas"
 	select ARCH_NOINTC
@@ -107,7 +101,6 @@ config ARCH
 	default "hc"      if ARCH_HC
 	default "mips"    if ARCH_MIPS
 	default "misoc"   if ARCH_MISOC
-	default "rgmp"    if ARCH_RGMP
 	default "renesas" if ARCH_RENESAS
 	default "risc-v"  if ARCH_RISCV
 	default "sim"     if ARCH_SIM
@@ -121,7 +114,6 @@ source arch/avr/Kconfig
 source arch/hc/Kconfig
 source arch/mips/Kconfig
 source arch/misoc/Kconfig
-source arch/rgmp/Kconfig
 source arch/renesas/Kconfig
 source arch/risc-v/Kconfig
 source arch/sim/Kconfig

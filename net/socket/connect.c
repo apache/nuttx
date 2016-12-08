@@ -346,7 +346,6 @@ static inline int psock_tcp_connect(FAR struct socket *psock,
                                     FAR const struct sockaddr *addr)
 {
   struct tcp_connect_s state;
-  net_lock_t           flags;
   int                  ret = OK;
 
   /* Interrupts must be disabled through all of the following because
@@ -354,7 +353,7 @@ static inline int psock_tcp_connect(FAR struct socket *psock,
    * setup.
    */
 
-  flags = net_lock();
+  net_lock();
 
   /* Get the connection reference from the socket */
 
@@ -431,7 +430,7 @@ static inline int psock_tcp_connect(FAR struct socket *psock,
         }
     }
 
-  net_unlock(flags);
+  net_unlock();
   return ret;
 }
 #endif /* CONFIG_NET_TCP */

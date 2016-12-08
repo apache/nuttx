@@ -74,7 +74,6 @@
 int net_addroute(in_addr_t target, in_addr_t netmask, in_addr_t router)
 {
   FAR struct net_route_s *route;
-  net_lock_t save;
 
   /* Allocate a route entry */
 
@@ -93,12 +92,12 @@ int net_addroute(in_addr_t target, in_addr_t netmask, in_addr_t router)
 
   /* Get exclusive address to the networking data structures */
 
-  save = net_lock();
+  net_lock();
 
   /* Then add the new entry to the table */
 
   sq_addlast((FAR sq_entry_t *)route, (FAR sq_queue_t *)&g_routes);
-  net_unlock(save);
+  net_unlock();
   return OK;
 }
 #endif
@@ -107,7 +106,6 @@ int net_addroute(in_addr_t target, in_addr_t netmask, in_addr_t router)
 int net_addroute_ipv6(net_ipv6addr_t target, net_ipv6addr_t netmask, net_ipv6addr_t router)
 {
   FAR struct net_route_ipv6_s *route;
-  net_lock_t save;
 
   /* Allocate a route entry */
 
@@ -126,12 +124,12 @@ int net_addroute_ipv6(net_ipv6addr_t target, net_ipv6addr_t netmask, net_ipv6add
 
   /* Get exclusive address to the networking data structures */
 
-  save = net_lock();
+  net_lock();
 
   /* Then add the new entry to the table */
 
   sq_addlast((FAR sq_entry_t *)route, (FAR sq_queue_t *)&g_routes_ipv6);
-  net_unlock(save);
+  net_unlock();
   return OK;
 }
 #endif

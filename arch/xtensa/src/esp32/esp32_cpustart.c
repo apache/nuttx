@@ -47,6 +47,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/sched_note.h>
 
 #include "sched/sched.h"
 #include "xtensa.h"
@@ -152,10 +153,16 @@ static inline void xtensa_attach_fromcpu0_interrupt(void)
 
 int xtensa_start_handler(int irq, FAR void *context)
 {
-  FAR struct tcb_s *tcb;
+  FAR struct tcb_s *tcb = this_task();
   int i;
 
   sinfo("CPU%d Started\n", up_cpu_index());
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION
+  /* Notify that this CPU has started */
+
+  sched_note_cpu_started(tcb);
+#endif
 
   /* Handle interlock*/
 
@@ -164,7 +171,6 @@ int xtensa_start_handler(int irq, FAR void *context)
 
   /* Reset scheduler parameters */
 
-  tcb = this_task();
   sched_resume_scheduler(tcb);
 
   /* Move CPU0 exception vectors to IRAM */
@@ -260,6 +266,12 @@ int up_cpu_start(int cpu)
       /* Start CPU1 */
 
       sinfo("Starting CPU%d\n", cpu);
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION
+      /* Notify of the start event */
+
+      sched_note_cpu_start(this_task(), cpu);
+#endif
 
       /* The waitsem semaphore is used for signaling and, hence, should not
        * have priority inheritance enabled.

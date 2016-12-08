@@ -82,11 +82,10 @@
 static FAR struct net_driver_s *netdev_finddevice_ipv4addr(in_addr_t ripaddr)
 {
   FAR struct net_driver_s *dev;
-  net_lock_t save;
 
   /* Examine each registered network device */
 
-  save = net_lock();
+  net_lock();
   for (dev = g_netdevices; dev; dev = dev->flink)
     {
       /* Is the interface in the "up" state? */
@@ -100,7 +99,7 @@ static FAR struct net_driver_s *netdev_finddevice_ipv4addr(in_addr_t ripaddr)
             {
               /* Its a match */
 
-              net_unlock(save);
+              net_unlock();
               return dev;
             }
         }
@@ -108,7 +107,7 @@ static FAR struct net_driver_s *netdev_finddevice_ipv4addr(in_addr_t ripaddr)
 
   /* No device with the matching address found */
 
-  net_unlock(save);
+  net_unlock();
   return NULL;
 }
 #endif /* CONFIG_NET_IPv4 */
@@ -137,11 +136,10 @@ static FAR struct net_driver_s *
 netdev_finddevice_ipv6addr(const net_ipv6addr_t ripaddr)
 {
   FAR struct net_driver_s *dev;
-  net_lock_t save;
 
   /* Examine each registered network device */
 
-  save = net_lock();
+  net_lock();
   for (dev = g_netdevices; dev; dev = dev->flink)
     {
       /* Is the interface in the "up" state? */
@@ -155,7 +153,7 @@ netdev_finddevice_ipv6addr(const net_ipv6addr_t ripaddr)
             {
               /* Its a match */
 
-              net_unlock(save);
+              net_unlock();
               return dev;
             }
         }
@@ -163,7 +161,7 @@ netdev_finddevice_ipv6addr(const net_ipv6addr_t ripaddr)
 
   /* No device with the matching address found */
 
-  net_unlock(save);
+  net_unlock();
   return NULL;
 }
 #endif /* CONFIG_NET_IPv6 */

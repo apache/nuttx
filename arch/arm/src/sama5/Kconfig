@@ -1437,6 +1437,26 @@ config SAMA5_GMAC_NBC
 	---help---
 		Select to disable receipt of broadcast packets.
 
+choice
+	prompt "Work queue"
+	default SAMA5_GMAC_LPWORK if SCHED_LPWORK
+	default SAMA5_GMAC_HPWORK if !SCHED_LPWORK && SCHED_HPWORK
+	depends on SCHED_WORKQUEUE
+	---help---
+		Work queue support is required to use the Ethernet driver.  If the
+		low priority work queue is available, then it should be used by the
+		driver.
+
+config SAMA5_GMAC_HPWORK
+	bool "High priority"
+	depends on SCHED_HPWORK
+
+config SAMA5_GMAC_LPWORK
+	bool "Low priority"
+	depends on SCHED_LPWORK
+
+endchoice # Work queue
+
 config SAMA5_GMAC_PHYADDR
 	int "PHY address"
 	default 1
@@ -1674,6 +1694,26 @@ config SAMA5_EMACA_NBC
 	default n
 	---help---
 		Select to disable receipt of broadcast packets.
+
+choice
+	prompt "Work queue"
+	default SAMA5_EMACA_LPWORK if SCHED_LPWORK
+	default SAMA5_EMACA_HPWORK if !SCHED_LPWORK && SCHED_HPWORK
+	depends on SCHED_WORKQUEUE
+	---help---
+		Work queue support is required to use the Ethernet driver.  If the
+		low priority work queue is available, then it should be used by the
+		driver.
+
+config SAMA5_EMACA_HPWORK
+	bool "High priority"
+	depends on SCHED_HPWORK
+
+config SAMA5_EMACA_LPWORK
+	bool "Low priority"
+	depends on SCHED_LPWORK
+
+endchoice # Work queue
 
 config SAMA5_EMACA_REGDEBUG
 	bool "Register-Level Debug"

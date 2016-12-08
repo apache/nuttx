@@ -514,13 +514,12 @@ static inline FAR struct tcp_conn_s *
 static inline int tcp_ipv4_bind(FAR struct tcp_conn_s *conn,
                                 FAR const struct sockaddr_in *addr)
 {
-  net_lock_t flags;
   int port;
   int ret;
 
   /* Verify or select a local port and address */
 
-  flags = net_lock();
+  net_lock();
 
   /* Verify or select a local port (host byte order) */
 
@@ -565,7 +564,7 @@ static inline int tcp_ipv4_bind(FAR struct tcp_conn_s *conn,
       return ret;
     }
 
-  net_unlock(flags);
+  net_unlock();
   return OK;
 }
 #endif /* CONFIG_NET_IPv4 */
@@ -589,13 +588,12 @@ static inline int tcp_ipv4_bind(FAR struct tcp_conn_s *conn,
 static inline int tcp_ipv6_bind(FAR struct tcp_conn_s *conn,
                                 FAR const struct sockaddr_in6 *addr)
 {
-  net_lock_t flags;
   int port;
   int ret;
 
   /* Verify or select a local port and address */
 
-  flags = net_lock();
+  net_lock();
 
   /* Verify or select a local port (host byte order) */
 
@@ -646,7 +644,7 @@ static inline int tcp_ipv6_bind(FAR struct tcp_conn_s *conn,
       return ret;
     }
 
-  net_unlock(flags);
+  net_unlock();
   return OK;
 }
 #endif /* CONFIG_NET_IPv6 */
@@ -700,14 +698,13 @@ void tcp_initialize(void)
 FAR struct tcp_conn_s *tcp_alloc(uint8_t domain)
 {
   FAR struct tcp_conn_s *conn;
-  net_lock_t flags;
 
   /* Because this routine is called from both interrupt level and
    * and from user level, we have not option but to disable interrupts
    * while accessing g_free_tcp_connections[];
    */
 
-  flags = net_lock();
+  net_lock();
 
   /* Return the entry from the head of the free list */
 
@@ -786,7 +783,7 @@ FAR struct tcp_conn_s *tcp_alloc(uint8_t domain)
     }
 #endif
 
-  net_unlock(flags);
+  net_unlock();
 
   /* Mark the connection allocated */
 
@@ -818,7 +815,6 @@ void tcp_free(FAR struct tcp_conn_s *conn)
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   FAR struct tcp_wrbuffer_s *wrbuffer;
 #endif
-  net_lock_t flags;
 
   /* Because g_free_tcp_connections is accessed from user level and interrupt
    * level, code, it is necessary to keep interrupts disabled during this
@@ -826,7 +822,7 @@ void tcp_free(FAR struct tcp_conn_s *conn)
    */
 
   DEBUGASSERT(conn->crefs == 0);
-  flags = net_lock();
+  net_lock();
 
   /* Free remaining callbacks, actually there should be only the close callback
    * left.
@@ -891,7 +887,7 @@ void tcp_free(FAR struct tcp_conn_s *conn)
 
   conn->tcpstateflags = TCP_CLOSED;
   dq_addlast(&conn->node, &g_free_tcp_connections);
-  net_unlock(flags);
+  net_unlock();
 }
 
 /****************************************************************************
@@ -1184,7 +1180,6 @@ int tcp_bind(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
 
 int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
 {
-  net_lock_t flags;
   int port;
   int ret;
 
@@ -1203,7 +1198,7 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
    * but the port may still be INPORT_ANY.
    */
 
-  flags = net_lock();
+  net_lock();
 
 #ifdef CONFIG_NETDEV_MULTINIC
   /* If there are multiple network devices, then we need to pass the local,
@@ -1373,7 +1368,7 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
   ret = OK;
 
 errout_with_lock:
-  net_unlock(flags);
+  net_unlock();
   return ret;
 }
 

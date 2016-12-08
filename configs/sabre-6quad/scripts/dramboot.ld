@@ -44,6 +44,7 @@
 
 MEMORY
 {
+	nocache (WR)  : ORIGIN = 0x00400000, LENGTH = 4K
 	oscram (W!RX) : ORIGIN = 0x00900000, LENGTH = 256K - 16K
 	ddr3 (W!RX)   : ORIGIN = 0x10800000, LENGTH = 1024M - 8M
 }
@@ -121,6 +122,13 @@ SECTIONS
 		*(.noinit*)
 		_enoinit = ABSOLUTE(.);
 	} > ddr3
+
+	.nocache :
+	{
+		_snocache = ABSOLUTE(.);
+		*(.nocache)
+		_enocache = ABSOLUTE(.);
+	} > nocache
 
 	/* Stabs debugging sections. */
 	.stab 0 : { *(.stab) }

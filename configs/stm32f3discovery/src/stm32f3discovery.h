@@ -1,6 +1,5 @@
 /****************************************************************************************************
  * configs/stm32f3discovery/src/stm32f3discovery.h
- * arch/arm/src/board/stm32f3discovery.n
  *
  *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -160,6 +159,18 @@ void weak_function stm32_spidev_initialize(void);
 
 #ifdef CONFIG_STM32_USB
 void weak_function stm32_usbinitialize(void);
+#endif
+
+/************************************************************************************
+ * Name: stm32_pwm_setup
+ *
+ * Description:
+ *   Initialize PWM and register the PWM device.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_PWM
+int stm32_pwm_setup(void);
 #endif
 
 /****************************************************************************

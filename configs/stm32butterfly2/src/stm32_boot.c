@@ -72,23 +72,36 @@ void stm32_boardinitialize(void)
 
 int board_app_initialize(uintptr_t arg)
 {
-  int rv = 0;
+  int ret = 0;
 
 #ifdef CONFIG_MMCSD
-  if ((rv = stm32_mmcsd_initialize(CONFIG_NSH_MMCSDMINOR)) < 0)
+  ret = stm32_mmcsd_initialize(CONFIG_NSH_MMCSDMINOR);
+  if (ret < 0)
     {
-      syslog(LOG_ERR, "Failed to initialize SD slot %d: %d\n");
-      return rv;
+      syslog(LOG_ERR, "Failed to initialize SD slot %d: %d\n", ret);
+      return ret;
     }
 #endif
 
 #ifdef CONFIG_USBHOST
-  if ((rv = stm32_usbhost_initialize()) < 0)
+  ret = stm32_usbhost_initialize();
+  if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Failed to initialize USB host: %d\n", rv);
-      return rv;
+      syslog(LOG_ERR, "ERROR: Failed to initialize USB host: %d\n", ret);
+      return ret;
     }
 #endif
 
-  return rv;
+#ifdef CONFIG_ADC
+  /* Initialize ADC and register the ADC driver. */
+
+  ret = stm32_adc_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_adc_setup failed: %d\n", ret);
+    }
+#endif
+
+  UNUSED(ret);
+  return ret;
 }

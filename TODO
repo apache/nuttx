@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated November 22, 2016)
+NuttX TODO List (Last updated December 3, 2016)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -308,33 +308,33 @@ o Task/Scheduler (sched/)
 o SMP
   ^^^
 
-  Title:       SPINLOCKS AND DATA CACHES
-  Description: If spinlocks are used in a system with a data cache, then there
-               may be a problem with cache coherency in some CPU architectures:
-               When one CPU modifies the spinlock, the changes may not be
-               visible to another CPU if it does not share the data cache.
-               That would cause failure in the spinlock logic.
+  Title:       SMP AND DATA CACHES
+  Description: When spinlocks, semaphores, etc. are used in an SMP system with
+               a data cache, then there may be problems with cache coherency
+               in some CPU architectures:  When one CPU modifies the shared
+               object, the changes may not be visible to another CPU if it
+               does not share the data cache. That would cause failure in
+               the IPC logic.
 
                Flushing the D-cache on writes and invalidating before a read is
-               not really an option.  spinlocks are normally 8-bits in size and
-               cache lines are typically 32-bytes so that would have side effects
-               unless the spinlocks were made to be the same size as one cache
-               line.
+               not really an option.  That would essentially effect every memory
+               access and there may be side-effects due to cache line sizes
+               and alignment.
 
-               This might be doable if a write-through cache is used.  Then you
-               could always safely invalidate the cache line before reading the
-               spinlock because there should never be any dirty cache lines in
-               this case.
+               For the same reason a separate, non-cacheable memory region is
+               not an option.  Essentially all data would have to go in the
+               non-cached region and you would have no benefit from the data
+               cache.
 
-               The better option is to add compiler independent "ornamentation"
-               to the spinlock so that the spinlocks are all linked together
-               into a separate, non-cacheable memory regions.  Because of
-               region alignment and minimum region mapping sizes this could
-               still be wasteful of memory.  This would work in systems that
-               have both data cache and either an MPU or an MMU.
-  Status:      Open
-  Priority:    High.  spinlocks, and hence SMP, will not work on such systems
-               without this change.
+               On ARM Cortex-A, each CPU has a separate data cache.  However,
+               the MPCore's Snoop Controller Unit supports coherency among
+               the different caches.  The SCU is enabled by the SCU control
+               register and each CPU participates in the SMP coherency by
+               setting the ACTLR_SMP bit in the auxiliary control register
+               (ACTLR).
+
+  Status:      Closed
+  Priority:    High on platforms that may have the issue.
 
 o Memory Management (mm/)
   ^^^^^^^^^^^^^^^^^^^^^^^
@@ -1043,41 +1043,18 @@ o Network (net/, drivers/net)
   Priority:    Medium.  Important on slow applications that will not accept
                connections promptly.
 
-  Title:       INTERRUPT LEVEL PROCESSING IN ETHERNET DRIVERS
-  Description: Too many Ethernet drivers do interrupt-level processing with
-               the network stack.  The network stack supports either interrupt
-               level processing or normal task level processing (depending on
-               CONFIG_NET_NOINTS).  This is really a very bad use of CPU
-               resources;  All of the network stack processing should be
-               modified to use a work queue (and, all use of CONFIG_NET_NOINTS=n
-               should be eliminated).  This applies to many Ethernet drivers:
+  Title:       IPv6 REQUIRES ADDRESS FILTER SUPPORT
+  Description: IPv6 requires that the Ethernet driver support NuttX address
+               filter interfaces.  Several Ethernet drivers do support there,
+               however.  Others support the address filtering interfaces but
+               have never been verifed:
 
-               ARCHITECTURE   CONFIG_NET_NOINTS?      ADDRESS FILTER SUPPORT?
-               C5471          NO                      NO
-               STM32          YES                     YES
-               STM32F7        YES                     YES
-               TIVA           ----------------------- ------
-                 LM3S         NO                      NO
-                 TM4C         YES                     YES
-               eZ80           NO                      NO
-               Kinetis        YES                     YES (not tested)
-               LPC17xx        YES                     YES (not tested)
-               LPC43xx        YES                     YES (not tested)
-               DMxxx NIC      NO                      NO
-               PIC32          NO                      NO
-               RGMP           ???                     ???
-               SAM3/4         YES                     YES
-               SAMA5D         ----------------------- ------
-                 EMACA        NO                      YES (not tested)
-                 EMACB        YES                     YES
-                 GMAC         NO                      YES (not tested)
-               SAMV7          YES                     YES
-               SIM            N/A  (No interrupts)    NO
+               C5471, LM3X, ez80, DM0x90 NIC, PIC: Do not support address
+                 filteringing.
+               Kinetis, LPC17xx, LPC43xx:  Untested address filter support
 
-               The general outline of how this might be done is included in
-               drivers/net/skeleton.c
   Status:      Open
-  Priority:    Pretty high if you want a well behaved system.
+  Priority:    Pretty high if you want a to use IPv6 on these platforms.
 
   Title:       UDP MULTICAST RECEPTION
   Description: The logic in udp_input() expects either a single receive socket or

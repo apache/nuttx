@@ -105,7 +105,7 @@ void up_idle(void)
    * should not matter which, however.
    */
 
-  static volatile spinlock_t lock = SP_UNLOCKED;
+  static volatile spinlock_t lock SP_SECTION = SP_UNLOCKED;
 
   /* The one that gets the lock is the one that executes the IDLE operations */
 

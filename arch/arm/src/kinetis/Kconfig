@@ -254,7 +254,6 @@ config KINETIS_ENET
 	select ARCH_HAVE_NETDEV_STATISTICS
 	select NET
 	select NETDEVICES
-	select NET_MULTIBUFFER
 	---help---
 		Support Ethernet (K6x only)
 

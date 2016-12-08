@@ -575,6 +575,16 @@ config TLS_NELEM
 
 endif # TLS
 
+config LIBC_IPv4_ADDRCONV
+	bool "IPv4 address conversions"
+	default n
+	depends on !NET_IPv4
+
+config LIBC_IPv6_ADDRCONV
+	bool "IPv6 address conversions"
+	default n
+	depends on !NET_IPv6
+
 config LIBC_NETDB
 	bool
 	default n

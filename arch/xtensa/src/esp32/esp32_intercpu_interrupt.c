@@ -59,11 +59,11 @@
 
 /* Single parameter passed with the inter-CPU interrupt */
 
-static volatile uint8_t g_intcode[CONFIG_SMP_NCPUS];
+static volatile uint8_t g_intcode[CONFIG_SMP_NCPUS] SP_SECTION;
 
 /* Spinlock protects parameter array */
 
-static volatile spinlock_t g_intercpu_spin[CONFIG_SMP_NCPUS] =
+static volatile spinlock_t g_intercpu_spin[CONFIG_SMP_NCPUS] SP_SECTION =
 {
   SP_UNLOCKED, SP_UNLOCKED
 };

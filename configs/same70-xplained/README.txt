@@ -388,7 +388,6 @@ Selecting the GMAC peripheral
 
   Networking Support
     CONFIG_NET=y                         : Enable Neworking
-    CONFIG_NET_NOINTS=y                  : Use the work queue, not interrupts for processing
     CONFIG_NET_SOCKOPTS=y                : Enable socket operations
     CONFIG_NET_ETH_MTU=562               : Maximum packet size (MTU) 1518 is more standard
     CONFIG_NET_ETH_TCP_RECVWNDO=562      : Should be the same as CONFIG_NET_ETH_MTU
@@ -732,10 +731,6 @@ MCAN1 Loopback Test
        CONFIG_SAMV7_MCAN1_TXBUFFER_32BYTES=y   # Each TX BUFFER is 32 bytes
        CONFIG_SAMV7_MCAN1_TXFIFOQ_SIZE=8       # There are 8 queue elements
        CONFIG_SAMV7_MCAN1_TXEVENTFIFO_SIZE=0   # The event FIFO is not used
-
-    Board Selection
-       CONFIG_LIB_BOARDCTL=y                   # Needed for CAN initialization
-       CONFIG_BOARDCTL_CANINIT=y               # Enabled CAN initialization
 
     Enabling the CAN Loopback Test
     ------------------------------

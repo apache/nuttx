@@ -272,16 +272,4 @@ void stm32_spiinitialize(void);
 
 void stm32l4_usbinitialize(void);
 
-/************************************************************************************
- * Name: board_adc_initialize
- *
- * Description:
- *   Initialize and register the ADC driver(s)
- *
- ************************************************************************************/
-
-#ifdef CONFIG_ADC
-int board_adc_initialize(void);
-#endif
-
 #endif /* __CONFIGS_STM32L476VG_DISCO_SRC_STM32L476VG_DISCO_H */

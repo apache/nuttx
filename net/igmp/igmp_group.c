@@ -213,7 +213,6 @@ FAR struct igmp_group_s *igmp_grpalloc(FAR struct net_driver_s *dev,
                                        FAR const in_addr_t *addr)
 {
   FAR struct igmp_group_s *group;
-  net_lock_t flags;
 
   ninfo("addr: %08x dev: %p\n", *addr, dev);
   if (up_interrupt_context())
@@ -256,12 +255,12 @@ FAR struct igmp_group_s *igmp_grpalloc(FAR struct net_driver_s *dev,
 
       /* Interrupts must be disabled in order to modify the group list */
 
-      flags = net_lock();
+      net_lock();
 
       /* Add the group structure to the list in the device structure */
 
       sq_addfirst((FAR sq_entry_t *)group, &dev->grplist);
-      net_unlock(flags);
+      net_unlock();
     }
 
   return group;
@@ -282,7 +281,6 @@ FAR struct igmp_group_s *igmp_grpfind(FAR struct net_driver_s *dev,
                                       FAR const in_addr_t *addr)
 {
   FAR struct igmp_group_s *group;
-  net_lock_t flags;
 
   grpinfo("Searching for addr %08x\n", (int)*addr);
 
@@ -290,7 +288,7 @@ FAR struct igmp_group_s *igmp_grpfind(FAR struct net_driver_s *dev,
    * called from.
    */
 
-  flags = net_lock();
+  net_lock();
   for (group = (FAR struct igmp_group_s *)dev->grplist.head;
        group;
        group = group->next)
@@ -303,7 +301,7 @@ FAR struct igmp_group_s *igmp_grpfind(FAR struct net_driver_s *dev,
         }
     }
 
-  net_unlock(flags);
+  net_unlock();
   return group;
 }
 
@@ -347,13 +345,11 @@ FAR struct igmp_group_s *igmp_grpallocfind(FAR struct net_driver_s *dev,
 
 void igmp_grpfree(FAR struct net_driver_s *dev, FAR struct igmp_group_s *group)
 {
-  net_lock_t flags;
-
   grpinfo("Free: %p flags: %02x\n", group, group->flags);
 
   /* Cancel the wdog */
 
-  flags = net_lock();
+  net_lock();
   wd_cancel(group->wdog);
 
   /* Remove the group structure from the group list in the device structure */
@@ -377,7 +373,7 @@ void igmp_grpfree(FAR struct net_driver_s *dev, FAR struct igmp_group_s *group)
     {
       grpinfo("Put back on free list\n");
       sq_addlast((FAR sq_entry_t *)group, &g_freelist);
-      net_unlock(flags);
+      net_unlock();
     }
   else
 #endif
@@ -386,7 +382,7 @@ void igmp_grpfree(FAR struct net_driver_s *dev, FAR struct igmp_group_s *group)
        * this function is executing within an interrupt handler.
        */
 
-      net_unlock(flags);
+      net_unlock();
       grpinfo("Call sched_kfree()\n");
       sched_kfree(group);
     }

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/hc/src/m9s12/m9s12_ethernet.c
  *
- *   Copyright (C) 2011, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -105,6 +105,12 @@ struct emac_driver_s
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+/* A single packet buffer is used */
+
+static uint8_t g_pktbuf[MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE];
+
+/* Driver state structure */
 
 static struct emac_driver_s g_emac[CONFIG_HCS12_NINTERFACES];
 
@@ -756,6 +762,7 @@ int emac_initialize(int intf)
   /* Initialize the driver structure */
 
   memset(priv, 0, sizeof(struct emac_driver_s));
+  priv->d_dev.d_buf     = g_pktbuf;      /* Single packet buffer */
   priv->d_dev.d_ifup    = emac_ifup;     /* I/F down callback */
   priv->d_dev.d_ifdown  = emac_ifdown;   /* I/F up (new IP address) callback */
   priv->d_dev.d_txavail = emac_txavail;  /* New TX data callback */
@@ -767,8 +774,8 @@ int emac_initialize(int intf)
 
   /* Create a watchdog for timing polling for and timing of transmisstions */
 
-  priv->d_txpoll       = wd_create();   /* Create periodic poll timer */
-  priv->d_txtimeout    = wd_create();   /* Create TX timeout timer */
+  priv->d_txpoll       = wd_create();    /* Create periodic poll timer */
+  priv->d_txtimeout    = wd_create();    /* Create TX timeout timer */
 
   /* Put the interface in the down state.  This usually amounts to resetting
    * the device and/or calling emac_ifdown().

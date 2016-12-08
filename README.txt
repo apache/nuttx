@@ -1419,8 +1419,6 @@ nuttx/
  |   |   `- README.txt
  |   |- qemu-i486/
  |   |   `- README.txt
- |   |- rgmp/
- |   |   `- README.txt
  |   |- sabre-6quad/
  |   |   `- README.txt
  |   |- sama5d2-xult/
@@ -1438,6 +1436,8 @@ nuttx/
  |   |- saml21-xplained/
  |   |   `- README.txt
  |   |- sam3u-ek/
+ |   |   `- README.txt
+ |   |- sam4cmp-db
  |   |   `- README.txt
  |   |- sam4e-ek/
  |   |   `- README.txt

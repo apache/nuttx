@@ -241,6 +241,13 @@ void __start(void)
   const uint32_t *src;
   uint32_t *dest;
 
+#ifdef CONFIG_SMP
+  /* Disable CMCC0 */
+
+  putreg32(0, 0x4007c008);
+  while ((getreg32(0x4007c00c) & 0x01) != 0);
+#endif
+
 #ifdef CONFIG_ARMV7M_STACKCHECK
   /* Set the stack limit before we attempt to call any functions */
 

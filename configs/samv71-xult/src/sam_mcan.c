@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/samv71-xultk/src/sam_mcan.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,7 +49,7 @@
 #include "sam_mcan.h"
 #include "samv71-xult.h"
 
-#if defined(CONFIG_CAN) && (defined(CONFIG_SAMV7_MCAN0) || defined(CONFIG_SAMV7_MCAN1))
+#ifdef CONFIG_SAMV7_MCAN
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -72,48 +72,41 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: board_can_initialize
+ * Name: sam_can_setup
  *
  * Description:
- *   All STM32 architectures must provide the following interface to work with
- *   examples/can.
+ *  Initialize CAN and register the CAN device
  *
  ************************************************************************************/
 
-int board_can_initialize(void)
+int sam_can_setup(void)
 {
-  static bool initialized = false;
+#if defined(CONFIG_SAMV7_MCAN0) || defined(CONFIG_SAMV7_MCAN1)
   struct can_dev_s *can;
   int ret;
 
-  /* Check if we have already initialized */
+  /* Call stm32_caninitialize() to get an instance of the CAN interface */
 
-  if (!initialized)
+  can = sam_mcan_initialize(CAN_PORT);
+  if (can == NULL)
     {
-      /* Call stm32_caninitialize() to get an instance of the CAN interface */
+      canerr("ERROR:  Failed to get CAN interface\n");
+      return -ENODEV;
+    }
 
-      can = sam_mcan_initialize(CAN_PORT);
-      if (can == NULL)
-        {
-          canerr("ERROR:  Failed to get CAN interface\n");
-          return -ENODEV;
-        }
+  /* Register the CAN driver at "/dev/can0" */
 
-      /* Register the CAN driver at "/dev/can0" */
-
-      ret = can_register("/dev/can0", can);
-      if (ret < 0)
-        {
-          canerr("ERROR: can_register failed: %d\n", ret);
-          return ret;
-        }
-
-      /* Now we are initialized */
-
-      initialized = true;
+  ret = can_register("/dev/can0", can);
+  if (ret < 0)
+    {
+      canerr("ERROR: can_register failed: %d\n", ret);
+      return ret;
     }
 
   return OK;
+#else
+  return -ENODEV;
+#endif
 }
 
-#endif /* CONFIG_CAN && (CONFIG_SAMV7_MCAN0 || CONFIG_SAMV7_MCAN1) */
+#endif /* CONFIG_SAMV7_MCAN */

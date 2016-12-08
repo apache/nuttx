@@ -45,11 +45,9 @@
 
 #include <nuttx/board.h>
 
-#ifdef CONFIG_LIB_BOARDCTL
+#include "freedom-kl25z.h"
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#ifdef CONFIG_LIB_BOARDCTL
 
 /****************************************************************************
  * Public Functions
@@ -80,15 +78,27 @@
 
 int board_app_initialize(uintptr_t arg)
 {
-#if defined(CONFIG_SENSORS_ADXL345)
   int ret;
 
+  #if defined(CONFIG_SENSORS_ADXL345)
   ret = adxl345_archinitialize(0);
   if (ret < 0)
     {
-      _err("ERROR: adxl345_archinitialize failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: adxl345_archinitialize failed: %d\n", ret);
     }
 #endif
+
+#ifdef CONFIG_PWM
+  /* Initialize PWM and register the PWM device. */
+
+  ret = kl_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: k64_pwm_setup() failed: %d\n", ret);
+    }
+#endif
+
+  UNUSED(ret);
   return OK;
 }
 

@@ -222,17 +222,6 @@ arch/renesas - Support for Renesas and legacy Hitachi microcontrollers.
       arch/renesas/include/m16c and arch/renesas/src/m16c
       arch/renesas/include/sh1 and arch/renesas/src/sh1
 
-arch/rgmp
-
-    RGMP stands for RTOS and GPOS on Multi-Processor.  RGMP is a project
-    for running GPOS and RTOS simultaneously on multi-processor platforms.
-    You can port your favorite RTOS to RGMP together with an unmodified
-    Linux to form a hybrid operating system. This makes your application
-    able to use both RTOS and GPOS features.
-
-    See http://rgmp.sourceforge.net/wiki/index.php/Main_Page for further
-    information about RGMP.
-
 arch/risc-v
     This directory is dedicated to ports to the RISC-V family.
 
