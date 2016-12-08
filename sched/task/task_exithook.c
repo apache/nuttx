@@ -73,6 +73,9 @@ static inline void task_atexit(FAR struct tcb_s *tcb)
   /* Make sure that we have not already left the group.  Only the final
    * exiting thread in the task group should trigger the atexit()
    * callbacks.
+   *
+   * REVISIT: This is a security problem In the PROTECTED and KERNEL builds:
+   * We must not call the registered function in supervisor mode!
    */
 
   if (group && group->tg_nmembers == 1)
@@ -133,6 +136,9 @@ static inline void task_onexit(FAR struct tcb_s *tcb, int status)
   /* Make sure that we have not already left the group.  Only the final
    * exiting thread in the task group should trigger the atexit()
    * callbacks.
+   *
+   * REVISIT: This is a security problem In the PROTECTED and KERNEL builds:
+   * We must not call the registered function in supervisor mode!
    */
 
   if (group && group->tg_nmembers == 1)
