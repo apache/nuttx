@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated December 17, 2016)
+NuttX TODO List (Last updated December 8, 2016)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -113,7 +113,7 @@ o Task/Scheduler (sched/)
                   context of the caller of task.  That is very bad!
 
                The fix for all of these issues it to have the callbacks
-               run on the caller's thread as is currently done with 
+               run on the caller's thread as is currently done with
                signal handlers.  Signals are delivered differently in
                PROTECTED and KERNEL modes:  The deliver is involes a
                signal handling trampoline function in the user address
@@ -186,6 +186,12 @@ o Task/Scheduler (sched/)
                NxWM::CNxConsole to terminate console tasks and also in
                apps/netutils/thttpd to kill CGI tasks that timeout.  So not
                so simple to remove.
+
+               Option:  Perhaps task_delete() should not do asynchronous
+               deletion but should rather do the same kind of
+               synchronization such as the pthread_cancellation points?
+               (see pthread_cancel() issues).
+
   Status:      Open
   Priority:    Low and not easily removable.
 
@@ -524,7 +530,28 @@ o pthreads (sched/pthreads)
 
   Title:       CANCELLATION POINTS
   Description: pthread_cancel():  Should implement cancellation points and
-               pthread_testcancel()
+               pthread_testcancel().
+
+               Internal implementation perhaps as follows. See list of
+               functions that are cancellation points on OpenGroup.org.  In
+               general:
+
+               - Remove asynchronous cancellation.  All cancellations must
+                 pend.
+               - Check if the thread is within cancellation region, then
+                 treat like a signal to wake up with -ECANCELED vs -EINTER
+
+               For each function/cancellation point
+
+               - Call enter_cancellation region() on entry. Checks for
+                 pending cancellation and marks "within cancellation region"
+                 in TCB flags.
+               - Will wake-up with -ECANCELED if cancellation occurs.
+               - Call leave_cancellation region() on exit.  Checks for
+                 pending cancellation and marks NOT "within cancellation region"
+
+               Perhaps task_delete() should do the same kind of synchronization?
+
   Status:      Open.  No changes are planned.
   Priority:    Low, probably not that useful
 
