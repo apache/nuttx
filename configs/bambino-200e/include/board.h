@@ -57,12 +57,11 @@
  * here because the including C file may not have that file in its include
  * path.
  *
- * The Xplorer board has four crystals on board:
+ * The Bambino-200e board has three crystals on board:
  *
  *     Y1 - RTC 32.768 MHz oscillator input,
- *     Y2 - 24.576 MHz input to the UDA 1380 audio codec,
- *     Y3 - 12.000 MHz LPC43xx crystal oscillator input
- *     Y4 - 50 MHz input for Ethernet
+ *     Y2 - 12.000 MHz LPC43xx crystal oscillator input
+ *     Y3 - 25 MHz input for Ethernet KSZ8031 PHY
  */
 
 #define BOARD_XTAL_FREQUENCY        (12000000)  /* XTAL oscillator frequency (Y3) */
