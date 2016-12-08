@@ -322,6 +322,18 @@ struct child_status_s
 };
 #endif
 
+/* struct pthread_cleanup_s ******************************************************/
+
+#ifdef CONFIG_PTHREAD_CLEANUP
+/* This structure describes one element of the pthread cleanup stack */
+
+struct pthread_cleanup_s
+{
+   pthread_cleanup_t pc_cleaner;    /* Cleanup callback address */
+   FAR void *pc_arg;                /* Argument that accompanies the callback */
+};
+#endif
+
 /* struct dspace_s ***************************************************************/
 /* This structure describes a reference counted D-Space region.  This must be a
  * separately allocated "break-away" structure that can be owned by a task and
@@ -681,6 +693,17 @@ struct pthread_tcb_s
 
   pthread_addr_t arg;                    /* Startup argument                    */
   FAR void *joininfo;                    /* Detach-able info to support join    */
+
+  /* Clean-up stack *************************************************************/
+
+#ifdef CONFIG_PTHREAD_CLEANUP
+  /* tos   - The index to the next avaiable entry at the top of the stack.
+   * stack - The pre-allocated clean-up stack memory.
+   */
+
+  uint8_t tos;
+  struct pthread_cleanup_s stack[CONFIG_PTHREAD_CLEANUP_STACKSIZE];
+#endif
 
   /* POSIX Thread Specific Data *************************************************/
 

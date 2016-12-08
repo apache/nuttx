@@ -64,6 +64,8 @@
 "pthread_barrier_init","pthread.h","!defined(CONFIG_DISABLE_PTHREAD)","int","FAR pthread_barrier_t*","FAR const pthread_barrierattr_t*","unsigned int"
 "pthread_barrier_wait","pthread.h","!defined(CONFIG_DISABLE_PTHREAD)","int","FAR pthread_barrier_t*"
 "pthread_cancel","pthread.h","!defined(CONFIG_DISABLE_PTHREAD)","int","pthread_t"
+"pthread_cleanup_pop","pthread.h","defined(CONFIG_PTHREAD_CLEANUP)","void","int"
+"pthread_cleanup_push","pthread.h","defined(CONFIG_PTHREAD_CLEANUP)","void","pthread_cleanup_t","FAR void*"
 "pthread_cond_broadcast","pthread.h","!defined(CONFIG_DISABLE_PTHREAD)","int","FAR pthread_cond_t*"
 "pthread_cond_destroy","pthread.h","!defined(CONFIG_DISABLE_PTHREAD)","int","FAR pthread_cond_t*"
 "pthread_cond_init","pthread.h","!defined(CONFIG_DISABLE_PTHREAD)","int","FAR pthread_cond_t*","FAR const pthread_condattr_t*"

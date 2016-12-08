@@ -304,6 +304,10 @@ SYSCALL_LOOKUP(up_assert,                 2, STUB_up_assert)
   SYSCALL_LOOKUP(pthread_kill,            2, STUB_pthread_kill)
   SYSCALL_LOOKUP(pthread_sigmask,         3, STUB_pthread_sigmask)
 #  endif
+#  ifdef CONFIG_PTHREAD_CLEANUP
+  SYSCALL_LOOKUP(pthread_cleanup_push,    2, STUB_pthread_cleanup_push)
+  SYSCALL_LOOKUP(pthread_cleanup_pop,     1, STUB_pthread_cleanup_pop)
+#  endif
 #endif
 
 /* The following are defined only if message queues are enabled */

@@ -53,7 +53,7 @@
 
 int pthread_cancel(pthread_t thread)
 {
-  FAR struct tcb_s *tcb;
+  FAR struct pthread_tcb_s *tcb;
 
   /* First, make sure that the handle references a valid thread */
 
@@ -66,8 +66,8 @@ int pthread_cancel(pthread_t thread)
       return ESRCH;
     }
 
-  tcb = sched_gettcb((pid_t)thread);
-  if (!tcb)
+  tcb = (FAR struct pthread_tcb_s *)sched_gettcb((pid_t)thread);
+  if (tcb == NULL)
     {
       /* The pid does not correspond to any known thread.  The thread
        * has probably already exited.
@@ -76,13 +76,15 @@ int pthread_cancel(pthread_t thread)
       return ESRCH;
     }
 
+  DEBUGASSERT((tcb-cmn.flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD);
+
   /* Check to see if this thread has the non-cancelable bit set in its
    * flags. Suppress context changes for a bit so that the flags are stable.
    * (the flags should not change in interrupt handling.
    */
 
   sched_lock();
-  if ((tcb->flags & TCB_FLAG_NONCANCELABLE) != 0)
+  if ((tcb->cmn.flags & TCB_FLAG_NONCANCELABLE) != 0)
     {
       /* Then we cannot cancel the thread now.  Here is how this is
        * supposed to work:
@@ -97,7 +99,7 @@ int pthread_cancel(pthread_t thread)
        *  processing."
        */
 
-      tcb->flags |= TCB_FLAG_CANCEL_PENDING;
+      tcb->cmn.flags |= TCB_FLAG_CANCEL_PENDING;
       sched_unlock();
       return OK;
     }
@@ -108,10 +110,16 @@ int pthread_cancel(pthread_t thread)
    * same as pthread_exit(PTHREAD_CANCELED).
    */
 
-  if (tcb == this_task())
+  if (tcb == (FAR struct pthread_tcb_s *)this_task())
     {
       pthread_exit(PTHREAD_CANCELED);
     }
+
+#ifdef CONFIG_PTHREAD_CLEANUP
+   /* Perform any stack pthread clean-up callbacks */
+
+   pthread_cleanup_popall(tcb);
+#endif
 
   /* Complete pending join operations */
 

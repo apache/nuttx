@@ -55,6 +55,10 @@ ifeq ($(CONFIG_SMP),y)
 CSRCS += pthread_setaffinity.c pthread_getaffinity.c
 endif
 
+ifeq ($(CONFIG_PTHREAD_CLEANUP),y)
+CSRCS += pthread_cleanup.c
+endif
+
 # Include pthread build support
 
 DEPPATH += --dep-path pthread

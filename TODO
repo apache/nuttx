@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated December 3, 2016)
+NuttX TODO List (Last updated December 17, 2016)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -101,7 +101,7 @@ o Task/Scheduler (sched/)
   Status:      Open
   Priority:    Medium Low for now
 
-  Title:       ISSUES WITH atexit() AND on_exit()
+  Title:       ISSUES WITH atexit(), on_exit(), AND pthread_cleanup_pop()
   Description: These functions execute with the following bad properties:
 
                1. They run with interrupts disabled,

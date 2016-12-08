@@ -537,6 +537,24 @@ config NPTHREAD_KEYS
 		The number of items of thread-
 		specific data that can be retained
 
+config PTHREAD_CLEANUP
+	bool "pthread cleanup stack"
+	default n
+	---help---
+		Select to enable support for pthread exit cleanup stacks.  This
+		enables the interfaces pthread_cleanup_push() and
+		pthread_cleanup_pop().
+
+config PTHREAD_CLEANUP_STACKSIZE
+	int "pthread cleanup stack size"
+	default 1
+	range 1 32
+	depends on PTHREAD_CLEANUP
+	---help---
+		The maximum number of cleanup actions that may be pushed by
+		pthread_clean_push().  This setting will increase the size of EVERY
+		pthread task control block by about 8 * CONFIG_PTHREAD_CLEANUP_STACKSIZE.
+
 endmenu # Pthread Options
 
 menu "Performance Monitoring"

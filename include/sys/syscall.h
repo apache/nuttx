@@ -406,7 +406,7 @@
 #  define SYS_pthread_setspecific      (__SYS_pthread+26)
 #  define SYS_pthread_yield            (__SYS_pthread+27)
 
-#  ifndef CONFIG_SMP
+#  ifdef CONFIG_SMP
 #    define SYS_pthread_setaffinity_np (__SYS_pthread+28)
 #    define SYS_pthread_getaffinity_np (__SYS_pthread+29)
 #    define __SYS_pthread_signals      (__SYS_pthread+30)
@@ -418,9 +418,17 @@
 #    define SYS_pthread_cond_timedwait (__SYS_pthread_signals+0)
 #    define SYS_pthread_kill           (__SYS_pthread_signals+1)
 #    define SYS_pthread_sigmask        (__SYS_pthread_signals+2)
-#    define __SYS_mqueue               (__SYS_pthread_signals+3)
+#    define __SYS_pthread_cleanup      (__SYS_pthread_signals+3)
 #  else
-#    define __SYS_mqueue               __SYS_pthread_signals
+#    define __SYS_pthread_cleanup      __SYS_pthread_signals
+#  endif
+
+#  ifdef CONFIG_PTHREAD_CLEANUP
+#    define __SYS_pthread_cleanup_push (__SYS_pthread_cleanup+0)
+#    define __SYS_pthread_cleanup_pop  (__SYS_pthread_cleanup+1)
+#    define __SYS_mqueue               (__SYS_pthread_cleanup+2)
+#  else
+#    define __SYS_mqueue               __SYS_pthread_cleanup
 #  endif
 
 #else

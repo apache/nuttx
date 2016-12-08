@@ -311,6 +311,10 @@ uintptr_t STUB_pthread_kill(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_pthread_sigmask(int nbr, uintptr_t parm1, uintptr_t parm2,
             uintptr_t parm3);
 
+uintptr_t STUB_pthread_cleanup_pop(int nbr, uintptr_t parm1);
+uintptr_t STUB_pthread_cleanup_push(int nbr, uintptr_t parm1,
+            uintptr_t parm2);
+
 /* The following are defined only if message queues are enabled */
 
 uintptr_t STUB_mq_close(int nbr, uintptr_t parm1);

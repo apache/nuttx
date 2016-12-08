@@ -75,7 +75,8 @@ static inline void task_atexit(FAR struct tcb_s *tcb)
    * callbacks.
    *
    * REVISIT: This is a security problem In the PROTECTED and KERNEL builds:
-   * We must not call the registered function in supervisor mode!
+   * We must not call the registered function in supervisor mode!  See also
+   * on_exit() and pthread_cleanup_pop() callbacks.
    */
 
   if (group && group->tg_nmembers == 1)
@@ -138,7 +139,8 @@ static inline void task_onexit(FAR struct tcb_s *tcb, int status)
    * callbacks.
    *
    * REVISIT: This is a security problem In the PROTECTED and KERNEL builds:
-   * We must not call the registered function in supervisor mode!
+   * We must not call the registered function in supervisor mode!  See also
+   * atexit() and pthread_cleanup_pop() callbacks.
    */
 
   if (group && group->tg_nmembers == 1)
