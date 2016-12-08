@@ -536,9 +536,18 @@ o pthreads (sched/pthreads)
                functions that are cancellation points on OpenGroup.org.  In
                general:
 
-               - Remove asynchronous cancellation.  All cancellations must
-                 pend.
-               - Check if the thread is within cancellation region, then
+               - Two types of cancellation.  DEFFERRED and ASYCNCHOOUS:
+                 PTHREAD_CANCEL_DEFERRED: A cancellation request is deferred
+                   until the thread next calls a function that is a cancellation
+                   point.  This is the default cancelability type for all
+                   threads.
+                 PTHREAD_CANCEL_ASYNCHRONOUS: The thread can be canceled at
+                   any time
+                 DEFERRED should be the default but currently only
+                 asyncrhononous is supported by NuttX
+               - To implement DEFERRED mode:
+                 All cancellations must pend.
+                 Check if the thread is within cancellation region, then
                  treat like a signal to wake up with -ECANCELED vs -EINTER
 
                For each function/cancellation point
