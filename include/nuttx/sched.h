@@ -323,10 +323,9 @@ struct child_status_s
 #endif
 
 /* struct pthread_cleanup_s ******************************************************/
-
-#ifdef CONFIG_PTHREAD_CLEANUP
 /* This structure describes one element of the pthread cleanup stack */
 
+#ifdef CONFIG_PTHREAD_CLEANUP
 struct pthread_cleanup_s
 {
    pthread_cleanup_t pc_cleaner;    /* Cleanup callback address */

@@ -108,9 +108,30 @@ o Task/Scheduler (sched/)
                2. They run in supervisor mode (if applicable), and
                3. They do not obey any setup of PIC or address
                   environments. Do they need to?
+               4. In the case of task_delete() and pthread_cancel, these
+                  callbacks will run on the thread of execution and address
+                  context of the caller of task.  That is very bad!
 
                The fix for all of these issues it to have the callbacks
-               run on the caller's thread (as with signal handlers).
+               run on the caller's thread as is currently done with 
+               signal handlers.  Signals are delivered differently in
+               PROTECTED and KERNEL modes:  The deliver is involes a
+               signal handling trampoline function in the user address
+               space and two signal handlers:  One to call the signal
+               handler trampoline in user mode (SYS_signal_handler) and
+               on in with the signal handler trampoline to return to
+               supervisor mode (SYS_signal_handler_return)
+
+               The primary difference is in the location of the signal
+               handling trampoline:
+
+               - In PROTECTED mode, there is on a single user space blob
+                 with a header at the beginning of the block (at a well-
+                 known location.  There is a pointer to the signal handler
+                 trampoline function in that header.
+               - In the KERNEL mode, a special process signal handler
+                 trampoline is used at a well-known location in every
+                 process address space (ARCH_DATA_RESERVE->ar_sigtramp).
   Status:      Open
   Priority:    Medium Low.  This is an important change to some less
                important interfaces.  For the average user, these
@@ -145,16 +166,26 @@ o Task/Scheduler (sched/)
   Priority:    Low
 
   Title:       REMOVE TASK_DELETE
-  Description: Need to remove or fix task delete.  This interface is non-
+  Description: Need to remove or fix task delete().  This interface is non-
                standard and not safe.  Arbitrary deleting tasks can cause
-               serious problems such as memory leaks.  Better to remove it
-               than to retain it as a latent bug.
+               serious problems such as memory leaks and resources like
+               semaphores left in bad states.
+
+               Task/process  exit callbacks registered via atexit() or
+               on_exit() will not work correctly with task_delete():  In
+               that case the callback would execute in the context the
+               caller of task_delete() cancel, not in the context of the
+               exiting task (or process).
+
+               Better to remove task_delete() than to retain it as a latent
+               bug.
 
                Currently used within the OS and also part of the
                implementation of pthread_cancel() and task_restart() (which
                should also go for the same reasons).  It is used in
                NxWM::CNxConsole to terminate console tasks and also in
-               apps/netutils/thttpd to kill CGI tasks that timeout.
+               apps/netutils/thttpd to kill CGI tasks that timeout.  So not
+               so simple to remove.
   Status:      Open
   Priority:    Low and not easily removable.
 

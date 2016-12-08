@@ -77,6 +77,10 @@ static inline void task_atexit(FAR struct tcb_s *tcb)
    * REVISIT: This is a security problem In the PROTECTED and KERNEL builds:
    * We must not call the registered function in supervisor mode!  See also
    * on_exit() and pthread_cleanup_pop() callbacks.
+   *
+   * REVISIT:  In the case of task_delete(), the callback would execute in
+   * the context the caller of task_delete() cancel, not in the context of
+   * the exiting task (or process).
    */
 
   if (group && group->tg_nmembers == 1)
@@ -141,6 +145,10 @@ static inline void task_onexit(FAR struct tcb_s *tcb, int status)
    * REVISIT: This is a security problem In the PROTECTED and KERNEL builds:
    * We must not call the registered function in supervisor mode!  See also
    * atexit() and pthread_cleanup_pop() callbacks.
+   *
+   * REVISIT:  In the case of task_delete(), the callback would execute in 
+   * he context the caller of task_delete() cancel, not in the context of
+   * the exiting task (or process).
    */
 
   if (group && group->tg_nmembers == 1)
