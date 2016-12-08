@@ -40,8 +40,8 @@
 #include <nuttx/config.h>
 
 #include <pthread.h>
+#include <sched.h>
 
-#include <nuttx/irq.h>
 #include <nuttx/sched.h>
 
 #include "sched/sched.h"
@@ -78,7 +78,7 @@ static void pthread_cleanup_pop_tcb(FAR struct pthread_tcb_s *tcb, int execute)
       /* Get the index to the last cleaner function pushed onto the stack */
 
       ndx = tcb->tos - 1;
-      DEBUGASSERT(ndx < CONFIG_PTHREAD_CLEANUP_STACKSIZE);
+      DEBUGASSERT(ndx >= 0 && ndx < CONFIG_PTHREAD_CLEANUP_STACKSIZE);
 
       /* Should we execute the cleanup routine at the top of the stack? */
 
@@ -136,32 +136,40 @@ static void pthread_cleanup_pop_tcb(FAR struct pthread_tcb_s *tcb, int execute)
 void pthread_cleanup_pop(int execute)
 {
   FAR struct pthread_tcb_s *tcb = (FAR struct pthread_tcb_s *)this_task();
-  irqstate_t flags;
 
   /* We don't assert if called from a non-pthread; we just don't do anything */
 
   DEBUGASSERT(tcb != NULL);
 
-  flags = enter_critical_section();
+  /* sched_lock() should provide sufficient protection.  We only need to
+   * have this TCB stationary; the pthread cleanup stack should never be
+   * modified by interrupt level logic.
+   */
+
+  sched_lock();
   if ((tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
     {
       pthread_cleanup_pop_tcb(tcb, execute);
     }
 
-  leave_critical_section(flags);
+  sched_unlock();
 }
 
 void pthread_cleanup_push(pthread_cleanup_t routine, FAR void *arg)
 {
   FAR struct pthread_tcb_s *tcb = (FAR struct pthread_tcb_s *)this_task();
-  irqstate_t flags;
 
   /* We don't assert if called from a non-pthread; we just don't do anything */
 
   DEBUGASSERT(tcb != NULL);
   DEBUGASSERT(tcb->tos < CONFIG_PTHREAD_CLEANUP_STACKSIZE);
 
-  flags = enter_critical_section();
+  /* sched_lock() should provide sufficient protection.  We only need to
+   * have this TCB stationary; the pthread cleanup stack should never be
+   * modified by interrupt level logic.
+   */
+
+  sched_lock();
   if ((tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD &&
        tcb->tos < CONFIG_PTHREAD_CLEANUP_STACKSIZE)
     {
@@ -172,7 +180,7 @@ void pthread_cleanup_push(pthread_cleanup_t routine, FAR void *arg)
       tcb->stack[ndx].pc_arg = arg;
     }
 
-  leave_critical_section(flags);
+  sched_unlock();
 }
 
 /****************************************************************************
@@ -193,20 +201,23 @@ void pthread_cleanup_push(pthread_cleanup_t routine, FAR void *arg)
 
 void pthread_cleanup_popall(FAR struct pthread_tcb_s *tcb)
 {
-  irqstate_t flags;
-
   DEBUGASSERT(tcb != NULL);
   DEBUGASSERT((tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD);
 
-  /* Pop and execute each cleanup routine */
+  /* Pop and execute each cleanup routine/
+   *
+   * sched_lock() should provide sufficient protection.  We only need to
+   * have this TCB stationary; the pthread cleanup stack should never be
+   * modified by interrupt level logic.
+   */
 
-  flags = enter_critical_section();
+  sched_lock();
   while (tcb->tos > 0)
     {
       pthread_cleanup_pop_tcb(tcb, 1);
     }
 
-  leave_critical_section(flags);
+  sched_unlock();
 }
 
 #endif /* CONFIG_PTHREAD_CLEANUP */

@@ -553,7 +553,10 @@ config PTHREAD_CLEANUP_STACKSIZE
 	---help---
 		The maximum number of cleanup actions that may be pushed by
 		pthread_clean_push().  This setting will increase the size of EVERY
-		pthread task control block by about 8 * CONFIG_PTHREAD_CLEANUP_STACKSIZE.
+		pthread task control block by about n * CONFIG_PTHREAD_CLEANUP_STACKSIZE
+		where n is the size of a pointer, 2* sizeof(uintptr_t), this would be
+		8 for a CPU with 32-bit addressing and 4 for a CPU with 16-bit
+		addressing.
 
 endmenu # Pthread Options
 
