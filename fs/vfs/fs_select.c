@@ -49,6 +49,7 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/pthread.h>
 #include <nuttx/fs/fs.h>
 
 #include "inode/inode.h"
