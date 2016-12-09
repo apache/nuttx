@@ -60,7 +60,7 @@
  *
  *   The cancelability state and type of any newly created threads,
  *   including the thread in which main() was first invoked, are
- *   PTHREAD_CANCEL_ASYNCHRONOUS and PTHREAD_CANCEL_DEFERRED respectively.
+ *   PTHREAD_CANCEL_ENABLE and PTHREAD_CANCEL_DEFERRED respectively.
  *
  ****************************************************************************/
 
