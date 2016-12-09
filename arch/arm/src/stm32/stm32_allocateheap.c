@@ -302,6 +302,7 @@
 #  else
 #    define SRAM1_END 0x20020000
 #  endif
+
    /* Set the range of CCM SRAM as well (although we may not use it) */
 
 #  define SRAM2_START 0x10000000
