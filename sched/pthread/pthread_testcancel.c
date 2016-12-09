@@ -42,6 +42,8 @@
 #include <pthread.h>
 #include <errno.h>
 
+#include <nuttx/pthread.h>
+
 #include "sched/sched.h"
 
 /****************************************************************************
@@ -60,7 +62,6 @@
 
 void pthread_testcancel(void)
 {
-#ifdef CONFIG_CANCELLATION_POINTS
-#  warning Missing Logic
-#endif
+  enter_cancellation_point();
+  leave_cancellation_point();
 }

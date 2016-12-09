@@ -164,6 +164,10 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
   int errcode;
   int ret;
 
+  /* waitid() is a cancellation point */
+
+  enter_cancellation_point();
+
   /* MISSING LOGIC:   If WNOHANG is provided in the options, then this function
    * should returned immediately.  However, there is no mechanism available now
    * know if the thread has child:  The children remember their parents (if
@@ -404,12 +408,14 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
         }
     }
 
+  leave_cancellation_point();
   sched_unlock();
   return OK;
 
 errout_with_errno:
   set_errno(errcode);
 errout:
+  leave_cancellation_point();
   sched_unlock();
   return ERROR;
 }

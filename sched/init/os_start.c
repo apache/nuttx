@@ -470,10 +470,11 @@ void os_start(void)
        */
 
 #ifdef CONFIG_SMP
-      g_idletcb[cpu].cmn.flags = (TCB_FLAG_TTYPE_KERNEL | TCB_FLAG_CPU_LOCKED);
+      g_idletcb[cpu].cmn.flags = (TCB_FLAG_TTYPE_KERNEL TCB_FLAG_NONCANCELABLE |
+                                  TCB_FLAG_CPU_LOCKED);
       g_idletcb[cpu].cmn.cpu   = cpu;
 #else
-      g_idletcb[cpu].cmn.flags = TCB_FLAG_TTYPE_KERNEL;
+      g_idletcb[cpu].cmn.flags = (TCB_FLAG_TTYPE_KERNEL | TCB_FLAG_NONCANCELABLE);
 #endif
 
 #ifdef CONFIG_SMP

@@ -86,6 +86,10 @@ int sem_wait(FAR sem_t *sem)
 
   DEBUGASSERT(sem != NULL && up_interrupt_context() == false);
 
+  /* sem_wait is a cancellation point */
+
+  enter_cancellation_point();
+
   /* Make sure we were supplied with a valid semaphore. */
 
   if (sem != NULL)
@@ -196,5 +200,6 @@ int sem_wait(FAR sem_t *sem)
       set_errno(EINVAL);
     }
 
+  leave_cancellation_point();
   return ret;
 }

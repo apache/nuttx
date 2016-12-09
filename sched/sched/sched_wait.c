@@ -44,6 +44,7 @@
 #include <errno.h>
 
 #include <nuttx/sched.h>
+#include <nuttx/pthread.h>
 
 #include "sched/sched.h"
 
@@ -84,4 +85,3 @@ pid_t wait(FAR int *stat_loc)
 }
 
 #endif /* CONFIG_SCHED_WAITPID && CONFIG_SCHED_HAVE_PARENT */
-
