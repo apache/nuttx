@@ -51,6 +51,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/wdog.h>
+#include <nuttx/pthread.h>
 
 #include "sched/sched.h"
 #include "pthread/pthread.h"
@@ -177,6 +178,10 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
   sinfo("cond=0x%p mutex=0x%p abstime=0x%p\n", cond, mutex, abstime);
 
   DEBUGASSERT(rtcb->waitdog == NULL);
+
+  /* pthread_cond_timedwait() is a cancellation point */
+
+  enter_cancellation_point();
 
   /* Make sure that non-NULL references were provided. */
 
@@ -338,6 +343,7 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
         }
     }
 
+  leave_cancellation_point();
   sinfo("Returning %d\n", ret);
   return ret;
 }

@@ -141,16 +141,17 @@
 #  define TCB_FLAG_TTYPE_PTHREAD   (1 << TCB_FLAG_TTYPE_SHIFT)  /* User pthread */
 #  define TCB_FLAG_TTYPE_KERNEL    (2 << TCB_FLAG_TTYPE_SHIFT)  /* Kernel thread */
 #define TCB_FLAG_NONCANCELABLE     (1 << 2) /* Bit 2: Pthread is non-cancelable */
-#define TCB_FLAG_CANCEL_PENDING    (1 << 3) /* Bit 3: Pthread cancel is pending */
-#define TCB_FLAG_POLICY_SHIFT      (4) /* Bit 4-5: Scheduling policy */
+#define TCB_FLAG_CANCEL_DEFERRED   (1 << 3) /* Bit 3: Deferred (vs asynch) cancellation type */
+#define TCB_FLAG_CANCEL_PENDING    (1 << 4) /* Bit 4: Pthread cancel is pending */
+#define TCB_FLAG_POLICY_SHIFT      (5) /* Bit 5-6: Scheduling policy */
 #define TCB_FLAG_POLICY_MASK       (3 << TCB_FLAG_POLICY_SHIFT)
 #  define TCB_FLAG_SCHED_FIFO      (0 << TCB_FLAG_POLICY_SHIFT) /* FIFO scheding policy */
 #  define TCB_FLAG_SCHED_RR        (1 << TCB_FLAG_POLICY_SHIFT) /* Round robin scheding policy */
 #  define TCB_FLAG_SCHED_SPORADIC  (2 << TCB_FLAG_POLICY_SHIFT) /* Sporadic scheding policy */
 #  define TCB_FLAG_SCHED_OTHER     (3 << TCB_FLAG_POLICY_SHIFT) /* Other scheding policy */
-#define TCB_FLAG_CPU_LOCKED        (1 << 6) /* Bit 6: Locked to this CPU */
-#define TCB_FLAG_EXIT_PROCESSING   (1 << 7) /* Bit 7: Exitting */
-                                            /* Bits 8-15: Available */
+#define TCB_FLAG_CPU_LOCKED        (1 << 7) /* Bit 7: Locked to this CPU */
+#define TCB_FLAG_EXIT_PROCESSING   (1 << 8) /* Bit 8: Exitting */
+                                            /* Bits 9-15: Available */
 
 /* Values for struct task_group tg_flags */
 
@@ -581,6 +582,9 @@ struct tcb_s
   int16_t  lockcount;                    /* 0=preemptable (not-locked)          */
 #ifdef CONFIG_SMP
   int16_t  irqcount;                     /* 0=interrupts enabled                */
+#endif
+#ifdef CONFIG_CANCELLATION_POINTS
+  int16_t  cpcount;                      /* Nested cancellation point count     */
 #endif
 
 #if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)

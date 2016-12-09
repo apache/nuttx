@@ -38,7 +38,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <signal.h>
+
+#include <nuttx/pthread.h>
 
 /****************************************************************************
  * Public Functions
@@ -65,5 +68,15 @@
 
 int sigwaitinfo(FAR const sigset_t *set, FAR struct siginfo *info)
 {
-  return sigtimedwait(set, info, NULL);
+  int ret;
+
+  /* sigwaitinfo() is a cancellation point */
+
+  enter_cancellation_point();
+
+  /* Just a wrapper around sigtimedwait() */
+
+  ret = sigtimedwait(set, info, NULL);
+  leave_cancellation_point();
+  return ret;
 }

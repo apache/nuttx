@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/socket/send.c
  *
- *   Copyright (C) 2007-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,8 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <errno.h>
+
+#include <nuttx/pthread.h>
 
 #include "tcp/tcp.h"
 #include "udp/udp.h"
@@ -122,6 +124,10 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
 {
   int ret;
 
+  /* Treat as a cancellation point */
+
+  enter_cancellation_point();
+
   switch (psock->s_type)
     {
 #if defined(CONFIG_NET_PKT)
@@ -192,6 +198,7 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
         break;
     }
 
+  leave_cancellation_point();
   return ret;
 }
 
@@ -261,5 +268,20 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
 
 ssize_t send(int sockfd, FAR const void *buf, size_t len, int flags)
 {
-  return psock_send(sockfd_socket(sockfd), buf, len, flags);
+  FAR struct socket *psock;
+  ssize_t ret;
+
+  /* send() is a cancellation point */
+
+  enter_cancellation_point();
+
+  /* Get the underlying socket structure */
+
+  psock = sockfd_socket(sockfd);
+
+  /* And let psock_send do all of the work */
+
+  ret = psock_send(psock, buf, len, flags, to, tolen);
+  leave_cancellation_point();
+  return ret;
 }

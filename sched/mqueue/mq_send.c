@@ -46,6 +46,7 @@
 
 #include  <nuttx/irq.h>
 #include  <nuttx/arch.h>
+#include  <nuttx/pthread.h>
 
 #include  "mqueue/mqueue.h"
 
@@ -103,12 +104,17 @@ int mq_send(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio)
   irqstate_t flags;
   int ret = ERROR;
 
+  /* mq_send() is a cancellation point */
+
+  enter_cancellation_point();
+
   /* Verify the input parameters -- setting errno appropriately
    * on any failures to verify.
    */
 
   if (mq_verifysend(mqdes, msg, msglen, prio) != OK)
     {
+      leave_cancellation_point();
       return ERROR;
     }
 
@@ -177,5 +183,6 @@ int mq_send(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio)
     }
 
   sched_unlock();
+  leave_cancellation_point();
   return ret;
 }

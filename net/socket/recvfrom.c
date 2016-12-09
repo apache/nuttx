@@ -57,6 +57,7 @@
 
 #include <nuttx/clock.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/pthread.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/iob.h>
 #include <nuttx/net/netdev.h>
@@ -1851,6 +1852,10 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
   ssize_t ret;
   int errcode;
 
+  /* Treat as a cancellation point */
+
+  enter_cancellation_point();
+
   /* Verify that non-NULL pointers were passed */
 
 #ifdef CONFIG_DEBUG_FEATURES
@@ -2013,10 +2018,12 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   /* Success return */
 
+  leave_cancellation_point();
   return ret;
 
 errout:
   set_errno(errcode);
+  leave_cancellation_point();
   return ERROR;
 }
 
@@ -2076,6 +2083,11 @@ ssize_t recvfrom(int sockfd, FAR void *buf, size_t len, int flags,
                  FAR struct sockaddr *from, FAR socklen_t *fromlen)
 {
   FAR struct socket *psock;
+  ssize_t ret;
+
+  /* recvfrom() is a cancellation point */
+
+  enter_cancellation_point();
 
   /* Get the underlying socket structure */
 
@@ -2083,7 +2095,9 @@ ssize_t recvfrom(int sockfd, FAR void *buf, size_t len, int flags,
 
   /* Then let psock_recvfrom() do all of the work */
 
-  return psock_recvfrom(psock, buf, len, flags, from, fromlen);
+  ret = psock_recvfrom(psock, buf, len, flags, from, fromlen);
+  leave_cancellation_point();
+  return ret;
 }
 
 #endif /* CONFIG_NET */

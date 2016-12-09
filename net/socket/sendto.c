@@ -309,6 +309,11 @@ ssize_t sendto(int sockfd, FAR const void *buf, size_t len, int flags,
                FAR const struct sockaddr *to, socklen_t tolen)
 {
   FAR struct socket *psock;
+  ssize_t ret;
+
+  /* sendto() is a cancellation point */
+
+  enter_cancellation_point();
 
   /* Get the underlying socket structure */
 
@@ -316,5 +321,7 @@ ssize_t sendto(int sockfd, FAR const void *buf, size_t len, int flags,
 
   /* And let psock_sendto do all of the work */
 
-  return psock_sendto(psock, buf, len, flags, to, tolen);
+  ret = psock_sendto(psock, buf, len, flags, to, tolen);
+  leave_cancellation_point();
+  return ret;
 }

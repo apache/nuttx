@@ -46,6 +46,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/pthread.h>
 
 #include "sched/sched.h"
 #include "semaphore/semaphore.h"
@@ -85,6 +86,10 @@ int sem_wait(FAR sem_t *sem)
   /* This API should not be called from interrupt handlers */
 
   DEBUGASSERT(sem != NULL && up_interrupt_context() == false);
+
+  /* sem_wait is a cancellation point */
+
+  enter_cancellation_point();
 
   /* Make sure we were supplied with a valid semaphore. */
 
@@ -196,5 +201,6 @@ int sem_wait(FAR sem_t *sem)
       set_errno(EINVAL);
     }
 
+  leave_cancellation_point();
   return ret;
 }

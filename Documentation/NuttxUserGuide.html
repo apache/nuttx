@@ -13,7 +13,7 @@
       <h1><big><font color="#3c34ec"><i>NuttX Operating System<p>User's Manual</i></font></big></h1>
       <p><small>by</small></p>
       <p>Gregory Nutt<p>
-      <p>Last Updated: July 24, 2015</p>
+      <p>Last Updated: December 9, 2016</p>
     </td>
   </tr>
 </table>
@@ -5424,12 +5424,15 @@ be sent.
     <li><a href="#pthreadexit">2.8.13 pthread_exit</a></li>
     <li><a href="#pthreadcancel">2.8.14 pthread_cancel</a></li>
     <li><a href="#pthreadsetcancelstate">2.8.15 pthread_setcancelstate</a></li>
-    <li><a href="#pthreadtestcancelstate">2.8.16 pthread_testcancelstate</a></li>
-    <li><a href="#pthreadjoin">2.8.17 pthread_join</a></li>
-    <li><a href="#pthreadyield">2.8.18 pthread_yield</a></li>
-    <li><a href="#pthreadself">2.8.19 pthread_self</a></li>
-    <li><a href="#pthreadgetschedparam">2.8.20 pthread_getschedparam</a></li>
-    <li><a href="#pthreadsetschedparam">2.8.21 pthread_setschedparam</a></li>
+    <li><a href="#pthreadsetcanceltype">2.8.16 pthread_setcanceltype</a></li>
+    <li><a href="#pthreadtestcancel">2.8.17 pthread_testcancel</a></li>
+    <li><a href="#pthreadcleauppop">2.8.18 pthread_cleanup_pop</a></li>
+    <li><a href="#pthreadcleauppush">2.8.19 pthread_cleanup_push</a></li>
+    <li><a href="#pthreadjoin">2.8.20 pthread_join</a></li>
+    <li><a href="#pthreadyield">2.8.21 pthread_yield</a></li>
+    <li><a href="#pthreadself">2.8.22 pthread_self</a></li>
+    <li><a href="#pthreadgetschedparam">2.8.23 pthread_getschedparam</a></li>
+    <li><a href="#pthreadsetschedparam">2.8.24 pthread_setschedparam</a></li>
   </ul>
   <p>
     <b>Thread Specific Data</b>.
@@ -5439,64 +5442,64 @@ be sent.
     (2) The main task thread does not had thread-specific data.
   </p>
   <ul>
-    <li><a href="#pthreadkeycreate">2.8.22 pthread_key_create</a></li>
-    <li><a href="#pthreadsetspecific">2.8.23 pthread_setspecific</a></li>
-    <li><a href="#pthreadgetspecific">2.8.24 pthread_getspecific</a></li>
-    <li><a href="#pthreadkeydelete">2.8.25 pthread_key_delete</a></li>
+    <li><a href="#pthreadkeycreate">2.8.25 pthread_key_create</a></li>
+    <li><a href="#pthreadsetspecific">2.8.26 pthread_setspecific</a></li>
+    <li><a href="#pthreadgetspecific">2.8.27 pthread_getspecific</a></li>
+    <li><a href="#pthreadkeydelete">2.8.28 pthread_key_delete</a></li>
   </ul>
   <p>
     <b>pthread Mutexes</b>.
   </p>
   <ul>
-    <li><a href="#pthreadmutexattrinit">2.8.26 pthread_mutexattr_init</a></li>
-    <li><a href="#pthreadmutexattrdestroy">2.8.27 pthread_mutexattr_destroy</a></li>
-    <li><a href="#pthreadmutexattrgetpshared">2.8.28 pthread_mutexattr_getpshared</a></li>
-    <li><a href="#pthreadmutexattrsetpshared">2.8.29 pthread_mutexattr_setpshared</a></li>
-    <li><a href="#pthreadmutexattrgettype">2.8.30 pthread_mutexattr_gettype</a></li>
-    <li><a href="#pthreadmutexattrsettype">2.8.31 pthread_mutexattr_settype</a></li>
-    <li><a href="#pthreadmutexinit">2.8.32 pthread_mutex_init</a></li>
-    <li><a href="#pthreadmutexdestrory">2.8.33 pthread_mutex_destroy</a></li>
-    <li><a href="#pthreadmutexlock">2.8.34 pthread_mutex_lock</a></li>
-    <li><a href="#pthreadmutextrylock">2.8.35 pthread_mutex_trylock</a></li>
-    <li><a href="#pthreadmutexunlock">2.8.36 pthread_mutex_unlock</a></li>
+    <li><a href="#pthreadmutexattrinit">2.8.29 pthread_mutexattr_init</a></li>
+    <li><a href="#pthreadmutexattrdestroy">2.8.30 pthread_mutexattr_destroy</a></li>
+    <li><a href="#pthreadmutexattrgetpshared">2.8.31 pthread_mutexattr_getpshared</a></li>
+    <li><a href="#pthreadmutexattrsetpshared">2.8.32 pthread_mutexattr_setpshared</a></li>
+    <li><a href="#pthreadmutexattrgettype">2.8.33 pthread_mutexattr_gettype</a></li>
+    <li><a href="#pthreadmutexattrsettype">2.8.34 pthread_mutexattr_settype</a></li>
+    <li><a href="#pthreadmutexinit">2.8.35 pthread_mutex_init</a></li>
+    <li><a href="#pthreadmutexdestrory">2.8.36 pthread_mutex_destroy</a></li>
+    <li><a href="#pthreadmutexlock">2.8.37 pthread_mutex_lock</a></li>
+    <li><a href="#pthreadmutextrylock">2.8.38 pthread_mutex_trylock</a></li>
+    <li><a href="#pthreadmutexunlock">2.8.39 pthread_mutex_unlock</a></li>
   </ul>
   <p>
     <b>Condition Variables</b>.
   </p>
   <ul>
-    <li><a href="#pthreadconaddrinit">2.8.37 pthread_condattr_init</a></li>
-    <li><a href="#pthreadocndattrdestroy">2.8.38 pthread_condattr_destroy</a></li>
-    <li><a href="#pthreadcondinit">2.8.39 pthread_cond_init</a></li>
-    <li><a href="#pthreadconddestroy">2.8.40 pthread_cond_destroy</a></li>
-    <li><a href="#pthreadcondbroadcast">2.8.41 pthread_cond_broadcast</a></li>
-    <li><a href="#pthreadcondsignal">2.8.42 pthread_cond_signal</a></li>
-    <li><a href="#pthreadcondwait">2.8.43 pthread_cond_wait</a></li>
-    <li><a href="#pthreadcondtimedwait">2.8.44 pthread_cond_timedwait</a></li>
+    <li><a href="#pthreadconaddrinit">2.8.40 pthread_condattr_init</a></li>
+    <li><a href="#pthreadocndattrdestroy">2.8.41 pthread_condattr_destroy</a></li>
+    <li><a href="#pthreadcondinit">2.8.42 pthread_cond_init</a></li>
+    <li><a href="#pthreadconddestroy">2.8.43 pthread_cond_destroy</a></li>
+    <li><a href="#pthreadcondbroadcast">2.8.44 pthread_cond_broadcast</a></li>
+    <li><a href="#pthreadcondsignal">2.8.45 pthread_cond_signal</a></li>
+    <li><a href="#pthreadcondwait">2.8.46 pthread_cond_wait</a></li>
+    <li><a href="#pthreadcondtimedwait">2.8.47 pthread_cond_timedwait</a></li>
   </ul>
   <p>
     <b>Barriers</b>.
   </p>
   <ul>
-    <li><a href="#pthreadbarrierattrinit">2.8.45 pthread_barrierattr_init</a></li>
-    <li><a href="#pthreadbarrierattrdestroy">2.8.46 pthread_barrierattr_destroy</a></li>
-    <li><a href="#pthreadbarrierattrsetpshared">2.8.47 pthread_barrierattr_setpshared</a></li>
-    <li><a href="#pthreadbarrierattrgetpshared">2.8.48 pthread_barrierattr_getpshared</a></li>
-    <li><a href="#pthreadbarrierinit">2.8.49 pthread_barrier_init</a></li>
-    <li><a href="#pthreadbarrierdestroy">2.8.50 pthread_barrier_destroy</a></li>
-    <li><a href="#pthreadbarrierwait">2.8.51 pthread_barrier_wait</a></li>
+    <li><a href="#pthreadbarrierattrinit">2.8.48 pthread_barrierattr_init</a></li>
+    <li><a href="#pthreadbarrierattrdestroy">2.8.49 pthread_barrierattr_destroy</a></li>
+    <li><a href="#pthreadbarrierattrsetpshared">2.8.50 pthread_barrierattr_setpshared</a></li>
+    <li><a href="#pthreadbarrierattrgetpshared">2.8.51 pthread_barrierattr_getpshared</a></li>
+    <li><a href="#pthreadbarrierinit">2.8.52 pthread_barrier_init</a></li>
+    <li><a href="#pthreadbarrierdestroy">2.8.53 pthread_barrier_destroy</a></li>
+    <li><a href="#pthreadbarrierwait">2.8.54 pthread_barrier_wait</a></li>
   </ul>
   <p>
     <b>Initialization</b>.
   </p>
   <ul>
-    <li><a href="#pthreadonce">2.8.52 pthread_once</a></li>
+    <li><a href="#pthreadonce">2.8.55 pthread_once</a></li>
   </ul>
   <p>
     <b>Signals</b>.
   </p>
   <ul>
-    <li><a href="#pthreadkill">2.8.53 pthread_kill</a></li>
-    <li><a href="#pthreadsigmask">2.8.54 pthread_sigmask</a></li>
+    <li><a href="#pthreadkill">2.8.56 pthread_kill</a></li>
+    <li><a href="#pthreadsigmask">2.8.57 pthread_sigmask</a></li>
   </ul>
 </ul>
 <p>
@@ -5515,8 +5518,6 @@ be sent.
   <li><code>pthread_attr_setscope</code>. get and set the contentionscope attribute.</li>
   <li><code>pthread_attr_setstack</code>. get and set stack attributes.</li>
   <li><code>pthread_attr_setstackaddr</code>. get and set the stackaddr attribute.</li>
-  <li><code>pthread_cleanup_pop</code>. establish cancellation handlers.</li>
-  <li><code>pthread_cleanup_push</code>. establish cancellation handlers.</li>
   <li><code>pthread_condattr_getclock</code>. set the clock selection condition variable attribute.</li>
   <li><code>pthread_condattr_getpshared</code>. get the process-shared condition variable attribute.</li>
   <li><code>pthread_condattr_setclock</code>. set the clock selection condition variable attribute.</li>
@@ -5543,14 +5544,12 @@ be sent.
   <li><code>pthread_rwlockattr_getpshared</code>. get and set the process-shared attribute of the read-write lock attributes object.</li>
   <li><code>pthread_rwlockattr_init</code>. destroy and initialize the read-write lock attributes object.</li>
   <li><code>pthread_rwlockattr_setpshared</code>. get and set the process-shared attribute of the read-write lock attributes object.</li>
-  <li><code>pthread_setcanceltype</code>. set cancelability state.</li>
   <li><code>pthread_setconcurrency</code>. get and set the level of concurrency.</li>
   <li><code>pthread_spin_destroy</code>. destroy or initialize a spin lock object.</li>
   <li><code>pthread_spin_init</code>. destroy or initialize a spin lock object.</li>
   <li><code>pthread_spin_lock</code>. lock a spin lock object.</li>
   <li><code>pthread_spin_trylock</code>. lock a spin lock object.</li>
   <li><code>pthread_spin_unlock</code>. unlock a spin lock object.</li>
-  <li><code>pthread_testcancel</code>. set cancelability state.</li>
 </ul>
 
 <H3><a name="pthreadattrinit">2.8.1 pthread_attr_init</a></H3>
@@ -5985,19 +5984,15 @@ interface of the same name.
 <p>
 <b>Description:</b>
 
-<p>The <code>pthread_cancel()</code> function will request that thread
-be canceled. The target thread's cancelability state determines
-when the cancellation takes effect. When the
-cancellation is acted on, thread will be terminated.</p>
+<p>The <code>pthread_cancel()</code> function will request that thread be canceled.
+The target thread's cancelability state, enabled, or disabled, determines when the cancellation takes effect:  When the cancellation is acted on, thread will be terminated. 
+When cancelability is disabled, all cancellations are held pending in the target thread until the thread re-enables cancelability.</p>
 
-<p>When cancelability is disabled, all cancels are held pending
-in the target thread until the thread changes the cancelability.
-When cancelability is deferred, all cancels are held pending in
-the target thread until the thread changes the cancelability or
-calls pthread_testcancel().</p>
+<p>The target thread's cancelability state determines how the cancellation is acted on:
+Either asychronrously or deferred.
+Asynchronous cancellations we be acted upon immediately (when enabled), interrupting the thread with its processing in an abritray state.</p>
 
-<p>Cancelability is asynchronous; all cancels are acted upon
-immediately (when enable), interrupting the thread with its processing.</p>
+<p>When cancelability is deferred, all cancels are held pending in the target thread until the thread changes the cancelability type or a cancellation point function such as <code>pthread_cancel()</code>.</p>
 
 <p>
 <b>Input Parameters:</b>
@@ -6018,16 +6013,10 @@ No thread could be found corresponding to that specified by the given thread ID.
 </ul>
 <b>Assumptions/Limitations:</b>
 <p>
-<b>POSIX Compatibility:</b> Comparable to the POSIX
-interface of the same name.  Except:</p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.  Except:</p>
 <ul>
-<li>The thread-specific data destructor functions will be called for thread.
-However, these destructors are not currently supported.</li>
-<li>Cancellation types are not supported.  The thread will be canceled
-at the time that pthread_cancel() is called or, if cancellation is disabled, at
-the time when cancellation is re-enabled.</li>
-<li><tt>pthread_testcancel()</tt> is not supported.</li>
-<li>Thread cancellation at <i>cancellation points</i> is not supported.</li>
+<li>The thread-specific data destructor functions will be not called for thread
+These destructors are not currently supported.</li>
 </ul>
 
 <H3><a name="pthreadsetcancelstate">2.8.15 pthread_setcancelstate</a></H3>
@@ -6040,23 +6029,29 @@ the time when cancellation is re-enabled.</li>
 </pre>
 <p>
 <b>Description:</b>
-<p>The <code>pthread_setcancelstate()</code> function atomically
+</p>
+<p>
+The <code>pthread_setcancelstate()</code> function atomically
 sets both the calling thread's cancelability state to the indicated
 state and returns the previous cancelability  state at the location
 referenced by oldstate.
-Legal values for state are PTHREAD_CANCEL_ENABLE and PTHREAD_CANCEL_DISABLE.<.li>
-
-<p>Any pending thread cancellation may occur at the time that the
-cancellation state is set to PTHREAD_CANCEL_ENABLE.</p>
-
+Legal values for state are PTHREAD_CANCEL_ENABLE and PTHREAD_CANCEL_DISABLE.
+</p>
+<p>
+Any pending thread cancellation may occur at the time that the
+cancellation state is set to PTHREAD_CANCEL_ENABLE.
+</p>
+<p>
 <b>Input Parameters:</b>
+</p>
 <p>
 <ul>
 <li><code>state</code>
-New cancellation state.  One of PTHREAD_CANCEL_ENABLE or PTHREAD_CANCEL_DISABLE.<.li>
+New cancellation state.  One of PTHREAD_CANCEL_ENABLE or PTHREAD_CANCEL_DISABLE.</li>
 <li><code>oldstate</code>.
 Location to return the previous cancellation state.
 </ul>
+</p>
 <p>
 <b>Returned Value:</b>
 <p>
@@ -6072,38 +6067,149 @@ No thread could be found corresponding to that specified by the given thread ID.
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadtestcancelstate">2.8.16 pthread_testcancelstate</a></H3>
+<H3><a name="pthreadsetcanceltype">2.8.16 pthread_setcanceltype</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
 <pre>
     #include &lt;pthread.h&gt;
-    int pthread_setcancelstate(void);
+    int pthread_setcanceltype(int type, FAR int *oldtype);
 </pre>
 <p>
 <b>Description:</b>
-<p><b>NOT SUPPORTED</b>
+The <code>pthread_setcanceltype()</code> function atomically both sets the calling thread's cancelability type to the indicated type and returns the previous cancelability type at the location referenced by <code>oldtype</code>.
+Legal values for type are <code>PTHREAD_CANCEL_DEFERRED</code> and <code>PTHREAD_CANCEL_ASYNCHRONOUS</code>.
+</p>
+<p>
+The cancelability state and type of any newly created threads are <code>PTHREAD_CANCEL_ENABLE</code> and <code>PTHREAD_CANCEL_DEFERRED respectively</code>.
+</p>
+<p>
+<b>Input Parameters:</b>
+</p>
+<p>
+<ul>
+<li><code>type</code>
+New cancellation state.  One of <code>PTHREAD_CANCEL_DEFERRED</code> or <code>PTHREAD_CANCEL_ASYNCHRONOUS</code>.</li>
+<li><code>oldtype</code>.
+Location to return the previous cancellation type.
+</ul>
+</p>
+<p>
+<b>Returned Value:</b>
+<p>
+If successful, the <code>pthread_setcancelstate()</code> function will return
+zero (<code>OK</code>).  Otherwise, an error number will be
+returned to indicate the error.
+</p>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
+</p>
+
+<H3><a name="pthreadtestcancel">2.8.17 pthread_testcancel</a></H3>
+<p>
+<b>Function Prototype:</b>
+</p>
+<p>
+<pre>
+    #include &lt;pthread.h&gt;
+    void pthread_testcancel(void);
+</pre>
+</p>
+<p>
+<b>Description:</b>
+</p>
+<p>
+The <code>pthread_testcancel()</code> function creates a cancellation point in the calling thread.
+The <code>pthread_testcancel()</code> function has no effect if cancelability is disabled.
+</p>
+<p>
+<b>Input Parameters:</b> None
+</p>
+<p>
+<b>Returned Value:</b> None
+</p>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
+</p>
+
+<H3><a name="pthreadcleauppop">2.8.18 pthread_cleanup_pop</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
+<pre>
+    #include &lt;pthread.h&gt;
+    void pthread_cleanup_pop(int execute);
+</pre>
+<p>
+<b>Description:</b>
+</p>
+<p>
+The <code>pthread_cleanup_pop()</code> function will remove the routine at the top of the calling thread's cancellation cleanup stack and optionally invoke it (if <code>execute</code> is non-zero).
+</p>
+<p>
+<b>Input Parameters:</b>
+</p>
+<p>
+<ul>
+  <li><code>execute</code>.  Execute the popped cleanup function immediately.</li>
+</ul>
+</p>
+<p>
+<b>Returned Value:</b>
+</p>
+<p>
+If successful, the <code>pthread_setcancelstate()</code> function will return
+zero (<code>OK</code>).  Otherwise, an error number will be
+returned to indicate the error:
+<p>
+</p>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
+</p>
+
+<H3><a name="pthreadcleauppush">2.8.19 pthread_cleanup_push</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
+<pre>
+    #include &lt;pthread.h&gt;
+    void pthread_cleanup_push(CODE void (*routine)(FAR void *), FAR void *arg);
+</pre>
+<p>
+<b>Description:</b>
+</p>
+<p>
+The <code>pthread_cleanup_push()</code> function will push the specified cancellation cleanup handler routine onto the calling thread's cancellation cleanup stack.
+</p>
+<p>
+The cancellation cleanup handler will be popped from the cancellation cleanup stack and invoked with the argument arg when:
+</p>
+<p>
+<ul>
+<li>The thread exits (that is, calls <code>pthread_exit()</code>).</li>
+<li>The thread acts upon a cancellation request.</li>
+<li>The thread calls <code>pthread_cleanup_pop()</code> with a non-zero execute argument.</li>
+</ul>
+</p>
+<p>
 <b>Input Parameters:</b>
 <p>
 <ul>
-  <li><code>To be provided</code>.</li>
+  <li><code>routine</code>.  The cleanup routine to be pushed on the the cleanup stack.</li>
+  <li><code>arg</code>.  An argument that will accompany the callback.</li>
 </ul>
 <p>
 <b>Returned Value:</b>
 <p>
 If successful, the <code>pthread_setcancelstate()</code> function will return
 zero (<code>OK</code>).  Otherwise, an error number will be
-returned to indicate the error:
+returned to indicate the error.
+</p>
 <p>
-<ul>
-  <li><code>To be provided</code>. </li>
-</ul>
-<b>Assumptions/Limitations:</b>
-<p>
-<b>POSIX Compatibility:</b> Comparable to the POSIX
-interface of the same name.
+<b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
+</p>
 
-<H3><a name="pthreadjoin">2.8.17 pthread_join</a></H3>
+<H3><a name="pthreadjoin">2.8.20 pthread_join</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6136,7 +6242,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadyield">2.8.18 pthread_yield</a></H3>
+<H3><a name="pthreadyield">2.8.21 pthread_yield</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6169,7 +6275,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadself">2.8.19 pthread_self</a></H3>
+<H3><a name="pthreadself">2.8.22 pthread_self</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6201,7 +6307,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadgetschedparam">2.8.20 pthread_getschedparam</a></H3>
+<H3><a name="pthreadgetschedparam">2.8.23 pthread_getschedparam</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -6291,7 +6397,7 @@ interface of the same name.
   Comparable to the POSIX interface of the same name.
 </p>
 
-<H3><a name="pthreadsetschedparam">2.8.21 pthread_setschedparam</a></H3>
+<H3><a name="pthreadsetschedparam">2.8.24 pthread_setschedparam</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -6383,7 +6489,7 @@ interface of the same name.
   Comparable to the POSIX interface of the same name.
 </p>
 
-<H3><a name="pthreadkeycreate">2.8.22 pthread_key_create</a></H3>
+<H3><a name="pthreadkeycreate">2.8.25 pthread_key_create</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6438,7 +6544,7 @@ interface of the same name.
 <li>The present implementation ignores the destructor argument.
 </ul>
 
-<H3><a name="pthreadsetspecific">2.8.23 pthread_setspecific</a></H3>
+<H3><a name="pthreadsetspecific">2.8.26 pthread_setspecific</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6488,7 +6594,7 @@ interface of the same name.
 destructor function.
 </ul>
 
-<H3><a name="pthreadgetspecific">2.8.24 pthread_getspecific</a></H3>
+<H3><a name="pthreadgetspecific">2.8.27 pthread_getspecific</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6529,7 +6635,7 @@ interface of the same name.
 destructor function.
 </ul>
 
-<H3><a name="pthreadkeydelete">2.8.25 pthread_key_delete</a></H3>
+<H3><a name="pthreadkeydelete">2.8.28 pthread_key_delete</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6561,7 +6667,7 @@ this function does nothing in the present implementation.
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutexattrinit">2.8.26 pthread_mutexattr_init</a></H3>
+<H3><a name="pthreadmutexattrinit">2.8.29 pthread_mutexattr_init</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6592,7 +6698,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutexattrdestroy">2.8.27 pthread_mutexattr_destroy</a></H3>
+<H3><a name="pthreadmutexattrdestroy">2.8.30 pthread_mutexattr_destroy</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6623,7 +6729,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutexattrgetpshared">2.8.28 pthread_mutexattr_getpshared</a></H3>
+<H3><a name="pthreadmutexattrgetpshared">2.8.31 pthread_mutexattr_getpshared</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6655,7 +6761,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutexattrsetpshared">2.8.29 pthread_mutexattr_setpshared</a></H3>
+<H3><a name="pthreadmutexattrsetpshared">2.8.32 pthread_mutexattr_setpshared</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6687,7 +6793,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<h3><a name="pthreadmutexattrgettype">2.8.30 pthread_mutexattr_gettype</a></h3>
+<h3><a name="pthreadmutexattrgettype">2.8.33 pthread_mutexattr_gettype</a></h3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6722,7 +6828,7 @@ returned to indicate the error:
 <p>
 <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 
-<h3><a name="pthreadmutexattrsettype">2.8.31 pthread_mutexattr_settype</a></h3>
+<h3><a name="pthreadmutexattrsettype">2.8.34 pthread_mutexattr_settype</a></h3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6776,7 +6882,7 @@ returned to indicate the error:
 <p>
 <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 
-<H3><a name="pthreadmutexinit">2.8.32 pthread_mutex_init</a></H3>
+<H3><a name="pthreadmutexinit">2.8.35 pthread_mutex_init</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6808,7 +6914,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutexdestrory">2.8.33 pthread_mutex_destroy</a></H3>
+<H3><a name="pthreadmutexdestrory">2.8.36 pthread_mutex_destroy</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6839,7 +6945,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutexlock">2.8.34 pthread_mutex_lock</a></H3>
+<H3><a name="pthreadmutexlock">2.8.37 pthread_mutex_lock</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6905,7 +7011,7 @@ Otherwise, an error number will be returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutextrylock">2.8.35 pthread_mutex_trylock</a></H3>
+<H3><a name="pthreadmutextrylock">2.8.38 pthread_mutex_trylock</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6945,7 +7051,7 @@ Otherwise, an error number will be returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutexunlock">2.8.36 pthread_mutex_unlock</a></H3>
+<H3><a name="pthreadmutexunlock">2.8.39 pthread_mutex_unlock</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6991,7 +7097,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadconaddrinit">2.8.37 pthread_condattr_init</a></H3>
+<H3><a name="pthreadconaddrinit">2.8.40 pthread_condattr_init</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -7022,7 +7128,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadocndattrdestroy">2.8.38 pthread_condattr_destroy</a></H3>
+<H3><a name="pthreadocndattrdestroy">2.8.41 pthread_condattr_destroy</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -7053,7 +7159,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadcondinit">2.8.39 pthread_cond_init</a></H3>
+<H3><a name="pthreadcondinit">2.8.42 pthread_cond_init</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -7084,7 +7190,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadconddestroy">2.8.40 pthread_cond_destroy</a></H3>
+<H3><a name="pthreadconddestroy">2.8.43 pthread_cond_destroy</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -7115,7 +7221,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadcondbroadcast">2.8.41 pthread_cond_broadcast</a></H3>
+<H3><a name="pthreadcondbroadcast">2.8.44 pthread_cond_broadcast</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -7146,7 +7252,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadcondsignal">2.8.42 pthread_cond_signal</a></H3>
+<H3><a name="pthreadcondsignal">2.8.45 pthread_cond_signal</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -7177,7 +7283,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadcondwait">2.8.43 pthread_cond_wait</a></H3>
+<H3><a name="pthreadcondwait">2.8.46 pthread_cond_wait</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -7208,7 +7314,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadcondtimedwait">2.8.44 pthread_cond_timedwait</a></H3>
+<H3><a name="pthreadcondtimedwait">2.8.47 pthread_cond_timedwait</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -7245,7 +7351,7 @@ interface of the same name.
   <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 </p>
 
-<h3><a name="pthreadbarrierattrinit">2.8.45 pthread_barrierattr_init</a></h3>
+<h3><a name="pthreadbarrierattrinit">2.8.48 pthread_barrierattr_init</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -7278,7 +7384,7 @@ interface of the same name.
   <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 </p>
 
-<h3><a name="pthreadbarrierattrdestroy">2.8.46 pthread_barrierattr_destroy</a></h3>
+<h3><a name="pthreadbarrierattrdestroy">2.8.49 pthread_barrierattr_destroy</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -7310,7 +7416,7 @@ interface of the same name.
   <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 </p>
 
-<h3><a name="pthreadbarrierattrsetpshared">2.8.47 pthread_barrierattr_setpshared</a></h3>
+<h3><a name="pthreadbarrierattrsetpshared">2.8.50 pthread_barrierattr_setpshared</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -7348,7 +7454,7 @@ interface of the same name.
   <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 </p>
 
-<h3><a name="pthreadbarrierattrgetpshared">2.8.48 pthread_barrierattr_getpshared</a></h3>
+<h3><a name="pthreadbarrierattrgetpshared">2.8.51 pthread_barrierattr_getpshared</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -7380,7 +7486,7 @@ interface of the same name.
   <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 </p>
 
-<h3><a name="pthreadbarrierinit">2.8.49 pthread_barrier_init</a></h3>
+<h3><a name="pthreadbarrierinit">2.8.52 pthread_barrier_init</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -7450,7 +7556,7 @@ interface of the same name.
   <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 </p>
 
-<h3><a name="pthreadbarrierdestroy">2.8.50 pthread_barrier_destroy</a></h3>
+<h3><a name="pthreadbarrierdestroy">2.8.53 pthread_barrier_destroy</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -7494,7 +7600,7 @@ interface of the same name.
   <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 </p>
 
-<h3><a name="pthreadbarrierwait">2.8.51 pthread_barrier_wait</a></h3>
+<h3><a name="pthreadbarrierwait">2.8.54 pthread_barrier_wait</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -7554,7 +7660,7 @@ interface of the same name.
 </p>
 
 
-<h3><a name="pthreadonce">2.8.52 pthread_once</a></h3>
+<h3><a name="pthreadonce">2.8.55 pthread_once</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -7598,7 +7704,7 @@ interface of the same name.
   <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 </p>
 
-<h3><a name="pthreadkill">2.8.53 pthread_kill</a></h3>
+<h3><a name="pthreadkill">2.8.56 pthread_kill</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -7660,7 +7766,7 @@ interface of the same name.
   <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 </p>
 
-<h3><a name="pthreadsigmask">2.8.54 pthread_sigmask</a></h3>
+<h3><a name="pthreadsigmask">2.8.57 pthread_sigmask</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -10077,7 +10183,8 @@ notify a task when a message is available on a queue.
   <li><a href="#pthreadsetschedparam">pthread_setschedparam</a></li>
   <li><a href="#pthreadsetspecific">pthread_setspecific</a></li>
   <li><a href="#pthreadsigmask">pthread_sigmask</a></li>
-  <li><a href="#pthreadtestcancelstate">pthread_testcancelstate</a></li>
+  <li><a href="#pthreadsetcanceltype">pthread_setcanceltype</a></li>
+  <li><a href="#pthreadtestcancel">pthread_testcancel</a></li>
   <li><a href="#pthreadyield">pthread_yield</a></li>
   <li><a href="#standardio">puts</a></li>
   <li><a href="#mmapxip">RAM disk driver</a></li>

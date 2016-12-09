@@ -50,6 +50,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
+#include <nuttx/pthread.h>
 
 #include "sched/sched.h"
 #include "clock/clock.h"
@@ -174,18 +175,24 @@ ssize_t mq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
 
   DEBUGASSERT(up_interrupt_context() == false && rtcb->waitdog == NULL);
 
+  /* mq_timedreceive() is a cancellation point */
+
+  enter_cancellation_point();
+
   /* Verify the input parameters and, in case of an error, set
    * errno appropriately.
    */
 
   if (mq_verifyreceive(mqdes, msg, msglen) != OK)
     {
+      leave_cancellation_point();
       return ERROR;
     }
 
   if (!abstime || abstime->tv_nsec < 0 || abstime->tv_nsec >= 1000000000)
     {
       set_errno(EINVAL);
+      leave_cancellation_point();
       return ERROR;
     }
 
@@ -198,6 +205,7 @@ ssize_t mq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
   if (!rtcb->waitdog)
     {
       set_errno(EINVAL);
+      leave_cancellation_point();
       return ERROR;
     }
 
@@ -250,6 +258,7 @@ ssize_t mq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
           rtcb->waitdog = NULL;
 
           set_errno(result);
+          leave_cancellation_point();
           return ERROR;
         }
 
@@ -288,5 +297,6 @@ ssize_t mq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
   sched_unlock();
   wd_delete(rtcb->waitdog);
   rtcb->waitdog = NULL;
+  leave_cancellation_point();
   return ret;
 }

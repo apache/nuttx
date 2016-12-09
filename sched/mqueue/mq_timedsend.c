@@ -50,6 +50,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
+#include <nuttx/pthread.h>
 
 #include "clock/clock.h"
 #include "sched/sched.h"
@@ -178,6 +179,10 @@ int mq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio,
 
   DEBUGASSERT(up_interrupt_context() == false && rtcb->waitdog == NULL);
 
+  /* mq_timedsend() is a cancellation point */
+
+  enter_cancellation_point();
+
   /* Verify the input parameters -- setting errno appropriately
    * on any failures to verify.
    */
@@ -186,6 +191,7 @@ int mq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio,
     {
       /* mq_verifysend() will set the errno appropriately */
 
+      leave_cancellation_point();
       return ERROR;
     }
 
@@ -199,6 +205,7 @@ int mq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio,
        */
 
       set_errno(ENOMEM);
+      leave_cancellation_point();
       return ERROR;
     }
 
@@ -229,6 +236,7 @@ int mq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio,
 
       ret = mq_dosend(mqdes, mqmsg, msg, msglen, prio);
       sched_unlock();
+      leave_cancellation_point();
       return ret;
     }
 
@@ -320,6 +328,7 @@ int mq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio,
   sched_unlock();
   wd_delete(rtcb->waitdog);
   rtcb->waitdog = NULL;
+  leave_cancellation_point();
   return ret;
 
 /* Exit here with (1) the scheduler locked, (2) a message allocated, (3) a
@@ -341,5 +350,6 @@ errout_with_mqmsg:
   sched_unlock();
 
   set_errno(result);
+  leave_cancellation_point();
   return ERROR;
 }

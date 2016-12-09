@@ -94,6 +94,17 @@ void pthread_exit(FAR void *exit_value)
   }
 #endif
 
+#ifdef CONFIG_CANCELLATION_POINTS
+   /* Mark the pthread as non-cancelable to avoid additional calls to
+    * pthread_exit() due to any cancellation point logic that might get
+    * kicked off by actions taken during pthread_exit processing.
+    */
+
+   tcb->flags  |=  TCB_FLAG_NONCANCELABLE;
+   tcb->flags  &= ~TCB_FLAG_CANCEL_PENDING;
+   tcb->cpcount = 0;
+#endif
+
 #ifdef CONFIG_PTHREAD_CLEANUP
    /* Perform any stack pthread clean-up callbacks */
 

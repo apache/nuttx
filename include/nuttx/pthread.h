@@ -2,7 +2,7 @@
  * include/nuttx/pthread.h
  * Non-standard, NuttX-specific pthread-related declarations.
  *
- *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -126,6 +126,80 @@ EXTERN const pthread_attr_t g_default_pthread_attr;
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Cancellation Points.
+ *
+ * Cancellation points shall occur when a thread is executing the following
+ * functions:
+ *
+ * accept()          mq_timedsend()           putpmsg()       sigtimedwait()
+ * aio_suspend()     msgrcv()                 pwrite()        sigwait()
+ * clock_nanosleep() msgsnd()                 read()          sigwaitinfo()
+ * close()           msync()                  readv()         sleep()
+ * connect()         nanosleep()              recv()          system()
+ * creat()           open()                   recvfrom()      tcdrain()
+ * fcntl()           pause()                  recvmsg()       usleep()
+ * fdatasync()       poll()                   select()        wait()
+ * fsync()           pread()                  sem_timedwait() waitid()
+ * getmsg()          pselect()                sem_wait()      waitpid()
+ * getpmsg()         pthread_cond_timedwait() send()          write()
+ * lockf()           pthread_cond_wait()      sendmsg()       writev()
+ * mq_receive()      pthread_join()           sendto()
+ * mq_send()         pthread_testcancel()     sigpause()
+ * mq_timedreceive() putmsg()                 sigsuspend()
+ *
+ * Each of the above function must call enter_cancellation_point() on entry
+ * in order to establish the cancellation point and leave_cancellation_point()
+ * on exit.  These functions are described below.
+ *
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: enter_cancellation_point
+ *
+ * Description:
+ *   Called at the beginning of the cancellation point to establish the
+ *   cancellation point.  This function does the following:
+ *
+ *   1. If deferred cancellation does not apply to this thread, nothing is
+ *      done, otherwise, it
+ *   2. Sets state information in the caller's TCB and increments a nesting
+ *      count.
+ *   3. If this is the outermost nesting level, it checks if there is a
+ *      pending cancellation and, if so, calls either exit() or
+ *      pthread_exit(), depending upon the type of the thread.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_CANCELLATION_POINTS
+void enter_cancellation_point(void);
+#else
+#  define enter_cancellation_point()
+#endif
+
+/****************************************************************************
+ * Name: leave_cancellation_point
+ *
+ * Description:
+ *   Called at the end of the cancellation point.  This function does the
+ *   following:
+ *
+ *   1. If deferred cancellation does not apply to this thread, nothing is
+ *      done, otherwise, it
+ *   2. Clears state information in the caller's TCB and decrements a
+ *      nesting count.
+ *   3. If this is the outermost nesting level, it checks if there is a
+ *      pending cancellation and, if so, calls either exit() or
+ *      pthread_exit(), depending upon the type of the thread.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_CANCELLATION_POINTS
+void leave_cancellation_point(void);
+#else
+#  define leave_cancellation_point()
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

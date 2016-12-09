@@ -560,6 +560,15 @@ config PTHREAD_CLEANUP_STACKSIZE
 
 endmenu # Pthread Options
 
+config CANCELLATION_POINTS
+	bool "Cancellation points"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		Enable POSIX cancellation points for pthread_cancel().  If selected,
+		cancellation points will also used with the () task_delete() API even if
+		pthreads are not enabled.
+
 menu "Performance Monitoring"
 
 config SCHED_CPULOAD

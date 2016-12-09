@@ -66,6 +66,10 @@ ifeq ($(CONFIG_SCHED_ONEXIT),y)
 CSRCS += task_onexit.c
 endif
 
+ifeq ($(CONFIG_CANCELLATION_POINTS),y)
+CSRCS += task_cancelpt.c
+endif
+
 # Include task build support
 
 DEPPATH += --dep-path task

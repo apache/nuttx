@@ -110,6 +110,10 @@ int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
   int ndx;
   int ret;
 
+  /* select() is cancellation point */
+
+  enter_cancellation_point();
+
   /* How many pollfd structures do we need to allocate? */
 
   /* Initialize the descriptor list for poll() */
@@ -134,6 +138,7 @@ int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
   if (!pollset)
     {
       set_errno(ENOMEM);
+      leave_cancellation_point();
       return ERROR;
     }
 
@@ -280,6 +285,7 @@ int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
       set_errno(errcode);
     }
 
+  leave_cancellation_point();
   return ret;
 }
 

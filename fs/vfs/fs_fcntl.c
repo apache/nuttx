@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/vfs/fs_fcntl.c
  *
- *   Copyright (C) 2009, 2012-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2012-2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,19 +44,12 @@
 #include <errno.h>
 #include <assert.h>
 
+#include <nuttx/sched.h>
+#include <nuttx/pthread.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
-#include <nuttx/sched.h>
 
 #include "inode/inode.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -228,6 +221,10 @@ int fcntl(int fd, int cmd, ...)
   va_list ap;
   int ret;
 
+  /* fcntl() is a cancellation point */
+
+  enter_cancellation_point();
+
   /* Setup to access the variable argument list */
 
   va_start(ap, cmd);
@@ -244,6 +241,8 @@ int fcntl(int fd, int cmd, ...)
         {
           /* The errno value has already been set */
 
+          va_end(ap);
+          leave_cancellation_point();
           return ERROR;
         }
 
@@ -273,5 +272,6 @@ int fcntl(int fd, int cmd, ...)
     }
 
   va_end(ap);
+  leave_cancellation_point();
   return ret;
 }

@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/vfs/fs_fsync.c
  *
- *   Copyright (C) 2007-2009, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013-2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,8 +44,9 @@
 #include <errno.h>
 #include <assert.h>
 
-#include <nuttx/fs/fs.h>
 #include <nuttx/sched.h>
+#include <nuttx/pthread.h>
+#include <nuttx/fs/fs.h>
 
 #include "inode/inode.h"
 
@@ -117,6 +118,11 @@ errout:
 int fsync(int fd)
 {
   FAR struct file *filep;
+  int ret;
+
+  /* fsync() is a cancellation point */
+
+  enter_cancellation_point();
 
   /* Get the file structure corresponding to the file descriptor. */
 
@@ -125,12 +131,15 @@ int fsync(int fd)
     {
       /* The errno value has already been set */
 
+      leave_cancellation_point();
       return ERROR;
     }
 
   /* Perform the fsync operation */
 
-  return file_fsync(filep);
+  ret = file_fsync(filep);
+  leave_cancellation_point();
+  return ret;
 }
 
 #endif /* !CONFIG_DISABLE_MOUNTPOINT */

@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/signal/sig_pause.c
+ * sched/pthread/pthread_setcanceltype.c
  *
- *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,61 +39,90 @@
 
 #include <nuttx/config.h>
 
-#include <unistd.h>
-#include <signal.h>
+#include <pthread.h>
+#include <errno.h>
 
-#include <nuttx/pthread.h>
+#include "sched/sched.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pause
+ * Name: pthread_setcancelstate
  *
  * Description:
- *   The pause() function will suspend the calling thread until delivery of a
- *   non-blocked signal.
+ *   The pthread_setcanceltype() function atomically both sets the calling
+ *   thread's cancelability type to the indicated type and returns the
+ *   previous cancelability type at the location referenced by oldtype
+ *   Legal values for type are PTHREAD_CANCEL_DEFERRED and
+ *   PTHREAD_CANCEL_ASYNCHRONOUS.
  *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   Since pause() suspends thread execution indefinitely unless interrupted
- *   a signal, there is no successful completion return value. A value of -1
- *   will always be returned and errno set to indicate the error (EINTR).
- *
- * POSIX compatibility:
- *   In the POSIX description of this function is the pause() function will
- *   suspend the calling thread until delivery of a signal whose action is
- *   either to execute a signal-catching function or to terminate the
- *   process.  This implementation only waits for any non-blocked signal
- *   to be received.
+ *   The cancelability state and type of any newly created threads,
+ *   including the thread in which main() was first invoked, are
+ *   PTHREAD_CANCEL_ENABLE and PTHREAD_CANCEL_DEFERRED respectively.
  *
  ****************************************************************************/
 
-int pause(void)
+int pthread_setcanceltype(int type, FAR int *oldtype)
 {
-  struct siginfo value;
-  sigset_t set;
-  int ret;
+  FAR struct tcb_s *tcb = this_task();
+  int ret = OK;
 
-  /* pause() is a cancellation point */
-
-  enter_cancellation_point();
-
-  /* Set up for the sleep.  Using the empty set means that we are not
-   * waiting for any particular signal.  However, any unmasked signal
-   * can still awaken sigtimedwait().
+  /* Suppress context changes for a bit so that the flags are stable. (the
+   * flags should not change in interrupt handling).
    */
 
-  (void)sigemptyset(&set);
+  sched_lock();
 
-  /* sigtwaitinfo() cannot succeed.  It should always return error EINTR
-   * meaning that some unblocked signal was caught.
-   */
+  /* Return the current type if so requrested */
 
-  ret = sigwaitinfo(&set, &value);
-  leave_cancellation_point();
+  if (oldtype)
+    {
+      if ((tcb->flags & TCB_FLAG_CANCEL_DEFERRED) != 0)
+        {
+          *oldtype = PTHREAD_CANCEL_DEFERRED;
+        }
+      else
+        {
+          *oldtype = PTHREAD_CANCEL_ASYNCHRONOUS;
+        }
+    }
+
+  /* Set the new cancellation type */
+
+  if (type == PTHREAD_CANCEL_ASYNCHRONOUS)
+    {
+      /* Clear the deferred cancellation bit */
+
+      tcb->flags &= ~TCB_FLAG_CANCEL_DEFERRED;
+
+#ifdef CONFIG_CANCELLATION_POINTS
+      /* If we just switched from deferred to asynchronous type and if a
+       * cancellation is pending, then exit now.
+       */
+
+      if ((tcb->flags & TCB_FLAG_CANCEL_PENDING) != 0 &&
+          (tcb->flags & TCB_FLAG_NONCANCELABLE) == 0)
+        {
+          tcb->flags &= ~TCB_FLAG_CANCEL_PENDING;
+          pthread_exit(PTHREAD_CANCELED);
+        }
+#endif
+    }
+#ifdef CONFIG_CANCELLATION_POINTS
+  else if (type == PTHREAD_CANCEL_DEFERRED)
+    {
+      /* Set the deferred cancellation type */
+
+      tcb->flags |= TCB_FLAG_CANCEL_DEFERRED;
+    }
+#endif
+  else
+    {
+      ret = EINVAL;
+    }
+
+  sched_unlock();
   return ret;
 }

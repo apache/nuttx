@@ -37,8 +37,12 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <pthread.h>
 #include <errno.h>
+
+#include "task/task.h"
 #include "sched/sched.h"
 
 /****************************************************************************
@@ -47,6 +51,18 @@
 
 /****************************************************************************
  * Name: pthread_setcancelstate
+ *
+ * Description:
+ *   The pthread_setcancelstate() function atomically both sets the calling
+ *   thread's cancelability state to the indicated state and returns the
+ *   previous cancelability state at the location referenced by oldstate.
+ *   Legal values for state are PTHREAD_CANCEL_ENABLE and
+ *   PTHREAD_CANCEL_DISABLE.
+ *
+ *   The cancelability state and type of any newly created threads,
+ *   including the thread in which main() was first invoked, are
+ *   PTHREAD_CANCEL_ENABLE and PTHREAD_CANCEL_DEFERRED respectively.
+ *
  ****************************************************************************/
 
 int pthread_setcancelstate(int state, FAR int *oldstate)
@@ -78,17 +94,38 @@ int pthread_setcancelstate(int state, FAR int *oldstate)
 
   if (state == PTHREAD_CANCEL_ENABLE)
     {
-      unsigned flags = tcb->flags;
+      /* Clear the non-cancelable flag */
 
-      /* Clear the non-cancelable and cancel pending flags */
+      tcb->flags &= ~TCB_FLAG_NONCANCELABLE;
 
-      tcb->flags &= ~(TCB_FLAG_NONCANCELABLE | TCB_FLAG_CANCEL_PENDING);
+      /* Check if a cancellation was pending */
 
-      /* If the cancel was pending, then just exit as requested */
-
-      if (flags & TCB_FLAG_CANCEL_PENDING)
+      if ((tcb->flags & TCB_FLAG_CANCEL_PENDING) != 0)
         {
-          pthread_exit(PTHREAD_CANCELED);
+#ifdef CONFIG_CANCELLATION_POINTS
+          /* If we are using deferred cancellation? */
+
+          if ((tcb->flags & TCB_FLAG_CANCEL_DEFERRED) != 0)
+            {
+              /* Yes.. If we are within a cancellation point, then
+               * notify of the cancellation.
+               */
+
+              if (tcb->cpcount > 0)
+                {
+                  notify_cancellation(tcb);
+                }
+            }
+          else
+#endif
+           {
+             /* No.. We are using asynchronous cancellation.  If the
+              * cancellation was pending in this case, then just exit.
+              */
+
+             tcb->flags &= ~TCB_FLAG_CANCEL_PENDING;
+             pthread_exit(PTHREAD_CANCELED);
+           }
         }
     }
   else if (state == PTHREAD_CANCEL_DISABLE)

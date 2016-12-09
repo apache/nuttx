@@ -46,6 +46,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/pthread.h>
 
 #include "sched/sched.h"
 #include "signal/signal.h"
@@ -97,6 +98,10 @@ int sigsuspend(FAR const sigset_t *set)
   FAR sigpendq_t *sigpend;
   irqstate_t flags;
   int unblocksigno;
+
+  /* sigsuspend() is a cancellation point */
+
+  enter_cancellation_point();
 
   /* Several operations must be performed below:  We must determine if any
    * signal is pending and, if not, wait for the signal.  Since signals can
@@ -154,5 +159,6 @@ int sigsuspend(FAR const sigset_t *set)
     }
 
   sched_unlock();
-  return ERROR;
+  leave_cancellation_point();
+  return ERROR; /* ??REVISIT:  Always returns ERROR?? */
 }

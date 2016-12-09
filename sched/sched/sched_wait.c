@@ -44,6 +44,7 @@
 #include <errno.h>
 
 #include <nuttx/sched.h>
+#include <nuttx/pthread.h>
 
 #include "sched/sched.h"
 
@@ -80,8 +81,11 @@
 
 pid_t wait(FAR int *stat_loc)
 {
+  /* wait() is a cancellation point, but nothings needs to be done for this
+   * trivial case.
+   */
+
   return waitpid((pid_t)-1, stat_loc, 0);
 }
 
 #endif /* CONFIG_SCHED_WAITPID && CONFIG_SCHED_HAVE_PARENT */
-

@@ -166,9 +166,9 @@ o Task/Scheduler (sched/)
   Priority:    Low
 
   Title:       REMOVE TASK_DELETE
-  Description: Need to remove or fix task delete().  This interface is non-
-               standard and not safe.  Arbitrary deleting tasks can cause
-               serious problems such as memory leaks and resources like
+  Description: Need to remove asychronous fix task_delete().  This interface
+               is non-standard and not safe.  Arbitrary deleting tasks can
+               cause serious problems such as memory leaks and resources like
                semaphores left in bad states.
 
                Task/process  exit callbacks registered via atexit() or
@@ -187,10 +187,12 @@ o Task/Scheduler (sched/)
                apps/netutils/thttpd to kill CGI tasks that timeout.  So not
                so simple to remove.
 
-               Option:  Perhaps task_delete() should not do asynchronous
-               deletion but should rather do the same kind of
-               synchronization such as the pthread_cancellation points?
-               (see pthread_cancel() issues).
+               Option:  With CONFIG_CANCELLATION_POINTS=y task_delete()
+               does not do asynchronous deletion but should rather do the
+               same kind of synchronization such as the pthread cancellation
+               points.  In this configuration, none of the issues above
+               apply.  It is only the asyncrhonous task deletion that cannot
+               be supported.
 
   Status:      Open
   Priority:    Low and not easily removable.
@@ -528,42 +530,6 @@ o Signals (sched/signal, arch/)
 o pthreads (sched/pthreads)
   ^^^^^^^^^^^^^^^^^
 
-  Title:       CANCELLATION POINTS
-  Description: pthread_cancel():  Should implement cancellation points and
-               pthread_testcancel().
-
-               Internal implementation perhaps as follows. See list of
-               functions that are cancellation points on OpenGroup.org.  In
-               general:
-
-               - Two types of cancellation.  DEFFERRED and ASYCNCHOOUS:
-                 PTHREAD_CANCEL_DEFERRED: A cancellation request is deferred
-                   until the thread next calls a function that is a cancellation
-                   point.  This is the default cancelability type for all
-                   threads.
-                 PTHREAD_CANCEL_ASYNCHRONOUS: The thread can be canceled at
-                   any time
-                 DEFERRED should be the default but currently only
-                 asyncrhononous is supported by NuttX
-               - To implement DEFERRED mode:
-                 All cancellations must pend.
-                 Check if the thread is within cancellation region, then
-                 treat like a signal to wake up with -ECANCELED vs -EINTER
-
-               For each function/cancellation point
-
-               - Call enter_cancellation region() on entry. Checks for
-                 pending cancellation and marks "within cancellation region"
-                 in TCB flags.
-               - Will wake-up with -ECANCELED if cancellation occurs.
-               - Call leave_cancellation region() on exit.  Checks for
-                 pending cancellation and marks NOT "within cancellation region"
-
-               Perhaps task_delete() should do the same kind of synchronization?
-
-  Status:      Open.  No changes are planned.
-  Priority:    Low, probably not that useful
-
   Title:       PTHREAD_PRIO_PROTECT
   Description: Extend pthread_mutexattr_setprotocol() support PTHREAD_PRIO_PROTECT:
 
@@ -623,6 +589,44 @@ o pthreads (sched/pthreads)
                 complexity; in all other ways I believe that it is the inferior
                 solution. So I discarded a few hours of programming. Not a
                 big loss from the experience I gained."
+
+  Title:       ISSUES WITH CANCELLATION POINTS
+  Description: According to POIX cancellation points must occur when a thread is executing
+               the following functions.  There are some execptions as noted:
+
+                accept()             mq_timedsend()           NA putpmsg()          sigtimedwait()
+             -4 aio_suspend()     NA msgrcv()                    pwrite()        NA sigwait()
+             NA clock_nanosleep() NA msgsnd()                    read()             sigwaitinfo()
+                close()           NA msync()                  NA readv()         -1 sleep()
+                connect()            nanosleep()                 recv()          -2 system()
+             OK creat()              open()                      recvfrom()      NA tcdrain()
+                fcntl()              pause()                  NA recvmsg()       -1 usleep()
+             NA fdatasync()          poll()                      select()        OK wait()
+                fsync()              pread()                     sem_timedwait()    waitid()
+             NA getmsg()          NA pselect()                   sem_wait()         waitpid()
+             NA getpmsg()            pthread_cond_timedwait()    send()             write()
+             NA lockf()              pthread_cond_wait()      NA sendmsg()       NA writev()
+                mq_receive()         pthread_join()              sendto()
+                mq_send()            pthread_testcancel()     -3 sigpause()
+                mq_timedreceive() NA putmsg()                    sigsuspend()
+
+               NA Not supported
+               OK Doesn't need instrumentation.  Handled by lower level calls.
+               -n See note n
+
+               NOTE 1: sleep() and usleep() are user-space functions in the C library and cannot
+               serve as cancellation points.  They are, however, simple wrappers around nanosleep
+               which is a true cancellation point.
+               NOTE 2: system() is actually implemented in apps/ as part of NSH.  It cannot be
+               a cancellation point either.
+               NOTE 3: sigpause() is a user-space function in the C library and cannot serve as
+               cancellation points.  It is, however, a simple wrapper around sigsuspend()
+               which is a true cancellation point.
+               NOTE 4: aio_suspend() is a user-space function in the C library and cannot serve as
+               cancellation points.  It does call around sigtimedwait() which is a true cancellation
+               point.
+  Status:      Not really open.  This is just the way it is.
+  Priority:    Nothing additional is planned.
 
 o Message Queues (sched/mqueue)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -378,6 +378,12 @@ static int thread_schedsetup(FAR struct tcb_s *tcb, int priority,
       tcb->flags         &= ~TCB_FLAG_TTYPE_MASK;
       tcb->flags         |= ttype;
 
+#ifdef CONFIG_CANCELLATION_POINTS
+      /* Set the deferred cancellation type */
+
+      tcb->flags         |= TCB_FLAG_CANCEL_DEFERRED;
+#endif
+
       /* Save the task ID of the parent task in the TCB and allocate
        * a child status structure.
        */
