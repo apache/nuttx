@@ -612,6 +612,17 @@ void task_exithook(FAR struct tcb_s *tcb, int status, bool nonblocking)
       return;
     }
 
+#ifdef CONFIG_CANCELLATION_POINTS
+   /* Mark the task as non-cancelable to avoid additional calls to exit()
+    * due to any cancellation point logic that might get kicked off by
+    * actions taken during exit processing.
+    */
+
+   tcb->flags  |= TCB_FLAG_NONCANCELABLE;
+   tcb->flags  &= ~TCB_FLAG_CANCEL_PENDING;
+   tcb->cpcount = 0;
+#endif
+
 #if defined(CONFIG_SCHED_ATEXIT) || defined(CONFIG_SCHED_ONEXIT)
   /* If exit function(s) were registered, call them now before we do any un-
    * initialization.

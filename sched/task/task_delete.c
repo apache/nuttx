@@ -103,7 +103,37 @@ int task_delete(pid_t pid)
       exit(EXIT_SUCCESS);
     }
 
-  /* Then let task_terminate do the heavy lifting */
+#ifdef CONFIG_CANCELLATION_POINTS
+  /* Check if this task supports deferred cancellation */
+
+  sched_lock();
+  if ((rtcb->flags & TCB_FLAG_CANCEL_DEFERRED) != 0)
+    {
+      /* Then we cannot cancel the task asynchronoulsy.  Mark the cancellation
+       * as pending.
+       */
+
+      rtcb->flags |= TCB_FLAG_CANCEL_PENDING;
+
+      /* If the task is waiting at a cancellation point, then notify of the
+       * cancellation thereby waking the task up with an ECANCELED error.
+       *
+       * REVISIT: is locking the scheduler sufficent in SMP mode?
+       */
+
+      if (rtcb->cpcount > 0)
+        {
+          notify_cancellation(rtcb);
+        }
+
+      sched_unlock();
+      return OK;
+    }
+#endif
+
+  /* Otherwise, perform the asynchronous cancellation, letting
+   * task_terminate() do all of the heavy lifting.
+   */
 
   return task_terminate(pid, false);
 }

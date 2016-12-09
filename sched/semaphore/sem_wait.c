@@ -46,6 +46,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/pthread.h>
 
 #include "sched/sched.h"
 #include "semaphore/semaphore.h"

@@ -108,6 +108,8 @@ void enter_cancellation_point(void)
   /* Disabling pre-emption should provide sufficient protection.  We only
    * need the TCB to be stationary (no interrupt level modification is
    * anticipated).
+   *
+   * REVISIT: is locking the scheduler sufficent in SMP mode?
    */
 
   sched_lock();
@@ -135,7 +137,7 @@ void enter_cancellation_point(void)
 #ifndef CONFIG_DISABLE_PTHREAD
            if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
              {
-               pthread_exit(NULL);
+               pthread_exit(PTHREAD_CANCELED);
              }
            else
 #endif
@@ -180,6 +182,8 @@ void leave_cancellation_point(void)
   /* Disabling pre-emption should provide sufficient protection.  We only
    * need the TCB to be stationary (no interrupt level modification is
    * anticipated).
+   *
+   * REVISIT: is locking the scheduler sufficent in SMP mode?
    */
 
   sched_lock();
@@ -211,7 +215,7 @@ void leave_cancellation_point(void)
 #ifndef CONFIG_DISABLE_PTHREAD
                if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
                  {
-                   pthread_exit(NULL);
+                   pthread_exit(PTHREAD_CANCELED);
                  }
                else
 #endif
