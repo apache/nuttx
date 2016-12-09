@@ -67,6 +67,9 @@
  * Return Value:
  *   None
  *
+ * Assumptions:
+ *   The scheduler is locked.
+ *
  ****************************************************************************/
 
 static void pthread_cleanup_pop_tcb(FAR struct pthread_tcb_s *tcb, int execute)

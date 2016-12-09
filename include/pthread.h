@@ -115,10 +115,15 @@
 
 #define PTHREAD_DEFAULT_PRIORITY      100
 
-/* Cancellation states returned by pthread_cancelstate() */
+/* Cancellation states used by pthread_setcancelstate() */
 
 #define PTHREAD_CANCEL_ENABLE         (0)
 #define PTHREAD_CANCEL_DISABLE        (1)
+
+/* Cancellation types used by pthread_setcanceltype() */
+
+#define PTHREAD_CANCEL_DEFERRED       (0)
+#define PTHREAD_CANCEL_ASYNCHRONOUS   (1)
 
 /* Thread return value when a pthread is canceled */
 
@@ -340,6 +345,7 @@ int pthread_detach(pthread_t thread);
 void pthread_exit(pthread_addr_t value) noreturn_function;
 int  pthread_cancel(pthread_t thread);
 int  pthread_setcancelstate(int state, FAR int *oldstate);
+int  pthread_setcanceltype(int type, FAR int *oldtype);
 void pthread_testcancel(void);
 
 /* A thread may set up cleanup functions to execut when the thread exits or
