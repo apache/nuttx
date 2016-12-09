@@ -1,8 +1,7 @@
 /****************************************************************************
- * include/nuttx/pthread.h
- * Non-standard, NuttX-specific pthread-related declarations.
+ * sched/task/task_cancelpt.c
  *
- *   Copyright (C) 2011, 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,99 +33,6 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_PTHREAD_H
-#define __INCLUDE_NUTTX_PTHREAD_H
-
-/****************************************************************************
- * Included Files
- ****************************************************************************/
-
-#include <nuttx/config.h>
-#include <pthread.h>
-#include <sched.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Default pthread attribute initializer */
-
-#if CONFIG_RR_INTERVAL == 0
-#  define PTHREAD_DEFAULT_POLICY SCHED_FIFO
-#else
-#  define PTHREAD_DEFAULT_POLICY SCHED_RR
-#endif
-
-/* A lot of hassle to use the old-fashioned struct initializers.  But this
- * gives us backward compatibility with some very old compilers.
- */
-
-#if defined(CONFIG_SCHED_SPORADIC) && defined(CONFIG_SMP)
-#  define PTHREAD_ATTR_INITIALIZER \
-  { \
-    PTHREAD_DEFAULT_PRIORITY, /* priority */ \
-    PTHREAD_DEFAULT_POLICY,   /* policy */ \
-    PTHREAD_EXPLICIT_SCHED,   /* inheritsched */ \
-    0,                        /* low_priority */ \
-    0,                        /* max_repl */ \
-    0,                        /* affinity */ \
-    PTHREAD_STACK_DEFAULT,    /* stacksize */ \
-    {0, 0},                   /* repl_period */ \
-    {0, 0}                    /* budget */ \
-  }
-#elif defined(CONFIG_SCHED_SPORADIC)
-#  define PTHREAD_ATTR_INITIALIZER \
-  { \
-    PTHREAD_DEFAULT_PRIORITY, /* priority */ \
-    PTHREAD_DEFAULT_POLICY,   /* policy */ \
-    PTHREAD_EXPLICIT_SCHED,   /* inheritsched */ \
-    0,                        /* low_priority */ \
-    0,                        /* max_repl */ \
-    PTHREAD_STACK_DEFAULT,    /* stacksize */ \
-    {0, 0},                   /* repl_period */ \
-    {0, 0},                   /* budget */ \
-  }
-#elif defined(CONFIG_SMP)
-#  define PTHREAD_ATTR_INITIALIZER \
-  { \
-    PTHREAD_DEFAULT_PRIORITY, /* priority */ \
-    PTHREAD_DEFAULT_POLICY,   /* policy */ \
-    PTHREAD_EXPLICIT_SCHED,   /* inheritsched */ \
-    0,                        /* affinity */ \
-    PTHREAD_STACK_DEFAULT,    /* stacksize */ \
-  }
-#else
-#  define PTHREAD_ATTR_INITIALIZER \
-  { \
-    PTHREAD_DEFAULT_PRIORITY, /* priority */ \
-    PTHREAD_DEFAULT_POLICY,   /* policy */ \
-    PTHREAD_EXPLICIT_SCHED,   /* inheritsched */ \
-    PTHREAD_STACK_DEFAULT,    /* stacksize */ \
-  }
-#endif
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-/* Default pthread attributes.  This global can only be shared within the
- * kernel- or within the user- address space.
- */
-
-EXTERN const pthread_attr_t g_default_pthread_attr;
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
 /****************************************************************************
  * Cancellation Points.
  *
@@ -156,6 +62,24 @@ EXTERN const pthread_attr_t g_default_pthread_attr;
  ****************************************************************************/
 
 /****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/config.h>
+
+#include <sched.h>
+
+#include <nuttx/pthread.h>
+
+#include "task/task.h"
+
+#ifdef CONFIG_CANCELLATION_POINTS
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
  * Name: enter_cancellation_point
  *
  * Description:
@@ -172,7 +96,10 @@ EXTERN const pthread_attr_t g_default_pthread_attr;
  *
  ****************************************************************************/
 
-void leave_cancellation_point(void);
+void leave_cancellation_point(void)
+{
+#warning Missing logic
+}
 
 /****************************************************************************
  * Name: enter_cancellation_point
@@ -191,11 +118,27 @@ void leave_cancellation_point(void);
  *
  ****************************************************************************/
 
-void enter_cancellation_point(void);
-
-#undef EXTERN
-#ifdef __cplusplus
+void enter_cancellation_point(void)
+{
+#warning Missing logic
 }
-#endif
 
-#endif /* __INCLUDE_NUTTX_PTHREAD_H */
+/****************************************************************************
+ * Name: notify_cancellation
+ *
+ * Description:
+ *   Called by task_delete() or pthread_cancel() if the cancellation occurs
+ *   while we the thread is within the cancellation point.  This logic
+ *   behaves much like sending a signal:  It will cause waiting threads
+ *   to wake up and terminated with ECANCELED.  A call to
+ *   leave_cancellation_point() whould then follow, causing the thread to
+ *   exit.
+ *
+ ****************************************************************************/
+
+void notify_cancellation(void)
+{
+#warning Missing logic
+}
+
+#endif /* CONFIG_CANCELLATION_POINTS */

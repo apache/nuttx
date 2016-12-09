@@ -37,8 +37,12 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <pthread.h>
 #include <errno.h>
+
+#include "task/task.h"
 #include "sched/sched.h"
 
 /****************************************************************************
@@ -107,9 +111,9 @@ int pthread_setcancelstate(int state, FAR int *oldstate)
                * notify of the cancellation.
                */
 
-              if (tcb->flags & TCB_FLAG_CANCEL_POINT) != 0)
+              if ((tcb->flags & TCB_FLAG_CANCEL_POINT) != 0)
                 {
-#  warning Missing logic
+                  notify_cancellation();
                 }
             }
           else
