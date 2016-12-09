@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/pthread/pthread_condwait.c
  *
- *   Copyright (C) 2007-2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,8 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/pthread.h>
+
 #include "pthread/pthread.h"
 
 /****************************************************************************
@@ -72,6 +74,10 @@ int pthread_cond_wait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex)
   int ret;
 
   sinfo("cond=0x%p mutex=0x%p\n", cond, mutex);
+
+  /* pthread_cond_wait() is a cancellation point */
+
+  enter_cancellation_point();
 
   /* Make sure that non-NULL references were provided. */
 
@@ -111,6 +117,7 @@ int pthread_cond_wait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex)
         }
     }
 
+  leave_cancellation_point();
   sinfo("Returning %d\n", ret);
   return ret;
 }

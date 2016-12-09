@@ -49,6 +49,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
+#include <nuttx/pthread.h>
 
 #include "sched/sched.h"
 #include "clock/clock.h"
@@ -102,6 +103,10 @@ int sem_timedwait(FAR sem_t *sem, FAR const struct timespec *abstime)
   int        ret = ERROR;
 
   DEBUGASSERT(up_interrupt_context() == false && rtcb->waitdog == NULL);
+
+  /* sem_timedwait() is a cancellation point */
+
+  enter_cancellation_point();
 
   /* Verify the input parameters and, in case of an error, set
    * errno appropriately.
@@ -209,6 +214,7 @@ success_with_irqdisabled:
   leave_critical_section(flags);
   wd_delete(rtcb->waitdog);
   rtcb->waitdog = NULL;
+  leave_cancellation_point();
   return OK;
 
   /* Error exits */
@@ -220,5 +226,6 @@ errout_with_irqdisabled:
 
 errout:
   set_errno(errcode);
+  leave_cancellation_point();
   return ERROR;
 }

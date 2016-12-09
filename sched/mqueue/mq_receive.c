@@ -47,6 +47,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/pthread.h>
 
 #include "mqueue/mqueue.h"
 
@@ -103,12 +104,17 @@ ssize_t mq_receive(mqd_t mqdes, FAR char *msg, size_t msglen,
 
   DEBUGASSERT(up_interrupt_context() == false);
 
+  /* mq_receive() is a cancellation point */
+
+  enter_cancellation_point();
+
   /* Verify the input parameters and, in case of an error, set
    * errno appropriately.
    */
 
   if (mq_verifyreceive(mqdes, msg, msglen) != OK)
     {
+      leave_cancellation_point();
       return ERROR;
     }
 
@@ -145,5 +151,6 @@ ssize_t mq_receive(mqd_t mqdes, FAR char *msg, size_t msglen,
     }
 
   sched_unlock();
+  leave_cancellation_point();
   return ret;
 }

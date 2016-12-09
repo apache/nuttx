@@ -52,6 +52,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
+#include <nuttx/pthread.h>
 
 #include "sched/sched.h"
 #include "signal/signal.h"
@@ -173,6 +174,9 @@ int sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *info,
 
   DEBUGASSERT(rtcb->waitdog == NULL);
 
+  /* sigtimedwait() is a cancellation point */
+
+  enter_cancellation_point();
   sched_lock();  /* Not necessary */
 
   /* Several operations must be performed below:  We must determine if any
@@ -343,5 +347,6 @@ int sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *info,
     }
 
   sched_unlock();
+  leave_cancellation_point();
   return ret;
 }

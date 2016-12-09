@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/pthread/pthread_join.c
  *
- *   Copyright (C) 2007, 2008, 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2011, 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,11 +37,15 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <sys/types.h>
 #include <unistd.h>
 #include <pthread.h>
 #include <errno.h>
 #include <debug.h>
+
+#include <nuttx/pthread.h>
 
 #include "sched/sched.h"
 #include "group/group.h"
@@ -90,12 +94,17 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
   sinfo("thread=%d group=%p\n", thread, group);
   DEBUGASSERT(group);
 
+  /* pthread_join() is a cancellation point */
+
+  enter_cancellation_point();
+
   /* First make sure that this is not an attempt to join to
    * ourself.
    */
 
   if ((pid_t)thread == getpid())
     {
+      leave_cancellation_point();
       return EDEADLK;
     }
 
@@ -230,6 +239,7 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
       ret = OK;
     }
 
+  leave_cancellation_point();
   sinfo("Returning %d\n", ret);
   return ret;
 }
