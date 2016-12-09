@@ -249,7 +249,6 @@ menu "Tasks and Scheduling"
 config SPINLOCK
 	bool "Support Spinlocks"
 	default n
-	depends on EXPERIMENTAL
 	---help---
 		Enables suppport for spinlocks.  Spinlocks are current used only for
 		SMP suppport.
@@ -563,7 +562,6 @@ endmenu # Pthread Options
 config CANCELLATION_POINTS
 	bool "Cancellation points"
 	default n
-	depends on EXPERIMENTAL
 	---help---
 		Enable POSIX cancellation points for pthread_cancel().  If selected,
 		cancellation points will also used with the () task_delete() API even if
