@@ -81,7 +81,7 @@ int pthread_cond_wait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex)
 
   /* Make sure that non-NULL references were provided. */
 
-  if (!cond || !mutex)
+  if (cond == NULL || mutex == NULL)
     {
       ret = EINVAL;
     }
@@ -111,7 +111,7 @@ int pthread_cond_wait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex)
 
       sinfo("Reacquire mutex...\n");
       ret |= pthread_takesemaphore((FAR sem_t *)&mutex->sem);
-      if (!ret)
+      if (ret == OK)
         {
           mutex->pid = getpid();
         }
