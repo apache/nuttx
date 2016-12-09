@@ -281,7 +281,7 @@ ssize_t send(int sockfd, FAR const void *buf, size_t len, int flags)
 
   /* And let psock_send do all of the work */
 
-  ret = psock_send(psock, buf, len, flags, to, tolen);
+  ret = psock_send(psock, buf, len, flags);
   leave_cancellation_point();
   return ret;
 }
