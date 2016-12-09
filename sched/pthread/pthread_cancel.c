@@ -77,7 +77,7 @@ int pthread_cancel(pthread_t thread)
       return ESRCH;
     }
 
-  DEBUGASSERT((tcb-cmn.flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD);
+  DEBUGASSERT((tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD);
 
   /* Check to see if this thread has the non-cancelable bit set in its
    * flags. Suppress context changes for a bit so that the flags are stable.
