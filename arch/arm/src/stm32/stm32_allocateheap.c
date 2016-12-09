@@ -295,6 +295,10 @@
 #    define SRAM1_END 0x20018000
 #  elif defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429)
 #    define SRAM1_END 0x20030000
+#  elif defined(CONFIG_STM32_STM32F446)
+#    define SRAM1_END 0x20020000
+#  elif defined(CONFIG_STM32_STM32F469)
+#    define SRAM1_END 0x20050000
 #  else
 #    define SRAM1_END 0x20020000
 #  endif
