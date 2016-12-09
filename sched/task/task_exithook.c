@@ -146,7 +146,7 @@ static inline void task_onexit(FAR struct tcb_s *tcb, int status)
    * We must not call the registered function in supervisor mode!  See also
    * atexit() and pthread_cleanup_pop() callbacks.
    *
-   * REVISIT:  In the case of task_delete(), the callback would execute in 
+   * REVISIT:  In the case of task_delete(), the callback would execute in
    * he context the caller of task_delete() cancel, not in the context of
    * the exiting task (or process).
    */

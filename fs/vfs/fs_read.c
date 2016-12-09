@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/vfs/fs_read.c
  *
- *   Copyright (C) 2007-2009, 2012-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012-2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,19 +38,17 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
 #include <sys/socket.h>
-
 #include <unistd.h>
 #include <fcntl.h>
 #include <sched.h>
 #include <errno.h>
 
-#include "inode/inode.h"
+#include <nuttx/pthread.h>
 
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#include "inode/inode.h"
 
 /****************************************************************************
  * Public Functions
@@ -136,23 +134,30 @@ ssize_t file_read(FAR struct file *filep, FAR void *buf, size_t nbytes)
 
 ssize_t read(int fd, FAR void *buf, size_t nbytes)
 {
+  ssize_t ret;
+
+  /* read() is a cancellation point */
+
+  enter_cancellation_point();
+
   /* Did we get a valid file descriptor? */
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
   if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS)
 #endif
     {
+#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
       /* No.. If networking is enabled, read() is the same as recv() with
-       * the flags parameter set to zero.
+       * the flags parameter set to zero.  Note that recv() sets
+       * the errno variable.
        */
 
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
-      return recv(fd, buf, nbytes, 0);
+      ret = recv(fd, buf, nbytes, 0);
 #else
       /* No networking... it is a bad descriptor in any event */
 
       set_errno(EBADF);
-      return ERROR;
+      ret = ERROR;
 #endif
     }
 
@@ -162,20 +167,28 @@ ssize_t read(int fd, FAR void *buf, size_t nbytes)
       FAR struct file *filep;
 
       /* The descriptor is in a valid range to file descriptor... do the
-       * read.  First, get the file structure.
+       * read.  First, get the file structure.  Note that on failure,
+       * fs_getfilep() will set the errno variable.
        */
 
       filep = fs_getfilep(fd);
-      if (!filep)
+      if (filep == NULL)
         {
           /* The errno value has already been set */
 
-          return ERROR;
+          ret = ERROR;
         }
+      else
+        {
+          /* Then let file_read do all of the work.  Note that file_read()
+           * sets the errno variable.
+           */
 
-      /* Then let file_read do all of the work */
-
-      return file_read(filep, buf, nbytes);
+          ret = file_read(filep, buf, nbytes);
+        }
     }
 #endif
+
+  leave_cancellation_point();
+  return ret;
 }

@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/vfs/fs_open.c
  *
- *   Copyright (C) 2007-2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,14 +48,11 @@
 #include <stdarg.h>
 #endif
 
+#include <nuttx/pthread.h>
 #include <nuttx/fs/fs.h>
 
 #include "inode/inode.h"
 #include "driver/driver.h"
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -105,6 +102,10 @@ int open(const char *path, int oflags, ...)
 #  ifdef CONFIG_CPP_HAVE_WARNING
 #    warning "File creation not implemented"
 #  endif
+
+  /* open() is a cancellation point */
+
+  enter_cancellation_point();
 
   /* If the file is opened for creation, then get the mode bits */
 
@@ -159,6 +160,7 @@ int open(const char *path, int oflags, ...)
 
        /* Return the file descriptor */
 
+       leave_cancellation_point();
        return fd;
      }
    else
@@ -204,6 +206,7 @@ int open(const char *path, int oflags, ...)
     {
       /* The errno value has already been set */
 
+      leave_cancellation_point();
       return ERROR;
     }
 
@@ -264,6 +267,7 @@ int open(const char *path, int oflags, ...)
     }
 #endif
 
+  leave_cancellation_point();
   return fd;
 
 errout_with_fd:
@@ -272,5 +276,6 @@ errout_with_inode:
   inode_release(inode);
 errout:
   set_errno(ret);
+  leave_cancellation_point();
   return ERROR;
 }

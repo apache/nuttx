@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/vfs/fs_pwrite.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,11 +43,8 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <nuttx/pthread.h>
 #include <nuttx/fs/fs.h>
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -142,6 +139,11 @@ ssize_t file_pwrite(FAR struct file *filep, FAR const void *buf,
 ssize_t pwrite(int fd, FAR const void *buf, size_t nbytes, off_t offset)
 {
   FAR struct file *filep;
+  ssize_t ret;
+
+  /* pread() is a cancellation point */
+
+  enter_cancellation_point();
 
   /* Get the file structure corresponding to the file descriptor. */
 
@@ -150,10 +152,15 @@ ssize_t pwrite(int fd, FAR const void *buf, size_t nbytes, off_t offset)
     {
       /* The errno value has already been set */
 
-      return (ssize_t)ERROR;
+      ret = (ssize_t)ERROR;
+    }
+  else
+    {
+      /* Let file_pread do the real work */
+
+      ret = file_pwrite(filep, buf, nbytes, offset);
     }
 
-  /* Let file_pread do the real work */
-
-  return file_pwrite(filep, buf, nbytes, offset);
+  enter_cancellation_point();
+  return ret;
 }

@@ -81,6 +81,10 @@
 
 pid_t wait(FAR int *stat_loc)
 {
+  /* wait() is a cancellation point, but nothings needs to be done for this
+   * trivial case.
+   */
+
   return waitpid((pid_t)-1, stat_loc, 0);
 }
 

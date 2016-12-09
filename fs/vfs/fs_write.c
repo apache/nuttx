@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/vfs/fs_write.c
  *
- *   Copyright (C) 2007-2009, 2012-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012-2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,6 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -49,11 +50,9 @@
 # include <sys/socket.h>
 #endif
 
-#include "inode/inode.h"
+#include <nuttx/pthread.h>
 
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#include "inode/inode.h"
 
 /****************************************************************************
  * Public Functions
@@ -72,7 +71,7 @@
 ssize_t file_write(FAR struct file *filep, FAR const void *buf, size_t nbytes)
 {
   FAR struct inode *inode;
-  int ret;
+  ssize_t ret;
   int errcode;
 
   /* Was this file opened for write access? */
@@ -163,6 +162,11 @@ ssize_t write(int fd, FAR const void *buf, size_t nbytes)
 #if CONFIG_NFILE_DESCRIPTORS > 0
   FAR struct file *filep;
 #endif
+  ssize_t ret;
+
+  /* write() is a cancellation point */
+
+  enter_cancellation_point();
 
   /* Did we get a valid file descriptor? */
 
@@ -170,31 +174,44 @@ ssize_t write(int fd, FAR const void *buf, size_t nbytes)
   if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS)
 #endif
     {
-      /* Write to a socket descriptor is equivalent to send with flags == 0 */
-
 #if defined(CONFIG_NET_TCP) && CONFIG_NSOCKET_DESCRIPTORS > 0
-      return send(fd, buf, nbytes, 0);
+      /* Write to a socket descriptor is equivalent to send with flags == 0.
+       * Note that send() will set the errno on failure.
+       */
+
+      ret = send(fd, buf, nbytes, 0);
 #else
       set_errno(EBADF);
-      return ERROR;
+      ret = ERROR ERROR;
 #endif
     }
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
-  /* The descriptor is in the right range to be a file descriptor... write
-   * to the file.
-   */
-
-  filep = fs_getfilep(fd);
-  if (!filep)
+  else
     {
-      /* The errno value has already been set */
+      /* The descriptor is in the right range to be a file descriptor..
+       * write to the file.  Note that fs_getfilep() will set the errno on
+       * failure.
+       */
 
-      return ERROR;
+      filep = fs_getfilep(fd);
+      if (filep == NULL)
+        {
+          /* The errno value has already been set */
+
+          ret = ERROR;
+        }
+      else
+        {
+          /* Perform the write operation using the file descriptor as an
+           * index.  Note that file_write() will set the errno on failure.
+           */
+
+          ret = file_write(filep, buf, nbytes);
+        }
+#endif
     }
 
-  /* Perform the write operation using the file descriptor as an index */
-
-  return file_write(filep, buf, nbytes);
-#endif
+  leave_cancellation_point();
+  return ret;
 }
