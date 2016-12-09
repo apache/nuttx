@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/socket/accept.c
  *
- *   Copyright (C) 2007-2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2012, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,6 +48,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/pthread.h>
 #include <arch/irq.h>
 
 #include "tcp/tcp.h"
@@ -131,6 +132,10 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
   int ret;
 
   DEBUGASSERT(psock != NULL);
+
+  /* Treat as a cancellation point */
+
+  enter_cancellation_point();
 
   /* Is the socket a stream? */
 
@@ -269,6 +274,8 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 
   newsock->s_flags |= _SF_CONNECTED;
   newsock->s_flags &= ~_SF_CLOSED;
+
+  leave_cancellation_point();
   return OK;
 
 errout_after_accept:
@@ -276,6 +283,7 @@ errout_after_accept:
 
 errout:
   set_errno(errcode);
+  leave_cancellation_point();
   return ERROR;
 }
 
@@ -355,6 +363,10 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
   int errcode;
   int ret;
 
+  /* accept() is a cancellation point */
+
+  enter_cancellation_point();
+
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
   if (psock == NULL || psock->s_crefs <= 0)
@@ -402,9 +414,11 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
       /* The errno value has already been set */
 
       sockfd_release(newfd);
+      leave_cancellation_point();
       return ERROR;
     }
 
+  leave_cancellation_point();
   return newfd;
 
 errout_with_socket:
@@ -412,6 +426,7 @@ errout_with_socket:
 
 errout:
   set_errno(errcode);
+  leave_cancellation_point();
   return ERROR;
 }
 

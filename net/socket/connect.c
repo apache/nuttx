@@ -51,6 +51,7 @@
 #include <arch/irq.h>
 
 #include <nuttx/semaphore.h>
+#include <nuttx/pthread.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/udp.h>
@@ -516,6 +517,10 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
 #endif
   int errcode;
 
+  /* Treat as a cancellation point */
+
+  enter_cancellation_point();
+
   /* Verify that the psock corresponds to valid, allocated socket */
 
   if (!psock || psock->s_crefs <= 0)
@@ -663,10 +668,12 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
         goto errout;
     }
 
+  leave_cancellation_point();
   return OK;
 
 errout:
   set_errno(errcode);
+  leave_cancellation_point();
   return ERROR;
 }
 
@@ -741,13 +748,21 @@ errout:
 
 int connect(int sockfd, FAR const struct sockaddr *addr, socklen_t addrlen)
 {
+  int ret;
+
+  /* accept() is a cancellation point */
+
+  enter_cancellation_point();
+
   /* Get the underlying socket structure */
 
   FAR struct socket *psock = sockfd_socket(sockfd);
 
   /* Then let psock_connect() do all of the work */
 
-  return psock_connect(psock, addr, addrlen);
+  ret = psock_connect(psock, addr, addrlen);
+  leave_cancellation_point();
+  return ret;
 }
 
 #endif /* CONFIG_NET */
