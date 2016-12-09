@@ -22,7 +22,7 @@ nuttx/:
  (12)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
   (0)  Other drivers (drivers/)
- (11)  Libraries (libc/, libm/)
+ (12)  Libraries (libc/, libm/)
  (11)  File system/Generic drivers (fs/, drivers/)
   (9)  Graphics Subsystem (graphics/)
   (2)  Build system / Toolchains
@@ -1522,9 +1522,16 @@ o Libraries (libc/, libm/)
                2016-07-30: Numerous fixes and performance improvements from
                David Alessio.
 
-Status:        Open
-Priority:      Low for casual users but clearly high if you need care about
+  Status:      Open
+  Priority:    Low for casual users but clearly high if you need care about
                these incorrect corner case behaviors in the math libraries.
+
+  Title:       Repartition libc functionality.
+  Description: There are many things implemented within the kernel (for example
+               under sched/pthread) that probably should be migrated in the
+               C library where it belongs.
+  Status:      Open
+  Priority:    Low
 
 o File system / Generic drivers (fs/, drivers/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
