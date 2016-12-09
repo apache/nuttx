@@ -68,9 +68,14 @@
 #include <nuttx/config.h>
 
 #include <sched.h>
+#include <errno.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/pthread.h>
 
+#include "sched/sched.h"
+#include "semaphore/semaphore.h"
+#include "mqueue/mqueue.h"
 #include "task/task.h"
 
 #ifdef CONFIG_CANCELLATION_POINTS
@@ -92,17 +97,67 @@
  *      count.
  *   3. If this is the outermost nesting level, it checks if there is a
  *      pending cancellation and, if so, calls either exit() or
- *      pthread_exit(), depending upon the type of the
+ *      pthread_exit(), depending upon the type of the thread.
  *
  ****************************************************************************/
 
-void leave_cancellation_point(void)
+void enter_cancellation_point(void)
 {
-#warning Missing logic
+  FAR struct tcb_s *tcb = this_task();
+
+  /* Disabling pre-emption should provide sufficient protection.  We only
+   * need the TCB to be stationary (no interrupt level modification is
+   * anticipated).
+   */
+
+  sched_lock();
+
+  /* If cancellation is disabled on this thread or if this thread is using
+   * asynchronous cancellation, then do nothing.
+   *
+   * Special case: if the cpcount count is greater than zero, then we are
+   * nested and the above condition was certainly true at the outermost
+   * nesting level.
+   */
+
+  if (((tcb->flags & TCB_FLAG_NONCANCELABLE) == 0 &&
+       (tcb->flags & TCB_FLAG_CANCEL_DEFERRED) != 0) ||
+       tcb->cpcount > 0)
+    {
+      /* If there is a pending cancellation and we are at the outermost
+       * nesting level of cancellation function calls, then just exit
+       * according to the type of the thread.
+       */
+
+      if ((tcb->flags & TCB_FLAG_CANCEL_PENDING) != 0 &&
+          tcb->cpcount == 0)
+        {
+#ifndef CONFIG_DISABLE_PTHREAD
+           if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
+             {
+               pthread_exit(NULL);
+             }
+           else
+#endif
+             {
+               exit(EXIT_FAILURE);
+             }
+        }
+
+      /* Otherwise, indicate that we are at a cancellation point by
+       * incrementing the nesting level of the cancellation point
+       * functions.
+       */
+
+      DEBUGASSERT(tcb->cpcount < INT16_MAX);
+      tcb->cpcount++;
+    }
+
+  sched_unlock();
 }
 
 /****************************************************************************
- * Name: enter_cancellation_point
+ * Name: leave_cancellation_point
  *
  * Description:
  *   Called at the end of the cancellation point.  This function does the
@@ -114,13 +169,68 @@ void leave_cancellation_point(void)
  *      nesting count.
  *   3. If this is the outermost nesting level, it checks if there is a
  *      pending cancellation and, if so, calls either exit() or
- *      pthread_exit(), depending upon the type of the
+ *      pthread_exit(), depending upon the type of the thread.
  *
  ****************************************************************************/
 
-void enter_cancellation_point(void)
+void leave_cancellation_point(void)
 {
-#warning Missing logic
+  FAR struct tcb_s *tcb = this_task();
+
+  /* Disabling pre-emption should provide sufficient protection.  We only
+   * need the TCB to be stationary (no interrupt level modification is
+   * anticipated).
+   */
+
+  sched_lock();
+
+  /* If cancellation is disabled on this thread or if this thread is using
+   * asynchronous cancellation, then do nothing.  Here we check only the
+   * nesting level: if the cpcount count is greater than zero, then the
+   * required condition was certainly true at the outermost nesting level.
+   */
+
+  if (tcb->cpcount > 0)
+    {
+      /* Decrement the nesting level.  If if would decrement to zero, then
+       * we are at the outermost nesting level and may need to do more.
+       */
+
+      if (tcb->cpcount == 1)
+        {
+          /* We are no longer at the cancellation point */
+
+          tcb->cpcount = 0;
+
+          /* If there is a pending cancellation then just exit according to
+           * the type of the thread.
+           */
+
+          if ((tcb->flags & TCB_FLAG_CANCEL_PENDING) != 0)
+            {
+#ifndef CONFIG_DISABLE_PTHREAD
+               if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
+                 {
+                   pthread_exit(NULL);
+                 }
+               else
+#endif
+                 {
+                   exit(EXIT_FAILURE);
+                 }
+            }
+        }
+      else
+        {
+           /* We are not at the outermost nesting level.  Just decrment the
+            * nesting level count.
+            */
+
+          tcb->cpcount--;
+        }
+    }
+
+  sched_unlock();
 }
 
 /****************************************************************************
@@ -136,9 +246,52 @@ void enter_cancellation_point(void)
  *
  ****************************************************************************/
 
-void notify_cancellation(void)
+void notify_cancellation(FAR struct tcb_s *tcb)
 {
-#warning Missing logic
+  irqstate_t flags;
+
+  /* We need perform the following operations from within a critical section
+   * because it can compete with interrupt level activity.
+   */
+
+  flags = enter_critical_section();
+
+  /* Make sure that the cancellation pending indication is set. */
+
+  tcb->flags |= TCB_FLAG_CANCEL_PENDING;
+
+  /* We only notify the cancellation if (1) the thread has not disabled
+   * cancellation, (2) the thread uses the deffered cancellation mode,
+   * (3) the thread is waiting within a cancellation point.
+   */
+
+  if (((tcb->flags & TCB_FLAG_NONCANCELABLE) == 0 &&
+       (tcb->flags & TCB_FLAG_CANCEL_DEFERRED) != 0) ||
+      tcb->cpcount > 0)
+    {
+      /* If the thread is blocked waiting for a semaphore, then the thread
+       * must be unblocked to handle the cancellation.
+       */
+
+      if (tcb->task_state == TSTATE_WAIT_SEM)
+        {
+          sem_waitirq(tcb, ECANCELED);
+        }
+
+      /* If the thread is blocked waiting on a message queue, then the
+       * thread must be unblocked to handle the cancellation.
+       */
+
+#ifndef CONFIG_DISABLE_MQUEUE
+      if (tcb->task_state == TSTATE_WAIT_MQNOTEMPTY ||
+          tcb->task_state == TSTATE_WAIT_MQNOTFULL)
+        {
+          mq_waitirq(tcb, ECANCELED);
+        }
+#endif
+    }
+
+  leave_critical_section(flags);
 }
 
 #endif /* CONFIG_CANCELLATION_POINTS */

@@ -168,14 +168,18 @@ EXTERN const pthread_attr_t g_default_pthread_attr;
  *      count.
  *   3. If this is the outermost nesting level, it checks if there is a
  *      pending cancellation and, if so, calls either exit() or
- *      pthread_exit(), depending upon the type of the
+ *      pthread_exit(), depending upon the type of the thread.
  *
  ****************************************************************************/
 
-void leave_cancellation_point(void);
+#ifdef CONFIG_CANCELLATION_POINTS
+void enter_cancellation_point(void);
+#else
+#  define enter_cancellation_point()
+#endif
 
 /****************************************************************************
- * Name: enter_cancellation_point
+ * Name: leave_cancellation_point
  *
  * Description:
  *   Called at the end of the cancellation point.  This function does the
@@ -187,11 +191,15 @@ void leave_cancellation_point(void);
  *      nesting count.
  *   3. If this is the outermost nesting level, it checks if there is a
  *      pending cancellation and, if so, calls either exit() or
- *      pthread_exit(), depending upon the type of the
+ *      pthread_exit(), depending upon the type of the thread.
  *
  ****************************************************************************/
 
-void enter_cancellation_point(void);
+#ifdef CONFIG_CANCELLATION_POINTS
+void leave_cancellation_point(void);
+#else
+#  define leave_cancellation_point()
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

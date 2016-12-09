@@ -111,9 +111,9 @@ int pthread_setcancelstate(int state, FAR int *oldstate)
                * notify of the cancellation.
                */
 
-              if ((tcb->flags & TCB_FLAG_CANCEL_POINT) != 0)
+              if (tcb->cpcount > 0)
                 {
-                  notify_cancellation();
+                  notify_cancellation(tcb);
                 }
             }
           else
