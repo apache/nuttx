@@ -14,7 +14,7 @@ nuttx/:
   (1)  Memory Management (mm/)
   (1)  Power Management (drivers/pm)
   (3)  Signals (sched/signal, arch/)
-  (2)  pthreads (sched/pthread)
+  (1)  pthreads (sched/pthread)
   (0)  Message Queues (sched/mqueue)
   (8)  Kernel/Protected Build
   (3)  C++ Support
@@ -166,9 +166,9 @@ o Task/Scheduler (sched/)
   Priority:    Low
 
   Title:       REMOVE TASK_DELETE
-  Description: Need to remove or fix task delete().  This interface is non-
-               standard and not safe.  Arbitrary deleting tasks can cause
-               serious problems such as memory leaks and resources like
+  Description: Need to remove asychronous fix task_delete().  This interface
+               is non-standard and not safe.  Arbitrary deleting tasks can
+               cause serious problems such as memory leaks and resources like
                semaphores left in bad states.
 
                Task/process  exit callbacks registered via atexit() or
@@ -187,10 +187,12 @@ o Task/Scheduler (sched/)
                apps/netutils/thttpd to kill CGI tasks that timeout.  So not
                so simple to remove.
 
-               Option:  Perhaps task_delete() should not do asynchronous
-               deletion but should rather do the same kind of
-               synchronization such as the pthread_cancellation points?
-               (see pthread_cancel() issues).
+               Option:  With CONFIG_CANCELLATION_POINTS=y task_delete()
+               does not do asynchronous deletion but should rather do the
+               same kind of synchronization such as the pthread cancellation
+               points.  In this configuration, none of the issues above
+               apply.  It is only the asyncrhonous task deletion that cannot
+               be supported.
 
   Status:      Open
   Priority:    Low and not easily removable.
@@ -527,42 +529,6 @@ o Signals (sched/signal, arch/)
 
 o pthreads (sched/pthreads)
   ^^^^^^^^^^^^^^^^^
-
-  Title:       CANCELLATION POINTS
-  Description: pthread_cancel():  Should implement cancellation points and
-               pthread_testcancel().
-
-               Internal implementation perhaps as follows. See list of
-               functions that are cancellation points on OpenGroup.org.  In
-               general:
-
-               - Two types of cancellation.  DEFFERRED and ASYCNCHOOUS:
-                 PTHREAD_CANCEL_DEFERRED: A cancellation request is deferred
-                   until the thread next calls a function that is a cancellation
-                   point.  This is the default cancelability type for all
-                   threads.
-                 PTHREAD_CANCEL_ASYNCHRONOUS: The thread can be canceled at
-                   any time
-                 DEFERRED should be the default but currently only
-                 asyncrhononous is supported by NuttX
-               - To implement DEFERRED mode:
-                 All cancellations must pend.
-                 Check if the thread is within cancellation region, then
-                 treat like a signal to wake up with -ECANCELED vs -EINTER
-
-               For each function/cancellation point
-
-               - Call enter_cancellation region() on entry. Checks for
-                 pending cancellation and marks "within cancellation region"
-                 in TCB flags.
-               - Will wake-up with -ECANCELED if cancellation occurs.
-               - Call leave_cancellation region() on exit.  Checks for
-                 pending cancellation and marks NOT "within cancellation region"
-
-               Perhaps task_delete() should do the same kind of synchronization?
-
-  Status:      Open.  No changes are planned.
-  Priority:    Low, probably not that useful
 
   Title:       PTHREAD_PRIO_PROTECT
   Description: Extend pthread_mutexattr_setprotocol() support PTHREAD_PRIO_PROTECT:
