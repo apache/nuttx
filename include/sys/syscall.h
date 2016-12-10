@@ -401,17 +401,19 @@
 #  define SYS_pthread_mutex_unlock     (__SYS_pthread+21)
 #  define SYS_pthread_once             (__SYS_pthread+22)
 #  define SYS_pthread_setcancelstate   (__SYS_pthread+23)
-#  define SYS_pthread_setschedparam    (__SYS_pthread+24)
-#  define SYS_pthread_setschedprio     (__SYS_pthread+25)
-#  define SYS_pthread_setspecific      (__SYS_pthread+26)
-#  define SYS_pthread_yield            (__SYS_pthread+27)
+#  define SYS_Pthread_setcanceltype    (__SYS_pthread+24)
+#  define SYS_pthread_setschedparam    (__SYS_pthread+25)
+#  define SYS_pthread_setschedprio     (__SYS_pthread+26)
+#  define SYS_pthread_setspecific      (__SYS_pthread+27)
+#  define SYS_pthread_testcancel       (__SYS_pthread+28)
+#  define SYS_pthread_yield            (__SYS_pthread+29)
 
 #  ifdef CONFIG_SMP
-#    define SYS_pthread_setaffinity_np (__SYS_pthread+28)
-#    define SYS_pthread_getaffinity_np (__SYS_pthread+29)
-#    define __SYS_pthread_signals      (__SYS_pthread+30)
+#    define SYS_pthread_setaffinity_np (__SYS_pthread+30)
+#    define SYS_pthread_getaffinity_np (__SYS_pthread+31)
+#    define __SYS_pthread_signals      (__SYS_pthread+32)
 #  else
-#    define __SYS_pthread_signals      (__SYS_pthread+28)
+#    define __SYS_pthread_signals      (__SYS_pthread+30)
 #  endif
 
 #  ifndef CONFIG_DISABLE_SIGNALS

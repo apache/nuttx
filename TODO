@@ -1530,7 +1530,18 @@ o Libraries (libc/, libm/)
   Description: There are many things implemented within the kernel (for example
                under sched/pthread) that probably should be migrated in the
                C library where it belongs.
-  Status:      Ope
+
+               I would really like to see a little flavor of a micro-kernel
+               at the OS interface:  I would like to see more primitive OS
+               system calls with more higher level logic in the C library.
+
+               One awkard thing is the incompatibility of KERNEL vs FLAT
+               builds:  In the kernel build, it would be nice to move many
+               of the thread-specific data items out of the TCB and into
+               the process address environment where they belong.  It is
+               difficult to make this compatible with the FLAT build,
+               however.
+  Status:      Open
   Priority:    Low
 
 o File system / Generic drivers (fs/, drivers/)
