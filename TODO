@@ -595,34 +595,34 @@ o pthreads (sched/pthreads)
                the following functions.  There are some execptions as noted:
 
                 accept()             mq_timedsend()           NA putpmsg()          sigtimedwait()
-             -4 aio_suspend()     NA msgrcv()                    pwrite()        NA sigwait()
+             04 aio_suspend()     NA msgrcv()                    pwrite()        NA sigwait()
              NA clock_nanosleep() NA msgsnd()                    read()             sigwaitinfo()
-                close()           NA msync()                  NA readv()         -1 sleep()
-                connect()            nanosleep()                 recv()          -2 system()
-             OK creat()              open()                      recvfrom()      NA tcdrain()
-                fcntl()              pause()                  NA recvmsg()       -1 usleep()
-             NA fdatasync()          poll()                      select()        OK wait()
+                close()           NA msync()                  NA readv()         01 sleep()
+                connect()            nanosleep()                 recv()          02 system()
+             -- creat()              open()                      recvfrom()      NA tcdrain()
+                fcntl()              pause()                  NA recvmsg()       01 usleep()
+             NA fdatasync()          poll()                      select()        -- wait()
                 fsync()              pread()                     sem_timedwait()    waitid()
              NA getmsg()          NA pselect()                   sem_wait()         waitpid()
              NA getpmsg()            pthread_cond_timedwait()    send()             write()
              NA lockf()              pthread_cond_wait()      NA sendmsg()       NA writev()
                 mq_receive()         pthread_join()              sendto()
-                mq_send()            pthread_testcancel()     -3 sigpause()
+                mq_send()            pthread_testcancel()     03 sigpause()
                 mq_timedreceive() NA putmsg()                    sigsuspend()
 
-               NA Not supported
-               OK Doesn't need instrumentation.  Handled by lower level calls.
-               -n See note n
+                  NA Not supported
+                  -- Doesn't need instrumentation.  Handled by lower level calls.
+                  nn See note nn
 
-               NOTE 1: sleep() and usleep() are user-space functions in the C library and cannot
+               NOTE 01: sleep() and usleep() are user-space functions in the C library and cannot
                serve as cancellation points.  They are, however, simple wrappers around nanosleep
                which is a true cancellation point.
-               NOTE 2: system() is actually implemented in apps/ as part of NSH.  It cannot be
+               NOTE 02: system() is actually implemented in apps/ as part of NSH.  It cannot be
                a cancellation point either.
-               NOTE 3: sigpause() is a user-space function in the C library and cannot serve as
+               NOTE 03: sigpause() is a user-space function in the C library and cannot serve as
                cancellation points.  It is, however, a simple wrapper around sigsuspend()
                which is a true cancellation point.
-               NOTE 4: aio_suspend() is a user-space function in the C library and cannot serve as
+               NOTE 04: aio_suspend() is a user-space function in the C library and cannot serve as
                cancellation points.  It does call around sigtimedwait() which is a true cancellation
                point.
   Status:      Not really open.  This is just the way it is.
@@ -1530,7 +1530,7 @@ o Libraries (libc/, libm/)
   Description: There are many things implemented within the kernel (for example
                under sched/pthread) that probably should be migrated in the
                C library where it belongs.
-  Status:      Open
+  Status:      Ope
   Priority:    Low
 
 o File system / Generic drivers (fs/, drivers/)

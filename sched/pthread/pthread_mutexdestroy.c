@@ -75,7 +75,7 @@ int pthread_mutex_destroy(FAR pthread_mutex_t *mutex)
 
   sinfo("mutex=0x%p\n", mutex);
 
-  if (!mutex)
+  if (mutex == NULL)
     {
       ret = EINVAL;
     }
@@ -100,7 +100,7 @@ int pthread_mutex_destroy(FAR pthread_mutex_t *mutex)
          ret = kill(mutex->pid, 0);
          if (ret < 0)
            {
-             /* That thread associated with the PID no longer exists */
+             /* The thread associated with the PID no longer exists */
 
              mutex->pid = -1;
 

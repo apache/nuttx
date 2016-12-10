@@ -107,7 +107,11 @@ int pthread_cond_wait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex)
       ret |= pthread_takesemaphore((FAR sem_t *)&cond->sem);
       sched_unlock();
 
-      /* Reacquire the mutex */
+      /* Reacquire the mutex.
+       *
+       * REVISIT: When cancellation points are enabled, we will almost
+       * certainly hold the mutex when the pthread is canceled.
+       */
 
       sinfo("Reacquire mutex...\n");
       ret |= pthread_takesemaphore((FAR sem_t *)&mutex->sem);
