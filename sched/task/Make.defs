@@ -50,7 +50,7 @@ CSRCS += task_spawn.c
 endif
 
 ifeq ($(CONFIG_CANCELLATION_POINTS),y)
-CSRCS += task_setcanceltype.c
+CSRCS += task_setcanceltype.c task_testcancel.c
 endif
 
 ifneq ($(CONFIG_BINFMT_DISABLE),y)

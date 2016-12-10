@@ -52,10 +52,6 @@ ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 CSRCS += pthread_condtimedwait.c pthread_kill.c pthread_sigmask.c
 endif
 
-ifeq ($(CONFIG_CANCELLATION_POINTS),y)
-CSRCS += pthread_testcancel.c
-endif
-
 ifeq ($(CONFIG_SMP),y)
 CSRCS += pthread_setaffinity.c pthread_getaffinity.c
 endif

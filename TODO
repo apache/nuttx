@@ -191,8 +191,15 @@ o Task/Scheduler (sched/)
                does not do asynchronous deletion but should rather do the
                same kind of synchronization such as the pthread cancellation
                points.  In this configuration, none of the issues above
-               apply.  It is only the asyncrhonous task deletion that cannot
-               be supported.
+               apply.  It is only the asynchronous task deletion that cannot
+               be supported.  These helper functions are also available to
+               help manage task deletion:
+
+                 int  task_setcancelstate(int state, FAR int *oldstate);
+                 int  task_setcanceltype(int type, FAR int *oldtype);
+                 void task_testcancel(void);
+
+               Which are analogous to the similarly named pthread_ interfaces.
 
   Status:      Open
   Priority:    Low and not easily removable.

@@ -243,6 +243,7 @@ int    task_restart(pid_t pid);
 
 int    task_setcancelstate(int state, FAR int *oldstate);
 int    task_setcanceltype(int type, FAR int *oldtype);
+void   task_testcancel(void);
 
 /* Task Scheduling Interfaces (based on POSIX APIs) */
 

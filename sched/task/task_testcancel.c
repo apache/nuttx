@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/pthread/pthread_testcancel.c
+ * sched/task/task_testcancel.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -37,26 +37,31 @@
  * Included Files
  ****************************************************************************/
 
-#include <pthread.h>
+#include <nuttx/config.h>
+
 #include <sched.h>
+#include <errno.h>
+
+#include <nuttx/cancelpt.h>
+
+#include "task/task.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pthread_testcancel
+ * Name: task_testcancel
  *
  * Description:
- *   The pthread_testcancel() function creates a cancellation point in the
- *   calling thread. The pthread_testcancel() function has no effect if
+ *   The task_testcancel() function creates a cancellation point in the
+ *   calling thread. The task_testcancel() function has no effect if
  *   cancelability is disabled
  *
  ****************************************************************************/
 
-void pthread_testcancel(void)
+void task_testcancel(void)
 {
-  /* task_testcancel() does the real work */
-
-  task_testcancel();
+  (void)enter_cancellation_point();
+  leave_cancellation_point();
 }
