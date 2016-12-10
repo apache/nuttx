@@ -13,7 +13,7 @@
       <h1><big><font color="#3c34ec"><i>NuttX Operating System<p>User's Manual</i></font></big></h1>
       <p><small>by</small></p>
       <p>Gregory Nutt<p>
-      <p>Last Updated: December 9, 2016</p>
+      <p>Last Updated: December 10, 2016</p>
     </td>
   </tr>
 </table>
@@ -469,8 +469,21 @@ int task_delete(pid_t pid);
 
 <p>
   <b>Description:</b>
-  This function causes a specified task to cease to exist -- its stack and TCB will be deallocated.
-  This function is the companion to task_create().
+  This function causes a specified task to cease to exist.
+  Its  stack and TCB will be deallocated. 
+  This function is the companion to <code>task_create()</code>.
+  This is the version of the function exposed to the user;
+  it is simply a wrapper around the internal, <code>task_terminate()</code> function.
+</p>
+<p>
+  The logic in this function only deletes non-running tasks.
+  If the  <code>pid</code> parameter refers to to the currently runing task, then processing is redirected to <code>exit()</code>. 
+  This can only happen if a task calls <code>task_delete()</code> in order to delete itself.
+</p>
+<p>
+  This function obeys the semantics of pthread cancellation:
+  task deletion is deferred if cancellation is disabled or if deferred cancellation is supported (with cancellation points enabled).
+</p>
 <p>
 <b>Input Parameters:</b>
 <ul>
@@ -485,7 +498,8 @@ int task_delete(pid_t pid);
 <ul>
   <li>
     <code>OK</code>, or <code>ERROR</code> if the task cannot be deleted.
-    This function can fail if the provided pid does not correspond to a task (<a href="#ErrnoAccess"><code>errno</code></a> is not set).
+    The <a href="#ErrnoAccess"><code>errno</code></a> is set to indicate the nature of the failure.
+    This function can fail, for example, if the provided pid does not correspond to a currently executing task.
   </li>
 </ul>
 <p>

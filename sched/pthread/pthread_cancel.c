@@ -58,7 +58,7 @@ int pthread_cancel(pthread_t thread)
 
   /* First, make sure that the handle references a valid thread */
 
-  if (!thread)
+  if (thread == 0)
     {
       /* pid == 0 is the IDLE task.  Callers cannot cancel the
        * IDLE task.
@@ -77,11 +77,13 @@ int pthread_cancel(pthread_t thread)
       return ESRCH;
     }
 
+  /* Only pthreads should use this interface */
+
   DEBUGASSERT((tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD);
 
   /* Check to see if this thread has the non-cancelable bit set in its
    * flags. Suppress context changes for a bit so that the flags are stable.
-   * (the flags should not change in interrupt handling.
+   * (the flags should not change in interrupt handling).
    */
 
   sched_lock();
@@ -110,7 +112,7 @@ int pthread_cancel(pthread_t thread)
 
   if ((tcb->cmn.flags & TCB_FLAG_CANCEL_DEFERRED) != 0)
     {
-      /* Then we cannot cancel the thread asynchronoulsy.  Mark the cancellation
+      /* Then we cannot cancel the thread asynchronously.  Mark the cancellation
        * as pending.
        */
 
@@ -162,9 +164,7 @@ int pthread_cancel(pthread_t thread)
 
   (void)pthread_completejoin((pid_t)thread, PTHREAD_CANCELED);
 
-  /* Then let pthread_delete do the real work */
+  /* Then let task_terminate do the real work */
 
-  task_delete((pid_t)thread);
-  return OK;
+  return task_terminate((pid_t)thread, false);
 }
-

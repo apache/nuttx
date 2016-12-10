@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/task/task_delete.c
  *
- *   Copyright (C) 2007-2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <stdlib.h>
+#include <errno.h>
 
 #include <nuttx/sched.h>
 
@@ -64,37 +65,111 @@
  *   redirected to exit().  This can only happen if a task calls task_delete()
  *   in order to delete itself.
  *
- *   In fact, this function (and task_terminate) are the final functions
- *   called all task termination sequences.  task_delete may be called
- *   from:
- *
- *   - task_restart(),
- *   - pthread_cancel(),
- *   - and directly from user code.
- *
- *   Other exit paths (exit(), _eixt(), and pthread_exit()) will go through
- *   task_terminate()
+ *   This function obeys the semantics of pthread cancellation:  task
+ *   deletion is deferred if cancellation is disabled or if deferred
+ *   cancellation is supported (with cancellation points enabled).
  *
  * Inputs:
  *   pid - The task ID of the task to delete.  A pid of zero
  *         signifies the calling task.
  *
  * Return Value:
- *   OK on success; or ERROR on failure
- *
- *   This function can fail if the provided pid does not correspond to a
- *   task (errno is not set)
+ *   OK on success; or ERROR on failure with the errno variable set
+ *   appropriately.
  *
  ****************************************************************************/
 
 int task_delete(pid_t pid)
 {
+  FAR struct tcb_s *dtcb;
   FAR struct tcb_s *rtcb;
+  int ret;
+
+  /* Check if the task to delete is the calling task:  PID=0 means to delete
+   * the calling task.  In this case, task_delete() is much like exit()
+   * except that it obeys the cancellation semantics.
+   */
+
+  rtcb = this_task();
+  if (pid == 0)
+    {
+      pid = rtcb->pid;
+    }
+
+  /* Get the TCB of the task to be deleted */
+
+  dtcb = (FAR struct tcb_s *)sched_gettcb(pid);
+  if (dtcb == NULL)
+    {
+      /* The pid does not correspond to any known thread.  The task
+       * has probably already exited.
+       */
+
+      set_errno(ESRCH);
+      return ERROR;
+    }
+
+  /* Only tasks and kernel threads should use this interface */
+
+  DEBUGASSERT((dtcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD);
+
+  /* Check to see if this task has the non-cancelable bit set in its
+   * flags. Suppress context changes for a bit so that the flags are stable.
+   * (the flags should not change in interrupt handling).
+   */
+
+  sched_lock();
+  if ((dtcb->flags & TCB_FLAG_NONCANCELABLE) != 0)
+    {
+      /* Then we cannot cancel the thread now.  Here is how this is
+       * supposed to work:
+       *
+       * "When cancelability is disabled, all cancels are held pending
+       *  in the target thread until the thread changes the cancelability.
+       *  When cancelability is deferred, all cancels are held pending in
+       *  the target thread until the thread changes the cancelability, calls
+       *  a function which is a cancellation point or calls pthread_testcancel(),
+       *  thus creating a cancellation point. When cancelability is asynchronous,
+       *  all cancels are acted upon immediately, interrupting the thread with its
+       *  processing."
+       */
+
+      dtcb->flags |= TCB_FLAG_CANCEL_PENDING;
+      sched_unlock();
+      return OK;
+    }
+
+#ifdef CONFIG_CANCELLATION_POINTS
+  /* Check if this task supports deferred cancellation */
+
+  if ((dtcb->flags & TCB_FLAG_CANCEL_DEFERRED) != 0)
+    {
+      /* Then we cannot cancel the task asynchronously.  Mark the cancellation
+       * as pending.
+       */
+
+      dtcb->flags |= TCB_FLAG_CANCEL_PENDING;
+
+      /* If the task is waiting at a cancellation point, then notify of the
+       * cancellation thereby waking the task up with an ECANCELED error.
+       *
+       * REVISIT: is locking the scheduler sufficent in SMP mode?
+       */
+
+      if (dtcb->cpcount > 0)
+        {
+          notify_cancellation(dtcb);
+        }
+
+      sched_unlock();
+      return OK;
+    }
+#endif
 
   /* Check if the task to delete is the calling task */
 
-  rtcb = this_task();
-  if (pid == 0 || pid == rtcb->pid)
+  sched_unlock();
+  if (pid == rtcb->pid)
     {
       /* If it is, then what we really wanted to do was exit. Note that we
        * don't bother to unlock the TCB since it will be going away.
@@ -103,37 +178,16 @@ int task_delete(pid_t pid)
       exit(EXIT_SUCCESS);
     }
 
-#ifdef CONFIG_CANCELLATION_POINTS
-  /* Check if this task supports deferred cancellation */
-
-  sched_lock();
-  if ((rtcb->flags & TCB_FLAG_CANCEL_DEFERRED) != 0)
-    {
-      /* Then we cannot cancel the task asynchronoulsy.  Mark the cancellation
-       * as pending.
-       */
-
-      rtcb->flags |= TCB_FLAG_CANCEL_PENDING;
-
-      /* If the task is waiting at a cancellation point, then notify of the
-       * cancellation thereby waking the task up with an ECANCELED error.
-       *
-       * REVISIT: is locking the scheduler sufficent in SMP mode?
-       */
-
-      if (rtcb->cpcount > 0)
-        {
-          notify_cancellation(rtcb);
-        }
-
-      sched_unlock();
-      return OK;
-    }
-#endif
-
   /* Otherwise, perform the asynchronous cancellation, letting
    * task_terminate() do all of the heavy lifting.
    */
 
-  return task_terminate(pid, false);
+  ret = task_terminate(pid, false);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      return ERROR;
+    }
+
+  return OK;
 }
