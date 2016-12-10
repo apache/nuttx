@@ -88,7 +88,7 @@ int close(int fd)
 
   /* close() is a cancellation point */
 
-  enter_cancellation_point();
+  (void)enter_cancellation_point();
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
   /* Did we get a valid file descriptor? */

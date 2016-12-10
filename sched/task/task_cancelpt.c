@@ -99,11 +99,19 @@
  *      pending cancellation and, if so, calls either exit() or
  *      pthread_exit(), depending upon the type of the thread.
  *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value
+ *   true is returned if a cancellation is pending but cannot be performed
+ *   now due to the nesting level.
+ *
  ****************************************************************************/
 
-void enter_cancellation_point(void)
+bool enter_cancellation_point(void)
 {
   FAR struct tcb_s *tcb = this_task();
+  bool ret = false;
 
   /* Disabling pre-emption should provide sufficient protection.  We only
    * need the TCB to be stationary (no interrupt level modification is
@@ -126,24 +134,32 @@ void enter_cancellation_point(void)
        (tcb->flags & TCB_FLAG_CANCEL_DEFERRED) != 0) ||
        tcb->cpcount > 0)
     {
-      /* If there is a pending cancellation and we are at the outermost
-       * nesting level of cancellation function calls, then just exit
-       * according to the type of the thread.
-       */
+      /* Check if there is a pending cancellation */
 
-      if ((tcb->flags & TCB_FLAG_CANCEL_PENDING) != 0 &&
-          tcb->cpcount == 0)
+      if ((tcb->flags & TCB_FLAG_CANCEL_PENDING) != 0)
         {
+          /* Yes... return true (if we don't exit here) */
+
+          ret = true;
+
+          /* If there is a pending cancellation and we are at the outermost
+           * nesting level of cancellation function calls, then exit
+           * according to the type of the thread.
+           */
+
+          if (tcb->cpcount == 0)
+            {
 #ifndef CONFIG_DISABLE_PTHREAD
-           if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
-             {
-               pthread_exit(PTHREAD_CANCELED);
-             }
-           else
+               if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
+                 {
+                   pthread_exit(PTHREAD_CANCELED);
+                 }
+               else
 #endif
-             {
-               exit(EXIT_FAILURE);
-             }
+                 {
+                   exit(EXIT_FAILURE);
+                 }
+            }
         }
 
       /* Otherwise, indicate that we are at a cancellation point by
@@ -156,6 +172,7 @@ void enter_cancellation_point(void)
     }
 
   sched_unlock();
+  return ret;
 }
 
 /****************************************************************************
@@ -172,6 +189,12 @@ void enter_cancellation_point(void)
  *   3. If this is the outermost nesting level, it checks if there is a
  *      pending cancellation and, if so, calls either exit() or
  *      pthread_exit(), depending upon the type of the thread.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value
+ *   None
  *
  ****************************************************************************/
 

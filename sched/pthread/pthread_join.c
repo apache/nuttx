@@ -96,7 +96,7 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
 
   /* pthread_join() is a cancellation point */
 
-  enter_cancellation_point();
+  (void)enter_cancellation_point();
 
   /* First make sure that this is not an attempt to join to
    * ourself.

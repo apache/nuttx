@@ -80,7 +80,7 @@ int pause(void)
 
   /* pause() is a cancellation point */
 
-  enter_cancellation_point();
+  (void)enter_cancellation_point();
 
   /* Set up for the sleep.  Using the empty set means that we are not
    * waiting for any particular signal.  However, any unmasked signal

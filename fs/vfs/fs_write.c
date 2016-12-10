@@ -166,7 +166,7 @@ ssize_t write(int fd, FAR const void *buf, size_t nbytes)
 
   /* write() is a cancellation point */
 
-  enter_cancellation_point();
+  (void)enter_cancellation_point();
 
   /* Did we get a valid file descriptor? */
 

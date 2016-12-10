@@ -87,21 +87,31 @@ int sem_wait(FAR sem_t *sem)
 
   DEBUGASSERT(sem != NULL && up_interrupt_context() == false);
 
-  /* sem_wait is a cancellation point */
+  /* The following operations must be performed with interrupts
+   * disabled because sem_post() may be called from an interrupt
+   * handler.
+   */
 
-  enter_cancellation_point();
+  flags = enter_critical_section();
+
+  /* sem_wait() is a cancellation point */
+
+  if (enter_cancellation_point())
+    {
+      /* If there is a pending cancellation, then do not perform
+       * the wait.  Exit now with ECANCELED.
+       */
+
+      set_errno(ECANCELED);
+      leave_cancellation_point();
+      leave_critical_section(flags);
+      return ERROR;
+    }
 
   /* Make sure we were supplied with a valid semaphore. */
 
   if (sem != NULL)
     {
-      /* The following operations must be performed with interrupts
-       * disabled because sem_post() may be called from an interrupt
-       * handler.
-       */
-
-      flags = enter_critical_section();
-
       /* Check if the lock is available */
 
       if (sem->semcount > 0)
@@ -191,10 +201,6 @@ int sem_wait(FAR sem_t *sem)
           sched_unlock();
 #endif
         }
-
-      /* Interrupts may now be enabled. */
-
-      leave_critical_section(flags);
     }
   else
     {
@@ -202,5 +208,6 @@ int sem_wait(FAR sem_t *sem)
     }
 
   leave_cancellation_point();
+  leave_critical_section(flags);
   return ret;
 }

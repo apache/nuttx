@@ -1854,7 +1854,7 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   /* Treat as a cancellation point */
 
-  enter_cancellation_point();
+  (void)enter_cancellation_point();
 
   /* Verify that non-NULL pointers were passed */
 
@@ -2087,7 +2087,7 @@ ssize_t recvfrom(int sockfd, FAR void *buf, size_t len, int flags,
 
   /* recvfrom() is a cancellation point */
 
-  enter_cancellation_point();
+  (void)enter_cancellation_point();
 
   /* Get the underlying socket structure */
 

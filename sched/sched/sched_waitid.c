@@ -167,7 +167,7 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
 
   /* waitid() is a cancellation point */
 
-  enter_cancellation_point();
+  (void)enter_cancellation_point();
 
   /* MISSING LOGIC:   If WNOHANG is provided in the options, then this function
    * should returned immediately.  However, there is no mechanism available now

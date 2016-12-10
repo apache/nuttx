@@ -122,7 +122,7 @@ int fsync(int fd)
 
   /* fsync() is a cancellation point */
 
-  enter_cancellation_point();
+  (void)enter_cancellation_point();
 
   /* Get the file structure corresponding to the file descriptor. */
 

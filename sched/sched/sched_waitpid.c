@@ -188,7 +188,7 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
 
   /* waitpid() is a cancellation point */
 
-  enter_cancellation_point();
+  (void)enter_cancellation_point();
 
   /* None of the options are supported */
 
@@ -317,7 +317,7 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
 
   /* waitpid() is a cancellation point */
 
-  enter_cancellation_point();
+  (void)enter_cancellation_point();
 
   /* None of the options are supported */
 

@@ -106,7 +106,7 @@ int sem_timedwait(FAR sem_t *sem, FAR const struct timespec *abstime)
 
   /* sem_timedwait() is a cancellation point */
 
-  enter_cancellation_point();
+  (void)enter_cancellation_point();
 
   /* Verify the input parameters and, in case of an error, set
    * errno appropriately.

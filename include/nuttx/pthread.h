@@ -42,6 +42,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <stdbool.h>
 #include <pthread.h>
 #include <sched.h>
 
@@ -170,12 +172,19 @@ EXTERN const pthread_attr_t g_default_pthread_attr;
  *      pending cancellation and, if so, calls either exit() or
  *      pthread_exit(), depending upon the type of the thread.
  *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value
+ *   true is returned if a cancellation is pending but cannot be performed
+ *   now due to the nesting level.
+ *
  ****************************************************************************/
 
 #ifdef CONFIG_CANCELLATION_POINTS
-void enter_cancellation_point(void);
+bool enter_cancellation_point(void);
 #else
-#  define enter_cancellation_point()
+#  define enter_cancellation_point() false
 #endif
 
 /****************************************************************************
@@ -192,6 +201,12 @@ void enter_cancellation_point(void);
  *   3. If this is the outermost nesting level, it checks if there is a
  *      pending cancellation and, if so, calls either exit() or
  *      pthread_exit(), depending upon the type of the thread.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value
+ *   None
  *
  ****************************************************************************/
 

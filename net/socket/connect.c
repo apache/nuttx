@@ -519,7 +519,7 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
 
   /* Treat as a cancellation point */
 
-  enter_cancellation_point();
+  (void)enter_cancellation_point();
 
   /* Verify that the psock corresponds to valid, allocated socket */
 
@@ -752,7 +752,7 @@ int connect(int sockfd, FAR const struct sockaddr *addr, socklen_t addrlen)
 
   /* accept() is a cancellation point */
 
-  enter_cancellation_point();
+  (void)enter_cancellation_point();
 
   /* Get the underlying socket structure */
 

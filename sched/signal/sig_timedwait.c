@@ -176,7 +176,7 @@ int sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *info,
 
   /* sigtimedwait() is a cancellation point */
 
-  enter_cancellation_point();
+  (void)enter_cancellation_point();
   sched_lock();  /* Not necessary */
 
   /* Several operations must be performed below:  We must determine if any

@@ -106,7 +106,7 @@ ssize_t mq_receive(mqd_t mqdes, FAR char *msg, size_t msglen,
 
   /* mq_receive() is a cancellation point */
 
-  enter_cancellation_point();
+  (void)enter_cancellation_point();
 
   /* Verify the input parameters and, in case of an error, set
    * errno appropriately.

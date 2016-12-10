@@ -135,7 +135,7 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 
   /* Treat as a cancellation point */
 
-  enter_cancellation_point();
+  (void)enter_cancellation_point();
 
   /* Is the socket a stream? */
 
@@ -365,7 +365,7 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
 
   /* accept() is a cancellation point */
 
-  enter_cancellation_point();
+  (void)enter_cancellation_point();
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
