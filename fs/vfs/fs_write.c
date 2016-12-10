@@ -209,8 +209,8 @@ ssize_t write(int fd, FAR const void *buf, size_t nbytes)
 
           ret = file_write(filep, buf, nbytes);
         }
-#endif
     }
+#endif
 
   leave_cancellation_point();
   return ret;
