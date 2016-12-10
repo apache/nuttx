@@ -50,7 +50,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
-#include <nuttx/pthread.h>
+#include <nuttx/cancelpt.h>
 
 #include "sched/sched.h"
 #include "clock/clock.h"

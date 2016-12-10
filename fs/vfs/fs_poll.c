@@ -48,7 +48,7 @@
 
 #include <nuttx/clock.h>
 #include <nuttx/semaphore.h>
-#include <nuttx/pthread.h>
+#include <nuttx/cancelpt.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
 

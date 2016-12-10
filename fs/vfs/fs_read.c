@@ -46,7 +46,7 @@
 #include <sched.h>
 #include <errno.h>
 
-#include <nuttx/pthread.h>
+#include <nuttx/cancelpt.h>
 
 #include "inode/inode.h"
 

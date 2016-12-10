@@ -48,7 +48,7 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/pthread.h>
+#include <nuttx/cancelpt.h>
 #include <arch/irq.h>
 
 #include "tcp/tcp.h"

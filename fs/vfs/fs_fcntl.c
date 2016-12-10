@@ -45,7 +45,7 @@
 #include <assert.h>
 
 #include <nuttx/sched.h>
-#include <nuttx/pthread.h>
+#include <nuttx/cancelpt.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
 

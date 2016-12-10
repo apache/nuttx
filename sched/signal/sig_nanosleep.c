@@ -46,7 +46,7 @@
 
 #include <nuttx/clock.h>
 #include <nuttx/irq.h>
-#include <nuttx/pthread.h>
+#include <nuttx/cancelpt.h>
 
 #include "clock/clock.h"
 

@@ -51,7 +51,7 @@
 #include <arch/irq.h>
 
 #include <nuttx/semaphore.h>
-#include <nuttx/pthread.h>
+#include <nuttx/cancelpt.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/udp.h>

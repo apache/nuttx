@@ -41,7 +41,7 @@
 
 #include <signal.h>
 
-#include <nuttx/pthread.h>
+#include <nuttx/cancelpt.h>
 
 /****************************************************************************
  * Public Functions

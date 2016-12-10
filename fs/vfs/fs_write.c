@@ -50,7 +50,7 @@
 # include <sys/socket.h>
 #endif
 
-#include <nuttx/pthread.h>
+#include <nuttx/cancelpt.h>
 
 #include "inode/inode.h"
 

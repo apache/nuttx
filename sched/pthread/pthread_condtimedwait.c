@@ -51,7 +51,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/wdog.h>
-#include <nuttx/pthread.h>
+#include <nuttx/cancelpt.h>
 
 #include "sched/sched.h"
 #include "pthread/pthread.h"

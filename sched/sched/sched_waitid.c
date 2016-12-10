@@ -44,7 +44,7 @@
 #include <errno.h>
 
 #include <nuttx/sched.h>
-#include <nuttx/pthread.h>
+#include <nuttx/cancelpt.h>
 
 #include "sched/sched.h"
 #include "group/group.h"

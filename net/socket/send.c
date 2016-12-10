@@ -43,7 +43,7 @@
 #include <sys/socket.h>
 #include <errno.h>
 
-#include <nuttx/pthread.h>
+#include <nuttx/cancelpt.h>
 
 #include "tcp/tcp.h"
 #include "udp/udp.h"

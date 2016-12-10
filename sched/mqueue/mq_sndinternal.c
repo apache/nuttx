@@ -53,7 +53,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
 #include <nuttx/signal.h>
-#include <nuttx/pthread.h>
+#include <nuttx/cancelpt.h>
 
 #include "sched/sched.h"
 #ifndef CONFIG_DISABLE_SIGNALS

@@ -57,7 +57,7 @@
 
 #include <nuttx/clock.h>
 #include <nuttx/semaphore.h>
-#include <nuttx/pthread.h>
+#include <nuttx/cancelpt.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/iob.h>
 #include <nuttx/net/netdev.h>

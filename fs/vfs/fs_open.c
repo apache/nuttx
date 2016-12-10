@@ -48,7 +48,7 @@
 #include <stdarg.h>
 #endif
 
-#include <nuttx/pthread.h>
+#include <nuttx/cancelpt.h>
 #include <nuttx/fs/fs.h>
 
 #include "inode/inode.h"

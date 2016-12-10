@@ -45,7 +45,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/pthread.h>
+#include <nuttx/cancelpt.h>
 #include <nuttx/net/net.h>
 
 #include "udp/udp.h"
