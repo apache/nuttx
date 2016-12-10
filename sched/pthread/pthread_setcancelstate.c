@@ -78,7 +78,7 @@ int pthread_setcancelstate(int state, FAR int *oldstate)
 
   /* Return the current state if so requrested */
 
-  if (oldstate)
+  if (oldstate != NULL)
     {
       if ((tcb->flags & TCB_FLAG_NONCANCELABLE) != 0)
         {

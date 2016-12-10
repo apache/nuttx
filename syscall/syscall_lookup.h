@@ -291,12 +291,14 @@ SYSCALL_LOOKUP(up_assert,                 2, STUB_up_assert)
   SYSCALL_LOOKUP(pthread_mutex_unlock,    1, STUB_pthread_mutex_unlock)
   SYSCALL_LOOKUP(pthread_once,            2, STUB_pthread_once)
   SYSCALL_LOOKUP(pthread_setcancelstate,  2, STUB_pthread_setcancelstate)
-  SYSCALL_LOOKUP(pthread_setcanceltype,   2, STUB_pthread_setcanceltype)
   SYSCALL_LOOKUP(pthread_setschedparam,   3, STUB_pthread_setschedparam)
   SYSCALL_LOOKUP(pthread_setschedprio,    2, STUB_pthread_setschedprio)
   SYSCALL_LOOKUP(pthread_setspecific,     2, STUB_pthread_setspecific)
-  SYSCALL_LOOKUP(pthread_testcancel,      0, STUB_pthread_testcancel)
   SYSCALL_LOOKUP(pthread_yield,           0, STUB_pthread_yield)
+#  ifdef CONFIG_CANCELLATION_POINTS
+  SYSCALL_LOOKUP(pthread_setcanceltype,   2, STUB_pthread_setcanceltype)
+  SYSCALL_LOOKUP(pthread_testcancel,      0, STUB_pthread_testcancel)
+#  endif
 #  ifdef CONFIG_SMP
   SYSCALL_LOOKUP(pthread_setaffinity,     3, STUB_pthread_setaffinity)
   SYSCALL_LOOKUP(pthread_getaffinity,     3, STUB_pthread_getaffinity)

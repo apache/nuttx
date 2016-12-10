@@ -77,7 +77,7 @@ int pthread_setcanceltype(int type, FAR int *oldtype)
 
   /* Return the current type if so requrested */
 
-  if (oldtype)
+  if (oldtype != NULL)
     {
       if ((tcb->flags & TCB_FLAG_CANCEL_DEFERRED) != 0)
         {

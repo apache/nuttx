@@ -48,6 +48,10 @@ CSRCS += pthread_mutexattr_getpshared.c pthread_mutexattr_setpshared.c
 CSRCS += pthread_mutexattr_setprotocol.c pthread_mutexattr_getprotocol.c
 CSRCS += pthread_mutexattr_settype.c pthread_mutexattr_gettype.c
 
+ifneq ($(CONFIG_CANCELLATION_POINTS),y)
+CSRCS += pthread_setcanceltype.c pthread_testcancel.c
+endif
+
 ifeq ($(CONFIG_SMP),y)
 CSRCS += pthread_attr_getaffinity.c pthread_attr_setaffinity.c
 endif
