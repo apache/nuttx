@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/pthread/pthread_setcanceltype.c
+ * sched/task/task_setcanceltype.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,32 +39,35 @@
 
 #include <nuttx/config.h>
 
+#include <stdlib.h>
 #include <pthread.h>
+#include <sched.h>
 #include <errno.h>
 
 #include "sched/sched.h"
+#include "task/task.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pthread_setcancelstate
+ * Name: task_setcancelstate
  *
  * Description:
- *   The pthread_setcanceltype() function atomically both sets the calling
+ *   The task_setcanceltype() function atomically both sets the calling
  *   thread's cancelability type to the indicated type and returns the
  *   previous cancelability type at the location referenced by oldtype
- *   Legal values for type are PTHREAD_CANCEL_DEFERRED and
- *   PTHREAD_CANCEL_ASYNCHRONOUS.
+ *   Legal values for type are TASK_CANCEL_DEFERRED and
+ *   TASK_CANCEL_ASYNCHRONOUS.
  *
  *   The cancelability state and type of any newly created threads,
  *   including the thread in which main() was first invoked, are
- *   PTHREAD_CANCEL_ENABLE and PTHREAD_CANCEL_DEFERRED respectively.
+ *   TASK_CANCEL_ENABLE and TASK_CANCEL_DEFERRED respectively.
  *
  ****************************************************************************/
 
-int pthread_setcanceltype(int type, FAR int *oldtype)
+int task_setcanceltype(int type, FAR int *oldtype)
 {
   FAR struct tcb_s *tcb = this_task();
   int ret = OK;
@@ -81,17 +84,17 @@ int pthread_setcanceltype(int type, FAR int *oldtype)
     {
       if ((tcb->flags & TCB_FLAG_CANCEL_DEFERRED) != 0)
         {
-          *oldtype = PTHREAD_CANCEL_DEFERRED;
+          *oldtype = TASK_CANCEL_DEFERRED;
         }
       else
         {
-          *oldtype = PTHREAD_CANCEL_ASYNCHRONOUS;
+          *oldtype = TASK_CANCEL_ASYNCHRONOUS;
         }
     }
 
   /* Set the new cancellation type */
 
-  if (type == PTHREAD_CANCEL_ASYNCHRONOUS)
+  if (type == TASK_CANCEL_ASYNCHRONOUS)
     {
       /* Clear the deferred cancellation bit */
 
@@ -106,12 +109,24 @@ int pthread_setcanceltype(int type, FAR int *oldtype)
           (tcb->flags & TCB_FLAG_NONCANCELABLE) == 0)
         {
           tcb->flags &= ~TCB_FLAG_CANCEL_PENDING;
-          pthread_exit(PTHREAD_CANCELED);
+
+          /* Exit according to the type of the thread */
+
+#ifndef CONFIG_DISABLE_PTHREAD
+          if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
+            {
+              pthread_exit(PTHREAD_CANCELED);
+            }
+          else
+#endif
+            {
+              exit(EXIT_FAILURE);
+            }
         }
 #endif
     }
 #ifdef CONFIG_CANCELLATION_POINTS
-  else if (type == PTHREAD_CANCEL_DEFERRED)
+  else if (type == TASK_CANCEL_DEFERRED)
     {
       /* Set the deferred cancellation type */
 

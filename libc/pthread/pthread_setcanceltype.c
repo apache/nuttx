@@ -38,7 +38,23 @@
  ****************************************************************************/
 
 #include <pthread.h>
+#include <sched.h>
 #include <errno.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+/* The following are defined in different header files but must have the
+ * same values.
+ */
+
+#if PTHREAD_CANCEL_DEFERRED != TASK_CANCEL_DEFERRED
+#  error We must have  PTHREAD_CANCEL_DEFERRED == TASK_CANCEL_DEFERRED
+#endif
+
+#if PTHREAD_CANCEL_ASYNCHRONOUS != TASK_CANCEL_ASYNCHRONOUS
+#  error We must have  PTHREAD_CANCEL_ASYNCHRONOUS == TASK_CANCEL_ASYNCHRONOUS
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -62,14 +78,15 @@
 
 int pthread_setcanceltype(int type, FAR int *oldtype)
 {
-  /* Return the current type if so requrested */
+  int ret;
 
-  if (oldtype != NULL)
+  /* task_setcanceltype() can do this */
+
+  ret = task_setcanceltype(type, oldtype);
+  if (ret < 0)
     {
-      *oldtype = PTHREAD_CANCEL_ASYNCHRONOUS;
+      ret = errno;
     }
 
-  /* Check the requested cancellation type */
-
-  return (type == PTHREAD_CANCEL_ASYNCHRONOUS) ? OK : ENOSYS;
+  return ret;
 }

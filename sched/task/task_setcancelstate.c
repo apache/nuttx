@@ -39,6 +39,9 @@
 
 #include <nuttx/config.h>
 
+#include <stdlib.h>
+#include <pthread.h>
+#include <sched.h>
 #include <errno.h>
 
 #include "sched/sched.h"
@@ -88,17 +91,17 @@ int task_setcancelstate(int state, FAR int *oldstate)
     {
       if ((tcb->flags & TCB_FLAG_NONCANCELABLE) != 0)
         {
-          *oldstate = PTHREAD_CANCEL_DISABLE;
+          *oldstate = TASK_CANCEL_DISABLE;
         }
       else
         {
-          *oldstate = PTHREAD_CANCEL_ENABLE;
+          *oldstate = TASK_CANCEL_ENABLE;
         }
     }
 
   /* Set the new cancellation state */
 
-  if (state == PTHREAD_CANCEL_ENABLE)
+  if (state == TASK_CANCEL_ENABLE)
     {
       /* Clear the non-cancelable flag */
 
@@ -124,27 +127,27 @@ int task_setcancelstate(int state, FAR int *oldstate)
             }
           else
 #endif
-           {
-             /* No.. We are using asynchronous cancellation.  If the
-              * cancellation was pending in this case, then just exit.
-              */
+            {
+              /* No.. We are using asynchronous cancellation.  If the
+               * cancellation was pending in this case, then just exit.
+               */
 
-             tcb->flags &= ~TCB_FLAG_CANCEL_PENDING;
+              tcb->flags &= ~TCB_FLAG_CANCEL_PENDING;
 
 #ifndef CONFIG_DISABLE_PTHREAD
-             if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
-               {
-                 pthread_exit(PTHREAD_CANCELED);
-               }
-             else
+              if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
+                {
+                  pthread_exit(PTHREAD_CANCELED);
+                }
+              else
 #endif
-               {
-                 exit(EXIT_FAILURE);
-               }
-           }
+                {
+                  exit(EXIT_FAILURE);
+                }
+            }
         }
     }
-  else if (state == PTHREAD_CANCEL_DISABLE)
+  else if (state == TASK_CANCEL_DISABLE)
     {
       /* Set the non-cancelable state */
 

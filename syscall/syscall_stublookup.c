@@ -100,6 +100,9 @@ uintptr_t STUB_task_setcancelstate(int nbr, uintptr_t parm1,
             uintptr_t parm2);
 uintptr_t STUB_up_assert(int nbr, uintptr_t parm1, uintptr_t parm2);
 
+uintptr_t STUB_task_setcanceltype(int nbr, uintptr_t parm1,
+            uintptr_t parm2);
+
 /* The following can be individually enabled */
 
 uintptr_t STUB_vfork(int nbr);
@@ -300,8 +303,6 @@ uintptr_t STUB_pthread_setspecific(int nbr, uintptr_t parm1,
             uintptr_t parm2);
 uintptr_t STUB_pthread_yield(int nbr);
 
-uintptr_t STUB_pthread_setcanceltype(int nbr, uintptr_t parm1,
-            uintptr_t parm2);
 uintptr_t STUB_pthread_testcancel(int nbr);
 
 uintptr_t STUB_pthread_setaffinity(int nbr, uintptr_t parm1,

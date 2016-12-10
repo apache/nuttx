@@ -130,7 +130,13 @@
 #  define SYS_task_restart             (__SYS_task_delete+1)
 #  define SYS_task_setcancelstate      (__SYS_task_delete+2)
 #  define SYS_up_assert                (__SYS_task_delete+3)
-#  define __SYS_vfork                  (__SYS_task_delete+4)
+
+#  ifdef CONFIG_CANCELLATION_POINTS
+#    define SYS_pthread_setcanceltype  (__SYS_task_delete+4)
+#    define __SYS_vfork                (__SYS_task_delete+5)
+#  else
+#    define __SYS_vfork                (__SYS_task_delete+4)
+#  endif
 
 /* The following can be individually enabled */
 
@@ -407,9 +413,8 @@
 #  define SYS_pthread_yield            (__SYS_pthread+26)
 
 #  ifdef CONFIG_CANCELLATION_POINTS
-#    define SYS_pthread_setcanceltype  (__SYS_pthread+27)
-#    define SYS_pthread_testcancel     (__SYS_pthread+28)
-#    define __SYS_pthread_smp          (__SYS_pthread+29)
+#    define SYS_pthread_testcancel     (__SYS_pthread+27)
+#    define __SYS_pthread_smp          (__SYS_pthread+28)
 #  else
 #    define __SYS_pthread_smp          (__SYS_pthread+27)
 #  endif

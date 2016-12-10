@@ -49,6 +49,10 @@ ifneq ($(CONFIG_BUILD_KERNEL),y)
 CSRCS += task_spawn.c
 endif
 
+ifeq ($(CONFIG_CANCELLATION_POINTS),y)
+CSRCS += task_setcanceltype.c
+endif
+
 ifneq ($(CONFIG_BINFMT_DISABLE),y)
 ifeq ($(CONFIG_LIBC_EXECFUNCS),y)
 CSRCS += task_execv.c task_posixspawn.c

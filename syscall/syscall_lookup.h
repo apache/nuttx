@@ -89,6 +89,10 @@ SYSCALL_LOOKUP(task_restart,              1, STUB_task_restart)
 SYSCALL_LOOKUP(task_setcancelstate,       2, STUB_task_setcancelstate)
 SYSCALL_LOOKUP(up_assert,                 2, STUB_up_assert)
 
+#  ifdef CONFIG_CANCELLATION_POINTS
+  SYSCALL_LOOKUP(task_setcanceltype,      2, STUB_task_setcanceltype)
+#  endif
+
 /* The following can be individually enabled */
 
 #ifdef CONFIG_ARCH_HAVE_VFORK
@@ -296,7 +300,6 @@ SYSCALL_LOOKUP(up_assert,                 2, STUB_up_assert)
   SYSCALL_LOOKUP(pthread_setspecific,     2, STUB_pthread_setspecific)
   SYSCALL_LOOKUP(pthread_yield,           0, STUB_pthread_yield)
 #  ifdef CONFIG_CANCELLATION_POINTS
-  SYSCALL_LOOKUP(pthread_setcanceltype,   2, STUB_pthread_setcanceltype)
   SYSCALL_LOOKUP(pthread_testcancel,      0, STUB_pthread_testcancel)
 #  endif
 #  ifdef CONFIG_SMP

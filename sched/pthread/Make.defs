@@ -53,7 +53,7 @@ CSRCS += pthread_condtimedwait.c pthread_kill.c pthread_sigmask.c
 endif
 
 ifeq ($(CONFIG_CANCELLATION_POINTS),y)
-CSRCS += pthread_setcanceltype.c pthread_testcancel.c
+CSRCS += pthread_testcancel.c
 endif
 
 ifeq ($(CONFIG_SMP),y)
