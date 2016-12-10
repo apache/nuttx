@@ -98,6 +98,7 @@ int sem_wait(FAR sem_t *sem)
 
   if (enter_cancellation_point())
     {
+#ifndef CONFIG_CANCELLATION_POINTS /* Not reachable in this case *.
       /* If there is a pending cancellation, then do not perform
        * the wait.  Exit now with ECANCELED.
        */
@@ -106,6 +107,7 @@ int sem_wait(FAR sem_t *sem)
       leave_cancellation_point();
       leave_critical_section(flags);
       return ERROR;
+#endif
     }
 
   /* Make sure we were supplied with a valid semaphore. */

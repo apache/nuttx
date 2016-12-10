@@ -239,6 +239,7 @@ int mq_waitsend(mqd_t mqdes)
 
   if (enter_cancellation_point())
     {
+#ifndef CONFIG_CANCELLATION_POINTS /* Not reachable in this case *.
       /* If there is a pending cancellation, then do not perform
        * the wait.  Exit now with ECANCELED.
        */
@@ -246,6 +247,7 @@ int mq_waitsend(mqd_t mqdes)
       set_errno(ECANCELED);
       leave_cancellation_point();
       return ERROR;
+#endif
     }
 
   /* Get a pointer to the message queue */
