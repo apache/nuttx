@@ -229,6 +229,8 @@ int    task_create(FAR const char *name, int priority, int stack_size,
 int    task_delete(pid_t pid);
 int    task_restart(pid_t pid);
 
+int    task_setcancelstate(int state, FAR int *oldstate);
+
 /* Task Scheduling Interfaces (based on POSIX APIs) */
 
 int    sched_setparam(pid_t pid, const struct sched_param *param);

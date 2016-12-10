@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/pthread/pthread_setcancelstate.c
+ * sched/task/task_setcancelstate.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,33 +39,39 @@
 
 #include <nuttx/config.h>
 
-#include <pthread.h>
 #include <errno.h>
 
-#include "task/task.h"
 #include "sched/sched.h"
+#include "task/task.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pthread_setcancelstate
+ * Name: task_setcancelstate
  *
  * Description:
- *   The pthread_setcancelstate() function atomically both sets the calling
- *   thread's cancelability state to the indicated state and returns the
+ *   The task_setcancelstate() function atomically both sets the calling
+ *   task's cancelability state to the indicated state and returns the
  *   previous cancelability state at the location referenced by oldstate.
- *   Legal values for state are PTHREAD_CANCEL_ENABLE and
- *   PTHREAD_CANCEL_DISABLE.
+ *   Legal values for state are TASK_CANCEL_ENABLE and TASK_CANCEL_DISABLE.
  *
- *   The cancelability state and type of any newly created threads,
- *   including the thread in which main() was first invoked, are
- *   PTHREAD_CANCEL_ENABLE and PTHREAD_CANCEL_DEFERRED respectively.
+ *   The cancelability state and type of any newly created tasks are
+ *   TASK_CANCEL_ENABLE and TASK_CANCEL_DEFERRED respectively.
+ *
+ * Input Parameters:
+ *   state    - the new cancellability state, either TASK_CANCEL_ENABLE or
+ *              TASK_CANCEL_DISABLE
+ *   oldstate - The location to return the old cancellability state.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; ERROR is returned on any failure with the
+ *   errno value set appropriately.
  *
  ****************************************************************************/
 
-int pthread_setcancelstate(int state, FAR int *oldstate)
+int task_setcancelstate(int state, FAR int *oldstate)
 {
   FAR struct tcb_s *tcb = this_task();
   int ret = OK;
@@ -124,7 +130,17 @@ int pthread_setcancelstate(int state, FAR int *oldstate)
               */
 
              tcb->flags &= ~TCB_FLAG_CANCEL_PENDING;
-             pthread_exit(PTHREAD_CANCELED);
+
+#ifndef CONFIG_DISABLE_PTHREAD
+             if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
+               {
+                 pthread_exit(PTHREAD_CANCELED);
+               }
+             else
+#endif
+               {
+                 exit(EXIT_FAILURE);
+               }
            }
         }
     }
@@ -136,7 +152,8 @@ int pthread_setcancelstate(int state, FAR int *oldstate)
     }
   else
     {
-      ret = EINVAL;
+      set_errno(EINVAL);
+      ret = ERROR;
     }
 
   sched_unlock();

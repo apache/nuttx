@@ -203,49 +203,51 @@ paragraphs.
   <li><a href="#taskactivate">2.1.3 task_activate</a></li>
   <li><a href="#taskdelete">2.1.4 task_delete</a></li>
   <li><a href="#taskrestart">2.1.5 task_restart</a></li>
+  <li><a href="#tasksetcancelstate">2.1.6 task_setcancelstate</a></li>
 </ul>
 <p>
   Standard interfaces
 </p>
 <ul>
-  <li><a href="#exit">2.1.6 exit</a></li>
-  <li><a href="#getpid">2.1.7 getpid</a></li>
+  <li><a href="#exit">2.1.7 exit</a></li>
+  <li><a href="#getpid">2.1.8 getpid</a></li>
 </ul>
 <p>
   Standard <code>vfork</code> and <code>exec[v|l]</code> interfaces:
 </p>
 <ul>
-  <li><a href="#vfork">2.1.8 vfork</a></li>
-  <li><a href="#execv">2.1.9 execv</a></li>
-  <li><a href="#execl">2.1.10 execl</a></li>
+  <li><a href="#vfork">2.1.9 vfork</a></li>
+  <li><a href="#execv">2.1.10 execv</a></li>
+  <li><a href="#execl">2.1.11 execl</a></li>
 </ul>
 <p>
   Standard <code>posix_spawn</code> interfaces:
 </p>
 <ul>
-  <li><a href="#posix_spawn">2.1.11 posix_spawn and posix_spawnp</a></li>
-  <li><a href="#posix_spawn_file_actions_init">2.1.12 posix_spawn_file_actions_init</a></li>
-  <li><a href="#posix_spawn_file_actions_destroy">2.1.13 posix_spawn_file_actions_destroy</a></li>
-  <li><a href="#posix_spawn_file_actions_addclose">2.1.14 posix_spawn_file_actions_addclose</a></li>
-  <li><a href="#posix_spawn_file_actions_adddup2">2.1.15 posix_spawn_file_actions_adddup2</a></li>
-  <li><a href="#posix_spawn_file_actions_addopen">2.1.16 posix_spawn_file_actions_addopen</a></li>
-  <li><a href="#posix_spawnattr_init">2.1.17 posix_spawnattr_init</a></li>
-  <li><a href="#posix_spawnattr_getflags">2.1.18 posix_spawnattr_getflags</a></li>
-  <li><a href="#posix_spawnattr_getschedparam">2.1.19 posix_spawnattr_getschedparam</a></li>
-  <li><a href="#posix_spawnattr_getschedpolicy">2.1.20 posix_spawnattr_getschedpolicy</a></li>
-  <li><a href="#posix_spawnattr_getsigmask">2.1.21 posix_spawnattr_getsigmask</a></li>
-  <li><a href="#posix_spawnattr_setflags">2.1.22 posix_spawnattr_setflags</a></li>
-  <li><a href="#posix_spawnattr_setschedparam">2.1.23 posix_spawnattr_setschedparam</a></li>
-  <li><a href="#posix_spawnattr_setschedpolicy">2.1.24 posix_spawnattr_setschedpolicy</a></li>
-  <li><a href="#posix_spawnattr_setsigmask">2.1.25 posix_spawnattr_setsigmask</a></li>
+  <li><a href="#posix_spawn">2.1.12 posix_spawn and posix_spawnp</a></li>
+  <li><a href="#posix_spawn_file_actions_init">2.1.13 posix_spawn_file_actions_init</a></li>
+  <li><a href="#posix_spawn_file_actions_destroy">2.1.14 posix_spawn_file_actions_destroy</a></li>
+  <li><a href="#posix_spawn_file_actions_addclose">2.1.15 posix_spawn_file_actions_addclose</a></li>
+  <li><a href="#posix_spawn_file_actions_adddup2">2.1.16 posix_spawn_file_actions_adddup2</a></li>
+  <li><a href="#posix_spawn_file_actions_addopen">2.1.17 posix_spawn_file_actions_addopen</a></li>
+  <li><a href="#posix_spawnattr_init">2.1.18 posix_spawnattr_init</a></li>
+  <li><a href="#posix_spawnattr_getflags">2.1.19 posix_spawnattr_getflags</a></li>
+  <li><a href="#posix_spawnattr_getschedparam">2.1.20 posix_spawnattr_getschedparam</a></li>
+  <li><a href="#posix_spawnattr_getschedpolicy">2.1.21 posix_spawnattr_getschedpolicy</a></li>
+  <li><a href="#posix_spawnattr_getsigmask">2.1.22 posix_spawnattr_getsigmask</a></li>
+  <li><a href="#posix_spawnattr_setflags">2.1.23 posix_spawnattr_setflags</a></li>
+  <li><a href="#posix_spawnattr_setschedparam">2.1.24 posix_spawnattr_setschedparam</a></li>
+  <li><a href="#posix_spawnattr_setschedpolicy">2.1.25 posix_spawnattr_setschedpolicy</a></li>
+  <li><a href="#posix_spawnattr_setsigmask">2.1.26 posix_spawnattr_setsigmask</a></li>
 </ul>
 <p>
   Non-standard task control interfaces inspired by <code>posix_spawn</code>:
 </p>
 <ul>
-  <li><a href="#task_spawn">2.1.26 task_spawn</a></li>
-  <li><a href="#task_spawnattr_getstacksize">2.1.27 task_spawnattr_getstacksize</a></li>
-  <li><a href="#task_spawnattr_setstacksize">2.1.28 task_spawnattr_setstacksize</a></li>
+  <li><a href="#task_spawn">2.1.27 task_spawn</a></li>
+  <li><a href="#task_spawnattr_getstacksize">2.1.28 task_spawnattr_getstacksize</a></li>
+  <li><a href="#task_spawnattr_setstacksize">2.1.29 task_spawnattr_setstacksize</a></li>
+  <li><a href="#posix_spawn_file_actions_init">2.1.30 posix_spawn_file_actions_init</a></li>
 </ul>
 
 <H3><a name="taskcreate">2.1.1 task_create</a></H3>
@@ -597,7 +599,59 @@ VxWorks provides the following similar interface:
   </li>
 </ul>
 
-<H3><a name="exit">2.1.6 exit</a></H3>
+<H3><a name="tasksetcancelstate">2.1.6 task_setcancelstate</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
+<pre>
+    #include &lt;sched.h&gt;
+    int task_setcancelstate(int state, int *oldstate);
+</pre>
+<p>
+<b>Description:</b>
+</p>
+<p>
+The <code>task_setcancelstate()</code> function atomically
+sets both the calling task's cancelability state to the indicated
+state and returns the previous cancelability  state at the location
+referenced by oldstate.
+Legal values for state are TASK_CANCEL_ENABLE and TASK_CANCEL_DISABLE.
+</p>
+<p>
+Any pending thread cancellation may occur at the time that the
+cancellation state is set to TASK_CANCEL_ENABLE.
+</p>
+<p>
+The cancelability state and type of any newly created tasks are TASK_CANCEL_ENABLE and TASK_CANCEL_DEFERRED respectively.
+<p>
+<b>Input Parameters:</b>
+</p>
+<p>
+<ul>
+<li><code>state</code>
+New cancellation state.  One of PTHREAD_CANCEL_ENABLE or PTHREAD_CANCEL_DISABLE.</li>
+<li><code>oldstate</code>.
+Location to return the previous cancellation state.
+</ul>
+</p>
+<p>
+<b>Returned Value:</b>
+</p>
+<p>
+Zero (<code>OK</code>) on success; <code>ERROR</code> is returned on any failure with the <code>errno</code> value set appropriately:
+</p>
+<p>
+<ul>
+<li><code>ESRCH</code>.
+No thread could be found corresponding to that specified by the given thread ID.</li>
+</ul>
+</p>
+<b>Assumptions/Limitations:</b>
+<p>
+<b>POSIX Compatibility:</b> This is a non-standard interface.  It extends the functionality of <code>pthread_setcancelstate()</code> to tasks and supports use of <code>task_delete</code>.
+</p>
+
+<H3><a name="exit">2.1.7 exit</a></H3>
 
 <p>
 <b>Function Prototype:</b>
@@ -643,7 +697,7 @@ And the UNIX interface:
 <li>The <code>code</code> parameter is ignored.
 </ul>
 
-<H3><a name="getpid">2.1.7 getpid</a></H3>
+<H3><a name="getpid">2.1.8 getpid</a></H3>
 
 <p>
 <b>Function Prototype:</b>
@@ -671,7 +725,7 @@ level.
 Compatible with the POSIX interface of the same name.
 </p>
 
-<H3><a name="vfork">2.1.8 vfork</a></H3>
+<H3><a name="vfork">2.1.9 vfork</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -705,7 +759,7 @@ pid_t vfork(void);
   Compatible with the Unix interface of the same name.
 </p>
 
-<H3><a name="execv">2.1.9 execv</a></H3>
+<H3><a name="execv">2.1.10 execv</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -791,7 +845,7 @@ int execv(FAR const char *path, FAR char *const argv[]);
   There are, however, several compatibility issues as detailed in the description above.
 </p>
 
-<H3><a name="execl">2.1.10 execl</a></H3>
+<H3><a name="execl">2.1.11 execl</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -835,7 +889,7 @@ int execl(FAR const char *path, ...);
   There are, however, several compatibility issues as detailed in the description of <a href="#execv">execv()</a>.
 </p>
 
-<h3><a name="posix_spawn">2.1.11 posix_spawn and posix_spawnp</a></h3>
+<h3><a name="posix_spawn">2.1.12 posix_spawn and posix_spawnp</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -978,7 +1032,7 @@ int posix_spawnp(FAR pid_t *pid, FAR const char *file,
   For the caller of <code>posix_spawn()</code>, the provided argv[0] will correspond to <code>argv[1]</code> received by the new task.
 </p>
 
-<h3><a name="posix_spawn_file_actions_init">2.1.12 posix_spawn_file_actions_init</a></h3>
+<h3><a name="posix_spawn_file_actions_init">2.1.13 posix_spawn_file_actions_init</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -1004,7 +1058,7 @@ int posix_spawn_file_actions_init(FAR posix_spawn_file_actions_t *file_actions);
   On success, this function returns 0; on failure it will return an error number from <code>&lt;errno.h&gt;</code>.
 <p>
 
-<h3><a name="posix_spawn_file_actions_destroy">2.1.13 posix_spawn_file_actions_destroy</a></h3>
+<h3><a name="posix_spawn_file_actions_destroy">2.1.14 posix_spawn_file_actions_destroy</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -1031,7 +1085,7 @@ int posix_spawn_file_actions_destroy(FAR posix_spawn_file_actions_t *file_action
   On success, this function returns 0; on failure it will return an error number from <code>&lt;errno.h&gt;</code>
 <p>
 
-<h3><a name="posix_spawn_file_actions_addclose">2.1.14 posix_spawn_file_actions_addclose</a></h3>
+<h3><a name="posix_spawn_file_actions_addclose">2.1.15 posix_spawn_file_actions_addclose</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -1062,7 +1116,7 @@ int posix_spawn_file_actions_addclose(FAR posix_spawn_file_actions_t *file_actio
   On success, this function returns 0; on failure it will return an error number from <code>&lt;errno.h&gt;</code>
 </p>
 
-<h3><a name="posix_spawn_file_actions_adddup2">2.1.15 posix_spawn_file_actions_adddup2</a></h3>
+<h3><a name="posix_spawn_file_actions_adddup2">2.1.16 posix_spawn_file_actions_adddup2</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -1099,7 +1153,7 @@ int posix_spawn_file_actions_adddup2(FAR posix_spawn_file_actions_t *file_action
   On success, this function returns 0; on failure it will return an error number from <code>&lt;errno.h&gt;</code>
 </p>
 
-<h3><a name="posix_spawn_file_actions_addopen">2.1.16 posix_spawn_file_actions_addopen</a></h3>
+<h3><a name="posix_spawn_file_actions_addopen">2.1.17 posix_spawn_file_actions_addopen</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -1144,7 +1198,7 @@ int posix_spawn_file_actions_addopen(FAR posix_spawn_file_actions_t *file_action
   On success, this function returns 0; on failure it will return an error number from <code>&lt;errno.h&gt;</code>
 </p>
 
-<h3><a name="posix_spawnattr_init">2.1.17 posix_spawnattr_init</a></h3>
+<h3><a name="posix_spawnattr_init">2.1.18 posix_spawnattr_init</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -1180,7 +1234,7 @@ int posix_spawnattr_init(FAR posix_spawnattr_t *attr);
   On success, this function returns 0; on failure it will return an error number from <code>&lt;errno.h&gt;</code>
 </p>
 
-<h3><a name="posix_spawnattr_getflags">2.1.18 posix_spawnattr_getflags</a></h3>
+<h3><a name="posix_spawnattr_getflags">2.1.19 posix_spawnattr_getflags</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -1210,7 +1264,7 @@ int posix_spawnattr_getflags(FAR const posix_spawnattr_t *attr, FAR short *flags
   On success, this function returns 0; on failure it will return an error number from <code>&lt;errno.h&gt;</code>
 </p>
 
-<h3><a name="posix_spawnattr_getschedparam">2.1.19 posix_spawnattr_getschedparam</a></h3>
+<h3><a name="posix_spawnattr_getschedparam">2.1.20 posix_spawnattr_getschedparam</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -1240,7 +1294,7 @@ int posix_spawnattr_getschedparam(FAR const posix_spawnattr_t *attr, FAR struct 
   On success, this function returns 0; on failure it will return an error number from <code>&lt;errno.h&gt;</code>
 </p>
 
-<h3><a name="posix_spawnattr_getschedpolicy">2.1.20 posix_spawnattr_getschedpolicy</a></h3>
+<h3><a name="posix_spawnattr_getschedpolicy">2.1.21 posix_spawnattr_getschedpolicy</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -1270,7 +1324,7 @@ int posix_spawnattr_getschedpolicy(FAR const posix_spawnattr_t *attr, FAR int *p
   On success, this function returns 0; on failure it will return an error number from <code>&lt;errno.h&gt;</code>
 </p>
 
-<h3><a name="posix_spawnattr_getsigmask">2.1.21 posix_spawnattr_getsigmask</a></h3>
+<h3><a name="posix_spawnattr_getsigmask">2.1.22 posix_spawnattr_getsigmask</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -1302,7 +1356,7 @@ int posix_spawnattr_getsigmask(FAR const posix_spawnattr_t *attr, FAR sigset_t *
   On success, this function returns 0; on failure it will return an error number from <code>&lt;errno.h&gt;</code>
 </p>
 
-<h3><a name="posix_spawnattr_setflags">2.1.22 posix_spawnattr_setflags</a></h3>
+<h3><a name="posix_spawnattr_setflags">2.1.23 posix_spawnattr_setflags</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -1332,7 +1386,7 @@ int posix_spawnattr_setflags(FAR posix_spawnattr_t *attr, short flags);
   On success, this function returns 0; on failure it will return an error number from <code>&lt;errno.h&gt;</code>
 </p>
 
-<h3><a name="posix_spawnattr_setschedparam">2.1.23 posix_spawnattr_setschedparam</a></h3>
+<h3><a name="posix_spawnattr_setschedparam">2.1.24 posix_spawnattr_setschedparam</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -1362,7 +1416,7 @@ int posix_spawnattr_setschedparam(FAR posix_spawnattr_t *attr, FAR const struct 
   On success, this function returns 0; on failure it will return an error number from <code>&lt;errno.h&gt;</code>
 </p>
 
-<h3><a name="posix_spawnattr_setschedpolicy">2.1.24 posix_spawnattr_setschedpolicy</a></h3>
+<h3><a name="posix_spawnattr_setschedpolicy">2.1.25 posix_spawnattr_setschedpolicy</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -1392,7 +1446,7 @@ int posix_spawnattr_setschedpolicy(FAR posix_spawnattr_t *attr, int policy);
   On success, this function returns 0; on failure it will return an error number from <code>&lt;errno.h&gt;</code>
 </p>
 
-<h3><a name="posix_spawnattr_setsigmask">2.1.25 posix_spawnattr_setsigmask</a></h3>
+<h3><a name="posix_spawnattr_setsigmask">2.1.26 posix_spawnattr_setsigmask</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -1424,7 +1478,7 @@ int posix_spawnattr_setsigmask(FAR posix_spawnattr_t *attr, FAR const sigset_t *
   On success, this function returns 0; on failure it will return an error number from <code>&lt;errno.h&gt;</code>
 </p>
 
-<h3><a name="task_spawn">2.1.26 task_spawn</a></h3>
+<h3><a name="task_spawn">2.1.27 task_spawn</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -1538,7 +1592,7 @@ int task_spawn(FAR pid_t *pid, FAR const char *name, main_t entry,
   This is a non-standard interface inspired by <code>posix_spawn()</code>.
 </p>
 
-<h3><a name="task_spawnattr_getstacksize">2.1.26 task_spawnattr_getstacksize</a></h3>
+<h3><a name="task_spawnattr_getstacksize">2.1.28 task_spawnattr_getstacksize</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -1568,7 +1622,7 @@ int task_spawnattr_getstacksize(FAR const posix_spawnattr_t *attr, FAR size_t *s
   On success, this function returns 0; on failure it will return an error number from <code>&lt;errno.h&gt;</code>
 </p>
 
-<h3><a name="task_spawnattr_setstacksize">2.1.26 task_spawnattr_setstacksize</a></h3>
+<h3><a name="task_spawnattr_setstacksize">2.1.29 task_spawnattr_setstacksize</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -1598,7 +1652,7 @@ int task_spawnattr_setstacksize(FAR posix_spawnattr_t *attr, size_t stacksize);
   On success, this function returns 0; on failure it will return an error number from <code>&lt;errno.h&gt;</code>
 </p>
 
-<h3><a name="posix_spawn_file_actions_init">2.1.12 posix_spawn_file_actions_init</a></h3>
+<h3><a name="posix_spawn_file_actions_init">2.1.30 posix_spawn_file_actions_init</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -10194,10 +10248,10 @@ notify a task when a message is available on a queue.
   <li><a href="#pthreadonce">pthread_once</a></li>
   <li><a href="#pthreadself">pthread_self</a></li>
   <li><a href="#pthreadsetcancelstate">pthread_setcancelstate</a></li>
+  <li><a href="#pthreadsetcanceltype">pthread_setcanceltype</a></li>
   <li><a href="#pthreadsetschedparam">pthread_setschedparam</a></li>
   <li><a href="#pthreadsetspecific">pthread_setspecific</a></li>
   <li><a href="#pthreadsigmask">pthread_sigmask</a></li>
-  <li><a href="#pthreadsetcanceltype">pthread_setcanceltype</a></li>
   <li><a href="#pthreadtestcancel">pthread_testcancel</a></li>
   <li><a href="#pthreadyield">pthread_yield</a></li>
   <li><a href="#standardio">puts</a></li>
@@ -10268,6 +10322,7 @@ notify a task when a message is available on a queue.
   <li><a href="#taskinit">task_init</a></li>
   <li><a href="#taskrestart">task_restart</a></li>
   <li><a href="#Task_Schedule">Task Scheduling Interfaces</a>
+  <li><a href="#tasksetcancelstate">task_setcancelstate</a></li>
   <li><a href="#task_spawn">task_spawn</a></li>
   <li><a href="#task_spawnattr_getstacksize">task_spawnattr_getstacksize</a></li>
   <li><a href="#task_spawnattr_setstacksize">task_spawnattr_setstacksize</a></li>
