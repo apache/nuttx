@@ -13130,5 +13130,231 @@
 	  So this change adds locking (via enter_critical section) to wdog
 	  expiration logic for the the case if the SMP configuration
 	  (2016-11-18).
+	* SAM3/4: Add delay between setting and clearing the endpoint RESET bit
+	  in sam_ep_resume().  We need to add a delay between setting and
+	  clearing the endpoint reset bit in SAM_UDP_RSTEP. Without the delay the
+	  USB controller will (may?) not reset the endpoint.  If the endpoint is
+	  not being reset, the Data Toggle (DTGLE) bit will not to be cleared
+	  which will cause the next transaction to fail if DTGLE is 1. If that
+	  happens the host will time-out and reset the bus.  Adding this delay
+	  may also fix the USBMSC_STALL_RACEWAR in usbmsc_scsi.c, however this
+	  has not been verified yet.  From Wolfgang Reißnegger (2016-11-18).
+	* SAM3/4: Remove unused 'halted' flag in UDP driver.  From Wolfgang
+	  Reißnegger (2016-11-18).
+	* SAM3/4: Remove 'stalled' flag in UDP driver.  The flag is not necessary.
+	  The state of the endpoint can be determined using 'epstate' instead.
+	  From Wolfgang Reißnegger (2016-11-18).
+	* USBMSC: Fix length of mode6 sense reply packet.  From Wolfgang
+	  Reißnegger (2016-11-18).
+	* configs/dk-tm4c129x: Typo fix.  From Wolfgang Reißnegger (2016-11-18).
+	* Typo fix in sam_udp.c.  From Wolfgang Reißnegger (2016-11-18).
+	* STM32: STM32F303xB and STM32F303xC chips have 4 ADCs.  From Paul A.
+	  Patience (2016-11-19).
+	* vfork(): Fix a race condition in the SMP case.  Existing logic
+	  depended on the fact that the child would not run until waitpid was
+	  called because the child had the same priority as the parent.  BUT
+	  in the SMP case that is not true... the child may run immediately on
+	  a different CPU (2016-11-19).
+	* arch/:  Add option to use low-priority work queue to all Ethernet
+	  drivers in arch that support CONFIG_NET_NOINTS (2016-11-19).
+	* sched/clock:  Correct calculation for the case of Tickless mode with
+	  a 32-bit timer.  In that case, the calculation was returning
+	  millisecond accuracy.  That is not good when the timer accuracy is < 1
+	  msec.  From Rajan Gill (2016-11-19).
+	* sched/task: task_restart() test not supported on SMP systems.  This is
+	  not fully implemented (2016-11-19).
+	* This commit adds a new internal interfaces and fixes a problem with
+	  three APIs in the SMP configuration.  The new internal interface is
+	  sched_cpu_pause(tcb).  This function will pause a CPU if the task
+	  associated with 'tcb' is running on that CPU.  This allows a different
+	  CPU to modify that OS data stuctures associated with the CPU.  When the
+	  other CPU is resumed, those modifications can safely take place.  The
+	  three fixes are to handle cases in the SMP configuration where one CPU
+	  does need to make modifications to TCB and data structures on a task
+	  that could be running running on another CPU.  Those three cases are
+	  task_delete(), task_restart(), and execution of signal handles.  In
+	  all three cases the solutions is basically the same:  (1) Call
+	  sched_cpu_pause(tcb) to pause the CPU on which the task is running,
+	  (2) perform the necessary operations, then (3) call up_cpu_resume() to
+	  restart the paused CPU (2016-11-20).
+	* task_restart: Make sure new task starts with pre-emption disabled and
+	  not in a critical section (2016-11-21).
+	* Fix a typo in a spinlock macro (2016-11-21).
+	* Spinlocks:  Added capability to provide architecture-specific memory
+	  barriers.  This was for i.MX6 but does not help with the SMP problems.
+	  It is still a good feature (2016-11-21).
+	* Remove a assertion condition that appears to rarely cause false-alarm
+	  assertions.  Teported by Petteri Aimonen (2016-11-21).
+	* The examples/qencoder app was trying to init the encoder by a direct
+	  call into the board, cheating in a local header to declare the normally
+	  unavailable function prototype.  From Sebastien Lorquet (2016-11-22).
+	* configs:  All QE encoder files.  Last change made timer hard-coded to 3.
+	  Make configurable (2016-11-22).
+	* configs: Remove all traces of the no-longer existent ARCHBUTTONS
+	  example.  Remove all button configurations that depended on the
+	  obsoleted ARCHBUTTON example (2016-11-22).
+	* nucleo-l476rg: Add better selection of timer (2016-11-22).
+	* implementation of dumpgpio for stm32l4, was required for pwm debug.
+	  From Sebastien Lorquet (2016-11-22).
+	* SMP: Add logic to avoid a deadlock condition when CPU1 is hung waiting
+	  for g_cpu_irqlock and CPU0 is waitin for g_cpu_paused (2016-11-22).
+	* Misoc:  Add timer driver.  From Ramtin Amin (2016-11-22).
+	* Misoc:  Add commits and warnings about missing caculation of the timer
+	  reload value (2016-11-22).
+	* SAM3/4: Name of method is now setcallback, not sethandler (2016-11-22).
+	* sam4s-xplained-pro/nsh: Configuration uses old, improper timer interface.
+	  CONFIG_TIMER disabled in configuration. (2016-11-22).
+	* sam4s-xplained-pro:  Remove obsolete timer initialization logic
+	  (2016-11-22).
+	* Misoc LM32: Make system timer configurable via CONFIG_USEC_PER_TICK.
+	  From Ramtin Amin (2016-11-23).
+	* LPC43xx: Add timer driver; configs/bambino-200e: Add support for timer
+	  driver.  From Alan Carvalho de Assis (2016-11-23).
+	* SMP: Fix backward condition in test (2016-11-23).
+	* ARMv7-A SMP: Add a little logic to signal handling (2016-11-24).
+	* Misoc LM32: Add signal handling logic.  From Ramtin Amin (2016-11-24).
+	* SMP: Add spin_trylock().  Use this in conditions where other CPUs need
+	  to stopped but we cannot call enter_critical_section (2016-11-24).
+	* Fix for F1 RTC Clock, tested on F103.  From Maciej Wójcik (2016-11-25).
+	* SMP:  Fix yet another potential deadlock (2016-11-25).
+	* Enable CONFIG_RTC in the hymini-stm32v/nsh2 (kitchensink) config.
+	  From Maciej Wójcik (2016-11-26).
+	* This adds support for keeping i.MX6 inter-processor communication data
+	  in a non-cached address region (2016-11-26).
+	* i.MX6: Disable non-cached region support.  Add SCU register definitions
+	  (2016-11-26).
+	* i.MX6: Add some controls to enable SMP cache coherency in SMP mode
+	  (2016-11-26).
+	* ARMv7-A: Fix some SCU SMP logic (2016-11-26).
+	* ARMv7-A/i.MX6:  Modify handling of the SMP cache coherency
+	  configuration so that it is identical to the steps from the TRM.
+	  Makes no differenct, however (2016-11-27).
+	* The Smoothie project needs to compile C++ inside config/boardname/src/
+	  to use with High Priority Interruption, then I modified the board
+	  configs Makefile to support it.  It works fine for the first time
+	  compilation, but if we execute "touch config/boardname/src/Pin.cxx"
+	  and execute "make" it will not detect that Pin.cxx was modified. I
+	  think there is some other place I should modify, but I didn't find
+	  it.  From Alan Carvalho de Assis (2016-11-27).
+	* ARMv7-A/i.MX6 SMP: Move SMP coherernt cache setup to earlier in
+	  initialization of CPUn, n>0 (2016-11-27).
+	* ARMv7 GIC: SGIs are non-maskable but go through the same path as other,
+	  maskable interrupts.  Added logic to serialize SGI processing when
+	  necessary (2016-11-27).
+	* sched_note: Extend OS instrumentation to include some SMP events
+	  (2016-11-27).
+	* sched_note: Add spinlock instrumentation; In SMP configurations,
+	  select to log only notes from certain CPUs (2016-11-28).
+	* Misoc LM3: Add Misoc Ethernet driver.  Integrate network support into
+	  configs/misoc/hello.  Remove configs/misoc/include/generated directory.
+	  I suppose the the intent now is that this is a symbolic link?  DANGER!
+	  This means that you cannot compile this code with first generating
+	  these files a providing a symbolic link to this location!  From Ramtin
+	  Amin (2016-11-28).
+	* Add tools/showsize.sh (2016-11-28).
+	* configs/misoc:  Add a sample directory containing generated sources.
+	  This is really only useful for performing test builds.  You really
+	  must generate the Misoc architecture for a real-life build.  From
+	  Ramtin Amin (2016-11-28).
+	* sched_note: Permit spinlock and critical section notes in in-memory
+	  buffer iff sched_not_get() interfaces is disabled (2016-11-28).
+	* STM32 DAC:  Fix shift value whenever there are is a DAC2 and, hence,
+	  up to three interfaces.  From Marc Rechté (2016-11-29).
+	* Back out a debug change that was included in commit (2016-11-29).
+	* i.MX6: Don't output the alphabet if CONFIG_DEBUG_FEATURES is not set
+	  (2016-11-29).
+	* Misoc LM32: Add logic to flush/invalidate caches.  From Ramtin Amin
+	  (2016-11-29).
+	* drivers/net/: Adapt all Ethernet drivers to work as though
+	  CONFIG_NET_MULTIBUFFER were set.  Remove all references to
+	  CONFIG_NET_MULTIBUFFER (2016-11-29).
+	* stm32_otghshost: if STM32F446 increase number of channels to 16.  From
+	  Janne Rosberg (2016-11-30).
+	* usbhost_composite: fix end offset in usbhost_copyinterface().  From
+	  Janne Rosberg (2016-11-30).
+	* usbhost_cdcacm: add CDC_SUBCLASS_ACM and CDC_PROTO_ATM to supported
+	  class and proto.  From Janne Rosberg (2016-11-30).
+	* LPC43 SD/MMC:  Correct some git definitions on SMMC control register
+	  in lpc43_sdmmc.h.  From Alan Carvalho de Assis (2016-11-30).
+	* STM32L4: Correct USART1/2 definitions.  Use default mbed UART4
+	  settings.  From Sebastien Lorquet (2016-12-01).
+	* boardctl:  Add new boardctl() command ,BOARDIOC_NX_START, to start the
+	  NX server as a kernel thread (2016-12-01).
+	* GPDMA driver for the LPC43xx.  The GPDMA block is basically the same
+	  as the LPC17xx.  Only the clock configuration is different and LPC43xx
+	  has four different DMA request sources, where LPC17xx has only two.
+	  From Alan Carvalho de Assis (2016-12-01).
+	* Remove RGMP and RGMP drivers (2016-12-02).
+	* i.MX6:  Add an untested SPI driver taken directly from the i.MX1 port
+	  (2016-12-02).
+	* Eliminate CONFIG_NO_NOINTS.  There is no longer any support for
+	  interrupt level processing of the network stack. Lots of files changed
+	  -> lots of testing needed (2016-12-03).
+	* Fix DEBUGASSERT() in group_signal.c.  From Masayuki Ishikawa
+	  (2016-12-04).
+	* Add support for the SAM5CMP-DB board.  From Masayuki Ishikawa
+	  (2016-12-04).
+	* SAM3/4:  Add SMP support for the dual-core SAM4CM.  From Masayuki
+	  Ishikawa (2016-12-04).
+	* C Library: Allow option to enable IP address conversions even when the
+	  IP address family is not supported (2016-12-04).
+	* SSD1306: Fix errors in SPI mode configuration.  From Gong Darcy
+	  (2016-12-04).
+	* SAMA5 does not build when executing from SDRAM before board
+	  frequencies are not constant.  Rather, the bootloader configures the
+	  clocking and we must derive the clocking from the MCK left by the
+	  bootloader.  This means lots more computations.  This is untested on
+	  initial commit because I don't have a good PWM test setup right now
+	  (2016-12-04).
+	* Olimex-LPC1766-STK: Enable procfs in NSH configuration. Automount
+	  /proc on startup (2016-12-05).
+	* SAM4CMP-DB: Add hooks to auto-mount the procfs file system on startup
+	  in board bring-up logic (2016-12-05).
+	* Remove all references to BOARDIOC_PWMSETUP and board_pwm_setup()
+	  (2016-12-05).
+	* Remove all references to BOARDIOC_ADCSETUP and board_adc_setup()
+	  (2016-12-05).
+	* Added Timers 2-5 and control of SAI and I2S PLLs.  From David Sidrane
+	  (2016-12-05).
+	* Added support for stmf469 SAI and I2S PLL configuration and STM446
+	  fixes.  From David Sidrane (2016-12-05).
+	* Expanded otgfs support to stm32F469 and stm32f446.  Added missing bits
+	  definitions, Used stm32F469 and stm32f446 bit definitions,  Removed
+	  unsed header file.  From David Sidrane (2016-12-05).
+	* Remove BOARDIOC_CAN_INITIALIZE.  CAN initialization is now done in the
+	  board initialization logic just like every other device driver
+	  (2016-12-06).
+	* STM32F7: Allow the config to override the clock edge setting.  From
+	  David Sidrane (2016-12-06).
+	* For Cortex-A9, should also set ACTLR.FW in SMP mode to enble TLB and
+	  cache broadcasts.  Does not fix SMP cache problem (2016-12-07).
+	* sched notes: Add additional note to see if/when CPU is started in SMP
+	  mode (2016-12-07).
+	* EFM32: Fix a compilation error.  From Pierre-noel Bouteville
+	  (2016-12-07).
+	* pthreads:  Add pthread_cleanup_push() and pthread_cleanup_pop()
+	  (2016-12-08).
+	* BUGFIX:STM32F427 was rebooting. Over reached family.  From David
+	  Sidrane (2016-12-08).
+	* Add pthread_setcanceltype() and pthread_testcancel() (2016-12-09).
+	* Added STM32F469 RAM size and deliberated STM32F446 size.  From David
+	  Sidrane (2016-12-09).
+	* Typo in stm32f76xx77xx_pinmap.h edited online with Bitbucket.  From
+	  David Sidrane (2016-12-09).
+	* stm32_allocateheap.c edited online with Bitbucket.  From David Sidrane
+	  (2016-12-09).
+	* LPC43xx SD card: Correct pin configuration options needed for SD card
+	  pins.  From Alan Carvalho de Assis (2016-12-09).
+	* pthread_mutex_destroy(): Fix an error in destroying a mutex which can
+	  occur after a pthread has been canceled while holding the mutex
+	  (2016-12-09).
+	* Add support for cancellation points (2016-12-09).
+	* Forgot to add some files in the last commit (2016-12-10).
+	* Correct some default font IDs.  From Pierre-Noel Bouteville
+	  (2016-12-10).
+	* task_delete() now obeys all cancellation point semantics (2016-12-10).
+	* Add task_setcancelstate(), task_setcanceltype(), and task_testcancel().
+	  These are non-standard interfaces analogous to the correponding pthread_
+	  interfaces that provide cancellation controls for tasks (2016-12-10).
 
 7.19 2016-xx-xx Gregory Nutt <gnutt@nuttx.org>
