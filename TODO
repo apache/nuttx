@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated December 8, 2016)
+NuttX TODO List (Last updated December 11, 2016)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -9,7 +9,7 @@ issues related to each board port.
 
 nuttx/:
 
- (13)  Task/Scheduler (sched/)
+ (12)  Task/Scheduler (sched/)
   (1)  SMP
   (1)  Memory Management (mm/)
   (1)  Power Management (drivers/pm)
@@ -164,45 +164,6 @@ o Task/Scheduler (sched/)
   Status:      Closed.  The existing solution is better (although its
                incompatibilities could show up in porting some code).
   Priority:    Low
-
-  Title:       REMOVE TASK_DELETE
-  Description: Need to remove asychronous fix task_delete().  This interface
-               is non-standard and not safe.  Arbitrary deleting tasks can
-               cause serious problems such as memory leaks and resources like
-               semaphores left in bad states.
-
-               Task/process  exit callbacks registered via atexit() or
-               on_exit() will not work correctly with task_delete():  In
-               that case the callback would execute in the context the
-               caller of task_delete() cancel, not in the context of the
-               exiting task (or process).
-
-               Better to remove task_delete() than to retain it as a latent
-               bug.
-
-               Currently used within the OS and also part of the
-               implementation of pthread_cancel() and task_restart() (which
-               should also go for the same reasons).  It is used in
-               NxWM::CNxConsole to terminate console tasks and also in
-               apps/netutils/thttpd to kill CGI tasks that timeout.  So not
-               so simple to remove.
-
-               Option:  With CONFIG_CANCELLATION_POINTS=y task_delete()
-               does not do asynchronous deletion but should rather do the
-               same kind of synchronization such as the pthread cancellation
-               points.  In this configuration, none of the issues above
-               apply.  It is only the asynchronous task deletion that cannot
-               be supported.  These helper functions are also available to
-               help manage task deletion:
-
-                 int  task_setcancelstate(int state, FAR int *oldstate);
-                 int  task_setcanceltype(int type, FAR int *oldtype);
-                 void task_testcancel(void);
-
-               Which are analogous to the similarly named pthread_ interfaces.
-
-  Status:      Open
-  Priority:    Low and not easily removable.
 
   Title:       RELEASE SEMAPHORES HELD BY CANCELED THREADS:
   Description: Commit: fecb9040d0e54baf14b729e556a832febfe8229e: "In
