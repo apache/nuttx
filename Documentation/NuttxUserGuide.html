@@ -13,7 +13,7 @@
       <h1><big><font color="#3c34ec"><i>NuttX Operating System<p>User's Manual</i></font></big></h1>
       <p><small>by</small></p>
       <p>Gregory Nutt<p>
-      <p>Last Updated: December 10, 2016</p>
+      <p>Last Updated: December 11, 2016</p>
     </td>
   </tr>
 </table>
@@ -3533,6 +3533,8 @@ interface of the same name.
   <li><a href="#semtrywait">2.5.8 sem_trywait</a></li>
   <li><a href="#sempost">2.5.9 sem_post</a></li>
   <li><a href="#semgetvalue">2.5.10 sem_getvalue</a></li>
+  <li><a href="#semgetprotocol">2.5.11 sem_getprotocol</a></li>
+  <li><a href="#semsetprotocol">2.5.12 sem_setprotocol</a></li>
 </ul>
 
 <H3><a name="seminit">2.5.1 sem_init</a></H3>
@@ -4005,6 +4007,74 @@ number of tasks waiting for the semaphore.
 <p>
 <b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
+</p>
+
+<H3><a name="semgetprotocol">2.5.11 sem_getprotocol</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
+<pre>
+    #include &lt;nuttx/semaphore.h&gt;
+    int sem_getprotocol(FAR const pthread_mutexattr_t *attr, FAR int *protocol);
+</pre>
+<p>
+<b>Description:</b> Return the value of the semaphore protocol attribute.
+</p>
+<p>
+<b>Input Parameters:</b>
+</p>
+<p>
+<ul>
+  <li><code>attr</code>. A pointer to the semaphore to be queried</li>
+  <li><code>protocol</code>. The user provided location in which to store the protocol value.  May be one of <code>SEM_PRIO_NONE</code>, or <code>SEM_PRIO_INHERIT</code>, <code>SEM_PRIO_PROTECT</code>.</li>
+</ul>
+</p>
+<p>
+<b>Returned Value:</b>
+</p>
+<p>
+If successful, the <code>sem_getprotocol()</code> function will return zero (<code>OK</code>).
+Otherwise, an -1 (<code>ERROR</code>) will be returned and the <code>errno</code> value will be set to indicate the nature of the error.
+</p>
+<p>
+<b>Assumptions/Limitations:</b>
+</p>
+<p>
+<b>POSIX Compatibility:</b> Non-standard NuttX interface.  Should not be used in portable code.  Analogous to <code>pthread_muxtexattr_getprotocol()</code>.
+</p>
+
+<H3><a name="semsetprotocol">2.5.12 sem_setprotocol</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
+<pre>
+    #include &lt;nuttx/semaphore.h&gt;
+    int sem_setprotocol(FAR pthread_mutexattr_t *attr, int protocol);
+</pre>
+<p>
+<b>Description:</b> Set semaphore protocol attribute.
+</p>
+<p>
+<b>Input Parameters:</b>
+</p>
+<p>
+<ul>
+  <li><code>attr</code>. A pointer to the semaphore to be modified</li>
+  <li><code>protocol</code>. The new protocol to use.  One of <code>SEM_PRIO_NONE</code>, or <code>SEM_PRIO_INHERIT</code>, <code>SEM_PRIO_PROTECT</code>.  <code>SEM_PRIO_INHERIT</code> is supported only if  <code>CONFIG_PRIORITY_INHERITANCE</code> is defined;  <code>SEM_PRIO_PROTECT</code> is not currently supported in any configuration.</li>
+</ul>
+</p>
+<p>
+<b>Returned Value:</b>
+</p>
+<p>
+If successful, the <code>sem_getprotocol()</code> function will return zero (<code>OK</code>).
+Otherwise, an -1 (<code>ERROR</code>) will be returned and the <code>errno</code> value will be set to indicate the nature of the error.
+</p>
+<p>
+<b>Assumptions/Limitations:</b>
+</p>
+<p>
+<b>POSIX Compatibility:</b> Non-standard NuttX interface.  Should not be used in portable code.  Analogous to <code>pthread_muxtexattr_setprotocol()</code>.
 </p>
 
 <table width ="100%">
@@ -5596,49 +5666,51 @@ be sent.
     <li><a href="#pthreadmutexattrsetpshared">2.8.32 pthread_mutexattr_setpshared</a></li>
     <li><a href="#pthreadmutexattrgettype">2.8.33 pthread_mutexattr_gettype</a></li>
     <li><a href="#pthreadmutexattrsettype">2.8.34 pthread_mutexattr_settype</a></li>
-    <li><a href="#pthreadmutexinit">2.8.35 pthread_mutex_init</a></li>
-    <li><a href="#pthreadmutexdestrory">2.8.36 pthread_mutex_destroy</a></li>
-    <li><a href="#pthreadmutexlock">2.8.37 pthread_mutex_lock</a></li>
-    <li><a href="#pthreadmutextrylock">2.8.38 pthread_mutex_trylock</a></li>
-    <li><a href="#pthreadmutexunlock">2.8.39 pthread_mutex_unlock</a></li>
+    <li><a href="#pthreadmutexattrgetprotocol">2.8.35 pthread_mutexattr_getprotocol</a></li>
+    <li><a href="#pthreadmutexattrsetprotocol">2.8.36 pthread_mutexattr_setprotocol</a></li>
+    <li><a href="#pthreadmutexinit">2.8.37 pthread_mutex_init</a></li>
+    <li><a href="#pthreadmutexdestrory">2.8.38 pthread_mutex_destroy</a></li>
+    <li><a href="#pthreadmutexlock">2.8.39 pthread_mutex_lock</a></li>
+    <li><a href="#pthreadmutextrylock">2.8.40 pthread_mutex_trylock</a></li>
+    <li><a href="#pthreadmutexunlock">2.8.41 pthread_mutex_unlock</a></li>
   </ul>
   <p>
     <b>Condition Variables</b>.
   </p>
   <ul>
-    <li><a href="#pthreadconaddrinit">2.8.40 pthread_condattr_init</a></li>
-    <li><a href="#pthreadocndattrdestroy">2.8.41 pthread_condattr_destroy</a></li>
-    <li><a href="#pthreadcondinit">2.8.42 pthread_cond_init</a></li>
-    <li><a href="#pthreadconddestroy">2.8.43 pthread_cond_destroy</a></li>
-    <li><a href="#pthreadcondbroadcast">2.8.44 pthread_cond_broadcast</a></li>
-    <li><a href="#pthreadcondsignal">2.8.45 pthread_cond_signal</a></li>
-    <li><a href="#pthreadcondwait">2.8.46 pthread_cond_wait</a></li>
-    <li><a href="#pthreadcondtimedwait">2.8.47 pthread_cond_timedwait</a></li>
+    <li><a href="#pthreadconaddrinit">2.8.42 pthread_condattr_init</a></li>
+    <li><a href="#pthreadocndattrdestroy">2.8.43 pthread_condattr_destroy</a></li>
+    <li><a href="#pthreadcondinit">2.8.44 pthread_cond_init</a></li>
+    <li><a href="#pthreadconddestroy">2.8.45 pthread_cond_destroy</a></li>
+    <li><a href="#pthreadcondbroadcast">2.8.46 pthread_cond_broadcast</a></li>
+    <li><a href="#pthreadcondsignal">2.8.47 pthread_cond_signal</a></li>
+    <li><a href="#pthreadcondwait">2.8.48 pthread_cond_wait</a></li>
+    <li><a href="#pthreadcondtimedwait">2.8.49 pthread_cond_timedwait</a></li>
   </ul>
   <p>
     <b>Barriers</b>.
   </p>
   <ul>
-    <li><a href="#pthreadbarrierattrinit">2.8.48 pthread_barrierattr_init</a></li>
-    <li><a href="#pthreadbarrierattrdestroy">2.8.49 pthread_barrierattr_destroy</a></li>
-    <li><a href="#pthreadbarrierattrsetpshared">2.8.50 pthread_barrierattr_setpshared</a></li>
-    <li><a href="#pthreadbarrierattrgetpshared">2.8.51 pthread_barrierattr_getpshared</a></li>
-    <li><a href="#pthreadbarrierinit">2.8.52 pthread_barrier_init</a></li>
-    <li><a href="#pthreadbarrierdestroy">2.8.53 pthread_barrier_destroy</a></li>
-    <li><a href="#pthreadbarrierwait">2.8.54 pthread_barrier_wait</a></li>
+    <li><a href="#pthreadbarrierattrinit">2.8.50 pthread_barrierattr_init</a></li>
+    <li><a href="#pthreadbarrierattrdestroy">2.8.51 pthread_barrierattr_destroy</a></li>
+    <li><a href="#pthreadbarrierattrsetpshared">2.8.52 pthread_barrierattr_setpshared</a></li>
+    <li><a href="#pthreadbarrierattrgetpshared">2.8.53 pthread_barrierattr_getpshared</a></li>
+    <li><a href="#pthreadbarrierinit">2.8.54 pthread_barrier_init</a></li>
+    <li><a href="#pthreadbarrierdestroy">2.8.55 pthread_barrier_destroy</a></li>
+    <li><a href="#pthreadbarrierwait">2.8.56 pthread_barrier_wait</a></li>
   </ul>
   <p>
     <b>Initialization</b>.
   </p>
   <ul>
-    <li><a href="#pthreadonce">2.8.55 pthread_once</a></li>
+    <li><a href="#pthreadonce">2.8.57 pthread_once</a></li>
   </ul>
   <p>
     <b>Signals</b>.
   </p>
   <ul>
-    <li><a href="#pthreadkill">2.8.56 pthread_kill</a></li>
-    <li><a href="#pthreadsigmask">2.8.57 pthread_sigmask</a></li>
+    <li><a href="#pthreadkill">2.8.58 pthread_kill</a></li>
+    <li><a href="#pthreadsigmask">2.8.59 pthread_sigmask</a></li>
   </ul>
 </ul>
 <p>
@@ -7021,7 +7093,77 @@ returned to indicate the error:
 <p>
 <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 
-<H3><a name="pthreadmutexinit">2.8.35 pthread_mutex_init</a></H3>
+<H3><a name="pthreadmutexattrgetprotocol">2.8.35 pthread_mutexattr_getprotocol</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
+<pre>
+    #include &lt;pthread.h&gt;
+    int pthread_mutexattr_getprotocol(FAR const pthread_mutexattr_t *attr,
+                                      FAR int *protocol);
+</pre>
+<p>
+<b>Description:</b> Return the value of the mutex protocol attribute..
+</p>
+<p>
+<b>Input Parameters:</b>
+</p>
+<p>
+<ul>
+  <li><code>attr</code>. A pointer to the mutex attributes to be queried</li>
+  <li><code>protocol</code>. The user provided location in which to store the protocol value.  May be one of <code>PTHREAD_PRIO_NONE</code>, or <code>PTHREAD_PRIO_INHERIT</code>, <code>PTHREAD_PRIO_PROTECT</code>.</li>
+</ul>
+</p>
+<p>
+<b>Returned Value:</b>
+</p>
+<p>
+If successful, the <code>pthread_mutexattr_setprotocol()</code> function will return zero (<code>OK</code>).
+Otherwise, an error number will be returned to indicate the error.
+</p>
+<p>
+<b>Assumptions/Limitations:</b>
+</p>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
+</p>
+
+<H3><a name="pthreadmutexattrsetprotocol">2.8.36 pthread_mutexattr_setprotocol</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
+<pre>
+    #include &lt;pthread.h&gt;
+    int pthread_mutexattr_setprotocol(FAR pthread_mutexattr_t *attr,
+                                      int protocol);
+</pre>
+<p>
+<b>Description:</b> Set mutex protocol attribute.
+</p>
+<p>
+<b>Input Parameters:</b>
+</p>
+<p>
+<ul>
+  <li><code>attr</code>. A pointer to the mutex attributes to be modified</li>
+  <li><code>protocol</code>. The new protocol to use.  One of <code>PTHREAD_PRIO_NONE</code>, or <code>PTHREAD_PRIO_INHERIT</code>, <code>PTHREAD_PRIO_PROTECT</code>.  <code>PTHREAD_PRIO_INHERIT</code> is supported only if  <code>CONFIG_PRIORITY_INHERITANCE</code> is defined;  <code>PTHREAD_PRIO_PROTECT</code> is not currently supported in any configuration.</li>
+</ul>
+</p>
+<p>
+<b>Returned Value:</b>
+</p>
+<p>
+If successful, the <code>pthread_mutexattr_setprotocol()</code> function will return zero (<code>OK</code>).
+Otherwise, an error number will be returned to indicate the error.
+</p>
+<p>
+<b>Assumptions/Limitations:</b>
+</p>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
+</p>
+
+<H3><a name="pthreadmutexinit">2.8.37 pthread_mutex_init</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -7050,10 +7192,9 @@ returned to indicate the error:
 </ul>
 <b>Assumptions/Limitations:</b>
 <p>
-<b>POSIX Compatibility:</b> Comparable to the POSIX
-interface of the same name.
+<b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 
-<H3><a name="pthreadmutexdestrory">2.8.36 pthread_mutex_destroy</a></H3>
+<H3><a name="pthreadmutexdestrory">2.8.38 pthread_mutex_destroy</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -7084,7 +7225,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutexlock">2.8.37 pthread_mutex_lock</a></H3>
+<H3><a name="pthreadmutexlock">2.8.39 pthread_mutex_lock</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -7150,7 +7291,7 @@ Otherwise, an error number will be returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutextrylock">2.8.38 pthread_mutex_trylock</a></H3>
+<H3><a name="pthreadmutextrylock">2.8.40 pthread_mutex_trylock</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -7190,7 +7331,7 @@ Otherwise, an error number will be returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutexunlock">2.8.39 pthread_mutex_unlock</a></H3>
+<H3><a name="pthreadmutexunlock">2.8.41 pthread_mutex_unlock</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -7236,7 +7377,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadconaddrinit">2.8.40 pthread_condattr_init</a></H3>
+<H3><a name="pthreadconaddrinit">2.8.42 pthread_condattr_init</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -7267,7 +7408,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadocndattrdestroy">2.8.41 pthread_condattr_destroy</a></H3>
+<H3><a name="pthreadocndattrdestroy">2.8.43 pthread_condattr_destroy</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -7298,7 +7439,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadcondinit">2.8.42 pthread_cond_init</a></H3>
+<H3><a name="pthreadcondinit">2.8.44 pthread_cond_init</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -7329,7 +7470,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadconddestroy">2.8.43 pthread_cond_destroy</a></H3>
+<H3><a name="pthreadconddestroy">2.8.45 pthread_cond_destroy</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -7360,7 +7501,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadcondbroadcast">2.8.44 pthread_cond_broadcast</a></H3>
+<H3><a name="pthreadcondbroadcast">2.8.46 pthread_cond_broadcast</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -7391,7 +7532,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadcondsignal">2.8.45 pthread_cond_signal</a></H3>
+<H3><a name="pthreadcondsignal">2.8.47 pthread_cond_signal</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -7422,7 +7563,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadcondwait">2.8.46 pthread_cond_wait</a></H3>
+<H3><a name="pthreadcondwait">2.8.48 pthread_cond_wait</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -7453,7 +7594,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadcondtimedwait">2.8.47 pthread_cond_timedwait</a></H3>
+<H3><a name="pthreadcondtimedwait">2.8.49 pthread_cond_timedwait</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -7490,7 +7631,7 @@ interface of the same name.
   <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 </p>
 
-<h3><a name="pthreadbarrierattrinit">2.8.48 pthread_barrierattr_init</a></h3>
+<h3><a name="pthreadbarrierattrinit">2.8.50 pthread_barrierattr_init</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -7523,7 +7664,7 @@ interface of the same name.
   <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 </p>
 
-<h3><a name="pthreadbarrierattrdestroy">2.8.49 pthread_barrierattr_destroy</a></h3>
+<h3><a name="pthreadbarrierattrdestroy">2.8.51 pthread_barrierattr_destroy</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -7555,7 +7696,7 @@ interface of the same name.
   <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 </p>
 
-<h3><a name="pthreadbarrierattrsetpshared">2.8.50 pthread_barrierattr_setpshared</a></h3>
+<h3><a name="pthreadbarrierattrsetpshared">2.8.52 pthread_barrierattr_setpshared</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -7593,7 +7734,7 @@ interface of the same name.
   <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 </p>
 
-<h3><a name="pthreadbarrierattrgetpshared">2.8.51 pthread_barrierattr_getpshared</a></h3>
+<h3><a name="pthreadbarrierattrgetpshared">2.8.53 pthread_barrierattr_getpshared</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -7625,7 +7766,7 @@ interface of the same name.
   <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 </p>
 
-<h3><a name="pthreadbarrierinit">2.8.52 pthread_barrier_init</a></h3>
+<h3><a name="pthreadbarrierinit">2.8.54 pthread_barrier_init</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -7695,7 +7836,7 @@ interface of the same name.
   <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 </p>
 
-<h3><a name="pthreadbarrierdestroy">2.8.53 pthread_barrier_destroy</a></h3>
+<h3><a name="pthreadbarrierdestroy">2.8.55 pthread_barrier_destroy</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -7739,7 +7880,7 @@ interface of the same name.
   <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 </p>
 
-<h3><a name="pthreadbarrierwait">2.8.54 pthread_barrier_wait</a></h3>
+<h3><a name="pthreadbarrierwait">2.8.56 pthread_barrier_wait</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -7799,7 +7940,7 @@ interface of the same name.
 </p>
 
 
-<h3><a name="pthreadonce">2.8.55 pthread_once</a></h3>
+<h3><a name="pthreadonce">2.8.57 pthread_once</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -7843,7 +7984,7 @@ interface of the same name.
   <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 </p>
 
-<h3><a name="pthreadkill">2.8.56 pthread_kill</a></h3>
+<h3><a name="pthreadkill">2.8.58 pthread_kill</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -7905,7 +8046,7 @@ interface of the same name.
   <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 </p>
 
-<h3><a name="pthreadsigmask">2.8.57 pthread_sigmask</a></h3>
+<h3><a name="pthreadsigmask">2.8.59 pthread_sigmask</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -10237,10 +10378,10 @@ notify a task when a message is available on a queue.
   <li><a href="#mqtimedsend">mq_timedsend</a></li>
   <li><a href="#mqunlink">mq_unlink</a></li>
   <li><a href="#mmap">mmap</a></li>
-</td>
-<td valign="top" width="33%">
   <li><a href="#Network">Network Interfaces</a></li>
   <li><a href="#onexit">on_exit</a>
+</td>
+<td valign="top" width="33%">
   <li><a href="#drvrfcntlops">open</a></li>
   <li><a href="#dirdirentops">opendir</a></li>
   <li><a href="#OS_Interfaces">OS Interfaces</a></li>
@@ -10305,9 +10446,11 @@ notify a task when a message is available on a queue.
   <li><a href="#pthreadkeydelete">pthread_key_delete</a></li>
   <li><a href="#pthreadkill">pthread_kill</a></li>
   <li><a href="#pthreadmutexattrdestroy">pthread_mutexattr_destroy</a></li>
+  <li><a href="#pthreadmutexattrgetprotocol">pthread_mutexattr_getprotocol</a></li>
   <li><a href="#pthreadmutexattrgetpshared">pthread_mutexattr_getpshared</a></li>
   <li><a href="#pthreadmutexattrgettype">pthread_mutexattr_gettype</a></li>
   <li><a href="#pthreadmutexattrinit">pthread_mutexattr_init</a></li>
+  <li><a href="#pthreadmutexattrsetprotocol">pthread_mutexattr_setprotocol</a></li>
   <li><a href="#pthreadmutexattrsetpshared">pthread_mutexattr_setpshared</a></li>
   <li><a href="#pthreadmutexattrsettype">pthread_mutexattr_settype</a></li>
   <li><a href="#pthreadmutexdestrory">pthread_mutex_destroy</a></li>
@@ -10328,9 +10471,9 @@ notify a task when a message is available on a queue.
   <li><a href="#standardio">puts</a></li>
   <li><a href="#mmapxip">RAM disk driver</a></li>
   <li><a href="#drvrunistdops">read</a></li>
+  <li><a href="#dirdirentops">readdir</a></li>
 </td>
 <td valign="top">
-  <li><a href="#dirdirentops">readdir</a></li>
   <li><a href="#dirdirentops">readdir_r</a></li>
   <li><a href="#recv">recv</a></li>
   <li><a href="#recvfrom">recvfrom</a></li>
@@ -10353,10 +10496,12 @@ notify a task when a message is available on a queue.
   <li><a href="#Semaphores">Counting Semaphore Interfaces</a>
   <li><a href="#semclose">sem_close</a></li>
   <li><a href="#semdestroy">sem_destroy</a></li>
+  <li><a href="#semgetprotocol">sem_getprotocol</a></li>
   <li><a href="#semgetvalue">sem_getvalue</a></li>
   <li><a href="#seminit">sem_init</a></li>
   <li><a href="#semopen">sem_open</a></li>
   <li><a href="#sempost">sem_post</a></li>
+  <li><a href="#semsetprotocol">sem_setprotocol</a></li>
   <li><a href="#semtrywait">sem_trywait</a></li>
   <li><a href="#semunlink">sem_unlink</a></li>
   <li><a href="#semwait">sem_wait</a></li>
