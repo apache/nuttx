@@ -3520,6 +3520,29 @@ interface of the same name.
   </li>
 </ul>
 <p>
+  <a name="lockingvssignaling"><b>Locking versus Signaling Semaphores</b></a>.
+  Semaphores (and mutexes) may be used for many different purposes.
+  One typical use of for mutual exclusion and locking of resources:
+  In this usage, the thread that needs exclusive access to a resources takes the semaphore to get access to the resource.
+  The same thread subsequently releases the seamphore count when it no longer needs exclusive access.
+  Priority inheritance is intended just for this usage case.
+</p>
+<p>
+  In a different usage case, a semaphore may to be used to signal an event:
+  One thread A waits on a semaphore for an event to occur.
+  When the event occurs, another thread B will post the semaphore waking the waiting thread A.
+  This is a completely different usage model; notice that in the mutual exclusion case, the same thread takes and posts the semaphore.  In the signaling case, one thread takes the seamphore and a different thread posts the samphore.  Priority inheritance should <i>never</i> be used in this signaling case.
+  Subtle, strange behaviors may result.
+</p>
+<p>
+  When priority inheritance is enabled with <code>CONFIG_PRIORITY_INHERITANCE</code>, the default <i>protocol</i> for the semaphore will be to use priority inheritance.
+  For signaling semaphores, priority inheritance must be explicitly disabled by calling <a href="#semsetprotocol"><code>sem_setprotocol</code></a> with <code>SEM_PRIO_NONE</code>.
+  For the case of pthread mutexes, <a href="#pthreadmutexattrsetprotocol"><code>pthread_mutexattr_setprotocol</code></a> with <code>PTHREAD_PRIO_NONE</code>.
+</p>
+<p>
+  This is discussed in much more detail on this <a href="http://www.nuttx.org/doku.php?id=wiki:howtos:signalling-semaphores">Wiki page</a>.
+</p>
+<p>
   <b>POSIX semaphore interfaces:</b>
 </p>
 <ul>
@@ -4052,7 +4075,8 @@ Otherwise, an -1 (<code>ERROR</code>) will be returned and the <code>errno</code
     int sem_setprotocol(FAR pthread_mutexattr_t *attr, int protocol);
 </pre>
 <p>
-<b>Description:</b> Set semaphore protocol attribute.
+<b>Description:</b> Set semaphore protocol attribute.  See the paragraph <a href="#lockingvssignaling">Locking versus Signaling Semaphores</a> for some important information about the use of this interface.
+
 </p>
 <p>
 <b>Input Parameters:</b>
@@ -4796,9 +4820,9 @@ interface of the same name.
   See the <a href="http://www.nuttx.org/doku.php?id=wiki:nxinternal:nxtasking">NuttX Threading Wiki</a> page and the <a href="http://www.nuttx.org/doku.php?id=wiki:nxinternal:tasksnthreads">Tasks vs. Threads FAQ</a> for additional information on tasks and threads in NuttX.
 </small></blockquote>
 <p>
-  <b>Signalling Multi-threaded Task Groups</b>.
+  <b>Signaling Multi-threaded Task Groups</b>.
   The behavior of signals in the multi-thread task group is complex.
-  NuttX emulates a process model with task groups and follows the POSIX rules for signalling behavior.
+  NuttX emulates a process model with task groups and follows the POSIX rules for signaling behavior.
   Normally when you signal the task group you would signal using the task ID of the main task that created the group (in practice, a different task should not know the IDs of the internal threads created within the task group); that ID is remembered by the task group (even if the main task thread exits).
 </p>
 <p>
@@ -7118,7 +7142,7 @@ returned to indicate the error:
 <b>Returned Value:</b>
 </p>
 <p>
-If successful, the <code>pthread_mutexattr_setprotocol()</code> function will return zero (<code>OK</code>).
+If successful, the <code>pthread_mutexattr_getprotocol()</code> function will return zero (<code>OK</code>).
 Otherwise, an error number will be returned to indicate the error.
 </p>
 <p>
@@ -7138,7 +7162,7 @@ Otherwise, an error number will be returned to indicate the error.
                                       int protocol);
 </pre>
 <p>
-<b>Description:</b> Set mutex protocol attribute.
+<b>Description:</b> Set mutex protocol attribute.  See the paragraph <a href="#lockingvssignaling">Locking versus Signaling Semaphores</a> for some important information about the use of this interface.
 </p>
 <p>
 <b>Input Parameters:</b>
@@ -10361,6 +10385,7 @@ notify a task when a message is available on a queue.
   <li><a href="#aio">lio_listio</a></li>
   <li><a href="#listen">listen</a></li>
   <li><a href="#localtimer">localtime_r</a></li>
+  <li><a href="#lockingvssignaling">Locking versus Signaling Semaphores</a></li>
   <li><a href="#drvrunistdops">lseek</a></li>
   <li><a href="#Message_Queue">Named Message Queue Interfaces</a>
   <li><a href="#standardio">mkdir</a></li>
