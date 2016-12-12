@@ -203,6 +203,11 @@ paragraphs.
   <li><a href="#taskactivate">2.1.3 task_activate</a></li>
   <li><a href="#taskdelete">2.1.4 task_delete</a></li>
   <li><a href="#taskrestart">2.1.5 task_restart</a></li>
+</ul>
+<p>
+  Non-standard extensions to VxWorks-like interfaces to support POSIX <a href="http://www.nuttx.org/doku.php?id=wiki:nxinternal:cancellation-points">Cancellation Points</a>.
+</p>
+<ul>
   <li><a href="#tasksetcancelstate">2.1.6 task_setcancelstate</a></li>
   <li><a href="#tasksetcanceltype">2.1.7 task_setcanceltype</a></li>
   <li><a href="#tasktestcancel">2.1.8 task_testcancel</a></li>
@@ -486,7 +491,7 @@ int task_delete(pid_t pid);
 </p>
 <p>
   This function obeys the semantics of pthread cancellation:
-  task deletion is deferred if cancellation is disabled or if deferred cancellation is supported (with cancellation points enabled).
+  task deletion is deferred if cancellation is disabled or if deferred cancellation is supported (with <a href="http://www.nuttx.org/doku.php?id=wiki:nxinternal:cancellation-points">Cancellation Points</a> enabled).
 </p>
 <p>
 <b>Input Parameters:</b>
@@ -708,7 +713,7 @@ No thread could be found corresponding to that specified by the given thread ID.
 <b>Description:</b>
 </p>
 <p>
-The <code>task_testcancel()</code> function creates a cancellation point in the calling task.
+The <code>task_testcancel()</code> function creates a <a href="http://www.nuttx.org/doku.php?id=wiki:nxinternal:cancellation-points">Cancellation Point</a> in the calling task.
 The <code>task_testcancel()</code> function has no effect if cancelability is disabled.
 </p>
 <p>
@@ -6225,7 +6230,7 @@ When cancelability is disabled, all cancellations are held pending in the target
 Either asychronrously or deferred.
 Asynchronous cancellations we be acted upon immediately (when enabled), interrupting the thread with its processing in an abritray state.</p>
 
-<p>When cancelability is deferred, all cancels are held pending in the target thread until the thread changes the cancelability type or a cancellation point function such as <code>pthread_cancel()</code>.</p>
+<p>When cancelability is deferred, all cancels are held pending in the target thread until the thread changes the cancelability type or a <a href="http://www.nuttx.org/doku.php?id=wiki:nxinternal:cancellation-points">Cancellation Point</a> function such as <code>pthread_cancel()</code>.</p>
 
 <p>
 <b>Input Parameters:</b>
@@ -6352,7 +6357,7 @@ returned to indicate the error.
 <b>Description:</b>
 </p>
 <p>
-The <code>pthread_testcancel()</code> function creates a cancellation point in the calling thread.
+The <code>pthread_testcancel()</code> function creates a <a href="http://www.nuttx.org/doku.php?id=wiki:nxinternal:cancellation-points">Cancellation Point</a> in the calling thread.
 The <code>pthread_testcancel()</code> function has no effect if cancelability is disabled.
 </p>
 <p>
