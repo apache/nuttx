@@ -6230,7 +6230,7 @@ When cancelability is disabled, all cancellations are held pending in the target
 Either asychronrously or deferred.
 Asynchronous cancellations we be acted upon immediately (when enabled), interrupting the thread with its processing in an abritray state.</p>
 
-<p>When cancelability is deferred, all cancels are held pending in the target thread until the thread changes the cancelability type or a <a href="http://www.nuttx.org/doku.php?id=wiki:nxinternal:cancellation-points">Cancellation Point</a> function such as <code>pthread_cancel()</code>.</p>
+<p>When cancelability is deferred, all cancellations are held pending in the target thread until the thread changes the cancelability type or a <a href="http://www.nuttx.org/doku.php?id=wiki:nxinternal:cancellation-points">Cancellation Point</a> function such as <a href="#pthreadtestcancel"><code>pthread_testcancel()</code></a> is entered.</p>
 
 <p>
 <b>Input Parameters:</b>
