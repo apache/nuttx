@@ -525,7 +525,51 @@ Open Issues:
    correctly yet.
 
    Currently cache inconsistencies appear to be the root cause of all current SMP
-   issues.
+   issues.  SMP works as expected if the caches are disabled, but otherwise there
+   are problems (usually hangs):
+
+   This will disable the caches:
+
+diff --git a/arch/arm/src/armv7-a/arm_head.S b/arch/arm/src/armv7-a/arm_head.S
+index 27c2a5b..2a6274c 100644
+--- a/arch/arm/src/armv7-a/arm_head.S
++++ b/arch/arm/src/armv7-a/arm_head.S
+@@ -454,6 +454,7 @@ __start:
+         * after SMP cache coherency has been setup.
+         */
+
++#if 0 // REMOVE ME
+ #if !defined(CPU_DCACHE_DISABLE) && !defined(CONFIG_SMP)
+        /* Dcache enable
+         *
+@@ -471,6 +472,7 @@ __start:
+
+        orr             r0, r0, #(SCTLR_I)
+ #endif
++#endif // REMOVE ME
+
+ #ifdef CPU_ALIGNMENT_TRAP
+        /* Alignment abort enable
+diff --git a/arch/arm/src/armv7-a/arm_scu.c b/arch/arm/src/armv7-a/arm_scu.c
+index eedf179..1db2092 100644
+--- a/arch/arm/src/armv7-a/arm_scu.c
++++ b/arch/arm/src/armv7-a/arm_scu.c
+@@ -156,6 +156,7 @@ static inline void arm_set_actlr(uint32_t actlr)
+
+ void arm_enable_smp(int cpu)
+ {
++#if 0 // REMOVE ME
+   uint32_t regval;
+
+   /* Handle actions unique to CPU0 which comes up first */
+@@ -222,6 +223,7 @@ void arm_enable_smp(int cpu)
+   regval  = arm_get_sctlr();
+   regval |= SCTLR_C;
+   arm_set_sctlr(regval);
++#endif // REMOVE ME
+ }
+
+ #endif
 
 Configurations
 ==============
