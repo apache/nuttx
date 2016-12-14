@@ -586,6 +586,19 @@ static int esp32_setup(struct uart_dev_s *dev)
 static void esp32_shutdown(struct uart_dev_s *dev)
 {
   struct esp32_dev_s *priv = (struct esp32_dev_s *)dev->priv;
+  uint32_t status;
+
+  /* Wait for outgoing FIFO to clear.   The ROM bootloader does not flush
+   * the FIFO before handing over to user code, so some of this output is
+   * not currently seen when the UART is reconfigured in early stages of
+   * startup.
+   */
+
+  do
+    {
+      status = esp32_serialin(priv, UART_STATUS_OFFSET);
+    }
+  while ((status & UART_TXFIFO_CNT_M) != 0);
 
   /* Disable all UART interrupts */
 

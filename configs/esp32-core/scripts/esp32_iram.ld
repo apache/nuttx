@@ -173,10 +173,6 @@ SECTIONS
     _sheap = ABSOLUTE(.);
   } >dram0_0_seg
 
-  .flash.rodata :
-  {
-  } >drom0_0_seg
-
   .rtc.text :
   {
     . = ALIGN(4);
