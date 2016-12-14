@@ -183,7 +183,7 @@ void xtensa_timer_initialize(void)
    */
 
   divisor = (1000000ull * (uint64_t)BOARD_CLOCK_FREQUENCY) / CONFIG_USEC_PER_TICK;
-  DEBUGASSERT(divisor <= UINT32_MAX)
+  DEBUGASSERT(divisor <= UINT32_MAX);
   g_tick_divisor = divisor;
 
   /* Set up periodic timer */

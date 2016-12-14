@@ -327,7 +327,7 @@ int esp32_alloc_levelint(int priority)
   uint32_t intmask;
 
   DEBUGASSERT(priority >= ESP32_MIN_PRIORITY &&
-              priority <= ESP32_MAX_PRIORITY)
+              priority <= ESP32_MAX_PRIORITY);
 
   /* Check if there are any level CPU interrupts available at the requested
    * interrupt priority.
@@ -359,7 +359,7 @@ int esp32_alloc_edgeint(int priority)
   uint32_t intmask;
 
   DEBUGASSERT(priority >= ESP32_MIN_PRIORITY &&
-              priority <= ESP32_MAX_PRIORITY)
+              priority <= ESP32_MAX_PRIORITY);
 
   /* Check if there are any edge CPU interrupts available at the requested
    * interrupt priority.
