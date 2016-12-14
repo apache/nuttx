@@ -1536,8 +1536,6 @@ nuttx/
  |   |   `- README.txt
  |   |- sensors/
  |   |   `- README.txt
- |   |- sercomm/
- |   |   `- README.txt
  |   |- syslog/
  |   |   `- README.txt
  |   `- README.txt

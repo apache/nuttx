@@ -723,7 +723,6 @@ CONFIG_ADC_FIFOSIZE=8
 # CONFIG_PM is not set
 # CONFIG_POWER is not set
 # CONFIG_SENSORS is not set
-# CONFIG_SERCOMM_CONSOLE is not set
 # CONFIG_SERIAL is not set
 # CONFIG_USBDEV is not set
 # CONFIG_USBHOST is not set
