@@ -2314,9 +2314,6 @@
       <name>$PROJ_DIR$/../../../../../libc/stdio/lib_memsostream.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$/../../../../../libc/stdio/lib_lowinstream.c</name>
-    </file>
-    <file>
       <name>$PROJ_DIR$/../../../../../libc/stdio/lib_lowoutstream.c</name>
     </file>
     <file>
