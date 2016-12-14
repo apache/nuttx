@@ -909,7 +909,7 @@ static void mmcsd_decodeCID(FAR struct mmcsd_state_s *priv, uint32_t cid[4])
 
   finfo("mid: %02x oid: %04x pnm: %s prv: %d psn: %lu mdt: %02x crc: %02x\n",
       decoded.mid, decoded.oid, decoded.pnm, decoded.prv,
-      decoded.psn, decoded.mdt, decoded.crc);
+      (unsigned long)decoded.psn, decoded.mdt, decoded.crc);
 }
 #endif
 
@@ -2248,7 +2248,8 @@ static int mmcsd_geometry(FAR struct inode *inode, struct geometry *geometry)
                  geometry->geo_mediachanged ? "true" : "false",
                  geometry->geo_writeenabled ? "true" : "false");
           finfo("nsectors: %lu sectorsize: %d\n",
-                 (long)geometry->geo_nsectors, geometry->geo_sectorsize);
+                 ((unsigned long))geometry->geo_nsectors,
+                 geometry->geo_sectorsize);
 
           priv->mediachanged = false;
           ret = OK;
