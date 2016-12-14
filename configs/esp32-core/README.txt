@@ -522,7 +522,9 @@ SMP
     CONFIG_DEBUG_SYMBOLS=y
     CONFIG_ESP32CORE_RUN_IRAM=y
 
-  I also made this change which will eliminate all attempts to re-configure serial. It will just use the serial settings as they were left by the bootloader:
+  I also made this change which will eliminate all attempts to re-configure
+  serial. It will just use the serial settings as they were left by the
+  bootloader:
 
     diff --git a/arch/xtensa/src/common/xtensa.h b/arch/xtensa/src/common/xtensa.h
     index 422ec0b..8707d7c 100644
@@ -551,7 +553,7 @@ SMP
     (gdb) mon reg pc [value report by load for entry point]
     (gdb) s
 
-  Single stepping works fine for me as do breakpoints. I get quite a way through initialization, into os_start() and into up_initialize(), and through up_irqinitialize() but it fails in xtensa_timer_initialize() immediatly upon enabling interrupts:
+  Single stepping works fine for me as do breakpoints:
 
     Breakpoint 1, xtensa_timer_initialize () at chip/esp32_timerisr.c:172
     72 {
