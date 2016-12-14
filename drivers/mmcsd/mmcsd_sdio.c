@@ -580,13 +580,13 @@ static void mmcsd_decodeCSD(FAR struct mmcsd_state_s *priv, uint32_t csd[4])
 
 #ifdef CONFIG_DEBUG_FS_INFO
   memset(&decoded, 0, sizeof(struct mmcsd_csd_s));
-  decoded.csdstructure               =  csd[0] >> 30;
-  decoded.mmcspecvers                = (csd[0] >> 26) & 0x0f;
-  decoded.taac.timevalue             = (csd[0] >> 19) & 0x0f;
-  decoded.taac.timeunit              = (csd[0] >> 16) & 7;
-  decoded.nsac                       = (csd[0] >> 8)  & 0xff;
-  decoded.transpeed.timevalue        = (csd[0] >> 3)  & 0x0f;
-  decoded.transpeed.transferrateunit =  csd[0]        & 7;
+  decoded.csdstructure               =  csd[3] >> 30;
+  decoded.mmcspecvers                = (csd[3] >> 26) & 0x0f;
+  decoded.taac.timevalue             = (csd[3] >> 19) & 0x0f;
+  decoded.taac.timeunit              = (csd[3] >> 16) & 7;
+  decoded.nsac                       = (csd[3] >> 8)  & 0xff;
+  decoded.transpeed.timevalue        = (csd[3] >> 3)  & 0x0f;
+  decoded.transpeed.transferrateunit =  csd[3]        & 7;
 #endif
 
   /* Word 2: Bits 64:95
@@ -603,15 +603,15 @@ static void mmcsd_decodeCSD(FAR struct mmcsd_state_s *priv, uint32_t csd[4])
    *   C_SIZE             48:69 Device size
    */
 
-  priv->dsrimp             = (csd[1] >> 12) & 1;
-  readbllen                = (csd[1] >> 16) & 0x0f;
+  priv->dsrimp             = (csd[2] >> 12) & 1;
+  readbllen                = (csd[2] >> 16) & 0x0f;
 
 #ifdef CONFIG_DEBUG_FS_INFO
-  decoded.ccc              = (csd[1] >> 20) & 0x0fff;
-  decoded.readbllen        = (csd[1] >> 16) & 0x0f;
-  decoded.readblpartial    = (csd[1] >> 15) & 1;
-  decoded.writeblkmisalign = (csd[1] >> 14) & 1;
-  decoded.readblkmisalign  = (csd[1] >> 13) & 1;
+  decoded.ccc              = (csd[2] >> 20) & 0x0fff;
+  decoded.readbllen        = (csd[2] >> 16) & 0x0f;
+  decoded.readblpartial    = (csd[2] >> 15) & 1;
+  decoded.writeblkmisalign = (csd[2] >> 14) & 1;
+  decoded.readblkmisalign  = (csd[2] >> 13) & 1;
   decoded.dsrimp           = priv->dsrimp;
 #endif
 
@@ -657,7 +657,7 @@ static void mmcsd_decodeCSD(FAR struct mmcsd_state_s *priv, uint32_t csd[4])
        *   512*1024 = (1 << 19)
        */
 
-      uint32_t csize                 = ((csd[1] & 0x3f) << 16) | (csd[2] >> 16);
+      uint32_t csize                 = ((csd[2] & 0x3f) << 16) | (csd[1] >> 16);
 #ifdef CONFIG_HAVE_LONG_LONG
       priv->capacity                 = ((uint64_t)(csize + 1)) << 19;
 #else
@@ -669,9 +669,9 @@ static void mmcsd_decodeCSD(FAR struct mmcsd_state_s *priv, uint32_t csd[4])
 
 #ifdef CONFIG_DEBUG_FS_INFO
       decoded.u.sdblock.csize        = csize;
-      decoded.u.sdblock.sderblen     = (csd[2] >> 14) & 1;
-      decoded.u.sdblock.sdsectorsize = (csd[2] >> 7) & 0x7f;
-      decoded.u.sdblock.sdwpgrpsize  =  csd[2] & 0x7f;
+      decoded.u.sdblock.sderblen     = (csd[1] >> 14) & 1;
+      decoded.u.sdblock.sdsectorsize = (csd[1] >> 7) & 0x7f;
+      decoded.u.sdblock.sdwpgrpsize  =  csd[1] & 0x7f;
 #endif
     }
   else
@@ -681,8 +681,8 @@ static void mmcsd_decodeCSD(FAR struct mmcsd_state_s *priv, uint32_t csd[4])
        * C_SIZE: 73:64 from Word 2 and 63:62 from Word 3
        */
 
-      uint16_t csize                 = ((csd[1] & 0x03ff) << 2) | ((csd[2] >> 30) & 3);
-      uint8_t  csizemult             = (csd[2] >> 15) & 7;
+      uint16_t csize                 = ((csd[2] & 0x03ff) << 2) | ((csd[1] >> 30) & 3);
+      uint8_t  csizemult             = (csd[1] >> 15) & 7;
 
       priv->nblocks                  = ((uint32_t)csize + 1) * (1 << (csizemult + 2));
       priv->blockshift               = readbllen;
@@ -707,27 +707,27 @@ static void mmcsd_decodeCSD(FAR struct mmcsd_state_s *priv, uint32_t csd[4])
       if (IS_SD(priv->type))
         {
           decoded.u.sdbyte.csize            = csize;
-          decoded.u.sdbyte.vddrcurrmin      = (csd[2] >> 27) & 7;
-          decoded.u.sdbyte.vddrcurrmax      = (csd[2] >> 24) & 7;
-          decoded.u.sdbyte.vddwcurrmin      = (csd[2] >> 21) & 7;
-          decoded.u.sdbyte.vddwcurrmax      = (csd[2] >> 18) & 7;
+          decoded.u.sdbyte.vddrcurrmin      = (csd[1] >> 27) & 7;
+          decoded.u.sdbyte.vddrcurrmax      = (csd[1] >> 24) & 7;
+          decoded.u.sdbyte.vddwcurrmin      = (csd[1] >> 21) & 7;
+          decoded.u.sdbyte.vddwcurrmax      = (csd[1] >> 18) & 7;
           decoded.u.sdbyte.csizemult        = csizemult;
-          decoded.u.sdbyte.sderblen         = (csd[2] >> 14) & 1;
-          decoded.u.sdbyte.sdsectorsize     = (csd[2] >> 7) & 0x7f;
-          decoded.u.sdbyte.sdwpgrpsize      =  csd[2] & 0x7f;
+          decoded.u.sdbyte.sderblen         = (csd[1] >> 14) & 1;
+          decoded.u.sdbyte.sdsectorsize     = (csd[1] >> 7) & 0x7f;
+          decoded.u.sdbyte.sdwpgrpsize      =  csd[1] & 0x7f;
         }
 #ifdef CONFIG_MMCSD_MMCSUPPORT
       else if (IS_MMC(priv->type))
         {
           decoded.u.mmc.csize               = csize;
-          decoded.u.mmc.vddrcurrmin         = (csd[2] >> 27) & 7;
-          decoded.u.mmc.vddrcurrmax         = (csd[2] >> 24) & 7;
-          decoded.u.mmc.vddwcurrmin         = (csd[2] >> 21) & 7;
-          decoded.u.mmc.vddwcurrmax         = (csd[2] >> 18) & 7;
+          decoded.u.mmc.vddrcurrmin         = (csd[1] >> 27) & 7;
+          decoded.u.mmc.vddrcurrmax         = (csd[1] >> 24) & 7;
+          decoded.u.mmc.vddwcurrmin         = (csd[1] >> 21) & 7;
+          decoded.u.mmc.vddwcurrmax         = (csd[1] >> 18) & 7;
           decoded.u.mmc.csizemult           = csizemult;
-          decoded.u.mmc.er.mmc22.sectorsize = (csd[2] >> 10) & 0x1f;
-          decoded.u.mmc.er.mmc22.ergrpsize  = (csd[2] >> 5) & 0x1f;
-          decoded.u.mmc.mmcwpgrpsize        =  csd[2] & 0x1f;
+          decoded.u.mmc.er.mmc22.sectorsize = (csd[1] >> 10) & 0x1f;
+          decoded.u.mmc.er.mmc22.ergrpsize  = (csd[1] >> 5) & 0x1f;
+          decoded.u.mmc.mmcwpgrpsize        =  csd[1] & 0x1f;
         }
 #endif
 #endif
@@ -749,23 +749,23 @@ static void mmcsd_decodeCSD(FAR struct mmcsd_state_s *priv, uint32_t csd[4])
    *   Not used             0:0
    */
 
-  permwriteprotect         = (csd[3] >> 13) & 1;
-  tmpwriteprotect          = (csd[3] >> 12) & 1;
+  permwriteprotect         = (csd[0] >> 13) & 1;
+  tmpwriteprotect          = (csd[0] >> 12) & 1;
   priv->wrprotect          = (permwriteprotect || tmpwriteprotect);
 
 #ifdef CONFIG_DEBUG_FS_INFO
-  decoded.wpgrpen          =  csd[3] >> 31;
-  decoded.mmcdfltecc       = (csd[3] >> 29) & 3;
-  decoded.r2wfactor        = (csd[3] >> 26) & 7;
-  decoded.writebllen       = (csd[3] >> 22) & 0x0f;
-  decoded.writeblpartial   = (csd[3] >> 21) & 1;
-  decoded.fileformatgrp    = (csd[3] >> 15) & 1;
-  decoded.copy             = (csd[3] >> 14) & 1;
+  decoded.wpgrpen          =  csd[0] >> 31;
+  decoded.mmcdfltecc       = (csd[0] >> 29) & 3;
+  decoded.r2wfactor        = (csd[0] >> 26) & 7;
+  decoded.writebllen       = (csd[0] >> 22) & 0x0f;
+  decoded.writeblpartial   = (csd[0] >> 21) & 1;
+  decoded.fileformatgrp    = (csd[0] >> 15) & 1;
+  decoded.copy             = (csd[0] >> 14) & 1;
   decoded.permwriteprotect = permwriteprotect;
   decoded.tmpwriteprotect  = tmpwriteprotect;
-  decoded.fileformat       = (csd[3] >> 10) & 3;
-  decoded.mmcecc           = (csd[3] >> 8)  & 3;
-  decoded.crc              = (csd[3] >> 1)  & 0x7f;
+  decoded.fileformat       = (csd[0] >> 10) & 3;
+  decoded.mmcecc           = (csd[0] >> 8)  & 3;
+  decoded.crc              = (csd[0] >> 1)  & 0x7f;
 
   finfo("CSD:\n");
   finfo("  CSD_STRUCTURE: %d SPEC_VERS: %d (MMC)\n",
@@ -856,9 +856,9 @@ static void mmcsd_decodeCID(FAR struct mmcsd_state_s *priv, uint32_t cid[4])
    *         pnm[0] 103:96
    */
 
-  decoded.mid    =  cid[0] >> 24;
-  decoded.oid    = (cid[0] >> 16) & 0xffff;
-  decoded.pnm[0] =  cid[0] & 0xff;
+  decoded.mid    =  cid[3] >> 24;
+  decoded.oid    = (cid[3] >> 8) & 0xffff;
+  decoded.pnm[0] =  cid[3] & 0xff;
 
   /* Word 2: Bits 64:95
    *   pnm - 103-64  40-bit Product Name (ascii) + null terminator
@@ -868,10 +868,10 @@ static void mmcsd_decodeCID(FAR struct mmcsd_state_s *priv, uint32_t cid[4])
    *         pnm[4] 71:64
    */
 
-  decoded.pnm[1] =  cid[1] >> 24;
-  decoded.pnm[2] = (cid[1] >> 16) & 0xff;
-  decoded.pnm[3] = (cid[1] >> 8) & 0xff;
-  decoded.pnm[4] =  cid[1] & 0xff;
+  decoded.pnm[1] =  cid[2] >> 24;
+  decoded.pnm[2] = (cid[2] >> 16) & 0xff;
+  decoded.pnm[3] = (cid[2] >> 8) & 0xff;
+  decoded.pnm[4] =  cid[2] & 0xff;
   decoded.pnm[5] = '\0';
 
   /* Word 3: Bits 32-63
@@ -879,8 +879,8 @@ static void mmcsd_decodeCID(FAR struct mmcsd_state_s *priv, uint32_t cid[4])
    *   psn -  55-24  32-bit Product serial number
    */
 
-  decoded.prv    = cid[2] >> 24;
-  decoded.psn    = cid[2] << 8;
+  decoded.prv    = cid[1] >> 24;
+  decoded.psn    = cid[1] << 8;
 
   /* Word 4: Bits 0-31
    *   psn -  55-24  32-bit Product serial number
@@ -889,11 +889,11 @@ static void mmcsd_decodeCID(FAR struct mmcsd_state_s *priv, uint32_t cid[4])
    *   crc -   7:1    7-bit CRC7
    */
 
-  decoded.psn   |=  cid[3] >> 24;
-  decoded.mdt    = (cid[3] >> 8) & 0x0fff;
-  decoded.crc    = (cid[3] >> 1) & 0x7f;
+  decoded.psn   |=  cid[0] >> 24;
+  decoded.mdt    = (cid[0] >> 8) & 0x0fff;
+  decoded.crc    = (cid[0] >> 1) & 0x7f;
 
-  finfo("mid: %02x oid: %04x pnm: %s prv: %d psn: %d mdt: %02x crc: %02x\n",
+  finfo("mid: %02x oid: %04x pnm: %s prv: %d psn: %lu mdt: %02x crc: %02x\n",
       decoded.mid, decoded.oid, decoded.pnm, decoded.prv,
       decoded.psn, decoded.mdt, decoded.crc);
 }
