@@ -172,6 +172,9 @@ Serial Console
   UART0 is, by default, the serial console.  It connects to the on-board
   CP2102 converter and is available on the USB connector USB CON8 (J1).
 
+  It will show up as /dev/ttypUSB[n] where [n] will probably be 0 (is it 1
+  on my PC because I have a another device at ttyUSB0).
+
 Buttons and LEDs
 ================
 
@@ -223,7 +226,8 @@ SMP
 
   3. Assertions.  On a fatal assertions, other CPUs need to be stopped.
 
-OpenOCD for the ESP32
+
+  for the ESP32
 =====================
 
   First you in need some debug environment which would be a JTAG emulator
@@ -506,6 +510,56 @@ OpenOCD for the ESP32
   would I be able to run directly out of IRAM without a bootloader?  That
   might be a simpler bring-up.
 
+  Sample Debug Steps
+  ------------------
+  I did the initial bring-up using the IRAM configuration and OpenOCD.  Here
+  is a synopsis of my debug steps:
+
+  configs/esp32-core/nsh with
+
+    CONFIG_DEBUG_ASSERTIONS=y
+    CONFIG_DEBUG_FEATURES=y
+    CONFIG_DEBUG_SYMBOLS=y
+    CONFIG_ESP32CORE_RUN_IRAM=y
+
+  I also made this change which will eliminate all attempts to re-configure serial. It will just use the serial settings as they were left by the bootloader:
+
+    diff --git a/arch/xtensa/src/common/xtensa.h b/arch/xtensa/src/common/xtensa.h
+    index 422ec0b..8707d7c 100644
+    --- a/arch/xtensa/src/common/xtensa.h
+    +++ b/arch/xtensa/src/common/xtensa.h
+    @@ -60,7 +60,7 @@
+     #undef CONFIG_SUPPRESS_INTERRUPTS /* DEFINED: Do not enable interrupts */
+     #undef CONFIG_SUPPRESS_TIMER_INTS /* DEFINED: No timer */
+     #undef CONFIG_SUPPRESS_SERIAL_INTS /* DEFINED: Console will poll */
+    -#undef CONFIG_SUPPRESS_UART_CONFIG /* DEFINED: Do not reconfigure UART */
+    +#define CONFIG_SUPPRESS_UART_CONFIG 1 /* DEFINED: Do not reconfigure UART */
+     #define CONFIG_SUPPRESS_CLOCK_CONFIG 1 /* DEFINED: Do not reconfigure clocking */
+     #undef CONFIG_DUMP_ON_EXIT /* DEFINED: Dump task state on exit */
+
+  Start OpenOCD:
+
+    cd ../openocde-esp32
+    cp ../nuttx/configs/esp32-core/scripts/esp32.cfg .
+    sudo ./src/openocd -s ./tcl/ -f tcl/interface/ftdi/olimex-arm-usb-ocd.cfg -f ./esp32.cfg
+
+  Start GDB and load code:
+
+    cd ../nuttx
+    xtensa-esp32-elf-gdb -ex 'target remote localhost:3333' nuttx
+    (gdb) load nuttx
+    (gdb) mon reg pc [value report by load for entry point]
+    (gdb) s
+
+  Single stepping works fine for me as do breakpoints. I get quite a way through initialization, into os_start() and into up_initialize(), and through up_irqinitialize() but it fails in xtensa_timer_initialize() immediatly upon enabling interrupts:
+
+    Breakpoint 1, xtensa_timer_initialize () at chip/esp32_timerisr.c:172
+    72 {
+    (gdb) n
+    esp32.cpu0: Target halted, pc=0x400835BF
+    187 g_tick_divisor = divisor;
+    (gdb) ...
+  
 Configurations
 ==============
 
