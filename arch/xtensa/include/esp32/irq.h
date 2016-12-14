@@ -378,7 +378,7 @@
 #define ESP32_CPUINT_NEDGEPERIPHS   4
 #define EPS32_CPUINT_EDGESET        0x50400400
 
-#define ESP32_CPUINT_NNMIPERIPHS    4
+#define ESP32_CPUINT_NNMIPERIPHS    1
 #define EPS32_CPUINT_NMISET         0x00004000
 
 #define ESP32_CPUINT_TIMER0         6
@@ -388,11 +388,11 @@
 #define ESP32_CPUINT_TIMER2         16
 #define ESP32_CPUINT_SOFTWARE1      29
 
-#define ESP32_CPUINT_NINTERNAL      5
+#define ESP32_CPUINT_NINTERNAL      6
 
 #define ESP32_CPUINT_MAX            31
-#define EPS32_CPUINT_PERIPHSET      0xdffe6f3f
-#define EPS32_CPUINT_INTERNALSET    0x200180c0
+#define EPS32_CPUINT_PERIPHSET      0xdffe773f
+#define EPS32_CPUINT_INTERNALSET    0x200188c0
 
 /* Priority 1:   0-10, 12-13, 17-18    (15)
  * Priority 2:   19-21                 (3)

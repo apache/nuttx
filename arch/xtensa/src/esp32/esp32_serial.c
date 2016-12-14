@@ -455,8 +455,8 @@ static void esp32_disableallints(struct esp32_dev_s *priv, uint32_t *intena)
 
 static int esp32_setup(struct uart_dev_s *dev)
 {
-  struct esp32_dev_s *priv = (struct esp32_dev_s *)dev->priv;
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
+  struct esp32_dev_s *priv = (struct esp32_dev_s *)dev->priv;
   uint32_t clkdiv;
   uint32_t regval;
   uint32_t conf0;
@@ -655,7 +655,9 @@ static int esp32_attach(struct uart_dev_s *dev)
   priv->cpuint = esp32_alloc_levelint(1);
   if (priv->cpuint < 0)
     {
-      ret = priv->cpuint;
+      /* Failed to allocate a CPU interrupt of this type */
+
+      return priv->cpuint;
     }
 
   /* Set up to receive peripheral interrupts on the current CPU */

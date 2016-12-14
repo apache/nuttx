@@ -165,9 +165,11 @@ static uint32_t g_intenable[1];
 
 #endif
 
-/* Bitsets for free, unallocated CPU interrupts */
+/* Bitsets for free, unallocated CPU interrupts available to peripheral
+ * devices.
+ */
 
-static uint32_t g_free_cpuints = 0xffffffff;
+static uint32_t g_free_cpuints = EPS32_CPUINT_PERIPHSET;
 
 /* Bitsets for each interrupt priority 1-5 */
 
@@ -188,7 +190,9 @@ static const uint32_t g_priority[5] =
  * Name:  esp32_alloc_cpuint
  *
  * Description:
- *   Allocate a CPU interrupt
+ *   Allocate a CPU interrupt for a peripheral device.  This function will
+ *   not allocate any of the pre-allocated CPU interrupts for internal
+ *   devices.
  *
  * Input Parameters:
  *   intmask - mask of candidate CPU interrupts.  The CPU interrupt will be
@@ -224,7 +228,7 @@ int esp32_alloc_cpuint(uint32_t intmask)
        */
 
       for (cpuint = 0, bitmask = 0xff;
-           cpuint <= ESP32_CPUINT_MAX;
+           cpuint <= ESP32_CPUINT_MAX && (intset & bitmask) == 0;
            cpuint += 8, bitmask <<= 8);
 
       /* Search for an unallocated CPU interrupt number in the remaining
