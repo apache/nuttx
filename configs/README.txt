@@ -206,13 +206,6 @@ configs/cloudctrl
   board. Based on the Shenzhou IV development board design.  It is based on
   the STM32F107VC MCU.
 
-configs/compal_e86, compal_e88 and compal_e99
-  These directories contain the board support for compal e86, e88 and e99 phones.
-  These ports are based on patches contributed by Denis Carikli for both the
-  compal e99 and e88.  The patches were made by Alan Carvalho de Assis and
-  Denis Carikli using the Stefan Richter's Osmocom-bb patches.  The variant
-  for the e86 was submitted by Craig Comstock.
-
 configs/demo9s12ne64
   Freescale DMO9S12NE64 board based on the MC9S12NE64 hcs12 cpu.  This
   port uses the m9s12x GCC toolchain.  STATUS:  (Still) under development; it
@@ -531,7 +524,6 @@ configs/pic32mx7mmb
   Mikroelektronika PIC32MX7 Multimedia Board (MMB).  See
   http://www.mikroe.com/ for further information.
 
-configs/pirelli_dpl10
 configs/pic32mz-starterkit
   This directory contains the port of NuttX to the Microchip PIC32MZ
   Embedded Connectivity (EC) Starter Kit.  There are two configurations of
@@ -543,10 +535,6 @@ configs/pic32mz-starterkit
        PIC32MZ2048ECM144-I/PH w/Crypto Engine (DM320006-C)
 
   See www.microchip.com for further information.
-
-  This directory contains the board support for Pirelli "Discus" DP-L10 phones.
-  It is a variant of the compal_e88 config with the small changes for the
-  differences in the board.
 
 configs/qemu-i486
   Port of NuttX to QEMU in i486 mode.  This port will also run on real i486
