@@ -227,6 +227,7 @@ _xtensa_context_save:
 	.align	4
 
 xtensa_context_save:
+	ENTRY(16)
 
 	/* Set up for call to _xtensa_context_save() */
 
@@ -248,7 +249,7 @@ xtensa_context_save:
 	l32i	a0, a2, (4 * REG_A0)			/* Recover return addess */
 	movi	a2, 0							/* Return zero */
 
-	ret
+	RET(16)
 
 	.size	xtensa_context_save, . - xtensa_context_save
 
@@ -372,6 +373,7 @@ _xtensa_context_restore:
 	.align	4
 
 xtensa_context_restore:
+	ENTRY(16)								/* REVISIT */
 
 	/* Restore the processor state */
 

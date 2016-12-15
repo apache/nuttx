@@ -187,7 +187,7 @@ void xtensa_irq_initialize(void)
 #endif
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
-  /* And finally, enable interrupts */
+  /* And finally, enable interrupts.  Also clears PS.EXCM */
 
   up_irq_enable();
 #endif
