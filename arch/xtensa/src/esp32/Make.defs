@@ -35,14 +35,13 @@
 
 # The start-up, "head", file.  May be either a .S or a .c file.
 
-HEAD_ASRC =
-HEAD_CSRC = esp32_start.c
+HEAD_ASRC  = xtensa_vectors.S xtensa_window_vector.S xtensa_windowspill.S
+HEAD_ASRC += xtensa_int_handlers.S  xtensa_user_handler.S
+HEAD_CSRC  = esp32_start.c
 
 # Common XTENSA files (arch/xtensa/src/common)
 
-CMN_ASRCS  = xtensa_context.S xtensa_coproc.S xtensa_cpuint.S
-CMN_ASRCS += xtensa_int_handlers.S xtensa_panic.S xtensa_user_handler.S
-CMN_ASRCS += xtensa_vectors.S xtensa_windowspill.S
+CMN_ASRCS  = xtensa_context.S xtensa_coproc.S xtensa_cpuint.S xtensa_panic.S
 
 CMN_CSRCS  = xtensa_assert.c xtensa_blocktask.c xtensa_copystate.c
 CMN_CSRCS += xtensa_cpenable.c xtensa_createstack.c xtensa_exit.c xtensa_idle.c

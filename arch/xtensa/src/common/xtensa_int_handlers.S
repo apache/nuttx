@@ -63,6 +63,7 @@
 #include <arch/chip/core-isa.h>
 #include <arch/xtensa/xtensa_specregs.h>
 
+#include "xtensa.h"
 #include "xtensa_abi.h"
 #include "chip_macros.h"
 #include "xtensa_timer.h"
@@ -142,6 +143,13 @@
 
 	extract_msb	a4, a2					/* a4 = MSB of a2, a2 trashed */
 
+	/* Check for a timer interrupt.
+	 *
+	 * REVISIT: XT_TIMER_INTEN will be only one of the configured timers
+	 * (see xtensa_timer.h).  There is no mechanism here to detect other
+	 * timer interrupts.
+	 */
+
 	movi	a3, XT_TIMER_INTEN			/* a3 = timer interrupt bit */
 	wsr		a4, INTCLEAR				/* Clear sw or edge-triggered interrupt */
 	beq		a3, a4, 4f					/* If timer interrupt then skip table */
@@ -182,9 +190,13 @@
 	 * We'll be reading the interrupt state again after this call
 	 * so no need to preserve any registers except a7 (pointer to
 	 * state save area).
+	 *
+	 * REVISIT: Here we explicitly assume that the INTERRUPT XT_TIMER_INTEN
+	 * corresponds to TIMER0.  That is probably that case, but not necessarily
+	 * so.
 	 */
 
-	movi	a2, XTENSA_IRQ_TIMER&level& /* Argument 1: IRQ number */
+	movi	a2, XTENSA_IRQ_TIMER0		/* Argument 1: Timer0 IRQ number */
 	mov		a3, a12						/* Argument 2: Top of stack = register save area */
 #ifdef __XTENSA_CALL0_ABI__
 	call0	xtensa_irq_dispatch			/* Call xtensa_int_decode */
@@ -270,6 +282,7 @@
 
 	.section HANDLER_SECTION, "ax"
 	.type	_xtensa_level1_handler, @function
+	.global	_xtensa_level1_handler
 	.align	4
 
 _xtensa_level1_handler:
@@ -354,6 +367,7 @@ _xtensa_level1_handler:
 #if XCHAL_EXCM_LEVEL >= 2
 	.section HANDLER_SECTION, "ax"
 	.type	_xtensa_level2_handler, @function
+	.global	_xtensa_level2_handler
 	.align	4
 
 _xtensa_level2_handler:
@@ -414,6 +428,7 @@ _xtensa_level2_handler:
 #if XCHAL_EXCM_LEVEL >= 3
 	.section HANDLER_SECTION, "ax"
 	.type	_xtensa_level3_handler, @function
+	.global	_xtensa_level3_handler
 	.align	4
 
 _xtensa_level3_handler:
@@ -474,6 +489,7 @@ _xtensa_level3_handler:
 #if XCHAL_EXCM_LEVEL >= 4
 	.section HANDLER_SECTION, "ax"
 	.type	_xtensa_level4_handler, @function
+	.global	_xtensa_level4_handler
 	.align	4
 
 _xtensa_level4_handler:
@@ -534,6 +550,7 @@ _xtensa_level4_handler:
 #if XCHAL_EXCM_LEVEL >= 5
 	.section HANDLER_SECTION, "ax"
 	.type	_xtensa_level5_handler, @function
+	.global	_xtensa_level5_handler
 	.align	4
 
 _xtensa_level5_handler:
@@ -594,6 +611,7 @@ _xtensa_level5_handler:
 #if XCHAL_EXCM_LEVEL >= 6
 	.section HANDLER_SECTION, "ax"
 	.type	_xtensa_level6_handler, @function
+	.global	_xtensa_level6_handler
 	.align	4
 
 _xtensa_level6_handler:
@@ -690,6 +708,7 @@ _xtensa_level6_handler:
 #if XCHAL_INT_NLEVELS >=2 && XCHAL_EXCM_LEVEL < 2 && XCHAL_DEBUGLEVEL !=2
 	.section	HANDLER_SECTION, "ax"
 	.type		_xtensa_level2_handler, @function
+	.global		_xtensa_level2_handler
 	.align		4
 
 _xtensa_level2_handler:
@@ -723,6 +742,7 @@ _xtensa_level2_handler:
 #if XCHAL_INT_NLEVELS >=3 && XCHAL_EXCM_LEVEL < 3 && XCHAL_DEBUGLEVEL !=3
 	.section	HANDLER_SECTION, "ax"
 	.type		_xtensa_level3_handler, @function
+	.global		_xtensa_level3_handler
 	.align		4
 
 _xtensa_level3_handler:
@@ -758,6 +778,7 @@ _xtensa_level3_handler:
 #if XCHAL_INT_NLEVELS >=4 && XCHAL_EXCM_LEVEL < 4 && XCHAL_DEBUGLEVEL !=4
 	.section	HANDLER_SECTION, "ax"
 	.type		_xtensa_level4_handler, @function
+	.global		_xtensa_level4_handler
 	.align		4
 
 _xtensa_level4_handler:
@@ -793,6 +814,7 @@ _xtensa_level4_handler:
 #if XCHAL_INT_NLEVELS >=5 && XCHAL_EXCM_LEVEL < 5 && XCHAL_DEBUGLEVEL !=5
 	.section	HANDLER_SECTION, "ax"
 	.type		_xtensa_level5_handler, @function
+	.global		_xtensa_level5_handler
 	.align		4
 
 _xtensa_level5_handler:
@@ -828,6 +850,7 @@ _xtensa_level5_handler:
 #if XCHAL_INT_NLEVELS >=6 && XCHAL_EXCM_LEVEL < 6 && XCHAL_DEBUGLEVEL !=6
 	.section	HANDLER_SECTION, "ax"
 	.type		_xtensa_level6_handler, @function
+	.global		_xtensa_level6_handler
 	.align		4
 
 _xtensa_level6_handler:

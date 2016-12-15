@@ -59,9 +59,12 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <arch/irq.h>
 #include <arch/xtensa/core.h>
 #include <arch/xtensa/xtensa_specregs.h>
+
+#include "chip_macros.h"
 
 /****************************************************************************
  * Assembly Language Macros
@@ -158,6 +161,7 @@ _xtensa_to_coproc_handler:
  ****************************************************************************/
 
 	.type	_xtensa_user_handler, @function
+	.global	_xtensa_user_handler
 	.align	4
 
 _xtensa_user_handler:
@@ -254,6 +258,7 @@ _xtensa_user_handler:
 	.section HANDLER_SECTION, "ax"
 	.type       _xtensa_syscall_handler, @function
 	.align      4
+
 _xtensa_syscall_handler:
 
 	/* Allocate stack frame and save A0, A1, and PS */

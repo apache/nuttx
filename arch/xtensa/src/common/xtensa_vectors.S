@@ -42,6 +42,7 @@
 #include <arch/chip/core-isa.h>
 #include <arch/xtensa/xtensa_specregs.h>
 
+#include "xtensa.h"
 #include "xtensa_abi.h"
 
 /****************************************************************************
@@ -226,10 +227,10 @@ _xtensa_nmi_vector:
  ****************************************************************************/
 
 #if XCHAL_HAVE_DEBUG
-	.begin      literal_prefix .debug_exception_vector
-	.section    .debug_exception_vector.text, "ax"
-	.global     _debug_exception_vector
-	.align      4
+	.begin		literal_prefix .debug_exception_vector
+	.section	.debug_exception_vector.text, "ax"
+	.global		_debug_exception_vector
+	.align		4
 
 _debug_exception_vector:
 
@@ -261,10 +262,10 @@ _debug_exception_vector:
  ****************************************************************************/
 
 #ifdef XCHAL_DOUBLEEXC_VECTOR_VADDR
-	.begin	literal_prefix .double_exception_vector
-	.section .double_exception_vector.text, "ax"
-	.global	_double_exception_vector
-	.align	4
+	.begin		literal_prefix .double_exception_vector
+	.section	.double_exception_vector.text, "ax"
+	.global		_double_exception_vector
+	.align		4
 
 _double_exception_vector:
 
@@ -286,7 +287,7 @@ _double_exception_vector:
 	movi	a2, XTENSA_DOUBLE_EXCEPTION		/* Address of state save on stack */
 	call0	_xtensa_panic					/* Does not return */
 
-	.end        literal_prefix
+	.end	literal_prefix
 
 #endif /* XCHAL_DOUBLEEXC_VECTOR_VADDR */
 
@@ -298,10 +299,10 @@ _double_exception_vector:
  *
  ****************************************************************************/
 
-	.begin	literal_prefix .kernel_exception_vector
-	.section .kernel_exception_vector.text, "ax"
-	.global	_kernel_exception_vector
-	.align	4
+	.begin		literal_prefix .kernel_exception_vector
+	.section	.kernel_exception_vector.text, "ax"
+	.global		_kernel_exception_vector
+	.align		4
 
 _kernel_exception_vector:
 
@@ -333,15 +334,15 @@ _kernel_exception_vector:
  *
  ****************************************************************************/
 
-	.begin	literal_prefix .user_exception_vector
-	.section .user_exception_vector.text, "ax"
-	.global	_user_exception_vector
-	.type	_user_exception_vector, @function
-	.align	4
+	.begin		literal_prefix .user_exception_vector
+	.section	.user_exception_vector.text, "ax"
+	.global		_user_exception_vector
+	.type		_user_exception_vector, @function
+	.align		4
 
 _user_exception_vector:
 
 	wsr		a0, EXCSAVE_1					/* Preserve a0 */
-	call0	xtensa_user_handler				/* And jump to user exception handler */
+	call0	_xtensa_user_handler			/* And jump to user exception handler */
 
 	.end	literal_prefix
