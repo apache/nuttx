@@ -146,13 +146,13 @@
 	/* Check for a timer interrupt.
 	 *
 	 * REVISIT: XT_TIMER_INTEN will be only one of the configured timers
-	 * (see xtensa_timer.h).  There is no mechanism here to detect other
-	 * timer interrupts.
+	 * selected as the system periodic timer (see xtensa_timer.h).  There
+	 * is no mechanism here to detect other timer interrupts.
 	 */
 
 	movi	a3, XT_TIMER_INTEN			/* a3 = timer interrupt bit */
 	wsr		a4, INTCLEAR				/* Clear sw or edge-triggered interrupt */
-	beq		a3, a4, 4f					/* If timer interrupt then skip table */
+	beq		a3, a4, 4f					/* If timer interrupt then skip decode */
 
 	/* Call xtensa_int_decode with, passing that address of the register save
 	 * area as a parameter (A2).
@@ -171,7 +171,7 @@
 	 * register save area.  This may or may not reside on a stack.
 	 */
 
-	beq		a2, a12, 3f					/* If timer interrupt then skip table */
+	beq		a2, a12, 3f					/* If timer interrupt then keep stack */
 
 	/* Switch stacks */
 
