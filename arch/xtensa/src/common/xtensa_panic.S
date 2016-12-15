@@ -114,7 +114,12 @@ _xtensa_panic:
 
 	/* Set up PS for C, reenable hi-pri interrupts, and clear EXCM. */
 
+#ifdef __XTENSA_CALL0_ABI__
+	movi	a0, PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM
+#else
 	movi	a0, PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_WOE
+#endif
+
 	wsr		a0, PS
 
 	/* Call C panic handler:  Arg1 (A2) = Exception code; Arg 2 (A3) = start
@@ -122,6 +127,7 @@ _xtensa_panic:
 	 */
 
 	mov		a3, sp
+
 #ifdef __XTENSA_CALL0_ABI__
 	call0	xtensa_panic					/* Call xtensa_panic. Should not return */
 #else
