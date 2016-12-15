@@ -2209,6 +2209,7 @@ static int stm32_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t rlo
       rlong[2] = getreg32(STM32_SDIO_RESP3);
       rlong[3] = getreg32(STM32_SDIO_RESP4);
     }
+
   return ret;
 }
 
