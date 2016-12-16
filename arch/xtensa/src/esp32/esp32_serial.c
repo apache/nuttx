@@ -1268,7 +1268,7 @@ int up_putc(int ch)
       /* Add CR */
 
       while(!esp32_txready(&CONSOLE_DEV));
-      esp32_send(&CONSOLE_DEV, 'r');
+      esp32_send(&CONSOLE_DEV, '\r');
     }
 
   while(!esp32_txready(&CONSOLE_DEV));
