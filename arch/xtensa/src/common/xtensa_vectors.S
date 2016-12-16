@@ -75,7 +75,7 @@ _xtensa_level2_vector:
 
 	/* Never returns here - call0 is used as a jump */
 
-	.end        literal_prefix
+	.end		literal_prefix
 
 	.size	_xtensa_level2_vector, . - _xtensa_level2_vector
 #endif
@@ -94,7 +94,7 @@ _xtensa_level3_vector:
 
 	/* Never returns here - call0 is used as a jump */
 
-	.end        literal_prefix
+	.end		literal_prefix
 
 	.size	_xtensa_level3_vector, . - _xtensa_level3_vector
 #endif
@@ -113,7 +113,7 @@ _xtensa_level4_vector:
 
 	/* Never returns here - call0 is used as a jump */
 
-	.end        literal_prefix
+	.end		literal_prefix
 
 	.size	_xtensa_level5_vector, . - _xtensa_level5_vector
 #endif
@@ -132,8 +132,8 @@ _xtensa_level5_vector:
 
 	/* Never returns here - call0 is used as a jump */
 
-	.size	_xtensa_level5_vector, . - _xtensa_level5_vector
-	.end        literal_prefix
+	.size		_xtensa_level5_vector, . - _xtensa_level5_vector
+	.end		literal_prefix
 #endif
 
 #if XCHAL_EXCM_LEVEL >= 6

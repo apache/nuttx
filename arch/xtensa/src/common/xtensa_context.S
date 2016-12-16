@@ -170,8 +170,8 @@ _xtensa_context_save:
 	call0	_xtensa_window_spill			/* Preserves only a4-a5, a8-a9, a12-a13 */
 
 	rsr		a2, EXCSAVE_1					/* Save interruptee's a0 */
-	l32i	a0,  a2, (4 * REG_TMP0)			/* Save return address */
-	l32i	sp,  a2, (4 * REG_TMP1)			/* Save current stack pointer */
+	l32i	a0, a2, (4 * REG_TMP0)			/* Save return address */
+	l32i	sp, a2, (4 * REG_TMP1)			/* Save current stack pointer */
 #endif
 
 	ret
@@ -189,7 +189,7 @@ _xtensa_context_save:
  *   called from user code (with interrupts disabled) to save the current
  *   state of the running thread.  This function always returns zero.
  *   However, it sets the saved value of the return address (A2) to 1.
- *   If the thread is restarted via _xtensa_contest_restore or
+ *   If the thread is s via _xtensa_context_restore or
  *   xtensa_context_restore, it will appear as a second return from
  *   xtensa_context_save but with the returned value of 1 to distinguish
  *   the two cases.
@@ -264,12 +264,13 @@ xtensa_context_save:
  *
  * Exit conditions:
  *   - A0  = Return address in caller.
- *   - Other registers are restored as detailed above (including A1 and A2).
+ *   - Other registers are restored as detailed above
+ *   - A2 is preserved
  *
  ****************************************************************************/
 
 	.global _xtensa_context_restore
-	.type   _xtensa_context_restore,@function
+	.type	xtensa_context_restore,@function
 
 	.align  4
 	.literal_position
@@ -278,12 +279,12 @@ xtensa_context_save:
 _xtensa_context_restore:
 
 #ifdef XCHAL_HAVE_LOOPS
-	l32i	a2, a2, (4 * REG_LBEG)
-	l32i	a3, a2, (4 * REG_LEND)
-	wsr		a2, LBEG
-	l32i	a2, a2, (4 * REG_LCOUNT)
-	wsr		a3, LEND
-	wsr		a2, LCOUNT
+	l32i	a3, a2, (4 * REG_LBEG)
+	l32i	a4, a2, (4 * REG_LEND)
+	wsr		a3, LBEG
+	l32i	a3, a2, (4 * REG_LCOUNT)
+	wsr		a4, LEND
+	wsr		a3, LCOUNT
 #endif
 
 #ifdef CONFIG_XTENSA_USE_OVLY
@@ -316,10 +317,6 @@ _xtensa_context_restore:
 	l32i	a13, a2, (4 * REG_A13)
 	l32i	a14, a2, (4 * REG_A14)
 	l32i	a15, a2, (4 * REG_A15)
-
-	/* Finally, restore A2 with the correct value */
-
-	l32i	a2, a2, (4 * REG_A2)
 
 	ret
 

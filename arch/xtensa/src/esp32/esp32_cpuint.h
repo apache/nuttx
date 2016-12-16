@@ -54,7 +54,7 @@
  * Public Data
  ****************************************************************************/
 
-/* Maps a CPU interrupt to the attached peripheral interrupt */
+/* Maps a CPU interrupt to the IRQ of the attached peripheral interrupt */
 
 extern uint8_t g_cpu0_intmap[ESP32_NCPUINTS];
 #ifdef CONFIG_SMP

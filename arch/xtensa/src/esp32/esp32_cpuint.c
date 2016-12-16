@@ -152,7 +152,7 @@
  * Public Data
  ****************************************************************************/
 
-/* Maps a CPU interrupt to the attached peripheral interrupt */
+/* Maps a CPU interrupt to the IRQ of the attached peripheral interrupt */
 
 uint8_t g_cpu0_intmap[ESP32_NCPUINTS];
 #ifdef CONFIG_SMP
@@ -351,7 +351,7 @@ int esp32_cpuint_initialize(void)
       putreg32(NO_CPUINT, regaddr);
     }
 
-  /* Initialize CPU0-to-peripheral mapping table */
+  /* Initialize CPU interrupt-to-IRQ mapping table */
 
 #ifdef CONFIG_SMP
   if (cpu != 0)
