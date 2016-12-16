@@ -126,45 +126,25 @@
 	 * a consequence of context switching.
 	 */
 
-	mov		a12, sp						/* a12 = address of save area */
+	mov		a12, sp						/* Address of save area */
 
-._xtensa_dispatch_level&level&:
-
+#ifdef __XTENSA_CALL0_ABI__
 	/* Get mask of pending, enabled interrupts at this level into a2. */
 
 	rsr		a2, INTENABLE
 	rsr		a3, INTERRUPT
 	movi	a4, \mask
 	and		a2, a2, a3
-	and		a2, a2, a4
-	beqz	a2, 5f						/* Nothing to do */
-
-	/* If multiple bits are set then MSB has highest priority. */
-
-	extract_msb	a4, a2					/* a4 = MSB of a2, a2 trashed */
-
-	/* Check for a timer interrupt.
-	 *
-	 * REVISIT: XT_TIMER_INTEN will be only one of the configured timers
-	 * selected as the system periodic timer (see xtensa_timer.h).  There
-	 * is no mechanism here to detect other timer interrupts.
-	 */
-
-	movi	a3, XT_TIMER_INTEN			/* a3 = timer interrupt bit */
-	wsr		a4, INTCLEAR				/* Clear sw or edge-triggered interrupt */
-	beq		a3, a4, 4f					/* If timer interrupt then skip decode */
+	and		a2, a2, a4					/* a2 = Set of pending, enabled interrupts for this level */
+	beqz	a2, 3f						/* Nothing to do */
 
 	/* Call xtensa_int_decode with, passing that address of the register save
 	 * area as a parameter (A2).
 	 */
 
-#ifdef __XTENSA_CALL0_ABI__
-	mov		a2, a12						/* Argument: Top of stack = register save area */
+										/* Argument 1: Set of CPU interrupt to dispatch */
+	mov		a3, sp						/* Argument 2: Top of stack = register save area */
 	call0	xtensa_int_decode			/* Call xtensa_int_decode */
-#else
-	mov		a6, a12						/* Argument: Top of stack = register save area */
-	call4	xtensa_int_decode			/* Call xtensa_int_decode */
-#endif
 
 	/* On return from xtensa_int_decode, a2 will contain the address of the new
 	 * register save area.  Usually this would be the same as the current SP.
@@ -172,7 +152,7 @@
 	 * register save area.  This may or may not reside on a stack.
 	 */
 
-	beq		a2, a12, 3f					/* If timer interrupt then keep stack */
+	beq		a2, sp, 3f					/* If no context switch then keep stack */
 
 	/* Switch stacks */
 
@@ -180,53 +160,42 @@
 	l32i	a2, a12, (4 * REG_A1)		/* Retrieve stack ptr and replace */
 	addi	sp, a2, -(4 * XCPTCONTEXT_SIZE)
 
-3:
-	j		._xtensa_dispatch_level&level&		/* Check for more interrupts */
+#else
+	/* Get mask of pending, enabled interrupts at this level into a2. */
 
-4:
+	rsr		a6, INTENABLE
+	rsr		a2, INTERRUPT
+	movi	a3, \mask
+	and		a6, a6, a2
+	and		a6, a6, a3					/* a6 = Set of pending, enabled interrupts for this level */
+	beqz	a6, 3f						/* Nothing to do */
 
-	.ifeq XT_TIMER_INTPRI - \level
-
-	/* Interrupt handler for the NuttX system timer if at this level.
-	 * We'll be reading the interrupt state again after this call
-	 * so no need to preserve any registers except a7 (pointer to
-	 * state save area).
-	 *
-	 * REVISIT: Here we explicitly assume that the INTERRUPT XT_TIMER_INTEN
-	 * corresponds to TIMER0.  That is probably that case, but not necessarily
-	 * so.  xtensa_timer.h should probably select the IRQ number as well.
+	/* Call xtensa_int_decode with, passing that address of the register save
+	 * area as a parameter (A2).
 	 */
 
-#ifdef __XTENSA_CALL0_ABI__
-	movi	a2, XTENSA_IRQ_TIMER0		/* Argument 1: Timer0 IRQ number */
-	mov		a3, a12						/* Argument 2: Top of stack = register save area */
-	call0	xtensa_irq_dispatch			/* Call xtensa_int_decode */
-#else
-	movi	a6, XTENSA_IRQ_TIMER0		/* Argument 1: Timer0 IRQ number */
-	mov		a7, a12						/* Argument 2: Top of stack = register save area */
-	call4	xtensa_irq_dispatch			/* Call xtensa_int_decode */
+										/* Argument 1: Set of CPU interrupt to dispatch */
+	mov		a7, sp						/* Argument 2: Top of stack = register save area */
+	call4	xtensa_int_decode			/* Call xtensa_int_decode */
+
+	/* On return from xtensa_int_decode, a2 will contain the address of the new
+	 * register save area.  Usually this would be the same as the current SP.
+	 * But in the event of a context switch, a2 will instead refer to the TCB
+	 * register save area.  This may or may not reside on a stack.
+	 */
+
+	beq		a4, sp, 3f					/* If no context switch then keep stack */
+
+	/* Switch stacks */
+
+	mov		a12, a4						/* Switch to the save area of the new thread */
+	l32i	a2, a12, (4 * REG_A1)		/* Retrieve stack ptr and replace */
+	addi	sp, a2, -(4 * XCPTCONTEXT_SIZE)
 #endif
 
-	/* On return from xtensa_irq_dispatch, A2 will contain the address of the new
-	 * register save area.  Usually this would be the same as the current SP.
-	 * But in the event of a context switch, A2 will instead refer to the TCB
-	 * register save area.
-	 */
 
-	beq		a2, a12, 5f					/* If timer interrupt then skip table */
-
-	/* Switch stacks */
-
-	mov		a12, a2						/* Switch to the save area of the new thread */
-	l32i	a2, a12, (4 * REG_A1)		/* Retrieve stack ptr and replace */
-	addi	sp, a2, -(4 * XCPTCONTEXT_SIZE)
-	.endif
-
-	j		._xtensa_dispatch_level&level&		/* Check for more interrupts */
-
-5:
-	/* done */
-
+	/* Done */
+3:
 	.endm
 
 /****************************************************************************

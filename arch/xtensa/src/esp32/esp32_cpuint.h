@@ -42,6 +42,25 @@
 
 #include <nuttx/config.h>
 
+#include <arch/irq.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define CPUINT_UNASSIGNED 0xff  /* No peripheral assigned to this CPU interrupt */
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* Maps a CPU interrupt to the attached peripheral interrupt */
+
+extern uint8_t g_cpu0_intmap[ESP32_NCPUINTS];
+#ifdef CONFIG_SMP
+extern uint8_t g_cpu1_intmap[ESP32_NCPUINTS];
+#endif
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/

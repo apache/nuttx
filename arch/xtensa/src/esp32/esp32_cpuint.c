@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <string.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
@@ -148,6 +149,17 @@
 #define ESP32_PRIO_INDEX(p)    ((p) - ESP32_MIN_PRIORITY)
 
 /****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* Maps a CPU interrupt to the attached peripheral interrupt */
+
+uint8_t g_cpu0_intmap[ESP32_NCPUINTS];
+#ifdef CONFIG_SMP
+uint8_t g_cpu1_intmap[ESP32_NCPUINTS];
+#endif
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -156,13 +168,9 @@
  */
 
 #ifdef CONFIG_SMP
-
 static uint32_t g_intenable[CONFIG_SMP_NCPUS];
-
 #else
-
 static uint32_t g_intenable[1];
-
 #endif
 
 /* Bitsets for free, unallocated CPU interrupts available to peripheral
@@ -170,11 +178,8 @@ static uint32_t g_intenable[1];
  */
 
 static uint32_t g_cpu0_freeints = EPS32_CPUINT_PERIPHSET;
-
 #ifdef CONFIG_SMP
-
 static uint32_t g_cpu1_freeints = EPS32_CPUINT_PERIPHSET;
-
 #endif
 
 /* Bitsets for each interrupt priority 1-5 */
@@ -311,6 +316,7 @@ int esp32_alloc_cpuint(uint32_t intmask)
 int esp32_cpuint_initialize(void)
 {
   uintptr_t regaddr;
+  uint8_t *intmap;
 #ifdef CONFIG_SMP
   int cpu;
 #endif
@@ -345,6 +351,38 @@ int esp32_cpuint_initialize(void)
       putreg32(NO_CPUINT, regaddr);
     }
 
+  /* Initialize CPU0-to-peripheral mapping table */
+
+#ifdef CONFIG_SMP
+  if (cpu != 0)
+    {
+      intmap = g_cpu1_intmap;
+    }
+  else
+#endif
+    {
+      intmap = g_cpu0_intmap;
+    }
+
+  /* Indiate that no peripheral interrupts are assigned to CPU interrupts */
+
+  memset(intmap, CPUINT_UNASSIGNED, ESP32_NCPUINTS);
+
+  /* Special case the 6 internal interrupts.
+   *
+   *   CPU interrupt bit           IRQ number
+   *   --------------------------- ---------------------
+   *   ESP32_CPUINT_TIMER0      6  XTENSA_IRQ_TIMER0  0
+   *   SP32_CPUINT_SOFTWARE0    7  Not yet defined
+   *   ESP32_CPUINT_PROFILING  11  Not yet defined
+   *   ESP32_CPUINT_TIMER1     15  XTENSA_IRQ_TIMER1  1
+   *   ESP32_CPUINT_TIMER2     16  XTENSA_IRQ_TIMER2  2
+   *   ESP32_CPUINT_SOFTWARE1  29  Not yet defined
+   */
+
+  intmap[ESP32_CPUINT_TIMER0] = XTENSA_IRQ_TIMER0;
+  intmap[ESP32_CPUINT_TIMER1] = XTENSA_IRQ_TIMER1;
+  intmap[ESP32_CPUINT_TIMER2] = XTENSA_IRQ_TIMER2;
   return OK;
 }
 
@@ -524,6 +562,7 @@ void esp32_free_cpuint(int cpuint)
 void esp32_attach_peripheral(int cpu, int periphid, int cpuint)
 {
   uintptr_t regaddr;
+  uint8_t *intmap;
 
   DEBUGASSERT(periphid >= 0 && periphid < ESP32_NPERIPHERALS);
   DEBUGASSERT(cpuint >= 0 && cpuint <= ESP32_CPUINT_MAX);
@@ -533,12 +572,17 @@ void esp32_attach_peripheral(int cpu, int periphid, int cpuint)
   if (cpu != 0)
     {
       regaddr = DPORT_APP_MAP_REGADDR(periphid);
+      intmap  = g_cpu1_intmap;
     }
   else
 #endif
     {
       regaddr = DPORT_PRO_MAP_REGADDR(periphid);
+      intmap  = g_cpu0_intmap;
     }
+
+  DEBUGASSERT(intmap[cpuint] == CPUINT_UNASSIGNED);
+  intmap[cpuint] = periphid + XTENSA_IRQ_FIRSTPERIPH;
 
   putreg32(cpuint, regaddr);
 }
@@ -564,6 +608,7 @@ void esp32_attach_peripheral(int cpu, int periphid, int cpuint)
 void esp32_detach_peripheral(int cpu, int periphid, int cpuint)
 {
   uintptr_t regaddr;
+  uint8_t *intmap;
 
   DEBUGASSERT(periphid >= 0 && periphid < ESP32_NPERIPHERALS);
 #ifdef CONFIG_SMP
@@ -572,12 +617,17 @@ void esp32_detach_peripheral(int cpu, int periphid, int cpuint)
   if (cpu != 0)
     {
       regaddr = DPORT_APP_MAP_REGADDR(periphid);
+      intmap  = g_cpu1_intmap;
     }
   else
 #endif
     {
       regaddr = DPORT_PRO_MAP_REGADDR(periphid);
+      intmap  = g_cpu0_intmap;
     }
+
+  DEBUGASSERT(intmap[cpuint] != CPUINT_UNASSIGNED);
+  intmap[cpuint] = CPUINT_UNASSIGNED;
 
   putreg32(NO_CPUINT, regaddr);
 }

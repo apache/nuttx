@@ -39,29 +39,32 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/sched.h>
-#include <arch/chip/irq.h>
+#include <stdint.h>
+#include <assert.h>
 
-#include "chip/esp32_dport.h"
+#include <nuttx/arch.h>
+#include <arch/irq.h>
+
 #include "xtensa.h"
+#include "esp32_cpuint.h"
 
 /****************************************************************************
- * Private Data
+ * Private Functions
  ****************************************************************************/
 
-static const uint8_t g_baseirq[3] =
-{
-  ESP32_IRQ_SREG0,
-  ESP32_IRQ_SREG1,
-  ESP32_IRQ_SREG2
-};
+/****************************************************************************
+ * Name: xtensa_intclear
+ ****************************************************************************/
 
-static const uint8_t g_nirqs[3] =
+static inline void xtensa_intclear(uint32_t mask)
 {
-  ESP32_NIRQS_SREG0,
-  ESP32_NIRQS_SREG1,
-  ESP32_NIRQS_SREG2
-};
+  __asm__ __volatile__
+  (
+    "movi a2, 0\n"
+    "wsr %0, INTCLEAR\n"
+    : "=r"(mask) : :
+  );
+}
 
 /****************************************************************************
  * Public Functions
@@ -75,80 +78,74 @@ static const uint8_t g_nirqs[3] =
  *   handling to the registered interrupt handler via xtensa_irq_dispatch().
  *
  * Input Parameters:
- *   regs - Saves processor state on the stack
+ *   cpuints - Set of pending interrupts valid for this level
+ *   regs    - Saves processor state on the stack
  *
  * Returned Value:
- *   Normally the same vale as regs is returned.  But, in the event of an
+ *   Normally the same value as regs is returned.  But, in the event of an
  *   interrupt level context switch, the returned value will, instead point
  *   to the saved processor state in the TCB of the newly started task.
  *
  ****************************************************************************/
 
-uint32_t *xtensa_int_decode(uint32_t *regs)
+uint32_t *xtensa_int_decode(uint32_t cpuints, uint32_t *regs)
 {
-  uintptr_t regaddr;
-  uint32_t regval;
+  uint8_t *intmap;
   uint32_t mask;
-  int regndx;
   int bit;
-  int baseirq;
-  int nirqs;
-
 #ifdef CONFIG_SMP
   int cpu;
+#endif
 
-  /* Select PRO or APP interrupt status registers */
+#ifdef CONFIG_SMP
+  /* Select PRO or APP CPU interrupt mapping table */
 
   cpu = up_cpu_index();
-  if (cpu == 0)
+  if (cpu != 0)
     {
-      regaddr = DPORT_PRO_INTR_STATUS_0_REG;
+      intmap = g_cpu1_intmap;
     }
   else
 #endif
     {
-      regaddr = DPORT_APP_INTR_STATUS_0_REG;
+      intmap = g_cpu0_intmap;
     }
 
-  /* Process each pending interrupt in each of the three interrupt status
-   * registers.
-   */
+  /* Skip over zero bits, eight at a time */
 
-  for (regndx = 0; regndx < 3; regndx++)
+  for (bit = 0, mask = 0xff;
+       bit < ESP32_NCPUINTS && (cpuints & mask) == 0;
+       bit += 8, mask <<= 8);
+
+  /* Process each pending CPU interrupt */
+
+  for (; bit < ESP32_NCPUINTS && cpuints != 0; bit++)
     {
-      /* Fetch the next register status register */
-
-      regval   = getreg32(regaddr);
-      regaddr += sizeof(uint32_t);
-
-      /* Set up the search */
-
-      baseirq = g_baseirq[regndx];
-      nirqs   = g_nirqs[regndx];
-
-      /* Decode and dispatch each pending bit in the interrupt status
-       * register.
-       */
-
-      for (bit = 0; regval != 0 && bit < nirqs; bit++)
+      mask = (1 << bit);
+      if ((cpuints & mask) != 0)
         {
-          /* Check if this interrupt is pending */
+          /* Extract the IRQ number from the mapping table */
 
-          mask = (1 << bit);
-          if ((regval & mask) != 0)
-            {
-              /* Yes.. Dispatch the interrupt.  Note that regs may be
-               * altered in the case of an interrupt level context switch.
-               */
+          uint8_t irq = intmap[bit];
+          DEBUGASSERT(irq != CPUINT_UNASSIGNED);
 
-              regs = xtensa_irq_dispatch(baseirq + bit, regs);
+          /* Clear software or edge-triggered interrupt */
 
-              /* Clear this bit in the sampled status register so that
-               * perhaps we can exit this loop sooner.
-               */
+           xtensa_intclear(mask);
 
-              regval &= ~mask;
-            }
+          /* Dispatch the CPU interrupt.
+           *
+           * NOTE that regs may be altered in the case of an interrupt
+           * level context switch.
+           */
+
+          regs = xtensa_irq_dispatch((int)irq, regs);
+
+          /* Clear the bit in the pending interrupt so that perhaps
+           * we can exit the look early.
+           */
+
+          cpuints &= ~mask;
         }
     }
 

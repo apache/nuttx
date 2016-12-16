@@ -390,7 +390,8 @@
 
 #define ESP32_CPUINT_NINTERNAL      6
 
-#define ESP32_CPUINT_MAX            31
+#define ESP32_NCPUINTS              32
+#define ESP32_CPUINT_MAX            (ESP32_NCPUINTS - 1)
 #define EPS32_CPUINT_PERIPHSET      0xdffe773f
 #define EPS32_CPUINT_INTERNALSET    0x200188c0
 
