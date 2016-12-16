@@ -147,20 +147,11 @@ _xtensa_context_save:
 #endif
 
 #ifndef __XTENSA_CALL0_ABI__
-	mov		a9,  a0							/* Preserve ret addr */
-#endif
-
-#ifndef __XTENSA_CALL0_ABI__
 	/* To spill the reg windows, temp. need pre-interrupt stack ptr and
-	 * a4-15.  Need to save a9,12,13 temporarily (in frame temps) and
-	 * recover originals.  Interrupts need to be disabled below
-	 * XCHAL_EXCM_LEVEL and window overflow and underflow exceptions
-	 * disabled (assured by PS.EXCM == 1).
+	 * a4-15.  Interrupts need to be disabled below XCHAL_EXCM_LEVEL and
+	 * window overflow and underflow exceptions disabled (assured by
+	 * PS.EXCM == 1).
 	 */
-
-	s32i	a12, a2, (4 * REG_TMP0)			/* Temp. save stuff in stack frame */
-	s32i	a13, a2, (4 * REG_TMP1)
-	s32i	a9,  a2, (4 * REG_TMP2)
 
 #ifdef CONFIG_XTENSA_USE_OVLY
 	/* Save the overlay state if we are supporting overlays. Since we just
@@ -171,17 +162,16 @@ _xtensa_context_save:
 #error Overly support is not implemented
 #endif
 
-	l32i	a12, a2, (4 * REG_A12)			/* Recover original a9,12,13 */
-	l32i	a13, a2, (4 * REG_A13)
-	l32i	a9,  a2, (4 * REG_A9)
+	s32i	a0, a2, (4 * REG_TMP0)			/* Save return address */
+	s32i	sp, a2, (4 * REG_TMP1)			/* Save current stack pointer */
+	wsr		a2, EXCSAVE_1					/* Preserve register save area */
 
-#warning REVISIT: The following is probably not correct due to changes in registers
-	addi	sp,  sp, (4 * XCPTCONTEXT_SIZE)	/* Restore the interruptee's SP */
-	call0	_xtensa_window_spill			/* Preserves only a4,5,8,9,12,13 */
-	addi	sp,  sp, -(4 * XCPTCONTEXT_SIZE)
-	l32i	a12, sp, (4 * REG_TMP0)			/* Recover stuff from stack frame */
-	l32i	a13, sp, (4 * REG_TMP1)
-	l32i	a9,  sp, (4 * REG_TMP2)
+	l32i	sp, a2, (4 * REG_A1)			/* Restore the interruptee's SP */
+	call0	_xtensa_window_spill			/* Preserves only a4-a5, a8-a9, a12-a13 */
+
+	rsr		a2, EXCSAVE_1					/* Save interruptee's a0 */
+	l32i	a0,  a2, (4 * REG_TMP0)			/* Save return address */
+	l32i	sp,  a2, (4 * REG_TMP1)			/* Save current stack pointer */
 #endif
 
 	ret

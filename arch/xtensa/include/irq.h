@@ -108,20 +108,21 @@
 #  define REG_LBEG          (_REG_LOOPS_START + 0)
 #  define REG_LEND          (_REG_LOOPS_START + 1)
 #  define REG_LCOUNT        (_REG_LOOPS_START + 2)
-#  define _REG_CALL0_START  (_REG_LOOPS_START + 3)
+#  define _REG_WINDOW_TMPS  (_REG_LOOPS_START + 3)
 #else
-#  define _REG_CALL0_START  _REG_LOOPS_START
+#  define _REG_WINDOW_TMPS  _REG_LOOPS_START
 #endif
 
 #ifndef __XTENSA_CALL0_ABI__
-  /* Temporary space for saving stuff during window spill */
+  /* Temporary space for saving stuff during window spill.
+   * REVISIT: I don't think that we need so many temporaries.
+   */
 
-#  define REG_TMP0          (_REG_CALL0_START + 0)
-#  define REG_TMP1          (_REG_CALL0_START + 1)
-#  define REG_TMP2          (_REG_CALL0_START + 2)
-#  define _REG_OVLY_START   (_REG_CALL0_START + 3)
+#  define REG_TMP0          (_REG_WINDOW_TMPS + 0)
+#  define REG_TMP1          (_REG_WINDOW_TMPS + 1)
+#  define _REG_OVLY_START   (_REG_WINDOW_TMPS + 2)
 #else
-#  define _REG_OVLY_START   _REG_CALL0_START
+#  define _REG_OVLY_START   _REG_WINDOW_TMPS
 #endif
 
 #ifdef CONFIG_XTENSA_USE_OVLY

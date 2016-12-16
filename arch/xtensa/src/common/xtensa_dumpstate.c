@@ -130,9 +130,8 @@ static inline void xtensa_registerdump(void)
              (unsigned long)regs[REG_LCOUNT]);
 #endif
 #ifndef __XTENSA_CALL0_ABI__
-      _alert(" TMP0: %08lx  TMP1: %08lx  TMP2: %08lx\n",
-             (unsigned long)regs[REG_TMP0], (unsigned long)regs[REG_TMP1],
-             (unsigned long)regs[REG_TMP2]);
+      _alert(" TMP0: %08lx  TMP1: %08lx\n",
+             (unsigned long)regs[REG_TMP0], (unsigned long)regs[REG_TMP1]);
 #endif
     }
 }
