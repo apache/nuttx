@@ -99,20 +99,6 @@ static void esp32_irq_dump(const char *msg, int irq)
 #endif
 
 /****************************************************************************
- * Name: xtensa_disable_all
- ****************************************************************************/
-
-static inline void xtensa_disable_all(void)
-{
-  __asm__ __volatile__
-  (
-    "movi a2, 0\n"
-    "xsr a2, INTENABLE\n"
-    : : : "a2"
-  );
-}
-
-/****************************************************************************
  * Name: xtensa_attach_fromcpu1_interrupt
  ****************************************************************************/
 
@@ -151,18 +137,9 @@ static inline void xtensa_attach_fromcpu1_interrupt(void)
 
 void xtensa_irq_initialize(void)
 {
-  int i;
+  /* Initialize CPU interrupts */
 
-  /* Disable all PRO CPU interrupts */
-
-  xtensa_disable_all();
-
-  /* Detach all peripheral sources PRO CPU interrupts */
-
-  for (i = 0; i < ESP32_NPERIPHERALS; i++)
-    {
-      esp32_detach_peripheral(0, i);
-    }
+  (void)esp32_cpuint_initialize();
 
 #if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 3
   /* Colorize the interrupt stack for debug purposes */

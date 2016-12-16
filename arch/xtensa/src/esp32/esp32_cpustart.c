@@ -89,20 +89,6 @@ static inline void xtensa_registerdump(FAR struct tcb_s *tcb)
 #endif
 
 /****************************************************************************
- * Name: xtensa_disable_all
- ****************************************************************************/
-
-static inline void xtensa_disable_all(void)
-{
-  __asm__ __volatile__
-  (
-    "movi a2, 0\n"
-    "xsr a2, INTENABLE\n"
-    : : : "a2"
-  );
-}
-
-/****************************************************************************
  * Name: xtensa_attach_fromcpu0_interrupt
  ****************************************************************************/
 
@@ -154,7 +140,6 @@ static inline void xtensa_attach_fromcpu0_interrupt(void)
 int xtensa_start_handler(int irq, FAR void *context)
 {
   FAR struct tcb_s *tcb = this_task();
-  int i;
 
   sinfo("CPU%d Started\n", up_cpu_index());
 
@@ -181,9 +166,9 @@ int xtensa_start_handler(int irq, FAR void *context)
 
   esp32_region_protection();
 
-  /* Disable all PRO CPU interrupts */
+  /* Initialize CPU interrupts */
 
-  xtensa_disable_all();
+  (void)esp32_cpuint_initialize();
 
   /* Attach and emable internal interrupts */
 
@@ -192,13 +177,6 @@ int xtensa_start_handler(int irq, FAR void *context)
 
   xtensa_attach_fromcpu0_interrupt();
 #endif
-
-  /* Detach all peripheral sources APP CPU interrupts */
-
-  for (i = 0; i < ESP32_NPERIPHERALS; i++)
-    {
-      esp32_detach_peripheral(1, i);;
-    }
 
 #if 0 /* Does it make since to have co-processors enabled on the IDLE thread? */
 #if XTENSA_CP_ALLSET != 0

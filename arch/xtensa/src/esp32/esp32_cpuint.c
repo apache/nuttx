@@ -193,6 +193,20 @@ static const uint32_t g_priority[5] =
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: xtensa_disable_all
+ ****************************************************************************/
+
+static inline void xtensa_disable_all(void)
+{
+  __asm__ __volatile__
+  (
+    "movi a2, 0\n"
+    "xsr a2, INTENABLE\n"
+    : : : "a2"
+  );
+}
+
+/****************************************************************************
  * Name:  esp32_alloc_cpuint
  *
  * Description:
@@ -278,6 +292,61 @@ int esp32_alloc_cpuint(uint32_t intmask)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name:  esp32_cpuint_initialize
+ *
+ * Description:
+ *   Initialize CPU interrupts
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned on
+ *   any failre.
+ *
+ ****************************************************************************/
+
+int esp32_cpuint_initialize(void)
+{
+  uintptr_t regaddr;
+#ifdef CONFIG_SMP
+  int cpu;
+#endif
+  int i;
+
+#ifdef CONFIG_SMP
+  /* Which CPU are we initializing */
+
+  cpu = up_cpu_index();
+  DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS);
+#endif
+
+  /* Disable all CPU interrupts on this CPU */
+
+  xtensa_disable_all();
+
+  /* Detach all peripheral sources PRO CPU interrupts */
+
+  for (i = 0; i < ESP32_NPERIPHERALS; i++)
+    {
+#ifdef CONFIG_SMP
+      if (cpu != 0)
+        {
+          regaddr = DPORT_APP_MAP_REGADDR(i);
+        }
+      else
+#endif
+        {
+          regaddr = DPORT_PRO_MAP_REGADDR(i);
+        }
+
+      putreg32(NO_CPUINT, regaddr);
+    }
+
+  return OK;
+}
 
 /****************************************************************************
  * Name: up_disable_irq
@@ -442,8 +511,10 @@ void esp32_free_cpuint(int cpuint)
  *
  * Input Parameters:
  *   cpu      - The CPU to receive the interrupt 0=PRO CPU 1=APP CPU
- *   periphid - The peripheral number from ira.h to be assigned.
+ *   periphid - The peripheral number from ira.h to be assigned to
+ *              a CPU interrupt.
  *   cpuint   - The CPU interrupt to receive the peripheral interrupt
+ *              assignment.
  *
  * Returned Value:
  *   None
@@ -479,15 +550,18 @@ void esp32_attach_peripheral(int cpu, int periphid, int cpuint)
  *   Detach a peripheral interupt from a CPU interrupt.
  *
  * Input Parameters:
- *   cpu    - The CPU to receive the interrupt 0=PRO CPU 1=APP CPU
- *   periphid - The peripheral number from ira.h to be assigned.
+ *   cpu      - The CPU to receive the interrupt 0=PRO CPU 1=APP CPU
+ *   periphid - The peripheral number from irq.h to be detached from the
+ *              CPU interrupt.
+ *   cpuint   - The CPU interrupt from which the peripheral interrupt will
+ *              be detached.
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void esp32_detach_peripheral(int cpu, int periphid)
+void esp32_detach_peripheral(int cpu, int periphid, int cpuint)
 {
   uintptr_t regaddr;
 

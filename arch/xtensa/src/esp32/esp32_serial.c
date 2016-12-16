@@ -716,7 +716,7 @@ static void esp32_detach(struct uart_dev_s *dev)
   cpu = 0;
 #endif
 
-  esp32_detach_peripheral(cpu, priv->config->periph);
+  esp32_detach_peripheral(cpu, priv->config->periph, priv->cpuint);
 
   /* And release the CPU interrupt */
 
