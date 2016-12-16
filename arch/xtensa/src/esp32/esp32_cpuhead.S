@@ -138,11 +138,11 @@ __cpu1_start:
 
 	/* Finish initialization in C */
 
-	movi	a2, 1				/* Argument 1: CPU ID */
-
 #ifdef __XTENSA_CALL0_ABI__
+	movi	a2, 1				/* Argument 1: CPU ID */
 	call0	xtensa_start_handler
 #else
+	movi	a6, 1				/* Argument 1: CPU ID */
 	call4	xtensa_start_handler
 #endif
 

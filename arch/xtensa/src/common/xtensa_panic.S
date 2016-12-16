@@ -98,6 +98,10 @@
 	.align	4
 
 _xtensa_panic:
+	/* Save the exception code */
+
+	wsr		a2, EXCSAVE_1
+
 	/* Save rest of interrupt context (A2=address of state save area on
 	 * stack.
 	 */
@@ -126,11 +130,13 @@ _xtensa_panic:
 	 * of the register save area.
 	 */
 
-	mov		a3, sp
-
 #ifdef __XTENSA_CALL0_ABI__
+	rsr		a2, EXCSAVE_1
+	mov		a3, sp
 	call0	xtensa_panic					/* Call xtensa_panic. Should not return */
 #else
+	rsr		a6, EXCSAVE_1
+	mov		a7, sp
 	call4	xtensa_panic					/* Call xtensa_panic. Should not return */
 #endif
 

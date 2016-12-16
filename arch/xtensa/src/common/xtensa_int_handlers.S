@@ -158,10 +158,11 @@
 	 * area as a parameter (A2).
 	 */
 
-	mov		a2, a12						/* Argument: Top of stack = register save area */
 #ifdef __XTENSA_CALL0_ABI__
+	mov		a2, a12						/* Argument: Top of stack = register save area */
 	call0	xtensa_int_decode			/* Call xtensa_int_decode */
 #else
+	mov		a6, a12						/* Argument: Top of stack = register save area */
 	call4	xtensa_int_decode			/* Call xtensa_int_decode */
 #endif
 
@@ -193,14 +194,16 @@
 	 *
 	 * REVISIT: Here we explicitly assume that the INTERRUPT XT_TIMER_INTEN
 	 * corresponds to TIMER0.  That is probably that case, but not necessarily
-	 * so.
+	 * so.  xtensa_timer.h should probably select the IRQ number as well.
 	 */
 
+#ifdef __XTENSA_CALL0_ABI__
 	movi	a2, XTENSA_IRQ_TIMER0		/* Argument 1: Timer0 IRQ number */
 	mov		a3, a12						/* Argument 2: Top of stack = register save area */
-#ifdef __XTENSA_CALL0_ABI__
 	call0	xtensa_irq_dispatch			/* Call xtensa_int_decode */
 #else
+	movi	a6, XTENSA_IRQ_TIMER0		/* Argument 1: Timer0 IRQ number */
+	mov		a7, a12						/* Argument 2: Top of stack = register save area */
 	call4	xtensa_irq_dispatch			/* Call xtensa_int_decode */
 #endif
 

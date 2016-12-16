@@ -229,12 +229,13 @@ _xtensa_user_handler:
 	 * beginning of the register save area.
 	 */
 
+#ifdef __XTENSA_CALL0_ABI__
 	rsr		a2, EXCCAUSE					/* Argument 1 (a2) = EXCCAUSE */
 	mov		a3, sp							/* Argument 2 (a2) = pointer to register save area */
-
-#ifdef __XTENSA_CALL0_ABI__
 	calx0	xtensa_user						/* Call xtensa_user */
 #else
+	rsr		a6, EXCCAUSE					/* Argument 1 (a2) = EXCCAUSE */
+	mov		a7, sp							/* Argument 2 (a2) = pointer to register save area */
 	call4	xtensa_user						/* Call xtensa_user */
 #endif
 
@@ -333,11 +334,13 @@ _xtensa_syscall_handler:
 	 */
 
 	mov		a12, sp							/* a12 = address of register save area */
+#ifdef __XTENSA_CALL0_ABI__
 	movi	a2, XTENSA_IRQ_SYSCALL			/* Argument 1: IRQ number */
 	mov		a3, a12							/* Argument 2: Top of stack = register save area */
-#ifdef __XTENSA_CALL0_ABI__
 	call0	xtensa_irq_dispatch				/* Call xtensa_int_decode */
 #else
+	movi	a6, XTENSA_IRQ_SYSCALL			/* Argument 1: IRQ number */
+	mov		a7, a12							/* Argument 2: Top of stack = register save area */
 	call4	xtensa_irq_dispatch				/* Call xtensa_int_decode */
 #endif
 
@@ -468,12 +471,13 @@ _xtensa_coproc_handler:
 	 * beginning of the register save area.
 	 */
 
+#ifdef __XTENSA_CALL0_ABI__
 	rsr		a2, EXCCAUSE					/* Argument 1 (a2) = EXCCAUSE */
 	mov		a3, sp							/* Argument 2 (a2) = pointer to register save area */
-
-#ifdef __XTENSA_CALL0_ABI__
 	calx0	xtensa_user						/* Call xtensa_user */
 #else
+	rsr		a6, EXCCAUSE					/* Argument 1 (a2) = EXCCAUSE */
+	mov		a7, sp							/* Argument 2 (a2) = pointer to register save area */
 	call4	xtensa_user						/* Call xtensa_user */
 #endif
 
