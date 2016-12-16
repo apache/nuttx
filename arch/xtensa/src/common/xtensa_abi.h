@@ -58,6 +58,27 @@
  *   CALL8, or CALL12 instructions to save 4, 8, or 12 live registers. Calls
  *   to routines that use a2..a7 for parameters may use only CALL8 or CALL12.
  *
+ *   Arguments are passed in both registers and memory. The first six incoming
+ *   arguments are stored in registers a2 through a7, and additional arguments
+ *   are stored on the stack starting at the current stack pointer a1.  Because
+ *   Xtensa uses register windows that rotate during a function call, outgoing
+ *   arguments that will become the incoming arguments must be stored to
+ *   different register numbers. Depending on the call instruction and, thus,
+ *   the rotation of the register window, the arguments are passed starting
+ *   starting with register a(2+N), where N is the size of the window rotation.
+ *   Therefore, the first argument in case of a call4 instruction is placed into
+ *   a6, and for a call8 instruction into a10. Large arguments (8-bytes) are
+ *   always passed in an even/odd register pair even if that means to omit a
+ *   register for alignment. The return values are stored in a2 through a7.
+ *
+ *             return addr  stack ptr       arg0, arg1, arg2, arg3, arg4, arg5
+ *             -----------  ---------       ----------------------------------
+ *               a0           a1              a2,   a3,   a4,   a5,   a6,   a7
+ *
+ *   call4       a4           a5              a6,   a7,   a8,   a9,  a10,  a11
+ *   call8       a8           a9             a10,  a11,  a12,  a13,  a14,  a15
+ *   call12     a12          a13             a14,  a15   ---   ---   ---   ---
+ *
  *   The stack pointer SP should only be modified by ENTRY and MOVSP
  *   instructions (except for initialization and restoration). If some other
  *   instruction modifies SP, any values in the register-spill area will not
