@@ -171,7 +171,7 @@ void xtensa_dumpstate(void)
       ustacksize = CONFIG_IDLETHREAD_STACKSIZE;
 #else
       ustackbase = sp + 128;
-      ustacksize = 128;
+      ustacksize = 256;
 #endif
     }
   else
