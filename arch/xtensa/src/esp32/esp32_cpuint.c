@@ -169,7 +169,13 @@ static uint32_t g_intenable[1];
  * devices.
  */
 
-static uint32_t g_free_cpuints = EPS32_CPUINT_PERIPHSET;
+static uint32_t g_cpu0_freeints = EPS32_CPUINT_PERIPHSET;
+
+#ifdef CONFIG_SMP
+
+static uint32_t g_cpu1_freeints = EPS32_CPUINT_PERIPHSET;
+
+#endif
 
 /* Bitsets for each interrupt priority 1-5 */
 
@@ -209,6 +215,7 @@ static const uint32_t g_priority[5] =
 int esp32_alloc_cpuint(uint32_t intmask)
 {
   irqstate_t flags;
+  uint32_t *freeints;
   uint32_t bitmask;
   uint32_t intset;
   int cpuint;
@@ -220,7 +227,18 @@ int esp32_alloc_cpuint(uint32_t intmask)
 
   flags = enter_critical_section();
 
-  intset = g_free_cpuints & intmask;
+#ifdef CONFIG_SMP
+  if (this_cpu() != 0)
+    {
+      freeints = &g_cpu1_freeints;
+    }
+  else
+#endif
+    {
+      freeints = &g_cpu0_freeints;
+    }
+
+  intset = *freeints & intmask;
   if (intset != 0)
     {
       /* Skip over initial unavailable CPU interrupts quickly in groups
@@ -246,7 +264,7 @@ int esp32_alloc_cpuint(uint32_t intmask)
             {
               /* Got it! */
 
-              g_free_cpuints &= ~bitmask;
+              *freeints &= ~bitmask;
               ret = cpuint;
               break;
             }
@@ -390,6 +408,7 @@ int esp32_alloc_edgeint(int priority)
 void esp32_free_cpuint(int cpuint)
 {
   irqstate_t flags;
+  uint32_t *freeints;
   uint32_t bitmask;
 
   DEBUGASSERT(cpuint >= 0 && cpuint < ESP32_CPUINT_NEDGEPERIPHS);
@@ -398,8 +417,20 @@ void esp32_free_cpuint(int cpuint)
 
   bitmask  = (1ul << cpuint);
   flags = enter_critical_section();
-  DEBUGASSERT((g_free_cpuints & bitmask) == 0);
-  g_free_cpuints |= bitmask;
+
+#ifdef CONFIG_SMP
+  if (this_cpu() != 0)
+    {
+      freeints = &g_cpu1_freeints;
+    }
+  else
+#endif
+    {
+      freeints = &g_cpu0_freeints;
+    }
+
+  DEBUGASSERT((*freeints & bitmask) == 0);
+  *freeints |= bitmask;
   leave_critical_section(flags);
 }
 
