@@ -142,6 +142,10 @@ static int findwidth(FAR const char *buf, FAR const char *fmt)
  *    Return a pointer to the character the closing ']'.
  *    The table has a 1 wherever characters should be considered part of the
  *    scanset.
+ *
+ *    Function findscanset based on source function __sccl of FreeBSD
+ *   (https://github.com/lattera/freebsd/blob/master/sys/kern/subr_scanf.c)
+ *
  ****************************************************************************/
 
 #ifdef CONFIG_LIBC_SCANSET
