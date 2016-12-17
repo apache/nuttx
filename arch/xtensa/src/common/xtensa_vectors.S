@@ -203,7 +203,7 @@ _xtensa_nmi_vector:
 	s32i	a0, sp, (4 * REG_A0)
 
 	s32i	a2, sp, (4 * REG_A2)
-	movi	a2, XTENSA_NMI_EXCEPTION		/* Address of state save on stack */
+	movi	a2, XTENSA_NMI_EXCEPTION		/* Argument 1: Error code */
 	call0	_xtensa_panic					/* Does not return */
 
 #else
@@ -245,7 +245,7 @@ _debug_exception_vector:
 	s32i	a0, sp, (4 * REG_A0)
 
 	s32i	a2, sp, (4 * REG_A2)
-	movi	a2, XTENSA_DEBUG_EXCEPTION		/* Address of state save on stack */
+	movi	a2, XTENSA_DEBUG_EXCEPTION		/* Argument 1: Error code */
 	call0	_xtensa_panic					/* Does not return */
 
 	.end	literal_prefix
@@ -284,7 +284,7 @@ _double_exception_vector:
 	s32i	a0, sp, (4 * REG_A0)
 
 	s32i	a2, sp, (4 * REG_A2)
-	movi	a2, XTENSA_DOUBLE_EXCEPTION		/* Address of state save on stack */
+	movi	a2, XTENSA_DOUBLE_EXCEPTION		/* Argument 1: Error code */
 	call0	_xtensa_panic					/* Does not return */
 
 	.end	literal_prefix
@@ -321,7 +321,7 @@ _kernel_exception_vector:
 	s32i	a0, sp, (4 * REG_A0)
 
 	s32i	a2, sp, (4 * REG_A2)
-	movi	a2, XTENSA_KERNEL_EXCEPTION		/* Address of state save on stack */
+	movi	a2, XTENSA_KERNEL_EXCEPTION		/* Argument 1: Error code */
 	call0	_xtensa_panic					/* Does not return */
 
 	.end	literal_prefix

@@ -77,6 +77,7 @@ config ARCH_X86
 
 config ARCH_XTENSA
 	bool "Xtensa"
+	select ARCH_HAVE_CUSTOMOPT
 	---help---
 		Cadence® Tensilica® Xtensa® actictures.
 

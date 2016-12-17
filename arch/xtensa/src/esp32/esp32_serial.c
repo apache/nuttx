@@ -1047,7 +1047,10 @@ static int  esp32_receive(struct uart_dev_s *dev, unsigned int *status)
 static void esp32_rxint(struct uart_dev_s *dev, bool enable)
 {
   struct esp32_dev_s *priv = (struct esp32_dev_s *)dev->priv;
+  irqstate_t flags;
   int regval;
+
+  flags = enter_critical_section();
 
   if (enable)
     {
@@ -1066,10 +1069,13 @@ static void esp32_rxint(struct uart_dev_s *dev, bool enable)
     {
       /* Disable the RX interrupts */
 
-      esp32_serialout(priv, UART_INT_CLR_OFFSET,
-                      (UART_RXFIFO_FULL_INT_CLR_S | UART_FRM_ERR_INT_CLR_S |
-                       UART_RXFIFO_TOUT_INT_CLR_S));
+      regval  = esp32_serialin(priv, UART_INT_ENA_OFFSET);
+      regval &= ~(UART_RXFIFO_FULL_INT_CLR_S | UART_FRM_ERR_INT_CLR_S |
+                  UART_RXFIFO_TOUT_INT_CLR_S);
+      esp32_serialout(priv, UART_INT_ENA_OFFSET, regval);
     }
+
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -1114,13 +1120,12 @@ static void esp32_txint(struct uart_dev_s *dev, bool enable)
 {
   struct esp32_dev_s *priv = (struct esp32_dev_s *)dev->priv;
   irqstate_t flags;
+  int regval;
 
   flags = enter_critical_section();
 
   if (enable)
     {
-      uint32_t regval;
-
       /* Set to receive an interrupt when the TX holding register register
        * is empty
        */
@@ -1141,8 +1146,9 @@ static void esp32_txint(struct uart_dev_s *dev, bool enable)
     {
       /* Disable the TX interrupt */
 
-      esp32_serialout(priv, UART_INT_CLR_OFFSET,
-                      (UART_TX_DONE_INT_CLR_S | UART_TXFIFO_EMPTY_INT_CLR_S));
+      regval  = esp32_serialin(priv, UART_INT_ENA_OFFSET);
+      regval &= ~(UART_TX_DONE_INT_ENA_S | UART_TXFIFO_EMPTY_INT_ENA_S);
+      esp32_serialout(priv, UART_INT_ENA_OFFSET, regval);
     }
 
   leave_critical_section(flags);
