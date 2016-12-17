@@ -290,7 +290,7 @@ _xtensa_level1_handler:
 	l32i	a0, a2, (4 * REG_A0)			/* Retrieve interruptee's A0 */
     l32i    sp, a2, (4 * REG_A1)            /* Remove interrupt stack frame */
 	l32i	a2, a2, (4 * REG_A2)			/* Retrieve interruptee's A2 */
-	rsync									/* Ensure EPS and EPC written */
+	rsync									/* Ensure PS and EPC written */
 
 	/* Return from exception. RFE returns from either the UserExceptionVector
 	 * or the KernelExceptionVector.  RFE sets PS.EXCM back to 0, and then

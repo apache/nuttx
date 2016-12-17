@@ -116,7 +116,6 @@
 
 _xtensa_context_save:
 
-	s32i	a2,  a2, (4 * REG_A2)
 	s32i	a3,  a2, (4 * REG_A3)
 	s32i	a4,  a2, (4 * REG_A4)
 	s32i	a5,  a2, (4 * REG_A5)
