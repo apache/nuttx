@@ -266,7 +266,7 @@ void xtensa_coproc_disable(struct xtensa_cpstate_s *cpstate, int cpset);
 
 /* IRQs */
 
-uint32_t *xtensa_int_decode(uint32_t *regs);
+uint32_t *xtensa_int_decode(uint32_t cpuints, uint32_t *regs);
 uint32_t *xtensa_irq_dispatch(int irq, uint32_t *regs);
 uint32_t xtensa_enable_cpuint(uint32_t *shadow, uint32_t intmask);
 uint32_t xtensa_disable_cpuint(uint32_t *shadow, uint32_t intmask);
