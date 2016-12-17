@@ -229,12 +229,15 @@ xtensa_coproc_savestate:
 	 */
 
 	ENTRY(16)
+	s32i	a0, sp, LOCAL_OFFSET(1)			/* Save return address */
 
 	/* Call _xtensa_coproc_savestate() with A2=address of co-processor
 	 * save area.
 	 */
 
 	call0 _xtensa_coproc_savestate
+
+	l32i	a0,  sp, LOCAL_OFFSET(1)		/* Recover return address */
 	RET(16)
 
 #else
@@ -243,10 +246,11 @@ xtensa_coproc_savestate:
 	 * a13-a15.  So only a13-a15 need be preserved.
 	 */
 
-	ENTRY(16)
-	s32i	a13, sp, LOCAL_OFFSET(1)
-	s32i	a14, sp, LOCAL_OFFSET(2)
-	s32i	a15, sp, LOCAL_OFFSET(3)
+	ENTRY(24)
+	s32i	a0,  sp, LOCAL_OFFSET(1)		/* Save return address */
+	s32i	a13, sp, LOCAL_OFFSET(2)
+	s32i	a14, sp, LOCAL_OFFSET(3)
+	s32i	a15, sp, LOCAL_OFFSET(4)
 
 	/* Call _xtensa_coproc_savestate() with A2=address of co-processor
 	 * save area.
@@ -256,11 +260,12 @@ xtensa_coproc_savestate:
 
 	/* Restore a13-15 and return */
 
-	l32i	a13, sp, LOCAL_OFFSET(1)
-	l32i	a14, sp, LOCAL_OFFSET(2)
-	l32i	a15, sp, LOCAL_OFFSET(3)
+	l32i	a0,  sp, LOCAL_OFFSET(1)		/* Recover return address */
+	l32i	a13, sp, LOCAL_OFFSET(2)
+	l32i	a14, sp, LOCAL_OFFSET(3)
+	l32i	a15, sp, LOCAL_OFFSET(4)
 
-	RET(16)
+	RET(24)
 
 #endif
 
@@ -424,12 +429,15 @@ xtensa_coproc_restorestate:
 	 */
 
 	ENTRY(16)
+	s32i	a0, sp, LOCAL_OFFSET(1)			/* Save return address */
 
 	/* Call _xtensa_coproc_restorestate() with A2=address of co-processor
-	 * save area.
+	 * save area.   Registers a0, a2-a7, a13-a15 have been trashed.
 	 */
 
 	call0 _xtensa_coproc_restorestate
+
+	l32i	a0, sp, LOCAL_OFFSET(1)			/* Recover return address */
 	RET(16)
 
 #else
@@ -438,24 +446,26 @@ xtensa_coproc_restorestate:
 	 * a13-a15.  So only a13-a15 need be preserved.
 	 */
 
-	ENTRY(16)
-	s32i	a13, sp, LOCAL_OFFSET(1)
-	s32i	a14, sp, LOCAL_OFFSET(2)
-	s32i	a15, sp, LOCAL_OFFSET(3)
+	ENTRY(24)
+	s32i	a0,  sp, LOCAL_OFFSET(1)		/* Save return address */
+	s32i	a13, sp, LOCAL_OFFSET(2)
+	s32i	a14, sp, LOCAL_OFFSET(3)
+	s32i	a15, sp, LOCAL_OFFSET(4)
 
 	/* Call _xtensa_coproc_restorestate() with A2=address of co-processor
-	 * save area.
+	 * save area.   Registers a0, a2-a7, a13-a15 have been trashed.
 	 */
 
 	call0 _xtensa_coproc_restorestate
 
 	/* Restore a13-15 and return */
 
-	l32i	a13, sp, LOCAL_OFFSET(1)
-	l32i	a14, sp, LOCAL_OFFSET(2)
-	l32i	a15, sp, LOCAL_OFFSET(3)
+	l32i	a0,  sp, LOCAL_OFFSET(1)		/* Recover return address */
+	l32i	a13, sp, LOCAL_OFFSET(2)
+	l32i	a14, sp, LOCAL_OFFSET(3)
+	l32i	a15, sp, LOCAL_OFFSET(4)
 
-	RET(16)
+	RET(24)
 
 #endif
 
