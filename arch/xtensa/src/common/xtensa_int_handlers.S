@@ -292,11 +292,12 @@ _xtensa_level1_handler:
 	l32i	a2, a2, (4 * REG_A2)			/* Retrieve interruptee's A2 */
 	rsync									/* Ensure EPS and EPC written */
 
-	/* Return from interrupt.  RFI  restores the PS from EPS_1 and jumps to
-	 * the address in EPC_1.
+	/* Return from exception. RFE returns from either the UserExceptionVector
+	 * or the KernelExceptionVector.  RFE sets PS.EXCM back to 0, and then
+	 * jumps to the address in EPC[1]. PS.UM and PS.WOE are left unchanged.
 	 */
 
-	rfi		1
+	rfe										/* And return from "exception" */
 
 /****************************************************************************
  * MEDIUM PRIORITY (LEVEL 2+) INTERRUPT LOW LEVEL HANDLERS.
