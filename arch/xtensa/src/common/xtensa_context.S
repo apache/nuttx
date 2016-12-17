@@ -218,26 +218,71 @@ _xtensa_context_save:
 xtensa_context_save:
 	ENTRY(16)
 
-	/* Set up for call to _xtensa_context_save() */
 
-	rsr		a12, PS							/* Save callee's PS */
-	s32i	a12, a2, (4 * REG_PS)
+	/* Set up for (potential) call to _xtensa_context_save() */
+
+	s32i	a3,  a2, (4 * REG_A3)			/* Get  scratch register */
+	rsr		a3, PS							/* Save callee's PS */
+	s32i	a3, a2, (4 * REG_PS)
 	s32i	a0, a2, (4 * REG_PC)			/* Save Return address as PC */
 
 	s32i	a0, a2, (4 * REG_A0)			/* Save callee's a0 */
 	s32i	sp, a2, (4 * REG_A1)			/* Save callee's SP */
-	movi	a12, 1							/* Set saved A2 to 1 */
-	s32i	a12, a2, (4 * REG_A2)
+	movi	a3, 1							/* Set saved A2 to 1 */
+	s32i	a3, a2, (4 * REG_A2)
 
-	/* Save the rest of the processor state */
+	/* Save the rest of the processor state.  For the CALL0 ABI, we can user
+	 * _xtensa_context_save(),  Otherwise we duplicate the context save here
+	 * to avoid the window spill.
+	 */
 
+#ifdef __XTENSA_CALL0_ABI__
+	l32i	r3, a2, (4 * REG_A3)			/* Recover original a3 */
 	call0	_xtensa_context_save			/* Save full register state */
 
 	/* Recover the return address and return zero */
 
 	l32i	a0, a2, (4 * REG_A0)			/* Recover return addess */
-	movi	a2, 0							/* Return zero */
+#else
+	/* REVISIT: We could save a lot here.  It should not be necessary to
+	 * preserve all of these registers.  The ABI permits volatile, callee-
+	 * saved, registers to be clobbered on function calls.  We save the
+	 * whole tamale here mostly for debug purposes.
+	 *
+	 * NOTE that PS, PC and registers 0-3 were saved above.  a0 is not
+	 * modified.
+	 */
 
+	s32i	a4,  a2, (4 * REG_A4)
+	s32i	a5,  a2, (4 * REG_A5)
+	s32i	a6,  a2, (4 * REG_A6)
+	s32i	a7,  a2, (4 * REG_A7)
+	s32i	a8,  a2, (4 * REG_A8)
+	s32i	a9,  a2, (4 * REG_A9)
+	s32i	a10, a2, (4 * REG_A10)
+	s32i	a11, a2, (4 * REG_A11)
+
+	/* Call0 ABI callee-saved regs a12-15 */
+
+	s32i	a12, a2, (4 * REG_A12)
+	s32i	a13, a2, (4 * REG_A13)
+	s32i	a14, a2, (4 * REG_A14)
+	s32i	a15, a2, (4 * REG_A15)
+
+	rsr		a3, SAR
+	s32i	a3, a2, (4 * REG_SAR)
+
+#ifdef XCHAL_HAVE_LOOPS
+	rsr		a3, LBEG
+	s32i	a3, a2, (4 * REG_LBEG)
+	rsr		a3, LEND
+	s32i	a3, a2, (4 * REG_LEND)
+	rsr		a3, LCOUNT
+	s32i	a3, a2, (4 * REG_LCOUNT)
+#endif
+#endif
+
+	movi	a2, 0							/* Return zero */
 	RET(16)
 
 	.size	xtensa_context_save, . - xtensa_context_save
