@@ -116,7 +116,6 @@
 
 _xtensa_context_save:
 
-	s32i	a2,  a2, (4 * REG_A2)
 	s32i	a3,  a2, (4 * REG_A3)
 	s32i	a4,  a2, (4 * REG_A4)
 	s32i	a5,  a2, (4 * REG_A5)
@@ -371,9 +370,14 @@ xtensa_context_restore:
 	l32i	a0, a2, (4 * REG_PS)			/* Restore PS */
 	wsr		a0, PS
 	l32i	a0, a2, (4 * REG_PC)			/* Set up for RFE */
-	rsr		a0, EPC
+	rsr		a0, EPC_1
 	l32i	a0, a2, (4 * REG_A0)			/* Restore a0 */
 	l32i	a2, a2, (4 * REG_A2)			/* Restore A2 */
+
+	/* Return from exception. RFE returns from either the UserExceptionVector
+	 * or the KernelExceptionVector.  RFE sets PS.EXCM back to 0, and then
+	 * jumps to the address in EPC[1]. PS.UM and PS.WOE are left unchanged.
+	 */
 
 	rfe										/* And return from "exception" */
 
