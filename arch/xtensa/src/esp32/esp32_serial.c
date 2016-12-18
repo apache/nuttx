@@ -759,9 +759,9 @@ static int esp32_interrupt(struct uart_dev_s *dev)
 
       /* Clear pending interrupts */
 
-      regval = (UART_RXFIFO_FULL_INT_CLR_S | UART_FRM_ERR_INT_CLR_S |
-                UART_RXFIFO_TOUT_INT_CLR_S | UART_TX_DONE_INT_CLR_S |
-                UART_TXFIFO_EMPTY_INT_CLR_S);
+      regval = (UART_RXFIFO_FULL_INT_CLR | UART_FRM_ERR_INT_CLR |
+                UART_RXFIFO_TOUT_INT_CLR | UART_TX_DONE_INT_CLR |
+                UART_TXFIFO_EMPTY_INT_CLR);
       esp32_serialout(priv, UART_INT_CLR_OFFSET, regval);
 
       if ((status & UART_RXFIFO_CNT_M) > 0)
@@ -1060,8 +1060,8 @@ static void esp32_rxint(struct uart_dev_s *dev, bool enable)
 
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
       regval  = esp32_serialin(priv, UART_INT_ENA_OFFSET);
-      regval |= (UART_RXFIFO_FULL_INT_CLR_S | UART_FRM_ERR_INT_CLR_S |
-                 UART_RXFIFO_TOUT_INT_CLR_S);
+      regval |= (UART_RXFIFO_FULL_INT_ENA | UART_FRM_ERR_INT_ENA |
+                 UART_RXFIFO_TOUT_INT_ENA);
       esp32_serialout(priv, UART_INT_ENA_OFFSET, regval);
 #endif
     }
@@ -1070,8 +1070,8 @@ static void esp32_rxint(struct uart_dev_s *dev, bool enable)
       /* Disable the RX interrupts */
 
       regval  = esp32_serialin(priv, UART_INT_ENA_OFFSET);
-      regval &= ~(UART_RXFIFO_FULL_INT_CLR_S | UART_FRM_ERR_INT_CLR_S |
-                  UART_RXFIFO_TOUT_INT_CLR_S);
+      regval &= ~(UART_RXFIFO_FULL_INT_ENA | UART_FRM_ERR_INT_ENA |
+                  UART_RXFIFO_TOUT_INT_ENA);
       esp32_serialout(priv, UART_INT_ENA_OFFSET, regval);
     }
 
@@ -1132,7 +1132,7 @@ static void esp32_txint(struct uart_dev_s *dev, bool enable)
 
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
       regval  = esp32_serialin(priv, UART_INT_ENA_OFFSET);
-      regval |= (UART_TX_DONE_INT_ENA_S | UART_TXFIFO_EMPTY_INT_ENA_S);
+      regval |= (UART_TX_DONE_INT_ENA | UART_TXFIFO_EMPTY_INT_ENA);
       esp32_serialout(priv, UART_INT_ENA_OFFSET, regval);
 
       /* Fake a TX interrupt here by just calling uart_xmitchars() with
@@ -1147,7 +1147,7 @@ static void esp32_txint(struct uart_dev_s *dev, bool enable)
       /* Disable the TX interrupt */
 
       regval  = esp32_serialin(priv, UART_INT_ENA_OFFSET);
-      regval &= ~(UART_TX_DONE_INT_ENA_S | UART_TXFIFO_EMPTY_INT_ENA_S);
+      regval &= ~(UART_TX_DONE_INT_ENA | UART_TXFIFO_EMPTY_INT_ENA);
       esp32_serialout(priv, UART_INT_ENA_OFFSET, regval);
     }
 
