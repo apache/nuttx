@@ -529,7 +529,36 @@ _xtensa_context_restore:
 xtensa_context_restore:
 	ENTRY(16)								/* REVISIT */
 
-	/* Restore the processor state */
+	/* Force a spill of the live registers of the thread that has been
+	 * suspended.
+	 *
+	 * _xtensa_window_spill return state:
+	 *   a2, a3: clobbered
+	 *   a4,a5,a8,a9,a12,a13: preserved
+	 *   a6,a7,a10,a11,a14,a15 clobbered if they were part of window(s)
+	 *      to be spilled, otherwise they are the same as on entry
+	 *   loop registers: Perserved
+	 *   SAR: clobbered
+	 *
+	 * We need to preserve only a2 for _xtensa_context_restore
+	 */
+
+	mov		a4, a2							/* Save a2 in a preserved register */
+	rsr		a5, PS							/* Save PS in preserved register */
+
+	movi	a3, ~(PS_WOE_MASK | PS_INTLEVEL_MASK)
+	and		a2, a5, a3						/* Clear WOE, INTLEVEL */
+	addi	a2, a2, XCHAL_EXCM_LEVEL		/* Set INTLEVEL = XCHAL_EXCM_LEVEL */
+	wsr		a2, PS							/* Apply to PS */
+	rsync
+
+	call0	_xtensa_window_spill
+	wsr		a5, PS							/* Restore PS */
+	rsync
+
+	mov		a2, a4							/* Recover a2 */
+
+	/* Restore the processor state for the newly started thread */
 
 	call0	_xtensa_context_restore			/* Restore full register state */
 
