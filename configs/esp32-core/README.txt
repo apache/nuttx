@@ -226,8 +226,7 @@ SMP
 
   3. Assertions.  On a fatal assertions, other CPUs need to be stopped.
 
-
-  for the ESP32
+OpenOCD for the ESP32
 =====================
 
   First you in need some debug environment which would be a JTAG emulator
@@ -471,7 +470,13 @@ SMP
 
   Running from IRAM
   -----------------
-  Running from IRAM is a good debug option.  You should be able to load the ELF directly via JTAG in this case, and you may not need the bootloader.  The one "gotcha" for needing the bootloader is disabling the initial watchdog, there is code in bootloader_start.c that does this.
+  *** SKIP this Section.  It is not useful information and will take you down the wrong path. ***
+  *** See instead "Sample Debug Steps" below which is a really usale procedure. ***
+
+  Running from IRAM is a good debug option.  You should be able to load the
+  ELF directly via JTAG in this case, and you may not need the bootloader.  The
+  one "gotcha" for needing the bootloader is disabling the initial watchdog, =
+  there is code in bootloader_start.c that does this.
 
   It is possible to skip the secondary bootloader and run out of IRAM using
   only the primary bootloader if your application of small enough (< 128KiB code,
