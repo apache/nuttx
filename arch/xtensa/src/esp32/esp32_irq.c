@@ -141,7 +141,7 @@ void xtensa_irq_initialize(void)
 
   (void)esp32_cpuint_initialize();
 
-#if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 3
+#if defined(CONFIG_STACK_COLORATION) && defined(HAVE_INTERRUPTSTACK)
   /* Colorize the interrupt stack for debug purposes */
 
 #warning Missing logic

@@ -150,7 +150,7 @@ void xtensa_dumpstate(void)
   uint32_t sp = xtensa_getsp();
   uint32_t ustackbase;
   uint32_t ustacksize;
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#ifdef HAVE_INTERRUPTSTACK
   uint32_t istackbase;
   uint32_t istacksize;
 #endif
@@ -165,14 +165,8 @@ void xtensa_dumpstate(void)
 
   if (rtcb->pid == 0)
     {
-#warning REVISIT: Need top of IDLE stack
-#if 0
-      ustackbase = g_idle_topstack - 4;
-      ustacksize = CONFIG_IDLETHREAD_STACKSIZE;
-#else
-      ustackbase = sp + 128;
-      ustacksize = 256;
-#endif
+      ustackbase = (uint32_t)&g_idlestack[IDLETHREAD_STACKWORDS-1];
+      ustacksize = IDLETHREAD_STACKSIZE;
     }
   else
     {
@@ -183,9 +177,9 @@ void xtensa_dumpstate(void)
   /* Get the limits on the interrupt stack memory */
 
 #warning REVISIT interrupt stack
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
-  istackbase = (uint32_t)&g_intstackbase;
-  istacksize = (CONFIG_ARCH_INTERRUPTSTACK & ~3) - 4;
+#ifdef HAVE_INTERRUPTSTACK
+  istackbase = (uint32_t)&g_intstack[INTERRUPT_STACKWORDS-1];
+  istacksize = INTERRUPTSTACK_SIZE;
 
   /* Show interrupt stack info */
 
@@ -208,7 +202,7 @@ void xtensa_dumpstate(void)
        * at the base of the interrupt stack.
        */
 
-      sp = g_intstackbase;
+      sp = &g_instack[INTERRUPTSTACK_SIZE - sizeof(uint32_t)];
       _alert("sp:     %08x\n", sp);
     }
 
@@ -229,7 +223,7 @@ void xtensa_dumpstate(void)
 
   if (sp > ustackbase || sp <= ustackbase - ustacksize)
     {
-#if !defined(CONFIG_ARCH_INTERRUPTSTACK) || CONFIG_ARCH_INTERRUPTSTACK < 4
+#ifdef HAVE_INTERRUPTSTACK
       _alert("ERROR: Stack pointer is not within allocated stack\n");
 #endif
     }

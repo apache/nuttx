@@ -34,13 +34,23 @@
 
 #include <nuttx/init.h>
 
+#include "xtensa.h"
 #include "xtensa_attr.h"
+
 #include "chip/esp32_dport.h"
 #include "chip/esp32_rtccntl.h"
 #include "esp32_clockconfig.h"
 #include "esp32_region.h"
 #include "esp32_start.h"
-#include "xtensa.h"
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* Address of the CPU0 IDLE thread */
+
+uint32_t g_idlestack[IDLETHREAD_STACKWORDS]
+  __attribute__((aligned(16) section(".noinit")));
 
 /****************************************************************************
  * Public Functions
@@ -62,6 +72,7 @@
 void IRAM_ATTR __start(void)
 {
   uint32_t regval;
+  uint32_t sp;
 
   /* Kill the watchdog timer */
 
@@ -72,6 +83,15 @@ void IRAM_ATTR __start(void)
   regval  = getreg32(0x6001f048); /* DR_REG_BB_BASE+48 */
   regval &= ~(1 << 14);
   putreg32(regval, 0x6001f048);
+
+  /* Move the stack to a known location.  Although we were give a stack
+   * pointer at start-up, we don't know where that stack pointer is positioned
+   * respect to our memory map.  The only safe option is to switch to a well-
+   * known IDLE thread stack.
+   */
+
+  sp = (uint32_t)g_idlestack + IDLETHREAD_STACKSIZE;
+  __asm__ __volatile__("mov sp, %0\n" : : "r"(sp));
 
   /* Make page 0 access raise an exception */
 
@@ -108,4 +128,5 @@ void IRAM_ATTR __start(void)
   /* Bring up NuttX */
 
   os_start();
+  for(; ; ); /* Should not return */
 }
