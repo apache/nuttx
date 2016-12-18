@@ -527,8 +527,9 @@ _xtensa_context_restore:
 	.align	4
 
 xtensa_context_restore:
-	ENTRY(16)								/* REVISIT */
+	ENTRY(16)
 
+#ifndef __XTENSA_CALL0_ABI__
 	/* Force a spill of the live registers of the thread that has been
 	 * suspended.
 	 *
@@ -557,6 +558,7 @@ xtensa_context_restore:
 	rsync
 
 	mov		a2, a4							/* Recover a2 */
+#endif
 
 	/* Restore the processor state for the newly started thread */
 
