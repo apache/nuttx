@@ -146,7 +146,7 @@
 
 struct esp32_config_s
 {
-  const uint32_t uartbase;     /* Base address of UART registers */
+  const uint32_t uartbase;      /* Base address of UART registers */
   xcpt_t   handler;             /* Interrupt handler */
   uint8_t  periph;              /* UART peripheral ID */
   uint8_t  irq;                 /* IRQ number assigned to the peripheral */
@@ -740,6 +740,8 @@ static int esp32_interrupt(struct uart_dev_s *dev)
   struct esp32_dev_s *priv;
   uint32_t regval;
   uint32_t status;
+  uint32_t enabled;
+  unsigned int nfifo;
   int passes;
   bool handled;
 
@@ -756,6 +758,7 @@ static int esp32_interrupt(struct uart_dev_s *dev)
       handled      = false;
       priv->status = esp32_serialin(priv, UART_INT_RAW_OFFSET);
       status       = esp32_serialin(priv, UART_STATUS_OFFSET);
+      enabled      = esp32_serialin(priv, UART_INT_ENA_OFFSET);
 
       /* Clear pending interrupts */
 
@@ -764,20 +767,39 @@ static int esp32_interrupt(struct uart_dev_s *dev)
                 UART_TXFIFO_EMPTY_INT_CLR);
       esp32_serialout(priv, UART_INT_CLR_OFFSET, regval);
 
-      if ((status & UART_RXFIFO_CNT_M) > 0)
+      /* Are Rx interrupts enabled?  The upper layer may hold off Rx input
+       * by disabling the Rx interrupts if there is no place to saved the
+       * data, possibly resulting in an overrun error.
+       */
+
+     if ((enabled & (UART_RXFIFO_FULL_INT_ENA | UART_RXFIFO_TOUT_INT_ENA)) != 0)
+       {
+         /* Is there any data waiting in the Rx FIFO? */
+
+         nfifo = (status & UART_RXFIFO_CNT_M) >> UART_RXFIFO_CNT_S;
+         if (nfifo > 0)
+            {
+              /* Received data in the RXFIFO! ... Process incoming bytes */
+
+              uart_recvchars(dev);
+              handled = true;
+            }
+       }
+
+      /* Are Tx interrupts enabled?  The upper layer will disable Tx interrupts
+       * when it has nothing to send.
+       */
+
+      if ((enabled & (UART_TX_DONE_INT_ENA | UART_TXFIFO_EMPTY_INT_ENA)) != 0)
         {
-          /* Received data in the RXFIFO ... process incoming bytes */
+          nfifo = (status & UART_TXFIFO_CNT_M) >> UART_TXFIFO_CNT_S;
+          if (nfifo < 0x7f)
+            {
+              /* The TXFIFO is not full ... process outgoing bytes */
 
-          uart_recvchars(dev);
-          handled = true;
-        }
-
-      if ((status & UART_TXFIFO_CNT_M) < 0x7f)
-        {
-          /* The TXFIFO is not full ... process outgoing bytes */
-
-          uart_xmitchars(dev);
-          handled = true;
+              uart_xmitchars(dev);
+              handled = true;
+            }
         }
     }
 
