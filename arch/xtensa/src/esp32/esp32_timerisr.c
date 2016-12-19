@@ -170,20 +170,15 @@ static int esp32_timerisr(int irq, uint32_t *regs)
 
 void xtensa_timer_initialize(void)
 {
-  uint64_t divisor;
+  uint32_t divisor;
   uint32_t count;
 
   /* Configured the timer0 as the system timer.
    *
-   * divisor = BOARD_CLOCK_FREQUENCY / ticks_per_sec
-   *         = BOARD_CLOCK_FREQUENCY / (ticks_per_usec * 1000000)
-   *         = (1000000 * BOARD_CLOCK_FREQUENCY) / ticks_per_usec
-   *
-   * A long long calculation is used to preserve accuracy in all cases.
+   *   divisor = BOARD_CLOCK_FREQUENCY / ticks_per_sec
    */
 
-  divisor = (1000000ull * (uint64_t)BOARD_CLOCK_FREQUENCY) / CONFIG_USEC_PER_TICK;
-  DEBUGASSERT(divisor <= UINT32_MAX);
+  divisor = BOARD_CLOCK_FREQUENCY / CLOCKS_PER_SEC;
   g_tick_divisor = divisor;
 
   /* Set up periodic timer */

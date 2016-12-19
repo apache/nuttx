@@ -56,7 +56,9 @@
 #if 0
 #  define BOARD_CLOCK_FREQUENCY 80000000
 #else
-#  define BOARD_CLOCK_FREQUENCY BOARD_XTAL_FREQUENCY
+  /* Hmmm... actually appears to be running at about 2 x the XTAL frequency */
+
+#  define BOARD_CLOCK_FREQUENCY (2 * BOARD_XTAL_FREQUENCY)
 #endif
 
 #endif /* __CONFIGS_ESP32_CORE_INCLUDE_BOARD_H */
