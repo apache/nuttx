@@ -164,6 +164,7 @@ int up_cpu_paused(int cpu)
     }
 
   spin_unlock(&g_cpu_wait[cpu]);
+  return OK;
 }
 
 /****************************************************************************

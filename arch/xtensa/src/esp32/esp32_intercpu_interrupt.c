@@ -86,7 +86,7 @@ static int esp32_fromcpu_interrupt(int fromcpu)
   int intcode;
   int tocpu;
 
-  DEBUGASSERT(regs != NULL);
+  DEBUGASSERT((unsigned)fromcpu < CONFIG_SMP_NCPUS);
 
   /* Clear the interrupt from the other CPU */
 
@@ -155,8 +155,8 @@ int xtensa_intercpu_interrupt(int tocpu, int intcode)
 {
   int fromcpu;
 
-  DEBUGASSERT((unsigned)cpu < CONFIG_SMP_NCPUS &&
-              (unsigned)incode <= UINT8_MAX);
+  DEBUGASSERT((unsigned)tocpu < CONFIG_SMP_NCPUS &&
+              (unsigned)intcode <= UINT8_MAX);
 
   /* Disable context switching so that some other thread does not attempt to
    * take the spinlock on the same CPU.
