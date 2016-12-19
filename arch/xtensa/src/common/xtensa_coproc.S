@@ -241,16 +241,18 @@ xtensa_coproc_savestate:
 	RET(16)
 
 #else
+	ENTRY(32)
 
 	/* Need to preserve a8-15.  _xtensa_coproc_savestate modifies a2-a7,
-	 * a13-a15.  So only a13-a15 need be preserved.
+	 * a13-a15.  So a13-a15 may need to be preserved.
 	 */
 
-	ENTRY(24)
 	s32i	a0,  sp, LOCAL_OFFSET(1)		/* Save return address */
-	s32i	a13, sp, LOCAL_OFFSET(2)
+#if 0
+	s32i	a13, sp, LOCAL_OFFSET(2)		/* Save clobbered registers */
 	s32i	a14, sp, LOCAL_OFFSET(3)
 	s32i	a15, sp, LOCAL_OFFSET(4)
+#endif
 
 	/* Call _xtensa_coproc_savestate() with A2=address of co-processor
 	 * save area.
@@ -261,11 +263,13 @@ xtensa_coproc_savestate:
 	/* Restore a13-15 and return */
 
 	l32i	a0,  sp, LOCAL_OFFSET(1)		/* Recover return address */
-	l32i	a13, sp, LOCAL_OFFSET(2)
+#if 0
+	l32i	a13, sp, LOCAL_OFFSET(2)		/* Restore clobbered registers */
 	l32i	a14, sp, LOCAL_OFFSET(3)
 	l32i	a15, sp, LOCAL_OFFSET(4)
+#endif
 
-	RET(24)
+	RET(32)
 
 #endif
 
@@ -441,16 +445,18 @@ xtensa_coproc_restorestate:
 	RET(16)
 
 #else
+	ENTRY(32)
 
 	/* Need to preserve a8-15.  _xtensa_coproc_savestate modifies a2-a7,
-	 * a13-a15.  So only a13-a15 need be preserved.
+	 * a13-a15.  So a13-a15 may need to be preserved.
 	 */
 
-	ENTRY(24)
 	s32i	a0,  sp, LOCAL_OFFSET(1)		/* Save return address */
-	s32i	a13, sp, LOCAL_OFFSET(2)
+#if 0
+	s32i	a13, sp, LOCAL_OFFSET(2)		/* Save clobbered values */
 	s32i	a14, sp, LOCAL_OFFSET(3)
 	s32i	a15, sp, LOCAL_OFFSET(4)
+#endif
 
 	/* Call _xtensa_coproc_restorestate() with A2=address of co-processor
 	 * save area.   Registers a0, a2-a7, a13-a15 have been trashed.
@@ -461,11 +467,13 @@ xtensa_coproc_restorestate:
 	/* Restore a13-15 and return */
 
 	l32i	a0,  sp, LOCAL_OFFSET(1)		/* Recover return address */
-	l32i	a13, sp, LOCAL_OFFSET(2)
+#if 0
+	l32i	a13, sp, LOCAL_OFFSET(2)		/* Restore clobbered registers */
 	l32i	a14, sp, LOCAL_OFFSET(3)
 	l32i	a15, sp, LOCAL_OFFSET(4)
+#endif
 
-	RET(24)
+	RET(32)
 
 #endif
 
