@@ -280,8 +280,13 @@ _double_exception_vector:
 	s32i	a0, sp, (4 * REG_PS)
 	rsr		a0, DEPC						/* Save interruptee's PC */
 	s32i	a0, sp, (4 * REG_PC)
-	rsr		a0, EXCSAVE_1					/* Save interruptee's a0 -- REVISIT */
+	rsr		a0, EXCSAVE						/* Save interruptee's a0 -- REVISIT */
 	s32i	a0, sp, (4 * REG_A0)
+
+	rsr		a0, EXCCAUSE					/* Save the EXCCAUSE register */
+	s32i	a0, sp, (4 * REG_EXCCAUSE)
+	rsr		a0, EXCVADDR					/* Save the EXCVADDR register */
+	s32i	a0, sp, (4 * REG_EXCVADDR)
 
 	s32i	a2, sp, (4 * REG_A2)
 	movi	a2, XTENSA_DOUBLE_EXCEPTION		/* Argument 1: Error code */
