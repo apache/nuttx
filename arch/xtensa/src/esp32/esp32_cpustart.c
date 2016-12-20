@@ -53,14 +53,12 @@
 #include "sched/sched.h"
 #include "xtensa.h"
 #include "chip/esp32_dport.h"
+#include "chip/esp32_rtccntl.h"
 #include "esp32_region.h"
 #include "esp32_cpuint.h"
 #include "esp32_smp.h"
 
 #ifdef CONFIG_SMP
-
-#warning REVISIT Need ets_set_appcpu_boot_addr() prototype
-void ets_set_appcpu_boot_addr(uint32_t);
 
 /****************************************************************************
  * Private Data
@@ -68,6 +66,14 @@ void ets_set_appcpu_boot_addr(uint32_t);
 
 static volatile bool g_appcpu_started;
 static sem_t g_appcpu_interlock;
+
+/****************************************************************************
+ * ROM function prototypes
+ ****************************************************************************/
+
+void Cache_Flush(int cpu);
+void Cache_Read_Enable(int cpu);
+void ets_set_appcpu_boot_addr(uint32_t start);
 
 /****************************************************************************
  * Private Functions
@@ -259,6 +265,23 @@ int up_cpu_start(int cpu)
       sem_init(&g_appcpu_interlock, 0, 0);
       sem_setprotocol(&g_appcpu_interlock, SEM_PRIO_NONE);
 
+      /* Flush and enable I-cache for APP CPU */
+
+      Cache_Flush(cpu);
+      Cache_Read_Enable(cpu);
+
+      /* Unstall the APP CPU */
+
+      regval  = getreg32(RTC_CNTL_SW_CPU_STALL_REG);
+      regval &= ~RTC_CNTL_SW_STALL_APPCPU_C1_M;
+      putreg32(regval, RTC_CNTL_SW_CPU_STALL_REG);
+
+      regval  = getreg32(RTC_CNTL_OPTIONS0_REG);
+      regval &= ~RTC_CNTL_SW_STALL_APPCPU_C0_M;
+      putreg32(regval, RTC_CNTL_OPTIONS0_REG);
+
+      /* Enable clock gating for the APP CPU */
+
       regval  = getreg32(DPORT_APPCPU_CTRL_B_REG);
       regval |= DPORT_APPCPU_CLKGATE_EN;
       putreg32(regval, DPORT_APPCPU_CTRL_B_REG);
@@ -266,6 +289,8 @@ int up_cpu_start(int cpu)
       regval  = getreg32(DPORT_APPCPU_CTRL_C_REG);
       regval &= ~DPORT_APPCPU_RUNSTALL;
       putreg32(regval, DPORT_APPCPU_CTRL_C_REG);
+
+      /* Reset the APP CPU */
 
       regval  = getreg32(DPORT_APPCPU_CTRL_A_REG);
       regval |= DPORT_APPCPU_RESETTING;
@@ -279,7 +304,7 @@ int up_cpu_start(int cpu)
 
       ets_set_appcpu_boot_addr((uint32_t)__cpu1_start);
 
-      /* And way for the initial task to run on CPU1 */
+      /* And wait for the initial task to run on CPU1 */
 
       while (!g_appcpu_started)
         {

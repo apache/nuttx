@@ -636,6 +636,29 @@ NOTES:
 
     NOTES:
 
+    1. Uses the CP2102 USB/Serial converter for the serial console.
+
+    2. I have only tested this in IRAM with UART reconfiguration disabled.
+       See "Sample Debug Steps".  In that case, NuttX is started via GDB.
+       It has, however, been reported to me that this configuration also
+       runs when written to address 0x1000 of FLASH with the esptool.py
+       (as described above).  Then NuttX is started via the second level
+       bootloader.  I cannot vouch for that since I have never tried it.
+
+    3. There are open clocking issues.  Currently clock configuration
+       logic is disabled because I don't have the technical information
+       to provide that logic -- hopefully that is coming.  As a
+       consequence, whatever clock setup was left when NuttX started is
+       used.  For the case of execution out of IRAM with GDB, the
+       settings in configs/esp32-core/include/board.h work.  To check
+       the timing, I use a stop watch and:
+
+         nsh> sleep 60
+
+       If the timing is correct in the board.h header file, the value
+       timed with the stop watch should be about 60 seconds.  If not,
+       change the frequency in the board.h header file.
+
   smp:
 
     Another NSH configuration, similar to nsh, but also enables
