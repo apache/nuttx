@@ -206,6 +206,15 @@ SMP
       CONFIG_SMP_NCPUS=2
       CONFIG_SMP_IDLETHREAD_STACKSIZE=2048
 
+  Debug Tip:  During debug session, OpenOCD may mysteriously switch from one
+  CPU to another.  This behavior can be eliminated by uncommenting one of the
+  following in scripts/esp32.cfg
+
+    # Only configure the PRO CPU
+    #set ESP32_ONLYCPU 1
+    # Only configure the APP CPU
+    #set ESP32_ONLYCPU 2
+
   Open Issues:
 
   1. Currently all device interrupts are handled on the PRO CPU only.  Critical
