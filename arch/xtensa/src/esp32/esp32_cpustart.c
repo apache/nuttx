@@ -129,24 +129,34 @@ static inline void xtensa_attach_fromcpu0_interrupt(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: xtensa_start_handler
+ * Name: xtensa_appcpu_start
  *
  * Description:
- *   This is the handler for SGI1.  This handler simply returns from the
- *   interrupt, restoring the state of the new task at the head of the ready
- *   to run list.
+ *   This is the entry point used with the APP CPU was started  via
+ *   up_cpu_start().  The actually start-up logic in in ROM and we boot up
+ *   in C code.
  *
  * Input Parameters:
- *   Standard interrupt handling
+ *   None
  *
  * Returned Value:
- *   Zero on success; a negated errno value on failure.
+ *   None, does not return
  *
  ****************************************************************************/
 
-int xtensa_start_handler(int irq, FAR void *context)
+void xtensa_appcpu_start(void)
 {
   FAR struct tcb_s *tcb = this_task();
+  register uint32_t sp;
+
+  /* Move to the stack assigned to us by up_smp_start immediately.  Although
+   * we were give a stack pointer at start-up, we don't know where that stack
+   * pointer is positioned respect to our memory map.  The only safe option
+   * is to switch to a well-known IDLE thread stack.
+   */
+
+  sp = (uint32_t)tcb->adj_stack_ptr;
+  __asm__ __volatile__("mov sp, %0\n" : : "r"(sp));
 
   sinfo("CPU%d Started\n", up_cpu_index());
 
@@ -209,7 +219,6 @@ int xtensa_start_handler(int irq, FAR void *context)
    */
 
   xtensa_context_restore(tcb->xcp.regs);
-  return OK;
 }
 
 /****************************************************************************
@@ -302,7 +311,7 @@ int up_cpu_start(int cpu)
 
       /* Set the CPU1 start address */
 
-      ets_set_appcpu_boot_addr((uint32_t)__cpu1_start);
+      ets_set_appcpu_boot_addr((uint32_t)xtensa_appcpu_start);
 
       /* And wait for the initial task to run on CPU1 */
 

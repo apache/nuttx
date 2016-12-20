@@ -88,7 +88,7 @@ CHIP_CSRCS += esp32_timerisr.c
 # Configuration-dependent ESP32 files
 
 ifeq ($(CONFIG_SMP),y)
-CHIP_ASRCS  = esp32_cpuhead.S esp32_cpuindex.S
+CHIP_ASRCS  = esp32_cpuindex.S
 CMN_CSRCS  += esp32_cpuidlestack.c esp32_cpustart.c esp32_intercpu_interrupt.c
 endif
 
