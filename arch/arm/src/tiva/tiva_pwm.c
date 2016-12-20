@@ -487,7 +487,7 @@ static int tiva_pwm_start(FAR struct pwm_lowerhalf_s *dev,
                           FAR const struct pwm_info_s *info, FAR void *handle)
 {
   FAR struct tiva_pwm_chan_s *chan = (FAR struct tiva_pwm_chan_s *)dev;
-  pwmdbg("start PWM for channel %d\n", chan->channel_id);
+  pwminfo("start PWM for channel %d\n", chan->channel_id);
 
   /* Save the handle */
 
@@ -568,6 +568,9 @@ static inline int tiva_pwm_timer(FAR struct tiva_pwm_chan_s *chan,
   uint16_t duty = info->duty;
   uint32_t frequency = info->frequency;
 
+  pwminfo("> frequency = %d\n", frequency);
+  pwminfo("> duty = %d\n", duty);
+
   /* Configure PWM countdown mode (refer to TM4C1294NC 23.4.6) */
 
   tiva_pwm_putreg(chan, TIVA_PWMn_CTL_OFFSET, 0);
@@ -590,7 +593,7 @@ static inline int tiva_pwm_timer(FAR struct tiva_pwm_chan_s *chan,
   uint32_t pwm_max_freq = g_pwm_freq;
   uint32_t load = (uint32_t)(g_pwm_freq / frequency);
 
-  pwminfo("channel %d: load = %u (%08x)\n", chan->channel_id, load, load);
+  pwminfo("> load = %u (%08x)\n", load, load);
 
   if (load >= g_pwm_counter || load < 1)
     {
@@ -610,7 +613,7 @@ static inline int tiva_pwm_timer(FAR struct tiva_pwm_chan_s *chan,
 
   uint32_t comp = (uint32_t)((1 - (float)duty / g_pwm_counter) * load);
   comp = (duty == 0) ? (comp - 1) : (comp);
-  pwminfo("channel %d: comp = %u (%08x)\n", chan->channel_id, comp, comp);
+  pwminfo("> comp = %u (%08x)\n", comp, comp);
 
   if (chan->channel_id % 2 == 0)
     {
@@ -777,11 +780,12 @@ FAR struct pwm_lowerhalf_s *tiva_pwm_initialize(int channel)
       return NULL;
     }
 
-  pwminfo("channel %d: channel_id=%d, ", channel, chan->channel_id);
-  pwminfo("controller_id=%d, controller_base=%08x, ",
-          chan->controller_id, chan->controller_base);
-  pwminfo("generator_id=%d, generator_base=%08x\n",
-          chan->generator_id, chan->generator_base);
+  pwminfo("channel %d:\n", channel);
+  pwminfo("> channel_id = %d\n", chan->channel_id);
+  pwminfo("> controller_id = %d\n", chan->controller_id);
+  pwminfo("> controller_base = %08x\n", chan->controller_base);
+  pwminfo("> generator_id = %d\n", chan->generator_id);
+  pwminfo("> generator_base = %08x\n", chan->generator_base);
 
   /* Enable PWM controller (refer to TM4C1294NC 23.4.1) */
 
