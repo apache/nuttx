@@ -509,6 +509,27 @@ static int tiva_pwm_start(FAR struct pwm_lowerhalf_s *dev,
     chan->inited = true;
   }
 
+  /* Count 0 means to generate indefinite number of pulses */
+
+  if (info->count == 0)
+  {
+    pwm_expired(chan->handle);
+
+    /* Disable interrupt */
+
+    uint32_t enable = getreg32(chan->controller_base + TIVA_PWM_INTEN_OFFSET);
+    enable &= ~(INT_ENABLE << chan->generator_id);
+    putreg32(enable, chan->controller_base + TIVA_PWM_INTEN_OFFSET);
+  }
+  else
+  {
+    /* Enable interrupt */
+
+    uint32_t enable = getreg32(chan->controller_base + TIVA_PWM_INTEN_OFFSET);
+    enable |= (INT_ENABLE << chan->generator_id);
+    putreg32(enable, chan->controller_base + TIVA_PWM_INTEN_OFFSET);
+  }
+
   /* Start the timer */
 
   return tiva_pwm_timer(chan, info);
@@ -817,12 +838,6 @@ FAR struct pwm_lowerhalf_s *tiva_pwm_initialize(int channel)
         break;
 #endif
     }
-
-  /* Enable interrupt */
-
-  uint32_t enable = getreg32(chan->controller_base + TIVA_PWM_INTEN_OFFSET);
-  enable |= (INT_ENABLE << chan->generator_id);
-  putreg32(enable, chan->controller_base + TIVA_PWM_INTEN_OFFSET);
 
 #endif
 
