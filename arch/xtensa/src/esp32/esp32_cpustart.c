@@ -41,13 +41,12 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/sched_note.h>
 
 #include "sched/sched.h"
@@ -65,7 +64,7 @@
  ****************************************************************************/
 
 static volatile bool g_appcpu_started;
-static sem_t g_appcpu_interlock;
+static volatile spinlock_t g_appcpu_interlock SP_SECTION;
 
 /****************************************************************************
  * ROM function prototypes
@@ -169,7 +168,7 @@ void xtensa_appcpu_start(void)
   /* Handle interlock*/
 
   g_appcpu_started = true;
-  sem_post(&g_appcpu_interlock);
+  spin_unlock(&g_appcpu_interlock);
 
   /* Reset scheduler parameters */
 
@@ -271,8 +270,7 @@ int up_cpu_start(int cpu)
        * have priority inheritance enabled.
        */
 
-      sem_init(&g_appcpu_interlock, 0, 0);
-      sem_setprotocol(&g_appcpu_interlock, SEM_PRIO_NONE);
+      spin_initialize(&g_appcpu_interlock, SP_LOCKED);
 
       /* Flush and enable I-cache for APP CPU */
 
@@ -315,16 +313,8 @@ int up_cpu_start(int cpu)
 
       /* And wait for the initial task to run on CPU1 */
 
-      while (!g_appcpu_started)
-        {
-          ret = sem_wait(&g_appcpu_interlock);
-          if (ret < 0)
-            {
-              DEBUGASSERT(errno == EINTR);
-            }
-        }
-
-      sem_destroy(&g_appcpu_interlock);
+      spin_lock(&g_appcpu_interlock);
+      DEBUGASSERT(g_appcpu_started);
     }
 
   return OK;
