@@ -161,7 +161,7 @@ ifeq ($(CONFIG_STM32F7_SPI),y)
 CHIP_CSRCS += stm32_spi.c
 endif
 
-ifeq ($(CONFIG_STM32F7_SDMMC1),y)
+ifeq ($(CONFIG_STM32F7_SDMMC),y)
 CHIP_CSRCS += stm32_sdmmc.c
 endif
 

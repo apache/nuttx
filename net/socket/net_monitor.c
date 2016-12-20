@@ -216,7 +216,6 @@ int net_startmonitor(FAR struct socket *psock)
 {
   FAR struct tcp_conn_s *conn;
   FAR struct devif_callback_s *cb;
-  net_lock_t save;
 
   DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
   conn = (FAR struct tcp_conn_s *)psock->s_conn;
@@ -226,7 +225,7 @@ int net_startmonitor(FAR struct socket *psock)
    * registered the monitoring callback.)
    */
 
-  save = net_lock();
+  net_lock();
   if (!(conn->tcpstateflags == TCP_ESTABLISHED ||
         conn->tcpstateflags == TCP_SYN_RCVD))
     {
@@ -244,7 +243,7 @@ int net_startmonitor(FAR struct socket *psock)
        * because the socket was already disconnected.
        */
 
-      net_unlock(save);
+      net_unlock();
       return -ENOTCONN;
     }
 
@@ -270,7 +269,7 @@ int net_startmonitor(FAR struct socket *psock)
   conn->connection_private = (FAR void *)psock;
   conn->connection_event   = connection_event;
 
-  net_unlock(save);
+  net_unlock();
   return OK;
 }
 
@@ -294,13 +293,11 @@ int net_startmonitor(FAR struct socket *psock)
 
 void net_stopmonitor(FAR struct tcp_conn_s *conn)
 {
-  net_lock_t save;
-
   DEBUGASSERT(conn);
 
   /* Free any allocated device event callback structure */
 
-  save = net_lock();
+  net_lock();
   if (conn->connection_devcb)
     {
       tcp_monitor_callback_free(conn, conn->connection_devcb);
@@ -311,7 +308,7 @@ void net_stopmonitor(FAR struct tcp_conn_s *conn)
   conn->connection_private = NULL;
   conn->connection_devcb   = NULL;
   conn->connection_event   = NULL;
-  net_unlock(save);
+  net_unlock();
 }
 
 /****************************************************************************
@@ -335,19 +332,17 @@ void net_stopmonitor(FAR struct tcp_conn_s *conn)
 
 void net_lostconnection(FAR struct socket *psock, uint16_t flags)
 {
-  net_lock_t save;
-
   DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
 
   /* Close the connection */
 
-  save = net_lock();
+  net_lock();
   connection_closed(psock, flags);
 
   /* Stop the network monitor */
 
   net_stopmonitor((FAR struct tcp_conn_s *)psock->s_conn);
-  net_unlock(save);
+  net_unlock();
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_TCP */

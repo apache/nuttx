@@ -70,32 +70,6 @@ config ARCH_BOARD_CLOUDCTRL
 		Small network relay development board. Based on the Shenzhou IV development
 		board design.
 
-config ARCH_BOARD_COMPALE86
-	bool "Compal e86 phone"
-	depends on ARCH_CHIP_CALYPSO
-	---help---
-		This configuration enables board support for Compal e86 phone.
-		This port derives from the Compal E88 port and was provided by Craig
-		Comstock.
-
-config ARCH_BOARD_COMPALE88
-	bool "Compal e88 phone"
-	depends on ARCH_CHIP_CALYPSO
-	---help---
-		This configuration enables board support for compal e88 phone.
-		This ports is based on patches contributed by Denis Carikli for both the
-		compal e99 and e88.  The patches were made by Alan Carvalho de Assis and
-		Denis Carikli using the Stefan Richter's Osmocom-bb patches.
-
-config ARCH_BOARD_COMPALE99
-	bool "Compal e99 phone"
-	depends on ARCH_CHIP_CALYPSO
-	---help---
-		This configuration enables board support for compal e88 and e99 phones.
-		This port is based on patches contributed by Denis Carikli for both the
-		compal e99 and e88.  The patches were made by Alan Carvalho de Assis and
-		Denis Carikli using the Stefan Richter's Osmocom-bb patches.
-
 config ARCH_BOARD_DEMOS92S12NEC64
 	bool "Freescale DMO9S12NE64 board"
 	depends on ARCH_CHIP_MCS92S12NEC64
@@ -170,14 +144,16 @@ config ARCH_BOARD_EKKLM3S9B96
 		TI/Stellaris EKK-LM3S9B96 board.  This board is based on the
 		an EKK-LM3S9B96 which is a Cortex-M3.
 
-config ARCH_BOARD_EZ80F910200KITG
-	bool "ZiLOG ez80f910200kitg development kit"
-	depends on ARCH_CHIP_EZ80F91
-	select ARCH_HAVE_LEDS
+config ARCH_BOARD_ESP32CORE
+	bool "Expressif ESP32 Core board V2"
+	depends on ARCH_CHIP_ESP32
 	---help---
-		ez80Acclaim! Microcontroller.  This port use the ZiLOG ez80f910200kitg
-		development kit, eZ80F091 part, and the Zilog ZDS-II Windows command line
-		tools.  The development environment is Cygwin under WinXP.
+		The ESP32 is a dual-core system from Expressif with two Harvard
+		architecture Xtensa LX6 CPUs. All embedded memory, external memory
+		and peripherals are located on the data bus and/or the instruction
+		bus of these CPUs. With some minor exceptions, the address mapping
+		of two CPUs is symmetric, meaning they use the same addresses to
+		access the same memory.
 
 config ARCH_BOARD_EZ80F910200ZCO
 	bool "ZiLOG ez80f910200zco development kit"
@@ -315,6 +291,15 @@ config ARCH_BOARD_LPCXPRESSO
 	---help---
 		Embedded Artists base board with NXP LPCExpresso LPC1768.  This board
 		is based on the NXP LPC1768.  The Code Red toolchain is used by default.
+
+config ARCH_BOARD_BAMBINO_200E
+	bool "Micromint Bambino 200E"
+	depends on ARCH_CHIP_LPC4330FBD144
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		Micromint Bambino board. This board is based on the LPC4330FBD144.
 
 config ARCH_BOARD_LPC4330_XPLORER
 	bool "NXG LPC4330-Xplorer"
@@ -666,12 +651,13 @@ config ARCH_BOARD_PIC32MZ_STARTERKIT
 
 		See www.microchip.com for further information.
 
-config ARCH_BOARD_PIRELLI_DPL10
-	bool "Pirelli DPL10 phone"
-	depends on ARCH_CHIP_CALYPSO
+config ARCH_BOARD_NR5M100_NEXYS4
+	bool "NEXT RISC-V NR5M100 on Nexys-4 board"
+	depends on ARCH_CHIP_NR5M100
+	select UART_SERIALDRIVER
 	---help---
-		This directory contains the board support for Pirelli dpl10 phones.  The
-		additions were made by Craig Comstock (with help form Alan Carvalho de Assis).
+		This is the port NuttX to the NEXT RISC-V processor runnining on a Digilent
+		Nexys-4 (non DDR version) FPGA board.
 
 config ARCH_BOARD_NUCLEO_144
 	bool "STMicro NUCLEO-144"
@@ -741,19 +727,6 @@ config ARCH_BOARD_QEMU_I486
 	---help---
 		Port of NuttX to QEMU in i486 mode.  This port will also run on real i486
 		hardwared (Google the Bifferboard).
-
-config ARCH_BOARD_RGMP
-	bool "RGMP"
-	depends on ARCH_RGMP
-	---help---
-		RGMP stands for RTOS and GPOS on Multi-Processor.  RGMP is a project for
-		running GPOS and RTOS simultaneously on multi-processor platforms. You can
-		port your favorite RTOS to RGMP together with an unmodified Linux to form a
-		hybrid operating system. This makes your application able to use both RTOS
-		and GPOS features.
-
-		See http://rgmp.sourceforge.net/wiki/index.php/Main_Page for further information
-		about RGMP.
 
 config ARCH_BOARD_SABRE_6QUAD
 	bool "NXP/Freescale i.MX6 Sabre-6Quad board"
@@ -845,6 +818,12 @@ config ARCH_BOARD_SAM3UEK
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		The port of NuttX to the Atmel SAM3U-EK development board.
+
+config ARCH_BOARD_SAM4CMP_DB
+	bool "Atmel SAM4CMP-DB development board"
+	depends on ARCH_CHIP_ATSAM4CMP16B
+	---help---
+		The port of NuttX to the Atmel SAM4CMP-DB development board.
 
 config ARCH_BOARD_SAM4EEK
 	bool "Atmel SAM4E-EK development board"
@@ -944,7 +923,8 @@ config ARCH_BOARD_STM32_BUTTERFLY2
 	---help---
 		A configuration for the Kamami STM32Butterfly2 development board
 		based on STM32F107VC micro-controler chip with optional ETH
-		board.
+		board.  See
+		https://kamami.pl/zestawy-uruchomieniowe-stm32/178507-stm32butterfly2.html
 
 config ARCH_BOARD_STM32_TINY
 	bool "STM32-Tiny board"
@@ -959,6 +939,8 @@ config ARCH_BOARD_STM32F103_MINIMUM
 	bool "STM32F103C8T6 Minimum ARM Development Board"
 	depends on ARCH_CHIP_STM32F103C8
 	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		A configuration for the STM32F103 Minimum board.
 
@@ -1368,11 +1350,9 @@ config ARCH_BOARD
 	default "arduino-mega2560"         if ARCH_BOARD_ARDUINO_MEGA2560
 	default "arduino-due"              if ARCH_BOARD_ARDUINO_DUE
 	default "avr32dev1"                if ARCH_BOARD_AVR32DEV1
+	default "bambino-200e"             if ARCH_BOARD_BAMBINO_200E
 	default "c5471evm"                 if ARCH_BOARD_C5471EVM
 	default "cloudctrl"                if ARCH_BOARD_CLOUDCTRL
-	default "compal_e86"               if ARCH_BOARD_COMPALE86
-	default "compal_e88"               if ARCH_BOARD_COMPALE88
-	default "compal_e99"               if ARCH_BOARD_COMPALE99
 	default "demo9s12ne64"             if ARCH_BOARD_DEMOS92S12NEC64
 	default "dk-tm4c129x"              if ARCH_BOARD_DK_TM4C129X
 	default "ea3131"                   if ARCH_BOARD_EA3131
@@ -1381,6 +1361,7 @@ config ARCH_BOARD
 	default "efm32-g8xx-stk"           if ARCH_BOARD_EFM32G8XXSTK
 	default "efm32gg-stk3700"          if ARCH_BOARD_EFM32GG_STK3700
 	default "ekk-lm3s9b96"             if ARCH_BOARD_EKKLM3S9B96
+	default "esp32-core"               if ARCH_BOARD_ESP32CORE
 	default "ez80f910200kitg"          if ARCH_BOARD_EZ80F910200KITG
 	default "ez80f910200zco"           if ARCH_BOARD_EZ80F910200ZCO
 	default "fire-stm32v2"             if ARCH_BOARD_FIRE_STM32
@@ -1411,6 +1392,7 @@ config ARCH_BOARD
 	default "ne64badge"                if ARCH_BOARD_NE64BADGE
 	default "ntosd-dm320"              if ARCH_BOARD_NTOSD_DM320
 	default "nutiny-nuc120"            if ARCH_BOARD_NUTINY_NUC120
+	default "nr5m100-nexys4"           if ARCH_BOARD_NR5M100_NEXYS4
 	default "olimex-efm32g880f128-stk" if ARCH_BOARD_OLIMEX_EFM32G880F128_STK
 	default "olimex-lpc1766stk"        if ARCH_BOARD_LPC1766STK
 	default "olimex-lpc2378"           if ARCH_BOARD_OLIMEXLPC2378
@@ -1429,13 +1411,11 @@ config ARCH_BOARD
 	default "pic32mx-starterkit"       if ARCH_BOARD_PIC32MX_STARTERKIT
 	default "pic32mx7mmb"              if ARCH_BOARD_PIC32MX7MMB
 	default "pic32mz-starterkit"       if ARCH_BOARD_PIC32MZ_STARTERKIT
-	default "pirelli_dpl10"            if ARCH_BOARD_PIRELLI_DPL10
 	default "nucleo-144"               if ARCH_BOARD_NUCLEO_144
 	default "nucleo-f303re"            if ARCH_BOARD_NUCLEO_F303RE
 	default "nucleo-f4x1re"            if ARCH_BOARD_NUCLEO_F401RE || ARCH_BOARD_NUCLEO_F411RE
 	default "nucleo-l476rg"            if ARCH_BOARD_NUCLEO_L476RG
 	default "qemu-i486"                if ARCH_BOARD_QEMU_I486
-	default "rgmp"                     if ARCH_BOARD_RGMP
 	default "sabre-6quad"              if ARCH_BOARD_SABRE_6QUAD
 	default "sama5d2-xult"             if ARCH_BOARD_SAMA5D2_XULT
 	default "sama5d3x-ek"              if ARCH_BOARD_SAMA5D3X_EK
@@ -1445,6 +1425,7 @@ config ARCH_BOARD
 	default "samd21-xplained"          if ARCH_BOARD_SAMD21_XPLAINED
 	default "saml21-xplained"          if ARCH_BOARD_SAML21_XPLAINED
 	default "sam3u-ek"                 if ARCH_BOARD_SAM3UEK
+	default "sam4cmp-db"               if ARCH_BOARD_SAM4CMP_DB
 	default "sam4e-ek"                 if ARCH_BOARD_SAM4EEK
 	default "sam4l-xplained"           if ARCH_BOARD_SAM4L_XPLAINED
 	default "sam4s-xplained"           if ARCH_BOARD_SAM4S_XPLAINED
@@ -1499,7 +1480,7 @@ config ARCH_HAVE_LEDS
 	bool
 
 config ARCH_LEDS
-	bool "Board LED support"
+	bool "Board LED Status support"
 	default y
 	depends on ARCH_HAVE_LEDS
 	---help---
@@ -1540,20 +1521,14 @@ endif
 if ARCH_BOARD_AVR32DEV1
 source "configs/avr32dev1/Kconfig"
 endif
+if ARCH_BOARD_BAMBINO_200E
+source "configs/bambino-200e/Kconfig"
+endif
 if ARCH_BOARD_C5471EVM
 source "configs/c5471evm/Kconfig"
 endif
 if ARCH_BOARD_CLOUDCTRL
 source "configs/cloudctrl/Kconfig"
-endif
-if ARCH_BOARD_COMPALE86
-source "configs/compal_e86/Kconfig"
-endif
-if ARCH_BOARD_COMPALE88
-source "configs/compal_e88/Kconfig"
-endif
-if ARCH_BOARD_COMPALE99
-source "configs/compal_e99/Kconfig"
 endif
 if ARCH_BOARD_DEMOS92S12NEC64
 source "configs/demo9s12ne64/Kconfig"
@@ -1578,6 +1553,9 @@ source "configs/efm32gg-stk3700/Kconfig"
 endif
 if ARCH_BOARD_EKKLM3S9B96
 source "configs/ekk-lm3s9b96/Kconfig"
+endif
+if ARCH_BOARD_ESP32CORE
+source "configs/esp32-core/Kconfig"
 endif
 if ARCH_BOARD_EZ80F910200KITG
 source "configs/ez80f910200kitg/Kconfig"
@@ -1723,9 +1701,6 @@ endif
 if ARCH_BOARD_PIC32MZ_STARTERKIT
 source "configs/pic32mz-starterkit/Kconfig"
 endif
-if ARCH_BOARD_PIRELLI_DPL10
-source "configs/pirelli_dpl10/Kconfig"
-endif
 if ARCH_BOARD_NUCLEO_144
 source "configs/nucleo-144/Kconfig"
 endif
@@ -1740,9 +1715,6 @@ source "configs/nucleo-l476rg/Kconfig"
 endif
 if ARCH_BOARD_QEMU_I486
 source "configs/qemu-i486/Kconfig"
-endif
-if ARCH_BOARD_RGMP
-source "configs/rgmp/Kconfig"
 endif
 if ARCH_BOARD_SABRE_6QUAD
 source "configs/sabre-6quad/Kconfig"
@@ -1770,6 +1742,9 @@ source "configs/saml21-xplained/Kconfig"
 endif
 if ARCH_BOARD_SAM3UEK
 source "configs/sam3u-ek/Kconfig"
+endif
+if ARCH_BOARD_SAM4CMP_DB
+source "configs/sam4cmp-db/Kconfig"
 endif
 if ARCH_BOARD_SAM4EEK
 source "configs/sam4e-ek/Kconfig"
@@ -2004,31 +1979,6 @@ config BOARDCTL_TSCTEST
 		BOARDIOC_TSCTEST_TEARDOWN boardctl() commands.  Architecture
 		specific logic must provide board_tsc_setup() and
 		board_tsc_teardown() interfaces.
-
-config BOARDCTL_ADCTEST
-	bool "Enable ADC test interfaces"
-	default n
-	---help---
-		Enables support for the BOARDIOC_ADCTEST_SETUP boardctl() command.
-		Architecture specific logic must provide board_adc_setup()
-		interface.
-
-config BOARDCTL_PWMTEST
-	bool "Enable PWM test interfaces"
-	default n
-	---help---
-		Enables support for the BOARDIOC_PWMTEST_SETUP boardctl() command.
-		Architecture specific logic must provide board_pwm_setup()
-		interface.
-
-config BOARDCTL_CANINIT
-	bool "Enable CAN initialize interface"
-	default n
-	depends on CAN
-	---help---
-		Enables support for the BOARDIOC_CAN_INITIALIZE boardctl() command.
-		Architecture specific logic must provide board_can_initialize()
-		interface.
 
 config BOARDCTL_GRAPHICS
 	bool "Enable custom graphics initialization interfaces"

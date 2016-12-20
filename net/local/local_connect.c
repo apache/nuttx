@@ -123,7 +123,7 @@ static inline void _local_semtake(sem_t *sem)
 
 int inline local_stream_connect(FAR struct local_conn_s *client,
                                 FAR struct local_conn_s *server,
-                                bool nonblock, net_lock_t state)
+                                bool nonblock)
 {
   int ret;
 
@@ -135,7 +135,7 @@ int inline local_stream_connect(FAR struct local_conn_s *client,
   if (server->lc_state != LOCAL_STATE_LISTENING ||
       server->u.server.lc_pending >= server->u.server.lc_backlog)
     {
-      net_unlock(state);
+      net_unlock();
       nerr("ERROR: Server is not listening: lc_state=%d\n",
            server->lc_state);
       nerr("   OR: The backlog limit was reached: %d or %d\n",
@@ -156,7 +156,7 @@ int inline local_stream_connect(FAR struct local_conn_s *client,
       nerr("ERROR: Failed to create FIFOs for %s: %d\n",
            client->lc_path, ret);
 
-      net_unlock(state);
+      net_unlock();
       return ret;
     }
 
@@ -170,7 +170,7 @@ int inline local_stream_connect(FAR struct local_conn_s *client,
       nerr("ERROR: Failed to open write-only FIFOs for %s: %d\n",
            client->lc_path, ret);
 
-      net_unlock(state);
+      net_unlock();
       goto errout_with_fifos;
     }
 
@@ -182,7 +182,7 @@ int inline local_stream_connect(FAR struct local_conn_s *client,
   client->lc_state = LOCAL_STATE_ACCEPT;
   local_accept_pollnotify(server, POLLIN);
   _local_semgive(&server->lc_waitsem);
-  net_unlock(state);
+  net_unlock();
 
   /* Wait for the server to accept the connections */
 
@@ -257,7 +257,6 @@ int psock_local_connect(FAR struct socket *psock,
   FAR struct local_conn_s *client;
   FAR struct sockaddr_un *unaddr = (FAR struct sockaddr_un *)addr;
   FAR struct local_conn_s *conn;
-  net_lock_t state;
 
   DEBUGASSERT(psock && psock->s_conn);
   client = (FAR struct local_conn_s *)psock->s_conn;
@@ -270,7 +269,7 @@ int psock_local_connect(FAR struct socket *psock,
 
   /* Find the matching server connection */
 
-  state = net_lock();
+  net_lock();
   for (conn = (FAR struct local_conn_s *)g_local_listeners.head;
       conn;
       conn = (FAR struct local_conn_s *)dq_next(&conn->lc_node))
@@ -290,7 +289,7 @@ int psock_local_connect(FAR struct socket *psock,
         case LOCAL_TYPE_ABSTRACT:  /* lc_path is length zero */
           {
 #warning Missing logic
-            net_unlock(state);
+            net_unlock();
             return OK;
           }
           break;
@@ -317,12 +316,11 @@ int psock_local_connect(FAR struct socket *psock,
                 if (conn->lc_proto == SOCK_STREAM)
                   {
                     ret = local_stream_connect(client, conn,
-                                               _SS_ISNONBLOCK(psock->s_flags),
-                                               state);
+                                               _SS_ISNONBLOCK(psock->s_flags));
                   }
                 else
                   {
-                    net_unlock(state);
+                    net_unlock();
                   }
 
                 return ret;
@@ -335,13 +333,13 @@ int psock_local_connect(FAR struct socket *psock,
 
         case LOCAL_TYPE_UNTYPED: /* Type is not determined until the socket is bound */
           {
-            net_unlock(state);
+            net_unlock();
             return -EINVAL;
           }
         }
     }
 
-  net_unlock(state);
+  net_unlock();
   return -EADDRNOTAVAIL;
 }
 

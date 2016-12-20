@@ -219,8 +219,8 @@ volatile pid_t g_lastpid;
  * 1. This hash table greatly speeds the determination of a new unique
  *    process ID for a task, and
  * 2. Is used to quickly map a process ID into a TCB.
- * It has the side effects of using more memory and limiting
  *
+ * It has the side effects of using more memory and limiting
  * the number of tasks to CONFIG_MAX_TASKS.
  */
 
@@ -470,10 +470,11 @@ void os_start(void)
        */
 
 #ifdef CONFIG_SMP
-      g_idletcb[cpu].cmn.flags = (TCB_FLAG_TTYPE_KERNEL | TCB_FLAG_CPU_LOCKED);
+      g_idletcb[cpu].cmn.flags = (TCB_FLAG_TTYPE_KERNEL | TCB_FLAG_NONCANCELABLE |
+                                  TCB_FLAG_CPU_LOCKED);
       g_idletcb[cpu].cmn.cpu   = cpu;
 #else
-      g_idletcb[cpu].cmn.flags = TCB_FLAG_TTYPE_KERNEL;
+      g_idletcb[cpu].cmn.flags = (TCB_FLAG_TTYPE_KERNEL | TCB_FLAG_NONCANCELABLE);
 #endif
 
 #ifdef CONFIG_SMP

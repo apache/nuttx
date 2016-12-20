@@ -120,8 +120,16 @@
 
 /* We need to have the work queue to handle SPI interrupts */
 
-#ifndef CONFIG_SCHED_WORKQUEUE
+#if !defined(CONFIG_SCHED_WORKQUEUE)
 #  error "Worker thread support is required (CONFIG_SCHED_WORKQUEUE)"
+#else
+#  if defined(CONFIG_ENCX24J600_HPWORK)
+#    define ENCWORK HPWORK
+#  elif defined(CONFIG_ENCX24J600_LPWORK)
+#    define ENCWORK LPWORK
+#  else
+#    error "Neither CONFIG_ENCX24J600_HPWORK nor CONFIG_ENCX24J600_LPWORK defined"
+#  endif
 #endif
 
 /* CONFIG_ENCX24J600_DUMPPACKET will dump the contents of each packet to the console. */
@@ -130,12 +138,6 @@
 #  define enc_dumppacket(m,a,n) lib_dumpbuffer(m,a,n)
 #else
 #  define enc_dumppacket(m,a,n)
-#endif
-
-/* The ENCX24J600 will not do interrupt level processing */
-
-#ifndef CONFIG_NET_NOINTS
-#  warning "CONFIG_NET_NOINTS should be set"
 #endif
 
 /* Low-level register debug */
@@ -273,6 +275,12 @@ struct enc_driver_s
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+/* A single packet buffer is used */
+
+static uint8_t g_pktbuf[MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE];
+
+/* Driver status structure */
 
 static struct enc_driver_s g_encx24j600[CONFIG_ENCX24J600_NINTERFACES];
 
@@ -482,7 +490,7 @@ static inline void enc_setethrst(FAR struct enc_driver_s *priv)
 {
   DEBUGASSERT(priv && priv->spi);
 
-  /* Select ENC28J60 chip */
+  /* Select ENCX24J600 chip */
 
   SPI_SELECT(priv->spi, SPIDEV_ETHERNET, true);
 
@@ -492,7 +500,7 @@ static inline void enc_setethrst(FAR struct enc_driver_s *priv)
 
   up_udelay(25);
 
-  /* De-select ENC28J60 chip. */
+  /* De-select ENCX24J600 chip. */
 
   SPI_SELECT(priv->spi, SPIDEV_ETHERNET, false);
   enc_cmddump(ENC_SETETHRST);
@@ -1827,14 +1835,13 @@ static void enc_rxabtif(FAR struct enc_driver_s *priv)
 static void enc_irqworker(FAR void *arg)
 {
   FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)arg;
-  net_lock_t lock;
   uint16_t eir;
 
   DEBUGASSERT(priv);
 
   /* Get exclusive access to both the network and the SPI bus. */
 
-  lock = net_lock();
+  net_lock();
   enc_lock(priv);
 
   /* A good practice is for the host controller to clear the Global Interrupt
@@ -1978,7 +1985,7 @@ static void enc_irqworker(FAR void *arg)
   /* Release lock on the SPI bus and the network */
 
   enc_unlock(priv);
-  net_unlock(lock);
+  net_unlock();
 }
 
 /****************************************************************************
@@ -2017,7 +2024,7 @@ static int enc_interrupt(int irq, FAR void *context)
    */
 
   priv->lower->disable(priv->lower);
-  return work_queue(HPWORK, &priv->irqwork, enc_irqworker, (FAR void *)priv, 0);
+  return work_queue(ENCWORK, &priv->irqwork, enc_irqworker, (FAR void *)priv, 0);
 }
 
 /****************************************************************************
@@ -2040,7 +2047,6 @@ static int enc_interrupt(int irq, FAR void *context)
 static void enc_toworker(FAR void *arg)
 {
   FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)arg;
-  net_lock_t lock;
   int ret;
 
   nerr("ERROR: Tx timeout\n");
@@ -2048,7 +2054,7 @@ static void enc_toworker(FAR void *arg)
 
   /* Get exclusive access to the network. */
 
-  lock = net_lock();
+  net_lock();
 
   /* Increment statistics and dump debug info */
 
@@ -2070,7 +2076,7 @@ static void enc_toworker(FAR void *arg)
 
   /* Release the network */
 
-  net_unlock(lock);
+  net_unlock();
 }
 
 /****************************************************************************
@@ -2109,7 +2115,7 @@ static void enc_txtimeout(int argc, uint32_t arg, ...)
    * can occur until we restart the Tx timeout watchdog.
    */
 
-  ret = work_queue(HPWORK, &priv->towork, enc_toworker, (FAR void *)priv, 0);
+  ret = work_queue(ENCWORK, &priv->towork, enc_toworker, (FAR void *)priv, 0);
   (void)ret;
   DEBUGASSERT(ret == OK);
 }
@@ -2134,13 +2140,12 @@ static void enc_txtimeout(int argc, uint32_t arg, ...)
 static void enc_pollworker(FAR void *arg)
 {
   FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)arg;
-  net_lock_t lock;
 
   DEBUGASSERT(priv);
 
   /* Get exclusive access to both the network and the SPI bus. */
 
-  lock = net_lock();
+  net_lock();
   enc_lock(priv);
 
   /* Verify that the hardware is ready to send another packet.  The driver
@@ -2162,7 +2167,7 @@ static void enc_pollworker(FAR void *arg)
   /* Release lock on the SPI bus and the network */
 
   enc_unlock(priv);
-  net_unlock(lock);
+  net_unlock();
 
   /* Setup the watchdog poll timer again */
 
@@ -2204,7 +2209,7 @@ static void enc_polltimer(int argc, uint32_t arg, ...)
    * occur until we restart the poll timeout watchdog.
    */
 
-  ret = work_queue(HPWORK, &priv->pollwork, enc_pollworker, (FAR void *)priv, 0);
+  ret = work_queue(ENCWORK, &priv->pollwork, enc_pollworker, (FAR void *)priv, 0);
   (void)ret;
   DEBUGASSERT(ret == OK);
 }
@@ -2858,6 +2863,7 @@ int enc_initialize(FAR struct spi_dev_s *spi,
   /* Initialize the driver structure */
 
   memset(g_encx24j600, 0, CONFIG_ENCX24J600_NINTERFACES*sizeof(struct enc_driver_s));
+  priv->dev.d_buf     = g_pktbuf;     /* Single packet buffer */
   priv->dev.d_ifup    = enc_ifup;     /* I/F up (new IP address) callback */
   priv->dev.d_ifdown  = enc_ifdown;   /* I/F down callback */
   priv->dev.d_txavail = enc_txavail;  /* New TX data callback */

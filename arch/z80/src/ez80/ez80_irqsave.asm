@@ -1,5 +1,5 @@
 ;**************************************************************************
-; arch/z80/src/ez80/ez80_up_irq_save.asm
+; arch/z80/src/ez80/ez80_irqsave.asm
 ;
 ;   Copyright (C) 2008 Gregory Nutt. All rights reserved.
 ;   Author: Gregory Nutt <gnutt@nuttx.org>

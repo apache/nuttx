@@ -44,6 +44,7 @@
 #include <debug.h>
 
 #include <nuttx/i2c/i2c_master.h>
+#include <nuttx/sensors/qencoder.h>
 #include <arch/board/board.h>
 
 #include <nuttx/drivers/pwm.h>
@@ -65,7 +66,7 @@
 #  define HAVE_PWM
 #endif
 
-#ifdef CONFIG_TM4C1294_LAUNCHPAD_QEI
+#if defined(CONFIG_TIVA_QEI0) || defined(CONFIG_TIVA_QEI1)
 #  define HAVE_QEI
 #endif
 
@@ -247,6 +248,7 @@ static void tm4c_pwm(void)
  *
  ****************************************************************************/
 
+#ifdef HAVE_QEI
 static void tm4c_qei_register(int id)
 {
   FAR struct qe_lowerhalf_s *dev;
@@ -268,6 +270,7 @@ static void tm4c_qei_register(int id)
         }
     }
 }
+#endif
 
 /****************************************************************************
  * Name: tm4c_qei

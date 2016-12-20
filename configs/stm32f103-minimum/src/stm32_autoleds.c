@@ -59,7 +59,7 @@
 static inline void set_led(bool v)
 {
   ledinfo("Turn LED %s\n", v? "on":"off");
-  stm32_gpiowrite(GPIO_LED, !v);
+  stm32_gpiowrite(GPIO_LED1, !v);
 }
 
 /****************************************************************************
@@ -75,7 +75,7 @@ void board_autoled_initialize(void)
 {
   /* Configure LED GPIO for output */
 
-  stm32_configgpio(GPIO_LED);
+  stm32_configgpio(GPIO_LED1);
 }
 
 /****************************************************************************

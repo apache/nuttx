@@ -61,10 +61,10 @@ extern "C"
 /* The default SYSLOG channel */
 
 struct syslog_channel_s; /* Forward reference */
-EXTERN const struct syslog_channel_s g_default_syslog_channel;
+EXTERN const struct syslog_channel_s g_default_channel;
 
 /* This is the current syslog channel in use.  It initially points to
- * g_default_syslog_channel.
+ * g_default_channel.
  */
 
 EXTERN FAR const struct syslog_channel_s *g_syslog_channel;

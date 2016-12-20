@@ -105,6 +105,12 @@
 #  endif
 #endif
 
+#if defined(CONFIG_STM32_STM32F37XX)
+#define PWR_CR_ENSD1           (1 << 9)   /* Bit 9: Enable SDADC1 */
+#define PWR_CR_ENSD2           (1 << 10)  /* Bit 10: Enable SDADC2 */
+#define PWR_CR_ENSD3           (1 << 11)  /* Bit 11: Enable SDADC3 */
+#endif
+
 #if defined(CONFIG_STM32_STM32L15XX)
 #  define PWR_CR_ULP           (1 << 9)  /* Ultralow power mode */
 #  define PWR_CR_FWU           (1 << 10) /* Fast wake-up */
@@ -132,7 +138,8 @@
 #define PWR_CSR_SBF            (1 << 1)  /* Bit 1:  Standby Flag */
 #define PWR_CSR_PVDO           (1 << 2)  /* Bit 2:  PVD Output */
 
-#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F37XX) || \
+    defined(CONFIG_STM32_STM32F40XX)
 #  define PWR_CSR_BRR          (1 << 3)  /* Bit 3:  Backup regulator ready */
 #elif defined(CONFIG_STM32_STM32L15XX)
 #  define PWR_CSR_VREFINTRDYF  (1 << 3)  /* Bit 3: Internal voltage reference (VREFINT) ready flag */
@@ -143,7 +150,7 @@
 #if defined(CONFIG_STM32_STM32F30XX)
 #  define PWR_CSR_EWUP1        (1 << 8)  /* Bit 8:  Enable WKUP1 pin */
 #  define PWR_CSR_EWUP2        (1 << 9)  /* Bit 9:  Enable WKUP2 pin */
-#elif defined(CONFIG_STM32_STM32L15XX)
+#elif defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F37XX)
 #  define PWR_CSR_EWUP1        (1 << 8)  /* Bit 8:  Enable WKUP1 pin */
 #  define PWR_CSR_EWUP2        (1 << 9)  /* Bit 9:  Enable WKUP2 pin */
 #  define PWR_CSR_EWUP3        (1 << 10) /* Bit 8:  Enable WKUP3 pin */

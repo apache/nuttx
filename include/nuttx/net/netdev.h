@@ -227,23 +227,19 @@ struct net_driver_s
   net_ipv6addr_t d_ipv6netmask; /* Network IPv6 subnet mask */
 #endif
 
-  /* The d_buf array is used to hold incoming and outgoing packets. The device
-   * driver should place incoming data into this buffer. When sending data,
-   * the device driver should read the link level headers and the TCP/IP
-   * headers from this buffer. The size of the link level headers is
+  /* The d_buf array is used to hold incoming and outgoing packets. The
+   * device driver should place incoming data into this buffer. When sending
+   * data, the device driver should read the link level headers and the
+   * TCP/IP headers from this buffer. The size of the link level headers is
    * configured by the NET_LL_HDRLEN(dev) define.
    *
    * The network will handle only a single buffer for both incoming and
-   * outgoing packets.  However, the driver design may be concurrently send
-   * and filling separate, break-off buffers if CONFIG_NET_MULTIBUFFER is
-   * defined.  That buffer management must be controlled by the driver.
+   * outgoing packets.  However, the driver design may be concurrently
+   * sending and filling separate, break-off buffers.  That buffer
+   * management must be controlled by the driver.
    */
 
-#ifdef CONFIG_NET_MULTIBUFFER
-  uint8_t *d_buf;
-#else
-  uint8_t d_buf[MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE];
-#endif
+  FAR uint8_t *d_buf;
 
   /* d_appdata points to the location where application data can be read from
    * or written to in the the packet buffer.

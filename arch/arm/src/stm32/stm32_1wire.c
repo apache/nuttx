@@ -56,6 +56,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/clock.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/drivers/1wire.h>
 
 #include <arch/board/board.h>
@@ -81,7 +82,11 @@
 #define WRITE_TX0       0x00
 #define WRITE_TX1       0xFF
 
-#define PIN_OPENDRAIN(GPIO) ((GPIO) | GPIO_OPENDRAIN)
+#define PIN_OPENDRAIN(GPIO) ((GPIO) | GPIO_CNF_OUTOD)
+
+#if defined(CONFIG_STM32_STM32F10XX)
+#  define USART_CR3_ONEBIT (0)
+#endif
 
 /****************************************************************************
  * Private Types
@@ -568,13 +573,13 @@ static void stm32_1wire_set_apb_clock(struct stm32_1wire_priv_s *priv,
       regaddr = STM32_RCC_APB1ENR;
       break;
 #endif
-#ifdef CONFIG_STM32_UART4
+#ifdef CONFIG_STM32_UART4_1WIREDRIVER
     case STM32_UART4_BASE:
       rcc_en = RCC_APB1ENR_UART4EN;
       regaddr = STM32_RCC_APB1ENR;
       break;
 #endif
-#ifdef CONFIG_STM32_UART5
+#ifdef CONFIG_STM32_UART5_1WIREDRIVER
     case STM32_UART5_BASE:
       rcc_en = RCC_APB1ENR_UART5EN;
       regaddr = STM32_RCC_APB1ENR;
@@ -586,13 +591,13 @@ static void stm32_1wire_set_apb_clock(struct stm32_1wire_priv_s *priv,
       regaddr = STM32_RCC_APB2ENR;
       break;
 #endif
-#ifdef CONFIG_STM32_UART7
+#ifdef CONFIG_STM32_UART7_1WIREDRIVER
     case STM32_UART7_BASE:
       rcc_en = RCC_APB1ENR_UART7EN;
       regaddr = STM32_RCC_APB1ENR;
       break;
 #endif
-#ifdef CONFIG_STM32_UART8
+#ifdef CONFIG_STM32_UART8_1WIREDRIVER
     case STM32_UART8_BASE:
       rcc_en = RCC_APB1ENR_UART8EN;
       regaddr = STM32_RCC_APB1ENR;
@@ -740,6 +745,12 @@ static inline void stm32_1wire_sem_init(FAR struct stm32_1wire_priv_s *priv)
 {
   sem_init(&priv->sem_excl, 0, 1);
   sem_init(&priv->sem_isr, 0, 0);
+
+  /* The sem_isr semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
+  sem_setprotocol(&priv->sem_isr, SEM_PRIO_NONE);
 }
 
 /****************************************************************************

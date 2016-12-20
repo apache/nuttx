@@ -3560,7 +3560,7 @@ static inline void stm32_otginterrupt(FAR struct stm32_usbdev_s *priv)
 
   /* Clear OTG interrupt */
 
-  stm32_putreg(retval, STM32_OTG_GOTGINT);
+  stm32_putreg(regval, STM32_OTG_GOTGINT);
 }
 #endif
 
@@ -4230,7 +4230,9 @@ static void stm32_epin_disable(FAR struct stm32_ep_s *privep)
 
   /* Clear the EPDISD interrupt indication */
 
-  stm32_putreg(OTG_DIEPINT_EPDISD, stm32_getreg(regaddr));
+  regval = stm32_getreg(regaddr);
+  regval |= OTG_DIEPINT_EPDISD;
+  stm32_putreg(regval, regaddr);
 
   /* Flush any data remaining in the TxFIFO */
 

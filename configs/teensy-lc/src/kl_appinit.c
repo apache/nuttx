@@ -45,6 +45,8 @@
 
 #include <nuttx/board.h>
 
+#include "teensy-lc.h"
+
 #ifdef CONFIG_LIB_BOARDCTL
 
 /****************************************************************************
@@ -78,6 +80,19 @@
 
 int board_app_initialize(uintptr_t arg)
 {
+  int ret;
+
+#ifdef CONFIG_PWM
+  /* Initialize PWM and register the PWM device. */
+
+  ret = kl_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: kl_pwm_setup() failed: %d\n", ret);
+    }
+#endif
+
+  UNUSED(ret);
   return OK;
 }
 

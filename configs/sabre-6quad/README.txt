@@ -101,6 +101,26 @@ Status
 
     +if (up_cpu_index() == 0) return 17; // REMOVE ME
 
+2016-11-26: With regard to SMP, the major issue is cache coherency.  I added
+  some special build logic to move spinlock data into the separate, non-
+  cached section.  That gives an improvement in performance but there are
+  still hangs.  These, I have determined, are to other kinds of cache
+  coherency problems.  Semaphores, message queues, etc.  basically all
+  shared data must be made coherent.
+
+  I also added some SCU controls that should enable cache consistency for SMP
+  CPUs, but I don't think I have that working right yet.  See the SMP section
+  below for more information.
+
+2016-11-28:  SMP is unusable until the SCU cache coherency logic is fixed.
+  I do not know how to do that now.
+
+2016-12-01:  I committed a completely untest SPI driver.  This was taken
+  directly from the i.MX1 and is most certainly not ready for use yet.
+
+2016-12-07:  Just a note to remind myself.  The PL310 L2 cache has *not*
+  yet been enbled.
+
 Platform Features
 =================
 
@@ -482,9 +502,6 @@ The i.MX6 6Quad has 4 CPUs.  Support is included for testing an SMP
 configuration.  That configuration is still not yet ready for usage but can
 be enabled with the following configuration settings:
 
-  Build Setup:
-    CONFIG_EXPERIMENTAL=y
-
   RTOS Features -> Tasks and Scheduling
     CONFIG_SPINLOCK=y
     CONFIG_SMP=y
@@ -495,53 +512,64 @@ Open Issues:
 
 1. Currently all device interrupts are handled on CPU0 only.  Critical sections will
    attempt to disable interrupts but will now disable interrupts only on the current
-   CPU (which may not be CPU0).  Perhaps that should be a spinlock to prohibit
-   execution of interrupts on CPU0 when other CPUs are in a critical section?
+   CPU (which may not be CPU0).  There is a spinlock to prohibit entrance into these
+   critical sections in interrupt handlers of other CPUs.
 
-2. Cache Concurency.  This is a complex problem.  There is logic in place now to
-   clean CPU0 D-cache before starting a new CPU and for invalidating the D-Cache
-   when the new CPU is started.  REVISIT:  Seems that this should not be necessary.
-   If the Shareable bit set in the MMU mappings and my understanding is that this
-   should keep cache coherency at least within a cluster.  I need to study more
-   how the inner and outer shareable attribute works to control cacheing
+   When the critical section is used to lock a resource that is also used by
+   interupt handling, the interrupt handling logic must also take the spinlock.
+   This will cause the interrupt handlers on other CPUs to spin until
+   leave_critical_section() is called.  More verification is needed.
 
-   But there may are many, many more such cache coherency issues if I cannot find
-   a systematic way to manage cache coherency.
+2. Cache Concurency.  Cache coherency in SMP configurations is managed by the
+   MPCore snoop control unit (SCU).  But I don't think I have the set up
+   correctly yet.
 
-   http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dht0008a/CJABEHDA.html
-   http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.den0024a/CEGDBEJE.html
+   Currently cache inconsistencies appear to be the root cause of all current SMP
+   issues.  SMP works as expected if the caches are disabled, but otherwise there
+   are problems (usually hangs):
 
-   Try:
+   This will disable the caches:
 
-    --- mmu.h.orig  2016-05-20 13:09:34.773462000 -0600
-    +++ mmu.h       2016-05-20 13:03:13.261978100 -0600
-    @@ -572,8 +572,14 @@
+diff --git a/arch/arm/src/armv7-a/arm_head.S b/arch/arm/src/armv7-a/arm_head.S
+index 27c2a5b..2a6274c 100644
+--- a/arch/arm/src/armv7-a/arm_head.S
++++ b/arch/arm/src/armv7-a/arm_head.S
+@@ -454,6 +454,7 @@ __start:
+         * after SMP cache coherency has been setup.
+         */
 
-     #define MMU_ROMFLAGS         (PMD_TYPE_SECT | PMD_SECT_AP_R1 | PMD_CACHEABLE | \
-                                   PMD_SECT_DOM(0))
-    -#define MMU_MEMFLAGS         (PMD_TYPE_SECT | PMD_SECT_AP_RW1 | PMD_CACHEABLE | \
-    +#ifdef CONFIG_SMP
-    +
-    +#  define MMU_MEMFLAGS       (PMD_TYPE_SECT | PMD_SECT_AP_RW1 | PMD_CACHEABLE | \
-    +                              PMD_SECT_S | PMD_SECT_DOM(0))
-    +#else
-    +#  define MMU_MEMFLAGS       (PMD_TYPE_SECT | PMD_SECT_AP_RW1 | PMD_CACHEABLE | \
-                                   PMD_SECT_DOM(0))
-    +#endif
-     #define MMU_IOFLAGS          (PMD_TYPE_SECT | PMD_SECT_AP_RW1 | PMD_DEVICE | \
-                                   PMD_SECT_DOM(0) | PMD_SECT_XN)
-     #define MMU_STRONGLY_ORDERED (PMD_TYPE_SECT | PMD_SECT_AP_RW1 | \
++#if 0 // REMOVE ME
+ #if !defined(CPU_DCACHE_DISABLE) && !defined(CONFIG_SMP)
+        /* Dcache enable
+         *
+@@ -471,6 +472,7 @@ __start:
 
-3. Assertions.  On a fatal assertions, other CPUs need to be stopped.  The SCR,
-   however, only supports disabling CPUs 1 through 3.  Perhaps if the assertion
-   occurs on CPUn, n > 0, then it should use and SGI to perform the assertion
-   on CPU0 always.  From CPU0, CPU1-3 can be disabled.
+        orr             r0, r0, #(SCTLR_I)
+ #endif
++#endif // REMOVE ME
 
-4. Caching probabaly interferes with spinlocks as they are currently implemented.
-   Waiting on a cached copy of the spinlock may result in a hang or a failure to
-   wait.
+ #ifdef CPU_ALIGNMENT_TRAP
+        /* Alignment abort enable
+diff --git a/arch/arm/src/armv7-a/arm_scu.c b/arch/arm/src/armv7-a/arm_scu.c
+index eedf179..1db2092 100644
+--- a/arch/arm/src/armv7-a/arm_scu.c
++++ b/arch/arm/src/armv7-a/arm_scu.c
+@@ -156,6 +156,7 @@ static inline void arm_set_actlr(uint32_t actlr)
 
-5. Do spinlocks need to go into a special "strongly ordered" memory region?
+ void arm_enable_smp(int cpu)
+ {
++#if 0 // REMOVE ME
+   uint32_t regval;
+
+   /* Handle actions unique to CPU0 which comes up first */
+@@ -222,6 +223,7 @@ void arm_enable_smp(int cpu)
+   regval  = arm_get_sctlr();
+   regval |= SCTLR_C;
+   arm_set_sctlr(regval);
++#endif // REMOVE ME
+ }
+
+ #endif
 
 Configurations
 ==============
@@ -631,7 +659,6 @@ Configuration sub-directories
        command.  To disable this RAMLOG feature, disable the following:
 
        Device Drivers:  CONFIG_RAMLOG
-
 
   smp
   ---

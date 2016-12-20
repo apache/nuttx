@@ -85,8 +85,9 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
-#include <nuttx/i2c/i2c_master.h>
 #include <nuttx/clock.h>
+#include <nuttx/semaphore.h>
+#include <nuttx/i2c/i2c_master.h>
 
 #include <arch/board/board.h>
 
@@ -101,7 +102,7 @@
 #if defined(CONFIG_STM32_I2C1) || defined(CONFIG_STM32_I2C2) || defined(CONFIG_STM32_I2C3)
 /* This implementation is for the STM32 F1, F2, and F4 only */
 
-#if defined(CONFIG_STM32_STM32F30XX)
+#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -899,8 +900,14 @@ static inline void stm32_i2c_sem_post(FAR struct stm32_i2c_priv_s *priv)
 static inline void stm32_i2c_sem_init(FAR struct stm32_i2c_priv_s *priv)
 {
   sem_init(&priv->sem_excl, 0, 1);
+
 #ifndef CONFIG_I2C_POLLED
+  /* This semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
   sem_init(&priv->sem_isr, 0, 0);
+  sem_setprotocol(&priv->sem_isr, SEM_PRIO_NONE);
 #endif
 }
 
@@ -1949,7 +1956,7 @@ out:
 FAR struct i2c_master_s *stm32_i2cbus_initialize(int port)
 {
   struct stm32_i2c_priv_s * priv = NULL;  /* private data of device with multiple instances */
-  irqtate_t flags;
+  irqstate_t flags;
 
 #if STM32_PCLK1_FREQUENCY < 4000000
 #   warning STM32_I2C_INIT: Peripheral clock must be at least 4 MHz to support 400 kHz operation.

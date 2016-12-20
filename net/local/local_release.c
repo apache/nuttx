@@ -69,12 +69,11 @@
 
 int local_release(FAR struct local_conn_s *conn)
 {
-  net_lock_t state;
 
   /* There should be no references on this structure */
 
   DEBUGASSERT(conn->lc_crefs == 0);
-  state = net_lock();
+  net_lock();
 
 #ifdef CONFIG_NET_LOCAL_STREAM
   /* We should not bet here with state LOCAL_STATE_ACCEPT.  That is an
@@ -126,7 +125,7 @@ int local_release(FAR struct local_conn_s *conn)
   /* Free the connection structure */
 
   local_free(conn);
-  net_unlock(state);
+  net_unlock();
   return OK;
 }
 

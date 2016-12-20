@@ -61,6 +61,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Standard time definitions (in units of seconds) */
 
 #define SEC_PER_MIN  ((time_t)60)
@@ -151,7 +152,7 @@ static inline int clock_basetime(FAR struct timespec *tp)
    * month, and date
    */
 
-  jdn = clock_calendar2utc(CONFIG_START_YEAR, CONFIG_START_MONTH,
+  jdn = clock_calendar2utc(CONFIG_START_YEAR, CONFIG_START_MONTH - 1,
                            CONFIG_START_DAY);
 
   /* Set the base time as seconds into this julian day. */

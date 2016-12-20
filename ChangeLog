@@ -1676,7 +1676,7 @@
 	* configs/*/ld.script: Removed 'sh_link not set for section .ARM.edix' for
 	  a few of the builds.  In you have this warning, it can be removed with the
 	  following change to the ld.script file:
-	
+
 		+ __exidx_start = ABSOLUTE(.);
 		.ARM.exidx : {
 		-     __exidx_start = ABSOLUTE(.);
@@ -4374,7 +4374,7 @@
 	  significant amounts of time (2013-03-18).
 	* arch/arm/src/armv7-h/ram_vectors.h, up_ramvec_*.c, arch/arm/src/*/*_irq.c,
 	  and Make.defs:  Add support for modifiable interrupt vectors in RAM
-      (2013-03-18).
+	  (2013-03-18).
 	* arch/arm/src/armv7-m/up_exception.S, sam3u/sam3u_vectors.S, and
 	  lpc17xx/lpc17_vectors.S: In exception handling with CONFIG_NUTTX_KERNEL,
 	  need to explicity set and clear the privilege bit in the CONTROL
@@ -12393,7 +12393,7 @@
 	  (2016-07-23).
 	* Freedom-K64F:  Add PWM support.  From Jordan MacIntyre (2016-07-25).
 
-7.18 2016-xx-xx Gregory Nutt <gnutt@nuttx.org>
+7.18 2016-10-08 Gregory Nutt <gnutt@nuttx.org>
 
 	* drivers/serial/pty.c, serial.c, usbdev/cdcacm.c, include/nuttx/fs/ioctl.h:
 	  Fix FIONWRITE and add FIONSPACE.  All implementations of FIONWRITE
@@ -12672,3 +12672,689 @@
 	  Vyhovanec (2016-09-02).
 	* MTD: SPI-based driver for Macronix MX25L3233F or MX25L6433F.  From
 	  Aleksandr Vyhovanec (2016-09-02).
+	* sched/: The TCB nchildren field should not be incremented when
+	  pthreads are created (2016-09-06).
+	* sched/: Move fields related to parent/child task relationship out of
+	  TCB into group structure (2016-09-06).
+	* STM32L4: Add support for USART3-USART5.  For STM32L4 parts, the higher
+	  number USART ports supported varies.  Add the HAVE_USARTx definitions
+	  to the configuration to allow enabling the higher numbered USART ports.
+	  From Jim Wylder (2016-09-15).
+	* configs/stm32l476-mdk: Support basic booting and nsh on Motorola MDK.
+	  The Motorola MDK is based off of an earlier version of NuttX.  This
+	  only provides a basic NSH shell.  From Jim Wylder (2016-09-15).
+	* STM32 USB: Set USB address to avoid a failed assertion.  From Pierre-noel
+	  Bouteville (2016-09-15).
+	* STM32 L4 and L7 USB: Pierre's assertion-avoidance change should also be
+	  applied to STM32 F7 and L4 (2016-09-15).
+	* sched/: mq_send() was not setting the errno value on certain failures
+	  to allocate a message (2016-09-15).
+	* include/nuttx/modem:  Move all modem-related IOCTL commands to a common
+	  file to assure that they will be unique (2016-09-16).
+	* STM32 F4 Discovery:  Add support for XEN1210 3D-board.  From Alan
+	  Carvalho de Assis (2016-09-17).
+	* drivers/sensors: Adds support for the  Sensixs XEN1210 3D-board.  This
+	  sensor is used on NANOSATC-BR2 a Brazillian CUBESAT project.  From
+	  Alan Carvalho de Assis (2016-09-16).
+	* include/analog/dac.h: Make DAC structure packed.  From Marc Rechté
+	  (2016-09-20).
+	* All SAM Ethernet Drivers: Add support so that the drivers can be built
+	  with CONFIG_NET_MULTIBUFFER=y (2016-09-20).
+	* Tiva Ethernet:  Needs support for CONFIG_NET_MULTIBUFFER=y (2016-09-20).
+	* drivers/net: NET_TUN=y => NET_MULTIBUFFER=y.  From Vladimir
+	  Komendantskiy (2016-09-20).
+	* SAM3/4: Fix GPIO pull-up/down code. Enabling the pull-down resistor
+	  while the pull-up resistor is still enabled is not possible. In this
+	  case, the write of PIO_PPDER for the relevant I/O line is discarded.
+	  Likewise, enabling the pull-up resistor while the pull-down resistor
+	  is still enabled is not possible. In this case, the write of PIO_PUER
+	  for the relevant I/O line is discarded.  From Wolfgang Reißnegger
+	  (2016-09-20).
+	* SAM GPIO: Apply Wolfgang's change for SAM3/4 to SAMA5 and SAMV7
+	  (2016-09-20).
+	* Tiva QEI: Add QEI lower-half driver impl. for Tiva series chip.  From
+	  Young (2016-09-21).
+	* STM32, L4, and F7: Remove GPIO_ETH_RMII_TX_CLK. TX_CLK is not present
+	  in RMII. Mateusz Szafoni (2016-09-22).
+	* sched/: Define 'group' even if HAVE_GROUPID is not set.  From Mateusz
+	  Szafoni (2016-09-22).
+	* sched/: vector table should have dimension NR_IRQS, not NR_IRQS+1.
+	  From Sagitta Li (2016-09-22).
+	* fs/mount: Corrects a bad assertion noted by Pierre-noel Bouteville.
+	  Also fixes a reference counting problem in an error condition:  When
+	  the mountpoint inode is found but is not an appropriate mountpoint,
+	  the reference count on the inode was not being decremented (2016-09-22).
+	* libnx/nxglib: Fix handling of near-horizontal lines of width 1 in
+	  nxgl_splitline().  Missing handling for degenerate condition caused
+	  width 1 lines such as (0, 0) - (100, 10) to have gaps in the drawing.
+	  From Petteri Aimonen (2016-09-22).
+	* drivers/net/slip.c: Fix calculations using MSEC_PER_TICK.  If
+	  USEC_PER_TICK is less than 1000, then MSEC_PER_TICK will be zero.  It
+	  will be inaccurate in any case (2016-09-25).
+	* Tiva QEI: Add a new ioctl command (set MAXPOS) for tiva QEI.  From
+	  Young (2016-09-26).
+	* LPC43xx Serial: There are some small problems in LPC43xx RS485 mode
+	  configuration. In particular: (1) UART0,2,3 do not have DTR pins
+	  (different from UART1), so, Kconfig needs to be adjusted. (2)
+	  lpc43_uart.c in RS485 mode only configures DIR pin, but doesn't enable
+	  pin output for UART0,2,3. (3) should be option to reverse DIR control
+	  pin output polarity. (4) lpc43xx/chip/lpc43_uart.h doesn't have USART3
+	  definitions.  NOTE: I didn't modified and didn't tested USART1, as it
+	  has different hardware.  From Vytautas Lukenskas.  From Vytautas
+	  Lukenskas (2016-09-30).
+	* STM32 Ethernet: Correct typo in conditional logic.  From Neil Hancock
+	  (2016-10-01).
+	* sched/pthread and task:  When a pthread is started, there is a small
+	  bit of logic that will run on the thread of execution of the new
+	  pthread.  In the case where the new pthread has a lower priority than
+	  the parent thread, then this could cause both the parent thread and
+	  the new pthread to be blocked at the priority of the lower priority
+	  pthread (assuming that CONFIG_PRIORITY_INHERITANCE is not selected).
+	  This change temporarily boosts the priority of the new pthread to at
+	  least the priority of the new pthread to at least the priority of the
+	  parent thread.  When that bit of logic has executed on the thread of
+	  execution of the new pthread, it will then drop to the correct
+	  priority (if necessary) before calling into the new pthread's entry
+	  point (2016-10-01).
+	* configs/stm32f103-minimum: Add stm32_bringup support and userled
+	  example to STM32F103 Minimum board.  From Alan Carvalho de Assis
+	  (2016-10-02).
+	* STM32 L4: Add support for quadrature encoders on STM32L4. Sebastien
+	  Lorquet (2016-10-02).
+	* configs: Add support for qencoders on various nucleo boards.  From
+	  Sebastien Lorquet (2016-10-03).
+	* STM32 L4 USB Device: Fixed L4 USB Driver by avoiding SETUPDONE and
+	  EPOUT_SETUP.  From David Sidrane (2016-10-04).
+	* configs/olimex-stm32-e407: Add some networking configurations.  From
+	  Mateusz Szafoni (2016-10-06).
+	* STM32 SPI: stm32_modifycr2 should be available on all platforms if DMA
+	  is enabled. (2016-10-06).
+	* STM32 DMA2D: fix an error in up_dma2dcreatelayer where an invalid
+	  pointer was returned when a certain underlying function failed.  From
+	  Jens Gräf (2016-10-07).
+	* include/nuttx/fs/nxffs.h: Needs forward reference to struct mtd_dev_s
+	  and needs to include stdbool.h (2016-10-09).
+	* STM32F103 Minimum: Note in Kconfig that the board supports buttons.
+	  From Alan Carvalho de Assis (2016-10-11).
+	* STM32F103 Minimum: Add button support.   From Alan Carvalho de Assis
+	  (2016-10-11).
+	* arch/arm/kinetis and configs/freedom-k64f: Add UID Unique ID.  From
+	  Neil Hancock (2016-10-13).
+	* arch/arm/src/stm32l4: (1) too many parentheses when calculating max
+	  chan count and (2) channel 4 does not have a complementary output. From
+	  Sebastien Lorquet (2016-10-14).
+	* arch/arm/src/stm32l4: Support Complementary PWM outputs on STM32L4.
+	  From Sebastien Lorquet (2016-10-14).
+	* Support PWM testing on board nucleo-l476.  From Sebastien Lorquet
+	  (2016-10-14).
+	* arch/arm/src/stm32: Support oversampling by 8 for the STM32 F4.
+	  From David Sidrane (2016-10-15).
+	* libc/stdio: Fixes sscanf %sn where strlen(data) < n.  From David
+	  Sidrane (2016-10-15).
+	* arch/risc-v: Add support for the RISC-V architecture and
+	  configs/nr5m100-nexys4 board.  I will be making the FPGA code for
+	  this available soon (within a week I would say).  The board support on
+	  this is pretty thin, but it seems like maybe a good idea to get the base
+	  RISC-V stuff in since there are people interested in it.  From Ken
+	  Pettit (2016-10-16).
+	* C library:  Add a dummy setlocale() function to avoid drawing the
+	  function from newlib (2016-10-17).
+	* libc/wchar: Add wcslen, wmemchr, wmemcmp, wmemcpy and wmemset to NuttX.
+	  From Alan Carvalho de Assis (2016-10-17).
+	* syscalls: Add setlocale to libc.csv (2016-10-17).
+	* libc/locale: Add clocale header file (2016-10-18).
+	* libc/wchar:  Add functions btowc, mbrtowc, mbtowc, wcscmp, wcscoll,
+	  wmemmove.  From Alan Carvalho de Assis (2016-10-18).
+	* usbhost/enumerate: fix possible buffer overwrite.  From Janne Rosberg
+	  (2016-10-18).
+	* configs/Board.mk: Add extra clean operations (2016-10-18).
+	* usbhost/composite: fix compile; missing semicolons.  From Jann
+	  Rosberg (2016-10-18).
+	* libc/stdio: Include wchar.h in lib_libvsprintf.c to fix compilation
+	  error.  From Alan Carvalho de Assis (2016-10-18).
+	* arch/arm/src/kinetis: Added missing headers.  From David Sidrane
+	  (2016-10-18).
+	* arch/arm/src/kinetis: Kinetis broke out SPI to kinetis/kinetis_spi.h.
+	  From David Sidrane (2016-10-18).
+	* arch/arm/src/kinetis: Broke out DMA to use the modern Nuttx chip
+	  inclusion - still STUBS.  From David Sidrane (2016-10-18).
+	* arch/arm/src/kinetis: Kinetis Support ARMV7 Common Vector and FPU.
+	  From David Sidrane (2016-10-18).
+	* arch/arm/src/kinetis: Kinetis Allow CONFIG_ARMV7M_CMNVECTOR,
+	  CONFIG_STACK_COLORATION, CONFIG_ARCH_FPU.  From David Sidrane
+	  (2016-10-18).
+	* arch/arm/src/kinetis: Kinetis i2c driver offset swapped for value
+	  in kinetis_i2c_putreg.  From David Sidrane (2016-10-18).
+	* Add functions wcrtomb, wcslcpy, wcsxfrm, wctob, wctomb, wctype,
+	  localeconv, strcoll, strxfrm. From Alan Carvalho de Assis
+	  (2016-10-18).
+	* libc/wctype: Add wctype.h; Move lib_wctype.c to libc/wctype.
+	  From Alan Carvalho de Assis (2016-10-18).
+	* include/: Modify locale.h to add localeconv() and lconv structure.
+	  From Alan Carvalho de Assis (2016-10-18).
+	* include/sys/time.h: timersub macro modified per recommendations of
+	  phreakuencies (2016-10-18).
+	* include/: Add isblank() macro to ctype.h.  From Alan Carvalho de
+	  Assis (2016-10-19).
+	* libc/wctype: Add iswctype, towlower, towupper and wcsftime functions.
+	  From Alan Carvalho de Assis (2016-10-19).
+	* syslog: Fixes required for file syslog output.  From Max Kriegleder
+	  (2016-10-19).
+	* arch/arm/src/stm32: add TIM8 to STM32F103V pinmap.  From Maciej Wójcik
+	  (2016-10-19).
+	* libc/locale: Allows c++ code to compile with or without
+	  CONFIG_LIBC_LOCALE and will generate a link error if CONFIG_LIBC_LOCALE
+	  is not defined and setlocale is referneced. With CONFIG_LIBC_LOCALE
+	  defined setlocale will act as if MB string is not supported and return
+	  "C" for POSIX. C and "". From David Sidrane (2016-10-19).
+	* Add vectors for interrupt levels 2-6 (2016-10-20).
+	* strtof:  Add strtof() as simply a copy of strtod with types and
+	  limits changed (2016-10-20).
+	* arch/arm/src/stm32v7:  Register the watchdog device at the configured
+	  device path CONFIG_WATCHDOG_DEVPATH vs. hard-coded /dev/wdt.  From Frank
+	  Benkert (2016-10-21).
+	* configs/*/defdonf The buttons example was changed to archbuttons.  As
+	  a result all of the button configurations are broken and need some
+	  renaming in the defconfig files.  Noted by Frank Berkert (2016-10-21).
+	* configs/stm32f103-minimum: Add support to PWM on STM32F103-Minimum
+	  board.  From Alan Carvalho de Assis (2016-10-21).
+	* include/ctype.h and cxx/cctype: Implement ctype.h functions as inline
+	  if possible.  cctype can then properly select namespace (2016-10-22).
+	* libc/unisted: Add strtold() (2016-10-22).
+	* sscanf:  Use strtof() instead of strtod() if a short floating point
+	  value was requested.  The should help performance with MCUs with 32-bit
+	  FPU support with some additional code size (2016-10-22).
+	* Remove support for software prioritization of interrupts (2016-10-23).
+	* drivers/net/tun.c: Fix bug in TUN interface driver.  From  Max
+	  Nekludov (2016-10-24).
+	* arch/arm/src/stm32: A new implementation of the STM32 F4 I2C bottom
+	  half.  The commin I2C as this did not handled correctly in the current
+	  implementation (see also https://github.com/PX4/NuttX/issues/54).  The
+	  changes almost exclusively affect the ISR.  From Max Kriegleder
+	  (2016-10-24).
+	* arch/arm/src/stm32l4: Fix I2C devices RCC registers.  From Sebastien
+	  Lorquet (2016-10-25).
+	* arch/arm/src/stm32l4: Enable and renames for 32l4 UARTs 4 and 5.
+	  From Sebastien Lorquet (2016-10-25).
+	* configs/stm32f103-minimum: Fix Timers 2 to 7 clock frequencies.
+	  From Alan Carvalho de Assis (2016-10-25).
+	* arch/arm/src/stm32: Initial implemention of the STM32 F37xx SDADC
+	  module. There are also changes to ADC, DAC modules. SDADC has only been
+	  tested in DMA mode and does not support external TIMER triggers. This
+	  is a work in progress.  From  Marc Rechté (2016-10-25).
+	* Add logic to attach peripheral interrupt sources to CPU interrupts
+	  (2016-10-25).
+	* CHxN channels are always outputs.  From Sebastien Lorquet
+	  (2016-10-26).
+	* sched/semaphore: Within the OS, when a thread obtains a semaphore
+	  count it must call sem_addholder() if CONFIG_PRIORITY_INHERITANCE is
+	  enabled.  If a count is available, then sem_wait() calls
+	  sem_addholder(), otherwise it waited for the semaphore and called
+	  sem_addholder() when it eventually received the count.
+
+	  This caused a problem when the thread calling sem_wait() was very
+	  low priority.  When it received the count, there may be higher
+	  priority threads "hogging" the CPU that prevent the lower priority
+	  task from running and, as a result, the sem_addholder() may be
+	  elayed indefinitely.
+
+	  The fix was to have sem_post() call sem_addholder() just before
+	  restarting the thread waiting for the semaphore count.
+
+	  This problem was noted by Benix Vincent who also suggested the
+	  solution (2016-10-26).
+	* configs/stm32f103-minimum: Add RGB LED support on STM32F103 Minimum
+	  board.  From Alan Carvalho de Assis (2016-10-26).
+	* arch/arm/src/stm32f7: stm32_i2c.c Dejavu.  Fixes a bug previously
+	  found in the F4. From David Sidrane (2016-10-26).
+	* arch/arm/src/stm32f7: stm32f76xx77xx_pinmap.h Missed one.  From
+	  David Sidrane (2016-10-26).
+	* LPC32xx serial: Fix a typo in ioctl TIOCSRS485 ioctl.  From Vytautas
+	  Lukenskas (2016-10-27).
+	* sched/clock: Correct clock initialization.  The correct range for
+	  the month is 0-11 but is entered as 1-12 in the .config file
+	  (2016-10-27).
+	* arch/*/include: Add architecture-specific inttypes.h.  From Paul
+	  A. Patience (2016-10-27).
+	* sched/Kconfig:  Add ranges to START_YEAR, MONTH, and DAY (2016-10-28).
+	* configs/nucleo-f303re: Add STM32 F303RE hello configuration; remove
+	  duplicate setting from board.h.   From  Marc Rechté (2016-10-18).
+	* arch/arm/src/lpc32xx: Restore RS485 mode on serial port open (if
+	  RS485 is enabled via menuconfig).  From Vytautas Lukenskas (2016-10-28).
+	* arch/arm/src/stm32f7:  otgdev fixed typo.  From David Sidrane
+	  (2016-10-28).
+	* arch/xtensa: Basic architectural support for Xtensa processors and
+	  the Expressif. ESP32 added.  Totally untested on initial release
+	  (2016-10-31).
+	* configs/esp32-core: Basic support for Expressif ESP32 Core v2 board
+	  added.  The initial release includes an NSH and an SMP test
+	  configuration.  Totally untested on initial relesae (2016-10-31).
+	* configs/bambino-200e: Add basic support to Micromint Bambino 200E
+	  board.  This includes contributions from Jim Wolfman.  From Alan
+	  Carvalho de Assis (2016-11-01).
+	* drivers/mtd/at24xx.c: Added EEPROM timeout.  Fromo Aleksandr
+	  Vyhovanec (2016-11-02).
+	* arch/misoc:  Adds basic support for the Misoc procoessors and the
+	  LM32 in particular.  From Ramtin Amin (2016-11-01).
+	* configs/misoc.  Board support for testing Misoc LM32 with Qemu.
+	  From Ramtin Amin (2016-11-01).
+	* arch/arm/src/stm32: I think, that Size is (highest address+1 - Base
+	  address).  Base address has been removed and if address+count >= size
+	  we are outside of the Flash.  From David Sidrane (2016-11-01).
+	* sched/semaphore, sched/phread/, libc/semaphore, libc/pthread: Add
+	  pthread_mutexattr_get/set_protocol and non-standard sem_get/set_protocol.
+	  These may use to enable or disable priority inheritance on a single
+	  semaphore (2016-11-02).
+	* arch/arm/src/stm32:  Fix ADC compilation error when DMA isn't enabled.
+	  From Paul A. Patience (2016-11-02).
+	* drivers/ and drivers/spi: Fix Kconfig warning.  This commit moves the
+	  ARCH_HAVE_SPI options outside the check for SPI.  Those options don't
+	  depend on SPI, and Kconfig files  in arch/ enable them even if SPI isn't
+	  enabled.
+
+	  Sourcing the driver's Kconfig in drivers/Kconfig only if support for
+	  the driver is enabled prevents us from defining these ARCH_HAVE options
+	  in the driver's Kconfig. We should probably remove the other checks in
+	  drivers/Kconfig and check if the drivers are enabled only in their
+	  Kconfig.  From Paul A. Patience (2016-11-02).
+	* Move protoypes for the non-standard include/semaphore.h file to the
+	  non-standard include/nuttx/semaphore.h with the other non-standard
+	  semaphore interfaces (2016-11-02).
+	* include/semaphores.h: Provide macros for sem_setprotocol() and
+	  sem_getprotocol() if priority inheritance is not enabled.  More
+	  SEM_PRIO_* definitions to include/nuttx/semaphore.h (2016-11-02).
+	* drivers/serial.c: Make sure that priority inheritance is not
+	  enabled for the signaling semaphores used in the serial driver
+	  (2016-11-03).
+	* arch/arm/src/stm32f7: Fix to SPI-Master driver.  Without this the
+	  chip select decoding feature will not work properly.  From Michael
+	  Spahlinger (2016-11-03).
+	* drivers/, net/, fs/, sched, arch/, graphics/, libnx,: Disable
+	  priority inheritance on all semaphores used for signaling (2016-11-03).
+	* sched/semaphore:   Handle a case of missing proxy for sem_setprotocol.
+	  Reorder so that (1) this error is avoided, and (2) >No proxy is needed
+	  if priority inheritance is not enabled (2016-11-03).
+	* config/*/defconfgs: More fallout from name change of
+	  apps/examples/buttons to archbuttons (2016-11-03).
+	* configs/nucleo_f303re: Various fixes to get the adc configuration
+	  building again after PR.  Refresh all configurations (2016-11-03).
+	* arch/misoc/src/common:  Add interrupting Misoc serial driver.  From
+	  Ramtin Amin (2016-11-04)
+	* Fix a number of header files with mismatched 'extern C {' and '}'
+	  (2016-11-05).
+	* Provide do-nothing stubs for mutex attribute interfaces if features
+	  ot enabled.  pthread_cond includes a signaling semaphore and should
+	  call sem_setprotocol (2016-11-05).
+	* arch/arm/src/armv7-r:  Fix compilation error.  This commit fixes
+	  compilation errors on MPU support for ARMv7-R.  From Heesub Shin
+	  (2016-11-06).
+	* arch/arm/src/armv7-r: fix invalid drbar handling.  In ARMv7-R,
+	  [31:5] bits of DRBAR is physical base address and other bits are
+	  reserved and SBZ. Thus, there is no point in passing other than the
+	  base address.  From Heesub Shin (2016-11-06).
+	* arch/arm/src/armv7-r:  Remove the redundant update on SCTLR.
+	  mpu_control() is invoking cp15_wrsctlr() around SCTLR update
+	  redundantly.  From Heesub Shin (2016-11-06).
+	* arch/arm/src/armv7-r: add new Kconfig entries for d/i-cache.
+	  Unlike in ARMv7-A/M, Kconfig entries for data and instruction caches
+	  are currently missing in ARMv7-R. This commit adds those missing
+	  Kconfig entries. Actual implmenetation for those functions will be
+	  added in the subsequent patches.  From Heesub Shin (2016-11-06).
+	* arch/arm/src/armv7-r: add cache handling functions.  This commit
+	  adds functions for enabling and disabling d/i-caches which were
+	  missing for ARMv7-R.  From Heesub Shin (2016-11-06).
+	* arch/arm/src/armv7-r: fix typo in mpu support.  s/ARMV7M/ARMV7R/g.
+	  From Heesub Shin (2016-11-06).
+	* arch/arm/src/armv7-r: fix CPSR corruption after exception handling.
+	  A sporadic hang with consequent crash was observed when booting. It
+	  seemed to be caused by the corrupted or wrong CPSR restored on return
+	  from exception. NuttX restores the context using code like this:
+
+	      msr spsr, r1
+
+	  GCC translates this to:
+
+	      msr spsr_fc, r1
+
+	  As a result, not all SPSR fields are updated on exception return.
+	  This should be:
+
+	      msr spsr_fsxc, r1
+
+	  On some evaluation boards, spsr_svc may have totally invalid value at
+	  power-on-reset. As it is not initialized at boot, the code above may
+	  result in the corruption of cpsr and thus unexpected behavior.
+
+	  From Heesub Shin (2016-11-06).
+	* arch/arm/src/armv7-r: fix to restore the Thumb flag in CPSR.  Thumb
+	  flag in CPSR is not restored back when the context switch occurs while
+	  executing thumb instruction.  From Heesub Shin (2016-11-06).
+	* sched/wqueue:  When queuing new LP work, don't signal any threads
+	  if they are all busy.  From Heesub Shin (2016-11-06).
+	* sched/wqueue: Signal sent from work_signal() may interrupt the low
+	  priority worker thread that is already running. For example, the worker
+	  thread that is waiting for a semaphore could be woken up by the signal
+	  and break any synchronization assumption as a result. It also does not
+	  make any sense to send signal if it is already running and busy. This
+	  commit fixes it.  From Heesub Shin (2016-11-06).
+	* arch/arm/src/stm32f7: STM32F7 SD/MMC driver depends on
+	  CONFIG_SDIO_DMA which is only defined in stm32/Kconfig.  Changed to
+	  CONFIG_STM32F7_SDMMC_DMA and defined in stm32f7/Kconfig (2016-11-07).
+	* arch/arm/src/stm32: Add PWM driver support for STMF37xx.  The
+	  changes have been tested successfuly for TIM4 and TIM17 (different
+	  IPs).  From  Marc Rechté (2016-11-07).
+	* sched/semaphore:  sem_trywait() no longer modifies the errno value
+	  UNLESS an error occurs.  This allows these functions to be used
+	  internally without clobbering the errno value.  From Freddie Chopin
+	  (2016-11-09).
+	* arch/arm/src/stm32l4: Change the way to configure quadrature encoder
+	  prescalers.  From Sebastien Lorquet (2016-11-09).
+	* libc/unisted: Patch brings strtol() and related functions more
+	  conformant with POSIX.  Corner cases like strtol(-2147483648, NULL, 10)
+	  now pass clang -fsanitize=integer without warnings.  From Juha Niskanen
+	  (2016-11-10).
+	* drivers/sensors and configs/stm32f103-minimum: Add Vishay VEML6070
+	  driver and support for STM32F103-Minimum board.  From   From Alan
+	  Carvalho de Assis(2016-11-13).
+	* Misoc LM32: Corrects a bug that never occured in qemu on simulation or
+	  real fpga. The error was that the r1 register was being modified out of
+	  context switching and not restoring it.  From Ramtin Amin (2016-11-14)
+	* arch/arm/src/samv71: A problem occurred with the SAMV7 USBDEVHS driver
+	  if the USB cable is unplugged while a large amount of data is send over
+	  an IN endpoint using DMA. If the USB cable is plugged in again after a
+	  few seconds it is not possible to send data over this IN endpoint again,
+	  all other endpoints work as expected.
+
+	  The problem occurs because if the USB cable is unplugged while an DMA
+	  transfer is in flight the transfer is canceled but the register
+	  SAM_USBHS_DEVDMACTRL is left in an undefined state.  The problem was
+	  fixed the problem by resetting the register SAM_USBHS_DEVDMACTRL to a
+	  known state. Additionally all pending interrupts are cleared.
+
+	  From Stefan Kolb (2016-11-14).
+	* configs/esp32-core: ESP32 Core v2: Add configuration to supporting
+	  linking NuttX for execution out of IRAM (2016-11-14).
+	* libc/unistd: sleep() was returning remaining nanoseconds (kind of),
+	  instead the remaining seconds.  From Eunbong Song (2016-11-15).
+	* sched/irq:  Fixes for the SMP case: (1) Change order for SMP case in
+	  enter_critical_section:  (1) Disable local interrupts BEFORE taking
+	  spinlock and (2) If SMP is enabled, if any interrupt handler calls
+	  enter_critical_section(), it should take the spinlock. (2016-11-15).
+	* arch/xtensa: Add EXPERIMENTAL hooks to support lazy Xtensa co-
+	  processor state restore in the future (2016-11-16).
+	* Add some experimental changes to enter/leave_critical_section to
+	  deal with the case where interrupts are disabled only on the local
+	  CPU (2016-11-16).
+	* sched/irq:  Add logic to handled nested calls to
+	  enter_critical_section() from interrupts handlers (with SMP)
+	  (2016-11-16).
+	* drivers/timer:  Remove the timer driver TIOC_SETHANDLER IOCTL call.
+	  This calls directly from the timer driver into application code.  That
+	  is non-standard, non-portable, and cannot be supported (2016-11-17).
+	*drivers/timer:  Add timer driver hooks to support signal notification
+	  of timer expiration.  Commented out because invasive interface changes
+	  would also be required to complete the implementation (2016-11-17).
+	* arch/arm/src/armv7-m: Fix double allocation of MPU region in mmu.h
+	  (2016-11-17).
+	* timer driver: Use signal to notify of timer expiration. Add generic
+	  argument so that there can be additional usage.  From Sebastien Lorquet
+	  (2016-11-17).
+	* All timer lower half drivers.  Port Sebastien's changes to all all
+	  other implementations of the timer lower half.  Very many just and
+	  untested.  Expect some problems. (2016-11-17).
+	* sched/irq: irq_csection() has a bad assumption in the SMP case.  It
+	  assumed that the state of certain variables.  That was true on entry
+	  into the interrupt handler, but might change to the execution of logic
+	  within the interrupt handler (2016-11-18).
+	* config/ nucleo-l476rg: Add support for timers to nucleo l476.  From
+	  Sebastien Lorquet (2016-11-18).
+	* drivers/net:  Add option to use low-priority work queue to all drivers
+	  in drivers/net.  Not yet added to all architecture-specific network
+	  drivers (2016-11-18).
+	* sched/wdog: Most interrupt handling logic interacts with tasks via
+	  standard mechanism such as sem_post, sigqueue, mq_send, etc.  These all
+	  call enter_critical_section and are assumed to be safe in the SMP case.
+
+	  But certain logic interacts with tasks in different ways.  The only one
+	  that comes to mind are wdogs.  There is a tasking interface that to
+	  manipulate wdogs, and a different interface in the timer interrupt
+	  handling logic to manage wdog expirations.
+
+	  In the normal case, this is fine.  Since the tasking level code calls
+	  enter_critical_section, interrupts are disabled an no conflicts can
+	  occur.  But that may not be the case in the SMP case.  Most
+	  architectures do not permit disabling interrupts on other CPUs so
+	  enter_critical_section must work differently:  Locks are required to
+	  protect code.
+
+	  So this change adds locking (via enter_critical section) to wdog
+	  expiration logic for the the case if the SMP configuration
+	  (2016-11-18).
+	* SAM3/4: Add delay between setting and clearing the endpoint RESET bit
+	  in sam_ep_resume().  We need to add a delay between setting and
+	  clearing the endpoint reset bit in SAM_UDP_RSTEP. Without the delay the
+	  USB controller will (may?) not reset the endpoint.  If the endpoint is
+	  not being reset, the Data Toggle (DTGLE) bit will not to be cleared
+	  which will cause the next transaction to fail if DTGLE is 1. If that
+	  happens the host will time-out and reset the bus.  Adding this delay
+	  may also fix the USBMSC_STALL_RACEWAR in usbmsc_scsi.c, however this
+	  has not been verified yet.  From Wolfgang Reißnegger (2016-11-18).
+	* SAM3/4: Remove unused 'halted' flag in UDP driver.  From Wolfgang
+	  Reißnegger (2016-11-18).
+	* SAM3/4: Remove 'stalled' flag in UDP driver.  The flag is not necessary.
+	  The state of the endpoint can be determined using 'epstate' instead.
+	  From Wolfgang Reißnegger (2016-11-18).
+	* USBMSC: Fix length of mode6 sense reply packet.  From Wolfgang
+	  Reißnegger (2016-11-18).
+	* configs/dk-tm4c129x: Typo fix.  From Wolfgang Reißnegger (2016-11-18).
+	* Typo fix in sam_udp.c.  From Wolfgang Reißnegger (2016-11-18).
+	* STM32: STM32F303xB and STM32F303xC chips have 4 ADCs.  From Paul A.
+	  Patience (2016-11-19).
+	* vfork(): Fix a race condition in the SMP case.  Existing logic
+	  depended on the fact that the child would not run until waitpid was
+	  called because the child had the same priority as the parent.  BUT
+	  in the SMP case that is not true... the child may run immediately on
+	  a different CPU (2016-11-19).
+	* arch/:  Add option to use low-priority work queue to all Ethernet
+	  drivers in arch that support CONFIG_NET_NOINTS (2016-11-19).
+	* sched/clock:  Correct calculation for the case of Tickless mode with
+	  a 32-bit timer.  In that case, the calculation was returning
+	  millisecond accuracy.  That is not good when the timer accuracy is < 1
+	  msec.  From Rajan Gill (2016-11-19).
+	* sched/task: task_restart() test not supported on SMP systems.  This is
+	  not fully implemented (2016-11-19).
+	* This commit adds a new internal interfaces and fixes a problem with
+	  three APIs in the SMP configuration.  The new internal interface is
+	  sched_cpu_pause(tcb).  This function will pause a CPU if the task
+	  associated with 'tcb' is running on that CPU.  This allows a different
+	  CPU to modify that OS data stuctures associated with the CPU.  When the
+	  other CPU is resumed, those modifications can safely take place.  The
+	  three fixes are to handle cases in the SMP configuration where one CPU
+	  does need to make modifications to TCB and data structures on a task
+	  that could be running running on another CPU.  Those three cases are
+	  task_delete(), task_restart(), and execution of signal handles.  In
+	  all three cases the solutions is basically the same:  (1) Call
+	  sched_cpu_pause(tcb) to pause the CPU on which the task is running,
+	  (2) perform the necessary operations, then (3) call up_cpu_resume() to
+	  restart the paused CPU (2016-11-20).
+	* task_restart: Make sure new task starts with pre-emption disabled and
+	  not in a critical section (2016-11-21).
+	* Fix a typo in a spinlock macro (2016-11-21).
+	* Spinlocks:  Added capability to provide architecture-specific memory
+	  barriers.  This was for i.MX6 but does not help with the SMP problems.
+	  It is still a good feature (2016-11-21).
+	* Remove a assertion condition that appears to rarely cause false-alarm
+	  assertions.  Teported by Petteri Aimonen (2016-11-21).
+	* The examples/qencoder app was trying to init the encoder by a direct
+	  call into the board, cheating in a local header to declare the normally
+	  unavailable function prototype.  From Sebastien Lorquet (2016-11-22).
+	* configs:  All QE encoder files.  Last change made timer hard-coded to 3.
+	  Make configurable (2016-11-22).
+	* configs: Remove all traces of the no-longer existent ARCHBUTTONS
+	  example.  Remove all button configurations that depended on the
+	  obsoleted ARCHBUTTON example (2016-11-22).
+	* nucleo-l476rg: Add better selection of timer (2016-11-22).
+	* implementation of dumpgpio for stm32l4, was required for pwm debug.
+	  From Sebastien Lorquet (2016-11-22).
+	* SMP: Add logic to avoid a deadlock condition when CPU1 is hung waiting
+	  for g_cpu_irqlock and CPU0 is waitin for g_cpu_paused (2016-11-22).
+	* Misoc:  Add timer driver.  From Ramtin Amin (2016-11-22).
+	* Misoc:  Add commits and warnings about missing caculation of the timer
+	  reload value (2016-11-22).
+	* SAM3/4: Name of method is now setcallback, not sethandler (2016-11-22).
+	* sam4s-xplained-pro/nsh: Configuration uses old, improper timer interface.
+	  CONFIG_TIMER disabled in configuration. (2016-11-22).
+	* sam4s-xplained-pro:  Remove obsolete timer initialization logic
+	  (2016-11-22).
+	* Misoc LM32: Make system timer configurable via CONFIG_USEC_PER_TICK.
+	  From Ramtin Amin (2016-11-23).
+	* LPC43xx: Add timer driver; configs/bambino-200e: Add support for timer
+	  driver.  From Alan Carvalho de Assis (2016-11-23).
+	* SMP: Fix backward condition in test (2016-11-23).
+	* ARMv7-A SMP: Add a little logic to signal handling (2016-11-24).
+	* Misoc LM32: Add signal handling logic.  From Ramtin Amin (2016-11-24).
+	* SMP: Add spin_trylock().  Use this in conditions where other CPUs need
+	  to stopped but we cannot call enter_critical_section (2016-11-24).
+	* Fix for F1 RTC Clock, tested on F103.  From Maciej Wójcik (2016-11-25).
+	* SMP:  Fix yet another potential deadlock (2016-11-25).
+	* Enable CONFIG_RTC in the hymini-stm32v/nsh2 (kitchensink) config.
+	  From Maciej Wójcik (2016-11-26).
+	* This adds support for keeping i.MX6 inter-processor communication data
+	  in a non-cached address region (2016-11-26).
+	* i.MX6: Disable non-cached region support.  Add SCU register definitions
+	  (2016-11-26).
+	* i.MX6: Add some controls to enable SMP cache coherency in SMP mode
+	  (2016-11-26).
+	* ARMv7-A: Fix some SCU SMP logic (2016-11-26).
+	* ARMv7-A/i.MX6:  Modify handling of the SMP cache coherency
+	  configuration so that it is identical to the steps from the TRM.
+	  Makes no differenct, however (2016-11-27).
+	* The Smoothie project needs to compile C++ inside config/boardname/src/
+	  to use with High Priority Interruption, then I modified the board
+	  configs Makefile to support it.  It works fine for the first time
+	  compilation, but if we execute "touch config/boardname/src/Pin.cxx"
+	  and execute "make" it will not detect that Pin.cxx was modified. I
+	  think there is some other place I should modify, but I didn't find
+	  it.  From Alan Carvalho de Assis (2016-11-27).
+	* ARMv7-A/i.MX6 SMP: Move SMP coherernt cache setup to earlier in
+	  initialization of CPUn, n>0 (2016-11-27).
+	* ARMv7 GIC: SGIs are non-maskable but go through the same path as other,
+	  maskable interrupts.  Added logic to serialize SGI processing when
+	  necessary (2016-11-27).
+	* sched_note: Extend OS instrumentation to include some SMP events
+	  (2016-11-27).
+	* sched_note: Add spinlock instrumentation; In SMP configurations,
+	  select to log only notes from certain CPUs (2016-11-28).
+	* Misoc LM3: Add Misoc Ethernet driver.  Integrate network support into
+	  configs/misoc/hello.  Remove configs/misoc/include/generated directory.
+	  I suppose the the intent now is that this is a symbolic link?  DANGER!
+	  This means that you cannot compile this code with first generating
+	  these files a providing a symbolic link to this location!  From Ramtin
+	  Amin (2016-11-28).
+	* Add tools/showsize.sh (2016-11-28).
+	* configs/misoc:  Add a sample directory containing generated sources.
+	  This is really only useful for performing test builds.  You really
+	  must generate the Misoc architecture for a real-life build.  From
+	  Ramtin Amin (2016-11-28).
+	* sched_note: Permit spinlock and critical section notes in in-memory
+	  buffer iff sched_not_get() interfaces is disabled (2016-11-28).
+	* STM32 DAC:  Fix shift value whenever there are is a DAC2 and, hence,
+	  up to three interfaces.  From Marc Rechté (2016-11-29).
+	* Back out a debug change that was included in commit (2016-11-29).
+	* i.MX6: Don't output the alphabet if CONFIG_DEBUG_FEATURES is not set
+	  (2016-11-29).
+	* Misoc LM32: Add logic to flush/invalidate caches.  From Ramtin Amin
+	  (2016-11-29).
+	* drivers/net/: Adapt all Ethernet drivers to work as though
+	  CONFIG_NET_MULTIBUFFER were set.  Remove all references to
+	  CONFIG_NET_MULTIBUFFER (2016-11-29).
+	* stm32_otghshost: if STM32F446 increase number of channels to 16.  From
+	  Janne Rosberg (2016-11-30).
+	* usbhost_composite: fix end offset in usbhost_copyinterface().  From
+	  Janne Rosberg (2016-11-30).
+	* usbhost_cdcacm: add CDC_SUBCLASS_ACM and CDC_PROTO_ATM to supported
+	  class and proto.  From Janne Rosberg (2016-11-30).
+	* LPC43 SD/MMC:  Correct some git definitions on SMMC control register
+	  in lpc43_sdmmc.h.  From Alan Carvalho de Assis (2016-11-30).
+	* STM32L4: Correct USART1/2 definitions.  Use default mbed UART4
+	  settings.  From Sebastien Lorquet (2016-12-01).
+	* boardctl:  Add new boardctl() command ,BOARDIOC_NX_START, to start the
+	  NX server as a kernel thread (2016-12-01).
+	* GPDMA driver for the LPC43xx.  The GPDMA block is basically the same
+	  as the LPC17xx.  Only the clock configuration is different and LPC43xx
+	  has four different DMA request sources, where LPC17xx has only two.
+	  From Alan Carvalho de Assis (2016-12-01).
+	* Remove RGMP and RGMP drivers (2016-12-02).
+	* i.MX6:  Add an untested SPI driver taken directly from the i.MX1 port
+	  (2016-12-02).
+	* Eliminate CONFIG_NO_NOINTS.  There is no longer any support for
+	  interrupt level processing of the network stack. Lots of files changed
+	  -> lots of testing needed (2016-12-03).
+	* Fix DEBUGASSERT() in group_signal.c.  From Masayuki Ishikawa
+	  (2016-12-04).
+	* Add support for the SAM5CMP-DB board.  From Masayuki Ishikawa
+	  (2016-12-04).
+	* SAM3/4:  Add SMP support for the dual-core SAM4CM.  From Masayuki
+	  Ishikawa (2016-12-04).
+	* C Library: Allow option to enable IP address conversions even when the
+	  IP address family is not supported (2016-12-04).
+	* SSD1306: Fix errors in SPI mode configuration.  From Gong Darcy
+	  (2016-12-04).
+	* SAMA5 does not build when executing from SDRAM before board
+	  frequencies are not constant.  Rather, the bootloader configures the
+	  clocking and we must derive the clocking from the MCK left by the
+	  bootloader.  This means lots more computations.  This is untested on
+	  initial commit because I don't have a good PWM test setup right now
+	  (2016-12-04).
+	* Olimex-LPC1766-STK: Enable procfs in NSH configuration. Automount
+	  /proc on startup (2016-12-05).
+	* SAM4CMP-DB: Add hooks to auto-mount the procfs file system on startup
+	  in board bring-up logic (2016-12-05).
+	* Remove all references to BOARDIOC_PWMSETUP and board_pwm_setup()
+	  (2016-12-05).
+	* Remove all references to BOARDIOC_ADCSETUP and board_adc_setup()
+	  (2016-12-05).
+	* Added Timers 2-5 and control of SAI and I2S PLLs.  From David Sidrane
+	  (2016-12-05).
+	* Added support for stmf469 SAI and I2S PLL configuration and STM446
+	  fixes.  From David Sidrane (2016-12-05).
+	* Expanded otgfs support to stm32F469 and stm32f446.  Added missing bits
+	  definitions, Used stm32F469 and stm32f446 bit definitions,  Removed
+	  unsed header file.  From David Sidrane (2016-12-05).
+	* Remove BOARDIOC_CAN_INITIALIZE.  CAN initialization is now done in the
+	  board initialization logic just like every other device driver
+	  (2016-12-06).
+	* STM32F7: Allow the config to override the clock edge setting.  From
+	  David Sidrane (2016-12-06).
+	* For Cortex-A9, should also set ACTLR.FW in SMP mode to enble TLB and
+	  cache broadcasts.  Does not fix SMP cache problem (2016-12-07).
+	* sched notes: Add additional note to see if/when CPU is started in SMP
+	  mode (2016-12-07).
+	* EFM32: Fix a compilation error.  From Pierre-noel Bouteville
+	  (2016-12-07).
+	* pthreads:  Add pthread_cleanup_push() and pthread_cleanup_pop()
+	  (2016-12-08).
+	* BUGFIX:STM32F427 was rebooting. Over reached family.  From David
+	  Sidrane (2016-12-08).
+	* Add pthread_setcanceltype() and pthread_testcancel() (2016-12-09).
+	* Added STM32F469 RAM size and deliberated STM32F446 size.  From David
+	  Sidrane (2016-12-09).
+	* Typo in stm32f76xx77xx_pinmap.h edited online with Bitbucket.  From
+	  David Sidrane (2016-12-09).
+	* stm32_allocateheap.c edited online with Bitbucket.  From David Sidrane
+	  (2016-12-09).
+	* LPC43xx SD card: Correct pin configuration options needed for SD card
+	  pins.  From Alan Carvalho de Assis (2016-12-09).
+	* pthread_mutex_destroy(): Fix an error in destroying a mutex which can
+	  occur after a pthread has been canceled while holding the mutex
+	  (2016-12-09).
+	* Add support for cancellation points (2016-12-09).
+	* Forgot to add some files in the last commit (2016-12-10).
+	* Correct some default font IDs.  From Pierre-Noel Bouteville
+	  (2016-12-10).
+	* task_delete() now obeys all cancellation point semantics (2016-12-10).
+	* Add task_setcancelstate(), task_setcanceltype(), and task_testcancel().
+	  These are non-standard interfaces analogous to the correponding pthread_
+	  interfaces that provide cancellation controls for tasks (2016-12-10).
+
+7.19 2016-xx-xx Gregory Nutt <gnutt@nuttx.org>

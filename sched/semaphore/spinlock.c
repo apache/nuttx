@@ -44,6 +44,7 @@
 #include <assert.h>
 
 #include <nuttx/spinlock.h>
+#include <nuttx/sched_note.h>
 #include <arch/irq.h>
 
 #include "sched/sched.h"
@@ -119,13 +120,55 @@ void spin_initializer(FAR struct spinlock_s *lock)
 
 void spin_lock(FAR volatile spinlock_t *lock)
 {
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
+  /* Notify that we are waiting for a spinlock */
+
+  sched_note_spinlock(this_task(), lock);
+#endif
+
   while (up_testset(lock) == SP_LOCKED)
     {
-#if 0 /* Would recurse */
-      sched_yield();
-#endif
+      SP_DSB();
     }
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
+  /* Notify that we have the spinlock */
+
+  sched_note_spinlocked(this_task(), lock);
+#endif
+  SP_DMB();
 }
+
+/****************************************************************************
+ * Name: spin_unlock
+ *
+ * Description:
+ *   Release one count on a non-reentrant spinlock.
+ *
+ * Input Parameters:
+ *   lock - A reference to the spinlock object to unlock.
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions:
+ *   Not running at the interrupt level.
+ *
+ ****************************************************************************/
+
+#ifdef __SP_UNLOCK_FUNCTION
+void spin_unlock(FAR volatile spinlock_t *lock)
+{
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
+  /* Notify that we are unlocking the spinlock */
+
+  sched_note_spinunlock(this_task(), lock);
+#endif
+
+  *lock = SP_UNLOCKED;
+  SP_DMB();
+}
+#endif
 
 /****************************************************************************
  * Name: spin_lockr
@@ -183,6 +226,13 @@ void spin_lockr(FAR struct spinlock_s *lock)
 
 #  warning Missing logic
 #endif
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
+      /* Notify that we are waiting for a spinlock */
+
+      sched_note_spinlock(this_task(), &lock->sp_lock);
+#endif
+
       /* Take the lock.  REVISIT:  We should set an indication in the TCB
        * that the thread is spinning.  This might be useful in determining
        * some scheduling actions?
@@ -193,7 +243,16 @@ void spin_lockr(FAR struct spinlock_s *lock)
           up_irq_restore(flags);
           sched_yield();
           flags = up_irq_save();
+          SP_DSB();
         }
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
+      /* Notify that we have thespinlock */
+
+      sched_note_spinlocked(this_task(), &lock->sp_lock);
+#endif
+
+      SP_DMB();
 
       /* Take one count on the lock */
 
@@ -205,6 +264,12 @@ void spin_lockr(FAR struct spinlock_s *lock)
 
 #else /* CONFIG_SMP */
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
+  /* Notify that we are waiting for a spinlock */
+
+  sched_note_spinlock(this_task(), &lock->sp_lock);
+#endif
+
   /* Take the lock.  REVISIT:  We should set an indication in the TCB that
    * the thread is spinning.  This might be useful in determining some
    * scheduling actions?
@@ -213,8 +278,16 @@ void spin_lockr(FAR struct spinlock_s *lock)
   while (up_testset(&lock->sp_lock) == SP_LOCKED)
     {
       sched_yield();
+      SP_DSB()
     }
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
+  /* Notify that we have thespinlock */
+
+  sched_note_spinlocked(this_task(), &lock->sp_lock);
+#endif
+
+  SP_DMB();
 #endif /* CONFIG_SMP */
 }
 
@@ -273,6 +346,11 @@ void spin_unlockr(FAR struct spinlock_s *lock)
 
       if (lock->sp_count <= 1)
         {
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
+          /* Notify that we are unlocking the spinlock */
+
+          sched_note_spinunlock(this_task(), &lock->sp_lock);
+#endif
           /* The count must decremented to zero */
 
           lock->sp_count = 0;
@@ -288,6 +366,13 @@ void spin_unlockr(FAR struct spinlock_s *lock)
   up_irq_restore(flags);
 
 #else /* CONFIG_SMP */
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
+  /* Notify that we are unlocking the spinlock */
+
+  sched_note_spinunlock(this_task(), &lock->sp_lock);
+#endif
+
   /* Just mark the spinlock unlocked */
 
   DEBUGASSERT(lock != NULL && lock->sp_lock == SP_LOCKED);
@@ -317,14 +402,30 @@ void spin_setbit(FAR volatile cpu_set_t *set, unsigned int cpu,
                  FAR volatile spinlock_t *setlock,
                  FAR volatile spinlock_t *orlock)
 {
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
+  cpu_set_t prev;
+#endif
+
   /* First, get the 'setlock' spinlock */
 
   spin_lock(setlock);
 
   /* Then set the bit and mark the 'orlock' as locked */
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
+  prev    = *set;
+#endif
   *set   |= (1 << cpu);
   *orlock = SP_LOCKED;
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
+  if (prev == 0)
+    {
+      /* Notify that we have locked the spinlock */
+
+      sched_note_spinlocked(this_task(), orlock);
+    }
+#endif
 
   /* Release the 'setlock' */
 
@@ -352,6 +453,10 @@ void spin_clrbit(FAR volatile cpu_set_t *set, unsigned int cpu,
                  FAR volatile spinlock_t *setlock,
                  FAR volatile spinlock_t *orlock)
 {
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
+  cpu_set_t prev;
+#endif
+
   /* First, get the 'setlock' spinlock */
 
   spin_lock(setlock);
@@ -360,8 +465,20 @@ void spin_clrbit(FAR volatile cpu_set_t *set, unsigned int cpu,
    * upon the resulting state of the CPU set.
    */
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
+  prev    = *set;
+#endif
   *set   &= ~(1 << cpu);
   *orlock = (*set != 0) ? SP_LOCKED : SP_UNLOCKED;
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
+  if (prev != 0 && *set == 0)
+    {
+      /* Notify that we have unlocked the spinlock */
+
+      sched_note_spinunlock(this_task(), orlock);
+    }
+#endif
 
   /* Release the 'setlock' */
 

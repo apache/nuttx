@@ -73,4 +73,8 @@ ifeq ($(CONFIG_PWM),y)
 CSRCS += k64_pwm.c
 endif
 
+ifeq ($(CONFIG_BOARDCTL_UNIQUEID),y)
+CSRCS += k64_uid.c
+endif
+
 include $(TOPDIR)/configs/Board.mk

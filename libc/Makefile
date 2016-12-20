@@ -67,6 +67,7 @@ include dirent/Make.defs
 include fixedmath/Make.defs
 include hex2bin/Make.defs
 include libgen/Make.defs
+include locale/Make.defs
 include math/Make.defs
 include misc/Make.defs
 include net/Make.defs
@@ -86,6 +87,8 @@ include termios/Make.defs
 include time/Make.defs
 include tls/Make.defs
 include unistd/Make.defs
+include wchar/Make.defs
+include wctype/Make.defs
 include wqueue/Make.defs
 
 # REVISIT: Backslash causes problems in $(COBJS) target

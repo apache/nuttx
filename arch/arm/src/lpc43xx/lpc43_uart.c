@@ -364,7 +364,31 @@ void lpc43_usart0_setup(void)
 
 #ifdef CONFIG_USART0_RS485MODE
   lpc43_pin_config(PINCONF_U0_DIR);
-#endif
+
+  /* Enable direction output pin */
+
+  regval = getreg32(LPC43_USART0_RS485CTRL);
+  regval |= UART_RS485CTRL_DCTRL;
+  putreg32(regval, LPC43_USART0_RS485CTRL);
+
+#ifdef CONFIG_USART0_RS485DIROIN
+
+  /* Invert direction control output pin polarity */
+
+  regval = getreg32(LPC43_USART0_RS485CTRL);
+  regval |= UART_RS485CTRL_OINV;
+  putreg32(regval, LPC43_USART0_RS485CTRL);
+
+#else
+
+  /* Do not invert direction countrol output pin polarity */
+
+  regval = getreg32(LPC43_USART0_RS485CTRL);
+  regval &= ~(UART_RS485CTRL_OINV);
+  putreg32(regval, LPC43_USART0_RS485CTRL);
+
+#endif /* CONFIG_USART0_RS485DIROIN */
+#endif /* CONFIG_USART0_RS485MODE */
 
   leave_critical_section(flags);
 };
@@ -467,7 +491,31 @@ void lpc43_usart2_setup(void)
 
 #ifdef CONFIG_USART2_RS485MODE
   lpc43_pin_config(PINCONF_U2_DIR);
-#endif
+
+  /* Enable direction output pin */
+
+  regval = getreg32(LPC43_USART2_RS485CTRL);
+  regval |= UART_RS485CTRL_DCTRL;
+  putreg32(regval, LPC43_USART2_RS485CTRL);
+
+#ifdef CONFIG_USART2_RS485DIROIN
+
+  /* Invert direction control output pin polarity */
+
+  regval = getreg32(LPC43_USART2_RS485CTRL);
+  regval |= UART_RS485CTRL_OINV;
+  putreg32(regval, LPC43_USART2_RS485CTRL);
+
+#else
+
+  /* Do not invert direction countrol output pin polarity */
+
+  regval = getreg32(LPC43_USART2_RS485CTRL);
+  regval &= ~(UART_RS485CTRL_OINV);
+  putreg32(regval, LPC43_USART2_RS485CTRL);
+
+#endif /* CONFIG_USART2_RS485DIROIN */
+#endif /* CONFIG_USART2_RS485MODE */
 
   leave_critical_section(flags);
 };
@@ -516,7 +564,31 @@ void lpc43_usart3_setup(void)
 
 #ifdef CONFIG_USART3_RS485MODE
   lpc43_pin_config(PINCONF_U3_DIR);
-#endif
+
+  /* Enable direction output pin */
+
+  regval = getreg32(LPC43_USART3_RS485CTRL);
+  regval |= UART_RS485CTRL_DCTRL;
+  putreg32(regval, LPC43_USART3_RS485CTRL);
+
+#ifdef CONFIG_USART3_RS485DIROIN
+
+  /* Invert direction control output pin polarity */
+
+  regval = getreg32(LPC43_USART3_RS485CTRL);
+  regval |= UART_RS485CTRL_OINV;
+  putreg32(regval, LPC43_USART3_RS485CTRL);
+
+#else
+
+  /* Do not invert direction countrol output pin polarity */
+
+  regval = getreg32(LPC43_USART3_RS485CTRL);
+  regval &= ~(UART_RS485CTRL_OINV);
+  putreg32(regval, LPC43_USART3_RS485CTRL);
+
+#endif /* CONFIG_USART3_RS485DIROIN */
+#endif /* CONFIG_USART3_RS485MODE */
 
   leave_critical_section(flags);
 };

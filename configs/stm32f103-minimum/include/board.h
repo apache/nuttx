@@ -43,11 +43,14 @@
 
 #include <nuttx/config.h>
 #ifndef __ASSEMBLY__
-# include <stdint.h>
+#  include <stdint.h>
 #endif
-#include "stm32_rcc.h"
-#include "stm32_sdio.h"
-#include "stm32.h"
+
+#ifdef __KERNEL__
+#  include "stm32_rcc.h"
+#  include "stm32_sdio.h"
+#  include "stm32.h"
+#endif
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -111,12 +114,12 @@
  * Note: TIM1,8 are on APB2, others on APB1 */
 
 #define BOARD_TIM1_FREQUENCY    STM32_HCLK_FREQUENCY
-#define BOARD_TIM2_FREQUENCY    STM32_HCLK_FREQUENCY
-#define BOARD_TIM3_FREQUENCY    STM32_HCLK_FREQUENCY
-#define BOARD_TIM4_FREQUENCY    STM32_HCLK_FREQUENCY
-#define BOARD_TIM5_FREQUENCY    STM32_HCLK_FREQUENCY
-#define BOARD_TIM6_FREQUENCY    STM32_HCLK_FREQUENCY
-#define BOARD_TIM7_FREQUENCY    STM32_HCLK_FREQUENCY
+#define BOARD_TIM2_FREQUENCY    STM32_PCLK1_FREQUENCY
+#define BOARD_TIM3_FREQUENCY    STM32_PCLK1_FREQUENCY
+#define BOARD_TIM4_FREQUENCY    STM32_PCLK1_FREQUENCY
+#define BOARD_TIM5_FREQUENCY    STM32_PCLK1_FREQUENCY
+#define BOARD_TIM6_FREQUENCY    STM32_PCLK1_FREQUENCY
+#define BOARD_TIM7_FREQUENCY    STM32_PCLK1_FREQUENCY
 #define BOARD_TIM8_FREQUENCY    STM32_HCLK_FREQUENCY
 
 /* SDIO dividers.  Note that slower clocking is required when DMA is disabled
@@ -149,7 +152,20 @@
 #  define SDIO_SDXFR_CLKDIV     (3 << SDIO_CLKCR_CLKDIV_SHIFT)
 #endif
 
+/* BUTTON definitions ***************************************************************/
+
+#define NUM_BUTTONS       2
+
+#define BUTTON_USER1      0
+#define BUTTON_USER2      1
+#define BUTTON_USER1_BIT  (1 << BUTTON_USER1)
+#define BUTTON_USER2_BIT  (1 << BUTTON_USER2)
+
 /* LED definitions ******************************************************************/
+
+/* Define how many LEDs this board has (needed by userleds) */
+
+#define BOARD_NLEDS       1
 
 /* The board has only one controllable LED */
 
@@ -161,6 +177,28 @@
 #define LED_SIGNAL        5  /* LED2 on */
 #define LED_ASSERTION     6  /* LED1 + LED2 */
 #define LED_PANIC         7  /* LED1 / LED2 blinking */
+
+/* PWM
+ *
+ * The STM32F103-Minimum has no real on-board PWM devices, but the board can
+ * be configured to output a pulse train using TIM3 CH3 on PB0.
+ *
+ * Note: we don't need redefine GPIO_TIM3_CH3OUT because PB0 is not remap pin.
+ */
+
+/* RGB LED
+ *
+ * R = TIM1 CH1 on PA8 | G = TIM2 CH2 on PA1 | B = TIM4 CH4 on PB9
+ *
+ * Note: Pin configs: GPIO_TIM1_CH1OUT ; GPIO_TIM2_CH2OUT ; GPIO_TIM4_CH4OUT
+ */
+
+#define RGBLED_RPWMTIMER   1
+#define RGBLED_RPWMCHANNEL 1
+#define RGBLED_GPWMTIMER   2
+#define RGBLED_GPWMCHANNEL 2
+#define RGBLED_BPWMTIMER   4
+#define RGBLED_BPWMCHANNEL 4
 
 /************************************************************************************
  * Public Data

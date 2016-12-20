@@ -102,6 +102,9 @@
 #define GPIO_USART2_RTS  GPIO_USART2_RTS_2
 #define GPIO_USART2_CTS  GPIO_USART2_CTS_2
 
+#define GPIO_UART4_RX   GPIO_UART4_RX_1    /* PA1 */
+#define GPIO_UART4_TX   GPIO_UART4_TX_1    /* PA0 */
+
 /* I2C
  *
  * The optional _GPIO configurations allow the I2C driver to manually
@@ -201,6 +204,31 @@
 #define NUM_BUTTONS        1
 
 #define BUTTON_USER_BIT    (1 << BUTTON_USER)
+
+/* Quadrature encoder
+ * Default is to use timer 5 (32-bit) and encoder on PA0/PA1
+ */
+
+#define GPIO_TIM2_CH1IN GPIO_TIM2_CH1IN_1
+#define GPIO_TIM2_CH2IN GPIO_TIM2_CH2IN_1
+
+#define GPIO_TIM3_CH1IN GPIO_TIM3_CH1IN_3
+#define GPIO_TIM3_CH2IN GPIO_TIM3_CH2IN_3
+
+#define GPIO_TIM5_CH1IN GPIO_TIM5_CH1IN_1
+#define GPIO_TIM5_CH2IN GPIO_TIM5_CH2IN_1
+
+/* PWM output for full bridge, uses config 1, because port E is N/A on QFP64
+ * CH1     | 1(A8) 2(E9)
+ * CH2     | 1(A9) 2(E11)
+ * CHN1    | 1(A7) 2(B13) 3(E8)
+ * CHN2    | 1(B0) 2(B14) 3(E10)
+ */
+
+#define GPIO_TIM1_CH1OUT  GPIO_TIM1_CH1OUT_1
+#define GPIO_TIM1_CH1NOUT GPIO_TIM1_CH1N_1
+#define GPIO_TIM1_CH2OUT  GPIO_TIM1_CH2OUT_1
+#define GPIO_TIM1_CH2NOUT GPIO_TIM1_CH2N_1
 
 /************************************************************************************
  * Public Data

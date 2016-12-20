@@ -269,8 +269,9 @@ config LPC43_SSP1
 	default n
 
 config LPC43_TMR0
-	bool "ADC1"
+	bool "Timer 0"
 	default n
+	select LPC43_TIMER
 
 config LPC43_TMR1
 	bool "Timer 1"
@@ -279,10 +280,17 @@ config LPC43_TMR1
 config LPC43_TMR2
 	bool "Timer 2"
 	default n
+	select LPC43_TIMER
 
 config LPC43_TMR3
 	bool "Timer 3"
 	default n
+	select LPC43_TIMER
+
+config LPC43_TIMER
+        bool
+        default n
+        select ARCH_HAVE_EXTCLK
 
 config LPC43_USART0
 	bool "USART0"
@@ -485,8 +493,8 @@ endif # LCP43_EXTSDRAM3
 
 endmenu # External Memory Configuration
 
-if LPC43_ETHERNET
 menu "Ethernet MAC configuration"
+	depends on LPC43_ETHERNET
 
 config LPC43_PHYADDR
 	int "PHY address"
@@ -619,6 +627,26 @@ config LPC43_RMII
 	bool
 	default y if !LPC43_MII
 
+choice
+	prompt "Work queue"
+	default LPC43_ETHERNET_LPWORK if SCHED_LPWORK
+	default LPC43_ETHERNET_HPWORK if !SCHED_LPWORK && SCHED_HPWORK
+	depends on SCHED_WORKQUEUE
+	---help---
+		Work queue support is required to use the Ethernet driver.  If the
+		low priority work queue is available, then it should be used by the
+		driver.
+
+config LPC43_ETHERNET_HPWORK
+	bool "High priority"
+	depends on SCHED_HPWORK
+
+config LPC43_ETHERNET_LPWORK
+	bool "Low priority"
+	depends on SCHED_LPWORK
+
+endchoice # Work queue
+
 config LPC43_ETHERNET_REGDEBUG
 	bool "Register-Level Debug"
 	default n
@@ -627,7 +655,6 @@ config LPC43_ETHERNET_REGDEBUG
 		Enable very low-level register access debug.  Depends on CONFIG_DEBUG_NET_INFO.
 
 endmenu # Ethernet MAC configuration
-endif # LPC43_ETHERNET
 
 menu "RS-485 Configuration"
 if LPC43_USART0
@@ -638,11 +665,16 @@ config USART0_RS485MODE
 	---help---
 		Enable RS-485 interface on USART0.
 
-config USART0_RS485_DTRDIR
-	bool "USART0 DTR for DIR"
+if USART0_RS485_MODE
+	config USART0_RS485DIROIN
+	bool "Invert direction control pin polarity"
 	default n
 	---help---
-		Use the USART DTR pin for the DIR pin
+		If disabled, control pin will be driven to logic 0 when the
+		transmitter has data to be sent.  It will be driven to logic 1 after
+		the last bit of data has been transmitted.
+
+endif # USART0_RS485MODE
 
 endif # LPC43_USART0
 
@@ -670,11 +702,15 @@ config USART2_RS485MODE
 	---help---
 		Enable RS-485 interface on USART2.
 
-config USART2_RS485_DTRDIR
-	bool "USART2 DTR for DIR"
+if USART2_RS485MODE
+	config USART0_RS485DIROIN
+	bool "Invert direction control pin polarity"
 	default n
 	---help---
-		Use the USART DTR pin for the DIR pin
+		If disabled, control pin will be driven to logic 0 when the transmitter has data to be sent.
+		It will be driven to logic 1 after the last bit of data has been transmitted.
+
+endif # USART2_RS485MODE
 
 endif # LPC43_USART2
 
@@ -686,11 +722,15 @@ config USART3_RS485MODE
 	---help---
 		Enable RS-485 interface on USART3.
 
-config USART3_RS485_DTRDIR
-	bool "USART3 DTR for DIR"
+if USART3_RS485MODE
+config USART3_RS485DIROIN
+	bool "Invert direction control pin polarity"
 	default n
 	---help---
-		Use the USART DTR pin for the DIR pin
+		If disabled, control pin will be driven to logic 0 when the transmitter has data to be sent.
+		It will be driven to logic 1 after the last bit of data has been transmitted.
+
+endif # USART3_RS485MODE
 
 endif # LPC43_USART3
 endmenu # RS-485 Configuration

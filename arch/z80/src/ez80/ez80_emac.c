@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z80/src/ez80/ez80_emac.c
  *
- *   Copyright (C) 2009-2010, 2012, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2012, 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -56,6 +56,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include <nuttx/wdog.h>
+#include <nuttx/wqueue.h>
 #include <nuttx/net/mii.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
@@ -74,6 +75,25 @@
  ****************************************************************************/
 
 /* Configuration ************************************************************/
+
+/* If processing is not done at the interrupt level, then work queue support
+ * is required.
+ */
+
+#if !defined(CONFIG_SCHED_WORKQUEUE)
+#  error Work queue support is required in this configuration (CONFIG_SCHED_WORKQUEUE)
+#else
+
+  /* Use the low priority work queue if possible */
+
+#  if defined(CONFIG_EZ80_EMAC_HPWORK)
+#    define ETHWORK HPWORK
+#  elif defined(CONFIG_EZ80_EMAC_LPWORK)
+#    define ETHWORK LPWORK
+#  else
+#    error Neither CONFIG_EZ80_EMAC_HPWORK nor CONFIG_EZ80_EMAC_LPWORK defined
+#  endif
+#endif
 
 #ifndef CONFIG_EZ80_RAMADDR
 #  define CONFIG_EZ80_RAMADDR EZ80_EMACSRAM
@@ -321,6 +341,10 @@ struct ez80emac_driver_s
   WDOG_ID txpoll;           /* TX poll timer */
   WDOG_ID txtimeout;        /* TX timeout timer */
 
+  struct work_s txwork;     /* For deferring Tx-related work to the work queue */
+  struct work_s rxwork;     /* For deferring Rx-related work to the work queue */
+  struct work_s syswork;    /* For deferring system work to the work queue */
+
 #if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_NET)
   struct ez80mac_statistics_s stat;
 #endif
@@ -333,6 +357,10 @@ struct ez80emac_driver_s
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+/* A single packet buffer is used */
+
+static uint8_t g_pktbuf[MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE];
 
 /* There is only a single instance of driver private data (because there is
  * only one EMAC interface.
@@ -371,20 +399,31 @@ static int  ez80emac_receive(struct ez80emac_driver_s *priv);
 
 /* Interrupt handling */
 
+static void ez80emac_txinterrupt_work(FAR void *arg);
 static int  ez80emac_txinterrupt(int irq, FAR void *context);
+
+static void ez80emac_rxinterrupt_work(FAR void *arg);
 static int  ez80emac_rxinterrupt(int irq, FAR void *context);
+
+static void ez80emac_sysinterrupt_work(FAR void *arg);
 static int  ez80emac_sysinterrupt(int irq, FAR void *context);
 
 /* Watchdog timer expirations */
 
-static void ez80emac_polltimer(int argc, uint32_t arg, ...);
-static void ez80emac_txtimeout(int argc, uint32_t arg, ...);
+static void ez80emac_txtimeout_work(FAR void *arg);
+static void ez80emac_txtimeout_expiry(int argc, uint32_t arg, ...);
+
+static void ez80emac_poll_work(FAR void *arg);
+static void ez80emac_poll_expiry(int argc, uint32_t arg, ...);
 
 /* NuttX callback functions */
 
 static int  ez80emac_ifup(struct net_driver_s *dev);
 static int  ez80emac_ifdown(struct net_driver_s *dev);
+
+static void ez80emac_txavail_work(FAR void *arg);
 static int  ez80emac_txavail(struct net_driver_s *dev);
+
 #ifdef CONFIG_NET_IGMP
 static int ez80emac_addmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 static int ez80emac_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac);
@@ -1047,7 +1086,8 @@ static int ez80emac_transmit(struct ez80emac_driver_s *priv)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  (void)wd_start(priv->txtimeout, EMAC_TXTIMEOUT, ez80emac_txtimeout, 1, (uint32_t)priv);
+  (void)wd_start(priv->txtimeout, EMAC_TXTIMEOUT,
+                 ez80emac_txtimeout_expiry, 1, (uint32_t)priv);
   return OK;
 }
 
@@ -1410,26 +1450,32 @@ static int ez80emac_receive(struct ez80emac_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: ez80emac_txinterrupt
+ * Function: ez80emac_txinterrupt_work
  *
  * Description:
- *   Process Rx-related interrupt events
+ *   Perform Tx interrupt related work from the worker thread
  *
  * Parameters:
- *   priv  - Driver data instance
- *   istat - Snapshot of ISTAT register containing Rx events to provess
+ *   arg - The argument passed when work_queue() was called.
  *
  * Returned Value:
- *  None
+ *   OK on success
+ *
+ * Assumptions:
+ *   The network is locked.
  *
  ****************************************************************************/
 
-static int ez80emac_txinterrupt(int irq, FAR void *context)
+static void ez80emac_txinterrupt_work(FAR void *arg)
 {
-  FAR struct ez80emac_driver_s *priv = &g_emac;
+  FAR struct ez80emac_driver_s *priv = (FAR struct ez80emac_driver_s *)arg;
   FAR struct ez80emac_desc_s *txhead = priv->txhead;
   uint8_t regval;
   uint8_t istat;
+
+  /* Process pending Ethernet Tx interrupts */
+
+  net_lock();
 
   /* EMAC Tx interrupts:
    *
@@ -1511,28 +1557,87 @@ static int ez80emac_txinterrupt(int irq, FAR void *context)
       wd_cancel(priv->txtimeout);
     }
 
+  net_unlock();
+
+  /* Re-enable Ethernet Tx interrupts */
+
+  up_enable_irq(EZ80_EMACRX_IRQ);
+}
+
+/****************************************************************************
+ * Function: ez80emac_txinterrupt
+ *
+ * Description:
+ *   Process Tx-related interrupt events
+ *
+ * Parameters:
+ *   irq     - Number of the IRQ that generated the interrupt
+ *   context - Interrupt register state save info (architecture-specific)
+ *
+ * Returned Value:
+ *   OK on success
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static int ez80emac_txinterrupt(int irq, FAR void *context)
+{
+  FAR struct ez80emac_driver_s *priv = &g_emac;
+  uint8_t istat;
+
+  /* Disable further Ethernet Tx interrupts.  Because Ethernet interrupts are
+   * also disabled if the TX timeout event occurs, there can be no race
+   * condition here.
+   */
+
+  up_disable_irq(EZ80_EMACTX_IRQ);
+
+  /* Determine if a TX transfer just completed */
+
+  istat = inp(EZ80_EMAC_ISTAT);
+  if ((istat & EMAC_ISTAT_TXDONE) != 0)
+    {
+      /* If a TX transfer just completed, then cancel the TX timeout so
+       * there will be no race condition between any subsequent timeout
+       * expiration and the deferred interrupt processing.
+       */
+
+       wd_cancel(priv->txtimeout);
+    }
+
+  /* Schedule to perform the Tx interrupt processing on the worker thread. */
+
+  work_queue(ETHWORK, &priv->txwork, ez80emac_txinterrupt_work, priv, 0);
+
   return OK;
 }
 
 /****************************************************************************
- * Function: ez80emac_rxinterrupt
+ * Function: ez80emac_rxinterrupt_work
  *
  * Description:
- *   Process Rx-related interrupt events
+ *   Perform Rx interrupt related work from the worker thread
  *
  * Parameters:
- *   priv  - Driver data instance
- *   istat - Snapshot of ISTAT register containing Rx events to provess
+ *   arg - The argument passed when work_queue() was called.
  *
  * Returned Value:
- *   None
+ *   OK on success
+ *
+ * Assumptions:
+ *   The network is locked.
  *
  ****************************************************************************/
 
-static int ez80emac_rxinterrupt(int irq, FAR void *context)
+static void ez80emac_rxinterrupt_work(FAR void *arg)
 {
-  FAR struct ez80emac_driver_s *priv   = &g_emac;
+  FAR struct ez80emac_driver_s *priv = (FAR struct ez80emac_driver_s *)arg;
   uint8_t  istat;
+
+  /* Process pending Ethernet Rx interrupts */
+
+  net_lock();
 
   /* EMAC Rx interrupts:
    *
@@ -1554,14 +1659,18 @@ static int ez80emac_rxinterrupt(int irq, FAR void *context)
   /* Process any RX packets pending the RX buffer */
 
   (void)ez80emac_receive(priv);
-  return OK;
+  net_unlock();
+
+  /* Re-enable Ethernet Rx interrupts */
+
+  up_enable_irq(EZ80_EMACRX_IRQ);
 }
 
 /****************************************************************************
- * Function: ez80emac_sysinterrupt
+ * Function: ez80emac_rxinterrupt
  *
  * Description:
- *   Hardware interrupt handler
+ *   Process Rx-related interrupt events
  *
  * Parameters:
  *   irq     - Number of the IRQ that generated the interrupt
@@ -1574,11 +1683,49 @@ static int ez80emac_rxinterrupt(int irq, FAR void *context)
  *
  ****************************************************************************/
 
-static int ez80emac_sysinterrupt(int irq, FAR void *context)
+static int ez80emac_rxinterrupt(int irq, FAR void *context)
 {
   FAR struct ez80emac_driver_s *priv = &g_emac;
+
+  /* Disable further Ethernet Rx interrupts.  Because Ethernet interrupts are
+   * also disabled if the TX timeout event occurs, there can be no race
+   * condition here.
+   */
+
+  up_disable_irq(EZ80_EMACRX_IRQ);
+
+  /* Schedule to perform the Rx interrupt processing on the worker thread. */
+
+  work_queue(ETHWORK, &priv->rxwork,  ez80emac_rxinterrupt_work, priv, 0);
+  return OK;
+}
+
+/****************************************************************************
+ * Function: ez80emac_sysinterrupt_work
+ *
+ * Description:
+ *   Perform system interrupt related work from the worker thread
+ *
+ * Parameters:
+ *   arg - The argument passed when work_queue() was called.
+ *
+ * Returned Value:
+ *   OK on success
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+static void ez80emac_sysinterrupt_work(FAR void *arg)
+{
+  FAR struct ez80emac_driver_s *priv = (FAR struct ez80emac_driver_s *)arg;
   uint8_t events;
   uint8_t istat;
+
+  /* Process pending system interrupts */
+
+  net_lock();
 
   /* EMAC system interrupts :
    *
@@ -1632,31 +1779,77 @@ static int ez80emac_sysinterrupt(int irq, FAR void *context)
       EMAC_STAT(priv, rx_errors);
       EMAC_STAT(priv, rx_ovrerrors);
     }
-  return OK;
+
+  net_unlock();
+
+  /* Re-enable Ethernet system interrupts */
+
+  up_enable_irq(EZ80_EMACSYS_IRQ);
 }
 
 /****************************************************************************
- * Function: ez80emac_txtimeout
+ * Function: ez80emac_sysinterrupt
  *
  * Description:
- *   Our TX watchdog timed out.  Called from the timer interrupt handler.
- *   The last TX never completed.  Reset the hardware and start again.
+ *   System interrupt handler
  *
  * Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   irq     - Number of the IRQ that generated the interrupt
+ *   context - Interrupt register state save info (architecture-specific)
  *
  * Returned Value:
- *   None
+ *   OK on success
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-static void ez80emac_txtimeout(int argc, uint32_t arg, ...)
+static int ez80emac_sysinterrupt(int irq, FAR void *context)
+{
+  FAR struct ez80emac_driver_s *priv = &g_emac;
+
+  /* Disable further Ethernet interrupts.  Because Ethernet interrupts are
+   * also disabled if the TX timeout event occurs, there can be no race
+   * condition here.
+   */
+
+  up_disable_irq(EZ80_EMACSYS_IRQ);
+
+  /* Cancel any pending poll work */
+
+  work_cancel(ETHWORK, &priv->syswork);
+
+  /* Schedule to perform the interrupt processing on the worker thread. */
+
+  work_queue(ETHWORK, &priv->syswork,  ez80emac_sysinterrupt_work, priv, 0);
+  return OK;
+}
+
+/****************************************************************************
+ * Function: ez80emac_txtimeout_work
+ *
+ * Description:
+ *   Perform TX timeout related work from the worker thread
+ *
+ * Parameters:
+ *   arg - The argument passed when work_queue() as called.
+ *
+ * Returned Value:
+ *   OK on success
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+static void ez80emac_txtimeout_work(FAR void *arg)
 {
   FAR struct ez80emac_driver_s *priv = (FAR struct ez80emac_driver_s *)arg;
   irqstate_t flags;
+
+  /* Process pending Ethernet interrupts */
+
+  net_lock();
 
   /* Increment statistics and dump debug info */
 
@@ -1673,10 +1866,84 @@ static void ez80emac_txtimeout(int argc, uint32_t arg, ...)
   /* Then poll the network for new XMIT data */
 
   (void)devif_poll(&priv->dev, ez80emac_txpoll);
+  net_unlock();
 }
 
 /****************************************************************************
- * Function: ez80emac_polltimer
+ * Function: ez80emac_txtimeout_expiry
+ *
+ * Description:
+ *   Our TX watchdog timed out.  Called from the timer interrupt handler.
+ *   The last TX never completed.  Reset the hardware and start again.
+ *
+ * Parameters:
+ *   argc - The number of available arguments
+ *   arg  - The first argument
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Global interrupts are disabled by the watchdog logic.
+ *
+ ****************************************************************************/
+
+static void ez80emac_txtimeout_expiry(int argc, wdparm_t arg, ...)
+{
+  FAR struct ez80emac_driver_s *priv = (FAR struct ez80emac_driver_s *)arg;
+
+  /* Disable further Ethernet Tx interrupts.  This will prevent some race
+   * conditions with interrupt work.  There is still a potential race
+   * condition with interrupt work that is already queued and in progress.
+   */
+
+  up_disable_irq(EZ80_EMACTX_IRQ);
+
+  /* Cancel any pending poll or Tx interrupt work.  This will have no
+   * effect on work that has already been started.
+   */
+
+  work_cancel(ETHWORK, &priv->txwork);
+
+  /* Schedule to perform the TX timeout processing on the worker thread. */
+
+  work_queue(ETHWORK, &priv->txwork, ez80emac_txtimeout_work, priv, 0);
+}
+
+/****************************************************************************
+ * Function: ez80emac_poll_work
+ *
+ * Description:
+ *   Perform periodic polling from the worker thread
+ *
+ * Parameters:
+ *   arg - The argument passed when work_queue() as called.
+ *
+ * Returned Value:
+ *   OK on success
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+static void ez80emac_poll_work(FAR void *arg)
+{
+  FAR struct ez80emac_driver_s *priv = (FAR struct ez80emac_driver_s *)arg;
+
+  /* Poll the network for new XMIT data */
+
+  net_lock();
+  (void)devif_timer(&priv->dev, ez80emac_txpoll);
+
+  /* Setup the watchdog poll timer again */
+
+  (void)wd_start(priv->txpoll, EMAC_WDDELAY, ez80emac_poll_expiry, 1, priv);
+  net_unlock();
+}
+
+/****************************************************************************
+ * Function: ez80emac_poll_expiry
  *
  * Description:
  *   Periodic timer handler.  Called from the timer interrupt handler.
@@ -1689,20 +1956,32 @@ static void ez80emac_txtimeout(int argc, uint32_t arg, ...)
  *   None
  *
  * Assumptions:
+ *   Global interrupts are disabled by the watchdog logic.
  *
  ****************************************************************************/
 
-static void ez80emac_polltimer(int argc, uint32_t arg, ...)
+static void ez80emac_poll_expiry(int argc, wdparm_t arg, ...)
 {
-  struct ez80emac_driver_s *priv = (struct ez80emac_driver_s *)arg;
+  FAR struct ez80emac_driver_s *priv = (FAR struct ez80emac_driver_s *)arg;
 
-  /* Poll the network for new XMIT data */
+  /* Is our single work structure available?  It may not be if there are
+   * pending interrupt actions.
+   */
 
-  (void)devif_timer(&priv->dev, ez80emac_txpoll);
+  if (work_available(&priv->syswork))
+    {
+      /* Schedule to perform the interrupt processing on the worker thread. */
 
-  /* Setup the watchdog poll timer again */
+      work_queue(ETHWORK, &priv->syswork, ez80emac_poll_work, priv, 0);
+    }
+  else
+    {
+      /* No.. Just re-start the watchdog poll timer, missing one polling
+       * cycle.
+       */
 
-  (void)wd_start(priv->txpoll, EMAC_WDDELAY, ez80emac_polltimer, 1, arg);
+      (void)wd_start(priv->txpoll, EMAC_WDDELAY, ez80emac_poll_expiry, 1, arg);
+    }
 }
 
 /****************************************************************************
@@ -1788,7 +2067,8 @@ static int ez80emac_ifup(FAR struct net_driver_s *dev)
 
       /* Set and activate a timer process */
 
-     (void)wd_start(priv->txpoll, EMAC_WDDELAY, ez80emac_polltimer, 1, (uint32_t)priv);
+     (void)wd_start(priv->txpoll, EMAC_WDDELAY, ez80emac_poll_expiry,
+                    1, (uint32_t)priv);
 
       /* Enable the Ethernet interrupts */
 
@@ -1851,6 +2131,42 @@ static int ez80emac_ifdown(struct net_driver_s *dev)
 }
 
 /****************************************************************************
+ * Function: ez80emac_txavail_work
+ *
+ * Description:
+ *   Perform an out-of-cycle poll on the worker thread.
+ *
+ * Parameters:
+ *   arg - Reference to the NuttX driver state structure (cast to void*)
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Called on the higher priority worker thread.
+ *
+ ****************************************************************************/
+
+static void ez80emac_txavail_work(FAR void *arg)
+{
+  FAR struct ez80emac_driver_s *priv = (FAR struct ez80emac_driver_s *)arg;
+
+  /* Ignore the notification if the interface is not yet up */
+
+  net_lock();
+  if (priv->bifup)
+    {
+      /* Check if there is room in the hardware to hold another outgoing packet. */
+
+      /* If so, then poll the network for new XMIT data */
+
+      (void)devif_poll(&priv->dev, ez80emac_txpoll);
+    }
+
+  net_unlock();
+}
+
+/****************************************************************************
  * Function: ez80emac_txavail
  *
  * Description:
@@ -1859,7 +2175,7 @@ static int ez80emac_ifdown(struct net_driver_s *dev)
  *   latency.
  *
  * Parameters:
- *   dev  - Reference to the NuttX driver state structure
+ *   dev - Reference to the NuttX driver state structure
  *
  * Returned Value:
  *   None
@@ -1869,26 +2185,22 @@ static int ez80emac_ifdown(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static int ez80emac_txavail(struct net_driver_s *dev)
+static int ez80emac_txavail(FAR struct net_driver_s *dev)
 {
-  struct ez80emac_driver_s *priv = (struct ez80emac_driver_s *)dev->d_private;
-  irqstate_t flags;
+  FAR struct ez80emac_driver_s *priv = (FAR struct ez80emac_driver_s *)dev->d_private;
 
-  flags = enter_critical_section();
+  /* Is our single work structure available?  It may not be if there are
+   * pending interrupt actions and we will have to ignore the Tx
+   * availability action.
+   */
 
-  /* Ignore the notification if the interface is not yet up */
-
-  if (priv->bifup)
+  if (work_available(&priv->syswork))
     {
+      /* Schedule to serialize the poll on the worker thread. */
 
-      /* Check if there is room in the hardware to hold another outgoing packet. */
-
-      /* If so, then poll the network for new XMIT data */
-
-      (void)devif_poll(&priv->dev, ez80emac_txpoll);
+      work_queue(ETHWORK, &priv->syswork, ez80emac_txavail_work, priv, 0);
     }
 
-  leave_critical_section(flags);
   return OK;
 }
 
@@ -2224,6 +2536,7 @@ int up_netinitialize(void)
   /* Initialize the driver structure */
 
   memset(&g_emac, 0, sizeof(struct ez80emac_driver_s));
+  priv->dev.d_buf     = g_pktbuf;           /* Single packet buffer */
   priv->dev.d_ifup    = ez80emac_ifup;      /* I/F down callback */
   priv->dev.d_ifdown  = ez80emac_ifdown;    /* I/F up (new IP address) callback */
   priv->dev.d_txavail = ez80emac_txavail;   /* New TX data callback */

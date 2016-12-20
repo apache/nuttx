@@ -55,8 +55,9 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/fs/fs.h>
 #include <nuttx/arch.h>
+#include <nuttx/semaphore.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/analog/dac.h>
 
 #include <nuttx/irq.h>
@@ -515,8 +516,16 @@ int dac_register(FAR const char *path, FAR struct dac_dev_s *dev)
 
   dev->ad_ocount = 0;
 
+  /* Initialize semaphores */
+
   sem_init(&dev->ad_xmit.af_sem, 0, 0);
   sem_init(&dev->ad_closesem, 0, 1);
+
+  /* The transmit semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
+  sem_setprotocol(&dev->ad_xmit.af_sem, SEM_PRIO_NONE);
 
   dev->ad_ops->ao_reset(dev);
 

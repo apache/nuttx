@@ -62,10 +62,10 @@
  */
 
 #ifdef CONFIG_NETDB_HOSTFILE
-#  undef  CONFIG_NET_IPv4
-#  undef  CONFIG_NET_IPv6
-#  define CONFIG_NET_IPv4 1
-#  define CONFIG_NET_IPv6 1
+#  undef  CONFIG_LIBC_IPv4_ADDRCONV
+#  undef  CONFIG_LIBC_IPv6_ADDRCONV
+#  define CONFIG_LIBC_IPv4_ADDRCONV 1
+#  define CONFIG_LIBC_IPv6_ADDRCONV 1
 #endif
 
 /****************************************************************************
@@ -97,7 +97,7 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IPv4
+#if defined(CONFIG_NET_IPv4) || defined(CONFIG_LIBC_IPv4_ADDRCONV)
 static int inet_ipv4_ntop(FAR const void *src, FAR char *dest, socklen_t size)
 {
   FAR char *ptr;
@@ -141,7 +141,7 @@ static int inet_ipv4_ntop(FAR const void *src, FAR char *dest, socklen_t size)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IPv6
+#if defined(CONFIG_NET_IPv6) || defined(CONFIG_LIBC_IPv6_ADDRCONV)
 static int inet_ipv6_ntop(FAR const void *src, FAR char *dest, socklen_t size)
 {
   FAR const struct in6_addr *in6_addr;
@@ -265,13 +265,13 @@ FAR const char *inet_ntop(int af, FAR const void *src, FAR char *dest,
 
   switch (af)
     {
-#ifdef CONFIG_NET_IPv4
+#if defined(CONFIG_NET_IPv4) || defined(CONFIG_LIBC_IPv4_ADDRCONV)
     case AF_INET:
       ret = inet_ipv4_ntop(src, dest, size);
       break;
 #endif
 
-#ifdef CONFIG_NET_IPv6
+#if defined(CONFIG_NET_IPv6) || defined(CONFIG_LIBC_IPv6_ADDRCONV)
     case AF_INET6:
       ret = inet_ipv6_ntop(src, dest, size);
       break;

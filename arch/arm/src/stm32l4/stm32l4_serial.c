@@ -96,7 +96,7 @@
 
 #  if defined(CONFIG_UART4_RXDMA) || defined(CONFIG_UART5_RXDMA)
 #    ifndef CONFIG_STM32L4_DMA2
-#      error STM32L4 USART4/5 receive DMA requires CONFIG_STM32L4_DMA2
+#      error STM32L4 UART4/5 receive DMA requires CONFIG_STM32L4_DMA2
 #    endif
 #  endif
 
@@ -731,7 +731,7 @@ static struct stm32l4_serial_s g_uart5priv =
 
 /* This table lets us iterate over the configured USARTs */
 
-FAR static struct stm32l4_serial_s * const uart_devs[STM32L4_NUSART] =
+FAR static struct stm32l4_serial_s * const uart_devs[STM32L4_NUSART+STM32L4_NUART] =
 {
 #ifdef CONFIG_STM32L4_USART1
   [0] = &g_usart1priv,
@@ -2407,7 +2407,7 @@ void up_earlyserialinit(void)
 
   /* Disable all USART interrupts */
 
-  for (i = 0; i < STM32L4_NUSART; i++)
+  for (i = 0; i < STM32L4_NUSART+STM32L4_NUART; i++)
     {
       if (uart_devs[i])
         {
@@ -2476,7 +2476,7 @@ void up_serialinit(void)
 
   strcpy(devname, "/dev/ttySx");
 
-  for (i = 0; i < STM32L4_NUSART; i++)
+  for (i = 0; i < STM32L4_NUSART+STM32L4_NUART; i++)
     {
       /* Don't create a device for non-configured ports. */
 

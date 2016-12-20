@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/tm4c123g-launchpad/src/tm4c_bringup.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -63,6 +63,16 @@ int tm4c_bringup(void)
 {
   int ret = OK;
 
+#ifdef CONFIG_TIVA_ADC
+  /* Initialize ADC and register the ADC driver. */
+
+  ret = tm4c_adc_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: tm4c_adc_setup failed: %d\n", ret);
+    }
+#endif
+
 #ifdef HAVE_AT24
   /* Initialize the AT24 driver */
 
@@ -85,5 +95,6 @@ int tm4c_bringup(void)
     }
 #endif /* CONFIG_TIVA_TIMER */
 
+  UNUSED(ret);
   return ret;
 }

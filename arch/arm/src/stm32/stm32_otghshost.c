@@ -52,6 +52,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/clock.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbhost.h>
 #include <nuttx/usb/usbhost_devaddr.h>
@@ -138,11 +139,16 @@
 /* HCD Setup *******************************************************************/
 /* Hardware capabilities */
 
-#define STM32_NHOST_CHANNELS      12  /* Number of host channels */
+#if defined(CONFIG_STM32_STM32F446)
+#  define STM32_NHOST_CHANNELS    16  /* Number of host channels */
+#  define STM32_MAX_TX_FIFOS      16  /* Max number of TX FIFOs */
+#else
+#  define STM32_NHOST_CHANNELS    12  /* Number of host channels */
+#  define STM32_MAX_TX_FIFOS      12  /* Max number of TX FIFOs */
+#endif
 #define STM32_MAX_PACKET_SIZE     64  /* Full speed max packet size */
 #define STM32_EP0_DEF_PACKET_SIZE 8   /* EP0 default packet size */
 #define STM32_EP0_MAX_PACKET_SIZE 64  /* EP0 HS max packet size */
-#define STM32_MAX_TX_FIFOS        12  /* Max number of TX FIFOs */
 #define STM32_MAX_PKTCOUNT        256 /* Max packet count */
 #define STM32_RETRY_COUNT         3   /* Number of ctrl transfer retries */
 
@@ -5091,6 +5097,12 @@ static inline void stm32_sw_initialize(FAR struct stm32_usbhost_s *priv)
   sem_init(&priv->pscsem,  0, 0);
   sem_init(&priv->exclsem, 0, 1);
 
+  /* The pscsem semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
+ sem_setprotocol(&priv->pscsem, SEM_PRIO_NONE);
+
   /* Initialize the driver state data */
 
   priv->smstate   = SMSTATE_DETACHED;
@@ -5106,8 +5118,15 @@ static inline void stm32_sw_initialize(FAR struct stm32_usbhost_s *priv)
   for (i = 0; i < STM32_MAX_TX_FIFOS; i++)
     {
       FAR struct stm32_chan_s *chan = &priv->chan[i];
+
       chan->chidx = i;
+
+      /* The waitsem semaphore is used for signaling and, hence, should not
+       * have priority inheritance enabled.
+       */
+
       sem_init(&chan->waitsem,  0, 0);
+      sem_setprotocol(&chan->waitsem, SEM_PRIO_NONE);
     }
 }
 

@@ -70,12 +70,12 @@
 #define LPC43_GPDMA_CONTROL_CHOFFSET      0x000c /* DMA Channel Control Register */
 #define LPC43_GPDMA_CONFIG_CHOFFSET       0x0010 /* DMA Channel Configuration Register */
 
-#define LPC43_GPDMA_CHOFFSET(n)           (0x0100 ((n) << 5))
+#define LPC43_GPDMA_CHOFFSET(n)           (0x0100 + ((n) << 5))
 #define LPC43_GPDMA_SRCADDR_OFFSET(n)     (LPC43_GPDMA_CHOFFSET(n)+LPC43_GPDMA_SRCADDR_CHOFFSET)
 #define LPC43_GPDMA_DESTADDR_OFFSET(n)    (LPC43_GPDMA_CHOFFSET(n)+LPC43_GPDMA_DESTADDR_CHOFFSET)
 #define LPC43_GPDMA_LLI_OFFSET(n)         (LPC43_GPDMA_CHOFFSET(n)+LPC43_GPDMA_LLI_CHOFFSET)
 #define LPC43_GPDMA_CONTROL_OFFSET(n)     (LPC43_GPDMA_CHOFFSET(n)+LPC43_GPDMA_CONTROL_CHOFFSET)
-#define LPC43_GPDMA_CONFIG_OFFSET(n)      (LPC43_GPDMA_CHOFFSET(n)+LPC43_GPDMA_CONFIG_CHOFFSET)
+#define LPC43_GPDMA_CONFIG_OFFSET_(n)     (LPC43_GPDMA_CHOFFSET(n)+LPC43_GPDMA_CONFIG_CHOFFSET)
 
 #define LPC43_GPDMA_SRCADDR0_OFFSET       0x0100 /* DMA Channel 0 Source Address Register */
 #define LPC43_GPDMA_DESTADDR0_OFFSET      0x0104 /* DMA Channel 0 Destination Address Register */
@@ -149,7 +149,7 @@
 #define LPC43_GPDMA_DESTADDR(n)           (LPC43_DMA_BASE+LPC43_GPDMA_DESTADDR_OFFSET(n))
 #define LPC43_GPDMA_LLI(n)                (LPC43_DMA_BASE+LPC43_GPDMA_LLI_OFFSET(n))
 #define LPC43_GPDMA_CONTROL(n)            (LPC43_DMA_BASE+LPC43_GPDMA_CONTROL_OFFSET(n))
-#define LPC43_GPDMA_CONFIG(n)             (LPC43_DMA_BASE+LPC43_GPDMA_CONFIG_OFFSET(n))
+#define LPC43_GPDMA_CONFIG_(n)            (LPC43_DMA_BASE+LPC43_GPDMA_CONFIG_OFFSET_(n))
 
 #define LPC43_GPDMA_SRCADDR0              (LPC43_DMA_BASE+LPC43_GPDMA_SRCADDR0_OFFSET)
 #define LPC43_GPDMA_DESTADDR0             (LPC43_DMA_BASE+LPC43_GPDMA_DESTADDR0_OFFSET)
@@ -203,6 +203,9 @@
 
 /* Common macros for DMA channel and source bit settings */
 
+#define DMACH_ALL                         (0xff)
+#define LPC43_NDMACH                      8          /* Eight DMA channels */
+#define LPC43_NDMAREQ                     (16)       /* The number of DMA requests */
 #define GPDMA_CHANNEL(n)                  (1 << (n)) /* Bits 0-7 correspond to DMA channel 0-7 */
 #define GPDMA_SOURCE(n)                   (1 << (n)) /* Bits 0-15 correspond to DMA source 0-15 */
 #define GPDMA_REQUEST(n)                  (1 << (n)) /* Bits 0-15 correspond to DMA request 0-15 */

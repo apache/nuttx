@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_eth.c
  *
- *   Copyright (C) 2011-2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,14 +53,11 @@
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include <nuttx/wdog.h>
-
-#ifdef CONFIG_NET_NOINTS
-#  include <nuttx/wqueue.h>
-#endif
-
+#include <nuttx/wqueue.h>
 #include <nuttx/net/mii.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
+
 #if defined(CONFIG_NET_PKT)
 #  include <nuttx/net/pkt.h>
 #endif
@@ -93,12 +90,23 @@
 #  error "Logic to support multiple Ethernet interfaces is incomplete"
 #endif
 
-/* If processing is not done at the interrupt level, then high priority
- * work queue support is required.
+/* If processing is not done at the interrupt level, then work queue support
+ * is required.
  */
 
-#if defined(CONFIG_NET_NOINTS) && !defined(CONFIG_SCHED_HPWORK)
-#  error High priority work queue support is required
+#if !defined(CONFIG_SCHED_WORKQUEUE)
+#  error Work queue support is required
+#else
+
+  /* Select work queue */
+
+#  if defined(CONFIG_STM32_ETHMAC_HPWORK)
+#    define ETHWORK HPWORK
+#  elif defined(CONFIG_STM32_ETHMAC_LPWORK)
+#    define ETHWORK LPWORK
+#  else
+#    error Neither CONFIG_STM32_ETHMAC_HPWORK nor CONFIG_STM32_ETHMAC_LPWORK defined
+#  endif
 #endif
 
 #if !defined(CONFIG_STM32_SYSCFG) && !defined(CONFIG_STM32_CONNECTIVITYLINE)
@@ -194,12 +202,6 @@
 
 #undef CONFIG_STM32_ETH_ENHANCEDDESC
 #undef CONFIG_STM32_ETH_HWCHECKSUM
-
-/* Ethernet buffer sizes, number of buffers, and number of descriptors */
-
-#ifndef CONFIG_NET_MULTIBUFFER
-#  error "CONFIG_NET_MULTIBUFFER is required"
-#endif
 
 /* Add 4 to the configured buffer size to account for the 2 byte checksum
  * memory needed at the end of the maximum size packet.  Buffer sizes must
@@ -581,9 +583,7 @@ struct stm32_ethmac_s
   uint8_t              fduplex : 1; /* Full (vs. half) duplex */
   WDOG_ID              txpoll;      /* TX poll timer */
   WDOG_ID              txtimeout;   /* TX timeout timer */
-#ifdef CONFIG_NET_NOINTS
   struct work_s        work;        /* For deferring work to the work queue */
-#endif
 
   /* This holds the information visible to the NuttX network */
 
@@ -656,34 +656,26 @@ static int  stm32_recvframe(FAR struct stm32_ethmac_s *priv);
 static void stm32_receive(FAR struct stm32_ethmac_s *priv);
 static void stm32_freeframe(FAR struct stm32_ethmac_s *priv);
 static void stm32_txdone(FAR struct stm32_ethmac_s *priv);
-#ifdef CONFIG_NET_NOINTS
+
 static void stm32_interrupt_work(FAR void *arg);
-#endif
 static int  stm32_interrupt(int irq, FAR void *context);
 
 /* Watchdog timer expirations */
 
-static inline void stm32_txtimeout_process(FAR struct stm32_ethmac_s *priv);
-#ifdef CONFIG_NET_NOINTS
 static void stm32_txtimeout_work(FAR void *arg);
-#endif
 static void stm32_txtimeout_expiry(int argc, uint32_t arg, ...);
 
-static inline void stm32_poll_process(FAR struct stm32_ethmac_s *priv);
-#ifdef CONFIG_NET_NOINTS
 static void stm32_poll_work(FAR void *arg);
-#endif
 static void stm32_poll_expiry(int argc, uint32_t arg, ...);
 
 /* NuttX callback functions */
 
 static int  stm32_ifup(struct net_driver_s *dev);
 static int  stm32_ifdown(struct net_driver_s *dev);
-static inline void stm32_txavail_process(FAR struct stm32_ethmac_s *priv);
-#ifdef CONFIG_NET_NOINTS
+
 static void stm32_txavail_work(FAR void *arg);
-#endif
 static int  stm32_txavail(struct net_driver_s *dev);
+
 #if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
 static int  stm32_addmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif
@@ -1958,26 +1950,32 @@ static void stm32_txdone(FAR struct stm32_ethmac_s *priv)
 }
 
 /****************************************************************************
- * Function: stm32_interrupt_process
+ * Function: stm32_interrupt_work
  *
  * Description:
- *   Interrupt processing.  This may be performed either within the interrupt
- *   handler or on the worker thread, depending upon the configuration
+ *   Perform interrupt related work from the worker thread
  *
  * Parameters:
- *   priv  - Reference to the driver state structure
+ *   arg - The argument passed when work_queue() was called.
  *
  * Returned Value:
- *   None
+ *   OK on success
  *
  * Assumptions:
  *   Ethernet interrupts are disabled
  *
  ****************************************************************************/
 
-static inline void stm32_interrupt_process(FAR struct stm32_ethmac_s *priv)
+static void stm32_interrupt_work(FAR void *arg)
 {
+  FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)arg;
   uint32_t dmasr;
+
+  DEBUGASSERT(priv);
+
+  /* Process pending Ethernet interrupts */
+
+  net_lock();
 
   /* Get the DMA interrupt status bits (no MAC interrupts are expected) */
 
@@ -2050,44 +2048,13 @@ static inline void stm32_interrupt_process(FAR struct stm32_ethmac_s *priv)
       stm32_putreg(ETH_DMAINT_AIS, STM32_ETH_DMASR);
     }
 #endif
-}
 
-/****************************************************************************
- * Function: stm32_interrupt_work
- *
- * Description:
- *   Perform interrupt related work from the worker thread
- *
- * Parameters:
- *   arg - The argument passed when work_queue() was called.
- *
- * Returned Value:
- *   OK on success
- *
- * Assumptions:
- *   Ethernet interrupts are disabled
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_NOINTS
-static void stm32_interrupt_work(FAR void *arg)
-{
-  FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)arg;
-  net_lock_t state;
-
-  DEBUGASSERT(priv);
-
-  /* Process pending Ethernet interrupts */
-
-  state = net_lock();
-  stm32_interrupt_process(priv);
-  net_unlock(state);
+  net_unlock();
 
   /* Re-enable Ethernet interrupts at the NVIC */
 
   up_enable_irq(STM32_IRQ_ETH);
 }
-#endif
 
 /****************************************************************************
  * Function: stm32_interrupt
@@ -2109,8 +2076,6 @@ static void stm32_interrupt_work(FAR void *arg)
 static int stm32_interrupt(int irq, FAR void *context)
 {
   FAR struct stm32_ethmac_s *priv = &g_stm32ethmac[0];
-
-#ifdef CONFIG_NET_NOINTS
   uint32_t dmasr;
 
   /* Get the DMA interrupt status bits (no MAC interrupts are expected) */
@@ -2139,54 +2104,14 @@ static int stm32_interrupt(int irq, FAR void *context)
 
       /* Cancel any pending poll work */
 
-      work_cancel(HPWORK, &priv->work);
+      work_cancel(ETHWORK, &priv->work);
 
       /* Schedule to perform the interrupt processing on the worker thread. */
 
-      work_queue(HPWORK, &priv->work, stm32_interrupt_work, priv, 0);
+      work_queue(ETHWORK, &priv->work, stm32_interrupt_work, priv, 0);
     }
 
-#else
-  /* Process the interrupt now */
-
-  stm32_interrupt_process(priv);
-#endif
-
   return OK;
-}
-
-/****************************************************************************
- * Function: stm32_txtimeout_process
- *
- * Description:
- *   Process a TX timeout.  Called from the either the watchdog timer
- *   expiration logic or from the worker thread, depending upon the
- *   configuration.  The timeout means that the last TX never completed.
- *   Reset the hardware and start again.
- *
- * Parameters:
- *   priv  - Reference to the driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Global interrupts are disabled by the watchdog logic.
- *
- ****************************************************************************/
-
-static inline void stm32_txtimeout_process(FAR struct stm32_ethmac_s *priv)
-{
-  /* Then reset the hardware.  Just take the interface down, then back
-   * up again.
-   */
-
-  stm32_ifdown(&priv->dev);
-  stm32_ifup(&priv->dev);
-
-  /* Then poll for new XMIT data */
-
-  stm32_dopoll(priv);
 }
 
 /****************************************************************************
@@ -2206,19 +2131,21 @@ static inline void stm32_txtimeout_process(FAR struct stm32_ethmac_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_NOINTS
 static void stm32_txtimeout_work(FAR void *arg)
 {
   FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)arg;
-  net_lock_t state;
 
-  /* Process pending Ethernet interrupts */
+  /* Reset the hardware.  Just take the interface down, then back up again. */
 
-  state = net_lock();
-  stm32_txtimeout_process(priv);
-  net_unlock(state);
+  net_lock();
+  stm32_ifdown(&priv->dev);
+  stm32_ifup(&priv->dev);
+
+  /* Then poll for new XMIT data */
+
+  stm32_dopoll(priv);
+  net_unlock();
 }
-#endif
 
 /****************************************************************************
  * Function: stm32_txtimeout_expiry
@@ -2245,7 +2172,6 @@ static void stm32_txtimeout_expiry(int argc, uint32_t arg, ...)
 
   nerr("ERROR: Timeout!\n");
 
-#ifdef CONFIG_NET_NOINTS
   /* Disable further Ethernet interrupts.  This will prevent some race
    * conditions with interrupt work.  There is still a potential race
    * condition with interrupt work that is already queued and in progress.
@@ -2259,38 +2185,33 @@ static void stm32_txtimeout_expiry(int argc, uint32_t arg, ...)
    * on work that has already been started.
    */
 
-  work_cancel(HPWORK, &priv->work);
+  work_cancel(ETHWORK, &priv->work);
 
   /* Schedule to perform the TX timeout processing on the worker thread. */
 
-  work_queue(HPWORK, &priv->work, stm32_txtimeout_work, priv, 0);
-
-#else
-  /* Process the timeout now */
-
-  stm32_txtimeout_process(priv);
-#endif
+  work_queue(ETHWORK, &priv->work, stm32_txtimeout_work, priv, 0);
 }
 
 /****************************************************************************
- * Function: stm32_poll_process
+ * Function: stm32_poll_work
  *
  * Description:
- *   Perform the periodic poll.  This may be called either from watchdog
- *   timer logic or from the worker thread, depending upon the configuration.
+ *   Perform periodic polling from the worker thread
  *
  * Parameters:
- *   priv  - Reference to the driver state structure
+ *   arg - The argument passed when work_queue() as called.
  *
  * Returned Value:
- *   None
+ *   OK on success
  *
  * Assumptions:
+ *   Ethernet interrupts are disabled
  *
  ****************************************************************************/
 
-static inline void stm32_poll_process(FAR struct stm32_ethmac_s *priv)
+static void stm32_poll_work(FAR void *arg)
 {
+  FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)arg;
   FAR struct net_driver_s *dev  = &priv->dev;
 
   /* Check if the next TX descriptor is owned by the Ethernet DMA or CPU.  We
@@ -2304,6 +2225,7 @@ static inline void stm32_poll_process(FAR struct stm32_ethmac_s *priv)
    * CONFIG_STM32_ETH_NTXDESC).
    */
 
+  net_lock();
   if ((priv->txhead->tdes0 & ETH_TDES0_OWN) == 0 &&
        priv->txhead->tdes2 == 0)
     {
@@ -2339,38 +2261,8 @@ static inline void stm32_poll_process(FAR struct stm32_ethmac_s *priv)
   /* Setup the watchdog poll timer again */
 
   (void)wd_start(priv->txpoll, STM32_WDDELAY, stm32_poll_expiry, 1, priv);
+  net_unlock();
 }
-
-/****************************************************************************
- * Function: stm32_poll_work
- *
- * Description:
- *   Perform periodic polling from the worker thread
- *
- * Parameters:
- *   arg - The argument passed when work_queue() as called.
- *
- * Returned Value:
- *   OK on success
- *
- * Assumptions:
- *   Ethernet interrupts are disabled
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_NOINTS
-static void stm32_poll_work(FAR void *arg)
-{
-  FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)arg;
-  net_lock_t state;
-
-  /* Perform the poll */
-
-  state = net_lock();
-  stm32_poll_process(priv);
-  net_unlock(state);
-}
-#endif
 
 /****************************************************************************
  * Function: stm32_poll_expiry
@@ -2394,7 +2286,6 @@ static void stm32_poll_expiry(int argc, uint32_t arg, ...)
 {
   FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)arg;
 
-#ifdef CONFIG_NET_NOINTS
   /* Is our single work structure available?  It may not be if there are
    * pending interrupt actions.
    */
@@ -2403,7 +2294,7 @@ static void stm32_poll_expiry(int argc, uint32_t arg, ...)
     {
       /* Schedule to perform the interrupt processing on the worker thread. */
 
-      work_queue(HPWORK, &priv->work, stm32_poll_work, priv, 0);
+      work_queue(ETHWORK, &priv->work, stm32_poll_work, priv, 0);
     }
   else
     {
@@ -2413,12 +2304,6 @@ static void stm32_poll_expiry(int argc, uint32_t arg, ...)
 
       (void)wd_start(priv->txpoll, STM32_WDDELAY, stm32_poll_expiry, 1, (uint32_t)priv);
     }
-
-#else
-  /* Process the interrupt now */
-
-  stm32_poll_process(priv);
-#endif
 }
 
 /****************************************************************************
@@ -2524,37 +2409,6 @@ static int stm32_ifdown(struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: stm32_txavail_process
- *
- * Description:
- *   Perform an out-of-cycle poll.
- *
- * Parameters:
- *   priv - Reference to the NuttX driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Called in normal user mode
- *
- ****************************************************************************/
-
-static inline void stm32_txavail_process(FAR struct stm32_ethmac_s *priv)
-{
-  ninfo("ifup: %d\n", priv->ifup);
-
-  /* Ignore the notification if the interface is not yet up */
-
-  if (priv->ifup)
-    {
-      /* Poll the network for new XMIT data */
-
-      stm32_dopoll(priv);
-    }
-}
-
-/****************************************************************************
  * Function: stm32_txavail_work
  *
  * Description:
@@ -2571,19 +2425,24 @@ static inline void stm32_txavail_process(FAR struct stm32_ethmac_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_NOINTS
 static void stm32_txavail_work(FAR void *arg)
 {
   FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)arg;
-  net_lock_t state;
 
-  /* Perform the poll */
+  ninfo("ifup: %d\n", priv->ifup);
 
-  state = net_lock();
-  stm32_txavail_process(priv);
-  net_unlock(state);
+  /* Ignore the notification if the interface is not yet up */
+
+  net_lock();
+  if (priv->ifup)
+    {
+      /* Poll the network for new XMIT data */
+
+      stm32_dopoll(priv);
+    }
+
+  net_unlock();
 }
-#endif
 
 /****************************************************************************
  * Function: stm32_txavail
@@ -2608,7 +2467,6 @@ static int stm32_txavail(struct net_driver_s *dev)
 {
   FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)dev->d_private;
 
-#ifdef CONFIG_NET_NOINTS
   /* Is our single work structure available?  It may not be if there are
    * pending interrupt actions and we will have to ignore the Tx
    * availability action.
@@ -2618,23 +2476,8 @@ static int stm32_txavail(struct net_driver_s *dev)
     {
       /* Schedule to serialize the poll on the worker thread. */
 
-      work_queue(HPWORK, &priv->work, stm32_txavail_work, priv, 0);
+      work_queue(ETHWORK, &priv->work, stm32_txavail_work, priv, 0);
     }
-
-#else
-  irqstate_t flags;
-
-  /* Disable interrupts because this function may be called from interrupt
-   * level processing.
-   */
-
-  flags = enter_critical_section();
-
-  /* Perform the out-of-cycle poll now */
-
-  stm32_txavail_process(priv);
-  leave_critical_section(flags);
-#endif
 
   return OK;
 }
@@ -3278,7 +3121,7 @@ static inline int stm32_dm9161(FAR struct stm32_ethmac_s *priv)
 
 static int stm32_phyinit(FAR struct stm32_ethmac_s *priv)
 {
-#ifdef CONFIG_STM32_AUTOGEN
+#ifdef CONFIG_STM32_AUTONEG
   volatile uint32_t timeout;
 #endif
 

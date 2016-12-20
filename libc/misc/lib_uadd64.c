@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/fixedmath/lib_uadd64.c
+ * libc/misc/lib_uadd64.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/armv7-a/arm_sigdeliver.c
  *
- *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -103,18 +103,27 @@ void up_sigdeliver(void)
 
   /* Then restore the task interrupt state */
 
-  up_irq_restore(regs[REG_CPSR]);
+  leave_critical_section(regs[REG_CPSR]);
 
-  /* Deliver the signals */
+  /* Deliver the signal */
 
   sigdeliver(rtcb);
 
   /* Output any debug messages BEFORE restoring errno (because they may
    * alter errno), then disable interrupts again and restore the original
    * errno that is needed by the user logic (it is probably EINTR).
+   *
+   * REVISIT: In SMP mode up_irq_save() probably only disables interrupts
+   * on the local CPU.  We do not want to call enter_critical_section()
+   * here, however, because we don't want this state to stick after the
+   * call to up_fullcontextrestore().
+   *
+   * I would prefer that all interrupts are disabled when
+   * up_fullcontextrestore() is called, but that may not be necessary.
    */
 
   sinfo("Resuming\n");
+
   (void)up_irq_save();
   rtcb->pterrno = saved_errno;
 

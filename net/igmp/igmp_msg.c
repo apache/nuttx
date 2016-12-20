@@ -72,15 +72,13 @@
 
 void igmp_schedmsg(FAR struct igmp_group_s *group, uint8_t msgid)
 {
-  net_lock_t flags;
-
   /* The following should be atomic */
 
-  flags = net_lock();
+  net_lock();
   DEBUGASSERT(!IS_SCHEDMSG(group->flags));
   group->msgid = msgid;
   SET_SCHEDMSG(group->flags);
-  net_unlock(flags);
+  net_unlock();
 }
 
 /****************************************************************************
@@ -98,11 +96,9 @@ void igmp_schedmsg(FAR struct igmp_group_s *group, uint8_t msgid)
 
 void igmp_waitmsg(FAR struct igmp_group_s *group, uint8_t msgid)
 {
-  net_lock_t flags;
-
   /* Schedule to send the message */
 
-  flags = net_lock();
+  net_lock();
   DEBUGASSERT(!IS_WAITMSG(group->flags));
   SET_WAITMSG(group->flags);
   igmp_schedmsg(group, msgid);
@@ -126,7 +122,7 @@ void igmp_waitmsg(FAR struct igmp_group_s *group, uint8_t msgid)
   /* The message has been sent and we are no longer waiting */
 
   CLR_WAITMSG(group->flags);
-  net_unlock(flags);
+  net_unlock();
 }
 
 #endif /* CONFIG_NET_IGMP */

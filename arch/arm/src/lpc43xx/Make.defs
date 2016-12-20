@@ -154,6 +154,10 @@ CHIP_CSRCS += lpc43_ssp.c
 endif
 endif
 
+ifeq ($(CONFIG_LPC43_TIMER),y)
+CHIP_CSRCS += lpc43_timer.c
+endif
+
 ifeq ($(CONFIG_LPC43_RIT),y)
 CHIP_CSRCS += lpc43_rit.c
 endif

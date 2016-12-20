@@ -1,0 +1,121 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "NanoRisc5 Configuration Options"
+
+choice
+	prompt "NR5 Chip Selection"
+	default ARCH_CHIP_NR5M100
+	depends on ARCH_CHIP_NR5
+
+config ARCH_CHIP_NR5M100
+	bool "NR5M100"
+	select NR5_HAVE_UART1
+	select NR5_HAVE_GPIOA
+	select NR5_HAVE_GPIOB
+	select NR5_HAVE_GPIOC
+	---help---
+		NanoRisc5, RV32IM 128K PROGRAM SRAM, 128K DATA SRAM
+
+endchoice
+
+config NR5_NR5M100
+	bool
+	default y
+	select NR5_NR5M1XX
+	select NR5_HAVE_UART1
+	select NR5_HAVE_TIMER1
+
+config NR5_NR5M1XX
+	bool
+	default n
+
+config NR5_EPIC
+	bool "Has Embedded Priority Interrupt Controller (EPIC)"
+	---help---
+		NanoRisc5 core can have either single vector interrupts or priority
+		encoded interrupts.  Selects if the core was compiled with EPIC.
+
+menu "NR5 Peripheral Support"
+
+# These "hidden" settings determine is a peripheral option is available for the
+# selection MCU
+
+config NR5_HAVE_UART1
+	bool
+	default n
+	select UART1_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config NR5_HAVE_TIMER1
+	bool
+	default n
+
+config NR5_HAVE_TIM2
+	bool
+	default n
+
+config NR5_HAVE_I2C1
+	bool
+	default n
+
+config NR5_HAVE_SPI1
+	bool
+	default n
+
+# These are the peripheral selections proper
+
+config NR5_I2C1
+	bool "I2C1"
+	default n
+	select NR5_I2C
+
+config NR5_SPI1
+	bool "SPI1"
+	default n
+	select SPI
+	select NR5_SPI
+
+config NR5_TIMER1
+	bool "TIMER1"
+	default n
+	depends on NR5_HAVE_TIMER1
+
+config NR5_TIMER2
+	bool "TIMER2"
+	default n
+
+config NR5_UART1
+	bool "UART1"
+	default n
+	select ARCH_HAVE_UART1
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select NR5_UART
+
+endmenu
+
+config NR5_SPI
+	bool
+
+config NR5_I2C
+	bool
+
+config NR5_UART
+	bool
+
+config NR5_UART_RX_BUF_SIZE
+	int "UART RX Bufer size"
+	default 64
+	depends on NR5_UART
+	---help---
+		Size of RX buffers for NR5 UARTs
+
+config NR5_UART_TX_BUF_SIZE
+	int "UART TX Bufer size"
+	default 64
+	depends on NR5_UART
+	---help---
+		Size of TX buffers for NR5 UARTs
+

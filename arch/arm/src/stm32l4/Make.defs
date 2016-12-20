@@ -195,6 +195,10 @@ ifeq ($(CONFIG_PWM),y)
 CHIP_CSRCS += stm32l4_pwm.c
 endif
 
+ifeq ($(CONFIG_QENCODER),y)
+CHIP_CSRCS += stm32l4_qencoder.c
+endif
+
 ifeq ($(CONFIG_STM32L4_QSPI),y)
 CHIP_CSRCS += stm32l4_qspi.c
 endif

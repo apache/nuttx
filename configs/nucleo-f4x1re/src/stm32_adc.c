@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/nucleo-f4x1re/src/stm32_adc.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -71,7 +71,6 @@
  ************************************************************************************/
 /* Identifying number of each ADC channel. */
 
-#ifdef CONFIG_STM32_ADC1
 #ifdef CONFIG_AJOYSTICK
 #ifdef CONFIG_ADC_DMA
 /* The Itead analog joystick gets inputs on ADC_IN0 and ADC_IN1 */
@@ -95,87 +94,51 @@ static const uint32_t g_adc1_pinlist[ADC1_NCHANNELS]  = {GPIO_ADC1_IN0};
 
 #endif /* CONFIG_ADC_DMA */
 #endif /* CONFIG_AJOYSTICK */
-#endif /* CONFIG_STM32_ADC1*/
-
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
 /************************************************************************************
- * Name: board_adc_initialize
+ * Name: stm32_adc_setup
  *
  * Description:
- *   Initialize and register the ADC driver
+ *   Initialize ADC and register the ADC driver.
  *
  ************************************************************************************/
 
-int board_adc_initialize(void)
+int stm32_adc_setup(void)
 {
-  static bool initialized = false;
   struct adc_dev_s *adc;
   int ret;
   int i;
 
-  /* Check if we have already initialized */
+  /* Configure the pins as analog inputs for the selected channels */
 
-  if (!initialized)
+  for (i = 0; i < ADC1_NCHANNELS; i++)
     {
-#ifdef CONFIG_STM32_ADC1
-      /* Configure the pins as analog inputs for the selected channels */
+      stm32_configgpio(g_adc1_pinlist[i]);
+    }
 
-      for (i = 0; i < ADC1_NCHANNELS; i++)
-        {
-          stm32_configgpio(g_adc1_pinlist[i]);
-        }
+  /* Call stm32_adcinitialize() to get an instance of the ADC interface */
 
-      /* Call stm32_adcinitialize() to get an instance of the ADC interface */
+  adc = stm32_adcinitialize(1, g_adc1_chanlist, ADC1_NCHANNELS);
+  if (adc == NULL)
+    {
+      aerr("ERROR: Failed to get ADC interface\n");
+      return -ENODEV;
+    }
 
-      adc = stm32_adcinitialize(1, g_adc1_chanlist, ADC1_NCHANNELS);
-      if (adc == NULL)
-        {
-          aerr("ERROR: Failed to get ADC interface\n");
-          return -ENODEV;
-        }
+  /* Register the ADC driver at "/dev/adc0" */
 
-      /* Register the ADC driver at "/dev/adc0" */
-
-      ret = adc_register("/dev/adc0", adc);
-      if (ret < 0)
-        {
-          aerr("ERROR: adc_register failed: %d\n", ret);
-          return ret;
-        }
-#endif
-      /* Now we are initialized */
-
-      initialized = true;
+  ret = adc_register("/dev/adc0", adc);
+  if (ret < 0)
+    {
+      aerr("ERROR: adc_register failed: %d\n", ret);
+      return ret;
     }
 
   return OK;
 }
-
-/************************************************************************************
- * Name: board_adc_setup
- *
- * Description:
- *   All STM32 architectures must provide the following interface to work with
- *   examples/adc.
- *
- ************************************************************************************/
-
-#ifdef CONFIG_EXAMPLES_ADC
-int board_adc_setup(void)
-{
-#ifdef CONFIG_SAMA5_ADC
-  return board_adc_initialize();
-#else
-  return -ENOSYS;
-#endif
-}
-#endif /* CONFIG_EXAMPLES_ADC */
 
 #endif /* CONFIG_STM32_ADC1 */

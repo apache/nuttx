@@ -687,9 +687,11 @@ int sam_wdt_initialize(void)
   (void)irq_attach(SAM_IRQ_WDT, sam_interrupt);
 #endif
 
-  /* Register the watchdog driver as /dev/wdt */
+  /* Register the watchdog driver as device-node configured via .config.
+   * Normally /dev/watchdog0
+   */
 
-  (void)watchdog_register("/dev/wdt",
+  (void)watchdog_register(CONFIG_WATCHDOG_DEVPATH,
                          (FAR struct watchdog_lowerhalf_s *)priv);
   return OK;
 }

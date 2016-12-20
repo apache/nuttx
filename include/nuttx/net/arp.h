@@ -137,7 +137,7 @@ extern "C"
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ARP_IPIN
-void arp_ipin(struct net_driver_s *dev);
+void arp_ipin(FAR struct net_driver_s *dev);
 #else
 # define arp_ipin(dev)
 #endif
@@ -152,20 +152,20 @@ void arp_ipin(struct net_driver_s *dev);
  *   that we previously sent out, the ARP cache will be filled in with
  *   the values from the ARP reply.  If the incoming ARP packet is an ARP
  *   request for our IP address, an ARP reply packet is created and put
- *   into the d_buf[] buffer.
+ *   into the d_buf buffer.
  *
  *   On entry, this function expects that an ARP packet with a prepended
- *   Ethernet header is present in the d_buf[] buffer and that the length of
+ *   Ethernet header is present in the d_buf buffer and that the length of
  *   the packet is set in the d_len field.
  *
  *   When the function returns, the value of the field d_len indicates whether
  *   the device driver should send out the ARP reply packet or not. If d_len
  *   is zero, no packet should be sent; If d_len is non-zero, it contains the
- *   length of the outbound packet that is present in the d_buf[] buffer.
+ *   length of the outbound packet that is present in the d_buf buffer.
  *
  ****************************************************************************/
 
-void arp_arpin(struct net_driver_s *dev);
+void arp_arpin(FAR struct net_driver_s *dev);
 
 /****************************************************************************
  * Name: arp_out
@@ -183,13 +183,13 @@ void arp_arpin(struct net_driver_s *dev);
  *   beginning of the packet and the function returns.
  *
  *   If no ARP cache entry is found for the destination IIPv4P address, the
- *   packet in the d_buf[] is replaced by an ARP request packet for the
+ *   packet in the d_buf is replaced by an ARP request packet for the
  *   IPv4 address. The IPv4 packet is dropped and it is assumed that the
  *   higher level protocols (e.g., TCP) eventually will retransmit the
  *   dropped packet.
  *
  *   Upon return in either the case, a packet to be sent is present in the
- *   d_buf[] buffer and the d_len field holds the length of the Ethernet
+ *   d_buf buffer and the d_len field holds the length of the Ethernet
  *   frame that should be transmitted.
  *
  ****************************************************************************/

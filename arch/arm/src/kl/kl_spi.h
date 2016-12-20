@@ -126,6 +126,11 @@ int kl_spi1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
 #endif
 #endif
 
+#if defined(__cplusplus)
+}
+#endif
+#undef EXTERN
+
 #endif /* __ASSEMBLY__ */
 #endif /* CONFIG_KL_SPI0 || CONFIG_KL_SPI1 */
 #endif /* __ARCH_ARM_SRC_KL_KL_SPI_H */

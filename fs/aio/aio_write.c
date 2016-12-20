@@ -279,7 +279,7 @@ errout:
  *     aiocbp->aio_nbytes is an invalid value.
  *
  *   In the case that the aio_write() successfully queues the I/O operation
- *   but the operation is subsequently cancelled or encounters an error, the
+ *   but the operation is subsequently canceled or encounters an error, the
  *   return status of the asynchronous operation is one of the values
  *   normally returned by the write() function call. In addition, the error
  *   status of the asynchronous operation is set to one of the error
@@ -290,7 +290,7 @@ errout:
  *     open for writing.
  *   EINVAL - The file offset value implied by aiocbp->aio_offset would be
  *     invalid.
- *   ECANCELED - The requested I/O was cancelled before the I/O completed
+ *   ECANCELED - The requested I/O was canceled before the I/O completed
  *     due to an explicit aio_cancel() request.
  *
  * The following condition may be detected synchronously or asynchronously:

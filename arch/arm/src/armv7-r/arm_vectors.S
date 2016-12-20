@@ -202,7 +202,7 @@ arm_vectorirq:
 	/* Restore the CPSR, SVC mode registers and return */
 
 	ldr		r1, [r0, #(4*REG_CPSR)]	/* Fetch the return SPSR */
-	msr		spsr, r1				/* Set the return mode SPSR */
+	msr		spsr_cxsf, r1			/* Set the return mode SPSR */
 
 #ifdef CONFIG_BUILD_PROTECTED
 	/* Are we leaving in user mode?  If so then we need to restore the
@@ -331,7 +331,7 @@ arm_vectorsvc:
 	/* Restore the CPSR, SVC mode registers and return */
 
 	ldr		r1, [r0, #(4*REG_CPSR)]	/* Fetch the return SPSR */
-	msr		spsr, r1				/* Set the return mode SPSR */
+	msr		spsr_cxsf, r1			/* Set the return mode SPSR */
 
 #ifdef CONFIG_BUILD_PROTECTED
 	/* Are we leaving in user mode?  If so then we need to restore the
@@ -913,7 +913,7 @@ arm_vectorfiq:
 	/* Restore the CPSR, SVC mode registers and return */
 
 	ldr		r1, [r0, #(4*REG_CPSR)]	/* Fetch the return SPSR */
-	msr		spsr, r1				/* Set the return mode SPSR */
+	msr		spsr_cxsf, r1			/* Set the return mode SPSR */
 
 #ifdef CONFIG_BUILD_PROTECTED
 	/* Are we leaving in user mode?  If so then we need to restore the

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_ohci.c
  *
- *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2015-2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,6 +51,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/ohci.h>
 #include <nuttx/usb/usbhost.h>
@@ -2664,6 +2665,12 @@ static int sam_epalloc(struct usbhost_driver_s *drvr,
 
   sem_init(&eplist->wdhsem, 0, 0);
 
+  /* The wdhsem semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
+  sem_setprotocol(&eplist->wdhsem, SEM_PRIO_NONE);
+
   /* We must have exclusive access to the ED pool, the bulk list, the periodic list
    * and the interrupt table.
    */
@@ -3902,6 +3909,12 @@ struct usbhost_connection_s *sam_ohci_initialize(int controller)
 
   sem_init(&g_ohci.pscsem,  0, 0);
   sem_init(&g_ohci.exclsem, 0, 1);
+
+  /* The pscsem semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
+  sem_setprotocol(&g_ohci.pscsem, SEM_PRIO_NONE);
 
 #ifndef CONFIG_USBHOST_INT_DISABLE
   g_ohci.ininterval  = MAX_PERINTERVAL;

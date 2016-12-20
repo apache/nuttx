@@ -79,12 +79,12 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
 # define IDX 0
 #endif
 
+#if defined(CONFIG_MM_SMALL) && !defined(CONFIG_SMALL_MEMORY)
   /* If the MCU handles wide addresses but the memory manager is configured
    * for a small heap, then verify that the caller is  not doing something
    * crazy.
    */
 
-#if defined(CONFIG_MM_SMALL) && !defined(CONFIG_SMALL_MEMORY)
   DEBUGASSERT(heapsize <= MMSIZE_MAX+1);
 #endif
 

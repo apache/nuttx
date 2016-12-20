@@ -42,6 +42,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
+
 #include <sys/types.h>
 #include <stdint.h>
 
@@ -189,7 +190,13 @@ long long strtoll(FAR const char *nptr, FAR char **endptr, int base);
 unsigned long long strtoull(FAR const char *nptr, FAR char **endptr,
                             int base);
 #endif
-double_t  strtod(FAR const char *str, FAR char **endptr);
+float     strtof(FAR const char *str, FAR char **endptr);
+#ifdef CONFIG_HAVE_DOUBLE
+double    strtod(FAR const char *str, FAR char **endptr);
+#endif
+#ifdef CONFIG_HAVE_LONG_DOUBLE
+long double strtold(FAR const char *str, FAR char **endptr);
+#endif
 
 #define atoi(nptr)  ((int)strtol((nptr), NULL, 10))
 #define atol(nptr)  strtol((nptr), NULL, 10)
@@ -201,6 +208,13 @@ double_t  strtod(FAR const char *str, FAR char **endptr);
 /* Binary to string conversions */
 
 FAR char *itoa(int val, FAR char *str, int base);
+
+/* Wide character operations */
+
+#ifdef CONFIG_LIBC_WCHAR
+int       mbtowc(FAR wchar_t *pwc, FAR const char *s, size_t n);
+int       wctomb(FAR char *s, wchar_t wchar);
+#endif
 
 /* Memory Management */
 

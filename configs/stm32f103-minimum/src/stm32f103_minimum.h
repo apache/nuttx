@@ -63,8 +63,20 @@
 /* GPIOs **************************************************************/
 /* LEDs */
 
-#define GPIO_LED        (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+#define GPIO_LED1       (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
                          GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN13)
+/* BUTTONs */
+
+#define GPIO_BTN_USER1  (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_MODE_INPUT|\
+                         GPIO_EXTI|GPIO_PORTA|GPIO_PIN0)
+
+#define GPIO_BTN_USER2  (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_MODE_INPUT|\
+                         GPIO_EXTI|GPIO_PORTA|GPIO_PIN1)
+
+#define MIN_IRQBUTTON   BUTTON_USER1
+#define MAX_IRQBUTTON   BUTTON_USER2
+#define NUM_IRQBUTTONS  (BUTTON_USER1 - BUTTON_USER2 + 1)
+
 
 /* SPI chip selects */
 
@@ -80,6 +92,11 @@
 #define STM32_LCD_RS    (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
                          GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN2)
 
+/* PWN Configuration */
+
+#define STM32F103MINIMUM_PWMTIMER   3
+#define STM32F103MINIMUM_PWMCHANNEL 3
+
 /* USB Soft Connect Pullup: PC.13 */
 
 #define GPIO_USB_PULLUP (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
@@ -91,6 +108,26 @@
 
 #ifndef __ASSEMBLY__
 
+/****************************************************************************
+ * Name: stm32_bringup
+ *
+ * Description:
+ *   Perform architecture specific initialization
+ *
+ *   CONFIG_LIB_BOARDCTL=y:
+ *     If CONFIG_NSH_ARCHINITIALIZE=y:
+ *       Called from the NSH library (or other application)
+ *     Otherse, assumed to be called from some other application.
+ *
+ *   Otherwise CONFIG_BOARD_INITIALIZE=y:
+ *     Called from board_initialize().
+ *
+ *   Otherise, bad news:  Never called
+ *
+ ****************************************************************************/
+
+int stm32_bringup(void);
+
 /************************************************************************************
  * Name: stm32_spidev_initialize
  *
@@ -100,6 +137,26 @@
  ************************************************************************************/
 
 void stm32_spidev_initialize(void);
+
+/****************************************************************************
+ * Name stm32_rgbled_setup
+ *
+ * Description:
+ *   This function is called by board initialization logic to configure the
+ *   RGB LED driver.  This function will register the driver as /dev/rgbled0.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RGBLED
+int stm32_rgbled_setup(void);
+#endif
 
 /************************************************************************************
  * Name: stm32_usbinitialize
@@ -112,6 +169,18 @@ void stm32_spidev_initialize(void);
 void stm32_usbinitialize(void);
 
 /************************************************************************************
+ * Name: stm32_pwm_setup
+ *
+ * Description:
+ *   Initialize PWM and register the PWM device.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_PWM
+int stm32_pwm_setup(void);
+#endif
+
+/************************************************************************************
  * Name: stm32_mfrc522initialize
  *
  * Description:
@@ -119,7 +188,7 @@ void stm32_usbinitialize(void);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_WL_MFRC522
+#ifdef CONFIG_CL_MFRC522
 int stm32_mfrc522initialize(FAR const char *devpath);
 #endif
 
@@ -133,6 +202,19 @@ int stm32_mfrc522initialize(FAR const char *devpath);
 
 #ifdef CONFIG_AUDIO_TONE
 int stm32_tone_setup(void);
+#endif
+
+/***********************************************************************************
+ * Name: stm32_veml6070initialize
+ *
+ * Description:
+ *   Called to configure an I2C and to register VEML6070 for the stm32f103-minimum
+ *   board.
+ *
+ ***********************************************************************************/
+
+#ifdef CONFIG_VEML6070
+int stm32_veml6070initialize(FAR const char *devpath);
 #endif
 
 #endif /* __ASSEMBLY__ */

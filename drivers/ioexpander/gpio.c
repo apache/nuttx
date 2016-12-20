@@ -372,6 +372,8 @@ int gpio_pin_register(FAR struct gpio_dev_s *dev, int minor)
     }
 
   snprintf(devname, 16, fmt, (unsigned int)minor);
+  gpioinfo("Registering %s\n", devname);
+
   return register_driver(devname, &g_gpio_drvrops, 0666, dev);
 }
 

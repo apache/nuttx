@@ -357,7 +357,7 @@ static inline void mpu_priv_flash(uintptr_t base, size_t size)
 
   /* Select the region */
 
-  putreg32(mpu_allocregion(), MPU_RNR);
+  putreg32(region, MPU_RNR);
 
   /* Select the region base address */
 

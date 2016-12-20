@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/tm4c123g-launchpad/src/tm4c123g-launchpad.h
  *
- *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -213,6 +213,18 @@ void tm4c_led_initialize(void);
 
 int tm4c_bringup(void);
 
+/************************************************************************************
+ * Name: tm4c_adc_setup
+ *
+ * Description:
+ *   Initialize ADC and register the ADC driver.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_TIVA_ADC
+int tm4c_adc_setup(void);
+#endif
+
 /****************************************************************************
  * Name: tm4c_at24_automount
  *
@@ -235,18 +247,6 @@ int tm4c_at24_automount(int minor);
 
 #ifdef CONFIG_TIVA_TIMER
 int tiva_timer_configure(void);
-#endif
-
-/************************************************************************************
- * Name: board_adc_initialize
- *
- * Description:
- *   Initialize and register the ADC driver
- *
- ************************************************************************************/
-
-#ifdef CONFIG_TIVA_ADC
-int board_adc_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

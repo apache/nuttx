@@ -164,7 +164,6 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
   FAR struct tcp_conn_s *conn = psock->s_conn;
   FAR struct tcp_poll_s *info;
   FAR struct devif_callback_s *cb;
-  net_lock_t flags;
   int ret;
 
   /* Sanity check */
@@ -186,7 +185,7 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
 
   /* Some of the  following must be atomic */
 
-  flags = net_lock();
+  net_lock();
 
   /* Allocate a TCP/IP callback structure */
 
@@ -296,12 +295,12 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
       sem_post(fds->sem);
     }
 
-  net_unlock(flags);
+  net_unlock();
   return OK;
 
 errout_with_lock:
   kmm_free(info);
-  net_unlock(flags);
+  net_unlock();
   return ret;
 }
 
@@ -325,7 +324,6 @@ int tcp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
 {
   FAR struct tcp_conn_s *conn = psock->s_conn;
   FAR struct tcp_poll_s *info;
-  net_lock_t flags;
 
   /* Sanity check */
 
@@ -344,9 +342,9 @@ int tcp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
     {
       /* Release the callback */
 
-      flags = net_lock();
+      net_lock();
       tcp_callback_free(conn, info->cb);
-      net_unlock(flags);
+      net_unlock();
 
       /* Release the poll/select data slot */
 

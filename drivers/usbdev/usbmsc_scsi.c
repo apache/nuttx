@@ -827,7 +827,7 @@ static int inline usbmsc_cmdmodesense6(FAR struct usbmsc_dev_s *priv,
             {
                /* Store the mode data length and return the total message size */
 
-               mph->mdlen      = mdlen - 1;
+               mph->mdlen      = mdlen + SCSIRESP_MODEPARAMETERHDR6_SIZEOF - 1;
                priv->nreqbytes = mdlen + SCSIRESP_MODEPARAMETERHDR6_SIZEOF;
             }
         }

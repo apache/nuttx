@@ -691,16 +691,6 @@ config NX_MXCLIENTMSGS
 		flooding of the client or server with too many messages (PREALLOC_MQ_MSGS
 		controls how many messages are pre-allocated).
 
-config NX_NXSTART
-	bool "nx_start()"
-	default n
-	---help---
-		If this option is selected, then the nx_start() interface will be
-		built.  The nx_start() interface provides a single call to initialize
-		and start the NX server.
-
-if NX_NXSTART
-
 config NXSTART_EXTERNINIT
 	bool "External display Initialization"
 	default n
@@ -736,6 +726,14 @@ config NXSTART_DEVNO
 		LCD device number (in case there are more than one LCDs connected).
 		Default: 0
 
+config NXSTART_DISPLAYNO
+	int "Display Number"
+	default 0
+	depends on !NX_LCDDRIVER && !NXSTART_EXTERNINIT
+	---help---
+		Framebuffer display number (in case there are more than one framebuffers).
+		Default: 0
+
 config NXSTART_VPLANE
 	int "Plane Number"
 	default 0
@@ -743,7 +741,6 @@ config NXSTART_VPLANE
 	---help---
 		Only a single video plane is supported. Default: 0
 
-endif # NX_NXSTART
 endif # NX_MULTIUSER
 
 source "graphics/vnc/Kconfig"

@@ -128,6 +128,12 @@
 #  define RCC_CFGR_PPRE2_HCLKd4     (5 << RCC_CFGR_PPRE2_SHIFT) /* 101: HCLK divided by 4 */
 #  define RCC_CFGR_PPRE2_HCLKd8     (6 << RCC_CFGR_PPRE2_SHIFT) /* 110: HCLK divided by 8 */
 #  define RCC_CFGR_PPRE2_HCLKd16    (7 << RCC_CFGR_PPRE2_SHIFT) /* 111: HCLK divided by 16 */
+#define RCC_CFGR_ADCPRE_SHIFT       (13) /* Bits 14-15: ADC prescaler */
+#define RCC_CFGR_ADCPRE_MASK        (7 << RCC_CFGR_ADCPRE_SHIFT)
+#  define RCC_CFGR_ADCPRE_PCLKd2    (0 << RCC_CFGR_ADCPRE_SHIFT) /* 00: PCLK divided by 2 */
+#  define RCC_CFGR_ADCPRE_PCLKd4    (1 << RCC_CFGR_ADCPRE_SHIFT) /* 01: PCLK divided by 4 */
+#  define RCC_CFGR_ADCPRE_PCLKd6    (2 << RCC_CFGR_ADCPRE_SHIFT) /* 10: PCLK divided by 6 */
+#  define RCC_CFGR_ADCPRE_PCLKd8    (3 << RCC_CFGR_ADCPRE_SHIFT) /* 11: PCLK divided by 8 */
 #define RCC_CFGR_PLLSRC             (1 << 16) /* Bit 16: PLL entry clock source */
 #define RCC_CFGR_PLLXTPRE           (1 << 17) /* Bit 17: HSE divider for PLL entry */
 #define RCC_CFGR_PLLMUL_SHIFT       (18)      /* Bits 21-18: PLL Multiplication Factor */
@@ -157,24 +163,24 @@
 #  define RCC_CFGR_MCO_HSICLK       (5 << RCC_CFGR_MCO_SHIFT)  /* 101: HSI clock selected */
 #  define RCC_CFGR_MCO_HSECLK       (6 << RCC_CFGR_MCO_SHIFT)  /* 101: HSE clock selected */
 #  define RCC_CFGR_PLLCLKd2         (7 << RCC_CFGR_MCO_SHIFT)  /* 111: PLL clock divided by 2 selected */
-#define RCC_CFGR_SDADCPRE_SHIFT     (24)      /* Bits 27-31: SDADC Prescaler */
-#define RCC_CFGR_SDADCPRE_MASK      (31 << RCC_CFGR_SDADCPRE_SHIFT)
-#  define RCC_CFGR_SDADCPRE_DIV2    (0 << RCC_CFGR_SDADCPRE_SHIFT)  /* 0xxxx: System clock divided by 2 */
-#  define RCC_CFGR_SDADCPRE_DIV4    (17 << RCC_CFGR_SDADCPRE_SHIFT) /* 10001: System clock divided by 4 */
-#  define RCC_CFGR_SDADCPRE_DIV6    (18 << RCC_CFGR_SDADCPRE_SHIFT) /* 10010: System clock divided by 6 */
-#  define RCC_CFGR_SDADCPRE_DIV8    (19 << RCC_CFGR_SDADCPRE_SHIFT) /* 10011: System clock divided by 8 */
-#  define RCC_CFGR_SDADCPRE_DIV10   (20 << RCC_CFGR_SDADCPRE_SHIFT) /* 10100: System clock divided by 10 */
-#  define RCC_CFGR_SDADCPRE_DIV12   (21 << RCC_CFGR_SDADCPRE_SHIFT) /* 10101: System clock divided by 12 */
-#  define RCC_CFGR_SDADCPRE_DIV14   (22 << RCC_CFGR_SDADCPRE_SHIFT) /* 10110: System clock divided by 14 */
-#  define RCC_CFGR_SDADCPRE_DIV16   (23 << RCC_CFGR_SDADCPRE_SHIFT) /* 10111: System clock divided by 16 */
-#  define RCC_CFGR_SDADCPRE_DIV20   (24 << RCC_CFGR_SDADCPRE_SHIFT) /* 11000: System clock divided by 20 */
-#  define RCC_CFGR_SDADCPRE_DIV24   (25 << RCC_CFGR_SDADCPRE_SHIFT) /* 11001: System clock divided by 24 */
-#  define RCC_CFGR_SDADCPRE_DIV28   (26 << RCC_CFGR_SDADCPRE_SHIFT) /* 11010: System clock divided by 28 */
-#  define RCC_CFGR_SDADCPRE_DIV32   (27 << RCC_CFGR_SDADCPRE_SHIFT) /* 11011: System clock divided by 32 */
-#  define RCC_CFGR_SDADCPRE_DIV36   (28 << RCC_CFGR_SDADCPRE_SHIFT) /* 11100: System clock divided by 36 */
-#  define RCC_CFGR_SDADCPRE_DIV40   (29 << RCC_CFGR_SDADCPRE_SHIFT) /* 11101: System clock divided by 40 */
-#  define RCC_CFGR_SDADCPRE_DIV44   (30 << RCC_CFGR_SDADCPRE_SHIFT) /* 11110: System clock divided by 44 */
-#  define RCC_CFGR_SDADCPRE_DIV48   (31 << RCC_CFGR_SDADCPRE_SHIFT) /* 11111: System clock divided by 48 */
+#define RCC_CFGR_SDPRE_SHIFT        (27)      /* Bits 27-31: SDADC Prescaler */
+#define RCC_CFGR_SDPRE_MASK         (0x1f << RCC_CFGR_SDPRE_SHIFT)
+#  define RCC_CFGR_SDPRE_DIV2       (0 << RCC_CFGR_SDPRE_SHIFT)  /* 0xxxx: System clock divided by 2 */
+#  define RCC_CFGR_SDPRE_DIV4       (17 << RCC_CFGR_SDPRE_SHIFT) /* 10001: System clock divided by 4 */
+#  define RCC_CFGR_SDPRE_DIV6       (18 << RCC_CFGR_SDPRE_SHIFT) /* 10010: System clock divided by 6 */
+#  define RCC_CFGR_SDPRE_DIV8       (19 << RCC_CFGR_SDPRE_SHIFT) /* 10011: System clock divided by 8 */
+#  define RCC_CFGR_SDPRE_DIV10      (20 << RCC_CFGR_SDPRE_SHIFT) /* 10100: System clock divided by 10 */
+#  define RCC_CFGR_SDPRE_DIV12      (21 << RCC_CFGR_SDPRE_SHIFT) /* 10101: System clock divided by 12 */
+#  define RCC_CFGR_SDPRE_DIV14      (22 << RCC_CFGR_SDPRE_SHIFT) /* 10110: System clock divided by 14 */
+#  define RCC_CFGR_SDPRE_DIV16      (23 << RCC_CFGR_SDPRE_SHIFT) /* 10111: System clock divided by 16 */
+#  define RCC_CFGR_SDPRE_DIV20      (24 << RCC_CFGR_SDPRE_SHIFT) /* 11000: System clock divided by 20 */
+#  define RCC_CFGR_SDPRE_DIV24      (25 << RCC_CFGR_SDPRE_SHIFT) /* 11001: System clock divided by 24 */
+#  define RCC_CFGR_SDPRE_DIV28      (26 << RCC_CFGR_SDPRE_SHIFT) /* 11010: System clock divided by 28 */
+#  define RCC_CFGR_SDPRE_DIV32      (27 << RCC_CFGR_SDPRE_SHIFT) /* 11011: System clock divided by 32 */
+#  define RCC_CFGR_SDPRE_DIV36      (28 << RCC_CFGR_SDPRE_SHIFT) /* 11100: System clock divided by 36 */
+#  define RCC_CFGR_SDPRE_DIV40      (29 << RCC_CFGR_SDPRE_SHIFT) /* 11101: System clock divided by 40 */
+#  define RCC_CFGR_SDPRE_DIV44      (30 << RCC_CFGR_SDPRE_SHIFT) /* 11110: System clock divided by 44 */
+#  define RCC_CFGR_SDPRE_DIV48      (31 << RCC_CFGR_SDPRE_SHIFT) /* 11111: System clock divided by 48 */
 
 /* Clock interrupt register */
 
@@ -199,7 +205,7 @@
 /* APB2 Peripheral reset register */
 
 #define RCC_APB2RSTR_SYSCFGRST      (1 << 0)  /* Bit 0: SYSCFG, Comparators and operational amplifiers reset */
-#define RCC_APB2RSTR_ADC1RST        (1 << 9)  /* Bit 9: ADC1 reset */
+#define RCC_APB2RSTR_ADCRST         (1 << 9)  /* Bit 9: ADC reset */
 #define RCC_APB2RSTR_SPI1RST        (1 << 12) /* Bit 12: SPI 1 reset */
 #define RCC_APB2RSTR_USART1RST      (1 << 14) /* Bit 14: USART1 reset */
 #define RCC_APB2RSTR_TIM15RST       (1 << 16) /* Bit 16: TIM15 reset */
@@ -232,7 +238,7 @@
 #define RCC_APB1RSTR_USBRST         (1 << 23) /* Bit 23: USB reset */
 #define RCC_APB1RSTR_CANRST         (1 << 25) /* Bit 25: CAN reset */
 #define RCC_APB1RSTR_CAN1RST        (1 << 25) /* Bit 25: CAN reset */
-#define RCC_APB1RSTR_DAC2RST        (1 << 26) /* Bit 26: DAC1 interface reset */
+#define RCC_APB1RSTR_DAC2RST        (1 << 26) /* Bit 26: DAC2 interface reset */
 #define RCC_APB1RSTR_PWRRST         (1 << 28) /* Bit 28: Power interface reset */
 #define RCC_APB1RSTR_DAC1RST        (1 << 29) /* Bit 29: DAC1 interface reset */
 #define RCC_APB1RSTR_CECRST         (1 << 30) /* Bit 30: CEC reset */

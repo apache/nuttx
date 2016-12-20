@@ -120,13 +120,13 @@ static const uint8_t g_multicast_ethaddr[3] =
  *   beginning of the packet and the function returns.
  *
  *   If no Neighbor Table entry is found for the destination IPv6 address,
- *   the packet in the d_buf[] is replaced by an ICMPv6 Neighbor Solicit
+ *   the packet in the d_buf is replaced by an ICMPv6 Neighbor Solicit
  *   request packet for the IPv6 address. The IPv6 packet is dropped and 
  *   it is assumed that the higher level protocols (e.g., TCP) eventually
  *   will retransmit the dropped packet.
  *
  *   Upon return in either the case, a packet to be sent is present in the
- *   d_buf[] buffer and the d_len field holds the length of the Ethernet
+ *   d_buf buffer and the d_len field holds the length of the Ethernet
  *   frame that should be transmitted.
  *
  ****************************************************************************/

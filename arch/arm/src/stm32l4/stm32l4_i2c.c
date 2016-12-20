@@ -81,8 +81,9 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
-#include <nuttx/i2c/i2c_master.h>
 #include <nuttx/clock.h>
+#include <nuttx/semaphore.h>
+#include <nuttx/i2c/i2c_master.h>
 
 #include <arch/board/board.h>
 
@@ -356,8 +357,8 @@ struct stm32l4_i2c_priv_s stm32l4_i2c1_priv =
 static const struct stm32l4_i2c_config_s stm32l4_i2c2_config =
 {
   .base       = STM32L4_I2C2_BASE,
-  .clk_bit    = RCC_APB1ENR_I2C2EN,
-  .reset_bit  = RCC_APB1RSTR_I2C2RST,
+  .clk_bit    = RCC_APB1ENR1_I2C2EN,
+  .reset_bit  = RCC_APB1RSTR1_I2C2RST,
   .scl_pin    = GPIO_I2C2_SCL,
   .sda_pin    = GPIO_I2C2_SDA,
 #ifndef CONFIG_I2C_POLLED
@@ -386,8 +387,8 @@ struct stm32l4_i2c_priv_s stm32l4_i2c2_priv =
 static const struct stm32l4_i2c_config_s stm32l4_i2c3_config =
 {
   .base       = STM32L4_I2C3_BASE,
-  .clk_bit    = RCC_APB1ENR_I2C3EN,
-  .reset_bit  = RCC_APB1RSTR_I2C3RST,
+  .clk_bit    = RCC_APB1ENR1_I2C3EN,
+  .reset_bit  = RCC_APB1RSTR1_I2C3RST,
   .scl_pin    = GPIO_I2C3_SCL,
   .sda_pin    = GPIO_I2C3_SDA,
 #ifndef CONFIG_I2C_POLLED
@@ -843,8 +844,14 @@ static inline void stm32l4_i2c_sem_post(FAR struct stm32l4_i2c_priv_s *priv)
 static inline void stm32l4_i2c_sem_init(FAR struct stm32l4_i2c_priv_s *priv)
 {
   sem_init(&priv->sem_excl, 0, 1);
+
 #ifndef CONFIG_I2C_POLLED
+  /* This semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
   sem_init(&priv->sem_isr, 0, 0);
+  sem_setprotocol(&priv->sem_isr, SEM_PRIO_NONE);
 #endif
 }
 

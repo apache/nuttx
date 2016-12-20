@@ -5,6 +5,11 @@
 
 if ARCH_BOARD_STM32F3_DISCOVERY
 
+config STM32F3DISCO_QETIMER
+	int "Timer to use with QE encoder"
+	default 3
+	depends on QENCODER
+
 config PM_BUTTONS
 	bool "PM Button support"
 	default n

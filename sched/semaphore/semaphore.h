@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/semaphore/semaphore.h
  *
- *   Copyright (C) 2007, 2009-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -89,6 +89,7 @@ void sem_recover(FAR struct tcb_s *tcb);
 void sem_initholders(void);
 void sem_destroyholder(FAR sem_t *sem);
 void sem_addholder(FAR sem_t *sem);
+void sem_addholder_tcb(FAR struct tcb_s *htcb, FAR sem_t *sem);
 void sem_boostpriority(FAR sem_t *sem);
 void sem_releaseholder(FAR sem_t *sem);
 void sem_restorebaseprio(FAR struct tcb_s *stcb, FAR sem_t *sem);
@@ -101,10 +102,11 @@ void sem_canceled(FAR struct tcb_s *stcb, FAR sem_t *sem);
 #  define sem_initholders()
 #  define sem_destroyholder(sem)
 #  define sem_addholder(sem)
+#  define sem_addholder_tcb(htcb,sem)
 #  define sem_boostpriority(sem)
 #  define sem_releaseholder(sem)
 #  define sem_restorebaseprio(stcb,sem)
-#  define sem_canceled(stcb, sem)
+#  define sem_canceled(stcb,sem)
 #endif
 
 #undef EXTERN

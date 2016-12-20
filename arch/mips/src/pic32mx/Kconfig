@@ -1094,13 +1094,6 @@ config NET_WOL
 	---help---
 		Enable Wake-up on LAN (not fully implemented).
 
-config NET_REGDEBUG
-	bool "Register level debug"
-	default n
-	depends on PIC32MX_ETHERNET && DEBUG_NET_INFO
-	---help---
-		Enabled low level register debug.  Also needs CONFIG_DEBUG_FEATURES.
-
 config NET_HASH
 	bool "Hash"
 	default n
@@ -1115,6 +1108,33 @@ config PIC32MX_MULTICAST
 	---help---
 		Enable receipt of multicast (and unicast) frames. Automatically set if
 		NET_IGMP is selected.
+
+choice
+	prompt "Work queue"
+	default PIC32MX_ETHERNET_LPWORK if SCHED_LPWORK
+	default PIC32MX_ETHERNET_HPWORK if !SCHED_LPWORK && SCHED_HPWORK
+	depends on SCHED_WORKQUEUE
+	---help---
+		Work queue support is required to use the Ethernet driver.  If the
+		low priority work queue is available, then it should be used by the
+		driver.
+
+config PIC32MX_ETHERNET_HPWORK
+	bool "High priority"
+	depends on SCHED_HPWORK
+
+config PIC32MX_ETHERNET_LPWORK
+	bool "Low priority"
+	depends on SCHED_LPWORK
+
+endchoice # Work queue
+
+config NET_REGDEBUG
+	bool "Register level debug"
+	default n
+	depends on PIC32MX_ETHERNET && DEBUG_NET_INFO
+	---help---
+		Enabled low level register debug.  Also needs CONFIG_DEBUG_FEATURES.
 
 endmenu
 

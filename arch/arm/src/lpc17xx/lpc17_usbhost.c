@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc17xx/lpc17_usbhost.c
  *
- *   Copyright (C) 2010-2012, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2012, 2014-2016 Gregory Nutt. All rights reserved.
  *   Authors: Rafael Noronha <rafael@pdsolucoes.com.br>
  *            Gregory Nutt <gnutt@nuttx.org>
  *
@@ -51,6 +51,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/ohci.h>
 #include <nuttx/usb/usbhost.h>
@@ -2262,10 +2263,12 @@ static int lpc17_epalloc(struct usbhost_driver_s *drvr,
       uinfo("EP%d CTRL:%08x\n", epdesc->addr, ed->hw.ctrl);
 
       /* Initialize the semaphore that is used to wait for the endpoint
-       * WDH event.
+       * WDH event. The wdhsem semaphore is used for signaling and, hence,
+       * should not have priority inheritance enabled.
        */
 
       sem_init(&ed->wdhsem, 0, 0);
+      sem_setprotocol(&ed->wdhsem, SEM_PRIO_NONE);
 
       /* Link the common tail TD to the ED's TD list */
 
@@ -3305,7 +3308,9 @@ errout_with_sem:
 
 static int lpc17_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 {
+#ifdef CONFIG_USBHOST_ASYNCH
   struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
+#endif
   struct lpc17_ed_s *ed = (struct lpc17_ed_s *)ep;
   struct lpc17_gtd_s *td;
   struct lpc17_gtd_s *next;
@@ -3313,7 +3318,7 @@ static int lpc17_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
   uint32_t ctrl;
   irqstate_t flags;
 
-  DEBUGASSERT(priv != NULL && ed != NULL);
+  DEBUGASSERT(drvr != NULL && ed != NULL);
 
   /* These first steps must be atomic as possible */
 
@@ -3639,6 +3644,12 @@ struct usbhost_connection_s *lpc17_usbhost_initialize(int controller)
   sem_init(&priv->pscsem,  0, 0);
   sem_init(&priv->exclsem, 0, 1);
 
+  /* The pscsem semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
+  sem_setprotocol(&priv->pscsem, SEM_PRIO_NONE);
+
 #ifndef CONFIG_USBHOST_INT_DISABLE
   priv->ininterval  = MAX_PERINTERVAL;
   priv->outinterval = MAX_PERINTERVAL;
@@ -3719,7 +3730,13 @@ struct usbhost_connection_s *lpc17_usbhost_initialize(int controller)
   memset((void *)HCCA,   0, sizeof(struct ohci_hcca_s));
   memset((void *)TDTAIL, 0, sizeof(struct ohci_gtd_s));
   memset((void *)EDCTRL, 0, sizeof(struct lpc17_ed_s));
+
+  /* The EDCTRL wdhsem semaphore is used for signaling and, hence, should
+   * not have priority inheritance enabled.
+   */
+
   sem_init(&EDCTRL->wdhsem, 0, 0);
+  sem_setprotocol(&EDCTRL->wdhsem, SEM_PRIO_NONE);
 
   /* Initialize user-configurable EDs */
 

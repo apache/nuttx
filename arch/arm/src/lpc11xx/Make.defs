@@ -71,7 +71,7 @@ endif
 
 CHIP_ASRCS  =
 CHIP_CSRCS  = lpc11_clockconfig.c lpc11_gpio.c lpc11_i2c.c lpc11_idle.c
-CHIP_CSRCS += lpc11_irq.c lpc11_lowputc.c lpc11_getc.c lpc11_serial.c
+CHIP_CSRCS += lpc11_irq.c lpc11_lowputc.c lpc11_serial.c
 CHIP_CSRCS += lpc11_spi.c lpc11_ssp.c lpc11_start.c
 
 # Configuration-dependent LPC11xx files

@@ -345,9 +345,25 @@ int sig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
 
   else
     {
+#ifdef CONFIG_SMP
+      int cpu;
+#endif
       /* Queue any sigaction's requested by this task. */
 
       ret = sig_queueaction(stcb, info);
+
+      /* Deliver of the signal must be performed in a critical section */
+
+      flags = enter_critical_section();
+
+#ifdef CONFIG_SMP
+      /* If the thread is running on another CPU, then pause that CPU.  We can
+       * then setup the for signal delivery on the running thread.  When the
+       * CPU is resumed, the signal handler will then execute.
+       */
+
+      cpu = sched_cpu_pause(stcb);
+#endif /* CONFIG_SMP */
 
       /* Then schedule execution of the signal handling action on the
        * recipient's thread.
@@ -355,12 +371,22 @@ int sig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
 
       up_schedule_sigaction(stcb, sig_deliver);
 
+#ifdef CONFIG_SMP
+      /* Resume the paused CPU (if any) */
+
+      if (cpu >= 0)
+        {
+          /* I am not yet sure how to handle a failure here. */
+
+          DEBUGVERIFY(up_cpu_resume(cpu));
+        }
+#endif /* CONFIG_SMP */
+
       /* Check if the task is waiting for an unmasked signal.  If so, then
        * unblock it. This must be performed in a critical section because
        * signals can be queued from the interrupt level.
        */
 
-      flags = enter_critical_section();
       if (stcb->task_state == TSTATE_WAIT_SIG)
         {
           memcpy(&stcb->sigunbinfo, info, sizeof(siginfo_t));

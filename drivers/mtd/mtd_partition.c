@@ -900,8 +900,8 @@ FAR struct mtd_dev_s *mtd_partition(FAR struct mtd_dev_s *mtd, off_t firstblock,
  *   Sets the name of the specified partition.
  *
  ****************************************************************************/
-#ifdef CONFIG_MTD_PARTITION_NAMES
 
+#ifdef CONFIG_MTD_PARTITION_NAMES
 int mtd_setpartitionname(FAR struct mtd_dev_s *mtd, FAR const char *name)
 {
   FAR struct mtd_partition_s *priv = (FAR struct mtd_partition_s *)mtd;

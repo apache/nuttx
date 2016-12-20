@@ -65,23 +65,18 @@ FAR struct pwm_lowerhalf_s *lpc17_mcpwminitialize(int timer);
 FAR struct pwm_lowerhalf_s *lpc17_timerinitialize(int timer);
 
 /************************************************************************************
- * Private Functions
- ************************************************************************************/
-
-/************************************************************************************
  * Public Functions
  ************************************************************************************/
 
 /************************************************************************************
- * Name: board_pwm_setup
+ * Name: lpcexpresso_pwm_setup
  *
  * Description:
- *   All LPC17 architectures must provide the following interface to work with
- *   examples/pwm.
+ *   Initialize PWM and register the PWM device.
  *
  ************************************************************************************/
 
-int board_pwm_setup(void)
+int lpcexpresso_pwm_setup(void)
 {
   static bool initialized = false;
   struct pwm_lowerhalf_s *pwm;

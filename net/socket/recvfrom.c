@@ -56,6 +56,8 @@
 #include <arch/irq.h>
 
 #include <nuttx/clock.h>
+#include <nuttx/semaphore.h>
+#include <nuttx/cancelpt.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/iob.h>
 #include <nuttx/net/netdev.h>
@@ -1217,7 +1219,14 @@ static void recvfrom_init(FAR struct socket *psock, FAR void *buf,
   /* Initialize the state structure. */
 
   memset(pstate, 0, sizeof(struct recvfrom_s));
+
+  /* This semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
   (void)sem_init(&pstate->rf_sem, 0, 0); /* Doesn't really fail */
+  (void)sem_setprotocol(&pstate->rf_sem, SEM_PRIO_NONE);
+
   pstate->rf_buflen    = len;
   pstate->rf_buffer    = buf;
   pstate->rf_from      = infrom;
@@ -1387,7 +1396,6 @@ static ssize_t pkt_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
   FAR struct pkt_conn_s *conn = (FAR struct pkt_conn_s *)psock->s_conn;
   FAR struct net_driver_s *dev;
   struct recvfrom_s state;
-  net_lock_t save;
   int ret;
 
   /* Perform the packet recvfrom() operation */
@@ -1397,7 +1405,7 @@ static ssize_t pkt_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
    * are ready.
    */
 
-  save = net_lock();
+  net_lock();
   recvfrom_init(psock, buf, len, from, fromlen, &state);
 
   /* Get the device driver that will service this transfer */
@@ -1455,7 +1463,7 @@ static ssize_t pkt_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
     }
 
 errout_with_state:
-  net_unlock(save);
+  net_unlock();
   recvfrom_uninit(&state);
   return ret;
 }
@@ -1488,7 +1496,6 @@ static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
   FAR struct udp_conn_s *conn = (FAR struct udp_conn_s *)psock->s_conn;
   FAR struct net_driver_s *dev;
   struct recvfrom_s state;
-  net_lock_t save;
   int ret;
 
   /* Perform the UDP recvfrom() operation */
@@ -1498,7 +1505,7 @@ static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
    * are ready.
    */
 
-  save = net_lock();
+  net_lock();
   recvfrom_init(psock, buf, len, from, fromlen, &state);
 
   /* Setup the UDP remote connection */
@@ -1596,7 +1603,7 @@ static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
     }
 
 errout_with_state:
-  net_unlock(save);
+  net_unlock();
   recvfrom_uninit(&state);
   return ret;
 }
@@ -1626,16 +1633,15 @@ errout_with_state:
 static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
                             FAR struct sockaddr *from, FAR socklen_t *fromlen)
 {
-  struct recvfrom_s       state;
-  net_lock_t              save;
-  int                     ret;
+  struct recvfrom_s state;
+  int               ret;
 
   /* Initialize the state structure.  This is done with interrupts
    * disabled because we don't want anything to happen until we
    * are ready.
    */
 
-  save = net_lock();
+  net_lock();
   recvfrom_init(psock, buf, len, from, fromlen, &state);
 
   /* Handle any any TCP data already buffered in a read-ahead buffer.  NOTE
@@ -1775,7 +1781,7 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
         }
     }
 
-  net_unlock(save);
+  net_unlock();
   recvfrom_uninit(&state);
   return (ssize_t)ret;
 }
@@ -1845,6 +1851,10 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 {
   ssize_t ret;
   int errcode;
+
+  /* Treat as a cancellation point */
+
+  (void)enter_cancellation_point();
 
   /* Verify that non-NULL pointers were passed */
 
@@ -2008,10 +2018,12 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   /* Success return */
 
+  leave_cancellation_point();
   return ret;
 
 errout:
   set_errno(errcode);
+  leave_cancellation_point();
   return ERROR;
 }
 
@@ -2071,6 +2083,11 @@ ssize_t recvfrom(int sockfd, FAR void *buf, size_t len, int flags,
                  FAR struct sockaddr *from, FAR socklen_t *fromlen)
 {
   FAR struct socket *psock;
+  ssize_t ret;
+
+  /* recvfrom() is a cancellation point */
+
+  (void)enter_cancellation_point();
 
   /* Get the underlying socket structure */
 
@@ -2078,7 +2095,9 @@ ssize_t recvfrom(int sockfd, FAR void *buf, size_t len, int flags,
 
   /* Then let psock_recvfrom() do all of the work */
 
-  return psock_recvfrom(psock, buf, len, flags, from, fromlen);
+  ret = psock_recvfrom(psock, buf, len, flags, from, fromlen);
+  leave_cancellation_point();
+  return ret;
 }
 
 #endif /* CONFIG_NET */

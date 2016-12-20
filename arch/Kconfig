@@ -39,11 +39,12 @@ config ARCH_MIPS
 	---help---
 		MIPS architectures (PIC32)
 
-config ARCH_RGMP
-	bool "RGMP"
+config ARCH_MISOC
+	bool "MISOC"
+	select ARCH_HAVE_INTERRUPTSTACK
+	select ARCH_HAVE_CUSTOMOPT
 	---help---
-		RTOS and GPOS on Multi-Processor (RGMP) architecture.  See
-		http://rgmp.sourceforge.net/wiki/index.php/Main_Page.
+		MISOC
 
 config ARCH_RENESAS
 	bool "Renesas"
@@ -51,6 +52,13 @@ config ARCH_RENESAS
 	select ARCH_HAVE_INTERRUPTSTACK
 	---help---
 		Renesas architectures (SH and M16C).
+
+config ARCH_RISCV
+	bool "RISC-V"
+	select ARCH_HAVE_INTERRUPTSTACK
+	select ARCH_HAVE_CUSTOMOPT
+	---help---
+		RISC-V 32 and 64-bit RV32 / RV64 architectures.
 
 config ARCH_SIM
 	bool "Simulation"
@@ -66,6 +74,12 @@ config ARCH_X86
 	bool "x86"
 	---help---
 		Intel x86 architectures.
+
+config ARCH_XTENSA
+	bool "Xtensa"
+	select ARCH_HAVE_CUSTOMOPT
+	---help---
+		Cadence® Tensilica® Xtensa® actictures.
 
 config ARCH_Z16
 	bool "ZNEO"
@@ -87,10 +101,12 @@ config ARCH
 	default "avr"     if ARCH_AVR
 	default "hc"      if ARCH_HC
 	default "mips"    if ARCH_MIPS
-	default "rgmp"    if ARCH_RGMP
+	default "misoc"   if ARCH_MISOC
 	default "renesas" if ARCH_RENESAS
+	default "risc-v"  if ARCH_RISCV
 	default "sim"     if ARCH_SIM
 	default "x86"     if ARCH_X86
+	default "xtensa"  if ARCH_XTENSA
 	default "z16"     if ARCH_Z16
 	default "z80"     if ARCH_Z80
 
@@ -98,10 +114,12 @@ source arch/arm/Kconfig
 source arch/avr/Kconfig
 source arch/hc/Kconfig
 source arch/mips/Kconfig
-source arch/rgmp/Kconfig
+source arch/misoc/Kconfig
 source arch/renesas/Kconfig
+source arch/risc-v/Kconfig
 source arch/sim/Kconfig
 source arch/x86/Kconfig
+source arch/xtensa/Kconfig
 source arch/z16/Kconfig
 source arch/z80/Kconfig
 
@@ -540,6 +558,7 @@ config ARCH_USBDUMP
 config ENDIAN_BIG
 	bool "Big Endian Architecture"
 	default n
+	depends on !ARCH_RISCV
 	---help---
 		Select if architecture operates using big-endian byte ordering.
 

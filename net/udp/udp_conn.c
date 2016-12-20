@@ -229,7 +229,7 @@ static uint16_t udp_select_port(void)
    * listen port number that is not being used by any other connection.
    */
 
-  net_lock_t flags = net_lock();
+  net_lock();
   do
     {
       /* Guess that the next available port number will be the one after
@@ -256,7 +256,7 @@ static uint16_t udp_select_port(void)
    */
 
   portno = g_last_udp_port;
-  net_unlock(flags);
+  net_unlock();
 
   return portno;
 }
@@ -576,7 +576,6 @@ FAR struct udp_conn_s *udp_nextconn(FAR struct udp_conn_s *conn)
 
 int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
 {
-  net_lock_t flags;
   uint16_t portno;
   int ret;
 
@@ -643,7 +642,7 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
     {
       /* Interrupts must be disabled while access the UDP connection list */
 
-      flags = net_lock();
+      net_lock();
 
       /* Is any other UDP connection already bound to this address and port? */
 
@@ -659,7 +658,7 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
           ret         = OK;
         }
 
-      net_unlock(flags);
+      net_unlock();
     }
 
   return ret;

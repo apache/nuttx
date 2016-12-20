@@ -125,13 +125,6 @@
 
 #define STM32_CFGR_USBPRE       0
 
-
-/* APB2 clock (PCLK2) is HCLK/2 (84MHz) */
-
-#define STM32_RCC_CFGR_PPRE2    RCC_CFGR_PPRE2_HCLKd2     /* PCLK2 = HCLK / 2 */
-#define STM32_PCLK2_FREQUENCY   (STM32_HCLK_FREQUENCY/2)
-
-
 /* Timer Frequencies, if APBx is set to 1, frequency is same to APBx
  * otherwise frequency is 2xAPBx.
  * Note: TIM1,8 are on APB2, others on APB1

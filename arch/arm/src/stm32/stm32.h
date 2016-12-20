@@ -61,6 +61,7 @@
 #include "stm32_can.h"
 #include "stm32_dbgmcu.h"
 #include "stm32_dma.h"
+#include "stm32_dac.h"
 #include "stm32_exti.h"
 #include "stm32_flash.h"
 #include "stm32_fsmc.h"
@@ -77,7 +78,6 @@
 #include "stm32_usbdev.h"
 #include "stm32_wdg.h"
 #include "stm32_lowputc.h"
-#include "stm32_getc.h"
 #include "stm32_eth.h"
 
 #endif /* __ARCH_ARM_SRC_STM32_STM32_H */

@@ -73,21 +73,20 @@
 FAR struct net_driver_s *netdev_findbyname(FAR const char *ifname)
 {
   FAR struct net_driver_s *dev;
-  net_lock_t save;
 
   if (ifname)
     {
-      save = net_lock();
+      net_lock();
       for (dev = g_netdevices; dev; dev = dev->flink)
         {
           if (strcmp(ifname, dev->d_ifname) == 0)
             {
-              net_unlock(save);
+              net_unlock();
               return dev;
             }
         }
 
-      net_unlock(save);
+      net_unlock();
     }
 
   return NULL;

@@ -688,6 +688,18 @@ refresh.sh
      refresh.sh will prompt you first to avoid overwriting the
      defconfig file with changes that you may not want.
 
+showsize.sh
+-----------
+
+  Show the top 10 biggest memory hogs in code and data spaces.  This
+  must be executed from the top-level NuttX directory like:
+
+    $ tools/showsize.sh
+    TOP 10 BIG DATA
+    ...
+    TOP 10 BIG CODE
+    ...
+
 testbuild.sh
 ------------
 

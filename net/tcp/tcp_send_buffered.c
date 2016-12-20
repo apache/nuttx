@@ -948,7 +948,6 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
 {
   FAR struct tcp_conn_s *conn;
   FAR struct tcp_wrbuffer_s *wrb;
-  net_lock_t save;
   ssize_t    result = 0;
   int        errcode;
   int        ret = OK;
@@ -1019,7 +1018,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
        * unlocked here.
        */
 
-      save = net_lock();
+      net_lock();
       wrb = tcp_wrbuffer_alloc();
       if (!wrb)
         {
@@ -1077,7 +1076,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
       /* Notify the device driver of the availability of TX data */
 
       send_txnotify(psock, conn);
-      net_unlock(save);
+      net_unlock();
     }
 
   /* Set the socket state to idle */
@@ -1112,7 +1111,7 @@ errout_with_wrb:
   tcp_wrbuffer_release(wrb);
 
 errout_with_lock:
-  net_unlock(save);
+  net_unlock();
 
 errout:
   set_errno(errcode);

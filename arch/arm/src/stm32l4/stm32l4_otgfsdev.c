@@ -336,7 +336,7 @@
 
 #define CONFIG_USB_DUMPBUFFER
 
-#if !defined(CONFIG_DEBUG_INFO) || !defined(CONFIG_DEBUG_USB)
+#if !defined(CONFIG_DEBUG_INFO) || !defined(CONFIG_DEBUG_FEATURES)
 #  undef CONFIG_USB_DUMPBUFFER
 #endif
 #ifdef CONFIG_USB_DUMPBUFFER
@@ -582,7 +582,7 @@ struct stm32l4_usbdev_s
 
 /* Register operations ********************************************************/
 
-#if defined(CONFIG_STM32L4_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_USB)
+#if defined(CONFIG_STM32L4_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static uint32_t    stm32l4_getreg(uint32_t addr);
 static void        stm32l4_putreg(uint32_t val, uint32_t addr);
 #else
@@ -902,7 +902,7 @@ const struct trace_msg_t g_usb_trace_strings_intdecode[] =
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32L4_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_USB)
+#if defined(CONFIG_STM32L4_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static uint32_t stm32l4_getreg(uint32_t addr)
 {
   static uint32_t prevaddr = 0;
@@ -923,7 +923,7 @@ static uint32_t stm32l4_getreg(uint32_t addr)
         {
           if (count == 4)
             {
-              lldbg("...\n");
+              uinfo("...\n");
             }
 
           return val;
@@ -940,7 +940,7 @@ static uint32_t stm32l4_getreg(uint32_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          lldbg("[repeats %d more times]\n", count-3);
+          uinfo("[repeats %d more times]\n", count-3);
         }
 
       /* Save the new address, value, and count */
@@ -952,7 +952,7 @@ static uint32_t stm32l4_getreg(uint32_t addr)
 
   /* Show the register value read */
 
-  lldbg("%08x->%08x\n", addr, val);
+  uinfo("%08x->%08x\n", addr, val);
   return val;
 }
 #endif
@@ -965,12 +965,12 @@ static uint32_t stm32l4_getreg(uint32_t addr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32L4_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_USB)
+#if defined(CONFIG_STM32L4_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static void stm32l4_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  lldbg("%08x<-%08x\n", addr, val);
+  uinfo("%08x<-%08x\n", addr, val);
 
   /* Write the value */
 
@@ -1075,7 +1075,7 @@ static void stm32l4_ep0in_activate(void)
 
   /* Set the max packet size  of the IN EP. */
 
-  regval  = stm32l4_getreg(STM32L4_OTGFS_DIEPCTL0);
+  regval  = stm32l4_getreg(STM32L4_OTGFS_DIEPCTL(0));
   regval &= ~OTGFS_DIEPCTL0_MPSIZ_MASK;
 
 #if CONFIG_USBDEV_EP0_MAXSIZE == 8
@@ -1090,7 +1090,7 @@ static void stm32l4_ep0in_activate(void)
 #  error "Unsupported value of CONFIG_USBDEV_EP0_MAXSIZE"
 #endif
 
-  stm32l4_putreg(regval, STM32L4_OTGFS_DIEPCTL0);
+  stm32l4_putreg(regval, STM32L4_OTGFS_DIEPCTL(0));
 
   /* Clear global IN NAK */
 
@@ -1116,13 +1116,13 @@ static void stm32l4_ep0out_ctrlsetup(FAR struct stm32l4_usbdev_s *priv)
   regval = (USB_SIZEOF_CTRLREQ * 3 << OTGFS_DOEPTSIZ0_XFRSIZ_SHIFT) |
            (OTGFS_DOEPTSIZ0_PKTCNT) |
            (3 << OTGFS_DOEPTSIZ0_STUPCNT_SHIFT);
-  stm32l4_putreg(regval, STM32L4_OTGFS_DOEPTSIZ0);
+  stm32l4_putreg(regval, STM32L4_OTGFS_DOEPTSIZ(0));
 
   /* Then clear NAKing and enable the transfer */
 
-  regval  = stm32l4_getreg(STM32L4_OTGFS_DOEPCTL0);
+  regval  = stm32l4_getreg(STM32L4_OTGFS_DOEPCTL(0));
   regval |= (OTGFS_DOEPCTL0_CNAK | OTGFS_DOEPCTL0_EPENA);
-  stm32l4_putreg(regval, STM32L4_OTGFS_DOEPCTL0);
+  stm32l4_putreg(regval, STM32L4_OTGFS_DOEPCTL(0));
 }
 
 /****************************************************************************
@@ -2416,8 +2416,6 @@ static inline void stm32l4_ep0out_stdrequest(struct stm32l4_usbdev_s *priv,
 
             stm32l4_setaddress(priv, (uint16_t)priv->ctrlreq.value[0]);
             stm32l4_ep0in_transmitzlp(priv);
-
-            uinfo("USB_REQ_SETADDRESS %02x\n",(uint16_t)priv->ctrlreq.value[0]);
           }
         else
           {
@@ -2983,7 +2981,7 @@ static inline void stm32l4_epin_interrupt(FAR struct stm32l4_usbdev_s *priv)
         {
           if ((daint & 1) != 0)
             {
-              uinfo("DIEPINT(%d) = %08x\n",
+              uerr("DIEPINT(%d) = %08x\n",
                      epno, stm32l4_getreg(STM32L4_OTGFS_DIEPINT(epno)));
               stm32l4_putreg(0xFF, STM32L4_OTGFS_DIEPINT(epno));
             }
@@ -3240,8 +3238,6 @@ static inline void stm32l4_rxinterrupt(FAR struct stm32l4_usbdev_s *priv)
   int bcnt;
   int epphy;
 
-  /* Disable the Rx status queue level interrupt */
-
   while(0 != (stm32l4_getreg(STM32L4_OTGFS_GINTSTS) & OTGFS_GINT_RXFLVL))
     {
 
@@ -3325,21 +3321,10 @@ static inline void stm32l4_rxinterrupt(FAR struct stm32l4_usbdev_s *priv)
             {
               usbtrace(TRACE_INTDECODE(STM32L4_TRACEINTID_SETUPDONE), epphy);
 
-              /* Now that the Setup Phase is complete if it was an OUT enable
-               * the endpoint
-               * (Doing this here prevents the loss of the first FIFO word)
+              /* On the L4 This event does not occur on the next SETUP
+               * after a SETUP OUT.
                */
 
-              if (priv->ep0state == EP0STATE_SETUP_OUT)
-                {
-
-                  /* Clear NAKSTS so that we can receive the data */
-
-                  regval  = stm32l4_getreg(STM32L4_OTGFS_DOEPCTL0);
-                  regval |= OTGFS_DOEPCTL0_CNAK;
-                  stm32l4_putreg(regval, STM32L4_OTGFS_DOEPCTL0);
-
-              }
             }
             break;
 
@@ -3375,17 +3360,23 @@ static inline void stm32l4_rxinterrupt(FAR struct stm32l4_usbdev_s *priv)
               datlen = GETUINT16(priv->ctrlreq.len);
               if (USB_REQ_ISOUT(priv->ctrlreq.type) && datlen > 0)
                 {
+                   /* Reset the endpoint and Stop NAK-ing */
+
+                   stm32l4_ep0out_ctrlsetup(priv);
+
                   /* Wait for the data phase. */
 
                   priv->ep0state = EP0STATE_SETUP_OUT;
                 }
               else
                 {
-                  /* We can process the setup data as soon as SETUP done word is
-                   * popped of the RxFIFO.
+                  /* We can process the setup data Now no need to wait for SETUP done word
+                   * to be popped of the RxFIFO.
                    */
 
                   priv->ep0state = EP0STATE_SETUP_READY;
+                  stm32l4_ep0out_setup(priv);
+
                 }
             }
             break;
@@ -3642,7 +3633,7 @@ static int stm32l4_usbinterrupt(int irq, FAR void *context)
   uint32_t regval;
   uint32_t reserved;
 
-  usbtrace(TRACE_INTENTRY(STM32L4_TRACEINTID_USB), 0);
+  usbtrace(TRACE_INTENTRY(STM32L4_TRACEINTID_USB), priv->ep0state);
 
   /* Assure that we are in device mode */
 
@@ -3699,7 +3690,7 @@ static int stm32l4_usbinterrupt(int irq, FAR void *context)
 
       /* Host/device mode mismatch error interrupt */
 
-#ifdef CONFIG_DEBUG_USB
+#ifdef CONFIG_DEBUG_FEATURES
       if ((regval & OTGFS_GINT_MMIS) != 0)
         {
           usbtrace(TRACE_INTDECODE(STM32L4_TRACEINTID_MISMATCH), (uint16_t)regval);
@@ -3750,7 +3741,7 @@ static int stm32l4_usbinterrupt(int irq, FAR void *context)
           /* Perform the device reset */
 
           stm32l4_usbreset(priv);
-          usbtrace(TRACE_INTEXIT(STM32L4_TRACEINTID_USB), 0);
+          usbtrace(TRACE_INTEXIT(STM32L4_TRACEINTID_USB), priv->ep0state);
           return OK;
         }
 
@@ -3811,7 +3802,7 @@ static int stm32l4_usbinterrupt(int irq, FAR void *context)
 #endif
     }
 
-  usbtrace(TRACE_INTEXIT(STM32L4_TRACEINTID_USB), 0);
+  usbtrace(TRACE_INTEXIT(STM32L4_TRACEINTID_USB), priv->ep0state);
   return OK;
 }
 
@@ -4317,7 +4308,7 @@ static int stm32l4_ep_disable(FAR struct usbdev_ep_s *ep)
 {
   FAR struct stm32l4_ep_s *privep = (FAR struct stm32l4_ep_s *)ep;
 
-#ifdef CONFIG_DEBUG_USB
+#ifdef CONFIG_DEBUG_FEATURES
   if (!ep)
     {
       usbtrace(TRACE_DEVERROR(STM32L4_TRACEERR_INVALIDPARMS), 0);
@@ -4357,7 +4348,7 @@ static FAR struct usbdev_req_s *stm32l4_ep_allocreq(FAR struct usbdev_ep_s *ep)
 {
   FAR struct stm32l4_req_s *privreq;
 
-#ifdef CONFIG_DEBUG_USB
+#ifdef CONFIG_DEBUG_FEATURES
   if (!ep)
     {
       usbtrace(TRACE_DEVERROR(STM32L4_TRACEERR_INVALIDPARMS), 0);
@@ -4390,7 +4381,7 @@ static void stm32l4_ep_freereq(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req
 {
   FAR struct stm32l4_req_s *privreq = (FAR struct stm32l4_req_s *)req;
 
-#ifdef CONFIG_DEBUG_USB
+#ifdef CONFIG_DEBUG_FEATURES
   if (!ep || !req)
     {
       usbtrace(TRACE_DEVERROR(STM32L4_TRACEERR_INVALIDPARMS), 0);
@@ -4463,7 +4454,7 @@ static int stm32l4_ep_submit(FAR struct usbdev_ep_s *ep,
 
   /* Some sanity checking */
 
-#ifdef CONFIG_DEBUG_USB
+#ifdef CONFIG_DEBUG_FEATURES
   if (!req || !req->callback || !req->buf || !ep)
     {
       usbtrace(TRACE_DEVERROR(STM32L4_TRACEERR_INVALIDPARMS), 0);
@@ -4475,7 +4466,7 @@ static int stm32l4_ep_submit(FAR struct usbdev_ep_s *ep,
   usbtrace(TRACE_EPSUBMIT, privep->epphy);
   priv = privep->dev;
 
-#ifdef CONFIG_DEBUG_USB
+#ifdef CONFIG_DEBUG_FEATURES
   if (!priv->driver)
     {
       usbtrace(TRACE_DEVERROR(STM32L4_TRACEERR_NOTCONFIGURED), priv->usbdev.speed);
@@ -4553,7 +4544,7 @@ static int stm32l4_ep_cancel(FAR struct usbdev_ep_s *ep,
   FAR struct stm32l4_ep_s *privep = (FAR struct stm32l4_ep_s *)ep;
   irqstate_t flags;
 
-#ifdef CONFIG_DEBUG_USB
+#ifdef CONFIG_DEBUG_FEATURES
   if (!ep || !req)
     {
       usbtrace(TRACE_DEVERROR(STM32L4_TRACEERR_INVALIDPARMS), 0);
@@ -5012,7 +5003,7 @@ static int stm32l4_selfpowered(struct usbdev_s *dev, bool selfpowered)
 
   usbtrace(TRACE_DEVSELFPOWERED, (uint16_t)selfpowered);
 
-#ifdef CONFIG_DEBUG_USB
+#ifdef CONFIG_DEBUG_FEATURES
   if (!dev)
     {
       usbtrace(TRACE_DEVERROR(STM32L4_TRACEERR_INVALIDPARMS), 0);
@@ -5366,7 +5357,7 @@ static void stm32l4_hwinitialize(FAR struct stm32l4_usbdev_s *priv)
   address = STM32L4_RXFIFO_WORDS;
   regval  = (address << OTGFS_DIEPTXF0_TX0FD_SHIFT) |
             (STM32L4_EP0_TXFIFO_WORDS << OTGFS_DIEPTXF0_TX0FSA_SHIFT);
-  stm32l4_putreg(regval, STM32L4_OTGFS_DIEPTXF0);
+  stm32l4_putreg(regval, STM32L4_OTGFS_DIEPTXF(0));
 #endif
 
 #if STM32L4_NENDPOINTS > 1
@@ -5375,7 +5366,7 @@ static void stm32l4_hwinitialize(FAR struct stm32l4_usbdev_s *priv)
   address += STM32L4_EP0_TXFIFO_WORDS;
   regval   = (address << OTGFS_DIEPTXF_INEPTXSA_SHIFT) |
              (STM32L4_EP1_TXFIFO_WORDS << OTGFS_DIEPTXF_INEPTXFD_SHIFT);
-  stm32l4_putreg(regval, STM32L4_OTGFS_DIEPTXF1);
+  stm32l4_putreg(regval, STM32L4_OTGFS_DIEPTXF(1));
 #endif
 
 #if STM32L4_NENDPOINTS > 2
@@ -5384,7 +5375,7 @@ static void stm32l4_hwinitialize(FAR struct stm32l4_usbdev_s *priv)
   address += STM32L4_EP1_TXFIFO_WORDS;
   regval   = (address << OTGFS_DIEPTXF_INEPTXSA_SHIFT) |
              (STM32L4_EP2_TXFIFO_WORDS << OTGFS_DIEPTXF_INEPTXFD_SHIFT);
-  stm32l4_putreg(regval, STM32L4_OTGFS_DIEPTXF2);
+  stm32l4_putreg(regval, STM32L4_OTGFS_DIEPTXF(2));
 #endif
 
 #if STM32L4_NENDPOINTS > 3
@@ -5393,7 +5384,7 @@ static void stm32l4_hwinitialize(FAR struct stm32l4_usbdev_s *priv)
   address += STM32L4_EP2_TXFIFO_WORDS;
   regval   = (address << OTGFS_DIEPTXF_INEPTXSA_SHIFT) |
              (STM32L4_EP3_TXFIFO_WORDS << OTGFS_DIEPTXF_INEPTXFD_SHIFT);
-  stm32l4_putreg(regval, STM32L4_OTGFS_DIEPTXF3);
+  stm32l4_putreg(regval, STM32L4_OTGFS_DIEPTXF(3));
 #endif
 
 #if STM32L4_NENDPOINTS > 4
@@ -5402,7 +5393,7 @@ static void stm32l4_hwinitialize(FAR struct stm32l4_usbdev_s *priv)
   address += STM32L4_EP3_TXFIFO_WORDS;
   regval   = (address << OTGFS_DIEPTXF_INEPTXSA_SHIFT) |
              (STM32L4_EP4_TXFIFO_WORDS << OTGFS_DIEPTXF_INEPTXFD_SHIFT);
-  stm32l4_putreg(regval, STM32L4_OTGFS_DIEPTXF4);
+  stm32l4_putreg(regval, STM32L4_OTGFS_DIEPTXF(4));
 #endif
 
 #if STM32L4_NENDPOINTS > 5
@@ -5411,7 +5402,7 @@ static void stm32l4_hwinitialize(FAR struct stm32l4_usbdev_s *priv)
   address += STM32L4_EP4_TXFIFO_WORDS;
   regval   = (address << OTGFS_DIEPTXF_INEPTXSA_SHIFT) |
              (STM32L4_EP5_TXFIFO_WORDS << OTGFS_DIEPTXF_INEPTXFD_SHIFT);
-  stm32l4_putreg(regval, STM32L4_OTGFS_DIEPTXF5);
+  stm32l4_putreg(regval, STM32L4_OTGFS_DIEPTXF(5));
 #endif
 
 
@@ -5501,7 +5492,7 @@ static void stm32l4_hwinitialize(FAR struct stm32l4_usbdev_s *priv)
   regval |= (OTGFS_GINT_OTG | OTGFS_GINT_SRQ);
 #endif
 
-#ifdef CONFIG_DEBUG_USB
+#ifdef CONFIG_DEBUG_FEATURES
   regval |= OTGFS_GINT_MMIS;
 #endif
 
@@ -5709,7 +5700,7 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
 
   usbtrace(TRACE_DEVREGISTER, 0);
 
-#ifdef CONFIG_DEBUG_USB
+#ifdef CONFIG_DEBUG_FEATURES
   if (!driver || !driver->ops->bind || !driver->ops->unbind ||
       !driver->ops->disconnect || !driver->ops->setup)
     {
@@ -5780,7 +5771,7 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
 
   usbtrace(TRACE_DEVUNREGISTER, 0);
 
-#ifdef CONFIG_DEBUG_USB
+#ifdef CONFIG_DEBUG_FEATURES
   if (driver != priv->driver)
     {
       usbtrace(TRACE_DEVERROR(STM32L4_TRACEERR_INVALIDPARMS), 0);

@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/string.h
  *
- *   Copyright (C) 2007-2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2012, 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -79,6 +79,7 @@ int        strcmp(FAR const char *, FAR const char *);
 int        strncmp(FAR const char *, FAR const char *, size_t);
 int        strcasecmp(FAR const char *, FAR const char *);
 int        strncasecmp(FAR const char *, FAR const char *, size_t);
+int        strcoll(FAR const char *, FAR const char *s2);
 FAR char  *strcpy(char *dest, FAR const char *src);
 FAR char  *stpcpy(char *dest, FAR const char *src);
 FAR char  *strncpy(char *, FAR const char *, size_t);
@@ -91,6 +92,7 @@ FAR char  *strstr(FAR const char *, FAR const char *);
 FAR char  *strcasestr(FAR const char *, FAR const char *);
 FAR char  *strtok(FAR char *, FAR const char *);
 FAR char  *strtok_r(FAR char *, FAR const char *, FAR char **);
+size_t     strxfrm(FAR char *, FAR const char *, size_t n);
 
 FAR void  *memchr(FAR const void *s, int c, size_t n);
 FAR void  *memccpy(FAR void *s1, FAR const void *s2, int c, size_t n);

@@ -191,6 +191,9 @@ configs/avr32dev1
   Atmel website.  STATUS: This port is functional but very basic.  There
   are configurations for NSH and the OS test.
 
+configs/bambino-200e
+  Micromint Bambino board. This board is based on the LPC4330FBD144.
+
 configs/c5471evm
   This is a port to the Spectrum Digital C5471 evaluation board.  The
   TMS320C5471 is a dual core processor from TI with an ARM7TDMI general
@@ -202,13 +205,6 @@ configs/cloudctrl
   Darcy's CloudController board.  This is a small network relay development
   board. Based on the Shenzhou IV development board design.  It is based on
   the STM32F107VC MCU.
-
-configs/compal_e86, compal_e88 and compal_e99
-  These directories contain the board support for compal e86, e88 and e99 phones.
-  These ports are based on patches contributed by Denis Carikli for both the
-  compal e99 and e88.  The patches were made by Alan Carvalho de Assis and
-  Denis Carikli using the Stefan Richter's Osmocom-bb patches.  The variant
-  for the e86 was submitted by Craig Comstock.
 
 configs/demo9s12ne64
   Freescale DMO9S12NE64 board based on the MC9S12NE64 hcs12 cpu.  This
@@ -245,6 +241,14 @@ configs/efm32gg-stk3700
 configs/ekk-lm3s9b96
   TI/Stellaris EKK-LM3S9B96 board.  This board is based on the
   an EKK-LM3S9B96 which is a Cortex-M3.
+
+configs/esp-core
+  The ESP32 is a dual-core system from Expressif with two Harvard
+  architecture Xtensa LX6 CPUs. All embedded memory, external memory and
+  nd peripherals are located on the data bus and/or the instruction bus of
+  bus of these CPUs. With some minor exceptions, the address mapping of two
+  CPUs is symmetric, meaning they use the same addresses to access the same
+  memory.
 
 configs/ez80f0910200kitg
   ez80Acclaim! Microcontroller.  This port use the Zilog ez80f0910200kitg
@@ -520,7 +524,6 @@ configs/pic32mx7mmb
   Mikroelektronika PIC32MX7 Multimedia Board (MMB).  See
   http://www.mikroe.com/ for further information.
 
-configs/pirelli_dpl10
 configs/pic32mz-starterkit
   This directory contains the port of NuttX to the Microchip PIC32MZ
   Embedded Connectivity (EC) Starter Kit.  There are two configurations of
@@ -533,23 +536,12 @@ configs/pic32mz-starterkit
 
   See www.microchip.com for further information.
 
-  This directory contains the board support for Pirelli "Discus" DP-L10 phones.
-  It is a variant of the compal_e88 config with the small changes for the
-  differences in the board.
-
 configs/qemu-i486
   Port of NuttX to QEMU in i486 mode.  This port will also run on real i486
   hardwared (Google the Bifferboard).
 
-configs/rgmp
-  RGMP stands for RTOS and GPOS on Multi-Processor.  RGMP is a project for
-  running GPOS and RTOS simultaneously on multi-processor platforms. You can
-  port your favorite RTOS to RGMP together with an unmodified Linux to form a
-  hybrid operating system. This makes your application able to use both RTOS
-  and GPOS features.
-
-  See http://rgmp.sourceforge.net/wiki/index.php/Main_Page for further
-  information about RGMP.
+configs/nr5m100-nexys4
+  Port of NuttX to RISC-V platform on IQ-Analog NR5M100 RISC-V FPGA platform.
 
 configs/sabre-6quad
   This directory holds a port of NuttX to the NXP/Freescale Sabre board
@@ -595,6 +587,9 @@ configs/samd21-xplained
 
 configs/sam3u-ek
   The port of NuttX to the Atmel SAM3U-EK development board.
+
+configs/sam4cmp-db
+  The port of NuttX to the Atmel SAM4CMP-DB development board.
 
 configs/sam4e-ek
   The port of NuttX to the Atmel SAM4E-EK development board.  This board
@@ -649,7 +644,8 @@ configs/stm3240g-eval
   toolchain (such as CodeSourcery).
 
 configs/stm32butterfly2
-  Kamami stm32butterfly2 development board with optional ETH phy.
+  Kamami stm32butterfly2 development board with optional ETH phy.  See
+  https://kamami.pl/zestawy-uruchomieniowe-stm32/178507-stm32butterfly2.html
 
 configs/stm32f103-minimum
   Generic STM32F103C8T6 Minimum ARM Development Board.

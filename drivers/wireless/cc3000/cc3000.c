@@ -63,13 +63,15 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <arpa/inet.h>
+
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/clock.h>
 #include <nuttx/arch.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/spi/spi.h>
-#include <arpa/inet.h>
 
 #include <nuttx/wireless/wireless.h>
 #include <nuttx/wireless/cc3000.h>
@@ -822,19 +824,33 @@ static int cc3000_open(FAR struct file *filep)
 
   if (tmp == 1)
     {
+      /* Initialize semaphores */
+
       sem_init(&priv->waitsem, 0, 0);  /* Initialize event wait semaphore */
       sem_init(&priv->irqsem, 0, 0);   /* Initialize IRQ Ready semaphore */
       sem_init(&priv->readysem, 0, 0); /* Initialize Device Ready semaphore */
 
+      /* These semaphores are all used for signaling and, hence, should
+       * not have priority inheritance enabled.
+       */
+
+      sem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
+      sem_setprotocol(&priv->irqsem, SEM_PRIO_NONE);
+      sem_setprotocol(&priv->readysem, SEM_PRIO_NONE);
+
 #ifdef CONFIG_CC3000_MT
       priv->accepting_socket.acc.sd = FREE_SLOT;
       sem_init(&priv->accepting_socket.acc.semwait, 0, 0);
+      sem_setprotocol(&priv->accepting_socket.acc.semwait, SEM_PRIO_NONE);
+
       for (s = 0; s < CONFIG_WL_MAX_SOCKETS; s++)
         {
           priv->sockets[s].sd = FREE_SLOT;
           priv->sockets[s].received_closed_event = false;
           priv->sockets[s].emptied_and_remotely_closed = false;
+
           sem_init(&priv->sockets[s].semwait, 0, 0);
+          sem_setprotocol(&priv->sockets[s].semwait, SEM_PRIO_NONE);
         }
 #endif
 
@@ -884,6 +900,8 @@ static int cc3000_open(FAR struct file *filep)
       pthread_attr_setschedparam(&tattr, &param);
 
       sem_init(&priv->selectsem, 0, 0);
+      sem_setprotocol(&priv->selectsem, SEM_PRIO_NONE);
+
       ret = pthread_create(&priv->selecttid, &tattr, select_thread_func,
                            (pthread_addr_t)priv);
       if (ret != 0)

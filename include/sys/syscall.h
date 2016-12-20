@@ -91,15 +91,22 @@
 #define SYS_sem_trywait                (CONFIG_SYS_RESERVED+18)
 #define SYS_sem_wait                   (CONFIG_SYS_RESERVED+19)
 
+#ifdef CONFIG_PRIORITY_INHERITANCE
+#  define SYS_sem_setprotocol          (CONFIG_SYS_RESERVED+20)
+#  define __SYS_named_sem              (CONFIG_SYS_RESERVED+21)
+#else
+#  define __SYS_named_sem              (CONFIG_SYS_RESERVED+20)
+#endif
+
 /* Named semaphores */
 
 #ifdef CONFIG_FS_NAMED_SEMAPHORES
-#  define SYS_sem_open                 (CONFIG_SYS_RESERVED+20)
-#  define SYS_sem_close                (CONFIG_SYS_RESERVED+21)
-#  define SYS_sem_unlink               (CONFIG_SYS_RESERVED+22)
-#  define __SYS_task_create            (CONFIG_SYS_RESERVED+23)
+#  define SYS_sem_open                 __SYS_named_sem
+#  define SYS_sem_close                (__SYS_named_sem+1)
+#  define SYS_sem_unlink               (__SYS_named_sem+2)
+#  define __SYS_task_create            (__SYS_named_sem+3)
 #else
-#  define __SYS_task_create            (CONFIG_SYS_RESERVED+20)
+#  define __SYS_task_create            __SYS_named_sem
 #endif
 
 /* Task creation APIs based on global entry points cannot be use with
@@ -121,8 +128,16 @@
 
 #  define SYS_task_delete              __SYS_task_delete
 #  define SYS_task_restart             (__SYS_task_delete+1)
-#  define SYS_up_assert                (__SYS_task_delete+2)
-#  define __SYS_vfork                  (__SYS_task_delete+3)
+#  define SYS_task_setcancelstate      (__SYS_task_delete+2)
+#  define SYS_up_assert                (__SYS_task_delete+3)
+
+#  ifdef CONFIG_CANCELLATION_POINTS
+#    define SYS_task_setcanceltype     (__SYS_task_delete+4)
+#    define SYS_task_testcancel        (__SYS_task_delete+5)
+#    define __SYS_vfork                (__SYS_task_delete+6)
+#  else
+#    define __SYS_vfork                (__SYS_task_delete+4)
+#  endif
 
 /* The following can be individually enabled */
 
@@ -393,27 +408,35 @@
 #  define SYS_pthread_mutex_trylock    (__SYS_pthread+20)
 #  define SYS_pthread_mutex_unlock     (__SYS_pthread+21)
 #  define SYS_pthread_once             (__SYS_pthread+22)
-#  define SYS_pthread_setcancelstate   (__SYS_pthread+23)
-#  define SYS_pthread_setschedparam    (__SYS_pthread+24)
-#  define SYS_pthread_setschedprio     (__SYS_pthread+25)
-#  define SYS_pthread_setspecific      (__SYS_pthread+26)
-#  define SYS_pthread_yield            (__SYS_pthread+27)
+#  define SYS_pthread_setschedparam    (__SYS_pthread+23)
+#  define SYS_pthread_setschedprio     (__SYS_pthread+24)
+#  define SYS_pthread_setspecific      (__SYS_pthread+25)
+#  define SYS_pthread_yield            (__SYS_pthread+26)
+#  define __SYS_pthread_smp            (__SYS_pthread+27)
 
-#  ifndef CONFIG_SMP
-#    define SYS_pthread_setaffinity_np (__SYS_pthread+28)
-#    define SYS_pthread_getaffinity_np (__SYS_pthread+29)
-#    define __SYS_pthread_signals      (__SYS_pthread+30)
+#  ifdef CONFIG_SMP
+#    define SYS_pthread_setaffinity_np (__SYS_pthread_smp+0)
+#    define SYS_pthread_getaffinity_np (__SYS_pthread_smp+1)
+#    define __SYS_pthread_signals      (__SYS_pthread_smp+2)
 #  else
-#    define __SYS_pthread_signals      (__SYS_pthread+28)
+#    define __SYS_pthread_signals      __SYS_pthread_smp
 #  endif
 
 #  ifndef CONFIG_DISABLE_SIGNALS
 #    define SYS_pthread_cond_timedwait (__SYS_pthread_signals+0)
 #    define SYS_pthread_kill           (__SYS_pthread_signals+1)
 #    define SYS_pthread_sigmask        (__SYS_pthread_signals+2)
-#    define __SYS_mqueue               (__SYS_pthread_signals+3)
+#    define __SYS_pthread_cleanup      (__SYS_pthread_signals+3)
 #  else
-#    define __SYS_mqueue               __SYS_pthread_signals
+#    define __SYS_pthread_cleanup      __SYS_pthread_signals
+#  endif
+
+#  ifdef CONFIG_PTHREAD_CLEANUP
+#    define __SYS_pthread_cleanup_push (__SYS_pthread_cleanup+0)
+#    define __SYS_pthread_cleanup_pop  (__SYS_pthread_cleanup+1)
+#    define __SYS_mqueue               (__SYS_pthread_cleanup+2)
+#  else
+#    define __SYS_mqueue               __SYS_pthread_cleanup
 #  endif
 
 #else

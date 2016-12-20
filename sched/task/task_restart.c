@@ -84,13 +84,10 @@ int task_restart(pid_t pid)
   FAR dq_queue_t *tasklist;
   irqstate_t flags;
   int errcode;
-  int status;
-
-  /* Make sure this task does not become ready-to-run while we are futzing
-   * with its TCB
-   */
-
-  sched_lock();
+#ifdef CONFIG_SMP
+  int cpu;
+#endif
+  int ret;
 
   /* Check if the task to restart is the calling task */
 
@@ -100,10 +97,18 @@ int task_restart(pid_t pid)
       /* Not implemented */
 
       errcode = ENOSYS;
-      goto errout_with_lock;
+      goto errout;
     }
 
-  /* We are restarting some other task than ourselves */
+  /* We are restarting some other task than ourselves.  Make sure that the
+   * task does not change its state while we are executing.  In the single
+   * CPU state this could be done by disabling pre-emption.  But we will
+   * a little stronger medicine on the SMP case:  The task make be running
+   * on another CPU.
+   */
+
+  flags = enter_critical_section();
+
   /* Find for the TCB associated with matching pid  */
 
   tcb = (FAR struct task_tcb_s *)sched_gettcb(pid);
@@ -120,22 +125,12 @@ int task_restart(pid_t pid)
     }
 
 #ifdef CONFIG_SMP
-  /* There is currently no capability to restart a task that is actively
-   * running on another CPU.  This is not the calling task so if it is
-   * running, then it could only be running a a different CPU.
-   *
-   * Also, we will need some interlocks to assure that no tasks are
-   * rescheduled on any other CPU while we do this.
+  /* If the task is running on another CPU, then pause that CPU.  We can
+   * then manipulate the TCB of the restarted task and when we resume the
+   * that CPU, the restart take effect.
    */
 
-#warning Missing SMP logic
-  if (tcb->cmn.task_state == TSTATE_TASK_RUNNING)
-    {
-      /* Not implemented */
-
-      errcode = ENOSYS;
-      goto errout_with_lock;
-    }
+  cpu = sched_cpu_pause(&tcb->cmn);
 #endif /* CONFIG_SMP */
 
   /* Try to recover from any bad states */
@@ -158,10 +153,8 @@ int task_restart(pid_t pid)
   tasklist = TLIST_HEAD(tcb->cmn.task_state);
 #endif
 
-  flags = enter_critical_section();
   dq_rem((FAR dq_entry_t *)tcb, tasklist);
   tcb->cmn.task_state = TSTATE_TASK_INVALID;
-  leave_critical_section(flags);
 
   /* Deallocate anything left in the TCB's queues */
 
@@ -169,12 +162,21 @@ int task_restart(pid_t pid)
 
   /* Reset the current task priority  */
 
-  tcb->cmn.sched_priority = tcb->init_priority;
+  tcb->cmn.sched_priority = tcb->cmn.init_priority;
+
+  /* The task should restart with pre-emption disabled and not in a critical
+   * secton.
+   */
+
+  tcb->cmn.lockcount = 0;
+#ifdef CONFIG_SMP
+  tcb->cmn.irqcount  = 0;
+#endif
 
   /* Reset the base task priority and the number of pending reprioritizations */
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
-  tcb->cmn.base_priority = tcb->init_priority;
+  tcb->cmn.base_priority = tcb->cmn.init_priority;
 #  if CONFIG_SEM_NNESTPRIO > 0
   tcb->cmn.npend_reprio = 0;
 #  endif
@@ -191,21 +193,37 @@ int task_restart(pid_t pid)
   dq_addfirst((FAR dq_entry_t *)tcb, (FAR dq_queue_t *)&g_inactivetasks);
   tcb->cmn.task_state = TSTATE_TASK_INACTIVE;
 
-  /* Activate the task */
+#ifdef CONFIG_SMP
+  /* Resume the paused CPU (if any) */
 
-  status = task_activate((FAR struct tcb_s *)tcb);
-  if (status != OK)
+  if (cpu >= 0)
     {
-      (void)task_delete(pid);
-      errcode = -status;
+      ret = up_cpu_resume(cpu);
+      if (ret < 0)
+        {
+          errcode = -ret;
+          goto errout_with_lock;
+        }
+    }
+#endif /* CONFIG_SMP */
+
+  leave_critical_section(flags);
+
+  /* Activate the task. */
+
+  ret = task_activate((FAR struct tcb_s *)tcb);
+  if (ret != OK)
+    {
+      (void)task_terminate(pid, true);
+      errcode = -ret;
       goto errout_with_lock;
     }
 
-  sched_unlock();
   return OK;
 
 errout_with_lock:
+  leave_critical_section(flags);
+errout:
   set_errno(errcode);
-  sched_unlock();
   return ERROR;
 }

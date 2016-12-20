@@ -69,7 +69,7 @@
  * Description: Specify the set of button events that can cause a poll()
  *              to awaken.  The default is all button depressions and all
  *              button releases (all supported buttons);
- * Argument:    A read-only pointer to an instance of struct ajoy_pollevents_s
+ * Argument:    A read-only pointer to an instance of struct btn_pollevents_s
  * Return:      Zero (OK) on success.  Minus one will be returned on failure
  *              with the errno value set appropriately.
  */

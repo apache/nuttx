@@ -756,12 +756,6 @@ static void stm32_stdclockconfig(void)
 
   stm32_rcc_enablelsi();
 #endif
-
-#if defined(CONFIG_RTC_LSECLOCK)
-  /* Low speed external clock source LSE */
-
-  stm32_rcc_enablelse();
-#endif
 }
 #endif
 
@@ -774,6 +768,14 @@ static inline void rcc_enableperipherals(void)
   rcc_enableahb();
   rcc_enableapb2();
   rcc_enableapb1();
+
+#if defined(CONFIG_RTC_LSECLOCK)
+  /* Low speed external clock source LSE
+   * For F1 it requires PWR and BKP from APB1
+   */
+
+  stm32_rcc_enablelse();
+#endif
 }
 
 /****************************************************************************

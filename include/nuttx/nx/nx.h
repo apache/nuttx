@@ -287,6 +287,9 @@ int nx_runinstance(FAR const char *mqname, FAR NX_DRIVERTYPE *dev);
  *   work in the NuttX kernel build because the resources required by the
  *   NX server are private to the kernel mode logic.
  *
+ *   nx_start() can be called (indirectly) from applications via the
+ *   boardctl() interface with the BOARDIOC_NX_START command.
+ *
  * Input Parameters:
  *   None
  *
@@ -300,7 +303,7 @@ int nx_runinstance(FAR const char *mqname, FAR NX_DRIVERTYPE *dev);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NX_MULTIUSER) && defined(CONFIG_NX_NXSTART)
+#ifdef CONFIG_NX_MULTIUSER
 int nx_start(void);
 #endif
 

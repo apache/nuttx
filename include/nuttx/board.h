@@ -316,40 +316,6 @@ int board_tsc_setup(int minor);
 void board_tsc_teardown(void);
 
 /****************************************************************************
- * Name: board_adc_setup
- *
- * Description:
- *   All architectures must provide the following interface in order to
- *   work with examples/adc.
- *
- *   This is an internal OS interface but may be invoked indirectly from
- *   application-level graphics logic.  If CONFIG_LIB_BOARDCTL=y and
- *   CONFIG_BOARDCTL_ADCTEST=y, then this functions will be invoked via the
- *   (non-standard) boardctl() interface using the BOARDIOC_ADCTEST_SETUP
- *   command.
- *
- ****************************************************************************/
-
-int board_adc_setup(void);
-
-/****************************************************************************
- * Name: board_pwm_setup
- *
- * Description:
- *   All architectures must provide the following interface in order to
- *   work with examples/pwm.
- *
- *   This is an internal OS interface but may be invoked indirectly from
- *   application-level graphics logic.  If CONFIG_LIB_BOARDCTL=y and
- *   CONFIG_BOARDCTL_PWMTEST=y, then this functions will be invoked via the
- *   (non-standard) boardctl() interface using the commands
- *   BOARDIOC_PWMTEST_SETUP command.
- *
- ****************************************************************************/
-
-int board_pwm_setup(void);
-
-/****************************************************************************
  * Name: board_graphics_setup
  *
  * Description:
@@ -370,25 +336,6 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno);
 #else
 struct fb_vtable_s;
 FAR struct fb_vtable_s *board_graphics_setup(unsigned int devno);
-#endif
-
-/****************************************************************************
- * Name: board_can_initialize
- *
- * Description:
- *   Perform one-time CAN initialization.  This is currently only needed for
- *   apps/examples/can.
- *
- *   This is an internal OS interface but may be invoked indirectly from
- *   application-level graphics logic.  If CONFIG_LIB_BOARDCTL=y and
- *   CONFIG_BOARDCTL_CANINIT=y, then this functions will be invoked via the
- *   (non-standard) boardctl() interface using the BOARDIOC_CAN_INITIALIZE
- *   command.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_BOARDCTL_CANINIT
-int board_can_initialize(void);
 #endif
 
 /****************************************************************************

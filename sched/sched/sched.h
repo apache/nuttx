@@ -353,12 +353,12 @@ extern volatile uint32_t g_cpuload_total;
  *    least one CPU has pre-emption disabled.
  */
 
-extern volatile spinlock_t g_cpu_schedlock;
+extern volatile spinlock_t g_cpu_schedlock SP_SECTION;
 
 /* Used to keep track of which CPU(s) hold the IRQ lock. */
 
-extern volatile spinlock_t g_cpu_locksetlock;
-extern volatile cpu_set_t g_cpu_lockset;
+extern volatile spinlock_t g_cpu_locksetlock SP_SECTION;
+extern volatile cpu_set_t g_cpu_lockset SP_SECTION;
 
 #endif /* CONFIG_SMP */
 
@@ -419,12 +419,13 @@ void sched_sporadic_lowpriority(FAR struct tcb_s *tcb);
 #endif
 
 #ifdef CONFIG_SMP
-int sched_cpu_select(cpu_set_t affinity);
+int  sched_cpu_select(cpu_set_t affinity);
+int  sched_cpu_pause(FAR struct tcb_s *tcb);
 #  define sched_islocked(tcb) spin_islocked(&g_cpu_schedlock)
 #else
-#  define sched_islocked(tcb) ((tcb)->lockcount > 0)
 #  define sched_cpu_select(a) (0)
-
+#  define sched_cpu_pause(t)  (-38)  /* -ENOSYS */
+#  define sched_islocked(tcb) ((tcb)->lockcount > 0)
 #endif
 
 /* CPU load measurement support */

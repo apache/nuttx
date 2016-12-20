@@ -79,14 +79,17 @@ struct timer
 };
 
 /****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
 
 static struct timer g_periodic_timer;
+
+/* A single packet buffer is used */
+
+static uint8_t g_pktbuf[MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE];
+
+/* Ethernet peripheral state */
+
 static struct net_driver_s g_sim_dev;
 
 /****************************************************************************
@@ -340,6 +343,7 @@ int netdriver_init(void)
 
   /* Set callbacks */
 
+  g_sim_dev.d_buf    = g_pktbuf;         /* Single packet buffer */
   g_sim_dev.d_ifup   = netdriver_ifup;
   g_sim_dev.d_ifdown = netdriver_ifdown;
 

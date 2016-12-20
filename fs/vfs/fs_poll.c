@@ -47,9 +47,10 @@
 #include <errno.h>
 
 #include <nuttx/clock.h>
+#include <nuttx/semaphore.h>
+#include <nuttx/cancelpt.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
-#include <nuttx/semaphore.h>
 
 #include <arch/irq.h>
 
@@ -365,7 +366,17 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
   int errcode;
   int ret;
 
+  /* poll() is a cancellation point */
+
+  (void)enter_cancellation_point();
+
+  /* This semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
   sem_init(&sem, 0, 0);
+  sem_setprotocol(&sem, SEM_PRIO_NONE);
+
   ret = poll_setup(fds, nfds, &sem);
   if (ret >= 0)
     {
@@ -419,6 +430,7 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
     }
 
   sem_destroy(&sem);
+  leave_cancellation_point();
 
   /* Check for errors */
 

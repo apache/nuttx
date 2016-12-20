@@ -77,7 +77,7 @@
 #define STM32_OTG_CID_OFFSET          0x003c /* Core ID register  */
 #define STM32_OTG_HPTXFSIZ_OFFSET     0x0100 /* Host periodic transmit FIFO size register */
 
-#define STM32_OTG_DIEPTXF_OFFSET(n)   (104+(((n)-1) << 2))
+#define STM32_OTG_DIEPTXF_OFFSET(n)   (0x0104+(((n)-1) << 2))
 
 /* Host-mode control and status registers */
 

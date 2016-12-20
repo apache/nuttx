@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_pwm.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -82,154 +82,14 @@
 #  warning CONFIG_PWM_PULSECOUNT no supported by this driver.
 #endif
 
-/* Are we using CLKA? CLKB?  If so, what frequency?  Select the prescaler
- * value that allows the largest, valid divider value.  This may not be
- * optimal in all cases, but in general should provide a reasonable frequency
- * value.
- *
- *   frequency = MCK / prescaler / div
- *
- * Pick smallest prescaler such that:
- *
- *   prescaler = MCK / frequency / div < 256
- *
- * Then:
- *
- *   div = MCK / prescaler / frequency
- *
- * Calulcated Values
- *
- *   CLKn_PRE       = CLKn prescaler value
- *   PWM_CLK_PREn   = CLKn prescaler register setting
- *   CLKn_DIV       = CLKn divider value
- *   PWM_CLK_DIVn   = CLKn divider register setting
- *   CLKn_FREQUENCY = Actual resulting CLKn frequency
- */
+/* Are we using CLKA? CLKB?  If so, at what frequency? */
 
-#ifdef CONFIG_SAMA5_PWM_CLKA
-
-#  if !defined(CONFIG_SAMA5_PWM_CLKA_FREQUENCY)
+#if defined(CONFIG_SAMA5_PWM_CLKA) && !defined(CONFIG_SAMA5_PWM_CLKA_FREQUENCY)
 #    error CONFIG_SAMA5_PWM_CLKA_FREQUENCY is not defined
-
-#  elif (BOARD_MCK_FREQUENCY / CONFIG_SAMA5_PWM_CLKA_FREQUENCY) < 256
-#    define CLKA_PRE_BITS PWM_CLK_PREA_DIV1
-#    define CLKA_PRE      1
-
-#  elif (BOARD_MCK_FREQUENCY / 2 / CONFIG_SAMA5_PWM_CLKA_FREQUENCY) < 256
-#    define CLKA_PRE_BITS PWM_CLK_PREA_DIV2
-#    define CLKA_PRE      2
-
-#  elif (BOARD_MCK_FREQUENCY / 4 / CONFIG_SAMA5_PWM_CLKA_FREQUENCY) < 256
-#    define CLKA_PRE_BITS PWM_CLK_PREA_DIV4
-#    define CLKA_PRE      4
-
-#  elif (BOARD_MCK_FREQUENCY / 8 / CONFIG_SAMA5_PWM_CLKA_FREQUENCY) < 256
-#    define CLKA_PRE_BITS PWM_CLK_PREA_DIV8
-#    define CLKA_PRE      8
-
-#  elif (BOARD_MCK_FREQUENCY / 16 / CONFIG_SAMA5_PWM_CLKA_FREQUENCY) < 256
-#    define CLKA_PRE_BITS PWM_CLK_PREA_DIV16
-#    define CLKA_PRE      16
-
-#  elif (BOARD_MCK_FREQUENCY / 32 / CONFIG_SAMA5_PWM_CLKA_FREQUENCY) < 256
-#    define CLKA_PRE_BITS PWM_CLK_PREA_DIV32
-#    define CLKA_PRE      32
-
-#  elif (BOARD_MCK_FREQUENCY / 64 / CONFIG_SAMA5_PWM_CLKA_FREQUENCY) < 256
-#    define CLKA_PRE_BITS PWM_CLK_PREA_DIV64
-#    define CLKA_PRE      64
-
-#  elif (BOARD_MCK_FREQUENCY / 128 / CONFIG_SAMA5_PWM_CLKA_FREQUENCY) < 256
-#    define CLKA_PRE_BITS PWM_CLK_PREA_DIV128
-#    define CLKA_PRE      128
-
-#  elif (BOARD_MCK_FREQUENCY / 256 / CONFIG_SAMA5_PWM_CLKA_FREQUENCY) < 256
-#    define CLKA_PRE_BITS PWM_CLK_PREA_DIV256
-#    define CLKA_PRE      256
-
-#  elif (BOARD_MCK_FREQUENCY / 512 / CONFIG_SAMA5_PWM_CLKA_FREQUENCY) < 256
-#    define CLKA_PRE_BITS PWM_CLK_PREA_DIV512
-#    define CLKA_PRE      512
-
-#  elif (BOARD_MCK_FREQUENCY / 1024 / CONFIG_SAMA5_PWM_CLKA_FREQUENCY) < 256
-#    define CLKA_PRE_BITS PWM_CLK_PREA_DIV1024
-#    define CLKA_PRE      1024
-
-#  else
-#    error Cannot realize CONFIG_SAMA5_PWM_CLKA_FREQUENCY
-#  endif
-
-#  define CLKA_DIV       (BOARD_MCK_FREQUENCY / CLKA_PRE / CONFIG_SAMA5_PWM_CLKA_FREQUENCY)
-#  define CLKA_FREQUENCY (BOARD_MCK_FREQUENCY / CLKA_PRE / CLKA_DIV)
-#  define CLKA_DIV_BITS   PWM_CLK_DIVA(CLKA_DIV)
-
-#else
-#  undef  CONFIG_SAMA5_PWM_CLKA_FREQUENCY
-#  define CLKA_PRE_BITS PWM_CLK_PREA_DIV1
-#  define CLKA_DIV_BITS PWM_CLK_DIVA_OFF
 #endif
 
-#ifdef CONFIG_SAMA5_PWM_CLKB
-
-#  if !defined(CONFIG_SAMA5_PWM_CLKB_FREQUENCY)
+#if defined(CONFIG_SAMA5_PWM_CLKB) && !defined(CONFIG_SAMA5_PWM_CLKB_FREQUENCY)
 #    error CONFIG_SAMA5_PWM_CLKB_FREQUENCY is not defined
-
-#  elif (BOARD_MCK_FREQUENCY / CONFIG_SAMA5_PWM_CLKB_FREQUENCY) < 256
-#    define CLKB_PRE_BITS PWM_CLK_PREB_DIV1
-#    define CLKB_PRE      1
-
-#  elif (BOARD_MCK_FREQUENCY / 2 / CONFIG_SAMA5_PWM_CLKB_FREQUENCY) < 256
-#    define CLKB_PRE_BITS PWM_CLK_PREB_DIV2
-#    define CLKB_PRE      2
-
-#  elif (BOARD_MCK_FREQUENCY / 4 / CONFIG_SAMA5_PWM_CLKB_FREQUENCY) < 256
-#    define CLKB_PRE_BITS PWM_CLK_PREB_DIV4
-#    define CLKB_PRE      4
-
-#  elif (BOARD_MCK_FREQUENCY / 8 / CONFIG_SAMA5_PWM_CLKB_FREQUENCY) < 256
-#    define CLKB_PRE_BITS PWM_CLK_PREB_DIV8
-#    define CLKB_PRE      8
-
-#  elif (BOARD_MCK_FREQUENCY / 16 / CONFIG_SAMA5_PWM_CLKB_FREQUENCY) < 256
-#    define CLKB_PRE_BITS PWM_CLK_PREB_DIV16
-#    define CLKB_PRE      16
-
-#  elif (BOARD_MCK_FREQUENCY / 32 / CONFIG_SAMA5_PWM_CLKB_FREQUENCY) < 256
-#    define CLKB_PRE_BITS PWM_CLK_PREB_DIV32
-#    define CLKB_PRE      32
-
-#  elif (BOARD_MCK_FREQUENCY / 64 / CONFIG_SAMA5_PWM_CLKB_FREQUENCY) < 256
-#    define CLKB_PRE_BITS PWM_CLK_PREB_DIV64
-#    define CLKB_PRE      64
-
-#  elif (BOARD_MCK_FREQUENCY / 128 / CONFIG_SAMA5_PWM_CLKB_FREQUENCY) < 256
-#    define CLKB_PRE_BITS PWM_CLK_PREB_DIV128
-#    define CLKB_PRE      128
-
-#  elif (BOARD_MCK_FREQUENCY / 256 / CONFIG_SAMA5_PWM_CLKB_FREQUENCY) < 256
-#    define CLKB_PRE_BITS PWM_CLK_PREB_DIV256
-#    define CLKB_PRE      256
-
-#  elif (BOARD_MCK_FREQUENCY / 512 / CONFIG_SAMA5_PWM_CLKB_FREQUENCY) < 256
-#    define CLKB_PRE_BITS PWM_CLK_PREB_DIV512
-#    define CLKB_PRE      512
-
-#  elif (BOARD_MCK_FREQUENCY / 1024 / CONFIG_SAMA5_PWM_CLKB_FREQUENCY) < 256
-#    define CLKB_PRE_BITS PWM_CLK_PREB_DIV1024
-#    define CLKB_PRE      1024
-
-#  else
-#    error Cannot realize CONFIG_SAMA5_PWM_CLKB_FREQUENCY
-#  endif
-
-#  define CLKB_DIV       (BOARD_MCK_FREQUENCY / CLKB_PRE / CONFIG_SAMA5_PWM_CLKB_FREQUENCY)
-#  define CLKB_FREQUENCY (BOARD_MCK_FREQUENCY / CLKB_PRE / CLKB_DIV)
-#  define CLKB_DIV_BITS   PWM_CLK_DIVB(CLKB_DIV)
-
-#else
-#  undef  CONFIG_SAMA5_PWM_CLKB_FREQUENCY
-#  define CLKB_PRE_BITS PWM_CLK_PREB_DIV1
-#  define CLKB_DIV_BITS PWM_CLK_DIVB_OFF
 #endif
 
 #ifdef CONFIG_SAMA5_PWM_CHAN0
@@ -237,27 +97,27 @@
 #    undef CONFIG_SAMA5_PWM_CHAN0_CLKA
 #    undef CONFIG_SAMA5_PWM_CHAN0_CLKB
 #    if CONFIG_SAMA5_PWM_CHAN0_MCKDIV == 1
-#      define SAMA5_PWM_CHAN0_MCKDIV_LOG2 = 0
+#      define SAMA5_PWM_CHAN0_MCKDIV_LOG2  0
 #    elif CONFIG_SAMA5_PWM_CHAN0_MCKDIV == 2
-#      define SAMA5_PWM_CHAN0_MCKDIV_LOG2 = 1
+#      define SAMA5_PWM_CHAN0_MCKDIV_LOG2  1
 #    elif CONFIG_SAMA5_PWM_CHAN0_MCKDIV == 4
-#      define SAMA5_PWM_CHAN0_MCKDIV_LOG2 = 2
+#      define SAMA5_PWM_CHAN0_MCKDIV_LOG2  2
 #    elif CONFIG_SAMA5_PWM_CHAN0_MCKDIV == 8
-#      define SAMA5_PWM_CHAN0_MCKDIV_LOG2 = 3
+#      define SAMA5_PWM_CHAN0_MCKDIV_LOG2  3
 #    elif CONFIG_SAMA5_PWM_CHAN0_MCKDIV == 16
-#      define SAMA5_PWM_CHAN0_MCKDIV_LOG2 = 4
+#      define SAMA5_PWM_CHAN0_MCKDIV_LOG2  4
 #    elif CONFIG_SAMA5_PWM_CHAN0_MCKDIV == 32
-#      define SAMA5_PWM_CHAN0_MCKDIV_LOG2 = 5
+#      define SAMA5_PWM_CHAN0_MCKDIV_LOG2  5
 #    elif CONFIG_SAMA5_PWM_CHAN0_MCKDIV == 64
-#      define SAMA5_PWM_CHAN0_MCKDIV_LOG2 = 6
+#      define SAMA5_PWM_CHAN0_MCKDIV_LOG2  6
 #    elif CONFIG_SAMA5_PWM_CHAN0_MCKDIV == 128
-#      define SAMA5_PWM_CHAN0_MCKDIV_LOG2 = 7
+#      define SAMA5_PWM_CHAN0_MCKDIV_LOG2  7
 #    elif CONFIG_SAMA5_PWM_CHAN0_MCKDIV == 256
-#      define SAMA5_PWM_CHAN0_MCKDIV_LOG2 = 8
+#      define SAMA5_PWM_CHAN0_MCKDIV_LOG2  8
 #    elif CONFIG_SAMA5_PWM_CHAN0_MCKDIV == 512
-#      define SAMA5_PWM_CHAN0_MCKDIV_LOG2 = 9
+#      define SAMA5_PWM_CHAN0_MCKDIV_LOG2  9
 #    elif CONFIG_SAMA5_PWM_CHAN0_MCKDIV == 1024
-#      define SAMA5_PWM_CHAN0_MCKDIV_LOG2 = 10
+#      define SAMA5_PWM_CHAN0_MCKDIV_LOG2  10
 #    else
 #      error Unsupported MCK divider value
 #    endif
@@ -485,6 +345,11 @@ static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev,
 
 /* Initialization */
 
+static unsigned int pwm_clk_prescaler_log2(uint32_t mck, uint32_t fclk);
+static unsigned int pwm_clk_divider(uint32_t mck, uint32_t fclk,
+                                    unsigned int prelog2);
+static uint32_t pwm_clk_frequency(uint32_t mck, unsigned int prelog2,
+                                  unsigned int div);
 static void pwm_resetpins(FAR struct sam_pwm_chan_s *chan);
 
 /****************************************************************************
@@ -779,6 +644,7 @@ static uint32_t pwm_getreg(struct sam_pwm_chan_s *chan, int offset)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_DEBUG_PWM_INFO /* Currently only used for debug output */
 static uint32_t pwm_chan_getreg(struct sam_pwm_chan_s *chan, int offset)
 {
   uintptr_t regaddr;
@@ -800,6 +666,7 @@ static uint32_t pwm_chan_getreg(struct sam_pwm_chan_s *chan, int offset)
 
   return regval;
 }
+#endif
 
 /****************************************************************************
  * Name: pwm_putreg
@@ -1073,6 +940,11 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
                      FAR const struct pwm_info_s *info)
 {
   FAR struct sam_pwm_chan_s *chan = (FAR struct sam_pwm_chan_s *)dev;
+#if defined(CONFIG_SAMA5_PWM_CLKA) || defined(CONFIG_SAMA5_PWM_CLKB)
+  unsigned int prelog2;
+  unsigned int div;
+  uint32_t mck;
+#endif
   uint32_t regval;
   uint32_t cprd;
   uint32_t fsrc;
@@ -1086,21 +958,35 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
   switch (chan->clksrc)
     {
     case PWM_CLKSRC_MCK:
-      regval = PWM_CMR_CPRE_MCKDIV(chan->divlog2);
-      fsrc   = BOARD_MCK_FREQUENCY >> chan->divlog2;
+      {
+        regval = PWM_CMR_CPRE_MCKDIV(chan->divlog2);
+        fsrc   = BOARD_MCK_FREQUENCY >> chan->divlog2;
+      }
       break;
 
 #ifdef CONFIG_SAMA5_PWM_CLKA
     case PWM_CLKSRC_CLKA:
-      regval = PWM_CMR_CPRE_CLKA;
-      fsrc   = CLKA_FREQUENCY;
+      {
+        regval  = pwm_getreg(chan, SAM_PWM_CLK_OFFSET);
+        prelog2 = (unsigned int)((regval & PWM_CLK_PREA_MASK) >> PWM_CLK_PREA_SHIFT);
+        div     = (unsigned int)((regval & PWM_CLK_DIVA_MASK) >> PWM_CLK_DIVA_SHIFT);
+        mck     = BOARD_MCK_FREQUENCY;
+        fsrc    = pwm_clk_frequency(mck, prelog2, div);
+        regval  = PWM_CMR_CPRE_CLKA;
+      }
       break;
 #endif
 
 #ifdef CONFIG_SAMA5_PWM_CLKB
     case PWM_CLKSRC_CLKB:
-      regval = PWM_CMR_CPRE_CLKB;
-      fsrc   = CLKB_FREQUENCY;
+      {
+        regval  = pwm_getreg(chan, SAM_PWM_CLK_OFFSET);
+        prelog2 = (unsigned int)((regval & PWM_CLK_PREB_MASK) >> PWM_CLK_PREB_SHIFT);
+        div     = (unsigned int)((regval & PWM_CLK_DIVB_MASK) >> PWM_CLK_DIVB_SHIFT);
+        mck     = BOARD_MCK_FREQUENCY;
+        fsrc    = pwm_clk_frequency(mck, prelog2, div);
+        regval  = PWM_CMR_CPRE_CLKB;
+      }
       break;
 #endif
 
@@ -1223,18 +1109,157 @@ static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev, int cmd, unsigned long arg
 }
 
 /****************************************************************************
- * Name: pwm_ioctl
+ * Name: pwm_clk_prescaler_log2
+ *
+ * Description:
+ *   Return log2 of the clock prescaler value.  The PWM clock divisor
+ *   register fields use this kind of value.  The return value of this
+ *   function can be converted into a PWM clock register value or an absolute
+ *   prescaler value by applying the following operations (macros defined in
+ *   chip/sam_pwm.h):
+ *
+ *   This function selects the prescaler value that allows the largest, valid
+ *   divider value.  This may not be optimal in all cases, but in general
+ *   should provide a reasonable frequency value.  The frequency is given by:
+ *
+ *     frequency = MCK / prescaler / div
+ *
+ *   The divider has a range of 1-255.  Pick smallest prescaler such that:
+ *
+ *     prescaler = MCK / frequency / div < 256
+ *
+ *   Example usage given:
+ *     unsigned int prelog2;
+ *     unsigned int prescaler;
+ *     uint32_t regbits;
+ *
+ *   For clock A:
+ *     prelog2   = pwm_clk_prescaler_log2(BOARD_MCK_FREQUENCY,
+ *                                    CONFIG_SAMA5_PWM_CLKA_FREQUENCY )
+ *     regbits   = PWM_CLK_PREA_DIV(prelog2);
+ *     prescaler = (1 << prelog2)
+ *
+ *   For clock B:
+ *     prelog2   = pwm_clk_prescaler_log2(BOARD_MCK_FREQUENCY,
+ *                                    CONFIG_SAMA5_PWM_CLKB_FREQUENCY )
+ *     regbits   = PWM_CLK_PREB_DIV(prelog2);
+ *     prescaler = (1 << prelog2)
+ *
+ * Input parameters:
+ *     mck  - The main clock frequency
+ *     fclk - The desired clock A or B frequency
+ *
+ * Returned Value:
+ *   The select value of log2(prescaler) in the range 0-10 corresponding to
+ *   the actual prescaler value in the range 1-1024.
+ *
+ ****************************************************************************/
+
+static unsigned int pwm_clk_prescaler_log2(uint32_t mck, uint32_t fclk)
+{
+  uint32_t unscaled;
+  unsigned int prelog2;
+
+  unscaled = mck / fclk;
+  prelog2  = 0;
+
+  /* Loop, incrementing the log2(prescaler) value.  Exit with either:
+   *
+   *   1) unscaled < 256 and prelog2 <= 10, or with
+   *   2) unscaled >= 256 and prelog2 == 10
+   */
+
+  while (unscaled >= 256 && prelog2 < 10)
+    {
+      unscaled >>= 1;
+      prelog2++;
+    }
+
+  DEBUGASSERT(unscaled < 256);
+  return prelog2;
+}
+
+/****************************************************************************
+ * Name: pwm_clk_divider
+ *
+ * Description:
+ *   Given that we have already selected the prescaler value, select the
+ *   divider in the range of 1 through 255.  The CLKA/B frequency is
+ *   determined by both the prescaler and divider valuess:
+ *
+ *   frequency = MCK / prescaler / div
+ *
+ * Then:
+ *
+ *   div = MCK / prescaler / frequency
+ *
+ * Input parameters:
+ *     mck     - The main clock frequency
+ *     fclk    - The desired clock A or B frequency
+ *     prelog2 - The log2(prescaler) value previously selected by
+ *               pwm_prescale_log2().
+ *
+ * Returned Value:
+ *   The select value of log2(prescaler) in the range 0-10 corresponding to
+ *   the actual prescaler value in the range 1-1024.
+ *
+ ****************************************************************************/
+
+static unsigned int pwm_clk_divider(uint32_t mck, uint32_t fclk,
+                                    unsigned int prelog2)
+{
+  uint32_t div = (mck >> prelog2) / fclk;
+
+  if (div < 1)
+    {
+      div = 1;
+    }
+  else if (div > 255)
+    {
+      div = 255;
+    }
+
+  return div;
+}
+
+/****************************************************************************
+ * Name: pwm_clk_frequency
+ *
+ * Description:
+ *   Given that we have already selected the prescaler value and cacluated
+ *   the corresponding divider, the result clock frequency is give by:
+ *
+ *   frequency = MCK / prescaler / div
+ *
+ * Input parameters:
+ *     mck     - The main clock frequency
+ *     prelog2 - The log2(prescaler) value previously selected by
+ *               pwm_prescale_log2().
+ *     div     - The divider previously calculated from pwm_clk_divider().
+ *
+ * Returned Value:
+ *   The select value of log2(prescaler) in the range 0-10 corresponding to
+ *   the actual prescaler value in the range 1-1024.
+ *
+ ****************************************************************************/
+
+static uint32_t pwm_clk_frequency(uint32_t mck, unsigned int prelog2,
+                                  unsigned int div)
+{
+  return (mck >> prelog2) / div;
+}
+
+/****************************************************************************
+ * Name: pwm_resetpins
  *
  * Description:
  *   Lower-half logic may support platform-specific ioctl commands
  *
  * Input parameters:
- *   dev - A reference to the lower half PWM driver state structure
- *   cmd - The ioctl command
- *   arg - The argument accompanying the ioctl command
+ *   chan - A reference to the PWM channel instance
  *
  * Returned Value:
- *   Zero on success; a negated errno value on failure
+ *   None
  *
  ****************************************************************************/
 
@@ -1327,13 +1352,37 @@ FAR struct pwm_lowerhalf_s *sam_pwminitialize(int channel)
 
   if (!g_pwm.initialized)
     {
+#if defined(CONFIG_SAMA5_PWM_CLKA) || defined(CONFIG_SAMA5_PWM_CLKB)
+      uint32_t mck;
+      unsigned int prelog2;
+      unsigned int div;
+#endif
+
       /* Enable the PWM peripheral clock */
 
       sam_pwm_enableclk();
 
-      /* Set clock A and clock B */
+#if defined(CONFIG_SAMA5_PWM_CLKA) || defined(CONFIG_SAMA5_PWM_CLKB)
+      mck      = BOARD_MCK_FREQUENCY;
+#endif
+#ifdef CONFIG_SAMA5_PWM_CLKA
+      /* Set clock A configuration */
 
-      regval = (CLKA_PRE_BITS | CLKA_DIV_BITS | CLKB_PRE_BITS | CLKB_DIV_BITS);
+      prelog2  = pwm_clk_prescaler_log2(mck, CONFIG_SAMA5_PWM_CLKA_FREQUENCY);
+      div      = pwm_clk_divider(mck, CONFIG_SAMA5_PWM_CLKA_FREQUENCY, prelog2);
+      regval   = (PWM_CLK_DIVA(div) | PWM_CLK_PREA_DIV(prelog2));
+#else
+      regval   = 0;
+#endif
+
+#ifdef CONFIG_SAMA5_PWM_CLKB
+      /* Set clock B configuration */
+
+      prelog2  = pwm_clk_prescaler_log2(mck, CONFIG_SAMA5_PWM_CLKB_FREQUENCY);
+      div      = pwm_clk_divider(mck, CONFIG_SAMA5_PWM_CLKA_FREQUENCY, prelog2);
+      regval  |= (PWM_CLK_DIVB(div) | PWM_CLK_PREB_DIV(prelog2));
+#endif
+
       pwm_putreg(chan, SAM_PWM_CLK_OFFSET, regval);
 
       /* Disable all PWM interrupts at the PWM peripheral */

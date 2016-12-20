@@ -69,15 +69,14 @@ FAR struct pwm_lowerhalf_s *lpc17_timerinitialize(int timer);
  ************************************************************************************/
 
 /************************************************************************************
- * Name: board_pwm_setup
+ * Name: lpc17_pwm_setup
  *
  * Description:
- *   All LPC17 architectures must provide the following interface to work with
- *   examples/pwm.
+ *   Initialize PWM and register the PWM device.
  *
  ************************************************************************************/
 
-int board_pwm_setup(void)
+int lpc17_pwm_setup(void)
 {
   static bool initialized = false;
   struct pwm_lowerhalf_s *pwm;

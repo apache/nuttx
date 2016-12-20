@@ -52,6 +52,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/clock.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbhost.h>
 #include <nuttx/usb/usbhost_devaddr.h>
@@ -5157,6 +5158,12 @@ static inline void efm32_sw_initialize(FAR struct efm32_usbhost_s *priv)
   sem_init(&priv->pscsem,  0, 0);
   sem_init(&priv->exclsem, 0, 1);
 
+  /* The pscsem semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
+  sem_setprotocol(&priv->pscsem, SEM_PRIO_NONE);
+
   /* Initialize the driver state data */
 
   priv->smstate   = SMSTATE_DETACHED;
@@ -5172,8 +5179,15 @@ static inline void efm32_sw_initialize(FAR struct efm32_usbhost_s *priv)
   for (i = 0; i < EFM32_MAX_TX_FIFOS; i++)
     {
       FAR struct efm32_chan_s *chan = &priv->chan[i];
+
       chan->chidx = i;
+
+      /* The waitsem semaphore is used for signaling and, hence, should not
+       * have priority inheritance enabled.
+       */
+
       sem_init(&chan->waitsem,  0, 0);
+      sem_setprotocol(&chan->waitsem, SEM_PRIO_NONE);
     }
 }
 

@@ -158,7 +158,6 @@ arch/arm - ARM-based micro-controllers
     MCU support
       arch/arm/include/a1x and arch/arm/src/a1x
       arch/arm/include/c5471 and arch/arm/src/c5471
-      arch/arm/include/calypso and arch/arm/src/calypso
       arch/arm/include/dm320 and arch/arm/src/dm320
       arch/arm/include/efm32 and arch/arm/src/efm32
       arch/arm/include/imx1 and arch/arm/src/imx1
@@ -222,16 +221,14 @@ arch/renesas - Support for Renesas and legacy Hitachi microcontrollers.
       arch/renesas/include/m16c and arch/renesas/src/m16c
       arch/renesas/include/sh1 and arch/renesas/src/sh1
 
-arch/rgmp
+arch/risc-v
+    This directory is dedicated to ports to the RISC-V family.
 
-    RGMP stands for RTOS and GPOS on Multi-Processor.  RGMP is a project
-    for running GPOS and RTOS simultaneously on multi-processor platforms.
-    You can port your favorite RTOS to RGMP together with an unmodified
-    Linux to form a hybrid operating system. This makes your application
-    able to use both RTOS and GPOS features.
+    Architecture Support
+      arch/risc-v/include/rv32im
 
-    See http://rgmp.sourceforge.net/wiki/index.php/Main_Page for further
-    information about RGMP.
+    MCU support
+      arch/risc-v/include/nr5m100
 
 arch/x86 - Intel x86 architectures
     This directory holds related, 32- and 64-bit architectures from Intel.
@@ -243,6 +240,21 @@ arch/x86 - Intel x86 architectures
     MCU support
       arch/x86/include/i486 and arch/x86/src/i486
       arch/x86/include/qemu and arch/x86/src/qemu
+
+arch/xtensa
+
+    Implementations based on the Cadence® Tensilica® Xtensa® processors,
+    such as the Xtensa LX6 dataplane processing units (DPUs).  At
+    present, this includes the following subdirectories:
+
+    Common XTENSA support:
+      arch/xtensa/include and arch/xtensa/src/common
+
+    LX6 DPU support:
+      arch/xtensa/include/lx6 and arch/xtensa/xtensa/lx6
+
+    Expressif ESP32 implemenation of the LX6 DPU:
+      arch/xtensa/include/esp32 and arch/xtensa/xtensa/esp32
 
 arch/z16 - ZiLOG 16-bit processors
     This directory holds related, 16-bit architectures from ZiLOG.  At

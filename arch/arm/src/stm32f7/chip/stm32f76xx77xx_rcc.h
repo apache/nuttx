@@ -601,7 +601,7 @@
 #  define RCC_PLLI2SCFGR_PLLI2SQ(n)  ((uint32_t)(n) << RCC_PLLI2SCFGR_PLLI2SQ_SHIFT)
 #define RCC_PLLI2SCFGR_PLLI2SR_SHIFT (28)      /* Bits 28-30: PLLI2S division factor for I2S clocks */
 #define RCC_PLLI2SCFGR_PLLI2SR_MASK  (7 << RCC_PLLI2SCFGR_PLLI2SR_SHIFT)
-#  define RCC_PLLI2SCFGR_PLLI2SR(n)  (uint32_t)(n) << RCC_PLLI2SCFGR_PLLI2SR_SHIFT)
+#  define RCC_PLLI2SCFGR_PLLI2SR(n)  ((uint32_t)(n) << RCC_PLLI2SCFGR_PLLI2SR_SHIFT)
 
 /* PLLSAI configuration register */
 

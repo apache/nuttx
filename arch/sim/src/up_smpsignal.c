@@ -52,26 +52,53 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sim_cpu_pause
+ * Name: up_cpu_pausereq
  *
  * Description:
- *   This is the SIGUSR1 signal handling logic.  It implements the core
- *   logic of up_cpu_pause() on the thread of execution the simulated CPU.
- *   This is the part of the implementation that must be performed in the
- *   NuttX vs. the host domain.
+ *   Return true if a pause request is pending for this CPU.
  *
  * Input Parameters:
- *   cpu    - The CPU being paused.
- *   wait   - Spinlock to wait on to be un-paused
- *   paused - A boolean to set when we are in the paused state.
+ *   cpu - The index of the CPU to be queried
  *
  * Returned Value:
- *   None
+ *   true   = a pause request is pending.
+ *   false = no pasue request is pending.
  *
  ****************************************************************************/
 
-void sim_cpu_pause(int cpu, volatile spinlock_t *wait,
-                   volatile unsigned char *paused)
+bool up_cpu_pausereq(int cpu)
+{
+  return spin_islocked(&g_cpu_paused[cpu]);
+}
+
+/****************************************************************************
+ * Name: up_cpu_paused
+ *
+ * Description:
+ *   Handle a pause request from another CPU.  Normally, this logic is
+ *   executed from interrupt handling logic within the architecture-specific
+ *   However, it is sometimes necessary necessary to perform the pending
+ *   pause operation in other contexts where the interrupt cannot be taken
+ *   in order to avoid deadlocks.
+ *
+ *   This function performs the following operations:
+ *
+ *   1. It saves the current task state at the head of the current assigned
+ *      task list.
+ *   2. It waits on a spinlock, then
+ *   3. Returns from interrupt, restoring the state of the new task at the
+ *      head of the ready to run list.
+ *
+ * Input Parameters:
+ *   cpu - The index of the CPU to be paused
+ *
+ * Returned Value:
+ *   On success, OK is returned.  Otherwise, a negated errno value indicating
+ *   the nature of the failure is returned.
+ *
+ ****************************************************************************/
+
+int up_cpu_paused(int cpu)
 {
   struct tcb_s *rtcb = current_task(cpu);
 
@@ -86,16 +113,18 @@ void sim_cpu_pause(int cpu, volatile spinlock_t *wait,
 
   if (up_setjmp(rtcb->xcp.regs) == 0)
     {
-      /* Indicate that we are in the paused state */
+      /* Unlock the g_cpu_paused spinlock to indicate that we are in the
+       * paused state
+       */
 
-      *paused = 1;
+      spin_unlock(&g_cpu_paused[cpu]);
 
       /* Spin until we are asked to resume.  When we resume, we need to
        * inicate that we are not longer paused.
        */
 
-      spin_lock(wait);
-      *paused = 0;
+      spin_lock(&g_cpu_wait[cpu]);
+      spin_unlock(&g_cpu_wait[cpu]);
 
       /* While we were paused, logic on a different CPU probably changed
        * the task as that head of the assigned task list.  So now we need
@@ -125,7 +154,8 @@ void sim_cpu_pause(int cpu, volatile spinlock_t *wait,
 
       up_longjmp(rtcb->xcp.regs, 1);
     }
+
+  return OK;
 }
 
 #endif /* CONFIG_SMP */
-

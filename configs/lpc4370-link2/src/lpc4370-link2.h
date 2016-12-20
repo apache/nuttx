@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/lpc4370-link2/src/lpc4370-link2.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -99,7 +99,27 @@
  * Public Functions
  ****************************************************************************/
 
+/************************************************************************************
+ * Name: board_spifi_initialize
+ *
+ * Description:
+ *   Initialize SPIFI.
+ *
+ ************************************************************************************/
+
 void board_spifi_initialize(void);
+
+/************************************************************************************
+ * Name: lpc43_adc_setup
+ *
+ * Description:
+ *   Initialize ADC and register the ADC driver.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_ADC
+int lpc43_adc_setup(void);
+#endif
 
 #endif /* __ASSEMBLY__ */
 #endif /* _CONFIGS_LPC4370_LINK2_SRC_LPC3257_LINK2_H */

@@ -93,11 +93,10 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: board_pwm_setup
+ * Name: stm32_rgbled_setup
  *
  * Description:
- *   All STM32 architectures must provide the following interface to work with
- *   examples/pwm.
+ *   Configure the RGB LED.
  *
  ************************************************************************************/
 

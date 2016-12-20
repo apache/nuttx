@@ -40,18 +40,19 @@
  * Included Files
  ********************************************************************************/
 
-#include <nuttx/config.h>   /* Default settings */
-#include <nuttx/compiler.h> /* Compiler settings, noreturn_function */
+#include <nuttx/config.h>    /* Default settings */
+#include <nuttx/compiler.h>  /* Compiler settings, noreturn_function */
 
-#include <sys/types.h>      /* Needed for general types */
-#include <sys/prctl.h>      /* Needed by pthread_[set|get]name_np */
+#include <sys/types.h>       /* Needed for general types */
+#include <sys/prctl.h>       /* Needed by pthread_[set|get]name_np */
 
-#include <stdint.h>         /* C99 fixed width integer types */
-#include <stdbool.h>        /* C99 boolean types */
-#include <unistd.h>         /* For getpid */
-#include <semaphore.h>      /* Needed for sem_t */
-#include <signal.h>         /* Needed for sigset_t, includes this file */
-#include <time.h>           /* Needed for struct timespec */
+#include <stdint.h>          /* C99 fixed width integer types */
+#include <stdbool.h>         /* C99 boolean types */
+#include <unistd.h>          /* For getpid */
+#include <signal.h>          /* Needed for sigset_t, includes this file */
+#include <time.h>            /* Needed for struct timespec */
+
+#include <nuttx/semaphore.h> /* For sem_t and SEM_PRIO_* defines */
 
 /********************************************************************************
  * Pre-processor Definitions
@@ -95,12 +96,10 @@
  *  An implementation is allowed to map this mutex to one of the other mutex types.
  */
 
-#ifdef CONFIG_MUTEX_TYPES
-#  define PTHREAD_MUTEX_NORMAL        0
-#  define PTHREAD_MUTEX_ERRORCHECK    1
-#  define PTHREAD_MUTEX_RECURSIVE     2
-#  define PTHREAD_MUTEX_DEFAULT       PTHREAD_MUTEX_NORMAL
-#endif
+#define PTHREAD_MUTEX_NORMAL          0
+#define PTHREAD_MUTEX_ERRORCHECK      1
+#define PTHREAD_MUTEX_RECURSIVE       2
+#define PTHREAD_MUTEX_DEFAULT         PTHREAD_MUTEX_NORMAL
 
 /* Valid ranges for the pthread stacksize attribute */
 
@@ -112,16 +111,19 @@
 #define PTHREAD_INHERIT_SCHED         0
 #define PTHREAD_EXPLICIT_SCHED        1
 
-#define PTHREAD_PRIO_NONE             0
-#define PTHREAD_PRIO_INHERIT          1
-#define PTHREAD_PRIO_PROTECT          2
+/* Default priority */
 
 #define PTHREAD_DEFAULT_PRIORITY      100
 
-/* Cancellation states returned by pthread_cancelstate() */
+/* Cancellation states used by pthread_setcancelstate() */
 
 #define PTHREAD_CANCEL_ENABLE         (0)
 #define PTHREAD_CANCEL_DISABLE        (1)
+
+/* Cancellation types used by pthread_setcanceltype() */
+
+#define PTHREAD_CANCEL_DEFERRED       (0)
+#define PTHREAD_CANCEL_ASYNCHRONOUS   (1)
 
 /* Thread return value when a pthread is canceled */
 
@@ -134,6 +136,12 @@
 /* This is returned by pthread_wait.  It must not match any errno in errno.h */
 
 #define PTHREAD_BARRIER_SERIAL_THREAD 0x1000
+
+/* Values for protocol mutex attribute */
+
+#define PTHREAD_PRIO_NONE             SEM_PRIO_NONE
+#define PTHREAD_PRIO_INHERIT          SEM_PRIO_INHERIT
+#define PTHREAD_PRIO_PROTECT          SEM_PRIO_PROTECT
 
 /* Definitions to map some non-standard, BSD thread management interfaces to
  * the non-standard Linux-like prctl() interface.  Since these are simple
@@ -212,6 +220,9 @@ typedef struct pthread_cond_s pthread_cond_t;
 struct pthread_mutexattr_s
 {
   uint8_t pshared;  /* PTHREAD_PROCESS_PRIVATE or PTHREAD_PROCESS_SHARED */
+#ifdef CONFIG_PRIORITY_INHERITANCE
+  uint8_t proto;    /* See PTHREAD_PRIO_* definitions */
+#endif
 #ifdef CONFIG_MUTEX_TYPES
   uint8_t type;     /* Type of the mutex.  See PTHREAD_MUTEX_* definitions */
 #endif
@@ -222,11 +233,11 @@ typedef struct pthread_mutexattr_s pthread_mutexattr_t;
 
 struct pthread_mutex_s
 {
-  int   pid;      /* ID of the holder of the mutex */
-  sem_t sem;      /* Semaphore underlying the implementation of the mutex */
+  int pid;          /* ID of the holder of the mutex */
+  sem_t sem;        /* Semaphore underlying the implementation of the mutex */
 #ifdef CONFIG_MUTEX_TYPES
-  uint8_t type;   /* Type of the mutex.  See PTHREAD_MUTEX_* definitions */
-  int   nlocks;   /* The number of recursive locks held */
+  uint8_t type;     /* Type of the mutex.  See PTHREAD_MUTEX_* definitions */
+  int nlocks;       /* The number of recursive locks held */
 #endif
 };
 
@@ -258,6 +269,12 @@ typedef struct pthread_barrier_s pthread_barrier_t;
 
 typedef bool pthread_once_t;
 #define __PTHREAD_ONCE_T_DEFINED 1
+
+#ifdef CONFIG_PTHREAD_CLEANUP
+/* This type describes the pthread cleanup callback (non-standard) */
+
+typedef CODE void (*pthread_cleanup_t)(FAR void *arg);
+#endif
 
 /* Forward references */
 
@@ -328,7 +345,17 @@ int pthread_detach(pthread_t thread);
 void pthread_exit(pthread_addr_t value) noreturn_function;
 int  pthread_cancel(pthread_t thread);
 int  pthread_setcancelstate(int state, FAR int *oldstate);
+int  pthread_setcanceltype(int type, FAR int *oldtype);
 void pthread_testcancel(void);
+
+/* A thread may set up cleanup functions to execut when the thread exits or
+ * is canceled.
+ */
+
+#ifdef CONFIG_PTHREAD_CLEANUP
+void pthread_cleanup_pop(int execute);
+void pthread_cleanup_push(pthread_cleanup_t routine, FAR void *arg);
+#endif
 
 /* A thread can await termination of another thread and retrieve the return
  * value of the thread.
@@ -381,10 +408,12 @@ int pthread_mutexattr_getpshared(FAR const pthread_mutexattr_t *attr,
                                  FAR int *pshared);
 int pthread_mutexattr_setpshared(FAR pthread_mutexattr_t *attr,
                                  int pshared);
-#ifdef CONFIG_MUTEX_TYPES
 int pthread_mutexattr_gettype(const pthread_mutexattr_t *attr, int *type);
 int pthread_mutexattr_settype(pthread_mutexattr_t *attr, int type);
-#endif
+int pthread_mutexattr_getprotocol(FAR const pthread_mutexattr_t *attr,
+                                  FAR int *protocol);
+int pthread_mutexattr_setprotocol(FAR pthread_mutexattr_t *attr,
+                                  int protocol);
 
 /* The following routines create, delete, lock and unlock mutexes. */
 

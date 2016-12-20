@@ -245,18 +245,6 @@ int stm32_dma_alloc_init(void);
 #endif
 
 /****************************************************************************
- * Name: stm32_adc_initialize
- *
- * Description:
- *   Called at application startup time to initialize the ADC functionality.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ADC
-int board_adc_initialize(void);
-#endif
-
-/****************************************************************************
  * Name: stm32_sdio_initialize
  *
  * Description:
@@ -279,6 +267,18 @@ int stm32_sdio_initialize(void);
 
 #ifdef CONFIG_STM32F7_OTGFS
 void stm32_usbinitialize(void);
+#endif
+
+/************************************************************************************
+ * Name: stm32_adc_setup
+ *
+ * Description:
+ *   Initialize ADC and register the ADC driver.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_ADC
+int stm32_adc_setup(void);
 #endif
 
 /************************************************************************************

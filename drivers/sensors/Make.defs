@@ -138,6 +138,12 @@ ifeq ($(CONFIG_QENCODER),y)
   CSRCS += qencoder.c
 endif
 
+# Vishay VEML6070
+
+ifeq ($(CONFIG_VEML6070),y)
+  CSRCS += veml6070.c
+endif
+
 # Sensixs XEN1210
 
 ifeq ($(CONFIG_XEN1210),y)

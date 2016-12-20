@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/tcp/tcp_accept.c
  *
- *   Copyright (C) 2007-2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2012, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,6 +49,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
 
 #include "socket/socket.h"
@@ -279,7 +280,13 @@ int psock_tcp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
       state.acpt_addrlen    = addrlen;
       state.acpt_newconn    = NULL;
       state.acpt_result     = OK;
+
+      /* This semaphore is used for signaling and, hence, should not have
+       * priority inheritance enabled.
+       */
+
       sem_init(&state.acpt_sem, 0, 0);
+      sem_setprotocol(&state.acpt_sem, SEM_PRIO_NONE);
 
       /* Set up the callback in the connection */
 

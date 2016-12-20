@@ -70,7 +70,7 @@
  * Name: up_testset
  *
  * Description:
- *   Perform and atomic test and set operation on the provided spinlock.
+ *   Perform an atomic test and set operation on the provided spinlock.
  *
  *   This function must be provided via the architecture-specific logoic.
  *

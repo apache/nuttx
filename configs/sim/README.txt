@@ -243,9 +243,6 @@ SMP
 
   You can enable SMP for ostest configuration by enabling:
 
-    -# CONFIG_EXPERIMENTAL is not set
-    +CONFIG_EXPERIMENTAL=y
-
     +CONFIG_SPINLOCK=y
     +CONFIG_SMP=y
     +CONFIG_SMP_NCPUS=2

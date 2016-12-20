@@ -44,6 +44,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
 #include <nuttx/spinlock.h>
+#include <nuttx/sched_note.h>
 
 #include "up_internal.h"
 #include "gic.h"
@@ -55,12 +56,131 @@
  * Private Data
  ****************************************************************************/
 
-static spinlock_t g_cpu_wait[CONFIG_SMP_NCPUS];
-static spinlock_t g_cpu_paused[CONFIG_SMP_NCPUS];
+/* These spinlocks are used in the SMP configuration in order to implement
+ * up_cpu_pause().  The protocol for CPUn to pause CPUm is as follows
+ *
+ * 1. The up_cpu_pause() implementation on CPUn locks both g_cpu_wait[m]
+ *    and g_cpu_paused[m].  CPUn then waits spinning on g_cpu_paused[m].
+ * 2. CPUm receives the interrupt it (1) unlocks g_cpu_paused[m] and
+ *    (2) locks g_cpu_wait[m].  The first unblocks CPUn and the second
+ *    blocks CPUm in the interrupt handler.
+ *
+ * When CPUm resumes, CPUn unlocks g_cpu_wait[m] and the interrupt handler
+ * on CPUm continues.  CPUm must, of course, also then unlock g_cpu_wait[m]
+ * so that it will be ready for the next pause operation.
+ */
+
+static volatile spinlock_t g_cpu_wait[CONFIG_SMP_NCPUS] SP_SECTION;
+static volatile spinlock_t g_cpu_paused[CONFIG_SMP_NCPUS] SP_SECTION;
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: up_cpu_pausereq
+ *
+ * Description:
+ *   Return true if a pause request is pending for this CPU.
+ *
+ * Input Parameters:
+ *   cpu - The index of the CPU to be queried
+ *
+ * Returned Value:
+ *   true   = a pause request is pending.
+ *   false = no pasue request is pending.
+ *
+ ****************************************************************************/
+
+bool up_cpu_pausereq(int cpu)
+{
+  return spin_islocked(&g_cpu_paused[cpu]);
+}
+
+/****************************************************************************
+ * Name: up_cpu_paused
+ *
+ * Description:
+ *   Handle a pause request from another CPU.  Normally, this logic is
+ *   executed from interrupt handling logic within the architecture-specific
+ *   However, it is sometimes necessary necessary to perform the pending
+ *   pause operation in other contexts where the interrupt cannot be taken
+ *   in order to avoid deadlocks.
+ *
+ *   This function performs the following operations:
+ *
+ *   1. It saves the current task state at the head of the current assigned
+ *      task list.
+ *   2. It waits on a spinlock, then
+ *   3. Returns from interrupt, restoring the state of the new task at the
+ *      head of the ready to run list.
+ *
+ * Input Parameters:
+ *   cpu - The index of the CPU to be paused
+ *
+ * Returned Value:
+ *   On success, OK is returned.  Otherwise, a negated errno value indicating
+ *   the nature of the failure is returned.
+ *
+ ****************************************************************************/
+
+int up_cpu_paused(int cpu)
+{
+  FAR struct tcb_s *tcb = this_task();
+
+  /* Update scheduler parameters */
+
+  sched_suspend_scheduler(tcb);
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION
+  /* Notify that we are paused */
+
+  sched_note_cpu_paused(tcb);
+#endif
+
+  /* Save the current context at CURRENT_REGS into the TCB at the head
+   * of the assigned task list for this CPU.
+   */
+
+  up_savestate(tcb->xcp.regs);
+
+  /* Release the g_cpu_puased spinlock to synchronize with the
+   * requesting CPU.
+   */
+
+  spin_unlock(&g_cpu_paused[cpu]);
+
+  /* Wait for the spinlock to be released.  The requesting CPU will release
+   * the spinlcok when the CPU is resumed.
+   */
+
+  spin_lock(&g_cpu_wait[cpu]);
+
+  /* This CPU has been resumed. Restore the exception context of the TCB at
+   * the (new) head of the assigned task list.
+   */
+
+  tcb = this_task();
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION
+  /* Notify that we have resumed */
+
+  sched_note_cpu_resumed(tcb);
+#endif
+
+  /* Reset scheduler parameters */
+
+  sched_resume_scheduler(tcb);
+
+  /* Then switch contexts.  Any necessary address environment changes
+   * will be made when the interrupt returns.
+   */
+
+  up_restorestate(tcb->xcp.regs);
+  spin_unlock(&g_cpu_wait[cpu]);
+
+  return OK;
+}
 
 /****************************************************************************
  * Name: arm_pause_handler
@@ -84,40 +204,19 @@ static spinlock_t g_cpu_paused[CONFIG_SMP_NCPUS];
 
 int arm_pause_handler(int irq, FAR void *context)
 {
-  FAR struct tcb_s *tcb = this_task();
-  int cpu = up_cpu_index();
+  int cpu = this_cpu();
 
-  /* Update scheduler parameters */
-
-  sched_suspend_scheduler(tcb);
-
-  /* Save the current context at CURRENT_REGS into the TCB at the head of the
-   * assigned task list for this CPU.
+  /* Check for false alarms.  Such false could occur as a consequence of
+   * some deadlock breaking logic that might have already serviced the SG2
+   * interrupt by calling up_cpu_paused().  If the pause event has already
+   * been processed then g_cpu_paused[cpu] will not be locked.
    */
 
-  up_savestate(tcb->xcp.regs);
+  if (spin_islocked(&g_cpu_paused[cpu]))
+    {
+      return up_cpu_paused(cpu);
+    }
 
-  /* Wait for the spinlock to be released */
-
-  spin_unlock(&g_cpu_paused[cpu]);
-  spin_lock(&g_cpu_wait[cpu]);
-
-  /* Restore the exception context of the tcb at the (new) head of the
-   * assigned task list.
-   */
-
-  tcb = this_task();
-
-  /* Reset scheduler parameters */
-
-  sched_resume_scheduler(tcb);
-
-  /* Then switch contexts.  Any necessary address environment changes will
-   * be made when the interrupt returns.
-   */
-
-  up_restorestate(tcb->xcp.regs);
-  spin_unlock(&g_cpu_wait[cpu]);
   return OK;
 }
 
@@ -134,7 +233,7 @@ int arm_pause_handler(int irq, FAR void *context)
  *   CPU.
  *
  * Input Parameters:
- *   cpu - The index of the CPU to be stopped/
+ *   cpu - The index of the CPU to be stopped
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
@@ -144,6 +243,12 @@ int arm_pause_handler(int irq, FAR void *context)
 int up_cpu_pause(int cpu)
 {
   int ret;
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION
+  /* Notify of the pause event */
+
+  sched_note_cpu_pause(this_task(), cpu);
+#endif
 
   DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS && cpu != this_cpu());
 
@@ -208,6 +313,12 @@ int up_cpu_pause(int cpu)
 
 int up_cpu_resume(int cpu)
 {
+#ifdef CONFIG_SCHED_INSTRUMENTATION
+  /* Notify of the resume event */
+
+  sched_note_cpu_resume(this_task(), cpu);
+#endif
+
   DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS && cpu != this_cpu());
 
   /* Release the spinlock.  Releasing the spinlock will cause the SGI2

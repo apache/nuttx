@@ -2,7 +2,7 @@
  * include/nuttx/pthread.h
  * Non-standard, NuttX-specific pthread-related declarations.
  *
- *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <pthread.h>
 #include <sched.h>
 

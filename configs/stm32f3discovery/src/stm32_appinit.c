@@ -115,9 +115,9 @@
 
 int board_app_initialize(uintptr_t arg)
 {
-#ifdef HAVE_USBMONITOR
-  int ret;
+  int ret = OK;
 
+#ifdef HAVE_USBMONITOR
   /* Start the USB Monitor */
 
   ret = usbmonitor_start();
@@ -127,5 +127,28 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
-  return OK;
+#ifdef CONFIG_PWM
+  /* Initialize PWM and register the PWM device. */
+
+  ret = stm32_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_pwm_setup() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_QENCODER
+  /* Initialize and register the qencoder driver */
+
+  ret = stm32_qencoder_initialize("/dev/qe0", CONFIG_STM32F3DISCO_QETIMER);
+  if (ret != OK)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to register the qencoder: %d\n",
+             ret);
+      return ret;
+    }
+#endif
+
+  return ret;
 }

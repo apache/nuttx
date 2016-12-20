@@ -165,6 +165,19 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 #ifdef CONFIG_BUILD_PROTECTED
               CURRENT_REGS[REG_LR]     = EXC_RETURN_PRIVTHR;
 #endif
+
+#ifdef CONFIG_SMP
+              /* In an SMP configuration, the interrupt disable logic also
+               * involves spinlocks that are configured per the TCB irqcount
+               * field.  This is logically equivalent to enter_critical_section().
+               * The matching call to leave_critical_section() will be
+               * performed in up_sigdeliver().
+               */
+
+              DEBUGASSERT(tcb->irqcount < INT16_MAX);
+              tcb->irqcount++;
+#endif
+
               /* And make sure that the saved context in the TCB is the same
                * as the interrupt return context.
                */
@@ -210,6 +223,19 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
           tcb->xcp.regs[REG_XPSR]    = ARMV7M_XPSR_T;
 #ifdef CONFIG_BUILD_PROTECTED
           tcb->xcp.regs[REG_LR]      = EXC_RETURN_PRIVTHR;
+#endif
+
+#ifdef CONFIG_SMP
+          /* In an SMP configuration, the interrupt disable logic also
+           * involves spinlocks that are configured per the TCB irqcount
+           * field.  This is logically equivalent to enter_critical_section();
+           * The matching leave_critical_section will be performed in
+           * The matching call to leave_critical_section() will be performed
+           * in up_sigdeliver().
+           */
+
+          DEBUGASSERT(tcb->irqcount < INT16_MAX);
+          tcb->irqcount++;
 #endif
         }
     }

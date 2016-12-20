@@ -52,7 +52,9 @@
 #include <debug.h>
 
 #include <arch/irq.h>
+
 #include <nuttx/clock.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/arp.h>
@@ -718,7 +720,6 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
 {
   FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)psock->s_conn;
   struct send_s state;
-  net_lock_t save;
   int errcode;
   int ret = OK;
 
@@ -790,9 +791,16 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
    * are ready.
    */
 
-  save                = net_lock();
+  net_lock();
   memset(&state, 0, sizeof(struct send_s));
+
+  /* This semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
   (void)sem_init(&state.snd_sem, 0, 0);    /* Doesn't really fail */
+  (void)sem_setprotocol(&state.snd_sem, SEM_PRIO_NONE);
+
   state.snd_sock      = psock;             /* Socket descriptor to use */
   state.snd_buflen    = len;               /* Number of bytes to send */
   state.snd_buffer    = buf;               /* Buffer to send from */
@@ -845,7 +853,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
     }
 
   sem_destroy(&state.snd_sem);
-  net_unlock(save);
+  net_unlock();
 
   /* Set the socket state to idle */
 

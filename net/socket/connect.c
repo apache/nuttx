@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/socket/connect.c
  *
- *   Copyright (C) 2007-2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2012, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,6 +49,9 @@
 #include <debug.h>
 
 #include <arch/irq.h>
+
+#include <nuttx/semaphore.h>
+#include <nuttx/cancelpt.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/udp.h>
@@ -107,7 +110,13 @@ static inline int psock_setup_callbacks(FAR struct socket *psock,
 
   /* Initialize the TCP state structure */
 
+  /* This semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
   (void)sem_init(&pstate->tc_sem, 0, 0); /* Doesn't really fail */
+  (void)sem_setprotocol(&pstate->tc_sem, SEM_PRIO_NONE);
+
   pstate->tc_conn   = conn;
   pstate->tc_psock  = psock;
   pstate->tc_result = -EAGAIN;
@@ -338,7 +347,6 @@ static inline int psock_tcp_connect(FAR struct socket *psock,
                                     FAR const struct sockaddr *addr)
 {
   struct tcp_connect_s state;
-  net_lock_t           flags;
   int                  ret = OK;
 
   /* Interrupts must be disabled through all of the following because
@@ -346,7 +354,7 @@ static inline int psock_tcp_connect(FAR struct socket *psock,
    * setup.
    */
 
-  flags = net_lock();
+  net_lock();
 
   /* Get the connection reference from the socket */
 
@@ -423,7 +431,7 @@ static inline int psock_tcp_connect(FAR struct socket *psock,
         }
     }
 
-  net_unlock(flags);
+  net_unlock();
   return ret;
 }
 #endif /* CONFIG_NET_TCP */
@@ -508,6 +516,10 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
   int ret;
 #endif
   int errcode;
+
+  /* Treat as a cancellation point */
+
+  (void)enter_cancellation_point();
 
   /* Verify that the psock corresponds to valid, allocated socket */
 
@@ -656,10 +668,12 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
         goto errout;
     }
 
+  leave_cancellation_point();
   return OK;
 
 errout:
   set_errno(errcode);
+  leave_cancellation_point();
   return ERROR;
 }
 
@@ -734,13 +748,21 @@ errout:
 
 int connect(int sockfd, FAR const struct sockaddr *addr, socklen_t addrlen)
 {
+  int ret;
+
+  /* accept() is a cancellation point */
+
+  (void)enter_cancellation_point();
+
   /* Get the underlying socket structure */
 
   FAR struct socket *psock = sockfd_socket(sockfd);
 
   /* Then let psock_connect() do all of the work */
 
-  return psock_connect(psock, addr, addrlen);
+  ret = psock_connect(psock, addr, addrlen);
+  leave_cancellation_point();
+  return ret;
 }
 
 #endif /* CONFIG_NET */

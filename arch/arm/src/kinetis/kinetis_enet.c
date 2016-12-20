@@ -53,13 +53,10 @@
 #include <nuttx/wdog.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/wqueue.h>
 #include <nuttx/net/mii.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
-
-#ifdef CONFIG_NET_NOINTS
-#  include <nuttx/wqueue.h>
-#endif
 
 #ifdef CONFIG_NET_PKT
 #  include <nuttx/net/pkt.h>
@@ -80,12 +77,23 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* If processing is not done at the interrupt level, then high priority
- * work queue support is required.
+/* If processing is not done at the interrupt level, then work queue support
+ * is required.
  */
 
-#if defined(CONFIG_NET_NOINTS) && !defined(CONFIG_SCHED_HPWORK)
-#  error High priority work queue support is required
+#if !defined(CONFIG_SCHED_WORKQUEUE)
+#  error Work queue support is required
+#else
+
+  /* Select work queue */
+
+#  if defined(CONFIG_KINETIS_EMAC_HPWORK)
+#    define ETHWORK HPWORK
+#  elif defined(CONFIG_KINETIS_EMAC_LPWORK)
+#    define ETHWORK LPWORK
+#  else
+#    error Neither CONFIG_KINETIS_EMAC_HPWORK nor CONFIG_KINETIS_EMAC_LPWORK defined
+#  endif
 #endif
 
 /* CONFIG_KINETIS_ENETNETHIFS determines the number of physical interfaces
@@ -106,10 +114,6 @@
 
 #define NENET_NBUFFERS \
   (CONFIG_KINETIS_ENETNTXBUFFERS+CONFIG_KINETIS_ENETNRXBUFFERS)
-
-#ifndef CONFIG_NET_MULTIBUFFER
-#  error "CONFIG_NET_MULTIBUFFER is required in the configuration"
-#endif
 
 /* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per
  * second.
@@ -211,9 +215,7 @@ struct kinetis_driver_s
   uint8_t phyaddr;             /* Selected PHY address */
   WDOG_ID txpoll;              /* TX poll timer */
   WDOG_ID txtimeout;           /* TX timeout timer */
-#ifdef CONFIG_NET_NOINTS
   struct work_s work;          /* For deferring work to the work queue */
-#endif
   struct enet_desc_s *txdesc;  /* A pointer to the list of TX descriptor */
   struct enet_desc_s *rxdesc;  /* A pointer to the list of RX descriptors */
 
@@ -271,24 +273,15 @@ static int  kinetis_txpoll(struct net_driver_s *dev);
 static void kinetis_receive(FAR struct kinetis_driver_s *priv);
 static void kinetis_txdone(FAR struct kinetis_driver_s *priv);
 
-static inline void kinetis_interrupt_process(FAR struct kinetis_driver_s *priv);
-#ifdef CONFIG_NET_NOINTS
 static void kinetis_interrupt_work(FAR void *arg);
-#endif
 static int  kinetis_interrupt(int irq, FAR void *context);
 
 /* Watchdog timer expirations */
 
-static inline void kinetis_txtimeout_process(FAR struct kinetis_driver_s *priv);
-#ifdef CONFIG_NET_NOINTS
 static void kinetis_txtimeout_work(FAR void *arg);
-#endif
 static void kinetis_txtimeout_expiry(int argc, uint32_t arg, ...);
 
-static inline void kinetis_poll_process(FAR struct kinetis_driver_s *priv);
-#ifdef CONFIG_NET_NOINTS
 static void kinetis_poll_work(FAR void *arg);
-#endif
 static void kinetis_polltimer_expiry(int argc, uint32_t arg, ...);
 
 /* NuttX callback functions */
@@ -296,10 +289,7 @@ static void kinetis_polltimer_expiry(int argc, uint32_t arg, ...);
 static int kinetis_ifup(struct net_driver_s *dev);
 static int kinetis_ifdown(struct net_driver_s *dev);
 
-static inline void kinetis_txavail_process(FAR struct kinetis_driver_s *priv);
-#ifdef CONFIG_NET_NOINTS
 static void kinetis_txavail_work(FAR void *arg);
-#endif
 static int kinetis_txavail(struct net_driver_s *dev);
 
 #ifdef CONFIG_NET_IGMP
@@ -816,26 +806,30 @@ static void kinetis_txdone(FAR struct kinetis_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: kinetis_interrupt_process
+ * Function: kinetis_interrupt_work
  *
  * Description:
- *   Interrupt processing.  This may be performed either within the interrupt
- *   handler or on the worker thread, depending upon the configuration
+ *   Perform interrupt related work from the worker thread
  *
  * Parameters:
- *   priv - Reference to the driver state structure
+ *   arg - The argument passed when work_queue() was called.
  *
  * Returned Value:
- *   None
+ *   OK on success
  *
  * Assumptions:
  *   The network is locked.
  *
  ****************************************************************************/
 
-static inline void kinetis_interrupt_process(FAR struct kinetis_driver_s *priv)
+static void kinetis_interrupt_work(FAR void *arg)
 {
+  FAR struct kinetis_driver_s *priv = (FAR struct kinetis_driver_s *)arg;
   uint32_t pending;
+
+  /* Process pending Ethernet interrupts */
+
+  net_lock();
 
   /* Get the set of unmasked, pending interrupt. */
 
@@ -884,36 +878,8 @@ static inline void kinetis_interrupt_process(FAR struct kinetis_driver_s *priv)
 
       putreg32(ENET_RDAR, KINETIS_ENET_RDAR);
     }
-}
 
-/****************************************************************************
- * Function: kinetis_interrupt_work
- *
- * Description:
- *   Perform interrupt related work from the worker thread
- *
- * Parameters:
- *   arg - The argument passed when work_queue() was called.
- *
- * Returned Value:
- *   OK on success
- *
- * Assumptions:
- *   The network is locked.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_NOINTS
-static void kinetis_interrupt_work(FAR void *arg)
-{
-  FAR struct kinetis_driver_s *priv = (FAR struct kinetis_driver_s *)arg;
-  net_lock_t state;
-
-  /* Process pending Ethernet interrupts */
-
-  state = net_lock();
-  kinetis_interrupt_process(priv);
-  net_unlock(state);
+  net_unlock();
 
   /* Re-enable Ethernet interrupts */
 
@@ -924,7 +890,6 @@ static void kinetis_interrupt_work(FAR void *arg)
   up_enable_irq(KINETIS_IRQ_EMACRX);
   up_enable_irq(KINETIS_IRQ_EMACMISC);
 }
-#endif
 
 /****************************************************************************
  * Function: kinetis_interrupt
@@ -950,7 +915,6 @@ static int kinetis_interrupt(int irq, FAR void *context)
 {
   register FAR struct kinetis_driver_s *priv = &g_enet[0];
 
-#ifdef CONFIG_NET_NOINTS
   /* Disable further Ethernet interrupts.  Because Ethernet interrupts are
    * also disabled if the TX timeout event occurs, there can be no race
    * condition here.
@@ -974,54 +938,12 @@ static int kinetis_interrupt(int irq, FAR void *context)
 
   /* Cancel any pending poll work */
 
-  work_cancel(HPWORK, &priv->work);
+  work_cancel(ETHWORK, &priv->work);
 
   /* Schedule to perform the interrupt processing on the worker thread. */
 
-  work_queue(HPWORK, &priv->work, kinetis_interrupt_work, priv, 0);
-
-#else
-  /* Process the interrupt now */
-
-  kinetis_interrupt_process(priv);
-#endif
-
+  work_queue(ETHWORK, &priv->work, kinetis_interrupt_work, priv, 0);
   return OK;
-}
-
-/****************************************************************************
- * Function: kinetis_txtimeout_process
- *
- * Description:
- *   Process a TX timeout.  Called from the either the watchdog timer
- *   expiration logic or from the worker thread, depending upon the
- *   configuration.  The timeout means that the last TX never completed.
- *   Reset the hardware and start again.
- *
- * Parameters:
- *   priv - Reference to the driver state structure
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static inline void kinetis_txtimeout_process(FAR struct kinetis_driver_s *priv)
-{
-  /* Increment statistics and dump debug info */
-
-  NETDEV_TXTIMEOUTS(&priv->dev);
-
-  /* Take the interface down and bring it back up.  The is the most agressive
-   * hardware reset.
-   */
-
-  (void)kinetis_ifdown(&priv->dev);
-  (void)kinetis_ifup(&priv->dev);
-
-  /* Then poll the network for new XMIT data */
-
-  (void)devif_poll(&priv->dev, kinetis_txpoll);
 }
 
 /****************************************************************************
@@ -1041,19 +963,27 @@ static inline void kinetis_txtimeout_process(FAR struct kinetis_driver_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_NOINTS
 static void kinetis_txtimeout_work(FAR void *arg)
 {
   FAR struct kinetis_driver_s *priv = (FAR struct kinetis_driver_s *)arg;
-  net_lock_t state;
 
-  /* Process pending Ethernet interrupts */
+  /* Increment statistics and dump debug info */
 
-  state = net_lock();
-  kinetis_txtimeout_process(priv);
-  net_unlock(state);
+  net_lock();
+  NETDEV_TXTIMEOUTS(&priv->dev);
+
+  /* Take the interface down and bring it back up.  The is the most agressive
+   * hardware reset.
+   */
+
+  (void)kinetis_ifdown(&priv->dev);
+  (void)kinetis_ifup(&priv->dev);
+
+  /* Then poll the network for new XMIT data */
+
+  (void)devif_poll(&priv->dev, kinetis_txpoll);
+  net_unlock();
 }
-#endif
 
 /****************************************************************************
  * Function: kinetis_txtimeout_expiry
@@ -1078,7 +1008,6 @@ static void kinetis_txtimeout_expiry(int argc, uint32_t arg, ...)
 {
   FAR struct kinetis_driver_s *priv = (FAR struct kinetis_driver_s *)arg;
 
-#ifdef CONFIG_NET_NOINTS
   /* Disable further Ethernet interrupts.  This will prevent some race
    * conditions with interrupt work.  There is still a potential race
    * condition with interrupt work that is already queued and in progress.
@@ -1093,55 +1022,11 @@ static void kinetis_txtimeout_expiry(int argc, uint32_t arg, ...)
    * on work that has already been started.
    */
 
-  work_cancel(HPWORK, &priv->work);
+  work_cancel(ETHWORK, &priv->work);
 
   /* Schedule to perform the TX timeout processing on the worker thread. */
 
-  work_queue(HPWORK, &priv->work, kinetis_txtimeout_work, priv, 0);
-#else
-  /* Process the timeout now */
-
-  kinetis_txtimeout_process(priv);
-#endif
-}
-
-/****************************************************************************
- * Function: kinetis_poll_process
- *
- * Description:
- *   Perform the periodic poll.  This may be called either from watchdog
- *   timer logic or from the worker thread, depending upon the configuration.
- *
- * Parameters:
- *   priv - Reference to the driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-static inline void kinetis_poll_process(FAR struct kinetis_driver_s *priv)
-{
-  /* Check if there is there is a transmission in progress.  We cannot perform
-   * the TX poll if he are unable to accept another packet for transmission.
-   */
-
-  if (!kinetics_txringfull(priv))
-    {
-      /* If so, update TCP timing states and poll the network for new XMIT data. Hmmm..
-       * might be bug here.  Does this mean if there is a transmit in progress,
-       * we will missing TCP time state updates?
-       */
-
-      (void)devif_timer(&priv->dev, kinetis_txpoll);
-    }
-
-  /* Setup the watchdog poll timer again in any case */
-
-  (void)wd_start(priv->txpoll, KINETIS_WDDELAY, kinetis_polltimer_expiry,
-                 1, (wdparm_t)priv);
+  work_queue(ETHWORK, &priv->work, kinetis_txtimeout_work, priv, 0);
 }
 
 /****************************************************************************
@@ -1161,19 +1046,31 @@ static inline void kinetis_poll_process(FAR struct kinetis_driver_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_NOINTS
 static void kinetis_poll_work(FAR void *arg)
 {
   FAR struct kinetis_driver_s *priv = (FAR struct kinetis_driver_s *)arg;
-  net_lock_t state;
 
-  /* Perform the poll */
+  /* Check if there is there is a transmission in progress.  We cannot perform
+   * the TX poll if he are unable to accept another packet for transmission.
+   */
 
-  state = net_lock();
-  kinetis_poll_process(priv);
-  net_unlock(state);
+  net_lock();
+  if (!kinetics_txringfull(priv))
+    {
+      /* If so, update TCP timing states and poll the network for new XMIT data. Hmmm..
+       * might be bug here.  Does this mean if there is a transmit in progress,
+       * we will missing TCP time state updates?
+       */
+
+      (void)devif_timer(&priv->dev, kinetis_txpoll);
+    }
+
+  /* Setup the watchdog poll timer again in any case */
+
+  (void)wd_start(priv->txpoll, KINETIS_WDDELAY, kinetis_polltimer_expiry,
+                 1, (wdparm_t)priv);
+  net_unlock();
 }
-#endif
 
 /****************************************************************************
  * Function: kinetis_polltimer_expiry
@@ -1197,7 +1094,6 @@ static void kinetis_polltimer_expiry(int argc, uint32_t arg, ...)
 {
   FAR struct kinetis_driver_s *priv = (FAR struct kinetis_driver_s *)arg;
 
-#ifdef CONFIG_NET_NOINTS
   /* Is our single work structure available?  It may not be if there are
    * pending interrupt actions.
    */
@@ -1206,7 +1102,7 @@ static void kinetis_polltimer_expiry(int argc, uint32_t arg, ...)
     {
       /* Schedule to perform the interrupt processing on the worker thread. */
 
-      work_queue(HPWORK, &priv->work, kinetis_poll_work, priv, 0);
+      work_queue(ETHWORK, &priv->work, kinetis_poll_work, priv, 0);
     }
   else
     {
@@ -1217,12 +1113,6 @@ static void kinetis_polltimer_expiry(int argc, uint32_t arg, ...)
       (void)wd_start(priv->txpoll, KINETIS_WDDELAY, kinetis_polltimer_expiry,
                      1, (wdparm_t)arg);
     }
-
-#else
-  /* Process the interrupt now */
-
-  kinetis_poll_process(priv);
-#endif
 }
 
 /****************************************************************************
@@ -1409,49 +1299,6 @@ static int kinetis_ifdown(struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: kinetis_txavail_process
- *
- * Description:
- *   Perform an out-of-cycle poll.
- *
- * Parameters:
- *   dev - Reference to the NuttX driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Called in normal user mode
- *
- ****************************************************************************/
-
-static inline void kinetis_txavail_process(FAR struct kinetis_driver_s *priv)
-{
-  net_lock_t state;
-
-  /* Ignore the notification if the interface is not yet up */
-
-  state = net_lock();
-  if (priv->bifup)
-    {
-      /* Check if there is room in the hardware to hold another outgoing
-       * packet.
-       */
-
-      if (!kinetics_txringfull(priv))
-        {
-          /* No, there is space for another transfer.  Poll the network for new
-           * XMIT data.
-           */
-
-          (void)devif_poll(&priv->dev, kinetis_txpoll);
-        }
-    }
-
-  net_unlock(state);
-}
-
-/****************************************************************************
  * Function: kinetis_txavail_work
  *
  * Description:
@@ -1468,16 +1315,31 @@ static inline void kinetis_txavail_process(FAR struct kinetis_driver_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_NOINTS
 static void kinetis_txavail_work(FAR void *arg)
 {
   FAR struct kinetis_driver_s *priv = (FAR struct kinetis_driver_s *)arg;
 
-  /* Perform the poll */
+  /* Ignore the notification if the interface is not yet up */
 
-  kinetis_txavail_process(priv);
+  net_lock();
+  if (priv->bifup)
+    {
+      /* Check if there is room in the hardware to hold another outgoing
+       * packet.
+       */
+
+      if (!kinetics_txringfull(priv))
+        {
+          /* No, there is space for another transfer.  Poll the network for new
+           * XMIT data.
+           */
+
+          (void)devif_poll(&priv->dev, kinetis_txpoll);
+        }
+    }
+
+  net_unlock();
 }
-#endif
 
 /****************************************************************************
  * Function: kinetis_txavail
@@ -1503,7 +1365,6 @@ static int kinetis_txavail(struct net_driver_s *dev)
   FAR struct kinetis_driver_s *priv =
     (FAR struct kinetis_driver_s *)dev->d_private;
 
-#ifdef CONFIG_NET_NOINTS
   /* Is our single work structure available?  It may not be if there are
    * pending interrupt actions and we will have to ignore the Tx
    * availability action.
@@ -1513,14 +1374,8 @@ static int kinetis_txavail(struct net_driver_s *dev)
     {
       /* Schedule to serialize the poll on the worker thread. */
 
-      work_queue(HPWORK, &priv->work, kinetis_txavail_work, priv, 0);
+      work_queue(ETHWORK, &priv->work, kinetis_txavail_work, priv, 0);
     }
-
-#else
-  /* Perform the out-of-cycle poll now */
-
-  kinetis_txavail_process(priv);
-#endif
 
   return OK;
 }

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_nand.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -58,6 +58,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/mtd/nand.h>
@@ -2944,7 +2945,12 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
   priv->cs             = cs;
 
 #ifdef CONFIG_SAMA5_NAND_DMA
+  /* The waitsem semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
   sem_init(&priv->waitsem, 0, 0);
+  sem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
 #endif
 
   /* Perform one-time, global NFC/PMECC initialization */
@@ -2956,8 +2962,14 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
 #if NAND_NBANKS > 1
       sem_init(&g_nand.exclsem, 0, 1);
 #endif
+
 #ifdef CONFIG_SAMA5_NAND_HSMCINTERRUPTS
+      /* The waitsem semaphore is used for signaling and, hence, should not
+       * have priority inheritance enabled.
+       */
+
       sem_init(&g_nand.waitsem, 0, 0);
+      sem_setprotocol(&g_nand.waitsem, SEM_PRIO_NONE);
 #endif
 
       /* Enable the NAND FLASH Controller (The NFC is always used) */

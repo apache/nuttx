@@ -1,0 +1,312 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_ESP32
+
+menu "ESP32 Peripheral Selection"
+
+config ESP32_UART
+	bool
+	default n
+
+config ESP32_BT
+	bool "Bluetooth"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		No yet implemented
+
+config ESP32_EMAC
+	bool "Ethernet MAC"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		No yet implemented
+
+config ESP32_I2C
+	bool "I2C"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		No yet implemented
+
+config ESP32_I2S0
+	bool "I2S 0"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		No yet implemented
+
+config ESP32_I2S1
+	bool "I2S 2"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		No yet implemented
+
+config ESP32_LEDC
+	bool "LED PWM (LEDC)"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		No yet implemented
+
+config ESP32_PCNT
+	bool "Pulse Count Module (PCNT)"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		No yet implemented
+
+config ESP32_RMT
+	bool "Remote Control Module (RMT)"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		No yet implemented
+
+config ESP32_SDIO_SAVE
+	bool "SDIO Slave"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		No yet implemented
+
+config ESP32_SDMMC
+	bool "SD/MMC card support"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		No yet implemented
+
+config ESP32_SPI0
+	bool "SPI 0"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		No yet implemented
+
+config ESP32_SPI1
+	bool "SPI 1"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		No yet implemented
+
+config ESP32_SPI2
+	bool "SPI 2"
+	default n
+	---help---
+		No yet implemented
+
+config XTENSA_TIMER1
+	bool "Xtensa Timer 1"
+	default n
+
+config XTENSA_TIMER2
+	bool "Xtensa Timer 2"
+	default n
+
+config ESP32_TIMER0
+	bool "64-bit Timer 0"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		No yet implemented
+
+config ESP32_TIMER1
+	bool "64-bit Timer 1"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		No yet implemented
+
+config ESP32_TIMER2
+	bool "64-bit Timer 2"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		No yet implemented
+
+config ESP32_TIMER3
+	bool "64-bit Timer 3"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		No yet implemented
+
+config ESP32_MWDT0
+	bool "Timer 0 Watchdog"
+	default n
+	depends on EXPERIMENTAL
+	select ESP32_TIMER0
+	---help---
+		No yet implemented
+
+config ESP32_MWDT1
+	bool "Timer 1 Watchdog"
+	default n
+	depends on EXPERIMENTAL
+	select ESP32_TIMER1
+	---help---
+		No yet implemented
+
+config ESP32_MWDT2
+	bool "Timer 2 Watchdog"
+	default n
+	depends on EXPERIMENTAL
+	select ESP32_TIMER2
+	---help---
+		No yet implemented
+
+config ESP32_MWDT3
+	bool "Timer 3 Watchdog"
+	default n
+	depends on EXPERIMENTAL
+	select ESP32_TIMER3
+	---help---
+		No yet implemented
+
+config ESP32_RWDT
+	bool "RTC Watchdog"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		No yet implemented
+
+config ESP32_UART0
+	bool "UART 0"
+	default n
+	select ESP32_UART
+	select UART0_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config ESP32_UART1
+	bool "UART 1"
+	default n
+	select ESP32_UART
+	select UART1_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config ESP32_UART2
+	bool "UART 2"
+	default n
+	select ESP32_UART
+	select UART2_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config ESP32_WIRELESS
+	bool "Wireless"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		No yet implemented
+
+endmenu # ESP32 Peripheral Selection
+
+menu "Memory Configuration"
+
+config ESP32_BT_RESERVE_DRAM
+	int "Reserved BT DRAM"
+	default 0
+
+config ESP32_TRACEMEM_RESERVE_DRAM
+	int "Reserved trace memory DRAM"
+	default 0
+
+config ESP32_ULP_COPROC_RESERVE_MEM
+	int "Reserved ULP co-processor DRAM"
+	default 0
+
+endmenu # Memory Configuration
+
+config ESP32_GPIO_IRQ
+	bool "GPIO pin interrupts"
+	---help---
+		Enable support for interrupting GPIO pins
+
+menu "UART configuration"
+	depends on ESP32_UART
+
+if ESP32_UART0
+
+config ESP32_UART0_TXPIN
+	int "UART0 Tx Pin"
+	default 0
+	range 0 39
+
+config ESP32_UART0_RXPIN
+	int "UART0 Rx Pin"
+	default 0
+	range 0 39
+
+if SERIAL_IFLOWCONTROL || SERIAL_OFLOWCONTROL
+config ESP32_UART0_RTSPIN
+	int "UART0 RTS Pin"
+	default 0
+	range 0 39
+
+config ESP32_UART0_CTSPIN
+	int "UART0 CTS Pin"
+	default 0
+	range 0 39
+
+endif # SERIAL_IFLOWCONTROL || SERIAL_OFLOWCONTROL
+endif # ESP32_UART0
+
+if ESP32_UART1
+
+config ESP32_UART1_TXPIN
+	int "UART1 Tx Pin"
+	default 0
+	range 0 39
+
+config ESP32_UART1_RXPIN
+	int "UART1 Rx Pin"
+	default 0
+	range 0 39
+
+if SERIAL_IFLOWCONTROL || SERIAL_OFLOWCONTROL
+config ESP32_UART1_RTSPIN
+	int "UART1 RTS Pin"
+	default 0
+	range 0 39
+
+config ESP32_UART1_CTSPIN
+	int "UART1 CTS Pin"
+	default 0
+	range 0 39
+
+endif # SERIAL_IFLOWCONTROL || SERIAL_OFLOWCONTROL
+endif # ESP32_UART1
+
+if ESP32_UART2
+
+config ESP32_UART2_TXPIN
+	int "UART2 Tx Pin"
+	default 0
+	range 0 39
+
+config ESP32_UART2_RXPIN
+	int "UART2 Rx Pin"
+	default 0
+	range 0 39
+
+if SERIAL_IFLOWCONTROL || SERIAL_OFLOWCONTROL
+config ESP32_UART2_RTSPIN
+	int "UART2 RTS Pin"
+	default 0
+	range 0 39
+
+config ESP32_UART2_CTSPIN
+	int "UART2 CTS Pin"
+	default 0
+	range 0 39
+
+endif # SERIAL_IFLOWCONTROL || SERIAL_OFLOWCONTROL
+endif # ESP32_UART2
+
+endmenu # UART configuration
+endif # ARCH_CHIP_ESP32

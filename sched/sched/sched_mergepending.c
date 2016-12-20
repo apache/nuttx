@@ -271,11 +271,11 @@ bool sched_mergepending(void)
               return ret;
             }
 
-          cpu = sched_cpu_select(ALL_CPUS /* ptcb->affinity */);
+          cpu  = sched_cpu_select(ALL_CPUS /* ptcb->affinity */);
           rtcb = current_task(cpu);
         }
 
-      /* No more pending tasks can be made running.  Move any reamaining
+      /* No more pending tasks can be made running.  Move any remaining
        * tasks in the pending task list to the ready-to-run task list.
        */
 

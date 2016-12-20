@@ -231,9 +231,10 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
-#include <nuttx/i2c/i2c_master.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/clock.h>
+#include <nuttx/i2c/i2c_master.h>
 
 #include <arch/board/board.h>
 
@@ -1089,8 +1090,14 @@ static inline void stm32_i2c_sem_post(FAR struct i2c_master_s *dev)
 static inline void stm32_i2c_sem_init(FAR struct i2c_master_s *dev)
 {
   sem_init(&((struct stm32_i2c_inst_s *)dev)->priv->sem_excl, 0, 1);
+
 #ifndef CONFIG_I2C_POLLED
+  /* This semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
   sem_init(&((struct stm32_i2c_inst_s *)dev)->priv->sem_isr, 0, 0);
+  sem_setprotocol(&((struct stm32_i2c_inst_s *)dev)->priv->sem_isr, SEM_PRIO_NONE);
 #endif
 }
 
@@ -1306,17 +1313,17 @@ static void stm32_i2c_setclock(FAR struct stm32_i2c_priv_s *priv, uint32_t frequ
         if (frequency == 100000)
           {
             presc        = 0;
-            scl_delay    = 3;
+            scl_delay    = 5;
             sda_delay    = 0;
-            scl_h_period = 30;
-            scl_l_period = 120;
+            scl_h_period = 61;
+            scl_l_period = 89;
 
           }
         else if (frequency == 400000)
            {
              presc        = 0;
              scl_delay    = 3;
-             sda_delay    = 9;
+             sda_delay    = 0;
              scl_h_period = 6;
              scl_l_period = 24;
            }
@@ -2245,7 +2252,10 @@ static int stm32_i2c_init(FAR struct stm32_i2c_priv_s *priv)
    * - Provide means to set peripheral clock source via RCC_CFGR3_I2CxSW
    * - Set to HSI by default, make Kconfig option
    */
+   
+  /* Force a frequency update */
 
+  priv->frequency = 0;
   stm32_i2c_setclock(priv, 100000);
 
   /* Enable I2C peripheral */

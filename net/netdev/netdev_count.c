@@ -72,12 +72,11 @@
 int netdev_count(void)
 {
   struct net_driver_s *dev;
-  net_lock_t save;
   int ndev;
 
-  save = net_lock();
+  net_lock();
   for (dev = g_netdevices, ndev = 0; dev; dev = dev->flink, ndev++);
-  net_unlock(save);
+  net_unlock();
   return ndev;
 }
 

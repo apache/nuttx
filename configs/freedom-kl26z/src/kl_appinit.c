@@ -40,14 +40,13 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <syslog.h>
 
 #include <nuttx/board.h>
 
-#ifdef CONFIG_LIB_BOARDCTL
+#include "freedom-kl26z.h"
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#ifdef CONFIG_LIB_BOARDCTL
 
 /****************************************************************************
  * Public Functions
@@ -78,6 +77,19 @@
 
 int board_app_initialize(uintptr_t arg)
 {
+  int ret;
+
+#ifdef CONFIG_PWM
+  /* Initialize PWM and register the PWM device. */
+
+  ret = kl_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: kl_pwm_setup() failed: %d\n", ret);
+    }
+#endif
+
+  UNUSED(ret);
   return OK;
 }
 

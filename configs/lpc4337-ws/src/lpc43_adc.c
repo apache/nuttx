@@ -63,15 +63,14 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: board_adc_setup
+ * Name: lpc43_adc_setup
  *
  * Description:
- *   All LPC43 architectures must provide the following interface to work with
- *   examples/adc.
+ *   Initialize ADC and register the ADC driver.
  *
  ************************************************************************************/
 
-int board_adc_setup(void)
+int lpc43_adc_setup(void)
 {
   static bool initialized = false;
   struct adc_dev_s *adc;

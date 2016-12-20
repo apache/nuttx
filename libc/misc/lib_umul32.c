@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/fixedmath/lib_umul32.c
+ * libc/misc/lib_umul32.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

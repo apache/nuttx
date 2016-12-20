@@ -64,6 +64,10 @@ g_fiqtmp:
 	.word	0		/* Saved lr */
 	.word	0		/* Saved spsr */
 #endif
+#if CONFIG_ARCH_INTERRUPTSTACK > 3 && defined(CONFIG_ARMV7A_HAVE_GICv2)
+g_nestlevel:
+	.word	0		/* Interrupt nesting level */
+#endif
 
 /************************************************************************************
  * Private Functions
@@ -172,13 +176,53 @@ arm_vectorirq:
 	mov		r0, sp					/* Get r0=xcp */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
+#ifdef CONFIG_ARMV7A_HAVE_GICv2
+	/* We will switch to the interrupt stack, UNLESS we are processing a
+	 * nested interrupt in which case we are already using the interrupt
+	 * stack.  SGI interrupts may be nested because they are non-maskable.
+	 */
+
+	ldr		r5, .Lirqnestlevel		/* r1=Points to interrupt nesting level */
+	ldr		r1, [r5]				/* Get r1= nesting level */
+	add		r1, r1, #1				/* Increment nesting level */
+	str		r1, [r5]				/* Save r1= nesting level */
+
+	cmp		r1, #1					/* r1>1 if nested */
+	bgt		.Lintnested				/* Use current SP if nested */
+#endif
+
+	/* Call arm_decodeirq() on the interrupt stack */
+
 	ldr		sp, .Lirqstackbase		/* SP = interrupt stack base */
 	str		r0, [sp]				/* Save the user stack pointer */
 	mov		r4, sp					/* Save the SP in a preserved register */
 	bic		sp, sp, #7				/* Force 8-byte alignment */
 	bl		arm_decodeirq			/* Call the handler */
 	ldr		sp, [r4]				/* Restore the user stack pointer */
+
+#ifdef CONFIG_ARMV7A_HAVE_GICv2
+	b		.Lintreturn
+
+	/* Call arm_decodeirq() on whatever stack is in place */
+
+.Lintnested:
+	mov		r4, sp					/* Save the SP in a preserved register */
+	bic		sp, sp, #7				/* Force 8-byte alignment */
+	bl		arm_decodeirq			/* Call the handler */
+	mov		sp, r4					/* Restore the possibly unaligned stack pointer */
+
+	/* Decrement the nesting level (r5 should be preserved) */
+
+.Lintreturn:
+	ldr		r1, [r5]				/* Get r1= nesting level */
+	cmp		r1, #0					/* A sanity check*/
+	subgt	r1, r1, #1				/* Decrement nesting level */
+	strgt	r1, [r5]				/* Save r1= nesting level */
+#endif
+
 #else
+	/* Call arm_decodeirq() on the user stack */
+
 	mov		r4, sp					/* Save the SP in a preserved register */
 	bic		sp, sp, #7				/* Force 8-byte alignment */
 	bl		arm_decodeirq			/* Call the handler */
@@ -227,6 +271,10 @@ arm_vectorirq:
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 .Lirqstackbase:
 	.word	g_intstackbase
+#ifdef CONFIG_ARMV7A_HAVE_GICv2
+.Lirqnestlevel:
+	.word	g_nestlevel
+#endif
 #endif
 	.size	arm_vectorirq, . - arm_vectorirq
 	.align	5
@@ -937,7 +985,7 @@ arm_vectorfiq:
 	.word	g_fiqtmp
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 .Lfiqstackbase:
-	.word	g_intstackbase
+	.word	g_fiqstackbase
 #endif
 
 #else
@@ -964,6 +1012,22 @@ g_intstackbase:
 	.skip	4
 	.size	g_intstackbase, 4
 	.size	g_intstackalloc, (CONFIG_ARCH_INTERRUPTSTACK & ~3)
+
+	.globl	g_fiqstackalloc
+	.type	g_fiqstackalloc, object
+	.globl	g_fiqstackbase
+	.type	g_fiqstackbase, object
+
+/************************************************************************************
+ *  Name: g_fiqstackalloc/g_fiqstackbase
+ ************************************************************************************/
+
+g_fiqstackalloc:
+	.skip	((CONFIG_ARCH_INTERRUPTSTACK & ~3) - 4)
+g_fiqstackbase:
+	.skip	4
+	.size	g_fiqstackbase, 4
+	.size	g_fiqstackalloc, (CONFIG_ARCH_INTERRUPTSTACK & ~3)
 
 #endif /* CONFIG_ARCH_INTERRUPTSTACK > 3 */
 	.end

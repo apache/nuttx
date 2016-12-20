@@ -987,7 +987,7 @@ Native Windows Build
   The windows native build logic initiated if CONFIG_WINDOWS_NATIVE=y is
   defined in the NuttX configuration file:
 
-  
+
   This build:
 
     - Uses all Windows style paths
@@ -1279,17 +1279,13 @@ nuttx/
  |   |   `- README.txt
  |   |- avr32dev1/
  |   |   `- README.txt
+ |   |- bambino-200e/
+ |   |   `- README.txt
  |   |- c5471evm/
  |   |   `- README.txt
  |   |- cc3200-launchpad/
  |   |   `- README.txt
  |   |- cloudctrl
- |   |   `- README.txt
- |   |- compal_e86
- |   |   `- README.txt
- |   |- compal_e88
- |   |   `- README.txt
- |   |- compal_e99
  |   |   `- README.txt
  |   |- demo0s12ne64/
  |   |   `- README.txt
@@ -1364,6 +1360,8 @@ nuttx/
  |   |   `- README.txt
  |   |- mirtoo/
  |   |   `- README.txt
+ |   |- misoc/
+ |   |   `- README.txt
  |   |- moteino-mega/
  |   |   `- README.txt
  |   |- mx1ads/
@@ -1411,11 +1409,7 @@ nuttx/
  |   |   `- README.txt
  |   |- pic32mz-starterkit/
  |   |   `- README.txt
- |   |- pirelli_dpl10/
- |   |   `- README.txt
  |   |- qemu-i486/
- |   |   `- README.txt
- |   |- rgmp/
  |   |   `- README.txt
  |   |- sabre-6quad/
  |   |   `- README.txt
@@ -1434,6 +1428,8 @@ nuttx/
  |   |- saml21-xplained/
  |   |   `- README.txt
  |   |- sam3u-ek/
+ |   |   `- README.txt
+ |   |- sam4cmp-db
  |   |   `- README.txt
  |   |- sam4e-ek/
  |   |   `- README.txt
@@ -1540,8 +1536,6 @@ nuttx/
  |   |   `- README.txt
  |   |- sensors/
  |   |   `- README.txt
- |   |- sercomm/
- |   |   `- README.txt
  |   |- syslog/
  |   |   `- README.txt
  |   `- README.txt
@@ -1593,7 +1587,8 @@ apps/
  |- gpsutils/
  |   `- minmea/README.txt
  |- graphics/
- |   `- tiff/README.txt
+ |   |- tiff/README.txt
+ |   `- traveler/tools/tcledit/README.txt
  |- interpreters/
  |   |- bas
  |   |  `- README.txt

@@ -22,6 +22,11 @@ config STM32F4DISCO_USBHOST_PRIO
 	default 100
 	depends on USBHOST
 
+config STM32F4DISCO_QETIMER
+	int "Timer to use with QE encoder"
+	default 3
+	depends on QENCODER
+
 config PM_BUTTONS
 	bool "PM button support"
 	default n

@@ -3388,6 +3388,19 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
             {
               canerr("ERROR: TX %08x\n", pending & MCAN_TXERR_INTS);
 
+              /* An Acknowledge-Error will occur if for example the device
+               * is not connected to the bus.
+               *
+               * The CAN-Standard states that the Chip has to retry the
+               * message forever, which will produce an ACKE every time.
+               * To prevent this Interrupt-Flooding and the high CPU-Load
+               * we disable the ACKE here as long we didn't transfer at
+               * least one message successfully (see MCAN_INT_TC below).
+               */
+
+              ie &= ~MCAN_INT_ACKE;
+              mcan_putreg(priv, SAM_MCAN_IE_OFFSET, ie);
+
               /* Clear the error indications */
 
               mcan_putreg(priv, SAM_MCAN_IR_OFFSET, MCAN_TXERR_INTS);
@@ -3441,6 +3454,17 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
 
       if ((pending & MCAN_INT_TC) != 0)
         {
+          /* Check if we have disabled the ACKE in the error-handling above
+           * (see MCAN_TXERR_INTS) to prevent Interrupt-Flooding and
+           * re-enable the error interrupt here again.
+           */
+
+          if ((ie & MCAN_INT_ACKE) == 0)
+            {
+                ie |= MCAN_INT_ACKE;
+                mcan_putreg(priv, SAM_MCAN_IE_OFFSET, ie);
+            }
+
           /* Clear the pending TX completion interrupt (and all
            * other TX-related interrupts)
            */

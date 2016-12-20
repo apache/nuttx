@@ -74,7 +74,7 @@ void stm32_spidev_initialize(void)
    *       architecture.
    */
 
-#ifdef CONFIG_WL_MFRC522
+#ifdef CONFIG_CL_MFRC522
   (void)stm32_configgpio(GPIO_CS_MFRC522);    /* MFRC522 chip select */
 #endif
 
@@ -112,7 +112,7 @@ void stm32_spidev_initialize(void)
 void stm32_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
                       bool selected)
 {
-#if defined(CONFIG_WL_MFRC522)
+#if defined(CONFIG_CL_MFRC522)
   if (devid == SPIDEV_WIRELESS)
     {
       stm32_gpiowrite(GPIO_CS_MFRC522, !selected);

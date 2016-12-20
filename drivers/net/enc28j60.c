@@ -115,8 +115,16 @@
 
 /* We need to have the work queue to handle SPI interrupts */
 
-#ifndef CONFIG_SCHED_WORKQUEUE
+#if !defined(CONFIG_SCHED_WORKQUEUE)
 #  error "Worker thread support is required (CONFIG_SCHED_WORKQUEUE)"
+#else
+#  if defined(CONFIG_ENC28J60_HPWORK)
+#    define ENCWORK HPWORK
+#  elif defined(CONFIG_ENC28J60_LPWORK)
+#    define ENCWORK LPWORK
+#  else
+#    error "Neither CONFIG_ENC28J60_HPWORK nor CONFIG_ENC28J60_LPWORK defined"
+#  endif
 #endif
 
 /* CONFIG_ENC28J60_DUMPPACKET will dump the contents of each packet to the console. */
@@ -125,12 +133,6 @@
 #  define enc_dumppacket(m,a,n) lib_dumpbuffer(m,a,n)
 #else
 #  define enc_dumppacket(m,a,n)
-#endif
-
-/* The ENC28J60 will not do interrupt level processing */
-
-#ifndef CONFIG_NET_NOINTS
-#  warrning "CONFIG_NET_NOINTS should be set"
 #endif
 
 /* Low-level register debug */
@@ -260,6 +262,12 @@ struct enc_driver_s
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+/* A single packet buffer is used */
+
+static uint8_t g_pktbuf[MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE];
+
+/* Driver status structure */
 
 static struct enc_driver_s g_enc28j60[CONFIG_ENC28J60_NINTERFACES];
 
@@ -1615,14 +1623,13 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
 static void enc_irqworker(FAR void *arg)
 {
   FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)arg;
-  net_lock_t lock;
   uint8_t eir;
 
   DEBUGASSERT(priv);
 
   /* Get exclusive access to both the network and the SPI bus. */
 
-  lock = net_lock();
+  net_lock();
   enc_lock(priv);
 
   /* Disable further interrupts by clearing the global interrupt enable bit.
@@ -1813,7 +1820,7 @@ static void enc_irqworker(FAR void *arg)
   /* Release lock on the SPI bus and the network */
 
   enc_unlock(priv);
-  net_unlock(lock);
+  net_unlock();
 }
 
 /****************************************************************************
@@ -1852,7 +1859,7 @@ static int enc_interrupt(int irq, FAR void *context)
    */
 
   priv->lower->disable(priv->lower);
-  return work_queue(HPWORK, &priv->irqwork, enc_irqworker, (FAR void *)priv, 0);
+  return work_queue(ENCWORK, &priv->irqwork, enc_irqworker, (FAR void *)priv, 0);
 }
 
 /****************************************************************************
@@ -1875,7 +1882,6 @@ static int enc_interrupt(int irq, FAR void *context)
 static void enc_toworker(FAR void *arg)
 {
   FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)arg;
-  net_lock_t lock;
   int ret;
 
   nerr("ERROR: Tx timeout\n");
@@ -1883,7 +1889,7 @@ static void enc_toworker(FAR void *arg)
 
   /* Get exclusive access to the network */
 
-  lock = net_lock();
+  net_lock();
 
   /* Increment statistics and dump debug info */
 
@@ -1905,7 +1911,7 @@ static void enc_toworker(FAR void *arg)
 
   /* Release lock on the network */
 
-  net_unlock(lock);
+  net_unlock();
 }
 
 /****************************************************************************
@@ -1944,7 +1950,7 @@ static void enc_txtimeout(int argc, uint32_t arg, ...)
    * can occur until we restart the Tx timeout watchdog.
    */
 
-  ret = work_queue(HPWORK, &priv->towork, enc_toworker, (FAR void *)priv, 0);
+  ret = work_queue(ENCWORK, &priv->towork, enc_toworker, (FAR void *)priv, 0);
   DEBUGASSERT(ret == OK);
   UNUSED(ret);
 }
@@ -1969,13 +1975,12 @@ static void enc_txtimeout(int argc, uint32_t arg, ...)
 static void enc_pollworker(FAR void *arg)
 {
   FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)arg;
-  net_lock_t lock;
 
   DEBUGASSERT(priv);
 
   /* Get exclusive access to both the network and the SPI bus. */
 
-  lock = net_lock();
+  net_lock();
   enc_lock(priv);
 
   /* Verify that the hardware is ready to send another packet.  The driver
@@ -1997,7 +2002,7 @@ static void enc_pollworker(FAR void *arg)
   /* Release lock on the SPI bus and the network */
 
   enc_unlock(priv);
-  net_unlock(lock);
+  net_unlock();
 
   /* Setup the watchdog poll timer again */
 
@@ -2040,7 +2045,7 @@ static void enc_polltimer(int argc, uint32_t arg, ...)
    * occur until we restart the poll timeout watchdog.
    */
 
-  ret = work_queue(HPWORK, &priv->pollwork, enc_pollworker, (FAR void *)priv, 0);
+  ret = work_queue(ENCWORK, &priv->pollwork, enc_pollworker, (FAR void *)priv, 0);
   DEBUGASSERT(ret == OK);
   UNUSED(ret);
 }
@@ -2623,6 +2628,7 @@ int enc_initialize(FAR struct spi_dev_s *spi,
   /* Initialize the driver structure */
 
   memset(g_enc28j60, 0, CONFIG_ENC28J60_NINTERFACES*sizeof(struct enc_driver_s));
+  priv->dev.d_buf     = g_pktbuf;     /* Single packet buffer */
   priv->dev.d_ifup    = enc_ifup;     /* I/F down callback */
   priv->dev.d_ifdown  = enc_ifdown;   /* I/F up (new IP address) callback */
   priv->dev.d_txavail = enc_txavail;  /* New TX data callback */

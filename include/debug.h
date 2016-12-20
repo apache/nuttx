@@ -810,7 +810,7 @@
 #ifdef CONFIG_DEBUG_CRYPTO_INFO
 #  define cryptinfo   _info
 #else
-#  define cryptinfo(x...)
+#  define cryptinfo   (void)
 #endif
 
 #ifdef CONFIG_DEBUG_INPUT_ERROR

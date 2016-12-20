@@ -343,6 +343,18 @@ void weak_function stm32_usbdev_initialize(void);
 int stm32_sdinitialize(int minor);
 
 /****************************************************************************
+ * Name: stm32_can_setup
+ *
+ * Description:
+ *  Initialize CAN and register the CAN device
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_CAN
+int stm32_can_setup(void);
+#endif
+
+/****************************************************************************
  * Name: stm32_mpl115ainitialize
  *
  * Description:

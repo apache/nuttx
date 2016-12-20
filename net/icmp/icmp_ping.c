@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/icmp/icmp_ping.c
  *
- *   Copyright (C) 2008-2012, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2012, 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,6 +51,7 @@
 #include <net/if.h>
 
 #include <nuttx/clock.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
@@ -333,7 +334,6 @@ int icmp_ping(in_addr_t addr, uint16_t id, uint16_t seqno, uint16_t datalen,
 {
   FAR struct net_driver_s *dev;
   struct icmp_ping_s state;
-  net_lock_t save;
 #ifdef CONFIG_NET_ARP_SEND
   int ret;
 #endif
@@ -364,7 +364,13 @@ int icmp_ping(in_addr_t addr, uint16_t id, uint16_t seqno, uint16_t datalen,
 
   /* Initialize the state structure */
 
+  /* This semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
   sem_init(&state.png_sem, 0, 0);
+  sem_setprotocol(&state.png_sem, SEM_PRIO_NONE);
+
   state.png_ticks  = DSEC2TICK(dsecs); /* System ticks to wait */
   state.png_result = -ENOMEM;          /* Assume allocation failure */
   state.png_addr   = addr;             /* Address of the peer to be ping'ed */
@@ -373,7 +379,7 @@ int icmp_ping(in_addr_t addr, uint16_t id, uint16_t seqno, uint16_t datalen,
   state.png_datlen = datalen;          /* The length of data to send in the ECHO request */
   state.png_sent   = false;            /* ECHO request not yet sent */
 
-  save             = net_lock();
+  net_lock();
   state.png_time   = clock_systimer();
 
   /* Set up the callback */
@@ -403,7 +409,7 @@ int icmp_ping(in_addr_t addr, uint16_t id, uint16_t seqno, uint16_t datalen,
       icmp_callback_free(dev, state.png_cb);
     }
 
-  net_unlock(save);
+  net_unlock();
 
   /* Return the negated error number in the event of a failure, or the
    * sequence number of the ECHO reply on success.

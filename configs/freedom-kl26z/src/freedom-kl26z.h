@@ -136,5 +136,17 @@ void weak_function kl_usbinitialize(void);
 void kl_led_initialize(void);
 #endif
 
+/************************************************************************************
+ * Name: kl_pwm_setup
+ *
+ * Description:
+ *   Initialize PWM and register the PWM device.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_PWM
+int kl_pwm_setup(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_FREEDOM_KL26Z_SRC_FREEDOM_KL26Z_H */

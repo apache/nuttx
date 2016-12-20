@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/icmpv6/icmpv6_ping.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,6 +50,7 @@
 #include <net/if.h>
 
 #include <nuttx/clock.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
@@ -407,7 +408,6 @@ int icmpv6_ping(net_ipv6addr_t addr, uint16_t id, uint16_t seqno,
 {
   FAR struct net_driver_s *dev;
   struct icmpv6_ping_s state;
-  net_lock_t save;
 
 #ifdef CONFIG_NET_ICMPv6_NEIGHBOR
   int ret;
@@ -437,7 +437,13 @@ int icmpv6_ping(net_ipv6addr_t addr, uint16_t id, uint16_t seqno,
 
   /* Initialize the state structure */
 
+  /* This semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
   sem_init(&state.png_sem, 0, 0);
+  sem_setprotocol(&state.png_sem, SEM_PRIO_NONE);
+
   state.png_ticks  = DSEC2TICK(dsecs);     /* System ticks to wait */
   state.png_result = -ENOMEM;              /* Assume allocation failure */
   state.png_id     = id;                   /* The ID to use in the ECHO request */
@@ -447,7 +453,7 @@ int icmpv6_ping(net_ipv6addr_t addr, uint16_t id, uint16_t seqno,
 
   net_ipv6addr_copy(state.png_addr, addr); /* Address of the peer to be ping'ed */
 
-  save             = net_lock();
+  net_lock();
   state.png_time   = clock_systimer();
 
   /* Set up the callback */
@@ -477,7 +483,7 @@ int icmpv6_ping(net_ipv6addr_t addr, uint16_t id, uint16_t seqno,
       icmpv6_callback_free(dev, state.png_cb);
     }
 
-  net_unlock(save);
+  net_unlock();
 
   /* Return the negated error number in the event of a failure, or the
    * sequence number of the ECHO reply on success.

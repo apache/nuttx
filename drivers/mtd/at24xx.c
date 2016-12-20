@@ -139,6 +139,10 @@
 #  define CONFIG_AT24XX_MTD_BLOCKSIZE AT24XX_PAGESIZE
 #endif
 
+#ifndef CONFIG_AT24XX_TIMEOUT_MS
+#  define CONFIG_AT24XX_TIMEOUT_MS 10
+#endif
+
 /************************************************************************************
  * Private Types
  ************************************************************************************/
@@ -252,6 +256,7 @@ static int at24c_eraseall(FAR struct at24c_dev_s *priv)
 {
   uint8_t buf[AT24XX_PAGESIZE + AT24XX_ADDRSIZE];
   int startblock = 0;
+  uint16_t wait;
 
   memset(&buf[AT24XX_ADDRSIZE], 0xff, priv->pagesize);
 
@@ -269,8 +274,15 @@ static int at24c_eraseall(FAR struct at24c_dev_s *priv)
       at24addr = (priv->addr | ((offset >> 8) & 0x07));
 #endif
 
+      wait = CONFIG_AT24XX_TIMEOUT_MS;
       while (at24c_i2c_write(priv, at24addr, buf, AT24XX_ADDRSIZE) < 0)
         {
+          finfo("wait\n");
+          if (!wait--) 
+            {
+              return -ETIMEDOUT;
+            }
+
           usleep(1000);
         }
 
@@ -301,6 +313,7 @@ static ssize_t at24c_read_internal(FAR struct at24c_dev_s *priv, off_t offset,
 {
   uint8_t buf[AT24XX_ADDRSIZE];
   uint16_t at24addr;
+  uint16_t wait;
 
   finfo("offset: %lu nbytes: %lu address: %02x\n",
         (unsigned long)offset, (unsigned long)nbytes, address);
@@ -327,9 +340,15 @@ static ssize_t at24c_read_internal(FAR struct at24c_dev_s *priv, off_t offset,
   at24addr = (address | ((offset >> 8) & 0x07));
 #endif
 
+  wait = CONFIG_AT24XX_TIMEOUT_MS;
   while (at24c_i2c_write(priv, at24addr, buf, AT24XX_ADDRSIZE) < 0)
     {
       finfo("wait\n");
+      if (!wait--) 
+        {
+          return -ETIMEDOUT;
+        }
+
       usleep(1000);
     }
 
@@ -410,6 +429,7 @@ static ssize_t at24c_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t 
   FAR struct at24c_dev_s *priv = (FAR struct at24c_dev_s *)dev;
   size_t blocksleft;
   uint8_t buf[AT24XX_PAGESIZE + AT24XX_ADDRSIZE];
+  uint16_t wait;
 
 #if CONFIG_AT24XX_MTD_BLOCKSIZE > AT24XX_PAGESIZE
   startblock *= (CONFIG_AT24XX_MTD_BLOCKSIZE / AT24XX_PAGESIZE);
@@ -443,9 +463,15 @@ static ssize_t at24c_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t 
       at24addr = (priv->addr | ((offset >> 8) & 0x07));
 #endif
 
+      wait = CONFIG_AT24XX_TIMEOUT_MS;
       while (at24c_i2c_write(priv, at24addr, buf, AT24XX_ADDRSIZE) < 0)
         {
           finfo("wait\n");
+          if (!wait--) 
+            {
+              return -ETIMEDOUT;
+            }
+
           usleep(1000);
         }
 

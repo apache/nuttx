@@ -55,14 +55,15 @@
  * Name: strtoull
  *
  * Description:
- *   The  strtol() function  converts  the initial part of the string in
+ *   The strtoull() function  converts  the initial part of the string in
  *   nptr to a long unsigned integer value according to the given base, which
  *   must be between 2 and 36 inclusive, or be the special value 0.
  *
  * Returns:
  *   - The converted value, if the base and number are valid
- *   - 0 if an error occurs, and seterrno to:
+ *   - 0 if an error occurs, and set errno to:
  *     * EINVAL if base < 2 or base > 36
+ *   - ULLONG_MAX if an overflow occurs, and set errno to:
  *     * ERANGE if the number cannot be represented using unsigned long long
  *
  ****************************************************************************/
@@ -102,7 +103,7 @@ unsigned long long strtoull(FAR const char *nptr, FAR char **endptr, int base)
           if (accum < prev)
             {
               set_errno(ERANGE);
-              accum = 0;
+              accum = ULLONG_MAX;
               break;
             }
         }

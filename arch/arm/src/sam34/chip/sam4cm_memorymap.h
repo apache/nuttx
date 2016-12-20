@@ -65,6 +65,7 @@
 /* Internal SRAM memory region */
 
 #define SAM_INTSRAM0_BASE      0x20000000 /* For SAM3U compatibility */
+#define SAM_INTSRAM1_BASE      0x20080000 /* 0x20080000-0x200fffff: Internal SRAM 1 */
 #define SAM_BBSRAM_BASE        0x22000000 /* 0x22000000-0x23ffffff: 32MB bit-band region */
                                           /* 0x24000000-0x3fffffff: Undefined */
 /* Peripherals address region */
