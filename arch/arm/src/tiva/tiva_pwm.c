@@ -312,6 +312,14 @@ static struct tiva_pwm_chan_s g_pwm_chan7 =
  * Private Functions
  ************************************************************************************/
 
+/************************************************************************************
+ * Name: tiva_pwm_gen[n]_interrupt
+ *
+ * Description:
+ *   Pulse count interrupt handlers for PWM[n]
+ *
+ ************************************************************************************/
+
 #if defined(CONFIG_PWM_PULSECOUNT) && defined(CONFIG_TIVA_PWM0_CHAN0)
 static int tiva_pwm_gen0_interrupt(int irq, FAR void *context)
 {
@@ -340,6 +348,14 @@ static int tiva_pwm_gen3_interrupt(int irq, FAR void *context)
 }
 #endif
 
+/************************************************************************************
+ * Name: tiva_pwm_interrupt
+ *
+ * Description:
+ *   Common pulse count interrupt handler.
+ *
+ ************************************************************************************/
+
 #if defined(CONFIG_PWM_PULSECOUNT) && \
     (defined(CONFIG_TIVA_PWM0_CHAN0) || defined(CONFIG_TIVA_PWM0_CHAN2) || \
     defined(CONFIG_TIVA_PWM0_CHAN4) || defined(CONFIG_TIVA_PWM0_CHAN6))
@@ -356,11 +372,11 @@ static int tiva_pwm_interrupt(struct tiva_pwm_chan_s *chan)
   /* Disable PWM generator and reload current pulse count */
 
   if (chan->cur_count == 0)
-  {
-    tiva_pwm_putreg(chan, TIVA_PWMn_CTL_OFFSET, CTL_DISABLE << TIVA_PWMn_CTL_ENABLE);
-    chan->cur_count = chan->count;
-    pwm_expired(chan->handle);
-  }
+    {
+      tiva_pwm_putreg(chan, TIVA_PWMn_CTL_OFFSET, CTL_DISABLE << TIVA_PWMn_CTL_ENABLE);
+      chan->cur_count = chan->count;
+      pwm_expired(chan->handle);
+    }
 
   return 0;
 }
@@ -503,32 +519,32 @@ static int tiva_pwm_start(FAR struct pwm_lowerhalf_s *dev,
   chan->cur_count = info->count;
 
   if (!chan->inited)
-  {
-    chan->count++;
-    chan->cur_count++;
-    chan->inited = true;
-  }
+    {
+      chan->count++;
+      chan->cur_count++;
+      chan->inited = true;
+    }
 
   /* Count 0 means to generate indefinite number of pulses */
 
   if (info->count == 0)
-  {
-    pwm_expired(chan->handle);
+    {
+      pwm_expired(chan->handle);
 
-    /* Disable interrupt */
+      /* Disable interrupt */
 
-    uint32_t enable = getreg32(chan->controller_base + TIVA_PWM_INTEN_OFFSET);
-    enable &= ~(INT_ENABLE << chan->generator_id);
-    putreg32(enable, chan->controller_base + TIVA_PWM_INTEN_OFFSET);
-  }
+      uint32_t enable = getreg32(chan->controller_base + TIVA_PWM_INTEN_OFFSET);
+      enable &= ~(INT_ENABLE << chan->generator_id);
+      putreg32(enable, chan->controller_base + TIVA_PWM_INTEN_OFFSET);
+    }
   else
-  {
-    /* Enable interrupt */
+    {
+      /* Enable interrupt */
 
-    uint32_t enable = getreg32(chan->controller_base + TIVA_PWM_INTEN_OFFSET);
-    enable |= (INT_ENABLE << chan->generator_id);
-    putreg32(enable, chan->controller_base + TIVA_PWM_INTEN_OFFSET);
-  }
+      uint32_t enable = getreg32(chan->controller_base + TIVA_PWM_INTEN_OFFSET);
+      enable |= (INT_ENABLE << chan->generator_id);
+      putreg32(enable, chan->controller_base + TIVA_PWM_INTEN_OFFSET);
+    }
 
   /* Start the timer */
 
