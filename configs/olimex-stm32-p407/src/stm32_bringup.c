@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/olimex-stm32-p407/src/stm32_appinit.c
+ * config/olimex-stm32-p407/src/stm32_bringup.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,60 +39,100 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <stdinit.h>
+#include <sys/mount.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <syslog.h>
+#include <errno.h>
 
 #include <nuttx/board.h>
 
-#include "olimex-stm32-p407.h"
+#ifdef CONFIG_USBMONITOR
+#  include <nuttx/usb/usbmonitor.h>
+#endif
 
-#ifdef CONFIG_LIB_BOARDCTL
+#ifdef CONFIG_STM32_OTGFS
+#  include "stm32_usbhost.h"
+#endif
+
+#include "stm32.h"
+#include "olimex-stm32-p407.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_app_initialize
+ * Name: stm32_bringup
  *
  * Description:
- *   Perform application specific initialization.  This function is never
- *   called directly from application code, but only indirectly via the
- *   (non-standard) boardctl() interface using the command BOARDIOC_INIT.
+ *   Perform architecture-specific initialization
  *
- *   CONFIG_LIB_BOARDCTL=y :
- *     Called from the NSH library
- *
- *   CONFIG_BOARD_INITIALIZE=y, CONFIG_NSH_LIBRARY=y, &&
- *   CONFIG_LIB_BOARDCTL=n :
+ *   CONFIG_BOARD_INITIALIZE=y :
  *     Called from board_initialize().
  *
- * Input Parameters:
- *   arg - The boardctl() argument is passed to the board_app_initialize()
- *         implementation without modification.  The argument has no
- *         meaning to NuttX; the meaning of the argument is a contract
- *         between the board-specific initalization logic and the the
- *         matching application logic.  The value cold be such things as a
- *         mode enumeration value, a set of DIP switch switch settings, a
- *         pointer to configuration data read from a file or serial FLASH,
- *         or whatever you would like to do with it.  Every implementation
- *         should accept zero/NULL as a default configuration.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure to indicate the nature of the failure.
+ *   CONFIG_BOARD_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y :
+ *     Called from the NSH library
  *
  ****************************************************************************/
 
-int board_app_initialize(uintptr_t arg)
+int stm32_bringup(void)
 {
-  /* Did we already initialize via board_initialize()? */
+  int ret;
 
-#ifndef CONFIG_BOARD_INITIALIZE
-  return stm32_bringup();
-#else
-  return OK;
+#ifdef CONFIG_FS_PROCFS
+  /* Mount the procfs file system */
+
+  ret = mount(NULL, "/proc", "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
+    }
 #endif
-}
 
-#endif /* CONFIG_LIB_BOARDCTL */
+#ifdef CONFIG_CAN
+  /* Initialize CAN and register the CAN driver. */
+
+  ret = stm32_can_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_can_setup failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ADC
+  /* Initialize ADC and register the ADC driver. */
+
+  ret = stm32_adc_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_adc_setup failed: %d\n", ret);
+    }
+#endif
+
+#ifdef HAVE_USBHOST
+  /* Initialize USB host operation.  stm32_usbhost_initialize() starts a thread
+   * will monitor for USB connection and disconnection events.
+   */
+
+  ret = stm32_usbhost_initialize();
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize USB host: %d\n", ret);
+      return ret;
+    }
+#endif
+
+#ifdef HAVE_USBMONITOR
+  /* Start the USB Monitor */
+
+  ret = usbmonitor_start();
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to start USB monitor: %d\n", ret);
+    }
+#endif
+
+  UNUSED(ret);
+  return OK;
+}
