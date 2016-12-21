@@ -1393,6 +1393,8 @@ nuttx/
  |   |   `- README.txt
  |   |- olimex-stm32-p207/
  |   |   `- README.txt
+ |   |- olimex-stm32-p407/
+ |   |   `- README.txt
  |   |- olimex-strp711/
  |   |   `- README.txt
  |   |- open1788/

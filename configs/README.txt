@@ -460,6 +460,11 @@ configs/olimex-stm32-p207
   toolchain under Linux or Cygwin. See the https://www.olimex.com/dev/stm32-p207.html
   for further information.  Contributed by Martin Lederhilger.
 
+configs/olimex-stm32-p407
+  This port uses the Olimex STM32-P407 board (STM32F407ZG) and a GNU arm-nuttx-elf
+  toolchain under Linux or Cygwin. See the https://www.olimex.com/dev/stm32-p407.html
+  for further information.
+
 configs/olimexino-stm32
   This port uses the Olimexino STM32 board (STM32F103RBT6) and a GNU arm-nuttx-elf
   toolchain* under Linux or Cygwin. See the http://www.olimex.com for further\

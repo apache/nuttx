@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/olimex-stm32-p407/src/stm32_usb.c
  *
- *   Copyright (C) 2012-2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -134,15 +134,15 @@ static int usbhost_waiter(int argc, char *argv[])
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32_usbinitialize
+ * Name: stm32_usbdev_setup
  *
  * Description:
- *   Called from stm32_usbinitialize very early in inialization to setup USB-related
+ *   Called from stm32_usbdev_setup very early in inialization to setup USB-related
  *   GPIO pins for the STM32F4Discovery board.
  *
  ************************************************************************************/
 
-void stm32_usbinitialize(void)
+void stm32_usbdev_setup(void)
 {
   /* The OTG FS has an internal soft pull-up.  No GPIO configuration is required */
 
@@ -156,7 +156,7 @@ void stm32_usbinitialize(void)
 }
 
 /***********************************************************************************
- * Name: stm32_usbhost_initialize
+ * Name: stm32_usbhost_setup
  *
  * Description:
  *   Called at application startup time to initialize the USB host functionality.
@@ -166,7 +166,7 @@ void stm32_usbinitialize(void)
  ***********************************************************************************/
 
 #ifdef CONFIG_USBHOST
-int stm32_usbhost_initialize(void)
+int stm32_usbhost_setup(void)
 {
   int pid;
 #if defined(CONFIG_USBHOST_HUB) || defined(CONFIG_USBHOST_MSC) || defined(CONFIG_USBHOST_CDCACM)

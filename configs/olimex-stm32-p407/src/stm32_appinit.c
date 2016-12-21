@@ -40,7 +40,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <stdinit.h>
+#include <stdint.h>
 
 #include <nuttx/board.h>
 

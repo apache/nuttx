@@ -71,35 +71,34 @@
  *
  * PLL source is HSE
  * PLL_VCO = (STM32_HSE_FREQUENCY / PLLM) * PLLN
- *         = (25,000,000 / 25) * 240
- *         = 240,000,000
+ *         = (25,000,000 / 25) * 336
+ *         = 336,000,000
  * SYSCLK  = PLL_VCO / PLLP
- *         = 240,000,000 / 2 = 120,000,000
+ *         = 336,000,000 / 2 = 168,000,000
  * USB OTG FS, SDIO and RNG Clock
  *         =  PLL_VCO / PLLQ
- *         = 240,000,000 / 5 = 48,000,000
  *         = 48,000,000
  */
 
 #define STM32_PLLCFG_PLLM       RCC_PLLCFG_PLLM(25)
-#define STM32_PLLCFG_PLLN       RCC_PLLCFG_PLLN(240)
+#define STM32_PLLCFG_PLLN       RCC_PLLCFG_PLLN(336)
 #define STM32_PLLCFG_PLLP       RCC_PLLCFG_PLLP_2
-#define STM32_PLLCFG_PLLQ       RCC_PLLCFG_PLLQ(5)
+#define STM32_PLLCFG_PLLQ       RCC_PLLCFG_PLLQ(7)
 
-#define STM32_SYSCLK_FREQUENCY  120000000ul
+#define STM32_SYSCLK_FREQUENCY  168000000ul
 
-/* AHB clock (HCLK) is SYSCLK (120MHz) */
+/* AHB clock (HCLK) is SYSCLK (168MHz) */
 
 #define STM32_RCC_CFGR_HPRE     RCC_CFGR_HPRE_SYSCLK  /* HCLK  = SYSCLK / 1 */
 #define STM32_HCLK_FREQUENCY    STM32_SYSCLK_FREQUENCY
 #define STM32_BOARD_HCLK        STM32_HCLK_FREQUENCY  /* same as above, to satisfy compiler */
 
-/* APB1 clock (PCLK1) is HCLK/4 (30MHz) */
+/* APB1 clock (PCLK1) is HCLK/4 (42MHz) */
 
 #define STM32_RCC_CFGR_PPRE1    RCC_CFGR_PPRE1_HCLKd4     /* PCLK1 = HCLK / 4 */
 #define STM32_PCLK1_FREQUENCY   (STM32_HCLK_FREQUENCY/4)
 
-/* Timers driven from APB1 will be twice PCLK1 (60Mhz)*/
+/* Timers driven from APB1 will be twice PCLK1 */
 
 #define STM32_APB1_TIM2_CLKIN   (2*STM32_PCLK1_FREQUENCY)
 #define STM32_APB1_TIM3_CLKIN   (2*STM32_PCLK1_FREQUENCY)
@@ -111,12 +110,12 @@
 #define STM32_APB1_TIM13_CLKIN  (2*STM32_PCLK1_FREQUENCY)
 #define STM32_APB1_TIM14_CLKIN  (2*STM32_PCLK1_FREQUENCY)
 
-/* APB2 clock (PCLK2) is HCLK/2 (60MHz) */
+/* APB2 clock (PCLK2) is HCLK/2 (84MHz) */
 
 #define STM32_RCC_CFGR_PPRE2    RCC_CFGR_PPRE2_HCLKd2     /* PCLK2 = HCLK / 2 */
 #define STM32_PCLK2_FREQUENCY   (STM32_HCLK_FREQUENCY/2)
 
-/* Timers driven from APB2 will be twice PCLK2 (120Mhz)*/
+/* Timers driven from APB2 will be twice PCLK2 */
 
 #define STM32_APB2_TIM1_CLKIN   (2*STM32_PCLK2_FREQUENCY)
 #define STM32_APB2_TIM8_CLKIN   (2*STM32_PCLK2_FREQUENCY)
@@ -137,6 +136,36 @@
 #define BOARD_TIM6_FREQUENCY    STM32_HCLK_FREQUENCY
 #define BOARD_TIM7_FREQUENCY    STM32_HCLK_FREQUENCY
 #define BOARD_TIM8_FREQUENCY    STM32_HCLK_FREQUENCY
+
+/* SDIO dividers.  Note that slower clocking is required when DMA is disabled
+ * in order to avoid RX overrun/TX underrun errors due to delayed responses
+ * to service FIFOs in interrupt driven mode.  These values have not been
+ * tuned!!!
+ *
+ * SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(118+2)=400 KHz
+ */
+
+#define SDIO_INIT_CLKDIV        (118 << SDIO_CLKCR_CLKDIV_SHIFT)
+
+/* DMA ON:  SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(1+2)=16 MHz
+ * DMA OFF: SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(2+2)=12 MHz
+ */
+
+#ifdef CONFIG_SDIO_DMA
+#  define SDIO_MMCXFR_CLKDIV    (1 << SDIO_CLKCR_CLKDIV_SHIFT)
+#else
+#  define SDIO_MMCXFR_CLKDIV    (2 << SDIO_CLKCR_CLKDIV_SHIFT)
+#endif
+
+/* DMA ON:  SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(1+2)=16 MHz
+ * DMA OFF: SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(2+2)=12 MHz
+ */
+
+#ifdef CONFIG_SDIO_DMA
+#  define SDIO_SDXFR_CLKDIV     (1 << SDIO_CLKCR_CLKDIV_SHIFT)
+#else
+#  define SDIO_SDXFR_CLKDIV     (2 << SDIO_CLKCR_CLKDIV_SHIFT)
+#endif
 
 /* LED definitions ******************************************************************/
 /* If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any
@@ -254,7 +283,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif

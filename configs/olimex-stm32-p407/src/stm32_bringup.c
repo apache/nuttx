@@ -111,11 +111,11 @@ int stm32_bringup(void)
 #endif
 
 #ifdef HAVE_USBHOST
-  /* Initialize USB host operation.  stm32_usbhost_initialize() starts a thread
+  /* Initialize USB host operation.  stm32_usbhost_setup() starts a thread
    * will monitor for USB connection and disconnection events.
    */
 
-  ret = stm32_usbhost_initialize();
+  ret = stm32_usbhost_setup();
   if (ret != OK)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize USB host: %d\n", ret);
