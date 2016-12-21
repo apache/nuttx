@@ -254,7 +254,6 @@ int up_cpu_start(int cpu)
   if (!g_appcpu_started)
     {
       uint32_t regval;
-      int ret;
 
       /* Start CPU1 */
 
