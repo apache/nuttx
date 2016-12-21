@@ -1,7 +1,7 @@
 /****************************************************************************
  *  arch/arm/src/armv7-m/up_releasepending.c
  *
- *   Copyright (C) 2007-2009, 2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,8 +39,10 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
 #include <sched.h>
 #include <debug.h>
+
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
 
@@ -65,68 +67,88 @@
 void up_release_pending(void)
 {
   struct tcb_s *rtcb = this_task();
+#ifdef CONFIG_SMP
+  static bool busy = false;
+#endif
 
   sinfo("From TCB=%p\n", rtcb);
 
-  /* Merge the g_pendingtasks list into the ready-to-run task list */
+  /* In SMP configurations, this function will be called as part of leaving
+   * the critical section.  In that case, it may be re-entered as part of
+   * the sched_addreadytorun() processing.  We have to guard against that
+   * case.
+   */
 
-  /* sched_lock(); */
-  if (sched_mergepending())
+#ifdef CONFIG_SMP
+  if (!busy)
     {
-      /* The currently active task has changed!  We will need to switch
-       * contexts.
-       */
+      busy = true;
+#endif
 
-      /* Update scheduler parameters */
+      /* Merge the g_pendingtasks list into the ready-to-run task list */
 
-      sched_suspend_scheduler(rtcb);
-
-      /* Are we operating in interrupt context? */
-
-      if (CURRENT_REGS)
+      /* sched_lock(); */
+      if (sched_mergepending())
         {
-          /* Yes, then we have to do things differently. Just copy the
-           * CURRENT_REGS into the OLD rtcb.
+          /* The currently active task has changed!  We will need to switch
+           * contexts.
            */
-
-           up_savestate(rtcb->xcp.regs);
-
-          /* Restore the exception context of the rtcb at the (new) head
-           * of the ready-to-run task list.
-           */
-
-          rtcb = this_task();
 
           /* Update scheduler parameters */
 
-          sched_resume_scheduler(rtcb);
+          sched_suspend_scheduler(rtcb);
 
-          /* Then switch contexts */
+          /* Are we operating in interrupt context? */
 
-          up_restorestate(rtcb->xcp.regs);
+          if (CURRENT_REGS)
+            {
+              /* Yes, then we have to do things differently. Just copy the
+               * CURRENT_REGS into the OLD rtcb.
+               */
+
+               up_savestate(rtcb->xcp.regs);
+
+              /* Restore the exception context of the rtcb at the (new) head
+               * of the ready-to-run task list.
+               */
+
+              rtcb = this_task();
+
+              /* Update scheduler parameters */
+
+              sched_resume_scheduler(rtcb);
+
+              /* Then switch contexts */
+
+              up_restorestate(rtcb->xcp.regs);
+            }
+
+          /* No, then we will need to perform the user context switch */
+
+          else
+            {
+              struct tcb_s *nexttcb = this_task();
+
+              /* Update scheduler parameters */
+
+              sched_resume_scheduler(nexttcb);
+
+              /* Switch context to the context of the task at the head of the
+               * ready to run list.
+               */
+
+              up_switchcontext(rtcb->xcp.regs, nexttcb->xcp.regs);
+
+              /* up_switchcontext forces a context switch to the task at the
+               * head of the ready-to-run list.  It does not 'return' in the
+               * normal sense.  When it does return, it is because the blocked
+               * task is again ready to run and has execution priority.
+               */
+            }
         }
 
-      /* No, then we will need to perform the user context switch */
-
-      else
-        {
-          struct tcb_s *nexttcb = this_task();
-
-          /* Update scheduler parameters */
-
-          sched_resume_scheduler(nexttcb);
-
-          /* Switch context to the context of the task at the head of the
-           * ready to run list.
-           */
-
-          up_switchcontext(rtcb->xcp.regs, nexttcb->xcp.regs);
-
-          /* up_switchcontext forces a context switch to the task at the
-           * head of the ready-to-run list.  It does not 'return' in the
-           * normal sense.  When it does return, it is because the blocked
-           * task is again ready to run and has execution priority.
-           */
-        }
+#ifdef CONFIG_SMP
+      busy = false;
     }
+#endif
 }
