@@ -542,6 +542,17 @@ config ARCH_BOARD_OLIMEX_STM32P207
 		toolchain under Linux or Cygwin. See the http://www.olimex.com for
 		further information. This board features the STMicro STM32F207ZE MCU
 
+config ARCH_BOARD_OLIMEX_STM32P407
+	bool "Olimex STM32 P407 board"
+	depends on ARCH_CHIP_STM32F407ZG
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This port uses the Olimex STM32 P407 board and a GNU arm-nuttx-elf
+		toolchain under Linux or Cygwin. See the http://www.olimex.com for
+		further information. This board features the STMicro STM32F407ZG MCU
+
 config ARCH_BOARD_OLIMEXINO_STM32
 	bool "Olimexino STM32 board"
 	depends on ARCH_CHIP_STM32F103RB
@@ -1402,6 +1413,7 @@ config ARCH_BOARD
 	default "olimex-stm32-e407"        if ARCH_BOARD_OLIMEX_STM32E407
 	default "olimex-stm32-p107"        if ARCH_BOARD_OLIMEX_STM32P107
 	default "olimex-stm32-p207"        if ARCH_BOARD_OLIMEX_STM32P207
+	default "olimex-stm32-p407"        if ARCH_BOARD_OLIMEX_STM32P407
 	default "olimex-strp711"           if ARCH_BOARD_OLIMEX_STRP711
 	default "olimexino-stm32"          if ARCH_BOARD_OLIMEXINO_STM32
 	default "open1788"                 if ARCH_BOARD_OPEN1788
@@ -1676,6 +1688,9 @@ source "configs/olimex-stm32-p107/Kconfig"
 endif
 if ARCH_BOARD_OLIMEX_STM32P207
 source "configs/olimex-stm32-p207/Kconfig"
+endif
+if ARCH_BOARD_OLIMEX_STM32P407
+source "configs/olimex-stm32-p407/Kconfig"
 endif
 if ARCH_BOARD_OLIMEX_STRP711
 source "configs/olimex-strp711/Kconfig"

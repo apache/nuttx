@@ -1,7 +1,7 @@
 /************************************************************************************
- * configs/stm32f4discovery/src/stm32_boot.c
+ * configs/olimex-stm32-p407/src/stm32_boot.c
  *
- *   Copyright (C) 2011-2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,11 +41,11 @@
 
 #include <debug.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
-#include "up_arch.h"
-#include "stm32f4discovery.h"
+#include "olimex-stm32-p407.h"
 
 /************************************************************************************
  * Public Functions
@@ -56,59 +56,36 @@
  *
  * Description:
  *   All STM32 architectures must provide the following entry point.  This entry point
- *   is called early in the initialization -- after all memory has been configured
+ *   is called early in the intitialization -- after all memory has been configured
  *   and mapped but before any devices have been initialized.
  *
  ************************************************************************************/
 
 void stm32_boardinitialize(void)
 {
-#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || defined(CONFIG_STM32_SPI3)
-  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
-   * stm32_spidev_initialize() has been brought into the link.
-   */
-
-  if (stm32_spidev_initialize)
-    {
-      stm32_spidev_initialize();
-    }
-#endif
-
-#ifdef CONFIG_STM32_OTGFS
   /* Initialize USB if the 1) OTG FS controller is in the configuration and 2)
-   * disabled, and 3) the weak function stm32_usbinitialize() has been brought
-   * into the build. Presumably either CONFIG_USBDEV or CONFIG_USBHOST is also
+   * disabled, and 3) the weak function stm32_usb_configure() has been brought
+   * into the build. Presumeably either CONFIG_USBDEV or CONFIG_USBHOST is also
    * selected.
    */
 
-  if (stm32_usbinitialize)
+#ifdef CONFIG_STM32_OTGFS
+  if (stm32_usb_configure)
     {
-      stm32_usbinitialize();
+      stm32_usb_configure();
     }
 #endif
 
-#ifdef HAVE_NETMONITOR
-  /* Configure board resources to support networking. */
-
-  if (stm32_netinitialize)
-    {
-      stm32_netinitialize();
-    }
-#endif
-
-#ifdef CONFIG_CANUTILS_LIBUAVCAN
-  (void)stm32_configgpio(GPIO_CAN1_RX);
-  (void)stm32_configgpio(GPIO_CAN1_TX);
-#  if CONFIG_LIBUAVCAN_STM32_NUM_IFACES > 1
-  (void)stm32_configgpio(GPIO_CAN2_RX);
-  (void)stm32_configgpio(GPIO_CAN2_TX);
-#  endif
-#endif
-
-#ifdef CONFIG_ARCH_LEDS
   /* Configure on-board LEDs if LED support has been selected. */
 
+#ifdef CONFIG_ARCH_LEDS
   board_autoled_initialize();
+#endif
+
+  /* Configure on-board BUTTONs if BUTTON support has been selected. */
+
+#ifdef CONFIG_ARCH_BUTTONS
+  board_button_initialize();
 #endif
 }
 
@@ -128,7 +105,7 @@ void stm32_boardinitialize(void)
 #ifdef CONFIG_BOARD_INITIALIZE
 void board_initialize(void)
 {
-  /* Perform board-specific initialization */
+  /* Perform board-specific initialization here if so configured */
 
   (void)stm32_bringup();
 }
