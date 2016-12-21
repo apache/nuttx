@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
 #include <sched.h>
 #include <debug.h>
 
@@ -68,92 +69,112 @@
 void up_release_pending(void)
 {
   struct tcb_s *rtcb = this_task();
+#ifdef CONFIG_SMP
+  static bool busy = false;
+#endif
 
   sinfo("From TCB=%p\n", rtcb);
 
-  /* Merge the g_pendingtasks list into the ready-to-run task list */
+  /* In SMP configurations, this function will be called as part of leaving
+   * the critical section.  In that case, it may be re-entered as part of
+   * the sched_addreadytorun() processing.  We have to guard against that
+   * case.
+   */
 
-  /* sched_lock(); */
-  if (sched_mergepending())
+#ifdef CONFIG_SMP
+  if (!busy)
     {
-      /* The currently active task has changed!  We will need to
-       * switch contexts.
-       */
+      busy = true;
+#endif
 
-      /* Update scheduler parameters */
+      /* Merge the g_pendingtasks list into the ready-to-run task list */
 
-      sched_suspend_scheduler(rtcb);
-
-      /* Are we operating in interrupt context? */
-
-      if (CURRENT_REGS)
+      /* sched_lock(); */
+      if (sched_mergepending())
         {
-          /* Yes, then we have to do things differently.
-           * Just copy the CURRENT_REGS into the OLD rtcb.
+          /* The currently active task has changed!  We will need to
+           * switch contexts.
            */
-
-           xtensa_savestate(rtcb->xcp.regs);
-
-          /* Restore the exception context of the rtcb at the (new) head
-           * of the ready-to-run task list.
-           */
-
-          rtcb = this_task();
 
           /* Update scheduler parameters */
 
-          sched_resume_scheduler(rtcb);
+          sched_suspend_scheduler(rtcb);
 
-          /* Then switch contexts.  Any necessary address environment
-           * changes will be made when the interrupt returns.
+          /* Are we operating in interrupt context? */
+
+          if (CURRENT_REGS)
+            {
+              /* Yes, then we have to do things differently.
+               * Just copy the CURRENT_REGS into the OLD rtcb.
+               */
+
+               xtensa_savestate(rtcb->xcp.regs);
+
+              /* Restore the exception context of the rtcb at the (new) head
+               * of the ready-to-run task list.
+               */
+
+              rtcb = this_task();
+
+              /* Update scheduler parameters */
+
+              sched_resume_scheduler(rtcb);
+
+              /* Then switch contexts.  Any necessary address environment
+               * changes will be made when the interrupt returns.
+               */
+
+              xtensa_restorestate(rtcb->xcp.regs);
+            }
+
+          /* Copy the exception context into the TCB of the task that
+           * was currently active. if up_saveusercontext returns a non-zero
+           * value, then this is really the previously running task
+           * restarting!
            */
 
-          xtensa_restorestate(rtcb->xcp.regs);
-        }
-
-      /* Copy the exception context into the TCB of the task that
-       * was currently active. if up_saveusercontext returns a non-zero
-       * value, then this is really the previously running task
-       * restarting!
-       */
-
-      else if (!xtensa_context_save(rtcb->xcp.regs))
-        {
+          else if (!xtensa_context_save(rtcb->xcp.regs))
+            {
 #if XCHAL_CP_NUM > 0
-          /* Save the co-processor state in in the suspended thread's co-
-           * processor save area.
-           */
+              /* Save the co-processor state in in the suspended thread's co-
+               * processor save area.
+               */
 
-          xtensa_coproc_savestate(&rtcb->xcp.cpstate);
+              xtensa_coproc_savestate(&rtcb->xcp.cpstate);
 #endif
-          /* Restore the exception context of the rtcb at the (new) head
-           * of the ready-to-run task list.
-           */
+              /* Restore the exception context of the rtcb at the (new) head
+               * of the ready-to-run task list.
+               */
 
-          rtcb = this_task();
+              rtcb = this_task();
 
 #if XCHAL_CP_NUM > 0
-          /* Set up the co-processor state for the newly started thread. */
+              /* Set up the co-processor state for the newly started thread. */
 
-          xtensa_coproc_restorestate(&rtcb->xcp.cpstate);
+              xtensa_coproc_restorestate(&rtcb->xcp.cpstate);
 #endif
 
 #ifdef CONFIG_ARCH_ADDRENV
-          /* Make sure that the address environment for the previously
-           * running task is closed down gracefully (data caches dump,
-           * MMU flushed) and set up the address environment for the new
-           * thread at the head of the ready-to-run list.
-           */
+              /* Make sure that the address environment for the previously
+               * running task is closed down gracefully (data caches dump,
+               * MMU flushed) and set up the address environment for the new
+               * thread at the head of the ready-to-run list.
+               */
 
-          (void)group_addrenv(rtcb);
+              (void)group_addrenv(rtcb);
 #endif
-          /* Update scheduler parameters */
+              /* Update scheduler parameters */
 
-          sched_resume_scheduler(rtcb);
+              sched_resume_scheduler(rtcb);
 
-          /* Then switch contexts */
+              /* Then switch contexts */
 
-          xtensa_context_restore(rtcb->xcp.regs);
+              xtensa_context_restore(rtcb->xcp.regs);
+            }
         }
+
+#ifdef CONFIG_SMP
+      busy = false;
     }
+#endif
 }
