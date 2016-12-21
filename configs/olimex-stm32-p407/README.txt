@@ -8,6 +8,7 @@ Note that CONFIG_STM32_DISABLE_IDLE_SLEEP_DURING_DEBUG is enabled so
 that the JTAG connection is not disconnected by the idle loop.
 
 The following peripherals are enabled in this configuration.
+
  - LEDs:       show the sytem status
 
  - Buttons:    TAMPER-button, WKUP-button, J1-Joystick (consists of RIGHT-,
@@ -23,6 +24,13 @@ The following peripherals are enabled in this configuration.
                inputs, but it seems that NuttX has currently no driver
                for it.
 
- - CAN:        Built in app 'can' works, but appart from that not really tested.
+ - CAN:        Built in app 'can' works, but apart from that not really tested.
 
  - Ethernet:   Ping to other station on the network works.
+
+STATUS:
+
+2016-12-21: This board configuration was ported from the Olimex STM32 P207
+  port.  Note all of the above features have been verified.  USB, AND, and
+  Ethernet are disabled in the base NSH configuration until they can be
+  verified.

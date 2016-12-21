@@ -228,18 +228,20 @@
 
 /* Alternate function pin selections ************************************************/
 
-//USART3:
-#define GPIO_USART3_RX    GPIO_USART3_RX_3  //PD9
-#define GPIO_USART3_TX    GPIO_USART3_TX_3  //PD8
-#define GPIO_USART3_CTS   GPIO_USART3_CTS_2 //PD11
-#define GPIO_USART3_RTS   GPIO_USART3_RTS_2 //PD12
+/* USART3: */
 
-//CAN:
-#define GPIO_CAN1_RX      GPIO_CAN1_RX_2 //PB8
-#define GPIO_CAN1_TX      GPIO_CAN1_TX_2 //PB9
+#define GPIO_USART3_RX    GPIO_USART3_RX_3  /* PD9  */
+#define GPIO_USART3_TX    GPIO_USART3_TX_3  /* PD8  */
+#define GPIO_USART3_CTS   GPIO_USART3_CTS_2 /* PD11 */
+#define GPIO_USART3_RTS   GPIO_USART3_RTS_2 /* PD12 */
 
-//Ethernet:
-/*
+/* CAN: */
+
+#define GPIO_CAN1_RX      GPIO_CAN1_RX_2    /* PB8 */
+#define GPIO_CAN1_TX      GPIO_CAN1_TX_2    /* PB9 */
+
+/* Ethernet:
+ *
  * - PA2  is ETH_MDIO
  * - PC1  is ETH_MDC
  * - PB5  is ETH_PPS_OUT     - NC (not connected)
