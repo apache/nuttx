@@ -704,12 +704,8 @@ NOTES:
 
     NOTES:
     1. See NOTES for the nsh configuration.
-    2. 2016-12-23: I have only tried to execute this once and I see some
-       assertion from like 87 of xtensa_sigdeliver.c:
-
-       ASSERT(rtcb->xcp.sigdeliver != NULL);
-
-       I have not yet looked into this.
+    2. 2016-12-23: Test appears to be fully functional in the single CPU mode.
+       I have not yet tried SMP mode.
 
 Things to Do
 ============

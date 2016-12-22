@@ -317,7 +317,8 @@ void xtensa_coproc_restorestate(struct xtensa_cpstate_s *cpstate);
 
 /* Signals */
 
-void xtensa_sigdeliver(void);
+void _xtensa_sig_trampoline(void);
+void xtensa_sig_deliver(void);
 
 /* Chip-specific functions **************************************************/
 /* Chip specific functions defined in arch/xtensa/src/<chip> */
