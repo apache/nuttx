@@ -480,7 +480,7 @@ OpenOCD for the ESP32
   Running from IRAM
   -----------------
   *** SKIP this Section.  It is not useful information and will take you down the wrong path. ***
-  *** See instead "Sample Debug Steps" below which is a really usale procedure. ***
+  *** See instead "Sample Debug Steps" below which is a really usable procedure. ***
 
   Running from IRAM is a good debug option.  You should be able to load the
   ELF directly via JTAG in this case, and you may not need the bootloader.  The
@@ -671,7 +671,31 @@ NOTES:
   smp:
 
     Another NSH configuration, similar to nsh, but also enables
-    SMP operation.
+    SMP operation.  It differs from the nsh configuration only in these
+    addtional settings:
+
+      CONFIG_EXAMPLES_SMP=y
+      CONFIG_EXAMPLES_SMP_NBARRIER_THREADS=8
+      CONFIG_EXAMPLES_SMP_PRIORITY=100
+      CONFIG_EXAMPLES_SMP_STACKSIZE=2048
+
+      CONFIG_SMP=y
+      CONFIG_SMP_IDLETHREAD_STACKSIZE=2048
+      CONFIG_SMP_NCPUS=2
+      CONFIG_SPINLOCK=y
+
+    NOTES:
+
+  ostest:
+
+    This is the NuttX test at apps/examples/ostest that is run against all new
+    architecture ports to assure a correct implementation of the OS.  The default
+    version is for a single CPU but can be modified for an SMP test by adding:
+
+      CONFIG_SMP=y
+      CONFIG_SMP_IDLETHREAD_STACKSIZE=2048
+      CONFIG_SMP_NCPUS=2
+      CONFIG_SPINLOCK=y
 
     NOTES:
 
