@@ -33,6 +33,7 @@
 #include <string.h>
 
 #include <nuttx/init.h>
+#include <nuttx/irq.h>
 
 #include "xtensa.h"
 #include "xtensa_attr.h"
@@ -83,6 +84,14 @@ void IRAM_ATTR __start(void)
   regval  = getreg32(0x6001f048); /* DR_REG_BB_BASE+48 */
   regval &= ~(1 << 14);
   putreg32(regval, 0x6001f048);
+
+  /* Make sure that normal interrupts are disabled.  This is really only an
+   * issue when we are started in un-usual ways (such as from IRAM).  In this
+   * case, we can at least defer some unexpected interrupts left over from the
+   * last program execution.
+   */
+
+  up_irq_disable();
 
   /* Move the stack to a known location.  Although we were give a stack
    * pointer at start-up, we don't know where that stack pointer is positioned

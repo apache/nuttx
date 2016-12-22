@@ -545,13 +545,13 @@ OpenOCD for the ESP32
     --- a/arch/xtensa/src/common/xtensa.h
     +++ b/arch/xtensa/src/common/xtensa.h
     @@ -60,7 +60,7 @@
-     #undef CONFIG_SUPPRESS_INTERRUPTS /* DEFINED: Do not enable interrupts */
-     #undef CONFIG_SUPPRESS_TIMER_INTS /* DEFINED: No timer */
-     #undef CONFIG_SUPPRESS_SERIAL_INTS /* DEFINED: Console will poll */
-    -#undef CONFIG_SUPPRESS_UART_CONFIG /* DEFINED: Do not reconfigure UART */
-    +#define CONFIG_SUPPRESS_UART_CONFIG 1 /* DEFINED: Do not reconfigure UART */
+     #undef  CONFIG_SUPPRESS_INTERRUPTS     /* DEFINED: Do not enable interrupts */
+     #undef  CONFIG_SUPPRESS_TIMER_INTS     /* DEFINED: No timer */
+     #undef  CONFIG_SUPPRESS_SERIAL_INTS    /* DEFINED: Console will poll */
+    -#undef  CONFIG_SUPPRESS_UART_CONFIG    /* DEFINED: Do not reconfigure UART */
+    +#define CONFIG_SUPPRESS_UART_CONFIG  1 /* DEFINED: Do not reconfigure UART */
      #define CONFIG_SUPPRESS_CLOCK_CONFIG 1 /* DEFINED: Do not reconfigure clocking */
-     #undef CONFIG_DUMP_ON_EXIT /* DEFINED: Dump task state on exit */
+     #undef  CONFIG_DUMP_ON_EXIT            /* DEFINED: Dump task state on exit */
 
   Start OpenOCD:
 
@@ -674,17 +674,22 @@ NOTES:
     SMP operation.  It differs from the nsh configuration only in these
     addtional settings:
 
-      CONFIG_EXAMPLES_SMP=y
-      CONFIG_EXAMPLES_SMP_NBARRIER_THREADS=8
-      CONFIG_EXAMPLES_SMP_PRIORITY=100
-      CONFIG_EXAMPLES_SMP_STACKSIZE=2048
+    SMP is enabled:
 
       CONFIG_SMP=y
       CONFIG_SMP_IDLETHREAD_STACKSIZE=2048
       CONFIG_SMP_NCPUS=2
       CONFIG_SPINLOCK=y
 
+    The apps/examples/smp test is included:
+
+      CONFIG_EXAMPLES_SMP=y
+      CONFIG_EXAMPLES_SMP_NBARRIER_THREADS=8
+      CONFIG_EXAMPLES_SMP_PRIORITY=100
+      CONFIG_EXAMPLES_SMP_STACKSIZE=2048
+
     NOTES:
+    1. See NOTES for the nsh configuration.
 
   ostest:
 
@@ -698,6 +703,13 @@ NOTES:
       CONFIG_SPINLOCK=y
 
     NOTES:
+    1. See NOTES for the nsh configuration.
+    2. 2016-12-23: I have only tried to execute this once and I see some
+       assertion from like 87 of xtensa_sigdeliver.c:
+
+       ASSERT(rtcb->xcp.sigdeliver != NULL);
+
+       I have not yet looked into this.
 
 Things to Do
 ============
@@ -733,3 +745,25 @@ Things to Do
   5. See SMP-related issues above
 
   6. See OpenOCD for the ESP32 above
+
+  7. Currently will not boot unless serial port initialization is disabled.
+     This will use the serial port settings as left by the preceding
+     bootloader:
+
+     diff --git a/arch/xtensa/src/common/xtensa.h b/arch/xtensa/src/common/xtensa.h
+     index 422ec0b..8707d7c 100644
+     --- a/arch/xtensa/src/common/xtensa.h
+     +++ b/arch/xtensa/src/common/xtensa.h
+     @@ -60,7 +60,7 @@
+      #undef  CONFIG_SUPPRESS_INTERRUPTS     /* DEFINED: Do not enable interrupts */
+      #undef  CONFIG_SUPPRESS_TIMER_INTS     /* DEFINED: No timer */
+      #undef  CONFIG_SUPPRESS_SERIAL_INTS    /* DEFINED: Console will poll */
+     -#undef  CONFIG_SUPPRESS_UART_CONFIG    /* DEFINED: Do not reconfigure UART */
+     +#define CONFIG_SUPPRESS_UART_CONFIG  1 /* DEFINED: Do not reconfigure UART */
+      #define CONFIG_SUPPRESS_CLOCK_CONFIG 1 /* DEFINED: Do not reconfigure clocking */
+      #undef  CONFIG_DUMP_ON_EXIT            /* DEFINED: Dump task state on exit */
+
+     I have not debugged this in detail, but this appears to be an issue with the
+     impelentation of esp32_configgpio() and/or gpio_matrix_out() when called from
+     the setup logic in arch/xtensa/src/esp32/esp32_serial.c.  I am not inclined
+     to invest a lot in driver debug until the clock configuration is finalized.
