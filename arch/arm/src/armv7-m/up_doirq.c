@@ -50,21 +50,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#include "irq/irq.h"
 
 /****************************************************************************
  * Public Functions
@@ -107,15 +93,35 @@ uint32_t *up_doirq(int irq, uint32_t *regs)
    * switch occurred during interrupt processing.
    */
 
+#ifdef CONFIG_SMP
+  /* In the SMP configuration, critical section management uses a "voting"
+   * algorithm with current task on each CPU casting its "vote" by the
+   * state of the TCB irqcount flag.  That irqcount for the current task
+   * on this CPU will be different is a context switch occurrred.
+   */
+
+  if (regs != (uint32_t *)CURRENT_REGS)
+    {
+      /* A context switch has occurred, time for the current task on this
+       * CPU to cast its vote.
+       */
+
+      irq_restore_lock();
+    }
+#endif
+
+  /* Return the current state of CURRENT_REGS */
+
   regs = (uint32_t *)CURRENT_REGS;
 
   /* Restore the previous value of CURRENT_REGS.  NULL would indicate that
    * we are no longer in an interrupt handler.  It will be non-NULL if we
-   * are returning from a nested interrupt.
+   * are returning from a nested interrupt (which are NOT fully supported).
    */
 
   CURRENT_REGS = savestate;
 #endif
+
   board_autoled_off(LED_INIRQ);
   return regs;
 }

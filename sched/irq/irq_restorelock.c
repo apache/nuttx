@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/irq/irq.h
+ * sched/irq/irq_restore.c
  *
- *   Copyright (C) 2007, 2008, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,78 +33,20 @@
  *
  ****************************************************************************/
 
-#ifndef __SCHED_IRQ_IRQ_H
-#define __SCHED_IRQ_IRQ_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
 
-#include <sys/types.h>
-
-#include <nuttx/arch.h>
-#include <nuttx/irq.h>
-#include <nuttx/spinlock.h>
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/* This is the list of interrupt handlers, one for each IRQ.  This is used
- * by irq_dispatch to transfer control to interrupt handlers after the
- * occurrence of an interrupt.
- */
-
-extern FAR xcpt_t g_irqvector[NR_IRQS];
+#include "sched/sched.h"
+#include "irq/irq.h"
 
 #ifdef CONFIG_SMP
-/* This is the spinlock that enforces critical sections when interrupts are
- * disabled.
- */
-
-extern volatile spinlock_t g_cpu_irqlock SP_SECTION;
-
-/* Used to keep track of which CPU(s) hold the IRQ lock. */
-
-extern volatile spinlock_t g_cpu_irqsetlock SP_SECTION;
-extern volatile cpu_set_t g_cpu_irqset SP_SECTION;
-#endif
 
 /****************************************************************************
- * Public Function Prototypes
+ * Public Functions
  ****************************************************************************/
-
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-/****************************************************************************
- * Name: irq_initialize
- *
- * Description:
- *   Configure the IRQ subsystem
- *
- ****************************************************************************/
-
-void weak_function irq_initialize(void);
-
-/****************************************************************************
- * Name: irq_unexpected_isr
- *
- * Description:
- *   An interrupt has been received for an IRQ that was never registered
- *   with the system.
- *
- ****************************************************************************/
-
-int irq_unexpected_isr(int irq, FAR void *context);
 
 /****************************************************************************
  * Name: irq_restore_lock
@@ -128,13 +70,26 @@ int irq_unexpected_isr(int irq, FAR void *context);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SMP
-void irq_restore_lock(void);
-#endif
+void irq_restore_lock(void)
+{
+  FAR struct tcb_s *rtcb;
+  int cpu;
 
-#undef EXTERN
-#ifdef __cplusplus
+  cpu  = this_cpu();
+  rtcb = current_task(cpu);
+
+  /* Adjust global IRQ controls.  If the irqcount of the newly running task is
+   * greater than zero, then this task/CPU holds the IRQ lock
+   */
+
+  if (rtcb->irqcount > 0)
+    {
+      spin_setbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock, &g_cpu_irqlock);
+    }
+  else
+    {
+      spin_clrbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock, &g_cpu_irqlock);
+    }
 }
-#endif
 
-#endif /* __SCHED_IRQ_IRQ_H */
+#endif /* CONFIG_SMP */
