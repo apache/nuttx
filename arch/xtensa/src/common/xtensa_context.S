@@ -529,6 +529,28 @@ _xtensa_context_restore:
 xtensa_context_restore:
 	ENTRY(16)
 
+#ifdef CONFIG_SMP
+	/* Since this function does not return, it is only necessary preserve the
+	 * processor state state are pointer across the following C call.
+	 */
+
+	s32i	a2, sp, LOCAL_OFFSET(1)
+
+	/* In the SMP configuration, critical section management uses a
+	 * "voting" algorithm with current task on each CPU casting its
+	 * "vote" by the state of the TCB irqcount flag.  That irqcount
+	 * for the current task on this CPU will be different is a
+	 * context switch occurrred.
+	 *
+	 * REVISIT:  This should be the very last thing that is done before the
+	 * 'rfe'.  Ideally, you will like to have all of the registers restored
+	 * (or protected on the stack) when the IRQ lock is unlocked.
+	 */
+
+	call4	irq_restore_lock
+	l32i	a2, sp, LOCAL_OFFSET(1)
+#endif
+
 #ifndef __XTENSA_CALL0_ABI__
 	/* Force a spill of the live registers of the thread that has been
 	 * suspended.
