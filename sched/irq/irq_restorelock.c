@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/irq/irq_restore.c
+ * sched/irq/irq_restorelock.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
