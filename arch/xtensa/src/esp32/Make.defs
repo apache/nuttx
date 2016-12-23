@@ -68,6 +68,11 @@ ifeq ($(CONFIG_SMP),y)
   CMN_CSRCS += xtensa_cpupause.c
 endif
 
+ifeq ($(CONFIG_STACK_COLORATION),y)
+  CMN_CSRCS += xtensa_checkstack.c
+endif
+
+
 # Use of common/xtensa_etherstub.c is deprecated.  The preferred mechanism
 # is to use CONFIG_NETDEV_LATEINIT=y to suppress the call to
 # up_netinitialize() in xtensa_initialize.c.  Then this stub would not be

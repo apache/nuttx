@@ -93,6 +93,22 @@ void IRAM_ATTR __start(void)
 
   up_irq_disable();
 
+#ifdef CONFIG_STACK_COLORATION
+  {
+    register uint32_t *ptr;
+    register int i;
+
+      /* If stack debug is enabled, then fill the stack with a recognizable value
+       * that we can use later to test for high water marks.
+       */
+
+      for (i = 0, ptr = g_idlestack;  i < IDLETHREAD_STACKWORDS; i++)
+        {
+          *ptr++ = STACK_COLOR;
+        }
+  }
+#endif
+
   /* Move the stack to a known location.  Although we were give a stack
    * pointer at start-up, we don't know where that stack pointer is positioned
    * respect to our memory map.  The only safe option is to switch to a well-
