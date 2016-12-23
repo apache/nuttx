@@ -51,22 +51,6 @@
 #include "up_internal.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -111,11 +95,12 @@ uint32_t *up_doirq(int irq, uint32_t *regs)
 
   /* Restore the previous value of CURRENT_REGS.  NULL would indicate that
    * we are no longer in an interrupt handler.  It will be non-NULL if we
-   * are returning from a nested interrupt.
+   * are returning from a nested interrupt (which are NOT fully supported).
    */
 
   CURRENT_REGS = savestate;
 #endif
+
   board_autoled_off(LED_INIRQ);
   return regs;
 }

@@ -77,6 +77,7 @@ up_fullcontextrestore:
 	 */
 
 #ifdef CONFIG_ARCH_FPU
+
 	/* First, restore the floating point registers.  Lets do this before we
 	 * restore the ARM registers so that we have plenty of registers to
 	 * work with.
@@ -96,9 +97,11 @@ up_fullcontextrestore:
 
 	ldr		r2, [r1], #4			/* Fetch the floating point control and status register */
 	vmsr	fpscr, r2				/* Restore the FPCSR */
+
 #endif
 
 #ifdef CONFIG_BUILD_KERNEL
+
 	/* For the kernel build, we need to be able to transition gracefully
 	 * between kernel- and user-mode tasks.  Here we do that with a system
 	 * call; the system call will execute in kernel mode and but can return
@@ -116,6 +119,7 @@ up_fullcontextrestore:
 	bx		lr						/* Unnecessary ... will not return */
 
 #else
+
 	/* For a flat build, we can do all of this here... Just think of this as
 	 * a longjmp() all on steriods.
 	 */
@@ -129,11 +133,15 @@ up_fullcontextrestore:
 
 	sub		sp, sp, #(3*4)			/* Frame for three registers */
 	ldr		r1, [r0, #(4*REG_R0)]	/* Fetch the stored r0 value */
-	str		r1, [sp]				/* Save it at the top of the stack */
+	str		r1, [sp, #(4*0)]		/* Save it at the top of the stack */
 	ldr		r1, [r0, #(4*REG_R1)]	/* Fetch the stored r1 value */
-	str		r1, [sp, #4]			/* Save it in the stack */
+	str		r1, [sp, #(4*1)]		/* Save it in the stack */
 	ldr		r1, [r0, #(4*REG_PC)]	/* Fetch the stored pc value */
-	str		r1, [sp, #8]			/* Save it at the bottom of the frame */
+	str		r1, [sp, #(4*2)]		/* Save it at the bottom of the frame */
+
+	/* Recover the saved CPSR value in r1 */
+
+	ldr		r1, [r0, #(4*REG_CPSR)]	/* Fetch the stored CPSR value */
 
 	/* Now we can restore the CPSR.  We wait until we are completely
 	 * finished with the context save data to do this. Restore the CPSR
@@ -142,14 +150,13 @@ up_fullcontextrestore:
 	 * disabled.
 	 */
 
-	ldr		r1, [r0, #(4*REG_CPSR)]	/* Fetch the stored CPSR value */
 	msr		cpsr, r1				/* Set the CPSR */
 
 	/* Now recover r0 and r1 */
 
 	ldr		r0, [sp]
 	ldr		r1, [sp, #4]
-	add		sp, sp, #(2*4)
+	add		sp, sp, #(4*2)
 
 	/* Then return to the address at the stop of the stack,
 	 * destroying the stack frame

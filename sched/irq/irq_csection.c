@@ -570,4 +570,4 @@ void leave_critical_section(irqstate_t flags)
 }
 #endif
 
-#endif /* CONFIG_SMP || CONFIG_SCHED_INSTRUMENTATION_CSECTION*/
+#endif /* CONFIG_SMP || CONFIG_SCHED_INSTRUMENTATION_CSECTION */

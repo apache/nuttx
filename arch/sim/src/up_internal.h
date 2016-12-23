@@ -52,7 +52,7 @@
 #  include <arch/irq.h>
 #  ifdef CONFIG_SMP
 #    include <nuttx/sched.h>
-#    include <arch/spinlock.h>
+#    include <nuttx/spinlock.h>
 #  endif
 #endif
 
