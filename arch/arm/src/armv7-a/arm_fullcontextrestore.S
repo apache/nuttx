@@ -145,26 +145,25 @@ up_fullcontextrestore:
 	 * assuming that it is set???).
 	 */
 
-	sub		sp, sp, #(4*9)			/* Frame for nine registers */
+	sub		sp, sp, #(4*8)			/* Frame for eight registers */
 
-	str		r0, [sp, #(4*0)]		/* Save the structure pointer at the top of the stack */
 	ldr		r1, [r0, #(4*REG_R2)]	/* Fetch the stored r2 value */
-	str		r1, [sp, #(4*1)]		/* Save it in the stack */
+	str		r1, [sp, #(4*0)]		/* Save it in the stack */
 	ldr		r1, [r0, #(4*REG_R3)]	/* Fetch the stored r3 value */
-	str		r1, [sp, #(4*2)]		/* Save it in the stack */
+	str		r1, [sp, #(4*1)]		/* Save it in the stack */
 	ldr		r1, [r0, #(4*REG_R12)]	/* Fetch the stored r12 value */
-	str		r1, [sp, #(4*3)]		/* Save it in the stack */
+	str		r1, [sp, #(4*2)]		/* Save it in the stack */
 	ldr		r1, [r0, #(4*REG_R14)]	/* Fetch the stored r14 value */
-	str		r1, [sp, #(4*4)]		/* Save it in the stack */
+	str		r1, [sp, #(4*3)]		/* Save it in the stack */
 	ldr		r1, [r0, #(4*REG_CPSR)]	/* Fetch the stored CPSR value */
-	str		r1, [sp, #(4*5)]		/* Save it in the stack */
+	str		r1, [sp, #(4*4)]		/* Save it in the stack */
 
 	ldr		r1, [r0, #(4*REG_R0)]	/* Fetch the stored r0 value */
-	str		r1, [sp, #(4*6)]		/* Save it in the stack */
+	str		r1, [sp, #(4*5)]		/* Save it in the stack */
 	ldr		r1, [r0, #(4*REG_R1)]	/* Fetch the stored r1 value */
-	str		r1, [sp, #(4*7)]		/* Save it in the stack */
+	str		r1, [sp, #(4*6)]		/* Save it in the stack */
 	ldr		r1, [r0, #(4*REG_PC)]	/* Fetch the stored pc value */
-	str		r1, [sp, #(4*8)]		/* Save it at the bottom of the frame */
+	str		r1, [sp, #(4*7)]		/* Save it at the bottom of the frame */
 
 	/* In the SMP configuration, critical section management uses a
 	 * "voting" algorithm with current task on each CPU casting its
@@ -179,13 +178,12 @@ up_fullcontextrestore:
 	 * that were saved on the stack.
 	 */
 
-	ldr		r0,  [sp, #(4*0)]		/* Recover the structure pointer at the top of the stack */
-	ldr		r2,  [sp, #(4*1)]		/* Recover R2 */
-	ldr		r3,  [sp, #(4*2)]		/* Recover R3 */
-	ldr		r12, [sp, #(4*3)]		/* Recover R12 */
-	ldr		r14, [sp, #(4*4)]		/* Recover R14 */
-	ldr		r1,  [sp, #(4*5)]		/* Recover the save CPSR in r1 */
-	add		sp,   sp, #(4*6)		/* Discard 6 of the allocated 9 storage locations */
+	ldr		r2,  [sp, #(4*0)]		/* Recover R2 */
+	ldr		r3,  [sp, #(4*1)]		/* Recover R3 */
+	ldr		r12, [sp, #(4*2)]		/* Recover R12 */
+	ldr		r14, [sp, #(4*3)]		/* Recover R14 */
+	ldr		r1,  [sp, #(4*4)]		/* Recover the save CPSR in r1 */
+	add		sp,   sp, #(4*5)		/* Discard 5 of the allocated 8 storage locations */
 
 #else
 
