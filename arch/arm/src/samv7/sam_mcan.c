@@ -1907,16 +1907,35 @@ static int mcan_del_extfilter(FAR struct sam_mcan_s *priv, int ndx)
 
   DEBUGASSERT(priv != NULL && priv->config != NULL);
   config = priv->config;
-  DEBUGASSERT(ndx < config->nextfilters);
+
+  /* Check user Parameters */
+
+  DEBUGASSERT(ndx >= 0 || ndx < config->nextfilters);
+
+  if (ndx < 0 || ndx >= config->nextfilters)
+    {
+      return -EINVAL;
+    }
 
   /* Get exclusive excess to the MCAN hardware */
 
   mcan_dev_lock(priv);
 
-  /* Release the filter */
-
   word = ndx >> 5;
   bit  = ndx & 0x1f;
+
+  /* Check if this filter is really assigned */
+
+  if ((priv->extfilters[word] & (1 << bit)) == 0)
+    {
+      /* No, error out */
+
+      mcan_dev_unlock(priv);
+      return -ENOENT;
+    }
+
+  /* Release the filter */
+
   priv->extfilters[word] &= ~(1 << bit);
 
   DEBUGASSERT(priv->nextalloc > 0);
@@ -2137,16 +2156,35 @@ static int mcan_del_stdfilter(FAR struct sam_mcan_s *priv, int ndx)
 
   DEBUGASSERT(priv != NULL && priv->config != NULL);
   config = priv->config;
-  DEBUGASSERT(ndx < config->nstdfilters);
+
+  /* Check Userspace Parameters */
+
+  DEBUGASSERT(ndx >= 0 || ndx < config->nstdfilters);
+
+  if (ndx < 0 || ndx >= config->nstdfilters)
+    {
+      return -EINVAL;
+    }
 
   /* Get exclusive excess to the MCAN hardware */
 
   mcan_dev_lock(priv);
 
-  /* Release the filter */
-
   word = ndx >> 5;
   bit  = ndx & 0x1f;
+
+  /* Check if this filter is really assigned */
+
+  if ((priv->stdfilters[word] & (1 << bit)) == 0)
+    {
+      /* No, error out */
+
+      mcan_dev_unlock(priv);
+      return -ENOENT;
+    }
+
+  /* Release the filter */
+
   priv->stdfilters[word] &= ~(1 << bit);
 
   DEBUGASSERT(priv->nstdalloc > 0);
