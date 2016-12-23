@@ -135,14 +135,17 @@ up_fullcontextrestore:
 
 	/* Recover the stack pointer (r13) */
 
-	add		sp, r0, #(4*REG_SP)		/* Recover the stack pointer */
+	ldr		sp, [r0, #(4*REG_SP)]	/* Recover the stack pointer */
 
 	/* Create a stack from to preserve the structure pointer and some
-	 * additional registers.  We need to have everything preserved on the
-	 * stack when irq_restore_lock(0) is called.
+	 * additional registers.  We should have everything preserved on the
+	 * in registers on on the stack when irq_restore_lock(0) is called (I am
+	 * not sure that is necessary, but I have concerns about the save
+	 * structure getting modified in the TCB if the spinlock is released --
+	 * assuming that it is set???).
 	 */
 
-	sub		sp, sp, #(4*9)			/* Frame for eight registers */
+	sub		sp, sp, #(4*9)			/* Frame for nine registers */
 
 	str		r0, [sp, #(4*0)]		/* Save the structure pointer at the top of the stack */
 	ldr		r1, [r0, #(4*REG_R2)]	/* Fetch the stored r2 value */
