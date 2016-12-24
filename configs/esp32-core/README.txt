@@ -204,7 +204,7 @@ SMP
       CONFIG_SPINLOCK=y
       CONFIG_SMP=y
       CONFIG_SMP_NCPUS=2
-      CONFIG_SMP_IDLETHREAD_STACKSIZE=2048
+      CONFIG_SMP_IDLETHREAD_STACKSIZE=3072
 
   Debug Tip:  During debug session, OpenOCD may mysteriously switch from one
   CPU to another.  This behavior can be eliminated by uncommenting one of the
@@ -677,7 +677,7 @@ NOTES:
     SMP is enabled:
 
       CONFIG_SMP=y
-      CONFIG_SMP_IDLETHREAD_STACKSIZE=2048
+      CONFIG_SMP_IDLETHREAD_STACKSIZE=3072
       CONFIG_SMP_NCPUS=2
       CONFIG_SPINLOCK=y
 
