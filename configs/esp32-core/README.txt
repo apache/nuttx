@@ -458,7 +458,7 @@ OpenOCD for the ESP32
   To FLASH an ELF via the command line is a two step process, something like
   this:
 
-    esptool.py --chip esp32 elf2image --flash_mode dio --flash_size 4MB -o ./nuttx.bin nuttx.elf
+    esptool.py --chip esp32 elf2image --flash_mode dio --flash_size 4MB -o ./nuttx.bin nuttx
     esptool.py --chip esp32 --port COMx write_flash 0x1000 bootloader.bin 0x4000 partition_table.bin 0x10000 nuttx.bin
 
   The first step converts an ELF image into an ESP32-compatible binary
@@ -477,16 +477,17 @@ OpenOCD for the ESP32
   See https://github.com/espressif/esp-idf/tree/master/components/bootloader
   and https://github.com/espressif/esp-idf/tree/master/components/partition_table.
 
-  Running from IRAM
-  -----------------
-  *** SKIP this Section.  It is not useful information and will take you down the wrong path. ***
-  *** See instead "Sample Debug Steps" below which is a really usable procedure. ***
-
+  Running from IRAM with OpenOCD
+  ------------------------------
   Running from IRAM is a good debug option.  You should be able to load the
-  ELF directly via JTAG in this case, and you may not need the bootloader.  The
-  one "gotcha" for needing the bootloader is disabling the initial watchdog, =
-  there is code in bootloader_start.c that does this.
+  ELF directly via JTAG in this case, and you may not need the bootloader.
 
+  NuttX supports a configuration option, CONFIG_ESP32CORE_RUN_IRAM, that may be
+  selected for execution from IRAM.  This option simply selects the correct
+  linker script for IRAM execution.
+
+  Skipping the Secondary Bootloader
+  ---------------------------------
   It is possible to skip the secondary bootloader and run out of IRAM using
   only the primary bootloader if your application of small enough (< 128KiB code,
   <180KiB data), then you can simplify initial bring-up by avoiding second stage
@@ -498,10 +499,6 @@ OpenOCD for the ESP32
 
     2. Use "esptool.py" utility found in ESP-IDF to convert application .elf
        file into binary format which can be loaded by first stage bootloader.
-
-  NuttX supports a configuration option, CONFIG_ESP32CORE_RUN_IRAM, that may be
-  selected for execution from IRAM.  This option simply selects the correct
-  linker script for IRAM execution.
 
   Again you would need to link the ELF file and convert it to binary format suitable
   for flashing into the board.  The command should to convert ELF file to binary
@@ -524,8 +521,8 @@ OpenOCD for the ESP32
   would I be able to run directly out of IRAM without a bootloader?  That
   might be a simpler bring-up.
 
-  Sample Debug Steps
-  ------------------
+  Sample OpenOCD Debug Steps
+  --------------------------
   I did the initial bring-up using the IRAM configuration and OpenOCD.  Here
   is a synopsis of my debug steps:
 
@@ -705,7 +702,9 @@ NOTES:
     NOTES:
     1. See NOTES for the nsh configuration.
     2. 2016-12-23: Test appears to be fully functional in the single CPU mode.
-       I have not yet tried SMP mode.
+    3. 2016-12-24: But when SMP is enabled, there is a consistent, repeatable
+       crash in the waitpid() test.  At the time of the crash, there is
+       extensive memory corruption and a user exception occurrs (cause=28).
 
 Things to Do
 ============
