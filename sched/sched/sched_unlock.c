@@ -121,7 +121,7 @@ int sched_unlock(void)
            */
 
 #ifdef CONFIG_SMP
-          if (g_pendingtasks.head != NULL && rtcb->irqcount <= 0)
+          if (!spin_islocked(&g_cpu_schedlock) && g_pendingtasks.head != NULL)
 #else
           if (g_pendingtasks.head != NULL)
 #endif
