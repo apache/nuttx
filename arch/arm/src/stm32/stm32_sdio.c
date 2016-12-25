@@ -2578,12 +2578,14 @@ static int stm32_dmapreflight(FAR struct sdio_dev_s *dev,
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
 
+#if !defined(CONFIG_STM32_STM32F40XX)
   /* Wide bus operation is required for DMA */
 
   if (!priv->widebus)
     {
       return -EINVAL;
     }
+#endif
 
   /* DMA must be possible to the buffer */
 
