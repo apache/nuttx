@@ -295,11 +295,6 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
           /* Adjust global pre-emption controls.  If the lockcount is
            * greater than zero, then this task/this CPU holds the scheduler
            * lock.
-           *
-           * NOTE that the global IRQ controls cannot yet be changed.  We
-           * must maintain the critical section until the full context
-           * switch is complete.  irq_restore_lock() will perform that
-           * operation.
            */
 
           if (btcb->lockcount > 0)
@@ -313,14 +308,19 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
                           &g_cpu_schedlock);
             }
 
-          /* If this is not current CPU, then we should update IRQ locks
-           * now.  Controls for this CPU will be updated when we finish the
-           * context switch.
+          /* Adjust global IRQ controls.  If irqcount is greater than zero,
+           * then this task/this CPU holds the IRQ lock
            */
 
-          if (cpu != me)
+          if (btcb->irqcount > 0)
             {
-              irq_restore_cpulock(cpu, btcb);
+              spin_setbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock,
+                          &g_cpu_irqlock);
+            }
+          else
+            {
+              spin_clrbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock,
+                          &g_cpu_irqlock);
             }
 
           /* If the following task is not locked to this CPU, then it must
@@ -379,10 +379,6 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
 
       if (cpu != me)
         {
-          /* In this we will not want to report a context switch to this
-           * CPU.  Only the other CPU is affected.
-           */
-
           DEBUGVERIFY(up_cpu_resume(cpu));
           doswitch = false;
         }

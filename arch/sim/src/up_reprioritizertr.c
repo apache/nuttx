@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/sim/src/up_reprioritizertr.c
  *
- *   Copyright (C) 2007-2009, 2013, 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,7 +48,6 @@
 #include <nuttx/sched.h>
 
 #include "sched/sched.h"
-#include "irq/irq.h"
 #include "up_internal.h"
 
 /****************************************************************************
@@ -167,16 +166,6 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
 
               sched_resume_scheduler(rtcb);
 
-#ifdef CONFIG_SMP
-              /* In the SMP configuration, critical section management uses a
-               * "voting" algorithm with current task on each CPU casting its
-               * "vote" by the state of the TCB irqcount flag.  That irqcount
-               * for the current task on this CPU will be different is a
-               * context switch occurrred.
-               */
-
-              irq_restore_lock();
-#endif
               /* Then switch contexts */
 
               up_longjmp(rtcb->xcp.regs, 1);

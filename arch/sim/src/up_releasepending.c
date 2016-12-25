@@ -47,7 +47,6 @@
 #include <nuttx/sched.h>
 
 #include "sched/sched.h"
-#include "irq/irq.h"
 #include "up_internal.h"
 
 /****************************************************************************
@@ -129,16 +128,6 @@ void up_release_pending(void)
 
               sched_resume_scheduler(rtcb);
 
-#ifdef CONFIG_SMP
-              /* In the SMP configuration, critical section management uses a
-               * "voting" algorithm with current task on each CPU casting its
-               * "vote" by the state of the TCB irqcount flag.  That irqcount
-               * for the current task on this CPU will be different is a
-               * context switch occurrred.
-               */
-
-              irq_restore_lock();
-#endif
               /* Then switch contexts */
 
               up_longjmp(rtcb->xcp.regs, 1);

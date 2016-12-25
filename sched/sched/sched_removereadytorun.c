@@ -236,10 +236,6 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
 
       /* Will pre-emption be disabled after the switch?  If the lockcount is
        * greater than zero, then this task/this CPU holds the scheduler lock.
-       *
-       * NOTE that the global IRQ controls cannot yet be changed.  We must
-       * maintain the critical section until the full context switch is
-       * complete.  irq_restore_lock() will perform that operation.
        */
 
       if (nxttcb->lockcount > 0)
@@ -257,6 +253,25 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
                       &g_cpu_schedlock);
         }
 
+      /* Interrupts may be disabled after the switch.  If irqcount is greater
+       * than zero, then this task/this CPU holds the IRQ lock
+       */
+
+      if (nxttcb->irqcount > 0)
+        {
+          /* Yes... make sure that scheduling logic knows about this */
+
+          spin_setbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock,
+                      &g_cpu_irqlock);
+        }
+      else
+        {
+          /* No.. we may need to release our hold on the irq state. */
+
+          spin_clrbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock,
+                      &g_cpu_irqlock);
+        }
+
       nxttcb->task_state = TSTATE_TASK_RUNNING;
 
       /* All done, restart the other CPU (if it was paused). */
@@ -264,13 +279,6 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
       doswitch = true;
       if (cpu != me)
         {
-          /* If this is not current CPU, then we should update IRQ locks
-           * now.  Controls for this CPU will be updated when we finish the
-           * context switch.
-           */
-
-          irq_restore_cpulock(cpu, nxttcb);
-
           /* In this we will not want to report a context switch to this
            * CPU.  Only the other CPU is affected.
            */

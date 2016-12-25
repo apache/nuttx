@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/sim/src/up_exit.c
  *
- *   Copyright (C) 2007-2009, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,6 @@
 
 #include "task/task.h"
 #include "sched/sched.h"
-#include "irq/irq.h"
 #include "up_internal.h"
 
 /****************************************************************************
@@ -92,17 +91,6 @@ void _exit(int status)
       ((sig_deliver_t)tcb->xcp.sigdeliver)(tcb);
       tcb->xcp.sigdeliver = NULL;
     }
-
-#ifdef CONFIG_SMP
-  /* In the SMP configuration, critical section management uses a
-   * "voting" algorithm with current task on each CPU casting its
-   * "vote" by the state of the TCB irqcount flag.  That irqcount
-   * for the current task on this CPU will be different is a
-   * context switch occurrred.
-   */
-
-  irq_restore_lock();
-#endif
 
   /* Then switch contexts */
 

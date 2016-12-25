@@ -106,54 +106,6 @@ void weak_function irq_initialize(void);
 
 int irq_unexpected_isr(int irq, FAR void *context);
 
-/****************************************************************************
- * Name: irq_restore_cpulock
- *
- * Description:
- *   Restore the state of g_cpu_schedlock and g_cpu_irqlock.  This function
- *   is called after a context switch on another CPU.  A consequence of
- *   the context switch is that the global spinlocks may need to change
- *   states.
- *
- * Input Parameters:
- *   cpu  - The CPU on which the task was started
- *   rtcb - The TCB of the task that was started
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SMP
-void irq_restore_cpulock(int cpu, FAR struct tcb_s *rtcb);
-#endif
-
-/****************************************************************************
- * Name: irq_restore_lock
- *
- * Description:
- *   Restore the state of g_cpu_schedlock and g_cpu_irqlock.  This function
- *   is called after a context switch on the current CPU.  A consequence of
- *   the context switch is that the global spinlocks may need to change
- *   states.  However, the actual realization of that change cannot occur
- *   until all context switching operations have completed.  This function
- *   implements the deferred setting of g_cpu_irqlock.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   g_cpu_irqlock is set upon entry.  It may or may not be set upon return.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SMP
-void irq_restore_lock(void);
-#endif
-
 #undef EXTERN
 #ifdef __cplusplus
 }

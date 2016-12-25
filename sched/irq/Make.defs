@@ -36,7 +36,7 @@
 CSRCS += irq_initialize.c irq_attach.c irq_dispatch.c irq_unexpectedisr.c
 
 ifeq ($(CONFIG_SMP),y)
-CSRCS += irq_csection.c irq_restorelock.c
+CSRCS += irq_csection.c
 else ifeq ($(CONFIG_SCHED_INSTRUMENTATION_CSECTION),y)
 CSRCS += irq_csection.c
 endif
