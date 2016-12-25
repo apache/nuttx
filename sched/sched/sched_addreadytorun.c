@@ -379,6 +379,10 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
 
       if (cpu != me)
         {
+          /* In this we will not want to report a context switch to this
+           * CPU.  Only the other CPU is affected.
+           */
+
           DEBUGVERIFY(up_cpu_resume(cpu));
           doswitch = false;
         }
