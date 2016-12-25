@@ -102,7 +102,8 @@ int sched_unlock(void)
 
 #ifdef CONFIG_SMP
           /* The lockcount has decremented to zero and we need to perform
-           * release our hold on the lock.
+           * release our hold on the lock.  Pre-emption may still be locked
+           * from other CPUs.
            */
 
           DEBUGASSERT(g_cpu_schedlock == SP_LOCKED &&
@@ -118,13 +119,12 @@ int sched_unlock(void)
            *
            * NOTE: This operation has a very high likelihood of causing
            * this task to be switched out!
+           *
+           * NOTE: In SMP mode, pre-emption may still be locked due to
+           * operations on other CPUs.
            */
 
-#ifdef CONFIG_SMP
-          if (!spin_islocked(&g_cpu_schedlock) && g_pendingtasks.head != NULL)
-#else
           if (g_pendingtasks.head != NULL)
-#endif
             {
               up_release_pending();
             }
