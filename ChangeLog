@@ -12952,14 +12952,12 @@
 	  From Paul A. Patience (2016-11-02).
 	* drivers/ and drivers/spi: Fix Kconfig warning.  This commit moves the
 	  ARCH_HAVE_SPI options outside the check for SPI.  Those options don't
-	  depend on SPI, and Kconfig files  in arch/ enable them even if SPI isn't
-	  enabled.
-
-	  Sourcing the driver's Kconfig in drivers/Kconfig only if support for
-	  the driver is enabled prevents us from defining these ARCH_HAVE options
-	  in the driver's Kconfig. We should probably remove the other checks in
-	  drivers/Kconfig and check if the drivers are enabled only in their
-	  Kconfig.  From Paul A. Patience (2016-11-02).
+	  depend on SPI, and Kconfig files  in arch/ enable them even if SPI
+	  isn't  enabled.  Source the driver's Kconfig in drivers/Kconfig only
+	  if support for the driver is enabled prevents us from defining these
+	  ARCH_HAVE options in the driver's Kconfig. We should probably remove
+	  the other checks in drivers/Kconfig and check if the drivers are
+	  enabled only in their Kconfig.  From Paul A. Patience (2016-11-02).
 	* Move protoypes for the non-standard include/semaphore.h file to the
 	  non-standard include/nuttx/semaphore.h with the other non-standard
 	  semaphore interfaces (2016-11-02).
@@ -13426,7 +13424,7 @@
 	  (2016-12-17).
 	* Xtensa ESP32: Need to clone some logic for synchronous context switch.
 	  Window spill logic in the conmon restores logic is inappropriate in
- 	  this context (2016-12-17).
+	  this context (2016-12-17).
 	* sscanf(): Add scansets to the scanf function. Enabled
 	  CONFIG_LIBC_SCANSET option.  From  Aleksandr Vyhovanec (2016-12-17).
 	* Xtensa ESP32: Fix context save logic when called in window ABI
