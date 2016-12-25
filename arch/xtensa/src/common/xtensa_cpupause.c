@@ -229,9 +229,6 @@ int up_cpu_pause(int cpu)
    * handler from returning until up_cpu_resume() is called; g_cpu_paused
    * is a handshake that will prefent this function from returning until
    * the CPU is actually paused.
-   *
-   * REVISIT: OR should there be logic to just skip this if the other CPU
-   * is already paused.
    */
 
   DEBUGASSERT(!spin_islocked(&g_cpu_wait[cpu]) &&
@@ -300,9 +297,6 @@ int up_cpu_resume(int cpu)
   /* Release the spinlock.  Releasing the spinlock will cause the SGI2
    * handler on 'cpu' to continue and return from interrupt to the newly
    * established thread.
-   *
-   * REVISIT: Should there be a more positive handshake to assure that the
-   * resumption is complete before returning.
    */
 
   DEBUGASSERT(spin_islocked(&g_cpu_wait[cpu]) &&
