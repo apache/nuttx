@@ -41,7 +41,6 @@
 
 #include <sys/types.h>
 #include <stdint.h>
-#include <sched.h>
 #include <assert.h>
 #include <errno.h>
 
@@ -158,12 +157,6 @@ int xtensa_intercpu_interrupt(int tocpu, int intcode)
   DEBUGASSERT((unsigned)tocpu < CONFIG_SMP_NCPUS &&
               (unsigned)intcode <= UINT8_MAX);
 
-  /* Disable context switching so that some other thread does not attempt to
-   * take the spinlock on the same CPU.
-   */
-
-  sched_lock();
-
   /* Make sure that each inter-cpu event is atomic.  The spinlock should
    * only be locked if we just completed sending an interrupt to this
    * CPU but the other CPU has not yet processed it.
@@ -195,7 +188,6 @@ int xtensa_intercpu_interrupt(int tocpu, int intcode)
       putreg32(DPORT_CPU_INTR_FROM_CPU_1, DPORT_CPU_INTR_FROM_CPU_1_REG);
     }
 
-  sched_unlock();
   return OK;
 }
 
