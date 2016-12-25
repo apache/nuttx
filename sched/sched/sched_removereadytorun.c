@@ -264,6 +264,13 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
       doswitch = true;
       if (cpu != me)
         {
+          /* If this is not current CPU, then we should update IRQ locks
+           * now.  Controls for this CPU will be updated when we finish the
+           * context switch.
+           */
+
+          irq_restore_cpulock(cpu, nxttcb);
+
           /* In this we will not want to report a context switch to this
            * CPU.  Only the other CPU is affected.
            */

@@ -313,6 +313,16 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
                           &g_cpu_schedlock);
             }
 
+          /* If this is not current CPU, then we should update IRQ locks
+           * now.  Controls for this CPU will be updated when we finish the
+           * context switch.
+           */
+
+          if (cpu != me)
+            {
+              irq_restore_cpulock(cpu, btcb);
+            }
+
           /* If the following task is not locked to this CPU, then it must
            * be moved to the g_readytorun list.  Since it cannot be at the
            * head of the list, we can do this without invoking any heavy

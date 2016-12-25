@@ -49,15 +49,49 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: irq_restore_cpulock
+ *
+ * Description:
+ *   Restore the state of g_cpu_schedlock and g_cpu_irqlock.  This function
+ *   is called after a context switch on another CPU.  A consequence of
+ *   the context switch is that the global spinlocks may need to change
+ *   states.
+ *
+ * Input Parameters:
+ *   cpu  - The CPU on which the task was started
+ *   rtcb - The TCB of the task that was started
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void irq_restore_cpulock(int cpu, FAR struct tcb_s *rtcb)
+{
+  /* Adjust global pre-emption controls.  If the lockcount is greater than
+   * zero, then this task/this CPU holds the scheduler lock.
+   */
+
+  if (rtcb->irqcount > 0)
+    {
+      spin_setbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock, &g_cpu_irqlock);
+    }
+  else
+    {
+      spin_clrbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock, &g_cpu_irqlock);
+    }
+}
+
+/****************************************************************************
  * Name: irq_restore_lock
  *
  * Description:
- *   Restore the state of g_cpu_irqlock.  This function is called after a
- *   context switch.  A consequence of the context switch is that the the
- *   global g_cpu_irqlock spinlock may need to change states.  However, the
- *   actual realization of that change cannot occur until all context
- *   switching operations have completed.  This function implements the
- *   deferred setting of g_cpu_irqlock.
+ *   Restore the state of g_cpu_schedlock and g_cpu_irqlock.  This function
+ *   is called after a context switch on the current CPU.  A consequence of
+ *   the context switch is that the global spinlocks may need to change
+ *   states.  However, the actual realization of that change cannot occur
+ *   until all context switching operations have completed.  This function
+ *   implements the deferred setting of g_cpu_irqlock.
  *
  * Input Parameters:
  *   None
@@ -78,18 +112,9 @@ void irq_restore_lock(void)
   cpu  = this_cpu();
   rtcb = current_task(cpu);
 
-  /* Adjust global IRQ controls.  If the irqcount of the newly running task is
-   * greater than zero, then this task/CPU holds the IRQ lock
-   */
+  /* Adjust global pre-emption and IRQ controls. */
 
-  if (rtcb->irqcount > 0)
-    {
-      spin_setbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock, &g_cpu_irqlock);
-    }
-  else
-    {
-      spin_clrbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock, &g_cpu_irqlock);
-    }
+  irq_restore_cpulock(cpu, rtcb);
 }
 
 #endif /* CONFIG_SMP */
