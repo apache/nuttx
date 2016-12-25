@@ -12772,6 +12772,9 @@
 	* STM32 DMA2D: fix an error in up_dma2dcreatelayer where an invalid
 	  pointer was returned when a certain underlying function failed.  From
 	  Jens Gräf (2016-10-07).
+
+7.19 2016-12-26 Gregory Nutt <gnutt@nuttx.org>
+
 	* include/nuttx/fs/nxffs.h: Needs forward reference to struct mtd_dev_s
 	  and needs to include stdbool.h (2016-10-09).
 	* STM32F103 Minimum: Note in Kconfig that the board supports buttons.
@@ -13356,5 +13359,114 @@
 	* Add task_setcancelstate(), task_setcanceltype(), and task_testcancel().
 	  These are non-standard interfaces analogous to the correponding pthread_
 	  interfaces that provide cancellation controls for tasks (2016-12-10).
+	* i.MX6 interrupt handling:  Additional logic needed to handle nested
+	  interrupts when an interrupt stack is used (2016-12-13).
+	* SAMV7 MCAN: Prevent Interrupt-Flooding of ACKE when not connected to
+	  CAN-BUS. An Acknowledge-Error will occur every time no other CAN Node
+	  acknowledges the message sent. This will also occur if the device is
+	  not connected to the can-bus. The CAN-Standard declares, that the Chip
+	  has to retry a given message as long as it is not sent successfully (or
+	  it is not cancelled by the application). Every time the chip tries to
+	  resend the message an Acknowledge-Error-Interrupt is generated. At high
+	  baud rates this can lead in extremely high CPU load just for handling
+	  the interrupts (and possibly the error handling in the application). To
+	  prevent this Interrupt-Flooding we disable the ACKE once it is seen as
+	  long we didn't transfer at least one message successfully.  From Frank
+	  Benkert (2016-12-13).
+	* i.MX6: Remove non-cached, inter-cpu memory region.  Not a useful
+	  concept (2016-12-13).
+	* minnsh Configurations: Remove minnsh configurations and support logic:
+	  up_getc() and lowinstream.  This was an interesting exercise to see
+	  just how small you could get NuttX, but otherwise it was not useful:
+	  (1) the NSH code violated the OS interface layer by callup up_getc and
+	  up_putc directly, and (2) while waiting for character input, NSH would
+	  call up_getc() which would hog all of the CPU.  NOt a reasonably
+	  solution other than as a proof of concept (2016-12-13).
+	* Calypso Boards: Remove all Calypso board configurations (2016-12-13).
+	* Calypso: Remove Calypso architecture support and support for Calypso
+	  SERCOMM driver (2016-12-13).
+	* ESP32 core v2: Two changes (1) flushes the UART TX buffer in the esp32
+	  serial shutdown routine. The ROM bootloader does not flush the FIFO
+	  before handing over to user code, so some of this output is not
+	  currently seen when the UART is reconfigured in early stages of
+	  startup.  And changes the openocd config file's default flash voltage
+	  from 1.8V to 3.3V. This is not necessary right now, but may save some
+	  hard-to-debug moments down the track (3.3V-only flash running at 1.8V
+	  often half-works and does weird things...).  From Angus Gratton
+	  (2016-12-14).
+	* Xtensa ESP32: Add missing ENTRY() and RET() macros in C callable
+	  assembly language.  At one time I though the that the ESP32 support the
+	  CALL0 ABI.  I was mistaken so there may be a few more like this
+	  (2016-12-14).
+	* Xtensa ESP32: Fix a couple of bugs associated with handling of CPU
+	  interrupts (2016-12-14).
+	* Xtensa ESP32: Fix several build-related issues associated with vector
+	  section (2016-12-15).
+	* Xtensa ESP32: Fix missing CALL0 ABI condition (2016-12-15).
+	* Xtensa EPS32: Make sure that all C callable assembly functions includes
+	  ENTRY prologue and RET epilogue (2016-12-15).
+	* Xtensa ESP32: Fix windowspill register handling + Use r6, not r2 when
+	  passing paramters with call4 (2016-12-16).
+	* Xtensa ESP32: Use r6, not r2 when passing paramters with call4
+	  (2016-12-16).
+	* Xtensa ESP32: Correct a logic problem the prevented dumping the IDLE
+	  thread's stack on an assertion (2016-12-16).
+	* Xtensa ESP32: Fix some missing SMP logic (2016-12-16).
+	* Xtensa ESP32: Basically a redesign of the interrupt dispatch logic
+	  (2016-12-16).
+	* Xtensa ESP32: Level 1 interrupts should return via RFE (2016-12-17).
+	* Xtensa ESP32: One register getting clobber on context save (2016-12-17).
+	* STM32 F7: Fix some STM32F7 copy paste errors.  From David Sidrane
+	  (2016-12-17).
+	* CDC/ACM Device Class: uart_ops_s portion of cdcacm will not be
+	  initalized with correct functions if CONFIG_SERIAL_DMA is lit
+	  (2016-12-17).
+	* Xtensa ESP32: Using wrong register to disable interrupts (2016-12-17).
+	* Xtensa ESP32: Fix clobbered a9 in co-processor context save/restore
+	  (2016-12-17).
+	* Xtensa ESP32: Need to clone some logic for synchronous context switch.
+	  Window spill logic in the conmon restores logic is inappropriate in
+ 	  this context (2016-12-17).
+	* sscanf(): Add scansets to the scanf function. Enabled
+	  CONFIG_LIBC_SCANSET option.  From  Aleksandr Vyhovanec (2016-12-17).
+	* Xtensa ESP32: Fix context save logic when called in window ABI
+	  configuration. Add an IDLE stack.  Don't depend on the mystery stack
+	  received from the bootloader (2016-12-18).
+	* Xtensa ESP32: Need to spill registers to memory as the last dying
+	  action before switching to a new thread (2016-12-18).
+	* ESP32 Serial: Add logic to prevent infinite loops in interrupt handler
+	  (2016-12-18).
+	* Xtensa ESP32: Automatically mount /proc at start-up (2016-12-19).
+	* Xtensa ESP32: Corrects timer initialization and timer input frequency
+	  (2016-12-19).
+	* Tiva PWM: Support PWM_PULSECOUNT feature for TI tiva.  From Young.Mu
+	  (2016-12-20).
+	* Xtensa ESP32: Missing prologue/epilogue macros on C callable function
+	  (2016-12-20).
+	* Xtensa ESP32: Update APP CPU startup logic to match current Expressif
+	  example code.  Fix errors APP CPU startup (2016-12-20).
+	* fs/procfs: Fix procfs status for SMP case (2016-12-20).
+	* Xtensa ESP32:  Clock frequency is different if running from IRAM or is
+	  booting from FLASH.   This is a booltloader issue (2016-12-20).
+	* Xtensa ESP32:  Basic port is function in both single CPU and dual CPU
+	  SMP configurations.  There is an NSH configuration for each CPU
+	  configuration (2016-12-21).
+	* STM32 F4: Merge in support for the Olimex STM32 P407 board (2016-12-21).
+	* Xtensa ESP32: Add an OS test to verify the port (2016-12-22).
+	* Xtensa ESP32:  Corrects a problem with dispatching to signal handlers:
+	  Cannot vector directly to the signal handling function as in other ABIs
+	  under the Xtensa Window ABI.  In that case, we need to go through a
+	  tiny hook when performs the correct window call (call4) otherwise
+	  registers will be scrambled in the signal handler (2016-12-22).
+	* SAMV7 CAN: Make delete_filter functions more robust.  From Frank
+	  Benkert (2016-12-23).
+	* Xtensa ESP32: Add stack checking logic (2016-12-23).
+	* sched note: record ID enumeration now results on constant values; ID
+	  values do not change with configuration.  This makes writing
+	  post-processing software much easier (2016-12-24).
+	* STM32 F3: Forgot to update chip.h for STM32F303x[BC]'s 4 ADCs
+	  (2016-12-24).
+	* STM32 F4: Allow dma in 1 bit mode in STM32F4xxx.  From David Sidrane
+	  (2016-12-24).
 
-7.19 2016-xx-xx Gregory Nutt <gnutt@nuttx.org>
+7.20 2017-xx-xx Gregory Nutt <gnutt@nuttx.org>
