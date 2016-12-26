@@ -3130,7 +3130,7 @@
 	  point numbers.
 	* lib/stdio/lib_libdtoa.c and lib_libvsprintf.c:  Correct some floating
 	  point options.
-	* arch/arm/lpc43xx/lpc32_usb0dev.c:  Add framework for development of
+	* arch/arm/lpc43xx/lpc43_usb0dev.c:  Add framework for development of
 	  an USB0, device-side driver for the LPC43XX.  The initial check-in,
 	  however, is simply for the LPC31xx driver with name changes.  The
 	  LPC31xx has the same USB IP, but will require some additional initialization
@@ -4440,7 +4440,7 @@
 	* binfmt/binfmt_execmodule.c:  Here is a place where I forget
 	  to update the call to sched_releasetcb() to pass the thread
 	  type as the second parameter (2013-03-23).
-	* arch/arm/src/lm, kinetis, lpc32, and nuc1xx:  Add kernel build
+	* arch/arm/src/lm, kinetis, lpc43, and nuc1xx:  Add kernel build
 	  support to all ARMv7-M and ARMv6-M chips.  There are no
 	  configurations in place to to verify these additions!
 	  (2013-03-24).
@@ -10964,7 +10964,7 @@
 	  (2015-09-09).
 	* configs/nucleo-f303re: Support for the STMicro Nucleo F303RE board
 	  from Paul Alexander Patience (2015-09-10).
-	* arch/arm/src/lpc43xx/lpc32_ehci.c and .h:  LPC43xx EHCI driver from
+	* arch/arm/src/lpc43xx/lpc43_ehci.c and .h:  LPC43xx EHCI driver from
 	  Ilya Averyanov (2015-09-10).
 	* ARMv7-M, all "lazy" interrupt stack logic.  Assembly instruction
 	  that fetches the saved value is incorrect; replace with more
@@ -12348,7 +12348,7 @@
 	  adds DEBUGASSERT for invalid geometry and additional memory debug
 	  logic.  Also fixes the dangling pointer on error bug.  From Ken
 	  Pettit (2016-07-14).
-	* arch/arm/src/lpc32xx: Extend LPC43xx EMC code to support SDRAM on a
+	* arch/arm/src/lpc43xx: Extend LPC43xx EMC code to support SDRAM on a
 	  dynamic memory interface.  From Vytautas Lukenskas (2016-07-19).
 	* arch/sim/src:  Add the simulated QSPI (N25Q) flash to the simulation
 	  and modify sim up_spiflash.c to enable it to run with different MTD
@@ -12847,16 +12847,16 @@
 	  (2016-10-19).
 	* libc/locale: Allows c++ code to compile with or without
 	  CONFIG_LIBC_LOCALE and will generate a link error if CONFIG_LIBC_LOCALE
-	  is not defined and setlocale is referneced. With CONFIG_LIBC_LOCALE
+	  is not defined and setlocale is referenced. With CONFIG_LIBC_LOCALE
 	  defined setlocale will act as if MB string is not supported and return
 	  "C" for POSIX. C and "". From David Sidrane (2016-10-19).
-	* Add vectors for interrupt levels 2-6 (2016-10-20).
-	* strtof:  Add strtof() as simply a copy of strtod with types and
+	* Xtensa ESP32: Add vectors for interrupt levels 2-6 (2016-10-20).
+	* strtof():  Add strtof() as simply a copy of strtod with types and
 	  limits changed (2016-10-20).
 	* arch/arm/src/stm32v7:  Register the watchdog device at the configured
 	  device path CONFIG_WATCHDOG_DEVPATH vs. hard-coded /dev/wdt.  From Frank
 	  Benkert (2016-10-21).
-	* configs/*/defdonf The buttons example was changed to archbuttons.  As
+	* configs/*/defconfig: The buttons example was changed to archbuttons.  As
 	  a result all of the button configurations are broken and need some
 	  renaming in the defconfig files.  Noted by Frank Berkert (2016-10-21).
 	* configs/stm32f103-minimum: Add support to PWM on STM32F103-Minimum
@@ -12912,7 +12912,7 @@
 	  found in the F4. From David Sidrane (2016-10-26).
 	* arch/arm/src/stm32f7: stm32f76xx77xx_pinmap.h Missed one.  From
 	  David Sidrane (2016-10-26).
-	* LPC32xx serial: Fix a typo in ioctl TIOCSRS485 ioctl.  From Vytautas
+	* LPC43xx serial: Fix a typo in ioctl TIOCSRS485 ioctl.  From Vytautas
 	  Lukenskas (2016-10-27).
 	* sched/clock: Correct clock initialization.  The correct range for
 	  the month is 0-11 but is entered as 1-12 in the .config file
@@ -12922,7 +12922,7 @@
 	* sched/Kconfig:  Add ranges to START_YEAR, MONTH, and DAY (2016-10-28).
 	* configs/nucleo-f303re: Add STM32 F303RE hello configuration; remove
 	  duplicate setting from board.h.   From  Marc Rechté (2016-10-18).
-	* arch/arm/src/lpc32xx: Restore RS485 mode on serial port open (if
+	* arch/arm/src/lpc43xx: Restore RS485 mode on serial port open (if
 	  RS485 is enabled via menuconfig).  From Vytautas Lukenskas (2016-10-28).
 	* arch/arm/src/stm32f7:  otgdev fixed typo.  From David Sidrane
 	  (2016-10-28).
@@ -13101,7 +13101,7 @@
 	  argument so that there can be additional usage.  From Sebastien Lorquet
 	  (2016-11-17).
 	* All timer lower half drivers.  Port Sebastien's changes to all all
-	  other implementations of the timer lower half.  Very many just and
+	  other implementations of the timer lower half.  Many changes and
 	  untested.  Expect some problems. (2016-11-17).
 	* sched/irq: irq_csection() has a bad assumption in the SMP case.  It
 	  assumed that the state of certain variables.  That was true on entry
@@ -13237,7 +13237,7 @@
 	  and execute "make" it will not detect that Pin.cxx was modified. I
 	  think there is some other place I should modify, but I didn't find
 	  it.  From Alan Carvalho de Assis (2016-11-27).
-	* ARMv7-A/i.MX6 SMP: Move SMP coherernt cache setup to earlier in
+	* ARMv7-A/i.MX6 SMP: Move SMP coherent cache setup to earlier in
 	  initialization of CPUn, n>0 (2016-11-27).
 	* ARMv7 GIC: SGIs are non-maskable but go through the same path as other,
 	  maskable interrupts.  Added logic to serialize SGI processing when
@@ -13378,7 +13378,7 @@
 	  just how small you could get NuttX, but otherwise it was not useful:
 	  (1) the NSH code violated the OS interface layer by callup up_getc and
 	  up_putc directly, and (2) while waiting for character input, NSH would
-	  call up_getc() which would hog all of the CPU.  NOt a reasonably
+	  call up_getc() which would hog all of the CPU.  Not a reasonable
 	  solution other than as a proof of concept (2016-12-13).
 	* Calypso Boards: Remove all Calypso board configurations (2016-12-13).
 	* Calypso: Remove Calypso architecture support and support for Calypso
