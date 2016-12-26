@@ -125,7 +125,13 @@ int sched_unlock(void)
            * in a critical section, i.e., g_cpu_irqlock is locked , or (2)
            * other CPUs still have pre-emption disabled, i.e.,
            * g_cpu_schedlock is locked.  In those cases, the release of the
-           * pending tasks must be deferred until those conditions are met.ing 
+           * pending tasks must be deferred until those conditions are met.
+           *
+           * REVISIT:  This seems incomplete.  Apparently there is some
+           * condition that we must prevent releasing the pending tasks
+           * when in a critical section.  This logic does that, but there
+           * no corresponding logic to prohibit a new task from being
+           * started on the g_assignedtasks list.  Something is amiss.
            */
 
           if (!spin_islocked(&g_cpu_schedlock) &&
