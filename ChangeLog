@@ -13466,5 +13466,13 @@
 	  (2016-12-24).
 	* STM32 F4: Allow dma in 1 bit mode in STM32F4xxx.  From David Sidrane
 	  (2016-12-24).
+	* termios.h:  Fix CRTSCTS define to include input and output flow.
+	  From  Lorenz Meier (2016-12-26).
+	* SMP: Enforce this rule: Tasks which are normally restored when
+	  sched_unlock() is called must remain pending (1) if we are in a
+	  critical section, i.e., g_cpu_irqlock is locked , or (2) other CPUs
+	  still have pre-emption disabled, i.e., g_cpu_schedlock is locked.  In
+	  those cases, the release of the pending tasks must be deferred until
+	  those conditions are met (2016-12-26).
 
 7.20 2017-xx-xx Gregory Nutt <gnutt@nuttx.org>

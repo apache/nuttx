@@ -513,12 +513,9 @@ void leave_critical_section(irqstate_t flags)
               if (!spin_islocked(&g_cpu_irqlock))
                 {
                   /* Check if there are pending tasks and that pre-emption
-                   * is also enabled.
-                   *
-                   * REVISIT: Is there an issue here?  up_release_pending()
-                   * must be called from within a critical section but here
-                   * we have just left the critical section.  At least we
-                   * still have interrupts disabled on this CPU.
+                   * is also enabled.  This is necessary becaue we may have
+                   * deferred the up_release_pending() call in sched_unlock()
+                   * because we were within a critical section then.
                    */
 
                   if (g_pendingtasks.head != NULL &&
@@ -529,9 +526,6 @@ void leave_critical_section(irqstate_t flags)
                        *
                        * NOTE: This operation has a very high likelihood of
                        * causing this task to be switched out!
-                       *
-                       * REVISIT: Should this not be done while we are in the
-                       * critical section.
                        */
 
                       up_release_pending();
