@@ -47,6 +47,76 @@
 #include "sched/sched.h"
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name:  sched_cpulocked
+ *
+ * Description:
+ *   Test if the IRQ lock set OR if this CPU holds the IRQ lock
+ *   There is an interaction with pre-emption controls and IRQ locking:
+ *   Even if the pre-emption is enabled, tasks will be forced to pend if
+ *   the IRQ lock is also set UNLESS the CPU starting the task is the
+ *   holder of the IRQ lock.
+ *
+ * Inputs:
+ *   rtcb - Points to the blocked TCB that is ready-to-run
+ *
+ * Return Value:
+ *   true  - IRQs are locked by a different CPU.
+ *   false - IRQs are unlocked OR if they are locked BUT this CPU
+ *           is the holder of the lock.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+static bool sched_cpulocked(int cpu)
+{
+  bool ret;
+
+  /* First, get the g_cpu_irqsetlock spinlock so that g_cpu_irqset and
+   * g_cpu_irqlock will be stable throughout this function.
+   */
+
+  spin_lock(&g_cpu_irqsetlock);
+
+  /* Test if g_cpu_irqlock is locked.  We don't really need to use check
+   * g_cpu_irqlock to do this, we can use the g_cpu_set.
+   */
+
+  if (g_cpu_irqset != 0)
+    {
+      /* Some CPU holds the lock.  So 'orlock' should be locked */
+
+      DEBUGASSERT(spin_islocked(&g_cpu_irqlock));
+
+      /* Return false if the 'cpu' is the holder of the lock; return
+       * true if g_cpu_irqlock is locked, but this CPU is not the
+       * holder of the lock.
+       */
+
+      ret = ((g_cpu_irqset & (1 << cpu)) == 0);
+    }
+  else
+    {
+      /* No CPU holds the lock.  So 'orlock' should be unlocked */
+
+      DEBUGASSERT(!spin_islocked(&g_cpu_irqlock));
+
+      /* Return false if g_cpu_irqlock is unlocked */
+
+      ret = false;
+    }
+
+  /* Release the g_cpu_irqsetlock */
+
+  spin_unlock(&g_cpu_irqsetlock);
+  return ret;
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -167,10 +237,11 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
 {
   FAR struct tcb_s *rtcb;
   FAR dq_queue_t *tasklist;
-  int task_state;
-  int cpu;
   bool switched;
   bool doswitch;
+  int task_state;
+  int cpu;
+  int me;
 
   /* Check if the blocked TCB is locked to this CPU */
 
@@ -226,9 +297,17 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
    * disabled.  If the selected state is TSTATE_TASK_READYTORUN, then it
    * should also go to the pending task list so that it will have a chance
    * to be restarted when the scheduler is unlocked.
+   *
+   * There is an interaction here with IRQ locking.  Even if the pre-
+   * emption is enabled, tasks will be forced to pend if the IRQ lock
+   * is also set UNLESS the CPU starting the thread is also the holder of
+   * the IRQ lock.  sched_cpulocked() performs an atomic check for that
+   * situation.
    */
 
-  if (spin_islocked(&g_cpu_schedlock) && task_state != TSTATE_TASK_ASSIGNED)
+  me = this_cpu();
+  if ((spin_islocked(&g_cpu_schedlock) || sched_cpulocked(me)) &&
+      task_state != TSTATE_TASK_ASSIGNED)
     {
       /* Add the new ready-to-run task to the g_pendingtasks task list for
        * now.
@@ -255,10 +334,8 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
     }
   else /* (task_state == TSTATE_TASK_ASSIGNED || task_state == TSTATE_TASK_RUNNING) */
     {
-      int me = this_cpu();
-
-      /* If we are modifying some assigned task list other than our own, we will
-       * need to stop that CPU.
+      /* If we are modifying some assigned task list other than our own, we
+       * will need to stop that CPU.
        */
 
       if (cpu != me)
