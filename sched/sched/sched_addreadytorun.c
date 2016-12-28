@@ -43,6 +43,8 @@
 #include <queue.h>
 #include <assert.h>
 
+#include <nuttx/init.h>
+
 #include "irq/irq.h"
 #include "sched/sched.h"
 
@@ -81,13 +83,24 @@ static bool sched_cpulocked(int cpu)
 
   spin_lock(&g_cpu_irqsetlock);
 
+  /* g_cpu_irqset is not valid in early phases of initialization */
+
+  if (g_os_initstate < OSINIT_OSREADY)
+    {
+      /* We are still single threaded.  In either state of g_cpu_irqlock,
+       * the correct return value should always be false.
+       */
+
+      ret = false;
+    }
+
   /* Test if g_cpu_irqlock is locked.  We don't really need to use check
    * g_cpu_irqlock to do this, we can use the g_cpu_set.
    */
 
-  if (g_cpu_irqset != 0)
+  else if (g_cpu_irqset != 0)
     {
-      /* Some CPU holds the lock.  So 'orlock' should be locked */
+      /* Some CPU holds the lock.  So g_cpu_irqlock should be locked */
 
       DEBUGASSERT(spin_islocked(&g_cpu_irqlock));
 
@@ -98,13 +111,20 @@ static bool sched_cpulocked(int cpu)
 
       ret = ((g_cpu_irqset & (1 << cpu)) == 0);
     }
+
+  /* No CPU holds the lock */
+
   else
     {
-      /* No CPU holds the lock.  So 'orlock' should be unlocked */
+      /* In this case g_cpu_irqlock should be unlocked.  However, if
+       * the lock was established in the interrupt handler AND there is
+       * no bits set in g_cpu_irqset, that probabaly means only that
+       * critical section was established from an interrupt handler.
+       */
 
-      DEBUGASSERT(!spin_islocked(&g_cpu_irqlock));
+      DEBUGASSERT(!spin_islocked(&g_cpu_irqlock) || up_interrupt_context());
 
-      /* Return false if g_cpu_irqlock is unlocked */
+      /* Return false in either case. */
 
       ret = false;
     }
@@ -350,7 +370,8 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
       tasklist = (FAR dq_queue_t *)&g_assignedtasks[cpu];
       switched = sched_addprioritized(btcb, tasklist);
 
-      /* If the selected task was the g_assignedtasks[] list, then a context
+      /* If the selected task list was the g_assignedtasks[] list and if the
+       * new tasks is the highest priority (RUNNING) task, then a context
        * switch will occur.
        */
 
@@ -444,7 +465,14 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
         }
       else
         {
-          /* No context switch.  Assign the CPU and set the assigned state */
+          /* No context switch.  Assign the CPU and set the assigned state.
+           *
+           * REVISIT: I have seen this assertion fire.  Apparently another
+           * CPU may add another, higher prioirity task to the same
+           * g_assignedtasks[] list sometime after sched_cpu_select() was
+           * called above, leaving this TCB in the wrong task list if task_state
+           * is TSTATE_TASK_ASSIGNED).
+           */
 
           DEBUGASSERT(task_state == TSTATE_TASK_ASSIGNED);
 
