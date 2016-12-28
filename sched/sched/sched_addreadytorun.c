@@ -75,13 +75,7 @@
 #ifdef CONFIG_SMP
 static bool sched_cpulocked(int cpu)
 {
-  bool ret;
-
-  /* First, get the g_cpu_irqsetlock spinlock so that g_cpu_irqset and
-   * g_cpu_irqlock will be stable throughout this function.
-   */
-
-  spin_lock(&g_cpu_irqsetlock);
+  cpu_set_t irqset;
 
   /* g_cpu_irqset is not valid in early phases of initialization */
 
@@ -91,25 +85,26 @@ static bool sched_cpulocked(int cpu)
        * the correct return value should always be false.
        */
 
-      ret = false;
+      return false;
     }
 
   /* Test if g_cpu_irqlock is locked.  We don't really need to use check
    * g_cpu_irqlock to do this, we can use the g_cpu_set.
+   *
+   * Sample the g_cpu_irqset once.  That is an atomic operation.  All
+   * subsequent operations will operate on the sampled cpu set.
    */
 
-  else if (g_cpu_irqset != 0)
+  irqset = (cpu_set_t)g_cpu_irqset;
+  if (irqset != 0)
     {
-      /* Some CPU holds the lock.  So g_cpu_irqlock should be locked */
-
-      DEBUGASSERT(spin_islocked(&g_cpu_irqlock));
-
-      /* Return false if the 'cpu' is the holder of the lock; return
+      /* Some CPU holds the lock.  So g_cpu_irqlock should be locked.
+       * Return false if the 'cpu' is the holder of the lock; return
        * true if g_cpu_irqlock is locked, but this CPU is not the
        * holder of the lock.
        */
 
-      ret = ((g_cpu_irqset & (1 << cpu)) == 0);
+      return ((irqset & (1 << cpu)) == 0);
     }
 
   /* No CPU holds the lock */
@@ -117,22 +112,14 @@ static bool sched_cpulocked(int cpu)
   else
     {
       /* In this case g_cpu_irqlock should be unlocked.  However, if
-       * the lock was established in the interrupt handler AND there is
+       * the lock was established in the interrupt handler AND there are
        * no bits set in g_cpu_irqset, that probabaly means only that
        * critical section was established from an interrupt handler.
+       * Return false in either case.
        */
 
-      DEBUGASSERT(!spin_islocked(&g_cpu_irqlock) || up_interrupt_context());
-
-      /* Return false in either case. */
-
-      ret = false;
+      return false;
     }
-
-  /* Release the g_cpu_irqsetlock */
-
-  spin_unlock(&g_cpu_irqsetlock);
-  return ret;
 }
 #endif
 
