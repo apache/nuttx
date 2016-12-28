@@ -504,16 +504,14 @@ void leave_critical_section(irqstate_t flags)
               DEBUGASSERT(spin_islocked(&g_cpu_irqlock) &&
                           (g_cpu_irqset & (1 << cpu)) != 0);
 
-              rtcb->irqcount = 0;
-              spin_clrbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock,
-                          &g_cpu_irqlock);
+              /* Check if releasing the lock held by this CPU will unlock the
+               * critical section.
+               */
 
-              /* Have all CPUs released the lock? */
-
-              if (!spin_islocked(&g_cpu_irqlock))
+              if ((g_cpu_irqset & ~(1 << cpu)) == 0)
                 {
-                  /* Check if there are pending tasks and that pre-emption
-                   * is also enabled.  This is necessary becaue we may have
+                  /* Yes.. Check if there are pending tasks and that pre-emption
+                   * is also enabled.  This is necessary because we may have
                    * deferred the up_release_pending() call in sched_unlock()
                    * because we were within a critical section then.
                    */
@@ -522,15 +520,25 @@ void leave_critical_section(irqstate_t flags)
                       !spin_islocked(&g_cpu_schedlock))
                     {
                       /* Release any ready-to-run tasks that have collected
-                       * in g_pendingtasks if the scheduler is not locked.
-                       *
-                       * NOTE: This operation has a very high likelihood of
-                       * causing this task to be switched out!
+                       * in g_pendingtasks.  NOTE: This operation has a very
+                       * high likelihood of causing this task to be switched
+                       * out!
                        */
 
                       up_release_pending();
                     }
                 }
+
+              /* Now, possibly on return from a context switch, clear our
+               * count on the lock.  If all CPUs have released the lock,
+               * then unlock the global IRQ spinlock.
+               */
+
+              rtcb->irqcount = 0;
+              spin_clrbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock,
+                          &g_cpu_irqlock);
+
+              /* Have all CPUs released the lock? */
             }
         }
     }
