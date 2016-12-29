@@ -43,85 +43,8 @@
 #include <queue.h>
 #include <assert.h>
 
-#include <nuttx/init.h>
-
 #include "irq/irq.h"
 #include "sched/sched.h"
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name:  sched_cpulocked
- *
- * Description:
- *   Test if the IRQ lock set OR if this CPU holds the IRQ lock
- *   There is an interaction with pre-emption controls and IRQ locking:
- *   Even if the pre-emption is enabled, tasks will be forced to pend if
- *   the IRQ lock is also set UNLESS the CPU starting the task is the
- *   holder of the IRQ lock.
- *
- * Inputs:
- *   rtcb - Points to the blocked TCB that is ready-to-run
- *
- * Return Value:
- *   true  - IRQs are locked by a different CPU.
- *   false - IRQs are unlocked OR if they are locked BUT this CPU
- *           is the holder of the lock.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SMP
-static bool sched_cpulocked(int cpu)
-{
-  cpu_set_t irqset;
-
-  /* g_cpu_irqset is not valid in early phases of initialization */
-
-  if (g_os_initstate < OSINIT_OSREADY)
-    {
-      /* We are still single threaded.  In either state of g_cpu_irqlock,
-       * the correct return value should always be false.
-       */
-
-      return false;
-    }
-
-  /* Test if g_cpu_irqlock is locked.  We don't really need to use check
-   * g_cpu_irqlock to do this, we can use the g_cpu_set.
-   *
-   * Sample the g_cpu_irqset once.  That is an atomic operation.  All
-   * subsequent operations will operate on the sampled cpu set.
-   */
-
-  irqset = (cpu_set_t)g_cpu_irqset;
-  if (irqset != 0)
-    {
-      /* Some CPU holds the lock.  So g_cpu_irqlock should be locked.
-       * Return false if the 'cpu' is the holder of the lock; return
-       * true if g_cpu_irqlock is locked, but this CPU is not the
-       * holder of the lock.
-       */
-
-      return ((irqset & (1 << cpu)) == 0);
-    }
-
-  /* No CPU holds the lock */
-
-  else
-    {
-      /* In this case g_cpu_irqlock should be unlocked.  However, if
-       * the lock was established in the interrupt handler AND there are
-       * no bits set in g_cpu_irqset, that probabaly means only that
-       * critical section was established from an interrupt handler.
-       * Return false in either case.
-       */
-
-      return false;
-    }
-}
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -308,12 +231,12 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
    * There is an interaction here with IRQ locking.  Even if the pre-
    * emption is enabled, tasks will be forced to pend if the IRQ lock
    * is also set UNLESS the CPU starting the thread is also the holder of
-   * the IRQ lock.  sched_cpulocked() performs an atomic check for that
+   * the IRQ lock.  irq_cpu_locked() performs an atomic check for that
    * situation.
    */
 
   me = this_cpu();
-  if ((spin_islocked(&g_cpu_schedlock) || sched_cpulocked(me)) &&
+  if ((spin_islocked(&g_cpu_schedlock) || irq_cpu_locked(me)) &&
       task_state != TSTATE_TASK_ASSIGNED)
     {
       /* Add the new ready-to-run task to the g_pendingtasks task list for

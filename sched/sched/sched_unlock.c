@@ -67,6 +67,10 @@
 int sched_unlock(void)
 {
   FAR struct tcb_s *rtcb = this_task();
+  int cpu;
+
+  cpu  = this_cpu();
+  rtcb = current_task(cpu);
 
   /* Check for some special cases:  (1) rtcb may be NULL only during
    * early boot-up phases, and (2) sched_unlock() should have no
@@ -107,9 +111,9 @@ int sched_unlock(void)
            */
 
           DEBUGASSERT(g_cpu_schedlock == SP_LOCKED &&
-                     (g_cpu_lockset & (1 << this_cpu())) != 0);
+                     (g_cpu_lockset & (1 << cpu)) != 0);
 
-          spin_clrbit(&g_cpu_lockset, this_cpu(), &g_cpu_locksetlock,
+          spin_clrbit(&g_cpu_lockset, cpu, &g_cpu_locksetlock,
                       &g_cpu_schedlock);
 #endif
 
@@ -122,20 +126,25 @@ int sched_unlock(void)
 
 #ifdef CONFIG_SMP
           /* In the SMP case, the tasks remains pend(1) if we are
-           * in a critical section, i.e., g_cpu_irqlock is locked , or (2)
-           * other CPUs still have pre-emption disabled, i.e.,
+           * in a critical section, i.e., g_cpu_irqlock is locked by other
+           * CPUs, or (2) other CPUs still have pre-emption disabled, i.e.,
            * g_cpu_schedlock is locked.  In those cases, the release of the
            * pending tasks must be deferred until those conditions are met.
            *
            * There are certain conditions that we must avoid by preventing
-           * releasing the pending tasks while withn a critical section.
-           * This logic does that and there is matching logic in
-           * sched_addreadytorun to avoid starting new tasks within the
-           * critical section (unless the CPU is the holder of the lock).
+           * releasing the pending tasks while within the critical section
+           * of other CPUs.  This logic does that and there is matching
+           * logic in sched_addreadytorun to avoid starting new tasks within
+           * the critical section (unless the CPU is the holder of the lock).
+           *
+           * REVISIT: If this CPU is only one that holds the IRQ lock, then
+           * we should go ahead and release the pending tasks.  See the logic
+           * leave_critical_section():  It will call up_release_pending()
+           * BEFORE it clears IRQ lock.
+           * BEFORE it clears IRQ lock.
            */
 
-          if (!spin_islocked(&g_cpu_schedlock) &&
-              !spin_islocked(&g_cpu_irqlock) &&
+          if (!spin_islocked(&g_cpu_schedlock) && !irq_cpu_locked(cpu) &&
               g_pendingtasks.head != NULL)
 #else
           /* In the single CPU case, decrementing irqcount to zero is
