@@ -53,6 +53,64 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: sched_nexttcb
+ *
+ * Description:
+ *   Get the next highest priority ready-to-run task.
+ *
+ * Inputs:
+ *   tcb - the TCB of task to reprioritize.
+ *
+ * Return Value:
+ *   TCB of the next highest priority ready-to-run task.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+static FAR struct tcb_s *sched_nexttcb(FAR struct tcb_s *tcb)
+{
+  FAR struct tcb_s *nxttcb = (FAR struct tcb_s *)tcb->flink;
+  FAR struct tcb_s *rtrtcb;
+  int cpu = this_cpu();
+
+  /* Which task should run next?  It will be either the next tcb in the
+   * assigned task list (nxttcb) or a TCB in the g_readytorun list.  We can
+   * only select a task from that list if the affinity mask includes the
+   * current CPU.
+   *
+   * If pre-emption is locked or another CPU is in a critical section,
+   * then use the 'nxttcb' which will probably be the IDLE thread.
+   */
+
+  if (!spin_islocked(&g_cpu_schedlock) && !irq_cpu_locked(cpu))
+    {
+      /* Search for the highest priority task that can run on this CPU. */
+
+      for (rtrtcb = (FAR struct tcb_s *)g_readytorun.head;
+           rtrtcb != NULL && !CPU_ISSET(cpu, &rtrtcb->affinity);
+           rtrtcb = (FAR struct tcb_s *)rtrtcb->flink);
+
+      /* Return the TCB from the readyt-to-run list if it is the next
+       * highest priority task.
+       */
+
+      if (rtrtcb != NULL &&
+          rtrtcb->sched_priority >= nxttcb->sched_priority)
+        {
+          return rtrtcb;
+        }
+    }
+
+  /* Otherwise, return the next TCB in the g_assignedtasks[] list...
+   * probably the TCB of the IDLE thread.
+   * REVISIT:  What if it is not the IDLE thread?
+   */
+
+  return nxttcb;
+}
+#endif
+
+/****************************************************************************
  * Name:  sched_running_setpriority
  *
  * Description:
@@ -77,12 +135,24 @@
 static inline void sched_running_setpriority(FAR struct tcb_s *tcb,
                                              int sched_priority)
 {
+  FAR struct tcb_s *nxttcb;
+
+  /* Get the TCB of the next highest priority, ready to run task */
+
+#ifdef CONFIG_SMP
+  nxttcb = sched_nexttcb(tcb);
+#else
+  nxttcb = (FAR struct tcb_s *)tcb->flink;
+#endif
+
+  DEBUGASSERT(nxttcb != NULL);
+
   /* A context switch will occur if the new priority of the running
    * task becomes less than OR EQUAL TO the next highest priority
    * ready to run task.
    */
 
-  if (sched_priority <= tcb->flink->sched_priority)
+  if (sched_priority <= nxttcb->sched_priority)
     {
       /* A context switch will occur. */
 
