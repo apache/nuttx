@@ -42,7 +42,7 @@
 #include <sys/types.h>
 #include <nuttx/board.h>
 
-#include "esp32_core.h"
+#include "esp32-core.h"
 
 #ifdef CONFIG_LIB_BOARDCTL
 

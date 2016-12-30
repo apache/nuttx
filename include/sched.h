@@ -54,18 +54,30 @@
 
 /* POSIX-like scheduling policies */
 
-#define SCHED_FIFO       1  /* FIFO priority scheduling policy */
-#define SCHED_RR         2  /* Round robin scheduling policy */
-#define SCHED_SPORADIC   3  /* Sporadic scheduling policy */
-#define SCHED_OTHER      4  /* Not supported */
+#define SCHED_FIFO                1  /* FIFO priority scheduling policy */
+#define SCHED_RR                  2  /* Round robin scheduling policy */
+#define SCHED_SPORADIC            3  /* Sporadic scheduling policy */
+#define SCHED_OTHER               4  /* Not supported */
 
 /* Maximum number of SCHED_SPORADIC replenishments */
 
-#define SS_REPL_MAX      CONFIG_SCHED_SPORADIC_MAXREPL
+#define SS_REPL_MAX               CONFIG_SCHED_SPORADIC_MAXREPL
+
+/* Cancellation definitions *****************************************************/
+
+/* Cancellation states used by task_setcancelstate() */
+
+#define TASK_CANCEL_ENABLE        (0)
+#define TASK_CANCEL_DISABLE       (1)
+
+/* Cancellation types used by task_setcanceltype() */
+
+#define TASK_CANCEL_DEFERRED      (0)
+#define TASK_CANCEL_ASYNCHRONOUS  (1)
 
 /* Pthread definitions **********************************************************/
 
-#define PTHREAD_KEYS_MAX CONFIG_NPTHREAD_KEYS
+#define PTHREAD_KEYS_MAX          CONFIG_NPTHREAD_KEYS
 
 /* CPU affinity mask helpers ***************************************************/
 /* These are not standard but are defined for Linux compatibility */
@@ -228,6 +240,10 @@ int    task_create(FAR const char *name, int priority, int stack_size,
 #endif
 int    task_delete(pid_t pid);
 int    task_restart(pid_t pid);
+
+int    task_setcancelstate(int state, FAR int *oldstate);
+int    task_setcanceltype(int type, FAR int *oldtype);
+void   task_testcancel(void);
 
 /* Task Scheduling Interfaces (based on POSIX APIs) */
 

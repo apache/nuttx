@@ -46,6 +46,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/cancelpt.h>
 
 #include "sched/sched.h"
 #include "semaphore/semaphore.h"
@@ -86,17 +87,33 @@ int sem_wait(FAR sem_t *sem)
 
   DEBUGASSERT(sem != NULL && up_interrupt_context() == false);
 
+  /* The following operations must be performed with interrupts
+   * disabled because sem_post() may be called from an interrupt
+   * handler.
+   */
+
+  flags = enter_critical_section();
+
+  /* sem_wait() is a cancellation point */
+
+  if (enter_cancellation_point())
+    {
+#ifndef CONFIG_CANCELLATION_POINTS /* Not reachable in this case */
+      /* If there is a pending cancellation, then do not perform
+       * the wait.  Exit now with ECANCELED.
+       */
+
+      set_errno(ECANCELED);
+      leave_cancellation_point();
+      leave_critical_section(flags);
+      return ERROR;
+#endif
+    }
+
   /* Make sure we were supplied with a valid semaphore. */
 
   if (sem != NULL)
     {
-      /* The following operations must be performed with interrupts
-       * disabled because sem_post() may be called from an interrupt
-       * handler.
-       */
-
-      flags = enter_critical_section();
-
       /* Check if the lock is available */
 
       if (sem->semcount > 0)
@@ -186,15 +203,13 @@ int sem_wait(FAR sem_t *sem)
           sched_unlock();
 #endif
         }
-
-      /* Interrupts may now be enabled. */
-
-      leave_critical_section(flags);
     }
   else
     {
       set_errno(EINVAL);
     }
 
+  leave_cancellation_point();
+  leave_critical_section(flags);
   return ret;
 }

@@ -44,6 +44,20 @@
 
 #ifdef CONFIG_SMP
 
+/****************************************************************************
+ * Pre-procesor Definitions
+ ****************************************************************************/
+
+/* An IDLE thread stack size for CPU0 must be defined */
+
+#if !defined(CONFIG_SMP_IDLETHREAD_STACKSIZE)
+#  error CONFIG_SMP_IDLETHREAD_STACKSIZE is not defined
+#elif CONFIG_SMP_IDLETHREAD_STACKSIZE < 16
+#  error CONFIG_SMP_IDLETHREAD_STACKSIZE is to small
+#endif
+
+#define CPU1_IDLETHREAD_STACKSIZE ((CONFIG_SMP_IDLETHREAD_STACKSIZE + 15) & ~15)
+#define CPU1_IDLETHREAD_STACKWORDS (CPU1_IDLETHREAD_STACKSIZE >> 2)
 
 /****************************************************************************
  * Public Data
@@ -51,8 +65,7 @@
 
 /* This is the CPU1 IDLE stack */
 
-#define CPU1_IDLETHREAD_STACKSIZE (CONFIG_SMP_IDLETHREAD_STACKSIZE & ~15)
-extern uint32_t g_cpu1_idlestack[CPU1_IDLETHREAD_STACKSIZE / 34];
+extern uint32_t g_cpu1_idlestack[CPU1_IDLETHREAD_STACKWORDS];
 
 /****************************************************************************
  * Public Functions

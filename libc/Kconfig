@@ -61,6 +61,12 @@ config LIBC_LONG_LONG
 		libraries that will be drawn into the build if long long support
 		is enabled.
 
+config LIBC_SCANSET
+	default "Scanset support"
+	default n
+	---help---
+		Add scanset support to sscanf().
+
 config LIBC_IOCTL_VARIADIC
 	bool "Enable variadic ioctl()"
 	default n

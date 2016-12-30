@@ -172,6 +172,9 @@ Serial Console
   UART0 is, by default, the serial console.  It connects to the on-board
   CP2102 converter and is available on the USB connector USB CON8 (J1).
 
+  It will show up as /dev/ttypUSB[n] where [n] will probably be 0 (is it 1
+  on my PC because I have a another device at ttyUSB0).
+
 Buttons and LEDs
 ================
 
@@ -201,7 +204,16 @@ SMP
       CONFIG_SPINLOCK=y
       CONFIG_SMP=y
       CONFIG_SMP_NCPUS=2
-      CONFIG_SMP_IDLETHREAD_STACKSIZE=2048
+      CONFIG_SMP_IDLETHREAD_STACKSIZE=3072
+
+  Debug Tip:  During debug session, OpenOCD may mysteriously switch from one
+  CPU to another.  This behavior can be eliminated by uncommenting one of the
+  following in scripts/esp32.cfg
+
+    # Only configure the PRO CPU
+    #set ESP32_ONLYCPU 1
+    # Only configure the APP CPU
+    #set ESP32_ONLYCPU 2
 
   Open Issues:
 
@@ -446,7 +458,7 @@ OpenOCD for the ESP32
   To FLASH an ELF via the command line is a two step process, something like
   this:
 
-    esptool.py --chip esp32 elf2image --flash_mode dio --flash_size 4MB -o ./nuttx.bin nuttx.elf
+    esptool.py --chip esp32 elf2image --flash_mode dio --flash_size 4MB -o ./nuttx.bin nuttx
     esptool.py --chip esp32 --port COMx write_flash 0x1000 bootloader.bin 0x4000 partition_table.bin 0x10000 nuttx.bin
 
   The first step converts an ELF image into an ESP32-compatible binary
@@ -465,10 +477,17 @@ OpenOCD for the ESP32
   See https://github.com/espressif/esp-idf/tree/master/components/bootloader
   and https://github.com/espressif/esp-idf/tree/master/components/partition_table.
 
-  Running from IRAM
-  -----------------
-  Running from IRAM is a good debug option.  You should be able to load the ELF directly via JTAG in this case, and you may not need the bootloader.  The one "gotcha" for needing the bootloader is disabling the initial watchdog, there is code in bootloader_start.c that does this.
+  Running from IRAM with OpenOCD
+  ------------------------------
+  Running from IRAM is a good debug option.  You should be able to load the
+  ELF directly via JTAG in this case, and you may not need the bootloader.
 
+  NuttX supports a configuration option, CONFIG_ESP32CORE_RUN_IRAM, that may be
+  selected for execution from IRAM.  This option simply selects the correct
+  linker script for IRAM execution.
+
+  Skipping the Secondary Bootloader
+  ---------------------------------
   It is possible to skip the secondary bootloader and run out of IRAM using
   only the primary bootloader if your application of small enough (< 128KiB code,
   <180KiB data), then you can simplify initial bring-up by avoiding second stage
@@ -480,10 +499,6 @@ OpenOCD for the ESP32
 
     2. Use "esptool.py" utility found in ESP-IDF to convert application .elf
        file into binary format which can be loaded by first stage bootloader.
-
-  NuttX supports a configuration option, CONFIG_ESP32CORE_RUN_IRAM, that may be
-  selected for execution from IRAM.  This option simply selects the correct
-  linker script for IRAM execution.
 
   Again you would need to link the ELF file and convert it to binary format suitable
   for flashing into the board.  The command should to convert ELF file to binary
@@ -506,6 +521,58 @@ OpenOCD for the ESP32
   would I be able to run directly out of IRAM without a bootloader?  That
   might be a simpler bring-up.
 
+  Sample OpenOCD Debug Steps
+  --------------------------
+  I did the initial bring-up using the IRAM configuration and OpenOCD.  Here
+  is a synopsis of my debug steps:
+
+  configs/esp32-core/nsh with
+
+    CONFIG_DEBUG_ASSERTIONS=y
+    CONFIG_DEBUG_FEATURES=y
+    CONFIG_DEBUG_SYMBOLS=y
+    CONFIG_ESP32CORE_RUN_IRAM=y
+
+  I also made this change which will eliminate all attempts to re-configure
+  serial. It will just use the serial settings as they were left by the
+  bootloader:
+
+    diff --git a/arch/xtensa/src/common/xtensa.h b/arch/xtensa/src/common/xtensa.h
+    index 422ec0b..8707d7c 100644
+    --- a/arch/xtensa/src/common/xtensa.h
+    +++ b/arch/xtensa/src/common/xtensa.h
+    @@ -60,7 +60,7 @@
+     #undef  CONFIG_SUPPRESS_INTERRUPTS     /* DEFINED: Do not enable interrupts */
+     #undef  CONFIG_SUPPRESS_TIMER_INTS     /* DEFINED: No timer */
+     #undef  CONFIG_SUPPRESS_SERIAL_INTS    /* DEFINED: Console will poll */
+    -#undef  CONFIG_SUPPRESS_UART_CONFIG    /* DEFINED: Do not reconfigure UART */
+    +#define CONFIG_SUPPRESS_UART_CONFIG  1 /* DEFINED: Do not reconfigure UART */
+     #define CONFIG_SUPPRESS_CLOCK_CONFIG 1 /* DEFINED: Do not reconfigure clocking */
+     #undef  CONFIG_DUMP_ON_EXIT            /* DEFINED: Dump task state on exit */
+
+  Start OpenOCD:
+
+    cd ../openocde-esp32
+    cp ../nuttx/configs/esp32-core/scripts/esp32.cfg .
+    sudo ./src/openocd -s ./tcl/ -f tcl/interface/ftdi/olimex-arm-usb-ocd.cfg -f ./esp32.cfg
+
+  Start GDB and load code:
+
+    cd ../nuttx
+    xtensa-esp32-elf-gdb -ex 'target remote localhost:3333' nuttx
+    (gdb) load nuttx
+    (gdb) mon reg pc [value report by load for entry point]
+    (gdb) s
+
+  Single stepping works fine for me as do breakpoints:
+
+    Breakpoint 1, xtensa_timer_initialize () at chip/esp32_timerisr.c:172
+    72 {
+    (gdb) n
+    esp32.cpu0: Target halted, pc=0x400835BF
+    187 g_tick_divisor = divisor;
+    (gdb) ...
+  
 Configurations
 ==============
 
@@ -575,12 +642,69 @@ NOTES:
 
     NOTES:
 
+    1. Uses the CP2102 USB/Serial converter for the serial console.
+
+    2. I have only tested this in IRAM with UART reconfiguration disabled.
+       See "Sample Debug Steps".  In that case, NuttX is started via GDB.
+       It has, however, been reported to me that this configuration also
+       runs when written to address 0x1000 of FLASH with the esptool.py
+       (as described above).  Then NuttX is started via the second level
+       bootloader.  I cannot vouch for that since I have never tried it.
+
+    3. There are open clocking issues.  Currently clock configuration
+       logic is disabled because I don't have the technical information
+       to provide that logic -- hopefully that is coming.  As a
+       consequence, whatever clock setup was left when NuttX started is
+       used.  For the case of execution out of IRAM with GDB, the
+       settings in configs/esp32-core/include/board.h work.  To check
+       the timing, I use a stop watch and:
+
+         nsh> sleep 60
+
+       If the timing is correct in the board.h header file, the value
+       timed with the stop watch should be about 60 seconds.  If not,
+       change the frequency in the board.h header file.
+
   smp:
 
     Another NSH configuration, similar to nsh, but also enables
-    SMP operation.
+    SMP operation.  It differs from the nsh configuration only in these
+    addtional settings:
+
+    SMP is enabled:
+
+      CONFIG_SMP=y
+      CONFIG_SMP_IDLETHREAD_STACKSIZE=3072
+      CONFIG_SMP_NCPUS=2
+      CONFIG_SPINLOCK=y
+
+    The apps/examples/smp test is included:
+
+      CONFIG_EXAMPLES_SMP=y
+      CONFIG_EXAMPLES_SMP_NBARRIER_THREADS=8
+      CONFIG_EXAMPLES_SMP_PRIORITY=100
+      CONFIG_EXAMPLES_SMP_STACKSIZE=2048
 
     NOTES:
+    1. See NOTES for the nsh configuration.
+
+  ostest:
+
+    This is the NuttX test at apps/examples/ostest that is run against all new
+    architecture ports to assure a correct implementation of the OS.  The default
+    version is for a single CPU but can be modified for an SMP test by adding:
+
+      CONFIG_SMP=y
+      CONFIG_SMP_IDLETHREAD_STACKSIZE=2048
+      CONFIG_SMP_NCPUS=2
+      CONFIG_SPINLOCK=y
+
+    NOTES:
+    1. See NOTES for the nsh configuration.
+    2. 2016-12-23: Test appears to be fully functional in the single CPU mode.
+    3. 2016-12-24: But when SMP is enabled, there is a consistent, repeatable
+       crash in the waitpid() test.  At the time of the crash, there is
+       extensive memory corruption and a user exception occurrs (cause=28).
 
 Things to Do
 ============
@@ -616,3 +740,25 @@ Things to Do
   5. See SMP-related issues above
 
   6. See OpenOCD for the ESP32 above
+
+  7. Currently will not boot unless serial port initialization is disabled.
+     This will use the serial port settings as left by the preceding
+     bootloader:
+
+     diff --git a/arch/xtensa/src/common/xtensa.h b/arch/xtensa/src/common/xtensa.h
+     index 422ec0b..8707d7c 100644
+     --- a/arch/xtensa/src/common/xtensa.h
+     +++ b/arch/xtensa/src/common/xtensa.h
+     @@ -60,7 +60,7 @@
+      #undef  CONFIG_SUPPRESS_INTERRUPTS     /* DEFINED: Do not enable interrupts */
+      #undef  CONFIG_SUPPRESS_TIMER_INTS     /* DEFINED: No timer */
+      #undef  CONFIG_SUPPRESS_SERIAL_INTS    /* DEFINED: Console will poll */
+     -#undef  CONFIG_SUPPRESS_UART_CONFIG    /* DEFINED: Do not reconfigure UART */
+     +#define CONFIG_SUPPRESS_UART_CONFIG  1 /* DEFINED: Do not reconfigure UART */
+      #define CONFIG_SUPPRESS_CLOCK_CONFIG 1 /* DEFINED: Do not reconfigure clocking */
+      #undef  CONFIG_DUMP_ON_EXIT            /* DEFINED: Dump task state on exit */
+
+     I have not debugged this in detail, but this appears to be an issue with the
+     impelentation of esp32_configgpio() and/or gpio_matrix_out() when called from
+     the setup logic in arch/xtensa/src/esp32/esp32_serial.c.  I am not inclined
+     to invest a lot in driver debug until the clock configuration is finalized.

@@ -2209,6 +2209,7 @@ static int stm32_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t rlo
       rlong[2] = getreg32(STM32_SDIO_RESP3);
       rlong[3] = getreg32(STM32_SDIO_RESP4);
     }
+
   return ret;
 }
 
@@ -2577,12 +2578,14 @@ static int stm32_dmapreflight(FAR struct sdio_dev_s *dev,
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
 
+#if !defined(CONFIG_STM32_STM32F40XX)
   /* Wide bus operation is required for DMA */
 
   if (!priv->widebus)
     {
       return -EINVAL;
     }
+#endif
 
   /* DMA must be possible to the buffer */
 

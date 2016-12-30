@@ -299,15 +299,13 @@ void lib_rawsistream(FAR struct lib_rawsistream_s *instream, int fd);
 void lib_rawsostream(FAR struct lib_rawsostream_s *outstream, int fd);
 
 /****************************************************************************
- * Name: lib_lowinstream, lib_lowoutstream
+ * Name: lib_lowoutstream
  *
  * Description:
- *   Initializes a stream for use with low-level, architecture-specific I/O.
- *   Defined in lib/stdio/lib_lowinstream.c and lib/stdio/lib_lowoutstream.c
+ *   Initializes a stream for use with low-level, architecture-specific output.
+ *   Defined in ib/stdio/lib_lowoutstream.c
  *
  * Input parameters:
- *   lowinstream  - User allocated, uninitialized instance of struct
- *                  lib_lowinstream_s to be initialized.
  *   lowoutstream - User allocated, uninitialized instance of struct
  *                  lib_lowoutstream_s to be initialized.
  *
@@ -316,9 +314,6 @@ void lib_rawsostream(FAR struct lib_rawsostream_s *outstream, int fd);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_LOWGETC
-void lib_lowinstream(FAR struct lib_instream_s *lowinstream);
-#endif
 #ifdef CONFIG_ARCH_LOWPUTC
 void lib_lowoutstream(FAR struct lib_outstream_s *lowoutstream);
 #endif

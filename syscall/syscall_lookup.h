@@ -86,7 +86,13 @@ SYSCALL_LOOKUP(pgalloc,                   2, STUB_pgalloc)
 #endif
 SYSCALL_LOOKUP(task_delete,               1, STUB_task_delete)
 SYSCALL_LOOKUP(task_restart,              1, STUB_task_restart)
+SYSCALL_LOOKUP(task_setcancelstate,       2, STUB_task_setcancelstate)
 SYSCALL_LOOKUP(up_assert,                 2, STUB_up_assert)
+
+#  ifdef CONFIG_CANCELLATION_POINTS
+  SYSCALL_LOOKUP(task_setcanceltype,      2, STUB_task_setcanceltype)
+  SYSCALL_LOOKUP(task_testcancel,         0, STUB_task_testcancel)
+#  endif
 
 /* The following can be individually enabled */
 
@@ -290,7 +296,6 @@ SYSCALL_LOOKUP(up_assert,                 2, STUB_up_assert)
   SYSCALL_LOOKUP(pthread_mutex_trylock,   1, STUB_pthread_mutex_trylock)
   SYSCALL_LOOKUP(pthread_mutex_unlock,    1, STUB_pthread_mutex_unlock)
   SYSCALL_LOOKUP(pthread_once,            2, STUB_pthread_once)
-  SYSCALL_LOOKUP(pthread_setcancelstate,  2, STUB_pthread_setcancelstate)
   SYSCALL_LOOKUP(pthread_setschedparam,   3, STUB_pthread_setschedparam)
   SYSCALL_LOOKUP(pthread_setschedprio,    2, STUB_pthread_setschedprio)
   SYSCALL_LOOKUP(pthread_setspecific,     2, STUB_pthread_setspecific)
@@ -303,6 +308,10 @@ SYSCALL_LOOKUP(up_assert,                 2, STUB_up_assert)
   SYSCALL_LOOKUP(pthread_cond_timedwait,  3, STUB_pthread_cond_timedwait)
   SYSCALL_LOOKUP(pthread_kill,            2, STUB_pthread_kill)
   SYSCALL_LOOKUP(pthread_sigmask,         3, STUB_pthread_sigmask)
+#  endif
+#  ifdef CONFIG_PTHREAD_CLEANUP
+  SYSCALL_LOOKUP(pthread_cleanup_push,    2, STUB_pthread_cleanup_push)
+  SYSCALL_LOOKUP(pthread_cleanup_pop,     1, STUB_pthread_cleanup_pop)
 #  endif
 #endif
 

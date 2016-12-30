@@ -954,11 +954,6 @@
               <FilePath>../../../../../libc/stdio/lib_memsostream.c</FilePath>
             </File>
             <File>
-              <FileName>lib_lowinstream.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../../../../../libc/stdio/lib_lowinstream.c</FilePath>
-            </File>
-            <File>
               <FileName>lib_lowoutstream.c</FileName>
               <FileType>1</FileType>
               <FilePath>../../../../../libc/stdio/lib_lowoutstream.c</FilePath>

@@ -1287,12 +1287,6 @@ nuttx/
  |   |   `- README.txt
  |   |- cloudctrl
  |   |   `- README.txt
- |   |- compal_e86
- |   |   `- README.txt
- |   |- compal_e88
- |   |   `- README.txt
- |   |- compal_e99
- |   |   `- README.txt
  |   |- demo0s12ne64/
  |   |   `- README.txt
  |   |- dk-tm4c129x/
@@ -1399,6 +1393,8 @@ nuttx/
  |   |   `- README.txt
  |   |- olimex-stm32-p207/
  |   |   `- README.txt
+ |   |- olimex-stm32-p407/
+ |   |   `- README.txt
  |   |- olimex-strp711/
  |   |   `- README.txt
  |   |- open1788/
@@ -1414,8 +1410,6 @@ nuttx/
  |   |- pic32mx7mmb/
  |   |   `- README.txt
  |   |- pic32mz-starterkit/
- |   |   `- README.txt
- |   |- pirelli_dpl10/
  |   |   `- README.txt
  |   |- qemu-i486/
  |   |   `- README.txt
@@ -1543,8 +1537,6 @@ nuttx/
  |   |- mtd/
  |   |   `- README.txt
  |   |- sensors/
- |   |   `- README.txt
- |   |- sercomm/
  |   |   `- README.txt
  |   |- syslog/
  |   |   `- README.txt

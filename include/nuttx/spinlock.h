@@ -145,15 +145,16 @@ spinlock_t up_testset(volatile FAR spinlock_t *lock);
  *   Initialize a non-reentrant spinlock object to its initial, unlocked state.
  *
  * Input Parameters:
- *   lock - A reference to the spinlock object to be initialized.
+ *   lock  - A reference to the spinlock object to be initialized.
+ *   state - Initial state of the spinlock {SP_LOCKED or SP_UNLOCKED)
  *
  * Returned Value:
  *   None.
  *
  ****************************************************************************/
 
-/* void spin_initialize(FAR spinlock_t *lock); */
-#define spin_initialize(i) do { (l) = SP_UNLOCKED; } while (0)
+/* void spin_initialize(FAR spinlock_t *lock, spinlock_t state); */
+#define spin_initialize(l,s) do { *(l) = (s); } while (0)
 
 /****************************************************************************
  * Name: spin_initializer
@@ -329,7 +330,7 @@ void spin_unlockr(FAR struct spinlock_s *lock);
  * Input Parameters:
  *   set     - A reference to the bitset to set the CPU bit in
  *   cpu     - The bit number to be set
- *   setlock - A reference to the lock lock protecting the set
+ *   setlock - A reference to the lock protecting the set
  *   orlock  - Will be set to SP_LOCKED while holding setlock
  *
  * Returned Value:
@@ -350,7 +351,7 @@ void spin_setbit(FAR volatile cpu_set_t *set, unsigned int cpu,
  * Input Parameters:
  *   set     - A reference to the bitset to set the CPU bit in
  *   cpu     - The bit number to be set
- *   setlock - A reference to the lock lock protecting the set
+ *   setlock - A reference to the lock protecting the set
  *   orlock  - Will be set to SP_UNLOCKED if all bits become cleared in set
  *
  * Returned Value:

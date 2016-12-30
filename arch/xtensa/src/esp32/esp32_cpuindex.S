@@ -39,6 +39,7 @@
  * Included Files
  ****************************************************************************/
 
+#include "xtensa_abi.h"
 #include "chip_macros.h"
 
 /****************************************************************************
@@ -71,6 +72,8 @@
 	.type	up_cpu_index, @function
 
 up_cpu_index:
+	ENTRY(16)
 	getcoreid	a2
-	ret
+	RET(16)
+
 	.size	up_cpu_index, . - up_cpu_index

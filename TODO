@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated December 3, 2016)
+NuttX TODO List (Last updated December 11, 2016)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -9,7 +9,7 @@ issues related to each board port.
 
 nuttx/:
 
- (13)  Task/Scheduler (sched/)
+ (12)  Task/Scheduler (sched/)
   (1)  SMP
   (1)  Memory Management (mm/)
   (1)  Power Management (drivers/pm)
@@ -22,7 +22,7 @@ nuttx/:
  (12)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
   (0)  Other drivers (drivers/)
- (11)  Libraries (libc/, libm/)
+ (12)  Libraries (libc/, libm/)
  (11)  File system/Generic drivers (fs/, drivers/)
   (9)  Graphics Subsystem (graphics/)
   (2)  Build system / Toolchains
@@ -101,16 +101,37 @@ o Task/Scheduler (sched/)
   Status:      Open
   Priority:    Medium Low for now
 
-  Title:       ISSUES WITH atexit() AND on_exit()
+  Title:       ISSUES WITH atexit(), on_exit(), AND pthread_cleanup_pop()
   Description: These functions execute with the following bad properties:
 
                1. They run with interrupts disabled,
                2. They run in supervisor mode (if applicable), and
                3. They do not obey any setup of PIC or address
                   environments. Do they need to?
+               4. In the case of task_delete() and pthread_cancel(), these
+                  callbacks will run on the thread of execution and address
+                  context of the caller of task.  That is very bad!
 
                The fix for all of these issues it to have the callbacks
-               run on the caller's thread (as with signal handlers).
+               run on the caller's thread as is currently done with
+               signal handlers.  Signals are delivered differently in
+               PROTECTED and KERNEL modes:  The deliver is involes a
+               signal handling trampoline function in the user address
+               space and two signal handlers:  One to call the signal
+               handler trampoline in user mode (SYS_signal_handler) and
+               on in with the signal handler trampoline to return to
+               supervisor mode (SYS_signal_handler_return)
+
+               The primary difference is in the location of the signal
+               handling trampoline:
+
+               - In PROTECTED mode, there is on a single user space blob
+                 with a header at the beginning of the block (at a well-
+                 known location.  There is a pointer to the signal handler
+                 trampoline function in that header.
+               - In the KERNEL mode, a special process signal handler
+                 trampoline is used at a well-known location in every
+                 process address space (ARCH_DATA_RESERVE->ar_sigtramp).
   Status:      Open
   Priority:    Medium Low.  This is an important change to some less
                important interfaces.  For the average user, these
@@ -143,20 +164,6 @@ o Task/Scheduler (sched/)
   Status:      Closed.  The existing solution is better (although its
                incompatibilities could show up in porting some code).
   Priority:    Low
-
-  Title:       REMOVE TASK_DELETE
-  Description: Need to remove or fix task delete.  This interface is non-
-               standard and not safe.  Arbitrary deleting tasks can cause
-               serious problems such as memory leaks.  Better to remove it
-               than to retain it as a latent bug.
-
-               Currently used within the OS and also part of the
-               implementation of pthread_cancel() and task_restart() (which
-               should also go for the same reasons).  It is used in
-               NxWM::CNxConsole to terminate console tasks and also in
-               apps/netutils/thttpd to kill CGI tasks that timeout.
-  Status:      Open
-  Priority:    Low and not easily removable.
 
   Title:       RELEASE SEMAPHORES HELD BY CANCELED THREADS:
   Description: Commit: fecb9040d0e54baf14b729e556a832febfe8229e: "In
@@ -491,12 +498,6 @@ o Signals (sched/signal, arch/)
 o pthreads (sched/pthreads)
   ^^^^^^^^^^^^^^^^^
 
-  Title:       CANCELLATION POINTS
-  Description: pthread_cancel():  Should implement cancellation points and
-               pthread_testcancel()
-  Status:      Open.  No changes are planned.
-  Priority:    Low, probably not that useful
-
   Title:       PTHREAD_PRIO_PROTECT
   Description: Extend pthread_mutexattr_setprotocol() support PTHREAD_PRIO_PROTECT:
 
@@ -556,6 +557,44 @@ o pthreads (sched/pthreads)
                 complexity; in all other ways I believe that it is the inferior
                 solution. So I discarded a few hours of programming. Not a
                 big loss from the experience I gained."
+
+  Title:       ISSUES WITH CANCELLATION POINTS
+  Description: According to POIX cancellation points must occur when a thread is executing
+               the following functions.  There are some execptions as noted:
+
+                accept()             mq_timedsend()           NA putpmsg()          sigtimedwait()
+             04 aio_suspend()     NA msgrcv()                    pwrite()        NA sigwait()
+             NA clock_nanosleep() NA msgsnd()                    read()             sigwaitinfo()
+                close()           NA msync()                  NA readv()         01 sleep()
+                connect()            nanosleep()                 recv()          02 system()
+             -- creat()              open()                      recvfrom()      NA tcdrain()
+                fcntl()              pause()                  NA recvmsg()       01 usleep()
+             NA fdatasync()          poll()                      select()        -- wait()
+                fsync()              pread()                     sem_timedwait()    waitid()
+             NA getmsg()          NA pselect()                   sem_wait()         waitpid()
+             NA getpmsg()            pthread_cond_timedwait()    send()             write()
+             NA lockf()              pthread_cond_wait()      NA sendmsg()       NA writev()
+                mq_receive()         pthread_join()              sendto()
+                mq_send()            pthread_testcancel()     03 sigpause()
+                mq_timedreceive() NA putmsg()                    sigsuspend()
+
+                  NA Not supported
+                  -- Doesn't need instrumentation.  Handled by lower level calls.
+                  nn See note nn
+
+               NOTE 01: sleep() and usleep() are user-space functions in the C library and cannot
+               serve as cancellation points.  They are, however, simple wrappers around nanosleep
+               which is a true cancellation point.
+               NOTE 02: system() is actually implemented in apps/ as part of NSH.  It cannot be
+               a cancellation point either.
+               NOTE 03: sigpause() is a user-space function in the C library and cannot serve as
+               cancellation points.  It is, however, a simple wrapper around sigsuspend()
+               which is a true cancellation point.
+               NOTE 04: aio_suspend() is a user-space function in the C library and cannot serve as
+               cancellation points.  It does call around sigtimedwait() which is a true cancellation
+               point.
+  Status:      Not really open.  This is just the way it is.
+  Priority:    Nothing additional is planned.
 
 o Message Queues (sched/mqueue)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1451,9 +1490,27 @@ o Libraries (libc/, libm/)
                2016-07-30: Numerous fixes and performance improvements from
                David Alessio.
 
-Status:        Open
-Priority:      Low for casual users but clearly high if you need care about
+  Status:      Open
+  Priority:    Low for casual users but clearly high if you need care about
                these incorrect corner case behaviors in the math libraries.
+
+  Title:       Repartition libc functionality.
+  Description: There are many things implemented within the kernel (for example
+               under sched/pthread) that probably should be migrated in the
+               C library where it belongs.
+
+               I would really like to see a little flavor of a micro-kernel
+               at the OS interface:  I would like to see more primitive OS
+               system calls with more higher level logic in the C library.
+
+               One awkard thing is the incompatibility of KERNEL vs FLAT
+               builds:  In the kernel build, it would be nice to move many
+               of the thread-specific data items out of the TCB and into
+               the process address environment where they belong.  It is
+               difficult to make this compatible with the FLAT build,
+               however.
+  Status:      Open
+  Priority:    Low
 
 o File system / Generic drivers (fs/, drivers/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

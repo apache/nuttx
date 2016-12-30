@@ -41,32 +41,38 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
+#include <errno.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/sched_note.h>
 
 #include "sched/sched.h"
 #include "xtensa.h"
 #include "chip/esp32_dport.h"
+#include "chip/esp32_rtccntl.h"
 #include "esp32_region.h"
 #include "esp32_cpuint.h"
 #include "esp32_smp.h"
 
 #ifdef CONFIG_SMP
 
-#warning REVISIT Need ets_set_appcpu_boot_addr() prototype
-void ets_set_appcpu_boot_addr(uint32_t);
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
 static volatile bool g_appcpu_started;
-static sem_t g_appcpu_interlock;
+static volatile spinlock_t g_appcpu_interlock SP_SECTION;
+
+/****************************************************************************
+ * ROM function prototypes
+ ****************************************************************************/
+
+void Cache_Flush(int cpu);
+void Cache_Read_Enable(int cpu);
+void ets_set_appcpu_boot_addr(uint32_t start);
 
 /****************************************************************************
  * Private Functions
@@ -87,20 +93,6 @@ static inline void xtensa_registerdump(FAR struct tcb_s *tcb)
 #else
 # define xtensa_registerdump(tcb)
 #endif
-
-/****************************************************************************
- * Name: xtensa_disable_all
- ****************************************************************************/
-
-static inline void xtensa_disable_all(void)
-{
-  __asm__ __volatile__
-  (
-    "movi a2, 0\n"
-    "xsr a2, INTENABLE\n"
-    : : : "a2"
-  );
-}
 
 /****************************************************************************
  * Name: xtensa_attach_fromcpu0_interrupt
@@ -136,25 +128,52 @@ static inline void xtensa_attach_fromcpu0_interrupt(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: xtensa_start_handler
+ * Name: xtensa_appcpu_start
  *
  * Description:
- *   This is the handler for SGI1.  This handler simply returns from the
- *   interrupt, restoring the state of the new task at the head of the ready
- *   to run list.
+ *   This is the entry point used with the APP CPU was started  via
+ *   up_cpu_start().  The actually start-up logic in in ROM and we boot up
+ *   in C code.
  *
  * Input Parameters:
- *   Standard interrupt handling
+ *   None
  *
  * Returned Value:
- *   Zero on success; a negated errno value on failure.
+ *   None, does not return
  *
  ****************************************************************************/
 
-int xtensa_start_handler(int irq, FAR void *context)
+void xtensa_appcpu_start(void)
 {
   FAR struct tcb_s *tcb = this_task();
-  int i;
+  register uint32_t sp;
+
+#ifdef CONFIG_STACK_COLORATION
+  {
+    register uint32_t *ptr;
+    register int i;
+
+      /* If stack debug is enabled, then fill the stack with a recognizable value
+       * that we can use later to test for high water marks.
+       */
+
+      for (i = 0, ptr = (uint32_t *)tcb->stack_alloc_ptr;
+           i < tcb->adj_stack_size;
+           i += sizeof(uint32_t))
+        {
+          *ptr++ = STACK_COLOR;
+        }
+  }
+#endif
+
+  /* Move to the stack assigned to us by up_smp_start immediately.  Although
+   * we were give a stack pointer at start-up, we don't know where that stack
+   * pointer is positioned respect to our memory map.  The only safe option
+   * is to switch to a well-known IDLE thread stack.
+   */
+
+  sp = (uint32_t)tcb->adj_stack_ptr;
+  __asm__ __volatile__("mov sp, %0\n" : : "r"(sp));
 
   sinfo("CPU%d Started\n", up_cpu_index());
 
@@ -167,7 +186,7 @@ int xtensa_start_handler(int irq, FAR void *context)
   /* Handle interlock*/
 
   g_appcpu_started = true;
-  sem_post(&g_appcpu_interlock);
+  spin_unlock(&g_appcpu_interlock);
 
   /* Reset scheduler parameters */
 
@@ -181,9 +200,9 @@ int xtensa_start_handler(int irq, FAR void *context)
 
   esp32_region_protection();
 
-  /* Disable all PRO CPU interrupts */
+  /* Initialize CPU interrupts */
 
-  xtensa_disable_all();
+  (void)esp32_cpuint_initialize();
 
   /* Attach and emable internal interrupts */
 
@@ -192,13 +211,6 @@ int xtensa_start_handler(int irq, FAR void *context)
 
   xtensa_attach_fromcpu0_interrupt();
 #endif
-
-  /* Detach all peripheral sources APP CPU interrupts */
-
-  for (i = 0; i < ESP32_NPERIPHERALS; i++)
-    {
-      esp32_detach_peripheral(1, i);;
-    }
 
 #if 0 /* Does it make since to have co-processors enabled on the IDLE thread? */
 #if XTENSA_CP_ALLSET != 0
@@ -224,7 +236,6 @@ int xtensa_start_handler(int irq, FAR void *context)
    */
 
   xtensa_context_restore(tcb->xcp.regs);
-  return OK;
 }
 
 /****************************************************************************
@@ -261,7 +272,6 @@ int up_cpu_start(int cpu)
   if (!g_appcpu_started)
     {
       uint32_t regval;
-      int ret;
 
       /* Start CPU1 */
 
@@ -277,8 +287,24 @@ int up_cpu_start(int cpu)
        * have priority inheritance enabled.
        */
 
-      sem_init(&g_appcpu_interlock, 0, 0);
-      sem_setprotocol(&g_appcpu_interlock, SEM_PRIO_NONE);
+      spin_initialize(&g_appcpu_interlock, SP_LOCKED);
+
+      /* Flush and enable I-cache for APP CPU */
+
+      Cache_Flush(cpu);
+      Cache_Read_Enable(cpu);
+
+      /* Unstall the APP CPU */
+
+      regval  = getreg32(RTC_CNTL_SW_CPU_STALL_REG);
+      regval &= ~RTC_CNTL_SW_STALL_APPCPU_C1_M;
+      putreg32(regval, RTC_CNTL_SW_CPU_STALL_REG);
+
+      regval  = getreg32(RTC_CNTL_OPTIONS0_REG);
+      regval &= ~RTC_CNTL_SW_STALL_APPCPU_C0_M;
+      putreg32(regval, RTC_CNTL_OPTIONS0_REG);
+
+      /* Enable clock gating for the APP CPU */
 
       regval  = getreg32(DPORT_APPCPU_CTRL_B_REG);
       regval |= DPORT_APPCPU_CLKGATE_EN;
@@ -287,6 +313,8 @@ int up_cpu_start(int cpu)
       regval  = getreg32(DPORT_APPCPU_CTRL_C_REG);
       regval &= ~DPORT_APPCPU_RUNSTALL;
       putreg32(regval, DPORT_APPCPU_CTRL_C_REG);
+
+      /* Reset the APP CPU */
 
       regval  = getreg32(DPORT_APPCPU_CTRL_A_REG);
       regval |= DPORT_APPCPU_RESETTING;
@@ -298,20 +326,12 @@ int up_cpu_start(int cpu)
 
       /* Set the CPU1 start address */
 
-      ets_set_appcpu_boot_addr((uint32_t)__cpu1_start);
+      ets_set_appcpu_boot_addr((uint32_t)xtensa_appcpu_start);
 
-      /* And way for the initial task to run on CPU1 */
+      /* And wait for the initial task to run on CPU1 */
 
-      while (!g_appcpu_started)
-        {
-          ret = sem_wait(&g_appcpu_interlock);
-          if (ret < 0)
-            {
-              DEBUGASSERT(errno == EINTR);
-            }
-        }
-
-      sem_destroy(&g_appcpu_interlock);
+      spin_lock(&g_appcpu_interlock);
+      DEBUGASSERT(g_appcpu_started);
     }
 
   return OK;

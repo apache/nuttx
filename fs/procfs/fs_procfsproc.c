@@ -316,6 +316,9 @@ static FAR const char *g_statenames[] =
   "Invalid",
   "Waiting,Unlock",
   "Ready",
+#ifdef CONFIG_SMP
+  "Assigned",
+#endif
   "Running",
   "Inactive",
   "Waiting,Semaphore",

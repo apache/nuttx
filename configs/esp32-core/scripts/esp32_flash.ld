@@ -19,25 +19,25 @@ SECTIONS
     /* Vectors according to builds/RF-2015.2-win32/esp108_v1_2_s5_512int_2/config.html */
 
     . = 0x0;
-    KEEP(*(.window_vectors.text));
+    KEEP (*(.window_vectors.text));
     . = 0x180;
-    KEEP(*(.xtensa_level2_vector.text));
+    KEEP (*(.xtensa_level2_vector.text));
     . = 0x1c0;
-    KEEP(*(.xtensa_level3_vector.text));
+    KEEP (*(.xtensa_level3_vector.text));
     . = 0x200;
-    KEEP(*(.xtensa_level4_vector.text));
+    KEEP (*(.xtensa_level4_vector.text));
     . = 0x240;
-    KEEP(*(.xtensa_level5_vector.text));
+    KEEP (*(.xtensa_level5_vector.text));
     . = 0x280;
-    KEEP(*(.debug_exception_vector.text));
+    KEEP (*(.debug_exception_vector.text));
     . = 0x2c0;
-    KEEP(*(.nmi_vector.text));
+    KEEP (*(.nmi_vector.text));
     . = 0x300;
-    KEEP(*(.kernel_exception_vector.text));
+    KEEP (*(.kernel_exception_vector.text));
     . = 0x340;
-    KEEP(*(.user_exception_vector.text));
+    KEEP (*(.user_exception_vector.text));
     . = 0x3c0;
-    KEEP(*(.double_exception_vector.text));
+    KEEP (*(.double_exception_vector.text));
     . = 0x400;
     *(.*_vector.literal)
 
@@ -78,7 +78,7 @@ SECTIONS
     *(.sbss2.*)
     *(.gnu.linkonce.sb2.*)
     *(.dynbss)
-    KEEP(*(.bss))
+    KEEP (*(.bss))
     *(.bss.*)
     *(.share.mem)
     *(.gnu.linkonce.b.*)
@@ -96,17 +96,17 @@ SECTIONS
     /* .data initialized on power-up in ROMed configurations. */
 
     _sdata = ABSOLUTE(.);
-    KEEP(*(.data))
-    KEEP(*(.data.*))
-    KEEP(*(.gnu.linkonce.d.*))
-    KEEP(*(.data1))
-    KEEP(*(.sdata))
-    KEEP(*(.sdata.*))
-    KEEP(*(.gnu.linkonce.s.*))
-    KEEP(*(.sdata2))
-    KEEP(*(.sdata2.*))
-    KEEP(*(.gnu.linkonce.s2.*))
-    KEEP(*(.jcr))
+    KEEP (*(.data))
+    KEEP (*(.data.*))
+    KEEP (*(.gnu.linkonce.d.*))
+    KEEP (*(.data1))
+    KEEP (*(.sdata))
+    KEEP (*(.sdata.*))
+    KEEP (*(.gnu.linkonce.s.*))
+    KEEP (*(.sdata2))
+    KEEP (*(.sdata2.*))
+    KEEP (*(.gnu.linkonce.s2.*))
+    KEEP (*(.jcr))
     *(.dram1 .dram1.*)
     _edata = ABSOLUTE(.);
     . = ALIGN(4);

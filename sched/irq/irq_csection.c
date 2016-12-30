@@ -504,39 +504,41 @@ void leave_critical_section(irqstate_t flags)
               DEBUGASSERT(spin_islocked(&g_cpu_irqlock) &&
                           (g_cpu_irqset & (1 << cpu)) != 0);
 
-              rtcb->irqcount = 0;
-              spin_clrbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock,
-                          &g_cpu_irqlock);
+              /* Check if releasing the lock held by this CPU will unlock the
+               * critical section.
+               */
 
-              /* Have all CPUs released the lock? */
-
-              if (!spin_islocked(&g_cpu_irqlock))
+              if ((g_cpu_irqset & ~(1 << cpu)) == 0)
                 {
-                  /* Check if there are pending tasks and that pre-emption
-                   * is also enabled.
-                   *
-                   * REVISIT: Is there an issue here?  up_release_pending()
-                   * must be called from within a critical section but here
-                   * we have just left the critical section.  At least we
-                   * still have interrupts disabled on this CPU.
+                  /* Yes.. Check if there are pending tasks and that pre-emption
+                   * is also enabled.  This is necessary because we may have
+                   * deferred the up_release_pending() call in sched_unlock()
+                   * because we were within a critical section then.
                    */
 
                   if (g_pendingtasks.head != NULL &&
                       !spin_islocked(&g_cpu_schedlock))
                     {
                       /* Release any ready-to-run tasks that have collected
-                       * in g_pendingtasks if the scheduler is not locked.
-                       *
-                       * NOTE: This operation has a very high likelihood of
-                       * causing this task to be switched out!
-                       *
-                       * REVISIT: Should this not be done while we are in the
-                       * critical section.
+                       * in g_pendingtasks.  NOTE: This operation has a very
+                       * high likelihood of causing this task to be switched
+                       * out!
                        */
 
                       up_release_pending();
                     }
                 }
+
+              /* Now, possibly on return from a context switch, clear our
+               * count on the lock.  If all CPUs have released the lock,
+               * then unlock the global IRQ spinlock.
+               */
+
+              rtcb->irqcount = 0;
+              spin_clrbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock,
+                          &g_cpu_irqlock);
+
+              /* Have all CPUs released the lock? */
             }
         }
     }
@@ -570,4 +572,78 @@ void leave_critical_section(irqstate_t flags)
 }
 #endif
 
-#endif /* CONFIG_SMP || CONFIG_SCHED_INSTRUMENTATION_CSECTION*/
+/****************************************************************************
+ * Name:  irq_cpu_locked
+ *
+ * Description:
+ *   Test if the IRQ lock set OR if this CPU holds the IRQ lock
+ *   There is an interaction with pre-emption controls and IRQ locking:
+ *   Even if the pre-emption is enabled, tasks will be forced to pend if
+ *   the IRQ lock is also set UNLESS the CPU starting the task is the
+ *   holder of the IRQ lock.
+ *
+ * Inputs:
+ *   rtcb - Points to the blocked TCB that is ready-to-run
+ *
+ * Return Value:
+ *   true  - IRQs are locked by a different CPU.
+ *   false - IRQs are unlocked OR if they are locked BUT this CPU
+ *           is the holder of the lock.
+ *
+ *   Warning: This values are volatile at only valid at the instance that
+ *   the CPU set was queried.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+bool irq_cpu_locked(int cpu)
+{
+  cpu_set_t irqset;
+
+  /* g_cpu_irqset is not valid in early phases of initialization */
+
+  if (g_os_initstate < OSINIT_OSREADY)
+    {
+      /* We are still single threaded.  In either state of g_cpu_irqlock,
+       * the correct return value should always be false.
+       */
+
+      return false;
+    }
+
+  /* Test if g_cpu_irqlock is locked.  We don't really need to use check
+   * g_cpu_irqlock to do this, we can use the g_cpu_set.
+   *
+   * Sample the g_cpu_irqset once.  That is an atomic operation.  All
+   * subsequent operations will operate on the sampled cpu set.
+   */
+
+  irqset = (cpu_set_t)g_cpu_irqset;
+  if (irqset != 0)
+    {
+      /* Some CPU holds the lock.  So g_cpu_irqlock should be locked.
+       * Return false if the 'cpu' is the holder of the lock; return
+       * true if g_cpu_irqlock is locked, but this CPU is not the
+       * holder of the lock.
+       */
+
+      return ((irqset & (1 << cpu)) == 0);
+    }
+
+  /* No CPU holds the lock */
+
+  else
+    {
+      /* In this case g_cpu_irqlock should be unlocked.  However, if
+       * the lock was established in the interrupt handler AND there are
+       * no bits set in g_cpu_irqset, that probabaly means only that
+       * critical section was established from an interrupt handler.
+       * Return false in either case.
+       */
+
+      return false;
+    }
+}
+#endif
+
+#endif /* CONFIG_SMP || CONFIG_SCHED_INSTRUMENTATION_CSECTION */

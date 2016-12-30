@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/signal/sig_pause.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,8 @@
 #include <unistd.h>
 #include <signal.h>
 
+#include <nuttx/cancelpt.h>
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -72,8 +74,13 @@
 
 int pause(void)
 {
-  sigset_t set;
   struct siginfo value;
+  sigset_t set;
+  int ret;
+
+  /* pause() is a cancellation point */
+
+  (void)enter_cancellation_point();
 
   /* Set up for the sleep.  Using the empty set means that we are not
    * waiting for any particular signal.  However, any unmasked signal
@@ -86,5 +93,7 @@ int pause(void)
    * meaning that some unblocked signal was caught.
    */
 
-  return sigwaitinfo(&set, &value);
+  ret = sigwaitinfo(&set, &value);
+  leave_cancellation_point();
+  return ret;
 }

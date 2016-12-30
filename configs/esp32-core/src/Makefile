@@ -42,7 +42,7 @@ ASRCS =
 CSRCS = esp32_boot.c esp32_bringup.c
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
-CONFIG_CSRCS += esp32_appinit.c
+CSRCS += esp32_appinit.c
 endif
 
 SCRIPTIN = $(SCRIPTDIR)$(DELIM)esp32.template

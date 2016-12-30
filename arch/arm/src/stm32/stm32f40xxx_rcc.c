@@ -743,7 +743,8 @@ static void stm32_stdclockconfig(void)
         {
         }
 
-#if defined(PWR_CSR_ODRDY)
+#if defined(CONFIG_STM32_STM32F429) || defined(CONFIG_STM32_STM32F446) || \
+    defined(CONFIG_STM32_STM32F469)
 
       /* Enable the Over-drive to extend the clock frequency to 180 Mhz */
 

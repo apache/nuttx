@@ -281,7 +281,8 @@ static void efm32_leuart_setbaud(uintptr_t base,  uint32_t baud)
 
 void efm32_lowsetup(void)
 {
-#if defined(HAVE_UART_DEVICE) || defined(HAVE_LEUART_DEVICE)
+#if defined(HAVE_UART_DEVICE) || defined(HAVE_LEUART_DEVICE) || \
+    defined(HAVE_SPI_DEVICE)
   uint32_t regval;
 #endif
 

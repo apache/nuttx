@@ -59,9 +59,12 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <arch/irq.h>
 #include <arch/xtensa/core.h>
 #include <arch/xtensa/xtensa_specregs.h>
+
+#include "chip_macros.h"
 
 /****************************************************************************
  * Public Functions
@@ -95,6 +98,10 @@
 	.align	4
 
 _xtensa_panic:
+	/* Save the exception code */
+
+	wsr		a2, EXCSAVE_1
+
 	/* Save rest of interrupt context (A2=address of state save area on
 	 * stack.
 	 */
@@ -111,17 +118,25 @@ _xtensa_panic:
 
 	/* Set up PS for C, reenable hi-pri interrupts, and clear EXCM. */
 
+#ifdef __XTENSA_CALL0_ABI__
+	movi	a0, PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM
+#else
 	movi	a0, PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_WOE
+#endif
+
 	wsr		a0, PS
 
 	/* Call C panic handler:  Arg1 (A2) = Exception code; Arg 2 (A3) = start
 	 * of the register save area.
 	 */
 
-	mov		a3, sp
 #ifdef __XTENSA_CALL0_ABI__
+	rsr		a2, EXCSAVE_1
+	mov		a3, sp
 	call0	xtensa_panic					/* Call xtensa_panic. Should not return */
 #else
+	rsr		a6, EXCSAVE_1
+	mov		a7, sp
 	call4	xtensa_panic					/* Call xtensa_panic. Should not return */
 #endif
 

@@ -146,7 +146,7 @@
 
 struct esp32_config_s
 {
-  const uint32_t uartbase;     /* Base address of UART registers */
+  const uint32_t uartbase;      /* Base address of UART registers */
   xcpt_t   handler;             /* Interrupt handler */
   uint8_t  periph;              /* UART peripheral ID */
   uint8_t  irq;                 /* IRQ number assigned to the peripheral */
@@ -455,8 +455,8 @@ static void esp32_disableallints(struct esp32_dev_s *priv, uint32_t *intena)
 
 static int esp32_setup(struct uart_dev_s *dev)
 {
-  struct esp32_dev_s *priv = (struct esp32_dev_s *)dev->priv;
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
+  struct esp32_dev_s *priv = (struct esp32_dev_s *)dev->priv;
   uint32_t clkdiv;
   uint32_t regval;
   uint32_t conf0;
@@ -586,6 +586,19 @@ static int esp32_setup(struct uart_dev_s *dev)
 static void esp32_shutdown(struct uart_dev_s *dev)
 {
   struct esp32_dev_s *priv = (struct esp32_dev_s *)dev->priv;
+  uint32_t status;
+
+  /* Wait for outgoing FIFO to clear.   The ROM bootloader does not flush
+   * the FIFO before handing over to user code, so some of this output is
+   * not currently seen when the UART is reconfigured in early stages of
+   * startup.
+   */
+
+  do
+    {
+      status = esp32_serialin(priv, UART_STATUS_OFFSET);
+    }
+  while ((status & UART_TXFIFO_CNT_M) != 0);
 
   /* Disable all UART interrupts */
 
@@ -642,7 +655,9 @@ static int esp32_attach(struct uart_dev_s *dev)
   priv->cpuint = esp32_alloc_levelint(1);
   if (priv->cpuint < 0)
     {
-      ret = priv->cpuint;
+      /* Failed to allocate a CPU interrupt of this type */
+
+      return priv->cpuint;
     }
 
   /* Set up to receive peripheral interrupts on the current CPU */
@@ -701,7 +716,7 @@ static void esp32_detach(struct uart_dev_s *dev)
   cpu = 0;
 #endif
 
-  esp32_detach_peripheral(cpu, priv->config->periph);
+  esp32_detach_peripheral(cpu, priv->config->periph, priv->cpuint);
 
   /* And release the CPU interrupt */
 
@@ -725,6 +740,8 @@ static int esp32_interrupt(struct uart_dev_s *dev)
   struct esp32_dev_s *priv;
   uint32_t regval;
   uint32_t status;
+  uint32_t enabled;
+  unsigned int nfifo;
   int passes;
   bool handled;
 
@@ -741,28 +758,48 @@ static int esp32_interrupt(struct uart_dev_s *dev)
       handled      = false;
       priv->status = esp32_serialin(priv, UART_INT_RAW_OFFSET);
       status       = esp32_serialin(priv, UART_STATUS_OFFSET);
+      enabled      = esp32_serialin(priv, UART_INT_ENA_OFFSET);
 
       /* Clear pending interrupts */
 
-      regval = (UART_RXFIFO_FULL_INT_CLR_S | UART_FRM_ERR_INT_CLR_S |
-                UART_RXFIFO_TOUT_INT_CLR_S | UART_TX_DONE_INT_CLR_S |
-                UART_TXFIFO_EMPTY_INT_CLR_S);
+      regval = (UART_RXFIFO_FULL_INT_CLR | UART_FRM_ERR_INT_CLR |
+                UART_RXFIFO_TOUT_INT_CLR | UART_TX_DONE_INT_CLR |
+                UART_TXFIFO_EMPTY_INT_CLR);
       esp32_serialout(priv, UART_INT_CLR_OFFSET, regval);
 
-      if ((status & UART_RXFIFO_CNT_M) > 0)
+      /* Are Rx interrupts enabled?  The upper layer may hold off Rx input
+       * by disabling the Rx interrupts if there is no place to saved the
+       * data, possibly resulting in an overrun error.
+       */
+
+     if ((enabled & (UART_RXFIFO_FULL_INT_ENA | UART_RXFIFO_TOUT_INT_ENA)) != 0)
+       {
+         /* Is there any data waiting in the Rx FIFO? */
+
+         nfifo = (status & UART_RXFIFO_CNT_M) >> UART_RXFIFO_CNT_S;
+         if (nfifo > 0)
+            {
+              /* Received data in the RXFIFO! ... Process incoming bytes */
+
+              uart_recvchars(dev);
+              handled = true;
+            }
+       }
+
+      /* Are Tx interrupts enabled?  The upper layer will disable Tx interrupts
+       * when it has nothing to send.
+       */
+
+      if ((enabled & (UART_TX_DONE_INT_ENA | UART_TXFIFO_EMPTY_INT_ENA)) != 0)
         {
-          /* Received data in the RXFIFO ... process incoming bytes */
+          nfifo = (status & UART_TXFIFO_CNT_M) >> UART_TXFIFO_CNT_S;
+          if (nfifo < 0x7f)
+            {
+              /* The TXFIFO is not full ... process outgoing bytes */
 
-          uart_recvchars(dev);
-          handled = true;
-        }
-
-      if ((status & UART_TXFIFO_CNT_M) < 0x7f)
-        {
-          /* The TXFIFO is not full ... process outgoing bytes */
-
-          uart_xmitchars(dev);
-          handled = true;
+              uart_xmitchars(dev);
+              handled = true;
+            }
         }
     }
 
@@ -1032,7 +1069,10 @@ static int  esp32_receive(struct uart_dev_s *dev, unsigned int *status)
 static void esp32_rxint(struct uart_dev_s *dev, bool enable)
 {
   struct esp32_dev_s *priv = (struct esp32_dev_s *)dev->priv;
+  irqstate_t flags;
   int regval;
+
+  flags = enter_critical_section();
 
   if (enable)
     {
@@ -1042,8 +1082,8 @@ static void esp32_rxint(struct uart_dev_s *dev, bool enable)
 
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
       regval  = esp32_serialin(priv, UART_INT_ENA_OFFSET);
-      regval |= (UART_RXFIFO_FULL_INT_CLR_S | UART_FRM_ERR_INT_CLR_S |
-                 UART_RXFIFO_TOUT_INT_CLR_S);
+      regval |= (UART_RXFIFO_FULL_INT_ENA | UART_FRM_ERR_INT_ENA |
+                 UART_RXFIFO_TOUT_INT_ENA);
       esp32_serialout(priv, UART_INT_ENA_OFFSET, regval);
 #endif
     }
@@ -1051,10 +1091,13 @@ static void esp32_rxint(struct uart_dev_s *dev, bool enable)
     {
       /* Disable the RX interrupts */
 
-      esp32_serialout(priv, UART_INT_CLR_OFFSET,
-                      (UART_RXFIFO_FULL_INT_CLR_S | UART_FRM_ERR_INT_CLR_S |
-                       UART_RXFIFO_TOUT_INT_CLR_S));
+      regval  = esp32_serialin(priv, UART_INT_ENA_OFFSET);
+      regval &= ~(UART_RXFIFO_FULL_INT_ENA | UART_FRM_ERR_INT_ENA |
+                  UART_RXFIFO_TOUT_INT_ENA);
+      esp32_serialout(priv, UART_INT_ENA_OFFSET, regval);
     }
+
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -1099,20 +1142,19 @@ static void esp32_txint(struct uart_dev_s *dev, bool enable)
 {
   struct esp32_dev_s *priv = (struct esp32_dev_s *)dev->priv;
   irqstate_t flags;
+  int regval;
 
   flags = enter_critical_section();
 
   if (enable)
     {
-      uint32_t regval;
-
       /* Set to receive an interrupt when the TX holding register register
        * is empty
        */
 
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
       regval  = esp32_serialin(priv, UART_INT_ENA_OFFSET);
-      regval |= (UART_TX_DONE_INT_ENA_S | UART_TXFIFO_EMPTY_INT_ENA_S);
+      regval |= (UART_TX_DONE_INT_ENA | UART_TXFIFO_EMPTY_INT_ENA);
       esp32_serialout(priv, UART_INT_ENA_OFFSET, regval);
 
       /* Fake a TX interrupt here by just calling uart_xmitchars() with
@@ -1126,8 +1168,9 @@ static void esp32_txint(struct uart_dev_s *dev, bool enable)
     {
       /* Disable the TX interrupt */
 
-      esp32_serialout(priv, UART_INT_CLR_OFFSET,
-                      (UART_TX_DONE_INT_CLR_S | UART_TXFIFO_EMPTY_INT_CLR_S));
+      regval  = esp32_serialin(priv, UART_INT_ENA_OFFSET);
+      regval &= ~(UART_TX_DONE_INT_ENA | UART_TXFIFO_EMPTY_INT_ENA);
+      esp32_serialout(priv, UART_INT_ENA_OFFSET, regval);
     }
 
   leave_critical_section(flags);
@@ -1253,7 +1296,7 @@ int up_putc(int ch)
       /* Add CR */
 
       while(!esp32_txready(&CONSOLE_DEV));
-      esp32_send(&CONSOLE_DEV, 'r');
+      esp32_send(&CONSOLE_DEV, '\r');
     }
 
   while(!esp32_txready(&CONSOLE_DEV));

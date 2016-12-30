@@ -104,9 +104,29 @@
 
 /* Check if an interrupt stack size is configured */
 
-#ifndef CONFIG_ARCH_INTERRUPTSTACK
-# define CONFIG_ARCH_INTERRUPTSTACK 0
+#define HAVE_INTERRUPTSTACK 1
+
+#if !defined(CONFIG_ARCH_INTERRUPTSTACK)
+#  define CONFIG_ARCH_INTERRUPTSTACK 0
+#  undef  HAVE_INTERRUPTSTACK
+#elif CONFIG_ARCH_INTERRUPTSTACK < 16
+#  warning CONFIG_ARCH_INTERRUPTSTACK is to small
+#  undef  HAVE_INTERRUPTSTACK
 #endif
+
+#define INTERRUPTSTACK_SIZE  ((CONFIG_ARCH_INTERRUPTSTACK + 15) & ~15)
+#define INTERRUPT_STACKWORDS (INTERRUPTSTACK_SIZE >> 2)
+
+/* An IDLE thread stack size for CPU0 must be defined */
+
+#if !defined(CONFIG_IDLETHREAD_STACKSIZE)
+#  error CONFIG_IDLETHREAD_STACKSIZE is not defined
+#elif CONFIG_IDLETHREAD_STACKSIZE < 16
+#  error CONFIG_IDLETHREAD_STACKSIZE is to small
+#endif
+
+#define IDLETHREAD_STACKSIZE  ((CONFIG_IDLETHREAD_STACKSIZE + 15) & ~15)
+#define IDLETHREAD_STACKWORDS (IDLETHREAD_STACKSIZE >> 2)
 
 /* Used for stack usage measurements */
 
@@ -180,11 +200,15 @@ extern volatile uint32_t *g_current_regs[1];
 
 #endif
 
-/* Address of the saved user stack pointer */
+#ifdef HAVE_INTERRUPTSTACK
+/* The (optional) interrupt stack */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
-extern void g_intstackbase;
+extern uint32_t g_intstack[INTERRUPT_STACKWORDS];
 #endif
+
+/* Address of the CPU0 IDLE thread */
+
+extern uint32_t g_idlestack[IDLETHREAD_STACKWORDS];
 
 /* These 'addresses' of these values are setup by the linker script.  They are
  * not actual uint32_t storage locations! They are only used meaningfully in the
@@ -266,7 +290,7 @@ void xtensa_coproc_disable(struct xtensa_cpstate_s *cpstate, int cpset);
 
 /* IRQs */
 
-uint32_t *xtensa_int_decode(uint32_t *regs);
+uint32_t *xtensa_int_decode(uint32_t cpuints, uint32_t *regs);
 uint32_t *xtensa_irq_dispatch(int irq, uint32_t *regs);
 uint32_t xtensa_enable_cpuint(uint32_t *shadow, uint32_t intmask);
 uint32_t xtensa_disable_cpuint(uint32_t *shadow, uint32_t intmask);
@@ -293,7 +317,8 @@ void xtensa_coproc_restorestate(struct xtensa_cpstate_s *cpstate);
 
 /* Signals */
 
-void xtensa_sigdeliver(void);
+void _xtensa_sig_trampoline(void);
+void xtensa_sig_deliver(void);
 
 /* Chip-specific functions **************************************************/
 /* Chip specific functions defined in arch/xtensa/src/<chip> */

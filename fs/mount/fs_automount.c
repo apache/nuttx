@@ -485,7 +485,7 @@ static int automount_interrupt(FAR const struct automount_lower_s *lower,
   /* Queue work to occur after a delay.  The delays performs debouncing:
    * If the insertion/removal detection logic has "chatter", then we may
    * receive this interrupt numerous times.  Each time, the previous work
-   * will be cancelled (above) and the new work will scheduled with the
+   * will be canceled (above) and the new work will scheduled with the
    * delay.  So the final mount operation will not be performed until the
    * insertion state is stable for that delay.
    */

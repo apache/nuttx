@@ -37,6 +37,10 @@
 
 CSRCS += sched_getprioritymax.c sched_getprioritymin.c
 
+ifneq ($(CONFIG_CANCELLATION_POINTS),y)
+CSRCS += task_setcanceltype.c task_testcancel.c
+endif
+
 ifeq ($(CONFIG_SMP),y)
 CSRCS += sched_cpucount.c
 endif

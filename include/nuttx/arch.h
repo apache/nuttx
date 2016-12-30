@@ -2301,16 +2301,6 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable);
 int up_putc(int ch);
 
 /****************************************************************************
- * Name: up_getc
- *
- * Description:
- *   Get one character on the console
- *
- ****************************************************************************/
-
-int up_getc(void);
-
-/****************************************************************************
  * Name: up_puts
  *
  * Description:

@@ -44,6 +44,7 @@
 #include <debug.h>
 #include <string.h>
 #include <stdio.h>
+#include <errno.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/spinlock.h>

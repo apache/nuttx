@@ -42,9 +42,45 @@
 
 #include <nuttx/config.h>
 
+#include <arch/irq.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define CPUINT_UNASSIGNED 0xff  /* No peripheral assigned to this CPU interrupt */
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* Maps a CPU interrupt to the IRQ of the attached peripheral interrupt */
+
+extern uint8_t g_cpu0_intmap[ESP32_NCPUINTS];
+#ifdef CONFIG_SMP
+extern uint8_t g_cpu1_intmap[ESP32_NCPUINTS];
+#endif
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Name:  esp32_cpuint_initialize
+ *
+ * Description:
+ *   Initialize CPU interrupts
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned on
+ *   any failre.
+ *
+ ****************************************************************************/
+
+int esp32_cpuint_initialize(void);
 
 /****************************************************************************
  * Name:  esp32_alloc_levelint
@@ -108,8 +144,10 @@ void esp32_free_cpuint(int cpuint);
  *
  * Input Parameters:
  *   cpu      - The CPU to receive the interrupt 0=PRO CPU 1=APP CPU
- *   periphid - The peripheral number from ira.h to be attached.
+ *   periphid - The peripheral number from ira.h to be assigned to
+ *              a CPU interrupt.
  *   cpuint   - The CPU interrupt to receive the peripheral interrupt
+ *              assignment.
  *
  * Returned Value:
  *   None
@@ -125,14 +163,17 @@ void esp32_attach_peripheral(int cpu, int periphid, int cpuint);
  *   Detach a peripheral interupt from a CPU interrupt.
  *
  * Input Parameters:
- *   cpu    - The CPU to receive the interrupt 0=PRO CPU 1=APP CPU
- *   periphid - The peripheral number from ira.h to be detached.
+ *   cpu      - The CPU to receive the interrupt 0=PRO CPU 1=APP CPU
+ *   periphid - The peripheral number from irq.h to be detached from the
+ *              CPU interrupt.
+ *   cpuint   - The CPU interrupt from which the peripheral interrupt will
+ *              be detached.
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void esp32_detach_peripheral(int cpu, int periphid);
+void esp32_detach_peripheral(int cpu, int periphid, int cpuint);
 
 #endif /* __ARCH_XTENSA_SRC_ESP32_ESP32_CPUINT_H */

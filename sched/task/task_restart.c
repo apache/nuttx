@@ -214,7 +214,7 @@ int task_restart(pid_t pid)
   ret = task_activate((FAR struct tcb_s *)tcb);
   if (ret != OK)
     {
-      (void)task_delete(pid);
+      (void)task_terminate(pid, true);
       errcode = -ret;
       goto errout_with_lock;
     }

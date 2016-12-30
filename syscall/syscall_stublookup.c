@@ -96,7 +96,13 @@ uintptr_t STUB_task_create(int nbr, uintptr_t parm1, uintptr_t parm2,
             uintptr_t parm3, uintptr_t parm4, uintptr_t parm5);
 uintptr_t STUB_task_delete(int nbr, uintptr_t parm1);
 uintptr_t STUB_task_restart(int nbr, uintptr_t parm1);
+uintptr_t STUB_task_setcancelstate(int nbr, uintptr_t parm1,
+            uintptr_t parm2);
 uintptr_t STUB_up_assert(int nbr, uintptr_t parm1, uintptr_t parm2);
+
+uintptr_t STUB_task_setcanceltype(int nbr, uintptr_t parm1,
+            uintptr_t parm2);
+uintptr_t STUB_task_testcancel(int nbr);
 
 /* The following can be individually enabled */
 
@@ -290,8 +296,6 @@ uintptr_t STUB_pthread_mutex_lock(int nbr, uintptr_t parm1);
 uintptr_t STUB_pthread_mutex_trylock(int nbr, uintptr_t parm1);
 uintptr_t STUB_pthread_mutex_unlock(int nbr, uintptr_t parm1);
 uintptr_t STUB_pthread_once(int nbr, uintptr_t parm1, uintptr_t parm2);
-uintptr_t STUB_pthread_setcancelstate(int nbr, uintptr_t parm1,
-            uintptr_t parm2);
 uintptr_t STUB_pthread_setschedparam(int nbr, uintptr_t parm1,
             uintptr_t parm2, uintptr_t parm3);
 uintptr_t STUB_pthread_setschedprio(int nbr, uintptr_t parm1,
@@ -310,6 +314,10 @@ uintptr_t STUB_pthread_cond_timedwait(int nbr, uintptr_t parm1,
 uintptr_t STUB_pthread_kill(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_pthread_sigmask(int nbr, uintptr_t parm1, uintptr_t parm2,
             uintptr_t parm3);
+
+uintptr_t STUB_pthread_cleanup_pop(int nbr, uintptr_t parm1);
+uintptr_t STUB_pthread_cleanup_push(int nbr, uintptr_t parm1,
+            uintptr_t parm2);
 
 /* The following are defined only if message queues are enabled */
 
