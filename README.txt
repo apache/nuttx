@@ -2,7 +2,9 @@ README
 ^^^^^^
 
   o Installation
+    - Environments
     - Installing Cygwin
+    - Ubuntu Bash under Windows 10
     - Download and Unpack
     - Semi-Optional apps/ Package
     - Installation Directories with Spaces in the Path
@@ -37,18 +39,29 @@ README
 INSTALLATION
 ^^^^^^^^^^^^
 
+Environments
+------------
+
   NuttX may be installed and built on a Linux system or on a Windows
-  system if Cygwin is installed.  The MSYS environment is an option
-  to Cygwin on the Windows platform.  However, I have little experience
-  that that configuration and it will not be discussed in this README
-  file.
+  system if Cygwin is installed.  Instructions for installation of
+  Cygwin on Windows system are provided in the following paragraph.
 
-  Instructions for installation of Cygwin on Windows system are provided
-  in the following paragraph.
+  Other Windows options are
 
-  NuttX can also be installed and built on a native Windows system, but
-  with some potential tool-related issues (see the discussion "Native
-  Windows Build" below).
+    - The MSYS environment.  However, I have little experience that
+      configuration and it will not be discussed in this README file.
+      See http://www.mingw.org/wiki/MSYS if you are interested in
+      using MSYS.  People report to me that they have used MSYS
+      successfully.
+
+    - Ubuntu/bash shell under Windows 10.  This is a new option under
+      Windows 10.  I am still looking into this option and do you yet
+      have much to say about.  As I learn more, I will update the
+      section "Ubuntu Bash under Windows 10" below.
+
+    - NuttX can also be installed and built on a native Windows system, but
+      with some potential tool-related issues (see the discussion "Native
+      Windows Build" below).
 
 Installing Cygwin
 -----------------
@@ -94,6 +107,79 @@ Installing Cygwin
   UPDATE: The last time I installed EVERTHING, the download was
   about 5GiB.  The server I selected was also very slow so it took
   over a day to do the whole install!
+
+Ubuntu Bash under Windows 10
+----------------------------
+
+  A better version of a command-line only Ubuntu under Windows 10 (beta)
+  has recently been made available from Microsoft.  I am tinkering with
+  that but do not yet have much to say about it.
+
+  Installation
+  ------------
+  Installation instructions abound on the Internet complete with screen
+  shots.  I will attempt to duplicate those instructions in full here.
+  Here are the simplified installation steps:
+
+    - Open "Settings".
+    - Click on "Update & security".
+    - Click on "For Developers".
+    - Under "Use developer features", select the "Developer mode" option to
+      setup the environment to install Bash.
+    - A message box should pop up.  Click "Yes" to turn on developer mode.
+    - After the necessary components install, you'll need to restart your
+      computer.
+
+  Once your computer reboots:
+
+    - Open "Control Panel".
+    - Click on "Programs".
+    - Click on "Turn Windows features on or off".
+    - A list of features will pop up, check the "Windows Subsystem for Linux
+      (beta)" option.
+    - Click OK.
+    - Once the components installed on your computer, click the "Restart
+      now" button to complete the task.
+
+  After your computer restarts, you will notice that Bash will not appear in
+  the "Recently added" list of apps, this is because Bash isn't actually
+  installed yet. Now that you have setup the necessary components, use the
+  following steps to complete the installation of Bash:
+
+    - Open "Start", do a search for bash.exe, and press "Enter".
+    - On the command prompt, type y and press Enter to download and install
+      Bash from the Windows Store.  This will take awhile.
+    - Then you'll need to create a default UNIX user account. This account
+      doesn't have to be the same as your Windows account. Enter the
+      username in the required field and press Enter (you can't use the
+      username "admin").
+    - Close the "bash.exe" command prompt.
+
+  Now that you completed the installation and setup, you can open the Bash
+  tool from the Start menu like you would with any other app.
+
+  Accessing Windows Files
+  -----------------------
+  Drivers will be mounted under "/mnt" so for example "C:\Program Files"
+  appears at "/mnt/c/Program Files".  This is as opposed to Cgwin where
+  the same directory would appear at "/cygdrive/c/Program Files".
+
+  With these differences (perhaps a few other Windows quirks) the Ubuntu
+  install works just like Ubuntu running natively on your PC.  Currently
+  there is not host configuration for Bash running under Windows 10 but
+  setting the host to either Linux or Cygwin should work fine.
+
+  Install Linux Software.
+  -----------------------
+  Use "sudo apt-get install <package name>"
+
+  Integrating with Windows Tools
+  ------------------------------
+  If you want to integrate with Windows native tools, then you will need
+  deal with the same kind of craziness as with integrating Cygwin with
+  native toolchains.  If you set the host PC to Cygwin in this case, then
+  the NuttX build system should deal with that craziness for you.
+
 
 Download and Unpack
 -------------------
