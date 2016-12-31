@@ -2574,11 +2574,11 @@ static bool stm32_dmasupported(FAR struct sdio_dev_s *dev)
 static int stm32_dmapreflight(FAR struct sdio_dev_s *dev,
                               FAR const uint8_t *buffer, size_t buflen)
 {
+#if !defined(CONFIG_STM32_STM32F40XX)
   struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
 
-#if !defined(CONFIG_STM32_STM32F40XX)
   /* Wide bus operation is required for DMA */
 
   if (!priv->widebus)
