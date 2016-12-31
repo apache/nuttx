@@ -45,6 +45,8 @@ ENVIRONMENTS
 
   Other Windows options are
 
+    - An installation Linux on a virtual machine in Windows.
+
     - The MSYS environment.  However, I have little experience that
       configuration and it will not be discussed in this README file.
       See http://www.mingw.org/wiki/MSYS if you are interested in
@@ -58,7 +60,7 @@ ENVIRONMENTS
 
     - NuttX can also be installed and built on a native Windows system, but
       with some potential tool-related issues (see the discussion "Native
-      Windows Build" below).
+      Windows Build" under "Building NuttX" below).
 
 Installing Cygwin
 -----------------
