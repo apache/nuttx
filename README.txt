@@ -1,10 +1,10 @@
 README
 ^^^^^^
 
-  o Installation
-    - Environments
+  o Environments
     - Installing Cygwin
     - Ubuntu Bash under Windows 10
+  o Installation
     - Download and Unpack
     - Semi-Optional apps/ Package
     - Installation Directories with Spaces in the Path
@@ -36,11 +36,8 @@ README
     - Window Native Toolchain Issues
   o Documentation
 
-INSTALLATION
+ENVIRONMENTS
 ^^^^^^^^^^^^
-
-Environments
-------------
 
   NuttX may be installed and built on a Linux system or on a Windows
   system if Cygwin is installed.  Instructions for installation of
@@ -55,7 +52,7 @@ Environments
       successfully.
 
     - Ubuntu/bash shell under Windows 10.  This is a new option under
-      Windows 10.  I am still looking into this option and do you yet
+      Windows 10.  I am still looking into this option and do not yet
       have much to say about.  As I learn more, I will update the
       section "Ubuntu Bash under Windows 10" below.
 
@@ -180,6 +177,8 @@ Ubuntu Bash under Windows 10
   native toolchains.  If you set the host PC to Cygwin in this case, then
   the NuttX build system should deal with that craziness for you.
 
+INSTALLATION
+^^^^^^^^^^^^
 
 Download and Unpack
 -------------------
