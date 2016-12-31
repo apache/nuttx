@@ -115,10 +115,6 @@ static void up_output_compare(uint32_t sr, uint32_t of)
 
   if ((sr & of) != 0)
     {
-      /* Clear the pending output compare interrupt */
-
-      putreg32(of, IMX_GPT_SR);
-
       /* Process timer interrupt event */
 
       sched_process_timer();
@@ -140,9 +136,16 @@ static void up_output_compare(uint32_t sr, uint32_t of)
 
 int up_timerisr(int irq, uint32_t *regs)
 {
-  /* Sample the SR (once) and process all pending output compare interrupt */
+  /* Sample the SR (once) */
 
   uint32_t sr = getreg32(IMX_GPT_SR);
+
+  /* Clear GPT status register */
+
+  putreg32(sr, IMX_GPT_SR);
+
+  /* Process all pending output compare interrupt */
+
   up_output_compare(sr, GPT_INT_OF1);
   up_output_compare(sr, GPT_INT_OF2);
   up_output_compare(sr, GPT_INT_OF3);

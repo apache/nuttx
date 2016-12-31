@@ -390,7 +390,7 @@ void spin_unlockr(FAR struct spinlock_s *lock)
  * Input Parameters:
  *   set     - A reference to the bitset to set the CPU bit in
  *   cpu     - The bit number to be set
- *   setlock - A reference to the lock lock protecting the set
+ *   setlock - A reference to the lock protecting the set
  *   orlock  - Will be set to SP_LOCKED while holding setlock
  *
  * Returned Value:
@@ -441,7 +441,7 @@ void spin_setbit(FAR volatile cpu_set_t *set, unsigned int cpu,
  * Input Parameters:
  *   set     - A reference to the bitset to set the CPU bit in
  *   cpu     - The bit number to be set
- *   setlock - A reference to the lock lock protecting the set
+ *   setlock - A reference to the lock protecting the set
  *   orlock  - Will be set to SP_UNLOCKED if all bits become cleared in set
  *
  * Returned Value:

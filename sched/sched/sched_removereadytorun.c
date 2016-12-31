@@ -165,7 +165,7 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
   if (rtcb->blink == NULL && TLIST_ISRUNNABLE(rtcb->task_state))
     {
       FAR struct tcb_s *nxttcb;
-      FAR struct tcb_s *rtrtcb;
+      FAR struct tcb_s *rtrtcb = NULL;
       int me;
 
       /* There must always be at least one task in the list (the IDLE task)
@@ -198,14 +198,21 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
        * g_readytorun list.  We can only select a task from that list if
        * the affinity mask includes the current CPU.
        *
-       * REVISIT: What should we do, if anything, if pre-emption is locked
-       * by the another CPU?  Should just used nxttcb?  Should we select
-       * from the pending task list instead of the g_readytorun list?
+       * If pre-emption is locked or another CPU is in a critical section,
+       * then use the 'nxttcb' which will probably be the IDLE thread.
+       * REVISIT: What if it is not the IDLE thread?
        */
 
-      for (rtrtcb = (FAR struct tcb_s *)g_readytorun.head;
-           rtrtcb != NULL && !CPU_ISSET(cpu, &rtrtcb->affinity);
-           rtrtcb = (FAR struct tcb_s *)rtrtcb->flink);
+      if (!spin_islocked(&g_cpu_schedlock) && !irq_cpu_locked(me))
+        {
+          /* Search for the highest priority task that can run on this
+           * CPU.
+           */
+
+          for (rtrtcb = (FAR struct tcb_s *)g_readytorun.head;
+               rtrtcb != NULL && !CPU_ISSET(cpu, &rtrtcb->affinity);
+               rtrtcb = (FAR struct tcb_s *)rtrtcb->flink);
+        }
 
       /* Did we find a task in the g_readytorun list?  Which task should
        * we use?  We decide strictly by the priority of the two tasks:
