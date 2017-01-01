@@ -161,8 +161,8 @@ Ubuntu Bash under Windows 10
   Now that you completed the installation and setup, you can open the Bash
   tool from the Start menu like you would with any other app.
 
-  Accessing Windows Files
-  -----------------------
+  Accessing Windows Files from Ubuntu
+  -----------------------------------
   File sysems will be mounted under "/mnt" so for example "C:\Program Files"
   appears at "/mnt/c/Program Files".  This is as opposed to Cgwin where
   the same directory would appear at "/cygdrive/c/Program Files".
@@ -172,6 +172,17 @@ Ubuntu Bash under Windows 10
   there is no host configuration for Bash running under Windows 10 but
   setting the host to either Linux or Cygwin in your configuratino file
   should work fine.
+
+  Accessing Ubuntu Files From Windows
+  -----------------------------------
+  In Ubuntu Userspace for Windows, the Ubuntu file system root directory is
+  at:
+
+    %localappdata%\lxss\rootfs
+
+  Or
+
+    C:\Users\Username\AppData\Local\lxss\rootfs
 
   Install Linux Software.
   -----------------------
