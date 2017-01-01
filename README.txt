@@ -39,13 +39,16 @@ README
 ENVIRONMENTS
 ^^^^^^^^^^^^
 
-  NuttX may be installed and built on a Linux system or on a Windows
-  system if Cygwin is installed.  Instructions for installation of
-  Cygwin on Windows system are provided in the following paragraph.
-
-  Other Windows options are
+  NuttX requires a POSIX development environment such as you would find uder
+  Linux or OSX.  NuttX may be also be installed and built on Windows system
+  if you also provde such a POSIX develoment environment.  Options for a
+  POSIX development environment under Windows include:
 
     - An installation Linux on a virtual machine in Windows.
+
+    - The Cygwin environment.  Instructions for installation of Cygwin on a
+      Windows system are provided in the following paragraph, "Installing
+      Cygwin".
 
     - The MSYS environment.  However, I have little experience that
       configuration and it will not be discussed in this README file.
@@ -54,9 +57,7 @@ ENVIRONMENTS
       successfully.
 
     - Ubuntu/bash shell under Windows 10.  This is a new option under
-      Windows 10.  I am still looking into this option and do not yet
-      have much to say about.  As I learn more, I will update the
-      section "Ubuntu Bash under Windows 10" below.
+      Windows 10.  See the section "Ubuntu Bash under Windows 10" below.
 
     - NuttX can also be installed and built on a native Windows system, but
       with some potential tool-related issues (see the discussion "Native
@@ -111,8 +112,7 @@ Ubuntu Bash under Windows 10
 ----------------------------
 
   A better version of a command-line only Ubuntu under Windows 10 (beta)
-  has recently been made available from Microsoft.  I am tinkering with
-  that but do not yet have much to say about it.
+  has recently been made available from Microsoft.
 
   Installation
   ------------
@@ -159,28 +159,46 @@ Ubuntu Bash under Windows 10
 
   Accessing Windows Files
   -----------------------
-  Drivers will be mounted under "/mnt" so for example "C:\Program Files"
+  File sysems will be mounted under "/mnt" so for example "C:\Program Files"
   appears at "/mnt/c/Program Files".  This is as opposed to Cgwin where
   the same directory would appear at "/cygdrive/c/Program Files".
 
   With these differences (perhaps a few other Windows quirks) the Ubuntu
   install works just like Ubuntu running natively on your PC.  Currently
-  there is not host configuration for Bash running under Windows 10 but
-  setting the host to either Linux or Cygwin should work fine.
+  there is no host configuration for Bash running under Windows 10 but
+  setting the host to either Linux or Cygwin in your configuratino file
+  should work fine.
 
   Install Linux Software.
   -----------------------
-  Use "sudo apt-get install <package name>"
+  Use "sudo apt-get install <package name>".  As examples, this is how
+  you would get GIT:
+
+    $ sudo apt-get install git
+
+  This will get you an ARM compiler:
+
+    $ sudo apt-get install gcc-arm-none-eabi
+
+  NOTE: That is just an example.  I am not sure if apt-get will give you a
+  current or usable compiler.  You should carefully select your toolchain
+  for the needs of your project.]
 
   Integrating with Windows Tools
   ------------------------------
   If you want to integrate with Windows native tools, then you will need
   deal with the same kind of craziness as with integrating Cygwin with
   native toolchains.  If you set the host PC to Cygwin in this case, then
-  the NuttX build system should deal with that craziness for you.
+  the NuttX build system should deal with that craziness for you. See the
+  section "Cygwin Build Problems" below.
 
 INSTALLATION
 ^^^^^^^^^^^^
+
+  There are two ways to get NuttX:  You may download released, stable
+  tarballs from wither the Bitbucket or Sourceforge download locations.
+  Or you may get NuttX by cloning the Bitbucket GIT repositories.  Let's
+  consider the released tarballs first:
 
 Download and Unpack
 -------------------
@@ -191,6 +209,11 @@ Download and Unpack
   version number). You might want to rename that directory nuttx to
   match the various instructions in the documentation and some scripts
   in the source tree.
+
+  Download locations:
+
+    https://bitbucket.org/nuttx/nuttx/downloads
+    https://sourceforge.net/projects/nuttx/files/nuttx/
 
 Semi-Optional apps/ Package
 ---------------------------
