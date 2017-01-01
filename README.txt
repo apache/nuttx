@@ -48,24 +48,31 @@ ENVIRONMENTS
 
     - The Cygwin environment.  Instructions for installation of Cygwin on a
       Windows system are provided in the following paragraph, "Installing
-      Cygwin".  Cygwin is a very convenient environment, especially if you
-      need to integrate with Windows tools.  But the compile times are
-      very slow.
-
-    - The MSYS environment.  However, I have little experience that
-      configuration and it will not be discussed in this README file.
-      See http://www.mingw.org/wiki/MSYS if you are interested in
-      using MSYS.  People report to me that they have used MSYS
-      successfully.
+      Cygwin".  Cygwin is a mature, well-tested, and very convenient
+      environment.  It is especially expecially convenient if you  need to
+      integrate with Windows tools.  Downsides are that the installation
+      time is very long and the compile times are very slow.
 
     - Ubuntu/bash shell under Windows 10.  This is a new option under
       Windows 10.  See the section "Ubuntu Bash under Windows 10" below.
       This is an improvement over Cygwin if your concern is compile time;
-      its build performance is comparable to native Linux.
+      its build performance is comparable to native Linux.  It also installs
+      in a tiny fraction of the time as Cygwin, perhaps 20 minutes for
+      the basic Ubuntu install (vs. more than a day for the complete Cygwin
+      install).
+
+    - The MSYS environment.  I have no experience using the MSYS environment
+      and that configuration will not be discussed in this README file.
+      See http://www.mingw.org/wiki/MSYS if you are interested in
+      using MSYS.  People report to me that they have used MSYS
+      successfully.  I suppose that the advantages of the MSYS environemnt
+      is that it is closer to a native Windows environment and uses only a
+      minimal of add-on POSIX-ish tools.
 
     - NuttX can also be installed and built on a native Windows system, but
       with some potential tool-related issues (see the discussion "Native
-      Windows Build" under "Building NuttX" below).
+      Windows Build" under "Building NuttX" below).  GNUWin32 is used to
+      provide compatible native windows tools.
 
 Installing Cygwin
 -----------------
@@ -100,6 +107,9 @@ Installing Cygwin
      You should certainly be able to omit "Science", "Math", and
      "Publishing".  You can try omitting KDE, Gnome, GTK, and other
      graphics packages if you don't plan to use them.
+
+     Perhaps a minimum set would be those packages listed below for the
+     "Ubuntu Bash under Windows 10" installation?
 
   After installing Cygwin, you will get lots of links for installed
   tools and shells.  I use the RXVT native shell.  It is fast and reliable
