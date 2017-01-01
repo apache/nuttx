@@ -48,7 +48,9 @@ ENVIRONMENTS
 
     - The Cygwin environment.  Instructions for installation of Cygwin on a
       Windows system are provided in the following paragraph, "Installing
-      Cygwin".
+      Cygwin".  Cygwin is a very convenient environment, especially if you
+      need to integrate with Windows tools.  But the compile times are
+      very slow.
 
     - The MSYS environment.  However, I have little experience that
       configuration and it will not be discussed in this README file.
@@ -58,6 +60,8 @@ ENVIRONMENTS
 
     - Ubuntu/bash shell under Windows 10.  This is a new option under
       Windows 10.  See the section "Ubuntu Bash under Windows 10" below.
+      This is an improvement over Cygwin if your concern is compile time;
+      its build performance is comparable to native Linux.
 
     - NuttX can also be installed and built on a native Windows system, but
       with some potential tool-related issues (see the discussion "Native
@@ -176,13 +180,24 @@ Ubuntu Bash under Windows 10
 
     $ sudo apt-get install git
 
-  This will get you an ARM compiler:
+  This will get you a compiler for your host PC:
+
+    $ sudo apt-get install gcc
+
+  This will get you an ARM compiler for your target:
 
     $ sudo apt-get install gcc-arm-none-eabi
 
   NOTE: That is just an example.  I am not sure if apt-get will give you a
   current or usable compiler.  You should carefully select your toolchain
   for the needs of your project.]
+
+  You will also need to the get the kconfig-frontends configuration as
+  described below under "NuttX Configuration tool".  In order build the
+  kconfig-frontends configuration tool you will also need:  make, gperf,
+  flex, bison, and libncurses-dev.
+
+  That is enough to do a basic NuttX build.
 
   Integrating with Windows Tools
   ------------------------------
