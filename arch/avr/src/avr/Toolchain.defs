@@ -1,7 +1,7 @@
 ############################################################################
 # arch/avr/src/avr/Toolchain.defs
 #
-#   Copyright (C) 2012-2013, 2017 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -133,8 +133,6 @@ endif
 ifeq ($(_WINAVR),1)
   CROSSDEV ?= avr-
   ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
-    WINTOOL = y
-  else ifeq ($(CONFIG_WINDOWS_UBUNTU),y)
     WINTOOL = y
   endif
   MAXOPTIMIZATION ?= -O2

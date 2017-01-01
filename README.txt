@@ -225,6 +225,12 @@ Ubuntu Bash under Windows 10
   NuttX build system should deal with most that craziness for you.   But not
   all, see the section "Cygwin Build Problems" below.
 
+  WARNING:  Do not use Windows native tools with Ubuntu under Windows.  This
+  tool combination is made to work with Cygwin through the use of the
+  'cygpath -w' tool that converts paths from say '/cydrive/c/Program Files'
+  to 'C:\Program Files'.  There is, however, no corresponding tool to convert
+  '/mnt/c/Program Files' in the Ubuntu environment.
+
 INSTALLATION
 ^^^^^^^^^^^^
 

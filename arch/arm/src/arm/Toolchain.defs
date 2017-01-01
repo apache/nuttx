@@ -1,7 +1,7 @@
 ############################################################################
 # arch/arm/src/armv/Toolchain.defs
 #
-#   Copyright (C) 2012-2014, 2017 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2012-2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -129,8 +129,6 @@ ifeq ($(CONFIG_ARM_TOOLCHAIN),CODESOURCERYW)
   MAXOPTIMIZATION ?= -O2
   ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
     WINTOOL = y
-  else ifeq ($(CONFIG_WINDOWS_UBUNTU),y)
-    WINTOOL = y
   endif
 endif
 
@@ -140,8 +138,6 @@ ifeq ($(CONFIG_ARM_TOOLCHAIN),DEVKITARM)
   CROSSDEV ?= arm-eabi-
   ARCROSSDEV ?= arm-eabi-
   ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
-    WINTOOL = y
-  else ifeq ($(CONFIG_WINDOWS_UBUNTU),y)
     WINTOOL = y
   endif
 endif
@@ -161,8 +157,6 @@ ifeq ($(CONFIG_ARM_TOOLCHAIN),GNU_EABIW)
   ARCROSSDEV ?= arm-none-eabi-
   MAXOPTIMIZATION ?= -Os
   ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
-    WINTOOL = y
-  else ifeq ($(CONFIG_WINDOWS_UBUNTU),y)
     WINTOOL = y
   endif
 endif
