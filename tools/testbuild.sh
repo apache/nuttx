@@ -77,15 +77,19 @@ while [ ! -z "$1" ]; do
     host=linux
     ;;
     -c )
+    host=windows
     wenv=cygwin
     ;;
     -u )
+    host=windows
     wenv=ubuntu
     ;;
     -n )
+    host=windows
     wenv=native
     ;;
     -s )
+    host=windows
     sizet=long
     ;;
     -a )
