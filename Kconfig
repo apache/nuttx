@@ -60,7 +60,13 @@ config WINDOWS_CYGWIN
 	bool "Cygwin"
 	---help---
 		Build natively in a Cygwin environment with POSIX style paths (like
-		/cygdrive/c/cgywin/home)
+		/cygdrive/c/Program Files)
+
+config WINDOWS_UBUNTU
+	bool "Ubuntu under Windows10"
+	---help---
+		Build natively in an Unbuntu shell under Windoes 10 environment with
+		POSIX style paths (like /mnt/c/Program Files)
 
 config WINDOWS_MSYS
 	bool "MSYS"

@@ -1,7 +1,7 @@
 ############################################################################
 # arch/arm/src/armv6-m/Toolchain.defs
 #
-#   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2013, 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -107,6 +107,8 @@ ifeq ($(CONFIG_ARMV6M_TOOLCHAIN),ATOLLIC)
   ARCROSSDEV ?= arm-atollic-eabi-
   ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
     WINTOOL = y
+  else ifeq ($(CONFIG_WINDOWS_UBUNTU),y)
+    WINTOOL = y
   endif
   ARCHCPUFLAGS = -mcpu=cortex-m0 -mthumb -mfloat-abi=soft
 endif
@@ -134,6 +136,8 @@ ifeq ($(CONFIG_ARMV6M_TOOLCHAIN),CODEREDW)
   ARCROSSDEV ?= arm-none-eabi-
   ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
     WINTOOL = y
+  else ifeq ($(CONFIG_WINDOWS_UBUNTU),y)
+    WINTOOL = y
   endif
   ARCHCPUFLAGS = -mcpu=cortex-m0 -mthumb -mfloat-abi=soft
 endif
@@ -153,6 +157,8 @@ ifeq ($(CONFIG_ARMV6M_TOOLCHAIN),CODESOURCERYW)
   ARCROSSDEV ?= arm-none-eabi-
   ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
     WINTOOL = y
+  else ifeq ($(CONFIG_WINDOWS_UBUNTU),y)
+    WINTOOL = y
   endif
   ARCHCPUFLAGS = -mcpu=cortex-m0 -mthumb -mfloat-abi=soft
 endif
@@ -163,6 +169,8 @@ ifeq ($(CONFIG_ARMV6M_TOOLCHAIN),DEVKITARM)
   CROSSDEV ?= arm-eabi-
   ARCROSSDEV ?= arm-eabi-
   ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
+    WINTOOL = y
+  else ifeq ($(CONFIG_WINDOWS_UBUNTU),y)
     WINTOOL = y
   endif
   ARCHCPUFLAGS = -mcpu=cortex-m0 -mthumb -mfloat-abi=soft
@@ -180,6 +188,8 @@ ifeq ($(CONFIG_ARMV6M_TOOLCHAIN),GNU_EABIW)
   CROSSDEV ?= arm-none-eabi-
   ARCROSSDEV ?= arm-none-eabi-
   ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
+    WINTOOL = y
+  else ifeq ($(CONFIG_WINDOWS_UBUNTU),y)
     WINTOOL = y
   endif
   ARCHCPUFLAGS = -mcpu=cortex-m0 -mthumb -mfloat-abi=soft

@@ -1,7 +1,7 @@
 #!/bin/bash
 # testbuild.sh
 #
-#   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -47,12 +47,13 @@ unset testfile
 
 function showusage {
     echo ""
-    echo "USAGE: $progname [-w|l] [-c|n] [-s] [-a <appsdir>] [-n <nxdir>] <testlist-file>"
+    echo "USAGE: $progname [-w|l] [-c|u|n] [-s] [-a <appsdir>] [-n <nxdir>] <testlist-file>"
     echo "       $progname -h"
     echo ""
     echo "Where:"
     echo "  -w|l selects Windows (w) or Linux (l).  Default: Linux"
-    echo "  -c|n selects Windows native (n) or Cygwin (c).  Default Cygwin"
+    echo "  -c|u|n selects Windows environment option:  Cygwin (c), Ubuntu under"
+    echo "     Windows 10 (u), or Windows native (n).  Default Cygwin"
     echo "  -s Use C++ unsigned long size_t in new operator. Default unsigned int"
     echo "  -a <appsdir> provides the relative path to the apps/ directory.  Default ../apps"
     echo "  -n <nxdir> provides the relative path to the NxWidgets/ directory.  Default ../NxWidgets"
@@ -77,6 +78,9 @@ while [ ! -z "$1" ]; do
     ;;
     -c )
     wenv=cygwin
+    ;;
+    -u )
+    wenv=ubuntu
     ;;
     -n )
     wenv=native
@@ -165,11 +169,19 @@ function configure {
         if [ "X$wenv" == "Xcygwin" ]; then
           echo "  Select CONFIG_WINDOWS_CYGWIN=y"
           kconfig-tweak --file $nuttx/.config --enable CONFIG_WINDOWS_CYGWIN
+          kconfig-tweak --file $nuttx/.config --disable CONFIG_WINDOWS_UBUNTU
           kconfig-tweak --file $nuttx/.config --disable CONFIG_WINDOWS_NATIVE
         else
-          echo "  Select CONFIG_WINDOWS_NATIVE=y"
-          kconfig-tweak --file $nuttx/.config --enable CONFIG_WINDOWS_NATIVE
           kconfig-tweak --file $nuttx/.config --disable CONFIG_WINDOWS_CYGWIN
+          if [ "X$wenv" == "Xubuntu" ]; then
+            echo "  Select CONFIG_WINDOWS_UBUNTU=y"
+            kconfig-tweak --file $nuttx/.config --enable CONFIG_WINDOWS_UBUNTU
+            kconfig-tweak --file $nuttx/.config --disable CONFIG_WINDOWS_NATIVE
+          else
+            echo "  Select CONFIG_WINDOWS_NATIVE=y"
+            kconfig-tweak --file $nuttx/.config --disable CONFIG_WINDOWS_UBUNTU
+            kconfig-tweak --file $nuttx/.config --enable CONFIG_WINDOWS_NATIVE
+          fi
         fi
 
         kconfig-tweak --file $nuttx/.config --disable CONFIG_WINDOWS_MSYS

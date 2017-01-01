@@ -37,7 +37,7 @@ config SIM_CYGWIN_DECORATED
 	default n
 	depends on WINDOWS_CYGWIN
 	---help---
-		Older versions of Cygwin toolsdecorated C symbol names by adding an
+		Older versions of Cygwin tools decorated C symbol names by adding an
 		underscore to the beginning of the symbol name.  Newer versions of
 		Cygwin do not seem to do this.
 

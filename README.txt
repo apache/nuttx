@@ -67,7 +67,7 @@ ENVIRONMENTS
       using MSYS.  People report to me that they have used MSYS
       successfully.  I suppose that the advantages of the MSYS environemnt
       is that it is closer to a native Windows environment and uses only a
-      minimal of add-on POSIX-ish tools.
+      minimal of add-on POSIX-land tools.
 
     - NuttX can also be installed and built on a native Windows system, but
       with some potential tool-related issues (see the discussion "Native
@@ -178,10 +178,7 @@ Ubuntu Bash under Windows 10
   the same directory would appear at "/cygdrive/c/Program Files".
 
   With these differences (perhaps a few other Windows quirks) the Ubuntu
-  install works just like Ubuntu running natively on your PC.  Currently
-  there is no host configuration for Bash running under Windows 10 but
-  setting the host to either Linux or Cygwin in your configuratino file
-  should work fine.
+  install works just like Ubuntu running natively on your PC.
 
   Accessing Ubuntu Files From Windows
   -----------------------------------
@@ -224,9 +221,9 @@ Ubuntu Bash under Windows 10
   ------------------------------
   If you want to integrate with Windows native tools, then you will need
   deal with the same kind of craziness as with integrating Cygwin with
-  native toolchains.  If you set the host PC to Cygwin in this case, then
-  the NuttX build system should deal with that craziness for you. See the
-  section "Cygwin Build Problems" below.
+  native toolchains.  But when you select a Windows native toolchain, the
+  NuttX build system should deal with most that craziness for you.   But not
+  all, see the section "Cygwin Build Problems" below.
 
 INSTALLATION
 ^^^^^^^^^^^^

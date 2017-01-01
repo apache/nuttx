@@ -1,7 +1,7 @@
 ############################################################################
 # arch/arm/src/armv7-m/Toolchain.defs
 #
-#   Copyright (C) 2012-2013, 2015-2016 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2012-2013, 2015-2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -167,6 +167,8 @@ ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),ATOLLIC)
   ARCHCPUFLAGS = $(TOOLCHAIN_MCPU) -mthumb $(TOOLCHAIN_MFLOAT)
   ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
     WINTOOL = y
+  else ifeq ($(CONFIG_WINDOWS_UBUNTU),y)
+    WINTOOL = y
   endif
 endif
 
@@ -203,6 +205,8 @@ ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),CODEREDW)
   ARCHCPUFLAGS = $(TOOLCHAIN_MCPU) -mthumb $(TOOLCHAIN_MFLOAT)
   ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
     WINTOOL = y
+  else ifeq ($(CONFIG_WINDOWS_UBUNTU),y)
+    WINTOOL = y
   endif
 endif
 
@@ -224,6 +228,8 @@ ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),CODESOURCERYW)
   ARCHCPUFLAGS = $(TOOLCHAIN_MCPU) -mthumb $(TOOLCHAIN_MFLOAT)
   ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
     WINTOOL = y
+  else ifeq ($(CONFIG_WINDOWS_UBUNTU),y)
+    WINTOOL = y
   endif
 endif
 
@@ -233,6 +239,8 @@ ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),DEVKITARM)
   CROSSDEV ?= arm-none-eabi-
   ARCROSSDEV ?= arm-none-eabi-
   ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
+    WINTOOL = y
+  else ifeq ($(CONFIG_WINDOWS_UBUNTU),y)
     WINTOOL = y
   endif
   ARCHCPUFLAGS = $(TOOLCHAIN_MCPU) -mthumb $(TOOLCHAIN_MFLOAT)
@@ -256,6 +264,8 @@ ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),GNU_EABIW)
   ARCHCPUFLAGS = $(TOOLCHAIN_MCPU) -mthumb $(TOOLCHAIN_MFLOAT)
   ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
     WINTOOL = y
+  else ifeq ($(CONFIG_WINDOWS_UBUNTU),y)
+    WINTOOL = y
   endif
 endif
 
@@ -265,6 +275,8 @@ ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),RAISONANCE)
   CROSSDEV ?= arm-none-eabi-
   ARCROSSDEV ?= arm-none-eabi-
   ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
+    WINTOOL = y
+  else ifeq ($(CONFIG_WINDOWS_UBUNTU),y)
     WINTOOL = y
   endif
   ARCHCPUFLAGS = $(TOOLCHAIN_MCPU) -mthumb $(TOOLCHAIN_MFLOAT)
