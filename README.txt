@@ -56,10 +56,10 @@ ENVIRONMENTS
     - Ubuntu/bash shell under Windows 10.  This is a new option under
       Windows 10.  See the section "Ubuntu Bash under Windows 10" below.
       This is an improvement over Cygwin if your concern is compile time;
-      its build performance is comparable to native Linux.  It also installs
-      in a tiny fraction of the time as Cygwin, perhaps 20 minutes for
-      the basic Ubuntu install (vs. more than a day for the complete Cygwin
-      install).
+      its build performance is comparable to native Linux, certainly better
+      than the Cygwin build time.  It also installs in a tiny fraction of
+      the time as Cygwin, perhaps 20 minutes for the basic Ubuntu install
+      (vs. more than a day for the complete Cygwin install).
 
     - The MSYS environment.  I have no experience using the MSYS environment
       and that configuration will not be discussed in this README file.

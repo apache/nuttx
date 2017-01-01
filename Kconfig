@@ -63,7 +63,7 @@ config WINDOWS_CYGWIN
 		/cygdrive/c/Program Files)
 
 config WINDOWS_UBUNTU
-	bool "Ubuntu under Windows10"
+	bool "Ubuntu under Windows 10"
 	---help---
 		Build natively in an Unbuntu shell under Windoes 10 environment with
 		POSIX style paths (like /mnt/c/Program Files)
