@@ -39,21 +39,27 @@ README
 ENVIRONMENTS
 ^^^^^^^^^^^^
 
-  NuttX requires a POSIX development environment such as you would find uder
+  NuttX requires a POSIX development environment such as you would find under
   Linux or OSX.  NuttX may be also be installed and built on Windows system
-  if you also provde such a POSIX develoment environment.  Options for a
+  if you also provde such a POSIX development environment.  Options for a
   POSIX development environment under Windows include:
 
-    - An installation Linux on a virtual machine in Windows.
+    - An installation of Linux on a virtual machine (VM) in Windows.  I have
+      not been happy using a VM myself.  I have had stability problems with
+      open source VMs and commercial VMs cost more than I want to spend.
+      Sharing files with Linux running in a VM is awkward;  sharing devices
+      connected to the Windows box with Linux in a VM is, at the very least,
+      confusing;  Using Windows tools (such as Segger J-Link) with files
+      built under the Linux VM is not a possibility.
 
     - The Cygwin environment.  Instructions for installation of Cygwin on a
       Windows system are provided in the following paragraph, "Installing
       Cygwin".  Cygwin is a mature, well-tested, and very convenient
       environment.  It is especially expecially convenient if you  need to
-      integrate with Windows tools.  Downsides are that the installation
-      time is very long and the compile times are very slow.
+      integrate with Windows tools and files.  Downsides are that the
+      installation time is very long and the compile times are slow.
 
-    - Ubuntu/bash shell under Windows 10.  This is a new option under
+    - Ubuntu/Bash shell under Windows 10.  This is a new option under
       Windows 10.  See the section "Ubuntu Bash under Windows 10" below.
       This is an improvement over Cygwin if your concern is compile time;
       its build performance is comparable to native Linux, certainly better
@@ -229,6 +235,20 @@ Ubuntu Bash under Windows 10
   from say '/cydrive/c/Program Files' to 'C:\Program Files'.  There is,
   however, no corresponding tool to convert '/mnt/c/Program Files' in the
   Ubuntu environment.
+
+  Graphics Support
+  ----------------
+  The Ubuntu version support by Microsoft is a command-line only version.
+  There is no support for Linux graphics utilities.
+
+  This limititation is not a limitation of Ubuntu, however, only in what
+  Microsoft is willing to support.  If you install a X-Server, then you
+  can also use basic graphics utilities.  See for example:
+
+    http://www.howtogeek.com/261575/how-to-run-graphical-linux-desktop-applications-from-windows-10s-bash-shell/
+
+  Many Linux graphics programs would, however, also require a graphics
+  framework like GTK or Qt.  So this might be a trip down the rabbit hole.
 
 INSTALLATION
 ^^^^^^^^^^^^

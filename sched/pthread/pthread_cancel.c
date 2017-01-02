@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/pthread/pthread_cancel.c
  *
- *   Copyright (C) 2007, 2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -120,8 +120,6 @@ int pthread_cancel(pthread_t thread)
 
       /* If the thread is waiting at a cancellation point, then notify of the
        * cancellation thereby waking the task up with an ECANCELED error.
-       *
-       * REVISIT: is locking the scheduler sufficent in SMP mode?
        */
 
       if (tcb->cmn.cpcount > 0)
