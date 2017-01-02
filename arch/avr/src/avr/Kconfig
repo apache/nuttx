@@ -8,13 +8,13 @@ comment "AVR Configuration Options"
 
 choice
 	prompt "Toolchain"
-	default AVR_WINAVR_TOOLCHAIN if HOST_WINDOWS
+	default AVR_WINAVR_TOOLCHAIN if TOOLCHAIN_WINDOWS
 	default AVR_BUILDROOT_TOOLCHAIN if HOST_LINUX
 	default AVR_CROSSPACK_TOOLCHAIN if HOST_OSX
 
 config AVR_WINAVR_TOOLCHAIN
 	bool "WinAVR"
-	depends on HOST_WINDOWS
+	depends on TOOLCHAIN_WINDOWS
 	---help---
 		For Cygwin development environment on Windows machines, you
 		can use WinAVR: http://sourceforge.net/projects/winavr/files/
@@ -29,7 +29,7 @@ config AVR_WINAVR_TOOLCHAIN
 
 config AVR_ATMEL_AVR_TOOLCHAIN
 	bool "Atmel AVR Toolchain"
-	depends on HOST_WINDOWS
+	depends on TOOLCHAIN_WINDOWS
 	---help---
                 Atmel provides GNU Toolchain for AVR development. It can
                 be obtained by installing Atmel Studio 6 and later or
@@ -55,7 +55,6 @@ config AVR_CROSSPACK_TOOLCHAIN
 
 config AVR_BUILDROOT_TOOLCHAIN
 	bool "Buildroot"
-	depends on HOST_LINUX || HOST_WINDOWS
 	---help---
 		There is a DIY buildroot version for the AVR boards here:
 		http://sourceforge.net/projects/nuttx/files/buildroot/. See

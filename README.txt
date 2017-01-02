@@ -219,17 +219,16 @@ Ubuntu Bash under Windows 10
 
   Integrating with Windows Tools
   ------------------------------
-  If you want to integrate with Windows native tools, then you will need
+  If you want to integrate with Windows native tools, then you would need
   deal with the same kind of craziness as with integrating Cygwin with
-  native toolchains.  But when you select a Windows native toolchain, the
-  NuttX build system should deal with most that craziness for you.   But not
-  all, see the section "Cygwin Build Problems" below.
+  native toolchains, see the section "Cygwin Build Problems" below.
 
-  WARNING:  Do not use Windows native tools with Ubuntu under Windows.  This
-  tool combination is made to work with Cygwin through the use of the
-  'cygpath -w' tool that converts paths from say '/cydrive/c/Program Files'
-  to 'C:\Program Files'.  There is, however, no corresponding tool to convert
-  '/mnt/c/Program Files' in the Ubuntu environment.
+  However, there is currently no build support for using Windows native
+  tools with Ubuntu under Windows.  This tool combination is made to work
+  with Cygwin through the use of the 'cygpath -w' tool that converts paths
+  from say '/cydrive/c/Program Files' to 'C:\Program Files'.  There is,
+  however, no corresponding tool to convert '/mnt/c/Program Files' in the
+  Ubuntu environment.
 
 INSTALLATION
 ^^^^^^^^^^^^
