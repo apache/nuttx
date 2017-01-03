@@ -1,7 +1,7 @@
 /****************************************************************************
  * libnx/nxfonts/nxfonts_getfont.c
  *
- *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,15 +49,7 @@
 #include "nxfonts.h"
 
 /****************************************************************************
- * Pre-Processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
+ * Public Data
  ****************************************************************************/
 
 /* MONO */
@@ -246,9 +238,12 @@ extern const struct nx_fontpackage_s g_x11_misc_fixed_9x18B_package;
 extern const struct nx_fontpackage_s g_x11_misc_fixed_10x20_package;
 #endif
 
+#ifdef CONFIG_NXFONT_TOM_THUMB_3X6
+extern const struct nx_fontpackage_s g_tom_thumb_3x6_package;
+#endif
+
 static FAR const struct nx_fontpackage_s *g_fontpackages[] =
 {
-
 /* MONO */
 
 #ifdef CONFIG_NXFONT_MONO5X8
@@ -429,6 +424,12 @@ static FAR const struct nx_fontpackage_s *g_fontpackages[] =
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_10X20
   &g_x11_misc_fixed_10x20_package,
+#endif
+
+/* Tom Thumb mono-space 3x6 font */
+
+#ifdef CONFIG_NXFONT_TOM_THUMB_3X6
+  &g_tom_thumb_3x6_package,
 #endif
 
   NULL

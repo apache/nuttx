@@ -555,6 +555,13 @@ config NXFONT_X11_MISC_FIXED_10X20
 		This option enables support for a "x11-misc-fixed-10x20".
 		(font ID FONTID_X11_MISC_FIXED_10X20 == 42).
 
+config NXFONT_TOM_THUMB_3X6
+	bool "Tom Thumb Monospace 3x6"
+	default n
+	---help---
+		This option enables support for a small, 3x5 font.
+		(font ID FONTID_TOM_THUMB_3X6 == 43).
+
 endmenu
 
 menuconfig NXTERM
