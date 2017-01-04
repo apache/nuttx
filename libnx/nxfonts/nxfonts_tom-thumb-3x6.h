@@ -62,7 +62,7 @@
 /* Maximum height and width of any glyph in the set */
 
 #define NXFONT_MAXHEIGHT  6
-#define NXFONT_MAXWIDTH   4
+#define NXFONT_MAXWIDTH   3
 
 /* The width of a space */
 
