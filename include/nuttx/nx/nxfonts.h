@@ -195,10 +195,10 @@
 #elif defined(CONFIG_NXFONT_MONO5X8)
 # define NXFONT_DEFAULT FONTID_MONO5X8
 
-/* Tom Thumb mono-space 3x6 font */
+/* Tom Thumb mono-space 4x6 font */
 
-#elif defined(CONFIG_NXFONT_TOM_THUMB_3X6)
-# define NXFONT_DEFAULT FONTID_TOM_THUMB_3X6
+#elif defined(CONFIG_NXFONT_TOM_THUMB_4X6)
+# define NXFONT_DEFAULT FONTID_TOM_THUMB_4X6
 
 #endif
 
@@ -394,8 +394,8 @@ enum nx_fontid_e
   , FONTID_X11_MISC_FIXED_10X20 = 42    /* X11 misc fixed 10x20 */
 #endif
 
-#ifdef CONFIG_NXFONT_TOM_THUMB_3X6
-  , FONTID_TOM_THUMB_3X6 = 43           /* Tom Thumb monospace 3x6 */
+#ifdef CONFIG_NXFONT_TOM_THUMB_4X6
+  , FONTID_TOM_THUMB_4X6 = 43           /* Tom Thumb monospace 4x6 */
 #endif
 };
 

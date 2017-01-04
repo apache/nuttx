@@ -296,11 +296,11 @@ NXFONTS_PREFIX := g_x11_misc_fixed_10x20_
 GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-10x20.c
 endif
 
-# Tom Thumb mono-space 3x6 font
+# Tom Thumb mono-space 4x6 font
 
 ifeq ($(NXFONTS_FONTID),43)
-NXFONTS_PREFIX := g_tom_thumb_3x6_
-GEN_CSRC = nxfonts_tom-thumb-3x6.c
+NXFONTS_PREFIX := g_tom_thumb_4x6_
+GEN_CSRC = nxfonts_tom-thumb-4x6.c
 endif
 
 DEPENDENCY := nxfonts_bitmaps.c

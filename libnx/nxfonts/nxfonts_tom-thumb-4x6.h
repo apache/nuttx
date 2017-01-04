@@ -1,5 +1,5 @@
 /****************************************************************************
- * libnx/nxfonts/nxfonts_tom-thumb-3x6.h
+ * libnx/nxfonts/nxfonts_tom-thumb-4x6.h
  *
  *   Copyright (C) 2017 Alan Carvalho de Assis. All rights reserved.
  *   Author: Alan Carvalho de Assis <acassis@gmail.com>
@@ -36,8 +36,8 @@
  *
  ****************************************************************************/
 
-#ifndef __LIBNX_NXFONTS_NXFONTS_TOM_THUMB_3X6_H
-#define __LIBNX_NXFONTS_NXFONTS_TOM_THUMB_3X6_H
+#ifndef __LIBNX_NXFONTS_NXFONTS_TOM_THUMB_4X6_H
+#define __LIBNX_NXFONTS_NXFONTS_TOM_THUMB_4X6_H
 
 /****************************************************************************
  * Included Files
@@ -49,7 +49,7 @@
 
 /* Font ID */
 
-#define NXFONT_ID         FONTID_TOM_THUMB_3X6
+#define NXFONT_ID         FONTID_TOM_THUMB_4X6
 
 /* Ranges of 7-bit and 8-bit fonts */
 

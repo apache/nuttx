@@ -238,8 +238,8 @@ extern const struct nx_fontpackage_s g_x11_misc_fixed_9x18B_package;
 extern const struct nx_fontpackage_s g_x11_misc_fixed_10x20_package;
 #endif
 
-#ifdef CONFIG_NXFONT_TOM_THUMB_3X6
-extern const struct nx_fontpackage_s g_tom_thumb_3x6_package;
+#ifdef CONFIG_NXFONT_TOM_THUMB_4X6
+extern const struct nx_fontpackage_s g_tom_thumb_4x6_package;
 #endif
 
 static FAR const struct nx_fontpackage_s *g_fontpackages[] =
@@ -426,10 +426,10 @@ static FAR const struct nx_fontpackage_s *g_fontpackages[] =
   &g_x11_misc_fixed_10x20_package,
 #endif
 
-/* Tom Thumb mono-space 3x6 font */
+/* Tom Thumb mono-space 4x6 font */
 
-#ifdef CONFIG_NXFONT_TOM_THUMB_3X6
-  &g_tom_thumb_3x6_package,
+#ifdef CONFIG_NXFONT_TOM_THUMB_4X6
+  &g_tom_thumb_4x6_package,
 #endif
 
   NULL

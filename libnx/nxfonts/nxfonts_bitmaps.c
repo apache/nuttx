@@ -131,7 +131,7 @@
 #elif NXFONTS_FONTID == 42
 #  include "nxfonts_x11-misc-fixed-10x20.h"
 #elif NXFONTS_FONTID == 43
-#  include "nxfonts_tom-thumb-3x6.h"
+#  include "nxfonts_tom-thumb-4x6.h"
 #else
 #  error "No font ID specified"
 #endif
