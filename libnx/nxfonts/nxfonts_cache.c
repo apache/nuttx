@@ -187,6 +187,8 @@ static inline void nxf_removeglyph(FAR struct nxfonts_fcache_s *priv,
                                    FAR struct nxfonts_glyph_s *glyph,
                                    FAR struct nxfonts_glyph_s *prev)
 {
+  ginfo("fcache=%p glyph=%p\n", priv, glyph);
+
   /* Remove the glyph for the list.  First check for removal from the head */
 
   if (prev == NULL)
@@ -239,6 +241,8 @@ static inline void nxf_removeglyph(FAR struct nxfonts_fcache_s *priv,
 static inline void nxf_addglyph(FAR struct nxfonts_fcache_s *priv,
                                 FAR struct nxfonts_glyph_s *glyph)
 {
+  ginfo("fcache=%p glyph=%p\n", priv, glyph);
+
   /* Add the glyph to the head of the list */
 
   glyph->flink = priv->head;
@@ -283,6 +287,9 @@ nxf_findglyph(FAR struct nxfonts_fcache_s *priv, uint8_t ch)
 {
   FAR struct nxfonts_glyph_s *glyph;
   FAR struct nxfonts_glyph_s *prev;
+
+  ginfo("fcache=%p ch=%c (%02x)\n",
+        priv, (ch >= 32 && ch < 128) ? ch : '.', ch);
 
   /* Try to find the glyph in the list of pre-rendered glyphs */
 
@@ -509,6 +516,9 @@ nxf_renderglyph(FAR struct nxfonts_fcache_s *priv,
   unsigned int stride;
   int ret;
 
+  ginfo("fcache=%p fbm=%p ch=%c (%02x)\n",
+        priv, fbm, (ch >= 32 && ch < 128) ? ch : '.', ch);
+
   /* Get the size of the glyph */
 
   width  = fbm->metric.width + fbm->metric.xoffset;
@@ -575,6 +585,9 @@ nxf_findcache(enum nx_fontid_e fontid, nxgl_mxpixel_t fgcolor,
 {
   FAR struct nxfonts_fcache_s *fcache;
 
+  ginfo("fontid=%p fgcolor=%u bgcolor=%u bpp=%d\n",
+        fontid, fgcolor, bgcolor, bpp);
+
   /* Search for a cache for this font characteristics */
 
   for (fcache = g_fcaches; fcache != NULL; fcache = fcache->flink)
@@ -588,10 +601,12 @@ nxf_findcache(enum nx_fontid_e fontid, nxgl_mxpixel_t fgcolor,
         {
           /* Yes... return it */
 
+          ginfo("Returning fcache=%p\n", fcache);
           return fcache;
         }
     }
 
+  ginfo("Not found\n");
   return NULL;
 }
 
@@ -628,6 +643,9 @@ FCACHE nxf_cache_connect(enum nx_fontid_e fontid,
 {
   FAR struct nxfonts_fcache_s *priv;
   int errcode;
+
+  ginfo("fontid=%p fgcolor=%u bgcolor=%u bpp=%d maxglyphs=%d\n",
+        fontid, fgcolor, bgcolor, bpp, maxglyphs);
 
   /* Get exclusive access to the font cache list */
 
@@ -721,6 +739,10 @@ FCACHE nxf_cache_connect(enum nx_fontid_e fontid,
           goto errout_with_fcache;
         }
 
+      /* Initialize the mutual exclusion semaphore */
+
+      sem_init(&priv->fsem, 0, 1);
+
       /* Add the new font cache to the list of font caches */
 
       priv->flink = g_fcaches;
@@ -739,6 +761,7 @@ FCACHE nxf_cache_connect(enum nx_fontid_e fontid,
     }
 
   nxf_list_unlock();
+  ginfo("fhandle=%p\n", priv);
   return (FCACHE)priv;
 
 errout_with_fcache:
@@ -772,6 +795,8 @@ void nxf_cache_disconnect(FCACHE fhandle)
   FAR struct nxfonts_fcache_s *prev;
   FAR struct nxfonts_glyph_s *glyph;
   FAR struct nxfonts_glyph_s *next;
+
+  ginfo("fhandle=%p\n", fhandle);
 
   DEBUGASSERT(priv != NULL && priv->fclients > 0);
 
@@ -871,6 +896,8 @@ FAR const struct nxfonts_glyph_s *nxf_cache_getglyph(FCACHE fhandle, uint8_t ch)
   FAR struct nxfonts_fcache_s *priv = (FAR struct nxfonts_fcache_s *)fhandle;
   FAR struct nxfonts_glyph_s *glyph;
   FAR const struct nx_fontbitmap_s *fbm;
+
+  ginfo("ch=%c (%02x)\n", (ch >= 32 && ch < 128) ? ch : '.', ch);
 
   /* Get exclusive access to the font cache */
 
