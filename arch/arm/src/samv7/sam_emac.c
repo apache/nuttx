@@ -2256,7 +2256,7 @@ static void sam_txerr_interrupt(FAR struct sam_emac_s *priv, int qid)
  * Function: sam_interrupt_work
  *
  * Description:
- *   Perform interrupt related work from the worker thread
+ *   Perform interrupt related work from the worker thread.
  *
  * Parameters:
  *   arg - The argument passed when work_queue() was called.
@@ -2279,7 +2279,7 @@ static void sam_interrupt_work(FAR void *arg)
   uint32_t regval;
   uint32_t pending;
   uint32_t clrbits;
-  int qid = EMAC_QUEUE_0;
+  int qid = EMAC_QUEUE_0;  /* REVISIT: Currently services on EMAC_QUEUE_0 */
 
   /* Process pending Ethernet interrupts */
 
@@ -2455,10 +2455,10 @@ static void sam_interrupt_work(FAR void *arg)
  * Function: sam_emac_interrupt
  *
  * Description:
- *   Common hardware interrupt handler
+ *   Common hardware interrupt handler.
  *
  * Parameters:
- *   priv    - Reference to the EMAC private state structure
+ *   priv - Reference to the EMAC private state structure
  *
  * Returned Value:
  *   OK on success
