@@ -2068,7 +2068,12 @@ o Other Applications & Tests (apps/examples/)
                it stops rendering.  This is not a problem for the examples/nx
                code because it uses so few fonts, but if the logic were
                leveraged for more general purposes, it would be a problem.
+
                Update: see examples/nxtext for some improved font cache handling.
+               Update: The NXTERM font cache has been generalized and is now
+               offered as the standard, common font cache for all applications.
+               both the nx and nxtext examples should be modified to use this
+               common font cache.  See interfaces defined in nxfonts.h.
   Status:      Open
   Priority:    Low.  This is not really a problem because examples/nx works
                fine with its bogus font caching.
