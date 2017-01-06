@@ -44,7 +44,12 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <math.h>
+#include <assert.h>
+
+#include <nuttx/arch.h>
 
 #include "libc.h"
 
@@ -156,6 +161,15 @@ static void lib_dtoa(FAR struct lib_outstream_s *obj, int fmt, int prec,
   int  nchars;          /* Number of characters to print */
   int  dsgn;            /* Unused sign indicator */
   int  i;
+
+  /* This function may *NOT* be called within interrupt level logic.  That is
+   * because the logic in __dtoa may attempt to allocate memory.  That will
+   * lead to cryptic failures down the road within the memory manager.
+   * Better to explicitly assert upstream here.  Rule:  Don't use floating
+   * point formats on any output from interrupt handling logic.
+   */
+
+  DEBUGASSERT(up_interrupt_context() == false);
 
   /* Special handling for NaN and Infinity */
 
