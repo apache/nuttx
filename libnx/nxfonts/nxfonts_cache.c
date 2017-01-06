@@ -673,11 +673,12 @@ FCACHE nxf_cache_connect(enum nx_fontid_e fontid,
 
       /* Initialize the font cache */
 
-      priv->maxglyphs = maxglyphs;
       priv->fontid    = fontid;
+      priv->fclients  = 1;
+      priv->maxglyphs = maxglyphs;
+      priv->bpp       = bpp;
       priv->fgcolor   = fgcolor;
       priv->bgcolor   = bgcolor;
-      priv->bpp       = bpp;
 
       /* Select the rendering function */
 
@@ -758,6 +759,10 @@ FCACHE nxf_cache_connect(enum nx_fontid_e fontid,
         {
           priv->maxglyphs = maxglyphs;
         }
+
+      /* Increment the number of clients of the font cache */
+
+      priv->fclients++;
     }
 
   nxf_list_unlock();
