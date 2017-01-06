@@ -45,7 +45,6 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/kmalloc.h>
 #include <nuttx/nx/nxfonts.h>
 
 /****************************************************************************
@@ -98,7 +97,7 @@ static void nxf_freeglyph(FAR struct nxfonts_glyph_s *glyph)
 {
   if (glyph->bitmap)
     {
-      kmm_free(glyph->bitmap);
+      lib_free(glyph->bitmap);
     }
 
   memset(glyph, 0, sizeof(struct nxfonts_glyph_s));
@@ -241,7 +240,7 @@ nxf_renderglyph(FAR struct nxfonts_fcache_s *priv,
   /* Allocate memory to hold the glyph with its offsets */
 
   bmsize        =  glyph->stride * glyph->height;
-  glyph->bitmap = (FAR uint8_t *)kmm_malloc(bmsize);
+  glyph->bitmap = (FAR uint8_t *)lib_malloc(bmsize);
 
   if (glyph->bitmap)
     {
@@ -402,7 +401,7 @@ FCACHE nxf_cache_connect(enum nx_fontid_e fontid,
       /* Allocate memory for the (empty) font cache */
 
       priv = (FAR struct nxfonts_fcache_s *)
-        kmm_malloc(sizeof( struct nxfonts_fcache_s));
+        lib_zalloc(sizeof( struct nxfonts_fcache_s));
 
       if (priv == NULL)
         {
@@ -494,7 +493,7 @@ FCACHE nxf_cache_connect(enum nx_fontid_e fontid,
   return (FCACHE)priv;
 
 errout_with_fcache:
-  kmm_free(priv);
+  lib_free(priv);
 errout:
   set_errno(errcode);
   return NULL;
@@ -546,7 +545,7 @@ void nxf_cache_disconnect(FCACHE fcache)
           FAR struct nxfonts_glyph_s *glyph = &priv->glyph[i];
           if (glyph->bitmap)
             {
-              kmm_free(glyph->bitmap);
+              lib_free(glyph->bitmap);
             }
         }
 
@@ -556,7 +555,7 @@ void nxf_cache_disconnect(FCACHE fcache)
 
       /* Finally, free the font cache stucture itself */
 
-      kmm_free(fcache);
+      lib_free(fcache);
     }
   else
     {
