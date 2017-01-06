@@ -88,10 +88,92 @@ struct nxfonts_fcache_s
 /* Head of a list of font caches */
 
 static FAR struct nxfonts_fcache_s *g_fcaches;
+static sem_t g_cachesem = SEM_INITIALIZER(1);
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: nxf_list_lock and nxf_list_unlock
+ *
+ * Description:
+ *   Get/relinquish exclusive access to the font cache list
+ *
+ ****************************************************************************/
+
+static void nxf_list_lock(void)
+{
+  int ret;
+
+  /* Get exclusive access to the font cache */
+
+  while ((ret = sem_wait(&g_cachesem)) < 0)
+    {
+      int errorcode = errno;
+      DEBUGASSERT(errorcode == EINTR || errorcode == ECANCELED);
+      UNUSED(errorcode);
+    }
+}
+
+#define nxf_list_unlock() (sem_post(&g_cachesem))
+
+/****************************************************************************
+ * Name: nxf_removecache
+ *
+ * Description:
+ *   Removes the entry 'glyph' from the font cache.
+ *
+ * Assumptions:
+ *   The caller holds the font cache list semaphore.
+ *
+ ****************************************************************************/
+
+static inline void nxf_removecache(FAR struct nxfonts_fcache_s *fcache,
+                                   FAR struct nxfonts_fcache_s *prev)
+{
+  /* Remove the cache for the list.  First check for removal from the head */
+
+  if (prev == NULL)
+    {
+      /* Replace the head with the node following glyph */
+
+      g_fcaches = fcache->flink;
+    }
+
+  /* No.. Remove from the head or from mid-list */
+
+  else
+    {
+      prev->flink = fcache->flink;
+    }
+
+  fcache->flink = NULL;
+}
+
+/****************************************************************************
+ * Name: nxf_cache_lock and nxf_cache_unlock
+ *
+ * Description:
+ *   Get/relinquish exclusive access to the font cache
+ *
+ ****************************************************************************/
+
+static void nxf_cache_lock(FAR struct nxfonts_fcache_s *priv)
+{
+  int ret;
+
+  /* Get exclusive access to the font cache */
+
+  while ((ret = sem_wait(&priv->fsem)) < 0)
+    {
+      int errorcode = errno;
+      DEBUGASSERT(errorcode == EINTR || errorcode == ECANCELED);
+      UNUSED(errorcode);
+    }
+}
+
+#define nxf_cache_unlock(p) (sem_post(&priv->fsem))
 
 /****************************************************************************
  * Name: nxf_removeglyph
@@ -131,7 +213,7 @@ static inline void nxf_removeglyph(FAR struct nxfonts_fcache_s *priv,
       prev->flink = NULL;
     }
 
-  /* No.. removae from mid-list */
+  /* No.. remove from mid-list */
 
   else
     {
@@ -190,6 +272,9 @@ static inline void nxf_addglyph(FAR struct nxfonts_fcache_s *priv,
  *   If the glyph is found, then it is moved to the head of the list of
  *   glyphs since it is now the most recently used (leaving the least
  *   recently used glyph at the tail of the list).
+ *
+ * Assumptions:
+ *   The caller has exclusive access to the font cache.
  *
  ****************************************************************************/
 
@@ -340,8 +425,26 @@ static inline void nxf_fillglyph(FAR struct nxfonts_fcache_s *priv,
 #ifndef CONFIG_NX_DISABLE_24BPP
   if (priv->bpp == 24)
     {
-      gerr("ERROR: Additional logic is needed to support 24-bit color\n");
-      goto errout_with_glyph;
+      FAR uint32_t *ptr = (FAR uint32_t *)glyph->bitmap;
+      FAR uint32_t pixel[3];
+
+      /* Get two 32-bit values for alternating 32 representations */
+
+      pixel[0] = (uint32_t)priv->bgcolor <<  8 | (uint32_t)priv->bgcolor >> 16;
+      pixel[1] = (uint32_t)priv->bgcolor << 16 | (uint32_t)priv->bgcolor >> 8;
+      pixel[1] = (uint32_t)priv->bgcolor << 24 | (uint32_t)priv->bgcolor;
+
+      for (row = 0; row < glyph->height; row++)
+        {
+          /* Just copy the color value into the glyph memory */
+
+          for (col = 0; col < glyph->width; col += 3)
+            {
+              *ptr++ = pixel[0];
+              *ptr++ = pixel[1];
+              *ptr++ = pixel[2];
+            }
+        }
     }
   else
 #endif
@@ -370,6 +473,14 @@ static inline void nxf_fillglyph(FAR struct nxfonts_fcache_s *priv,
 
 /****************************************************************************
  * Name: nxf_renderglyph
+ *
+ * Description:
+ *   Allocate memory for a new glyph and render the bitmap font into the
+ *   allocated glyph memory.
+ *
+ * Assumptions:
+ *   The caller holds the font cache semaphore.
+ *
  ****************************************************************************/
 
 static inline FAR struct nxfonts_glyph_s *
@@ -434,6 +545,13 @@ nxf_renderglyph(FAR struct nxfonts_fcache_s *priv,
 
 /****************************************************************************
  * Name: nxf_findcache
+ *
+ * Description:
+ *   Find a font cache tht matches the font charcteristics.
+ *
+ * Assumptions:
+ *   The caller holds the font cache list semaphore.
+ *
  ****************************************************************************/
 
 static FAR struct nxfonts_fcache_s *
@@ -441,9 +559,6 @@ nxf_findcache(enum nx_fontid_e fontid, nxgl_mxpixel_t fgcolor,
               nxgl_mxpixel_t bgcolor, int bpp)
 {
   FAR struct nxfonts_fcache_s *fcache;
-
-  /* Get exclusive access to the font cache list */
-#warning Missing logic
 
   /* Search for a cache for this font characteristics */
 
@@ -499,6 +614,10 @@ FCACHE nxf_cache_connect(enum nx_fontid_e fontid,
   FAR struct nxfonts_fcache_s *priv;
   int errcode;
 
+  /* Get exclusive access to the font cache list */
+
+  nxf_list_lock();
+
   /* Find a font cache with the matching font characteristics */
 
   priv = nxf_findcache(fontid, fgcolor, bgcolor, bpp);
@@ -516,7 +635,7 @@ FCACHE nxf_cache_connect(enum nx_fontid_e fontid,
       if (priv == NULL)
         {
           errcode = ENOMEM;
-          goto errout;
+          goto errout_with_lock;
         }
 
       /* Initialize the font cache */
@@ -598,6 +717,11 @@ FCACHE nxf_cache_connect(enum nx_fontid_e fontid,
           gerr("ERROR: Failed to get font ID %d: %d\n",  fontid, errcode);
           goto errout_with_fcache;
         }
+
+      /* Add the new font cache to the list of font caches */
+
+      priv->flink = g_fcaches;
+      g_fcaches = priv;
     }
   else
     {
@@ -611,11 +735,13 @@ FCACHE nxf_cache_connect(enum nx_fontid_e fontid,
         }
     }
 
+  nxf_list_unlock();
   return (FCACHE)priv;
 
 errout_with_fcache:
   lib_free(priv);
-errout:
+errout_with_lock:
+  nxf_list_unlock();
   set_errno(errcode);
   return NULL;
 }
@@ -629,36 +755,46 @@ errout:
  *   font handle is invalid upon return in either case.
  *
  * Input Parameters:
- *   fcache - A font cache handle previously returned by nxf_cache_connect();
+ *   fhandle - A font cache handle previously returned by nxf_cache_connect();
  *
  * Returned value:
  *   None
  *
  ****************************************************************************/
 
-void nxf_cache_disconnect(FCACHE fcache)
+void nxf_cache_disconnect(FCACHE fhandle)
 {
-  FAR struct nxfonts_fcache_s *priv = (FAR struct nxfonts_fcache_s *)fcache;
+  FAR struct nxfonts_fcache_s *priv = (FAR struct nxfonts_fcache_s *)fhandle;
+  FAR struct nxfonts_fcache_s *fcache;
+  FAR struct nxfonts_fcache_s *prev;
   FAR struct nxfonts_glyph_s *glyph;
   FAR struct nxfonts_glyph_s *next;
-  int ret;
 
   DEBUGASSERT(priv != NULL && priv->fclients > 0);
 
   /* Get exclusive access to the font cache */
 
-  while ((ret = sem_wait(&priv->fsem)) < 0)
-    {
-      int errorcode = errno;
-      DEBUGASSERT(errorcode == EINTR || errorcode == ECANCELED);
-      UNUSED(errorcode);
-    }
+  nxf_cache_lock(priv);
 
   /* Is this the last client of the font cache? */
 
   if (priv->fclients <= 1)
     {
-      /* Yes.. destroy the font cache */
+      /* Get exclusive access to the font cache list */
+
+      nxf_list_lock();
+
+      /* Remove the font cache from the list of caches.  This is a singly
+       * linked list, so we must do this the hard way.
+       */
+
+      for (prev = NULL, fcache = g_fcaches;
+           fcache != priv && fcache != NULL;
+           fcache = fcache->flink);
+
+      ASSERT(fcache == priv);
+      nxf_removecache(fcache, prev);
+      nxf_list_unlock();
 
       /* Free all allocated glyph memory */
 
@@ -683,7 +819,7 @@ void nxf_cache_disconnect(FCACHE fcache)
        */
 
       priv->fclients--;
-      sem_post(&priv->fsem);
+      nxf_cache_unlock(priv);
     }
 }
 
@@ -695,7 +831,7 @@ void nxf_cache_disconnect(FCACHE fcache)
  *   cache.
  *
  * Input Parameters:
- *   fcache - A font cache handle previously returned by nxf_cache_connect();
+ *   fhandle - A font cache handle previously returned by nxf_cache_connect();
  *
  * Returned value:
  *   Zero (OK) is returned if the metrics were
@@ -705,9 +841,9 @@ void nxf_cache_disconnect(FCACHE fcache)
  *
  ****************************************************************************/
 
-NXHANDLE nxf_cache_getfonthandle(FCACHE fcache)
+NXHANDLE nxf_cache_getfonthandle(FCACHE fhandle)
 {
-  FAR struct nxfonts_fcache_s *priv = (FAR struct nxfonts_fcache_s *)fcache;
+  FAR struct nxfonts_fcache_s *priv = (FAR struct nxfonts_fcache_s *)fhandle;
 
   DEBUGASSERT(priv != NULL && priv->font != NULL);
   return priv->font;
@@ -727,31 +863,32 @@ NXHANDLE nxf_cache_getfonthandle(FCACHE fcache)
  *
  ****************************************************************************/
 
-FAR const struct nxfonts_glyph_s *nxf_cache_getglyph(FCACHE fcache, uint8_t ch)
+FAR const struct nxfonts_glyph_s *nxf_cache_getglyph(FCACHE fhandle, uint8_t ch)
 {
-  FAR struct nxfonts_fcache_s *priv = (FAR struct nxfonts_fcache_s *)fcache;
+  FAR struct nxfonts_fcache_s *priv = (FAR struct nxfonts_fcache_s *)fhandle;
   FAR struct nxfonts_glyph_s *glyph;
   FAR const struct nx_fontbitmap_s *fbm;
+
+  /* Get exclusive access to the font cache */
+
+  nxf_cache_lock(priv);
 
   /* First, try to find the glyph in the cache of pre-rendered glyphs */
 
   glyph = nxf_findglyph(priv, ch);
-  if (glyph != NULL)
+  if (glyph == NULL)
     {
-      /* We found it in the cache .. return the cached glyph */
+      /* No, it is not cached... Does the code map to a font? */
 
-      return glyph;
+      fbm = nxf_getbitmap(priv->font, ch);
+      if (fbm)
+        {
+          /* Yes.. render the glyph */
+
+          glyph = nxf_renderglyph(priv, fbm, ch);
+        }
     }
 
-  /* No, it is not cached... Does the code map to a font? */
-
-  fbm = nxf_getbitmap(priv->font, ch);
-  if (fbm)
-    {
-      /* Yes.. render the glyph */
-
-      glyph = nxf_renderglyph(priv, fbm, ch);
-    }
-
+  nxf_cache_unlock(priv);
   return glyph;
 }

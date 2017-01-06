@@ -624,14 +624,14 @@ FCACHE nxf_cache_connect(enum nx_fontid_e fontid,
  *   font handler is invalid upon return in either case.
  *
  * Input Parameters:
- *   fcache - A font cache handler previously returned by nxf_cache_connect();
+ *   fhandle - A font cache handler previously returned by nxf_cache_connect();
  *
  * Returned value:
  *   None
  *
  ****************************************************************************/
 
-void nxf_cache_disconnect(FCACHE fcache);
+void nxf_cache_disconnect(FCACHE fhandle);
 
 /****************************************************************************
  * Name: nxf_cache_getfonthandle
@@ -641,7 +641,7 @@ void nxf_cache_disconnect(FCACHE fcache);
  *   cache.
  *
  * Input Parameters:
- *   fcache - A font cache handle previously returned by nxf_cache_connect();
+ *   fhandle - A font cache handle previously returned by nxf_cache_connect();
  *
  * Returned value:
  *   Zero (OK) is returned if the metrics were
@@ -651,7 +651,7 @@ void nxf_cache_disconnect(FCACHE fcache);
  *
  ****************************************************************************/
 
-NXHANDLE nxf_cache_getfonthandle(FCACHE fcache);
+NXHANDLE nxf_cache_getfonthandle(FCACHE fhandle);
 
 /****************************************************************************
  * Name: nxf_cache_getglyph
@@ -667,7 +667,7 @@ NXHANDLE nxf_cache_getfonthandle(FCACHE fcache);
  *
  ****************************************************************************/
 
-FAR const struct nxfonts_glyph_s *nxf_cache_getglyph(FCACHE fcache, uint8_t ch);
+FAR const struct nxfonts_glyph_s *nxf_cache_getglyph(FCACHE fhandle, uint8_t ch);
 
 #undef EXTERN
 #if defined(__cplusplus)
