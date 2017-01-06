@@ -37,7 +37,7 @@
 
 ifeq ($(CONFIG_NX),y)
 
-CSRCS += nxfonts_getfont.c
+CSRCS += nxfonts_getfont.c nxfonts_cache.c
 CSRCS += nxfonts_convert_1bpp.c nxfonts_convert_2bpp.c
 CSRCS += nxfonts_convert_4bpp.c nxfonts_convert_8bpp.c
 CSRCS += nxfonts_convert_16bpp.c nxfonts_convert_24bpp.c

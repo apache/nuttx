@@ -51,6 +51,7 @@
  * Pre-processor definitions
  ****************************************************************************/
 
+/* Font Definitions *********************************************************/
 /* Select the default font.  If no fonts are selected, then a compilation
  * error is likely down the road.
  */
@@ -206,6 +207,7 @@
  * Public Types
  ****************************************************************************/
 
+/* Font Types ***************************************************************/
 /* Font IDs */
 
 enum nx_fontid_e
@@ -453,6 +455,25 @@ struct nx_fontpackage_s
 #endif
 };
 
+/* Font Cache ***************************************************************/
+/* Opaque handle used to reference a font cache */
+
+typedef FAR void *FCACHE;
+
+/* Describes one cached font glyph */
+
+struct nxfonts_glyph_s
+{
+  FAR struct nxfonts_glyph_s *flink;   /* Implements a singly linked list */
+  uint8_t code;                        /* Character code */
+  uint8_t height;                      /* Height of this glyph (in rows) */
+  uint8_t width;                       /* Width of this glyph (in pixels) */
+  uint8_t stride;                      /* Width of the glyph row (in bytes) */
+  FAR uint8_t bitmap[1];               /* Bitmap memory, actual size varies */
+};
+
+#define SIZEOF_NXFONTS_GLYPH_S(b) (sizeof(struct nxfonts_glyph_s) + (b) - 1)
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -479,6 +500,9 @@ extern "C"
  *
  * Input Parameters:
  *   fontid:  Identifies the font set to get
+ *
+ * Returned Value:
+ *   One success, a non-NULL font handle is returned.
  *
  ****************************************************************************/
 
@@ -563,6 +587,87 @@ int nxf_convert_32bpp(FAR uint32_t *dest, uint16_t height,
                       uint16_t width, uint16_t stride,
                       FAR const struct nx_fontbitmap_s *bm,
                       nxgl_mxpixel_t color);
+
+/****************************************************************************
+ * Name: nxf_cache_connect
+ *
+ * Description:
+ *   Create a new font cache for the provided 'fontid'.  If the cache
+ *   already, then just increment a reference count return the handle for
+ *   the existing font cache.
+ *
+ * Input Parameters:
+ *   fontid    - Identifies the font supported by this cache
+ *   fgcolor   - Foreground color
+ *   bgcolor   - Background color
+ *   bpp       - Bits per pixel
+ *   maxglyphs - Maximum number of glyphs permitted in the cache
+ *
+ * Returned value:
+ *   On success a non-NULL handle is returned that then may sequently be
+ *   used with nxf_getglyph() to extract fonts from the font cache.  NULL
+ *   returned on any failure with the errno value set to indicate the nature
+ *   of the error.
+ *
+ ****************************************************************************/
+
+FCACHE nxf_cache_connect(enum nx_fontid_e fontid,
+                         nxgl_mxpixel_t fgcolor, nxgl_mxpixel_t bgcolor,
+                         int bpp, int maxglyph);
+
+/****************************************************************************
+ * Name: nxf_cache_disconnect
+ *
+ * Description:
+ *   Decrement the reference count on the font cache and, if the reference
+ *   count goes to zero, free all resources used by the font cache.  The
+ *   font handler is invalid upon return in either case.
+ *
+ * Input Parameters:
+ *   fhandle - A font cache handler previously returned by nxf_cache_connect();
+ *
+ * Returned value:
+ *   None
+ *
+ ****************************************************************************/
+
+void nxf_cache_disconnect(FCACHE fhandle);
+
+/****************************************************************************
+ * Name: nxf_cache_getfonthandle
+ *
+ * Description:
+ *   Return the handle to the font set used by this instance of the font
+ *   cache.
+ *
+ * Input Parameters:
+ *   fhandle - A font cache handle previously returned by nxf_cache_connect();
+ *
+ * Returned value:
+ *   Zero (OK) is returned if the metrics were
+ *
+ * Returned Value:
+ *   One success, a non-NULL font handle is returned.
+ *
+ ****************************************************************************/
+
+NXHANDLE nxf_cache_getfonthandle(FCACHE fhandle);
+
+/****************************************************************************
+ * Name: nxf_cache_getglyph
+ *
+ * Description:
+ *   Get the font glyph for the character code 'ch' from the font cache.  If
+ *   the glyph for that character code does not exist in the font cache, it
+ *   be rendered.
+ *
+ * Returned Value:
+ *   On success, a non-NULL pointer to the rendered glyph in the font cache
+ *   is returned.  NULL is returned on any failure.
+ *
+ ****************************************************************************/
+
+FAR const struct nxfonts_glyph_s *nxf_cache_getglyph(FCACHE fhandle, uint8_t ch);
 
 #undef EXTERN
 #if defined(__cplusplus)

@@ -142,7 +142,7 @@ void nxterm_putc(FAR struct nxterm_state_s *priv, uint8_t ch)
    * display.
    */
 
-  bm = nxterm_addchar(priv->font, priv, ch);
+  bm = nxterm_addchar(priv, ch);
   if (bm)
     {
       nxterm_fillchar(priv, NULL, bm);
