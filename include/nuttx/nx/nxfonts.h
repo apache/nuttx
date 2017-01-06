@@ -203,11 +203,6 @@
 
 #endif
 
-/* Font Cache Definitions (**************************************************/
-/* Limit to range of font cache usage count */
-
-#define MAX_USECNT 255                     /* Limit to range of a uint8_t */
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -469,13 +464,15 @@ typedef FAR void *FCACHE;
 
 struct nxfonts_glyph_s
 {
+  FAR struct nxfonts_glyph_s *flink;   /* Implements a singly linked list */
   uint8_t code;                        /* Character code */
   uint8_t height;                      /* Height of this glyph (in rows) */
   uint8_t width;                       /* Width of this glyph (in pixels) */
   uint8_t stride;                      /* Width of the glyph row (in bytes) */
-  uint8_t usecnt;                      /* Use count */
-  FAR uint8_t *bitmap;                 /* Allocated bitmap memory */
+  FAR uint8_t bitmap[1];               /* Bitmap memory, actual size varies */
 };
+
+#define SIZEOF_NXFONTS_GLYPH_S(b) (sizeof(struct nxfonts_glyph_s) + (b) - 1)
 
 /****************************************************************************
  * Public Data
@@ -596,11 +593,15 @@ int nxf_convert_32bpp(FAR uint32_t *dest, uint16_t height,
  *
  * Description:
  *   Create a new font cache for the provided 'fontid'.  If the cache
- *   already, then just increment a reference count return the handler for
+ *   already, then just increment a reference count return the handle for
  *   the existing font cache.
  *
  * Input Parameters:
- *   fontid - Identifies the font supported by this cache
+ *   fontid    - Identifies the font supported by this cache
+ *   fgcolor   - Foreground color
+ *   bgcolor   - Background color
+ *   bpp       - Bits per pixel
+ *   maxglyphs - Maximum number of glyphs permitted in the cache
  *
  * Returned value:
  *   On success a non-NULL handle is returned that then may sequently be
@@ -612,7 +613,7 @@ int nxf_convert_32bpp(FAR uint32_t *dest, uint16_t height,
 
 FCACHE nxf_cache_connect(enum nx_fontid_e fontid,
                          nxgl_mxpixel_t fgcolor, nxgl_mxpixel_t bgcolor,
-                         int bpp);
+                         int bpp, int maxglyph);
 
 /****************************************************************************
  * Name: nxf_cache_disconnect
@@ -666,7 +667,7 @@ NXHANDLE nxf_cache_getfonthandle(FCACHE fcache);
  *
  ****************************************************************************/
 
-FAR struct nxfonts_glyph_s *nxf_cache_getglyph(FCACHE fcache, uint8_t ch);
+FAR const struct nxfonts_glyph_s *nxf_cache_getglyph(FCACHE fcache, uint8_t ch);
 
 #undef EXTERN
 #if defined(__cplusplus)

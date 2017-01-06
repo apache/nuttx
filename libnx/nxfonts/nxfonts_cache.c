@@ -47,6 +47,8 @@
 
 #include <nuttx/nx/nxfonts.h>
 
+#include "nxcontext.h"
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -66,7 +68,8 @@ struct nxfonts_fcache_s
   sem_t fsem;                          /* Serializes access to the font cache */
   uint16_t fontid;                     /* ID of font in this cache */
   int16_t fclients;                    /* Number of connected clients */
-  uint8_t maxglyphs;                   /* Size of glyph[] array */
+  uint8_t maxglyphs;                   /* Maximum size of glyph[] array */
+  uint8_t nglyphs;                     /* Current size of glyph[] array */
   uint8_t bpp;                         /* Bits per pixel */
   nxgl_mxpixel_t fgcolor;              /* Foreground color */
   nxgl_mxpixel_t bgcolor;              /* Background color */
@@ -74,7 +77,8 @@ struct nxfonts_fcache_s
 
   /* Glyph cache data storage */
 
-  struct nxfonts_glyph_s glyph[CONFIG_NXTERM_CACHESIZE];
+  FAR struct nxfonts_glyph_s *head;    /* Head of the list of glyphs */
+  FAR struct nxfonts_glyph_s *tail;    /* Tail of the list of glyphs */
 };
 
 /****************************************************************************
@@ -90,119 +94,278 @@ static FAR struct nxfonts_fcache_s *g_fcaches;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxf_freeglyph
+ * Name: nxf_removeglyph
+ *
+ * Description:
+ *   Removes the entry 'glyph' from the font cache.
+ *
  ****************************************************************************/
 
-static void nxf_freeglyph(FAR struct nxfonts_glyph_s *glyph)
+static inline void nxf_removeglyph(FAR struct nxfonts_fcache_s *priv,
+                                   FAR struct nxfonts_glyph_s *glyph,
+                                   FAR struct nxfonts_glyph_s *prev)
 {
-  if (glyph->bitmap)
+  /* Remove the glyph for the list.  First check for removal from the head */
+
+  if (prev == NULL)
     {
-      lib_free(glyph->bitmap);
+      /* Replace the head with the node following glyph */
+
+      priv->head = glyph->flink;
+
+      /* If there is no node following glyph, then the list is empty */
+
+      if (priv->head == NULL)
+        {
+          priv->tail = NULL;
+        }
     }
 
-  memset(glyph, 0, sizeof(struct nxfonts_glyph_s));
+  /* Check for removal from the tail (we know that the list cannot become
+   * empty in either of the next two cases).
+   */
+
+  else if (glyph->flink == NULL)
+    {
+      priv->tail = prev;
+      prev->flink = NULL;
+    }
+
+  /* No.. removae from mid-list */
+
+  else
+    {
+      prev->flink = glyph->flink;
+    }
+
+  glyph->flink = NULL;
+
+  /* Decrement the count of glyphs in the font cache */
+
+  DEBUGASSERT(priv->nglyphs > 0);
+  priv->nglyphs--;
 }
 
 /****************************************************************************
- * Name: nxf_allocglyph
+ * Name: nxf_addglyph
+ *
+ * Description:
+ *   Add the entry 'glyph' to the head font cache list.
+ *
  ****************************************************************************/
 
-static inline FAR struct nxfonts_glyph_s *
-nxf_allocglyph(FAR struct nxfonts_fcache_s *priv)
+static inline void nxf_addglyph(FAR struct nxfonts_fcache_s *priv,
+                                FAR struct nxfonts_glyph_s *glyph)
 {
-  FAR struct nxfonts_glyph_s *glyph = NULL;
-  FAR struct nxfonts_glyph_s *luglyph = NULL;
-  uint8_t luusecnt;
-  int i;
+  /* Add the glyph to the head of the list */
 
-  /* Search through the glyph cache looking for an unused glyph.  Also, keep
-   * track of the least used glyph as well.  We need that if we have to replace
-   * a glyph in the cache.
-   */
+  glyph->flink = priv->head;
 
-   for (i = 0; i < priv->maxglyphs; i++)
+  if (priv->head == NULL)
     {
-      /* Is this glyph in use? */
-
-      glyph = &priv->glyph[i];
-      if (!glyph->usecnt)
-        {
-          /* No.. return this glyph with a use count of one */
-
-          glyph->usecnt = 1;
-          return glyph;
-        }
-
-      /* Yes.. check for the least recently used */
-
-      if (!luglyph || glyph->usecnt < luglyph->usecnt)
-        {
-          luglyph = glyph;
-        }
+      priv->tail = glyph;
     }
 
-  /* If we get here, the glyph cache is full.  We replace the least used
-   * glyph with the one we need now. (luglyph can't be NULL).
-   */
+  priv->head = glyph
 
-  luusecnt = luglyph->usecnt;
-  nxf_freeglyph(luglyph);
+  /* Increment the count of glyphs in the font cache. */
 
-  /* But lets decrement all of the usecnts so that the new one one be so
-   * far behind in the counts as the older ones.
-   */
-
-  if (luusecnt > 1)
-    {
-       uint8_t decr = luusecnt - 1;
-
-       for (i = 0; i < priv->maxglyphs; i++)
-        {
-          /* Is this glyph in use? */
-
-          glyph = &priv->glyph[i];
-          if (glyph->usecnt > decr)
-            {
-              glyph->usecnt -= decr;
-            }
-        }
-    }
-
-  /* Then return the least used glyph */
-
-  luglyph->usecnt = 1;
-  return luglyph;
+  DEBUGASSERT(priv->nglyphs < priv->maxglyphs);
+  priv->nglyphs++;
 }
 
 /****************************************************************************
  * Name: nxf_findglyph
+ *
+ * Description:
+ *   Find the glyph for the specific character 'ch' in the list of pre-
+ *   rendered fonts in the font cache.
+ *
+ *   This is logically a part of nxf_cache_getglyph().  nxf_cache_getglyph()
+ *   will attempt to find the cached glyph before rendering a new one.  So
+ *   this function has two unexpected side-effects:  (1) If the font cache
+ *   is full and the font is not found, then the least-recently-used glyph
+ *   is deleted to make space for the new glyph that will be allocated.
+ *
+ *   If the glyph is found, then it is moved to the head of the list of
+ *   glyphs since it is now the most recently used (leaving the least
+ *   recently used glyph at the tail of the list).
+ *
  ****************************************************************************/
 
 static FAR struct nxfonts_glyph_s *
 nxf_findglyph(FAR struct nxfonts_fcache_s *priv, uint8_t ch)
 {
-  int i;
+  FAR struct nxfonts_glyph_s *glyph;
+  FAR struct nxfonts_glyph_s *prev;
 
-  /* First, try to find the glyph in the cache of pre-rendered glyphs */
+  /* Try to find the glyph in the list of pre-rendered glyphs */
 
-   for (i = 0; i < priv->maxglyphs; i++)
+   for (prev = NULL, glyph = priv->head;
+        glyph != NULL;
+        prev = glyph, glyph = glyph->flink)
     {
-      FAR struct nxfonts_glyph_s *glyph = &priv->glyph[i];
-      if (glyph->usecnt > 0 && glyph->code == ch)
-        {
-          /* Increment the use count (unless it is already at the max) */
+      /* Check if we found the the glyph for this character */
 
-          if (glyph->usecnt < MAX_USECNT)
-            {
-               glyph->usecnt++;
-            }
+      if (glyph->code == ch)
+        {
+          /* This is now the most recently used glyph.  Move it to the head
+           * of the list.
+           */
+
+          nxf_removeglyph(priv, glyph, prev);
+          nxf_addglyph(priv, glyph);
 
           /* And return the glyph that we found */
 
           return glyph;
         }
+
+      /* Is this the last glyph in the list?  Has the cache reached its
+       * limited for the number of cached fonts?
+       */
+
+      if (glyph->flink == NULL && priv->nglyphs >= priv->maxglyphs)
+        {
+          /* Yes.. then remove it from the list and free the glyph memory.
+           * We do this because we have all of the information in hand now
+           * and we will surely need to have this space later.
+           */
+
+          nxf_removeglyph(priv, glyph, prev);
+          return NULL;
+        }
     }
+
   return NULL;
+}
+
+/****************************************************************************
+ * Name: nxf_fillglyph
+ *
+ * Description:
+ *   Fill the glyph memory with the background color
+ *
+ ****************************************************************************/
+
+static inline void nxf_fillglyph(FAR struct nxfonts_fcache_s *priv,
+                                 FAR struct nxfonts_glyph_s *glyph)
+{
+  int row;
+  int col;
+
+  /* Initialize the glyph memory to the background color. */
+
+#if !defined(CONFIG_NX_DISABLE_1BPP) || !defined(CONFIG_NX_DISABLE_2BPP) || \
+    !defined(CONFIG_NX_DISABLE_4BPP) || !defined(CONFIG_NX_DISABLE_8BPP)
+
+  /* For pixel depths of 1, 2, 4, and 8, build up an 8-bit value containing
+   * multiple background colored pixels.
+   */
+
+  if (priv->bpp <= 8)
+    {
+      uint8_t pixel = (uint8_t)priv->bgcolor;
+      FAR uint8_t *ptr;
+
+#ifndef CONFIG_NX_DISABLE_1BPP
+      /* Pack a 1-bit pixel to 2 pixels */
+
+      if (priv->bpp < 2)
+        {
+          /* Pack 1-bit pixels into a 2-bits */
+
+          pixel &= 0x01;
+          pixel  = (pixel) << 1 | pixel;
+        }
+#endif
+
+#if !defined(CONFIG_NX_DISABLE_1BPP) || !defined(CONFIG_NX_DISABLE_2BPP)
+      /* Pack a 2-bit pixel to a 4-bit nibble */
+
+      if (priv->bpp < 4)
+        {
+          /* Pack 2-bit pixels into a nibble */
+
+          pixel &= 0x03;
+          pixel  = (pixel) << 2 | pixel;
+        }
+#endif
+
+#if !defined(CONFIG_NX_DISABLE_1BPP) || !defined(CONFIG_NX_DISABLE_2BPP) || \
+    !defined(CONFIG_NX_DISABLE_4BPP)
+      /* Pack the 4-bit nibble into a byte */
+
+      if (priv->bpp < 8)
+        {
+          pixel &= 0x0f;
+          pixel  = (pixel) << 4 | pixel;
+        }
+#endif
+
+      /* Then fill the glyph with the packed background color */
+
+      ptr = (FAR uint8_t *)glyph->bitmap;
+      for (row = 0; row < glyph->height; row++)
+        {
+          for (col = 0; col < glyph->stride; col++)
+            {
+              /* Transfer the packed bytes into the buffer */
+
+              *ptr++ = pixel;
+            }
+        }
+    }
+  else
+#endif
+
+#if !defined(CONFIG_NX_DISABLE_16BPP)
+  if (priv->bpp == 16)
+    {
+      FAR uint16_t *ptr = (FAR uint16_t *)glyph->bitmap;
+
+      for (row = 0; row < glyph->height; row++)
+        {
+          /* Just copy the color value into the glyph memory */
+
+          for (col = 0; col < glyph->width; col++)
+            {
+              *ptr++ = priv->bgcolor;
+            }
+        }
+    }
+  else
+#endif
+
+#ifndef CONFIG_NX_DISABLE_24BPP
+  if (priv->bpp == 24)
+    {
+      gerr("ERROR: Additional logic is needed to support 24-bit color\n");
+      goto errout_with_glyph;
+    }
+  else
+#endif
+
+#if !defined(CONFIG_NX_DISABLE_32BPP)
+  if (priv->bpp == 32)
+    {
+      FAR uint32_t *ptr = (FAR uint32_t *)glyph->bitmap;
+
+      for (row = 0; row < glyph->height; row++)
+        {
+          /* Just copy the color value into the glyph memory */
+
+          for (col = 0; col < glyph->width; col++)
+            {
+              *ptr++ = priv->bgcolor;
+            }
+        }
+    }
+  else
+#endif
+    {
+      PANIC();
+    }
 }
 
 /****************************************************************************
@@ -214,98 +377,40 @@ nxf_renderglyph(FAR struct nxfonts_fcache_s *priv,
                 FAR const struct nx_fontbitmap_s *fbm, uint8_t ch)
 {
   FAR struct nxfonts_glyph_s *glyph = NULL;
-  FAR nxgl_mxpixel_t *ptr;
-#if CONFIG_NXTERM_BPP < 8
-  nxgl_mxpixel_t pixel;
-#endif
-  int bmsize;
-  int row;
-  int col;
+  size_t bmsize;
+  unsigned int height;
+  unsigned int width;
+  unsigned int stride;
   int ret;
 
-  /* Allocate the glyph (always succeeds) */
+  /* Get the size of the glyph */
 
-  glyph         = nxf_allocglyph(priv);
-  glyph->code   = ch;
-
-  /* Get the dimensions of the glyph */
-
-  glyph->width  = fbm->metric.width + fbm->metric.xoffset;
-  glyph->height = fbm->metric.height + fbm->metric.yoffset;
+  width  = fbm->metric.width + fbm->metric.xoffset;
+  height = fbm->metric.height + fbm->metric.yoffset;
 
   /* Get the physical width of the glyph in bytes */
 
-  glyph->stride = (glyph->width * CONFIG_NXTERM_BPP + 7) / 8;
+  stride = (width * priv->bpp + 7) >> 3;
 
-  /* Allocate memory to hold the glyph with its offsets */
+  /* Allocate the glyph (always succeeds) */
 
-  bmsize        =  glyph->stride * glyph->height;
-  glyph->bitmap = (FAR uint8_t *)lib_malloc(bmsize);
+  bmsize = stride * height;
+  glyph  = (FAR struct nxfonts_glyph_s *)lib_malloc(SIZEOF_NXFONTS_GLYPH_S(bmsize));
 
-  if (glyph->bitmap)
+  if (glyph != NULL)
     {
-      /* Initialize the glyph memory to the background color using the
-       * hard-coded bits-per-pixel (BPP).
-       *
-       * TODO:  The rest of NX is configured to support multiple devices
-       * with differing BPP.  They logic should be extended to support
-       * differing BPP's as well.
-       */
+      /* Save the character code, dimensions, and physcial width of the glyph */
 
-#if CONFIG_NXTERM_BPP < 8
-      pixel  = priv->bgcolor;
+      glyph->code   = ch;
+      glyph->width  = width;
+      glyph->height = height;
+      glyph->stride = stride;
 
-#  if CONFIG_NXTERM_BPP == 1
+      /* Initialize the glyph memory to the background color. */
 
-      /* Pack 1-bit pixels into a 2-bits */
+      nxf_fillglyph(priv, glyph);
 
-      pixel &= 0x01;
-      pixel  = (pixel) << 1 | pixel;
-
-#  endif
-#  if CONFIG_NXTERM_BPP < 4
-
-      /* Pack 2-bit pixels into a nibble */
-
-      pixel &= 0x03;
-      pixel  = (pixel) << 2 | pixel;
-
-#  endif
-
-      /* Pack 4-bit nibbles into a byte */
-
-      pixel &= 0x0f;
-      pixel  = (pixel) << 4 | pixel;
-
-      ptr    = (FAR nxgl_mxpixel_t *)glyph->bitmap;
-      for (row = 0; row < glyph->height; row++)
-        {
-          for (col = 0; col < glyph->stride; col++)
-            {
-              /* Transfer the packed bytes into the buffer */
-
-              *ptr++ = pixel;
-            }
-        }
-
-#elif CONFIG_NXTERM_BPP == 24
-# error "Additional logic is needed here for 24bpp support"
-
-#else /* CONFIG_NXTERM_BPP = {8,16,32} */
-
-      ptr = (FAR nxgl_mxpixel_t *)glyph->bitmap;
-      for (row = 0; row < glyph->height; row++)
-        {
-          /* Just copy the color value into the glyph memory */
-
-          for (col = 0; col < glyph->width; col++)
-            {
-              *ptr++ = priv->bgcolor;
-            }
-        }
-#endif
-
-      /* Then render the glyph into the allocated memory */
+      /* Then render the glyph into the allocated, initialized memory */
 
       ret = priv->renderer((FAR nxgl_mxpixel_t *)glyph->bitmap,
                            glyph->height, glyph->width, glyph->stride,
@@ -315,9 +420,13 @@ nxf_renderglyph(FAR struct nxfonts_fcache_s *priv,
           /* Actually, the renderer never returns a failure */
 
           gerr("ERROR: nxf_renderglyph: Renderer failed\n");
-          nxf_freeglyph(glyph);
-          glyph = NULL;
+          lib_free(glyph);
+          return NULL;
         }
+
+      /* Add the new glyph to the font cache */
+
+      nxf_addglyph(priv, glyph);
     }
 
   return glyph;
@@ -369,10 +478,11 @@ nxf_findcache(enum nx_fontid_e fontid, nxgl_mxpixel_t fgcolor,
  *   the existing font cache.
  *
  * Input Parameters:
- *   fontid  - Identifies the font supported by this cache
- *   fgcolor - Foreground color
- *   bgcolor - Background color
- *   bpp     - Bits per pixel
+ *   fontid    - Identifies the font supported by this cache
+ *   fgcolor   - Foreground color
+ *   bgcolor   - Background color
+ *   bpp       - Bits per pixel
+ *   maxglyphs - Maximum number of glyphs permitted in the cache
  *
  * Returned value:
  *   On success a non-NULL handle is returned that then may sequently be
@@ -384,7 +494,7 @@ nxf_findcache(enum nx_fontid_e fontid, nxgl_mxpixel_t fgcolor,
 
 FCACHE nxf_cache_connect(enum nx_fontid_e fontid,
                          nxgl_mxpixel_t fgcolor, nxgl_mxpixel_t bgcolor,
-                         int bpp)
+                         int bpp, int maxglyphs)
 {
   FAR struct nxfonts_fcache_s *priv;
   int errcode;
@@ -411,7 +521,7 @@ FCACHE nxf_cache_connect(enum nx_fontid_e fontid,
 
       /* Initialize the font cache */
 
-      priv->maxglyphs = CONFIG_NXTERM_CACHESIZE;
+      priv->maxglyphs = maxglyphs;
       priv->fontid    = fontid;
       priv->fgcolor   = fgcolor;
       priv->bgcolor   = bgcolor;
@@ -489,6 +599,17 @@ FCACHE nxf_cache_connect(enum nx_fontid_e fontid,
           goto errout_with_fcache;
         }
     }
+  else
+    {
+      /* A font cache with these characteristics already exists.  Just make
+       * sure that it is as least a big as the size requested.
+       */
+
+      if (priv->maxglyphs < maxglyphs)
+        {
+          priv->maxglyphs = maxglyphs;
+        }
+    }
 
   return (FCACHE)priv;
 
@@ -518,8 +639,9 @@ errout:
 void nxf_cache_disconnect(FCACHE fcache)
 {
   FAR struct nxfonts_fcache_s *priv = (FAR struct nxfonts_fcache_s *)fcache;
+  FAR struct nxfonts_glyph_s *glyph;
+  FAR struct nxfonts_glyph_s *next;
   int ret;
-  int i;
 
   DEBUGASSERT(priv != NULL && priv->fclients > 0);
 
@@ -538,15 +660,12 @@ void nxf_cache_disconnect(FCACHE fcache)
     {
       /* Yes.. destroy the font cache */
 
-      /* Free all allocated glyph bitmap */
+      /* Free all allocated glyph memory */
 
-      for (i = 0; i < CONFIG_NXTERM_CACHESIZE; i++)
+      for (glyph = priv->head; glyph != NULL; glyph = next)
         {
-          FAR struct nxfonts_glyph_s *glyph = &priv->glyph[i];
-          if (glyph->bitmap)
-            {
-              lib_free(glyph->bitmap);
-            }
+          next = glyph->flink;
+          lib_free(glyph);
         }
 
       /* Destroy the serializing semaphore... while we are holding it? */
@@ -555,7 +674,7 @@ void nxf_cache_disconnect(FCACHE fcache)
 
       /* Finally, free the font cache stucture itself */
 
-      lib_free(fcache);
+      lib_free(priv);
     }
   else
     {
@@ -608,7 +727,7 @@ NXHANDLE nxf_cache_getfonthandle(FCACHE fcache)
  *
  ****************************************************************************/
 
-FAR struct nxfonts_glyph_s *nxf_cache_getglyph(FCACHE fcache, uint8_t ch)
+FAR const struct nxfonts_glyph_s *nxf_cache_getglyph(FCACHE fcache, uint8_t ch)
 {
   FAR struct nxfonts_fcache_s *priv = (FAR struct nxfonts_fcache_s *)fcache;
   FAR struct nxfonts_glyph_s *glyph;
@@ -617,7 +736,7 @@ FAR struct nxfonts_glyph_s *nxf_cache_getglyph(FCACHE fcache, uint8_t ch)
   /* First, try to find the glyph in the cache of pre-rendered glyphs */
 
   glyph = nxf_findglyph(priv, ch);
-  if (glyph)
+  if (glyph != NULL)
     {
       /* We found it in the cache .. return the cached glyph */
 

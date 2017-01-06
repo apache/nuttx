@@ -106,7 +106,8 @@ FAR struct nxterm_state_s *
   /* Connect to the font cache for the configured font characteristics */
 
   priv->fcache = nxf_cache_connect(wndo->fontid, wndo->fcolor[0],
-                                   wndo->wcolor[0], CONFIG_NXTERM_BPP);
+                                   wndo->wcolor[0], CONFIG_NXTERM_BPP,
+                                   CONFIG_NXTERM_CACHESIZE);
   if (priv->fcache == NULL)
     {
       gerr("ERROR: Failed to connect to font cache for font ID %d: %d\n",

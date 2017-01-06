@@ -99,7 +99,7 @@ FAR const struct nxterm_bitmap_s *
 nxterm_addchar(FAR struct nxterm_state_s *priv, uint8_t ch)
 {
   FAR struct nxterm_bitmap_s *bm = NULL;
-  FAR struct nxfonts_glyph_s *glyph;
+  FAR const struct nxfonts_glyph_s *glyph;
 
   /* Is there space for another character on the display? */
 
@@ -275,7 +275,7 @@ void nxterm_fillchar(FAR struct nxterm_state_s *priv,
                      FAR const struct nxgl_rect_s *rect,
                      FAR const struct nxterm_bitmap_s *bm)
 {
-  FAR struct nxfonts_glyph_s *glyph;
+  FAR const struct nxfonts_glyph_s *glyph;
   struct nxgl_rect_s bounds;
   struct nxgl_rect_s intersection;
   struct nxgl_size_s fsize;
