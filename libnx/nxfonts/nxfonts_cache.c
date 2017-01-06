@@ -189,7 +189,9 @@ static inline void nxf_removeglyph(FAR struct nxfonts_fcache_s *priv,
 {
   ginfo("fcache=%p glyph=%p\n", priv, glyph);
 
-  /* Remove the glyph for the list.  First check for removal from the head */
+  /* Remove the glyph for the list.  First check for removal from the head
+   * (which, I think, never actually happens).
+   */
 
   if (prev == NULL)
     {
@@ -215,7 +217,7 @@ static inline void nxf_removeglyph(FAR struct nxfonts_fcache_s *priv,
       prev->flink = NULL;
     }
 
-  /* No.. remove from mid-list */
+  /* No.. Remove from mid-list */
 
   else
     {
@@ -302,11 +304,14 @@ nxf_findglyph(FAR struct nxfonts_fcache_s *priv, uint8_t ch)
       if (glyph->code == ch)
         {
           /* This is now the most recently used glyph.  Move it to the head
-           * of the list.
+           * of the list (if it is not already at the head of the list).
            */
 
-          nxf_removeglyph(priv, glyph, prev);
-          nxf_addglyph(priv, glyph);
+          if (prev != NULL)
+            {
+              nxf_removeglyph(priv, glyph, prev);
+              nxf_addglyph(priv, glyph);
+            }
 
           /* And return the glyph that we found */
 
@@ -314,7 +319,7 @@ nxf_findglyph(FAR struct nxfonts_fcache_s *priv, uint8_t ch)
         }
 
       /* Is this the last glyph in the list?  Has the cache reached its
-       * limited for the number of cached fonts?
+       * limit for the number of cached fonts?
        */
 
       if (glyph->flink == NULL && priv->nglyphs >= priv->maxglyphs)
