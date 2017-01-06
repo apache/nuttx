@@ -2262,7 +2262,7 @@ static void sam_txerr_interrupt(FAR struct sam_emac_s *priv, int qid)
  *   arg - The argument passed when work_queue() was called.
  *
  * Returned Value:
- *   OK on success
+ *   None
  *
  * Assumptions:
  *   Ethernet interrupts are disabled
@@ -2279,6 +2279,7 @@ static void sam_interrupt_work(FAR void *arg)
   uint32_t regval;
   uint32_t pending;
   uint32_t clrbits;
+  int qid = EMAC_QUEUE_0;
 
   /* Process pending Ethernet interrupts */
 
