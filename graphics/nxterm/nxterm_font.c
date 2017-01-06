@@ -65,7 +65,7 @@ static int nxterm_fontsize(FAR struct nxterm_state_s *priv, uint8_t ch,
   /* Get the handle of the font managed by the font cache */
 
   hfont = nxf_cache_getfonthandle(priv->fcache);
-  DEBUGASSERT(hfront != NULL);
+  DEBUGASSERT(hfont != NULL);
 
   /* Does the character code map to a font? */
 

@@ -248,7 +248,7 @@ static inline void nxf_addglyph(FAR struct nxfonts_fcache_s *priv,
       priv->tail = glyph;
     }
 
-  priv->head = glyph
+  priv->head = glyph;
 
   /* Increment the count of glyphs in the font cache. */
 
@@ -269,7 +269,7 @@ static inline void nxf_addglyph(FAR struct nxfonts_fcache_s *priv,
  *   is full and the font is not found, then the least-recently-used glyph
  *   is deleted to make space for the new glyph that will be allocated.
  *
- *   If the glyph is found, then it is moved to the head of the list of
+ *   (2) If the glyph is found, then it is moved to the head of the list of
  *   glyphs since it is now the most recently used (leaving the least
  *   recently used glyph at the tail of the list).
  *
@@ -436,13 +436,28 @@ static inline void nxf_fillglyph(FAR struct nxfonts_fcache_s *priv,
 
       for (row = 0; row < glyph->height; row++)
         {
-          /* Just copy the color value into the glyph memory */
+          /* Copy the color value into the glyph memory */
 
-          for (col = 0; col < glyph->width; col += 3)
+          col = 0;
+          for (; ; )
             {
               *ptr++ = pixel[0];
+              if (++col >= glyph->width)
+                {
+                  break;
+                }
+
               *ptr++ = pixel[1];
+              if (++col >= glyph->width)
+                {
+                  break;
+                }
+
               *ptr++ = pixel[2];
+              if (++col >= glyph->width)
+                {
+                  break;
+                }
             }
         }
     }
@@ -653,56 +668,44 @@ FCACHE nxf_cache_connect(enum nx_fontid_e fontid,
        * 24).
        */
 
-#ifndef CONFIG_NX_DISABLE_1BPP
-      if (bpp == 1)
+      switch (bpp)
         {
+#ifndef CONFIG_NX_DISABLE_1BPP
+        case 1:
           priv->renderer = (nxf_renderer_t)nxf_convert_1bpp;
-        }
-      else
+          break;
 #endif
 #ifndef CONFIG_NX_DISABLE_2BPP
-      if (bpp == 2)
-        {
+        case 2:
           priv->renderer = (nxf_renderer_t)nxf_convert_2bpp;
-        }
-      else
+          break;
 #endif
 #ifndef CONFIG_NX_DISABLE_4BPP
-      if (bpp == 4)
-        {
+        case 4:
           priv->renderer = (nxf_renderer_t)nxf_convert_4bpp;
-        }
-      else
+          break;
 #endif
 #ifndef CONFIG_NX_DISABLE_8BPP
-      if (bpp == 8)
-        {
+        case 8:
           priv->renderer = (nxf_renderer_t)nxf_convert_8bpp;
-        }
-      else
+          break;
 #endif
 #ifndef CONFIG_NX_DISABLE_16BPP
-      if (bpp == 16)
-        {
+        case 16:
           priv->renderer = (nxf_renderer_t)nxf_convert_16bpp;
-        }
-      else
+          break;
 #endif
 #ifndef CONFIG_NX_DISABLE_24BPP
-      if (bpp == 24)
-        {
+        case 24:
           priv->renderer = (nxf_renderer_t)nxf_convert_24bpp;
-        }
-      else
+          break;
 #endif
 #ifndef CONFIG_NX_DISABLE_32BPP
-      if (bpp == 32)
-        {
+        case 32:
           priv->renderer = (nxf_renderer_t)nxf_convert_32bpp;
-        }
-      else
+          break;
 #endif
-        {
+        default:
           gerr("ERROR: Unsupported pixel depth: %d\n", bpp);
           errcode = ENOSYS;
           goto errout_with_fcache;
@@ -883,7 +886,7 @@ FAR const struct nxfonts_glyph_s *nxf_cache_getglyph(FCACHE fhandle, uint8_t ch)
       fbm = nxf_getbitmap(priv->font, ch);
       if (fbm)
         {
-          /* Yes.. render the glyph */
+          /* Yes.. render the glyph for the font */
 
           glyph = nxf_renderglyph(priv, fbm, ch);
         }
