@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated December 11, 2016)
+NuttX TODO List (Last updated January 6, 2017)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -24,7 +24,7 @@ nuttx/:
   (0)  Other drivers (drivers/)
  (12)  Libraries (libc/, libm/)
  (11)  File system/Generic drivers (fs/, drivers/)
-  (9)  Graphics Subsystem (graphics/)
+  (8)  Graphics Subsystem (graphics/)
   (2)  Build system / Toolchains
   (3)  Linux/Cywgin simulation (arch/sim)
   (4)  ARM (arch/arm/)
@@ -1709,18 +1709,6 @@ o Graphics Subsystem (graphics/)
                more about the appropriate context to do the autoraise.
   Status:      Open
   Priority:    Medium low
-
-  Title:       IMPROVED NxTERM FONT CACHING
-  Description: Now each NxTerm instance has its own private font cache
-               whose size is determined by CONFIG_NXTERM_MXCHARS.  If there
-               are multiple NxTerm instances using the same font, each will
-               have a separate font cache.  This is inefficient and wasteful
-               of memory:  Each NxTerm instance should share a common font
-               cache.
-  Status:      Open
-  Priority:    Medium.  Not important for day-to-day testing but would be
-               a critical improvement if NxTerm were to be used in a
-               product.
 
   Title:       NxTERM VT100 SUPPORT
   Description: If the NxTerm will be used with the Emacs-like command line
