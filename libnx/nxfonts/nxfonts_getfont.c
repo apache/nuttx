@@ -1,7 +1,7 @@
 /****************************************************************************
  * libnx/nxfonts/nxfonts_getfont.c
  *
- *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,14 +47,6 @@
 #include <nuttx/nx/nxfonts.h>
 
 #include "nxfonts.h"
-
-/****************************************************************************
- * Pre-Processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
 
 /****************************************************************************
  * Private Data
@@ -246,9 +238,12 @@ extern const struct nx_fontpackage_s g_x11_misc_fixed_9x18B_package;
 extern const struct nx_fontpackage_s g_x11_misc_fixed_10x20_package;
 #endif
 
+#ifdef CONFIG_NXFONT_TOM_THUMB_4X6
+extern const struct nx_fontpackage_s g_tom_thumb_4x6_package;
+#endif
+
 static FAR const struct nx_fontpackage_s *g_fontpackages[] =
 {
-
 /* MONO */
 
 #ifdef CONFIG_NXFONT_MONO5X8
@@ -431,12 +426,14 @@ static FAR const struct nx_fontpackage_s *g_fontpackages[] =
   &g_x11_misc_fixed_10x20_package,
 #endif
 
+/* Tom Thumb mono-space 4x6 font */
+
+#ifdef CONFIG_NXFONT_TOM_THUMB_4X6
+  &g_tom_thumb_4x6_package,
+#endif
+
   NULL
 };
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions

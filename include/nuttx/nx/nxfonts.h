@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/nx/nxfonts.h
  *
- *   Copyright (C) 2008, 2009, 2011, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2009, 2011, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,6 +50,7 @@
 /****************************************************************************
  * Pre-processor definitions
  ****************************************************************************/
+
 /* Select the default font.  If no fonts are selected, then a compilation
  * error is likely down the road.
  */
@@ -193,6 +194,11 @@
 
 #elif defined(CONFIG_NXFONT_MONO5X8)
 # define NXFONT_DEFAULT FONTID_MONO5X8
+
+/* Tom Thumb mono-space 4x6 font */
+
+#elif defined(CONFIG_NXFONT_TOM_THUMB_4X6)
+# define NXFONT_DEFAULT FONTID_TOM_THUMB_4X6
 
 #endif
 
@@ -386,6 +392,10 @@ enum nx_fontid_e
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_10X20
   , FONTID_X11_MISC_FIXED_10X20 = 42    /* X11 misc fixed 10x20 */
+#endif
+
+#ifdef CONFIG_NXFONT_TOM_THUMB_4X6
+  , FONTID_TOM_THUMB_4X6 = 43           /* Tom Thumb monospace 4x6 */
 #endif
 };
 

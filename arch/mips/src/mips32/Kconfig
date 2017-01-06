@@ -8,8 +8,8 @@ comment "MIPS32 Configuration Options"
 
 choice
 	prompt "Toolchain Selection"
-	default MIPS32_TOOLCHAIN_MICROCHIPW_LITE if HOST_WINDOWS
-	default MIPS32_TOOLCHAIN_GNU_ELF if !HOST_WINDOWS
+	default MIPS32_TOOLCHAIN_MICROCHIPW_LITE if TOOLCHAIN_WINDOWS
+	default MIPS32_TOOLCHAIN_GNU_ELF if !TOOLCHAIN_WINDOWS
 
 config MIPS32_TOOLCHAIN_GNU_ELF
 	bool "Generic GNU ELF toolchain"
@@ -31,15 +31,15 @@ config MIPS32_TOOLCHAIN_MICROCHIPL_LITE
 
 config MIPS32_TOOLCHAIN_MICROCHIPW_XC32
 	bool "Microchip XC32 toolchain under Windows"
-	depends on HOST_WINDOWS
+	depends on TOOLCHAIN_WINDOWS
 
 config MIPS32_TOOLCHAIN_MICROCHIPW
 	bool "Microchip C32 toolchain under Windows"
-	depends on HOST_WINDOWS
+	depends on TOOLCHAIN_WINDOWS
 
 config MIPS32_TOOLCHAIN_MICROCHIPW_LITE
 	bool "Microchip C32 toolchain under Windows (Lite edition)"
-	depends on HOST_WINDOWS
+	depends on TOOLCHAIN_WINDOWS
 
 config MIPS32_TOOLCHAIN_MICROCHIPOPENL
 	bool "microchipOpen toolchain under Linux"
@@ -47,7 +47,7 @@ config MIPS32_TOOLCHAIN_MICROCHIPOPENL
 
 config MIPS32_TOOLCHAIN_PINGUINOW
 	bool "Pinguino mips-elf toolchain under Windows"
-	depends on HOST_WINDOWS
+	depends on TOOLCHAIN_WINDOWS
 
 config MIPS32_TOOLCHAIN_PINGUINOL
 	bool "Pinguino mips-elf toolchain under OS X or Linux"

@@ -152,8 +152,6 @@ int task_delete(pid_t pid)
 
       /* If the task is waiting at a cancellation point, then notify of the
        * cancellation thereby waking the task up with an ECANCELED error.
-       *
-       * REVISIT: is locking the scheduler sufficent in SMP mode?
        */
 
       if (dtcb->cpcount > 0)

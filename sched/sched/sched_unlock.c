@@ -67,10 +67,14 @@
 int sched_unlock(void)
 {
   FAR struct tcb_s *rtcb = this_task();
+#ifdef CONFIG_SMP
   int cpu;
 
   cpu  = this_cpu();
   rtcb = current_task(cpu);
+#else
+  rtcb = this_task();
+#endif
 
   /* Check for some special cases:  (1) rtcb may be NULL only during
    * early boot-up phases, and (2) sched_unlock() should have no
