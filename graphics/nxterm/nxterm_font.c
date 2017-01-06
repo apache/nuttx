@@ -49,293 +49,25 @@
 #include "nxterm.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Select renderer -- Some additional logic would be required to support
- * pixel depths that are not directly addressable (1,2,4, and 24).
- */
-
-#if CONFIG_NXTERM_BPP == 1
-#  define RENDERER nxf_convert_1bpp
-#elif CONFIG_NXTERM_BPP == 2
-#  define RENDERER nxf_convert_2bpp
-#elif CONFIG_NXTERM_BPP == 4
-#  define RENDERER nxf_convert_4bpp
-#elif CONFIG_NXTERM_BPP == 8
-#  define RENDERER nxf_convert_8bpp
-#elif CONFIG_NXTERM_BPP == 16
-#  define RENDERER nxf_convert_16bpp
-#elif CONFIG_NXTERM_BPP == 24
-#  define RENDERER nxf_convert_24bpp
-#elif  CONFIG_NXTERM_BPP == 32
-#  define RENDERER nxf_convert_32bpp
-#else
-#  error "Unsupported CONFIG_NXTERM_BPP"
-#endif
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: nxterm_freeglyph
- ****************************************************************************/
-
-static void nxterm_freeglyph(FAR struct nxterm_glyph_s *glyph)
-{
-  if (glyph->bitmap)
-    {
-      kmm_free(glyph->bitmap);
-    }
-  memset(glyph, 0, sizeof(struct nxterm_glyph_s));
-}
-
-/****************************************************************************
- * Name: nxterm_allocglyph
- ****************************************************************************/
-
-static inline FAR struct nxterm_glyph_s *
-nxterm_allocglyph(FAR struct nxterm_state_s *priv)
-{
-  FAR struct nxterm_glyph_s *glyph = NULL;
-  FAR struct nxterm_glyph_s *luglyph = NULL;
-  uint8_t luusecnt;
-  int i;
-
-  /* Search through the glyph cache looking for an unused glyph.  Also, keep
-   * track of the least used glyph as well.  We need that if we have to replace
-   * a glyph in the cache.
-   */
-
-   for (i = 0; i < priv->maxglyphs; i++)
-    {
-      /* Is this glyph in use? */
-
-      glyph = &priv->glyph[i];
-      if (!glyph->usecnt)
-        {
-          /* No.. return this glyph with a use count of one */
-
-          glyph->usecnt = 1;
-          return glyph;
-        }
-
-      /* Yes.. check for the least recently used */
-
-      if (!luglyph || glyph->usecnt < luglyph->usecnt)
-        {
-          luglyph = glyph;
-        }
-    }
-
-  /* If we get here, the glyph cache is full.  We replace the least used
-   * glyph with the one we need now. (luglyph can't be NULL).
-   */
-
-  luusecnt = luglyph->usecnt;
-  nxterm_freeglyph(luglyph);
-
-  /* But lets decrement all of the usecnts so that the new one one be so
-   * far behind in the counts as the older ones.
-   */
-
-  if (luusecnt > 1)
-    {
-       uint8_t decr = luusecnt - 1;
-
-       for (i = 0; i < priv->maxglyphs; i++)
-        {
-          /* Is this glyph in use? */
-
-          glyph = &priv->glyph[i];
-          if (glyph->usecnt > decr)
-            {
-              glyph->usecnt -= decr;
-            }
-        }
-    }
-
-  /* Then return the least used glyph */
-
-  luglyph->usecnt = 1;
-  return luglyph;
-}
-
-/****************************************************************************
- * Name: nxterm_findglyph
- ****************************************************************************/
-
-static FAR struct nxterm_glyph_s *
-nxterm_findglyph(FAR struct nxterm_state_s *priv, uint8_t ch)
-{
-  int i;
-
-  /* First, try to find the glyph in the cache of pre-rendered glyphs */
-
-   for (i = 0; i < priv->maxglyphs; i++)
-    {
-      FAR struct nxterm_glyph_s *glyph = &priv->glyph[i];
-      if (glyph->usecnt > 0 && glyph->code == ch)
-        {
-          /* Increment the use count (unless it is already at the max) */
-
-          if (glyph->usecnt < MAX_USECNT)
-            {
-               glyph->usecnt++;
-            }
-
-          /* And return the glyph that we found */
-
-          return glyph;
-        }
-    }
-  return NULL;
-}
-
-/****************************************************************************
- * Name: nxterm_renderglyph
- ****************************************************************************/
-
-static inline FAR struct nxterm_glyph_s *
-nxterm_renderglyph(FAR struct nxterm_state_s *priv,
-                   FAR const struct nx_fontbitmap_s *fbm, uint8_t ch)
-{
-  FAR struct nxterm_glyph_s *glyph = NULL;
-  FAR nxgl_mxpixel_t *ptr;
-#if CONFIG_NXTERM_BPP < 8
-  nxgl_mxpixel_t pixel;
-#endif
-  int bmsize;
-  int row;
-  int col;
-  int ret;
-
-  /* Allocate the glyph (always succeeds) */
-
-  glyph         = nxterm_allocglyph(priv);
-  glyph->code   = ch;
-
-  /* Get the dimensions of the glyph */
-
-  glyph->width  = fbm->metric.width + fbm->metric.xoffset;
-  glyph->height = fbm->metric.height + fbm->metric.yoffset;
-
-  /* Get the physical width of the glyph in bytes */
-
-  glyph->stride = (glyph->width * CONFIG_NXTERM_BPP + 7) / 8;
-
-  /* Allocate memory to hold the glyph with its offsets */
-
-  bmsize        =  glyph->stride * glyph->height;
-  glyph->bitmap = (FAR uint8_t *)kmm_malloc(bmsize);
-
-  if (glyph->bitmap)
-    {
-      /* Initialize the glyph memory to the background color using the
-       * hard-coded bits-per-pixel (BPP).
-       *
-       * TODO:  The rest of NX is configured to support multiple devices
-       * with differing BPP.  They logic should be extended to support
-       * differing BPP's as well.
-       */
-
-#if CONFIG_NXTERM_BPP < 8
-      pixel  = priv->wndo.wcolor[0];
-
-#  if CONFIG_NXTERM_BPP == 1
-
-      /* Pack 1-bit pixels into a 2-bits */
-
-      pixel &= 0x01;
-      pixel  = (pixel) << 1 | pixel;
-
-#  endif
-#  if CONFIG_NXTERM_BPP < 4
-
-      /* Pack 2-bit pixels into a nibble */
-
-      pixel &= 0x03;
-      pixel  = (pixel) << 2 | pixel;
-
-#  endif
-
-      /* Pack 4-bit nibbles into a byte */
-
-      pixel &= 0x0f;
-      pixel  = (pixel) << 4 | pixel;
-
-      ptr    = (FAR nxgl_mxpixel_t *)glyph->bitmap;
-      for (row = 0; row < glyph->height; row++)
-        {
-          for (col = 0; col < glyph->stride; col++)
-            {
-              /* Transfer the packed bytes into the buffer */
-
-              *ptr++ = pixel;
-            }
-        }
-
-#elif CONFIG_NXTERM_BPP == 24
-# error "Additional logic is needed here for 24bpp support"
-
-#else /* CONFIG_NXTERM_BPP = {8,16,32} */
-
-      ptr = (FAR nxgl_mxpixel_t *)glyph->bitmap;
-      for (row = 0; row < glyph->height; row++)
-        {
-          /* Just copy the color value into the glyph memory */
-
-          for (col = 0; col < glyph->width; col++)
-            {
-              *ptr++ = priv->wndo.wcolor[0];
-            }
-        }
-#endif
-
-      /* Then render the glyph into the allocated memory */
-
-      ret = RENDERER((FAR nxgl_mxpixel_t *)glyph->bitmap,
-                      glyph->height, glyph->width, glyph->stride,
-                      fbm, priv->wndo.fcolor[0]);
-      if (ret < 0)
-        {
-          /* Actually, the RENDERER never returns a failure */
-
-          gerr("ERROR: nxterm_renderglyph: RENDERER failed\n");
-          nxterm_freeglyph(glyph);
-          glyph = NULL;
-        }
-    }
-
-  return glyph;
-}
 
 /****************************************************************************
  * Name: nxterm_fontsize
  ****************************************************************************/
 
-static int nxterm_fontsize(NXHANDLE hfont, uint8_t ch, FAR struct nxgl_size_s *size)
+static int nxterm_fontsize(FAR struct nxterm_state_s *priv, uint8_t ch,
+                           FAR struct nxgl_size_s *size)
 {
   FAR const struct nx_fontbitmap_s *fbm;
+  NXHANDLE hfont;
 
-  /* No, it is not cached... Does the code map to a font? */
+  /* Get the handle of the font managed by the font cache */
+
+  hfont = nxf_cache_getfonthandle(priv->fcache);
+  DEBUGASSERT(hfront != NULL);
+
+  /* Does the character code map to a font? */
 
   fbm = nxf_getbitmap(hfont, ch);
   if (fbm)
@@ -347,40 +79,7 @@ static int nxterm_fontsize(NXHANDLE hfont, uint8_t ch, FAR struct nxgl_size_s *s
       return OK;
     }
 
-  return ERROR;
-}
-
-/****************************************************************************
- * Name: nxterm_getglyph
- ****************************************************************************/
-
-static FAR struct nxterm_glyph_s *
-nxterm_getglyph(NXHANDLE hfont, FAR struct nxterm_state_s *priv, uint8_t ch)
-{
-  FAR struct nxterm_glyph_s *glyph;
-  FAR const struct nx_fontbitmap_s *fbm;
-
-  /* First, try to find the glyph in the cache of pre-rendered glyphs */
-
-  glyph = nxterm_findglyph(priv, ch);
-  if (glyph)
-    {
-      /* We found it in the cache .. return the cached glyph */
-
-      return glyph;
-    }
-
-  /* No, it is not cached... Does the code map to a font? */
-
-  fbm = nxf_getbitmap(hfont, ch);
-  if (fbm)
-    {
-      /* Yes.. render the glyph */
-
-      glyph = nxterm_renderglyph(priv, fbm, ch);
-    }
-
-  return glyph;
+  return -ENOENT;
 }
 
 /****************************************************************************
@@ -397,10 +96,10 @@ nxterm_getglyph(NXHANDLE hfont, FAR struct nxterm_state_s *priv, uint8_t ch)
  ****************************************************************************/
 
 FAR const struct nxterm_bitmap_s *
-nxterm_addchar(NXHANDLE hfont, FAR struct nxterm_state_s *priv, uint8_t ch)
+nxterm_addchar(FAR struct nxterm_state_s *priv, uint8_t ch)
 {
   FAR struct nxterm_bitmap_s *bm = NULL;
-  FAR struct nxterm_glyph_s *glyph;
+  FAR struct nxfonts_glyph_s *glyph;
 
   /* Is there space for another character on the display? */
 
@@ -416,7 +115,7 @@ nxterm_addchar(NXHANDLE hfont, FAR struct nxterm_state_s *priv, uint8_t ch)
 
       /* Find (or create) the matching glyph */
 
-      glyph = nxterm_getglyph(hfont, priv, ch);
+      glyph = nxf_cache_getglyph(priv->fcache, ch);
       if (!glyph)
         {
           /* No, there is no font for this code.  Just mark this as a space. */
@@ -449,6 +148,7 @@ nxterm_addchar(NXHANDLE hfont, FAR struct nxterm_state_s *priv, uint8_t ch)
  *   Erase a character from the window.
  *
  ****************************************************************************/
+
 int nxterm_hidechar(FAR struct nxterm_state_s *priv,
                    FAR const struct nxterm_bitmap_s *bm)
 {
@@ -461,7 +161,7 @@ int nxterm_hidechar(FAR struct nxterm_state_s *priv,
    * modification is required (not an error).
    */
 
-  ret = nxterm_fontsize(priv->font, bm->code, &fsize);
+  ret = nxterm_fontsize(priv, bm->code, &fsize);
   if (ret < 0)
     {
       /* It was rendered as a space. */
@@ -572,10 +272,10 @@ void nxterm_newline(FAR struct nxterm_state_s *priv)
  ****************************************************************************/
 
 void nxterm_fillchar(FAR struct nxterm_state_s *priv,
-                    FAR const struct nxgl_rect_s *rect,
-                    FAR const struct nxterm_bitmap_s *bm)
+                     FAR const struct nxgl_rect_s *rect,
+                     FAR const struct nxterm_bitmap_s *bm)
 {
-  FAR struct nxterm_glyph_s *glyph;
+  FAR struct nxfonts_glyph_s *glyph;
   struct nxgl_rect_s bounds;
   struct nxgl_rect_s intersection;
   struct nxgl_size_s fsize;
@@ -590,7 +290,7 @@ void nxterm_fillchar(FAR struct nxterm_state_s *priv,
 
   /* Get the size of the font glyph (which may not have been created yet) */
 
-  ret = nxterm_fontsize(priv->font, bm->code, &fsize);
+  ret = nxterm_fontsize(priv, bm->code, &fsize);
   if (ret < 0)
     {
       /* This would mean that there is no bitmap for the character code and
@@ -632,7 +332,7 @@ void nxterm_fillchar(FAR struct nxterm_state_s *priv,
 
       /* Find (or create) the glyph that goes with this font */
 
-      glyph = nxterm_getglyph(priv->font, priv, bm->code);
+      glyph = nxf_cache_getglyph(priv->fcache, bm->code);
       if (!glyph)
         {
           /* Shouldn't happen */
@@ -648,4 +348,3 @@ void nxterm_fillchar(FAR struct nxterm_state_s *priv,
       DEBUGASSERT(ret >= 0);
     }
 }
-
