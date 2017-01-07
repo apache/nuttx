@@ -851,13 +851,14 @@ static int quorem(Bigint * b, Bigint * S)
 #endif
 
   n = S->wds;
+
 #ifdef CONFIG_DEBUG_LIB
   if (b->wds > n)
     {
       lerr("ERROR: oversize b in quorem\n");
     }
 #endif
-`
+
   if (b->wds < n)
     {
       return 0;
@@ -868,6 +869,7 @@ static int quorem(Bigint * b, Bigint * S)
   bx = b->x;
   bxe = bx + n;
   q = *bxe / (*sxe + 1);        /* ensure q <= true quotient */
+
 #ifdef CONFIG_DEBUG_LIB
   if (q > 9)
     {
@@ -956,6 +958,7 @@ static int quorem(Bigint * b, Bigint * S)
         {
           while (--bxe > bx && !*bxe)
             --n;
+
           b->wds = n;
         }
     }
@@ -1048,7 +1051,8 @@ char *__dtoa(double d, int mode, int ndigits, int *decpt, int *sign, char **rve)
 
   if (word0(d) & Sign_bit)
     {
-      /* set sign for everything, including 0's and NaNs */
+      /* Set sign for everything, including 0's and NaNs */
+
       *sign = 1;
       word0(d) &= ~Sign_bit;    /* clear sign bit */
     }
@@ -1065,6 +1069,7 @@ char *__dtoa(double d, int mode, int ndigits, int *decpt, int *sign, char **rve)
 #endif
     {
       /* Infinity or NaN */
+
       *decpt = 9999;
       s =
 #ifdef IEEE_Arith
@@ -1083,6 +1088,7 @@ char *__dtoa(double d, int mode, int ndigits, int *decpt, int *sign, char **rve)
       return s;
     }
 #endif
+
   if (!d)
     {
       *decpt = 1;
@@ -1210,6 +1216,7 @@ char *__dtoa(double d, int mode, int ndigits, int *decpt, int *sign, char **rve)
     case 3:
       leftright = 0;
       /* no break */
+
     case 5:
       i = ndigits + k + 1;
       ilim = i;
@@ -1248,7 +1255,8 @@ char *__dtoa(double d, int mode, int ndigits, int *decpt, int *sign, char **rve)
 
           if (j & Bletch)
             {
-              /* prevent overflows */
+              /* Prevent overflows */
+
               j &= Bletch - 1;
               d /= bigtens[n_bigtens - 1];
               ieps++;
@@ -1299,8 +1307,10 @@ char *__dtoa(double d, int mode, int ndigits, int *decpt, int *sign, char **rve)
           d -= 5.;
           if (d > eps)
             goto one_digit;
+
           if (d < -eps)
             goto no_digits;
+
           goto fast_failed;
         }
 
@@ -1364,6 +1374,7 @@ char *__dtoa(double d, int mode, int ndigits, int *decpt, int *sign, char **rve)
 #ifndef No_leftright
         }
 #endif
+
     fast_failed:
       s = s0;
       d = d2;
@@ -1393,8 +1404,10 @@ char *__dtoa(double d, int mode, int ndigits, int *decpt, int *sign, char **rve)
         {
           L = (int)(d / ds);
           d -= L * ds;
+
 #ifdef Check_FLT_ROUNDS
           /* If FLT_ROUNDS == 2, L will usually be high by 1 */
+
           if (d < 0)
             {
               L--;
@@ -1418,6 +1431,7 @@ char *__dtoa(double d, int mode, int ndigits, int *decpt, int *sign, char **rve)
 
                   ++*s++;
                 }
+
               break;
             }
 
@@ -1507,6 +1521,7 @@ char *__dtoa(double d, int mode, int ndigits, int *decpt, int *sign, char **rve)
       if (!word1(d) && !(word0(d) & Bndry_mask) && word0(d) & Exp_mask)
         {
           /* The special case */
+
           b2 += Log2P;
           s2 += Log2P;
           spec_case = 1;
