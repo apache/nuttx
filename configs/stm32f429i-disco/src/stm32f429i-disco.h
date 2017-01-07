@@ -66,6 +66,16 @@
 #  undef CONFIG_STM32_SPI3
 #endif
 
+/* STMPE811 on I2C3 */
+
+//#define GPIO_I2C3_SCL GPIO_I2C3_SCL_1
+//#define GPIO_I2C3_SDA GPIO_I2C3_SDA_1
+
+#define STMPE811_ADDR1    0x41
+#define STMPE811_ADDR2    0x44
+
+#define GPIO_IO_EXPANDER (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTA|GPIO_PIN15)
+
 /* STM32F429 Discovery GPIOs **************************************************************************/
 /* LEDs */
 

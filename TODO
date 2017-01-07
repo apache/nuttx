@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated December 11, 2016)
+NuttX TODO List (Last updated January 6, 2017)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -24,7 +24,7 @@ nuttx/:
   (0)  Other drivers (drivers/)
  (12)  Libraries (libc/, libm/)
  (11)  File system/Generic drivers (fs/, drivers/)
-  (9)  Graphics Subsystem (graphics/)
+  (8)  Graphics Subsystem (graphics/)
   (2)  Build system / Toolchains
   (3)  Linux/Cywgin simulation (arch/sim)
   (4)  ARM (arch/arm/)
@@ -1710,18 +1710,6 @@ o Graphics Subsystem (graphics/)
   Status:      Open
   Priority:    Medium low
 
-  Title:       IMPROVED NxTERM FONT CACHING
-  Description: Now each NxTerm instance has its own private font cache
-               whose size is determined by CONFIG_NXTERM_MXCHARS.  If there
-               are multiple NxTerm instances using the same font, each will
-               have a separate font cache.  This is inefficient and wasteful
-               of memory:  Each NxTerm instance should share a common font
-               cache.
-  Status:      Open
-  Priority:    Medium.  Not important for day-to-day testing but would be
-               a critical improvement if NxTerm were to be used in a
-               product.
-
   Title:       NxTERM VT100 SUPPORT
   Description: If the NxTerm will be used with the Emacs-like command line
                editor (CLE), then it will need to support VT100 cursor control
@@ -2080,7 +2068,12 @@ o Other Applications & Tests (apps/examples/)
                it stops rendering.  This is not a problem for the examples/nx
                code because it uses so few fonts, but if the logic were
                leveraged for more general purposes, it would be a problem.
+
                Update: see examples/nxtext for some improved font cache handling.
+               Update: The NXTERM font cache has been generalized and is now
+               offered as the standard, common font cache for all applications.
+               both the nx and nxtext examples should be modified to use this
+               common font cache.  See interfaces defined in nxfonts.h.
   Status:      Open
   Priority:    Low.  This is not really a problem because examples/nx works
                fine with its bogus font caching.

@@ -224,6 +224,11 @@
 
 #define GPIO_TIM4_CH2OUT GPIO_TIM4_CH2OUT_2
 
+/* I2C - There is a STMPE811 TouchPanel on I2C3 using these pins: */
+
+#define GPIO_I2C3_SCL GPIO_I2C3_SCL_1
+#define GPIO_I2C3_SDA GPIO_I2C3_SDA_1
+
 /* SPI - There is a MEMS device on SPI5 using these pins: */
 
 #define GPIO_SPI5_MISO GPIO_SPI5_MISO_1

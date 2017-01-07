@@ -58,5 +58,6 @@ void sq_addfirst(FAR sq_entry_t *node, sq_queue_t *queue)
     {
       queue->tail = node;
     }
+
   queue->head = node;
 }
