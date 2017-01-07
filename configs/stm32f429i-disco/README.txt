@@ -71,6 +71,36 @@ FLASH may be programmed:
 
   - Via JTAG/SWD connected to the SWD connector CN2.
 
+    CN4 Jumpers.  Remove jumpers to enable signals at SWD connector CN2.
+
+    SWD 6-Pin STM32F429i-Discovery Connector CN2
+    Pin   Signal Name       Description
+    ----- ------ ---------- ------------------------------
+    Pin 1 AIN_1  VDD_TARGET VDD from application
+    Pin 2 T_JCLK SWCLK      SWD Clock
+    Pin 3 GND    GND        Ground
+    Pin 4 T_JTMS SWDIO      SWD data input/output
+    Pin 5 T_NRST NRST       Reset of target MCU
+    Pin 6 T_SWO  SWO        Reserved
+
+    SWD 20-pin J-Link Connector
+    Pin    Name      Type   Description
+    ------ --------- ------ ------------------------------
+    Pin  1 VTref     Input  Target reference voltage
+    Pin  2 Vsupply   NC     Not connected in J-Link
+    Pin  3 Not used  NC     Not used in J-Link
+    Pin  5 Not used  NC     Not used in J-Link
+    Pin  7 SWDIO     I/O    Bi-directional data pin
+    Pin  9 SWCLK     Output Clock signal to target CPU
+    Pin 11 Not used  NC     Not used in J-Link
+    Pin 13 SWO       Output Serial wire output trace port
+    Pin 15 RESET     I/O    Target CPU reset signal (nRST)
+    Pin 17 Not used  NC     Not connected in J-Link
+    Pin 19 5V-Supply Output Supplies power to some boards.
+
+    Pins 4, 45, 8, 10, 12, 14, 16, 18 and 20 are GND pins in J-Link.  They
+    should also be connected to ground in the target system.
+
 LEDs
 ====
 
@@ -155,6 +185,13 @@ USART1 is enabled as the serial console in all configurations (see */defconfig).
 USART1 RX and TX are configured on pins PA10 and PA9, respectively (see
 include/board.h).
 
+  Header 32X2 P1
+  --------------
+  Pin 1  5V
+  Pin 51 PA10
+  Pin 52 PA9
+  Pin 63 GND
+
 If solder bridges SB11 and SB12 are closed, then USART1 will be connected to
 the ST-Link and should be available over USB as a virtual COM interface.
 
@@ -207,7 +244,7 @@ TIM14
   CH1     PA7*, PF9*
 
  * Indicates pins that have other on-board functions and should be used only
-   with care (See table 5 in the STM32F429I-DISCO User Guide).  The rest are
+   with care (See table 6 in the STM32F429I-DISCO User Guide).  The rest are
    free I/O pins (This need to be updated.  They are incorrect!)
 ** Port I pins are not supported by the MCU
 
