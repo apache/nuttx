@@ -158,54 +158,54 @@ Timer Inputs/Outputs
 ====================
 
 TIM1
-  CH1     PA8, PE9
-  CH2     PA9*, PE11
-  CH3     PA10*, PE13
-  CH4     PA11*, PE14
+  CH1     PA8*, PE9*
+  CH2     PA9, PE11*
+  CH3     PA10, PE13*
+  CH4     PA11*, PE14*
 TIM2
-  CH1     PA0*, PA15, PA5*
-  CH2     PA1, PB3*
-  CH3     PA2, PB10*
-  CH4     PA3, PB11
+  CH1     PA0*, PA15*, PA5
+  CH2     PA1*, PB3*
+  CH3     PA2*, PB10*
+  CH4     PA3*, PB11*
 TIM3
-  CH1     PA6*, PB4, PC6
-  CH2     PA7*, PB5, PC7*
-  CH3     PB0, PC8
-  CH4     PB1, PC9
+  CH1     PA6*, PB4, PC6*
+  CH2     PA7*, PB5*, PC7*
+  CH3     PB0*, PC8
+  CH4     PB1*, PC9*
 TIM4
   CH1     PB6*, PD12*
   CH2     PB7, PD13*
-  CH3     PB8, PD14*
+  CH3     PB8*, PD14*
   CH4     PB9*, PD15*
 TIM5
-  CH1     PA0*, PH10**
-  CH2     PA1, PH11**
-  CH3     PA2, PH12**
-  CH4     PA3, PI0
+  CH1     PA0*, PH10*
+  CH2     PA1*, PH11*
+  CH3     PA2*, PH12*
+  CH4     PA3*, PI0**
 TIM8
-  CH1     PC6, PI5
-  CH2     PC7*, PI6
-  CH3     PC8, PI7
-  CH4     PC9, PI2
+  CH1     PC6*, PI5**
+  CH2     PC7*, PI6**
+  CH3     PC8, PI7**
+  CH4     PC9*, PI2**
 TIM9
-  CH1     PA2, PE5
-  CH2     PA3, PE6
+  CH1     PA2*, PE5
+  CH2     PA3*, PE6
 TIM10
-  CH1     PB8, PF6
+  CH1     PB8*, PF6
 TIM11
-  CH1     PB9*, PF7
+  CH1     PB9*, PF7*
 TIM12
-  CH1     PH6**, PB14
-  CH2     PC15, PH9**
+  CH1     PH6*, PB14*
+  CH2     PC15*, PH9*
 TIM13
-  CH1     PA6*, PF8
+  CH1     PA6*, PF8*
 TIM14
-  CH1     PA7*, PF9
+  CH1     PA7*, PF9*
 
  * Indicates pins that have other on-board functions and should be used only
    with care (See table 5 in the STM32F429I-DISCO User Guide).  The rest are
    free I/O pins (This need to be updated.  They are incorrect!)
-** Port H pins are not supported by the MCU
+** Port I pins are not supported by the MCU
 
 FPU
 ===
