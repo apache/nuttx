@@ -52,6 +52,7 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* This describes a rendering function */
 
 typedef CODE int (*nxf_renderer_t)(FAR nxgl_mxpixel_t *dest, uint16_t height,

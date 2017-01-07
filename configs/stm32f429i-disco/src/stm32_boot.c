@@ -70,6 +70,7 @@
 #   define HAVE_NXSTART
 #   include <nuttx/nx/nx.h>
 #endif
+
 /* Should we initialize the touchscreen for the NxWM (CONFIG_NXWM=y)?  This
  * is done if we have a touchscreen (CONFIG_INPUT_STMPE811=y), NxWM uses the
  * touchscreen (CONFIG_NXWM_TOUCHSCREEN=y), and if we were asked to
@@ -121,11 +122,6 @@
 #    define CONFIG_STM32F429I_DISCO_BOARDINIT_STACK 2048
 #  endif
 #endif
-
-
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
 
 /************************************************************************************
  * Public Functions

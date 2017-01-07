@@ -591,6 +591,7 @@ static int cmp(Bigint * a, Bigint * b)
           break;
         }
     }
+
   return 0;
 }
 
@@ -784,6 +785,7 @@ static Bigint *d2b(double d, int *e, int *bits)
     }
   while (!x[i])
     --i;
+
   b->wds = i + 1;
 #endif
   if (de)
@@ -855,6 +857,7 @@ static int quorem(Bigint * b, Bigint * S)
       lerr("ERROR: oversize b in quorem\n");
     }
 #endif
+`
   if (b->wds < n)
     {
       return 0;
@@ -867,15 +870,16 @@ static int quorem(Bigint * b, Bigint * S)
   q = *bxe / (*sxe + 1);        /* ensure q <= true quotient */
 #ifdef CONFIG_DEBUG_LIB
   if (q > 9)
-   {
-     lerr("ERROR: oversized quotient in quorem\n");
-   }
+    {
+      lerr("ERROR: oversized quotient in quorem\n");
+    }
 #endif
 
   if (q)
     {
       borrow = 0;
       carry = 0;
+
       do
         {
 #ifdef Pack_32
@@ -912,6 +916,7 @@ static int quorem(Bigint * b, Bigint * S)
           b->wds = n;
         }
     }
+
   if (cmp(b, S) >= 0)
     {
       q++;
@@ -919,6 +924,7 @@ static int quorem(Bigint * b, Bigint * S)
       carry = 0;
       bx = b->x;
       sx = S->x;
+
       do
         {
 #ifdef Pack_32
@@ -943,6 +949,7 @@ static int quorem(Bigint * b, Bigint * S)
 #endif
         }
       while (sx <= sxe);
+
       bx = b->x;
       bxe = bx + n;
       if (!*bxe)
