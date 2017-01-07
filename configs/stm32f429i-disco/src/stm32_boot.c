@@ -52,6 +52,77 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
+/* Configuration ********************************************************************/
+/* Should we initialize the NX server using nx_start?  This is done for NxWidgets
+ * (CONFIG_NXWIDGETS=y) and if the NxWidget::CNxServer class expects the RTOS do the
+ * the NX initialization (CONFIG_NXWIDGET_SERVERINIT=n).  This combination of
+ * settings is normally only used in the kernel build mode* (CONFIG_BUILD_PROTECTED)
+ * when NxWidgets is unable to initialize NX from user-space.
+ */
+
+#undef HAVE_NXSTART
+
+#if !defined(CONFIG_NX_MULTIUSER)
+#  undef CONFIG_NX_START
+#endif
+
+#if defined(CONFIG_NXWIDGETS) && !defined(CONFIG_NXWIDGET_SERVERINIT)
+#   define HAVE_NXSTART
+#   include <nuttx/nx/nx.h>
+#endif
+/* Should we initialize the touchscreen for the NxWM (CONFIG_NXWM=y)?  This
+ * is done if we have a touchscreen (CONFIG_INPUT_STMPE811=y), NxWM uses the
+ * touchscreen (CONFIG_NXWM_TOUCHSCREEN=y), and if we were asked to
+ * initialize the touchscreen for NxWM (NXWM_TOUCHSCREEN_DEVINIT=n). This
+ * combination of settings is normally only used in the kernel build mode
+ * (CONFIG_BUILD_PROTECTED) when NxWidgets is unable to initialize NX from
+ * user-space.
+ */
+
+#undef HAVE_TCINIT
+
+#if defined(CONFIG_NXWM_TOUCHSCREEN)
+#  if !defined(CONFIG_NXWM_TOUCHSCREEN_DEVNO)
+#    error CONFIG_NXWM_TOUCHSCREEN_DEVNO is not defined
+#  elif defined(CONFIG_INPUT_STMPE811)
+#    if !defined(CONFIG_NXWM_TOUCHSCREEN_DEVINIT)
+#      define HAVE_TCINIT
+#      include <nuttx/input/touchscreen.h>
+#    endif
+#  else
+#    if !defined(CONFIG_NXWM_TOUCHSCREEN_DEVINIT) && defined(CONFIG_BUILD_PROTECTED)
+#      error CONFIG_INPUT_STMPE811=y is needed
+#    endif
+#  endif
+#endif
+
+/* Check if we will need to support the initialization kernel thread */
+
+#undef HAVE_INITTHREAD
+
+#ifdef CONFIG_BOARD_INITIALIZE
+#  if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_LIB_BOARDCTL)
+#    define HAVE_INITTHREAD 1
+#  elif defined(HAVE_NXSTART)
+#    define HAVE_INITTHREAD 1
+#  elif defined(HAVE_TCINIT)
+#    define HAVE_INITTHREAD 1
+#  endif
+#endif
+
+#ifdef HAVE_INITTHREAD
+#  include <stdlib.h>
+#  include <assert.h>
+#  include <nuttx/kthread.h>
+#  ifndef CONFIG_STM32F429I_DISCO_BOARDINIT_PRIO
+#    define CONFIG_STM32F429I_DISCO_BOARDINIT_PRIO 196
+#  endif
+#  ifndef CONFIG_STM32F429I_DISCO_BOARDINIT_STACK
+#    define CONFIG_STM32F429I_DISCO_BOARDINIT_STACK 2048
+#  endif
+#endif
+
+
 /************************************************************************************
  * Private Functions
  ************************************************************************************/
@@ -131,6 +202,17 @@ void stm32_boardinitialize(void)
 #ifdef CONFIG_BOARD_INITIALIZE
 void board_initialize(void)
 {
+#ifdef HAVE_INITTHREAD
+  pid_t server;
+
+  /* Start the board initialization kernel thread */
+
+  server = kernel_thread("Board Init", CONFIG_STM32F429I_DISCO_BOARDINIT_PRIO,
+                         CONFIG_STM32F429I_DISCO_BOARDINIT_STACK, board_initthread,
+                         NULL);
+  ASSERT(server > 0);
+#endif
+
 #ifdef CONFIG_STM32F429I_DISCO_ILI9341_FBIFACE
   /* Initialize the framebuffer driver */
 
