@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated January 6, 2017)
+NuttX TODO List (Last updated January 7, 2017)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -24,7 +24,7 @@ nuttx/:
   (0)  Other drivers (drivers/)
  (12)  Libraries (libc/, libm/)
  (11)  File system/Generic drivers (fs/, drivers/)
-  (8)  Graphics Subsystem (graphics/)
+  (9)  Graphics Subsystem (graphics/)
   (2)  Build system / Toolchains
   (3)  Linux/Cywgin simulation (arch/sim)
   (4)  ARM (arch/arm/)
@@ -1745,6 +1745,35 @@ o Graphics Subsystem (graphics/)
   Status:      Open
   Priority:    Low, not a serious issue but worth noting.  There is no plan
                to change this behavior.
+
+  Title:       REMOVE SINGLE USER MODE
+  Description: NX graphics supports two modes:  A simple single user mode and
+               more complex multi-user mode selected with CONFIG_NX_MULTIUSER=y.
+               In this configuration, an application can start the NX server
+               with boardctrl(BOARDIOC_NX_START);  After that, all graphic
+               interactions are via a thin layer in libnx/.   The OS
+               interface is only via messages sent and received using POSIX
+               message queues.  So this is good code and respects all of the
+               POSIX interfacing rules.
+
+               But without CONFIG_NX_MULTIUSER, the single user applications
+               violate all of the rules and call internal NX functions
+               directly.  This includes all calls to internal OSfunctions
+               with names like, nx_open, up_fbinitialize, board_lcd_*, and
+               others
+
+               The single user mode does have some desirable properties:  It
+               is lighter weight and so more suitable for very resource limited
+               platforms.  But I think that in the long run the only reasonable
+               solution is to eliminate the single user mode and provide only
+               the multi-user mode with the message queue interface.
+  Status:      Open
+  Priority:    Low, not a serious issue but worth noting.  Single user
+               mode is a blemish on the OS and not compatible with the RTOS
+               roadmap.  But neither is there any critical necessity to
+               remove the offending code immediately.  Be aware:  If you use
+               the single user mode, it will be yanked out from under your
+               feet in the not-so-distant future.
 
 o Build system
   ^^^^^^^^^^^^

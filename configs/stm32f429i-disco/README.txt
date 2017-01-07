@@ -148,11 +148,15 @@ UART7
    with care (See table 6 in the STM32F429I-DISCO User Guide for a list of free
    I/O pins on the board).
 
-Default USART/UART Configuration
---------------------------------
+Default Serial Console
+----------------------
 
-USART1 is enabled in all configurations (see */defconfig).  RX and TX are
-configured on pins PA10 and PA9, respectively (see include/board.h).
+USART1 is enabled as the serial console in all configurations (see */defconfig).
+USART1 RX and TX are configured on pins PA10 and PA9, respectively (see
+include/board.h).
+
+If solder bridges SB11 and SB12 are closed, then USART1 will be connected to
+the ST-Link and should be available over USB as a virtual COM interface.
 
 Timer Inputs/Outputs
 ====================
