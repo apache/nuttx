@@ -57,7 +57,8 @@ Setup and Programming Flash
 ===========================
 
 I use a USB cable to power and program it.  And I use a USB/Serial
-connected to pins PA9 and PA10 for the serial console.
+connected to pins PA9 and PA10 for the serial console (See the section
+"UARTs" below).
 
 FLASH may be programmed:
 
@@ -101,8 +102,8 @@ UARTs
 =====
 
 On the STM32F429I-DISCO board, because of pin mappings to support the
-onboard SDRAM and LCD, the only UARTs that has both RX and TX pins
-avilalbe are USART1 and UART5.  Other USARTS could be used for RX or TX
+onboard SDRAM and LCD, the only UARTs that have both RX and TX pins
+available are USART1 and UART5.  Other USARTS could be used for RX or TX
 only, or they could be used for full-duplex if the other pin functions
 aren't being used (i.e. LCD or SDRAM).
 
@@ -110,38 +111,38 @@ UART/USART PINS
 ---------------
 
 USART1
-  CK      PA8
+  CK      PA8*
   CTS     PA11*
   RTS     PA12*
-  RX      PA10*, PB7*
-  TX      PA9*, PB6*
+  RX      PA10, PB7
+  TX      PA9, PB6*
 USART2
   CK      PA4*, PD7
-  CTS     PA0*, PD3
-  RTS     PA1, PD4*
-  RX      PA3, PD6
-  TX      PA2, PD5*
+  CTS     PA0*, PD3*
+  RTS     PA1*, PD4
+  RX      PA3*, PD6*
+  TX      PA2*, PD5
 USART3
-  CK      PB12, PC12*, PD10
-  CTS     PB13, PD11
-  RTS     PB14, PD12*
-  RX      PB11, PC11, PD9
-  TX      PB10*, PC10*, PD8
+  CK      PB12*, PC12, PD10*
+  CTS     PB13*, PD11*
+  RTS     PB14*, PD12*
+  RX      PB11*, PC11, PD9*
+  TX      PB10*, PC10*, PD8*
 UART4
-  RX      PA1, PC11
+  RX      PA1*, PC11
   TX      PA0*, PC10*
 UART5
   RX      PD2
-  TX      PC12*
+  TX      PC12
 USART6
   CK      PC8, PG7*
   CTS     PG13*, PG15*
   RTS     PG12*, PG8*
-  RX      PC7*, PG9*
-  TX      PC6, PG14*
+  RX      PC7*, PG9
+  TX      PC6*, PG14*
 UART7
-  RX      PE7*,PF6*
-  TX      PE8*,PF7*
+  RX      PE7*, PF6
+  TX      PE8*, PF7*
 
  * Indicates pins that have other on-board functions and should be used only
    with care (See table 6 in the STM32F429I-DISCO User Guide for a list of free
@@ -203,7 +204,7 @@ TIM14
 
  * Indicates pins that have other on-board functions and should be used only
    with care (See table 5 in the STM32F429I-DISCO User Guide).  The rest are
-   free I/O pins.
+   free I/O pins (This need to be updated.  They are incorrect!)
 ** Port H pins are not supported by the MCU
 
 FPU
