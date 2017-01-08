@@ -983,6 +983,13 @@ Where <subdir> is one of the following:
        $ cd ~/nuttx-code/nuttx
        $ make
 
+    STATUS:
+      17-01-08:  There are instabilities in this configuration that make it
+      not usable on this platform.  While the equivalent configuration works
+      on other platforms, this one does not:  The calculator display does
+      not form properly.  There are fails in the NxTerm display, usually around
+      the point where the display should scroll up.
+
   usbnsh:
   ------
 
