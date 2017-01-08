@@ -991,7 +991,8 @@ Where <subdir> is one of the following:
       the point where the display should scroll up.
 
       Update:  With all optimizations disabled, the issue seems to go away.
-      So this is most likely due to using a bleeding edge GCC tool.
+      So this is most likely due to using high levels of optimization with a
+      bleeding edge GCC toolchain.
 
   usbnsh:
   ------

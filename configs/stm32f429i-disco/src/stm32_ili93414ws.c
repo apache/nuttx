@@ -157,8 +157,7 @@ struct ili93414ws_lcd_s
 #endif
 
 #ifndef CONFIG_STM32F429I_DISCO_ILI9341_SPIBITS16
-  /*
-   * Marks current display operation mode (gram or command/parameter)
+  /* Marks current display operation mode (gram or command/parameter)
    * If 16-bit spi mode is enabled for pixel data operation, the flag is not
    * neccessary. The pixel data operation mode can then be recognized by the
    * DFF flag in the cr1 register.
@@ -168,39 +167,38 @@ struct ili93414ws_lcd_s
 #endif
 };
 
-
 /****************************************************************************
  * Private Function Protototypes
  ****************************************************************************/
 
 /* Low-level spi transfer */
 
-static void stm32_ili93414ws_modifyreg(
-                uint32_t reg, uint16_t setbits, uint16_t clrbits);
-static inline void stm32_ili93414ws_modifycr1(
-                      uint16_t setbits, uint16_t clrbits);
-static inline void stm32_ili93414ws_modifycr2(
-                      uint16_t setbits, uint16_t clrbits);
+static void stm32_ili93414ws_modifyreg(uint32_t reg, uint16_t setbits,
+              uint16_t clrbits);
+static inline void stm32_ili93414ws_modifycr1(uint16_t setbits,
+              uint16_t clrbits);
+static inline void stm32_ili93414ws_modifycr2(uint16_t setbits,
+              uint16_t clrbits);
 static void stm32_ili93414ws_spisendmode(void);
 static void stm32_ili93414ws_spirecvmode(void);
 static void stm32_ili93414ws_spienable(void);
 static void stm32_ili93414ws_spidisable(void);
 
 static inline void stm32_ili93414ws_set8bitmode(
-                        FAR struct ili93414ws_lcd_s *dev);
+              FAR struct ili93414ws_lcd_s *dev);
 static inline void stm32_ili93414ws_set16bitmode(
-                        FAR struct ili93414ws_lcd_s *dev);
+              FAR struct ili93414ws_lcd_s *dev);
 
 /* Command and data transmission control */
 
 static void stm32_ili93414ws_sndword(uint16_t wd);
 static int stm32_ili93414ws_sendblock(FAR struct ili93414ws_lcd_s *lcd,
-                                const uint16_t *wd, uint16_t nwords);
+              const uint16_t *wd, uint16_t nwords);
 static uint16_t stm32_ili93414ws_recvword(void);
 static int stm32_ili93414ws_recvblock(FAR struct ili93414ws_lcd_s *lcd,
-                                uint16_t *wd, uint16_t nwords);
+              uint16_t *wd, uint16_t nwords);
 static inline void stm32_ili93414ws_cmddata(
-                        FAR struct ili9341_lcd_s *lcd, bool cmd);
+              FAR struct ili9341_lcd_s *lcd, bool cmd);
 
 /* Initializing / Configuration */
 
@@ -232,16 +230,16 @@ struct ili93414ws_lcd_s g_lcddev;
  *
  ****************************************************************************/
 
-static void stm32_ili93414ws_modifyreg(
-                uint32_t reg, uint16_t setbits, uint16_t clrbits)
+static void stm32_ili93414ws_modifyreg(uint32_t reg, uint16_t setbits,
+                                       uint16_t clrbits)
 {
   uint16_t regval;
-  regval = getreg16(reg);
+
+  regval  = getreg16(reg);
   regval &= ~clrbits;
   regval |= setbits;
   putreg16(regval, reg);
 }
-
 
 /****************************************************************************
  * Name: stm32_ili93414ws_modifycr1
@@ -254,10 +252,12 @@ static void stm32_ili93414ws_modifyreg(
  *   setbits - The bits to set
  *
  * Returned Value:
+ *   None
  *
  ****************************************************************************/
 
-static inline void stm32_ili93414ws_modifycr1(uint16_t setbits, uint16_t clrbits)
+static inline void stm32_ili93414ws_modifycr1(uint16_t setbits,
+                                              uint16_t clrbits)
 {
   stm32_ili93414ws_modifyreg(ILI93414WS_SPI_CR1, setbits, clrbits);
 }
@@ -273,14 +273,15 @@ static inline void stm32_ili93414ws_modifycr1(uint16_t setbits, uint16_t clrbits
  *   setbits - The bits to set
  *
  * Returned Value:
+ *   None
  *
  ****************************************************************************/
 
-static inline void stm32_ili93414ws_modifycr2(uint16_t setbits, uint16_t clrbits)
+static inline void stm32_ili93414ws_modifycr2(uint16_t setbits,
+                                              uint16_t clrbits)
 {
   stm32_ili93414ws_modifyreg(ILI93414WS_SPI_CR2, setbits, clrbits);
 }
-
 
 /****************************************************************************
  * Name: stm32_ili93414ws_spirecvmode
@@ -304,14 +305,12 @@ static void stm32_ili93414ws_spirecvmode(void)
 
   stm32_ili93414ws_spidisable();
 
-  /*
-   * Clear the rx buffer if received data exist e.g. from previous
+  /* Clear the rx buffer if received data exist e.g. from previous
    * broken transfer.
    */
 
   (void)getreg16(ILI93414WS_SPI_DR);
 }
-
 
 /****************************************************************************
  * Name: stm32_ili93414ws_spisendmode
@@ -320,8 +319,10 @@ static void stm32_ili93414ws_spirecvmode(void)
  *   Sets the spi device to the bidirectional transmit mode
  *
  * Input Parameters:
+ *   None
  *
  * Returned Value:
+ *   None
  *
  ****************************************************************************/
 
@@ -336,7 +337,6 @@ static void stm32_ili93414ws_spisendmode(void)
   stm32_ili93414ws_spienable();
 }
 
-
 /****************************************************************************
  * Name: stm32_ili93414ws_spienable
  *
@@ -344,8 +344,10 @@ static void stm32_ili93414ws_spisendmode(void)
  *   Enable the spi device
  *
  * Input Parameters:
+ *   None
  *
  * Returned Value:
+ *   None
  *
  ****************************************************************************/
 
@@ -358,7 +360,6 @@ static void stm32_ili93414ws_spienable(void)
   putreg16(regval, ILI93414WS_SPI_CR1);
 }
 
-
 /****************************************************************************
  * Name: stm32_ili93414ws_spidisable
  *
@@ -366,8 +367,10 @@ static void stm32_ili93414ws_spienable(void)
  *   Disable the spi device
  *
  * Input Parameters:
+ *   None
  *
  * Returned Value:
+ *   None
  *
  ****************************************************************************/
 
@@ -380,7 +383,6 @@ static void stm32_ili93414ws_spidisable(void)
   putreg16(regval, ILI93414WS_SPI_CR1);
 }
 
-
 /****************************************************************************
  * Name: stm32_ili93414ws_sndword
  *
@@ -391,6 +393,7 @@ static void stm32_ili93414ws_spidisable(void)
  *   wd  - word to send
  *
  * Returned Value:
+ *   None
  *
  ****************************************************************************/
 
@@ -422,13 +425,14 @@ static void stm32_ili93414ws_sndword(uint16_t wd)
  ****************************************************************************/
 
 static int stm32_ili93414ws_sendblock(FAR struct ili93414ws_lcd_s *lcd,
-                                const uint16_t *wd, uint16_t nwords)
+                                      const uint16_t *wd, uint16_t nwords)
 {
   /* Set to bidirectional transmit mode and enable spi */
 
   stm32_ili93414ws_spisendmode();
 
   /* Check if 16-bit spi mode is configured for transmit */
+
 #ifdef CONFIG_STM32F429I_DISCO_ILI9341_SPIBITS16
   if ((getreg16(ILI93414WS_SPI_CR1) & SPI_CR1_DFF) != 0)
     {
@@ -444,10 +448,10 @@ static int stm32_ili93414ws_sendblock(FAR struct ili93414ws_lcd_s *lcd,
         }
     }
 #else
-  /*
-   * 8-bit spi mode is enabled for pixel data operations.
+  /* 8-bit spi mode is enabled for pixel data operations.
    * Each pixel must be transmitted by two write operations.
    */
+
   if (lcd->gmode == 16)
     {
       /* 8-bit spi mode */
@@ -478,8 +482,7 @@ static int stm32_ili93414ws_sendblock(FAR struct ili93414ws_lcd_s *lcd,
 
     }
 
-  /*
-   * Wait until transmit is not busy after the last word is transmitted, marked
+  /* Wait until transmit is not busy after the last word is transmitted, marked
    * by the BSY flag in the cr1 register. This is neccessary if entering in halt
    * mode or disable the spi periphery.
    */
@@ -500,6 +503,7 @@ static int stm32_ili93414ws_sendblock(FAR struct ili93414ws_lcd_s *lcd,
  *   Receive a word from the lcd driver.
  *
  * Input Parameters:
+ *   None
  *
  * Returned Value:
  *   On success - The received word from the LCD Single Chip Driver.
@@ -513,8 +517,7 @@ static uint16_t stm32_ili93414ws_recvword(void)
           uint16_t   regval;
         irqstate_t   flags;
 
-  /*
-   * Disable interrupts during time critical spi sequence.
+  /* Disable interrupts during time critical spi sequence.
    * In bidrectional receive mode the data transfer can only be stopped by
    * disabling the spi device. This is here done by disabling the spi device
    * immediately after enabling it. If the pixel data stream is interrupted
@@ -533,8 +536,7 @@ static uint16_t stm32_ili93414ws_recvword(void)
 
   regval = getreg16(ILI93414WS_SPI_CR1);
 
-  /*
-   * Enable spi device followed by disable the spi device.
+  /* Enable spi device followed by disable the spi device.
    *
    * Ensure that the spi is disabled within 8 or 16 spi clock cycles depending
    * on the configured spi bit mode. This is neccessary to prevent that the next
@@ -557,8 +559,7 @@ static uint16_t stm32_ili93414ws_recvword(void)
 
   leave_critical_section(flags);
 
-  /*
-   * Waits until the RX buffer is filled with the received data word signalized
+  /* Waits until the RX buffer is filled with the received data word signalized
    * by the spi hardware through the RXNE flag.
    * A busy loop is preferred against interrupt driven receiving method here
    * because this happend fairly often. Also we have to ensure to avoid a big
@@ -581,7 +582,6 @@ static uint16_t stm32_ili93414ws_recvword(void)
   return 0;
 }
 
-
 /****************************************************************************
  * Name: stm32_ili93414ws_recvblock
  *
@@ -602,8 +602,7 @@ static uint16_t stm32_ili93414ws_recvword(void)
 static int stm32_ili93414ws_recvblock(FAR struct ili93414ws_lcd_s *lcd,
                                 uint16_t *wd, uint16_t nwords)
 {
-  /*
-   * ili9341 uses a 18-bit pixel format packed in a 24-bit stream per pixel.
+  /* ili9341 uses a 18-bit pixel format packed in a 24-bit stream per pixel.
    * The following format is transmitted: RRRRRR00 GGGGGG00 BBBBBB00
    * Convert it to:                       RRRRRGGG GGGBBBBB
    */
@@ -644,8 +643,7 @@ static int stm32_ili93414ws_recvblock(FAR struct ili93414ws_lcd_s *lcd,
           --nwords;
         }
 
-      /*
-       * Receive
+      /* Receive
        * if nwords even and greater than 2: pixel 2 to n-1
        * if nwords odd and greater than 2:  pixel 2 to n
        */
@@ -653,9 +651,11 @@ static int stm32_ili93414ws_recvblock(FAR struct ili93414ws_lcd_s *lcd,
       while (nwords--)
         {
           /* RRRRRR00 GGGGGG00 */
+
           w1 = stm32_ili93414ws_recvword();
 
           /* BBBBBB00 RRRRRR00 */
+
           w2 = stm32_ili93414ws_recvword();
 
           *dest++ = ((w1 & 0xf800) | ((w1 << 3) & 0x7e0) | (w2 >> 11));
@@ -666,6 +666,7 @@ static int stm32_ili93414ws_recvblock(FAR struct ili93414ws_lcd_s *lcd,
             }
 
           /* GGGGGG00 BBBBBB00 */
+
           w1 = stm32_ili93414ws_recvword();
 
           *dest++ = (((w1 >> 5) & 0x7e0) |
@@ -676,16 +677,18 @@ static int stm32_ili93414ws_recvblock(FAR struct ili93414ws_lcd_s *lcd,
         }
     }
 #else
-  /*
-   * 8-bit spi mode is enabled for pixel data operations.
+  /* 8-bit spi mode is enabled for pixel data operations.
    * Each pixel must be received by three read operations.
    */
+
   if (lcd->gmode == 16)
     {
       /* 8-bit spi mode but 16-bit mode is done by two 8-bit transmits */
+
       uint16_t *dest = wd;
 
       /* Dummy read to discard the first 8 bit. */
+
       (void)stm32_ili93414ws_recvword();
 
       while (nwords--)
@@ -715,7 +718,6 @@ static int stm32_ili93414ws_recvblock(FAR struct ili93414ws_lcd_s *lcd,
   return OK;
 }
 
-
 /****************************************************************************
  * Name: stm32_ili93414ws_set8bitmode
  *
@@ -726,6 +728,7 @@ static int stm32_ili93414ws_recvblock(FAR struct ili93414ws_lcd_s *lcd,
  *   dev  - Reference to the private driver structure
  *
  * Returned Value:
+ *   None
  *
  ****************************************************************************/
 
@@ -738,7 +741,6 @@ static inline void stm32_ili93414ws_set8bitmode(
 #endif
 }
 
-
 #ifdef CONFIG_STM32F429I_DISCO_ILI9341_SPIBITS16
 /****************************************************************************
  * Name: stm32_ili93414ws_set16bitmode
@@ -750,6 +752,7 @@ static inline void stm32_ili93414ws_set8bitmode(
  *   dev  - Reference to the private driver structure
  *
  * Returned Value:
+ *   None
  *
  ****************************************************************************/
 
@@ -767,7 +770,6 @@ static inline void stm32_ili93414ws_set16bitmode(
 }
 #endif
 
-
 /****************************************************************************
  * Name: stm32_ili93414ws_spiconfig
  *
@@ -778,6 +780,7 @@ static inline void stm32_ili93414ws_set16bitmode(
  *   lcd  - Reference to the private driver structure
  *
  * Returned Value:
+ *   None
  *
  ****************************************************************************/
 
@@ -819,8 +822,7 @@ static void stm32_ili93414ws_spiconfig(FAR struct ili9341_lcd_s *lcd)
   priv->cr1 = getreg16(ILI93414WS_SPI_CR1);
 #endif
 
-  /*
-   * Set spi device to bidirectional half duplex
+  /* Set spi device to bidirectional half duplex
    * Configure to master with 8-bit data format and SPIDEV_MODE0
    */
 
@@ -887,7 +889,6 @@ static int stm32_ili93414ws_backlight(FAR struct ili9341_lcd_s *lcd, int level)
   return OK;
 }
 
-
 /****************************************************************************
  * Name: stm32_ili93414ws_select
  *
@@ -906,8 +907,7 @@ static void stm32_ili93414ws_select(FAR struct ili9341_lcd_s *lcd)
 {
   FAR struct ili93414ws_lcd_s *priv = (FAR struct ili93414ws_lcd_s *)lcd;
 
-  /*
-   * Select ili9341 (locking the SPI bus in case there are multiple
+  /* Select ili9341 (locking the SPI bus in case there are multiple
    * devices competing for the SPI bus
    */
 
@@ -921,7 +921,7 @@ static void stm32_ili93414ws_select(FAR struct ili9341_lcd_s *lcd)
 #else
 static void stm32_ili93414ws_select(FAR struct ili9341_lcd_s *lcd)
 {
-  /* we own the spi bus, so just select the chip */
+  /* We own the spi bus, so just select the chip */
 
   (void)stm32_gpiowrite(GPIO_CS_LCD, false);
 
@@ -952,8 +952,7 @@ static void stm32_ili93414ws_deselect(FAR struct ili9341_lcd_s *lcd)
 
   flags = enter_critical_section();
 
-  /*
-   * Restore cr1 and cr2 register to be sure they will be usable
+  /* Restore cr1 and cr2 register to be sure they will be usable
    * by default spi interface structure. (This is an important workarround as
    * long as half duplex mode is not supported by the spi interface in
    * arch/arm/src/stm32/stm32_spi.c).
@@ -962,8 +961,7 @@ static void stm32_ili93414ws_deselect(FAR struct ili9341_lcd_s *lcd)
   putreg16(priv->cr2, ILI93414WS_SPI_CR2);
   putreg16(priv->cr1, ILI93414WS_SPI_CR1);
 
-  /*
-   * Enable spi device is default for initialized spi ports (see
+  /* Enable spi device is default for initialized spi ports (see
    * arch/arm/src/stm32/stm32_spi.c).
    */
 
@@ -982,7 +980,6 @@ static void stm32_ili93414ws_deselect(FAR struct ili9341_lcd_s *lcd)
   (void)stm32_gpiowrite(GPIO_CS_LCD, true);
 }
 #endif
-
 
 /****************************************************************************
  * Name: stm32_ili93414ws_sndcmd
@@ -1018,7 +1015,6 @@ static int stm32_ili93414ws_sendcmd(
   return ret;
 }
 
-
 /****************************************************************************
  * Name: stm32_ili93414ws_sendparam
  *
@@ -1047,7 +1043,6 @@ static int stm32_ili93414ws_sendparam(FAR struct ili9341_lcd_s *lcd,
   lcdinfo("param=%04x\n", bw);
   return stm32_ili93414ws_sendblock(priv, &bw, 1);
 }
-
 
 /****************************************************************************
  * Name: stm32_ili93414ws_sendgram
@@ -1079,7 +1074,6 @@ static int stm32_ili93414ws_sendgram(FAR struct ili9341_lcd_s *lcd,
   return stm32_ili93414ws_sendblock(priv, wd, nwords);
 };
 
-
 /****************************************************************************
  * Name: stm32_ili93414ws_recvparam
  *
@@ -1110,7 +1104,6 @@ static int stm32_ili93414ws_recvparam(FAR struct ili9341_lcd_s *lcd,
   return stm32_ili93414ws_recvblock(priv, (uint16_t*)param, 1);
 }
 
-
 /****************************************************************************
  * Name: stm32_ili93414ws_recvgram
  *
@@ -1140,7 +1133,6 @@ static int stm32_ili93414ws_recvgram(FAR struct ili9341_lcd_s *lcd,
 
   return stm32_ili93414ws_recvblock(priv, wd, nwords);
 };
-
 
 /****************************************************************************
  * Name:  stm32_ili93414ws_initialize
