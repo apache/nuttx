@@ -990,6 +990,9 @@ Where <subdir> is one of the following:
       not form properly.  There are fails in the NxTerm display, usually around
       the point where the display should scroll up.
 
+      Update:  With all optimizations disabled, the issue seems to go away.
+      So this is most likely due to using a bleeding edge GCC tool.
+
   usbnsh:
   ------
 

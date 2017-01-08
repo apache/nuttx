@@ -200,7 +200,8 @@ void nxterm_scroll(FAR struct nxterm_state_s *priv, int scrollheight)
 
           for (j = i; j < priv->nchars-1; j++)
             {
-              memcpy(&priv->bm[j], &priv->bm[j+1], sizeof(struct nxterm_bitmap_s));
+              memcpy(&priv->bm[j], &priv->bm[j+1],
+                     sizeof(struct nxterm_bitmap_s));
             }
 
           /* Decrement the number of cached characters ('i' is not incremented
