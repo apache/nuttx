@@ -65,6 +65,7 @@
  *   we can read the displays framebuffer memory, then the job is pretty
  *   easy.  However, many displays (such as SPI-based LCDs) are often read-
  *   only.
+ *
  ****************************************************************************/
 
 #ifdef CONFIG_NX_WRITEONLY
