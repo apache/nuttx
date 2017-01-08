@@ -64,7 +64,7 @@
 
 /* Default server MQ name used by nx_run() macro */
 
-#define NX_DEFAULT_SERVER_MQNAME "/dev/nxs"
+#define NX_DEFAULT_SERVER_MQNAME "nxs"
 
 /* Mouse button bits */
 
