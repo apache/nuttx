@@ -119,7 +119,7 @@
  * Public Types
  ****************************************************************************/
 
-struct pn532_frame
+begin_packed_struct struct pn532_frame
 {
   uint8_t  preamble;    /* 0x00 */
   uint16_t start_code;  /* 0x00FF (BE) -> 0xFF00 (LE) */
@@ -130,22 +130,22 @@ struct pn532_frame
   uint8_t  tfi;         /* Frame idenfifier 0xD4, 0xD5 */
   uint8_t  data[];      /* LEN-1 bytes of Packet Data Information.
                          * The first byte PD0 is the Command Code */
-} packed_struct;
+} end_packed_struct;
 
-struct pn_poll_response
+begin_packed_struct struct pn_poll_response
 {
   uint8_t nbtg;
   uint8_t tg;
   uint8_t target_data[];
-} packed_struct;
+} end_packed_struct;
 
-struct pn_target_type_a
+begin_packed_struct struct pn_target_type_a
 {
   uint16_t sens_res;
   uint8_t  sel_res;
   uint8_t  nfcid_len;
   uint8_t  nfcid_data[];
-} packed_struct;
+} end_packed_struct;
 
 struct pn_firmware_version
 {

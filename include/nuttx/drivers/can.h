@@ -1,7 +1,7 @@
 /************************************************************************************
  * include/nuttx/drivers/can.h
  *
- *   Copyright (C) 2008, 2009, 2011-2012, 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2009, 2011-2012, 2015-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -388,7 +388,7 @@
  */
 
 #ifdef CONFIG_CAN_EXTID
-struct can_hdr_s
+begin_packed_struct struct can_hdr_s
 {
   uint32_t     ch_id;         /* 11- or 29-bit ID (20- or 3-bits unused) */
   uint8_t      ch_dlc    : 4; /* 4-bit DLC */
@@ -398,9 +398,9 @@ struct can_hdr_s
 #endif
   uint8_t      ch_extid  : 1; /* Extended ID indication */
   uint8_t      ch_unused : 1; /* Unused */
-} packed_struct;
+} end_packed_struct;
 #else
-struct can_hdr_s
+begin_packed_struct struct can_hdr_s
 {
   uint16_t     ch_id;         /* 11-bit standard ID (5-bits unused) */
   uint8_t      ch_dlc    : 4; /* 4-bit DLC.  May be encoded in CAN_FD mode. */
@@ -409,14 +409,14 @@ struct can_hdr_s
   uint8_t      ch_error  : 1; /* 1=ch_id is an error report */
 #endif
   uint8_t      ch_unused : 2; /* Unused */
-} packed_struct;
+} end_packed_struct;
 #endif
 
-struct can_msg_s
+begin_packed_struct struct can_msg_s
 {
   struct can_hdr_s cm_hdr;                  /* The CAN header */
   uint8_t          cm_data[CAN_MAXDATALEN]; /* CAN message data (0-8 byte) */
-} packed_struct;
+} end_packed_struct;
 
 /* This structure defines a CAN message FIFO. */
 
