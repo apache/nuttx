@@ -931,57 +931,63 @@ Where <subdir> is one of the following:
   nxwm
   ----
     This is a special configuration setup for the NxWM window manager
-    UnitTest.  The NxWM window manager can be found here:
+    UnitTest.
 
-      nuttx-code/NxWidgets/nxwm
+    NOTES:
+    1. The NxWM window manager can be found here:
 
-    The NxWM unit test can be found at:
+         nuttx-code/NxWidgets/nxwm
 
-      nuttx-code/NxWidgets/UnitTests/nxwm
+       The NxWM unit test can be found at:
 
-    Documentation for installing the NxWM unit test can be found here:
+         nuttx-code/NxWidgets/UnitTests/nxwm
 
-      nuttx-code/NxWidgets/UnitTests/README.txt
+       Documentation for installing the NxWM unit test can be found here:
 
-    Here is the quick summary of the build steps (Assuming that all of
-    the required packages are available in a directory ~/nuttx-code):
+         nuttx-code/NxWidgets/UnitTests/README.txt
 
-    1. Install the nxwm configuration
+    2. Here is the quick summary of the build steps (Assuming that all of
+       the required packages are available in a directory ~/nuttx-code):
 
-       $ cd ~/nuttx-code/nuttx/tools
-       $ ./configure.sh stm32f429i-disco/nxwm
+       1. Install the nxwm configuration
 
-    2. Make the build context (only)
+          $ cd ~/nuttx-code/nuttx/tools
+          $ ./configure.sh stm32f429i-disco/nxwm
 
-       $ cd ..
-       $ . ./setenv.sh
-       $ make context
-       ...
+       2. Make the build context (only)
 
-    3. Install the nxwm unit test
+          $ cd ..
+          $ . ./setenv.sh
+          $ make context
+          ...
 
-       $ cd ~/nuttx-code/NxWidgets
-       $ tools/install.sh ~/nuttx-code/apps nxwm
-       Creating symbolic link
+       3. Install the nxwm unit test
+
+          $ cd ~/nuttx-code/NxWidgets
+          $ tools/install.sh ~/nuttx-code/apps nxwm
+          Creating symbolic link
         - To ~/nuttx-code/NxWidgets/UnitTests/nxwm
         - At ~/nuttx-code/apps/external
 
-    4. Build the NxWidgets library
+       4. Build the NxWidgets library
 
-       $ cd ~/nuttx-code/NxWidgets/libnxwidgets
-       $ make TOPDIR=~/nuttx-code/nuttx
-       ...
+          $ cd ~/nuttx-code/NxWidgets/libnxwidgets
+          $ make TOPDIR=~/nuttx-code/nuttx
+         ...
 
-    5. Build the NxWM library
+       5. Build the NxWM library
 
-       $ cd ~/nuttx-code/NxWidgets/nxwm
-       $ make TOPDIR=~/nuttx-code/nuttx
-       ...
+          $ cd ~/nuttx-code/NxWidgets/nxwm
+          $ make TOPDIR=~/nuttx-code/nuttx
+          ...
 
-    6. Built NuttX with the installed unit test as the application
+       6. Built NuttX with the installed unit test as the application
 
-       $ cd ~/nuttx-code/nuttx
-       $ make
+          $ cd ~/nuttx-code/nuttx
+          $ make
+
+    3. Performance is not so good in this example configuration because it
+       uses the slower SPI interfaces.
 
     STATUS:
       17-01-08:  There are instabilities in this configuration that make it

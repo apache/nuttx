@@ -170,8 +170,7 @@
                                         ILI9341_MADCTL_LANDSCAPE_BGR | \
                                         ILI9341_MADCTL_LANDSCAPE_MH)
 
-/*
- * Portrait:    00000000 / 00001000 / h08
+/* Portrait:    00000000 / 00001000 / h08
  *
  * MY:          0
  * MX:          0
@@ -199,8 +198,7 @@
                                         ILI9341_MADCTL_PORTRAIT_BGR | \
                                         ILI9341_MADCTL_PORTRAIT_MH)
 
-/*
- * RLandscape:  01100000 / 01101000 / h68
+/* RLandscape:  01100000 / 01101000 / h68
  *
  * MY:          0
  * MX:          1
@@ -229,8 +227,7 @@
                                         ILI9341_MADCTL_RLANDSCAPE_BGR | \
                                         ILI9341_MADCTL_RLANDSCAPE_MH)
 
-/*
- * RPortrait:   11000000 / 11001000 / hc8
+/* RPortrait:   11000000 / 11001000 / hc8
  *
  * MY:          1
  * MX:          1
@@ -463,7 +460,6 @@ FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
   return NULL;
 }
 
-
 /************************************************************************************
  * Name: board_lcd_initialize
  *
@@ -494,8 +490,7 @@ int board_lcd_initialize(void)
 
       if (dev)
         {
-          /*
-           * Get a reference to valid lcd driver structure to avoid repeated
+          /* Get a reference to valid lcd driver structure to avoid repeated
            * initialization of the LCD Device. Also enables uninitializing of
            * the LCD Device.
            */
