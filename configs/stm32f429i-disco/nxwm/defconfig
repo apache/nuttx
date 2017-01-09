@@ -550,7 +550,7 @@ CONFIG_BOARD_LOOPSPERMSEC=16717
 # Interrupt options
 #
 CONFIG_ARCH_HAVE_INTERRUPTSTACK=y
-CONFIG_ARCH_INTERRUPTSTACK=0
+CONFIG_ARCH_INTERRUPTSTACK=2048
 CONFIG_ARCH_HAVE_HIPRI_INTERRUPT=y
 # CONFIG_ARCH_HIPRI_INTERRUPT is not set
 
@@ -1060,7 +1060,7 @@ CONFIG_NXTERM=y
 # NxTerm Output Text/Graphics Options
 #
 CONFIG_NXTERM_BPP=16
-CONFIG_NXTERM_CURSORCHAR=137
+CONFIG_NXTERM_CURSORCHAR=95
 CONFIG_NXTERM_MXCHARS=325
 CONFIG_NXTERM_CACHESIZE=32
 CONFIG_NXTERM_LINESEPARATION=0
@@ -1219,10 +1219,10 @@ CONFIG_BUILTIN_PROXY_STACKSIZE=1024
 # CONFIG_EXAMPLES_NRF24L01TERM is not set
 # CONFIG_EXAMPLES_NSH is not set
 # CONFIG_EXAMPLES_NULL is not set
+# CONFIG_EXAMPLES_NX is not set
 # CONFIG_EXAMPLES_NXFFS is not set
 # CONFIG_EXAMPLES_NXHELLO is not set
 # CONFIG_EXAMPLES_NXIMAGE is not set
-# CONFIG_EXAMPLES_NX is not set
 # CONFIG_EXAMPLES_NXLINES is not set
 # CONFIG_EXAMPLES_NXTERM is not set
 # CONFIG_EXAMPLES_NXTEXT is not set
@@ -1497,7 +1497,7 @@ CONFIG_NXWM_TASKBAR_LEFT=y
 CONFIG_NXWM_STARTWINDOW_VSPACING=4
 CONFIG_NXWM_STARTWINDOW_HSPACING=4
 # CONFIG_NXWM_CUSTOM_STARTWINDOW_ICON is not set
-CONFIG_NXWM_STARTWINDOW_MQNAME="/dev/nxwm"
+CONFIG_NXWM_STARTWINDOW_MQNAME="nxwm"
 CONFIG_NXWM_STARTWINDOW_MXMSGS=32
 CONFIG_NXWM_STARTWINDOW_MXMPRIO=42
 CONFIG_NXWM_STARTWINDOW_PRIO=100
@@ -1526,12 +1526,22 @@ CONFIG_NXWM_TOUCHSCREEN_DEVNO=0
 CONFIG_NXWM_TOUCHSCREEN_DEVPATH="/dev/input0"
 CONFIG_NXWM_TOUCHSCREEN_SIGNO=5
 CONFIG_NXWM_TOUCHSCREEN_LISTENERPRIO=120
-CONFIG_NXWM_TOUCHSCREEN_LISTENERSTACK=1024
+CONFIG_NXWM_TOUCHSCREEN_LISTENERSTACK=1596
 
 #
 # NxWM Keyboard Configuration
 #
-# CONFIG_NXWM_KEYBOARD is not set
+CONFIG_NXWM_KEYBOARD=y
+
+#
+# Keyboard Device Settings
+#
+CONFIG_NXWM_KEYBOARD_DEVPATH="/dev/console"
+# CONFIG_NXWM_KEYBOARD_USBHOST is not set
+CONFIG_NXWM_KEYBOARD_SIGNO=6
+CONFIG_NXWM_KEYBOARD_BUFSIZE=16
+CONFIG_NXWM_KEYBOARD_LISTENERPRIO=120
+CONFIG_NXWM_KEYBOARD_LISTENERSTACK=2048
 
 #
 # NxWM Calibration Display Settings
@@ -1552,90 +1562,6 @@ CONFIG_NXWM_CALIBRATION_LISTENERSTACK=2048
 # CONFIG_NXWM_CUSTOM_HEXCALCULATOR_ICON is not set
 CONFIG_NXWM_HEXCALCULATOR_CUSTOM_FONTID=y
 CONFIG_NXWM_HEXCALCULATOR_FONTID=5
-
-#
-# NxWM Media Player Display Settings
-#
-
-#
-# NxWidgets/NxWM
-#
-
-#
-# NX Server/Device Configuration
-#
-
-#
-# NXWidget Configuration
-#
-
-#
-# NXWidget Default Values
-#
-
-#
-# Keypad behavior
-#
-
-#
-# NxWM General Settings
-#
-
-#
-# Color configuration
-#
-
-#
-# Background Image
-#
-
-#
-# NxWM Taskbar Configuration
-#
-
-#
-# Horizontal and vertical spacing of icons in the task bar
-#
-
-#
-# NxWM Toolbar Configuration
-#
-
-#
-# NxWM Application Window Configuration
-#
-
-#
-# NxWM Start Window Configuration
-#
-
-#
-# Horizontal and vertical spacing of icons in the task bar
-#
-
-#
-# NxTerm Window Settings
-#
-
-#
-# NxWM Touchscreen Configuration
-#
-
-#
-# Touchscreen Device Settings
-#
-
-#
-# NxWM Keyboard Configuration
-#
-
-#
-# NxWM Calibration Display Settings
-#
-
-#
-# NxWM Hex Calculator Display Settings
-#
 
 #
 # NxWM Media Player Display Settings

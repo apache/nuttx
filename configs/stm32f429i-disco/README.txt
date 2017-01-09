@@ -71,11 +71,41 @@ FLASH may be programmed:
 
   - Via JTAG/SWD connected to the SWD connector CN2.
 
+    CN4 Jumpers.  Remove jumpers to enable signals at SWD connector CN2.
+
+    SWD 6-Pin STM32F429i-Discovery Connector CN2
+    Pin   Signal Name       Description
+    ----- ------ ---------- ------------------------------
+    Pin 1 AIN_1  VDD_TARGET VDD from application
+    Pin 2 T_JCLK SWCLK      SWD Clock
+    Pin 3 GND    GND        Ground
+    Pin 4 T_JTMS SWDIO      SWD data input/output
+    Pin 5 T_NRST NRST       Reset of target MCU
+    Pin 6 T_SWO  SWO        Reserved
+
+    SWD 20-pin J-Link Connector
+    Pin    Name      Type   Description
+    ------ --------- ------ ------------------------------
+    Pin  1 VTref     Input  Target reference voltage
+    Pin  2 Vsupply   NC     Not connected in J-Link
+    Pin  3 Not used  NC     Not used in J-Link
+    Pin  5 Not used  NC     Not used in J-Link
+    Pin  7 SWDIO     I/O    Bi-directional data pin
+    Pin  9 SWCLK     Output Clock signal to target CPU
+    Pin 11 Not used  NC     Not used in J-Link
+    Pin 13 SWO       Output Serial wire output trace port
+    Pin 15 RESET     I/O    Target CPU reset signal (nRST)
+    Pin 17 Not used  NC     Not connected in J-Link
+    Pin 19 5V-Supply Output Supplies power to some boards.
+
+    Pins 4, 45, 8, 10, 12, 14, 16, 18 and 20 are GND pins in J-Link.  They
+    should also be connected to ground in the target system.
+
 LEDs
 ====
 
-The STM32F429I-DISCO board has two user LEDs; green, and red on the board
-board. These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
+The STM32F429I-DISCO board has two user LEDs; green, and red on the board.
+These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
 defined.  In that case, the usage by the board port is defined in
 include/board.h and src/up_leds.c. The LEDs are used to encode OS-related
 events as follows:
@@ -148,11 +178,22 @@ UART7
    with care (See table 6 in the STM32F429I-DISCO User Guide for a list of free
    I/O pins on the board).
 
-Default USART/UART Configuration
---------------------------------
+Default Serial Console
+----------------------
 
-USART1 is enabled in all configurations (see */defconfig).  RX and TX are
-configured on pins PA10 and PA9, respectively (see include/board.h).
+USART1 is enabled as the serial console in all configurations (see */defconfig).
+USART1 RX and TX are configured on pins PA10 and PA9, respectively (see
+include/board.h).
+
+  Header 32X2 P1
+  --------------
+  Pin 1  5V
+  Pin 51 PA10
+  Pin 52 PA9
+  Pin 63 GND
+
+If solder bridges SB11 and SB12 are closed, then USART1 will be connected to
+the ST-Link and should be available over USB as a virtual COM interface.
 
 Timer Inputs/Outputs
 ====================
@@ -203,7 +244,7 @@ TIM14
   CH1     PA7*, PF9*
 
  * Indicates pins that have other on-board functions and should be used only
-   with care (See table 5 in the STM32F429I-DISCO User Guide).  The rest are
+   with care (See table 6 in the STM32F429I-DISCO User Guide).  The rest are
    free I/O pins (This need to be updated.  They are incorrect!)
 ** Port I pins are not supported by the MCU
 
@@ -890,57 +931,74 @@ Where <subdir> is one of the following:
   nxwm
   ----
     This is a special configuration setup for the NxWM window manager
-    UnitTest.  The NxWM window manager can be found here:
+    UnitTest.
 
-      nuttx-code/NxWidgets/nxwm
+    NOTES:
+    1. The NxWM window manager can be found here:
 
-    The NxWM unit test can be found at:
+         nuttx-code/NxWidgets/nxwm
 
-      nuttx-code/NxWidgets/UnitTests/nxwm
+       The NxWM unit test can be found at:
 
-    Documentation for installing the NxWM unit test can be found here:
+         nuttx-code/NxWidgets/UnitTests/nxwm
 
-      nuttx-code/NxWidgets/UnitTests/README.txt
+       Documentation for installing the NxWM unit test can be found here:
 
-    Here is the quick summary of the build steps (Assuming that all of
-    the required packages are available in a directory ~/nuttx-code):
+         nuttx-code/NxWidgets/UnitTests/README.txt
 
-    1. Install the nxwm configuration
+    2. Here is the quick summary of the build steps (Assuming that all of
+       the required packages are available in a directory ~/nuttx-code):
 
-       $ cd ~/nuttx-code/nuttx/tools
-       $ ./configure.sh stm32f429i-disco/nxwm
+       1. Install the nxwm configuration
 
-    2. Make the build context (only)
+          $ cd ~/nuttx-code/nuttx/tools
+          $ ./configure.sh stm32f429i-disco/nxwm
 
-       $ cd ..
-       $ . ./setenv.sh
-       $ make context
-       ...
+       2. Make the build context (only)
 
-    3. Install the nxwm unit test
+          $ cd ..
+          $ . ./setenv.sh
+          $ make context
+          ...
 
-       $ cd ~/nuttx-code/NxWidgets
-       $ tools/install.sh ~/nuttx-code/apps nxwm
-       Creating symbolic link
+       3. Install the nxwm unit test
+
+          $ cd ~/nuttx-code/NxWidgets
+          $ tools/install.sh ~/nuttx-code/apps nxwm
+          Creating symbolic link
         - To ~/nuttx-code/NxWidgets/UnitTests/nxwm
         - At ~/nuttx-code/apps/external
 
-    4. Build the NxWidgets library
+       4. Build the NxWidgets library
 
-       $ cd ~/nuttx-code/NxWidgets/libnxwidgets
-       $ make TOPDIR=~/nuttx-code/nuttx
-       ...
+          $ cd ~/nuttx-code/NxWidgets/libnxwidgets
+          $ make TOPDIR=~/nuttx-code/nuttx
+         ...
 
-    5. Build the NxWM library
+       5. Build the NxWM library
 
-       $ cd ~/nuttx-code/NxWidgets/nxwm
-       $ make TOPDIR=~/nuttx-code/nuttx
-       ...
+          $ cd ~/nuttx-code/NxWidgets/nxwm
+          $ make TOPDIR=~/nuttx-code/nuttx
+          ...
 
-    6. Built NuttX with the installed unit test as the application
+       6. Built NuttX with the installed unit test as the application
 
-       $ cd ~/nuttx-code/nuttx
-       $ make
+          $ cd ~/nuttx-code/nuttx
+          $ make
+
+    3. Performance is not so good in this example configuration because it
+       uses the slower SPI interfaces.
+
+    STATUS:
+      17-01-08:  There are instabilities in this configuration that make it
+      not usable on this platform.  While the equivalent configuration works
+      on other platforms, this one does not:  The calculator display does
+      not form properly.  There are fails in the NxTerm display, usually around
+      the point where the display should scroll up.
+
+      Update:  With all optimizations disabled, the issue seems to go away.
+      So this is most likely due to using high levels of optimization with a
+      bleeding edge GCC toolchain.
 
   usbnsh:
   ------
