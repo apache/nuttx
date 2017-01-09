@@ -158,7 +158,7 @@ static FAR const char *findscanset(FAR const char *fmt,
 
   fmt++;           /* Skip '[' */
 
-  /* first `clear' the whole table */
+  /* First `clear' the whole table */
 
   c = *fmt++;      /* First char hat => negated scanset */
   if (c == '^')
@@ -186,14 +186,14 @@ static FAR const char *findscanset(FAR const char *fmt,
 
   for (;;)
     {
-      set[c / 8] |= (1 << (c % 8));  /* take character c */
+      set[c / 8] |= (1 << (c % 8));  /* Take character c */
 
 doswitch:
-      n = *fmt++;    /* and examine the next */
+      n = *fmt++;    /* Examine the next */
       switch (n)
         {
-        case 0:      /* format ended too soon */
-        case ']':    /* end of scanset */
+        case 0:      /* Format ended too soon */
+        case ']':    /* End of scanset */
           goto doexit;
 
         case '-':
@@ -220,7 +220,7 @@ doswitch:
           if (n == ']' || n < c)
             {
               c = '-';
-              break;  /* resume the for(;;) */
+              break;  /* Resume the for(;;) */
             }
 
           fmt++;
@@ -240,16 +240,16 @@ doswitch:
 
           goto doswitch;
 
-        default:    /* just another character */
+        default:    /* Just another character */
           c = n;
           break;
         }
     }
 
 doexit:
-  if (v) /* default => accept */
+  if (v) /* Default => accept */
     {
-      for (int i = 0; i < 32; i++) /* invert all */
+      for (int i = 0; i < 32; i++) /* Invert all */
         {
           set[i] ^= 0xFF;
         }
