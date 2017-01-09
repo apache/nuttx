@@ -90,6 +90,7 @@ static const char spaces[] = " \t\n\r\f\v";
 
 static int findwidth(FAR const char *buf, FAR const char *fmt)
 {
+#if 0 /* Behavior no longer supported */
   FAR const char *next = fmt + 1;
 
   /* No... is there a space after the format? Or does the format string end
@@ -114,7 +115,7 @@ static int findwidth(FAR const char *buf, FAR const char *fmt)
        */
 
       FAR const char *ptr = strchr(buf, *next);
-      if (ptr)
+      if (ptr != NULL)
         {
           return (int)(ptr - buf);
         }
@@ -130,6 +131,9 @@ static int findwidth(FAR const char *buf, FAR const char *fmt)
    * determining the width of the data if there is no fieldwidth, no space
    * separating the input, and no usable delimiter character.
    */
+#endif
+
+  /* Use the input up until the first white space is encountered. */
 
   return strcspn(buf, spaces);
 }
@@ -155,6 +159,7 @@ static FAR const char *findscanset(FAR const char *fmt,
   int c;
   int n;
   int v;
+  int i;
 
   fmt++;           /* Skip '[' */
 
@@ -249,7 +254,7 @@ doswitch:
 doexit:
   if (v) /* Default => accept */
     {
-      for (int i = 0; i < 32; i++) /* Invert all */
+      for (i = 0; i < 32; i++) /* Invert all */
         {
           set[i] ^= 0xFF;
         }

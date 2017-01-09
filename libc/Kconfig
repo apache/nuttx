@@ -62,7 +62,7 @@ config LIBC_LONG_LONG
 		is enabled.
 
 config LIBC_SCANSET
-	default "Scanset support"
+	bool "Scanset support"
 	default n
 	---help---
 		Add scanset support to sscanf().
