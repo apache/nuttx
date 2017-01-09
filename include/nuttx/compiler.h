@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/compiler.h
  *
- *   Copyright (C) 2007-2009, 2012-2013, 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012-2013, 2015-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -81,7 +81,7 @@
 #  define weak_alias(name, aliasname)
 #  define weak_function
 #  define weak_const_function
-#endif
+# endif
 
 /* The noreturn attribute informs GCC that the function will not return. */
 
@@ -97,7 +97,8 @@
  * ignoring other alignment rules.
  */
 
-# define packed_struct __attribute__ ((packed))
+# define begin_packed_struct
+# define end_packed_struct __attribute__ ((packed))
 
 /* GCC does not support the reentrant attribute */
 
@@ -279,7 +280,8 @@
 /* SDCC does not support the noreturn or packed attributes */
 
 # define noreturn_function
-# define packed_struct
+# define begin_packed_struct
+# define end_packed_struct
 
 /* REVISIT: */
 
@@ -397,7 +399,8 @@
 /* The Zilog compiler does not support the noreturn, packed, naked attributes */
 
 # define noreturn_function
-# define packed_struct
+# define begin_packed_struct
+# define end_packed_struct
 # define naked_function
 # define inline_function
 # define noinline_function
@@ -489,7 +492,8 @@
 # define weak_const_function
 # define noreturn_function
 # define farcall_function
-# define packed_struct
+# define begin_packed_struct  __packed
+# define end_packed_struct
 # define reentrant_function
 # define naked_function
 # define inline_function
@@ -526,7 +530,8 @@
 # define restrict
 # define noreturn_function
 # define farcall_function
-# define packed_struct
+# define begin_packed_struct
+# define end_packed_struct
 # define reentrant_function
 # define naked_function
 # define inline_function

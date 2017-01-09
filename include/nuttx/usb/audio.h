@@ -2,7 +2,7 @@
  * include/nuttx/usb/audio.h
  * Audio Device Class (ADC) definitions
  *
- *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:  This header file is based on information provided by the
@@ -1321,18 +1321,18 @@ struct adc_l1_curparm_s
 
 /* Layout 1, Control RANGE Parameter Block */
 
-struct adc_l1_subrange_s
+begin_packed_struct struct adc_l1_subrange_s
 {
    uint8_t l1_min;              /* 0: MIN attribute */
    uint8_t l1_max;              /* 1: MAX attribute */
    uint8_t l1_res;              /* 2: RES attribute */
-} packed_struct;
+} end_packed_struct;
 
-struct adc_l1_rangeparm_s
+begin_packed_struct struct adc_l1_rangeparm_s
 {
    uint8_t l1_nranges;          /* 0: Number of sub-ranges */
    struct adc_l1_subrange_s l1_subrange[1];
-} packed_struct;
+} end_packed_struct;
 
 #define USB_SIZEOF_ADC_LI_RANGEPARM(nranges) (1+3*(nranges))
 
@@ -1422,18 +1422,18 @@ struct adc_equalizer_curparm_s
 
 /* Graphic Equalizer Control RANGE Parameter Block */
 
-struct adc_eq_subrange_s
+begin_packed_struct struct adc_eq_subrange_s
 {
    uint8_t eq_min;              /* 0: MIN attribute */
    uint8_t eq_max;              /* 1: MAX attribute */
    uint8_t eq_res;              /* 2: RES attribute */
-} packed_struct;
+} end_packed_struct;
 
-struct adc_equalizer_rangeparm_s
+begin_packed_struct struct adc_equalizer_rangeparm_s
 {
    uint8_t eq_nranges;          /* 0: Number of sub-ranges */
    struct adc_eq_subrange_s eq_subrange[1];
-} packed_struct;
+} end_packed_struct;
 
 #define USB_SIZEOF_ADC_EQUALIZER_RANGEPARM(nranges) (1+3*(nranges))
 
@@ -1457,18 +1457,18 @@ struct adc_hilo_curparm_s
 
 /* High/Low Scaling Control RANGE Parameter Block */
 
-struct adc_hl_subrange_s
+begin_packed_struct struct adc_hl_subrange_s
 {
    uint8_t hl_min;              /* 0: MIN attribute */
    uint8_t hl_max;              /* 1: MAX attribute */
    uint8_t hl_res;              /* 2: RES attribute */
-} packed_struct;
+} end_packed_struct;
 
-struct adc_hilo_rangeparm_s
+begin_packed_struct struct adc_hilo_rangeparm_s
 {
    uint8_t hl_nranges[2];       /* 0: Number of sub-ranges */
    struct adc_hl_subrange_s hl_subrange[1];
-} packed_struct;
+} end_packed_struct;
 
 #define USB_SIZEOF_ADC_HILO_RANGEPARM(nranges) (2+3*(nranges))
 
