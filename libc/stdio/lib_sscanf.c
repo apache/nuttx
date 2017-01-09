@@ -159,6 +159,7 @@ static FAR const char *findscanset(FAR const char *fmt,
   int c;
   int n;
   int v;
+  int i;
 
   fmt++;           /* Skip '[' */
 
@@ -253,7 +254,7 @@ doswitch:
 doexit:
   if (v) /* Default => accept */
     {
-      for (int i = 0; i < 32; i++) /* Invert all */
+      for (i = 0; i < 32; i++) /* Invert all */
         {
           set[i] ^= 0xFF;
         }
