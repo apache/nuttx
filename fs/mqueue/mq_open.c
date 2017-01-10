@@ -100,7 +100,7 @@ mqd_t mq_open(FAR const char *mq_name, int oflags, ...)
 
   /* Make sure that a non-NULL name is supplied */
 
-  if (mq_name == NULL || *mq_name == '/0')
+  if (mq_name == NULL || *mq_name == '\0')
     {
       errcode = EINVAL;
       goto errout;
