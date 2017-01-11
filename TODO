@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated January 7, 2017)
+NuttX TODO List (Last updated January 10, 2017)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -31,8 +31,8 @@ nuttx/:
 
 apps/ and other Add-Ons:
 
-  (3)  Network Utilities (apps/netutils/)
-  (2)  NuttShell (NSH) (apps/nshlib)
+  (2)  Network Utilities (apps/netutils/)
+  (1)  NuttShell (NSH) (apps/nshlib)
   (1)  System libraries apps/system (apps/system)
   (1)  Pascal add-on (pcode/)
   (4)  Other Applications & Tests (apps/examples/)
@@ -427,7 +427,9 @@ o Memory Management (mm/)
                it is inherently unsafe, I would never incorporate anything
                like that into NuttX.
 
-  Status:      Open.  No changes are planned.
+  Status:      Open.  No changes are planned.  NOTE: This applies to the FLAT
+               and PROTECTED builds only.  There is no such leaking of memory
+               in the KERNEL build mode.
   Priority:    Medium/Low, a good feature to prevent memory leaks but would
                have negative impact on memory usage and code size.
 
@@ -1503,7 +1505,7 @@ o Libraries (libc/, libm/)
                at the OS interface:  I would like to see more primitive OS
                system calls with more higher level logic in the C library.
 
-               One awkard thing is the incompatibility of KERNEL vs FLAT
+               One awkward thing is the incompatibility of KERNEL vs FLAT
                builds:  In the kernel build, it would be nice to move many
                of the thread-specific data items out of the TCB and into
                the process address environment where they belong.  It is
@@ -1754,13 +1756,15 @@ o Graphics Subsystem (graphics/)
                interactions are via a thin layer in libnx/.   The OS
                interface is only via messages sent and received using POSIX
                message queues.  So this is good code and respects all of the
-               POSIX interfacing rules.
+               POSIX interfacing rules.  Hence, it works well in all build
+               modes (FLAT, PROTECTED, and KERNEL builds).
 
                But without CONFIG_NX_MULTIUSER, the single user applications
-               violate all of the rules and call internal NX functions
+               violate all of the rules and calls internal NX functions
                directly.  This includes all calls to internal OSfunctions
                with names like, nx_open, up_fbinitialize, board_lcd_*, and
-               others
+               others.  This is a violation of interfacing standard in all
+               cases and can only be made to work in the FLAT build mode.
 
                The single user mode does have some desirable properties:  It
                is lighter weight and so more suitable for very resource limited
@@ -1768,7 +1772,7 @@ o Graphics Subsystem (graphics/)
                solution is to eliminate the single user mode and provide only
                the multi-user mode with the message queue interface.
   Status:      Open
-  Priority:    Low, not a serious issue but worth noting.  Single user
+  Priority:    Low-Medium, not a serious issue but worth noting.  Single user
                mode is a blemish on the OS and not compatible with the RTOS
                roadmap.  But neither is there any critical necessity to
                remove the offending code immediately.  Be aware:  If you use
@@ -1803,21 +1807,6 @@ o Build system
   Status:      Open
   Priority:    Low, since I am not aware of anyone using the Windows Native build.
                But, of course, very high if you want to use it.
-
-  Title:       REMOVE SINGLE USER MODE
-  Description: The graphics sub-system can operate in either a single-user mode or
-               in a multi-user mode.  In the multiple-user mode, a kernel thread
-               is used to support a graphics server.  Multiple applications may then
-               communicate with the server using a message queue.  This users only
-               standard POSIX interfaces and works in all build modes (FLAT,
-               PROTECTED, and KERNEL builds).
-
-               The single-user mode, on the hand, uses inappropriate calls directly
-               into the OS.  This violates the POSIX interface and must, eventually,
-               be eliminated.  These inappropriate calls can only be supported in
-               the FLAT build mode.
-  Status:      Open
-  Priority:    Medium-High
 
 o Other drivers (drivers/)
   ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2011,13 +2000,6 @@ o Network Utilities (apps/netutils/)
   Status:      Open
   Priority:    Medium
 
-  Title:       THTTPD WARNINGS
-  Description: If the network is enabled, but THTTPD is not configured, it spews out lots
-               of pointless warnings.  This is kind of annoying and unprofessional; needs to
-               be fixed someday.
-  Status:      Open.  An annoyance, but not a real problem.
-  Priority:    Low
-
   Title:       NETWORK MONITOR NOT GENERALLY AVAILABLE
   Description: The NSH network management logic has general applicability
                but is currently useful only because it is embedded in the NSH
@@ -2036,11 +2018,6 @@ o NuttShell (NSH) (apps/nshlib)
                still show status for all interfaces.
   Status:      Open
   Priority:    Low
-
-  Title:       ARPPING COMMAND
-  Description: Add an arping command
-  Status:      Open
-  Priority:    Low (enhancement)
 
 o System libraries apps/system (apps/system)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
