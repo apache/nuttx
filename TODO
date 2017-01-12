@@ -414,7 +414,7 @@ o Memory Management (mm/)
 
                So in this case, NuttX work just link Linux or or *nix systems:
                All memory allocated by processes or threads in processes will
-               be recovered when the process exists.
+               be recovered when the process exits.
 
                But not for the flat memory build.  In that case, the issues
                above do apply.  There is no safe way to recover the memory in
