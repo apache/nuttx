@@ -83,6 +83,12 @@ struct note_startalloc_s
 #endif
 
 /****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+static void note_add(FAR const uint8_t *note, uint8_t notelen);
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -558,21 +564,21 @@ void sched_note_csection(FAR struct tcb_s *tcb, bool enter)
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
 void sched_note_spinlock(FAR struct tcb_s *tcb, FAR volatile void *spinlock)
 {
-  note_spincommon(tcb, spinlock, NOTE_SPINLOCK_LOCK)
+  note_spincommon(tcb, spinlock, NOTE_SPINLOCK_LOCK);
 }
 
-void sched_note_spinlocked(FAR struct tcb_s *tcb, FAR volatile void *spinlock);
+void sched_note_spinlocked(FAR struct tcb_s *tcb, FAR volatile void *spinlock)
 {
-  note_spincommon(tcb, spinlock, NOTE_SPINLOCK_LOCKED)
+  note_spincommon(tcb, spinlock, NOTE_SPINLOCK_LOCKED);
 }
 
-void sched_note_spinunlock(FAR struct tcb_s *tcb, FAR volatile void *spinlock);
+void sched_note_spinunlock(FAR struct tcb_s *tcb, FAR volatile void *spinlock)
 {
-  note_spincommon(tcb, spinlock, NOTE_SPINLOCK_UNLOCK)
+  note_spincommon(tcb, spinlock, NOTE_SPINLOCK_UNLOCK);
 }
-void sched_note_spinabort(FAR struct tcb_s *tcb, FAR volatile void *spinlock);
+void sched_note_spinabort(FAR struct tcb_s *tcb, FAR volatile void *spinlock)
 {
-  note_spincommon(tcb, spinlock, NOTE_SPINLOCK_ABORT)
+  note_spincommon(tcb, spinlock, NOTE_SPINLOCK_ABORT);
 }
 #endif
 
