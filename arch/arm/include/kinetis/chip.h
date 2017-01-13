@@ -1017,8 +1017,8 @@
 #  define KINETIS_NEW_MCG         1            /* Kinetis New MCG - different VDIV */
 #  undef  KINETIS_K64                          /* Not Kinetis K64 family */
 #  define KINETIS_FLASH_SIZE      (1024*1024)  /* 1Mb */
-#  define KINETIS_FLEXNVM_SIZE    (512*1024)   /* 512Kb FlexNVM */
-#  define KINETIS_FLEXRAM_SIZE    (16*1024)    /* 16Kb FlexRAM */
+#  undef  KINETIS_FLEXNVM_SIZE                 /* No FlexNVM */
+#  undef  KINETIS_FLEXRAM_SIZE                 /* No FlexRAM */
 #  define KINETIS_SRAM_SIZE       (128*1024)   /* 128Kb */
 #  define KINETIS_MPU             1            /* Memory protection unit */
 #  define KINETIS_EXTBUS          1            /* External bus interface */
