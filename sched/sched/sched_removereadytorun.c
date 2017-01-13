@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sched_removereadytorun.c
  *
- *   Copyright (C) 2007-2009, 2012, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -260,23 +260,44 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
                       &g_cpu_schedlock);
         }
 
-      /* Interrupts may be disabled after the switch.  If irqcount is greater
-       * than zero, then this task/this CPU holds the IRQ lock
+      /* Adjust global IRQ controls.  This works differently if we are
+       * performing a context switch from an interrupt handler and the
+       * interrupt handler has established a critical section.  We can
+       * detect this case when g_cpu_nestcount[me] > 0:
        */
 
-      if (nxttcb->irqcount > 0)
+      if (g_cpu_nestcount[me] <= 0)
         {
-          /* Yes... make sure that scheduling logic knows about this */
+          /* If irqcount is greater than zero, then this task/this CPU
+           * holds the IRQ lock
+           */
 
-          spin_setbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock,
-                      &g_cpu_irqlock);
+          if (nxttcb->irqcount > 0)
+            {
+              /* Yes... make sure that scheduling logic knows about this */
+
+              spin_setbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock,
+                          &g_cpu_irqlock);
+            }
+          else
+            {
+              /* No.. we may need to release our hold on the IRQ state. */
+
+              spin_clrbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock,
+                          &g_cpu_irqlock);
+            }
         }
       else
         {
-          /* No.. we may need to release our hold on the irq state. */
+          /* Sanity check.  g_cpu_netcount should be greater than zero
+           * only while we are within the critical section and within
+           * an interrupt handler.  If we are not in an interrupt handler
+           * then there is a problem; perhaps some logic previously
+           * called enter_critical_section() with no matching call to
+           * leave_critical_section(), leaving the non-zero count.
+           */
 
-          spin_clrbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock,
-                      &g_cpu_irqlock);
+          DEBUGASSERT(up_interrupt_context());
         }
 
       nxttcb->task_state = TSTATE_TASK_RUNNING;

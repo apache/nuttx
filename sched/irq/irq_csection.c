@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/irq/irq_csection.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,16 +66,10 @@ volatile spinlock_t g_cpu_irqlock SP_SECTION = SP_UNLOCKED;
 
 volatile spinlock_t g_cpu_irqsetlock SP_SECTION;
 volatile cpu_set_t g_cpu_irqset SP_SECTION;
-#endif
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-#ifdef CONFIG_SMP
 /* Handles nested calls to enter_critical section from interrupt handlers */
 
-static uint8_t g_cpu_nestcount[CONFIG_SMP_NCPUS];
+volatile uint8_t g_cpu_nestcount[CONFIG_SMP_NCPUS];
 #endif
 
 /****************************************************************************
@@ -303,6 +297,13 @@ try_again:
               /* In any event, the nesting count is now one */
 
               g_cpu_nestcount[cpu] = 1;
+
+              /* Also set the CPU bit so that other CPUs will be aware that this
+               * CPU holds the critical section.
+               */
+
+              spin_setbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock,
+                          &g_cpu_irqlock);
             }
         }
       else
@@ -455,18 +456,22 @@ void leave_critical_section(irqstate_t flags)
             }
           else
             {
-              /* No, not nested. Release the spinlock. */
+              /* No, not nested. Restore the g_cpu_irqset for this CPU
+               * and release the spinlock (if necessary).
+               */
 
               DEBUGASSERT(spin_islocked(&g_cpu_irqlock) &&
                           g_cpu_nestcount[cpu] == 1);
 
-              spin_lock(&g_cpu_irqsetlock); /* Protects g_cpu_irqset */
-              if (g_cpu_irqset == 0)
+              FAR struct tcb_s *rtcb = this_task();
+              DEBUGASSERT(rtcb != NULL);
+
+              if (rtcb->irqcount <= 0)
                 {
-                  spin_unlock(&g_cpu_irqlock);
+                  spin_clrbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock,
+                              &g_cpu_irqlock);
                 }
 
-              spin_unlock(&g_cpu_irqsetlock);
               g_cpu_nestcount[cpu] = 0;
             }
         }
