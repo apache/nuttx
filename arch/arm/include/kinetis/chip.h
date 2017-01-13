@@ -1014,6 +1014,7 @@
 #  undef  KINETIS_K20                          /* Not Kinetis K20 family */
 #  undef  KINETIS_K40                          /* Not Kinetics K40 family */
 #  define KINETIS_K60             1            /* Kinetis K60 family */
+#  define KINETIS_NEW_MCG         1            /* Kinetis New MCG - different VDIV */
 #  undef  KINETIS_K64                          /* Not Kinetis K64 family */
 #  define KINETIS_FLASH_SIZE      (1024*1024)  /* 1Mb */
 #  define KINETIS_FLEXNVM_SIZE    (512*1024)   /* 512Kb FlexNVM */
