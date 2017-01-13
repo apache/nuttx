@@ -263,7 +263,10 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
       /* Adjust global IRQ controls.  This works differently if we are
        * performing a context switch from an interrupt handler and the
        * interrupt handler has established a critical section.  We can
-       * detect this case when g_cpu_nestcount[me] > 0:
+       * detect this case when g_cpu_nestcount[me] > 0.
+       *
+       * REVISIT: Could this not cause logic to exit the critical section
+       * prematurely in the context switch sequence?
        */
 
       if (g_cpu_nestcount[me] <= 0)
