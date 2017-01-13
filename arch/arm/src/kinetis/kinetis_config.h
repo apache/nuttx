@@ -80,7 +80,7 @@
 #undef HAVE_UART_DEVICE
 #if defined(CONFIG_KINETIS_UART0) || defined(CONFIG_KINETIS_UART1) || \
     defined(CONFIG_KINETIS_UART2) || defined(CONFIG_KINETIS_UART3) || \
-    defined(CONFIG_KINETIS_UART5)
+    defined(CONFIG_KINETIS_UART4) || defined(CONFIG_KINETIS_UART5)
 #  define HAVE_UART_DEVICE 1
 #endif
 
