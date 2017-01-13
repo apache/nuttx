@@ -260,35 +260,36 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
                       &g_cpu_schedlock);
         }
 
-      /* Adjust global IRQ controls.  This works differently if we are
-       * performing a context switch from an interrupt handler and the
-       * interrupt handler has established a critical section.  We can
-       * detect this case when g_cpu_nestcount[me] > 0.
+      /* Adjust global IRQ controls.  If irqcount is greater than zero,
+       * then this task/this CPU holds the IRQ lock
+       */
+
+      if (nxttcb->irqcount > 0)
+        {
+          /* Yes... make sure that scheduling logic on other CPUs knows
+           * that we hold the IRQ lock.
+           */
+
+          spin_setbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock,
+                      &g_cpu_irqlock);
+        }
+
+      /* This CPU will be relinquishing the lock.  But this works
+       * differently if we are performing a context switch from an
+       * interrupt handler and the interrupt handler has established
+       * a critical section.  We can detect this case when
+       * g_cpu_nestcount[me] > 0.
        *
        * REVISIT: Could this not cause logic to exit the critical section
        * prematurely in the context switch sequence?
        */
 
-      if (g_cpu_nestcount[me] <= 0)
+      else if (g_cpu_nestcount[me] <= 0)
         {
-          /* If irqcount is greater than zero, then this task/this CPU
-           * holds the IRQ lock
-           */
+          /* No.. we may need to release our hold on the IRQ state. */
 
-          if (nxttcb->irqcount > 0)
-            {
-              /* Yes... make sure that scheduling logic knows about this */
-
-              spin_setbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock,
-                          &g_cpu_irqlock);
-            }
-          else
-            {
-              /* No.. we may need to release our hold on the IRQ state. */
-
-              spin_clrbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock,
-                          &g_cpu_irqlock);
-            }
+          spin_clrbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock,
+                     &g_cpu_irqlock);
         }
       else
         {

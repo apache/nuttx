@@ -316,31 +316,36 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
                           &g_cpu_schedlock);
             }
 
-          /* Adjust global IRQ controls.  This works differently if we are
-           * performing a context switch from an interrupt handler and the
-           * interrupt handler has established a critical section.  We can
-           * detect this case when g_cpu_nestcount[me] > 0.
-           *
-           * REVISIT: Could this not cause logic to exit the critical
-           * section prematurely in the context switch sequence?
+          /* Adjust global IRQ controls.  If irqcount is greater than zero,
+           * then this task/this CPU holds the IRQ lock
            */
 
-          if (g_cpu_nestcount[me] <= 0)
+          if (btcb->irqcount > 0)
             {
-              /* If irqcount is greater than zero, then this task/this CPU
-               * holds the IRQ lock
+              /* Yes... make sure that scheduling logic on other CPUs knows
+               * that we hold the IRQ lock.
                */
 
-              if (btcb->irqcount > 0)
-                {
-                  spin_setbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock,
-                              &g_cpu_irqlock);
-                }
-              else
-                {
-                  spin_clrbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock,
-                              &g_cpu_irqlock);
-                }
+              spin_setbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock,
+                          &g_cpu_irqlock);
+            }
+
+          /* This CPU will be relinquishing the lock.  But this works
+           * differently if we are performing a context switch from an
+           * interrupt handler and the interrupt handler has established
+           * a critical section.  We can detect this case when
+           * g_cpu_nestcount[me] > 0.
+           *
+           * REVISIT: Could this not cause logic to exit the critical section
+           * prematurely in the context switch sequence?
+           */
+
+          else if (g_cpu_nestcount[me] <= 0)
+            {
+              /* No.. we may need to release our hold on the IRQ state. */
+
+              spin_clrbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock,
+                         &g_cpu_irqlock);
             }
           else
             {
