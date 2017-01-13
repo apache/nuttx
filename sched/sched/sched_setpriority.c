@@ -46,6 +46,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
+#include "irq/irq.h"
 #include "sched/sched.h"
 
 /****************************************************************************
