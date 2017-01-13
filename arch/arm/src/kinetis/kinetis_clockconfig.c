@@ -152,7 +152,7 @@ void kinetis_pllconfig(void)
    */
 
 #ifdef BOARD_FRDIV
-  putreg8(BOARD_FRDIV | MCG_C1_CLKS_EXTREF, KINETIS_MCG_C1);
+  putreg8((BOARD_FRDIV << MCG_C1_FRDIV_SHIFT) | MCG_C1_CLKS_EXTREF, KINETIS_MCG_C1);
 #else
   putreg8(MCG_C1_FRDIV_DIV256 | MCG_C1_CLKS_EXTREF, KINETIS_MCG_C1);
 #endif
