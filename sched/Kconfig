@@ -732,7 +732,7 @@ config SCHED_INSTRUMENTATION_CSECTION
 
 			void sched_note_csection(FAR struct tcb_s *tcb, bool state);
 
-config SCHED_INSTRUMENTATION_SPINLOCK
+config SCHED_INSTRUMENTATION_SPINLOCKS
 	bool "Spinlock monitor hooks"
 	default n
 	---help---

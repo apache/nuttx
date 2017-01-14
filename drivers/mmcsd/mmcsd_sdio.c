@@ -1476,6 +1476,7 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_state_s *priv,
     {
       offset = startblock << priv->blockshift;
     }
+
   finfo("nbytes=%d byte offset=%d\n", nbytes, offset);
 
   /* Select the block size for the card */

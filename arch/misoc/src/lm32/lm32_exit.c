@@ -1,9 +1,9 @@
 /****************************************************************************
  * arch/misoc/src/lm32/lm32_exit.c
  *
- *   Copyright (C) 2010, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2013-2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *          Ramtin Amin <keytwo@gmail.com>
+ *           Ramtin Amin <keytwo@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -42,8 +42,9 @@
 
 #include <sched.h>
 #include <debug.h>
-#include <nuttx/arch.h>
 
+#include <nuttx/arch.h>
+#include <nuttx/irq.h>
 #ifdef CONFIG_DUMP_ON_EXIT
 #  include <nuttx/fs/fs.h>
 #endif
@@ -139,11 +140,11 @@ void _exit(int status)
 {
   struct tcb_s *tcb;
 
-  /* Disable interrupts.  They will be restored when the next
-   * task is started.
+  /* Make sure that we are in a critical section with local interrupts.
+   * The IRQ state will be restored when the next task is started.
    */
 
-  (void)up_irq_save();
+  (void)enter_critical_section();
 
   sinfo("TCB=%p exiting\n", this_task());
 

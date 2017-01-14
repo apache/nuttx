@@ -55,10 +55,10 @@
  * configuration (with no suffix) that maps to the correct alternative.
  */
 
-#if defined(CONFIG_ARCH_CHIP_MK60N256VLQ100) || defined(CONFIG_ARCH_CHIP_MK60X256VLQ100) || \
+#if   defined(CONFIG_ARCH_CHIP_MK60N256VLQ100) || defined(CONFIG_ARCH_CHIP_MK60X256VLQ100) || \
       defined(CONFIG_ARCH_CHIP_MK60N512VLQ100) || defined(CONFIG_ARCH_CHIP_MK60N256VMD100) || \
       defined(CONFIG_ARCH_CHIP_MK60X256VMD100) || defined(CONFIG_ARCH_CHIP_MK60N512VMD100) || \
-      defined(CONFIG_ARCH_CHIP_MK60N512VLL100)
+      defined(CONFIG_ARCH_CHIP_MK60N512VLL100) || defined(CONFIG_ARCH_CHIP_MK60FN1M0VLQ12)
 
 #define PIN_TSI0_CH1             (PIN_ANALOG | PIN_PORTA | PIN0)
 #define PIN_UART0_CTS_1          (PIN_ALT2   | PIN_PORTA | PIN0)

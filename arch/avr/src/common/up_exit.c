@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/avr/src/common/up_exit.c
  *
- *   Copyright (C) 2010, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2013-2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,10 +41,11 @@
 
 #include <sched.h>
 #include <debug.h>
-#include <nuttx/arch.h>
 
+#include <nuttx/arch.h>
+#include <nuttx/irq.h>
 #ifdef CONFIG_DUMP_ON_EXIT
-#include <nuttx/fs/fs.h>
+#  include <nuttx/fs/fs.h>
 #endif
 
 #include "task/task.h"
@@ -140,11 +141,11 @@ void _exit(int status)
 {
   struct tcb_s *tcb;
 
-  /* Disable interrupts.  They will be restored when the next
-   * task is started.
+  /* Make sure that we are in a critical section with local interrupts.
+   * The IRQ state will be restored when the next task is started.
    */
 
-  (void)up_irq_save();
+  (void)enter_critical_section();
 
   sinfo("TCB=%p exiting\n", this_task());
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/irq/irq.h
  *
- *   Copyright (C) 2007, 2008, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2013-2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -72,6 +72,10 @@ extern volatile spinlock_t g_cpu_irqlock SP_SECTION;
 
 extern volatile spinlock_t g_cpu_irqsetlock SP_SECTION;
 extern volatile cpu_set_t g_cpu_irqset SP_SECTION;
+
+/* Handles nested calls to enter_critical section from interrupt handlers */
+
+extern volatile uint8_t g_cpu_nestcount[CONFIG_SMP_NCPUS];
 #endif
 
 /****************************************************************************

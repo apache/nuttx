@@ -151,7 +151,11 @@
 
 #define MCG_C6_VDIV_SHIFT         (0)       /* Bits 0-4: VCO Divider */
 #define MCG_C6_VDIV_MASK          (31 << MCG_C6_VDIV_SHIFT)
+#ifdef KINETIS_NEW_MCG
+#  define MCG_C6_VDIV(n)          ((uint32_t)((n)-16) << MCG_C6_VDIV_SHIFT) /* n=16..47 */
+#else
 #  define MCG_C6_VDIV(n)          ((uint32_t)((n)-24) << MCG_C6_VDIV_SHIFT) /* n=24..55 */
+#endif
 #define MCG_C6_CME                (1 << 5)  /* Bit 5:  Clock Monitor Enable */
 #define MCG_C6_PLLS               (1 << 6)  /* Bit 6:  PLL Select */
 #define MCG_C6_LOLIE              (1 << 7)  /* Bit 7:  Loss of Lock Interrrupt Enable */

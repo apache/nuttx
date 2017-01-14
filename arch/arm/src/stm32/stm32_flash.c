@@ -231,12 +231,14 @@ ssize_t up_progmem_erasepage(size_t page)
       return -EFAULT;
     }
 
-  /* Get flash ready and begin erasing single page */
-
+#if !defined(CONFIG_STM32_STM32F40XX)
   if (!(getreg32(STM32_RCC_CR) & RCC_CR_HSION))
     {
       return -EPERM;
     }
+#endif
+
+  /* Get flash ready and begin erasing single page */
 
   stm32_flash_unlock();
 
@@ -318,12 +320,14 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
       return -EFAULT;
     }
 
-  /* Get flash ready and begin flashing */
-
+#if !defined(CONFIG_STM32_STM32F40XX)
   if (!(getreg32(STM32_RCC_CR) & RCC_CR_HSION))
     {
       return -EPERM;
     }
+#endif
+
+  /* Get flash ready and begin flashing */
 
   stm32_flash_unlock();
 
