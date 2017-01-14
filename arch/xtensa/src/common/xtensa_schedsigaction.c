@@ -144,19 +144,19 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                * NOTE: that hi-priority interrupts are not disabled.
                */
 
-              tcb->xcp.sigdeliver       = sigdeliver;
-              tcb->xcp.saved_pc         = CURRENT_REGS[REG_PC];
-              tcb->xcp.saved_ps         = CURRENT_REGS[REG_PS];
+              tcb->xcp.sigdeliver  = sigdeliver;
+              tcb->xcp.saved_pc    = CURRENT_REGS[REG_PC];
+              tcb->xcp.saved_ps    = CURRENT_REGS[REG_PS];
 
               /* Then set up to vector to the trampoline with interrupts
                * disabled
                */
 
-              CURRENT_REGS[REG_PC]      = (uint32_t)_xtensa_sig_trampoline;
+              CURRENT_REGS[REG_PC] = (uint32_t)_xtensa_sig_trampoline;
 #ifdef __XTENSA_CALL0_ABI__
-              CURRENT_REGS[REG_PS]      = (uint32_t)(PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM);
+              CURRENT_REGS[REG_PS] = (uint32_t)(PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM);
 #else
-              CURRENT_REGS[REG_PS]      = (uint32_t)(PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_WOE);
+              CURRENT_REGS[REG_PS] = (uint32_t)(PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_WOE);
 #endif
 
               /* And make sure that the saved context in the TCB is the same
@@ -180,19 +180,19 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * NOTE: that hi-priority interrupts are not disabled.
            */
 
-          tcb->xcp.sigdeliver       = sigdeliver;
-          tcb->xcp.saved_pc         = CURRENT_REGS[REG_PC];
-          tcb->xcp.saved_ps         = CURRENT_REGS[REG_PS];
+          tcb->xcp.sigdeliver   = sigdeliver;
+          tcb->xcp.saved_pc     = CURRENT_REGS[REG_PC];
+          tcb->xcp.saved_ps     = CURRENT_REGS[REG_PS];
 
           /* Then set up to vector to the trampoline with interrupts
            * disabled
            */
 
-          tcb->xcp.regs[REG_PC]     = (uint32_t)_xtensa_sig_trampoline;
+          tcb->xcp.regs[REG_PC] = (uint32_t)_xtensa_sig_trampoline;
 #ifdef __XTENSA_CALL0_ABI__
-          tcb->xcp.regs[REG_PS]     = (uint32_t)(PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM);
+          tcb->xcp.regs[REG_PS] = (uint32_t)(PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM);
 #else
-          tcb->xcp.regs[REG_PS]     = (uint32_t)(PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_WOE);
+          tcb->xcp.regs[REG_PS] = (uint32_t)(PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_WOE);
 #endif
         }
     }
@@ -224,11 +224,11 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
       sinfo("rtcb=0x%p CURRENT_REGS=0x%p\n", this_task(), CURRENT_REGS);
 
-      me  = this_cpu();
-      cpu = tcb->cpu;
-
       if (tcb->task_state == TSTATE_TASK_RUNNING)
         {
+          me  = this_cpu();
+          cpu = tcb->cpu;
+
           /* CASE 1:  We are not in an interrupt handler and a task is
            * signalling itself for some reason.
            */
@@ -346,9 +346,9 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * NOTE: that hi-priority interrupts are not disabled.
            */
 
-          tcb->xcp.sigdeliver       = sigdeliver;
-          tcb->xcp.saved_pc         = CURRENT_REGS[REG_PC];
-          tcb->xcp.saved_ps         = CURRENT_REGS[REG_PS];
+          tcb->xcp.sigdeliver   = sigdeliver;
+          tcb->xcp.saved_pc     = CURRENT_REGS[REG_PC];
+          tcb->xcp.saved_ps     = CURRENT_REGS[REG_PS];
 
           /* Increment the IRQ lock count so that when the task is restarted,
            * it will hold the IRQ spinlock.
@@ -361,11 +361,11 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * disabled
            */
 
-          tcb->xcp.regs[REG_PC]     = (uint32_t)_xtensa_sig_trampoline;
+          tcb->xcp.regs[REG_PC] = (uint32_t)_xtensa_sig_trampoline;
 #ifdef __XTENSA_CALL0_ABI__
-          tcb->xcp.regs[REG_PS]     = (uint32_t)(PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM);
+          tcb->xcp.regs[REG_PS] = (uint32_t)(PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM);
 #else
-          tcb->xcp.regs[REG_PS]     = (uint32_t)(PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_WOE);
+          tcb->xcp.regs[REG_PS] = (uint32_t)(PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_WOE);
 #endif
         }
     }

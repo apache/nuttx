@@ -166,7 +166,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 #endif
               CURRENT_REGS[REG_XPSR]    = ARMV7M_XPSR_T;
 #ifdef CONFIG_BUILD_PROTECTED
-              CURRENT_REGS[REG_LR]     = EXC_RETURN_PRIVTHR;
+              CURRENT_REGS[REG_LR]      = EXC_RETURN_PRIVTHR;
 #endif
               /* And make sure that the saved context in the TCB is the same
                * as the interrupt return context.
@@ -244,11 +244,11 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
       sinfo("rtcb=0x%p CURRENT_REGS=0x%p\n", this_task(), CURRENT_REGS);
 
-      me  = this_cpu();
-      cpu = tcb->cpu;
-
       if (tcb->task_state == TSTATE_TASK_RUNNING)
         {
+          me  = this_cpu();
+          cpu = tcb->cpu;
+
           /* CASE 1:  We are not in an interrupt handler and a task is
            * signalling itself for some reason.
            */
@@ -345,7 +345,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 #endif
                   CURRENT_REGS[REG_XPSR]    = ARMV7M_XPSR_T;
 #ifdef CONFIG_BUILD_PROTECTED
-                  CURRENT_REGS[REG_LR]     = EXC_RETURN_PRIVTHR;
+                  CURRENT_REGS[REG_LR]      = EXC_RETURN_PRIVTHR;
 #endif
                   /* In an SMP configuration, the interrupt disable logic also
                    * involves spinlocks that are configured per the TCB irqcount
