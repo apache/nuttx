@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/stm32f103-minimum/src/stm32_bringup.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -181,6 +181,12 @@ int stm32_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: stm32_veml6070initialize() failed: %d\n", ret);
     }
+#endif
+
+#if defined(CONFIG_WL_NRF24L01)
+  /* Initialize the NRF24L01 wireless module */
+
+  stm32_wlinitialize();
 #endif
 
   return ret;

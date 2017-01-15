@@ -337,8 +337,8 @@ static inline int sst26_readid(struct sst26_dev_s *priv)
   SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
   sst26_unlock(priv->dev);
 
-  _info("manufacturer: %02x memory: %02x capacity: %02x\n",
-        manufacturer, memory, capacity);
+  sstinfo("manufacturer: %02x memory: %02x capacity: %02x\n",
+          manufacturer, memory, capacity);
 
   /* Check for a valid manufacturer and memory type */
 

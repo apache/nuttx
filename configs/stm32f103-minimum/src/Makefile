@@ -1,7 +1,7 @@
 ############################################################################
 # configs/stm32f103-minimum/src/Makefile
 #
-#   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #           Laurent Latil <laurent@latil.nom.fr>
 #
@@ -75,6 +75,10 @@ endif
 
 ifeq ($(CONFIG_VEML6070),y)
 CSRCS += stm32_veml6070.c
+endif
+
+ifeq ($(CONFIG_WL_NRF24L01),y)
+CSRCS += stm32_wireless.c
 endif
 
 include $(TOPDIR)/configs/Board.mk

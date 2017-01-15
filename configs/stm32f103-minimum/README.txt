@@ -434,6 +434,13 @@ Where <subdir> is one of the following:
     LCD you need to connect PA5 (SPI1 CLK) to SCK; PA7 (SPI1 MOSI) to SDA; PA4
     to CS; PA3 to RST; PA2 to RS.
 
+  nrf24:
+  ---------
+    This is a config example to test the nrf24 terminal example. You will need
+    two stm32f103-minimum board each one with a nRF24L01 module connected this
+    way: connect PB1 to nRF24 CE pin; PA4 to CSN; PA5 (SPI1 CLK) to SCK; PA7
+    (SPI1 MOSI) to MOSI; PA6 (SPI1 MISO) to MISO; PA0 to IRQ.
+
   usbnsh:
   -------
 

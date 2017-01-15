@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/armv7-m/up_schedulesigaction.c
  *
- *   Copyright (C) 2009-2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2014, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,6 +52,8 @@
 #include "up_internal.h"
 #include "up_arch.h"
 
+#include "irq/irq.h"
+
 #ifndef CONFIG_DISABLE_SIGNALS
 
 /****************************************************************************
@@ -91,6 +93,7 @@
  *
  ****************************************************************************/
 
+#ifndef CONFIG_SMP
 void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 {
   irqstate_t flags;
@@ -163,21 +166,8 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 #endif
               CURRENT_REGS[REG_XPSR]    = ARMV7M_XPSR_T;
 #ifdef CONFIG_BUILD_PROTECTED
-              CURRENT_REGS[REG_LR]     = EXC_RETURN_PRIVTHR;
+              CURRENT_REGS[REG_LR]      = EXC_RETURN_PRIVTHR;
 #endif
-
-#ifdef CONFIG_SMP
-              /* In an SMP configuration, the interrupt disable logic also
-               * involves spinlocks that are configured per the TCB irqcount
-               * field.  This is logically equivalent to enter_critical_section().
-               * The matching call to leave_critical_section() will be
-               * performed in up_sigdeliver().
-               */
-
-              DEBUGASSERT(tcb->irqcount < INT16_MAX);
-              tcb->irqcount++;
-#endif
-
               /* And make sure that the saved context in the TCB is the same
                * as the interrupt return context.
                */
@@ -224,23 +214,219 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 #ifdef CONFIG_BUILD_PROTECTED
           tcb->xcp.regs[REG_LR]      = EXC_RETURN_PRIVTHR;
 #endif
+        }
+    }
+
+  leave_critical_section(flags);
+}
+#endif /* !CONFIG_SMP */
 
 #ifdef CONFIG_SMP
-          /* In an SMP configuration, the interrupt disable logic also
-           * involves spinlocks that are configured per the TCB irqcount
-           * field.  This is logically equivalent to enter_critical_section();
-           * The matching leave_critical_section will be performed in
-           * The matching call to leave_critical_section() will be performed
-           * in up_sigdeliver().
+void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
+{
+  irqstate_t flags;
+  int cpu;
+  int me;
+
+  sinfo("tcb=0x%p sigdeliver=0x%p\n", tcb, sigdeliver);
+
+  /* Make sure that interrupts are disabled */
+
+  flags = enter_critical_section();
+
+  /* Refuse to handle nested signal actions */
+
+  if (!tcb->xcp.sigdeliver)
+    {
+      /* First, handle some special cases when the signal is being delivered
+       * to task that is currently executing on any CPU.
+       */
+
+      sinfo("rtcb=0x%p CURRENT_REGS=0x%p\n", this_task(), CURRENT_REGS);
+
+      if (tcb->task_state == TSTATE_TASK_RUNNING)
+        {
+          me  = this_cpu();
+          cpu = tcb->cpu;
+
+          /* CASE 1:  We are not in an interrupt handler and a task is
+           * signalling itself for some reason.
+           */
+
+          if (cpu == me && !CURRENT_REGS)
+            {
+              /* In this case just deliver the signal now. */
+
+              sigdeliver(tcb);
+            }
+
+          /* CASE 2:  The task that needs to receive the signal is running.
+           * This could happen if the task is running on another CPU OR if
+           * we are in an interrupt handler and the task is running on this
+           * CPU.  In the former case, we will have to PAUSE the other CPU
+           * first.  But in either case, we will have to modify the return
+           * state as well as the state in the TCB.
+           *
+           * Hmmm... there looks like a latent bug here: The following logic
+           * would fail in the strange case where we are in an interrupt
+           * handler, the thread is signalling itself, but a context switch
+           * to another task has occurred so that CURRENT_REGS does not
+           * refer to the thread of this_task()!
+           */
+
+          else
+            {
+              /* If we signalling a task running on the other CPU, we have
+               * to PAUSE the other CPU.
+               */
+
+              if (cpu != me)
+                {
+                  up_cpu_pause(cpu);
+                }
+
+              /* Save the return PC, CPSR and either the BASEPRI or PRIMASK
+               * registers (and perhaps also the LR).  These will be
+               * restored by the signal trampoline after the signal has been
+               * delivered.
+               */
+
+              tcb->xcp.sigdeliver       = (FAR void *)sigdeliver;
+              tcb->xcp.saved_pc         = CURRENT_REGS[REG_PC];
+#ifdef CONFIG_ARMV7M_USEBASEPRI
+              tcb->xcp.saved_basepri    = CURRENT_REGS[REG_BASEPRI];
+#else
+              tcb->xcp.saved_primask    = CURRENT_REGS[REG_PRIMASK];
+#endif
+              tcb->xcp.saved_xpsr       = CURRENT_REGS[REG_XPSR];
+#ifdef CONFIG_BUILD_PROTECTED
+              tcb->xcp.saved_lr         = CURRENT_REGS[REG_LR];
+#endif
+              /* Increment the IRQ lock count so that when the task is restarted,
+               * it will hold the IRQ spinlock.
+               */
+
+              DEBUGASSERT(tcb->irqcount < INT16_MAX);
+              tcb->irqcount++;
+
+              /* Handle a possible race condition where the TCB was suspended
+               * just before we paused the other CPU.  The critical section
+               * established above will prevent new threads from running on
+               * that CPU, but it will not guarantee that the running thread
+               * did not suspend itself (allowing any threads "assigned" to
+               * the CPU to run).
+               */
+
+              if (tcb->task_state != TSTATE_TASK_RUNNING)
+                {
+                  /* Then set up to vector to the trampoline with interrupts
+                   * disabled.  We must already be in privileged thread mode
+                   * to be here.
+                   */
+
+                  tcb->xcp.regs[REG_PC]      = (uint32_t)up_sigdeliver;
+#ifdef CONFIG_ARMV7M_USEBASEPRI
+                  tcb->xcp.regs[REG_BASEPRI] = NVIC_SYSH_DISABLE_PRIORITY;
+#else
+                  tcb->xcp.regs[REG_PRIMASK] = 1;
+#endif
+                  tcb->xcp.regs[REG_XPSR]    = ARMV7M_XPSR_T;
+#ifdef CONFIG_BUILD_PROTECTED
+                  tcb->xcp.regs[REG_LR]      = EXC_RETURN_PRIVTHR;
+#endif
+                }
+              else
+                {
+                  /* Then set up to vector to the trampoline with interrupts
+                   * disabled
+                   */
+
+                  CURRENT_REGS[REG_PC]      = (uint32_t)up_sigdeliver;
+#ifdef CONFIG_ARMV7M_USEBASEPRI
+                  CURRENT_REGS[REG_BASEPRI] = NVIC_SYSH_DISABLE_PRIORITY;
+#else
+                  CURRENT_REGS[REG_PRIMASK] = 1;
+#endif
+                  CURRENT_REGS[REG_XPSR]    = ARMV7M_XPSR_T;
+#ifdef CONFIG_BUILD_PROTECTED
+                  CURRENT_REGS[REG_LR]      = EXC_RETURN_PRIVTHR;
+#endif
+                  /* In an SMP configuration, the interrupt disable logic also
+                   * involves spinlocks that are configured per the TCB irqcount
+                   * field.  This is logically equivalent to enter_critical_section().
+                   * The matching call to leave_critical_section() will be
+                   * performed in up_sigdeliver().
+                   */
+
+                  spin_setbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock,
+                              &g_cpu_irqlock);
+
+                  /* And make sure that the saved context in the TCB is the same
+                   * as the interrupt return context.
+                   */
+
+                  up_savestate(tcb->xcp.regs);
+                }
+
+              /* RESUME the other CPU if it was PAUSED */
+
+              if (cpu != me)
+                {
+                  up_cpu_pause(cpu);
+                }
+            }
+        }
+
+      /* Otherwise, we are (1) signaling a task is not running from an
+       * interrupt handler or (2) we are not in an interrupt handler and the
+       * running task is signalling some other non-running task.
+       */
+
+      else
+        {
+          /* Save the return PC, CPSR and either the BASEPRI or PRIMASK
+           * registers (and perhaps also the LR).  These will be restored
+           * by the signal trampoline after the signal has been delivered.
+           */
+
+          tcb->xcp.sigdeliver       = (FAR void *)sigdeliver;
+          tcb->xcp.saved_pc         = tcb->xcp.regs[REG_PC];
+#ifdef CONFIG_ARMV7M_USEBASEPRI
+          tcb->xcp.saved_basepri    = tcb->xcp.regs[REG_BASEPRI];
+#else
+          tcb->xcp.saved_primask    = tcb->xcp.regs[REG_PRIMASK];
+#endif
+          tcb->xcp.saved_xpsr       = tcb->xcp.regs[REG_XPSR];
+#ifdef CONFIG_BUILD_PROTECTED
+          tcb->xcp.saved_lr         = tcb->xcp.regs[REG_LR];
+#endif
+          /* Increment the IRQ lock count so that when the task is restarted,
+           * it will hold the IRQ spinlock.
            */
 
           DEBUGASSERT(tcb->irqcount < INT16_MAX);
           tcb->irqcount++;
+
+          /* Then set up to vector to the trampoline with interrupts
+           * disabled.  We must already be in privileged thread mode to be
+           * here.
+           */
+
+          tcb->xcp.regs[REG_PC]      = (uint32_t)up_sigdeliver;
+#ifdef CONFIG_ARMV7M_USEBASEPRI
+          tcb->xcp.regs[REG_BASEPRI] = NVIC_SYSH_DISABLE_PRIORITY;
+#else
+          tcb->xcp.regs[REG_PRIMASK] = 1;
+#endif
+          tcb->xcp.regs[REG_XPSR]    = ARMV7M_XPSR_T;
+#ifdef CONFIG_BUILD_PROTECTED
+          tcb->xcp.regs[REG_LR]      = EXC_RETURN_PRIVTHR;
 #endif
         }
     }
 
   leave_critical_section(flags);
 }
+#endif /* CONFIG_SMP */
 
 #endif /* !CONFIG_DISABLE_SIGNALS */

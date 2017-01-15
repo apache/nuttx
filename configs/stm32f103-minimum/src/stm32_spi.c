@@ -81,6 +81,10 @@ void stm32_spidev_initialize(void)
 #ifdef CONFIG_LCD_ST7567
   (void)stm32_configgpio(STM32_LCD_CS);       /* ST7567 chip select */
 #endif
+
+#ifdef CONFIG_WL_NRF24L01
+  stm32_configgpio(GPIO_NRF24L01_CS);         /* nRF24L01 chip select */
+#endif
 }
 
 /****************************************************************************
@@ -125,11 +129,27 @@ void stm32_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
       stm32_gpiowrite(GPIO_CS_MFRC522, !selected);
     }
 #endif
+
+#ifdef CONFIG_WL_NRF24L01
+  if (devid == SPIDEV_WIRELESS)
+    {
+      stm32_gpiowrite(GPIO_NRF24L01_CS, !selected);
+    }
+#endif
 }
 
 uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
-  return 0;
+  uint8_t status = 0;
+
+#ifdef CONFIG_WL_NRF24L01
+  if (devid == SPIDEV_WIRELESS)
+    {
+       status |= SPI_STATUS_PRESENT;
+    }
+#endif
+
+  return status;
 }
 #endif
 
