@@ -1421,7 +1421,7 @@ int uart_register(FAR const char *path, FAR uart_dev_t *dev)
 
   /* Register the serial driver */
 
-  _info("Registering %s\n", path);
+  sinfo("Registering %s\n", path);
   return register_driver(path, &g_serialops, 0666, dev);
 }
 
