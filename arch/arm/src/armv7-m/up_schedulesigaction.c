@@ -310,7 +310,11 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
               tcb->irqcount++;
 
               /* Handle a possible race condition where the TCB was suspended
-               * just before we paused the other CPU.
+               * just before we paused the other CPU.  The critical section
+               * established above will prevent new threads from running on
+               * that CPU, but it will not guarantee that the running thread
+               * did not suspend itself (allowing any threads "assigned" to
+               * the CPU to run).
                */
 
               if (tcb->task_state != TSTATE_TASK_RUNNING)
