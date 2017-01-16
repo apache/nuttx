@@ -372,7 +372,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
               if (cpu != me)
                 {
-                  up_cpu_pause(cpu);
+                  up_cpu_resume(cpu);
                 }
             }
         }
