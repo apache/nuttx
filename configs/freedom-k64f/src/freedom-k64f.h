@@ -3,6 +3,7 @@
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Updated: Neil Hancock
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -57,6 +58,10 @@
 #define HAVE_MMCSD       1
 #define HAVE_AUTOMOUNTER 1
 #define HAVE_USBDEV      1
+
+#if defined(CONFIG_KINETIS_RTC)
+#define HAVE_RTC_DRIVER  1
+#endif
 
 /* Automount procfs */
 
