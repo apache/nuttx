@@ -228,21 +228,21 @@ static inline void psock_lost_connection(FAR struct socket *psock,
 
 #ifdef NEED_IPDOMAIN_SUPPORT
 static inline void send_ipselect(FAR struct net_driver_s *dev,
-                                 FAR struct socket *psock)
+                                 FAR struct tcp_conn_s *conn)
 {
   /* Which domain the the socket support */
 
-  if (psock->s_domain == PF_INET)
+  if (conn->domain == PF_INET)
     {
       /* Select the IPv4 domain */
 
       tcp_ipv4_select(dev);
     }
-  else /* if (psock->s_domain == PF_INET6) */
+  else /* if (conn->domain == PF_INET6) */
     {
       /* Select the IPv6 domain */
 
-      DEBUGASSERT(psock->s_domain == PF_INET6);
+      DEBUGASSERT(conn->domain == PF_INET6);
       tcp_ipv4_select(dev);
     }
 }
@@ -754,7 +754,7 @@ static uint16_t psock_send_interrupt(FAR struct net_driver_s *dev,
            * place and we need do nothing.
            */
 
-          send_ipselect(dev, psock);
+          send_ipselect(dev, conn);
 #endif
           /* Then set-up to send that amount of data with the offset
            * corresponding to the amount of data already sent. (this

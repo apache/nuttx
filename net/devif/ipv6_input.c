@@ -174,12 +174,12 @@ int ipv6_input(FAR struct net_driver_s *dev)
    *
    * The length reported in the IPv6 header is the length of the payload
    * that follows the header. The device interface uses the d_len variable for
-   * holding the size of the entire packet, including the IP header and link
-   * layer header.
+   * holding the size of the entire packet, including the IP header but without 
+   * the link layer header.
    */
 
   pktlen = ((uint16_t)ipv6->len[0] << 8) + (uint16_t)ipv6->len[1] +
-           IPv6_HDRLEN + netdev_ipv6_hdrlen(dev);
+           IPv6_HDRLEN;
 
   if (pktlen <= dev->d_len)
     {
