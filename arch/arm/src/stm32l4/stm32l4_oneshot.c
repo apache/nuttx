@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32l4/stm32l4_oneshot.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           dev@ziggurat29.com
  *
@@ -43,6 +43,7 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <sched.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
@@ -55,10 +56,66 @@
 #ifdef CONFIG_STM32L4_ONESHOT
 
 /****************************************************************************
- * Private Date
+ * Private Function Prototypes
  ****************************************************************************/
 
-static struct stm32l4_oneshot_s *g_oneshot;
+static int stm32l4_oneshot_handler(struct stm32l4_oneshot_s *oneshot);
+static int stm32l4_oneshot1_handler(int irq, void *context);
+#if CONFIG_STM32L4_ONESHOT_MAXTIMERS > 1
+static int stm32l4_oneshot2_handler(int irq, void *context);
+#endif
+#if CONFIG_STM32L4_ONESHOT_MAXTIMERS > 2
+static int stm32l4_oneshot3_handler(int irq, void *context);
+#endif
+#if CONFIG_STM32L4_ONESHOT_MAXTIMERS > 3
+static int stm32l4_oneshot4_handler(int irq, void *context);
+#endif
+#if CONFIG_STM32L4_ONESHOT_MAXTIMERS > 4
+static int stm32l4_oneshot5_handler(int irq, void *context);
+#endif
+#if CONFIG_STM32L4_ONESHOT_MAXTIMERS > 5
+static int stm32l4_oneshot6_handler(int irq, void *context);
+#endif
+#if CONFIG_STM32L4_ONESHOT_MAXTIMERS > 6
+static int stm32l4_oneshot7_handler(int irq, void *context);
+#endif
+#if CONFIG_STM32L4_ONESHOT_MAXTIMERS > 7
+static int stm32l4_oneshot8_handler(int irq, void *context);
+#endif
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static struct stm32l4_oneshot_s *g_oneshot[CONFIG_STM32L4_ONESHOT_MAXTIMERS];
+
+#if CONFIG_STM32L4_ONESHOT_MAXTIMERS > 1
+static const xcpt_t g_callbacks[CONFIG_STM32L4_ONESHOT_MAXTIMERS] =
+{
+  stm32l4_oneshot1_handler,
+#if CONFIG_STM32L4_ONESHOT_MAXTIMERS > 1
+  stm32l4_oneshot2_handler,
+#endif
+#if CONFIG_STM32L4_ONESHOT_MAXTIMERS > 2
+  stm32l4_oneshot3_handler,
+#endif
+#if CONFIG_STM32L4_ONESHOT_MAXTIMERS > 3
+  stm32l4_oneshot4_handler,
+#endif
+#if CONFIG_STM32L4_ONESHOT_MAXTIMERS > 4
+  stm32l4_oneshot5_handler,
+#endif
+#if CONFIG_STM32L4_ONESHOT_MAXTIMERS > 5
+  stm32l4_oneshot6_handler,
+#endif
+#if CONFIG_STM32L4_ONESHOT_MAXTIMERS > 6
+  stm32l4_oneshot7_handler,
+#endif
+#if CONFIG_STM32L4_ONESHOT_MAXTIMERS > 7
+  stm32l4_oneshot8_handler,
+#endif
+};
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -68,24 +125,20 @@ static struct stm32l4_oneshot_s *g_oneshot;
  * Name: stm32l4_oneshot_handler
  *
  * Description:
- *   Timer interrupt callback.  When the oneshot timer interrupt expires,
- *   this function will be called.  It will forward the call to the next
- *   level up.
+ *   Common timer interrupt callback.  When any oneshot timer interrupt
+ *   expires, this function will be called.  It will forward the call to
+ *   the next level up.
  *
  * Input Parameters:
- *   tch - The handle that represents the timer state
- *   arg - An opaque argument provided when the interrupt was registered
- *   sr  - The value of the timer interrupt status register at the time
- *         that the interrupt occurred.
+ *   oneshot - The state associated with the expired timer
  *
  * Returned Value:
- *   None
+ *   Always returns OK
  *
  ****************************************************************************/
 
-static int stm32l4_oneshot_handler(int irq, FAR void *context)
+static int stm32l4_oneshot_handler(struct stm32l4_oneshot_s *oneshot)
 {
-  FAR struct stm32l4_oneshot_s *oneshot = g_oneshot;
   oneshot_handler_t oneshot_handler;
   FAR void *oneshot_arg;
 
@@ -117,6 +170,137 @@ static int stm32l4_oneshot_handler(int irq, FAR void *context)
 }
 
 /****************************************************************************
+ * Name: stm32l4_oneshot[N]_handler
+ *
+ * Description:
+ *   Timer interrupt callbacks.  When a oneshot timer interrupt expires,
+ *   one of these functions will be called.  These functions will forward
+ *   the call to the nextlevel up.
+ *
+ * Input Parameters:
+ *   Standard interrupt handler arguments.
+ *
+ * Returned Value:
+ *   Always returns OK
+ *
+ ****************************************************************************/
+
+static int stm32l4_oneshot1_handler(int irq, void *context)
+{
+  DEBUGASSERT(g_oneshot[0] != NULL);
+  return stm32l4_oneshot_handler(g_oneshot[0]);
+}
+
+#if CONFIG_STM32L4_ONESHOT_MAXTIMERS > 1
+static int stm32l4_oneshot2_handler(int irq, void *context)
+{
+  DEBUGASSERT(g_oneshot[1] != NULL);
+  return stm32l4_oneshot_handler(g_oneshot[1]);
+}
+#endif
+
+#if CONFIG_STM32L4_ONESHOT_MAXTIMERS > 2
+static int stm32l4_oneshot3_handler(int irq, void *context)
+{
+  DEBUGASSERT(g_oneshot[2] != NULL);
+  return stm32l4_oneshot_handler(g_oneshot[2]);
+}
+#endif
+
+#if CONFIG_STM32L4_ONESHOT_MAXTIMERS > 3
+static int stm32l4_oneshot4_handler(int irq, void *context)
+{
+  DEBUGASSERT(g_oneshot[3] != NULL);
+  return stm32l4_oneshot_handler(g_oneshot[3]);
+}
+#endif
+
+#if CONFIG_STM32L4_ONESHOT_MAXTIMERS > 4
+static int stm32l4_oneshot5_handler(int irq, void *context)
+{
+  DEBUGASSERT(g_oneshot[4] != NULL);
+  return stm32l4_oneshot_handler(g_oneshot[4]);
+}
+#endif
+
+#if CONFIG_STM32L4_ONESHOT_MAXTIMERS > 5
+static int stm32l4_oneshot6_handler(int irq, void *context)
+{
+  DEBUGASSERT(g_oneshot[6] != NULL);
+  return stm32l4_oneshot_handler(g_oneshot[5]);
+}
+#endif
+
+#if CONFIG_STM32L4_ONESHOT_MAXTIMERS > 6
+static int stm32l4_oneshot7_handler(int irq, void *context)
+{
+  DEBUGASSERT(g_oneshot[7] != NULL);
+  return stm32l4_oneshot_handler(g_oneshot[6]);
+}
+#endif
+
+#if CONFIG_STM32L4_ONESHOT_MAXTIMERS > 7
+static int stm32l4_oneshot8_handler(int irq, void *context)
+{
+  DEBUGASSERT(g_oneshot[0] != NULL);
+  return stm32l4_oneshot_handler(g_oneshot[7]);
+}
+#endif
+
+/****************************************************************************
+ * Name: stm32l4_allocate_handler
+ *
+ * Description:
+ *   Allocate a timer callback handler for the oneshot instance.
+ *
+ * Input Parameters:
+ *   oneshot - The state instance the new oneshot timer
+ *
+ * Returned Value:
+ *   Returns zero (OK) on success.  This can only fail if the number of
+ *   timers exceeds CONFIG_STM32L4_ONESHOT_MAXTIMERS.
+ *
+ ****************************************************************************/
+
+static inline int stm32l4_allocate_handler(struct stm32l4_oneshot_s *oneshot)
+{
+#if CONFIG_STM32L4_ONESHOT_MAXTIMERS > 1
+  int ret = -ENOMEM;
+  int i;
+
+  /* Search for an unused handler */
+
+  sched_lock();
+  for (i = 0; i < CONFIG_STM32L4_ONESHOT_MAXTIMERS; i++)
+    {
+      /* Is this handler available? */
+
+      if (g_oneshot[i] == NULL)
+        {
+          /* Yes... assign it to this oneshot */
+
+          g_oneshot[i]   = oneshot;
+          oneshot->cbndx = i;
+          ret            = OK;
+          break;
+        }
+    }
+
+  sched_unlock();
+  return ret;
+
+#else
+  if (g_oneshot[0] == NULL)
+    {
+      g_oneshot[0] = oneshot;
+      return OK;
+    }
+
+  return -ENOMEM;
+#endif
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -139,8 +323,8 @@ static int stm32l4_oneshot_handler(int irq, FAR void *context)
  *
  ****************************************************************************/
 
-int stm32l4_oneshot_initialize(FAR struct stm32l4_oneshot_s *oneshot, int chan,
-                               uint16_t resolution)
+int stm32l4_oneshot_initialize(FAR struct stm32l4_oneshot_s *oneshot,
+                               int chan, uint16_t resolution)
 {
   uint32_t frequency;
 
@@ -161,17 +345,16 @@ int stm32l4_oneshot_initialize(FAR struct stm32l4_oneshot_s *oneshot, int chan,
 
   STM32L4_TIM_SETCLOCK(oneshot->tch, frequency);
 
-  /* Initialize the remaining fields in the state structure and return
-   * success.
-   */
+  /* Initialize the remaining fields in the state structure. */
 
   oneshot->chan       = chan;
   oneshot->running    = false;
   oneshot->handler    = NULL;
   oneshot->arg        = NULL;
 
-  g_oneshot           = oneshot;
-  return OK;
+  /* Assign a callback handler to the oneshot */
+
+  return stm32l4_allocate_handler(oneshot);
 }
 
 /****************************************************************************
@@ -261,7 +444,11 @@ int stm32l4_oneshot_start(FAR struct stm32l4_oneshot_s *oneshot,
 
   /* Set up to receive the callback when the interrupt occurs */
 
-  STM32L4_TIM_SETISR(oneshot->tch, stm32l4_oneshot_handler, 0);
+#if CONFIG_STM32L4_ONESHOT_MAXTIMERS > 1
+  STM32L4_TIM_SETISR(oneshot->tch, g_callbacks[oneshot->cbndx], 0);
+#else
+  STM32L4_TIM_SETISR(oneshot->tch, stm32l4_oneshot1_handler, 0);
+#endif
 
   /* Set timer period */
 

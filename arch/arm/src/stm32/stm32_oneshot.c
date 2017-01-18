@@ -105,7 +105,7 @@ static const xcpt_t g_callbacks[CONFIG_STM32_ONESHOT_MAXTIMERS] =
   stm32_oneshot5_handler,
 #endif
 #if CONFIG_STM32_ONESHOT_MAXTIMERS > 5
-  stm32_oneshot5_handler,
+  stm32_oneshot6_handler,
 #endif
 #if CONFIG_STM32_ONESHOT_MAXTIMERS > 6
   stm32_oneshot7_handler,
@@ -223,7 +223,7 @@ static int stm32_oneshot5_handler(int irq, void *context)
 #endif
 
 #if CONFIG_STM32_ONESHOT_MAXTIMERS > 5
-static int stm32_oneshot5_handler(int irq, void *context)
+static int stm32_oneshot6_handler(int irq, void *context)
 {
   DEBUGASSERT(g_oneshot[6] != NULL);
   return stm32_oneshot_handler(g_oneshot[5]);

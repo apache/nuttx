@@ -89,7 +89,7 @@ struct stm32_oneshot_s
 {
   uint8_t chan;                       /* The timer/counter in use */
 #if CONFIG_STM32_ONESHOT_MAXTIMERS > 1
-  uint8_t cbndx;                      /* Timer callback handler index*/
+  uint8_t cbndx;                      /* Timer callback handler index */
 #endif
   volatile bool running;              /* True: the timer is running */
   FAR struct stm32_tim_dev_s *tch;    /* Pointer returned by
