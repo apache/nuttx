@@ -45,9 +45,27 @@
 #include <stdint.h>
 #include <time.h>
 
+#include <nuttx/irq.h>
+
 #include "stm32_tim.h"
 
 #ifdef CONFIG_STM32_ONESHOT
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#if !defined(CONFIG_STM32_ONESHOT_MAXTIMERS) || \
+    CONFIG_STM32_ONESHOT_MAXTIMERS < 1
+#  undef CONFIG_STM32_ONESHOT_MAXTIMERS
+#  define CONFIG_STM32_ONESHOT_MAXTIMERS 1
+#endif
+
+#if CONFIG_STM32_ONESHOT_MAXTIMERS > 8
+#  warning Additional logic required to handle more than 8 timers
+#  undef CONFIG_STM32_ONESHOT_MAXTIMERS
+#  define CONFIG_STM32_ONESHOT_MAXTIMERS 8
+#endif
 
 /****************************************************************************
  * Public Types
@@ -70,6 +88,9 @@ typedef void (*oneshot_handler_t)(void *arg);
 struct stm32_oneshot_s
 {
   uint8_t chan;                       /* The timer/counter in use */
+#if CONFIG_STM32_ONESHOT_MAXTIMERS > 1
+  uint8_t cbndx;                      /* Timer callback handler index*/
+#endif
   volatile bool running;              /* True: the timer is running */
   FAR struct stm32_tim_dev_s *tch;    /* Pointer returned by
                                        * stm32_tim_init() */
