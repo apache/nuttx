@@ -316,6 +316,9 @@ static FAR const char *g_statenames[] =
   "Invalid",
   "Waiting,Unlock",
   "Ready",
+#ifdef CONFIG_SMP
+  "Assigned",
+#endif
   "Running",
   "Inactive",
   "Waiting,Semaphore",
@@ -957,7 +960,7 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
 #endif
 
 #if CONFIG_NSOCKET_DESCRIPTORS > 0
-  linesize   = snprintf(procfile->line, STATUS_LINELEN, "\n%3-s %-2s %-3s %s\n",
+  linesize   = snprintf(procfile->line, STATUS_LINELEN, "\n%-3s %-2s %-3s %s\n",
                         "SD", "RF", "TYP", "FLAGS");
   copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining, &offset);
 
@@ -980,7 +983,7 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
         {
           linesize   = snprintf(procfile->line, STATUS_LINELEN, "%3d %2d %3d %02x",
                                 i + CONFIG_NFILE_DESCRIPTORS,
-                                (long)socket->s_crefs, socket->s_type, socket->s_flags);
+                                socket->s_crefs, socket->s_type, socket->s_flags);
           copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining, &offset);
 
           totalsize += copysize;

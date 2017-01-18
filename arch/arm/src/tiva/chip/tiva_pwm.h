@@ -107,6 +107,23 @@
 #define CC_PWMDIV_64                    (0x5)   /* (Value) Divided by 64 */
 
 #define TIVA_PWMn_CTL_ENABLE            (0)     /* (Bit) PWM Block Enable */
+#define CTL_DISABLE                     (0)     /* (Value) Disable */
 #define CTL_ENABLE                      (1)     /* (Value) Enable */
+
+#define INTEN_GEN3                      (3)     /* (Bit) Enable PWM GEN3 Interrupt */
+#define INTEN_GEN2                      (2)     /* (Bit) Enable PWM GEN2 Interrupt */
+#define INTEN_GEN1                      (1)     /* (Bit) Enable PWM GEN1 Interrupt */
+#define INTEN_GEN0                      (0)     /* (Bit) Enable PWM GEN0 Interrupt */
+#define INT_DISABLE                     (0)     /* (Value) Disable */
+#define INT_ENABLE                      (1)     /* (Value) Enable */
+
+#define INTCMPBD                        (5)     /* (Bit) Interrupt for Counter=PWMnCMPB Down */
+#define INTCMPBU                        (4)     /* (Bit) Interrupt for Counter=PWMnCMPB Up */
+#define INTCMPAD                        (3)     /* (Bit) Interrupt for Counter=PWMnCMPA Down */
+#define INTCMPAU                        (2)     /* (Bit) Interrupt for Counter=PWMnCMPA Up */
+#define INTCNTLOAD                      (1)     /* (Bit) Interrupt for Counter=PWMnLOAD */
+#define INTCNTZERO                      (0)     /* (Bit) Interrupt for Counter=0 */
+#define INT_CLR                         (0)     /* (Value) Bit Clear */
+#define INT_SET                         (1)     /* (Value) Bit Set */
 
 #endif /* __ARCH_ARM_SRC_TIVA_CHIP_TIVA_PWM_H */

@@ -61,6 +61,12 @@ config LIBC_LONG_LONG
 		libraries that will be drawn into the build if long long support
 		is enabled.
 
+config LIBC_SCANSET
+	bool "Scanset support"
+	default n
+	---help---
+		Add scanset support to sscanf().
+
 config LIBC_IOCTL_VARIADIC
 	bool "Enable variadic ioctl()"
 	default n
@@ -574,6 +580,16 @@ config TLS_NELEM
 		the user library functions tls_get_element() and tls_set_element().
 
 endif # TLS
+
+config LIBC_IPv4_ADDRCONV
+	bool "IPv4 address conversions"
+	default n
+	depends on !NET_IPv4
+
+config LIBC_IPv6_ADDRCONV
+	bool "IPv6 address conversions"
+	default n
+	depends on !NET_IPv6
 
 config LIBC_NETDB
 	bool

@@ -71,6 +71,8 @@
 
 ssize_t recv(int sockfd, FAR void *buf, size_t len, int flags)
 {
+  /* recv is a cancellation point, but that can all be handled by recvfrom */
+
   return recvfrom(sockfd, buf, len, flags, NULL, 0);
 }
 

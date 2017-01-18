@@ -59,19 +59,11 @@
 #  include <nuttx/usb/pl2303.h>
 #endif
 
-#ifdef CONFIG_TIMER
-#  include <nuttx/timers/timer.h>
-#endif
-
 #ifdef CONFIG_USBMONITOR
 #  include <nuttx/usb/usbmonitor.h>
 #endif
 
 #include "sam4s-xplained-pro.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions

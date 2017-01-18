@@ -59,9 +59,12 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <arch/irq.h>
 #include <arch/xtensa/core.h>
 #include <arch/xtensa/xtensa_specregs.h>
+
+#include "chip_macros.h"
 
 /****************************************************************************
  * Assembly Language Macros
@@ -158,6 +161,7 @@ _xtensa_to_coproc_handler:
  ****************************************************************************/
 
 	.type	_xtensa_user_handler, @function
+	.global	_xtensa_user_handler
 	.align	4
 
 _xtensa_user_handler:
@@ -225,12 +229,13 @@ _xtensa_user_handler:
 	 * beginning of the register save area.
 	 */
 
+#ifdef __XTENSA_CALL0_ABI__
 	rsr		a2, EXCCAUSE					/* Argument 1 (a2) = EXCCAUSE */
 	mov		a3, sp							/* Argument 2 (a2) = pointer to register save area */
-
-#ifdef __XTENSA_CALL0_ABI__
 	calx0	xtensa_user						/* Call xtensa_user */
 #else
+	rsr		a6, EXCCAUSE					/* Argument 1 (a2) = EXCCAUSE */
+	mov		a7, sp							/* Argument 2 (a2) = pointer to register save area */
 	call4	xtensa_user						/* Call xtensa_user */
 #endif
 
@@ -254,6 +259,7 @@ _xtensa_user_handler:
 	.section HANDLER_SECTION, "ax"
 	.type       _xtensa_syscall_handler, @function
 	.align      4
+
 _xtensa_syscall_handler:
 
 	/* Allocate stack frame and save A0, A1, and PS */
@@ -323,54 +329,52 @@ _xtensa_syscall_handler:
 	ps_setup	1 a0
 
 	/* Dispatch the sycall as with other interrupts. */
-	/* At this point, sp holds the pointer to the register save area.  That,
-	 * however, may change as a consequence of context switching.
-	 */
 
 	mov		a12, sp							/* a12 = address of register save area */
-	movi	a2, XTENSA_IRQ_SYSCALL			/* Argument 1: IRQ number */
-	mov		a3, a12							/* Argument 2: Top of stack = register save area */
-#ifdef __XTENSA_CALL0_ABI__
-	call0	xtensa_irq_dispatch				/* Call xtensa_int_decode */
-#else
-	call4	xtensa_irq_dispatch				/* Call xtensa_int_decode */
-#endif
 
-	/* On return from xtensa_irq_dispatch, A2 will contain the address of the new
+#ifdef __XTENSA_CALL0_ABI__
+	movi	a2, XTENSA_IRQ_SYSCALL			/* Argument 1: IRQ number */
+	mov		a3, sp							/* Argument 2: Top of stack = register save area */
+	call0	xtensa_irq_dispatch				/* Call xtensa_int_decode */
+
+	/* On return from xtensa_irq_dispatch, a2 will contain the address of the new
 	 * register save area.  Usually this would be the same as the current SP.
 	 * But in the event of a context switch, A2 will instead refer to the TCB
 	 * register save area.
 	 */
 
-	beq		a2, a12, 2f						/* If timer interrupt then skip table */
+#else
+	movi	a6, XTENSA_IRQ_SYSCALL			/* Argument 1: IRQ number */
+	mov		a7, sp							/* Argument 2: Top of stack = register save area */
+	call4	xtensa_irq_dispatch				/* Call xtensa_int_decode */
 
-	/* Switch stacks */
+	/* On return from xtensa_irq_dispatch, a5 will contain the address of the new
+	 * register save area.  Usually this would be the same as the current SP.
+	 * But in the event of a context switch, A2 will instead refer to the TCB
+	 * register save area.
+	 */
 
-	mov		a12, a2							/* Switch to the save area of the new thread */
-	l32i	a2, a12, (4 * REG_A1)			/* Retrieve stack ptr and replace */
-	addi	sp, a2, -(4 * XCPTCONTEXT_SIZE)
-
-2:
+	mov		a2, a6							/* Switch to the new register save area */
+#endif
 
 	/* Restore registers in preparation to return from interrupt */
 
-	mov		a2, a12							/* a2 = address of new state save area */
-	call0	_xtensa_context_restore
+	call0	_xtensa_context_restore			/* (Preserves a2) */
 
 	/* Restore only level-specific regs (the rest were already restored) */
 
-	l32i	a0, sp, (4 * REG_PS)			/* Retrieve interruptee's PS */
+	l32i	a0, a2, (4 * REG_PS)			/* Retrieve interruptee's PS */
 	wsr		a0, PS
-	l32i	a0, sp, (4 * REG_PC)			/* Retrieve interruptee's PC */
+	l32i	a0, a2, (4 * REG_PC)			/* Retrieve interruptee's PC */
 	wsr		a0, EPC_1
-	l32i	a0, sp, (4 * REG_A0)			/* Retrieve interruptee's A0 */
-	l32i	a2, sp, (4 * REG_A2)			/* Retrieve interruptee's A2 */
-	l32i	sp, sp, (4 * REG_A1)			/* Remove interrupt stack frame */
+	l32i	a0, a2, (4 * REG_A0)			/* Retrieve interruptee's A0 */
+	l32i	sp, a2, (4 * REG_A1)			/* Remove interrupt stack frame */
+	l32i	a2, a2, (4 * REG_A2)			/* Retrieve interruptee's A2 */
 	rsync									/* Ensure EPS and EPC written */
 
-	/* Return from exception.  RFE returns from either the UserExceptionVector
-	 * or the KernelExceptionVector. RFE sets PS.EXCM back to 0 and then jumps
-	 * to the address in EPC[1].
+	/* Return from exception. RFE returns from either the UserExceptionVector
+	 * or the KernelExceptionVector.  RFE sets PS.EXCM back to 0, and then
+	 * jumps to the address in EPC[1]. PS.UM and PS.WOE are left unchanged.
 	 */
 
 	rfe
@@ -463,12 +467,13 @@ _xtensa_coproc_handler:
 	 * beginning of the register save area.
 	 */
 
+#ifdef __XTENSA_CALL0_ABI__
 	rsr		a2, EXCCAUSE					/* Argument 1 (a2) = EXCCAUSE */
 	mov		a3, sp							/* Argument 2 (a2) = pointer to register save area */
-
-#ifdef __XTENSA_CALL0_ABI__
 	calx0	xtensa_user						/* Call xtensa_user */
 #else
+	rsr		a6, EXCCAUSE					/* Argument 1 (a2) = EXCCAUSE */
+	mov		a7, sp							/* Argument 2 (a2) = pointer to register save area */
 	call4	xtensa_user						/* Call xtensa_user */
 #endif
 

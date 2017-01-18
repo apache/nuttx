@@ -195,11 +195,44 @@
 
 struct xcptcontext
 {
+#ifndef CONFIG_DISABLE_SIGNALS
+  /* The following function pointer is non-NULL if there are pending signals
+   * to be processed.
+   */
+
+  void *sigdeliver;       /* Actual type is sig_deliver_t */
+
+  /* These additional register save locations are used to implement the
+   * signal delivery trampoline.
+   */
+
+  uint32_t saved_epc;     /* Trampoline PC */
+  uint32_t saved_int_ctx; /* Interrupt context with interrupts disabled. */
+
+# ifdef CONFIG_BUILD_KERNEL
+  /* This is the saved address to use when returning from a user-space
+   * signal handler.
+   */
+
+  uint32_t sigreturn;
+
+# endif
+#endif
+
+#ifdef CONFIG_BUILD_KERNEL
+  /* The following array holds information needed to return from each nested
+   * system call.
+   */
+
+  uint8_t nsyscalls;
+  struct xcpt_syscall_s syscall[CONFIG_SYS_NNEST];
+
+#endif
+
   /* Register save area */
 
   uint32_t regs[XCPTCONTEXT_REGS];
 };
 
 #endif /* __ASSEMBLY__ */
-
 #endif /* __ARCH_MISOC_INCLUDE_LM32_IRQ_H */

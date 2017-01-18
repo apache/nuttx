@@ -6,7 +6,7 @@
  *
  * Based on configs/stm3220g-eval/src/lpc17_adc.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -76,15 +76,14 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: board_adc_setup
+ * Name: zkit_adc_setup
  *
  * Description:
- *   All LPC17 architectures must provide the following interface to work with
- *   examples/adc.
+ *   Initialize ADC and register the ADC driver.
  *
  ************************************************************************************/
 
-int board_adc_setup(void)
+int zkit_adc_setup(void)
 {
   static bool initialized = false;
   struct adc_dev_s *adc;

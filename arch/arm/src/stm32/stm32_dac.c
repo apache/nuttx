@@ -472,7 +472,7 @@ static struct dac_dev_s g_dac2dev =
 #endif
 
 #ifdef CONFIG_STM32_DAC2
-/* Channel 1 */
+/* Channel 3 */
 
 static struct stm32_chan_s g_dac3priv =
 {
@@ -514,9 +514,18 @@ static struct stm32_dac_s g_dacblock;
 static inline void stm32_dac_modify_cr(FAR struct stm32_chan_s *chan,
                                        uint32_t clearbits, uint32_t setbits)
 {
-  uint32_t shift;
+  unsigned int shift;
 
-  shift = chan->intf * 16;
+  /* DAC1 channels 1 and 2 share the STM32_DAC[1]_CR control register.  DAC2
+   * channel 1 (and perhaps channel 2) uses the STM32_DAC2_CR control
+   * register.  In either case, bit 0 of the interface number provides the
+   * correct shift.
+   *
+   *   Bit 0 = 0: Shift = 0
+   *   Bit 0 = 1: Shift = 16
+   */
+
+  shift = (chan->intf & 1) << 4;
   modifyreg32(chan->cr, clearbits << shift, setbits << shift);
 }
 

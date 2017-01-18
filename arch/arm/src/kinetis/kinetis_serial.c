@@ -875,7 +875,7 @@ static int up_interrupts(int irq, void *context)
   else
 #endif
 #ifdef CONFIG_KINETIS_UART5
-  if (g_uart5priv.irq == irqs)
+  if (g_uart5priv.irqs == irq)
     {
       dev = &g_uart5port;
     }

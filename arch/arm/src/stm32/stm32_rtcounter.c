@@ -378,13 +378,12 @@ int up_rtc_initialize(void)
    */
 
   stm32_pwr_enablebkp(true);
-
-  /* Set access to the peripheral, enable the backup domain (BKP) and the lower
-   * power external 32,768Hz (Low-Speed External, LSE) oscillator.  Configure the
-   * LSE to drive the RTC.
-   */
-
-  stm32_rcc_enablelse();
+  
+  /* Select the lower power external 32,768Hz (Low-Speed External, LSE) oscillator
+   * as RTC Clock Source and enable the Clock */
+  
+  modifyreg16(STM32_RCC_BDCR, RCC_BDCR_RTCSEL_MASK, RCC_BDCR_RTCSEL_LSE);
+  modifyreg16(STM32_RCC_BDCR, 0, RCC_BDCR_RTCEN);
 
   /* TODO: Get state from this function, if everything is
    *   okay and whether it is already enabled (if it was disabled

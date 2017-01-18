@@ -114,6 +114,7 @@
  * handler but rather from the context of the worker thread with interrupts enabled.
  */
 
+struct xen1210_config_s;
 typedef void (*xen1210_handler_t)(FAR struct xen1210_config_s *config, FAR void *arg);
 
 /* A reference to a structure of this type must be passed to the XEN1210 driver when the

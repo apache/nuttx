@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/net/loopback.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -67,12 +67,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Non-network-driven configuration is required */
-
-#ifndef CONFIG_NET_NOINTS
-#  error CONFIG_NET_NOINTS must be selected
-#endif
-
 /* We need to have the work queue to handle SPI interrupts */
 
 #if !defined(CONFIG_SCHED_WORKQUEUE)
@@ -121,10 +115,7 @@ struct lo_driver_s
  ****************************************************************************/
 
 static struct lo_driver_s g_loopback;
-
-#ifdef CONFIG_NET_MULTIBUFFER
 static uint8_t g_iobuffer[MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE];
-#endif
 
 /****************************************************************************
  * Private Function Prototypes
@@ -247,11 +238,10 @@ static int lo_txpoll(FAR struct net_driver_s *dev)
 static void lo_poll_work(FAR void *arg)
 {
   FAR struct lo_driver_s *priv = (FAR struct lo_driver_s *)arg;
-  net_lock_t state;
 
   /* Perform the poll */
 
-  state = net_lock();
+  net_lock();
   priv->lo_txdone = false;
   (void)devif_timer(&priv->lo_dev, lo_txpoll);
 
@@ -268,7 +258,7 @@ static void lo_poll_work(FAR void *arg)
   /* Setup the watchdog poll timer again */
 
   (void)wd_start(priv->lo_polldog, LO_WDDELAY, lo_poll_expiry, 1, priv);
-  net_unlock(state);
+  net_unlock();
 }
 
 /****************************************************************************
@@ -404,11 +394,10 @@ static int lo_ifdown(FAR struct net_driver_s *dev)
 static void lo_txavail_work(FAR void *arg)
 {
   FAR struct lo_driver_s *priv = (FAR struct lo_driver_s *)arg;
-  net_lock_t state;
 
   /* Ignore the notification if the interface is not yet up */
 
-  state = net_lock();
+  net_lock();
   if (priv->lo_bifup)
     {
       do
@@ -421,7 +410,7 @@ static void lo_txavail_work(FAR void *arg)
       while (priv->lo_txdone);
     }
 
-  net_unlock(state);
+  net_unlock();
 }
 
 /****************************************************************************
@@ -555,9 +544,7 @@ int localhost_initialize(void)
   priv->lo_dev.d_addmac  = lo_addmac;    /* Add multicast MAC address */
   priv->lo_dev.d_rmmac   = lo_rmmac;     /* Remove multicast MAC address */
 #endif
-#ifdef CONFIG_NET_MULTIBUFFER
   priv->lo_dev.d_buf     = g_iobuffer;   /* Attach the IO buffer */
-#endif
   priv->lo_dev.d_private = (FAR void *)priv; /* Used to recover private state from dev */
 
   /* Create a watchdog for timing polling for and timing of transmissions */

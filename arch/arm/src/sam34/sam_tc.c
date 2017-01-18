@@ -125,7 +125,7 @@ static int      sam34_getstatus(FAR struct timer_lowerhalf_s *lower,
                   FAR struct timer_status_s *status);
 static int      sam34_settimeout(FAR struct timer_lowerhalf_s *lower,
                   uint32_t timeout);
-static void     sam34_sethandler(FAR struct timer_lowerhalf_s *lower,
+static void     sam34_setcallback(FAR struct timer_lowerhalf_s *lower,
                   tccb_t callback, FAR void *arg);
 static int      sam34_ioctl(FAR struct timer_lowerhalf_s *lower, int cmd,
                   unsigned long arg);
@@ -137,12 +137,12 @@ static int      sam34_ioctl(FAR struct timer_lowerhalf_s *lower, int cmd,
 
 static const struct timer_ops_s g_tcops =
 {
-  .start      = sam34_start,
-  .stop       = sam34_stop,
-  .getstatus  = sam34_getstatus,
-  .settimeout = sam34_settimeout,
-  .sethandler = sam34_sethandler,
-  .ioctl      = sam34_ioctl,
+  .start       = sam34_start,
+  .stop        = sam34_stop,
+  .getstatus   = sam34_getstatus,
+  .settimeout  = sam34_settimeout,
+  .setcallback = sam34_setcallback,
+  .ioctl       = sam34_ioctl,
 };
 
 /* "Lower half" driver state */
@@ -513,8 +513,8 @@ static int sam34_settimeout(FAR struct timer_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static void sam34_sethandler(FAR struct timer_lowerhalf_s *lower,
-                             tccb_t callback, FAR void *arg)
+static void sam34_setcallback(FAR struct timer_lowerhalf_s *lower,
+                              tccb_t callback, FAR void *arg)
 {
   FAR struct sam34_lowerhalf_s *priv = (FAR struct sam34_lowerhalf_s *)lower;
   irqstate_t flags;

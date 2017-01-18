@@ -44,6 +44,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/sched_note.h>
 
+#include "irq/irq.h"
 #include "sched/sched.h"
 
 /****************************************************************************
@@ -66,6 +67,14 @@
 int sched_unlock(void)
 {
   FAR struct tcb_s *rtcb = this_task();
+#ifdef CONFIG_SMP
+  int cpu;
+
+  cpu  = this_cpu();
+  rtcb = current_task(cpu);
+#else
+  rtcb = this_task();
+#endif
 
   /* Check for some special cases:  (1) rtcb may be NULL only during
    * early boot-up phases, and (2) sched_unlock() should have no
@@ -106,23 +115,48 @@ int sched_unlock(void)
            */
 
           DEBUGASSERT(g_cpu_schedlock == SP_LOCKED &&
-                     (g_cpu_lockset & (1 << this_cpu())) != 0);
+                     (g_cpu_lockset & (1 << cpu)) != 0);
 
-          spin_clrbit(&g_cpu_lockset, this_cpu(), &g_cpu_locksetlock,
+          spin_clrbit(&g_cpu_lockset, cpu, &g_cpu_locksetlock,
                       &g_cpu_schedlock);
 #endif
 
           /* Release any ready-to-run tasks that have collected in
-           * g_pendingtasks.  In the SMP case, the scheduler remains
-           * locked if interrupts are disabled.
+           * g_pendingtasks.
            *
            * NOTE: This operation has a very high likelihood of causing
            * this task to be switched out!
            */
 
 #ifdef CONFIG_SMP
-          if (g_pendingtasks.head != NULL && rtcb->irqcount <= 0)
+          /* In the SMP case, the tasks remains pend(1) if we are
+           * in a critical section, i.e., g_cpu_irqlock is locked by other
+           * CPUs, or (2) other CPUs still have pre-emption disabled, i.e.,
+           * g_cpu_schedlock is locked.  In those cases, the release of the
+           * pending tasks must be deferred until those conditions are met.
+           *
+           * There are certain conditions that we must avoid by preventing
+           * releasing the pending tasks while within the critical section
+           * of other CPUs.  This logic does that and there is matching
+           * logic in sched_addreadytorun to avoid starting new tasks within
+           * the critical section (unless the CPU is the holder of the lock).
+           *
+           * REVISIT: If this CPU is only one that holds the IRQ lock, then
+           * we should go ahead and release the pending tasks.  See the logic
+           * leave_critical_section():  It will call up_release_pending()
+           * BEFORE it clears IRQ lock.
+           * BEFORE it clears IRQ lock.
+           */
+
+          if (!spin_islocked(&g_cpu_schedlock) && !irq_cpu_locked(cpu) &&
+              g_pendingtasks.head != NULL)
 #else
+          /* In the single CPU case, decrementing irqcount to zero is
+           * sufficient to release the pending tasks.  Further, in that
+           * configuration, critical sections and pre-emption can operate
+           * fully independently.
+           */
+
           if (g_pendingtasks.head != NULL)
 #endif
             {

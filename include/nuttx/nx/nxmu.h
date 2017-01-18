@@ -71,8 +71,8 @@
 
 /* Used to create unique client MQ name */
 
-#define NX_CLIENT_MQNAMEFMT  "/dev/nxc%d"
-#define NX_CLIENT_MXNAMELEN  (16)
+#define NX_CLIENT_MQNAMEFMT  "nxc%d"
+#define NX_CLIENT_MXNAMELEN  (12)
 
 #define NX_MXSVRMSGLEN       (64) /* Maximum size of a client->server command */
 #define NX_MXEVENTLEN        (64) /* Maximum size of an event */

@@ -7,8 +7,8 @@ comment "RV32IM Configuration Options"
 
 choice
 	prompt "Toolchain Selection"
-	default RV32IM_TOOLCHAIN_GNU_RVGW if HOST_WINDOWS
-	default RV32IM_TOOLCHAIN_GNU_RVGL if !HOST_WINDOWS
+	default RV32IM_TOOLCHAIN_GNU_RVGW if TOOLCHAIN_WINDOWS
+	default RV32IM_TOOLCHAIN_GNU_RVGL if !TOOLCHAIN_WINDOWS
 
 config RV32IM_TOOLCHAIN_GNU_RVGL
 	bool "Generic GNU RVG toolchain under Linux (or other POSIX environment)"
@@ -18,7 +18,7 @@ config RV32IM_TOOLCHAIN_GNU_RVGL
 
 config RV32IM_TOOLCHAIN_GNU_RVGW
 	bool "Generic GNU RVG toolchain under Windows"
-	depends on HOST_WINDOWS
+	depends on TOOLCHAIN_WINDOWS
 	---help---
 		This option should work for any modern GNU toolchain (GCC 5.2 or newer)
 		configured for riscv32-unknown-elf.

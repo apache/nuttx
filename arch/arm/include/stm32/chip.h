@@ -1374,7 +1374,7 @@
 #  define STM32_NLCD                     0   /* (0) No LCD */
 #  define STM32_NUSBOTG                  0   /* USB FS device, but no USB OTG FS/HS */
 #  define STM32_NGPIO                    37  /* GPIOA-F */
-#  define STM32_NADC                     3   /* (3) 12-bit ADC1-3 */
+#  define STM32_NADC                     4   /* (3) 12-bit ADC1-4 */
 #  define STM32_NDAC                     2   /* (2) 12-bit DAC1-2 */
 #  define STM32_NCAPSENSE                0   /* (0) No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* (1) CRC calculation unit */
@@ -1414,7 +1414,7 @@
 #  define STM32_NLCD                     0   /* (0) No LCD */
 #  define STM32_NUSBOTG                  0   /* USB FS device, but no USB OTG FS/HS */
 #  define STM32_NGPIO                    52  /* GPIOA-F */
-#  define STM32_NADC                     3   /* (3) 12-bit ADC1-3 */
+#  define STM32_NADC                     4   /* (3) 12-bit ADC1-4 */
 #  define STM32_NDAC                     2   /* (2) 12-bit DAC1-2 */
 #  define STM32_NCAPSENSE                0   /* (0) No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* (1) CRC calculation unit */
@@ -1494,7 +1494,7 @@
 #  define STM32_NLCD                     0   /* (0) No LCD */
 #  define STM32_NUSBOTG                  0   /* USB FS device, but no USB OTG FS/HS */
 #  define STM32_NGPIO                    87  /* GPIOA-F */
-#  define STM32_NADC                     3   /* (3) 12-bit ADC1-3 */
+#  define STM32_NADC                     4   /* (3) 12-bit ADC1-4 */
 #  define STM32_NDAC                     2   /* (2) 12-bit DAC1-2 */
 #  define STM32_NCAPSENSE                0   /* (0) No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* (1) CRC calculation unit */

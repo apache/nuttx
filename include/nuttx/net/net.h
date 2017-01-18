@@ -49,10 +49,6 @@
 #include <stdarg.h>
 #include <semaphore.h>
 
-#ifndef CONFIG_NET_NOINTS
-#  include <nuttx/irq.h>
-#endif
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -142,24 +138,6 @@ struct socketlist
 struct net_driver_s; /* Forward reference. Defined in nuttx/net/netdev.h */
 typedef int (*netdev_callback_t)(FAR struct net_driver_s *dev, FAR void *arg);
 
-#ifdef CONFIG_NET_NOINTS
-/* Semaphore based locking for non-interrupt based logic.
- *
- * net_lock_t -- Not used.  Only for compatibility
- */
-
-typedef uint8_t net_lock_t; /* Not really used */
-
-#else
-
-/* Enable/disable locking for interrupt based logic:
- *
- * net_lock_t -- The processor specific representation of interrupt state.
- */
-
-#  define net_lock_t        irqstate_t
-#endif
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -221,26 +199,14 @@ void net_setup(void);
 void net_initialize(void);
 
 /****************************************************************************
- * Critical section management.  The NuttX configuration setting
- * CONFIG_NET_NOINTS indicates that the network stack not called from the
- * interrupt level.  If CONFIG_NET_NOINTS is defined, then these will map
- * to semaphore controls.  Otherwise, it assumed that the stack will be
- * called from interrupt level handling and these will map to interrupt
- * enable/disable controls.
+ * Critical section management.
  *
- *
- * If CONFIG_NET_NOINTS is defined, then semaphore based locking is used:
+ * Semaphore based locking is used:
  *
  *   net_lock()          - Takes the semaphore().  Implements a re-entrant mutex.
  *   net_unlock()        - Gives the semaphore().
  *   net_lockedwait()    - Like pthread_cond_wait(); releases the semaphore
  *                         momentarily to wait on another semaphore()
- *
- * Otherwise, interrupt based locking is used:
- *
- *   net_lock()          - Disables interrupts.
- *   net_unlock()        - Conditionally restores interrupts.
- *   net_lockedwait()    - Just wait for the semaphore.
  *
  ****************************************************************************/
 
@@ -252,11 +218,7 @@ void net_initialize(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_NOINTS
-net_lock_t net_lock(void);
-#else
-#  define net_lock() enter_critical_section()
-#endif
+void net_lock(void);
 
 /****************************************************************************
  * Function: net_unlock
@@ -266,11 +228,7 @@ net_lock_t net_lock(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_NOINTS
-void net_unlock(net_lock_t flags);
-#else
-#  define net_unlock(f) leave_critical_section(f)
-#endif
+void net_unlock(void);
 
 /****************************************************************************
  * Function: net_timedwait
@@ -290,12 +248,8 @@ void net_unlock(net_lock_t flags);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_NOINTS
 struct timespec;
 int net_timedwait(sem_t *sem, FAR const struct timespec *abstime);
-#else
-#  define net_timedwait(s,t) sem_timedwait(s,t)
-#endif
 
 /****************************************************************************
  * Function: net_lockedwait
@@ -313,11 +267,7 @@ int net_timedwait(sem_t *sem, FAR const struct timespec *abstime);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_NOINTS
 int net_lockedwait(sem_t *sem);
-#else
-#  define net_lockedwait(s) sem_wait(s)
-#endif
 
 /****************************************************************************
  * Function: net_setipid

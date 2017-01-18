@@ -857,7 +857,7 @@ static void mmcsd_decodeCID(FAR struct mmcsd_state_s *priv, uint32_t cid[4])
    */
 
   decoded.mid    =  cid[0] >> 24;
-  decoded.oid    = (cid[0] >> 16) & 0xffff;
+  decoded.oid    = (cid[0] >> 8) & 0xffff;
   decoded.pnm[0] =  cid[0] & 0xff;
 
   /* Word 2: Bits 64:95
@@ -893,9 +893,9 @@ static void mmcsd_decodeCID(FAR struct mmcsd_state_s *priv, uint32_t cid[4])
   decoded.mdt    = (cid[3] >> 8) & 0x0fff;
   decoded.crc    = (cid[3] >> 1) & 0x7f;
 
-  finfo("mid: %02x oid: %04x pnm: %s prv: %d psn: %d mdt: %02x crc: %02x\n",
+  finfo("mid: %02x oid: %04x pnm: %s prv: %d psn: %lu mdt: %02x crc: %02x\n",
       decoded.mid, decoded.oid, decoded.pnm, decoded.prv,
-      decoded.psn, decoded.mdt, decoded.crc);
+      (unsigned long)decoded.psn, decoded.mdt, decoded.crc);
 }
 #endif
 
@@ -1476,6 +1476,7 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_state_s *priv,
     {
       offset = startblock << priv->blockshift;
     }
+
   finfo("nbytes=%d byte offset=%d\n", nbytes, offset);
 
   /* Select the block size for the card */
@@ -2234,7 +2235,8 @@ static int mmcsd_geometry(FAR struct inode *inode, struct geometry *geometry)
                  geometry->geo_mediachanged ? "true" : "false",
                  geometry->geo_writeenabled ? "true" : "false");
           finfo("nsectors: %lu sectorsize: %d\n",
-                 (long)geometry->geo_nsectors, geometry->geo_sectorsize);
+                 ((unsigned long))geometry->geo_nsectors,
+                 geometry->geo_sectorsize);
 
           priv->mediachanged = false;
           ret = OK;

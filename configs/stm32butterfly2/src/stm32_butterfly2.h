@@ -127,5 +127,19 @@ int stm32_usbhost_initialize(void);
 static inline int stm32_usbhost_initialize(void) { return 0; }
 #endif
 
+/************************************************************************************
+ * Name: stm32_adc_setup
+ *
+ * Description:
+ *   Initialize ADC and register the ADC driver.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_STM32_ADC
+int stm32_adc_setup(void);
+#else
+static inline int stm32_adc_setup(void) { return 0; }
+#endif
+
 #endif /* __CONFIGS_STM32_BUTTERFLY2_SRC_STM32_BUTTERFLY2_H */
 

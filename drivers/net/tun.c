@@ -58,15 +58,12 @@
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include <nuttx/wdog.h>
+#include <nuttx/wqueue.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
-
-#include <net/if.h>
 #include <nuttx/net/tun.h>
 
-#ifdef CONFIG_NET_NOINTS
-#  include <nuttx/wqueue.h>
-#endif
+#include <net/if.h>
 
 #ifdef CONFIG_NET_PKT
 #  include <nuttx/net/pkt.h>
@@ -79,11 +76,10 @@
  * work queue support is required.
  */
 
-#if defined(CONFIG_NET_NOINTS) && !defined(CONFIG_SCHED_WORKQUEUE)
+#if !defined(CONFIG_SCHED_WORKQUEUE)
 #  error Work queue support is required in this configuration (CONFIG_SCHED_WORKQUEUE)
-#endif
+#else
 
-#if defined(CONFIG_SCHED_WORKQUEUE)
 #  if defined(CONFIG_TUN_HPWORK)
 #    define TUNWORK HPWORK
 #  elif defined(CONFIG_TUN_LPWORK)
@@ -119,9 +115,7 @@ struct tun_device_s
 {
   bool              bifup;   /* true:ifup false:ifdown */
   WDOG_ID           txpoll;  /* TX poll timer */
-#ifdef CONFIG_NET_NOINTS
   struct work_s     work;    /* For deferring work to the work queue */
-#endif
 
   FAR struct file  *filep;
 
@@ -169,10 +163,7 @@ static void tun_txdone(FAR struct tun_device_s *priv);
 
 /* Watchdog timer expirations */
 
-static inline void tun_poll_process(FAR struct tun_device_s *priv);
-#ifdef CONFIG_NET_NOINTS
 static void tun_poll_work(FAR void *arg);
-#endif
 static void tun_poll_expiry(int argc, wdparm_t arg, ...);
 
 /* NuttX callback functions */
@@ -533,42 +524,6 @@ static void tun_txdone(FAR struct tun_device_s *priv)
 }
 
 /****************************************************************************
- * Function: tun_poll_process
- *
- * Description:
- *   Perform the periodic poll.  This may be called either from watchdog
- *   timer logic or from the worker thread, depending upon the configuration.
- *
- * Parameters:
- *   priv - Reference to the driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-static void tun_poll_process(FAR struct tun_device_s *priv)
-{
-  /* Check if there is room in the send another TX packet.  We cannot perform
-   * the TX poll if he are unable to accept another packet for transmission.
-   */
-
-  if (priv->read_d_len == 0)
-    {
-      /* If so, poll the network for new XMIT data. */
-
-      priv->dev.d_buf = priv->read_buf;
-      (void)devif_timer(&priv->dev, tun_txpoll);
-    }
-
-  /* Setup the watchdog poll timer again */
-
-  (void)wd_start(priv->txpoll, TUN_WDDELAY, tun_poll_expiry, 1, priv);
-}
-
-/****************************************************************************
  * Function: tun_poll_work
  *
  * Description:
@@ -585,23 +540,34 @@ static void tun_poll_process(FAR struct tun_device_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_NOINTS
 static void tun_poll_work(FAR void *arg)
 {
   FAR struct tun_device_s *priv = (FAR struct tun_device_s *)arg;
-  net_lock_t state;
 
   /* Perform the poll */
 
   tun_lock(priv);
-  state = net_lock();
+  net_lock();
 
-  tun_poll_process(priv);
+  /* Check if there is room in the send another TX packet.  We cannot perform
+   * the TX poll if he are unable to accept another packet for transmission.
+   */
 
-  net_unlock(state);
+  if (priv->read_d_len == 0)
+    {
+      /* If so, poll the network for new XMIT data. */
+
+      priv->dev.d_buf = priv->read_buf;
+      (void)devif_timer(&priv->dev, tun_txpoll);
+    }
+
+  /* Setup the watchdog poll timer again */
+
+  (void)wd_start(priv->txpoll, TUN_WDDELAY, tun_poll_expiry, 1, priv);
+
+  net_unlock();
   tun_unlock(priv);
 }
-#endif
 
 /****************************************************************************
  * Function: tun_poll_expiry
@@ -625,7 +591,6 @@ static void tun_poll_expiry(int argc, wdparm_t arg, ...)
 {
   FAR struct tun_device_s *priv = (FAR struct tun_device_s *)arg;
 
-#ifdef CONFIG_NET_NOINTS
   /* Is our single work structure available?  It may not be if there are
    * pending interrupt actions.
    */
@@ -644,12 +609,6 @@ static void tun_poll_expiry(int argc, wdparm_t arg, ...)
 
       (void)wd_start(priv->txpoll, TUN_WDDELAY, tun_poll_expiry, 1, arg);
     }
-
-#else
-  /* Process the interrupt now */
-
-  tun_poll_process(priv);
-#endif
 }
 
 /****************************************************************************
@@ -758,7 +717,6 @@ static int tun_ifdown(struct net_driver_s *dev)
 static int tun_txavail(struct net_driver_s *dev)
 {
   FAR struct tun_device_s *priv = (FAR struct tun_device_s *)dev->d_private;
-  net_lock_t state;
 
   tun_lock(priv);
 
@@ -770,7 +728,7 @@ static int tun_txavail(struct net_driver_s *dev)
       return OK;
     }
 
-  state = net_lock();
+  net_lock();
 
   if (priv->bifup)
     {
@@ -780,7 +738,7 @@ static int tun_txavail(struct net_driver_s *dev)
       (void)devif_poll(&priv->dev, tun_txpoll);
     }
 
-  net_unlock(state);
+  net_unlock();
   tun_unlock(priv);
 
   return OK;
@@ -1005,7 +963,6 @@ static ssize_t tun_write(FAR struct file *filep, FAR const char *buffer,
                          size_t buflen)
 {
   FAR struct tun_device_s *priv = filep->f_priv;
-  net_lock_t state;
   ssize_t ret;
 
   if (!priv)
@@ -1021,7 +978,7 @@ static ssize_t tun_write(FAR struct file *filep, FAR const char *buffer,
       return -EBUSY;
     }
 
-  state = net_lock();
+  net_lock();
 
   if (buflen > CONFIG_NET_TUN_MTU)
     {
@@ -1039,7 +996,7 @@ static ssize_t tun_write(FAR struct file *filep, FAR const char *buffer,
       ret = (ssize_t)buflen;
     }
 
-  net_unlock(state);
+  net_unlock();
   tun_unlock(priv);
 
   return ret;
@@ -1053,7 +1010,6 @@ static ssize_t tun_read(FAR struct file *filep, FAR char *buffer,
                         size_t buflen)
 {
   FAR struct tun_device_s *priv = filep->f_priv;
-  net_lock_t state;
   ssize_t ret;
   size_t write_d_len;
   size_t read_d_len;
@@ -1084,9 +1040,9 @@ static ssize_t tun_read(FAR struct file *filep, FAR char *buffer,
 
       if (priv->read_d_len == 0)
         {
-          state = net_lock();
+          net_lock();
           tun_txdone(priv);
-          net_unlock(state);
+          net_unlock();
         }
 
       goto out;
@@ -1106,7 +1062,7 @@ static ssize_t tun_read(FAR struct file *filep, FAR char *buffer,
       tun_lock(priv);
     }
 
-  state = net_lock();
+  net_lock();
 
   read_d_len = priv->read_d_len;
   if (buflen < read_d_len)
@@ -1122,7 +1078,7 @@ static ssize_t tun_read(FAR struct file *filep, FAR char *buffer,
   priv->read_d_len = 0;
   tun_txdone(priv);
 
-  net_unlock(state);
+  net_unlock();
 
 out:
   tun_unlock(priv);

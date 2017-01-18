@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/kinetis/kinetis_alarm.h
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author:  Matias v01d <phreakuencies@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,6 +56,34 @@
 
 typedef CODE void (*alarmcb_t)(void);
 
+/* These features are in KinetisK 1st generation
+ * Time Alarm Interrupt
+ * Time Overflow Interrupt
+ * Time Seconds Interrupt
+ *
+ * For KinetisK 2nd Generation devices
+ * 64bit Monotonic  register.
+ */
+
+enum alm_id_e
+{
+  /* Used for indexing - must be sequential */
+
+  RTC_ALARMA = 0,     /* RTC ALARM A */
+  RTC_ALARMM,         /* FUT: RTC Monotonic */
+  RTC_ALARM_LAST
+};
+
+/* Structure used to pass parmaters to set an alarm */
+
+struct alm_setalarm_s
+{
+  int as_id;          /* enum alm_id_e */
+  struct tm as_time;  /* Alarm expiration time */
+  alarmcb_t as_cb;    /* Callback (if non-NULL) */
+  FAR void *as_arg;   /* Argument for callback */
+};
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -84,7 +112,6 @@ extern "C"
  *
  ****************************************************************************/
 
-struct timespec;
 int kinetis_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback);
 
 /****************************************************************************
@@ -102,6 +129,30 @@ int kinetis_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback);
  ****************************************************************************/
 
 int kinetis_rtc_cancelalarm(void);
+
+/****************************************************************************
+ * Name: kinetis_rtc_lowerhalf
+ *
+ * Description:
+ *   Instantiate the RTC lower half driver for the Kinetis.  General usage:
+ *
+ *     #include <nuttx/timers/rtc.h>
+ *     #include "kinetis_rtc.h>
+ *
+ *     struct rtc_lowerhalf_s *lower;
+ *     lower = kinetis_rtc_lowerhalf();
+ *     rtc_initialize(0, lower);
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   On success, a non-NULL RTC lower interface is returned.
+ *   NULL is returned on any failure.
+ *
+ ****************************************************************************/
+
+FAR struct rtc_lowerhalf_s *kinetis_rtc_lowerhalf(void);
 
 #undef EXTERN
 #if defined(__cplusplus)

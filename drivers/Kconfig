@@ -519,23 +519,6 @@ if SENSORS
 source drivers/sensors/Kconfig
 endif # SENSORS
 
-menuconfig SERCOMM_CONSOLE
-	bool "Osmocom-bb Sercomm Driver Support"
-	default n
-	---help---
-		Sercomm is the transport used by osmocom-bb that runs on top of serial.
-		See http://bb.osmocom.org/trac/wiki/nuttx-bb/run for detailed the usage
-		of nuttx with sercomm.
-
-		drivers/sercomm is only built if SERCOMM_CONSOLE in the NuttX
-		configuration file.  If you attempt to build this driver without
-		osmocom-bb, you will get compilation errors because of header files
-		that are needed from the osmocom-bb.
-
-if SERCOMM_CONSOLE
-source drivers/sercomm/Kconfig
-endif # SERCOMM_CONSOLE
-
 menuconfig SERIAL
 	bool "Serial Driver Support"
 	default y

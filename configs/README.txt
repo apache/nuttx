@@ -206,13 +206,6 @@ configs/cloudctrl
   board. Based on the Shenzhou IV development board design.  It is based on
   the STM32F107VC MCU.
 
-configs/compal_e86, compal_e88 and compal_e99
-  These directories contain the board support for compal e86, e88 and e99 phones.
-  These ports are based on patches contributed by Denis Carikli for both the
-  compal e99 and e88.  The patches were made by Alan Carvalho de Assis and
-  Denis Carikli using the Stefan Richter's Osmocom-bb patches.  The variant
-  for the e86 was submitted by Craig Comstock.
-
 configs/demo9s12ne64
   Freescale DMO9S12NE64 board based on the MC9S12NE64 hcs12 cpu.  This
   port uses the m9s12x GCC toolchain.  STATUS:  (Still) under development; it
@@ -467,6 +460,11 @@ configs/olimex-stm32-p207
   toolchain under Linux or Cygwin. See the https://www.olimex.com/dev/stm32-p207.html
   for further information.  Contributed by Martin Lederhilger.
 
+configs/olimex-stm32-p407
+  This port uses the Olimex STM32-P407 board (STM32F407ZG) and a GNU arm-nuttx-elf
+  toolchain under Linux or Cygwin. See the https://www.olimex.com/dev/stm32-p407.html
+  for further information.
+
 configs/olimexino-stm32
   This port uses the Olimexino STM32 board (STM32F103RBT6) and a GNU arm-nuttx-elf
   toolchain* under Linux or Cygwin. See the http://www.olimex.com for further\
@@ -531,7 +529,6 @@ configs/pic32mx7mmb
   Mikroelektronika PIC32MX7 Multimedia Board (MMB).  See
   http://www.mikroe.com/ for further information.
 
-configs/pirelli_dpl10
 configs/pic32mz-starterkit
   This directory contains the port of NuttX to the Microchip PIC32MZ
   Embedded Connectivity (EC) Starter Kit.  There are two configurations of
@@ -544,23 +541,9 @@ configs/pic32mz-starterkit
 
   See www.microchip.com for further information.
 
-  This directory contains the board support for Pirelli "Discus" DP-L10 phones.
-  It is a variant of the compal_e88 config with the small changes for the
-  differences in the board.
-
 configs/qemu-i486
   Port of NuttX to QEMU in i486 mode.  This port will also run on real i486
   hardwared (Google the Bifferboard).
-
-configs/rgmp
-  RGMP stands for RTOS and GPOS on Multi-Processor.  RGMP is a project for
-  running GPOS and RTOS simultaneously on multi-processor platforms. You can
-  port your favorite RTOS to RGMP together with an unmodified Linux to form a
-  hybrid operating system. This makes your application able to use both RTOS
-  and GPOS features.
-
-  See http://rgmp.sourceforge.net/wiki/index.php/Main_Page for further
-  information about RGMP.
 
 configs/nr5m100-nexys4
   Port of NuttX to RISC-V platform on IQ-Analog NR5M100 RISC-V FPGA platform.
@@ -609,6 +592,9 @@ configs/samd21-xplained
 
 configs/sam3u-ek
   The port of NuttX to the Atmel SAM3U-EK development board.
+
+configs/sam4cmp-db
+  The port of NuttX to the Atmel SAM4CMP-DB development board.
 
 configs/sam4e-ek
   The port of NuttX to the Atmel SAM4E-EK development board.  This board

@@ -158,7 +158,6 @@ arch/arm - ARM-based micro-controllers
     MCU support
       arch/arm/include/a1x and arch/arm/src/a1x
       arch/arm/include/c5471 and arch/arm/src/c5471
-      arch/arm/include/calypso and arch/arm/src/calypso
       arch/arm/include/dm320 and arch/arm/src/dm320
       arch/arm/include/efm32 and arch/arm/src/efm32
       arch/arm/include/imx1 and arch/arm/src/imx1
@@ -221,17 +220,6 @@ arch/renesas - Support for Renesas and legacy Hitachi microcontrollers.
     MCU support
       arch/renesas/include/m16c and arch/renesas/src/m16c
       arch/renesas/include/sh1 and arch/renesas/src/sh1
-
-arch/rgmp
-
-    RGMP stands for RTOS and GPOS on Multi-Processor.  RGMP is a project
-    for running GPOS and RTOS simultaneously on multi-processor platforms.
-    You can port your favorite RTOS to RGMP together with an unmodified
-    Linux to form a hybrid operating system. This makes your application
-    able to use both RTOS and GPOS features.
-
-    See http://rgmp.sourceforge.net/wiki/index.php/Main_Page for further
-    information about RGMP.
 
 arch/risc-v
     This directory is dedicated to ports to the RISC-V family.

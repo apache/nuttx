@@ -43,6 +43,13 @@ config MISOC_UART1
 	select ARCH_HAVE_UART1
 	select MISOC_UART
 
+config MISOC_ETHERNET
+	bool "Ethernet"
+	default n
+	select NETDEVICES
+	select ARCH_HAVE_PHY
+	select ARCH_HAVE_NETDEV_STATISTICS
+
 endmenu # MISOC Peripheral Support
 
 config MISOC_UART

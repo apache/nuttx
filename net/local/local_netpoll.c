@@ -62,12 +62,11 @@ static int local_accept_pollsetup(FAR struct local_conn_s *conn,
                                   FAR struct pollfd *fds,
                                   bool setup)
 {
-  net_lock_t state;
   pollevent_t eventset;
   int ret = OK;
   int i;
 
-  state = net_lock();
+  net_lock();
   if (setup)
     {
       /* This is a request to set up the poll.  Find an available
@@ -125,7 +124,7 @@ static int local_accept_pollsetup(FAR struct local_conn_s *conn,
     }
 
 errout:
-  net_unlock(state);
+  net_unlock();
   return ret;
 }
 #endif

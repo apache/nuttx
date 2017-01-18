@@ -62,6 +62,7 @@ static ssize_t nxterm_write(FAR struct file *filep, FAR const char *buffer,
 /****************************************************************************
  * Public Data
  ****************************************************************************/
+
 /* This is the common NX driver file operations */
 
 #ifdef CONFIG_NXTERM_NXKBDIN
@@ -97,10 +98,6 @@ const struct file_operations g_nxterm_drvrops =
 };
 
 #endif /* CONFIG_NXTERM_NXKBDIN */
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions

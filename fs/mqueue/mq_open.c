@@ -100,10 +100,19 @@ mqd_t mq_open(FAR const char *mq_name, int oflags, ...)
 
   /* Make sure that a non-NULL name is supplied */
 
-  if (!mq_name)
+  if (mq_name == NULL || *mq_name == '\0')
     {
       errcode = EINVAL;
       goto errout;
+    }
+
+  /* Skip over any leading '/'.  All message queue paths are relative to
+   * CONFIG_FS_MQUEUE_MPATH.
+   */
+
+  while (*mq_name == '/')
+    {
+      mq_name++;
     }
 
   /* Get the full path to the message queue */

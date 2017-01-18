@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/mtd/mtd_config.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2013 Ken Pettit. All rights reserved.
  *   Author: Ken Pettit <pettitkd@gmail.com>
  *           With Updates from Gregory Nutt <gnutt@nuttx.org>
@@ -101,13 +101,13 @@ struct mtdconfig_struct_s
   FAR uint8_t *buffer;        /* Temp block read buffer */
 };
 
-struct mtdconfig_header_s
+begin_packed_struct struct mtdconfig_header_s
 {
   uint8_t      flags;         /* Entry control flags */
   uint8_t      instance;      /* Instance of the item */
   uint16_t     id;            /* ID of the config data item */
   uint16_t     len;           /* Length of the data block */
-} packed_struct;
+} end_packed_struct;
 
 /****************************************************************************
  * Private Function Prototypes

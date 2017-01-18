@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sched/sched_addreadytorun.c
  *
- *   Copyright (C) 2007-2009, 2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2014, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -167,10 +167,11 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
 {
   FAR struct tcb_s *rtcb;
   FAR dq_queue_t *tasklist;
-  int task_state;
-  int cpu;
   bool switched;
   bool doswitch;
+  int task_state;
+  int cpu;
+  int me;
 
   /* Check if the blocked TCB is locked to this CPU */
 
@@ -226,9 +227,17 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
    * disabled.  If the selected state is TSTATE_TASK_READYTORUN, then it
    * should also go to the pending task list so that it will have a chance
    * to be restarted when the scheduler is unlocked.
+   *
+   * There is an interaction here with IRQ locking.  Even if the pre-
+   * emption is enabled, tasks will be forced to pend if the IRQ lock
+   * is also set UNLESS the CPU starting the thread is also the holder of
+   * the IRQ lock.  irq_cpu_locked() performs an atomic check for that
+   * situation.
    */
 
-  if (spin_islocked(&g_cpu_schedlock) && task_state != TSTATE_TASK_ASSIGNED)
+  me = this_cpu();
+  if ((spin_islocked(&g_cpu_schedlock) || irq_cpu_locked(me)) &&
+      task_state != TSTATE_TASK_ASSIGNED)
     {
       /* Add the new ready-to-run task to the g_pendingtasks task list for
        * now.
@@ -255,10 +264,8 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
     }
   else /* (task_state == TSTATE_TASK_ASSIGNED || task_state == TSTATE_TASK_RUNNING) */
     {
-      int me = this_cpu();
-
-      /* If we are modifying some assigned task list other than our own, we will
-       * need to stop that CPU.
+      /* If we are modifying some assigned task list other than our own, we
+       * will need to stop that CPU.
        */
 
       if (cpu != me)
@@ -273,7 +280,8 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
       tasklist = (FAR dq_queue_t *)&g_assignedtasks[cpu];
       switched = sched_addprioritized(btcb, tasklist);
 
-      /* If the selected task was the g_assignedtasks[] list, then a context
+      /* If the selected task list was the g_assignedtasks[] list and if the
+       * new tasks is the highest priority (RUNNING) task, then a context
        * switch will occur.
        */
 
@@ -314,13 +322,40 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
 
           if (btcb->irqcount > 0)
             {
+              /* Yes... make sure that scheduling logic on other CPUs knows
+               * that we hold the IRQ lock.
+               */
+
               spin_setbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock,
                           &g_cpu_irqlock);
             }
+
+          /* No.. This CPU will be relinquishing the lock.  But this works
+           * differently if we are performing a context switch from an
+           * interrupt handler and the interrupt handler has established
+           * a critical section.  We can detect this case when
+           * g_cpu_nestcount[me] > 0.
+           */
+
+          else if (g_cpu_nestcount[me] <= 0)
+            {
+              /* Release our hold on the IRQ lock. */
+
+              spin_clrbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock,
+                         &g_cpu_irqlock);
+            }
+
+          /* Sanity check.  g_cpu_netcount should be greater than zero
+           * only while we are within the critical section and within
+           * an interrupt handler.  If we are not in an interrupt handler
+           * then there is a problem; perhaps some logic previously
+           * called enter_critical_section() with no matching call to
+           * leave_critical_section(), leaving the non-zero count.
+           */
+
           else
             {
-              spin_clrbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock,
-                          &g_cpu_irqlock);
+              DEBUGASSERT(up_interrupt_context());
             }
 
           /* If the following task is not locked to this CPU, then it must
@@ -367,7 +402,14 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
         }
       else
         {
-          /* No context switch.  Assign the CPU and set the assigned state */
+          /* No context switch.  Assign the CPU and set the assigned state.
+           *
+           * REVISIT: I have seen this assertion fire.  Apparently another
+           * CPU may add another, higher prioirity task to the same
+           * g_assignedtasks[] list sometime after sched_cpu_select() was
+           * called above, leaving this TCB in the wrong task list if task_state
+           * is TSTATE_TASK_ASSIGNED).
+           */
 
           DEBUGASSERT(task_state == TSTATE_TASK_ASSIGNED);
 

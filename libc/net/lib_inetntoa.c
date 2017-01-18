@@ -44,7 +44,7 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 
-#ifdef CONFIG_NET_IPv4
+#if defined(CONFIG_NET_IPv4) || defined(CONFIG_LIBC_IPv4_ADDRCONV)
 
 /****************************************************************************
  * Public Functions
@@ -78,4 +78,4 @@ FAR char *_inet_ntoa(in_addr_t in)
   return buffer;
 }
 #endif
-#endif /* CONFIG_NET_IPv4 */
+#endif /* CONFIG_NET_IPv4 || CONFIG_LIBC_IPv4_ADDRCONV */

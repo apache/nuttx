@@ -52,7 +52,7 @@
 #  include <arch/irq.h>
 #  ifdef CONFIG_SMP
 #    include <nuttx/sched.h>
-#    include <arch/spinlock.h>
+#    include <nuttx/spinlock.h>
 #  endif
 #endif
 
@@ -197,6 +197,25 @@ extern volatile int g_eventloop;
 
 #if defined(CONFIG_DEV_CONSOLE) && !defined(CONFIG_SIM_UART_DATAPOST)
 extern volatile int g_uart_data_available;
+#endif
+
+#ifdef CONFIG_SMP
+/* These spinlocks are used in the SMP configuration in order to implement
+ * up_cpu_pause().  The protocol for CPUn to pause CPUm is as follows
+ *
+ * 1. The up_cpu_pause() implementation on CPUn locks both g_cpu_wait[m]
+ *    and g_cpu_paused[m].  CPUn then waits spinning on g_cpu_paused[m].
+ * 2. CPUm receives the interrupt it (1) unlocks g_cpu_paused[m] and
+ *    (2) locks g_cpu_wait[m].  The first unblocks CPUn and the second
+ *    blocks CPUm in the interrupt handler.
+ *
+ * When CPUm resumes, CPUn unlocks g_cpu_wait[m] and the interrupt handler
+ * on CPUm continues.  CPUm must, of course, also then unlock g_cpu_wait[m]
+ * so that it will be ready for the next pause operation.
+ */
+
+volatile spinlock_t g_cpu_wait[CONFIG_SMP_NCPUS] SP_SECTION;
+volatile spinlock_t g_cpu_paused[CONFIG_SMP_NCPUS] SP_SECTION;
 #endif
 
 /****************************************************************************

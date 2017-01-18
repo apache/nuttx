@@ -115,10 +115,15 @@
 
 #define PTHREAD_DEFAULT_PRIORITY      100
 
-/* Cancellation states returned by pthread_cancelstate() */
+/* Cancellation states used by pthread_setcancelstate() */
 
 #define PTHREAD_CANCEL_ENABLE         (0)
 #define PTHREAD_CANCEL_DISABLE        (1)
+
+/* Cancellation types used by pthread_setcanceltype() */
+
+#define PTHREAD_CANCEL_DEFERRED       (0)
+#define PTHREAD_CANCEL_ASYNCHRONOUS   (1)
 
 /* Thread return value when a pthread is canceled */
 
@@ -265,6 +270,12 @@ typedef struct pthread_barrier_s pthread_barrier_t;
 typedef bool pthread_once_t;
 #define __PTHREAD_ONCE_T_DEFINED 1
 
+#ifdef CONFIG_PTHREAD_CLEANUP
+/* This type describes the pthread cleanup callback (non-standard) */
+
+typedef CODE void (*pthread_cleanup_t)(FAR void *arg);
+#endif
+
 /* Forward references */
 
 struct sched_param; /* Defined in sched.h */
@@ -334,7 +345,17 @@ int pthread_detach(pthread_t thread);
 void pthread_exit(pthread_addr_t value) noreturn_function;
 int  pthread_cancel(pthread_t thread);
 int  pthread_setcancelstate(int state, FAR int *oldstate);
+int  pthread_setcanceltype(int type, FAR int *oldtype);
 void pthread_testcancel(void);
+
+/* A thread may set up cleanup functions to execut when the thread exits or
+ * is canceled.
+ */
+
+#ifdef CONFIG_PTHREAD_CLEANUP
+void pthread_cleanup_pop(int execute);
+void pthread_cleanup_push(pthread_cleanup_t routine, FAR void *arg);
+#endif
 
 /* A thread can await termination of another thread and retrieve the return
  * value of the thread.

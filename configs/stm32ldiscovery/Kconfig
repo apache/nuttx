@@ -4,4 +4,10 @@
 #
 
 if ARCH_BOARD_STM32FL_DISCOVERY
+
+config STM32LDISCO_QETIMER
+	int "Timer to use with QE encoder"
+	default 3
+	depends on QENCODER
+
 endif

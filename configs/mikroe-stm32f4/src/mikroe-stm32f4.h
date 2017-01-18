@@ -1,7 +1,7 @@
 /****************************************************************************************************
  * configs/mikroe-stm32f4/src/mikroe-stm32f4.h
  *
- *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -227,6 +227,18 @@ void weak_function stm32_spidev_initialize(void);
 void weak_function stm32_usbinitialize(void);
 #endif
 
+/************************************************************************************
+ * Name: stm32_pwm_setup
+ *
+ * Description:
+ *   Initialize PWM and register the PWM device.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_PWM
+int stm32_pwm_setup(void);
+#endif
+
 /****************************************************************************************************
  * Name: stm32_usbhost_initialize
  *
@@ -238,6 +250,18 @@ void weak_function stm32_usbinitialize(void);
 
 #if defined(CONFIG_STM32_OTGFS) && defined(CONFIG_USBHOST)
 #  error "The Mikroe-STM32F4 board does not support HOST OTG, only device!"
+#endif
+
+/****************************************************************************
+ * Name: stm32_qencoder_initialize
+ *
+ * Description:
+ *   Initialize and register a qencoder
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_QENCODER
+int stm32_qencoder_initialize(FAR const char *devpath, int timer);
 #endif
 
 /****************************************************************************************************

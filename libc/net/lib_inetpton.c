@@ -64,10 +64,10 @@
  */
 
 #ifdef CONFIG_NETDB_HOSTFILE
-#  undef  CONFIG_NET_IPv4
-#  undef  CONFIG_NET_IPv6
-#  define CONFIG_NET_IPv4 1
-#  define CONFIG_NET_IPv6 1
+#  undef  CONFIG_LIBC_IPv4_ADDRCONV
+#  undef  CONFIG_LIBC_IPv6_ADDRCONV
+#  define CONFIG_LIBC_IPv4_ADDRCONV 1
+#  define CONFIG_LIBC_IPv6_ADDRCONV 1
 #endif
 
 /****************************************************************************
@@ -93,7 +93,7 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IPv4
+#if defined(CONFIG_NET_IPv4) || defined(CONFIG_LIBC_IPv4_ADDRCONV)
 static int inet_ipv4_pton(FAR const char *src, FAR void *dest)
 {
   size_t srcoffset;
@@ -203,7 +203,7 @@ static int inet_ipv4_pton(FAR const char *src, FAR void *dest)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IPv6
+#if defined(CONFIG_NET_IPv6) || defined(CONFIG_LIBC_IPv6_ADDRCONV)
 static int inet_ipv6_pton(FAR const char *src, FAR void *dest)
 {
   size_t srcoffset;
@@ -393,12 +393,12 @@ int inet_pton(int af, FAR const char *src, FAR void *dest)
 
   switch (af)
     {
-#ifdef CONFIG_NET_IPv4
+#if defined(CONFIG_NET_IPv4) || defined(CONFIG_LIBC_IPv4_ADDRCONV)
     case AF_INET:
       return inet_ipv4_pton(src, dest);
 #endif
 
-#ifdef CONFIG_NET_IPv6
+#if defined(CONFIG_NET_IPv6) || defined(CONFIG_LIBC_IPv6_ADDRCONV)
     case AF_INET6:
       return inet_ipv6_pton(src, dest);
 #endif

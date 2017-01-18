@@ -75,7 +75,7 @@
  *   This function must be provided via the architecture-specific logoic.
  *
  * Input Parameters:
- *   lock - The address of spinlock object.
+ *   lock - The address of spinlock object (r0).
  *
  * Returned Value:
  *   The spinlock is always locked upon return.  The value of previous value
@@ -83,6 +83,8 @@
  *   as previously locked (meaning that the test-and-set operation failed to
  *   obtain the lock) or SP_UNLOCKED if the spinlock was previously unlocked
  *   (meaning that we successfully obtained the lock)
+ *
+ * Modifies: r1, r2, and lr
  *
  ****************************************************************************/
 
@@ -98,7 +100,7 @@ up_testset:
 1:
 	ldrexb	r2, [r0]			/* Test if spinlock is locked or not */
 	cmp		r2, r1				/* Already locked? */
-	beq		2f					/* If alrady locked, return SP_LOCKED */
+	beq		2f					/* If already locked, return SP_LOCKED */
 
 	/* Not locked ... attempt to lock it */
 

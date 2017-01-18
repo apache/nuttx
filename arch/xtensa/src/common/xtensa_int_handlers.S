@@ -63,6 +63,7 @@
 #include <arch/chip/core-isa.h>
 #include <arch/xtensa/xtensa_specregs.h>
 
+#include "xtensa.h"
 #include "xtensa_abi.h"
 #include "chip_macros.h"
 #include "xtensa_timer.h"
@@ -125,37 +126,25 @@
 	 * a consequence of context switching.
 	 */
 
-	mov		a12, sp						/* a12 = address of save area */
+	mov		a12, sp						/* Address of save area */
 
-._xtensa_dispatch_level&level&:
-
+#ifdef __XTENSA_CALL0_ABI__
 	/* Get mask of pending, enabled interrupts at this level into a2. */
 
 	rsr		a2, INTENABLE
 	rsr		a3, INTERRUPT
 	movi	a4, \mask
 	and		a2, a2, a3
-	and		a2, a2, a4
-	beqz	a2, 5f						/* Nothing to do */
-
-	/* If multiple bits are set then MSB has highest priority. */
-
-	extract_msb	a4, a2					/* a4 = MSB of a2, a2 trashed */
-
-	movi	a3, XT_TIMER_INTEN			/* a3 = timer interrupt bit */
-	wsr		a4, INTCLEAR				/* Clear sw or edge-triggered interrupt */
-	beq		a3, a4, 4f					/* If timer interrupt then skip table */
+	and		a2, a2, a4					/* a2 = Set of pending, enabled interrupts for this level */
+	beqz	a2, 1f						/* Nothing to do */
 
 	/* Call xtensa_int_decode with, passing that address of the register save
 	 * area as a parameter (A2).
 	 */
 
-	mov		a2, a12						/* Argument: Top of stack = register save area */
-#ifdef __XTENSA_CALL0_ABI__
+										/* Argument 1: Set of CPU interrupt to dispatch */
+	mov		a3, sp						/* Argument 2: Top of stack = register save area */
 	call0	xtensa_int_decode			/* Call xtensa_int_decode */
-#else
-	call4	xtensa_int_decode			/* Call xtensa_int_decode */
-#endif
 
 	/* On return from xtensa_int_decode, a2 will contain the address of the new
 	 * register save area.  Usually this would be the same as the current SP.
@@ -163,55 +152,38 @@
 	 * register save area.  This may or may not reside on a stack.
 	 */
 
-	beq		a2, a12, 3f					/* If timer interrupt then skip table */
-
-	/* Switch stacks */
-
 	mov		a12, a2						/* Switch to the save area of the new thread */
-	l32i	a2, a12, (4 * REG_A1)		/* Retrieve stack ptr and replace */
-	addi	sp, a2, -(4 * XCPTCONTEXT_SIZE)
 
-3:
-	j		._xtensa_dispatch_level&level&		/* Check for more interrupts */
+#else
+	/* Get mask of pending, enabled interrupts at this level into a2. */
 
-4:
+	rsr		a6, INTENABLE
+	rsr		a2, INTERRUPT
+	movi	a3, \mask
+	and		a6, a6, a2
+	and		a6, a6, a3					/* a6 = Set of pending, enabled interrupts for this level */
+	beqz	a6, 1f						/* Nothing to do */
 
-	.ifeq XT_TIMER_INTPRI - \level
-
-	/* Interrupt handler for the NuttX system timer if at this level.
-	 * We'll be reading the interrupt state again after this call
-	 * so no need to preserve any registers except a7 (pointer to
-	 * state save area).
+	/* Call xtensa_int_decode with, passing that address of the register save
+	 * area as a parameter (A2).
 	 */
 
-	movi	a2, XTENSA_IRQ_TIMER&level& /* Argument 1: IRQ number */
-	mov		a3, a12						/* Argument 2: Top of stack = register save area */
-#ifdef __XTENSA_CALL0_ABI__
-	call0	xtensa_irq_dispatch			/* Call xtensa_int_decode */
-#else
-	call4	xtensa_irq_dispatch			/* Call xtensa_int_decode */
+										/* Argument 1: Set of CPU interrupt to dispatch */
+	mov		a7, sp						/* Argument 2: Top of stack = register save area */
+	call4	xtensa_int_decode			/* Call xtensa_int_decode */
+
+	/* On return from xtensa_int_decode, a6 will contain the address of the new
+	 * register save area.  Usually this would be the same as the current SP.
+	 * But in the event of a context switch, a2 will instead refer to the TCB
+	 * register save area.  This may or may not reside on a stack.
+	 */
+
+	mov		a12, a6						/* Switch to the save area of the new thread */
 #endif
 
-	/* On return from xtensa_irq_dispatch, A2 will contain the address of the new
-	 * register save area.  Usually this would be the same as the current SP.
-	 * But in the event of a context switch, A2 will instead refer to the TCB
-	 * register save area.
-	 */
 
-	beq		a2, a12, 5f					/* If timer interrupt then skip table */
-
-	/* Switch stacks */
-
-	mov		a12, a2						/* Switch to the save area of the new thread */
-	l32i	a2, a12, (4 * REG_A1)		/* Retrieve stack ptr and replace */
-	addi	sp, a2, -(4 * XCPTCONTEXT_SIZE)
-	.endif
-
-	j		._xtensa_dispatch_level&level&		/* Check for more interrupts */
-
-5:
-	/* done */
-
+	/* Done */
+1:
 	.endm
 
 /****************************************************************************
@@ -270,6 +242,7 @@
 
 	.section HANDLER_SECTION, "ax"
 	.type	_xtensa_level1_handler, @function
+	.global	_xtensa_level1_handler
 	.align	4
 
 _xtensa_level1_handler:
@@ -306,24 +279,25 @@ _xtensa_level1_handler:
 	/* Restore registers in preparation to return from interrupt */
 
 	mov		a2, a12							/* a2 = address of new state save area */
-	call0	_xtensa_context_restore
+	call0	_xtensa_context_restore			/* (preserves a2) */
 
 	/* Restore only level-specific regs (the rest were already restored) */
 
-	l32i	a0, sp, (4 * REG_PS)			/* Retrieve interruptee's PS */
+	l32i	a0, a2, (4 * REG_PS)			/* Retrieve interruptee's PS */
 	wsr		a0, PS
-	l32i	a0, sp, (4 * REG_PC)			/* Retrieve interruptee's PC */
+	l32i	a0, a2, (4 * REG_PC)			/* Retrieve interruptee's PC */
 	wsr		a0, EPC_1
-	l32i	a0, sp, (4 * REG_A0)			/* Retrieve interruptee's A0 */
-	l32i	a2, sp, (4 * REG_A2)			/* Retrieve interruptee's A2 */
-	l32i	sp, sp, (4 * REG_A1)			/* Remove interrupt stack frame */
-	rsync									/* Ensure EPS and EPC written */
+	l32i	a0, a2, (4 * REG_A0)			/* Retrieve interruptee's A0 */
+    l32i    sp, a2, (4 * REG_A1)            /* Remove interrupt stack frame */
+	l32i	a2, a2, (4 * REG_A2)			/* Retrieve interruptee's A2 */
+	rsync									/* Ensure PS and EPC written */
 
-	/* Return from interrupt.  RFI  restores the PS from EPS_1 and jumps to
-	 * the address in EPC_1.
+	/* Return from exception. RFE returns from either the UserExceptionVector
+	 * or the KernelExceptionVector.  RFE sets PS.EXCM back to 0, and then
+	 * jumps to the address in EPC[1]. PS.UM and PS.WOE are left unchanged.
 	 */
 
-	rfi		1
+	rfe										/* And return from "exception" */
 
 /****************************************************************************
  * MEDIUM PRIORITY (LEVEL 2+) INTERRUPT LOW LEVEL HANDLERS.
@@ -354,6 +328,7 @@ _xtensa_level1_handler:
 #if XCHAL_EXCM_LEVEL >= 2
 	.section HANDLER_SECTION, "ax"
 	.type	_xtensa_level2_handler, @function
+	.global	_xtensa_level2_handler
 	.align	4
 
 _xtensa_level2_handler:
@@ -390,17 +365,17 @@ _xtensa_level2_handler:
 	/* Restore registers in preparation to return from interrupt */
 
 	mov		a2, a12							/* a2 = address of new state save area */
-	call0	_xtensa_context_restore
+	call0	_xtensa_context_restore			/* (preserves a2) */
 
 	/* Restore only level-specific regs (the rest were already restored) */
 
-	l32i	a0, sp, (4 * REG_PS)			/* Retrieve interruptee's PS */
+	l32i	a0, a2, (4 * REG_PS)			/* Retrieve interruptee's PS */
 	wsr		a0, EPS_2
-	l32i	a0, sp, (4 * REG_PC)			/* Retrieve interruptee's PC */
+	l32i	a0, a2, (4 * REG_PC)			/* Retrieve interruptee's PC */
 	wsr		a0, EPC_2
-	l32i	a0, sp, (4 * REG_A0)			/* Retrieve interruptee's A0 */
-	l32i	a2, sp, (4 * REG_A2)			/* Retrieve interruptee's A2 */
-	l32i	sp, sp, (4 * REG_A1)			/* Remove interrupt stack frame */
+	l32i	a0, a2, (4 * REG_A0)			/* Retrieve interruptee's A0 */
+	l32i	sp, a2, (4 * REG_A1)			/* Remove interrupt stack frame */
+	l32i	a2, a2, (4 * REG_A2)			/* Retrieve interruptee's A2 */
 	rsync									/* Ensure EPS and EPC written */
 
 	/* Return from interrupt.  RFI  restores the PS from EPS_2 and jumps to
@@ -414,6 +389,7 @@ _xtensa_level2_handler:
 #if XCHAL_EXCM_LEVEL >= 3
 	.section HANDLER_SECTION, "ax"
 	.type	_xtensa_level3_handler, @function
+	.global	_xtensa_level3_handler
 	.align	4
 
 _xtensa_level3_handler:
@@ -450,17 +426,17 @@ _xtensa_level3_handler:
 	/* Restore registers in preparation to return from interrupt */
 
 	mov		a2, a12							/* a2 = address of new state save area */
-	call0	_xtensa_context_restore
+	call0	_xtensa_context_restore			/* (preserves a2) */
 
 	/* Restore only level-specific regs (the rest were already restored) */
 
-	l32i	a0, sp, (4 * REG_PS)			/* Retrieve interruptee's PS */
+	l32i	a0, a2, (4 * REG_PS)			/* Retrieve interruptee's PS */
 	wsr		a0, EPS_3
-	l32i	a0, sp, (4 * REG_PC)			/* Retrieve interruptee's PC */
+	l32i	a0, a2, (4 * REG_PC)			/* Retrieve interruptee's PC */
 	wsr		a0, EPC_3
-	l32i	a0, sp, (4 * REG_A0)			/* Retrieve interruptee's A0 */
-	l32i	a2, sp, (4 * REG_A2)			/* Retrieve interruptee's A2 */
-	l32i	sp, sp, (4 * REG_A1)			/* Remove interrupt stack frame */
+	l32i	a0, a2, (4 * REG_A0)			/* Retrieve interruptee's A0 */
+	l32i	sp, a2, (4 * REG_A1)			/* Remove interrupt stack frame */
+	l32i	a2, a2, (4 * REG_A2)			/* Retrieve interruptee's A2 */
 	rsync									/* Ensure EPS and EPC written */
 
 	/* Return from interrupt.  RFI  restores the PS from EPS_3 and jumps to
@@ -474,6 +450,7 @@ _xtensa_level3_handler:
 #if XCHAL_EXCM_LEVEL >= 4
 	.section HANDLER_SECTION, "ax"
 	.type	_xtensa_level4_handler, @function
+	.global	_xtensa_level4_handler
 	.align	4
 
 _xtensa_level4_handler:
@@ -510,17 +487,17 @@ _xtensa_level4_handler:
 	/* Restore registers in preparation to return from interrupt */
 
 	mov		a2, a12							/* a2 = address of new state save area */
-	call0	_xtensa_context_restore
+	call0	_xtensa_context_restore			/* (presevers a2) */
 
 	/* Restore only level-specific regs (the rest were already restored) */
 
-	l32i	a0, sp, (4 * REG_PS)			/* Retrieve interruptee's PS */
+	l32i	a0, a2, (4 * REG_PS)			/* Retrieve interruptee's PS */
 	wsr		a0, EPS_4
-	l32i	a0, sp, (4 * REG_PC)			/* Retrieve interruptee's PC */
+	l32i	a0, a2, (4 * REG_PC)			/* Retrieve interruptee's PC */
 	wsr		a0, EPC_4
-	l32i	a0, sp, (4 * REG_A0)			/* Retrieve interruptee's A0 */
-	l32i	a2, sp, (4 * REG_A2)			/* Retrieve interruptee's A2 */
-	l32i	sp, sp, (4 * REG_A1)			/* Remove interrupt stack frame */
+	l32i	a0, a2, (4 * REG_A0)			/* Retrieve interruptee's A0 */
+	l32i	sp, a2, (4 * REG_A1)			/* Remove interrupt stack frame */
+	l32i	a2, a2, (4 * REG_A2)			/* Retrieve interruptee's A2 */
 	rsync									/* Ensure EPS and EPC written */
 
 	/* Return from interrupt.  RFI  restores the PS from EPS_4 and jumps to
@@ -534,6 +511,7 @@ _xtensa_level4_handler:
 #if XCHAL_EXCM_LEVEL >= 5
 	.section HANDLER_SECTION, "ax"
 	.type	_xtensa_level5_handler, @function
+	.global	_xtensa_level5_handler
 	.align	4
 
 _xtensa_level5_handler:
@@ -570,17 +548,17 @@ _xtensa_level5_handler:
 	/* Restore registers in preparation to return from interrupt */
 
 	mov		a2, a12							/* a2 = address of new state save area */
-	call0	_xtensa_context_restore
+	call0	_xtensa_context_restore			/* (preserves a2) */
 
 	/* Restore only level-specific regs (the rest were already restored) */
 
-	l32i	a0, sp, (4 * REG_PS)			/* Retrieve interruptee's PS */
+	l32i	a0, a2, (4 * REG_PS)			/* Retrieve interruptee's PS */
 	wsr		a0, EPS_5
-	l32i	a0, sp, (4 * REG_PC)			/* Retrieve interruptee's PC */
+	l32i	a0, a2, (4 * REG_PC)			/* Retrieve interruptee's PC */
 	wsr		a0, EPC_5
-	l32i	a0, sp, (4 * REG_A0)			/* Retrieve interruptee's A0 */
-	l32i	a2, sp, (4 * REG_A2)			/* Retrieve interruptee's A2 */
-	l32i	sp, sp, (4 * REG_A1)			/* Remove interrupt stack frame */
+	l32i	a0, a2, (4 * REG_A0)			/* Retrieve interruptee's A0 */
+	l32i	sp, a2, (4 * REG_A1)			/* Remove interrupt stack frame */
+	l32i	a2, a2, (4 * REG_A2)			/* Retrieve interruptee's A2 */
 	rsync									/* Ensure EPS and EPC written */
 
 	/* Return from interrupt.  RFI  restores the PS from EPS_5 and jumps to
@@ -594,6 +572,7 @@ _xtensa_level5_handler:
 #if XCHAL_EXCM_LEVEL >= 6
 	.section HANDLER_SECTION, "ax"
 	.type	_xtensa_level6_handler, @function
+	.global	_xtensa_level6_handler
 	.align	4
 
 _xtensa_level6_handler:
@@ -630,17 +609,17 @@ _xtensa_level6_handler:
 	/* Restore registers in preparation to return from interrupt */
 
 	mov		a2, a12							/* a2 = address of new state save area */
-	call0	_xtensa_context_restore
+	call0	_xtensa_context_restore			/* (preserves a2) */
 
 	/* Restore only level-specific regs (the rest were already restored) */
 
-	l32i	a0, sp, (4 * REG_PS)			/* Retrieve interruptee's PS */
+	l32i	a0, a2, (4 * REG_PS)			/* Retrieve interruptee's PS */
 	wsr		a0, EPS_6
-	l32i	a0, sp, (4 * REG_PC)			/* Retrieve interruptee's PC */
+	l32i	a0, a2, (4 * REG_PC)			/* Retrieve interruptee's PC */
 	wsr		a0, EPC_6
-	l32i	a0, sp, (4 * REG_A0)			/* Retrieve interruptee's A0 */
-	l32i	a2, sp, (4 * REG_A2)			/* Retrieve interruptee's A2 */
-	l32i	sp, sp, (4 * REG_A1)			/* Remove interrupt stack frame */
+	l32i	a0, a2, (4 * REG_A0)			/* Retrieve interruptee's A0 */
+	l32i	sp, a2, (4 * REG_A1)			/* Remove interrupt stack frame */
+	l32i	a2, a2, (4 * REG_A2)			/* Retrieve interruptee's A2 */
 	rsync									/* Ensure EPS and EPC written */
 
 	/* Return from interrupt.  RFI  restores the PS from EPS_6 and jumps to
@@ -690,6 +669,7 @@ _xtensa_level6_handler:
 #if XCHAL_INT_NLEVELS >=2 && XCHAL_EXCM_LEVEL < 2 && XCHAL_DEBUGLEVEL !=2
 	.section	HANDLER_SECTION, "ax"
 	.type		_xtensa_level2_handler, @function
+	.global		_xtensa_level2_handler
 	.align		4
 
 _xtensa_level2_handler:
@@ -723,6 +703,7 @@ _xtensa_level2_handler:
 #if XCHAL_INT_NLEVELS >=3 && XCHAL_EXCM_LEVEL < 3 && XCHAL_DEBUGLEVEL !=3
 	.section	HANDLER_SECTION, "ax"
 	.type		_xtensa_level3_handler, @function
+	.global		_xtensa_level3_handler
 	.align		4
 
 _xtensa_level3_handler:
@@ -758,6 +739,7 @@ _xtensa_level3_handler:
 #if XCHAL_INT_NLEVELS >=4 && XCHAL_EXCM_LEVEL < 4 && XCHAL_DEBUGLEVEL !=4
 	.section	HANDLER_SECTION, "ax"
 	.type		_xtensa_level4_handler, @function
+	.global		_xtensa_level4_handler
 	.align		4
 
 _xtensa_level4_handler:
@@ -793,6 +775,7 @@ _xtensa_level4_handler:
 #if XCHAL_INT_NLEVELS >=5 && XCHAL_EXCM_LEVEL < 5 && XCHAL_DEBUGLEVEL !=5
 	.section	HANDLER_SECTION, "ax"
 	.type		_xtensa_level5_handler, @function
+	.global		_xtensa_level5_handler
 	.align		4
 
 _xtensa_level5_handler:
@@ -828,6 +811,7 @@ _xtensa_level5_handler:
 #if XCHAL_INT_NLEVELS >=6 && XCHAL_EXCM_LEVEL < 6 && XCHAL_DEBUGLEVEL !=6
 	.section	HANDLER_SECTION, "ax"
 	.type		_xtensa_level6_handler, @function
+	.global		_xtensa_level6_handler
 	.align		4
 
 _xtensa_level6_handler:

@@ -456,15 +456,7 @@ int board_ajoy_initialize(void)
 
   iinfo("Initialize ADC driver: /dev/adc0\n");
 
-  /* Initialize ADC.  We will need this to read the ADC inputs */
-
-  ret = board_adc_initialize();
-  if (ret < 0)
-    {
-      ierr("ERROR: board_adc_initialize() failed: %d\n", ret);
-      return ret;
-    }
-
+  /* NOTE: The ADC driver was initialized earlier in the bring-up sequence. */
   /* Open the ADC driver for reading. */
 
   fd = open("/dev/adc0", O_RDONLY);

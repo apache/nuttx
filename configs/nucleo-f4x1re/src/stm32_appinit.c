@@ -56,18 +56,6 @@
 #include "nucleo-f4x1re.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -112,9 +100,7 @@ void up_netinitialize(void)
 
 int board_app_initialize(uintptr_t arg)
 {
-#if defined(HAVE_MMCSD) || defined(CONFIG_AJOYSTICK)
-  int ret;
-#endif
+  int ret = OK;
 
   /* Configure CPU load estimation */
 
@@ -153,6 +139,29 @@ int board_app_initialize(uintptr_t arg)
   syslog(LOG_INFO, "[boot] Initialized SDIO\n");
 #endif
 
+#ifdef CONFIG_ADC
+  /* Initialize ADC and register the ADC driver. */
+
+  ret = stm32_adc_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_adc_setup failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_QENCODER
+  /* Initialize and register the qencoder driver */
+
+  ret = stm32_qencoder_initialize("/dev/qe0", CONFIG_NUCLEO_F401RE_QETIMER);
+  if (ret != OK)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to register the qencoder: %d\n",
+             ret);
+      return ret;
+    }
+#endif
+
 #ifdef CONFIG_AJOYSTICK
   /* Initialize and register the joystick driver */
 
@@ -166,5 +175,5 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
-  return OK;
+  return ret;
 }

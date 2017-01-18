@@ -61,30 +61,30 @@
  *   The aio_cancel() function attempts to cancel one or more asynchronous
  *   I/O requests currently outstanding against file descriptor 'fildes'.
  *   The aiocbp argument points to the asynchronous I/O control block for
- *   a particular request to be cancelled. If aiocbp is NULL, then all
+ *   a particular request to be canceled. If aiocbp is NULL, then all
  *   outstanding cancelable asynchronous I/O requests against fildes will
- *   be cancelled.
+ *   be canceled.
  *
  *   Normal asynchronous notification will occur for asynchronous I/O
- *   operations that are successfully cancelled. If there are requests that
- *   cannot be cancelled, then the normal asynchronous completion process
+ *   operations that are successfully canceled. If there are requests that
+ *   cannot be canceled, then the normal asynchronous completion process
  *   will take place for those requests when they are completed.
  *
- *   For requested operations that are successfully cancelled, the associated
+ *   For requested operations that are successfully canceled, the associated
  *   error status will be set to ECANCELED and the return status will be -1.
- *   For requested operations that are not successfully cancelled, the aiocbp
+ *   For requested operations that are not successfully canceled, the aiocbp
  *   will not be modified by aio_cancel().
  *
  * Input Parameters:
  *   fildes - Not used in this implementation
  *   aiocbp - Points to the asynchronous I/O control block for a particular
- *            request to be cancelled.
+ *            request to be canceled.
  *
  * Returned Value:
  *    The aio_cancel() function will return the value AIO_CANCELED if the
- *    requested operation(s) were cancelled. The value AIO_NOTCANCELED will
+ *    requested operation(s) were canceled. The value AIO_NOTCANCELED will
  *    be returned if at least one of the requested operation(s) cannot be
- *    cancelled because it is in progress. In this case, the state of the
+ *    canceled because it is in progress. In this case, the state of the
  *    other operations, if any, referenced in the call to aio_cancel() is
  *    not indicated by the return value of aio_cancel(). The application
  *    may determine the state of affairs for these operations by using
@@ -133,7 +133,7 @@ int aio_cancel(int fildes, FAR struct aiocb *aiocbp)
                * possibilities:* (1) the work has already been started and
                * is no longer queued, or (2) the work has not been started
                * and is still in the work queue.  Only the second case can
-               * be cancelled.  work_cancel() will return -ENOENT in the
+               * be canceled.  work_cancel() will return -ENOENT in the
                * first case.
                */
 
@@ -177,7 +177,7 @@ int aio_cancel(int fildes, FAR struct aiocb *aiocbp)
                * possibilities:* (1) the work has already been started and
                * is no longer queued, or (2) the work has not been started
                * and is still in the work queue.  Only the second case can
-               * be cancelled.  work_cancel() will return -ENOENT in the
+               * be canceled.  work_cancel() will return -ENOENT in the
                * first case.
                */
 

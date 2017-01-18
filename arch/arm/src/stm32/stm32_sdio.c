@@ -149,18 +149,27 @@
 #define SDIO_CLKCR_RISINGEDGE    (0)
 #define SDIO_CLKCR_FALLINGEDGE   SDIO_CLKCR_NEGEDGE
 
+/* Use the default of the rising edge but allow a configuration,
+ * that does not have the errata, to override the edge the SDIO
+ * command and data is changed on.
+ */
+
+#if !defined(SDIO_CLKCR_EDGE)
+#  define SDIO_CLKCR_EDGE SDIO_CLKCR_RISINGEDGE
+#endif
+
 /* Mode dependent settings.  These depend on clock devisor settings that must
  * be defined in the board-specific board.h header file: SDIO_INIT_CLKDIV,
  * SDIO_MMCXFR_CLKDIV, and SDIO_SDXFR_CLKDIV.
  */
 
-#define STM32_CLCKCR_INIT        (SDIO_INIT_CLKDIV | SDIO_CLKCR_RISINGEDGE | \
+#define STM32_CLCKCR_INIT        (SDIO_INIT_CLKDIV | SDIO_CLKCR_EDGE | \
                                   SDIO_CLKCR_WIDBUS_D1)
-#define SDIO_CLKCR_MMCXFR        (SDIO_MMCXFR_CLKDIV | SDIO_CLKCR_RISINGEDGE | \
+#define SDIO_CLKCR_MMCXFR        (SDIO_MMCXFR_CLKDIV | SDIO_CLKCR_EDGE | \
                                   SDIO_CLKCR_WIDBUS_D1)
-#define SDIO_CLCKR_SDXFR         (SDIO_SDXFR_CLKDIV | SDIO_CLKCR_RISINGEDGE | \
+#define SDIO_CLCKR_SDXFR         (SDIO_SDXFR_CLKDIV | SDIO_CLKCR_EDGE | \
                                   SDIO_CLKCR_WIDBUS_D1)
-#define SDIO_CLCKR_SDWIDEXFR     (SDIO_SDXFR_CLKDIV | SDIO_CLKCR_RISINGEDGE | \
+#define SDIO_CLCKR_SDWIDEXFR     (SDIO_SDXFR_CLKDIV | SDIO_CLKCR_EDGE | \
                                   SDIO_CLKCR_WIDBUS_D4)
 
 /* Timing */
@@ -2200,6 +2209,7 @@ static int stm32_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t rlo
       rlong[2] = getreg32(STM32_SDIO_RESP3);
       rlong[3] = getreg32(STM32_SDIO_RESP4);
     }
+
   return ret;
 }
 
@@ -2564,6 +2574,7 @@ static bool stm32_dmasupported(FAR struct sdio_dev_s *dev)
 static int stm32_dmapreflight(FAR struct sdio_dev_s *dev,
                               FAR const uint8_t *buffer, size_t buflen)
 {
+#if !defined(CONFIG_STM32_STM32F40XX)
   struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
@@ -2574,6 +2585,7 @@ static int stm32_dmapreflight(FAR struct sdio_dev_s *dev,
     {
       return -EINVAL;
     }
+#endif
 
   /* DMA must be possible to the buffer */
 

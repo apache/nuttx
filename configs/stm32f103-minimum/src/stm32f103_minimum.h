@@ -63,44 +63,58 @@
 /* GPIOs **************************************************************/
 /* LEDs */
 
-#define GPIO_LED1       (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
-                         GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN13)
+#define GPIO_LED1         (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                           GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN13)
 /* BUTTONs */
 
-#define GPIO_BTN_USER1  (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_MODE_INPUT|\
-                         GPIO_EXTI|GPIO_PORTA|GPIO_PIN0)
+#define GPIO_BTN_USER1    (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_MODE_INPUT|\
+                           GPIO_EXTI|GPIO_PORTA|GPIO_PIN0)
 
-#define GPIO_BTN_USER2  (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_MODE_INPUT|\
-                         GPIO_EXTI|GPIO_PORTA|GPIO_PIN1)
+#define GPIO_BTN_USER2    (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_MODE_INPUT|\
+                           GPIO_EXTI|GPIO_PORTA|GPIO_PIN1)
 
-#define MIN_IRQBUTTON   BUTTON_USER1
-#define MAX_IRQBUTTON   BUTTON_USER2
-#define NUM_IRQBUTTONS  (BUTTON_USER1 - BUTTON_USER2 + 1)
+#define MIN_IRQBUTTON     BUTTON_USER1
+#define MAX_IRQBUTTON     BUTTON_USER2
+#define NUM_IRQBUTTONS    (BUTTON_USER1 - BUTTON_USER2 + 1)
 
 
 /* SPI chip selects */
 
-#define GPIO_CS_MFRC522 (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
-                         GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN4)
+#define GPIO_CS_MFRC522   (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                           GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN4)
 
-#define STM32_LCD_CS    (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
-                         GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN4)
+#define STM32_LCD_CS      (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                           GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN4)
 
-#define STM32_LCD_RST   (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
-                         GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN3)
+#define GPIO_NRF24L01_CS  (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                           GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN4)
 
-#define STM32_LCD_RS    (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
-                         GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN2)
+#define STM32_LCD_RST     (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                           GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN3)
+
+#define STM32_LCD_RS      (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                           GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN2)
 
 /* PWN Configuration */
 
 #define STM32F103MINIMUM_PWMTIMER   3
 #define STM32F103MINIMUM_PWMCHANNEL 3
 
+/* nRF24 Configuration */
+
+/* NRF24L01 chip enable:  PB.1 */
+
+#define GPIO_NRF24L01_CE  (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                           GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN1)
+
+/* NRF24L01 IRQ line:  PA.0 */
+
+#define GPIO_NRF24L01_IRQ (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_PORTA|GPIO_PIN0)
+
 /* USB Soft Connect Pullup: PC.13 */
 
-#define GPIO_USB_PULLUP (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
-                         GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN13)
+#define GPIO_USB_PULLUP   (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                           GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN13)
 
 /************************************************************************************
  * Public Functions
@@ -167,6 +181,36 @@ int stm32_rgbled_setup(void);
  ************************************************************************************/
 
 void stm32_usbinitialize(void);
+
+/************************************************************************************
+ * Name: stm32_pwm_setup
+ *
+ * Description:
+ *   Initialize PWM and register the PWM device.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_PWM
+int stm32_pwm_setup(void);
+#endif
+
+/************************************************************************************
+ * Name: stm32_wlinitialize
+ *
+ * Description:
+ *   Initialize the NRF24L01 wireless module
+ *
+ * Input Parmeters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_WL_NRF24L01
+void stm32_wlinitialize(void);
+#endif
 
 /************************************************************************************
  * Name: stm32_mfrc522initialize

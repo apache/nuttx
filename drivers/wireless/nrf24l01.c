@@ -1254,7 +1254,7 @@ int nrf24l01_register(FAR struct spi_dev_s *spi, FAR struct nrf24l01_config_s *c
 
   /* Register the device as an input device */
 
-  iinfo("Registering " DEV_NAME "\n");
+  winfo("Registering " DEV_NAME "\n");
 
   result = register_driver(DEV_NAME, &nrf24l01_fops, 0666, dev);
   if (result < 0)

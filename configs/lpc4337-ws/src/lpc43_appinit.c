@@ -46,8 +46,9 @@
 #include <nuttx/board.h>
 #include <nuttx/i2c/i2c_master.h>
 
-#include "lpc43_i2c.h"
 #include "chip.h"
+#include "lpc43_i2c.h"
+#include "lpc4337-ws.h"
 
 /****************************************************************************
  * Private Functions
@@ -135,8 +136,22 @@ static void lpc43_i2ctool(void)
 
 int board_app_initialize(uintptr_t arg)
 {
+  int ret;
+
   /* Register I2C drivers on behalf of the I2C tool */
 
   lpc43_i2ctool();
+
+#ifdef CONFIG_LPC43_ADC0
+  /* Initialize ADC and register the ADC driver. */
+
+  ret = lpc43_adc_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: lpc43_adc_setup failed: %d\n", ret);
+    }
+#endif
+
+  UNUSED(ret);
   return OK;
 }

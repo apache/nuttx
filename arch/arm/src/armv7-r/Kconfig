@@ -144,8 +144,8 @@ endif # ARMV7R_HAVE_L2CC
 
 choice
 	prompt "Toolchain Selection"
-	default ARMV7R_TOOLCHAIN_GNU_EABIW if HOST_WINDOWS
-	default ARMV7R_TOOLCHAIN_GNU_EABIL if !HOST_WINDOWS
+	default ARMV7R_TOOLCHAIN_GNU_EABIW if TOOLCHAIN_WINDOWS
+	default ARMV7R_TOOLCHAIN_GNU_EABIL if !TOOLCHAIN_WINDOWS
 
 config ARMV7R_TOOLCHAIN_BUILDROOT
 	bool "Buildroot (Cygwin or Linux)"
@@ -161,11 +161,11 @@ config ARMV7R_TOOLCHAIN_CODESOURCERYL
 
 config ARMV7R_TOOLCHAIN_CODESOURCERYW
 	bool "CodeSourcery GNU toolchain under Windows"
-	depends on HOST_WINDOWS
+	depends on TOOLCHAIN_WINDOWS
 
 config ARMV7R_TOOLCHAIN_DEVKITARM
 	bool "devkitARM GNU toolchain"
-	depends on HOST_WINDOWS
+	depends on TOOLCHAIN_WINDOWS
 
 config ARMV7R_TOOLCHAIN_GNU_EABIL
 	bool "Generic GNU EABI toolchain under Linux (or other POSIX environment)"
@@ -175,7 +175,7 @@ config ARMV7R_TOOLCHAIN_GNU_EABIL
 
 config ARMV7R_TOOLCHAIN_GNU_EABIW
 	bool "Generic GNU EABI toolchain under Windows"
-	depends on HOST_WINDOWS
+	depends on TOOLCHAIN_WINDOWS
 	---help---
 		This option should work for any modern GNU toolchain (GCC 4.5 or newer)
 		configured for arm-none-eabi-.

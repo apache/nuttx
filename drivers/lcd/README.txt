@@ -162,10 +162,6 @@ that support additional LCDs.  LCD drivers in the configuration directory
 if they support some differ LCD interface (such as a parallel interface)
 that makes then less re-usable:
 
-  SSD1783 Drivers:
-
-    configs/compal_e99/src/ssd1783.c
-
   SSD1289 Drivers:
 
     configs/hymini-stm32v/src/ssd1289.c.  See also drivers/lcd/ssd1298.c

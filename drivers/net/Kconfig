@@ -9,12 +9,9 @@ config NETDEV_LOOPBACK
 	bool
 	default n if !NET_LOOPBACK
 	default y if NET_LOOPBACK
-	select NET_NOINTS
 	select ARCH_HAVE_NETDEV_STATISTICS
 	---help---
-		Add support for the local network loopback device, lo.  Any additional
-		networking devices that are enabled must be compatible with
-		CONFIG_NET_NOINTS.
+		Add support for the local network loopback device, lo.
 
 if NETDEV_LOOPBACK
 
@@ -195,6 +192,26 @@ config DM9X_NINTERFACES
 	default 1
 	depends on EXPERIMENTAL
 
+choice
+	prompt "Work queue"
+	default DM9X_LPWORK if SCHED_LPWORK
+	default DM9X_HPWORK if !SCHED_LPWORK && SCHED_HPWORK
+	depends on SCHED_WORKQUEUE
+	---help---
+		Work queue support is required to use the Ethernet driver.  If the
+		low priority work queue is available, then it should be used by the
+		driver.
+
+config DM9X_HPWORK
+	bool "High priority"
+	depends on SCHED_HPWORK
+
+config DM9X_LPWORK
+	bool "Low priority"
+	depends on SCHED_LPWORK
+
+endchoice # Work queue
+
 endif # NET_DM90x0
 
 config NET_CS89x0
@@ -367,26 +384,6 @@ config ENCX24J600_REGDEBUG
 
 endif # ENCX24J600
 
-menuconfig NET_E1000
-	bool "E1000 support"
-	default n
-
-if NET_E1000
-
-config E1000_N_TX_DESC
-	int "Number of TX descriptors"
-	default 128
-
-config E1000_N_RX_DESC
-	int "Number of RX descriptors"
-	default 128
-
-config E1000_BUFF_SIZE
-	int "Buffer size"
-	default 2048
-
-endif # NET_E1000
-
 menuconfig NET_SLIP
 	bool "SLIP (serial line) support"
 	default n
@@ -465,18 +462,6 @@ config FTMAC100_LPWORK
 endchoice # Work queue
 
 endif # NET_FTMAC100
-
-menuconfig NET_VNET
-	bool "VNET support"
-	default n
-
-if NET_VNET
-
-config VNET_NINTERFACES
-	int "Number of VNET interfaces"
-	default 1
-
-endif # NET_VNET
 
 if ARCH_HAVE_PHY
 

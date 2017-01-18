@@ -22,6 +22,10 @@ config ARCH_CHIP_ESP32
 		of two CPUs is symmetric, meaning they use the same addresses to
 		access the same memory.
 
+		The two CPUs are named "PRO_CPU" and "APP_CPU" (for "protocol" and
+		"application"), however for most purposes the two CPUs are
+		interchangeable.
+
 endchoice # XTENSA chip selection
 
 config ARCH_FAMILY_LX6

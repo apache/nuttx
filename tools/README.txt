@@ -269,7 +269,7 @@ bdf-convert.c
     2. Use the bdf-converter program to convert the BDF font to the NuttX
        font format.  This will result in a C header file containing
        definitions.  That header file should be installed at, for example,
-       graphics/nxfonts/nxfonts_myfont.h.
+       libnx/nxfonts/nxfonts_myfont.h.
 
   Create a new NuttX configuration variable.  For example, suppose
   you define the following variable:  CONFIG_NXFONT_MYFONT.  Then
@@ -324,7 +324,7 @@ bdf-convert.c
           @$(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=2 EXTRADEFINES=$(EXTRADEFINES)
         endif
 
-    6. nuttx/graphics/nxfonts/Make.defs.  Set the make variable NXFSET_CSRCS.
+    6. nuttx/libnx/nxfonts/Make.defs.  Set the make variable NXFSET_CSRCS.
        NXFSET_CSRCS determines the name of the font C file to build when
        NXFONTS_FONTID=2:
 
@@ -335,12 +335,12 @@ bdf-convert.c
        NXFSET_CSRCS    += nxfonts_bitmaps_myfont.c
        endif
 
-    7. nuttx/graphics/nxfonts/Makefile.sources.  This is the Makefile used
+    7. nuttx/libnx/nxfonts/Makefile.sources.  This is the Makefile used
        in step 5 that will actually generate the font C file.  So, given
        your NXFONTS_FONTID=2, it needs to determine a prefix to use for
        auto-generated variable and function names and (again) the name of
        the auto-generated file to create (this must be the same name that
-       was used in nuttx/graphics/nxfonts/Make.defs):
+       was used in nuttx/libnx/nxfonts/Make.defs):
 
        ifeq ($(NXFONTS_FONTID),1)
        NXFONTS_PREFIX    := g_sans23x27_
@@ -351,9 +351,9 @@ bdf-convert.c
        GEN_CSRC    = nxfonts_bitmaps_myfont.c
        endif
 
-    8. graphics/nxfonts/nxfonts_bitmaps.c.  This is the file that contains
+    8. graphics/libnx/nxfonts_bitmaps.c.  This is the file that contains
        the generic font structures.  It is used as a "template" file by
-       nuttx/graphics/nxfonts/Makefile.sources to create your customized
+       nuttx/libnx/nxfonts/Makefile.sources to create your customized
        font data set.
 
        #if NXFONTS_FONTID == 1
@@ -367,7 +367,7 @@ bdf-convert.c
        Where nxfonts_myfont.h is the NuttX font file that we generated in
        step 2 using the bdf-converter tool.
 
-    9. graphics/nxfonts/nxfonts_getfont.c.  Finally, we need to extend the
+    9. libnx/nxfonts/nxfonts_getfont.c.  Finally, we need to extend the
        logic that does the run-time font lookups so that can find our new
        font.  The lookup function is NXHANDLE nxf_getfonthandle(enum nx_fontid_e fontid).
        The new font information needs to be added to data structures used by
@@ -687,6 +687,18 @@ refresh.sh
      option, this file copy will occur autiomatically.  Otherwise,
      refresh.sh will prompt you first to avoid overwriting the
      defconfig file with changes that you may not want.
+
+showsize.sh
+-----------
+
+  Show the top 10 biggest memory hogs in code and data spaces.  This
+  must be executed from the top-level NuttX directory like:
+
+    $ tools/showsize.sh
+    TOP 10 BIG DATA
+    ...
+    TOP 10 BIG CODE
+    ...
 
 testbuild.sh
 ------------

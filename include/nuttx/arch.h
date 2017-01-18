@@ -1821,10 +1821,64 @@ int up_cpu_start(int cpu);
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
  *
+ * Assumptions:
+ *   Called from within a critical section; up_cpu_resume() must be called
+ *   later while still within the same critical section.
+ *
  ****************************************************************************/
 
 #ifdef CONFIG_SMP
 int up_cpu_pause(int cpu);
+#endif
+
+/****************************************************************************
+ * Name: up_cpu_pausereq
+ *
+ * Description:
+ *   Return true if a pause request is pending for this CPU.
+ *
+ * Input Parameters:
+ *   cpu - The index of the CPU to be queried
+ *
+ * Returned Value:
+ *   true   = a pause request is pending.
+ *   false = no pasue request is pending.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+bool up_cpu_pausereq(int cpu);
+#endif
+
+/****************************************************************************
+ * Name: up_cpu_paused
+ *
+ * Description:
+ *   Handle a pause request from another CPU.  Normally, this logic is
+ *   executed from interrupt handling logic within the architecture-specific
+ *   However, it is sometimes necessary necessary to perform the pending
+ *   pause operation in other contexts where the interrupt cannot be taken
+ *   in order to avoid deadlocks.
+ *
+ *   This function performs the following operations:
+ *
+ *   1. It saves the current task state at the head of the current assigned
+ *      task list.
+ *   2. It waits on a spinlock, then
+ *   3. Returns from interrupt, restoring the state of the new task at the
+ *      head of the ready to run list.
+ *
+ * Input Parameters:
+ *   cpu - The index of the CPU to be paused
+ *
+ * Returned Value:
+ *   On success, OK is returned.  Otherwise, a negated errno value indicating
+ *   the nature of the failure is returned.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+int up_cpu_paused(int cpu);
 #endif
 
 /****************************************************************************
@@ -1843,6 +1897,10 @@ int up_cpu_pause(int cpu);
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
+ *
+ * Assumptions:
+ *   Called from within a critical section; up_cpu_pause() must have
+ *   previously been called within the same critical section.
  *
  ****************************************************************************/
 
@@ -2249,16 +2307,6 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable);
  ****************************************************************************/
 
 int up_putc(int ch);
-
-/****************************************************************************
- * Name: up_getc
- *
- * Description:
- *   Get one character on the console
- *
- ****************************************************************************/
-
-int up_getc(void);
 
 /****************************************************************************
  * Name: up_puts

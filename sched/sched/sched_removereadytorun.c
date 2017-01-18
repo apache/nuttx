@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sched_removereadytorun.c
  *
- *   Copyright (C) 2007-2009, 2012, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -145,7 +145,7 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
   cpu      = rtcb->cpu;
   tasklist = TLIST_HEAD(rtcb->task_state, cpu);
 
-  /* Check if the TCB to be removed is at the head of a ready to run list.
+  /* Check if the TCB to be removed is at the head of a ready-to-run list.
    * For the case of SMP, there are two lists involved:  (1) the
    * g_readytorun list that holds non-running tasks that have not been
    * assigned to a CPU, and (2) and the g_assignedtasks[] lists which hold
@@ -154,15 +154,18 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
    * only only removing the head of that list can result in a context
    * switch.
    *
-   * The tasklist RUNNABLE attribute will inform us if the list holds the
-   * currently executing and task and, hence, if a context switch could
-   * occur.
+   * rtcb->blink == NULL will tell us if the TCB is at the head of the
+   * ready-to-run list and, hence, a candidate for the new running task.
+   *
+   * If so, then the tasklist RUNNABLE attribute will inform us if the list
+   * holds the currently executing task and, hence, if a context switch
+   * should occur.
    */
 
   if (rtcb->blink == NULL && TLIST_ISRUNNABLE(rtcb->task_state))
     {
       FAR struct tcb_s *nxttcb;
-      FAR struct tcb_s *rtrtcb;
+      FAR struct tcb_s *rtrtcb = NULL;
       int me;
 
       /* There must always be at least one task in the list (the IDLE task)
@@ -195,17 +198,27 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
        * g_readytorun list.  We can only select a task from that list if
        * the affinity mask includes the current CPU.
        *
-       * REVISIT: What should we do, if anything, if pre-emption is locked
-       * by the another CPU?  Should just used nxttcb?  Should we select
-       * from the pending task list instead of the g_readytorun list?
+       * If pre-emption is locked or another CPU is in a critical section,
+       * then use the 'nxttcb' which will probably be the IDLE thread.
+       * REVISIT: What if it is not the IDLE thread?
        */
 
-      for (rtrtcb = (FAR struct tcb_s *)g_readytorun.head;
-           rtrtcb != NULL && !CPU_ISSET(cpu, &rtrtcb->affinity);
-           rtrtcb = (FAR struct tcb_s *)rtrtcb->flink);
+      if (!spin_islocked(&g_cpu_schedlock) && !irq_cpu_locked(me))
+        {
+          /* Search for the highest priority task that can run on this
+           * CPU.
+           */
+
+          for (rtrtcb = (FAR struct tcb_s *)g_readytorun.head;
+               rtrtcb != NULL && !CPU_ISSET(cpu, &rtrtcb->affinity);
+               rtrtcb = (FAR struct tcb_s *)rtrtcb->flink);
+        }
 
       /* Did we find a task in the g_readytorun list?  Which task should
-       * we use? We decide strictly by the priority of the two tasks.
+       * we use?  We decide strictly by the priority of the two tasks:
+       * Either (1) the task currently at the head of the g_assignedtasks[cpu]
+       * list (nexttcb) or (2) the highest priority task from the
+       * g_readytorun list with matching affinity (rtrtcb).
        */
 
       if (rtrtcb != NULL && rtrtcb->sched_priority >= nxttcb->sched_priority)
@@ -247,23 +260,46 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
                       &g_cpu_schedlock);
         }
 
-      /* Interrupts may be disabled after the switch.  If irqcount is greater
-       * than zero, then this task/this CPU holds the IRQ lock
+      /* Adjust global IRQ controls.  If irqcount is greater than zero,
+       * then this task/this CPU holds the IRQ lock
        */
 
       if (nxttcb->irqcount > 0)
         {
-          /* Yes... make sure that scheduling logic knows about this */
+          /* Yes... make sure that scheduling logic on other CPUs knows
+           * that we hold the IRQ lock.
+           */
 
           spin_setbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock,
                       &g_cpu_irqlock);
         }
-      else
+
+      /* No.. This CPU will be relinquishing the lock.  But this works
+       * differently if we are performing a context switch from an
+       * interrupt handler and the interrupt handler has established
+       * a critical section.  We can detect this case when
+       * g_cpu_nestcount[me] > 0.
+       */
+
+      else if (g_cpu_nestcount[me] <= 0)
         {
-          /* No.. we may need to perform release our hold on the irq state. */
+          /* Release our hold on the IRQ lock. */
 
           spin_clrbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock,
-                      &g_cpu_irqlock);
+                     &g_cpu_irqlock);
+        }
+
+      /* Sanity check.  g_cpu_netcount should be greater than zero
+       * only while we are within the critical section and within
+       * an interrupt handler.  If we are not in an interrupt handler
+       * then there is a problem; perhaps some logic previously
+       * called enter_critical_section() with no matching call to
+       * leave_critical_section(), leaving the non-zero count.
+       */
+
+      else
+        {
+          DEBUGASSERT(up_interrupt_context());
         }
 
       nxttcb->task_state = TSTATE_TASK_RUNNING;

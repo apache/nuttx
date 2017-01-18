@@ -79,6 +79,42 @@ static inline uint32_t xtensa_getsp(void)
 }
 
 /****************************************************************************
+ * Name: up_taskdump
+ ****************************************************************************/
+
+#ifdef CONFIG_STACK_COLORATION
+static void up_taskdump(FAR struct tcb_s *tcb, FAR void *arg)
+{
+  /* Dump interesting properties of this task */
+
+#if CONFIG_TASK_NAME_SIZE > 0
+  _alert("%s: PID=%d Stack Used=%lu of %lu\n",
+        tcb->name, tcb->pid, (unsigned long)up_check_tcbstack(tcb),
+        (unsigned long)tcb->adj_stack_size);
+#else
+  _alert("PID: %d Stack Used=%lu of %lu\n",
+        tcb->pid, (unsigned long)up_check_tcbstack(tcb),
+        (unsigned long)tcb->adj_stack_size);
+#endif
+}
+#endif
+
+/****************************************************************************
+ * Name: up_showtasks
+ ****************************************************************************/
+
+#ifdef CONFIG_STACK_COLORATION
+static inline void up_showtasks(void)
+{
+  /* Dump interesting properties of each task in the crash environment */
+
+  sched_foreach(up_taskdump, NULL);
+}
+#else
+#  define up_showtasks()
+#endif
+
+/****************************************************************************
  * Name: xtensa_stackdump
  ****************************************************************************/
 
@@ -130,9 +166,8 @@ static inline void xtensa_registerdump(void)
              (unsigned long)regs[REG_LCOUNT]);
 #endif
 #ifndef __XTENSA_CALL0_ABI__
-      _alert(" TMP0: %08lx  TMP1: %08lx  TMP2: %08lx\n",
-             (unsigned long)regs[REG_TMP0], (unsigned long)regs[REG_TMP1],
-             (unsigned long)regs[REG_TMP2]);
+      _alert(" TMP0: %08lx  TMP1: %08lx\n",
+             (unsigned long)regs[REG_TMP0], (unsigned long)regs[REG_TMP1]);
 #endif
     }
 }
@@ -151,7 +186,7 @@ void xtensa_dumpstate(void)
   uint32_t sp = xtensa_getsp();
   uint32_t ustackbase;
   uint32_t ustacksize;
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#ifdef HAVE_INTERRUPTSTACK
   uint32_t istackbase;
   uint32_t istacksize;
 #endif
@@ -166,14 +201,8 @@ void xtensa_dumpstate(void)
 
   if (rtcb->pid == 0)
     {
-#warning REVISIT: Need top of IDLE stack
-#if 0
-      ustackbase = g_idle_topstack - 4;
-      ustacksize = CONFIG_IDLETHREAD_STACKSIZE;
-#else
-      ustackbase = sp + 128;
-      ustacksize = 128;
-#endif
+      ustackbase = (uint32_t)&g_idlestack[IDLETHREAD_STACKWORDS-1];
+      ustacksize = IDLETHREAD_STACKSIZE;
     }
   else
     {
@@ -184,9 +213,9 @@ void xtensa_dumpstate(void)
   /* Get the limits on the interrupt stack memory */
 
 #warning REVISIT interrupt stack
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
-  istackbase = (uint32_t)&g_intstackbase;
-  istacksize = (CONFIG_ARCH_INTERRUPTSTACK & ~3) - 4;
+#ifdef HAVE_INTERRUPTSTACK
+  istackbase = (uint32_t)&g_intstack[INTERRUPT_STACKWORDS-1];
+  istacksize = INTERRUPTSTACK_SIZE;
 
   /* Show interrupt stack info */
 
@@ -194,6 +223,9 @@ void xtensa_dumpstate(void)
   _alert("IRQ stack:\n");
   _alert("  base: %08x\n", istackbase);
   _alert("  size: %08x\n", istacksize);
+#ifdef CONFIG_STACK_COLORATION
+  _alert("  used: %08x\n", up_check_intstack());
+#endif
 
   /* Does the current stack pointer lie within the interrupt
    * stack?
@@ -209,7 +241,7 @@ void xtensa_dumpstate(void)
        * at the base of the interrupt stack.
        */
 
-      sp = g_intstackbase;
+      sp = &g_instack[INTERRUPTSTACK_SIZE - sizeof(uint32_t)];
       _alert("sp:     %08x\n", sp);
     }
 
@@ -218,10 +250,16 @@ void xtensa_dumpstate(void)
   _alert("User stack:\n");
   _alert("  base: %08x\n", ustackbase);
   _alert("  size: %08x\n", ustacksize);
+#ifdef CONFIG_STACK_COLORATION
+  _alert("  used: %08x\n", up_check_tcbstack(rtcb));
+#endif
 #else
   _alert("sp:         %08x\n", sp);
   _alert("stack base: %08x\n", ustackbase);
   _alert("stack size: %08x\n", ustacksize);
+#ifdef CONFIG_STACK_COLORATION
+  _alert("stack used: %08x\n", up_check_tcbstack(rtcb));
+#endif
 #endif
 
   /* Dump the user stack if the stack pointer lies within the allocated user
@@ -230,7 +268,7 @@ void xtensa_dumpstate(void)
 
   if (sp > ustackbase || sp <= ustackbase - ustacksize)
     {
-#if !defined(CONFIG_ARCH_INTERRUPTSTACK) || CONFIG_ARCH_INTERRUPTSTACK < 4
+#ifdef HAVE_INTERRUPTSTACK
       _alert("ERROR: Stack pointer is not within allocated stack\n");
 #endif
     }
@@ -242,6 +280,10 @@ void xtensa_dumpstate(void)
   /* Then dump the registers (if available) */
 
   xtensa_registerdump();
+
+  /* Dump the state of all tasks (if available) */
+
+  up_showtasks();
 }
 
 #endif /* CONFIG_ARCH_STACKDUMP */

@@ -35,8 +35,10 @@ Contents
 
   - Development Environment
   - GNU Toolchain Options
+  - Setup and Programming Flash
   - LEDs
   - UARTs
+  - Ser
   - Timer Inputs/Outputs
   - FPU
   - FSMC SRAM
@@ -46,16 +48,64 @@ Contents
 Development Environment
 =======================
 
-  The Development environments for the STM32F429I-DISCO board are identical
-  to the environments for other STM32F boards.  For full details on the
-  environment options and setup, see the README.txt file in the
-  config/stm32f4discovery directory.
+The Development environments for the STM32F429I-DISCO board are identical
+to the environments for other STM32F boards.  For full details on the
+environment options and setup, see the README.txt file in the
+config/stm32f4discovery directory.
+
+Setup and Programming Flash
+===========================
+
+I use a USB cable to power and program it.  And I use a USB/Serial
+connected to pins PA9 and PA10 for the serial console (See the section
+"UARTs" below).
+
+FLASH may be programmed:
+
+  - Via USB using STM32 ST-Link Utility
+
+  - Via USB using OpenOCD.  This command may be used to flash the
+    firmware using OpenOCD:
+
+    $ sudo openocd -f interface/stlink-v2.cfg -f target/stm32f4x.cfg -c init -c "reset halt" -c "flash write_image erase nuttx.bin 0x08000000"
+
+  - Via JTAG/SWD connected to the SWD connector CN2.
+
+    CN4 Jumpers.  Remove jumpers to enable signals at SWD connector CN2.
+
+    SWD 6-Pin STM32F429i-Discovery Connector CN2
+    Pin   Signal Name       Description
+    ----- ------ ---------- ------------------------------
+    Pin 1 AIN_1  VDD_TARGET VDD from application
+    Pin 2 T_JCLK SWCLK      SWD Clock
+    Pin 3 GND    GND        Ground
+    Pin 4 T_JTMS SWDIO      SWD data input/output
+    Pin 5 T_NRST NRST       Reset of target MCU
+    Pin 6 T_SWO  SWO        Reserved
+
+    SWD 20-pin J-Link Connector
+    Pin    Name      Type   Description
+    ------ --------- ------ ------------------------------
+    Pin  1 VTref     Input  Target reference voltage
+    Pin  2 Vsupply   NC     Not connected in J-Link
+    Pin  3 Not used  NC     Not used in J-Link
+    Pin  5 Not used  NC     Not used in J-Link
+    Pin  7 SWDIO     I/O    Bi-directional data pin
+    Pin  9 SWCLK     Output Clock signal to target CPU
+    Pin 11 Not used  NC     Not used in J-Link
+    Pin 13 SWO       Output Serial wire output trace port
+    Pin 15 RESET     I/O    Target CPU reset signal (nRST)
+    Pin 17 Not used  NC     Not connected in J-Link
+    Pin 19 5V-Supply Output Supplies power to some boards.
+
+    Pins 4, 45, 8, 10, 12, 14, 16, 18 and 20 are GND pins in J-Link.  They
+    should also be connected to ground in the target system.
 
 LEDs
 ====
 
-The STM32F429I-DISCO board has two user LEDs; green, and red on the board
-board. These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
+The STM32F429I-DISCO board has two user LEDs; green, and red on the board.
+These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
 defined.  In that case, the usage by the board port is defined in
 include/board.h and src/up_leds.c. The LEDs are used to encode OS-related
 events as follows:
@@ -82,8 +132,8 @@ UARTs
 =====
 
 On the STM32F429I-DISCO board, because of pin mappings to support the
-onboard SDRAM and LCD, the only UARTs that has both RX and TX pins
-avilalbe are USART1 and UART5.  Other USARTS could be used for RX or TX
+onboard SDRAM and LCD, the only UARTs that have both RX and TX pins
+available are USART1 and UART5.  Other USARTS could be used for RX or TX
 only, or they could be used for full-duplex if the other pin functions
 aren't being used (i.e. LCD or SDRAM).
 
@@ -91,101 +141,112 @@ UART/USART PINS
 ---------------
 
 USART1
-  CK      PA8
+  CK      PA8*
   CTS     PA11*
   RTS     PA12*
-  RX      PA10*, PB7*
-  TX      PA9*, PB6*
+  RX      PA10, PB7
+  TX      PA9, PB6*
 USART2
   CK      PA4*, PD7
-  CTS     PA0*, PD3
-  RTS     PA1, PD4*
-  RX      PA3, PD6
-  TX      PA2, PD5*
+  CTS     PA0*, PD3*
+  RTS     PA1*, PD4
+  RX      PA3*, PD6*
+  TX      PA2*, PD5
 USART3
-  CK      PB12, PC12*, PD10
-  CTS     PB13, PD11
-  RTS     PB14, PD12*
-  RX      PB11, PC11, PD9
-  TX      PB10*, PC10*, PD8
+  CK      PB12*, PC12, PD10*
+  CTS     PB13*, PD11*
+  RTS     PB14*, PD12*
+  RX      PB11*, PC11, PD9*
+  TX      PB10*, PC10*, PD8*
 UART4
-  RX      PA1, PC11
+  RX      PA1*, PC11
   TX      PA0*, PC10*
 UART5
   RX      PD2
-  TX      PC12*
+  TX      PC12
 USART6
   CK      PC8, PG7*
   CTS     PG13*, PG15*
   RTS     PG12*, PG8*
-  RX      PC7*, PG9*
-  TX      PC6, PG14*
+  RX      PC7*, PG9
+  TX      PC6*, PG14*
 UART7
-  RX      PE7*,PF6*
-  TX      PE8*,PF7*
+  RX      PE7*, PF6
+  TX      PE8*, PF7*
 
  * Indicates pins that have other on-board functions and should be used only
    with care (See table 6 in the STM32F429I-DISCO User Guide for a list of free
    I/O pins on the board).
 
-Default USART/UART Configuration
---------------------------------
+Default Serial Console
+----------------------
 
-USART1 is enabled in all configurations (see */defconfig).  RX and TX are
-configured on pins PA3 and PA2, respectively (see include/board.h).
+USART1 is enabled as the serial console in all configurations (see */defconfig).
+USART1 RX and TX are configured on pins PA10 and PA9, respectively (see
+include/board.h).
+
+  Header 32X2 P1
+  --------------
+  Pin 1  5V
+  Pin 51 PA10
+  Pin 52 PA9
+  Pin 63 GND
+
+If solder bridges SB11 and SB12 are closed, then USART1 will be connected to
+the ST-Link and should be available over USB as a virtual COM interface.
 
 Timer Inputs/Outputs
 ====================
 
 TIM1
-  CH1     PA8, PE9
-  CH2     PA9*, PE11
-  CH3     PA10*, PE13
-  CH4     PA11*, PE14
+  CH1     PA8*, PE9*
+  CH2     PA9, PE11*
+  CH3     PA10, PE13*
+  CH4     PA11*, PE14*
 TIM2
-  CH1     PA0*, PA15, PA5*
-  CH2     PA1, PB3*
-  CH3     PA2, PB10*
-  CH4     PA3, PB11
+  CH1     PA0*, PA15*, PA5
+  CH2     PA1*, PB3*
+  CH3     PA2*, PB10*
+  CH4     PA3*, PB11*
 TIM3
-  CH1     PA6*, PB4, PC6
-  CH2     PA7*, PB5, PC7*
-  CH3     PB0, PC8
-  CH4     PB1, PC9
+  CH1     PA6*, PB4, PC6*
+  CH2     PA7*, PB5*, PC7*
+  CH3     PB0*, PC8
+  CH4     PB1*, PC9*
 TIM4
   CH1     PB6*, PD12*
   CH2     PB7, PD13*
-  CH3     PB8, PD14*
+  CH3     PB8*, PD14*
   CH4     PB9*, PD15*
 TIM5
-  CH1     PA0*, PH10**
-  CH2     PA1, PH11**
-  CH3     PA2, PH12**
-  CH4     PA3, PI0
+  CH1     PA0*, PH10*
+  CH2     PA1*, PH11*
+  CH3     PA2*, PH12*
+  CH4     PA3*, PI0**
 TIM8
-  CH1     PC6, PI5
-  CH2     PC7*, PI6
-  CH3     PC8, PI7
-  CH4     PC9, PI2
+  CH1     PC6*, PI5**
+  CH2     PC7*, PI6**
+  CH3     PC8, PI7**
+  CH4     PC9*, PI2**
 TIM9
-  CH1     PA2, PE5
-  CH2     PA3, PE6
+  CH1     PA2*, PE5
+  CH2     PA3*, PE6
 TIM10
-  CH1     PB8, PF6
+  CH1     PB8*, PF6
 TIM11
-  CH1     PB9*, PF7
+  CH1     PB9*, PF7*
 TIM12
-  CH1     PH6**, PB14
-  CH2     PC15, PH9**
+  CH1     PH6*, PB14*
+  CH2     PC15*, PH9*
 TIM13
-  CH1     PA6*, PF8
+  CH1     PA6*, PF8*
 TIM14
-  CH1     PA7*, PF9
+  CH1     PA7*, PF9*
 
  * Indicates pins that have other on-board functions and should be used only
-   with care (See table 5 in the STM32F429I-DISCO User Guide).  The rest are
-   free I/O pins.
-** Port H pins are not supported by the MCU
+   with care (See table 6 in the STM32F429I-DISCO User Guide).  The rest are
+   free I/O pins (This need to be updated.  They are incorrect!)
+** Port I pins are not supported by the MCU
 
 FPU
 ===
@@ -240,7 +301,7 @@ the following lines in each Make.defs file:
 Configuration Changes
 ---------------------
 
-Below are all of the configuration changes that I had to make to configs/stm3240g-eval/nsh2
+Below are all of the configuration changes that I had to make to configs/stm32f429i-disco/nsh2
 in order to successfully build NuttX using the Atollic toolchain WITH FPU support:
 
   -CONFIG_ARCH_FPU=n                       : Enable FPU support
@@ -598,6 +659,30 @@ instead of configure.sh:
 
 Where <subdir> is one of the following:
 
+  extflash:
+  ---------
+
+    This is another NSH example.  If differs from other 'nsh' configurations
+    in that this configuration defines an external 8 MByte SPI FLASH (the
+    SST25VF064C part from Silicon Storage Technology, Inc.) which must be
+    be connected to the Discovery board's SPI4 pins on the expansion pins.
+    Additionally, this demo uses UART1 for the console
+
+    NOTES:
+
+    1. This configuration assumes an SST25VF064C 8Mbyte SPI FLASH is
+       connected to SPI4 on the following Discovery board Pins:
+
+       SCK:   Port PE2   Board Connector P1, Pin 15
+       MOSI:  Port PE6   Board Connector P1, Pin 11
+       MISO:  Port PE5   Board Connector P1, Pin 14
+       CS:    Port PE4   Board Connector P1, Pin 13
+
+    2. This configuration does have UART1 output enabled and set up as
+       the system logging device.  To use this UART, you must add an
+       external RS-232 line driver to the UART1 pins of the DISCO board
+       on PA9 and PA10 of connector P1.
+
   ltdc:
   ----
     STM32F429I-DISCO LTDC Framebuffer demo example.  See
@@ -843,29 +928,77 @@ Where <subdir> is one of the following:
        2015-04-30
           Appears to be fully functional.
 
-  extflash:
-  ---------
-
-    This is another NSH example.  If differs from other 'nsh' configurations
-    in that this configuration defines an external 8 MByte SPI FLASH (the
-    SST25VF064C part from Silicon Storage Technology, Inc.) which must be
-    be connected to the Discovery board's SPI4 pins on the expansion pins.
-    Additionally, this demo uses UART1 for the console
+  nxwm
+  ----
+    This is a special configuration setup for the NxWM window manager
+    UnitTest.
 
     NOTES:
+    1. The NxWM window manager can be found here:
 
-    1. This configuration assumes an SST25VF064C 8Mbyte SPI FLASH is
-       connected to SPI4 on the following Discovery board Pins:
+         nuttx-code/NxWidgets/nxwm
 
-       SCK:   Port PE2   Board Connector P1, Pin 15
-       MOSI:  Port PE6   Board Connector P1, Pin 11
-       MISO:  Port PE5   Board Connector P1, Pin 14
-       CS:    Port PE4   Board Connector P1, Pin 13
+       The NxWM unit test can be found at:
 
-    2. This configuration does have UART1 output enabled and set up as
-       the system logging device.  To use this UART, you must add an
-       external RS-232 line driver to the UART1 pins of the DISCO board
-       on PA9 and PA10 of connector P1.
+         nuttx-code/NxWidgets/UnitTests/nxwm
+
+       Documentation for installing the NxWM unit test can be found here:
+
+         nuttx-code/NxWidgets/UnitTests/README.txt
+
+    2. Here is the quick summary of the build steps (Assuming that all of
+       the required packages are available in a directory ~/nuttx-code):
+
+       1. Install the nxwm configuration
+
+          $ cd ~/nuttx-code/nuttx/tools
+          $ ./configure.sh stm32f429i-disco/nxwm
+
+       2. Make the build context (only)
+
+          $ cd ..
+          $ . ./setenv.sh
+          $ make context
+          ...
+
+       3. Install the nxwm unit test
+
+          $ cd ~/nuttx-code/NxWidgets
+          $ tools/install.sh ~/nuttx-code/apps nxwm
+          Creating symbolic link
+        - To ~/nuttx-code/NxWidgets/UnitTests/nxwm
+        - At ~/nuttx-code/apps/external
+
+       4. Build the NxWidgets library
+
+          $ cd ~/nuttx-code/NxWidgets/libnxwidgets
+          $ make TOPDIR=~/nuttx-code/nuttx
+         ...
+
+       5. Build the NxWM library
+
+          $ cd ~/nuttx-code/NxWidgets/nxwm
+          $ make TOPDIR=~/nuttx-code/nuttx
+          ...
+
+       6. Built NuttX with the installed unit test as the application
+
+          $ cd ~/nuttx-code/nuttx
+          $ make
+
+    3. Performance is not so good in this example configuration because it
+       uses the slower SPI interfaces.
+
+    STATUS:
+      17-01-08:  There are instabilities in this configuration that make it
+      not usable on this platform.  While the equivalent configuration works
+      on other platforms, this one does not:  The calculator display does
+      not form properly.  There are fails in the NxTerm display, usually around
+      the point where the display should scroll up.
+
+      Update:  With all optimizations disabled, the issue seems to go away.
+      So this is most likely due to using high levels of optimization with a
+      bleeding edge GCC toolchain.
 
   usbnsh:
   ------

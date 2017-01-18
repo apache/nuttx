@@ -213,7 +213,6 @@ ssize_t psock_pkt_send(FAR struct socket *psock, FAR const void *buf,
 {
   FAR struct net_driver_s *dev;
   struct send_s state;
-  net_lock_t save;
   int errcode;
   int ret = OK;
 
@@ -245,7 +244,7 @@ ssize_t psock_pkt_send(FAR struct socket *psock, FAR const void *buf,
    * are ready.
    */
 
-  save                = net_lock();
+  net_lock();
   memset(&state, 0, sizeof(struct send_s));
 
   /* This semaphore is used for signaling and, hence, should not have
@@ -293,7 +292,7 @@ ssize_t psock_pkt_send(FAR struct socket *psock, FAR const void *buf,
     }
 
   sem_destroy(&state.snd_sem);
-  net_unlock(save);
+  net_unlock();
 
   /* Set the socket state to idle */
 

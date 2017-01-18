@@ -80,4 +80,10 @@ int  task_terminate(pid_t pid, bool nonblocking);
 void task_exithook(FAR struct tcb_s *tcb, int status, bool nonblocking);
 void task_recover(FAR struct tcb_s *tcb);
 
+/* Cancellation points */
+
+#ifdef CONFIG_CANCELLATION_POINTS
+void notify_cancellation(FAR struct tcb_s *tcb);
+#endif
+
 #endif /* __SCHED_TASK_TASK_H */

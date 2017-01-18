@@ -72,10 +72,6 @@ static const char *dequote_list[] =
   "CONFIG_INIT_SYMTAB",                /* Global symbol table */
   "CONFIG_INIT_NEXPORTS",              /* Global symbol table size */
 
-  /* RGMP */
-
-  "CONFIG_RGMP_SUBARCH",               /* RGMP sub-architecture */
-
   /* NxWidgets/NxWM */
 
   "CONFIG_NXWM_BACKGROUND_IMAGE",      /* Name of bitmap image class */

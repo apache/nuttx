@@ -276,7 +276,7 @@ void ssd1306_sendblk(FAR struct ssd1306_dev_s *priv, uint8_t *data, uint8_t len)
 #ifdef CONFIG_LCD_SSD1306_SPI
 void ssd1306_select(FAR struct ssd1306_dev_s *priv, bool cs);
 void ssd1306_cmddata(FAR struct ssd1306_dev_s *priv, bool cmd);
-static inline void ssd1306_configspi(FAR struct spi_dev_s *spi)
+static inline void ssd1306_configspi(FAR struct spi_dev_s *spi);
 
 #else
 #  define ssd1306_select(priv, cs)

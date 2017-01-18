@@ -337,7 +337,7 @@ static int usbhost_copyinterface(uint8_t ifno, FAR const uint8_t *configdesc,
            */
 
           for (offset += len;
-               offset < desclen - sizeof(struct usb_ifdesc_s);
+               offset <= desclen - sizeof(struct usb_epdesc_s);
                offset += len)
             {
               epdesc = (FAR struct usb_epdesc_s *)&configdesc[offset];

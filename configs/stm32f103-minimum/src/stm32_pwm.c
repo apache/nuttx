@@ -81,31 +81,25 @@
 #  undef HAVE_PWM
 #endif
 
-#if CONFIG_STM32_TIM3_CHANNEL != STM32F103MINIMUM_PWMCHANNEL
+#if !defined(CONFIG_STM32_TIM3_CHANNEL) || CONFIG_STM32_TIM3_CHANNEL != STM32F103MINIMUM_PWMCHANNEL
 #  undef HAVE_PWM
 #endif
-
-#ifdef HAVE_PWM
-
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
 /************************************************************************************
- * Name: board_pwm_setup
+ * Name: stm32_pwm_setup
  *
  * Description:
- *   All STM32 architectures must provide the following interface to work with
- *   examples/pwm.
+ *   Initialize PWM and register the PWM device.
  *
  ************************************************************************************/
 
-int board_pwm_setup(void)
+int stm32_pwm_setup(void)
 {
+#ifdef HAVE_PWM
   static bool initialized = false;
   struct pwm_lowerhalf_s *pwm;
   int ret;
@@ -138,6 +132,8 @@ int board_pwm_setup(void)
     }
 
   return OK;
+#else
+  return -ENODEV;
+#endif
 }
 
-#endif /* HAVE_PWM */

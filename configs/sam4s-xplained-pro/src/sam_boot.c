@@ -42,18 +42,9 @@
 #include <debug.h>
 
 #include <nuttx/board.h>
-#include <nuttx/timers/watchdog.h>
 #include <arch/board/board.h>
 
 #include "sam4s-xplained-pro.h"
-
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
 
 /************************************************************************************
  * Public Functions
@@ -91,6 +82,7 @@ void sam_boardinitialize(void)
  *   may be used, for example, to initialize board-specific device drivers.
  *
  ****************************************************************************/
+
 #ifdef CONFIG_BOARD_INITIALIZE
 void board_initialize(void)
 {
@@ -105,12 +97,5 @@ void board_initialize(void)
 
   sam_led_initialize();
 #endif
-
-#ifdef CONFIG_TIMER
-  /* Registers the timers and starts any async processes (which may include the scheduler) */
-
-  sam_timerinitialize();
-#endif
-
 }
 #endif /* CONFIG_BOARD_INITIALIZE */

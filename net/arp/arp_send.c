@@ -192,7 +192,6 @@ int arp_send(in_addr_t ipaddr)
   struct arp_notify_s notify;
   struct timespec delay;
   struct arp_send_s state;
-  net_lock_t save;
   int ret;
 
   /* First check if destination is a local broadcast. */
@@ -282,7 +281,7 @@ int arp_send(in_addr_t ipaddr)
    * want anything to happen until we are ready.
    */
 
-  save = net_lock();
+  net_lock();
   state.snd_cb = arp_callback_alloc(dev);
   if (!state.snd_cb)
     {
@@ -409,7 +408,7 @@ int arp_send(in_addr_t ipaddr)
   sem_destroy(&state.snd_sem);
   arp_callback_free(dev, state.snd_cb);
 errout_with_lock:
-  net_unlock(save);
+  net_unlock();
 errout:
   return ret;
 }

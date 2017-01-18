@@ -58,7 +58,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: xtensa_sigdeliver
+ * Name: xtensa_sig_deliver
  *
  * Description:
  *   This is the a signal handling trampoline.  When a signal action was
@@ -67,7 +67,7 @@
  *
  ****************************************************************************/
 
-void xtensa_sigdeliver(void)
+void xtensa_sig_deliver(void)
 {
   struct tcb_s  *rtcb = this_task();
   uint32_t regs[XCPTCONTEXT_REGS];

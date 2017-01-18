@@ -146,17 +146,42 @@ static int rtc_driver_initialize(void)
 
 int board_app_initialize(uintptr_t arg)
 {
-#ifdef HAVE_RTC_DRIVER
-  (void)rtc_driver_initialize();
-#endif
+  int ret;
 
-#ifdef CONFIG_MPL115A
-  stm32_mpl115ainitialize("/dev/press");
+#ifdef HAVE_RTC_DRIVER
+  ret = rtc_driver_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: rtc_driver_initialize failed: %d\n", ret);
+    }
 #endif
 
 #ifdef HAVE_MMCSD
-  return stm32_sdinitialize(CONFIG_NSH_MMCSDSLOTNO);
-#else
-  return OK;
+  ret = stm32_sdinitialize(CONFIG_NSH_MMCSDSLOTNO);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_sdinitialize failed: %d\n", ret);
+    }
 #endif
+
+#ifdef CONFIG_CAN
+  /* Initialize CAN and register the CAN driver. */
+
+  ret = stm32_can_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_can_setup failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_MPL115A
+  ret = stm32_mpl115ainitialize("/dev/press");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_mpl115ainitialize failed: %d\n", ret);
+    }
+#endif
+
+  UNUSED(ret);
+  return OK;
 }

@@ -46,6 +46,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Must match definitions in up_testset.c */
 
 #define SP_UNLOCKED false  /* The Un-locked state */

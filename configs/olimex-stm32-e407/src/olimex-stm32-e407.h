@@ -221,6 +221,18 @@
 void weak_function stm32_usbinitialize(void);
 #endif
 
+/************************************************************************************
+ * Name: stm32_adc_setup
+ *
+ * Description:
+ *   Initialize ADC and register the ADC driver.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_ADC
+int stm32_adc_setup(void);
+#endif
+
 /****************************************************************************
  * Name: stm32_sdio_initialize
  *
@@ -234,27 +246,15 @@ int stm32_sdio_initialize(void);
 #endif
 
 /****************************************************************************
- * Name: stm32_adc_initialize
+ * Name: stm32_can_setup
  *
  * Description:
- *   Called at application startup time to initialize the ADC functionality.
+ *  Initialize CAN and register the CAN device
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ADC
-int stm32_adc_initialize(void);
-#endif
-
-/****************************************************************************
- * Name: stm32_can_initialize
- *
- * Description:
- *   Called at application startup time to initialize the CAN functionality.
- *
- ****************************************************************************/
-
-#if defined(CONFIG_CAN) && (defined(CONFIG_STM32_CAN1) || defined(CONFIG_STM32_CAN2))
-int stm32_can_initialize(void);
+#ifdef CONFIG_CAN
+int stm32_can_setup(void);
 #endif
 
 #endif  /* __ASSEMBLY__ */

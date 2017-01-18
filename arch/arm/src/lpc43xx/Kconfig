@@ -269,8 +269,9 @@ config LPC43_SSP1
 	default n
 
 config LPC43_TMR0
-	bool "ADC1"
+	bool "Timer 0"
 	default n
+	select LPC43_TIMER
 
 config LPC43_TMR1
 	bool "Timer 1"
@@ -279,10 +280,17 @@ config LPC43_TMR1
 config LPC43_TMR2
 	bool "Timer 2"
 	default n
+	select LPC43_TIMER
 
 config LPC43_TMR3
 	bool "Timer 3"
 	default n
+	select LPC43_TIMER
+
+config LPC43_TIMER
+        bool
+        default n
+        select ARCH_HAVE_EXTCLK
 
 config LPC43_USART0
 	bool "USART0"

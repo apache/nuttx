@@ -62,7 +62,10 @@ pthread_mutex_init NXpthread_mutex_init
 pthread_mutex_lock NXpthread_mutex_lock
 pthread_mutex_unlock NXpthread_mutex_unlock
 pthread_setspecific NXpthread_setspecific
+pthread_setcancelstate NXpthread_setcancelstate
+pthread_setcanceltype NXpthread_setcanceltype
 pthread_sigmask NXpthread_sigmask
+pthread_testcancel NXpthread_testcancel
 pthread_yield  NXpthread_yield
 ptsname        NXptsname
 ptsname_r      NXptsname_r

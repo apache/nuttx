@@ -340,7 +340,6 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
   FAR struct udp_conn_s *conn;
   FAR struct net_driver_s *dev;
   struct sendto_s state;
-  net_lock_t save;
   int ret;
 
 #if defined(CONFIG_NET_ARP_SEND) || defined(CONFIG_NET_ICMPv6_NEIGHBOR)
@@ -390,7 +389,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
    * are ready.
    */
 
-  save = net_lock();
+  net_lock();
   memset(&state, 0, sizeof(struct sendto_s));
 
   /* This semaphore is used for signaling and, hence, should not have
@@ -484,7 +483,7 @@ errout_with_lock:
 
   /* Unlock the network and return the result of the sendto() operation */
 
-  net_unlock(save);
+  net_unlock();
   return ret;
 }
 

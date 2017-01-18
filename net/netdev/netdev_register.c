@@ -178,7 +178,6 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
 #ifdef CONFIG_NET_USER_DEVFMT
   FAR const char devfmt_str[IFNAMSIZ];
 #endif
-  net_lock_t save;
   int devnum;
 
   if (dev)
@@ -271,7 +270,7 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
        * the interface
        */
 
-      save = net_lock();
+      net_lock();
 
 #ifdef CONFIG_NET_MULTILINK
 #  ifdef CONFIG_NET_LOOPBACK
@@ -316,7 +315,7 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
 #ifdef CONFIG_NET_IGMP
       igmp_devinit(dev);
 #endif
-      net_unlock(save);
+      net_unlock();
 
 #ifdef CONFIG_NET_ETHERNET
       ninfo("Registered MAC: %02x:%02x:%02x:%02x:%02x:%02x as dev: %s\n",

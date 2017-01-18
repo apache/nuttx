@@ -76,16 +76,16 @@
  *   that we previously sent out, the ARP cache will be filled in with
  *   the values from the ARP reply.  If the incoming ARP packet is an ARP
  *   request for our IP address, an ARP reply packet is created and put
- *   into the d_buf[] buffer.
+ *   into the d_buf buffer.
  *
  *   On entry, this function expects that an ARP packet with a prepended
- *   Ethernet header is present in the d_buf[] buffer and that the length of
+ *   Ethernet header is present in the d_buf buffer and that the length of
  *   the packet is set in the d_len field.
  *
  *   When the function returns, the value of the field d_len indicates whether
  *   the device driver should send out the ARP reply packet or not. If d_len
  *   is zero, no packet should be sent; If d_len is non-zero, it contains the
- *   length of the outbound packet that is present in the d_buf[] buffer.
+ *   length of the outbound packet that is present in the d_buf buffer.
  *
  ****************************************************************************/
 

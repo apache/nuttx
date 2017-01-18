@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated November 19, 2016)
+NuttX TODO List (Last updated January 10, 2017)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -9,8 +9,8 @@ issues related to each board port.
 
 nuttx/:
 
- (13)  Task/Scheduler (sched/)
-  (2)  SMP
+ (12)  Task/Scheduler (sched/)
+  (1)  SMP
   (1)  Memory Management (mm/)
   (1)  Power Management (drivers/pm)
   (3)  Signals (sched/signal, arch/)
@@ -22,7 +22,7 @@ nuttx/:
  (12)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
   (0)  Other drivers (drivers/)
- (11)  Libraries (libc/, libm/)
+ (12)  Libraries (libc/, libm/)
  (11)  File system/Generic drivers (fs/, drivers/)
   (9)  Graphics Subsystem (graphics/)
   (2)  Build system / Toolchains
@@ -31,8 +31,8 @@ nuttx/:
 
 apps/ and other Add-Ons:
 
-  (3)  Network Utilities (apps/netutils/)
-  (2)  NuttShell (NSH) (apps/nshlib)
+  (2)  Network Utilities (apps/netutils/)
+  (1)  NuttShell (NSH) (apps/nshlib)
   (1)  System libraries apps/system (apps/system)
   (1)  Pascal add-on (pcode/)
   (4)  Other Applications & Tests (apps/examples/)
@@ -101,16 +101,37 @@ o Task/Scheduler (sched/)
   Status:      Open
   Priority:    Medium Low for now
 
-  Title:       ISSUES WITH atexit() AND on_exit()
+  Title:       ISSUES WITH atexit(), on_exit(), AND pthread_cleanup_pop()
   Description: These functions execute with the following bad properties:
 
                1. They run with interrupts disabled,
                2. They run in supervisor mode (if applicable), and
                3. They do not obey any setup of PIC or address
                   environments. Do they need to?
+               4. In the case of task_delete() and pthread_cancel(), these
+                  callbacks will run on the thread of execution and address
+                  context of the caller of task.  That is very bad!
 
                The fix for all of these issues it to have the callbacks
-               run on the caller's thread (as with signal handlers).
+               run on the caller's thread as is currently done with
+               signal handlers.  Signals are delivered differently in
+               PROTECTED and KERNEL modes:  The deliver is involes a
+               signal handling trampoline function in the user address
+               space and two signal handlers:  One to call the signal
+               handler trampoline in user mode (SYS_signal_handler) and
+               on in with the signal handler trampoline to return to
+               supervisor mode (SYS_signal_handler_return)
+
+               The primary difference is in the location of the signal
+               handling trampoline:
+
+               - In PROTECTED mode, there is on a single user space blob
+                 with a header at the beginning of the block (at a well-
+                 known location.  There is a pointer to the signal handler
+                 trampoline function in that header.
+               - In the KERNEL mode, a special process signal handler
+                 trampoline is used at a well-known location in every
+                 process address space (ARCH_DATA_RESERVE->ar_sigtramp).
   Status:      Open
   Priority:    Medium Low.  This is an important change to some less
                important interfaces.  For the average user, these
@@ -143,20 +164,6 @@ o Task/Scheduler (sched/)
   Status:      Closed.  The existing solution is better (although its
                incompatibilities could show up in porting some code).
   Priority:    Low
-
-  Title:       REMOVE TASK_DELETE
-  Description: Need to remove or fix task delete.  This interface is non-
-               standard and not safe.  Arbitrary deleting tasks can cause
-               serious problems such as memory leaks.  Better to remove it
-               than to retain it as a latent bug.
-
-               Currently used within the OS and also part of the
-               implementation of pthread_cancel() and task_restart() (which
-               should also go for the same reasons).  It is used in
-               NxWM::CNxConsole to terminate console tasks and also in
-               apps/netutils/thttpd to kill CGI tasks that timeout.
-  Status:      Open
-  Priority:    Low and not easily removable.
 
   Title:       RELEASE SEMAPHORES HELD BY CANCELED THREADS:
   Description: Commit: fecb9040d0e54baf14b729e556a832febfe8229e: "In
@@ -308,70 +315,33 @@ o Task/Scheduler (sched/)
 o SMP
   ^^^
 
-  Title:       SPINLOCKS AND DATA CACHES
-  Description: If spinlocks are used in a system with a data cache, then there
-               may be a problem with cache coherency in some CPU architectures:
-               When one CPU modifies the spinlock, the changes may not be
-               visible to another CPU if it does not share the data cache.
-               That would cause failure in the spinlock logic.
+  Title:       SMP AND DATA CACHES
+  Description: When spinlocks, semaphores, etc. are used in an SMP system with
+               a data cache, then there may be problems with cache coherency
+               in some CPU architectures:  When one CPU modifies the shared
+               object, the changes may not be visible to another CPU if it
+               does not share the data cache. That would cause failure in
+               the IPC logic.
 
                Flushing the D-cache on writes and invalidating before a read is
-               not really an option.  spinlocks are normally 8-bits in size and
-               cache lines are typically 32-bytes so that would have side effects
-               unless the spinlocks were made to be the same size as one cache
-               line.
+               not really an option.  That would essentially effect every memory
+               access and there may be side-effects due to cache line sizes
+               and alignment.
 
-               This might be doable if a write-through cache is used.  Then you
-               could always safely invalidate the cache line before reading the
-               spinlock because there should never be any dirty cache lines in
-               this case.
+               For the same reason a separate, non-cacheable memory region is
+               not an option.  Essentially all data would have to go in the
+               non-cached region and you would have no benefit from the data
+               cache.
 
-               The better option is to add compiler independent "ornamentation"
-               to the spinlock so that the spinlocks are all linked together
-               into a separate, non-cacheable memory regions.  Because of
-               region alignment and minimum region mapping sizes this could
-               still be wasteful of memory.  This would work in systems that
-               have both data cache and either an MPU or an MMU.
-  Status:      Open
-  Priority:    High.  spinlocks, and hence SMP, will not work on such systems
-               without this change.
+               On ARM Cortex-A, each CPU has a separate data cache.  However,
+               the MPCore's Snoop Controller Unit supports coherency among
+               the different caches.  The SCU is enabled by the SCU control
+               register and each CPU participates in the SMP coherency by
+               setting the ACTLR_SMP bit in the auxiliary control register
+               (ACTLR).
 
-  Title:       DEADLOCK SCENARIO WITH up_cpu_pause().
-  Description: I think there is a possibilty for a hang in up_cpu_pause().
-               Suppose this situation:
-
-               - CPU1 is in a critical section and has the g_cpu_irqlock 
-                 spinlock.
-               - CPU0 takes an interrupt and attempts to enter the critical
-                 section.  It spins waiting on g_cpu_irqlock with interrupt
-                 disabled.
-               - CPU1 calls up_cpu_pause() to pause operation on CPU1.  This
-                 will issue an inter-CPU interrupt to CPU0
-               - But interrupts are disabled.  What will happen?  I think
-                 that this is a deadlock:  Interrupts will stay disabled on
-                 CPU0 because it is spinning in the interrupt handler;
-                 up_cpu_pause() will hang becuase the inter-CPU interrupt
-                 is pending.
-
-               Are inter-CPU interrupts maskable in the same way as other
-               interrupts?  If the are not-maskable, then we must also handle
-               them as nested interrupts in some fashion.
-
-               A work-around might be to check the state of other-CPU
-               interrupt handler inside the spin loop of up_cpu_pause().
-               Having the other CPU spinning and waiting for  up_cpu_pause()
-               provided that (1) the pending interrupt can be cleared, and
-               (2) leave_critical_section() is not called prior to the point
-               where up_cpu_resume() is called, and (3) up_cpu_resume() is
-               smart enough to know that it should not attempt to resume a
-               non-paused CPU.
-
-               This would require some kind of information about each
-               interrupt handler:  In an interrupt, waiting for spinlock,
-               have spinlock, etc.
-
-  Status:      Open
-  Priority:    Medium-High.  I don't know for certain that this is a problem but it seems like it could 
+  Status:      Closed
+  Priority:    High on platforms that may have the issue.
 
 o Memory Management (mm/)
   ^^^^^^^^^^^^^^^^^^^^^^^
@@ -444,7 +414,7 @@ o Memory Management (mm/)
 
                So in this case, NuttX work just link Linux or or *nix systems:
                All memory allocated by processes or threads in processes will
-               be recovered when the process exists.
+               be recovered when the process exits.
 
                But not for the flat memory build.  In that case, the issues
                above do apply.  There is no safe way to recover the memory in
@@ -457,7 +427,9 @@ o Memory Management (mm/)
                it is inherently unsafe, I would never incorporate anything
                like that into NuttX.
 
-  Status:      Open.  No changes are planned.
+  Status:      Open.  No changes are planned.  NOTE: This applies to the FLAT
+               and PROTECTED builds only.  There is no such leaking of memory
+               in the KERNEL build mode.
   Priority:    Medium/Low, a good feature to prevent memory leaks but would
                have negative impact on memory usage and code size.
 
@@ -528,12 +500,6 @@ o Signals (sched/signal, arch/)
 o pthreads (sched/pthreads)
   ^^^^^^^^^^^^^^^^^
 
-  Title:       CANCELLATION POINTS
-  Description: pthread_cancel():  Should implement cancellation points and
-               pthread_testcancel()
-  Status:      Open.  No changes are planned.
-  Priority:    Low, probably not that useful
-
   Title:       PTHREAD_PRIO_PROTECT
   Description: Extend pthread_mutexattr_setprotocol() support PTHREAD_PRIO_PROTECT:
 
@@ -593,6 +559,44 @@ o pthreads (sched/pthreads)
                 complexity; in all other ways I believe that it is the inferior
                 solution. So I discarded a few hours of programming. Not a
                 big loss from the experience I gained."
+
+  Title:       ISSUES WITH CANCELLATION POINTS
+  Description: According to POIX cancellation points must occur when a thread is executing
+               the following functions.  There are some execptions as noted:
+
+                accept()             mq_timedsend()           NA putpmsg()          sigtimedwait()
+             04 aio_suspend()     NA msgrcv()                    pwrite()        NA sigwait()
+             NA clock_nanosleep() NA msgsnd()                    read()             sigwaitinfo()
+                close()           NA msync()                  NA readv()         01 sleep()
+                connect()            nanosleep()                 recv()          02 system()
+             -- creat()              open()                      recvfrom()      NA tcdrain()
+                fcntl()              pause()                  NA recvmsg()       01 usleep()
+             NA fdatasync()          poll()                      select()        -- wait()
+                fsync()              pread()                     sem_timedwait()    waitid()
+             NA getmsg()          NA pselect()                   sem_wait()         waitpid()
+             NA getpmsg()            pthread_cond_timedwait()    send()             write()
+             NA lockf()              pthread_cond_wait()      NA sendmsg()       NA writev()
+                mq_receive()         pthread_join()              sendto()
+                mq_send()            pthread_testcancel()     03 sigpause()
+                mq_timedreceive() NA putmsg()                    sigsuspend()
+
+                  NA Not supported
+                  -- Doesn't need instrumentation.  Handled by lower level calls.
+                  nn See note nn
+
+               NOTE 01: sleep() and usleep() are user-space functions in the C library and cannot
+               serve as cancellation points.  They are, however, simple wrappers around nanosleep
+               which is a true cancellation point.
+               NOTE 02: system() is actually implemented in apps/ as part of NSH.  It cannot be
+               a cancellation point either.
+               NOTE 03: sigpause() is a user-space function in the C library and cannot serve as
+               cancellation points.  It is, however, a simple wrapper around sigsuspend()
+               which is a true cancellation point.
+               NOTE 04: aio_suspend() is a user-space function in the C library and cannot serve as
+               cancellation points.  It does call around sigtimedwait() which is a true cancellation
+               point.
+  Status:      Not really open.  This is just the way it is.
+  Priority:    Nothing additional is planned.
 
 o Message Queues (sched/mqueue)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1080,41 +1084,18 @@ o Network (net/, drivers/net)
   Priority:    Medium.  Important on slow applications that will not accept
                connections promptly.
 
-  Title:       INTERRUPT LEVEL PROCESSING IN ETHERNET DRIVERS
-  Description: Too many Ethernet drivers do interrupt-level processing with
-               the network stack.  The network stack supports either interrupt
-               level processing or normal task level processing (depending on
-               CONFIG_NET_NOINTS).  This is really a very bad use of CPU
-               resources;  All of the network stack processing should be
-               modified to use a work queue (and, all use of CONFIG_NET_NOINTS=n
-               should be eliminated).  This applies to many Ethernet drivers:
+  Title:       IPv6 REQUIRES ADDRESS FILTER SUPPORT
+  Description: IPv6 requires that the Ethernet driver support NuttX address
+               filter interfaces.  Several Ethernet drivers do support there,
+               however.  Others support the address filtering interfaces but
+               have never been verifed:
 
-               ARCHITECTURE   CONFIG_NET_NOINTS?      ADDRESS FILTER SUPPORT?
-               C5471          NO                      NO
-               STM32          YES                     YES
-               STM32F7        YES                     YES
-               TIVA           ----------------------- ------
-                 LM3S         NO                      NO
-                 TM4C         YES                     YES
-               eZ80           NO                      NO
-               Kinetis        YES                     YES (not tested)
-               LPC17xx        YES                     YES (not tested)
-               LPC43xx        YES                     YES (not tested)
-               DMxxx NIC      NO                      NO
-               PIC32          NO                      NO
-               RGMP           ???                     ???
-               SAM3/4         YES                     YES
-               SAMA5D         ----------------------- ------
-                 EMACA        NO                      YES (not tested)
-                 EMACB        YES                     YES
-                 GMAC         NO                      YES (not tested)
-               SAMV7          YES                     YES
-               SIM            N/A  (No interrupts)    NO
+               C5471, LM3X, ez80, DM0x90 NIC, PIC: Do not support address
+                 filteringing.
+               Kinetis, LPC17xx, LPC43xx:  Untested address filter support
 
-               The general outline of how this might be done is included in
-               drivers/net/skeleton.c
   Status:      Open
-  Priority:    Pretty high if you want a well behaved system.
+  Priority:    Pretty high if you want a to use IPv6 on these platforms.
 
   Title:       UDP MULTICAST RECEPTION
   Description: The logic in udp_input() expects either a single receive socket or
@@ -1511,9 +1492,27 @@ o Libraries (libc/, libm/)
                2016-07-30: Numerous fixes and performance improvements from
                David Alessio.
 
-Status:        Open
-Priority:      Low for casual users but clearly high if you need care about
+  Status:      Open
+  Priority:    Low for casual users but clearly high if you need care about
                these incorrect corner case behaviors in the math libraries.
+
+  Title:       Repartition libc functionality.
+  Description: There are many things implemented within the kernel (for example
+               under sched/pthread) that probably should be migrated in the
+               C library where it belongs.
+
+               I would really like to see a little flavor of a micro-kernel
+               at the OS interface:  I would like to see more primitive OS
+               system calls with more higher level logic in the C library.
+
+               One awkward thing is the incompatibility of KERNEL vs FLAT
+               builds:  In the kernel build, it would be nice to move many
+               of the thread-specific data items out of the TCB and into
+               the process address environment where they belong.  It is
+               difficult to make this compatible with the FLAT build,
+               however.
+  Status:      Open
+  Priority:    Low
 
 o File system / Generic drivers (fs/, drivers/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1713,18 +1712,6 @@ o Graphics Subsystem (graphics/)
   Status:      Open
   Priority:    Medium low
 
-  Title:       IMPROVED NxTERM FONT CACHING
-  Description: Now each NxTerm instance has its own private font cache
-               whose size is determined by CONFIG_NXTERM_MXCHARS.  If there
-               are multiple NxTerm instances using the same font, each will
-               have a separate font cache.  This is inefficient and wasteful
-               of memory:  Each NxTerm instance should share a common font
-               cache.
-  Status:      Open
-  Priority:    Medium.  Not important for day-to-day testing but would be
-               a critical improvement if NxTerm were to be used in a
-               product.
-
   Title:       NxTERM VT100 SUPPORT
   Description: If the NxTerm will be used with the Emacs-like command line
                editor (CLE), then it will need to support VT100 cursor control
@@ -1761,6 +1748,37 @@ o Graphics Subsystem (graphics/)
   Priority:    Low, not a serious issue but worth noting.  There is no plan
                to change this behavior.
 
+  Title:       REMOVE SINGLE USER MODE
+  Description: NX graphics supports two modes:  A simple single user mode and
+               more complex multi-user mode selected with CONFIG_NX_MULTIUSER=y.
+               In this configuration, an application can start the NX server
+               with boardctrl(BOARDIOC_NX_START);  After that, all graphic
+               interactions are via a thin layer in libnx/.   The OS
+               interface is only via messages sent and received using POSIX
+               message queues.  So this is good code and respects all of the
+               POSIX interfacing rules.  Hence, it works well in all build
+               modes (FLAT, PROTECTED, and KERNEL builds).
+
+               But without CONFIG_NX_MULTIUSER, the single user applications
+               violate all of the rules and calls internal NX functions
+               directly.  This includes all calls to internal OSfunctions
+               with names like, nx_open, up_fbinitialize, board_lcd_*, and
+               others.  This is a violation of interfacing standard in all
+               cases and can only be made to work in the FLAT build mode.
+
+               The single user mode does have some desirable properties:  It
+               is lighter weight and so more suitable for very resource limited
+               platforms.  But I think that in the long run the only reasonable
+               solution is to eliminate the single user mode and provide only
+               the multi-user mode with the message queue interface.
+  Status:      Open
+  Priority:    Low-Medium, not a serious issue but worth noting.  Single user
+               mode is a blemish on the OS and not compatible with the RTOS
+               roadmap.  But neither is there any critical necessity to
+               remove the offending code immediately.  Be aware:  If you use
+               the single user mode, it will be yanked out from under your
+               feet in the not-so-distant future.
+
 o Build system
   ^^^^^^^^^^^^
 
@@ -1789,21 +1807,6 @@ o Build system
   Status:      Open
   Priority:    Low, since I am not aware of anyone using the Windows Native build.
                But, of course, very high if you want to use it.
-
-  Title:       REMOVE SINGLE USER MODE
-  Description: The graphics sub-system can operate in either a single-user mode or
-               in a multi-user mode.  In the multiple-user mode, a kernel thread
-               is used to support a graphics server.  Multiple applications may then
-               communicate with the server using a message queue.  This users only
-               standard POSIX interfaces and works in all build modes (FLAT,
-               PROTECTED, and KERNEL builds).
-
-               The single-user mode, on the hand, uses inappropriate calls directly
-               into the OS.  This violates the POSIX interface and must, eventually,
-               be eliminated.  These inappropriate calls can only be supported in
-               the FLAT build mode.
-  Status:      Open
-  Priority:    Medium-High
 
 o Other drivers (drivers/)
   ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1997,13 +2000,6 @@ o Network Utilities (apps/netutils/)
   Status:      Open
   Priority:    Medium
 
-  Title:       THTTPD WARNINGS
-  Description: If the network is enabled, but THTTPD is not configured, it spews out lots
-               of pointless warnings.  This is kind of annoying and unprofessional; needs to
-               be fixed someday.
-  Status:      Open.  An annoyance, but not a real problem.
-  Priority:    Low
-
   Title:       NETWORK MONITOR NOT GENERALLY AVAILABLE
   Description: The NSH network management logic has general applicability
                but is currently useful only because it is embedded in the NSH
@@ -2022,11 +2018,6 @@ o NuttShell (NSH) (apps/nshlib)
                still show status for all interfaces.
   Status:      Open
   Priority:    Low
-
-  Title:       ARPPING COMMAND
-  Description: Add an arping command
-  Status:      Open
-  Priority:    Low (enhancement)
 
 o System libraries apps/system (apps/system)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2083,7 +2074,12 @@ o Other Applications & Tests (apps/examples/)
                it stops rendering.  This is not a problem for the examples/nx
                code because it uses so few fonts, but if the logic were
                leveraged for more general purposes, it would be a problem.
+
                Update: see examples/nxtext for some improved font cache handling.
+               Update: The NXTERM font cache has been generalized and is now
+               offered as the standard, common font cache for all applications.
+               both the nx and nxtext examples should be modified to use this
+               common font cache.  See interfaces defined in nxfonts.h.
   Status:      Open
   Priority:    Low.  This is not really a problem because examples/nx works
                fine with its bogus font caching.

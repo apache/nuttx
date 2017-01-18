@@ -45,6 +45,14 @@ config HOST_OTHER
 
 endchoice
 
+config TOOLCHAIN_WINDOWS
+	bool
+	default n
+	depends on HOST_WINDOWS
+	---help---
+		Selected internally if the selected Windows environment is compatible
+		with the use of Windows native toolchains.
+
 choice
 	prompt "Windows Build Environment"
 	default WINDOWS_CYGWIN
@@ -52,24 +60,34 @@ choice
 
 config WINDOWS_NATIVE
 	bool "Windows Native"
+	select TOOLCHAIN_WINDOWS
 	---help---
 		Build natively in a CMD.exe environment with Windows style paths
 		(like C:\cgywin\home)
 
 config WINDOWS_CYGWIN
 	bool "Cygwin"
+	select TOOLCHAIN_WINDOWS
 	---help---
 		Build natively in a Cygwin environment with POSIX style paths (like
-		/cygdrive/c/cgywin/home)
+		/cygdrive/c/Program Files)
+
+config WINDOWS_UBUNTU
+	bool "Ubuntu under Windows 10"
+	---help---
+		Build natively in an Unbuntu shell under Windoes 10 environment with
+		POSIX style paths (like /mnt/c/Program Files)
 
 config WINDOWS_MSYS
 	bool "MSYS"
+	select TOOLCHAIN_WINDOWS
 	---help---
 		Build natively in a Cygwin environment with POSIX style paths (like
 		/cygdrive/c/cgywin/home)
 
 config WINDOWS_OTHER
 	bool "Windows POSIX-like environment"
+	select TOOLCHAIN_WINDOWS
 	---help---
 		Build natively in another POSIX-like environment.  Additional
 		support may be necessary

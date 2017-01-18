@@ -286,6 +286,7 @@
 #  define PWM_CLK_DIVA(n)          ((uint32_t)(n) << PWM_CLK_DIVA_SHIFT) /* CLKA clock = clock selected by PREA / DIVA */
 #define PWM_CLK_PREA_SHIFT         (8)       /* Bits 8-11: CLKA Source Clock Selection */
 #define PWM_CLK_PREA_MASK          (15 << PWM_CLK_PREA_SHIFT)
+#  define PWM_CLK_PREA_DIV(n)      ((uint32_t)(n) << PWM_CLK_PREA_SHIFT)
 #  define PWM_CLK_PREA_DIV1        (0 << PWM_CLK_PREA_SHIFT)  /* MCK */
 #  define PWM_CLK_PREA_DIV2        (1 << PWM_CLK_PREA_SHIFT)  /* MCK/2 */
 #  define PWM_CLK_PREA_DIV4        (2 << PWM_CLK_PREA_SHIFT)  /* MCK/4 */
@@ -298,11 +299,13 @@
 #  define PWM_CLK_PREA_DIV512      (9 << PWM_CLK_PREA_SHIFT)  /* MCK/512 */
 #  define PWM_CLK_PREA_DIV1024     (10 << PWM_CLK_PREA_SHIFT) /* MCK/1024 */
 #define PWM_CLK_DIVB_SHIFT         (16)      /* Bits 16-23: CLKB Divide Factor */
+#define PWM_CLK_DIVB_MASK          (0xff << PWM_CLK_DIVB_SHIFT)
 #  define PWM_CLK_DIVB_OFF         (0 << PWM_CLK_DIVB_SHIFT)             /* CLKB clock = off */
 #  define PWM_CLK_DIVB_PREB        (1 << PWM_CLK_DIVB_SHIFT)             /* CLKB clock = clock selected by PREB  */
 #  define PWM_CLK_DIVB(n)          ((uint32_t)(n) << PWM_CLK_DIVB_SHIFT) /* CLKB clock = clock selected by PREB / DIVB */
 #define PWM_CLK_PREB_SHIFT         (24)      /* Bits 24-27: CLKB Source Clock Selection */
 #define PWM_CLK_PREB_MASK          (15 << PWM_CLK_PREB_SHIFT)
+#  define PWM_CLK_PREB_DIV(n)      ((uint32_t)(n) << PWM_CLK_PREB_SHIFT)
 #  define PWM_CLK_PREB_DIV1        (0 << PWM_CLK_PREB_SHIFT)  /* MCK */
 #  define PWM_CLK_PREB_DIV2        (1 << PWM_CLK_PREB_SHIFT)  /* MCK/2 */
 #  define PWM_CLK_PREB_DIV4        (2 << PWM_CLK_PREB_SHIFT)  /* MCK/4 */

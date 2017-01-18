@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/sama5d3x-ek/src/sam_adc.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,32 +51,18 @@
 #ifdef CONFIG_ADC
 
 /************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-/* Configuration ********************************************************************/
-
-/************************************************************************************
- * Private Data
- ************************************************************************************/
-
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
-
-/************************************************************************************
  * Public Functions
  ************************************************************************************/
 
 /************************************************************************************
- * Name: board_adc_setup
+ * Name: sam_adc_setup
  *
  * Description:
- *   All STM32 architectures must provide the following interface to work with
- *   examples/adc.
+ *   Initialize ADC and register the ADC driver.
  *
  ************************************************************************************/
 
-int board_adc_setup(void)
+int sam_adc_setup(void)
 {
 #ifdef CONFIG_SAMA5_ADC
   static bool initialized = false;

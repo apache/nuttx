@@ -134,11 +134,11 @@ void up_irqinitialize(void)
   CURRENT_REGS = NULL;
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
+#ifdef CONFIG_IMX6_PIO_IRQ
   /* Initialize logic to support a second level of interrupt decoding for
    * PIO pins.
    */
 
-#ifdef CONFIG_IMX6_PIO_IRQ
   imx_gpioirq_initialize();
 #endif
 

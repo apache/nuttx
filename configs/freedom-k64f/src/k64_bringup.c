@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/freedom-k64f/src/k64_bringup.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,11 @@
 #include <errno.h>
 #include <debug.h>
 
+#ifdef HAVE_RTC_DRIVER
+#  include <nuttx/timers/rtc.h>
+#  include "kinetis_alarm.h"
+#endif
+
 #include "freedom-k64f.h"
 
 #if defined(CONFIG_LIB_BOARDCTL) || defined(CONFIG_BOARD_INITIALIZE)
@@ -64,6 +69,9 @@
 int k64_bringup(void)
 {
   int ret;
+#ifdef HAVE_RTC_DRIVER
+  FAR struct rtc_lowerhalf_s *lower;
+#endif
 
 #ifdef HAVE_PROC
   /* Mount the proc filesystem */
@@ -86,13 +94,12 @@ int k64_bringup(void)
   ret = k64_sdhc_initialize();
   if (ret < 0)
     {
-      mcerr("ERROR: k64_sdhc_initialize() failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: k64_sdhc_initialize() failed: %d\n", ret);
     }
 
 #ifdef CONFIG_FRDMK64F_SDHC_MOUNT
   else
     {
-      /* REVISIT:  A delay seems to be required here or the mount will fail. */
       /* Mount the volume on HSMCI0 */
 
       ret = mount(CONFIG_FRDMK64F_SDHC_MOUNT_BLKDEV,
@@ -102,18 +109,53 @@ int k64_bringup(void)
 
       if (ret < 0)
         {
-          mcerr("ERROR: Failed to mount %s: %d\n",
-                CONFIG_FRDMK64F_SDHC_MOUNT_MOUNTPOINT, errno);
+          syslog(LOG_ERR,"ERROR: Failed to mount %s: %d\n",
+                 CONFIG_FRDMK64F_SDHC_MOUNT_MOUNTPOINT, errno);
         }
     }
 
 #endif /* CONFIG_FRDMK64F_SDHC_MOUNT */
 #endif /* HAVE_MMCSD */
 
+#ifdef CONFIG_PWM
+  /* Initialize PWM and register the PWM device. */
+
+  ret = k64_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: k64_pwm_setup() failed: %d\n", ret);
+    }
+#endif
+
 #ifdef HAVE_AUTOMOUNTER
   /* Initialize the auto-mounter */
 
   k64_automount_initialize();
+#endif
+
+#ifdef HAVE_RTC_DRIVER
+  /* Instantiate the KINETIS lower-half RTC driver */
+
+  lower = kinetis_rtc_lowerhalf();
+  if (!lower)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to instantiate the RTC lower-half driver\n");
+    }
+  else
+    {
+      /* Bind the lower half driver and register the combined RTC driver
+       * as /dev/rtc0
+       */
+
+      ret = rtc_initialize(0, lower);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR,
+                 "ERROR: Failed to bind/register the RTC driver: %d\n",
+                 ret);
+        }
+    }
 #endif
 
   UNUSED(ret);

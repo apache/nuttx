@@ -1,7 +1,7 @@
 /************************************************************************************
- * configs/lpcxpresso-lpc1768/src/lpcxpresso-lpc1768.h
+ * configs/lpcxpresso-lpcxpresso68/src/lpcxpresso-lpcxpresso68.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -140,8 +140,8 @@
  * SD   Signal      Pin   Pin
  * ---  ----------- ----- --------
  * CS   PIO1_11*     55   P2.2        (See LPCXPRESSO_SD_CS)
- * DIN  PIO0_9-MOSI   5   P0.9 MOSI1  (See GPIO_SSP1_MOSI in chip/lpc17_ssp.h)
- * DOUT PIO0_8-MISO   6   P0.8 MISO1  (See GPIO_SSP1_MISO in chip/lpc17_ssp.h)
+ * DIN  PIO0_9-MOSI   5   P0.9 MOSI1  (See GPIO_SSP1_MOSI in chip/lpcxpresso_ssp.h)
+ * DOUT PIO0_8-MISO   6   P0.8 MISO1  (See GPIO_SSP1_MISO in chip/lpcxpresso_ssp.h)
  * CLK  PIO2_11-SCK   7   P0.9 SCK1   (See GPIO_SSP1_SCK in board.h)
  * CD   PIO2_10      52   P2.11       (See LPCXPRESSO_SD_CD)
  */
@@ -229,6 +229,30 @@
  ************************************************************************************/
 
 void weak_function lpcxpresso_sspdev_initialize(void);
+
+/************************************************************************************
+ * Name: lpcexpresso_pwm_setup
+ *
+ * Description:
+ *   Initialize PWM and register the PWM device.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_PWM
+int lpcexpresso_pwm_setup(void);
+#endif
+
+/************************************************************************************
+ * Name: lpcxpresso_adc_setup
+ *
+ * Description:
+ *   Initialize ADC and register the ADC driver.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_ADC
+int lpcxpresso_adc_setup(void);
+#endif
 
 #endif /* __ASSEMBLY__ */
 #endif /* _CONFIGS_LPCXPRESSO_LPC1768_SRC_LPCXPRESSO_H */

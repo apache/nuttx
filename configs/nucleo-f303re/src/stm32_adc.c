@@ -320,85 +320,74 @@ static const uint32_t g_pinlist2[1] =
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: board_adc_setup
+/************************************************************************************
+ * Name: stm32_adc_setup
  *
  * Description:
- *   All STM32 architectures must provide the following interface to work
- *   with examples/adc.
+ *   Initialize ADC and register the ADC driver.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
-int board_adc_setup(void)
+int stm32_adc_setup(void)
 {
-  static bool initialized = false;
   FAR struct adc_dev_s *adc;
   int ret;
   int i;
 
-  /* Check if we have already initialized */
+  /* DEV1 */
+  /* Configure the pins as analog inputs for the selected channels */
 
-  if (!initialized) {
+  for (i = 0; i < DEV1_NCHANNELS; i++)
+    {
+      stm32_configgpio(g_pinlist1[i]);
+    }
 
-      /* DEV1 */
-      /* Configure the pins as analog inputs for the selected channels */
+  /* Call stm32_adcinitialize() to get an instance of the ADC interface */
 
-      for (i = 0; i < DEV1_NCHANNELS; i++)
-        {
-          stm32_configgpio(g_pinlist1[i]);
-        }
+  adc = stm32_adcinitialize(DEV1_PORT, g_chanlist1, DEV1_NCHANNELS);
+  if (adc == NULL)
+    {
+      aerr("ERROR: Failed to get ADC interface 1\n");
+      return -ENODEV;
+    }
 
-      /* Call stm32_adcinitialize() to get an instance of the ADC interface */
+  /* Register the ADC driver at "/dev/adc0" */
 
-      adc = stm32_adcinitialize(DEV1_PORT, g_chanlist1, DEV1_NCHANNELS);
-      if (adc == NULL)
-        {
-          aerr("ERROR: Failed to get ADC interface 1\n");
-          return -ENODEV;
-        }
-
-      /* Register the ADC driver at "/dev/adc0" */
-
-      ret = adc_register("/dev/adc0", adc);
-      if (ret < 0)
-        {
-          aerr("ERROR: adc_register /dev/adc0 failed: %d\n", ret);
-          return ret;
-        }
+  ret = adc_register("/dev/adc0", adc);
+  if (ret < 0)
+    {
+      aerr("ERROR: adc_register /dev/adc0 failed: %d\n", ret);
+      return ret;
+    }
 
 #ifdef DEV2_PORT
 
-      /* DEV2 */
-      /* Configure the pins as analog inputs for the selected channels */
+  /* DEV2 */
+  /* Configure the pins as analog inputs for the selected channels */
 
-      for (i = 0; i < DEV2_NCHANNELS; i++)
-        {
-          stm32_configgpio(g_pinlist2[i]);
-        }
-
-      /* Call stm32_adcinitialize() to get an instance of the ADC interface */
-
-      adc = stm32_adcinitialize(DEV2_PORT, g_chanlist2, DEV2_NCHANNELS);
-      if (adc == NULL)
-        {
-          aerr("ERROR: Failed to get ADC interface 2\n");
-          return -ENODEV;
-        }
-
-      /* Register the ADC driver at "/dev/adc1" */
-
-      ret = adc_register("/dev/adc1", adc);
-      if (ret < 0)
-        {
-          aerr("ERROR: adc_register /dev/adc1 failed: %d\n", ret);
-          return ret;
-        }
-#endif
-
-      /* Now we are initialized */
-
-      initialized = true;
+  for (i = 0; i < DEV2_NCHANNELS; i++)
+    {
+      stm32_configgpio(g_pinlist2[i]);
     }
+
+  /* Call stm32_adcinitialize() to get an instance of the ADC interface */
+
+  adc = stm32_adcinitialize(DEV2_PORT, g_chanlist2, DEV2_NCHANNELS);
+  if (adc == NULL)
+    {
+      aerr("ERROR: Failed to get ADC interface 2\n");
+      return -ENODEV;
+    }
+
+  /* Register the ADC driver at "/dev/adc1" */
+
+  ret = adc_register("/dev/adc1", adc);
+  if (ret < 0)
+    {
+      aerr("ERROR: adc_register /dev/adc1 failed: %d\n", ret);
+      return ret;
+    }
+#endif
 
   return OK;
 }

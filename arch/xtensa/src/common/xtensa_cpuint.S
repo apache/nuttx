@@ -40,6 +40,8 @@
 #include <nuttx/config.h>
 #include <arch/chip/core-isa.h>
 
+#include "xtensa_abi.h"
+
 #if XCHAL_HAVE_INTERRUPTS
 
 /****************************************************************************
@@ -69,6 +71,7 @@
 	.align	4
 
 xtensa_enable_cpuint:
+	ENTRY(16)
 
 	movi	a4, 0
 	xsr		a4, INTENABLE		/* Disables all interrupts */
@@ -80,7 +83,7 @@ xtensa_enable_cpuint:
 
 	wsr		a5, INTENABLE		/* Set CPU INTENABLE to shadow */
 	mov		a3, a4				/* Return previous shadow content */
-	ret
+	RET(16)
 
 	.size	xtensa_enable_cpuint, . - xtensa_enable_cpuint
 
@@ -107,6 +110,7 @@ xtensa_enable_cpuint:
 	.align	4
 
 xtensa_disable_cpuint:
+	ENTRY(16)
 
 	movi	a4, 0
 	xsr		a4, INTENABLE		/* Disables all interrupts */
@@ -119,7 +123,7 @@ xtensa_disable_cpuint:
 
 	wsr		a5, INTENABLE		/* Set CPU INTENABLE to shadow */
 	mov		a3, a4				/* Return previous shadow content */
-	ret
+	RET(16)
 
 	.size	xtensa_disable_cpuint, . - xtensa_disable_cpuint
 

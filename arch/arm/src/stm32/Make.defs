@@ -110,7 +110,7 @@ CHIP_ASRCS  =
 
 CHIP_CSRCS  = stm32_allocateheap.c stm32_start.c stm32_rcc.c stm32_lse.c
 CHIP_CSRCS += stm32_lsi.c stm32_gpio.c stm32_exti_gpio.c stm32_flash.c
-CHIP_CSRCS += stm32_irq.c stm32_dma.c stm32_lowputc.c stm32_getc.c
+CHIP_CSRCS += stm32_irq.c stm32_dma.c stm32_lowputc.c
 CHIP_CSRCS += stm32_serial.c stm32_spi.c stm32_sdio.c stm32_tim.c
 CHIP_CSRCS += stm32_waste.c stm32_ccm.c stm32_uid.c stm32_capture.c
 

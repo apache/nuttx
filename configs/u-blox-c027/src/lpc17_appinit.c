@@ -195,5 +195,28 @@ int board_app_initialize(uintptr_t arg)
   syslog(LOG_INFO, "Successfuly bound SSP port %d to MMC/SD slot %d\n",
          CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO);
 #endif
+
+#ifdef CONFIG_PWM
+  /* Initialize PWM and register the PWM device. */
+
+  ret = lpc17_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: lpc17_pwm_setup() failed: %d\n", ret);
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_ADC
+  /* Initialize ADC and register the ADC driver. */
+
+  ret = lpc17_adc_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: lpc17_adc_setup failed: %d\n", ret);
+    }
+#endif
+
+  UNUSED(ret);
   return OK;
 }

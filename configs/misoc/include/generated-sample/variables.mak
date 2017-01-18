@@ -1,0 +1,11 @@
+TRIPLE=lm32-elf
+CPU=lm32
+CPUFLAGS=-mbarrel-shift-enabled -mmultiply-enabled -mdivide-enabled -msign-extend-enabled
+CPUENDIANNESS=big
+CLANG=0
+SOC_DIRECTORY=/usr/local/lib/python3.5/dist-packages/litex-0.1-py3.5.egg/litex/soc
+BUILDINC_DIRECTORY=/home/lenovo/fpga/arty-soc/build/software/include
+LIBBASE_DIRECTORY=/usr/local/lib/python3.5/dist-packages/litex-0.1-py3.5.egg/litex/soc/software/libbase
+LIBCOMPILER_RT_DIRECTORY=/usr/local/lib/python3.5/dist-packages/litex-0.1-py3.5.egg/litex/soc/software/libcompiler_rt
+LIBNET_DIRECTORY=/usr/local/lib/python3.5/dist-packages/litex-0.1-py3.5.egg/litex/soc/software/libnet
+BIOS_DIRECTORY=/usr/local/lib/python3.5/dist-packages/litex-0.1-py3.5.egg/litex/soc/software/bios
