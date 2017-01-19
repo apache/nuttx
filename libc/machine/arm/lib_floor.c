@@ -1,6 +1,10 @@
 /****************************************************************************
  * libc/machine/arm/lib_floor.c
  *
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *
+ * Adapted for NuttX from BSD licensed code provided by ARM:
+ *
  *   Copyright (c) 2011, 2012 ARM Ltd.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
