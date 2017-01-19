@@ -264,7 +264,7 @@ static int stm32_oneshot8_handler(int irq, void *context)
 static inline int stm32_allocate_handler(struct stm32_oneshot_s *oneshot)
 {
 #if CONFIG_STM32_ONESHOT_MAXTIMERS > 1
-  int ret = -ENOMEM;
+  int ret = -EBUSY;
   int i;
 
   /* Search for an unused handler */
@@ -295,7 +295,7 @@ static inline int stm32_allocate_handler(struct stm32_oneshot_s *oneshot)
       return OK;
     }
 
-  return -ENOMEM;
+  return -EBUSY;
 #endif
 }
 
