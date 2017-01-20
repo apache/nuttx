@@ -6,9 +6,6 @@
 config ARMV7A_MEMCPY
 	bool "Enable optimized memcpy() for ARMv7-A"
 	select LIBC_ARCH_MEMCPY
-	depends on ARM_TOOLCHAIN_GNU && EXPERIMENTAL
+	depends on ARM_TOOLCHAIN_GNU
 	---help---
 		Enable optimized ARMv7-A specific memcpy() library function
-
-		Marked EXPERIMENTAL because it did not build for me the last time I
-		tried.

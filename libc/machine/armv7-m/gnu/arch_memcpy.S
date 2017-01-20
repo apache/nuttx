@@ -57,18 +57,8 @@
  ************************************************************************************/
 
 	.global		memcpy
-
 	.syntax		unified
 	.thumb
-
-#if defined(CONFIG_ARCH_CORTEXM3)
-	.cpu		cortex-m3
-#elif defined(CONFIG_ARCH_CORTEXM4)
-	.cpu		cortex-m4
-#elif defined(CONFIG_ARCH_CORTEXM7)
-	.cpu		cortex-m7
-#endif
-
 	.file		"arch_memcpy.S"
 
 /************************************************************************************
