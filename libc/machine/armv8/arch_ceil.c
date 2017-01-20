@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/machine/arm/lib_round.c
+ * libc/machine/armv8/arch_ceil.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *
@@ -45,13 +45,13 @@
 
 #if __ARM_ARCH >= 8 && (__ARM_FP & 0x8) && !defined (__SOFTFP__)
 
-double round(double x)
+double ceil(double x)
 {
   double result;
-  asm volatile ("vrinta.f64\t%P0, %P1" : "=w" (result) : "w" (x));
+  asm volatile ( "vrintp.f64\t%P0, %P1" : "=w" (result) : "w" (x) );
   return result;
 }
 
 #else
-#  warning round() not built
+#  warning ceil() not built
 #endif

@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/machine/arm/lib_rint.c
+ * libc/machine/armv8/arch_roundf.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *
@@ -43,15 +43,15 @@
  * Public Functions
  ****************************************************************************/
 
-#if __ARM_ARCH >= 8 && (__ARM_FP & 0x8) && !defined (__SOFTFP__)
+#if __ARM_ARCH >= 8 && !defined (__SOFTFP__)
 
-double rint(double x)
+float roundf(float x)
 {
-  double result;
-  asm volatile ("vrintx.f64\t%P0, %P1" : "=w" (result) : "w" (x));
+  float result;
+  asm volatile ("vrinta.f32\t%0, %1" : "=t" (result) : "t" (x));
   return result;
 }
 
 #else
-#  warning rint() not built
+#  warning roundf() not built
 #endif

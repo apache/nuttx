@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/machine/arm/lib_rintf.c
+ * libc/machine/armv8/arch_truncf.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *
@@ -45,13 +45,13 @@
 
 #if __ARM_ARCH >= 8 && !defined (__SOFTFP__)
 
-float rintf(float x)
+float truncf(float x)
 {
   float result;
-  asm volatile ("vrintx.f32\t%0, %1" : "=t" (result) : "t" (x));
+  asm volatile ("vrintz.f32\t%0, %1" : "=t" (result) : "t" (x));
   return result;
 }
 
 #else
-#  warning rintf() not built
+#  warning truncf() not built
 #endif

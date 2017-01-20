@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/machine/arm/lib_floor.c
+ * libc/machine/armv8/arch_floor.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *

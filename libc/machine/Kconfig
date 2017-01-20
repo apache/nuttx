@@ -3,70 +3,58 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+# These are library functions that may be overriden by architecture-
+# specific implementations.  Not all architectures support implementations
+# for every library function.
+
 config LIBM_ARCH_CEIL
 	default n
-	depends on LIBC_ARCHOPT
+	depends on LIBM && ARCH_CORTEXM33
 
 config LIBM_ARCH_FLOOR
 	default n
-	depends on LIBC_ARCHOPT
+	depends on LIBM && ARCH_CORTEXM33
 
 config LIBM_ARCH_NEARBYINT
 	default n
-	depends on LIBC_ARCHOPT
+	depends on LIBM && ARCH_CORTEXM33
 
 config LIBM_ARCH_RINT
 	default n
-	depends on LIBC_ARCHOPT
+	depends on LIBM && ARCH_CORTEXM33
 
 config LIBM_ARCH_ROUND
 	default n
-	depends on LIBC_ARCHOPT
+	depends on LIBM && ARCH_CORTEXM33
 
 config LIBM_ARCH_TRUNC
 	default n
-	depends on LIBC_ARCHOPT
+	depends on LIBM && ARCH_CORTEXM33
 
 config LIBM_ARCH_CEILF
 	default n
-	depends on LIBC_ARCHOPT
+	depends on LIBM && ARCH_CORTEXM33
 
 config LIBM_ARCH_FLOORF
 	default n
-	depends on LIBC_ARCHOPT
+	depends on LIBM && ARCH_CORTEXM33
 
 config LIBM_ARCH_NEARBYINTF
 	default n
-	depends on LIBC_ARCHOPT
+	depends on LIBM && ARCH_CORTEXM33
 
 config LIBM_ARCH_RINTF
 	default n
-	depends on LIBC_ARCHOPT
+	depends on LIBM && ARCH_CORTEXM33
 
 config LIBM_ARCH_ROUNDF
 	default n
-	depends on LIBC_ARCHOPT
+	depends on LIBM && ARCH_CORTEXM33
 
 config LIBM_ARCH_TRUNCF
 	default n
-	depends on LIBC_ARCHOPT
+	depends on LIBM && ARCH_CORTEXM33
 
-config LIBC_ARCHOPT
-	bool "Architecture specific optimizations"
-	default n
-	select LIBM_ARCH_CEIL if CONFIG_ARCH_DPFPU
-	select LIBM_ARCH_FLOOR if CONFIG_ARCH_DPFPU
-	select LIBM_ARCH_NEARBYINT if CONFIG_ARCH_DPFPU
-	select LIBM_ARCH_RINT if CONFIG_ARCH_DPFPU
-	select LIBM_ARCH_ROUND if CONFIG_ARCH_DPFPU
-	select LIBM_ARCH_TRUNC if CONFIG_ARCH_DPFPU
-	select LIBM_ARCH_CEILF if CONFIG_ARCH_FPU
-	select LIBM_ARCH_FLOORF if CONFIG_ARCH_FPU
-	select LIBM_ARCH_NEARBYINTF if CONFIG_ARCH_FPU
-	select LIBM_ARCH_RINTF if CONFIG_ARCH_FPU
-	select LIBM_ARCH_ROUNDF if CONFIG_ARCH_FPU
-	select LIBM_ARCH_TRUNCF if CONFIG_ARCH_FPU
-	depends on ARCH_ARM && LIBM
-	---help---
-		Enable architecture specific optimizations.  Currently only
-		available for use with ARM and only for the NuttX math library.
+if ARCH_CORTEXM33
+source libc/machine/armv8/Kconfig
+endif

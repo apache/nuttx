@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/machine/arm/lib_ceilf.c
+ * libc/machine/armv8/arch_ceilf.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *

@@ -1,0 +1,27 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CORTEXM33
+
+config ARMV8_LIBM
+	bool "Architecture specific optimizations"
+	default n
+	select LIBM_ARCH_CEIL if CONFIG_ARCH_DPFPU
+	select LIBM_ARCH_FLOOR if CONFIG_ARCH_DPFPU
+	select LIBM_ARCH_NEARBYINT if CONFIG_ARCH_DPFPU
+	select LIBM_ARCH_RINT if CONFIG_ARCH_DPFPU
+	select LIBM_ARCH_ROUND if CONFIG_ARCH_DPFPU
+	select LIBM_ARCH_TRUNC if CONFIG_ARCH_DPFPU
+	select LIBM_ARCH_CEILF if CONFIG_ARCH_FPU
+	select LIBM_ARCH_FLOORF if CONFIG_ARCH_FPU
+	select LIBM_ARCH_NEARBYINTF if CONFIG_ARCH_FPU
+	select LIBM_ARCH_RINTF if CONFIG_ARCH_FPU
+	select LIBM_ARCH_ROUNDF if CONFIG_ARCH_FPU
+	select LIBM_ARCH_TRUNCF if CONFIG_ARCH_FPU
+	depends on LIBM
+	---help---
+		Enable ARMv8 specific floating point optimizations.
+
+endif

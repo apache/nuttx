@@ -33,8 +33,6 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_LIBC_ARCHOPT),y)
-ifeq ($(CONFIG_ARCH_ARM),y)
-include ${TOPDIR}/libc/machine/arm/Make.defs
-endif
+ifeq ($(CONFIG_ARCH_CORTEXM33),y)
+include ${TOPDIR}/libc/machine/armv8/Make.defs
 endif

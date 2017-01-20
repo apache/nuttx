@@ -1,5 +1,5 @@
 ############################################################################
-# libc/machine/arm/Make.defs
+# libc/machine/armv8/Make.defs
 #
 #   Copyright (C) 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,21 +33,57 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_LIBM),y)
-ifeq ($(CONFIG_ARCH_FPU),y)
+ifeq ($(CONFIG_ARMV8_LIBM),y)
 
-CSRCS += lib_ceilf.c lib_floorf.c lib_nearbyintf.c lib_rintf.c
-CSRCS += lib_roundf.c lib_truncf.c
+ifeq ($(LIBM_ARCH_CEIL),y)
+CSRCS += arch_ceil.c
+endif
 
-ifeq ($(CONFIG_ARCH_DPFPU),y)
+ifeq ($(LIBM_ARCH_CEILF),y)
+CSRCS += arch_ceilf.c
+endif
 
-CSRCS += lib_ceil.c lib_floor.c lib_nearbyint.c lib_rint.c lib_round.c
-CSRCS += lib_trunc.c
+ifeq ($(LIBM_ARCH_FLOOR),y)
+CSRCS += arch_floor.c
+endif
 
-endif # CONFIG_ARCH_DPFPU
+ifeq ($(LIBM_ARCH_FLOORF),y)
+CSRCS += arch_floorf.c
+endif
 
-DEPPATH += --dep-path machine/arm
-VPATH += :machine/arm
+ifeq ($(LIBM_ARCH_NEARBYINT),y)
+CSRCS += arch_nearbyint.c
+endif
 
-endif # CONFIG_ARCH_FPU
-endif # CONFIG_LIBM
+ifeq ($(LIBM_ARCH_NEARBYINTF),y)
+CSRCS += arch_nearbyintf.c
+endif
+
+ifeq ($(LIBM_ARCH_RINTF),y)
+CSRCS += arch_rintf.c
+endif
+
+ifeq ($(LIBM_ARCH_ROUNDF),y)
+CSRCS += arch_roundf.c
+endif
+
+ifeq ($(LIBM_ARCH_TRUNCF),y)
+CSRCS += arch_truncf.c
+endif
+
+ifeq ($(LIBM_ARCH_RINT),y)
+CSRCS += arch_rint.c
+endif
+
+ifeq ($(LIBM_ARCH_ROUND),y)
+CSRCS += arch_round.c
+endif
+
+ifeq ($(LIBM_ARCH_TRUNC),y)
+CSRCS += arch_trunc.c
+endif
+
+DEPPATH += --dep-path machine/armv8
+VPATH += :machine/armv8
+
+endif # CONFIG_ARMV8_LIBM
