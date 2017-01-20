@@ -1,9 +1,14 @@
 /************************************************************************************
  * nuttx/arch/arm/src/armv7-r/arm_memcpy.S
+ * ARMv7-R optimized memcpy.
  *
- * ARMv7-R optimised memcpy, based on the ARMv7-M version contributed by Mike Smith.
- * Apparently in the public domain and is re-released here under the modified BSD
- * license:
+ * Adapted for use with ARMv7-R and NuttX by:
+ *
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *
+ * Based on the ARMv7-M version contributed by Mike Smith.  Apparently in the public
+ * domain and is re-released here under the modified BSD license:
  *
  * Obtained via a posting on the Stellaris forum:
  *  http://e2e.ti.com/support/microcontrollers/\
