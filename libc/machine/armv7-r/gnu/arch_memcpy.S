@@ -59,13 +59,22 @@
 
 	.global	memcpy
 
-#ifdef CONFIG_ARCH_FPU
+#if defined(CONFIG_ARCH_CORTEXR4)
 	.cpu	cortex-r4
-#else
+#elif defined(CONFIG_ARCH_CORTEXR4F)
 	.cpu	cortex-r4f
-#endif
+#elif defined(CONFIG_ARCH_CORTEXR5)
+	.cpu	cortex-r5
+#elif defined(CONFIG_ARCH_CORTEXR6F)
+	.cpu	cortex-r5f
+#elif defined(CONFIG_ARCH_CORTEXR7)
+	.cpu	cortex-r7
+#elif defined(CONFIG_ARCH_CORTEXR7F)
+	.cpu	cortex-r7f
+endif
+
 	.syntax	unified
-	.file	"arm_memcpy.S"
+	.file	"arch_memcpy.S"
 
 /************************************************************************************
  * .text

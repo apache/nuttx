@@ -1,0 +1,11 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config ARMV7M_MEMCPY
+	bool "Enable optimized memcpy() for ARMv7-M"
+	select LIBC_ARCH_MEMCPY
+	depends on ARM_TOOLCHAIN_GNU
+	---help---
+		Enable optimized ARMv7-M specific memcpy() library function

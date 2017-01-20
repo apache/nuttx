@@ -113,6 +113,18 @@ config LIBM_ARCH_TRUNCF
 
 # One or more the of above may be selected by architecture specific logic
 
+if ARCH_CORTEXA5 || ARCH_CORTEXA8 || ARCH_CORTEXA9
+source libc/machine/armv7-a/Kconfig
+endif
+
+if ARCH_CORTEXR4 || ARCH_CORTEXR4F || ARCH_CORTEXR5 || ARCH_CORTEXR5F || ARCH_CORTEXR7 || ARCH_CORTEXR7F
+source libc/machine/armv7-r/Kconfig
+endif
+
+if ARCH_CORTEXM3 || ARCH_CORTEXM4 || ARCH_CORTEXM7
+source libc/machine/armv7-m/Kconfig
+endif
+
 if ARCH_CORTEXM33
 source libc/machine/armv8/Kconfig
 endif

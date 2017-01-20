@@ -59,10 +59,6 @@ CMN_ASRCS += arm_testset.S
 CMN_ASRCS += cp15_coherent_dcache.S cp15_invalidate_dcache.S
 CMN_ASRCS += cp15_clean_dcache.S cp15_flush_dcache.S cp15_invalidate_dcache_all.S
 
-ifeq ($(CONFIG_LIBC_ARCH_MEMCPY),y)
-CMN_ASRCS += arm_memcpy.S
-endif
-
 # Common C source files
 
 CMN_CSRCS  = up_initialize.c up_idle.c up_interruptcontext.c up_exit.c

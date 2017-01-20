@@ -1,8 +1,9 @@
 /************************************************************************************
- * nuttx/arch/arm/src/armv7-m/gnu/up_memcpy.S
+ * nuttx/arch/arm/src/armv7-a/arm_memcpy.S
  *
- * armv7m-optimised memcpy, contributed by Mike Smith.  Apparently in the public
- * domain and is re-released here under the modified BSD license:
+ * ARMv7-A optimised memcpy, based on the ARMv7-M version contributed by Mike Smith.
+ * Apparently in the public domain and is re-released here under the modified BSD
+ * license:
  *
  * Obtained via a posting on the Stellaris forum:
  *  http://e2e.ti.com/support/microcontrollers/\
@@ -58,10 +59,16 @@
 
 	.global		memcpy
 
+#if defined(CONFIG_ARCH_CORTEXA5)
+	.cpu		cortex-a5
+#elif defined(CONFIG_ARCH_CORTEXA8)
+	.cpu		cortex-a8
+#elif defined(CONFIG_ARCH_CORTEXA9)
+	.cpu		cortex-a9
+#endif
+
 	.syntax		unified
-	.thumb
-	.cpu		cortex-m3
-	.file		"up_memcpy.S"
+	.file		"arch_memcpy.S"
 
 /************************************************************************************
  * .text
@@ -148,7 +155,6 @@ MEM_LongCopyTable:
  ************************************************************************************/
 
 	.align 4
-	.thumb_func
 
 memcpy:
 	push	{r14}
@@ -159,7 +165,6 @@ memcpy:
 
 	.align 4
 
-	.thumb_func
 _do_memcpy:
 	push    {r14}
 
