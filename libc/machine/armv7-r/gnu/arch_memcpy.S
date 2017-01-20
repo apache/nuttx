@@ -100,36 +100,36 @@
  */
 
 MEM_DataCopyTable:
-	.byte	(MEM_DataCopy0  - MEM_DataCopyJump) >> 1
-	.byte	(MEM_DataCopy1  - MEM_DataCopyJump) >> 1
-	.byte	(MEM_DataCopy2  - MEM_DataCopyJump) >> 1
-	.byte	(MEM_DataCopy3  - MEM_DataCopyJump) >> 1
-	.byte	(MEM_DataCopy4  - MEM_DataCopyJump) >> 1
-	.byte	(MEM_DataCopy5  - MEM_DataCopyJump) >> 1
-	.byte	(MEM_DataCopy6  - MEM_DataCopyJump) >> 1
-	.byte	(MEM_DataCopy7  - MEM_DataCopyJump) >> 1
-	.byte	(MEM_DataCopy8  - MEM_DataCopyJump) >> 1
-	.byte	(MEM_DataCopy9  - MEM_DataCopyJump) >> 1
-	.byte	(MEM_DataCopy10 - MEM_DataCopyJump) >> 1
-	.byte	(MEM_DataCopy11 - MEM_DataCopyJump) >> 1
-	.byte	(MEM_DataCopy12 - MEM_DataCopyJump) >> 1
-	.byte	(MEM_DataCopy13 - MEM_DataCopyJump) >> 1
-	.byte	(MEM_DataCopy14 - MEM_DataCopyJump) >> 1
-	.byte	(MEM_DataCopy15 - MEM_DataCopyJump) >> 1
+	.byte	(MEM_DataCopy0  - MEM_DataCopyJump) >> 2
+	.byte	(MEM_DataCopy1  - MEM_DataCopyJump) >> 2
+	.byte	(MEM_DataCopy2  - MEM_DataCopyJump) >> 2
+	.byte	(MEM_DataCopy3  - MEM_DataCopyJump) >> 2
+	.byte	(MEM_DataCopy4  - MEM_DataCopyJump) >> 2
+	.byte	(MEM_DataCopy5  - MEM_DataCopyJump) >> 2
+	.byte	(MEM_DataCopy6  - MEM_DataCopyJump) >> 2
+	.byte	(MEM_DataCopy7  - MEM_DataCopyJump) >> 2
+	.byte	(MEM_DataCopy8  - MEM_DataCopyJump) >> 2
+	.byte	(MEM_DataCopy9  - MEM_DataCopyJump) >> 2
+	.byte	(MEM_DataCopy10 - MEM_DataCopyJump) >> 2
+	.byte	(MEM_DataCopy11 - MEM_DataCopyJump) >> 2
+	.byte	(MEM_DataCopy12 - MEM_DataCopyJump) >> 2
+	.byte	(MEM_DataCopy13 - MEM_DataCopyJump) >> 2
+	.byte	(MEM_DataCopy14 - MEM_DataCopyJump) >> 2
+	.byte	(MEM_DataCopy15 - MEM_DataCopyJump) >> 2
 
 	.align 2
 
 MEM_LongCopyTable:
-	.byte	(MEM_LongCopyEnd   - MEM_LongCopyJump) >> 1	/* 0 bytes left */
-	.byte	(MEM_LongCopyJump0 - MEM_LongCopyJump) >> 1	/* 4 bytes left */
-	.byte	(MEM_LongCopyJump1 - MEM_LongCopyJump) >> 1	/* 8 bytes left */
-	.byte	(MEM_LongCopyJump2 - MEM_LongCopyJump) >> 1	/* 12 bytes left */
-	.byte	(MEM_LongCopyJump3 - MEM_LongCopyJump) >> 1	/* 16 bytes left */
-	.byte	(MEM_LongCopyJump4 - MEM_LongCopyJump) >> 1	/* 20 bytes left */
-	.byte	(MEM_LongCopyJump5 - MEM_LongCopyJump) >> 1	/* 24 bytes left */
-	.byte	(MEM_LongCopyJump6 - MEM_LongCopyJump) >> 1	/* 28 bytes left */
-	.byte	(MEM_LongCopyJump7 - MEM_LongCopyJump) >> 1	/* 32 bytes left */
-	.byte	(MEM_LongCopyJump8 - MEM_LongCopyJump) >> 1	/* 36 bytes left */
+	.byte	(MEM_LongCopyEnd   - MEM_LongCopyJump) >> 2	/* 0 bytes left */
+	.byte	(MEM_LongCopyJump0 - MEM_LongCopyJump) >> 2	/* 4 bytes left */
+	.byte	(MEM_LongCopyJump1 - MEM_LongCopyJump) >> 2	/* 8 bytes left */
+	.byte	(MEM_LongCopyJump2 - MEM_LongCopyJump) >> 2	/* 12 bytes left */
+	.byte	(MEM_LongCopyJump3 - MEM_LongCopyJump) >> 2	/* 16 bytes left */
+	.byte	(MEM_LongCopyJump4 - MEM_LongCopyJump) >> 2	/* 20 bytes left */
+	.byte	(MEM_LongCopyJump5 - MEM_LongCopyJump) >> 2	/* 24 bytes left */
+	.byte	(MEM_LongCopyJump6 - MEM_LongCopyJump) >> 2	/* 28 bytes left */
+	.byte	(MEM_LongCopyJump7 - MEM_LongCopyJump) >> 2	/* 32 bytes left */
+	.byte	(MEM_LongCopyJump8 - MEM_LongCopyJump) >> 2	/* 36 bytes left */
 
 /************************************************************************************
  * Public Functions
@@ -173,9 +173,9 @@ _do_memcpy:
 	bfi		r14, r1, #2, #2	 		/* Get source alignment bits */
 
 	ldr		r3, =MEM_DataCopyTable	/* Jump table base address */
-	ldrb	r4, [r3, r14]			/* Hword offset for this alignment combination */
+	ldrb	r4, [r3, r14]			/* DWord offset for this alignment combination */
 	ldr		r3, =MEM_DataCopyJump	/* Base of branch table anchor */
-	add		r3, r3, r4, lsl #1		/* Absolute address of logic */
+	add		r3, r3, r4, lsl #2		/* Absolute address of logic */
 	bx		r3
 
 	/* data copy branch table anchor */
@@ -237,9 +237,9 @@ MEM_DataCopy0_2:
 	ldr		r14, =MEM_LongCopyTable	/* Jump table base address */
 	lsr		r11, r2, 2				/* Convert byte count to word count */
 	add		r14, r14, r11			/* Jump table offset address */
-	ldrb	r3, [r14]				/* HWord offset from branch table anchor */
+	ldrb	r3, [r14]				/* DWord offset from branch table anchor */
 	ldr		r11, =MEM_LongCopyJump	/* Address of branch table anchor */
-	add		r11, r11, r3, lsl #1	/* Absolute address into branch table */
+	add		r11, r11, r3, lsl #2	/* Absolute address into branch table */
 	bx		r11						/* Go there */
 
 	/* longword copy branch table anchor */
