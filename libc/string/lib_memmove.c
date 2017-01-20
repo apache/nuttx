@@ -49,7 +49,7 @@
  * Public Functions
  ****************************************************************************/
 
-#ifndef CONFIG_ARCH_MEMMOVE
+#ifndef CONFIG_LIBC_ARCH_MEMMOVE
 FAR void *memmove(FAR void *dest, FAR const void *src, size_t count)
 {
   FAR char *tmp;

@@ -43,7 +43,7 @@ CSRCS += lib_strnlen.c lib_strncasecmp.c lib_strncat.c lib_strncmp.c
 CSRCS += lib_strncpy.c lib_strndup.c lib_strcasestr.c lib_strpbrk.c
 CSRCS += lib_strrchr.c lib_strspn.c lib_strstr.c lib_strtok.c lib_strtokr.c
 
-ifneq ($(CONFIG_ARCH_MEMCPY),y)
+ifneq ($(CONFIG_LIBC_ARCH_MEMCPY),y)
 ifeq ($(CONFIG_MEMCPY_VIK),y)
 CSRCS += lib_vikmemcpy.c
 else

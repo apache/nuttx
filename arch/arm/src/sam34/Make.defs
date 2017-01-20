@@ -76,7 +76,7 @@ ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
 CMN_CSRCS += up_ramvec_initialize.c up_ramvec_attach.c
 endif
 
-ifeq ($(CONFIG_ARCH_MEMCPY),y)
+ifeq ($(CONFIG_LIBC_ARCH_MEMCPY),y)
 CMN_ASRCS += up_memcpy.S
 endif
 

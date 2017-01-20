@@ -49,7 +49,7 @@
  ****************************************************************************/
 /* Compatibility definitions */
 
-#ifndef CONFIG_ARCH_BZERO
+#ifndef CONFIG_LIBC_ARCH_BZERO
 # define bzero(s,n) (void)memset(s,0,n)
 #endif
 

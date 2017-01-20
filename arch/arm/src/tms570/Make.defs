@@ -53,7 +53,7 @@ ifeq ($(CONFIG_ARCH_FPU),y)
 CMN_ASRCS += arm_fpuconfig.S
 endif
 
-ifeq ($(CONFIG_ARCH_MEMCPY),y)
+ifeq ($(CONFIG_LIBC_ARCH_MEMCPY),y)
 CMN_ASRCS += arm_memcpy.S
 endif
 
