@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/armv6-m/up_elf.c
+ * libc/machine/arm/armv7-m/up_elf.c
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,16 +49,12 @@
 #include <nuttx/binfmt/elf.h>
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Function Prototypes
  ****************************************************************************/
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#ifdef CONFIG_UCLIBCXX_EXCEPTION
+extern void init_unwind_exidx(Elf32_Addr start, Elf32_Addr end);
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -203,6 +199,18 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
         *(uint32_t *)addr += sym->st_value;
       }
       break;
+
+#ifdef CONFIG_ARMV7M_TARGET2_PREL
+    case R_ARM_TARGET2:  /* TARGET2 is a platform-specific relocation: gcc-arm-none-eabi
+                          * performs a self relocation */
+      {
+        binfo("Performing TARGET2 link at addr=%08lx [%08lx] to sym=%p st_value=%08lx\n",
+              (long)addr, (long)(*(uint32_t *)addr), sym, (long)sym->st_value);
+
+        *(uint32_t *)addr += sym->st_value - addr;
+      }
+      break;
+#endif
 
     case R_ARM_THM_CALL:
     case R_ARM_THM_JUMP24:
@@ -439,10 +447,12 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
             offset >>= 16;
           }
 
-        upper_insn = ((upper_insn & 0xfbf0) | ((offset & 0xf000) >> 12) | ((offset & 0x0800) >> 1));
+        upper_insn = ((upper_insn & 0xfbf0) | ((offset & 0xf000) >> 12) |
+                      ((offset & 0x0800) >> 1));
         *(uint16_t *)addr = (uint16_t)upper_insn;
 
-        lower_insn = ((lower_insn & 0x8f00) | ((offset & 0x0700) << 4) | (offset & 0x00ff));
+        lower_insn = ((lower_insn & 0x8f00) | ((offset & 0x0700) << 4) |
+                      (offset & 0x00ff));
         *(uint16_t *)(addr + 2) = (uint16_t)lower_insn;
 
         binfo("  insn [%04x %04x]\n",
@@ -464,3 +474,13 @@ int up_relocateadd(FAR const Elf32_Rela *rel, FAR const Elf32_Sym *sym,
   berr("ERROR: RELA relocation not supported\n");
   return -ENOSYS;
 }
+
+#ifdef CONFIG_UCLIBCXX_EXCEPTION
+int up_init_exidx(Elf32_Addr address, Elf32_Word size)
+{
+  init_unwind_exidx(address, size);
+
+  return OK;
+}
+#endif
+

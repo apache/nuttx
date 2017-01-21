@@ -11,6 +11,10 @@ if ARCH_CORTEXR4 || ARCH_CORTEXR4F || ARCH_CORTEXR5 || ARCH_CORTEXR5F || ARCH_CO
 source libc/machine/arm/armv7-r/Kconfig
 endif
 
+if ARCH_CORTEXM0
+source libc/machine/arm/armv6-m/Kconfig
+endif
+
 if ARCH_CORTEXM3 || ARCH_CORTEXM4 || ARCH_CORTEXM7
 source libc/machine/arm/armv7-m/Kconfig
 endif

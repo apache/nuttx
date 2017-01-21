@@ -102,9 +102,9 @@ endif
 endif
 
 ifeq ($(CONFIG_ELF),y)
-CMN_CSRCS += up_elf.c up_coherent_dcache.c
+CMN_CSRCS += up_coherent_dcache.c
 else ifeq ($(CONFIG_MODULE),y)
-CMN_CSRCS += up_elf.c up_coherent_dcache.c
+CMN_CSRCS += up_coherent_dcache.c
 endif
 
 ifeq ($(CONFIG_STACK_COLORATION),y)

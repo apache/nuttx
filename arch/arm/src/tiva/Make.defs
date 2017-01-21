@@ -65,12 +65,6 @@ else
 CMN_CSRCS += up_allocateheap.c
 endif
 
-ifeq ($(CONFIG_ELF),y)
-CMN_CSRCS += up_elf.c
-else ifeq ($(CONFIG_MODULE),y)
-CMN_CSRCS += up_elf.c
-endif
-
 CHIP_ASRCS  =
 CHIP_CSRCS  = tiva_allocateheap.c tiva_start.c tiva_irq.c tiva_gpio.c
 CHIP_CSRCS += tiva_gpioirq.c tiva_lowputc.c tiva_serial.c tiva_ssi.c
