@@ -138,7 +138,7 @@ MEM_LongCopyTable:
  * Name: memcpy
  *
  * Description:
- *   Optimised "general" copy routine
+ *   Optimized "general" copy routine
  *
  * Input Parameters:
  *   r0 = destination, r1 = source, r2 = length

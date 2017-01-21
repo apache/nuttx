@@ -1,7 +1,7 @@
 /************************************************************************************
  * nuttx/arch/arm/src/armv7-m/gnu/up_memcpy.S
  *
- * armv7m-optimised memcpy, contributed by Mike Smith.  Apparently in the public
+ * armv7m-optimized memcpy, contributed by Mike Smith.  Apparently in the public
  * domain and is re-released here under the modified BSD license:
  *
  * Obtained via a posting on the Stellaris forum:
@@ -135,7 +135,7 @@ MEM_LongCopyTable:
  * Name: memcpy
  *
  * Description:
- *   Optimised "general" copy routine
+ *   Optimized "general" copy routine
  *
  * Input Parameters:
  *   r0 = destination, r1 = source, r2 = length
