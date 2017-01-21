@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/machine/armv8/arch_ceil.c
+ * libc/machine/arm/armv8/arch_floor.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *
@@ -45,13 +45,13 @@
 
 #if __ARM_ARCH >= 8 && (__ARM_FP & 0x8) && !defined (__SOFTFP__)
 
-double ceil(double x)
+double floor(double x)
 {
   double result;
-  asm volatile ( "vrintp.f64\t%P0, %P1" : "=w" (result) : "w" (x) );
+  asm volatile ("vrintm.f64\t%P0, %P1" : "=w" (result) : "w" (x));
   return result;
 }
 
 #else
-#  warning ceil() not built
+#  warning floor() not built
 #endif

@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/machine/armv8/arch_truncf.c
+ * libc/machine/arm/armv8/arch_nearbyintf.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *
@@ -45,13 +45,13 @@
 
 #if __ARM_ARCH >= 8 && !defined (__SOFTFP__)
 
-float truncf(float x)
+float nearbyintf(float x)
 {
   float result;
-  asm volatile ("vrintz.f32\t%0, %1" : "=t" (result) : "t" (x));
+  asm volatile ("vrintr.f32\t%0, %1" : "=t" (result) : "t" (x));
   return result;
 }
 
 #else
-#  warning truncf() not built
+#  warning nearbyintf() not built
 #endif

@@ -1,5 +1,5 @@
 /************************************************************************************
- * nuttx/arch/arm/src/armv7-a/arm_memcpy.S
+ * libc/machine/arm/armv7-a/arm_memcpy.S
  * ARMv7-A optimized memcpy.
  *
  * Adapted for use with ARMv7-A and NuttX by:
