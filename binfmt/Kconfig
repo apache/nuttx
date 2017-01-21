@@ -42,6 +42,7 @@ endif
 config ELF
 	bool "Enable the ELF Binary Format"
 	default n
+	select LIBC_ARCH_ELF
 	---help---
 		Enable support for the ELF binary format.  Default: n
 

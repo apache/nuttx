@@ -1115,6 +1115,7 @@ endmenu # POSIX Message Queue Options
 menuconfig MODULE
 	bool "Enable loadable OS modules"
 	default n
+	select LIBC_ARCH_ELF
 	---help---
 		Enable support for loadable OS modules.  Default: n
 

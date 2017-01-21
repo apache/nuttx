@@ -41,3 +41,12 @@ DEPPATH += --dep-path machine/arm/armv7-r/gnu
 VPATH += :machine/arm/armv7-r/gnu
 
 endif
+
+ifeq ($(CONFIG_LIBC_ARCH_ELF),y)
+
+CSRCS += arch_elf.c
+
+DEPPATH += --dep-path machine/arm/armv7-r
+VPATH += :machine/arm/armv7-r
+
+endif

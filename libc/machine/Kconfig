@@ -51,6 +51,10 @@ config LIBC_ARCH_BZERO
 	bool
 	default n
 
+config LIBC_ARCH_ELF
+	bool
+	default n
+
 config LIBM_ARCH_CEIL
 	bool
 	default n
