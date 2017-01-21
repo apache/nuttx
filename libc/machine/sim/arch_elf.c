@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/x86/src/up_elf.c
+ * machine/sim/arm_elf.c
  *
- *   Copyright (C) 2012, 2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,14 +56,6 @@
 
 #define ELF_BITS        32
 #define ELF_ARCH        EM_386
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -133,7 +125,7 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
        break;
 
      case R_386_PC32:
-       *ptr += sym->st_value - (uint32_t)ptr;
+       *ptr += sym->st_value - (uint32_t)((uintptr_t)ptr);
        break;
 
      default:
@@ -146,6 +138,7 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
 int up_relocateadd(FAR const Elf32_Rela *rel, FAR const Elf32_Sym *sym,
                    uintptr_t addr)
 {
-  bwarn("WARNING: Not supported\n");
+  berr("ERROR: Not supported\n");
   return -ENOSYS;
 }
+

@@ -120,3 +120,9 @@ config LIBM_ARCH_TRUNCF
 if ARCH_ARM
 source libc/machine/arm/Kconfig
 endif
+if ARCH_SIM
+source libc/machine/sim/Kconfig
+endif
+if ARCH_X86
+source libc/machine/x86/Kconfig
+endif

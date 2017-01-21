@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/machine/arm/armv6-m/up_elf.c
+ * libc/machine/arm/armv6-m/arch_elf.c
  *
  *   Copyright (C) 2013-2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

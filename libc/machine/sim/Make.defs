@@ -1,5 +1,5 @@
 ############################################################################
-# libc/machine/Make.defs
+# libc/machine/sim/Make.defs
 #
 #   Copyright (C) 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,12 +33,11 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_ARCH_ARM),y)
-include ${TOPDIR}/libc/machine/arm/Make.defs
-endif
-ifeq ($(CONFIG_ARCH_SIM),y)
-include ${TOPDIR}/libc/machine/sim/Make.defs
-endif
-ifeq ($(CONFIG_ARCH_X86),y)
-include ${TOPDIR}/libc/machine/x86/Make.defs
+ifeq ($(CONFIG_LIBC_ARCH_ELF),y)
+
+CSRCS += arch_elf.c
+
+DEPPATH += --dep-path machine/sim
+VPATH += :machine/sim
+
 endif
