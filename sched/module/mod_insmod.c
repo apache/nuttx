@@ -266,7 +266,7 @@ int insmod(FAR const char *filename, FAR const char *modulename)
 
   /* Call the module initializer */
 
-  ret = initializer(&modp->uninitializer, &modp->arg);
+  ret = initializer(&modp->modinfo);
   if (ret < 0)
     {
       sinfo("Failed to initialize the module: %d\n", ret);

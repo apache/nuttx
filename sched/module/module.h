@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/module/module.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -62,8 +62,7 @@ struct module_s
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
   mod_initializer_t initializer;       /* Module initializer function */
 #endif
-  mod_uninitializer_t uninitializer;   /* Module uninitializer function */
-  FAR void *arg;                       /* Uninitializer argument */
+  struct mod_info_s modinfo;           /* Module information */
   FAR void *alloc;                     /* Allocated kernel memory */
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
   size_t textsize;                     /* Size of the kernel .text memory allocation */

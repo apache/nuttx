@@ -95,11 +95,11 @@ int rmmod(FAR const char *modulename)
 
   /* Is there an uninitializer? */
 
-  if (modp->uninitializer != NULL)
+  if (modp->modinfo.uninitializer != NULL)
     {
-      /* Try to uninitializer the module */
+      /* Try to uninitialize the module */
 
-      ret = modp->uninitializer(modp->arg);
+      ret = modp->modinfo.uninitializer(modp->modinfo.arg);
 
       /* Did the module sucessfully uninitialize? */
 
@@ -111,11 +111,13 @@ int rmmod(FAR const char *modulename)
 
       /* Nullify so that the uninitializer cannot be called again */
 
+      modp->modinfo.uninitializer = NULL;
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
-      modp->initializer = NULL;
+      modp->initializer           = NULL;
+      modp->modinfo.arg           = NULL;
+      modp->modinfo.exports       = NULL;
+      modp->modinfo.nexports      = 0;
 #endif
-      modp->uninitializer = NULL;
-      modp->arg = NULL;
     }
 
   /* Release resources held by the module */

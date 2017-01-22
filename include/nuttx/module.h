@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/module.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -94,24 +94,39 @@
 
 typedef CODE int (*mod_uninitializer_t)(FAR void *arg);
 
+/* The contect of this structure is returned by module_initialize().
+ *
+ *   uninitializer - The pointer to the uninitialization function.  NULL may
+ *                   be returned if no uninitialization is needed (i.e, the
+ *                   the module memory can be deallocated at any time).
+ *   arg           - An argument that will be passed to the uninitialization
+                     function.
+ *   exports       - A symbol table exported by the module
+ *   nexports      - The number of symbols in the exported symbol table.
+ */
+
+struct mod_info_s
+{
+  mod_uninitializer_t uninitializer; /* Module uninitializer */
+  FAR void *arg;                     /* Uninitializer argument */
+  FAR struct symtab_s *exports;      /* Symbols exported by module */
+  unsigned int nexports;             /* Number of symobols in exports list */
+};
+
 /* A NuttX module is expected to export a function called module_initialize()
  * that has the following function prototype.  This function should appear as
- * the entry point in the ELF module file and will be called bythe binfmt
+ * the entry point in the ELF module file and will be called by the binfmt
  * logic after the module has been loaded into kernel memory.
  *
  * Input Parameters:
- *   uninitializer - The pointer to the uninitialization function.  NULL may
- *     be returned if no uninitialization is needed (i.e, the the module
- *     memory can be deallocated at any time).
- *   arg - An argument that will be passed to the uninitialization function.
+ *   modinfo - Module information returned by mod_initialize().
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on any failure to
  *   initialize the module.
  */
 
-typedef CODE int (*mod_initializer_t)(mod_uninitializer_t *uninitializer,
-                                      FAR void **arg);
+typedef CODE int (*mod_initializer_t)(FAR struct mod_info_s *modinfo);
 
 #ifdef __KERNEL__
 /* This is the type of the callback function used by mod_registry_foreach() */
