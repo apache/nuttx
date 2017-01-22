@@ -624,10 +624,10 @@ config SCHED_CPULOAD_TICKSPERSEC
 	---help---
 		If an external clock is used to drive the sampling for the CPU load
 		calculations, then this value must be provided.  This value provides
-		the rate of the external clock in units of ticks per second.  The
-		default value of 100 corresponds to 100Hz clock.  NOTE: that 100Hz
-		is the default frequency of the system time and, hence, the worst
-		possible choice in most cases.
+		the rate of the external clock interrupts in units of ticks per
+		second.  The default value of 100 corresponds to a 100Hz clock.  NOTE:
+		that 100Hz is the default frequency of the system time and, hence,
+		the worst possible choice in most cases.
 
 config CPULOAD_ONESHOT
 	bool "Use Oneshot timer"
@@ -640,6 +640,13 @@ config CPULOAD_ONESHOT
 			void sched_oneshot_extclk(FAR struct oneshot_lowerhalf_s *lower);
 
 		To start the CPU load measurement. See include/nuttx/clock.h
+
+		NOTE that in this configuration, CONFIG_SCHED_CPULOAD_TICKSPERSEC is
+		the sample rate that will be accomplished by programming the oneshot
+		time repeatedly.  If CPULOAD_ONESHOT_ENTROPY is also selected, then
+		the underly frequency driving the oneshote timer must be
+		significantly faster than CONFIG_SCHED_CPULOAD_TICKSPERSE to permit
+		precise modulation the sample periods.
 
 config CPULOAD_ONESHOT_ENTROPY
 	int "Bits of entropy"
