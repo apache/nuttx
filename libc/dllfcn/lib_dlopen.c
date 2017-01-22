@@ -41,6 +41,8 @@
 
 #include <dllfcn.h>
 
+#include <nuttx/module.h>
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -147,6 +149,42 @@
 
 FAR void *dlopen(FAR const char *file, int mode)
 {
+#if defined(CONFIG_BUILD_FLAT)
+  /* In the FLAT build, a shared library is essentially the same as a kernel
+   * module.
+   *
+   * REVIST:  Missing functionality:
+   * - No automatic binding of symbols
+   * - No dependencies
+   * - mode is ignored.
+   */
+
+  return insmod(file, file);
+
+#elif defined(CONFIG_BUILD_PROTECTED)
+  /* The PROTECTED build is equivalent to the FLAT build EXCEPT that there
+   * must be two copies of the the module logic:  One residing in kernel
+   * space and using the kernel symbol table and one residing in user space
+   * using the user space symbol table.
+   *
+   * The brute force way to accomplish this is by just copying the kernel
+   * module code into libc/module.
+   */
+
 #warning Missing logic
   return NULL;
+
+#else /* if defined(CONFIG_BUILD_KERNEL) */
+  /* The KERNEL build is considerably more complex:  In order to be shared,
+   * the .text portion of the module must be (1) build for PIC/PID operation
+   * and (2) must like in a shared memory region accessible from all
+   * processes.  The .data/.bss portion of the module must be allocated in
+   * the user space of each process, but must lie at the same virtual address
+   * so that it can be referenced from the one copy of the text in the shared
+   * memory region.
+   */
+
+#warning Missing logic
+  return NULL;
+#endif
 }
