@@ -39,7 +39,11 @@
 
 #include <nuttx/config.h>
 
+#include <stdlib.h>
+#include <string.h>
+#include <libgen.h>
 #include <dllfcn.h>
+#include <assert.h>
 
 #include <nuttx/module.h>
 
@@ -150,6 +154,11 @@
 FAR void *dlopen(FAR const char *file, int mode)
 {
 #if defined(CONFIG_BUILD_FLAT)
+  FAR void *handle;
+  FAR char *name;
+
+  DEBUGASSERT(file != NULL);
+
   /* In the FLAT build, a shared library is essentially the same as a kernel
    * module.
    *
@@ -159,7 +168,23 @@ FAR void *dlopen(FAR const char *file, int mode)
    * - mode is ignored.
    */
 
-  return insmod(file, file);
+  /* Use the basename of the file as the module name.
+   * REVISIT: This places an non-standard restriction.  We cannot install
+   * two modules of the same name event though they lie in different
+   * directories.
+   */
+
+  name = strdup(file);
+  if (name == NULL)
+    {
+      return NULL;
+    }
+
+  /* Then install the file using the basename of the file as the module name. */
+
+  handle = insmod(file, basename(name));
+  free(name);
+  return handle;
 
 #elif defined(CONFIG_BUILD_PROTECTED)
   /* The PROTECTED build is equivalent to the FLAT build EXCEPT that there
