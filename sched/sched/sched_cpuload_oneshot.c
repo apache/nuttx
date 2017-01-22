@@ -133,11 +133,11 @@ static struct sched_oneshot_s g_sched_oneshot;
 
 static void sched_oneshot_start(void)
 {
-#if CONFIG_CPULOAD_ONESHOT_ENTROPY > 0
   struct timespec ts;
+#if CONFIG_CPULOAD_ONESHOT_ENTROPY > 0
   uint32_t entropy;
-  int32_t secs;
 #endif
+  int32_t secs;
   int32_t usecs;
 
   /* Get the next delay */
