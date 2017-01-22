@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/module/mod_insmod.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,8 +43,9 @@
 #include <stdint.h>
 #include <string.h>
 #include <elf32.h>
-#include <debug.h>
+#include <assert.h>
 #include <errno.h>
+#include <debug.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
@@ -178,12 +179,14 @@ static void mod_dumpinitializer(mod_initializer_t initializer,
  *     it has been loaded.
  *
  * Returned Value:
- *   Zero (OK) on success.  On any failure, -1 (ERROR) is returned the
- *   errno value is set appropriately.
+ *   A non-NULL module handle that can be used on subsequent calls to other
+ *   module interfaces is returned on success.  If insmod() was unable to
+ *   load the module insmod() will return a NULL handle and the errno
+ *   variable will be set appropriately.
  *
  ****************************************************************************/
 
-int insmod(FAR const char *filename, FAR const char *modulename)
+FAR void *insmod(FAR const char *filename, FAR const char *modulename)
 {
   struct mod_loadinfo_s loadinfo;
   FAR struct module_s *modp;
@@ -248,7 +251,7 @@ int insmod(FAR const char *filename, FAR const char *modulename)
       goto errout_with_load;
     }
 
-  /* Return the load information */
+  /* Save the load information */
 
   modp->alloc       = (FAR void *)loadinfo.textalloc;
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
@@ -279,7 +282,7 @@ int insmod(FAR const char *filename, FAR const char *modulename)
 
   mod_uninitialize(&loadinfo);
   mod_registry_unlock();
-  return OK;
+  return (FAR void *)modp;
 
 errout_with_load:
   mod_unload(&loadinfo);
@@ -290,7 +293,7 @@ errout_with_loadinfo:
 errout_with_lock:
   mod_registry_unlock();
   set_errno(-ret);
-  return ERROR;
+  return NULL;
 }
 
 #endif /* CONFIG_MODULE */

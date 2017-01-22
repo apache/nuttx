@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/module/mod_rmmod.c
+ * sched/module/mod_modsym.c
  *
- *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,46 +39,53 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
 #include <assert.h>
 #include <errno.h>
+#include <debug.h>
 
-#include <nuttx/kmalloc.h>
 #include <nuttx/module.h>
 
-#include "module/module.h"
-
-#ifdef CONFIG_MODULE
+#include "module.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: rmmod
+ * Name: modsym
  *
  * Description:
- *   Remove a previously installed module from memory.
+ *   modsym() returns the address of a symbol defined within the object that
+ *   was previously made accessible through a insmod() call.  handle is the
+ *   value returned from a call to insmod() (and which has not since been
+ *   released via a call to rmmod()), name is the symbol's name as a
+ *   character string.
+ *
+ *   The returned symbol address will remain valid until rmmod() is called.
  *
  * Input Parameters:
- *   handle - The module handler previously returned by insmod().
+ *   handle - The opaque, non-NULL value returned by a previous successful
+ *            call to insmod().
+ *   name   - A pointer to the symbol name string.
  *
  * Returned Value:
- *   Zero (OK) on success.  On any failure, -1 (ERROR) is returned the
- *   errno value is set appropriately.
+ *   The address associated with the symbol is returned on success.
+ *   If handle does not refer to a valid module opened by insmod(), or if
+ *   the named symbol cannot be found within any of the objects associated
+ *   with handle, modsym() will return NULL and the errno variable will be
+ *   set appropriately.
+ *
+ *   NOTE: This means that the address zero can never be a valid return
+ *   value.
  *
  ****************************************************************************/
 
-int rmmod(FAR void *handle)
+FAR const void *modsym(FAR void *handle, FAR const char *name)
 {
   FAR struct module_s *modp = (FAR struct module_s *)handle;
+  FAR const struct symtab_s *symbol;
+  int err;
   int ret;
-
-  DEBUGASSERT(modp != NULL);
-
-  /* Get exclusive access to the module registry */
-
-  mod_registry_lock();
 
   /* Verify that the module is in the registry */
 
@@ -86,73 +93,38 @@ int rmmod(FAR void *handle)
   if (ret < 0)
     {
       serr("ERROR: Failed to verify module: %d\n", ret);
+      err = -ret;
       goto errout_with_lock;
     }
 
-  /* Is there an uninitializer? */
+  /* Does the module have a symbol table? */
 
-  if (modp->modinfo.uninitializer != NULL)
+  if (modp->modinfo.exports == NULL || modp->modinfo.nexports == 0)
     {
-      /* Try to uninitialize the module */
-
-      ret = modp->modinfo.uninitializer(modp->modinfo.arg);
-
-      /* Did the module sucessfully uninitialize? */
-
-      if (ret < 0)
-        {
-          serr("ERROR: Failed to uninitialize the module: %d\n", ret);
-          goto errout_with_lock;
-        }
-
-      /* Nullify so that the uninitializer cannot be called again */
-
-      modp->modinfo.uninitializer = NULL;
-#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
-      modp->initializer           = NULL;
-      modp->modinfo.arg           = NULL;
-      modp->modinfo.exports       = NULL;
-      modp->modinfo.nexports      = 0;
-#endif
-    }
-
-  /* Release resources held by the module */
-
-  if (modp->alloc != NULL)
-    {
-      /* Free the module memory */
-
-      kmm_free((FAR void *)modp->alloc);
-
-      /* Nullify so that the memory cannot be freed again */
-
-      modp->alloc = NULL;
-#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
-      modp->textsize  = 0;
-      modp->datasize  = 0;
-#endif
-    }
-
-  /* Remove the module from the registry */
-
-  ret = mod_registry_del(modp);
-  if (ret < 0)
-    {
-      serr("ERROR: Failed to remove the module from the registry: %d\n", ret);
+      serr("ERROR: Module has no symbol table\n");
+      err = ENOENT;
       goto errout_with_lock;
     }
+
+  /* Search the symbol table for the matching symbol */
+
+  symbol = symtab_findbyname(modp->modinfo.exports, name,
+                             modp->modinfo.nexports);
+  if (symbol == NULL)
+    {
+      serr("ERROR: Failed to find symbol in symbol \"$s\" in table\n", name);
+      err = ENOENT;
+      goto errout_with_lock;
+    }
+
+  /* Return the address within the module assoicated with the symbol */
 
   mod_registry_unlock();
-
-  /* And free the registry entry */
-
-  kmm_free(modp);
-  return OK;
+  DEBUGASSERT(symbol->sym_value != NULL);
+  return symbol->sym_value;
 
 errout_with_lock:
   mod_registry_unlock();
-  set_errno(-ret);
-  return ERROR;
+  set_errno(err);
+  return NULL;
 }
-
-#endif /* CONFIG_MODULE */

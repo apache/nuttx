@@ -443,4 +443,25 @@ int mod_registry_del(FAR struct module_s *modp);
 
 FAR struct module_s *mod_registry_find(FAR const char *modulename);
 
+/****************************************************************************
+ * Name: mod_registry_verify
+ *
+ * Description:
+ *   Verify that a module handle is valid by traversing the module list and
+ *   assuring that the module still resides in the list.  If it does not,
+ *   the handle is probably a stale pointer.
+ *
+ * Input Parameters:
+ *   modp - The registry entry to be verified.
+ *
+ * Returned Value:
+ *   Returns OK is the module is valid; -ENOENT otherwise.
+ *
+ * Assumptions:
+ *   The caller holds the lock on the module registry.
+ *
+ ****************************************************************************/
+
+int mod_registry_verify(FAR struct module_s *modp);
+
 #endif /* __SCHED_MODULE_MODULE_H */

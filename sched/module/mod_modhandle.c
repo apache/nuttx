@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/module/mod_rmmod.c
+ * sched/module/mod_modhandle.c
  *
- *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,6 @@
 #include <assert.h>
 #include <errno.h>
 
-#include <nuttx/kmalloc.h>
 #include <nuttx/module.h>
 
 #include "module/module.h"
@@ -55,104 +54,44 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: rmmod
+ * Name: modhandle
  *
  * Description:
- *   Remove a previously installed module from memory.
+ *   modhandle() returns the module handle for the installed module with the
+ *   provided name.  A secondary use of this function is to determin if a
+ *   module has been loaded or not.
  *
  * Input Parameters:
- *   handle - The module handler previously returned by insmod().
+ *   name   - A pointer to the module name string.
  *
  * Returned Value:
- *   Zero (OK) on success.  On any failure, -1 (ERROR) is returned the
- *   errno value is set appropriately.
+ *   The non-NULL module handle previously returned by insmod() is returned
+ *   on success.  If no module with that name is installed, modhandle() will
+ *   return a NULL handle and the errno variable will be set appropriately.
  *
  ****************************************************************************/
 
-int rmmod(FAR void *handle)
+FAR void *modhandle(FAR const char *name)
 {
-  FAR struct module_s *modp = (FAR struct module_s *)handle;
-  int ret;
+  FAR struct module_s *modp;
 
-  DEBUGASSERT(modp != NULL);
+  DEBUGASSERT(name != NULL);
 
   /* Get exclusive access to the module registry */
 
   mod_registry_lock();
 
-  /* Verify that the module is in the registry */
+  /* Find the module entry for this name in the registry */
 
-  ret = mod_registry_verify(modp);
-  if (ret < 0)
+  modp = mod_registry_find(name);
+  if (modp == NULL)
     {
-      serr("ERROR: Failed to verify module: %d\n", ret);
-      goto errout_with_lock;
-    }
-
-  /* Is there an uninitializer? */
-
-  if (modp->modinfo.uninitializer != NULL)
-    {
-      /* Try to uninitialize the module */
-
-      ret = modp->modinfo.uninitializer(modp->modinfo.arg);
-
-      /* Did the module sucessfully uninitialize? */
-
-      if (ret < 0)
-        {
-          serr("ERROR: Failed to uninitialize the module: %d\n", ret);
-          goto errout_with_lock;
-        }
-
-      /* Nullify so that the uninitializer cannot be called again */
-
-      modp->modinfo.uninitializer = NULL;
-#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
-      modp->initializer           = NULL;
-      modp->modinfo.arg           = NULL;
-      modp->modinfo.exports       = NULL;
-      modp->modinfo.nexports      = 0;
-#endif
-    }
-
-  /* Release resources held by the module */
-
-  if (modp->alloc != NULL)
-    {
-      /* Free the module memory */
-
-      kmm_free((FAR void *)modp->alloc);
-
-      /* Nullify so that the memory cannot be freed again */
-
-      modp->alloc = NULL;
-#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
-      modp->textsize  = 0;
-      modp->datasize  = 0;
-#endif
-    }
-
-  /* Remove the module from the registry */
-
-  ret = mod_registry_del(modp);
-  if (ret < 0)
-    {
-      serr("ERROR: Failed to remove the module from the registry: %d\n", ret);
-      goto errout_with_lock;
+      serr("ERROR: Failed to find module %s: %d\n", name, ret);
+      set_errno(ENOENT);
     }
 
   mod_registry_unlock();
-
-  /* And free the registry entry */
-
-  kmm_free(modp);
-  return OK;
-
-errout_with_lock:
-  mod_registry_unlock();
-  set_errno(-ret);
-  return ERROR;
+  return (FAR void *)modp;
 }
 
 #endif /* CONFIG_MODULE */

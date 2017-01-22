@@ -205,12 +205,14 @@ void mod_setsymtab(FAR const struct symtab_s *symtab, int nsymbols);
  *     it has been loaded.
  *
  * Returned Value:
- *   Zero (OK) on success.  On any failure, -1 (ERROR) is returned the
- *   errno value is set appropriately.
+ *   A non-NULL module handle that can be used on subsequent calls to other
+ *   module interfaces is returned on success.  If insmod() was unable to
+ *   load the module insmod() will return a NULL handle and the errno
+ *   variable will be set appropriately.
  *
  ****************************************************************************/
 
-int insmod(FAR const char *filename, FAR const char *modulename);
+FAR void *insmod(FAR const char *filename, FAR const char *modulename);
 
 /****************************************************************************
  * Name: rmmod
@@ -219,9 +221,7 @@ int insmod(FAR const char *filename, FAR const char *modulename);
  *   Remove a previously installed module from memory.
  *
  * Input Parameters:
- *
- *   modulename - The module name.  This is the name module name that was
- *     provided to insmod when the module was loaded.
+ *   handle - The module handler previously returned by insmod().
  *
  * Returned Value:
  *   Zero (OK) on success.  On any failure, -1 (ERROR) is returned the
@@ -229,7 +229,55 @@ int insmod(FAR const char *filename, FAR const char *modulename);
  *
  ****************************************************************************/
 
-int rmmod(FAR const char *modulename);
+int rmmod(FAR void *handle);
+
+/****************************************************************************
+ * Name: modsym
+ *
+ * Description:
+ *   modsym() returns the address of a symbol defined within the object that
+ *   was previously made accessible through a insmod() call.  handle is the
+ *   value returned from a call to insmod() (and which has not since been
+ *   released via a call to rmmod()), name is the symbol's name as a
+ *   character string.
+ *
+ *   The returned symbol address will remain valid until rmmod() is called.
+ *
+ * Input Parameters:
+ *   handle - The opaque, non-NULL value returned by a previous successful
+ *            call to insmod().
+ *   name   - A pointer to the symbol name string.
+ *
+ * Returned Value:
+ *   The address associated with the symbol is returned on success.
+ *   If handle does not refer to a valid module opened by insmod(), or if
+ *   the named symbol cannot be found within any of the objects associated
+ *   with handle, modsym() will return NULL and the errno variable will be
+ *   set appropriately.
+ *
+ ****************************************************************************/
+
+FAR const void *modsym(FAR void *handle, FAR const char *name);
+
+/****************************************************************************
+ * Name: modhandle
+ *
+ * Description:
+ *   modhandle() returns the module handle for the installed module with the
+ *   provided name.  A secondary use of this function is to determin if a
+ *   module has been loaded or not.
+ *
+ * Input Parameters:
+ *   name   - A pointer to the module name string.
+ *
+ * Returned Value:
+ *   The non-NULL module handle previously returned by insmod() is returned
+ *   on success.  If no module with that name is installed, modhandle() will
+ *   return a NULL handle and the errno variable will be set appropriately.
+ *
+ ****************************************************************************/
+
+FAR void *modhandle(FAR const char *name);
 
 /****************************************************************************
  * Name: mod_registry_foreach
