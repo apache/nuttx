@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/dllfcn.h
+ * libc/dllfcn/lib_dlopen.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,76 +33,17 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_DLLFCN_H
-#define __INCLUDE_DLLFCN_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <dllfcn.h>
 
 /****************************************************************************
- * Pre-processor Definitons
+ * Public Functions
  ****************************************************************************/
-
-/* The dlfcn.h header defines at least the following macros for use in the
- * construction of a dlopen() mode argument:
- *
- *   RTLD_LAZY   - Relocations are performed at an implementation-dependent
- *                 time, ranging from the time of the dlopen() call until
- *                 the first reference to a given symbol occurs. Specifying
- *                 RTLD_LAZY should improve performance on implementations
- *                 supporting dynamic symbol binding as a process may not
- *                 reference all of the functions in any given object. And,
- *                 for systems supporting dynamic symbol resolution for
- *                 normal process execution, this behaviour mimics the
- *                 normal handling of process execution.
- *   RTLD_NOW    - All necessary relocations are performed when the object
- *                 is first loaded. This may waste some processing if
- *                 relocations are performed for functions that are never
- *                 referenced. This behaviour may be useful for
- *                 applications that need to know as soon as an object is
- *                 loaded that all symbols referenced during execution will
- *                 be available.
- *
- * Any object loaded by dlopen() that requires relocations against global
- * symbols can reference the symbols in the original process image file,
- * any objects loaded at program startup, from the object itself as well as
- * any other object included in the same dlopen() invocation, and any
- * objects that were loaded in any dlopen() invocation and which specified
- * the RTLD_GLOBAL flag. To determine the scope of visibility for the
- * symbols loaded with a dlopen() invocation, the mode parameter should be
- * bitwise or'ed with one of the following values:
- *
- *   RTLD_GLOBAL - The object's symbols are made available for the
- *                 relocation processing of any other object. In addition,
- *                 symbol lookup using dlopen(0, mode) and an associated
- *                 dlsym() allows objects loaded with this mode to be
- *                 searched.
- *   RTLD_LOCAL  - All symbols are not made available for relocation
- *                 processing by other modules.
- *
- * Reference: OpenGroup.org
- */
-
-#define RTLD_LAZY   (0 << 0)
-#define RTLD_NOW    (1 << 0)
-#define RTLD_GLOBAL (1 << 1)
-#define RTLD_LOCAL  (1 << 2)
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
 
 /****************************************************************************
  * Name: dlopen
@@ -202,111 +143,10 @@ extern "C"
  *
  * Reference: OpenGroup.org
  *
- * ****************************************************************************/
-
-FAR void *dlopen(FAR const char *file, int mode);
-
-/****************************************************************************
- * Name: dlsym
- *
- * Description:
- *   dlsym() allows a process to obtain the address of a symbol defined
- *   within an object made accessible through a dlopen() call. handle is the
- *   value returned from a call to dlopen() (and which has not since been
- *   released via a call to dlclose()), name is the symbol's name as a
- *   character string.
- *
- *   dlsym() will search for the named symbol in all objects loaded
- *   automatically as a result of loading the object referenced by handle
- *   (see dlopen()). Load ordering is used in dlsym() operations upon the
- *   global symbol object. The symbol resolution algorithm used will be
- *   dependency order as described in dlopen().
- *
- * Input Parameters:
- *   handle - The opaque, non-NULL value returned by a previous successful
- *            call to dlopen().
- *   name   - A pointer to the symbol name string.
- *
- * Returned Value:
- *   If handle does not refer to a valid object opened by dlopen(), or if
- *   the named symbol cannot be found within any of the objects associated
- *   with handle, dlsym() will return NULL. More detailed diagnostic
- *   information will be available through dlerror().
- *
- * Reference: OpenGroup.org
- *
  ****************************************************************************/
 
-FAR void *dlsym(FAR void *handle, FAR const char *name);
-
-/****************************************************************************
- * Name: dlclose
- *
- * Description:
- *   dlclose() is used to inform the system that the object referenced by a
- *   handle returned from a previous dlopen() invocation is no longer needed
- *   by the application.
- *
- *   The use of dlclose() reflects a statement of intent on the part of the
- *   process, but does not create any requirement upon the implementation,
- *   such as removal of the code or symbols referenced by handle. Once an
- *   object has been closed using dlclose() an application should assume
- *   that its symbols are no longer available to dlsym(). All objects loaded
- *   automatically as a result of invoking dlopen() on the referenced object
- *   are also closed.
- *
- *   Although a dlclose() operation is not required to remove structures
- *   from an address space, neither is an implementation prohibited from
- *   doing so. The only restriction on such a removal is that no object will
- *   be removed to which references have been relocated, until or unless all
- *   such references are removed. For instance, an object that had been
- *   loaded with a dlopen() operation specifying the RTLD_GLOBAL flag might
- *   provide a target for dynamic relocations performed in the processing of
- *   other objects - in such environments, an application may assume that no
- *   relocation, once made, will be undone or remade unless the object
- *   requiring the relocation has itself been removed.
- *
- * Input Parameters:
- *   handle - The opaque, non-NULL value returned by a previous successful
- *            call to dlopen().
- *
- * Returned Value:
- *   If the referenced object was successfully closed, dlclose() returns 0.
- *   If the object could not be closed, or if handle does not refer to an
- *   open object, dlclose() returns a non-zero value. More detailed
- *   diagnostic information will be available through dlerror().
- *
- * Reference: OpenGroup.org
- *  ****************************************************************************/
-
-int dlclose(FAR void *handle);
-
-/****************************************************************************
- * Name: dlerror
- *
- * Description:
- *   dlerror() returns a null-terminated character string (with no trailing
- *   newline) that describes the last error that occurred during dynamic
- *   linking processing. If no dynamic linking errors have occurred since
- *   the last invocation of dlerror(), dlerror() returns NULL. Thus,
- *   invoking dlerror() a second time, immediately following a prior
- *   invocation, will result in NULL being returned.
- *
- * Input Parameters:
- *   If successful, dlerror() returns a null-terminated character string.
- *   Otherwise, NULL is returned.
- *
- * Returned Value:
- *
- * Reference: OpenGroup.org
- *
- ****************************************************************************/
-
-FAR char *dlerror(void);
-
-#undef EXTERN
-#ifdef __cplusplus
+FAR void *dlopen(FAR const char *file, int mode)
+{
+#warning Missing logic
+  return NULL;
 }
-#endif
-
-#endif /* __INCLUDE_DLLFCN_H */

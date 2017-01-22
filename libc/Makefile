@@ -64,6 +64,7 @@ VPATH := .
 include aio/Make.defs
 include audio/Make.defs
 include dirent/Make.defs
+include dllfcn/Make.defs
 include fixedmath/Make.defs
 include hex2bin/Make.defs
 include libgen/Make.defs
