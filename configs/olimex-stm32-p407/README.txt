@@ -10,7 +10,7 @@ Discovery (which has the same STM32 part)
 Note that CONFIG_STM32_DISABLE_IDLE_SLEEP_DURING_DEBUG is enabled so
 that the JTAG connection is not disconnected by the idle loop.
 
-The following peripherals are enabled in this configuration.
+The following peripherals are available in this configuration.
 
  - LEDs:       show the sytem status
 
@@ -30,6 +30,64 @@ The following peripherals are enabled in this configuration.
  - CAN:        Built in app 'can' works, but apart from that not really tested.
 
  - Ethernet:   Ping to other station on the network works.
+Configurations
+==============
+
+Each Olimex STM32-P407 configuration is maintained in a sub-directory and can be
+selected as follow:
+
+    cd tools
+    ./configure.sh olimex-stm32-p407/<subdir>
+    cd -
+    . ./setenv.sh
+
+Where <subdir> is one of the following:
+
+  nsh:
+
+    This is the NuttShell (NSH) using the NSH startup logic at
+    apps/examples/nsh.
+
+    NOTES:
+
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configurations using that tool, you should:
+
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          see additional README.txt files in the NuttX tools repository.
+
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
+
+    2. Serial Output
+
+       This configuraiont produces all of its test output on the serial
+       console.  This configuration has USART3 enabled as a serial console.
+       This is the connector labeled RS232_2.  This can easily be changed
+       by reconfiguring with 'make menuconfig'.
+
+    3. Toolchain
+
+       By default, the host platform is set to be Linux using the NuttX
+       buildroot toolchain. The host and/or toolchain selection can easily
+       be changed with 'make menuconfig'.
+
+    4. Kernel Modules
+
+       I used this configuration for testing NuttX kernel modules with the
+       following configuration additions to the configuration file:
+
+          CONFIG_BOARDCTL_OS_SYMTAB=y
+          CONFIG_EXAMPLES_MODULE=y
+          CONFIG_EXAMPLES_MODULE_DEVMINOR=0
+          CONFIG_EXAMPLES_MODULE_DEVPATH="/dev/ram0"
+          CONFIG_FS_ROMFS=y
+          CONFIG_LIBC_ARCH_ELF=y
+          CONFIG_LIBC_DLLFCN=y
+          CONFIG_MODULE=y
+          CONFIG_MODULE_ALIGN_LOG2=2
+          CONFIG_MODULE_BUFFERINCR=32
+          CONFIG_MODULE_BUFFERSIZE=128
 
 STATUS:
 
