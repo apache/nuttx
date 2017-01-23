@@ -7,8 +7,8 @@ to share the same board design.  Other code comes from the STM3240G board
 support (which has the same crystal and clocking) and from the STM32 F4
 Discovery (which has the same STM32 part)
 
-Note that CONFIG_STM32_DISABLE_IDLE_SLEEP_DURING_DEBUG is enabled so
-that the JTAG connection is not disconnected by the idle loop.
+Peripherals
+===========
 
 The following peripherals are available in this configuration.
 
@@ -80,6 +80,9 @@ the make, the nuttx binary will reside in an ELF file called, simply, nuttx.
        By default, the host platform is set to be Linux using the NuttX
        buildroot toolchain. The host and/or toolchain selection can easily
        be changed with 'make menuconfig'.
+
+    4. Note that CONFIG_STM32_DISABLE_IDLE_SLEEP_DURING_DEBUG is enabled so
+       that the JTAG connection is not disconnected by the idle loop.
 
 Configuration sub-directories
 -----------------------------
@@ -173,24 +176,33 @@ must be is one of the following.
 
     NOTES:
 
-    1. Kernel Modules
+    1. Kernel Modules / Shared Libraries
 
-       I used this configuration for testing NuttX kernel modules with the
-       following configuration additions to the configuration file:
+       I used this configuration for testing NuttX kernel modules in the
+       FLAT build with the following configuration additions to the
+       configuration file:
 
-          CONFIG_BOARDCTL_OS_SYMTAB=y
-          CONFIG_EXAMPLES_MODULE=y
-          CONFIG_EXAMPLES_MODULE_DEVMINOR=0
-          CONFIG_EXAMPLES_MODULE_DEVPATH="/dev/ram0"
-          CONFIG_FS_ROMFS=y
-          CONFIG_LIBC_ARCH_ELF=y
-          CONFIG_LIBC_DLLFCN=y
-          CONFIG_MODULE=y
-          CONFIG_MODULE_ALIGN_LOG2=2
-          CONFIG_MODULE_BUFFERINCR=32
-          CONFIG_MODULE_BUFFERSIZE=128
+         CONFIG_BOARDCTL_OS_SYMTAB=y
+         CONFIG_EXAMPLES_MODULE=y
+         CONFIG_EXAMPLES_MODULE_DEVMINOR=0
+         CONFIG_EXAMPLES_MODULE_DEVPATH="/dev/ram0"
+         CONFIG_FS_ROMFS=y
+         CONFIG_LIBC_ARCH_ELF=y
+         CONFIG_MODULE=y
+         CONFIG_MODULE_ALIGN_LOG2=2
+         CONFIG_MODULE_BUFFERINCR=32
+         CONFIG_MODULE_BUFFERSIZE=128
 
-STATUS:
+       Add the following for testing shared libraries in the FLAT
+       build:
+
+         CONFIG_LIBC_DLLFCN=y
+         CONFIG_EXAMPLES_SOTEST=y
+         CONFIG_EXAMPLES_SOTEST_DEVMINOR=1
+         CONFIG_EXAMPLES_SOTEST_DEVPATH="/dev/ram1"
+
+STATUS
+======
 
 2016-12-21: This board configuration was ported from the Olimex STM32 P207
   port.  Note that none of the above features have been verified.  USB, CAN,
@@ -202,3 +214,6 @@ STATUS:
 
   CCM memory is not included in the heap (CONFIG_STM32_CCMEXCLUDE=y) because
   it does no suport DMA, leaving only 128KiB for program usage.
+
+2107-01-23:  Added the the knsh configuration and support for the PROTECTED
+  build mode.
