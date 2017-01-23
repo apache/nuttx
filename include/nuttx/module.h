@@ -107,10 +107,10 @@ typedef CODE int (*mod_uninitializer_t)(FAR void *arg);
 
 struct mod_info_s
 {
-  mod_uninitializer_t uninitializer; /* Module uninitializer */
-  FAR void *arg;                     /* Uninitializer argument */
-  FAR struct symtab_s *exports;      /* Symbols exported by module */
-  unsigned int nexports;             /* Number of symobols in exports list */
+  mod_uninitializer_t uninitializer;   /* Module uninitializer */
+  FAR void *arg;                       /* Uninitializer argument */
+  FAR const struct symtab_s *exports;  /* Symbols exported by module */
+  unsigned int nexports;               /* Number of symobols in exports list */
 };
 
 /* A NuttX module is expected to export a function called module_initialize()
@@ -128,7 +128,7 @@ struct mod_info_s
 
 typedef CODE int (*mod_initializer_t)(FAR struct mod_info_s *modinfo);
 
-#ifdef __KERNEL__
+#if defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT)
 /* This is the type of the callback function used by mod_registry_foreach() */
 
 struct module_s;
@@ -163,7 +163,7 @@ extern "C"
  *
  ****************************************************************************/
 
-#ifdef __KERNEL__
+#if defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT)
 void mod_getsymtab(FAR const struct symtab_s **symtab, FAR int *nsymbols);
 #endif
 
@@ -182,7 +182,7 @@ void mod_getsymtab(FAR const struct symtab_s **symtab, FAR int *nsymbols);
  *
  ****************************************************************************/
 
-#ifdef __KERNEL__
+#if defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT)
 void mod_setsymtab(FAR const struct symtab_s *symtab, int nsymbols);
 #endif
 
@@ -301,7 +301,7 @@ FAR void *modhandle(FAR const char *name);
  *
  ****************************************************************************/
 
-#ifdef __KERNEL__
+#if defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT)
 int mod_registry_foreach(mod_callback_t callback, FAR void *arg);
 #endif
 

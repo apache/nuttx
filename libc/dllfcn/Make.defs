@@ -37,7 +37,7 @@ ifeq ($(CONFIG_LIBC_DLLFCN),y)
 
 # Add the dllfcn.h files to the build
 
-CSRCS += lib_dlopen.c lib_dlclose.c lib_dlsym.c lib_dlerror.c
+CSRCS += lib_dlopen.c lib_dlclose.c lib_dlsym.c lib_dlerror.c lib_dlsymtab.c
 
 # Add the dllfcn.h directory to the build
 
