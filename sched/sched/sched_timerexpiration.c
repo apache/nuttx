@@ -142,13 +142,14 @@ static struct timespec g_stop_time;
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  sched_process_scheduler
+ * Name:  sched_cpu_scheduler
  *
  * Description:
  *   Check for operations specific to scheduling policy of the currently
- *   active task.
+ *   active task on a single CPU.
  *
  * Inputs:
+ *   cpu - The CPU that we are performing the scheduler operations on.
  *   ticks - The number of ticks that have elapsed on the interval timer.
  *   noswitches - True: Can't do context switches now.
  *
@@ -166,10 +167,10 @@ static struct timespec g_stop_time;
  ****************************************************************************/
 
 #if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
-static inline uint32_t sched_process_scheduler(uint32_t ticks, bool noswitches)
+static inline uint32_t sched_cpu_scheduler(int cpu, uint32_t ticks,                                           bool noswitches)
 {
-  FAR struct tcb_s *rtcb  = this_task();
-  FAR struct tcb_s *ntcb  = this_task();
+  FAR struct tcb_s *rtcb  = current_task(cpu);
+  FAR struct tcb_s *ntcb  = current_task(cpu);
   uint32_t ret = 0;
 
 #if CONFIG_RR_INTERVAL > 0
@@ -216,7 +217,7 @@ static inline uint32_t sched_process_scheduler(uint32_t ticks, bool noswitches)
    * the new task at the head of the ready to run list.
    */
 
-  ntcb = this_task();
+  ntcb = current_task(cpu);
 
   /* Check if the new task at the head of the ready-to-run has changed. */
 
@@ -239,6 +240,63 @@ static inline uint32_t sched_process_scheduler(uint32_t ticks, bool noswitches)
 #endif
 
   return ret;
+}
+#endif
+
+/****************************************************************************
+ * Name:  sched_process_scheduler
+ *
+ * Description:
+ *   Check for operations specific to scheduling policy of the currently
+ *   active task on a single CPU.
+ *
+ * Inputs:
+ *   ticks - The number of ticks that have elapsed on the interval timer.
+ *   noswitches - True: Can't do context switches now.
+ *
+ * Return Value:
+ *   The number if ticks remaining until the next time slice expires.
+ *   Zero is returned if there is no time slicing (i.e., the task at the
+ *   head of the ready-to-run list does not support round robin
+ *   scheduling).
+ *
+ *   The value one may returned under certain circumstances that probably
+ *   can't happen.  The value one is the minimal timer setup and it means
+ *   that a context switch is needed now, but cannot be performed because
+ *   noswitches == true.
+ *
+ ****************************************************************************/
+
+#if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
+static inline uint32_t sched_process_scheduler(uint32_t ticks,
+                                               bool noswitches)
+{
+#ifdef CONFIG_SMP
+  uint32_t minslice = UINT32_MAX;
+  uint32_t timeslice;
+  irqstate_t flags;
+  int i;
+
+  /* Perform scheduler operations on all CPUs */
+
+  flags = enter_critical_section();
+  for (i = 0; i < CONFIG_SMP_NCPUS; i++)
+    {
+      timeslice = sched_cpu_scheduler(i, ticks, noswitches);
+      if (timeslice > 0 && timeslice < minslice)
+        {
+          minslice = timeslice;
+        }
+    }
+
+  leave_critical_section(flags);
+  return minslice < UINT32_MAX ? minslice : 0;
+
+#else
+  /* Perform scheduler operations on the single CPUs */
+
+  return sched_cpu_scheduler(0, ticks, noswitches);
+#endif
 }
 #else
 #  define sched_process_scheduler(t,n) (0)
@@ -656,4 +714,5 @@ void sched_timer_reassess(void)
   nexttime = sched_timer_cancel();
   sched_timer_start(nexttime);
 }
+
 #endif /* CONFIG_SCHED_TICKLESS */

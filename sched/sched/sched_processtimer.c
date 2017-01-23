@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sched/sched_processtimer.c
  *
- *   Copyright (C) 2007, 2009, 2014-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2014-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,14 +55,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  sched_process_scheduler
+ * Name:  sched_cpu_scheduler
  *
  * Description:
  *   Check for operations specific to scheduling policy of the currently
- *   active task.
+ *   active task on one CPU.
  *
  * Input Parameters:
- *   None
+ *   cpu - The CPU that we are performing the scheduler operations on.
  *
  * Returned Value:
  *   None
@@ -70,9 +70,9 @@
  ****************************************************************************/
 
 #if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
-static inline void sched_process_scheduler(void)
+static inline void sched_cpu_scheduler(int cpu)
 {
-  FAR struct tcb_s *rtcb  = this_task();
+  FAR struct tcb_s *rtcb = current_task(cpu);
 
 #if CONFIG_RR_INTERVAL > 0
   /* Check if the currently executing task uses round robin scheduling. */
@@ -98,6 +98,46 @@ static inline void sched_process_scheduler(void)
 
       (void)sched_sporadic_process(rtcb, 1, false);
     }
+#endif
+}
+#endif
+
+/****************************************************************************
+ * Name:  sched_process_scheduler
+ *
+ * Description:
+ *   Check for operations specific to scheduling policy of the currently
+ *   active task on all configured CPUs.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
+static inline void sched_process_scheduler(void)
+{
+#ifdef CONFIG_SMP
+  irqstate_t flags;
+  int i;
+
+  /* Perform scheduler operations on all CPUs */
+
+  flags = enter_critical_section();
+  for (i = 0; i < CONFIG_SMP_NCPUS; i++)
+    {
+      sched_cpu_scheduler(i);
+    }
+
+  leave_critical_section(flags);
+
+#else
+  /* Perform scheduler operations on the single CPUs */
+
+  sched_cpu_scheduler(0);
 #endif
 }
 #else
