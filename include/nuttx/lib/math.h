@@ -98,7 +98,7 @@
 
 #define isnan(x)    ((x) != (x))
 #define isinf(x)    (((x) == INFINITY) || ((x) == -INFINITY))
-#define isfinite(x) (!(isinf(x)) && (x != NAN))
+#define isfinite(x) (!(isinf(x) || isnan(x)))
 
 #define isinf_f(x)  (((x) == INFINITY_F) || ((x) == -INFINITY_F))
 
