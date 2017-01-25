@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/armv7-m/up_elf.c
+ * libc/machine/arm/armv7-m/arch_elf.c
  *
- *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without

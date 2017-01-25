@@ -45,7 +45,7 @@
  * Public Functions
  ****************************************************************************/
 
-#ifndef CONFIG_ARCH_STRLEN
+#ifndef CONFIG_LIBC_ARCH_STRLEN
 size_t strlen(const char *s)
 {
   const char *sc;

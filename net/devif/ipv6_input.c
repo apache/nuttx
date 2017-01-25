@@ -2,7 +2,7 @@
  * net/devif/ipv6_input.c
  * Device driver IPv6 packet receipt interface
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
@@ -173,13 +173,13 @@ int ipv6_input(FAR struct net_driver_s *dev)
    * we set d_len to the correct value.
    *
    * The length reported in the IPv6 header is the length of the payload
-   * that follows the header. The device interface uses the d_len variable for
-   * holding the size of the entire packet, including the IP header and link
-   * layer header.
+   * that follows the header.  The device interface uses the d_len variable
+   * for holding the size of the entire packet, including the IP header but
+   * without the link layer header.
    */
 
   pktlen = ((uint16_t)ipv6->len[0] << 8) + (uint16_t)ipv6->len[1] +
-           IPv6_HDRLEN + netdev_ipv6_hdrlen(dev);
+           IPv6_HDRLEN;
 
   if (pktlen <= dev->d_len)
     {

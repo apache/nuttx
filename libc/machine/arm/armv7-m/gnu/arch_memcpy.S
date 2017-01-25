@@ -1,9 +1,8 @@
 /************************************************************************************
- * nuttx/arch/arm/src/armv7-a/arm_memcpy.S
+ * libc/machine/arm/armv7-m/gnu/up_memcpy.S
  *
- * ARMv7-A optimised memcpy, based on the ARMv7-M version contributed by Mike Smith.
- * Apparently in the public domain and is re-released here under the modified BSD
- * license:
+ * armv7m-optimized memcpy, contributed by Mike Smith.  Apparently in the public
+ * domain and is re-released here under the modified BSD license:
  *
  * Obtained via a posting on the Stellaris forum:
  *  http://e2e.ti.com/support/microcontrollers/\
@@ -58,10 +57,9 @@
  ************************************************************************************/
 
 	.global		memcpy
-
 	.syntax		unified
-
-	.file		"arm_memcpy.S"
+	.thumb
+	.file		"arch_memcpy.S"
 
 /************************************************************************************
  * .text
@@ -137,7 +135,7 @@ MEM_LongCopyTable:
  * Name: memcpy
  *
  * Description:
- *   Optimised "general" copy routine
+ *   Optimized "general" copy routine
  *
  * Input Parameters:
  *   r0 = destination, r1 = source, r2 = length
@@ -148,6 +146,7 @@ MEM_LongCopyTable:
  ************************************************************************************/
 
 	.align 4
+	.thumb_func
 
 memcpy:
 	push	{r14}
@@ -158,6 +157,7 @@ memcpy:
 
 	.align 4
 
+	.thumb_func
 _do_memcpy:
 	push    {r14}
 

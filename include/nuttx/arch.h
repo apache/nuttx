@@ -1821,6 +1821,10 @@ int up_cpu_start(int cpu);
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
  *
+ * Assumptions:
+ *   Called from within a critical section; up_cpu_resume() must be called
+ *   later while still within the same critical section.
+ *
  ****************************************************************************/
 
 #ifdef CONFIG_SMP
@@ -1893,6 +1897,10 @@ int up_cpu_paused(int cpu);
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
+ *
+ * Assumptions:
+ *   Called from within a critical section; up_cpu_pause() must have
+ *   previously been called within the same critical section.
  *
  ****************************************************************************/
 

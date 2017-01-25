@@ -659,6 +659,24 @@ config STM32L4_FREERUN
 	bool
 	default y
 
+config STM32L4_TICKLESS_ONESHOT
+	int "Tickless one-shot timer channel"
+	default 2
+	range 1 8
+	depends on STM32L4_ONESHOT
+	---help---
+		If the Tickless OS feature is enabled, then one clock must be
+		assigned to provide the one-shot timer needed by the OS.
+
+config STM32L4_TICKLESS_FREERUN
+	int "Tickless free-running timer channel"
+	default 5
+	range 1 8
+	depends on STM32L4_FREERUN
+	---help---
+		If the Tickless OS feature is enabled, then one clock must be
+		assigned to provide the free-running timer needed by the OS.
+
 endif # SCHED_TICKLESS
 
 if !SCHED_TICKLESS
@@ -679,23 +697,16 @@ config STM32L4_FREERUN
 
 endif # !SCHED_TICKLESS
 
-config STM32L4_TICKLESS_ONESHOT
-	int "Tickless one-shot timer channel"
-	default 2
+config STM32L4_ONESHOT_MAXTIMERS
+	int "Maximum number of oneshot timers"
+	default 1
 	range 1 8
 	depends on STM32L4_ONESHOT
 	---help---
-		If the Tickless OS feature is enabled, then one clock must be
-		assigned to provide the one-shot timer needed by the OS.
-
-config STM32L4_TICKLESS_FREERUN
-	int "Tickless free-running timer channel"
-	default 5
-	range 1 8
-	depends on STM32L4_FREERUN
-	---help---
-		If the Tickless OS feature is enabled, then one clock must be
-		assigned to provide the free-running timer needed by the OS.
+		Determines the maximum number of oneshot timers that can be
+		supported.  This setting pre-allocates some minimal support for each
+		of the timers and places an upper limit on the number of oneshot
+		timers that you can use.
 
 config STM32L4_TIM1_PWM
 	bool "TIM1 PWM"

@@ -61,11 +61,22 @@
 #if defined(CONFIG_RTC)
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#if !defined(BOARD_RTC_CAP)
+/* Capacitance values 8pF if not already defined */
+
+#  define BOARD_RTC_CAP RTC_CR_SC8P | RTC_CR_SC4P
+#endif
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
 static alarmcb_t g_alarmcb;
+static bool rtc_irq_state = false;
 #endif
 
 /****************************************************************************
@@ -77,6 +88,73 @@ volatile bool g_rtc_enabled = false;
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: rtc_dumpregs
+ *
+ * Description:
+ *    Disable RTC write protection
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_RTC_INFO
+static void rtc_dumpregs(FAR const char *msg)
+{
+  rtcinfo("%s:\n", msg);
+  rtcinfo("   TSR: %08x\n", getreg32(KINETIS_RTC_TSR));
+  rtcinfo("   TPR: %08x\n", getreg32(KINETIS_RTC_TPR));
+  rtcinfo("   TAR: %08x\n", getreg32(KINETIS_RTC_TAR));
+  rtcinfo("    CR: %08x\n", getreg32(KINETIS_RTC_CR));
+  rtcinfo("    SR: %08x\n", getreg32(KINETIS_RTC_SR));
+  rtcinfo("    LR: %08x\n", getreg32(KINETIS_RTC_LR));
+  rtcinfo("   IER: %08x\n", getreg32(KINETIS_RTC_IER));
+#if defined(KINETIS_RTC_GEN2)
+  rtcinfo("  TTSR: %08x\n", getreg32(KINETIS_RTC_TTSR));
+  rtcinfo("   MER: %08x\n", getreg32(KINETIS_RTC_MER));
+  rtcinfo("  MCLR: %08x\n", getreg32(KINETIS_RTC_MCLR));
+  rtcinfo("  MCHR: %08x\n", getreg32(KINETIS_RTC_MCHR));
+  rtcinfo("   WAR: %08x\n", getreg32(KINETIS_RTC_WAR));
+  rtcinfo("   RAR: %08x\n", getreg32(KINETIS_RTC_RAR));
+#endif
+}
+#else
+#  define rtc_dumpregs(msg)
+#endif
+
+/****************************************************************************
+ * Name: rtc_dumptime
+ *
+ * Description:
+ *    Disable RTC write protection
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_RTC_INFO
+static void rtc_dumptime(FAR struct tm *tp, FAR const char *msg)
+{
+  rtcinfo("%s:\n", msg);
+  rtcinfo("  tm_sec: %08x\n", tp->tm_sec);
+  rtcinfo("  tm_min: %08x\n", tp->tm_min);
+  rtcinfo(" tm_hour: %08x\n", tp->tm_hour);
+  rtcinfo(" tm_mday: %08x\n", tp->tm_mday);
+  rtcinfo("  tm_mon: %08x\n", tp->tm_mon);
+  rtcinfo(" tm_year: %08x\n", tp->tm_year);
+}
+#else
+#  define rtc_dumptime(tp, msg)
+#endif
 
 /****************************************************************************
  * Name: kinetis_rtc_interrupt
@@ -96,26 +174,118 @@ volatile bool g_rtc_enabled = false;
 #if defined(CONFIG_RTC_ALARM)
 static int kinetis_rtc_interrupt(int irq, void *context)
 {
-  if (g_alarmcb != NULL)
-    {
-      /* Alarm callback */
+ uint16_t rtc_sr;
 
-      g_alarmcb();
-      g_alarmcb = NULL;
+  /* if alarm */
+  rtc_sr = getreg32( KINETIS_RTC_SR);
+  if (rtc_sr & RTC_SR_TAF )
+    {
+      if (g_alarmcb != NULL)
+        {
+          /* Alarm callback */
+
+          g_alarmcb();
+          g_alarmcb = NULL;
+        }
+    }
+  else
+    {
+      /* other interrupts are serious and should leave a turd
+       *
+       * RTC_SR_TIF   _TOF   _MOF
+       */
+
+      rtcwarn("unexp int src=0x%x, num=", rtc_sr);
     }
 
   /* Clear pending flags, disable alarm */
 
-  putreg32(0, KINETIS_RTC_TAR); /* unset alarm (resets flags) */
-  putreg32(0, KINETIS_RTC_IER); /* disable alarm interrupt */
+  putreg32(0, KINETIS_RTC_TAR); /* Unset alarm (resets flags) */
+  putreg32(0, KINETIS_RTC_IER); /* Disable alarm interrupt */
 
   return 0;
 }
 #endif
 
 /****************************************************************************
+ * Name: RTC_Reset
+ *
+ * Description:
+ *    Reset the RTC to known state
+ *
+ * Input Parameters:
+ *    none
+ *
+ * Returned Value:
+ *   none
+ *
+ ****************************************************************************/
+
+static inline void RTC_Reset(void)
+{
+    putreg32(( RTC_CR_SWR | getreg32(KINETIS_RTC_CR)),KINETIS_RTC_CR);
+    putreg32((~RTC_CR_SWR & getreg32(KINETIS_RTC_CR)),KINETIS_RTC_CR);
+
+   /* Set TSR register to 0x1 to avoid the timer invalid (TIF) bit being
+    * set in the SR register
+    */
+
+    putreg32(1,KINETIS_RTC_TSR);
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: up_rtc_irqinit
+ *
+ * Description:
+ *   Initialize the hardware RTC irq.
+*    This only needs to be called once when first used.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_RTC_ALARM)
+int up_rtc_irq_attach(void)
+{
+  uint32_t rtc_sr;
+
+  if (!rtc_irq_state)
+    {
+      rtc_irq_state=true;
+
+      /* Clear TAF if pending */
+
+      rtc_sr = getreg32( KINETIS_RTC_SR);
+      if (rtc_sr & RTC_SR_TAF )
+        {
+          putreg32(0, KINETIS_RTC_TAR);
+        }
+
+      /* Enable alarm interrupts.
+       * This will not work if part of up_rtc_initialize()
+       * as it is called very early in initialization BEFORE the interrupt
+       * system will be enabled.  All interrupts will disabled later when
+       * the interrupt system is disabled. This must be done later when the
+       * alarm is first set.
+       *
+       * KINETIS_IRQ_RTCS is a separate interrupt for seconds if needed
+       */
+
+      irq_attach(KINETIS_IRQ_RTC, kinetis_rtc_interrupt);
+      up_enable_irq(KINETIS_IRQ_RTC);
+    }
+
+  return OK;
+}
+#endif
 
 /****************************************************************************
  * Name: up_rtc_initialize
@@ -134,7 +304,8 @@ static int kinetis_rtc_interrupt(int irq, void *context)
 
 int up_rtc_initialize(void)
 {
-  int regval;
+  uint32_t regval;
+  bool rtc_valid = false;
 
   /* Enable RTC module */
 
@@ -142,16 +313,64 @@ int up_rtc_initialize(void)
   regval |= SIM_SCGC6_RTC;
   putreg32(regval, KINETIS_SIM_SCGC6);
 
-  /* Disable counters (just in case) */
+  regval = getreg32(KINETIS_RTC_SR);
+  if (!(regval & RTC_SR_TIF))
+    {
+#ifdef KINETIS_RTC_GEN2
+      /* Check if the one-time initialization of the RTC has already been
+       * performed. We can determine this by checking if the magic number
+       * has been writing to to back-up date register DR0.
+       */
 
-  putreg32(0, KINETIS_RTC_SR);
+      regval = getreg32(KINETIS_RTC_MCLR);
+      if ((CONFIG_RTC_MAGICL == regval ) &&
+          (CONFIG_RTC_MAGICH == getreg32(KINETIS_RTC_MCHR)) )
+#endif
+        {
+          rtc_valid = true;
+        }
+    }
 
-  /* Enable oscilator */
-  /* capacitance values from teensyduino */
+  if (rtc_valid)
+    {
+      rtcinfo("Do resume\n");
 
-  putreg32(RTC_CR_SC16P | RTC_CR_SC4P | RTC_CR_OSCE, KINETIS_RTC_CR);
+      /* RTC already set-up, just resume normal operation */
 
-  /* TODO: delay some time (1024 cycles? would be 30ms) */
+      rtc_dumpregs("Did resume");
+    }
+  else
+    {
+      rtcinfo("Do setup\n");
+      RTC_Reset();
+
+#ifdef KINETIS_RTC_GEN2
+      /* Configure the RTC to be initialized */
+
+      putreg32(CONFIG_RTC_MAGICL, KINETIS_RTC_MCLR);
+      putreg32(CONFIG_RTC_MAGICH, KINETIS_RTC_MCHR);
+#endif
+
+      /* Setup the update mode and supervisor access mode */
+
+      putreg32((~(RTC_CR_UM|RTC_CR_SUP) & getreg32(KINETIS_RTC_CR)),
+               KINETIS_RTC_CR);
+
+      /* Disable counters (just in case) */
+
+      putreg32(0, KINETIS_RTC_SR);
+
+      /* Enable oscilator - must have Vbat else hard fault */
+
+      putreg32((BOARD_RTC_CAP | RTC_CR_OSCE ), KINETIS_RTC_CR);
+
+     /* TODO - add capability to accurately tune RTC
+      * This is a per individual board customization and requires
+      * parameters to be configurable and stored in non-volatile eg flash.
+      */
+
+      /* TODO: delay some time (1024 cycles? would be 30ms) */
+    }
 
   /* Disable interrupts */
 
@@ -162,17 +381,6 @@ int up_rtc_initialize(void)
    */
 
   putreg32(getreg32(KINETIS_RTC_TSR), KINETIS_RTC_TSR);
-
-#if defined(CONFIG_RTC_ALARM)
-  /* Enable alarm interrupts. REVISIT: This will not work.  up_rtc_initialize() 
-   * is called very early in initialization BEFORE the interrupt system will be 
-   * enabled.  All interrupts will disabled later when the interrupt system is
-   * disabled. This must be done later when the alarm is first set.
-   */
-
-  irq_attach(KINETIS_IRQ_RTC, kinetis_rtc_interrupt);
-  up_enable_irq(KINETIS_IRQ_RTC);
-#endif
 
   /* Enable counters */
 
@@ -319,11 +527,17 @@ int kinetis_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback)
 
       g_alarmcb = callback;
 
+      /* ensure irq is attached */
+
+      up_rtc_irq_attach();
+
       /* Enable and set RTC alarm */
 
       putreg32(tp->tv_sec, KINETIS_RTC_TAR);    /* Set alarm (also resets
                                                  * flags) */
       putreg32(RTC_IER_TAIE, KINETIS_RTC_IER);  /* Enable alarm interrupt */
+
+      rtc_dumpregs("set alarmtime");
 
       return OK;
     }

@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sched/sched_cpuload_oneshot.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,24 +56,42 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Configuration ************************************************************/
+
 #if !defined(CONFIG_SCHED_CPULOAD) || !defined(CONFIG_SCHED_CPULOAD_EXTCLK)
 #  error CONFIG_SCHED_CPULOAD and CONFIG_SCHED_CPULOAD_EXTCLK must be defined
 #endif
+
+/* CONFIG_SCHED_CPULOAD_TICKSPERSEC is the frequency of the external clock
+ * source.
+ */
 
 #ifndef CONFIG_SCHED_CPULOAD_TICKSPERSEC
 #  error CONFIG_SCHED_CPULOAD_TICKSPERSEC not defined
 #endif
 
-#define CPULOAD_ONESHOT_NOMINAL      (CONFIG_SCHED_CPULOAD_TICKSPERSEC * 1000)
-
-#if CPULOAD_ONESHOT_NOMINAL < 1 || CPULOAD_ONESHOT_NOMINAL > 0x7fffffff
-#  error CPULOAD_ONESHOT_NOMINAL is out of range
-#endif
+/* CONFIG_CPULOAD_ONESHOT_ENTROPY determines that amount of random "jitter"
+ * that will be added to the nominal sample interval.  Specified as a number
+ * bits.
+ */
 
 #ifndef CONFIG_CPULOAD_ONESHOT_ENTROPY
 #  warning CONFIG_CPULOAD_ONESHOT_ENTROPY not defined
 #  define CONFIG_CPULOAD_ONESHOT_ENTROPY 0
 #endif
+
+/* Calculate the nomimal sample interval in microseconds:
+ *
+ * nominal = (1,000,000 usec/sec) / Frequency cycles/sec) = Period usec/cycle
+ */
+
+#define CPULOAD_ONESHOT_NOMINAL      (1000000 / CONFIG_SCHED_CPULOAD_TICKSPERSEC)
+
+#if CPULOAD_ONESHOT_NOMINAL < 1 || CPULOAD_ONESHOT_NOMINAL > 0x7fffffff
+#  error CPULOAD_ONESHOT_NOMINAL is out of range
+#endif
+
+/* Convert the entropy from number of bits to a numeric value */
 
 #define CPULOAD_ONESHOT_ENTROPY      (1 << CONFIG_CPULOAD_ONESHOT_ENTROPY)
 
@@ -133,11 +151,11 @@ static struct sched_oneshot_s g_sched_oneshot;
 
 static void sched_oneshot_start(void)
 {
-#if CONFIG_CPULOAD_ONESHOT_ENTROPY > 0
   struct timespec ts;
+#if CONFIG_CPULOAD_ONESHOT_ENTROPY > 0
   uint32_t entropy;
-  int32_t secs;
 #endif
+  int32_t secs;
   int32_t usecs;
 
   /* Get the next delay */

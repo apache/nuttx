@@ -2,7 +2,7 @@
  * net/tcp/tcp_devpoll.c
  * Driver poll for the availability of TCP TX data
  *
- *   Copyright (C) 2007-2009, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
@@ -105,8 +105,19 @@ void tcp_poll(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
            * setup may not actually be used.
            */
 
-#if defined(CONFIG_NET_IPv4)
+#if defined(CONFIG_NET_IPv6) && defined(CONFIG_NET_IPv4)
+          if (conn->domain == PF_INET)
+            {
+              tcp_ipv4_select(dev);
+            }
+          else
+            {
+              tcp_ipv6_select(dev);
+            }
+
+#elif defined(CONFIG_NET_IPv4)
           tcp_ipv4_select(dev);
+
 #else /* if defined(CONFIG_NET_IPv6) */
           tcp_ipv6_select(dev);
 #endif

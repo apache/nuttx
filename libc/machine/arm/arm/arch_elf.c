@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/armv-7a/arm_elf.c
+ * libc/machine/arm/arm/arch_elf.c
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,18 @@
 #include <arch/elf.h>
 #include <nuttx/arch.h>
 #include <nuttx/binfmt/elf.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -138,12 +150,10 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
   int32_t offset;
   unsigned int relotype;
 
-  /* All relocations except R_ARM_V4BX depend upon having valid symbol
-   * information.
-   */
+  /* All relocations depend upon having valid symbol information */
 
   relotype = ELF32_R_TYPE(rel->r_info);
-  if (sym == NULL && relotype != R_ARM_NONE && relotype != R_ARM_V4BX)
+  if (sym == NULL && relotype != R_ARM_NONE)
     {
       return -EINVAL;
     }

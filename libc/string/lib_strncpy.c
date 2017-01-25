@@ -49,7 +49,7 @@
  * Name: strncpy
  ****************************************************************************/
 
-#ifndef CONFIG_ARCH_STRNCPY
+#ifndef CONFIG_LIBC_ARCH_STRNCPY
 char *strncpy(FAR char *dest, FAR const char *src, size_t n)
 {
   char *ret = dest;     /* Value to be returned */

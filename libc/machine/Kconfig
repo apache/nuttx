@@ -1,0 +1,128 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+# These are library functions that may be overriden by architecture-
+# specific implementations.  Not all architectures support implementations
+# for every library function.
+
+config LIBC_ARCH_MEMCPY
+	bool
+	default n
+
+config LIBC_ARCH_MEMCMP
+	bool
+	default n
+
+config LIBC_ARCH_MEMMOVE
+	bool
+	default n
+
+config LIBC_ARCH_MEMSET
+	bool
+	default n
+
+config LIBC_ARCH_STRCHR
+	bool
+	default n
+
+config LIBC_ARCH_STRCMP
+	bool
+	default n
+
+config LIBC_ARCH_STRCPY
+	bool
+	default n
+
+config LIBC_ARCH_STRNCPY
+	bool
+	default n
+
+config LIBC_ARCH_STRLEN
+	bool
+	default n
+
+config LIBC_ARCH_STRNLEN
+	bool
+	default n
+
+config LIBC_ARCH_BZERO
+	bool
+	default n
+
+config LIBC_ARCH_ELF
+	bool
+	default n
+
+config LIBM_ARCH_CEIL
+	bool
+	default n
+	depends on LIBM && ARCH_CORTEXM33
+
+config LIBM_ARCH_FLOOR
+	bool
+	default n
+	depends on LIBM && ARCH_CORTEXM33
+
+config LIBM_ARCH_NEARBYINT
+	bool
+	default n
+	depends on LIBM && ARCH_CORTEXM33
+
+config LIBM_ARCH_RINT
+	bool
+	default n
+	depends on LIBM && ARCH_CORTEXM33
+
+config LIBM_ARCH_ROUND
+	bool
+	default n
+	depends on LIBM && ARCH_CORTEXM33
+
+config LIBM_ARCH_TRUNC
+	bool
+	default n
+	depends on LIBM && ARCH_CORTEXM33
+
+config LIBM_ARCH_CEILF
+	bool
+	default n
+	depends on LIBM && ARCH_CORTEXM33
+
+config LIBM_ARCH_FLOORF
+	bool
+	default n
+	depends on LIBM && ARCH_CORTEXM33
+
+config LIBM_ARCH_NEARBYINTF
+	bool
+	default n
+	depends on LIBM && ARCH_CORTEXM33
+
+config LIBM_ARCH_RINTF
+	bool
+	default n
+	depends on LIBM && ARCH_CORTEXM33
+
+config LIBM_ARCH_ROUNDF
+	bool
+	default n
+	depends on LIBM && ARCH_CORTEXM33
+
+config LIBM_ARCH_TRUNCF
+	bool
+	default n
+	depends on LIBM && ARCH_CORTEXM33
+
+# One or more the of above may be selected by architecture specific logic
+
+if ARCH_ARM
+source libc/machine/arm/Kconfig
+endif
+if ARCH_SIM
+source libc/machine/sim/Kconfig
+endif
+if ARCH_X86
+source libc/machine/x86/Kconfig
+endif

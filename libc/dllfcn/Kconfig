@@ -1,0 +1,15 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config LIBC_DLLFCN
+	bool "Shared library support"
+	default n
+	select LIBC_ARCH_ELF
+	select MODULE if BUILD_FLAT
+	depends on EXPERIMENTAL || BUILD_FLAT
+	---help---
+		Enabled support for user-space shared libraries.
+
+		A work in progress, hence, marked EXPERIMENTAL

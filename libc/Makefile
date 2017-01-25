@@ -1,7 +1,7 @@
 ############################################################################
 # libc/Makefile
 #
-#   Copyright (C) 2007-2014, 2016 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007-2014, 2016-2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -64,10 +64,12 @@ VPATH := .
 include aio/Make.defs
 include audio/Make.defs
 include dirent/Make.defs
+include dllfcn/Make.defs
 include fixedmath/Make.defs
 include hex2bin/Make.defs
 include libgen/Make.defs
 include locale/Make.defs
+include machine/Make.defs
 include math/Make.defs
 include misc/Make.defs
 include net/Make.defs

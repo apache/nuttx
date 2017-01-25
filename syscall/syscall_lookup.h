@@ -1,7 +1,7 @@
 /****************************************************************************
  * syscall/syscall_lookup.h
  *
- *   Copyright (C) 2011, 2013-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -123,6 +123,8 @@ SYSCALL_LOOKUP(up_assert,                 2, STUB_up_assert)
 #ifdef CONFIG_MODULE
   SYSCALL_LOOKUP(insmod,                  2, STUB_insmod)
   SYSCALL_LOOKUP(rmmod,                   1, STUB_rmmod)
+  SYSCALL_LOOKUP(modsym,                  2, STUB_modsym)
+  SYSCALL_LOOKUP(modhandle,               1, STUB_modhandle)
 #endif
 
 /* The following can only be defined if we are configured to execute

@@ -1,7 +1,7 @@
 ############################################################################
 # arch/arm/src/kinetis/Make.defs
 #
-#   Copyright (C) 2011, 2013-2016 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2011, 2013-2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -71,10 +71,6 @@ ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
 CMN_CSRCS += up_ramvec_initialize.c up_ramvec_attach.c
 endif
 
-ifeq ($(CONFIG_ARCH_MEMCPY),y)
-CMN_ASRCS += up_memcpy.S
-endif
-
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CMN_CSRCS += up_mpu.c up_task_start.c up_pthread_start.c
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
@@ -95,12 +91,6 @@ ifeq ($(CONFIG_NET),y)
 ifneq ($(CONFIG_KINETIS_ENET),y)
 CMN_CSRCS += up_etherstub.c
 endif
-endif
-
-ifeq ($(CONFIG_ELF),y)
-CMN_CSRCS += up_elf.c
-else ifeq ($(CONFIG_MODULE),y)
-CMN_CSRCS += up_elf.c
 endif
 
 ifeq ($(CONFIG_ARCH_FPU),y)
@@ -174,6 +164,9 @@ endif
 
 ifeq ($(CONFIG_RTC),y)
 CHIP_CSRCS += kinetis_rtc.c
+ifeq ($(CONFIG_RTC_DRIVER),y)
+CHIP_CSRCS += kinetis_rtc_lowerhalf.c
+endif
 endif
 
 ifeq ($(CONFIG_NET),y)

@@ -29,10 +29,12 @@ in the include/ directory provides the prototype for library functions.  So
 we have:
 
   audio     - This part of he audio system: nuttx/audio/audio.h
+  dllfcn    - dllfcn.h
   hex2bin   - hex2bin.h
   libgen    - libgen.h
   locale    - locale.h
   fixedmath - fixedmath.h
+  machine   - Various architecture-specifica implementations.
   math      - math.h
   net       - Various network-related header files: netinet/ether.h, arpa/inet.h
   pthread   - pthread.h

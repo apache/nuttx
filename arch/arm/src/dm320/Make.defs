@@ -46,12 +46,6 @@ CMN_CSRCS += up_reprioritizertr.c up_schedulesigaction.c
 CMN_CSRCS += up_sigdeliver.c up_stackframe.c up_syscall.c up_unblocktask.c
 CMN_CSRCS += up_undefinedinsn.c up_usestack.c up_vfork.c
 
-ifeq ($(CONFIG_ELF),y)
-CMN_CSRCS += up_elf.c
-else ifeq ($(CONFIG_MODULE),y)
-CMN_CSRCS += up_elf.c
-endif
-
 ifeq ($(CONFIG_STACK_COLORATION),y)
 CMN_CSRCS += up_checkstack.c
 endif

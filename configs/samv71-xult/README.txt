@@ -1652,7 +1652,7 @@ Configuration sub-directories
   knsh:
 
     This is identical to the nsh configuration below except that NuttX
-    is built as a kernel-mode, monolithic module and the user applications
+    is built as a protected mode, monolithic module and the user applications
     are built separately.  There are four very similar NSH configurations:
 
       - knsh.  This is a somewhat simplified version of the nsh configuration

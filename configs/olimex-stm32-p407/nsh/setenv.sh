@@ -1,7 +1,7 @@
 #!/bin/bash
 # configs/olimex-stm32-p407/nsh/setenv.sh
 #
-#   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2016 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without

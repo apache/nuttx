@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/module/mod_registry.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -197,6 +197,40 @@ FAR struct module_s *mod_registry_find(FAR const char *modulename)
        modp = modp->flink);
 
   return modp;
+}
+
+/****************************************************************************
+ * Name: mod_registry_verify
+ *
+ * Description:
+ *   Verify that a module handle is valid by traversing the module list and
+ *   assuring that the module still resides in the list.  If it does not,
+ *   the handle is probably a stale pointer.
+ *
+ * Input Parameters:
+ *   modp - The registry entry to be verified.
+ *
+ * Returned Value:
+ *   Returns OK is the module is valid; -ENOENT otherwise.
+ *
+ * Assumptions:
+ *   The caller holds the lock on the module registry.
+ *
+ ****************************************************************************/
+
+int mod_registry_verify(FAR struct module_s *modp)
+{
+  FAR struct module_s *node;
+
+  for (node = g_mod_registry; node != NULL; node = node->flink)
+    {
+      if (node == modp)
+        {
+          return OK;
+        }
+    }
+
+  return -ENOENT;
 }
 
 /****************************************************************************

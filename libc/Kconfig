@@ -32,7 +32,9 @@ config LIB_HOMEDIR
 	---help---
 		The home directory to use with operations like such as 'cd ~'
 
+source libc/dllfcn/Kconfig
 source libc/math/Kconfig
+source libc/machine/Kconfig
 
 config NOPRINTF_FIELDWIDTH
 	bool "Disable sprintf support fieldwidth"
@@ -400,27 +402,10 @@ config ARCH_ROMGETC
 		particular needs of your environment.  There is no "one-size-fits-all"
 		solution for this problem.
 
-config ARCH_OPTIMIZED_FUNCTIONS
-	bool "Enable arch optimized functions"
-	default n
-	---help---
-		Allow for architecture optimized implementations of certain library
-		functions.  Architecture-specific implementations can improve overall
-		system performance.
-
-if ARCH_OPTIMIZED_FUNCTIONS
-
-config ARCH_MEMCPY
-	bool "memcpy()"
-	default n
-	---help---
-		Select this option if the architecture provides an optimized version
-		of memcpy().
-
 config MEMCPY_VIK
 	bool "Vik memcpy()"
 	default n
-	depends on !ARCH_MEMCPY
+	depends on !LIBC_ARCH_MEMCPY
 	---help---
 		Select this option to use the optimized memcpy() function by Daniel Vik.
 		Select this option for improved performance at the expense of increased
@@ -450,31 +435,10 @@ config MEMCPY_64BIT
 
 endif # MEMCPY_VIK
 
-config ARCH_MEMCMP
-	bool "memcmp()"
-	default n
-	---help---
-		Select this option if the architecture provides an optimized version
-		of memcmp().
-
-config ARCH_MEMMOVE
-	bool "memmove()"
-	default n
-	---help---
-		Select this option if the architecture provides an optimized version
-		of memmove().
-
-config ARCH_MEMSET
-	bool "memset()"
-	default n
-	---help---
-		Select this option if the architecture provides an optimized version
-		of memset().
-
 config MEMSET_OPTSPEED
 	bool "Optimize memset() for speed"
 	default n
-	depends on !ARCH_MEMSET
+	depends on !LIBC_ARCH_MEMSET
 	---help---
 		Select this option to use a version of memcpy() optimized for speed.
 		Default: memcpy() is optimized for size.
@@ -486,57 +450,6 @@ config MEMSET_64BIT
 	---help---
 		Compiles memset() for architectures that suppport 64-bit operations
 		efficiently.
-
-config ARCH_STRCHR
-	bool "strchr()"
-	default n
-	---help---
-		Select this option if the architecture provides an optimized version
-		of strchr().
-
-config ARCH_STRCMP
-	bool "strcmp()"
-	default n
-	---help---
-		Select this option if the architecture provides an optimized version
-		of strcmp().
-
-config ARCH_STRCPY
-	bool "strcpy()"
-	default n
-	---help---
-		Select this option if the architecture provides an optimized version
-		of strcpy().
-
-config ARCH_STRNCPY
-	bool "strncpy()"
-	default n
-	---help---
-		Select this option if the architecture provides an optimized version
-		of strncpy().
-
-config ARCH_STRLEN
-	bool "strlen"
-	default n
-	---help---
-		Select this option if the architecture provides an optimized version
-		of strlen().
-
-config ARCH_STRNLEN
-	bool "strlen()"
-	default n
-	---help---
-		Select this option if the architecture provides an optimized version
-		of strnlen().
-
-config ARCH_BZERO
-	bool "bzero()"
-	default n
-	---help---
-		Select this option if the architecture provides an optimized version
-		of bzero().
-
-endif # ARCH_OPTIMIZED_FUNCTIONS
 
 config ARCH_HAVE_TLS
 	bool

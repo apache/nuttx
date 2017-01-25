@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/module/module.c
+ * sched/module/mod_rmmod.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,8 +40,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <stdint.h>
-#include <string.h>
+#include <assert.h>
 #include <errno.h>
 
 #include <nuttx/kmalloc.h>
@@ -62,9 +61,7 @@
  *   Remove a previously installed module from memory.
  *
  * Input Parameters:
- *
- *   modulename - The module name.  This is the name module name that was
- *     provided to insmod when the module was loaded.
+ *   handle - The module handler previously returned by insmod().
  *
  * Returned Value:
  *   Zero (OK) on success.  On any failure, -1 (ERROR) is returned the
@@ -72,34 +69,33 @@
  *
  ****************************************************************************/
 
-int rmmod(FAR const char *modulename)
+int rmmod(FAR void *handle)
 {
-  FAR struct module_s *modp;
-  int ret = OK;
+  FAR struct module_s *modp = (FAR struct module_s *)handle;
+  int ret;
 
-  DEBUGASSERT(modulename != NULL);
+  DEBUGASSERT(modp != NULL);
 
   /* Get exclusive access to the module registry */
 
   mod_registry_lock();
 
-  /* Find the module entry for this modulename in the registry */
+  /* Verify that the module is in the registry */
 
-  modp = mod_registry_find(modulename);
-  if (modp == NULL)
+  ret = mod_registry_verify(modp);
+  if (ret < 0)
     {
-      serr("ERROR: Failed to find module %s: %d\n", modulename, ret);
-      ret = -ENOENT;
+      serr("ERROR: Failed to verify module: %d\n", ret);
       goto errout_with_lock;
     }
 
   /* Is there an uninitializer? */
 
-  if (modp->uninitializer != NULL)
+  if (modp->modinfo.uninitializer != NULL)
     {
-      /* Try to uninitializer the module */
+      /* Try to uninitialize the module */
 
-      ret = modp->uninitializer(modp->arg);
+      ret = modp->modinfo.uninitializer(modp->modinfo.arg);
 
       /* Did the module sucessfully uninitialize? */
 
@@ -111,11 +107,13 @@ int rmmod(FAR const char *modulename)
 
       /* Nullify so that the uninitializer cannot be called again */
 
+      modp->modinfo.uninitializer = NULL;
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
-      modp->initializer = NULL;
+      modp->initializer           = NULL;
+      modp->modinfo.arg           = NULL;
+      modp->modinfo.exports       = NULL;
+      modp->modinfo.nexports      = 0;
 #endif
-      modp->uninitializer = NULL;
-      modp->arg = NULL;
     }
 
   /* Release resources held by the module */

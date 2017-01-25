@@ -244,13 +244,13 @@ int up_cpu_pause(int cpu)
 {
   int ret;
 
+  DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS && cpu != this_cpu());
+
 #ifdef CONFIG_SCHED_INSTRUMENTATION
   /* Notify of the pause event */
 
   sched_note_cpu_pause(this_task(), cpu);
 #endif
-
-  DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS && cpu != this_cpu());
 
   /* Take the both spinlocks.  The g_cpu_wait spinlock will prevent the SGI2
    * handler from returning until up_cpu_resume() is called; g_cpu_paused
@@ -313,13 +313,13 @@ int up_cpu_pause(int cpu)
 
 int up_cpu_resume(int cpu)
 {
+  DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS && cpu != this_cpu());
+
 #ifdef CONFIG_SCHED_INSTRUMENTATION
   /* Notify of the resume event */
 
   sched_note_cpu_resume(this_task(), cpu);
 #endif
-
-  DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS && cpu != this_cpu());
 
   /* Release the spinlock.  Releasing the spinlock will cause the SGI2
    * handler on 'cpu' to continue and return from interrupt to the newly

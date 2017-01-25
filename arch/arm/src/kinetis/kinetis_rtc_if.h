@@ -1,8 +1,8 @@
 /****************************************************************************
- * arch/sim/src/up_elf.c
+ * arch/arm/src/kinetis/kinetis_rtc_if.h
  *
- *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Author: Neil Hancock
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -37,108 +37,114 @@
  * Included Files
  ****************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_KINETIS_KINETIS_RTC_IF_H
+#define __ARCH_ARM_SRC_KINETIS_KINETIS_RTC_IF_H
+
 #include <nuttx/config.h>
 
-#include <stdlib.h>
-#include <elf32.h>
-#include <errno.h>
-#include <debug.h>
+#include "chip.h"
 
-#include <nuttx/arch.h>
-#include <nuttx/binfmt/elf.h>
+/* Kinetis parts all have a simple battery-backed 32bit counter for its RTC
+ * KINETIS_RTC_GEN2 have
+ *    a Tamper Time seconds - 32bibt
+ *    a MONOTONC seconds  which is used is 2*32bit registers
+ *
+ */
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define R_386_32        1
-#define R_386_PC32      2
-
-#define ELF_BITS        32
-#define ELF_ARCH        EM_386
+#include "kinetis_alarm.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
+#ifndef __ASSEMBLY__
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
 /****************************************************************************
- * Name: up_checkarch
+ * Name: KINETIS_rtc_getdatetime_with_subseconds
  *
  * Description:
- *   Given the ELF header in 'hdr', verify that the ELF file is appropriate
- *   for the current, configured architecture.  Every architecture that uses
- *   the ELF loader must provide this function.
+ *   Get the current date and time from the date/time RTC.  This interface
+ *   is only supported by the date/time RTC hardware implementation.
+ *   It is used to replace the system timer.  It is only used by the RTOS
+ *   during initialization to set up the system time when CONFIG_RTC and
+ *   CONFIG_RTC_DATETIME are selected (and CONFIG_RTC_HIRES is not).
+ *
+ *   NOTE: Some date/time RTC hardware is capability of sub-second accuracy.
+ *   Thatsub-second accuracy is returned through 'nsec'.
  *
  * Input Parameters:
- *   hdr - The ELF header read from the ELF file.
+ *   tp - The location to return the high resolution time value.
+ *   nsec - The location to return the subsecond time value.
  *
  * Returned Value:
- *   True if the architecture supports this ELF file.
+ *   Zero (OK) on success; a negated errno on failure
  *
  ****************************************************************************/
 
-bool up_checkarch(FAR const Elf32_Ehdr *hdr)
-{
-  return hdr->e_machine == EM_386 || hdr->e_machine == EM_486;
-}
+#ifdef CONFIG_KINETIS_HAVE_RTC_SUBSECONDS
+int KINETIS_rtc_getdatetime_with_subseconds(FAR struct tm *tp, FAR long *nsec);
+#endif
 
 /****************************************************************************
- * Name: up_relocate and up_relocateadd
+ * Name: KINETIS_rtc_setdatetime
  *
  * Description:
- *   Perform on architecture-specific ELF relocation.  Every architecture
- *   that uses the ELF loader must provide this function.
+ *   Set the RTC to the provided time. RTC implementations which provide
+ *   up_rtc_getdatetime() (CONFIG_RTC_DATETIME is selected) should provide
+ *   this function.
  *
  * Input Parameters:
- *   rel - The relocation type
- *   sym - The ELF symbol structure containing the fully resolved value.
- *         There are a few relocation types for a few architectures that do
- *         not require symbol information.  For those, this value will be
- *         NULL.  Implementations of these functions must be able to handle
- *         that case.
- *   addr - The address that requires the relocation.
+ *   tp - the time to use
  *
  * Returned Value:
- *   Zero (OK) if the relocation was successful.  Otherwise, a negated errno
- *   value indicating the cause of the relocation failure.
+ *   Zero (OK) on success; a negated errno on failure
  *
  ****************************************************************************/
 
-int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
-                uintptr_t addr)
-{
-  FAR uint32_t *ptr = (FAR uint32_t *)addr;
+#ifdef CONFIG_RTC_DATETIME
+struct tm;
+int kinetis_rtc_setdatetime(FAR const struct tm *tp);
+#endif
 
-  /* All relocations depend upon having valid symbol information. */
+/****************************************************************************
+ * Name: KINETIS_rtc_lowerhalf
+ *
+ * Description:
+ *   Instantiate the RTC lower half driver for the KINETIS.  General usage:
+ *
+ *     #include <nuttx/timers/rtc.h>
+ *     #include "KINETIS_rtc.h>
+ *
+ *     struct rtc_lowerhalf_s *lower;
+ *     lower = KINETIS_rtc_lowerhalf();
+ *     rtc_initialize(0, lower);
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   On success, a non-NULL RTC lower interface is returned.  NULL is
+ *   returned on any failure.
+ *
+ ****************************************************************************/
 
-  if (sym == NULL)
-    {
-      return -EINVAL;
-    }
+#ifdef CONFIG_RTC_DRIVER
+FAR struct rtc_lowerhalf_s *kinetis_rtc_lowerhalf(void);
+#endif
 
-  /* Handle the relocation by relocation type */
-
-  switch (ELF32_R_TYPE(rel->r_info))
-    {
-     case R_386_32:
-       *ptr += sym->st_value;
-       break;
-
-     case R_386_PC32:
-       *ptr += sym->st_value - (uint32_t)ptr;
-       break;
-
-     default:
-       return -EINVAL;
-    }
-
-  return OK;
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
 
-int up_relocateadd(FAR const Elf32_Rela *rel, FAR const Elf32_Sym *sym,
-                   uintptr_t addr)
-{
-  berr("ERROR: Not supported\n");
-  return -ENOSYS;
-}
-
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_ARM_SRC_KINETIS_KINETIS_RTC_IF_H */

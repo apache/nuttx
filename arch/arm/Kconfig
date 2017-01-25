@@ -302,6 +302,10 @@ config ARCH_CORTEXM0
 	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_RESET
 
+config ARCH_CORTEXM23
+	bool
+	default n
+
 config ARCH_CORTEXM3
 	bool
 	default n
@@ -309,6 +313,10 @@ config ARCH_CORTEXM3
 	select ARCH_HAVE_RAMVECTORS
 	select ARCH_HAVE_HIPRI_INTERRUPT
 	select ARCH_HAVE_RESET
+
+config ARCH_CORTEXM33
+	bool
+	default n
 
 config ARCH_CORTEXM4
 	bool
@@ -325,6 +333,7 @@ config ARCH_CORTEXM7
 	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_RAMVECTORS
 	select ARCH_HAVE_HIPRI_INTERRUPT
+	select ARCH_HAVE_RESET
 	select ARCH_HAVE_COHERENT_DCACHE if ELF || MODULE
 
 config ARCH_CORTEXA5

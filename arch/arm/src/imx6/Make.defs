@@ -62,10 +62,6 @@ CMN_ASRCS += arm_testset.S
 CMN_ASRCS += cp15_coherent_dcache.S cp15_invalidate_dcache.S
 CMN_ASRCS += cp15_clean_dcache.S cp15_flush_dcache.S cp15_invalidate_dcache_all.S
 
-ifeq ($(CONFIG_ARCH_MEMCPY),y)
-CMN_ASRCS += arm_memcpy.S
-endif
-
 # Common C source files
 
 CMN_CSRCS  = up_initialize.c up_idle.c up_interruptcontext.c up_exit.c
@@ -124,9 +120,9 @@ endif
 endif
 
 ifeq ($(CONFIG_ELF),y)
-CMN_CSRCS += arm_elf.c arm_coherent_dcache.c
+CMN_CSRCS += arm_coherent_dcache.c
 else ifeq ($(CONFIG_MODULE),y)
-CMN_CSRCS += arm_elf.c arm_coherent_dcache.c
+CMN_CSRCS += arm_coherent_dcache.c
 endif
 
 ifeq ($(CONFIG_ARCH_FPU),y)
