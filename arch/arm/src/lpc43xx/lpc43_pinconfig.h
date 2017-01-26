@@ -54,11 +54,11 @@
  * following definitions provide the bit encoding that is used to define a pin configuration.
  * Note that these pins do not corresponding GPIO ports and pins.
  *
- * 20-bit Encoding:
+ * 21-bit Encoding:
  * 1111 1111 1100 0000 0000
  * 9876 5432 1098 7654 3210
  * ---- ---- ---- ---- ----
- * .FFF UUDD IGWS SSSP PPPP
+ * FFFU UDDI GWSS SSSP PPPP
  */
 
 /* Alternate function number:
@@ -66,10 +66,10 @@
  * 1111 1111 1100 0000 0000
  * 9876 5432 1098 7654 3210
  * ---- ---- ---- ---- ----
- * .FFF .... .... .... ....
+ * FFF. .... .... .... ....
  */
 
-#define PINCONF_FUNC_SHIFT            (16)       /* Bits 16-18: Alternate function number */
+#define PINCONF_FUNC_SHIFT            (17)       /* Bits 16-18: Alternate function number */
 #define PINCONF_FUNC_MASK             (7 << PINCONF_FUNC_SHIFT)
 #  define PINCONF_FUNC(n)             ((n) << PINCONF_FUNC_SHIFT)
 #  define PINCONF_FUNC0               (0 << PINCONF_FUNC_SHIFT)
@@ -87,12 +87,12 @@
  * 1111 1111 1100 0000 0000
  * 9876 5432 1098 7654 3210
  * ---- ---- ---- ---- ----
- * .... UU.. .... .... ....
+ * ...U U... .... .... ....
  */
 
-#define PINCONF_PULLUP                (1 << 15) /* Bit 15: 1=Pull-up */
-#define PINCONF_PULLDOWN              (1 << 14) /* Bit 14: 1=Pull-down */
-#define PINCONF_FLOAT                 (0)       /* Bit 14-15=0 if neither */
+#define PINCONF_PULLUP                (1 << 16) /* Bit 16: 1=Pull-up */
+#define PINCONF_PULLDOWN              (1 << 15) /* Bit 15: 1=Pull-down */
+#define PINCONF_FLOAT                 (0)       /* Bit 15-16=0 if neither */
 
 #define PINCONF_IS_PULLUP(p)          (((p) & PINCONF_PULLUP) != 0)
 #define PINCONF_IS_PULLDOWN(p)        (((p) & PINCONF_PULLDOWN) != 0)
@@ -103,10 +103,10 @@
  * 1111 1111 1100 0000 0000
  * 9876 5432 1098 7654 3210
  * ---- ---- ---- ---- ----
- * .... ..DD .... .... ....
+ * .... .DD. .... .... ....
  */
 
-#define PINCONF_DRIVE_SHIFT           (12)       /* Bits 12-13 = Pin drive strength */
+#define PINCONF_DRIVE_SHIFT           (13)       /* Bits 12-13 = Pin drive strength */
 #define PINCONF_DRIVE_MASK            (3 << PINCONF_DRIVE_SHIFT)
 #  define PINCONF_DRIVE_NORMAL        (0 << PINCONF_DRIVE_SHIFT)
 #  define PINCONF_DRIVE_MEDIUM        (1 << PINCONF_DRIVE_SHIFT)
@@ -118,10 +118,10 @@
  * 1111 1111 1100 0000 0000
  * 9876 5432 1098 7654 3210
  * ---- ---- ---- ---- ----
- * .... .... I... .... ....
+ * .... ...I .... .... ....
  */
 
-#define PINCONF_INBUFFER              (1 << 11)  /* Bit 11: 1=Enabled input buffer */
+#define PINCONF_INBUFFER              (1 << 12)  /* Bit 11: 1=Enabled input buffer */
 #define PINCONF_INBUFFER_ENABLED(p)   (((p) & PINCONF_INBUFFER) != 0)
 
 /* Glitch filter enable
@@ -129,10 +129,10 @@
  * 1111 1111 1100 0000 0000
  * 9876 5432 1098 7654 3210
  * ---- ---- ---- ---- ----
- * .... .... .G.. .... ....
+ * .... .... G... .... ....
  */
 
-#define PINCONF_GLITCH                (1 << 10)  /* Bit 10: 1=Glitch filter enable */
+#define PINCONF_GLITCH                (1 << 11)  /* Bit 10: 1=Glitch filter enable */
 #define PINCONF_GLITCH_ENABLE(p)      (((p) & PINCONF_GLITCH) == 0)
 
 /* Slew rate
@@ -140,10 +140,10 @@
  * 1111 1111 1100 0000 0000
  * 9876 5432 1098 7654 3210
  * ---- ---- ---- ---- ----
- * .... .... ..W. .... ....
+ * .... .... .W.. .... ....
  */
 
-#define PINCONF_SLEW_FAST             (1 << 9)   /* Bit 9: 1=Alternate function */
+#define PINCONF_SLEW_FAST             (1 << 10)   /* Bit 9: 1=Alternate function */
 #define PINCONF_SLEW_SLOW             (0)        /* Bit 9: 0=Normal function */
 
 #define PINCONF_IS_SLEW_FAST(p)       (((p) & PINCONF_SLEW_FAST) != 0)
@@ -154,11 +154,11 @@
  * 1111 1111 1100 0000 0000
  * 9876 5432 1098 7654 3210
  * ---- ---- ---- ---- ----
- * .... .... ...S SSS. ....
+ * .... .... ..SS SSS. ....
  */
 
-#define PINCONF_PINS_SHIFT            (5)        /* Bits 5-8: Pin set */
-#define PINCONF_PINS_MASK             (15 << PINCONF_PINS_SHIFT)
+#define PINCONF_PINS_SHIFT            (5)        /* Bits 5-9: Pin set */
+#define PINCONF_PINS_MASK             (31 << PINCONF_PINS_SHIFT)
 #  define PINCONF_PINS0               (0 << PINCONF_PINS_SHIFT)
 #  define PINCONF_PINS1               (1 << PINCONF_PINS_SHIFT)
 #  define PINCONF_PINS2               (2 << PINCONF_PINS_SHIFT)
@@ -175,6 +175,22 @@
 #  define PINCONF_PINSD               (13 << PINCONF_PINS_SHIFT)
 #  define PINCONF_PINSE               (14 << PINCONF_PINS_SHIFT)
 #  define PINCONF_PINSF               (15 << PINCONF_PINS_SHIFT)
+#  define PINCONF_PINSG               (16 << PINCONF_PINS_SHIFT) /* Reserved */
+#  define PINCONF_PINSH               (17 << PINCONF_PINS_SHIFT) /* Reserved */
+#  define PINCONF_PINSI               (18 << PINCONF_PINS_SHIFT) /* Reserved */
+#  define PINCONF_PINSJ               (19 << PINCONF_PINS_SHIFT) /* Reserved */
+#  define PINCONF_PINSK               (20 << PINCONF_PINS_SHIFT) /* Reserved */
+#  define PINCONF_PINSL               (21 << PINCONF_PINS_SHIFT) /* Reserved */
+#  define PINCONF_PINSM               (22 << PINCONF_PINS_SHIFT) /* Reserved */
+#  define PINCONF_PINSN               (23 << PINCONF_PINS_SHIFT) /* Reserved */
+#  define PINCONF_PINSO               (24 << PINCONF_PINS_SHIFT) /* SFSCLK0 - SFSCLK3 */
+#  define PINCONF_PINSP               (25 << PINCONF_PINS_SHIFT) /* Reserved */
+#  define PINCONF_PINSQ               (26 << PINCONF_PINS_SHIFT) /* Reserved */
+#  define PINCONF_PINSR               (27 << PINCONF_PINS_SHIFT) /* Reserved */
+#  define PINCONF_PINSS               (28 << PINCONF_PINS_SHIFT) /* Reserved */
+#  define PINCONF_PINST               (29 << PINCONF_PINS_SHIFT) /* Reserved */
+#  define PINCONF_PINSU               (30 << PINCONF_PINS_SHIFT) /* Reserved */
+#  define PINCONF_PINSV               (31 << PINCONF_PINS_SHIFT) /* Reserved */
 
 /* Pin numbers:
  *
