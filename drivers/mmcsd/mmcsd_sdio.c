@@ -3050,9 +3050,11 @@ static int mmcsd_probe(FAR struct mmcsd_state_s *priv)
               finfo("Capacity: %lu Kbytes\n", (unsigned long)(priv->capacity / 1024));
               priv->mediachanged = true;
 
+#ifdef CONFIG_MMCSD_HAVECARDDETECT
               /* Set up to receive asynchronous, media removal events */
 
               SDIO_CALLBACKENABLE(priv->dev, SDIOMEDIA_EJECTED);
+#endif
             }
 
           /* REVISIT: There is a problem here.  If mmcsd_initialize() returns a
