@@ -81,7 +81,7 @@ void mod_getsymtab(FAR const struct symtab_s **symtab, FAR int *nsymbols)
   mod_registry_lock();
   *symtab   = g_mod_symtab;
   *nsymbols = g_mod_nsymbols;
-  mod_registry_lock();
+  mod_registry_unlock();
 }
 
 /****************************************************************************
@@ -106,5 +106,5 @@ void mod_setsymtab(FAR const struct symtab_s *symtab, int nsymbols)
   mod_registry_lock();
   g_mod_symtab   = symtab;
   g_mod_nsymbols = nsymbols;
-  mod_registry_lock();
+  mod_registry_unlock();
 }

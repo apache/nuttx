@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/module/mod_symbols.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,9 +54,27 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Amount to reallocate buffer when buffer is full */
+
 #ifndef CONFIG_MODULE_BUFFERINCR
 #  define CONFIG_MODULE_BUFFERINCR 32
 #endif
+
+/* Return values search for exported modules */
+
+#define SYM_NOT_FOUND 0
+#define SYM_FOUND     1
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+struct mod_exportinfo_s
+{
+  FAR const char *name;              /* Symbol name to find */
+  FAR struct module_s *modp;         /* The module that needs the symbol */
+  FAR const struct symtab_s *symbol; /* Symbol info returned (if found) */
+};
 
 /****************************************************************************
  * Private Functions
@@ -156,6 +174,56 @@ static int mod_symname(FAR struct mod_loadinfo_s *loadinfo,
 }
 
 /****************************************************************************
+ * Name: mod_symcallback
+ *
+ * Description:
+ *   mod_registry_foreach() callback function.  Test if the provided module,
+ *   modp, exports the symbol of interest.  If so, return that symbol value
+ *   and setup the module dependency relationship.
+ *
+ * Returned Value:
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+static int mod_symcallback(FAR struct module_s *modp, FAR void *arg)
+{
+  FAR struct mod_exportinfo_s *exportinfo = (FAR struct mod_exportinfo_s *)arg;
+  int ret;
+
+  /* Check if this module exports a symbol of that name */
+
+#ifdef CONFIG_SYMTAB_ORDEREDBYNAME
+  exportinfo->symbol = symtab_findorderedbyname(modp->modinfo.exports,
+                                                exportinfo->name,
+                                                modp->modinfo.nexports);
+#else
+  exportinfo->symbol = symtab_findbyname(modp->modinfo.exports,
+                                         exportinfo->name,
+                                         modp->modinfo.nexports);
+#endif
+
+   if (exportinfo->symbol != NULL)
+     {
+       /* Yes.. save the dependency relationship and return SYM_FOUND to
+        * stop the traversal.
+        */
+
+       ret = mod_depend(exportinfo->modp, modp);
+       if (ret < 0)
+         {
+           serr("ERROR: mod_depend failed: %d\n", ret);
+           return ret;
+         }
+
+       return SYM_FOUND;
+     }
+
+   return SYM_NOT_FOUND;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -246,6 +314,7 @@ int mod_readsym(FAR struct mod_loadinfo_s *loadinfo, int index,
  *   in the st_value field of the symbol table entry.
  *
  * Input Parameters:
+ *   modp     - Module state information
  *   loadinfo - Load state information
  *   sym      - Symbol table entry (value might be undefined)
  *
@@ -261,9 +330,11 @@ int mod_readsym(FAR struct mod_loadinfo_s *loadinfo, int index,
  *
  ****************************************************************************/
 
-int mod_symvalue(FAR struct mod_loadinfo_s *loadinfo, FAR Elf32_Sym *sym)
+int mod_symvalue(FAR struct module_s *modp,
+                 FAR struct mod_loadinfo_s *loadinfo, FAR Elf32_Sym *sym)
 {
   FAR const struct symtab_s *symbol;
+  struct mod_exportinfo_s exportinfo;
   uintptr_t secbase;
   int ret;
 
@@ -302,18 +373,43 @@ int mod_symvalue(FAR struct mod_loadinfo_s *loadinfo, FAR Elf32_Sym *sym)
             return ret;
           }
 
-        /* Check if the base code exports a symbol of this name */
+        /* First check if the symbol is exported by an installed module.
+         * Newest modules are installed at the head of the list.  Therefore,
+         * if the symbol is exported by numerous modules, then the most
+         * recently installed will take precedence.
+         */
 
+        exportinfo.name   = (FAR const char *)loadinfo->iobuffer;
+        exportinfo.modp   = modp;
+        exportinfo.symbol = NULL;
+
+        ret = mod_registry_foreach(mod_symcallback, (FAR void *)&exportinfo);
+        if (ret < 0)
+          {
+            serr("ERROR: mod_symcallback failed: \n", ret);
+            return ret;
+          }
+
+        symbol = exportinfo.symbol;
+
+        /* If the symbol is not exported by any module, then check if the
+         * base code exports a symbol of this name.
+         */
+
+        if (symbol == NULL)
+          {
 #ifdef CONFIG_SYMTAB_ORDEREDBYNAME
-        symbol = symtab_findorderedbyname(g_mod_symtab,
-                                          (FAR char *)loadinfo->iobuffer,
-                                          g_mod_nsymbols);
+            symbol = symtab_findorderedbyname(g_mod_symtab, exportinfo.name,
+                                              g_mod_nsymbols);
 #else
-        symbol = symtab_findbyname(g_mod_symtab,
-                                   (FAR char *)loadinfo->iobuffer,
-                                   g_mod_nsymbols);
+            symbol = symtab_findbyname(g_mod_symtab, exportinfo.name,
+                                       g_mod_nsymbols);
 #endif
-        if (!symbol)
+          }
+
+        /* Was the symbol found from any exporter? */
+
+        if (symbol == NULL)
           {
             serr("ERROR: SHN_UNDEF: Exported symbol \"%s\" not found\n",
                  loadinfo->iobuffer);

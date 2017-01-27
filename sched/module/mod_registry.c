@@ -49,10 +49,33 @@
 #include "module.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define NO_HOLDER ((pid_t)-1)
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+struct mod_registrylock_s
+{
+  sem_t lock;         /* The actual registry lock */
+  pid_t holder;       /* The PID of the current holder of the lock */
+  int16_t count;      /* The number of nested calls to mod_registry_lock */
+};
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static sem_t g_mod_lock = SEM_INITIALIZER(1);
+static struct mod_registrylock_s g_modlock =
+{
+  SEM_INITIALIZER(1), /* lock */
+  0,                  /* pid */
+  0                   /* count */
+};
+
 static FAR struct module_s *g_mod_registry;
 
 /****************************************************************************
@@ -75,9 +98,36 @@ static FAR struct module_s *g_mod_registry;
 
 void mod_registry_lock(void)
 {
-  while (sem_post(&g_mod_lock) < 0)
+  pid_t me;
+
+  /* Do we already hold the semaphore? */
+
+  me = getpid();
+  if (me == g_modlock.holder)
     {
-      DEBUGASSERT(errno == EINTR);
+      /* Yes... just increment the count */
+
+      g_modlock.count++;
+      DEBUGASSERT(g_modlock.count > 0);
+    }
+
+  /* Take the semaphore (perhaps waiting) */
+
+  else
+    {
+      while (sem_wait(&g_modlock.lock) != 0)
+        {
+          /* The only case that an error should occr here is if
+           * the wait was awakened by a signal.
+           */
+
+          ASSERT(get_errno() == EINTR);
+        }
+
+      /* No we hold the semaphore */
+
+      g_modlock.holder = me;
+      g_modlock.count  = 1;
     }
 }
 
@@ -97,7 +147,25 @@ void mod_registry_lock(void)
 
 void mod_registry_unlock(void)
 {
-  sem_post(&g_mod_lock);
+  DEBUGASSERT(g_modlock.holder == getpid());
+
+  /* Is this our last count on the semaphore? */
+
+  if (g_modlock.count > 1)
+    {
+      /* No.. just decrement the count */
+
+      g_modlock.count--;
+    }
+
+  /* Yes.. then we can really release the semaphore */
+
+  else
+    {
+      g_modlock.holder = NO_HOLDER;
+      g_modlock.count  = 0;
+      sem_post(&g_modlock.lock);
+    }
 }
 
 /****************************************************************************
@@ -249,15 +317,12 @@ int mod_registry_verify(FAR struct module_s *modp)
  *   function returns a non-zero value, the traversal will be terminated and
  *   that non-zero value will be returned.
  *
- * Assumptions:
- *   The caller does *NOT* hold the lock on the module registry.
- *
  ****************************************************************************/
 
 int mod_registry_foreach(mod_callback_t callback, FAR void *arg)
 {
   FAR struct module_s *modp;
-  int ret;
+  int ret = OK;
 
   /* Get exclusive access to the module registry */
 
@@ -272,10 +337,10 @@ int mod_registry_foreach(mod_callback_t callback, FAR void *arg)
       ret = callback(modp, arg);
       if (ret != 0)
         {
-          return ret;
+          break;
         }
     }
 
   mod_registry_unlock();
-  return OK;
+  return ret;
 }

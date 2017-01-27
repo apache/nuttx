@@ -244,7 +244,7 @@ FAR void *insmod(FAR const char *filename, FAR const char *modulename)
 
   /* Bind the program to the kernel symbol table */
 
-  ret = mod_bind(&loadinfo);
+  ret = mod_bind(modp, &loadinfo);
   if (ret != 0)
     {
       sinfo("Failed to bind symbols program binary: %d\n", ret);
@@ -286,6 +286,7 @@ FAR void *insmod(FAR const char *filename, FAR const char *modulename)
 
 errout_with_load:
   mod_unload(&loadinfo);
+  (void)mod_undepend(modp);
 errout_with_registry_entry:
   kmm_free(modp);
 errout_with_loadinfo:

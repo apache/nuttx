@@ -89,6 +89,7 @@ FAR const void *modsym(FAR void *handle, FAR const char *name)
 
   /* Verify that the module is in the registry */
 
+  mod_registry_lock();
   ret = mod_registry_verify(modp);
   if (ret < 0)
     {

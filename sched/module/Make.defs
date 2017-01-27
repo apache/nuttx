@@ -37,13 +37,13 @@ ifeq ($(CONFIG_MODULE),y)
 
 # OS module interfaces
 
-CSRCS += mod_insmod.c mod_rmmod.c
+CSRCS += mod_insmod.c mod_rmmod.c mod_modsym.c mod_symtab.c mod_modhandle.c
 
-# loadable module library
+# Loadable module library
 
-CSRCS += mod_bind.c mod_init.c mod_iobuffer.c mod_load.c mod_modhandle.c
-CSRCS += mod_modsym.c mod_read.c mod_registry.c mod_sections.c mod_symbols.c
-CSRCS += mod_symtab.c mod_uninit.c mod_unload.c mod_verify.c
+CSRCS += mod_bind.c mod_depend.c mod_init.c mod_iobuffer.c mod_load.c
+CSRCS += mod_read.c mod_registry.c mod_sections.c mod_symbols.c mod_uninit.c
+CSRCS += mod_unload.c mod_verify.c
 
 # procfs support
 

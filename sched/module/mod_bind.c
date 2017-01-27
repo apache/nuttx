@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/module/mod_bind.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -98,7 +98,8 @@ static inline int mod_readrel(FAR struct mod_loadinfo_s *loadinfo,
  *
  ****************************************************************************/
 
-static int mod_relocate(FAR struct mod_loadinfo_s *loadinfo, int relidx)
+static int mod_relocate(FAR struct module_s *modp,
+                        FAR struct mod_loadinfo_s *loadinfo, int relidx)
 
 {
   FAR Elf32_Shdr *relsec = &loadinfo->shdr[relidx];
@@ -148,7 +149,7 @@ static int mod_relocate(FAR struct mod_loadinfo_s *loadinfo, int relidx)
 
       /* Get the value of the symbol (in sym.st_value) */
 
-      ret = mod_symvalue(loadinfo, &sym);
+      ret = mod_symvalue(modp, loadinfo, &sym);
       if (ret < 0)
         {
           /* The special error -ESRCH is returned only in one condition:  The
@@ -199,7 +200,8 @@ static int mod_relocate(FAR struct mod_loadinfo_s *loadinfo, int relidx)
   return OK;
 }
 
-static int mod_relocateadd(FAR struct mod_loadinfo_s *loadinfo, int relidx)
+static int mod_relocateadd(FAR struct module_s *modp,
+                           FAR struct mod_loadinfo_s *loadinfo, int relidx)
 {
   serr("ERROR: Not implemented\n");
   return -ENOSYS;
@@ -216,13 +218,17 @@ static int mod_relocateadd(FAR struct mod_loadinfo_s *loadinfo, int relidx)
  *   Bind the imported symbol names in the loaded module described by
  *   'loadinfo' using the exported symbol values provided by mod_setsymtab().
  *
+ * Input Parameters:
+ *   modp     - Module state information
+ *   loadinfo - Load state information
+ *
  * Returned Value:
  *   0 (OK) is returned on success and a negated errno is returned on
  *   failure.
  *
  ****************************************************************************/
 
-int mod_bind(FAR struct mod_loadinfo_s *loadinfo)
+int mod_bind(FAR struct module_s *modp, FAR struct mod_loadinfo_s *loadinfo)
 {
   int ret;
   int i;
@@ -258,7 +264,7 @@ int mod_bind(FAR struct mod_loadinfo_s *loadinfo)
           continue;
         }
 
-      /* Make sure that the section is allocated.  We can't relocated
+      /* Make sure that the section is allocated.  We can't relocate
        * sections that were not loaded into memory.
        */
 
@@ -271,11 +277,11 @@ int mod_bind(FAR struct mod_loadinfo_s *loadinfo)
 
       if (loadinfo->shdr[i].sh_type == SHT_REL)
         {
-          ret = mod_relocate(loadinfo, i);
+          ret = mod_relocate(modp, loadinfo, i);
         }
       else if (loadinfo->shdr[i].sh_type == SHT_RELA)
         {
-          ret = mod_relocateadd(loadinfo, i);
+          ret = mod_relocateadd(modp, loadinfo, i);
         }
 
       if (ret < 0)

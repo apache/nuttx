@@ -68,6 +68,16 @@ struct module_s
   size_t textsize;                     /* Size of the kernel .text memory allocation */
   size_t datasize;                     /* Size of the kernel .bss/.data memory allocation */
 #endif
+
+#if CONFIG_MODULE_MAXDEPEND > 0
+  uint8_t dependents;                  /* Number of modules that depend on this module */
+
+  /* This is an upacked array of pointers to other modules that this module
+   * depends upon.
+   */
+
+  FAR struct module_s *dependencies[CONFIG_MODULE_MAXDEPEND];
+#endif
 };
 
 /* This struct provides a description of the currently loaded instantiation
@@ -168,7 +178,7 @@ int mod_load(FAR struct mod_loadinfo_s *loadinfo);
  *
  ****************************************************************************/
 
-int mod_bind(FAR struct mod_loadinfo_s *loadinfo);
+int mod_bind(FAR struct module_s *modp, FAR struct mod_loadinfo_s *loadinfo);
 
 /****************************************************************************
  * Name: mod_unload
@@ -178,6 +188,10 @@ int mod_bind(FAR struct mod_loadinfo_s *loadinfo);
  *   the actions of mod_load.  It is called only under certain error
  *   conditions after the module has been loaded but not yet started.
  *
+ * Input Parameters:
+ *   modp     - Module state information
+ *   loadinfo - Load state information
+ *
  * Returned Value:
  *   0 (OK) is returned on success and a negated errno is returned on
  *   failure.
@@ -185,6 +199,48 @@ int mod_bind(FAR struct mod_loadinfo_s *loadinfo);
  ****************************************************************************/
 
 int mod_unload(struct mod_loadinfo_s *loadinfo);
+
+/****************************************************************************
+ * Name: mod_depend
+ *
+ * Description:
+ *   Set up module dependencies between the exporter and the importer of a
+ *   symbol.  The happens when the module is installed via insmod and a
+ *   symbol is imported from another module.
+ *
+ * Returned Value:
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ * Assumptions:
+ *   Caller holds the registry lock.
+ *
+ ****************************************************************************/
+
+#if CONFIG_MODULE_MAXDEPEND > 0
+int mod_depend(FAR struct module_s *importer, FAR struct module_s *exporter);
+#endif
+
+/****************************************************************************
+ * Name: mod_undepend
+ *
+ * Description:
+ *   Tear down module dependencies between the exporters and the importer of
+ *   symbols.  This happens when the module is removed via rmmod (and on
+ *   error handling cases in insmod).
+ *
+ * Returned Value:
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ * Assumptions:
+ *   Caller holds the registry lock.
+ *
+ ****************************************************************************/
+
+#if CONFIG_MODULE_MAXDEPEND > 0
+int mod_undepend(FAR struct module_s *importer);
+#endif
 
 /****************************************************************************
  * Name: mod_verifyheader
@@ -292,6 +348,7 @@ int mod_readsym(FAR struct mod_loadinfo_s *loadinfo, int index,
  *   in the st_value field of the symbol table entry.
  *
  * Input Parameters:
+ *   modp     - Module state information
  *   loadinfo - Load state information
  *   sym      - Symbol table entry (value might be undefined)
  *
@@ -307,7 +364,8 @@ int mod_readsym(FAR struct mod_loadinfo_s *loadinfo, int index,
  *
  ****************************************************************************/
 
-int mod_symvalue(FAR struct mod_loadinfo_s *loadinfo, FAR Elf32_Sym *sym);
+int mod_symvalue(FAR struct module_s *modp,
+                 FAR struct mod_loadinfo_s *loadinfo, FAR Elf32_Sym *sym);
 
 /****************************************************************************
  * Name: mod_freebuffers

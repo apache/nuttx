@@ -89,6 +89,17 @@ int rmmod(FAR void *handle)
       goto errout_with_lock;
     }
 
+#if CONFIG_MODULE_MAXDEPEND > 0
+  /* Refuse to remove any module that other modules may depend upon. */
+
+  if (modp->dependents > 0)
+    {
+      serr("ERROR: Module has dependents: %d\n", modp->dependents);
+      ret = -EBUSY;
+      goto errout_with_lock;
+    }
+#endif
+
   /* Is there an uninitializer? */
 
   if (modp->modinfo.uninitializer != NULL)
@@ -142,6 +153,11 @@ int rmmod(FAR void *handle)
       goto errout_with_lock;
     }
 
+#if CONFIG_MODULE_MAXDEPEND > 0
+  /* Eliminate any dependencies that this module has on other modules */
+
+  (void)mod_undepend(modp);
+#endif
   mod_registry_unlock();
 
   /* And free the registry entry */
