@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/olimex-stm32-p407/include/board.h
  *
- *   Copyright (C) 2009, 2012, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -240,6 +240,32 @@
 #define GPIO_CAN1_RX      GPIO_CAN1_RX_2    /* PB8 */
 #define GPIO_CAN1_TX      GPIO_CAN1_TX_2    /* PB9 */
 
+/* microSD Connector:
+ *
+ *   ----------------- ----------------- ------------------------
+ *   SD/MMC CONNECTOR        BOARD        GPIO CONFIGURATION(s
+ *   PIN SIGNAL             SIGNAL          (no remapping)
+ *   --- ------------- ----------------- -------------------------
+ *   1   DAT2/RES      SD_D2/USART3_TX/  PC10 GPIO_SDIO_D2
+ *                     SPI3_SCK
+ *   2   CD/DAT3/CS    SD_D3/USART3_RX/  PC11 GPIO_SDIO_D3
+ *                     SPI3_MISO
+ *   3   CMD/DI        SD_CMD            PD2  GPIO_SDIO_CMD
+ *   4   VDD           N/A               N/A
+ *   5   CLK/SCLK      SD_CLK/SPI3_MOSI  PC12 GPIO_SDIO_CK
+ *   6   VSS           N/A               N/A
+ *   7   DAT0/D0       SD_D0/DCMI_D2     PC8  GPIO_SDIO_D0
+ *   8   DAT1/RES      SD_D1/DCMI_D3     PC9  GPIO_SDIO_D1
+ *   --- ------------- ----------------- -------------------------
+ *
+ *   NOTES:
+ *   1. DAT4, DAT4, DAT6, and DAT7 not connected.
+ *   2. There are no alternative pin selections.
+ *   3. There is no card detect (CD) GPIO input so we will not
+ *      sense if there is a card in the SD slot or not.  This will
+ *      make usage very awkward.
+ */
+
 /* Ethernet:
  *
  * - PA2  is ETH_MDIO
@@ -275,6 +301,17 @@
 #define GPIO_ETH_RMII_TX_EN GPIO_ETH_RMII_TX_EN_1
 #define GPIO_ETH_RMII_TXD0  GPIO_ETH_RMII_TXD0_2
 #define GPIO_ETH_RMII_TXD1  GPIO_ETH_RMII_TXD1_2
+
+/* DMA Channel/Stream Selections ****************************************************/
+/* Stream selections are arbitrary for now but might become important in the future
+ * if we set aside more DMA channels/streams.
+ *
+ * SDIO DMA
+ *   DMAMAP_SDIO_1 = Channel 4, Stream 3
+ *   DMAMAP_SDIO_2 = Channel 4, Stream 6
+ */
+
+#define DMAMAP_SDIO       DMAMAP_SDIO_1
 
 /************************************************************************************
  * Public Data

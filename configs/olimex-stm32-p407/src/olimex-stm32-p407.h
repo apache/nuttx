@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/olimex-stm32-p107/src/olimex-stm32-p407.h
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Derives from a file of a similar name for the Olimex STM32 P207:
@@ -55,9 +55,47 @@
 
 /* Configuration ************************************************************/
 
+/* Assume that we support everything until convinced otherwise */
+
+#define HAVE_MMCSD      1
 #define HAVE_USBDEV     1
 #define HAVE_USBHOST    1
 #define HAVE_USBMONITOR 1
+
+/* Can't support MMC/SD features if mountpoints are disabled or if SDIO support
+ * is not enabled.
+ */
+
+#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_STM32_SDIO) || \
+   !defined(CONFIG_MMCSD_SDIO)
+#  undef HAVE_MMCSD
+#endif
+
+/* Default MMC/SD minor number */
+
+#ifdef HAVE_MMCSD
+
+/* Default MMC/SD SLOT number */
+
+#  if defined(CONFIG_NSH_MMCSDSLOTNO) && CONFIG_NSH_MMCSDSLOTNO != 0
+#    error Only one MMC/SD slot
+#    undef CONFIG_NSH_MMCSDSLOTNO
+#  endif
+
+#  ifdef CONFIG_NSH_MMCSDSLOTNO
+#    define MMCSD_SLOTNO CONFIG_NSH_MMCSDSLOTNO
+#  else
+#    define MMCSD_SLOTNO 0
+#  endif
+
+/* Default minor device number */
+
+#  ifdef CONFIG_NSH_MMCSDMINOR
+#    define MMCSD_MINOR CONFIG_NSH_MMCSDMINOR
+#  else
+#    define MMCSD_MINOR 0
+#  endif
+#endif
 
 /* Can't support USB host or device features if USB OTG FS is not enabled */
 
