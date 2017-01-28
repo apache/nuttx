@@ -123,7 +123,6 @@ SYSCALL_LOOKUP(up_assert,                 2, STUB_up_assert)
 #ifdef CONFIG_MODULE
   SYSCALL_LOOKUP(insmod,                  2, STUB_insmod)
   SYSCALL_LOOKUP(rmmod,                   1, STUB_rmmod)
-  SYSCALL_LOOKUP(modsym,                  2, STUB_modsym)
   SYSCALL_LOOKUP(modhandle,               1, STUB_modhandle)
 #endif
 

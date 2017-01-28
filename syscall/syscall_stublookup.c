@@ -122,7 +122,6 @@ uintptr_t STUB_waitid(int nbr, uintptr_t parm1, uintptr_t parm2,
 #ifdef CONFIG_MODULE
 uintptr_t STUB_insmod(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_rmmod(int nbr, uintptr_t parm1);
-uintptr_t STUB_modsym(int nbr, uintptr_t parm1);
 uintptr_t STUB_modhandle(int nbr, uintptr_t parm1, uintptr_t parm2);
 #endif
 

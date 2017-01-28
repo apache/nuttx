@@ -182,9 +182,8 @@
 #ifdef CONFIG_MODULE
 #  define SYS_insmod                   __SYS_insmod
 #  define SYS_rmmod                   (__SYS_insmod+1)
-#  define SYS_modsym                  (__SYS_insmod+2)
-#  define SYS_modhandle               (__SYS_insmod+3)
-#  define __SYS_posix_spawn           (__SYS_insmod+4)
+#  define SYS_modhandle               (__SYS_insmod+2)
+#  define __SYS_posix_spawn           (__SYS_insmod+3)
 #else
 #  define __SYS_posix_spawn            __SYS_insmod
 #endif

@@ -38,7 +38,6 @@
 "mkfifo2","nuttx/drivers/drivers.h","defined(CONFIG_PIPES) && CONFIG_DEV_FIFO_SIZE > 0","int","FAR const char*","mode_t","size_t"
 "mmap","sys/mman.h","CONFIG_NFILE_DESCRIPTORS > 0","FAR void*","FAR void*","size_t","int","int","int","off_t"
 "modhandle","nuttx/module.h","defined(CONFIG_MODULE)","FAR void *","FAR const char *"
-"modsym","nuttx/module.h","defined(CONFIG_MODULE)","FAR const void *","FAR void *","FAR const char *"
 "mount","sys/mount.h","CONFIG_NFILE_DESCRIPTORS > 0 && !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_READABLE)","int","const char*","const char*","const char*","unsigned long","const void*"
 "mq_close","mqueue.h","!defined(CONFIG_DISABLE_MQUEUE)","int","mqd_t"
 "mq_getattr","mqueue.h","!defined(CONFIG_DISABLE_MQUEUE)","int","mqd_t","struct mq_attr *"
