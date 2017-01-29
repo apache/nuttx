@@ -33,6 +33,7 @@ config LIB_HOMEDIR
 		The home directory to use with operations like such as 'cd ~'
 
 source libc/dllfcn/Kconfig
+source libc/modlib/Kconfig
 source libc/math/Kconfig
 source libc/machine/Kconfig
 

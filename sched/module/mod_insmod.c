@@ -59,14 +59,14 @@
  ****************************************************************************/
 
 /* CONFIG_DEBUG_INFO, and CONFIG_DEBUG_BINFMT have to be defined or
- * CONFIG_MODULE_DUMPBUFFER does nothing.
+ * CONFIG_LIBC_MODLIB_DUMPBUFFER does nothing.
  */
 
 #if !defined(CONFIG_DEBUG_INFO) || !defined (CONFIG_DEBUG_BINFMT)
-#  undef CONFIG_MODULE_DUMPBUFFER
+#  undef CONFIG_LIBC_MODLIB_DUMPBUFFER
 #endif
 
-#ifdef CONFIG_MODULE_DUMPBUFFER
+#ifdef CONFIG_LIBC_MODLIB_DUMPBUFFER
 # define mod_dumpbuffer(m,b,n) sinfodumpbuffer(m,b,n)
 #else
 # define mod_dumpbuffer(m,b,n)
@@ -144,7 +144,7 @@ static void mod_dumploadinfo(FAR struct mod_loadinfo_s *loadinfo)
  * Name: mod_dumpinitializer
  ****************************************************************************/
 
-#ifdef CONFIG_MODULE_DUMPBUFFER
+#ifdef CONFIG_LIBC_MODLIB_DUMPBUFFER
 static void mod_dumpinitializer(mod_initializer_t initializer,
                                 FAR struct mod_loadinfo_s *loadinfo)
 {

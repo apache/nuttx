@@ -70,7 +70,7 @@
 
 int mod_depend(FAR struct module_s *importer, FAR struct module_s *exporter)
 {
-#if CONFIG_MODULE_MAXDEPEND > 0
+#if CONFIG_LIBC_MODLIB_MAXDEPEND > 0
   int freendx;
   int i;
 
@@ -82,11 +82,11 @@ int mod_depend(FAR struct module_s *importer, FAR struct module_s *exporter)
    * list of dependencies.
    *
    * The list dependency list is a a dumb, upacked array of pointers.  This
-   * should not be too inefficient if the number of CONFIG_MODULE_MAXDEPEND
+   * should not be too inefficient if the number of CONFIG_LIBC_MODLIB_MAXDEPEND
    * is small.  Otherwise, a more dynamic data structure would be in order.
    */
 
-  for (i = 0, freendx = -1; i < CONFIG_MODULE_MAXDEPEND; i++)
+  for (i = 0, freendx = -1; i < CONFIG_LIBC_MODLIB_MAXDEPEND; i++)
     {
       FAR const struct module_s *modp;
 
@@ -167,7 +167,7 @@ int mod_depend(FAR struct module_s *importer, FAR struct module_s *exporter)
 
 int mod_undepend(FAR struct module_s *importer)
 {
-#if CONFIG_MODULE_MAXDEPEND > 0
+#if CONFIG_LIBC_MODLIB_MAXDEPEND > 0
   FAR struct module_s *exporter;
   int i;
 
@@ -175,11 +175,11 @@ int mod_undepend(FAR struct module_s *importer)
 
   /* Decrement the dependency count on each of exporters of symbols used by
    * this importer module.  This is an upacked array of pointers.  This
-   * should not be too inefficient if the number of CONFIG_MODULE_MAXDEPEND
+   * should not be too inefficient if the number of CONFIG_LIBC_MODLIB_MAXDEPEND
    * is small.  Otherwise, a more dynamic data structure would be in order.
    */
 
-  for (i = 0; i < CONFIG_MODULE_MAXDEPEND; i++)
+  for (i = 0; i < CONFIG_LIBC_MODLIB_MAXDEPEND; i++)
     {
       exporter = importer->dependencies[i];
       if (exporter != NULL)

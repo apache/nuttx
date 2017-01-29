@@ -58,7 +58,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define ELF_ALIGN_MASK   ((1 << CONFIG_MODULE_ALIGN_LOG2) - 1)
+#define ELF_ALIGN_MASK   ((1 << CONFIG_LIBC_MODLIB_ALIGN_LOG2) - 1)
 #define ELF_ALIGNUP(a)   (((unsigned long)(a) + ELF_ALIGN_MASK) & ~ELF_ALIGN_MASK)
 #define ELF_ALIGNDOWN(a) ((unsigned long)(a) & ~ELF_ALIGN_MASK)
 

@@ -147,7 +147,7 @@ static inline int mod_sectname(FAR struct mod_loadinfo_s *loadinfo,
 
       /* No.. then we have to read more */
 
-      ret = mod_reallocbuffer(loadinfo, CONFIG_MODULE_BUFFERINCR);
+      ret = mod_reallocbuffer(loadinfo, CONFIG_LIBC_MODLIB_BUFFERINCR);
       if (ret < 0)
         {
           serr("ERROR: mod_reallocbuffer failed: %d\n", ret);

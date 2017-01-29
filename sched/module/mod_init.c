@@ -55,15 +55,15 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* CONFIG_DEBUG_FEATURES, CONFIG_DEBUG_INFO, and CONFIG_MODULE_DUMPBUFFER have to
- * be defined or CONFIG_MODULE_DUMPBUFFER does nothing.
+/* CONFIG_DEBUG_FEATURES, CONFIG_DEBUG_INFO, and CONFIG_LIBC_MODLIB_DUMPBUFFER
+ * have to be defined or CONFIG_LIBC_MODLIB_DUMPBUFFER does nothing.
  */
 
-#if !defined(CONFIG_DEBUG_INFO) || !defined (CONFIG_MODULE_DUMPBUFFER)
-#  undef CONFIG_MODULE_DUMPBUFFER
+#if !defined(CONFIG_DEBUG_INFO) || !defined (CONFIG_LIBC_MODLIB_DUMPBUFFER)
+#  undef CONFIG_LIBC_MODLIB_DUMPBUFFER
 #endif
 
-#ifdef CONFIG_MODULE_DUMPBUFFER
+#ifdef CONFIG_LIBC_MODLIB_DUMPBUFFER
 # define mod_dumpbuffer(m,b,n) sinfodumpbuffer(m,b,n)
 #else
 # define mod_dumpbuffer(m,b,n)

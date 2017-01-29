@@ -88,7 +88,7 @@ int rmmod(FAR void *handle)
       goto errout_with_lock;
     }
 
-#if CONFIG_MODULE_MAXDEPEND > 0
+#if CONFIG_LIBC_MODLIB_MAXDEPEND > 0
   /* Refuse to remove any module that other modules may depend upon. */
 
   if (modp->dependents > 0)
@@ -152,7 +152,7 @@ int rmmod(FAR void *handle)
       goto errout_with_lock;
     }
 
-#if CONFIG_MODULE_MAXDEPEND > 0
+#if CONFIG_LIBC_MODLIB_MAXDEPEND > 0
   /* Eliminate any dependencies that this module has on other modules */
 
   (void)mod_undepend(modp);

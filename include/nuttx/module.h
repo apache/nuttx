@@ -53,25 +53,6 @@
 #include <nuttx/binfmt/binfmt.h>
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-/* Configuration ************************************************************/
-
-#ifndef CONFIG_MODULE_ALIGN_LOG2
-#  define CONFIG_MODULE_ALIGN_LOG2 2
-#endif
-
-#ifndef CONFIG_MODULE_BUFFERSIZE
-#  define CONFIG_MODULE_BUFFERSIZE 128
-#endif
-
-#ifndef CONFIG_MODULE_BUFFERINCR
-#  define CONFIG_MODULE_BUFFERINCR 32
-#endif
-
-#define MODULENAME_MAX 16
-
-/****************************************************************************
  * Public Types
  ****************************************************************************/
 

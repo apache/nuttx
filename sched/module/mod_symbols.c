@@ -55,8 +55,8 @@
 
 /* Amount to reallocate buffer when buffer is full */
 
-#ifndef CONFIG_MODULE_BUFFERINCR
-#  define CONFIG_MODULE_BUFFERINCR 32
+#ifndef CONFIG_LIBC_MODLIB_BUFFERINCR
+#  define CONFIG_LIBC_MODLIB_BUFFERINCR 32
 #endif
 
 /* Return values search for exported modules */
@@ -159,7 +159,7 @@ static int mod_symname(FAR struct mod_loadinfo_s *loadinfo,
 
       /* No.. then we have to read more */
 
-      ret = mod_reallocbuffer(loadinfo, CONFIG_MODULE_BUFFERINCR);
+      ret = mod_reallocbuffer(loadinfo, CONFIG_LIBC_MODLIB_BUFFERINCR);
       if (ret < 0)
         {
           serr("ERROR: mod_reallocbuffer failed: %d\n", ret);

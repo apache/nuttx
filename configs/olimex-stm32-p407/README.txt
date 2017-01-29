@@ -265,9 +265,10 @@ must be is one of the following.
          CONFIG_FS_ROMFS=y
          CONFIG_LIBC_ARCH_ELF=y
          CONFIG_MODULE=y
-         CONFIG_MODULE_ALIGN_LOG2=2
-         CONFIG_MODULE_BUFFERINCR=32
-         CONFIG_MODULE_BUFFERSIZE=128
+         CONFIG_LIBC_MODLIB=y
+         CONFIG_MODLIB_ALIGN_LOG2=2
+         CONFIG_MODLIB_BUFFERINCR=32
+         CONFIG_MODLIB_BUFFERSIZE=128
 
        Add the following for testing shared libraries in the FLAT
        build:

@@ -72,6 +72,7 @@ include locale/Make.defs
 include machine/Make.defs
 include math/Make.defs
 include misc/Make.defs
+include modlib/Make.defs
 include net/Make.defs
 include netdb/Make.defs
 include pthread/Make.defs

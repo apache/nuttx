@@ -49,6 +49,25 @@
 #include <nuttx/module.h>
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+/* Configuration ************************************************************/
+
+#ifndef CONFIG_LIBC_MODLIB_ALIGN_LOG2
+#  define CONFIG_LIBC_MODLIB_ALIGN_LOG2 2
+#endif
+
+#ifndef CONFIG_LIBC_MODLIB_BUFFERSIZE
+#  define CONFIG_LIBC_MODLIB_BUFFERSIZE 128
+#endif
+
+#ifndef CONFIG_LIBC_MODLIB_BUFFERINCR
+#  define CONFIG_LIBC_MODLIB_BUFFERINCR 32
+#endif
+
+#define MODULENAME_MAX 16
+
+/****************************************************************************
  * Public Types
  ****************************************************************************/
 
@@ -69,14 +88,14 @@ struct module_s
   size_t datasize;                     /* Size of the kernel .bss/.data memory allocation */
 #endif
 
-#if CONFIG_MODULE_MAXDEPEND > 0
+#if CONFIG_LIBC_MODLIB_MAXDEPEND > 0
   uint8_t dependents;                  /* Number of modules that depend on this module */
 
   /* This is an upacked array of pointers to other modules that this module
    * depends upon.
    */
 
-  FAR struct module_s *dependencies[CONFIG_MODULE_MAXDEPEND];
+  FAR struct module_s *dependencies[CONFIG_LIBC_MODLIB_MAXDEPEND];
 #endif
 };
 
@@ -217,7 +236,7 @@ int mod_unload(struct mod_loadinfo_s *loadinfo);
  *
  ****************************************************************************/
 
-#if CONFIG_MODULE_MAXDEPEND > 0
+#if CONFIG_LIBC_MODLIB_MAXDEPEND > 0
 int mod_depend(FAR struct module_s *importer, FAR struct module_s *exporter);
 #endif
 
@@ -238,7 +257,7 @@ int mod_depend(FAR struct module_s *importer, FAR struct module_s *exporter);
  *
  ****************************************************************************/
 
-#if CONFIG_MODULE_MAXDEPEND > 0
+#if CONFIG_LIBC_MODLIB_MAXDEPEND > 0
 int mod_undepend(FAR struct module_s *importer);
 #endif
 

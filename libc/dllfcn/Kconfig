@@ -7,8 +7,9 @@ config LIBC_DLLFCN
 	bool "Shared library support"
 	default n
 	select LIBC_ARCH_ELF
+	select LIBC_MODLIB if !BUILD_KERNEL
 	select MODULE if BUILD_FLAT
-	depends on EXPERIMENTAL || BUILD_FLAT
+	depends on EXPERIMENTAL || !BUILD_KERNEL
 	---help---
 		Enabled support for user-space shared libraries.
 
