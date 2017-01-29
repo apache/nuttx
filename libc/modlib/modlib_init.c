@@ -66,9 +66,9 @@
 #endif
 
 #ifdef CONFIG_MODLIB_DUMPBUFFER
-# define mod_dumpbuffer(m,b,n) sinfodumpbuffer(m,b,n)
+# define modlib_dumpbuffer(m,b,n) sinfodumpbuffer(m,b,n)
 #else
-# define mod_dumpbuffer(m,b,n)
+# define modlib_dumpbuffer(m,b,n)
 #endif
 
 /****************************************************************************
@@ -76,7 +76,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mod_filelen
+ * Name: modlib_filelen
  *
  * Description:
  *  Get the size of the ELF file
@@ -87,8 +87,8 @@
  *
  ****************************************************************************/
 
-static inline int mod_filelen(FAR struct mod_loadinfo_s *loadinfo,
-                              FAR const char *filename)
+static inline int modlib_filelen(FAR struct mod_loadinfo_s *loadinfo,
+                                 FAR const char *filename)
 {
   struct stat buf;
   int ret;
@@ -151,10 +151,10 @@ int modlib_initialize(FAR const char *filename,
 
   /* Get the length of the file. */
 
-  ret = mod_filelen(loadinfo, filename);
+  ret = modlib_filelen(loadinfo, filename);
   if (ret < 0)
     {
-      serr("ERROR: mod_filelen failed: %d\n", ret);
+      serr("ERROR: modlib_filelen failed: %d\n", ret);
       return ret;
     }
 
@@ -178,7 +178,7 @@ int modlib_initialize(FAR const char *filename,
       return ret;
     }
 
-  mod_dumpbuffer("ELF header", (FAR const uint8_t *)&loadinfo->ehdr,
+  modlib_dumpbuffer("ELF header", (FAR const uint8_t *)&loadinfo->ehdr,
                     sizeof(Elf32_Ehdr));
 
   /* Verify the ELF header */

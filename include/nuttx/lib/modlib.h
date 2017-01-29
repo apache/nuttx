@@ -65,6 +65,20 @@
 #  define CONFIG_MODLIB_BUFFERINCR 32
 #endif
 
+/* CONFIG_DEBUG_INFO, and CONFIG_DEBUG_BINFMT have to be defined or
+ * CONFIG_MODLIB_DUMPBUFFER does nothing.
+ */
+
+#if !defined(CONFIG_DEBUG_INFO) || !defined (CONFIG_DEBUG_BINFMT)
+#  undef CONFIG_MODLIB_DUMPBUFFER
+#endif
+
+#ifdef CONFIG_MODLIB_DUMPBUFFER
+# define modlib_dumpbuffer(m,b,n) sinfodumpbuffer(m,b,n)
+#else
+# define modlib_dumpbuffer(m,b,n)
+#endif
+
 /* Module names.  These are only used by the kernel module and will be
  * disabled in all other configurations.
  *
