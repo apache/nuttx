@@ -89,7 +89,7 @@ FAR void *dlsym(FAR void *handle, FAR const char *name)
 
 #elif defined(CONFIG_BUILD_PROTECTED)
   /* The PROTECTED build is equivalent to the FLAT build EXCEPT that there
-   * must be two copies of the the module logic:  One residing in kernel
+   * must be two copies of the module logic:  One residing in kernel
    * space and using the kernel symbol table and one residing in user space
    * using the user space symbol table.
    *
