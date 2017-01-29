@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/module/gnu-elf.ld
+ * libc/modlib/gnu-elf.ld
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
