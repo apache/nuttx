@@ -77,18 +77,18 @@ int rmmod(FAR void *handle)
 
   /* Get exclusive access to the module registry */
 
-  mod_registry_lock();
+  modlib_registry_lock();
 
   /* Verify that the module is in the registry */
 
-  ret = mod_registry_verify(modp);
+  ret = modlib_registry_verify(modp);
   if (ret < 0)
     {
       serr("ERROR: Failed to verify module: %d\n", ret);
       goto errout_with_lock;
     }
 
-#if CONFIG_LIBC_MODLIB_MAXDEPEND > 0
+#if CONFIG_MODLIB_MAXDEPEND > 0
   /* Refuse to remove any module that other modules may depend upon. */
 
   if (modp->dependents > 0)
@@ -145,19 +145,19 @@ int rmmod(FAR void *handle)
 
   /* Remove the module from the registry */
 
-  ret = mod_registry_del(modp);
+  ret = modlib_registry_del(modp);
   if (ret < 0)
     {
       serr("ERROR: Failed to remove the module from the registry: %d\n", ret);
       goto errout_with_lock;
     }
 
-#if CONFIG_LIBC_MODLIB_MAXDEPEND > 0
+#if CONFIG_MODLIB_MAXDEPEND > 0
   /* Eliminate any dependencies that this module has on other modules */
 
-  (void)mod_undepend(modp);
+  (void)modlib_undepend(modp);
 #endif
-  mod_registry_unlock();
+  modlib_registry_unlock();
 
   /* And free the registry entry */
 
@@ -165,7 +165,7 @@ int rmmod(FAR void *handle)
   return OK;
 
 errout_with_lock:
-  mod_registry_unlock();
+  modlib_registry_unlock();
   set_errno(-ret);
   return ERROR;
 }

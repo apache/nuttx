@@ -37,6 +37,9 @@ ifeq ($(CONFIG_LIBC_MODLIB),y)
 
 # Add the nuttx/lib/modlib.h files to the build
 
+CSRCS += modlib_bind.c modlib_depend.c modlib_init.c modlib_registry.c
+CSRCS += modlib_uninit.c
+
 # Add the modlib directory to the build
 
 DEPPATH += --dep-path modlib

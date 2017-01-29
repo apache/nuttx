@@ -77,10 +77,10 @@ void mod_getsymtab(FAR const struct symtab_s **symtab, FAR int *nsymbols)
 
   /* Borrow the registry lock to assure atomic access */
 
-  mod_registry_lock();
+  modlib_registry_lock();
   *symtab   = g_mod_symtab;
   *nsymbols = g_mod_nsymbols;
-  mod_registry_unlock();
+  modlib_registry_unlock();
 }
 
 /****************************************************************************
@@ -102,8 +102,8 @@ void mod_setsymtab(FAR const struct symtab_s *symtab, int nsymbols)
 {
   /* Borrow the registry lock to assure atomic access */
 
-  mod_registry_lock();
+  modlib_registry_lock();
   g_mod_symtab   = symtab;
   g_mod_nsymbols = nsymbols;
-  mod_registry_unlock();
+  modlib_registry_unlock();
 }

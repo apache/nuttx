@@ -40,9 +40,11 @@
 #include <nuttx/config.h>
 
 #include <string.h>
+#include <elf32.h>
 #include <debug.h>
 #include <errno.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/module.h>
 
 /****************************************************************************

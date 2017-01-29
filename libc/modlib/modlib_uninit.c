@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/module/mod_uninit.c
+ * libc/modlib/modlib_uninit.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015. 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,16 +47,18 @@
 #include <nuttx/module.h>
 #include <nuttx/lib/modlib.h>
 
+#include "libc.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mod_uninitialize
+ * Name: modlib_uninitialize
  *
  * Description:
- *   Releases any resources committed by mod_initialize().  This essentially
- *   undoes the actions of mod_initialize.
+ *   Releases any resources committed by modlib_initialize().  This
+ *   essentially undoes the actions of modlib_initialize.
  *
  * Returned Value:
  *   0 (OK) is returned on success and a negated errno is returned on
@@ -64,7 +66,7 @@
  *
  ****************************************************************************/
 
-int mod_uninitialize(struct mod_loadinfo_s *loadinfo)
+int modlib_uninitialize(struct mod_loadinfo_s *loadinfo)
 {
   /* Free all working buffers */
 
@@ -96,15 +98,15 @@ int mod_freebuffers(struct mod_loadinfo_s *loadinfo)
 {
   /* Release all working allocations  */
 
-  if (loadinfo->shdr)
+  if (loadinfo->shdr != NULL)
     {
-      kmm_free((FAR void *)loadinfo->shdr);
+      lib_free((FAR void *)loadinfo->shdr);
       loadinfo->shdr      = NULL;
     }
 
-  if (loadinfo->iobuffer)
+  if (loadinfo->iobuffer != NULL)
     {
-      kmm_free((FAR void *)loadinfo->iobuffer);
+      lib_free((FAR void *)loadinfo->iobuffer);
       loadinfo->iobuffer  = NULL;
       loadinfo->buflen    = 0;
     }

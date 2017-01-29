@@ -59,14 +59,14 @@
  ****************************************************************************/
 
 /* CONFIG_DEBUG_INFO, and CONFIG_DEBUG_BINFMT have to be defined or
- * CONFIG_LIBC_MODLIB_DUMPBUFFER does nothing.
+ * CONFIG_MODLIB_DUMPBUFFER does nothing.
  */
 
 #if !defined(CONFIG_DEBUG_INFO) || !defined (CONFIG_DEBUG_BINFMT)
-#  undef CONFIG_LIBC_MODLIB_DUMPBUFFER
+#  undef CONFIG_MODLIB_DUMPBUFFER
 #endif
 
-#ifdef CONFIG_LIBC_MODLIB_DUMPBUFFER
+#ifdef CONFIG_MODLIB_DUMPBUFFER
 # define mod_dumpbuffer(m,b,n) sinfodumpbuffer(m,b,n)
 #else
 # define mod_dumpbuffer(m,b,n)
@@ -144,7 +144,7 @@ static void mod_dumploadinfo(FAR struct mod_loadinfo_s *loadinfo)
  * Name: mod_dumpinitializer
  ****************************************************************************/
 
-#ifdef CONFIG_LIBC_MODLIB_DUMPBUFFER
+#ifdef CONFIG_MODLIB_DUMPBUFFER
 static void mod_dumpinitializer(mod_initializer_t initializer,
                                 FAR struct mod_loadinfo_s *loadinfo)
 {
@@ -197,20 +197,20 @@ FAR void *insmod(FAR const char *filename, FAR const char *modulename)
 
   /* Get exclusive access to the module registry */
 
-  mod_registry_lock();
+  modlib_registry_lock();
 
   /* Check if this module is already installed */
 
-  if (mod_registry_find(modulename) != NULL)
+  if (modlib_registry_find(modulename) != NULL)
     {
-      mod_registry_unlock();
+      modlib_registry_unlock();
       ret = -EEXIST;
       goto errout_with_lock;
     }
 
   /* Initialize the ELF library to load the program binary. */
 
-  ret = mod_initialize(filename, &loadinfo);
+  ret = modlib_initialize(filename, &loadinfo);
   mod_dumploadinfo(&loadinfo);
   if (ret != 0)
     {
@@ -243,7 +243,7 @@ FAR void *insmod(FAR const char *filename, FAR const char *modulename)
 
   /* Bind the program to the kernel symbol table */
 
-  ret = mod_bind(modp, &loadinfo);
+  ret = modlib_bind(modp, &loadinfo);
   if (ret != 0)
     {
       sinfo("Failed to bind symbols program binary: %d\n", ret);
@@ -277,21 +277,21 @@ FAR void *insmod(FAR const char *filename, FAR const char *modulename)
 
   /* Add the new module entry to the registry */
 
-  mod_registry_add(modp);
+  modlib_registry_add(modp);
 
-  mod_uninitialize(&loadinfo);
-  mod_registry_unlock();
+  modlib_uninitialize(&loadinfo);
+  modlib_registry_unlock();
   return (FAR void *)modp;
 
 errout_with_load:
   mod_unload(&loadinfo);
-  (void)mod_undepend(modp);
+  (void)modlib_undepend(modp);
 errout_with_registry_entry:
   kmm_free(modp);
 errout_with_loadinfo:
-  mod_uninitialize(&loadinfo);
+  modlib_uninitialize(&loadinfo);
 errout_with_lock:
-  mod_registry_unlock();
+  modlib_registry_unlock();
   set_errno(-ret);
   return NULL;
 }

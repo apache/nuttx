@@ -55,8 +55,8 @@
 
 /* Amount to reallocate buffer when buffer is full */
 
-#ifndef CONFIG_LIBC_MODLIB_BUFFERINCR
-#  define CONFIG_LIBC_MODLIB_BUFFERINCR 32
+#ifndef CONFIG_MODLIB_BUFFERINCR
+#  define CONFIG_MODLIB_BUFFERINCR 32
 #endif
 
 /* Return values search for exported modules */
@@ -159,7 +159,7 @@ static int mod_symname(FAR struct mod_loadinfo_s *loadinfo,
 
       /* No.. then we have to read more */
 
-      ret = mod_reallocbuffer(loadinfo, CONFIG_LIBC_MODLIB_BUFFERINCR);
+      ret = mod_reallocbuffer(loadinfo, CONFIG_MODLIB_BUFFERINCR);
       if (ret < 0)
         {
           serr("ERROR: mod_reallocbuffer failed: %d\n", ret);
@@ -176,7 +176,7 @@ static int mod_symname(FAR struct mod_loadinfo_s *loadinfo,
  * Name: mod_symcallback
  *
  * Description:
- *   mod_registry_foreach() callback function.  Test if the provided module,
+ *   modlib_registry_foreach() callback function.  Test if the provided module,
  *   modp, exports the symbol of interest.  If so, return that symbol value
  *   and setup the module dependency relationship.
  *
@@ -209,10 +209,10 @@ static int mod_symcallback(FAR struct module_s *modp, FAR void *arg)
         * stop the traversal.
         */
 
-       ret = mod_depend(exportinfo->modp, modp);
+       ret = modlib_depend(exportinfo->modp, modp);
        if (ret < 0)
          {
-           serr("ERROR: mod_depend failed: %d\n", ret);
+           serr("ERROR: modlib_depend failed: %d\n", ret);
            return ret;
          }
 
@@ -382,7 +382,7 @@ int mod_symvalue(FAR struct module_s *modp,
         exportinfo.modp   = modp;
         exportinfo.symbol = NULL;
 
-        ret = mod_registry_foreach(mod_symcallback, (FAR void *)&exportinfo);
+        ret = modlib_registry_foreach(mod_symcallback, (FAR void *)&exportinfo);
         if (ret < 0)
           {
             serr("ERROR: mod_symcallback failed: \n", ret);

@@ -44,78 +44,6 @@
 
 #include <sys/types.h>
 
-#include <stdint.h>
-#include <stdbool.h>
-#include <elf32.h>
-
-#include <nuttx/arch.h>
-#include <nuttx/symtab.h>
-#include <nuttx/binfmt/binfmt.h>
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/* This is the type of the function that is called to uninitialize the
- * the loaded module.  This may mean, for example, un-registering a device
- * driver. If the module is successfully initialized, its memory will be
- * deallocated.
- *
- * Input Parameters:
- *   arg - An opaque argument that was previously returned by the initializer
- *         function.
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on any failure to
- *   initialize the module.  If zero is returned, then the module memory
- *   will be deallocated.  If the module is still in use (for example with
- *   open driver instances), the uninitialization function should fail with
- *   -EBUSY
- */
-
-typedef CODE int (*mod_uninitializer_t)(FAR void *arg);
-
-/* The contect of this structure is returned by module_initialize().
- *
- *   uninitializer - The pointer to the uninitialization function.  NULL may
- *                   be returned if no uninitialization is needed (i.e, the
- *                   the module memory can be deallocated at any time).
- *   arg           - An argument that will be passed to the uninitialization
-                     function.
- *   exports       - A symbol table exported by the module
- *   nexports      - The number of symbols in the exported symbol table.
- */
-
-struct mod_info_s
-{
-  mod_uninitializer_t uninitializer;   /* Module uninitializer */
-  FAR void *arg;                       /* Uninitializer argument */
-  FAR const struct symtab_s *exports;  /* Symbols exported by module */
-  unsigned int nexports;               /* Number of symobols in exports list */
-};
-
-/* A NuttX module is expected to export a function called module_initialize()
- * that has the following function prototype.  This function should appear as
- * the entry point in the ELF module file and will be called by the binfmt
- * logic after the module has been loaded into kernel memory.
- *
- * Input Parameters:
- *   modinfo - Module information returned by mod_initialize().
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on any failure to
- *   initialize the module.
- */
-
-typedef CODE int (*mod_initializer_t)(FAR struct mod_info_s *modinfo);
-
-#if defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT)
-/* This is the type of the callback function used by mod_registry_foreach() */
-
-struct module_s;
-typedef CODE int (*mod_callback_t)(FAR struct module_s *modp, FAR void *arg);
-#endif
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -259,32 +187,6 @@ FAR const void *modsym(FAR void *handle, FAR const char *name);
  ****************************************************************************/
 
 FAR void *modhandle(FAR const char *name);
-
-/****************************************************************************
- * Name: mod_registry_foreach
- *
- * Description:
- *   Visit each module in the registry.  This is an internal OS interface and
- *   not available for use by applications.
- *
- * Input Parameters:
- *   callback - This callback function was be called for each entry in the
- *     registry.
- *   arg - This opaque argument will be passed to the callback function.
- *
- * Returned Value:
- *   This function normally returns zero (OK).  If, however, any callback
- *   function returns a non-zero value, the traversal will be terminated and
- *   that non-zero value will be returned.
- *
- * Assumptions:
- *   The caller does NOT hold the lock on the module registry.
- *
- ****************************************************************************/
-
-#if defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT)
-int mod_registry_foreach(mod_callback_t callback, FAR void *arg);
-#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

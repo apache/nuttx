@@ -53,16 +53,16 @@
  ****************************************************************************/
 /* Configuration ************************************************************/
 
-#ifndef CONFIG_LIBC_MODLIB_ALIGN_LOG2
-#  define CONFIG_LIBC_MODLIB_ALIGN_LOG2 2
+#ifndef CONFIG_MODLIB_ALIGN_LOG2
+#  define CONFIG_MODLIB_ALIGN_LOG2 2
 #endif
 
-#ifndef CONFIG_LIBC_MODLIB_BUFFERSIZE
-#  define CONFIG_LIBC_MODLIB_BUFFERSIZE 128
+#ifndef CONFIG_MODLIB_BUFFERSIZE
+#  define CONFIG_MODLIB_BUFFERSIZE 128
 #endif
 
-#ifndef CONFIG_LIBC_MODLIB_BUFFERINCR
-#  define CONFIG_LIBC_MODLIB_BUFFERINCR 32
+#ifndef CONFIG_MODLIB_BUFFERINCR
+#  define CONFIG_MODLIB_BUFFERINCR 32
 #endif
 
 #define MODULENAME_MAX 16
@@ -70,6 +70,64 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
+/* This is the type of the function that is called to uninitialize the
+ * the loaded module.  This may mean, for example, un-registering a device
+ * driver. If the module is successfully initialized, its memory will be
+ * deallocated.
+ *
+ * Input Parameters:
+ *   arg - An opaque argument that was previously returned by the initializer
+ *         function.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on any failure to
+ *   initialize the module.  If zero is returned, then the module memory
+ *   will be deallocated.  If the module is still in use (for example with
+ *   open driver instances), the uninitialization function should fail with
+ *   -EBUSY
+ */
+
+typedef CODE int (*mod_uninitializer_t)(FAR void *arg);
+
+/* The contect of this structure is returned by module_initialize().
+ *
+ *   uninitializer - The pointer to the uninitialization function.  NULL may
+ *                   be returned if no uninitialization is needed (i.e, the
+ *                   the module memory can be deallocated at any time).
+ *   arg           - An argument that will be passed to the uninitialization
+                     function.
+ *   exports       - A symbol table exported by the module
+ *   nexports      - The number of symbols in the exported symbol table.
+ */
+
+struct mod_info_s
+{
+  mod_uninitializer_t uninitializer;   /* Module uninitializer */
+  FAR void *arg;                       /* Uninitializer argument */
+  FAR const struct symtab_s *exports;  /* Symbols exported by module */
+  unsigned int nexports;               /* Number of symobols in exports list */
+};
+
+/* A NuttX module is expected to export a function called module_initialize()
+ * that has the following function prototype.  This function should appear as
+ * the entry point in the ELF module file and will be called by the binfmt
+ * logic after the module has been loaded into kernel memory.
+ *
+ * Input Parameters:
+ *   modinfo - Module information returned by modlib_initialize().
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on any failure to
+ *   initialize the module.
+ */
+
+typedef CODE int (*mod_initializer_t)(FAR struct mod_info_s *modinfo);
+
+/* This is the type of the callback function used by modlib_registry_foreach() */
+
+struct module_s;
+typedef CODE int (*mod_callback_t)(FAR struct module_s *modp, FAR void *arg);
 
 /* This describes the file to be loaded. */
 
@@ -88,14 +146,14 @@ struct module_s
   size_t datasize;                     /* Size of the kernel .bss/.data memory allocation */
 #endif
 
-#if CONFIG_LIBC_MODLIB_MAXDEPEND > 0
+#if CONFIG_MODLIB_MAXDEPEND > 0
   uint8_t dependents;                  /* Number of modules that depend on this module */
 
   /* This is an upacked array of pointers to other modules that this module
    * depends upon.
    */
 
-  FAR struct module_s *dependencies[CONFIG_LIBC_MODLIB_MAXDEPEND];
+  FAR struct module_s *dependencies[CONFIG_MODLIB_MAXDEPEND];
 #endif
 };
 
@@ -139,7 +197,7 @@ FAR int g_mod_nsymbols;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mod_initialize
+ * Name: modlib_initialize
  *
  * Description:
  *   This function is called to configure the library to process an kernel
@@ -151,15 +209,15 @@ FAR int g_mod_nsymbols;
  *
  ****************************************************************************/
 
-int mod_initialize(FAR const char *filename,
-                   FAR struct mod_loadinfo_s *loadinfo);
+int modlib_initialize(FAR const char *filename,
+                      FAR struct mod_loadinfo_s *loadinfo);
 
 /****************************************************************************
- * Name: mod_uninitialize
+ * Name: modlib_uninitialize
  *
  * Description:
- *   Releases any resources committed by mod_init().  This essentially
- *   undoes the actions of mod_initialize.
+ *   Releases any resources committed by modlib_initialize().  This essentially
+ *   undoes the actions of modlib_initialize.
  *
  * Returned Value:
  *   0 (OK) is returned on success and a negated errno is returned on
@@ -167,7 +225,7 @@ int mod_initialize(FAR const char *filename,
  *
  ****************************************************************************/
 
-int mod_uninitialize(FAR struct mod_loadinfo_s *loadinfo);
+int modlib_uninitialize(FAR struct mod_loadinfo_s *loadinfo);
 
 /****************************************************************************
  * Name: mod_load
@@ -185,7 +243,7 @@ int mod_uninitialize(FAR struct mod_loadinfo_s *loadinfo);
 int mod_load(FAR struct mod_loadinfo_s *loadinfo);
 
 /****************************************************************************
- * Name: mod_bind
+ * Name: modlib_bind
  *
  * Description:
  *   Bind the imported symbol names in the loaded module described by
@@ -197,7 +255,7 @@ int mod_load(FAR struct mod_loadinfo_s *loadinfo);
  *
  ****************************************************************************/
 
-int mod_bind(FAR struct module_s *modp, FAR struct mod_loadinfo_s *loadinfo);
+int modlib_bind(FAR struct module_s *modp, FAR struct mod_loadinfo_s *loadinfo);
 
 /****************************************************************************
  * Name: mod_unload
@@ -220,7 +278,7 @@ int mod_bind(FAR struct module_s *modp, FAR struct mod_loadinfo_s *loadinfo);
 int mod_unload(struct mod_loadinfo_s *loadinfo);
 
 /****************************************************************************
- * Name: mod_depend
+ * Name: modlib_depend
  *
  * Description:
  *   Set up module dependencies between the exporter and the importer of a
@@ -236,12 +294,12 @@ int mod_unload(struct mod_loadinfo_s *loadinfo);
  *
  ****************************************************************************/
 
-#if CONFIG_LIBC_MODLIB_MAXDEPEND > 0
-int mod_depend(FAR struct module_s *importer, FAR struct module_s *exporter);
+#if CONFIG_MODLIB_MAXDEPEND > 0
+int modlib_depend(FAR struct module_s *importer, FAR struct module_s *exporter);
 #endif
 
 /****************************************************************************
- * Name: mod_undepend
+ * Name: modlib_undepend
  *
  * Description:
  *   Tear down module dependencies between the exporters and the importer of
@@ -257,8 +315,8 @@ int mod_depend(FAR struct module_s *importer, FAR struct module_s *exporter);
  *
  ****************************************************************************/
 
-#if CONFIG_LIBC_MODLIB_MAXDEPEND > 0
-int mod_undepend(FAR struct module_s *importer);
+#if CONFIG_MODLIB_MAXDEPEND > 0
+int modlib_undepend(FAR struct module_s *importer);
 #endif
 
 /****************************************************************************
@@ -430,7 +488,7 @@ int mod_allocbuffer(FAR struct mod_loadinfo_s *loadinfo);
 int mod_reallocbuffer(FAR struct mod_loadinfo_s *loadinfo, size_t increment);
 
 /****************************************************************************
- * Name: mod_registry_lock
+ * Name: modlib_registry_lock
  *
  * Description:
  *   Get exclusive access to the module registry.
@@ -443,10 +501,10 @@ int mod_reallocbuffer(FAR struct mod_loadinfo_s *loadinfo, size_t increment);
  *
  ****************************************************************************/
 
-void mod_registry_lock(void);
+void modlib_registry_lock(void);
 
 /****************************************************************************
- * Name: mod_registry_unlock
+ * Name: modlib_registry_unlock
  *
  * Description:
  *   Relinquish the lock on the module registry
@@ -459,10 +517,10 @@ void mod_registry_lock(void);
  *
  ****************************************************************************/
 
-void mod_registry_unlock(void);
+void modlib_registry_unlock(void);
 
 /****************************************************************************
- * Name: mod_registry_add
+ * Name: modlib_registry_add
  *
  * Description:
  *   Add a new entry to the module registry.
@@ -478,10 +536,10 @@ void mod_registry_unlock(void);
  *
  ****************************************************************************/
 
-void mod_registry_add(FAR struct module_s *modp);
+void modlib_registry_add(FAR struct module_s *modp);
 
 /****************************************************************************
- * Name: mod_registry_del
+ * Name: modlib_registry_del
  *
  * Description:
  *   Remove a module entry from the registry
@@ -498,10 +556,10 @@ void mod_registry_add(FAR struct module_s *modp);
  *
  ****************************************************************************/
 
-int mod_registry_del(FAR struct module_s *modp);
+int modlib_registry_del(FAR struct module_s *modp);
 
 /****************************************************************************
- * Name: mod_registry_find
+ * Name: modlib_registry_find
  *
  * Description:
  *   Find an entry in the module registry using the name of the module.
@@ -518,10 +576,10 @@ int mod_registry_del(FAR struct module_s *modp);
  *
  ****************************************************************************/
 
-FAR struct module_s *mod_registry_find(FAR const char *modulename);
+FAR struct module_s *modlib_registry_find(FAR const char *modulename);
 
 /****************************************************************************
- * Name: mod_registry_verify
+ * Name: modlib_registry_verify
  *
  * Description:
  *   Verify that a module handle is valid by traversing the module list and
@@ -539,6 +597,30 @@ FAR struct module_s *mod_registry_find(FAR const char *modulename);
  *
  ****************************************************************************/
 
-int mod_registry_verify(FAR struct module_s *modp);
+int modlib_registry_verify(FAR struct module_s *modp);
+
+/****************************************************************************
+ * Name: modlib_registry_foreach
+ *
+ * Description:
+ *   Visit each module in the registry.  This is an internal OS interface and
+ *   not available for use by applications.
+ *
+ * Input Parameters:
+ *   callback - This callback function was be called for each entry in the
+ *     registry.
+ *   arg - This opaque argument will be passed to the callback function.
+ *
+ * Returned Value:
+ *   This function normally returns zero (OK).  If, however, any callback
+ *   function returns a non-zero value, the traversal will be terminated and
+ *   that non-zero value will be returned.
+ *
+ * Assumptions:
+ *   The caller does NOT hold the lock on the module registry.
+ *
+ ****************************************************************************/
+
+int modlib_registry_foreach(mod_callback_t callback, FAR void *arg);
 
 #endif /* __INCLUDE_NUTTX_LIB_MODLIB_H */

@@ -247,7 +247,7 @@ static ssize_t modprocfs_read(FAR struct file *filep, FAR char *buffer,
   priv->buflen    = buflen;
   priv->offset    = filep->f_pos;
 
-  ret = mod_registry_foreach(modprocfs_callback, priv);
+  ret = modlib_registry_foreach(modprocfs_callback, priv);
   if (ret >= 0)
     {
       filep->f_pos += priv->totalsize;

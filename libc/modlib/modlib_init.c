@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/module/mod_init.c
+ * libc/modlib/modlib_init.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,23 +55,19 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* CONFIG_DEBUG_FEATURES, CONFIG_DEBUG_INFO, and CONFIG_LIBC_MODLIB_DUMPBUFFER
- * have to be defined or CONFIG_LIBC_MODLIB_DUMPBUFFER does nothing.
+/* CONFIG_DEBUG_FEATURES, CONFIG_DEBUG_INFO, and CONFIG_MODLIB_DUMPBUFFER
+ * have to be defined or CONFIG_MODLIB_DUMPBUFFER does nothing.
  */
 
-#if !defined(CONFIG_DEBUG_INFO) || !defined (CONFIG_LIBC_MODLIB_DUMPBUFFER)
-#  undef CONFIG_LIBC_MODLIB_DUMPBUFFER
+#if !defined(CONFIG_DEBUG_INFO) || !defined (CONFIG_MODLIB_DUMPBUFFER)
+#  undef CONFIG_MODLIB_DUMPBUFFER
 #endif
 
-#ifdef CONFIG_LIBC_MODLIB_DUMPBUFFER
+#ifdef CONFIG_MODLIB_DUMPBUFFER
 # define mod_dumpbuffer(m,b,n) sinfodumpbuffer(m,b,n)
 #else
 # define mod_dumpbuffer(m,b,n)
 #endif
-
-/****************************************************************************
- * Private Constant Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -128,7 +124,7 @@ static inline int mod_filelen(FAR struct mod_loadinfo_s *loadinfo,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mod_initialize
+ * Name: modlib_initialize
  *
  * Description:
  *   This function is called to configure the library to process an ELF
@@ -140,8 +136,8 @@ static inline int mod_filelen(FAR struct mod_loadinfo_s *loadinfo,
  *
  ****************************************************************************/
 
-int mod_initialize(FAR const char *filename,
-                   FAR struct mod_loadinfo_s *loadinfo)
+int modlib_initialize(FAR const char *filename,
+                      FAR struct mod_loadinfo_s *loadinfo)
 {
   int ret;
 

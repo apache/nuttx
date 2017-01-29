@@ -44,6 +44,7 @@
 #include <debug.h>
 
 #include <nuttx/module.h>
+#include <nuttx/symtab.h>
 #include <nuttx/lib/modlib.h>
 
 /****************************************************************************
@@ -88,8 +89,8 @@ FAR const void *modsym(FAR void *handle, FAR const char *name)
 
   /* Verify that the module is in the registry */
 
-  mod_registry_lock();
-  ret = mod_registry_verify(modp);
+  modlib_registry_lock();
+  ret = modlib_registry_verify(modp);
   if (ret < 0)
     {
       serr("ERROR: Failed to verify module: %d\n", ret);
@@ -119,12 +120,12 @@ FAR const void *modsym(FAR void *handle, FAR const char *name)
 
   /* Return the address within the module assoicated with the symbol */
 
-  mod_registry_unlock();
+  modlib_registry_unlock();
   DEBUGASSERT(symbol->sym_value != NULL);
   return symbol->sym_value;
 
 errout_with_lock:
-  mod_registry_unlock();
+  modlib_registry_unlock();
   set_errno(err);
   return NULL;
 }
