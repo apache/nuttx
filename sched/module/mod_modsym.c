@@ -44,8 +44,7 @@
 #include <debug.h>
 
 #include <nuttx/module.h>
-
-#include "module.h"
+#include <nuttx/lib/modlib.h>
 
 /****************************************************************************
  * Public Functions

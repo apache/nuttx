@@ -43,8 +43,7 @@
 
 #include <nuttx/symtab.h>
 #include <nuttx/module.h>
-
-#include "module.h"
+#include <nuttx/lib/modlib.h>
 
 /****************************************************************************
  * Public Data

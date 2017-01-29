@@ -44,8 +44,7 @@
 #include <errno.h>
 
 #include <nuttx/module.h>
-
-#include "module/module.h"
+#include <nuttx/lib/modlib.h>
 
 #ifdef CONFIG_MODULE
 

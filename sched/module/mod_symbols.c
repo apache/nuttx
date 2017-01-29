@@ -46,9 +46,8 @@
 #include <debug.h>
 
 #include <nuttx/module.h>
+#include <nuttx/lib/modlib.h>
 #include <nuttx/binfmt/symtab.h>
-
-#include "module.h"
 
 /****************************************************************************
  * Pre-processor Definitions

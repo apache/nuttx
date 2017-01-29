@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/module/module.h
+ * include/nuttx/lib/modlib.h
  *
  *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __SCHED_MODULE_MODULE_H
-#define __SCHED_MODULE_MODULE_H
+#ifndef __INCLUDE_NUTTX_LIB_MODLIB_H
+#define __INCLUDE_NUTTX_LIB_MODLIB_H
 
 /****************************************************************************
  * Included Files
@@ -522,4 +522,4 @@ FAR struct module_s *mod_registry_find(FAR const char *modulename);
 
 int mod_registry_verify(FAR struct module_s *modp);
 
-#endif /* __SCHED_MODULE_MODULE_H */
+#endif /* __INCLUDE_NUTTX_LIB_MODLIB_H */
