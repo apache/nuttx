@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/module/mod_verify.c
+ * libc/modlib/modlib_symtab.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,78 +39,71 @@
 
 #include <nuttx/config.h>
 
-#include <string.h>
-#include <elf32.h>
-#include <debug.h>
-#include <errno.h>
+#include <assert.h>
 
-#include <nuttx/arch.h>
+#include <nuttx/symtab.h>
 #include <nuttx/module.h>
+#include <nuttx/lib/modlib.h>
 
 /****************************************************************************
- * Private Constant Data
+ * Public Data
  ****************************************************************************/
 
-static const char g_modmagic[EI_MAGIC_SIZE] =
-{
-    0x7f, 'E', 'L', 'F'
-};
+FAR const struct symtab_s *g_modlib_symtab;
+FAR int g_modlib_nsymbols;
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mod_verifyheader
+ * Name: modlib_getsymtab
  *
  * Description:
- *   Given the header from a possible ELF executable, verify that it
- *   is an ELF executable.
+ *   Get the current kernel symbol table selection as an atomic operation.
+ *
+ * Input Parameters:
+ *   symtab - The location to store the symbol table.
+ *   nsymbols - The location to store the number of symbols in the symbol table.
  *
  * Returned Value:
- *   0 (OK) is returned on success and a negated errno is returned on
- *   failure.
- *
- *   -ENOEXEC  : Not an ELF file
- *   -EINVAL : Not a relocatable ELF file or not supported by the current,
- *               configured architecture.
+ *   None
  *
  ****************************************************************************/
 
-int mod_verifyheader(FAR const Elf32_Ehdr *ehdr)
+void modlib_getsymtab(FAR const struct symtab_s **symtab, FAR int *nsymbols)
 {
-  if (!ehdr)
-    {
-      serr("ERROR: NULL ELF header!");
-      return -ENOEXEC;
-    }
+  DEBUGASSERT(symtab != NULL && nsymbols != NULL);
 
-  /* Verify that the magic number indicates an ELF file */
+  /* Borrow the registry lock to assure atomic access */
 
-  if (memcmp(ehdr->e_ident, g_modmagic, EI_MAGIC_SIZE) != 0)
-    {
-      sinfo("Not ELF magic {%02x, %02x, %02x, %02x}\n",
-            ehdr->e_ident[0], ehdr->e_ident[1], ehdr->e_ident[2], ehdr->e_ident[3]);
-      return -ENOEXEC;
-    }
+  modlib_registry_lock();
+  *symtab   = g_modlib_symtab;
+  *nsymbols = g_modlib_nsymbols;
+  modlib_registry_unlock();
+}
 
-  /* Verify that this is a relocatable file */
+/****************************************************************************
+ * Name: modlib_setsymtab
+ *
+ * Description:
+ *   Select a new kernel symbol table selection as an atomic operation.
+ *
+ * Input Parameters:
+ *   symtab - The new symbol table.
+ *   nsymbols - The number of symbols in the symbol table.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
 
-  if (ehdr->e_type != ET_REL)
-    {
-      serr("ERROR: Not a relocatable file: e_type=%d\n", ehdr->e_type);
-      return -EINVAL;
-    }
+void modlib_setsymtab(FAR const struct symtab_s *symtab, int nsymbols)
+{
+  /* Borrow the registry lock to assure atomic access */
 
-  /* Verify that this file works with the currently configured architecture */
-
-  if (up_checkarch(ehdr))
-    {
-      serr("ERROR: Not a supported architecture\n");
-      return -ENOEXEC;
-    }
-
-  /* Looks good so far... we still might find some problems later. */
-
-  return OK;
+  modlib_registry_lock();
+  g_modlib_symtab   = symtab;
+  g_modlib_nsymbols = nsymbols;
+  modlib_registry_unlock();
 }

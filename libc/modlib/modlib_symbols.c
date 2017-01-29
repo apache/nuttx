@@ -308,7 +308,7 @@ int modlib_readsym(FAR struct mod_loadinfo_s *loadinfo, int index,
 }
 
 /****************************************************************************
- * Name: mod_symvalue
+ * Name: modlib_symvalue
  *
  * Description:
  *   Get the value of a symbol.  The updated value of the symbol is returned
@@ -331,8 +331,8 @@ int modlib_readsym(FAR struct mod_loadinfo_s *loadinfo, int index,
  *
  ****************************************************************************/
 
-int mod_symvalue(FAR struct module_s *modp,
-                 FAR struct mod_loadinfo_s *loadinfo, FAR Elf32_Sym *sym)
+int modlib_symvalue(FAR struct module_s *modp,
+                    FAR struct mod_loadinfo_s *loadinfo, FAR Elf32_Sym *sym)
 {
   FAR const struct symtab_s *symbol;
   struct mod_exportinfo_s exportinfo;
@@ -400,11 +400,11 @@ int mod_symvalue(FAR struct module_s *modp,
         if (symbol == NULL)
           {
 #ifdef CONFIG_SYMTAB_ORDEREDBYNAME
-            symbol = symtab_findorderedbyname(g_mod_symtab, exportinfo.name,
-                                              g_mod_nsymbols);
+            symbol = symtab_findorderedbyname(g_modlib_symtab, exportinfo.name,
+                                              g_modlib_nsymbols);
 #else
-            symbol = symtab_findbyname(g_mod_symtab, exportinfo.name,
-                                       g_mod_nsymbols);
+            symbol = symtab_findbyname(g_modlib_symtab, exportinfo.name,
+                                       g_modlib_nsymbols);
 #endif
           }
 

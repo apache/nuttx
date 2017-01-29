@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/module/mod_symtab.c
+ * libc/modlib/modlib_unload.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,71 +39,51 @@
 
 #include <nuttx/config.h>
 
-#include <assert.h>
+#include <stdlib.h>
+#include <debug.h>
 
-#include <nuttx/symtab.h>
 #include <nuttx/module.h>
 #include <nuttx/lib/modlib.h>
 
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-FAR const struct symtab_s *g_mod_symtab;
-FAR int g_mod_nsymbols;
+#include "libc.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mod_getsymtab
+ * Name: modlib_unload
  *
  * Description:
- *   Get the current kernel symbol table selection as an atomic operation.
- *
- * Input Parameters:
- *   symtab - The location to store the symbol table.
- *   nsymbols - The location to store the number of symbols in the symbol table.
+ *   This function unloads the object from memory. This essentially undoes
+ *   the actions of modlib_load().  It is called only under certain error
+ *   conditions after the module has been loaded but not yet started.
  *
  * Returned Value:
- *   None
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
  *
  ****************************************************************************/
 
-void mod_getsymtab(FAR const struct symtab_s **symtab, FAR int *nsymbols)
+int modlib_unload(struct mod_loadinfo_s *loadinfo)
 {
-  DEBUGASSERT(symtab != NULL && nsymbols != NULL);
+  /* Free all working buffers */
 
-  /* Borrow the registry lock to assure atomic access */
+  modlib_freebuffers(loadinfo);
 
-  modlib_registry_lock();
-  *symtab   = g_mod_symtab;
-  *nsymbols = g_mod_nsymbols;
-  modlib_registry_unlock();
-}
+  /* Release memory holding the relocated ELF image */
 
-/****************************************************************************
- * Name: mod_setsymtab
- *
- * Description:
- *   Select a new kernel symbol table selection as an atomic operation.
- *
- * Input Parameters:
- *   symtab - The new symbol table.
- *   nsymbols - The number of symbols in the symbol table.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
+  if (loadinfo->textalloc != 0)
+    {
+      lib_free((FAR void *)loadinfo->textalloc);
+    }
 
-void mod_setsymtab(FAR const struct symtab_s *symtab, int nsymbols)
-{
-  /* Borrow the registry lock to assure atomic access */
+  /* Clear out all indications of the allocated address environment */
 
-  modlib_registry_lock();
-  g_mod_symtab   = symtab;
-  g_mod_nsymbols = nsymbols;
-  modlib_registry_unlock();
+  loadinfo->textalloc = 0;
+  loadinfo->datastart = 0;
+  loadinfo->textsize  = 0;
+  loadinfo->datasize  = 0;
+
+  return OK;
 }

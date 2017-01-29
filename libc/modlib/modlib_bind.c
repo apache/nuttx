@@ -150,7 +150,7 @@ static int modlib_relocate(FAR struct module_s *modp,
 
       /* Get the value of the symbol (in sym.st_value) */
 
-      ret = mod_symvalue(modp, loadinfo, &sym);
+      ret = modlib_symvalue(modp, loadinfo, &sym);
       if (ret < 0)
         {
           /* The special error -ESRCH is returned only in one condition:  The
@@ -217,7 +217,7 @@ static int modlib_relocateadd(FAR struct module_s *modp,
  *
  * Description:
  *   Bind the imported symbol names in the loaded module described by
- *   'loadinfo' using the exported symbol values provided by mod_setsymtab().
+ *   'loadinfo' using the exported symbol values provided by modlib_setsymtab().
  *
  * Input Parameters:
  *   modp     - Module state information

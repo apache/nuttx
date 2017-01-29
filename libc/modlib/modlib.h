@@ -53,6 +53,21 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: modlib_verifyheader
+ *
+ * Description:
+ *   Given the header from a possible ELF executable, verify that it is
+ *   an ELF executable.
+ *
+ * Returned Value:
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+int modlib_verifyheader(FAR const Elf32_Ehdr *header);
+
+/****************************************************************************
  * Name: modlib_findsymtab
  *
  * Description:
@@ -85,6 +100,33 @@ int modlib_findsymtab(FAR struct mod_loadinfo_s *loadinfo);
 
 int modlib_readsym(FAR struct mod_loadinfo_s *loadinfo, int index,
                    FAR Elf32_Sym *sym);
+
+/****************************************************************************
+ * Name: modlib_symvalue
+ *
+ * Description:
+ *   Get the value of a symbol.  The updated value of the symbol is returned
+ *   in the st_value field of the symbol table entry.
+ *
+ * Input Parameters:
+ *   modp     - Module state information
+ *   loadinfo - Load state information
+ *   sym      - Symbol table entry (value might be undefined)
+ *
+ * Returned Value:
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ *   EINVAL - There is something inconsistent in the symbol table (should only
+ *            happen if the file is corrupted)
+ *   ENOSYS - Symbol lies in common
+ *   ESRCH  - Symbol has no name
+ *   ENOENT - Symbol undefined and not provided via a symbol table
+ *
+ ****************************************************************************/
+
+int modlib_symvalue(FAR struct module_s *modp,
+                    FAR struct mod_loadinfo_s *loadinfo, FAR Elf32_Sym *sym);
 
 /****************************************************************************
  * Name: modlib_loadshdrs
@@ -149,5 +191,19 @@ int modlib_allocbuffer(FAR struct mod_loadinfo_s *loadinfo);
  ****************************************************************************/
 
 int modlib_reallocbuffer(FAR struct mod_loadinfo_s *loadinfo, size_t increment);
+
+/****************************************************************************
+ * Name: modlib_freebuffers
+ *
+ * Description:
+ *  Release all working buffers.
+ *
+ * Returned Value:
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+int modlib_freebuffers(FAR struct mod_loadinfo_s *loadinfo);
 
 #endif /* __LIBC_MODLIB_MODLIB_H */

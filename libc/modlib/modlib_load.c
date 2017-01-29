@@ -287,6 +287,6 @@ int modlib_load(FAR struct mod_loadinfo_s *loadinfo)
   /* Error exits */
 
 errout_with_buffers:
-  mod_unload(loadinfo);
+  modlib_unload(loadinfo);
   return ret;
 }

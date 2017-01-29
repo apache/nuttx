@@ -189,8 +189,9 @@ struct mod_loadinfo_s
  * Public Data
  ****************************************************************************/
 
-FAR const struct symtab_s *g_mod_symtab;
-FAR int g_mod_nsymbols;
+struct symtab_s;
+FAR const struct symtab_s *g_modlib_symtab;
+FAR int g_modlib_nsymbols;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -228,6 +229,40 @@ int modlib_initialize(FAR const char *filename,
 int modlib_uninitialize(FAR struct mod_loadinfo_s *loadinfo);
 
 /****************************************************************************
+ * Name: modlib_getsymtab
+ *
+ * Description:
+ *   Get the current symbol table selection as an atomic operation.
+ *
+ * Input Parameters:
+ *   symtab - The location to store the symbol table.
+ *   nsymbols - The location to store the number of symbols in the symbol table.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void modlib_getsymtab(FAR const struct symtab_s **symtab, FAR int *nsymbols);
+
+/****************************************************************************
+ * Name: modlib_setsymtab
+ *
+ * Description:
+ *   Select a new symbol table selection as an atomic operation.
+ *
+ * Input Parameters:
+ *   symtab - The new symbol table.
+ *   nsymbols - The number of symbols in the symbol table.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void modlib_setsymtab(FAR const struct symtab_s *symtab, int nsymbols);
+
+/****************************************************************************
  * Name: modlib_load
  *
  * Description:
@@ -247,7 +282,7 @@ int modlib_load(FAR struct mod_loadinfo_s *loadinfo);
  *
  * Description:
  *   Bind the imported symbol names in the loaded module described by
- *   'loadinfo' using the exported symbol values provided by mod_setsymtab().
+ *   'loadinfo' using the exported symbol values provided by modlib_setsymtab().
  *
  * Returned Value:
  *   0 (OK) is returned on success and a negated errno is returned on
@@ -258,7 +293,7 @@ int modlib_load(FAR struct mod_loadinfo_s *loadinfo);
 int modlib_bind(FAR struct module_s *modp, FAR struct mod_loadinfo_s *loadinfo);
 
 /****************************************************************************
- * Name: mod_unload
+ * Name: modlib_unload
  *
  * Description:
  *   This function unloads the object from memory. This essentially undoes
@@ -275,7 +310,7 @@ int modlib_bind(FAR struct module_s *modp, FAR struct mod_loadinfo_s *loadinfo);
  *
  ****************************************************************************/
 
-int mod_unload(struct mod_loadinfo_s *loadinfo);
+int modlib_unload(struct mod_loadinfo_s *loadinfo);
 
 /****************************************************************************
  * Name: modlib_depend
@@ -320,21 +355,6 @@ int modlib_undepend(FAR struct module_s *importer);
 #endif
 
 /****************************************************************************
- * Name: mod_verifyheader
- *
- * Description:
- *   Given the header from a possible ELF executable, verify that it is
- *   an ELF executable.
- *
- * Returned Value:
- *   0 (OK) is returned on success and a negated errno is returned on
- *   failure.
- *
- ****************************************************************************/
-
-int mod_verifyheader(FAR const Elf32_Ehdr *header);
-
-/****************************************************************************
  * Name: modlib_read
  *
  * Description:
@@ -349,47 +369,6 @@ int mod_verifyheader(FAR const Elf32_Ehdr *header);
 
 int modlib_read(FAR struct mod_loadinfo_s *loadinfo, FAR uint8_t *buffer,
                 size_t readsize, off_t offset);
-
-/****************************************************************************
- * Name: mod_symvalue
- *
- * Description:
- *   Get the value of a symbol.  The updated value of the symbol is returned
- *   in the st_value field of the symbol table entry.
- *
- * Input Parameters:
- *   modp     - Module state information
- *   loadinfo - Load state information
- *   sym      - Symbol table entry (value might be undefined)
- *
- * Returned Value:
- *   0 (OK) is returned on success and a negated errno is returned on
- *   failure.
- *
- *   EINVAL - There is something inconsistent in the symbol table (should only
- *            happen if the file is corrupted)
- *   ENOSYS - Symbol lies in common
- *   ESRCH  - Symbol has no name
- *   ENOENT - Symbol undefined and not provided via a symbol table
- *
- ****************************************************************************/
-
-int mod_symvalue(FAR struct module_s *modp,
-                 FAR struct mod_loadinfo_s *loadinfo, FAR Elf32_Sym *sym);
-
-/****************************************************************************
- * Name: mod_freebuffers
- *
- * Description:
- *  Release all working buffers.
- *
- * Returned Value:
- *   0 (OK) is returned on success and a negated errno is returned on
- *   failure.
- *
- ****************************************************************************/
-
-int mod_freebuffers(FAR struct mod_loadinfo_s *loadinfo);
 
 /****************************************************************************
  * Name: modlib_registry_lock

@@ -39,7 +39,8 @@ ifeq ($(CONFIG_LIBC_MODLIB),y)
 
 CSRCS += modlib_bind.c modlib_depend.c modlib_init.c modlib_iobuffer.c
 CSRCS += modlib_load.c modlib_read.c modlib_registry.c modlib_sections.c
-CSRCS += modlib_symbols.c modlib_uninit.c
+CSRCS += modlib_symbols.c modlib_symtab.c modlib_uninit.c modlib_unload.c
+CSRCS += modlib_verify.c
 
 # Add the modlib directory to the build
 

@@ -166,8 +166,8 @@ static void mod_dumpinitializer(mod_initializer_t initializer,
  *   Verify that the file is an ELF module binary and, if so, load the
  *   module into kernel memory and initialize it for use.
  *
- *   NOTE: mod_setsymtab had to have been called in board-specific OS logic
- *   prior to calling this function from application logic (perhaps via
+ *   NOTE: modlib_setsymtab() had to have been called in board-specific OS
+ *   logicprior to calling this function from application logic (perhaps via
  *   boardctl(BOARDIOC_OS_SYMTAB).  Otherwise, insmod will be unable to
  *   resolve symbols in the OS module.
  *
@@ -284,7 +284,7 @@ FAR void *insmod(FAR const char *filename, FAR const char *modulename)
   return (FAR void *)modp;
 
 errout_with_load:
-  mod_unload(&loadinfo);
+  modlib_unload(&loadinfo);
   (void)modlib_undepend(modp);
 errout_with_registry_entry:
   kmm_free(modp);

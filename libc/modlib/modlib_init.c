@@ -51,6 +51,8 @@
 #include <nuttx/module.h>
 #include <nuttx/lib/modlib.h>
 
+#include "modlib/modlib.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -181,13 +183,13 @@ int modlib_initialize(FAR const char *filename,
 
   /* Verify the ELF header */
 
-  ret = mod_verifyheader(&loadinfo->ehdr);
+  ret = modlib_verifyheader(&loadinfo->ehdr);
   if (ret < 0)
     {
       /* This may not be an error because we will be called to attempt loading
-       * EVERY binary.  If mod_verifyheader() does not recognize the ELF header,
+       * EVERY binary.  If modlib_verifyheader() does not recognize the ELF header,
        * it will -ENOEXEC whcih simply informs the system that the file is not an
-       * ELF file.  mod_verifyheader() will return other errors if the ELF header
+       * ELF file.  modlib_verifyheader() will return other errors if the ELF header
        * is not correctly formed.
        */
 

@@ -42,6 +42,7 @@
 #include <dllfcn.h>
 
 #include <nuttx/module.h>
+#include <nuttx/lib/modlib.h>
 
 /****************************************************************************
  * Public Functions
@@ -71,7 +72,7 @@ int dlsymtab(FAR const struct symtab_s *symtab, int nsymbols)
    * module.
    */
 
-  mod_setsymtab(symtab, nsymbols);
+  modlib_setsymtab(symtab, nsymbols);
   return OK;
 
 #elif defined(CONFIG_BUILD_PROTECTED)

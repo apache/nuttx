@@ -58,51 +58,13 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: mod_getsymtab
- *
- * Description:
- *   Get the current kernel symbol table selection as an atomic operation.
- *
- * Input Parameters:
- *   symtab - The location to store the symbol table.
- *   nsymbols - The location to store the number of symbols in the symbol table.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#if defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT)
-void mod_getsymtab(FAR const struct symtab_s **symtab, FAR int *nsymbols);
-#endif
-
-/****************************************************************************
- * Name: mod_setsymtab
- *
- * Description:
- *   Select a new kernel symbol table selection as an atomic operation.
- *
- * Input Parameters:
- *   symtab - The new symbol table.
- *   nsymbols - The number of symbols in the symbol table.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#if defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT)
-void mod_setsymtab(FAR const struct symtab_s *symtab, int nsymbols);
-#endif
-
-/****************************************************************************
  * Name: insmod
  *
  * Description:
  *   Verify that the file is an ELF module binary and, if so, load the
  *   module into kernel memory and initialize it for use.
  *
- *   NOTE: mod_setsymtab had to have been called in board-specific OS logic
+ *   NOTE: modlib_setsymtab had to have been called in board-specific OS logic
  *   prior to calling this function from application logic (perhaps via
  *   boardctl(BOARDIOC_OS_SYMTAB).  Otherwise, insmod will be unable to
  *   resolve symbols in the OS module.

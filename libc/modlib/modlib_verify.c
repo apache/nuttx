@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/module/mod_unload.c
+ * libc/modlib/modlib_verify.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,50 +39,78 @@
 
 #include <nuttx/config.h>
 
-#include <stdlib.h>
+#include <string.h>
+#include <elf32.h>
 #include <debug.h>
+#include <errno.h>
 
-#include <nuttx/kmalloc.h>
-#include <nuttx/module.h>
+#include <nuttx/arch.h>
 #include <nuttx/lib/modlib.h>
+
+/****************************************************************************
+ * Private Constant Data
+ ****************************************************************************/
+
+static const char g_modmagic[EI_MAGIC_SIZE] =
+{
+    0x7f, 'E', 'L', 'F'
+};
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mod_unload
+ * Name: modlib_verifyheader
  *
  * Description:
- *   This function unloads the object from memory. This essentially undoes
- *   the actions of modlib_load().  It is called only under certain error
- *   conditions after the module has been loaded but not yet started.
+ *   Given the header from a possible ELF executable, verify that it
+ *   is an ELF executable.
  *
  * Returned Value:
  *   0 (OK) is returned on success and a negated errno is returned on
  *   failure.
  *
+ *   -ENOEXEC  : Not an ELF file
+ *   -EINVAL : Not a relocatable ELF file or not supported by the current,
+ *               configured architecture.
+ *
  ****************************************************************************/
 
-int mod_unload(struct mod_loadinfo_s *loadinfo)
+int modlib_verifyheader(FAR const Elf32_Ehdr *ehdr)
 {
-  /* Free all working buffers */
-
-  mod_freebuffers(loadinfo);
-
-  /* Release memory holding the relocated ELF image */
-
-  if (loadinfo->textalloc != 0)
+  if (!ehdr)
     {
-      kmm_free((FAR void *)loadinfo->textalloc);
+      serr("ERROR: NULL ELF header!");
+      return -ENOEXEC;
     }
 
-  /* Clear out all indications of the allocated address environment */
+  /* Verify that the magic number indicates an ELF file */
 
-  loadinfo->textalloc = 0;
-  loadinfo->datastart = 0;
-  loadinfo->textsize  = 0;
-  loadinfo->datasize  = 0;
+  if (memcmp(ehdr->e_ident, g_modmagic, EI_MAGIC_SIZE) != 0)
+    {
+      sinfo("Not ELF magic {%02x, %02x, %02x, %02x}\n",
+            ehdr->e_ident[0], ehdr->e_ident[1], ehdr->e_ident[2], ehdr->e_ident[3]);
+      return -ENOEXEC;
+    }
+
+  /* Verify that this is a relocatable file */
+
+  if (ehdr->e_type != ET_REL)
+    {
+      serr("ERROR: Not a relocatable file: e_type=%d\n", ehdr->e_type);
+      return -EINVAL;
+    }
+
+  /* Verify that this file works with the currently configured architecture */
+
+  if (up_checkarch(ehdr))
+    {
+      serr("ERROR: Not a supported architecture\n");
+      return -ENOEXEC;
+    }
+
+  /* Looks good so far... we still might find some problems later. */
 
   return OK;
 }

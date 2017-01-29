@@ -48,6 +48,7 @@
 #include <nuttx/lib/modlib.h>
 
 #include "libc.h"
+#include "modlib/modlib.h"
 
 /****************************************************************************
  * Public Functions
@@ -70,7 +71,7 @@ int modlib_uninitialize(struct mod_loadinfo_s *loadinfo)
 {
   /* Free all working buffers */
 
-  mod_freebuffers(loadinfo);
+  modlib_freebuffers(loadinfo);
 
   /* Close the ELF file */
 
@@ -83,7 +84,7 @@ int modlib_uninitialize(struct mod_loadinfo_s *loadinfo)
 }
 
 /****************************************************************************
- * Name: mod_freebuffers
+ * Name: modlib_freebuffers
  *
  * Description:
  *  Release all working buffers.
@@ -94,7 +95,7 @@ int modlib_uninitialize(struct mod_loadinfo_s *loadinfo)
  *
  ****************************************************************************/
 
-int mod_freebuffers(struct mod_loadinfo_s *loadinfo)
+int modlib_freebuffers(struct mod_loadinfo_s *loadinfo)
 {
   /* Release all working allocations  */
 
