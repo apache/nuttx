@@ -1123,7 +1123,6 @@ config MODULE
 	bool "Enable loadable OS modules"
 	default n
 	select LIBC_MODLIB
-	select LIBC_MODLIB_NAMES
 	select LIBC_ARCH_ELF
 	---help---
 		Enable support for loadable OS modules.  Default: n

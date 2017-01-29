@@ -173,8 +173,8 @@ static void mod_dumpinitializer(mod_initializer_t initializer,
  *
  * Input Parameters:
  *
- *   filename   - Full path to the module binary to be loaded
- *   modulename - The name that can be used to refer to the module after
+ *   filename - Full path to the module binary to be loaded
+ *   modname  - The name that can be used to refer to the module after
  *     it has been loaded.
  *
  * Returned Value:
@@ -185,14 +185,14 @@ static void mod_dumpinitializer(mod_initializer_t initializer,
  *
  ****************************************************************************/
 
-FAR void *insmod(FAR const char *filename, FAR const char *modulename)
+FAR void *insmod(FAR const char *filename, FAR const char *modname)
 {
   struct mod_loadinfo_s loadinfo;
   FAR struct module_s *modp;
   mod_initializer_t initializer;
   int ret;
 
-  DEBUGASSERT(filename != NULL && modulename != NULL);
+  DEBUGASSERT(filename != NULL && modname != NULL);
   sinfo("Loading file: %s\n", filename);
 
   /* Get exclusive access to the module registry */
@@ -201,7 +201,7 @@ FAR void *insmod(FAR const char *filename, FAR const char *modulename)
 
   /* Check if this module is already installed */
 
-  if (modlib_registry_find(modulename) != NULL)
+  if (modlib_registry_find(modname) != NULL)
     {
       modlib_registry_unlock();
       ret = -EEXIST;
@@ -229,7 +229,7 @@ FAR void *insmod(FAR const char *filename, FAR const char *modulename)
 
   /* Save the module name in the registry entry */
 
-  strncpy(modp->modulename, modulename, MODULENAME_MAX);
+  strncpy(modp->modname, modname, MODLIB_NAMEMAX);
 
   /* Load the program binary */
 

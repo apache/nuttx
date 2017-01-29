@@ -244,7 +244,7 @@ int modlib_registry_del(FAR struct module_s *modp)
  *   Find an entry in the module registry using the name of the module.
  *
  * Input Parameters:
- *   modulename - The name of the module to be found
+ *   modname - The name of the module to be found
  *
  * Returned Value:
  *   If the registry entry is found, a pointer to the module entry is
@@ -255,16 +255,18 @@ int modlib_registry_del(FAR struct module_s *modp)
  *
  ****************************************************************************/
 
-FAR struct module_s *modlib_registry_find(FAR const char *modulename)
+#ifdef HAVE_MODLIB_NAMES
+FAR struct module_s *modlib_registry_find(FAR const char *modname)
 {
   FAR struct module_s *modp;
 
   for (modp = g_mod_registry;
-       modp != NULL && strncmp(modp->modulename, modulename, MODULENAME_MAX) != 0;
+       modp != NULL && strncmp(modp->modname, modname, MODLIB_NAMEMAX) != 0;
        modp = modp->flink);
 
   return modp;
 }
+#endif
 
 /****************************************************************************
  * Name: modlib_registry_verify

@@ -7,10 +7,6 @@ config LIBC_MODLIB
 	bool
 	default n
 
-config MODLIB_NAMES
-	bool
-	default n
-
 menu "Module library configuration"
 	depends on LIBC_MODLIB
 

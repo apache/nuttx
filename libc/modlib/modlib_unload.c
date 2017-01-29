@@ -46,6 +46,7 @@
 #include <nuttx/lib/modlib.h>
 
 #include "libc.h"
+#include "modlib/modlib.h"
 
 /****************************************************************************
  * Public Functions

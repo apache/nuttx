@@ -65,7 +65,19 @@
 #  define CONFIG_MODLIB_BUFFERINCR 32
 #endif
 
-#define MODULENAME_MAX 16
+/* Module names.  These are only used by the kernel module and will be
+ * disabled in all other configurations.
+ *
+ * FLAT build:  There are only kernel modules and kernel modules
+ *   masquerading as shared libraries.  Names are required.
+ * PROTECTED and KERNEL builds:  Names are only needed in the kernel
+ *   portion of the build
+ */
+
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+#  define HAVE_MODLIB_NAMES
+#  define MODLIB_NAMEMAX 16
+#endif
 
 /****************************************************************************
  * Public Types
@@ -135,7 +147,9 @@ struct symtab_s;
 struct module_s
 {
   FAR struct module_s *flink;          /* Supports a singly linked list */
-  FAR char modulename[MODULENAME_MAX]; /* Module name */
+#ifdef HAVE_MODLIB_NAMES
+  FAR char modname[MODLIB_NAMEMAX];    /* Module name */
+#endif
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
   mod_initializer_t initializer;       /* Module initializer function */
 #endif
@@ -448,7 +462,7 @@ int modlib_registry_del(FAR struct module_s *modp);
  *   Find an entry in the module registry using the name of the module.
  *
  * Input Parameters:
- *   modulename - The name of the module to be found
+ *   modname - The name of the module to be found
  *
  * Returned Value:
  *   If the registry entry is found, a pointer to the module entry is
@@ -459,7 +473,9 @@ int modlib_registry_del(FAR struct module_s *modp);
  *
  ****************************************************************************/
 
-FAR struct module_s *modlib_registry_find(FAR const char *modulename);
+#ifdef HAVE_MODLIB_NAMES
+FAR struct module_s *modlib_registry_find(FAR const char *modname);
+#endif
 
 /****************************************************************************
  * Name: modlib_registry_verify

@@ -71,8 +71,8 @@ extern "C"
  *
  * Input Parameters:
  *
- *   filename   - Full path to the module binary to be loaded
- *   modulename - The name that can be used to refer to the module after
+ *   filename - Full path to the module binary to be loaded
+ *   modname  - The name that can be used to refer to the module after
  *     it has been loaded.
  *
  * Returned Value:
@@ -83,7 +83,7 @@ extern "C"
  *
  ****************************************************************************/
 
-FAR void *insmod(FAR const char *filename, FAR const char *modulename);
+FAR void *insmod(FAR const char *filename, FAR const char *modname);
 
 /****************************************************************************
  * Name: rmmod
