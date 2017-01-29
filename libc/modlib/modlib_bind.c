@@ -50,6 +50,8 @@
 #include <nuttx/lib/modlib.h>
 #include <nuttx/binfmt/symtab.h>
 
+#include "modlib/modlib.h"
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -82,7 +84,7 @@ static inline int modlib_readrel(FAR struct mod_loadinfo_s *loadinfo,
 
   /* And, finally, read the symbol table entry into memory */
 
-  return mod_read(loadinfo, (FAR uint8_t *)rel, sizeof(Elf32_Rel), offset);
+  return modlib_read(loadinfo, (FAR uint8_t *)rel, sizeof(Elf32_Rel), offset);
 }
 
 /****************************************************************************
@@ -138,7 +140,7 @@ static int modlib_relocate(FAR struct module_s *modp,
 
       /* Read the symbol table entry into memory */
 
-      ret = mod_readsym(loadinfo, symidx, &sym);
+      ret = modlib_readsym(loadinfo, symidx, &sym);
       if (ret < 0)
         {
           serr("ERROR: Section %d reloc %d: Failed to read symbol[%d]: %d\n",
@@ -234,7 +236,7 @@ int modlib_bind(FAR struct module_s *modp, FAR struct mod_loadinfo_s *loadinfo)
 
   /* Find the symbol and string tables */
 
-  ret = mod_findsymtab(loadinfo);
+  ret = modlib_findsymtab(loadinfo);
   if (ret < 0)
     {
       return ret;
@@ -244,10 +246,10 @@ int modlib_bind(FAR struct module_s *modp, FAR struct mod_loadinfo_s *loadinfo)
    * accumulate the variable length symbol name.
    */
 
-  ret = mod_allocbuffer(loadinfo);
+  ret = modlib_allocbuffer(loadinfo);
   if (ret < 0)
     {
-      serr("ERROR: mod_allocbuffer failed: %d\n", ret);
+      serr("ERROR: modlib_allocbuffer failed: %d\n", ret);
       return -ENOMEM;
     }
 

@@ -41,7 +41,6 @@ CSRCS += mod_insmod.c mod_rmmod.c mod_modsym.c mod_symtab.c mod_modhandle.c
 
 # Loadable module library
 
-CSRCS += mod_iobuffer.c mod_load.c mod_read.c mod_sections.c mod_symbols.c
 CSRCS += mod_unload.c mod_verify.c
 
 # procfs support

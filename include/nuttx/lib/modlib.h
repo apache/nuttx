@@ -228,7 +228,7 @@ int modlib_initialize(FAR const char *filename,
 int modlib_uninitialize(FAR struct mod_loadinfo_s *loadinfo);
 
 /****************************************************************************
- * Name: mod_load
+ * Name: modlib_load
  *
  * Description:
  *   Loads the binary into memory, allocating memory, performing relocations
@@ -240,7 +240,7 @@ int modlib_uninitialize(FAR struct mod_loadinfo_s *loadinfo);
  *
  ****************************************************************************/
 
-int mod_load(FAR struct mod_loadinfo_s *loadinfo);
+int modlib_load(FAR struct mod_loadinfo_s *loadinfo);
 
 /****************************************************************************
  * Name: modlib_bind
@@ -262,7 +262,7 @@ int modlib_bind(FAR struct module_s *modp, FAR struct mod_loadinfo_s *loadinfo);
  *
  * Description:
  *   This function unloads the object from memory. This essentially undoes
- *   the actions of mod_load.  It is called only under certain error
+ *   the actions of modlib_load.  It is called only under certain error
  *   conditions after the module has been loaded but not yet started.
  *
  * Input Parameters:
@@ -335,7 +335,7 @@ int modlib_undepend(FAR struct module_s *importer);
 int mod_verifyheader(FAR const Elf32_Ehdr *header);
 
 /****************************************************************************
- * Name: mod_read
+ * Name: modlib_read
  *
  * Description:
  *   Read 'readsize' bytes from the object file at 'offset'.  The data is
@@ -347,75 +347,8 @@ int mod_verifyheader(FAR const Elf32_Ehdr *header);
  *
  ****************************************************************************/
 
-int mod_read(FAR struct mod_loadinfo_s *loadinfo, FAR uint8_t *buffer,
-             size_t readsize, off_t offset);
-
-/****************************************************************************
- * Name: mod_loadshdrs
- *
- * Description:
- *   Loads section headers into memory.
- *
- * Returned Value:
- *   0 (OK) is returned on success and a negated errno is returned on
- *   failure.
- *
- ****************************************************************************/
-
-int mod_loadshdrs(FAR struct mod_loadinfo_s *loadinfo);
-
-/****************************************************************************
- * Name: mod_findsection
- *
- * Description:
- *   A section by its name.
- *
- * Input Parameters:
- *   loadinfo - Load state information
- *   sectname - Name of the section to find
- *
- * Returned Value:
- *   On success, the index to the section is returned; A negated errno value
- *   is returned on failure.
- *
- ****************************************************************************/
-
-int mod_findsection(FAR struct mod_loadinfo_s *loadinfo,
-                    FAR const char *sectname);
-
-/****************************************************************************
- * Name: mod_findsymtab
- *
- * Description:
- *   Find the symbol table section.
- *
- * Returned Value:
- *   0 (OK) is returned on success and a negated errno is returned on
- *   failure.
- *
- ****************************************************************************/
-
-int mod_findsymtab(FAR struct mod_loadinfo_s *loadinfo);
-
-/****************************************************************************
- * Name: mod_readsym
- *
- * Description:
- *   Read the ELFT symbol structure at the specfied index into memory.
- *
- * Input Parameters:
- *   loadinfo - Load state information
- *   index    - Symbol table index
- *   sym      - Location to return the table entry
- *
- * Returned Value:
- *   0 (OK) is returned on success and a negated errno is returned on
- *   failure.
- *
- ****************************************************************************/
-
-int mod_readsym(FAR struct mod_loadinfo_s *loadinfo, int index,
-                FAR Elf32_Sym *sym);
+int modlib_read(FAR struct mod_loadinfo_s *loadinfo, FAR uint8_t *buffer,
+                size_t readsize, off_t offset);
 
 /****************************************************************************
  * Name: mod_symvalue
@@ -457,35 +390,6 @@ int mod_symvalue(FAR struct module_s *modp,
  ****************************************************************************/
 
 int mod_freebuffers(FAR struct mod_loadinfo_s *loadinfo);
-
-/****************************************************************************
- * Name: mod_allocbuffer
- *
- * Description:
- *   Perform the initial allocation of the I/O buffer, if it has not already
- *   been allocated.
- *
- * Returned Value:
- *   0 (OK) is returned on success and a negated errno is returned on
- *   failure.
- *
- ****************************************************************************/
-
-int mod_allocbuffer(FAR struct mod_loadinfo_s *loadinfo);
-
-/****************************************************************************
- * Name: mod_reallocbuffer
- *
- * Description:
- *   Increase the size of I/O buffer by the specified buffer increment.
- *
- * Returned Value:
- *   0 (OK) is returned on success and a negated errno is returned on
- *   failure.
- *
- ****************************************************************************/
-
-int mod_reallocbuffer(FAR struct mod_loadinfo_s *loadinfo, size_t increment);
 
 /****************************************************************************
  * Name: modlib_registry_lock

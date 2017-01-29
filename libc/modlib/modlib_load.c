@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/module/mod_load.c
+ * libc/modlib/modlib_load.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,9 +50,11 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/kmalloc.h>
 #include <nuttx/module.h>
 #include <nuttx/lib/modlib.h>
+
+#include "libc.h"
+#include "modlib/modlib.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -75,7 +77,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mod_elfsize
+ * Name: modlib_elfsize
  *
  * Description:
  *   Calculate total memory allocation for the ELF file.
@@ -86,7 +88,7 @@
  *
  ****************************************************************************/
 
-static void mod_elfsize(struct mod_loadinfo_s *loadinfo)
+static void modlib_elfsize(struct mod_loadinfo_s *loadinfo)
 {
   size_t textsize;
   size_t datasize;
@@ -129,7 +131,7 @@ static void mod_elfsize(struct mod_loadinfo_s *loadinfo)
 }
 
 /****************************************************************************
- * Name: mod_loadfile
+ * Name: modlib_loadfile
  *
  * Description:
  *   Read the section data into memory. Section addresses in the shdr[] are
@@ -141,7 +143,7 @@ static void mod_elfsize(struct mod_loadinfo_s *loadinfo)
  *
  ****************************************************************************/
 
-static inline int mod_loadfile(FAR struct mod_loadinfo_s *loadinfo)
+static inline int modlib_loadfile(FAR struct mod_loadinfo_s *loadinfo)
 {
   FAR uint8_t *text;
   FAR uint8_t *data;
@@ -188,7 +190,7 @@ static inline int mod_loadfile(FAR struct mod_loadinfo_s *loadinfo)
         {
           /* Read the section data from sh_offset to the memory region */
 
-          ret = mod_read(loadinfo, *pptr, shdr->sh_size, shdr->sh_offset);
+          ret = modlib_read(loadinfo, *pptr, shdr->sh_size, shdr->sh_offset);
           if (ret < 0)
             {
               serr("ERROR: Failed to read section %d: %d\n", i, ret);
@@ -225,7 +227,7 @@ static inline int mod_loadfile(FAR struct mod_loadinfo_s *loadinfo)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mod_load
+ * Name: modlib_load
  *
  * Description:
  *   Loads the binary into memory, allocating memory, performing relocations
@@ -237,7 +239,7 @@ static inline int mod_loadfile(FAR struct mod_loadinfo_s *loadinfo)
  *
  ****************************************************************************/
 
-int mod_load(FAR struct mod_loadinfo_s *loadinfo)
+int modlib_load(FAR struct mod_loadinfo_s *loadinfo)
 {
   int ret;
 
@@ -246,22 +248,22 @@ int mod_load(FAR struct mod_loadinfo_s *loadinfo)
 
   /* Load section headers into memory */
 
-  ret = mod_loadshdrs(loadinfo);
+  ret = modlib_loadshdrs(loadinfo);
   if (ret < 0)
     {
-      serr("ERROR: mod_loadshdrs failed: %d\n", ret);
+      serr("ERROR: modlib_loadshdrs failed: %d\n", ret);
       goto errout_with_buffers;
     }
 
   /* Determine total size to allocate */
 
-  mod_elfsize(loadinfo);
+  modlib_elfsize(loadinfo);
 
   /* Allocate (and zero) memory for the ELF file. */
 
   /* Allocate memory to hold the ELF image */
 
-  loadinfo->textalloc = (uintptr_t)kmm_zalloc(loadinfo->textsize + loadinfo->datasize);
+  loadinfo->textalloc = (uintptr_t)lib_zalloc(loadinfo->textsize + loadinfo->datasize);
   if (!loadinfo->textalloc)
     {
       serr("ERROR: Failed to allocate memory for the module\n");
@@ -273,10 +275,10 @@ int mod_load(FAR struct mod_loadinfo_s *loadinfo)
 
   /* Load ELF section data into memory */
 
-  ret = mod_loadfile(loadinfo);
+  ret = modlib_loadfile(loadinfo);
   if (ret < 0)
     {
-      serr("ERROR: mod_loadfile failed: %d\n", ret);
+      serr("ERROR: modlib_loadfile failed: %d\n", ret);
       goto errout_with_buffers;
     }
 

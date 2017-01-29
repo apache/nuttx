@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/module/mod_read.c
+ * libc/modlib/modlib.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,6 +33,9 @@
  *
  ****************************************************************************/
 
+#ifndef __LIBC_MODLIB_MODLIB_H
+#define __LIBC_MODLIB_MODLIB_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -40,66 +43,20 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <stdint.h>
-#include <unistd.h>
-#include <string.h>
 #include <elf32.h>
-#include <debug.h>
-#include <errno.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/module.h>
-#include <nuttx/lib/modlib.h>
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#undef ELF_DUMP_READDATA       /* Define to dump all file data read */
-
-/****************************************************************************
- * Private Constant Data
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: mod_dumpreaddata
- ****************************************************************************/
-
-#if defined(ELF_DUMP_READDATA)
-static inline void mod_dumpreaddata(FAR char *buffer, int buflen)
-{
-  FAR uint32_t *buf32 = (FAR uint32_t *)buffer;
-  int i;
-  int j;
-
-  for (i = 0; i < buflen; i += 32)
-    {
-      syslog(LOG_DEBUG, "%04x:", i);
-      for (j = 0; j < 32; j += sizeof(uint32_t))
-        {
-          syslog(LOG_DEBUG, "  %08x", *buf32++);
-        }
-
-      syslog(LOG_DEBUG, "\n");
-    }
-}
-#else
-#  define mod_dumpreaddata(b,n)
-#endif
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: mod_read
+ * Name: modlib_findsymtab
  *
  * Description:
- *   Read 'readsize' bytes from the object file at 'offset'.  The data is
- *   read into 'buffer.'
+ *   Find the symbol table section.
  *
  * Returned Value:
  *   0 (OK) is returned on success and a negated errno is returned on
@@ -107,58 +64,90 @@ static inline void mod_dumpreaddata(FAR char *buffer, int buflen)
  *
  ****************************************************************************/
 
-int mod_read(FAR struct mod_loadinfo_s *loadinfo, FAR uint8_t *buffer,
-             size_t readsize, off_t offset)
-{
-  ssize_t nbytes;      /* Number of bytes read */
-  off_t   rpos;        /* Position returned by lseek */
+int modlib_findsymtab(FAR struct mod_loadinfo_s *loadinfo);
 
-  sinfo("Read %ld bytes from offset %ld\n", (long)readsize, (long)offset);
+/****************************************************************************
+ * Name: modlib_readsym
+ *
+ * Description:
+ *   Read the ELFT symbol structure at the specfied index into memory.
+ *
+ * Input Parameters:
+ *   loadinfo - Load state information
+ *   index    - Symbol table index
+ *   sym      - Location to return the table entry
+ *
+ * Returned Value:
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
 
-  /* Loop until all of the requested data has been read. */
+int modlib_readsym(FAR struct mod_loadinfo_s *loadinfo, int index,
+                   FAR Elf32_Sym *sym);
 
-  while (readsize > 0)
-    {
-      /* Seek to the next read position */
+/****************************************************************************
+ * Name: modlib_loadshdrs
+ *
+ * Description:
+ *   Loads section headers into memory.
+ *
+ * Returned Value:
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
 
-      rpos = lseek(loadinfo->filfd, offset, SEEK_SET);
-      if (rpos != offset)
-        {
-          int errval = errno;
-          serr("ERROR: Failed to seek to position %lu: %d\n",
-               (unsigned long)offset, errval);
-          return -errval;
-        }
+int modlib_loadshdrs(FAR struct mod_loadinfo_s *loadinfo);
 
-      /* Read the file data at offset into the user buffer */
+/****************************************************************************
+ * Name: modlib_findsection
+ *
+ * Description:
+ *   A section by its name.
+ *
+ * Input Parameters:
+ *   loadinfo - Load state information
+ *   sectname - Name of the section to find
+ *
+ * Returned Value:
+ *   On success, the index to the section is returned; A negated errno value
+ *   is returned on failure.
+ *
+ ****************************************************************************/
 
-       nbytes = read(loadinfo->filfd, buffer, readsize);
-       if (nbytes < 0)
-         {
-           int errval = errno;
+#if 0 /* Not used */
+int modlib_findsection(FAR struct mod_loadinfo_s *loadinfo,
+                       FAR const char *sectname);
+#endif
 
-           /* EINTR just means that we received a signal */
+/****************************************************************************
+ * Name: modlib_allocbuffer
+ *
+ * Description:
+ *   Perform the initial allocation of the I/O buffer, if it has not already
+ *   been allocated.
+ *
+ * Returned Value:
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
 
-           if (errval != EINTR)
-             {
-               serr("ERROR: Read from offset %lu failed: %d\n",
-                    (unsigned long)offset, errval);
-               return -errval;
-             }
-         }
-       else if (nbytes == 0)
-         {
-           serr("ERROR: Unexpected end of file\n");
-           return -ENODATA;
-         }
-       else
-         {
-           readsize -= nbytes;
-           buffer   += nbytes;
-           offset   += nbytes;
-         }
-    }
+int modlib_allocbuffer(FAR struct mod_loadinfo_s *loadinfo);
 
-  mod_dumpreaddata(buffer, readsize);
-  return OK;
-}
+/****************************************************************************
+ * Name: modlib_reallocbuffer
+ *
+ * Description:
+ *   Increase the size of I/O buffer by the specified buffer increment.
+ *
+ * Returned Value:
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+int modlib_reallocbuffer(FAR struct mod_loadinfo_s *loadinfo, size_t increment);
+
+#endif /* __LIBC_MODLIB_MODLIB_H */

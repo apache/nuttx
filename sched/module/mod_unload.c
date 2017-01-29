@@ -55,7 +55,7 @@
  *
  * Description:
  *   This function unloads the object from memory. This essentially undoes
- *   the actions of mod_load.  It is called only under certain error
+ *   the actions of modlib_load().  It is called only under certain error
  *   conditions after the module has been loaded but not yet started.
  *
  * Returned Value:

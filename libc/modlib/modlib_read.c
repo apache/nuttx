@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/modlib/modlib_init.c
+ * libc/modlib/modlib_read.c
  *
  *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,11 +39,10 @@
 
 #include <nuttx/config.h>
 
-#include <sys/stat.h>
-
+#include <sys/types.h>
 #include <stdint.h>
+#include <unistd.h>
 #include <string.h>
-#include <fcntl.h>
 #include <elf32.h>
 #include <debug.h>
 #include <errno.h>
@@ -55,80 +54,48 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* CONFIG_DEBUG_FEATURES, CONFIG_DEBUG_INFO, and CONFIG_MODLIB_DUMPBUFFER
- * have to be defined or CONFIG_MODLIB_DUMPBUFFER does nothing.
- */
-
-#if !defined(CONFIG_DEBUG_INFO) || !defined (CONFIG_MODLIB_DUMPBUFFER)
-#  undef CONFIG_MODLIB_DUMPBUFFER
-#endif
-
-#ifdef CONFIG_MODLIB_DUMPBUFFER
-# define mod_dumpbuffer(m,b,n) sinfodumpbuffer(m,b,n)
-#else
-# define mod_dumpbuffer(m,b,n)
-#endif
+#undef ELF_DUMP_READDATA       /* Define to dump all file data read */
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mod_filelen
- *
- * Description:
- *  Get the size of the ELF file
- *
- * Returned Value:
- *   0 (OK) is returned on success and a negated errno is returned on
- *   failure.
- *
+ * Name: modlib_dumpreaddata
  ****************************************************************************/
 
-static inline int mod_filelen(FAR struct mod_loadinfo_s *loadinfo,
-                              FAR const char *filename)
+#if defined(ELF_DUMP_READDATA)
+static inline void modlib_dumpreaddata(FAR char *buffer, int buflen)
 {
-  struct stat buf;
-  int ret;
+  FAR uint32_t *buf32 = (FAR uint32_t *)buffer;
+  int i;
+  int j;
 
-  /* Get the file stats */
-
-  ret = stat(filename, &buf);
-  if (ret < 0)
+  for (i = 0; i < buflen; i += 32)
     {
-      int errval = errno;
-      serr("ERROR: Failed to stat file: %d\n", errval);
-      return -errval;
+      syslog(LOG_DEBUG, "%04x:", i);
+      for (j = 0; j < 32; j += sizeof(uint32_t))
+        {
+          syslog(LOG_DEBUG, "  %08x", *buf32++);
+        }
+
+      syslog(LOG_DEBUG, "\n");
     }
-
-  /* Verify that it is a regular file */
-
-  if (!S_ISREG(buf.st_mode))
-    {
-      serr("ERROR: Not a regular file.  mode: %d\n", buf.st_mode);
-      return -ENOENT;
-    }
-
-  /* TODO:  Verify that the file is readable.  Not really important because
-   * we will detect this when we try to open the file read-only.
-   */
-
-  /* Return the size of the file in the loadinfo structure */
-
-  loadinfo->filelen = buf.st_size;
-  return OK;
 }
+#else
+#  define modlib_dumpreaddata(b,n)
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: modlib_initialize
+ * Name: modlib_read
  *
  * Description:
- *   This function is called to configure the library to process an ELF
- *   program binary.
+ *   Read 'readsize' bytes from the object file at 'offset'.  The data is
+ *   read into 'buffer.'
  *
  * Returned Value:
  *   0 (OK) is returned on success and a negated errno is returned on
@@ -136,64 +103,58 @@ static inline int mod_filelen(FAR struct mod_loadinfo_s *loadinfo,
  *
  ****************************************************************************/
 
-int modlib_initialize(FAR const char *filename,
-                      FAR struct mod_loadinfo_s *loadinfo)
+int modlib_read(FAR struct mod_loadinfo_s *loadinfo, FAR uint8_t *buffer,
+                size_t readsize, off_t offset)
 {
-  int ret;
+  ssize_t nbytes;      /* Number of bytes read */
+  off_t   rpos;        /* Position returned by lseek */
 
-  sinfo("filename: %s loadinfo: %p\n", filename, loadinfo);
+  sinfo("Read %ld bytes from offset %ld\n", (long)readsize, (long)offset);
 
-  /* Clear the load info structure */
+  /* Loop until all of the requested data has been read. */
 
-  memset(loadinfo, 0, sizeof(struct mod_loadinfo_s));
-
-  /* Get the length of the file. */
-
-  ret = mod_filelen(loadinfo, filename);
-  if (ret < 0)
+  while (readsize > 0)
     {
-      serr("ERROR: mod_filelen failed: %d\n", ret);
-      return ret;
+      /* Seek to the next read position */
+
+      rpos = lseek(loadinfo->filfd, offset, SEEK_SET);
+      if (rpos != offset)
+        {
+          int errval = errno;
+          serr("ERROR: Failed to seek to position %lu: %d\n",
+               (unsigned long)offset, errval);
+          return -errval;
+        }
+
+      /* Read the file data at offset into the user buffer */
+
+       nbytes = read(loadinfo->filfd, buffer, readsize);
+       if (nbytes < 0)
+         {
+           int errval = errno;
+
+           /* EINTR just means that we received a signal */
+
+           if (errval != EINTR)
+             {
+               serr("ERROR: Read from offset %lu failed: %d\n",
+                    (unsigned long)offset, errval);
+               return -errval;
+             }
+         }
+       else if (nbytes == 0)
+         {
+           serr("ERROR: Unexpected end of file\n");
+           return -ENODATA;
+         }
+       else
+         {
+           readsize -= nbytes;
+           buffer   += nbytes;
+           offset   += nbytes;
+         }
     }
 
-  /* Open the binary file for reading (only) */
-
-  loadinfo->filfd = open(filename, O_RDONLY);
-  if (loadinfo->filfd < 0)
-    {
-      int errval = errno;
-      serr("ERROR: Failed to open ELF binary %s: %d\n", filename, errval);
-      return -errval;
-    }
-
-  /* Read the ELF ehdr from offset 0 */
-
-  ret = modlib_read(loadinfo, (FAR uint8_t *)&loadinfo->ehdr,
-                    sizeof(Elf32_Ehdr), 0);
-  if (ret < 0)
-    {
-      serr("ERROR: Failed to read ELF header: %d\n", ret);
-      return ret;
-    }
-
-  mod_dumpbuffer("ELF header", (FAR const uint8_t *)&loadinfo->ehdr,
-                    sizeof(Elf32_Ehdr));
-
-  /* Verify the ELF header */
-
-  ret = mod_verifyheader(&loadinfo->ehdr);
-  if (ret < 0)
-    {
-      /* This may not be an error because we will be called to attempt loading
-       * EVERY binary.  If mod_verifyheader() does not recognize the ELF header,
-       * it will -ENOEXEC whcih simply informs the system that the file is not an
-       * ELF file.  mod_verifyheader() will return other errors if the ELF header
-       * is not correctly formed.
-       */
-
-      serr("ERROR: Bad ELF header: %d\n", ret);
-      return ret;
-    }
-
+  modlib_dumpreaddata(buffer, readsize);
   return OK;
 }

@@ -233,7 +233,7 @@ FAR void *insmod(FAR const char *filename, FAR const char *modulename)
 
   /* Load the program binary */
 
-  ret = mod_load(&loadinfo);
+  ret = modlib_load(&loadinfo);
   mod_dumploadinfo(&loadinfo);
   if (ret != 0)
     {

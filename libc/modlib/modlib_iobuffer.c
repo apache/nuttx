@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/module/mod_iobuffer.c
+ * libc/modlib/modlib_iobuffer.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,16 +42,18 @@
 #include <debug.h>
 #include <errno.h>
 
-#include <nuttx/kmalloc.h>
 #include <nuttx/module.h>
 #include <nuttx/lib/modlib.h>
+
+#include "libc.h"
+#include "modlib/modlib.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mod_allocbuffer
+ * Name: modlib_allocbuffer
  *
  * Description:
  *   Perform the initial allocation of the I/O buffer, if it has not already
@@ -63,7 +65,7 @@
  *
  ****************************************************************************/
 
-int mod_allocbuffer(FAR struct mod_loadinfo_s *loadinfo)
+int modlib_allocbuffer(FAR struct mod_loadinfo_s *loadinfo)
 {
   /* Has a buffer been allocated> */
 
@@ -71,7 +73,7 @@ int mod_allocbuffer(FAR struct mod_loadinfo_s *loadinfo)
     {
       /* No.. allocate one now */
 
-      loadinfo->iobuffer = (FAR uint8_t *)kmm_malloc(CONFIG_MODLIB_BUFFERSIZE);
+      loadinfo->iobuffer = (FAR uint8_t *)lib_malloc(CONFIG_MODLIB_BUFFERSIZE);
       if (!loadinfo->iobuffer)
         {
           serr("ERROR: Failed to allocate an I/O buffer\n");
@@ -85,7 +87,7 @@ int mod_allocbuffer(FAR struct mod_loadinfo_s *loadinfo)
 }
 
 /****************************************************************************
- * Name: mod_reallocbuffer
+ * Name: modlib_reallocbuffer
  *
  * Description:
  *   Increase the size of I/O buffer by the specified buffer increment.
@@ -96,7 +98,7 @@ int mod_allocbuffer(FAR struct mod_loadinfo_s *loadinfo)
  *
  ****************************************************************************/
 
-int mod_reallocbuffer(FAR struct mod_loadinfo_s *loadinfo, size_t increment)
+int modlib_reallocbuffer(FAR struct mod_loadinfo_s *loadinfo, size_t increment)
 {
   FAR void *buffer;
   size_t newsize;
@@ -107,7 +109,7 @@ int mod_reallocbuffer(FAR struct mod_loadinfo_s *loadinfo, size_t increment)
 
   /* And perform the reallocation */
 
-   buffer = kmm_realloc((FAR void *)loadinfo->iobuffer, newsize);
+   buffer = lib_realloc((FAR void *)loadinfo->iobuffer, newsize);
    if (!buffer)
     {
       serr("ERROR: Failed to reallocate the I/O buffer\n");
@@ -120,4 +122,3 @@ int mod_reallocbuffer(FAR struct mod_loadinfo_s *loadinfo, size_t increment)
   loadinfo->buflen   = newsize;
   return OK;
 }
-

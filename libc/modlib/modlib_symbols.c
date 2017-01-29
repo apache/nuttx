@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/module/mod_symbols.c
+ * libc/modlib/modlib_symbols.c
  *
  *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -49,6 +49,8 @@
 #include <nuttx/lib/modlib.h>
 #include <nuttx/binfmt/symtab.h>
 
+#include "modlib/modlib.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -80,7 +82,7 @@ struct mod_exportinfo_s
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mod_symname
+ * Name: modlib_symname
  *
  * Description:
  *   Get the symbol name in loadinfo->iobuffer[].
@@ -95,8 +97,8 @@ struct mod_exportinfo_s
  *
  ****************************************************************************/
 
-static int mod_symname(FAR struct mod_loadinfo_s *loadinfo,
-                       FAR const Elf32_Sym *sym)
+static int modlib_symname(FAR struct mod_loadinfo_s *loadinfo,
+                          FAR const Elf32_Sym *sym)
 {
   FAR uint8_t *buffer;
   off_t  offset;
@@ -139,10 +141,10 @@ static int mod_symname(FAR struct mod_loadinfo_s *loadinfo,
       /* Read that number of bytes into the array */
 
       buffer = &loadinfo->iobuffer[bytesread];
-      ret = mod_read(loadinfo, buffer, readlen, offset);
+      ret = modlib_read(loadinfo, buffer, readlen, offset);
       if (ret < 0)
         {
-          serr("ERROR: mod_read failed: %d\n", ret);
+          serr("ERROR: modlib_read failed: %d\n", ret);
           return ret;
         }
 
@@ -159,7 +161,7 @@ static int mod_symname(FAR struct mod_loadinfo_s *loadinfo,
 
       /* No.. then we have to read more */
 
-      ret = mod_reallocbuffer(loadinfo, CONFIG_MODLIB_BUFFERINCR);
+      ret = modlib_reallocbuffer(loadinfo, CONFIG_MODLIB_BUFFERINCR);
       if (ret < 0)
         {
           serr("ERROR: mod_reallocbuffer failed: %d\n", ret);
@@ -173,7 +175,7 @@ static int mod_symname(FAR struct mod_loadinfo_s *loadinfo,
 }
 
 /****************************************************************************
- * Name: mod_symcallback
+ * Name: modlib_symcallback
  *
  * Description:
  *   modlib_registry_foreach() callback function.  Test if the provided module,
@@ -186,7 +188,7 @@ static int mod_symname(FAR struct mod_loadinfo_s *loadinfo,
  *
  ****************************************************************************/
 
-static int mod_symcallback(FAR struct module_s *modp, FAR void *arg)
+static int modlib_symcallback(FAR struct module_s *modp, FAR void *arg)
 {
   FAR struct mod_exportinfo_s *exportinfo = (FAR struct mod_exportinfo_s *)arg;
   int ret;
@@ -227,7 +229,7 @@ static int mod_symcallback(FAR struct module_s *modp, FAR void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mod_findsymtab
+ * Name: modlib_findsymtab
  *
  * Description:
  *   Find the symbol table section.
@@ -238,7 +240,7 @@ static int mod_symcallback(FAR struct module_s *modp, FAR void *arg)
  *
  ****************************************************************************/
 
-int mod_findsymtab(FAR struct mod_loadinfo_s *loadinfo)
+int modlib_findsymtab(FAR struct mod_loadinfo_s *loadinfo)
 {
   int i;
 
@@ -266,7 +268,7 @@ int mod_findsymtab(FAR struct mod_loadinfo_s *loadinfo)
 }
 
 /****************************************************************************
- * Name: mod_readsym
+ * Name: modlib_readsym
  *
  * Description:
  *   Read the ELFT symbol structure at the specfied index into memory.
@@ -282,8 +284,8 @@ int mod_findsymtab(FAR struct mod_loadinfo_s *loadinfo)
  *
  ****************************************************************************/
 
-int mod_readsym(FAR struct mod_loadinfo_s *loadinfo, int index,
-                FAR Elf32_Sym *sym)
+int modlib_readsym(FAR struct mod_loadinfo_s *loadinfo, int index,
+                   FAR Elf32_Sym *sym)
 {
   FAR Elf32_Shdr *symtab = &loadinfo->shdr[loadinfo->symtabidx];
   off_t offset;
@@ -302,7 +304,7 @@ int mod_readsym(FAR struct mod_loadinfo_s *loadinfo, int index,
 
   /* And, finally, read the symbol table entry into memory */
 
-  return mod_read(loadinfo, (FAR uint8_t *)sym, sizeof(Elf32_Sym), offset);
+  return modlib_read(loadinfo, (FAR uint8_t *)sym, sizeof(Elf32_Sym), offset);
 }
 
 /****************************************************************************
@@ -359,7 +361,7 @@ int mod_symvalue(FAR struct module_s *modp,
       {
         /* Get the name of the undefined symbol */
 
-        ret = mod_symname(loadinfo, sym);
+        ret = modlib_symname(loadinfo, sym);
         if (ret < 0)
           {
             /* There are a few relocations for a few architectures that do
@@ -382,10 +384,10 @@ int mod_symvalue(FAR struct module_s *modp,
         exportinfo.modp   = modp;
         exportinfo.symbol = NULL;
 
-        ret = modlib_registry_foreach(mod_symcallback, (FAR void *)&exportinfo);
+        ret = modlib_registry_foreach(modlib_symcallback, (FAR void *)&exportinfo);
         if (ret < 0)
           {
-            serr("ERROR: mod_symcallback failed: \n", ret);
+            serr("ERROR: modlib_symcallback failed: \n", ret);
             return ret;
           }
 

@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/module/mod_sections.c
+ * libc/modlib/modlib_sections.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,16 +45,18 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/kmalloc.h>
 #include <nuttx/module.h>
 #include <nuttx/lib/modlib.h>
+
+#include "libc.h"
+#include "modlib/modlib.h"
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mod_sectname
+ * Name: modlib_sectname
  *
  * Description:
  *   Get the symbol name in loadinfo->iobuffer[].
@@ -65,8 +67,8 @@
  *
  ****************************************************************************/
 
-static inline int mod_sectname(FAR struct mod_loadinfo_s *loadinfo,
-                               FAR const Elf32_Shdr *shdr)
+static inline int modlib_sectname(FAR struct mod_loadinfo_s *loadinfo,
+                                  FAR const Elf32_Shdr *shdr)
 {
   FAR Elf32_Shdr *shstr;
   FAR uint8_t *buffer;
@@ -127,7 +129,7 @@ static inline int mod_sectname(FAR struct mod_loadinfo_s *loadinfo,
       /* Read that number of bytes into the array */
 
       buffer = &loadinfo->iobuffer[bytesread];
-      ret = mod_read(loadinfo, buffer, readlen, offset);
+      ret = modlib_read(loadinfo, buffer, readlen, offset);
       if (ret < 0)
         {
           serr("ERROR: Failed to read section name: %d\n", ret);
@@ -147,7 +149,7 @@ static inline int mod_sectname(FAR struct mod_loadinfo_s *loadinfo,
 
       /* No.. then we have to read more */
 
-      ret = mod_reallocbuffer(loadinfo, CONFIG_MODLIB_BUFFERINCR);
+      ret = modlib_reallocbuffer(loadinfo, CONFIG_MODLIB_BUFFERINCR);
       if (ret < 0)
         {
           serr("ERROR: mod_reallocbuffer failed: %d\n", ret);
@@ -165,7 +167,7 @@ static inline int mod_sectname(FAR struct mod_loadinfo_s *loadinfo,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mod_loadshdrs
+ * Name: modlib_loadshdrs
  *
  * Description:
  *   Loads section headers into memory.
@@ -176,7 +178,7 @@ static inline int mod_sectname(FAR struct mod_loadinfo_s *loadinfo,
  *
  ****************************************************************************/
 
-int mod_loadshdrs(FAR struct mod_loadinfo_s *loadinfo)
+int modlib_loadshdrs(FAR struct mod_loadinfo_s *loadinfo)
 {
   size_t shdrsize;
   int ret;
@@ -202,7 +204,7 @@ int mod_loadshdrs(FAR struct mod_loadinfo_s *loadinfo)
 
   /* Allocate memory to hold a working copy of the sector header table */
 
-  loadinfo->shdr = (FAR FAR Elf32_Shdr *)kmm_malloc(shdrsize);
+  loadinfo->shdr = (FAR FAR Elf32_Shdr *)lib_malloc(shdrsize);
   if (!loadinfo->shdr)
     {
       serr("ERROR: Failed to allocate the section header table. Size: %ld\n",
@@ -212,7 +214,7 @@ int mod_loadshdrs(FAR struct mod_loadinfo_s *loadinfo)
 
   /* Read the section header table into memory */
 
-  ret = mod_read(loadinfo, (FAR uint8_t *)loadinfo->shdr, shdrsize,
+  ret = modlib_read(loadinfo, (FAR uint8_t *)loadinfo->shdr, shdrsize,
                     loadinfo->ehdr.e_shoff);
   if (ret < 0)
     {
@@ -223,7 +225,7 @@ int mod_loadshdrs(FAR struct mod_loadinfo_s *loadinfo)
 }
 
 /****************************************************************************
- * Name: mod_findsection
+ * Name: modlib_findsection
  *
  * Description:
  *   A section by its name.
@@ -238,8 +240,9 @@ int mod_loadshdrs(FAR struct mod_loadinfo_s *loadinfo)
  *
  ****************************************************************************/
 
-int mod_findsection(FAR struct mod_loadinfo_s *loadinfo,
-                    FAR const char *sectname)
+#if 0 /* Not used */
+int modlib_findsection(FAR struct mod_loadinfo_s *loadinfo,
+                       FAR const char *sectname)
 {
   FAR const Elf32_Shdr *shdr;
   int ret;
@@ -252,10 +255,10 @@ int mod_findsection(FAR struct mod_loadinfo_s *loadinfo,
       /* Get the name of this section */
 
       shdr = &loadinfo->shdr[i];
-      ret  = mod_sectname(loadinfo, shdr);
+      ret  = modlib_sectname(loadinfo, shdr);
       if (ret < 0)
         {
-          serr("ERROR: mod_sectname failed: %d\n", ret);
+          serr("ERROR: modlib_sectname failed: %d\n", ret);
           return ret;
         }
 
@@ -276,3 +279,4 @@ int mod_findsection(FAR struct mod_loadinfo_s *loadinfo,
 
   return -ENOENT;
 }
+#endif
