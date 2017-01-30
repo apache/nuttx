@@ -260,6 +260,7 @@ must be is one of the following.
 
          CONFIG_BOARDCTL_OS_SYMTAB=y
          CONFIG_EXAMPLES_MODULE=y
+         CONFIG_EXAMPLES_MODULE_BUILTINFS=y
          CONFIG_EXAMPLES_MODULE_DEVMINOR=0
          CONFIG_EXAMPLES_MODULE_DEVPATH="/dev/ram0"
          CONFIG_FS_ROMFS=y
@@ -275,6 +276,7 @@ must be is one of the following.
 
          CONFIG_LIBC_DLLFCN=y
          CONFIG_EXAMPLES_SOTEST=y
+         CONFIG_EXAMPLES_SOTEST_BUILTINFS=y
          CONFIG_EXAMPLES_SOTEST_DEVMINOR=1
          CONFIG_EXAMPLES_SOTEST_DEVPATH="/dev/ram1"
 
