@@ -33,15 +33,12 @@
  *
  ****************************************************************************/
 
-/* The SAME70Q21 has 2048Kb of FLASH beginning at address 0x0040:0000 and
+/* The SAMe70Q21 has 2048Kb of FLASH beginning at address 0x0040:0000 and
  * 384Kb of SRAM beginining at 0x2040:0000
  *
  * When booting from FLASH, FLASH memory is aliased to address 0x0000:0000
  * where the code expects to begin execution by jumping to the entry point in
  * the 0x0400:0000 address range.
- *
- * NOTE: that the DTCM address of 0x2000:0000 is used for SRAM.  If DTCM is
- * disabled, then the accesses will actually occur on the AHB bus.
  *
  * The user space partition will be spanned with a single region of size
  * 2**n bytes.  The alignment of the user-space region must be the same.
@@ -55,18 +52,18 @@
  *
  * A detailed memory map for the 384KB SRAM region is as follows:
  *
- *   0x20000 0000:  Kernel .data region.  Typical size: 0.1KB
- *   ------- ----   Kernel .bss  region.  Typical size: 1.8KB
- *   0x20000 0800:  Kernel IDLE thread stack (approximate).  Size is
- *                  determined by CONFIG_IDLETHREAD_STACKSIZE and
- *                  adjustments for alignment.  Typical is 1KB.
- *   ------- ----   Padded to 4KB
- *   0x20002 0000:  User .data region.  Size is variable.
- *   ------- ----   User .bss region  Size is variable.
- *   0x20000 2000:  Beginning of kernel heap.  Size determined by
- *                  CONFIG_MM_KERNEL_HEAPSIZE.
- *   ------- ----   Beginning of user heap.  Can vary with other settings.
- *   0x20004 0000:  End+1 of mappable internal SRAM
+ *   0x2040 0000:  Kernel .data region.  Typical size: 0.1KB
+ *   ------ ----   Kernel .bss  region.  Typical size: 1.8KB
+ *   0x2040 0800:  Kernel IDLE thread stack (approximate).  Size is
+ *                 determined by CONFIG_IDLETHREAD_STACKSIZE and
+ *                 adjustments for alignment.  Typical is 1KB.
+ *   ------ ----   Padded to 4KB
+ *   0x2042 0000:  User .data region.  Size is variable.
+ *   ------- ----  User .bss region  Size is variable.
+ *   0x2044 0000:  Beginning of kernel heap.  Size determined by
+ *                 CONFIG_MM_KERNEL_HEAPSIZE.
+ *   ------ ----   Beginning of user heap.  Can vary with other settings.
+ *   0x2046 0000:  End+1 of mappable internal SRAM
  */
 
 MEMORY
@@ -78,7 +75,7 @@ MEMORY
 
     /* 384Kb of internal SRAM */
 
-    ksram (rwx)      : ORIGIN = 0x20000000, LENGTH = 128K
-    usram (rwx)      : ORIGIN = 0x20020000, LENGTH = 128K
-    xsram (rwx)      : ORIGIN = 0x20040000, LENGTH = 128K
+    ksram (rwx)      : ORIGIN = 0x20400000, LENGTH = 128K
+    usram (rwx)      : ORIGIN = 0x20420000, LENGTH = 128K
+    xsram (rwx)      : ORIGIN = 0x20440000, LENGTH = 128K
 }
