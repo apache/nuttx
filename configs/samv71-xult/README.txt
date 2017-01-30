@@ -1756,6 +1756,35 @@ Configuration sub-directories
         but assumes that you have a maXTouch Xplained Pro LCD attached
         and includes extra tests for the touchscreen and LCD.
 
+    NOTES:
+
+    1. Kernel Modules / Shared Libraries
+
+       I intend to use this configuration for testing NuttX kernel modules
+       in the FLAT build with the following configuration additions to the
+       configuration file:
+
+         CONFIG_BOARDCTL_OS_SYMTAB=y
+         CONFIG_EXAMPLES_MODULE=y
+         CONFIG_EXAMPLES_MODULE_BINDIR="/mnt/sdcard"
+         CONFIG_FS_ROMFS=y
+         CONFIG_LIBC_ARCH_ELF=y
+         CONFIG_MODULE=y
+         CONFIG_LIBC_MODLIB=y
+         CONFIG_MODLIB_ALIGN_LOG2=2
+         CONFIG_MODLIB_BUFFERINCR=32
+         CONFIG_MODLIB_BUFFERSIZE=128
+
+       Add the following for testing shared libraries in the FLAT
+       build:
+
+         CONFIG_LIBC_DLLFCN=y
+         CONFIG_EXAMPLES_SOTEST=y
+         CONFIG_EXAMPLES_SOTEST_BINDIR="/mnt/sdcard"
+
+    STATUS:
+    2017-01-30: Does not yet run correctly.
+
   mxtxplnd:
 
     Configures the NuttShell (nsh) located at examples/nsh.  There are five
@@ -2477,8 +2506,10 @@ Configuration sub-directories
            rect = (FAR struct vnc_fbupdate_s *)sq_remfirst(&session->updqueue);
            DEBUGASSERT(rect != NULL);
 
-        I would think that could mean only that the semaphore counting is
-        out of sync with the number of updates in the queue.
+         I would think that could mean only that the semaphore counting is
+         out of sync with the number of updates in the queue.
 
-        But also the assertion at devif/devif_iobsend.c line: 102 which
-        probably means some kind of memory corruption.
+         But also the assertion at devif/devif_iobsend.c line: 102 which
+         probably means some kind of memory corruption.
+
+       2017-01-30: knsh configuration does not yet run correctly.
