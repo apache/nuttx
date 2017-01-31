@@ -6076,21 +6076,23 @@ endmenu
 menu "SDIO Configuration"
 	depends on STM32_SDIO
 
-config SDIO_DMA
+config STM32_SDIO_DMA
 	bool "Support DMA data transfers"
 	default y if STM32_DMA2
+	default n if !STM32_DMA2
+	select SDIO_DMA
 	depends on STM32_DMA2
 	---help---
 		Support DMA data transfers.  Requires STM32_SDIO and config STM32_DMA2.
 
-config SDIO_PRI
+config STM32_SDIO_PRI
 	hex "SDIO interrupt priority"
 	default 128
 	depends on ARCH_IRQPRIO && EXPERIMENTAL
 	---help---
 		Select SDIO interrupt priority.  Default: 128.
 
-config SDIO_DMAPRIO
+config STM32_SDIO_DMAPRIO
 	hex "SDIO DMA priority"
 	default 0x00001000 if STM32_STM32F10XX
 	default 0x00010000 if !STM32_STM32F10XX

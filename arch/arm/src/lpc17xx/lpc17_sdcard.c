@@ -78,9 +78,9 @@
 /* Required system configuration options:
  *
  *   CONFIG_ARCH_DMA - Enable architecture-specific DMA subsystem
- *     initialization.  Required if CONFIG_SDIO_DMA is enabled.
+ *     initialization.  Required if CONFIG_LPC17_SDCARD_DMA is enabled.
  *   CONFIG_LPC17_GPDMA - Enable LPC17XX GPDMA support.  Required if
- *     CONFIG_SDIO_DMA is enabled
+ *     CONFIG_LPC17_SDCARD_DMA is enabled
  *   CONFIG_SCHED_WORKQUEUE -- Callback support requires work queue support.
  *
  * Driver-specific configuration options:
@@ -88,7 +88,7 @@
  *   CONFIG_SDIO_MUXBUS - Setting this configuration enables some locking
  *     APIs to manage concurrent accesses on the SD card bus.  This is not
  *     needed for the simple case of a single SD card, for example.
- *   CONFIG_SDIO_DMA - Enable SD card DMA.  This is a marginally optional.
+ *   CONFIG_LPC17_SDCARD_DMA - Enable SD card DMA.  This is a marginally optional.
  *     For most usages, SD accesses will cause data overruns if used without DMA.
  *     NOTE the above system DMA configuration options.
  *   CONFIG_LPC17_SDCARD_WIDTH_D1_ONLY - This may be selected to force the
@@ -98,12 +98,15 @@
  *     This also requires CONFIG_DEBUG_FS and CONFIG_DEBUG_INFO
  */
 
-#if defined(CONFIG_SDIO_DMA) && !defined(CONFIG_LPC17_GPDMA)
-#  warning "CONFIG_SDIO_DMA support requires CONFIG_LPC17_GPDMA"
-#endif
-
-#ifndef CONFIG_SDIO_DMA
+#ifndef CONFIG_LPC17_SDCARD_DMA
 #  warning "Large Non-DMA transfer may result in RX overrun failures"
+#else
+#  ifndef CONFIG_LPC17_GPDMA
+#    error "CONFIG_LPC17_SDCARD_DMA support requires CONFIG_LPC17_GPDMA"
+#  endif
+#  ifndef CONFIG_SDIO_DMA
+#    error CONFIG_SDIO_DMA must be defined with CONFIG_LPC17_SDCARD_DMA
+#  endif
 #endif
 
 #ifndef CONFIG_SCHED_WORKQUEUE
@@ -211,7 +214,7 @@
 /* Register logging support */
 
 #ifdef CONFIG_DEBUG_MEMCARD_INFO
-#  ifdef CONFIG_SDIO_DMA
+#  ifdef CONFIG_LPC17_SDCARD_DMA
 #    define SAMPLENDX_BEFORE_SETUP  0
 #    define SAMPLENDX_BEFORE_ENABLE 1
 #    define SAMPLENDX_AFTER_SETUP   2
@@ -262,7 +265,7 @@ struct lpc17_dev_s
   /* DMA data transfer support */
 
   bool               widebus;    /* Required for DMA support */
-#ifdef CONFIG_SDIO_DMA
+#ifdef CONFIG_LPC17_SDCARD_DMA
   volatile uint8_t   xfrflags;   /* Used to synchronize SD card and DMA completion events */
   bool               dmamode;    /* true: DMA mode transfer */
   DMA_HANDLE         dma;        /* Handle for DMA channel */
@@ -288,7 +291,7 @@ struct lpc17_sdcard_regs_s
 struct lpc17_sampleregs_s
 {
   struct lpc17_sdcard_regs_s sdcard;
-#if defined(CONFIG_DEBUG_DMA) && defined(CONFIG_SDIO_DMA)
+#if defined(CONFIG_DEBUG_DMA) && defined(CONFIG_LPC17_SDCARD_DMA)
   struct lpc17_dmaregs_s  dma;
 #endif
 };
@@ -325,7 +328,7 @@ static void lpc17_dumpsamples(struct lpc17_dev_s *priv);
 #  define   lpc17_dumpsamples(priv)
 #endif
 
-#ifdef CONFIG_SDIO_DMA
+#ifdef CONFIG_LPC17_SDCARD_DMA
 static void lpc17_dmacallback(DMA_HANDLE handle, void *arg, int status);
 #endif
 
@@ -395,7 +398,7 @@ static int  lpc17_registercallback(FAR struct sdio_dev_s *dev,
 
 /* DMA */
 
-#ifdef CONFIG_SDIO_DMA
+#ifdef CONFIG_LPC17_SDCARD_DMA
 static int  lpc17_dmarecvsetup(FAR struct sdio_dev_s *dev,
               FAR uint8_t *buffer, size_t buflen);
 static int  lpc17_dmasendsetup(FAR struct sdio_dev_s *dev,
@@ -561,7 +564,7 @@ static void lpc17_configwaitints(struct lpc17_dev_s *priv, uint32_t waitmask,
   priv->waitevents = waitevents;
   priv->wkupevent  = wkupevent;
   priv->waitmask   = waitmask;
-#ifdef CONFIG_SDIO_DMA
+#ifdef CONFIG_LPC17_SDCARD_DMA
   priv->xfrflags   = 0;
 #endif
   putreg32(priv->xfrmask | priv->waitmask, LPC17_SDCARD_MASK0);
@@ -698,7 +701,7 @@ static void lpc17_sdcard_sample(struct lpc17_sdcard_regs_s *regs)
 static void lpc17_sample(struct lpc17_dev_s *priv, int index)
 {
   struct lpc17_sampleregs_s *regs = &g_sampleregs[index];
-#if defined(CONFIG_DEBUG_DMA) && defined(CONFIG_SDIO_DMA)
+#if defined(CONFIG_DEBUG_DMA) && defined(CONFIG_LPC17_SDCARD_DMA)
   if (priv->dmamode)
     {
       lpc17_dmasample(priv->dma, &regs->dma);
@@ -745,7 +748,7 @@ static void lpc17_sdcard_dump(struct lpc17_sdcard_regs_s *regs, const char *msg)
 static void lpc17_dumpsample(struct lpc17_dev_s *priv,
                              struct lpc17_sampleregs_s *regs, const char *msg)
 {
-#if defined(CONFIG_DEBUG_DMA) && defined(CONFIG_SDIO_DMA)
+#if defined(CONFIG_DEBUG_DMA) && defined(CONFIG_LPC17_SDCARD_DMA)
   if (priv->dmamode)
     {
       lpc17_dmadump(priv->dma, &regs->dma, msg);
@@ -767,7 +770,7 @@ static void lpc17_dumpsample(struct lpc17_dev_s *priv,
 static void lpc17_dumpsamples(struct lpc17_dev_s *priv)
 {
   lpc17_dumpsample(priv, &g_sampleregs[SAMPLENDX_BEFORE_SETUP], "Before setup");
-#if defined(CONFIG_DEBUG_DMA) && defined(CONFIG_SDIO_DMA)
+#if defined(CONFIG_DEBUG_DMA) && defined(CONFIG_LPC17_SDCARD_DMA)
   if (priv->dmamode)
     {
       lpc17_dumpsample(priv, &g_sampleregs[SAMPLENDX_BEFORE_ENABLE], "Before DMA enable");
@@ -775,7 +778,7 @@ static void lpc17_dumpsamples(struct lpc17_dev_s *priv)
 #endif
   lpc17_dumpsample(priv, &g_sampleregs[SAMPLENDX_AFTER_SETUP], "After setup");
   lpc17_dumpsample(priv, &g_sampleregs[SAMPLENDX_END_TRANSFER], "End of transfer");
-#if defined(CONFIG_DEBUG_DMA) && defined(CONFIG_SDIO_DMA)
+#if defined(CONFIG_DEBUG_DMA) && defined(CONFIG_LPC17_SDCARD_DMA)
   if (priv->dmamode)
     {
       lpc17_dumpsample(priv, &g_sampleregs[SAMPLENDX_DMA_CALLBACK], "DMA Callback");
@@ -792,7 +795,7 @@ static void lpc17_dumpsamples(struct lpc17_dev_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SDIO_DMA
+#ifdef CONFIG_LPC17_SDCARD_DMA
 static void lpc17_dmacallback(DMA_HANDLE handle, void *arg, int status)
 {
   FAR struct lpc17_dev_s *priv = (FAR struct lpc17_dev_s *)arg;
@@ -1147,7 +1150,7 @@ static void lpc17_endtransfer(struct lpc17_dev_s *priv, sdio_eventset_t wkupeven
 
   /* If this was a DMA transfer, make sure that DMA is stopped */
 
-#ifdef CONFIG_SDIO_DMA
+#ifdef CONFIG_LPC17_SDCARD_DMA
   if (priv->dmamode)
     {
       /* DMA debug instrumentation */
@@ -1215,7 +1218,7 @@ static int lpc17_interrupt(int irq, void *context)
       pending  = enabled & priv->xfrmask;
       if (pending != 0)
         {
-#ifdef CONFIG_SDIO_DMA
+#ifdef CONFIG_LPC17_SDCARD_DMA
           if (!priv->dmamode)
 #endif
             {
@@ -1254,7 +1257,7 @@ static int lpc17_interrupt(int irq, void *context)
 
               /* Was this transfer performed in DMA mode? */
 
-#ifdef CONFIG_SDIO_DMA
+#ifdef CONFIG_LPC17_SDCARD_DMA
               if (priv->dmamode)
                 {
                   /* Yes.. Terminate the transfers only if the DMA has also
@@ -1453,7 +1456,7 @@ static void lpc17_reset(FAR struct sdio_dev_s *dev)
   priv->waitevents = 0;      /* Set of events to be waited for */
   priv->waitmask   = 0;      /* Interrupt enables for event waiting */
   priv->wkupevent  = 0;      /* The event that caused the wakeup */
-#ifdef CONFIG_SDIO_DMA
+#ifdef CONFIG_LPC17_SDCARD_DMA
   priv->xfrflags   = 0;      /* Used to synchronize SD card and DMA completion events */
 #endif
 
@@ -1468,7 +1471,7 @@ static void lpc17_reset(FAR struct sdio_dev_s *dev)
   /* DMA data transfer support */
 
   priv->widebus    = false;  /* Required for DMA support */
-#ifdef CONFIG_SDIO_DMA
+#ifdef CONFIG_LPC17_SDCARD_DMA
   priv->dmamode    = false;  /* true: DMA mode transfer */
 #endif
 
@@ -1503,7 +1506,7 @@ static sdio_capset_t lpc17_capabilities(FAR struct sdio_dev_s *dev)
 #ifdef CONFIG_LPC17_SDCARD_WIDTH_D1_ONLY
   caps |= SDIO_CAPS_1BIT_ONLY;
 #endif
-#ifdef CONFIG_SDIO_DMA
+#ifdef CONFIG_LPC17_SDCARD_DMA
   caps |= SDIO_CAPS_DMASUPPORTED;
 #endif
 
@@ -1764,7 +1767,7 @@ static int lpc17_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   priv->buffer    = (uint32_t *)buffer;
   priv->remaining = nbytes;
-#ifdef CONFIG_SDIO_DMA
+#ifdef CONFIG_LPC17_SDCARD_DMA
   priv->dmamode   = false;
 #endif
 
@@ -1819,7 +1822,7 @@ static int lpc17_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer
 
   priv->buffer    = (uint32_t *)buffer;
   priv->remaining = nbytes;
-#ifdef CONFIG_SDIO_DMA
+#ifdef CONFIG_LPC17_SDCARD_DMA
   priv->dmamode   = false;
 #endif
 
@@ -1873,7 +1876,7 @@ static int lpc17_cancel(FAR struct sdio_dev_s *dev)
 
   /* If this was a DMA transfer, make sure that DMA is stopped */
 
-#ifdef CONFIG_SDIO_DMA
+#ifdef CONFIG_LPC17_SDCARD_DMA
   if (priv->dmamode)
     {
       /* Make sure that the DMA is stopped (it will be stopped automatically
@@ -2331,7 +2334,7 @@ static sdio_eventset_t lpc17_eventwait(FAR struct sdio_dev_s *dev,
   /* Disable event-related interrupts */
 
   lpc17_configwaitints(priv, 0, 0, 0);
-#ifdef CONFIG_SDIO_DMA
+#ifdef CONFIG_LPC17_SDCARD_DMA
   priv->xfrflags   = 0;
 #endif
 
@@ -2432,7 +2435,7 @@ static int lpc17_registercallback(FAR struct sdio_dev_s *dev,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SDIO_DMA
+#ifdef CONFIG_LPC17_SDCARD_DMA
 static int lpc17_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
                               size_t buflen)
 {
@@ -2511,7 +2514,7 @@ static int lpc17_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SDIO_DMA
+#ifdef CONFIG_LPC17_SDCARD_DMA
 static int lpc17_dmasendsetup(FAR struct sdio_dev_s *dev,
                               FAR const uint8_t *buffer, size_t buflen)
 {
@@ -2723,7 +2726,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
   priv->waitwdog = wd_create();
   DEBUGASSERT(priv->waitwdog);
 
-#ifdef CONFIG_SDIO_DMA
+#ifdef CONFIG_LPC17_SDCARD_DMA
   /* Configure the SDCARD DMA request */
 
   lpc17_dmaconfigure(DMA_REQ_SDCARD, DMA_DMASEL_SDCARD);

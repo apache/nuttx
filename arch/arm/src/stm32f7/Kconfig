@@ -1741,6 +1741,7 @@ config STM32F7_SDMMC_XFRDEBUG
 config STM32F7_SDMMC_DMA
 	bool "Support DMA data transfers"
 	default n
+	select SDIO_DMA
 	depends on STM32F7_DMA
 	---help---
 		Support DMA data transfers.

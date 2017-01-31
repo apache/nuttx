@@ -101,12 +101,15 @@
  *     This also requires CONFIG_DEBUG_FS and CONFIG_DEBUG_INFO
  */
 
-#if defined(CONFIG_STM32F7_SDMMC_DMA) && !defined(CONFIG_STM32F7_DMA2)
-#  warning "CONFIG_STM32F7_SDMMC_DMA support requires CONFIG_STM32F7_DMA2"
-#endif
-
 #ifndef CONFIG_STM32F7_SDMMC_DMA
 #  warning "Large Non-DMA transfer may result in RX overrun failures"
+#else
+#  ifndef CONFIG_STM32F7_DMA2
+#    error "CONFIG_STM32F7_SDMMC_DMA support requires CONFIG_STM32F7_DMA2"
+#  endif
+#  ifndef CONFIG_SDIO_DMA
+#    error CONFIG_SDIO_DMA must be defined with CONFIG_STM32F7_SDMMC_DMA
+#  endif
 #endif
 
 #ifndef CONFIG_SCHED_WORKQUEUE
@@ -587,7 +590,7 @@ struct stm32_dev_s g_sdmmcdev1 =
     .eventwait        = stm32_eventwait,
     .callbackenable   = stm32_callbackenable,
     .registercallback = stm32_registercallback,
-#ifdef CONFIG_STM32F7_SDMMC_DMA
+#ifdef CONFIG_SDIO_DMA
 #ifdef CONFIG_SDIO_PREFLIGHT
     .dmapreflight     = stm32_dmapreflight,
 #endif
@@ -643,7 +646,7 @@ struct stm32_dev_s g_sdmmcdev2 =
     .eventwait        = stm32_eventwait,
     .callbackenable   = stm32_callbackenable,
     .registercallback = stm32_registercallback,
-#ifdef CONFIG_STM32F7_SDMMC_DMA
+#ifdef CONFIG_SDIO_DMA
 #ifdef CONFIG_SDIO_PREFLIGHT
     .dmapreflight     = stm32_dmapreflight,
 #endif
@@ -1870,7 +1873,7 @@ static sdio_capset_t stm32_capabilities(FAR struct sdio_dev_s *dev)
 {
   sdio_capset_t caps = 0;
 
-#ifdef CONFIG_SDIO_DMA
+#ifdef CONFIG_STM32F7_SDMMC_DMA
   caps |= SDIO_CAPS_DMASUPPORTED;
 #endif
 

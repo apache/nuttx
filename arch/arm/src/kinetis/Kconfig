@@ -658,6 +658,16 @@ endmenu # Kinetis Ethernet Configuration
 menu "Kinetis SDHC Configuration"
 	depends on KINETIS_SDHC
 
+config KINETIS_SDHC_DMA
+	bool "Support DMA data transfers"
+	default y
+	select SDIO_DMA
+	---help---
+		Support DMA data transfers.
+		Enable SD card DMA data transfers.  This is marginally optional.
+		For most usages, SD accesses will cause data overruns if used without
+		DMA.
+
 config KINETIS_SDHC_WIDTH_D1_ONLY
 	bool "Use D1 only"
 	default n

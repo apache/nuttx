@@ -2893,6 +2893,16 @@ endchoice # HSMCI1 XDMAC Selection
 # There is no HSMCI2 on the platforms that support XDMAC
 endif # SAMA5_XDMAC0 || SAMA5_XDMAC1
 
+config SAMA5_HSMCI_DMA
+	bool "Support DMA data transfers"
+	default y
+	select SDIO_DMA
+	---help---
+		Support DMA data transfers.
+		Enable SD card DMA data transfers.  This is marginally optional.
+		For most usages, SD accesses will cause data overruns if used without
+		DMA.
+
 config SAMA5_HSMCI_RDPROOF
 	bool "Read Proof Enable"
 	default n

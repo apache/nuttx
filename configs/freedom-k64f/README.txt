@@ -443,6 +443,7 @@ SD Card Support
 
     System Type->Kinetic Peripheral Selection
       CONFIG_KINETIS_SDHC=y                 : To enable SDHC0 support
+      CONFIG_KINETIS_SDHC_DMA=y             : Use SDIO DMA
 
     System Type
       CONFIG_KINETIS_GPIOIRQ=y              : GPIO interrupts needed
@@ -456,7 +457,6 @@ SD Card Support
       CONFIG_MMCSD_MMCSUPPORT=n             : Interferes with some SD cards
       CONFIG_MMCSD_SPI=n                    : No SPI-based MMC/SD support
       CONFIG_MMCSD_SDIO=y                   : SDIO-based MMC/SD support
-      CONFIG_SDIO_DMA=y                     : Use SDIO DMA
       CONFIG_SDIO_BLOCKSETUP=y              : Needs to know block sizes
 
     RTOS Features -> Work Queue Support

@@ -89,6 +89,12 @@
 
 /* Configuration ************************************************************/
 
+#if !defined(CONFIG_SAM34_HSMCI_DMA)
+#  warning "Large Non-DMA transfer may result in RX overrun failures"
+#elif !defined(CONFIG_SDIO_DMA)
+#  warning CONFIG_SDIO_DMA should be defined with CONFIG_SAM34_HSMCI_DMA
+#endif
+
 #if !(defined(CONFIG_SAM34_DMAC0) || defined(CONFIG_SAM34_PDCA))
 #  warning "HSMCI driver requires CONFIG_SAM34_DMAC0 or CONFIG_SAM34_PDCA"
 #endif
@@ -499,7 +505,7 @@ static int  sam_registercallback(FAR struct sdio_dev_s *dev,
 
 /* DMA */
 
-#ifdef CONFIG_SDIO_DMA
+#ifdef CONFIG_SAM34_HSMCI_DMA
 static int  sam_dmarecvsetup(FAR struct sdio_dev_s *dev,
               FAR uint8_t *buffer, size_t buflen);
 static int  sam_dmasendsetup(FAR struct sdio_dev_s *dev,
@@ -1474,7 +1480,7 @@ static sdio_capset_t sam_capabilities(FAR struct sdio_dev_s *dev)
 {
   sdio_capset_t caps = 0;
 
-#ifdef CONFIG_SDIO_DMA
+#ifdef CONFIG_SAM34_HSMCI_DMA
   caps |= SDIO_CAPS_DMASUPPORTED;
 #endif
 

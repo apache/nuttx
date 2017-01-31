@@ -633,15 +633,16 @@ endmenu
 menu "SDCARD Configuration"
 	depends on LPC17_SDCARD
 
-config SDIO_DMA
+config LPC17_SDCARD_DMA
 	bool "Support DMA data transfers"
 	default y if LPC17_GPDMA
+	select SDIO_DMA
 	depends on LPC17_GPDMA
 	---help---
 		Support DMA data transfers.
-		Enable SD card DMA data transfers.  This is a marginally optional.
+		Enable SD card DMA data transfers.  This is marginally optional.
 		For most usages, SD accesses will cause data overruns if used without
-		DMA.  Requires LPC17_SDCARD and config LPC17_GPDMA.
+		DMA.
 
 config LPC17_SDCARD_WIDTH_D1_ONLY
 	bool "Use D1 only"

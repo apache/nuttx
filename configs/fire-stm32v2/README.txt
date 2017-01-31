@@ -734,10 +734,10 @@ M3 Wildfire-specific Configuration Options
     CONFIG_STM32_SPI_DMA - Use DMA to improve SPI transfer performance.
       Cannot be used with CONFIG_STM32_SPI_INTERRUPT.
 
-    CONFIG_SDIO_DMA - Support DMA data transfers.  Requires CONFIG_STM32_SDIO
-      and CONFIG_STM32_DMA2.
-    CONFIG_SDIO_PRI - Select SDIO interrupt prority.  Default: 128
-    CONFIG_SDIO_DMAPRIO - Select SDIO DMA interrupt priority.
+    CONFIG_STM32_SDIO_DMA - Support DMA data transfers.  Requires
+      CONFIG_STM32_SDIO and CONFIG_STM32_DMA2.
+    CONFIG_STM32_SDIO_PRI - Select SDIO interrupt prority.  Default: 128
+    CONFIG_STM32_SDIO_DMAPRIO - Select SDIO DMA interrupt priority.
       Default:  Medium
     CONFIG_STM32_SDIO_WIDTH_D1_ONLY - Select 1-bit transfer mode.  Default:
       4-bit transfer mode.

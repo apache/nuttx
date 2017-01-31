@@ -78,8 +78,15 @@
 
 /* Configuration ************************************************************/
 
-#ifndef CONFIG_SAMV7_XDMAC
-#  error "HSMCI support requires CONFIG_SAMV7_XDMAC"
+#ifndef CONFIG_SAMA5_HSMCI_DMA
+#  warning "Large Non-DMA transfer may result in RX overrun failures"
+#else
+#  ifndef CONFIG_SAMV7_XDMAC
+#    error "CONFIG_SAMA5_HSMCI_DMA support requires CONFIG_SAMV7_XDMAC"
+#  endif
+#  ifndef CONFIG_SDIO_DMA
+#    error CONFIG_SDIO_DMA must be defined with CONFIG_SAMA5_HSMCI_DMA
+#  endif
 #endif
 
 #ifndef CONFIG_DEBUG_MEMCARD_INFO
@@ -517,7 +524,7 @@ static int  sam_registercallback(FAR struct sdio_dev_s *dev,
 
 /* DMA */
 
-#ifdef CONFIG_SDIO_DMA
+#ifdef CONFIG_SAMV7_HSMCI_DMA
 #ifndef HSCMI_NORXDMA
 static int  sam_dmarecvsetup(FAR struct sdio_dev_s *dev,
               FAR uint8_t *buffer, size_t buflen);
@@ -1766,7 +1773,7 @@ static sdio_capset_t sam_capabilities(FAR struct sdio_dev_s *dev)
 {
   sdio_capset_t caps = 0;
 
-#ifdef CONFIG_SDIO_DMA
+#ifdef CONFIG_SAMV7_HSMCI_DMA
   caps |= SDIO_CAPS_DMASUPPORTED;
 #endif
 
