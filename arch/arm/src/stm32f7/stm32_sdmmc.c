@@ -122,14 +122,14 @@
 #  endif
 
 #  ifdef CONFIG_STM32F7_SDMMC_DMA
-#    ifndef CONFIG_SDMMC1_DMAPRIO
-#        define CONFIG_SDMMC1_DMAPRIO DMA_SCR_PRIVERYHI
+#    ifndef CONFIG_STM32F7_SDMMC1_DMAPRIO
+#        define CONFIG_STM32F7_SDMMC1_DMAPRIO DMA_SCR_PRIVERYHI
 #    endif
-#    if (CONFIG_SDMMC1_DMAPRIO & ~DMA_SCR_PL_MASK) != 0
-#      error "Illegal value for CONFIG_SDMMC1_DMAPRIO"
+#    if (CONFIG_STM32F7_SDMMC1_DMAPRIO & ~DMA_SCR_PL_MASK) != 0
+#      error "Illegal value for CONFIG_STM32F7_SDMMC1_DMAPRIO"
 #    endif
 #  else
-#    undef CONFIG_SDMMC1_DMAPRIO
+#    undef CONFIG_STM32F7_SDMMC1_DMAPRIO
 #  endif
 #endif
 
@@ -139,14 +139,14 @@
 #  endif
 
 #  ifdef CONFIG_STM32F7_SDMMC_DMA
-#    ifndef CONFIG_SDMMC2_DMAPRIO
-#        define CONFIG_SDMMC2_DMAPRIO DMA_SCR_PRIVERYHI
+#    ifndef CONFIG_STM32F7_SDMMC2_DMAPRIO
+#        define CONFIG_STM32F7_SDMMC2_DMAPRIO DMA_SCR_PRIVERYHI
 #    endif
-#    if (CONFIG_SDMMC2_DMAPRIO & ~DMA_SCR_PL_MASK) != 0
-#      error "Illegal value for CONFIG_SDMMC2_DMAPRIO"
+#    if (CONFIG_STM32F7_SDMMC2_DMAPRIO & ~DMA_SCR_PL_MASK) != 0
+#      error "Illegal value for CONFIG_STM32F7_SDMMC2_DMAPRIO"
 #    endif
 #  else
-#    undef CONFIG_SDMMC2_DMAPRIO
+#    undef CONFIG_STM32F7_SDMMC2_DMAPRIO
 #  endif
 #endif
 
@@ -609,8 +609,8 @@ struct stm32_dev_s g_sdmmcdev1 =
   .d0_gpio           = GPIO_SDMMC1_D0,
   .wrchandler        = stm32_sdmmc1_rdyinterrupt,
 #endif
-#ifdef CONFIG_SDMMC1_DMAPRIO
-  .dmapri            = CONFIG_SDMMC1_DMAPRIO,
+#ifdef CONFIG_STM32F7_SDMMC1_DMAPRIO
+  .dmapri            = CONFIG_STM32F7_SDMMC1_DMAPRIO,
 #endif
 };
 #endif
@@ -665,8 +665,8 @@ struct stm32_dev_s g_sdmmcdev2 =
   .d0_gpio           = GPIO_SDMMC2_D0,
   .wrchandler        = stm32_sdmmc2_rdyinterrupt,
 #endif
-#ifdef CONFIG_SDMMC2_DMAPRIO
-  .dmapri            = CONFIG_SDMMC2_DMAPRIO,
+#ifdef CONFIG_STM32F7_SDMMC2_DMAPRIO
+  .dmapri            = CONFIG_STM32F7_SDMMC2_DMAPRIO,
 #endif
 };
 #endif
@@ -2031,8 +2031,8 @@ static int stm32_attach(FAR struct sdio_dev_s *dev)
 
       up_enable_irq(priv->nirq);
 
-#if defined(CONFIG_ARCH_IRQPRIO) && (defined(CONFIG_SDMMC1_DMAPRIO) || \
-                                     defined(CONFIG_SDMMC2_DMAPRIO))
+#if defined(CONFIG_ARCH_IRQPRIO) && (defined(CONFIG_STM32F7_SDMMC1_DMAPRIO) || \
+                                     defined(CONFIG_STM32F7_SDMMC2_DMAPRIO))
       /* Set the interrupt priority */
 
       up_prioritize_irq(priv->nirq, priv->irqprio);

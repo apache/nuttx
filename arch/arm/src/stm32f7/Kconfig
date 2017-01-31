@@ -1749,21 +1749,14 @@ config STM32F7_SDMMC_DMA
 menu "SDMMC1 Configuration"
 	depends on STM32F7_SDMMC1
 
-config SDMMC1_DMA
-	bool "Support DMA data transfers on SDMMC1"
-	default y if STM32F7_DMA2
-	depends on STM32F7_SDMMC_DMA && STM32F7_DMA2
-	---help---
-		Support DMA data transfers on SDMMC1.  Requires STM32F7_SDMMC1 and config STM32F7_DMA2.
-
-config SDMMC1_PRI
+config STM32F7_SDMMC1_PRI
 	hex "SDMMC1 interrupt priority"
 	default 128
 	depends on ARCH_IRQPRIO && EXPERIMENTAL
 	---help---
 		Select SDMMC1 interrupt priority.  Default: 128.
 
-config SDMMC1_DMAPRIO
+config STM32F7_SDMMC1_DMAPRIO
 	hex "SDMMC1 DMA priority"
 	default 0x00010000
 	---help---
@@ -1783,21 +1776,14 @@ endmenu # "SDMMC1 Configuration"
 menu "SDMMC2 Configuration"
 	depends on STM32F7_SDMMC2
 
-config SDMMC2_DMA
-	bool "Support DMA data transfers on SDMMC2"
-	default y if STM32F7_DMA2
-	depends on STM32F7_SDMMC_DMA && STM32F7_DMA2
-	---help---
-		Support DMA data transfers on SDMMC2.  Requires STM32F7_SDMMC2 and config STM32F7_DMA2.
-
-config SDMMC2_PRI
+config STM32F7_SDMMC2_PRI
 	hex "SDMMC2 interrupt priority"
 	default 128
 	depends on ARCH_IRQPRIO && EXPERIMENTAL
 	---help---
 		Select SDMMC2 interrupt priority.  Default: 128.
 
-config SDMMC2_DMAPRIO
+config STM32F7_SDMMC2_DMAPRIO
 	hex "SDMMC2 DMA priority"
 	default 0x00010000
 	---help---
