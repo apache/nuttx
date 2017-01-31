@@ -1629,7 +1629,7 @@ static sdio_capset_t stm32_capabilities(FAR struct sdio_dev_s *dev)
 
 #ifdef CONFIG_STM32_SDIO_WIDTH_D1_ONLY
   caps |= SDIO_CAPS_1BIT_ONLY;
-#else
+#endif
 #ifdef CONFIG_STM32_SDIO_DMA
   caps |= SDIO_CAPS_DMASUPPORTED;
 #endif
