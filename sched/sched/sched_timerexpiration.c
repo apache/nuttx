@@ -123,7 +123,7 @@ static uint32_t sched_cpu_scheduler(int cpu, uint32_t ticks, bool noswitches);
 static uint32_t sched_process_scheduler(uint32_t ticks, bool noswitches);
 #endif
 static unsigned int sched_timer_process(unsigned int ticks, bool noswitches);
-static void sched_timer_start(unsigned int ticks)
+static void sched_timer_start(unsigned int ticks);
 
 /****************************************************************************
  * Private Data
