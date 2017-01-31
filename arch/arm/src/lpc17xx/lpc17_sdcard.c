@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc17xx/lpc17_sdcard.c
  *
- *   Copyright (C) 2013-2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -91,9 +91,9 @@
  *   CONFIG_SDIO_DMA - Enable SD card DMA.  This is a marginally optional.
  *     For most usages, SD accesses will cause data overruns if used without DMA.
  *     NOTE the above system DMA configuration options.
- *   CONFIG_SDIO_WIDTH_D1_ONLY - This may be selected to force the driver
- *     operate with only a single data line (the default is to use all
- *     4 SD data lines).
+ *   CONFIG_LPC17_SDCARD_WIDTH_D1_ONLY - This may be selected to force the
+ *     driver operate with only a single data line (the default is to use
+ *     all 4 SD data lines).
  *   CONFIG_DEBUG_MEMCARD_* - Enables some very low-level debug output
  *     This also requires CONFIG_DEBUG_FS and CONFIG_DEBUG_INFO
  */
@@ -247,7 +247,7 @@ struct lpc17_dev_s
 
   /* Callback support */
 
-  uint8_t            cdstatus;   /* Card status */
+  sdio_statset_t     cdstatus;   /* Card status */
   sdio_eventset_t    cbevents;   /* Set of events to be cause callbacks */
   worker_t           callback;   /* Registered callback function */
   void              *cbarg;      /* Registered callback argument */
@@ -355,6 +355,7 @@ static int lpc17_lock(FAR struct sdio_dev_s *dev, bool lock);
 /* Initialization/setup */
 
 static void lpc17_reset(FAR struct sdio_dev_s *dev);
+static sdio_capset_t lpc17_capabilities(FAR struct sdio_dev_s *dev);
 static uint8_t lpc17_status(FAR struct sdio_dev_s *dev);
 static void lpc17_widebus(FAR struct sdio_dev_s *dev, bool enable);
 static void lpc17_clock(FAR struct sdio_dev_s *dev,
@@ -419,6 +420,7 @@ struct lpc17_dev_s g_scard_dev =
     .lock             = lpc17_lock,
 #endif
     .reset            = lpc17_reset,
+    .capabilities     = lpc17_capabilities,
     .status           = lpc17_status,
     .widebus          = lpc17_widebus,
     .clock            = lpc17_clock,
@@ -1483,6 +1485,28 @@ static void lpc17_reset(FAR struct sdio_dev_s *dev)
 }
 
 /****************************************************************************
+ * Name: lpc17_capabilities
+ *
+ * Description:
+ *   Get capabilities (and limitations) of the SDIO driver (optional)
+ *
+ * Input Parameters:
+ *   dev   - Device-specific state data
+ *
+ * Returned Value:
+ *   Returns a bitset of status values (see SDIO_CAPS_* defines)
+ *
+ ****************************************************************************/
+
+static sdio_capset_t lpc17_capabilities(FAR struct sdio_dev_s *dev)
+{
+#ifdef CONFIG_LPC17_SDCARD_WIDTH_D1_ONLY
+  return SDIO_CAPS_1BIT_ONLY;
+#else
+  return 0;
+}
+
+/****************************************************************************
  * Name: lpc17_status
  *
  * Description:
@@ -1496,7 +1520,7 @@ static void lpc17_reset(FAR struct sdio_dev_s *dev)
  *
  ****************************************************************************/
 
-static uint8_t lpc17_status(FAR struct sdio_dev_s *dev)
+static sdio_statset_t lpc17_status(FAR struct sdio_dev_s *dev)
 {
   struct lpc17_dev_s *priv = (struct lpc17_dev_s *)dev;
   return priv->cdstatus;
@@ -1569,7 +1593,7 @@ static void lpc17_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
       /* SD normal operation clocking (wide 4-bit mode) */
 
       case CLOCK_SD_TRANSFER_4BIT:
-#ifndef CONFIG_SDIO_WIDTH_D1_ONLY
+#ifndef CONFIG_LPC17_SDCARD_WIDTH_D1_ONLY
         clkcr = (SDCARD_CLOCK_SDWIDEXFR | SDCARD_CLOCK_CLKEN);
         break;
 #endif
@@ -2735,7 +2759,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
 
 #ifndef CONFIG_SDIO_MUXBUS
   lpc17_configgpio(GPIO_SD_DAT0);
-#ifndef CONFIG_SDIO_WIDTH_D1_ONLY
+#ifndef CONFIG_LPC17_SDCARD_WIDTH_D1_ONLY
   lpc17_configgpio(GPIO_SD_DAT1);
   lpc17_configgpio(GPIO_SD_DAT2);
   lpc17_configgpio(GPIO_SD_DAT3);
@@ -2775,7 +2799,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
 void sdio_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot)
 {
   struct lpc17_dev_s *priv = (struct lpc17_dev_s *)dev;
-  uint8_t cdstatus;
+  sdio_statset_t cdstatus;
   irqstate_t flags;
 
   /* Update card status */
@@ -2798,6 +2822,7 @@ void sdio_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot)
     {
       lpc17_callback(priv);
     }
+
   leave_critical_section(flags);
 }
 

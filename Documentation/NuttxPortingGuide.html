@@ -5376,7 +5376,8 @@ int kbd_decode(FAR struct lib_instream_s *stream, FAR struct kbd_getstate_s *sta
     </p>
     <ul>
      <p><code>void (*reset)(FAR struct sdio_dev_s *dev);</code><br>
-     <code>uint8_t (*status)(FAR struct sdio_dev_s *dev);</code><br>
+     <code>sdio_capset_t (*capabilities)(FAR struct sdio_dev_s *dev);</code><br>
+     <code>sdio_statset_t (*status)(FAR struct sdio_dev_s *dev);</code><br>
      <code>void (*widebus)(FAR struct sdio_dev_s *dev, bool enable);</code><br>
      <code>void (*clock)(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate);</code><br>
      <code>int (*attach)(FAR struct sdio_dev_s *dev);</code><br>

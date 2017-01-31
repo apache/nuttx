@@ -658,6 +658,12 @@ endmenu # Kinetis Ethernet Configuration
 menu "Kinetis SDHC Configuration"
 	depends on KINETIS_SDHC
 
+config KINETIS_SDHC_WIDTH_D1_ONLY
+	bool "Use D1 only"
+	default n
+	---help---
+		Select 1-bit transfer mode.  Default: 4-bit transfer mode.
+
 config KINETIS_SDHC_ABSFREQ
 	bool "Custom transfer frequencies"
 	default n
@@ -687,14 +693,14 @@ config KINETIS_MMCXFR_FREQ
 config KINETIS_SD1BIT_FREQ
 	int "SD 1-bit transfer frequency"
 	default 20000000
-	depends on SDIO_WIDTH_D1_ONLY
+	depends on KINETIS_SDHC_WIDTH_D1_ONLY
 	---help---
 		Frequency to use for transferring data to/from an SD card using on a single data liune.
 
 config KINETIS_SD4BIT_FREQ
 	int "SD 4-bit transfer frequency"
 	default 20000000
-	depends on !SDIO_WIDTH_D1_ONLY
+	depends on !KINETIS_SDHC_WIDTH_D1_ONLY
 	---help---
 		Frequency to use for transferring data to/from an SD card using all four data lines.
 

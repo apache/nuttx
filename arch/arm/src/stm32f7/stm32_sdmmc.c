@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32f7/stm32_sdmmc.c
  *
- *   Copyright (C) 2009, 2011-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011-2017 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            David Sidrane <david_s5@nscdg.com>
  *
@@ -366,7 +366,7 @@ struct stm32_dev_s
 
   /* Callback support */
 
-  uint8_t            cdstatus;   /* Card status */
+  sdio_statset_t     cdstatus;   /* Card status */
   sdio_eventset_t    cbevents;   /* Set of events to be cause callbacks */
   worker_t           callback;   /* Registered callback function */
   void              *cbarg;      /* Registered callback argument */
@@ -495,7 +495,7 @@ static int stm32_lock(FAR struct sdio_dev_s *dev, bool lock);
 /* Initialization/setup */
 
 static void stm32_reset(FAR struct sdio_dev_s *dev);
-static uint8_t stm32_status(FAR struct sdio_dev_s *dev);
+static sdio_statset_t stm32_status(FAR struct sdio_dev_s *dev);
 static void stm32_widebus(FAR struct sdio_dev_s *dev, bool enable);
 static void stm32_clock(FAR struct sdio_dev_s *dev,
               enum sdio_clock_e rate);
@@ -563,6 +563,7 @@ struct stm32_dev_s g_sdmmcdev1 =
     .lock             = stm32_lock,
 #endif
     .reset            = stm32_reset,
+    .capabilities     = NULL,
     .status           = stm32_status,
     .widebus          = stm32_widebus,
     .clock            = stm32_clock,
@@ -619,6 +620,7 @@ struct stm32_dev_s g_sdmmcdev2 =
     .lock             = stm32_lock,
 #endif
     .reset            = stm32_reset,
+    .capabilities     = NULL,
     .status           = stm32_status,
     .widebus          = stm32_widebus,
     .clock            = stm32_clock,
@@ -1866,7 +1868,7 @@ static void stm32_reset(FAR struct sdio_dev_s *dev)
  *
  ****************************************************************************/
 
-static uint8_t stm32_status(FAR struct sdio_dev_s *dev)
+static sdio_statset_t stm32_status(FAR struct sdio_dev_s *dev)
 {
   struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
   return priv->cdstatus;
@@ -3276,7 +3278,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
 void sdio_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot)
 {
   struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
-  uint8_t cdstatus;
+  sdio_statset_t cdstatus;
   irqstate_t flags;
 
   /* Update card status */

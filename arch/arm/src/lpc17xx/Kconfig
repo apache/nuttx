@@ -630,7 +630,7 @@ config LPC17_I2C2_FREQUENCY
 
 endmenu
 
-menu "SDIO Configuration"
+menu "SDCARD Configuration"
 	depends on LPC17_SDCARD
 
 config SDIO_DMA
@@ -643,7 +643,7 @@ config SDIO_DMA
 		For most usages, SD accesses will cause data overruns if used without
 		DMA.  Requires LPC17_SDCARD and config LPC17_GPDMA.
 
-config SDIO_WIDTH_D1_ONLY
+config LPC17_SDCARD_WIDTH_D1_ONLY
 	bool "Use D1 only"
 	default n
 	---help---

@@ -249,7 +249,6 @@ CONFIG_KINETIS_PORTEINTS=y
 #
 # CONFIG_KINETIS_UARTFIFOS is not set
 CONFIG_SDIO_DMA=y
-# CONFIG_SDIO_WIDTH_D1_ONLY is not set
 
 #
 # Architecture Options

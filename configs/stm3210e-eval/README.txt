@@ -638,7 +638,7 @@ STM3210E-EVAL-specific Configuration Options
     CONFIG_SDIO_PRI - Select SDIO interrupt prority.  Default: 128
     CONFIG_SDIO_DMAPRIO - Select SDIO DMA interrupt priority.
       Default:  Medium
-    CONFIG_SDIO_WIDTH_D1_ONLY - Select 1-bit transfer mode.  Default:
+    CONFIG_STM32_SDIO_WIDTH_D1_ONLY - Select 1-bit transfer mode.  Default:
       4-bit transfer mode.
 
   STM3210E-EVAL CAN Configuration

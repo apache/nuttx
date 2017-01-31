@@ -128,6 +128,7 @@ struct mmcsd_state_s
   uint8_t mode:2;                  /* (See MMCSDMODE_* definitions) */
   uint8_t type:4;                  /* Card type (See MMCSD_CARDTYPE_* definitions) */
   uint8_t buswidth:4;              /* Bus widthes supported (SD only) */
+  sdio_capset_t caps;              /* SDIO driver capabilities/limitations */
   uint16_t selblocklen;            /* The currently selected block length */
   uint16_t rca;                    /* Relative Card Address (RCS) register */
 
@@ -2381,12 +2382,14 @@ static void mmcsd_mediachange(FAR void *arg)
 
 static int mmcsd_widebus(FAR struct mmcsd_state_s *priv)
 {
-#ifndef CONFIG_SDIO_WIDTH_D1_ONLY
   int ret;
 
-  /* Check if the SD card supports this feature (as reported in the SCR) */
+  /* Check if the SD card supports wide bus operation (as reported in the
+   * SCR or in the SDIO driver capabililities)
+   */
 
-  if ((priv->buswidth & MMCSD_SCR_BUSWIDTH_4BIT) != 0)
+  if ((priv->buswidth & MMCSD_SCR_BUSWIDTH_4BIT) != 0 &&
+      (priv->caps & SDIO_CAPS_1BIT_ONLY) == 0)
     {
       /* Disconnect any CD/DAT3 pull up using ACMD42.  ACMD42 is optional and
        * need not be supported by all SD calls.
@@ -2453,13 +2456,6 @@ static int mmcsd_widebus(FAR struct mmcsd_state_s *priv)
 
   fwarn("WARNING: Card does not support wide-bus operation\n");
   return -ENOSYS;
-
-#else /* CONFIG_SDIO_WIDTH_D1_ONLY */
-
-  finfo("Wide-bus operation is disabled\n");
-  return -ENOSYS;
-
-#endif /* CONFIG_SDIO_WIDTH_D1_ONLY */
 }
 
 /****************************************************************************
@@ -3130,6 +3126,10 @@ static int mmcsd_hwinitialize(FAR struct mmcsd_state_s *priv)
   int ret;
 
   mmcsd_takesem(priv);
+
+  /* Get the capabilities of the SDIO driver */
+
+  priv->caps = SDIO_CAPABILITIES(priv->dev);
 
 #ifdef CONFIG_SDIO_DMA
   /* Does this architecture support DMA with the MMC/SD device? */

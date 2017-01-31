@@ -240,7 +240,6 @@ CONFIG_LPC17_EXTDRAMHEAP=y
 # SDIO Configuration
 #
 # CONFIG_SDIO_DMA is not set
-# CONFIG_SDIO_WIDTH_D1_ONLY is not set
 
 #
 # LCD device driver options

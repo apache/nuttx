@@ -6103,7 +6103,7 @@ config SDIO_DMAPRIO
 		For other STM32's, options are: 0x00000000 low, 0x00010000 medium,
 		0x00020000 high, 0x00030000 very high.  Default: medium.
 
-config SDIO_WIDTH_D1_ONLY
+config STM32_SDIO_WIDTH_D1_ONLY
 	bool "Use D1 only"
 	default n
 	---help---

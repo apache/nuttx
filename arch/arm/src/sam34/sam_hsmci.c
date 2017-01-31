@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sam34/sam_hsmci.c
  *
- *   Copyright (C) 2010, 2012-2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2012-2014, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -325,7 +325,7 @@ struct sam_dev_s
 
   /* Callback support */
 
-  uint8_t            cdstatus;   /* Card status */
+  sdio_statset_t     cdstatus;   /* Card status */
   sdio_eventset_t    cbevents;   /* Set of events to be cause callbacks */
   worker_t           callback;   /* Registered callback function */
   void              *cbarg;      /* Registered callback argument */
@@ -464,7 +464,7 @@ static int  sam_interrupt(int irq, void *context);
 /* Initialization/setup */
 
 static void sam_reset(FAR struct sdio_dev_s *dev);
-static uint8_t sam_status(FAR struct sdio_dev_s *dev);
+static sdio_statset_t sam_status(FAR struct sdio_dev_s *dev);
 static void sam_widebus(FAR struct sdio_dev_s *dev, bool enable);
 static void sam_clock(FAR struct sdio_dev_s *dev,
               enum sdio_clock_e rate);
@@ -519,6 +519,7 @@ struct sam_dev_s g_sdiodev =
   .dev =
   {
     .reset            = sam_reset,
+    .capabilities     = NULL,
     .status           = sam_status,
     .widebus          = sam_widebus,
     .clock            = sam_clock,
@@ -1470,7 +1471,7 @@ static void sam_reset(FAR struct sdio_dev_s *dev)
  *
  ****************************************************************************/
 
-static uint8_t sam_status(FAR struct sdio_dev_s *dev)
+static sdio_statset_t sam_status(FAR struct sdio_dev_s *dev)
 {
   struct sam_dev_s *priv = (struct sam_dev_s *)dev;
   return priv->cdstatus;
@@ -2738,7 +2739,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
 void sdio_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot)
 {
   struct sam_dev_s *priv = (struct sam_dev_s *)dev;
-  uint8_t cdstatus;
+  sdio_statset_t cdstatus;
   irqstate_t flags;
 
   /* Update card status */

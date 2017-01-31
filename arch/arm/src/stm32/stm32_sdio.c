@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_sdio.c
  *
- *   Copyright (C) 2009, 2011-2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011-2014, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -88,9 +88,9 @@
  *   CONFIG_SDIO_DMA - Enable SDIO.  This is a marginally optional.  For
  *     most usages, SDIO will cause data overruns if used without DMA.
  *     NOTE the above system DMA configuration options.
- *   CONFIG_SDIO_WIDTH_D1_ONLY - This may be selected to force the driver
- *     operate with only a single data line (the default is to use all
- *     4 SD data lines).
+ *   CONFIG_STM32_SDIO_WIDTH_D1_ONLY - This may be selected to force the
+ *     driver operate with only a single data line (the default is to use
+ *     all 4 SD data lines).
  *   CONFIG_SDIO_PRI - SDIO interrupt priority.  This setting is not very
  *     important since interrupt nesting is not currently supported.
  *   CONFIG_SDM_DMAPRIO - SDIO DMA priority.  This can be selecte if
@@ -314,7 +314,7 @@ struct stm32_dev_s
 
   /* Callback support */
 
-  uint8_t            cdstatus;   /* Card status */
+  sdio_statset_t     cdstatus;   /* Card status */
   sdio_eventset_t    cbevents;   /* Set of events to be cause callbacks */
   worker_t           callback;   /* Registered callback function */
   void              *cbarg;      /* Registered callback argument */
@@ -425,7 +425,8 @@ static int stm32_lock(FAR struct sdio_dev_s *dev, bool lock);
 /* Initialization/setup */
 
 static void stm32_reset(FAR struct sdio_dev_s *dev);
-static uint8_t stm32_status(FAR struct sdio_dev_s *dev);
+static sdio_capset_t stm32_capabilities(FAR struct sdio_dev_s *dev);
+static sdio_statset_t stm32_status(FAR struct sdio_dev_s *dev);
 static void stm32_widebus(FAR struct sdio_dev_s *dev, bool enable);
 static void stm32_clock(FAR struct sdio_dev_s *dev,
               enum sdio_clock_e rate);
@@ -493,6 +494,7 @@ struct stm32_dev_s g_sdiodev =
     .lock             = stm32_lock,
 #endif
     .reset            = stm32_reset,
+    .capabilities     = stm32_capabilities,
     .status           = stm32_status,
     .widebus          = stm32_widebus,
     .clock            = stm32_clock,
@@ -1603,6 +1605,28 @@ static void stm32_reset(FAR struct sdio_dev_s *dev)
 }
 
 /****************************************************************************
+ * Name: stm32_capabilities
+ *
+ * Description:
+ *   Get capabilities (and limitations) of the SDIO driver (optional)
+ *
+ * Input Parameters:
+ *   dev   - Device-specific state data
+ *
+ * Returned Value:
+ *   Returns a bitset of status values (see SDIO_CAPS_* defines)
+ *
+ ****************************************************************************/
+
+static sdio_capset_t stm32_capabilities(FAR struct sdio_dev_s *dev)
+{
+#ifdef CONFIG_STM32_SDIO_WIDTH_D1_ONLY
+  return SDIO_CAPS_1BIT_ONLY;
+#else
+  return 0;
+}
+
+/****************************************************************************
  * Name: stm32_status
  *
  * Description:
@@ -1616,7 +1640,7 @@ static void stm32_reset(FAR struct sdio_dev_s *dev)
  *
  ****************************************************************************/
 
-static uint8_t stm32_status(FAR struct sdio_dev_s *dev)
+static sdio_statset_t stm32_status(FAR struct sdio_dev_s *dev)
 {
   struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
   return priv->cdstatus;
@@ -1688,7 +1712,7 @@ static void stm32_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
       /* SD normal operation clocking (wide 4-bit mode) */
 
       case CLOCK_SD_TRANSFER_4BIT:
-#ifndef CONFIG_SDIO_WIDTH_D1_ONLY
+#ifndef CONFIG_STM32_SDIO_WIDTH_D1_ONLY
         clckr = (SDIO_CLCKR_SDWIDEXFR | SDIO_CLKCR_CLKEN);
         break;
 #endif
@@ -2897,7 +2921,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
 
 #ifndef CONFIG_SDIO_MUXBUS
   stm32_configgpio(GPIO_SDIO_D0);
-#ifndef CONFIG_SDIO_WIDTH_D1_ONLY
+#ifndef CONFIG_STM32_SDIO_WIDTH_D1_ONLY
   stm32_configgpio(GPIO_SDIO_D1);
   stm32_configgpio(GPIO_SDIO_D2);
   stm32_configgpio(GPIO_SDIO_D3);
@@ -2936,7 +2960,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
 void sdio_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot)
 {
   struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
-  uint8_t cdstatus;
+  sdio_statset_t cdstatus;
   irqstate_t flags;
 
   /* Update card status */

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/kinetis/kinetis_sdhc.c
  *
- *   Copyright (C) 2011-2012, 2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2014, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -173,7 +173,7 @@ struct kinetis_dev_s
 
   /* Callback support */
 
-  uint8_t            cdstatus;   /* Card status */
+  sdio_statset_t     cdstatus;   /* Card status */
   sdio_eventset_t    cbevents;   /* Set of events to be cause callbacks */
   worker_t           callback;   /* Registered callback function */
   void              *cbarg;      /* Registered callback argument */
@@ -282,7 +282,8 @@ static int kinetis_lock(FAR struct sdio_dev_s *dev, bool lock);
 /* Initialization/setup */
 
 static void kinetis_reset(FAR struct sdio_dev_s *dev);
-static uint8_t kinetis_status(FAR struct sdio_dev_s *dev);
+static sdio_capset_t kinetis_capabilities(FAR struct sdio_dev_s *dev);
+static sdio_statset_t kinetis_status(FAR struct sdio_dev_s *dev);
 static void kinetis_widebus(FAR struct sdio_dev_s *dev, bool enable);
 #ifdef CONFIG_KINETIS_SDHC_ABSFREQ
 static void kinetis_frequency(FAR struct sdio_dev_s *dev, uint32_t frequency);
@@ -350,6 +351,7 @@ struct kinetis_dev_s g_sdhcdev =
     .lock             = kinetis_lock,
 #endif
     .reset            = kinetis_reset,
+    .capabilities     = kinetis_capabilities,
     .status           = kinetis_status,
     .widebus          = kinetis_widebus,
     .clock            = kinetis_clock,
@@ -1312,6 +1314,28 @@ static void kinetis_reset(FAR struct sdio_dev_s *dev)
 }
 
 /****************************************************************************
+ * Name: kinetis_capabilities
+ *
+ * Description:
+ *   Get capabilities (and limitations) of the SDIO driver (optional)
+ *
+ * Input Parameters:
+ *   dev   - Device-specific state data
+ *
+ * Returned Value:
+ *   Returns a bitset of status values (see SDIO_CAPS_* defines)
+ *
+ ****************************************************************************/
+
+static sdio_capset_t kinetis_capabilities(FAR struct sdio_dev_s *dev)
+{
+#ifdef CONFIG_KINETIS_SDHC_WIDTH_D1_ONLY
+  return SDIO_CAPS_1BIT_ONLY;
+#else
+  return 0;
+}
+
+/****************************************************************************
  * Name: kinetis_status
  *
  * Description:
@@ -1325,7 +1349,7 @@ static void kinetis_reset(FAR struct sdio_dev_s *dev)
  *
  ****************************************************************************/
 
-static uint8_t kinetis_status(FAR struct sdio_dev_s *dev)
+static sdio_statset_t kinetis_status(FAR struct sdio_dev_s *dev)
 {
   struct kinetis_dev_s *priv = (struct kinetis_dev_s *)dev;
   return priv->cdstatus;
@@ -1560,7 +1584,7 @@ static void kinetis_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
         break;
 
       case CLOCK_SD_TRANSFER_1BIT :  /* SD normal operation clocking (narrow 1-bit mode) */
-#ifndef CONFIG_SDIO_WIDTH_D1_ONLY
+#ifndef CONFIG_KINETIS_SDHC_WIDTH_D1_ONLY
         frequency = CONFIG_KINETIS_SD1BIT_FREQ;
         break;
 #endif
@@ -1632,7 +1656,7 @@ static void kinetis_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
 
       case CLOCK_SD_TRANSFER_1BIT :  /* SD normal operation clocking (narrow
                                       * 1-bit mode) */
-#ifndef CONFIG_SDIO_WIDTH_D1_ONLY
+#ifndef CONFIG_KINETIS_SDHC_WIDTH_D1_ONLY
         regval |= (BOARD_SDHC_SD1MODE_PRESCALER | BOARD_SDHC_IDMODE_DIVISOR |
                    SDHC_SYSCTL_SDCLKEN | SDHC_SYSCTL_PEREN | SDHC_SYSCTL_HCKEN |
                    SDHC_SYSCTL_IPGEN);
@@ -2829,7 +2853,7 @@ FAR struct sdio_dev_s *sdhc_initialize(int slotno)
 
   /* Data width 4 or 8 */
 
-#ifndef CONFIG_SDIO_WIDTH_D1_ONLY
+#ifndef CONFIG_KINETIS_SDHC_WIDTH_D1_ONLY
   kinetis_pinconfig(PIN_SDHC0_D1);
   kinetis_pinconfig(PIN_SDHC0_D2);
   kinetis_pinconfig(PIN_SDHC0_D3);
@@ -2881,7 +2905,7 @@ FAR struct sdio_dev_s *sdhc_initialize(int slotno)
 void sdhc_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot)
 {
   struct kinetis_dev_s *priv = (struct kinetis_dev_s *)dev;
-  uint8_t cdstatus;
+  sdio_statset_t cdstatus;
   irqstate_t flags;
 
   /* Update card status */
