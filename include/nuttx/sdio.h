@@ -362,7 +362,6 @@
 
 #define SDIO_RESET(dev) ((dev)->reset(dev))
 
-
 /****************************************************************************
  * Name: SDIO_CAPABILITIES
  *
@@ -377,12 +376,12 @@
  *
  ****************************************************************************/
 
-#define SDIO_CAPABILITIES(dev) \
-  (((dev)->status != NULL) ? (dev)->capabilities(dev) : 0)
+#define SDIO_CAPABILITIES(dev) ((dev)->capabilities(dev))
 
 /* SDIO capability bits */
 
 #define SDIO_CAPS_1BIT_ONLY     0x01 /* Bit 0=1: Supports only 1-bit operation */
+#define SDIO_CAPS_DMASUPPORTED  0x02 /* Bit 1=1: Supports DMA data transfers */
 
 /****************************************************************************
  * Name: SDIO_STATUS
@@ -728,26 +727,6 @@
 #endif
 
 /****************************************************************************
- * Name: SDIO_DMASUPPORTED
- *
- * Description:
- *   Return true if the hardware can support DMA
- *
- * Input Parameters:
- *   dev - An instance of the SDIO device interface
- *
- * Returned Value:
- *   true if DMA is supported.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SDIO_DMA
-#  define SDIO_DMASUPPORTED(dev) ((dev)->dmasupported(dev))
-#else
-#  define SDIO_DMASUPPORTED(dev) (false)
-#endif
-
-/****************************************************************************
  * Name: SDIO_DMAPREFLIGHT
  *
  * Description:
@@ -923,7 +902,6 @@ struct sdio_dev_s
    */
 
 #ifdef CONFIG_SDIO_DMA
-  bool  (*dmasupported)(FAR struct sdio_dev_s *dev);
 #ifdef CONFIG_SDIO_PREFLIGHT
   int   (*dmapreflight)(FAR struct sdio_dev_s *dev,
           FAR const uint8_t *buffer, size_t buflen);

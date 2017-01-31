@@ -396,7 +396,6 @@ static int  lpc17_registercallback(FAR struct sdio_dev_s *dev,
 /* DMA */
 
 #ifdef CONFIG_SDIO_DMA
-static bool lpc17_dmasupported(FAR struct sdio_dev_s *dev);
 static int  lpc17_dmarecvsetup(FAR struct sdio_dev_s *dev,
               FAR uint8_t *buffer, size_t buflen);
 static int  lpc17_dmasendsetup(FAR struct sdio_dev_s *dev,
@@ -442,7 +441,6 @@ struct lpc17_dev_s g_scard_dev =
     .callbackenable   = lpc17_callbackenable,
     .registercallback = lpc17_registercallback,
 #ifdef CONFIG_SDIO_DMA
-    .dmasupported     = lpc17_dmasupported,
     .dmarecvsetup     = lpc17_dmarecvsetup,
     .dmasendsetup     = lpc17_dmasendsetup,
 #endif
@@ -1500,10 +1498,16 @@ static void lpc17_reset(FAR struct sdio_dev_s *dev)
 
 static sdio_capset_t lpc17_capabilities(FAR struct sdio_dev_s *dev)
 {
+  sdio_capset_t caps = 0;
+
 #ifdef CONFIG_LPC17_SDCARD_WIDTH_D1_ONLY
-  return SDIO_CAPS_1BIT_ONLY;
-#else
-  return 0;
+  caps |= SDIO_CAPS_1BIT_ONLY;
+#endif
+#ifdef CONFIG_SDIO_DMA
+  caps |= SDIO_CAPS_DMASUPPORTED;
+#endif
+
+  return caps;
 }
 
 /****************************************************************************
@@ -2408,27 +2412,6 @@ static int lpc17_registercallback(FAR struct sdio_dev_s *dev,
   priv->callback = callback;
   return OK;
 }
-
-/****************************************************************************
- * Name: lpc17_dmasupported
- *
- * Description:
- *   Return true if the hardware can support DMA
- *
- * Input Parameters:
- *   dev - An instance of the SD card device interface
- *
- * Returned Value:
- *   true if DMA is supported.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SDIO_DMA
-static bool lpc17_dmasupported(FAR struct sdio_dev_s *dev)
-{
-  return true;
-}
-#endif
 
 /****************************************************************************
  * Name: lpc17_dmarecvsetup

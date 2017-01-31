@@ -466,7 +466,6 @@ static int  stm32_registercallback(FAR struct sdio_dev_s *dev,
 /* DMA */
 
 #ifdef CONFIG_SDIO_DMA
-static bool stm32_dmasupported(FAR struct sdio_dev_s *dev);
 #ifdef CONFIG_SDIO_PREFLIGHT
 static int  stm32_dmapreflight(FAR struct sdio_dev_s *dev,
               FAR const uint8_t *buffer, size_t buflen);
@@ -519,7 +518,6 @@ struct stm32_dev_s g_sdiodev =
     .callbackenable   = stm32_callbackenable,
     .registercallback = stm32_registercallback,
 #ifdef CONFIG_SDIO_DMA
-    .dmasupported     = stm32_dmasupported,
 #ifdef CONFIG_SDIO_PREFLIGHT
     .dmapreflight     = stm32_dmapreflight,
 #endif
@@ -1620,10 +1618,16 @@ static void stm32_reset(FAR struct sdio_dev_s *dev)
 
 static sdio_capset_t stm32_capabilities(FAR struct sdio_dev_s *dev)
 {
+  sdio_capset_t caps = 0;
+
 #ifdef CONFIG_STM32_SDIO_WIDTH_D1_ONLY
-  return SDIO_CAPS_1BIT_ONLY;
+  caps |= SDIO_CAPS_1BIT_ONLY;
 #else
-  return 0;
+#ifdef CONFIG_SDIO_DMA
+  caps |= SDIO_CAPS_DMASUPPORTED;
+#endif
+
+  return caps;
 }
 
 /****************************************************************************
@@ -2556,27 +2560,6 @@ static int stm32_registercallback(FAR struct sdio_dev_s *dev,
   priv->callback = callback;
   return OK;
 }
-
-/****************************************************************************
- * Name: stm32_dmasupported
- *
- * Description:
- *   Return true if the hardware can support DMA
- *
- * Input Parameters:
- *   dev - An instance of the SDIO device interface
- *
- * Returned Value:
- *   true if DMA is supported.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SDIO_DMA
-static bool stm32_dmasupported(FAR struct sdio_dev_s *dev)
-{
-  return true;
-}
-#endif
 
 /****************************************************************************
  * Name: stm32_dmapreflight

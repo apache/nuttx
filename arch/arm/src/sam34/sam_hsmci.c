@@ -464,6 +464,7 @@ static int  sam_interrupt(int irq, void *context);
 /* Initialization/setup */
 
 static void sam_reset(FAR struct sdio_dev_s *dev);
+static sdio_capset_t sam_capabilities(FAR struct sdio_dev_s *dev);
 static sdio_statset_t sam_status(FAR struct sdio_dev_s *dev);
 static void sam_widebus(FAR struct sdio_dev_s *dev, bool enable);
 static void sam_clock(FAR struct sdio_dev_s *dev,
@@ -499,12 +500,11 @@ static int  sam_registercallback(FAR struct sdio_dev_s *dev,
 /* DMA */
 
 #ifdef CONFIG_SDIO_DMA
-static bool sam_dmasupported(FAR struct sdio_dev_s *dev);
-#endif
 static int  sam_dmarecvsetup(FAR struct sdio_dev_s *dev,
               FAR uint8_t *buffer, size_t buflen);
 static int  sam_dmasendsetup(FAR struct sdio_dev_s *dev,
               FAR const uint8_t *buffer, size_t buflen);
+#endif
 
 /* Initialization/uninitialization/reset ************************************/
 
@@ -519,7 +519,7 @@ struct sam_dev_s g_sdiodev =
   .dev =
   {
     .reset            = sam_reset,
-    .capabilities     = NULL,
+    .capabilities     = sam_capabilities,
     .status           = sam_status,
     .widebus          = sam_widebus,
     .clock            = sam_clock,
@@ -542,7 +542,6 @@ struct sam_dev_s g_sdiodev =
     .callbackenable   = sam_callbackenable,
     .registercallback = sam_registercallback,
 #ifdef CONFIG_SDIO_DMA
-    .dmasupported     = sam_dmasupported,
     .dmarecvsetup     = sam_dmarecvsetup,
     .dmasendsetup     = sam_dmasendsetup,
 #endif
@@ -1455,6 +1454,31 @@ static void sam_reset(FAR struct sdio_dev_s *dev)
 
   priv->widebus    = false;
   leave_critical_section(flags);
+}
+
+/****************************************************************************
+ * Name: sam_capabilities
+ *
+ * Description:
+ *   Get capabilities (and limitations) of the SDIO driver (optional)
+ *
+ * Input Parameters:
+ *   dev   - Device-specific state data
+ *
+ * Returned Value:
+ *   Returns a bitset of status values (see SDIO_CAPS_* defines)
+ *
+ ****************************************************************************/
+
+static sdio_capset_t sam_capabilities(FAR struct sdio_dev_s *dev)
+{
+  sdio_capset_t caps = 0;
+
+#ifdef CONFIG_SDIO_DMA
+  caps |= SDIO_CAPS_DMASUPPORTED;
+#endif
+
+  return caps;
 }
 
 /****************************************************************************
@@ -2394,27 +2418,6 @@ static int sam_registercallback(FAR struct sdio_dev_s *dev,
   priv->callback = callback;
   return OK;
 }
-
-/****************************************************************************
- * Name: sam_dmasupported
- *
- * Description:
- *   Return true if the hardware can support DMA
- *
- * Input Parameters:
- *   dev - An instance of the SDIO device interface
- *
- * Returned Value:
- *   true if DMA is supported.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SDIO_DMA
-static bool sam_dmasupported(FAR struct sdio_dev_s *dev)
-{
-  return true;
-}
-#endif
 
 /****************************************************************************
  * Name: sam_dmarecvsetup

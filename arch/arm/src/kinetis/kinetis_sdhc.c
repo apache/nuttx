@@ -328,7 +328,6 @@ static int  kinetis_registercallback(FAR struct sdio_dev_s *dev,
 /* DMA */
 
 #ifdef CONFIG_SDIO_DMA
-static bool kinetis_dmasupported(FAR struct sdio_dev_s *dev);
 static int  kinetis_dmarecvsetup(FAR struct sdio_dev_s *dev,
               FAR uint8_t *buffer, size_t buflen);
 static int  kinetis_dmasendsetup(FAR struct sdio_dev_s *dev,
@@ -378,7 +377,6 @@ struct kinetis_dev_s g_sdhcdev =
     .callbackenable   = kinetis_callbackenable,
     .registercallback = kinetis_registercallback,
 #ifdef CONFIG_SDIO_DMA
-    .dmasupported     = kinetis_dmasupported,
     .dmarecvsetup     = kinetis_dmarecvsetup,
     .dmasendsetup     = kinetis_dmasendsetup,
 #endif
@@ -1329,10 +1327,16 @@ static void kinetis_reset(FAR struct sdio_dev_s *dev)
 
 static sdio_capset_t kinetis_capabilities(FAR struct sdio_dev_s *dev)
 {
+  sdio_capset_t caps = 0;
+
 #ifdef CONFIG_KINETIS_SDHC_WIDTH_D1_ONLY
-  return SDIO_CAPS_1BIT_ONLY;
-#else
-  return 0;
+  caps |= SDIO_CAPS_1BIT_ONLY;
+#endif
+#ifdef CONFIG_SDIO_DMA
+  caps |= SDIO_CAPS_DMASUPPORTED;
+#endif
+
+  return caps;
 }
 
 /****************************************************************************
@@ -2549,27 +2553,6 @@ static int kinetis_registercallback(FAR struct sdio_dev_s *dev,
   priv->callback = callback;
   return OK;
 }
-
-/****************************************************************************
- * Name: kinetis_dmasupported
- *
- * Description:
- *   Return true if the hardware can support DMA
- *
- * Input Parameters:
- *   dev - An instance of the SDIO device interface
- *
- * Returned Value:
- *   true if DMA is supported.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SDIO_DMA
-static bool kinetis_dmasupported(FAR struct sdio_dev_s *dev)
-{
-  return true;
-}
-#endif
 
 /****************************************************************************
  * Name: kinetis_dmarecvsetup
