@@ -113,8 +113,22 @@ uint32_t g_oneshot_maxticks = UINT32_MAX;
 #endif
 
 /****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+#if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
+static uint32_t sched_cpu_scheduler(int cpu, uint32_t ticks, bool noswitches);
+#endif
+#if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
+static uint32_t sched_process_scheduler(uint32_t ticks, bool noswitches);
+#endif
+static unsigned int sched_timer_process(unsigned int ticks, bool noswitches);
+static void sched_timer_start(unsigned int ticks)
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* This is the duration of the currently active timer or, when
  * sched_timer_expiration() is called, the duration of interval timer
  * that just expired.  The value zero means that no timer was active.
@@ -167,7 +181,7 @@ static struct timespec g_stop_time;
  ****************************************************************************/
 
 #if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
-static inline uint32_t sched_cpu_scheduler(int cpu, uint32_t ticks,                                           bool noswitches)
+static uint32_t sched_cpu_scheduler(int cpu, uint32_t ticks, bool noswitches)
 {
   FAR struct tcb_s *rtcb  = current_task(cpu);
   FAR struct tcb_s *ntcb  = current_task(cpu);
@@ -244,7 +258,7 @@ static inline uint32_t sched_cpu_scheduler(int cpu, uint32_t ticks,             
 #endif
 
 /****************************************************************************
- * Name:  sched_process_scheduler
+ * Name: sched_process_scheduler
  *
  * Description:
  *   Check for operations specific to scheduling policy of the currently
@@ -268,8 +282,7 @@ static inline uint32_t sched_cpu_scheduler(int cpu, uint32_t ticks,             
  ****************************************************************************/
 
 #if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
-static inline uint32_t sched_process_scheduler(uint32_t ticks,
-                                               bool noswitches)
+static uint32_t sched_process_scheduler(uint32_t ticks, bool noswitches)
 {
 #ifdef CONFIG_SMP
   uint32_t minslice = UINT32_MAX;
