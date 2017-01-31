@@ -90,7 +90,7 @@
  *   CONFIG_STM32F7_SDMMC_DMA - Enable SDMMC.  This is a marginally optional.  For
  *     most usages, SDMMC will cause data overruns if used without DMA.
  *     NOTE the above system DMA configuration options.
- *   CONFIG_SDMMC_WIDTH_D1_ONLY - This may be selected to force the driver
+ *   CONFIG_SDMMC1/2_WIDTH_D1_ONLY - This may be selected to force the driver
  *     operate with only a single data line (the default is to use all
  *     4 SD data lines).
  *   CONFIG_SDMMC_PRI - SDMMC interrupt priority.  This setting is not very
@@ -384,6 +384,7 @@ struct stm32_dev_s
   /* DMA data transfer support */
 
   bool               widebus;    /* Required for DMA support */
+  bool               onebit;     /* true: Only 1-bit transfers are supported */
 #ifdef CONFIG_STM32F7_SDMMC_DMA
   volatile uint8_t   xfrflags;   /* Used to synchronize SDMMC and DMA completion events */
   bool               dmamode;    /* true: DMA mode transfer */
@@ -1871,7 +1872,13 @@ static void stm32_reset(FAR struct sdio_dev_s *dev)
 
 static sdio_capset_t stm32_capabilities(FAR struct sdio_dev_s *dev)
 {
+  struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
   sdio_capset_t caps = 0;
+
+  if (priv->onebit)
+    {
+      caps |= SDIO_CAPS_1BIT_ONLY;
+    }
 
 #ifdef CONFIG_STM32F7_SDMMC_DMA
   caps |= SDIO_CAPS_DMASUPPORTED;
@@ -1967,10 +1974,11 @@ static void stm32_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
       /* SD normal operation clocking (wide 4-bit mode) */
 
       case CLOCK_SD_TRANSFER_4BIT:
-#ifndef CONFIG_SDMMC_WIDTH_D1_ONLY
-        clckr = (STM32_SDMMC_CLCKR_SDWIDEXFR | STM32_SDMMC_CLKCR_CLKEN);
-        break;
-#endif
+        if (!priv->onebit)
+          {
+            clckr = (STM32_SDMMC_CLCKR_SDWIDEXFR | STM32_SDMMC_CLKCR_CLKEN);
+            break;
+          }
 
       /* SD normal operation clocking (narrow 1-bit mode) */
 
@@ -3169,7 +3177,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
 {
   struct stm32_dev_s *priv = NULL;
 #ifdef CONFIG_STM32F7_SDMMC_DMA
-  unsigned int      dmachan;
+  unsigned int dmachan;
 #endif
 
 #ifdef CONFIG_STM32F7_SDMMC1
@@ -3178,8 +3186,15 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
       /* Select SDMMC 1 */
 
       priv = &g_sdmmcdev1;
+
 #ifdef CONFIG_STM32F7_SDMMC_DMA
       dmachan = SDMMC1_DMACHAN;
+#endif
+
+#ifdef CONFIG_SDMMC1_WIDTH_D1_ONLY
+      priv->onebit = true;
+#else
+      priv->onebit = false;
 #endif
 
       /* Configure GPIOs for 4-bit, wide-bus operation (the chip is capable of
@@ -3188,17 +3203,17 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
        * If bus is multiplexed then there is a custom bus configuration utility
        * in the scope of the board support package.
        */
-#ifndef CONFIG_SDIO_MUXBUS
-        stm32_configgpio(GPIO_SDMMC1_D0);
-#ifndef CONFIG_SDMMC1_WIDTH_D1_ONLY
-        stm32_configgpio(GPIO_SDMMC1_D1);
-        stm32_configgpio(GPIO_SDMMC1_D2);
-        stm32_configgpio(GPIO_SDMMC1_D3);
-#endif
-        stm32_configgpio(GPIO_SDMMC1_CK);
-        stm32_configgpio(GPIO_SDMMC1_CMD);
-#endif
 
+#ifndef CONFIG_SDIO_MUXBUS
+      stm32_configgpio(GPIO_SDMMC1_D0);
+#ifndef CONFIG_SDMMC1_WIDTH_D1_ONLY
+      stm32_configgpio(GPIO_SDMMC1_D1);
+      stm32_configgpio(GPIO_SDMMC1_D2);
+      stm32_configgpio(GPIO_SDMMC1_D3);
+#endif
+      stm32_configgpio(GPIO_SDMMC1_CK);
+      stm32_configgpio(GPIO_SDMMC1_CMD);
+#endif
     }
   else
 #endif
@@ -3208,21 +3223,35 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
       /* Select SDMMC 2 */
 
       priv = &g_sdmmcdev2;
+
 #ifdef CONFIG_STM32F7_SDMMC_DMA
       dmachan = SDMMC2_DMACHAN;
 #endif
 
+#ifdef CONFIG_SDMMC2_WIDTH_D1_ONLY
+      priv->onebit = true;
+#else
+      priv->onebit = false;
+#endif
+
+      /* Configure GPIOs for 4-bit, wide-bus operation (the chip is capable of
+       * 8-bit wide bus operation but D4-D7 are not configured).
+       *
+       * If bus is multiplexed then there is a custom bus configuration utility
+       * in the scope of the board support package.
+       */
+
 #ifndef CONFIG_SDIO_MUXBUS
-        stm32_configgpio(GPIO_SDMMC2_D0);
+      stm32_configgpio(GPIO_SDMMC2_D0);
 #ifndef CONFIG_SDMMC2_WIDTH_D1_ONLY
-        stm32_configgpio(GPIO_SDMMC2_D1);
-        stm32_configgpio(GPIO_SDMMC2_D2);
-        stm32_configgpio(GPIO_SDMMC2_D3);
+      stm32_configgpio(GPIO_SDMMC2_D1);
+      stm32_configgpio(GPIO_SDMMC2_D2);
+      stm32_configgpio(GPIO_SDMMC2_D3);
 #endif
-        stm32_configgpio(GPIO_SDMMC2_CK);
-        stm32_configgpio(GPIO_SDMMC2_CMD);
+      stm32_configgpio(GPIO_SDMMC2_CK);
+      stm32_configgpio(GPIO_SDMMC2_CMD);
 #endif
-}
+    }
   else
 #endif
     {
@@ -3246,9 +3275,9 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
   priv->waitwdog = wd_create();
   DEBUGASSERT(priv->waitwdog);
 
+#ifdef CONFIG_STM32F7_SDMMC_DMA
   /* Allocate a DMA channel */
 
-#ifdef CONFIG_STM32F7_SDMMC_DMA
   priv->dma = stm32_dmachannel(dmachan);
   DEBUGASSERT(priv->dma);
 #endif
