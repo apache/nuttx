@@ -323,11 +323,18 @@
 #  define SYS_statfs                   (__SYS_filedesc+12)
 #  define SYS_telldir                  (__SYS_filedesc+13)
 
-#  if defined(CONFIG_PIPES) && CONFIG_DEV_PIPE_SIZE > 0
-#    define SYS_pipe2                  (__SYS_filedesc+14)
-#    define __SYS_mkfifo2              (__SYS_filedesc+15)
+#  if defined(CONFIG_PSEUDOFS_SOFTLINKS)
+#    define SYS_link                   (__SYS_filedesc+14)
+#    define __SYS_pipes                (__SYS_filedesc+15)
 #  else
-#    define __SYS_mkfifo2              (__SYS_filedesc+14)
+#    define __SYS_pipes                (__SYS_filedesc+14)
+#  endif
+
+#  if defined(CONFIG_PIPES) && CONFIG_DEV_PIPE_SIZE > 0
+#    define SYS_pipe2                  (__SYS_pipes+0)
+#    define __SYS_mkfifo2              (__SYS_pipes+1)
+#  else
+#    define __SYS_mkfifo2              (__SYS_pipes+0)
 #  endif
 
 #  if defined(CONFIG_PIPES) && CONFIG_DEV_FIFO_SIZE > 0

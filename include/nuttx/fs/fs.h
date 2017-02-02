@@ -328,7 +328,7 @@ union inode_ops_u
   FAR struct mqueue_inode_s            *i_mqueue; /* POSIX message queue */
 #endif
 #ifdef CONFIG_PSEUDOFS_SOFTLINKS
-  FAR char                             *i_link;   /* Full path to link */
+  FAR char                             *i_link;   /* Full path to link target */
 #endif
 };
 

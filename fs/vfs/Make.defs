@@ -43,10 +43,6 @@ ifneq ($(CONFIG_NSOCKET_DESCRIPTORS),0)
 
 CSRCS += fs_close.c fs_read.c fs_write.c fs_ioctl.c
 
-ifneq ($(CONFIG_PSEUDOFS_SOFTLINKS),0)
-CSRCS += fs_softlink.c
-endif
-
 # Stream support
 
 ifneq ($(CONFIG_NFILE_STREAMS),0)
@@ -91,7 +87,7 @@ endif
 CSRCS += fs_pread.c fs_pwrite.c
 
 ifneq ($(CONFIG_PSEUDOFS_SOFTLINKS),0)
-CSRCS += fs_softlink.c
+CSRCS += fs_link.c
 endif
 
 # Stream support

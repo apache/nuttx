@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/vfs/fs_softlink.c
+ * fs/vfs/fs_link.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -41,6 +41,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <unistd.h>
 #include <string.h>
 #include <errno.h>
 
@@ -64,7 +65,7 @@
  *
  * Description:
  *   The link() function will create a new link (directory entry) for the
- *   existing file, path1.  This implementation is simplied for use with
+ *   existing file, path2.  This implementation is simplied for use with
  *   NuttX in these ways:
  *
  *   - Links may be created only within the NuttX top-level, pseudo file
@@ -90,21 +91,21 @@ int link(FAR const char *path1, FAR const char *path2)
   int errcode;
   int ret;
 
-  /* Both paths must be absolute.  We need only check path2 here. path1 will
+  /* Both paths must be absolute.  We need only check path1 here. path2 will
    * be checked by inode find.
    */
 
-  if (path2 == NULL || *path2 != '/')
+  if (path1 == NULL || *path1 != '/')
     {
       errcode = EINVAL;
       goto errout;
     }
 
-  /* Check that no inode exists at the 'path2' and that the path up to 'path2'
+  /* Check that no inode exists at the 'path1' and that the path up to 'path1'
    * does not lie on a mounted volume.
    */
 
-  inode = inode_find(path1, NULL);
+  inode = inode_find(path2, NULL);
   if (inode != NULL)
     {
 #ifndef CONFIG_DISABLE_MOUNTPOINT
@@ -119,7 +120,7 @@ int link(FAR const char *path1, FAR const char *path2)
       else
 #endif
         {
-          /* A node already exists in the pseudofs at 'path2' */
+          /* A node already exists in the pseudofs at 'path1' */
 
           errcode = EEXIST;
         }
@@ -133,9 +134,9 @@ int link(FAR const char *path1, FAR const char *path2)
 
   else
     {
-      /* Copy path2 */
+      /* Copy path1 */
 
-      FAR char *newpath2 = strdup(path2);
+      FAR char *newpath2 = strdup(path1);
       if (newpath2 == NULL)
         {
           errcode = ENOMEM;
@@ -148,7 +149,7 @@ int link(FAR const char *path1, FAR const char *path2)
        */
 
       inode_semtake();
-      ret = inode_reserve(path1, &inode);
+      ret = inode_reserve(path2, &inode);
       inode_semgive();
 
       if (ret < 0)

@@ -32,6 +32,7 @@
 "insmod","nuttx/module.h","defined(CONFIG_MODULE)","FAR void *","FAR const char *","FAR const char *"
 "ioctl","sys/ioctl.h","!defined(CONFIG_LIBC_IOCTL_VARIADIC) && (CONFIG_NSOCKET_DESCRIPTORS > 0 || CONFIG_NFILE_DESCRIPTORS > 0)","int","int","int","unsigned long"
 "kill","signal.h","!defined(CONFIG_DISABLE_SIGNALS)","int","pid_t","int"
+"link","unistd.h","defined(CONFIG_PSEUDOFS_SOFTLINKS)","int","FAR const char *","FAR const char *"
 "listen","sys/socket.h","CONFIG_NSOCKET_DESCRIPTORS > 0 && defined(CONFIG_NET)","int","int","int"
 "lseek","unistd.h","CONFIG_NFILE_DESCRIPTORS > 0","off_t","int","off_t","int"
 "mkdir","sys/stat.h","CONFIG_NFILE_DESCRIPTORS > 0 && !defined(CONFIG_DISABLE_MOUNTPOINT)","int","FAR const char*","mode_t"
