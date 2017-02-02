@@ -196,7 +196,8 @@ _inode_dereference(FAR struct inode *node, FAR struct inode **peer,
 
   while (node != NULL && INODE_IS_SOFTLINK(node))
     {
-      node = inode_search_nofollow(node->u.i_link, peer, parent, relpath);
+      node = inode_search_nofollow((FAR const char **)&node->u.i_link,
+                                   peer, parent, relpath);
       if (++count > SYMLOOP_MAX)
         {
           return NULL;
@@ -526,8 +527,8 @@ void inode_free(FAR struct inode *node)
 #ifdef CONFIG_PSEUDOFS_SOFTLINKS
       /* Symbol links should never have peers or children */
 
-      DEBUGASSERT(!INODE_IS_SOFTLINK(node)) ||
-                  (node->i_peer == NULL && node->i_child == NULL)
+      DEBUGASSERT(!INODE_IS_SOFTLINK(node) ||
+                  (node->i_peer == NULL && node->i_child == NULL));
 #endif
 
       /* Free all peers and children of this i_node */
@@ -540,7 +541,7 @@ void inode_free(FAR struct inode *node)
        * entity.
        */
 
-      if (INODE_IS_SOFTLINK(node) && inode->u.i_link != NULL)
+      if (INODE_IS_SOFTLINK(node) && node->u.i_link != NULL)
         {
           kmm_free(node->u.i_link);
         }

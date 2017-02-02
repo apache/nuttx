@@ -136,7 +136,7 @@ FAR struct inode *inode_search(FAR const char **path,
 FAR struct inode *inode_search_nofollow(FAR const char **path,
                                         FAR struct inode **peer,
                                         FAR struct inode **parent,
-                                        FAR const char **relpath)
+                                        FAR const char **relpath);
 #else
 #  define inode_search_nofollow(p,l,a,r) inode_search(p,l,a,r)
 #endif
@@ -234,7 +234,7 @@ FAR struct inode *inode_find(FAR const char *path, FAR const char **relpath);
 
 #ifdef CONFIG_PSEUDOFS_SOFTLINKS
 FAR struct inode *inode_find_nofollow(FAR const char *path,
-                                      FARconst char **relpath);
+                                      FAR const char **relpath);
 #else
 #  define inode_find_nofollow(p,r) inode_find(p,r)
 #endif

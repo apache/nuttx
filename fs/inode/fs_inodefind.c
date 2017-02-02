@@ -88,7 +88,7 @@ FAR struct inode *inode_find(FAR const char *path, FAR const char **relpath)
 
 #ifdef CONFIG_PSEUDOFS_SOFTLINKS
 FAR struct inode *inode_find_nofollow(FAR const char *path,
-                                      FARconst char **relpath)
+                                      FAR const char **relpath)
 {
   FAR struct inode *node;
 

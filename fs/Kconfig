@@ -42,8 +42,7 @@ config DISABLE_PSEUDOFS_OPERATIONS
 
 config PSEUDOFS_SOFTLINKS
 	bool "Pseudo-filesystem soft links"
-	default y if DEFAULT_SMALL
-	default n if !DEFAULT_SMALL
+	default n
 	depends on !DISABLE_PSEUDOFS_OPERATIONS
 	---help---
 		Enable support for soft links in the pseudeo file system.  Soft

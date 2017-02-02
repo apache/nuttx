@@ -41,8 +41,10 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <string.h>
 #include <errno.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 
 #include "inode/inode.h"
@@ -94,7 +96,7 @@ int link(FAR const char *path1, FAR const char *path2)
 
   if (path2 == NULL || *path2 != '/')
     {
-      errode = EINVAL;
+      errcode = EINVAL;
       goto errout;
     }
 
@@ -102,7 +104,7 @@ int link(FAR const char *path1, FAR const char *path2)
    * does not lie on a mounted volume.
    */
 
-  inode = inode_find(pathname, NULL);
+  inode = inode_find(path1, NULL);
   if (inode != NULL)
     {
 #ifndef CONFIG_DISABLE_MOUNTPOINT
@@ -110,7 +112,7 @@ int link(FAR const char *path1, FAR const char *path2)
 
       if (INODE_IS_MOUNTPT(inode))
         {
-          /* Symbol links within the mounted volume are not supported */
+          /* Symbolic links within the mounted volume are not supported */
 
           errcode = ENOSYS;
         }
@@ -119,7 +121,7 @@ int link(FAR const char *path1, FAR const char *path2)
         {
           /* A node already exists in the pseudofs at 'path2' */
 
-          errorcode = EEXIST;
+          errcode = EEXIST;
         }
 
       goto errout_with_inode;
@@ -133,7 +135,7 @@ int link(FAR const char *path1, FAR const char *path2)
     {
       /* Copy path2 */
 
-      FAR char newpath2 = strdup(path2);
+      FAR char *newpath2 = strdup(path2);
       if (newpath2 == NULL)
         {
           errcode = ENOMEM;
@@ -146,12 +148,12 @@ int link(FAR const char *path1, FAR const char *path2)
        */
 
       inode_semtake();
-      ret = inode_reserve(pathname, &inode);
+      ret = inode_reserve(path1, &inode);
       inode_semgive();
 
       if (ret < 0)
         {
-          kmm_free(newpath2)
+          kmm_free(newpath2);
           errcode = -ret;
           goto errout;
         }
