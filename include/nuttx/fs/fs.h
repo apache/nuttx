@@ -125,7 +125,7 @@
  * descriptor instead.
  *
  * This case is when SUSv1 pseudo-terminals are used (CONFIG_PSEUDOTERM_SUSV1=y).
- * In this case, the output is encoded and decoded using these macros in 
+ * In this case, the output is encoded and decoded using these macros in
  * order to support (a) returning file descriptor 0 (which really should
  * not happen), and (b) avoiding confusion if some other open method returns
  * a positive, non-zero value which is not a file descriptor.

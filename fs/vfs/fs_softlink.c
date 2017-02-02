@@ -88,7 +88,15 @@ int link(FAR const char *path1, FAR const char *path2)
   int errcode;
   int ret;
 
-  DEBUGASSERT(path1 != NULL && path2 != NULL && *path2 != '\0');
+  /* Both paths must be absolute.  We need only check path2 here. path1 will
+   * be checked by inode find.
+   */
+
+  if (path2 == NULL || *path2 != '/')
+    {
+      errode = EINVAL;
+      goto errout;
+    }
 
   /* Check that no inode exists at the 'path2' and that the path up to 'path2'
    * does not lie on a mounted volume.
@@ -129,7 +137,7 @@ int link(FAR const char *path1, FAR const char *path2)
       if (newpath2 == NULL)
         {
           errcode = ENOMEM;
-          goto errout;          
+          goto errout;
         }
 
       /* Create an inode in the pseudo-filesystem at this path.

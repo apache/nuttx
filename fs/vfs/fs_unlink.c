@@ -85,9 +85,11 @@ int unlink(FAR const char *pathname)
   int               errcode;
   int               ret;
 
-  /* Get an inode for this file */
+  /* Get an inode for this file (without deference the final node in the path
+   * which may be a symbolic link)
+   */
 
-  inode = inode_find(pathname, &relpath);
+  inode = inode_find_nofollow(pathname, &relpath);
   if (!inode)
     {
       /* There is no inode that includes in this path */
@@ -124,17 +126,17 @@ int unlink(FAR const char *pathname)
 #endif
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  /* If this is a "dangling" pseudo-file node (i.e., it has operations) then rm
-   * should remove the node.
+  /* If this is a "dangling" pseudo-file node (i.e., it has no operations)
+   * or a soft link, then rm should remove the node.
    */
 
-  if (!INODE_IS_SPECIAL(inode) && inode->u.i_ops)
+  if (!INODE_IS_SPECIAL(inode))
     {
       /* If this is a pseudo-file node (i.e., it has no operations)
-       * then rmdir should remove the node.
+       * then unlink should remove the node.
        */
 
-      if (inode->u.i_ops)
+      if (inode->u.i_ops != NULL)
         {
           inode_semtake();
 

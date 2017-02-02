@@ -49,11 +49,15 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: inode_find
+ * Name: inode_find and indode_find_nofollow
  *
  * Description:
  *   This is called from the open() logic to get a reference to the inode
  *   associated with a path.
+ *
+ *   Both versions will follow soft links in path leading up to the terminal
+ *   node.  inode_find() will deference that terminal node,
+ *   indode_find_nofollow no follow will not.
  *
  ****************************************************************************/
 
@@ -61,7 +65,7 @@ FAR struct inode *inode_find(FAR const char *path, FAR const char **relpath)
 {
   FAR struct inode *node;
 
-  if (path == NULL || path[0] == '\0' || path[0] != '/')
+  if (path == NULL || *path != '/')
     {
       return NULL;
     }
@@ -71,7 +75,8 @@ FAR struct inode *inode_find(FAR const char *path, FAR const char **relpath)
    */
 
   inode_semtake();
-  node = inode_search(&path, (FAR struct inode**)NULL, (FAR struct inode**)NULL, relpath);
+  node = inode_search(&path, (FAR struct inode**)NULL,
+                      (FAR struct inode**)NULL, relpath);
   if (node)
     {
       node->i_crefs++;
@@ -81,3 +86,30 @@ FAR struct inode *inode_find(FAR const char *path, FAR const char **relpath)
   return node;
 }
 
+#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+FAR struct inode *inode_find_nofollow(FAR const char *path,
+                                      FARconst char **relpath)
+{
+  FAR struct inode *node;
+
+  if (path == NULL || *path != '/')
+    {
+      return NULL;
+    }
+
+  /* Find the node matching the path.  If found, increment the count of
+   * references on the node.
+   */
+
+  inode_semtake();
+  node = inode_search_nofollow(&path, (FAR struct inode**)NULL,
+                               (FAR struct inode**)NULL, relpath);
+  if (node)
+    {
+      node->i_crefs++;
+    }
+
+  inode_semgive();
+  return node;
+}
+#endif

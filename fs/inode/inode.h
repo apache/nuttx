@@ -112,14 +112,18 @@ void inode_semtake(void);
 void inode_semgive(void);
 
 /****************************************************************************
- * Name: inode_search
+ * Name: inode_search and inode_search_nofollow
  *
  * Description:
  *   Find the inode associated with 'path' returning the inode references
  *   and references to its companion nodes.
  *
+ *   Both versions will follow soft links in path leading up to the terminal
+ *   node.  inode_search() will deference that terminal node,
+ *   inode_search_nofollow will not.
+ *
  * Assumptions:
- *   The caller holds the tree_sem
+ *   The caller holds the g_inode_sem semaphore
  *
  ****************************************************************************/
 
@@ -127,6 +131,15 @@ FAR struct inode *inode_search(FAR const char **path,
                                FAR struct inode **peer,
                                FAR struct inode **parent,
                                FAR const char **relpath);
+
+#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+FAR struct inode *inode_search_nofollow(FAR const char **path,
+                                        FAR struct inode **peer,
+                                        FAR struct inode **parent,
+                                        FAR const char **relpath)
+#else
+#  define inode_search_nofollow(p,l,a,r) inode_search(p,l,a,r)
+#endif
 
 /****************************************************************************
  * Name: inode_free
@@ -205,15 +218,26 @@ FAR struct inode *inode_unlink(FAR const char *path);
 int inode_remove(FAR const char *path);
 
 /****************************************************************************
- * Name: inode_find
+ * Name: inode_find and indode_find_nofollow
  *
  * Description:
  *   This is called from the open() logic to get a reference to the inode
  *   associated with a path.
  *
+ *   Both versions will follow soft links in path leading up to the terminal
+ *   node.  inode_find() will deference that terminal node,
+ *   indode_find_nofollow no follow will not.
+ *
  ****************************************************************************/
 
-FAR struct inode *inode_find(FAR const char *path, const char **relpath);
+FAR struct inode *inode_find(FAR const char *path, FAR const char **relpath);
+
+#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+FAR struct inode *inode_find_nofollow(FAR const char *path,
+                                      FARconst char **relpath);
+#else
+#  define inode_find_nofollow(p,r) inode_find(p,r)
+#endif
 
 /****************************************************************************
  * Name: inode_addref
