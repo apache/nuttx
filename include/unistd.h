@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/unistd.h
  *
- *   Copyright (C) 2007-2009, 2013-2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013-2014, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -190,6 +190,7 @@ FAR char *getcwd(FAR char *buf, size_t size);
 int     access(FAR const char *path, int amode);
 int     rmdir(FAR const char *pathname);
 int     unlink(FAR const char *pathname);
+int     link(FAR const char *path1, FAR const char *path2);
 
 /* Execution of programs from files */
 

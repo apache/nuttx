@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/inode/fs_inode.c
  *
- *   Copyright (C) 2007-2009, 2011-2012, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2012, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,7 @@
 
 #include <assert.h>
 #include <semaphore.h>
+#include <assert.h>
 #include <errno.h>
 
 #include <nuttx/kmalloc.h>
@@ -345,6 +346,7 @@ FAR struct inode *inode_search(FAR const char **path,
                 {
                   *relpath = name;
                 }
+
               break;
             }
           else
@@ -401,8 +403,29 @@ void inode_free(FAR struct inode *node)
 
   if (node != NULL)
     {
+#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+      /* Symbol links should never have peers or children */
+
+      DEBUGASSERT(!INODE_IS_SOFTLINK(node)) ||
+                  (node->i_peer == NULL && node->i_child == NULL)
+#endif
+
+      /* Free all peers and children of this i_node */
+
       inode_free(node->i_peer);
       inode_free(node->i_child);
+
+#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+      /* If the inode is a symbolic link, the free the path to the linked
+       * entity.
+       */
+
+      if (INODE_IS_SOFTLINK(node) && inode->u.i_link != NULL)
+        {
+          kmm_free(node->u.i_link);
+        }
+#endif
+
       kmm_free(node);
     }
 }

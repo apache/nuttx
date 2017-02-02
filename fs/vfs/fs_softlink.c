@@ -1,7 +1,7 @@
 /****************************************************************************
- * fs/vfs/fs_rmdir.c
+ * fs/vfs/fs_softlink.c
  *
- *   Copyright (C) 2007-2009, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,8 +39,10 @@
 
 #include <nuttx/config.h>
 
-#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <errno.h>
+
 #include <nuttx/fs/fs.h>
 
 #include "inode/inode.h"
@@ -49,132 +51,112 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#undef FS_HAVE_WRITABLE_MOUNTPOINT
-#if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_WRITABLE) && \
-    CONFIG_NFILE_STREAMS > 0
-#  define FS_HAVE_WRITABLE_MOUNTPOINT 1
-#endif
-
-#undef FS_HAVE_PSEUDOFS_OPERATIONS
-#if !defined(CONFIG_DISABLE_PSEUDOFS_OPERATIONS) && CONFIG_NFILE_STREAMS > 0
-#  define FS_HAVE_PSEUDOFS_OPERATIONS 1
-#endif
-
-#undef FS_HAVE_RMDIR
-#if defined(FS_HAVE_WRITABLE_MOUNTPOINT) || defined(FS_HAVE_PSEUDOFS_OPERATIONS)
-#  define FS_HAVE_RMDIR 1
-#endif
-
-#ifdef FS_HAVE_RMDIR
+#ifdef CONFIG_PSEUDOFS_SOFTLINKS
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: rmdir
+ * Name: link
  *
- * Description:  Remove a file managed a mountpoint
+ * Description:
+ *   The link() function will create a new link (directory entry) for the
+ *   existing file, path1.  This implementation is simplied for use with
+ *   NuttX in these ways:
+ *
+ *   - Links may be created only within the NuttX top-level, pseudo file
+ *     system.  No file system currently supported by NuttX provides
+ *     symbolic links.
+ *   - For the same reason, only soft links are implemented.
+ *   - File privileges are ignored.
+ *   - c_time is not updated.
+ *
+ * Input Parameters:
+ *   path1 - Points to a pathname naming an existing file.
+ *   path2 - Points to a pathname naming the new directory entry to be created.
+ *
+ * Returned Value:
+ *   On success, zero (OK) is returned.  Otherwise, -1 (ERROR) is returned
+ *   the the errno variable is set appropriately.
  *
  ****************************************************************************/
 
-int rmdir(FAR const char *pathname)
+int link(FAR const char *path1, FAR const char *path2)
 {
   FAR struct inode *inode;
-  const char       *relpath = NULL;
-  int               errcode;
+  int errcode;
+  int ret;
 
-  /* Get an inode for the directory (or for the mountpoint containing the
-   * directory).  inode_find() automatically increments the reference count
-   * on the inode if one is found.
+  DEBUGASSERT(path1 != NULL && path2 != NULL && *path2 != '\0');
+
+  /* Check that no inode exists at the 'path2' and that the path up to 'path2'
+   * does not lie on a mounted volume.
    */
 
-  inode = inode_find(pathname, &relpath);
-  if (!inode)
+  inode = inode_find(pathname, NULL);
+  if (inode != NULL)
     {
-      /* There is no inode that includes in this path */
-
-      errcode = ENOENT;
-      goto errout;
-    }
-
 #ifndef CONFIG_DISABLE_MOUNTPOINT
-  /* Check if the inode is a valid mountpoint. */
+      /* Check if the inode is a mountpoint. */
 
-  if (INODE_IS_MOUNTPT(inode) && inode->u.i_mops)
-    {
-      /* Perform the rmdir operation using the relative path
-       * from the mountpoint.
-       */
-
-      if (inode->u.i_mops->rmdir)
+      if (INODE_IS_MOUNTPT(inode))
         {
-          int ret = inode->u.i_mops->rmdir(inode, relpath);
-          if (ret < 0)
-            {
-              errcode = -ret;
-              goto errout_with_inode;
-            }
+          /* Symbol links within the mounted volume are not supported */
+
+          errcode = ENOSYS;
         }
       else
-        {
-          errcode = ENOSYS;
-          goto errout_with_inode;
-        }
-    }
-  else
 #endif
+        {
+          /* A node already exists in the pseudofs at 'path2' */
 
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  /* If this is a "dangling" pseudo-directory node (i.e., it has no operations)
-   * then rmdir should remove the node.
+          errorcode = EEXIST;
+        }
+
+      goto errout_with_inode;
+    }
+
+  /* No inode exists that contains this path.  Create a new inode in the
+   * pseudo-filesystem at this location.
    */
 
-  if (!inode->u.i_ops)
+  else
     {
-      int ret;
+      /* Copy path2 */
 
-      /* If the directory inode has children, however, then it cannot be
-       * removed.
-       */
-
-      if (inode->i_child)
+      FAR char newpath2 = strdup(path2);
+      if (newpath2 == NULL)
         {
-          errcode = ENOTEMPTY;
-          goto errout_with_inode;
+          errcode = ENOMEM;
+          goto errout;          
         }
 
-      /* Remove the inode.  NOTE: Because we hold a reference count on the
-       * inode, it will not be deleted now.  But probably when inode_release()
-       * is called below.  inode_remove should return -EBUSY to indicate that
-       * the inode was not deleted now.
+      /* Create an inode in the pseudo-filesystem at this path.
+       * NOTE that the new inode will be created with a reference
+       * count of zero.
        */
 
       inode_semtake();
-      ret = inode_remove(pathname);
+      ret = inode_reserve(pathname, &inode);
       inode_semgive();
 
-      if (ret < 0 && ret != -EBUSY)
+      if (ret < 0)
         {
+          kmm_free(newpath2)
           errcode = -ret;
-          goto errout_with_inode;
+          goto errout;
         }
-    }
-  else
-    {
-      errcode = ENOTDIR;
-      goto errout_with_inode;
-    }
-#else
-    {
-      errcode = ENXIO;
-      goto errout_with_inode;
-    }
-#endif
 
-  /* Successfully removed the directory */
+      /* Initialize the inode */
 
-  inode_release(inode);
+      INODE_SET_SOFTLINK(inode);
+      inode->u.i_link = newpath2;
+      inode->i_crefs  = 1;
+    }
+
+  /* Symbolic link successfully created */
+
   return OK;
 
 errout_with_inode:
@@ -184,4 +166,4 @@ errout:
   return ERROR;
 }
 
-#endif /* FS_HAVE_RMDIR */
+#endif /* CONFIG_PSEUDOFS_SOFTLINKS */
