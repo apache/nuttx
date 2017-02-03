@@ -84,8 +84,9 @@ int rmdir(FAR const char *pathname)
   const char       *relpath = NULL;
   int               errcode;
 
-  /* Get an inode for this file.  inode_find() automatically increments the
-   * reference count on the inode if one is found.
+  /* Get an inode for the directory (or for the mountpoint containing the
+   * directory).  inode_find() automatically increments the reference count
+   * on the inode if one is found.
    */
 
   inode = inode_find(pathname, &relpath);

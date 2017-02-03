@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/fs/fs.h
  *
- *   Copyright (C) 2007-2009, 2011-2013, 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2013, 2015-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,7 +66,11 @@
 #define __FS_FLAG_EOF   (1 << 0) /* EOF detected by a read operation */
 #define __FS_FLAG_ERROR (1 << 1) /* Error detected by any operation */
 
-/* Inode i_flag values */
+/* Inode i_flag values:
+ *
+ *   Bit 0-3: Inode type (Bit 4 indicates internal OS types)
+ *   Bit 4:   Set if inode has been unlinked and is pending removal.
+ */
 
 #define FSNODEFLAG_TYPE_MASK       0x00000007 /* Isolates type field        */
 #define   FSNODEFLAG_TYPE_DRIVER   0x00000000 /*   Character driver         */
@@ -118,7 +122,7 @@
  * descriptor instead.
  *
  * This case is when SUSv1 pseudo-terminals are used (CONFIG_PSEUDOTERM_SUSV1=y).
- * In this case, the output is encoded and decoded using these macros in 
+ * In this case, the output is encoded and decoded using these macros in
  * order to support (a) returning file descriptor 0 (which really should
  * not happen), and (b) avoiding confusion if some other open method returns
  * a positive, non-zero value which is not a file descriptor.
@@ -337,6 +341,7 @@ struct inode
   FAR void         *i_private;  /* Per inode driver private data */
   char              i_name[1];  /* Name of inode (variable) */
 };
+
 #define FSNODE_SIZE(n) (sizeof(struct inode) + (n))
 
 /* This is the underlying representation of an open file.  A file

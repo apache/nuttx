@@ -131,10 +131,10 @@ int unlink(FAR const char *pathname)
   if (!INODE_IS_SPECIAL(inode) && inode->u.i_ops)
     {
       /* If this is a pseudo-file node (i.e., it has no operations)
-       * then rmdir should remove the node.
+       * then unlink should remove the node.
        */
 
-      if (inode->u.i_ops)
+      if (inode->u.i_ops != NULL)
         {
           inode_semtake();
 

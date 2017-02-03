@@ -61,7 +61,7 @@ FAR struct inode *inode_find(FAR const char *path, FAR const char **relpath)
 {
   FAR struct inode *node;
 
-  if (path == NULL || path[0] == '\0' || path[0] != '/')
+  if (path == NULL || *path != '/')
     {
       return NULL;
     }
@@ -71,7 +71,8 @@ FAR struct inode *inode_find(FAR const char *path, FAR const char **relpath)
    */
 
   inode_semtake();
-  node = inode_search(&path, (FAR struct inode**)NULL, (FAR struct inode**)NULL, relpath);
+  node = inode_search(&path, (FAR struct inode**)NULL,
+                      (FAR struct inode**)NULL, relpath);
   if (node)
     {
       node->i_crefs++;
