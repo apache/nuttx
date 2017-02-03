@@ -234,6 +234,7 @@ SYSCALL_LOOKUP(up_assert,                 2, STUB_up_assert)
 
 #  if defined(CONFIG_PSEUDOFS_SOFTLINKS)
   SYSCALL_LOOKUP(link,                    2, STUB_link)
+  SYSCALL_LOOKUP(readlink,                3, STUB_readlink)
 #  endif
 
 #  if defined(CONFIG_PIPES) && CONFIG_DEV_PIPE_SIZE > 0

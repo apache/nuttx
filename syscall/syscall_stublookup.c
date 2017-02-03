@@ -239,6 +239,8 @@ uintptr_t STUB_statfs(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_telldir(int nbr, uintptr_t parm1);
 
 uintptr_t STUB_link(int nbr, uintptr_t parm1, uintptr_t parm2);
+uintptr_t STUB_readlink(int nbr, uintptr_t parm1, uintptr_t parm2,
+            uintptr_t parm3);
 
 uintptr_t STUB_pipe2(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_mkfifo2(int nbr, uintptr_t parm1, uintptr_t parm2,

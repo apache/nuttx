@@ -190,7 +190,11 @@ FAR char *getcwd(FAR char *buf, size_t size);
 int     access(FAR const char *path, int amode);
 int     rmdir(FAR const char *pathname);
 int     unlink(FAR const char *pathname);
+
+#ifdef CONFIG_PSEUDOFS_SOFTLINKS
 int     link(FAR const char *path1, FAR const char *path2);
+ssize_t readlink(FAR const char *path, FAR char *buf, size_t bufsize);
+#endif
 
 /* Execution of programs from files */
 

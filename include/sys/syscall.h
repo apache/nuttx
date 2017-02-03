@@ -325,7 +325,8 @@
 
 #  if defined(CONFIG_PSEUDOFS_SOFTLINKS)
 #    define SYS_link                   (__SYS_filedesc+14)
-#    define __SYS_pipes                (__SYS_filedesc+15)
+#    define SYS_readlink               (__SYS_filedesc+15)
+#    define __SYS_pipes                (__SYS_filedesc+16)
 #  else
 #    define __SYS_pipes                (__SYS_filedesc+14)
 #  endif
