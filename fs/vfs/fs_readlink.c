@@ -91,7 +91,7 @@ ssize_t readlink(FAR const char *path, FAR char *buf, size_t bufsize)
    * symbolic link node.
    */
 
-  node = inode_find(path, &relpath);
+  node = inode_find_nofollow(path, &relpath);
   if (node == NULL)
     {
       errcode = ENOENT;
@@ -113,7 +113,7 @@ ssize_t readlink(FAR const char *path, FAR char *buf, size_t bufsize)
   /* Copy the link target pathto the user-provided buffer. */
 
   *buf = '\0';
-  (void)strncpy(node->u.i_link, buf, bufsize);
+  (void)strncpy(buf, node->u.i_link, bufsize);
 
   /* Release our reference on the inode and return the length */
 
