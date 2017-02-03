@@ -168,6 +168,38 @@ config ARCH_CHIP_MK64FN1M0VMD12
 	select KINETIS_HAVE_I2C1
 	select KINETIS_HAVE_I2C2
 
+config ARCH_CHIP_MK66FX1M0VMD18
+	bool "MK66FX1M0VMD18"
+	select ARCH_FAMILY_K66
+	select KINETIS_HAVE_I2C1
+	select KINETIS_HAVE_I2C2
+	select KINETIS_HAVE_I2C3
+	select KINETIS_HAVE_I2C4
+
+config ARCH_CHIP_MK66FN2M0VMD18
+	bool "MK66FN2M0VMD18"
+	select ARCH_FAMILY_K66
+	select KINETIS_HAVE_I2C1
+	select KINETIS_HAVE_I2C2
+	select KINETIS_HAVE_I2C3
+	select KINETIS_HAVE_I2C4
+
+config ARCH_CHIP_MK66FX1M0VLQ18
+	bool "MK66FX1M0VLQ18"
+	select ARCH_FAMILY_K66
+	select KINETIS_HAVE_I2C1
+	select KINETIS_HAVE_I2C2
+	select KINETIS_HAVE_I2C3
+	select KINETIS_HAVE_I2C4
+
+config ARCH_CHIP_MK66FN2M0VLQ18
+	bool "MK66FN2M0VLQ18"
+	select ARCH_FAMILY_K66
+	select KINETIS_HAVE_I2C1
+	select KINETIS_HAVE_I2C2
+	select KINETIS_HAVE_I2C3
+	select KINETIS_HAVE_I2C4
+
 endchoice
 
 # Chip families
@@ -188,6 +220,10 @@ config ARCH_FAMILY_K64
 	bool
 	default n
 
+config ARCH_FAMILY_K66
+	bool
+	default n
+
 menu "Kinetis Peripheral Support"
 
 config KINETIS_HAVE_I2C1
@@ -195,6 +231,14 @@ config KINETIS_HAVE_I2C1
 	default n
 
 config KINETIS_HAVE_I2C2
+	bool
+	default n
+
+config KINETIS_HAVE_I2C3
+	bool
+	default n
+
+config KINETIS_HAVE_I2C4
 	bool
 	default n
 
@@ -255,7 +299,7 @@ config KINETIS_UART5
 config KINETIS_ENET
 	bool "Ethernet"
 	default n
-	depends on ARCH_FAMILY_K60 || ARCH_FAMILY_K64
+	depends on ARCH_FAMILY_K60 || ARCH_FAMILY_K64 || ARCH_FAMILY_K66
 	select ARCH_HAVE_PHY
 	select ARCH_HAVE_NETDEV_STATISTICS
 	select NET
@@ -266,7 +310,7 @@ config KINETIS_ENET
 config KINETIS_RNGB
 	bool "Random number generator"
 	default n
-	depends on ARCH_FAMILY_K60 || ARCH_FAMILY_K64
+	depends on ARCH_FAMILY_K60 || ARCH_FAMILY_K64 || ARCH_FAMILY_K66
 	select ARCH_HAVE_RNG
 	---help---
 		Support the random number generator(K6x only)
