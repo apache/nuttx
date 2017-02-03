@@ -186,6 +186,7 @@ static inline FAR struct inode *
 _inode_dereference(FAR struct inode *node, FAR struct inode **peer,
                    FAR struct inode **parent, FAR const char **relpath)
 {
+  FAR const char *copy;
   unsigned int count = 0;
 
   /* An infinite loop is avoided only by the loop count.
@@ -196,9 +197,14 @@ _inode_dereference(FAR struct inode *node, FAR struct inode **peer,
 
   while (node != NULL && INODE_IS_SOFTLINK(node))
     {
-      node = inode_search_nofollow((FAR const char **)&node->u.i_link,
-                                   peer, parent, relpath);
-      if (++count > SYMLOOP_MAX)
+      /* Careful: inode_search_nofollow overwrites the input string pointer */
+
+      copy = (FAR const char *)node->u.i_link;
+
+      /* Now, look-up the inode associated with the target path */
+
+      node = inode_search_nofollow(&copy, peer, parent, relpath);
+      if (node == NULL && ++count > SYMLOOP_MAX)
         {
           return NULL;
         }
@@ -348,6 +354,20 @@ FAR struct inode *inode_search(FAR const char **path,
   FAR struct inode *node  = g_root_inode;
   FAR struct inode *left  = NULL;
   FAR struct inode *above = NULL;
+#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+  FAR struct inode *newnode;
+#endif
+
+#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+  /* Handle the case were the root node is a symbolic link */
+
+#warning Missing logic
+#endif
+
+  /* Traverse the pseudo file system node tree until either (1) all nodes
+   * have been examined without finding the matching node, or (2) the
+   * matching node is found.
+   */
 
   while (node != NULL)
     {
@@ -383,13 +403,32 @@ FAR struct inode *inode_search(FAR const char **path,
           FAR const char *nextname = inode_nextname(name);
           if (*nextname != '\0')
             {
-              node = _inode_dereference(node, NULL, &above, relpath);
-              if (node == NULL)
+              newnode = _inode_dereference(node, NULL, &above, relpath);
+              if (newnode == NULL)
                 {
+                  /* Probably means that the node is a symbolic link, but
+                   * that the target of the symbolic link does not exist.
+                   */
+
                   break;
+                }
+              else if (newnode != node)
+                {
+                  /* The node was a valid symbolic link and we have jumped to a
+                   * different, spot in the the pseudo file system tree.  Reset
+                   * everything and continue looking at the next level "down"
+                   * from that new spot in the tree.
+                   */
+
+                  above = newnode;
+                  left  = NULL;
+                  node  = newnode->i_child;
+                  continue;
                 }
             }
 #endif
+          /* Continue looking to the left */
+
           left = node;
           node = node->i_peer;
         }
@@ -429,7 +468,7 @@ FAR struct inode *inode_search(FAR const char **path,
             }
           else
             {
-              /* More to go.. */
+              /* More nodes to be examined in the path... */
 
 #ifdef CONFIG_PSEUDOFS_SOFTLINKS
               /* If this intermediate inode in the is a soft link, then (1)
@@ -438,13 +477,46 @@ FAR struct inode *inode_search(FAR const char **path,
                * continue searching with that inode instead.
                */
 
-              node = _inode_dereference(node,  NULL, NULL, relpath);
-              if (node == NULL)
+              newnode = _inode_dereference(node,  NULL, NULL, relpath);
+              if (newnode == NULL)
                 {
+                  /* Probably means that the node is a symbolic link, but
+                   * that the target of the symbolic link does not exist.
+                   */
+
                   break;
                 }
-#endif
+              else if (newnode != node)
+                {
+                  /* The node was a valid symbolic link and we have jumped to a
+                   * different, spot in the the pseudo file system tree.  Reset
+                   * everything and continue looking to the right (if possible)
+                   * otherwise at the next level "down" from that new spot in
+                   * the tree.
+                   */
 
+                  if (newnode->i_peer != NULL)
+                    {
+                      above = NULL;  /* REVISIT: This can't be right */
+                      left  = newnode;
+                      node  = newnode->i_peer;
+
+                      /* Did the symbolic link take us to a mountpoint? */
+
+                      if (INODE_IS_MOUNTPT(newnode))
+                        {
+                          /* Yes.. return the mountpoint information */
+
+                          if (relpath)
+                           {
+                             *relpath = name;
+                           }
+
+                          break;
+                        }
+                    }
+                }
+#endif
               /* Keep looking at the next level "down" */
 
               above = node;
