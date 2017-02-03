@@ -142,6 +142,26 @@ FAR struct inode *inode_search_nofollow(FAR const char **path,
 #endif
 
 /****************************************************************************
+ * Name: inode_linktarget
+ *
+ * Description:
+ *   If the inode is a soft link, then (1) get the name of the full path of
+ *   the soft link, (2) recursively look-up the inode referenced by the soft
+ *   link, and (3) return the inode referenced by the soft link.
+ *
+ * Assumptions:
+ *   The caller holds the g_inode_sem semaphore
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+FAR struct inode *inode_linktarget(FAR struct inode *node,
+                                   FAR struct inode **peer,
+                                   FAR struct inode **parent,
+                                   FAR const char **relpath);
+#endif
+
+/****************************************************************************
  * Name: inode_free
  *
  * Description:

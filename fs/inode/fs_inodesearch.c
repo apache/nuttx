@@ -135,52 +135,6 @@ static int _inode_compare(FAR const char *fname,
 }
 
 /****************************************************************************
- * Name: _inode_dereference
- *
- * Description:
- *   If the inode is a soft link, then (1) get the name of the full path of
- *   the soft link, (2) recursively look-up the inode referenced by the soft
- *   link, and (3) return the inode referenced by the soft link.
- *
- * Assumptions:
- *   The caller holds the g_inode_sem semaphore
- *
- ****************************************************************************/
-
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
-static inline FAR struct inode *
-_inode_dereference(FAR struct inode *node, FAR struct inode **peer,
-                   FAR struct inode **parent, FAR const char **relpath)
-{
-  FAR const char *copy;
-  unsigned int count = 0;
-
-  /* An infinite loop is avoided only by the loop count.
-  *
-   * REVISIT:  The ELOOP error should be reported to the application in that
-   * case but there is no simple mechanism to do that.
-   */
-
-  while (node != NULL && INODE_IS_SOFTLINK(node))
-    {
-      /* Careful: inode_search_nofollow overwrites the input string pointer */
-
-      copy = (FAR const char *)node->u.i_link;
-
-      /* Now, look-up the inode associated with the target path */
-
-      node = inode_search_nofollow(&copy, peer, parent, relpath);
-      if (node == NULL && ++count > SYMLOOP_MAX)
-        {
-          return NULL;
-        }
-    }
-
-  return node;
-}
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -266,7 +220,7 @@ FAR struct inode *inode_search(FAR const char **path,
           FAR const char *nextname = inode_nextname(name);
           if (*nextname != '\0')
             {
-              newnode = _inode_dereference(node, NULL, &above, relpath);
+              newnode = inode_linktarget(node, NULL, &above, relpath);
               if (newnode == NULL)
                 {
                   /* Probably means that the node is a symbolic link, but
@@ -340,7 +294,7 @@ FAR struct inode *inode_search(FAR const char **path,
                * continue searching with that inode instead.
                */
 
-              newnode = _inode_dereference(node,  NULL, NULL, relpath);
+              newnode = inode_linktarget(node,  NULL, NULL, relpath);
               if (newnode == NULL)
                 {
                   /* Probably means that the node is a symbolic link, but
@@ -438,7 +392,54 @@ FAR struct inode *inode_search(FAR const char **path,
        * return that inode instead.
        */
 
-       return _inode_dereference(node, peer, parent, relpath);
+       return inode_linktarget(node, peer, parent, relpath);
+    }
+
+  return node;
+}
+#endif
+
+/****************************************************************************
+ * Name: inode_linktarget
+ *
+ * Description:
+ *   If the inode is a soft link, then (1) get the name of the full path of
+ *   the soft link, (2) recursively look-up the inode referenced by the soft
+ *   link, and (3) return the inode referenced by the soft link.
+ *
+ * Assumptions:
+ *   The caller holds the g_inode_sem semaphore
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+FAR struct inode *inode_linktarget(FAR struct inode *node,
+                                   FAR struct inode **peer,
+                                   FAR struct inode **parent,
+                                   FAR const char **relpath)
+{
+  FAR const char *copy;
+  unsigned int count = 0;
+
+  /* An infinite loop is avoided only by the loop count.
+  *
+   * REVISIT:  The ELOOP error should be reported to the application in that
+   * case but there is no simple mechanism to do that.
+   */
+
+  while (node != NULL && INODE_IS_SOFTLINK(node))
+    {
+      /* Careful: inode_search_nofollow overwrites the input string pointer */
+
+      copy = (FAR const char *)node->u.i_link;
+
+      /* Now, look-up the inode associated with the target path */
+
+      node = inode_search_nofollow(&copy, peer, parent, relpath);
+      if (node == NULL && ++count > SYMLOOP_MAX)
+        {
+          return NULL;
+        }
     }
 
   return node;

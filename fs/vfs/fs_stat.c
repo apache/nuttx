@@ -79,48 +79,84 @@ static inline int statpseudo(FAR struct inode *inode, FAR struct stat *buf)
 #if defined(CONFIG_FS_SHM)
        if (INODE_IS_SHM(inode)) */
         {
-          buf->st_mode | S_IFSHM;
+          buf->st_mode = S_IFSHM;
         }
       else
 #endif
        {
        }
     }
-  else if (inode->u.i_ops)
+  else if (inode->u.i_ops != NULL)
     {
-      if (inode->u.i_ops->read)
-        {
-          buf->st_mode = S_IROTH | S_IRGRP | S_IRUSR;
-        }
+#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+      /* Handle softlinks differently.  Just call stat() recursively on the
+       * target of the softlink.
+       *
+       * REVISIT: This has the possibility of an infinite loop!
+       */
 
-      if (inode->u.i_ops->write)
+      if (INODE_IS_SOFTLINK(inode))
         {
-          buf->st_mode |= S_IWOTH | S_IWGRP | S_IWUSR;
-        }
+          int ret;
 
-      if (INODE_IS_MOUNTPT(inode))
-        {
-          buf->st_mode |= S_IFDIR;
-        }
-      else if (INODE_IS_BLOCK(inode))
-        {
-          /* What is if also has child inodes? */
+          /* stat() the target of the soft link.
+           *
+           * Note: We don't really handle links to links nicely.  I suppose
+           * that we should repetitively deference the symbolic link inodes
+           * until we discover the true target link?
+           */
 
-          buf->st_mode |= S_IFBLK;
-        }
-#if 0 /* ifdef CONFIG_PSEUDOFS_SOFTLINKS See REVISIT in stat() */
-      else if (INODE_IS_SOFTLINK(inode))
-        {
-          /* Should not have child inodes. */
+          ret = stat((FAR const char *)inode->u.i_link, buf);
+
+          /* If stat() fails, then there is a probleml with target of the
+           * symbolic link, but not with the symbolic link itself.  We should
+           * still report success, just with less information.
+           */
+
+          if (ret < 0)
+            {
+              memset(buf, 0, sizeof(struct stat));
+            }
+
+          /* And make sure that the caller knows that this really a symbolic link. */
 
           buf->st_mode |= S_IFLNK;
         }
+      else
 #endif
-      else /* if (INODE_IS_DRIVER(inode)) */
         {
-          /* What is it if it also has child inodes? */
+          /* Determine read/write privileges based on the existence of read
+           * and write methods.
+           */
 
-          buf->st_mode |= S_IFCHR;
+          if (inode->u.i_ops->read)
+            {
+              buf->st_mode = S_IROTH | S_IRGRP | S_IRUSR;
+            }
+
+          if (inode->u.i_ops->write)
+            {
+              buf->st_mode |= S_IWOTH | S_IWGRP | S_IWUSR;
+            }
+
+          /* Determine the type of the inode */
+
+          if (INODE_IS_MOUNTPT(inode))
+            {
+              buf->st_mode |= S_IFDIR;
+            }
+          else if (INODE_IS_BLOCK(inode))
+            {
+              /* What is if also has child inodes? */
+
+              buf->st_mode |= S_IFBLK;
+            }
+          else /* if (INODE_IS_DRIVER(inode)) */
+            {
+              /* What is it if it also has child inodes? */
+
+              buf->st_mode |= S_IFCHR;
+            }
         }
     }
   else
@@ -199,11 +235,7 @@ int stat(FAR const char *path, FAR struct stat *buf)
 
   /* Get an inode for this file */
 
-#if 0 /* REVISIT: inode_find_nofollow needed for symlinks but conflicts with other usage */
   inode = inode_find_nofollow(path, &relpath);
-#else
-  inode = inode_find(path, &relpath);
-#endif
   if (!inode)
     {
       /* This name does not refer to a psudeo-inode and there is no
