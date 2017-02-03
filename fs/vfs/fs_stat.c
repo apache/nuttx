@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/vfs/fs_stat.c
  *
- *   Copyright (C) 2007-2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -104,10 +104,18 @@ static inline int statpseudo(FAR struct inode *inode, FAR struct stat *buf)
         }
       else if (INODE_IS_BLOCK(inode))
         {
-          /* What is it also has child inodes? */
+          /* What is if also has child inodes? */
 
           buf->st_mode |= S_IFBLK;
         }
+#if 0 /* ifdef CONFIG_PSEUDOFS_SOFTLINKS See REVISIT in stat() */
+      else if (INODE_IS_SOFTLINK(inode))
+        {
+          /* Should not have child inodes. */
+
+          buf->st_mode |= S_IFLNK;
+        }
+#endif
       else /* if (INODE_IS_DRIVER(inode)) */
         {
           /* What is it if it also has child inodes? */
@@ -191,7 +199,11 @@ int stat(FAR const char *path, FAR struct stat *buf)
 
   /* Get an inode for this file */
 
+#if 0 /* REVISIT: inode_find_nofollow needed for symlinks but conflicts with other usage */
+  inode = inode_find_nofollow(path, &relpath);
+#else
   inode = inode_find(path, &relpath);
+#endif
   if (!inode)
     {
       /* This name does not refer to a psudeo-inode and there is no

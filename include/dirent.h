@@ -55,15 +55,18 @@
  * of NuttX, an inode can be BOTH a file and a directory
  */
 
-#define DTYPE_FILE      0x01
-#define DTYPE_CHR       0x02
-#define DTYPE_BLK       0x04
-#define DTYPE_DIRECTORY 0x08
+#define DTYPE_UNKNOWN   0         /* The file type could not be determined */
+#define DTYPE_FILE      (1 << 0)  /* Bit 0: Regular file */
+#define DTYPE_CHR       (1 << 1)  /* Bit 1: Character device */
+#define DTYPE_BLK       (1 << 2)  /* Bit 2: Block device */
+#define DTYPE_DIRECTORY (1 << 3)  /* Bit 3: Directory */
+#define DTYPE_LINK      (1 << 4)  /* Bit 4: Symbolic link */
 
 #define DIRENT_ISFILE(dtype)      (((dtype) & DTYPE_FILE) != 0 )
 #define DIRENT_ISCHR(dtype)       (((dtype) & DTYPE_CHR) != 0 )
 #define DIRENT_ISBLK(dtype)       (((dtype) & DTYPE_BLK) != 0 )
 #define DIRENT_ISDIRECTORY(dtype) (((dtype) & DTYPE_DIRECTORY) != 0 )
+#define DIRENT_ISLINK(dtype)      (((dtype) & DTYPE_LINK) != 0 )
 
 /****************************************************************************
  * Public Type Definitions
