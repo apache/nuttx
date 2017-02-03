@@ -43,7 +43,7 @@ ifneq ($(CONFIG_NSOCKET_DESCRIPTORS),0)
 
 CSRCS += fs_close.c fs_read.c fs_write.c fs_ioctl.c
 
-# Stream support
+# Support for network access using streams
 
 ifneq ($(CONFIG_NFILE_STREAMS),0)
 CSRCS += fs_fdopen.c
