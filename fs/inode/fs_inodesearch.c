@@ -268,33 +268,30 @@ FAR struct inode *inode_search(FAR const char **path,
               else if (newnode != node)
                 {
                   /* The node was a valid symbolic link and we have jumped to a
-                   * different, spot in the the pseudo file system tree.  Reset
-                   * everything and continue looking to the right (if possible)
-                   * otherwise at the next level "down" from that new spot in
-                   * the tree.
+                   * different, spot in the the pseudo file system tree.
+                   *
+                   * Continue from this new inode.
                    */
 
-                  if (newnode->i_peer != NULL)
+                  node = newnode;
+
+                  /* Check if this took us to a mountpoint. */
+
+                  if (INODE_IS_MOUNTPT(newnode))
                     {
-                      /* Set up to continue searching at the new node */
+                      /* Yes.. return the mountpoint information.
+                       * REVISIT: The relpath is incorrect in this case.  It is
+                       * relative to symbolic link, not to the root of the mount.
+                       */
 
-                      above = NULL;  /* REVISIT: This can't be right */
-                      left  = newnode;
-                      node  = newnode->i_peer;
+                      if (relpath)
+                       {
+                         *relpath = name;
+                       }
 
-                      /* Did the symbolic link take us to a mountpoint? */
-
-                      if (INODE_IS_MOUNTPT(newnode))
-                        {
-                          /* Yes.. return the mountpoint information */
-
-                          if (relpath)
-                           {
-                             *relpath = name;
-                           }
-
-                          break;
-                        }
+                      above = NULL;
+                      left  = NULL;
+                      break;
                     }
                 }
 #endif
@@ -346,14 +343,23 @@ FAR struct inode *inode_search(FAR const char **path,
 
   FAR struct inode *node = inode_search_nofollow(path, peer, parent, relpath);
 
-  /* Did we find it? */
+  /* Did we find it?  inode_search_nofollow() will terminate in one of
+   * three ways:
+   *
+   *   1. With an error (node == NULL)
+   *   2. With node referring to the terminal inode which may be a symbolic
+   *      link, or
+   *   3. with node referring to an intermediate MOUNTPOINT inode with the
+   *      residual path in relpath.
+   *
+   * REVISIT: The relpath is incorrect in the final case.  It will be relative
+   * to symbolic link, not to the root of the mount.
+   */
 
-  if (node != NULL)
+  if (node != NULL && INODE_IS_SOFTLINK(node))
     {
-      /* Yes.. If the terminating inode is a soft link, then (1) get
-       * the name of the full path of the soft link, (2) recursively
-       * look-up the inode referenced by the soft link, and (3)
-       * return that inode instead.
+      /* The terminating inode is a valid soft link:  Return the inode,
+       * corresponding to link target.
        */
 
        return inode_linktarget(node, peer, parent, relpath);
