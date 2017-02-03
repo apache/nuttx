@@ -122,6 +122,9 @@ void inode_semgive(void);
  *   node.  inode_search() will deference that terminal node,
  *   inode_search_nofollow will not.
  *
+ *   If a soft link is encountered that is not the terminal node in the path,
+ *   that that WILL be deferenced and the mountpoint inode will be returned.
+ *
  * Assumptions:
  *   The caller holds the g_inode_sem semaphore
  *
@@ -247,6 +250,9 @@ int inode_remove(FAR const char *path);
  *   Both versions will follow soft links in path leading up to the terminal
  *   node.  inode_find() will deference that terminal node,
  *   indode_find_nofollow no follow will not.
+ *
+ *   If a soft link is encounter that is not the terminal node in the path,
+ *   that that WILL be deferenced and the mountpoint inode will be returned.
  *
  ****************************************************************************/
 

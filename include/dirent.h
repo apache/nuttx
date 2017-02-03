@@ -62,11 +62,11 @@
 #define DTYPE_DIRECTORY (1 << 3)  /* Bit 3: Directory */
 #define DTYPE_LINK      (1 << 4)  /* Bit 4: Symbolic link */
 
-#define DIRENT_ISFILE(dtype)      (((dtype) & DTYPE_FILE) != 0 )
-#define DIRENT_ISCHR(dtype)       (((dtype) & DTYPE_CHR) != 0 )
-#define DIRENT_ISBLK(dtype)       (((dtype) & DTYPE_BLK) != 0 )
-#define DIRENT_ISDIRECTORY(dtype) (((dtype) & DTYPE_DIRECTORY) != 0 )
-#define DIRENT_ISLINK(dtype)      (((dtype) & DTYPE_LINK) != 0 )
+#define DIRENT_ISFILE(dtype)      (((dtype) & DTYPE_FILE) != 0)
+#define DIRENT_ISCHR(dtype)       (((dtype) & DTYPE_CHR) != 0)
+#define DIRENT_ISBLK(dtype)       (((dtype) & DTYPE_BLK) != 0)
+#define DIRENT_ISDIRECTORY(dtype) (((dtype) & DTYPE_DIRECTORY) != 0)
+#define DIRENT_ISLINK(dtype)      (((dtype) & DTYPE_LINK) != 0)
 
 /****************************************************************************
  * Public Type Definitions
