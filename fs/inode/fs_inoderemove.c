@@ -58,6 +58,11 @@
  *   path refers to.  This is normally done in preparation to removing or
  *   moving an inode.
  *
+ *   In symbolic links in the pseduo file system are enabled, then this
+ *   logic will follow the symbolic links up until the terminal node.  Then
+ *   that link in removed. So if this the terminal node is a symbolic link,
+ *   the symbolic link node will be removed, not the target of the link.
+ *
  * Assumptions/Limitations:
  *   The caller must hold the inode semaphore
  *
@@ -79,7 +84,7 @@ FAR struct inode *inode_unlink(FAR const char *path)
 
   /* Find the node to unlink */
 
-  node = inode_search(&name, &peer, &parent, (const char **)NULL);
+  node = inode_search_nofollow(&name, &peer, &parent, (const char **)NULL);
   if (node)
     {
       /* If peer is non-null, then remove the node from the right of

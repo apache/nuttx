@@ -32,6 +32,7 @@ gettimeofday   NXgettimeofday
 ioctl          NXioctl
 isatty         NXisatty
 kill           NXkill
+link           NXlink
 listen         NXlisten
 lseek          NXlseek
 mallinfo       NXmallinfo

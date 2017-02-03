@@ -1,7 +1,7 @@
 ############################################################################
 # fs/vfs/Make.defs
 #
-#   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2014-2015, 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -85,6 +85,10 @@ endif
 # Support for positional file access
 
 CSRCS += fs_pread.c fs_pwrite.c
+
+ifneq ($(CONFIG_PSEUDOFS_SOFTLINKS),0)
+CSRCS += fs_link.c
+endif
 
 # Stream support
 

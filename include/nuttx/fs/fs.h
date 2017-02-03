@@ -76,6 +76,7 @@
 #define   FSNODEFLAG_TYPE_DRIVER   0x00000000 /*   Character driver         */
 #define   FSNODEFLAG_TYPE_BLOCK    0x00000001 /*   Block driver             */
 #define   FSNODEFLAG_TYPE_MOUNTPT  0x00000002 /*   Mount point              */
+#define   FSNODEFLAG_TYPE_SOFTLINK 0x00000003 /*   Soft link                */
 #define FSNODEFLAG_TYPE_SPECIAL    0x00000004 /* Special OS type            */
 #define   FSNODEFLAG_TYPE_NAMEDSEM 0x00000004 /*   Named semaphore          */
 #define   FSNODEFLAG_TYPE_MQUEUE   0x00000005 /*   Message Queue            */
@@ -90,6 +91,7 @@
 #define INODE_IS_DRIVER(i)    INODE_IS_TYPE(i,FSNODEFLAG_TYPE_DRIVER)
 #define INODE_IS_BLOCK(i)     INODE_IS_TYPE(i,FSNODEFLAG_TYPE_BLOCK)
 #define INODE_IS_MOUNTPT(i)   INODE_IS_TYPE(i,FSNODEFLAG_TYPE_MOUNTPT)
+#define INODE_IS_SOFTLINK(i)  INODE_IS_TYPE(i,FSNODEFLAG_TYPE_SOFTLINK)
 #define INODE_IS_NAMEDSEM(i)  INODE_IS_TYPE(i,FSNODEFLAG_TYPE_NAMEDSEM)
 #define INODE_IS_MQUEUE(i)    INODE_IS_TYPE(i,FSNODEFLAG_TYPE_MQUEUE)
 #define INODE_IS_SHM(i)       INODE_IS_TYPE(i,FSNODEFLAG_TYPE_SHM)
@@ -105,6 +107,7 @@
 #define INODE_SET_DRIVER(i)   INODE_SET_TYPE(i,FSNODEFLAG_TYPE_DRIVER)
 #define INODE_SET_BLOCK(i)    INODE_SET_TYPE(i,FSNODEFLAG_TYPE_BLOCK)
 #define INODE_SET_MOUNTPT(i)  INODE_SET_TYPE(i,FSNODEFLAG_TYPE_MOUNTPT)
+#define INODE_SET_SOFTLINK(i) INODE_SET_TYPE(i,FSNODEFLAG_TYPE_SOFTLINK)
 #define INODE_SET_NAMEDSEM(i) INODE_SET_TYPE(i,FSNODEFLAG_TYPE_NAMEDSEM)
 #define INODE_SET_MQUEUE(i)   INODE_SET_TYPE(i,FSNODEFLAG_TYPE_MQUEUE)
 #define INODE_SET_SHM(i)      INODE_SET_TYPE(i,FSNODEFLAG_TYPE_SHM)
@@ -313,16 +316,19 @@ struct mountpt_operations
 
 union inode_ops_u
 {
-  FAR const struct file_operations      *i_ops;    /* Driver operations for inode */
+  FAR const struct file_operations     *i_ops;    /* Driver operations for inode */
 #ifndef CONFIG_DISABLE_MOUNTPOINT
-  FAR const struct block_operations     *i_bops;   /* Block driver operations */
-  FAR const struct mountpt_operations   *i_mops;   /* Operations on a mountpoint */
+  FAR const struct block_operations    *i_bops;   /* Block driver operations */
+  FAR const struct mountpt_operations  *i_mops;   /* Operations on a mountpoint */
 #endif
 #ifdef CONFIG_FS_NAMED_SEMAPHORES
-  FAR struct nsem_inode_s               *i_nsem;   /* Named semaphore */
+  FAR struct nsem_inode_s              *i_nsem;   /* Named semaphore */
 #endif
 #ifndef CONFIG_DISABLE_MQUEUE
-  FAR struct mqueue_inode_s             *i_mqueue; /* POSIX message queue */
+  FAR struct mqueue_inode_s            *i_mqueue; /* POSIX message queue */
+#endif
+#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+  FAR char                             *i_link;   /* Full path to link target */
 #endif
 };
 
