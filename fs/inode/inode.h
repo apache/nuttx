@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/inode/inode.h
  *
- *   Copyright (C) 2007, 2009, 2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2012, 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,7 @@
 
 #include <sys/types.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <dirent.h>
 
 #include <nuttx/fs/fs.h>
@@ -253,14 +254,8 @@ int inode_remove(FAR const char *path);
  *
  ****************************************************************************/
 
-FAR struct inode *inode_find(FAR const char *path, FAR const char **relpath);
-
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
-FAR struct inode *inode_find_nofollow(FAR const char *path,
-                                      FAR const char **relpath);
-#else
-#  define inode_find_nofollow(p,r) inode_find(p,r)
-#endif
+FAR struct inode *inode_find(FAR const char *path, FAR const char **relpath,
+                             bool nofollow);
 
 /****************************************************************************
  * Name: inode_addref

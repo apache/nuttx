@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/vfs/fs_statfs.c
  *
- *   Copyright (C) 2007-2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -105,7 +105,7 @@ int statfs(FAR const char *path, FAR struct statfs *buf)
 
   /* Get an inode for this file */
 
-  inode = inode_find(path, &relpath);
+  inode = inode_find(path, &relpath, false);
   if (!inode)
     {
       /* This name does not refer to a psudeo-inode and there is no

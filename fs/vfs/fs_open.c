@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/vfs/fs_open.c
  *
- *   Copyright (C) 2007-2009, 2011-2012, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2012, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <stdbool.h>
 #include <fcntl.h>
 #include <sched.h>
 #include <errno.h>
@@ -120,7 +121,7 @@ int open(const char *path, int oflags, ...)
 
   /* Get an inode for this file */
 
-  inode = inode_find(path, &relpath);
+  inode = inode_find(path, &relpath, false);
   if (!inode)
     {
       /* "O_CREAT is not set and the named file does not exist.  Or, a

@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/vfs/fs_rename.c
  *
- *   Copyright (C) 2007-2009, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,8 +39,10 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <errno.h>
+
 #include <nuttx/fs/fs.h>
 
 #include "inode/inode.h"
@@ -101,7 +103,7 @@ int rename(FAR const char *oldpath, FAR const char *newpath)
 
   /* Get an inode that includes the oldpath */
 
-  oldinode = inode_find(oldpath, &oldrelpath);
+  oldinode = inode_find(oldpath, &oldrelpath, true);
   if (!oldinode)
     {
       /* There is no inode that includes in this path */
@@ -115,11 +117,11 @@ int rename(FAR const char *oldpath, FAR const char *newpath)
 
   if (INODE_IS_MOUNTPT(oldinode) && oldinode->u.i_mops)
     {
-      /* Get an inode for the new relpath -- it should like on the same
+      /* Get an inode for the new relpath -- it should lie on the same
        * mountpoint
        */
 
-      newinode = inode_find(newpath, &newrelpath);
+      newinode = inode_find(newpath, &newrelpath, true);
       if (!newinode)
         {
           /* There is no mountpoint that includes in this path */

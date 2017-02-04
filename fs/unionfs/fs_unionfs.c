@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/unionfs/fs_unionfs.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -2445,7 +2445,7 @@ static int unionfs_getmount(FAR const char *path, FAR struct inode **inode)
 
   /* Find the mountpt */
 
-  minode = inode_find(path, NULL);
+  minode = inode_find(path, NULL, false);
   if (!minode)
     {
       /* Mountpoint inode not found */

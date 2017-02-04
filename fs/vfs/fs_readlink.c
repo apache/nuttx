@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <stdbool.h>
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
@@ -91,7 +92,7 @@ ssize_t readlink(FAR const char *path, FAR char *buf, size_t bufsize)
    * symbolic link node.
    */
 
-  node = inode_find_nofollow(path, &relpath);
+  node = inode_find(path, &relpath, true);
   if (node == NULL)
     {
       errcode = ENOENT;

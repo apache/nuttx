@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/vfs/fs_unlink.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,8 +39,10 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
 #include <unistd.h>
 #include <errno.h>
+
 #include <nuttx/fs/fs.h>
 
 #include "inode/inode.h"
@@ -89,7 +91,7 @@ int unlink(FAR const char *pathname)
    * which may be a symbolic link)
    */
 
-  inode = inode_find_nofollow(pathname, &relpath);
+  inode = inode_find(pathname, &relpath, true);
   if (!inode)
     {
       /* There is no inode that includes in this path */

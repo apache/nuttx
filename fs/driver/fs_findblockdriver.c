@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/driver/fs_openblockdriver.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in pathname and binary forms, with or without
@@ -41,6 +41,7 @@
 
 #include <sys/types.h>
 #include <sys/mount.h>
+#include <stdbool.h>
 #include <debug.h>
 #include <errno.h>
 
@@ -93,7 +94,7 @@ int find_blockdriver(FAR const char *pathname, int mountflags, FAR struct inode 
 
   /* Find the inode registered with this pathname */
 
-  inode = inode_find(pathname, NULL);
+  inode = inode_find(pathname, NULL, false);
   if (!inode)
     {
       ferr("ERROR: Failed to find %s\n", pathname);

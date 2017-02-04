@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/mount/fs_mount.c
  *
- *   Copyright (C) 2007-2009, 2011-2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2013, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <sys/mount.h>
+#include <stdbool.h>
 #include <string.h>
 #include <errno.h>
 #include <assert.h>
@@ -280,7 +281,7 @@ int mount(FAR const char *source, FAR const char *target,
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   /* Check if the inode already exists */
 
-  mountpt_inode = inode_find(target, NULL);
+  mountpt_inode = inode_find(target, NULL, false);
   if (mountpt_inode != NULL)
     {
       /* Successfully found.  The reference count on the inode has been

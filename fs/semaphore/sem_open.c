@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/semaphore/sem_open.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <fcntl.h>
@@ -129,11 +130,11 @@ FAR sem_t *sem_open (FAR const char *name, int oflags, ...)
       snprintf(fullpath, MAX_SEMPATH, CONFIG_FS_NAMED_SEMPATH "/%s", name);
 
       /* Get the inode for this semaphore.  This should succeed if the
-       * semaphore has already been created.  In this case, inode_finde()
+       * semaphore has already been created.  In this case, inode_find()
        * will have incremented the reference count on the inode.
        */
 
-      inode = inode_find(fullpath, &relpath);
+      inode = inode_find(fullpath, &relpath, false);
       if (inode)
         {
           /* It exists.  Verify that the inode is a semaphore */

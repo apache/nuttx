@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fat/fs_fat32attrib.c
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <errno.h>
 
 #include <nuttx/fs/fs.h>
@@ -70,7 +71,7 @@ static int fat_attrib(const char *path, fat_attrib_t *retattrib,
 
   /* Get an inode for this file */
 
-  inode = inode_find(path, &relpath);
+  inode = inode_find(path, &relpath, false);
   if (!inode)
     {
       /* There is no mountpoint that includes in this path */

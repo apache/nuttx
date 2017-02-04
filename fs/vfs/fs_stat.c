@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <sys/stat.h>
+#include <stdbool.h>
 #include <string.h>
 #include <sched.h>
 #include <errno.h>
@@ -233,7 +234,7 @@ int stat(FAR const char *path, FAR struct stat *buf)
 
   /* Get an inode for this file */
 
-  inode = inode_find_nofollow(path, &relpath);
+  inode = inode_find(path, &relpath, true);
   if (!inode)
     {
       /* This name does not refer to a psudeo-inode and there is no

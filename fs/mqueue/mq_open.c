@@ -1,7 +1,7 @@
 /****************************************************************************
  *  fs/mqueue/mq_open.c
  *
- *   Copyright (C) 2007-2009, 2011, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2014-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <sched.h>
@@ -128,11 +129,11 @@ mqd_t mq_open(FAR const char *mq_name, int oflags, ...)
   sched_lock();
 
   /* Get the inode for this mqueue.  This should succeed if the message
-   * queue has already been created.  In this case, inode_finde() will
+   * queue has already been created.  In this case, inode_find() will
    * have incremented the reference count on the inode.
    */
 
-  inode = inode_find(fullpath, &relpath);
+  inode = inode_find(fullpath, &relpath, false);
   if (inode)
     {
       /* It exists.  Verify that the inode is a message queue */

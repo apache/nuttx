@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/semaphore/sem_unlink.c
  *
- *   Copyright (C) 2007-2009, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <semaphore.h>
 #include <sched.h>
@@ -91,7 +92,7 @@ int sem_unlink(FAR const char *name)
   /* Get the inode for this semaphore. */
 
   sched_lock();
-  inode = inode_find(fullpath, &relpath);
+  inode = inode_find(fullpath, &relpath, false);
   if (!inode)
     {
       /* There is no inode that includes in this path */

@@ -41,6 +41,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <stdbool.h>
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
@@ -105,7 +106,7 @@ int link(FAR const char *path1, FAR const char *path2)
    * does not lie on a mounted volume.
    */
 
-  inode = inode_find(path2, NULL);
+  inode = inode_find(path2, NULL, false);
   if (inode != NULL)
     {
 #ifndef CONFIG_DISABLE_MOUNTPOINT

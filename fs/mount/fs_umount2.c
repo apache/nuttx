@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/mount/fs_umount2.c
  *
- *   Copyright (C) 2007-2009, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <sys/mount.h>
+#include <stdbool.h>
 #include <errno.h>
 #include <assert.h>
 
@@ -86,7 +87,7 @@ int umount2(FAR const char *target, unsigned int flags)
 
   /* Find the mountpt */
 
-  mountpt_inode = inode_find(target, NULL);
+  mountpt_inode = inode_find(target, NULL, false);
   if (!mountpt_inode)
     {
       errcode = ENOENT;

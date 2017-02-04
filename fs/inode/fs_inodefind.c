@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/inode/fs_inodefind.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -64,7 +64,8 @@
  *
  ****************************************************************************/
 
-FAR struct inode *inode_find(FAR const char *path, FAR const char **relpath)
+FAR struct inode *inode_find(FAR const char *path, FAR const char **relpath,
+                             bool nofollow)
 {
   struct inode_search_s desc;
   FAR struct inode *node = NULL;
@@ -83,7 +84,7 @@ FAR struct inode *inode_find(FAR const char *path, FAR const char **relpath)
   desc.path = path;
 
   inode_semtake();
-  ret = inode_search(&desc);
+  ret = nofollow ? inode_search_nofollow(&desc) : inode_search(&desc);
   if (ret >= 0)
     {
       /* Found it */
@@ -106,49 +107,3 @@ FAR struct inode *inode_find(FAR const char *path, FAR const char **relpath)
   inode_semgive();
   return node;
 }
-
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
-FAR struct inode *inode_find_nofollow(FAR const char *path,
-                                      FAR const char **relpath)
-{
-  struct inode_search_s desc;
-  FAR struct inode *node = NULL;
-  int ret;
-
-  if (path == NULL || *path != '/')
-    {
-      return NULL;
-    }
-
-  /* Find the node matching the path.  If found, increment the count of
-   * references on the node.
-   */
-
-  memset(&desc, 0, sizeof(struct inode_search_s));
-  desc.path = path;
-
-  inode_semtake();
-  ret = inode_search_nofollow(&desc);
-  if (ret >= 0)
-    {
-      /* Found it */
-
-      node = desc.node;
-      DEBUGASSERT(node != NULL);
-
-      /* Increment the reference count on the inode */
-
-      node->i_crefs++;
-
-      /* Return any remaining relative path fragment */
-
-      if (relpath != NULL)
-        {
-          *relpath = desc.relpath;
-        }
-    }
-
-  inode_semgive();
-  return node;
-}
-#endif

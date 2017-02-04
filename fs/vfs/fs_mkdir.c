@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/vfs/fs_mkdir.c
  *
- *   Copyright (C) 2007, 2008, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,9 +38,12 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <stdbool.h>
 #include <errno.h>
+
 #include <nuttx/fs/fs.h>
 
 #include "inode/inode.h"
@@ -87,7 +90,7 @@ int mkdir(const char *pathname, mode_t mode)
 
   /* Find the inode that includes this path */
 
-  inode = inode_find(pathname, &relpath);
+  inode = inode_find(pathname, &relpath, false);
   if (inode)
     {
       /* An inode was found that includes this path and possibly refers to a
