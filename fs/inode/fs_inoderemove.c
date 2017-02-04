@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/inode/fs_inoderemove.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <string.h>
 #include <errno.h>
 
 #include <nuttx/kmalloc.h>
@@ -70,10 +71,9 @@
 
 FAR struct inode *inode_unlink(FAR const char *path)
 {
-  const char       *name = path;
+  struct inode_search_s desc;
   FAR struct inode *node;
-  FAR struct inode *peer;
-  FAR struct inode *parent;
+  int ret;
 
   /* Verify parameters.  Ignore null paths and relative paths */
 
@@ -84,25 +84,31 @@ FAR struct inode *inode_unlink(FAR const char *path)
 
   /* Find the node to unlink */
 
-  node = inode_search_nofollow(&name, &peer, &parent, (const char **)NULL);
-  if (node)
+  memset(&desc, 0, sizeof(struct inode_search_s));
+  desc.path = path;
+
+  ret = inode_search_nofollow(&desc);
+  if (ret >= 0)
     {
+      node = desc.node;
+      DEBUGASSERT(node != NULL);
+
       /* If peer is non-null, then remove the node from the right of
        * of that peer node.
        */
 
-      if (peer)
+      if (desc.peer != NULL)
         {
-          peer->i_peer = node->i_peer;
+          desc.peer->i_peer = node->i_peer;
         }
 
       /* If parent is non-null, then remove the node from head of
        * of the list of children.
        */
 
-      else if (parent)
+      else if (desc.parent)
         {
-          parent->i_child = node->i_peer;
+          desc.parent->i_child = node->i_peer;
         }
 
       /* Otherwise, we must be removing the root inode. */

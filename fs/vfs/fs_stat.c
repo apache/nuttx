@@ -83,11 +83,6 @@ static inline int statpseudo(FAR struct inode *inode, FAR struct stat *buf)
         }
       else
 #endif
-       {
-       }
-    }
-  else if (inode->u.i_ops != NULL)
-    {
 #ifdef CONFIG_PSEUDOFS_SOFTLINKS
       /* Handle softlinks differently.  Just call stat() recursively on the
        * target of the softlink.
@@ -124,39 +119,42 @@ static inline int statpseudo(FAR struct inode *inode, FAR struct stat *buf)
         }
       else
 #endif
+       {
+       }
+    }
+  else if (inode->u.i_ops != NULL)
+    {
+      /* Determine read/write privileges based on the existence of read
+       * and write methods.
+       */
+
+      if (inode->u.i_ops->read)
         {
-          /* Determine read/write privileges based on the existence of read
-           * and write methods.
-           */
+          buf->st_mode = S_IROTH | S_IRGRP | S_IRUSR;
+        }
 
-          if (inode->u.i_ops->read)
-            {
-              buf->st_mode = S_IROTH | S_IRGRP | S_IRUSR;
-            }
+      if (inode->u.i_ops->write)
+        {
+          buf->st_mode |= S_IWOTH | S_IWGRP | S_IWUSR;
+        }
 
-          if (inode->u.i_ops->write)
-            {
-              buf->st_mode |= S_IWOTH | S_IWGRP | S_IWUSR;
-            }
+      /* Determine the type of the inode */
 
-          /* Determine the type of the inode */
+      if (INODE_IS_MOUNTPT(inode))
+        {
+          buf->st_mode |= S_IFDIR;
+        }
+      else if (INODE_IS_BLOCK(inode))
+        {
+          /* What is if also has child inodes? */
 
-          if (INODE_IS_MOUNTPT(inode))
-            {
-              buf->st_mode |= S_IFDIR;
-            }
-          else if (INODE_IS_BLOCK(inode))
-            {
-              /* What is if also has child inodes? */
+          buf->st_mode |= S_IFBLK;
+        }
+      else /* if (INODE_IS_DRIVER(inode)) */
+        {
+          /* What is it if it also has child inodes? */
 
-              buf->st_mode |= S_IFBLK;
-            }
-          else /* if (INODE_IS_DRIVER(inode)) */
-            {
-              /* What is it if it also has child inodes? */
-
-              buf->st_mode |= S_IFCHR;
-            }
+          buf->st_mode |= S_IFCHR;
         }
     }
   else

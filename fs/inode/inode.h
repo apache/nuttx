@@ -52,6 +52,29 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+/* This is the type of the argument to inode_search().
+ *
+ *  path    - INPUT:  Path of inode to find
+ *            OUTPUT: Residual part of path not traversed
+ *  node    - INPUT:  (not used)
+ *            OUTPUT: On success, holds the pointer to the inode found.
+ *  peer    - INPUT:  (not used)
+ *            OUTPUT: The inode to the "left" of the inode found.
+ *  parent  - INPUT:  (not used)
+ *            OUTPUT: The inode to the "above" of the inode found.
+ *  relpath - INPUT:  (not used)
+ *            OUTPUT: If the returned inode is a mountpoint, this is the
+ *                    relative path from the mountpoint.
+ */
+
+struct inode_search_s
+{
+  FAR const char *path;      /* Path of inode to find */
+  FAR struct inode *node;    /* Pointer to the inode found */
+  FAR struct inode *peer;    /* Node to the "left" for the found inode */
+  FAR struct inode *parent;  /* Node "above" the found inode */
+  FAR const char *relpath;   /* Relative path into the mountpoint */
+};
 
 /* Callback used by foreach_inode to traverse all inodes in the pseudo-
  * file system.
@@ -130,38 +153,12 @@ void inode_semgive(void);
  *
  ****************************************************************************/
 
-FAR struct inode *inode_search(FAR const char **path,
-                               FAR struct inode **peer,
-                               FAR struct inode **parent,
-                               FAR const char **relpath);
+int inode_search(FAR struct inode_search_s *desc);
 
 #ifdef CONFIG_PSEUDOFS_SOFTLINKS
-FAR struct inode *inode_search_nofollow(FAR const char **path,
-                                        FAR struct inode **peer,
-                                        FAR struct inode **parent,
-                                        FAR const char **relpath);
+int inode_search_nofollow(FAR struct inode_search_s *desc);
 #else
-#  define inode_search_nofollow(p,l,a,r) inode_search(p,l,a,r)
-#endif
-
-/****************************************************************************
- * Name: inode_linktarget
- *
- * Description:
- *   If the inode is a soft link, then (1) get the name of the full path of
- *   the soft link, (2) recursively look-up the inode referenced by the soft
- *   link, and (3) return the inode referenced by the soft link.
- *
- * Assumptions:
- *   The caller holds the g_inode_sem semaphore
- *
- ****************************************************************************/
-
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
-FAR struct inode *inode_linktarget(FAR struct inode *node,
-                                   FAR struct inode **peer,
-                                   FAR struct inode **parent,
-                                   FAR const char **relpath);
+#  define inode_search_nofollow(d) inode_search(d)
 #endif
 
 /****************************************************************************

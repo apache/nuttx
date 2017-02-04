@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/mount/fs_automount.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -124,9 +124,7 @@ static int  automount_interrupt(FAR const struct automount_lower_s *lower,
 
 static int automount_findinode(FAR const char *path)
 {
-  FAR struct inode *node;
-  FAR const char *srchpath;
-  FAR const char *relpath;
+  struct inode_search_s desc;
   int ret;
 
   /* Make sure that we were given an absolute path */
@@ -139,12 +137,14 @@ static int automount_findinode(FAR const char *path)
 
   /* Find the inode */
 
-  srchpath = path;
-  node = inode_search(&srchpath, (FAR struct inode**)NULL,
-                      (FAR struct inode**)NULL, &relpath);
+  memset(&desc, 0, sizeof(struct inode_search_s));
+  desc.path = path;
+
+  ret = inode_search(&desc);
+
   /* Did we find it? */
 
-  if (!node)
+  if (ret < 0)
     {
       /* No.. Not found */
 
@@ -153,7 +153,7 @@ static int automount_findinode(FAR const char *path)
 
   /* Yes.. is it a mount point? */
 
-  else if (INODE_IS_MOUNTPT(node))
+  else if (INODE_IS_MOUNTPT(desc.node))
     {
       /* Yes.. we found a mountpoint at this path */
 
@@ -161,7 +161,7 @@ static int automount_findinode(FAR const char *path)
     }
   else
     {
-      /* No.. then somethin is in the way */
+      /* No.. then something is in the way */
 
       ret = -ENOTDIR;
     }

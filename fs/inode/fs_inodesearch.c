@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <limits.h>
+#include <string.h>
 #include <assert.h>
 #include <errno.h>
 
@@ -135,6 +136,66 @@ static int _inode_compare(FAR const char *fname,
 }
 
 /****************************************************************************
+ * Name: inode_linktarget
+ *
+ * Description:
+ *   If the inode is a soft link, then (1) get the name of the full path of
+ *   the soft link, (2) recursively look-up the inode referenced by the soft
+ *   link, and (3) return the inode referenced by the soft link.
+ *
+ * Assumptions:
+ *   The caller holds the g_inode_sem semaphore
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+static int inode_linktarget(FAR struct inode *node,
+                            FAR struct inode_search_s *desc)
+{
+  unsigned int count = 0;
+  int ret = -ENOENT;
+
+  DEBUGASSERT(desc != NULL && node != NULL);
+
+  /* An infinite loop is avoided only by the loop count.
+  *
+   * REVISIT:  The ELOOP error should be reported to the application in that
+   * case but there is no simple mechanism to do that.
+   */
+
+  while (INODE_IS_SOFTLINK(node))
+    {
+      /* Now, look-up the inode associated with the target path */
+
+      memset(desc, 0, sizeof(struct inode_search_s));
+      desc->path = (FAR const char *)node->u.i_link;
+
+      /* Look up the target of the symbolic link */
+
+      ret = inode_search_nofollow(desc);
+      if (ret < 0)
+        {
+          break;
+        }
+
+      /* Limit the number of symbolic links that we pass through */
+
+      if (++count > SYMLOOP_MAX)
+        {
+          ret = -ELOOP;
+          break;
+        }
+
+      /* Set up for the next time through the loop */
+
+      node = desc->node;
+    }
+
+  return ret;
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -158,25 +219,32 @@ static int _inode_compare(FAR const char *fname,
  ****************************************************************************/
 
 #ifdef CONFIG_PSEUDOFS_SOFTLINKS
-
-FAR struct inode *inode_search_nofollow(FAR const char **path,
-                                        FAR struct inode **peer,
-                                        FAR struct inode **parent,
-                                        FAR const char **relpath)
+int inode_search_nofollow(FAR struct inode_search_s *desc)
 #else
-FAR struct inode *inode_search(FAR const char **path,
-                               FAR struct inode **peer,
-                               FAR struct inode **parent,
-                               FAR const char **relpath)
+int inode_search(FAR struct inode_search_s *desc)
 #endif
 {
-  FAR const char   *name  = *path + 1; /* Skip over leading '/' */
-  FAR struct inode *node  = g_root_inode;
-  FAR struct inode *left  = NULL;
-  FAR struct inode *above = NULL;
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
-  FAR struct inode *newnode;
-#endif
+  FAR const char   *name;
+  FAR struct inode *node    = g_root_inode;
+  FAR struct inode *left    = NULL;
+  FAR struct inode *above   = NULL;
+  FAR const char   *relpath = NULL;
+  int ret = -ENOENT;
+
+  /* Get the search path, skipping over the leading '/'.  The leading '/' is
+   * mandatory because only absolte paths are expected in this context.
+   */
+
+  DEBUGASSERT(desc != NULL && desc->path != NULL);
+  name  = desc->path;
+
+  DEBUGASSERT(*name == '/');
+  if (*name != '/')
+    {
+      return -EINVAL;
+    }
+
+  name++;   /* Skip over the leading '/' */
 
   /* Traverse the pseudo file system node tree until either (1) all nodes
    * have been examined without finding the matching node, or (2) the
@@ -231,10 +299,7 @@ FAR struct inode *inode_search(FAR const char **path,
                * and will handle the remaining part of the pathname
                */
 
-              if (relpath)
-                {
-                  *relpath = name;
-                }
+              relpath = name;
 
 #ifdef CONFIG_PSEUDOFS_SOFTLINKS
               /* NOTE that if the terminal inode is a soft link, it is not
@@ -243,6 +308,7 @@ FAR struct inode *inode_search(FAR const char **path,
                * In that case a wrapper function will perform that operation.
                */
 #endif
+              ret = OK;
               break;
             }
           else
@@ -250,48 +316,63 @@ FAR struct inode *inode_search(FAR const char **path,
               /* More nodes to be examined in the path "below" this one. */
 
 #ifdef CONFIG_PSEUDOFS_SOFTLINKS
-              /* If this intermediate inode in the is a soft link, then (1)
-               * get the name of the full path of the soft link, (2) recursively
-               * look-up the inode referenced by the sof link, and (3)
-               * continue searching with that inode instead.
+              /* Was the node a soft link?  If so, then we need need to
+               * continue below the target of the link, not the link itself.
                */
 
-              newnode = inode_linktarget(node,  NULL, NULL, relpath);
-              if (newnode == NULL)
+              if (INODE_IS_SOFTLINK(node))
                 {
-                  /* Probably means that the node is a symbolic link, but
-                   * that the target of the symbolic link does not exist.
+                  int status;
+
+                  /* If this intermediate inode in the is a soft link, then
+                   * (1) get the name of the full path of the soft link, (2)
+                   * recursively look-up the inode referenced by the soft
+                   * link, and (3) continue searching with that inode instead.
                    */
 
-                  break;
-                }
-              else if (newnode != node)
-                {
-                  /* The node was a valid symbolic link and we have jumped to a
-                   * different, spot in the the pseudo file system tree.
-                   *
-                   * Continue from this new inode.
-                   */
-
-                  node = newnode;
-
-                  /* Check if this took us to a mountpoint. */
-
-                  if (INODE_IS_MOUNTPT(newnode))
+                  status = inode_linktarget(node, desc);
+                  if (status < 0)
                     {
-                      /* Yes.. return the mountpoint information.
-                       * REVISIT: The relpath is incorrect in this case.  It is
-                       * relative to symbolic link, not to the root of the mount.
+                      /* Probably means that the the target of the symbolic
+                       * link does not exist.
                        */
 
-                      if (relpath)
-                       {
-                         *relpath = name;
-                       }
-
-                      above = NULL;
-                      left  = NULL;
+                      ret = status;
                       break;
+                    }
+                  else
+                    {
+                      FAR struct inode *newnode = desc->node;
+
+                      if (newnode != node)
+                        {
+                          /* The node was a valid symbolic link and we have
+                           * jumped to a different, spot in the the pseudo
+                           * file system tree.
+                           *
+                           * Continue from this new inode.
+                           */
+
+                          node = newnode;
+
+                          /* Check if this took us to a mountpoint. */
+
+                          if (INODE_IS_MOUNTPT(node))
+                            {
+                              /* Yes.. return the mountpoint information.
+                               * REVISIT: The relpath is incorrect in this case.
+                               * It is relative to symbolic link, not to the
+                               * root of the mount.
+                               */
+
+                              relpath = name;
+                              above   = NULL;
+                              left    = NULL;
+
+                              ret     = OK;
+                              break;
+                            }
+                        }
                     }
                 }
 #endif
@@ -319,29 +400,22 @@ FAR struct inode *inode_search(FAR const char **path,
    *   (4) When the node matching the full path is found
    */
 
-  if (peer)
-    {
-      *peer = left;
-    }
-
-  if (parent)
-    {
-      *parent = above;
-    }
-
-  *path = name;
-  return node;
+  desc->path    = name;
+  desc->node    = node;
+  desc->peer    = left;
+  desc->parent  = above;
+  desc->relpath = relpath;
+  return ret;
 }
 
 #ifdef CONFIG_PSEUDOFS_SOFTLINKS
-FAR struct inode *inode_search(FAR const char **path,
-                               FAR struct inode **peer,
-                               FAR struct inode **parent,
-                               FAR const char **relpath)
+int inode_search(FAR struct inode_search_s *desc)
 {
+  int ret;
+
   /* Lookup the terminal inode */
 
-  FAR struct inode *node = inode_search_nofollow(path, peer, parent, relpath);
+  ret = inode_search_nofollow(desc);
 
   /* Did we find it?  inode_search_nofollow() will terminate in one of
    * three ways:
@@ -356,63 +430,26 @@ FAR struct inode *inode_search(FAR const char **path,
    * to symbolic link, not to the root of the mount.
    */
 
-  if (node != NULL && INODE_IS_SOFTLINK(node))
+  if (ret >= 0)
     {
-      /* The terminating inode is a valid soft link:  Return the inode,
-       * corresponding to link target.
-       */
+      /* Sucessfully found inode */
 
-       return inode_linktarget(node, peer, parent, relpath);
-    }
+      FAR struct inode *node = desc->node;
+      DEBUGASSERT(node != NULL);
 
-  return node;
-}
-#endif
+      /* Is the terminal node a softlink? */
 
-/****************************************************************************
- * Name: inode_linktarget
- *
- * Description:
- *   If the inode is a soft link, then (1) get the name of the full path of
- *   the soft link, (2) recursively look-up the inode referenced by the soft
- *   link, and (3) return the inode referenced by the soft link.
- *
- * Assumptions:
- *   The caller holds the g_inode_sem semaphore
- *
- ****************************************************************************/
-
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
-FAR struct inode *inode_linktarget(FAR struct inode *node,
-                                   FAR struct inode **peer,
-                                   FAR struct inode **parent,
-                                   FAR const char **relpath)
-{
-  FAR const char *copy;
-  unsigned int count = 0;
-
-  /* An infinite loop is avoided only by the loop count.
-  *
-   * REVISIT:  The ELOOP error should be reported to the application in that
-   * case but there is no simple mechanism to do that.
-   */
-
-  while (node != NULL && INODE_IS_SOFTLINK(node))
-    {
-      /* Careful: inode_search_nofollow overwrites the input string pointer */
-
-      copy = (FAR const char *)node->u.i_link;
-
-      /* Now, look-up the inode associated with the target path */
-
-      node = inode_search_nofollow(&copy, peer, parent, relpath);
-      if (node == NULL && ++count > SYMLOOP_MAX)
+      if (INODE_IS_SOFTLINK(node))
         {
-          return NULL;
+          /* The terminating inode is a valid soft link:  Return the inode,
+           * corresponding to link target.
+           */
+
+           ret = inode_linktarget(node, desc);
         }
     }
 
-  return node;
+  return ret;
 }
 #endif
 

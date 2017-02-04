@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/dirent/fs_opendir.c
  *
- *   Copyright (C) 2007-2009, 2011, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2013-2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -226,7 +226,8 @@ FAR DIR *opendir(FAR const char *path)
 {
   FAR struct inode *inode = NULL;
   FAR struct fs_dirent_s *dir;
-  FAR const char *relpath;
+  struct inode_search_s desc;
+  FAR const char *relpath = NULL;
   bool isroot = false;
   int ret;
 
@@ -239,7 +240,6 @@ FAR DIR *opendir(FAR const char *path)
     {
       inode   = g_root_inode;
       isroot  = true;
-      relpath = NULL;
     }
   else
     {
@@ -253,15 +253,23 @@ FAR DIR *opendir(FAR const char *path)
 
       /* Find the node matching the path. */
 
-      inode = inode_search(&path, (FAR struct inode**)NULL,
-                           (FAR struct inode**)NULL, &relpath);
+      memset(&desc, 0, sizeof(struct inode_search_s));
+      desc.path = path;
+
+      ret = inode_search(&desc);
+      if (ret >= 0)
+        {
+          inode   = desc.node;
+          DEBUGASSERT(inode != NULL);
+          relpath = desc.relpath;
+        }
     }
 
   /* Did we get an inode? */
 
   if (!inode)
     {
-      /* 'path' is not a does not exist. */
+      /* 'path' does not exist. */
 
       ret = ENOTDIR;
       goto errout_with_semaphore;
@@ -305,9 +313,9 @@ FAR DIR *opendir(FAR const char *path)
    */
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT
-   else if (INODE_IS_MOUNTPT(inode))
-     {
-       /* Yes, the node is a file system mountpoint */
+  else if (INODE_IS_MOUNTPT(inode))
+    {
+      /* Yes, the node is a file system mountpoint */
 
       dir->fd_root = inode;  /* Save the inode where we start */
 

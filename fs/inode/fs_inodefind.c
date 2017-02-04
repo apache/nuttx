@@ -39,7 +39,10 @@
 
 #include <nuttx/config.h>
 
+#include <string.h>
+#include <assert.h>
 #include <errno.h>
+
 #include <nuttx/fs/fs.h>
 
 #include "inode/inode.h"
@@ -63,7 +66,9 @@
 
 FAR struct inode *inode_find(FAR const char *path, FAR const char **relpath)
 {
-  FAR struct inode *node;
+  struct inode_search_s desc;
+  FAR struct inode *node = NULL;
+  int ret;
 
   if (path == NULL || *path != '/')
     {
@@ -74,12 +79,28 @@ FAR struct inode *inode_find(FAR const char *path, FAR const char **relpath)
    * references on the node.
    */
 
+  memset(&desc, 0, sizeof(struct inode_search_s));
+  desc.path = path;
+
   inode_semtake();
-  node = inode_search(&path, (FAR struct inode**)NULL,
-                      (FAR struct inode**)NULL, relpath);
-  if (node)
+  ret = inode_search(&desc);
+  if (ret >= 0)
     {
+      /* Found it */
+
+      node = desc.node;
+      DEBUGASSERT(node != NULL);
+
+      /* Increment the reference count on the inode */
+
       node->i_crefs++;
+
+      /* Return any remaining relative path fragment */
+
+      if (relpath != NULL)
+        {
+          *relpath = desc.relpath;
+        }
     }
 
   inode_semgive();
@@ -90,7 +111,9 @@ FAR struct inode *inode_find(FAR const char *path, FAR const char **relpath)
 FAR struct inode *inode_find_nofollow(FAR const char *path,
                                       FAR const char **relpath)
 {
-  FAR struct inode *node;
+  struct inode_search_s desc;
+  FAR struct inode *node = NULL;
+  int ret;
 
   if (path == NULL || *path != '/')
     {
@@ -101,12 +124,28 @@ FAR struct inode *inode_find_nofollow(FAR const char *path,
    * references on the node.
    */
 
+  memset(&desc, 0, sizeof(struct inode_search_s));
+  desc.path = path;
+
   inode_semtake();
-  node = inode_search_nofollow(&path, (FAR struct inode**)NULL,
-                               (FAR struct inode**)NULL, relpath);
-  if (node)
+  ret = inode_search_nofollow(&desc);
+  if (ret >= 0)
     {
+      /* Found it */
+
+      node = desc.node;
+      DEBUGASSERT(node != NULL);
+
+      /* Increment the reference count on the inode */
+
       node->i_crefs++;
+
+      /* Return any remaining relative path fragment */
+
+      if (relpath != NULL)
+        {
+          *relpath = desc.relpath;
+        }
     }
 
   inode_semgive();
