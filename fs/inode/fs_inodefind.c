@@ -39,7 +39,6 @@
 
 #include <nuttx/config.h>
 
-#include <string.h>
 #include <assert.h>
 #include <errno.h>
 
@@ -79,7 +78,7 @@ FAR struct inode *inode_find(FAR const char *path, FAR const char **relpath,
    * references on the node.
    */
 
-  memset(&desc, 0, sizeof(struct inode_search_s));
+  RESET_SEARCH(&desc);
   desc.path     = path;
 #ifdef CONFIG_PSEUDOFS_SOFTLINKS
   desc.nofollow = nofollow;

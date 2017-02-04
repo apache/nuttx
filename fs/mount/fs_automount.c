@@ -137,7 +137,7 @@ static int automount_findinode(FAR const char *path)
 
   /* Find the inode */
 
-  memset(&desc, 0, sizeof(struct inode_search_s));
+  RESET_SEARCH(&desc);
   desc.path = path;
 
   ret = inode_search(&desc);

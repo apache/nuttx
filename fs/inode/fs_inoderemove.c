@@ -39,7 +39,6 @@
 
 #include <nuttx/config.h>
 
-#include <string.h>
 #include <errno.h>
 
 #include <nuttx/kmalloc.h>
@@ -84,7 +83,7 @@ FAR struct inode *inode_unlink(FAR const char *path)
 
   /* Find the node to unlink */
 
-  memset(&desc, 0, sizeof(struct inode_search_s));
+  RESET_SEARCH(&desc);
   desc.path     = path;
 #ifdef CONFIG_PSEUDOFS_SOFTLINKS
   desc.nofollow = true;

@@ -39,7 +39,6 @@
 
 #include <nuttx/config.h>
 
-#include <string.h>
 #include <assert.h>
 #include <errno.h>
 
@@ -184,7 +183,7 @@ int inode_reserve(FAR const char *path, FAR struct inode **inode)
 
   /* Find the location to insert the new subtree */
 
-  memset(&desc, 0, sizeof(struct inode_search_s));
+  RESET_SEARCH(&desc);
   desc.path = path;
 
   ret = inode_search(&desc);

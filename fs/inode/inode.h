@@ -41,6 +41,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
 #include <sys/types.h>
 #include <stdint.h>
@@ -48,11 +49,41 @@
 #include <dirent.h>
 
 #include <nuttx/fs/fs.h>
-#include <nuttx/compiler.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+#  define RESET_SEARCH(d) \
+    do \
+      { \
+        (d)->path     = NULL; \
+        (d)->node     = NULL; \
+        (d)->peer     = NULL; \
+        (d)->parent   = NULL; \
+        (d)->relpath  = NULL; \
+        (d)->linktgt  = NULL; \
+        (d)->nofollow = false; \
+      } \
+    while (0)
+#else
+#  define RESET_SEARCH(d) \
+    do \
+      { \
+        (d)->path     = NULL; \
+        (d)->node     = NULL; \
+        (d)->peer     = NULL; \
+        (d)->parent   = NULL; \
+        (d)->relpath  = NULL; \
+      } \
+    while (0)
+#endif
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
 /* This is the type of the argument to inode_search().
  *
  *  path     - INPUT:  Path of inode to find
@@ -66,10 +97,19 @@
  *  relpath  - INPUT:  (not used)
  *             OUTPUT: If the returned inode is a mountpoint, this is the
  *                     relative path from the mountpoint.
+ *  linktgt  - INPUT:  (not used)
+ *             OUTPUT: If a symobolic link into a mounted file system is
+ *                     detected while traversing the path, then the link
+ *                     will be converted to a mountpoint inode if the
+ *                     mountpoint link is in an intermediate node of the
+ *                     path or at the final node of the path with nofollow=true.
  *  nofollow - INPUT:  true: terminal node is returned; false: if the
  *                     terminal is a soft link, then return the inode of
  *                     the link target.
  *           - OUTPUT: (not used)
+ *  fullpath - INPUT:  Not used
+ *           - OUTPUT: May hold an intermediate path which is probably of
+ *                     no interest to the caller.
  */
 
 struct inode_search_s
@@ -80,7 +120,9 @@ struct inode_search_s
   FAR struct inode *parent;  /* Node "above" the found inode */
   FAR const char *relpath;   /* Relative path into the mountpoint */
 #ifdef CONFIG_PSEUDOFS_SOFTLINKS
+  FAR const char *linktgt;   /* Target of symbolic link if linked to a directory */
   bool nofollow;             /* true: Don't follow terminal soft link */
+  char fullpath[PATH_MAX];         /* Path expansion buffer */
 #endif
 };
 

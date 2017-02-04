@@ -40,8 +40,8 @@
 #include <nuttx/config.h>
 
 #include <stdbool.h>
-#include <dirent.h>
 #include <string.h>
+#include <dirent.h>
 #include <assert.h>
 #include <errno.h>
 
@@ -253,7 +253,7 @@ FAR DIR *opendir(FAR const char *path)
 
       /* Find the node matching the path. */
 
-      memset(&desc, 0, sizeof(struct inode_search_s));
+      RESET_SEARCH(&desc);
       desc.path = path;
 
       ret = inode_search(&desc);

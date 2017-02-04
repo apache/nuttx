@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdio.h>
 #include <string.h>
 #include <limits.h>
 #include <assert.h>
@@ -47,6 +48,17 @@
 #include <nuttx/fs/fs.h>
 
 #include "inode/inode.h"
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+static int _inode_compare(FAR const char *fname, FAR struct inode *node);
+#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+static int _inode_linktarget(FAR struct inode *node,
+                             FAR struct inode_search_s *desc);
+#endif
+static int _inode_search(FAR struct inode_search_s *desc);
 
 /****************************************************************************
  * Public Data
@@ -66,8 +78,7 @@ FAR struct inode *g_root_inode = NULL;
  *
  ****************************************************************************/
 
-static int _inode_compare(FAR const char *fname,
-                          FAR struct inode *node)
+static int _inode_compare(FAR const char *fname, FAR struct inode *node)
 {
   char *nname = node->i_name;
 
@@ -136,7 +147,7 @@ static int _inode_compare(FAR const char *fname,
 }
 
 /****************************************************************************
- * Name: inode_linktarget
+ * Name: _inode_linktarget
  *
  * Description:
  *   If the inode is a soft link, then (1) get the name of the full path of
@@ -149,8 +160,8 @@ static int _inode_compare(FAR const char *fname,
  ****************************************************************************/
 
 #ifdef CONFIG_PSEUDOFS_SOFTLINKS
-static int inode_linktarget(FAR struct inode *node,
-                            FAR struct inode_search_s *desc)
+static int _inode_linktarget(FAR struct inode *node,
+                             FAR struct inode_search_s *desc)
 {
   unsigned int count = 0;
   bool save;
@@ -169,13 +180,13 @@ static int inode_linktarget(FAR struct inode *node,
     {
       /* Reset and reinitialize the search descriptor.  */
 
-      memset(desc, 0, sizeof(struct inode_search_s));
+      RESET_SEARCH(desc);
       desc->path     = (FAR const char *)node->u.i_link;
       desc->nofollow = true;
 
       /* Look up inode associated with the target of the symbolic link */
 
-      ret = inode_search(desc);
+      ret = _inode_search(desc);
       if (ret < 0)
         {
           break;
@@ -200,24 +211,17 @@ static int inode_linktarget(FAR struct inode *node,
 #endif
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: inode_search
+ * Name: _inode_search
  *
  * Description:
  *   Find the inode associated with 'path' returning the inode references
- *   and references to its companion nodes.
+ *   and references to its companion nodes.  This is the internal, common
+ *   implementation of inode_search().
  *
  *   If a mountpoint is encountered in the search prior to encountering the
  *   terminal node, the search will terminate at the mountpoint inode.  That
  *   inode and the relative path from the mountpoint, 'relpath' will be
  *   returned.
- *
- *   inode_search will follow soft links in path leading up to the terminal
- *   node.  Whether or no inode_search() will deference that terminal node
- *   depends on the 'nofollow' input.
  *
  *   If a soft link is encountered that is not the terminal node in the path,
  *   that link WILL be deferenced unconditionally.
@@ -227,7 +231,7 @@ static int inode_linktarget(FAR struct inode *node,
  *
  ****************************************************************************/
 
-int inode_search(FAR struct inode_search_s *desc)
+static int _inode_search(FAR struct inode_search_s *desc)
 {
   FAR const char   *name;
   FAR struct inode *node    = g_root_inode;
@@ -306,33 +310,6 @@ int inode_search(FAR struct inode_search_s *desc)
 
               relpath = name;
               ret = OK;
-
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
-              /* Is the terminal node a softlink? Should we follow it? */
-
-              if (!desc->nofollow && INODE_IS_SOFTLINK(node))
-                {
-                  int status;
-
-                  /* The terminating inode is a valid soft link:  Return the
-                   * inode, corresponding to link target.
-                   */
-
-                  status = inode_linktarget(node, desc);
-                  if (status < 0)
-                    {
-                      ret = status;
-                    }
-                  else
-                    {
-                      /* Return, skipping setting of 'desc' return values
-                       * at the normal exit point.
-                       */
-
-                      return OK;
-                    }
-                }
-#endif
               break;
             }
           else
@@ -354,7 +331,7 @@ int inode_search(FAR struct inode_search_s *desc)
                    * link, and (3) continue searching with that inode instead.
                    */
 
-                  status = inode_linktarget(node, desc);
+                  status = _inode_linktarget(node, desc);
                   if (status < 0)
                     {
                       /* Probably means that the the target of the symbolic
@@ -373,29 +350,30 @@ int inode_search(FAR struct inode_search_s *desc)
                           /* The node was a valid symbolic link and we have
                            * jumped to a different, spot in the the pseudo
                            * file system tree.
-                           *
-                           * Continue from this new inode.
                            */
-
-                          node = newnode;
 
                           /* Check if this took us to a mountpoint. */
 
-                          if (INODE_IS_MOUNTPT(node))
+                          if (INODE_IS_MOUNTPT(newnode))
                             {
-                              /* Yes.. return the mountpoint information.
-                               * REVISIT: The relpath is incorrect in this case.
-                               * It is relative to symbolic link, not to the
-                               * root of the mount.
-                               */
+                              /* Yes.. return the path to the link target */
 
-                              relpath = name;
+                              desc->linktgt = node->u.i_link;
+
+                              /* Return the mountpoint information. */
+
+                              node    = newnode;
                               above   = NULL;
                               left    = NULL;
+                              relpath = name;
 
                               ret     = OK;
                               break;
                             }
+
+                          /* Continue from this new inode. */
+
+                          node = newnode;
                         }
                     }
                 }
@@ -433,6 +411,148 @@ int inode_search(FAR struct inode_search_s *desc)
 }
 
 /****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: inode_search
+ *
+ * Description:
+ *   Find the inode associated with 'path' returning the inode references
+ *   and references to its companion nodes.
+ *
+ *   If a mountpoint is encountered in the search prior to encountering the
+ *   terminal node, the search will terminate at the mountpoint inode.  That
+ *   inode and the relative path from the mountpoint, 'relpath' will be
+ *   returned.
+ *
+ *   inode_search will follow soft links in path leading up to the terminal
+ *   node.  Whether or no inode_search() will deference that terminal node
+ *   depends on the 'nofollow' input.
+ *
+ *   If a soft link is encountered that is not the terminal node in the path,
+ *   that link WILL be deferenced unconditionally.
+ *
+ * Assumptions:
+ *   The caller holds the g_inode_sem semaphore
+ *
+ ****************************************************************************/
+
+int inode_search(FAR struct inode_search_s *desc)
+{
+  int ret;
+
+  /* Perform the common _inode_search() logic.  This does everything except
+   * operations special operations that must be performed on the terminal
+   * node if node is a symbolic link.
+   */
+
+  DEBUGASSERT(desc != NULL);
+#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+  desc->linktgt = NULL;
+#endif
+
+  ret = _inode_search(desc);
+
+#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+  if (ret >= 0)
+    {
+      FAR struct inode *node;
+
+      /* Search completed successfully */
+
+      node    = desc->node;
+      DEBUGASSERT(node != NULL);
+
+      /* Is the terminal node a softlink? Should we follow it? */
+
+      if (!desc->nofollow && INODE_IS_SOFTLINK(node))
+        {
+          /* Save some things we need that will be clobbered by the call to
+           * _inode_linktgt().
+           */
+
+          FAR struct inode *link  = node;
+          FAR const char *relpath = desc->relpath; /* Will always be "" here */
+
+          /* The terminating inode is a valid soft link:  Return the inode,
+           * corresponding to link target.
+           */
+
+          ret = _inode_linktarget(link, desc);
+          if (ret < 0)
+            {
+              /* The most likely cause for failure is that the target of the
+               * symbolic link does not exist.
+               */
+
+              return ret;
+            }
+
+          /* The dereferenced node might be a mountpoint */
+
+          node = desc->node;
+          DEBUGASSERT(node != NULL);
+
+          if (INODE_IS_MOUNTPT(node))
+            {
+               /* Yes... set up for the MOUNTPOINT logic below. */
+
+              desc->relpath = relpath;
+              desc->linktgt = link->u.i_link;
+            }
+        }
+
+      /* Handle a special case.  This special occurs with either (1)
+       * inode_search() terminates early because it encountered a MOUNTPOINT
+       * at an intermediate node in the path, or (2) inode_search()
+       * terminates because it reached the terminal node and 'nofollow' is
+       * false and the above logic converted the symbolic link to a
+       * MOUNTPOINT.
+       *
+       * We can detect the special cases because desc->linktgt will be
+       * non-NULL.
+       */
+
+      if (desc->linktgt != NULL && INODE_IS_MOUNTPT(node))
+        {
+          /* There would be no problem in this case if the link was to
+           * either to the root directory of the MOUNTPOINT or to a
+           * regular file within the the mounted volume.  However,
+           * there is a problem if the symbolic link is to a directory
+           * within the mounted volume.  In that case, the 'relpath'
+           * will be relative to the symbolic link and not to the
+           * MOUNTPOINT.
+           *
+           * We will handle the worst case by creating the full path
+           * excluding the symbolic link and performing the look-up
+           * again.
+           */
+
+          if (desc->relpath != NULL && *desc->relpath != '\0')
+            {
+              snprintf(desc->fullpath, PATH_MAX, "%s/%s",
+                       desc->linktgt, desc->relpath);
+            }
+          else
+            {
+              strncpy(desc->fullpath, desc->linktgt, PATH_MAX);
+            }
+
+          /* Reset the search description and perform the search again. */
+
+          RESET_SEARCH(desc);
+          desc->path = desc->fullpath;
+
+          ret = _inode_search(desc);
+        }
+    }
+#endif
+
+  return ret;
+}
+
+/****************************************************************************
  * Name: inode_nextname
  *
  * Description:
@@ -447,7 +567,7 @@ FAR const char *inode_nextname(FAR const char *name)
    * path segment.
    */
 
-  while (*name && *name != '/')
+  while (*name != '\0' && *name != '/')
     {
       name++;
     }
@@ -456,7 +576,7 @@ FAR const char *inode_nextname(FAR const char *name)
    * the next character (which might also be the NUL terminator).
    */
 
-  if (*name)
+  while (*name == '/')
     {
       name++;
     }
