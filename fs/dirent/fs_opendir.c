@@ -267,9 +267,9 @@ FAR DIR *opendir(FAR const char *path)
 
   /* Did we get an inode? */
 
-  if (!inode)
+  if (inode == NULL)
     {
-      /* 'path' does not exist. */
+      /* Inode for 'path' does not exist. */
 
       ret = ENOTDIR;
       goto errout_with_semaphore;
@@ -336,7 +336,7 @@ FAR DIR *opendir(FAR const char *path)
        */
 
       FAR struct inode *child = inode->i_child;
-      if (child)
+      if (child != NULL)
         {
           /* It looks we have a valid pseudo-filesystem directory node. */
 

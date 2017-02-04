@@ -39,8 +39,8 @@
 
 #include <nuttx/config.h>
 
-#include <limits.h>
 #include <string.h>
+#include <limits.h>
 #include <assert.h>
 #include <errno.h>
 
@@ -153,26 +153,29 @@ static int inode_linktarget(FAR struct inode *node,
                             FAR struct inode_search_s *desc)
 {
   unsigned int count = 0;
+  bool save;
   int ret = -ENOENT;
 
   DEBUGASSERT(desc != NULL && node != NULL);
 
   /* An infinite loop is avoided only by the loop count.
-  *
+   *
    * REVISIT:  The ELOOP error should be reported to the application in that
    * case but there is no simple mechanism to do that.
    */
 
+  save = desc->nofollow;
   while (INODE_IS_SOFTLINK(node))
     {
-      /* Now, look-up the inode associated with the target path */
+      /* Reset and reinitialize the search descriptor.  */
 
       memset(desc, 0, sizeof(struct inode_search_s));
-      desc->path = (FAR const char *)node->u.i_link;
+      desc->path     = (FAR const char *)node->u.i_link;
+      desc->nofollow = true;
 
-      /* Look up the target of the symbolic link */
+      /* Look up inode associated with the target of the symbolic link */
 
-      ret = inode_search_nofollow(desc);
+      ret = inode_search(desc);
       if (ret < 0)
         {
           break;
@@ -191,6 +194,7 @@ static int inode_linktarget(FAR struct inode *node,
       node = desc->node;
     }
 
+  desc->nofollow = save;
   return ret;
 }
 #endif
@@ -200,29 +204,30 @@ static int inode_linktarget(FAR struct inode *node,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: inode_search and inode_search_nofollow
+ * Name: inode_search
  *
  * Description:
  *   Find the inode associated with 'path' returning the inode references
  *   and references to its companion nodes.
  *
- *   Both versions will follow soft links in path leading up to the terminal
- *   node.  inode_search() will deference that terminal node,
- *   inode_search_nofollow will not.
+ *   If a mountpoint is encountered in the search prior to encountering the
+ *   terminal node, the search will terminate at the mountpoint inode.  That
+ *   inode and the relative path from the mountpoint, 'relpath' will be
+ *   returned.
+ *
+ *   inode_search will follow soft links in path leading up to the terminal
+ *   node.  Whether or no inode_search() will deference that terminal node
+ *   depends on the 'nofollow' input.
  *
  *   If a soft link is encountered that is not the terminal node in the path,
- *   that that WILL be deferenced and the mountpoint inode will be returned.
+ *   that link WILL be deferenced unconditionally.
  *
  * Assumptions:
  *   The caller holds the g_inode_sem semaphore
  *
  ****************************************************************************/
 
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
-int inode_search_nofollow(FAR struct inode_search_s *desc)
-#else
 int inode_search(FAR struct inode_search_s *desc)
-#endif
 {
   FAR const char   *name;
   FAR struct inode *node    = g_root_inode;
@@ -300,15 +305,34 @@ int inode_search(FAR struct inode_search_s *desc)
                */
 
               relpath = name;
+              ret = OK;
 
 #ifdef CONFIG_PSEUDOFS_SOFTLINKS
-              /* NOTE that if the terminal inode is a soft link, it is not
-               * deferenced in this case. The raw inode is returned.
-               *
-               * In that case a wrapper function will perform that operation.
-               */
+              /* Is the terminal node a softlink? Should we follow it? */
+
+              if (!desc->nofollow && INODE_IS_SOFTLINK(node))
+                {
+                  int status;
+
+                  /* The terminating inode is a valid soft link:  Return the
+                   * inode, corresponding to link target.
+                   */
+
+                  status = inode_linktarget(node, desc);
+                  if (status < 0)
+                    {
+                      ret = status;
+                    }
+                  else
+                    {
+                      /* Return, skipping setting of 'desc' return values
+                       * at the normal exit point.
+                       */
+
+                      return OK;
+                    }
+                }
 #endif
-              ret = OK;
               break;
             }
           else
@@ -407,51 +431,6 @@ int inode_search(FAR struct inode_search_s *desc)
   desc->relpath = relpath;
   return ret;
 }
-
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
-int inode_search(FAR struct inode_search_s *desc)
-{
-  int ret;
-
-  /* Lookup the terminal inode */
-
-  ret = inode_search_nofollow(desc);
-
-  /* Did we find it?  inode_search_nofollow() will terminate in one of
-   * three ways:
-   *
-   *   1. With an error (node == NULL)
-   *   2. With node referring to the terminal inode which may be a symbolic
-   *      link, or
-   *   3. with node referring to an intermediate MOUNTPOINT inode with the
-   *      residual path in relpath.
-   *
-   * REVISIT: The relpath is incorrect in the final case.  It will be relative
-   * to symbolic link, not to the root of the mount.
-   */
-
-  if (ret >= 0)
-    {
-      /* Sucessfully found inode */
-
-      FAR struct inode *node = desc->node;
-      DEBUGASSERT(node != NULL);
-
-      /* Is the terminal node a softlink? */
-
-      if (INODE_IS_SOFTLINK(node))
-        {
-          /* The terminating inode is a valid soft link:  Return the inode,
-           * corresponding to link target.
-           */
-
-           ret = inode_linktarget(node, desc);
-        }
-    }
-
-  return ret;
-}
-#endif
 
 /****************************************************************************
  * Name: inode_nextname

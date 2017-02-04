@@ -55,17 +55,21 @@
  ****************************************************************************/
 /* This is the type of the argument to inode_search().
  *
- *  path    - INPUT:  Path of inode to find
- *            OUTPUT: Residual part of path not traversed
- *  node    - INPUT:  (not used)
- *            OUTPUT: On success, holds the pointer to the inode found.
- *  peer    - INPUT:  (not used)
- *            OUTPUT: The inode to the "left" of the inode found.
- *  parent  - INPUT:  (not used)
- *            OUTPUT: The inode to the "above" of the inode found.
- *  relpath - INPUT:  (not used)
- *            OUTPUT: If the returned inode is a mountpoint, this is the
- *                    relative path from the mountpoint.
+ *  path     - INPUT:  Path of inode to find
+ *             OUTPUT: Residual part of path not traversed
+ *  node     - INPUT:  (not used)
+ *             OUTPUT: On success, holds the pointer to the inode found.
+ *  peer     - INPUT:  (not used)
+ *             OUTPUT: The inode to the "left" of the inode found.
+ *  parent   - INPUT:  (not used)
+ *             OUTPUT: The inode to the "above" of the inode found.
+ *  relpath  - INPUT:  (not used)
+ *             OUTPUT: If the returned inode is a mountpoint, this is the
+ *                     relative path from the mountpoint.
+ *  nofollow - INPUT:  true: terminal node is returned; false: if the
+ *                     terminal is a soft link, then return the inode of
+ *                     the link target.
+ *           - OUTPUT: (not used)
  */
 
 struct inode_search_s
@@ -75,6 +79,9 @@ struct inode_search_s
   FAR struct inode *peer;    /* Node to the "left" for the found inode */
   FAR struct inode *parent;  /* Node "above" the found inode */
   FAR const char *relpath;   /* Relative path into the mountpoint */
+#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+  bool nofollow;             /* true: Don't follow terminal soft link */
+#endif
 };
 
 /* Callback used by foreach_inode to traverse all inodes in the pseudo-
@@ -136,18 +143,23 @@ void inode_semtake(void);
 void inode_semgive(void);
 
 /****************************************************************************
- * Name: inode_search and inode_search_nofollow
+ * Name: inode_search
  *
  * Description:
  *   Find the inode associated with 'path' returning the inode references
  *   and references to its companion nodes.
  *
- *   Both versions will follow soft links in path leading up to the terminal
- *   node.  inode_search() will deference that terminal node,
- *   inode_search_nofollow will not.
+ *   If a mountpoint is encountered in the search prior to encountering the
+ *   terminal node, the search will terminate at the mountpoint inode.  That
+ *   inode and the relative path from the mountpoint, 'relpath' will be
+ *   returned.
+ *
+ *   inode_search will follow soft links in path leading up to the terminal
+ *   node.  Whether or no inode_search() will deference that terminal node
+ *   depends on the 'nofollow' input.
  *
  *   If a soft link is encountered that is not the terminal node in the path,
- *   that that WILL be deferenced and the mountpoint inode will be returned.
+ *   that link WILL be deferenced unconditionally.
  *
  * Assumptions:
  *   The caller holds the g_inode_sem semaphore
@@ -155,12 +167,6 @@ void inode_semgive(void);
  ****************************************************************************/
 
 int inode_search(FAR struct inode_search_s *desc);
-
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
-int inode_search_nofollow(FAR struct inode_search_s *desc);
-#else
-#  define inode_search_nofollow(d) inode_search(d)
-#endif
 
 /****************************************************************************
  * Name: inode_free
@@ -239,18 +245,14 @@ FAR struct inode *inode_unlink(FAR const char *path);
 int inode_remove(FAR const char *path);
 
 /****************************************************************************
- * Name: inode_find and indode_find_nofollow
+ * Name: inode_find
  *
  * Description:
  *   This is called from the open() logic to get a reference to the inode
- *   associated with a path.
- *
- *   Both versions will follow soft links in path leading up to the terminal
- *   node.  inode_find() will deference that terminal node,
- *   indode_find_nofollow no follow will not.
- *
- *   If a soft link is encounter that is not the terminal node in the path,
- *   that that WILL be deferenced and the mountpoint inode will be returned.
+ *   associated with a path.  This is accomplished by calling inode_search().
+ *   The primary difference between inode_find() and inode_search is (1) in
+ *   the form of the input paramters and return value and (2) inode_find()
+ *   will lock the inode tree and increment the reference count on the inode.
  *
  ****************************************************************************/
 

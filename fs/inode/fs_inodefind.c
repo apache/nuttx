@@ -52,15 +52,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: inode_find and indode_find_nofollow
+ * Name: inode_find
  *
  * Description:
  *   This is called from the open() logic to get a reference to the inode
- *   associated with a path.
- *
- *   Both versions will follow soft links in path leading up to the terminal
- *   node.  inode_find() will deference that terminal node,
- *   indode_find_nofollow no follow will not.
+ *   associated with a path.  This is accomplished by calling inode_search().
+ *   The primary difference between inode_find() and inode_search is (1) in
+ *   the form of the input paramters and return value and (2) inode_find()
+ *   will lock the inode tree and increment the reference count on the inode.
  *
  ****************************************************************************/
 
@@ -81,10 +80,13 @@ FAR struct inode *inode_find(FAR const char *path, FAR const char **relpath,
    */
 
   memset(&desc, 0, sizeof(struct inode_search_s));
-  desc.path = path;
+  desc.path     = path;
+#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+  desc.nofollow = nofollow;
+#endif
 
   inode_semtake();
-  ret = nofollow ? inode_search_nofollow(&desc) : inode_search(&desc);
+  ret = inode_search(&desc);
   if (ret >= 0)
     {
       /* Found it */
