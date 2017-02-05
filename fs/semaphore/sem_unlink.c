@@ -91,8 +91,7 @@ int sem_unlink(FAR const char *name)
 
   /* Get the inode for this semaphore. */
 
-  RESET_SEARCH(&desc);
-  desc.path = fullpath;
+  SETUP_SEARCH(&desc, fullpath, false);
 
   sched_lock();
   ret = inode_find(&desc);
@@ -101,7 +100,7 @@ int sem_unlink(FAR const char *name)
       /* There is no inode that includes in this path */
 
       errcode = -ret;
-      goto errout;
+      goto errout_with_search;
     }
 
   /* Get the search results */
@@ -152,14 +151,18 @@ int sem_unlink(FAR const char *name)
 
   inode_semgive();
   ret = sem_close((FAR sem_t *)inode->u.i_nsem);
+  RELEASE_SEARCH(&desc);
   sched_unlock();
   return ret;
 
 errout_with_semaphore:
   inode_semgive();
+
 errout_with_inode:
   inode_release(inode);
-errout:
+
+errout_with_search:
+  RELEASE_SEARCH(&desc);
   set_errno(errcode);
   sched_unlock();
   return ERROR;

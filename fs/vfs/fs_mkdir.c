@@ -86,13 +86,12 @@ int mkdir(const char *pathname, mode_t mode)
 {
   struct inode_search_s desc;
   FAR struct inode *inode;
-  int               errcode;
-  int               ret;
+  int errcode;
+  int ret;
 
   /* Find the inode that includes this path */
 
-  RESET_SEARCH(&desc);
-  desc.path = pathname;
+  SETUP_SEARCH(&desc, pathname, false);
 
   ret = inode_find(&desc);
   if (ret >= 0)
@@ -164,24 +163,27 @@ int mkdir(const char *pathname, mode_t mode)
       if (ret < 0)
         {
           errcode = -ret;
-          goto errout;
+          goto errout_with_search;
         }
     }
 #else
   else
     {
       errcode = ENXIO;
-      goto errout;
+      goto errout_with_search;
     }
 #endif
 
   /* Directory successfully created */
 
+  RELEASE_SEARCH(&desc);
   return OK;
 
 errout_with_inode:
   inode_release(inode);
-errout:
+
+errout_with_search:
+  RELEASE_SEARCH(&desc);
   set_errno(errcode);
   return ERROR;
 }

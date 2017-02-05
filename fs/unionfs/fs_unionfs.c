@@ -2446,15 +2446,14 @@ static int unionfs_getmount(FAR const char *path, FAR struct inode **inode)
 
   /* Find the mountpt */
 
-  RESET_SEARCH(&desc);
-  desc.path = path;
+  SETUP_SEARCH(&desc, path, false);
 
   ret = inode_find(&desc);
   if (ret < 0)
     {
       /* Mountpoint inode not found */
 
-      return ret;
+      goto errout_with_search;
     }
 
   /* Get the search results */
@@ -2462,20 +2461,33 @@ static int unionfs_getmount(FAR const char *path, FAR struct inode **inode)
   minode = desc.node;
   DEBUGASSERT(minode != NULL);
 
-  /* Verify that the inode is a mountpoint */
+  /* Verify that the inode is a mountpoint.
+   *
+   * REVISIT: If desc.relpath points to a non-empty string, then the path
+   * does not really refer to a mountpoint but, rather, to a some entity
+   * within the mounted volume.
+   */
 
   if (!INODE_IS_MOUNTPT(minode))
     {
-      /* Inode was found, but is it is a mounpoint */
+      /* Inode was found, but is it is not a mounpoint */
 
-      inode_release(minode);
-      return -EINVAL;
+      ret = -EINVAL;
+      goto errout_with_inode;
     }
 
   /* Success! */
 
   *inode = minode;
+  RELEASE_SEARCH(&desc);
   return OK;
+
+errout_with_inode:
+  inode_release(minode);
+
+errout_with_search:
+  RELEASE_SEARCH(&desc);
+  return ret;
 }
 
 /****************************************************************************

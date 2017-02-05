@@ -83,7 +83,9 @@
 int rename(FAR const char *oldpath, FAR const char *newpath)
 {
   struct inode_search_s olddesc;
+#ifndef CONFIG_DISABLE_MOUNTPOINT
   struct inode_search_s newdesc;
+#endif
   FAR struct inode *oldinode;
   FAR struct inode *newinode;
   int               errcode;
@@ -101,11 +103,7 @@ int rename(FAR const char *oldpath, FAR const char *newpath)
 
   /* Get an inode that includes the oldpath */
 
-  RESET_SEARCH(&olddesc);
-  olddesc.path     = oldpath;
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
-  olddesc.nofollow = true;
-#endif
+  SETUP_SEARCH(&olddesc, oldpath, true);
 
   ret = inode_find(&olddesc);
   if (ret < 0)
@@ -113,7 +111,7 @@ int rename(FAR const char *oldpath, FAR const char *newpath)
       /* There is no inode that includes in this path */
 
       errcode = -ret;
-      goto errout;
+      goto errout_with_oldsearch;
     }
 
   /* Get the search results */
@@ -130,11 +128,7 @@ int rename(FAR const char *oldpath, FAR const char *newpath)
        * mountpoint
        */
 
-      RESET_SEARCH(&newdesc);
-      newdesc.path     = newpath;
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
-      newdesc.nofollow = true;
-#endif
+      SETUP_SEARCH(&newdesc, newpath, true);
 
       ret = inode_find(&newdesc);
       if (ret < 0)
@@ -142,7 +136,7 @@ int rename(FAR const char *oldpath, FAR const char *newpath)
           /* There is no mountpoint that includes in this path */
 
           errcode = -ret;
-          goto errout_with_oldinode;
+          goto errout_with_newsearch;
         }
 
       /* Get the search results */
@@ -181,9 +175,10 @@ int rename(FAR const char *oldpath, FAR const char *newpath)
       /* Successfully renamed */
 
       inode_release(newinode);
+      RELEASE_SEARCH(&newdesc);
     }
   else
-#endif
+#endif /* CONFIG_DISABLE_MOUNTPOINT */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
     {
       /* Create a new, empty inode at the destination location.
@@ -246,22 +241,29 @@ int rename(FAR const char *oldpath, FAR const char *newpath)
 #else
     {
       errcode = ENXIO;
-      goto errout;
+      goto errout_with_oldsearch;
     }
 #endif
 
   /* Successfully renamed */
 
   inode_release(oldinode);
+  RELEASE_SEARCH(&olddesc);
   return OK;
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT
 errout_with_newinode:
   inode_release(newinode);
+
+errout_with_newsearch:
+  RELEASE_SEARCH(&newdesc);
 #endif
+
 errout_with_oldinode:
   inode_release(oldinode);
-errout:
+
+errout_with_oldsearch:
+  RELEASE_SEARCH(&olddesc);
   set_errno(errcode);
   return ERROR;
 }

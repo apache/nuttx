@@ -284,8 +284,7 @@ int mount(FAR const char *source, FAR const char *target,
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   /* Check if the inode already exists */
 
-  RESET_SEARCH(&desc);
-  desc.path = target;
+  SETUP_SEARCH(&desc, target, false);
 
   ret = inode_find(&desc);
   if (ret >= 0)
@@ -414,6 +413,9 @@ int mount(FAR const char *source, FAR const char *target,
     }
 #endif
 
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  RELEASE_SEARCH(&desc);
+#endif
   return OK;
 
   /* A lot of goto's!  But they make the error handling much simpler */
@@ -432,10 +434,14 @@ errout_with_mountpt:
 #endif
 
   inode_release(mountpt_inode);
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  RELEASE_SEARCH(&desc);
+#endif
   goto errout;
 
 errout_with_semaphore:
   inode_semgive();
+
 #ifdef BDFS_SUPPORT
 #ifdef NONBDFS_SUPPORT
   if (blkdrvr_inode)
@@ -443,6 +449,10 @@ errout_with_semaphore:
     {
       inode_release(blkdrvr_inode);
     }
+#endif
+
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  RELEASE_SEARCH(&desc);
 #endif
 
 errout:

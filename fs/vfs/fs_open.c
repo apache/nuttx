@@ -121,8 +121,7 @@ int open(const char *path, int oflags, ...)
 
   /* Get an inode for this file */
 
-  RESET_SEARCH(&desc);
-  desc.path = path;
+  SETUP_SEARCH(&desc, path, false);
 
   ret = inode_find(&desc);
   if (ret < 0)
@@ -133,7 +132,7 @@ int open(const char *path, int oflags, ...)
        */
 
       ret = -ret;
-      goto errout;
+      goto errout_with_search;
     }
 
   /* Get the search results */
@@ -164,11 +163,12 @@ int open(const char *path, int oflags, ...)
        if (fd < 0)
          {
            ret = fd;
-           goto errout;
+           goto errout_with_search;
          }
 
        /* Return the file descriptor */
 
+       RELEASE_SEARCH(&desc);
        leave_cancellation_point();
        return fd;
      }
@@ -215,8 +215,7 @@ int open(const char *path, int oflags, ...)
     {
       /* The errno value has already been set */
 
-      leave_cancellation_point();
-      return ERROR;
+      goto errout;
     }
 
   /* Perform the driver open operation.  NOTE that the open method may be
@@ -276,15 +275,21 @@ int open(const char *path, int oflags, ...)
     }
 #endif
 
+  RELEASE_SEARCH(&desc);
   leave_cancellation_point();
   return fd;
 
 errout_with_fd:
   files_release(fd);
+
 errout_with_inode:
   inode_release(inode);
-errout:
+
+errout_with_search:
+  RELEASE_SEARCH(&desc);
   set_errno(ret);
+
+errout:
   leave_cancellation_point();
   return ERROR;
 }

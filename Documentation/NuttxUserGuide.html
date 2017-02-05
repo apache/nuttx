@@ -479,14 +479,14 @@ int task_delete(pid_t pid);
 <p>
   <b>Description:</b>
   This function causes a specified task to cease to exist.
-  Its  stack and TCB will be deallocated. 
+  Its  stack and TCB will be deallocated.
   This function is the companion to <code>task_create()</code>.
   This is the version of the function exposed to the user;
   it is simply a wrapper around the internal, <code>task_terminate()</code> function.
 </p>
 <p>
   The logic in this function only deletes non-running tasks.
-  If the  <code>pid</code> parameter refers to to the currently runing task, then processing is redirected to <code>exit()</code>. 
+  If the  <code>pid</code> parameter refers to to the currently runing task, then processing is redirected to <code>exit()</code>.
   This can only happen if a task calls <code>task_delete()</code> in order to delete itself.
 </p>
 <p>
@@ -6223,7 +6223,7 @@ interface of the same name.
 <b>Description:</b>
 
 <p>The <code>pthread_cancel()</code> function will request that thread be canceled.
-The target thread's cancelability state, enabled, or disabled, determines when the cancellation takes effect:  When the cancellation is acted on, thread will be terminated. 
+The target thread's cancelability state, enabled, or disabled, determines when the cancellation takes effect:  When the cancellation is acted on, thread will be terminated.
 When cancelability is disabled, all cancellations are held pending in the target thread until the thread re-enables cancelability.</p>
 
 <p>The target thread's cancelability state determines how the cancellation is acted on:
@@ -6592,16 +6592,16 @@ interface of the same name.
 </p>
 <ul>
   <li><code>sched_ss_low_priority</code>
-    Low scheduling priority for sporadic server. 
+    Low scheduling priority for sporadic server.
   </li>
   <li><code>sched_ss_repl_period</code>
-    Replenishment period for sporadic server. 
+    Replenishment period for sporadic server.
   </li>
   <li><code>sched_ss_init_budget</code>
-    Initial budget for sporadic server. 
+    Initial budget for sporadic server.
   </li>
   <li><code>sched_ss_max_repl</code>
-    Maximum pending replenishments for  sporadic server. 
+    Maximum pending replenishments for  sporadic server.
   </li>
 </ul>
 <p>
@@ -8584,12 +8584,16 @@ int        telldir(FAR DIR *dirp);
 <ul><pre>
 #include &lt;unistd.h&gt;
 
+/* Task Control Interfaces */
+
 pid_t   vfork(void);
 pid_t   getpid(void);
 void    _exit(int status) noreturn_function;
 unsigned int sleep(unsigned int seconds);
 void    usleep(unsigned long usec);
 int     pause(void);
+
+/* File descriptor operations */
 
 int     close(int fd);
 int     dup(int fd);
@@ -8598,21 +8602,58 @@ int     fsync(int fd);
 off_t   lseek(int fd, off_t offset, int whence);
 ssize_t read(int fd, FAR void *buf, size_t nbytes);
 ssize_t write(int fd, FAR const void *buf, size_t nbytes);
+ssize_t pread(int fd, FAR void *buf, size_t nbytes, off_t offset);
+ssize_t pwrite(int fd, FAR const void *buf, size_t nbytes, off_t offset);
+
+/* Check if a file descriptor corresponds to a terminal I/O file */
+
+int     isatty(int fd);
+
+/* Memory management */
+
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_MM_PGALLOC) && \
+    defined(CONFIG_ARCH_USE_MMU)
+FAR void *sbrk(intptr_t incr);
+#endif
+
+/* Special devices */
 
 int     pipe(int fd[2]);
+
+/* Working directory operations */
 
 int     chdir(FAR const char *path);
 FAR char *getcwd(FAR char *buf, size_t size);
 
-int     unlink(FAR const char *pathname);
+/* File path operations */
+
+int     access(FAR const char *path, int amode);
 int     rmdir(FAR const char *pathname);
+int     unlink(FAR const char *pathname);
+
+#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+int     link(FAR const char *path1, FAR const char *path2);
+ssize_t readlink(FAR const char *path, FAR char *buf, size_t bufsize);
+#endif
+
+/* Execution of programs from files */
 
 #ifdef CONFIG_LIBC_EXECFUNCS
 int     execl(FAR const char *path, ...);
 int     execv(FAR const char *path, FAR char *const argv[]);
 #endif
 
+/* Networking */
+
+#ifdef CONFIG_NET
+int     gethostname(FAR char *name, size_t size);
+int     sethostname(FAR const char *name, size_t size);
+#endif
+
+/* Other */
+
 int     getopt(int argc, FAR char *const argv[], FAR const char *optstring);
+
 </pre></ul>
 </a>
 

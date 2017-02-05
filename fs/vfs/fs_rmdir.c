@@ -93,11 +93,7 @@ int rmdir(FAR const char *pathname)
    * on the inode if one is found.
    */
 
-  RESET_SEARCH(&desc);
-  desc.path     = pathname;
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
-  desc.nofollow = true;
-#endif
+  SETUP_SEARCH(&desc, pathname, true);
 
   ret = inode_find(&desc);
   if (ret < 0)
@@ -105,7 +101,7 @@ int rmdir(FAR const char *pathname)
       /* There is no inode that includes in this path */
 
       errcode = -ret;
-      goto errout;
+      goto errout_with_search;
     }
 
   /* Get the search results */
@@ -188,11 +184,13 @@ int rmdir(FAR const char *pathname)
   /* Successfully removed the directory */
 
   inode_release(inode);
+  RELEASE_SEARCH(&desc);
   return OK;
 
 errout_with_inode:
   inode_release(inode);
-errout:
+errout_with_search:
+  RELEASE_SEARCH(&desc);
   set_errno(errcode);
   return ERROR;
 }

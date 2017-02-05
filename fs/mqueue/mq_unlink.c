@@ -87,8 +87,7 @@ int mq_unlink(FAR const char *mq_name)
 
   /* Get the inode for this message queue. */
 
-  RESET_SEARCH(&desc);
-  desc.path = fullpath;
+  SETUP_SEARCH(&desc, fullpath, false);
 
   sched_lock();
   ret = inode_find(&desc);
@@ -97,7 +96,7 @@ int mq_unlink(FAR const char *mq_name)
       /* There is no inode that includes in this path */
 
       errcode = -ret;
-      goto errout;
+      goto errout_with_search;
     }
 
   /* Get the search results */
@@ -149,14 +148,18 @@ int mq_unlink(FAR const char *mq_name)
 
   inode_semgive();
   mq_inode_release(inode);
+  RELEASE_SEARCH(&desc);
   sched_unlock();
   return OK;
 
 errout_with_semaphore:
   inode_semgive();
+
 errout_with_inode:
   inode_release(inode);
-errout:
+
+errout_with_search:
+  RELEASE_SEARCH(&desc);
   set_errno(errcode);
   sched_unlock();
   return ERROR;

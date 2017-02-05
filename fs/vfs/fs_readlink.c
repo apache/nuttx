@@ -93,17 +93,13 @@ ssize_t readlink(FAR const char *path, FAR char *buf, size_t bufsize)
    * symbolic link node.
    */
 
-  RESET_SEARCH(&desc);
-  desc.path     = path;
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
-  desc.nofollow = true;
-#endif
+  SETUP_SEARCH(&desc, path, true);
 
   ret = inode_find(&desc);
   if (ret < 0)
     {
       errcode = -ret;
-      goto errout;
+      goto errout_with_search;
     }
 
   /* Get the search results */
@@ -131,11 +127,14 @@ ssize_t readlink(FAR const char *path, FAR char *buf, size_t bufsize)
   /* Release our reference on the inode and return the length */
 
   inode_release(node);
+  RELEASE_SEARCH(&desc);
   return strlen(buf);
 
 errout_with_inode:
   inode_release(node);
-errout:
+
+errout_with_search:
+  RELEASE_SEARCH(&desc);
   set_errno(errcode);
   return ERROR;
 }

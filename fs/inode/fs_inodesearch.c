@@ -180,9 +180,8 @@ static int _inode_linktarget(FAR struct inode *node,
     {
       /* Reset and reinitialize the search descriptor.  */
 
-      RESET_SEARCH(desc);
-      desc->path     = (FAR const char *)node->u.i_link;
-      desc->nofollow = true;
+      RELEASE_SEARCH(desc);
+      SETUP_SEARCH(desc, (FAR const char *)node->u.i_link, true);
 
       /* Look up inode associated with the target of the symbolic link */
 
@@ -516,6 +515,8 @@ int inode_search(FAR struct inode_search_s *desc)
 
       if (desc->linktgt != NULL && INODE_IS_MOUNTPT(node))
         {
+          FAR char *buffer;
+
           /* There would be no problem in this case if the link was to
            * either to the root directory of the MOUNTPOINT or to a
            * regular file within the the mounted volume.  However,
@@ -531,20 +532,28 @@ int inode_search(FAR struct inode_search_s *desc)
 
           if (desc->relpath != NULL && *desc->relpath != '\0')
             {
-              snprintf(desc->fullpath, PATH_MAX, "%s/%s",
-                       desc->linktgt, desc->relpath);
+              (void)asprintf(&buffer, "%s/%s",
+                             desc->linktgt, desc->relpath);
             }
           else
             {
-              strncpy(desc->fullpath, desc->linktgt, PATH_MAX);
+              buffer = strdup(desc->linktgt);
             }
 
-          /* Reset the search description and perform the search again. */
+          if (buffer == NULL)
+            {
+              ret = -ENOMEM;
+            }
+          else
+            {
+              /* Reset the search description and perform the search again. */
 
-          RESET_SEARCH(desc);
-          desc->path = desc->fullpath;
+              RELEASE_SEARCH(desc);
+              SETUP_SEARCH(desc, buffer, false);
+              desc->buffer = buffer;
 
-          ret = _inode_search(desc);
+              ret = _inode_search(desc);
+            }
         }
     }
 #endif

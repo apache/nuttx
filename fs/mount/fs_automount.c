@@ -137,8 +137,7 @@ static int automount_findinode(FAR const char *path)
 
   /* Find the inode */
 
-  RESET_SEARCH(&desc);
-  desc.path = path;
+  SETUP_SEARCH(&desc, path, false);
 
   ret = inode_search(&desc);
 
@@ -169,6 +168,7 @@ static int automount_findinode(FAR const char *path)
   /* Relinquish our exclusive access to the inode try and return the result */
 
   inode_semgive();
+  RELEASE_SEARCH(&desc);
   return ret;
 }
 

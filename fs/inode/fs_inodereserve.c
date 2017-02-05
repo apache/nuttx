@@ -183,8 +183,7 @@ int inode_reserve(FAR const char *path, FAR struct inode **inode)
 
   /* Find the location to insert the new subtree */
 
-  RESET_SEARCH(&desc);
-  desc.path = path;
+  SETUP_SEARCH(&desc, path, false);
 
   ret = inode_search(&desc);
   if (ret >= 0)
@@ -193,7 +192,8 @@ int inode_reserve(FAR const char *path, FAR struct inode **inode)
        * lies within a mountpoint, we don't distinguish here).
        */
 
-      return -EEXIST;
+      ret = -EEXIST;
+      goto errout_with_search;
     }
 
   /* Now we now where to insert the subtree */
@@ -236,12 +236,18 @@ int inode_reserve(FAR const char *path, FAR struct inode **inode)
             {
               inode_insert(node, left, parent);
               *inode = node;
-              return OK;
+              ret = OK;
+              break;
             }
         }
 
       /* We get here on failures to allocate node memory */
 
-      return -ENOMEM;
+      ret = -ENOMEM;
+      break;
     }
+
+errout_with_search:
+  RELEASE_SEARCH(&desc);
+  return ret;
 }

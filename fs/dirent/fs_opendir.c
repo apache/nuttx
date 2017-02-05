@@ -235,6 +235,8 @@ FAR DIR *opendir(FAR const char *path)
    * request for the root inode.
    */
 
+  SETUP_SEARCH(&desc, path, false);
+
   inode_semtake();
   if (path == NULL || *path == '\0' || strcmp(path, "/") == 0)
     {
@@ -252,9 +254,6 @@ FAR DIR *opendir(FAR const char *path)
         }
 
       /* Find the node matching the path. */
-
-      RESET_SEARCH(&desc);
-      desc.path = path;
 
       ret = inode_search(&desc);
       if (ret >= 0)
@@ -357,6 +356,7 @@ FAR DIR *opendir(FAR const char *path)
         }
     }
 
+  RELEASE_SEARCH(&desc);
   inode_semgive();
   return ((FAR DIR *)dir);
 
@@ -366,6 +366,7 @@ errout_with_direntry:
   kumm_free(dir);
 
 errout_with_semaphore:
+  RELEASE_SEARCH(&desc);
   inode_semgive();
   set_errno(ret);
   return NULL;

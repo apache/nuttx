@@ -83,11 +83,7 @@ FAR struct inode *inode_unlink(FAR const char *path)
 
   /* Find the node to unlink */
 
-  RESET_SEARCH(&desc);
-  desc.path     = path;
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
-  desc.nofollow = true;
-#endif
+  SETUP_SEARCH(&desc, path, true);
 
   ret = inode_search(&desc);
   if (ret >= 0)
@@ -123,6 +119,7 @@ FAR struct inode *inode_unlink(FAR const char *path)
       node->i_peer = NULL;
     }
 
+  RELEASE_SEARCH(&desc);
   return node;
 }
 
