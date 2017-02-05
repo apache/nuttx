@@ -48,6 +48,7 @@
 #include <stdbool.h>
 #include <dirent.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 
 /****************************************************************************
@@ -55,6 +56,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_PSEUDOFS_SOFTLINKS
+
 #  define SETUP_SEARCH(d,p,n) \
     do \
       { \
@@ -64,10 +66,20 @@
         (d)->parent   = NULL; \
         (d)->relpath  = NULL; \
         (d)->linktgt  = NULL; \
+        (d)->buffer   = NULL; \
         (d)->nofollow = (n); \
       } \
     while (0)
+
+#  define RELEASE_SEARCH(d) \
+     if ((d)->buffer != NULL) \
+       { \
+         kmm_free((d)->buffer); \
+         (d)->buffer  = NULL; \
+       }
+
 #else
+
 #  define SETUP_SEARCH(d,p,n) \
     do \
       { \
@@ -78,9 +90,10 @@
         (d)->relpath  = NULL; \
       } \
     while (0)
-#endif
 
-#define RELEASE_SEARCH(d)
+#  define RELEASE_SEARCH(d)
+
+#endif
 
 /****************************************************************************
  * Public Types
@@ -109,9 +122,10 @@
  *                     terminal is a soft link, then return the inode of
  *                     the link target.
  *           - OUTPUT: (not used)
- *  fullpath - INPUT:  Not used
- *           - OUTPUT: May hold an intermediate path which is probably of
- *                     no interest to the caller.
+ *  buffer   - INPUT:  Not used
+ *           - OUTPUT: May hold an allocated intermediate path which is
+ *                     probably of no interest to the caller unless it holds
+ *                     the relpath.
  */
 
 struct inode_search_s
@@ -123,8 +137,8 @@ struct inode_search_s
   FAR const char *relpath;   /* Relative path into the mountpoint */
 #ifdef CONFIG_PSEUDOFS_SOFTLINKS
   FAR const char *linktgt;   /* Target of symbolic link if linked to a directory */
+  FAR char *buffer;          /* Path expansion buffer */
   bool nofollow;             /* true: Don't follow terminal soft link */
-  char fullpath[PATH_MAX];         /* Path expansion buffer */
 #endif
 };
 

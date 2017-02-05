@@ -115,9 +115,9 @@ FAR sem_t *sem_open (FAR const char *name, int oflags, ...)
   /* Make sure that a non-NULL name is supplied */
 
   DEBUGASSERT(name != NULL);
- 
+
   /* The POSIX specification requires that the "check for the existence
-   * of a semaphore and the creation of the semaphore if it does not 
+   * of a semaphore and the creation of the semaphore if it does not
    * exist shall be atomic with respect to other processes executing
    * sem_open()..."  A simple sched_lock() should be sufficient to meet
    * this requirement.
