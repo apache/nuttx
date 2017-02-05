@@ -89,22 +89,20 @@ int find_blockdriver(FAR const char *pathname, int mountflags, FAR struct inode 
 #ifdef CONFIG_DEBUG_FEATURES
   if (!pathname || !ppinode)
     {
-      ret = -EINVAL;
-      goto errout;
+      return -EINVAL;
     }
 #endif
 
   /* Find the inode registered with this pathname */
 
-  RESET_SEARCH(&desc);
-  desc.path = pathname;
+  SETUP_SEARCH(&desc, pathname, false);
 
   ret = inode_find(&desc);
   if (ret < 0)
     {
       ferr("ERROR: Failed to find %s\n", pathname);
       ret = -ENOENT;
-      goto errout;
+      goto errout_with_search;
     }
 
   /* Get the search results */
@@ -132,10 +130,12 @@ int find_blockdriver(FAR const char *pathname, int mountflags, FAR struct inode 
     }
 
   *ppinode = inode;
+  RELEASE_SEARCH(&desc);
   return OK;
 
 errout_with_inode:
   inode_release(inode);
-errout:
+errout_with_search:
+  RELEASE_SEARCH(&desc);
   return ret;
 }

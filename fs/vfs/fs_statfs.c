@@ -105,8 +105,7 @@ int statfs(FAR const char *path, FAR struct statfs *buf)
 
   /* Get an inode for this file */
 
-  RESET_SEARCH(&desc);
-  desc.path = path;
+  SETUP_SEARCH(&desc, path, false);
 
   ret = inode_find(&desc);
   if (ret < 0)
@@ -116,7 +115,7 @@ int statfs(FAR const char *path, FAR struct statfs *buf)
        */
 
       ret = -ret;
-      goto errout;
+      goto errout_with_search;
     }
 
   /* Get the search results */
@@ -161,12 +160,17 @@ int statfs(FAR const char *path, FAR struct statfs *buf)
   /* Successfully statfs'ed the file */
 
   inode_release(inode);
+  RELEASE_SEARCH(&desc);
   return OK;
 
 /* Failure conditions always set the errno appropriately */
 
 errout_with_inode:
   inode_release(inode);
+
+errout_with_search:
+  RELEASE_SEARCH(&desc);
+
 errout:
   set_errno(ret);
   return ERROR;

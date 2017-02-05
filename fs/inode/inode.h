@@ -55,23 +55,23 @@
  ****************************************************************************/
 
 #ifdef CONFIG_PSEUDOFS_SOFTLINKS
-#  define RESET_SEARCH(d) \
+#  define SETUP_SEARCH(d,p,n) \
     do \
       { \
-        (d)->path     = NULL; \
+        (d)->path     = (p); \
         (d)->node     = NULL; \
         (d)->peer     = NULL; \
         (d)->parent   = NULL; \
         (d)->relpath  = NULL; \
         (d)->linktgt  = NULL; \
-        (d)->nofollow = false; \
+        (d)->nofollow = (n); \
       } \
     while (0)
 #else
-#  define RESET_SEARCH(d) \
+#  define SETUP_SEARCH(d,p,n) \
     do \
       { \
-        (d)->path     = NULL; \
+        (d)->path     = (p); \
         (d)->node     = NULL; \
         (d)->peer     = NULL; \
         (d)->parent   = NULL; \
@@ -79,6 +79,8 @@
       } \
     while (0)
 #endif
+
+#define RELEASE_SEARCH(d)
 
 /****************************************************************************
  * Public Types

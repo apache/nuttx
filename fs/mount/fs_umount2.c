@@ -88,14 +88,13 @@ int umount2(FAR const char *target, unsigned int flags)
 
   /* Find the mountpt */
 
-  RESET_SEARCH(&desc);
-  desc.path = target;
+  SETUP_SEARCH(&desc, target, false);
 
   ret = inode_find(&desc);
   if (ret < 0)
     {
       errcode = ENOENT;
-      goto errout;
+      goto errout_with_search;
     }
 
   /* Get the search results */
@@ -199,18 +198,24 @@ int umount2(FAR const char *target, unsigned int flags)
       inode_release(blkdrvr_inode);
     }
 
+  RELEASE_SEARCH(&desc);
   return OK;
 
   /* A lot of goto's!  But they make the error handling much simpler */
 
 errout_with_semaphore:
   inode_semgive();
+
 errout_with_mountpt:
   inode_release(mountpt_inode);
   if (blkdrvr_inode)
     {
       inode_release(blkdrvr_inode);
     }
+
+errout_with_search:
+  RELEASE_SEARCH(&desc);
+
 errout:
   set_errno(errcode);
   return ERROR;

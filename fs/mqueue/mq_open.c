@@ -133,8 +133,7 @@ mqd_t mq_open(FAR const char *mq_name, int oflags, ...)
    * have incremented the reference count on the inode.
    */
 
-  RESET_SEARCH(&desc);
-  desc.path = fullpath;
+  SETUP_SEARCH(&desc, fullpath, false);
 
   ret = inode_find(&desc);
   if (ret >= 0)
@@ -236,16 +235,21 @@ mqd_t mq_open(FAR const char *mq_name, int oflags, ...)
       inode->i_crefs    = 1;
     }
 
+  RELEASE_SEARCH(&desc);
   sched_unlock();
   return mqdes;
 
 errout_with_msgq:
   mq_msgqfree(msgq);
   inode->u.i_mqueue = NULL;
+
 errout_with_inode:
   inode_release(inode);
+
 errout_with_lock:
+  RELEASE_SEARCH(&desc);
   sched_unlock();
+
 errout:
   set_errno(errcode);
   return (mqd_t)ERROR;

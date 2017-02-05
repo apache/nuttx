@@ -61,25 +61,25 @@ static int fat_attrib(const char *path, fat_attrib_t *retattrib,
                       fat_attrib_t setbits, fat_attrib_t clearbits)
 {
   struct fat_mountpt_s *fs;
-  struct fat_dirinfo_s  dirinfo;
+  struct fat_dirinfo_s dirinfo;
   struct inode_search_s desc;
-  FAR struct inode     *inode;
-  uint8_t              *direntry;
-  uint8_t               oldattributes;
-  uint8_t               newattributes;
-  int                   ret;
+  FAR struct inode *inode;
+  uint8_t *direntry;
+  uint8_t oldattributes;
+  uint8_t newattributes;
+  int status;
+  int ret;
 
   /* Find the inode for this file */
 
-  RESET_SEARCH(&desc);
-  desc.path = path;
+  SETUP_SEARCH(&desc, path, false);
 
-  ret = inode_find(&desc);
-  if (ret < 0)
+  status = inode_find(&desc);
+  if (status < 0)
     {
       /* There is no mountpoint that includes in this path */
 
-      ret = ENOENT;
+      ret = -status;
       goto errout;
     }
 
@@ -165,14 +165,18 @@ static int fat_attrib(const char *path, fat_attrib_t *retattrib,
 
   fat_semgive(fs);
   inode_release(inode);
+  RELEASE_SEARCH(&desc);
   return OK;
 
 errout_with_semaphore:
   fat_semgive(fs);
+
 errout_with_inode:
   inode_release(inode);
+
 errout:
-  *get_errno_ptr() = ret;
+  RELEASE_SEARCH(&desc);
+  set_errno(ret);
   return ERROR;
 }
 

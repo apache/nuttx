@@ -234,11 +234,7 @@ int stat(FAR const char *path, FAR struct stat *buf)
 
   /* Get an inode for this file */
 
-  RESET_SEARCH(&desc);
-  desc.path     = path;
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
-  desc.nofollow = true;
-#endif
+  SETUP_SEARCH(&desc, path, true);
 
   ret = inode_find(&desc);
   if (ret < 0)
@@ -248,7 +244,7 @@ int stat(FAR const char *path, FAR struct stat *buf)
        */
 
       ret = -ret;
-      goto errout;
+      goto errout_with_search;
     }
 
   /* Get the search results */
@@ -293,12 +289,17 @@ int stat(FAR const char *path, FAR struct stat *buf)
   /* Successfully stat'ed the file */
 
   inode_release(inode);
+  RELEASE_SEARCH(&desc);
   return OK;
 
 /* Failure conditions always set the errno appropriately */
 
 errout_with_inode:
   inode_release(inode);
+
+errout_with_search:
+  RELEASE_SEARCH(&desc);
+
 errout:
   set_errno(ret);
   return ERROR;

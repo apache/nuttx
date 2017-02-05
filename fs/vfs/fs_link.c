@@ -107,8 +107,7 @@ int link(FAR const char *path1, FAR const char *path2)
    * does not lie on a mounted volume.
    */
 
-  RESET_SEARCH(&desc);
-  desc.path = path2;
+  SETUP_SEARCH(&desc, path2, false);
 
   ret = inode_find(&desc);
   if (ret >= 0)
@@ -149,7 +148,7 @@ int link(FAR const char *path1, FAR const char *path2)
       if (newpath2 == NULL)
         {
           errcode = ENOMEM;
-          goto errout;
+          goto errout_with_search;
         }
 
       /* Create an inode in the pseudo-filesystem at this path.
@@ -165,7 +164,7 @@ int link(FAR const char *path1, FAR const char *path2)
         {
           kmm_free(newpath2);
           errcode = -ret;
-          goto errout;
+          goto errout_with_search;
         }
 
       /* Initialize the inode */
@@ -177,10 +176,15 @@ int link(FAR const char *path1, FAR const char *path2)
 
   /* Symbolic link successfully created */
 
+  RELEASE_SEARCH(&desc);
   return OK;
 
 errout_with_inode:
   inode_release(inode);
+
+errout_with_search:
+  RELEASE_SEARCH(&desc);
+
 errout:
   set_errno(errcode);
   return ERROR;

@@ -114,149 +114,148 @@ FAR sem_t *sem_open (FAR const char *name, int oflags, ...)
 
   /* Make sure that a non-NULL name is supplied */
 
-  if (name)
+  DEBUGASSERT(name != NULL);
+ 
+  /* The POSIX specification requires that the "check for the existence
+   * of a semaphore and the creation of the semaphore if it does not 
+   * exist shall be atomic with respect to other processes executing
+   * sem_open()..."  A simple sched_lock() should be sufficient to meet
+   * this requirement.
+   */
+
+  sched_lock();
+
+  /* Get the full path to the semaphore */
+
+  snprintf(fullpath, MAX_SEMPATH, CONFIG_FS_NAMED_SEMPATH "/%s", name);
+
+  /* Get the inode for this semaphore.  This should succeed if the
+   * semaphore has already been created.  In this case, inode_find()
+   * will have incremented the reference count on the inode.
+   */
+
+  SETUP_SEARCH(&desc, fullpath, false);
+
+  ret = inode_find(&desc);
+  if (ret >= 0)
     {
-      /* The POSIX specification requires that the "check for the existence
-       * of a semaphore and the creation of the semaphore if it does not 
-       * exist shall be atomic with respect to other processes executing
-       * sem_open()..."  A simple sched_lock() should be sufficient to meet
-       * this requirement.
-       */
+      /* Something exists at this path.  Get the search results */
 
-      sched_lock();
+      inode = desc.node;
+      relpath = desc.relpath;
+      DEBUGASSERT(inode != NULL);
 
-      /* Get the full path to the semaphore */
+      /* Verify that the inode is a semaphore */
 
-      snprintf(fullpath, MAX_SEMPATH, CONFIG_FS_NAMED_SEMPATH "/%s", name);
-
-      /* Get the inode for this semaphore.  This should succeed if the
-       * semaphore has already been created.  In this case, inode_find()
-       * will have incremented the reference count on the inode.
-       */
-
-      RESET_SEARCH(&desc);
-      desc.path = fullpath;
-
-      ret = inode_find(&desc);
-      if (ret >= 0)
+      if (!INODE_IS_NAMEDSEM(inode))
         {
-          /* Something exists at this path.  Get the search results */
-
-          inode = desc.node;
-          relpath = desc.relpath;
-          DEBUGASSERT(inode != NULL);
-
-          /* Verify that the inode is a semaphore */
-
-          if (!INODE_IS_NAMEDSEM(inode))
-            {
-              errcode = ENXIO;
-              goto errout_with_inode;
-            }
-
-          /* It exists and is a semaphore.  Check if the caller wanted to
-           * create a new semaphore with this name.
-           */
-
-          if ((oflags & (O_CREAT | O_EXCL)) == (O_CREAT | O_EXCL))
-            {
-              errcode = EEXIST;
-              goto errout_with_inode;
-            }
-
-          /* Return a reference to the semaphore, retaining the reference
-           * count on the inode.
-           */
-
-          sem = &inode->u.i_nsem->ns_sem;
-
-        }
-      else
-        {
-          va_list ap;
-
-          /* The semaphore does not exists.  Were we asked to create it? */
-
-          if ((oflags & O_CREAT) == 0)
-            {
-              /* The semaphore does not exist and O_CREAT is not set */
-
-              errcode = ENOENT;
-              goto errout_with_lock;
-            }
-
-          /* Create the semaphore.  First we have to extract the additional
-           * parameters from the variable argument list.
-           * REVISIT:  Mode parameter is not currently used.
-           */
-
-          va_start(ap, oflags);
-          mode  = va_arg(ap, mode_t);
-          value = va_arg(ap, unsigned);
-          va_end(ap);
-
-          UNUSED(mode);
-
-          /* Check the semaphore value */
-
-          if (value > SEM_VALUE_MAX)
-            {
-              errcode = EINVAL;
-              goto errout_with_lock;
-            }
-
-          /* Create an inode in the pseudo-filesystem at this path.  The new
-           * inode will be created with a reference count of zero.
-           */
-
-          inode_semtake();
-          ret = inode_reserve(fullpath, &inode);
-          inode_semgive();
-
-          if (ret < 0)
-            {
-              errcode = -ret;
-              goto errout_with_lock;
-            }
-
-          /* Allocate the semaphore structure (using the appropriate allocator
-           * for the group)
-           */
-
-          nsem = group_malloc(NULL, sizeof(struct nsem_inode_s));
-          if (!nsem)
-            {
-              errcode = ENOMEM;
-              goto errout_with_inode;
-            }
-
-          /* Link to the inode */
-
-          inode->u.i_nsem = nsem;
-          nsem->ns_inode  = inode;
-
-          /* Initialize the inode */
-
-          INODE_SET_NAMEDSEM(inode);
-          inode->i_crefs = 1;
-
-          /* Initialize the semaphore */
-
-          sem_init(&nsem->ns_sem, 0, value);
-
-          /* Return a reference to the semaphore */
-
-          sem = &nsem->ns_sem;
+          errcode = ENXIO;
+          goto errout_with_inode;
         }
 
-      sched_unlock();
+      /* It exists and is a semaphore.  Check if the caller wanted to
+       * create a new semaphore with this name.
+       */
+
+      if ((oflags & (O_CREAT | O_EXCL)) == (O_CREAT | O_EXCL))
+        {
+          errcode = EEXIST;
+          goto errout_with_inode;
+        }
+
+      /* Return a reference to the semaphore, retaining the reference
+       * count on the inode.
+       */
+
+      sem = &inode->u.i_nsem->ns_sem;
+    }
+  else
+    {
+      va_list ap;
+
+      /* The semaphore does not exists.  Were we asked to create it? */
+
+      if ((oflags & O_CREAT) == 0)
+        {
+          /* The semaphore does not exist and O_CREAT is not set */
+
+          errcode = ENOENT;
+          goto errout_with_lock;
+        }
+
+      /* Create the semaphore.  First we have to extract the additional
+       * parameters from the variable argument list.
+       * REVISIT:  Mode parameter is not currently used.
+       */
+
+      va_start(ap, oflags);
+      mode  = va_arg(ap, mode_t);
+      value = va_arg(ap, unsigned);
+      va_end(ap);
+
+      UNUSED(mode);
+
+      /* Check the semaphore value */
+
+      if (value > SEM_VALUE_MAX)
+        {
+          errcode = EINVAL;
+          goto errout_with_lock;
+        }
+
+      /* Create an inode in the pseudo-filesystem at this path.  The new
+       * inode will be created with a reference count of zero.
+       */
+
+      inode_semtake();
+      ret = inode_reserve(fullpath, &inode);
+      inode_semgive();
+
+      if (ret < 0)
+        {
+          errcode = -ret;
+          goto errout_with_lock;
+        }
+
+      /* Allocate the semaphore structure (using the appropriate allocator
+       * for the group)
+       */
+
+      nsem = group_malloc(NULL, sizeof(struct nsem_inode_s));
+      if (!nsem)
+        {
+          errcode = ENOMEM;
+          goto errout_with_inode;
+        }
+
+      /* Link to the inode */
+
+      inode->u.i_nsem = nsem;
+      nsem->ns_inode  = inode;
+
+      /* Initialize the inode */
+
+      INODE_SET_NAMEDSEM(inode);
+      inode->i_crefs = 1;
+
+      /* Initialize the semaphore */
+
+      sem_init(&nsem->ns_sem, 0, value);
+
+      /* Return a reference to the semaphore */
+
+      sem = &nsem->ns_sem;
     }
 
+  RELEASE_SEARCH(&desc);
+  sched_unlock();
   return sem;
 
 errout_with_inode:
   inode_release(inode);
+
 errout_with_lock:
+  RELEASE_SEARCH(&desc);
   set_errno(errcode);
   sched_unlock();
   return (FAR sem_t *)ERROR;

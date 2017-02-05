@@ -180,9 +180,8 @@ static int _inode_linktarget(FAR struct inode *node,
     {
       /* Reset and reinitialize the search descriptor.  */
 
-      RESET_SEARCH(desc);
-      desc->path     = (FAR const char *)node->u.i_link;
-      desc->nofollow = true;
+      RELEASE_SEARCH(desc);
+      SETUP_SEARCH(desc, (FAR const char *)node->u.i_link, true);
 
       /* Look up inode associated with the target of the symbolic link */
 
@@ -541,9 +540,8 @@ int inode_search(FAR struct inode_search_s *desc)
 
           /* Reset the search description and perform the search again. */
 
-          RESET_SEARCH(desc);
-          desc->path = desc->fullpath;
-
+          RELEASE_SEARCH(desc);
+          SETUP_SEARCH(desc, desc->fullpath, false);
           ret = _inode_search(desc);
         }
     }
