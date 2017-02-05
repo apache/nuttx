@@ -119,7 +119,8 @@ int link(FAR const char *path1, FAR const char *path2)
 #ifndef CONFIG_DISABLE_MOUNTPOINT
       /* Check if the inode is a mountpoint. */
 
-      if (INODE_IS_MOUNTPT(inode))
+      DEBUGASSERT(desc.node != NULL);
+      if (INODE_IS_MOUNTPT(desc.node))
         {
           /* Symbolic links within the mounted volume are not supported */
 
@@ -171,7 +172,6 @@ int link(FAR const char *path1, FAR const char *path2)
 
       INODE_SET_SOFTLINK(inode);
       inode->u.i_link = newpath2;
-      inode->i_crefs  = 1;
     }
 
   /* Symbolic link successfully created */
