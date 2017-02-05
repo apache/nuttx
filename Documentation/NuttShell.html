@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttShell (NSH)</i></font></big></h1>
-      <p>Last Updated: February 2, 2017</p>
+      <p>Last Updated: February 5, 2017</p>
     </td>
   </tr>
 </table>
@@ -377,115 +377,121 @@
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdreboot">2.49 Reset and reboot the system (reboot)</a>
+    <a href="#cmdreadlink">2.49 Show target of a link (readlink)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdrm">2.50 Remove a File (rm)</a>
+    <a href="#cmdreboot">2.50 Reset and reboot the system (reboot)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdrmdir">2.51 Remove a Directory (rmdir)</a>
+    <a href="#cmdrm">2.51 Remove a File (rm)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdrmmod">2.52 Remove on OS Module (rmmod)</a>
+    <a href="#cmdrmdir">2.52 Remove a Directory (rmdir)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdset">2.53 Set an Environment Variable (set)</a>
+    <a href="#cmdrmmod">2.53 Remove on OS Module (rmmod)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdsh">2.54 Execute an NSH Script (sh)</a>
+    <a href="#cmdset">2.54 Set an Environment Variable (set)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdshutdown">2.55 Shut the system down (shutdown)</a>
+    <a href="#cmdsh">2.55 Execute an NSH Script (sh)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdsleep">2.56 Wait for Seconds (sleep)</a>
+    <a href="#cmdshutdown">2.56 Shut the system down (shutdown)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdtime">2.57 Time execution of another command (time)</a>
+    <a href="#cmdsleep">2.57 Wait for Seconds (sleep)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdunmount">2.58 Unmount a File System (umount)</a>
+    <a href="#cmdtime">2.58 Time execution of another command (time)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmduname">2.59 Print system information (uname)</a>
+    <a href="#cmdunmount">2.59 Unmount a File System (umount)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdunset">2.60 Unset an Environment Variable (unset)</a>
+    <a href="#cmduname">2.60 Print system information (uname)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdurldec">2.61 URL Decode (urldecode)</a>
+    <a href="#cmdunset">2.61 Unset an Environment Variable (unset)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdurlencode">2.62 URL Encode (urlencode)</a>
+    <a href="#cmdurldec">2.62 URL Decode (urldecode)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmduseradd">2.63 Add a New User (useradd)</a>
+    <a href="#cmdurlencode">2.63 URL Encode (urlencode)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmduserdel">2.64 Delete a user (userdel)</a>
+    <a href="#cmduseradd">2.64 Add a New User (useradd)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdusleep">2.65 Wait for Microseconds (usleep)</a>
+    <a href="#cmduserdel">2.65 Delete a user (userdel)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdwget">2.66 Get File Via HTTP (wget)</a>
+    <a href="#cmdusleep">2.66 Wait for Microseconds (usleep)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdxd">2.67 Hexadecimal Dump of Memory (xd)</a>
+    <a href="#cmdwget">2.67 Get File Via HTTP (wget)</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#cmdxd">2.68 Hexadecimal Dump of Memory (xd)</a>
   </td>
 </tr>
 <tr>
@@ -2560,7 +2566,24 @@ nsh&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdreboot"><h2>2.49 Reboot the system (reboot)</h2></a>
+    <a name="cmdreadlink"><h2>2.49 Show target of a link (readlink)</h2></a>
+  </td>
+  </tr>
+</table>
+
+<p><b>Command Syntax:</b></p>
+<ul><pre>
+readlink &lt;link&gt;
+</pre></ul>
+<p>
+  <b>Synopsis</b>.
+  Show the target of the soft link at the path <code>&lt;link&gt;</code>.
+</p>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="cmdreboot"><h2>2.50 Reboot the system (reboot)</h2></a>
   </td>
   </tr>
 </table>
@@ -2575,14 +2598,13 @@ reboot
   This command depends on hardware support to reset the system.
 </p>
 <p>
-<p>
   NOTE: Supporting both the <code>reboot</code> and <code>shutdown</code> commands is redundant.
 </p>
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdrm"><h2>2.50 Remove a File (rm)</h2></a>
+    <a name="cmdrm"><h2>2.51 Remove a File (rm)</h2></a>
   </td>
 </tr>
 </table>
@@ -2616,7 +2638,7 @@ nsh&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdrmdir"><h2>2.51 Remove a Directory (rmdir)</h2></a>
+    <a name="cmdrmdir"><h2>2.52 Remove a Directory (rmdir)</h2></a>
   </td>
 </tr>
 </table>
@@ -2651,7 +2673,7 @@ nsh&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdrmmod"><h2>2.52 Remove on OS Module (rmmod)</h2></a>
+    <a name="cmdrmmod"><h2>2.53 Remove on OS Module (rmmod)</h2></a>
   </td>
 </tr>
 </table>
@@ -2679,7 +2701,7 @@ nsh&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdset"><h2>2.53 Set an Environment Variable (set)</h2></a>
+    <a name="cmdset"><h2>2.54 Set an Environment Variable (set)</h2></a>
   </td>
   </tr>
 </table>
@@ -2705,7 +2727,7 @@ nsh&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdsh"><h2>2.54 Execute an NSH Script (sh)</h2></a>
+    <a name="cmdsh"><h2>2.55 Execute an NSH Script (sh)</h2></a>
   </td>
   </tr>
 </table>
@@ -2724,7 +2746,7 @@ sh &lt;script-path&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdshutdown"><h2>2.55 Shut the system down (shutdown)</h2></a>
+    <a name="cmdshutdown"><h2>2.56 Shut the system down (shutdown)</h2></a>
   </td>
   </tr>
 </table>
@@ -2745,7 +2767,7 @@ shutdown [--reboot]
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdsleep"><h2>2.56 Wait for Seconds (sleep)</h2></a>
+    <a name="cmdsleep"><h2>2.57 Wait for Seconds (sleep)</h2></a>
   </td>
   </tr>
 </table>
@@ -2762,7 +2784,7 @@ sleep &lt;sec&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdtime"><h2>2.57 Time execution of another command (time)</h2></a>
+    <a name="cmdtime"><h2>2.58 Time execution of another command (time)</h2></a>
   </td>
 </tr>
 </table>
@@ -2821,7 +2843,7 @@ nsh&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdunmount"><h2>2.58 Unmount a File System (umount)</h2></a>
+    <a name="cmdunmount"><h2>2.59 Unmount a File System (umount)</h2></a>
   </td>
 </tr>
 </table>
@@ -2851,7 +2873,7 @@ nsh&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmduname"><h2>2.59 Print system information (uname)</h2></a>
+    <a name="cmduname"><h2>2.60 Print system information (uname)</h2></a>
   </td>
   </tr>
 </table>
@@ -2918,7 +2940,7 @@ uname [-a | -imnoprsv]
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdunset"><h2>2.60 Unset an Environment Variable (unset)</h2></a>
+    <a name="cmdunset"><h2>2.61 Unset an Environment Variable (unset)</h2></a>
   </td>
   </tr>
 </table>
@@ -2944,7 +2966,7 @@ nsh&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdurldec"><h2>2.61 URL Decode (urldecode)</h2></a>
+    <a name="cmdurldec"><h2>2.62 URL Decode (urldecode)</h2></a>
   </td>
   </tr>
 </table>
@@ -2961,7 +2983,7 @@ urldecode [-f] &lt;string or filepath&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdurlencode"><h2>2.62 URL Encode (urlencode)</h2></a>
+    <a name="cmdurlencode"><h2>2.63 URL Encode (urlencode)</h2></a>
   </td>
   </tr>
 </table>
@@ -2978,7 +3000,7 @@ urlencode [-f] &lt;string or filepath&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmduseradd"><h2>2.63 Add a New User (useradd)</h2></a>
+    <a name="cmduseradd"><h2>2.64 Add a New User (useradd)</h2></a>
   </td>
   </tr>
 </table>
@@ -2995,7 +3017,7 @@ useradd &lt;username&gt; &lt;password&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmduserdel"><h2>2.64 Delete a user (userdel)</h2></a>
+    <a name="cmduserdel"><h2>2.65 Delete a user (userdel)</h2></a>
   </td>
   </tr>
 </table>
@@ -3012,7 +3034,7 @@ userdel &lt;username&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdusleep"><h2>2.65 Wait for Microseconds (usleep)</h2></a>
+    <a name="cmdusleep"><h2>2.66 Wait for Microseconds (usleep)</h2></a>
   </td>
   </tr>
 </table>
@@ -3029,7 +3051,7 @@ usleep &lt;usec&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdwget"><h2>2.66 Get File Via HTTP (wget)</h2></a>
+    <a name="cmdwget"><h2>2.67 Get File Via HTTP (wget)</h2></a>
   </td>
   </tr>
 </table>
@@ -3056,7 +3078,7 @@ wget [-o &lt;local-path&gt;] &lt;url&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdxd"><h2>2.67 Hexadecimal Dump of Memory (xd)</h2></a>
+    <a name="cmdxd"><h2>2.68 Hexadecimal Dump of Memory (xd)</h2></a>
   </td>
   </tr>
 </table>
@@ -5294,6 +5316,7 @@ xxd -i romfs_img >nsh_romfsimg.h
   <li><a href="#cmdpwd"><code>pwd</code></a></li>
   <li><a href="#environvars"><code>PWD</code></a></li>
   <li><a href="#custinit"><code>rcS.template</code></a></li>
+  <li><a href="#cmdreadlink"><code>readlink</code></a></li>
   <li><a href="#cmdreboot"><code>reboot</code></a></li>
   <li><a href="#cmdoverview">Re-directed commands</a></li>
   <li><a href="#custapps">Registration of builtin applications</a></li>
