@@ -90,9 +90,9 @@ int inode_checkflags(FAR struct inode *inode, int oflags)
 
 int open(const char *path, int oflags, ...)
 {
+  struct inode_search_s desc;
   FAR struct file *filep;
   FAR struct inode *inode;
-  FAR const char *relpath = NULL;
 #if defined(CONFIG_FILE_MODE) || !defined(CONFIG_DISABLE_MOUNTPOINT)
   mode_t mode = 0666;
 #endif
@@ -121,17 +121,25 @@ int open(const char *path, int oflags, ...)
 
   /* Get an inode for this file */
 
-  inode = inode_find(path, &relpath, false);
-  if (!inode)
+  RESET_SEARCH(&desc);
+  desc.path = path;
+
+  ret = inode_find(&desc);
+  if (ret < 0)
     {
       /* "O_CREAT is not set and the named file does not exist.  Or, a
        * directory component in pathname does not exist or is a dangling
        * symbolic link."
        */
 
-      ret = ENOENT;
+      ret = -ret;
       goto errout;
     }
+
+  /* Get the search results */
+
+  inode = desc.node;
+  DEBUGASSERT(inode != NULL);
 
 #if !defined(CONFIG_DISABLE_PSEUDOFS_OPERATIONS) && \
     !defined(CONFIG_DISABLE_MOUNTPOINT)
@@ -222,7 +230,7 @@ int open(const char *path, int oflags, ...)
 #ifndef CONFIG_DISABLE_MOUNTPOINT
       if (INODE_IS_MOUNTPT(inode))
         {
-          ret = inode->u.i_mops->open(filep, relpath, oflags, mode);
+          ret = inode->u.i_mops->open(filep, desc.relpath, oflags, mode);
         }
       else
 #endif

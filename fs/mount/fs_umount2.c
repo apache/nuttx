@@ -74,6 +74,7 @@ int umount2(FAR const char *target, unsigned int flags)
 {
   FAR struct inode *mountpt_inode;
   FAR struct inode *blkdrvr_inode = NULL;
+  struct inode_search_s desc;
   int errcode = OK;
   int ret;
 
@@ -87,12 +88,20 @@ int umount2(FAR const char *target, unsigned int flags)
 
   /* Find the mountpt */
 
-  mountpt_inode = inode_find(target, NULL, false);
-  if (!mountpt_inode)
+  RESET_SEARCH(&desc);
+  desc.path = target;
+
+  ret = inode_find(&desc);
+  if (ret < 0)
     {
       errcode = ENOENT;
       goto errout;
     }
+
+  /* Get the search results */
+
+  mountpt_inode = desc.node;
+  DEBUGASSERT(mountpt_inode != NULL);
 
   /* Verify that the inode is a mountpoint */
 

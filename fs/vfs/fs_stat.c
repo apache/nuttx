@@ -207,9 +207,9 @@ static inline int statroot(FAR struct stat *buf)
 
 int stat(FAR const char *path, FAR struct stat *buf)
 {
+  struct inode_search_s desc;
   FAR struct inode *inode;
-  const char       *relpath = NULL;
-  int               ret     = OK;
+  int ret = OK;
 
   /* Sanity checks */
 
@@ -234,16 +234,27 @@ int stat(FAR const char *path, FAR struct stat *buf)
 
   /* Get an inode for this file */
 
-  inode = inode_find(path, &relpath, true);
-  if (!inode)
+  RESET_SEARCH(&desc);
+  desc.path     = path;
+#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+  desc.nofollow = true;
+#endif
+
+  ret = inode_find(&desc);
+  if (ret < 0)
     {
       /* This name does not refer to a psudeo-inode and there is no
        * mountpoint that includes in this path.
        */
 
-      ret = ENOENT;
+      ret = -ret;
       goto errout;
     }
+
+  /* Get the search results */
+
+  inode = desc.node;
+  DEBUGASSERT(inode != NULL);
 
   /* The way we handle the stat depends on the type of inode that we
    * are dealing with.
@@ -260,7 +271,7 @@ int stat(FAR const char *path, FAR struct stat *buf)
         {
           /* Perform the stat() operation */
 
-          ret = inode->u.i_mops->stat(inode, relpath, buf);
+          ret = inode->u.i_mops->stat(inode, desc.relpath, buf);
         }
     }
   else

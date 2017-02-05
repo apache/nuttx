@@ -2442,16 +2442,25 @@ static int unionfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
 static int unionfs_getmount(FAR const char *path, FAR struct inode **inode)
 {
   FAR struct inode *minode;
+  struct inode_search_s desc;
 
   /* Find the mountpt */
 
-  minode = inode_find(path, NULL, false);
-  if (!minode)
+  RESET_SEARCH(&desc);
+  desc.path = path;
+
+  ret = inode_find(&desc);
+  if (ret < 0)
     {
       /* Mountpoint inode not found */
 
-      return -ENOENT;
+      return ret;
     }
+
+  /* Get the search results */
+
+  minode = desc.node;
+  DEBUGASSERT(minode != NULL);
 
   /* Verify that the inode is a mountpoint */
 

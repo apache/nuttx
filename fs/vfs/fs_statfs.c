@@ -85,9 +85,9 @@ static inline int statpseudofs(FAR struct inode *inode, FAR struct statfs *buf)
 
 int statfs(FAR const char *path, FAR struct statfs *buf)
 {
+  struct inode_search_s desc;
   FAR struct inode *inode;
-  FAR const char   *relpath = NULL;
-  int               ret     = OK;
+  int ret = OK;
 
   /* Sanity checks */
 
@@ -105,16 +105,24 @@ int statfs(FAR const char *path, FAR struct statfs *buf)
 
   /* Get an inode for this file */
 
-  inode = inode_find(path, &relpath, false);
-  if (!inode)
+  RESET_SEARCH(&desc);
+  desc.path = path;
+
+  ret = inode_find(&desc);
+  if (ret < 0)
     {
       /* This name does not refer to a psudeo-inode and there is no
        * mountpoint that includes in this path.
        */
 
-      ret = ENOENT;
+      ret = -ret;
       goto errout;
     }
+
+  /* Get the search results */
+
+  inode = desc.node;
+  DEBUGASSERT(inode != NULL);
 
   /* The way we handle the statfs depends on the type of inode that we
    * are dealing with.

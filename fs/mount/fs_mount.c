@@ -235,6 +235,9 @@ int mount(FAR const char *source, FAR const char *target,
 #endif
   FAR struct inode *mountpt_inode;
   FAR const struct mountpt_operations *mops;
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  struct inode_search_s desc;
+#endif
   void *fshandle;
   int errcode;
   int ret;
@@ -281,13 +284,20 @@ int mount(FAR const char *source, FAR const char *target,
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   /* Check if the inode already exists */
 
-  mountpt_inode = inode_find(target, NULL, false);
-  if (mountpt_inode != NULL)
+  RESET_SEARCH(&desc);
+  desc.path = target;
+
+  ret = inode_find(&desc);
+  if (ret >= 0)
     {
       /* Successfully found.  The reference count on the inode has been
        * incremented.
-       *
-       * But is it a directory node (i.e., not a driver or other special
+       */
+
+      mountpt_inode = desc.node;
+      DEBUGASSERT(mountpt_inode != NULL);
+
+      /* But is it a directory node (i.e., not a driver or other special
        * node)?
        */
 

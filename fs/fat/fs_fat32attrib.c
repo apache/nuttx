@@ -62,23 +62,31 @@ static int fat_attrib(const char *path, fat_attrib_t *retattrib,
 {
   struct fat_mountpt_s *fs;
   struct fat_dirinfo_s  dirinfo;
+  struct inode_search_s desc;
   FAR struct inode     *inode;
-  const char           *relpath = NULL;
   uint8_t              *direntry;
   uint8_t               oldattributes;
   uint8_t               newattributes;
   int                   ret;
 
-  /* Get an inode for this file */
+  /* Find the inode for this file */
 
-  inode = inode_find(path, &relpath, false);
-  if (!inode)
+  RESET_SEARCH(&desc);
+  desc.path = path;
+
+  ret = inode_find(&desc);
+  if (ret < 0)
     {
       /* There is no mountpoint that includes in this path */
 
       ret = ENOENT;
       goto errout;
     }
+
+  /* Get the search results */
+
+  inode = desc.node;
+  DEBUGASSERT(inode != NULL);
 
   /* Verify that the inode is a valid mountpoint. */
 
@@ -101,9 +109,9 @@ static int fat_attrib(const char *path, fat_attrib_t *retattrib,
       goto errout_with_semaphore;
     }
 
-  /* Find the file/directory entry for the oldrelpath */
+  /* Find the file/directory entry for the relpath */
 
-  ret = fat_finddirentry(fs, &dirinfo, relpath);
+  ret = fat_finddirentry(fs, &dirinfo, desc.relpath);
   if (ret != OK)
     {
       /* Some error occurred -- probably -ENOENT */

@@ -80,7 +80,7 @@
 int sem_unlink(FAR const char *name)
 {
   FAR struct inode *inode;
-  FAR const char *relpath = NULL;
+  struct inode_search_s desc;
   char fullpath[MAX_SEMPATH];
   int errcode;
   int ret;
@@ -91,15 +91,23 @@ int sem_unlink(FAR const char *name)
 
   /* Get the inode for this semaphore. */
 
+  RESET_SEARCH(&desc);
+  desc.path = fullpath;
+
   sched_lock();
-  inode = inode_find(fullpath, &relpath, false);
-  if (!inode)
+  ret = inode_find(&desc);
+  if (ret < 0)
     {
       /* There is no inode that includes in this path */
 
-      errcode = ENOENT;
+      errcode = -ret;
       goto errout;
     }
+
+  /* Get the search results */
+
+  inode = desc.node;
+  DEBUGASSERT(inode != NULL);
 
   /* Verify that what we found is, indeed, a semaphore */
 

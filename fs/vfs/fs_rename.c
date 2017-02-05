@@ -82,12 +82,10 @@
 
 int rename(FAR const char *oldpath, FAR const char *newpath)
 {
+  struct inode_search_s olddesc;
+  struct inode_search_s newdesc;
   FAR struct inode *oldinode;
   FAR struct inode *newinode;
-  const char       *oldrelpath = NULL;
-#ifndef CONFIG_DISABLE_MOUNTPOINT
-  const char       *newrelpath = NULL;
-#endif
   int               errcode;
   int               ret;
 
@@ -103,14 +101,25 @@ int rename(FAR const char *oldpath, FAR const char *newpath)
 
   /* Get an inode that includes the oldpath */
 
-  oldinode = inode_find(oldpath, &oldrelpath, true);
-  if (!oldinode)
+  RESET_SEARCH(&olddesc);
+  olddesc.path     = oldpath;
+#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+  olddesc.nofollow = true;
+#endif
+
+  ret = inode_find(&olddesc);
+  if (ret < 0)
     {
       /* There is no inode that includes in this path */
 
-      errcode = ENOENT;
+      errcode = -ret;
       goto errout;
     }
+
+  /* Get the search results */
+
+  oldinode = olddesc.node;
+  DEBUGASSERT(oldinode != NULL);
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT
   /* Verify that the old inode is a valid mountpoint. */
@@ -121,14 +130,25 @@ int rename(FAR const char *oldpath, FAR const char *newpath)
        * mountpoint
        */
 
-      newinode = inode_find(newpath, &newrelpath, true);
-      if (!newinode)
+      RESET_SEARCH(&newdesc);
+      newdesc.path     = newpath;
+#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+      newdesc.nofollow = true;
+#endif
+
+      ret = inode_find(&newdesc);
+      if (ret < 0)
         {
           /* There is no mountpoint that includes in this path */
 
-          errcode = ENOENT;
+          errcode = -ret;
           goto errout_with_oldinode;
         }
+
+      /* Get the search results */
+
+      newinode = newdesc.node;
+      DEBUGASSERT(newinode != NULL);
 
       /* Verify that the two paths lie on the same mountpoint inode */
 
@@ -144,7 +164,8 @@ int rename(FAR const char *oldpath, FAR const char *newpath)
 
       if (oldinode->u.i_mops->rename)
         {
-          ret = oldinode->u.i_mops->rename(oldinode, oldrelpath, newrelpath);
+          ret = oldinode->u.i_mops->rename(oldinode, olddesc.relpath,
+                                           newdesc.relpath);
           if (ret < 0)
             {
               errcode = -ret;

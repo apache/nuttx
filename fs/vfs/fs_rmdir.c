@@ -41,6 +41,7 @@
 
 #include <stdbool.h>
 #include <unistd.h>
+#include <assert.h>
 #include <errno.h>
 
 #include <nuttx/fs/fs.h>
@@ -82,23 +83,35 @@
 
 int rmdir(FAR const char *pathname)
 {
+  struct inode_search_s desc;
   FAR struct inode *inode;
-  const char       *relpath = NULL;
-  int               errcode;
+  int errcode;
+  int ret;
 
   /* Get an inode for the directory (or for the mountpoint containing the
    * directory).  inode_find() automatically increments the reference count
    * on the inode if one is found.
    */
 
-  inode = inode_find(pathname, &relpath, true);
-  if (!inode)
+  RESET_SEARCH(&desc);
+  desc.path     = pathname;
+#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+  desc.nofollow = true;
+#endif
+
+  ret = inode_find(&desc);
+  if (ret < 0)
     {
       /* There is no inode that includes in this path */
 
-      errcode = ENOENT;
+      errcode = -ret;
       goto errout;
     }
+
+  /* Get the search results */
+
+  inode = desc.node;
+  DEBUGASSERT(inode != NULL);
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT
   /* Check if the inode is a valid mountpoint. */
@@ -111,7 +124,7 @@ int rmdir(FAR const char *pathname)
 
       if (inode->u.i_mops->rmdir)
         {
-          int ret = inode->u.i_mops->rmdir(inode, relpath);
+          ret = inode->u.i_mops->rmdir(inode, desc.relpath);
           if (ret < 0)
             {
               errcode = -ret;
@@ -134,8 +147,6 @@ int rmdir(FAR const char *pathname)
 
   if (!inode->u.i_ops)
     {
-      int ret;
-
       /* If the directory inode has children, however, then it cannot be
        * removed.
        */

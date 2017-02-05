@@ -88,6 +88,7 @@
 
 int link(FAR const char *path1, FAR const char *path2)
 {
+  struct inode_search_s desc;
   FAR struct inode *inode;
   int errcode;
   int ret;
@@ -106,9 +107,16 @@ int link(FAR const char *path1, FAR const char *path2)
    * does not lie on a mounted volume.
    */
 
-  inode = inode_find(path2, NULL, false);
-  if (inode != NULL)
+  RESET_SEARCH(&desc);
+  desc.path = path2;
+
+  ret = inode_find(&desc);
+  if (ret >= 0)
     {
+      /* Something exists at the path2 where we are trying to create the
+       * link.
+       */
+
 #ifndef CONFIG_DISABLE_MOUNTPOINT
       /* Check if the inode is a mountpoint. */
 

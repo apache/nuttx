@@ -82,9 +82,10 @@
 
 ssize_t readlink(FAR const char *path, FAR char *buf, size_t bufsize)
 {
+  struct inode_search_s desc;
   FAR struct inode *node;
-  const char *relpath = NULL;
   int errcode;
+  int ret;
 
   DEBUGASSERT(path != NULL && buf != NULL && bufsize > 0);
 
@@ -92,12 +93,23 @@ ssize_t readlink(FAR const char *path, FAR char *buf, size_t bufsize)
    * symbolic link node.
    */
 
-  node = inode_find(path, &relpath, true);
-  if (node == NULL)
+  RESET_SEARCH(&desc);
+  desc.path     = path;
+#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+  desc.nofollow = true;
+#endif
+
+  ret = inode_find(&desc);
+  if (ret < 0)
     {
-      errcode = ENOENT;
+      errcode = -ret;
       goto errout;
     }
+
+  /* Get the search results */
+
+  node = desc.node;
+  DEBUGASSERT(node != NULL);
 
   /* An inode was found that includes this path and possibly refers to a
    * symbolic link.

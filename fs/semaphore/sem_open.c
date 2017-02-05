@@ -103,11 +103,11 @@
 FAR sem_t *sem_open (FAR const char *name, int oflags, ...)
 {
   FAR struct inode *inode;
-  FAR const char *relpath = NULL;
-  mode_t mode;
   FAR struct nsem_inode_s *nsem;
   FAR sem_t *sem = (FAR sem_t *)ERROR;
+  struct inode_search_s desc;
   char fullpath[MAX_SEMPATH];
+  mode_t mode;
   unsigned value;
   int errcode;
   int ret;
@@ -134,10 +134,19 @@ FAR sem_t *sem_open (FAR const char *name, int oflags, ...)
        * will have incremented the reference count on the inode.
        */
 
-      inode = inode_find(fullpath, &relpath, false);
-      if (inode)
+      RESET_SEARCH(&desc);
+      desc.path = fullpath;
+
+      ret = inode_find(&desc);
+      if (ret >= 0)
         {
-          /* It exists.  Verify that the inode is a semaphore */
+          /* Something exists at this path.  Get the search results */
+
+          inode = desc.node;
+          relpath = desc.relpath;
+          DEBUGASSERT(inode != NULL);
+
+          /* Verify that the inode is a semaphore */
 
           if (!INODE_IS_NAMEDSEM(inode))
             {

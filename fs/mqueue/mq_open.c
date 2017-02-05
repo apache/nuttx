@@ -89,8 +89,8 @@
 mqd_t mq_open(FAR const char *mq_name, int oflags, ...)
 {
   FAR struct inode *inode;
-  FAR const char *relpath = NULL;
   FAR struct mqueue_inode_s *msgq;
+  struct inode_search_s desc;
   char fullpath[MAX_MQUEUE_PATH];
   va_list ap;
   struct mq_attr *attr;
@@ -133,10 +133,18 @@ mqd_t mq_open(FAR const char *mq_name, int oflags, ...)
    * have incremented the reference count on the inode.
    */
 
-  inode = inode_find(fullpath, &relpath, false);
-  if (inode)
+  RESET_SEARCH(&desc);
+  desc.path = fullpath;
+
+  ret = inode_find(&desc);
+  if (ret >= 0)
     {
-      /* It exists.  Verify that the inode is a message queue */
+      /* Something exists at this path.  Get the search results */
+
+      inode = desc.node;
+      DEBUGASSERT(inode != NULL);
+
+      /* Verify that the inode is a message queue */
 
       if (!INODE_IS_MQUEUE(inode))
         {

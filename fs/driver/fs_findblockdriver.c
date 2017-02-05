@@ -42,8 +42,9 @@
 #include <sys/types.h>
 #include <sys/mount.h>
 #include <stdbool.h>
-#include <debug.h>
+#include <assert.h>
 #include <errno.h>
+#include <debug.h>
 
 #include <nuttx/fs/fs.h>
 
@@ -79,6 +80,7 @@
 
 int find_blockdriver(FAR const char *pathname, int mountflags, FAR struct inode **ppinode)
 {
+  struct inode_search_s desc;
   FAR struct inode *inode;
   int ret = 0; /* Assume success */
 
@@ -94,13 +96,21 @@ int find_blockdriver(FAR const char *pathname, int mountflags, FAR struct inode 
 
   /* Find the inode registered with this pathname */
 
-  inode = inode_find(pathname, NULL, false);
-  if (!inode)
+  RESET_SEARCH(&desc);
+  desc.path = pathname;
+
+  ret = inode_find(&desc);
+  if (ret < 0)
     {
       ferr("ERROR: Failed to find %s\n", pathname);
       ret = -ENOENT;
       goto errout;
     }
+
+  /* Get the search results */
+
+  inode = desc.node;
+  DEBUGASSERT(inode != NULL);
 
   /* Verify that the inode is a block driver. */
 
