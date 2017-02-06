@@ -121,10 +121,10 @@
 #define SDHC_CMDTIMEOUT         (100000)
 #define SDHC_LONGTIMEOUT        (0x7fffffff)
 
-/* Big DVS setting.  Range is 0=SDCLK*213 through 14=SDCLK*227 */
+/* Big DTOCV setting.  Range is 0=SDCLK*2^13 through 14=SDCLK*2^27 */
 
-#define SDHC_DVS_MAXTIMEOUT     (14)
-#define SDHC_DVS_DATATIMEOUT    (14)
+#define SDHC_DTOCV_MAXTIMEOUT   (14)
+#define SDHC_DTOCV_DATATIMEOUT  (14)
 
 /* Maximum watermark value */
 
@@ -656,8 +656,8 @@ static void kinetis_dataconfig(struct kinetis_dev_s *priv, bool bwrite,
   /* Set the data timeout value in the SDHC_SYSCTL field to the selected value */
 
   regval  = getreg32(KINETIS_SDHC_SYSCTL);
-  regval &= ~SDHC_SYSCTL_DVS_MASK;
-  regval |= timeout << SDHC_SYSCTL_DVS_SHIFT;
+  regval &= ~SDHC_SYSCTL_DTOCV_MASK;
+  regval |= timeout << SDHC_SYSCTL_DTOCV_SHIFT;
   putreg32(regval, KINETIS_SDHC_SYSCTL);
 
   /* Set the block size and count in the SDHC_BLKATTR register.  The block
@@ -754,8 +754,8 @@ static void kinetis_datadisable(void)
   /* Set the data timeout value in the SDHC_SYSCTL field to the maximum value */
 
   regval  = getreg32(KINETIS_SDHC_SYSCTL);
-  regval &= ~SDHC_SYSCTL_DVS_MASK;
-  regval |= SDHC_DVS_MAXTIMEOUT << SDHC_SYSCTL_DVS_SHIFT;
+  regval &= ~SDHC_SYSCTL_DTOCV_MASK;
+  regval |= SDHC_DTOCV_MAXTIMEOUT << SDHC_SYSCTL_DTOCV_SHIFT;
   putreg32(regval, KINETIS_SDHC_SYSCTL);
 
   /* Set the block size to zero (no transfer) */
@@ -1663,7 +1663,7 @@ static void kinetis_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
       case CLOCK_SD_TRANSFER_1BIT :  /* SD normal operation clocking (narrow
                                       * 1-bit mode) */
 #ifndef CONFIG_KINETIS_SDHC_WIDTH_D1_ONLY
-        regval |= (BOARD_SDHC_SD1MODE_PRESCALER | BOARD_SDHC_IDMODE_DIVISOR |
+        regval |= (BOARD_SDHC_SD1MODE_PRESCALER | BOARD_SDHC_SD1MODE_DIVISOR |
                    SDHC_SYSCTL_SDCLKEN | SDHC_SYSCTL_PEREN | SDHC_SYSCTL_HCKEN |
                    SDHC_SYSCTL_IPGEN);
         break;
@@ -1926,7 +1926,7 @@ static int kinetis_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   /* Then set up the SDIO data path */
 
-  kinetis_dataconfig(priv, false, nbytes, 1, SDHC_DVS_DATATIMEOUT);
+  kinetis_dataconfig(priv, false, nbytes, 1, SDHC_DTOCV_DATATIMEOUT);
 
   /* And enable interrupts */
 
@@ -1977,7 +1977,7 @@ static int kinetis_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buff
 
   /* Then set up the SDIO data path */
 
-  kinetis_dataconfig(priv, true, nbytes, 1, SDHC_DVS_DATATIMEOUT);
+  kinetis_dataconfig(priv, true, nbytes, 1, SDHC_DTOCV_DATATIMEOUT);
 
   /* Enable TX interrupts */
 
@@ -2220,7 +2220,8 @@ static int kinetis_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd,
   return ret;
 }
 
-static int kinetis_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t rlong[4])
+static int kinetis_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd,
+                            uint32_t rlong[4])
 {
   uint32_t regval;
   int ret = OK;
@@ -2264,15 +2265,29 @@ static int kinetis_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t r
 
   if (rlong)
     {
+#if 0
       rlong[0] = getreg32(KINETIS_SDHC_CMDRSP3);
       rlong[1] = getreg32(KINETIS_SDHC_CMDRSP2);
       rlong[2] = getreg32(KINETIS_SDHC_CMDRSP1);
       rlong[3] = getreg32(KINETIS_SDHC_CMDRSP0);
+#else
+      uint32_t rsp3 = getreg32(KINETIS_SDHC_CMDRSP3);
+      uint32_t rsp2 = getreg32(KINETIS_SDHC_CMDRSP2);
+      uint32_t rsp1 = getreg32(KINETIS_SDHC_CMDRSP1);
+      uint32_t rsp0 = getreg32(KINETIS_SDHC_CMDRSP0);
+
+      rlong[0] = rsp3 << 8 | rsp2 >> 24;
+      rlong[1] = rsp2 << 8 | rsp1 >> 24;
+      rlong[2] = rsp1 << 8 | rsp0 >> 24;
+      rlong[3] = rsp0 << 8;
+#endif
     }
+
   return ret;
 }
 
-static int kinetis_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *rshort)
+static int kinetis_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd,
+                             uint32_t *rshort)
 {
   uint32_t regval;
   int ret = OK;
@@ -2600,7 +2615,7 @@ static int kinetis_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   /* Then set up the SDIO data path */
 
-  kinetis_dataconfig(priv, false, buflen, 1, SDHC_DVS_DATATIMEOUT);
+  kinetis_dataconfig(priv, false, buflen, 1, SDHC_DTOCV_DATATIMEOUT);
 
   /* Configure the RX DMA */
 
@@ -2658,7 +2673,7 @@ static int kinetis_dmasendsetup(FAR struct sdio_dev_s *dev,
 
   /* Then set up the SDIO data path */
 
-  kinetis_dataconfig(priv, true, buflen, 1, SDHC_DVS_DATATIMEOUT);
+  kinetis_dataconfig(priv, true, buflen, 1, SDHC_DTOCV_DATATIMEOUT);
 
   /* Configure the TX DMA */
 
