@@ -56,8 +56,7 @@
 static int _inode_compare(FAR const char *fname, FAR struct inode *node);
 #ifdef CONFIG_PSEUDOFS_SOFTLINKS
 static int _inode_linktarget(FAR struct inode *node,
-                             FAR struct inode_search_s *desc,
-                             FAR const char **linktgt);
+                             FAR struct inode_search_s *desc);
 #endif
 static int _inode_search(FAR struct inode_search_s *desc);
 
@@ -162,8 +161,7 @@ static int _inode_compare(FAR const char *fname, FAR struct inode *node)
 
 #ifdef CONFIG_PSEUDOFS_SOFTLINKS
 static int _inode_linktarget(FAR struct inode *node,
-                             FAR struct inode_search_s *desc,
-                             FAR const char **linktgt)
+                             FAR struct inode_search_s *desc)
 {
   unsigned int count = 0;
   bool save;
@@ -181,13 +179,6 @@ static int _inode_linktarget(FAR struct inode *node,
   while (INODE_IS_SOFTLINK(node))
     {
       FAR const char *link = (FAR const char *)node->u.i_link;
-
-      /* Return the link target of the inode if the caller needs it. */
-
-      if (linktgt != NULL)
-        {
-          *linktgt = link;
-        }
 
       /* Reset and reinitialize the search descriptor.  */
 
@@ -213,6 +204,8 @@ static int _inode_linktarget(FAR struct inode *node,
       /* Set up for the next time through the loop */
 
       node = desc->node;
+      DEBUGASSERT(node != NULL);
+      desc->linktgt = link;
     }
 
   desc->nofollow = save;
@@ -341,7 +334,7 @@ static int _inode_search(FAR struct inode_search_s *desc)
                    * link, and (3) continue searching with that inode instead.
                    */
 
-                  status = _inode_linktarget(node, desc, NULL);
+                  status = _inode_linktarget(node, desc);
                   if (status < 0)
                     {
                       /* Probably means that the the target of the symbolic
@@ -366,11 +359,10 @@ static int _inode_search(FAR struct inode_search_s *desc)
 
                           if (INODE_IS_MOUNTPT(newnode))
                             {
-                              /* Yes.. return the path to the link target */
-
-                              desc->linktgt = node->u.i_link;
-
-                              /* Return the mountpoint information. */
+                              /* Return the mountpoint information.
+                               * NOTE that the last path to the link target
+                               * was already set by _inode_linktarget().
+                               */
 
                               node    = newnode;
                               above   = NULL;
@@ -483,7 +475,6 @@ int inode_search(FAR struct inode_search_s *desc)
            */
 
           FAR const char *relpath = desc->relpath; /* Will always be "" here */
-          FAR const char *link = NULL;
 
           /* The terminating inode is a valid soft link:  Return the inode,
            * corresponding to link target.  _inode_linktarget() will follow
@@ -491,7 +482,7 @@ int inode_search(FAR struct inode_search_s *desc)
            * link target of the final symbolic link in the series.
            */
 
-          ret = _inode_linktarget(node, desc, &link);
+          ret = _inode_linktarget(node, desc);
           if (ret < 0)
             {
               /* The most likely cause for failure is that the target of the
@@ -504,14 +495,13 @@ int inode_search(FAR struct inode_search_s *desc)
           /* The dereferenced node might be a mountpoint */
 
           node = desc->node;
-          DEBUGASSERT(node != NULL && link != NULL);
+          DEBUGASSERT(node != NULL && desc->linktgt != NULL);
 
           if (INODE_IS_MOUNTPT(node))
             {
                /* Yes... set up for the MOUNTPOINT logic below. */
 
               desc->relpath = relpath;
-              desc->linktgt = link;
             }
         }
 
