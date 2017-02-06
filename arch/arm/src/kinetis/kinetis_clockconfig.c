@@ -224,7 +224,7 @@ void kinetis_pllconfig(void)
 
   /* Wait for the PLL LOCK bit to set */
 
-  while ((getreg8(KINETIS_MCG_S) & MCG_S_LOCK) == 0);
+  while ((getreg8(KINETIS_MCG_S) & MCG_S_LOCK0) == 0);
 
   /* We are now running in PLL Bypassed External (PBE) mode.  Transition to
    * PLL Engaged External (PEE) mode by setting CLKS to 0
