@@ -80,12 +80,6 @@ config MMCSD_SDIO
 
 if MMCSD_SDIO
 
-config SDIO_DMA
-	bool "SDIO DMA support"
-	default n
-	---help---
-		SDIO driver supports DMA
-
 config SDIO_PREFLIGHT
 	bool
 	default n
