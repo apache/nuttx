@@ -135,7 +135,7 @@
 # define KINETIS_OSC_BASE       0x40065000 /* System oscillator (XOSC) */
 # define KINETIS_I2C0_BASE      0x40066000 /* I2C 0 */
 # define KINETIS_I2C1_BASE      0x40067000 /* I2C 1 */
-# define KINETIS_I2C2_BASE      0x400E6000 /* I2C 2 */                                            
+# define KINETIS_I2C2_BASE      0x400E6000 /* I2C 2 */
 # define KINETIS_UART0_BASE     0x4006a000 /* UART0 */
 # define KINETIS_UART1_BASE     0x4006b000 /* UART1 */
 # define KINETIS_UART2_BASE     0x4006c000 /* UART2 */
