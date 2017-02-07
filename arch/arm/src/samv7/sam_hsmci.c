@@ -78,14 +78,14 @@
 
 /* Configuration ************************************************************/
 
-#ifndef CONFIG_SAMA5_HSMCI_DMA
+#ifndef CONFIG_SAMV7_HSMCI_DMA
 #  warning "Large Non-DMA transfer may result in RX overrun failures"
 #else
 #  ifndef CONFIG_SAMV7_XDMAC
-#    error "CONFIG_SAMA5_HSMCI_DMA support requires CONFIG_SAMV7_XDMAC"
+#    error "CONFIG_SAMV7_HSMCI_DMA support requires CONFIG_SAMV7_XDMAC"
 #  endif
 #  ifndef CONFIG_SDIO_DMA
-#    error CONFIG_SDIO_DMA must be defined with CONFIG_SAMA5_HSMCI_DMA
+#    error CONFIG_SDIO_DMA must be defined with CONFIG_SAMV7_HSMCI_DMA
 #  endif
 #endif
 

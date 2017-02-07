@@ -379,8 +379,13 @@ struct kinetis_dev_s g_sdhcdev =
     .callbackenable   = kinetis_callbackenable,
     .registercallback = kinetis_registercallback,
 #ifdef CONFIG_SDIO_DMA
+#ifdef CONFIG_KINETIS_SDHC_DMA
     .dmarecvsetup     = kinetis_dmarecvsetup,
     .dmasendsetup     = kinetis_dmasendsetup,
+#else
+    .dmarecvsetup     = kinetis_recvsetup,
+    .dmasendsetup     = kinetis_sendsetup,
+#endif
 #endif
   },
 };

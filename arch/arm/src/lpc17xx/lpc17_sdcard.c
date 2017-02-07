@@ -444,8 +444,13 @@ struct lpc17_dev_s g_scard_dev =
     .callbackenable   = lpc17_callbackenable,
     .registercallback = lpc17_registercallback,
 #ifdef CONFIG_SDIO_DMA
+#ifdef CONFIG_LPC17_SDCARD_DMA
     .dmarecvsetup     = lpc17_dmarecvsetup,
     .dmasendsetup     = lpc17_dmasendsetup,
+#else
+    .dmarecvsetup     = lpc17_recvsetup,
+    .dmasendsetup     = lpc17_sendsetup,
+#endif
 #endif
   },
 };

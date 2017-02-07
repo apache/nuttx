@@ -592,11 +592,19 @@ struct stm32_dev_s g_sdmmcdev1 =
     .callbackenable   = stm32_callbackenable,
     .registercallback = stm32_registercallback,
 #ifdef CONFIG_SDIO_DMA
+#ifdef CONFIG_STM32F7_SDMMC_DMA
 #ifdef CONFIG_SDIO_PREFLIGHT
     .dmapreflight     = stm32_dmapreflight,
 #endif
     .dmarecvsetup     = stm32_dmarecvsetup,
     .dmasendsetup     = stm32_dmasendsetup,
+#else
+#ifdef CONFIG_SDIO_PREFLIGHT
+    .dmapreflight     = NULL,
+#endif
+    .dmarecvsetup     = stm32_recvsetup,
+    .dmasendsetup     = stm32_sendsetup,
+#endif
 #endif
   },
   .base              = STM32_SDMMC1_BASE,
