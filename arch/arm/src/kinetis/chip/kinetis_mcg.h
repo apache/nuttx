@@ -40,12 +40,15 @@
 /************************************************************************************
  * Included Files
  ************************************************************************************/
+
 #include <nuttx/config.h>
 
 #include "chip.h"
+
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
 /* Register Offsets *****************************************************************/
 
 #define KINETIS_MCG_C1_OFFSET       0x0000 /* MCG Control 1 Register */
@@ -306,7 +309,7 @@
 
 #if defined(KINETIS_MCG_HAS_C7)
 #  if defined(KINETIS_MCG_HAS_C7_OSCSEL)
-#    define MCG_C7_OSCSEL_SHIFT    (0)       /* Bits 0-[1]: MCG OSC Clock Select */
+#    define MCG_C7_OSCSEL_SHIFT    (0)        /* Bits 0-[1]: MCG OSC Clock Select */
 #    define MCG_C7_OSCSEL_MASK     (KINETIS_MCG_C7_OSCSEL_MASK << MCG_C7_OSCSEL_SHIFT)
 #    define MCG_C7_OSCSEL_OSCCLK   (0 << MCG_C7_OSCSEL_SHIFT)  /* Selects Oscillator (OSCCLK) */
 #    define MCG_C7_OSCSEL_32KHZ    (1 << MCG_C7_OSCSEL_SHIFT)  /* Selects 32 kHz RTC Oscillator */
@@ -320,7 +323,7 @@
 
 #if defined(KINETIS_MCG_HAS_C8)
 #  if defined(KINETIS_MCG_HAS_C8_LOCS1)
-#    define MCG_C8_LOCS1           (1 << 0)  /* Bit 0: RTC Loss of Clock Status */
+#    define MCG_C8_LOCS1           (1 << 0)   /* Bit 0: RTC Loss of Clock Status */
 #  endif
                                               /* Bits 1-4: Reserved */
 #  if defined(KINETIS_MCG_HAS_C8_CME1)
@@ -353,9 +356,9 @@
 /* MCG Control 10 Register */
 
 #if defined(KINETIS_MCG_HAS_C10)
-                                                /* Bits 0-[1]: Reserved */
+                                              /* Bits 0-[1]: Reserved */
 #  if defined(KINETIS_MCG_HAS_C10_LOCS1)
-#    define MCG_C10_LOCS1_SHIFT       (1 << 1)  /* Bit 1: RTC Loss of Clock Status */
+#    define MCG_C10_LOCS1_SHIFT     (1 << 1)  /* Bit 1: RTC Loss of Clock Status */
 #  endif
 #  define MCG_C10_EREFS1            (1 << 2)  /* Bit 2:  External Reference Select */
 #  define MCG_C10_HGO1              (1 << 3)  /* Bit 3:  High Gain Oscillator1 Select */
@@ -364,7 +367,7 @@
 #    define MCG_C10_RANGE_LOW       (0 << MCG_C10_RANGE_SHIFT) /* Oscillator of 32 kHz to 40 kHz  */
 #    define MCG_C10_RANGE_HIGH      (1 << MCG_C10_RANGE_SHIFT) /* Oscillator of 1 MHz to 8 MHz */
 #    define MCG_C10_RANGE_VHIGH     (2 << MCG_C10_RANGE_SHIFT) /* Oscillator of 8 MHz to 32 MHz */
-                                                /* Bit 6: Reserved */
+                                              /* Bit 6: Reserved */
 #  define MCG_C10_LOCRE2            (1 << 7)  /* Bit 7: OSC1 Loss of Clock Reset Enable */
 #endif
 
@@ -407,11 +410,11 @@
 #    define MCG_S2_LOCS2_SHIFT      (1 << 0)  /* Bit 0: OSC1 Loss of Clock Status */
 #    define MCG_S2_OSCINIT1         (1 << 1)  /* Bit 1: OSC1 Initialization */
 #  endif
-                                                /* Bits 2-3: Reserved */
+                                              /* Bits 2-3: Reserved */
 #  if defined(KINETIS_MCG_HAS_S2_PLLCST)
 #    define MCG_S2_PLLCST           (1 << 4)  /* Bit 4: PLL Clock Select Status */
 #  endif
-                                                /* Bit 5: Reserved */
+                                              /* Bit 5: Reserved */
 #  if defined(KINETIS_MCG_HAS_S2_PLL1OSC1)
 #    define MCG_S2_LOCK1            (1 << 6)  /* Bit 6: Lock1 Status */
 #    define MCG_S2_LOLS1            (1 << 7)  /* Bit 7: Loss of Lock1 Status */

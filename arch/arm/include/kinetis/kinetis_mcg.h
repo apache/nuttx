@@ -33,6 +33,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ************************************************************************************/
+
 #ifndef __ARCH_ARM_INCLUDE_KINETIS_KINETIS_MCG_H
 #define __ARCH_ARM_INCLUDE_KINETIS_KINETIS_MCG_H
 
@@ -56,8 +57,9 @@
  * 2/5/2017, the catch all KINETIS_MCG_VERSION_UKN configuration is assigned
  * to all the chips that did not have any conditional compilation based on
  * NEW_MCG or KINETIS_K64. This is  a "No worse" than the original code solution.
- * N.B. Each original chip "if"definitions have been left intact so that the complete
- * legacy definitions prior to 2/5/2017 may be filled in completely when vetted.
+ * N.B. Each original chip "if"definitions have been left intact so that the
+ * complete legacy definitions prior to 2/5/2017 may be filled in completely when
+ * vetted.
  */
 
 /* MCG Configuration Parameters
@@ -65,7 +67,8 @@
  * KINETIS_MCG_PLL_REF_MIN           - OSCCLK/PLL_R minimum
  * KINETIS_MCG_PLL_REF_MAX           - OSCCLK/PLL_R maximum
  * KINETIS_MCG_PLL_INTERNAL_DIVBY    - The PLL clock is divided by n before VCO divider
- * KINETIS_MCG_HAS_PLL_EXTRA_DIVBY   - Is PLL clock divided by n before MCG PLL/FLL clock selection in the SIM module
+ * KINETIS_MCG_HAS_PLL_EXTRA_DIVBY   - Is PLL clock divided by n before MCG PLL/FLL
+ *                                     clock selection in the SIM module
  * KINETIS_MCG_FFCLK_DIVBY           - MCGFFCLK divided by n
  * KINETIS_MCG_HAS_IRC_48M           -  Has 48MHz internal oscillator
  * KINETIS_MCG_HAS_LOW_FREQ_IRC      - Has LTRIMRNG, LFRIM, LSTRIM and bit MC[LIRC_DIV2]
@@ -347,9 +350,9 @@
 #  define KINETIS_MCG_HAS_S2_PLLCST                    /* SoC has S2[PLLCST] */
 
 #elif defined(CONFIG_ARCH_CHIP_MK64FN1M0VLL12) || defined(CONFIG_ARCH_CHIP_MK64FX512VLL12) || \
-	  defined(CONFIG_ARCH_CHIP_MK64FX512VDC12) || defined(CONFIG_ARCH_CHIP_MK64FN1M0VDC12) || \
-	  defined(CONFIG_ARCH_CHIP_MK64FX512VLQ12) || defined(CONFIG_ARCH_CHIP_MK64FN1M0VLQ12) || \
-	  defined(CONFIG_ARCH_CHIP_MK64FX512VMD12) || defined(CONFIG_ARCH_CHIP_MK64FN1M0VMD12)
+      defined(CONFIG_ARCH_CHIP_MK64FX512VDC12) || defined(CONFIG_ARCH_CHIP_MK64FN1M0VDC12) || \
+      defined(CONFIG_ARCH_CHIP_MK64FX512VLQ12) || defined(CONFIG_ARCH_CHIP_MK64FN1M0VLQ12) || \
+      defined(CONFIG_ARCH_CHIP_MK64FX512VMD12) || defined(CONFIG_ARCH_CHIP_MK64FN1M0VMD12)
 
 /* Verified to Document Number: K64P144M120SF5RM Rev. 2, January 2014 */
 
@@ -439,6 +442,7 @@
  *  MK66FN2M0VLQ18  180 MHz 144 LQFP     2   MB    —    — KB  260 KB 100
  *  MK66FX1M0VLQ18  180 MHz 144 LQFP    1.25 MB  1 MB   4 KB  256 KB 100
  */
+
 #elif defined(CONFIG_ARCH_CHIP_MK66FN2M0VMD18) || defined(CONFIG_ARCH_CHIP_MK66FX1M0VMD18) || \
       defined(CONFIG_ARCH_CHIP_MK66FN2M0VLQ18) || defined(CONFIG_ARCH_CHIP_MK66FX1M0VLQ18)
 

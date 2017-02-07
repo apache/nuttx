@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/kinetis/kinetis_clockconfig.c
  *
- *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -128,26 +128,27 @@
 /* Do some sanity checking */
 
 #if BOARD_PRDIV > KINETIS_MCG_C5_PRDIV_MAX || \
-	BOARD_PRDIV < KINETIS_MCG_C5_PRDIV_BASE
+    BOARD_PRDIV < KINETIS_MCG_C5_PRDIV_BASE
 #  error BOARD_PRDIV must satisfy KINETIS_MCG_C5_PRDIV_BASE >= \
          BOARD_VDIV <= KINETIS_MCG_C5_PRDIV_MAX
 #endif
 
 #if BOARD_VDIV > KINETIS_MCG_C6_VDIV_MAX || \
-	BOARD_VDIV < KINETIS_MCG_C6_VDIV_BASE
+    BOARD_VDIV < KINETIS_MCG_C6_VDIV_BASE
 #  error BOARD_VDIV must satisfy KINETIS_MCG_C6_VDIV_BASE >= \
          BOARD_VDIV <= KINETIS_MCG_C6_VDIV_MAX
 #endif
 
 #if BOARD_PLLIN_FREQ < KINETIS_MCG_PLL_REF_MIN || \
-	BOARD_PLLIN_FREQ > KINETIS_MCG_PLL_REF_MAX
+    BOARD_PLLIN_FREQ > KINETIS_MCG_PLL_REF_MAX
 #  error BOARD_PLLIN_FREQ must satisfy KINETIS_MCG_PLL_REF_MIN >= \
-	     BOARD_PLLIN_FREQ <= KINETIS_MCG_PLL_REF_MAX
+         BOARD_PLLIN_FREQ <= KINETIS_MCG_PLL_REF_MAX
 #endif
 
 #if ((BOARD_FRDIV & MCG_C1_FRDIV_MASK) >> MCG_C1_FRDIV_SHIFT) > KINETIS_MCG_C1_FRDIV_MAX
 #  error BOARD_FRDIV choice is not supported on this SoC
 #endif
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -223,7 +224,8 @@ void kinetis_pllconfig(void)
    *   LOCRE0  = 0 if not supported or value provided by board
    */
 
-  putreg8(BOARD_MCG_C2_LOCRE0 | BOARD_MCG_C2_FCFTRIM | BOARD_MGC_C2_HGO | MCG_C2_RANGE_VHIGH | MCG_C2_EREFS, KINETIS_MCG_C2);
+  putreg8(BOARD_MCG_C2_LOCRE0 | BOARD_MCG_C2_FCFTRIM | BOARD_MGC_C2_HGO |
+          MCG_C2_RANGE_VHIGH | MCG_C2_EREFS, KINETIS_MCG_C2);
 #  endif
 #endif /* defined(BOARD_MCG_C2) */
 
@@ -249,11 +251,11 @@ void kinetis_pllconfig(void)
 
   putreg8(BOARD_FRDIV | MCG_C1_CLKS_EXTREF, KINETIS_MCG_C1);
 
+#ifndef BOARD_EXTCLOCK
   /* If we aren't using an oscillator input we don't need to wait for the
    * oscillator to initialize
    */
 
-#ifndef BOARD_EXTCLOCK
   while ((getreg8(KINETIS_MCG_S) & MCG_S_OSCINIT) == 0);
 #endif
 
@@ -438,7 +440,7 @@ void __ramfunc__
 kinesis_setdividers(uint32_t div1, uint32_t div2, uint32_t div3, uint32_t div4)
 {
   uint32_t regval;
-  int i;
+  volatile int i;
 
   /* Save the current value of the Flash Access Protection Register */
 
