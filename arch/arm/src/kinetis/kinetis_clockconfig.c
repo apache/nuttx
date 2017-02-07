@@ -58,6 +58,96 @@
 # error "CONFIG_ARCH_RAMFUNCS must be defined for this logic"
 #endif
 
+/* A board may provide an override for BOARD_FRDIV */
+
+#if !defined(BOARD_FRDIV)
+#  define BOARD_FRDIV               MCG_C1_FRDIV_DIV256
+#endif
+
+/* A board may provide BOARD_MCG_C2 with all the MCG_C2 setting
+ * or use individual setting with 0 defaults
+ */
+
+#if !defined(BOARD_MCG_C2)
+
+/* A board may provide an override for BOARD_EXTCLOCK_MCG_C2 */
+
+#  if defined(BOARD_EXTCLOCK)
+#    if defined(BOARD_EXTCLOCK_MCG_C2)
+#      define EXTCLOCK_MCG_C2   BOARD_EXTCLOCK_MCG_C2
+#    else
+#      define EXTCLOCK_MCG_C2   0
+#    endif
+#  endif
+
+/* A board may provide BOARD_EXTAL_LP to not choose MCG_C2_HGO */
+
+# if defined(BOARD_EXTAL_LP)
+#   define BOARD_MGC_C2_HGO        0  /* Do not use MCG_C2_HGO */
+# else
+#   if !defined(KINETIS_MCG_HAS_C2_HGO)
+#     error BOARD_EXTAL_LP is not defined and MCG_C2_HGO is not supported on this SoC!
+#   else
+#     define BOARD_MGC_C2_HGO      MCG_C2_HGO
+#   endif
+# endif
+
+/* A board must provide BOARD_MCG_C2_FCFTRIM when SoC has the setting */
+
+#  if defined(KINETIS_MCG_HAS_C2_FCFTRIM) && !defined(BOARD_MCG_C2_FCFTRIM)
+#    error MCG_C2_FCFTRIM is supported on this SoC and BOARD_MCG_C2_FCFTRIM is not defined!
+#  endif
+
+#  if !defined(KINETIS_MCG_HAS_C2_FCFTRIM) && defined(BOARD_MCG_C2_FCFTRIM)
+#    error BOARD_MCG_C2_FCFTRIM is defined but MCG_C2_FCFTRIM is not supported on this SoC!
+#  endif
+
+/* Provide the 0 default */
+
+#  if !defined(KINETIS_MCG_HAS_C2_FCFTRIM) && !defined(BOARD_MCG_C2_FCFTRIM)
+#    define BOARD_MCG_C2_FCFTRIM 0
+#  endif
+
+/* A board must provide BOARD_MCG_C2_LOCRE0 when SoC has the setting */
+
+#  if defined(KINETIS_MCG_HAS_C2_LOCRE0) && !defined(BOARD_MCG_C2_LOCRE0)
+#      error MCG_C2_LOCRE0 is supported on this SoC and BOARD_MCG_C2_LOCRE0 is not defined!
+#  endif
+
+#  if !defined(KINETIS_MCG_HAS_C2_LOCRE0) && defined(BOARD_MCG_C2_LOCRE0)
+#      error BOARD_MCG_C2_LOCRE0 is defined but MCG_C2_LOCRE0 is not supported on this SoC!
+#  endif
+
+/* Provide the 0 default */
+
+#  if !defined(KINETIS_MCG_HAS_C2_LOCRE0) && !defined(BOARD_MCG_C2_LOCRE0)
+#    define BOARD_MCG_C2_LOCRE0 0
+#  endif
+#endif /* !defined(BOARD_MCG_C2) */
+
+/* Do some sanity checking */
+
+#if BOARD_PRDIV > KINETIS_MCG_C5_PRDIV_MAX || \
+	BOARD_PRDIV < KINETIS_MCG_C5_PRDIV_BASE
+#  error BOARD_PRDIV must satisfy KINETIS_MCG_C5_PRDIV_BASE >= \
+         BOARD_VDIV <= KINETIS_MCG_C5_PRDIV_MAX
+#endif
+
+#if BOARD_VDIV > KINETIS_MCG_C6_VDIV_MAX || \
+	BOARD_VDIV < KINETIS_MCG_C6_VDIV_BASE
+#  error BOARD_VDIV must satisfy KINETIS_MCG_C6_VDIV_BASE >= \
+         BOARD_VDIV <= KINETIS_MCG_C6_VDIV_MAX
+#endif
+
+#if BOARD_PLLIN_FREQ < KINETIS_MCG_PLL_REF_MIN || \
+	BOARD_PLLIN_FREQ > KINETIS_MCG_PLL_REF_MAX
+#  error BOARD_PLLIN_FREQ must satisfy KINETIS_MCG_PLL_REF_MIN >= \
+	     BOARD_PLLIN_FREQ <= KINETIS_MCG_PLL_REF_MAX
+#endif
+
+#if ((BOARD_FRDIV & MCG_C1_FRDIV_MASK) >> MCG_C1_FRDIV_SHIFT) > KINETIS_MCG_C1_FRDIV_MAX
+#  error BOARD_FRDIV choice is not supported on this SoC
+#endif
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -103,9 +193,16 @@ void kinetis_pllconfig(void)
   uint32_t regval32;
   uint8_t regval8;
 
+#if defined(BOARD_MCG_C2)
+
+  /* Use complete BOARD_MCG_C2 settings */
+
+  putreg8(BOARD_MCG_C2, KINETIS_MCG_C2);
+#else
+
   /* Transition to FLL Bypassed External (FBE) mode */
 
-#ifdef BOARD_EXTCLOCK
+#  if defined(BOARD_EXTCLOCK)
   /*   IRCS  = 0 (Internal Reference Clock Select)
    *   LP    = 0 (Low Power Select)
    *   EREFS = 0 (External Reference Select)
@@ -113,23 +210,22 @@ void kinetis_pllconfig(void)
    *   RANGE = 0 (Oscillator of 32 kHz to 40 kHz)
    */
 
-  putreg8(0, KINETIS_MCG_C2);
-#else
+  putreg8(EXTCLOCK_MCG_C2, KINETIS_MCG_C2);
+#  else
   /* Enable external oscillator:
    *
-   *   IRCS  = 0 (Internal Reference Clock Select)
-   *   LP    = 0 (Low Power Select)
-   *   EREFS = 1 (External Reference Select)
-   *   HGO   = 1 (High Gain Oscillator Select)
-   *   RANGE = 2 (Oscillator of 8 MHz to 32 MHz)
+   *   IRCS    = 0 (Internal Reference Clock Select)
+   *   LP      = 0 (Low Power Select)
+   *   EREFS   = 1 (External Reference Select)
+   *   HGO     = 1 (High Gain Oscillator Select)
+   *   RANGE   = 2 (Oscillator of 8 MHz to 32 MHz)
+   *   FCFTRIM = 0 if not supported or value provided by board
+   *   LOCRE0  = 0 if not supported or value provided by board
    */
 
-#ifdef BOARD_EXTAL_LP
-  putreg8(MCG_C2_EREFS | MCG_C2_RANGE_VHIGH, KINETIS_MCG_C2);
-#else
-  putreg8(MCG_C2_EREFS | MCG_C2_HGO | MCG_C2_RANGE_VHIGH, KINETIS_MCG_C2);
-#endif /* BOARD_EXTAL_LP */
-#endif
+  putreg8(BOARD_MCG_C2_LOCRE0 | BOARD_MCG_C2_FCFTRIM | BOARD_MGC_C2_HGO | MCG_C2_RANGE_VHIGH | MCG_C2_EREFS, KINETIS_MCG_C2);
+#  endif
+#endif /* defined(BOARD_MCG_C2) */
 
   /* Released latched state of oscillator and GPIO */
 
@@ -147,15 +243,11 @@ void kinetis_pllconfig(void)
    *   IREFSTEN = 0 (Internal Reference Stop Enable)
    *   IRCLKEN  = 0 (Internal Reference Clock Enable)
    *   IREFS    = 0 (Internal Reference Select)
-   *   FRDIV    = 3 (FLL External Reference Divider, RANGE!=0 divider=256)
+   *   FRDIV    = BOARD_FRDIV (FLL External Reference Divider)
    *   CLKS     = 2 (Clock Source Select, External reference clock)
    */
 
-#ifdef BOARD_FRDIV
-  putreg8((BOARD_FRDIV << MCG_C1_FRDIV_SHIFT) | MCG_C1_CLKS_EXTREF, KINETIS_MCG_C1);
-#else
-  putreg8(MCG_C1_FRDIV_DIV256 | MCG_C1_CLKS_EXTREF, KINETIS_MCG_C1);
-#endif
+  putreg8(BOARD_FRDIV | MCG_C1_CLKS_EXTREF, KINETIS_MCG_C1);
 
   /* If we aren't using an oscillator input we don't need to wait for the
    * oscillator to initialize
