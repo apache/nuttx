@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/x86/src/qemu/qemu_timerisr.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  *   Based on Bran's kernel development tutorials. Rewritten for JamesM's
@@ -81,19 +81,11 @@
 #define PIT_DIVISOR  ((uint32_t)PIT_CLOCK/(uint32_t)CLK_TCK)
 
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  up_timerisr
+ * Function: qemu_timerisr
  *
  * Description:
  *   The timer ISR will perform a variety of services for various portions
@@ -101,12 +93,12 @@
  *
  ****************************************************************************/
 
-static int up_timerisr(int irq, uint32_t *regs)
+static int qemu_timerisr(int irq, uint32_t *regs)
 {
-   /* Process timer interrupt */
+  /* Process timer interrupt */
 
-   sched_process_timer();
-   return 0;
+  sched_process_timer();
+  return 0;
 }
 
 /****************************************************************************
@@ -114,7 +106,7 @@ static int up_timerisr(int irq, uint32_t *regs)
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  up_timer_initialize
+ * Function:  x86_timer_initialize
  *
  * Description:
  *   This function is called during start-up to initialize
@@ -122,7 +114,7 @@ static int up_timerisr(int irq, uint32_t *regs)
  *
  ****************************************************************************/
 
-void up_timer_initialize(void)
+void x86_timer_initialize(void)
 {
   /* uint32_t to avoid compile time overflow errors */
 
@@ -131,7 +123,7 @@ void up_timer_initialize(void)
 
   /* Attach to the timer interrupt handler */
 
-  (void)irq_attach(IRQ0, (xcpt_t)up_timerisr);
+  (void)irq_attach(IRQ0, (xcpt_t)qemu_timerisr);
 
   /* Send the command byte to configure counter 0 */
 

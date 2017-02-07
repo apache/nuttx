@@ -143,7 +143,6 @@ void up_irqinitialize(void);
 void weak_function up_dmainitialize(void);
 #endif
 void up_sigdeliver(void);
-int  up_timerisr(int irq, uint32_t *regs);
 void up_lowputc(char ch);
 void up_puts(const char *str);
 void up_lowputs(const char *str);
@@ -185,7 +184,7 @@ void lowconsole_init(void);
 
 /* Defined in chip/xxx_timerisr.c */
 
-void up_timer_initialize(void);
+void avr_timer_initialize(void);
 
 /* Defined in chip/xxx_ethernet.c */
 

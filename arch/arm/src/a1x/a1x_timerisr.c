@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/a1x/a1x_timerisr.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -70,19 +70,11 @@
 #define TMR_INTERVAL ((TMR0_CLOCK + (CLK_TCK >> 1)) / CLK_TCK)
 
 /****************************************************************************
- * Private Types
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Function:  up_timerisr
+ * Function:  a1x_timerisr
  *
  * Description:
  *   The timer ISR will perform a variety of services for various portions
@@ -90,7 +82,7 @@
  *
  ****************************************************************************/
 
-int up_timerisr(int irq, uint32_t *regs)
+static int a1x_timerisr(int irq, uint32_t *regs)
 {
   /* Only a TIMER0 interrupt is expected here */
 
@@ -107,7 +99,11 @@ int up_timerisr(int irq, uint32_t *regs)
 }
 
 /****************************************************************************
- * Function:  up_timer_initialize
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Function:  arm_timer_initialize
  *
  * Description:
  *   This function is called during start-up to initialize
@@ -115,7 +111,7 @@ int up_timerisr(int irq, uint32_t *regs)
  *
  ****************************************************************************/
 
-void up_timer_initialize(void)
+void arm_timer_initialize(void)
 {
   uint32_t regval;
 
@@ -142,7 +138,7 @@ void up_timer_initialize(void)
 
   /* Attach the timer interrupt vector */
 
-  (void)irq_attach(A1X_IRQ_TIMER0, (xcpt_t)up_timerisr);
+  (void)irq_attach(A1X_IRQ_TIMER0, (xcpt_t)a1x_timerisr);
 
   /* Enable interrupts from the TIMER 0 port */
 

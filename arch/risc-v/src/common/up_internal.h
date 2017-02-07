@@ -142,8 +142,7 @@ uint32_t up_get_newintctx(void);
 
 /* System timer *************************************************************/
 
-void up_timer_initialize(void);
-int  up_timerisr(int irq, void *context);
+void riscv_timer_initialize(void);
 
 /* Low level serial output **************************************************/
 

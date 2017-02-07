@@ -158,13 +158,12 @@ void up_prefetchabort(uint32_t *regs);
 int  up_saveusercontext(uint32_t *regs);
 void up_sigdeliver(void);
 void up_syscall(uint32_t *regs);
-int  up_timerisr(int irq, uint32_t *regs);
 void up_undefinedinsn(uint32_t *regs);
 void up_lowputc(char ch);
 void up_puts(const char *str);
 void up_lowputs(const char *str);
 
-/* Defined in up_vectors.S */
+/* Defined in xyz_vectors.S */
 
 void up_vectorundefinsn(void);
 void up_vectorswi(void);
@@ -174,7 +173,7 @@ void up_vectoraddrexcptn(void);
 void up_vectorirq(void);
 void up_vectorfiq(void);
 
-/* Defined in up_serial.c */
+/* Defined in xyz_serial.c */
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
 void up_earlyconsoleinit(void);
@@ -192,15 +191,15 @@ void lowconsole_init(void);
 # define lowconsole_init()
 #endif
 
-/* Defined in up_watchdog.c */
+/* Defined in xyz_watchdog.c */
 
 void up_wdtinit(void);
 
-/* Defined in up_timerisr.c */
+/* Defined in xyz_timerisr.c */
 
-void up_timer_initialize(void);
+void renesas_timer_initialize(void);
 
-/* Defined in board/up_lcd.c */
+/* Defined in board/xyz_lcd.c */
 
 #ifdef CONFIG_LCD_CONSOLE
 void up_lcdinit(void);
@@ -210,7 +209,7 @@ void up_lcdputc(char ch);
 # define up_lcdputc(ch)
 #endif
 
-/* Defined in board/up_network.c */
+/* Defined in board/xyz_network.c */
 
 #ifdef CONFIG_NET
 void up_netinitialize(void);

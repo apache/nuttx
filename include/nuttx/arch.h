@@ -1402,8 +1402,9 @@ int up_prioritize_irq(int irq, int priority);
  * is suppressed and the platform specific code is expected to provide the
  * following custom functions.
  *
- *   void up_timer_initialize(void): Initializes the timer facilities.  Called
- *     early in the intialization sequence (by up_intialize()).
+ *   Architecture specific timer initialiation logic initializes the timer
+ *     facilities.  This happens early in the intialization sequence (via
+ *     up_intialize()).
  *   int up_timer_gettime(FAR struct timespec *ts):  Returns the current
  *     time from the platform specific time source.
  *
@@ -1435,41 +1436,12 @@ int up_prioritize_irq(int irq, int priority);
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_timer_initialize
- *
- * Description:
- *   Initializes all platform-specific timer facilities.  This function is
- *   called early in the initialization sequence by up_intialize().
- *   On return, the current up-time should be available from
- *   up_timer_gettime() and the interval timer is ready for use (but not
- *   actively timing).
- *
- *   Provided by platform-specific code and called from the architecture-
- *   specific logic.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Called early in the initialization sequence before any special
- *   concurrency protections are required.
- *
- ****************************************************************************/
-
-#if 0 /* Prototyped in up_internal.h in all cases. */
-void up_timer_initialize(void);
-#endif
-
-/****************************************************************************
  * Name: up_timer_gettime
  *
  * Description:
  *   Return the elapsed time since power-up (or, more correctly, since
- *   up_timer_initialize() was called).  This function is functionally
- *   equivalent to:
+ *   the archtecture-specific timer was initialized).  This function is
+ *   functionally equivalent to:
  *
  *      int clock_gettime(clockid_t clockid, FAR struct timespec *ts);
  *

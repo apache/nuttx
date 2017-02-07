@@ -87,7 +87,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  up_timerisr
+ * Function:  misoc_timer_isr
  *
  * Description:
  *   The timer ISR will perform a variety of services for various portions
@@ -95,7 +95,7 @@
  *
  ****************************************************************************/
 
-int up_timerisr(int irq, void *context)
+int misoc_timer_isr(int irq, void *context)
 {
   /* Clear event pending */
 
@@ -108,7 +108,7 @@ int up_timerisr(int irq, void *context)
 }
 
 /****************************************************************************
- * Function:  up_timer_initialize
+ * Function:  misoc_timer_initialize
  *
  * Description:
  *   This function is called during start-up to initialize
@@ -139,7 +139,7 @@ void misoc_timer_initialize(void)
 
   /* Attach the timer interrupt vector */
 
-  (void)irq_attach(TIMER0_INTERRUPT, up_timerisr);
+  (void)irq_attach(TIMER0_INTERRUPT, misoc_timer_isr);
 
   /* And enable the timer interrupt */
 

@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated January 10, 2017)
+NuttX TODO List (Last updated February 7, 2017)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -9,10 +9,10 @@ issues related to each board port.
 
 nuttx/:
 
- (12)  Task/Scheduler (sched/)
+ (10)  Task/Scheduler (sched/)
   (1)  SMP
   (1)  Memory Management (mm/)
-  (1)  Power Management (drivers/pm)
+  (0)  Power Management (drivers/pm)
   (3)  Signals (sched/signal, arch/)
   (2)  pthreads (sched/pthread)
   (0)  Message Queues (sched/mqueue)
@@ -165,133 +165,6 @@ o Task/Scheduler (sched/)
                incompatibilities could show up in porting some code).
   Priority:    Low
 
-  Title:       RELEASE SEMAPHORES HELD BY CANCELED THREADS:
-  Description: Commit: fecb9040d0e54baf14b729e556a832febfe8229e: "In
-                case a thread is doing a blocking operation (e.g. read())
-                on a serial device, while it is being terminated by
-                pthread_cancel(), then uart_close() gets called, but
-                the semaphore (dev->recv.sem in the above example) is
-                still blocked.
-
-               "This means that once the serial device is opened next
-                time, data will arrive on the serial port (and driver
-                interrupts handled as normal), but the received characters
-                never arrive in the reader thread.
-
-                This patch addresses the problem by re-initializing the
-                semaphores on the last uart_close() on the device."
-
-               Yahoo! Groups message 7726: "I think that the system
-                should be required to handle pthread_cancel safely in
-                all cases.  In the NuttX model, a task is like a Unix
-                process and a pthread is like a Unix thread.  Canceling
-                threads should always be safe (or at least as unsafe) as
-                under Unix because the model is complete for pthreads...
-
-               "So, in my opinion, this is a generic system issue, not
-                specific to the serial driver.  I could also implement
-                logic to release all semaphores held by a thread when
-                it exits -- but only if priority inheritance is enabled;
-                because only in that case does the code have any memory
-                of which threads actually hold the semaphore.
-
-               "The patch I just incorporated is also insufficient.  It
-                works only if the serial driver is shut down when the
-                thread is canceled.  But what if there are other open
-                references to the driver?  Then the driver will not be
-                shut down, the semaphores will not be re-initialized, and
-                the semaphore counts will still be off by one.
-
-               "I think that the system needs to automatically release any
-                semaphores held by a thread being killed asynchronously?
-                It seems necessary to me."
-
-               UPDATE; The logic enabled when priority inheritance is
-               enabled for this purpose is insufficient.  It provides
-               hooks so that given a semaphore it can traverse all
-               holders.  What is needed would be logic so that given
-               a task, you can traverse all semaphores held by the task,
-               releasing each semaphore count held by the exiting task.
-               Nothing like this exists now so that solution is not
-               imminent.
-
-               UPDATE: The basic fix to release the semaphore count if
-               a thread is killed via pthread_cancel() or task_delete()
-               has been implemented (2014-12-13).  See the new file:
-               sched/semaphore/sem_recover.c  However, the general
-               issue of freeing semaphores when a thread exists still
-               exists.
-  Status:      Open
-  Priority:    Medium-ish
-
-  Title:       ISSUES WITH PRIORITY INHERITANCE WHEN SEMAPHORE/MUTX IS USED AS IPC
-  Description: Semaphores have multiple uses.  The typical usage is where
-               the semaphore is used as lock on one or more resources.  In
-               this typical case, priority inheritance works perfectly:  The
-               holder of a semaphore count must be remembered so that its
-               priority can be boosted if a higher priority task requires a
-               count from the semaphore.  It remains the holder until the
-               same task calls sem_post() to release the count on the
-               semaphore.
-
-               But a different usage model for semaphores is for signalling
-               events.  In this case, the semaphore count is initialized to
-               zero and the receiving task calls sem_wait() to wait for the
-               next event of interest.  When an event of interest is
-               detected by another task (or even an interrupt handler),
-               sem_post() is called which increments the count to 1 and
-               wakes up the receiving task.
-
-               For example, in the following TASK A waits for events and
-               TASK B (or perhaps an interrupt handler) signals task A of
-               the occurence of the events by posting the semaphore:
-
-                 ---------------------- ---------------
-                 TASK A                 TASK B
-                 ---------------------- ---------------
-                 sem_init(sem, 0, 0);
-                 sem_wait(sem);
-                                        sem_post(sem);
-                 Awakens as holder
-                 ---------------------- ---------------
-
-               These two usage models are really very different and priority
-               inheritance simply does not apply when the semaphore is used for
-               signalling rather than locking.  In this signalling case
-               priority inheritance can interfere with the operation of the
-               semaphore.  The problem is that when TASK A is awakened it is
-               a holder of the semaphore.  Normally, a task is removed from
-               the holder list when it finally releases the semaphore via
-               sem_post().
-
-               However, TASK A never calls sem_post(sem) so it becomes
-               *permanently* a holder of the semaphore and may have its
-               priority boosted at any time when any other task tries to
-               acquire the semaphore.
-
-               The fix is to call sem_setprotocol(SEM_PRIO_NONE) immediately
-               after the sem_init() call so that there will be no priority
-               inheritance operations on this semaphore used for signalling.
-
-               NOTE also that in NuttX, pthread mutexes are build on top of
-               binary semaphores.  As a result, the above recommendation also
-               applies when pthread mutexes are used for inter-thread
-               signaling.  That is, a mutex that is used for signaling should
-               be initialize like this (simplified, no error checking here):
-
-                  pthread_mutexattr_t attr;
-                  pthread_mutex_t mutex;
-
-                  pthread_mutexattr_init(&attr);
-                  pthread_mutexattr_settype(&attr, PTHREAD_PRIO_NONE);
-                  pthread_mutex_init(&mutex, &attr);
-
-  Status:      Closed.  If you have priority inheritance enabled and you use
-               semaphores for signalling events, then you *must* call
-               sem_setprotocol(SEM_PRIO_NONE) immediately after initializing
-               the semaphore.
-  Priority:    High.
-
   Title:       SCALABILITY
   Description: Task control information is retained in simple lists.  This
                is completely appropriate for small embedded systems where
@@ -436,37 +309,12 @@ o Memory Management (mm/)
 o Power Management (drivers/pm)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-  Title:       PM CALLBACKS AREN'T BASED ON DOMAIN
-  Description: Recently support for different power domains was added.  Prior
-               to this, only a single domain (the "IDLE" domain was supported).
-               Having multiple power domains extends the basic concept to
-               support power management for different functionality.  For
-               example, a UI may be managed separately from, say, some network
-               functionality.
-
-               One thing that was missed when the PM domains was added was
-               support for domain-specific driver callbacks:  Currently, all
-               callbacks will be invoked for all PM domain events making it
-               impossible to distinguish the domain in the driver.
-
-               Possibilities:
-               - Add a domain value to the PM registration function.  In this
-                 case, callbacks would be retained separately for each domain
-                 and those callbacks would be invoked only for domain-specific
-                 events.
-               - Add a domain value to the PM callback functions.  In this case,
-                 each driver would receive events from all domains and could
-                 respond different (or ignore) events from other domains.
-  Status:      Open
-  Priority:    Currently low because I know of no use of the multiple PM
-               domains.  But, obviously, this would become important if the
-               features were used.
 o Signals (sched/signal, arch/)
   ^^^^^^^^^^^^^^^^^^^^^^^
 
   Title:       STANDARD SIGNALS
   Description: 'Standard' signals and signal actions are not supported.
-               (e.g., SIGINT, SIGSEGV, etc).
+               (e.g., SIGINT, SIGSEGV, etc).  Default is only SIG_IGN.
 
                Update:  SIGCHLD is supported if so configured.
   Status:      Open.  No further changes are planned.
@@ -501,7 +349,9 @@ o pthreads (sched/pthreads)
   ^^^^^^^^^^^^^^^^^
 
   Title:       PTHREAD_PRIO_PROTECT
-  Description: Extend pthread_mutexattr_setprotocol() support PTHREAD_PRIO_PROTECT:
+  Description: Extend pthread_mutexattr_setprotocol().  It should support
+               PTHREAD_PRIO_PROTECT (and so should its non-standard counterpart
+               sem_setproto()).
 
                "When a thread owns one or more mutexes initialized with the
                PTHREAD_PRIO_PROTECT protocol, it shall execute at the higher of its

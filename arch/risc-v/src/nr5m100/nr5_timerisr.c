@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/risc-v/src/nr5m100/nr5_timerisr.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  *   Modified for RISC-V:
@@ -84,19 +84,17 @@
 #endif
 
 /****************************************************************************
- * Private Types
+ * Private Data
+ ****************************************************************************/
+
+static uint64_t g_systick = 0;
+
+/****************************************************************************
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Global Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Function:  up_timerisr
+ * Function:  nr5m100_timerisr
  *
  * Description:
  *   The timer ISR will perform a variety of services for various portions
@@ -104,15 +102,17 @@
  *
  ****************************************************************************/
 
-static uint64_t   g_systick = 0;
-
-int up_timerisr(int irq, void *context)
+static int nr5m100_timerisr(int irq, void *context)
 {
   /* Process timer interrupt */
 
   sched_process_timer();
   return 0;
 }
+
+/****************************************************************************
+ * Global Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Function:  up_get_systick
@@ -128,7 +128,7 @@ uint64_t up_get_systick(void)
 }
 
 /****************************************************************************
- * Function:  up_timer_initialize
+ * Function:  riscv_timer_initialize
  *
  * Description:
  *   This function is called during start-up to initialize
@@ -136,7 +136,7 @@ uint64_t up_get_systick(void)
  *
  ****************************************************************************/
 
-void up_timer_initialize(void)
+void riscv_timer_initialize(void)
 {
   /* Set the SysTick interrupt to the default priority */
 
@@ -146,7 +146,7 @@ void up_timer_initialize(void)
 
   /* Attach the timer interrupt vector */
 
-  (void)irq_attach(NR5_IRQ_SYSTICK, up_timerisr);
+  (void)irq_attach(NR5_IRQ_SYSTICK, nr5m100_timerisr);
 
   /* Configure and enable SysTick to interrupt at the requested rate */
 

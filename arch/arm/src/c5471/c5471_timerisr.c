@@ -70,19 +70,11 @@
 #define PTV                0x00000003
 
 /****************************************************************************
- * Private Types
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Function:  up_timerisr
+ * Function:  c5471_timerisr
  *
  * Description:
  *   The timer ISR will perform a variety of services for
@@ -90,7 +82,7 @@
  *
  ****************************************************************************/
 
-int up_timerisr(int irq, uint32_t *regs)
+static int c5471_timerisr(int irq, uint32_t *regs)
 {
   /* Process timer interrupt */
 
@@ -99,7 +91,11 @@ int up_timerisr(int irq, uint32_t *regs)
 }
 
 /****************************************************************************
- * Function:  up_timer_initialize
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Function:  arm_timer_initialize
  *
  * Description:
  *   This function is called during start-up to initialize
@@ -107,7 +103,7 @@ int up_timerisr(int irq, uint32_t *regs)
  *
  ****************************************************************************/
 
-void up_timer_initialize(void)
+void arm_timer_initialize(void)
 {
   uint32_t val;
 
@@ -122,6 +118,6 @@ void up_timer_initialize(void)
 
   /* Attach and enable the timer interrupt */
 
-  irq_attach(C5471_IRQ_SYSTIMER, (xcpt_t)up_timerisr);
+  irq_attach(C5471_IRQ_SYSTIMER, (xcpt_t)c5471_timerisr);
   up_enable_irq(C5471_IRQ_SYSTIMER);
 }

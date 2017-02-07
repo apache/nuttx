@@ -45,20 +45,10 @@
 #include "up_internal.h"
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Function Prototypes
  ****************************************************************************/
 
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+int z80sim_timerisr(int irq, FAR chipreg_t *regs);
 
 /****************************************************************************
  * Public Functions
@@ -76,10 +66,11 @@ void up_irqinitialize(void)
    *
    * NOTE:  Normally, there are seperate enables for "global" interrupts
    * and specific device interrupts.  In such a "normal" case, the timer
-   * interrupt should be attached and enabled in the function up_timer_initialize()
+   * interrupt should be attached and enabled in the function
+   * z80sim_timer_initialize()
    */
 
-  irq_attach(Z80_IRQ_SYSTIMER, (xcpt_t)up_timerisr);
+  irq_attach(Z80_IRQ_SYSTIMER, (xcpt_t)z80sim_timerisr);
 
   /* And finally, enable interrupts (including the timer) */
 

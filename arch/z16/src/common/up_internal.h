@@ -146,7 +146,6 @@ void up_restoreusercontext(FAR chipreg_t *regs);
 void up_irqinitialize(void);
 int  up_saveusercontext(FAR chipreg_t *regs);
 void up_sigdeliver(void);
-int  up_timerisr(int irq, FAR chipreg_t *regs);
 
 #if defined(CONFIG_Z16_LOWPUTC) || defined(CONFIG_Z16_LOWGETC)
 void up_lowputc(char ch);
@@ -154,13 +153,13 @@ void up_lowputc(char ch);
 # define up_lowputc(ch)
 #endif
 
-/* Defined in up_allocateheap.c */
+/* Defined in xyz_allocateheap.c */
 
 #if CONFIG_MM_REGIONS > 1
 void up_addregion(void);
 #endif
 
-/* Defined in up_serial.c */
+/* Defined in xyz_serial.c */
 
 #ifdef USE_SERIALDRIVER
 void up_earlyserialinit(void);
@@ -171,15 +170,15 @@ void up_serialinit(void);
 void lowconsole_init(void);
 #endif
 
-/* Defined in up_timerisr.c */
+/* Defined in xyz_timerisr.c */
 
-void up_timer_initialize(void);
+void z16_timer_initialize(void);
 
-/* Defined in up_irq.c */
+/* Defined in xyz_irq.c */
 
 void up_ack_irq(int irq);
 
-/* Defined in board/up_network.c */
+/* Defined in board/xyz_network.c */
 
 #ifdef CONFIG_NET
 void up_netinitialize(void);

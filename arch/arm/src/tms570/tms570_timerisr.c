@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/tms570/tms570_timerisr.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -118,11 +118,11 @@
 #define RTI_CMP0  ((CONFIG_USEC_PER_TICK * (RTI_FRC0CLK / 100000) + 50) / 100)
 
 /****************************************************************************
- * Public Functions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  up_timerisr
+ * Name:  tms570_timerisr
  *
  * Description:
  *   The timer ISR will perform a variety of services for various portions
@@ -130,7 +130,7 @@
  *
  ****************************************************************************/
 
-int up_timerisr(int irq, uint32_t *regs)
+static int tms570_timerisr(int irq, uint32_t *regs)
 {
   /* Cleear the RTI Compare 0 interrupts */
 
@@ -143,7 +143,11 @@ int up_timerisr(int irq, uint32_t *regs)
 }
 
 /****************************************************************************
- * Name:  up_timer_initialize
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name:  arm_timer_initialize
  *
  * Description:
  *   This function is called during start-up to initialize the timer
@@ -151,7 +155,7 @@ int up_timerisr(int irq, uint32_t *regs)
  *
  ****************************************************************************/
 
-void up_timer_initialize(void)
+void arm_timer_initialize(void)
 {
   /* Disable all RTI interrupts */
 
@@ -190,7 +194,7 @@ void up_timer_initialize(void)
 
   /* Attach the interrupt handler to the RTI Compare 0 interrupt */
 
-  DEBUGVERIFY(irq_attach(TMS570_REQ_RTICMP0, (xcpt_t)up_timerisr));
+  DEBUGVERIFY(irq_attach(TMS570_REQ_RTICMP0, (xcpt_t)tms570_timerisr));
 
   /* Enable RTI compare 0 interrupts at the VIM */
 

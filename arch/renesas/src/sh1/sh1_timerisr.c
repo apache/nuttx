@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/renesas/src/sh1/sh1_timerisr.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -113,19 +113,11 @@
 #define TCNT_PER_TICK    ((TCNT_CLOCK + (CLK_TCK-1))/ CLK_TCK)
 
 /****************************************************************************
- * Private Types
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Function:  up_timerisr
+ * Function:  sh1_timerisr
  *
  * Description:
  *   The timer ISR will perform a variety of services for various portions
@@ -133,25 +125,29 @@
  *
  ****************************************************************************/
 
-int up_timerisr(int irq, uint32_t *regs)
+static int sh1_timerisr(int irq, uint32_t *regs)
 {
-   uint8_t reg8;
+  uint8_t reg8;
 
-   /* Process timer interrupt */
+  /* Process timer interrupt */
 
-   sched_process_timer();
+  sched_process_timer();
 
-   /* Clear ITU0 interrupt status flag */
+  /* Clear ITU0 interrupt status flag */
 
-   reg8 = getreg8(SH1_ITU0_TSR);
-   reg8 &= ~SH1_ITUTSR_IMFA;
-   putreg8(reg8, SH1_ITU0_TSR);
+  reg8 = getreg8(SH1_ITU0_TSR);
+  reg8 &= ~SH1_ITUTSR_IMFA;
+  putreg8(reg8, SH1_ITU0_TSR);
 
-   return 0;
+  return 0;
 }
 
 /****************************************************************************
- * Function:  up_timer_initialize
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Function:  renesas_timer_initialize
  *
  * Description:
  *   This function is called during start-up to initialize
@@ -159,7 +155,7 @@ int up_timerisr(int irq, uint32_t *regs)
  *
  ****************************************************************************/
 
-void up_timer_initialize(void)
+void renesas_timer_initialize(void)
 {
   uint8_t reg8;
 
@@ -187,7 +183,7 @@ void up_timer_initialize(void)
 
   /* Attach the IMIA0 IRQ */
 
-  irq_attach(SH1_SYSTIMER_IRQ, (xcpt_t)up_timerisr);
+  irq_attach(SH1_SYSTIMER_IRQ, (xcpt_t)sh1_timerisr);
 
   /* Enable interrupts on GRA compare match */
 
