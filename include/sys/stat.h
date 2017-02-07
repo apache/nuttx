@@ -120,6 +120,8 @@
 
 struct stat
 {
+  /* Required, standard fields */
+
   mode_t    st_mode;    /* File type, atributes, and access mode bits */
   off_t     st_size;    /* Size of file/directory, in bytes */
   blksize_t st_blksize; /* Blocksize used for filesystem I/O */
@@ -127,8 +129,13 @@ struct stat
   time_t    st_atime;   /* Time of last access */
   time_t    st_mtime;   /* Time of last modification */
   time_t    st_ctime;   /* Time of last status change */
+
+  /* Internal fields.  These are part this specifi instance and should not
+   * referenced by application code for portability reasons.
+   */
+
 #ifdef CONFIG_PSEUDOFS_SOFTLINKS
-  uint16_t  st_count;   /* Used internally to limit traversal of links */
+  uint8_t   st_count;   /* Used internally to limit traversal of links */
 #endif
 };
 

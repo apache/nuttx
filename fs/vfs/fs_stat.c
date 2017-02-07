@@ -129,6 +129,8 @@ static inline int statpseudo(FAR struct inode *inode, FAR struct stat *buf)
               return -ELOOP;
             }
 
+          DEBUGASSERT(buff->st_count > 0);  /* Check for unsigned integer overflow */
+
           /* stat() the target of the soft link. */
 
           ret = stat_recursive((FAR const char *)inode->u.i_link, buf);
