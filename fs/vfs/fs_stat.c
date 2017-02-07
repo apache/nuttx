@@ -48,6 +48,25 @@
 #include "inode/inode.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+/* Reset, preserving the number of symbolic links encountered so far */
+
+#  define RESET_BUF(b) \
+  { \
+    uint16_t save = (b)->st_count; \
+    memset((b), 0, sizeof(struct stat)); \
+    (b)->st_count = save; \
+  }
+#else
+/* Reset everything */
+
+#  define RESET_BUF(b) memset((b), 0, sizeof(struct stat));
+#endif
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -59,7 +78,7 @@ static inline int statpseudo(FAR struct inode *inode, FAR struct stat *buf)
 {
   /* Most of the stat entries just do not apply */
 
-  memset(buf, 0, sizeof(struct stat));
+  RESET_BUF(buf);
 
   if (INODE_IS_SPECIAL(inode))
     {
@@ -95,26 +114,36 @@ static inline int statpseudo(FAR struct inode *inode, FAR struct stat *buf)
         {
           int ret;
 
-          /* stat() the target of the soft link.
+          /* Increment the link counter.  This is necesssary to avoid
+           * infinite recursion if loops are encountered in the traversal.
+           * If we encounter more SYMLOOP_MAX symbolic links at any time
+           * during the travrsal, error out.
            *
-           * Note: We don't really handle links to links nicely.  I suppose
-           * that we should repetitively deference the symbolic link inodes
-           * until we discover the true target link?
+           * NOTE: That inode_search() will automatically skip over
+           * consecutive, intermediate symbolic links.  Those numbers will
+           * not be included in the total.
            */
 
-          ret = stat((FAR const char *)inode->u.i_link, buf);
+          if (++buf->st_count > SYMLOOP_MAX)
+            {
+              return -ELOOP;
+            }
 
-          /* If stat() fails, then there is a probleml with target of the
+          /* stat() the target of the soft link. */
+
+          ret = stat_recursive((FAR const char *)inode->u.i_link, buf);
+
+          /* If stat() fails, then there is a problem with the target of the
            * symbolic link, but not with the symbolic link itself.  We should
            * still report success, just with less information.
            */
 
           if (ret < 0)
             {
-              memset(buf, 0, sizeof(struct stat));
+              RESET_BUF(buf);
             }
 
-          /* And make sure that the caller knows that this really a symbolic link. */
+          /* Make sure that the caller knows that this really a symbolic link. */
 
           buf->st_mode |= S_IFLNK;
         }
@@ -180,17 +209,13 @@ static inline int statroot(FAR struct stat *buf)
 {
   /* There is no inode associated with the fake root directory */
 
-  memset(buf, 0, sizeof(struct stat));
+  RESET_BUF(buf);
   buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR;
   return OK;
 }
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: stat
+ * Name: stat_recursive
  *
  * Returned Value:
  *   Zero on success; -1 on failure with errno set:
@@ -205,34 +230,13 @@ static inline int statroot(FAR struct stat *buf)
  *
  ****************************************************************************/
 
-int stat(FAR const char *path, FAR struct stat *buf)
+int stat_recursive(FAR const char *path, FAR struct stat *buf)
 {
   struct inode_search_s desc;
   FAR struct inode *inode;
-  int ret = OK;
+  int ret;
 
-  /* Sanity checks */
-
-  if (!path || !buf)
-    {
-      ret = EFAULT;
-      goto errout;
-    }
-
-  if (!path[0])
-    {
-      ret = ENOENT;
-      goto errout;
-    }
-
-  /* Check for the fake root directory (which has no inode) */
-
-  if (strcmp(path, "/") == 0)
-    {
-      return statroot(buf);
-    }
-
-  /* Get an inode for this file */
+  /* Get an inode for this path */
 
   SETUP_SEARCH(&desc, path, true);
 
@@ -273,7 +277,9 @@ int stat(FAR const char *path, FAR struct stat *buf)
   else
 #endif
     {
-      /* The node is part of the root pseudo file system */
+      /* The node is part of the root pseudo file system.  This path may
+       * recurse if soft links are supported in the pseudo file system.
+       */
 
       ret = statpseudo(inode, buf);
     }
@@ -299,6 +305,65 @@ errout_with_inode:
 
 errout_with_search:
   RELEASE_SEARCH(&desc);
+
+errout:
+  set_errno(ret);
+  return ERROR;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: stat
+ *
+ * Returned Value:
+ *   Zero on success; -1 on failure with errno set:
+ *
+ *   EACCES  Search permission is denied for one of the directories in the
+ *           path prefix of path.
+ *   EFAULT  Bad address.
+ *   ENOENT  A component of the path path does not exist, or the path is an
+ *           empty string.
+ *   ENOMEM  Out of memory
+ *   ENOTDIR A component of the path is not a directory.
+ *
+ ****************************************************************************/
+
+int stat(FAR const char *path, FAR struct stat *buf)
+{
+  int ret;
+
+  /* Sanity checks */
+
+  if (path == NULL  || buf == NULL)
+    {
+      ret = EFAULT;
+      goto errout;
+    }
+
+  if (*path == '\0')
+    {
+      ret = ENOENT;
+      goto errout;
+    }
+
+  /* Check for the fake root directory (which has no inode) */
+
+  if (strcmp(path, "/") == 0)
+    {
+      return statroot(buf);
+    }
+
+  /* The perform the stat() operation on the path.  This is potentially
+   * recursive if soft link support is enabled.
+   */
+
+#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+  buf->st_count = 0;
+#endif
+  return stat_recursive(path, buf);
 
 errout:
   set_errno(ret);

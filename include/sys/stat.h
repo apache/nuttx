@@ -40,6 +40,8 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <sys/types.h>
 #include <time.h>
 
@@ -125,6 +127,9 @@ struct stat
   time_t    st_atime;   /* Time of last access */
   time_t    st_mtime;   /* Time of last modification */
   time_t    st_ctime;   /* Time of last status change */
+#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+  uint16_t  st_count;   /* Used internally to limit traversal of links */
+#endif
 };
 
 /****************************************************************************

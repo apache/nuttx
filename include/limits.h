@@ -151,7 +151,7 @@
 
 /* Required for symbolic links */
 
-#define _POSIX_SYMLOOP_MAX    100
+#define _POSIX_SYMLOOP_MAX    8
 
 /* Required for POSIX timers.
  *
