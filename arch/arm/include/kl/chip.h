@@ -50,7 +50,7 @@
 
 #if defined(CONFIG_ARCH_CHIP_MKL25Z64)
 
-#  define KL_Z64             1          /* Kinetics KL25Z128 family */
+#  define KL_Z64             1          /* Kinetis KL25Z128 family */
 #  define KL_FLASH_SIZE      (64*1024)  /* 64Kb */
 #  define KL_SRAM_SIZE       (8*1024)   /* 8Kb */
 #  undef  KL_MPU                        /* No memory protection unit */
@@ -88,7 +88,7 @@
 
 #elif defined(CONFIG_ARCH_CHIP_MKL25Z128)
 
-#  define KL_Z128            1          /* Kinetics KL25Z128 family */
+#  define KL_Z128            1          /* Kinetis KL25Z128 family */
 #  define KL_FLASH_SIZE      (128*1024) /* 64Kb */
 #  define KL_SRAM_SIZE       (16*1024)  /* 16Kb */
 #  undef  KL_MPU                        /* No memory protection unit */
@@ -127,7 +127,7 @@
 
 #elif defined(CONFIG_ARCH_CHIP_MKL26Z128)
 
-#  define KL_Z128            1          /* Kinetics KL25Z128 family */
+#  define KL_Z128            1          /* Kinetis KL25Z128 family */
 #  define KL_FLASH_SIZE      (128*1024) /* 64Kb */
 #  define KL_SRAM_SIZE       (16*1024)  /* 16Kb */
 #  undef  KL_MPU                        /* No memory protection unit */

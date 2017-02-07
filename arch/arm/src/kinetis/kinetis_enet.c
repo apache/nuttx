@@ -264,7 +264,7 @@ static inline uint16_t kinesis_swap16(uint16_t value);
 
 /* Common TX logic */
 
-static bool kinetics_txringfull(FAR struct kinetis_driver_s *priv);
+static bool kinetis_txringfull(FAR struct kinetis_driver_s *priv);
 static int  kinetis_transmit(FAR struct kinetis_driver_s *priv);
 static int  kinetis_txpoll(struct net_driver_s *dev);
 
@@ -366,7 +366,7 @@ static inline uint16_t kinesis_swap16(uint16_t value)
 #endif
 
 /****************************************************************************
- * Function: kinetics_txringfull
+ * Function: kinetis_txringfull
  *
  * Description:
  *   Check if all of the TX descriptors are in use.
@@ -380,7 +380,7 @@ static inline uint16_t kinesis_swap16(uint16_t value)
  *
  ****************************************************************************/
 
-static bool kinetics_txringfull(FAR struct kinetis_driver_s *priv)
+static bool kinetis_txringfull(FAR struct kinetis_driver_s *priv)
 {
   uint8_t txnext;
 
@@ -429,7 +429,7 @@ static int kinetis_transmit(FAR struct kinetis_driver_s *priv)
    * case, the outgoing packet will be dropped (e.g. an ARP reply)
    */
 
-  if (kinetics_txringfull(priv))
+  if (kinetis_txringfull(priv))
     {
       return -EBUSY;
     }
@@ -565,7 +565,7 @@ static int kinetis_txpoll(struct net_driver_s *dev)
        * return a non-zero value to terminate the poll.
        */
 
-      if (kinetics_txringfull(priv))
+      if (kinetis_txringfull(priv))
         {
           return -EBUSY;
         }
@@ -1055,7 +1055,7 @@ static void kinetis_poll_work(FAR void *arg)
    */
 
   net_lock();
-  if (!kinetics_txringfull(priv))
+  if (!kinetis_txringfull(priv))
     {
       /* If so, update TCP timing states and poll the network for new XMIT data. Hmmm..
        * might be bug here.  Does this mean if there is a transmit in progress,
@@ -1328,7 +1328,7 @@ static void kinetis_txavail_work(FAR void *arg)
        * packet.
        */
 
-      if (!kinetics_txringfull(priv))
+      if (!kinetis_txringfull(priv))
         {
           /* No, there is space for another transfer.  Poll the network for new
            * XMIT data.
