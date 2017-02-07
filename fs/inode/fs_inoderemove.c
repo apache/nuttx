@@ -71,7 +71,7 @@
 FAR struct inode *inode_unlink(FAR const char *path)
 {
   struct inode_search_s desc;
-  FAR struct inode *node;
+  FAR struct inode *node = NULL;
   int ret;
 
   /* Verify parameters.  Ignore null paths and relative paths */
