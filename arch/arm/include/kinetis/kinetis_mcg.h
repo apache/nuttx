@@ -269,7 +269,7 @@
 
 #elif defined(CONFIG_ARCH_CHIP_MK60FN1M0VLQ12)
 
-/* Verified to Document Number: K66P144M180SF5RMV2 Rev. 2, May 2015 */
+/* Verified to Document Number: K60P144M100SF2V2RM Rev. 2 Jun 2012 */
 
 #  define KINETIS_MCG_VERSION KINETIS_MCG_VERSION_01
 
@@ -442,6 +442,8 @@
 #elif defined(CONFIG_ARCH_CHIP_MK66FN2M0VMD18) || defined(CONFIG_ARCH_CHIP_MK66FX1M0VMD18) || \
       defined(CONFIG_ARCH_CHIP_MK66FN2M0VLQ18) || defined(CONFIG_ARCH_CHIP_MK66FX1M0VLQ18)
 
+/* Verified to Document Number: Document Number: K66P144M180SF5RMV2 Rev. 2, May 2015 */
+
 #  define KINETIS_MCG_VERSION KINETIS_K_MCG_VERSION_06
 
 /* MCG Configuration Parameters */
@@ -521,7 +523,7 @@
 #  error "Unsupported Kinetis chip"
 #endif
 
-/* Use the catch all configuration for the MCG based on the implementations in nuttx prior 2-3/2017 */
+/* Use the catch all configuration for the MCG based on the implementations in nuttx prior 2/3/2017 */
 
 #if KINETIS_MCG_VERSION == KINETIS_MCG_VERSION_UKN
 
