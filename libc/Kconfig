@@ -16,8 +16,10 @@ config STDIO_LINEBUFFER
 	bool "STDIO line buffering"
 	default y
 	---help---
-		Flush buffer I/O whenever a newline character is found in
-		the output data stream.
+		Sets the default behavior to flush buffered I/O whenever a newline
+		character is found in the output data stream.  This setting just
+		sets the initial default behavior of all streams.  The behavior of
+		an individual stream can be changed via setvbuf().
 
 config NUNGET_CHARS
 	int "Number unget() characters"

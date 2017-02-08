@@ -135,7 +135,7 @@ int setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size)
       goto errout;
     }
 
-#if 1 /* REVISIT */
+#if 1 /* REVISIT: _IONBF not yet supported */
   /* Not all features are be available.  Without some additional logic,
    * we cannot disable buffering if CONFIG_STDIO_BUFFER_SIZE > 0
    */
