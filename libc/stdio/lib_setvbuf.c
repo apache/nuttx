@@ -98,11 +98,12 @@
 int setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size)
 {
 #if CONFIG_STDIO_BUFFER_SIZE > 0
+  FAR unsigned char *newbuf;
   uint8_t flags;
   int errcode;
-  int ret = OK;
 
   /* Verify arguments */
+  /* Make sure that a valid mode was provided */
 
   if (mode != _IOFBF && mode != _IOLBF && mode != _IONBF)
     {
@@ -110,26 +111,19 @@ int setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size)
       goto errout;
     }
 
-  /* Make sure that the size argument agrees with the mode */
-
-  if (((mode == _IOFBF || mode == _IOLBF) && size == 0) ||
-      (mode == _IONBF && size > 0))
-    {
-      errcode = EINVAL;
-      goto errout;
-    }
-
-  /* Make sure that the buffer argument agrees with mode */
-
-  if (mode == _IONBF && buffer != NULL)
-    {
-      errcode = EINVAL;
-      goto errout;
-    }
-
-  /* Make sure that the buffer and size argeuments agree */
+  /* If a buffer pointer is provided, then it must have a non-zero size */
 
   if (buffer != NULL && size == 0)
+    {
+      errcode = EINVAL;
+      goto errout;
+    }
+
+  /* A non-zero size (or a non-NULL buffer) with mode = _IONBF makes no
+   * sense.
+   */
+
+  if (mode == _IONBF && size > 0)
     {
       errcode = EINVAL;
       goto errout;
@@ -146,6 +140,19 @@ int setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size)
       goto errout;
     }
 #endif
+
+  /* My assumption is that if size is zero for modes {_IOFBF, _IOLBF} the
+   * caller is only attempting to change the buffering mode.  In this case,
+   * the existing buffer should be re-used (if there is one).  If there is no
+   * existing buffer, then I suppose we should allocate one of the default
+   * size?
+   */
+
+  if ((mode == _IOFBF || mode == _IOLBF) && size == 0 &&
+      stream->fs_bufstart == NULL)
+    {
+      size = CONFIG_STDIO_BUFFER_SIZE;
+    }
 
   /* Make sure that we have exclusive access to the stream */
 
@@ -166,6 +173,8 @@ int setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size)
   /* Return EBUSY if operations have already been performed on the buffer.
    * Here we really only verify that there is no valid data in the existing
    * buffer.
+   *
+   * REVIST:  There could be race conditions here, could there not?
    */
 
   if (stream->fs_bufpos != stream->fs_bufstart)
@@ -185,82 +194,96 @@ int setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size)
   flags = stream->fs_flags & ~(__FS_FLAG_LBF | __FS_FLAG_NBF | __FS_FLAG_UBF);
 #endif
 
-  /* Allocate a new buffer if one is needed.  We have already verified that:
-   *
-   *   If a buffer is needed, then size > 0
-   *   If a buffer is NOT needed, then buffer is NULL
-   *   If buffer != NULL, then size > 0
-   *
-   * That simplifies the following check:
+  /* Allocate a new buffer if one is needed or reuse the existing buffer it
+   * is appropriate to do so.
    */
 
-#if 0 /* REVISIT: _IONBF not yet supported */
-  if (size > 0)
-#else
-  DEBUGASSERT(size > 0);
-#endif
+  switch (mode)
     {
-      FAR unsigned char *newbuf;
+      case _IOLBF:
+        flags |= __FS_FLAG_LBF;
 
-      /* A buffer is needed.  Did the caller provide the buffer memory? */
+        /* Fall through */
 
-      DEBUGASSERT(mode == _IOFBF || mode == _IOLBF);
-      if (buffer != NULL)
-        {
-          newbuf = (FAR unsigned char *)buffer;
+      case _IOFBF:
+        /* Use the existing buffer if size == 0 */
 
-          /* Indicate that we have an I/O buffer managed by the caller of
-           * setvbuf.
-           */
+        if (size > 0)
+          {
+            /* A new buffer is needed.  Did the caller provide the buffer
+             * memory?
+             */
 
-          flags |= __FS_FLAG_UBF;
-        }
-      else
-        {
-          newbuf = (FAR unsigned char *)lib_malloc(size);
-          if (newbuf == NULL)
-            {
-              errcode = ENOMEM;
-              goto errout_with_semaphore;
-            }
-        }
+            if (buffer != NULL)
+              {
+                newbuf = (FAR unsigned char *)buffer;
 
-      /* Do not release the previous buffer if it was allocated by the user
-       * on a previous call to setvbuf().
-       */
+                /* Indicate that we have an I/O buffer managed by the caller of
+                 * setvbuf.
+                 */
 
-      if ((stream->fs_flags & __FS_FLAG_UBF) != 0)
-        {
-          lib_free(stream->fs_bufstart);
-        }
+                flags |= __FS_FLAG_UBF;
+              }
+            else
+              {
+                newbuf = (FAR unsigned char *)lib_malloc(size);
+                if (newbuf == NULL)
+                  {
+                    errcode = ENOMEM;
+                    goto errout_with_semaphore;
+                  }
+              }
+          }
+        else
+          {
+            /* Re-use the existing buffer and retain some existing flags.
+             * This supports changing the buffering mode without changing
+             * the buffer.
+             */
 
-      /* Use the new buffer */
+            DEBUGASSERT(stream->fs_bufstart != NULL);
+            flags |= stream->fs_flags & __FS_FLAG_UBF;
+            goto reuse_buffer;
+          }
 
-      stream->fs_bufstart = newbuf;
-      stream->fs_bufend   = newbuf;
-      stream->fs_bufpos   = newbuf;
-      stream->fs_bufread  = newbuf;
+        break;
 
-      /* Check for line buffering */
-
-      if (mode == _IOLBF)
-        {
-          flags |= __FS_FLAG_LBF;
-        }
-    }
+      case _IONBF:
 #if 0 /* REVISIT: _IONBF not yet supported */
-  else
-    {
-      /* No buffer needed... We must be performing unbuffered I/O */
+        /* No buffer needed... We must be performing unbuffered I/O */
 
-      DEBUGASSERT(mode == _IONBF);
-      flags |= __FS_FLAG_NBF;
-    }
+        DEBUGASSERT(size == 0);
+        newbuf = NULL;
+        flags |= __FS_FLAG_NBF;
+        break;
 #endif
+
+      default:
+        PANIC();
+    }
+
+   /* Do not release the previous buffer if it was allocated by the user
+    * on a previous call to setvbuf().
+    */
+
+   if (stream->fs_bufstart != NULL &&
+       (stream->fs_flags & __FS_FLAG_UBF) == 0)
+    {
+      lib_free(stream->fs_bufstart);
+    }
+
+  /* Set the new buffer information */
+
+  stream->fs_bufstart = newbuf;
+  stream->fs_bufpos   = newbuf;
+  stream->fs_bufread  = newbuf;
+  stream->fs_bufend   = newbuf + size;
 
   /* Update the stream flags and return success */
 
-  stream->fs_flags = flags;
+reuse_buffer:
+
+  stream->fs_flags    = flags;
   lib_give_semaphore(stream);
   return OK;
 
