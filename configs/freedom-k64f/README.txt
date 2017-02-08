@@ -257,7 +257,7 @@ f Application Configuration -> Network Utilities
   you can enable like DHCP client (or server) or network name
   resolution.
 
-  By default, the IP address of the DK-TM4C129X will be 10.0.0.2 and
+  By default, the IP address of the FRDM-K64F will be 10.0.0.2 and
   it will assume that your host is the gateway and has the IP address
   10.0.0.1.
 
@@ -287,7 +287,7 @@ f Application Configuration -> Network Utilities
   the first time you ping due to the default handling of the ARP
   table.
 
-  On the host side, you should also be able to ping the DK-TM4C129X:
+  On the host side, you should also be able to ping the FRDM-K64F:
 
     $ ping 10.0.0.2
 
@@ -424,8 +424,8 @@ SD Card Support
     ------------ ------------- --------
     SD Card Slot Board Signal  K64F Pin
     ------------ ------------- --------
-    DAT0         SDHC0_D0      PTE0
-    DAT1         SDHC0_D1      PTE1
+    DAT0         SDHC0_D0      PTE1
+    DAT1         SDHC0_D1      PTE0
     DAT2         SDHC0_D2      PTE5
     CD/DAT3      SDHC0_D3      PTE4
     CMD          SDHC0_CMD     PTE3
