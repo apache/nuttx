@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/stdio/lib_stdsostream.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -82,7 +82,7 @@ static void stdsostream_putc(FAR struct lib_sostream_s *this, int ch)
  * Name: stdsostream_flush
  ****************************************************************************/
 
-#if defined(CONFIG_STDIO_LINEBUFFER) && CONFIG_STDIO_BUFFER_SIZE > 0
+#if CONFIG_STDIO_BUFFER_SIZE > 0
 static int stdsostream_flush(FAR struct lib_sostream_s *this)
 {
   FAR struct lib_stdsostream_s *sthis = (FAR struct lib_stdsostream_s *)this;
@@ -138,7 +138,6 @@ void lib_stdsostream(FAR struct lib_stdsostream_s *outstream,
    * meaning.
    */
 
-#ifdef CONFIG_STDIO_LINEBUFFER
 #if CONFIG_STDIO_BUFFER_SIZE > 0
   if ((stream->fs_oflags & O_BINARY) == 0)
     {
@@ -149,7 +148,6 @@ void lib_stdsostream(FAR struct lib_stdsostream_s *outstream,
     {
       outstream->public.flush = lib_snoflush;
     }
-#endif
 
   /* Select the seek operation */
 

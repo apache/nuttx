@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/stdio/lib_libsnoflush.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,8 +48,6 @@
 
 #include "libc.h"
 
-#ifdef CONFIG_STDIO_LINEBUFFER
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -59,8 +57,7 @@
  *
  * Description:
  *  lib_snoflush() provides a common, dummy flush method for seekable output
- *  streams that are not flushable.  Only used if CONFIG_STDIO_LINEBUFFER
- *  is selected.
+ *  streams that are not flushable.
  *
  * Return:
  *  Always returns OK
@@ -71,6 +68,3 @@ int lib_snoflush(FAR struct lib_sostream_s *this)
 {
   return OK;
 }
-
-#endif /* CONFIG_STDIO_LINEBUFFER */
-

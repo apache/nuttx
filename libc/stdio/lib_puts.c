@@ -76,15 +76,18 @@ int puts(FAR const char *s)
         {
           nput = nwritten + 1;
 
-          /* Flush the buffer after the newline is output. */
+          /* Flush the buffer after the newline is output if line buffering
+           * is enabled.
+           */
 
-#ifdef CONFIG_STDIO_LINEBUFFER
-          ret = lib_fflush(stream, true);
-          if (ret < 0)
+          if ((stream->fs_flags & __FS_FLAG_LBF) != 0)
             {
-              nput = EOF;
+              ret = lib_fflush(stream, true);
+              if (ret < 0)
+                {
+                  nput = EOF;
+                }
             }
-#endif
         }
     }
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/stdio/lib_fputc.c
  *
- *   Copyright (C) 2007, 2008, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2011-2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,8 +58,7 @@ int fputc(int c, FAR FILE *stream)
     {
       /* Flush the buffer if a newline is output */
 
-#ifdef CONFIG_STDIO_LINEBUFFER
-      if (c == '\n')
+      if (c == '\n' && (stream->fs_flags & __FS_FLAG_LBF) != 0)
         {
           ret = lib_fflush(stream, true);
           if (ret < 0)
@@ -67,7 +66,7 @@ int fputc(int c, FAR FILE *stream)
               return EOF;
             }
         }
-#endif
+
       return c;
     }
   else

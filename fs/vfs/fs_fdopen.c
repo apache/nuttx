@@ -251,6 +251,12 @@ FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb)
           stream->fs_bufpos  = stream->fs_bufstart;
           stream->fs_bufpos  = stream->fs_bufstart;
           stream->fs_bufread = stream->fs_bufstart;
+
+          /* Setup buffer flags */
+
+#ifdef CONFIG_STDIO_LINEBUFFER
+          stream->fs_flags  |= __FS_FLAG_LBF; /* Line buffering */
+#endif
 #endif
           /* Save the file description and open flags.  Setting the
            * file descriptor locks this stream.

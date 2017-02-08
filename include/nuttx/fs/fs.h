@@ -65,7 +65,8 @@
 
 #define __FS_FLAG_EOF   (1 << 0) /* EOF detected by a read operation */
 #define __FS_FLAG_ERROR (1 << 1) /* Error detected by any operation */
-#define __FS_FLAG_UBF   (1 << 2) /* Buffer allocated by caller of setvbuf */
+#define __FS_FLAG_LBF   (1 << 2) /* Line buffered */
+#define __FS_FLAG_UBF   (1 << 3) /* Buffer allocated by caller of setvbuf */
 
 /* Inode i_flag values:
  *

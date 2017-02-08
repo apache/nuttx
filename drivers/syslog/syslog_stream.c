@@ -109,8 +109,6 @@ static void syslogstream_putc(FAR struct lib_outstream_s *this, int ch)
 void syslogstream(FAR struct lib_outstream_s *stream)
 {
   stream->put   = syslogstream_putc;
-#ifdef CONFIG_STDIO_LINEBUFFER
   stream->flush = lib_noflush;
-#endif
   stream->nput  = 0;
 }

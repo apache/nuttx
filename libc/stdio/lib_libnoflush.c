@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/stdio/lib_libnoflush.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,8 +49,6 @@
 
 #include "libc.h"
 
-#ifdef CONFIG_STDIO_LINEBUFFER
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -60,7 +58,7 @@
  *
  * Description:
  *  lib_noflush() provides a common, dummy flush method for output streams
- *  that are not flushable.  Only used if CONFIG_STDIO_LINEBUFFER is selected.
+ *  that are not flushable.
  *
  * Return:
  *  Always returns OK
@@ -71,6 +69,3 @@ int lib_noflush(FAR struct lib_outstream_s *this)
 {
   return OK;
 }
-
-#endif /* CONFIG_STDIO_LINEBUFFER */
-

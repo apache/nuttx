@@ -76,16 +76,10 @@
  * by the setvbuf() function. The contents of the array at any time are
  * unspecified.
  *
- * REVISIT: This initial version of setvbuf has some severe limitations and
- * not all features features required by the specification are available.
- * These the limitations are the result of hard-coded stream logic based
- * the static configuration.  This logic cannot support variable behaviors
- * without some additional logic.  Specifically, we cannot support:
- *
- *  - Any line buffering state that is inconsistent with the configuration
- *    setting CONFIG_STDIO_LINEBUFFER
- *  - We cannot support disabling stream buffering if
- *    CONFIG_STDIO_BUFFER_SIZE > 0
+ * REVISIT: This initial version of setvbuf has some limitations and not
+ * all features features required by the specification are available.
+ * Specifically, this current implementation cannot support sisabling
+ * stream buffering if CONFIG_STDIO_BUFFER_SIZE > 0
  *
  * Parmeters:
  *  stream - the stream to flush
@@ -141,21 +135,17 @@ int setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size)
       goto errout;
     }
 
+#if 1 /* REVISIT */
   /* Not all features are be available.  Without some additional logic,
-   * we cannot support (1) any line buffering state that is inconsistent
-   * with CONFIG_STDIO_LINEBUFFER nor can we (2) disable buffering if
-   * CONFIG_STDIO_BUFFER_SIZE > 0
+   * we cannot disable buffering if CONFIG_STDIO_BUFFER_SIZE > 0
    */
 
-#ifdef CONFIG_STDIO_LINEBUFFER
-  if (mode != _IOLBF)
-#else
-  if (mode != _IOFBF)
-#endif
+  if (mode == _IONBF)
     {
       errcode = ENOSYS;
       goto errout;
     }
+#endif
 
   /* Make sure that we have exclusive access to the stream */
 
@@ -189,7 +179,11 @@ int setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size)
    * successful.
    */
 
-  flags = stream->fs_flags & ~__FS_FLAG_UBF;
+#if 1 /* REVISIT: _IONBF not yet supported */
+  flags = stream->fs_flags & ~(__FS_FLAG_LBF | __FS_FLAG_UBF);
+#else
+  flags = stream->fs_flags & ~(__FS_FLAG_LBF | __FS_FLAG_NBF | __FS_FLAG_UBF);
+#endif
 
   /* Allocate a new buffer if one is needed.  We have already verified that:
    *
@@ -200,7 +194,7 @@ int setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size)
    * That simplifies the following check:
    */
 
-#if 0 /* size should always be > 0 in the currently supported configurations */
+#if 0 /* REVISIT: _IONBF not yet supported */
   if (size > 0)
 #else
   DEBUGASSERT(size > 0);
@@ -246,7 +240,23 @@ int setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size)
       stream->fs_bufend   = newbuf;
       stream->fs_bufpos   = newbuf;
       stream->fs_bufread  = newbuf;
+
+      /* Check for line buffering */
+
+      if (mode == _IOLBF)
+        {
+          flags |= __FS_FLAG_LBF;
+        }
     }
+#if 0 /* REVISIT: _IONBF not yet supported */
+  else
+    {
+      /* No buffer needed... We must be performing unbuffered I/O */
+
+      DEBUGASSERT(mode == _IONBF);
+      flags |= __FS_FLAG_NBF;
+    }
+#endif
 
   /* Update the stream flags and return success */
 
