@@ -64,15 +64,21 @@
 #  define BUFSIZ CONFIG_STDIO_BUFFER_SIZE
 #endif
 
+/* The following three definitions are for ANSI C, used by setvbuf */
+
+#define _IOFBF     0               /* Fully buffered */
+#define _IOLBF     1               /* Line buffered */
+#define _IONBF     2               /* Unbuffered */
+
 /* File system error values */
 
 #define EOF        (-1)
 
 /* The first three _iob entries are reserved for standard I/O */
 
-#define stdin  (&sched_getstreams()->sl_streams[0])
-#define stdout (&sched_getstreams()->sl_streams[1])
-#define stderr (&sched_getstreams()->sl_streams[2])
+#define stdin      (&sched_getstreams()->sl_streams[0])
+#define stdout     (&sched_getstreams()->sl_streams[1])
+#define stderr     (&sched_getstreams()->sl_streams[2])
 
 /* These APIs are not implemented and/or can be synthesized from
  * supported APIs.
@@ -90,7 +96,7 @@
 #  define CONFIG_LIBC_TMPDIR "/tmp"
 #endif
 
-#define P_tmpdir CONFIG_LIBC_TMPDIR
+#define P_tmpdir   CONFIG_LIBC_TMPDIR
 
 /* Maximum size of character array to hold tmpnam() output. */
 
@@ -98,7 +104,7 @@
 #  define CONFIG_LIBC_MAX_TMPFILE 32
 #endif
 
-#define L_tmpnam CONFIG_LIBC_MAX_TMPFILE
+#define L_tmpnam   CONFIG_LIBC_MAX_TMPFILE
 
 /* The maximum number of unique temporary file names that can be generated */
 
@@ -156,6 +162,7 @@ size_t fwrite(FAR const void *ptr, size_t size, size_t n_items,
          FAR FILE *stream);
 FAR char *gets(FAR char *s);
 FAR char *gets_s(FAR char *s, rsize_t n);
+int    setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size);
 int    ungetc(int c, FAR FILE *stream);
 
 /* Operations on the stdout stream, buffers, paths, and the whole printf-family */

@@ -65,7 +65,7 @@ CSRCS += lib_rdflush.c lib_wrflush.c lib_fputc.c lib_puts.c lib_fputs.c
 CSRCS += lib_ungetc.c lib_vprintf.c lib_fprintf.c lib_vfprintf.c
 CSRCS += lib_stdinstream.c lib_stdoutstream.c lib_stdsistream.c
 CSRCS += lib_stdsostream.c lib_perror.c lib_feof.c lib_ferror.c
-CSRCS += lib_clearerr.c
+CSRCS += lib_clearerr.c lib_setvbuf.c
 
 endif
 

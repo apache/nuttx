@@ -67,6 +67,14 @@
 #endif
 
 /****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+static inline int statpseudo(FAR struct inode *inode, FAR struct stat *buf);
+static inline int statroot(FAR struct stat *buf);
+int stat_recursive(FAR const char *path, FAR struct stat *buf);
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -129,7 +137,7 @@ static inline int statpseudo(FAR struct inode *inode, FAR struct stat *buf)
               return -ELOOP;
             }
 
-          DEBUGASSERT(buff->st_count > 0);  /* Check for unsigned integer overflow */
+          DEBUGASSERT(buf->st_count > 0);  /* Check for unsigned integer overflow */
 
           /* stat() the target of the soft link. */
 
@@ -307,8 +315,6 @@ errout_with_inode:
 
 errout_with_search:
   RELEASE_SEARCH(&desc);
-
-errout:
   set_errno(ret);
   return ERROR;
 }

@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/stdio/lib_fclose.c
  *
- *   Copyright (C) 2007-2009, 2011, 3013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -114,7 +114,8 @@ int fclose(FAR FILE *stream)
 
       /* Release the buffer */
 
-      if (stream->fs_bufstart)
+      if (stream->fs_bufstart != NULL &&
+          (stream->fs_flags & __FS_FLAG_UBF) == 0)
         {
           lib_free(stream->fs_bufstart);
         }
