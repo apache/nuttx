@@ -131,7 +131,6 @@ static inline void rcc_resetbkp(void)
   regval = getreg32(RTC_MAGIC_REG);
   if (regval != RTC_MAGIC)
     {
-
       stm32_pwr_enablebkp(true);
 
       /* We might be changing RTCSEL - to ensure such changes work, we must
