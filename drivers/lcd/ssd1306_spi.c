@@ -51,7 +51,7 @@
 #if defined(CONFIG_LCD_SSD1306) && defined(CONFIG_LCD_SSD1306_SPI)
 
 /****************************************************************************
- * Private Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -61,7 +61,7 @@
  *
  ****************************************************************************/
 
-static inline void ssd1306_configspi(FAR struct spi_dev_s *spi)
+void ssd1306_configspi(FAR struct spi_dev_s *spi)
 {
   lcdinfo("Mode: %d Bits: 8 Frequency: %d\n",
           CONFIG_SSD1306_SPIMODE, CONFIG_SSD1306_FREQUENCY);
@@ -73,10 +73,6 @@ static inline void ssd1306_configspi(FAR struct spi_dev_s *spi)
   (void)SPI_HWFEATURES(spi, 0);
   (void)SPI_SETFREQUENCY(spi, CONFIG_SSD1306_FREQUENCY);
 }
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Name: ssd1306_sendbyte
