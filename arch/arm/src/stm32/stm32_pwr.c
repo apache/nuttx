@@ -2,9 +2,10 @@
  * arch/arm/src/stm32/stm32_pwr.c
  *
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
- *   Copyright (C) 2013, 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2015-2017 Gregory Nutt. All rights reserved.
  *   Authors: Uros Platise <uros.platise@isotel.eu>
  *            Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -52,6 +53,12 @@
 #include "stm32_pwr.h"
 
 #if defined(CONFIG_STM32_PWR)
+
+/************************************************************************************
+ * Private Data
+ ************************************************************************************/
+
+static uint16_t g_bkp_writable_counter = 0;
 
 /************************************************************************************
  * Private Functions
@@ -115,6 +122,39 @@ void stm32_pwr_enablesdadc(uint8_t sdadc)
 }
 #endif
 
+/************************************************************************************
+ * Name: stm32_pwr_initbkp
+ *
+ * Description:
+ *   Insures the referenced count access to the backup domain (RTC registers,
+ *   RTC backup data registers and backup SRAM is consistent with the HW state
+ *   without relying on a variable.
+ *
+ *   NOTE: This function should only be called by SoC Start up code.
+ *
+ * Input Parameters:
+ *   writable - True: enable ability to write to backup domain registers
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
+
+void stm32_pwr_initbkp(bool writable)
+{
+  uint16_t regval;
+
+  /* Make the HW not writable */
+
+  regval = stm32_pwr_getreg(STM32_PWR_CR_OFFSET);
+  regval &= ~PWR_CR_DBP;
+  stm32_pwr_putreg(STM32_PWR_CR_OFFSET, regval);
+
+  /* Make the reference count agree */
+
+  g_bkp_writable_counter =  0;
+  stm32_pwr_enablebkp(writable);
+}
 
 /************************************************************************************
  * Name: stm32_pwr_enablebkp
@@ -137,7 +177,6 @@ void stm32_pwr_enablesdadc(uint8_t sdadc)
 
 void stm32_pwr_enablebkp(bool writable)
 {
-  static uint16_t writable_counter = 0;
   irqstate_t flags;
   uint16_t regval;
   bool waswritable;
@@ -152,24 +191,24 @@ void stm32_pwr_enablebkp(bool writable)
 
   if (writable)
     {
-      DEBUGASSERT(writable_counter < UINT16_MAX);
-      writable_counter++;
+      DEBUGASSERT(g_bkp_writable_counter < UINT16_MAX);
+      g_bkp_writable_counter++;
     }
-  else if (writable_counter > 0)
+  else if (g_bkp_writable_counter > 0)
     {
-      writable_counter--;
+      g_bkp_writable_counter--;
     }
 
   /* Enable or disable the ability to write */
 
-  if (waswritable && writable_counter == 0)
+  if (waswritable && g_bkp_writable_counter == 0)
     {
       /* Disable backup domain access */
 
       regval &= ~PWR_CR_DBP;
       stm32_pwr_putreg(STM32_PWR_CR_OFFSET, regval);
     }
-  else if (!waswritable && writable_counter > 0)
+  else if (!waswritable && g_bkp_writable_counter > 0)
     {
       /* Enable backup domain access */
 
