@@ -14,9 +14,10 @@ config STDIO_DISABLE_BUFFERING
 
 		NOTE that even if STDIO buffering is enabled, you can still disable
 		buffer by setting CONFIG_STDIO_BUFFER_SIZE=0 or dynamically through
-		the setvbuf() interface.  In these case, however, there is no
-		reduction in code size.  Only setting CONFIG_STDIO_DISABLE_BUFFERING
-		will reduce code size.
+		the setvbuf() interface.  In this case, however,  memory used for
+		buffering will be eliminated, of course, buth there will be no
+		reduction in static code size.  Only setting
+		CONFIG_STDIO_DISABLE_BUFFERING will reduce static code size.
 
 if !STDIO_DISABLE_BUFFERING
 
