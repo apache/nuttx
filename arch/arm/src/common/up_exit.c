@@ -118,7 +118,7 @@ static void _up_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
                     filep->fs_bufpos - filep->fs_bufstart);
             }
           else
-Eendif
+#endif
             {
               sinfo("      fd=%d\n", filep->fs_fd);
             }
