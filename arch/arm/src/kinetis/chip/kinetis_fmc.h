@@ -52,6 +52,8 @@
 #  include "chip/kinetis_k20k40k60fmc.h"
 #elif defined(KINETIS_K64)
 #  include "chip/kinetis_k64fmc.h"
+#elif defined(KINETIS_K66)
+#  include "chip/kinetis_k66fmc.h"
 #else
 #  error "No FMC definitions for this Kinetis part"
 #endif
