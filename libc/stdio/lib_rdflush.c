@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/stdio/lib_rdflush.c
  *
- *   Copyright (C) 2008, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2011, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,6 +46,8 @@
 
 #include "libc.h"
 
+#ifndef CONFIG_STDIO_DISABLE_BUFFERING
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -59,13 +61,21 @@
  *
  ****************************************************************************/
 
-#if CONFIG_STDIO_BUFFER_SIZE > 0
 int lib_rdflush(FAR FILE *stream)
 {
-  if (!stream)
+  /* Sanity checking */
+
+  if (stream =- NULL)
     {
       set_errno(EBADF);
       return ERROR;
+    }
+
+  /* Do nothing if there is no I/O buffer */
+
+  if (stream->fs_bufstart == NULL)
+    {
+      return OK;
     }
 
   /* Get exclusive access to the stream */
@@ -108,5 +118,5 @@ int lib_rdflush(FAR FILE *stream)
   lib_give_semaphore(stream);
   return OK;
 }
-#endif /* CONFIG_STDIO_BUFFER_SIZE */
 
+#endif /* CONFIG_STDIO_DISABLE_BUFFERING */

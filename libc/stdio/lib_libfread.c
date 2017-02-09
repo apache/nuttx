@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/stdio/lib_libfread.c
  *
- *   Copyright (C) 2007-2009, 2011-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,7 +60,7 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
 {
   FAR unsigned char *dest  = (FAR unsigned char*)ptr;
   ssize_t bytes_read;
-#if CONFIG_STDIO_BUFFER_SIZE > 0
+#ifndef CONFIG_STDIO_DISABLE_BUFFERING
   int ret;
 #endif
 
@@ -96,170 +96,177 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
         }
 #endif
 
-#if CONFIG_STDIO_BUFFER_SIZE > 0
-      /* If the buffer is currently being used for write access, then
-       * flush all of the buffered write data.  We do not support concurrent
-       * buffered read/write access.
-       */
+#ifndef CONFIG_STDIO_DISABLE_BUFFERING
+      /* Is there an I/O buffer? */
 
-      ret = lib_wrflush(stream);
-      if (ret < 0)
+      if (stream->bufstart != NULL)
         {
-          lib_give_semaphore(stream);
-          return ret;
-        }
-
-      /* Now get any other needed chars from the buffer or the file. */
-
-      while (count > 0)
-        {
-          /* Is there readable data in the buffer? */
-
-          while ((count > 0) && (stream->fs_bufpos < stream->fs_bufread))
-            {
-              /* Yes, copy a byte into the user buffer */
-
-              *dest++ = *stream->fs_bufpos++;
-              count--;
-            }
-
-          /* The buffer is empty OR we have already supplied the number of
-           * bytes requested in the read.  Check if we need to read
-           * more from the file.
+          /* If the buffer is currently being used for write access, then
+           * flush all of the buffered write data.  We do not support concurrent
+           * buffered read/write access.
            */
 
-          if (count > 0)
+          ret = lib_wrflush(stream);
+          if (ret < 0)
             {
-              size_t buffer_available;
+              lib_give_semaphore(stream);
+              return ret;
+            }
 
-              /* We need to read more data into the buffer from the file */
+          /* Now get any other needed chars from the buffer or the file. */
 
-              /* Mark the buffer empty */
+          while (count > 0)
+            {
+              /* Is there readable data in the buffer? */
 
-              stream->fs_bufpos = stream->fs_bufread = stream->fs_bufstart;
+              while ((count > 0) && (stream->fs_bufpos < stream->fs_bufread))
+                {
+                  /* Yes, copy a byte into the user buffer */
 
-              /* How much space is available in the buffer? */
+                  *dest++ = *stream->fs_bufpos++;
+                  count--;
+                }
 
-              buffer_available = stream->fs_bufend - stream->fs_bufread;
-
-              /* Will the number of bytes that we need to read fit into
-               * the buffer space that is available? If the read size is
-               * larger than the buffer, then read some of the data
-               * directly into the user's buffer.
+              /* The buffer is empty OR we have already supplied the number of
+               * bytes requested in the read.  Check if we need to read
+               * more from the file.
                */
 
-              if (count > buffer_available)
+              if (count > 0)
                 {
-                  bytes_read = read(stream->fs_fd, dest, count);
-                  if (bytes_read < 0)
+                  size_t buffer_available;
+
+                  /* We need to read more data into the buffer from the file */
+
+                  /* Mark the buffer empty */
+
+                  stream->fs_bufpos = stream->fs_bufread = stream->fs_bufstart;
+
+                  /* How much space is available in the buffer? */
+
+                  buffer_available = stream->fs_bufend - stream->fs_bufread;
+
+                  /* Will the number of bytes that we need to read fit into
+                   * the buffer space that is available? If the read size is
+                   * larger than the buffer, then read some of the data
+                   * directly into the user's buffer.
+                   */
+
+                  if (count > buffer_available)
                     {
-                      /* An error occurred on the read.  The error code is
-                       * in the 'errno' variable.
-                       */
-
-                      goto errout_with_errno;
-                    }
-                  else if (bytes_read == 0)
-                    {
-                      /* We are at the end of the file.  But we may already
-                       * have buffered data.  In that case, we will report
-                       * the EOF indication later.
-                       */
-
-                      goto shortread;
-                    }
-                  else
-                    {
-                      /* Some bytes were read. Adjust the dest pointer */
-
-                      dest  += bytes_read;
-
-                      /* Were all of the requested bytes read? */
-
-                      if ((size_t)bytes_read < count)
+                      bytes_read = read(stream->fs_fd, dest, count);
+                      if (bytes_read < 0)
                         {
-                          /* No.  We must be at the end of file. */
+                          /* An error occurred on the read.  The error code is
+                           * in the 'errno' variable.
+                           */
+
+                          goto errout_with_errno;
+                        }
+                      else if (bytes_read == 0)
+                        {
+                          /* We are at the end of the file.  But we may already
+                           * have buffered data.  In that case, we will report
+                           * the EOF indication later.
+                           */
 
                           goto shortread;
                         }
                       else
                         {
-                          /* Yes.  We are done. */
+                          /* Some bytes were read. Adjust the dest pointer */
 
-                          count = 0;
+                          dest  += bytes_read;
+
+                          /* Were all of the requested bytes read? */
+
+                          if ((size_t)bytes_read < count)
+                            {
+                              /* No.  We must be at the end of file. */
+
+                              goto shortread;
+                            }
+                          else
+                            {
+                              /* Yes.  We are done. */
+
+                              count = 0;
+                            }
                         }
-                    }
-                }
-              else
-                {
-                  /* The number of bytes required to satisfy the read
-                   * is less than or equal to the size of the buffer
-                   * space that we have left. Read as much as we can
-                   * into the buffer.
-                   */
-
-                  bytes_read = read(stream->fs_fd, stream->fs_bufread, buffer_available);
-                  if (bytes_read < 0)
-                    {
-                      /* An error occurred on the read.  The error code is
-                       * in the 'errno' variable.
-                       */
-
-                      goto errout_with_errno;
-                    }
-                  else if (bytes_read == 0)
-                    {
-                      /* We are at the end of the file.  But we may already
-                       * have buffered data.  In that case, we will report
-                       * the EOF indication later.
-                       */
-
-                      goto shortread;
                     }
                   else
                     {
-                      /* Some bytes were read */
+                      /* The number of bytes required to satisfy the read
+                       * is less than or equal to the size of the buffer
+                       * space that we have left. Read as much as we can
+                       * into the buffer.
+                       */
 
-                      stream->fs_bufread += bytes_read;
+                      bytes_read = read(stream->fs_fd, stream->fs_bufread, buffer_available);
+                      if (bytes_read < 0)
+                        {
+                          /* An error occurred on the read.  The error code is
+                           * in the 'errno' variable.
+                           */
+
+                          goto errout_with_errno;
+                        }
+                      else if (bytes_read == 0)
+                        {
+                          /* We are at the end of the file.  But we may already
+                           * have buffered data.  In that case, we will report
+                           * the EOF indication later.
+                           */
+
+                          goto shortread;
+                        }
+                      else
+                        {
+                          /* Some bytes were read */
+
+                          stream->fs_bufread += bytes_read;
+                        }
                     }
                 }
             }
-        }
 #else
-      /* Now get any other needed chars from the file. */
+          /* Now get any other needed chars from the file. */
 
-      while (count > 0)
-        {
-          bytes_read = read(stream->fs_fd, dest, count);
-          if (bytes_read < 0)
+          while (count > 0)
             {
-              /* An error occurred on the read.  The error code is
-               * in the 'errno' variable.
-               */
+              bytes_read = read(stream->fs_fd, dest, count);
+              if (bytes_read < 0)
+                {
+                  /* An error occurred on the read.  The error code is
+                   * in the 'errno' variable.
+                   */
 
-              goto errout_with_errno;
-            }
-          else if (bytes_read == 0)
-            {
-              /* We are at the end of the file.  But we may already
-               * have buffered data.  In that case, we will report
-               * the EOF indication later.
-               */
+                  goto errout_with_errno;
+                }
+              else if (bytes_read == 0)
+                {
+                  /* We are at the end of the file.  But we may already
+                   * have buffered data.  In that case, we will report
+                   * the EOF indication later.
+                   */
 
-              break;
-            }
-          else
-            {
-              dest  += bytes_read;
-              count -= bytes_read;
+                  break;
+                }
+              else
+                {
+                  dest  += bytes_read;
+                  count -= bytes_read;
+                }
             }
         }
 #endif
+
       /* Here after a successful (but perhaps short) read */
 
-#if CONFIG_STDIO_BUFFER_SIZE > 0
+#ifndef CONFIG_STDIO_DISABLE_BUFFERING
     shortread:
 #endif
+
       bytes_read = dest - (FAR unsigned char *)ptr;
 
       /* Set or clear the EOF indicator.  If we get here because of a

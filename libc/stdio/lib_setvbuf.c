@@ -74,11 +74,6 @@
  * by the setvbuf() function. The contents of the array at any time are
  * unspecified.
  *
- * REVISIT: This initial version of setvbuf has some limitations and not
- * all features features required by the specification are available.
- * Specifically, this current implementation cannot support sisabling
- * stream buffering if CONFIG_STDIO_BUFFER_SIZE > 0
- *
  * Parmeters:
  *  stream - the stream to flush
  *  buffer - the user allocate buffer. If NULL, will allocates a buffer of
@@ -95,7 +90,7 @@
 
 int setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size)
 {
-#if CONFIG_STDIO_BUFFER_SIZE > 0
+#ifndef CONFIG_STDIO_DISABLE_BUFFERING
   FAR unsigned char *newbuf;
   uint8_t flags;
   int errcode;
@@ -127,18 +122,6 @@ int setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size)
       goto errout;
     }
 
-#if 1 /* REVISIT: _IONBF not yet supported */
-  /* Not all features are be available.  Without some additional logic,
-   * we cannot disable buffering if CONFIG_STDIO_BUFFER_SIZE > 0
-   */
-
-  if (mode == _IONBF)
-    {
-      errcode = ENOSYS;
-      goto errout;
-    }
-#endif
-
   /* My assumption is that if size is zero for modes {_IOFBF, _IOLBF} the
    * caller is only attempting to change the buffering mode.  In this case,
    * the existing buffer should be re-used (if there is one).  If there is no
@@ -149,7 +132,7 @@ int setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size)
   if ((mode == _IOFBF || mode == _IOLBF) && size == 0 &&
       stream->fs_bufstart == NULL)
     {
-      size = CONFIG_STDIO_BUFFER_SIZE;
+      size = BUFSIZE;
     }
 
   /* Make sure that we have exclusive access to the stream */
@@ -186,11 +169,7 @@ int setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size)
    * successful.
    */
 
-#if 1 /* REVISIT: _IONBF not yet supported */
-  flags = stream->fs_flags & ~(__FS_FLAG_LBF | __FS_FLAG_UBF);
-#else
   flags = stream->fs_flags & ~(__FS_FLAG_LBF | __FS_FLAG_NBF | __FS_FLAG_UBF);
-#endif
 
   /* Allocate a new buffer if one is needed or reuse the existing buffer it
    * is appropriate to do so.
@@ -247,14 +226,12 @@ int setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size)
         break;
 
       case _IONBF:
-#if 0 /* REVISIT: _IONBF not yet supported */
         /* No buffer needed... We must be performing unbuffered I/O */
 
         DEBUGASSERT(size == 0);
         newbuf = NULL;
         flags |= __FS_FLAG_NBF;
         break;
-#endif
 
       default:
         PANIC();
@@ -299,3 +276,5 @@ errout:
   return ERROR;
 #endif
 }
+
+#endif /* !CONFIG_STDIO_DISABLE_BUFFERING */

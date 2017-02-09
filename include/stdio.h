@@ -58,10 +58,12 @@
 
 #define FILENAME_MAX _POSIX_NAME_MAX
 
-/* The size of the I/O buffers */
+/* The (default) size of the I/O buffers */
 
-#if CONFIG_STDIO_BUFFER_SIZE > 0
-#  define BUFSIZ CONFIG_STDIO_BUFFER_SIZE
+#if defined(CONFIG_STDIO_BUFFER_SIZE) && CONFIG_STDIO_BUFFER_SIZE > 0
+#  define BUFSIZ   CONFIG_STDIO_BUFFER_SIZE
+#else
+#  define BUFSIZ   64
 #endif
 
 /* The following three definitions are for ANSI C, used by setvbuf */

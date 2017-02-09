@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/vfs/fs_fdopen.c
  *
- *   Copyright (C) 2007-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -221,17 +221,18 @@ FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb)
         {
           /* Zero the structure */
 
-#if CONFIG_STDIO_BUFFER_SIZE > 0
+#ifndef CONFIG_STDIO_DISABLE_BUFFERING
           memset(stream, 0, sizeof(FILE));
 #elif CONFIG_NUNGET_CHARS > 0
           stream->fs_nungotten = 0;
 #endif
 
-#if CONFIG_STDIO_BUFFER_SIZE > 0
+#ifndef CONFIG_STDIO_DISABLE_BUFFERING
           /* Initialize the semaphore the manages access to the buffer */
 
           (void)sem_init(&stream->fs_sem, 0, 1);
 
+#if CONFIG_STDIO_BUFFER_SIZE > 0
           /* Allocate the IO buffer at the appropriate privilege level for
            * the group.
            */
@@ -251,12 +252,15 @@ FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb)
           stream->fs_bufpos  = stream->fs_bufstart;
           stream->fs_bufread = stream->fs_bufstart;
 
+#ifdef CONFIG_STDIO_LINEBUFFER
           /* Setup buffer flags */
 
-#ifdef CONFIG_STDIO_LINEBUFFER
           stream->fs_flags  |= __FS_FLAG_LBF; /* Line buffering */
-#endif
-#endif
+
+#endif /* CONFIG_STDIO_LINEBUFFER */
+#endif /* CONFIG_STDIO_BUFFER_SIZE > 0 */
+#endif /* !CONFIG_STDIO_DISABLE_BUFFERING */
+
           /* Save the file description and open flags.  Setting the
            * file descriptor locks this stream.
            */

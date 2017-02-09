@@ -107,7 +107,7 @@ int fclose(FAR FILE *stream)
             }
         }
 
-#if CONFIG_STDIO_BUFFER_SIZE > 0
+#ifndef CONFIG_STDIO_DISABLE_BUFFERING
       /* Destroy the semaphore */
 
       sem_destroy(&stream->fs_sem);
@@ -123,6 +123,7 @@ int fclose(FAR FILE *stream)
       /* Clear the whole structure */
 
       memset(stream, 0, sizeof(FILE));
+
 #else
 #if CONFIG_NUNGET_CHARS > 0
       /* Reset the number of ungetc characters */
@@ -133,6 +134,7 @@ int fclose(FAR FILE *stream)
 
       stream->fs_oflags = 0;
 #endif
+
       /* Setting the file descriptor to -1 makes the stream available for reuse */
 
       stream->fs_fd = -1;

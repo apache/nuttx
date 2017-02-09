@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/misc/lib_stream.c
  *
- *   Copyright (C) 2007, 2011, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2011, 2013-2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -109,7 +109,7 @@ void lib_stream_initialize(FAR struct task_group_s *group)
 #endif /* CONFIG_NFILE_STREAMS > 0 */
 
 /****************************************************************************
- * Name: lib_stream_init
+ * Name: lib_stream_release
  *
  * Description:
  *   This function is called when a TCB is destroyed.  Note that it does not
@@ -122,7 +122,7 @@ void lib_stream_initialize(FAR struct task_group_s *group)
 void lib_stream_release(FAR struct task_group_s *group)
 {
   FAR struct streamlist *list;
-#if CONFIG_STDIO_BUFFER_SIZE > 0
+#ifndef CONFIG_STDIO_DISABLE_BUFFERING
   int i;
 #endif
 
@@ -139,9 +139,9 @@ void lib_stream_release(FAR struct task_group_s *group)
 
   (void)sem_destroy(&list->sl_sem);
 
+#ifndef CONFIG_STDIO_DISABLE_BUFFERING
   /* Release each stream in the list */
 
-#if CONFIG_STDIO_BUFFER_SIZE > 0
   for (i = 0; i < CONFIG_NFILE_STREAMS; i++)
     {
       FAR struct file_struct *stream = &list->sl_streams[i];
@@ -177,6 +177,6 @@ void lib_stream_release(FAR struct task_group_s *group)
     }
 #endif
 }
-#endif /* CONFIG_NFILE_STREAMS > 0 */
 
+#endif /* CONFIG_NFILE_STREAMS > 0 */
 #endif /* (!CONFIG_BUILD_PROTECTED &&7 !CONFIG_BUILD_KERNEL) || __KERNEL__ */

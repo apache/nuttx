@@ -82,11 +82,23 @@ static void stdsostream_putc(FAR struct lib_sostream_s *this, int ch)
  * Name: stdsostream_flush
  ****************************************************************************/
 
-#if CONFIG_STDIO_BUFFER_SIZE > 0
+#ifndef CONFIG_STDIO_DISABLE_BUFFERING
 static int stdsostream_flush(FAR struct lib_sostream_s *this)
 {
-  FAR struct lib_stdsostream_s *sthis = (FAR struct lib_stdsostream_s *)this;
-  return lib_fflush(sthis->stream, true);
+  FAR struct lib_stdsostream_s *sthis = (FAR struct lib_stdoutstream_s *)this;
+  FAR struct file *stream;
+
+  DEBUGASSERT(sthis != NULL && sthis->stream != NULL);
+  stream = sthis->stream;
+
+  if (stream->fs_bufstart != NULL)
+    {
+      return lib_fflush(sthis->stream, true);
+    }
+  else
+    {
+      return OK;  
+    }
 }
 #endif
 
@@ -138,8 +150,8 @@ void lib_stdsostream(FAR struct lib_stdsostream_s *outstream,
    * meaning.
    */
 
-#if CONFIG_STDIO_BUFFER_SIZE > 0
-  if ((stream->fs_oflags & O_BINARY) == 0)
+#ifndef CONFIG_STDIO_DISABLE_BUFFERING
+  if (stream->fs_bufstart != NULL && (stream->fs_oflags & O_BINARY) == 0)
     {
       outstream->public.flush = stdsostream_flush;
     }

@@ -5,12 +5,22 @@
 
 comment "Standard C Library Options"
 
+config STDIO_DISABLE_BUFFERING
+	bool "Disable I/O Buffering"
+	default n
+	---help---
+		Tiny systems may need to disable all support for I/O buffering in
+		order to minimum footprint.
+
 config STDIO_BUFFER_SIZE
 	int "C STDIO buffer size"
 	default 64
+	depends on !STDIO_DISABLE_BUFFERING
 	---help---
-		Size of buffers using within the C buffered I/O interfaces.
-		(printf, putchar, fwrite, etc.).
+		Size of buffers using within the C buffered I/O interfaces (printf,
+		putchar, fwrite, etc.).  This function sets the initial I/O buffer
+		size.  Zero disables I/O buffering.  That size may be subsequently
+		modified using setvbuf().
 
 config STDIO_LINEBUFFER
 	bool "STDIO line buffering"

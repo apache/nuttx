@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/stdio/lib_libfflush.c
  *
- *   Copyright (C) 2007-2008, 2011-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2008, 2011-2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -73,10 +73,11 @@
 
 ssize_t lib_fflush(FAR FILE *stream, bool bforce)
 {
-#if CONFIG_STDIO_BUFFER_SIZE > 0
+#ifndef CONFIG_STDIO_DISABLE_BUFFERING
   FAR const unsigned char *src;
   ssize_t bytes_written;
   ssize_t nbuffer;
+  int ret;
 
   /* Return EBADF if the file is not opened for writing */
 
@@ -89,9 +90,19 @@ ssize_t lib_fflush(FAR FILE *stream, bool bforce)
 
   lib_take_semaphore(stream);
 
+  /* Check if there is an allocated I/O buffer */
+
+  if (stream->fs_bufstart == NULL)
+    {
+      /* No, then there can be nothing remaining in the buffer. */
+
+      ret = 0;
+      goto errout_with_sem;
+   }
+
   /* Make sure that the buffer holds valid data */
 
-  if (stream->fs_bufpos  != stream->fs_bufstart)
+  if (stream->fs_bufpos != stream->fs_bufstart)
     {
       /* Make sure that the buffer holds buffered write data.  We do not
        * support concurrent read/write buffer usage.
@@ -103,8 +114,8 @@ ssize_t lib_fflush(FAR FILE *stream, bool bforce)
            * remaining in the buffer."
            */
 
-          lib_give_semaphore(stream);
-          return 0;
+          ret = 0;
+          goto errout_with_sem;
         }
 
       /* How many bytes of write data are used in the buffer now */
@@ -126,8 +137,8 @@ ssize_t lib_fflush(FAR FILE *stream, bool bforce)
                */
 
               stream->fs_flags |= __FS_FLAG_ERROR;
-              lib_give_semaphore(stream);
-              return -get_errno();
+              ret = -get_errno();;
+              goto errout_with_sem;
             }
 
           /* Handle partial writes.  fflush() must either return with
@@ -162,6 +173,11 @@ ssize_t lib_fflush(FAR FILE *stream, bool bforce)
 
   lib_give_semaphore(stream);
   return stream->fs_bufpos - stream->fs_bufstart;
+
+errout_with_sem:
+  lib_give_semaphore(stream);
+  return ret;
+
 #else
   /* Return no bytes remaining in the buffer */
 

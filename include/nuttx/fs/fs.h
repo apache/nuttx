@@ -405,7 +405,7 @@ struct filelist
 struct file_struct
 {
   int                fs_fd;        /* File descriptor associated with stream */
-#if CONFIG_STDIO_BUFFER_SIZE > 0
+#ifndef CONFIG_STDIO_DISABLE_BUFFERING
   sem_t              fs_sem;       /* For thread safety */
   pid_t              fs_holder;    /* Holder of sem */
   int                fs_counts;    /* Number of times sem is held */
