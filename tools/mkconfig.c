@@ -112,7 +112,7 @@ int main(int argc, char **argv, char **envp)
 
   printf("/* NXFLAT requires PIC support in the TCBs. */\n\n");
   printf("#if defined(CONFIG_NXFLAT)\n");
-  printf("#  undef CONFIG_PIC\n");
+  printf("#  undef  CONFIG_PIC\n");
   printf("#  define CONFIG_PIC 1\n");
   printf("#endif\n\n");
 
@@ -139,6 +139,21 @@ int main(int argc, char **argv, char **envp)
   printf("#  define CONFIG_NFILE_DESCRIPTORS 0\n");
   printf("#endif\n\n");
 
+  printf("/* If no file descriptors are configured, then make certain no streams\n");
+  printf(" * are configured either.\n");
+  printf(" */\n\n");
+  printf("#if CONFIG_NFILE_DESCRIPTORS == 0\n");
+  printf("#  undef  CONFIG_NFILE_STREAMS\n");
+  printf("#  define CONFIG_NFILE_STREAMS 0\n");
+  printf("#endif\n\n");
+
+  printf("/* The correct way to disable stream support is to set the number of\n");
+  printf(" * streamd to zero.\n");
+  printf(" */\n\n");
+  printf("#ifndef CONFIG_NFILE_STREAMS\n");
+  printf("#  define CONFIG_NFILE_STREAMS 0\n");
+  printf("#endif\n\n");
+
   printf("/* If a console is selected, then make sure that there are resources for\n");
   printf(" * three file descriptors and, if any streams are selected, also for three\n");
   printf(" * file streams.\n");
@@ -162,14 +177,6 @@ int main(int argc, char **argv, char **envp)
   printf("#else\n");
   printf("#  undef CONFIG_DEV_LOWCONSOLE\n");
   printf("#  undef CONFIG_RAMLOG_CONSOLE\n");
-  printf("#endif\n\n");
-
-  printf("/* If no file descriptors are configured, then make certain no\n");
-  printf(" * streams are configured either.\n");
-  printf(" */\n\n");
-  printf("#if CONFIG_NFILE_DESCRIPTORS == 0\n");
-  printf("#  undef  CONFIG_NFILE_STREAMS\n");
-  printf("#  define CONFIG_NFILE_STREAMS 0\n");
   printf("#endif\n\n");
 
   printf("/* If no file streams are configured, then make certain that buffered I/O\n");
