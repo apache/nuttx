@@ -113,16 +113,6 @@ int setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size)
       goto errout;
     }
 
-  /* A non-zero size (or a non-NULL buffer) with mode = _IONBF makes no
-   * sense.
-   */
-
-  if (mode == _IONBF && size > 0)
-    {
-      errcode = EINVAL;
-      goto errout;
-    }
-
   /* My assumption is that if size is zero for modes {_IOFBF, _IOLBF} the
    * caller is only attempting to change the buffering mode.  In this case,
    * the existing buffer should be re-used (if there is one).  If there is no
@@ -134,6 +124,17 @@ int setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size)
       stream->fs_bufstart == NULL)
     {
       size = BUFSIZ;
+    }
+
+  /* A non-zero size (or a non-NULL buffer) with mode = _IONBF makes no
+   * sense but is, apparently, permissible. We simply force the buffer to
+   * NULL and size to zero in this case without complaining.
+   */
+
+  else if (mode == _IONBF)
+    {
+      buffer = NULL;
+      size   = 0;
     }
 
   /* Make sure that we have exclusive access to the stream */
@@ -229,7 +230,6 @@ int setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size)
       case _IONBF:
         /* No buffer needed... We must be performing unbuffered I/O */
 
-        DEBUGASSERT(size == 0);
         newbuf = NULL;
         break;
 

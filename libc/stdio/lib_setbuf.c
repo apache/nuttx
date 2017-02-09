@@ -59,11 +59,7 @@
  *
  *     setvbuf(stream, buf, _IONBF, BUFSIZ)
  *
- *    if buf is a null pointer.
- *
- * EXCEPTION:  Currently, the NuttX setvbuf() expects the size argument to
- * be zero if the mode is __INOBF.  That is a descrepancy!  What would a
- * non-zero size mean in that case?
+ *   if buf is a null pointer.
  *
  * Input Parameters:
  *   stream - The stream whose buffer will be modified
@@ -77,16 +73,15 @@
 
 void setbuf(FAR FILE *stream, FAR char *buf)
 {
+#ifndef CONFIG_STDIO_DISABLE_BUFFERING
+  int mode;
+
   DEBUGASSERT(stream != NULL);
 
-#ifndef CONFIG_STDIO_DISABLE_BUFFERING
-  if (buf != NULL)
-    {
-      (void)setvbuf(stream, buf, _IOFBF, BUFSIZ);
-    }
-  else
-    {
-      (void)setvbuf(stream, NULL, _IONBF, 0);
-    }
+  mode = (buf != NULL) ? _IOFBF : _IONBF;
+  (void)setvbuf(stream, buf, mode, BUFSIZ);
+
+#else
+  DEBUGASSERT(stream != NULL);
 #endif
 }
