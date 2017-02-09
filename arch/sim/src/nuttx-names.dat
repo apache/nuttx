@@ -73,6 +73,7 @@ ptsname_r      NXptsname_r
 puts           NXputs
 read           NXread
 readdir        NXreaddir
+readlink       NXreadlink
 realloc        NXrealloc
 recv           NXrecv
 recvfrom       NXrecvfrom
@@ -91,6 +92,7 @@ sendto         NXsendto
 setenv         NXsetenv
 setlogmask     NXsetlogmask
 setsockopt     NXsetsockopt
+setvbuf        NXsetvbuf
 sigaction      NXsigaction
 sigaddset      NXsigaddset
 sigdelset      NXsigdelset
