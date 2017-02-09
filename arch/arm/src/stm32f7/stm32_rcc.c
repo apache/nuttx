@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32f7/stm32_rcc.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            David Sidrane <david_s5@nscdg.com>
  *
@@ -52,6 +52,7 @@
 
 #include "chip/stm32_flash.h"
 #include "stm32_rcc.h"
+#include "stm32_pwr.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -112,6 +113,13 @@ void stm32_clockconfig(void)
   /* Make sure that we are starting in the reset state */
 
   rcc_reset();
+
+#if defined(CONFIG_STM32F7_PWR)
+
+  /* Insure the bkp is initialized */
+
+  stm32_pwr_initbkp(false);
+#endif
 
 #if defined(CONFIG_STM32F7_CUSTOM_CLOCKCONFIG)
 
