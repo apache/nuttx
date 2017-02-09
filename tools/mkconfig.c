@@ -164,6 +164,24 @@ int main(int argc, char **argv, char **envp)
   printf("#  undef CONFIG_RAMLOG_CONSOLE\n");
   printf("#endif\n\n");
 
+  printf("/* If no file descriptors are configured, then make certain no\n");
+  printf(" * streams are configured either.\n");
+  printf(" */\n\n");
+  printf("#if CONFIG_NFILE_DESCRIPTORS == 0\n");
+  printf("#  undef  CONFIG_NFILE_STREAMS\n");
+  printf("#  define CONFIG_NFILE_STREAMS 0\n");
+  printf("#endif\n\n");
+
+  printf("/* If no file streams are configured, then make certain that buffered I/O\n");
+  printf(" * support is disabled\n");
+  printf(" */\n\n");
+  printf("#if CONFIG_NFILE_STREAMS == 0\n");
+  printf("#  undef  CONFIG_STDIO_BUFFER_SIZE\n");
+  printf("#  undef  CONFIG_STDIO_LINEBUFFER\n");
+  printf("#  undef  CONFIG_STDIO_DISABLE_BUFFERING\n");
+  printf("#  define CONFIG_STDIO_DISABLE_BUFFERING 1\n");
+  printf("#endif\n\n");
+
   printf("/* If priority inheritance is disabled, then do not allocate any\n");
   printf(" * associated resources.\n");
   printf(" */\n\n");
@@ -172,16 +190,8 @@ int main(int argc, char **argv, char **envp)
   printf("#  define CONFIG_SEM_PREALLOCHOLDERS 0\n");
   printf("#endif\n\n");
   printf("#if !defined(CONFIG_PRIORITY_INHERITANCE) || !defined(CONFIG_SEM_NNESTPRIO)\n");
-  printf("#  undef CONFIG_SEM_NNESTPRIO\n");
+  printf("#  undef  CONFIG_SEM_NNESTPRIO\n");
   printf("#  define CONFIG_SEM_NNESTPRIO 0\n");
-  printf("#endif\n\n");
-
-  printf("/* If no file descriptors are configured, then make certain no\n");
-  printf(" * streams are configured either.\n");
-  printf(" */\n\n");
-  printf("#if CONFIG_NFILE_DESCRIPTORS == 0\n");
-  printf("#  undef CONFIG_NFILE_STREAMS\n");
-  printf("#  define CONFIG_NFILE_STREAMS 0\n");
   printf("#endif\n\n");
 
   printf("/* If the end of RAM is not specified then it is assumed to be the beginning\n");
@@ -199,16 +209,6 @@ int main(int argc, char **argv, char **envp)
   printf(" */\n\n");
   printf("#ifndef CONFIG_FLASH_END\n");
   printf("#  define CONFIG_FLASH_END (CONFIG_FLASH_START+CONFIG_FLASH_SIZE)\n");
-  printf("#endif\n\n");
-
-  printf("/* If no file streams are configured, then make certain that buffered I/O\n");
-  printf(" * support is disabled\n");
-  printf(" */\n\n");
-  printf("#if CONFIG_NFILE_STREAMS == 0\n");
-  printf("#  undef  CONFIG_STDIO_BUFFER_SIZE\n");
-  printf("#  undef  CONFIG_STDIO_LINEBUFFER\n");
-  printf("#  undef  CONFIG_STDIO_DISABLE_BUFFERING\n");
-  printf("#  define CONFIG_STDIO_DISABLE_BUFFERING 1\n");
   printf("#endif\n\n");
 
   printf("/* If the maximum message size is zero, then we assume that message queues\n");
