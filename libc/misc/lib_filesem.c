@@ -45,6 +45,8 @@
 #include <errno.h>
 #include <assert.h>
 
+#include <nuttx/fs/fs.h>
+
 #include "libc.h"
 
 #ifndef CONFIG_STDIO_DISABLE_BUFFERING
