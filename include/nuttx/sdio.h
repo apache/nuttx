@@ -380,8 +380,9 @@
 
 /* SDIO capability bits */
 
-#define SDIO_CAPS_1BIT_ONLY     0x01 /* Bit 0=1: Supports only 1-bit operation */
-#define SDIO_CAPS_DMASUPPORTED  0x02 /* Bit 1=1: Supports DMA data transfers */
+#define SDIO_CAPS_1BIT_ONLY       0x01 /* Bit 0=1: Supports only 1-bit operation */
+#define SDIO_CAPS_DMASUPPORTED    0x02 /* Bit 1=1: Supports DMA data transfers */
+#define SDIO_CAPS_DMABEFOREWRITE  0x04 /* Bit 2=1: Executes DMA before write command */
 
 /****************************************************************************
  * Name: SDIO_STATUS

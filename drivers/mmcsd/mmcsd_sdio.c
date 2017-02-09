@@ -1694,14 +1694,19 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_state_s *priv,
       return ret;
     }
 
-  /* Send CMD24, WRITE_BLOCK, and verify that good R1 status is returned */
+  /* If Controller doesn't need DMA before Write then send CMD */
 
-  mmcsd_sendcmdpoll(priv, MMCSD_CMD24, offset);
-  ret = mmcsd_recvR1(priv, MMCSD_CMD24);
-  if (ret != OK)
+  if ((priv->caps & SDIO_CAPS_DMABEFOREWRITE) == 0)
     {
-      ferr("ERROR: mmcsd_recvR1 for CMD24 failed: %d\n", ret);
-      return ret;
+      /* Send CMD24, WRITE_BLOCK, and verify that good R1 status is returned */
+
+      mmcsd_sendcmdpoll(priv, MMCSD_CMD24, offset);
+      ret = mmcsd_recvR1(priv, MMCSD_CMD24);
+      if (ret != OK)
+        {
+          ferr("ERROR: mmcsd_recvR1 for CMD24 failed: %d\n", ret);
+          return ret;
+        }
     }
 
   /* Configure SDIO controller hardware for the write transfer */
@@ -1731,6 +1736,21 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_state_s *priv,
    */
 
   priv->wrbusy = true;
+
+  /* If Controller needs DMA before Write then only send CMD now */
+
+  if ((priv->caps & SDIO_CAPS_DMABEFOREWRITE) != 0)
+    {
+      /* Send CMD24, WRITE_BLOCK, and verify that good R1 status is returned */
+
+      mmcsd_sendcmdpoll(priv, MMCSD_CMD24, offset);
+      ret = mmcsd_recvR1(priv, MMCSD_CMD24);
+      if (ret != OK)
+        {
+          ferr("ERROR: mmcsd_recvR1 for CMD24 failed: %d\n", ret);
+          return ret;
+        }
+    }
 
   /* Wait for the transfer to complete */
 
@@ -2238,7 +2258,7 @@ static int mmcsd_geometry(FAR struct inode *inode, struct geometry *geometry)
                  geometry->geo_mediachanged ? "true" : "false",
                  geometry->geo_writeenabled ? "true" : "false");
           finfo("nsectors: %lu sectorsize: %d\n",
-                 ((unsigned long))geometry->geo_nsectors,
+                 (unsigned long)geometry->geo_nsectors,
                  geometry->geo_sectorsize);
 
           priv->mediachanged = false;
