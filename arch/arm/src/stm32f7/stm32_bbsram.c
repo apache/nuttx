@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32f7/stm32_bbsram.c
  *
- *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           David Sidrane <david_s5@nscdg.com>
  *
@@ -257,7 +257,7 @@ static void stm32_bbsram_semtake(FAR struct stm32_bbsram_s *priv)
 
 static inline void stm32_bbsram_unlock(void)
 {
-  (void)stm32_pwr_enablebkp(true);
+  stm32_pwr_enablebkp(true);
 }
 
 /****************************************************************************
@@ -277,7 +277,7 @@ static inline void stm32_bbsram_unlock(void)
 
 static inline void stm32_bbsram_lock(void)
 {
-  (void)stm32_pwr_enablebkp(false);
+  stm32_pwr_enablebkp(false);
 }
 
 /****************************************************************************

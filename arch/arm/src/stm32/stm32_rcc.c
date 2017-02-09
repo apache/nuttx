@@ -1,8 +1,9 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_rcc.c
  *
- *   Copyright (C) 2009, 2011-2012 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2009, 2011-2012, 2017 Gregory Nutt. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -125,9 +126,12 @@ static inline void rcc_resetbkp(void)
 
   /* Check if the RTC is already configured */
 
+  stm32_pwr_initbkp(false);
+
   regval = getreg32(RTC_MAGIC_REG);
   if (regval != RTC_MAGIC)
     {
+
       stm32_pwr_enablebkp(true);
 
       /* We might be changing RTCSEL - to ensure such changes work, we must
