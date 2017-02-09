@@ -63,7 +63,6 @@ ssize_t lib_fwrite(FAR const void *ptr, size_t count, FAR FILE *stream)
   FAR const unsigned char *src   = ptr;
   ssize_t ret = ERROR;
   unsigned char *dest;
-  int ret;
 
   /* Make sure that writing to this stream is allowed */
 
@@ -153,7 +152,7 @@ ssize_t lib_fwrite(FAR const void *ptr, size_t count, FAR FILE *stream)
 
   /* Return the number of bytes written */
 
-  ret = src - start;
+  ret = (uintptr_t)src - (uintptr_t)start;
 
 errout_with_semaphore:
   lib_give_semaphore(stream);

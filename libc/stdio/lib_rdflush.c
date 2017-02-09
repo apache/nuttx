@@ -65,7 +65,7 @@ int lib_rdflush(FAR FILE *stream)
 {
   /* Sanity checking */
 
-  if (stream =- NULL)
+  if (stream == NULL)
     {
       set_errno(EBADF);
       return ERROR;

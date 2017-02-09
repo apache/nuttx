@@ -86,19 +86,9 @@ static void stdoutstream_putc(FAR struct lib_outstream_s *this, int ch)
 static int stdoutstream_flush(FAR struct lib_outstream_s *this)
 {
   FAR struct lib_stdoutstream_s *sthis = (FAR struct lib_stdoutstream_s *)this;
-  FAR struct file *stream;
 
   DEBUGASSERT(sthis != NULL && sthis->stream != NULL);
-  stream = sthis->stream;
-
-  if (stream->fs_bufstart != NULL)
-    {
-      return lib_fflush(sthis->stream, true);
-    }
-  else
-    {
-      return OK;
-    }
+  return lib_fflush(sthis->stream, true);
 }
 #endif
 

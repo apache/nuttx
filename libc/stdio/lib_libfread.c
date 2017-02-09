@@ -99,7 +99,7 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
 #ifndef CONFIG_STDIO_DISABLE_BUFFERING
       /* Is there an I/O buffer? */
 
-      if (stream->bufstart != NULL)
+      if (stream->fs_bufstart != NULL)
         {
           /* If the buffer is currently being used for write access, then
            * flush all of the buffered write data.  We do not support concurrent
@@ -202,7 +202,8 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
                        * into the buffer.
                        */
 
-                      bytes_read = read(stream->fs_fd, stream->fs_bufread, buffer_available);
+                      bytes_read = read(stream->fs_fd, stream->fs_bufread,
+                                        buffer_available);
                       if (bytes_read < 0)
                         {
                           /* An error occurred on the read.  The error code is
@@ -229,7 +230,10 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
                     }
                 }
             }
-#else
+        }
+      else
+#endif
+        {
           /* Now get any other needed chars from the file. */
 
           while (count > 0)
@@ -259,7 +263,6 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
                 }
             }
         }
-#endif
 
       /* Here after a successful (but perhaps short) read */
 

@@ -132,7 +132,7 @@ int setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size)
   if ((mode == _IOFBF || mode == _IOLBF) && size == 0 &&
       stream->fs_bufstart == NULL)
     {
-      size = BUFSIZE;
+      size = BUFSIZ;
     }
 
   /* Make sure that we have exclusive access to the stream */
@@ -169,7 +169,7 @@ int setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size)
    * successful.
    */
 
-  flags = stream->fs_flags & ~(__FS_FLAG_LBF | __FS_FLAG_NBF | __FS_FLAG_UBF);
+  flags = stream->fs_flags & ~(__FS_FLAG_LBF | __FS_FLAG_UBF);
 
   /* Allocate a new buffer if one is needed or reuse the existing buffer it
    * is appropriate to do so.
@@ -230,7 +230,6 @@ int setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size)
 
         DEBUGASSERT(size == 0);
         newbuf = NULL;
-        flags |= __FS_FLAG_NBF;
         break;
 
       default:
@@ -276,5 +275,3 @@ errout:
   return ERROR;
 #endif
 }
-
-#endif /* !CONFIG_STDIO_DISABLE_BUFFERING */

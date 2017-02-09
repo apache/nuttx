@@ -85,20 +85,10 @@ static void stdsostream_putc(FAR struct lib_sostream_s *this, int ch)
 #ifndef CONFIG_STDIO_DISABLE_BUFFERING
 static int stdsostream_flush(FAR struct lib_sostream_s *this)
 {
-  FAR struct lib_stdsostream_s *sthis = (FAR struct lib_stdoutstream_s *)this;
-  FAR struct file *stream;
+  FAR struct lib_stdsostream_s *sthis = (FAR struct lib_stdsostream_s *)this;
 
   DEBUGASSERT(sthis != NULL && sthis->stream != NULL);
-  stream = sthis->stream;
-
-  if (stream->fs_bufstart != NULL)
-    {
-      return lib_fflush(sthis->stream, true);
-    }
-  else
-    {
-      return OK;  
-    }
+  return lib_fflush(sthis->stream, true);
 }
 #endif
 
@@ -109,10 +99,10 @@ static int stdsostream_flush(FAR struct lib_sostream_s *this)
 static off_t stdsostream_seek(FAR struct lib_sostream_s *this, off_t offset,
                               int whence)
 {
-  FAR struct lib_stdsostream_s *mthis = (FAR struct lib_stdsostream_s *)this;
+  FAR struct lib_stdsostream_s *sthis = (FAR struct lib_stdsostream_s *)this;
 
-  DEBUGASSERT(this);
-  return fseek(mthis->stream, offset, whence);
+  DEBUGASSERT(sthis != NULL && sthis->stream != NULL);
+  return fseek(sthis->stream, offset, whence);
 }
 
 /****************************************************************************
