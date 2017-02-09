@@ -74,7 +74,7 @@ CSRCS += lib_tempnam.c lib_tmpnam.c
 endif
 
 ifneq ($(CONFIG_STDIO_DISABLE_BUFFERING),y)
-CSRCS += lib_setvbuf.c
+CSRCS += lib_setbuf.c lib_setvbuf.c
 endif
 endif
 

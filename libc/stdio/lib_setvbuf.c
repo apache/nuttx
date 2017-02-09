@@ -42,6 +42,7 @@
 
 #include <sys/types.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
@@ -74,17 +75,17 @@
  * by the setvbuf() function. The contents of the array at any time are
  * unspecified.
  *
- * Parmeters:
- *  stream - the stream to flush
- *  buffer - the user allocate buffer. If NULL, will allocates a buffer of
- *           specified size
- *  mode   - specifies a mode for file buffering
- *  size   - size of buffer
+ * Input Parameters:
+ *   stream - the stream to flush
+ *   buffer - the user allocate buffer. If NULL, will allocates a buffer of
+ *            specified size
+ *   mode   - specifies a mode for file buffering
+ *   size   - size of buffer
  *
- * Return:
- *  Upon successful completion, setvbuf() will return 0. Otherwise, it will
- *  return a non-zero value if an invalid value is given for type or if the
- *  request cannot be honored, [CX] and may set errno to indicate the error
+ * Returned Value:
+ *   Upon successful completion, setvbuf() will return 0. Otherwise, it will
+ *   return a non-zero value if an invalid value is given for type or if the
+ *   request cannot be honored, [CX] and may set errno to indicate the error
  *
  ****************************************************************************/
 

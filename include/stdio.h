@@ -164,6 +164,7 @@ size_t fwrite(FAR const void *ptr, size_t size, size_t n_items,
          FAR FILE *stream);
 FAR char *gets(FAR char *s);
 FAR char *gets_s(FAR char *s, rsize_t n);
+void   setbuf(FAR FILE *stream, FAR char *buf);
 int    setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size);
 int    ungetc(int c, FAR FILE *stream);
 
