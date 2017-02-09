@@ -1694,7 +1694,9 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_state_s *priv,
       return ret;
     }
 
-  /* If Controller doesn't need DMA before Write then send CMD */
+  /* If Controller does not need DMA setup before the write then send CMD24
+   * now.
+   */
 
   if ((priv->caps & SDIO_CAPS_DMABEFOREWRITE) == 0)
     {
@@ -1737,7 +1739,7 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_state_s *priv,
 
   priv->wrbusy = true;
 
-  /* If Controller needs DMA before Write then only send CMD now */
+  /* If Controller needs DMA setup before write then only send CMD24 now. */
 
   if ((priv->caps & SDIO_CAPS_DMABEFOREWRITE) != 0)
     {

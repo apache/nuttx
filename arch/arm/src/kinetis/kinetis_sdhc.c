@@ -116,10 +116,10 @@
 #  endif
 #endif
 
-/* Timing */
+/* Timing in ms for commands wait response */
 
-#define SDHC_CMDTIMEOUT         (100000)
-#define SDHC_LONGTIMEOUT        (0x7fffffff)
+#define SDHC_CMDTIMEOUT         MSEC2TICK(100)
+#define SDHC_LONGTIMEOUT        MSEC2TICK(500)
 
 /* Big DTOCV setting.  Range is 0=SDCLK*2^13 through 14=SDCLK*2^27 */
 
@@ -675,7 +675,6 @@ static void kinetis_dataconfig(struct kinetis_dev_s *priv, bool bwrite,
 
   /* Set the watermark level */
 
-#ifdef CONFIG_KINETIS_SDHC_DMA
   /* Set the Read Watermark Level to the blocksize to be read
    * (limited to half of the maximum watermark value).  BRR will be
    * set when the number of queued words is greater than or equal
@@ -715,32 +714,6 @@ static void kinetis_dataconfig(struct kinetis_dev_s *priv, bool bwrite,
 
       putreg32(watermark << SDHC_WML_RD_SHIFT, KINETIS_SDHC_WML);
     }
-#else
-  if (bwrite)
-    {
-      /* Write Watermark Level = 0:  BWR will be set when the number of
-       * queued words is less than or equal to 0.
-       */
-
-      putreg32(0, KINETIS_SDHC_WML);
-    }
-  else
-    {
-      /* Set the Read Watermark Level to the blocksize to be read
-       * (limited to half of the maximum watermark value).  BRR will be
-       * set when the number of queued words is greater than or equal
-       * to this value.
-       */
-
-      watermark = (blocksize + 3) >> 2;
-      if (watermark > (SDHC_MAX_WATERMARK / 2))
-        {
-          watermark = (SDHC_MAX_WATERMARK / 2);
-        }
-
-      putreg32(watermark << SDHC_WML_RD_SHIFT, KINETIS_SDHC_WML);
-    }
-#endif
 }
 
 /****************************************************************************
@@ -791,22 +764,16 @@ static void kinetis_transmit(struct kinetis_dev_s *priv)
     uint8_t  b[4];
   } data;
 
-  /* Loop while there is more data to be sent, waiting for buffer write
-   * ready (BWR)
+  /* Loop while there is more data to be sent, while buffer write enable
+   * (PRSSTAT.BWEN)
    */
 
   mcinfo("Entry: remaining: %d IRQSTAT: %08x\n",
          priv->remaining, getreg32(KINETIS_SDHC_IRQSTAT));
 
   while (priv->remaining > 0 &&
-         (getreg32(KINETIS_SDHC_IRQSTAT) & SDHC_INT_BWR) != 0)
+         (getreg32(KINETIS_SDHC_PRSSTAT) & SDHC_PRSSTAT_BWEN) != 0)
     {
-      /* Clear BWR.  If there is more data in the buffer, writing to the
-       * buffer should reset BRR.
-       */
-
-      putreg32(SDHC_INT_BWR, KINETIS_SDHC_IRQSTAT);
-
       /* Is there a full word remaining in the user buffer? */
 
       if (priv->remaining >= sizeof(uint32_t))
@@ -840,6 +807,12 @@ static void kinetis_transmit(struct kinetis_dev_s *priv)
 
       putreg32(data.w, KINETIS_SDHC_DATPORT);
     }
+
+  /* Clear BWR.  If there is more data in the buffer, writing to the
+   * buffer should reset BWR.
+   */
+
+  putreg32(SDHC_INT_BWR, KINETIS_SDHC_IRQSTAT);
 
   mcinfo("Exit: remaining: %d IRQSTAT: %08x\n",
          priv->remaining, getreg32(KINETIS_SDHC_IRQSTAT));
@@ -1342,6 +1315,7 @@ static sdio_capset_t kinetis_capabilities(FAR struct sdio_dev_s *dev)
 #ifdef CONFIG_KINETIS_SDHC_DMA
   caps |= SDIO_CAPS_DMASUPPORTED;
 #endif
+  caps |= SDIO_CAPS_DMABEFOREWRITE;
 
   return caps;
 }
@@ -1750,11 +1724,14 @@ static int kinetis_attach(FAR struct sdio_dev_s *dev)
  *
  ****************************************************************************/
 
-static int kinetis_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg)
+static int kinetis_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
+                           uint32_t arg)
 {
+  systime_t timeout;
+  systime_t start;
+  systime_t elapsed;
   uint32_t regval;
   uint32_t cmdidx;
-  int32_t  timeout;
 
   /* Initialize the command index */
 
@@ -1866,9 +1843,14 @@ static int kinetis_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t ar
    */
 
   timeout = SDHC_CMDTIMEOUT;
+  start   = clock_systimer();
+
   while ((getreg32(KINETIS_SDHC_PRSSTAT) & SDHC_PRSSTAT_CIHB) != 0)
     {
-      if (--timeout <= 0)
+      /* Calculate the elapsed time */
+
+      elapsed = clock_systimer() - start;
+      if (elapsed >= timeout)
         {
           mcerr("ERROR: Timeout cmd: %08x PRSSTAT: %08x\n",
                 cmd, getreg32(KINETIS_SDHC_PRSSTAT));
@@ -2067,9 +2049,11 @@ static int kinetis_cancel(FAR struct sdio_dev_s *dev)
 
 static int kinetis_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
 {
+  systime_t timeout;
+  systime_t start;
+  systime_t elapsed;
   uint32_t errors;
-  int32_t  timeout;
-  int      ret = OK;
+  int ret = OK;
 
   switch (cmd & MMCSD_RESPONSE_MASK)
     {
@@ -2105,9 +2089,14 @@ static int kinetis_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
    * (except Auto CMD12).
    */
 
+  start = clock_systimer();
+
   while ((getreg32(KINETIS_SDHC_IRQSTAT) & SDHC_INT_CC) == 0)
     {
-      if (--timeout <= 0)
+      /* Calculate the elapsed time */
+
+      elapsed = clock_systimer() - start;
+      if (elapsed >= timeout)
         {
           mcerr("ERROR: Timeout cmd: %08x IRQSTAT: %08x\n",
                 cmd, getreg32(KINETIS_SDHC_IRQSTAT));
