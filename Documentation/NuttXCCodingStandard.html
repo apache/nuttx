@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX C Coding Standard</i>
       </font></big></h1>
-      <p>Last Updated: August 24, 2016</p>
+      <p>Last Updated: February 9, 2017</p>
     </td>
   </tr>
 </table>
@@ -1074,6 +1074,15 @@ int do_foobar(void)
 
 <h2>2.2 <a name="globalvariable">Global Variables</a></h2>
 
+<b>Global vs. Local vs. Public vs. Private</b>
+By a <i>global</i> variable it is meant any variable defined outside of a function.
+The distinction is between this kind of <i>global</i> and function <i>local</i> definition and refers to the scope a symbol <i>within a file</i>.
+A related concept for all <i>global</i> names defined within a file is the scope of the name across different files.
+If the global symbol is pre-pended with the <code>static</code> storage class then the scope of the global symbol is within the file only.
+This is a somewhat different concept and within NuttX you will find these distinguished as <i>private</i> vs. <i>public</i> global symbols.
+However, within this standard, the term <i>global variable</i> will refer to any variable that has more than local scope.
+</li>
+
 <p><b>Coding Standard:</b></p>
 <ul>
   <li>
@@ -1114,6 +1123,7 @@ int do_foobar(void)
 <p><font color="red"><b>Incorrect</b></p>
 <ul><pre>
 extern int someint;
+static int anotherint;
 uint32_t dwA32BitInt;
 uint32_t gAGlobalVariable;
 </ul></pre></font>
@@ -1122,6 +1132,7 @@ uint32_t gAGlobalVariable;
 <p><font color="blue"><b>Acceptable</b></p>
 <ul><pre>
 extern int g_someint;
+static int g_anotherint;
 uint32_t g_a32bitint;
 uint32_t g_aglobal;
 </ul></pre></font>
@@ -1136,6 +1147,7 @@ struct my_variables_s
 };
 
 extern int g_someint;
+static int g_anotherint;
 struct my_variables_s g_myvariables;
 </ul></pre></font>
 </td></tr>

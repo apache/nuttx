@@ -10,14 +10,17 @@ config STDIO_DISABLE_BUFFERING
 	default n
 	---help---
 		Tiny systems may need to disable all support for I/O buffering in
-		order to minimum footprint.
+		order to minimize the memory footprint.
 
 		NOTE that even if STDIO buffering is enabled, you can still disable
-		buffer by setting CONFIG_STDIO_BUFFER_SIZE=0 or dynamically through
-		the setvbuf() interface.  In this case, however,  memory used for
-		buffering will be eliminated, of course, buth there will be no
-		reduction in static code size.  Only setting
+		buffering by setting CONFIG_STDIO_BUFFER_SIZE=0 or dynamically
+		through the setvbuf() interface.  In this case, however,  memory
+		used forbuffering will be eliminated, of course, buth there will be
+		no reduction in static code size.  Only setting
 		CONFIG_STDIO_DISABLE_BUFFERING will reduce static code size.
+
+		The setvbuf() interface is not available if
+		CONFIG_STDIO_DISABLE_BUFFERING is selected.
 
 if !STDIO_DISABLE_BUFFERING
 
@@ -27,8 +30,8 @@ config STDIO_BUFFER_SIZE
 	---help---
 		Size of buffers using within the C buffered I/O interfaces (printf,
 		putchar, fwrite, etc.).  This function sets the initial I/O buffer
-		size.  Zero disables I/O buffering.  That size may be subsequently
-		modified using setvbuf().
+		size.  Zero disables I/O buffering initially.  Any buffer size may
+		be subsequently modified using setvbuf().
 
 config STDIO_LINEBUFFER
 	bool "STDIO line buffering"
