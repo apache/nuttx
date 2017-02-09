@@ -205,8 +205,10 @@ int main(int argc, char **argv, char **envp)
   printf(" * support is disabled\n");
   printf(" */\n\n");
   printf("#if CONFIG_NFILE_STREAMS == 0\n");
-  printf("#  undef CONFIG_STDIO_BUFFER_SIZE\n");
-  printf("#  define CONFIG_STDIO_BUFFER_SIZE 0\n");
+  printf("#  undef  CONFIG_STDIO_BUFFER_SIZE\n");
+  printf("#  undef  CONFIG_STDIO_LINEBUFFER\n");
+  printf("#  undef  CONFIG_STDIO_DISABLE_BUFFERING\n");
+  printf("#  define CONFIG_STDIO_DISABLE_BUFFERING 1\n");
   printf("#endif\n\n");
 
   printf("/* If the maximum message size is zero, then we assume that message queues\n");
