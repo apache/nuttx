@@ -3,14 +3,12 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-if BUILD_PROTECTED || BUILD_KERNEL
-
 menu "User Work Queue Support"
+	depends on (BUILD_PROTECTED || BUILD_KERNEL) && !DISABLE_SIGNALS
 
 config LIB_USRWORK
 	bool "User mode worker thread"
 	default n
-	depends on !DISABLE_SIGNALS
 	---help---
 		User space work queues can also be made available for deferred
 		processing in the NuttX kernel build.
@@ -38,4 +36,3 @@ config LIB_USRWORKSTACKSIZE
 
 endif # LIB_USRWORK
 endmenu # User Work Queue Support
-endif # BUILD_PROTECTED || BUILD_KERNEL

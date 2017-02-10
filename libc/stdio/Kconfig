@@ -106,8 +106,6 @@ config EOL_IS_EITHER_CRLF
 
 endchoice
 
-source libc/time/Kconfig
-
 config MEMCPY_VIK
 	bool "Vik memcpy()"
 	default n

@@ -10,9 +10,8 @@ config ARCH_HAVE_TLS
 		Selected by the configuration system if the current architecture
 		supports TLS.
 
-if ARCH_HAVE_TLS
-
 menu "Thread Local Storage (TLS)"
+	depends on ARCH_HAVE_TLS
 
 config TLS
 	bool "Thread Local Storage (TLS)"
@@ -49,4 +48,3 @@ config TLS_NELEM
 
 endif # TLS
 endmenu # Thread Local Storage (TLS)
-endif # ARCH_HAVE_TLS
