@@ -3,6 +3,8 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+comment "Shared Library Support"
+
 config LIBC_DLLFCN
 	bool "Shared library support"
 	default n

@@ -3,6 +3,8 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+comment "Math Library Support"
+
 config LIBM
 	bool "Standard Math library"
 	default n

@@ -1,0 +1,12 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "Wide character suppoort"
+
+config LIBC_WCHAR
+	bool "Enable wide-characters (Unicode) support"
+	default n
+	---help---
+		By default, wide-characters support is disabled.

@@ -973,4 +973,7 @@ Status
     USB device, however, has not yet been tested.  I have not yet looked
     into 48MHz clocking requirements.
 
- 
+  2017-02-10:  These have been numerous SDHC fixes submitted by Marc Rechte'.
+    These may or may not have fixed the SDHC issues mentioned about.  You
+    would have to retest to verify the SDHC functionality.
+

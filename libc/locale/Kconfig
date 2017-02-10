@@ -1,0 +1,12 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "Locale Support"
+
+config LIBC_LOCALE
+	bool "Enable I18N (LOCALE) support"
+	default n
+	---help---
+		By default, i18n (locale) support is disabled.

@@ -203,7 +203,9 @@ long double strtold(FAR const char *str, FAR char **endptr);
 #ifdef CONFIG_HAVE_LONG_LONG
 #define atoll(nptr) strtoll((nptr), NULL, 10)
 #endif
+#ifdef CONFIG_HAVE_DOUBLE
 #define atof(nptr)  strtod((nptr), NULL)
+#endif
 
 /* Binary to string conversions */
 
