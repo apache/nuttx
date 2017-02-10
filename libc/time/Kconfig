@@ -3,7 +3,7 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-comment "Time/Time Zone Support"
+menu "Time/Time Zone Support"
 
 config LIBC_LOCALTIME
 	bool "localtime API call support"
@@ -79,3 +79,5 @@ config TIME_EXTENDED
 		that expect the tm struct to contain these members.
 
 		Note: tm_isdst is always 0
+
+endmenu # Time/Time Zone Support

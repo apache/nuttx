@@ -7,7 +7,7 @@
 # specific implementations.  Not all architectures support implementations
 # for every library function.
 
-comment "Architecture-Specific Spport"
+menu "Architecture-Specific Support"
 
 config ARCH_LOWPUTC
 	bool "Low-level console output"
@@ -163,3 +163,5 @@ endif
 if ARCH_X86
 source libc/machine/x86/Kconfig
 endif
+
+endmenu # Architecture-Specific Spport

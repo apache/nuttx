@@ -3,7 +3,7 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-comment "Random Number Generation"
+menu "stdlib Options"
 
 config LIB_RAND_ORDER
 	int "Order of the random number generate"
@@ -13,16 +13,12 @@ config LIB_RAND_ORDER
 		The order of the random number generator. 1=fast but very bad random
 		numbers, 3=slow but very good random numbers.
 
-comment "Environment Variables"
-
 config LIB_HOMEDIR
 	string "Home directory"
 	default "/"
 	depends on !DISABLE_ENVIRON
 	---help---
 		The home directory to use with operations like such as 'cd ~'
-
-comment "Temporary Files"
 
 config LIBC_TMPDIR
 	string "Temporary file directory"
@@ -45,3 +41,4 @@ config LIBC_MAX_TMPFILE
 		maximum size of that last filename.  This size is the size of the full
 		file path.
 
+endmenu # stdlib Options

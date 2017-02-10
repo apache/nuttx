@@ -12,9 +12,9 @@ config ARCH_HAVE_TLS
 
 if ARCH_HAVE_TLS
 
-comment "Thread Local Storage"
+menu "Thread Local Storage (TLS)"
 
-menuconfig TLS
+config TLS
 	bool "Thread Local Storage (TLS)"
 	default n
 	---help---
@@ -48,4 +48,5 @@ config TLS_NELEM
 		the user library functions tls_get_element() and tls_set_element().
 
 endif # TLS
+endmenu # Thread Local Storage (TLS)
 endif # ARCH_HAVE_TLS

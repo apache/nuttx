@@ -3,7 +3,7 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-comment "errno Decode Support"
+menu "errno Decode Support"
 
 config LIBC_STRERROR
 	bool "Enable strerror"
@@ -36,7 +36,9 @@ config LIBC_PERROR_STDOUT
 		be defined, however, to provide perror() output that is serialized with
 		other stdout messages.
 
-comment "memcpy/memset Options"
+endmenu # errno Decode Support
+
+menu "memcpy/memset Options"
 
 config MEMCPY_VIK
 	bool "Vik memcpy()"
@@ -87,3 +89,4 @@ config MEMSET_64BIT
 		Compiles memset() for architectures that suppport 64-bit operations
 		efficiently.
 
+endmenu # memcpy/memset Options

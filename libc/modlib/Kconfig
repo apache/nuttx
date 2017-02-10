@@ -3,8 +3,6 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-comment "Module Library Configuration"
-
 config LIBC_MODLIB
 	bool
 	default n

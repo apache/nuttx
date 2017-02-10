@@ -5,7 +5,7 @@
 
 if BUILD_PROTECTED || BUILD_KERNEL
 
-comment "User Work Queue Support"
+menu "User Work Queue Support"
 
 config LIB_USRWORK
 	bool "User mode worker thread"
@@ -37,4 +37,5 @@ config LIB_USRWORKSTACKSIZE
 		The stack size allocated for the lower priority worker thread.  Default: 2K.
 
 endif # LIB_USRWORK
+endmenu # User Work Queue Support
 endif # BUILD_PROTECTED || BUILD_KERNEL

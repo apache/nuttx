@@ -3,11 +3,11 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-comment "NETDB Support"
-
 config LIBC_NETDB
 	bool
 	default n
+
+menu "NETDB Support"
 
 menuconfig NETDB_HOSTFILE
 	bool "Network host file support"
@@ -250,3 +250,4 @@ config NETDB_DNSSERVER_IPv6ADDR_8
 
 endif # NETDB_DNSSERVER_IPv6
 endif # NETDB_DNSCLIENT
+endmenu # NETDB Support

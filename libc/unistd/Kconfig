@@ -3,7 +3,7 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-comment "Program Execution Options"
+menu "Program Execution Options"
 
 config LIBC_EXECFUNCS
 	bool "Enable exec[l|v] / posix_spawn() Support"
@@ -86,3 +86,5 @@ config TASK_SPAWN_DEFAULT_STACKSIZE
 		task_spawnattr_setstacksize().  This value specifies the default
 		stack size to use if task_spawnattr_setstacksize() is not used.
 		Default: 2048.
+
+endmenu # Program Execution Options

@@ -3,7 +3,7 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-comment "Shared Library Support"
+# menu "Shared Library Support"
 
 config LIBC_DLLFCN
 	bool "Shared library support"
@@ -16,3 +16,5 @@ config LIBC_DLLFCN
 		Enabled support for user-space shared libraries.
 
 		A work in progress, hence, marked EXPERIMENTAL
+
+# endmenu # Shared Library Support

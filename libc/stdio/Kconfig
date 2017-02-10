@@ -3,7 +3,7 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-comment "Standard C I/O"
+menu "Standard C I/O"
 
 config STDIO_DISABLE_BUFFERING
 	bool "Disable STDIO Buffering"
@@ -116,3 +116,5 @@ config MEMCPY_VIK
 		Select this option to use the optimized memcpy() function by Daniel Vik.
 		Select this option for improved performance at the expense of increased
 		size. See licensing information in the top-level COPYING file.
+
+endmenu #Standard C I/O
