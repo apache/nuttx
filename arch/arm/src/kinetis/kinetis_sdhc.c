@@ -2808,15 +2808,6 @@ FAR struct sdio_dev_s *sdhc_initialize(int slotno)
   priv->waitwdog = wd_create();
   DEBUGASSERT(priv->waitwdog);
 
-  /* Enable clocking to the SDHC module.  Clocking is still diabled in
-   * the SYSCTRL register.
-   */
-
-  regval = getreg32(KINETIS_SIM_SCGC3);
-  regval |= SIM_SCGC3_SDHC;
-  putreg32(regval, KINETIS_SIM_SCGC3);
-  mcinfo("SIM_SCGC3: %08x\n", regval);
-
   /* In addition to the system clock, the SDHC module needs a clock for the
    * base for the external card clock.  There are four possible sources for
    * this clock, selected by the SIM's SOPT2 register:
@@ -2832,6 +2823,16 @@ FAR struct sdio_dev_s *sdhc_initialize(int slotno)
   regval |= SIM_SOPT2_SDHCSRC_CORE;
   putreg32(regval, KINETIS_SIM_SOPT2);
   mcinfo("SIM_SOPT2: %08x\n", regval);
+
+  /* Enable clocking to the SDHC module.  Clocking is still disabled in
+   * the SYSCTRL register.
+   */
+
+  regval = getreg32(KINETIS_SIM_SCGC3);
+  regval |= SIM_SCGC3_SDHC;
+  putreg32(regval, KINETIS_SIM_SCGC3);
+  mcinfo("SIM_SCGC3: %08x\n", regval);
+
 
   /* Configure pins for 1 or 4-bit, wide-bus operation (the chip is capable
    * of 8-bit wide bus operation but D4-D7 are not configured).
