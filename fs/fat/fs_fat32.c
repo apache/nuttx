@@ -2419,7 +2419,10 @@ int fat_rename(FAR struct inode *mountpt, FAR const char *oldrelpath,
     {
       if (ret == OK)
         {
-          /* It is an error if the object at newrelpath already exists */
+          /* It is an error if the directory entry at newrelpath already
+           * exists.  The necessary steps to avoid this case should have
+           * been handled by higher level logic in the VFS.
+           */
 
           ret = -EEXIST;
         }

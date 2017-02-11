@@ -1890,9 +1890,6 @@ int smartfs_rename(struct inode *mountpt, const char *oldrelpath,
   const char               *newfilename;
   mode_t                    mode;
   uint16_t                  type;
-  uint16_t                  sector;
-  uint16_t                  offset;
-  uint16_t                  entrysize;
   struct smartfs_entry_header_s *direntry;
   struct smart_read_write_s readwrite;
 
@@ -1911,94 +1908,25 @@ int smartfs_rename(struct inode *mountpt, const char *oldrelpath,
   oldentry.name = NULL;
   newentry.name = NULL;
   ret = smartfs_finddirentry(fs, &oldentry, oldrelpath, &oldparentdirsector,
-          &oldfilename);
+                             &oldfilename);
   if (ret < 0)
     {
       goto errout_with_semaphore;
     }
 
-  /* Search for the new entry and validate it DOESN'T exist, unless we
-   * are copying to a directory and keeping the same filename, such as:
-   *
-   *    mv /mntpoint/somefile.txt /mntpoint/somedir
-   *
-   * in which case, we need to validate the /mntpoint/somedir/somefile.txt
-   * doens't exsit.
-   */
+  /* Search for the new entry and validate it DOESN'T exist. */
 
   ret = smartfs_finddirentry(fs, &newentry, newrelpath, &newparentdirsector,
-          &newfilename);
+                             &newfilename);
   if (ret == OK)
     {
-      /* Test if it's a file.  If it is, then it's an error */
+      /* It is an error if the directory entry at newrelpath already
+       * exists.  The necessary steps to avoid this case should have been
+       * handled by higher level logic in the VFS.
+       */
 
-      if ((newentry.flags & SMARTFS_DIRENT_TYPE) == SMARTFS_DIRENT_TYPE_FILE)
-        {
-          ret = -EEXIST;
-          goto errout_with_semaphore;
-        }
-
-      /* Nope, it's a directory.  Now search the directory for oldfilename */
-
-      sector = newentry.firstsector;
-      while (sector != SMARTFS_ERASEDSTATE_16BIT)
-        {
-          /* Read the next sector of diretory entries */
-
-          readwrite.logsector = sector;
-          readwrite.offset = 0;
-          readwrite.count = fs->fs_llformat.availbytes;
-          readwrite.buffer = (uint8_t *) fs->fs_rwbuffer;
-          ret = FS_IOCTL(fs, BIOC_READSECT, (unsigned long) &readwrite);
-          if (ret < 0)
-            {
-              ferr("ERROR: Error %d reading sector %d data\n",
-                   ret, oldentry.dsector);
-              goto errout_with_semaphore;
-            }
-
-          /* Search for newfilename in this sector */
-
-          offset = sizeof(struct smartfs_chain_header_s);
-          entrysize = sizeof(struct smartfs_entry_header_s) + fs->fs_llformat.namesize;
-          while (offset + entrysize < fs->fs_llformat.availbytes)
-            {
-              /* Test the next entry */
-
-              direntry = (struct smartfs_entry_header_s *) &fs->fs_rwbuffer[offset];
-              if (((direntry->flags & SMARTFS_DIRENT_EMPTY) ==
-                  (SMARTFS_ERASEDSTATE_16BIT & SMARTFS_DIRENT_EMPTY)) ||
-                  ((direntry->flags & SMARTFS_DIRENT_ACTIVE) !=
-                  (SMARTFS_ERASEDSTATE_16BIT & SMARTFS_DIRENT_ACTIVE)))
-                {
-                  /* This entry isn't valid, skip it */
-
-                  offset += entrysize;
-                  continue;
-                }
-
-              /* Test if this entry matches newfilename */
-
-              if (strcmp(newfilename, direntry->name) == 0)
-                {
-                  /* Uh-oh, looks like the entry already exists */
-
-                  ret = -EEXIST;
-                  goto errout_with_semaphore;
-                }
-
-              offset += entrysize;
-            }
-
-          /* Chain to next sector */
-
-          sector = SMARTFS_NEXTSECTOR(((struct smartfs_chain_header_s *)fs->fs_rwbuffer));
-        }
-
-      /* Okay, we will create newfilename in the newentry directory */
-
-      newparentdirsector = newentry.firstsector;
-      newfilename = oldfilename;
+      ret = -EEXIST;
+      goto errout_with_semaphore;
     }
 
   /* Test if the new parent directory is valid */
