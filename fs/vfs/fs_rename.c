@@ -117,10 +117,10 @@ next_subdir:
         }
 #endif
       /* We found it and it appears to be a "normal" inode.  Is it a
-       * directory (i.e, an inode with children)?
+       * directory (i.e, an operation-less inode or an inode with children)?
        */
 
-      if (newinode->i_child != NULL)
+      if (newinode->u.i_ops == NULL || newinode->i_child != NULL)
         {
           FAR char *subdirname;
           FAR char *tmp;
