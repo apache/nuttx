@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fat/fs_fat32.c
  *
- *   Copyright (C) 2007-2009, 2011-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -84,6 +84,8 @@ static int     fat_ioctl(FAR struct file *filep, int cmd,
 
 static int     fat_sync(FAR struct file *filep);
 static int     fat_dup(FAR const struct file *oldp, FAR struct file *newp);
+static int     fat_fstat(FAR const struct file *filep,
+                 FAR struct stat *buf);
 
 static int     fat_opendir(FAR struct inode *mountpt,
                  FAR const char *relpath, FAR struct fs_dirent_s *dir);
@@ -129,6 +131,7 @@ const struct mountpt_operations fat_operations =
 
   fat_sync,          /* sync */
   fat_dup,           /* dup */
+  fat_fstat,         /* fstat */
 
   fat_opendir,       /* opendir */
   NULL,              /* closedir */
@@ -1604,6 +1607,21 @@ static int fat_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 errout_with_semaphore:
   fat_semgive(fs);
   return ret;
+}
+
+/****************************************************************************
+ * Name: fat_fstat
+ *
+ * Description:
+ *   Obtain information about an open file associated with the file
+ *   descriptor 'fd', and will write it to the area pointed to by 'buf'.
+ *
+ ****************************************************************************/
+
+static int fat_fstat(FAR const struct file *filep, FAR struct stat *buf)
+{
+#warning Missing logic
+  return -ENOSYS;
 }
 
 /****************************************************************************

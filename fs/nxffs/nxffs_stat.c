@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/nxffs/nxffs_stat.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References: Linux/Documentation/filesystems/romfs.txt
@@ -175,3 +175,19 @@ errout_with_semaphore:
 errout:
   return ret;
 }
+
+/****************************************************************************
+ * Name: nxffs_fstat
+ *
+ * Description:
+ *   Obtain information about an open file associated with the file
+ *   descriptor 'fd', and will write it to the area pointed to by 'buf'.
+ *
+ ****************************************************************************/
+
+int nxffs_fstat(FAR const struct file *filep, FAR struct stat *buf)
+{
+#warning Missing logic
+  return -ENOSYS;
+}
+

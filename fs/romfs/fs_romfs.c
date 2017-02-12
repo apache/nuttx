@@ -1,7 +1,7 @@
 /****************************************************************************
  * rm/romfs/fs_romfs.h
  *
- *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References: Linux/Documentation/filesystems/romfs.txt
@@ -76,7 +76,10 @@ static off_t   romfs_seek(FAR struct file *filep, off_t offset, int whence);
 static int     romfs_ioctl(FAR struct file *filep, int cmd,
                            unsigned long arg);
 
-static  int    romfs_dup(FAR const struct file *oldp, FAR struct file *newp);
+static int     romfs_dup(FAR const struct file *oldp,
+                         FAR struct file *newp);
+static int     romfs_fstat(FAR const struct file *filep,
+                           FAR struct stat *buf);
 
 static int     romfs_opendir(FAR struct inode *mountpt,
                              FAR const char *relpath,
@@ -116,6 +119,7 @@ const struct mountpt_operations romfs_operations =
 
   NULL,            /* sync */
   romfs_dup,       /* dup */
+  romfs_fstat,     /* fstat */
 
   romfs_opendir,   /* opendir */
   NULL,            /* closedir */
@@ -674,6 +678,21 @@ static int romfs_dup(FAR const struct file *oldp, FAR struct file *newp)
 errout_with_semaphore:
   romfs_semgive(rm);
   return ret;
+}
+
+/****************************************************************************
+ * Name: romfs_fstat
+ *
+ * Description:
+ *   Obtain information about an open file associated with the file
+ *   descriptor 'fd', and will write it to the area pointed to by 'buf'.
+ *
+ ****************************************************************************/
+
+static int romfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
+{
+#warning Missing logic
+  return -ENOSYS;
 }
 
 /****************************************************************************

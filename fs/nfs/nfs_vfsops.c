@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/nfs/nfs_vfsops.c
  *
- *   Copyright (C) 2012-2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2012 Jose Pablo Rojas Vargas. All rights reserved.
  *   Author: Jose Pablo Rojas Vargas <jrojas@nx-engineering.com>
  *           Gregory Nutt <gnutt@nuttx.org>
@@ -131,6 +131,7 @@ static ssize_t nfs_read(FAR struct file *filep, char *buffer, size_t buflen);
 static ssize_t nfs_write(FAR struct file *filep, const char *buffer,
                    size_t buflen);
 static int     nfs_dup(FAR const struct file *oldp, FAR struct file *newp);
+static int     nfs_fstat(FAR const struct file *filep, FAR struct stat *buf);
 static int     nfs_opendir(struct inode *mountpt, const char *relpath,
                    struct fs_dirent_s *dir);
 static int     nfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir);
@@ -168,6 +169,7 @@ const struct mountpt_operations nfs_operations =
 
   NULL,                         /* sync */
   nfs_dup,                      /* dup */
+  nfs_fstat,                    /* fstat */
 
   nfs_opendir,                  /* opendir */
   NULL,                         /* closedir */
@@ -1114,7 +1116,7 @@ errout_with_semaphore:
 }
 
 /****************************************************************************
- * Name: binfs_dup
+ * Name: nfs_dup
  *
  * Description:
  *   Duplicate open file data in the new file structure.
@@ -1171,6 +1173,21 @@ static int nfs_dup(FAR const struct file *oldp, FAR struct file *newp)
 
   nfs_semgive(nmp);
   return OK;
+}
+
+/****************************************************************************
+ * Name: nfs_fstat
+ *
+ * Description:
+ *   Obtain information about an open file associated with the file
+ *   descriptor 'fd', and will write it to the area pointed to by 'buf'.
+ *
+ ****************************************************************************/
+
+static int nfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
+{
+#warning Missing logic
+  return -ENOSYS;
 }
 
 /****************************************************************************

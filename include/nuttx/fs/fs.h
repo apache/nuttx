@@ -265,7 +265,7 @@ struct mountpt_operations
 
   int     (*sync)(FAR struct file *filep);
   int     (*dup)(FAR const struct file *oldp, FAR struct file *newp);
-  int     (*fstat)(FAR const struct file *filep,  FAR struct stat *buf);
+  int     (*fstat)(FAR const struct file *filep, FAR struct stat *buf);
 
   /* Directory operations */
 

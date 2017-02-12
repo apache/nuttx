@@ -160,6 +160,8 @@ static int     unionfs_ioctl(FAR struct file *filep, int cmd,
 static int     unionfs_sync(FAR struct file *filep);
 static int     unionfs_dup(FAR const struct file *oldp,
                  FAR struct file *newp);
+static int     unionfs_fstat(FAR const struct file *filep,
+                 FAR struct stat *buf);
 
 /* Operations on directories */
 
@@ -215,6 +217,7 @@ static const struct mountpt_operations g_unionfs_mops =
 
   unionfs_sync,        /* sync */
   unionfs_dup,         /* dup */
+  unionfs_fstat,       /* fstat */
 
   unionfs_opendir,     /* opendir */
   unionfs_closedir,    /* closedir */
@@ -1307,6 +1310,21 @@ static int unionfs_dup(FAR const struct file *oldp, FAR struct file *newp)
     }
 
   return ret;
+}
+
+/****************************************************************************
+ * Name: unionfs_fstat
+ *
+ * Description:
+ *   Obtain information about an open file associated with the file
+ *   descriptor 'fd', and will write it to the area pointed to by 'buf'.
+ *
+ ****************************************************************************/
+
+static int unionfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
+{
+#warning Missing logic
+  return -ENOSYS;
 }
 
 /****************************************************************************

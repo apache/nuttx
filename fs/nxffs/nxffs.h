@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/nxffs/nxffs.h
  *
- *   Copyright (C) 2011, 2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References: Linux/Documentation/filesystems/romfs.txt
@@ -1092,6 +1092,7 @@ ssize_t nxffs_write(FAR struct file *filep, FAR const char *buffer,
                     size_t buflen);
 int nxffs_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 int nxffs_dup(FAR const struct file *oldp, FAR struct file *newp);
+int nxffs_fstat(FAR const struct file *filep, FAR struct stat *buf);
 int nxffs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
                   FAR struct fs_dirent_s *dir);
 int nxffs_readdir(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir);
