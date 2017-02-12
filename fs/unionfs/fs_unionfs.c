@@ -492,7 +492,7 @@ static int unionfs_trymkdir(FAR struct inode *inode, FAR const char *relpath,
 }
 
 /****************************************************************************
- * Name: unionfs_trystat
+ * Name: unionfs_tryrename
  ****************************************************************************/
 
 static int unionfs_tryrename(FAR struct inode *mountpt,
@@ -1323,8 +1323,45 @@ static int unionfs_dup(FAR const struct file *oldp, FAR struct file *newp)
 
 static int unionfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
 {
-#warning Missing logic
-  return -ENOSYS;
+  FAR struct unionfs_inode_s *ui;
+  FAR struct unionfs_file_s *uf;
+  FAR struct unionfs_mountpt_s *um;
+  FAR const struct mountpt_operations *ops;
+  int ret = -EPERM;
+
+  finfo("Entry\n");
+
+  /* Recover the open file data from the struct file instance */
+
+  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
+  ui = (FAR struct unionfs_inode_s *)filep->f_inode->i_private;
+
+  /* Get exclusive access to the file system data structures */
+
+  ret = unionfs_semtake(ui, false);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  DEBUGASSERT(ui != NULL && filep->f_priv != NULL);
+  uf = (FAR struct unionfs_file_s *)filep->f_priv;
+
+  DEBUGASSERT(uf->uf_ndx == 0 || uf->uf_ndx == 1);
+  um = &ui->ui_fs[uf->uf_ndx];
+
+  DEBUGASSERT(um != NULL && um->um_node != NULL && um->um_node->u.i_mops != NULL);
+  ops = um->um_node->u.i_mops;
+
+  /* Perform the lower level write operation */
+
+  if (ops->fstat)
+    {
+      ret = ops->fstat(&uf->uf_file, buf);
+    }
+
+  unionfs_semgive(ui);
+  return ret;
 }
 
 /****************************************************************************
@@ -2461,6 +2498,7 @@ static int unionfs_getmount(FAR const char *path, FAR struct inode **inode)
 {
   FAR struct inode *minode;
   struct inode_search_s desc;
+  int ret;
 
   /* Find the mountpt */
 
