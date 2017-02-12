@@ -272,7 +272,11 @@ static int mountptrename(FAR const char *oldpath, FAR struct inode *oldinode,
 
   DEBUGASSERT(oldinode->u.i_mops);
 
-  /* If the file system does not support the rename() method, then bail now. */
+  /* If the file system does not support the rename() method, then bail now.
+   * As of this writing, only NXFFS does not support the rename method.  A
+   * good fallback might be to copy the oldrelpath to the correct location,
+   * then unlink it.
+   */
 
   if (oldinode->u.i_mops->rename == NULL)
     {
