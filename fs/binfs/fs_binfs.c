@@ -258,8 +258,15 @@ static int binfs_dup(FAR const struct file *oldp, FAR struct file *newp)
 
 static int binfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
 {
-#warning Missing logic
-  return -ENOSYS;
+  DEBUGASSERT(filep != NULL && buf != NULL);
+
+  /* It's a execute-only file system */
+
+  buf->st_mode    = S_IFREG | S_IXOTH | S_IXGRP | S_IXUSR;
+  buf->st_size    = 0;
+  buf->st_blksize = 0;
+  buf->st_blocks  = 0;
+  return OK;
 }
 
 /****************************************************************************
