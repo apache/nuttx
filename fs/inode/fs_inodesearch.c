@@ -256,7 +256,23 @@ static int _inode_search(FAR struct inode_search_s *desc)
       return -EINVAL;
     }
 
-  name++;   /* Skip over the leading '/' */
+  /* Skip over the leading '/' */
+
+  while (*name == '/')
+    {
+      name++;
+    }
+
+  /* Special case the root directory.  There is no root inode and there is
+   * no name for the root.
+   */
+
+  if (*name == '\0')
+    {
+      /* This is a bug.  I don't know how to handle this case yet. */
+
+      return -ENOSYS;
+    }
 
   /* Traverse the pseudo file system node tree until either (1) all nodes
    * have been examined without finding the matching node, or (2) the
@@ -389,18 +405,20 @@ static int _inode_search(FAR struct inode_search_s *desc)
         }
     }
 
-  /* node is null.  This can happen in one of four cases:
+  /* The node may or may not be null as per one of the following four cases
+   * cases:
+   *
    * With node = NULL
-   *   (1) We went left past the final peer:  The new node
-   *       name is larger than any existing node name at
-   *       that level.
-   *   (2) We broke out in the middle of the list of peers
-   *       because the name was not found in the ordered
-   *       list.
-   *   (3) We went down past the final parent:  The new node
-   *       name is "deeper" than anything that we currently
-   *       have in the tree.
-   * with node != NULL
+   *
+   *   (1) We went left past the final peer:  The new node name is larger
+   *       than any existing node name at that level.
+   *   (2) We broke out in the middle of the list of peers because the name
+   *       was not found in the ordered list.
+   *   (3) We went down past the final parent:  The new node name is
+   *       "deeper" than anything that we currently have in the tree.
+   *
+   * With node != NULL
+   *
    *   (4) When the node matching the full path is found
    */
 
