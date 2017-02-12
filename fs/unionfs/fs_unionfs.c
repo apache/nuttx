@@ -2443,6 +2443,7 @@ static int unionfs_getmount(FAR const char *path, FAR struct inode **inode)
 {
   FAR struct inode *minode;
   struct inode_search_s desc;
+  int ret;
 
   /* Find the mountpt */
 
