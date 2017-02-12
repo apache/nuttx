@@ -70,7 +70,6 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static inline int statpseudo(FAR struct inode *inode, FAR struct stat *buf);
 static inline int statroot(FAR struct stat *buf);
 int stat_recursive(FAR const char *path, FAR struct stat *buf);
 
@@ -79,11 +78,197 @@ int stat_recursive(FAR const char *path, FAR struct stat *buf);
  ****************************************************************************/
 
 /****************************************************************************
- * Name: statpseudo
+ * Name: statroot
  ****************************************************************************/
 
-static inline int statpseudo(FAR struct inode *inode, FAR struct stat *buf)
+static inline int statroot(FAR struct stat *buf)
 {
+  /* There is no inode associated with the fake root directory */
+
+  RESET_BUF(buf);
+  buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: stat_recursive
+ *
+ * Returned Value:
+ *   Zero on success; -1 on failure with errno set:
+ *
+ *   EACCES  Search permission is denied for one of the directories in the
+ *           path prefix of path.
+ *   EFAULT  Bad address.
+ *   ENOENT  A component of the path path does not exist, or the path is an
+ *           empty string.
+ *   ENOMEM  Out of memory
+ *   ENOTDIR A component of the path is not a directory.
+ *
+ ****************************************************************************/
+
+int stat_recursive(FAR const char *path, FAR struct stat *buf)
+{
+  struct inode_search_s desc;
+  FAR struct inode *inode;
+  int ret;
+
+  /* Get an inode for this path */
+
+  SETUP_SEARCH(&desc, path, true);
+
+  ret = inode_find(&desc);
+  if (ret < 0)
+    {
+      /* This name does not refer to an inode in the pseudo file system and
+       * there is no mountpoint that includes in this path.
+       */
+
+      ret = -ret;
+      goto errout_with_search;
+    }
+
+  /* Get the search results */
+
+  inode = desc.node;
+  DEBUGASSERT(inode != NULL);
+
+  /* The way we handle the stat depends on the type of inode that we
+   * are dealing with.
+   */
+
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+  if (INODE_IS_MOUNTPT(inode))
+    {
+      /* The node is a file system mointpoint. Verify that the mountpoint
+       * supports the stat() method
+       */
+
+      if (inode->u.i_mops && inode->u.i_mops->stat)
+        {
+          /* Perform the stat() operation */
+
+          ret = inode->u.i_mops->stat(inode, desc.relpath, buf);
+        }
+    }
+  else
+#endif
+    {
+      /* The node is part of the root pseudo file system.  This path may
+       * recurse if soft links are supported in the pseudo file system.
+       */
+
+      ret = inode_stat(inode, buf);
+    }
+
+  /* Check if the stat operation was successful */
+
+  if (ret < 0)
+    {
+      ret = -ret;
+      goto errout_with_inode;
+    }
+
+  /* Successfully stat'ed the file */
+
+  inode_release(inode);
+  RELEASE_SEARCH(&desc);
+  return OK;
+
+/* Failure conditions always set the errno appropriately */
+
+errout_with_inode:
+  inode_release(inode);
+
+errout_with_search:
+  RELEASE_SEARCH(&desc);
+  set_errno(ret);
+  return ERROR;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: stat
+ *
+ * Returned Value:
+ *   Zero on success; -1 on failure with errno set:
+ *
+ *   EACCES  Search permission is denied for one of the directories in the
+ *           path prefix of path.
+ *   EFAULT  Bad address.
+ *   ENOENT  A component of the path path does not exist, or the path is an
+ *           empty string.
+ *   ENOMEM  Out of memory
+ *   ENOTDIR A component of the path is not a directory.
+ *
+ ****************************************************************************/
+
+int stat(FAR const char *path, FAR struct stat *buf)
+{
+  int ret;
+
+  /* Sanity checks */
+
+  if (path == NULL  || buf == NULL)
+    {
+      ret = EFAULT;
+      goto errout;
+    }
+
+  if (*path == '\0')
+    {
+      ret = ENOENT;
+      goto errout;
+    }
+
+  /* Check for the fake root directory (which has no inode) */
+
+  if (strcmp(path, "/") == 0)
+    {
+      return statroot(buf);
+    }
+
+  /* The perform the stat() operation on the path.  This is potentially
+   * recursive if soft link support is enabled.
+   */
+
+#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+  buf->st_count = 0;
+#endif
+  return stat_recursive(path, buf);
+
+errout:
+  set_errno(ret);
+  return ERROR;
+}
+
+/****************************************************************************
+ * Name: inode_stat
+ *
+ * Description:
+ *   The inode_stat() function will obtain information about an 'inode' in
+ *   the pseudo file system and will write it to the area pointed to by 'buf'.
+ *
+ *   The 'buf' argument is a pointer to a stat structure, as defined in
+ *   <sys/stat.h>, into which information is placed concerning the file.
+ *
+ * Input Parameters:
+ *   inode - The indoe of interest
+ *   buf   - The caller provide location in which to return information about
+ *           the inode.
+ *
+ * Returned Value:
+ *   Zero (OK) returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+int inode_stat(FAR struct inode *inode, FAR struct stat *buf)
+{
+  DEBUGASSERT(inode != NULL && buf != NULL);
+
   /* Most of the stat entries just do not apply */
 
   RESET_BUF(buf);
@@ -209,171 +394,4 @@ static inline int statpseudo(FAR struct inode *inode, FAR struct stat *buf)
     }
 
   return OK;
-}
-
-/****************************************************************************
- * Name: statroot
- ****************************************************************************/
-
-static inline int statroot(FAR struct stat *buf)
-{
-  /* There is no inode associated with the fake root directory */
-
-  RESET_BUF(buf);
-  buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR;
-  return OK;
-}
-
-/****************************************************************************
- * Name: stat_recursive
- *
- * Returned Value:
- *   Zero on success; -1 on failure with errno set:
- *
- *   EACCES  Search permission is denied for one of the directories in the
- *           path prefix of path.
- *   EFAULT  Bad address.
- *   ENOENT  A component of the path path does not exist, or the path is an
- *           empty string.
- *   ENOMEM  Out of memory
- *   ENOTDIR A component of the path is not a directory.
- *
- ****************************************************************************/
-
-int stat_recursive(FAR const char *path, FAR struct stat *buf)
-{
-  struct inode_search_s desc;
-  FAR struct inode *inode;
-  int ret;
-
-  /* Get an inode for this path */
-
-  SETUP_SEARCH(&desc, path, true);
-
-  ret = inode_find(&desc);
-  if (ret < 0)
-    {
-      /* This name does not refer to a psudeo-inode and there is no
-       * mountpoint that includes in this path.
-       */
-
-      ret = -ret;
-      goto errout_with_search;
-    }
-
-  /* Get the search results */
-
-  inode = desc.node;
-  DEBUGASSERT(inode != NULL);
-
-  /* The way we handle the stat depends on the type of inode that we
-   * are dealing with.
-   */
-
-#ifndef CONFIG_DISABLE_MOUNTPOINT
-  if (INODE_IS_MOUNTPT(inode))
-    {
-      /* The node is a file system mointpoint. Verify that the mountpoint
-       * supports the stat() method
-       */
-
-      if (inode->u.i_mops && inode->u.i_mops->stat)
-        {
-          /* Perform the stat() operation */
-
-          ret = inode->u.i_mops->stat(inode, desc.relpath, buf);
-        }
-    }
-  else
-#endif
-    {
-      /* The node is part of the root pseudo file system.  This path may
-       * recurse if soft links are supported in the pseudo file system.
-       */
-
-      ret = statpseudo(inode, buf);
-    }
-
-  /* Check if the stat operation was successful */
-
-  if (ret < 0)
-    {
-      ret = -ret;
-      goto errout_with_inode;
-    }
-
-  /* Successfully stat'ed the file */
-
-  inode_release(inode);
-  RELEASE_SEARCH(&desc);
-  return OK;
-
-/* Failure conditions always set the errno appropriately */
-
-errout_with_inode:
-  inode_release(inode);
-
-errout_with_search:
-  RELEASE_SEARCH(&desc);
-  set_errno(ret);
-  return ERROR;
-}
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: stat
- *
- * Returned Value:
- *   Zero on success; -1 on failure with errno set:
- *
- *   EACCES  Search permission is denied for one of the directories in the
- *           path prefix of path.
- *   EFAULT  Bad address.
- *   ENOENT  A component of the path path does not exist, or the path is an
- *           empty string.
- *   ENOMEM  Out of memory
- *   ENOTDIR A component of the path is not a directory.
- *
- ****************************************************************************/
-
-int stat(FAR const char *path, FAR struct stat *buf)
-{
-  int ret;
-
-  /* Sanity checks */
-
-  if (path == NULL  || buf == NULL)
-    {
-      ret = EFAULT;
-      goto errout;
-    }
-
-  if (*path == '\0')
-    {
-      ret = ENOENT;
-      goto errout;
-    }
-
-  /* Check for the fake root directory (which has no inode) */
-
-  if (strcmp(path, "/") == 0)
-    {
-      return statroot(buf);
-    }
-
-  /* The perform the stat() operation on the path.  This is potentially
-   * recursive if soft link support is enabled.
-   */
-
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
-  buf->st_count = 0;
-#endif
-  return stat_recursive(path, buf);
-
-errout:
-  set_errno(ret);
-  return ERROR;
 }
