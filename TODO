@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated February 7, 2017)
+NuttX TODO List (Last updated February 12, 2017)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -1371,6 +1371,25 @@ o File system / Generic drivers (fs/, drivers/)
 
   Title:       CHMOD(), TRUNCATE(), AND FSTAT()
   Description: Implement chmod(), truncate(), and fstat().
+
+               chmod() is probably not relevant since file modes are not
+                 currently supported.
+
+               fstat() may be doable: Most file system implement stat() by
+                 looking up the directory entry associated with the path
+                 then generating the struct stat data.  But most file
+                 systems also keep the directory entry in the private data
+                 associated withe open file.  So it should possible to
+                 implement fstat() as a file system method and use that
+                 saved directory entry to generate the stat data.
+
+               The primary obstacle to all these is that each would require
+               changes to all existing file systems.  That number is pretty
+               large.  The number of file system implementations that would
+               need to be reviewed and modified  As of this writing this
+               would include binfs, fat, hostfs, nfs, nxffs, procfs, romfs,
+               tmpfs, unionfs, plus pseduo-file system support.
+
   Status:      Open
   Priority:    Low
 
