@@ -72,7 +72,7 @@
  *
  ****************************************************************************/
 
-int fstat(int fd, FAR struct stat *buf);
+int fstat(int fd, FAR struct stat *buf)
 {
   FAR struct file *filep;
   FAR struct inode *inode;

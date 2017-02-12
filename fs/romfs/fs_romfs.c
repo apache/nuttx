@@ -96,6 +96,8 @@ static int     romfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
 static int     romfs_statfs(FAR struct inode *mountpt,
                             FAR struct statfs *buf);
 
+static int     romfs_stat_common(uint8_t type, uint32_t size,
+                                 uint16_t sectorsize, FAR struct stat *buf);
 static int     romfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
                           FAR struct stat *buf);
 
@@ -236,6 +238,7 @@ static int romfs_open(FAR struct file *filep, FAR const char *relpath,
    */
 
   rf->rf_size = dirinfo.rd_size;
+  rf->rf_type = (uint8_t)(dirinfo.rd_next & RFNEXT_ALLMODEMASK);
 
   /* Get the start of the file data */
 
@@ -691,8 +694,38 @@ errout_with_semaphore:
 
 static int romfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
 {
-#warning Missing logic
-  return -ENOSYS;
+  FAR struct romfs_mountpt_s *rm;
+  FAR struct romfs_file_s *rf;
+  int ret;
+
+  finfo("fstat\n");
+
+  /* Sanity checks */
+
+  DEBUGASSERT(filep->f_priv == NULL && filep->f_inode != NULL);
+
+  /* Get mountpoint private data from the inode reference from the file
+   * structure
+   */
+
+  rf = filep->f_priv;
+  rm = (FAR struct romfs_mountpt_s *)filep->f_inode->i_private;
+  DEBUGASSERT(rm != NULL);
+
+  /* Check if the mount is still healthy */
+
+  romfs_semtake(rm);
+  ret = romfs_checkmount(rm);
+  if (ret >= 0)
+    {
+      /* Return information about the directory entry */
+
+      ret = romfs_stat_common(rf->rf_type, rf->rf_size,
+                              rm->rm_hwsectorsize, buf);
+    }
+
+  romfs_semgive(rm);
+  return ret;
 }
 
 /****************************************************************************
@@ -1120,6 +1153,54 @@ errout_with_semaphore:
 }
 
 /****************************************************************************
+ * Name: romfs_stat_common
+ *
+ * Description:
+ *   Return information about a file or directory
+ *
+ ****************************************************************************/
+
+static int romfs_stat_common(uint8_t type, uint32_t size,
+                             uint16_t sectorsize, FAR struct stat *buf)
+{
+  memset(buf, 0, sizeof(struct stat));
+  if (IS_DIRECTORY(type))
+    {
+      /* It's a read-only directory name */
+
+      buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR;
+      if (IS_EXECUTABLE(type))
+        {
+          buf->st_mode |= S_IXOTH | S_IXGRP | S_IXUSR;
+        }
+    }
+  else if (IS_FILE(type))
+    {
+      /* It's a read-only file name */
+
+      buf->st_mode = S_IFREG | S_IROTH | S_IRGRP | S_IRUSR;
+      if (IS_EXECUTABLE(type))
+        {
+          buf->st_mode |= S_IXOTH | S_IXGRP | S_IXUSR;
+        }
+    }
+  else
+    {
+      /* Otherwise, pretend like the unsupported type does not exist */
+
+      finfo("Unsupported type: %d\n", type);
+      return -ENOENT;
+    }
+
+  /* File/directory size, access block size */
+
+  buf->st_size    = size;
+  buf->st_blksize = sectorsize;
+  buf->st_blocks  = (buf->st_size + sectorsize - 1) / sectorsize;
+  return OK;
+}
+
+/****************************************************************************
  * Name: romfs_stat
  *
  * Description: Return information about a file or directory
@@ -1131,6 +1212,7 @@ static int romfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
 {
   FAR struct romfs_mountpt_s *rm;
   FAR struct romfs_dirinfo_s dirinfo;
+  uint8_t type;
   int ret;
 
   finfo("Entry\n");
@@ -1165,43 +1247,10 @@ static int romfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
       goto errout_with_semaphore;
     }
 
-  memset(buf, 0, sizeof(struct stat));
-  if (IS_DIRECTORY(dirinfo.rd_next))
-    {
-      /* It's a read-only directory name */
+  /* Return information about the directory entry */
 
-      buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR;
-      if (IS_EXECUTABLE(dirinfo.rd_next))
-        {
-          buf->st_mode |= S_IXOTH | S_IXGRP | S_IXUSR;
-        }
-    }
-  else if (IS_FILE(dirinfo.rd_next))
-    {
-      /* It's a read-only file name */
-
-      buf->st_mode = S_IFREG | S_IROTH | S_IRGRP | S_IRUSR;
-      if (IS_EXECUTABLE(dirinfo.rd_next))
-        {
-          buf->st_mode |= S_IXOTH | S_IXGRP | S_IXUSR;
-        }
-    }
-  else
-    {
-      /* Otherwise, pretend like the unsupported node does not exist */
-
-      finfo("Unsupported inode: %d\n", dirinfo.rd_next);
-      ret = -ENOENT;
-      goto errout_with_semaphore;
-    }
-
-  /* File/directory size, access block size */
-
-  buf->st_size      = dirinfo.rd_size;
-  buf->st_blksize   = rm->rm_hwsectorsize;
-  buf->st_blocks    = (buf->st_size + buf->st_blksize - 1) / buf->st_blksize;
-
-  ret = OK;
+  type = (uint8_t)(dirinfo.rd_next & RFNEXT_ALLMODEMASK);
+  ret  = romfs_stat_common(type, dirinfo.rd_size, rm->rm_hwsectorsize, buf);
 
 errout_with_semaphore:
   romfs_semgive(rm);
