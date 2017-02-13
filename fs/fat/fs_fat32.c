@@ -110,6 +110,10 @@ static int     fat_rename(FAR struct inode *mountpt,
                  FAR const char *oldrelpath, FAR const char *newrelpath);
 static int     fat_stat_common(FAR struct fat_mountpt_s *fs,
                  FAR uint8_t *direntry, FAR struct stat *buf);
+static int     fat_stat_file(FAR struct fat_mountpt_s *fs,
+                 FAR uint8_t *direntry, FAR struct stat *buf);
+static int     fat_stat_root(FAR struct fat_mountpt_s *fs,
+                 FAR uint8_t *direntry, FAR struct stat *buf);
 static int     fat_stat(struct inode *mountpt, const char *relpath,
                  FAR struct stat *buf);
 
@@ -1670,11 +1674,11 @@ static int fat_fstat(FAR const struct file *filep, FAR struct stat *buf)
 
   direntry = &fs->fs_buffer[(ff->ff_dirindex & DIRSEC_NDXMASK(fs)) * DIR_SIZE];
 
-  /* Call fat_stat_common() to create the buf and to save information to
+  /* Call fat_stat_file() to create the buf and to save information to
    * it.
    */
 
-  ret = fat_stat_common(fs, direntry, buf);
+  ret = fat_stat_file(fs, direntry, buf);
 
 errout_with_semaphore:
   fat_semgive(fs);
@@ -2565,17 +2569,60 @@ errout_with_semaphore:
 /****************************************************************************
  * Name: fat_stat_common
  *
- * Description: Common function used by fat_stat() and fat_fstat().
+ * Description:
+ *   Common logic used by fat_stat_file() and fat_fstat_root().
  *
  ****************************************************************************/
 
 static int fat_stat_common(FAR struct fat_mountpt_s *fs,
                            FAR uint8_t *direntry, FAR struct stat *buf)
 {
-  uint8_t  attribute;
   uint16_t fatdate;
   uint16_t date2;
   uint16_t fattime;
+
+  /* Times */
+
+  fatdate           = DIR_GETWRTDATE(direntry);
+  fattime           = DIR_GETWRTTIME(direntry);
+  buf->st_mtime     = fat_fattime2systime(fattime, fatdate);
+
+  date2             = DIR_GETLASTACCDATE(direntry);
+  if (fatdate == date2)
+    {
+      buf->st_atime = buf->st_mtime;
+    }
+  else
+    {
+      buf->st_atime = fat_fattime2systime(0, date2);
+    }
+
+  fatdate           = DIR_GETCRDATE(direntry);
+  fattime           = DIR_GETCRTIME(direntry);
+  buf->st_ctime     = fat_fattime2systime(fattime, fatdate);
+
+  /* File/directory size, access block size */
+
+  buf->st_size      = DIR_GETFILESIZE(direntry);
+  buf->st_blksize   = fs->fs_fatsecperclus * fs->fs_hwsectorsize;
+  buf->st_blocks    = (buf->st_size + buf->st_blksize - 1) / buf->st_blksize;
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: fat_stat_file
+ *
+ * Description:
+ *   Function to return the status associated with a file in the FAT file
+ *   system.  Used by fat_stat() and fat_fstat().
+ *
+ ****************************************************************************/
+
+static int fat_stat_file(FAR struct fat_mountpt_s *fs,
+                         FAR uint8_t *direntry, FAR struct stat *buf)
+{
+  uint8_t  attribute;
 
   /* Initialize the "struct stat" */
 
@@ -2610,33 +2657,30 @@ static int fat_stat_common(FAR struct fat_mountpt_s *fs,
       buf->st_mode |= S_IFREG;
     }
 
-  /* Times */
+  return fat_stat_common(fs, direntry, buf);
+}
 
-  fatdate           = DIR_GETWRTDATE(direntry);
-  fattime           = DIR_GETWRTTIME(direntry);
-  buf->st_mtime     = fat_fattime2systime(fattime, fatdate);
+/****************************************************************************
+ * Name: fat_stat_root
+ *
+ * Description:
+ *   Logic to stat the root directory.  Used by fat_stat().
+ *
+ ****************************************************************************/
 
-  date2             = DIR_GETLASTACCDATE(direntry);
-  if (fatdate == date2)
-    {
-      buf->st_atime = buf->st_mtime;
-    }
-  else
-    {
-      buf->st_atime = fat_fattime2systime(0, date2);
-    }
+static int fat_stat_root(FAR struct fat_mountpt_s *fs,
+                         FAR uint8_t *direntry, FAR struct stat *buf)
+{
+  /* Clear the "struct stat"  */
 
-  fatdate           = DIR_GETCRDATE(direntry);
-  fattime           = DIR_GETCRTIME(direntry);
-  buf->st_ctime     = fat_fattime2systime(fattime, fatdate);
+  memset(buf, 0, sizeof(struct stat));
 
-  /* File/directory size, access block size */
+  /* It's directory name of the mount point */
 
-  buf->st_size      = DIR_GETFILESIZE(direntry);
-  buf->st_blksize   = fs->fs_fatsecperclus * fs->fs_hwsectorsize;
-  buf->st_blocks    = (buf->st_size + buf->st_blksize - 1) / buf->st_blksize;
+  buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR | S_IWOTH |
+                 S_IWGRP | S_IWUSR;
 
-  return OK;
+  return fat_stat_common(fs, direntry, buf);
 }
 
 /****************************************************************************
@@ -2682,27 +2726,23 @@ static int fat_stat(FAR struct inode *mountpt, FAR const char *relpath,
       goto errout_with_semaphore;
     }
 
-  /* Get the FAT attribute and map it so some meaningful mode_t values */
+  /* Get a pointer to the directory entry */
 
+  direntry = &fs->fs_buffer[dirinfo.fd_seq.ds_offset];
+
+  /* Get the FAT attribute and map it so some meaningful mode_t values */
 
   if (dirinfo.fd_root)
     {
-      /* Clear the "struct stat"  */
-
-      memset(buf, 0, sizeof(struct stat));
-
-      /* It's directory name of the mount point */
-
-      buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR | S_IWOTH |
-                     S_IWGRP | S_IWUSR;
-      ret = OK;
+      ret = fat_stat_root(fs, direntry, buf);
     }
   else
     {
-      /* Call fat_stat_common() to create the buf and to save information to it */
+      /* Call fat_stat_file() to create the buf and to save information to
+       * the stat buffer.
+       */
 
-      direntry = &fs->fs_buffer[dirinfo.fd_seq.ds_offset];
-      ret      = fat_stat_common(fs, direntry, buf);
+      ret = fat_stat_file(fs, direntry, buf);
     }
 
 errout_with_semaphore:
