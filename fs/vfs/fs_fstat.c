@@ -117,6 +117,7 @@ int fstat(int fd, FAR struct stat *buf)
        * supports the fstat() method
        */
 
+      ret = OK;
       if (inode->u.i_mops && inode->u.i_mops->fstat)
         {
           /* Perform the fstat() operation */

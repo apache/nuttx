@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/nfs/nfs_node.h
  *
- *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013, 2017 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2012 Jose Pablo Rojas Vargas. All rights reserved.
  *   Author: Jose Pablo Rojas Vargas <jrojas@nx-engineering.com>
  *           Gregory Nutt <gnutt@nuttx.org>
@@ -74,10 +74,11 @@ struct nfsnode
   uint8_t            n_type;        /* File type */
   uint8_t            n_fhsize;      /* Size in bytes of the file handle */
   uint8_t            n_flags;       /* Node flags */
-  struct timespec    n_mtime;       /* File modification time (see NOTE) */
-  time_t             n_ctime;       /* File creation time (see NOTE) */
+  uint16_t           n_mode;        /* File mode for fstat() */
+  struct timespec    n_mtime;       /* File modification time */
+  time_t             n_ctime;       /* File creation time */
   nfsfh_t            n_fhandle;     /* NFS File Handle */
-  uint64_t           n_size;        /* Current size of file (see NOTE) */
+  uint64_t           n_size;        /* Current size of file */
 };
 
 #endif /* __FS_NFS_NFS_NODE_H */

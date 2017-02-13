@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/nfs/nfs_util.c
  *
- *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,7 @@
 #include <queue.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <time.h>
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
@@ -577,10 +578,15 @@ int nfs_finddir(struct nfsmount *nmp, FAR const char *relpath,
 
 void nfs_attrupdate(FAR struct nfsnode *np, FAR struct nfs_fattr *attributes)
 {
-  /* Save a few of the files attribute values in file structur (host order) */
+  struct timespec ts;
 
-  np->n_type   = fxdr_unsigned(uint32_t, attributes->fa_type);
+  /* Save a few of the files attribute values in file structure (host order) */
+
+  np->n_type   = fxdr_unsigned(uint8_t, attributes->fa_type);
+  np->n_mode   = fxdr_unsigned(uint16_t, attributes->fa_mode);
   np->n_size   = fxdr_hyper(&attributes->fa_size);
-  fxdr_nfsv3time(&attributes->fa_mtime, &np->n_mtime)
-  np->n_ctime  = fxdr_hyper(&attributes->fa_ctime);
+
+  fxdr_nfsv3time(&attributes->fa_mtime, &np->n_mtime);
+  fxdr_nfsv3time(&attributes->fa_ctime, &ts);
+  np->n_ctime  = ts.tv_sec;
 }

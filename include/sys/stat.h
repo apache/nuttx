@@ -130,8 +130,8 @@ struct stat
   time_t    st_mtime;   /* Time of last modification */
   time_t    st_ctime;   /* Time of last status change */
 
-  /* Internal fields.  These are part this specifi instance and should not
-   * referenced by application code for portability reasons.
+  /* Internal fields.  These are part this specific implementation and
+   * should not referenced by application code for portability reasons.
    */
 
 #ifdef CONFIG_PSEUDOFS_SOFTLINKS

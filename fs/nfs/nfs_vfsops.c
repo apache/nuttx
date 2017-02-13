@@ -47,10 +47,11 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/statfs.h>
 #include <sys/stat.h>
-#include <sys/types.h>
+#include <sys/time.h>
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -104,6 +105,22 @@
 #endif
 
 /****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+/* Use to pass file information to nfs_stat_common() */
+
+struct nfs_statinfo_s
+{
+  uint16_t ns_mode;    /* File access mode */
+  uint8_t  ns_type;    /* File type */
+  uint64_t ns_size;    /* File size */
+  time_t   ns_atime;   /* Time of last access */
+  time_t   ns_mtime;   /* Time of last modification */
+  time_t   ns_ctime;   /* Time of last status change */
+};
+
+/****************************************************************************
  * Public Data
  ****************************************************************************/
 
@@ -143,15 +160,20 @@ static int     nfs_bind(FAR struct inode *blkdriver, const void *data,
                    void **handle);
 static int     nfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
                    unsigned int flags);
-static int     nfs_statfs(struct inode *mountpt, struct statfs *buf);
-static int     nfs_remove(struct inode *mountpt, const char *relpath);
-static int     nfs_mkdir(struct inode *mountpt, const char *relpath,
-                   mode_t mode);
-static int     nfs_rmdir(struct inode *mountpt, const char *relpath);
-static int     nfs_rename(struct inode *mountpt, const char *oldrelpath,
-                   const char *newrelpath);
-static int     nfs_stat(struct inode *mountpt, const char *relpath,
-                   struct stat *buf);
+static int     nfs_statfs(FAR struct inode *mountpt,
+                   FAR struct statfs *buf);
+static int     nfs_remove(FAR struct inode *mountpt,
+                   FAR const char *relpath);
+static int     nfs_mkdir(FAR struct inode *mountpt,
+                   FAR const char *relpath, mode_t mode);
+static int     nfs_rmdir(FAR struct inode *mountpt,
+                   FAR const char *relpath);
+static int     nfs_rename(FAR struct inode *mountpt,
+                   FAR const char *oldrelpath, FAR const char *newrelpath);
+static void    nfs_stat_common(FAR struct nfs_statinfo_s *info,
+                   FAR struct stat *buf);
+static int     nfs_stat(struct inode *mountpt, FAR const char *relpath,
+                   FAR struct stat *buf);
 
 /****************************************************************************
  * Public Data
@@ -1186,8 +1208,67 @@ static int nfs_dup(FAR const struct file *oldp, FAR struct file *newp)
 
 static int nfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
 {
-#warning Missing logic
-  return -ENOSYS;
+  FAR struct nfsmount *nmp;
+  FAR struct nfsnode *np;
+  struct nfs_statinfo_s info;
+  struct timeval tv;
+  int error;
+  int ret;
+
+  finfo("Buf %p\n", buf);
+  DEBUGASSERT(filep != NULL && buf != NULL);
+
+  /* Recover our private data from the struct file instance */
+
+  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
+  np  = (FAR struct nfsnode *)filep->f_priv;
+
+  nmp = (FAR struct nfsmount *)filep->f_inode->i_private;
+  DEBUGASSERT(nmp != NULL);
+
+  /* Make sure that the mount is still healthy */
+
+  nfs_semtake(nmp);
+  error = nfs_checkmount(nmp);
+  if (error != OK)
+    {
+      ferr("ERROR: nfs_checkmount failed: %d\n", error);
+      goto errout_with_semaphore;
+    }
+
+  /* Extract the file mode, file type, and file size from the nfsnode
+   * structure.
+   */
+
+  info.ns_mode  = np->n_mode;
+  info.ns_type  = np->n_type;
+  info.ns_size  = (off_t)np->n_size;
+
+  /* Extract time values as type time_t in units of seconds. */
+
+  info.ns_mtime = np->n_mtime.tv_sec;
+  info.ns_ctime = np->n_ctime;
+
+  /* Use the current time for the time of last access. */
+
+  ret = gettimeofday(&tv, NULL);
+  if (ret < 0)
+    {
+      error = -get_errno();
+      ferr("ERROR: gettimeofday failed: %d\n", error);
+      goto errout_with_semaphore;
+    }
+
+  info.ns_atime = tv.tv_sec;
+
+  /* Then update the stat buffer with this information */
+
+  nfs_stat_common(&info, buf);
+  ret = OK;
+
+errout_with_semaphore:
+  nfs_semgive(nmp);
+  return -error;
 }
 
 /****************************************************************************
@@ -2520,84 +2601,45 @@ errout_with_semaphore:
 }
 
 /****************************************************************************
- * Name: nfs_stat
+ * Name: nfs_stat_common
  *
  * Description:
- *   Return information about the file system object at 'relpath'
+ *   Return information about the file system object described by 'info'
  *
  * Returned Value:
- *   0 on success; a negated errno value on failure.
+ *   None
  *
  ****************************************************************************/
 
-static int nfs_stat(struct inode *mountpt, const char *relpath,
-                    struct stat *buf)
+static void nfs_stat_common(FAR struct nfs_statinfo_s *info,
+                            FAR struct stat *buf)
 {
-  struct nfsmount   *nmp;
-  struct file_handle fhandle;
-  struct nfs_fattr   obj_attributes;
-  uint32_t           tmp;
-  uint32_t           mode;
-  int                error;
-
-  /* Sanity checks */
-
-  DEBUGASSERT(mountpt && mountpt->i_private);
-
-  /* Get the mountpoint private data from the inode structure */
-
-  nmp = (FAR struct nfsmount *)mountpt->i_private;
-  DEBUGASSERT(nmp && buf);
-
-  /* Check if the mount is still healthy */
-
-  nfs_semtake(nmp);
-  error = nfs_checkmount(nmp);
-  if (error != OK)
-    {
-      ferr("ERROR: nfs_checkmount failed: %d\n", error);
-      goto errout_with_semaphore;
-    }
-
-  /* Get the file handle attributes of the requested node */
-
-  error = nfs_findnode(nmp, relpath, &fhandle, &obj_attributes, NULL);
-  if (error != OK)
-    {
-      ferr("ERROR: nfs_findnode failed: %d\n", error);
-      goto errout_with_semaphore;
-    }
-
-  /* Construct the file mode.  This is a 32-bit, encoded value containing
-   * both the access mode and the file type.
-   */
-
-  tmp = fxdr_unsigned(uint32_t, obj_attributes.fa_mode);
+  mode_t mode;
 
   /* Here we exploit the fact that most mode bits are the same in NuttX
    * as in the NFSv3 spec.
    */
 
-  mode = tmp & (NFSMODE_IXOTH | NFSMODE_IWOTH | NFSMODE_IROTH |
-                NFSMODE_IXGRP | NFSMODE_IWGRP | NFSMODE_IRGRP |
-                NFSMODE_IXUSR | NFSMODE_IWUSR | NFSMODE_IRUSR);
+  mode = info->ns_mode &
+           (NFSMODE_IXOTH | NFSMODE_IWOTH | NFSMODE_IROTH |
+            NFSMODE_IXGRP | NFSMODE_IWGRP | NFSMODE_IRGRP |
+            NFSMODE_IXUSR | NFSMODE_IWUSR | NFSMODE_IRUSR);
 
   /* Handle the cases that are not the same */
 
-  if ((mode & NFSMODE_ISGID) != 0)
+  if ((info->ns_mode & NFSMODE_ISGID) != 0)
     {
       mode |= S_ISGID;
     }
 
-  if ((mode & NFSMODE_ISUID) != 0)
+  if ((info->ns_mode & NFSMODE_ISUID) != 0)
     {
       mode |= S_ISUID;
     }
 
   /* Now OR in the file type */
 
-  tmp = fxdr_unsigned(uint32_t, obj_attributes.fa_type);
-  switch (tmp)
+  switch (info->ns_mode)
     {
     default:
     case NFNON:   /* Unknown type */
@@ -2633,12 +2675,83 @@ static int nfs_stat(struct inode *mountpt, const char *relpath,
     }
 
   buf->st_mode    = mode;
-  buf->st_size    = fxdr_hyper(&obj_attributes.fa_size);
+  buf->st_size    = (off_t)info->ns_size;
   buf->st_blksize = 0;
   buf->st_blocks  = 0;
-  buf->st_mtime   = fxdr_hyper(&obj_attributes.fa_mtime);
-  buf->st_atime   = fxdr_hyper(&obj_attributes.fa_atime);
-  buf->st_ctime   = fxdr_hyper(&obj_attributes.fa_ctime);
+  buf->st_mtime   = info->ns_mtime;
+  buf->st_atime   = info->ns_atime;
+  buf->st_ctime   = info->ns_ctime;
+}
+
+/****************************************************************************
+ * Name: nfs_stat
+ *
+ * Description:
+ *   Return information about the file system object at 'relpath'
+ *
+ * Returned Value:
+ *   0 on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int nfs_stat(struct inode *mountpt, const char *relpath,
+                    struct stat *buf)
+{
+  struct nfsmount *nmp;
+  struct file_handle fhandle;
+  struct nfs_fattr obj_attributes;
+  struct nfs_statinfo_s info;
+  struct timespec ts;
+  int error;
+
+  /* Sanity checks */
+
+  DEBUGASSERT(mountpt && mountpt->i_private);
+
+  /* Get the mountpoint private data from the inode structure */
+
+  nmp = (FAR struct nfsmount *)mountpt->i_private;
+  DEBUGASSERT(nmp && buf);
+
+  /* Check if the mount is still healthy */
+
+  nfs_semtake(nmp);
+  error = nfs_checkmount(nmp);
+  if (error != OK)
+    {
+      ferr("ERROR: nfs_checkmount failed: %d\n", error);
+      goto errout_with_semaphore;
+    }
+
+  /* Get the file handle attributes of the requested node */
+
+  error = nfs_findnode(nmp, relpath, &fhandle, &obj_attributes, NULL);
+  if (error != OK)
+    {
+      ferr("ERROR: nfs_findnode failed: %d\n", error);
+      goto errout_with_semaphore;
+    }
+
+  /* Extract the file mode, file type, and file size. */
+
+  info.ns_mode  = fxdr_unsigned(uint16_t, obj_attributes.fa_mode);
+  info.ns_type  = fxdr_unsigned(uint8_t, obj_attributes.fa_type);
+  info.ns_size  = fxdr_hyper(&obj_attributes.fa_size);
+
+  /* Extract time values as type time_t in units of seconds */
+
+  fxdr_nfsv3time(&obj_attributes.fa_mtime, &ts);
+  info.ns_mtime = ts.tv_sec;
+
+  fxdr_nfsv3time(&obj_attributes.fa_atime, &ts);
+  info.ns_atime = ts.tv_sec;
+
+  fxdr_nfsv3time(&obj_attributes.fa_ctime, &ts);
+  info.ns_ctime = ts.tv_sec;
+
+  /* Then update the stat buffer with this information */
+
+  nfs_stat_common(&info, buf);
 
 errout_with_semaphore:
   nfs_semgive(nmp);
