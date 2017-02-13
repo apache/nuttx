@@ -130,8 +130,8 @@ struct stat
   time_t    st_mtime;   /* Time of last modification */
   time_t    st_ctime;   /* Time of last status change */
 
-  /* Internal fields.  These are part this specifi instance and should not
-   * referenced by application code for portability reasons.
+  /* Internal fields.  These are part this specific implementation and
+   * should not referenced by application code for portability reasons.
    */
 
 #ifdef CONFIG_PSEUDOFS_SOFTLINKS
@@ -155,9 +155,7 @@ extern "C"
 int mkdir(FAR const char *pathname, mode_t mode);
 int mkfifo(FAR const char *pathname, mode_t mode);
 int stat(const char *path, FAR struct stat *buf);
-#if 0 /* Not yet supported */
 int fstat(int fd, FAR struct stat *buf);
-#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

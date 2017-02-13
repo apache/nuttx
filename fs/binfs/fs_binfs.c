@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/binfs/fs_binfs.c
  *
- *   Copyright (C) 2011-2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -70,6 +70,7 @@ static ssize_t binfs_read(FAR struct file *filep, char *buffer, size_t buflen);
 static int     binfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 
 static int     binfs_dup(FAR const struct file *oldp, FAR struct file *newp);
+static int     binfs_fstat(FAR const struct file *filep, FAR struct stat *buf);
 
 static int     binfs_opendir(struct inode *mountpt, const char *relpath,
                              struct fs_dirent_s *dir);
@@ -108,6 +109,7 @@ const struct mountpt_operations binfs_operations =
 
   NULL,              /* sync */
   binfs_dup,         /* dup */
+  binfs_fstat,       /* fstat */
 
   binfs_opendir,     /* opendir */
   NULL,              /* closedir */
@@ -242,6 +244,28 @@ static int binfs_dup(FAR const struct file *oldp, FAR struct file *newp)
   /* Copy the index from the old to the new file structure */
 
   newp->f_priv = oldp->f_priv;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: binfs_fstat
+ *
+ * Description:
+ *   Obtain information about an open file associated with the file
+ *   descriptor 'fd', and will write it to the area pointed to by 'buf'.
+ *
+ ****************************************************************************/
+
+static int binfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
+{
+  DEBUGASSERT(filep != NULL && buf != NULL);
+
+  /* It's a execute-only file system */
+
+  buf->st_mode    = S_IFREG | S_IXOTH | S_IXGRP | S_IXUSR;
+  buf->st_size    = 0;
+  buf->st_blksize = 0;
+  buf->st_blocks  = 0;
   return OK;
 }
 

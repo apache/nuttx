@@ -241,6 +241,29 @@ int inode_search(FAR struct inode_search_s *desc);
 int inode_find(FAR struct inode_search_s *desc);
 
 /****************************************************************************
+ * Name: inode_stat
+ *
+ * Description:
+ *   The inode_stat() function will obtain information about an 'inode' in
+ *   the pseudo file system and will write it to the area pointed to by 'buf'.
+ *
+ *   The 'buf' argument is a pointer to a stat structure, as defined in
+ *   <sys/stat.h>, into which information is placed concerning the file.
+ *
+ * Input Parameters:
+ *   inode - The indoe of interest
+ *   buf   - The caller provide location in which to return information about
+ *           the inode.
+ *
+ * Returned Value:
+ *   Zero (OK) returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+int inode_stat(FAR struct inode *inode, FAR struct stat *buf);
+
+/****************************************************************************
  * Name: inode_free
  *
  * Description:

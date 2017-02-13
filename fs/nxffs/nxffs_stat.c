@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/nxffs/nxffs_stat.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References: Linux/Documentation/filesystems/romfs.txt
@@ -47,6 +47,7 @@
 #include <string.h>
 #include <fcntl.h>
 #include <assert.h>
+#include <errno.h>
 #include <debug.h>
 
 #include <nuttx/fs/fs.h>
@@ -149,6 +150,8 @@ int nxffs_stat(FAR struct inode *mountpt, FAR const char *relpath,
           goto errout_with_semaphore;
         }
 
+      /* Return status information based on the directory entry */
+
       buf->st_blocks  = entry.datlen / (volume->geo.blocksize - SIZEOF_NXFFS_BLOCK_HDR);
       buf->st_mode    = S_IFREG | S_IXOTH | S_IXGRP | S_IXUSR;
       buf->st_size    = entry.datlen;
@@ -174,4 +177,59 @@ errout_with_semaphore:
   sem_post(&volume->exclsem);
 errout:
   return ret;
+}
+
+/****************************************************************************
+ * Name: nxffs_fstat
+ *
+ * Description:
+ *   Obtain information about an open file associated with the file
+ *   descriptor 'fd', and will write it to the area pointed to by 'buf'.
+ *
+ ****************************************************************************/
+
+int nxffs_fstat(FAR const struct file *filep, FAR struct stat *buf)
+{
+
+  FAR struct nxffs_volume_s *volume;
+  FAR struct nxffs_ofile_s *ofile;
+  int ret;
+
+  finfo("Buf %s\n", buf);
+  DEBUGASSERT(filep != NULL && buf != NULL);
+
+  /* Recover the open file state from the struct file instance */
+
+  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
+  ofile = (FAR struct nxffs_ofile_s *)filep->f_priv;
+
+  /* Recover the volume state from the open file */
+
+  volume = (FAR struct nxffs_volume_s *)filep->f_inode->i_private;
+  DEBUGASSERT(volume != NULL);
+
+  /* Get exclusive access to the volume.  Note that the volume exclsem
+   * protects the open file list.
+   */
+
+  ret = sem_wait(&volume->exclsem);
+  if (ret != OK)
+    {
+      int errcode = get_errno();
+      ferr("ERROR: sem_wait failed: %d\n", errcode);
+      return -errcode;
+    }
+
+  /* Return status information based on the directory entry */
+
+  buf->st_blocks = ofile->entry.datlen /
+                   (volume->geo.blocksize - SIZEOF_NXFFS_BLOCK_HDR);
+  buf->st_mode   = S_IFREG | S_IXOTH | S_IXGRP | S_IXUSR;
+  buf->st_size   = ofile->entry.datlen;
+  buf->st_atime  = ofile->entry.utc;
+  buf->st_mtime  = ofile->entry.utc;
+  buf->st_ctime  = ofile->entry.utc;
+
+  sem_post(&volume->exclsem);
+  return OK;
 }

@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/tmpfs/fs_tmpfs.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -91,75 +91,79 @@ static void tmpfs_unlock_reentrant(FAR struct tmpfs_sem_s *sem);
 static void tmpfs_unlock(FAR struct tmpfs_s *fs);
 static void tmpfs_lock_object(FAR struct tmpfs_object_s *to);
 static void tmpfs_unlock_object(FAR struct tmpfs_object_s *to);
-static int tmpfs_realloc_directory(FAR struct tmpfs_directory_s **tdo,
-            unsigned int nentries);
-static int tmpfs_realloc_file(FAR struct tmpfs_file_s **tfo,
-            size_t newsize);
+static int  tmpfs_realloc_directory(FAR struct tmpfs_directory_s **tdo,
+              unsigned int nentries);
+static int  tmpfs_realloc_file(FAR struct tmpfs_file_s **tfo,
+              size_t newsize);
 static void tmpfs_release_lockedobject(FAR struct tmpfs_object_s *to);
 static void tmpfs_release_lockedfile(FAR struct tmpfs_file_s *tfo);
-static int tmpfs_find_dirent(FAR struct tmpfs_directory_s *tdo,
-            FAR const char *name);
-static int tmpfs_remove_dirent(FAR struct tmpfs_directory_s *tdo,
-            FAR const char *name);
-static int tmpfs_add_dirent(FAR struct tmpfs_directory_s **tdo,
-            FAR struct tmpfs_object_s *to, FAR const char *name);
+static int  tmpfs_find_dirent(FAR struct tmpfs_directory_s *tdo,
+              FAR const char *name);
+static int  tmpfs_remove_dirent(FAR struct tmpfs_directory_s *tdo,
+              FAR const char *name);
+static int  tmpfs_add_dirent(FAR struct tmpfs_directory_s **tdo,
+              FAR struct tmpfs_object_s *to, FAR const char *name);
 static FAR struct tmpfs_file_s *tmpfs_alloc_file(void);
-static int tmpfs_create_file(FAR struct tmpfs_s *fs,
-            FAR const char *relpath, FAR struct tmpfs_file_s **tfo);
+static int  tmpfs_create_file(FAR struct tmpfs_s *fs,
+              FAR const char *relpath, FAR struct tmpfs_file_s **tfo);
 static FAR struct tmpfs_directory_s *tmpfs_alloc_directory(void);
-static int tmpfs_create_directory(FAR struct tmpfs_s *fs,
-            FAR const char *relpath, FAR struct tmpfs_directory_s **tdo);
-static int tmpfs_find_object(FAR struct tmpfs_s *fs,
-            FAR const char *relpath, FAR struct tmpfs_object_s **object,
-            FAR struct tmpfs_directory_s **parent);
-static int tmpfs_find_file(FAR struct tmpfs_s *fs,
-            FAR const char *relpath,
-            FAR struct tmpfs_file_s **tfo,
-            FAR struct tmpfs_directory_s **parent);
-static int tmpfs_find_directory(FAR struct tmpfs_s *fs,
-            FAR const char *relpath,
-            FAR struct tmpfs_directory_s **tdo,
-            FAR struct tmpfs_directory_s **parent);
-static int tmpfs_statfs_callout(FAR struct tmpfs_directory_s *tdo,
-            unsigned int index, FAR void *arg);
-static int tmpfs_free_callout(FAR struct tmpfs_directory_s *tdo,
-            unsigned int index, FAR void *arg);
-static int tmpfs_foreach(FAR struct tmpfs_directory_s *tdo,
-            tmpfs_foreach_t callout, FAR void *arg);
+static int  tmpfs_create_directory(FAR struct tmpfs_s *fs,
+              FAR const char *relpath, FAR struct tmpfs_directory_s **tdo);
+static int  tmpfs_find_object(FAR struct tmpfs_s *fs,
+              FAR const char *relpath, FAR struct tmpfs_object_s **object,
+              FAR struct tmpfs_directory_s **parent);
+static int  tmpfs_find_file(FAR struct tmpfs_s *fs,
+              FAR const char *relpath,
+              FAR struct tmpfs_file_s **tfo,
+              FAR struct tmpfs_directory_s **parent);
+static int  tmpfs_find_directory(FAR struct tmpfs_s *fs,
+              FAR const char *relpath,
+              FAR struct tmpfs_directory_s **tdo,
+              FAR struct tmpfs_directory_s **parent);
+static int  tmpfs_statfs_callout(FAR struct tmpfs_directory_s *tdo,
+              unsigned int index, FAR void *arg);
+static int  tmpfs_free_callout(FAR struct tmpfs_directory_s *tdo,
+              unsigned int index, FAR void *arg);
+static int  tmpfs_foreach(FAR struct tmpfs_directory_s *tdo,
+              tmpfs_foreach_t callout, FAR void *arg);
 
 /* File system operations */
 
-static int tmpfs_open(FAR struct file *filep, FAR const char *relpath,
-            int oflags, mode_t mode);
-static int tmpfs_close(FAR struct file *filep);
+static int  tmpfs_open(FAR struct file *filep, FAR const char *relpath,
+              int oflags, mode_t mode);
+static int  tmpfs_close(FAR struct file *filep);
 static ssize_t tmpfs_read(FAR struct file *filep, FAR char *buffer,
-            size_t buflen);
+              size_t buflen);
 static ssize_t tmpfs_write(FAR struct file *filep, FAR const char *buffer,
-            size_t buflen);
+              size_t buflen);
 static off_t tmpfs_seek(FAR struct file *filep, off_t offset, int whence);
-static int tmpfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
-static int tmpfs_dup(FAR const struct file *oldp, FAR struct file *newp);
-static int tmpfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
-            FAR struct fs_dirent_s *dir);
-static int tmpfs_closedir(FAR struct inode *mountpt,
-            FAR struct fs_dirent_s *dir);
-static int tmpfs_readdir(FAR struct inode *mountpt,
-            FAR struct fs_dirent_s *dir);
-static int tmpfs_rewinddir(FAR struct inode *mountpt,
-            FAR struct fs_dirent_s *dir);
-static int tmpfs_bind(FAR struct inode *blkdriver, FAR const void *data,
-            FAR void **handle);
-static int tmpfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
-            unsigned int flags);
-static int tmpfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf);
-static int tmpfs_unlink(FAR struct inode *mountpt, FAR const char *relpath);
-static int tmpfs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
-            mode_t mode);
-static int tmpfs_rmdir(FAR struct inode *mountpt, FAR const char *relpath);
-static int tmpfs_rename(FAR struct inode *mountpt, FAR const char *oldrelpath,
-            FAR const char *newrelpath);
-static int tmpfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
-            FAR struct stat *buf);
+static int  tmpfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+static int  tmpfs_dup(FAR const struct file *oldp, FAR struct file *newp);
+static int  tmpfs_fstat(FAR const struct file *filep, FAR struct stat *buf);
+
+static int  tmpfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
+              FAR struct fs_dirent_s *dir);
+static int  tmpfs_closedir(FAR struct inode *mountpt,
+              FAR struct fs_dirent_s *dir);
+static int  tmpfs_readdir(FAR struct inode *mountpt,
+              FAR struct fs_dirent_s *dir);
+static int  tmpfs_rewinddir(FAR struct inode *mountpt,
+              FAR struct fs_dirent_s *dir);
+static int  tmpfs_bind(FAR struct inode *blkdriver, FAR const void *data,
+              FAR void **handle);
+static int  tmpfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
+              unsigned int flags);
+static int  tmpfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf);
+static int  tmpfs_unlink(FAR struct inode *mountpt, FAR const char *relpath);
+static int  tmpfs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
+              mode_t mode);
+static int  tmpfs_rmdir(FAR struct inode *mountpt, FAR const char *relpath);
+static int  tmpfs_rename(FAR struct inode *mountpt, FAR const char *oldrelpath,
+              FAR const char *newrelpath);
+static void tmpfs_stat_common(FAR struct tmpfs_object_s *to,
+                              FAR struct stat *buf);
+static int  tmpfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
+              FAR struct stat *buf);
 
 /****************************************************************************
  * Public Data
@@ -175,6 +179,7 @@ const struct mountpt_operations tmpfs_operations =
   tmpfs_ioctl,      /* ioctl */
   NULL,             /* sync */
   tmpfs_dup,        /* dup */
+  tmpfs_fstat,      /* fstat */
   tmpfs_opendir,    /* opendir */
   tmpfs_closedir,   /* closedir */
   tmpfs_readdir,    /* readdir */
@@ -1770,6 +1775,41 @@ static int tmpfs_dup(FAR const struct file *oldp, FAR struct file *newp)
 }
 
 /****************************************************************************
+ * Name: tmpfs_fstat
+ *
+ * Description:
+ *   Obtain information about an open file associated with the file
+ *   descriptor 'fd', and will write it to the area pointed to by 'buf'.
+ *
+ ****************************************************************************/
+
+static int tmpfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
+{
+  FAR struct tmpfs_file_s *tfo;
+
+  finfo("Fstat %p\n", buf);
+  DEBUGASSERT(filep != NULL && buf != NULL);
+
+  /* Recover our private data from the struct file instance */
+
+  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
+  tfo = filep->f_priv;
+
+  /* Get exclusive access to the file */
+
+  tmpfs_lock_file(tfo);
+
+  /* Return information about the file in the stat buffer.*/
+
+  tmpfs_stat_common((FAR struct tmpfs_object_s *)tfo, buf);
+
+  /* Release the lock on the file and return success. */
+
+  tmpfs_unlock_file(tfo);
+  return OK;
+}
+
+/****************************************************************************
  * Name: tmpfs_opendir
  ****************************************************************************/
 
@@ -2459,41 +2499,15 @@ errout_with_lock:
 }
 
 /****************************************************************************
- * Name: tmpfs_stat
+ * Name: tmpfs_stat_common
  ****************************************************************************/
 
-static int tmpfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
-                      FAR struct stat *buf)
+static void tmpfs_stat_common(FAR struct tmpfs_object_s *to,
+                              FAR struct stat *buf)
 {
-  FAR struct tmpfs_s *fs;
-  FAR struct tmpfs_object_s *to;
   size_t objsize;
-  int ret;
 
-  finfo("mountpt=%p relpath=%s buf=%p\n", mountpt, relpath, buf);
-  DEBUGASSERT(mountpt != NULL && relpath != NULL && buf != NULL);
-
-  /* Get the file system structure from the inode reference. */
-
-  fs = mountpt->i_private;
-  DEBUGASSERT(fs != NULL && fs->tfs_root.tde_object != NULL);
-
-  /* Get exclusive access to the file system */
-
-  tmpfs_lock(fs);
-
-  /* Find the tmpfs object at the relpath.  If successful,
-   * tmpfs_find_object() will lock the object and increment the
-   * reference count on the object.
-   */
-
-  ret = tmpfs_find_object(fs, relpath, &to, NULL);
-  if (ret < 0)
-    {
-      goto errout_with_fslock;
-    }
-
-  /* We found it... Is the object a regular file? */
+  /* Is the tmpfs object a regular file? */
 
   memset(buf, 0, sizeof(struct stat));
 
@@ -2530,8 +2544,50 @@ static int tmpfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
   buf->st_blksize = CONFIG_FS_TMPFS_BLOCKSIZE;
   buf->st_blocks  = (objsize + CONFIG_FS_TMPFS_BLOCKSIZE - 1) /
                     CONFIG_FS_TMPFS_BLOCKSIZE;
+}
 
-  /* No... unlock the object and return success */
+/****************************************************************************
+ * Name: tmpfs_stat
+ ****************************************************************************/
+
+static int tmpfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
+                      FAR struct stat *buf)
+{
+  FAR struct tmpfs_s *fs;
+  FAR struct tmpfs_object_s *to;
+  int ret;
+
+  finfo("mountpt=%p relpath=%s buf=%p\n", mountpt, relpath, buf);
+  DEBUGASSERT(mountpt != NULL && relpath != NULL && buf != NULL);
+
+  /* Get the file system structure from the inode reference. */
+
+  fs = mountpt->i_private;
+  DEBUGASSERT(fs != NULL && fs->tfs_root.tde_object != NULL);
+
+  /* Get exclusive access to the file system */
+
+  tmpfs_lock(fs);
+
+  /* Find the tmpfs object at the relpath.  If successful,
+   * tmpfs_find_object() will lock the object and increment the
+   * reference count on the object.
+   */
+
+  ret = tmpfs_find_object(fs, relpath, &to, NULL);
+  if (ret < 0)
+    {
+      goto errout_with_fslock;
+    }
+
+  /* We found it... Return information about the file object in the stat
+   * buffer.
+   */
+
+  DEBUGASSERT(to != NULL);
+  tmpfs_stat_common(to, buf);
+
+  /* Unlock the object and return success */
 
   tmpfs_release_lockedobject(to);
   ret = OK;

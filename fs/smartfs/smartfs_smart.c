@@ -69,33 +69,50 @@
 static int     smartfs_open(FAR struct file *filep, const char *relpath,
                         int oflags, mode_t mode);
 static int     smartfs_close(FAR struct file *filep);
-static ssize_t smartfs_read(FAR struct file *filep, char *buffer, size_t buflen);
+static ssize_t smartfs_read(FAR struct file *filep, char *buffer,
+                        size_t buflen);
 static ssize_t smartfs_write(FAR struct file *filep, const char *buffer,
                         size_t buflen);
-static off_t   smartfs_seek(FAR struct file *filep, off_t offset, int whence);
-static int     smartfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+static off_t   smartfs_seek(FAR struct file *filep, off_t offset,
+                        int whence);
+static int     smartfs_ioctl(FAR struct file *filep, int cmd,
+                        unsigned long arg);
 
 static int     smartfs_sync(FAR struct file *filep);
-static int     smartfs_dup(FAR const struct file *oldp, FAR struct file *newp);
+static int     smartfs_dup(FAR const struct file *oldp,
+                        FAR struct file *newp);
+static int     smartfs_fstat(FAR const struct file *filep,
+                        FAR struct stat *buf);
 
-static int     smartfs_opendir(struct inode *mountpt, const char *relpath,
-                        struct fs_dirent_s *dir);
-static int     smartfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir);
-static int     smartfs_rewinddir(struct inode *mountpt, struct fs_dirent_s *dir);
+static int     smartfs_opendir(FAR struct inode *mountpt,
+                        FAR const char *relpath,
+                        FAR struct fs_dirent_s *dir);
+static int     smartfs_readdir(FAR struct inode *mountpt,
+                        FAR struct fs_dirent_s *dir);
+static int     smartfs_rewinddir(FAR struct inode *mountpt,
+                       FAR struct fs_dirent_s *dir);
 
-static int     smartfs_bind(FAR struct inode *blkdriver, const void *data,
-                        void **handle);
+static int     smartfs_bind(FAR struct inode *blkdriver,
+                        FAR const void *data,
+                        FAR void **handle);
 static int     smartfs_unbind(void *handle, FAR struct inode **blkdriver,
                         unsigned int flags);
-static int     smartfs_statfs(struct inode *mountpt, struct statfs *buf);
+static int     smartfs_statfs(FAR struct inode *mountpt,
+                        FAR struct statfs *buf);
 
-static int     smartfs_unlink(struct inode *mountpt, const char *relpath);
-static int     smartfs_mkdir(struct inode *mountpt, const char *relpath,
+static int     smartfs_unlink(FAR struct inode *mountpt,
+                        FAR const char *relpath);
+static int     smartfs_mkdir(FAR struct inode *mountpt,
+                        FAR const char *relpath,
                         mode_t mode);
-static int     smartfs_rmdir(struct inode *mountpt, const char *relpath);
-static int     smartfs_rename(struct inode *mountpt, const char *oldrelpath,
+static int     smartfs_rmdir(FAR struct inode *mountpt,
+                        FAR const char *relpath);
+static int     smartfs_rename(FAR struct inode *mountpt,
+                        FAR const char *oldrelpath,
                         const char *newrelpath);
-static int     smartfs_stat(struct inode *mountpt, const char *relpath, struct stat *buf);
+static int     smartfs_stat(FAR struct inode *mountpt,
+                        FAR const char *relpath,
+                        FAR struct stat *buf);
 
 static off_t smartfs_seek_internal(struct smartfs_mountpt_s *fs,
                         struct smartfs_ofile_s *sf,
@@ -128,6 +145,7 @@ const struct mountpt_operations smartfs_operations =
 
   smartfs_sync,          /* sync */
   smartfs_dup,           /* dup */
+  smartfs_fstat,         /* fstat */
 
   smartfs_opendir,       /* opendir */
   NULL,                  /* closedir */
@@ -1250,13 +1268,29 @@ static int smartfs_dup(FAR const struct file *oldp, FAR struct file *newp)
 }
 
 /****************************************************************************
+ * Name: smartfs_fstat
+ *
+ * Description:
+ *   Obtain information about an open file associated with the file
+ *   descriptor 'fd', and will write it to the area pointed to by 'buf'.
+ *
+ ****************************************************************************/
+
+static int smartfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
+{
+#warning Missing logic
+  return -ENOSYS;
+}
+
+/****************************************************************************
  * Name: smartfs_opendir
  *
  * Description: Open a directory for read access
  *
  ****************************************************************************/
 
-static int smartfs_opendir(struct inode *mountpt, const char *relpath, struct fs_dirent_s *dir)
+static int smartfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
+                           FAR struct fs_dirent_s *dir)
 {
   struct smartfs_mountpt_s *fs;
   int                       ret;
