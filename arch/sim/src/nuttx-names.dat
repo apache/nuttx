@@ -24,6 +24,7 @@ fread          NXfread
 fseek          NXfseek
 fwrite         NXfwrite
 fsync          NXfsync
+fstat          NXfstat
 ftell          NXftell
 getenv         NXgetenv
 getopt         NXgetopt
