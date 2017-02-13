@@ -1184,13 +1184,10 @@ static int romfs_stat_common(uint8_t type, uint32_t size,
   memset(buf, 0, sizeof(struct stat));
   if (IS_DIRECTORY(type))
     {
-      /* It's a read-only directory name */
+      /* It's a read-execute directory name */
 
-      buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR;
-      if (IS_EXECUTABLE(type))
-        {
-          buf->st_mode |= S_IXOTH | S_IXGRP | S_IXUSR;
-        }
+      buf->st_mode = S_IFDIR | S_IROTH | S_IXOTH | S_IRGRP | S_IXGRP |
+                     S_IRUSR | S_IXUSR;
     }
   else if (IS_FILE(type))
     {
@@ -1199,6 +1196,8 @@ static int romfs_stat_common(uint8_t type, uint32_t size,
       buf->st_mode = S_IFREG | S_IROTH | S_IRGRP | S_IRUSR;
       if (IS_EXECUTABLE(type))
         {
+          /* It's a read-execute file name */
+
           buf->st_mode |= S_IXOTH | S_IXGRP | S_IXUSR;
         }
     }
