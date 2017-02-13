@@ -163,7 +163,6 @@ struct romfs_file_s
   uint32_t rf_size;                 /* Size of the file in bytes */
   uint32_t rf_cachesector;          /* Current sector in the rf_buffer */
   uint8_t *rf_buffer;               /* File sector buffer, allocated if rm_xipbase==0 */
-  uint8_t  rf_type;                 /* File type (for fstat()) */
 };
 
 /* This structure is used internally for describing the result of

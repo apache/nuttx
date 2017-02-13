@@ -205,7 +205,11 @@ static int romfs_open(FAR struct file *filep, FAR const char *relpath,
     }
 
   /* The full path exists -- but is the final component a file
-   * or a directory?
+   * or a directory?  Or some other Unix file type that not
+   * appropriate in this contex.
+   *
+   * REVISIT: This logic should follow hard/soft link file
+   * types.  At present, it returns the ENXIO.
    */
 
   if (IS_DIRECTORY(dirinfo.rd_next))
@@ -214,6 +218,20 @@ static int romfs_open(FAR struct file *filep, FAR const char *relpath,
 
       ret = -EISDIR;
       ferr("ERROR: '%s' is a directory\n", relpath);
+      goto errout_with_semaphore;
+    }
+  else if (!IS_FILE(dirinfo.rd_next))
+    {
+      /* ENXIO indicates "The named file is a character special or
+       * block special file, and the device associated with this
+       * special file does not exist."
+       *
+       * Here we also return ENXIO if the file is not a directory
+       * or a regular file.
+       */
+
+      ret = -ENXIO;
+      ferr("ERROR: '%s' is a special file\n", relpath);
       goto errout_with_semaphore;
     }
 
@@ -238,7 +256,6 @@ static int romfs_open(FAR struct file *filep, FAR const char *relpath,
    */
 
   rf->rf_size = dirinfo.rd_size;
-  rf->rf_type = (uint8_t)(dirinfo.rd_next & RFNEXT_ALLMODEMASK);
 
   /* Get the start of the file data */
 
@@ -720,7 +737,7 @@ static int romfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
     {
       /* Return information about the directory entry */
 
-      ret = romfs_stat_common(rf->rf_type, rf->rf_size,
+      ret = romfs_stat_common(RFNEXT_FILE, rf->rf_size,
                               rm->rm_hwsectorsize, buf);
     }
 
