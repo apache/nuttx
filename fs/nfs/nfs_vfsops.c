@@ -51,7 +51,6 @@
 #include <sys/socket.h>
 #include <sys/statfs.h>
 #include <sys/stat.h>
-#include <sys/time.h>
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -1211,7 +1210,7 @@ static int nfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
   FAR struct nfsmount *nmp;
   FAR struct nfsnode *np;
   struct nfs_statinfo_s info;
-  struct timeval tv;
+  struct timespec ts;
   int error;
   int ret;
 
@@ -1251,15 +1250,15 @@ static int nfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
 
   /* Use the current time for the time of last access. */
 
-  ret = gettimeofday(&tv, NULL);
+  ret = clock_gettime(CLOCK_REALTIME, &ts);
   if (ret < 0)
     {
       error = -get_errno();
-      ferr("ERROR: gettimeofday failed: %d\n", error);
+      ferr("ERROR: clock_gettime failed: %d\n", error);
       goto errout_with_semaphore;
     }
 
-  info.ns_atime = tv.tv_sec;
+  info.ns_atime = ts.tv_sec;
 
   /* Then update the stat buffer with this information */
 
