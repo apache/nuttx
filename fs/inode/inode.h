@@ -261,6 +261,7 @@ int inode_find(FAR struct inode_search_s *desc);
  *
  ****************************************************************************/
 
+struct stat;  /* Forward reference */
 int inode_stat(FAR struct inode *inode, FAR struct stat *buf);
 
 /****************************************************************************
