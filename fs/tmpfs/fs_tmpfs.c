@@ -160,6 +160,8 @@ static int  tmpfs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
 static int  tmpfs_rmdir(FAR struct inode *mountpt, FAR const char *relpath);
 static int  tmpfs_rename(FAR struct inode *mountpt, FAR const char *oldrelpath,
               FAR const char *newrelpath);
+static void tmpfs_stat_common(FAR struct tmpfs_object_s *to,
+                              FAR struct stat *buf);
 static int  tmpfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
               FAR struct stat *buf);
 
@@ -1783,8 +1785,28 @@ static int tmpfs_dup(FAR const struct file *oldp, FAR struct file *newp)
 
 static int tmpfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
 {
-#warning Missing logic
-  return -ENOSYS;
+  FAR struct tmpfs_file_s *tfo;
+
+  finfo("Fstat %p\n", buf);
+  DEBUGASSERT(filep != NULL && buf != NULL);
+
+  /* Recover our private data from the struct file instance */
+
+  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
+  tfo = filep->f_priv;
+
+  /* Get exclusive access to the file */
+
+  tmpfs_lock_file(tfo);
+
+  /* Return information about the file in the stat buffer.*/
+
+  tmpfs_stat_common((FAR struct tmpfs_object_s *)tfo, buf);
+
+  /* Release the lock on the file and return success. */
+
+  tmpfs_unlock_file(tfo);
+  return OK;
 }
 
 /****************************************************************************
@@ -2477,41 +2499,15 @@ errout_with_lock:
 }
 
 /****************************************************************************
- * Name: tmpfs_stat
+ * Name: tmpfs_stat_common
  ****************************************************************************/
 
-static int tmpfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
-                      FAR struct stat *buf)
+static void tmpfs_stat_common(FAR struct tmpfs_object_s *to,
+                              FAR struct stat *buf)
 {
-  FAR struct tmpfs_s *fs;
-  FAR struct tmpfs_object_s *to;
   size_t objsize;
-  int ret;
 
-  finfo("mountpt=%p relpath=%s buf=%p\n", mountpt, relpath, buf);
-  DEBUGASSERT(mountpt != NULL && relpath != NULL && buf != NULL);
-
-  /* Get the file system structure from the inode reference. */
-
-  fs = mountpt->i_private;
-  DEBUGASSERT(fs != NULL && fs->tfs_root.tde_object != NULL);
-
-  /* Get exclusive access to the file system */
-
-  tmpfs_lock(fs);
-
-  /* Find the tmpfs object at the relpath.  If successful,
-   * tmpfs_find_object() will lock the object and increment the
-   * reference count on the object.
-   */
-
-  ret = tmpfs_find_object(fs, relpath, &to, NULL);
-  if (ret < 0)
-    {
-      goto errout_with_fslock;
-    }
-
-  /* We found it... Is the object a regular file? */
+  /* Is the tmpfs object a regular file? */
 
   memset(buf, 0, sizeof(struct stat));
 
@@ -2548,8 +2544,50 @@ static int tmpfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
   buf->st_blksize = CONFIG_FS_TMPFS_BLOCKSIZE;
   buf->st_blocks  = (objsize + CONFIG_FS_TMPFS_BLOCKSIZE - 1) /
                     CONFIG_FS_TMPFS_BLOCKSIZE;
+}
 
-  /* No... unlock the object and return success */
+/****************************************************************************
+ * Name: tmpfs_stat
+ ****************************************************************************/
+
+static int tmpfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
+                      FAR struct stat *buf)
+{
+  FAR struct tmpfs_s *fs;
+  FAR struct tmpfs_object_s *to;
+  int ret;
+
+  finfo("mountpt=%p relpath=%s buf=%p\n", mountpt, relpath, buf);
+  DEBUGASSERT(mountpt != NULL && relpath != NULL && buf != NULL);
+
+  /* Get the file system structure from the inode reference. */
+
+  fs = mountpt->i_private;
+  DEBUGASSERT(fs != NULL && fs->tfs_root.tde_object != NULL);
+
+  /* Get exclusive access to the file system */
+
+  tmpfs_lock(fs);
+
+  /* Find the tmpfs object at the relpath.  If successful,
+   * tmpfs_find_object() will lock the object and increment the
+   * reference count on the object.
+   */
+
+  ret = tmpfs_find_object(fs, relpath, &to, NULL);
+  if (ret < 0)
+    {
+      goto errout_with_fslock;
+    }
+
+  /* We found it... Return information about the file object in the stat
+   * buffer.
+   */
+
+  DEBUGASSERT(to != NULL);
+  tmpfs_stat_common(to, buf);
+
+  /* Unlock the object and return success */
 
   tmpfs_release_lockedobject(to);
   ret = OK;

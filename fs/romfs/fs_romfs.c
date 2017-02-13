@@ -205,7 +205,7 @@ static int romfs_open(FAR struct file *filep, FAR const char *relpath,
     }
 
   /* The full path exists -- but is the final component a file
-   * or a directory?  Or some other Unix file type that not
+   * or a directory?  Or some other Unix file type that is not
    * appropriate in this contex.
    *
    * REVISIT: This logic should follow hard/soft link file
