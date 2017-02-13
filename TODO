@@ -1369,19 +1369,45 @@ o File system / Generic drivers (fs/, drivers/)
 
   NOTE:  The NXFFS file system has its own TODO list at nuttx/fs/nxffs/README.txt
 
-  Title:       CHMOD(), TRUNCATE(), AND FSTAT()
-  Description: Implement chmod(), truncate(), and fstat().
+  Title:       MISSING FILE SYSTEM FEATURES
+  Description: Implement missing file system features:
 
                chmod() is probably not relevant since file modes are not
                  currently supported.
 
-               fstat() may be doable: Most file system implement stat() by
-                 looking up the directory entry associated with the path
-                 then generating the struct stat data.  But most file
-                 systems also keep the directory entry in the private data
-                 associated withe open file.  So it should possible to
-                 implement fstat() as a file system method and use that
-                 saved directory entry to generate the stat data.
+                 File privileges would also be good to support.  But this is
+                 really a small part of a much larger feature.  NuttX has no
+                 user IDs, there are no groups, there are no privileges
+                 associated with either.  User's don't need credentials.
+                 This is really a system wide issues of which chmod is only
+                 a small part.
+
+                 User privileges never seemed important to me since NuttX is
+                 intended for deeply embedded environments where there are
+                 not multiple users with varying levels of trust.
+
+               truncate - The standard way of setting a fixed file size.
+                 Often used with random access, data base files.  There is no
+                 simple way of doing that now (other than just writing data
+                 to the file).
+
+               fstat():  Currently in work.  The unverified solution is on
+                 the 'fstat' branch in the repository.
+
+               link, unlink, softlink, readlink - For symbolic links.  Only
+                 the ROMFS file system currently supports hard and soft links,
+                 so this is not too important.
+
+               File locking
+
+               Special files - NuttX support special files only in the top-
+                 level pseudo file system.  Unix systems support many
+                 different special files via mknod().  This would be
+                 important only if it is an objective of NuttX to become a
+                 true Unix OS.  Again only supported by ROMFS.
+
+               True inodes - Standard Unix inodes.  Currently only supported
+                 by ROMFs.
 
                The primary obstacle to all these is that each would require
                changes to all existing file systems.  That number is pretty
