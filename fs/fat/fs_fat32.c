@@ -108,6 +108,8 @@ static int     fat_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
 static int     fat_rmdir(FAR struct inode *mountpt, FAR const char *relpath);
 static int     fat_rename(FAR struct inode *mountpt,
                  FAR const char *oldrelpath, FAR const char *newrelpath);
+static int     fat_stat_common(FAR struct fat_mountpt_s *fs,
+                 FAR uint8_t *direntry, FAR struct stat *buf);
 static int     fat_stat(struct inode *mountpt, const char *relpath,
                  FAR struct stat *buf);
 
@@ -1620,8 +1622,63 @@ errout_with_semaphore:
 
 static int fat_fstat(FAR const struct file *filep, FAR struct stat *buf)
 {
-#warning Missing logic
-  return -ENOSYS;
+  FAR struct inode *inode;
+  FAR struct fat_mountpt_s *fs;
+  FAR struct fat_file_s *ff;
+  uint8_t *direntry;
+  int ret;
+
+  /* Sanity checks */
+
+  DEBUGASSERT(filep->f_priv == NULL && filep->f_inode != NULL);
+
+  /* Get the mountpoint inode reference from the file structure and the
+   * mountpoint private data from the inode structure
+   */
+
+  inode = filep->f_inode;
+  fs    = inode->i_private;
+
+  DEBUGASSERT(fs != NULL);
+
+  /* Check if the mount is still healthy */
+
+  fat_semtake(fs);
+  ret = fat_checkmount(fs);
+  if (ret != OK)
+    {
+      goto errout_with_semaphore;
+    }
+
+  /* Recover our private data from the struct file instance */
+
+  ff = filep->f_priv;
+
+  /* Update the directory entry.  First read the directory
+   * entry into the fs_buffer (preserving the ff_buffer)
+   */
+
+  ret = fat_fscacheread(fs, ff->ff_dirsector);
+  if (ret < 0)
+    {
+      goto errout_with_semaphore;
+    }
+
+  /* Recover a pointer to the specific directory entry in the sector using
+   * the saved directory index.
+   */
+
+  direntry = &fs->fs_buffer[(ff->ff_dirindex & DIRSEC_NDXMASK(fs)) * DIR_SIZE];
+
+  /* Call fat_stat_common() to create the buf and to save information to
+   * it.
+   */
+
+  ret = fat_stat_common(fs, direntry, buf);
+
+errout_with_semaphore:
+  fat_semgive(fs);
+  return ret;
 }
 
 /****************************************************************************
@@ -2506,6 +2563,83 @@ errout_with_semaphore:
 }
 
 /****************************************************************************
+ * Name: fat_stat_common
+ *
+ * Description: Common function used by fat_stat() and fat_fstat().
+ *
+ ****************************************************************************/
+
+static int fat_stat_common(FAR struct fat_mountpt_s *fs,
+                           FAR uint8_t *direntry, FAR struct stat *buf)
+{
+  uint8_t  attribute;
+  uint16_t fatdate;
+  uint16_t date2;
+  uint16_t fattime;
+
+  /* Initialize the "struct stat" */
+
+  memset(buf, 0, sizeof(struct stat));
+
+  /* Get attribute from direntry */
+
+  attribute = DIR_GETATTRIBUTES(direntry);
+  if ((attribute & FATATTR_VOLUMEID) != 0)
+    {
+      return -ENOENT;
+    }
+
+  /* Set the access permissions.  The file/directory is always readable
+   * by everyone but may be writeable by no-one.
+   */
+
+  buf->st_mode = S_IROTH | S_IRGRP | S_IRUSR;
+  if ((attribute & FATATTR_READONLY) == 0)
+    {
+      buf->st_mode |= S_IWOTH | S_IWGRP | S_IWUSR;
+    }
+
+  /* We will report only types file or directory */
+
+  if ((attribute & FATATTR_DIRECTORY) != 0)
+    {
+      buf->st_mode |= S_IFDIR;
+    }
+  else
+    {
+      buf->st_mode |= S_IFREG;
+    }
+
+  /* Times */
+
+  fatdate           = DIR_GETWRTDATE(direntry);
+  fattime           = DIR_GETWRTTIME(direntry);
+  buf->st_mtime     = fat_fattime2systime(fattime, fatdate);
+
+  date2             = DIR_GETLASTACCDATE(direntry);
+  if (fatdate == date2)
+    {
+      buf->st_atime = buf->st_mtime;
+    }
+  else
+    {
+      buf->st_atime = fat_fattime2systime(0, date2);
+    }
+
+  fatdate           = DIR_GETCRDATE(direntry);
+  fattime           = DIR_GETCRTIME(direntry);
+  buf->st_ctime     = fat_fattime2systime(fattime, fatdate);
+
+  /* File/directory size, access block size */
+
+  buf->st_size      = DIR_GETFILESIZE(direntry);
+  buf->st_blksize   = fs->fs_fatsecperclus * fs->fs_hwsectorsize;
+  buf->st_blocks    = (buf->st_size + buf->st_blksize - 1) / buf->st_blksize;
+
+  return OK;
+}
+
+/****************************************************************************
  * Name: fat_stat
  *
  * Description: Return information about a file or directory
@@ -2517,11 +2651,7 @@ static int fat_stat(FAR struct inode *mountpt, FAR const char *relpath,
 {
   FAR struct fat_mountpt_s *fs;
   struct fat_dirinfo_s dirinfo;
-  uint16_t fatdate;
-  uint16_t date2;
-  uint16_t fattime;
   FAR uint8_t *direntry;
-  uint8_t attribute;
   int ret;
 
   /* Sanity checks */
@@ -2552,75 +2682,28 @@ static int fat_stat(FAR struct inode *mountpt, FAR const char *relpath,
       goto errout_with_semaphore;
     }
 
-  memset(buf, 0, sizeof(struct stat));
+  /* Get the FAT attribute and map it so some meaningful mode_t values */
+
+
   if (dirinfo.fd_root)
     {
+      /* Clear the "struct stat"  */
+
+      memset(buf, 0, sizeof(struct stat));
+
       /* It's directory name of the mount point */
 
       buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR | S_IWOTH |
                      S_IWGRP | S_IWUSR;
       ret = OK;
-      goto errout_with_semaphore;
-    }
-
-  /* Get the FAT attribute and map it so some meaningful mode_t values */
-
-  direntry  = &fs->fs_buffer[dirinfo.fd_seq.ds_offset];
-  attribute = DIR_GETATTRIBUTES(direntry);
-  if ((attribute & FATATTR_VOLUMEID) != 0)
-    {
-      ret = -ENOENT;
-      goto errout_with_semaphore;
-    }
-
-  /* Set the access permissions.  The file/directory is always readable
-   * by everyone but may be writeable by no-one.
-   */
-
-  buf->st_mode = S_IROTH | S_IRGRP | S_IRUSR;
-  if ((attribute & FATATTR_READONLY) == 0)
-    {
-      buf->st_mode |= S_IWOTH | S_IWGRP | S_IWUSR;
-    }
-
-  /* We will report only types file or directory */
-
-  if ((attribute & FATATTR_DIRECTORY) != 0)
-    {
-      buf->st_mode |= S_IFDIR;
     }
   else
     {
-      buf->st_mode |= S_IFREG;
+      /* Call fat_stat_common() to create the buf and to save information to it */
+
+      direntry = &fs->fs_buffer[dirinfo.fd_seq.ds_offset];
+      ret      = fat_stat_common(fs, direntry, buf);
     }
-
-  /* File/directory size, access block size */
-
-  buf->st_size      = DIR_GETFILESIZE(direntry);
-  buf->st_blksize   = fs->fs_fatsecperclus * fs->fs_hwsectorsize;
-  buf->st_blocks    = (buf->st_size + buf->st_blksize - 1) / buf->st_blksize;
-
-  /* Times */
-
-  fatdate           = DIR_GETWRTDATE(direntry);
-  fattime           = DIR_GETWRTTIME(direntry);
-  buf->st_mtime     = fat_fattime2systime(fattime, fatdate);
-
-  date2             = DIR_GETLASTACCDATE(direntry);
-  if (fatdate == date2)
-    {
-      buf->st_atime = buf->st_mtime;
-    }
-  else
-    {
-      buf->st_atime = fat_fattime2systime(0, date2);
-    }
-
-  fatdate           = DIR_GETCRDATE(direntry);
-  fattime           = DIR_GETCRTIME(direntry);
-  buf->st_ctime     = fat_fattime2systime(fattime, fatdate);
-
-  ret = OK;
 
 errout_with_semaphore:
   fat_semgive(fs);
