@@ -256,6 +256,7 @@ static int romfs_open(FAR struct file *filep, FAR const char *relpath,
    */
 
   rf->rf_size = dirinfo.rd_size;
+  rf->rf_type = (uint8_t)(dirinfo.rd_next & RFNEXT_ALLMODEMASK);
 
   /* Get the start of the file data */
 
@@ -737,7 +738,7 @@ static int romfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
     {
       /* Return information about the directory entry */
 
-      ret = romfs_stat_common(RFNEXT_FILE, rf->rf_size,
+      ret = romfs_stat_common(rf->rf_type, rf->rf_size,
                               rm->rm_hwsectorsize, buf);
     }
 
