@@ -1,8 +1,9 @@
 /************************************************************************************
- * configs/teensy-3.x/src/k20_spi.c
+ * configs/freedom-k66f/src/k66_spi.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -49,7 +50,7 @@
 #include "up_arch.h"
 #include "chip.h"
 #include "kinetis.h"
-#include "teensy-3x.h"
+#include "freedom-k66f.h"
 
 #if defined(CONFIG_KINETIS_SPI0) || defined(CONFIG_KINETIS_SPI1) || \
 	defined(CONFIG_KINETIS_SPI2)
@@ -59,35 +60,38 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: kinetis_spidev_initialize
+ * Name: k66_spidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the KwikStik-K40 board.
+ *   Called to configure SPI chip select GPIO pins for the FREEDOM-K66F board.
  *
  ************************************************************************************/
 
-void weak_function kinetis_spidev_initialize(void)
+void weak_function k66_spidev_initialize(void)
 {
 # warning "Missing logic"
 }
 
 /************************************************************************************
- * Name:  kinetis_spi0/1/2select and kinetis_spi0/1/2status
+ * Name:  kinetis_spi[n]select, kinetis_spi[n]status, and kinetis_spi[n]cmddata
  *
  * Description:
- *   The external functions, kinetis_spi0/1/2select and kinetis_spi0/1/2status must be
- *   provided by board-specific logic.  They are implementations of the select
- *   and status methods of the SPI interface defined by struct spi_ops_s (see
- *   include/nuttx/spi/spi.h). All other methods (including kinetis_spibus_initialize())
- *   are provided by common Kinetis logic.  To use this common SPI logic on your
- *   board:
+ *   These external functions must be provided by board-specific logic.  They are
+ *   implementations of the select, status, and cmddata methods of the SPI interface
+ *   defined by struct spi_ops_s (see include/nuttx/spi/spi.h). All other methods
+ *   including kinetis_spibus_initialize()) are provided by common Kinetis logic.
+ *   To use this common SPI logic on your board:
  *
  *   1. Provide logic in kinetis_boardinitialize() to configure SPI chip select
  *      pins.
- *   2. Provide kinetis_spi0/1/2select() and kinetis_spi0/1/2status() functions in your
- *      board-specific logic.  These functions will perform chip selection and
- *      status operations using GPIOs in the way your board is configured.
- *   3. Add a calls to kinetis_spibus_initialize() in your low level application
+ *   2. Provide kinetis_spi[n]select() and kinetis_spi[n]status() functions
+ *      in your board-specific logic.  These functions will perform chip selection
+ *      and status operations using GPIOs in the way your board is configured.
+ *   2. If CONFIG_SPI_CMDDATA is defined in the NuttX configuration, provide
+ *      kinetis_spi[n]cmddata() functions in your board-specific logic.  These
+ *      functions will perform cmd/data selection operations using GPIOs in the way
+ *      your board is configured.
+ *   3. Add a call to kinetis_spibus_initialize() in your low level application
  *      initialization logic
  *   4. The handle returned by kinetis_spibus_initialize() may then be used to bind the
  *      SPI driver to higher level logic (e.g., calling

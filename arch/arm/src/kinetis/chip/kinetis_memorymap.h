@@ -56,6 +56,8 @@
 #  include "chip/kinetis_k60memorymap.h"
 #elif defined(KINETIS_K64)
 #  include "chip/kinetis_k64memorymap.h"
+#elif defined(KINETIS_K66)
+#  include "chip/kinetis_k66memorymap.h"
 #else
 #  error "No memory map for this Kinetis part"
 #endif

@@ -170,21 +170,21 @@
 /* Peripheral Bridge 1 Memory Map ***************************************************/
 
 # define KINETIS_AIPS1_BASE         0x40080000 /* Peripheral bridge 1 (AIPS-Lite 1) */
-# define KINETIS_RNGB_BASE          0x400a0000 /* Random number generator (RNGB) */
+# define KINETIS_RNGA_ALT_BASE      0x400a0000 /* Alternate address Random number generator (RNGA) */
 # define KINETIS_USBHS_BASE         0x400a1000 /* USB OTG HS/FS/LS */
 # define KINETIS_USBHSPHY_BASE      0x400a2000 /* USBHS PHY */
 # define KINETIS_USBHSDCD_BASE      0x400a3000 /* USBHS DCD */
 # define KINETIS_CAN1_BASE          0x400a4000 /* FlexCAN 1 */
 # define KINETIS_SPI2_BASE          0x400ac000 /* DSPI 2 */
 # define KINETIS_SDHC_BASE          0x400b1000 /* eSDHC */
-/* define KINETIS_FTM2_BASE         0x400b8000 /* FlexTimer 2 */
+# define KINETIS_FTM2_ALT_BASE      0x400b8000 /* Alternate address FlexTimer 2 */
 # define KINETIS_FTM3_BASE          0x400b9000 /* FlexTimer 3 */
 # define KINETIS_ADC1_BASE          0x400bb000 /* Analog-to-digital converter (ADC) 1 */
 # define KINETIS_EMAC_BASE          0x400c0000 /* Ethernet MAC and IEEE 1588 timers */
 # define KINETIS_LPUART0_BASE       0x400c4000 /* LPUART0 */
 # define KINETIS_TPM1_BASE          0x400c9000 /* TPM1 */
 # define KINETIS_TPM2_BASE          0x400ca000 /* TPM2 */
-# define KINETIS_DAC0_BASE          0x400cc000 /* 12-bit digital-to-analog converter (DAC) 0 */
+# define KINETIS_DAC0_ALT_BASE      0x400cc000 /* Alternate address 12-bit digital-to-analog converter (DAC) 0 */
 # define KINETIS_DAC1_BASE          0x400cd000 /* 12-bit digital-to-analog converter (DAC) 1 */
 # define KINETIS_I2C2_BASE          0x400e6000 /* I2C 2 */
 # define KINETIS_I2C3_BASE          0x400e7000 /* I2C 3 */

@@ -278,7 +278,8 @@ void kinetis_pllconfig(void)
    *
    * Either the external clock or crystal frequency is used to select the
    * PRDIV value. Only reference clock frequencies are supported that will
-   * produce a 2MHz reference clock to the PLL.
+   * produce a KINETIS_MCG_PLL_REF_MIN >= PLLIN <= KINETIS_MCG_PLL_REF_MAX
+   * reference clock to the PLL.
    */
 
   putreg8(MCG_C5_PRDIV(BOARD_PRDIV), KINETIS_MCG_C5);

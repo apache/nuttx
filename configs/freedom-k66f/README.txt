@@ -1,13 +1,13 @@
 README.txt
 ==========
 
-This is the README file for the port of NuttX to the Freescale Freedom-K64F
+This is the README file for the port of NuttX to the Freescale Freedom-K66F
 develoment board.
 
 Contents
 ========
 
-  o Freedom K64F Features
+  o Freedom K66F Features
   o Serial Console
   o LEDs and Buttons
   o Networking Support
@@ -15,48 +15,51 @@ Contents
   o USB Device Controller Support
   o Development Environment
   o GNU Toolchain Options
-  o Freedom K64F Configuration Options
+  o Freedom K66F Configuration Options
   o Configurations
   o Status
 
-Kinetis Freedom K64F Features:
+Kinetis Freedom K66F Features:
 =============================
 
-  The features of the FRDM-K64F hardware are as follows:
+  The features of the FRDM-K66F hardware are as follows:
 
-  - MK64FN1M0VLL12 MCU (120 MHz, 1 MB flash memory, 256 KB RAM, low-power,
-    crystal-less USB, and 100 LQFP)
+  - MK66FN2M0VMD18 MCU (180 MHz, 2MB Flash, 256KB RAM, 144MBGA package)
   - Dual role USB interface with micro-B USB connector
   - RGB LED
   - FXOS8700CQ - accelerometer and magnetometer
+  - FXAS21002 - Gyroscope
   - Two user push buttons
-  - Flexible power supply option - OpenSDAv2 USB, K64 USB, and external
-    source
+  - Flexible power supply options – OpenSDAv2.1 USB, K66F USB, and external
+    sources
   - Easy access to MCU input/output through Arduino R3TM compatible I/O
     connectors
-  - Programmable OpenSDAv2 debug circuit supporting the CMSIS-DAP Interface
-    software that provides:
-    o Mass storage device (MSD) flash programming interface
-    o CMSIS-DAP debug interface over a driver-less USB HID connection
-       providing run-control debugging and compatibility with IDE tools
+  - Programmable OpenSDAv2.1 debug interface with multiple applications
+    available
+    including:
+    o SWD debug interface over a USB HID connection providing run-control
+      debugging and compatibility with IDE tools
     o Virtual serial port interface
-    o Open-source CMSIS-DAP software project: github.com/mbedmicro/CMSIS-DAP.
   - Ethernet
-  - SDHC
-  - Add-on RF module: nRF24L01+ Nordic 2.4GHz Radio
-  - Add-on Bluetooth module: JY-MCU BT board V1.05 BT
+  - Micro SD
+  - Audio features
+    o Digital MEMS microphone
+    o Auxiliary input jack
+    o Headset/Analog microphone jack
+    o Two optional input for analogue microphone
+  - Optional header for add-on RF module: RF24L01+ Nordic 2.4 GHz Radio
+  - Optional header for add-on Bluetooth module: JY-MCU BT Board V1.05 BT
 
-OpenSDAv2
+OpenSDAv2.1
 =========
 
-  The FRDM-K64F platform features OpenSDAv2, the Freescale open-source
-  hardware embedded serial and debug adapter running an open-source
-  bootloader. This circuit offers several options for serial communication,
-  flash programming, and run-control debugging. OpenSDAv2 is an mbed
-  HDK-compatible debug interface preloaded with the open-source CMSIS-DAP
-  Interface firmware (mbed interface) for rapid prototyping and product
-  development.
-  
+  The FRDM-K66F platform features OpenSDAv2.1, the NXP open-source hardware
+  embedded serial and debug adapter running an open-source bootloader.
+  This circuit offers several options for serial communication, flash
+  programming and run-control debugging. The openSDAv2.1 is loaded with
+  JLink firmware for rapid prototyping and product development, with a focus
+  on connected Internet of Things devices.
+
   To use set raw binary output for nuttx.bin
 
 Serial Console
@@ -65,7 +68,7 @@ Serial Console
   USB VCOM Console
   ----------------
   The primary serial port interface signals are PTB16 UART0_RX and PTB17
-  UART0_TX. These signals are connected to the OpenSDAv2 VCOM circuit.
+  UART0_TX. These signals are connected to the OpenSDAv2.1 VCOM circuit.
 
   Serial Shield Console
   ---------------------
@@ -73,7 +76,7 @@ Serial Console
   on the Freedom Board.  In this case, Arduino pin D1 provides UART TX and
   pin D0 privides UART RX.
 
-  The I/O headers on the FRDM-K64F board are arranged to enable
+  The I/O headers on the FRDM-K66F board are arranged to enable
   compatibility with Arduino shield. The outer rows of pins (even numbered
   pins) on the headers, share the same mechanical spacing and placement with
   the I/O headers on the Arduino Revision 3 (R3) standard.
@@ -81,15 +84,15 @@ Serial Console
   The Arduino D0 and D1 pins then correspond to pins 2 and 4 on the J1 I/O
   connector:
 
-    Arduino Pin              FRDM-K64F J1 Connector
+    Arduino Pin              FRDM-K66F J1 Connector
     ------------------------ -----------------------
-    UART TX, Arduino D1 pin  Pin 4, PTC17, UART3_TX
-    UART RX, Arduino D0 pin  Pin 2, PTC16, UART3_RX
+    UART RX, Arduino D0 pin  Pin 2, PTC3, UART1_RX
+    UART TX, Arduino D1 pin  Pin 4, PTC4, UART1_TX
 
   Default Serial Console
   ----------------------
   By default, these configuration are setup to use the Serial Console on
-  UART3.  That, however, is easily reconfigured.
+  UART1.  That, however, is easily reconfigured.
 
 LEDs and Buttons
 ================
@@ -98,15 +101,15 @@ LEDs and Buttons
   -------
   An RGB LED is connected through GPIO as shown below:
 
-    LED    K64
+    LED    K66
     ------ -------------------------------------------------------
-    RED    PTB22/SPI2_SOUT/FB_AD29/CMP2_OUT
-    BLUE   PTB21/SPI2_SCK/FB_AD30/CMP1_OUT
-    GREEN  PTE26/ENET_1588_CLKIN/UART4_CTS_b/RTC_CLKOUT/USB0_CLKIN
+    RED    PTC9/ADC1_SE5B/CMP0_IN3/FTM3_CH5/I2S0_RX_BCLK/FB_AD6/SDRAM_A14/FTM_FLT0
+    GREEN  PTE6/LLWU_P16/SPI1_PCS3/UART3_CTS/I2S0_MCLK/FTM3_CH1/USB0_SOF_OUT
+    BLUE   PTA11/LLWU_P23/FTM2_CH1/MII0_RXCLK/I2C2_SDA/FTM2_QD_PHB/TPM2_CH1
 
   If CONFIG_ARCH_LEDs is defined, then NuttX will control the LED on board the
-  Freedom KL25Z.  Usage of these LEDs is defined in include/board.h and
-  src/k64_leds.c.  The following definitions describe how NuttX controls the LEDs:
+  Freedom K66.  Usage of these LEDs is defined in include/board.h and
+  src/K66_leds.c.  The following definitions describe how NuttX controls the LEDs:
 
     SYMBOL                Meaning                 LED state
                                                   RED   GREEN  BLUE
@@ -119,19 +122,19 @@ LEDs and Buttons
     LED_SIGNAL           In a signal handler      (no change)
     LED_ASSERTION        An assertion failed      (no change)
     LED_PANIC            The system has crashed    FLASH OFF OFF
-    LED_IDLE             K64 is in sleep mode     (Optional, not used)
+    LED_IDLE             K66 is in sleep mode     (Optional, not used)
 
   Buttons
   -------
-  Two push buttons, SW2 and SW3, are available on FRDM-K64F board, where
-  SW2 is connected to PTC6 and SW3 is connected to PTA4. Besides the
-  general purpose input/output functions, SW2 and SW3 can be low-power
-  wake up signal. Also, only SW3 can be a non-maskable interrupt.
+  Two push button switches, SW2 and SW3, are available on the FRDM-K66F
+  board. SW2 is connected to PTD11 and SW3 is connected to PTA10.
+  Beside the general purpose IO function, both SW2 and SW3 can be used
+  as a low-leakage wakeup (LLWU) source.
 
   Switch    GPIO Function
   --------- ---------------------------------------------------------------
-  SW2       PTC6/SPI0_SOUT/PD0_EXTRG/I2S0_RX_BCLK/FB_AD9/I2S0_MCLK/LLWU_P10
-  SW3       PTA4/FTM0_CH1/NMI_b/LLWU_P3
+  SW2       PTD11/LLWU_P25/SPI2_PCS0/SDHC0_CLKIN/LPUART0_CTS/FB_A19
+  SW3       PTA10/LLWU_P22/FTM2_CH0/MII0_RXD2/FTM2_QD_PHA/TPM2_CH0/TRACE_D0
 
 Networking Support
 ==================
@@ -139,7 +142,7 @@ Networking Support
   Ethernet MAC/KSZ8081 PHY
   ------------------------
   ------------ ----------------- --------------------------------------------
-  KSZ8081      Board Signal(s)   K64F Pin
+  KSZ8081      Board Signal(s)   K66F Pin
   Pin Signal                     Function                       pinmux Name
   --- -------- ----------------- --------------------------------------------
    1  VDD_1V2  VDDPLL_1.2V       ---                            ---
@@ -157,7 +160,7 @@ Networking Support
   13  RXD0     RMII0_RXD_0       PTA13/RMII0_RXD0               PIN_RMII0_RXD0
   14  VDDIO    VDDIO_ENET        ---                            ---
   15  CRS_DIV                    PTA14/RMII0_CRS_DV             PIN_RMII0_CRS_DV
-  16  REF_CLK  RMII_RXCLK        PTA18/EXTAL0, PHY clock input  ---
+  16  REF_CLK  PTE26             PTE26(Ethernet clock)          PTE26/ENET_1588_CLKIN
   17  RXER     RMII0_RXER        PTA5/RMII0_RXER                PIN_RMII0_RXER
   18  INTRP    RMII0_INT_B,      J14 Pin 2, Apparently not      ---
                PHY_INT_1         available unless jumpered
@@ -169,13 +172,13 @@ Networking Support
   25  GND2     ---               ---                            ---
   --- -------- ----------------- --------------------------------------------
 
-  No external pullup is available on MDIO signal when MK64FN1M0VLL12 MCU is
-  requests status of the Ethernet link connection. Internal pullup is required
-  when port configuration for MDIO signal is enabled:
+  There is no external pull up on MDIO signal when MK66FN2M0VMD18 is
+  requesting status of the Ethernet link connection. Internal pull is
+  required when enabled in port configuration for MDIO signal.
 
     CONFIG_KINETIS_ENET_MDIOPULLUP=y
 
-  Networking support via the can be added to NSH by selecting the following
+  Networking support can be added to NSH by selecting the following
   configuration options.
 
   Selecting the EMAC peripheral
@@ -211,8 +214,8 @@ Networking Support
     CONFIG_NET_ICMP=y                   : Enable ICMP networking
     CONFIG_NET_ICMP_PING=y              : Needed for NSH ping command
                                         : Defaults should be okay for other options
-f Application Configuration -> Network Utilities
-    CONFIG_NETDB_DNSCLIENT=y               : Enable host address resolution
+ Application Configuration -> Network Utilities
+    CONFIG_NETDB_DNSCLIENT=y            : Enable host address resolution
     CONFIG_NETUTILS_TELNETD=y           : Enable the Telnet daemon
     CONFIG_NETUTILS_TFTPC=y             : Enable TFTP data file transfers for get and put commands
     CONFIG_NETUTILS_NETLIB=y            : Network library support is needed
@@ -257,7 +260,7 @@ f Application Configuration -> Network Utilities
   you can enable like DHCP client (or server) or network name
   resolution.
 
-  By default, the IP address of the FRDM-K64F will be 10.0.0.2 and
+  By default, the IP address of the FRDM-K66F will be 10.0.0.2 and
   it will assume that your host is the gateway and has the IP address
   10.0.0.1.
 
@@ -287,7 +290,7 @@ f Application Configuration -> Network Utilities
   the first time you ping due to the default handling of the ARP
   table.
 
-  On the host side, you should also be able to ping the FRDM-K64F:
+  On the host side, you should also be able to ping the FRDM-K66F:
 
     $ ping 10.0.0.2
 
@@ -299,7 +302,7 @@ f Application Configuration -> Network Utilities
     Escape character is '^]'.
     sh_telnetmain: Session [3] Started
 
-    NuttShell (NSH) NuttX-6.31
+    NuttShell (NSH) NuttX-7.19
     nsh> help
     help usage:  help [-v] [<cmd>]
 
@@ -369,10 +372,10 @@ f Application Configuration -> Network Utilities
 
     - CONFIG_NSH_NETINIT_THREAD as described above.
 
-    - The K64F EMAC block does not support PHY interrupts.  The KSZ8081
+    - The K66F EMAC block does not support PHY interrupts.  The KSZ8081
       PHY interrupt line is brought to a jumper block and it should be
       possible to connect that some some interrupt port pin.  You would
-      need to provide some custom logic in the Freedcom K64F
+      need to provide some custom logic in the Freedcom K66F
       configuration to set up that PHY interrupt.
 
     - In addtion to the PHY interrupt, the Network Monitor also requires the
@@ -386,7 +389,7 @@ f Application Configuration -> Network Utilities
 
         CONFIG_ARCH_PHY_INTERRUPT. This is not a user selectable option.
         Rather, it is set when you select a board that supports PHY
-        interrupts.  For the K64F, like most other architectures, the PHY
+        interrupts.  For the K66F, like most other architectures, the PHY
         interrupt must be provided via some board-specific GPIO.  In any
         event, the board-specific logic must provide support for the PHY
         interrupt. To do this, the board logic must do two things: (1) It
@@ -416,13 +419,13 @@ SD Card Support
 
   Card Slot
   ---------
-  A micro Secure Digital (SD) card slot is available on the FRDM-K64F connected to
+  A micro Secure Digital (SD) card slot is available on the FRDM-K66F connected to
   the SD Host Controller (SDHC) signals of the MCU. This slot will accept micro
-  format SD memory cards. The SD card detect pin (PTE6) is an open switch that
+  format SD memory cards. The SD card detect pin (PTD10) is an open switch that
   shorts with VDD when card is inserted.
 
     ------------ ------------- --------
-    SD Card Slot Board Signal  K64F Pin
+    SD Card Slot Board Signal  K66F Pin
     ------------ ------------- --------
     DAT0         SDHC0_D0      PTE1
     DAT1         SDHC0_D1      PTE0
@@ -430,14 +433,14 @@ SD Card Support
     CD/DAT3      SDHC0_D3      PTE4
     CMD          SDHC0_CMD     PTE3
     CLK          SDHC0_DCLK    PTE2
-    SWITCH       D_CARD_DETECT PTE6
+    SWITCH       D_CARD_DETECT PTD10
     ------------ ------------- --------
 
-  There is no Write Protect pin available to the K64F.
+  There is no Write Protect pin available to the K66F.
 
   Configuration Settings
   ----------------------
-  Enabling SDHC support. The Freedom K64F provides one microSD memory card
+  Enabling SDHC support. The Freedom K66F provides one microSD memory card
   slot.  Support for the SD slots can be enabled with the following
   settings:
 
@@ -525,12 +528,12 @@ SD Card Support
       CONFIG_FS_AUTOMOUNTER=y
 
     Board-Specific Options
-      CONFIG_FRDMK64F_SDHC_AUTOMOUNT=y
-      CONFIG_FRDMK64F_SDHC_AUTOMOUNT_FSTYPE="vfat"
-      CONFIG_FRDMK64F_SDHC_AUTOMOUNT_BLKDEV="/dev/mmcsd0"
-      CONFIG_FRDMK64F_SDHC_AUTOMOUNT_MOUNTPOINT="/mnt/sdcard"
-      CONFIG_FRDMK64F_SDHC_AUTOMOUNT_DDELAY=1000
-      CONFIG_FRDMK64F_SDHC_AUTOMOUNT_UDELAY=2000
+      CONFIG_FRDMK66F_SDHC_AUTOMOUNT=y
+      CONFIG_FRDMK66F_SDHC_AUTOMOUNT_FSTYPE="vfat"
+      CONFIG_FRDMK66F_SDHC_AUTOMOUNT_BLKDEV="/dev/mmcsd0"
+      CONFIG_FRDMK66F_SDHC_AUTOMOUNT_MOUNTPOINT="/mnt/sdcard"
+      CONFIG_FRDMK66F_SDHC_AUTOMOUNT_DDELAY=1000
+      CONFIG_FRDMK66F_SDHC_AUTOMOUNT_UDELAY=2000
 
   WARNING:  SD cards should never be removed without first unmounting
   them.  This is to avoid data and possible corruption of the file
@@ -651,7 +654,7 @@ GNU Toolchain Options
 
      An alias in your .bashrc file might make that less painful.
 
-Freedom K64F Configuration Options
+Freedom K66F Configuration Options
 ==================================
 
     CONFIG_ARCH - Identifies the arch/ subdirectory.  This sould
@@ -674,16 +677,16 @@ Freedom K64F Configuration Options
     CONFIG_ARCH_CHIP_name - For use in C code to identify the exact
        chip:
 
-       CONFIG_ARCH_CHIP_MK64FN1M0VLL12
+       CONFIG_ARCH_CHIP_MK66FN2M0VMD18
 
     CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
        hence, the board that supports the particular chip or SoC.
 
-       CONFIG_ARCH_BOARD="freedom-k64f" (for the Freedom K64F development board)
+       CONFIG_ARCH_BOARD="freedom-K66F" (for the Freedom K66F development board)
 
     CONFIG_ARCH_BOARD_name - For use in C code
 
-       CONFIG_ARCH_BOARD_FREEDOM_K64F=y
+       CONFIG_ARCH_BOARD_FREEDOM_K66F=y
 
     CONFIG_ARCH_LOOPSPERMSEC - Must be calibrated for correct operation
        of delay loops
@@ -693,11 +696,11 @@ Freedom K64F Configuration Options
 
     CONFIG_RAM_SIZE - Describes the installed DRAM (SRAM in this case):
 
-       CONFIG_RAM_SIZE=0x00010000 (64Kb)
+       CONFIG_RAM_SIZE=0x00040000 (256Kb)
 
     CONFIG_RAM_START - The start address of installed DRAM
 
-       CONFIG_RAM_START=0x20000000
+       CONFIG_RAM_START=0x1fff0000
 
     CONFIG_ARCH_LEDS - Use LEDs to show state. Unique to boards that
        have LEDs
@@ -737,6 +740,8 @@ Freedom K64F Configuration Options
     CONFIG_KINETIS_SPI2     -- Support SPI2
     CONFIG_KINETIS_I2C0     -- Support I2C0
     CONFIG_KINETIS_I2C1     -- Support I2C1
+    CONFIG_KINETIS_I2C2     -- Support I2C2
+    CONFIG_KINETIS_I2C3     -- Support I2C3
     CONFIG_KINETIS_I2S      -- Support I2S
     CONFIG_KINETIS_DAC0     -- Support DAC0
     CONFIG_KINETIS_DAC1     -- Support DAC1
@@ -748,6 +753,7 @@ Freedom K64F Configuration Options
     CONFIG_KINETIS_FTM0     -- Support FlexTimer 0
     CONFIG_KINETIS_FTM1     -- Support FlexTimer 1
     CONFIG_KINETIS_FTM2     -- Support FlexTimer 2
+    CONFIG_KINETIS_FTM3     -- Support FlexTimer 3
     CONFIG_KINETIS_LPTIMER  -- Support the low power timer
     CONFIG_KINETIS_RTC      -- Support RTC
     CONFIG_KINETIS_SLCD     -- Support the segment LCD (K3x, K4x, and K5x only)
@@ -763,6 +769,7 @@ Freedom K64F Configuration Options
     CONFIG_KINETIS_PDB      -- Support the Programmable Delay Block
     CONFIG_KINETIS_PIT      -- Support Programmable Interval Timers
     CONFIG_ARM_MPU          -- Support the MPU
+    CONFIG_ARM_CAU          -- Support the Cryptographic Acceleration Unit
 
   Kinetis interrupt priorities (Default is the mid priority).  These should
   not be set because they can cause unhandled, nested interrupts.  All
@@ -792,10 +799,10 @@ Freedom K64F Configuration Options
     CONFIG_KINETIS_PORTDINTS -- Support 32 Port D interrupts
     CONFIG_KINETIS_PORTEINTS -- Support 32 Port E interrupts
 
-  Kinetis K64 specific device driver settings
+  Kinetis K66 specific device driver settings
 
     CONFIG_UARTn_SERIAL_CONSOLE - selects the UARTn (n=0..5) for the
-      console and ttys0 (default is the UART0).
+      console and ttys0 (default is the UART1).
     CONFIG_UARTn_RXBUFSIZE - Characters are buffered as received.
        This specific the size of the receive buffer
     CONFIG_UARTn_TXBUFSIZE - Characters are buffered before
@@ -816,11 +823,11 @@ Freedom K64F Configuration Options
 Configurations
 ==============
 
-Each Freedom K64F configuration is maintained in a sub-directory and
+Each Freedom K66F configuration is maintained in a sub-directory and
 can be selected as follow:
 
     cd tools
-    ./configure.sh freedom-k64f/<subdir>
+    ./configure.sh freedom-K66F/<subdir>
     cd -
     . ./setenv.sh
 
@@ -849,7 +856,7 @@ Where <subdir> is one of the following:
        CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : ARM/mbed toolcahin (arm-none-elf-gcc)
        CONFIG_INTELHEX_BINARY=y            : Output formats: Intel hex binary
 
-    3. The Serial Console is provided on UART3 with the correct pin
+    3. The Serial Console is provided on UART1 with the correct pin
        configuration for use with an Arduino Serial Shield.
 
     4. SDHC support is not enabled in this configuration.  Refer to the
@@ -858,7 +865,7 @@ Where <subdir> is one of the following:
     5. Support for NSH built-in applications is enabled, but no built-in
        applications have been configured in.
 
-    6. No external pullup is available on MDIO signal when MK64FN1M0VLL12 MCU
+    6. No external pullup is available on MDIO signal when MK66FN1M0VLL12 MCU
        is requests status of the Ethernet link connection. Internal pullup is
        required when port configuration for MDIO signal is enabled:
 
@@ -879,7 +886,7 @@ Where <subdir> is one of the following:
   nsh:
   ---
     Configures the NuttShell (nsh) located at apps/examples/nsh using a
-    serial console on UART3.
+    serial console on UART1.
 
     NOTES:
 
@@ -899,30 +906,30 @@ Where <subdir> is one of the following:
          CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : ARM/mbed toolcahin (arm-none-elf-gcc)
          CONFIG_INTELHEX_BINARY=y            : Output formats: Intel hex binary
 
-    3. The Serial Console is provided on UART0 with the correct pin
-       configuration for use with the OpenSDAv2 VCOM.  This can be switched
-       to use a RS-232 shield on UART3 by reconfiguring the serial console.
+    3. The Serial Console is provided on UART1 with the correct pin
+       configuration to use a RS-232 shield. This can be switched to UART0
+       for use with the OpenSDAv2.1 VCOM by reconfiguring the serial console.
 
-         -CONFIG_KINETIS_UART0=y
-         +CONFIG_KINETIS_UART3=y
-         -CONFIG_UART0_SERIALDRIVER=y
-         +CONFIG_UART3_SERIALDRIVER=y
-         -CONFIG_UART0_SERIAL_CONSOLE=y
-         +CONFIG_UART3_SERIAL_CONSOLE=y
-         -CONFIG_UART0_RXBUFSIZE=256
-         +CONFIG_UART3_RXBUFSIZE=256
-         -CONFIG_UART0_TXBUFSIZE=256
-         +CONFIG_UART3_TXBUFSIZE=256
-         -CONFIG_UART0_BAUD=115200
-         +CONFIG_UART3_BAUD=115200
-         -CONFIG_UART0_BITS=8
-         +CONFIG_UART3_BITS=8
-         -CONFIG_UART0_PARITY=0
-         +CONFIG_UART3_PARITY=0
-         -CONFIG_UART0_2STOP=0
-         +CONFIG_UART3_2STOP=0
+         +CONFIG_KINETIS_UART0=y
+         -CONFIG_KINETIS_UART1=y
+         +CONFIG_UART0_SERIALDRIVER=y
+         -CONFIG_UART1_SERIALDRIVER=y
+         +CONFIG_UART0_SERIAL_CONSOLE=y
+         -CONFIG_UART1_SERIAL_CONSOLE=y
+         +CONFIG_UART0_RXBUFSIZE=256
+         -CONFIG_UART1_RXBUFSIZE=256
+         +CONFIG_UART0_TXBUFSIZE=256
+         -CONFIG_UART1_TXBUFSIZE=256
+         +CONFIG_UART0_BAUD=115200
+         1CONFIG_UART1_BAUD=115200
+         +CONFIG_UART0_BITS=8
+         -CONFIG_UART1_BITS=8
+         +CONFIG_UART0_PARITY=0
+         -CONFIG_UART1_PARITY=0
+         +CONFIG_UART0_2STOP=0
+         -CONFIG_UART1_2STOP=0
 
-       NOTE: On my Windows 10 / Cygwin64 system, the OpenSDAv2 VCOM is not
+       NOTE: On my Windows 10 / Cygwin64 system, the OpenSDAv2.1 VCOM is not
        recognized.  I probably need to install a driver?
 
        There is a serial USB driver on the mbed web site.  However, this
@@ -934,24 +941,14 @@ Where <subdir> is one of the following:
 
     5. An SDHC driver is enabled in this configuration but does not yet work.
        The basic problem seems to be that it does not sense the presence of
-       the SD card on PTE6.  No interrupts are generated when the SD card is
+       the SD card on PTD10.  No interrupts are generated when the SD card is
        inserted or removed.  You might want to disable SDHC and MMC/SD if
        you are using this configuration.  Refer to the configuration
        settings listed above under "SD Card Support".
+       TODO:Verify Claim
 
 Status
 ======
-
-  2016-07-11:  Received hardware today and the board came up on the very
-    first try.  That does not happen often.  At this point, the very basic
-    NSH configuration is working and LEDs are working.
-
-    The only odd behavior that I see is that pressing SW3 causes an NMI
-    interrupt (followed by a crash):
-
-      kinetis_nmi: PANIC!!! NMI received
-
-    I don't yet understand why this is.
 
   2016-07-12:  Added support for the KSZ8081 PHY and added the netnsh
     configuration.  The network is basically functional.  More testing is
@@ -960,7 +957,8 @@ Status
     In testing, I notice a strange thing.  If I run at full optimization the
     code runs (albeit with bugs-to-be-solved).  But with no optimization or
     even at -O1, the system fails to boot.  This seems to be related to the
-    watchdog timer.
+    watchdog timer - this is due to the fact that in-lined get/putreg are
+    not inlined and the delay allows for the WD to timeout.
 
   2016-07-13:  Add SD automounter logic; broke out SDHC logic into a separate
     file.  The nsh configuration now has SDHC enabled be default.  Does not
@@ -972,8 +970,3 @@ Status
     The nsh configuration now builds successfully with USB device enabled.
     USB device, however, has not yet been tested.  I have not yet looked
     into 48MHz clocking requirements.
-
-  2017-02-10:  These have been numerous SDHC fixes submitted by Marc Rechte'.
-    These may or may not have fixed the SDHC issues mentioned about.  You
-    would have to retest to verify the SDHC functionality.
-

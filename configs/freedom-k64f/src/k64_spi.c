@@ -51,7 +51,8 @@
 #include "kinetis.h"
 #include "freedom-k64f.h"
 
-#if defined(CONFIG_KINETIS_SPI1) || defined(CONFIG_KINETIS_SPI2)
+#if defined(CONFIG_KINETIS_SPI0) || defined(CONFIG_KINETIS_SPI1) || \
+	defined(CONFIG_KINETIS_SPI2)
 
 /************************************************************************************
  * Public Functions
@@ -98,6 +99,20 @@ void weak_function k64_spidev_initialize(void)
  *
  ************************************************************************************/
 
+#ifdef CONFIG_KINETIS_SPI0
+void kinetis_spi0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+{
+  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+# warning "Missing logic"
+}
+
+uint8_t kinetis_spi0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+{
+# warning "Missing logic"
+  return SPI_STATUS_PRESENT;
+}
+#endif
+
 #ifdef CONFIG_KINETIS_SPI1
 void kinetis_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
@@ -126,18 +141,4 @@ uint8_t kinetis_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 }
 #endif
 
-#ifdef CONFIG_KINETIS_SPI3
-void kinetis_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
-{
-  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
-# warning "Missing logic"
-}
-
-uint8_t kinetis_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
-{
-# warning "Missing logic"
-  return SPI_STATUS_PRESENT;
-}
-#endif
-
-#endif /* CONFIG_KINETIS_SPI1 || CONFIG_KINETIS_SPI2 */
+#endif /* CONFIG_KINETIS_SPI0 || CONFIG_KINETIS_SPI1 || CONFIG_KINETIS_SPI2 */

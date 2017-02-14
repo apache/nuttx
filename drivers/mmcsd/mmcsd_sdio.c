@@ -2120,7 +2120,7 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
         }
 
 #else
-      /* Use either the single- or muliple-block transfer method */
+      /* Use either the single- or multiple-block transfer method */
 
       if (nsectors == 1)
         {
