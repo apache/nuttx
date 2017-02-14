@@ -110,6 +110,9 @@ static int     smartfs_rmdir(FAR struct inode *mountpt,
 static int     smartfs_rename(FAR struct inode *mountpt,
                         FAR const char *oldrelpath,
                         const char *newrelpath);
+static void    smartfs_stat_common(FAR struct smartfs_mountpt_s *fs,
+                        FAR struct smartfs_entry_s *entry,
+                        FAR struct stat *buf);
 static int     smartfs_stat(FAR struct inode *mountpt,
                         FAR const char *relpath,
                         FAR struct stat *buf);
@@ -200,7 +203,7 @@ static int smartfs_open(FAR struct file *filep, const char *relpath,
 
   /* Locate the directory entry for this path */
 
-  sf = (struct smartfs_ofile_s *) kmm_malloc(sizeof *sf);
+  sf = (struct smartfs_ofile_s *)kmm_malloc(sizeof *sf);
   if (sf == NULL)
     {
       ret = -ENOMEM;
@@ -210,7 +213,7 @@ static int smartfs_open(FAR struct file *filep, const char *relpath,
   /* Allocate a sector buffer if CRC enabled in the MTD layer */
 
 #ifdef CONFIG_SMARTFS_USE_SECTOR_BUFFER
-  sf->buffer = (uint8_t *) kmm_malloc(fs->fs_llformat.availbytes);
+  sf->buffer = (uint8_t *)kmm_malloc(fs->fs_llformat.availbytes);
   if (sf->buffer == NULL)
     {
       /* Error ... no memory */
@@ -1278,8 +1281,30 @@ static int smartfs_dup(FAR const struct file *oldp, FAR struct file *newp)
 
 static int smartfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
 {
-#warning Missing logic
-  return -ENOSYS;
+  FAR struct inode *inode;
+  FAR struct smartfs_mountpt_s *fs;
+  FAR struct smartfs_ofile_s *sf;
+
+  DEBUGASSERT(filep != NULL && buf != NULL);
+
+  /* Recover our private data from the struct file instance */
+
+  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
+  sf    = filep->f_priv;
+  inode = filep->f_inode;
+
+  fs    = inode->i_private;
+  DEBUGASSERT(fs != NULL);
+
+  /* Take the semaphore */
+
+  smartfs_semtake(fs);
+
+  /* Return information about the directory entry in the stat structure */
+
+  smartfs_stat_common(fs, &sf->entry, buf);
+  smartfs_semgive(fs);
+  return OK;
 }
 
 /****************************************************************************
@@ -2040,19 +2065,61 @@ errout_with_semaphore:
 }
 
 /****************************************************************************
- * Name: smartfs_stat
+ * Name: smartfs_stat_common
  *
- * Description: Return information about a file or directory
+ * Description:
+ *   Return information about a directory entry
  *
  ****************************************************************************/
 
-static int smartfs_stat(struct inode *mountpt, const char *relpath, struct stat *buf)
+static void smartfs_stat_common(FAR struct smartfs_mountpt_s *fs,
+                                FAR struct smartfs_entry_s *entry,
+                                FAR struct stat *buf)
 {
-  struct smartfs_mountpt_s *fs;
-  struct smartfs_entry_s    entry;
-  int                       ret;
-  uint16_t                  parentdirsector;
-  const char               *filename;
+  /* Initialize the stat structure */
+
+  memset(buf, 0, sizeof(struct stat));
+  if (entry->firstsector == fs->fs_rootsector)
+    {
+      /* It's directory name of the mount point */
+
+      buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR | S_IWOTH |
+                     S_IWGRP | S_IWUSR;
+    }
+  else
+    {
+      buf->st_mode = entry->flags & 0xFFF;
+      if ((entry->flags & SMARTFS_DIRENT_TYPE) == SMARTFS_DIRENT_TYPE_DIR)
+        {
+          buf->st_mode |= S_IFDIR;
+        }
+      else
+        {
+          buf->st_mode |= S_IFREG;
+        }
+
+      buf->st_size    = entry->datlen;
+      buf->st_blksize = fs->fs_llformat.availbytes;
+      buf->st_blocks  = (buf->st_size + buf->st_blksize - 1) / buf->st_blksize;
+    }
+}
+
+/****************************************************************************
+ * Name: smartfs_stat
+ *
+ * Description:
+ *   Return information about a file or directory
+ *
+ ****************************************************************************/
+
+static int smartfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
+                        FAR struct stat *buf)
+{
+  FAR struct smartfs_mountpt_s *fs;
+  FAR struct smartfs_entry_s entry;
+  FAR const char *filename;
+  uint16_t parentdirsector;
+  int ret;
 
   /* Sanity checks */
 
@@ -2074,35 +2141,9 @@ static int smartfs_stat(struct inode *mountpt, const char *relpath, struct stat 
       goto errout_with_semaphore;
     }
 
-  /* Initialize the stat structure */
+  /* Return information about the directory entry in the stat structure */
 
-  memset(buf, 0, sizeof(struct stat));
-  if (entry.firstsector == fs->fs_rootsector)
-    {
-      /* It's directory name of the mount point */
-
-      buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR | S_IWOTH |
-                     S_IWGRP | S_IWUSR;
-      ret = OK;
-      goto errout_with_semaphore;
-    }
-
-  buf->st_mode = entry.flags & 0xFFF;
-  if ((entry.flags & SMARTFS_DIRENT_TYPE) == SMARTFS_DIRENT_TYPE_DIR)
-    {
-      buf->st_mode |= S_IFDIR;
-    }
-  else
-    {
-      buf->st_mode |= S_IFREG;
-    }
-
-  buf->st_size      = entry.datlen;
-  buf->st_blksize   = fs->fs_llformat.availbytes;
-  buf->st_blocks    = (buf->st_size + buf->st_blksize - 1) / buf->st_blksize;
-  buf->st_atime     = 0;
-  buf->st_ctime     = 0;
-
+  smartfs_stat_common(fs, &entry, buf);
   ret = OK;
 
 errout_with_semaphore:
