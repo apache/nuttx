@@ -1391,9 +1391,6 @@ o File system / Generic drivers (fs/, drivers/)
                  simple way of doing that now (other than just writing data
                  to the file).
 
-               fstat():  Currently in work.  The unverified solution is on
-                 the 'fstat' branch in the repository.
-
                link, unlink, softlink, readlink - For symbolic links.  Only
                  the ROMFS file system currently supports hard and soft links,
                  so this is not too important.
