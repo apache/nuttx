@@ -1,7 +1,7 @@
 /****************************************************************************
  * syscall/syscall_stublookup.c
  *
- *   Copyright (C) 2011-2013, 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013, 2015-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -235,6 +235,7 @@ uintptr_t STUB_readdir(int nbr, uintptr_t parm1);
 uintptr_t STUB_rewinddir(int nbr, uintptr_t parm1);
 uintptr_t STUB_seekdir(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_stat(int nbr, uintptr_t parm1, uintptr_t parm2);
+uintptr_t STUB_fstat(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_statfs(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_telldir(int nbr, uintptr_t parm1);
 
