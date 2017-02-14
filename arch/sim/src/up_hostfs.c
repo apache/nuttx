@@ -58,6 +58,57 @@
  * Public Functions
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: host_stat_convert
+ ****************************************************************************/
+
+static void host_stat_convert(struct stat *hostbuf, struct nuttx_stat_s *buf)
+{
+  /* Map the return values */
+
+  buf->st_mode = hostbuf->st_mode & 0777;
+
+  if (hostbuf->st_mode & S_IFDIR)
+    {
+      buf->st_mode |= NUTTX_S_IFDIR;
+    }
+  else if (hostbuf->st_mode & S_IFREG)
+    {
+      buf->st_mode |= NUTTX_S_IFREG;
+    }
+  else if (hostbuf->st_mode & S_IFCHR)
+    {
+      buf->st_mode |= NUTTX_S_IFCHR;
+    }
+  else if (hostbuf->st_mode & S_IFBLK)
+    {
+      buf->st_mode |= NUTTX_S_IFBLK;
+    }
+  else if (hostbuf->st_mode & S_IFLNK)
+    {
+      buf->st_mode |= NUTTX_S_IFLNK;
+    }
+  else /* if (hostbuf->st_mode & S_IFIFO) */
+    {
+      buf->st_mode |= NUTTX_S_IFIFO;
+    }
+
+  buf->st_size    = hostbuf->st_size;
+  buf->st_blksize = hostbuf->st_blksize;
+  buf->st_blocks  = hostbuf->st_blocks;
+  buf->st_atim    = hostbuf->st_atime;
+  buf->st_mtim    = hostbuf->st_mtime;
+  buf->st_ctim    = hostbuf->st_ctime;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: host_open
+ ****************************************************************************/
+
 int host_open(const char *pathname, int flags, int mode)
 {
   int mapflags;
@@ -106,7 +157,7 @@ int host_open(const char *pathname, int flags, int mode)
 }
 
 /****************************************************************************
- * Public Functions
+ * Name: host_close
  ****************************************************************************/
 
 int host_close(int fd)
@@ -117,7 +168,7 @@ int host_close(int fd)
 }
 
 /****************************************************************************
- * Public Functions
+ * Name: host_read
  ****************************************************************************/
 
 ssize_t host_read(int fd, void* buf, size_t count)
@@ -128,7 +179,7 @@ ssize_t host_read(int fd, void* buf, size_t count)
 }
 
 /****************************************************************************
- * Public Functions
+ * Name: host_write
  ****************************************************************************/
 
 ssize_t host_write(int fd, const void *buf, size_t count)
@@ -139,7 +190,7 @@ ssize_t host_write(int fd, const void *buf, size_t count)
 }
 
 /****************************************************************************
- * Public Functions
+ * Name: host_lseek
  ****************************************************************************/
 
 off_t host_lseek(int fd, off_t offset, int whence)
@@ -150,7 +201,7 @@ off_t host_lseek(int fd, off_t offset, int whence)
 }
 
 /****************************************************************************
- * Public Functions
+ * Name: host_ioctl
  ****************************************************************************/
 
 int host_ioctl(int fd, int request, unsigned long arg)
@@ -161,7 +212,7 @@ int host_ioctl(int fd, int request, unsigned long arg)
 }
 
 /****************************************************************************
- * Public Functions
+ * Name: host_sync
  ****************************************************************************/
 
 void host_sync(int fd)
@@ -172,7 +223,7 @@ void host_sync(int fd)
 }
 
 /****************************************************************************
- * Public Functions
+ * Name: host_dup
  ****************************************************************************/
 
 int host_dup(int fd)
@@ -181,7 +232,26 @@ int host_dup(int fd)
 }
 
 /****************************************************************************
- * Public Functions
+ * Name: host_fstat
+ ****************************************************************************/
+
+int host_fstat(int fd, struct nuttx_stat_s *buf)
+{
+  struct stat hostbuf;
+  int ret;
+
+  /* Call the host's stat routine */
+
+  ret = fstat(fd, &hostbuf);
+
+  /* Map the return values */
+
+  host_stat_convert(&hostbuf, buf);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: host_opendir
  ****************************************************************************/
 
 void *host_opendir(const char *name)
@@ -192,50 +262,50 @@ void *host_opendir(const char *name)
 }
 
 /****************************************************************************
- * Public Functions
+ * Name: host_readdir
  ****************************************************************************/
 
 int host_readdir(void* dirp, struct nuttx_dirent_s* entry)
 {
-    struct dirent *ent;
+  struct dirent *ent;
 
-    /* Call the host's readdir routine */
+  /* Call the host's readdir routine */
 
-    ent = readdir(dirp);
-    if (ent != NULL)
-      {
-        /* Copy the entry name */
+  ent = readdir(dirp);
+  if (ent != NULL)
+    {
+      /* Copy the entry name */
 
-        strncpy(entry->d_name, ent->d_name, sizeof(entry->d_name));
+      strncpy(entry->d_name, ent->d_name, sizeof(entry->d_name));
 
-        /* Map the type */
+      /* Map the type */
 
-        entry->d_type = 0;
-        if (ent->d_type == DT_REG)
-          {
-            entry->d_type = NUTTX_DTYPE_FILE;
-          }
-        else if (ent->d_type == DT_CHR)
-          {
-            entry->d_type = NUTTX_DTYPE_CHR;
-          }
-        else if (ent->d_type == DT_BLK)
-          {
-            entry->d_type = NUTTX_DTYPE_BLK;
-          }
-        else if (ent->d_type == DT_DIR)
-          {
-            entry->d_type = NUTTX_DTYPE_DIRECTORY;
-          }
+      entry->d_type = 0;
+      if (ent->d_type == DT_REG)
+        {
+          entry->d_type = NUTTX_DTYPE_FILE;
+        }
+      else if (ent->d_type == DT_CHR)
+        {
+          entry->d_type = NUTTX_DTYPE_CHR;
+        }
+      else if (ent->d_type == DT_BLK)
+        {
+          entry->d_type = NUTTX_DTYPE_BLK;
+        }
+      else if (ent->d_type == DT_DIR)
+        {
+          entry->d_type = NUTTX_DTYPE_DIRECTORY;
+        }
 
-        return 0;
-      }
+      return 0;
+    }
 
-    return -ENOENT;
+  return -ENOENT;
 }
 
 /****************************************************************************
- * Public Functions
+ * Name: host_rewinddir
  ****************************************************************************/
 
 void host_rewinddir(void *dirp)
@@ -246,7 +316,7 @@ void host_rewinddir(void *dirp)
 }
 
 /****************************************************************************
- * Public Functions
+ * Name: host_closedir
  ****************************************************************************/
 
 int host_closedir(void *dirp)
@@ -255,34 +325,34 @@ int host_closedir(void *dirp)
 }
 
 /****************************************************************************
- * Public Functions
+ * Name: host_statfs
  ****************************************************************************/
 
 int host_statfs(const char *path, struct nuttx_statfs_s *buf)
 {
   int           ret;
-  struct statfs host_buf; 
+  struct statfs hostbuf;
 
   /* Call the host's statfs routine */
 
-  ret = statfs(path, &host_buf);
+  ret = statfs(path, &hostbuf);
 
   /* Map the struct statfs value */
 
-  buf->f_type    = host_buf.f_type;
-  buf->f_namelen = host_buf.f_namelen;
-  buf->f_bsize   = host_buf.f_bsize;
-  buf->f_blocks  = host_buf.f_blocks;
-  buf->f_bfree   = host_buf.f_bfree;
-  buf->f_bavail  = host_buf.f_bavail;
-  buf->f_files   = host_buf.f_files;
-  buf->f_ffree   = host_buf.f_ffree;
+  buf->f_type    = hostbuf.f_type;
+  buf->f_namelen = hostbuf.f_namelen;
+  buf->f_bsize   = hostbuf.f_bsize;
+  buf->f_blocks  = hostbuf.f_blocks;
+  buf->f_bfree   = hostbuf.f_bfree;
+  buf->f_bavail  = hostbuf.f_bavail;
+  buf->f_files   = hostbuf.f_files;
+  buf->f_ffree   = hostbuf.f_ffree;
 
   return ret;
 }
 
 /****************************************************************************
- * Public Functions
+ * Name: host_unlink
  ****************************************************************************/
 
 int host_unlink(const char *pathname)
@@ -291,7 +361,7 @@ int host_unlink(const char *pathname)
 }
 
 /****************************************************************************
- * Public Functions
+ * Name: host_mkdir
  ****************************************************************************/
 
 int host_mkdir(const char *pathname, mode_t mode)
@@ -302,7 +372,7 @@ int host_mkdir(const char *pathname, mode_t mode)
 }
 
 /****************************************************************************
- * Public Functions
+ * Name: host_rmdir
  ****************************************************************************/
 
 int host_rmdir(const char *pathname)
@@ -311,7 +381,7 @@ int host_rmdir(const char *pathname)
 }
 
 /****************************************************************************
- * Public Functions
+ * Name: host_rename
  ****************************************************************************/
 
 int host_rename(const char *oldpath, const char *newpath)
@@ -320,53 +390,20 @@ int host_rename(const char *oldpath, const char *newpath)
 }
 
 /****************************************************************************
- * Public Functions
+ * Name: host_stat
  ****************************************************************************/
 
 int host_stat(const char *path, struct nuttx_stat_s *buf)
 {
-  struct stat host_buf;
+  struct stat hostbuf;
   int ret;
 
   /* Call the host's stat routine */
 
-  ret = stat(path, &host_buf);
+  ret = stat(path, &hostbuf);
 
   /* Map the return values */
 
-  buf->st_mode = host_buf.st_mode & 0777;
-
-  if (host_buf.st_mode & S_IFDIR)
-    {
-      buf->st_mode |= NUTTX_S_IFDIR;
-    }
-  else if (host_buf.st_mode & S_IFREG)
-    {
-      buf->st_mode |= NUTTX_S_IFREG;
-    }
-  else if (host_buf.st_mode & S_IFCHR)
-    {
-      buf->st_mode |= NUTTX_S_IFCHR;
-    }
-  else if (host_buf.st_mode & S_IFBLK)
-    {
-      buf->st_mode |= NUTTX_S_IFBLK;
-    }
-  else if (host_buf.st_mode & S_IFLNK)
-    {
-      buf->st_mode |= NUTTX_S_IFLNK;
-    }
-  else /* if (host_buf.st_mode & S_IFIFO) */
-    {
-      buf->st_mode |= NUTTX_S_IFIFO;
-    }
-
-  buf->st_size    = host_buf.st_size;
-  buf->st_blksize = host_buf.st_blksize;
-  buf->st_blocks  = host_buf.st_blocks;
-  buf->st_atim    = host_buf.st_atim.tv_sec;
-  buf->st_mtim    = host_buf.st_mtim.tv_sec;
-  buf->st_ctim    = host_buf.st_ctim.tv_sec;
-
+  host_stat_convert(&hostbuf, buf);
   return ret;
 }

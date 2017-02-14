@@ -658,8 +658,34 @@ static int hostfs_dup(FAR const struct file *oldp, FAR struct file *newp)
 
 static int hostfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
 {
-#warning Missing logic
-  return -ENOSYS;
+  FAR struct inode *inode;
+  FAR struct hostfs_mountpt_s *fs;
+  FAR struct hostfs_ofile_s *hf;
+  int ret = OK;
+
+  /* Sanity checks */
+
+  DEBUGASSERT(filep != NULL && buf != NULL);
+
+  /* Recover our private data from the struct file instance */
+
+  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
+  hf    = filep->f_priv;
+  inode = filep->f_inode;
+
+  fs    = inode->i_private;
+  DEBUGASSERT(fs != NULL);
+
+  /* Take the semaphore */
+
+  hostfs_semtake(fs);
+
+  /* Call the host to perform the read */
+
+  ret = host_fstat(hf->fd, buf);
+
+  hostfs_semgive(fs);
+  return ret;
 }
 
 /****************************************************************************
