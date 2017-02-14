@@ -1,8 +1,9 @@
 /****************************************************************************************************
- * arch/arm/src/kinetis/kinetis_mpu.h
+ * arch/arm/src/kinetis/chip/kinetis_k64k66mpu.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2011, 2017 Gregory Nutt. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,8 +34,8 @@
  *
  ****************************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_KINETIS_KINETIS_MPU_H
-#define __ARCH_ARM_SRC_KINETIS_KINETIS_MPU_H
+#ifndef __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_K64K66MPU_H
+#define __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_K64K66MPU_H
 
 /****************************************************************************************************
  * Included Files
@@ -355,4 +356,4 @@
  * Public Functions
  ****************************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_KINETIS_KINETIS_MPU_H */
+#endif /* __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_K64K66MPU_H */
