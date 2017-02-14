@@ -23,7 +23,7 @@ nuttx/:
   (4)  USB (drivers/usbdev, drivers/usbhost)
   (0)  Other drivers (drivers/)
  (12)  Libraries (libc/, libm/)
- (11)  File system/Generic drivers (fs/, drivers/)
+ (10)  File system/Generic drivers (fs/, drivers/)
   (9)  Graphics Subsystem (graphics/)
   (2)  Build system / Toolchains
   (3)  Linux/Cywgin simulation (arch/sim)
@@ -1463,7 +1463,7 @@ o File system / Generic drivers (fs/, drivers/)
                file descriptors could lie in the same range.
 
                Another example of how the current implementation limits
-               functionality:  I recently started an implement of the FILEMAX
+               functionality:  I recently started to implement of the FILEMAX
                (using pctl() instead sysctl()).  My objective was to be able
                to control the number of available file descriptors on a task-
                by-task basis.  The complexity due to the partitioning of
@@ -1494,15 +1494,6 @@ o File system / Generic drivers (fs/, drivers/)
 
   Status:      Open
   Priority:    Low
-
-  Title:       FAT LONG FILENAME COMPATIBILITY
-  Description: Recently there have been reports that file with long file
-               names created by NuttX don't have long file names when viewed
-               on Windows.  The long file name support has been around for a
-               long time and I don't ever having seen this before so I am
-               suspecting that some evil has crept in.
-  Status:      Open
-  Priority:    Medium
 
   Title:       MISSING FILES IN NSH 'LS' OF A DIRECTORY
   Description: I have seen cases where (1) long file names are enabled,
