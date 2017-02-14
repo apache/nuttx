@@ -1245,7 +1245,7 @@ static int nfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
 
   /* Extract time values as type time_t in units of seconds. */
 
-  info.ns_mtime = np->n_mtime.tv_sec;
+  info.ns_mtime = np->n_mtime;
   info.ns_ctime = np->n_ctime;
 
   /* Use the current time for the time of last access. */
