@@ -474,8 +474,17 @@ static int procfs_dup(FAR const struct file *oldp, FAR struct file *newp)
 
 static int procfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
 {
-#warning Missing logic
-  return -ENOSYS;
+  /* This is trivially simple in the current implementation.  The procfs
+   * file system contains only directory and read-only data file entries.
+   * Therefore, the return buf always has the same fixed values.
+   *
+   * REVISIT:  This, of course, will need to change if read-write procfs
+   * entries are to be supported.
+   */
+
+  memset(buf, 0, sizeof(struct stat));
+  buf->st_mode = S_IFREG | S_IROTH | S_IRGRP | S_IRUSR;
+  return OK;
 }
 
 /****************************************************************************
