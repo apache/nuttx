@@ -1007,11 +1007,6 @@ static int procfs_stat(struct inode *mountpt, const char *relpath,
         }
     }
 
-  /* File/directory size, access block size */
-
-  buf->st_size    = 0;
-  buf->st_blksize = 0;
-  buf->st_blocks  = 0;
   return ret;
 }
 
