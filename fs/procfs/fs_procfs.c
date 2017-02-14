@@ -964,6 +964,7 @@ static int procfs_stat(struct inode *mountpt, const char *relpath,
    *   is a file.
    */
 
+  memset(buf, 0, sizeof(struct stat));
   if (!relpath || relpath[0] == '\0')
     {
       /* The path refers to the top level directory */
