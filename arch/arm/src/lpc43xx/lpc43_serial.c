@@ -149,26 +149,26 @@ static const struct uart_ops_s g_uart_ops =
 /* I/O buffers */
 
 #ifdef CONFIG_LPC43_USART0
-static char g_uart0rxbuffer[CONFIG_USART0_RXBUFSIZE];
-static char g_uart0txbuffer[CONFIG_USART0_TXBUFSIZE];
+static charg_usart0rxbuffer[CONFIG_USART0_RXBUFSIZE];
+static charg_usart0txbuffer[CONFIG_USART0_TXBUFSIZE];
 #endif
 #ifdef CONFIG_LPC43_UART1
 static char g_uart1rxbuffer[CONFIG_UART1_RXBUFSIZE];
 static char g_uart1txbuffer[CONFIG_UART1_TXBUFSIZE];
 #endif
 #ifdef CONFIG_LPC43_USART2
-static char g_uart2rxbuffer[CONFIG_USART2_RXBUFSIZE];
-static char g_uart2txbuffer[CONFIG_USART2_TXBUFSIZE];
+static char g_usart2rxbuffer[CONFIG_USART2_RXBUFSIZE];
+static char g_usart2txbuffer[CONFIG_USART2_TXBUFSIZE];
 #endif
 #ifdef CONFIG_LPC43_USART3
-static char g_uart3rxbuffer[CONFIG_USART3_RXBUFSIZE];
-static char g_uart3txbuffer[CONFIG_USART3_TXBUFSIZE];
+static char g_usart3rxbuffer[CONFIG_USART3_RXBUFSIZE];
+static char g_usart3txbuffer[CONFIG_USART3_TXBUFSIZE];
 #endif
 
 /* This describes the state of the LPC43xx uart0 port. */
 
 #ifdef CONFIG_LPC43_USART0
-static struct up_dev_s g_uart0priv =
+static struct up_dev_sg_usart0priv =
 {
   .uartbase       = LPC43_USART0_BASE,
   .basefreq       = BOARD_USART0_BASEFREQ,
@@ -190,17 +190,17 @@ static struct up_dev_s g_uart0priv =
 #endif
 };
 
-static uart_dev_t g_uart0port =
+static uart_dev_tg_usart0port =
 {
   .recv     =
   {
     .size   = CONFIG_USART0_RXBUFSIZE,
-    .buffer = g_uart0rxbuffer,
+    .buffer =g_usart0rxbuffer,
   },
   .xmit     =
   {
     .size   = CONFIG_USART0_TXBUFSIZE,
-    .buffer = g_uart0txbuffer,
+    .buffer =g_usart0txbuffer,
   },
   .ops      = &g_uart_ops,
   .priv     = &g_uart0priv,
@@ -245,7 +245,7 @@ static uart_dev_t g_uart1port =
 /* This describes the state of the LPC43xx uart1 port. */
 
 #ifdef CONFIG_LPC43_USART2
-static struct up_dev_s g_uart2priv =
+static struct up_dev_s g_usart2priv =
 {
   .uartbase       = LPC43_USART2_BASE,
   .basefreq       = BOARD_USART2_BASEFREQ,
@@ -267,27 +267,27 @@ static struct up_dev_s g_uart2priv =
 #endif
 };
 
-static uart_dev_t g_uart2port =
+static uart_dev_t g_usart2port =
 {
   .recv     =
   {
     .size   = CONFIG_USART2_RXBUFSIZE,
-    .buffer = g_uart2rxbuffer,
+    .buffer = g_usart2rxbuffer,
   },
   .xmit     =
   {
     .size   = CONFIG_USART2_TXBUFSIZE,
-    .buffer = g_uart2txbuffer,
+    .buffer = g_usart2txbuffer,
   },
   .ops      = &g_uart_ops,
-  .priv     = &g_uart2priv,
+  .priv     = &g_usart2priv,
 };
 #endif
 
 /* This describes the state of the LPC43xx uart1 port. */
 
 #ifdef CONFIG_LPC43_USART3
-static struct up_dev_s g_uart3priv =
+static struct up_dev_s g_usart3priv =
 {
   .uartbase       = LPC43_USART3_BASE,
   .basefreq       = BOARD_USART3_BASEFREQ,
@@ -309,223 +309,113 @@ static struct up_dev_s g_uart3priv =
 #endif
 };
 
-static uart_dev_t g_uart3port =
+static uart_dev_t g_usart3port =
 {
   .recv     =
   {
     .size   = CONFIG_USART3_RXBUFSIZE,
-    .buffer = g_uart3rxbuffer,
+    .buffer = g_usart3rxbuffer,
   },
   .xmit     =
   {
     .size   = CONFIG_USART3_TXBUFSIZE,
-    .buffer = g_uart3txbuffer,
+    .buffer = g_usart3txbuffer,
   },
   .ops      = &g_uart_ops,
-  .priv     = &g_uart3priv,
+  .priv     = &g_usart3priv,
 };
 #endif
 
 /* Which UART with be tty0/console and which tty1? tty2? tty3? */
 
+#undef CONSOLE_DEV                          /* Assume no console */
+#undef TTYS0_DEV                            /* Assume no ttyS0 */
+#undef TTYS1_DEV                            /* Assume no ttyS1 */
+#undef TTYS2_DEV                            /* Assume no ttyS2 */
+#undef TTYS3_DEV                            /* Assume no ttyS3 */
+#undef USART0_ASSIGNED                      /* USART0 has not been assigned */
+#undef UART1_ASSIGNED                       /* UART1 has not been assigned */
+#undef USART2_ASSIGNED                      /* USART2 has not been assigned */
+#undef USART3_ASSIGNED                      /* USART3 has not been assigned */
+
+/* Assign the console device and ttyS0 */
+
 #ifdef HAVE_CONSOLE
 #  if defined(CONFIG_USART0_SERIAL_CONSOLE)
-#    define CONSOLE_DEV     g_uart0port      /* USART0=console */
-#    define TTYS0_DEV       g_uart0port      /* USART0=ttyS0 */
-#    ifdef CONFIG_LPC43_UART1
-#      define TTYS1_DEV     g_uart1port      /* USART0=ttyS0;UART1=ttyS1 */
-#      ifdef CONFIG_LPC43_USART2
-#        define TTYS2_DEV   g_uart2port      /* USART0=ttyS0;UART1=ttyS1;USART2=ttyS2 */
-#        ifdef CONFIG_LPC43_USART3
-#          define TTYS3_DEV g_uart3port      /* USART0=ttyS0;UART1=ttyS1;USART2=ttyS2;USART3=ttyS3 */
-#        else
-#          undef TTYS3_DEV                   /* USART0=ttyS0;UART1=ttyS1;USART2=ttyS;No ttyS3 */
-#        endif
-#      else
-#        ifdef CONFIG_LPC43_USART3
-#          define TTYS2_DEV g_uart3port     /* USART0=ttyS0;UART1=ttyS1;USART3=ttys2;No ttyS3 */
-#        else
-#          undef TTYS2_DEV                  /* USART0=ttyS0;UART1=ttyS1;No ttyS2;No ttyS3 */
-#        endif
-#        undef TTYS3_DEV                    /* No ttyS3 */
-#      endif
-#    else
-#      ifdef CONFIG_LPC43_USART2
-#        define TTYS1_DEV   g_uart2port    /* USART0=ttyS0;USART2=ttyS1;No ttyS3 */
-#        ifdef CONFIG_LPC43_USART3
-#          define TTYS2_DEV g_uart3port    /* USART0=ttyS0;USART2=ttyS1;USART3=ttyS2;No ttyS3 */
-#        else
-#          undef TTYS2_DEV                 /* USART0=ttyS0;USART2=ttyS1;No ttyS2;No ttyS3 */
-#        endif
-#        undef TTYS3_DEV                   /* No ttyS3 */
-#      else
-#        ifdef CONFIG_LPC43_USART3
-#          define TTYS1_DEV g_uart3port    /* USART0=ttyS0;USART3=ttyS1;No ttyS2;No ttyS3 */
-#        else
-#          undef TTYS1_DEV                 /* USART0=ttyS0;No ttyS1;No ttyS2;No ttyS3 */
-#        endif
-#          undef TTYS2_DEV                  /* No ttyS2 */
-#        undef TTYS3_DEV                    /* No ttyS3 */
-#      endif
-#    endif
+#    define CONSOLE_DEV     g_usart0port    /* USART0=console */
+#    define TTYS0_DEV       g_usart0port    /* USART0=ttyS0 */
+#    define USART0_ASSIGNED 1
 #  elif defined(CONFIG_UART1_SERIAL_CONSOLE)
 #    define CONSOLE_DEV     g_uart1port     /* UART1=console */
 #    define TTYS0_DEV       g_uart1port     /* UART1=ttyS0 */
-#    ifdef CONFIG_LPC43_USART0
-#      define TTYS1_DEV     g_uart0port     /* UART1=ttyS0;USART0=ttyS1 */
-#      ifdef CONFIG_LPC43_USART2
-#        define TTYS2_DEV   g_uart2port     /* UART1=ttyS0;USART0=ttyS1;USART2=ttyS2 */
-#        ifdef CONFIG_LPC43_USART3
-#          define TTYS3_DEV g_uart3port     /* UART1=ttyS0;USART0=ttyS1;USART2=ttyS2;USART3=ttyS3 */
-#        else
-#          undef TTYS3_DEV                  /* UART1=ttyS0;USART0=ttyS1;USART2=ttyS;No ttyS3 */
-#        endif
-#      else
-#        ifdef CONFIG_LPC43_USART3
-#          define TTYS2_DEV g_uart3port     /* UART1=ttyS0;USART0=ttyS1;USART3=ttys2;No ttyS3 */
-#        else
-#          undef TTYS2_DEV                  /* UART1=ttyS0;USART0=ttyS1;No ttyS2;No ttyS3 */
-#        endif
-#        undef TTYS3_DEV                    /* No ttyS3 */
-#      endif
-#    else
-#      ifdef CONFIG_LPC43_USART2
-#        define TTYS1_DEV   g_uart2port     /* UART1=ttyS0;USART2=ttyS1 */
-#        ifdef CONFIG_LPC43_USART3
-#          define TTYS2_DEV g_uart3port     /* UART1=ttyS0;USART2=ttyS1;USART3=ttyS2;No ttyS3 */
-#        else
-#          undef TTYS2_DEV                  /* UART1=ttyS0;USART2=ttyS1;No ttyS2;No ttyS3 */
-#        endif
-#        undef TTYS3_DEV                    /* No ttyS3 */
-#      else
-#        ifdef CONFIG_LPC43_USART3
-#          define TTYS1_DEV   g_uart3port   /* UART1=ttyS0;USART3=ttyS1;No ttyS2;No ttyS3 */
-#        else
-#          undef TTYS1_DEV                  /* UART1=ttyS0;No ttyS1;No ttyS2;No ttyS3 */
-#        endif
-#        undef TTYS2_DEV                    /* No ttyS2 */
-#        undef TTYS3_DEV                    /* No ttyS3 */
-#      endif
-#    endif
+#    define UART1_ASSIGNED  1
 #  elif defined(CONFIG_USART2_SERIAL_CONSOLE)
-#    define CONSOLE_DEV     g_uart2port     /* USART2=console */
-#    define TTYS0_DEV       g_uart2port     /* USART2=ttyS0 */
-#    ifdef CONFIG_LPC43_USART0
-#      define TTYS1_DEV     g_uart0port     /* USART2=ttyS0;USART0=ttyS1 */
-#      ifdef CONFIG_LPC43_UART1
-#        define TTYS2_DEV   g_uart1port     /* USART2=ttyS0;USART0=ttyS1;UART1=ttyS2 */
-#        ifdef CONFIG_LPC43_USART3
-#          define TTYS3_DEV g_uart3port     /* USART2=ttyS0;USART0=ttyS1;UART1=ttyS2;USART3=ttyS3 */
-#        else
-#          undef TTYS3_DEV                  /* USART2=ttyS0;USART0=ttyS1;UART1=ttyS;No ttyS3 */
-#        endif
-#      else
-#        ifdef CONFIG_LPC43_USART3
-#          define TTYS2_DEV g_uart3port     /* USART2=ttyS0;USART0=ttyS1;USART3=ttys2;No ttyS3 */
-#        else
-#          undef TTYS2_DEV                  /* USART2=ttyS0;USART0=ttyS1;No ttyS2;No ttyS3 */
-#        endif
-#        undef TTYS3_DEV                    /* No ttyS3 */
-#      endif
-#    else
-#      ifdef CONFIG_LPC43_UART1
-#        define TTYS1_DEV   g_uart1port    /* USART2=ttyS0;UART1=ttyS1 */
-#        ifdef CONFIG_LPC43_USART3
-#          define TTYS2_DEV g_uart3port    /* USART2=ttyS0;UART1=ttyS1;USART3=ttyS2 */
-#        else
-#          undef TTYS2_DEV                 /* USART2=ttyS0;UART1=ttyS1;No ttyS2;No ttyS3 */
-#        endif
-#        undef TTYS3_DEV                   /* No ttyS3 */
-#      else
-#        ifdef CONFIG_LPC43_USART3
-#          define TTYS1_DEV g_uart3port    /* USART2=ttyS0;USART3=ttyS1;No ttyS3 */
-#        else
-#          undef TTYS1_DEV                 /* USART2=ttyS0;No ttyS1;No ttyS2;No ttyS3 */
-#        endif
-#        undef TTYS2_DEV                   /* No ttyS2 */
-#        undef TTYS3_DEV                   /* No ttyS3 */
-#      endif
-#    endif
-#  elif defined(CONFIG_USART3_SERIAL_CONSOLE)
-#    define CONSOLE_DEV     g_uart3port    /* USART3=console */
-#    define TTYS0_DEV       g_uart3port    /* USART3=ttyS0 */
-#    ifdef CONFIG_LPC43_USART0
-#      define TTYS1_DEV     g_uart0port    /* USART3=ttyS0;USART0=ttyS1 */
-#      ifdef CONFIG_LPC43_UART1
-#        define TTYS2_DEV   g_uart1port    /* USART3=ttyS0;USART0=ttyS1;UART1=ttyS2 */
-#        ifdef CONFIG_LPC43_USART2
-#          define TTYS3_DEV g_uart2port    /* USART3=ttyS0;USART0=ttyS1;UART1=ttyS2;USART2=ttyS3 */
-#        else
-#          undef TTYS3_DEV                 /* USART3=ttyS0;USART0=ttyS1;UART1=ttyS;No ttyS3 */
-#        endif
-#      else
-#        ifdef CONFIG_LPC43_USART2
-#          define TTYS2_DEV g_uart2port    /* USART3=ttyS0;USART0=ttyS1;USART2=ttys2;No ttyS3 */
-#        else
-#          undef TTYS2_DEV                 /* USART3=ttyS0;USART0=ttyS1;No ttyS2;No ttyS3 */
-#        endif
-#          undef TTYS3_DEV                 /* No ttyS3 */
-#      endif
-#    else
-#      ifdef CONFIG_LPC43_UART1
-#        define TTYS1_DEV   g_uart1port    /* USART3=ttyS0;UART1=ttyS1 */
-#        ifdef CONFIG_LPC43_USART2
-#          define TTYS2_DEV g_uart2port    /* USART3=ttyS0;UART1=ttyS1;USART2=ttyS2;No ttyS3 */
-#        else
-#          undef TTYS2_DEV                 /* USART3=ttyS0;UART1=ttyS1;No ttyS2;No ttyS3 */
-#        endif
-#        undef TTYS3_DEV                   /* No ttyS3 */
-#      else
-#        ifdef CONFIG_LPC43_USART2
-#          define TTYS1_DEV   g_uart2port  /* USART3=ttyS0;USART2=ttyS1;No ttyS3;No ttyS3 */
-#          undef TTYS3_DEV                 /* USART3=ttyS0;USART2=ttyS1;No ttyS2;No ttyS3 */
-#        else
-#          undef TTYS1_DEV                 /* USART3=ttyS0;No ttyS1;No ttyS2;No ttyS3 */
-#        endif
-#        undef TTYS2_DEV                   /* No ttyS2 */
-#        undef TTYS3_DEV                   /* No ttyS3 */
-#      endif
-#    endif
-#  endif
-#else /* No console */
-#  define TTYS0_DEV       g_uart0port      /* USART0=ttyS0 */
-#  ifdef CONFIG_LPC43_UART1
-#    define TTYS1_DEV     g_uart1port      /* USART0=ttyS0;UART1=ttyS1 */
-#    ifdef CONFIG_LPC43_USART2
-#      define TTYS2_DEV   g_uart2port      /* USART0=ttyS0;UART1=ttyS1;USART2=ttyS2 */
-#      ifdef CONFIG_LPC43_USART3
-#        define TTYS3_DEV g_uart3port      /* USART0=ttyS0;UART1=ttyS1;USART2=ttyS2;USART3=ttyS3 */
-#      else
-#        undef TTYS3_DEV                   /* USART0=ttyS0;UART1=ttyS1;USART2=ttyS;No ttyS3 */
-#      endif
-#    else
-#      ifdef CONFIG_LPC43_USART3
-#        define TTYS2_DEV g_uart3port      /* USART0=ttyS0;UART1=ttyS1;USART3=ttys2;No ttyS3 */
-#      else
-#        undef TTYS2_DEV                   /* USART0=ttyS0;UART1=ttyS1;No ttyS2;No ttyS3 */
-#      endif
-#      undef TTYS3_DEV                     /* No ttyS3 */
-#    endif
-#  else
-#    ifdef CONFIG_LPC43_USART2
-#      define TTYS1_DEV   g_uart2port     /* USART0=ttyS0;USART2=ttyS1;No ttyS3 */
-#      ifdef CONFIG_LPC43_USART3
-#        define TTYS2_DEV g_uart3port     /* USART0=ttyS0;USART2=ttyS1;USART3=ttyS2;No ttyS3 */
-#      else
-#        undef TTYS2_DEV                  /* USART0=ttyS0;USART2=ttyS1;No ttyS2;No ttyS3 */
-#      endif
-#      undef TTYS3_DEV                    /* No ttyS3 */
-#    else
-#      ifdef CONFIG_LPC43_USART3
-#        define TTYS1_DEV g_uart3port     /* USART0=ttyS0;USART3=ttyS1;No ttyS2;No ttyS3 */
-#      else
-#        undef TTYS1_DEV                  /* USART0=ttyS0;No ttyS1;No ttyS2;No ttyS3 */
-#      endif
-#        undef TTYS2_DEV                  /* No ttyS2 */
-#      undef TTYS3_DEV                    /* No ttyS3 */
-#    endif
-#  endif
-#endif /* HAVE_CONSOLE */
+#    define CONSOLE_DEV     g_usart2port    /* USART2=console */
+#    define TTYS0_DEV       g_usart2port    /* USART2=ttyS0 */
+#    define USART2_ASSIGNED 1
+#  else /* elif defined(CONFIG_USART3_SERIAL_CONSOLE) */
+#    define CONSOLE_DEV     g_usart3port    /* USART3=console */
+#    define TTYS0_DEV       g_usart3port    /* USART3=ttyS0 */
+#    define USART3_ASSIGNED 1
+# endif
+#else
+/* No console, assign only ttyS0 */
+
+#  if defined(CONFIG_LPC43_USART0)
+#    define TTYS0_DEV       g_usart0port    /* USART0=ttyS0 */
+#    define USART0_ASSIGNED 1
+#  elif defined(CONFIG_LPC43_UART1)
+#    define TTYS0_DEV       g_uart1port     /* UART1=ttyS0 */
+#    define UART1_ASSIGNED  1
+#  elif defined(CONFIG_LPC43_USART2)
+#    define TTYS0_DEV       g_usart2port    /* USART2=ttyS0 */
+#    define USART2_ASSIGNED 1
+#  else /* elif defined(CONFIG_LPC43_USART3) */
+#    define TTYS0_DEV       g_usart3port    /* USART3=ttyS0 */
+#    define USART3_ASSIGNED 1
+# endif
+#endif
+
+/* Assign ttyS1 */
+
+#if defined(CONFIG_LPC43_USART0) && !defined(USART0_ASSIGNED)
+#  define TTYS1_DEV         g_usart0port    /* USART0=ttyS1 */
+#  define USART0_ASSIGNED 1
+#elif defined(CONFIG_LPC43_UART1) && !defined(UART1_ASSIGNED)
+#  define TTYS1_DEV         g_usart1port    /* USART1=ttyS1 */
+#  define UART1_ASSIGNED 1
+#elif defined(CONFIG_LPC43_USART2) && !defined(USART2_ASSIGNED)
+#  define TTYS1_DEV         g_usart2port    /* USART2=ttyS1 */
+#  define USART2_ASSIGNED 1
+#elif defined(CONFIG_LPC43_USART3) && !defined(USART3_ASSIGNED)
+#  define TTYS1_DEV         g_usart3port    /* USART3=ttyS1 */
+#  define USART3_ASSIGNED 1
+#endif
+
+/* Assign ttyS2.  USART0 has already been assigned if it was configured. */
+
+#if defined(CONFIG_LPC43_UART1) && !defined(UART1_ASSIGNED)
+#  define TTYS2_DEV         g_usart1port    /* USART1=ttyS2 */
+#  define UART1_ASSIGNED 1
+#elif defined(CONFIG_LPC43_USART2) && !defined(USART2_ASSIGNED)
+#  define TTYS2_DEV         g_usart2port    /* USART2=ttyS2 */
+#  define USART2_ASSIGNED 1
+#elif defined(CONFIG_LPC43_USART3) && !defined(USART3_ASSIGNED)
+#  define TTYS2_DEV         g_usart3port    /* USART3=ttyS2 */
+#  define USART3_ASSIGNED 1
+#endif
+
+/* Assign ttyS3.  USART0 and UART1 have already been assigned if they were
+ * configured.
+ */
+
+#if defined(CONFIG_LPC43_USART2) && !defined(USART2_ASSIGNED)
+#  define TTYS3_DEV         g_usart2port    /* USART2=ttyS3 */
+#  define USART2_ASSIGNED 1
+#elif defined(CONFIG_LPC43_USART3) && !defined(USART3_ASSIGNED)
+#  define TTYS3_DEV         g_usart3port    /* USART3=ttyS3 */
+#  define USART3_ASSIGNED 1
+#endif
 
 /****************************************************************************
  * Inline Functions
@@ -834,16 +724,16 @@ static int up_interrupt(int irq, void *context)
   else
 #endif
 #ifdef CONFIG_LPC43_USART2
-  if (g_uart2priv.irq == irq)
+  if (g_usart2priv.irq == irq)
     {
-      dev = &g_uart2port;
+      dev = &g_usart2port;
     }
   else
 #endif
 #ifdef CONFIG_LPC43_USART3
-  if (g_uart3priv.irq == irq)
+  if (g_usart3priv.irq == irq)
     {
-      dev = &g_uart3port;
+      dev = &g_usart3port;
     }
   else
 #endif
@@ -1437,14 +1327,14 @@ void up_earlyserialinit(void)
 #ifndef CONFIG_USART2_SERIAL_CONSOLE
   lpc43_usart2_setup();
 #endif
-  up_disableuartint(&g_uart2priv, NULL);
+  up_disableuartint(&g_usart2priv, NULL);
 #endif
 
 #ifdef CONFIG_LPC43_USART3
 #ifndef CONFIG_USART3_SERIAL_CONSOLE
   lpc43_usart3_setup();
 #endif
-  up_disableuartint(&g_uart3priv, NULL);
+  up_disableuartint(&g_usart3priv, NULL);
 #endif
 
   /* Configuration whichever one is the console */
