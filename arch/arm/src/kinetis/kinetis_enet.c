@@ -1,8 +1,9 @@
 /****************************************************************************
  * arch/arm/src/kinetis/kinetis_enet.c
  *
- *   Copyright (C) 2011-2012, 2014-2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2011-2012, 2014-2017 Gregory Nutt. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -199,6 +200,17 @@
 #define BUF ((struct eth_hdr_s *)priv->dev.d_buf)
 
 #define KINETIS_BUF_SIZE  ((CONFIG_NET_ETH_MTU & 0xfffffff0) + 0x10)
+
+/* If this SoC has the RMII Clock Source selection configure it */
+
+#if defined(CONFIG_KINETIS_EMAC_RMIICLKEXTAL)
+#  define SIM_SOPT2_RMIISRC SIM_SOPT2_RMIISRC_EXTAL
+#endif
+
+#if defined(CONFIG_KINETIS_EMAC_RMIICLK1588CLKIN)
+#  define SIM_SOPT2_RMIISRC SIM_SOPT2_RMIISRC_EXTBYP
+#endif
+
 
 /****************************************************************************
  * Private Types
@@ -1988,6 +2000,21 @@ int kinetis_netinitialize(int intf)
 
   DEBUGASSERT(intf < CONFIG_KINETIS_ENETNETHIFS);
   priv = &g_enet[intf];
+
+#if defined(SIM_SOPT2_RMIISRC)
+  /* If this Soc has RMII clock select then select the RMII clock source.
+   * First if the source is ENET_1588_CLKIN - configure the pin to apply the
+   * clock to the block. Then select it as the source.
+   */
+
+#  if SIM_SOPT2_RMIISRC == SIM_SOPT2_RMIISRC_EXTBYP
+  kinetis_pinconfig(PIN_ENET_1588_CLKIN);
+#  endif
+
+  regval  = getreg32(KINETIS_SIM_SOPT2);
+  regval |= SIM_SOPT2_RMIISRC;
+  putreg32(regval, KINETIS_SIM_SOPT2);
+#endif
 
   /* Enable the ENET clock */
 

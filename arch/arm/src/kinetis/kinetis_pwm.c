@@ -1,10 +1,11 @@
 /****************************************************************************
  * arch/arm/src/kinetis/kinetis_pwm.c
  *
- *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Alan Carvalho de Assis <acassis@gmail.com>
- *           Ken Fazzone <kfazz01@gmail.com>
+ *   Copyright (C) 2013, 2016, 2017 Gregory Nutt. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            Alan Carvalho de Assis <acassis@gmail.com>
+ *            Ken Fazzone <kfazz01@gmail.com>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -68,7 +69,7 @@
  */
 
 #if defined(CONFIG_KINETIS_FTM0_PWM)  || defined(CONFIG_KINETIS_FTM1_PWM)  || \
-    defined(CONFIG_KINETIS_FTM2_PWM)
+    defined(CONFIG_KINETIS_FTM2_PWM)  || defined(CONFIG_KINETIS_FTM3_PWM)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -179,6 +180,18 @@ static struct kinetis_pwmtimer_s g_pwm2dev =
   .channel    = CONFIG_KINETIS_FTM2_CHANNEL,
   .base       = KINETIS_FTM2_BASE,
   .pincfg     = PWM_FTM2_PINCFG,
+  .pclk       = BOARD_CORECLK_FREQ,
+};
+#endif
+
+#ifdef CONFIG_KINETIS_FTM3_PWM
+static struct kinetis_pwmtimer_s g_pwm3dev =
+{
+  .ops        = &g_pwmops,
+  .tpmid      = 3,
+  .channel    = CONFIG_KINETIS_FTM3_CHANNEL,
+  .base       = KINETIS_FTM3_BASE,
+  .pincfg     = PWM_FTM3_PINCFG,
   .pclk       = BOARD_CORECLK_FREQ,
 };
 #endif
@@ -549,6 +562,9 @@ static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
 
   regval = getreg32(KINETIS_SIM_SCGC3);
   regval |= SIM_SCGC3_FTM2;
+#if defined(CONFIG_KINETIS_FTM3_PWM)
+  regval |= SIM_SCGC3_FTM3;
+#endif
   putreg32(regval, KINETIS_SIM_SCGC3);
 
   pwminfo("FTM%d pincfg: %08x\n", priv->tpmid, priv->pincfg);
@@ -778,6 +794,13 @@ FAR struct pwm_lowerhalf_s *kinetis_pwminitialize(int timer)
         break;
 #endif
 
+#ifdef CONFIG_KINETIS_FTM3_PWM
+      case 3:
+        lower = &g_pwm3dev;
+
+        break;
+#endif
+
       default:
         pwmerr("ERROR: No such timer configured\n");
         return NULL;
@@ -786,4 +809,4 @@ FAR struct pwm_lowerhalf_s *kinetis_pwminitialize(int timer)
   return (FAR struct pwm_lowerhalf_s *)lower;
 }
 
-#endif /* CONFIG_KINETIS_FTMn_PWM, n = 0,...,2 */
+#endif /* CONFIG_KINETIS_FTMn_PWM, n = 0,...,3 */

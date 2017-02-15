@@ -154,6 +154,16 @@
 #define GPIO_FTM0_CH4OUT PIN_FTM0_CH4_1
 #define GPIO_FTM0_CH5OUT PIN_FTM0_CH5_1
 
+/* PWM Configuration */
+/* FTM3 Channels */
+/* Channels can be modified using kinetis_k66pinmux.h */
+
+#define GPIO_FTM3_CH0OUT PIN_FTM3_CH0_1
+#define GPIO_FTM3_CH1OUT PIN_FTM3_CH1_1
+#define GPIO_FTM3_CH2OUT PIN_FTM3_CH2_1
+#define GPIO_FTM3_CH3OUT PIN_FTM3_CH3_1
+#define GPIO_FTM3_CH4OUT PIN_FTM3_CH4_1
+
 /* LED definitions ******************************************************************/
 /* The Freedom K66F has a single RGB LED driven by the K66F as follows:
  *

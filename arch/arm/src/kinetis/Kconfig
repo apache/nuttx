@@ -470,6 +470,13 @@ config KINETIS_FTM2
 	---help---
 		Support FlexTimer 2
 
+config KINETIS_FTM3
+	bool "FTM3"
+	default n
+	depends on ARCH_FAMILY_K64 || ARCH_FAMILY_K66
+	---help---
+		Support FlexTimer 3
+
 config KINETIS_LPTIMER
 	bool "Low power timer (LPTIMER)"
 	default n
@@ -558,7 +565,7 @@ config KINETIS_PIT
 endmenu
 
 menu "Kinetis FTM PWM Configuration"
-	depends on KINETIS_FTM0 || KINETIS_FTM1 || KINETIS_FTM2
+	depends on KINETIS_FTM0 || KINETIS_FTM1 || KINETIS_FTM2 || KINETIS_FTM3
 
 config KINETIS_FTM0_PWM
 	bool "FTM0 PWM"
@@ -622,6 +629,27 @@ config KINETIS_FTM2_CHANNEL
 	---help---
 		If FTM2 is enabled for PWM usage, you also need specifies the timer output
 		channel {0,..,1}
+
+config KINETIS_FTM3_PWM
+	bool "FTM3 PWM"
+	default n
+	depends on KINETIS_FTM3
+	---help---
+		Reserve timer 3 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If KINETIS_FTM3
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+config KINETIS_FTM3_CHANNEL
+	int "FTM3 PWM Output Channel"
+	default 0
+	range 0 7
+	depends on KINETIS_FTM3_PWM
+	---help---
+		If FTM3 is enabled for PWM usage, you also need specifies the timer output
+		channel {0,..,7}
 
 endmenu # Kinetis FTM PWM Configuration
 
@@ -712,6 +740,21 @@ config KINETIS_ENET_NORXER
 	---help---
 		If selected, then the MII/RMII RXER output will be configured as a
 		GPIO and pulled low.
+
+choice
+	prompt "RMII Clock Source"
+	default KINETIS_EMAC_RMIICLKEXTAL
+	depends on !KINETIS_ENETUSEMII && (ARCH_FAMILY_K64 || ARCH_FAMILY_K66)
+	---help---
+		The RMII clock can be selected between EXTAL or ENET_1588_CLKIN
+
+config KINETIS_EMAC_RMIICLKEXTAL
+	bool "Use EXTAL for RMII Clock"
+
+config KINETIS_EMAC_RMIICLK1588CLKIN
+	bool "Use ENET_1588_CLKIN for RMII Clock"
+
+endchoice # RMII Clock Source
 
 choice
 	prompt "Work queue"
