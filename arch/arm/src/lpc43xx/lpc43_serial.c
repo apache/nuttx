@@ -149,8 +149,8 @@ static const struct uart_ops_s g_uart_ops =
 /* I/O buffers */
 
 #ifdef CONFIG_LPC43_USART0
-static charg_usart0rxbuffer[CONFIG_USART0_RXBUFSIZE];
-static charg_usart0txbuffer[CONFIG_USART0_TXBUFSIZE];
+static char g_usart0rxbuffer[CONFIG_USART0_RXBUFSIZE];
+static char g_usart0txbuffer[CONFIG_USART0_TXBUFSIZE];
 #endif
 #ifdef CONFIG_LPC43_UART1
 static char g_uart1rxbuffer[CONFIG_UART1_RXBUFSIZE];
@@ -168,7 +168,7 @@ static char g_usart3txbuffer[CONFIG_USART3_TXBUFSIZE];
 /* This describes the state of the LPC43xx uart0 port. */
 
 #ifdef CONFIG_LPC43_USART0
-static struct up_dev_sg_usart0priv =
+static struct up_dev_s g_usart0priv =
 {
   .uartbase       = LPC43_USART0_BASE,
   .basefreq       = BOARD_USART0_BASEFREQ,
@@ -190,20 +190,20 @@ static struct up_dev_sg_usart0priv =
 #endif
 };
 
-static uart_dev_tg_usart0port =
+static uart_dev_t g_usart0port =
 {
   .recv     =
   {
     .size   = CONFIG_USART0_RXBUFSIZE,
-    .buffer =g_usart0rxbuffer,
+    .buffer = g_usart0rxbuffer,
   },
   .xmit     =
   {
     .size   = CONFIG_USART0_TXBUFSIZE,
-    .buffer =g_usart0txbuffer,
+    .buffer = g_usart0txbuffer,
   },
   .ops      = &g_uart_ops,
-  .priv     = &g_uart0priv,
+  .priv     = &g_usart0priv,
 };
 #endif
 
@@ -710,9 +710,9 @@ static int up_interrupt(int irq, void *context)
   int                passes;
 
 #ifdef CONFIG_LPC43_USART0
-  if (g_uart0priv.irq == irq)
+  if (g_usart0priv.irq == irq)
     {
-      dev = &g_uart0port;
+      dev = &g_usart0port;
     }
   else
 #endif
@@ -1313,7 +1313,7 @@ void up_earlyserialinit(void)
 #ifndef CONFIG_USART0_SERIAL_CONSOLE
   lpc43_usart0_setup();
 #endif
-  up_disableuartint(&g_uart0priv, NULL);
+  up_disableuartint(&g_usart0priv, NULL);
 #endif
 
 #ifdef CONFIG_LPC43_UART1
