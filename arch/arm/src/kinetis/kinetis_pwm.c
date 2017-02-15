@@ -74,6 +74,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* PWM/Timer Definitions ****************************************************/
 
 /* Debug ********************************************************************/
@@ -87,6 +88,7 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* This structure represents the state of one PWM timer */
 
 struct kinetis_pwmtimer_s
@@ -318,6 +320,7 @@ static void pwm_dumpregs(struct kinetis_pwmtimer_s *priv, FAR const char *msg)
               priv->tpmid,
               pwm_getreg(priv, KINETIS_FTM_C5V_OFFSET));
     }
+
   if (nchannels >= 7)
     {
       pwminfo("   FTM%d_C6SC:  %04x   FTM%d_C6V:  %04x\n",
@@ -326,6 +329,7 @@ static void pwm_dumpregs(struct kinetis_pwmtimer_s *priv, FAR const char *msg)
               priv->tpmid,
               pwm_getreg(priv, KINETIS_FTM_C6V_OFFSET));
     }
+
   if (nchannels >= 8)
     {
       pwminfo("   FTM%d_C7SC:  %04x   FTM%d_C7V:  %04x\n",
@@ -776,28 +780,24 @@ FAR struct pwm_lowerhalf_s *kinetis_pwminitialize(int timer)
 #ifdef CONFIG_KINETIS_FTM0_PWM
       case 0:
         lower = &g_pwm0dev;
-
         break;
 #endif
 
 #ifdef CONFIG_KINETIS_FTM1_PWM
       case 1:
         lower = &g_pwm1dev;
-
         break;
 #endif
 
 #ifdef CONFIG_KINETIS_FTM2_PWM
       case 2:
         lower = &g_pwm2dev;
-
         break;
 #endif
 
 #ifdef CONFIG_KINETIS_FTM3_PWM
       case 3:
         lower = &g_pwm3dev;
-
         break;
 #endif
 
