@@ -1,6 +1,7 @@
 /****************************************************************************
  * fs/procfs/fs_skeleton.c
  *
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2015 Ken Pettit. All rights reserved.
  *   Author: Ken Pettit <pettitkd@gmail.com>
  *
@@ -438,7 +439,7 @@ static int skel_rewinddir(FAR struct fs_dirent_s *dir)
  *
  ****************************************************************************/
 
-static int skel_stat(FAR const char *relpath, FAR truct stat *buf)
+static int skel_stat(FAR const char *relpath, FAR struct stat *buf)
 {
   int ret = -ENOENT;
 
@@ -446,14 +447,12 @@ static int skel_stat(FAR const char *relpath, FAR truct stat *buf)
    *        or a directory and set it's permissions.
    */
 
+  memset(buf, 0, sizeof(struct stat));
   buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR;
+
+  /* Other 'struct buf' settings may be appropriate (optional) */
+
   ret = OK;
-
-  /* File/directory size, access block size */
-
-  buf->st_size    = 0;
-  buf->st_blksize = 0;
-  buf->st_blocks  = 0;
 
   return ret;
 }

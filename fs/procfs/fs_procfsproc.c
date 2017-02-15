@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/procfs/fs_procfsproc.c
  *
- *   Copyright (C) 2013-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -1552,6 +1552,7 @@ static int proc_stat(const char *relpath, struct stat *buf)
 
   /* Was the <pid> the final element of the path? */
 
+  memset(buf, 0, sizeof(struct stat));
   if (*ptr == '\0' || strcmp(ptr, "/") == 0)
     {
       /* Yes ... It's a read-only directory */
@@ -1601,11 +1602,6 @@ static int proc_stat(const char *relpath, struct stat *buf)
         }
     }
 
-  /* File/directory size, access block size */
-
-  buf->st_size    = 0;
-  buf->st_blksize = 0;
-  buf->st_blocks  = 0;
   return OK;
 }
 

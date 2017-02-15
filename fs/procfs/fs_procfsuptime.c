@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/procfs/fs_procfsuptime.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -346,10 +346,8 @@ static int uptime_stat(FAR const char *relpath, FAR struct stat *buf)
 
   /* "uptime" is the name for a read-only file */
 
-  buf->st_mode    = S_IFREG | S_IROTH | S_IRGRP | S_IRUSR;
-  buf->st_size    = 0;
-  buf->st_blksize = 0;
-  buf->st_blocks  = 0;
+  memset(buf, 0, sizeof(struct stat));
+  buf->st_mode = S_IFREG | S_IROTH | S_IRGRP | S_IRUSR;
   return OK;
 }
 
