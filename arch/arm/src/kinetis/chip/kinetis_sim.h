@@ -1,8 +1,9 @@
 /************************************************************************************
  * arch/arm/src/kinetis/chip/kinetis_sim.h
  *
- *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2011, 2016, 2017 Gregory Nutt. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -136,8 +137,17 @@
                                                 /* Bit 17: Reserved */
 #define SIM_SOPT2_USBSRC              (1 << 18) /* Bit 18: USB clock source select */
                                                 /* Bit 19: Reserved */
-#ifdef KINETIS_K60
-#  define SIM_SOPT2_TIMESRC           (1 << 20) /* Bit 20: IEEE 1588 timestamp clock source select (K60) */
+#if defined(KINETIS_K60) || defined(KINETIS_K64) || defined(KINETIS_K66)
+#  define SIM_SOPT2_RMIISRC_SHIFT     (19)      /* Bit 19: RMII clock source select */
+#  define SIM_SOPT2_RMIISRC_EXTAL     (0 << SIM_SOPT2_RMIISRC_SHIFT) /* EXTAL clock */
+#  define SIM_SOPT2_RMIISRC_EXTBYP    (1 << SIM_SOPT2_RMIISRC_SHIFT) /* External bypass clock (ENET_1588_CLKIN) */
+#  define SIM_SOPT2_TIMESRC_SHIFT     (20)      /* Bit 20-21: IEEE 1588 timestamp clock source select (K60) */
+#  define SIM_SOPT2_TIMESRC_MASK      (3 << SIM_SOPT2_TIMESRC_SHIFT)
+#  define SIM_SOPT2_TIMESRC_CORE      (0 << SIM_SOPT2_TIMESRC_SHIFT) /* Core/system clock */
+#  define SIM_SOPT2_TIMESRC_PLLSEL    (1 << SIM_SOPT2_TIMESRC_SHIFT) /* MCGFLLCLK,MCGPLLCLK,IRC48M,USB1 PFD
+                                                                        clock as selected by SOPT2[PLLFLLSEL] */
+#  define SIM_SOPT2_TIMESRC_OSCERCLK  (2 << SIM_SOPT2_TIMESRC_SHIFT) /* OSCERCLK clock */
+#  define SIM_SOPT2_TIMESRC_EXTBYP    (0 << SIM_SOPT2_TIMESRC_SHIFT) /* External bypass clock (ENET_1588_CLKIN) */
 #endif
                                                 /* Bits 12-23: Reserved */
 #define SIM_SOPT2_I2SSRC_SHIFT        (24)      /* Bits 24-25: I2S master clock source select */

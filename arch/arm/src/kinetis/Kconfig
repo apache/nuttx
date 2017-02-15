@@ -714,6 +714,21 @@ config KINETIS_ENET_NORXER
 		GPIO and pulled low.
 
 choice
+	prompt "RMII Clock Source"
+	default KINETIS_EMAC_RMIICLKEXTAL
+	depends on !KINETIS_ENETUSEMII && (ARCH_FAMILY_K64 || ARCH_FAMILY_K66)
+	---help---
+		The RMII clock can be selected between EXTAL or ENET_1588_CLKIN
+
+config KINETIS_EMAC_RMIICLKEXTAL
+	bool "Use EXTAL for RMII Clock"
+
+config KINETIS_EMAC_RMIICLK1588CLKIN
+	bool "Use ENET_1588_CLKIN for RMII Clock"
+
+endchoice # RMII Clock Source
+
+choice
 	prompt "Work queue"
 	default KINETIS_EMAC_LPWORK if SCHED_LPWORK
 	default KINETIS_EMAC_HPWORK if !SCHED_LPWORK && SCHED_HPWORK
