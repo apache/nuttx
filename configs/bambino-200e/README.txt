@@ -384,6 +384,11 @@ as follow:
 
 Where <subdir> is one of the following:
 
+  netnsh:
+  -------
+    Configures the NuttShell (nsh) located at examples/nsh.  This
+    configuration is focused on network testing.
+
   nsh:
   ----
     This configuration is the NuttShell (NSH) example at examples/nsh/.
@@ -451,3 +456,49 @@ Where <subdir> is one of the following:
        be found on the lpcware.com website.  In this build sceneario, you must
        also provide the patch to the external SPIFI library be defining the make
        variable EXTRA_LIBS in the top-level Make.defs file.  Good luck!
+
+  usbnsh:
+  -------
+
+    This is another NSH example.  If differs from other 'nsh' configurations
+    in that this configurations uses a USB serial device for console I/O.
+
+    NOTES:
+
+    1. This configuration does have UART1 output enabled and set up as
+       the system logging device:
+
+       CONFIG_SYSLOG_CHAR=y               : Use a character device for system logging
+       CONFIG_SYSLOG_DEVPATH="/dev/ttyS0" : UART1 will be /dev/ttyS0
+
+       However, there is nothing to generate SYLOG output in the default
+       configuration so nothing should appear on UART1 unless you enable
+       some debug output or enable the USB monitor.
+
+       NOTE:  Using the SYSLOG to get debug output has limitations.  Among
+       those are that you cannot get debug output from interrupt handlers.
+       So, in particularly, debug output is not a useful way to debug the
+       USB device controller driver.  Instead, use the USB monitor with
+       USB debug off and USB trace on (see below).
+
+    4. Enabling USB monitor SYSLOG output.  If tracing is enabled, the USB
+       device will save encoded trace output in in-memory buffer; if the
+       USB monitor is enabled, that trace buffer will be periodically
+       emptied and dumped to the system logging device (UART2 in this
+       configuration):
+
+       CONFIG_USBDEV_TRACE=y                   : Enable USB trace feature
+       CONFIG_USBDEV_TRACE_NRECORDS=128        : Buffer 128 records in memory
+       CONFIG_NSH_USBDEV_TRACE=n               : No builtin tracing from NSH
+       CONFIG_NSH_ARCHINIT=y                   : Automatically start the USB monitor
+       CONFIG_USBMONITOR=y              : Enable the USB monitor daemon
+       CONFIG_USBMONITOR_STACKSIZE=2048 : USB monitor daemon stack size
+       CONFIG_USBMONITOR_PRIORITY=50    : USB monitor daemon priority
+       CONFIG_USBMONITOR_INTERVAL=2     : Dump trace data every 2 seconds
+
+       CONFIG_USBMONITOR_TRACEINIT=y    : Enable TRACE output
+       CONFIG_USBMONITOR_TRACECLASS=y
+       CONFIG_USBMONITOR_TRACETRANSFERS=y
+       CONFIG_USBMONITOR_TRACECONTROLLER=y
+       CONFIG_USBMONITOR_TRACEINTERRUPTS=y
+
