@@ -107,7 +107,9 @@ static int     skel_open(FAR struct file *filep, FAR const char *relpath,
 static int     skel_close(FAR struct file *filep);
 static ssize_t skel_read(FAR struct file *filep, FAR char *buffer,
                  size_t buflen);
-
+/* TODO: Should not support skel_write if read-only */
+static ssize_t skel_write(FAR struct file *filep, FAR const char *buffer,
+                 size_t buflen);
 static int     skel_dup(FAR const struct file *oldp,
                  FAR struct file *newp);
 
@@ -137,9 +139,12 @@ const struct procfs_operations skel_procfsoperations =
   skel_open,       /* open */
   skel_close,      /* close */
   skel_read,       /* read */
-
-  /* TODO:  Decide if this driver supports write */
+  /* TODO:  Decide if this procfs entry supports write access */
+#if 0 /* NULL if the procfs entry does not support write access. */
   NULL,            /* write */
+#else
+  skel_write,      /* write */
+#endif
 
   skel_dup,        /* dup */
 
@@ -190,7 +195,6 @@ static int skel_open(FAR struct file *filep, FAR const char *relpath,
 
   /* TODO: Initialize the context specific data here */
 
-
   /* Save the open file structure as the open-specific state in
    * filep->f_priv.
    */
@@ -221,6 +225,10 @@ static int skel_close(FAR struct file *filep)
 
 /****************************************************************************
  * Name: skel_read
+ *
+ * Description:
+ *   Handle read from procfs file.
+ *
  ****************************************************************************/
 
 static ssize_t skel_read(FAR struct file *filep, FAR char *buffer,
@@ -236,7 +244,51 @@ static ssize_t skel_read(FAR struct file *filep, FAR char *buffer,
   priv = (FAR struct skel_file_s *)filep->f_priv;
   DEBUGASSERT(priv);
 
-  /* TODO: Provide the requested data */
+  /* TODO: Provide the requested data.
+   * Take into account current filep->f_pos and 'buflen'.  The read could
+   * require several calls to skel_read().
+   */
+
+  ret = 0;
+
+  /* Update the file offset */
+
+  if (ret > 0)
+    {
+      filep->f_pos += ret;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: skel_write
+ *
+ * Description:
+ *   Handle write3 to procfs file.
+ *
+ ****************************************************************************/
+
+/* TODO: Should not support skel_write if read-only */
+static ssize_t skel_write(FAR struct file *filep, FAR const char *buffer,
+                          size_t buflen)
+{
+  FAR struct skel_file_s *priv;
+  ssize_t ret;
+
+  finfo("buffer=%p buflen=%d\n", buffer, (int)buflen);
+
+  /* Recover our private data from the struct file instance */
+
+  priv = (FAR struct skel_file_s *)filep->f_priv;
+  DEBUGASSERT(priv);
+
+  /* TODO: Verify that the write is within range */
+
+  /* TODO: Handle the write data as appropriate to function of file.
+   * Take into account current filep->f_pos and 'buflen' since the write
+   * may require several calls to skel_write().
+   */
 
   ret = 0;
 
@@ -317,8 +369,7 @@ static int skel_opendir(FAR const char *relpath, FAR struct fs_dirent_s *dir)
       return -ENOMEM;
     }
 
-  /* TODO:  Initialze context specific data */
-
+  /* TODO:  Initialize context specific data */
 
   /* Initialze base structure components */
 
