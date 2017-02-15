@@ -72,6 +72,7 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* This enumeration identifies all of the thread attributes that can be
  * accessed via the procfs file system.
  */
@@ -107,7 +108,7 @@ static int     skel_open(FAR struct file *filep, FAR const char *relpath,
 static int     skel_close(FAR struct file *filep);
 static ssize_t skel_read(FAR struct file *filep, FAR char *buffer,
                  size_t buflen);
-/* TODO: Should not support skel_write if read-only */
+/* TODO:  Should not support skel_write if read-only */
 static ssize_t skel_write(FAR struct file *filep, FAR const char *buffer,
                  size_t buflen);
 static int     skel_dup(FAR const struct file *oldp,
@@ -171,10 +172,9 @@ static int skel_open(FAR struct file *filep, FAR const char *relpath,
 
   finfo("Open '%s'\n", relpath);
 
-  /* PROCFS is read-only.  Any attempt to open with any kind of write
-   * access is not permitted.
-   *
-   * REVISIT:  Write-able proc files could be quite useful.
+  /* If PROCFS is read-only, then the (1) the skel_write() method must not
+   * be provided and (2) any attempt to open with any kind of write access
+   * can not be permitted.
    */
 
   if (((oflags & O_WRONLY) != 0 || (oflags & O_RDONLY) == 0) &&
@@ -193,7 +193,7 @@ static int skel_open(FAR struct file *filep, FAR const char *relpath,
       return -ENOMEM;
     }
 
-  /* TODO: Initialize the context specific data here */
+  /* TODO:  Initialize the context specific data here */
 
   /* Save the open file structure as the open-specific state in
    * filep->f_priv.
@@ -244,9 +244,9 @@ static ssize_t skel_read(FAR struct file *filep, FAR char *buffer,
   priv = (FAR struct skel_file_s *)filep->f_priv;
   DEBUGASSERT(priv);
 
-  /* TODO: Provide the requested data.
-   * Take into account current filep->f_pos and 'buflen'.  The read could
-   * require several calls to skel_read().
+  /* TODO:  Provide the requested data.
+   *        Take into account current filep->f_pos and 'buflen'.  The read
+   *        could require several calls to skel_read().
    */
 
   ret = 0;
@@ -283,11 +283,11 @@ static ssize_t skel_write(FAR struct file *filep, FAR const char *buffer,
   priv = (FAR struct skel_file_s *)filep->f_priv;
   DEBUGASSERT(priv);
 
-  /* TODO: Verify that the write is within range */
+  /* TODO:  Verify that the write is within range */
 
-  /* TODO: Handle the write data as appropriate to function of file.
-   * Take into account current filep->f_pos and 'buflen' since the write
-   * may require several calls to skel_write().
+  /* TODO:  Handle the write data as appropriate to function of file.
+   *        Take into account current filep->f_pos and 'buflen' since the
+   *        write may require several calls to skel_write().
    */
 
   ret = 0;
@@ -421,9 +421,9 @@ static int skel_readdir(FAR struct fs_dirent_s *dir)
   DEBUGASSERT(dir && dir->u.procfs);
   level1 = dir->u.procfs;
 
-  /* TODO: Perform device specific readdir function here.  This may
-   *       or may not involve validating the nentries variable
-   *       in the base depending on the implementation.
+  /* TODO:  Perform device specific readdir function here.  This may
+   *        or may not involve validating the nentries variable
+   *        in the base depending on the implementation.
    */
 
   /* Have we reached the end of the directory */
@@ -445,7 +445,7 @@ static int skel_readdir(FAR struct fs_dirent_s *dir)
     {
       DEBUGASSERT(level1->base.level == 1);
 
-      /* TODO: Add device specific entries */
+      /* TODO:  Add device specific entries */
 
       strcpy(filename, "dummy");
 
@@ -501,7 +501,11 @@ static int skel_stat(FAR const char *relpath, FAR struct stat *buf)
   memset(buf, 0, sizeof(struct stat));
   buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR;
 
-  /* Other 'struct buf' settings may be appropriate (optional) */
+  /* TODO:  Set S_IFREG if the relpath refers to a file.
+  /* TODO:  If the skel_write() method is supported, then stat must also
+   *        report S_IWOTH | S_IWGRP | S_IWUSR for files (but not for
+   *        directories) as well.
+  /* TODO:  Other 'struct buf' settings may be appropriate (optional) */
 
   ret = OK;
 
