@@ -174,6 +174,10 @@
                                                 /* Bits 5-7: Reserved */
 #define SIM_SOPT4_FTM2FLT0            (1 << 8)  /* Bit 8:  FTM2 Fault 0 Select */
                                                 /* Bits 9-17: Reserved */
+#if defined(CONFIG_KINETIS_FTM3)
+                                                /* Bits 9-11,13-17: Reserved */
+#  define SIM_SOPT4_FTM3FLT0          (1 << 12) /* Bit 12:  FTM3 Fault 0 Select */
+#endif
 #define SIM_SOPT4_FTM1CH0SRC_SHIFT    (18)      /* Bits 18-19: FTM1 channel 0 input capture source select */
 #define SIM_SOPT4_FTM1CH0SRC_MASK     (3 << SIM_SOPT4_FTM1CH0SRC_SHIFT)
 #  define SIM_SOPT4_FTM1CH0SRC_CH0    (0 << SIM_SOPT4_FTM1CH0SRC_SHIFT) /* FTM1_CH0 signal */
@@ -189,6 +193,11 @@
 #define SIM_SOPT4_FTM1CLKSEL          (1 << 25) /* Bit 25:  FTM1 External Clock Pin Select */
 #define SIM_SOPT4_FTM2CLKSEL          (1 << 26) /* Bit 26:  FlexTimer 2 External Clock Pin Select */
                                                 /* Bits 27-31: Reserved */
+#if defined(CONFIG_KINETIS_FTM3)
+#  define SIM_SOPT4_FTM3CLKSEL        (1 << 27) /* Bit 27: FlexTimer 3 External Clock Pin Select */
+#  define SIM_SOPT4_FTM3TRG0SRC       (1 << 30) /* Bit 30: FlexTimer 3 Hardware Trigger 0 Source Select */
+#  define SIM_SOPT4_FTM3TRG1SRC       (1 << 31) /* Bit 31: FlexTimer 3 Hardware Trigger 1 Source Select */
+#endif
 
 /* System Options Register 5 */
 
@@ -241,6 +250,9 @@
 #  define SIM_SOPT7_ADC0TRGSEL_FTM0   (8 << SIM_SOPT7_ADC0TRGSEL_SHIFT)  /* FTM0 trigger */
 #  define SIM_SOPT7_ADC0TRGSEL_FTM1   (9 << SIM_SOPT7_ADC0TRGSEL_SHIFT)  /* FTM1 trigger */
 #  define SIM_SOPT7_ADC0TRGSEL_FTM2   (10 << SIM_SOPT7_ADC0TRGSEL_SHIFT) /* FTM2 trigger */
+#if defined(CONFIG_KINETIS_FTM3)
+#    define SIM_SOPT7_ADC0TRGSEL_FTM3 (11 << SIM_SOPT7_ADC0TRGSEL_SHIFT) /* FTM3 trigger */
+#endif
 #  define SIM_SOPT7_ADC0TRGSEL_ALARM  (12 << SIM_SOPT7_ADC0TRGSEL_SHIFT) /* RTC alarm */
 #  define SIM_SOPT7_ADC0TRGSEL_SECS   (13 << SIM_SOPT7_ADC0TRGSEL_SHIFT) /* RTC seconds */
 #  define SIM_SOPT7_ADC0TRGSEL_LPTMR  (14 << SIM_SOPT7_ADC0TRGSEL_SHIFT) /* Low-power timer trigger */
@@ -261,6 +273,9 @@
 #  define SIM_SOPT7_ADC1TRGSEL_FTM1   (9 << SIM_SOPT7_ADC1TRGSEL_SHIFT)  /* FTM1 trigger */
 #  define SIM_SOPT7_ADC1TRGSEL_FTM2   (10 << SIM_SOPT7_ADC1TRGSEL_SHIFT) /* FTM2 trigger */
 #  define SIM_SOPT7_ADC1TRGSEL_ALARM  (12 << SIM_SOPT7_ADC1TRGSEL_SHIFT) /* RTC alarm */
+#if defined(CONFIG_KINETIS_FTM3)
+#    define SIM_SOPT7_ADC1TRGSEL_FTM3 (11 << SIM_SOPT7_ADC1TRGSEL_SHIFT) /* FTM3 trigger */
+#endif
 #  define SIM_SOPT7_ADC1TRGSEL_SECS   (13 << SIM_SOPT7_ADC1TRGSEL_SHIFT) /* RTC seconds */
 #  define SIM_SOPT7_ADC1TRGSEL_LPTMR  (14 << SIM_SOPT7_ADC1TRGSEL_SHIFT) /* Low-power timer trigger */
 #define SIM_SOPT7_ADC1PRETRGSEL       (1 << 12) /* Bit 12: ADC1 pre-trigger select */
@@ -323,6 +338,9 @@
                                                 /* Bits 18-23: Reserved */
 #define SIM_SCGC3_FTM2                (1 << 24) /* Bit 24: FTM2 Clock Gate Control */
                                                 /* Bits 25-26: Reserved */
+#if defined(CONFIG_KINETIS_FTM3)
+#  define SIM_SCGC3_FTM3              (1 << 25) /* Bit 25: FTM3 Clock Gate Control */
+#endif
 #define SIM_SCGC3_ADC1                (1 << 27) /* Bit 27: ADC1 Clock Gate Control */
                                                 /* Bits 28-29: Reserved */
 #if defined(KINETIS_NSLCD) && KINETIS_NSLCD > 0
