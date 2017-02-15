@@ -50,8 +50,8 @@
 
 #if defined(KINETIS_K20) || defined(KINETIS_K40) || defined(KINETIS_K60)
 #  include "chip/kinetis_k20k40k60mpu.h"
-#elif defined(KINETIS_K64)
-#  include "chip/kinetis_k64mpu.h"
+#elif defined(KINETIS_K64) || defined(KINETIS_K66)
+#  include "chip/kinetis_k64k66mpu.h"
 #else
 #  error "No MPU definitions for this Kinetis part"
 #endif

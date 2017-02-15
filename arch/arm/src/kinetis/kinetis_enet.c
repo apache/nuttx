@@ -147,6 +147,7 @@
  *
  * The Tower SER board uses a KSZ8041 PHY.
  * The Freedom K64F board uses a KSZ8081 PHY
+ * The Freedom K66F board uses a KSZ8081 PHY
  */
 
 #if defined(CONFIG_ETH0_PHY_KSZ8041)

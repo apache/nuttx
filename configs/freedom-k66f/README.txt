@@ -970,3 +970,8 @@ Status
     The nsh configuration now builds successfully with USB device enabled.
     USB device, however, has not yet been tested.  I have not yet looked
     into 48MHz clocking requirements.
+
+  2017-02-14:  nsh: SDHC DMA is not working yet. Buttons and SDIO with
+    automounter is working.
+    netnsh:Is building but Ehternet is not working yet. TX is called but
+    not IRQ is issued.
