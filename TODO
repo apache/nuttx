@@ -1293,8 +1293,8 @@ o Libraries (libc/, libm/)
   Priority:    ??
 
   Title:       FLOATING POINT FORMATS
-  Description: Only the %f floating point format is supported.  Others are accepted
-               but treated like %f.
+  Description: Only the %f floating point format is supported.  Others are
+               accepted but treated like %f.
   Status:      Open
   Priority:    Medium (this might important to someone).
 
@@ -1346,7 +1346,7 @@ o Libraries (libc/, libm/)
   Priority:    Low for casual users but clearly high if you need care about
                these incorrect corner case behaviors in the math libraries.
 
-  Title:       Repartition libc functionality.
+  Title:       REPARTITION LIBC FUNCTIONALITY
   Description: There are many things implemented within the kernel (for example
                under sched/pthread) that probably should be migrated in the
                C library where it belongs.
@@ -1877,9 +1877,10 @@ o Network Utilities (apps/netutils/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   Title:       UNVERIFIED THTTPD FEATURES
-  Description: Not all THTTPD features/options have been verified.  In particular, there is no
-               test case of a CGI program receiving POST input.  Only the configuration of
-               apps/examples/thttpd has been tested.
+  Description: Not all THTTPD features/options have been verified.  In
+               particular, there is no test case of a CGI program receiving
+               POST input.  Only the configuration of apps/examples/thttpd
+               has been tested.
   Status:      Open
   Priority:    Medium
 

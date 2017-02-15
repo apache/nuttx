@@ -250,7 +250,6 @@ static int _inode_search(FAR struct inode_search_s *desc)
   DEBUGASSERT(desc != NULL && desc->path != NULL);
   name  = desc->path;
 
-  DEBUGASSERT(*name == '/');
   if (*name != '/')
     {
       return -EINVAL;

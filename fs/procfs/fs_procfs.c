@@ -474,16 +474,32 @@ static int procfs_dup(FAR const struct file *oldp, FAR struct file *newp)
 
 static int procfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
 {
-  /* This is trivially simple in the current implementation.  The procfs
-   * file system contains only directory and read-only data file entries.
-   * Therefore, the return buf always has the same fixed values.
-   *
-   * REVISIT:  This, of course, will need to change if read-write procfs
-   * entries are to be supported.
+  FAR struct procfs_file_s *handler;
+
+  finfo("buf=%p\n", buf);
+
+  /* Recover our private data from the struct file instance */
+
+  handler = (FAR struct procfs_file_s *)filep->f_priv;
+  DEBUGASSERT(handler);
+
+  /* The procfs file system contains only directory and data file entries.
+   * Since the file has been opened, we know that this is a data file and,
+   * at a minimum, readable.
    */
 
   memset(buf, 0, sizeof(struct stat));
   buf->st_mode = S_IFREG | S_IROTH | S_IRGRP | S_IRUSR;
+
+  /* If the write method is provided, then let's also claim that the file is
+   * writable.
+   */
+
+  if (handler->procfsentry->ops->write != NULL)
+    {
+      buf->st_mode |= S_IWOTH | S_IWGRP | S_IWUSR;
+    }
+
   return OK;
 }
 
