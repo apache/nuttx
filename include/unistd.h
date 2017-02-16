@@ -203,7 +203,11 @@ int     execl(FAR const char *path, ...);
 int     execv(FAR const char *path, FAR char *const argv[]);
 #endif
 
-/* Other */
+/* Byte operations */
+
+void    swab(FAR const void *src, FAR void *dest, ssize_t nbytes);
+
+/* getopt and friends */
 
 int     getopt(int argc, FAR char *const argv[], FAR const char *optstring);
 

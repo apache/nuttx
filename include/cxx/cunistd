@@ -106,7 +106,11 @@ namespace std
   using ::execv;
 #endif
 
-  // Other
+  // Byte operations
+
+  using ::swab;
+
+  // getopt and friends
 
   using ::getopt;
 
