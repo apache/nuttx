@@ -227,7 +227,9 @@ FAR DIR *opendir(FAR const char *path)
   FAR struct inode *inode = NULL;
   FAR struct fs_dirent_s *dir;
   struct inode_search_s desc;
+#ifndef CONFIG_DISABLE_MOUNTPOINT
   FAR const char *relpath = NULL;
+#endif
   bool isroot = false;
   int ret;
 
@@ -260,7 +262,9 @@ FAR DIR *opendir(FAR const char *path)
         {
           inode   = desc.node;
           DEBUGASSERT(inode != NULL);
+#ifndef CONFIG_DISABLE_MOUNTPOINT
           relpath = desc.relpath;
+#endif
         }
     }
 
