@@ -65,4 +65,4 @@ endif
 DEPPATH += --dep-path pthread
 VPATH += :pthread
 
-endif
+endif # CONFIG_DISABLE_PTHREAD
