@@ -247,7 +247,7 @@
                                            /* Bits 5-7: Reserved */
 #endif
 
-#ifdef KINETIS_K64
+#if defined(KINETIS_K64) || defined(KINETIS_K66)
 #  define I2C_FLT_SHIFT          (0)       /* Bits 0-3: I2C programmable filter factor */
 #  define I2C_FLT_MASK           (15 << I2C_FLT_SHIFT)
 #    define I2C_FLT(n)           ((uint8_t)(n) << I2C_FLT_SHIFT)
