@@ -45,7 +45,7 @@ we have:
   semaphore - semaphore.h
   stdio     - stdio.h
   stdlib    - stdlib.h
-  string    - string.h
+  string    - string.h (and legacy strings.h)
   time      - time.h
   unistd    - unistd.h
   wchar     - wchar.h

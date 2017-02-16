@@ -442,7 +442,7 @@ void os_start(void)
        * that has pid == 0 and sched_priority == 0.
        */
 
-      bzero((void *)&g_idletcb[cpu], sizeof(struct task_tcb_s));
+      memset((void *)&g_idletcb[cpu], 0, sizeof(struct task_tcb_s));
       g_idletcb[cpu].cmn.pid        = g_lastpid;
       g_idletcb[cpu].cmn.task_state = TSTATE_TASK_RUNNING;
 

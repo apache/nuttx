@@ -1,7 +1,7 @@
 /****************************************************************************
- * libc/string/lib_strcasecmp.c
+ * include/strings.h
  *
- *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,33 +33,51 @@
  *
  ****************************************************************************/
 
+#ifndef __INCLUDE_STRINGS_H
+#define __INCLUDE_STRINGS_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <strings.h>
-#include <ctype.h>
+#include <string.h>
 
 /****************************************************************************
- * Public Functions
+ * Pre-processor Definitions
+ ****************************************************************************/
+/* Compatibility definitions */
+
+#define bcmp(b1,b2,len)  memcmp(b1,b2,(size_t)len)
+#define bcopy(b1,b2,len) (void)memmove(b2,b1,len)
+
+#ifndef CONFIG_LIBC_ARCH_BZERO
+# define bzero(s,n)      (void)memset(s,0,n)
+#endif
+
+#define index(s,c)       strchr(s,c)
+#define rindex(s,c)      strrchr(s,c)
+
+/****************************************************************************
+ * Public Function Prototypes
  ****************************************************************************/
 
-#ifndef CONFIG_ARCH_STRCASECMP
-int strcasecmp(FAR const char *cs, FAR const char *ct)
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
 {
-  int result;
-  for (; ; )
-    {
-      if ((result = (int)toupper(*cs) - (int)toupper(*ct)) != 0 || !*cs)
-        {
-          break;
-        }
+#else
+#define EXTERN extern
+#endif
 
-      cs++;
-      ct++;
-    }
-  return result;
+int ffs(int j);
+int strcasecmp(FAR const char *, FAR const char *);
+int strncasecmp(FAR const char *, FAR const char *, size_t);
+
+#undef EXTERN
+#if defined(__cplusplus)
 }
 #endif
+#endif /* __INCLUDE_STRINGS_H */

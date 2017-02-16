@@ -42,6 +42,7 @@
 
 #include <nuttx/config.h>
 #include <string.h>
+#include <strings.h>
 
 //***************************************************************************
 // Namespace
@@ -50,6 +51,8 @@
 namespace std
 {
   using ::size_t;
+
+  // Declared in string.h
 
   using ::strdup;
   using ::strndup;
@@ -60,8 +63,6 @@ namespace std
   using ::strncat;
   using ::strcmp;
   using ::strncmp;
-  using ::strcasecmp;
-  using ::strncasecmp;
   using ::strcoll;
   using ::stpcpy;
   using ::strcpy;
@@ -83,6 +84,12 @@ namespace std
   using ::memcpy;
   using ::memmove;
   using ::memset;
+
+  // Declared in legacy strings.h
+
+  using ::ffs;
+  using ::strcasecmp;
+  using ::strncasecmp;
 }
 
 #endif // __INCLUDE_CXX_CSTRING

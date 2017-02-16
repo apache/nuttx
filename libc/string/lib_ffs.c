@@ -1,7 +1,7 @@
 /****************************************************************************
- * libc/string/lib_strcasecmp.c
+ * libc/string/lib_ffs.c
  *
- *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,33 +33,55 @@
  *
  ****************************************************************************/
 
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
 #include <strings.h>
-#include <ctype.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define NBITS (8 * sizeof(unsigned int))
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-#ifndef CONFIG_ARCH_STRCASECMP
-int strcasecmp(FAR const char *cs, FAR const char *ct)
-{
-  int result;
-  for (; ; )
-    {
-      if ((result = (int)toupper(*cs) - (int)toupper(*ct)) != 0 || !*cs)
-        {
-          break;
-        }
+/****************************************************************************
+ * Name: ffs
+ *
+ * Description:
+ *   The ffs() function will find the first bit set (beginning with the least
+ *   significant bit) in i, and return the index of that bit. Bits are
+ *   numbered starting at one (the least significant bit).
+ *
+ * Returned Value:
+ *   The ffs() function will return the index of the first bit set. If i is
+ *   0, then ffs() will return 0.
+ *
+ ****************************************************************************/
 
-      cs++;
-      ct++;
+int ffs(int j)
+{
+  int ret = 0;
+
+  if (j != 0)
+    {
+      unsigned int value = (unsigned int)j;
+      int bitno;
+
+      for (bitno = 1; bitno <= NBITS; bitno++, value >>= 1)
+        {
+          if ((value & 1) != 0)
+            {
+              ret = bitno;
+              break;
+            }
+        }
     }
-  return result;
+
+  return ret;
 }
-#endif
