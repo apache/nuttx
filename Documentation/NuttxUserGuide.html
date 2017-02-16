@@ -8661,6 +8661,8 @@ int     getopt(int argc, FAR char *const argv[], FAR const char *optstring);
 <ul><pre>
 #include &lt;stdio.h&gt;
 
+/* Operations on streams (FILE) */
+
 void   clearerr(register FILE *stream);
 int    fclose(FILE *stream);
 int    fflush(FILE *stream);
@@ -8670,20 +8672,24 @@ int    fileno(FAR FILE *stream);
 int    fgetc(FILE *stream);
 int    fgetpos(FILE *stream, fpos_t *pos);
 char  *fgets(char *s, int n, FILE *stream);
-FILE  *fdopen(int fd, const char *type);
 FILE  *fopen(const char *path, const char *type);
 int    fprintf(FILE *stream, const char *format, ...);
 int    fputc(int c, FILE *stream);
 int    fputs(const char *s, FILE *stream);
 size_t fread(void *ptr, size_t size, size_t n_items, FILE *stream);
+FAR FILE *freopen(FAR const char *path, FAR const char *mode,
+         FAR FILE *stream);
 int    fseek(FILE *stream, long int offset, int whence);
 int    fsetpos(FILE *stream, fpos_t *pos);
 long   ftell(FILE *stream);
 size_t fwrite(const void *ptr, size_t size, size_t n_items, FILE *stream);
-char  *gets(char *s);
+FAR char *gets(char *s);
+FAR char *gets_s(FAR char *s, rsize_t n);
 void   setbuf(FAR FILE *stream, FAR char *buf);
 int    setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size);
 int    ungetc(int c, FAR FILE *stream);
+
+/* Operations on the stdout stream, buffers, paths, and the whole printf-family *    /
 
 int    printf(const char *format, ...);
 int    puts(const char *s);
@@ -8701,21 +8707,29 @@ int    vasprintf(FAR char **ptr, const char *fmt, va_list ap);
 int    vsnprintf(FAR char *buf, size_t size, const char *format, va_list ap);
 int    vsscanf(char *buf, const char *s, va_list ap);
 
+/* Operations on file descriptors including:
+ *
+ * POSIX-like File System Interfaces (fdopen), and
+ * Extensions from the Open Group Technical Standard, 2006, Extended API Set
+ *   Part 1 (dprintf and vdprintf)
+ */
+
 FAR FILE *fdopen(int fd, FAR const char *type);
 int    dprintf(int fd, FAR const char *fmt, ...);
 int    vdprintf(int fd, FAR const char *fmt, va_list ap);
 
+/* Operations on paths */
+
 FAR char *tmpnam(FAR char *s);
 FAR char *tempnam(FAR const char *dir, FAR const char *pfx);
+int       remove(FAR const char *path);
 
 #include &lt;sys/stat.h&gt;
 
 int mkdir(FAR const char *pathname, mode_t mode);
 int mkfifo(FAR const char *pathname, mode_t mode);
 int stat(const char *path, FAR struct stat *buf);
-#if 0 /* Not yet supported */
 int fstat(int fd, FAR struct stat *buf);
-#endif
 
 #include &lt;sys/statfs.h&gt;
 
