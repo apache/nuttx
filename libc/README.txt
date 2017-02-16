@@ -34,6 +34,7 @@ we have:
   libgen    - libgen.h
   locale    - locale.h
   fixedmath - fixedmath.h
+  inttypes  - inttypes.h
   machine   - Various architecture-specifica implementations.
   math      - math.h
   modlib    - Part of module and shared libary logic: nuttx/lib/modlib.h

@@ -173,6 +173,7 @@
 "strtoul","stdlib.h","","unsigned long","FAR const char *","FAR char **","int"
 "strtoull","stdlib.h","defined(CONFIG_HAVE_LONG_LONG)","unsigned long long","FAR const char *","FAR char **","int"
 "strxfrm","string.h","defined(CONFIG_LIBC_LOCALE)","size_t","FAR char *","FAR const char *","size_t"
+"swab","unistd.h","","void","int","FAR const void *","FAR void *","ssize_t"
 "syslog","syslog.h","","int","int","FAR const char *","..."
 "tcflush","termios.h","CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_SERIAL_TERMIOS)","int","int","int"
 "tcgetattr","termios.h","CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_SERIAL_TERMIOS)","int","int","FAR struct termios *"

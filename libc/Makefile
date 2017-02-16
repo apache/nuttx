@@ -67,6 +67,7 @@ include dirent/Make.defs
 include dllfcn/Make.defs
 include fixedmath/Make.defs
 include hex2bin/Make.defs
+include inttypes/Make.defs
 include libgen/Make.defs
 include locale/Make.defs
 include machine/Make.defs
