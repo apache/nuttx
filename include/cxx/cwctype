@@ -1,7 +1,7 @@
 //***************************************************************************
-// include/cxx/cwchar
+// include/cxx/cwctype
 //
-//   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
+//   Copyright (C) 2017 Gregory Nutt. All rights reserved.
 //   Author: Gregory Nutt <gnutt@nuttx.org>
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,14 +33,14 @@
 //
 //***************************************************************************
 
-#ifndef __INCLUDE_CXX_CWCHAR
-#define __INCLUDE_CXX_CWCHAR
+#ifndef __INCLUDE_CXX_CWCTYPE
+#define __INCLUDE_CXX_CWCTYPE
 
 //***************************************************************************
 // Included Files
 //***************************************************************************
 
-#include <wchar.h>
+#include <wctype.h>
 
 //***************************************************************************
 // Namespace
@@ -48,17 +48,13 @@
 
 namespace std
 {
-  using ::mbstate_t;
-  using ::wint_t;
-  using ::wctype_t;
-  using ::size_t;
+  using ::wctrans_t;
 
-  using ::btowc;
-  using ::fwprintf;
-  using ::fwscanf;
   using ::iswalnum;
   using ::iswalpha;
+  using ::iswblank;
   using ::iswcntrl;
+  using ::iswctype;
   using ::iswdigit;
   using ::iswgraph;
   using ::iswlower;
@@ -67,64 +63,12 @@ namespace std
   using ::iswspace;
   using ::iswupper;
   using ::iswxdigit;
-  using ::iswctype;
-  using ::fgetwc;
-  using ::fgetws;
-  using ::fputwc;
-  using ::fputws;
-  using ::fwide;
-  using ::getwc;
-  using ::getwchar;
-  using ::mbsinit;
-  using ::mbrlen;
-  using ::mbrtowc;
-  using ::mbsrtowcs;
-  using ::putwc;
-  using ::putwchar;
-  using ::swprintf;
-  using ::swscanf;
+  using ::towctrans;
   using ::towlower;
   using ::towupper;
-  using ::ungetwc;
-  using ::vfwprintf;
-  using ::vwprintf;
-  using ::vswprintf;
-  using ::wcrtomb;
-  using ::wcscat;
-  using ::wcschr;
-  using ::wcscmp;
-  using ::wcscoll;
-  using ::wcscpy;
-  using ::wcscspn;
-  using ::wcsftime;
-  using ::wcslen;
-  using ::wcslcpy;
-  using ::wcslcat;
-  using ::wcsncat;
-  using ::wcsncmp;
-  using ::wcsncpy;
-  using ::wcspbrk;
-  using ::wcsrchr;
-  using ::wcsrtombs;
-  using ::wcsspn;
-  using ::wcsstr;
-  using ::wcstod;
-  using ::wcstok;
-  using ::wcstol;
-  using ::wcstoul;
-  using ::wcswcs;
-  using ::wcswidth;
-  using ::wcsxfrm;
-  using ::wctob;
+  using ::wctrans;
+  using ::iswctype;
   using ::wctype;
-  using ::wcwidth;
-  using ::wmemchr;
-  using ::wmemcmp;
-  using ::wmemcpy;
-  using ::wmemmove;
-  using ::wmemset;
-  using ::wprintf;
-  using ::wscanf;
 };
 
-#endif // __INCLUDE_CXX_CWCHAR
+#endif // __INCLUDE_CXX_CWCTYPE
