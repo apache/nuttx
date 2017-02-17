@@ -1029,9 +1029,9 @@ static void tiva_interrupt_work(void *arg)
   /* Re-enable Ethernet interrupts */
 
 #if TIVA_NETHCONTROLLERS > 1
-  up_disable_irq(priv->irq);
+  up_enable_irq(priv->irq);
 #else
-  up_disable_irq(TIVA_IRQ_ETHCON);
+  up_enable_irq(TIVA_IRQ_ETHCON);
 #endif
 }
 
