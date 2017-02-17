@@ -1,7 +1,7 @@
 /****************************************************************************
- * fs/vfs/fs_statfs.c
+ * fs/vfs/fs_fstatfs.c
  *
- *   Copyright (C) 2007-2009, 2012, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,27 +48,11 @@
 #include "inode/inode.h"
 
 /****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: statpseudo
- ****************************************************************************/
-
-static int statpseudofs(FAR struct inode *inode, FAR struct statfs *buf)
-{
-  memset(buf, 0, sizeof(struct statfs));
-  buf->f_type    = PROC_SUPER_MAGIC;
-  buf->f_namelen = NAME_MAX;
-  return OK;
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: statfs
+ * Name: fstatfs
  *
  * Return: Zero on success; -1 on failure with errno set:
  *
@@ -83,54 +67,43 @@ static int statpseudofs(FAR struct inode *inode, FAR struct statfs *buf)
  *
  ****************************************************************************/
 
-int statfs(FAR const char *path, FAR struct statfs *buf)
+int fstatfs(int fd, FAR struct statfs *buf)
 {
-  struct inode_search_s desc;
+  FAR struct file *filep;
   FAR struct inode *inode;
-  int ret = OK;
+  int ret;
 
-  /* Sanity checks */
+  DEBUGASSERT(buf != NULL);
 
-  if (path == NULL  || buf == NULL)
+  /* Did we get a valid file descriptor? */
+
+  if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS)
     {
-      ret = EFAULT;
-      goto errout;
+      /* No networking... it is a bad descriptor in any event */
+
+      set_errno(EBADF);
+      return ERROR;
     }
 
-  if (*path == '\0')
+  /* The descriptor is in a valid range to file descriptor... do the
+   * read.  First, get the file structure.  Note that on failure,
+   * fs_getfilep() will set the errno variable.
+   */
+
+  filep = fs_getfilep(fd);
+  if (filep == NULL)
     {
-      ret = ENOENT;
-      goto errout;
+      /* The errno value has already been set */
+
+      return ERROR;
     }
 
-  /* Check for the fake root directory (which has no inode) */
+  /* Get the inode from the file structure */
 
-  if (strcmp(path, "/") == 0)
-    {
-      return statpseudofs(NULL, buf);
-    }
-
-  /* Get an inode for this file */
-
-  SETUP_SEARCH(&desc, path, false);
-
-  ret = inode_find(&desc);
-  if (ret < 0)
-    {
-      /* This name does not refer to a psudeo-inode and there is no
-       * mountpoint that includes in this path.
-       */
-
-      ret = -ret;
-      goto errout_with_search;
-    }
-
-  /* Get the search results */
-
-  inode = desc.node;
+  inode = filep->f_inode;
   DEBUGASSERT(inode != NULL);
 
-  /* The way we handle the statfs depends on the type of inode that we
+  /* The way we handle the stat depends on the type of inode that we
    * are dealing with.
    */
 
@@ -141,6 +114,7 @@ int statfs(FAR const char *path, FAR struct statfs *buf)
        * supports the statfs() method
        */
 
+      ret = -ENOSYS;
       if (inode->u.i_mops && inode->u.i_mops->statfs)
         {
           /* Perform the statfs() operation */
@@ -153,32 +127,21 @@ int statfs(FAR const char *path, FAR struct statfs *buf)
     {
       /* The node is part of the root pseudo file system */
 
-      ret = statpseudofs(inode, buf);
+      memset(buf, 0, sizeof(struct statfs));
+      buf->f_type    = PROC_SUPER_MAGIC;
+      buf->f_namelen = NAME_MAX;
+      ret            = OK;
     }
 
-  /* Check if the statfs operation was successful */
+  /* Check if the fstat operation was successful */
 
   if (ret < 0)
     {
-      ret = -ret;
-      goto errout_with_inode;
+      set_errno(-ret);
+      return ERROR;
     }
 
   /* Successfully statfs'ed the file */
 
-  inode_release(inode);
-  RELEASE_SEARCH(&desc);
   return OK;
-
-/* Failure conditions always set the errno appropriately */
-
-errout_with_inode:
-  inode_release(inode);
-
-errout_with_search:
-  RELEASE_SEARCH(&desc);
-
-errout:
-  set_errno(ret);
-  return ERROR;
 }
