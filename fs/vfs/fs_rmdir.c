@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/vfs/fs_rmdir.c
  *
- *   Copyright (C) 2007-2009, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,8 +39,11 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
 #include <unistd.h>
+#include <assert.h>
 #include <errno.h>
+
 #include <nuttx/fs/fs.h>
 
 #include "inode/inode.h"
@@ -80,22 +83,31 @@
 
 int rmdir(FAR const char *pathname)
 {
+  struct inode_search_s desc;
   FAR struct inode *inode;
-  const char       *relpath = NULL;
-  int               errcode;
+  int errcode;
+  int ret;
 
-  /* Get an inode for this file.  inode_find() automatically increments the
-   * reference count on the inode if one is found.
+  /* Get an inode for the directory (or for the mountpoint containing the
+   * directory).  inode_find() automatically increments the reference count
+   * on the inode if one is found.
    */
 
-  inode = inode_find(pathname, &relpath);
-  if (!inode)
+  SETUP_SEARCH(&desc, pathname, true);
+
+  ret = inode_find(&desc);
+  if (ret < 0)
     {
       /* There is no inode that includes in this path */
 
-      errcode = ENOENT;
-      goto errout;
+      errcode = -ret;
+      goto errout_with_search;
     }
+
+  /* Get the search results */
+
+  inode = desc.node;
+  DEBUGASSERT(inode != NULL);
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT
   /* Check if the inode is a valid mountpoint. */
@@ -108,7 +120,7 @@ int rmdir(FAR const char *pathname)
 
       if (inode->u.i_mops->rmdir)
         {
-          int ret = inode->u.i_mops->rmdir(inode, relpath);
+          ret = inode->u.i_mops->rmdir(inode, desc.relpath);
           if (ret < 0)
             {
               errcode = -ret;
@@ -131,8 +143,6 @@ int rmdir(FAR const char *pathname)
 
   if (!inode->u.i_ops)
     {
-      int ret;
-
       /* If the directory inode has children, however, then it cannot be
        * removed.
        */
@@ -174,11 +184,13 @@ int rmdir(FAR const char *pathname)
   /* Successfully removed the directory */
 
   inode_release(inode);
+  RELEASE_SEARCH(&desc);
   return OK;
 
 errout_with_inode:
   inode_release(inode);
-errout:
+errout_with_search:
+  RELEASE_SEARCH(&desc);
   set_errno(errcode);
   return ERROR;
 }

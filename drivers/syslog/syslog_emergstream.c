@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/syslog/syslog_emergtream.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -109,8 +109,6 @@ static void emergstream_putc(FAR struct lib_outstream_s *this, int ch)
 void emergstream(FAR struct lib_outstream_s *stream)
 {
   stream->put   = emergstream_putc;
-#ifdef CONFIG_STDIO_LINEBUFFER
   stream->flush = lib_noflush;
-#endif
   stream->nput  = 0;
 }

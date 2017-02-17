@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/stdio/lib_wrflush.c
  *
- *   Copyright (C) 2008-2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011-2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,34 +46,6 @@
 #include "libc.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Public Constant Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Constant Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -88,15 +60,22 @@
 
 int lib_wrflush(FAR FILE *stream)
 {
-#if CONFIG_STDIO_BUFFER_SIZE > 0
+#ifndef CONFIG_STDIO_DISABLE_BUFFERING
   /* Verify that we were passed a valid (i.e., non-NULL) stream */
 
 #ifdef CONFIG_DEBUG_FEATURES
-  if (!stream)
+  if (stream == NULL)
     {
       return -EINVAL;
     }
 #endif
+
+  /* Do nothing if there is no I/O buffer */
+
+  if (stream->fs_bufstart == NULL)
+    {
+      return OK;
+    }
 
   /* Verify that the stream is opened for writing... lib_fflush will
    * return an error if it is called for a stream that is not opened for
@@ -119,6 +98,7 @@ int lib_wrflush(FAR FILE *stream)
    */
 
   return lib_fflush(stream, true);
+
 #else
   /* Verify that we were passed a valid (i.e., non-NULL) stream */
 

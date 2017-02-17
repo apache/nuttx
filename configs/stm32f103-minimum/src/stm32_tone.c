@@ -63,6 +63,10 @@
 
 #define TONE_PWM_TIMER 2
 
+/* TIMx used to generate oneshot */
+
+#define ONESHOT_TIMER 3
+
 /* Oneshot timer resolution in microseconds */
 
 #define OST_RES        10
@@ -76,10 +80,6 @@
 #endif
 
 #ifndef CONFIG_STM32_TIM2_PWM
-#  undef HAVE_TONE
-#endif
-
-#ifndef CONFIG_STM32_TICKLESS_ONESHOT
 #  undef HAVE_TONE
 #endif
 
@@ -123,9 +123,9 @@ int stm32_tone_setup(void)
       tone->ops->setup(tone);
       tone->ops->start(tone, &info);
 
-      /* Initialize ONESHOT Timer (i.e. STM32_TICKLESS_ONESHOT = TIM3) */
+      /* Initialize ONESHOT Timer */
 
-      oneshot = oneshot_initialize(CONFIG_STM32_TICKLESS_ONESHOT, OST_RES);
+      oneshot = oneshot_initialize(ONESHOT_TIMER, OST_RES);
       if (!oneshot)
         {
           auderr("Failed to initialize ONESHOT Timer!\n");
@@ -149,6 +149,4 @@ int stm32_tone_setup(void)
   return OK;
 }
 
-#else
-#  error "HAVE_TONE is undefined"
 #endif /* HAVE_TONE */

@@ -1158,6 +1158,7 @@ static int spi_setdelay(struct spi_dev_s *dev, uint32_t startdelay,
   regval  = spi_getreg(spi, offset);
   regval &= ~SPI_CSR_DLYBS_MASK;
   regval |= (uint32_t) dlybs << SPI_CSR_DLYBS_SHIFT;
+  spi_putreg(spi, regval, offset);
 
   /* stopdelay = DLYBCT: Delay Between Consecutive Transfers.
    * This field defines the delay between two consecutive transfers with the

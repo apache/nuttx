@@ -1,0 +1,50 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config ARCH_HAVE_TLS
+	bool
+	default n
+	---help---
+		Selected by the configuration system if the current architecture
+		supports TLS.
+
+menu "Thread Local Storage (TLS)"
+	depends on ARCH_HAVE_TLS
+
+config TLS
+	bool "Thread Local Storage (TLS)"
+	default n
+	---help---
+		Build in support for stack based thread local storage (TLS).
+
+if TLS
+
+config TLS_LOG2_MAXSTACK
+	int "Maximum stack size (log2)"
+	default 13
+	range 11 24
+	---help---
+		Stack based TLS works by fetch thread information from the beginning
+		of the stack memory allocation.  In order to do this, the memory
+		must be aligned in such a way that the executing logic can simply
+		masking the current stack pointer to get the beginning of the stack
+		allocation.
+
+		This setting specifies the alignment of the stack as a power of 2:
+		11=2KB, 12=4KB, 13=8KB, etc.  The exact alignment is not so critical
+		except that (1) a very large value can cause you to run out of
+		alignable memory (and fail memory allocations), and (2) smaller
+		values will limit the maximum size of the stack (hence the naming
+		of this configuration value).
+
+config TLS_NELEM
+	int "Number of TLS elements"
+	default 1
+	---help---
+		The number of unique TLS elements.  These can be accessed with
+		the user library functions tls_get_element() and tls_set_element().
+
+endif # TLS
+endmenu # Thread Local Storage (TLS)

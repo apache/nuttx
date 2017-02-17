@@ -40,6 +40,18 @@ config DISABLE_PSEUDOFS_OPERATIONS
 		However, in practical embedded system, they are seldom needed and
 		you can save a little FLASH space by disabling the capability.
 
+config PSEUDOFS_SOFTLINKS
+	bool "Pseudo-filesystem soft links"
+	default n
+	depends on !DISABLE_PSEUDOFS_OPERATIONS
+	---help---
+		Enable support for soft links in the pseudeo file system.  Soft
+		links are not supported within mounted volumes by any NuttX file
+		system.  However, if this option is selected, then soft links
+		may be add in the pseudo file system.  This might be useful, for
+		to link a directory in the pseudo-file system, such as /bin, to
+		to a directory in a mounted volume, say /mnt/sdcard/bin.
+
 config FS_READABLE
 	bool
 	default n

@@ -47,23 +47,11 @@
 #include "up_internal.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  up_timerisr
+ * Function:  z80sim_timerisr
  *
  * Description:
  *   The timer ISR will perform a variety of services for various portions of
@@ -71,7 +59,7 @@
  *
  ****************************************************************************/
 
-int up_timerisr(int irq, FAR chipreg_t *regs)
+int z80sim_timerisr(int irq, FAR chipreg_t *regs)
 {
    /* Process timer interrupt */
 
@@ -80,7 +68,7 @@ int up_timerisr(int irq, FAR chipreg_t *regs)
 }
 
 /****************************************************************************
- * Function:  up_timer_initialize
+ * Function:  z80sim_timer_initialize
  *
  * Description:
  *   This function is called during start-up to initialize the timer
@@ -88,8 +76,7 @@ int up_timerisr(int irq, FAR chipreg_t *regs)
  *
  ****************************************************************************/
 
-void up_timer_initialize(void)
+void z80sim_timer_initialize(void)
 {
   /* The timer interrupt was attached in up_irqinitialize -- see comments there */
 }
-

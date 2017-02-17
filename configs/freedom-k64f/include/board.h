@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/freedom-k64f/include/board.h
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -65,14 +65,15 @@
 
 /* PLL Configuration.  Either the external clock or crystal frequency is used to
  * select the PRDIV value. Only reference clock frequencies are supported that will
- * produce a 2MHz reference clock to the PLL.
+ * produce a KINETIS_MCG_PLL_REF_MIN >= PLLIN <= KINETIS_MCG_PLL_REF_MIN reference
+ * clock to the PLL.
  *
  *   PLL Input frequency:   PLLIN  = REFCLK / PRDIV = 50  Mhz  / 20 = 2.5 MHz
  *   PLL Output frequency:  PLLOUT = PLLIN  * VDIV  = 2.5 Mhz  * 48 = 120 MHz
  *   MCG Frequency:         PLLOUT = 120 MHz
  *
- * PRDIV register value is the divider minus one.  So 20 -> 19
- * VDIV  regiser value is offset by 24.  So 28 -> 24
+ * PRDIV register value is the divider minus KINETIS_MCG_C5_PRDIV_BASE.
+ * VDIV  register value is offset by KINETIS_MCG_C6_VDIV_BASE.
  */
 
 #define BOARD_PRDIV          20             /* PLL External Reference Divider */
@@ -81,6 +82,11 @@
 #define BOARD_PLLIN_FREQ     (BOARD_EXTAL_FREQ / BOARD_PRDIV)
 #define BOARD_PLLOUT_FREQ    (BOARD_PLLIN_FREQ * BOARD_VDIV)
 #define BOARD_MCG_FREQ       BOARD_PLLOUT_FREQ
+
+/* Define additional MCG_C2 Setting */
+
+#define BOARD_MCG_C2_FCFTRIM 0              /* Do not enable FCFTRIM */
+#define BOARD_MCG_C2_LOCRE0  MCG_C2_LOCRE0  /* Enable reset on loss of clock */
 
 /* SIM CLKDIV1 dividers */
 

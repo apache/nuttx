@@ -261,7 +261,7 @@ void up_serialinit(void);
 
 /* System timer */
 
-void up_timer_initialize(void);
+void mips_timer_initialize(void);
 
 /* Network */
 

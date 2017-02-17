@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/fs/fs.h
  *
- *   Copyright (C) 2007-2009, 2011-2013, 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2013, 2015-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -65,8 +65,14 @@
 
 #define __FS_FLAG_EOF   (1 << 0) /* EOF detected by a read operation */
 #define __FS_FLAG_ERROR (1 << 1) /* Error detected by any operation */
+#define __FS_FLAG_LBF   (1 << 2) /* Line buffered */
+#define __FS_FLAG_UBF   (1 << 3) /* Buffer allocated by caller of setvbuf */
 
-/* Inode i_flag values */
+/* Inode i_flag values:
+ *
+ *   Bit 0-3: Inode type (Bit 4 indicates internal OS types)
+ *   Bit 4:   Set if inode has been unlinked and is pending removal.
+ */
 
 #define FSNODEFLAG_TYPE_MASK       0x00000007 /* Isolates type field        */
 #define   FSNODEFLAG_TYPE_DRIVER   0x00000000 /*   Character driver         */
@@ -76,6 +82,7 @@
 #define   FSNODEFLAG_TYPE_NAMEDSEM 0x00000004 /*   Named semaphore          */
 #define   FSNODEFLAG_TYPE_MQUEUE   0x00000005 /*   Message Queue            */
 #define   FSNODEFLAG_TYPE_SHM      0x00000006 /*   Shared memory region     */
+#define   FSNODEFLAG_TYPE_SOFTLINK 0x00000007 /*   Soft link                */
 #define FSNODEFLAG_DELETED         0x00000008 /* Unlinked                   */
 
 #define INODE_IS_TYPE(i,t) \
@@ -89,6 +96,7 @@
 #define INODE_IS_NAMEDSEM(i)  INODE_IS_TYPE(i,FSNODEFLAG_TYPE_NAMEDSEM)
 #define INODE_IS_MQUEUE(i)    INODE_IS_TYPE(i,FSNODEFLAG_TYPE_MQUEUE)
 #define INODE_IS_SHM(i)       INODE_IS_TYPE(i,FSNODEFLAG_TYPE_SHM)
+#define INODE_IS_SOFTLINK(i)  INODE_IS_TYPE(i,FSNODEFLAG_TYPE_SOFTLINK)
 
 #define INODE_GET_TYPE(i)     ((i)->i_flags & FSNODEFLAG_TYPE_MASK)
 #define INODE_SET_TYPE(i,t) \
@@ -104,6 +112,7 @@
 #define INODE_SET_NAMEDSEM(i) INODE_SET_TYPE(i,FSNODEFLAG_TYPE_NAMEDSEM)
 #define INODE_SET_MQUEUE(i)   INODE_SET_TYPE(i,FSNODEFLAG_TYPE_MQUEUE)
 #define INODE_SET_SHM(i)      INODE_SET_TYPE(i,FSNODEFLAG_TYPE_SHM)
+#define INODE_SET_SOFTLINK(i) INODE_SET_TYPE(i,FSNODEFLAG_TYPE_SOFTLINK)
 
 /* Mountpoint fd_flags values */
 
@@ -118,7 +127,7 @@
  * descriptor instead.
  *
  * This case is when SUSv1 pseudo-terminals are used (CONFIG_PSEUDOTERM_SUSV1=y).
- * In this case, the output is encoded and decoded using these macros in 
+ * In this case, the output is encoded and decoded using these macros in
  * order to support (a) returning file descriptor 0 (which really should
  * not happen), and (b) avoiding confusion if some other open method returns
  * a positive, non-zero value which is not a file descriptor.
@@ -256,6 +265,7 @@ struct mountpt_operations
 
   int     (*sync)(FAR struct file *filep);
   int     (*dup)(FAR const struct file *oldp, FAR struct file *newp);
+  int     (*fstat)(FAR const struct file *filep, FAR struct stat *buf);
 
   /* Directory operations */
 
@@ -309,16 +319,19 @@ struct mountpt_operations
 
 union inode_ops_u
 {
-  FAR const struct file_operations      *i_ops;    /* Driver operations for inode */
+  FAR const struct file_operations     *i_ops;    /* Driver operations for inode */
 #ifndef CONFIG_DISABLE_MOUNTPOINT
-  FAR const struct block_operations     *i_bops;   /* Block driver operations */
-  FAR const struct mountpt_operations   *i_mops;   /* Operations on a mountpoint */
+  FAR const struct block_operations    *i_bops;   /* Block driver operations */
+  FAR const struct mountpt_operations  *i_mops;   /* Operations on a mountpoint */
 #endif
 #ifdef CONFIG_FS_NAMED_SEMAPHORES
-  FAR struct nsem_inode_s               *i_nsem;   /* Named semaphore */
+  FAR struct nsem_inode_s              *i_nsem;   /* Named semaphore */
 #endif
 #ifndef CONFIG_DISABLE_MQUEUE
-  FAR struct mqueue_inode_s             *i_mqueue; /* POSIX message queue */
+  FAR struct mqueue_inode_s            *i_mqueue; /* POSIX message queue */
+#endif
+#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+  FAR char                             *i_link;   /* Full path to link target */
 #endif
 };
 
@@ -337,6 +350,7 @@ struct inode
   FAR void         *i_private;  /* Per inode driver private data */
   char              i_name[1];  /* Name of inode (variable) */
 };
+
 #define FSNODE_SIZE(n) (sizeof(struct inode) + (n))
 
 /* This is the underlying representation of an open file.  A file
@@ -348,7 +362,7 @@ struct file
 {
   int               f_oflags;   /* Open mode flags */
   off_t             f_pos;      /* File position */
-  FAR struct inode *f_inode;    /* Driver interface */
+  FAR struct inode *f_inode;    /* Driver or file system interface */
   void             *f_priv;     /* Per file driver private data */
 };
 
@@ -392,7 +406,7 @@ struct filelist
 struct file_struct
 {
   int                fs_fd;        /* File descriptor associated with stream */
-#if CONFIG_STDIO_BUFFER_SIZE > 0
+#ifndef CONFIG_STDIO_DISABLE_BUFFERING
   sem_t              fs_sem;       /* For thread safety */
   pid_t              fs_holder;    /* Holder of sem */
   int                fs_counts;    /* Number of times sem is held */

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/armv7-r/cp15_coherent_dcache.S
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -93,7 +93,7 @@
 	.type	cp15_coherent_dcache, function
 
 cp15_coherent_dcache:
-	mrc		CP15_CTR(r3)				/* Read the Cache Type Register */
+	mrc		CP15_CTR(r3)			/* Read the Cache Type Register */
 	lsr		r3, r3, #16				/* Isolate the DMinLine field */
 	and		r3, r3, #0xf
 	mov		r2, #4
@@ -111,7 +111,7 @@ cp15_coherent_dcache:
 
 	dsb
 
-	mrc		CP15_CTR(r3)				/* Read the Cache Type Register */
+	mrc		CP15_CTR(r3)			/* Read the Cache Type Register */
 	and		r3, r3, #0xf			/* Isolate the IminLine field */
 	mov		r2, #4
 	mov		r2, r2, lsl r3			/* Get the cache line size in bytes */
@@ -127,8 +127,10 @@ cp15_coherent_dcache:
 	blo		1b
 
 	mov		r0, #0
+#ifdef CONFIG_SMP
 	mcr		CP15_BPIALLIS(r0)		/* Invalidate entire branch predictor array Inner Shareable */
-	mcr		CP15_BPIALL(r0)			/* Invalidate entire branch predictor array Inner Shareable */
+#endif
+	mcr		CP15_BPIALL(r0)			/* Invalidate all branch predictors */
 
 	dsb
 	isb

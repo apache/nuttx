@@ -1722,6 +1722,16 @@ endmenu # DAC device driver configuration
 menu "HSMCI device driver options"
 	depends on SAMV7_HSMCI
 
+config SAMV7_HSMCI_DMA
+	bool "Support DMA data transfers"
+	default y
+	select SDIO_DMA
+	---help---
+		Support DMA data transfers.
+		Enable SD card DMA data transfers.  This is marginally optional.
+		For most usages, SD accesses will cause data overruns if used without
+		DMA.
+
 config SAMV7_HSMCI_RDPROOF
 	bool "Read Proof Enable"
 	default n

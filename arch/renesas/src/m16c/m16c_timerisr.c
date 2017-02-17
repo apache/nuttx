@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/renesas/src/m16c/m16c_timerisr.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -107,19 +107,11 @@
   ((M16C_XIN_FREQ / M16C_PRESCALE_VALUE / CLK_TCK)  - 1)
 
 /****************************************************************************
- * Private Type Definitions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Function:  up_timerisr
+ * Function:  m16c_timerisr
  *
  * Description:
  *   The timer ISR will perform a variety of services for various portions
@@ -127,16 +119,20 @@
  *
  ****************************************************************************/
 
-int up_timerisr(int irq, uint32_t *regs)
+static int m16c_timerisr(int irq, uint32_t *regs)
 {
-   /* Process timer interrupt */
+  /* Process timer interrupt */
 
-   sched_process_timer();
-   return 0;
+  sched_process_timer();
+  return 0;
 }
 
 /****************************************************************************
- * Function:  up_timer_initialize
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Function:  renesas_timer_initialize
  *
  * Description:
  *   This function is called during start-up to initialize
@@ -144,7 +140,7 @@ int up_timerisr(int irq, uint32_t *regs)
  *
  ****************************************************************************/
 
-void up_timer_initialize(void)
+void renesas_timer_initialize(void)
 {
   /* Make sure that no timers are running and that all timer interrupts are
    * disabled.
@@ -170,7 +166,7 @@ void up_timer_initialize(void)
 
   /* Attach the interrupt handler */
 
-  irq_attach(M16C_SYSTIMER_IRQ, (xcpt_t)up_timerisr);
+  irq_attach(M16C_SYSTIMER_IRQ, (xcpt_t)m16c_timerisr);
 
   /* Enable timer interrupts */
 

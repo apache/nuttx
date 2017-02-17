@@ -40,8 +40,135 @@
 #include <nuttx/config.h>
 
 #include <dllfcn.h>
+#include <errno.h>
 
 #include <nuttx/module.h>
+#include <nuttx/lib/modlib.h>
+
+#include "libc.h"
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: dlremove
+ *
+ * Description:
+ *   Remove a previously installed shared library from memory.
+ *
+ * Input Parameters:
+ *   handle - The shared library handle previously returned by dlopen().
+ *
+ * Returned Value:
+ *   Zero (OK) on success.  On any failure, -1 (ERROR) is returned the
+ *   errno value is set appropriately.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BUILD_PROTECTED
+static inline int dlremove(FAR void *handle)
+{
+  FAR struct module_s *modp = (FAR struct module_s *)handle;
+  int ret;
+
+  DEBUGASSERT(modp != NULL);
+
+  /* Get exclusive access to the module registry */
+
+  modlib_registry_lock();
+
+  /* Verify that the module is in the registry */
+
+  ret = modlib_registry_verify(modp);
+  if (ret < 0)
+    {
+      serr("ERROR: Failed to verify module: %d\n", ret);
+      goto errout_with_lock;
+    }
+
+#if CONFIG_MODLIB_MAXDEPEND > 0
+  /* Refuse to remove any module that other modules may depend upon. */
+
+  if (modp->dependents > 0)
+    {
+      serr("ERROR: Module has dependents: %d\n", modp->dependents);
+      ret = -EBUSY;
+      goto errout_with_lock;
+    }
+#endif
+
+  /* Is there an uninitializer? */
+
+  if (modp->modinfo.uninitializer != NULL)
+    {
+      /* Try to uninitialize the module */
+
+      ret = modp->modinfo.uninitializer(modp->modinfo.arg);
+
+      /* Did the module sucessfully uninitialize? */
+
+      if (ret < 0)
+        {
+          serr("ERROR: Failed to uninitialize the module: %d\n", ret);
+          goto errout_with_lock;
+        }
+
+      /* Nullify so that the uninitializer cannot be called again */
+
+      modp->modinfo.uninitializer = NULL;
+#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
+      modp->initializer           = NULL;
+      modp->modinfo.arg           = NULL;
+      modp->modinfo.exports       = NULL;
+      modp->modinfo.nexports      = 0;
+#endif
+    }
+
+  /* Release resources held by the module */
+
+  if (modp->alloc != NULL)
+    {
+      /* Free the module memory */
+
+      lib_free((FAR void *)modp->alloc);
+
+      /* Nullify so that the memory cannot be freed again */
+
+      modp->alloc = NULL;
+#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
+      modp->textsize  = 0;
+      modp->datasize  = 0;
+#endif
+    }
+
+  /* Remove the module from the registry */
+
+  ret = modlib_registry_del(modp);
+  if (ret < 0)
+    {
+      serr("ERROR: Failed to remove the module from the registry: %d\n", ret);
+      goto errout_with_lock;
+    }
+
+#if CONFIG_MODLIB_MAXDEPEND > 0
+  /* Eliminate any dependencies that this module has on other modules */
+
+  (void)modlib_undepend(modp);
+#endif
+  modlib_registry_unlock();
+
+  /* And free the registry entry */
+
+  lib_free(modp);
+  return OK;
+
+errout_with_lock:
+  modlib_registry_unlock();
+  set_errno(-ret);
+  return ERROR;
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -99,16 +226,14 @@ int dlclose(FAR void *handle)
 
 #elif defined(CONFIG_BUILD_PROTECTED)
   /* The PROTECTED build is equivalent to the FLAT build EXCEPT that there
-   * must be two copies of the the module logic:  One residing in kernel
+   * must be two copies of the module logic:  One residing in kernel
    * space and using the kernel symbol table and one residing in user space
    * using the user space symbol table.
    *
-   * The brute force way to accomplish this is by just copying the kernel
-   * module code into libc/module.
+   * dlremove() is essentially a clone of rmmod().
    */
 
-#warning Missing logic
-  return -ENOSYS;
+  return dlremove(handle);
 
 #else /* if defined(CONFIG_BUILD_KERNEL) */
   /* The KERNEL build is considerably more complex:  In order to be shared,

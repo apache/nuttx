@@ -1,7 +1,7 @@
 //***************************************************************************
 // include/cxx/cunistd
 //
-//   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+//   Copyright (C) 2012, 2017 Gregory Nutt. All rights reserved.
 //   Author: Gregory Nutt <gnutt@nuttx.org>
 //
 // Redistribution and use in source and binary forms, with or without
@@ -48,10 +48,17 @@
 
 namespace std
 {
+  // Task control interfaces
+
+  using ::vfork;
   using ::getpid;
   using ::_exit;
   using ::sleep;
   using ::usleep;
+  using ::pause;
+
+  // File descriptor opertions
+
   using ::close;
   using ::dup;
   using ::dup2;
@@ -61,15 +68,64 @@ namespace std
   using ::write;
   using ::pread;
   using ::pwrite;
+
+  // Terminal I/O
+
+  using ::isatty;
+
+  // Memory management
+
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_MM_PGALLOC) && \
+    defined(CONFIG_ARCH_USE_MMU)
+  using sbrk;
+#endif
+
+  // Special devices
+
   using ::pipe;
+
+  // Operations on working directories
+
   using ::chdir;
   using ::getcwd;
+
+  // Operations on file paths
+
+  using ::access;
   using ::unlink;
   using ::rmdir;
+#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+  using ::link;
+  using ::readlink;
+#endif
+
+  // Execution of program files
+
+#ifdef CONFIG_LIBC_EXECFUNCS
+  using ::execl;
+  using ::execv;
+#endif
+
+  // Byte operations
+
+  using ::swab;
+
+  // getopt and friends
+
   using ::getopt;
+
+  // Non-standard accessor functions
+
   using ::getoptargp;
   using ::getoptindp;
   using ::getoptoptp;
+
+  // Networking
+
+#ifdef CONFIG_NET
+  using ::gethostname;
+  using ::sethostname;
+#endif
 }
 
 #endif // __INCLUDE_CXX_CUNISTD

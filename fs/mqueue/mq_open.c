@@ -1,7 +1,7 @@
 /****************************************************************************
  *  fs/mqueue/mq_open.c
  *
- *   Copyright (C) 2007-2009, 2011, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2014-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <sched.h>
@@ -88,8 +89,8 @@
 mqd_t mq_open(FAR const char *mq_name, int oflags, ...)
 {
   FAR struct inode *inode;
-  FAR const char *relpath = NULL;
   FAR struct mqueue_inode_s *msgq;
+  struct inode_search_s desc;
   char fullpath[MAX_MQUEUE_PATH];
   va_list ap;
   struct mq_attr *attr;
@@ -128,14 +129,21 @@ mqd_t mq_open(FAR const char *mq_name, int oflags, ...)
   sched_lock();
 
   /* Get the inode for this mqueue.  This should succeed if the message
-   * queue has already been created.  In this case, inode_finde() will
+   * queue has already been created.  In this case, inode_find() will
    * have incremented the reference count on the inode.
    */
 
-  inode = inode_find(fullpath, &relpath);
-  if (inode)
+  SETUP_SEARCH(&desc, fullpath, false);
+
+  ret = inode_find(&desc);
+  if (ret >= 0)
     {
-      /* It exists.  Verify that the inode is a message queue */
+      /* Something exists at this path.  Get the search results */
+
+      inode = desc.node;
+      DEBUGASSERT(inode != NULL);
+
+      /* Verify that the inode is a message queue */
 
       if (!INODE_IS_MQUEUE(inode))
         {
@@ -227,16 +235,21 @@ mqd_t mq_open(FAR const char *mq_name, int oflags, ...)
       inode->i_crefs    = 1;
     }
 
+  RELEASE_SEARCH(&desc);
   sched_unlock();
   return mqdes;
 
 errout_with_msgq:
   mq_msgqfree(msgq);
   inode->u.i_mqueue = NULL;
+
 errout_with_inode:
   inode_release(inode);
+
 errout_with_lock:
+  RELEASE_SEARCH(&desc);
   sched_unlock();
+
 errout:
   set_errno(errcode);
   return (mqd_t)ERROR;

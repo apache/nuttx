@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/driver/fs_openblockdriver.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in pathname and binary forms, with or without
@@ -41,8 +41,10 @@
 
 #include <sys/types.h>
 #include <sys/mount.h>
-#include <debug.h>
+#include <stdbool.h>
+#include <assert.h>
 #include <errno.h>
+#include <debug.h>
 
 #include <nuttx/fs/fs.h>
 
@@ -78,6 +80,7 @@
 
 int find_blockdriver(FAR const char *pathname, int mountflags, FAR struct inode **ppinode)
 {
+  struct inode_search_s desc;
   FAR struct inode *inode;
   int ret = 0; /* Assume success */
 
@@ -86,20 +89,26 @@ int find_blockdriver(FAR const char *pathname, int mountflags, FAR struct inode 
 #ifdef CONFIG_DEBUG_FEATURES
   if (!pathname || !ppinode)
     {
-      ret = -EINVAL;
-      goto errout;
+      return -EINVAL;
     }
 #endif
 
   /* Find the inode registered with this pathname */
 
-  inode = inode_find(pathname, NULL);
-  if (!inode)
+  SETUP_SEARCH(&desc, pathname, false);
+
+  ret = inode_find(&desc);
+  if (ret < 0)
     {
       ferr("ERROR: Failed to find %s\n", pathname);
       ret = -ENOENT;
-      goto errout;
+      goto errout_with_search;
     }
+
+  /* Get the search results */
+
+  inode = desc.node;
+  DEBUGASSERT(inode != NULL);
 
   /* Verify that the inode is a block driver. */
 
@@ -121,10 +130,12 @@ int find_blockdriver(FAR const char *pathname, int mountflags, FAR struct inode 
     }
 
   *ppinode = inode;
+  RELEASE_SEARCH(&desc);
   return OK;
 
 errout_with_inode:
   inode_release(inode);
-errout:
+errout_with_search:
+  RELEASE_SEARCH(&desc);
   return ret;
 }

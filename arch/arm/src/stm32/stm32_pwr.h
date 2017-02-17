@@ -1,8 +1,9 @@
 /************************************************************************************
  * arch/arm/src/stm32/stm32_pwr.h
  *
- *   Copyright (C) 2009, 2013, 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2009, 2013, 2015, 2017 Gregory Nutt. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -83,6 +84,27 @@ extern "C"
 #if defined(CONFIG_STM32_STM32F37XX)
 void stm32_pwr_enablesdadc(uint8_t sdadc);
 #endif
+
+/************************************************************************************
+ * Name: stm32_pwr_initbkp
+ *
+ * Description:
+ *   Insures the referenced count access to the backup domain (RTC registers,
+ *   RTC backup data registers and backup SRAM is consistent with the HW state
+ *   without relying on a variable.
+ *
+ *   NOTE: This function should only be called by SoC Start up code.
+ *
+ * Input Parameters:
+ *   writable - set the initial state of the enable and the
+ *              bkp_writable_counter
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
+
+void stm32_pwr_initbkp(bool writable);
 
 /************************************************************************************
  * Name: stm32_pwr_enablebkp

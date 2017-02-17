@@ -44,8 +44,7 @@
 #include <errno.h>
 
 #include <nuttx/module.h>
-
-#include "module/module.h"
+#include <nuttx/lib/modlib.h>
 
 #ifdef CONFIG_MODULE
 
@@ -79,18 +78,18 @@ FAR void *modhandle(FAR const char *name)
 
   /* Get exclusive access to the module registry */
 
-  mod_registry_lock();
+  modlib_registry_lock();
 
   /* Find the module entry for this name in the registry */
 
-  modp = mod_registry_find(name);
+  modp = modlib_registry_find(name);
   if (modp == NULL)
     {
       serr("ERROR: Failed to find module %s: %d\n", name, ret);
       set_errno(ENOENT);
     }
 
-  mod_registry_unlock();
+  modlib_registry_unlock();
   return (FAR void *)modp;
 }
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/vfs/fs_open.c
  *
- *   Copyright (C) 2007-2009, 2011-2012, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2012, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <stdbool.h>
 #include <fcntl.h>
 #include <sched.h>
 #include <errno.h>
@@ -89,9 +90,9 @@ int inode_checkflags(FAR struct inode *inode, int oflags)
 
 int open(const char *path, int oflags, ...)
 {
+  struct inode_search_s desc;
   FAR struct file *filep;
   FAR struct inode *inode;
-  FAR const char *relpath = NULL;
 #if defined(CONFIG_FILE_MODE) || !defined(CONFIG_DISABLE_MOUNTPOINT)
   mode_t mode = 0666;
 #endif
@@ -120,17 +121,24 @@ int open(const char *path, int oflags, ...)
 
   /* Get an inode for this file */
 
-  inode = inode_find(path, &relpath);
-  if (!inode)
+  SETUP_SEARCH(&desc, path, false);
+
+  ret = inode_find(&desc);
+  if (ret < 0)
     {
       /* "O_CREAT is not set and the named file does not exist.  Or, a
        * directory component in pathname does not exist or is a dangling
        * symbolic link."
        */
 
-      ret = ENOENT;
-      goto errout;
+      ret = -ret;
+      goto errout_with_search;
     }
+
+  /* Get the search results */
+
+  inode = desc.node;
+  DEBUGASSERT(inode != NULL);
 
 #if !defined(CONFIG_DISABLE_PSEUDOFS_OPERATIONS) && \
     !defined(CONFIG_DISABLE_MOUNTPOINT)
@@ -155,11 +163,12 @@ int open(const char *path, int oflags, ...)
        if (fd < 0)
          {
            ret = fd;
-           goto errout;
+           goto errout_with_search;
          }
 
        /* Return the file descriptor */
 
+       RELEASE_SEARCH(&desc);
        leave_cancellation_point();
        return fd;
      }
@@ -206,8 +215,7 @@ int open(const char *path, int oflags, ...)
     {
       /* The errno value has already been set */
 
-      leave_cancellation_point();
-      return ERROR;
+      goto errout;
     }
 
   /* Perform the driver open operation.  NOTE that the open method may be
@@ -221,7 +229,7 @@ int open(const char *path, int oflags, ...)
 #ifndef CONFIG_DISABLE_MOUNTPOINT
       if (INODE_IS_MOUNTPT(inode))
         {
-          ret = inode->u.i_mops->open(filep, relpath, oflags, mode);
+          ret = inode->u.i_mops->open(filep, desc.relpath, oflags, mode);
         }
       else
 #endif
@@ -267,15 +275,21 @@ int open(const char *path, int oflags, ...)
     }
 #endif
 
+  RELEASE_SEARCH(&desc);
   leave_cancellation_point();
   return fd;
 
 errout_with_fd:
   files_release(fd);
+
 errout_with_inode:
   inode_release(inode);
-errout:
+
+errout_with_search:
+  RELEASE_SEARCH(&desc);
   set_errno(ret);
+
+errout:
   leave_cancellation_point();
   return ERROR;
 }

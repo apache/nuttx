@@ -128,6 +128,7 @@ struct mmcsd_state_s
   uint8_t mode:2;                  /* (See MMCSDMODE_* definitions) */
   uint8_t type:4;                  /* Card type (See MMCSD_CARDTYPE_* definitions) */
   uint8_t buswidth:4;              /* Bus widthes supported (SD only) */
+  sdio_capset_t caps;              /* SDIO driver capabilities/limitations */
   uint16_t selblocklen;            /* The currently selected block length */
   uint16_t rca;                    /* Relative Card Address (RCS) register */
 
@@ -1304,7 +1305,7 @@ static ssize_t mmcsd_readsingle(FAR struct mmcsd_state_s *priv,
    * will be able to before we commit the card to the operation.
    */
 
-  if (priv->dma)
+  if ((priv->caps & SDIO_CAPS_DMASUPPORTED) != 0)
     {
       ret = SDIO_DMAPREFLIGHT(priv->dev, buffer, priv->blocksize);
 
@@ -1360,7 +1361,7 @@ static ssize_t mmcsd_readsingle(FAR struct mmcsd_state_s *priv,
                   SDIOWAIT_TRANSFERDONE | SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR);
 
 #ifdef CONFIG_SDIO_DMA
-  if (priv->dma)
+  if ((priv->caps & SDIO_CAPS_DMASUPPORTED) != 0)
     {
       ret = SDIO_DMARECVSETUP(priv->dev, buffer, priv->blocksize);
       if (ret != OK)
@@ -1438,7 +1439,7 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_state_s *priv,
    * will be able to before we commit the card to the operation.
    */
 
-  if (priv->dma)
+  if ((priv->caps & SDIO_CAPS_DMASUPPORTED) != 0)
     {
       ret = SDIO_DMAPREFLIGHT(priv->dev, buffer, priv->blocksize);
 
@@ -1495,7 +1496,7 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_state_s *priv,
                  SDIOWAIT_TRANSFERDONE | SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR);
 
 #ifdef CONFIG_SDIO_DMA
-  if (priv->dma)
+  if ((priv->caps & SDIO_CAPS_DMASUPPORTED) != 0)
     {
       ret = SDIO_DMARECVSETUP(priv->dev, buffer, nbytes);
       if (ret != OK)
@@ -1644,7 +1645,7 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_state_s *priv,
    * will be able to before we commit the card to the operation.
    */
 
-  if (priv->dma)
+  if ((priv->caps & SDIO_CAPS_DMASUPPORTED) != 0)
     {
       ret = SDIO_DMAPREFLIGHT(priv->dev, buffer, priv->blocksize);
 
@@ -1693,14 +1694,21 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_state_s *priv,
       return ret;
     }
 
-  /* Send CMD24, WRITE_BLOCK, and verify that good R1 status is returned */
+  /* If Controller does not need DMA setup before the write then send CMD24
+   * now.
+   */
 
-  mmcsd_sendcmdpoll(priv, MMCSD_CMD24, offset);
-  ret = mmcsd_recvR1(priv, MMCSD_CMD24);
-  if (ret != OK)
+  if ((priv->caps & SDIO_CAPS_DMABEFOREWRITE) == 0)
     {
-      ferr("ERROR: mmcsd_recvR1 for CMD24 failed: %d\n", ret);
-      return ret;
+      /* Send CMD24, WRITE_BLOCK, and verify that good R1 status is returned */
+
+      mmcsd_sendcmdpoll(priv, MMCSD_CMD24, offset);
+      ret = mmcsd_recvR1(priv, MMCSD_CMD24);
+      if (ret != OK)
+        {
+          ferr("ERROR: mmcsd_recvR1 for CMD24 failed: %d\n", ret);
+          return ret;
+        }
     }
 
   /* Configure SDIO controller hardware for the write transfer */
@@ -1708,8 +1716,9 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_state_s *priv,
   SDIO_BLOCKSETUP(priv->dev, priv->blocksize, 1);
   SDIO_WAITENABLE(priv->dev,
                   SDIOWAIT_TRANSFERDONE | SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR);
+
 #ifdef CONFIG_SDIO_DMA
-  if (priv->dma)
+  if ((priv->caps & SDIO_CAPS_DMASUPPORTED) != 0)
     {
       ret = SDIO_DMASENDSETUP(priv->dev, buffer, priv->blocksize);
       if (ret != OK)
@@ -1729,6 +1738,21 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_state_s *priv,
    */
 
   priv->wrbusy = true;
+
+  /* If Controller needs DMA setup before write then only send CMD24 now. */
+
+  if ((priv->caps & SDIO_CAPS_DMABEFOREWRITE) != 0)
+    {
+      /* Send CMD24, WRITE_BLOCK, and verify that good R1 status is returned */
+
+      mmcsd_sendcmdpoll(priv, MMCSD_CMD24, offset);
+      ret = mmcsd_recvR1(priv, MMCSD_CMD24);
+      if (ret != OK)
+        {
+          ferr("ERROR: mmcsd_recvR1 for CMD24 failed: %d\n", ret);
+          return ret;
+        }
+    }
 
   /* Wait for the transfer to complete */
 
@@ -1787,7 +1811,7 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
    * will be able to before we commit the card to the operation.
    */
 
-  if (priv->dma)
+  if ((priv->caps & SDIO_CAPS_DMASUPPORTED) != 0)
     {
       ret = SDIO_DMAPREFLIGHT(priv->dev, buffer, priv->blocksize);
 
@@ -1871,8 +1895,9 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
   SDIO_BLOCKSETUP(priv->dev, priv->blocksize, nblocks);
   SDIO_WAITENABLE(priv->dev,
                   SDIOWAIT_TRANSFERDONE | SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR);
+
 #ifdef CONFIG_SDIO_DMA
-  if (priv->dma)
+  if ((priv->caps & SDIO_CAPS_DMASUPPORTED) != 0)
     {
       ret = SDIO_DMASENDSETUP(priv->dev, buffer, nbytes);
       if (ret != OK)
@@ -2095,7 +2120,7 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
         }
 
 #else
-      /* Use either the single- or muliple-block transfer method */
+      /* Use either the single- or multiple-block transfer method */
 
       if (nsectors == 1)
         {
@@ -2235,7 +2260,7 @@ static int mmcsd_geometry(FAR struct inode *inode, struct geometry *geometry)
                  geometry->geo_mediachanged ? "true" : "false",
                  geometry->geo_writeenabled ? "true" : "false");
           finfo("nsectors: %lu sectorsize: %d\n",
-                 ((unsigned long))geometry->geo_nsectors,
+                 (unsigned long)geometry->geo_nsectors,
                  geometry->geo_sectorsize);
 
           priv->mediachanged = false;
@@ -2381,12 +2406,14 @@ static void mmcsd_mediachange(FAR void *arg)
 
 static int mmcsd_widebus(FAR struct mmcsd_state_s *priv)
 {
-#ifndef CONFIG_SDIO_WIDTH_D1_ONLY
   int ret;
 
-  /* Check if the SD card supports this feature (as reported in the SCR) */
+  /* Check if the SD card supports wide bus operation (as reported in the
+   * SCR or in the SDIO driver capabililities)
+   */
 
-  if ((priv->buswidth & MMCSD_SCR_BUSWIDTH_4BIT) != 0)
+  if ((priv->buswidth & MMCSD_SCR_BUSWIDTH_4BIT) != 0 &&
+      (priv->caps & SDIO_CAPS_1BIT_ONLY) == 0)
     {
       /* Disconnect any CD/DAT3 pull up using ACMD42.  ACMD42 is optional and
        * need not be supported by all SD calls.
@@ -2453,13 +2480,6 @@ static int mmcsd_widebus(FAR struct mmcsd_state_s *priv)
 
   fwarn("WARNING: Card does not support wide-bus operation\n");
   return -ENOSYS;
-
-#else /* CONFIG_SDIO_WIDTH_D1_ONLY */
-
-  finfo("Wide-bus operation is disabled\n");
-  return -ENOSYS;
-
-#endif /* CONFIG_SDIO_WIDTH_D1_ONLY */
 }
 
 /****************************************************************************
@@ -3050,9 +3070,11 @@ static int mmcsd_probe(FAR struct mmcsd_state_s *priv)
               finfo("Capacity: %lu Kbytes\n", (unsigned long)(priv->capacity / 1024));
               priv->mediachanged = true;
 
+#ifdef CONFIG_MMCSD_HAVECARDDETECT
               /* Set up to receive asynchronous, media removal events */
 
               SDIO_CALLBACKENABLE(priv->dev, SDIOMEDIA_EJECTED);
+#endif
             }
 
           /* REVISIT: There is a problem here.  If mmcsd_initialize() returns a
@@ -3129,12 +3151,10 @@ static int mmcsd_hwinitialize(FAR struct mmcsd_state_s *priv)
 
   mmcsd_takesem(priv);
 
-#ifdef CONFIG_SDIO_DMA
-  /* Does this architecture support DMA with the MMC/SD device? */
+  /* Get the capabilities of the SDIO driver */
 
-  priv->dma = SDIO_DMASUPPORTED(priv->dev);
-  finfo("DMA supported: %d\n", priv->dma);
-#endif
+  priv->caps = SDIO_CAPABILITIES(priv->dev);
+  finfo("DMA supported: %d\n", (priv->caps & SDIO_CAPS_DMASUPPORTED) != 0);
 
   /* Attach and prepare MMC/SD interrupts */
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/mount/fs_umount2.c
  *
- *   Copyright (C) 2007-2009, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <sys/mount.h>
+#include <stdbool.h>
 #include <errno.h>
 #include <assert.h>
 
@@ -73,6 +74,7 @@ int umount2(FAR const char *target, unsigned int flags)
 {
   FAR struct inode *mountpt_inode;
   FAR struct inode *blkdrvr_inode = NULL;
+  struct inode_search_s desc;
   int errcode = OK;
   int ret;
 
@@ -86,12 +88,19 @@ int umount2(FAR const char *target, unsigned int flags)
 
   /* Find the mountpt */
 
-  mountpt_inode = inode_find(target, NULL);
-  if (!mountpt_inode)
+  SETUP_SEARCH(&desc, target, false);
+
+  ret = inode_find(&desc);
+  if (ret < 0)
     {
       errcode = ENOENT;
-      goto errout;
+      goto errout_with_search;
     }
+
+  /* Get the search results */
+
+  mountpt_inode = desc.node;
+  DEBUGASSERT(mountpt_inode != NULL);
 
   /* Verify that the inode is a mountpoint */
 
@@ -189,18 +198,24 @@ int umount2(FAR const char *target, unsigned int flags)
       inode_release(blkdrvr_inode);
     }
 
+  RELEASE_SEARCH(&desc);
   return OK;
 
   /* A lot of goto's!  But they make the error handling much simpler */
 
 errout_with_semaphore:
   inode_semgive();
+
 errout_with_mountpt:
   inode_release(mountpt_inode);
   if (blkdrvr_inode)
     {
       inode_release(blkdrvr_inode);
     }
+
+errout_with_search:
+  RELEASE_SEARCH(&desc);
+
 errout:
   set_errno(errcode);
   return ERROR;

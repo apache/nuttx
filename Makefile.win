@@ -171,7 +171,8 @@ endif
 
 # This is the name of the final target (relative to the top level directorty)
 
-BIN = nuttx$(EXEEXT)
+NUTTXNAME = nuttx
+BIN       = $(NUTTXNAME)$(EXEEXT)
 
 all: $(BIN)
 .PHONY: dirlinks context clean_context check_context configenv config oldconfig menuconfig export subdir_clean clean subdir_distclean distclean apps_clean apps_distclean
@@ -416,20 +417,20 @@ pass2deps: pass2dep $(NUTTXLIBS)
 pass2: pass2deps
 	$(Q) $(MAKE) -C $(ARCH_SRC) TOPDIR="$(TOPDIR)" EXTRA_OBJS="$(EXTRA_OBJS)" LINKLIBS="$(LINKLIBS)" EXTRADEFINES=$(KDEFINE) $(BIN)
 ifeq ($(CONFIG_RRLOAD_BINARY),y)
-	@echo "MK: $(BIN).rr"
-	$(Q) $(TOPDIR)\tools\mkimage.sh --Prefix $(CROSSDEV) $(BIN) $(BIN).rr
+	@echo "MK: $(NUTTXNAME).rr"
+	$(Q) $(TOPDIR)\tools\mkimage.sh --Prefix $(CROSSDEV) $(BIN) $(NUTTXNAME).rr
 endif
 ifeq ($(CONFIG_INTELHEX_BINARY),y)
-	@echo "CP: $(BIN).hex"
-	$(Q) $(OBJCOPY) $(OBJCOPYARGS) -O ihex $(BIN) $(BIN).hex
+	@echo "CP: $(NUTTXNAME).hex"
+	$(Q) $(OBJCOPY) $(OBJCOPYARGS) -O ihex $(BIN) $(NUTTXNAME).hex
 endif
 ifeq ($(CONFIG_MOTOROLA_SREC),y)
-	@echo "CP: $(BIN).srec"
-	$(Q) $(OBJCOPY) $(OBJCOPYARGS) -O srec $(BIN) $(BIN).srec
+	@echo "CP: $(NUTTXNAME).srec"
+	$(Q) $(OBJCOPY) $(OBJCOPYARGS) -O srec $(BIN) $(NUTTXNAME).srec
 endif
 ifeq ($(CONFIG_RAW_BINARY),y)
-	@echo "CP: $(BIN).bin"
-	$(Q) $(OBJCOPY) $(OBJCOPYARGS) -O binary $(BIN) $(BIN).bin
+	@echo "CP: $(NUTTXNAME).bin"
+	$(Q) $(OBJCOPY) $(OBJCOPYARGS) -O binary $(BIN) $(NUTTXNAME).bin
 endif
 
 # $(BIN)

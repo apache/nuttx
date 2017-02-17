@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/stdio/lib_memsostream.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -137,9 +137,7 @@ void lib_memsostream(FAR struct lib_memsostream_s *outstream,
                      FAR char *bufstart, int buflen)
 {
   outstream->public.put   = memsostream_putc;
-#ifdef CONFIG_STDIO_LINEBUFFER
   outstream->public.flush = lib_snoflush;
-#endif
   outstream->public.seek  = memsostream_seek;
   outstream->public.nput  = 0;          /* Total number of characters written */
   outstream->buffer       = bufstart;   /* Start of buffer */

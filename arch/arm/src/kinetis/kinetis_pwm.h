@@ -1,10 +1,11 @@
 /************************************************************************************
  * arch/arm/src/kinetis/kinetis_pwm.h
  *
- *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Alan Carvalho de Assis <acassis@gmail.com>
- *           Ken Fazzone <kfazz01@gmail.com>
+ *   Copyright (C) 2013, 2016, 2017 Gregory Nutt. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            Alan Carvalho de Assis <acassis@gmail.com>
+ *            Ken Fazzone <kfazz01@gmail.com>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -66,11 +67,14 @@
 #ifndef CONFIG_KINETIS_FTM2
 #  undef CONFIG_KINETIS_FTM2_PWM
 #endif
+#ifndef CONFIG_KINETIS_FTM3
+#  undef CONFIG_KINETIS_FTM3_PWM
+#endif
 
 /* Check if PWM support for any channel is enabled. */
 
 #if defined(CONFIG_KINETIS_FTM0_PWM)  || defined(CONFIG_KINETIS_FTM1_PWM)  || \
-    defined(CONFIG_KINETIS_FTM2_PWM)
+    defined(CONFIG_KINETIS_FTM2_PWM)  || defined(CONFIG_KINETIS_FTM3_PWM)
 
 #include <arch/board/board.h>
 #include "chip/kinetis_pinmux.h"
@@ -143,6 +147,30 @@
 #    define PWM_FTM2_PINCFG GPIO_FTM2_CH4OUT
 #  elif CONFIG_KINETIS_FTM2_CHANNEL == 5
 #    define PWM_FTM2_PINCFG GPIO_FTM2_CH5OUT
+#  else
+#    error "Unsupported value of CONFIG_KINETIS_FTM3_CHANNEL"
+#  endif
+#endif
+
+#ifdef CONFIG_KINETIS_FTM3_PWM
+#  if !defined(CONFIG_KINETIS_FTM3_CHANNEL)
+#    error "CONFIG_KINETIS_FTM3_CHANNEL must be provided"
+#  elif CONFIG_KINETIS_FTM3_CHANNEL == 0
+#    define PWM_FTM3_PINCFG GPIO_FTM3_CH0OUT
+#  elif CONFIG_KINETIS_FTM3_CHANNEL == 1
+#    define PWM_FTM3_PINCFG GPIO_FTM3_CH1OUT
+#  elif CONFIG_KINETIS_FTM3_CHANNEL == 2
+#    define PWM_FTM3_PINCFG GPIO_FTM3_CH2OUT
+#  elif CONFIG_KINETIS_FTM3_CHANNEL == 3
+#    define PWM_FTM3_PINCFG GPIO_FTM3_CH3OUT
+#  elif CONFIG_KINETIS_FTM3_CHANNEL == 4
+#    define PWM_FTM3_PINCFG GPIO_FTM3_CH4OUT
+#  elif CONFIG_KINETIS_FTM3_CHANNEL == 5
+#    define PWM_FTM3_PINCFG GPIO_FTM3_CH5OUT
+#  elif CONFIG_KINETIS_FTM3_CHANNEL == 6
+#    define PWM_FTM3_PINCFG GPIO_FTM3_CH6OUT
+#  elif CONFIG_KINETIS_FTM3_CHANNEL == 7
+#    define PWM_FTM3_PINCFG GPIO_FTM3_CH7OUT
 #  else
 #    error "Unsupported value of CONFIG_KINETIS_FTM3_CHANNEL"
 #  endif

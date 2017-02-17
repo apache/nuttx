@@ -1,7 +1,7 @@
 /****************************************************************************
  * syscall/syscall_stublookup.c
  *
- *   Copyright (C) 2011-2013, 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013, 2015-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -122,7 +122,6 @@ uintptr_t STUB_waitid(int nbr, uintptr_t parm1, uintptr_t parm2,
 #ifdef CONFIG_MODULE
 uintptr_t STUB_insmod(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_rmmod(int nbr, uintptr_t parm1);
-uintptr_t STUB_modsym(int nbr, uintptr_t parm1);
 uintptr_t STUB_modhandle(int nbr, uintptr_t parm1, uintptr_t parm2);
 #endif
 
@@ -236,8 +235,13 @@ uintptr_t STUB_readdir(int nbr, uintptr_t parm1);
 uintptr_t STUB_rewinddir(int nbr, uintptr_t parm1);
 uintptr_t STUB_seekdir(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_stat(int nbr, uintptr_t parm1, uintptr_t parm2);
+uintptr_t STUB_fstat(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_statfs(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_telldir(int nbr, uintptr_t parm1);
+
+uintptr_t STUB_link(int nbr, uintptr_t parm1, uintptr_t parm2);
+uintptr_t STUB_readlink(int nbr, uintptr_t parm1, uintptr_t parm2,
+            uintptr_t parm3);
 
 uintptr_t STUB_pipe2(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_mkfifo2(int nbr, uintptr_t parm1, uintptr_t parm2,

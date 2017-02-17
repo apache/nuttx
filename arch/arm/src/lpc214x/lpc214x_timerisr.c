@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc214x/lpc214x_timerisr.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -72,19 +72,11 @@
 #define tmr_putreg32(v,o) putreg32((v), LPC214X_TMR0_BASE+(o))
 
 /****************************************************************************
- * Private Types
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Function:  up_timerisr
+ * Function:  lpc214x_timerisr
  *
  * Description:
  *   The timer ISR will perform a variety of services for
@@ -93,9 +85,9 @@
  ****************************************************************************/
 
 #ifdef CONFIG_VECTORED_INTERRUPTS
-int up_timerisr(uint32_t *regs)
+static int lpc214x_timerisr(uint32_t *regs)
 #else
-int up_timerisr(int irq, uint32_t *regs)
+static int lpc214x_timerisr(int irq, uint32_t *regs)
 #endif
 {
   /* Process timer interrupt */
@@ -115,7 +107,11 @@ int up_timerisr(int irq, uint32_t *regs)
 }
 
 /****************************************************************************
- * Function:  up_timer_initialize
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Function:  arm_timer_initialize
  *
  * Description:
  *   This function is called during start-up to initialize
@@ -123,7 +119,7 @@ int up_timerisr(int irq, uint32_t *regs)
  *
  ****************************************************************************/
 
-void up_timer_initialize(void)
+void arm_timer_initialize(void)
 {
   uint16_t mcr;
 
@@ -158,9 +154,10 @@ void up_timer_initialize(void)
   /* Attach the timer interrupt vector */
 
 #ifdef CONFIG_VECTORED_INTERRUPTS
-  up_attach_vector(LPC214X_IRQ_SYSTIMER, LPC214X_SYSTIMER_VEC, (vic_vector_t)up_timerisr);
+  up_attach_vector(LPC214X_IRQ_SYSTIMER, LPC214X_SYSTIMER_VEC,
+                   (vic_vector_t)lpc214x_timerisr);
 #else
-  (void)irq_attach(LPC214X_IRQ_SYSTIMER, (xcpt_t)up_timerisr);
+  (void)irq_attach(LPC214X_IRQ_SYSTIMER, (xcpt_t)lpc214x_timerisr);
 #endif
 
   /* And enable the timer interrupt */

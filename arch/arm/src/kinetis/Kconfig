@@ -131,42 +131,92 @@ config ARCH_CHIP_MK64FN1M0VLL12
 	select ARCH_FAMILY_K64
 	select KINETIS_HAVE_I2C1
 	select KINETIS_HAVE_I2C2
+	select KINETIS_HAVE_SPI1
+	select KINETIS_HAVE_SPI2
 
 config ARCH_CHIP_MK64FX512VLL12
 	bool "MK64FX512VLL12"
 	select ARCH_FAMILY_K64
 	select KINETIS_HAVE_I2C1
 	select KINETIS_HAVE_I2C2
+	select KINETIS_HAVE_SPI1
+	select KINETIS_HAVE_SPI2
 
 config ARCH_CHIP_MK64FX512VDC12
 	bool "MK64FX512VDC12"
 	select ARCH_FAMILY_K64
 	select KINETIS_HAVE_I2C1
 	select KINETIS_HAVE_I2C2
+	select KINETIS_HAVE_SPI1
+	select KINETIS_HAVE_SPI2
 
 config ARCH_CHIP_MK64FN1M0VDC12
 	bool "MK64FN1M0VDC12"
 	select ARCH_FAMILY_K64
 	select KINETIS_HAVE_I2C1
 	select KINETIS_HAVE_I2C2
+	select KINETIS_HAVE_SPI1
+	select KINETIS_HAVE_SPI2
 
 config ARCH_CHIP_MK64FX512VLQ12
 	bool "MK64FX512VLQ12"
 	select ARCH_FAMILY_K64
 	select KINETIS_HAVE_I2C1
 	select KINETIS_HAVE_I2C2
+	select KINETIS_HAVE_SPI1
+	select KINETIS_HAVE_SPI2
 
 config ARCH_CHIP_MK64FX512VMD12
 	bool "MK64FX512VMD12"
 	select ARCH_FAMILY_K64
 	select KINETIS_HAVE_I2C1
 	select KINETIS_HAVE_I2C2
+	select KINETIS_HAVE_SPI1
+	select KINETIS_HAVE_SPI2
 
 config ARCH_CHIP_MK64FN1M0VMD12
 	bool "MK64FN1M0VMD12"
 	select ARCH_FAMILY_K64
 	select KINETIS_HAVE_I2C1
 	select KINETIS_HAVE_I2C2
+	select KINETIS_HAVE_SPI1
+	select KINETIS_HAVE_SPI2
+
+config ARCH_CHIP_MK66FX1M0VMD18
+	bool "MK66FX1M0VMD18"
+	select ARCH_FAMILY_K66
+	select KINETIS_HAVE_I2C1
+	select KINETIS_HAVE_I2C2
+	select KINETIS_HAVE_I2C3
+	select KINETIS_HAVE_SPI1
+	select KINETIS_HAVE_SPI2
+
+config ARCH_CHIP_MK66FN2M0VMD18
+	bool "MK66FN2M0VMD18"
+	select ARCH_FAMILY_K66
+	select KINETIS_HAVE_I2C1
+	select KINETIS_HAVE_I2C2
+	select KINETIS_HAVE_I2C3
+	select KINETIS_HAVE_SPI1
+	select KINETIS_HAVE_SPI2
+
+config ARCH_CHIP_MK66FX1M0VLQ18
+	bool "MK66FX1M0VLQ18"
+	select ARCH_FAMILY_K66
+	select KINETIS_HAVE_I2C1
+	select KINETIS_HAVE_I2C2
+	select KINETIS_HAVE_I2C3
+	select KINETIS_HAVE_SPI1
+	select KINETIS_HAVE_SPI2
+
+config ARCH_CHIP_MK66FN2M0VLQ18
+	bool "MK66FN2M0VLQ18"
+	select ARCH_FAMILY_K66
+	select KINETIS_HAVE_I2C1
+	select KINETIS_HAVE_I2C2
+	select KINETIS_HAVE_I2C3
+	select KINETIS_HAVE_SPI1
+	select KINETIS_HAVE_SPI2
 
 endchoice
 
@@ -188,6 +238,10 @@ config ARCH_FAMILY_K64
 	bool
 	default n
 
+config ARCH_FAMILY_K66
+	bool
+	default n
+
 menu "Kinetis Peripheral Support"
 
 config KINETIS_HAVE_I2C1
@@ -195,6 +249,18 @@ config KINETIS_HAVE_I2C1
 	default n
 
 config KINETIS_HAVE_I2C2
+	bool
+	default n
+
+config KINETIS_HAVE_I2C3
+	bool
+	default n
+
+config KINETIS_HAVE_SPI1
+	bool
+	default n
+
+config KINETIS_HAVE_SPI2
 	bool
 	default n
 
@@ -255,7 +321,7 @@ config KINETIS_UART5
 config KINETIS_ENET
 	bool "Ethernet"
 	default n
-	depends on ARCH_FAMILY_K60 || ARCH_FAMILY_K64
+	depends on ARCH_FAMILY_K60 || ARCH_FAMILY_K64 || ARCH_FAMILY_K66
 	select ARCH_HAVE_PHY
 	select ARCH_HAVE_NETDEV_STATISTICS
 	select NET
@@ -266,7 +332,7 @@ config KINETIS_ENET
 config KINETIS_RNGB
 	bool "Random number generator"
 	default n
-	depends on ARCH_FAMILY_K60 || ARCH_FAMILY_K64
+	depends on ARCH_FAMILY_K60 || ARCH_FAMILY_K64 || ARCH_FAMILY_K66
 	select ARCH_HAVE_RNG
 	---help---
 		Support the random number generator(K6x only)
@@ -286,18 +352,23 @@ config KINETIS_FLEXCAN1
 config KINETIS_SPI0
 	bool "SPI0"
 	default n
+	select SPI
 	---help---
 		Support SPI0
 
 config KINETIS_SPI1
 	bool "SPI1"
 	default n
+	select SPI
+	depends on KINETIS_HAVE_SPI1
 	---help---
 		Support SPI1
 
 config KINETIS_SPI2
 	bool "SPI2"
 	default n
+	select SPI
+	depends on KINETIS_HAVE_SPI2
 	---help---
 		Support SPI2
 
@@ -322,7 +393,15 @@ config KINETIS_I2C2
 	select I2C
 	depends on KINETIS_HAVE_I2C2
 	---help---
-		Support I2C1
+		Support I2C2
+
+config KINETIS_I2C3
+	bool "I2C3"
+	default n
+	select I2C
+	depends on KINETIS_HAVE_I2C3
+	---help---
+		Support I2C3
 
 config KINETIS_I2S
 	bool "I2S"
@@ -390,6 +469,13 @@ config KINETIS_FTM2
 	default n
 	---help---
 		Support FlexTimer 2
+
+config KINETIS_FTM3
+	bool "FTM3"
+	default n
+	depends on ARCH_FAMILY_K64 || ARCH_FAMILY_K66
+	---help---
+		Support FlexTimer 3
 
 config KINETIS_LPTIMER
 	bool "Low power timer (LPTIMER)"
@@ -479,7 +565,7 @@ config KINETIS_PIT
 endmenu
 
 menu "Kinetis FTM PWM Configuration"
-	depends on KINETIS_FTM0 || KINETIS_FTM1 || KINETIS_FTM2
+	depends on KINETIS_FTM0 || KINETIS_FTM1 || KINETIS_FTM2 || KINETIS_FTM3
 
 config KINETIS_FTM0_PWM
 	bool "FTM0 PWM"
@@ -543,6 +629,27 @@ config KINETIS_FTM2_CHANNEL
 	---help---
 		If FTM2 is enabled for PWM usage, you also need specifies the timer output
 		channel {0,..,1}
+
+config KINETIS_FTM3_PWM
+	bool "FTM3 PWM"
+	default n
+	depends on KINETIS_FTM3
+	---help---
+		Reserve timer 3 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If KINETIS_FTM3
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+config KINETIS_FTM3_CHANNEL
+	int "FTM3 PWM Output Channel"
+	default 0
+	range 0 7
+	depends on KINETIS_FTM3_PWM
+	---help---
+		If FTM3 is enabled for PWM usage, you also need specifies the timer output
+		channel {0,..,7}
 
 endmenu # Kinetis FTM PWM Configuration
 
@@ -635,6 +742,21 @@ config KINETIS_ENET_NORXER
 		GPIO and pulled low.
 
 choice
+	prompt "RMII Clock Source"
+	default KINETIS_EMAC_RMIICLKEXTAL
+	depends on !KINETIS_ENETUSEMII && (ARCH_FAMILY_K64 || ARCH_FAMILY_K66)
+	---help---
+		The RMII clock can be selected between EXTAL or ENET_1588_CLKIN
+
+config KINETIS_EMAC_RMIICLKEXTAL
+	bool "Use EXTAL for RMII Clock"
+
+config KINETIS_EMAC_RMIICLK1588CLKIN
+	bool "Use ENET_1588_CLKIN for RMII Clock"
+
+endchoice # RMII Clock Source
+
+choice
 	prompt "Work queue"
 	default KINETIS_EMAC_LPWORK if SCHED_LPWORK
 	default KINETIS_EMAC_HPWORK if !SCHED_LPWORK && SCHED_HPWORK
@@ -657,6 +779,22 @@ endmenu # Kinetis Ethernet Configuration
 
 menu "Kinetis SDHC Configuration"
 	depends on KINETIS_SDHC
+
+config KINETIS_SDHC_DMA
+	bool "Support DMA data transfers"
+	default y
+	select SDIO_DMA
+	---help---
+		Support DMA data transfers.
+		Enable SD card DMA data transfers.  This is marginally optional.
+		For most usages, SD accesses will cause data overruns if used without
+		DMA.
+
+config KINETIS_SDHC_WIDTH_D1_ONLY
+	bool "Use D1 only"
+	default n
+	---help---
+		Select 1-bit transfer mode.  Default: 4-bit transfer mode.
 
 config KINETIS_SDHC_ABSFREQ
 	bool "Custom transfer frequencies"
@@ -687,14 +825,14 @@ config KINETIS_MMCXFR_FREQ
 config KINETIS_SD1BIT_FREQ
 	int "SD 1-bit transfer frequency"
 	default 20000000
-	depends on SDIO_WIDTH_D1_ONLY
+	depends on KINETIS_SDHC_WIDTH_D1_ONLY
 	---help---
 		Frequency to use for transferring data to/from an SD card using on a single data liune.
 
 config KINETIS_SD4BIT_FREQ
 	int "SD 4-bit transfer frequency"
 	default 20000000
-	depends on !SDIO_WIDTH_D1_ONLY
+	depends on !KINETIS_SDHC_WIDTH_D1_ONLY
 	---help---
 		Frequency to use for transferring data to/from an SD card using all four data lines.
 

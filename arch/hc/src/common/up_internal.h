@@ -173,8 +173,7 @@ void up_sigdeliver(void);
 
 /* System timer initialization */
 
-void up_timer_initialize(void);
-int  up_timerisr(int irq, uint32_t *regs);
+void hc_timer_initialize(void);
 
 /* Debug output */
 

@@ -1659,7 +1659,7 @@ static void lpc43_receive(FAR struct lpc43_ethmac_s *priv)
             }
         }
       else
-#endif
+#endif /* CONFIG_NET_IPv4 */
 #ifdef CONFIG_NET_IPv6
       if (BUF->type == HTONS(ETHTYPE_IP6))
         {
@@ -1696,7 +1696,7 @@ static void lpc43_receive(FAR struct lpc43_ethmac_s *priv)
             }
         }
       else
-#endif
+#endif /* CONFIG_NET_IPv6 */
 #ifdef CONFIG_NET_ARP
       if (BUF->type == htons(ETHTYPE_ARP))
         {
@@ -1978,6 +1978,7 @@ static void lpc43_interrupt_work(FAR void *arg)
 
       lpc43_putreg(ETH_DMAINT_AIS, LPC43_ETH_DMASTAT);
     }
+#endif /* CONFIG_DEBUG_NET */
 
   net_unlock();
 

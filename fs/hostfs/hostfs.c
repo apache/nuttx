@@ -80,6 +80,8 @@ static int     hostfs_ioctl(FAR struct file *filep, int cmd,
 static int     hostfs_sync(FAR struct file *filep);
 static int     hostfs_dup(FAR const struct file *oldp,
                         FAR struct file *newp);
+static int     hostfs_fstat(FAR const struct file *filep,
+                        FAR struct stat *buf);
 
 static int     hostfs_opendir(FAR struct inode *mountpt,
                         FAR const char *relpath,
@@ -136,6 +138,7 @@ const struct mountpt_operations hostfs_operations =
 
   hostfs_sync,          /* sync */
   hostfs_dup,           /* dup */
+  hostfs_fstat,         /* fstat */
 
   hostfs_opendir,       /* opendir */
   hostfs_closedir,      /* closedir */
@@ -642,6 +645,47 @@ static int hostfs_dup(FAR const struct file *oldp, FAR struct file *newp)
   newp->f_priv = (FAR void *)sf;
 
   return OK;
+}
+
+/****************************************************************************
+ * Name: hostfs_fstat
+ *
+ * Description:
+ *   Obtain information about an open file associated with the file
+ *   descriptor 'fd', and will write it to the area pointed to by 'buf'.
+ *
+ ****************************************************************************/
+
+static int hostfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
+{
+  FAR struct inode *inode;
+  FAR struct hostfs_mountpt_s *fs;
+  FAR struct hostfs_ofile_s *hf;
+  int ret = OK;
+
+  /* Sanity checks */
+
+  DEBUGASSERT(filep != NULL && buf != NULL);
+
+  /* Recover our private data from the struct file instance */
+
+  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
+  hf    = filep->f_priv;
+  inode = filep->f_inode;
+
+  fs    = inode->i_private;
+  DEBUGASSERT(fs != NULL);
+
+  /* Take the semaphore */
+
+  hostfs_semtake(fs);
+
+  /* Call the host to perform the read */
+
+  ret = host_fstat(hf->fd, buf);
+
+  hostfs_semgive(fs);
+  return ret;
 }
 
 /****************************************************************************

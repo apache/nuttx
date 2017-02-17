@@ -1,7 +1,7 @@
 ############################################################################
 # fs/inode/Make.defs
 #
-#   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -38,8 +38,9 @@
 ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
 
 CSRCS += fs_files.c fs_foreachinode.c fs_inode.c fs_inodeaddref.c
-CSRCS += fs_inodebasename.c fs_inodefind.c fs_inoderelease.c
-CSRCS += fs_inoderemove.c fs_inodereserve.c fs_filedetach.c
+CSRCS += fs_inodebasename.c fs_inodefind.c fs_inodefree.c fs_inoderelease.c
+CSRCS += fs_inoderemove.c fs_inodereserve.c fs_inodesearch.c
+CSRCS += fs_filedetach.c
 
 # Include inode/utils build support
 

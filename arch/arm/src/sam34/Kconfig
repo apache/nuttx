@@ -1371,7 +1371,18 @@ config SAM34_EMAC_REGDEBUG
 endmenu # EMAC device driver options
 
 if SAM34_HSMCI
+
 menu "AT91SAM3/4 HSMCI device driver options"
+
+config SAM34_HSMCI_DMA
+	bool "Support DMA data transfers"
+	default y
+	select SDIO_DMA
+	---help---
+		Support DMA data transfers.
+		Enable SD card DMA data transfers.  This is marginally optional.
+		For most usages, SD accesses will cause data overruns if used without
+		DMA.
 
 config SAM34_HSMCI_RDPROOF
 	bool "Read Proof Enable"

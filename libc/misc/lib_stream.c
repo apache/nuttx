@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/misc/lib_stream.c
  *
- *   Copyright (C) 2007, 2011, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2011, 2013-2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,18 +54,6 @@
       defined(__KERNEL__)
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -101,13 +89,15 @@ void lib_stream_initialize(FAR struct task_group_s *group)
 
   for (i = 0; i < CONFIG_NFILE_STREAMS; i++)
    {
-     /* Clear the IOB */
+      FAR struct file_struct *stream = &list->sl_streams[i];
 
-      memset(&list->sl_streams[i], 0, sizeof(FILE));
+      /* Clear the IOB */
+
+      memset(stream, 0, sizeof(FILE));
 
       /* Indicate not opened */
 
-      list->sl_streams[i].fs_fd = -1;
+      stream->fs_fd = -1;
 
       /* Initialize the stream semaphore to one to support one-at-
        * a-time access to private data sets.
@@ -119,7 +109,7 @@ void lib_stream_initialize(FAR struct task_group_s *group)
 #endif /* CONFIG_NFILE_STREAMS > 0 */
 
 /****************************************************************************
- * Name: lib_stream_init
+ * Name: lib_stream_release
  *
  * Description:
  *   This function is called when a TCB is destroyed.  Note that it does not
@@ -132,7 +122,7 @@ void lib_stream_initialize(FAR struct task_group_s *group)
 void lib_stream_release(FAR struct task_group_s *group)
 {
   FAR struct streamlist *list;
-#if CONFIG_STDIO_BUFFER_SIZE > 0
+#ifndef CONFIG_STDIO_DISABLE_BUFFERING
   int i;
 #endif
 
@@ -149,23 +139,26 @@ void lib_stream_release(FAR struct task_group_s *group)
 
   (void)sem_destroy(&list->sl_sem);
 
+#ifndef CONFIG_STDIO_DISABLE_BUFFERING
   /* Release each stream in the list */
 
-#if CONFIG_STDIO_BUFFER_SIZE > 0
   for (i = 0; i < CONFIG_NFILE_STREAMS; i++)
     {
+      FAR struct file_struct *stream = &list->sl_streams[i];
+
       /* Destroy the semaphore that protects the IO buffer */
 
-      (void)sem_destroy(&list->sl_streams[i].fs_sem);
+      (void)sem_destroy(&stream->fs_sem);
 
       /* Release the IO buffer */
 
-      if (list->sl_streams[i].fs_bufstart)
+      if (stream->fs_bufstart != NULL &&
+          (stream->fs_flags & __FS_FLAG_UBF) == 0)
         {
 #ifndef CONFIG_BUILD_KERNEL
           /* Release memory from the user heap */
 
-          sched_ufree(list->sl_streams[i].fs_bufstart);
+          sched_ufree(stream->fs_bufstart);
 #else
           /* If the exiting group is unprivileged, then it has an address
            * environment.  Don't bother to release the memory in this case...
@@ -177,13 +170,13 @@ void lib_stream_release(FAR struct task_group_s *group)
 
           if ((group->tg_flags & GROUP_FLAG_PRIVILEGED) != 0)
             {
-              sched_kfree(list->sl_streams[i].fs_bufstart);
+              sched_kfree(stream->fs_bufstart);
             }
 #endif
         }
     }
 #endif
 }
-#endif /* CONFIG_NFILE_STREAMS > 0 */
 
+#endif /* CONFIG_NFILE_STREAMS > 0 */
 #endif /* (!CONFIG_BUILD_PROTECTED &&7 !CONFIG_BUILD_KERNEL) || __KERNEL__ */

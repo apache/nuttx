@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/lpc43xx/lpc43_config.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -99,28 +99,28 @@
 #  undef CONFIG_UART1_SERIAL_CONSOLE
 #  undef CONFIG_USART2_SERIAL_CONSOLE
 #  undef CONFIG_USART3_SERIAL_CONSOLE
-#  define HAVE_CONSOLE 1
+#  define HAVE_SERIAL_CONSOLE 1
 #elif defined(CONFIG_UART1_SERIAL_CONSOLE)
 #  undef CONFIG_USART0_SERIAL_CONSOLE
 #  undef CONFIG_USART2_SERIAL_CONSOLE
 #  undef CONFIG_USART3_SERIAL_CONSOLE
-#  define HAVE_CONSOLE 1
+#  define HAVE_SERIAL_CONSOLE 1
 #elif defined(CONFIG_USART2_SERIAL_CONSOLE)
 #  undef CONFIG_USART0_SERIAL_CONSOLE
 #  undef CONFIG_UART1_SERIAL_CONSOLE
 #  undef CONFIG_USART3_SERIAL_CONSOLE
-#  define HAVE_CONSOLE 1
+#  define HAVE_SERIAL_CONSOLE 1
 #elif defined(CONFIG_USART3_SERIAL_CONSOLE)
 #  undef CONFIG_USART0_SERIAL_CONSOLE
 #  undef CONFIG_UART1_SERIAL_CONSOLE
 #  undef CONFIG_USART2_SERIAL_CONSOLE
-#  define HAVE_CONSOLE 1
+#  define HAVE_SERIAL_CONSOLE 1
 #else
 #  undef CONFIG_USART0_SERIAL_CONSOLE
 #  undef CONFIG_UART1_SERIAL_CONSOLE
 #  undef CONFIG_USART2_SERIAL_CONSOLE
 #  undef CONFIG_USART3_SERIAL_CONSOLE
-#  undef HAVE_CONSOLE
+#  undef HAVE_SERIAL_CONSOLE
 #endif
 
 /* Check UART flow control (Only supported by UART1) */

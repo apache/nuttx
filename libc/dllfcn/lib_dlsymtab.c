@@ -40,8 +40,10 @@
 #include <nuttx/config.h>
 
 #include <dllfcn.h>
+#include <errno.h>
 
 #include <nuttx/module.h>
+#include <nuttx/lib/modlib.h>
 
 /****************************************************************************
  * Public Functions
@@ -66,26 +68,13 @@
 
 int dlsymtab(FAR const struct symtab_s *symtab, int nsymbols)
 {
-#if defined(CONFIG_BUILD_FLAT)
-  /* In the FLAT build, a shared library is essentially the same as a kernel
-   * module.
+#if defined(CONFIG_BUILD_FLAT) || defined(CONFIG_BUILD_PROTECTED)
+  /* Set the symbol take information that will be used by this instance of
+   * the module library.
    */
 
-  mod_setsymtab(symtab, nsymbols);
+  modlib_setsymtab(symtab, nsymbols);
   return OK;
-
-#elif defined(CONFIG_BUILD_PROTECTED)
-  /* The PROTECTED build is equivalent to the FLAT build EXCEPT that there
-   * must be two copies of the the module logic:  One residing in kernel
-   * space and using the kernel symbol table and one residing in user space
-   * using the user space symbol table.
-   *
-   * The brute force way to accomplish this is by just copying the kernel
-   * module code into libc/module.
-   */
-
-#warning Missing logic
-  return NULL;
 
 #else /* if defined(CONFIG_BUILD_KERNEL) */
   /* The KERNEL build is considerably more complex:  In order to be shared,
@@ -98,6 +87,6 @@ int dlsymtab(FAR const struct symtab_s *symtab, int nsymbols)
    */
 
 #warning Missing logic
-  return NULL;
+  return -ENOSYS;
 #endif
 }

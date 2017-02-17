@@ -58,8 +58,6 @@
  * Public Functions
  ****************************************************************************/
 
-void up_timer_initialize(void);
-int up_timer_gettime(FAR struct timespec *ts);
 int up_alarm_cancel(FAR struct timespec *ts);
 int up_alarm_start(FAR const struct timespec *ts);
 int up_timer_cancel(FAR struct timespec *ts);

@@ -2,7 +2,7 @@
  * arch/arm/src/stm32f7/stm32_pwr.c
  *
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
- *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Authors: Uros Platise <uros.platise@isotel.eu>
  *            Gregory Nutt <gnutt@nuttx.org>
  *            David Sidrane <david_s5@nscdg.com>
@@ -53,6 +53,12 @@
 #if defined(CONFIG_STM32F7_PWR)
 
 /************************************************************************************
+ * Private Data
+ ************************************************************************************/
+
+static uint16_t g_bkp_writable_counter = 0;
+
+/************************************************************************************
  * Private Functions
  ************************************************************************************/
 
@@ -76,52 +82,108 @@ static inline void stm32_pwr_modifyreg(uint8_t offset, uint16_t clearbits, uint1
  ************************************************************************************/
 
 /************************************************************************************
+ * Name: stm32_pwr_initbkp
+ *
+ * Description:
+ *   Insures the referenced count access to the backup domain (RTC registers,
+ *   RTC backup data registers and backup SRAM is consistent with the HW state
+ *   without relying on a variable.
+ *
+ *   NOTE: This function should only be called by SoC Start up code.
+ *
+ * Input Parameters:
+ *   writable - True: enable ability to write to backup domain registers
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
+
+void stm32_pwr_initbkp(bool writable)
+{
+  uint16_t regval;
+
+  /* Make the HW not writable */
+
+  regval = stm32_pwr_getreg(STM32_PWR_CR1_OFFSET);
+  regval &= ~PWR_CR1_DBP;
+  stm32_pwr_putreg(STM32_PWR_CR1_OFFSET, regval);
+
+  /* Make the reference count agree */
+
+  g_bkp_writable_counter =  0;
+  stm32_pwr_enablebkp(writable);
+}
+
+/************************************************************************************
  * Name: stm32_pwr_enablebkp
  *
  * Description:
  *   Enables access to the backup domain (RTC registers, RTC backup data registers
  *   and backup SRAM).
  *
+ *   NOTE: Reference counting is used in order to supported nested calls to this
+ *   function.  As a consequence, every call to stm32_pwr_enablebkp(true) must
+ *   be followed by a matching call to stm32_pwr_enablebkp(false).
+ *
  * Input Parameters:
  *   writable - True: enable ability to write to backup domain registers
  *
  * Returned Value:
- *   True: The backup domain was previously writable.
+ *   None
  *
  ************************************************************************************/
 
-bool stm32_pwr_enablebkp(bool writable)
+void stm32_pwr_enablebkp(bool writable)
 {
+  irqstate_t flags;
   uint16_t regval;
   bool waswritable;
+  bool wait = false;
+
+  flags = enter_critical_section();
 
   /* Get the current state of the STM32 PWR control register */
 
   regval      = stm32_pwr_getreg(STM32_PWR_CR1_OFFSET);
   waswritable = ((regval & PWR_CR1_DBP) != 0);
 
+  if (writable)
+    {
+      DEBUGASSERT(g_bkp_writable_counter < UINT16_MAX);
+      g_bkp_writable_counter++;
+    }
+  else if (g_bkp_writable_counter > 0)
+    {
+      g_bkp_writable_counter--;
+    }
   /* Enable or disable the ability to write */
 
-  if (waswritable && !writable)
+  if (waswritable && g_bkp_writable_counter == 0)
     {
       /* Disable backup domain access */
 
       regval &= ~PWR_CR1_DBP;
       stm32_pwr_putreg(STM32_PWR_CR1_OFFSET, regval);
     }
-  else if (!waswritable && writable)
+  else if (!waswritable && g_bkp_writable_counter > 0)
     {
       /* Enable backup domain access */
 
       regval |= PWR_CR1_DBP;
       stm32_pwr_putreg(STM32_PWR_CR1_OFFSET, regval);
 
+      wait = true;
+	}
+
+  leave_critical_section(flags);
+
+  if (wait)
+    {
       /* Enable does not happen right away */
 
       up_udelay(4);
     }
-
-  return waswritable;
 }
 
 /************************************************************************************

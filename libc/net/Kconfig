@@ -1,0 +1,18 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menu "Network-Related Options"
+
+config LIBC_IPv4_ADDRCONV
+	bool "IPv4 address conversions"
+	default n
+	depends on !NET_IPv4
+
+config LIBC_IPv6_ADDRCONV
+	bool "IPv6 address conversions"
+	default n
+	depends on !NET_IPv6
+
+endmenu # Network-Related Options

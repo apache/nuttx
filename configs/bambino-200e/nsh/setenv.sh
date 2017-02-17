@@ -52,9 +52,9 @@ fi
 # toolchain under windows.  You will have to edit this if you install the
 # Code Red toolchain in any other location or if you install a different
 # version
-export TOOLCHAIN_BIN="/cygdrive/c/code_red/RedSuite_4.2.3_379/redsuite/Tools/bin"
+#export TOOLCHAIN_BIN="/cygdrive/c/code_red/RedSuite_4.2.3_379/redsuite/Tools/bin"
 #export SCRIPT_BIN="/cygdrive/c/code_red/RedSuite_4.2.3_379/redsuite/bin"
-export SCRIPT_BIN="/cygdrive/c/nxp/LPCXpresso_4.2.3_292/lpcxpresso/bin"
+#export SCRIPT_BIN="/cygdrive/c/nxp/LPCXpresso_4.2.3_292/lpcxpresso/bin"
 
 # This is the Cygwin path to the location where I installed the CodeSourcery
 # toolchain under windows.  You will also have to edit this if you install
@@ -70,6 +70,10 @@ export SCRIPT_BIN="/cygdrive/c/nxp/LPCXpresso_4.2.3_292/lpcxpresso/bin"
 #export TOOLCHAIN_BIN="/usr/bin:/cygdrive/c/Program Files (x86)/Atollic/TrueSTUDIO for ARM Pro 2.3.0/ARMTools/bin"
 #export TOOLCHAIN_BIN="/usr/bin:/cygdrive/c/Program Files (x86)/Atollic/TrueSTUDIO for STMicroelectronics STM32 Lite 2.3.0/ARMTools/bin"
 #export SCRIPT_BIN=
+
+# This is the location where I installed the ARM "GNU Tools for ARM Embedded Processors"
+# You can this free toolchain here https://launchpad.net/gcc-arm-embedded
+export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/GNU Tools ARM Embedded/4.9 2015q2/bin"
 
 # This is the Cygwin path to the location where I build the buildroot
 # toolchain.

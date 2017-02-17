@@ -123,7 +123,6 @@ SYSCALL_LOOKUP(up_assert,                 2, STUB_up_assert)
 #ifdef CONFIG_MODULE
   SYSCALL_LOOKUP(insmod,                  2, STUB_insmod)
   SYSCALL_LOOKUP(rmmod,                   1, STUB_rmmod)
-  SYSCALL_LOOKUP(modsym,                  2, STUB_modsym)
   SYSCALL_LOOKUP(modhandle,               1, STUB_modhandle)
 #endif
 
@@ -230,8 +229,14 @@ SYSCALL_LOOKUP(up_assert,                 2, STUB_up_assert)
   SYSCALL_LOOKUP(rewinddir,               1, STUB_rewinddir)
   SYSCALL_LOOKUP(seekdir,                 2, STUB_seekdir)
   SYSCALL_LOOKUP(stat,                    2, STUB_stat)
+  SYSCALL_LOOKUP(fstat,                   2, STUB_fstat)
   SYSCALL_LOOKUP(statfs,                  2, STUB_statfs)
   SYSCALL_LOOKUP(telldir,                 1, STUB_telldir)
+
+#  if defined(CONFIG_PSEUDOFS_SOFTLINKS)
+  SYSCALL_LOOKUP(link,                    2, STUB_link)
+  SYSCALL_LOOKUP(readlink,                3, STUB_readlink)
+#  endif
 
 #  if defined(CONFIG_PIPES) && CONFIG_DEV_PIPE_SIZE > 0
   SYSCALL_LOOKUP(pipe2,                   2, STUB_pipe2)

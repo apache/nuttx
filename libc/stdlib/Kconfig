@@ -1,0 +1,44 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menu "stdlib Options"
+
+config LIB_RAND_ORDER
+	int "Order of the random number generate"
+	default 1
+	range 1 3
+	---help---
+		The order of the random number generator. 1=fast but very bad random
+		numbers, 3=slow but very good random numbers.
+
+config LIB_HOMEDIR
+	string "Home directory"
+	default "/"
+	depends on !DISABLE_ENVIRON
+	---help---
+		The home directory to use with operations like such as 'cd ~'
+
+config LIBC_TMPDIR
+	string "Temporary file directory"
+	default "/tmp"
+	depends on FS_WRITABLE
+		---help---
+		If a write-able file system is selected, this string will be
+		provided to specify the full path to a directory where temporary
+		files can be created.  This would be a good application of RAM disk:
+		To provide temporary storage for application data.
+
+config LIBC_MAX_TMPFILE
+	int "Maximum size of a temporary file path"
+	default 32
+	depends on FS_WRITABLE
+		---help---
+		If a write-able file system is selected, then temporary file may be
+		supported at the path provided by LIBC_TMPDIR.  The tmpnam() interface
+		keeps a static copy of this last filename produced; this value is the
+		maximum size of that last filename.  This size is the size of the full
+		file path.
+
+endmenu # stdlib Options

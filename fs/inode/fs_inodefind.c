@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/inode/fs_inodefind.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,9 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
 #include <errno.h>
+
 #include <nuttx/fs/fs.h>
 
 #include "inode/inode.h"
@@ -53,31 +55,35 @@
  *
  * Description:
  *   This is called from the open() logic to get a reference to the inode
- *   associated with a path.
+ *   associated with a path.  This is accomplished by calling inode_search().
+ *   inode_find() is a simple wrapper around inode_search().  The primary
+ *   difference between inode_find() and inode_search is that inode_find()
+ *   will lock the inode tree and increment the reference count on the inode.
  *
  ****************************************************************************/
 
-FAR struct inode *inode_find(FAR const char *path, FAR const char **relpath)
+int inode_find(FAR struct inode_search_s *desc)
 {
-  FAR struct inode *node;
-
-  if (path == NULL || path[0] == '\0' || path[0] != '/')
-    {
-      return NULL;
-    }
+  int ret;
 
   /* Find the node matching the path.  If found, increment the count of
    * references on the node.
    */
 
   inode_semtake();
-  node = inode_search(&path, (FAR struct inode**)NULL, (FAR struct inode**)NULL, relpath);
-  if (node)
+  ret = inode_search(desc);
+  if (ret >= 0)
     {
+      /* Found it */
+
+      FAR struct inode *node = desc->node;
+      DEBUGASSERT(node != NULL);
+
+      /* Increment the reference count on the inode */
+
       node->i_crefs++;
     }
 
   inode_semgive();
-  return node;
+  return ret;
 }
-

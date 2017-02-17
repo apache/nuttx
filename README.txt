@@ -1486,6 +1486,8 @@ nuttx/
  |   |   `- README.txt
  |   |- freedom-k64f/
  |   |   `- README.txt
+ |   |- freedom-k66f/
+ |   |   `- README.txt
  |   |- freedom-kl25z/
  |   |   `- README.txt
  |   |- freedom-kl26z/

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_timerisr.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -76,19 +76,11 @@
 #define PIT_PIV ((PIT_CLOCK + (CLK_TCK >> 1)) / CLK_TCK)
 
 /****************************************************************************
- * Private Types
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Function:  up_timerisr
+ * Function:  sam_timerisr
  *
  * Description:
  *   The timer ISR will perform a variety of services for various portions
@@ -96,7 +88,7 @@
  *
  ****************************************************************************/
 
-int up_timerisr(int irq, uint32_t *regs)
+static int sam_timerisr(int irq, uint32_t *regs)
 {
   /* "When CPIV and PICNT values are obtained by reading the Periodic
    *  Interval Value Register (PIT_PIVR), the overflow counter (PICNT) is
@@ -118,7 +110,11 @@ int up_timerisr(int irq, uint32_t *regs)
 }
 
 /****************************************************************************
- * Function:  up_timer_initialize
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Function:  arm_timer_initialize
  *
  * Description:
  *   This function is called during start-up to initialize
@@ -126,7 +122,7 @@ int up_timerisr(int irq, uint32_t *regs)
  *
  ****************************************************************************/
 
-void up_timer_initialize(void)
+void arm_timer_initialize(void)
 {
   uint32_t regval;
 
@@ -140,7 +136,7 @@ void up_timer_initialize(void)
 
   /* Attach the timer interrupt vector */
 
-  (void)irq_attach(SAM_IRQ_PIT, (xcpt_t)up_timerisr);
+  (void)irq_attach(SAM_IRQ_PIT, (xcpt_t)sam_timerisr);
 
   /* Set the PIT overflow value (PIV), enable the PIT, and enable
    * interrupts from the PIT.

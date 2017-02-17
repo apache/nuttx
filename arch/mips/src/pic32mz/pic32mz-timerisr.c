@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/mips/src/pic32mz/pic32mz_timerisr.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -124,19 +124,11 @@
 #define TIMER1_MATCH (TIMER1_SRC_FREQ / TIMER1_PRESCALE / CLOCKS_PER_SEC)
 
 /****************************************************************************
- * Private Types
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Function:  up_timerisr
+ * Function:  pc32mz_timerisr
  *
  * Description:
  *   The timer ISR will perform a variety of services for various portions
@@ -144,20 +136,24 @@
  *
  ****************************************************************************/
 
-int up_timerisr(int irq, uint32_t *regs)
+static int pc32mz_timerisr(int irq, uint32_t *regs)
 {
-   /* Clear the pending timer interrupt */
+  /* Clear the pending timer interrupt */
 
-   up_clrpend_irq(PIC32MZ_IRQ_T1);
+  up_clrpend_irq(PIC32MZ_IRQ_T1);
 
-   /* Process timer interrupt */
+  /* Process timer interrupt */
 
-   sched_process_timer();
-   return 0;
+  sched_process_timer();
+  return 0;
 }
 
 /****************************************************************************
- * Function:  up_timer_initialize
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Function:  mips_timer_initialize
  *
  * Description:
  *   This function is called during start-up to initialize
@@ -165,7 +161,7 @@ int up_timerisr(int irq, uint32_t *regs)
  *
  ****************************************************************************/
 
-void up_timer_initialize(void)
+void mips_timer_initialize(void)
 {
   /* Configure and enable TIMER1.  Used the computed TCKPS divider and timer
    * match value.  The source will be either the internal PBCLOCK (TCS=0) or
@@ -183,7 +179,7 @@ void up_timer_initialize(void)
 
   /* Attach the timer interrupt vector */
 
-  (void)irq_attach(PIC32MZ_IRQ_T1, (xcpt_t)up_timerisr);
+  (void)irq_attach(PIC32MZ_IRQ_T1, (xcpt_t)pc32mz_timerisr);
 
   /* And enable the timer interrupt */
 

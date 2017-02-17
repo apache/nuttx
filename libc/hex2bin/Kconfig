@@ -1,0 +1,11 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config LIB_HEX2BIN
+	bool "Intel HEX to binary conversion library"
+	default n
+	---help---
+		Build in support for conversions from Intel Hex format to binary.
+		This selection enables the interfaces of include/hex2bin.h.

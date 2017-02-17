@@ -56,6 +56,8 @@
 #  include "chip/kinetis_k60pinmux.h"
 #elif defined(KINETIS_K64)
 #  include "chip/kinetis_k64pinmux.h"
+#elif defined(KINETIS_K66)
+#  include "chip/kinetis_k66pinmux.h"
 #else
 #  error "No pin multiplexing for this Kinetis part"
 #endif

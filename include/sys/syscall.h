@@ -2,7 +2,7 @@
  * include/sys/syscall.h
  * This file contains the system call numbers.
  *
- *   Copyright (C) 2011-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -182,9 +182,8 @@
 #ifdef CONFIG_MODULE
 #  define SYS_insmod                   __SYS_insmod
 #  define SYS_rmmod                   (__SYS_insmod+1)
-#  define SYS_modsym                  (__SYS_insmod+2)
-#  define SYS_modhandle               (__SYS_insmod+3)
-#  define __SYS_posix_spawn           (__SYS_insmod+4)
+#  define SYS_modhandle               (__SYS_insmod+2)
+#  define __SYS_posix_spawn           (__SYS_insmod+3)
 #else
 #  define __SYS_posix_spawn            __SYS_insmod
 #endif
@@ -321,14 +320,23 @@
 #  define SYS_rewinddir                (__SYS_filedesc+9)
 #  define SYS_seekdir                  (__SYS_filedesc+10)
 #  define SYS_stat                     (__SYS_filedesc+11)
-#  define SYS_statfs                   (__SYS_filedesc+12)
-#  define SYS_telldir                  (__SYS_filedesc+13)
+#  define SYS_fstat                    (__SYS_filedesc+12)
+#  define SYS_statfs                   (__SYS_filedesc+13)
+#  define SYS_telldir                  (__SYS_filedesc+14)
+
+#  if defined(CONFIG_PSEUDOFS_SOFTLINKS)
+#    define SYS_link                   (__SYS_filedesc+15)
+#    define SYS_readlink               (__SYS_filedesc+16)
+#    define __SYS_pipes                (__SYS_filedesc+17)
+#  else
+#    define __SYS_pipes                (__SYS_filedesc+15)
+#  endif
 
 #  if defined(CONFIG_PIPES) && CONFIG_DEV_PIPE_SIZE > 0
-#    define SYS_pipe2                  (__SYS_filedesc+14)
-#    define __SYS_mkfifo2              (__SYS_filedesc+15)
+#    define SYS_pipe2                  (__SYS_pipes+0)
+#    define __SYS_mkfifo2              (__SYS_pipes+1)
 #  else
-#    define __SYS_mkfifo2              (__SYS_filedesc+14)
+#    define __SYS_mkfifo2              (__SYS_pipes+0)
 #  endif
 
 #  if defined(CONFIG_PIPES) && CONFIG_DEV_FIFO_SIZE > 0

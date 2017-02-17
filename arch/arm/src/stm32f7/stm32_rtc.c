@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32f7/stm32_rtc.c
  *
- *   Copyright (C) 2011, 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2015-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           David Sidrane <david_s5@nscdg.com>
  *
@@ -261,7 +261,7 @@ static void rtc_wprunlock(void)
    * registers and backup SRAM).
    */
 
-  (void)stm32_pwr_enablebkp(true);
+  stm32_pwr_enablebkp(true);
 
   /* The following steps are required to unlock the write protection on all the
    * RTC registers (except for RTC_ISR[13:8], RTC_TAFCR, and RTC_BKPxR).
@@ -300,7 +300,7 @@ static inline void rtc_wprlock(void)
    * data registers and backup SRAM).
    */
 
-  (void)stm32_pwr_enablebkp(false);
+  stm32_pwr_enablebkp(false);
 }
 
 /****************************************************************************
@@ -850,7 +850,7 @@ int up_rtc_initialize(void)
 
   regval = getreg32(RTC_MAGIC_REG);
 
-  (void)stm32_pwr_enablebkp(true);
+  stm32_pwr_enablebkp(true);
 
   if (regval != RTC_MAGIC)
     {
@@ -943,7 +943,7 @@ int up_rtc_initialize(void)
         }
     }
 
-  (void)stm32_pwr_enablebkp(false);
+  stm32_pwr_enablebkp(false);
 
   /* Loop, attempting to initialize/resume the RTC.  This loop is necessary
    * because it seems that occasionally it takes longer to initialize the
@@ -994,7 +994,7 @@ int up_rtc_initialize(void)
        * backup data registers and backup SRAM).
        */
 
-      (void)stm32_pwr_enablebkp(true);
+      stm32_pwr_enablebkp(true);
 
       /* Remember that the RTC is initialized */
 
@@ -1014,7 +1014,7 @@ int up_rtc_initialize(void)
    * data registers and backup SRAM).
    */
 
-  (void)stm32_pwr_enablebkp(false);
+  stm32_pwr_enablebkp(false);
 
   if (ret != OK && nretry > 0)
     {

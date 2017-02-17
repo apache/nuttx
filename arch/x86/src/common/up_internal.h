@@ -215,7 +215,7 @@ void up_addregion(void);
 # define up_addregion()
 #endif
 
-/* Defined in up_serial.c */
+/* Defined in xyz_serial.c */
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
 void up_earlyserialinit(void);
@@ -233,13 +233,13 @@ void lowconsole_init(void);
 # define lowconsole_init()
 #endif
 
-/* Defined in up_watchdog.c */
+/* Defined in xyz_watchdog.c */
 
 void up_wdtinit(void);
 
-/* Defined in up_timerisr.c */
+/* Defined in xyz_timerisr.c */
 
-void up_timer_initialize(void);
+void x86_timer_initialize(void);
 
 /* Defined in board/up_network.c */
 

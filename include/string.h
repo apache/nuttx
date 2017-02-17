@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/string.h
  *
- *   Copyright (C) 2007-2012, 2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2012, 2014, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,13 +47,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Compatibility definitions */
-
-#ifndef CONFIG_LIBC_ARCH_BZERO
-# define bzero(s,n) (void)memset(s,0,n)
-#endif
-
-#define bcopy(b1,b2,len) (void)memmove(b2,b1,len)
 
 /****************************************************************************
  * Public Function Prototypes
@@ -77,8 +70,6 @@ FAR char  *strcat(FAR char *, FAR const char *);
 FAR char  *strncat(FAR char *, FAR const char *, size_t);
 int        strcmp(FAR const char *, FAR const char *);
 int        strncmp(FAR const char *, FAR const char *, size_t);
-int        strcasecmp(FAR const char *, FAR const char *);
-int        strncasecmp(FAR const char *, FAR const char *, size_t);
 int        strcoll(FAR const char *, FAR const char *s2);
 FAR char  *strcpy(char *dest, FAR const char *src);
 FAR char  *stpcpy(char *dest, FAR const char *src);

@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/inode/fs_inoderemove.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,6 +58,11 @@
  *   path refers to.  This is normally done in preparation to removing or
  *   moving an inode.
  *
+ *   In symbolic links in the pseduo file system are enabled, then this
+ *   logic will follow the symbolic links up until the terminal node.  Then
+ *   that link in removed. So if this the terminal node is a symbolic link,
+ *   the symbolic link node will be removed, not the target of the link.
+ *
  * Assumptions/Limitations:
  *   The caller must hold the inode semaphore
  *
@@ -65,10 +70,9 @@
 
 FAR struct inode *inode_unlink(FAR const char *path)
 {
-  const char       *name = path;
-  FAR struct inode *node;
-  FAR struct inode *peer;
-  FAR struct inode *parent;
+  struct inode_search_s desc;
+  FAR struct inode *node = NULL;
+  int ret;
 
   /* Verify parameters.  Ignore null paths and relative paths */
 
@@ -79,25 +83,30 @@ FAR struct inode *inode_unlink(FAR const char *path)
 
   /* Find the node to unlink */
 
-  node = inode_search(&name, &peer, &parent, (const char **)NULL);
-  if (node)
+  SETUP_SEARCH(&desc, path, true);
+
+  ret = inode_search(&desc);
+  if (ret >= 0)
     {
+      node = desc.node;
+      DEBUGASSERT(node != NULL);
+
       /* If peer is non-null, then remove the node from the right of
        * of that peer node.
        */
 
-      if (peer)
+      if (desc.peer != NULL)
         {
-          peer->i_peer = node->i_peer;
+          desc.peer->i_peer = node->i_peer;
         }
 
       /* If parent is non-null, then remove the node from head of
        * of the list of children.
        */
 
-      else if (parent)
+      else if (desc.parent)
         {
-          parent->i_child = node->i_peer;
+          desc.parent->i_child = node->i_peer;
         }
 
       /* Otherwise, we must be removing the root inode. */
@@ -110,6 +119,7 @@ FAR struct inode *inode_unlink(FAR const char *path)
       node->i_peer = NULL;
     }
 
+  RELEASE_SEARCH(&desc);
   return node;
 }
 

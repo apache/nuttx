@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/unionfs/fs_unionfs.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -160,6 +160,8 @@ static int     unionfs_ioctl(FAR struct file *filep, int cmd,
 static int     unionfs_sync(FAR struct file *filep);
 static int     unionfs_dup(FAR const struct file *oldp,
                  FAR struct file *newp);
+static int     unionfs_fstat(FAR const struct file *filep,
+                 FAR struct stat *buf);
 
 /* Operations on directories */
 
@@ -215,6 +217,7 @@ static const struct mountpt_operations g_unionfs_mops =
 
   unionfs_sync,        /* sync */
   unionfs_dup,         /* dup */
+  unionfs_fstat,       /* fstat */
 
   unionfs_opendir,     /* opendir */
   unionfs_closedir,    /* closedir */
@@ -489,7 +492,7 @@ static int unionfs_trymkdir(FAR struct inode *inode, FAR const char *relpath,
 }
 
 /****************************************************************************
- * Name: unionfs_trystat
+ * Name: unionfs_tryrename
  ****************************************************************************/
 
 static int unionfs_tryrename(FAR struct inode *mountpt,
@@ -1306,6 +1309,58 @@ static int unionfs_dup(FAR const struct file *oldp, FAR struct file *newp)
       newp->f_priv = newpriv;
     }
 
+  return ret;
+}
+
+/****************************************************************************
+ * Name: unionfs_fstat
+ *
+ * Description:
+ *   Obtain information about an open file associated with the file
+ *   descriptor 'fd', and will write it to the area pointed to by 'buf'.
+ *
+ ****************************************************************************/
+
+static int unionfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
+{
+  FAR struct unionfs_inode_s *ui;
+  FAR struct unionfs_file_s *uf;
+  FAR struct unionfs_mountpt_s *um;
+  FAR const struct mountpt_operations *ops;
+  int ret = -EPERM;
+
+  finfo("Entry\n");
+
+  /* Recover the open file data from the struct file instance */
+
+  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
+  ui = (FAR struct unionfs_inode_s *)filep->f_inode->i_private;
+
+  /* Get exclusive access to the file system data structures */
+
+  ret = unionfs_semtake(ui, false);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  DEBUGASSERT(ui != NULL && filep->f_priv != NULL);
+  uf = (FAR struct unionfs_file_s *)filep->f_priv;
+
+  DEBUGASSERT(uf->uf_ndx == 0 || uf->uf_ndx == 1);
+  um = &ui->ui_fs[uf->uf_ndx];
+
+  DEBUGASSERT(um != NULL && um->um_node != NULL && um->um_node->u.i_mops != NULL);
+  ops = um->um_node->u.i_mops;
+
+  /* Perform the lower level write operation */
+
+  if (ops->fstat)
+    {
+      ret = ops->fstat(&uf->uf_file, buf);
+    }
+
+  unionfs_semgive(ui);
   return ret;
 }
 
@@ -2442,31 +2497,53 @@ static int unionfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
 static int unionfs_getmount(FAR const char *path, FAR struct inode **inode)
 {
   FAR struct inode *minode;
+  struct inode_search_s desc;
+  int ret;
 
   /* Find the mountpt */
 
-  minode = inode_find(path, NULL);
-  if (!minode)
+  SETUP_SEARCH(&desc, path, false);
+
+  ret = inode_find(&desc);
+  if (ret < 0)
     {
       /* Mountpoint inode not found */
 
-      return -ENOENT;
+      goto errout_with_search;
     }
 
-  /* Verify that the inode is a mountpoint */
+  /* Get the search results */
+
+  minode = desc.node;
+  DEBUGASSERT(minode != NULL);
+
+  /* Verify that the inode is a mountpoint.
+   *
+   * REVISIT: If desc.relpath points to a non-empty string, then the path
+   * does not really refer to a mountpoint but, rather, to a some entity
+   * within the mounted volume.
+   */
 
   if (!INODE_IS_MOUNTPT(minode))
     {
-      /* Inode was found, but is it is a mounpoint */
+      /* Inode was found, but is it is not a mounpoint */
 
-      inode_release(minode);
-      return -EINVAL;
+      ret = -EINVAL;
+      goto errout_with_inode;
     }
 
   /* Success! */
 
   *inode = minode;
+  RELEASE_SEARCH(&desc);
   return OK;
+
+errout_with_inode:
+  inode_release(minode);
+
+errout_with_search:
+  RELEASE_SEARCH(&desc);
+  return ret;
 }
 
 /****************************************************************************

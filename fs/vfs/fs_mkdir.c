@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/vfs/fs_mkdir.c
  *
- *   Copyright (C) 2007, 2008, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,9 +38,13 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <stdbool.h>
+#include <assert.h>
 #include <errno.h>
+
 #include <nuttx/fs/fs.h>
 
 #include "inode/inode.h"
@@ -80,19 +84,24 @@
 
 int mkdir(const char *pathname, mode_t mode)
 {
+  struct inode_search_s desc;
   FAR struct inode *inode;
-  const char       *relpath = NULL;
-  int               errcode;
-  int               ret;
+  int errcode;
+  int ret;
 
   /* Find the inode that includes this path */
 
-  inode = inode_find(pathname, &relpath);
-  if (inode)
+  SETUP_SEARCH(&desc, pathname, false);
+
+  ret = inode_find(&desc);
+  if (ret >= 0)
     {
       /* An inode was found that includes this path and possibly refers to a
        * mountpoint.
        */
+
+      inode = desc.node;
+      DEBUGASSERT(inode != NULL);
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT
       /* Check if the inode is a valid mountpoint. */
@@ -111,7 +120,7 @@ int mkdir(const char *pathname, mode_t mode)
 
       if (inode->u.i_mops->mkdir)
         {
-          ret = inode->u.i_mops->mkdir(inode, relpath, mode);
+          ret = inode->u.i_mops->mkdir(inode, desc.relpath, mode);
           if (ret < 0)
             {
               errcode = -ret;
@@ -154,24 +163,27 @@ int mkdir(const char *pathname, mode_t mode)
       if (ret < 0)
         {
           errcode = -ret;
-          goto errout;
+          goto errout_with_search;
         }
     }
 #else
   else
     {
       errcode = ENXIO;
-      goto errout;
+      goto errout_with_search;
     }
 #endif
 
   /* Directory successfully created */
 
+  RELEASE_SEARCH(&desc);
   return OK;
 
 errout_with_inode:
   inode_release(inode);
-errout:
+
+errout_with_search:
+  RELEASE_SEARCH(&desc);
   set_errno(errcode);
   return ERROR;
 }

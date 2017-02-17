@@ -145,7 +145,7 @@ void up_initialize(void)
 #if !defined(CONFIG_SUPPRESS_INTERRUPTS) && !defined(CONFIG_SUPPRESS_TIMER_INTS)
   /* Initialize the system timer interrupt */
 
-  up_timer_initialize();
+  z80_timer_initialize();
 #endif
 
   /* Initialize the CPU for those that use it (only for the Z180).  This

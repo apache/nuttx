@@ -46,7 +46,7 @@
 #include <assert.h>
 
 #include <nuttx/board.h>
-#include <nuttx/module.h>
+#include <nuttx/lib/modlib.h>
 #include <nuttx/binfmt/symtab.h>
 #include <nuttx/nx/nx.h>
 
@@ -357,7 +357,7 @@ int boardctl(unsigned int cmd, uintptr_t arg)
             (FAR const struct boardioc_symtab_s *)arg;
 
          DEBUGASSERT(symdesc != NULL);
-         mod_setsymtab(symdesc->symtab, symdesc->nsymbols);
+         modlib_setsymtab(symdesc->symtab, symdesc->nsymbols);
          ret = OK;
         }
         break;

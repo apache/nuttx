@@ -7,8 +7,8 @@ to share the same board design.  Other code comes from the STM3240G board
 support (which has the same crystal and clocking) and from the STM32 F4
 Discovery (which has the same STM32 part)
 
-Peripherals
-===========
+Board Support
+=============
 
 The following peripherals are available in this configuration.
 
@@ -30,6 +30,82 @@ The following peripherals are available in this configuration.
  - CAN:        Built in app 'can' works, but apart from that not really tested.
 
  - Ethernet:   Ping to other station on the network works.
+
+microSD Card Interface
+======================
+
+  microSD Connector
+  -----------------
+
+    ----------------- ----------------- ------------------------
+    SD/MMC CONNECTOR        BOARD        GPIO CONFIGURATION(s
+    PIN SIGNAL             SIGNAL          (no remapping)
+    --- ------------- ----------------- -------------------------
+    1   DAT2/RES      SD_D2/USART3_TX/  PC10 GPIO_SDIO_D2
+                      SPI3_SCK
+    2   CD/DAT3/CS    SD_D3/USART3_RX/  PC11 GPIO_SDIO_D3
+                      SPI3_MISO
+    3   CMD/DI        SD_CMD            PD2  GPIO_SDIO_CMD
+    4   VDD           N/A               N/A
+    5   CLK/SCLK      SD_CLK/SPI3_MOSI  PC12 GPIO_SDIO_CK
+    6   VSS           N/A               N/A
+    7   DAT0/D0       SD_D0/DCMI_D2     PC8  GPIO_SDIO_D0
+    8   DAT1/RES      SD_D1/DCMI_D3     PC9  GPIO_SDIO_D1
+    --- ------------- ----------------- -------------------------
+
+    NOTES:
+    1. DAT4, DAT4, DAT6, and DAT7 not connected.
+    2. There are no alternative pin selections.
+    3. There is no card detect (CD) GPIO input so we will not
+       sense if there is a card in the SD slot or not.  This will
+       make usage very awkward.
+
+  Configuration
+  -------------
+
+  Enabling SDIO-based MMC/SD support:
+
+    System Type->STM32 Peripheral Support
+      CONFIG_STM32_SDIO=y                      : Enable SDIO support
+      CONFIG_STM32_DMA2=y                      : DMA2 is needed by the driver
+
+    Device Drivers -> MMC/SD Driver Support
+      CONFIG_MMCSD=y                           : Enable MMC/SD support
+      CONFIG_MMSCD_NSLOTS=1                    : One slot per driver instance
+      # CONFIG_MMCSD_HAVECARDDETECT is not set : No card-detect GPIO
+      # CONFIG_MMCSD_MMCSUPPORT is not set     : Interferes with some SD cards
+      # CONFIG_MMCSD_SPI is not set            : No SPI-based MMC/SD support
+      CONFIG_MMCSD_SDIO=y                      : SDIO-based MMC/SD support
+      CONFIG_MMCSD_MULTIBLOCK_DISABLE=y        : Disable to keep things simple
+      CONFIG_SDIO_DMA=y                        : Use SDIO DMA
+      # CONFIG_SDIO_BLOCKSETUP is not set      : (not implemented)
+
+    Library Routines
+      CONFIG_SCHED_WORKQUEUE=y                 : Driver needs work queue support
+
+    Application Configuration -> NSH Library
+      CONFIG_NSH_ARCHINIT=y                    : NSH board-initialization
+
+    Using the SD card
+    -----------------
+
+    1. Since there is no CD GPIO pin, the firmware sill not know if there is
+       a card in the SD slot or not.  It will assume that there is and attempt
+       to mount the SD card on power-up.  If there is no SD card in the card
+       slot, there will be a long delay during initialization as the firmware
+       attempts to query the non-existent card, timeout, and retry.
+
+    2. After booting, an SDIO device will appear as /dev/mmcsd0
+
+    3. If you try mounting an SD card with nothing in the slot, the
+       mount will fail:
+
+         nsh> mount -t vfat /dev/mmcsd0 /mnt/sdcard
+         nsh: mount: mount failed: 19
+
+    STATUS:
+    -------
+    2017-01-28:  There is no card communication.  All commands to the SD card timeout.
 
 Configurations
 ==============
@@ -184,20 +260,23 @@ must be is one of the following.
 
          CONFIG_BOARDCTL_OS_SYMTAB=y
          CONFIG_EXAMPLES_MODULE=y
+         CONFIG_EXAMPLES_MODULE_BUILTINFS=y
          CONFIG_EXAMPLES_MODULE_DEVMINOR=0
          CONFIG_EXAMPLES_MODULE_DEVPATH="/dev/ram0"
          CONFIG_FS_ROMFS=y
          CONFIG_LIBC_ARCH_ELF=y
          CONFIG_MODULE=y
-         CONFIG_MODULE_ALIGN_LOG2=2
-         CONFIG_MODULE_BUFFERINCR=32
-         CONFIG_MODULE_BUFFERSIZE=128
+         CONFIG_LIBC_MODLIB=y
+         CONFIG_MODLIB_ALIGN_LOG2=2
+         CONFIG_MODLIB_BUFFERINCR=32
+         CONFIG_MODLIB_BUFFERSIZE=128
 
        Add the following for testing shared libraries in the FLAT
        build:
 
          CONFIG_LIBC_DLLFCN=y
          CONFIG_EXAMPLES_SOTEST=y
+         CONFIG_EXAMPLES_SOTEST_BUILTINFS=y
          CONFIG_EXAMPLES_SOTEST_DEVMINOR=1
          CONFIG_EXAMPLES_SOTEST_DEVPATH="/dev/ram1"
 

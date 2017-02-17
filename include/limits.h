@@ -111,6 +111,12 @@
  *
  *   _POSIX_SEM_NSEMS_MAX  Max number of open semaphores per task
  *   _POSIX_SEM_VALUE_MAX  Max value a semaphore may have
+ *
+ * Required for symbolic links
+ *   _POSIX_SYMLOOP_MAX   Maximum number of symbolic links that can be
+ *                        reliably traversed in the resolution of a pathname
+ *                        in the absence of a loop.
+ *
  */
 
 #define _POSIX_ARG_MAX        4096
@@ -142,6 +148,10 @@
 
 #define _POSIX_RTSIG_MAX      31
 #define _POSIX_SIGQUEUE_MAX   32
+
+/* Required for symbolic links */
+
+#define _POSIX_SYMLOOP_MAX    8
 
 /* Required for POSIX timers.
  *
@@ -204,6 +214,8 @@
 
 #define RTSIG_MAX      _POSIX_RTSIG_MAX
 #define SIGQUEUE_MAX   _POSIX_SIGQUEUE_MAX
+
+#define SYMLOOP_MAX    _POSIX_SYMLOOP_MAX
 
 #define DELAYTIMER_MAX _POSIX_DELAYTIMER_MAX
 #define TIMER_MAX      _POSIX_TIMER_MAX

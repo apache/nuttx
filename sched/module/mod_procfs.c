@@ -52,10 +52,9 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/module.h>
+#include <nuttx/lib/modlib.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/procfs.h>
-
-#include "module.h"
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_PROCFS) && \
     !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
@@ -148,7 +147,7 @@ static int modprocfs_callback(FAR struct module_s *modp, FAR void *arg)
   priv = (FAR struct modprocfs_file_s *)arg;
 
   linesize = snprintf(priv->line, MOD_LINELEN, "%s,%p,%p,%p,%u,%p,%lu,%p,%lu\n",
-                      modp->modulename, modp->initializer,
+                      modp->modname, modp->initializer,
                       modp->modinfo.uninitializer, modp->modinfo.arg,
                       modp->modinfo.nexports, modp->alloc,
                       (unsigned long)modp->textsize,
@@ -248,7 +247,7 @@ static ssize_t modprocfs_read(FAR struct file *filep, FAR char *buffer,
   priv->buflen    = buflen;
   priv->offset    = filep->f_pos;
 
-  ret = mod_registry_foreach(modprocfs_callback, priv);
+  ret = modlib_registry_foreach(modprocfs_callback, priv);
   if (ret >= 0)
     {
       filep->f_pos += priv->totalsize;

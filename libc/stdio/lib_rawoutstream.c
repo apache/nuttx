@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/stdio/lib_rawsostream.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -119,9 +119,7 @@ static off_t rawsostream_seek(FAR struct lib_sostream_s *this, off_t offset,
 void lib_rawsostream(FAR struct lib_rawsostream_s *outstream, int fd)
 {
   outstream->public.put   = rawsostream_putc;
-#ifdef CONFIG_STDIO_LINEBUFFER
   outstream->public.flush = lib_snoflush;
-#endif
   outstream->public.seek  = rawsostream_seek;
   outstream->public.nput  = 0;
   outstream->fd           = fd;

@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/olimex-stm32-p407/src/stm32_bringup.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,6 +46,7 @@
 #include <errno.h>
 
 #include <nuttx/board.h>
+#include <nuttx/mmcsd.h>
 
 #ifdef CONFIG_USBMONITOR
 #  include <nuttx/usb/usbmonitor.h>
@@ -78,6 +79,9 @@
 
 int stm32_bringup(void)
 {
+#ifdef HAVE_MMCSD
+  FAR struct sdio_dev_s *sdio;
+#endif
   int ret;
 
 #ifdef CONFIG_FS_PROCFS
@@ -88,6 +92,38 @@ int stm32_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
     }
+#endif
+
+#ifdef HAVE_MMCSD
+  /* Mount the SDIO-based MMC/SD block driver */
+  /* First, get an instance of the SDIO interface */
+
+  sdio = sdio_initialize(MMCSD_SLOTNO);
+  if (!sdio)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize SDIO slot %d\n",
+             MMCSD_SLOTNO);
+      return -ENODEV;
+    }
+
+  /* Now bind the SDIO interface to the MMC/SD driver */
+
+  ret = mmcsd_slotinitialize(MMCSD_MINOR, sdio);
+  if (ret != OK)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n",
+             ret);
+      return ret;
+    }
+
+  /* Then let's guess and say that there is a card in the slot.  The Olimex
+   * STM32 P407 does not support a GPIO to detect if there is a card in
+   * the slot so we are reduced to guessing.
+   */
+
+   sdio_mediachange(sdio, true);
 #endif
 
 #ifdef CONFIG_CAN

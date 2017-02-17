@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fat/fs_fat32attrib.c
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <errno.h>
 
 #include <nuttx/fs/fs.h>
@@ -60,24 +61,32 @@ static int fat_attrib(const char *path, fat_attrib_t *retattrib,
                       fat_attrib_t setbits, fat_attrib_t clearbits)
 {
   struct fat_mountpt_s *fs;
-  struct fat_dirinfo_s  dirinfo;
-  FAR struct inode     *inode;
-  const char           *relpath = NULL;
-  uint8_t              *direntry;
-  uint8_t               oldattributes;
-  uint8_t               newattributes;
-  int                   ret;
+  struct fat_dirinfo_s dirinfo;
+  struct inode_search_s desc;
+  FAR struct inode *inode;
+  uint8_t *direntry;
+  uint8_t oldattributes;
+  uint8_t newattributes;
+  int status;
+  int ret;
 
-  /* Get an inode for this file */
+  /* Find the inode for this file */
 
-  inode = inode_find(path, &relpath);
-  if (!inode)
+  SETUP_SEARCH(&desc, path, false);
+
+  status = inode_find(&desc);
+  if (status < 0)
     {
       /* There is no mountpoint that includes in this path */
 
-      ret = ENOENT;
+      ret = -status;
       goto errout;
     }
+
+  /* Get the search results */
+
+  inode = desc.node;
+  DEBUGASSERT(inode != NULL);
 
   /* Verify that the inode is a valid mountpoint. */
 
@@ -100,9 +109,9 @@ static int fat_attrib(const char *path, fat_attrib_t *retattrib,
       goto errout_with_semaphore;
     }
 
-  /* Find the file/directory entry for the oldrelpath */
+  /* Find the file/directory entry for the relpath */
 
-  ret = fat_finddirentry(fs, &dirinfo, relpath);
+  ret = fat_finddirentry(fs, &dirinfo, desc.relpath);
   if (ret != OK)
     {
       /* Some error occurred -- probably -ENOENT */
@@ -156,14 +165,18 @@ static int fat_attrib(const char *path, fat_attrib_t *retattrib,
 
   fat_semgive(fs);
   inode_release(inode);
+  RELEASE_SEARCH(&desc);
   return OK;
 
 errout_with_semaphore:
   fat_semgive(fs);
+
 errout_with_inode:
   inode_release(inode);
+
 errout:
-  *get_errno_ptr() = ret;
+  RELEASE_SEARCH(&desc);
+  set_errno(ret);
   return ERROR;
 }
 

@@ -257,7 +257,7 @@ f Application Configuration -> Network Utilities
   you can enable like DHCP client (or server) or network name
   resolution.
 
-  By default, the IP address of the DK-TM4C129X will be 10.0.0.2 and
+  By default, the IP address of the FRDM-K64F will be 10.0.0.2 and
   it will assume that your host is the gateway and has the IP address
   10.0.0.1.
 
@@ -287,7 +287,7 @@ f Application Configuration -> Network Utilities
   the first time you ping due to the default handling of the ARP
   table.
 
-  On the host side, you should also be able to ping the DK-TM4C129X:
+  On the host side, you should also be able to ping the FRDM-K64F:
 
     $ ping 10.0.0.2
 
@@ -424,8 +424,8 @@ SD Card Support
     ------------ ------------- --------
     SD Card Slot Board Signal  K64F Pin
     ------------ ------------- --------
-    DAT0         SDHC0_D0      PTE0
-    DAT1         SDHC0_D1      PTE1
+    DAT0         SDHC0_D0      PTE1
+    DAT1         SDHC0_D1      PTE0
     DAT2         SDHC0_D2      PTE5
     CD/DAT3      SDHC0_D3      PTE4
     CMD          SDHC0_CMD     PTE3
@@ -443,6 +443,7 @@ SD Card Support
 
     System Type->Kinetic Peripheral Selection
       CONFIG_KINETIS_SDHC=y                 : To enable SDHC0 support
+      CONFIG_KINETIS_SDHC_DMA=y             : Use SDIO DMA
 
     System Type
       CONFIG_KINETIS_GPIOIRQ=y              : GPIO interrupts needed
@@ -456,7 +457,6 @@ SD Card Support
       CONFIG_MMCSD_MMCSUPPORT=n             : Interferes with some SD cards
       CONFIG_MMCSD_SPI=n                    : No SPI-based MMC/SD support
       CONFIG_MMCSD_SDIO=y                   : SDIO-based MMC/SD support
-      CONFIG_SDIO_DMA=y                     : Use SDIO DMA
       CONFIG_SDIO_BLOCKSETUP=y              : Needs to know block sizes
 
     RTOS Features -> Work Queue Support
@@ -973,4 +973,7 @@ Status
     USB device, however, has not yet been tested.  I have not yet looked
     into 48MHz clocking requirements.
 
- 
+  2017-02-10:  These have been numerous SDHC fixes submitted by Marc Rechte'.
+    These may or may not have fixed the SDHC issues mentioned about.  You
+    would have to retest to verify the SDHC functionality.
+

@@ -40,7 +40,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <string.h>
+#include <strings.h>
 #include <ctype.h>
 
 /****************************************************************************

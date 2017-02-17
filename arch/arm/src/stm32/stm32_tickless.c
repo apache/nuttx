@@ -39,7 +39,7 @@
  * is suppressed and the platform specific code is expected to provide the
  * following custom functions.
  *
- *   void up_timer_initialize(void): Initializes the timer facilities.
+ *   void arm_timer_initialize(void): Initializes the timer facilities.
  *     Called early in the initialization sequence (by up_intialize()).
  *   int up_timer_gettime(FAR struct timespec *ts):  Returns the current
  *     time from the platform specific time source.
@@ -162,7 +162,7 @@ static void stm32_oneshot_handler(void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_timer_initialize
+ * Name: arm_timer_initialize
  *
  * Description:
  *   Initializes all platform-specific timer facilities.  This function is
@@ -186,7 +186,7 @@ static void stm32_oneshot_handler(void *arg)
  *
  ****************************************************************************/
 
-void up_timer_initialize(void)
+void arm_timer_initialize(void)
 {
 #ifdef CONFIG_SCHED_TICKLESS_LIMIT_MAX_SLEEP
   uint64_t max_delay;
@@ -244,7 +244,7 @@ void up_timer_initialize(void)
  *
  * Description:
  *   Return the elapsed time since power-up (or, more correctly, since
- *   up_timer_initialize() was called).  This function is functionally
+ *   arm_timer_initialize() was called).  This function is functionally
  *   equivalent to:
  *
  *      int clock_gettime(clockid_t clockid, FAR struct timespec *ts);

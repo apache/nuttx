@@ -70,9 +70,7 @@ struct lib_instream_s
 struct lib_outstream_s
 {
   lib_putc_t             put;     /* Put one character to the outstream */
-#ifdef CONFIG_STDIO_LINEBUFFER
   lib_flush_t            flush;   /* Flush any buffered characters in the outstream */
-#endif
   int                    nput;    /* Total number of characters put.  Written
                                    * by put method, readable by user */
 };
@@ -101,9 +99,7 @@ struct lib_sistream_s
 struct lib_sostream_s
 {
   lib_soputc_t           put;     /* Put one character to the outstream */
-#ifdef CONFIG_STDIO_LINEBUFFER
   lib_soflush_t          flush;   /* Flush any buffered characters in the outstream */
-#endif
   lib_soseek_t           seek;    /* Seek a position in the output stream */
   int                    nput;    /* Total number of characters put.  Written
                                    * by put method, readable by user */
@@ -389,23 +385,21 @@ void emergstream(FAR struct lib_outstream_s *stream);
  *
  * Description:
  *  lib_noflush() provides a common, dummy flush method for output streams
- *  that are not flushable.  Only used if CONFIG_STDIO_LINEBUFFER is selected.
+ *  that are not flushable.
  *
  * Return:
  *  Always returns OK
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STDIO_LINEBUFFER
 int lib_noflush(FAR struct lib_outstream_s *stream);
-#endif
 
 /****************************************************************************
  * Name: lib_snoflush
  *
  * Description:
  *  lib_snoflush() provides a common, dummy flush method for seekable output
- *  streams that are not flushable.  Only used if CONFIG_STDIO_LINEBUFFER
+ *  streams that are not flushable.
  *  is selected.
  *
  * Return:
@@ -413,9 +407,7 @@ int lib_noflush(FAR struct lib_outstream_s *stream);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STDIO_LINEBUFFER
 int lib_snoflush(FAR struct lib_sostream_s *this);
-#endif
 
 /****************************************************************************
  * Name: lib_sprintf and lib_vsprintf

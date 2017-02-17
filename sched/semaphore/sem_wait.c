@@ -98,7 +98,7 @@ int sem_wait(FAR sem_t *sem)
 
   if (enter_cancellation_point())
     {
-#ifndef CONFIG_CANCELLATION_POINTS /* Not reachable in this case */
+#ifdef CONFIG_CANCELLATION_POINTS
       /* If there is a pending cancellation, then do not perform
        * the wait.  Exit now with ECANCELED.
        */

@@ -247,14 +247,14 @@
                                            /* Bits 5-7: Reserved */
 #endif
 
-#ifdef KINETIS_K64
+#if defined(KINETIS_K64) || defined(KINETIS_K66)
 #  define I2C_FLT_SHIFT          (0)       /* Bits 0-3: I2C programmable filter factor */
 #  define I2C_FLT_MASK           (15 << I2C_FLT_SHIFT)
 #    define I2C_FLT(n)           ((uint8_t)(n) << I2C_FLT_SHIFT)
-#  define I2C_FLT_STARTF         (1 << 4) /* I2C bus start detect flag */
-#  define I2C_FLT_SSIE           (1 << 5) /* I2C bus stop or start interrupt enable */
-#  define I2C_FLT_STOPF          (1 << 6) /* I2C bus stop detect flag */
-#  define I2C_FLT_SHEN           (1 << 7) /* Stop hold enable */
+#  define I2C_FLT_STARTF         (1 << 4)  /* I2C bus start detect flag */
+#  define I2C_FLT_SSIE           (1 << 5)  /* I2C bus stop or start interrupt enable */
+#  define I2C_FLT_STOPF          (1 << 6)  /* I2C bus stop detect flag */
+#  define I2C_FLT_SHEN           (1 << 7)  /* Stop hold enable */
 #endif
 
 /* I2C Range Address register (8-bit) */

@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/mount/fs_mount.c
  *
- *   Copyright (C) 2007-2009, 2011-2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2013, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <sys/mount.h>
+#include <stdbool.h>
 #include <string.h>
 #include <errno.h>
 #include <assert.h>
@@ -234,6 +235,9 @@ int mount(FAR const char *source, FAR const char *target,
 #endif
   FAR struct inode *mountpt_inode;
   FAR const struct mountpt_operations *mops;
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  struct inode_search_s desc;
+#endif
   void *fshandle;
   int errcode;
   int ret;
@@ -280,13 +284,19 @@ int mount(FAR const char *source, FAR const char *target,
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   /* Check if the inode already exists */
 
-  mountpt_inode = inode_find(target, NULL);
-  if (mountpt_inode != NULL)
+  SETUP_SEARCH(&desc, target, false);
+
+  ret = inode_find(&desc);
+  if (ret >= 0)
     {
       /* Successfully found.  The reference count on the inode has been
        * incremented.
-       *
-       * But is it a directory node (i.e., not a driver or other special
+       */
+
+      mountpt_inode = desc.node;
+      DEBUGASSERT(mountpt_inode != NULL);
+
+      /* But is it a directory node (i.e., not a driver or other special
        * node)?
        */
 
@@ -403,6 +413,9 @@ int mount(FAR const char *source, FAR const char *target,
     }
 #endif
 
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  RELEASE_SEARCH(&desc);
+#endif
   return OK;
 
   /* A lot of goto's!  But they make the error handling much simpler */
@@ -421,10 +434,14 @@ errout_with_mountpt:
 #endif
 
   inode_release(mountpt_inode);
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  RELEASE_SEARCH(&desc);
+#endif
   goto errout;
 
 errout_with_semaphore:
   inode_semgive();
+
 #ifdef BDFS_SUPPORT
 #ifdef NONBDFS_SUPPORT
   if (blkdrvr_inode)
@@ -432,6 +449,10 @@ errout_with_semaphore:
     {
       inode_release(blkdrvr_inode);
     }
+#endif
+
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  RELEASE_SEARCH(&desc);
 #endif
 
 errout:

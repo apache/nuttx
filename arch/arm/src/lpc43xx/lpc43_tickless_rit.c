@@ -595,7 +595,7 @@ static int lpc43_tl_isr(int irq, FAR void *context)
  * Public Functions
  ****************************************************************************/
 
-void up_timer_initialize(void)
+void arm_timer_initialize(void)
 {
   irqstate_t flags;
   flags = enter_critical_section();

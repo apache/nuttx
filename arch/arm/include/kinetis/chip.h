@@ -2,7 +2,8 @@
  * arch/arm/include/kinetis/chip.h
  *
  *   Copyright (C) 2011, 2013, 2015-2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -41,6 +42,7 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
+#include <arch/kinetis/kinetis_mcg.h>
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -69,10 +71,11 @@
     defined(CONFIG_ARCH_CHIP_MK20DN128VLH5) || \
     defined(CONFIG_ARCH_CHIP_MK20DX128VLH5)
 
-#  define KINETIS_K20             1          /* Kinetics K20 family */
-#  undef  KINETIS_K40                        /* Not Kinetics K40 family */
+#  define KINETIS_K20             1          /* Kinetis K20 family */
+#  undef  KINETIS_K40                        /* Not Kinetis K40 family */
 #  undef  KINETIS_K60                        /* Not Kinetis K60 family */
 #  undef  KINETIS_K64                        /* Not Kinetis K64 family */
+#  undef  KINETIS_K66                        /* Not Kinetis K66 family */
 
 #if defined(CONFIG_ARCH_CHIP_MK20DN32VLH5)
 #  define KINETIS_FLASH_SIZE      (64*1024)  /* 32Kb */
@@ -151,10 +154,11 @@
       defined(CONFIG_ARCH_CHIP_MK20DX128VLH7) || \
       defined(CONFIG_ARCH_CHIP_MK20DX256VLH7)
 
-#  define KINETIS_K20             1            /* Kinetics K20 family */
-#  undef  KINETIS_K40                          /* Not Kinetics K40 family */
+#  define KINETIS_K20             1            /* Kinetis K20 family */
+#  undef  KINETIS_K40                          /* Not Kinetis K40 family */
 #  undef  KINETIS_K60                          /* Not Kinetis K60 family */
 #  undef  KINETIS_K64                          /* Not Kinetis K64 family */
+#  undef  KINETIS_K66                          /* Not Kinetis K66 family */
 
 #if defined(CONFIG_ARCH_CHIP_MK20DX64VLH7)
 #  define KINETIS_FLASH_SIZE      (64*1024)    /* 64Kb */
@@ -207,9 +211,11 @@
 #elif defined(CONFIG_ARCH_CHIP_MK40X64VFX50) || defined(CONFIG_ARCH_CHIP_MK40X64VLH50) || \
     defined(CONFIG_ARCH_CHIP_MK40X64VLK50) || defined(CONFIG_ARCH_CHIP_MK40X64VMB50)
 #  undef  KINETIS_K20                          /* Not Kinetis K20 family */
-#  define KINETIS_K40             1            /* Kinetics K40 family */
+#  define KINETIS_K40             1            /* Kinetis K40 family */
 #  undef  KINETIS_K60                          /* Not Kinetis K60 family */
 #  undef  KINETIS_K64                          /* Not Kinetis K64 family */
+#  undef  KINETIS_K66                          /* Not Kinetis K66 family */
+
 #  define KINETIS_FLASH_SIZE      (64*1024)    /* 64Kb */
 #  define KINETIS_FLEXMEM_SIZE    (32*1024)    /* 32Kb */
 #  define KINETIS_SRAM_SIZE       (16*1024)    /* 16Kb */
@@ -258,9 +264,11 @@
     defined(CONFIG_ARCH_CHIP_MK40X128VLK72) || defined(CONFIG_ARCH_CHIP_MK40X128VMB72) || \
     defined(CONFIG_ARCH_CHIP_MK40X128VLL72) || defined(CONFIG_ARCH_CHIP_MK40X128VML72)
 #  undef  KINETIS_K20                          /* Not Kinetis K20 family */
-#  define KINETIS_K40             1            /* Kinetics K40 family */
+#  define KINETIS_K40             1            /* Kinetis K40 family */
 #  undef  KINETIS_K60                          /* Not Kinetis K60 family */
 #  undef  KINETIS_K64                          /* Not Kinetis K64 family */
+#  undef  KINETIS_K66                          /* Not Kinetis K66 family */
+
 #  define KINETIS_FLASH_SIZE      (128*1024)   /* 128Kb */
 #  define KINETIS_FLEXMEM_SIZE    (32*1024)    /* 32Kb */
 #  define KINETIS_SRAM_SIZE       (32*1024)    /* 32Kb */
@@ -301,9 +309,11 @@
 #elif defined(CONFIG_ARCH_CHIP_MK40X256VLK72) || defined(CONFIG_ARCH_CHIP_MK40X256VMB72) || \
     defined(CONFIG_ARCH_CHIP_MK40X256VLL72) || defined(CONFIG_ARCH_CHIP_MK40X256VML72)
 #  undef  KINETIS_K20                          /* Not Kinetis K20 family */
-#  define KINETIS_K40             1            /* Kinetics K40 family */
+#  define KINETIS_K40             1            /* Kinetis K40 family */
 #  undef  KINETIS_K60                          /* Not Kinetis K60 family */
 #  undef  KINETIS_K64                          /* Not Kinetis K64 family */
+#  undef  KINETIS_K66                          /* Not Kinetis K66 family */
+
 #  define KINETIS_FLASH_SIZE      (256*1024)   /* 256Kb */
 #  define KINETIS_FLEXMEM_SIZE    (32*1024)    /* 32Kb */
 #  define KINETIS_SRAM_SIZE       (32*1024)    /* 64Kb */
@@ -343,9 +353,11 @@
 
 #elif defined(CONFIG_ARCH_CHIP_MK40X128VLQ100) || defined(CONFIG_ARCH_CHIP_MK40X128VMD100)
 #  undef  KINETIS_K20                          /* Not Kinetis K20 family */
-#  define KINETIS_K40             1            /* Kinetics K40 family */
+#  define KINETIS_K40             1            /* Kinetis K40 family */
 #  undef  KINETIS_K60                          /* Not Kinetis K60 family */
 #  undef  KINETIS_K64                          /* Not Kinetis K64 family */
+#  undef  KINETIS_K66                          /* Not Kinetis K66 family */
+
 #  define KINETIS_FLASH_SIZE      (128*1024)   /* 128Kb */
 #  define KINETIS_FLEXMEM_SIZE    (128*1024)   /* 128Kb */
 #  define KINETIS_SRAM_SIZE       (32*1024)    /* 32Kb */
@@ -385,9 +397,11 @@
 
 #elif defined(CONFIG_ARCH_CHIP_MK40X256VLQ100) || defined(CONFIG_ARCH_CHIP_MK40X256VMD100)
 #  undef  KINETIS_K20                          /* Not Kinetis K20 family */
-#  define KINETIS_K40             1            /* Kinetics K40 family */
+#  define KINETIS_K40             1            /* Kinetis K40 family */
 #  undef  KINETIS_K60                          /* Not Kinetis K60 family */
 #  undef  KINETIS_K64                          /* Not Kinetis K64 family */
+#  undef  KINETIS_K66                          /* Not Kinetis K66 family */
+
 #  define KINETIS_FLASH_SIZE      (256*1024)   /* 256Kb */
 #  define KINETIS_FLEXMEM_SIZE    (256*1024)   /* 256Kb */
 #  define KINETIS_SRAM_SIZE       (64*1024)    /* 32Kb */
@@ -429,9 +443,11 @@
       defined(CONFIG_ARCH_CHIP_MK40N512VLL100) || defined(CONFIG_ARCH_CHIP_MK40N512VML100) || \
       defined(CONFIG_ARCH_CHIP_MK40N512VLQ100) || defined(CONFIG_ARCH_CHIP_MK40N512VMD100)
 #  undef  KINETIS_K20                          /* Not Kinetis K20 family */
-#  define KINETIS_K40             1            /* Kinetics K40 family */
+#  define KINETIS_K40             1            /* Kinetis K40 family */
 #  undef  KINETIS_K60                          /* Not Kinetis K60 family */
 #  undef  KINETIS_K64                          /* Not Kinetis K64 family */
+#  undef  KINETIS_K66                          /* Not Kinetis K66 family */
+
 #  define KINETIS_FLASH_SIZE      (512*1024)   /* 512Kb */
 #  undef  KINETIS_FLEXMEM_SIZE                 /* No FlexMemory */
 #  define KINETIS_SRAM_SIZE       (128*1024)   /* 128Kb */
@@ -471,9 +487,11 @@
 
 #elif defined(CONFIG_ARCH_CHIP_MK60N256VLL100)
 #  undef  KINETIS_K20                          /* Not Kinetis K20 family */
-#  undef  KINETIS_K40                          /* Not Kinetics K40 family */
+#  undef  KINETIS_K40                          /* Not Kinetis K40 family */
 #  define KINETIS_K60             1            /* Kinetis K60 family */
 #  undef  KINETIS_K64                          /* Not Kinetis K64 family */
+#  undef  KINETIS_K66                          /* Not Kinetis K66 family */
+
 #  define KINETIS_FLASH_SIZE      (256*1024)   /* 256Kb */
 #  undef  KINETIS_FLEXNVM_SIZE                 /* No FlexNVM */
 #  undef  KINETIS_FLEXRAM_SIZE                 /* No FlexRAM */
@@ -516,9 +534,11 @@
 
 #elif defined(CONFIG_ARCH_CHIP_MK60X256VLL100)
 #  undef  KINETIS_K20                          /* Not Kinetis K20 family */
-#  undef  KINETIS_K40                          /* Not Kinetics K40 family */
+#  undef  KINETIS_K40                          /* Not Kinetis K40 family */
 #  define KINETIS_K60             1            /* Kinetis K60 family */
 #  undef  KINETIS_K64                          /* Not Kinetis K64 family */
+#  undef  KINETIS_K66                          /* Not Kinetis K66 family */
+
 #  define KINETIS_FLASH_SIZE      (256*1024)   /* 256Kb */
 #  define KINETIS_FLEXNVM_SIZE    (256*1024)   /* 256Kb  */
 #  define KINETIS_FLEXRAM_SIZE    (4*1024)     /* 32Kb */
@@ -561,9 +581,11 @@
 
 #elif defined(CONFIG_ARCH_CHIP_MK60N512VLL100)
 #  undef  KINETIS_K20                          /* Not Kinetis K20 family */
-#  undef  KINETIS_K40                          /* Not Kinetics K40 family */
+#  undef  KINETIS_K40                          /* Not Kinetis K40 family */
 #  define KINETIS_K60             1            /* Kinetis K60 family */
 #  undef  KINETIS_K64                          /* Not Kinetis K64 family */
+#  undef  KINETIS_K66                          /* Not Kinetis K66 family */
+
 #  define KINETIS_FLASH_SIZE      (512*1024)   /* 256Kb */
 #  undef  KINETIS_FLEXNVM_SIZE                 /* No FlexNVM */
 #  undef  KINETIS_FLEXRAM_SIZE                 /* No FlexRAM */
@@ -607,9 +629,11 @@
 
 #elif defined(CONFIG_ARCH_CHIP_MK60N256VML100)
 #  undef  KINETIS_K20                          /* Not Kinetis K20 family */
-#  undef  KINETIS_K40                          /* Not Kinetics K40 family */
+#  undef  KINETIS_K40                          /* Not Kinetis K40 family */
 #  define KINETIS_K60             1            /* Kinetis K60 family */
 #  undef  KINETIS_K64                          /* Not Kinetis K64 family */
+#  undef  KINETIS_K66                          /* Not Kinetis K66 family */
+
 #  define KINETIS_FLASH_SIZE      (256*1024)   /* 256Kb */
 #  undef  KINETIS_FLEXNVM_SIZE                 /* No FlexNVM */
 #  undef  KINETIS_FLEXRAM_SIZE                 /* No FlexRAM */
@@ -652,9 +676,11 @@
 
 #elif defined(CONFIG_ARCH_CHIP_MK60X256VML100)
 #  undef  KINETIS_K20                          /* Not Kinetis K20 family */
-#  undef  KINETIS_K40                          /* Not Kinetics K40 family */
+#  undef  KINETIS_K40                          /* Not Kinetis K40 family */
 #  define KINETIS_K60             1            /* Kinetis K60 family */
 #  undef  KINETIS_K64                          /* Not Kinetis K64 family */
+#  undef  KINETIS_K66                          /* Not Kinetis K66 family */
+
 #  define KINETIS_FLASH_SIZE      (256*1024)   /* 256Kb */
 #  define KINETIS_FLEXNVM_SIZE    (256*1024)   /* 256Kb */
 #  define KINETIS_FLEXRAM_SIZE    (4*1024)     /* 4Kb */
@@ -697,9 +723,11 @@
 
 #elif defined(CONFIG_ARCH_CHIP_MK60N512VML100)
 #  undef  KINETIS_K20                          /* Not Kinetis K20 family */
-#  undef  KINETIS_K40                          /* Not Kinetics K40 family */
+#  undef  KINETIS_K40                          /* Not Kinetis K40 family */
 #  define KINETIS_K60             1            /* Kinetis K60 family */
 #  undef  KINETIS_K64                          /* Not Kinetis K64 family */
+#  undef  KINETIS_K66                          /* Not Kinetis K66 family */
+
 #  define KINETIS_FLASH_SIZE      (512*1024)   /* 256Kb */
 #  undef  KINETIS_FLEXNVM_SIZE                 /* No FlexNVM */
 #  undef  KINETIS_FLEXRAM_SIZE                 /* No FlexRAM */
@@ -742,9 +770,11 @@
 
 #elif defined(CONFIG_ARCH_CHIP_MK60N256VLQ100)
 #  undef  KINETIS_K20                          /* Not Kinetis K20 family */
-#  undef  KINETIS_K40                          /* Not Kinetics K40 family */
+#  undef  KINETIS_K40                          /* Not Kinetis K40 family */
 #  define KINETIS_K60             1            /* Kinetis K60 family */
 #  undef  KINETIS_K64                          /* Not Kinetis K64 family */
+#  undef  KINETIS_K66                          /* Not Kinetis K66 family */
+
 #  define KINETIS_FLASH_SIZE      (256*1024)   /* 256Kb */
 #  undef  KINETIS_FLEXNVM_SIZE                 /* No FlexNVM */
 #  undef  KINETIS_FLEXRAM_SIZE                 /* No FlexRAM */
@@ -787,9 +817,11 @@
 
 #elif defined(CONFIG_ARCH_CHIP_MK60X256VLQ100)
 #  undef  KINETIS_K20                          /* Not Kinetis K20 family */
-#  undef  KINETIS_K40                          /* Not Kinetics K40 family */
+#  undef  KINETIS_K40                          /* Not Kinetis K40 family */
 #  define KINETIS_K60             1            /* Kinetis K60 family */
 #  undef  KINETIS_K64                          /* Not Kinetis K64 family */
+#  undef  KINETIS_K66                          /* Not Kinetis K66 family */
+
 #  define KINETIS_FLASH_SIZE      (256*1024)   /* 256Kb */
 #  define KINETIS_FLEXNVM_SIZE    (256*1024)   /* 256Kb */
 #  define KINETIS_FLEXRAM_SIZE    (4*1024)     /* 4Kb */
@@ -832,9 +864,11 @@
 
 #elif defined(CONFIG_ARCH_CHIP_MK60N512VLQ100)
 #  undef  KINETIS_K20                          /* Not Kinetis K20 family */
-#  undef  KINETIS_K40                          /* Not Kinetics K40 family */
+#  undef  KINETIS_K40                          /* Not Kinetis K40 family */
 #  define KINETIS_K60             1            /* Kinetis K60 family */
 #  undef  KINETIS_K64                          /* Not Kinetis K64 family */
+#  undef  KINETIS_K66                          /* Not Kinetis K66 family */
+
 #  define KINETIS_FLASH_SIZE      (512*1024)   /* 512Kb */
 #  undef  KINETIS_FLEXNVM_SIZE                 /* No FlexNVM */
 #  undef  KINETIS_FLEXRAM_SIZE                 /* No FlexRAM */
@@ -877,9 +911,11 @@
 
 #elif defined(CONFIG_ARCH_CHIP_MK60N256VMD100)
 #  undef  KINETIS_K20                          /* Not Kinetis K20 family */
-#  undef  KINETIS_K40                          /* Not Kinetics K40 family */
+#  undef  KINETIS_K40                          /* Not Kinetis K40 family */
 #  define KINETIS_K60             1            /* Kinetis K60 family */
 #  undef  KINETIS_K64                          /* Not Kinetis K64 family */
+#  undef  KINETIS_K66                          /* Not Kinetis K66 family */
+
 #  define KINETIS_FLASH_SIZE      (256*1024)   /* 256Kb */
 #  undef  KINETIS_FLEXNVM_SIZE                 /* No FlexNVM */
 #  undef  KINETIS_FLEXRAM_SIZE                 /* No FlexRAM */
@@ -922,9 +958,11 @@
 
 #elif defined(CONFIG_ARCH_CHIP_MK60X256VMD100)
 #  undef  KINETIS_K20                          /* Not Kinetis K20 family */
-#  undef  KINETIS_K40                          /* Not Kinetics K40 family */
+#  undef  KINETIS_K40                          /* Not Kinetis K40 family */
 #  define KINETIS_K60             1            /* Kinetis K60 family */
 #  undef  KINETIS_K64                          /* Not Kinetis K64 family */
+#  undef  KINETIS_K66                          /* Not Kinetis K66 family */
+
 #  define KINETIS_FLASH_SIZE      (256*1024)   /* 256Kb */
 #  define KINETIS_FLEXNVM_SIZE    (256*1024)   /* 256Kb */
 #  define KINETIS_FLEXRAM_SIZE    (4*1024)     /* 4Kb */
@@ -967,9 +1005,11 @@
 
 #elif defined(CONFIG_ARCH_CHIP_MK60N512VMD100)
 #  undef  KINETIS_K20                          /* Not Kinetis K20 family */
-#  undef  KINETIS_K40                          /* Not Kinetics K40 family */
+#  undef  KINETIS_K40                          /* Not Kinetis K40 family */
 #  define KINETIS_K60             1            /* Kinetis K60 family */
 #  undef  KINETIS_K64                          /* Not Kinetis K64 family */
+#  undef  KINETIS_K66                          /* Not Kinetis K66 family */
+
 #  define KINETIS_FLASH_SIZE      (512*1024)   /* 512Kb */
 #  undef  KINETIS_FLEXNVM_SIZE                 /* No FlexNVM */
 #  undef  KINETIS_FLEXRAM_SIZE                 /* No FlexRAM */
@@ -1012,10 +1052,12 @@
 
 #elif defined(CONFIG_ARCH_CHIP_MK60FN1M0VLQ12)
 #  undef  KINETIS_K20                          /* Not Kinetis K20 family */
-#  undef  KINETIS_K40                          /* Not Kinetics K40 family */
+#  undef  KINETIS_K40                          /* Not Kinetis K40 family */
 #  define KINETIS_K60             1            /* Kinetis K60 family */
 #  define KINETIS_NEW_MCG         1            /* Kinetis New MCG - different VDIV */
 #  undef  KINETIS_K64                          /* Not Kinetis K64 family */
+#  undef  KINETIS_K66                          /* Not Kinetis K66 family */
+
 #  define KINETIS_FLASH_SIZE      (1024*1024)  /* 1Mb */
 #  undef  KINETIS_FLEXNVM_SIZE                 /* No FlexNVM */
 #  undef  KINETIS_FLEXRAM_SIZE                 /* No FlexRAM */
@@ -1052,12 +1094,14 @@
 #  define KINETIS_NCRC            1            /* CRC */
 
 #elif defined(CONFIG_ARCH_CHIP_MK64FN1M0VLL12)
-#  undef  KINETIS_K20                          /* Not Kinetics K20 family */
-#  undef  KINETIS_K40                          /* Not Kinetics K40 family */
+#  undef  KINETIS_K20                          /* Not Kinetis K20 family */
+#  undef  KINETIS_K40                          /* Not Kinetis K40 family */
 #  undef  KINETIS_K60                          /* Not Kinetis K60 family */
 #  define KINETIS_K64             1            /* Kinetis K64 family */
+#  undef  KINETIS_K66                          /* Not Kinetis K66 family */
+
 #  define KINETIS_FLASH_SIZE      (1024*1024)  /* 1Mb */
-#  define KINETIS_FLEXNVM_SIZE    (0*1024)     /* 0Kb  */
+#  undef  KINETIS_FLEXNVM_SIZE                 /* No FlexNVM */
 #  define KINETIS_FLEXRAM_SIZE    (4*1024)     /* 4Kb */
 #  define KINETIS_SRAM_SIZE       (256*1024)   /* 256Kb */
 #  define KINETIS_MPU             1            /* Memory protection unit */
@@ -1086,12 +1130,14 @@
 #  define KINETIS_NCRC            1            /* CRC */
 
 #elif defined(CONFIG_ARCH_CHIP_MK64FX512VLL12)
-#  undef  KINETIS_K20                          /* Not Kinetics K20 family */
-#  undef  KINETIS_K40                          /* Not Kinetics K40 family */
+#  undef  KINETIS_K20                          /* Not Kinetis K20 family */
+#  undef  KINETIS_K40                          /* Not Kinetis K40 family */
 #  undef  KINETIS_K60                          /* Not Kinetis K60 family */
 #  define KINETIS_K64             1            /* Kinetis K64 family */
+#  undef  KINETIS_K66                          /* Not Kinetis K66 family */
+
 #  define KINETIS_FLASH_SIZE      (1024*1024)  /* 1Mb */
-#  define KINETIS_FLEXNVM_SIZE    (0*1024)     /* 0Kb  */
+#  undef  KINETIS_FLEXNVM_SIZE                 /* No FlexNVM */
 #  define KINETIS_FLEXRAM_SIZE    (4*1024)     /* 4Kb */
 #  define KINETIS_SRAM_SIZE       (256*1024)   /* 256Kb */
 #  define KINETIS_MPU             1            /* Memory protection unit */
@@ -1120,12 +1166,14 @@
 #  define KINETIS_NCRC            1            /* CRC */
 
 #elif defined(CONFIG_ARCH_CHIP_MK64FX512VDC12)
-#  undef  KINETIS_K20                          /* Not Kinetics K20 family */
-#  undef  KINETIS_K40                          /* Not Kinetics K40 family */
+#  undef  KINETIS_K20                          /* Not Kinetis K20 family */
+#  undef  KINETIS_K40                          /* Not Kinetis K40 family */
 #  undef  KINETIS_K60                          /* Not Kinetis K60 family */
 #  define KINETIS_K64             1            /* Kinetis K64 family */
+#  undef  KINETIS_K66                          /* Not Kinetis K66 family */
+
 #  define KINETIS_FLASH_SIZE      (1024*1024)  /* 1Mb */
-#  define KINETIS_FLEXNVM_SIZE    (0*1024)     /* 0Kb  */
+#  undef  KINETIS_FLEXNVM_SIZE                 /* No FlexNVM */
 #  define KINETIS_FLEXRAM_SIZE    (4*1024)     /* 4Kb */
 #  define KINETIS_SRAM_SIZE       (256*1024)   /* 256Kb */
 #  define KINETIS_MPU             1            /* Memory protection unit */
@@ -1154,12 +1202,14 @@
 #  define KINETIS_NCRC            1            /* CRC */
 
 #elif defined(CONFIG_ARCH_CHIP_MK64FN1M0VDC12)
-#  undef  KINETIS_K20                          /* Not Kinetics K20 family */
-#  undef  KINETIS_K40                          /* Not Kinetics K40 family */
+#  undef  KINETIS_K20                          /* Not Kinetis K20 family */
+#  undef  KINETIS_K40                          /* Not Kinetis K40 family */
 #  undef  KINETIS_K60                          /* Not Kinetis K60 family */
 #  define KINETIS_K64             1            /* Kinetis K64 family */
+#  undef  KINETIS_K66                          /* Not Kinetis K66 family */
+
 #  define KINETIS_FLASH_SIZE      (1024*1024)  /* 1Mb */
-#  define KINETIS_FLEXNVM_SIZE    (0*1024)     /* 0Kb  */
+#  undef  KINETIS_FLEXNVM_SIZE                 /* No FlexNVM */
 #  define KINETIS_FLEXRAM_SIZE    (4*1024)     /* 4Kb */
 #  define KINETIS_SRAM_SIZE       (256*1024)   /* 256Kb */
 #  define KINETIS_MPU             1            /* Memory protection unit */
@@ -1188,12 +1238,14 @@
 #  define KINETIS_NCRC            1            /* CRC */
 
 #elif defined(CONFIG_ARCH_CHIP_MK64FX512VLQ12)
-#  undef  KINETIS_K20                          /* Not Kinetics K20 family */
-#  undef  KINETIS_K40                          /* Not Kinetics K40 family */
+#  undef  KINETIS_K20                          /* Not Kinetis K20 family */
+#  undef  KINETIS_K40                          /* Not Kinetis K40 family */
 #  undef  KINETIS_K60                          /* Not Kinetis K60 family */
 #  define KINETIS_K64             1            /* Kinetis K64 family */
+#  undef  KINETIS_K66                          /* Not Kinetis K66 family */
+
 #  define KINETIS_FLASH_SIZE      (1024*1024)  /* 1Mb */
-#  define KINETIS_FLEXNVM_SIZE    (0*1024)     /* 0Kb  */
+#  undef  KINETIS_FLEXNVM_SIZE                 /* No FlexNVM */
 #  define KINETIS_FLEXRAM_SIZE    (4*1024)     /* 4Kb */
 #  define KINETIS_SRAM_SIZE       (256*1024)   /* 256Kb */
 #  define KINETIS_MPU             1            /* Memory protection unit */
@@ -1222,12 +1274,14 @@
 #  define KINETIS_NCRC            1            /* CRC */
 
 #elif defined(CONFIG_ARCH_CHIP_MK64FN1M0VLQ12)
-#  undef  KINETIS_K20                          /* Not Kinetics K20 family */
-#  undef  KINETIS_K40                          /* Not Kinetics K40 family */
+#  undef  KINETIS_K20                          /* Not Kinetis K20 family */
+#  undef  KINETIS_K40                          /* Not Kinetis K40 family */
 #  undef  KINETIS_K60                          /* Not Kinetis K60 family */
 #  define KINETIS_K64             1            /* Kinetis K64 family */
+#  undef  KINETIS_K66                          /* Not Kinetis K66 family */
+
 #  define KINETIS_FLASH_SIZE      (1024*1024)  /* 1Mb */
-#  define KINETIS_FLEXNVM_SIZE    (0*1024)     /* 0Kb  */
+#  undef  KINETIS_FLEXNVM_SIZE                 /* No FlexNVM */
 #  define KINETIS_FLEXRAM_SIZE    (4*1024)     /* 4Kb */
 #  define KINETIS_SRAM_SIZE       (256*1024)   /* 256Kb */
 #  define KINETIS_MPU             1            /* Memory protection unit */
@@ -1256,12 +1310,14 @@
 #  define KINETIS_NCRC            1            /* CRC */
 
 #elif defined(CONFIG_ARCH_CHIP_MK64FX512VMD12)
-#  undef  KINETIS_K20                          /* Not Kinetics K20 family */
-#  undef  KINETIS_K40                          /* Not Kinetics K40 family */
+#  undef  KINETIS_K20                          /* Not Kinetis K20 family */
+#  undef  KINETIS_K40                          /* Not Kinetis K40 family */
 #  undef  KINETIS_K60                          /* Not Kinetis K60 family */
 #  define KINETIS_K64             1            /* Kinetis K64 family */
+#  undef  KINETIS_K66                          /* Not Kinetis K66 family */
+
 #  define KINETIS_FLASH_SIZE      (1024*1024)  /* 1Mb */
-#  define KINETIS_FLEXNVM_SIZE    (0*1024)     /* 0Kb  */
+#  undef  KINETIS_FLEXNVM_SIZE                 /* No FlexNVM */
 #  define KINETIS_FLEXRAM_SIZE    (4*1024)     /* 4Kb */
 #  define KINETIS_SRAM_SIZE       (256*1024)   /* 256Kb */
 #  define KINETIS_MPU             1            /* Memory protection unit */
@@ -1290,12 +1346,14 @@
 #  define KINETIS_NCRC            1            /* CRC */
 
 #elif defined(CONFIG_ARCH_CHIP_MK64FN1M0VMD12)
-#  undef  KINETIS_K20                          /* Not Kinetics K20 family */
-#  undef  KINETIS_K40                          /* Not Kinetics K40 family */
+#  undef  KINETIS_K20                          /* Not Kinetis K20 family */
+#  undef  KINETIS_K40                          /* Not Kinetis K40 family */
 #  undef  KINETIS_K60                          /* Not Kinetis K60 family */
 #  define KINETIS_K64             1            /* Kinetis K64 family */
+#  undef  KINETIS_K66                          /* Not Kinetis K66 family */
+
 #  define KINETIS_FLASH_SIZE      (1024*1024)  /* 1Mb */
-#  define KINETIS_FLEXNVM_SIZE    (0*1024)     /* 0Kb  */
+#  undef  KINETIS_FLEXNVM_SIZE                 /* No FlexNVM */
 #  define KINETIS_FLEXRAM_SIZE    (4*1024)     /* 4Kb */
 #  define KINETIS_SRAM_SIZE       (256*1024)   /* 256Kb */
 #  define KINETIS_MPU             1            /* Memory protection unit */
@@ -1323,6 +1381,66 @@
 #  define KINETIS_NMMCAU          1            /* Hardware encryption */
 #  define KINETIS_NCRC            1            /* CRC */
 
+/* MK66F N/X 1M0/2M0 V MD/LQ 18
+ *
+ *  --------------- ------- --- ------- ------- ------ ------ ------ -----
+ *  PART NUMBER     CPU     PIN PACKAGE  TOTAL  PROGRAM EEPROM SRAM  GPIO
+ *                  FREQ    CNT          FLASH  FLASH
+ *  --------------- ------- --- ------- ------- ------ ------ ------ -----
+ *  MK66FN2M0VMD18  180 MHz 144 MAPBGA   2   MB    —    — KB  260 KB 100
+ *  MK66FX1M0VMD18  180 MHz 144 MAPBGA  1.25 MB  1 MB   4 KB  256 KB 100
+ *  MK66FN2M0VLQ18  180 MHz 144 LQFP     2   MB    —    — KB  260 KB 100
+ *  MK66FX1M0VLQ18  180 MHz 144 LQFP    1.25 MB  1 MB   4 KB  256 KB 100
+ */
+
+#elif defined(CONFIG_ARCH_CHIP_MK66FN2M0VMD18) || \
+      defined(CONFIG_ARCH_CHIP_MK66FX1M0VMD18) || \
+      defined(CONFIG_ARCH_CHIP_MK66FN2M0VLQ18) || \
+      defined(CONFIG_ARCH_CHIP_MK66FX1M0VLQ18)
+#  undef  KINETIS_K20                          /* Not Kinetis K20 family */
+#  undef  KINETIS_K40                          /* Not Kinetis K40 family */
+#  undef  KINETIS_K60                          /* Not Kinetis K60 family */
+#  undef  KINETIS_K64                          /* Not Kinetis K64 family */
+#  define KINETIS_K66             1            /* Kinetis K66 family */
+
+#  if defined(CONFIG_ARCH_CHIP_MK66FX1M0VMD18) || \
+      defined(CONFIG_ARCH_CHIP_MK66FX1M0VLQ18)
+#    define KINETIS_FLASH_SIZE      (1024*1024)  /* 1Mb */
+#    define KINETIS_FLEXNVM_SIZE    (256*1024)   /* 256Kb  */
+#    define KINETIS_FLEXRAM_SIZE    (4*1024)     /* 4Kb */
+#    define KINETIS_SRAM_SIZE       (256*1024)   /* 256Kb */
+#  endif
+#  if defined(CONFIG_ARCH_CHIP_MK66FN2M0VMD18) || \
+      defined(CONFIG_ARCH_CHIP_MK66FN2M0VLQ18)
+#    define KINETIS_FLASH_SIZE      (2048*1024)  /* 2Mb */
+#  undef  KINETIS_FLEXNVM_SIZE                   /* No FlexNVM */
+#    define KINETIS_FLEXRAM_SIZE    (4*1024)     /* 4Kb */
+#    define KINETIS_SRAM_SIZE       (256*1024)   /* 256Kb */
+#  endif
+#  define KINETIS_MPU             1            /* Memory protection unit */
+#  define KINETIS_EXTBUS          1            /* External bus interface */
+#  define KINETIS_NDMACH          32           /* Up to 32 DMA channels */
+#  define KINETIS_NENET           1            /* One IEEE 1588 Ethernet controller */
+#  define KINETIS_NUSBOTG         1            /* With USB OTG controller */
+#  define KINETIS_NUSBDEV         1            /* One USB device controller */
+#  define KINETIS_NSDHC           1            /* SD host controller */
+#  define KINETIS_NI2C            4            /* Four I2C modules */
+#  define KINETIS_NUART           5            /* Five UART modues */
+#  define KINETIS_NSPI            3            /* Three SPI modules */
+#  define KINETIS_NCAN            2            /* Two CAN controllers */
+#  define KINETIS_NI2S            1            /* One I2S modules */
+#  undef  KINETIS_NSLCD                        /* No segment LCD interface */
+#  define KINETIS_NADC16          2            /* Four 16-bit ADC */
+#  define KINETIS_NCMP            4            /* Four analog comparators */
+#  define KINETIS_NDAC6           4            /* Four 6-bit DAC */
+#  define KINETIS_NDAC12          2            /* Two 12-bit DAC */
+#  define KINETIS_NVREF           1            /* Voltage reference */
+#  define KINETIS_NTIMERS8        2            /* ? Two 8 channel timers */
+#  define KINETIS_NTIMERS2        2            /* ? Two 2 channel timers */
+#  define KINETIS_NRTC            1            /* Real time clock */
+#  define KINETIS_NRNG            1            /* Random number generator */
+#  define KINETIS_NMMCAU          1            /* Hardware encryption */
+#  define KINETIS_NCRC            1            /* CRC */
 #else
 #  error "Unsupported Kinetis chip"
 #endif

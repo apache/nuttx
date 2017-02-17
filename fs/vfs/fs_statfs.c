@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/vfs/fs_statfs.c
  *
- *   Copyright (C) 2007-2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,7 +55,7 @@
  * Name: statpseudo
  ****************************************************************************/
 
-static inline int statpseudofs(FAR struct inode *inode, FAR struct statfs *buf)
+static int statpseudofs(FAR struct inode *inode, FAR struct statfs *buf)
 {
   memset(buf, 0, sizeof(struct statfs));
   buf->f_type    = PROC_SUPER_MAGIC;
@@ -85,36 +85,50 @@ static inline int statpseudofs(FAR struct inode *inode, FAR struct statfs *buf)
 
 int statfs(FAR const char *path, FAR struct statfs *buf)
 {
+  struct inode_search_s desc;
   FAR struct inode *inode;
-  FAR const char   *relpath = NULL;
-  int               ret     = OK;
+  int ret = OK;
 
   /* Sanity checks */
 
-  if (!path || !buf)
+  if (path == NULL  || buf == NULL)
     {
       ret = EFAULT;
       goto errout;
     }
 
-  if (!path[0])
+  if (*path == '\0')
     {
       ret = ENOENT;
       goto errout;
     }
 
+  /* Check for the fake root directory (which has no inode) */
+
+  if (strcmp(path, "/") == 0)
+    {
+      return statpseudofs(NULL, buf);
+    }
+
   /* Get an inode for this file */
 
-  inode = inode_find(path, &relpath);
-  if (!inode)
+  SETUP_SEARCH(&desc, path, false);
+
+  ret = inode_find(&desc);
+  if (ret < 0)
     {
       /* This name does not refer to a psudeo-inode and there is no
        * mountpoint that includes in this path.
        */
 
-      ret = ENOENT;
-      goto errout;
+      ret = -ret;
+      goto errout_with_search;
     }
+
+  /* Get the search results */
+
+  inode = desc.node;
+  DEBUGASSERT(inode != NULL);
 
   /* The way we handle the statfs depends on the type of inode that we
    * are dealing with.
@@ -153,12 +167,17 @@ int statfs(FAR const char *path, FAR struct statfs *buf)
   /* Successfully statfs'ed the file */
 
   inode_release(inode);
+  RELEASE_SEARCH(&desc);
   return OK;
 
 /* Failure conditions always set the errno appropriately */
 
 errout_with_inode:
   inode_release(inode);
+
+errout_with_search:
+  RELEASE_SEARCH(&desc);
+
 errout:
   set_errno(ret);
   return ERROR;

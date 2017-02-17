@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/misc/lib_filesem.c
  *
- *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,17 +45,11 @@
 #include <errno.h>
 #include <assert.h>
 
+#include <nuttx/fs/fs.h>
+
 #include "libc.h"
 
-#if CONFIG_STDIO_BUFFER_SIZE > 0
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
+#ifndef CONFIG_STDIO_DISABLE_BUFFERING
 
 /****************************************************************************
  * Public Functions
@@ -142,4 +136,5 @@ void lib_give_semaphore(FAR struct file_struct *stream)
       ASSERT(sem_post(&stream->fs_sem) == 0);
     }
 }
-#endif /* CONFIG_STDIO_BUFFER_SIZE */
+
+#endif /* CONFIG_STDIO_DISABLE_BUFFERING */

@@ -13,7 +13,7 @@
       <h1><big><font color="#3c34ec"><i>NuttX Operating System<p>User's Manual</i></font></big></h1>
       <p><small>by</small></p>
       <p>Gregory Nutt<p>
-      <p>Last Updated: December 11, 2016</p>
+      <p>Last Updated: February 16, 2017</p>
     </td>
   </tr>
 </table>
@@ -479,14 +479,14 @@ int task_delete(pid_t pid);
 <p>
   <b>Description:</b>
   This function causes a specified task to cease to exist.
-  Its  stack and TCB will be deallocated. 
+  Its  stack and TCB will be deallocated.
   This function is the companion to <code>task_create()</code>.
   This is the version of the function exposed to the user;
   it is simply a wrapper around the internal, <code>task_terminate()</code> function.
 </p>
 <p>
   The logic in this function only deletes non-running tasks.
-  If the  <code>pid</code> parameter refers to to the currently runing task, then processing is redirected to <code>exit()</code>. 
+  If the  <code>pid</code> parameter refers to to the currently runing task, then processing is redirected to <code>exit()</code>.
   This can only happen if a task calls <code>task_delete()</code> in order to delete itself.
 </p>
 <p>
@@ -6223,7 +6223,7 @@ interface of the same name.
 <b>Description:</b>
 
 <p>The <code>pthread_cancel()</code> function will request that thread be canceled.
-The target thread's cancelability state, enabled, or disabled, determines when the cancellation takes effect:  When the cancellation is acted on, thread will be terminated. 
+The target thread's cancelability state, enabled, or disabled, determines when the cancellation takes effect:  When the cancellation is acted on, thread will be terminated.
 When cancelability is disabled, all cancellations are held pending in the target thread until the thread re-enables cancelability.</p>
 
 <p>The target thread's cancelability state determines how the cancellation is acted on:
@@ -6592,16 +6592,16 @@ interface of the same name.
 </p>
 <ul>
   <li><code>sched_ss_low_priority</code>
-    Low scheduling priority for sporadic server. 
+    Low scheduling priority for sporadic server.
   </li>
   <li><code>sched_ss_repl_period</code>
-    Replenishment period for sporadic server. 
+    Replenishment period for sporadic server.
   </li>
   <li><code>sched_ss_init_budget</code>
-    Initial budget for sporadic server. 
+    Initial budget for sporadic server.
   </li>
   <li><code>sched_ss_max_repl</code>
-    Maximum pending replenishments for  sporadic server. 
+    Maximum pending replenishments for  sporadic server.
   </li>
 </ul>
 <p>
@@ -8584,12 +8584,16 @@ int        telldir(FAR DIR *dirp);
 <ul><pre>
 #include &lt;unistd.h&gt;
 
+/* Task Control Interfaces */
+
 pid_t   vfork(void);
 pid_t   getpid(void);
 void    _exit(int status) noreturn_function;
 unsigned int sleep(unsigned int seconds);
 void    usleep(unsigned long usec);
 int     pause(void);
+
+/* File descriptor operations */
 
 int     close(int fd);
 int     dup(int fd);
@@ -8598,27 +8602,66 @@ int     fsync(int fd);
 off_t   lseek(int fd, off_t offset, int whence);
 ssize_t read(int fd, FAR void *buf, size_t nbytes);
 ssize_t write(int fd, FAR const void *buf, size_t nbytes);
+ssize_t pread(int fd, FAR void *buf, size_t nbytes, off_t offset);
+ssize_t pwrite(int fd, FAR const void *buf, size_t nbytes, off_t offset);
+
+/* Check if a file descriptor corresponds to a terminal I/O file */
+
+int     isatty(int fd);
+
+/* Memory management */
+
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_MM_PGALLOC) && \
+    defined(CONFIG_ARCH_USE_MMU)
+FAR void *sbrk(intptr_t incr);
+#endif
+
+/* Special devices */
 
 int     pipe(int fd[2]);
+
+/* Working directory operations */
 
 int     chdir(FAR const char *path);
 FAR char *getcwd(FAR char *buf, size_t size);
 
-int     unlink(FAR const char *pathname);
+/* File path operations */
+
+int     access(FAR const char *path, int amode);
 int     rmdir(FAR const char *pathname);
+int     unlink(FAR const char *pathname);
+
+#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+int     link(FAR const char *path1, FAR const char *path2);
+ssize_t readlink(FAR const char *path, FAR char *buf, size_t bufsize);
+#endif
+
+/* Execution of programs from files */
 
 #ifdef CONFIG_LIBC_EXECFUNCS
 int     execl(FAR const char *path, ...);
 int     execv(FAR const char *path, FAR char *const argv[]);
 #endif
 
+/* Networking */
+
+#ifdef CONFIG_NET
+int     gethostname(FAR char *name, size_t size);
+int     sethostname(FAR const char *name, size_t size);
+#endif
+
+/* Other */
+
 int     getopt(int argc, FAR char *const argv[], FAR const char *optstring);
+
 </pre></ul>
 </a>
 
 <h3><a name="standardio">2.10.5 Standard I/O</a></h3>
 <ul><pre>
 #include &lt;stdio.h&gt;
+
+/* Operations on streams (FILE) */
 
 void   clearerr(register FILE *stream);
 int    fclose(FILE *stream);
@@ -8629,18 +8672,24 @@ int    fileno(FAR FILE *stream);
 int    fgetc(FILE *stream);
 int    fgetpos(FILE *stream, fpos_t *pos);
 char  *fgets(char *s, int n, FILE *stream);
-FILE  *fdopen(int fd, const char *type);
 FILE  *fopen(const char *path, const char *type);
 int    fprintf(FILE *stream, const char *format, ...);
 int    fputc(int c, FILE *stream);
 int    fputs(const char *s, FILE *stream);
 size_t fread(void *ptr, size_t size, size_t n_items, FILE *stream);
+FAR FILE *freopen(FAR const char *path, FAR const char *mode,
+         FAR FILE *stream);
 int    fseek(FILE *stream, long int offset, int whence);
 int    fsetpos(FILE *stream, fpos_t *pos);
 long   ftell(FILE *stream);
 size_t fwrite(const void *ptr, size_t size, size_t n_items, FILE *stream);
-char  *gets(char *s);
+FAR char *gets(char *s);
+FAR char *gets_s(FAR char *s, rsize_t n);
+void   setbuf(FAR FILE *stream, FAR char *buf);
+int    setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size);
 int    ungetc(int c, FAR FILE *stream);
+
+/* Operations on the stdout stream, buffers, paths, and the whole printf-family *    /
 
 int    printf(const char *format, ...);
 int    puts(const char *s);
@@ -8658,21 +8707,29 @@ int    vasprintf(FAR char **ptr, const char *fmt, va_list ap);
 int    vsnprintf(FAR char *buf, size_t size, const char *format, va_list ap);
 int    vsscanf(char *buf, const char *s, va_list ap);
 
+/* Operations on file descriptors including:
+ *
+ * POSIX-like File System Interfaces (fdopen), and
+ * Extensions from the Open Group Technical Standard, 2006, Extended API Set
+ *   Part 1 (dprintf and vdprintf)
+ */
+
 FAR FILE *fdopen(int fd, FAR const char *type);
 int    dprintf(int fd, FAR const char *fmt, ...);
 int    vdprintf(int fd, FAR const char *fmt, va_list ap);
 
+/* Operations on paths */
+
 FAR char *tmpnam(FAR char *s);
 FAR char *tempnam(FAR const char *dir, FAR const char *pfx);
+int       remove(FAR const char *path);
 
 #include &lt;sys/stat.h&gt;
 
 int mkdir(FAR const char *pathname, mode_t mode);
 int mkfifo(FAR const char *pathname, mode_t mode);
 int stat(const char *path, FAR struct stat *buf);
-#if 0 /* Not yet supported */
 int fstat(int fd, FAR struct stat *buf);
-#endif
 
 #include &lt;sys/statfs.h&gt;
 
@@ -8739,7 +8796,17 @@ void  *memcpy(void *dest, const void *src, size_t n);
 int    memcmp(const void *s1, const void *s2, size_t n);
 void  *memmove(void *dest, const void *src, size_t count);
 
-# define bzero(s,n) (void)memset(s,0,n)
+#include &lt;strings.h&gt;
+
+#define bcmp(b1,b2,len)  memcmp(b1,b2,(size_t)len)
+#define bcopy(b1,b2,len) (void)memmove(b2,b1,len)
+#define bzero(s,n)       (void)memset(s,0,n)
+#define index(s,c)       strchr(s,c)
+#define rindex(s,c)      strrchr(s,c)
+
+int    ffs(int j);
+int    strcasecmp(const char *, const char *);
+int    strncasecmp(const char *, const char *, size_t);
 </pre></ul>
 
 <h3><a name="PipesNFifos">2.10.9 Pipes and FIFOs</a></h3>

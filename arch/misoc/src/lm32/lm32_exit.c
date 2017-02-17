@@ -108,13 +108,18 @@ static void _up_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
       struct file_struct *filep = &streamlist->sl_streams[i];
       if (filep->fs_fd >= 0)
         {
-#if CONFIG_STDIO_BUFFER_SIZE > 0
-          sinfo("      fd=%d nbytes=%d\n",
-                filep->fs_fd,
-                filep->fs_bufpos - filep->fs_bufstart);
-#else
-          sinfo("      fd=%d\n", filep->fs_fd);
+#ifndef CONFIG_STDIO_DISABLE_BUFFERING
+          if (filep->fs_bufstart != NULL)
+            {
+              sinfo("      fd=%d nbytes=%d\n",
+                    filep->fs_fd,
+                    filep->fs_bufpos - filep->fs_bufstart);
+            }
+          else
 #endif
+            {
+              sinfo("      fd=%d\n", filep->fs_fd);
+            }
         }
     }
 #endif

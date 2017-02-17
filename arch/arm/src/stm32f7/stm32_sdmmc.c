@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32f7/stm32_sdmmc.c
  *
- *   Copyright (C) 2009, 2011-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011-2017 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            David Sidrane <david_s5@nscdg.com>
  *
@@ -90,7 +90,7 @@
  *   CONFIG_STM32F7_SDMMC_DMA - Enable SDMMC.  This is a marginally optional.  For
  *     most usages, SDMMC will cause data overruns if used without DMA.
  *     NOTE the above system DMA configuration options.
- *   CONFIG_SDMMC_WIDTH_D1_ONLY - This may be selected to force the driver
+ *   CONFIG_SDMMC1/2_WIDTH_D1_ONLY - This may be selected to force the driver
  *     operate with only a single data line (the default is to use all
  *     4 SD data lines).
  *   CONFIG_SDMMC_PRI - SDMMC interrupt priority.  This setting is not very
@@ -101,12 +101,15 @@
  *     This also requires CONFIG_DEBUG_FS and CONFIG_DEBUG_INFO
  */
 
-#if defined(CONFIG_STM32F7_SDMMC_DMA) && !defined(CONFIG_STM32F7_DMA2)
-#  warning "CONFIG_STM32F7_SDMMC_DMA support requires CONFIG_STM32F7_DMA2"
-#endif
-
 #ifndef CONFIG_STM32F7_SDMMC_DMA
 #  warning "Large Non-DMA transfer may result in RX overrun failures"
+#else
+#  ifndef CONFIG_STM32F7_DMA2
+#    error "CONFIG_STM32F7_SDMMC_DMA support requires CONFIG_STM32F7_DMA2"
+#  endif
+#  ifndef CONFIG_SDIO_DMA
+#    error CONFIG_SDIO_DMA must be defined with CONFIG_STM32F7_SDMMC_DMA
+#  endif
 #endif
 
 #ifndef CONFIG_SCHED_WORKQUEUE
@@ -119,14 +122,14 @@
 #  endif
 
 #  ifdef CONFIG_STM32F7_SDMMC_DMA
-#    ifndef CONFIG_SDMMC1_DMAPRIO
-#        define CONFIG_SDMMC1_DMAPRIO DMA_SCR_PRIVERYHI
+#    ifndef CONFIG_STM32F7_SDMMC1_DMAPRIO
+#        define CONFIG_STM32F7_SDMMC1_DMAPRIO DMA_SCR_PRIVERYHI
 #    endif
-#    if (CONFIG_SDMMC1_DMAPRIO & ~DMA_SCR_PL_MASK) != 0
-#      error "Illegal value for CONFIG_SDMMC1_DMAPRIO"
+#    if (CONFIG_STM32F7_SDMMC1_DMAPRIO & ~DMA_SCR_PL_MASK) != 0
+#      error "Illegal value for CONFIG_STM32F7_SDMMC1_DMAPRIO"
 #    endif
 #  else
-#    undef CONFIG_SDMMC1_DMAPRIO
+#    undef CONFIG_STM32F7_SDMMC1_DMAPRIO
 #  endif
 #endif
 
@@ -136,14 +139,14 @@
 #  endif
 
 #  ifdef CONFIG_STM32F7_SDMMC_DMA
-#    ifndef CONFIG_SDMMC2_DMAPRIO
-#        define CONFIG_SDMMC2_DMAPRIO DMA_SCR_PRIVERYHI
+#    ifndef CONFIG_STM32F7_SDMMC2_DMAPRIO
+#        define CONFIG_STM32F7_SDMMC2_DMAPRIO DMA_SCR_PRIVERYHI
 #    endif
-#    if (CONFIG_SDMMC2_DMAPRIO & ~DMA_SCR_PL_MASK) != 0
-#      error "Illegal value for CONFIG_SDMMC2_DMAPRIO"
+#    if (CONFIG_STM32F7_SDMMC2_DMAPRIO & ~DMA_SCR_PL_MASK) != 0
+#      error "Illegal value for CONFIG_STM32F7_SDMMC2_DMAPRIO"
 #    endif
 #  else
-#    undef CONFIG_SDMMC2_DMAPRIO
+#    undef CONFIG_STM32F7_SDMMC2_DMAPRIO
 #  endif
 #endif
 
@@ -366,7 +369,7 @@ struct stm32_dev_s
 
   /* Callback support */
 
-  uint8_t            cdstatus;   /* Card status */
+  sdio_statset_t     cdstatus;   /* Card status */
   sdio_eventset_t    cbevents;   /* Set of events to be cause callbacks */
   worker_t           callback;   /* Registered callback function */
   void              *cbarg;      /* Registered callback argument */
@@ -381,6 +384,7 @@ struct stm32_dev_s
   /* DMA data transfer support */
 
   bool               widebus;    /* Required for DMA support */
+  bool               onebit;     /* true: Only 1-bit transfers are supported */
 #ifdef CONFIG_STM32F7_SDMMC_DMA
   volatile uint8_t   xfrflags;   /* Used to synchronize SDMMC and DMA completion events */
   bool               dmamode;    /* true: DMA mode transfer */
@@ -495,7 +499,8 @@ static int stm32_lock(FAR struct sdio_dev_s *dev, bool lock);
 /* Initialization/setup */
 
 static void stm32_reset(FAR struct sdio_dev_s *dev);
-static uint8_t stm32_status(FAR struct sdio_dev_s *dev);
+static sdio_capset_t stm32_capabilities(FAR struct sdio_dev_s *dev);
+static sdio_statset_t stm32_status(FAR struct sdio_dev_s *dev);
 static void stm32_widebus(FAR struct sdio_dev_s *dev, bool enable);
 static void stm32_clock(FAR struct sdio_dev_s *dev,
               enum sdio_clock_e rate);
@@ -535,7 +540,6 @@ static int  stm32_registercallback(FAR struct sdio_dev_s *dev,
 /* DMA */
 
 #ifdef CONFIG_STM32F7_SDMMC_DMA
-static bool stm32_dmasupported(FAR struct sdio_dev_s *dev);
 #ifdef CONFIG_SDIO_PREFLIGHT
 static int  stm32_dmapreflight(FAR struct sdio_dev_s *dev,
               FAR const uint8_t *buffer, size_t buflen);
@@ -563,6 +567,7 @@ struct stm32_dev_s g_sdmmcdev1 =
     .lock             = stm32_lock,
 #endif
     .reset            = stm32_reset,
+    .capabilities     = stm32_capabilities,
     .status           = stm32_status,
     .widebus          = stm32_widebus,
     .clock            = stm32_clock,
@@ -586,13 +591,20 @@ struct stm32_dev_s g_sdmmcdev1 =
     .eventwait        = stm32_eventwait,
     .callbackenable   = stm32_callbackenable,
     .registercallback = stm32_registercallback,
+#ifdef CONFIG_SDIO_DMA
 #ifdef CONFIG_STM32F7_SDMMC_DMA
-    .dmasupported     = stm32_dmasupported,
 #ifdef CONFIG_SDIO_PREFLIGHT
     .dmapreflight     = stm32_dmapreflight,
 #endif
     .dmarecvsetup     = stm32_dmarecvsetup,
     .dmasendsetup     = stm32_dmasendsetup,
+#else
+#ifdef CONFIG_SDIO_PREFLIGHT
+    .dmapreflight     = NULL,
+#endif
+    .dmarecvsetup     = stm32_recvsetup,
+    .dmasendsetup     = stm32_sendsetup,
+#endif
 #endif
   },
   .base              = STM32_SDMMC1_BASE,
@@ -605,8 +617,8 @@ struct stm32_dev_s g_sdmmcdev1 =
   .d0_gpio           = GPIO_SDMMC1_D0,
   .wrchandler        = stm32_sdmmc1_rdyinterrupt,
 #endif
-#ifdef CONFIG_SDMMC1_DMAPRIO
-  .dmapri            = CONFIG_SDMMC1_DMAPRIO,
+#ifdef CONFIG_STM32F7_SDMMC1_DMAPRIO
+  .dmapri            = CONFIG_STM32F7_SDMMC1_DMAPRIO,
 #endif
 };
 #endif
@@ -619,6 +631,7 @@ struct stm32_dev_s g_sdmmcdev2 =
     .lock             = stm32_lock,
 #endif
     .reset            = stm32_reset,
+    .capabilities     = stm32_capabilities,
     .status           = stm32_status,
     .widebus          = stm32_widebus,
     .clock            = stm32_clock,
@@ -642,8 +655,7 @@ struct stm32_dev_s g_sdmmcdev2 =
     .eventwait        = stm32_eventwait,
     .callbackenable   = stm32_callbackenable,
     .registercallback = stm32_registercallback,
-#ifdef CONFIG_STM32F7_SDMMC_DMA
-    .dmasupported     = stm32_dmasupported,
+#ifdef CONFIG_SDIO_DMA
 #ifdef CONFIG_SDIO_PREFLIGHT
     .dmapreflight     = stm32_dmapreflight,
 #endif
@@ -661,8 +673,8 @@ struct stm32_dev_s g_sdmmcdev2 =
   .d0_gpio           = GPIO_SDMMC2_D0,
   .wrchandler        = stm32_sdmmc2_rdyinterrupt,
 #endif
-#ifdef CONFIG_SDMMC2_DMAPRIO
-  .dmapri            = CONFIG_SDMMC2_DMAPRIO,
+#ifdef CONFIG_STM32F7_SDMMC2_DMAPRIO
+  .dmapri            = CONFIG_STM32F7_SDMMC2_DMAPRIO,
 #endif
 };
 #endif
@@ -1853,6 +1865,37 @@ static void stm32_reset(FAR struct sdio_dev_s *dev)
 }
 
 /****************************************************************************
+ * Name: stm32_capabilities
+ *
+ * Description:
+ *   Get capabilities (and limitations) of the SDIO driver (optional)
+ *
+ * Input Parameters:
+ *   dev   - Device-specific state data
+ *
+ * Returned Value:
+ *   Returns a bitset of status values (see SDIO_CAPS_* defines)
+ *
+ ****************************************************************************/
+
+static sdio_capset_t stm32_capabilities(FAR struct sdio_dev_s *dev)
+{
+  struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
+  sdio_capset_t caps = 0;
+
+  if (priv->onebit)
+    {
+      caps |= SDIO_CAPS_1BIT_ONLY;
+    }
+
+#ifdef CONFIG_STM32F7_SDMMC_DMA
+  caps |= SDIO_CAPS_DMASUPPORTED;
+#endif
+
+  return caps;
+}
+
+/****************************************************************************
  * Name: stm32_status
  *
  * Description:
@@ -1866,7 +1909,7 @@ static void stm32_reset(FAR struct sdio_dev_s *dev)
  *
  ****************************************************************************/
 
-static uint8_t stm32_status(FAR struct sdio_dev_s *dev)
+static sdio_statset_t stm32_status(FAR struct sdio_dev_s *dev)
 {
   struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
   return priv->cdstatus;
@@ -1939,10 +1982,11 @@ static void stm32_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
       /* SD normal operation clocking (wide 4-bit mode) */
 
       case CLOCK_SD_TRANSFER_4BIT:
-#ifndef CONFIG_SDMMC_WIDTH_D1_ONLY
-        clckr = (STM32_SDMMC_CLCKR_SDWIDEXFR | STM32_SDMMC_CLKCR_CLKEN);
-        break;
-#endif
+        if (!priv->onebit)
+          {
+            clckr = (STM32_SDMMC_CLCKR_SDWIDEXFR | STM32_SDMMC_CLKCR_CLKEN);
+            break;
+          }
 
       /* SD normal operation clocking (narrow 1-bit mode) */
 
@@ -1995,8 +2039,8 @@ static int stm32_attach(FAR struct sdio_dev_s *dev)
 
       up_enable_irq(priv->nirq);
 
-#if defined(CONFIG_ARCH_IRQPRIO) && (defined(CONFIG_SDMMC1_DMAPRIO) || \
-                                     defined(CONFIG_SDMMC2_DMAPRIO))
+#if defined(CONFIG_ARCH_IRQPRIO) && (defined(CONFIG_STM32F7_SDMMC1_DMAPRIO) || \
+                                     defined(CONFIG_STM32F7_SDMMC2_DMAPRIO))
       /* Set the interrupt priority */
 
       up_prioritize_irq(priv->nirq, priv->irqprio);
@@ -2804,27 +2848,6 @@ static int stm32_registercallback(FAR struct sdio_dev_s *dev,
 }
 
 /****************************************************************************
- * Name: stm32_dmasupported
- *
- * Description:
- *   Return true if the hardware can support DMA
- *
- * Input Parameters:
- *   dev - An instance of the SDIO device interface
- *
- * Returned Value:
- *   true if DMA is supported.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_STM32F7_SDMMC_DMA
-static bool stm32_dmasupported(FAR struct sdio_dev_s *dev)
-{
-  return true;
-}
-#endif
-
-/****************************************************************************
  * Name: stm32_dmapreflight
  *
  * Description:
@@ -3162,7 +3185,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
 {
   struct stm32_dev_s *priv = NULL;
 #ifdef CONFIG_STM32F7_SDMMC_DMA
-  unsigned int      dmachan;
+  unsigned int dmachan;
 #endif
 
 #ifdef CONFIG_STM32F7_SDMMC1
@@ -3171,8 +3194,15 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
       /* Select SDMMC 1 */
 
       priv = &g_sdmmcdev1;
+
 #ifdef CONFIG_STM32F7_SDMMC_DMA
       dmachan = SDMMC1_DMACHAN;
+#endif
+
+#ifdef CONFIG_SDMMC1_WIDTH_D1_ONLY
+      priv->onebit = true;
+#else
+      priv->onebit = false;
 #endif
 
       /* Configure GPIOs for 4-bit, wide-bus operation (the chip is capable of
@@ -3181,17 +3211,17 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
        * If bus is multiplexed then there is a custom bus configuration utility
        * in the scope of the board support package.
        */
-#ifndef CONFIG_SDIO_MUXBUS
-        stm32_configgpio(GPIO_SDMMC1_D0);
-#ifndef CONFIG_SDMMC1_WIDTH_D1_ONLY
-        stm32_configgpio(GPIO_SDMMC1_D1);
-        stm32_configgpio(GPIO_SDMMC1_D2);
-        stm32_configgpio(GPIO_SDMMC1_D3);
-#endif
-        stm32_configgpio(GPIO_SDMMC1_CK);
-        stm32_configgpio(GPIO_SDMMC1_CMD);
-#endif
 
+#ifndef CONFIG_SDIO_MUXBUS
+      stm32_configgpio(GPIO_SDMMC1_D0);
+#ifndef CONFIG_SDMMC1_WIDTH_D1_ONLY
+      stm32_configgpio(GPIO_SDMMC1_D1);
+      stm32_configgpio(GPIO_SDMMC1_D2);
+      stm32_configgpio(GPIO_SDMMC1_D3);
+#endif
+      stm32_configgpio(GPIO_SDMMC1_CK);
+      stm32_configgpio(GPIO_SDMMC1_CMD);
+#endif
     }
   else
 #endif
@@ -3201,21 +3231,35 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
       /* Select SDMMC 2 */
 
       priv = &g_sdmmcdev2;
+
 #ifdef CONFIG_STM32F7_SDMMC_DMA
       dmachan = SDMMC2_DMACHAN;
 #endif
 
+#ifdef CONFIG_SDMMC2_WIDTH_D1_ONLY
+      priv->onebit = true;
+#else
+      priv->onebit = false;
+#endif
+
+      /* Configure GPIOs for 4-bit, wide-bus operation (the chip is capable of
+       * 8-bit wide bus operation but D4-D7 are not configured).
+       *
+       * If bus is multiplexed then there is a custom bus configuration utility
+       * in the scope of the board support package.
+       */
+
 #ifndef CONFIG_SDIO_MUXBUS
-        stm32_configgpio(GPIO_SDMMC2_D0);
+      stm32_configgpio(GPIO_SDMMC2_D0);
 #ifndef CONFIG_SDMMC2_WIDTH_D1_ONLY
-        stm32_configgpio(GPIO_SDMMC2_D1);
-        stm32_configgpio(GPIO_SDMMC2_D2);
-        stm32_configgpio(GPIO_SDMMC2_D3);
+      stm32_configgpio(GPIO_SDMMC2_D1);
+      stm32_configgpio(GPIO_SDMMC2_D2);
+      stm32_configgpio(GPIO_SDMMC2_D3);
 #endif
-        stm32_configgpio(GPIO_SDMMC2_CK);
-        stm32_configgpio(GPIO_SDMMC2_CMD);
+      stm32_configgpio(GPIO_SDMMC2_CK);
+      stm32_configgpio(GPIO_SDMMC2_CMD);
 #endif
-}
+    }
   else
 #endif
     {
@@ -3239,9 +3283,9 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
   priv->waitwdog = wd_create();
   DEBUGASSERT(priv->waitwdog);
 
+#ifdef CONFIG_STM32F7_SDMMC_DMA
   /* Allocate a DMA channel */
 
-#ifdef CONFIG_STM32F7_SDMMC_DMA
   priv->dma = stm32_dmachannel(dmachan);
   DEBUGASSERT(priv->dma);
 #endif
@@ -3276,7 +3320,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
 void sdio_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot)
 {
   struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
-  uint8_t cdstatus;
+  sdio_statset_t cdstatus;
   irqstate_t flags;
 
   /* Update card status */

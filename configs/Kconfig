@@ -188,6 +188,17 @@ config ARCH_BOARD_FREEDOM_K64F
 		This port uses the FreeScale FREEDOM-K64F development board. This
 		board uses the Kinetis K64 MK64FN1M0VLL12 Cortex-M4 MCU.
 
+config ARCH_BOARD_FREEDOM_K66F
+	bool "NXP Freedom-k66f development board"
+	depends on ARCH_CHIP_MK66FN2M0VMD18
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		development board.
+		This port uses the FreeScale FREEDOM-K66F development board. This
+		board uses the Kinetis K66 MK66FN2M0VMD18 Cortex-M4 MCU.
+
 config ARCH_BOARD_FREEDOM_KL25Z
 	bool "Freescale Freedom KL25Z"
 	depends on ARCH_CHIP_MKL25Z128
@@ -1377,6 +1388,7 @@ config ARCH_BOARD
 	default "ez80f910200zco"           if ARCH_BOARD_EZ80F910200ZCO
 	default "fire-stm32v2"             if ARCH_BOARD_FIRE_STM32
 	default "freedom-k64f"             if ARCH_BOARD_FREEDOM_K64F
+	default "freedom-k66f"             if ARCH_BOARD_FREEDOM_K66F
 	default "freedom-kl25z"            if ARCH_BOARD_FREEDOM_KL25Z
 	default "freedom-kl26z"            if ARCH_BOARD_FREEDOM_KL26Z
 	default "hymini-stm32v"            if ARCH_BOARD_HYMINI_STM32V
@@ -1580,6 +1592,9 @@ source "configs/fire-stm32v2/Kconfig"
 endif
 if ARCH_BOARD_FREEDOM_K64F
 source "configs/freedom-k64f/Kconfig"
+endif
+if ARCH_BOARD_FREEDOM_K66F
+source "configs/freedom-k66f/Kconfig"
 endif
 if ARCH_BOARD_FREEDOM_KL25Z
 source "configs/freedom-kl25z/Kconfig"

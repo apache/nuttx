@@ -24,6 +24,7 @@ fread          NXfread
 fseek          NXfseek
 fwrite         NXfwrite
 fsync          NXfsync
+fstat          NXfstat
 ftell          NXftell
 getenv         NXgetenv
 getopt         NXgetopt
@@ -32,6 +33,7 @@ gettimeofday   NXgettimeofday
 ioctl          NXioctl
 isatty         NXisatty
 kill           NXkill
+link           NXlink
 listen         NXlisten
 lseek          NXlseek
 mallinfo       NXmallinfo
@@ -72,6 +74,7 @@ ptsname_r      NXptsname_r
 puts           NXputs
 read           NXread
 readdir        NXreaddir
+readlink       NXreadlink
 realloc        NXrealloc
 recv           NXrecv
 recvfrom       NXrecvfrom
@@ -90,6 +93,7 @@ sendto         NXsendto
 setenv         NXsetenv
 setlogmask     NXsetlogmask
 setsockopt     NXsetsockopt
+setvbuf        NXsetvbuf
 sigaction      NXsigaction
 sigaddset      NXsigaddset
 sigdelset      NXsigdelset

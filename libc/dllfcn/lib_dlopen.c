@@ -44,8 +44,220 @@
 #include <libgen.h>
 #include <dllfcn.h>
 #include <assert.h>
+#include <errno.h>
 
 #include <nuttx/module.h>
+#include <nuttx/lib/modlib.h>
+
+#include "libc.h"
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: dldump_loadinfo
+ ****************************************************************************/
+
+#ifdef CONFIG_BUILD_PROTECTED
+#if defined(CONFIG_DEBUG_INFO) && defined(CONFIG_DEBUG_BINFMT)
+static void dldump_loadinfo(FAR struct mod_loadinfo_s *loadinfo)
+{
+  int i;
+
+  binfo("LOAD_INFO:\n");
+  binfo("  textalloc:    %08lx\n", (long)loadinfo->textalloc);
+  binfo("  datastart:    %08lx\n", (long)loadinfo->datastart);
+  binfo("  textsize:     %ld\n",   (long)loadinfo->textsize);
+  binfo("  datasize:     %ld\n",   (long)loadinfo->datasize);
+  binfo("  filelen:      %ld\n",   (long)loadinfo->filelen);
+  binfo("  filfd:        %d\n",    loadinfo->filfd);
+  binfo("  symtabidx:    %d\n",    loadinfo->symtabidx);
+  binfo("  strtabidx:    %d\n",    loadinfo->strtabidx);
+
+  binfo("ELF Header:\n");
+  binfo("  e_ident:      %02x %02x %02x %02x\n",
+    loadinfo->ehdr.e_ident[0], loadinfo->ehdr.e_ident[1],
+    loadinfo->ehdr.e_ident[2], loadinfo->ehdr.e_ident[3]);
+  binfo("  e_type:       %04x\n",  loadinfo->ehdr.e_type);
+  binfo("  e_machine:    %04x\n",  loadinfo->ehdr.e_machine);
+  binfo("  e_version:    %08x\n",  loadinfo->ehdr.e_version);
+  binfo("  e_entry:      %08lx\n", (long)loadinfo->ehdr.e_entry);
+  binfo("  e_phoff:      %d\n",    loadinfo->ehdr.e_phoff);
+  binfo("  e_shoff:      %d\n",    loadinfo->ehdr.e_shoff);
+  binfo("  e_flags:      %08x\n" , loadinfo->ehdr.e_flags);
+  binfo("  e_ehsize:     %d\n",    loadinfo->ehdr.e_ehsize);
+  binfo("  e_phentsize:  %d\n",    loadinfo->ehdr.e_phentsize);
+  binfo("  e_phnum:      %d\n",    loadinfo->ehdr.e_phnum);
+  binfo("  e_shentsize:  %d\n",    loadinfo->ehdr.e_shentsize);
+  binfo("  e_shnum:      %d\n",    loadinfo->ehdr.e_shnum);
+  binfo("  e_shstrndx:   %d\n",    loadinfo->ehdr.e_shstrndx);
+
+  if (loadinfo->shdr && loadinfo->ehdr.e_shnum > 0)
+    {
+      for (i = 0; i < loadinfo->ehdr.e_shnum; i++)
+        {
+          FAR Elf32_Shdr *shdr = &loadinfo->shdr[i];
+          binfo("Sections %d:\n", i);
+          binfo("  sh_name:      %08x\n", shdr->sh_name);
+          binfo("  sh_type:      %08x\n", shdr->sh_type);
+          binfo("  sh_flags:     %08x\n", shdr->sh_flags);
+          binfo("  sh_addr:      %08x\n", shdr->sh_addr);
+          binfo("  sh_offset:    %d\n",   shdr->sh_offset);
+          binfo("  sh_size:      %d\n",   shdr->sh_size);
+          binfo("  sh_link:      %d\n",   shdr->sh_link);
+          binfo("  sh_info:      %d\n",   shdr->sh_info);
+          binfo("  sh_addralign: %d\n",   shdr->sh_addralign);
+          binfo("  sh_entsize:   %d\n",   shdr->sh_entsize);
+        }
+    }
+}
+#else
+# define dldump_loadinfo(i)
+#endif
+#endif
+
+/****************************************************************************
+ * Name: dldump_initializer
+ ****************************************************************************/
+
+#ifdef CONFIG_BUILD_PROTECTED
+#ifdef CONFIG_MODLIB_DUMPBUFFER
+static void dldump_initializer(mod_initializer_t initializer,
+                               FAR struct mod_loadinfo_s *loadinfo)
+{
+  modlib_dumpbuffer("Initializer code", (FAR const uint8_t *)initializer,
+                    MIN(loadinfo->textsize - loadinfo->ehdr.e_entry, 512));
+}
+#else
+# define dldump_initializer(b,l)
+#endif
+#endif
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: dlinsert
+ *
+ * Description:
+ *   Verify that the file is an ELF module binary and, if so, load the
+ *   shared library into user memory and initialize it for use.
+ *
+ *   NOTE: modlib_setsymtab() had to have been called by application logic
+ *   logic prior to calling this.  Otherwise, dlinsert will be unable to
+ *   resolve symbols in the OS module.
+ *
+ * Input Parameters:
+ *   filename - Full path to the shared library file to be loaded
+ *
+ * Returned Value:
+ *   A non-NULL module handle that can be used on subsequent calls to other
+ *   shared library interfaces is returned on success.  If insmod() was
+ *   unable to load the module insmod() will return a NULL handle and the
+ *   errno variable will be set appropriately.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BUILD_PROTECTED
+static inline FAR void *dlinsert(FAR const char *filename)
+{
+  struct mod_loadinfo_s loadinfo;
+  FAR struct module_s *modp;
+  mod_initializer_t initializer;
+  int ret;
+
+  binfo("Loading file: %s\n", filename);
+
+  /* Get exclusive access to the module registry */
+
+  modlib_registry_lock();
+
+  /* Initialize the ELF library to load the program binary. */
+
+  ret = modlib_initialize(filename, &loadinfo);
+  dldump_loadinfo(&loadinfo);
+  if (ret != 0)
+    {
+      serr("ERROR: Failed to initialize to load module: %d\n", ret);
+      goto errout_with_lock;
+    }
+
+  /* Allocate a module registry entry to hold the module data */
+
+  modp = (FAR struct module_s *)lib_zalloc(sizeof(struct module_s));
+  if (ret != 0)
+    {
+      binfo("Failed to initialize for load of ELF program: %d\n", ret);
+      goto errout_with_loadinfo;
+    }
+
+  /* Load the program binary */
+
+  ret = modlib_load(&loadinfo);
+  dldump_loadinfo(&loadinfo);
+  if (ret != 0)
+    {
+      binfo("Failed to load ELF program binary: %d\n", ret);
+      goto errout_with_registry_entry;
+    }
+
+  /* Bind the program to the kernel symbol table */
+
+  ret = modlib_bind(modp, &loadinfo);
+  if (ret != 0)
+    {
+      binfo("Failed to bind symbols program binary: %d\n", ret);
+      goto errout_with_load;
+    }
+
+  /* Save the load information */
+
+  modp->alloc       = (FAR void *)loadinfo.textalloc;
+#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
+  modp->textsize    = loadinfo.textsize;
+  modp->datasize    = loadinfo.datasize;
+#endif
+
+  /* Get the module initializer entry point */
+
+  initializer = (mod_initializer_t)(loadinfo.textalloc + loadinfo.ehdr.e_entry);
+#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
+  modp->initializer = initializer;
+#endif
+  dldump_initializer(initializer, &loadinfo);
+
+  /* Call the module initializer */
+
+  ret = initializer(&modp->modinfo);
+  if (ret < 0)
+    {
+      binfo("Failed to initialize the module: %d\n", ret);
+      goto errout_with_load;
+    }
+
+  /* Add the new module entry to the registry */
+
+  modlib_registry_add(modp);
+
+  modlib_uninitialize(&loadinfo);
+  modlib_registry_unlock();
+  return (FAR void *)modp;
+
+errout_with_load:
+  modlib_unload(&loadinfo);
+  (void)modlib_undepend(modp);
+errout_with_registry_entry:
+  lib_free(modp);
+errout_with_loadinfo:
+  modlib_uninitialize(&loadinfo);
+errout_with_lock:
+  modlib_registry_unlock();
+  set_errno(-ret);
+  return NULL;
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -188,16 +400,14 @@ FAR void *dlopen(FAR const char *file, int mode)
 
 #elif defined(CONFIG_BUILD_PROTECTED)
   /* The PROTECTED build is equivalent to the FLAT build EXCEPT that there
-   * must be two copies of the the module logic:  One residing in kernel
+   * must be two copies of the module logic:  One residing in kernel
    * space and using the kernel symbol table and one residing in user space
    * using the user space symbol table.
    *
-   * The brute force way to accomplish this is by just copying the kernel
-   * module code into libc/module.
+   * dlinsert() is essentially a clone of insmod().
    */
 
-#warning Missing logic
-  return NULL;
+  return dlinsert(file);
 
 #else /* if defined(CONFIG_BUILD_KERNEL) */
   /* The KERNEL build is considerably more complex:  In order to be shared,

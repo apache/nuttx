@@ -40,8 +40,84 @@
 #include <nuttx/config.h>
 
 #include <dllfcn.h>
+#include <errno.h>
 
 #include <nuttx/module.h>
+#include <nuttx/symtab.h>
+#include <nuttx/lib/modlib.h>
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: dlgetsym
+ *
+ * Description:
+ *   dlgetsym() implements dlsym() for the PROTECTED build.
+ *
+ * Input Parameters:
+ *   handle - The opaque, non-NULL value returned by a previous successful
+ *            call to insmod().
+ *   name   - A pointer to the symbol name string.
+ *
+ * Returned Value:
+ *   See dlsym().
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BUILD_PROTECTED
+static inline FAR const void *dlgetsym(FAR void *handle,
+                                       FAR const char *name)
+{
+  FAR struct module_s *modp = (FAR struct module_s *)handle;
+  FAR const struct symtab_s *symbol;
+  int err;
+  int ret;
+
+  /* Verify that the module is in the registry */
+
+  modlib_registry_lock();
+  ret = modlib_registry_verify(modp);
+  if (ret < 0)
+    {
+      serr("ERROR: Failed to verify module: %d\n", ret);
+      err = -ret;
+      goto errout_with_lock;
+    }
+
+  /* Does the module have a symbol table? */
+
+  if (modp->modinfo.exports == NULL || modp->modinfo.nexports == 0)
+    {
+      serr("ERROR: Module has no symbol table\n");
+      err = ENOENT;
+      goto errout_with_lock;
+    }
+
+  /* Search the symbol table for the matching symbol */
+
+  symbol = symtab_findbyname(modp->modinfo.exports, name,
+                             modp->modinfo.nexports);
+  if (symbol == NULL)
+    {
+      serr("ERROR: Failed to find symbol in symbol \"$s\" in table\n", name);
+      err = ENOENT;
+      goto errout_with_lock;
+    }
+
+  /* Return the address within the module assoicated with the symbol */
+
+  modlib_registry_unlock();
+  DEBUGASSERT(symbol->sym_value != NULL);
+  return symbol->sym_value;
+
+errout_with_lock:
+  modlib_registry_unlock();
+  set_errno(err);
+  return NULL;
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -89,16 +165,14 @@ FAR void *dlsym(FAR void *handle, FAR const char *name)
 
 #elif defined(CONFIG_BUILD_PROTECTED)
   /* The PROTECTED build is equivalent to the FLAT build EXCEPT that there
-   * must be two copies of the the module logic:  One residing in kernel
+   * must be two copies of the module logic:  One residing in kernel
    * space and using the kernel symbol table and one residing in user space
    * using the user space symbol table.
    *
-   * The brute force way to accomplish this is by just copying the kernel
-   * module code into libc/module.
+   * dlgetsem() is essentially a clone of modsym().
    */
 
-#warning Missing logic
-  return NULL;
+  return (FAR void *)dlgetsym(handle, name);
 
 #else /* if defined(CONFIG_BUILD_KERNEL) */
   /* The KERNEL build is considerably more complex:  In order to be shared,

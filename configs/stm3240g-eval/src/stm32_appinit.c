@@ -297,9 +297,8 @@ int board_app_initialize(uintptr_t arg)
 #warning "Now what are we going to do with this SPI FLASH driver?"
 #endif
 
-  /* Mount the SDIO-based MMC/SD block driver */
-
 #ifdef HAVE_MMCSD
+  /* Mount the SDIO-based MMC/SD block driver */
   /* First, get an instance of the SDIO interface */
 
   sdio = sdio_initialize(CONFIG_NSH_MMCSDSLOTNO);

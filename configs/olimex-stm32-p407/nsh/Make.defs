@@ -99,9 +99,9 @@ CMODULEFLAGS = $(CFLAGS) -mlong-calls # --target1-abs
 
 LDMODULEFLAGS = -r -e module_initialize
 ifeq ($(WINTOOL),y)
-  LDMODULEFLAGS += -T "${shell cygpath -w $(TOPDIR)/sched/module/gnu-elf.ld}"
+  LDMODULEFLAGS += -T "${shell cygpath -w $(TOPDIR)/libc/modlib/gnu-elf.ld}"
 else
-  LDMODULEFLAGS += -T $(TOPDIR)/sched/module/gnu-elf.ld
+  LDMODULEFLAGS += -T $(TOPDIR)/libc/modlib/gnu-elf.ld
 endif
 
 ASMEXT = .S

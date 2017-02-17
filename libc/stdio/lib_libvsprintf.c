@@ -209,22 +209,10 @@ static void postjustify(FAR struct lib_outstream_s *obj, uint8_t fmt,
 #endif
 
 /****************************************************************************
- * Public Constant Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
  * Private Constant Data
  ****************************************************************************/
 
 static const char g_nullstring[] = "(null)";
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -1205,14 +1193,13 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const IPTR char *src,
 
            /* Flush the buffer if a newline is encountered */
 
-#ifdef CONFIG_STDIO_LINEBUFFER
            if (FMT_CHAR == '\n')
              {
                /* Should return an error on a failure to flush */
 
                (void)obj->flush(obj);
              }
-#endif
+
            /* Process the next character in the format */
 
            continue;

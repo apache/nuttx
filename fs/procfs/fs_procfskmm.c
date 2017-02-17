@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/procfs/fs_procfskmm.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -312,10 +312,8 @@ static int kmm_stat(FAR const char *relpath, FAR struct stat *buf)
 
   /* "kmm" is the name for a read-only file */
 
-  buf->st_mode    = S_IFREG | S_IROTH | S_IRGRP | S_IRUSR;
-  buf->st_size    = 0;
-  buf->st_blksize = 0;
-  buf->st_blocks  = 0;
+  memset(buf, 0, sizeof(struct stat));
+  buf->st_mode = S_IFREG | S_IROTH | S_IRGRP | S_IRUSR;
   return OK;
 }
 

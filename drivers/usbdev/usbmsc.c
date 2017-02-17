@@ -1529,6 +1529,7 @@ int usbmsc_bindlun(FAR void *handle, FAR const char *drvrpath,
   lun->startsector = startsector;
   lun->nsectors    = nsectors;
   lun->sectorsize  = geo.geo_sectorsize;
+  lun->readonly    = readonly;
 
   /* If the driver does not support the write method, then this is read-only */
 

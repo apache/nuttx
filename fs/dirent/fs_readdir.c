@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/dirent/fs_readdir.c
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -88,9 +88,16 @@ static inline int readpseudodir(struct fs_dirent_s *idir)
         {
            idir->fd_dir.d_type |= DTYPE_BLK;
         }
-      if (INODE_IS_MOUNTPT(idir->u.pseudo.fd_next))
+      else if (INODE_IS_MOUNTPT(idir->u.pseudo.fd_next))
         {
            idir->fd_dir.d_type |= DTYPE_DIRECTORY;
+        }
+      else
+#endif
+#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+      if (INODE_IS_SOFTLINK(idir->u.pseudo.fd_next))
+        {
+           idir->fd_dir.d_type |= DTYPE_LINK;
         }
       else
 #endif

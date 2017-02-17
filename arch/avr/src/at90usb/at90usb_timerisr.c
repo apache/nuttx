@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/avr/src/at90usb/at90usb_timerisr.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -102,19 +102,11 @@
  */
 
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Function:  up_timerisr
+ * Function:  at90usb_timerisr
  *
  * Description:
  *   The timer ISR will perform a variety of services for various portions
@@ -122,7 +114,7 @@
  *
  ****************************************************************************/
 
-int up_timerisr(int irq, uint32_t *regs)
+static int at90usb_timerisr(int irq, uint32_t *regs)
 {
   /* Process timer interrupt */
 
@@ -131,7 +123,11 @@ int up_timerisr(int irq, uint32_t *regs)
 }
 
 /****************************************************************************
- * Function:  up_timer_initialize
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Function:  avr_timer_initialize
  *
  * Description:
  *   This function is called during start-up to initialize the timer
@@ -140,7 +136,7 @@ int up_timerisr(int irq, uint32_t *regs)
  *
  ****************************************************************************/
 
-void up_timer_initialize(void)
+void avr_timer_initialize(void)
 {
   /* Setup timer 1 compare match A to generate a tick interrupt.
    *
@@ -172,7 +168,7 @@ void up_timer_initialize(void)
 
   /* Attach the timer interrupt vector */
 
-  (void)irq_attach(AT90USB_IRQ_T1COMPA, (xcpt_t)up_timerisr);
+  (void)irq_attach(AT90USB_IRQ_T1COMPA, (xcpt_t)at90usb_timerisr);
 
   /* Enable the interrupt on compare match A */
 
