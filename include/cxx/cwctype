@@ -48,7 +48,9 @@
 
 namespace std
 {
+  using ::wint_t;
   using ::wctrans_t;
+  using ::wctype_t;
 
   using ::iswalnum;
   using ::iswalpha;
