@@ -237,6 +237,7 @@ uintptr_t STUB_seekdir(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_stat(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_fstat(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_statfs(int nbr, uintptr_t parm1, uintptr_t parm2);
+uintptr_t STUB_fstatfs(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_telldir(int nbr, uintptr_t parm1);
 
 uintptr_t STUB_link(int nbr, uintptr_t parm1, uintptr_t parm2);

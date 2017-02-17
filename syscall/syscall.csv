@@ -24,6 +24,7 @@
 "fs_fdopen","nuttx/fs/fs.h","CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_NFILE_STREAMS > 0","FAR struct file_struct*","int","int","FAR struct tcb_s*"
 "fs_ioctl","nuttx/fs/fs.h","defined(CONFIG_LIBC_IOCTL_VARIADIC) && (CONFIG_NSOCKET_DESCRIPTORS > 0 || CONFIG_NFILE_DESCRIPTORS > 0)","int","int","int","unsigned long"
 "fstat","sys/stat.h","CONFIG_NFILE_DESCRIPTORS > 0","int","int","FAR struct stat*"
+"fstatfs","sys/statfs.h","CONFIG_NFILE_DESCRIPTORS > 0","int","int","FAR struct statfs*"
 "fsync","unistd.h","CONFIG_NFILE_DESCRIPTORS > 0 && !defined(CONFIG_DISABLE_MOUNTPOINT)","int","int"
 "get_errno","errno.h","!defined(__DIRECT_ERRNO_ACCESS)","int"
 "get_errno_ptr","errno.h","defined(__DIRECT_ERRNO_ACCESS)","FAR int*"

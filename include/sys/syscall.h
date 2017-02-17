@@ -322,7 +322,8 @@
 #  define SYS_stat                     (__SYS_filedesc+11)
 #  define SYS_fstat                    (__SYS_filedesc+12)
 #  define SYS_statfs                   (__SYS_filedesc+13)
-#  define SYS_telldir                  (__SYS_filedesc+14)
+#  define SYS_fstatfs                  (__SYS_filedesc+14)
+#  define SYS_telldir                  (__SYS_filedesc+15)
 
 #  if defined(CONFIG_PSEUDOFS_SOFTLINKS)
 #    define SYS_link                   (__SYS_filedesc+15)
