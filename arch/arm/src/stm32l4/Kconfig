@@ -49,6 +49,8 @@ config STM32L4_STM32L476XX
 	select STM32L4_HAVE_USART3
 	select STM32L4_HAVE_UART4
 	select STM32L4_HAVE_UART5
+	select STM32L4_HAVE_SAI1
+	select STM32L4_HAVE_SAI2
 
 config STM32L4_STM32L486XX
 	bool
@@ -62,6 +64,8 @@ config STM32L4_STM32L486XX
 	select STM32L4_HAVE_USART3
 	select STM32L4_HAVE_UART4
 	select STM32L4_HAVE_UART5
+	select STM32L4_HAVE_SAI1
+	select STM32L4_HAVE_SAI2
 	select STM32L4_FLASH_1024KB
 
 choice
@@ -115,6 +119,14 @@ menu "STM32L4 Peripheral Support"
 # selection MCU
 
 config STM32L4_HAVE_LTDC
+	bool
+	default n
+
+config STM32L4_HAVE_SAI1
+	bool
+	default n
+
+config STM32L4_HAVE_SAI2
 	bool
 	default n
 
@@ -211,6 +223,38 @@ config STM32L4_RNG
 	bool "RNG"
 	default n
 	select ARCH_HAVE_RNG
+
+config STM32L4_SAI1_A
+	bool "SAI1 Block A"
+	default n
+	select AUDIO
+	select I2S
+	select SCHED_WORKQUEUE
+	select STM32L4_SAI
+
+config STM32L4_SAI1_B
+	bool "SAI1 Block B"
+	default n
+	select AUDIO
+	select I2S
+	select SCHED_WORKQUEUE
+	select STM32L4_SAI
+
+config STM32L4_SAI2_A
+	bool "SAI2 Block A"
+	default n
+	select AUDIO
+	select I2S
+	select SCHED_WORKQUEUE
+	select STM32L4_SAI
+
+config STM32L4_SAI2_B
+	bool "SAI2 Block B"
+	default n
+	select AUDIO
+	select I2S
+	select SCHED_WORKQUEUE
+	select STM32L4_SAI
 
 comment "AHB3 Peripherals"
 
@@ -556,12 +600,10 @@ config STM32L4_TIM17
 config STM32L4_SAI1
 	bool "SAI1"
 	default n
-	select STM32L4_SAI
 
 config STM32L4_SAI2
 	bool "SAI2"
 	default n
-	select STM32L4_SAI
 
 config STM32L4_DFSDM
     bool "DFSDM"
@@ -2993,6 +3035,70 @@ config STM32L4_QENCODER_SAMPLE_EVENT_8
 	bool "8"
 
 endchoice
+
+endmenu
+
+menu "SAI Configuration"
+	depends on STM32L4_SAI
+
+choice
+	prompt "Operation mode"
+	default STM32L4_SAI_DMA
+	---help---
+		Select the operation mode the SAI driver should use.
+
+config STM32L4_SAI_POLLING
+	bool "Polling"
+	---help---
+		The SAI registers are polled for events.
+
+config STM32L4_SAI_INTERRUPTS
+	bool "Interrupt"
+	---help---
+		Select to enable interrupt driven SAI support.
+
+config STM32L4_SAI_DMA
+	bool "DMA"
+	---help---
+		Use DMA to improve SAI transfer performance.
+
+endchoice # Operation mode
+
+choice
+	prompt "SAI1 synchronization enable"
+	default STM32L4_SAI1_BOTH_ASYNC
+	depends on STM32L4_SAI1_A && STM32L4_SAI1_B
+	---help---
+		Select the synchronization mode of the SAI sub-blocks
+
+config STM32L4_SAI1_BOTH_ASYNC
+	bool "Both asynchronous"
+
+config STM32L4_SAI1_A_SYNC_WITH_B
+	bool "Block A is synchronous with Block B"
+
+config STM32L4_SAI1_B_SYNC_WITH_A
+	bool "Block B is synchronous with Block A"
+
+endchoice # SAI1 synchronization enable
+
+choice
+	prompt "SAI2 synchronization enable"
+	default STM32L4_SAI2_BOTH_ASYNC
+	depends on STM32L4_SAI2_A && STM32L4_SAI2_B
+	---help---
+		Select the synchronization mode of the SAI sub-blocks
+
+config STM32L4_SAI2_BOTH_ASYNC
+	bool "Both asynchronous"
+
+config STM32L4_SAI2_A_SYNC_WITH_B
+	bool "Block A is synchronous with Block B"
+
+config STM32L4_SAI2_B_SYNC_WITH_A
+	bool "Block B is synchronous with Block A"
+
+endchoice # SAI2 synchronization enable
 
 endmenu
 

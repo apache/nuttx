@@ -51,65 +51,65 @@
 
 #define STM32L4_SAI_GCR_OFFSET     0x0000  /* SAI Global Configuration Register */
 
-#define STM32L4_SAI_ACR1_OFFSET    0x0004  /* SAI Configuration Register 1 A */
-#define STM32L4_SAI_ACR2_OFFSET    0x0008  /* SAI Configuration Register 2 A */
-#define STM32L4_SAI_AFRCR_OFFSET   0x000c  /* SAI Frame Configuration Register A */
-#define STM32L4_SAI_ASLOTR_OFFSET  0x0010  /* SAI Slot Register A */
-#define STM32L4_SAI_AIM_OFFSET     0x0014  /* SAI Interrupt Mask Register 2 A */
-#define STM32L4_SAI_ASR_OFFSET     0x0018  /* SAI Status Register A */
-#define STM32L4_SAI_ACLRFR_OFFSET  0x001c  /* SAI Clear Flag Register A */
-#define STM32L4_SAI_ADR_OFFSET     0x0020  /* SAI Data Register A */
+#define STM32L4_SAI_A_OFFSET       0x0004
+#define STM32L4_SAI_B_OFFSET       0x0024
 
-#define STM32L4_SAI_BCR1_OFFSET    0x0024  /* SAI Configuration Register 1 B */
-#define STM32L4_SAI_BCR2_OFFSET    0x0028  /* SAI Configuration Register 2 B */
-#define STM32L4_SAI_BFRCR_OFFSET   0x002c  /* SAI Frame Configuration Register B */
-#define STM32L4_SAI_BSLOTR_OFFSET  0x0030  /* SAI Slot Register B */
-#define STM32L4_SAI_BIM_OFFSET     0x0034  /* SAI Interrupt Mask Register 2 B */
-#define STM32L4_SAI_BSR_OFFSET     0x0038  /* SAI Status Register B */
-#define STM32L4_SAI_BCLRFR_OFFSET  0x003c  /* SAI Clear Flag Register A */
-#define STM32L4_SAI_BDR_OFFSET     0x0040  /* SAI Data Register B */
+#define STM32L4_SAI_CR1_OFFSET     0x0000  /* SAI Configuration Register 1 A */
+#define STM32L4_SAI_CR2_OFFSET     0x0004  /* SAI Configuration Register 2 A */
+#define STM32L4_SAI_FRCR_OFFSET    0x0008  /* SAI Frame Configuration Register A */
+#define STM32L4_SAI_SLOTR_OFFSET   0x000c  /* SAI Slot Register A */
+#define STM32L4_SAI_IM_OFFSET      0x0010  /* SAI Interrupt Mask Register 2 A */
+#define STM32L4_SAI_SR_OFFSET      0x0014  /* SAI Status Register A */
+#define STM32L4_SAI_CLRFR_OFFSET   0x0018  /* SAI Clear Flag Register A */
+#define STM32L4_SAI_DR_OFFSET      0x001c  /* SAI Data Register A */
 
 /* Register Addresses ***************************************************************/
 
-#define STM32L4_SAI1_GCR           (STM32L4_SAI1_BASE+STM32L4_SAI_GCR_OFFSET)
+#define STM32L4_SAI1_GCR           (STM32L4_SAI_GCR_OFFSET)
 
-#define STM32L4_SAI1_ACR1          (STM32L4_SAI1_BASE+STM32L4_SAI_ACR1_OFFSET)
-#define STM32L4_SAI1_ACR2          (STM32L4_SAI1_BASE+STM32L4_SAI_ACR2_OFFSET)
-#define STM32L4_SAI1_AFRCR         (STM32L4_SAI1_BASE+STM32L4_SAI_AFRCR_OFFSET)
-#define STM32L4_SAI1_ASLOTR        (STM32L4_SAI1_BASE+STM32L4_SAI_ASLOTR_OFFSET)
-#define STM32L4_SAI1_AIM           (STM32L4_SAI1_BASE+STM32L4_SAI_AIM_OFFSET)
-#define STM32L4_SAI1_ASR           (STM32L4_SAI1_BASE+STM32L4_SAI_ASR_OFFSET)
-#define STM32L4_SAI1_ACLRFR        (STM32L4_SAI1_BASE+STM32L4_SAI_ACLRFR_OFFSET)
-#define STM32L4_SAI1_ADR           (STM32L4_SAI1_BASE+STM32L4_SAI_ADR_OFFSET)
+#define STM32L4_SAI1_A_BASE        (STM32L4_SAI1_BASE+STM32L4_SAI_A_OFFSET)
+#define STM32L4_SAI1_B_BASE        (STM32L4_SAI1_BASE+STM32L4_SAI_B_OFFSET)
 
-#define STM32L4_SAI1_BCR1          (STM32L4_SAI1_BASE+STM32L4_SAI_BCR1_OFFSET)
-#define STM32L4_SAI1_BCR2          (STM32L4_SAI1_BASE+STM32L4_SAI_BCR2_OFFSET)
-#define STM32L4_SAI1_BFRCR         (STM32L4_SAI1_BASE+STM32L4_SAI_BFRCR_OFFSET)
-#define STM32L4_SAI1_BSLOTR        (STM32L4_SAI1_BASE+STM32L4_SAI_BSLOTR_OFFSET)
-#define STM32L4_SAI1_BIM           (STM32L4_SAI1_BASE+STM32L4_SAI_BIM_OFFSET)
-#define STM32L4_SAI1_BSR           (STM32L4_SAI1_BASE+STM32L4_SAI_BSR_OFFSET)
-#define STM32L4_SAI1_BCLRFR        (STM32L4_SAI1_BASE+STM32L4_SAI_BCLRFR_OFFSET)
-#define STM32L4_SAI1_BDR           (STM32L4_SAI1_BASE+STM32L4_SAI_BDR_OFFSET)
+#define STM32L4_SAI1_ACR1          (STM32L4_SAI1_A_BASE+STM32L4_SAI_ACR1_OFFSET)
+#define STM32L4_SAI1_ACR2          (STM32L4_SAI1_A_BASE+STM32L4_SAI_ACR2_OFFSET)
+#define STM32L4_SAI1_AFRCR         (STM32L4_SAI1_A_BASE+STM32L4_SAI_AFRCR_OFFSET)
+#define STM32L4_SAI1_ASLOTR        (STM32L4_SAI1_A_BASE+STM32L4_SAI_ASLOTR_OFFSET)
+#define STM32L4_SAI1_AIM           (STM32L4_SAI1_A_BASE+STM32L4_SAI_AIM_OFFSET)
+#define STM32L4_SAI1_ASR           (STM32L4_SAI1_A_BASE+STM32L4_SAI_ASR_OFFSET)
+#define STM32L4_SAI1_ACLRFR        (STM32L4_SAI1_A_BASE+STM32L4_SAI_ACLRFR_OFFSET)
+#define STM32L4_SAI1_ADR           (STM32L4_SAI1_A_BASE+STM32L4_SAI_ADR_OFFSET)
+
+#define STM32L4_SAI1_BCR1          (STM32L4_SAI1_B_BASE+STM32L4_SAI_BCR1_OFFSET)
+#define STM32L4_SAI1_BCR2          (STM32L4_SAI1_B_BASE+STM32L4_SAI_BCR2_OFFSET)
+#define STM32L4_SAI1_BFRCR         (STM32L4_SAI1_B_BASE+STM32L4_SAI_BFRCR_OFFSET)
+#define STM32L4_SAI1_BSLOTR        (STM32L4_SAI1_B_BASE+STM32L4_SAI_BSLOTR_OFFSET)
+#define STM32L4_SAI1_BIM           (STM32L4_SAI1_B_BASE+STM32L4_SAI_BIM_OFFSET)
+#define STM32L4_SAI1_BSR           (STM32L4_SAI1_B_BASE+STM32L4_SAI_BSR_OFFSET)
+#define STM32L4_SAI1_BCLRFR        (STM32L4_SAI1_B_BASE+STM32L4_SAI_BCLRFR_OFFSET)
+#define STM32L4_SAI1_BDR           (STM32L4_SAI1_B_BASE+STM32L4_SAI_BDR_OFFSET)
 
 #define STM32L4_SAI2_GCR           (STM32L4_SAI2_BASE+STM32L4_SAI_GCR_OFFSET)
 
-#define STM32L4_SAI2_ACR1          (STM32L4_SAI2_BASE+STM32L4_SAI_ACR1_OFFSET)
-#define STM32L4_SAI2_ACR2          (STM32L4_SAI2_BASE+STM32L4_SAI_ACR2_OFFSET)
-#define STM32L4_SAI2_AFRCR         (STM32L4_SAI2_BASE+STM32L4_SAI_AFRCR_OFFSET)
-#define STM32L4_SAI2_ASLOTR        (STM32L4_SAI2_BASE+STM32L4_SAI_ASLOTR_OFFSET)
-#define STM32L4_SAI2_AIM           (STM32L4_SAI2_BASE+STM32L4_SAI_AIM_OFFSET)
-#define STM32L4_SAI2_ASR           (STM32L4_SAI2_BASE+STM32L4_SAI_ASR_OFFSET)
-#define STM32L4_SAI2_ACLRFR        (STM32L4_SAI2_BASE+STM32L4_SAI_ACLRFR_OFFSET)
-#define STM32L4_SAI2_ADR           (STM32L4_SAI2_BASE+STM32L4_SAI_ADR_OFFSET)
+#define STM32L4_SAI2_A_BASE        (STM32L4_SAI2_BASE+STM32L4_SAI_A_OFFSET)
+#define STM32L4_SAI2_B_BASE        (STM32L4_SAI2_BASE+STM32L4_SAI_B_OFFSET)
 
-#define STM32L4_SAI2_BCR1          (STM32L4_SAI2_BASE+STM32L4_SAI_BCR1_OFFSET)
-#define STM32L4_SAI2_BCR2          (STM32L4_SAI2_BASE+STM32L4_SAI_BCR2_OFFSET)
-#define STM32L4_SAI2_BFRCR         (STM32L4_SAI2_BASE+STM32L4_SAI_BFRCR_OFFSET)
-#define STM32L4_SAI2_BSLOTR        (STM32L4_SAI2_BASE+STM32L4_SAI_BSLOTR_OFFSET)
-#define STM32L4_SAI2_BIM           (STM32L4_SAI2_BASE+STM32L4_SAI_BIM_OFFSET)
-#define STM32L4_SAI2_BSR           (STM32L4_SAI2_BASE+STM32L4_SAI_BSR_OFFSET)
-#define STM32L4_SAI2_BCLRFR        (STM32L4_SAI2_BASE+STM32L4_SAI_BCLRFR_OFFSET)
-#define STM32L4_SAI2_BDR           (STM32L4_SAI2_BASE+STM32L4_SAI_BDR_OFFSET)
+#define STM32L4_SAI2_ACR1          (STM32L4_SAI2_A_BASE+STM32L4_SAI_ACR1_OFFSET)
+#define STM32L4_SAI2_ACR2          (STM32L4_SAI2_A_BASE+STM32L4_SAI_ACR2_OFFSET)
+#define STM32L4_SAI2_AFRCR         (STM32L4_SAI2_A_BASE+STM32L4_SAI_AFRCR_OFFSET)
+#define STM32L4_SAI2_ASLOTR        (STM32L4_SAI2_A_BASE+STM32L4_SAI_ASLOTR_OFFSET)
+#define STM32L4_SAI2_AIM           (STM32L4_SAI2_A_BASE+STM32L4_SAI_AIM_OFFSET)
+#define STM32L4_SAI2_ASR           (STM32L4_SAI2_A_BASE+STM32L4_SAI_ASR_OFFSET)
+#define STM32L4_SAI2_ACLRFR        (STM32L4_SAI2_A_BASE+STM32L4_SAI_ACLRFR_OFFSET)
+#define STM32L4_SAI2_ADR           (STM32L4_SAI2_A_BASE+STM32L4_SAI_ADR_OFFSET)
+
+#define STM32L4_SAI2_BCR1          (STM32L4_SAI2_B_BASE+STM32L4_SAI_BCR1_OFFSET)
+#define STM32L4_SAI2_BCR2          (STM32L4_SAI2_B_BASE+STM32L4_SAI_BCR2_OFFSET)
+#define STM32L4_SAI2_BFRCR         (STM32L4_SAI2_B_BASE+STM32L4_SAI_BFRCR_OFFSET)
+#define STM32L4_SAI2_BSLOTR        (STM32L4_SAI2_B_BASE+STM32L4_SAI_BSLOTR_OFFSET)
+#define STM32L4_SAI2_BIM           (STM32L4_SAI2_B_BASE+STM32L4_SAI_BIM_OFFSET)
+#define STM32L4_SAI2_BSR           (STM32L4_SAI2_B_BASE+STM32L4_SAI_BSR_OFFSET)
+#define STM32L4_SAI2_BCLRFR        (STM32L4_SAI2_B_BASE+STM32L4_SAI_BCLRFR_OFFSET)
+#define STM32L4_SAI2_BDR           (STM32L4_SAI2_B_BASE+STM32L4_SAI_BDR_OFFSET)
 
 /* Register Bitfield Definitions ****************************************************/
 
@@ -128,10 +128,10 @@
 
 #define SAI_CR1_MODE_SHIFT         (0)       /* Bits 0-1: SAI audio block mode */
 #define SAI_CR1_MODE_MASK          (3 << SAI_CR1_MODE_SHIFT)
-#  define SAI_CR1_MODE_MXMIT       (0 << SAI_CR1_MODE_SHIFT) /* Master transmitter */
-#  define SAI_CR1_MODE_MRECV       (1 << SAI_CR1_MODE_SHIFT) /* Master receiver */
-#  define SAI_CR1_MODE_SXMIT       (2 << SAI_CR1_MODE_SHIFT) /* Slave transmitter */
-#  define SAI_CR1_MODE_SRECV       (3 << SAI_CR1_MODE_SHIFT) /* Slave receiver */
+#  define SAI_CR1_MODE_MASTER_TX   (0 << SAI_CR1_MODE_SHIFT) /* Master transmitter */
+#  define SAI_CR1_MODE_MASTER_RX   (1 << SAI_CR1_MODE_SHIFT) /* Master receiver */
+#  define SAI_CR1_MODE_SLAVE_TX    (2 << SAI_CR1_MODE_SHIFT) /* Slave transmitter */
+#  define SAI_CR1_MODE_SLAVE_RX    (3 << SAI_CR1_MODE_SHIFT) /* Slave receiver */
 #define SAI_CR1_PRTCFG_SHIFT       (2)       /* Bits 2-3: Protocol configuration */
 #define SAI_CR1_PRTCFG_MASK        (3 << SAI_CR1_PRTCFG_SHIFT)
 #  define SAI_CR1_PRTCFG_FREE      (0 << SAI_CR1_PRTCFG_SHIFT) /* Free protocol */
@@ -167,12 +167,12 @@
 
 /* SAI Configuration Register 2 */
 
-#define SAI_CR2_FTH_SHIFT          (x0x)   /* Bits 0-2: FIFO threshold */
+#define SAI_CR2_FTH_SHIFT          (0)       /* Bits 0-2: FIFO threshold */
 #define SAI_CR2_FTH_MASK           (7 << SAI_CR2_FTH_SHIFT)
 #  define SAI_CR2_FTH_EMPTY        (0 << SAI_CR2_FTH_SHIFT) /* FIFO empty */
-#  define SAI_CR2_FTH_25PCT        (1 << SAI_CR2_FTH_SHIFT) /* 25% FIFO */
-#  define SAI_CR2_FTH_50PCT        (2 << SAI_CR2_FTH_SHIFT) /* 50% FIFO */
-#  define SAI_CR2_FTH_75PCT        (3 << SAI_CR2_FTH_SHIFT) /* 75% FIFO */
+#  define SAI_CR2_FTH_1QF          (1 << SAI_CR2_FTH_SHIFT) /* 1/4 FIFO */
+#  define SAI_CR2_FTH_HF           (2 << SAI_CR2_FTH_SHIFT) /* 1/2 FIFO */
+#  define SAI_CR2_FTH_3QF          (3 << SAI_CR2_FTH_SHIFT) /* 3/4 FIFO */
 #  define SAI_CR2_FTH_FULL         (4 << SAI_CR2_FTH_SHIFT) /* FIFO full */
 #define SAI_CR2_FFLUSH             (1 << 3)  /* Bit 3:  FIFO flush */
 #define SAI_CR2_TRIS               (1 << 4)  /* Bit 4:  Tristate management on data line */
@@ -193,13 +193,19 @@
 
 #define SAI_FRCR_FRL_SHIFT         (0)       /* Bits 0-7: Frame length */
 #define SAI_FRCR_FRL_MASK          (0xff << SAI_FRCR_FRL_SHIFT)
-#  define SAI_FRCR_FRL(n)          ((uint32_t)(n) << SAI_FRCR_FRL_SHIFT)
+#  define SAI_FRCR_FRL(n)          ((uint32_t)((n) - 1) << SAI_FRCR_FRL_SHIFT)
 #define SAI_FRCR_FSALL_SHIFT       (8)       /* Bits 8-14: Frame synchronization active level length */
 #define SAI_FRCR_FSALL_MASK        (0x7f << SAI_FRCR_FSALL_SHIFT)
-#  define SAI_FRCR_FSALL(n)        ((uint32_t)(n) << SAI_FRCR_FSALL_SHIFT)
+#  define SAI_FRCR_FSALL(n)        ((uint32_t)((n) - 1) << SAI_FRCR_FSALL_SHIFT)
 #define SAI_FRCR_FSDEF             (1 << 16) /* Bit 16: Frame synchronization definition */
+#  define SAI_FRCR_FSDEF_SF        (0)             /* FS signal is a start frame signal */
+#  define SAI_FRCR_FSDEF_CHID      SAI_FRCR_FSDEF  /* FS signal is a start of frame + channel side ID */
 #define SAI_FRCR_FSPOL             (1 << 17) /* Bit 17: Frame synchronization polarity */
+#  define SAI_FRCR_FSPOL_LOW       (0)             /* FS is active low */
+#  define SAI_FRCR_FSPOL_HIGH      SAI_FRCR_FSPOL  /* FS is active high */
 #define SAI_FRCR_FSOFF             (1 << 18) /* Bit 18: Frame synchronization offset */
+#  define SAI_FRCR_FSOFF_FB        (0)             /* FS on first bit of slot 0 */
+#  define SAI_FRCR_FSOFF_BFB       SAI_FRCR_FSOFF  /* FS one bit before first bit of slot 0 */
                                              /* Bits 19-31: Reserved */
 
 /* SAI Slot Register */
@@ -215,11 +221,27 @@
 #  define SAI_SLOTR_SLOTSZ_32BIT   (2 << SAI_SLOTR_SLOTSZ_SHIFT) /* 32-bit */
 #define SAI_SLOTR_NBSLOT_SHIFT     (0)       /* Bits 0-3: Number of slots in an audio frame */
 #define SAI_SLOTR_NBSLOT_MASK      (15 << SAI_SLOTR_NBSLOT_SHIFT)
-#  define SAI_SLOTR_NBSLOT(n)      ((uint32_t)(n) << SAI_SLOTR_NBSLOT_SHIFT)
+#  define SAI_SLOTR_NBSLOT(n)      ((uint32_t)((n) - 1) << SAI_SLOTR_NBSLOT_SHIFT)
                                              /* Bits 12-15: Reserved */
 #define SAI_SLOTR_SLOTEN_SHIFT     (16)      /* Bits 16-31: Slot enable */
 #define SAI_SLOTR_SLOTEN_MASK      (0xffff << SAI_SLOTR_SLOTEN_SHIFT)
 #  define SAI_SLOTR_SLOTEN(n)      ((uint32_t)(n) << SAI_SLOTR_SLOTEN_SHIFT)
+#  define SAI_SLOTR_SLOTEN_0       (1 << 16)  /* Bit 16: Slot 0 Enabled */
+#  define SAI_SLOTR_SLOTEN_1       (1 << 17)  /* Bit 17: Slot 1 Enabled */
+#  define SAI_SLOTR_SLOTEN_2       (1 << 18)  /* Bit 18: Slot 2 Enabled */
+#  define SAI_SLOTR_SLOTEN_3       (1 << 19)  /* Bit 19: Slot 3 Enabled */
+#  define SAI_SLOTR_SLOTEN_4       (1 << 20)  /* Bit 20: Slot 4 Enabled */
+#  define SAI_SLOTR_SLOTEN_5       (1 << 21)  /* Bit 21: Slot 5 Enabled */
+#  define SAI_SLOTR_SLOTEN_6       (1 << 22)  /* Bit 22: Slot 6 Enabled */
+#  define SAI_SLOTR_SLOTEN_7       (1 << 23)  /* Bit 23: Slot 7 Enabled */
+#  define SAI_SLOTR_SLOTEN_8       (1 << 24)  /* Bit 24: Slot 8 Enabled */
+#  define SAI_SLOTR_SLOTEN_9       (1 << 25)  /* Bit 25: Slot 9 Enabled */
+#  define SAI_SLOTR_SLOTEN_10      (1 << 26)  /* Bit 26: Slot 10 Enabled */
+#  define SAI_SLOTR_SLOTEN_11      (1 << 27)  /* Bit 27: Slot 11 Enabled */
+#  define SAI_SLOTR_SLOTEN_12      (1 << 28)  /* Bit 28: Slot 12 Enabled */
+#  define SAI_SLOTR_SLOTEN_13      (1 << 29)  /* Bit 29: Slot 13 Enabled */
+#  define SAI_SLOTR_SLOTEN_14      (1 << 30)  /* Bit 30: Slot 14 Enabled */
+#  define SAI_SLOTR_SLOTEN_15      (1 << 31)  /* Bit 31: Slot 15 Enabled */
 
 /* SAI Interrupt Mask Register 2, SAI Status Register, and SAI Clear Flag Register */
 

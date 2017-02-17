@@ -1,6 +1,7 @@
 ############################################################################
 # arch/arm/src/stm32l4/Make.defs
 #
+#   Copyright (C) 2017 Gregory Nutt. All rights reserved.
 #   Copyright (C) 2015-2016 Sebastien Lorquet. All rights reserved.
 #   Author: Sebastien Lorquet <sebastien@lorquet.fr>
 #
@@ -179,6 +180,10 @@ endif
 
 ifeq ($(CONFIG_STM32L4_RNG),y)
 CHIP_CSRCS += stm32l4_rng.c
+endif
+
+ifeq ($(CONFIG_STM32L4_SAI),y)
+CHIP_CSRCS += stm32l4_sai.c
 endif
 
 ifeq ($(CONFIG_PWM),y)
