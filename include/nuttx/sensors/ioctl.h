@@ -57,7 +57,7 @@
 #define SNIOC_OTLRM         _SNIOC(0x0006) /* One Time L-Res Mode Arg: None  */
 #define SNIOC_CHMEATIME     _SNIOC(0x0007) /* Change Meas. Time Arg: uint8_t */
 
-/* IOCTL commands unique to the KXJT9 */
+/* IOCTL commands unique to the KXTJ9 */
 
 #define SNIOC_ENABLE        _SNIOC(0x0008) /* Arg: None */
 #define SNIOC_DISABLE       _SNIOC(0x0009) /* Arg: None */

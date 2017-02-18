@@ -50,7 +50,7 @@ ifeq ($(CONFIG_AS5048B),y)
 endif
 
 ifeq ($(CONFIG_SENSOR_KXTJ9),y)
-  CSRCS += kxjt9.c
+  CSRCS += kxtj9.c
 endif
 
 ifeq ($(CONFIG_LIS3DSH),y)

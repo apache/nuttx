@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/sensors/kxjt9.c
+ * drivers/sensors/kxtj9.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -50,7 +50,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/i2c/i2c_master.h>
-#include <nuttx/sensors/kxjt9.h>
+#include <nuttx/sensors/kxtj9.h>
 
 #if defined(CONFIG_I2C) && defined(CONFIG_SENSOR_KXTJ9)
 
@@ -123,7 +123,7 @@
 
 /* This structure describes the state of one KXTJ9 device */
 
-struct kxjt9_dev_s
+struct kxtj9_dev_s
 {
   FAR struct i2c_master_s *i2c;
   sem_t exclsem;
@@ -142,29 +142,29 @@ struct kxjt9_dev_s
 
 /* I2C helpers */
 
-static int     kxtj9_reg_read(FAR struct kxjt9_dev_s *priv, uint8_t regaddr,
+static int     kxtj9_reg_read(FAR struct kxtj9_dev_s *priv, uint8_t regaddr,
                  FAR uint8_t *regval, unsigned int len);
-static int     kxtj9_reg_write(FAR struct kxjt9_dev_s *priv,
+static int     kxtj9_reg_write(FAR struct kxtj9_dev_s *priv,
                  uint8_t regaddr,  uint8_t regval);
 
 /* KXTJ9 helpers */
 
-static int     kxtj9_configure(FAR struct kxjt9_dev_s *priv, uint8_t odr);
-static int     kxtj9_enable(FAR struct kxjt9_dev_s *priv, bool on);
-static int     kxtj9_read_sensor_data(FAR struct kxjt9_dev_s *priv,
+static int     kxtj9_configure(FAR struct kxtj9_dev_s *priv, uint8_t odr);
+static int     kxtj9_enable(FAR struct kxtj9_dev_s *priv, bool on);
+static int     kxtj9_read_sensor_data(FAR struct kxtj9_dev_s *priv,
                  FAR struct kxtj9_sensor_data *sensor_data);
-static void    kxtj9_soft_reset(FAR struct kxjt9_dev_s *priv);
-static void    kxtj9_set_mode_standby(FAR struct kxjt9_dev_s *priv);
+static void    kxtj9_soft_reset(FAR struct kxtj9_dev_s *priv);
+static void    kxtj9_set_mode_standby(FAR struct kxtj9_dev_s *priv);
 
 /* Character driver methods */
 
-static int     kxjt9_open(FAR struct file *filep);
-static int     kxjt9_close(FAR struct file *filep);
-static ssize_t kxjt9_read(FAR struct file *filep, FAR char *buffer,
+static int     kxtj9_open(FAR struct file *filep);
+static int     kxtj9_close(FAR struct file *filep);
+static ssize_t kxtj9_read(FAR struct file *filep, FAR char *buffer,
                  size_t buflen);
-static ssize_t kxjt9_write(FAR struct file *filep, FAR const char *buffer,
+static ssize_t kxtj9_write(FAR struct file *filep, FAR const char *buffer,
                  size_t buflen);
-static int     kxjt9_ioctl(FAR struct file *filep, int cmd,
+static int     kxtj9_ioctl(FAR struct file *filep, int cmd,
                  unsigned long arg);
 
 /****************************************************************************
@@ -173,12 +173,12 @@ static int     kxjt9_ioctl(FAR struct file *filep, int cmd,
 
 static const struct file_operations g_fops =
 {
-  kxjt9_open,
-  kxjt9_close,
-  kxjt9_read,
-  kxjt9_write,
+  kxtj9_open,
+  kxtj9_close,
+  kxtj9_read,
+  kxtj9_write,
   NULL,
-  kxjt9_ioctl,
+  kxtj9_ioctl,
 #ifndef CONFIG_DISABLE_POLL
   NULL,
 #endif
@@ -199,7 +199,7 @@ static const struct file_operations g_fops =
  *
  ****************************************************************************/
 
-static int kxtj9_reg_read(FAR struct kxjt9_dev_s *priv, uint8_t regaddr,
+static int kxtj9_reg_read(FAR struct kxtj9_dev_s *priv, uint8_t regaddr,
                           FAR uint8_t *regval, unsigned int len)
 {
   struct i2c_msg_s msg[2];
@@ -246,7 +246,7 @@ static int kxtj9_reg_read(FAR struct kxjt9_dev_s *priv, uint8_t regaddr,
  *
  ****************************************************************************/
 
-static int kxtj9_reg_write(FAR struct kxjt9_dev_s *priv, uint8_t regaddr,
+static int kxtj9_reg_write(FAR struct kxtj9_dev_s *priv, uint8_t regaddr,
                            uint8_t regval)
 {
   struct i2c_msg_s msg;
@@ -284,7 +284,7 @@ static int kxtj9_reg_write(FAR struct kxjt9_dev_s *priv, uint8_t regaddr,
  *
  ****************************************************************************/
 
-static void kxtj9_soft_reset(FAR struct kxjt9_dev_s *priv)
+static void kxtj9_soft_reset(FAR struct kxtj9_dev_s *priv)
 {
   uint8_t wbuf[1];
 
@@ -313,7 +313,7 @@ static void kxtj9_soft_reset(FAR struct kxjt9_dev_s *priv)
  *
  ****************************************************************************/
 
-static void kxtj9_set_mode_standby(FAR struct kxjt9_dev_s *priv)
+static void kxtj9_set_mode_standby(FAR struct kxtj9_dev_s *priv)
 {
   uint8_t wbuf[1];
 
@@ -336,7 +336,7 @@ static void kxtj9_set_mode_standby(FAR struct kxjt9_dev_s *priv)
  *
  ****************************************************************************/
 
-static int kxtj9_configure(FAR struct kxjt9_dev_s *priv, uint8_t odr)
+static int kxtj9_configure(FAR struct kxtj9_dev_s *priv, uint8_t odr)
 {
   uint8_t wbuf[0];
   int ret;
@@ -389,7 +389,7 @@ static int kxtj9_configure(FAR struct kxjt9_dev_s *priv, uint8_t odr)
  *
  ****************************************************************************/
 
-static int kxtj9_enable(FAR struct kxjt9_dev_s *priv, bool on)
+static int kxtj9_enable(FAR struct kxtj9_dev_s *priv, bool on)
 {
   uint8_t wbuf[1];
   int ret;
@@ -434,7 +434,7 @@ static int kxtj9_enable(FAR struct kxjt9_dev_s *priv, bool on)
  *
  ****************************************************************************/
 
-static int kxtj9_read_sensor_data(FAR struct kxjt9_dev_s *priv,
+static int kxtj9_read_sensor_data(FAR struct kxtj9_dev_s *priv,
                                   FAR struct kxtj9_sensor_data *sensor_data)
 {
   int16_t acc_data[3];
@@ -463,44 +463,44 @@ static int kxtj9_read_sensor_data(FAR struct kxjt9_dev_s *priv,
 }
 
 /****************************************************************************
- * Name: kxjt9_open
+ * Name: kxtj9_open
  *
  * Description:
  *   This method is called when the device is opened.
  *
  ****************************************************************************/
 
-static int kxjt9_open(FAR struct file *filep)
+static int kxtj9_open(FAR struct file *filep)
 {
   return OK;
 }
 
 /****************************************************************************
- * Name: kxjt9_close
+ * Name: kxtj9_close
  *
  * Description:
  *   This method is called when the device is closed.
  *
  ****************************************************************************/
 
-static int kxjt9_close(FAR struct file *filep)
+static int kxtj9_close(FAR struct file *filep)
 {
   return OK;
 }
 
 /****************************************************************************
- * Name: kxjt9_read
+ * Name: kxtj9_read
  *
  * Description:
  *   The standard read method.
  *
  ****************************************************************************/
 
-static ssize_t kxjt9_read(FAR struct file *filep, FAR char *buffer,
+static ssize_t kxtj9_read(FAR struct file *filep, FAR char *buffer,
                           size_t buflen)
 {
   FAR struct inode *inode;
-  FAR struct kxjt9_dev_s *priv;
+  FAR struct kxtj9_dev_s *priv;
   size_t nsamples;
   size_t i;
   int ret;
@@ -523,7 +523,7 @@ static ssize_t kxjt9_read(FAR struct file *filep, FAR char *buffer,
   DEBUGASSERT(filep != NULL && filep->f_inode != NULL && buffer != NULL);
   inode = filep->f_inode;
 
-  priv = (FAR struct kxjt9_dev_s *)inode->i_private;
+  priv = (FAR struct kxtj9_dev_s *)inode->i_private;
   DEBUGASSERT(priv != NULL  && priv->i2c != NULL);
 
   /* Return all of the samples that will fit in the user-provided buffer */
@@ -548,31 +548,31 @@ static ssize_t kxjt9_read(FAR struct file *filep, FAR char *buffer,
 }
 
 /****************************************************************************
- * Name: kxjt9_write
+ * Name: kxtj9_write
  *
  * Description:
  *   A dummy write method.
  *
  ****************************************************************************/
 
-static ssize_t kxjt9_write(FAR struct file *filep, FAR const char *buffer,
+static ssize_t kxtj9_write(FAR struct file *filep, FAR const char *buffer,
                              size_t buflen)
 {
   return -ENOSYS;
 }
 
 /****************************************************************************
- * Name: kxjt9_ioctl
+ * Name: kxtj9_ioctl
  *
  * Description:
  *   The standard ioctl method.
  *
  ****************************************************************************/
 
-static int kxjt9_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+static int kxtj9_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   FAR struct inode *inode;
-  FAR struct kxjt9_dev_s *priv;
+  FAR struct kxtj9_dev_s *priv;
   int  ret;
 
   /* Sanity check */
@@ -580,7 +580,7 @@ static int kxjt9_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode = filep->f_inode;
 
-  priv = (FAR struct kxjt9_dev_s *)inode->i_private;
+  priv = (FAR struct kxtj9_dev_s *)inode->i_private;
   DEBUGASSERT(priv != NULL && priv->i2c != NULL);
 
   /* Handle ioctl commands */
@@ -626,15 +626,15 @@ static int kxjt9_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: kxjt9_register
+ * Name: kxtj9_register
  *
  * Description:
- *   Register the KXJT9 accelerometer device as 'devpath'.
+ *   Register the KXTJ9 accelerometer device as 'devpath'.
  *
  * Input Parameters:
  *   devpath - The full path to the driver to register, e.g., "/dev/accel0".
  *   i2c     - An I2C driver instance.
- *   addr    - The I2C address of the KXJT9 accelerometer, gyroscope or
+ *   addr    - The I2C address of the KXTJ9 accelerometer, gyroscope or
  *             magnetometer.
  *
  * Returned Value:
@@ -642,10 +642,10 @@ static int kxjt9_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-int kxjt9_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
+int kxtj9_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
                    uint8_t address)
 {
-  FAR struct kxjt9_dev_s *priv;
+  FAR struct kxtj9_dev_s *priv;
   int ret;
 
   /* Sanity check */
@@ -654,7 +654,7 @@ int kxjt9_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   /* Initialize the device's structure */
 
-  priv = (FAR struct kxjt9_dev_s *)kmm_zalloc(sizeof(struct kxjt9_dev_s));
+  priv = (FAR struct kxtj9_dev_s *)kmm_zalloc(sizeof(struct kxtj9_dev_s));
   if (priv == NULL)
     {
       snerr("ERROR: Failed to allocate driver instance\n");
