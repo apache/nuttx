@@ -1750,8 +1750,8 @@ static int stm32l4serial_ioctl(FAR struct file *filep, int cmd,
         irqstate_t flags;
 
         flags = enter_critical_section();
-        cr1   = stm32l4serial_getreg(priv, STM32_USART_CR1_OFFSET);
-        stm32l4serial_putreg(priv, STM32_USART_CR1_OFFSET, cr1 | USART_CR1_SBK);
+        cr1   = stm32l4serial_getreg(priv, STM32L4_USART_CR1_OFFSET);
+        stm32l4serial_putreg(priv, STM32L4_USART_CR1_OFFSET, cr1 | USART_CR1_SBK);
         leave_critical_section(flags);
       }
       break;
@@ -1762,8 +1762,8 @@ static int stm32l4serial_ioctl(FAR struct file *filep, int cmd,
         irqstate_t flags;
 
         flags = enter_critical_section();
-        cr1   = stm32l4serial_getreg(priv, STM32_USART_CR1_OFFSET);
-        stm32l4serial_putreg(priv, STM32_USART_CR1_OFFSET, cr1 & ~USART_CR1_SBK);
+        cr1   = stm32l4serial_getreg(priv, STM32L4_USART_CR1_OFFSET);
+        stm32l4serial_putreg(priv, STM32L4_USART_CR1_OFFSET, cr1 & ~USART_CR1_SBK);
         leave_critical_section(flags);
       }
       break;

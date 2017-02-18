@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_STC_STM32_CHIP_STM32L4_SAI_H
-#define __ARCH_ARM_STC_STM32_CHIP_STM32L4_SAI_H
+#ifndef __ARCH_ARM_STC_STM32L4_CHIP_STM32L4_SAI_H
+#define __ARCH_ARM_STC_STM32L4_CHIP_STM32L4_SAI_H
 
 /************************************************************************************
  * Included Files
@@ -256,4 +256,4 @@
 
 /* SAI Data Register (32-bit data) */
 
-#endif /* __ARCH_ARM_STC_STM32_CHIP_STM32L4_SAI_H */
+#endif /* __ARCH_ARM_STC_STM32L4_CHIP_STM32L4_SAI_H */
