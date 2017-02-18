@@ -105,8 +105,8 @@
 
 #define PWR_CR1_LPMS_SHIFT       0
 #define PWR_CR1_LPMS_MASK        (7 << PWR_CR1_LPMS_SHIFT) /* Bits 0-2: Low-power mode selection */
-#  define PWR_CR1_LPMS_STOP0     (0 << PWR_CR1_LPMS_SHIFT) /* 000: Stop 0 mode */
-#  define PWR_CR1_LPMS_STOP1     (1 << PWR_CR1_LPMS_SHIFT) /* 001: Stpp 1 mode */
+#  define PWR_CR1_LPMS_STOP1MR   (0 << PWR_CR1_LPMS_SHIFT) /* Stop 1 mode with main regulator (MR) */
+#  define PWR_CR1_LPMS_STOP1LPR  (1 << PWR_CR1_LPMS_SHIFT) /* Stop 1 mode with low-power regulator (LPR) */
 #  define PWR_CR1_LPMS_STOP2     (2 << PWR_CR1_LPMS_SHIFT) /* 010: Stop 2 mode*/
 #  define PWR_CR1_LPMS_STANDBY   (3 << PWR_CR1_LPMS_SHIFT) /* 011: Standby mode */
 #  define PWR_CR1_LPMS_SHUTDOWN  (4 << PWR_CR1_LPMS_SHIFT) /* 1xx: Shutdown node */

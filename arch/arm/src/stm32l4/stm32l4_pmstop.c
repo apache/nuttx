@@ -1,7 +1,8 @@
-/************************************************************************************
- * arch/arm/src/stm32l4/stm32l4_pm.h
+/****************************************************************************
+ * arch/arm/src/stm32l4/stm32l4_pmstop.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Motorola Mobility, LLC. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,10 +32,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
-
-#ifndef __ARCH_ARM_SRC_STM32L4_STM32L4_PM_H
-#define __ARCH_ARM_SRC_STM32L4_STM32L4_PM_H
+ ****************************************************************************/
 
 /****************************************************************************
  * Included Files
@@ -44,21 +42,49 @@
 
 #include <stdbool.h>
 
-#include "chip.h"
-#include "up_internal.h"
+#include "up_arch.h"
+#include "nvic.h"
+#include "stm32l4_pwr.h"
+#include "stm32l4_pm.h"
 
 /****************************************************************************
- * Public Function Prototypes
+ * Private Functions
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
+static int do_stop(void)
 {
+  uint32_t regval;
+
+  /* Set SLEEPDEEP bit of Cortex System Control Register */
+
+  regval  = getreg32(NVIC_SYSCON);
+  regval |= NVIC_SYSCON_SLEEPDEEP;
+  putreg32(regval, NVIC_SYSCON);
+
+  /* Sleep until the wakeup interrupt or event occurs */
+
+#ifdef CONFIG_PM_WFE
+  /* Mode: SLEEP + Entry with WFE */
+
+  asm("wfe");
 #else
-#define EXTERN extern
+  /* Mode: SLEEP + Entry with WFI */
+
+  asm("wfi");
 #endif
+
+  /* Clear SLEEPDEEP bit of Cortex System Control Register */
+
+  regval  = getreg32(NVIC_SYSCON);
+  regval &= ~NVIC_SYSCON_SLEEPDEEP;
+  putreg32(regval, NVIC_SYSCON);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: stm32l4_pmstop
@@ -73,13 +99,50 @@ extern "C"
  *
  * Returned Value:
  *   Zero means that the STOP was successfully entered and the system has
- *   been re-awakened.  The internal voltage regulator is back to its
+ *   been re-awakened.  The internal volatage regulator is back to its
  *   original state.  Otherwise, STOP mode did not occur and a negated
  *   errno value is returned to indicate the cause of the failure.
  *
  ****************************************************************************/
 
-int stm32l4_pmstop(bool lpds);
+int stm32l4_pmstop(bool lpds)
+{
+  uint32_t regval;
+
+#if defined(CONFIG_STM32L4_STM32L4X6) || defined(CONFIG_STM32L4_STM32L4X3)
+  /* Clear Low-Power Mode Selection (LPMS) bits in power control register 1. */
+  regval  = getreg32(STM32L4_PWR_CR1);
+  regval &= ~PWR_CR1_LPMS_MASK;
+
+  /* Select Stop 1 mode with low-power regulator if so requested */
+  if (lpds)
+    {
+      regval |= PWR_CR1_LPMS_STOP1LPR;
+    }
+
+  putreg32(regval, STM32L4_PWR_CR1);
+#else
+  /* Clear the Power Down Deep Sleep (PDDS), Low Power Deep Sleep (LPDS), and
+   * Low Power regulator Low Voltage in Deep Sleep (LPLVDS) bits in the power
+   * control register.
+   */
+
+  regval  = getreg32(STM32L4_PWR_CR);
+  regval &= ~(PWR_CR_LPDS | PWR_CR_PDDS | PWR_CR_LPLVDS);
+
+  /* Set the Low Power Deep Sleep (LPDS) and Low Power regulator Low Voltage
+   * in Deep Sleep (LPLVDS) bits if so requested */
+
+  if (lpds)
+    {
+      regval |= PWR_CR_LPDS | PWR_CR_LPLVDS;
+    }
+
+  putreg32(regval, STM32L4_PWR_CR);
+#endif
+
+  return do_stop();
+}
 
 /****************************************************************************
  * Name: stm32l4_pmstop2
@@ -98,74 +161,17 @@ int stm32l4_pmstop(bool lpds);
  ****************************************************************************/
 
 #if defined(CONFIG_STM32L4_STM32L4X6) || defined(CONFIG_STM32L4_STM32L4X3)
-int stm32l4_pmstop2(void);
-#endif
+int stm32l4_pmstop2(void)
+{
+  uint32_t regval;
 
-/****************************************************************************
- * Name: stm32l4_pmstandby
- *
- * Description:
- *   Enter STANDBY mode.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value.
- *   On success, this function will not return (STANDBY mode can only be
- *   terminated with a reset event).  Otherwise, STANDBY mode did not occur
- *   and a negated errno value is returned to indicate the cause of the
- *   failure.
- *
- ****************************************************************************/
+  /* Select Stop 2 mode in power control register 1. */
 
-int stm32l4_pmstandby(void);
+  regval  = getreg32(STM32L4_PWR_CR1);
+  regval &= ~PWR_CR1_LPMS_MASK;
+  regval |= PWR_CR1_LPMS_STOP2;
+  putreg32(regval, STM32L4_PWR_CR1);
 
-/****************************************************************************
- * Name: stm32l4_pmsleep
- *
- * Description:
- *   Enter SLEEP mode.
- *
- * Input Parameters:
- *   sleeponexit - true:  SLEEPONEXIT bit is set when the WFI instruction is
- *                        executed, the MCU enters Sleep mode as soon as it
- *                        exits the lowest priority ISR.
- *               - false: SLEEPONEXIT bit is cleared, the MCU enters Sleep mode
- *                        as soon as WFI or WFE instruction is executed.
- * Returned Value:
- *   Zero means that the STOP was successfully entered and the system has
- *   been re-awakened.  The internal volatage regulator is back to its
- *   original state.  Otherwise, STOP mode did not occur and a negated
- *   errno value is returned to indicate the cause of the failure.
- *
- ****************************************************************************/
-
-void stm32l4_pmsleep(bool sleeponexit);
-
-/****************************************************************************
- * Name: stm32l4_pmlpr
- *
- * Description:
- *   Enter Low-Power Run (LPR) mode.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   Zero means that LPR was successfully entered. Otherwise, LPR mode was not
- *   entered and a negated errno value is returned to indicate the cause of the
- *   failure.
- *
- ****************************************************************************/
-
-#if defined(CONFIG_STM32L4_STM32L4X6) || defined(CONFIG_STM32L4_STM32L4X3)
-int stm32l4_pmlpr(void);
-#endif
-
-#undef EXTERN
-#ifdef __cplusplus
+  return do_stop();
 }
 #endif
-#endif /* __ASSEMBLY__ */
-
-#endif /* __ARCH_ARM_SRC_STM32L4_STM32L4_PM_H */
