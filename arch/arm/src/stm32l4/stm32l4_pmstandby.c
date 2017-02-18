@@ -74,7 +74,7 @@ int stm32l4_pmstandby(void)
 
 #if defined(CONFIG_STM32L4_STM32L4X6) || defined(CONFIG_STM32L4_STM32L4X3)
   /* Clear the Wake-Up Flags by setting the CWUFx bits in the power status
-   * clear register 
+   * clear register
    */
   regval = PWR_SCR_CWUF1 | PWR_SCR_CWUF2 | PWR_SCR_CWUF3 |
            PWR_SCR_CWUF4 | PWR_SCR_CWUF5;

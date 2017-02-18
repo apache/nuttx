@@ -120,7 +120,7 @@
 /* Power control register 2 */
 
 #define PWR_CR2_PVDE             (1 <<  0) /* Bit  0: Power voltage detector enable */
-#define PWR_CR2_PLS_SHIFT        1         
+#define PWR_CR2_PLS_SHIFT        1
 #define PWR_CR2_PLS_MASK         (7 << PWR_CR2_PLS_SHIFT) /* Bits 1-3: Power voltage detector level selection */
 #  define PWR_CR2_PLS_2000mv     (0 << PWR_CR2_PLS_SHIFT) /* 000: VPVD0 around 2.0V */
 #  define PWR_CR2_PLS_2200mv     (1 << PWR_CR2_PLS_SHIFT) /* 001: VPVD1 around 2.2V */
