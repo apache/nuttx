@@ -130,6 +130,10 @@ ifeq ($(CONFIG_LIS3MDL),y)
   CSRCS += lis3mdl.c
 endif
 
+ifeq ($(CONFIG_SENSORS_L3GD20),y)
+  CSRCS += l3gd20.c
+endif
+
 endif # CONFIG_SPI
 
 # Quadrature encoder upper half
