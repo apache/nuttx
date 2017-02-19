@@ -114,6 +114,11 @@
 #define GPIO_CS_SST25   (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
                          GPIO_OUTPUT_SET|GPIO_PORTE|GPIO_PIN4)
 
+/* L3GD20 MEMS*/
+
+#define GPIO_L3GD20_DREADY (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTA|GPIO_PIN2)
+#define L3GD20_IRQ  (2 + STM32_IRQ_EXTI0)
+
 /* USB OTG HS
  *
  * PA9  OTG_HS_VBUS VBUS sensing (also connected to the green LED)
@@ -273,6 +278,25 @@ FAR struct ili9341_lcd_s *stm32_ili93414ws_initialize(void);
  ****************************************************************************/
 
 FAR struct spi_dev_s *stm32_spi5initialize(void);
+#endif
+
+
+#if defined(CONFIG_SPI) & defined(CONFIG_SENSORS_L3GD20)
+/****************************************************************************
+ * Name: stm32_l3gd20initialize()
+ *
+ * Description:
+ *   Initialize and register the L3GD20 3 axis gyroscope sensor driver.
+ *
+ * Input parameters:
+ *   devpath - The full path to the driver to register. E.g., "/dev/gyro0"
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int stm32_l3gd20initialize(FAR const char *devpath);
 #endif
 
 #endif /* __ASSEMBLY__ */
