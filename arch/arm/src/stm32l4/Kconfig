@@ -45,6 +45,7 @@ config STM32L4_STM32L4X3
 	select STM32L4_HAVE_USART3
 	select STM32L4_HAVE_LPTIM1
 	select STM32L4_HAVE_LPTIM2
+	select STM32L4_HAVE_COMP
 	select STM32L4_HAVE_SAI1
 	select STM32L4_HAVE_SAI2
 
@@ -58,6 +59,7 @@ config STM32L4_STM32L4X6
 	select STM32L4_HAVE_UART5
 	select STM32L4_HAVE_LPTIM1
 	select STM32L4_HAVE_LPTIM2
+	select STM32L4_HAVE_COMP
 	select STM32L4_HAVE_SAI1
 	select STM32L4_HAVE_SAI2
 
@@ -139,6 +141,10 @@ config STM32L4_HAVE_LPTIM1
 	default n
 
 config STM32L4_HAVE_LPTIM2
+	bool
+	default n
+
+config STM32L4_HAVE_COMP
 	bool
 	default n
 
@@ -619,13 +625,20 @@ config STM32L4_TIM17
 	bool "TIM17"
 	default n
 
+config STM32L4_COMP
+	bool "COMP"
+	default n
+	depends on STM32L4_HAVE_COMP
+
 config STM32L4_SAI1
 	bool "SAI1"
 	default n
+	depends on STM32L4_HAVE_SAI1
 
 config STM32L4_SAI2
 	bool "SAI2"
 	default n
+	depends on STM32L4_HAVE_SAI2
 
 config STM32L4_DFSDM
 	bool "DFSDM"

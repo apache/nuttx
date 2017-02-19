@@ -187,6 +187,10 @@ ifeq ($(CONFIG_DEBUG_FEATURES),y)
 CHIP_CSRCS += stm32l4_dumpgpio.c
 endif
 
+ifeq ($(CONFIG_STM32L4_COMP),y)
+CHIP_CSRCS += stm32l4_comp.c stm32l4_exti_comp.c
+endif
+
 ifeq ($(CONFIG_STM32L4_RNG),y)
 CHIP_CSRCS += stm32l4_rng.c
 endif
