@@ -1,7 +1,8 @@
 /****************************************************************************
  * configs/stm32f429i-disco/src/stm32_l3gd20.c
  *
- * Authors: Mateusz Szafoni <raiden00@railab.me>
+ *   Copyright (C) Gregory Nutt.  All rights reserved.
+ *   Author: Mateusz Szafoni <raiden00@railab.me>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -29,7 +30,6 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- *
  *
  ****************************************************************************/
 
@@ -68,11 +68,11 @@ static int l3gd20_attach(FAR struct l3gd20_config_s * cfg, xcpt_t irq);
 /* Only one L3GD20 device on board */
 
 static struct l3gd20_config_s g_l3gd20_config =
-  {
-    .attach = l3gd20_attach,
-    .irq = L3GD20_IRQ,
-    .spi_devid = SPIDEV_ACCELEROMETER
-  };
+{
+  .attach = l3gd20_attach,
+  .irq = L3GD20_IRQ,
+  .spi_devid = SPIDEV_ACCELEROMETER
+};
 
 /****************************************************************************
  * Private Functions
@@ -137,7 +137,7 @@ int stm32_l3gd20initialize(FAR const char *devpath)
       goto errout;
     }
 
- errout:
+errout:
   return ret;
 }
 

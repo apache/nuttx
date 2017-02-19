@@ -2,8 +2,10 @@
  * drivers/sensors/l3gd20.c
  * Character driver for the ST L3GD20 3-Axis gyroscope.
  *
- * Authors: Mateusz Szafoni <raiden00@railab.me>
- * based on drivers/sensors/lis3dsh.c
+ *   Copyright (C) Gregory Nutt. All rights reserved.
+ *   Author: Mateusz Szafoni <raiden00@railab.me>
+ *
+ * Based on drivers/sensors/lis3dsh.c
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -54,13 +56,13 @@
 
 #if defined(CONFIG_SPI) && defined(CONFIG_SENSORS_L3GD20)
 
-#if !defined(CONFIG_SCHED_HPWORK)
-#  error Hi-priority work queue support is required (CONFIG_SCHED_HPWORK)
-#endif
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#if !defined(CONFIG_SCHED_HPWORK)
+#  error Hi-priority work queue support is required (CONFIG_SCHED_HPWORK)
+#endif
 
 /****************************************************************************
  * Private Types
@@ -87,15 +89,15 @@ struct l3gd20_dev_s
  ****************************************************************************/
 
 static void l3gd20_read_register(FAR struct l3gd20_dev_s *dev,
-                                 uint8_t const reg_addr, uint8_t * reg_data);
+                                 uint8_t const reg_addr, uint8_t *reg_data);
 static void l3gd20_write_register(FAR struct l3gd20_dev_s *dev,
                                   uint8_t const reg_addr,
                                   uint8_t const reg_data);
 static void l3gd20_reset(FAR struct l3gd20_dev_s *dev);
 static void l3gd20_read_measurement_data(FAR struct l3gd20_dev_s *dev);
 static void l3gd20_read_gyroscope_data(FAR struct l3gd20_dev_s *dev,
-                                       uint16_t * x_gyr, uint16_t * y_gyr,
-                                       uint16_t * z_gyr);
+                                       uint16_t *x_gyr, uint16_t *y_gyr,
+                                       uint16_t *z_gyr);
 static void l3gd20_read_temperature(FAR struct l3gd20_dev_s *dev,
                                     uint8_t * temperature);
 static int l3gd20_interrupt_handler(int irq, FAR void *context);
@@ -103,7 +105,8 @@ static void l3gd20_worker(FAR void *arg);
 
 static int l3gd20_open(FAR struct file *filep);
 static int l3gd20_close(FAR struct file *filep);
-static ssize_t l3gd20_read(FAR struct file *, FAR char *, size_t);
+static ssize_t l3gd20_read(FAR struct file *filep, FAR char *buffer,
+                           size_t buflen);
 static ssize_t l3gd20_write(FAR struct file *filep, FAR const char *buffer,
                             size_t buflen);
 static int l3gd20_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
@@ -113,20 +116,20 @@ static int l3gd20_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
  ****************************************************************************/
 
 static const struct file_operations g_l3gd20_fops =
-  {
-    l3gd20_open,
-    l3gd20_close,
-    l3gd20_read,
-    l3gd20_write,
-    NULL,
-    l3gd20_ioctl
+{
+  l3gd20_open,
+  l3gd20_close,
+  l3gd20_read,
+  l3gd20_write,
+  NULL,
+  l3gd20_ioctl
 #ifndef CONFIG_DISABLE_POLL
-    , NULL
+  , NULL
 #endif
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-    , NULL
+  , NULL
 #endif
-  };
+};
 
 /* Single linked list to store instances of drivers */
 
@@ -141,7 +144,7 @@ static struct l3gd20_dev_s *g_l3gd20_list = NULL;
  ****************************************************************************/
 
 static void l3gd20_read_register(FAR struct l3gd20_dev_s *dev,
-                                 uint8_t const reg_addr, uint8_t * reg_data)
+                                 uint8_t const reg_addr, uint8_t *reg_data)
 {
   /* Lock the SPI bus so that only one device can access it at the same time */
 
@@ -206,6 +209,7 @@ static void l3gd20_write_register(FAR struct l3gd20_dev_s *dev,
 /****************************************************************************
  * Name: l3gd20_reset
  ****************************************************************************/
+
 static void l3gd20_reset(FAR struct l3gd20_dev_s *dev)
 {
   /* Reboot memory content */
@@ -221,9 +225,11 @@ static void l3gd20_reset(FAR struct l3gd20_dev_s *dev)
 
 static void l3gd20_read_measurement_data(FAR struct l3gd20_dev_s *dev)
 {
-  int ret;
-  uint16_t x_gyr = 0, y_gyr = 0, z_gyr = 0;
+  uint16_t x_gyr = 0;
+  uint16_t y_gyr = 0;
+  uint16_t z_gyr = 0;
   uint8_t temperature = 0;
+  int ret;
 
   /* Read Gyroscope */
 
@@ -252,7 +258,6 @@ static void l3gd20_read_measurement_data(FAR struct l3gd20_dev_s *dev)
 
   sem_post(&dev->datasem);
 }
-
 
 /****************************************************************************
  * Name: l3gd20_read_gyroscope_data
@@ -296,10 +301,10 @@ static void l3gd20_read_gyroscope_data(FAR struct l3gd20_dev_s *dev,
   SPI_LOCK(dev->spi, false);
 }
 
-
 /****************************************************************************
  * Name: l3gd20_read_temperature
  ****************************************************************************/
+
 static void l3gd20_read_temperature(FAR struct l3gd20_dev_s* dev,
                                     uint8_t* temperature)
 {
@@ -390,7 +395,6 @@ static int l3gd20_open(FAR struct file *filep)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct l3gd20_dev_s *priv = inode->i_private;
-
 #ifdef CONFIG_DEBUG_SENSORS_INFO
   uint8_t reg_content;
   uint8_t reg_addr;
@@ -457,7 +461,6 @@ static int l3gd20_open(FAR struct file *filep)
   return OK;
 }
 
-
 /****************************************************************************
  * Name: l3gd20_close
  ****************************************************************************/
@@ -472,7 +475,6 @@ static int l3gd20_close(FAR struct file *filep)
   /* Perform a reset */
 
   l3gd20_reset(priv);
-
   return OK;
 }
 
@@ -498,7 +500,7 @@ static ssize_t l3gd20_read(FAR struct file *filep, FAR char *buffer,
       return -ENOSYS;
     }
 
-  /* Aquire the semaphore before the data is copied */
+  /* Acquire the semaphore before the data is copied */
 
   ret = sem_wait(&priv->datasem);
   if (ret < 0)
@@ -524,7 +526,6 @@ static ssize_t l3gd20_read(FAR struct file *filep, FAR char *buffer,
 
   return sizeof(FAR struct l3gd20_sensor_data_s);
 }
-
 
 /****************************************************************************
  * Name: l3gd20_write
@@ -600,13 +601,13 @@ int l3gd20_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
       goto errout;
     }
 
-  priv->spi         = spi;
-  priv->config      = config;
-  priv->work.worker = NULL;
+  priv->spi              = spi;
+  priv->config           = config;
+  priv->work.worker      = NULL;
 
-  priv->data.x_gyr = 0;
-  priv->data.y_gyr = 0;
-  priv->data.z_gyr = 0;
+  priv->data.x_gyr       = 0;
+  priv->data.y_gyr       = 0;
+  priv->data.z_gyr       = 0;
   priv->data.temperature = 0;
 
   /* Initialize sensor data access semaphore */
@@ -642,10 +643,10 @@ int l3gd20_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
    * instance to a list of device instances so that it can be found by the
    * interrupt handler based on the received IRQ number. */
 
-  priv->flink = g_l3gd20_list;
+  priv->flink   = g_l3gd20_list;
   g_l3gd20_list = priv;
 
- errout:
+errout:
   return ret;
 }
 

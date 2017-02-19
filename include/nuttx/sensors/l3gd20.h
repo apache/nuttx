@@ -1,7 +1,8 @@
 /****************************************************************************
- * drivers/sensors/l3gd20.c
+ * include/nuttx/sensors/l3gd20.h
  *
- * Authors: Mateusz Szafoni <raiden00@railab.me>
+ *   Copyright (C) Gregory Nutt. All rights reserved.
+ *   Author: Mateusz Szafoni <raiden00@railab.me>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -85,23 +86,22 @@
 #define L3GD20_INT_GEN_THS_Z_L_REG     0x37 /* Gyroscope yaw (Z) interrupt threshold low byte */
 #define L3GD20_INT_GEN_DUR_REG         0x38 /* Gyroscope interrupt duration */
 
-
 /* Register Bit Definitions *************************************************/
 
 /* Device identification register */
 
-#define L3GD20_WHO_AM_I_VALUE       0xD4
+#define L3GD20_WHO_AM_I_VALUE          0xD4
 
 /* Gyroscope control register 1 */
 
-#define L3GD20_CTRL_REG_1_X_EN_bm         (1 << 0)
-#define L3GD20_CTRL_REG_1_Y_EN_bm         (1 << 1)
-#define L3GD20_CTRL_REG_1_Z_EN_bm         (1 << 2)
-#define L3GD20_CTRL_REG_1_POWERDOWN_bm    (1 << 3)
-#define L3GD20_CTRL_REG_1_BW_0_bm         (1 << 4)
-#define L3GD20_CTRL_REG_1_BW_1_bm         (1 << 5)
-#define L3GD20_CTRL_REG_1_DR_0_bm         (1 << 6)
-#define L3GD20_CTRL_REG_1_DR_1_bm         (1 << 7)
+#define L3GD20_CTRL_REG_1_X_EN_bm          (1 << 0)
+#define L3GD20_CTRL_REG_1_Y_EN_bm          (1 << 1)
+#define L3GD20_CTRL_REG_1_Z_EN_bm          (1 << 2)
+#define L3GD20_CTRL_REG_1_POWERDOWN_bm     (1 << 3)
+#define L3GD20_CTRL_REG_1_BW_0_bm          (1 << 4)
+#define L3GD20_CTRL_REG_1_BW_1_bm          (1 << 5)
+#define L3GD20_CTRL_REG_1_DR_0_bm          (1 << 6)
+#define L3GD20_CTRL_REG_1_DR_1_bm          (1 << 7)
 
 /* Gyroscope control register 2 */
 
@@ -177,14 +177,14 @@
 
 /* FIFO status control register */
 
-#define L3GD20_FIFO_SRC_FSS_0_bm          (1 << 0)
-#define L3GD20_FIFO_SRC_FSS_1_bm          (1 << 1)
-#define L3GD20_FIFO_SRC_FSS_2_bm          (1 << 2)
-#define L3GD20_FIFO_SRC_FSS_3_bm          (1 << 3)
-#define L3GD20_FIFO_SRC_FSS_4_bm          (1 << 4)
-#define L3GD20_FIFO_SRC_EMPTY_bm          (1 << 5)
-#define L3GD20_FIFO_SRC_OVRUN_bm          (1 << 6)
-#define L3GD20_FIFO_SRC_WTM_bm            (1 << 7)
+#define L3GD20_FIFO_SRC_FSS_0_bm           (1 << 0)
+#define L3GD20_FIFO_SRC_FSS_1_bm           (1 << 1)
+#define L3GD20_FIFO_SRC_FSS_2_bm           (1 << 2)
+#define L3GD20_FIFO_SRC_FSS_3_bm           (1 << 3)
+#define L3GD20_FIFO_SRC_FSS_4_bm           (1 << 4)
+#define L3GD20_FIFO_SRC_EMPTY_bm           (1 << 5)
+#define L3GD20_FIFO_SRC_OVRUN_bm           (1 << 6)
+#define L3GD20_FIFO_SRC_WTM_bm             (1 << 7)
 
 /* Gyroscope interrupt configuration */
 
@@ -200,14 +200,14 @@
 
 /* Gyroscope interrupt source */
 
-#define L3GD20_INT_GEN_SRC_X_L_bm        (1 << 0)
-#define L3GD20_INT_GEN_SRC_X_H_bm        (1 << 1)
-#define L3GD20_INT_GEN_SRC_Y_L_bm        (1 << 2)
-#define L3GD20_INT_GEN_SRC_Y_H_bm        (1 << 3)
-#define L3GD20_INT_GEN_SRC_Z_L_bm        (1 << 4)
-#define L3GD20_INT_GEN_SRC_Z_H_bm        (1 << 5)
-#define L3GD20_INT_GEN_SRC_I_A_bm        (1 << 6)
-#define L3GD20_INT_GEN_SRC_RES7_         (1 << 7)
+#define L3GD20_INT_GEN_SRC_X_L_bm          (1 << 0)
+#define L3GD20_INT_GEN_SRC_X_H_bm          (1 << 1)
+#define L3GD20_INT_GEN_SRC_Y_L_bm          (1 << 2)
+#define L3GD20_INT_GEN_SRC_Y_H_bm          (1 << 3)
+#define L3GD20_INT_GEN_SRC_Z_L_bm          (1 << 4)
+#define L3GD20_INT_GEN_SRC_Z_H_bm          (1 << 5)
+#define L3GD20_INT_GEN_SRC_I_A_bm          (1 << 6)
+#define L3GD20_INT_GEN_SRC_RES7_           (1 << 7)
 
 /****************************************************************************
  * Public Types
@@ -253,7 +253,6 @@ struct l3gd20_sensor_data_s
   int8_t temperature;         /* Measurement result for temperature sensor */
 };
 
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -265,7 +264,6 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
-
 
 /****************************************************************************
  * Name: l3gd20_register

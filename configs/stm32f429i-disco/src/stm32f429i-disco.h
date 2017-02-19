@@ -114,10 +114,10 @@
 #define GPIO_CS_SST25   (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
                          GPIO_OUTPUT_SET|GPIO_PORTE|GPIO_PIN4)
 
-/* L3GD20 MEMS*/
+/* L3GD20 MEMS */
 
 #define GPIO_L3GD20_DREADY (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTA|GPIO_PIN2)
-#define L3GD20_IRQ  (2 + STM32_IRQ_EXTI0)
+#define L3GD20_IRQ      (2 + STM32_IRQ_EXTI0)
 
 /* USB OTG HS
  *
@@ -235,7 +235,6 @@ void stm32_ledpminitialize(void);
 void stm32_pmbuttons(void);
 #endif
 
-#ifdef CONFIG_STM32F429I_DISCO_ILI9341
 /****************************************************************************
  * Name:  stm32_ili93414ws_initialize
  *
@@ -251,10 +250,10 @@ void stm32_pmbuttons(void);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_STM32F429I_DISCO_ILI9341
 FAR struct ili9341_lcd_s *stm32_ili93414ws_initialize(void);
 #endif
 
-#ifdef CONFIG_STM32_SPI5
 /****************************************************************************
  * Name: stm32_spi5initialize
  *
@@ -277,11 +276,11 @@ FAR struct ili9341_lcd_s *stm32_ili93414ws_initialize(void);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_STM32_SPI5
 FAR struct spi_dev_s *stm32_spi5initialize(void);
 #endif
 
 
-#if defined(CONFIG_SPI) & defined(CONFIG_SENSORS_L3GD20)
 /****************************************************************************
  * Name: stm32_l3gd20initialize()
  *
@@ -296,6 +295,7 @@ FAR struct spi_dev_s *stm32_spi5initialize(void);
  *
  ****************************************************************************/
 
+#if defined(CONFIG_SPI) & defined(CONFIG_SENSORS_L3GD20)
 int stm32_l3gd20initialize(FAR const char *devpath);
 #endif
 

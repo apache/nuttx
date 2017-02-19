@@ -386,7 +386,6 @@ int board_app_initialize(uintptr_t arg)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize l3gd20 sensor: %d\n", ret);
     }
-
 #endif
 
   return OK;
