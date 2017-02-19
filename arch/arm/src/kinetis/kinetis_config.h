@@ -197,8 +197,8 @@
 #  define CONFIG_ENET_PHYADDR 1
 #endif
 
-#ifndef CONFIG_ENET_NETHIFS
-# define CONFIG_ENET_NETHIFS 1
+#ifndef CONFIG_ENETNETHIFS
+# define CONFIG_ENETNETHIFS 1
 #endif
 
 /* EMAC Default Interrupt Priorities */
