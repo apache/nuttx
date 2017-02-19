@@ -164,6 +164,7 @@
 #else
 #  error "Unrecognized or missing PHY selection"
 #endif
+
 #define BOARD_PHY_10BASET(s)  (((s) & (1 << MII_PHYCTRL2_MODE_SHIFT)) != 0)
 #define BOARD_PHY_100BASET(s) (((s) & (2 << MII_PHYCTRL2_MODE_SHIFT)) != 0)
 #define BOARD_PHY_ISDUPLEX(s) (((s) & (4 << MII_PHYCTRL2_MODE_SHIFT)) != 0)
@@ -206,7 +207,6 @@
 #if defined(CONFIG_KINETIS_EMAC_RMIICLK1588CLKIN)
 #  define SIM_SOPT2_RMIISRC SIM_SOPT2_RMIISRC_EXTBYP
 #endif
-
 
 /****************************************************************************
  * Private Types
@@ -1757,7 +1757,7 @@ static inline int kinetis_initphy(struct kinetis_driver_s *priv)
 
   /* Start auto negotiation */
 
-  ninfo("%s: Start autonegotiation...\n",  BOARD_PHY_NAME);
+  ninfo("%s: Start Autonegotiation...\n",  BOARD_PHY_NAME);
   kinetis_writemii(priv, phyaddr, MII_MCR,
                   (MII_MCR_ANRESTART | MII_MCR_ANENABLE));
 
@@ -1772,10 +1772,12 @@ static inline int kinetis_initphy(struct kinetis_driver_s *priv)
                 BOARD_PHY_NAME, ret);
           return ret;
         }
+
       if (phydata & MII_MSR_ANEGCOMPLETE)
         {
           break;
         }
+
       usleep(LINK_WAITUS);
     }
 
@@ -1786,14 +1788,14 @@ static inline int kinetis_initphy(struct kinetis_driver_s *priv)
     }
   else
     {
-      /* TODO: autonegotitation has right now failed. Maybe the Eth cable is not connected.
+      /* TODO: Autonegotitation has right now failed. Maybe the Eth cable is not connected.
          PHY chip have mechanisms to configure link OK. We should leave autconf on, 
          and find a way to re-configure MCU whenever the link is ready. */
 
       ninfo("%s: Autonegotiation failed (is cable plugged-in ?), default to 10Mbs mode\n", \
             BOARD_PHY_NAME);
 
-      /* Stop auto negociation */
+      /* Stop auto negotiation */
       
       kinetis_writemii(priv, phyaddr, MII_MCR, 0);
     }
@@ -1808,7 +1810,6 @@ static inline int kinetis_initphy(struct kinetis_driver_s *priv)
            BOARD_PHY_NAME, BOARD_PHY_STATUS, ret);
       return ret;
    }
-
 
   ninfo("%s: BOARD_PHY_STATUS: %04x\n", BOARD_PHY_NAME, phydata);
 
@@ -1862,7 +1863,7 @@ static inline int kinetis_initphy(struct kinetis_driver_s *priv)
     }
   else
     {
-      /* This might happen if autonegotiation did not complete(?) */
+      /* This might happen if Autonegotiation did not complete(?) */
 
       nerr("ERROR: Neither 10- nor 100-BaseT reported: PHY STATUS=%04x\n",
            phydata);
@@ -2151,8 +2152,10 @@ int kinetis_netinitialize(int intf)
 
 #ifdef CONFIG_NET_ETHERNET
  /* Determine a semi-unique MAC address from MCU UID
-    We use UID Low and Mid Low registers to get 64 bits, from which we keep 48 bits.
-    We then force unicast and locally administered bits (b0 and b1, 1st octet) */
+  * We use UID Low and Mid Low registers to get 64 bits, from which we keep
+  * 48 bits.  We then force unicast and locally administered bits (b0 and b1,
+  * 1st octet)
+  */
 
   uint32_t uidl = getreg32(KINETIS_SIM_UIDL);
   uint32_t uidml = getreg32(KINETIS_SIM_UIDML);

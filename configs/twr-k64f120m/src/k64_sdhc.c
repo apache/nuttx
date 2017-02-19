@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/twr-k64f120m/src/k64_sdhc.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -72,16 +72,12 @@
 
 #include "twrk64.h"
 
-
 #ifdef HAVE_MMCSD
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* This structure holds static information unique to one SDHC peripheral */
 
 struct k64_sdhc_state_s

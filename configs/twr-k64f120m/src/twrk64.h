@@ -157,7 +157,6 @@
 #  undef HAVE_USBDEV
 #endif
 
-
 /* How many SPI modules does this chip support? The LM3S6918 supports 2 SPI
  * modules (others may support more -- in such case, the following must be
  * expanded).
@@ -169,7 +168,6 @@
 #elif KINETIS_NSPI < 2
 #  undef CONFIG_KINETIS_SPI2
 #endif
-
 
 /* Button definitions ***************************************************************/
 /* The TWR-K64F120M has 2 user buttons (plus a reset button):
@@ -267,7 +265,6 @@ TODO See README
  ************************************************************************************/
 
 void weak_function k64_spidev_initialize(void);
-
 
 /************************************************************************************
  * Name: k64_usbinitialize
@@ -386,7 +383,6 @@ void k64_automount_event(bool inserted);
 #ifdef CONFIG_PWM
 int k64_pwm_setup(void);
 #endif
-
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_TWR_K64F120M_SRC_TWRK64_H */

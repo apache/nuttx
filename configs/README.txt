@@ -207,7 +207,7 @@ configs/cloudctrl
   the STM32F107VC MCU.
 
 configs/demo9s12ne64
-  Freescale DMO9S12NE64 board based on the MC9S12NE64 hcs12 cpu.  This
+  NXP/FreeScale DMO9S12NE64 board based on the MC9S12NE64 hcs12 cpu.  This
   port uses the m9s12x GCC toolchain.  STATUS:  (Still) under development; it
   is code complete but has not yet been verified.
 
@@ -266,12 +266,12 @@ configs/fire-stm32v2
   the boards are supported but only version 2 has been tested.
 
 configs/freedom-k64f
-  This port uses the FreeScale FREEDOM-K64F development board. This board
+  This port uses the NXP/FreeScale FREEDOM-K64F development board. This board
   uses the Kinetis K64 MK64FN1M0VLL12 Cortex-M4 MCU.
 
 configs/freedom-kl25z
 configs/freedom-kl26z
-  These configurations are for the Freescale Freedom KL25Z and very similar
+  These configurations are for the NXP/FreeScale Freedom KL25Z and very similar
   KL26Z board.  The Freedom-KL25Z features the K25Z120LE3AN chip; the
   Freedom-KL26Z has the K26Z128VLH4 chip.  These are separate configurations
   because of minor differences in the on-board logic.  Both include a
@@ -282,7 +282,7 @@ configs/hymini-stm32v
   STM32F103VCT chip.
 
 configs/kwikstik-k40.
-  Kinetis K40 Cortex-M4 MCU.  This port uses the FreeScale KwikStik-K40
+  Kinetis K40 Cortex-M4 MCU.  This port uses the NXP/FreeScale KwikStik-K40
   development board.
 
 configs/launchxl-tms57004
@@ -375,7 +375,7 @@ configs/moxa
 
 configs/mx1ads
   This is a port to the Motorola MX1ADS development board.  That board
-  is based on the Freescale i.MX1 processor.  The i.MX1 is an ARM920T.
+  is based on the NXP/FreeScale i.MX1 processor.  The i.MX1 is an ARM920T.
   STATUS:  This port is nearly code complete but was never fully
   integrated due to tool-related issues.
 
@@ -735,6 +735,10 @@ configs/tm4c1294-launchpad
 
 configs/twr-k60n512
   Kinetis K60 Cortex-M4 MCU.  This port uses the FreeScale TWR-K60N512
+  development board.
+
+configs/twr-k64f120m
+  Kinetis K64 Cortex-M4 MCU.  This port uses the FreeScale TWR-K64F120M
   development board.
 
 configs/ubw32

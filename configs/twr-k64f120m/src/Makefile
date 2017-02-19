@@ -1,7 +1,7 @@
 ############################################################################
 # configs/twr-k64f120m/src/Makefile
 #
-#   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
 -include $(TOPDIR)/Make.defs
 
 ASRCS =
-#CSRCS = k60_boot.c k60_spi.c
+#CSRCS = k64_boot.c k64_spi.c
 CSRCS = k64_boot.c
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
@@ -44,7 +44,7 @@ CSRCS += k64_leds.c
 endif
 
 ifeq ($(CONFIG_ARCH_BUTTONS),y)
-#CSRCS += k60_buttons.c
+#CSRCS += k64_buttons.c
 endif
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
@@ -59,11 +59,11 @@ endif
 endif
 
 ifeq ($(CONFIG_USBDEV),y)
-#CSRCS += k60_usbdev.c
+#CSRCS += k64_usbdev.c
 endif
 
 ifeq ($(CONFIG_USBMSC),y)
-#CSRCS += k60_usbmsc.c
+#CSRCS += k64_usbmsc.c
 endif
 
 include $(TOPDIR)/configs/Board.mk
