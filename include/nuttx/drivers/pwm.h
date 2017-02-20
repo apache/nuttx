@@ -66,6 +66,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 /* CONFIG_PWM - Enables because PWM driver support
  * CONFIG_PWM_PULSECOUNT - Some hardware will support generation of a fixed
@@ -73,7 +74,8 @@
  *   motor.  If the hardware will support a fixed pulse count, then this
  *   configuration should be set to enable the capability.
  * CONFIG_PWM_MULTICHAN - Enables support for multiple output channels per
- *   timer
+ *   timer.  If selected, then CONFIG_PWM_NCHANNELS must be provided to
+ *   indicated the maximum number of supported PWM output channels.
  * CONFIG_DEBUG_PWM_INFO - This will generate output that can be use to
  *   debug the PWM driver.
  */
@@ -193,7 +195,7 @@ struct pwm_ops_s
                     FAR const struct pwm_info_s *info);
 #endif
 
-  /* Stop the pulsed output and reset the timer resources*/
+  /* Stop the pulsed output and reset the timer resources */
 
   CODE int (*stop)(FAR struct pwm_lowerhalf_s *dev);
 
