@@ -2010,6 +2010,11 @@ static void kinetis_reset(struct kinetis_driver_s *priv)
 int kinetis_netinitialize(int intf)
 {
   struct kinetis_driver_s *priv;
+#ifdef CONFIG_NET_ETHERNET
+  uint32_t uidl;
+  uint32_t uidml;
+  uint8_t *mac;
+#endif
   uint32_t regval;
 
   /* Get the interface structure associated with this interface number. */
@@ -2157,9 +2162,9 @@ int kinetis_netinitialize(int intf)
   * 1st octet)
   */
 
-  uint32_t uidl = getreg32(KINETIS_SIM_UIDL);
-  uint32_t uidml = getreg32(KINETIS_SIM_UIDML);
-  uint8_t *mac = priv->dev.d_mac.ether_addr_octet;
+  uidl   = getreg32(KINETIS_SIM_UIDL);
+  uidml  = getreg32(KINETIS_SIM_UIDML);
+  mac    = priv->dev.d_mac.ether_addr_octet;
 
   uidml |= 0x00000200;
   uidml &= 0x0000FEFF;
