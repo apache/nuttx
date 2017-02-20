@@ -1,8 +1,7 @@
 /************************************************************************************
- * configs/twr-k60n512/include/board.h
- * include/arch/board/board.h
+ * configs/twr-k64f120m/include/board.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_BOARD_BOARD_H
-#define __ARCH_BOARD_BOARD_H
+#ifndef __CONFIGS_TWR_K64F120M_INCLUDE_BOARCH_H
+#define __CONFIGS_TWR_K64F120M_INCLUDE_BOARCH_H
 
 /************************************************************************************
  * Included Files
@@ -187,7 +186,7 @@ extern "C" {
  *
  ************************************************************************************/
 
-EXTERN void kinetis_boardinitialize(void);
+void kinetis_boardinitialize(void);
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -195,4 +194,4 @@ EXTERN void kinetis_boardinitialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __ARCH_BOARD_BOARD_H */
+#endif  /* __CONFIGS_TWR_K64F120M_INCLUDE_BOARCH_H */

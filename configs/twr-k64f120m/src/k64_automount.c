@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/twr-k64f120m/src/k64_automount.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,21 +54,9 @@
 #ifdef HAVE_AUTOMOUNTER
 
 /************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-#if 0
-#ifndef NULL
-#  define NULL (FAR void *)0
-#endif
-
-#ifndef OK
-#  define OK 0
-#endif
-#endif
-
-/************************************************************************************
  * Private Types
  ************************************************************************************/
+
 /* This structure represents the changeable state of the automounter */
 
 struct k64_automount_state_s

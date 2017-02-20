@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/twr-k64f120m/src/k64_leds.c
  *
- *   Copyright (C) 2011, 2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,6 +49,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* The TWR-K64F120M has four LEDs:
  *
  * 1. D5 / Green LED    PTE6 
