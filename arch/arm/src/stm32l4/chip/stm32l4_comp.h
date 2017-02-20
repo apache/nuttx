@@ -69,19 +69,11 @@
 #  define COMP_CSR_INMSEL_VREF     (3 << COMP_CSR_INMSEL_SHIFT) /* VREFINT */
 #  define COMP_CSR_INMSEL_DAC1     (4 << COMP_CSR_INMSEL_SHIFT) /* DAC Channel1 */
 #  define COMP_CSR_INMSEL_DAC2     (5 << COMP_CSR_INMSEL_SHIFT) /* DAC Channel2 */
-#  define COMP_CSR_INMSEL_PIN1     (6 << COMP_CSR_INMSEL_SHIFT) /* Input minus pin 1 */
-#  define COMP_CSR_INMSEL_PIN2     (7 << COMP_CSR_INMSEL_SHIFT) /* Input minus pin 2 */
-#  define COMP1_CSR_INMSEL_PB1     (6 << COMP_CSR_INMSEL_SHIFT) /* PB1 */
-#  define COMP1_CSR_INMSEL_PC4     (7 << COMP_CSR_INMSEL_SHIFT) /* PC4 */
-#  define COMP2_CSR_INMSEL_PB3     (6 << COMP_CSR_INMSEL_SHIFT) /* PB3 */
-#  define COMP2_CSR_INMSEL_PB7     (7 << COMP_CSR_INMSEL_SHIFT) /* PB7 */
+#  define COMP_CSR_INMSEL_PIN1     (6 << COMP_CSR_INMSEL_SHIFT) /* Input minus pin 1: COMP1=PB1; COMP2=PB3 */
+#  define COMP_CSR_INMSEL_PIN2     (7 << COMP_CSR_INMSEL_SHIFT) /* Input minus pin 2: COMP1=PC4; COMP2=PB7 */
 #define COMP_CSR_INPSEL_MASK       (1 << 7)  /* Bit 7:  Input plus selection bit */
-#  define COMP1_CSR_INPSEL_PIN1     (0)
-#  define COMP1_CSR_INPSEL_PIN2    COMP_CSR_INPSEL_MASK
-#  define COMP1_CSR_INPSEL_PC5     (0)
-#  define COMP1_CSR_INPSEL_PB2     COMP_CSR_INPSEL_MASK
-#  define COMP2_CSR_INPSEL_PB4     (0)
-#  define COMP2_CSR_INPSEL_PB6     COMP_CSR_INPSEL_MASK
+#  define COMP_CSR_INPSEL_PIN1     (0)                          /* Input plus pin 1: COMP1=PC5; COMP2=PB4 */
+#  define COMP_CSR_INPSEL_PIN2     COMP_CSR_INPSEL_MASK         /* Input plus pin 1: COMP1=PB2; COMP2=PB6 */
 #define COMP2_CSR_WINMODE          (1 << 9)  /* Bit 9:  Windows mode selection bit (COMP2 only) */
 #  define COMP2_CSR_WINMODE_NOCONN (0)                /* Comparator 2 input not connected to Comparator 1 */
 #  define COMP2_CSR_WINMODE_CONN   COMP2_CSR_WINMODE  /* Comparator 2 input connected to Comparator 1 */
