@@ -154,7 +154,7 @@ static void oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
 static uint32_t note_duration(FAR uint32_t *silence, uint32_t note_length,
                               uint32_t dots);
 static uint32_t rest_duration(uint32_t rest_length, uint32_t dots);
-static int  start_note(FAR struct tone_upperhalf_s *upper, uint8_t note);
+static void start_note(FAR struct tone_upperhalf_s *upper, uint8_t note);
 static void stop_note(FAR struct tone_upperhalf_s *upper);
 static void start_tune(FAR struct tone_upperhalf_s *upper, const char *tune);
 static void next_note(FAR struct tone_upperhalf_s *upper);
