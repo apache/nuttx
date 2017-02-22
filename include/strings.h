@@ -57,11 +57,7 @@
 
 #  define bcmp(b1,b2,len)  memcmp(b1,b2,(size_t)len)
 #  define bcopy(b1,b2,len) (void)memmove(b2,b1,len)
-
-#  ifndef CONFIG_LIBC_ARCH_BZERO
-#    define bzero(s,n)      (void)memset(s,0,n)
-#  endif
-
+#  define bzero(s,n)       (void)memset(s,0,n)
 #  define index(s,c)       strchr(s,c)
 #  define rindex(s,c)      strrchr(s,c)
 
@@ -97,12 +93,10 @@ static inline void bcopy(FAR const void *b1, FAR void *b2, size_t len)
   (void)memmove(b2, b1, len);
 }
 
-#ifndef CONFIG_LIBC_ARCH_BZERO
 static inline void bzero(FAR void *s, size_t len)
 {
   (void)memset(s, 0, len);
 }
-#endif
 
 static inline FAR char *index(FAR const char *s, int c)
 {
@@ -119,9 +113,6 @@ static inline FAR char *rindex(FAR const char *s, int c)
  * Public Function Prototypes
  ****************************************************************************/
 
-#ifdef CONFIG_LIBC_ARCH_BZERO
-void bzero(FAR void *s, size_t len);
-#endif
 int  ffs(int j);
 int  strcasecmp(FAR const char *, FAR const char *);
 int  strncasecmp(FAR const char *, FAR const char *, size_t);
