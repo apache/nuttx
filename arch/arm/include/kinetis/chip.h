@@ -43,6 +43,8 @@
 
 #include <nuttx/config.h>
 #include <arch/kinetis/kinetis_mcg.h>
+#include <arch/kinetis/kinetis_sim.h>
+#include <arch/kinetis/kinetis_pmc.h>
 
 /************************************************************************************
  * Pre-processor Definitions

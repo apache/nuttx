@@ -78,22 +78,33 @@
 
 #define PMC_LVDSC2_LVWV_SHIFT     (0)       /* Bits 0-1: Low-Voltage Warning Voltage Select */
 #define PMC_LVDSC2_LVWV_MASK      (3 << PMC_LVDSC2_LVWV_SHIFT)
-#  define PMC_LVDSC2_LVWV_ LOW    (0 << PMC_LVDSC2_LVWV_SHIFT) /* Low trip point selected (VLVW = VLVW1H/L) */
-#  define PMC_LVDSC2_LVWV_ MID1   (1 << PMC_LVDSC2_LVWV_SHIFT) /* Mid 1 trip point selected (VLVW = VLVW2H/L) */
-#  define PMC_LVDSC2_LVWV_ MID2   (2 << PMC_LVDSC2_LVWV_SHIFT) /* Mid 2 trip point selected (VLVW = VLVW3H/L) */
-#  define PMC_LVDSC2_LVWV_ HIGH   (3 << PMC_LVDSC2_LVWV_SHIFT) /* High trip point selected (VLVW = VLVW4H/L) */
+#  define PMC_LVDSC2_LVWV_LOW     (0 << PMC_LVDSC2_LVWV_SHIFT) /* Low trip point selected (VLVW = VLVW1H/L) */
+#  define PMC_LVDSC2_LVWV_MID1    (1 << PMC_LVDSC2_LVWV_SHIFT) /* Mid 1 trip point selected (VLVW = VLVW2H/L) */
+#  define PMC_LVDSC2_LVWV_MID2    (2 << PMC_LVDSC2_LVWV_SHIFT) /* Mid 2 trip point selected (VLVW = VLVW3H/L) */
+#  define PMC_LVDSC2_LVWV_HIGH    (3 << PMC_LVDSC2_LVWV_SHIFT) /* High trip point selected (VLVW = VLVW4H/L) */
                                             /* Bits 2-4: Reserved */
 #define PMC_LVDSC2_LVWIE          (1 << 5)  /* Bit 5:  Low-Voltage Warning Interrupt Enable */
 #define PMC_LVDSC2_LVWACK         (1 << 6)  /* Bit 6:  Low-Voltage Warning Acknowledge */
 #define PMC_LVDSC2_LVWF           (1 << 7)  /* Bit 7:  Low-Voltage Warning Flag */
 
 /* Regulator Status and Control Register */
-
 #define PMC_REGSC_BGBE            (1 << 0)  /* Bit 0:  Bandgap Buffer Enable */
                                             /* Bit 1: Reserved */
-#define PMC_REGSC_REGONS          (1 << 2)  /* Bit 2:  Regulator in Run Regulation Status */
-#define PMC_REGSC_VLPRS           (1 << 3)  /* Bit 3:  Very Low Power Run Status */
-#define PMC_REGSC_TRAMPO          (1 << 4)  /* Bit 4:  For devices with FlexNVM: Traditional RAM Power Option */
+#if defined(KINETIS_PMC_HAS_REGSC_REGONS)
+#  define PMC_REGSC_REGONS        (1 << 2)  /* Bit 2:  Regulator in Run Regulation Status */
+#endif
+#if defined(KINETIS_PMC_HAS_REGSC_ACKISO)
+#  define PMC_REGSC_ACKISO        (1 << 3)  /* Bit 3:  Acknowledge Isolation */
+#endif
+#if defined(KINETIS_PMC_HAS_REGSC_VLPRS)
+#  define PMC_REGSC_VLPRS         (1 << 3)  /* Bit 3:  Very Low Power Run Status */
+#endif
+#if defined(KINETIS_PMC_HAS_REGSC_BGEN)
+#  define PMC_REGSC_BGEN          (1 << 4)  /* Bit 4:  Bandgap Enable In VLPx Operation */
+#endif
+#if defined(KINETIS_PMC_HAS_REGSC_TRAMPO)
+#  define PMC_REGSC_TRAMPO        (1 << 4)  /* Bit 4:  For devices with FlexNVM: Traditional RAM Power Option */
+#endif
                                             /* Bits 5-7: Reserved */
 
 /************************************************************************************

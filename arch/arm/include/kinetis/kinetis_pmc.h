@@ -1,0 +1,324 @@
+/************************************************************************************
+ * arch/arm/include/kinetis/kinetis_pmc.h
+ *
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ * 3. Neither the name NuttX nor the names of its contributors may be
+ *    used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
+ ************************************************************************************/
+
+#ifndef __ARCH_ARM_INCLUDE_KINETIS_KINETIS_PMC_H
+#define __ARCH_ARM_INCLUDE_KINETIS_KINETIS_PMC_H
+
+/************************************************************************************
+ * Included Files
+ ************************************************************************************/
+
+#include <nuttx/config.h>
+
+/************************************************************************************
+ * Pre-processor Definitions
+ ************************************************************************************/
+
+/* Note: It is envisioned that in the long term as a chip is added. The author of
+ * the new chip definitions will either find the exact configuration in an existing
+ * chip define and add the new chip to it Or add the PMC feature configuration
+ * #defines to the chip ifdef list below. In either case the author should mark
+ * it as "Verified to Document Number:" taken from the reference manual.
+ *
+ * To maintain backward compatibility to the version of NuttX prior to
+ * 2/22/2017, the catch all KINETIS_PMC_VERSION_UKN configuration is assigned
+ * to all the chips that did not have any conditional compilation based on
+ * KINETIS_K64 or KINETIS_K66. This is  a "No worse" than the original code solution.
+ * N.B. Each original chip "if"definitions have been left intact so that the
+ * complete legacy definitions prior to 2/22/2017 may be filled in completely when
+ * vetted.
+ */
+
+/* PMC Register Configuration
+ *
+ * KINETIS_PMC_HAS_REGSC             - SoC has REGSC Register
+ * KINETIS_PMC_HAS_REGSC_ACKISO      - SoC has REGSC[ACKISO]
+ * KINETIS_PMC_HAS_REGSC_VLPRS       - SoC has REGSC[VLPRS]
+ * KINETIS_PMC_HAS_REGSC_VLPO        - SoC has REGSC[VLPO]
+ * KINETIS_PMC_HAS_REGSC_REGFPM      - SoC has REGSC[REGFPM]
+ * KINETIS_PMC_HAS_REGSC_BGEN        - SoC has REGSC[BGEN]
+ * KINETIS_PMC_HAS_REGSC_TRAMPO      - SoC has REGSC[TRAMPO]
+ * KINETIS_PMC_HAS_REGSC_REGONS      - SoC has REGSC[REGONS]
+ */
+
+/* Describe the version of the PMC
+ *
+ * These defines are not related to any NXP reference but are merely
+ * a way to label the versions we are using
+ */
+
+#define KINETIS_PMC_VERSION_UKN  -1 /* What was in nuttx prior to 2/22/2017 */
+#define KINETIS_PMC_VERSION_01    1  /* Verified Document Number: K60P144M150SF3RM Rev. 3, November 2014 */
+#define KINETIS_PMC_VERSION_04    4  /* Verified to Document Numbers:
+                                      * K20P64M72SF1RM  Rev. 1.1, Dec 2012
+                                      * K64P144M120SF5RM Rev. 2, January 2014
+                                      * K66P144M180SF5RMV2 Rev. 2, May 2015 */
+
+/* MK20DX/DN---VLH5
+ *
+ *  ------------- ------ --- ------- ------ ------- ------ ----- ----
+ *  PART NUMBER   CPU    PIN PACKAGE TOTAL  PROGRAM EEPROM SRAM  GPIO
+ *                FREQ   CNT         FLASH  FLASH
+ *  ------------- ------ --- ------- ------ ------- ------ ----- ----
+ *  MK20DN32VLH5  50 MHz 64  LQFP     32 KB 32 KB   —       8 KB 40
+ *  MK20DX32VLH5  50 MHz 64  LQFP     64 KB 32 KB   2 KB    8 KB 40
+ *  MK20DN64VLH5  50 MHz 64  LQFP     64 KB 64 KB   —      16 KB 40
+ *  MK20DX64VLH5  50 MHz 64  LQFP     96 KB 64 KB   2 KB   16 KB 40
+ *  MK20DN128VLH5 50 MHz 64  LQFP    128 KB 128 KB  —      16 KB 40
+ *  MK20DX128VLH5 50 MHz 64  LQFP    160 KB 128 KB  2 KB   16 KB 40
+ */
+
+#if defined(CONFIG_ARCH_CHIP_MK20DN32VLH5) || \
+    defined(CONFIG_ARCH_CHIP_MK20DX32VLH5) || \
+    defined(CONFIG_ARCH_CHIP_MK20DN64VLH5) || \
+    defined(CONFIG_ARCH_CHIP_MK20DX64VLH5) || \
+    defined(CONFIG_ARCH_CHIP_MK20DN128VLH5) || \
+    defined(CONFIG_ARCH_CHIP_MK20DX128VLH5)
+
+#  define KINETIS_PMC_VERSION KINETIS_PMC_VERSION_UKN
+
+/* MK20DX---VLH7
+ *
+ *  ------------- ------ --- ------- ------ ------- ------ ----- ----
+ *  PART NUMBER   CPU    PIN PACKAGE TOTAL  PROGRAM EEPROM SRAM  GPIO
+ *                FREQ   CNT         FLASH  FLASH
+ *  ------------- ------ --- ------- ------ ------- ------ ----- ----
+ *  MK20DX64VLH7  72 MHz 64  LQFP     96 KB  64 KB  2 KB   16 KB 40
+ *  MK20DX128VLH7 72 MHz 64  LQFP    160 KB 128 KB  2 KB   32 KB 40
+ *  MK20DX256VLH7 72 MHz 64  LQFP    288 KB 256 KB  2 KB   64 KB 40
+ *  ------------- ------ --- ------- ------ ------- ------ ----- ----
+ */
+
+#elif defined(CONFIG_ARCH_CHIP_MK20DX64VLH7) || defined(CONFIG_ARCH_CHIP_MK20DX128VLH7) || \
+      defined(CONFIG_ARCH_CHIP_MK20DX256VLH7)
+
+/* Verified to Document Number: K20P64M72SF1RM Rev. 1.1, Dec 2012 */
+
+#  define KINETIS_PMC_VERSION KINETIS_PMC_VERSION_04
+
+/* PMC Register Configuration */
+
+#  define KINETIS_PMC_HAS_REGSC             1 /* SoC has REGSC Register */
+#  define KINETIS_PMC_HAS_REGSC_ACKISO      1 /* SoC has REGSC[ACKISO]  */
+#  undef  KINETIS_PMC_HAS_REGSC_VLPRS         /* SoC has REGSC[VLPRS]   */
+#  undef  KINETIS_PMC_HAS_REGSC_VLPO          /* SoC has REGSC[VLPO]    */
+#  undef  KINETIS_PMC_HAS_REGSC_REGFPM        /* SoC has REGSC[REGFPM]  */
+#  define KINETIS_PMC_HAS_REGSC_BGEN        1 /* SoC has REGSC[BGEN]    */
+#  undef  KINETIS_PMC_HAS_REGSC_TRAMPO        /* SoC has REGSC[TRAMPO]  */
+#  define KINETIS_PMC_HAS_REGSC_REGONS      1 /* SoC has REGSC[REGONS]  */
+
+#elif defined(CONFIG_ARCH_CHIP_MK40X64VFX50) || defined(CONFIG_ARCH_CHIP_MK40X64VLH50) || \
+      defined(CONFIG_ARCH_CHIP_MK40X64VLK50) || defined(CONFIG_ARCH_CHIP_MK40X64VMB50)
+
+#  define KINETIS_PMC_VERSION KINETIS_PMC_VERSION_UKN
+
+#elif defined(CONFIG_ARCH_CHIP_MK40X128VFX50) || defined(CONFIG_ARCH_CHIP_MK40X128VLH50) || \
+      defined(CONFIG_ARCH_CHIP_MK40X128VLK50) || defined(CONFIG_ARCH_CHIP_MK40X128VMB50) || \
+      defined(CONFIG_ARCH_CHIP_MK40X128VLL50) || defined(CONFIG_ARCH_CHIP_MK40X128VML50) || \
+      defined(CONFIG_ARCH_CHIP_MK40X128VFX72) || defined(CONFIG_ARCH_CHIP_MK40X128VLH72) || \
+      defined(CONFIG_ARCH_CHIP_MK40X128VLK72) || defined(CONFIG_ARCH_CHIP_MK40X128VMB72) || \
+      defined(CONFIG_ARCH_CHIP_MK40X128VLL72) || defined(CONFIG_ARCH_CHIP_MK40X128VML72)
+
+#  define KINETIS_PMC_VERSION KINETIS_PMC_VERSION_UKN
+
+#elif defined(CONFIG_ARCH_CHIP_MK40X256VLK72) || defined(CONFIG_ARCH_CHIP_MK40X256VMB72) || \
+      defined(CONFIG_ARCH_CHIP_MK40X256VLL72) || defined(CONFIG_ARCH_CHIP_MK40X256VML72)
+
+#  define KINETIS_PMC_VERSION KINETIS_PMC_VERSION_UKN
+
+#elif defined(CONFIG_ARCH_CHIP_MK40X128VLQ100) || defined(CONFIG_ARCH_CHIP_MK40X128VMD100)
+
+#  define KINETIS_PMC_VERSION KINETIS_PMC_VERSION_UKN
+
+#elif defined(CONFIG_ARCH_CHIP_MK40X256VLQ100) || defined(CONFIG_ARCH_CHIP_MK40X256VMD100)
+
+#  define KINETIS_PMC_VERSION KINETIS_PMC_VERSION_UKN
+
+#elif defined(CONFIG_ARCH_CHIP_MK40N512VLK100) || defined(CONFIG_ARCH_CHIP_MK40N512VMB100) || \
+      defined(CONFIG_ARCH_CHIP_MK40N512VLL100) || defined(CONFIG_ARCH_CHIP_MK40N512VML100) || \
+      defined(CONFIG_ARCH_CHIP_MK40N512VLQ100) || defined(CONFIG_ARCH_CHIP_MK40N512VMD100)
+
+#  define KINETIS_PMC_VERSION KINETIS_PMC_VERSION_UKN
+
+#elif defined(CONFIG_ARCH_CHIP_MK60N256VLL100)
+
+#  define KINETIS_PMC_VERSION KINETIS_PMC_VERSION_UKN
+
+#elif defined(CONFIG_ARCH_CHIP_MK60X256VLL100)
+
+#  define KINETIS_PMC_VERSION KINETIS_PMC_VERSION_UKN
+
+#elif defined(CONFIG_ARCH_CHIP_MK60N512VLL100)
+
+#  define KINETIS_PMC_VERSION KINETIS_PMC_VERSION_UKN
+
+#elif defined(CONFIG_ARCH_CHIP_MK60N256VML100)
+
+#  define KINETIS_PMC_VERSION KINETIS_PMC_VERSION_UKN
+
+#elif defined(CONFIG_ARCH_CHIP_MK60X256VML100)
+
+#  define KINETIS_PMC_VERSION KINETIS_PMC_VERSION_UKN
+
+#elif defined(CONFIG_ARCH_CHIP_MK60N512VML100)
+
+#  define KINETIS_PMC_VERSION KINETIS_PMC_VERSION_UKN
+
+#elif defined(CONFIG_ARCH_CHIP_MK60N256VLQ100)
+
+#  define KINETIS_PMC_VERSION KINETIS_PMC_VERSION_UKN
+
+#elif defined(CONFIG_ARCH_CHIP_MK60X256VLQ100)
+
+#  define KINETIS_PMC_VERSION KINETIS_PMC_VERSION_UKN
+
+#elif defined(CONFIG_ARCH_CHIP_MK60N512VLQ100)
+
+#  define KINETIS_PMC_VERSION KINETIS_PMC_VERSION_UKN
+
+#elif defined(CONFIG_ARCH_CHIP_MK60N256VMD100)
+
+#  define KINETIS_PMC_VERSION KINETIS_PMC_VERSION_UKN
+
+#elif defined(CONFIG_ARCH_CHIP_MK60X256VMD100)
+
+#  define KINETIS_PMC_VERSION KINETIS_PMC_VERSION_UKN
+
+#elif defined(CONFIG_ARCH_CHIP_MK60N512VMD100)
+
+#  define KINETIS_PMC_VERSION KINETIS_PMC_VERSION_UKN
+
+#elif defined(CONFIG_ARCH_CHIP_MK60FN1M0VLQ12)
+
+/* Verified to Document Number: K60P144M100SF2V2RM Rev. 2 Jun 2012 */
+
+#  define KINETIS_PMC_VERSION KINETIS_PMC_VERSION_01
+
+/* PMC Register Configuration */
+
+#  define KINETIS_PMC_HAS_REGSC             1 /* SoC has REGSC Register */
+#  define KINETIS_PMC_HAS_REGSC_ACKISO      1 /* SoC has REGSC[ACKISO]  */
+#  undef  KINETIS_PMC_HAS_REGSC_VLPRS         /* SoC has REGSC[VLPRS]   */
+#  undef  KINETIS_PMC_HAS_REGSC_VLPO          /* SoC has REGSC[VLPO]    */
+#  undef  KINETIS_PMC_HAS_REGSC_REGFPM        /* SoC has REGSC[REGFPM]  */
+#  undef  KINETIS_PMC_HAS_REGSC_BGEN          /* SoC has REGSC[BGEN]    */
+#  undef  KINETIS_PMC_HAS_REGSC_TRAMPO        /* SoC has REGSC[TRAMPO]  */
+#  define KINETIS_PMC_HAS_REGSC_REGONS      1 /* SoC has REGSC[REGONS]  */
+
+#elif defined(CONFIG_ARCH_CHIP_MK64FN1M0VLL12) || defined(CONFIG_ARCH_CHIP_MK64FX512VLL12) || \
+      defined(CONFIG_ARCH_CHIP_MK64FX512VDC12) || defined(CONFIG_ARCH_CHIP_MK64FN1M0VDC12) || \
+      defined(CONFIG_ARCH_CHIP_MK64FX512VLQ12) || defined(CONFIG_ARCH_CHIP_MK64FN1M0VLQ12) || \
+      defined(CONFIG_ARCH_CHIP_MK64FX512VMD12) || defined(CONFIG_ARCH_CHIP_MK64FN1M0VMD12)
+
+/* Verified to Document Number: K64P144M120SF5RM Rev. 2, January 2014 */
+
+#  define KINETIS_PMC_VERSION KINETIS_PMC_VERSION_04
+
+/* PMC Register Configuration */
+
+#  define KINETIS_PMC_HAS_REGSC             1 /* SoC has REGSC Register */
+#  define KINETIS_PMC_HAS_REGSC_ACKISO      1 /* SoC has REGSC[ACKISO]  */
+#  undef  KINETIS_PMC_HAS_REGSC_VLPRS         /* SoC has REGSC[VLPRS]   */
+#  undef  KINETIS_PMC_HAS_REGSC_VLPO          /* SoC has REGSC[VLPO]    */
+#  undef  KINETIS_PMC_HAS_REGSC_REGFPM        /* SoC has REGSC[REGFPM]  */
+#  define KINETIS_PMC_HAS_REGSC_BGEN        1 /* SoC has REGSC[BGEN]    */
+#  undef  KINETIS_PMC_HAS_REGSC_TRAMPO        /* SoC has REGSC[TRAMPO]  */
+#  define KINETIS_PMC_HAS_REGSC_REGONS      1 /* SoC has REGSC[REGONS]  */
+
+/* MK66F N/X 1M0/2M0 V MD/LQ 18
+ *
+ *  --------------- ------- --- ------- ------- ------ ------ ------ -----
+ *  PART NUMBER     CPU     PIN PACKAGE  TOTAL  PROGRAM EEPROM SRAM  GPIO
+ *                  FREQ    CNT          FLASH  FLASH
+ *  --------------- ------- --- ------- ------- ------ ------ ------ -----
+ *  MK66FN2M0VMD18  180 MHz 144 MAPBGA   2   MB    —    — KB  260 KB 100
+ *  MK66FX1M0VMD18  180 MHz 144 MAPBGA  1.25 MB  1 MB   4 KB  256 KB 100
+ *  MK66FN2M0VLQ18  180 MHz 144 LQFP     2   MB    —    — KB  260 KB 100
+ *  MK66FX1M0VLQ18  180 MHz 144 LQFP    1.25 MB  1 MB   4 KB  256 KB 100
+ */
+
+#elif defined(CONFIG_ARCH_CHIP_MK66FN2M0VMD18) || defined(CONFIG_ARCH_CHIP_MK66FX1M0VMD18) || \
+      defined(CONFIG_ARCH_CHIP_MK66FN2M0VLQ18) || defined(CONFIG_ARCH_CHIP_MK66FX1M0VLQ18)
+
+/* Verified to Document Number: Document Number: K66P144M180SF5RMV2 Rev. 2, May 2015 */
+
+#  define KINETIS_PMC_VERSION KINETIS_PMC_VERSION_04
+
+/* PMC Register Configuration */
+
+#  define KINETIS_PMC_HAS_REGSC             1 /* SoC has REGSC Register */
+#  define KINETIS_PMC_HAS_REGSC_ACKISO      1 /* SoC has REGSC[ACKISO]  */
+#  undef  KINETIS_PMC_HAS_REGSC_VLPRS         /* SoC has REGSC[VLPRS]   */
+#  undef  KINETIS_PMC_HAS_REGSC_VLPO          /* SoC has REGSC[VLPO]    */
+#  undef  KINETIS_PMC_HAS_REGSC_REGFPM        /* SoC has REGSC[REGFPM]  */
+#  define KINETIS_PMC_HAS_REGSC_BGEN        1 /* SoC has REGSC[BGEN]    */
+#  undef  KINETIS_PMC_HAS_REGSC_TRAMPO        /* SoC has REGSC[TRAMPO]  */
+#  define KINETIS_PMC_HAS_REGSC_REGONS      1 /* SoC has REGSC[REGONS]  */
+
+#else
+#  error "Unsupported Kinetis chip"
+#endif
+
+/* Use the catch all configuration for the PMC based on the implementations in nuttx prior 2/3/2017 */
+
+#if KINETIS_PMC_VERSION == KINETIS_PMC_VERSION_UKN
+
+/* PMC Register Configuration */
+
+#  define KINETIS_PMC_HAS_REGSC             1 /* SoC has REGSC Register */
+#  undef  KINETIS_PMC_HAS_REGSC_ACKISO        /* SoC has REGSC[ACKISO]  */
+#  define KINETIS_PMC_HAS_REGSC_VLPRS       1 /* SoC has REGSC[VLPRS]   */
+#  undef  KINETIS_PMC_HAS_REGSC_VLPO          /* SoC has REGSC[VLPO]    */
+#  undef  KINETIS_PMC_HAS_REGSC_REGFPM        /* SoC has REGSC[REGFPM]  */
+#  undef  KINETIS_PMC_HAS_REGSC_BGEN          /* SoC has REGSC[BGEN]    */
+#  define KINETIS_PMC_HAS_REGSC_TRAMPO      1 /* SoC has REGSC[TRAMPO]  */
+#  define KINETIS_PMC_HAS_REGSC_REGONS      1 /* SoC has REGSC[REGONS]  */
+
+#endif
+
+#if !defined(KINETIS_PMC_VERSION)
+#  error "No KINETIS_PMC_VERSION defined!"
+#endif
+
+#if defined(KINETIS_PMC_HAS_C5_PRDIV)
+#  define KINETIS_PMC_C5_PRDIV_MASK  ((1 << (KINETIS_PMC_C5_PRDIV_BITS))-1)
+#endif
+
+#if defined(KINETIS_PMC_HAS_C7_OSCSEL)
+#  define KINETIS_PMC_C7_OSCSEL_MASK  ((1 << (KINETIS_PMC_C7_OSCSEL_BITS))-1)
+#endif
+
+#endif /* __ARCH_ARM_INCLUDE_KINETIS_KINETIS_PMC_H */

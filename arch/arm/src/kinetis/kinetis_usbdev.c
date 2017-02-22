@@ -4396,10 +4396,11 @@ void up_usbinitialize(void)
    * easier.
    */
 #if 1
+#warning "This code needs to be driven by BOARD_ settings and SIM_SOPT2[PLLFLLSE] needs to be set globally"
   /* 1: Select clock source */
 
   regval = getreg32(KINETIS_SIM_SOPT2);
-  regval |= SIM_SOPT2_PLLFLLSEL | SIM_SOPT2_USBSRC;
+  regval |= SIM_SOPT2_PLLFLLSEL_MCGPLLCLK | SIM_SOPT2_USBSRC;
   putreg32(regval, KINETIS_SIM_SOPT2);
 
   regval = getreg32(KINETIS_SIM_CLKDIV2);
