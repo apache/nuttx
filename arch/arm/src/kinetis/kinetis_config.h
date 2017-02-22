@@ -50,7 +50,7 @@
  ************************************************************************************/
 
 /* Configuration *********************************************************************/
-/* Make that no unsupported UARTs are enabled */
+/* Make sure that no unsupported UARTs are enabled */
 
 #ifndef KINETIS_NISO7816
 #  define KINETIS_NISO7816 0
