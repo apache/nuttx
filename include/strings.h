@@ -94,7 +94,7 @@ static inline int bcmp(FAR const void *b1, FAR const void *b2, size_t len)
 
 static inline void bcopy(FAR const void *b1, FAR void *b2, size_t len)
 {
-  (void)memmove(b1, b2, len);
+  (void)memmove(b2, b1, len);
 }
 
 #ifndef CONFIG_LIBC_ARCH_BZERO
