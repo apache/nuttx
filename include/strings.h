@@ -113,9 +113,9 @@ static inline FAR char *rindex(FAR const char *s, int c)
  * Public Function Prototypes
  ****************************************************************************/
 
-int  ffs(int j);
-int  strcasecmp(FAR const char *, FAR const char *);
-int  strncasecmp(FAR const char *, FAR const char *, size_t);
+int ffs(int j);
+int strcasecmp(FAR const char *, FAR const char *);
+int strncasecmp(FAR const char *, FAR const char *, size_t);
 
 #undef EXTERN
 #if defined(__cplusplus)

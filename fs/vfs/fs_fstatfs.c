@@ -70,7 +70,9 @@
 int fstatfs(int fd, FAR struct statfs *buf)
 {
   FAR struct file *filep;
+#ifndef CONFIG_DISABLE_MOUNTPOINT
   FAR struct inode *inode;
+#endif
   int ret;
 
   DEBUGASSERT(buf != NULL);
@@ -98,6 +100,7 @@ int fstatfs(int fd, FAR struct statfs *buf)
       return ERROR;
     }
 
+#ifndef CONFIG_DISABLE_MOUNTPOINT
   /* Get the inode from the file structure */
 
   inode = filep->f_inode;
@@ -107,7 +110,6 @@ int fstatfs(int fd, FAR struct statfs *buf)
    * are dealing with.
    */
 
-#ifndef CONFIG_DISABLE_MOUNTPOINT
   if (INODE_IS_MOUNTPT(inode))
     {
       /* The node is a file system mointpoint. Verify that the mountpoint
