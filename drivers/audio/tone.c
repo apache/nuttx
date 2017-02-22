@@ -309,9 +309,9 @@ static void start_note(FAR struct tone_upperhalf_s *upper, uint8_t note)
   upper->tone.frequency           = g_notes_freq[note - 1];
 #ifdef CONFIG_PWM_MULTICHAN
   upper->tone.channels[0].channel = upper->channel;
-  upper->tone.channels[0].duty    = 50;
+  upper->tone.channels[0].duty    = b16HALF;
 #else
-  upper->tone.duty                = 50;
+  upper->tone.duty                = b16HALF;
 #endif
 
   /* REVISIT: Should check the return value */
