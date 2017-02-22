@@ -47,7 +47,11 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Compatibility definitions */
+/* Compatibility definitions
+ *
+ * Marked LEGACY in Open Group Base Specifications Issue 6/IEEE Std 1003.1-2004
+ * Removed from Open Group Base Specifications Issue 7/IEEE Std 1003.1-2008
+ */
 
 #define bcmp(b1,b2,len)  memcmp(b1,b2,(size_t)len)
 #define bcopy(b1,b2,len) (void)memmove(b2,b1,len)
