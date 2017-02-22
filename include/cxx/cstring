@@ -45,19 +45,6 @@
 #include <strings.h>
 
 //***************************************************************************
-// Pre-processor Definitions
-//***************************************************************************
-
-// Remove macros defined in strings.h.  The index() definition, in
-// particular, can cause naming collision problems.
-
-#undef bcmp
-#undef bcopy
-#undef bzero
-#undef index
-#undef rindex
-
-//***************************************************************************
 // Namespace
 //***************************************************************************
 
@@ -100,6 +87,11 @@ namespace std
 
   // Declared in legacy strings.h
 
+  using ::bcmp;
+  using ::bcopy;
+  using ::bzero;
+  using ::index;
+  using ::rindex;
   using ::ffs;
   using ::strcasecmp;
   using ::strncasecmp;
