@@ -45,6 +45,7 @@
 #include "chip/kinetis_mcg.h"
 #include "chip/kinetis_sim.h"
 #include "chip/kinetis_fmc.h"
+#include "chip/kinetis_pmc.h"
 #include "chip/kinetis_llwu.h"
 #include "chip/kinetis_pinmux.h"
 
@@ -191,7 +192,9 @@ static inline void kinesis_portclocks(void)
 
 void kinetis_pllconfig(void)
 {
+#if defined(SIM_SCGC4_LLWU)
   uint32_t regval32;
+#endif
   uint8_t regval8;
 
 #if defined(BOARD_MCG_C2)
@@ -228,16 +231,25 @@ void kinetis_pllconfig(void)
           MCG_C2_RANGE_VHIGH | MCG_C2_EREFS, KINETIS_MCG_C2);
 #  endif
 #endif /* defined(BOARD_MCG_C2) */
-
+#if defined(SIM_SCGC4_LLWU)
   /* Released latched state of oscillator and GPIO */
 
   regval32 = getreg32(KINETIS_SIM_SCGC4);
   regval32 |= SIM_SCGC4_LLWU;
   putreg32(regval32, KINETIS_SIM_SCGC4);
+#endif
 
+#if defined(LLWU_CS_ACKISO)
   regval8 = getreg8(KINETIS_LLWU_CS);
   regval8 |= LLWU_CS_ACKISO;
   putreg8(regval8, KINETIS_LLWU_CS);
+#endif
+
+#if defined(PMC_REGSC_ACKISO)
+  regval8 = getreg8(KINETIS_PMC_REGSC);
+  regval8 |= PMC_REGSC_ACKISO;
+  putreg8(regval8, KINETIS_PMC_REGSC);
+#endif
 
   /* Select external oscillator and Reference Divider and clear IREFS to
    * start the external oscillator.
