@@ -70,9 +70,7 @@
 int fstatfs(int fd, FAR struct statfs *buf)
 {
   FAR struct file *filep;
-#ifndef CONFIG_DISABLE_MOUNTPOINT
   FAR struct inode *inode;
-#endif
   int ret;
 
   DEBUGASSERT(buf != NULL);
@@ -81,7 +79,7 @@ int fstatfs(int fd, FAR struct statfs *buf)
 
   if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS)
     {
-      /* No networking... it is a bad descriptor in any event */
+      /* It is a bad, out-of-range descriptor */
 
       set_errno(EBADF);
       return ERROR;
@@ -100,12 +98,21 @@ int fstatfs(int fd, FAR struct statfs *buf)
       return ERROR;
     }
 
-#ifndef CONFIG_DISABLE_MOUNTPOINT
   /* Get the inode from the file structure */
 
   inode = filep->f_inode;
   DEBUGASSERT(inode != NULL);
 
+  /* Check if the file is open */
+
+  if (inode == NULL)
+    {
+      /* The descriptor does not refer to an open file. */
+
+      ret = -EBADF;
+    }
+  else
+#ifndef CONFIG_DISABLE_MOUNTPOINT
   /* The way we handle the stat depends on the type of inode that we
    * are dealing with.
    */
