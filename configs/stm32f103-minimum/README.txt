@@ -4,70 +4,86 @@ README
 This README discusses issues unique to NuttX configurations for the
 STM32F103C8T6 Minimum System Development Board for ARM Microcontroller.
 
-This board is available from several vendors on the net, and may
-be sold under different names or no name at all. It is based on a
-STM32F103C8T6 and has a DIP-40 form-factor.
+Contents
+========
 
-There are two versions of very similar boards:  One is red and one is
-blue.  See http://www.stm32duino.com/viewtopic.php?f=28&t=117
+  - STM32F103C8T6 Minimum System Development Boards:
+  - LEDs
+  - UARTs
+  - Timer Inputs/Outputs
+  - Using 128KiB of Flash instead of 64KiB
+  - Quadrature Encoder
+  - STM32F103 Minimum - specific Configuration Options
+  - Configurations
 
-The Red Board:
+STM32F103C8T6 Minimum System Development Boards:
+================================================
 
-  Good things about the red board:
+  This STM32F103C8T6 minimum system development board is available from
+  several vendors on the net, and may be sold under different names or
+  no name at all. It is based on a STM32F103C8T6 and has a DIP-40 form-
+  factor.
 
-  - 1.5k pull up resistor on the PA12 pin (USB D+) which you can
-    programatically drag down for automated USB reset.
-  - large power capacitors and LDO power.
+  There are two versions of very similar boards:  One is red and one is
+  blue.  See http://www.stm32duino.com/viewtopic.php?f=28&t=117
 
-  Problems with the red board:
+  The Red Board:
 
-  - Silk screen is barely readable, the text is chopped off on some of
-    the pins
-  - USB connector only has two anchor points and it is directly soldered
-    on the surface
-  - Small reset button with hardly any resistance
+    Good things about the red board:
 
-The Blue Board:
+    - 1.5k pull up resistor on the PA12 pin (USB D+) which you can
+      programatically drag down for automated USB reset.
+    - large power capacitors and LDO power.
 
-  Good things about the blue board:
+    Problems with the red board:
 
-  - Four soldered anchor point on the USB connector. What you can't tell
-    from this picture is that there is a notch in the pcb board and the USB
-    connector sits down inside it some. This provides some lateral stability
-    that takes some of the stress off the solder points.
-  - It has nice clear readable silkscreen printing.
-  - It also a larger reset button.
+    - Silk screen is barely readable, the text is chopped off on some of
+      the pins
+    - USB connector only has two anchor points and it is directly soldered
+      on the surface
+    - Small reset button with hardly any resistance
 
-  Problems with the blue board:
+  The Blue Board:
 
-  - Probably won't work as a USB device if it has a 10k pull-up on PA12. You
-    have to check the pull up on PA12 (USB D+). If it has a 10k pull-up
-    resistor, you will need to replace it with a 1.5k one to use the native
-    USB.
-  - Puny voltage regulator probably 100mA.
+    Good things about the blue board:
 
-  A schematic for the blue board is available here:
-  http://www.stm32duino.com/download/file.php?id=276
+    - Four soldered anchor point on the USB connector. What you can't tell
+      from this picture is that there is a notch in the pcb board and the USB
+      connector sits down inside it some. This provides some lateral stability
+      that takes some of the stress off the solder points.
+    - It has nice clear readable silkscreen printing.
+    - It also a larger reset button.
 
-Both Boards:
+    Problems with the blue board:
 
-  Nice features common to both:
+    - Probably won't work as a USB device if it has a 10k pull-up on PA12. You
+      have to check the pull up on PA12 (USB D+). If it has a 10k pull-up
+      resistor, you will need to replace it with a 1.5k one to use the native
+      USB.
+    - Puny voltage regulator probably 100mA.
 
-  - SWD pins broken out and easily connected (VCC, GND, SWDIO, SWCLK)
-  - USB 5V is broken out with easy access.
-  - User LED on PC13
-  - Power LED
-  - You can probably use more flash (128k) than officially documented for
-    the chip (stm32f103c8t6 64k), I was able to load 115k of flash on mine
-    and it seemed to work.
+    A schematic for the blue board is available here:
+    http://www.stm32duino.com/download/file.php?id=276
 
-  Problems with both boards:
+  Both Boards:
 
-  - No preloaded bootloader * to me this isn't really a problem as the
-    entire 64k of flash is available for use
-  - No user button
+    Nice features common to both:
 
-This is the board pinout based on its form-factor for the Blue board:
+    - SWD pins broken out and easily connected (VCC, GND, SWDIO, SWCLK)
+    - USB 5V is broken out with easy access.
+    - User LED on PC13
+    - Power LED
+    - You can probably use more flash (128k) than officially documented for
+      the chip (stm32f103c8t6 64k), I was able to load 115k of flash on mine
+      and it seemed to work.
+
+    Problems with both boards:
+
+    - No preloaded bootloader * to me this isn't really a problem as the
+      entire 64k of flash is available for use
+    - No user button
+
+  This is the board pinout based on its form-factor for the Blue board:
 
         USB
         ___
@@ -94,25 +110,15 @@ This is the board pinout based on its form-factor for the Blue board:
   |3.3V       VB|
   |_____________|
 
-Contents
-========
-
-  - LEDs
-  - UARTs
-  - Timer Inputs/Outputs
-  - Using 128KiB of Flash instead of 64KiB
-  - STM32F103 Minimum - specific Configuration Options
-  - Configurations
-
 LEDs
 ====
 
-The STM32F103 Minimum board has only one software controllable LED.
-This LED can be used by the board port when CONFIG_ARCH_LEDS option is
-enabled.
+  The STM32F103 Minimum board has only one software controllable LED.
+  This LED can be used by the board port when CONFIG_ARCH_LEDS option is
+  enabled.
 
-If enabled the LED is simply turned on when the board boots
-succesfully, and is blinking on panic / assertion failed.
+  If enabled the LED is simply turned on when the board boots
+  succesfully, and is blinking on panic / assertion failed.
 
 UARTs
 =====
@@ -139,7 +145,7 @@ UARTs
 Default USART/UART Configuration
 --------------------------------
 
-USART1 (RX & TX only) is available through pins PA9 (TX) and PA10 (RX).
+  USART1 (RX & TX only) is available through pins PA9 (TX) and PA10 (RX).
 
 Timer Inputs/Outputs
 ====================
@@ -171,69 +177,101 @@ Timer Inputs/Outputs
 Using 128KiB of Flash instead of 64KiB
 ======================================
 
-Some people figured out that the STM32F103C8T6 has 128KiB of internal memory
-instead of 64KiB as documented in the datasheet and reported by its internal
-register.
+  Some people figured out that the STM32F103C8T6 has 128KiB of internal memory
+  instead of 64KiB as documented in the datasheet and reported by its internal
+  register.
 
-In order to enable 128KiB you need modify the linker script to reflect this
-new size. Open the configs/stm32f103-minimum/scripts/ld.script and replace:
+  In order to enable 128KiB you need modify the linker script to reflect this
+  new size. Open the configs/stm32f103-minimum/scripts/ld.script and replace:
 
-  flash (rx) : ORIGIN = 0x08000000, LENGTH = 64K
+    flash (rx) : ORIGIN = 0x08000000, LENGTH = 64K
 
-with
+  with
 
-  flash (rx) : ORIGIN = 0x08000000, LENGTH = 128K
+    flash (rx) : ORIGIN = 0x08000000, LENGTH = 128K
 
-Enable many NuttX features (ie. many filesystems and applications) to get a
-large binary image with more than 64K.
+  Enable many NuttX features (ie. many filesystems and applications) to get a
+  large binary image with more than 64K.
 
-We will use OpenOCD to write the firmware in the STM32F103C8T6 Flash. Use a
-up to dated OpenOCD version (ie. openocd-0.9).
+  We will use OpenOCD to write the firmware in the STM32F103C8T6 Flash. Use a
+  up to dated OpenOCD version (ie. openocd-0.9).
 
-You will need to create a copy of original openocd/scripts/target/stm32f1x.cfg
-to openocd/scripts/target/stm32f103c8t6.cfg and edit the later file replacing:
+  You will need to create a copy of original openocd/scripts/target/stm32f1x.cfg
+  to openocd/scripts/target/stm32f103c8t6.cfg and edit the later file replacing:
 
-  flash bank $_FLASHNAME stm32f1x 0x08000000 0 0 0 $_TARGETNAME
+    flash bank $_FLASHNAME stm32f1x 0x08000000 0 0 0 $_TARGETNAME
 
-with
+  with
 
-  flash bank $_FLASHNAME stm32f1x 0x08000000 0x20000 0 0 $_TARGETNAME
+    flash bank $_FLASHNAME stm32f1x 0x08000000 0x20000 0 0 $_TARGETNAME
 
-We will use OpenOCD with STLink-V2 programmer, but it will work with other
-programmers (JLink, Versaloon, or some based on FTDI FT232, etc).
+  We will use OpenOCD with STLink-V2 programmer, but it will work with other
+  programmers (JLink, Versaloon, or some based on FTDI FT232, etc).
 
-Open a terminal and execute:
+  Open a terminal and execute:
 
-  $ sudo openocd -f interface/stlink-v2.cfg -f target/stm32f103c8t6.cfg
+    $ sudo openocd -f interface/stlink-v2.cfg -f target/stm32f103c8t6.cfg
 
-Now in other terminal execute:
+  Now in other terminal execute:
 
-  $ telnet localhost 4444
+    $ telnet localhost 4444
 
-  Trying 127.0.0.1...
-  Connected to localhost.
-  Escape character is '^]'.
-  Open On-Chip Debugger
+    Trying 127.0.0.1...
+    Connected to localhost.
+    Escape character is '^]'.
+    Open On-Chip Debugger
 
-  > reset halt
-  stm32f1x.cpu: target state: halted
-  target halted due to debug-request, current mode: Thread
-  xPSR: 0x01000000 pc: 0x080003ac msp: 0x20000d78
+    > reset halt
+    stm32f1x.cpu: target state: halted
+    target halted due to debug-request, current mode: Thread
+    xPSR: 0x01000000 pc: 0x080003ac msp: 0x20000d78
 
-  > flash write_image erase nuttx.bin 0x08000000
-  auto erase enabled
-  device id = 0x20036410
-  ignoring flash probed value, using configured bank size
-  flash size = 128kbytes
-  stm32f1x.cpu: target state: halted
-  target halted due to breakpoint, current mode: Thread
-  xPSR: 0x61000000 pc: 0x2000003a msp: 0x20000d78
-  wrote 92160 bytes from file nuttx.bin in 4.942194s (18.211 KiB/s)
+    > flash write_image erase nuttx.bin 0x08000000
+    auto erase enabled
+    device id = 0x20036410
+    ignoring flash probed value, using configured bank size
+    flash size = 128kbytes
+    stm32f1x.cpu: target state: halted
+    target halted due to breakpoint, current mode: Thread
+    xPSR: 0x61000000 pc: 0x2000003a msp: 0x20000d78
+    wrote 92160 bytes from file nuttx.bin in 4.942194s (18.211 KiB/s)
 
-  > reset run
-  > exit
+    > reset run
+    > exit
 
-Now NuttX should start normally.
+  Now NuttX should start normally.
+
+Quadrature Encoder:
+===================
+
+  The nsh configuration has been used to test the Quadrture Encoder
+  (QEncoder, QE) with the following modifications to the configuration
+  file:
+
+  - These setting enable support for the common QEncode upper half driver:
+
+   CONFIG_SENSORS=y
+     CONFIG_QENCODER=y
+
+  - This is a board setting that selected timer 4 for use with the
+    quadrature encode:
+
+    CONFIG_STM32F103MINIMUM_QETIMER=4
+
+  - These settings enable the STM32 Quadrature encoder on timer 4:
+
+    CONFIG_STM32_TIM4_CAP=y
+    CONFIG_STM32_TIM4_QE=y
+    CONFIG_STM32_TIM4_QECLKOUT=2800000
+    CONFIG_STM32_QENCODER_FILTER=y
+    CONFIG_STM32_QENCODER_SAMPLE_EVENT_6=y
+    CONFIG_STM32_QENCODER_SAMPLE_FDTS_4=y
+
+  - These settings enable the test case at apps/examples/qencoder:
+
+    CONFIG_EXAMPLES_QENCODER=y
+    CONFIG_EXAMPLES_QENCODER_DELAY=100
+    CONFIG_EXAMPLES_QENCODER_DEVPATH="/dev/qe0"
 
 STM32F103 Minimum - specific Configuration Options
 ==================================================
@@ -406,21 +444,25 @@ STM32F103 Minimum - specific Configuration Options
 Configurations
 ==============
 
-Each STM32F103 Minimum configuration is maintained in a sub-directory and
-can be selected as follow:
+  Instantiating Configurations
+  ----------------------------
+  Each STM32F103 Minimum configuration is maintained in a sub-directory and
+  can be selected as follow:
 
     cd tools
     ./configure.sh STM32F103 Minimum/<subdir>
     cd -
     . ./setenv.sh
 
-If this is a Windows native build, then configure.bat should be used
-instead of configure.sh:
+  If this is a Windows native build, then configure.bat should be used
+  instead of configure.sh:
 
     configure.bat STM32F103-Minimum\<subdir>
 
-Where <subdir> is one of the following:
+  Where <subdir> is one of the following:
 
+  Configuration Directories
+  -------------------------
   nsh:
   ---
     Configures the NuttShell (nsh) located at apps/examples/nsh. This
