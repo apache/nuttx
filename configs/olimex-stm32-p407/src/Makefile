@@ -48,6 +48,11 @@ ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS +=  stm32_buttons.c
 endif
 
+
+ifeq ($(CONFIG_STM32_FSMC),y)
+CSRCS += stm32_sram.c
+endif
+
 ifeq ($(CONFIG_STM32_OTGFS),y)
 CSRCS += stm32_usb.c
 endif
