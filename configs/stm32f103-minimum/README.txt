@@ -273,6 +273,9 @@ Quadrature Encoder:
     CONFIG_EXAMPLES_QENCODER_DELAY=100
     CONFIG_EXAMPLES_QENCODER_DEVPATH="/dev/qe0"
 
+  In this configuration, the QEncoder inputs will be on the TIM4 inputs of
+  PB6 and PB7.
+
 STM32F103 Minimum - specific Configuration Options
 ==================================================
 
