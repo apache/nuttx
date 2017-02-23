@@ -4,4 +4,10 @@
 #
 
 if ARCH_BOARD_STM32F103_MINIMUM
+
+config STM32F103MINIMUM_QETIMER
+	int "Timer to use with QE encoder"
+	default 4
+	depends on QENCODER
+
 endif
