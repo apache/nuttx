@@ -438,7 +438,7 @@ o pthreads (sched/pthreads)
                serve as cancellation points.  They are, however, simple wrappers around nanosleep
                which is a true cancellation point.
                NOTE 02: system() is actually implemented in apps/ as part of NSH.  It cannot be
-               a cancellation point either.
+               a cancellation point.
                NOTE 03: sigpause() is a user-space function in the C library and cannot serve as
                cancellation points.  It is, however, a simple wrapper around sigsuspend()
                which is a true cancellation point.

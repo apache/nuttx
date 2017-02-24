@@ -337,14 +337,6 @@ if I2C
 source drivers/i2c/Kconfig
 endif
 
-menuconfig SPI
-	bool "SPI Driver Support"
-	default n
-	---help---
-		This selection enables selection of common SPI options.  This option
-		should be enabled by all platforms that support SPI interfaces.
-		See include/nuttx/spi/spi.h for further SPI driver information.
-
 source drivers/spi/Kconfig
 
 menuconfig I2S

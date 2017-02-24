@@ -107,18 +107,18 @@ int stm32l4_compconfig(int cmp, const struct stm32l4_comp_config_s *cfg)
     {
     case STM32L4_COMP_INP_PIN_1:
       stm32l4_configgpio(cmp == STM32L4_COMP1 ? GPIO_COMP1_INP_1 : GPIO_COMP2_INP_1);
-      regval |= COMP1_CSR_INPSEL_PIN1;
+      regval |= COMP_CSR_INPSEL_PIN1;
       break;
 
     case STM32L4_COMP_INP_PIN_2:
       stm32l4_configgpio(cmp == STM32L4_COMP1 ? GPIO_COMP1_INP_2 : GPIO_COMP2_INP_2);
-      regval |= COMP1_CSR_INPSEL_PIN2;
+      regval |= COMP_CSR_INPSEL_PIN2;
       break;
 
 #if defined(CONFIG_STM32L4_STM32L4X3)
     case STM32L4_COMP_INP_PIN_3:
       stm32l4_configgpio(cmp == STM32L4_COMP1 ? GPIO_COMP1_INP_3 : GPIO_COMP2_INP_3);
-      regval |= COMP1_CSR_INPSEL_PIN3;
+      regval |= COMP_CSR_INPSEL_PIN3;
       break;
 #endif
 

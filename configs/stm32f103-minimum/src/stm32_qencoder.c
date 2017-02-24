@@ -1,7 +1,7 @@
 /************************************************************************************
- * configs/olimex-stm32-p407/src/stm32_boot.c
+ * configs/stm32f103-minimum/src/stm32_qencoder.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,80 +39,42 @@
 
 #include <nuttx/config.h>
 
+#include <errno.h>
 #include <debug.h>
 
-#include <nuttx/arch.h>
-#include <nuttx/board.h>
+#include <nuttx/sensors/qencoder.h>
 #include <arch/board/board.h>
 
-#include "olimex-stm32-p407.h"
+#include "chip.h"
+#include "up_arch.h"
+#include "stm32_qencoder.h"
+#include "stm32f103_minimum.h"
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32_boardinitialize
+ * Name: stm32_qencoder_initialize
  *
  * Description:
- *   All STM32 architectures must provide the following entry point.  This entry point
- *   is called early in the intitialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
+ *   All STM32 architectures must provide the following interface to work with
+ *   examples/qencoder.
  *
  ************************************************************************************/
 
-void stm32_boardinitialize(void)
+int stm32_qencoder_initialize(FAR const char *devpath, int timer)
 {
-#ifdef CONFIG_STM32_FSMC
-  /* If the FSMC is enabled, then enable SRAM access */
+  int ret;
 
-  stm32_stram_configure();
-#endif
+  /* Initialize a quadrature encoder interface. */
 
-  /* Initialize USB if the 1) OTG FS controller is in the configuration and 2)
-   * disabled, and 3) the weak function stm32_usb_configure() has been brought
-   * into the build. Presumeably either CONFIG_USBDEV or CONFIG_USBHOST is also
-   * selected.
-   */
-
-#ifdef CONFIG_STM32_OTGFS
-  if (stm32_usb_configure)
+  sninfo("Initializing the quadrature encoder using TIM%d\n", timer);
+  ret = stm32_qeinitialize(devpath, timer);
+  if (ret < 0)
     {
-      stm32_usb_configure();
+      snerr("ERROR: stm32_qeinitialize failed: %d\n", ret);
     }
-#endif
 
-  /* Configure on-board LEDs if LED support has been selected. */
-
-#ifdef CONFIG_ARCH_LEDS
-  board_autoled_initialize();
-#endif
-
-  /* Configure on-board BUTTONs if BUTTON support has been selected. */
-
-#ifdef CONFIG_ARCH_BUTTONS
-  board_button_initialize();
-#endif
+  return ret;
 }
-
-/****************************************************************************
- * Name: board_initialize
- *
- * Description:
- *   If CONFIG_BOARD_INITIALIZE is selected, then an additional
- *   initialization call will be performed in the boot-up sequence to a
- *   function called board_initialize().  board_initialize() will be
- *   called immediately after up_initialize() is called and just before the
- *   initial application is started.  This additional initialization phase
- *   may be used, for example, to initialize board-specific device drivers.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_BOARD_INITIALIZE
-void board_initialize(void)
-{
-  /* Perform board-specific initialization here if so configured */
-
-  (void)stm32_bringup();
-}
-#endif

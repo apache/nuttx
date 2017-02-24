@@ -73,6 +73,10 @@ ifeq ($(CONFIG_LCD_ST7567),y)
 CSRCS += stm32_lcd.c
 endif
 
+ifeq ($(CONFIG_QENCODER),y)
+CSRCS += stm32_qencoder.c
+endif
+
 ifeq ($(CONFIG_VEML6070),y)
 CSRCS += stm32_veml6070.c
 endif
