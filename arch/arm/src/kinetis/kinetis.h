@@ -1,8 +1,9 @@
 /************************************************************************************
  * arch/arm/src/kinetis/kinetis.h
  *
- *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2011, 2013, 2017 Gregory Nutt. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -365,6 +366,18 @@ void kinetis_uartreset(uintptr_t uart_base);
 #endif
 
 /****************************************************************************
+ * Name: kinetis_lpuartreset
+ *
+ * Description:
+ *   Reset a UART.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_LPUART_DEVICE
+void kinetis_lpuartreset(uintptr_t uart_base);
+#endif
+
+/****************************************************************************
  * Name: kinetis_uartconfigure
  *
  * Description:
@@ -374,7 +387,22 @@ void kinetis_uartreset(uintptr_t uart_base);
 
 #ifdef HAVE_UART_DEVICE
 void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud, uint32_t clock,
-                           unsigned int parity, unsigned int nbits);
+                           unsigned int parity, unsigned int nbits,
+                           unsigned int stop2);
+#endif
+
+/****************************************************************************
+ * Name: kinetis_lpuartconfigure
+ *
+ * Description:
+ *   Configure a UART as a RS-232 UART.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_LPUART_DEVICE
+void kinetis_lpuartconfigure(uintptr_t uart_base, uint32_t baud, uint32_t clock,
+                           unsigned int parity, unsigned int nbits,
+                           unsigned int stop2);
 #endif
 
 /************************************************************************************
