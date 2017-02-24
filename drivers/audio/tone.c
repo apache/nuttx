@@ -94,6 +94,9 @@ struct tone_upperhalf_s
 {
   uint8_t crefs;                       /* The number of times the device has been
                                         * opened */
+#ifdef CONFIG_PWM_MULTICHAN
+  uint8_t channel;                     /* Output channel that drives the tone. */
+#endif
   volatile bool started;               /* True: pulsed output is being generated */
   sem_t exclsem;                       /* Supports mutual exclusion */
   struct pwm_info_s tone;              /* Pulsed output for Audio Tone */
@@ -146,6 +149,19 @@ static bool g_repeat;
  * Private Function Prototypes
  ****************************************************************************/
 
+static void oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
+                             FAR void *arg);
+static uint32_t note_duration(FAR uint32_t *silence, uint32_t note_length,
+                              uint32_t dots);
+static uint32_t rest_duration(uint32_t rest_length, uint32_t dots);
+static void start_note(FAR struct tone_upperhalf_s *upper, uint8_t note);
+static void stop_note(FAR struct tone_upperhalf_s *upper);
+static void start_tune(FAR struct tone_upperhalf_s *upper, const char *tune);
+static void next_note(FAR struct tone_upperhalf_s *upper);
+static int next_char(void);
+static uint8_t next_number(void);
+static uint8_t next_dots(void);
+
 static int tone_open(FAR struct file *filep);
 static int tone_close(FAR struct file *filep);
 static ssize_t tone_read(FAR struct file *filep, FAR char *buffer,
@@ -153,10 +169,6 @@ static ssize_t tone_read(FAR struct file *filep, FAR char *buffer,
 static ssize_t tone_write(FAR struct file *filep, FAR const char *buffer,
                           size_t buflen);
 
-static int next_char(void);
-static uint8_t next_number(void);
-static uint8_t next_dots(void);
-static void next_note(FAR struct tone_upperhalf_s *upper);
 
 /****************************************************************************
  * Private Data
@@ -294,12 +306,17 @@ static void start_note(FAR struct tone_upperhalf_s *upper, uint8_t note)
 {
   FAR struct pwm_lowerhalf_s *tone = upper->devtone;
 
-  upper->tone.frequency = g_notes_freq[note - 1];
-  upper->tone.duty = 50;
+  upper->tone.frequency           = g_notes_freq[note - 1];
+#ifdef CONFIG_PWM_MULTICHAN
+  upper->tone.channels[0].channel = upper->channel;
+  upper->tone.channels[0].duty    = b16HALF;
+#else
+  upper->tone.duty                = b16HALF;
+#endif
+
+  /* REVISIT: Should check the return value */
 
   tone->ops->start(tone, &upper->tone);
-
-  return;
 }
 
 /****************************************************************************
@@ -311,8 +328,6 @@ static void stop_note(FAR struct tone_upperhalf_s *upper)
   FAR struct pwm_lowerhalf_s *tone = upper->devtone;
 
   tone->ops->stop(tone);
-
-  return;
 }
 
 /****************************************************************************
@@ -520,7 +535,6 @@ static void next_note(FAR struct tone_upperhalf_s *upper)
           ts.tv_nsec = (unsigned long)nsec;
 
           ONESHOT_START(upper->oneshot, oneshot_callback, upper, &ts);
-
           return;
 
           /* Change tempo */
@@ -648,7 +662,6 @@ static void next_note(FAR struct tone_upperhalf_s *upper)
   /* And arrange a callback when the note should stop */
 
   ONESHOT_START(upper->oneshot, oneshot_callback, upper, &ts);
-
   return;
 
   /* Tune looks bad (unexpected EOF, bad character, etc.) */
@@ -925,9 +938,14 @@ static ssize_t tone_write(FAR struct file *filep, FAR const char *buffer,
  ****************************************************************************/
 
 int tone_register(FAR const char *path, FAR struct pwm_lowerhalf_s *tone,
+#ifdef CONFIG_PWM_MULTICHAN
+                  int channel,
+#endif
                   FAR struct oneshot_lowerhalf_s *oneshot)
 {
   FAR struct tone_upperhalf_s *upper;
+
+  DEBUGASSERT(path != NULL && tone != NULL);
 
   /* Allocate the upper-half data structure */
 
@@ -947,6 +965,9 @@ int tone_register(FAR const char *path, FAR struct pwm_lowerhalf_s *tone,
   sem_init(&upper->exclsem, 0, 1);
   upper->devtone = tone;
   upper->oneshot = oneshot;
+#ifdef CONFIG_PWM_MULTICHAN
+  upper->channel = (uint8_t)channel;
+#endif
 
   /* Register the PWM device */
 

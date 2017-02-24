@@ -84,10 +84,6 @@ config LIBC_ARCH_STRNLEN
 	bool
 	default n
 
-config LIBC_ARCH_BZERO
-	bool
-	default n
-
 config LIBC_ARCH_ELF
 	bool
 	default n

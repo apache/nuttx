@@ -76,7 +76,7 @@
  * KINETIS_MCG_HAS_PLL_INTERNAL_MODE - Has PEI mode or PBI mode
  * KINETIS_MCG_HAS_RESET_IS_BLPI     - Has Reset clock mode is BLPI
  *
- * MCD Register Configuration
+ * MCG Register Configuration
  *
  * KINETIS_MCG_HAS_C1                - SoC has C1 Register
  * KINETIS_MCG_HAS_C1_IREFS          - SoC has C1[IREFS]
@@ -289,7 +289,7 @@
 #  undef  KINETIS_MCG_HAS_PLL_INTERNAL_MODE            /* Has PEI mode or PBI mode */
 #  undef  KINETIS_MCG_HAS_RESET_IS_BLPI                /* Has Reset clock mode is BLPI */
 
-/* MCD Register Configuration */
+/* MCG Register Configuration */
 
 #  define KINETIS_MCG_HAS_C1                 1         /* SoC has C1 Register */
 #  define KINETIS_MCG_HAS_C1_IREFS           1         /* SoC has C1[IREFS] */
@@ -371,7 +371,7 @@
 #  undef  KINETIS_MCG_HAS_PLL_INTERNAL_MODE            /* Has PEI mode or PBI mode */
 #  undef  KINETIS_MCG_HAS_RESET_IS_BLPI                /* Has Reset clock mode is BLPI */
 
-/* MCD Register Configuration */
+/* MCG Register Configuration */
 
 #  define KINETIS_MCG_HAS_C1                 1         /* SoC has C1 Register */
 #  define KINETIS_MCG_HAS_C1_IREFS           1         /* SoC has C1[IREFS] */
@@ -448,7 +448,7 @@
 
 /* Verified to Document Number: Document Number: K66P144M180SF5RMV2 Rev. 2, May 2015 */
 
-#  define KINETIS_MCG_VERSION KINETIS_K_MCG_VERSION_06
+#  define KINETIS_MCG_VERSION KINETIS_MCG_VERSION_06
 
 /* MCG Configuration Parameters */
 
@@ -463,7 +463,7 @@
 #  undef  KINETIS_MCG_HAS_PLL_INTERNAL_MODE            /* Has PEI mode or PBI mode */
 #  undef  KINETIS_MCG_HAS_RESET_IS_BLPI                /* Has Reset clock mode is BLPI */
 
-/* MCD Register Configuration */
+/* MCG Register Configuration */
 
 #  define KINETIS_MCG_HAS_C1                 1         /* SoC has C1 Register */
 #  define KINETIS_MCG_HAS_C1_IREFS           1         /* SoC has C1[IREFS] */
@@ -544,7 +544,7 @@
 #  undef  KINETIS_MCG_HAS_PLL_INTERNAL_MODE            /* Has PEI mode or PBI mode */
 #  undef  KINETIS_MCG_HAS_RESET_IS_BLPI                /* Has Reset clock mode is BLPI */
 
-/* MCD Register Configuration */
+/* MCG Register Configuration */
 
 #  define KINETIS_MCG_HAS_C1                 1         /* SoC has C1 Register */
 #  define KINETIS_MCG_HAS_C1_IREFS           1         /* SoC has C1[IREFS] */

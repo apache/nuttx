@@ -163,6 +163,18 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_QENCODER
+  /* Initialize and register the qencoder driver */
+
+  ret = stm32_qencoder_initialize("/dev/qe0", CONFIG_STM32F103MINIMUM_QETIMER);
+  if (ret != OK)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to register the qencoder: %d\n",
+             ret);
+    }
+#endif
+
 #ifdef CONFIG_USERLED
   /* Register the LED driver */
 
