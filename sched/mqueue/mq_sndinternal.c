@@ -224,7 +224,7 @@ FAR struct mqueue_msg_s *mq_msgalloc(void)
  *
  * Assumptions/restrictions:
  * - The caller has verified the input parameters using mq_verifysend().
- * - Interrupts are disabled.
+ * - Executes within a critical section established by the caller.
  *
  ****************************************************************************/
 
