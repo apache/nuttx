@@ -1140,19 +1140,25 @@
 /* System Clock Divider Register 2 */
 
 #if defined(KINETIS_SIM_HAS_CLKDIV2_USBFRAC)
-#  define SIM_CLKDIV2_USBFRAC                 (1 << 0)  /* Bit 0:  USB clock divider fraction */
+#  define SIM_CLKDIV2_USBFRAC_SHIFT           (0)  /* Bit 0:  USB clock divider fraction */
+#  define SIM_CLKDIV2_USBFRAC_MASK            (1 << SIM_CLKDIV2_USBFRAC_SHIFT)
+#    define SIM_CLKDIV2_USBFRAC(n)            ((((n)-1) & 1) << SIM_CLKDIV2_USBFRAC_SHIFT) /* n=1..2 */
 #endif
 #if defined(KINETIS_SIM_HAS_CLKDIV2_USBDIV)
 #  define SIM_CLKDIV2_USBDIV_SHIFT            (1)       /* Bits 1-3: USB clock divider divisor */
 #  define SIM_CLKDIV2_USBDIV_MASK             (7 << SIM_CLKDIV2_USBDIV_SHIFT)
+#  define SIM_CLKDIV2_USBDIV(n)               ((((n)-1) & 7) << SIM_CLKDIV2_USBDIV_SHIFT) /* n=1..8 */
 #endif
                                                         /* Bits 4-7: Reserved */
 #if defined(KINETIS_SIM_HAS_CLKDIV2_USBHSFRAC)
-#  define SIM_CLKDIV2_USBHSFRAC               (1 << 8)  /* Bit 8:  USB HS clock divider fraction */
+#  define SIM_CLKDIV2_USBHSFRAC_SHIFT         (8)       /* Bit 8:  USB HS clock divider fraction */
+#  define SIM_CLKDIV2_USBHSFRAC_MASK          (1 << SIM_CLKDIV2_USBHSFRAC_SHIFT)
+#    define SIM_CLKDIV2_USBHSFRAC(n)          ((((n)-1) & 1) << SIM_CLKDIV2_USBHSFRAC_SHIFT) /* n=1..2 */
 #endif
 #if defined(KINETIS_SIM_HAS_CLKDIV2_USBHSDIV)
 #  define SIM_CLKDIV2_USBHSDIV_SHIFT          (9)       /* Bits 1-3: USB HS clock divider divisor */
 #  define SIM_CLKDIV2_USBHSDIV_MASK           (7 << SIM_CLKDIV2_USBHSDIV_SHIFT)
+#  define SIM_CLKDIV2_USBHSDIV(n)             ((((n)-1) & 7) << SIM_CLKDIV2_USBHSDIV_SHIFT) /* n=1..8 */
 #endif
 #if defined(KINETIS_SIM_HAS_CLKDIV2_I2SFRAC)
 #  define SIM_CLKDIV2_I2SFRAC_SHIFT           (8)       /* Bits 8-15: I2S clock divider fraction */
@@ -1259,7 +1265,9 @@
 /* System Clock Divider Register 3 */
 
 #  if defined(KINETIS_SIM_HAS_CLKDIV3_PLLFLLFRAC)
-#    define SIM_CLKDIV3_PLLFLLFRAC            (1 << 0) /* Bit 0: PLLFLL clock divider fraction */
+#    define SIM_CLKDIV3_PLLFLLFRAC_SHIFT       (0) /* Bit 0: PLLFLL clock divider fraction */
+#    define SIM_CLKDIV3_PLLFLLFRAC_MASK        (1 << SIM_CLKDIV3_PLLFLLFRAC_SHIFT)
+#      define SIM_CLKDIV3_PLLFLLFRAC(n)         ((((n)-1) & 1) <<  SIM_CLKDIV3_PLLFLLFRAC_SHIFT) /* n=1..2 */
 #  endif
 #  if defined(KINETIS_SIM_HAS_CLKDIV3_PLLFLLDIV)
 #    define SIM_CLKDIV3_PLLFLLDIV_SHIFT       (1)      /* Bits 1-3: PLLFLL clock divider divisor */
@@ -1271,7 +1279,9 @@
 /* System Clock Divider Register 4 */
 
 #  if defined(KINETIS_SIM_HAS_CLKDIV4_TRACEFRAC)
-#    define SIM_CLKDIV4_TRACEFRAC             (1 << 0) /* Bit 0: Trace clock divider fraction */
+#    define SIM_CLKDIV4_TRACEFRAC_SHIFTS      (0)      /* Bit 0: Trace clock divider fraction */
+#    define SIM_CLKDIV4_TRACEFRAC_MASK        (1 << SIM_CLKDIV4_TRACEFRAC_SHIFTS)
+#    define SIM_CLKDIV4_TRACEFRAC(n)          ((((n)-1) & 1) <<  SIM_CLKDIV4_TRACEFRAC_SHIFTS) /* n=1..2 */
 #  endif
 #  if defined(KINETIS_SIM_HAS_CLKDIV4_TRACEDIV)
 #    define SIM_CLKDIV4_TRACEDIV_SHIFT        (1)      /* Bits 1-3: Trace clock divider divisor */
