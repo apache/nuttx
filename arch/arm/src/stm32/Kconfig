@@ -6768,11 +6768,12 @@ config STM32_TIM1_QE
 
 if STM32_TIM1_QE
 
-config STM32_TIM1_QECLKOUT
-	int "TIM1 output clock"
-	default 2800000
+config STM32_TIM1_QEPSC
+	int "TIM1 pulse prescaler"
+	default 1
 	---help---
-		The output clock of TIM1.
+		This prescaler divides the number of recorded encoder pulses,
+		limiting the count rate at the expense of resolution.
 
 endif
 
@@ -6785,11 +6786,12 @@ config STM32_TIM2_QE
 
 if STM32_TIM2_QE
 
-config STM32_TIM2_QECLKOUT
-	int "TIM2 output clock"
-	default 2800000
+config STM32_TIM2_QEPSC
+	int "TIM2 pulse prescaler"
+	default 1
 	---help---
-		The output clock of TIM2.
+		This prescaler divides the number of recorded encoder pulses,
+		limiting the count rate at the expense of resolution.
 
 endif
 
@@ -6802,11 +6804,12 @@ config STM32_TIM3_QE
 
 if STM32_TIM3_QE
 
-config STM32_TIM3_QECLKOUT
-	int "TIM3 output clock"
-	default 2800000
+config STM32_TIM3_QEPSC
+	int "TIM3 pulse prescaler"
+	default 1
 	---help---
-		The output clock of TIM3.
+		This prescaler divides the number of recorded encoder pulses,
+		limiting the count rate at the expense of resolution.
 
 endif
 
@@ -6819,11 +6822,12 @@ config STM32_TIM4_QE
 
 if STM32_TIM4_QE
 
-config STM32_TIM4_QECLKOUT
-	int "TIM4 output clock"
-	default 2800000
+config STM32_TIM4_QEPSC
+	int "TIM4 pulse prescaler"
+	default 1
 	---help---
-		The output clock of TIM4.
+		This prescaler divides the number of recorded encoder pulses,
+		limiting the count rate at the expense of resolution.
 
 endif
 
@@ -6836,11 +6840,12 @@ config STM32_TIM5_QE
 
 if STM32_TIM5_QE
 
-config STM32_TIM5_QECLKOUT
-	int "TIM5 output clock"
-	default 2800000
+config STM32_TIM5_QEPSC
+	int "TIM5 pulse prescaler"
+	default 1
 	---help---
-		The output clock of TIM5.
+		This prescaler divides the number of recorded encoder pulses,
+		limiting the count rate at the expense of resolution.
 
 endif
 
@@ -6853,11 +6858,12 @@ config STM32_TIM8_QE
 
 if STM32_TIM8_QE
 
-config STM32_TIM8_QECLKOUT
-	int "TIM8 output clock"
-	default 2800000
+config STM32_TIM8_QEPSC
+	int "TIM8 pulse prescaler"
+	default 1
 	---help---
-		The output clock of TIM8.
+		This prescaler divides the number of recorded encoder pulses,
+		limiting the count rate at the expense of resolution.
 
 endif
 
