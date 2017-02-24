@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/net/skeleton.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -463,6 +463,8 @@ static void skel_receive(FAR struct skel_driver_s *priv)
 
 static void skel_txdone(FAR struct skel_driver_s *priv)
 {
+  int delay;
+
   /* Check for errors and update statistics */
 
   NETDEV_TXDONE(priv->sk_dev);
@@ -475,14 +477,25 @@ static void skel_txdone(FAR struct skel_driver_s *priv)
 
   wd_cancel(priv->sk_txtimeout);
 
-  /* Then make sure that the TX poll timer is running (if it is already
-   * running, the following would restart it).  This is necessary to
-   * avoid certain race conditions where the polling sequence can be
-   * interrupted.
+  /* Check if the poll timer is running.  If it is not, then start it now.
+   * There is a race condition here:  We may test the time remaining on the
+   * poll timer and determine that it is still running, but then the timer
+   * expires immiately.  That should not be problem, however, the poll timer
+   * processing should be in the work queue and should execute immediately
+   * after we complete the TX poll. Inefficient, but not fatal.
    */
 
-  (void)wd_start(priv->sk_txpoll, skeleton_WDDELAY, skel_poll_expiry, 1,
-                 (wdparm_t)priv);
+  delay = wd_gettime(priv->sk_txpoll);
+  if (delay <= 0)
+    {
+      /* The poll timer is not running .. restart it.  This is necessary to
+       * avoid certain race conditions where the polling sequence can be
+       * interrupted.
+       */
+
+      (void)wd_start(priv->sk_txpoll, skeleton_WDDELAY, skel_poll_expiry,
+                     1, (wdparm_t)priv);
+    }
 
   /* And disable further TX interrupts. */
 

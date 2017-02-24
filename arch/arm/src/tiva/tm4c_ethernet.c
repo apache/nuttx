@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/tiva/tm4c_ethernet.c
  *
- *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -1955,17 +1955,32 @@ static void tiva_txdone(FAR struct tiva_ethmac_s *priv)
 
   if (priv->inflight <= 0)
     {
+      int delay;
+
       /* Cancel the TX timeout */
 
       wd_cancel(priv->txtimeout);
 
-      /* Then make sure that the TX poll timer is running (if it is already
-       * running, the following would restart it).  This is necessary to
-       * avoid certain race conditions where the polling sequence can be
-       * interrupted.
+      /* Check if the poll timer is running.  If it is not, then start it
+       * now.  There is a race condition here:  We may test the time
+       * remaining on the poll timer and determine that it is still running,
+       * but then the timer expires immiately.  That should not be problem,
+       * however, the poll timer processing should be in the work queue and
+       * should execute immediately after we complete the TX poll.
+       * Inefficient, but not fatal.
        */
 
-      (void)wd_start(priv->txpoll, TIVA_WDDELAY, tiva_poll_expiry, 1, (uint32_t)priv);
+      delay = wd_gettime(priv->txpoll);
+      if (delay <= 0)
+        {
+          /* The poll timer is not running .. restart it.  This is necessary
+           * to avoid certain race conditions where the polling sequence can
+           * be interrupted.
+           */
+
+          (void)wd_start(priv->txpoll, TIVA_WDDELAY, tiva_poll_expiry,
+                         1, (uint32_t)priv);
+        }
 
       /* And disable further TX interrupts. */
 
@@ -2306,7 +2321,8 @@ static void tiva_poll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  (void)wd_start(priv->txpoll, TIVA_WDDELAY, tiva_poll_expiry, 1, (uint32_t)priv);
+  (void)wd_start(priv->txpoll, TIVA_WDDELAY, tiva_poll_expiry,
+                 1, (uint32_t)priv);
   net_unlock();
 }
 
@@ -2348,7 +2364,8 @@ static void tiva_poll_expiry(int argc, uint32_t arg, ...)
        * cycle.
        */
 
-      (void)wd_start(priv->txpoll, TIVA_WDDELAY, tiva_poll_expiry, 1, (uint32_t)priv);
+      (void)wd_start(priv->txpoll, TIVA_WDDELAY, tiva_poll_expiry,
+                     1, (uint32_t)priv);
     }
 }
 
@@ -2396,7 +2413,8 @@ static int tiva_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  (void)wd_start(priv->txpoll, TIVA_WDDELAY, tiva_poll_expiry, 1, (uint32_t)priv);
+  (void)wd_start(priv->txpoll, TIVA_WDDELAY, tiva_poll_expiry,
+                 1, (uint32_t)priv);
 
   /* Enable the Ethernet interrupt */
 

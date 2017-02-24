@@ -1453,7 +1453,8 @@ static void dm9x_poll_expiry(int argc, wdparm_t arg, ...)
        * cycle.
        */
 
-      (void)wd_start(priv->dm_txpoll, DM9X_WDDELAY, dm9x_poll_expiry, 1, arg);
+      (void)wd_start(priv->dm_txpoll, DM9X_WDDELAY, dm9x_poll_expiry,
+                     1, arg);
     }
 }
 

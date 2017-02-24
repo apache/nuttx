@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc17xx/lpc17_ethernet.c
  *
- *   Copyright (C) 2010-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -1262,6 +1262,8 @@ static int lpc17_interrupt(int irq, void *context)
 
           if ((status & ETH_INT_TXDONE) != 0)
             {
+              int delay;
+
               NETDEV_TXDONE(&priv->lp_dev);
 
               /* A packet transmission just completed */
@@ -1283,14 +1285,28 @@ static int lpc17_interrupt(int irq, void *context)
 
               work_cancel(ETHWORK, &priv->lp_txwork);
 
-              /* Then make sure that the TX poll timer is running (if it is
-               * already running, the following would restart it).  This is
-               * necessary to avoid certain race conditions where the polling
-               * sequence can be interrupted.
+              /* Check if the poll timer is running.  If it is not, then
+               * start it now.  There is a race condition here:  We may test
+               * the time remaining on the poll timer and determine that it
+               * is still running, but then the timer expires immiately.
+               * That should not be problem, however, the poll timer is
+               * queued for processing should be in the work queue and
+               * should execute immediately after we complete the TX poll.
+               * Inefficient, but not fatal.
                */
 
-              (void)wd_start(priv->lp_txpoll, LPC17_WDDELAY, lpc17_poll_expiry,
-                             1, priv);
+              delay = wd_gettime(priv->lp_txpoll);
+              if (delay <= 0)
+                {
+                  /* The poll timer is not running .. restart it.  This is
+                   * necessary to avoid certain race conditions where the
+                   * polling sequence can be interrupted.
+                   */
+
+
+                  (void)wd_start(priv->lp_txpoll, LPC17_WDDELAY,
+                                 lpc17_poll_expiry, 1, priv);
+                }
 
               /* Schedule TX-related work to be performed on the work thread */
 

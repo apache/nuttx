@@ -2097,7 +2097,8 @@ static void pic32mz_poll_expiry(int argc, wdparm_t arg, ...)
        * cycle.
        */
 
-      (void)wd_start(priv->pd_txpoll, PIC32MZ_WDDELAY, pic32mz_poll_expiry, 1, arg);
+      (void)wd_start(priv->pd_txpoll, PIC32MZ_WDDELAY, pic32mz_poll_expiry,
+                     1, arg);
     }
 }
 

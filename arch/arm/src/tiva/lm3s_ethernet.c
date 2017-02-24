@@ -1272,7 +1272,8 @@ static void tiva_poll_expiry(int argc, wdparm_t arg, ...)
        * cycle.
        */
 
-      (void)wd_start(priv->ld_txpoll, TIVA_WDDELAY, tiva_poll_expiry, 1, arg);
+      (void)wd_start(priv->ld_txpoll, TIVA_WDDELAY, tiva_poll_expiry,
+                     1, arg);
     }
 }
 
@@ -1425,7 +1426,8 @@ static int tiva_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  (void)wd_start(priv->ld_txpoll, TIVA_WDDELAY, tiva_poll_expiry, 1, (uint32_t)priv);
+  (void)wd_start(priv->ld_txpoll, TIVA_WDDELAY, tiva_poll_expiry,
+                 1, (uint32_t)priv);
 
   priv->ld_bifup = true;
   leave_critical_section(flags);

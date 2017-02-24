@@ -805,6 +805,7 @@ static void ftmac100_receive(FAR struct ftmac100_driver_s *priv)
 static void ftmac100_txdone(FAR struct ftmac100_driver_s *priv)
 {
   FAR struct ftmac100_txdes_s *txdes;
+  int delay;
 
   /* Check if a Tx was pending */
 
@@ -843,13 +844,25 @@ static void ftmac100_txdone(FAR struct ftmac100_driver_s *priv)
 
   wd_cancel(priv->ft_txtimeout);
 
-  /* Then make sure that the TX poll timer is running (if it is already
-   * running, the following would restart it).  This is necessary to avoid
-   * certain race conditions where the polling sequence can be interrupted.
+  /* Check if the poll timer is running.  If it is not, then start it now.
+   * There is a race condition here:  We may test the time remaining on the
+   * poll timer and determine that it is still running, but then the timer
+   * expires immiately.  That should not be problem, however, the poll timer
+   * processing should be in the work queue and should execute immediately
+   * after we complete the TX poll. Inefficient, but not fatal.
    */
 
-  (void)wd_start(priv->ft_txpoll, FTMAC100_WDDELAY, ftmac100_poll_expiry, 1,
-                 (wdparm_t)priv);
+  delay = wd_gettime(priv->ft_txpoll);
+  if (delay <= 0)
+    {
+      /* The poll timer is not running .. restart it.  This is necessary to
+       * avoid certain race conditions where the polling sequence can be
+       * interrupted.
+       */
+
+      (void)wd_start(priv->ft_txpoll, FTMAC100_WDDELAY, ftmac100_poll_expiry,
+                     1, (wdparm_t)priv);
+    }
 
   /* Then poll the network for new XMIT data */
 

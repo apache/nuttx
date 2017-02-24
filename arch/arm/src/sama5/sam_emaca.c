@@ -4,7 +4,7 @@
  * 10/100 Base-T Ethernet driver for the SAMA5D3.  Denoted as 'A' to
  * distinguish it from the SAMA5D4 EMAC driver.
  *
- *   Copyright (C) 2013-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -1676,6 +1676,8 @@ static int sam_emac_interrupt(int irq, void *context)
   tsr = sam_getreg(priv, SAM_EMAC_TSR_OFFSET);
   if ((tsr & EMAC_TSR_COMP) != 0)
     {
+      int delay;
+
       /* If a TX transfer just completed, then cancel the TX timeout so
        * there will be do race condition between any subsequent timeout
        * expiration and the deferred interrupt processing.
@@ -1683,13 +1685,26 @@ static int sam_emac_interrupt(int irq, void *context)
 
        wd_cancel(priv->txtimeout);
 
-      /* Make sure that the TX poll timer is running (if it is already
-       * running, the following would restart it).  This is necessary to
-       * avoid certain race conditions where the polling sequence can be
-       * interrupted.
+      /* Check if the poll timer is running.  If it is not, then start it
+       * now.  There is a race condition here:  We may test the time
+       * remaining on the poll timer and determine that it is still running,
+       * but then the timer expires immiately.  That should not be problem,
+       * however, the poll timer processing should be in the work queue and
+       * should execute immediately after we complete the TX poll.
+       * Inefficient, but not fatal.
        */
 
-      (void)wd_start(priv->txpoll, SAM_WDDELAY, sam_poll_expiry, 1, priv);
+      delay = wd_gettime(priv->txpoll);
+      if (delay <= 0)
+        {
+          /* The poll timer is not running .. restart it.  This is necessary
+           * to avoid certain race conditions where the polling sequence can
+           * be interrupted.
+           */
+
+          (void)wd_start(priv->txpoll, SAM_WDDELAY, sam_poll_expiry,
+                         1, priv);
+        }
     }
 
   /* Cancel any pending poll work */

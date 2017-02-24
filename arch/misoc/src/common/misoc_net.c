@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/misoc/src/commong/misoc_net_net.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Ramtin Amin <keytwo@gmail.com>
  *
@@ -542,6 +542,8 @@ static void misoc_net_receive(FAR struct misoc_net_driver_s *priv)
 
 static void misoc_net_txdone(FAR struct misoc_net_driver_s *priv)
 {
+  int delay;
+
   /* Check for errors and update statistics */
 
   NETDEV_TXDONE(priv->misoc_net_dev);
@@ -554,14 +556,25 @@ static void misoc_net_txdone(FAR struct misoc_net_driver_s *priv)
 
   wd_cancel(priv->misoc_net_txtimeout);
 
-  /* Then make sure that the TX poll timer is running (if it is already
-   * running, the following would restart it).  This is necessary to
-   * avoid certain race conditions where the polling sequence can be
-   * interrupted.
+  /* Check if the poll timer is running.  If it is not, then start it now.
+   * There is a race condition here:  We may test the time remaining on the
+   * poll timer and determine that it is still running, but then the timer
+   * expires immiately.  That should not be problem, however, the poll timer
+   * processing should be in the work queue and should execute immediately
+   * after we complete the TX poll. Inefficient, but not fatal.
    */
 
-  (void)wd_start(priv->misoc_net_txpoll, MISOC_NET_WDDELAY,
-                 misoc_net_poll_expiry, 1, (wdparm_t)priv);
+  delay = wd_gettime(priv->misoc_net_txpoll);
+  if (delay <= 0)
+    {
+      /* The poll timer is not running .. restart it.  This is necessary to
+       * avoid certain race conditions where the polling sequence can be
+       * interrupted.
+       */
+
+      (void)wd_start(priv->misoc_net_txpoll, MISOC_NET_WDDELAY,
+                     misoc_net_poll_expiry, 1, (wdparm_t)priv);
+    }
 
   /* And disable further TX interrupts. */
 

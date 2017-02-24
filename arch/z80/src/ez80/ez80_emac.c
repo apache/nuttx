@@ -1980,7 +1980,8 @@ static void ez80emac_poll_expiry(int argc, wdparm_t arg, ...)
        * cycle.
        */
 
-      (void)wd_start(priv->txpoll, EMAC_WDDELAY, ez80emac_poll_expiry, 1, arg);
+      (void)wd_start(priv->txpoll, EMAC_WDDELAY, ez80emac_poll_expiry,
+                     1, arg);
     }
 }
 
