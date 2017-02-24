@@ -190,10 +190,10 @@ static inline void wd_expiration(void)
  * Name: wd_start
  *
  * Description:
- *   This function adds a watchdog to the timer queue.  The specified
- *   watchdog function will be called from the interrupt level after the
- *   specified number of ticks has elapsed. Watchdog timers may be started
- *   from the interrupt level.
+ *   This function adds a watchdog timer to the actuve timer queue.  The
+ *   specified watchdog function at 'wdentry' will be called from the
+ *   interrupt level after the specified number of ticks has elapsed.
+ *   Watchdog timers may be started from the interrupt level.
  *
  *   Watchdog timers execute in the address environment that was in effect
  *   when wd_start() is called.
@@ -205,10 +205,10 @@ static inline void wd_expiration(void)
  *   on a given watchdog ID has any effect.
  *
  * Parameters:
- *   wdog     = watchdog ID
- *   delay    = Delay count in clock ticks
- *   wdentry  = function to call on timeout
- *   parm1..4 = parameters to pass to wdentry
+ *   wdog     - watchdog ID
+ *   delay    - Delay count in clock ticks
+ *   wdentry  - function to call on timeout
+ *   parm1..4 - parameters to pass to wdentry
  *
  * Return Value:
  *   OK or ERROR
