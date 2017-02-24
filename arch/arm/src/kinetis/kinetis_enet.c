@@ -127,6 +127,7 @@
 #define KINETIS_TXTIMEOUT (60*CLK_TCK)
 #define MII_MAXPOLLS      (0x1ffff)
 #define LINK_WAITUS       (500*1000)
+#define LINK_NLOOPS       (10)
 
 /* PHY definitions.
  *
@@ -1763,7 +1764,7 @@ static inline int kinetis_initphy(struct kinetis_driver_s *priv)
 
   /* Wait for auto negotiation to complete */
 
-  for (retries = 0; retries < 10; retries++)
+  for (retries = 0; retries < LINK_NLOOPS; retries++)
     {
       ret = kinetis_readmii(priv, phyaddr, MII_MSR, &phydata);
       if (ret < 0)
@@ -1792,8 +1793,8 @@ static inline int kinetis_initphy(struct kinetis_driver_s *priv)
          PHY chip have mechanisms to configure link OK. We should leave autconf on, 
          and find a way to re-configure MCU whenever the link is ready. */
 
-      ninfo("%s: Autonegotiation failed (is cable plugged-in ?), default to 10Mbs mode\n", \
-            BOARD_PHY_NAME);
+      ninfo("%s: Autonegotiation failed [%d] (is cable plugged-in ?), default to 10Mbs mode\n", \
+            BOARD_PHY_NAME, retries);
 
       /* Stop auto negotiation */
       
