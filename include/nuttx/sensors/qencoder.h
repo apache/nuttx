@@ -71,13 +71,13 @@
 #define QE_NCMDS           2              /* Two required commands */
 
 /* User defined ioctl commands are also supported. These will be forwarded
- * by the upper-half QE driver to the lower-half QE driver via the ioclt()
+ * by the upper-half QE driver to the lower-half QE driver via the ioctl()
  * method fo the QE lower-half interface.  However, the lower-half driver
  * must reserve a block of commands as follows in order prevent IOCTL
  * command numbers from overlapping.
  */
 
-/* See arch/arm/src/tiva/tiva_qencoder.h */
+/* See arch/arm/src/tiva/tiva_qencoder.h (Not usable at that location) */
 
 #define QE_TIVA_FIRST      (QE_FIRST + QE_NCMDS)
 #define QE_TIVA_NCMDS      3

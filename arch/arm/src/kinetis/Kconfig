@@ -632,10 +632,11 @@ config KINETIS_FTM0_PWM
 	---help---
 		Reserve timer 0 for use by PWM
 
-		Timer devices may be used for different purposes.  One special purpose is
-		to generate modulated outputs for such things as motor control.  If KINETIS_FTM0
-		is defined then THIS following may also be defined to indicate that
-		the timer is intended to be used for pulsed output modulation.
+		Timer devices may be used for different purposes.  One special
+		purpose is to generate modulated outputs for such things as motor
+		control.  If KINETIS_FTM0 is defined then THIS following may also be
+		defined to indicate that the timer is intended to be used for pulsed
+		output modulation.
 
 config KINETIS_FTM0_CHANNEL
 	int "FTM0 PWM Output Channel"
@@ -1062,6 +1063,7 @@ config LPUART1_SERIAL_CONSOLE
 config NO_LPUART_SERIAL_CONSOLE
 	bool "No LPUART serial console"
 	---help---
-		No serial LPUART based console OR some other serial device provides the serial console
+		No serial LPUART based console OR some other serial device provides
+		the serial console
 
 endchoice # Kinetis LPUART Serial Console
