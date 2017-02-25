@@ -819,7 +819,7 @@ static int stm32_setup(FAR struct qe_lowerhalf_s *lower)
 
   /* Enable clocking to the timer */
 
-  modifyreg32(priv->regaddr, 0, priv->enable);
+  modifyreg32(priv->config->regaddr, 0, priv->config->enable);
 
   /* Timer base configuration */
 
@@ -1126,7 +1126,7 @@ static int stm32_shutdown(FAR struct qe_lowerhalf_s *lower)
 
   /* Disable clocking to the timer */
 
-  modifyreg32(priv->regaddr, priv->enable, 0);
+  modifyreg32(priv->config->regaddr, priv->config->enable, 0);
 
   /* Put the TI1 GPIO pin back to its default state */
 
