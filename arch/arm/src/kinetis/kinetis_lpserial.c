@@ -66,6 +66,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Some sanity checks *******************************************************/
 /* Is there at least one LPUART enabled and configured as a RS-232 device? */
 
@@ -107,35 +108,35 @@
 /* Pick ttys1. This could be any of LPUART0-1 excluding the console LPUART. */
 
 #if defined(CONFIG_KINETIS_LPUART0) && !defined(LPUART0_ASSIGNED)
-#  define TTYS1_DEV           g_lpuart0port /* LPUART0 is ttyS1 */
-#  define LPUART0_ASSIGNED    1
+#  define TTYS1_DEV             g_lpuart0port /* LPUART0 is ttyS1 */
+#  define LPUART0_ASSIGNED      1
 #elif defined(CONFIG_KINETIS_LPUART1) && !defined(LPUART1_ASSIGNED)
-#  define TTYS1_DEV           g_lpuart1port /* LPUART1 is ttyS1 */
-#  define LPUART1_ASSIGNED    1
+#  define TTYS1_DEV             g_lpuart1port /* LPUART1 is ttyS1 */
+#  define LPUART1_ASSIGNED      1
 #endif
 
-#define LPUART_CTRL_ERROR_INTS (LPUART_CTRL_ORIE | LPUART_CTRL_FEIE | \
-                                LPUART_CTRL_NEIE | LPUART_CTRL_PEIE)
+#define LPUART_CTRL_ERROR_INTS  (LPUART_CTRL_ORIE | LPUART_CTRL_FEIE | \
+                                 LPUART_CTRL_NEIE | LPUART_CTRL_PEIE)
 
-#define LPUART_CTRL_RX_INTS    LPUART_CTRL_RIE
+#define LPUART_CTRL_RX_INTS     LPUART_CTRL_RIE
 
-#define LPUART_CTRL_TX_INTS    LPUART_CTRL_TIE
+#define LPUART_CTRL_TX_INTS     LPUART_CTRL_TIE
 
-#define LPUART_CTRL_ALL_INTS   (LPUART_CTRL_TX_INTS | LPUART_CTRL_RX_INTS | \
-                                LPUART_CTRL_MA1IE | LPUART_CTRL_MA1IE | \
-                                LPUART_CTRL_ILIE  | LPUART_CTRL_TCIE)
+#define LPUART_CTRL_ALL_INTS    (LPUART_CTRL_TX_INTS | LPUART_CTRL_RX_INTS | \
+                                 LPUART_CTRL_MA1IE | LPUART_CTRL_MA1IE | \
+                                 LPUART_CTRL_ILIE  | LPUART_CTRL_TCIE)
 
-#define LPUART_STAT_ERRORS     (LPUART_STAT_OR | LPUART_STAT_FE | \
-                                LPUART_STAT_PF | LPUART_STAT_NF)
+#define LPUART_STAT_ERRORS      (LPUART_STAT_OR | LPUART_STAT_FE | \
+                                 LPUART_STAT_PF | LPUART_STAT_NF)
 
 
 /* The LPUART does not have an common set of aligned bits for the interrupt
  * enable and the status. So map the ctrl to the stat bits
  */
 
-#define LPUART_CTRL_TR_INTS    (LPUART_CTRL_TX_INTS | LPUART_CTRL_RX_INTS)
-#define LPUART_CTRL2STAT(c)    ((((c) & LPUART_CTRL_ERROR_INTS) >> 8) | \
-                                ((c) & (LPUART_CTRL_TR_INTS)))
+#define LPUART_CTRL_TR_INTS     (LPUART_CTRL_TX_INTS | LPUART_CTRL_RX_INTS)
+#define LPUART_CTRL2STAT(c)     ((((c) & LPUART_CTRL_ERROR_INTS) >> 8) | \
+                                 ((c) & (LPUART_CTRL_TR_INTS)))
 
 /****************************************************************************
  * Private Types
@@ -277,7 +278,8 @@ static uart_dev_t g_lpuart1port =
  * Name: kinetis_serialin
  ****************************************************************************/
 
-static inline uint32_t kinetis_serialin(struct kinetis_dev_s *priv, int offset)
+static inline uint32_t kinetis_serialin(struct kinetis_dev_s *priv,
+                                        int offset)
 {
   return getreg32(priv->uartbase + offset);
 }
@@ -286,7 +288,8 @@ static inline uint32_t kinetis_serialin(struct kinetis_dev_s *priv, int offset)
  * Name: kinetis_serialout
  ****************************************************************************/
 
-static inline void kinetis_serialout(struct kinetis_dev_s *priv, int offset, uint32_t value)
+static inline void kinetis_serialout(struct kinetis_dev_s *priv, int offset,
+                                     uint32_t value)
 {
   putreg32(value, priv->uartbase + offset);
 }
@@ -403,14 +406,15 @@ static void kinetis_shutdown(struct uart_dev_s *dev)
  * Name: kinetis_attach
  *
  * Description:
- *   Configure the LPUART to operation in interrupt driven mode.  This method is
- *   called when the serial port is opened.  Normally, this is just after the
- *   the setup() method is called, however, the serial console may operate in
- *   a non-interrupt driven mode during the boot phase.
+ *   Configure the LPUART to operation in interrupt driven mode.  This
+ *   method is called when the serial port is opened.  Normally, this is
+ *   just after the the setup() method is called, however, the serial
+ *   console may operate in a non-interrupt driven mode during the boot phase.
  *
- *   RX and TX interrupts are not enabled when by the attach method (unless the
- *   hardware supports multiple levels of interrupt enabling).  The RX and TX
- *   interrupts are not enabled until the txint() and rxint() methods are called.
+ *   RX and TX interrupts are not enabled when by the attach method (unless
+ *   the hardware supports multiple levels of interrupt enabling).  The RX
+ *   and TX interrupts are not enabled until the txint() and rxint() methods
+ *   are called.
  *
  ****************************************************************************/
 
@@ -436,9 +440,9 @@ static int kinetis_attach(struct uart_dev_s *dev)
  * Name: kinetis_detach
  *
  * Description:
- *   Detach LPUART interrupts.  This method is called when the serial port is
- *   closed normally just before the shutdown method is called.  The exception
- *   is the serial console which is never shutdown.
+ *   Detach LPUART interrupts.  This method is called when the serial port
+ *   is closed normally just before the shutdown method is called.  The
+ *   exception is the serial console which is never shutdown.
  *
  ****************************************************************************/
 
@@ -460,9 +464,9 @@ static void kinetis_detach(struct uart_dev_s *dev)
  * Name: kinetis_interrupts
  *
  * Description:
- *   This is the LPUART status interrupt handler.  It will be invoked when an
- *   interrupt received on the 'irq'  It should call uart_transmitchars or
- *   uart_receivechar to perform the appropriate data transfers.  The
+ *   This is the LPUART status interrupt handler.  It will be invoked when
+ *   an interrupt received on the 'irq'  It should call uart_transmitchars
+ *   or uart_receivechar to perform the appropriate data transfers.  The
  *   interrupt handling logic must be able to map the 'irq' number into the
  *   Appropriate uart_dev_s structure in order to call these functions.
  *
@@ -471,7 +475,7 @@ static void kinetis_detach(struct uart_dev_s *dev)
 static int kinetis_interrupt(int irq, void *context)
 {
   struct uart_dev_s *dev = NULL;
-  struct kinetis_dev_s   *priv;
+  struct kinetis_dev_s *priv;
   uint32_t stat;
   uint32_t ctrl;
 
@@ -622,6 +626,7 @@ static int kinetis_receive(struct uart_dev_s *dev, uint32_t *status)
   struct kinetis_dev_s *priv = (struct kinetis_dev_s *)dev->priv;
   uint32_t regval;
   int data;
+
   /* Get error status information:
    *
    * OR: Receiver Overrun Flag. To clear OR, when STAT read with OR set,
@@ -653,6 +658,7 @@ static int kinetis_receive(struct uart_dev_s *dev, uint32_t *status)
     {
       kinetis_serialout(priv, KINETIS_LPUART_STAT_OFFSET, regval);
     }
+
   return data;
 }
 
@@ -672,8 +678,8 @@ static void kinetis_rxint(struct uart_dev_s *dev, bool enable)
   flags = enter_critical_section();
   if (enable)
     {
-      /* Receive an interrupt when their is anything in the Rx data register (or an Rx
-       * related error occurs).
+      /* Receive an interrupt when their is anything in the Rx data register
+       * (or an Rx related error occurs).
        */
 
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
@@ -898,4 +904,3 @@ int up_putc(int ch)
 }
 
 #endif /* USE_SERIALDRIVER */
-

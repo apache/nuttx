@@ -127,7 +127,6 @@
 #  endif
 #endif /* HAVE_UART_CONSOLE */
 
-
 #if defined(HAVE_LPUART_CONSOLE)
 #  if ((CONSOLE_FREQ / (CONSOLE_BAUD * 32)) > (LPUART_BAUD_SBR_MASK >> LPUART_BAUD_SBR_SHIFT))
 #    error "LPUART Console: Baud rate not obtainable with this input clock!"
@@ -140,17 +139,6 @@
                             LPUART_BAUD_M10 | LPUART_BAUD_MAEN2 | \
                             LPUART_BAUD_MAEN2)
 #endif
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Data
@@ -161,12 +149,11 @@
  */
 
 #ifdef CONFIG_KINETIS_UARTFIFOS
-static uint8_t g_sizemap[8] = {1, 4, 8, 16, 32, 64, 128, 0};
+static uint8_t g_sizemap[8] =
+{
+  1, 4, 8, 16, 32, 64, 128, 0
+};
 #endif
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -314,6 +301,7 @@ void kinetis_lowsetup(void)
                         CONSOLE_PARITY, CONSOLE_BITS, CONSOLE_2STOP);
 #  endif
 #endif /* HAVE_UART_DEVICE */
+
 #if HAVE_LPUART_DEVICE
 
   /* Clocking Source for LPUARTs 0 selected in  SIM_SOPT2 */
@@ -521,6 +509,7 @@ void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud,
     {
       depth = (3 * depth) >> 2;
     }
+
   putreg8(depth , uart_base+KINETIS_UART_RWFIFO_OFFSET);
 
   depth = g_sizemap[(regval & UART_PFIFO_TXFIFOSIZE_MASK) >> UART_PFIFO_TXFIFOSIZE_SHIFT];
@@ -528,6 +517,7 @@ void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud,
     {
       depth = (depth >> 2);
     }
+
   putreg8(depth, uart_base+KINETIS_UART_TWFIFO_OFFSET);
 
   /* Enable RX and TX FIFOs */
@@ -552,7 +542,7 @@ void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud,
 
   /* Now we can (re-)enable the transmitter and receiver */
 
-  regval = getreg8(uart_base+KINETIS_UART_C2_OFFSET);
+  regval  = getreg8(uart_base+KINETIS_UART_C2_OFFSET);
   regval |= (UART_C2_RE | UART_C2_TE);
   putreg8(regval, uart_base+KINETIS_UART_C2_OFFSET);
 }
@@ -635,6 +625,7 @@ void kinetis_lpuartconfigure(uintptr_t uart_base, uint32_t baud,
            osrreg = osr;
          }
     }
+
   UNUSED(actual_baud);
   DEBUGASSERT(actual_baud-baud < (baud /100) * 2);
   DEBUGASSERT(sbrreg != 0 && sbrreg < 8192);
