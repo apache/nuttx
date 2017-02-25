@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/qencoder.h
  *
- *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -67,14 +67,25 @@
 #define QEIOC_POSITION     _QEIOC(0x0001) /* Arg: int32_t* pointer */
 #define QEIOC_RESET        _QEIOC(0x0002) /* Arg: None */
 
-/* User defined ioctl cms should use QEIOC_USER like this:
- *
- * #define QEIOC_MYCMD1    _QEIOC(QEIOC_USER)
- * #define QEIOC_MYCMD2    _QEIOC(QEIOC_USER+1)
- * ...
+#define QE_FIRST           0x0001         /* First required command */
+#define QE_NCMDS           2              /* Two required commands */
+
+/* User defined ioctl commands are also supported. These will be forwarded
+ * by the upper-half QE driver to the lower-half QE driver via the ioclt()
+ * method fo the QE lower-half interface.  However, the lower-half driver
+ * must reserve a block of commands as follows in order prevent IOCTL
+ * command numbers from overlapping.
  */
 
-#define QEIOC_USER         0x0003
+/* See arch/arm/src/tiva/tiva_qencoder.h */
+
+#define QE_TIVA_FIRST      (QE_FIRST + QE_NCMDS)
+#define QE_TIVA_NCMDS      3
+
+/* See include/nuttx/sensors/as5048b.h */
+
+#define QE_AS5048B_FIRST   (QE_TIVA_FIRST + QEIOC_TIVA_NCMDS)
+#define QE_AS5048B_NCMDS   4
 
 /****************************************************************************
  * Public Types
