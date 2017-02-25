@@ -243,21 +243,23 @@
 
 struct stm32_qeconfig_s
 {
-  uint8_t  timid;   /* Timer ID {1,2,3,4,5,8} */
-  uint8_t  irq;     /* Timer update IRQ */
+  uint8_t   timid;   /* Timer ID {1,2,3,4,5,8} */
+  uint8_t   irq;     /* Timer update IRQ */
 #ifdef HAVE_MIXEDWIDTH_TIMERS
-  uint8_t  width;   /* Timer width (16- or 32-bits) */
+  uint8_t   width;   /* Timer width (16- or 32-bits) */
 #endif
 #ifdef CONFIG_STM32_STM32F10XX
-  uint16_t ti1cfg;  /* TI1 input pin configuration (16-bit encoding) */
-  uint16_t ti2cfg;  /* TI2 input pin configuration (16-bit encoding) */
+  uint16_t  ti1cfg;  /* TI1 input pin configuration (16-bit encoding) */
+  uint16_t  ti2cfg;  /* TI2 input pin configuration (16-bit encoding) */
 #else
-  uint32_t ti1cfg;  /* TI1 input pin configuration (20-bit encoding) */
-  uint32_t ti2cfg;  /* TI2 input pin configuration (20-bit encoding) */
+  uint32_t  ti1cfg;  /* TI1 input pin configuration (20-bit encoding) */
+  uint32_t  ti2cfg;  /* TI2 input pin configuration (20-bit encoding) */
 #endif
-  uint32_t base;    /* Register base address */
-  uint32_t psc;     /* Timer input clock prescaler */
-  xcpt_t   handler; /* Interrupt handler for this IRQ */
+  uintptr_t regaddr; /* RCC clock enable register address */
+  uint32_t  enable;  /* RCC clock enable bit */
+  uint32_t  base;    /* Register base address */
+  uint32_t  psc;     /* Timer input clock prescaler */
+  xcpt_t    handler; /* Interrupt handler for this IRQ */
 };
 
 /* Overall, RAM-based state structure */
@@ -355,6 +357,8 @@ static const struct stm32_qeconfig_s g_tim1config =
 #ifdef HAVE_MIXEDWIDTH_TIMERS
   .width    = TIM1_BITWIDTH,
 #endif
+  .regaddr  = STM32_RCC_APB2ENR,
+  .enable   = RCC_APB2ENR_TIM1EN,
   .base     = STM32_TIM1_BASE,
   .psc      = CONFIG_STM32_TIM1_QEPSC,
   .ti1cfg   = GPIO_TIM1_CH1IN,
@@ -381,6 +385,8 @@ static const struct stm32_qeconfig_s g_tim2config =
 #ifdef HAVE_MIXEDWIDTH_TIMERS
   .width    = TIM2_BITWIDTH,
 #endif
+  .regaddr  = STM32_RCC_APB1ENR,
+  .enable   = RCC_APB1ENR_TIM2EN,
   .base     = STM32_TIM2_BASE,
   .psc      = CONFIG_STM32_TIM2_QEPSC,
   .ti1cfg   = GPIO_TIM2_CH1IN,
@@ -407,6 +413,8 @@ static const struct stm32_qeconfig_s g_tim3config =
 #ifdef HAVE_MIXEDWIDTH_TIMERS
   .width    = TIM3_BITWIDTH,
 #endif
+  .regaddr  = STM32_RCC_APB1ENR,
+  .enable   = RCC_APB1ENR_TIM3EN,
   .base     = STM32_TIM3_BASE,
   .psc      = CONFIG_STM32_TIM3_QEPSC,
   .ti1cfg   = GPIO_TIM3_CH1IN,
@@ -433,6 +441,8 @@ static const struct stm32_qeconfig_s g_tim4config =
 #ifdef HAVE_MIXEDWIDTH_TIMERS
   .width    = TIM4_BITWIDTH,
 #endif
+  .regaddr  = STM32_RCC_APB1ENR,
+  .enable   = RCC_APB1ENR_TIM4EN,
   .base     = STM32_TIM4_BASE,
   .psc      = CONFIG_STM32_TIM4_QEPSC,
   .ti1cfg   = GPIO_TIM4_CH1IN,
@@ -459,6 +469,8 @@ static const struct stm32_qeconfig_s g_tim5config =
 #ifdef HAVE_MIXEDWIDTH_TIMERS
   .width    = TIM5_BITWIDTH,
 #endif
+  .regaddr  = STM32_RCC_APB1ENR,
+  .enable   = RCC_APB1ENR_TIM5EN,
   .base     = STM32_TIM5_BASE,
   .psc      = CONFIG_STM32_TIM5_QEPSC,
   .ti1cfg   = GPIO_TIM5_CH1IN,
@@ -485,6 +497,8 @@ static const struct stm32_qeconfig_s g_tim8config =
 #ifdef HAVE_MIXEDWIDTH_TIMERS
   .width    = TIM8_BITWIDTH,
 #endif
+  .regaddr  = STM32_RCC_APB2ENR,
+  .enable   = RCC_APB2ENR_TIM8EN,
   .base     = STM32_TIM8_BASE,
   .psc      = CONFIG_STM32_TIM8_QEPSC,
   .ti1cfg   = GPIO_TIM8_CH1IN,
@@ -803,7 +817,9 @@ static int stm32_setup(FAR struct qe_lowerhalf_s *lower)
   int ret;
 #endif
 
-  /* NOTE: Clocking should have been enabled in the low-level RCC logic at boot-up */
+  /* Enable clocking to the timer */
+
+  modifyreg32(priv->regaddr, 0, priv->enable);
 
   /* Timer base configuration */
 
@@ -1108,6 +1124,10 @@ static int stm32_shutdown(FAR struct qe_lowerhalf_s *lower)
   sninfo("regaddr: %08x resetbit: %08x\n", regaddr, resetbit);
   stm32_dumpregs(priv, "After stop");
 
+  /* Disable clocking to the timer */
+
+  modifyreg32(priv->regaddr, priv->enable, 0);
+
   /* Put the TI1 GPIO pin back to its default state */
 
   pincfg  = priv->config->ti1cfg & (GPIO_PORT_MASK | GPIO_PIN_MASK);
@@ -1264,7 +1284,7 @@ int stm32_qeinitialize(FAR const char *devpath, int tim)
       return -EBUSY;
     }
 
-  /* Register the priv-half driver */
+  /* Register the upper-half driver */
 
   ret = qe_register(devpath, (FAR struct qe_lowerhalf_s *)priv);
   if (ret < 0)
