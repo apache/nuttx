@@ -54,9 +54,9 @@
 
 /* IOCTL Commands ***********************************************************/
 /* The Quadrature Encode module uses a standard character driver framework.
- * However, since the driver is a devices control interface and not a data
- * transfer interface, the majority of the functionality is implemented in
- * driver ioctl calls.  The PWM ioctl commands are listed below:
+ * However, since the driver is a device control interface rather than a
+ * data transfer interface, the majority of the functionality is implemented
+ * in driver ioctl calls.  The PWM ioctl commands are listed below:
  *
  * QEIOC_POSITION - Get the current position from the encoder.
  *   Argument: int32_t pointer to the location to return the position.

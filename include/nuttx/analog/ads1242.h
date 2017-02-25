@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/sensors/ads1242.h
+ * include/nuttx/analog/ads1242.h
  *
  *   Copyright (C) 2016, DS-Automotion GmbH. All rights reserved.
  *   Author: Alexander Entinger <a.entinger@ds-automotion.com>
@@ -41,7 +41,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/fs/ioctl.h>
+#include <nuttx/analog/ioctl.h>
 #include <nuttx/spi/spi.h>
 
 #if defined(CONFIG_SPI) && defined(CONFIG_ADC_ADS1242)
@@ -59,12 +59,12 @@
  * Cmd: ANIOC_ADS2142_DO_SYSTEM_OFFSET_CALIB  Arg: None
  */
 
-#define ANIOC_ADS2142_READ                    _ANIOC(ANIOC_USER + 0)
-#define ANIOC_ADS2142_SET_GAIN                _ANIOC(ANIOC_USER + 1)
-#define ANIOC_ADS2142_SET_POSITIVE_INPUT      _ANIOC(ANIOC_USER + 2)
-#define ANIOC_ADS2142_SET_NEGATIVE_INPUT      _ANIOC(ANIOC_USER + 3)
-#define ANIOC_ADS2142_IS_DATA_READY           _ANIOC(ANIOC_USER + 4)
-#define ANIOC_ADS2142_DO_SYSTEM_OFFSET_CALIB  _ANIOC(ANIOC_USER + 5)
+#define ANIOC_ADS2142_READ                    _ANIOC(AN_ADS2142_FIRST + 0)
+#define ANIOC_ADS2142_SET_GAIN                _ANIOC(AN_ADS2142_FIRST + 1)
+#define ANIOC_ADS2142_SET_POSITIVE_INPUT      _ANIOC(AN_ADS2142_FIRST + 2)
+#define ANIOC_ADS2142_SET_NEGATIVE_INPUT      _ANIOC(AN_ADS2142_FIRST + 3)
+#define ANIOC_ADS2142_IS_DATA_READY           _ANIOC(AN_ADS2142_FIRST + 4)
+#define ANIOC_ADS2142_DO_SYSTEM_OFFSET_CALIB  _ANIOC(AN_ADS2142_FIRST + 5)
 
 /* ADS1242 REGISTER *********************************************************/
 

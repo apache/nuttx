@@ -242,21 +242,16 @@
 #define _TSIOCVALID(c)    (_IOC_TYPE(c)==_TSIOCBASE)
 #define _TSIOC(nr)        _IOC(_TSIOCBASE,nr)
 
-/* NuttX sensor ioctl definitions (see nuttx/sensor/xxx.h) ******************/
+/* NuttX sensor ioctl definitions (see nuttx/sensor/ioctl.h) ****************/
 
 #define _SNIOCVALID(c)    (_IOC_TYPE(c)==_SNIOCBASE)
 #define _SNIOC(nr)        _IOC(_SNIOCBASE,nr)
 
-/* Nuttx Analog (DAC/ADC_ ioctl commands ************************************/
+/* Nuttx Analog (DAC/ADC) ioctl commands (see nuttx/analog/ioctl.h **********/
 
 #define _ANIOCVALID(c)    (_IOC_TYPE(c)==_ANIOCBASE)
 #define _ANIOC(nr)        _IOC(_ANIOCBASE,nr)
 
-#define ANIOC_TRIGGER     _ANIOC(0x0001)  /* Trigger one conversion
-                                           * IN: None
-                                           * OUT: None */
-#define ANIOC_USER        0x0002          /* Device specific IOCTL commands
-                                           * may follow */
 /* NuttX PWM ioctl definitions (see nuttx/drivers/pwm.h) ********************/
 
 #define _PWMIOCVALID(c)   (_IOC_TYPE(c)==_PWMIOCBASE)
