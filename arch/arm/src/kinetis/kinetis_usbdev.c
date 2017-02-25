@@ -133,8 +133,6 @@
 #define KHCI_ENDP_BIT(ep)     (1 << (ep))
 #define KHCI_ENDP_ALLSET      0xffff
 
-#define SIM_CLKDIV2_USBDIV(n) (uint32_t)(((n) & 0x07) << 1)
-
 /* BDT Table Indexing.  The BDT is addressed in the hardware as follows:
  *
  *   Bits 9-31:  These come the BDT address bits written into the BDTP3,
@@ -4404,15 +4402,18 @@ void up_usbinitialize(void)
   putreg32(regval, KINETIS_SIM_SOPT2);
 
   regval = getreg32(KINETIS_SIM_CLKDIV2);
-#if defined(CONFIG_TEENSY_3X_OVERCLOCK)
-  /* (USBFRAC + 0)/(USBDIV + 1) = (1 + 0)/(1 + 1) = 1/2 for 96Mhz clock */
 
-  regval = SIM_CLKDIV2_USBDIV(1);
+#if defined(CONFIG_TEENSY_3X_OVERCLOCK)
+  /* USBFRAC/USBDIV = 1/2 of 96Mhz clock = 48MHz */
+
+  regval = SIM_CLKDIV2_USBDIV(2) | SIM_CLKDIV2_USBFRAC(1);
 #else
+  /* USBFRAC/USBDIV = 2/3 of 72Mhz clock = 48MHz */
   /* 72Mhz */
 
-  regval = SIM_CLKDIV2_USBDIV(2) | SIM_CLKDIV2_USBFRAC;
+  regval = SIM_CLKDIV2_USBDIV(3) | SIM_CLKDIV2_USBFRAC(2);
 #endif
+
   putreg32(regval, KINETIS_SIM_CLKDIV2);
 
   /* 2: Gate USB clock */
