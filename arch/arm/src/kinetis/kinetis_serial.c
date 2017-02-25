@@ -1,8 +1,9 @@
 /****************************************************************************
  * arch/mips/src/kinetis/kinetis_serial.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2011-2012, 2017 Gregory Nutt. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -240,6 +241,7 @@ struct up_dev_s
   uint8_t   ie;        /* Interrupts enabled */
   uint8_t   parity;    /* 0=none, 1=odd, 2=even */
   uint8_t   bits;      /* Number of bits (8 or 9) */
+  uint8_t   stop2;     /* Use 2 stop bits */
 };
 
 /****************************************************************************
@@ -334,6 +336,7 @@ static struct up_dev_s g_uart0priv =
   .irqprio        = CONFIG_KINETIS_UART0PRIO,
   .parity         = CONFIG_UART0_PARITY,
   .bits           = CONFIG_UART0_BITS,
+  .stop2          = CONFIG_UART0_2STOP,
 };
 
 static uart_dev_t g_uart0port =
@@ -368,6 +371,7 @@ static struct up_dev_s g_uart1priv =
   .irqprio        = CONFIG_KINETIS_UART1PRIO,
   .parity         = CONFIG_UART1_PARITY,
   .bits           = CONFIG_UART1_BITS,
+  .stop2          = CONFIG_UART1_2STOP,
 };
 
 static uart_dev_t g_uart1port =
@@ -402,6 +406,7 @@ static struct up_dev_s g_uart2priv =
   .irqprio        = CONFIG_KINETIS_UART2PRIO,
   .parity         = CONFIG_UART2_PARITY,
   .bits           = CONFIG_UART2_BITS,
+  .stop2          = CONFIG_UART2_2STOP,
 };
 
 static uart_dev_t g_uart2port =
@@ -436,6 +441,7 @@ static struct up_dev_s g_uart3priv =
   .irqprio        = CONFIG_KINETIS_UART3PRIO,
   .parity         = CONFIG_UART3_PARITY,
   .bits           = CONFIG_UART3_BITS,
+  .stop2          = CONFIG_UART3_2STOP,
 };
 
 static uart_dev_t g_uart3port =
@@ -470,6 +476,7 @@ static struct up_dev_s g_uart4priv =
   .irqprio        = CONFIG_KINETIS_UART4PRIO,
   .parity         = CONFIG_UART4_PARITY,
   .bits           = CONFIG_UART4_BITS,
+  .stop2          = CONFIG_UART4_2STOP,
 };
 
 static uart_dev_t g_uart4port =
@@ -504,6 +511,7 @@ static struct up_dev_s g_uart5priv =
   .irqprio        = CONFIG_KINETIS_UART5PRIO,
   .parity         = CONFIG_UART5_PARITY,
   .bits           = CONFIG_UART5_BITS,
+  .stop2          = CONFIG_UART5_2STOP,
 };
 
 static uart_dev_t g_uart5port =
@@ -615,7 +623,7 @@ static int up_setup(struct uart_dev_s *dev)
   /* Configure the UART as an RS-232 UART */
 
   kinetis_uartconfigure(priv->uartbase, priv->baud, priv->clock,
-                        priv->parity, priv->bits);
+                        priv->parity, priv->bits, priv->stop2);
 #endif
 
   /* Make sure that all interrupts are disabled */
@@ -1256,7 +1264,7 @@ void up_earlyserialinit(void)
 
   /* Configuration whichever one is the console */
 
-#ifdef HAVE_SERIAL_CONSOLE
+#ifdef HAVE_UART_CONSOLE
   CONSOLE_DEV.isconsole = true;
   up_setup(&CONSOLE_DEV);
 #endif
@@ -1275,7 +1283,7 @@ void up_serialinit(void)
 {
   /* Register the console */
 
-#ifdef HAVE_SERIAL_CONSOLE
+#ifdef HAVE_UART_CONSOLE
   (void)uart_register("/dev/console", &CONSOLE_DEV);
 #endif
 
@@ -1309,7 +1317,7 @@ void up_serialinit(void)
 
 int up_putc(int ch)
 {
-#ifdef HAVE_SERIAL_CONSOLE
+#ifdef HAVE_UART_CONSOLE
   struct up_dev_s *priv = (struct up_dev_s *)CONSOLE_DEV.priv;
   uint8_t ie;
 
@@ -1342,7 +1350,7 @@ int up_putc(int ch)
 
 int up_putc(int ch)
 {
-#ifdef HAVE_SERIAL_CONSOLE
+#ifdef HAVE_UART_CONSOLE
   /* Check for LF */
 
   if (ch == '\n')
