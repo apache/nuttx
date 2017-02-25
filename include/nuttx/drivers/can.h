@@ -197,8 +197,8 @@
 #define CANIOC_GET_CONNMODES      _CANIOC(8)
 #define CANIOC_SET_CONNMODES      _CANIOC(9)
 
-#define CAN_FIRST                 0x0001         /* First required command */
-#define CAN_NCMDS                 9              /* Two required commands */
+#define CAN_FIRST                 0x0001         /* First common command */
+#define CAN_NCMDS                 9              /* Nine common commands */
 
 /* User defined ioctl commands are also supported. These will be forwarded
  * by the upper-half CAN driver to the lower-half CAN driver via the co_ioctl()

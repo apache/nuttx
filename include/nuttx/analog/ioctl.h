@@ -59,8 +59,8 @@
                                            * IN: None
                                            * OUT: None */
 
-#define AN_FIRST           0x0001         /* First required command */
-#define AN_NCMDS           1              /* Two required commands */
+#define AN_FIRST           0x0001         /* First common command */
+#define AN_NCMDS           1              /* Two common commands */
 
 /* User defined ioctl commands are also supported. These will be forwarded
  * by the upper-half QE driver to the lower-half QE driver via the ioctl()
