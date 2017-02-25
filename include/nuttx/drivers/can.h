@@ -197,11 +197,34 @@
 #define CANIOC_GET_CONNMODES      _CANIOC(8)
 #define CANIOC_SET_CONNMODES      _CANIOC(9)
 
-/* CANIOC_USER: Device specific ioctl calls can be supported with cmds greater
- * than this value
- */
+#define CAN_FIRST                 0x0001         /* First required command */
+#define CAN_NCMDS                 9              /* Two required commands */
 
-#define CANIOC_USER               _CANIOC(10)
+/* User defined ioctl commands are also supported. These will be forwarded
+ * by the upper-half CAN driver to the lower-half CAN driver via the co_ioctl()
+ * method fo the CAN lower-half interface.  However, the lower-half driver
+ * must reserve a block of commands as follows in order prevent IOCTL
+ * command numbers from overlapping.
+ *
+ * This is generally done as follows.  The first reservation for CAN driver A would
+ * look like:
+ *
+ *   CAN_A_FIRST                 (CAN_FIRST + CAN_NCMDS)     <- First command
+ *   CAN_A_NCMDS                 42                          <- Number of commands
+ *
+ * IOCTL commands for CAN driver A would then be defined in a CAN A header file like:
+ *
+ *   CANIOC_A_CMD1               _CANIOC(CAN_A_FIRST+0)
+ *   CANIOC_A_CMD2               _CANIOC(CAN_A_FIRST+1)
+ *   CANIOC_A_CMD3               _CANIOC(CAN_A_FIRST+2)
+ *   ...
+ *   CANIOC_A_CMD42              _CANIOC(CAN_A_FIRST+41)
+ *
+ * The next reservation would look like:
+ *
+ *   CAN_B_FIRST                 (CAN_A_FIRST + CAN_A_NCMDS) <- Next command
+ *   CAN_B_NCMDS                 77                          <- Number of commands
+ */
 
 /* Convenience macros ***************************************************************/
 
