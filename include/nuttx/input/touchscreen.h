@@ -81,11 +81,11 @@
  *
  * IOCTL commands for TSC driver A would then be defined in a TSC A header file like:
  *
- *   CANIOC_A_CMD1               _CANIOC(TSC_A_FIRST+0)
- *   CANIOC_A_CMD2               _CANIOC(TSC_A_FIRST+1)
- *   CANIOC_A_CMD3               _CANIOC(TSC_A_FIRST+2)
+ *   TSCIOC_A_CMD1               _TSIOC(TSC_A_FIRST+0)
+ *   TSCIOC_A_CMD2               _TSIOC(TSC_A_FIRST+1)
+ *   TSCIOC_A_CMD3               _TSIOC(TSC_A_FIRST+2)
  *   ...
- *   CANIOC_A_CMD42              _CANIOC(TSC_A_FIRST+41)
+ *   TSCIOC_A_CMD42              _TSIOC(TSC_A_FIRST+41)
  *
  * The next reservation would look like:
  *
