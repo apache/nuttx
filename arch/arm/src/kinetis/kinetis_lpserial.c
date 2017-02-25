@@ -853,6 +853,7 @@ void up_serialinit(void)
  *
  ****************************************************************************/
 
+#ifdef HAVE_LPUART_PUTC
 int up_putc(int ch)
 {
 #ifdef HAVE_LPUART_CONSOLE
@@ -875,6 +876,7 @@ int up_putc(int ch)
 #endif
   return ch;
 }
+#endif
 
 #else /* USE_SERIALDRIVER */
 
@@ -886,6 +888,7 @@ int up_putc(int ch)
  *
  ****************************************************************************/
 
+#ifdef HAVE_LPUART_PUTC
 int up_putc(int ch)
 {
 #ifdef HAVE_LPUART_CONSOLE
@@ -902,5 +905,6 @@ int up_putc(int ch)
 #endif
   return ch;
 }
+#endif
 
 #endif /* USE_SERIALDRIVER */

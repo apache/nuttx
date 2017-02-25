@@ -203,6 +203,31 @@
 #  endif
 #endif
 
+/* Which version of up_putc() should be built?
+ *
+ * --------------------+-------------------+-----------------+------------------
+ *                      HAVE_UART_DEVICE && HAVE_UART_DEVICE  HAVE_LPUART_DEVICE
+ *                      HAVE_LPUART_DEVICE  (only)            (only)
+ * --------------------+-------------------+-----------------+------------------
+ * HAVE_UART_CONSOLE    kinetis_serial      kinetis_serial    (impossible)
+ * HAVE_LPUART_CONSOLE  kinetis_lpserial    (impossible)      kinetis_lpserial
+ * No serial console    kinetis_serial      kinetis_serial    kinetis_lpserial
+ * --------------------+-------------------+-----------------+------------------
+ */
+
+#undef HAVE_UART_PUTC
+#undef HAVE_LPUART_PUTC
+
+#if defined(HAVE_LPUART_CONSOLE)
+#  define HAVE_LPUART_PUTC 1
+#elif defined(HAVE_UART_CONSOLE)
+#  define HAVE_UART_PUTC   1
+#elif define(HAVE_UART_DEVICE)
+#  define HAVE_UART_PUTC   1
+#elif define(HAVE_LPUART_DEVICE)
+#  define HAVE_LPUART_PUTC 1
+#endif
+
 /* Check UART flow control (Not yet supported) */
 
 # undef CONFIG_UART0_FLOWCONTROL
