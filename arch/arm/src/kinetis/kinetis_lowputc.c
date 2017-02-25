@@ -200,7 +200,7 @@ void up_lowputc(char ch)
   /* Then write the character to the UART data register */
 
   putreg8((uint8_t)ch, CONSOLE_BASE+KINETIS_UART_D_OFFSET);
-}
+
 #elif defined(HAVE_LPUART_CONSOLE)
   while ((getreg32(CONSOLE_BASE + KINETIS_LPUART_STAT_OFFSET) & LPUART_STAT_TDRE) == 0);
 
@@ -302,7 +302,7 @@ void kinetis_lowsetup(void)
 #  endif
 #endif /* HAVE_UART_DEVICE */
 
-#if HAVE_LPUART_DEVICE
+#ifdef HAVE_LPUART_DEVICE
 
   /* Clocking Source for LPUARTs 0 selected in  SIM_SOPT2 */
 
@@ -337,7 +337,7 @@ void kinetis_lowsetup(void)
    kinetis_lpuartconfigure(CONSOLE_BASE, CONSOLE_BAUD, CONSOLE_FREQ, \
                            CONSOLE_PARITY, CONSOLE_BITS, CONSOLE_2STOP);
 #  endif
-#endif /* HAVE_UART_DEVICE */
+#endif /* HAVE_LPUART_DEVICE */
 }
 
 /****************************************************************************
