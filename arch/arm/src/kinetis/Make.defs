@@ -162,6 +162,10 @@ ifeq ($(CONFIG_I2C),y)
 CHIP_CSRCS += kinetis_i2c.c
 endif
 
+ifeq ($(CONFIG_KINETIS_LPUART),y)
+CHIP_CSRCS += kinetis_lpserial.c
+endif
+
 ifeq ($(CONFIG_RTC),y)
 CHIP_CSRCS += kinetis_rtc.c
 ifeq ($(CONFIG_RTC_DRIVER),y)
