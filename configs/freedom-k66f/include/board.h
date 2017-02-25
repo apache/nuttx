@@ -46,7 +46,7 @@
 #  include <stdint.h>
 #endif
 
-#include "chip.h"
+#include <arch/chip/chip.h>
 
 /************************************************************************************
  * Pre-processor Definitions
