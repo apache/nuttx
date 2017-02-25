@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_sdadc.c
  *
- *   Copyright (C) 2011, 2013, 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013, 2015-2017 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2016 Studelec. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Marc Rechté <mrechte@studelec-sa.com>
@@ -59,6 +59,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/analog/adc.h>
+#include <nuttx/analog/ioctl.h>
 
 #include "up_internal.h"
 #include "up_arch.h"
@@ -92,6 +93,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* RCC reset ****************************************************************/
 
 #define STM32_RCC_RSTR   STM32_RCC_APB2RSTR

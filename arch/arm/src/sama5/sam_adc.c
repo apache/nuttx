@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/sama5/sam_adc.c
  *
- *   Copyright (C) 2013, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -65,6 +65,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/analog/adc.h>
+#include <nuttx/analog/ioctl.h>
 
 #include "up_internal.h"
 #include "up_arch.h"
