@@ -153,6 +153,18 @@ int stm32_bringup(void);
 void stm32_spidev_initialize(void);
 
 /****************************************************************************
+ * Name: stm32_qencoder_initialize
+ *
+ * Description:
+ *   Initialize and register a qencoder
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_QENCODER
+int stm32_qencoder_initialize(FAR const char *devpath, int timer);
+#endif
+
+/****************************************************************************
  * Name stm32_rgbled_setup
  *
  * Description:
