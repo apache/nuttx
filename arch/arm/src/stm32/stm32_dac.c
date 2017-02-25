@@ -847,7 +847,6 @@ static int dac_timinit(FAR struct stm32_chan_s *chan)
    * default) will be enabled
    */
 
-  pclk    = STM32_TIM27_FREQUENCY;
   regaddr = STM32_RCC_APB1ENR;
 
   switch (chan->timer)
@@ -855,31 +854,37 @@ static int dac_timinit(FAR struct stm32_chan_s *chan)
 #ifdef NEED_TIM2
       case 2:
         setbits = RCC_APB1ENR_TIM2EN;
+        pclk    = BOARD_TIM2_FREQUENCY;
         break;
 #endif
 #ifdef NEED_TIM3
       case 3:
         setbits = RCC_APB1ENR_TIM3EN;
+        pclk    = BOARD_TIM3_FREQUENCY;
         break;
 #endif
 #ifdef NEED_TIM4
       case 4:
         setbits = RCC_APB1ENR_TIM4EN;
+        pclk    = BOARD_TIM4_FREQUENCY;
         break;
 #endif
 #ifdef NEED_TIM5
       case 5:
         setbits = RCC_APB1ENR_TIM5EN;
+        pclk    = BOARD_TIM5_FREQUENCY;
         break;
 #endif
 #ifdef NEED_TIM6
       case 6:
         setbits = RCC_APB1ENR_TIM6EN;
+        pclk    = BOARD_TIM6_FREQUENCY;
         break;
 #endif
 #ifdef NEED_TIM7
       case 7:
         setbits = RCC_APB1ENR_TIM7EN;
+        pclk    = BOARD_TIM7_FREQUENCY;
         break;
 #endif
 #ifdef NEED_TIM8
@@ -891,7 +896,7 @@ static int dac_timinit(FAR struct stm32_chan_s *chan)
 #endif
       default:
         aerr("ERROR: Could not enable timer\n");
-        break;
+        return -EINVAL;
     }
 
   /* Enable the timer. */
