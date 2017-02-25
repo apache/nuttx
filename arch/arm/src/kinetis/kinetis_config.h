@@ -222,9 +222,9 @@
 #  define HAVE_LPUART_PUTC 1
 #elif defined(HAVE_UART_CONSOLE)
 #  define HAVE_UART_PUTC   1
-#elif define(HAVE_UART_DEVICE)
+#elif defined(HAVE_UART_DEVICE)
 #  define HAVE_UART_PUTC   1
-#elif define(HAVE_LPUART_DEVICE)
+#elif defined(HAVE_LPUART_DEVICE)
 #  define HAVE_LPUART_PUTC 1
 #endif
 
