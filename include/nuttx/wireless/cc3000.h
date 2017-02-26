@@ -56,14 +56,14 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define DEV_FORMAT   "/dev/wireless%d" /* The device Name*/
-#define DEV_NAMELEN  17                /* The buffer size to hold formatted string*/
+#define DEV_FORMAT    "/dev/wireless%d" /* The device Name*/
+#define DEV_NAMELEN   17                /* The buffer size to hold formatted string*/
 
-#define QUEUE_FORMAT   "wlq%d"         /* The Queue name */
-#define QUEUE_NAMELEN  8               /* The buffer size to hold formatted string*/
+#define QUEUE_FORMAT  "wlq%d"           /* The Queue name */
+#define QUEUE_NAMELEN 8                 /* The buffer size to hold formatted string*/
 
-#define SEM_FORMAT   "wls%d"           /* The Spi Resume Senaphore name*/
-#define SEM_NAMELEN   8                /* The buffer size to hold formatted string*/
+#define SEM_FORMAT    "wls%d"           /* The Spi Resume Senaphore name*/
+#define SEM_NAMELEN   8                 /* The buffer size to hold formatted string*/
 
 /* IOCTL commands */
 

@@ -1315,7 +1315,7 @@ void up_serialinit(void)
  *
  ****************************************************************************/
 
-#ifndef HAVE_UART_PUTC
+#ifdef HAVE_UART_PUTC
 int up_putc(int ch)
 {
 #ifdef HAVE_UART_CONSOLE
@@ -1350,7 +1350,7 @@ int up_putc(int ch)
  *
  ****************************************************************************/
 
-#ifndef HAVE_UART_PUTC
+#ifdef HAVE_UART_PUTC
 int up_putc(int ch)
 {
 #ifdef HAVE_UART_CONSOLE

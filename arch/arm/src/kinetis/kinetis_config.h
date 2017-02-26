@@ -84,7 +84,7 @@
 #  undef CONFIG_KINETIS_LPUART0
 #endif
 
-/* Are any UARTs enabled? */
+/* Are any UARTs or LPUARTs enabled? */
 
 #undef HAVE_UART_DEVICE
 #if defined(CONFIG_KINETIS_UART0) || defined(CONFIG_KINETIS_UART1) || \
