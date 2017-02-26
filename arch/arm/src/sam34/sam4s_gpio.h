@@ -83,11 +83,11 @@
 #define GPIO_CFG_SHIFT             (12)        /* Bits 12-16: GPIO configuration bits */
 #define GPIO_CFG_MASK              (31 << GPIO_CFG_SHIFT)
 #  define GPIO_CFG_DEFAULT         (0  << GPIO_CFG_SHIFT) /* Default, no attribute */
-#  define GPIO_CFG_PULLUP          (1  << GPIO_CFG_SHIFT) /* Bit 11: Internal pull-up */
-#  define GPIO_CFG_PULLDOWN        (2  << GPIO_CFG_SHIFT) /* Bit 11: Internal pull-down */
-#  define GPIO_CFG_DEGLITCH        (4  << GPIO_CFG_SHIFT) /* Bit 12: Internal glitch filter */
-#  define GPIO_CFG_OPENDRAIN       (8  << GPIO_CFG_SHIFT) /* Bit 13: Open drain */
-#  define GPIO_CFG_SCHMITT         (16 << GPIO_CFG_SHIFT) /* Bit 13: Schmitt trigger */
+#  define GPIO_CFG_PULLUP          (1  << GPIO_CFG_SHIFT) /* Bit 12: Internal pull-up */
+#  define GPIO_CFG_PULLDOWN        (2  << GPIO_CFG_SHIFT) /* Bit 13: Internal pull-down */
+#  define GPIO_CFG_DEGLITCH        (4  << GPIO_CFG_SHIFT) /* Bit 14: Internal glitch filter */
+#  define GPIO_CFG_OPENDRAIN       (8  << GPIO_CFG_SHIFT) /* Bit 15: Open drain */
+#  define GPIO_CFG_SCHMITT         (16 << GPIO_CFG_SHIFT) /* Bit 16: Schmitt trigger */
 
 /* Additional interrupt modes:
  *
@@ -99,7 +99,7 @@
 #  define _GIO_INT_AIM             (1 << 10)   /* Bit 10: Additional Interrupt modes */
 #  define _GPIO_INT_LEVEL          (1 << 9)    /* Bit 9: Level detection interrupt */
 #  define _GPIO_INT_EDGE           (0)         /*        (vs. Edge detection interrupt) */
-#  define _GPIO_INT_RH             (1 << 8)    /* Bit 9: Rising edge/High level detection interrupt */
+#  define _GPIO_INT_RH             (1 << 8)    /* Bit 8: Rising edge/High level detection interrupt */
 #  define _GPIO_INT_FL             (0)         /*        (vs. Falling edge/Low level detection interrupt) */
 
 #  define GPIO_INT_HIGHLEVEL       (_GIO_INT_AIM | _GPIO_INT_LEVEL | _GPIO_INT_RH)
