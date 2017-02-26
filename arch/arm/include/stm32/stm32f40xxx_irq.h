@@ -1,5 +1,5 @@
 /****************************************************************************************************
- * arch/arm/include/stm32s/stm32f40xxx_irq.h
+ * arch/arm/include/stm32/stm32f40xxx_irq.h
  *
  *   Copyright (C) 2009, 2014-2015 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2016 Omni Hoverboards Inc. All rights reserved.

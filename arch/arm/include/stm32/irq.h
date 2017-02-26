@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/include/stm32s/irq.h
+ * arch/arm/include/stm32/irq.h
  *
  *   Copyright (C) 2009, 2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /************************************************************************************
- * arm/arm/src/stm32/stm32_spi.c
+ * arch/arm/src/stm32/stm32_spi.c
  *
  *   Copyright (C) 2009-2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

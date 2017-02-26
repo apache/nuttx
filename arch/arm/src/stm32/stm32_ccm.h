@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/stm32_ccm.h
+ * arch/arm/src/stm32/stm32_ccm.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

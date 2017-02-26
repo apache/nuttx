@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/include/stm32/dma2d.h
+ * arch/arm/include/stm32/dma2d.h
  *
  *   Copyright (C) 2015 Marco Krahl. All rights reserved.
  *   Author: Marco Krahl <ocram.lhark@gmail.com>
