@@ -94,6 +94,12 @@
 #     undef CONFIG_STM32_DAC1_DMA
 #     undef CONFIG_STM32_DAC2_DMA
 #   endif
+# elif defined(CONFIG_STM32_STM32F33XX)
+#   ifndef CONFIG_STM32_DMA1
+#     warning "STM32 F334 DAC DMA support requires CONFIG_STM32_DMA1"
+#     undef CONFIG_STM32_DAC1_DMA
+#     undef CONFIG_STM32_DAC2_DMA
+#   endif
 # elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
 #   ifndef CONFIG_STM32_DMA1
 #     warning "STM32 F4 DAC DMA support requires CONFIG_STM32_DMA1"
@@ -147,7 +153,8 @@
 #   define DAC_DMA         2
 #   define DAC1_DMA_CHAN   DMACHAN_DAC_CHAN1
 #   define DAC2_DMA_CHAN   DMACHAN_DAC_CHAN2
-# elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+# elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX) || \
+  defined(CONFIG_STM32_STM32F33XX)
 #   define HAVE_DMA        1
 #   define DAC_DMA         1
 #   define DAC1_DMA_CHAN   DMAMAP_DAC1

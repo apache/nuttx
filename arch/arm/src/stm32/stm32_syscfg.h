@@ -49,6 +49,8 @@
 #  include "chip/stm32f20xxx_syscfg.h"
 #elif defined(CONFIG_STM32_STM32F30XX)
 #  include "chip/stm32f30xxx_syscfg.h"
+#elif defined(CONFIG_STM32_STM32F33XX)
+#  include "chip/stm32f33xxx_syscfg.h"
 #elif defined(CONFIG_STM32_STM32F37XX)
 #  include "chip/stm32f37xxx_syscfg.h"
 #elif defined(CONFIG_STM32_STM32F40XX)

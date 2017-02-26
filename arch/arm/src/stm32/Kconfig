@@ -773,6 +773,60 @@ config ARCH_CHIP_STM32F303VC
 	select STM32_HAVE_UART5
 	select STM32_HAVE_USBDEV
 
+config ARCH_CHIP_STM32F334K4
+	bool "STM32F334K4"
+	select ARCH_CORTEXM4
+	select STM32_STM32F33XX
+	select ARCH_HAVE_FPU
+
+config ARCH_CHIP_STM32F334K6
+	bool "STM32F334K6"
+	select ARCH_CORTEXM4
+	select STM32_STM32F33XX
+	select ARCH_HAVE_FPU
+
+config ARCH_CHIP_STM32F334K8
+	bool "STM32F334K8"
+	select ARCH_CORTEXM4
+	select STM32_STM32F33XX
+	select ARCH_HAVE_FPU
+
+config ARCH_CHIP_STM32F334C4
+	bool "STM32F334C4"
+	select ARCH_CORTEXM4
+	select STM32_STM32F33XX
+	select ARCH_HAVE_FPU
+
+config ARCH_CHIP_STM32F334C6
+	bool "STM32F334C6"
+	select ARCH_CORTEXM4
+	select STM32_STM32F33XX
+	select ARCH_HAVE_FPU
+
+config ARCH_CHIP_STM32F334C8
+	bool "STM32F334C8"
+	select ARCH_CORTEXM4
+	select STM32_STM32F33XX
+	select ARCH_HAVE_FPU
+
+config ARCH_CHIP_STM32F334R4
+	bool "STM32F334R4"
+	select ARCH_CORTEXM4
+	select STM32_STM32F33XX
+	select ARCH_HAVE_FPU
+
+config ARCH_CHIP_STM32F334R6
+	bool "STM32F334R6"
+	select ARCH_CORTEXM4
+	select STM32_STM32F33XX
+	select ARCH_HAVE_FPU
+
+config ARCH_CHIP_STM32F334R8
+	bool "STM32F334R8"
+	select ARCH_CORTEXM4
+	select STM32_STM32F33XX
+	select ARCH_HAVE_FPU
+
 config ARCH_CHIP_STM32F372C8
 	bool "STM32F372C8"
 	select ARCH_CORTEXM4
@@ -1388,6 +1442,25 @@ config STM32_STM32F303
 	select STM32_HAVE_DAC2
 	select STM32_HAVE_TIM7
 
+config STM32_STM32F33XX
+	bool
+       	default n
+	select STM32_HAVE_HRTIM1
+	select STM32_HAVE_COMP2
+	select STM32_HAVE_COMP4
+	select STM32_HAVE_COMP6
+	select STM32_HAVE_OPAMP
+	select STM32_HAVE_CCM
+	select STM32_HAVE_TIM1
+	select STM32_HAVE_TIM15
+	select STM32_HAVE_TIM16
+	select STM32_HAVE_TIM17
+	select STM32_HAVE_ADC2
+	select STM32_HAVE_CAN1
+	select STM32_HAVE_DAC1
+	select STM32_HAVE_DAC2
+	select STM32_HAVE_USART3
+
 config STM32_STM32F37XX
 	bool
 	default n
@@ -1673,6 +1746,10 @@ config STM32_HAVE_FSMC
 	bool
 	default n
 
+config STM32_HAVE_HRTIM1
+	bool
+	default n
+
 config STM32_HAVE_LTDC
 	bool
 	default n
@@ -1829,6 +1906,18 @@ config STM32_HAVE_CAN2
 	bool
 	default n
 
+config STM32_HAVE_COMP2
+       bool
+       default n
+
+config STM32_HAVE_COMP4
+       bool
+       default n
+
+config STM32_HAVE_COMP6
+       bool
+       default n
+
 config STM32_HAVE_DAC1
 	bool
 	default n
@@ -1880,6 +1969,10 @@ config STM32_HAVE_SAIPLL
 config STM32_HAVE_I2SPLL
 	bool
 	default n
+
+config STM32_HAVE_OPAMP
+       bool
+       default n
 
 # These are the peripheral selections proper
 
@@ -1937,6 +2030,21 @@ config STM32_COMP
 	bool "COMP"
 	default n
 	depends on STM32_STM32L15XX
+
+config STM32_COMP2
+	bool "COMP2"
+	default n
+	depends on STM32_HAVE_COMP2
+
+config STM32_COMP4
+	bool "COMP4"
+	default n
+	depends on STM32_HAVE_COMP4
+
+config STM32_COMP6
+	bool "COMP6"
+	default n
+	depends on STM32_HAVE_COMP6
 
 config STM32_BKP
 	bool "BKP"
@@ -2033,6 +2141,11 @@ config STM32_HASH
 	default n
 	depends on STM32_STM32F207 || STM32_STM32F40XX
 
+config STM32_HRTIM1
+	bool "HRTIM1"
+	default n
+	depends on STM32_HAVE_HRTIM1
+
 config STM32_I2C1
 	bool "I2C1"
 	default n
@@ -2067,6 +2180,11 @@ config STM32_DMA2D
 	---help---
 		The STM32 DMA2D is an Chrom-Art Accelerator for image manipulation
 		available on the STM32F429 and STM32F439 devices.
+
+config STM32_OPAMP
+	bool "OPAMP"
+	default n
+	depends on STM32_HAVE_OPAMP
 
 config STM32_OTGFS
 	bool "OTG FS"

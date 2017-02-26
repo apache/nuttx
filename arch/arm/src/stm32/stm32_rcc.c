@@ -82,6 +82,8 @@
 #  include "stm32f20xxx_rcc.c"
 #elif defined(CONFIG_STM32_STM32F30XX)
 #  include "stm32f30xxx_rcc.c"
+#elif defined(CONFIG_STM32_STM32F33XX)
+#  include "stm32f33xxx_rcc.c"
 #elif defined(CONFIG_STM32_STM32F37XX)
 #  include "stm32f37xxx_rcc.c"
 #elif defined(CONFIG_STM32_STM32F40XX)
