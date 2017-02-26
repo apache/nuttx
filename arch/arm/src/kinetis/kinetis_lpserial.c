@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/mips/src/kinetis/kinetis_lpserial.c
+ * arch/arm/src/kinetis/kinetis_lpserial.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>

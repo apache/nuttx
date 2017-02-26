@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/lpc17/kinetis_irq.c
+ * arch/arm/src/kinetis/kinetis_irq.c
  *
  *   Copyright (C) 2011, 2013-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
