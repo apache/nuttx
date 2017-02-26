@@ -714,6 +714,15 @@ config ARCH_BOARD_NUCLEO_F303RE
 	---help---
 		STMicro Nucleo F303RE board based on the STMicro STM32F303RET6 MCU.
 
+config ARCH_BOARD_NUCLEO_F334R8
+	bool "STM32F334 Nucleo F334R8"
+	depends on ARCH_CHIP_STM32F334R8
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		STMicro Nucleo F334R8 board based on the STMicro STM32F334R8 MCU.
+
 config ARCH_BOARD_NUCLEO_F401RE
 	bool "STM32F401 Nucleo F401RE"
 	depends on ARCH_CHIP_STM32F401RE
@@ -1447,6 +1456,7 @@ config ARCH_BOARD
 	default "pic32mz-starterkit"       if ARCH_BOARD_PIC32MZ_STARTERKIT
 	default "nucleo-144"               if ARCH_BOARD_NUCLEO_144
 	default "nucleo-f303re"            if ARCH_BOARD_NUCLEO_F303RE
+	default "nucleo-f334r8"            if ARCH_BOARD_NUCLEO_F334R8
 	default "nucleo-f4x1re"            if ARCH_BOARD_NUCLEO_F401RE || ARCH_BOARD_NUCLEO_F411RE
 	default "nucleo-l476rg"            if ARCH_BOARD_NUCLEO_L476RG
 	default "qemu-i486"                if ARCH_BOARD_QEMU_I486
@@ -1747,6 +1757,9 @@ source "configs/nucleo-144/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_F303RE
 source "configs/nucleo-f303re/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_F334R8
+source "configs/nucleo-f334r8/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_F401RE || ARCH_BOARD_NUCLEO_F411RE
 source "configs/nucleo-f4x1re/Kconfig"

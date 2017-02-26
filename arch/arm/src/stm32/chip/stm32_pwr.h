@@ -150,7 +150,8 @@
 #if defined(CONFIG_STM32_STM32F30XX)
 #  define PWR_CSR_EWUP1        (1 << 8)  /* Bit 8:  Enable WKUP1 pin */
 #  define PWR_CSR_EWUP2        (1 << 9)  /* Bit 9:  Enable WKUP2 pin */
-#elif defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F37XX)
+#elif defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F33XX) || \
+      defined(CONFIG_STM32_STM32F37XX)
 #  define PWR_CSR_EWUP1        (1 << 8)  /* Bit 8:  Enable WKUP1 pin */
 #  define PWR_CSR_EWUP2        (1 << 9)  /* Bit 9:  Enable WKUP2 pin */
 #  define PWR_CSR_EWUP3        (1 << 10) /* Bit 8:  Enable WKUP3 pin */
