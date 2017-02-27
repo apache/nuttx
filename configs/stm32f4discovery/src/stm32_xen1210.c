@@ -154,7 +154,7 @@ static struct stm32_xen1210config_s g_xen1210config =
 
 /* This is the XEN1210 Interrupt handler */
 
-int xen1210_interrupt(int irq, FAR void *context)
+int xen1210_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   /* Verify that we have a handler attached */
 

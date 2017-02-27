@@ -1484,8 +1484,7 @@ static int stm32_tim_getcapture(FAR struct stm32_tim_dev_s *dev, uint8_t channel
  * Name: stm32_tim_setisr
  ************************************************************************************/
 
-static int stm32_tim_setisr(FAR struct stm32_tim_dev_s *dev,
-                            int (*handler)(int irq, void *context),
+static int stm32_tim_setisr(FAR struct stm32_tim_dev_s *dev, xcpt_t handler,
                             int source)
 {
   int vectorno;

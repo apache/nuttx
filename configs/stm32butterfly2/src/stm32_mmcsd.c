@@ -124,7 +124,7 @@ static void *stm32_cd_thread(void *arg)
  *   Card detect interrupt handler.
  ****************************************************************************/
 
-static int stm32_cd(int irq, void *context)
+static int stm32_cd(int irq, void *context, void *arg)
 {
   static const int debounce_time = 100; /* [ms] */
   static uint32_t now = 0;
