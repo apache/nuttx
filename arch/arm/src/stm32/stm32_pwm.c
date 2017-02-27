@@ -1139,6 +1139,8 @@ static void pwm_dumpregs(struct stm32_pwmtimer_s *priv, FAR const char *msg)
               pwm_getreg(priv, STM32_GTIM_CCMR2_OFFSET));
     }
 
+  /* REVISIT: CNT and ARR may be 32-bits wide */
+
   pwminfo(" CCER: %04x CNT:  %04x PSC:   %04x ARR:   %04x\n",
           pwm_getreg(priv, STM32_GTIM_CCER_OFFSET),
           pwm_getreg(priv, STM32_GTIM_CNT_OFFSET),
@@ -1151,6 +1153,8 @@ static void pwm_dumpregs(struct stm32_pwmtimer_s *priv, FAR const char *msg)
           pwm_getreg(priv, STM32_ATIM_RCR_OFFSET),
           pwm_getreg(priv, STM32_ATIM_BDTR_OFFSET));
     }
+
+  /* REVISIT: CCR1-CCR4 may be 32-bits wide */
 
   if (priv->timid == 16 || priv->timid == 17)
     {
