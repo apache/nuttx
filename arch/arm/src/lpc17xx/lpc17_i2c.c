@@ -129,7 +129,7 @@ struct lpc17_i2cdev_s
 
 static int  lpc17_i2c_start(struct lpc17_i2cdev_s *priv);
 static void lpc17_i2c_stop(struct lpc17_i2cdev_s *priv);
-static int  lpc17_i2c_interrupt(int irq, FAR void *context, FAR void *arg);
+static int  lpc17_i2c_interrupt(int irq, FAR void *context, void *arg);
 static void lpc17_i2c_timeout(int argc, uint32_t arg, ...);
 static void lpc17_i2c_setfrequency(struct lpc17_i2cdev_s *priv,
               uint32_t frequency);
@@ -304,7 +304,7 @@ static int lpc17_i2c_transfer(FAR struct i2c_master_s *dev,
 }
 
 /****************************************************************************
- * Name: lpc17_i2c_interrupt
+ * Name: lpc17_stopnext
  *
  * Description:
  *   Check if we need to issue STOP at the next message
@@ -334,36 +334,13 @@ static void lpc17_stopnext(struct lpc17_i2cdev_s *priv)
  *
  ****************************************************************************/
 
-static int lpc17_i2c_interrupt(int irq, FAR void *context, FAR void *arg)
+static int lpc17_i2c_interrupt(int irq, FAR void *context, void *arg)
 {
-  struct lpc17_i2cdev_s *priv;
+  struct lpc17_i2cdev_s *priv = (struct lpc17_i2cdev_s *)arg;
   struct i2c_msg_s *msg;
   uint32_t state;
 
-#ifdef CONFIG_LPC17_I2C0
-  if (irq == LPC17_IRQ_I2C0)
-    {
-      priv = &g_i2c0dev;
-    }
-  else
-#endif
-#ifdef CONFIG_LPC17_I2C1
-  if (irq == LPC17_IRQ_I2C1)
-    {
-      priv = &g_i2c1dev;
-    }
-  else
-#endif
-#ifdef CONFIG_LPC17_I2C2
-  if (irq == LPC17_IRQ_I2C2)
-    {
-      priv = &g_i2c2dev;
-    }
-  else
-#endif
-    {
-      PANIC();
-    }
+  DEBUGASSERT(priv != NULL);
 
   /* Reference UM10360 19.10.5 */
 
@@ -608,7 +585,7 @@ struct i2c_master_s *lpc17_i2cbus_initialize(int port)
 
   /* Attach Interrupt Handler */
 
-  irq_attach(priv->irqid, lpc17_i2c_interrupt, NULL);
+  irq_attach(priv->irqid, lpc17_i2c_interrupt, priv);
 
   /* Enable Interrupt Handler */
 
