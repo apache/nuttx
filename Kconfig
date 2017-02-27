@@ -859,21 +859,21 @@ config DEBUG_IRQ
 if DEBUG_IRQ
 
 config DEBUG_IRQ_ERROR
-	bool "DMA Error Output"
+	bool "Interrupt Controller Error Output"
 	default n
 	depends on DEBUG_ERROR
 	---help---
 		Enable interrupt controller error output to SYSLOG.
 
 config DEBUG_IRQ_WARN
-	bool "DMA Warnings Output"
+	bool "Interrupt Controller Warnings Output"
 	default n
 	depends on DEBUG_WARN
 	---help---
 		Enable interrupt controller warning output to SYSLOG.
 
 config DEBUG_IRQ_INFO
-	bool "DMA Informational Output"
+	bool "Interrupt Controller Informational Output"
 	default n
 	depends on DEBUG_INFO
 	---help---
@@ -1277,7 +1277,7 @@ endif # DEBUG_RTC
 config DEBUG_MEMCARD
 	bool "Memory Card Driver Debug Features"
 	default n
-	depends on MMCSD_SDIO
+	depends on MMCSD
 	---help---
 		Enable MMC/SD memory card Driver debug features.
 
