@@ -275,9 +275,9 @@ void kinetis_pinirqinitialize(void)
 xcpt_t kinetis_pinirqattach(uint32_t pinset, xcpt_t pinisr, void *arg)
 {
 #ifdef HAVE_PORTINTS
-  xcpt_t      *isrtab;
-  xcpt_t       oldisr;
-  irqstate_t   flags;
+  struct kinetis_pinirq_s *isrtab;
+  xcpt_t oldisr;
+  irqstate_t flags;
   unsigned int port;
   unsigned int pin;
 
@@ -331,8 +331,9 @@ xcpt_t kinetis_pinirqattach(uint32_t pinset, xcpt_t pinisr, void *arg)
 
    /* Get the old PIN ISR and set the new PIN ISR */
 
-   oldisr      = isrtab[pin];
-   isrtab[pin] = pinisr;
+   oldisr              = isrtab[pin].handler;
+   isrtab[pin].handler = pinisr;
+   isrtab[pin].arg     = arg;
 
    /* And return the old PIN isr address */
 
