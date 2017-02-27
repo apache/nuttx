@@ -122,7 +122,7 @@ static int stm32_exti_pvd_isr(int irq, void *context, FAR void *arg)
  ****************************************************************************/
 
 xcpt_t stm32_exti_pvd(bool risingedge, bool fallingedge, bool event,
-                      xcpt_t func)
+                      xcpt_t func, void *arg)
 {
   xcpt_t oldhandler;
 
