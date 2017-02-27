@@ -326,11 +326,11 @@
 #  define SYS_telldir                  (__SYS_filedesc+15)
 
 #  if defined(CONFIG_PSEUDOFS_SOFTLINKS)
-#    define SYS_link                   (__SYS_filedesc+15)
-#    define SYS_readlink               (__SYS_filedesc+16)
-#    define __SYS_pipes                (__SYS_filedesc+17)
+#    define SYS_link                   (__SYS_filedesc+16)
+#    define SYS_readlink               (__SYS_filedesc+17)
+#    define __SYS_pipes                (__SYS_filedesc+18)
 #  else
-#    define __SYS_pipes                (__SYS_filedesc+15)
+#    define __SYS_pipes                (__SYS_filedesc+16)
 #  endif
 
 #  if defined(CONFIG_PIPES) && CONFIG_DEV_PIPE_SIZE > 0
