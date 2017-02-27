@@ -499,7 +499,7 @@ static int nrf24l01_irqhandler(int irq, FAR void *context, FAR void *arg)
 
   /* If RX is enabled we delegate the actual work to bottom-half handler */
 
-  work_queue(HPWORK, &priv->irq_work, nrf24l01_worker, dev, 0);
+  work_queue(HPWORK, &dev->irq_work, nrf24l01_worker, dev, 0);
 #else
 
   /* Otherwise we simply wake up the send function */
