@@ -267,12 +267,12 @@ static int  up_setup(struct uart_dev_s *dev);
 static void up_shutdown(struct uart_dev_s *dev);
 static int  up_attach(struct uart_dev_s *dev);
 static void up_detach(struct uart_dev_s *dev);
-static int  up_rcvinterrupt(int irq, void *context, FAR void *arg);
+static int  up_rcvinterrupt(int irq, void *context, void *arg);
 static int  up_receive(struct uart_dev_s *dev, unsigned int *status);
 static void m16c_rxint(struct up_dev_s *dev, bool enable);
 static void up_rxint(struct uart_dev_s *dev, bool enable);
 static bool up_rxavailable(struct uart_dev_s *dev);
-static int  up_xmtinterrupt(int irq, void *context, FAR void *arg);
+static int  up_xmtinterrupt(int irq, void *context, void *arg);
 static void up_send(struct uart_dev_s *dev, int ch);
 static void m16c_txint(struct up_dev_s *dev, bool enable);
 static void up_txint(struct uart_dev_s *dev, bool enable);
@@ -711,12 +711,12 @@ static int up_attach(struct uart_dev_s *dev)
 
   /* Attach the UART receive data available IRQ */
 
-  ret = irq_attach(priv->rcvirq, up_rcvinterrupt, NULL);
+  ret = irq_attach(priv->rcvirq, up_rcvinterrupt, dev);
   if (ret == OK)
     {
       /* Attach the UART transmit complete IRQ */
 
-      ret = irq_attach(priv->xmtirq, up_xmtinterrupt, NULL);
+      ret = irq_attach(priv->xmtirq, up_xmtinterrupt, dev);
       if (ret != OK)
         {
           /* Detach the ERI interrupt on failure */
@@ -764,34 +764,11 @@ static void up_detach(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static int up_rcvinterrupt(int irq, void *context, FAR void *arg)
+static int up_rcvinterrupt(int irq, void *context, void *arg)
 {
-  struct uart_dev_s *dev = NULL;
+  struct uart_dev_s *dev = (struct uart_dev_s *)arg;
 
-#ifdef CONFIG_M16C_UART0
-  if (irq == g_uart0priv.rcvirq)
-    {
-      dev = &g_uart0port;
-    }
-  else
-#endif
-#ifdef CONFIG_M16C_UART1
-  if (irq == g_uart1priv.rcvirq)
-    {
-      dev = &g_uart1port;
-    }
-  else
-#endif
-#ifdef CONFIG_M16C_UART2
-  if (irq = g_uart2priv.rcvirq)
-    {
-      dev = &g_uart2port;
-    }
-  else
-#endif
-    {
-      PANIC();
-    }
+  DEBUGASSERT(dev != NULL && dev->priv != NULL);
 
   /* Handle incoming, receive bytes (RDRF: Receive Data Register Full) */
 
@@ -924,40 +901,17 @@ static bool up_rxavailable(struct uart_dev_s *dev)
  *   This is the UART receive interrupt handler.  It will be invoked
  *   when an interrupt received on the 'irq'  It should call
  *   uart_transmitchars or uart_receivechar to perform the
- *   appropriate data transfers.  The interrupt handling logic\
+ *   appropriate data transfers.  The interrupt handling logic
  *   must be able to map the 'irq' number into the approprite
  *   up_dev_s structure in order to call these functions.
  *
  ****************************************************************************/
 
-static int up_xmtinterrupt(int irq, void *context, FAR void *arg)
+static int up_xmtinterrupt(int irq, void *context, void *arg)
 {
-  struct uart_dev_s *dev = NULL;
+  struct uart_dev_s *dev = (struct uart_dev_s *)arg;
 
-#ifdef CONFIG_M16C_UART0
-  if (irq == g_uart0priv.xmtirq)
-    {
-      dev = &g_uart0port;
-    }
-  else
-#endif
-#ifdef CONFIG_M16C_UART1
-  if (irq == g_uart1priv.xmtirq)
-    {
-      dev = &g_uart1port;
-    }
-  else
-#endif
-#ifdef CONFIG_M16C_UART2
-  if (irq == g_uart2priv.xmtirq)
-    {
-      dev = &g_uart1port;
-    }
-  else
-#endif
-    {
-      PANIC();
-    }
+  DEBUGASSERT(dev != NULL && dev->priv != NULL);
 
   /* Handle outgoing, transmit bytes */
 

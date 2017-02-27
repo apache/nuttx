@@ -369,7 +369,7 @@ static void stm32_dmastreamdisable(struct stm32_dma_s *dmast)
  *
  ************************************************************************************/
 
-static int stm32_dmainterrupt(int irq, void *context, FAR void *arg)
+static int stm32_dmainterrupt(int irq, void *context, void *arg)
 {
   struct stm32_dma_s *dmast;
   uint32_t status;
@@ -481,7 +481,7 @@ void weak_function up_dmainitialize(void)
 
       /* Attach DMA interrupt vectors */
 
-      (void)irq_attach(dmast->irq, stm32_dmainterrupt, NULL);
+      (void)irq_attach(dmast->irq, stm32_dmainterrupt, dmast);
 
       /* Disable the DMA stream */
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/mips/src/pic32mz/pic32mz-serial.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -248,7 +248,6 @@
 struct up_dev_s
 {
   uintptr_t uartbase;  /* Base address of UART registers */
-  xcpt_t    handler;   /* UART interrupt handler */
   uint32_t  baud;      /* Configured baud */
   uint8_t   irqe;      /* Error IRQ associated with this UART (for enable) */
   uint8_t   irqrx;     /* RX IRQ associated with this UART (for enable) */
@@ -276,27 +275,7 @@ static int  up_setup(struct uart_dev_s *dev);
 static void up_shutdown(struct uart_dev_s *dev);
 static int  up_attach(struct uart_dev_s *dev);
 static void up_detach(struct uart_dev_s *dev);
-
-static int  up_interrupt(struct uart_dev_s *priv);
-#ifdef CONFIG_PIC32MZ_UART1
-static int  up_uart1_interrupt(int irq, void *context, FAR void *arg);
-#endif
-#ifdef CONFIG_PIC32MZ_UART2
-static int  up_uart2_interrupt(int irq, void *context, FAR void *arg);
-#endif
-#ifdef CONFIG_PIC32MZ_UART3
-static int  up_uart3_interrupt(int irq, void *context, FAR void *arg);
-#endif
-#ifdef CONFIG_PIC32MZ_UART4
-static int  up_uart4_interrupt(int irq, void *context, FAR void *arg);
-#endif
-#ifdef CONFIG_PIC32MZ_UART5
-static int  up_uart5_interrupt(int irq, void *context, FAR void *arg);
-#endif
-#ifdef CONFIG_PIC32MZ_UART6
-static int  up_uart6_interrupt(int irq, void *context, FAR void *arg);
-#endif
-
+static int  up_interrupt(int irq, void *context, FAR void *arg);
 static int  up_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int  up_receive(struct uart_dev_s *dev, uint32_t *status);
 static void up_rxint(struct uart_dev_s *dev, bool enable);
@@ -362,7 +341,6 @@ static char g_uart6txbuffer[CONFIG_UART6_TXBUFSIZE];
 static struct up_dev_s g_uart1priv =
 {
   .uartbase  = PIC32MZ_UART1_K1BASE,
-  .handler   = up_uart1_interrupt,
   .baud      = CONFIG_UART1_BAUD,
   .irqe      = PIC32MZ_IRQ_U1E,
   .irqrx     = PIC32MZ_IRQ_U1RX,
@@ -395,7 +373,6 @@ static uart_dev_t g_uart1port =
 static struct up_dev_s g_uart2priv =
 {
   .uartbase  = PIC32MZ_UART2_K1BASE,
-  .handler   = up_uart2_interrupt,
   .baud      = CONFIG_UART2_BAUD,
   .irqe      = PIC32MZ_IRQ_U2E,
   .irqrx     = PIC32MZ_IRQ_U2RX,
@@ -428,7 +405,6 @@ static uart_dev_t g_uart2port =
 static struct up_dev_s g_uart3priv =
 {
   .uartbase  = PIC32MZ_UART3_K1BASE,
-  .handler   = up_uart3_interrupt,
   .baud      = CONFIG_UART3_BAUD,
   .irqe      = PIC32MZ_IRQ_U3E,
   .irqrx     = PIC32MZ_IRQ_U3RX,
@@ -461,7 +437,6 @@ static uart_dev_t g_uart3port =
 static struct up_dev_s g_uart4priv =
 {
   .uartbase  = PIC32MZ_UART4_K1BASE,
-  .handler   = up_uart4_interrupt,
   .baud      = CONFIG_UART4_BAUD,
   .irqe      = PIC32MZ_IRQ_U4E,
   .irqrx     = PIC32MZ_IRQ_U4RX,
@@ -494,7 +469,6 @@ static uart_dev_t g_uart4port =
 static struct up_dev_s g_uart5priv =
 {
   .uartbase  = PIC32MZ_UART5_K1BASE,
-  .handler   = up_uart5_interrupt,
   .baud      = CONFIG_UART5_BAUD,
   .irqe      = PIC32MZ_IRQ_U5E,
   .irqrx     = PIC32MZ_IRQ_U5RX,
@@ -527,7 +501,6 @@ static uart_dev_t g_uart5port =
 static struct up_dev_s g_uart6priv =
 {
   .uartbase  = PIC32MZ_UART6_K1BASE,
-  .handler   = up_uart6_interrupt,
   .baud      = CONFIG_UART6_BAUD,
   .irqe      = PIC32MZ_IRQ_U6E,
   .irqrx     = PIC32MZ_IRQ_U6RX,
@@ -675,17 +648,19 @@ static int up_attach(struct uart_dev_s *dev)
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   int ret;
 
-  /* Attach the IRQs */
+  DEBUGASSERT(dev != NULL && dev->priv != NULL);
 
-  ret = irq_attach(priv->irqrx, priv->handler, NULL);
+  /* Attach the IRQ */
+
+  ret = irq_attach(priv->irqrx, up_interrupt, dev);
   if (ret == 0)
     {
-      ret = irq_attach(priv->irqtx, priv->handler, NULL);
+      ret = irq_attach(priv->irqtx, up_interrupt, dev);
     }
 
   if (ret == 0)
     {
-      ret = irq_attach(priv->irqe, priv->handler, NULL);
+      ret = irq_attach(priv->irqe, up_interrupt, dev);
     }
 
   return ret;
@@ -727,13 +702,14 @@ static void up_detach(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static int  up_interrupt(struct uart_dev_s *dev)
+static int up_interrupt(int irq, void *context, FAR void *arg)
 {
+  struct uart_dev_s *dev = (struct uart_dev_s *)arg;
   struct up_dev_s *priv;
-  int              passes;
-  bool             handled;
+  int passes;
+  bool handled;
 
-  DEBUGASSERT(dev && dev->priv);
+  DEBUGASSERT(dev != NULL && dev->priv != NULL);
   priv = (struct up_dev_s *)dev->priv;
 
   /* Loop until there are no characters to be transferred or,
@@ -829,56 +805,6 @@ static int  up_interrupt(struct uart_dev_s *dev)
 
   return OK;
 }
-
-/****************************************************************************
- * Name: up_uartn_interrupt
- *
- * Description:
- *   These the UART-specific interrupt handlers.  They simply invoke the
- *   common uart interrupt handler with the correct state data.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_PIC32MZ_UART1
-static int  up_uart1_interrupt(int irq, void *context, FAR void *arg)
-{
-  return up_interrupt(&g_uart1port);
-}
-#endif
-
-#ifdef CONFIG_PIC32MZ_UART2
-static int  up_uart2_interrupt(int irq, void *context, FAR void *arg)
-{
-  return up_interrupt(&g_uart2port);
-}
-#endif
-
-#ifdef CONFIG_PIC32MZ_UART3
-static int  up_uart3_interrupt(int irq, void *context, FAR void *arg)
-{
-  return up_interrupt(&g_uart3port);
-}
-#endif
-
-#ifdef CONFIG_PIC32MZ_UART4
-static int  up_uart4_interrupt(int irq, void *context, FAR void *arg)
-{
-  return up_interrupt(&g_uart4port);
-}
-#endif
-
-#ifdef CONFIG_PIC32MZ_UART5
-static int  up_uart5_interrupt(int irq, void *context, FAR void *arg)
-{
-  return up_interrupt(&g_uart5port);
-}
-#endif
-#ifdef CONFIG_PIC32MZ_UART6
-static int  up_uart6_interrupt(int irq, void *context, FAR void *arg)
-{
-  return up_interrupt(&g_uart6port);
-}
-#endif
 
 /****************************************************************************
  * Name: up_ioctl

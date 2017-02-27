@@ -482,7 +482,7 @@ void weak_function up_dmainitialize(void)
 
       /* Attach DMA interrupt vectors */
 
-      (void)irq_attach(dmast->irq, stm32_dmainterrupt, NULL);
+      (void)irq_attach(dmast->irq, stm32_dmainterrupt, dmast);
 
       /* Disable the DMA stream */
 

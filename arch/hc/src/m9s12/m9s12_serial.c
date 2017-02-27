@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/hc/src/m9s12/m9s12_serial.c
  *
- *   Copyright (C) 2009, 2011-2012, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011-2012, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -123,7 +123,7 @@ static int  up_setup(struct uart_dev_s *dev);
 static void up_shutdown(struct uart_dev_s *dev);
 static int  up_attach(struct uart_dev_s *dev);
 static void up_detach(struct uart_dev_s *dev);
-static int  up_interrupt(int irq, void *context, FAR void *arg);
+static int  up_interrupt(int irq, void *context, void *arg);
 static int  up_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int  up_receive(struct uart_dev_s *dev, uint32_t *status);
 static void up_rxint(struct uart_dev_s *dev, bool enable);
@@ -422,7 +422,7 @@ static int up_attach(struct uart_dev_s *dev)
 
   /* Attach and enable the IRQ */
 
-  ret = irq_attach(priv->irq, up_interrupt, NULL);
+  ret = irq_attach(priv->irq, up_interrupt, dev);
   if (ret == OK)
     {
        /* Enable the Rx interrupt (the TX interrupt is still disabled
@@ -465,30 +465,14 @@ static void up_detach(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static int up_interrupt(int irq, void *context, FAR void *arg)
+static int up_interrupt(int irq, void *context, void *arg)
 {
-  struct uart_dev_s *dev = NULL;
+  struct uart_dev_s *dev = (struct uart_dev_s *)arg;
   struct up_dev_s   *priv;
   int                passes;
   bool               handled;
 
-#ifndef CONFIG_SCI0_DISABLE
-  if (g_sci0priv.irq == irq)
-    {
-      dev = &g_sci0port;
-    }
-  else
-#endif
-#ifndef CONFIG_SCI1_DISABLE
-  if (g_sci1priv.irq == irq)
-    {
-      dev = &g_sci1port;
-    }
-  else
-#endif
-    {
-      PANIC();
-    }
+  DEBUGASSERT(dev != NULL && dev->priv != NULL);
   priv = (struct up_dev_s*)dev->priv;
 
   /* Loop until there are no characters to be transferred or,

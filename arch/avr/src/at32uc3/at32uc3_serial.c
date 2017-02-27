@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/avr/src/at32uc3/at32uc3_serial.c
  *
- *   Copyright (C) 2010, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -160,7 +160,7 @@ static int  up_setup(struct uart_dev_s *dev);
 static void up_shutdown(struct uart_dev_s *dev);
 static int  up_attach(struct uart_dev_s *dev);
 static void up_detach(struct uart_dev_s *dev);
-static int  up_interrupt(int irq, void *context, FAR void *arg);
+static int  up_interrupt(int irq, void *context, void *arg);
 static int  up_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int  up_receive(struct uart_dev_s *dev, uint32_t *status);
 static void up_rxint(struct uart_dev_s *dev, bool enable);
@@ -408,7 +408,7 @@ static int up_attach(struct uart_dev_s *dev)
 
   /* Attach the IRQ */
 
-  return irq_attach(priv->irq, up_interrupt, NULL);
+  return irq_attach(priv->irq, up_interrupt, dev);
 }
 
 /****************************************************************************
@@ -440,40 +440,16 @@ static void up_detach(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static int up_interrupt(int irq, void *context, FAR void *arg)
+static int up_interrupt(int irq, void *context, void *arg)
 {
-  struct uart_dev_s *dev = NULL;
+  struct uart_dev_s *dev = (struct uart_dev_s *)arg;
   struct up_dev_s   *priv;
   uint32_t           csr;
   int                passes;
   bool               handled;
 
-#ifdef CONFIG_AVR32_USART0_RS232
-  if (g_usart0priv.irq == irq)
-    {
-      dev = &g_usart0port;
-    }
-  else
-#endif
-#ifdef CONFIG_AVR32_USART1_RS232
-  if (g_usart1priv.irq == irq)
-    {
-      dev = &g_usart1port;
-    }
-  else
-#endif
-#ifdef CONFIG_AVR32_USART2_RS232
-  if (g_usart2priv.irq == irq)
-    {
-      dev = &g_usart2port;
-    }
-  else
-#endif
-    {
-      PANIC();
-    }
+  DEBUGASSERT(dev != NULL && dev->priv != NULL);
   priv = (struct up_dev_s *)dev->priv;
-  DEBUGASSERT(priv);
 
   /* Loop until there are no characters to be transferred or,
    * until we have been looping for a long time.

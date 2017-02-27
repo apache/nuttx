@@ -147,8 +147,7 @@ static inline void sam_chan_putreg(struct sam_chan_s *chan,
 
 /* Interrupt Handling *******************************************************/
 
-static int sam_tc_interrupt(struct sam_chan_s *tc);
-static int sam_raw_interrupt(int irq, void *context, FAR void *arg);
+static int sam_tc_interrupt(int irq, void *context, FAR void *arg);
 
 /* Initialization ***********************************************************/
 
@@ -535,13 +534,16 @@ static inline void sam_chan_putreg(struct sam_chan_s *chan, unsigned int offset,
  *
  ****************************************************************************/
 
-static int sam_tc_interrupt(struct sam_chan_s *chan)
+static int sam_tc_interrupt(int irq, void *context, FAR void *arg)
 {
+  struct sam_chan_s *chan = (struct sam_chan_s *)arg;
   uint32_t sr;
   uint32_t imr;
   uint32_t pending;
 
   /* Process interrupts */
+
+  DEBUGASSERT(chan != NULL);
 
   /* Get the interrupt status for this channel */
 
@@ -576,40 +578,9 @@ static int sam_tc_interrupt(struct sam_chan_s *chan)
 }
 
 /****************************************************************************
- * Name: sam_raw_interrupt
- *
- * Description:
- *  Timer block interrupt handlers
- *
- * Input Parameters:
- *   irq
- *   context
- *
- * Returned Value:
- *
- ****************************************************************************/
-
-static int sam_raw_interrupt(int irq, void *context, FAR void *arg)
-{
-  int i;
-  struct sam_chan_s *chan;
-
-  for (i = 0; i < ENABLED_CHANNELS; i++)
-    {
-      chan = &g_channels[i];
-
-      if (chan->irq == irq)
-        {
-          return sam_tc_interrupt(chan);
-        }
-    }
-
-  return OK;
-}
-
-/****************************************************************************
  * Initialization
  ****************************************************************************/
+
 /****************************************************************************
  * Name: sam_tc_mckdivider
  *
@@ -816,7 +787,7 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
 
       /* Attach the timer interrupt handler and enable the timer interrupts */
 
-      (void)irq_attach(chan->irq, sam_raw_interrupt, NULL);
+      (void)irq_attach(chan->irq, sam_tc_interrupt, chan);
       up_enable_irq(chan->irq);
 
       /* Now the channel is initialized */
