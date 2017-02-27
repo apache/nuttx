@@ -232,19 +232,19 @@ static void imx_detach(struct uart_dev_s *dev);
 
 static int  imx_interrupt(struct uart_dev_s *dev);
 #ifdef CONFIG_IMX6_UART1
-static int  imx_uart1_interrupt(int irq, void *context);
+static int  imx_uart1_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_IMX6_UART2
-static int  imx_uart2_interrupt(int irq, void *context);
+static int  imx_uart2_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_IMX6_UART3
-static int  imx_uart3_interrupt(int irq, void *context);
+static int  imx_uart3_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_IMX6_UART4
-static int  imx_uart4_interrupt(int irq, void *context);
+static int  imx_uart4_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_IMX6_UART5
-static int  imx_uart5_interrupt(int irq, void *context);
+static int  imx_uart5_interrupt(int irq, void *context, FAR void *arg);
 #endif
 
 static int  imx_ioctl(struct file *filep, int cmd, unsigned long arg);
@@ -618,7 +618,7 @@ static int imx_attach(struct uart_dev_s *dev)
 
   /* Attach and enable the IRQ */
 
-  ret = irq_attach(priv->irq, priv->handler);
+  ret = irq_attach(priv->irq, priv->handler, NULL);
   if (ret == OK)
     {
       /* Configure as a (high) level interrupt */
@@ -720,31 +720,31 @@ static int imx_interrupt(struct uart_dev_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_IMX6_UART1
-static int  imx_uart1_interrupt(int irq, void *context)
+static int  imx_uart1_interrupt(int irq, void *context, FAR void *arg)
 {
   return imx_interrupt(&g_uart1port);
 }
 #endif
 #ifdef CONFIG_IMX6_UART2
-static int  imx_uart2_interrupt(int irq, void *context)
+static int  imx_uart2_interrupt(int irq, void *context, FAR void *arg)
 {
   return imx_interrupt(&g_uart2port);
 }
 #endif
 #ifdef CONFIG_IMX6_UART3
-static int  imx_uart3_interrupt(int irq, void *context)
+static int  imx_uart3_interrupt(int irq, void *context, FAR void *arg)
 {
   return imx_interrupt(&g_uart3port);
 }
 #endif
 #ifdef CONFIG_IMX6_UART4
-static int  imx_uart4_interrupt(int irq, void *context)
+static int  imx_uart4_interrupt(int irq, void *context, FAR void *arg)
 {
   return imx_interrupt(&g_uart4port);
 }
 #endif
 #ifdef CONFIG_IMX6_UART5
-static int  imx_uart5_interrupt(int irq, void *context)
+static int  imx_uart5_interrupt(int irq, void *context, FAR void *arg)
 {
   return imx_interrupt(&g_uart5port);
 }

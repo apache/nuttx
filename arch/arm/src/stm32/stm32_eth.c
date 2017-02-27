@@ -658,7 +658,7 @@ static void stm32_freeframe(FAR struct stm32_ethmac_s *priv);
 static void stm32_txdone(FAR struct stm32_ethmac_s *priv);
 
 static void stm32_interrupt_work(FAR void *arg);
-static int  stm32_interrupt(int irq, FAR void *context);
+static int  stm32_interrupt(int irq, FAR void *context, FAR void *arg);
 
 /* Watchdog timer expirations */
 
@@ -2088,7 +2088,7 @@ static void stm32_interrupt_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static int stm32_interrupt(int irq, FAR void *context)
+static int stm32_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct stm32_ethmac_s *priv = &g_stm32ethmac[0];
   uint32_t dmasr;
@@ -4023,7 +4023,7 @@ int stm32_ethinitialize(int intf)
 
   /* Attach the IRQ to the driver */
 
-  if (irq_attach(STM32_IRQ_ETH, stm32_interrupt))
+  if (irq_attach(STM32_IRQ_ETH, stm32_interrupt, NULL))
     {
       /* We could not attach the ISR to the interrupt */
 

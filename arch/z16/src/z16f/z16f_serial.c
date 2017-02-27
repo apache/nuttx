@@ -95,8 +95,8 @@ static int  z16f_setup(struct uart_dev_s *dev);
 static void z16f_shutdown(struct uart_dev_s *dev);
 static int  z16f_attach(struct uart_dev_s *dev);
 static void z16f_detach(struct uart_dev_s *dev);
-static int  z16f_rxinterrupt(int irq, void *context);
-static int  z16f_txinterrupt(int irq, void *context);
+static int  z16f_rxinterrupt(int irq, void *context, FAR void *arg);
+static int  z16f_txinterrupt(int irq, void *context, FAR void *arg);
 static int  z16f_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int  z16f_receive(struct uart_dev_s *dev, uint32_t *status);
 static void z16f_rxint(struct uart_dev_s *dev, bool enable);
@@ -426,12 +426,12 @@ static int z16f_attach(struct uart_dev_s *dev)
 
   /* Attach the RX IRQ */
 
-  ret = irq_attach(priv->rxirq, z16f_rxinterrupt);
+  ret = irq_attach(priv->rxirq, z16f_rxinterrupt, NULL);
   if (ret == OK)
     {
       /* Attach the TX IRQ */
 
-      ret = irq_attach(priv->txirq, z16f_txinterrupt);
+      ret = irq_attach(priv->txirq, z16f_txinterrupt, NULL);
       if (ret != OK)
         {
           irq_detach(priv->rxirq);
@@ -471,7 +471,7 @@ static void z16f_detach(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static int z16f_rxinterrupt(int irq, void *context)
+static int z16f_rxinterrupt(int irq, void *context, FAR void *arg)
 {
   struct uart_dev_s  *dev = NULL;
   struct z16f_uart_s *priv;
@@ -526,7 +526,7 @@ static int z16f_rxinterrupt(int irq, void *context)
  *
  ****************************************************************************/
 
-static int z16f_txinterrupt(int irq, void *context)
+static int z16f_txinterrupt(int irq, void *context, FAR void *arg)
 {
   struct uart_dev_s  *dev = NULL;
   struct z16f_uart_s *priv;

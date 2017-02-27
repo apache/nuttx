@@ -96,8 +96,8 @@ static int  z8_setup(FAR struct uart_dev_s *dev);
 static void z8_shutdown(FAR struct uart_dev_s *dev);
 static int  z8_attach(FAR struct uart_dev_s *dev);
 static void z8_detach(FAR struct uart_dev_s *dev);
-static int  z8_rxinterrupt(int irq, FAR void *context);
-static int  z8_txinterrupt(int irq, FAR void *context);
+static int  z8_rxinterrupt(int irq, FAR void *context, FAR void *arg);
+static int  z8_txinterrupt(int irq, FAR void *context, FAR void *arg);
 static int  z8_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 static int  z8_receive(FAR struct uart_dev_s *dev, FAR uint32_t *status);
 static void z8_rxint(FAR struct uart_dev_s *dev, bool enable);
@@ -446,12 +446,12 @@ static int z8_attach(FAR struct uart_dev_s *dev)
 
   /* Attach the RX IRQ */
 
-  ret = irq_attach(priv->rxirq, z8_rxinterrupt);
+  ret = irq_attach(priv->rxirq, z8_rxinterrupt, NULL);
   if (ret == OK)
     {
       /* Attach the TX IRQ */
 
-      ret = irq_attach(priv->txirq, z8_txinterrupt);
+      ret = irq_attach(priv->txirq, z8_txinterrupt, NULL);
       if (ret != OK)
         {
           irq_detach(priv->rxirq);
@@ -488,7 +488,7 @@ static void z8_detach(FAR struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static int z8_rxinterrupt(int irq, FAR void *context)
+static int z8_rxinterrupt(int irq, FAR void *context, FAR void *arg)
 {
   struct uart_dev_s  *dev = NULL;
   struct z8_uart_s *priv;
@@ -537,7 +537,7 @@ static int z8_rxinterrupt(int irq, FAR void *context)
  *
  ****************************************************************************/
 
-static int z8_txinterrupt(int irq, FAR void *context)
+static int z8_txinterrupt(int irq, FAR void *context, FAR void *arg)
 {
   struct uart_dev_s  *dev = NULL;
   struct z8_uart_s *priv;

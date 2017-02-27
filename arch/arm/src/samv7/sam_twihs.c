@@ -203,13 +203,13 @@ static int twi_wait(struct twi_dev_s *priv, unsigned int size);
 static void twi_wakeup(struct twi_dev_s *priv, int result);
 static int twi_interrupt(struct twi_dev_s *priv);
 #ifdef CONFIG_SAMV7_TWIHS0
-static int twi0_interrupt(int irq, FAR void *context);
+static int twi0_interrupt(int irq, FAR void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_SAMV7_TWIHS1
-static int twi1_interrupt(int irq, FAR void *context);
+static int twi1_interrupt(int irq, FAR void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_SAMV7_TWIHS2
-static int twi2_interrupt(int irq, FAR void *context);
+static int twi2_interrupt(int irq, FAR void *context, FAR void *arg);
 #endif
 static void twi_timeout(int argc, uint32_t arg, ...);
 
@@ -762,21 +762,21 @@ static int twi_interrupt(struct twi_dev_s *priv)
 }
 
 #ifdef CONFIG_SAMV7_TWIHS0
-static int twi0_interrupt(int irq, FAR void *context)
+static int twi0_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   return twi_interrupt(&g_twi0);
 }
 #endif
 
 #ifdef CONFIG_SAMV7_TWIHS1
-static int twi1_interrupt(int irq, FAR void *context)
+static int twi1_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   return twi_interrupt(&g_twi1);
 }
 #endif
 
 #ifdef CONFIG_SAMV7_TWIHS2
-static int twi2_interrupt(int irq, FAR void *context)
+static int twi2_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   return twi_interrupt(&g_twi2);
 }
@@ -1444,7 +1444,7 @@ struct i2c_master_s *sam_i2cbus_initialize(int bus)
 
       /* Attach Interrupt Handler */
 
-      ret = irq_attach(priv->attr->irq, priv->attr->handler);
+      ret = irq_attach(priv->attr->irq, priv->attr->handler, NULL);
       if (ret < 0)
         {
           ierr("ERROR: Failed to attach irq %d\n", priv->attr->irq);

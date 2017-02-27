@@ -4109,7 +4109,7 @@ struct usbhost_connection_s *sam_ohci_initialize(int controller)
    * then it will manage the shared interrupt.
    */
 
-  if (irq_attach(SAM_IRQ_UHPHS, sam_ohci_tophalf) != 0)
+  if (irq_attach(SAM_IRQ_UHPHS, sam_ohci_tophalf, NULL) != 0)
     {
       usbhost_trace1(OHCI_TRACE1_IRQATTACH, SAM_IRQ_UHPHS);
       return NULL;
@@ -4176,7 +4176,7 @@ struct usbhost_connection_s *sam_ohci_initialize(int controller)
  *
  ****************************************************************************/
 
-int sam_ohci_tophalf(int irq, void *context)
+int sam_ohci_tophalf(int irq, void *context, FAR void *arg)
 {
   uint32_t intst;
   uint32_t inten;

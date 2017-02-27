@@ -113,7 +113,7 @@ static void     lpc43_putreg(uint32_t val, uint32_t addr);
 
 /* Interrupt handling *******************************************************/
 
-static int      lpc43_interrupt(int irq, FAR void *context);
+static int      lpc43_interrupt(int irq, FAR void *context, FAR void *arg);
 
 /* "Lower half" driver methods **********************************************/
 
@@ -336,7 +336,7 @@ void tmr_clk_disable(uint16_t tmrid)
  *
  ****************************************************************************/
 
-static int lpc43_interrupt(int irq, FAR void *context)
+static int lpc43_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   uint8_t chan_int = 0x0f;
   FAR struct lpc43_lowerhalf_s *priv = &g_tmrdevs[irq-LPC43M4_IRQ_TIMER0];
@@ -757,7 +757,7 @@ void lpc43_tmrinitialize(FAR const char *devpath, int irq)
 
   priv->ops = &g_tmrops;
 
-  (void)irq_attach(irq, lpc43_interrupt);
+  (void)irq_attach(irq, lpc43_interrupt, NULL);
 
   /* Enable NVIC interrupt. */
 

@@ -165,10 +165,10 @@ static int  efm32_attach(struct uart_dev_s *dev);
 static void efm32_detach(struct uart_dev_s *dev);
 static int  efm32_interrupt(struct uart_dev_s *dev);
 #if defined(CONFIG_EFM32_LEUART0)
-static int  efm32_leuart0_interrupt(int irq, void *context);
+static int  efm32_leuart0_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #if defined(CONFIG_EFM32_LEUART1)
-static int  efm32_leuart1_interrupt(int irq, void *context);
+static int  efm32_leuart1_interrupt(int irq, void *context, FAR void *arg);
 #endif
 static int  efm32_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int  efm32_receive(struct uart_dev_s *dev, uint32_t *status);
@@ -429,7 +429,7 @@ static int efm32_attach(struct uart_dev_s *dev)
    * disabled in the C2 register.
    */
 
-  ret = irq_attach(config->irq, config->handler);
+  ret = irq_attach(config->irq, config->handler, NULL);
   if (ret >= 0)
     {
       up_enable_irq(config->irq);
@@ -535,14 +535,14 @@ static int  efm32_interrupt(struct uart_dev_s *dev)
 }
 
 #if defined(CONFIG_EFM32_LEUART0)
-static int efm32_leuart0_interrupt(int irq, void *context)
+static int efm32_leuart0_interrupt(int irq, void *context, FAR void *arg)
 {
   return efm32_interrupt(&g_leuart0port);
 }
 #endif
 
 #if defined(CONFIG_EFM32_LEUART1)
-static int  efm32_leuart1_interrupt(int irq, void *context)
+static int  efm32_leuart1_interrupt(int irq, void *context, FAR void *arg)
 {
   return efm32_interrupt(&g_leuart1port);
 }

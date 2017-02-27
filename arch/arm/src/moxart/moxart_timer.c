@@ -98,7 +98,7 @@ static uint32_t cmp = BOARD_32KOSC_FREQUENCY / 100;
  *
  ****************************************************************************/
 
-static int moxart_timerisr(int irq, uint32_t *regs)
+static int moxart_timerisr(int irq, uint32_t *regs, void *arg)
 {
   uint32_t state;
 
@@ -148,7 +148,7 @@ void arm_timer_initialize(void)
 
   /* Attach and enable the timer interrupt */
 
-  irq_attach(IRQ_SYSTIMER, (xcpt_t)moxart_timerisr);
+  irq_attach(IRQ_SYSTIMER, (xcpt_t)moxart_timerisr, NULL);
   up_enable_irq(IRQ_SYSTIMER);
   ftintc010_set_trig_mode(IRQ_SYSTIMER, 1);
   ftintc010_set_trig_level(IRQ_SYSTIMER, 0);

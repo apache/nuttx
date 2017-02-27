@@ -72,7 +72,7 @@
 
 /* Interrupts */
 
-static int sam_interrupt(int irq, void *context);
+static int sam_interrupt(int irq, void *context, FAR void *arg);
 
 /* Character driver methods */
 
@@ -128,7 +128,7 @@ static const struct file_operations g_trngops =
  *
  ****************************************************************************/
 
-static int sam_interrupt(int irq, void *context)
+static int sam_interrupt(int irq, void *context, FAR void *arg)
 {
   uint32_t odata;
 
@@ -372,7 +372,7 @@ static int sam_rng_initialize(void)
 
   /* Initialize the TRNG interrupt */
 
-  ret = irq_attach(SAM_IRQ_TRNG, sam_interrupt);
+  ret = irq_attach(SAM_IRQ_TRNG, sam_interrupt, NULL);
   if (ret < 0)
     {
       ferr("ERROR: Failed to attach to IRQ%d\n", SAM_IRQ_TRNG);

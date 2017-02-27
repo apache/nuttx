@@ -161,7 +161,7 @@ static void misoc_net_receive(FAR struct misoc_net_driver_s *priv);
 static void misoc_net_txdone(FAR struct misoc_net_driver_s *priv);
 
 static void misoc_net_interrupt_work(FAR void *arg);
-static int  misoc_net_interrupt(int irq, FAR void *context);
+static int  misoc_net_interrupt(int irq, FAR void *context, FAR void *arg);
 
 /* Watchdog timer expirations */
 
@@ -652,7 +652,7 @@ static void misoc_net_interrupt_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static int misoc_net_interrupt(int irq, FAR void *context)
+static int misoc_net_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct misoc_net_driver_s *priv = &g_misoc_net[0];
 
@@ -1187,7 +1187,7 @@ int misoc_net_initialize(int intf)
 
   /* Attach the IRQ to the driver */
 
-  if (irq_attach(ETHMAC_INTERRUPT, misoc_net_interrupt))
+  if (irq_attach(ETHMAC_INTERRUPT, misoc_net_interrupt, NULL))
     {
       /* We could not attach the ISR to the interrupt */
 

@@ -252,22 +252,22 @@ static void sam_disableallints(struct sam_dev_s *priv);
 static int  sam_interrupt(struct uart_dev_s *dev);
 
 #ifdef SAMDL_HAVE_USART0
-static int  sam_usart0_interrupt(int irq, void *context);
+static int  sam_usart0_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef SAMDL_HAVE_USART1
-static int  sam_usart1_interrupt(int irq, void *context);
+static int  sam_usart1_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef SAMDL_HAVE_USART2
-static int  sam_usart2_interrupt(int irq, void *context);
+static int  sam_usart2_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef SAMDL_HAVE_USART3
-static int  sam_usart3_interrupt(int irq, void *context);
+static int  sam_usart3_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef SAMDL_HAVE_USART4
-static int  sam_usart4_interrupt(int irq, void *context);
+static int  sam_usart4_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef SAMDL_HAVE_USART5
-static int  sam_usart5_interrupt(int irq, void *context);
+static int  sam_usart5_interrupt(int irq, void *context, FAR void *arg);
 #endif
 
 /* UART methods */
@@ -609,42 +609,42 @@ static int sam_interrupt(struct uart_dev_s *dev)
  ****************************************************************************/
 
 #ifdef SAMDL_HAVE_USART0
-static int  sam_usart0_interrupt(int irq, void *context)
+static int  sam_usart0_interrupt(int irq, void *context, FAR void *arg)
 {
   return sam_interrupt(&g_usart0port);
 }
 #endif
 
 #ifdef SAMDL_HAVE_USART1
-static int  sam_usart1_interrupt(int irq, void *context)
+static int  sam_usart1_interrupt(int irq, void *context, FAR void *arg)
 {
   return sam_interrupt(&g_usart1port);
 }
 #endif
 
 #ifdef SAMDL_HAVE_USART2
-static int  sam_usart2_interrupt(int irq, void *context)
+static int  sam_usart2_interrupt(int irq, void *context, FAR void *arg)
 {
   return sam_interrupt(&g_usart2port);
 }
 #endif
 
 #ifdef SAMDL_HAVE_USART3
-static int  sam_usart3_interrupt(int irq, void *context)
+static int  sam_usart3_interrupt(int irq, void *context, FAR void *arg)
 {
   return sam_interrupt(&g_usart3port);
 }
 #endif
 
 #ifdef SAMDL_HAVE_USART4
-static int  sam_usart4_interrupt(int irq, void *context)
+static int  sam_usart4_interrupt(int irq, void *context, FAR void *arg)
 {
   return sam_interrupt(&g_usart4port);
 }
 #endif
 
 #ifdef SAMDL_HAVE_USART5
-static int  sam_usart5_interrupt(int irq, void *context)
+static int  sam_usart5_interrupt(int irq, void *context, FAR void *arg)
 {
   return sam_interrupt(&g_usart5port);
 }
@@ -726,7 +726,7 @@ static int sam_attach(struct uart_dev_s *dev)
 
   /* Attach and enable the IRQ */
 
-  ret = irq_attach(config->irq, priv->handler);
+  ret = irq_attach(config->irq, priv->handler, NULL);
   if (ret == OK)
     {
       /* Enable the interrupt (RX and TX interrupts are still disabled

@@ -235,19 +235,19 @@ struct flexus_dev_s
 
 static int  flexus_interrupt(struct uart_dev_s *dev);
 #ifdef CONFIG_USART0_SERIALDRIVER
-static int  flexus0_interrupt(int irq, void *context);
+static int  flexus0_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_USART1_SERIALDRIVER
-static int  flexus1_interrupt(int irq, void *context);
+static int  flexus1_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_USART2_SERIALDRIVER
-static int  flexus2_interrupt(int irq, void *context);
+static int  flexus2_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_USART3_SERIALDRIVER
-static int  flexus3_interrupt(int irq, void *context);
+static int  flexus3_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_USART4_SERIALDRIVER
-static int  flexus4_interrupt(int irq, void *context);
+static int  flexus4_interrupt(int irq, void *context, FAR void *arg);
 #endif
 
 static int  flexus_setup(struct uart_dev_s *dev);
@@ -614,31 +614,31 @@ static int flexus_interrupt(struct uart_dev_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_USART0_SERIALDRIVER
-static int  flexus0_interrupt(int irq, void *context)
+static int  flexus0_interrupt(int irq, void *context, FAR void *arg)
 {
   return flexus_interrupt(&g_flexus0port);
 }
 #endif
 #ifdef CONFIG_USART1_SERIALDRIVER
-static int  flexus1_interrupt(int irq, void *context)
+static int  flexus1_interrupt(int irq, void *context, FAR void *arg)
 {
   return flexus_interrupt(&g_flexus1port);
 }
 #endif
 #ifdef CONFIG_USART2_SERIALDRIVER
-static int  flexus2_interrupt(int irq, void *context)
+static int  flexus2_interrupt(int irq, void *context, FAR void *arg)
 {
   return flexus_interrupt(&g_flexus2port);
 }
 #endif
 #ifdef CONFIG_USART3_SERIALDRIVER
-static int  flexus3_interrupt(int irq, void *context)
+static int  flexus3_interrupt(int irq, void *context, FAR void *arg)
 {
   return flexus_interrupt(&g_flexus3port);
 }
 #endif
 #ifdef CONFIG_USART4_SERIALDRIVER
-static int  flexus4_interrupt(int irq, void *context)
+static int  flexus4_interrupt(int irq, void *context, FAR void *arg)
 {
   return flexus_interrupt(&g_flexus4port);
 }
@@ -803,7 +803,7 @@ static int flexus_attach(struct uart_dev_s *dev)
 
   /* Attach and enable the IRQ */
 
-  ret = irq_attach(priv->irq, priv->handler);
+  ret = irq_attach(priv->irq, priv->handler, NULL);
   if (ret == OK)
     {
       /* Enable the interrupt (RX and TX interrupts are still disabled

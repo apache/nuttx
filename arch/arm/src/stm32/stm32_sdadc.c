@@ -184,13 +184,13 @@ static void sdadc_rccreset(FAR struct stm32_dev_s *priv, bool reset);
 
 static int sdadc_interrupt(FAR struct adc_dev_s *dev);
 #if defined(CONFIG_STM32_SDADC1)
-static int sdadc1_interrupt(int irq, FAR void *context);
+static int sdadc1_interrupt(int irq, FAR void *context, FAR void * arg);
 #endif
 #if defined(CONFIG_STM32_SDADC2)
-static int sdadc2_interrupt(int irq, FAR void *context);
+static int sdadc2_interrupt(int irq, FAR void *context, FAR void * arg);
 #endif
 #if defined(CONFIG_STM32_SDADC3)
-static int sdadc3_interrupt(int irq, FAR void *context);
+static int sdadc3_interrupt(int irq, FAR void *context, FAR void * arg);
 #endif
 
 /* ADC Driver Methods */
@@ -998,7 +998,7 @@ static int sdadc_setup(FAR struct adc_dev_s *dev)
     {
       /* Attach the SDADC interrupt */
 
-      ret = irq_attach(priv->irq, priv->isr);
+      ret = irq_attach(priv->irq, priv->isr, NULL);
       if (ret < 0)
         {
           ainfo("irq_attach failed: %d\n", ret);
@@ -1008,7 +1008,7 @@ static int sdadc_setup(FAR struct adc_dev_s *dev)
 #else
   /* Attach the SDADC interrupt */
 
-  ret = irq_attach(priv->irq, priv->isr);
+  ret = irq_attach(priv->irq, priv->isr, NULL);
   if (ret < 0)
     {
       ainfo("irq_attach failed: %d\n", ret);
@@ -1313,7 +1313,7 @@ static int sdadc_interrupt(FAR struct adc_dev_s *dev)
  ****************************************************************************/
 
 #if defined(CONFIG_STM32_SDADC1)
-static int sdadc1_interrupt(int irq, FAR void *context)
+static int sdadc1_interrupt(int irq, FAR void *context, FAR void * arg)
 {
   sdadc_interrupt(&g_sdadcdev1);
 
@@ -1336,7 +1336,7 @@ static int sdadc1_interrupt(int irq, FAR void *context)
  ****************************************************************************/
 
 #if defined(CONFIG_STM32_SDADC2)
-static int sdadc2_interrupt(int irq, FAR void *context)
+static int sdadc2_interrupt(int irq, FAR void *context, FAR void * arg)
 {
   sdadc_interrupt(&g_sdadcdev2);
 
@@ -1359,7 +1359,7 @@ static int sdadc2_interrupt(int irq, FAR void *context)
  ****************************************************************************/
 
 #if defined(CONFIG_STM32_SDADC3)
-static int sdadc3_interrupt(int irq, FAR void *context)
+static int sdadc3_interrupt(int irq, FAR void *context, FAR void * arg)
 {
   sdadc_interrupt(&g_sdadcdev3);
 

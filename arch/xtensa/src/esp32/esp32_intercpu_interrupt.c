@@ -132,12 +132,12 @@ static int esp32_fromcpu_interrupt(int fromcpu)
  *
  ****************************************************************************/
 
-int esp32_fromcpu0_interrupt(int irq, FAR void *context)
+int esp32_fromcpu0_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   return esp32_fromcpu_interrupt(0);
 }
 
-int esp32_fromcpu1_interrupt(int irq, FAR void *context)
+int esp32_fromcpu1_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   return esp32_fromcpu_interrupt(1);
 }

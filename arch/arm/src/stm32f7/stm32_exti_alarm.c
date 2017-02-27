@@ -85,7 +85,7 @@ static xcpt_t stm32_exti_callback;
  *
  ****************************************************************************/
 
-static int stm32_exti_alarm_isr(int irq, void *context)
+static int stm32_exti_alarm_isr(int irq, void *context, FAR void *arg)
 {
   int ret = OK;
 
@@ -139,7 +139,7 @@ xcpt_t stm32_exti_alarm(bool risingedge, bool fallingedge, bool event,
 
   if (func)
     {
-      irq_attach(STM32_IRQ_RTCALRM, stm32_exti_alarm_isr);
+      irq_attach(STM32_IRQ_RTCALRM, stm32_exti_alarm_isr, NULL);
       up_enable_irq(STM32_IRQ_RTCALRM);
     }
   else

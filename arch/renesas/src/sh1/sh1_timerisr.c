@@ -125,7 +125,7 @@
  *
  ****************************************************************************/
 
-static int sh1_timerisr(int irq, uint32_t *regs)
+static int sh1_timerisr(int irq, uint32_t *regs, void *arg)
 {
   uint8_t reg8;
 
@@ -183,7 +183,7 @@ void renesas_timer_initialize(void)
 
   /* Attach the IMIA0 IRQ */
 
-  irq_attach(SH1_SYSTIMER_IRQ, (xcpt_t)sh1_timerisr);
+  irq_attach(SH1_SYSTIMER_IRQ, (xcpt_t)sh1_timerisr, NULL);
 
   /* Enable interrupts on GRA compare match */
 

@@ -437,34 +437,34 @@ struct up_dev_s
 
 static int  up_interrupt(struct uart_dev_s *dev);
 #ifdef CONFIG_SAMA5_UART0
-static int  up_uart0_interrupt(int irq, void *context);
+static int  up_uart0_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_SAMA5_UART1
-static int  up_uart1_interrupt(int irq, void *context);
+static int  up_uart1_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_SAMA5_UART2
-static int  up_uart2_interrupt(int irq, void *context);
+static int  up_uart2_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_SAMA5_UART3
-static int  up_uart3_interrupt(int irq, void *context);
+static int  up_uart3_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_SAMA5_UART4
-static int  up_uart4_interrupt(int irq, void *context);
+static int  up_uart4_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_USART0_SERIALDRIVER
-static int  up_usart0_interrupt(int irq, void *context);
+static int  up_usart0_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_USART1_SERIALDRIVER
-static int  up_usart1_interrupt(int irq, void *context);
+static int  up_usart1_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_USART2_SERIALDRIVER
-static int  up_usart2_interrupt(int irq, void *context);
+static int  up_usart2_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_USART3_SERIALDRIVER
-static int  up_usart3_interrupt(int irq, void *context);
+static int  up_usart3_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_USART4_SERIALDRIVER
-static int  up_usart4_interrupt(int irq, void *context);
+static int  up_usart4_interrupt(int irq, void *context, FAR void *arg);
 #endif
 
 static int  up_setup(struct uart_dev_s *dev);
@@ -1044,61 +1044,61 @@ static int up_interrupt(struct uart_dev_s *dev)
 }
 
 #ifdef CONFIG_SAMA5_UART0
-static int  up_uart0_interrupt(int irq, void *context)
+static int  up_uart0_interrupt(int irq, void *context, FAR void *arg)
 {
   return up_interrupt(&g_uart0port);
 }
 #endif
 #ifdef CONFIG_SAMA5_UART1
-static int  up_uart1_interrupt(int irq, void *context)
+static int  up_uart1_interrupt(int irq, void *context, FAR void *arg)
 {
   return up_interrupt(&g_uart1port);
 }
 #endif
 #ifdef CONFIG_SAMA5_UART2
-static int  up_uart2_interrupt(int irq, void *context)
+static int  up_uart2_interrupt(int irq, void *context, FAR void *arg)
 {
   return up_interrupt(&g_uart2port);
 }
 #endif
 #ifdef CONFIG_SAMA5_UART3
-static int  up_uart3_interrupt(int irq, void *context)
+static int  up_uart3_interrupt(int irq, void *context, FAR void *arg)
 {
   return up_interrupt(&g_uart3port);
 }
 #endif
 #ifdef CONFIG_SAMA5_UART4
-static int  up_uart4_interrupt(int irq, void *context)
+static int  up_uart4_interrupt(int irq, void *context, FAR void *arg)
 {
   return up_interrupt(&g_uart4port);
 }
 #endif
 #ifdef CONFIG_USART0_SERIALDRIVER
-static int  up_usart0_interrupt(int irq, void *context)
+static int  up_usart0_interrupt(int irq, void *context, FAR void *arg)
 {
   return up_interrupt(&g_usart0port);
 }
 #endif
 #ifdef CONFIG_USART1_SERIALDRIVER
-static int  up_usart1_interrupt(int irq, void *context)
+static int  up_usart1_interrupt(int irq, void *context, FAR void *arg)
 {
   return up_interrupt(&g_usart1port);
 }
 #endif
 #ifdef CONFIG_USART2_SERIALDRIVER
-static int  up_usart2_interrupt(int irq, void *context)
+static int  up_usart2_interrupt(int irq, void *context, FAR void *arg)
 {
   return up_interrupt(&g_usart2port);
 }
 #endif
 #ifdef CONFIG_USART3_SERIALDRIVER
-static int  up_usart3_interrupt(int irq, void *context)
+static int  up_usart3_interrupt(int irq, void *context, FAR void *arg)
 {
   return up_interrupt(&g_usart3port);
 }
 #endif
 #ifdef CONFIG_USART4_SERIALDRIVER
-static int  up_usart4_interrupt(int irq, void *context)
+static int  up_usart4_interrupt(int irq, void *context, FAR void *arg)
 {
   return up_interrupt(&g_usart4port);
 }
@@ -1294,7 +1294,7 @@ static int up_attach(struct uart_dev_s *dev)
 
   /* Attach and enable the IRQ */
 
-  ret = irq_attach(priv->irq, priv->handler);
+  ret = irq_attach(priv->irq, priv->handler, NULL);
   if (ret == OK)
     {
       /* Enable the interrupt (RX and TX interrupts are still disabled

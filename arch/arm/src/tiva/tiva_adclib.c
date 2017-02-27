@@ -414,7 +414,7 @@ void tiva_adc_irq_attach(uint8_t adc, uint8_t sse, xcpt_t isr)
         isr, adc, sse, irq);
 #endif
 
-  ret = irq_attach(irq, isr);
+  ret = irq_attach(irq, isr, NULL);
   if (ret < 0)
     {
       aerr("ERROR: Failed to attach IRQ %d: %d\n", irq, ret);

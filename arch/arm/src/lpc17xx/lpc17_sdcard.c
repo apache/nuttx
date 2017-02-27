@@ -345,7 +345,7 @@ static void lpc17_endtransfer(struct lpc17_dev_s *priv, sdio_eventset_t wkupeven
 
 /* Interrupt Handling *******************************************************/
 
-static int  lpc17_interrupt(int irq, void *context);
+static int  lpc17_interrupt(int irq, void *context, FAR void *arg);
 
 /* SD Card Interface Methods ************************************************/
 
@@ -1203,7 +1203,7 @@ static void lpc17_endtransfer(struct lpc17_dev_s *priv, sdio_eventset_t wkupeven
  *
  ****************************************************************************/
 
-static int lpc17_interrupt(int irq, void *context)
+static int lpc17_interrupt(int irq, void *context, FAR void *arg)
 {
   struct lpc17_dev_s *priv = &g_scard_dev;
   uint32_t enabled;
@@ -1642,7 +1642,7 @@ static int lpc17_attach(FAR struct sdio_dev_s *dev)
 
   /* Attach the SD card interrupt handler */
 
-  ret = irq_attach(LPC17_IRQ_MCI, lpc17_interrupt);
+  ret = irq_attach(LPC17_IRQ_MCI, lpc17_interrupt, NULL);
   if (ret == OK)
     {
 

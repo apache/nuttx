@@ -279,22 +279,22 @@ static void up_detach(struct uart_dev_s *dev);
 
 static int  up_interrupt(struct uart_dev_s *priv);
 #ifdef CONFIG_PIC32MZ_UART1
-static int  up_uart1_interrupt(int irq, void *context);
+static int  up_uart1_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_PIC32MZ_UART2
-static int  up_uart2_interrupt(int irq, void *context);
+static int  up_uart2_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_PIC32MZ_UART3
-static int  up_uart3_interrupt(int irq, void *context);
+static int  up_uart3_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_PIC32MZ_UART4
-static int  up_uart4_interrupt(int irq, void *context);
+static int  up_uart4_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_PIC32MZ_UART5
-static int  up_uart5_interrupt(int irq, void *context);
+static int  up_uart5_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_PIC32MZ_UART6
-static int  up_uart6_interrupt(int irq, void *context);
+static int  up_uart6_interrupt(int irq, void *context, FAR void *arg);
 #endif
 
 static int  up_ioctl(struct file *filep, int cmd, unsigned long arg);
@@ -677,15 +677,15 @@ static int up_attach(struct uart_dev_s *dev)
 
   /* Attach the IRQs */
 
-  ret = irq_attach(priv->irqrx, priv->handler);
+  ret = irq_attach(priv->irqrx, priv->handler, NULL);
   if (ret == 0)
     {
-      ret = irq_attach(priv->irqtx, priv->handler);
+      ret = irq_attach(priv->irqtx, priv->handler, NULL);
     }
 
   if (ret == 0)
     {
-      ret = irq_attach(priv->irqe, priv->handler);
+      ret = irq_attach(priv->irqe, priv->handler, NULL);
     }
 
   return ret;
@@ -840,41 +840,41 @@ static int  up_interrupt(struct uart_dev_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_PIC32MZ_UART1
-static int  up_uart1_interrupt(int irq, void *context)
+static int  up_uart1_interrupt(int irq, void *context, FAR void *arg)
 {
   return up_interrupt(&g_uart1port);
 }
 #endif
 
 #ifdef CONFIG_PIC32MZ_UART2
-static int  up_uart2_interrupt(int irq, void *context)
+static int  up_uart2_interrupt(int irq, void *context, FAR void *arg)
 {
   return up_interrupt(&g_uart2port);
 }
 #endif
 
 #ifdef CONFIG_PIC32MZ_UART3
-static int  up_uart3_interrupt(int irq, void *context)
+static int  up_uart3_interrupt(int irq, void *context, FAR void *arg)
 {
   return up_interrupt(&g_uart3port);
 }
 #endif
 
 #ifdef CONFIG_PIC32MZ_UART4
-static int  up_uart4_interrupt(int irq, void *context)
+static int  up_uart4_interrupt(int irq, void *context, FAR void *arg)
 {
   return up_interrupt(&g_uart4port);
 }
 #endif
 
 #ifdef CONFIG_PIC32MZ_UART5
-static int  up_uart5_interrupt(int irq, void *context)
+static int  up_uart5_interrupt(int irq, void *context, FAR void *arg)
 {
   return up_interrupt(&g_uart5port);
 }
 #endif
 #ifdef CONFIG_PIC32MZ_UART6
-static int  up_uart6_interrupt(int irq, void *context)
+static int  up_uart6_interrupt(int irq, void *context, FAR void *arg)
 {
   return up_interrupt(&g_uart6port);
 }

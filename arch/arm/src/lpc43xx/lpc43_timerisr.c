@@ -90,7 +90,7 @@
  *
  ****************************************************************************/
 
-static int lpc43_timerisr(int irq, uint32_t *regs)
+static int lpc43_timerisr(int irq, uint32_t *regs, void *arg)
 {
   /* Process timer interrupt */
 
@@ -134,7 +134,7 @@ void arm_timer_initialize(void)
 
   /* Attach the timer interrupt vector */
 
-  (void)irq_attach(LPC43_IRQ_SYSTICK, (xcpt_t)lpc43_timerisr);
+  (void)irq_attach(LPC43_IRQ_SYSTICK, (xcpt_t)lpc43_timerisr, NULL);
 
   /* Enable SysTick interrupts */
 

@@ -514,7 +514,7 @@ static inline void lpc31_portsc_bottomhalf(void);
 static inline void lpc31_syserr_bottomhalf(void);
 static inline void lpc31_async_advance_bottomhalf(void);
 static void lpc31_ehci_bottomhalf(FAR void *arg);
-static int lpc31_ehci_interrupt(int irq, FAR void *context);
+static int lpc31_ehci_interrupt(int irq, FAR void *context, FAR void *arg);
 
 /* USB Host Controller Operations **********************************************/
 
@@ -3357,7 +3357,7 @@ static void lpc31_ehci_bottomhalf(FAR void *arg)
  *
  ****************************************************************************/
 
-static int lpc31_ehci_interrupt(int irq, FAR void *context)
+static int lpc31_ehci_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   uint32_t usbsts;
   uint32_t pending;
@@ -5282,7 +5282,7 @@ FAR struct usbhost_connection_s *lpc31_ehci_initialize(int controller)
 
   /* Interrupt Configuration ***************************************************/
 
-  ret = irq_attach(LPC31_IRQ_USBOTG, lpc31_ehci_interrupt);
+  ret = irq_attach(LPC31_IRQ_USBOTG, lpc31_ehci_interrupt, NULL);
   if (ret != 0)
     {
       usbhost_trace1(EHCI_TRACE1_IRQATTACH_FAILED, LPC31_IRQ_USBOTG);

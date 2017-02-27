@@ -47,7 +47,7 @@
  * Public Data
  ****************************************************************************/
 
-FAR xcpt_t g_irqvector[NR_IRQS];
+struct irq g_irqvector[NR_IRQS];
 
 /****************************************************************************
  * Public Functions
@@ -69,6 +69,7 @@ void irq_initialize(void)
 
   for (i = 0; i < NR_IRQS; i++)
     {
-      g_irqvector[i] = irq_unexpected_isr;
+      g_irqvector[i].handler = irq_unexpected_isr;
+      g_irqvector[i].arg     = NULL;
     }
 }

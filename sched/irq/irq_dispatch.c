@@ -62,17 +62,20 @@
 void irq_dispatch(int irq, FAR void *context)
 {
   xcpt_t vector;
+  FAR void *arg;
 
   /* Perform some sanity checks */
 
 #if NR_IRQS > 0
-  if ((unsigned)irq >= NR_IRQS || g_irqvector[irq] == NULL)
+  if ((unsigned)irq >= NR_IRQS || g_irqvector[irq].handler == NULL)
     {
       vector = irq_unexpected_isr;
+      arg    = NULL;
     }
   else
     {
-      vector = g_irqvector[irq];
+      vector = g_irqvector[irq].handler;
+      arg    = g_irqvector[irq].arg;
     }
 #else
   vector = irq_unexpected_isr;
@@ -80,5 +83,5 @@ void irq_dispatch(int irq, FAR void *context)
 
   /* Then dispatch to the interrupt handler */
 
-  vector(irq, context);
+  vector(irq, context, arg);
 }

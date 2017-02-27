@@ -330,7 +330,7 @@ static void pwm_dumpregs(FAR struct sam_pwm_chan_s *chan, FAR const char *msg);
 /* PWM Interrupts */
 
 #ifdef PWM_INTERRUPTS
-static int pwm_interrupt(int irq, void *context);
+static int pwm_interrupt(int irq, void *context, FAR void *arg);
 #endif
 
 /* PWM driver methods */
@@ -836,7 +836,7 @@ static void pwm_dumpregs(struct sam_pwm_chan_s *chan, FAR const char *msg)
  ****************************************************************************/
 
 #ifdef PWM_INTERRUPTS
-static int pwm_interrupt(int irq, void *context)
+static int pwm_interrupt(int irq, void *context, FAR void *arg)
 {
   /* No PWM interrupts are used in the current design */
 
@@ -1393,7 +1393,7 @@ FAR struct pwm_lowerhalf_s *sam_pwminitialize(int channel)
       /* Attach the PWM interrupt handler */
 
 #ifdef PWM_INTERRUPTS
-      ret = irq_attach(SAM_IRQ_PWM, pwm_interrupt);
+      ret = irq_attach(SAM_IRQ_PWM, pwm_interrupt, NULL);
       if (ret < 0)
         {
           pwmerr("ERROR: Failed to attach IRQ%d\n", channel);

@@ -74,7 +74,7 @@ static xcpt_t stm32l4_exti_callback;
  *
  ****************************************************************************/
 
-static int stm32l4_exti_alarm_isr(int irq, void *context)
+static int stm32l4_exti_alarm_isr(int irq, void *context, FAR void *arg)
 {
   int ret = OK;
 
@@ -82,7 +82,7 @@ static int stm32l4_exti_alarm_isr(int irq, void *context)
 
   if (stm32l4_exti_callback)
     {
-      ret = stm32l4_exti_callback(irq, context);
+      ret = stm32l4_exti_callback(irq, context, arg);
     }
 
   /* Clear the pending EXTI interrupt */
@@ -128,7 +128,7 @@ xcpt_t stm32l4_exti_alarm(bool risingedge, bool fallingedge, bool event,
 
   if (func)
     {
-      irq_attach(STM32L4_IRQ_RTCALRM, stm32l4_exti_alarm_isr);
+      irq_attach(STM32L4_IRQ_RTCALRM, stm32l4_exti_alarm_isr, NULL);
       up_enable_irq(STM32L4_IRQ_RTCALRM);
     }
   else

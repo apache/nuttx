@@ -118,7 +118,7 @@ static void     sam34_putreg(uint32_t val, uint32_t addr);
 
 /* Interrupt handling *******************************************************/
 
-static int      sam34_interrupt(int irq, FAR void *context);
+static int      sam34_interrupt(int irq, FAR void *context, FAR void *arg);
 
 /* "Lower half" driver methods **********************************************/
 
@@ -256,7 +256,7 @@ static void sam34_putreg(uint32_t val, uint32_t addr)
  *
  ****************************************************************************/
 
-static int sam34_interrupt(int irq, FAR void *context)
+static int sam34_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct sam34_lowerhalf_s *priv = &g_wdgdev;
   uint16_t regval;
@@ -681,7 +681,7 @@ void sam_wdtinitialize(FAR const char *devpath)
 
   /* Attach our EWI interrupt handler (But don't enable it yet) */
 
-  (void)irq_attach(SAM_IRQ_WDT, sam34_interrupt);
+  (void)irq_attach(SAM_IRQ_WDT, sam34_interrupt, NULL);
 
   /* Select an arbitrary initial timeout value.  But don't start the watchdog
    * yet. NOTE: If the "Hardware watchdog" feature is enabled through the

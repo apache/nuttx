@@ -1006,7 +1006,7 @@ struct i2c_master_s *sam_i2cbus_initialize(int bus)
 
   /* Attach Interrupt Handler */
 
-  irq_attach(priv->irq, handler);
+  irq_attach(priv->irq, handler, NULL);
 
   /* Enable Interrupts */
 

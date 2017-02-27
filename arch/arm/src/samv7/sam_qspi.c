@@ -270,7 +270,7 @@ static void     qspi_memcpy(uint8_t *dest, const uint8_t *src,
 #ifdef QSPI_USE_INTERRUPTS
 static int     qspi_interrupt(struct sam_qspidev_s *priv);
 #ifdef CONFIG_SAMV7_QSPI
-static int     qspi0_interrupt(int irq, void *context);
+static int     qspi0_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #endif
 
@@ -1811,7 +1811,7 @@ struct qspi_dev_s *sam_qspi_initialize(int intf)
 #ifdef QSPI_USE_INTERRUPTS
       /* Attach the interrupt handler */
 
-      ret = irq_attach(priv->irq, priv->handler);
+      ret = irq_attach(priv->irq, priv->handler, NULL);
       if (ret < 0)
         {
           spierr("ERROR: Failed to attach irq %d\n", priv->irq);

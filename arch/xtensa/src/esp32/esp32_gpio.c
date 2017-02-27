@@ -119,7 +119,7 @@ static void gpio_dispatch(int irq, uint32_t status, uint32_t *regs)
  ****************************************************************************/
 
 #ifdef CONFIG_ESP32_GPIO_IRQ
-static int gpio_interrupt(int irq, FAR void *context)
+static int gpio_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   uint32_t status;
 
@@ -336,7 +336,7 @@ void esp32_gpioirqinitialize(void)
 
   /* Attach and enable the interrupt handler */
 
-  DEBUGVERIFY(irq_attach(ESP32_IRQ_CPU_GPIO, gpio_interrupt));
+  DEBUGVERIFY(irq_attach(ESP32_IRQ_CPU_GPIO, gpio_interrupt, NULL));
   up_enable_irq(g_gpio_cpuint);
 }
 #endif

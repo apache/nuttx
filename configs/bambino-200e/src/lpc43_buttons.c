@@ -200,7 +200,7 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
         {
           /* Attach then enable the new interrupt handler */
 
-          (void)irq_attach(irq, irqhandler);
+          (void)irq_attach(irq, irqhandler, NULL);
           up_enable_irq(irq);
         }
       else

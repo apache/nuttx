@@ -210,7 +210,7 @@ static void ftmac100_receive(FAR struct ftmac100_driver_s *priv);
 static void ftmac100_txdone(FAR struct ftmac100_driver_s *priv);
 
 static void ftmac100_interrupt_work(FAR void *arg);
-static int  ftmac100_interrupt(int irq, FAR void *context);
+static int  ftmac100_interrupt(int irq, FAR void *context, FAR void *arg);
 
 /* Watchdog timer expirations */
 
@@ -990,7 +990,7 @@ out:
  *
  ****************************************************************************/
 
-static int ftmac100_interrupt(int irq, FAR void *context)
+static int ftmac100_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct ftmac100_driver_s *priv = &g_ftmac100[0];
   FAR struct ftmac100_register_s *iobase = (FAR struct ftmac100_register_s *)priv->iobase;
@@ -1579,7 +1579,7 @@ int ftmac100_initialize(int intf)
 
   /* Attach the IRQ to the driver */
 
-  if (irq_attach(CONFIG_FTMAC100_IRQ, ftmac100_interrupt))
+  if (irq_attach(CONFIG_FTMAC100_IRQ, ftmac100_interrupt, NULL))
     {
       /* We could not attach the ISR to the interrupt */
 

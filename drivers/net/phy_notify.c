@@ -116,13 +116,13 @@ struct phy_notify_s
  ****************************************************************************/
 
 static int phy_handler(FAR struct phy_notify_s *client);
-static int phy_handler_0(int irq, FAR void *context);
+static int phy_handler_0(int irq, FAR void *context, FAR void *arg);
 #if CONFIG_PHY_NOTIFICATION_NCLIENTS > 1
-static int phy_handler_1(int irq, FAR void *context);
+static int phy_handler_1(int irq, FAR void *context, FAR void *arg);
 #if CONFIG_PHY_NOTIFICATION_NCLIENTS > 2
-static int phy_handler_2(int irq, FAR void *context);
+static int phy_handler_2(int irq, FAR void *context, FAR void *arg);
 #if CONFIG_PHY_NOTIFICATION_NCLIENTS > 3
-static int phy_handler_3(int irq, FAR void *context);
+static int phy_handler_3(int irq, FAR void *context, FAR void *arg);
 #endif
 #endif
 #endif
@@ -298,27 +298,27 @@ static int phy_handler(FAR struct phy_notify_s *client)
  * Name: phy_handler_0, phy_handler_1, ...
  ****************************************************************************/
 
-static int phy_handler_0(int irq, FAR void *context)
+static int phy_handler_0(int irq, FAR void *context, FAR void *arg)
 {
   return phy_handler(&g_notify_clients[0]);
 }
 
 #if CONFIG_PHY_NOTIFICATION_NCLIENTS > 1
-static int phy_handler_1(int irq, FAR void *context)
+static int phy_handler_1(int irq, FAR void *context, FAR void *arg)
 {
   return phy_handler(&g_notify_clients[1]);
 }
 #endif
 
 #if CONFIG_PHY_NOTIFICATION_NCLIENTS > 2
-static int phy_handler_2(int irq, FAR void *context)
+static int phy_handler_2(int irq, FAR void *context, FAR void *arg)
 {
   return phy_handler(&g_notify_clients[2]);
 }
 #endif
 
 #if CONFIG_PHY_NOTIFICATION_NCLIENTS > 3
-static int phy_handler_3(int irq, FAR void *context)
+static int phy_handler_3(int irq, FAR void *context, FAR void *arg)
 {
   return phy_handler(&g_notify_clients[3]);
 }

@@ -82,7 +82,7 @@
  *
  ****************************************************************************/
 
-static int a1x_timerisr(int irq, uint32_t *regs)
+static int a1x_timerisr(int irq, uint32_t *regs, void *arg)
 {
   /* Only a TIMER0 interrupt is expected here */
 
@@ -138,7 +138,7 @@ void arm_timer_initialize(void)
 
   /* Attach the timer interrupt vector */
 
-  (void)irq_attach(A1X_IRQ_TIMER0, (xcpt_t)a1x_timerisr);
+  (void)irq_attach(A1X_IRQ_TIMER0, (xcpt_t)a1x_timerisr, NULL);
 
   /* Enable interrupts from the TIMER 0 port */
 

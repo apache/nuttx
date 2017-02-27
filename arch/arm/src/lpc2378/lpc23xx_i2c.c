@@ -134,7 +134,7 @@ struct lpc2378_i2cdev_s
 
 static int  lpc2378_i2c_start(struct lpc2378_i2cdev_s *priv);
 static void lpc2378_i2c_stop(struct lpc2378_i2cdev_s *priv);
-static int  lpc2378_i2c_interrupt(int irq, FAR void *context);
+static int  lpc2378_i2c_interrupt(int irq, FAR void *context, FAR void *arg);
 static void lpc2378_i2c_timeout(int argc, uint32_t arg, ...);
 static void lpc2378_i2c_setfrequency(struct lpc2378_i2cdev_s *priv,
               uint32_t frequency);
@@ -296,7 +296,7 @@ static void lpc2378_stopnext(struct lpc2378_i2cdev_s *priv)
  *
  ****************************************************************************/
 
-static int lpc2378_i2c_interrupt(int irq, FAR void *context)
+static int lpc2378_i2c_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   struct lpc2378_i2cdev_s *priv;
   struct i2c_msg_s *msg;
@@ -619,7 +619,7 @@ struct i2c_master_s *lpc2378_i2cbus_initialize(int port)
 
   /* Attach Interrupt Handler */
 
-  irq_attach(priv->irqid, lpc2378_i2c_interrupt);
+  irq_attach(priv->irqid, lpc2378_i2c_interrupt, NULL);
 
   /* Enable Interrupt Handler */
 

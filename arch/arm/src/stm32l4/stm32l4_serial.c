@@ -243,7 +243,7 @@ struct stm32l4_serial_s
   const unsigned int rxdma_channel; /* DMA channel assigned */
 #endif
 
-  int (*const vector)(int irq, void *context); /* Interrupt handler */
+  int (*const vector)(int irq, void *context, FAR void *arg); /* Interrupt handler */
 
   /* RX DMA state */
 
@@ -308,19 +308,19 @@ static int  stm32l4serial_pmprepare(FAR struct pm_callback_s *cb, int domain,
 #endif
 
 #ifdef CONFIG_STM32L4_USART1
-static int up_interrupt_usart1(int irq, FAR void *context);
+static int up_interrupt_usart1(int irq, FAR void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_STM32L4_USART2
-static int up_interrupt_usart2(int irq, FAR void *context);
+static int up_interrupt_usart2(int irq, FAR void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_STM32L4_USART3
-static int up_interrupt_usart3(int irq, FAR void *context);
+static int up_interrupt_usart3(int irq, FAR void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_STM32L4_UART4
-static int up_interrupt_uart4(int irq, FAR void *context);
+static int up_interrupt_uart4(int irq, FAR void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_STM32L4_UART5
-static int up_interrupt_uart5(int irq, FAR void *context);
+static int up_interrupt_uart5(int irq, FAR void *context, FAR void *arg);
 #endif
 
 /****************************************************************************
@@ -1399,7 +1399,7 @@ static int stm32l4serial_attach(FAR struct uart_dev_s *dev)
 
   /* Attach and enable the IRQ */
 
-  ret = irq_attach(priv->irq, priv->vector);
+  ret = irq_attach(priv->irq, priv->vector, NULL);
   if (ret == OK)
     {
       /* Enable the interrupt (RX and TX interrupts are still disabled
@@ -2209,35 +2209,35 @@ static bool stm32l4serial_txready(FAR struct uart_dev_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_STM32L4_USART1
-static int up_interrupt_usart1(int irq, FAR void *context)
+static int up_interrupt_usart1(int irq, FAR void *context, FAR void *arg)
 {
   return up_interrupt_common(&g_usart1priv);
 }
 #endif
 
 #ifdef CONFIG_STM32L4_USART2
-static int up_interrupt_usart2(int irq, FAR void *context)
+static int up_interrupt_usart2(int irq, FAR void *context, FAR void *arg)
 {
   return up_interrupt_common(&g_usart2priv);
 }
 #endif
 
 #ifdef CONFIG_STM32L4_USART3
-static int up_interrupt_usart3(int irq, FAR void *context)
+static int up_interrupt_usart3(int irq, FAR void *context, FAR void *arg)
 {
   return up_interrupt_common(&g_usart3priv);
 }
 #endif
 
 #ifdef CONFIG_STM32L4_UART4
-static int up_interrupt_uart4(int irq, FAR void *context)
+static int up_interrupt_uart4(int irq, FAR void *context, FAR void *arg)
 {
   return up_interrupt_common(&g_uart4priv);
 }
 #endif
 
 #ifdef CONFIG_STM32L4_UART5
-static int up_interrupt_uart5(int irq, FAR void *context)
+static int up_interrupt_uart5(int irq, FAR void *context, FAR void *arg)
 {
   return up_interrupt_common(&g_uart5priv);
 }

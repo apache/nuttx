@@ -85,7 +85,7 @@ static int  ez80_setup(struct uart_dev_s *dev);
 static void ez80_shutdown(struct uart_dev_s *dev);
 static int  ez80_attach(struct uart_dev_s *dev);
 static void ez80_detach(struct uart_dev_s *dev);
-static int  ez80_interrupt(int irq, void *context);
+static int  ez80_interrupt(int irq, void *context, FAR void *arg);
 static int  ez80_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int  ez80_receive(struct uart_dev_s *dev, unsigned int *status);
 static void ez80_rxint(struct uart_dev_s *dev, bool enable);
@@ -438,7 +438,7 @@ static int ez80_attach(struct uart_dev_s *dev)
 
   /* Attach the IRQ */
 
-  return irq_attach(priv->irq, ez80_interrupt);
+  return irq_attach(priv->irq, ez80_interrupt, NULL);
 }
 
 /****************************************************************************
@@ -471,7 +471,7 @@ static void ez80_detach(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static int ez80_interrupt(int irq, void *context)
+static int ez80_interrupt(int irq, void *context, FAR void *arg)
 {
   struct uart_dev_s *dev = NULL;
   struct ez80_dev_s   *priv;

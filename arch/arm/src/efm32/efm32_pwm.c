@@ -135,16 +135,16 @@ static int pwm_timer(FAR struct efm32_pwmtimer_s *priv,
                                        )
 static int pwm_interrupt(struct efm32_pwmtimer_s *priv);
 #if defined(CONFIG_EFM32_TIMER0_PWM)
-static int pwm_timer0_interrupt(int irq, void *context);
+static int pwm_timer0_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #if defined(CONFIG_EFM32_TIMER1_PWM)
 static int pwm_timer1_interrupt(int irq, void *context);
 #endif
 #if defined(CONFIG_EFM32_TIMER2_PWM)
-static int pwm_timer2_interrupt(int irq, void *context);
+static int pwm_timer2_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #if defined(CONFIG_EFM32_TIMER3_PWM)
-static int pwm_timer3_interrupt(int irq, void *context);
+static int pwm_timer3_interrupt(int irq, void *context, FAR void *arg);
 #endif
 static uint8_t pwm_pulsecount(uint32_t count);
 
@@ -547,7 +547,7 @@ static int pwm_interrupt(struct efm32_pwmtimer_s *priv)
  ****************************************************************************/
 
 #if defined(CONFIG_PWM_PULSECOUNT) && defined(CONFIG_EFM32_TIMER0_PWM)
-static int pwm_timer0_interrupt(int irq, void *context)
+static int pwm_timer0_interrupt(int irq, void *context, FAR void *arg)
 {
   return pwm_interrupt(&g_pwm0dev);
 }
@@ -561,14 +561,14 @@ static int pwm_timer1_interrupt(int irq, void *context)
 #endif
 
 #if defined(CONFIG_PWM_PULSECOUNT) && defined(CONFIG_EFM32_TIMER2_PWM)
-static int pwm_timer2_interrupt(int irq, void *context)
+static int pwm_timer2_interrupt(int irq, void *context, FAR void *arg)
 {
   return pwm_interrupt(&g_pwm2dev);
 }
 #endif
 
 #if defined(CONFIG_PWM_PULSECOUNT) && defined(CONFIG_EFM32_TIMER3_PWM)
-static int pwm_timer3_interrupt(int irq, void *context)
+static int pwm_timer3_interrupt(int irq, void *context, FAR void *arg)
 {
   return pwm_interrupt(&g_pwm3dev);
 }
@@ -870,7 +870,7 @@ FAR struct pwm_lowerhalf_s *efm32_pwminitialize(int timer)
         /* Attach but disable the TIM1 update interrupt */
 
 #ifdef CONFIG_PWM_PULSECOUNT
-        irq_attach(lower->irq, pwm_timer0_interrupt);
+        irq_attach(lower->irq, pwm_timer0_interrupt, NULL);
         up_disable_irq(lower->irq);
 #endif
         break;
@@ -883,7 +883,7 @@ FAR struct pwm_lowerhalf_s *efm32_pwminitialize(int timer)
         /* Attach but disable the TIM1 update interrupt */
 
 #ifdef CONFIG_PWM_PULSECOUNT
-        irq_attach(lower->irq, pwm_timer0_interrupt);
+        irq_attach(lower->irq, pwm_timer0_interrupt, NULL);
         up_disable_irq(lower->irq);
 #endif
         break;
@@ -895,7 +895,7 @@ FAR struct pwm_lowerhalf_s *efm32_pwminitialize(int timer)
         /* Attach but disable the TIM1 update interrupt */
 
 #ifdef CONFIG_PWM_PULSECOUNT
-        irq_attach(lower->irq, pwm_timer2_interrupt);
+        irq_attach(lower->irq, pwm_timer2_interrupt, NULL);
         up_disable_irq(lower->irq);
 #endif
         break;
@@ -907,7 +907,7 @@ FAR struct pwm_lowerhalf_s *efm32_pwminitialize(int timer)
         /* Attach but disable the TIM1 update interrupt */
 
 #ifdef CONFIG_PWM_PULSECOUNT
-        irq_attach(lower->irq, pwm_timer3_interrupt);
+        irq_attach(lower->irq, pwm_timer3_interrupt, NULL);
         up_disable_irq(lower->irq);
 #endif
         break;

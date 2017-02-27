@@ -125,7 +125,7 @@ static FAR struct sdio_dev_s *g_sdiodev;
  ****************************************************************************/
 
 #ifdef NSH_HAVEMMCSD
-static int nsh_cdinterrupt(int irq, FAR void *context)
+static int nsh_cdinterrupt(int irq, FAR void *context, FAR void *arg)
 {
   static bool inserted = 0xff; /* Impossible value */
   bool present;

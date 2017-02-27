@@ -126,7 +126,7 @@ static void cs89x0_txdone(struct cs89x0_driver_s *cs89x0, uint16_t isq);
 #if CONFIG_CS89x0_NINTERFACES > 1
 static inline FAR struct cs89x0_driver_s *cs89x0_mapirq(int irq);
 #endif
-static int  cs89x0_interrupt(int irq, FAR void *context);
+static int  cs89x0_interrupt(int irq, FAR void *context, FAR void *arg);
 
 /* Watchdog timer expirations */
 
@@ -672,7 +672,7 @@ static inline FAR struct cs89x0_driver_s *cs89x0_mapirq(int irq)
  *
  ****************************************************************************/
 
-static int cs89x0_interrupt(int irq, FAR void *context)
+static int cs89x0_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   register struct cs89x0_driver_s *cs89x0 = s89x0_mapirq(irq);
   uint16_t isq;
@@ -1023,7 +1023,7 @@ int cs89x0_initialize(FAR const cs89x0_driver_s *cs89x0, int devno)
 
   /* Attach the IRQ to the driver */
 
-  if (irq_attach(cs89x0->irq, cs89x0_interrupt))
+  if (irq_attach(cs89x0->irq, cs89x0_interrupt, NULL))
     {
       /* We could not attach the ISR to the ISR */
 

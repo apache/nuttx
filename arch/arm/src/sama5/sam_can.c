@@ -227,10 +227,10 @@ static inline void can_txinterrupt(FAR struct can_dev_s *dev, int mbndx);
 static inline void can_mbinterrupt(FAR struct can_dev_s *dev, int mbndx);
 static void can_interrupt(FAR struct can_dev_s *dev);
 #ifdef CONFIG_SAMA5_CAN0
-static int  can0_interrupt(int irq, void *context);
+static int  can0_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_SAMA5_CAN1
-static int  can1_interrupt(int irq, void *context);
+static int  can1_interrupt(int irq, void *context, FAR void *arg);
 #endif
 
 /* Hardware initialization */
@@ -860,7 +860,7 @@ static int can_setup(FAR struct can_dev_s *dev)
 
   /* Attach the CAN interrupt handler */
 
-  ret = irq_attach(config->pid, config->handler);
+  ret = irq_attach(config->pid, config->handler, NULL);
   if (ret < 0)
     {
       canerr("ERROR: Failed to attach CAN%d IRQ (%d)", config->port, config->pid);
@@ -1536,7 +1536,7 @@ static void can_interrupt(FAR struct can_dev_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_CAN0
-static int can0_interrupt(int irq, void *context)
+static int can0_interrupt(int irq, void *context, FAR void *arg)
 {
   can_interrupt(&g_can0dev);
   return OK;
@@ -1559,7 +1559,7 @@ static int can0_interrupt(int irq, void *context)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_CAN1
-static int can1_interrupt(int irq, void *context)
+static int can1_interrupt(int irq, void *context, FAR void *arg)
 {
   can_interrupt(&g_can1dev);
   return OK;

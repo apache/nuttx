@@ -275,7 +275,7 @@ static void stm32_dmachandisable(struct stm32_dma_s *dmach)
  *
  ************************************************************************************/
 
-static int stm32_dmainterrupt(int irq, void *context)
+static int stm32_dmainterrupt(int irq, void *context, FAR void *arg)
 {
   struct stm32_dma_s *dmach;
   uint32_t isr;
@@ -351,7 +351,7 @@ void weak_function up_dmainitialize(void)
 
       /* Attach DMA interrupt vectors */
 
-      (void)irq_attach(dmach->irq, stm32_dmainterrupt);
+      (void)irq_attach(dmach->irq, stm32_dmainterrupt, NULL);
 
       /* Disable the DMA channel */
 

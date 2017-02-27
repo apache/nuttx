@@ -157,7 +157,7 @@ static void rtc_waitnotbusy(void)
  *
  ****************************************************************************/
 
-static int at32uc3_timerisr(int irq, uint32_t *regs)
+static int at32uc3_timerisr(int irq, uint32_t *regs, void *arg)
 {
   /* Clear the pending timer interrupt */
 
@@ -219,7 +219,7 @@ void avr_timer_initialize(void)
 
   /* Attach the timer interrupt vector */
 
-  (void)irq_attach(AVR32_IRQ_RTC, (xcpt_t)at32uc3_timerisr);
+  (void)irq_attach(AVR32_IRQ_RTC, (xcpt_t)at32uc3_timerisr, NULL);
 
   /* Enable RTC interrupts */
 

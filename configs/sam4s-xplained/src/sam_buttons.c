@@ -150,7 +150,7 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
           /* Configure the interrupt */
 
           sam_gpioirq(GPIO_BP2);
-          (void)irq_attach(IRQ_BP2, irqhandler);
+          (void)irq_attach(IRQ_BP2, irqhandler, NULL);
           sam_gpioirqenable(IRQ_BP2);
         }
       else

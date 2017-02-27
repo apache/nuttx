@@ -126,7 +126,7 @@ static inline void xtensa_setcompare(uint32_t compare)
  *
  ****************************************************************************/
 
-static int esp32_timerisr(int irq, uint32_t *regs)
+static int esp32_timerisr(int irq, uint32_t *regs, FAR void *arg)
 {
   uint32_t divisor;
   uint32_t compare;
@@ -192,7 +192,7 @@ void xtensa_timer_initialize(void)
 
   /* Attach the timer interrupt */
 
-  (void)irq_attach(XTENSA_IRQ_TIMER0, (xcpt_t)esp32_timerisr);
+  (void)irq_attach(XTENSA_IRQ_TIMER0, (xcpt_t)esp32_timerisr, NULL);
 
   /* Enable the timer 0 CPU interrupt. */
 

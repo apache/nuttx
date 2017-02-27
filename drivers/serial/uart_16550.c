@@ -94,7 +94,7 @@ static void u16550_shutdown(struct uart_dev_s *dev);
 static int  u16550_attach(struct uart_dev_s *dev);
 static void u16550_detach(struct uart_dev_s *dev);
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
-static int  u16550_interrupt(int irq, void *context);
+static int  u16550_interrupt(int irq, void *context, FAR void *arg);
 #endif
 static int  u16550_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int  u16550_receive(struct uart_dev_s *dev, uint32_t *status);
@@ -688,7 +688,7 @@ static int u16550_attach(struct uart_dev_s *dev)
 
   /* Attach and enable the IRQ */
 
-  ret = irq_attach(priv->irq, u16550_interrupt);
+  ret = irq_attach(priv->irq, u16550_interrupt, NULL);
 #ifndef CONFIG_ARCH_NOINTC
   if (ret == OK)
     {
@@ -739,7 +739,7 @@ static void u16550_detach(FAR struct uart_dev_s *dev)
  ****************************************************************************/
 
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
-static int u16550_interrupt(int irq, void *context)
+static int u16550_interrupt(int irq, void *context, FAR void *arg)
 {
   struct uart_dev_s *dev = NULL;
   struct u16550_s   *priv;

@@ -148,10 +148,10 @@ static void     spi_semtake(struct sam_spidev_s *priv);
 
 static int      spi_interrupt(struct sam_spidev_s *priv);
 #ifdef CONFIG_SAMV7_SPI0_SLAVE
-static int      spi0_interrupt(int irq, void *context);
+static int      spi0_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_SAMV7_SPI1_SLAVE
-static int      spi1_interrupt(int irq, void *context);
+static int      spi1_interrupt(int irq, void *context, FAR void *arg);
 #endif
 
 /* SPI Helpers */
@@ -568,7 +568,7 @@ static int spi_interrupt(struct sam_spidev_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMV7_SPI0_SLAVE
-static int spi0_interrupt(int irq, void *context)
+static int spi0_interrupt(int irq, void *context, FAR void *arg)
 {
   return spi_interrupt(&g_spi0_sctrlr);
 }
@@ -589,7 +589,7 @@ static int spi0_interrupt(int irq, void *context)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMV7_SPI1_SLAVE
-static int spi1_interrupt(int irq, void *context)
+static int spi1_interrupt(int irq, void *context, FAR void *arg)
 {
   return spi_interrupt(&g_spi1_sctrlr);
 }
@@ -1255,7 +1255,7 @@ struct spi_sctrlr_s *sam_spi_slave_initialize(int port)
 
       /* Attach and enable interrupts at the NVIC */
 
-      DEBUGVERIFY(irq_attach(priv->irq, priv->handler));
+      DEBUGVERIFY(irq_attach(priv->irq, priv->handler, NULL));
       up_enable_irq(priv->irq);
 
       spi_dumpregs(priv, "After initialization");

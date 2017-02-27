@@ -169,31 +169,31 @@ static int kinetis_portinterrupt(int irq, FAR void *context,
  ****************************************************************************/
 
 #ifdef CONFIG_KINETIS_PORTAINTS
-static int kinetis_portainterrupt(int irq, FAR void *context)
+static int kinetis_portainterrupt(int irq, FAR void *context, FAR void *arg)
 {
   return kinetis_portinterrupt(irq, context, KINETIS_PORTA_ISFR, g_portaisrs);
 }
 #endif
 #ifdef CONFIG_KINETIS_PORTBINTS
-static int kinetis_portbinterrupt(int irq, FAR void *context)
+static int kinetis_portbinterrupt(int irq, FAR void *context, FAR void *arg)
 {
   return kinetis_portinterrupt(irq, context, KINETIS_PORTB_ISFR, g_portbisrs);
 }
 #endif
 #ifdef CONFIG_KINETIS_PORTCINTS
-static int kinetis_portcinterrupt(int irq, FAR void *context)
+static int kinetis_portcinterrupt(int irq, FAR void *context, FAR void *arg)
 {
   return kinetis_portinterrupt(irq, context, KINETIS_PORTC_ISFR, g_portcisrs);
 }
 #endif
 #ifdef CONFIG_KINETIS_PORTDINTS
-static int kinetis_portdinterrupt(int irq, FAR void *context)
+static int kinetis_portdinterrupt(int irq, FAR void *context, FAR void *arg)
 {
   return kinetis_portinterrupt(irq, context, KINETIS_PORTD_ISFR, g_portdisrs);
 }
 #endif
 #ifdef CONFIG_KINETIS_PORTEINTS
-static int kinetis_porteinterrupt(int irq, FAR void *context)
+static int kinetis_porteinterrupt(int irq, FAR void *context, FAR void *arg)
 {
   return kinetis_portinterrupt(irq, context, KINETIS_PORTE_ISFR, g_porteisrs);
 }
@@ -215,27 +215,27 @@ static int kinetis_porteinterrupt(int irq, FAR void *context)
 void kinetis_pinirqinitialize(void)
 {
 #ifdef CONFIG_KINETIS_PORTAINTS
-  (void)irq_attach(KINETIS_IRQ_PORTA, kinetis_portainterrupt);
+  (void)irq_attach(KINETIS_IRQ_PORTA, kinetis_portainterrupt, NULL);
   putreg32(0xffffffff, KINETIS_PORTA_ISFR);
   up_enable_irq(KINETIS_IRQ_PORTA);
 #endif
 #ifdef CONFIG_KINETIS_PORTBINTS
-  (void)irq_attach(KINETIS_IRQ_PORTB, kinetis_portbinterrupt);
+  (void)irq_attach(KINETIS_IRQ_PORTB, kinetis_portbinterrupt, NULL);
   putreg32(0xffffffff, KINETIS_PORTB_ISFR);
   up_enable_irq(KINETIS_IRQ_PORTB);
 #endif
 #ifdef CONFIG_KINETIS_PORTCINTS
-  (void)irq_attach(KINETIS_IRQ_PORTC, kinetis_portcinterrupt);
+  (void)irq_attach(KINETIS_IRQ_PORTC, kinetis_portcinterrupt, NULL);
   putreg32(0xffffffff, KINETIS_PORTC_ISFR);
   up_enable_irq(KINETIS_IRQ_PORTC);
 #endif
 #ifdef CONFIG_KINETIS_PORTDINTS
-  (void)irq_attach(KINETIS_IRQ_PORTD, kinetis_portdinterrupt);
+  (void)irq_attach(KINETIS_IRQ_PORTD, kinetis_portdinterrupt, NULL);
   putreg32(0xffffffff, KINETIS_PORTD_ISFR);
   up_enable_irq(KINETIS_IRQ_PORTD);
 #endif
 #ifdef CONFIG_KINETIS_PORTEINTS
-  (void)irq_attach(KINETIS_IRQ_PORTE, kinetis_porteinterrupt);
+  (void)irq_attach(KINETIS_IRQ_PORTE, kinetis_porteinterrupt, NULL);
   putreg32(0xffffffff, KINETIS_PORTE_ISFR);
   up_enable_irq(KINETIS_IRQ_PORTE);
 #endif

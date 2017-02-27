@@ -284,7 +284,7 @@ static void kinetis_receive(FAR struct kinetis_driver_s *priv);
 static void kinetis_txdone(FAR struct kinetis_driver_s *priv);
 
 static void kinetis_interrupt_work(FAR void *arg);
-static int  kinetis_interrupt(int irq, FAR void *context);
+static int  kinetis_interrupt(int irq, FAR void *context, FAR void *arg);
 
 /* Watchdog timer expirations */
 
@@ -921,7 +921,7 @@ static void kinetis_interrupt_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static int kinetis_interrupt(int irq, FAR void *context)
+static int kinetis_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   register FAR struct kinetis_driver_s *priv = &g_enet[0];
 
@@ -2097,7 +2097,7 @@ int kinetis_netinitialize(int intf)
   /* Attach the Ethernet MAC IEEE 1588 timer interrupt handler */
 
 #if 0
-  if (irq_attach(KINETIS_IRQ_EMACTMR, kinetis_tmrinterrupt))
+  if (irq_attach(KINETIS_IRQ_EMACTMR, kinetis_tmrinterrupt, NULL))
     {
       /* We could not attach the ISR to the interrupt */
 
@@ -2108,7 +2108,7 @@ int kinetis_netinitialize(int intf)
 
   /* Attach the Ethernet MAC transmit interrupt handler */
 
-  if (irq_attach(KINETIS_IRQ_EMACTX, kinetis_interrupt))
+  if (irq_attach(KINETIS_IRQ_EMACTX, kinetis_interrupt, NULL))
     {
       /* We could not attach the ISR to the interrupt */
 
@@ -2118,7 +2118,7 @@ int kinetis_netinitialize(int intf)
 
   /* Attach the Ethernet MAC receive interrupt handler */
 
-  if (irq_attach(KINETIS_IRQ_EMACRX, kinetis_interrupt))
+  if (irq_attach(KINETIS_IRQ_EMACRX, kinetis_interrupt, NULL))
     {
       /* We could not attach the ISR to the interrupt */
 
@@ -2128,7 +2128,7 @@ int kinetis_netinitialize(int intf)
 
   /* Attach the Ethernet MAC error and misc interrupt handler */
 
-  if (irq_attach(KINETIS_IRQ_EMACMISC, kinetis_interrupt))
+  if (irq_attach(KINETIS_IRQ_EMACMISC, kinetis_interrupt, NULL))
     {
       /* We could not attach the ISR to the interrupt */
 

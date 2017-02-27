@@ -146,10 +146,10 @@ static int  tms570_attach(struct uart_dev_s *dev);
 static void tms570_detach(struct uart_dev_s *dev);
 static int tms570_interrupt(struct uart_dev_s *dev);
 #ifdef CONFIG_TMS570_SCI1
-static int  tms570_sci1_interrupt(int irq, void *context);
+static int  tms570_sci1_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_TMS570_SCI2
-static int  tms570_sci2_interrupt(int irq, void *context);
+static int  tms570_sci2_interrupt(int irq, void *context, FAR void *arg);
 #endif
 static int  tms570_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int  tms570_receive(struct uart_dev_s *dev, uint32_t *status);
@@ -387,7 +387,7 @@ static int tms570_attach(struct uart_dev_s *dev)
 
   /* Attach and enable the IRQ */
 
-  ret = irq_attach(priv->irq, priv->handler);
+  ret = irq_attach(priv->irq, priv->handler, NULL);
   if (ret == OK)
     {
       /* Enable the interrupt (RX and TX interrupts are still disabled
@@ -523,13 +523,13 @@ static int tms570_interrupt(struct uart_dev_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_TMS570_SCI1
-static int  tms570_sci1_interrupt(int irq, void *context)
+static int  tms570_sci1_interrupt(int irq, void *context, FAR void *arg)
 {
   return tms570_interrupt(&g_sci1port);
 }
 #endif
 #ifdef CONFIG_TMS570_SCI2
-static int  tms570_sci2_interrupt(int irq, void *context)
+static int  tms570_sci2_interrupt(int irq, void *context, FAR void *arg)
 {
   return tms570_interrupt(&g_sci2port);
 }

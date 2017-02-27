@@ -163,7 +163,7 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
           /* Configure the interrupt */
 
           sam_pioirq(PIO_USER1);
-          (void)irq_attach(IRQ_USER1, irqhandler);
+          (void)irq_attach(IRQ_USER1, irqhandler, NULL);
           sam_pioirqenable(IRQ_USER1);
         }
       else

@@ -256,7 +256,7 @@ static void mxt_touch_event(FAR struct mxt_dev_s *priv,
               FAR struct mxt_msg_s *msg, int ndx);
 static void mxt_worker(FAR void *arg);
 static int  mxt_interrupt(FAR const struct mxt_lower_s *lower,
-              FAR void *arg);
+              FAR void *context);
 
 /* Character driver methods */
 
@@ -1074,7 +1074,7 @@ errout_with_semaphore:
  * Name: mxt_interrupt
  ****************************************************************************/
 
-static int mxt_interrupt(FAR const struct mxt_lower_s *lower, FAR void *arg)
+static int mxt_interrupt(FAR const struct mxt_lower_s *lower, FAR void * arg)
 {
   FAR struct mxt_dev_s *priv = (FAR struct mxt_dev_s *)arg;
   int ret;

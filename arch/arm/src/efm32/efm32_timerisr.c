@@ -86,7 +86,7 @@
  *
  ****************************************************************************/
 
-static int efm32_timerisr(int irq, uint32_t *regs)
+static int efm32_timerisr(int irq, uint32_t *regs, FAR void *arg)
 {
   /* Process timer interrupt */
 
@@ -125,7 +125,7 @@ void arm_timer_initialize(void)
 
   /* Attach the timer interrupt vector */
 
-  (void)irq_attach(EFM32_IRQ_SYSTICK, (xcpt_t)efm32_timerisr);
+  (void)irq_attach(EFM32_IRQ_SYSTICK, (xcpt_t)efm32_timerisr, NULL);
 
   /* Enable SysTick interrupts */
 

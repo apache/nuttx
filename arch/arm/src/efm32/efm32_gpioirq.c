@@ -133,7 +133,7 @@ static int  efm32_gpio_interrupt(uint32_t mask, void *context)
  *
  ************************************************************************************/
 
-static int efm32_even_interrupt(int irq, void *context)
+static int efm32_even_interrupt(int irq, void *context, FAR void *arg)
 {
   return efm32_gpio_interrupt(0x00005555, context);
 }
@@ -146,7 +146,7 @@ static int efm32_even_interrupt(int irq, void *context)
  *
  ************************************************************************************/
 
-static int efm32_odd_interrupt(int irq, void *context)
+static int efm32_odd_interrupt(int irq, void *context, FAR void *arg)
 {
   return efm32_gpio_interrupt(0x0000aaaa, context);
 }
@@ -173,8 +173,8 @@ void efm32_gpioirqinitialize(void)
 
   /* Attach the even and odd interrupt handlers */
 
-  DEBUGVERIFY(irq_attach(EFM32_IRQ_GPIO_EVEN, efm32_even_interrupt));
-  DEBUGVERIFY(irq_attach(EFM32_IRQ_GPIO_ODD, efm32_odd_interrupt));
+  DEBUGVERIFY(irq_attach(EFM32_IRQ_GPIO_EVEN, efm32_even_interrupt, NULL));
+  DEBUGVERIFY(irq_attach(EFM32_IRQ_GPIO_ODD, efm32_odd_interrupt, NULL));
 
   /* Enable GPIO even and odd interrupts at the NVIC */
 

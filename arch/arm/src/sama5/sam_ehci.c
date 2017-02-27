@@ -388,7 +388,7 @@ static inline void sam_portsc_bottomhalf(void);
 static inline void sam_syserr_bottomhalf(void);
 static inline void sam_async_advance_bottomhalf(void);
 static void sam_ehci_bottomhalf(FAR void *arg);
-static int sam_ehci_tophalf(int irq, FAR void *context);
+static int sam_ehci_tophalf(int irq, FAR void *context, FAR void *arg);
 
 /* USB Host Controller Operations **********************************************/
 
@@ -3167,7 +3167,7 @@ static void sam_ehci_bottomhalf(FAR void *arg)
  *
  ****************************************************************************/
 
-static int sam_ehci_tophalf(int irq, FAR void *context)
+static int sam_ehci_tophalf(int irq, FAR void *context, FAR void *arg)
 {
   uint32_t usbsts;
   uint32_t pending;
@@ -3228,15 +3228,15 @@ static int sam_ehci_tophalf(int irq, FAR void *context)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_OHCI
-static int sam_uhphs_interrupt(int irq, FAR void *context)
+static int sam_uhphs_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   int ohci;
   int ehci;
 
   /* Provide the interrupting event to both the EHCI and OHCI top half */
 
-  ohci = sam_ohci_tophalf(irq, context);
-  ehci = sam_ehci_tophalf(irq, context);
+  ohci = sam_ohci_tophalf(irq, context, arg);
+  ehci = sam_ehci_tophalf(irq, context, arg);
 
   /* Return OK only if both handlers returned OK */
 
@@ -5098,9 +5098,9 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
    */
 
 #ifdef CONFIG_SAMA5_OHCI
-  ret = irq_attach(SAM_IRQ_UHPHS, sam_uhphs_interrupt);
+  ret = irq_attach(SAM_IRQ_UHPHS, sam_uhphs_interrupt, NULL);
 #else
-  ret = irq_attach(SAM_IRQ_UHPHS, sam_ehci_tophalf);
+  ret = irq_attach(SAM_IRQ_UHPHS, sam_ehci_tophalf, NULL);
 #endif
   if (ret != 0)
     {

@@ -225,19 +225,19 @@ static int    spi_transfer(struct imx_spidev_s *priv, const void *txbuffer,
 #ifndef CONFIG_SPI_POLLWAIT
 static int    spi_interrupt(struct imx_spidev_s *priv);
 #ifdef CONFIG_IMX6_ECSPI1
-static int    ecspi1_interrupt(int irq, void *context);
+static int    ecspi1_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_IMX6_ECSPI2
-static int    ecspi2_interrupt(int irq, void *context);
+static int    ecspi2_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_IMX6_ECSPI3
-static int    ecspi3_interrupt(int irq, void *context);
+static int    ecspi3_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_IMX6_ECSPI4
-static int    ecspi4_interrupt(int irq, void *context);
+static int    ecspi4_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_IMX6_ECSPI5
-static int    ecspi5_interrupt(int irq, void *context);
+static int    ecspi5_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #endif
 
@@ -806,35 +806,35 @@ static int spi_interrupt(struct imx_spidev_s *priv)
 
 #ifndef CONFIG_SPI_POLLWAIT
 #ifdef CONFIG_IMX6_ECSPI1
-static int ecspi1_interrupt(int irq, void *context)
+static int ecspi1_interrupt(int irq, void *context, FAR void *arg)
 {
   return spi_interrupt(&g_spidev[SPI1_NDX]);
 }
 #endif
 
 #ifdef CONFIG_IMX6_ECSPI2
-static int ecspi2_interrupt(int irq, void *context)
+static int ecspi2_interrupt(int irq, void *context, FAR void *arg)
 {
   return spi_interrupt(&g_spidev[SPI2_NDX]);
 }
 #endif
 
 #ifdef CONFIG_IMX6_ECSPI3
-static int ecspi3_interrupt(int irq, void *context)
+static int ecspi3_interrupt(int irq, void *context, FAR void *arg)
 {
   return spi_interrupt(&g_spidev[SPI3_NDX]);
 }
 #endif
 
 #ifdef CONFIG_IMX6_ECSPI4
-static int ecspi4_interrupt(int irq, void *context)
+static int ecspi4_interrupt(int irq, void *context, FAR void *arg)
 {
   return spi_interrupt(&g_spidev[SPI4_NDX]);
 }
 #endif
 
 #ifdef CONFIG_IMX6_ECSPI5
-static int ecspi5_interrupt(int irq, void *context)
+static int ecspi5_interrupt(int irq, void *context, FAR void *arg)
 {
   return spi_interrupt(&g_spidev[SPI5_NDX]);
 }
@@ -1425,7 +1425,7 @@ FAR struct spi_dev_s *imx_spibus_initialize(int port)
   /* Attach the interrupt */
 
 #ifndef CONFIG_SPI_POLLWAIT
-  DEBUGVERIFY(irq_attach(priv->irq, priv->handler));
+  DEBUGVERIFY(irq_attach(priv->irq, priv->handler, NULL));
 #endif
 
   /* Enable SPI */

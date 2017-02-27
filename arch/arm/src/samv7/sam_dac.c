@@ -109,7 +109,7 @@ struct sam_chan_s
 
 /* Interrupt handler */
 
-static int  dac_interrupt(int irq, FAR void *context);
+static int  dac_interrupt(int irq, FAR void *context, FAR void *arg);
 
 /* DAC methods */
 
@@ -199,7 +199,7 @@ static struct sam_dac_s g_dacmodule;
  *
  ****************************************************************************/
 
-static int dac_interrupt(int irq, FAR void *context)
+static int dac_interrupt(int irq, FAR void *context, FAR void *arg)
 {
 #ifdef CONFIG_SAMV7_DAC1
   uint32_t status;
@@ -569,7 +569,7 @@ static int dac_module_init(void)
 
   /* Configure interrupts */
 
-  ret = irq_attach(SAM_IRQ_DACC, dac_interrupt);
+  ret = irq_attach(SAM_IRQ_DACC, dac_interrupt, NULL);
   if (ret < 0)
     {
       aerr("irq_attach failed: %d\n", ret);

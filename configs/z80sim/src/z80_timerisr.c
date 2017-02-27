@@ -59,7 +59,7 @@
  *
  ****************************************************************************/
 
-int z80sim_timerisr(int irq, FAR chipreg_t *regs)
+int z80sim_timerisr(int irq, FAR chipreg_t *regs, void *arg)
 {
    /* Process timer interrupt */
 

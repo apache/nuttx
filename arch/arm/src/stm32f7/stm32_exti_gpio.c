@@ -313,7 +313,7 @@ xcpt_t stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
 
   if (func)
     {
-      irq_attach(irq, handler);
+      irq_attach(irq, handler, NULL);
       up_enable_irq(irq);
     }
   else

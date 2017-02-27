@@ -115,7 +115,7 @@ static xcpt_t board_button_irqx(gpio_pinset_t pinset, int irq,
       /* Configure the interrupt */
 
       sam_gpioirq(pinset);
-      (void)irq_attach(irq, irqhandler);
+      (void)irq_attach(irq, irqhandler, NULL);
       sam_gpioirqenable(irq);
     }
   else

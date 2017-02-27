@@ -381,7 +381,7 @@ static void sam_receive(struct sam_emac_s *priv);
 static void sam_txdone(struct sam_emac_s *priv);
 
 static void sam_interrupt_work(FAR void *arg);
-static int  sam_emac_interrupt(int irq, void *context);
+static int  sam_emac_interrupt(int irq, void *context, FAR void *arg);
 
 /* Watchdog timer expirations */
 
@@ -1614,7 +1614,7 @@ static void sam_interrupt_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static int sam_emac_interrupt(int irq, void *context)
+static int sam_emac_interrupt(int irq, void *context, FAR void *arg)
 {
   struct sam_emac_s *priv = &g_emac;
 
@@ -3715,7 +3715,7 @@ void up_netinitialize(void)
    * the interface is in the 'up' state.
    */
 
-  ret = irq_attach(SAM_IRQ_EMAC, sam_emac_interrupt);
+  ret = irq_attach(SAM_IRQ_EMAC, sam_emac_interrupt, NULL);
   if (ret < 0)
     {
       nerr("ERROR: Failed to attach the handler to the IRQ%d\n", SAM_IRQ_EMAC);

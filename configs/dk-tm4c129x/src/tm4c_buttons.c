@@ -175,7 +175,7 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
 
       if (irqhandler)
         {
-          ret = irq_attach(IRQ_SW4, irqhandler);
+          ret = irq_attach(IRQ_SW4, irqhandler, NULL);
           if (ret == OK)
             {
               handler = irqhandler;

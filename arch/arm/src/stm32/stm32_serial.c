@@ -315,7 +315,7 @@ struct up_dev_s
   const unsigned int rxdma_channel; /* DMA channel assigned */
 #endif
 
-  int (*const vector)(int irq, void *context); /* Interrupt handler */
+  int (*const vector)(int irq, void *context, void *arg); /* Interrupt handler */
 
   /* RX DMA state */
 
@@ -374,28 +374,28 @@ static int  up_pm_prepare(struct pm_callback_s *cb, int domain,
 #endif
 
 #ifdef CONFIG_STM32_USART1_SERIALDRIVER
-static int up_interrupt_usart1(int irq, void *context);
+static int up_interrupt_usart1(int irq, void *context, void *arg);
 #endif
 #ifdef CONFIG_STM32_USART2_SERIALDRIVER
-static int up_interrupt_usart2(int irq, void *context);
+static int up_interrupt_usart2(int irq, void *context, void *arg);
 #endif
 #ifdef CONFIG_STM32_USART3_SERIALDRIVER
-static int up_interrupt_usart3(int irq, void *context);
+static int up_interrupt_usart3(int irq, void *context, void *arg);
 #endif
 #ifdef CONFIG_STM32_UART4_SERIALDRIVER
-static int up_interrupt_uart4(int irq, void *context);
+static int up_interrupt_uart4(int irq, void *context, void *arg);
 #endif
 #ifdef CONFIG_STM32_UART5_SERIALDRIVER
-static int up_interrupt_uart5(int irq, void *context);
+static int up_interrupt_uart5(int irq, void *context, void *arg);
 #endif
 #ifdef CONFIG_STM32_USART6_SERIALDRIVER
-static int up_interrupt_usart6(int irq, void *context);
+static int up_interrupt_usart6(int irq, void *context, void *arg);
 #endif
 #ifdef CONFIG_STM32_UART7_SERIALDRIVER
-static int up_interrupt_uart7(int irq, void *context);
+static int up_interrupt_uart7(int irq, void *context, void *arg);
 #endif
 #ifdef CONFIG_STM32_UART8_SERIALDRIVER
-static int up_interrupt_uart8(int irq, void *context);
+static int up_interrupt_uart8(int irq, void *context, void *arg);
 #endif
 
 /****************************************************************************
@@ -1744,7 +1744,7 @@ static int up_attach(struct uart_dev_s *dev)
 
   /* Attach and enable the IRQ */
 
-  ret = irq_attach(priv->irq, priv->vector);
+  ret = irq_attach(priv->irq, priv->vector, NULL);
   if (ret == OK)
     {
       /* Enable the interrupt (RX and TX interrupts are still disabled
@@ -2520,56 +2520,56 @@ static bool up_txready(struct uart_dev_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_STM32_USART1_SERIALDRIVER
-static int up_interrupt_usart1(int irq, void *context)
+static int up_interrupt_usart1(int irq, void *context, void *arg)
 {
   return up_interrupt_common(&g_usart1priv);
 }
 #endif
 
 #ifdef CONFIG_STM32_USART2_SERIALDRIVER
-static int up_interrupt_usart2(int irq, void *context)
+static int up_interrupt_usart2(int irq, void *context, void *arg)
 {
   return up_interrupt_common(&g_usart2priv);
 }
 #endif
 
 #ifdef CONFIG_STM32_USART3_SERIALDRIVER
-static int up_interrupt_usart3(int irq, void *context)
+static int up_interrupt_usart3(int irq, void *context, void *arg)
 {
   return up_interrupt_common(&g_usart3priv);
 }
 #endif
 
 #ifdef CONFIG_STM32_UART4_SERIALDRIVER
-static int up_interrupt_uart4(int irq, void *context)
+static int up_interrupt_uart4(int irq, void *context, void *arg)
 {
   return up_interrupt_common(&g_uart4priv);
 }
 #endif
 
 #ifdef CONFIG_STM32_UART5_SERIALDRIVER
-static int up_interrupt_uart5(int irq, void *context)
+static int up_interrupt_uart5(int irq, void *context, void *arg)
 {
   return up_interrupt_common(&g_uart5priv);
 }
 #endif
 
 #ifdef CONFIG_STM32_USART6_SERIALDRIVER
-static int up_interrupt_usart6(int irq, void *context)
+static int up_interrupt_usart6(int irq, void *context, void *arg)
 {
   return up_interrupt_common(&g_usart6priv);
 }
 #endif
 
 #ifdef CONFIG_STM32_UART7_SERIALDRIVER
-static int up_interrupt_uart7(int irq, void *context)
+static int up_interrupt_uart7(int irq, void *context, void *arg)
 {
   return up_interrupt_common(&g_uart7priv);
 }
 #endif
 
 #ifdef CONFIG_STM32_UART8_SERIALDRIVER
-static int up_interrupt_uart8(int irq, void *context)
+static int up_interrupt_uart8(int irq, void *context, void *arg)
 {
   return up_interrupt_common(&g_uart8priv);
 }

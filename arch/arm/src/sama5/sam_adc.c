@@ -448,7 +448,7 @@ static void sam_adc_dmastart(struct sam_adc_s *priv);
 
 static void sam_adc_endconversion(void *arg);
 #endif
-static int  sam_adc_interrupt(int irq, void *context);
+static int  sam_adc_interrupt(int irq, void *context, FAR void *arg);
 
 /* ADC methods */
 
@@ -907,7 +907,7 @@ static void sam_adc_endconversion(void *arg)
  *
  ****************************************************************************/
 
-static int sam_adc_interrupt(int irq, void *context)
+static int sam_adc_interrupt(int irq, void *context, FAR void *arg)
 {
   struct sam_adc_s *priv = &g_adcpriv;
   uint32_t isr;
@@ -2110,7 +2110,7 @@ struct adc_dev_s *sam_adc_initialize(void)
 
       /* Attach the ADC interrupt */
 
-      ret = irq_attach(SAM_IRQ_ADC, sam_adc_interrupt);
+      ret = irq_attach(SAM_IRQ_ADC, sam_adc_interrupt, NULL);
       if (ret < 0)
         {
           aerr("ERROR: Failed to attach IRQ %d: %d\n", SAM_IRQ_ADC, ret);

@@ -112,7 +112,7 @@ static struct lpc31_i2cdev_s i2cdevices[2];
  * Private Function Prototypes
  ****************************************************************************/
 
-static int  i2c_interrupt(int irq, FAR void *context);
+static int  i2c_interrupt(int irq, FAR void *context, FAR void *arg);
 static void i2c_progress(struct lpc31_i2cdev_s *priv);
 static void i2c_timeout(int argc, uint32_t arg, ...);
 static void i2c_hwreset(struct lpc31_i2cdev_s *priv);
@@ -184,7 +184,7 @@ static void i2c_setfrequency(struct lpc31_i2cdev_s *priv, uint32_t frequency)
  *
  ****************************************************************************/
 
-static int i2c_interrupt(int irq, FAR void *context)
+static int i2c_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   if (irq == LPC31_IRQ_I2C0)
     {
@@ -585,7 +585,7 @@ struct i2c_master_s *lpc31_i2cbus_initialize(int port)
 
   /* Attach Interrupt Handler */
 
-  irq_attach(priv->irqid, i2c_interrupt);
+  irq_attach(priv->irqid, i2c_interrupt, NULL);
 
   /* Enable Interrupt Handler */
 

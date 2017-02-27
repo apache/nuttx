@@ -1124,7 +1124,7 @@ struct i2c_master_s *kinetis_i2cbus_initialize(int port)
 
   /* Attach Interrupt Handler */
 
-  irq_attach(priv->irqid, handler);
+  irq_attach(priv->irqid, handler, NULL);
 
   /* Enable Interrupt Handler */
 

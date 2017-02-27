@@ -768,7 +768,7 @@ int up_rtc_initialize(void)
 
   /* Then attach the ALARM interrupt handler */
 
-  irq_attach(STM32_IRQ_RTC_WKUP, rtc_interrupt);
+  irq_attach(STM32_IRQ_RTC_WKUP, rtc_interrupt, NULL);
   up_enable_irq(STM32_IRQ_RTC_WKUP);
 #endif
 

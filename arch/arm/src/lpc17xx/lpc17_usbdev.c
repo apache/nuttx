@@ -421,7 +421,7 @@ static void lpc17_dispatchrequest(struct lpc17_usbdev_s *priv,
 static inline void lpc17_ep0setup(struct lpc17_usbdev_s *priv);
 static inline void lpc17_ep0dataoutinterrupt(struct lpc17_usbdev_s *priv);
 static inline void lpc17_ep0dataininterrupt(struct lpc17_usbdev_s *priv);
-static int lpc17_usbinterrupt(int irq, FAR void *context);
+static int lpc17_usbinterrupt(int irq, FAR void *context, FAR void *arg);
 
 #ifdef CONFIG_LPC17_USBDEV_DMA
 static int  lpc17_dmasetup(struct lpc17_usbdev_s *priv, uint8_t epphy,
@@ -2051,7 +2051,7 @@ static inline void lpc17_ep0dataininterrupt(struct lpc17_usbdev_s *priv)
  *
  ****************************************************************************/
 
-static int lpc17_usbinterrupt(int irq, FAR void *context)
+static int lpc17_usbinterrupt(int irq, FAR void *context, FAR void *arg)
 {
   struct lpc17_usbdev_s *priv = &g_usbdev;
   struct lpc17_ep_s *privep ;
@@ -3321,7 +3321,7 @@ void up_usbinitialize(void)
 
   /* Attach USB controller interrupt handler */
 
-  if (irq_attach(LPC17_IRQ_USB, lpc17_usbinterrupt) != 0)
+  if (irq_attach(LPC17_IRQ_USB, lpc17_usbinterrupt, NULL) != 0)
     {
       usbtrace(TRACE_DEVERROR(LPC17_TRACEERR_IRQREGISTRATION),
                (uint16_t)LPC17_IRQ_USB);

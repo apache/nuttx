@@ -83,7 +83,7 @@ static xcpt_t stm32_exti_pvd_callback;
  *
  ****************************************************************************/
 
-static int stm32_exti_pvd_isr(int irq, void *context)
+static int stm32_exti_pvd_isr(int irq, void *context, FAR void *arg)
 {
   int ret = OK;
 
@@ -95,7 +95,7 @@ static int stm32_exti_pvd_isr(int irq, void *context)
 
   if (stm32_exti_pvd_callback)
     {
-      ret = stm32_exti_pvd_callback(irq, context);
+      ret = stm32_exti_pvd_callback(irq, context, arg);
     }
 
   return ret;
@@ -137,7 +137,7 @@ xcpt_t stm32_exti_pvd(bool risingedge, bool fallingedge, bool event,
 
   if (func)
     {
-      irq_attach(STM32_IRQ_PVD, stm32_exti_pvd_isr);
+      irq_attach(STM32_IRQ_PVD, stm32_exti_pvd_isr, NULL);
       up_enable_irq(STM32_IRQ_PVD);
     }
   else

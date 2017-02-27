@@ -62,7 +62,7 @@
  *
  ****************************************************************************/
 
-static int ez80_timerisr(int irq, chipreg_t *regs)
+static int ez80_timerisr(int irq, chipreg_t *regs, void *arg)
 {
   /* Read the appropriate timer0 register to clear the interrupt */
 
@@ -110,7 +110,7 @@ void z80_timer_initialize(void)
 
   /* Attach system timer interrupts */
 
-  irq_attach(EZ80_IRQ_SYSTIMER, (xcpt_t)ez80_timerisr);
+  irq_attach(EZ80_IRQ_SYSTIMER, (xcpt_t)ez80_timerisr, NULL);
 
   /* Set up the timer reload value */
   /* Write to the timer reload register to set the reload value.

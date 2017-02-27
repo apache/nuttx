@@ -281,7 +281,7 @@ static void     qspi_dumpgpioconfig(const char *msg);
 /* Interrupts */
 
 #ifdef STM32L4_QSPI_INTERRUPTS
-static int     qspi0_interrupt(int irq, void *context);
+static int     qspi0_interrupt(int irq, void *context, FAR void *arg);
 
 #endif
 
@@ -1067,7 +1067,7 @@ static void qspi_ccrconfig(struct stm32l4_qspidev_s *priv,
  *
  ****************************************************************************/
 
-static int qspi0_interrupt(int irq, void *context)
+static int qspi0_interrupt(int irq, void *context, FAR void *arg)
 {
   uint32_t status;
   uint32_t cr;
@@ -2522,7 +2522,7 @@ struct qspi_dev_s *stm32l4_qspi_initialize(int intf)
 #ifdef STM32L4_QSPI_INTERRUPTS
       /* Attach the interrupt handler */
 
-      ret = irq_attach(priv->irq, priv->handler);
+      ret = irq_attach(priv->irq, priv->handler, NULL);
       if (ret < 0)
         {
           spierr("ERROR: Failed to attach irq %d\n", priv->irq);

@@ -103,7 +103,7 @@ static inline void arm_registerdump(FAR struct tcb_s *tcb)
  *
  ****************************************************************************/
 
-int arm_start_handler(int irq, FAR void *context)
+int arm_start_handler(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct tcb_s *tcb = this_task();
 

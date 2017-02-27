@@ -119,7 +119,7 @@ static inline void xtensa_attach_fromcpu1_interrupt(void)
 
   /* Attach the inter-CPU interrupt. */
 
-  (void)irq_attach(ESP32_IRQ_CPU_CPU1, (xcpt_t)esp32_fromcpu1_interrupt);
+  (void)irq_attach(ESP32_IRQ_CPU_CPU1, (xcpt_t)esp32_fromcpu1_interrupt, NULL);
 
   /* Enable the inter 0 CPU interrupt. */
 

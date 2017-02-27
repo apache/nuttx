@@ -126,9 +126,9 @@ void board_button_initialize(void)
 
   /* Attach GIO interrupts */
 
-  irq_attach(EZ80_PB_IRQ, up_PBinterrupt);
-  irq_attach(EZ80_PB1_IRQ, up_pb1interrupt);
-  irq_attach(EZ80_PB2_IRQ, up_pb2interrupt);
+  irq_attach(EZ80_PB_IRQ, up_PBinterrupt, NULL);
+  irq_attach(EZ80_PB1_IRQ, up_pb1interrupt, NULL);
+  irq_attach(EZ80_PB2_IRQ, up_pb2interrupt, NULL);
 
   /* Configure PB0,1,2 as interrupt, rising edge */
 

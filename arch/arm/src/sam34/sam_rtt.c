@@ -116,7 +116,7 @@ static void     sam34_putreg(uint32_t val, uint32_t addr);
 
 /* Interrupt handling *******************************************************/
 
-static int      sam34_interrupt(int irq, FAR void *context);
+static int      sam34_interrupt(int irq, FAR void *context, FAR void *arg);
 
 /* "Lower half" driver methods **********************************************/
 
@@ -275,7 +275,7 @@ static void sam34_putreg(uint32_t val, uint32_t addr)
  *
  ****************************************************************************/
 
-static int sam34_interrupt(int irq, FAR void *context)
+static int sam34_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct sam34_lowerhalf_s *priv = &g_tcdev;
 
@@ -650,7 +650,7 @@ void sam_rttinitialize(FAR const char *devpath)
 
   priv->ops = &g_tcops;
 
-  (void)irq_attach(SAM_IRQ_RTT, sam34_interrupt);
+  (void)irq_attach(SAM_IRQ_RTT, sam34_interrupt, NULL);
 
   /* Enable NVIC interrupt. */
 

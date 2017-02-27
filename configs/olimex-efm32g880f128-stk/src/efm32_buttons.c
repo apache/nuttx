@@ -205,7 +205,7 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
 
           /* Attach and enable the interrupt */
 
-          (void)irq_attach(g_button_irqs[id], irqhandler);
+          (void)irq_attach(g_button_irqs[id], irqhandler, NULL);
           efm32_gpioirqenable(g_button_irqs[id]);
         }
       else

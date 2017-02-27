@@ -585,10 +585,10 @@ static void sam_txerr_interrupt(FAR struct sam_emac_s *priv, int qid);
 static void sam_interrupt_work(FAR void *arg);
 static int  sam_emac_interrupt(struct sam_emac_s *priv);
 #ifdef CONFIG_SAMV7_EMAC0
-static int sam_emac0_interrupt(int irq, void *context);
+static int sam_emac0_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_SAMV7_EMAC1
-static int sam_emac1_interrupt(int irq, void *context);
+static int sam_emac1_interrupt(int irq, void *context, FAR void *arg);
 #endif
 
 /* Watchdog timer expirations */
@@ -2548,14 +2548,14 @@ static int sam_emac_interrupt(struct sam_emac_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMV7_EMAC0
-static int sam_emac0_interrupt(int irq, void *context)
+static int sam_emac0_interrupt(int irq, void *context, FAR void *arg)
 {
   return sam_emac_interrupt(&g_emac0);
 }
 #endif
 
 #ifdef CONFIG_SAMV7_EMAC1
-static int sam_emac1_interrupt(int irq, void *context)
+static int sam_emac1_interrupt(int irq, void *context, FAR void *arg)
 {
   return sam_emac_interrupt(&g_emac1);
 }
@@ -5052,7 +5052,7 @@ int sam_emac_initialize(int intf)
    * the interface is in the 'up' state.
    */
 
-  ret = irq_attach(priv->attr->irq, priv->attr->handler);
+  ret = irq_attach(priv->attr->irq, priv->attr->handler, NULL);
   if (ret < 0)
     {
       nerr("ERROR: Failed to attach the handler to the IRQ%d\n", priv->attr->irq);

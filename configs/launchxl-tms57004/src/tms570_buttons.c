@@ -108,7 +108,7 @@ static xcpt_t board_button_irqx(gio_pinset_t pinset, int irq,
       /* Configure the interrupt */
 
       tms570_gioirq(pinset);
-      (void)irq_attach(irq, irqhandler);
+      (void)irq_attach(irq, irqhandler, NULL);
       tms570_gioirqenable(irq);
     }
   else

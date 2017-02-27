@@ -129,7 +129,7 @@ struct lpc11_i2cdev_s
 
 static int  lpc11_i2c_start(struct lpc11_i2cdev_s *priv);
 static void lpc11_i2c_stop(struct lpc11_i2cdev_s *priv);
-static int  lpc11_i2c_interrupt(int irq, FAR void *context);
+static int  lpc11_i2c_interrupt(int irq, FAR void *context, FAR void *arg);
 static void lpc11_i2c_timeout(int argc, uint32_t arg, ...);
 static void lpc11_i2c_setfrequency(struct lpc11_i2cdev_s *priv,
               uint32_t frequency);
@@ -334,7 +334,7 @@ static void lpc11_stopnext(struct lpc11_i2cdev_s *priv)
  *
  ****************************************************************************/
 
-static int lpc11_i2c_interrupt(int irq, FAR void *context)
+static int lpc11_i2c_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   struct lpc11_i2cdev_s *priv;
   struct i2c_msg_s *msg;
@@ -603,7 +603,7 @@ struct i2c_master_s *lpc11_i2cbus_initialize(int port)
 
   /* Attach Interrupt Handler */
 
-  irq_attach(priv->irqid, lpc11_i2c_interrupt);
+  irq_attach(priv->irqid, lpc11_i2c_interrupt, NULL);
 
   /* Enable Interrupt Handler */
 

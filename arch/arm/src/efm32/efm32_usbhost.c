@@ -417,7 +417,7 @@ static inline void efm32_gint_ipxfrisr(FAR struct efm32_usbhost_s *priv);
 
 /* First level, global interrupt handler */
 
-static int efm32_gint_isr(int irq, FAR void *context);
+static int efm32_gint_isr(int irq, FAR void *context, FAR void *arg);
 
 /* Interrupt controls */
 
@@ -3495,7 +3495,7 @@ static inline void efm32_gint_ipxfrisr(FAR struct efm32_usbhost_s *priv)
  *
  ****************************************************************************/
 
-static int efm32_gint_isr(int irq, FAR void *context)
+static int efm32_gint_isr(int irq, FAR void *context, FAR void *arg)
 {
   /* At present, there is only support for a single OTG FS host. Hence it is
    * pre-allocated as g_usbhost.  However, in most code, the private data
@@ -5374,7 +5374,7 @@ FAR struct usbhost_connection_s *efm32_usbhost_initialize(int controller)
 
   /* Attach USB host controller interrupt handler */
 
-  if (irq_attach(EFM32_IRQ_USB, efm32_gint_isr) != 0)
+  if (irq_attach(EFM32_IRQ_USB, efm32_gint_isr, NULL) != 0)
     {
       usbhost_trace1(USBHOST_TRACE1_IRQATTACH, 0);
       return NULL;

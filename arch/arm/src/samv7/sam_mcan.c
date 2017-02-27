@@ -975,10 +975,10 @@ static void mcan_receive(FAR struct can_dev_s *dev,
               FAR uint32_t *rxbuffer, unsigned long nwords);
 static void mcan_interrupt(FAR struct can_dev_s *dev);
 #ifdef CONFIG_SAMV7_MCAN0
-static int  mcan0_interrupt(int irq, void *context);
+static int  mcan0_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_SAMV7_MCAN1
-static int  mcan1_interrupt(int irq, void *context);
+static int  mcan1_interrupt(int irq, void *context, FAR void *arg);
 #endif
 
 /* Hardware initialization */
@@ -2340,7 +2340,7 @@ static int mcan_setup(FAR struct can_dev_s *dev)
 
   /* Attach the MCAN interrupt handlers */
 
-  ret = irq_attach(config->irq0, config->handler);
+  ret = irq_attach(config->irq0, config->handler, NULL);
   if (ret < 0)
     {
       canerr("ERROR: Failed to attach MCAN%d line 0 IRQ (%d)",
@@ -2348,7 +2348,7 @@ static int mcan_setup(FAR struct can_dev_s *dev)
       return ret;
     }
 
-  ret = irq_attach(config->irq1, config->handler);
+  ret = irq_attach(config->irq1, config->handler, NULL);
   if (ret < 0)
     {
       canerr("ERROR: Failed to attach MCAN%d line 1 IRQ (%d)",
@@ -3691,7 +3691,7 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMV7_MCAN0
-static int mcan0_interrupt(int irq, void *context)
+static int mcan0_interrupt(int irq, void *context, FAR void *arg)
 {
   mcan_interrupt(&g_mcan0dev);
   return OK;
@@ -3714,7 +3714,7 @@ static int mcan0_interrupt(int irq, void *context)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMV7_MCAN1
-static int mcan1_interrupt(int irq, void *context)
+static int mcan1_interrupt(int irq, void *context, FAR void *arg)
 {
   mcan_interrupt(&g_mcan1dev);
   return OK;

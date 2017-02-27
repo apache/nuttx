@@ -148,7 +148,7 @@ static inline void sam_chan_putreg(struct sam_chan_s *chan,
 /* Interrupt Handling *******************************************************/
 
 static int sam_tc_interrupt(struct sam_chan_s *tc);
-static int sam_raw_interrupt(int irq, void *context);
+static int sam_raw_interrupt(int irq, void *context, FAR void *arg);
 
 /* Initialization ***********************************************************/
 
@@ -589,7 +589,7 @@ static int sam_tc_interrupt(struct sam_chan_s *chan)
  *
  ****************************************************************************/
 
-static int sam_raw_interrupt(int irq, void *context)
+static int sam_raw_interrupt(int irq, void *context, FAR void *arg)
 {
   int i;
   struct sam_chan_s *chan;
@@ -816,7 +816,7 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
 
       /* Attach the timer interrupt handler and enable the timer interrupts */
 
-      (void)irq_attach(chan->irq, sam_raw_interrupt);
+      (void)irq_attach(chan->irq, sam_raw_interrupt, NULL);
       up_enable_irq(chan->irq);
 
       /* Now the channel is initialized */

@@ -160,7 +160,7 @@ static int  up_setup(struct uart_dev_s *dev);
 static void up_shutdown(struct uart_dev_s *dev);
 static int  up_attach(struct uart_dev_s *dev);
 static void up_detach(struct uart_dev_s *dev);
-static int  up_interrupt(int irq, void *context);
+static int  up_interrupt(int irq, void *context, FAR void *arg);
 static int  up_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int  up_receive(struct uart_dev_s *dev, uint32_t *status);
 static void up_rxint(struct uart_dev_s *dev, bool enable);
@@ -408,7 +408,7 @@ static int up_attach(struct uart_dev_s *dev)
 
   /* Attach the IRQ */
 
-  return irq_attach(priv->irq, up_interrupt);
+  return irq_attach(priv->irq, up_interrupt, NULL);
 }
 
 /****************************************************************************
@@ -440,7 +440,7 @@ static void up_detach(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static int up_interrupt(int irq, void *context)
+static int up_interrupt(int irq, void *context, FAR void *arg)
 {
   struct uart_dev_s *dev = NULL;
   struct up_dev_s   *priv;

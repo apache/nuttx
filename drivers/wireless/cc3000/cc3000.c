@@ -142,7 +142,7 @@ static void cc3000_deselect_and_unlock(FAR struct spi_dev_s *spi);
 
 static void cc3000_notify(FAR struct cc3000_dev_s *priv);
 static void *cc3000_worker(FAR void *arg);
-static int cc3000_interrupt(int irq, FAR void *context);
+static int cc3000_interrupt(int irq, FAR void *context, FAR void *arg);
 
 /* Character driver methods */
 
@@ -746,7 +746,7 @@ static void * cc3000_worker(FAR void *arg)
  * Name: cc3000_interrupt
  ****************************************************************************/
 
-static int cc3000_interrupt(int irq, FAR void *context)
+static int cc3000_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct cc3000_dev_s    *priv;
 
@@ -1577,7 +1577,7 @@ int cc3000_register(FAR struct spi_dev_s *spi,
 
   /* Attach the interrupt handler */
 
-  ret = config->irq_attach(config, cc3000_interrupt);
+  ret = config->irq_attach(config, cc3000_interrupt, NULL);
   if (ret < 0)
     {
       nerr("ERROR: Failed to attach interrupt\n");

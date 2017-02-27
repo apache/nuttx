@@ -536,7 +536,7 @@ static inline void lpc43_tl_alarm(uint32_t curr)
 
 /* Interrupt handler */
 
-static int lpc43_tl_isr(int irq, FAR void *context)
+static int lpc43_tl_isr(int irq, FAR void *context, FAR void *arg)
 {
   lpc43_tl_sync_up();
 
@@ -624,7 +624,7 @@ void arm_timer_initialize(void)
   lpc43_tl_set_reset_on_match(false);
   lpc43_tl_clear_interrupt();
 
-  irq_attach(LPC43M4_IRQ_RITIMER, lpc43_tl_isr);
+  irq_attach(LPC43M4_IRQ_RITIMER, lpc43_tl_isr, NULL);
   up_enable_irq(LPC43M4_IRQ_RITIMER);
 
   lpc43_tl_init_timer_vars();

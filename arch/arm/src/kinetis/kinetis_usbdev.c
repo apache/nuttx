@@ -562,7 +562,7 @@ static void   khci_ep0outcomplete(struct khci_usbdev_s *priv);
 static void   khci_ep0incomplete(struct khci_usbdev_s *priv);
 static void   khci_ep0transfer(struct khci_usbdev_s *priv,
                 uint16_t ustat);
-static int    khci_interrupt(int irq, void *context);
+static int    khci_interrupt(int irq, void *context, FAR void *arg);
 
 /* Endpoint helpers *********************************************************/
 
@@ -2713,7 +2713,7 @@ static void khci_ep0transfer(struct khci_usbdev_s *priv, uint16_t ustat)
  * Name: khci_interrupt
  ****************************************************************************/
 
-static int khci_interrupt(int irq, void *context)
+static int khci_interrupt(int irq, void *context, FAR void *arg)
 {
   /* For now there is only one USB controller, but we will always refer to
    * it using a pointer to make any future ports to multiple USB controllers
@@ -4444,7 +4444,7 @@ void up_usbinitialize(void)
    * them when we need them later.
    */
 
-  if (irq_attach(KINETIS_IRQ_USBOTG, khci_interrupt) != 0)
+  if (irq_attach(KINETIS_IRQ_USBOTG, khci_interrupt, NULL) != 0)
     {
       usbtrace(TRACE_DEVERROR(KHCI_TRACEERR_IRQREGISTRATION),
                (uint16_t)KINETIS_IRQ_USBOTG);

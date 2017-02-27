@@ -71,7 +71,7 @@ static xcpt_t stm32l4_exti_callbacks[16];
  * Interrupt Service Routines - Dispatchers
  ****************************************************************************/
 
-static int stm32l4_exti0_isr(int irq, void *context)
+static int stm32l4_exti0_isr(int irq, void *context, FAR void *arg)
 {
   int ret = OK;
 
@@ -83,13 +83,13 @@ static int stm32l4_exti0_isr(int irq, void *context)
 
   if (stm32l4_exti_callbacks[0])
     {
-      ret = stm32l4_exti_callbacks[0](irq, context);
+      ret = stm32l4_exti_callbacks[0](irq, context, arg);
     }
 
   return ret;
 }
 
-static int stm32l4_exti1_isr(int irq, void *context)
+static int stm32l4_exti1_isr(int irq, void *context, FAR void *arg)
 {
   int ret = OK;
 
@@ -101,13 +101,13 @@ static int stm32l4_exti1_isr(int irq, void *context)
 
   if (stm32l4_exti_callbacks[1])
     {
-      ret = stm32l4_exti_callbacks[1](irq, context);
+      ret = stm32l4_exti_callbacks[1](irq, context, arg);
     }
 
   return ret;
 }
 
-static int stm32l4_exti2_isr(int irq, void *context)
+static int stm32l4_exti2_isr(int irq, void *context, FAR void *arg)
 {
   int ret = OK;
 
@@ -119,13 +119,13 @@ static int stm32l4_exti2_isr(int irq, void *context)
 
   if (stm32l4_exti_callbacks[2])
     {
-      ret = stm32l4_exti_callbacks[2](irq, context);
+      ret = stm32l4_exti_callbacks[2](irq, context, arg);
     }
 
   return ret;
 }
 
-static int stm32l4_exti3_isr(int irq, void *context)
+static int stm32l4_exti3_isr(int irq, void *context, FAR void *arg)
 {
   int ret = OK;
 
@@ -137,13 +137,13 @@ static int stm32l4_exti3_isr(int irq, void *context)
 
   if (stm32l4_exti_callbacks[3])
     {
-      ret = stm32l4_exti_callbacks[3](irq, context);
+      ret = stm32l4_exti_callbacks[3](irq, context, arg);
     }
 
   return ret;
 }
 
-static int stm32l4_exti4_isr(int irq, void *context)
+static int stm32l4_exti4_isr(int irq, void *context, FAR void *arg)
 {
   int ret = OK;
 
@@ -155,13 +155,13 @@ static int stm32l4_exti4_isr(int irq, void *context)
 
   if (stm32l4_exti_callbacks[4])
     {
-      ret = stm32l4_exti_callbacks[4](irq, context);
+      ret = stm32l4_exti_callbacks[4](irq, context, arg);
     }
 
   return ret;
 }
 
-static int stm32l4_exti_multiisr(int irq, void *context, int first, int last)
+static int stm32l4_exti_multiisr(int irq, void *context, void *arg, int first, int last)
 {
   uint32_t pr;
   int pin;
@@ -188,7 +188,7 @@ static int stm32l4_exti_multiisr(int irq, void *context, int first, int last)
 
           if (stm32l4_exti_callbacks[pin])
             {
-              int tmp = stm32l4_exti_callbacks[pin](irq, context);
+              int tmp = stm32l4_exti_callbacks[pin](irq, context, arg);
               if (tmp != OK)
                 {
                   ret = tmp;
@@ -200,14 +200,14 @@ static int stm32l4_exti_multiisr(int irq, void *context, int first, int last)
   return ret;
 }
 
-static int stm32l4_exti95_isr(int irq, void *context)
+static int stm32l4_exti95_isr(int irq, void *context, void *arg)
 {
-  return stm32l4_exti_multiisr(irq, context, 5, 9);
+  return stm32l4_exti_multiisr(irq, context, arg, 5, 9);
 }
 
-static int stm32l4_exti1510_isr(int irq, void *context)
+static int stm32l4_exti1510_isr(int irq, void *context, FAR void *arg)
 {
-  return stm32l4_exti_multiisr(irq, context, 10, 15);
+  return stm32l4_exti_multiisr(irq, context, arg, 10, 15);
 }
 
 /****************************************************************************
@@ -300,7 +300,7 @@ xcpt_t stm32l4_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
 
   if (func)
     {
-      irq_attach(irq, handler);
+      irq_attach(irq, handler, NULL);
       up_enable_irq(irq);
     }
   else

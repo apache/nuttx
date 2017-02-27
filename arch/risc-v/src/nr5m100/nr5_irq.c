@@ -111,7 +111,7 @@ void epic_dump(void)
 
 #define CONFIG_DEBUG
 
-int nr5_trap_handler(int irq, void *context)
+int nr5_trap_handler(int irq, void *context, FAR void *arg)
 {
   uint32_t  sp;
 
@@ -182,11 +182,11 @@ void up_irqinitialize(void)
 
   /* Attach the Trap exception handler.  */
 
-  irq_attach(NR5_IRQ_TRAP, nr5_trap_handler);
+  irq_attach(NR5_IRQ_TRAP, nr5_trap_handler, NULL);
 
   /* Attach software interrupt handler */
 
-  irq_attach(NR5_IRQ_SOFTWARE, up_swint);
+  irq_attach(NR5_IRQ_SOFTWARE, up_swint, NULL);
   up_enable_irq(NR5_IRQ_SOFTWARE);
 
   /* Set the software interrupt priority higher */

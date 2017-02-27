@@ -262,7 +262,7 @@ static void gpio_porthandler(uint32_t regbase, int irqbase, uint32_t irqset, voi
  ****************************************************************************/
 
 #if CONFIG_AVR32_GPIOIRQSETA != 0
-static int gpio0_interrupt(int irq, FAR void *context)
+static int gpio0_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   gpio_porthandler(AVR32_GPIO0_BASE, __IRQ_GPIO_PA0,
                    CONFIG_AVR32_GPIOIRQSETA, context);
@@ -271,7 +271,7 @@ static int gpio0_interrupt(int irq, FAR void *context)
 #endif
 
 #if CONFIG_AVR32_GPIOIRQSETB != 0
-static int gpio1_interrupt(int irq, FAR void *context)
+static int gpio1_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   gpio_porthandler(AVR32_GPIO1_BASE, __IRQ_GPIO_PB0,
                    CONFIG_AVR32_GPIOIRQSETB, context);
@@ -310,10 +310,10 @@ void gpio_irqinitialize(void)
   /* Then attach the GPIO interrupt handlers */
 
 #if CONFIG_AVR32_GPIOIRQSETA != 0
-  irq_attach(AVR32_IRQ_GPIO0, gpio0_interrupt);
+  irq_attach(AVR32_IRQ_GPIO0, gpio0_interrupt, NULL);
 #endif
 #if CONFIG_AVR32_GPIOIRQSETB != 0
-  irq_attach(AVR32_IRQ_GPIO1, gpio1_interrupt);
+  irq_attach(AVR32_IRQ_GPIO1, gpio1_interrupt, NULL);
 #endif
 }
 

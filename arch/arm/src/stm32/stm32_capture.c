@@ -736,13 +736,13 @@ static int stm32_cap_setisr(FAR struct stm32_cap_dev_s *dev, xcpt_t handler)
 
   /* Otherwise set callback and enable interrupt */
 
-  irq_attach(irq, handler);
+  irq_attach(irq, handler, NULL);
   up_enable_irq(irq);
 
 #ifdef USE_ADVENCED_TIM
   if (priv->irq_of)
     {
-      irq_attach(priv->irq_of, handler);
+      irq_attach(priv->irq_of, handler, NULL);
       up_enable_irq(priv->irq_of);
     }
 #endif

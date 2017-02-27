@@ -355,28 +355,28 @@ static int  sam_attach(struct uart_dev_s *dev);
 static void sam_detach(struct uart_dev_s *dev);
 static int sam_interrupt(struct uart_dev_s *dev);
 #ifdef CONFIG_SAMV7_UART0
-static int  sam_uart0_interrupt(int irq, void *context);
+static int  sam_uart0_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_SAMV7_UART1
-static int  sam_uart1_interrupt(int irq, void *context);
+static int  sam_uart1_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_SAMV7_UART2
-static int  sam_uart2_interrupt(int irq, void *context);
+static int  sam_uart2_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_SAMV7_UART3
-static int  sam_uart3_interrupt(int irq, void *context);
+static int  sam_uart3_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_SAMV7_UART4
-static int  sam_uart4_interrupt(int irq, void *context);
+static int  sam_uart4_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #if defined(CONFIG_SAMV7_USART0) &&  defined(CONFIG_USART0_SERIALDRIVER)
-static int  sam_usart0_interrupt(int irq, void *context);
+static int  sam_usart0_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #if defined(CONFIG_SAMV7_USART1) &&  defined(CONFIG_USART1_SERIALDRIVER)
-static int  sam_usart1_interrupt(int irq, void *context);
+static int  sam_usart1_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #if defined(CONFIG_SAMV7_USART2) &&  defined(CONFIG_USART2_SERIALDRIVER)
-static int  sam_usart2_interrupt(int irq, void *context);
+static int  sam_usart2_interrupt(int irq, void *context, FAR void *arg);
 #endif
 static int  sam_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int  sam_receive(struct uart_dev_s *dev, uint32_t *status);
@@ -973,7 +973,7 @@ static int sam_attach(struct uart_dev_s *dev)
 
   /* Attach and enable the IRQ */
 
-  ret = irq_attach(priv->irq, priv->handler);
+  ret = irq_attach(priv->irq, priv->handler, NULL);
   if (ret == OK)
     {
       /* Enable the interrupt (RX and TX interrupts are still disabled
@@ -1077,31 +1077,31 @@ static int sam_interrupt(struct uart_dev_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMV7_UART0
-static int  sam_uart0_interrupt(int irq, void *context)
+static int  sam_uart0_interrupt(int irq, void *context, FAR void *arg)
 {
   return sam_interrupt(&g_uart0port);
 }
 #endif
 #ifdef CONFIG_SAMV7_UART1
-static int  sam_uart1_interrupt(int irq, void *context)
+static int  sam_uart1_interrupt(int irq, void *context, FAR void *arg)
 {
   return sam_interrupt(&g_uart1port);
 }
 #endif
 #ifdef CONFIG_SAMV7_UART2
-static int  sam_uart2_interrupt(int irq, void *context)
+static int  sam_uart2_interrupt(int irq, void *context, FAR void *arg)
 {
   return sam_interrupt(&g_uart2port);
 }
 #endif
 #ifdef CONFIG_SAMV7_UART3
-static int  sam_uart3_interrupt(int irq, void *context)
+static int  sam_uart3_interrupt(int irq, void *context, FAR void *arg)
 {
   return sam_interrupt(&g_uart3port);
 }
 #endif
 #ifdef CONFIG_SAMV7_UART4
-static int  sam_uart4_interrupt(int irq, void *context)
+static int  sam_uart4_interrupt(int irq, void *context, FAR void *arg)
 {
   return sam_interrupt(&g_uart4port);
 }
@@ -1116,19 +1116,19 @@ static int  sam_uart4_interrupt(int irq, void *context)
  ****************************************************************************/
 
 #if defined(CONFIG_SAMV7_USART0) && defined(CONFIG_USART0_SERIALDRIVER)
-static int  sam_usart0_interrupt(int irq, void *context)
+static int  sam_usart0_interrupt(int irq, void *context, FAR void *arg)
 {
   return sam_interrupt(&g_usart0port);
 }
 #endif
 #if defined(CONFIG_SAMV7_USART1) && defined(CONFIG_USART1_SERIALDRIVER)
-static int  sam_usart1_interrupt(int irq, void *context)
+static int  sam_usart1_interrupt(int irq, void *context, FAR void *arg)
 {
   return sam_interrupt(&g_usart1port);
 }
 #endif
 #if defined(CONFIG_SAMV7_USART2) && defined(CONFIG_USART2_SERIALDRIVER)
-static int  sam_usart2_interrupt(int irq, void *context)
+static int  sam_usart2_interrupt(int irq, void *context, FAR void *arg)
 {
   return sam_interrupt(&g_usart2port);
 }

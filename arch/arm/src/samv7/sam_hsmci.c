@@ -1951,7 +1951,7 @@ static int sam_attach(FAR struct sdio_dev_s *dev)
 
   /* Attach the HSMCI interrupt handler */
 
-  ret = irq_attach(irq, handler);
+  ret = irq_attach(irq, handler, NULL);
   if (ret == OK)
     {
 

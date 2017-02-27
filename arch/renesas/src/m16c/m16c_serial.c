@@ -267,12 +267,12 @@ static int  up_setup(struct uart_dev_s *dev);
 static void up_shutdown(struct uart_dev_s *dev);
 static int  up_attach(struct uart_dev_s *dev);
 static void up_detach(struct uart_dev_s *dev);
-static int  up_rcvinterrupt(int irq, void *context);
+static int  up_rcvinterrupt(int irq, void *context, FAR void *arg);
 static int  up_receive(struct uart_dev_s *dev, unsigned int *status);
 static void m16c_rxint(struct up_dev_s *dev, bool enable);
 static void up_rxint(struct uart_dev_s *dev, bool enable);
 static bool up_rxavailable(struct uart_dev_s *dev);
-static int  up_xmtinterrupt(int irq, void *context);
+static int  up_xmtinterrupt(int irq, void *context, FAR void *arg);
 static void up_send(struct uart_dev_s *dev, int ch);
 static void m16c_txint(struct up_dev_s *dev, bool enable);
 static void up_txint(struct uart_dev_s *dev, bool enable);
@@ -711,12 +711,12 @@ static int up_attach(struct uart_dev_s *dev)
 
   /* Attach the UART receive data available IRQ */
 
-  ret = irq_attach(priv->rcvirq, up_rcvinterrupt);
+  ret = irq_attach(priv->rcvirq, up_rcvinterrupt, NULL);
   if (ret == OK)
     {
       /* Attach the UART transmit complete IRQ */
 
-      ret = irq_attach(priv->xmtirq, up_xmtinterrupt);
+      ret = irq_attach(priv->xmtirq, up_xmtinterrupt, NULL);
       if (ret != OK)
         {
           /* Detach the ERI interrupt on failure */
@@ -764,7 +764,7 @@ static void up_detach(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static int up_rcvinterrupt(int irq, void *context)
+static int up_rcvinterrupt(int irq, void *context, FAR void *arg)
 {
   struct uart_dev_s *dev = NULL;
 
@@ -930,7 +930,7 @@ static bool up_rxavailable(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static int up_xmtinterrupt(int irq, void *context)
+static int up_xmtinterrupt(int irq, void *context, FAR void *arg)
 {
   struct uart_dev_s *dev = NULL;
 

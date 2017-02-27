@@ -306,22 +306,22 @@ static FAR struct stm32_lowerhalf_s *stm32_tim2lower(int tim);
 #ifdef HAVE_16BIT_TIMERS
 static int stm32_interrupt(FAR struct stm32_lowerhalf_s *priv);
 #if defined(CONFIG_STM32_TIM1_QE) && TIM1_BITWIDTH == 16
-static int stm32_tim1interrupt(int irq, FAR void *context);
+static int stm32_tim1interrupt(int irq, FAR void *context, FAR void * arg);
 #endif
 #if defined(CONFIG_STM32_TIM2_QE) && TIM2_BITWIDTH == 16
-static int stm32_tim2interrupt(int irq, FAR void *context);
+static int stm32_tim2interrupt(int irq, FAR void *context, FAR void * arg);
 #endif
 #if defined(CONFIG_STM32_TIM3_QE) && TIM3_BITWIDTH == 16
-static int stm32_tim3interrupt(int irq, FAR void *context);
+static int stm32_tim3interrupt(int irq, FAR void *context, FAR void * arg);
 #endif
 #if defined(CONFIG_STM32_TIM4_QE) && TIM4_BITWIDTH == 16
-static int stm32_tim4interrupt(int irq, FAR void *context);
+static int stm32_tim4interrupt(int irq, FAR void *context, FAR void * arg);
 #endif
 #if defined(CONFIG_STM32_TIM5_QE) && TIM5_BITWIDTH == 16
-static int stm32_tim5interrupt(int irq, FAR void *context);
+static int stm32_tim5interrupt(int irq, FAR void *context, FAR void * arg);
 #endif
 #if defined(CONFIG_STM32_TIM8_QE) && TIM8_BITWIDTH == 16
-static int stm32_tim8interrupt(int irq, FAR void *context);
+static int stm32_tim8interrupt(int irq, FAR void *context, FAR void * arg);
 #endif
 #endif
 
@@ -753,42 +753,42 @@ static int stm32_interrupt(FAR struct stm32_lowerhalf_s *priv)
  ************************************************************************************/
 
 #if defined(CONFIG_STM32_TIM1_QE) && TIM1_BITWIDTH == 16
-static int stm32_tim1interrupt(int irq, FAR void *context)
+static int stm32_tim1interrupt(int irq, FAR void *context, FAR void * arg)
 {
   return stm32_interrupt(&g_tim1lower);
 }
 #endif
 
 #if defined(CONFIG_STM32_TIM2_QE) && TIM2_BITWIDTH == 16
-static int stm32_tim2interrupt(int irq, FAR void *context)
+static int stm32_tim2interrupt(int irq, FAR void *context, FAR void * arg)
 {
   return stm32_interrupt(&g_tim2lower);
 }
 #endif
 
 #if defined(CONFIG_STM32_TIM3_QE) && TIM3_BITWIDTH == 16
-static int stm32_tim3interrupt(int irq, FAR void *context)
+static int stm32_tim3interrupt(int irq, FAR void *context, FAR void * arg)
 {
   return stm32_interrupt(&g_tim3lower);
 }
 #endif
 
 #if defined(CONFIG_STM32_TIM4_QE) && TIM4_BITWIDTH == 16
-static int stm32_tim4interrupt(int irq, FAR void *context)
+static int stm32_tim4interrupt(int irq, FAR void *context, FAR void * arg)
 {
   return stm32_interrupt(&g_tim4lower);
 }
 #endif
 
 #if defined(CONFIG_STM32_TIM5_QE) && TIM5_BITWIDTH == 16
-static int stm32_tim5interrupt(int irq, FAR void *context)
+static int stm32_tim5interrupt(int irq, FAR void *context, FAR void * arg)
 {
   return stm32_interrupt(&g_tim5lower);
 }
 #endif
 
 #if defined(CONFIG_STM32_TIM8_QE) && TIM8_BITWIDTH == 16
-static int stm32_tim8interrupt(int irq, FAR void *context)
+static int stm32_tim8interrupt(int irq, FAR void *context, FAR void * arg)
 {
   return stm32_interrupt(&g_tim8lower);
 }
@@ -973,7 +973,7 @@ static int stm32_setup(FAR struct qe_lowerhalf_s *lower)
     {
       /* Attach the interrupt handler */
 
-      ret = irq_attach(priv->config->irq, priv->config->handler);
+      ret = irq_attach(priv->config->irq, priv->config->handler, NULL);
       if (ret < 0)
         {
           stm32_shutdown(lower);

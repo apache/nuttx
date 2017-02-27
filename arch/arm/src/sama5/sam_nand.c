@@ -181,7 +181,7 @@ static void     nand_wait_nfcbusy(struct sam_nandcs_s *priv);
 #endif
 static uint32_t nand_nfc_poll(void);
 #ifdef CONFIG_SAMA5_NAND_HSMCINTERRUPTS
-static int      hsmc_interrupt(int irq, void *context);
+static int      hsmc_interrupt(int irq, void *context, FAR void *arg);
 #endif
 
 /* DMA Helpers */
@@ -1059,7 +1059,7 @@ static uint32_t nand_nfc_poll(void)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_NAND_HSMCINTERRUPTS
-static int hsmc_interrupt(int irq, void *context)
+static int hsmc_interrupt(int irq, void *context, FAR void *arg)
 {
   uint32_t sr      = nand_nfc_poll();
   uint32_t imr     = nand_getreg(SAM_HSMC_IMR);
@@ -2992,7 +2992,7 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
 #ifdef CONFIG_SAMA5_NAND_HSMCINTERRUPTS
       /* Attach the CAN interrupt handler */
 
-      ret = irq_attach(SAM_IRQ_HSMC, hsmc_interrupt);
+      ret = irq_attach(SAM_IRQ_HSMC, hsmc_interrupt, NULL);
       if (ret < 0)
         {
           ferr("ERROR: Failed to attach HSMC IRQ (%d)", SAM_IRQ_HSMC);

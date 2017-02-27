@@ -188,13 +188,13 @@ static int  esp32_attach(struct uart_dev_s *dev);
 static void esp32_detach(struct uart_dev_s *dev);
 static int  esp32_interrupt(struct uart_dev_s *dev);
 #ifdef CONFIG_ESP32_UART0
-static int  esp32_uart0_interrupt(int cpuint, void *context);
+static int  esp32_uart0_interrupt(int cpuint, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_ESP32_UART1
-static int  esp32_uart1_interrupt(int cpuint, void *context);
+static int  esp32_uart1_interrupt(int cpuint, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_ESP32_UART2
-static int  esp32_uart2_interrupt(int cpuint, void *context);
+static int  esp32_uart2_interrupt(int cpuint, void *context, FAR void *arg);
 #endif
 static int  esp32_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int  esp32_receive(struct uart_dev_s *dev, unsigned int *status);
@@ -675,7 +675,7 @@ static int esp32_attach(struct uart_dev_s *dev)
 
   /* Attach and enable the IRQ */
 
-  ret = irq_attach(priv->config->irq, priv->config->handler);
+  ret = irq_attach(priv->config->irq, priv->config->handler, NULL);
   if (ret == OK)
     {
       /* Enable the CPU interrupt (RX and TX interrupts are still disabled
@@ -815,19 +815,19 @@ static int esp32_interrupt(struct uart_dev_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_ESP32_UART0
-static int  esp32_uart0_interrupt(int cpuint, void *context)
+static int  esp32_uart0_interrupt(int cpuint, void *context, FAR void *arg)
 {
   return esp32_interrupt(&g_uart0port);
 }
 #endif
 #ifdef CONFIG_ESP32_UART1
-static int  esp32_uart1_interrupt(int cpuint, void *context)
+static int  esp32_uart1_interrupt(int cpuint, void *context, FAR void *arg)
 {
   return esp32_interrupt(&g_uart1port);
 }
 #endif
 #ifdef CONFIG_ESP32_UART2
-static int  esp32_uart2_interrupt(int cpuint, void *context)
+static int  esp32_uart2_interrupt(int cpuint, void *context, FAR void *arg)
 {
   return esp32_interrupt(&g_uart2port);
 }

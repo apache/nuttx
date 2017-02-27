@@ -110,28 +110,28 @@ static int  up_attach(struct uart_dev_s *dev);
 static void up_detach(struct uart_dev_s *dev);
 static int  uart_interrupt(struct uart_dev_s *dev);
 #ifdef CONFIG_A1X_UART0
-static int  uart0_interrupt(int irq, void *context);
+static int  uart0_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_A1X_UART1
-static int  uart1_interrupt(int irq, void *context);
+static int  uart1_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_A1X_UART2
-static int  uart2_interrupt(int irq, void *context);
+static int  uart2_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_A1X_UART3
-static int  uart3_interrupt(int irq, void *context);
+static int  uart3_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_A1X_UART4
-static int  uart4_interrupt(int irq, void *context);
+static int  uart4_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_A1X_UART5
-static int  uart5_interrupt(int irq, void *context);
+static int  uart5_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_A1X_UART6
-static int  uart6_interrupt(int irq, void *context);
+static int  uart6_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_A1X_UART7
-static int  uart7_interrupt(int irq, void *context);
+static int  uart7_interrupt(int irq, void *context, FAR void *arg);
 #endif
 static int  up_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int  up_receive(struct uart_dev_s *dev, uint32_t *status);
@@ -1068,7 +1068,7 @@ static int up_attach(struct uart_dev_s *dev)
 
   /* Attach and enable the IRQ */
 
-  ret = irq_attach(priv->irq, priv->handler);
+  ret = irq_attach(priv->irq, priv->handler, NULL);
   if (ret == OK)
     {
       /* Enable the interrupt (RX and TX interrupts are still disabled
@@ -1202,56 +1202,56 @@ static int uart_interrupt(struct uart_dev_s *dev)
 }
 
 #ifdef CONFIG_A1X_UART0
-static int uart0_interrupt(int irq, void *context)
+static int uart0_interrupt(int irq, void *context, FAR void *arg)
 {
   return uart_interrupt(&g_uart0port);
 }
 #endif
 
 #ifdef CONFIG_A1X_UART1
-static int uart1_interrupt(int irq, void *context)
+static int uart1_interrupt(int irq, void *context, FAR void *arg)
 {
   return uart_interrupt(&g_uart1port);
 }
 #endif
 
 #ifdef CONFIG_A1X_UART2
-static int uart2_interrupt(int irq, void *context)
+static int uart2_interrupt(int irq, void *context, FAR void *arg)
 {
   return uart_interrupt(&g_uart2port);
 }
 #endif
 
 #ifdef CONFIG_A1X_UART3
-static int uart3_interrupt(int irq, void *context)
+static int uart3_interrupt(int irq, void *context, FAR void *arg)
 {
   return uart_interrupt(&g_uart3port);
 }
 #endif
 
 #ifdef CONFIG_A1X_UART4
-static int uart4_interrupt(int irq, void *context)
+static int uart4_interrupt(int irq, void *context, FAR void *arg)
 {
   return uart_interrupt(&g_uart4port);
 }
 #endif
 
 #ifdef CONFIG_A1X_UART5
-static int uart5_interrupt(int irq, void *context)
+static int uart5_interrupt(int irq, void *context, FAR void *arg)
 {
   return uart_interrupt(&g_uart5port);
 }
 #endif
 
 #ifdef CONFIG_A1X_UART6
-static int uart6_interrupt(int irq, void *context)
+static int uart6_interrupt(int irq, void *context, FAR void *arg)
 {
   return uart_interrupt(&g_uart6port);
 }
 #endif
 
 #ifdef CONFIG_A1X_UART7
-static int uart7_interrupt(int irq, void *context)
+static int uart7_interrupt(int irq, void *context, FAR void *arg)
 {
   return uart_interrupt(&g_uart7port);
 }

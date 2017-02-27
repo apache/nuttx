@@ -166,22 +166,22 @@ static void     spi_dumpregs(struct sam_spidev_s *priv, const char *msg);
 static int  spi_interrupt(struct sam_spidev_s *dev);
 
 #ifdef SAMDL_HAVE_SPI0
-static int  spi0_interrupt(int irq, void *context);
+static int  spi0_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef SAMDL_HAVE_SPI1
-static int  spi1_interrupt(int irq, void *context);
+static int  spi1_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef SAMDL_HAVE_SPI2
-static int  spi2_interrupt(int irq, void *context);
+static int  spi2_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef SAMDL_HAVE_SPI3
-static int  spi3_interrupt(int irq, void *context);
+static int  spi3_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef SAMDL_HAVE_SPI4
-static int  spi4_interrupt(int irq, void *context);
+static int  spi4_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef SAMDL_HAVE_SPI5
-static int  spi5_interrupt(int irq, void *context);
+static int  spi5_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #endif
 
@@ -802,42 +802,42 @@ static int spi_interrupt(struct sam_spidev_s *dev)
 
 #if 0 /* Not used */
 #ifdef SAMDL_HAVE_SPI0
-static int  spi0_interrupt(int irq, void *context)
+static int  spi0_interrupt(int irq, void *context, FAR void *arg)
 {
   return spi_interrupt(&g_spi0dev);
 }
 #endif
 
 #ifdef SAMDL_HAVE_SPI1
-static int  spi1_interrupt(int irq, void *context)
+static int  spi1_interrupt(int irq, void *context, FAR void *arg)
 {
   return spi_interrupt(&g_spi1dev);
 }
 #endif
 
 #ifdef SAMDL_HAVE_SPI2
-static int  spi2_interrupt(int irq, void *context)
+static int  spi2_interrupt(int irq, void *context, FAR void *arg)
 {
   return spi_interrupt(&g_spi2dev);
 }
 #endif
 
 #ifdef SAMDL_HAVE_SPI3
-static int  spi3_interrupt(int irq, void *context)
+static int  spi3_interrupt(int irq, void *context, FAR void *arg)
 {
   return spi_interrupt(&g_spi3dev);
 }
 #endif
 
 #ifdef SAMDL_HAVE_SPI4
-static int  spi4_interrupt(int irq, void *context)
+static int  spi4_interrupt(int irq, void *context, FAR void *arg)
 {
   return spi_interrupt(&g_spi4dev);
 }
 #endif
 
 #ifdef SAMDL_HAVE_SPI5
-static int  spi5_interrupt(int irq, void *context)
+static int  spi5_interrupt(int irq, void *context, FAR void *arg)
 {
   return spi_interrupt(&g_spi5dev);
 }
@@ -1546,7 +1546,7 @@ struct spi_dev_s *sam_spibus_initialize(int port)
 #if 0 /* Not used */
   /* Attach and enable the SERCOM interrupt handler */
 
-  ret = irq_attach(priv->irq, priv->handler);
+  ret = irq_attach(priv->irq, priv->handler, NULL);
   if (ret < 0)
     {
       spierr("ERROR: Failed to attach interrupt: %d\n", irq);

@@ -112,7 +112,7 @@ struct sam_hsmci_state_s
 /* HSCMI device state */
 
 #ifdef CONFIG_SAMA5_HSMCI0
-static int sam_hsmci0_cardetect(int irq, void *regs);
+static int sam_hsmci0_cardetect(int irq, void *regs, FAR void *arg);
 
 static struct sam_hsmci_state_s g_hsmci0 =
 {
@@ -124,7 +124,7 @@ static struct sam_hsmci_state_s g_hsmci0 =
 #endif
 
 #ifdef CONFIG_SAMA5_HSMCI1
-static int sam_hsmci1_cardetect(int irq, void *regs);
+static int sam_hsmci1_cardetect(int irq, void *regs, FAR void *arg);
 
 static struct sam_hsmci_state_s g_hsmci1 =
 {
@@ -189,14 +189,14 @@ static int sam_hsmci_cardetect(struct sam_hsmci_state_s *state)
 }
 
 #ifdef CONFIG_SAMA5_HSMCI0
-static int sam_hsmci0_cardetect(int irq, void *regs)
+static int sam_hsmci0_cardetect(int irq, void *regs, FAR void *arg)
 {
   return sam_hsmci_cardetect(&g_hsmci0);
 }
 #endif
 
 #ifdef CONFIG_SAMA5_HSMCI1
-static int sam_hsmci1_cardetect(int irq, void *regs)
+static int sam_hsmci1_cardetect(int irq, void *regs, FAR void *arg)
 {
   return sam_hsmci_cardetect(&g_hsmci1);
 }
@@ -287,7 +287,7 @@ int sam_hsmci_initialize(int slotno, int minor)
   /* Configure card detect interrupts */
 
   sam_pioirq(state->pincfg);
-  (void)irq_attach(state->irq, state->handler);
+  (void)irq_attach(state->irq, state->handler, NULL);
 
   /* Then inform the HSMCI driver if there is or is not a card in the slot. */
 

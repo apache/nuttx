@@ -492,7 +492,7 @@ static void   pic32mx_ep0outcomplete(struct pic32mx_usbdev_s *priv);
 static void   pic32mx_ep0incomplete(struct pic32mx_usbdev_s *priv);
 static void   pic32mx_ep0transfer(struct pic32mx_usbdev_s *priv,
                 uint16_t ustat);
-static int    pic32mx_interrupt(int irq, void *context);
+static int    pic32mx_interrupt(int irq, void *context, FAR void *arg);
 
 /* Endpoint helpers *********************************************************/
 
@@ -2643,7 +2643,7 @@ static void pic32mx_ep0transfer(struct pic32mx_usbdev_s *priv, uint16_t ustat)
  * Name: pic32mx_interrupt
  ****************************************************************************/
 
-static int pic32mx_interrupt(int irq, void *context)
+static int pic32mx_interrupt(int irq, void *context, FAR void *arg)
 {
   /* For now there is only one USB controller, but we will always refer to
    * it using a pointer to make any future ports to multiple USB controllers
@@ -4297,7 +4297,7 @@ void up_usbinitialize(void)
    * them when we need them later.
    */
 
-  if (irq_attach(PIC32MX_IRQ_USB, pic32mx_interrupt) != 0)
+  if (irq_attach(PIC32MX_IRQ_USB, pic32mx_interrupt, NULL) != 0)
     {
       usbtrace(TRACE_DEVERROR(PIC32MX_TRACEERR_IRQREGISTRATION),
                (uint16_t)PIC32MX_IRQ_USB);

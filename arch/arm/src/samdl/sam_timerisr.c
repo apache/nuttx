@@ -95,7 +95,7 @@
  *
  ****************************************************************************/
 
-static int sam_timerisr(int irq, uint32_t *regs)
+static int sam_timerisr(int irq, uint32_t *regs, void *arg)
 {
   /* Process timer interrupt */
 
@@ -133,7 +133,7 @@ void arm_timer_initialize(void)
 
   /* Attach the timer interrupt vector */
 
-  (void)irq_attach(SAM_IRQ_SYSTICK, (xcpt_t)sam_timerisr);
+  (void)irq_attach(SAM_IRQ_SYSTICK, (xcpt_t)sam_timerisr, NULL);
 
   /* Enable SysTick interrupts */
 

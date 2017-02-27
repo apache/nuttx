@@ -251,7 +251,7 @@ static void tiva_receive(struct tiva_driver_s *priv);
 static void tiva_txdone(struct tiva_driver_s *priv);
 
 static void tiva_interrupt_work(void *arg);
-static int  tiva_interrupt(int irq, void *context);
+static int  tiva_interrupt(int irq, void *context, FAR void *arg);
 
 /* Watchdog timer expirations */
 
@@ -1052,7 +1052,7 @@ static void tiva_interrupt_work(void *arg)
  *
  ****************************************************************************/
 
-static int tiva_interrupt(int irq, void *context)
+static int tiva_interrupt(int irq, void *context, FAR void *arg)
 {
   struct tiva_driver_s *priv;
   uint32_t ris;
@@ -1741,9 +1741,9 @@ static inline int tiva_ethinitialize(int intf)
   /* Attach the IRQ to the driver */
 
 #if TIVA_NETHCONTROLLERS > 1
-  ret = irq_attach(priv->irq, tiva_interrupt);
+  ret = irq_attach(priv->irq, tiva_interrupt, NULL);
 #else
-  ret = irq_attach(TIVA_IRQ_ETHCON, tiva_interrupt);
+  ret = irq_attach(TIVA_IRQ_ETHCON, tiva_interrupt, NULL);
 #endif
   if (ret != 0)
     {

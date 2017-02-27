@@ -295,7 +295,7 @@ static void avr_dispatchrequest(FAR const struct usb_ctrlreq_s *ctrl);
 static int avr_ep0configure(void);
 static void avr_setaddress(uint8_t address);
 static void avr_ep0setup(void);
-static int avr_epinterrupt(int irq, FAR void *context);
+static int avr_epinterrupt(int irq, FAR void *context, FAR void *arg);
 
 /* General interrupt handling **************************************************/
 
@@ -305,7 +305,7 @@ static void avr_genvbus(void);
 static inline void avr_gensuspend(void);
 static void avr_genwakeup(void);
 static inline void avr_geneor(void);
-static int avr_geninterrupt(int irq, FAR void *context);
+static int avr_geninterrupt(int irq, FAR void *context, FAR void *arg);
 
 /* USB device controller operations ********************************************/
 
@@ -1877,7 +1877,7 @@ static inline void avr_epNinterrupt(void)
  *
  ****************************************************************************/
 
-static int avr_epinterrupt(int irq, FAR void *context)
+static int avr_epinterrupt(int irq, FAR void *context, FAR void *arg)
 {
   usbtrace(TRACE_INTENTRY(AVR_TRACEINTID_EPINT), irq);
 
@@ -2061,7 +2061,7 @@ static inline void avr_geneor(void)
  *
  ****************************************************************************/
 
-static int avr_geninterrupt(int irq, FAR void *context)
+static int avr_geninterrupt(int irq, FAR void *context, FAR void *arg)
 {
   usbtrace(TRACE_INTENTRY(AVR_TRACEINTID_GENINT), irq);
 
@@ -2783,7 +2783,7 @@ void up_usbinitialize(void)
 
   /* Attach USB controller general interrupt handler */
 
-  if (irq_attach(AT90USB_IRQ_USBGEN, avr_geninterrupt) != 0)
+  if (irq_attach(AT90USB_IRQ_USBGEN, avr_geninterrupt, NULL) != 0)
     {
       usbtrace(TRACE_DEVERROR(AVR_TRACEERR_IRQREGISTRATION), AT90USB_IRQ_USBGEN);
       goto errout;
@@ -2791,7 +2791,7 @@ void up_usbinitialize(void)
 
   /* Attach USB controller endpoint/pipe interrupt handler */
 
-  if (irq_attach(AT90USB_IRQ_USBEP, avr_epinterrupt) != 0)
+  if (irq_attach(AT90USB_IRQ_USBEP, avr_epinterrupt, NULL) != 0)
     {
       usbtrace(TRACE_DEVERROR(AVR_TRACEERR_IRQREGISTRATION), AT90USB_IRQ_USBEP);
       goto errout;

@@ -400,13 +400,13 @@ static int  ez80emac_receive(struct ez80emac_driver_s *priv);
 /* Interrupt handling */
 
 static void ez80emac_txinterrupt_work(FAR void *arg);
-static int  ez80emac_txinterrupt(int irq, FAR void *context);
+static int  ez80emac_txinterrupt(int irq, FAR void *context, FAR void *arg);
 
 static void ez80emac_rxinterrupt_work(FAR void *arg);
-static int  ez80emac_rxinterrupt(int irq, FAR void *context);
+static int  ez80emac_rxinterrupt(int irq, FAR void *context, FAR void *arg);
 
 static void ez80emac_sysinterrupt_work(FAR void *arg);
-static int  ez80emac_sysinterrupt(int irq, FAR void *context);
+static int  ez80emac_sysinterrupt(int irq, FAR void *context, FAR void *arg);
 
 /* Watchdog timer expirations */
 
@@ -1581,7 +1581,7 @@ static void ez80emac_txinterrupt_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static int ez80emac_txinterrupt(int irq, FAR void *context)
+static int ez80emac_txinterrupt(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct ez80emac_driver_s *priv = &g_emac;
   uint8_t istat;
@@ -1683,7 +1683,7 @@ static void ez80emac_rxinterrupt_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static int ez80emac_rxinterrupt(int irq, FAR void *context)
+static int ez80emac_rxinterrupt(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct ez80emac_driver_s *priv = &g_emac;
 
@@ -1804,7 +1804,7 @@ static void ez80emac_sysinterrupt_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static int ez80emac_sysinterrupt(int irq, FAR void *context)
+static int ez80emac_sysinterrupt(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct ez80emac_driver_s *priv = &g_emac;
 
@@ -2510,7 +2510,7 @@ int up_netinitialize(void)
 
   /* Attach IRQs */
 
-  ret = irq_attach(EZ80_EMACSYS_IRQ, ez80emac_sysinterrupt);
+  ret = irq_attach(EZ80_EMACSYS_IRQ, ez80emac_sysinterrupt, NULL);
   if (ret < 0)
     {
       nerr("ERROR: Unable to attach IRQ %d\n", EZ80_EMACSYS_IRQ);
@@ -2518,7 +2518,7 @@ int up_netinitialize(void)
       goto errout;
     }
 
-  ret = irq_attach(EZ80_EMACRX_IRQ, ez80emac_rxinterrupt);
+  ret = irq_attach(EZ80_EMACRX_IRQ, ez80emac_rxinterrupt, NULL);
   if (ret < 0)
     {
       nerr("ERROR: Unable to attach IRQ %d\n", EZ80_EMACRX_IRQ);
@@ -2526,7 +2526,7 @@ int up_netinitialize(void)
       goto errout;
     }
 
-  ret = irq_attach(EZ80_EMACTX_IRQ, ez80emac_txinterrupt);
+  ret = irq_attach(EZ80_EMACTX_IRQ, ez80emac_txinterrupt, NULL);
   if (ret < 0)
     {
       nerr("ERROR: Unable to attach IRQ %d\n", EZ80_EMACTX_IRQ);

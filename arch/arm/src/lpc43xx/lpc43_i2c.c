@@ -130,7 +130,7 @@ static struct lpc43_i2cdev_s g_i2c1dev;
 
 static int  lpc43_i2c_start(struct lpc43_i2cdev_s *priv);
 static void lpc43_i2c_stop(struct lpc43_i2cdev_s *priv);
-static int  lpc43_i2c_interrupt(int irq, FAR void *context);
+static int  lpc43_i2c_interrupt(int irq, FAR void *context, FAR void *arg);
 static void lpc43_i2c_timeout(int argc, uint32_t arg, ...);
 static void lpc43_i2c_setfrequency(struct lpc43_i2cdev_s *priv,
               uint32_t frequency);
@@ -277,7 +277,7 @@ void lpc32_i2c_nextmsg(struct lpc43_i2cdev_s *priv)
  *
  ****************************************************************************/
 
-static int lpc43_i2c_interrupt(int irq, FAR void *context)
+static int lpc43_i2c_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   struct lpc43_i2cdev_s *priv;
   struct i2c_msg_s *msg;
@@ -558,7 +558,7 @@ struct i2c_master_s *lpc43_i2cbus_initialize(int port)
 
   /* Attach Interrupt Handler */
 
-  irq_attach(priv->irqid, lpc43_i2c_interrupt);
+  irq_attach(priv->irqid, lpc43_i2c_interrupt, NULL);
 
   /* Enable Interrupt Handler */
 

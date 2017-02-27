@@ -1899,14 +1899,14 @@ static int sam_xdmac_interrupt(struct sam_xdmac_s *xdmac)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_XDMAC0
-static int sam_xdmac0_interrupt(int irq, void *context)
+static int sam_xdmac0_interrupt(int irq, void *context, FAR void *arg)
 {
   return sam_xdmac_interrupt(&g_xdmac0);
 }
 #endif
 
 #ifdef CONFIG_SAMA5_XDMAC1
-static int sam_xdmac1_interrupt(int irq, void *context)
+static int sam_xdmac1_interrupt(int irq, void *context, FAR void *arg)
 {
   return sam_xdmac_interrupt(&g_xdmac1);
 }
@@ -1965,7 +1965,7 @@ void weak_function up_dmainitialize(void)
 
   /* Attach DMA interrupt vector */
 
-  (void)irq_attach(SAM_IRQ_XDMAC0, sam_xdmac0_interrupt);
+  (void)irq_attach(SAM_IRQ_XDMAC0, sam_xdmac0_interrupt, NULL);
 
   /* Initialize the controller */
 
@@ -1985,7 +1985,7 @@ void weak_function up_dmainitialize(void)
 
   /* Attach DMA interrupt vector */
 
-  (void)irq_attach(SAM_IRQ_XDMAC1, sam_xdmac1_interrupt);
+  (void)irq_attach(SAM_IRQ_XDMAC1, sam_xdmac1_interrupt, NULL);
 
   /* Initialize the controller */
 

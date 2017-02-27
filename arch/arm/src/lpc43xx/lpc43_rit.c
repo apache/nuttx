@@ -86,7 +86,7 @@ struct timespec g_ts;
  * Private Functions
  ****************************************************************************/
 
-static int lpc43_RIT_isr(int irq, FAR void *context)
+static int lpc43_RIT_isr(int irq, FAR void *context, FAR void *arg)
 {
   irqstate_t flags;
 
@@ -166,7 +166,7 @@ void arm_timer_initialize(void)
 
   /* Set up the IRQ here */
 
-  irq_attach(LPC43M4_IRQ_RITIMER, lpc43_RIT_isr);
+  irq_attach(LPC43M4_IRQ_RITIMER, lpc43_RIT_isr, NULL);
 
   /* Compute how many seconds per tick we have on the main clock.  If it is
    * 204MHz for example, then there should be about 4.90ns per tick
