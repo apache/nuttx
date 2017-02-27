@@ -1067,3 +1067,22 @@ config NO_LPUART_SERIAL_CONSOLE
 		the serial console
 
 endchoice # Kinetis LPUART Serial Console
+
+config KINETIS_MERGE_TTY
+	bool "Kinetis Merge TTY names for LPUARTS"
+	default n
+	depends on KINETIS_LPUART
+	---help---
+		Enable the merging of the TTY names when both LPUARTs and UARTs
+		are defined.  When enabled, all both LPUARTS and UART types will be
+		listed as dev/ttySn. When disabled, LPUARTS willbe listed as
+		/dev/ttyLPn and UARTs as /dev/ttySn see also (KINETS_LPUART_LOWEST)
+
+config KINETS_LPUART_LOWEST
+	bool "Kinetis Order ttySn LPUARTs before UARTS"
+	default n
+	depends on KINETIS_LPUART && KINETIS_UART
+	depends on KINETIS_MERGE_TTY
+	---help---
+		Used with KINETIS_MERGE_TTY, will set the order of ttySn assignments
+		Enabled will order the LPUART's before the UARTS.

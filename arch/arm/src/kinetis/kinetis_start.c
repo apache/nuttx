@@ -330,7 +330,7 @@ void __start(void)
   kinetis_fpuconfig();
   kinetis_lowsetup();
 #ifdef USE_EARLYSERIALINIT
-  up_earlyserialinit();
+  kinetis_earlyserialinit();
 #endif
 
   /* For the case of the separate user-/kernel-space build, perform whatever
