@@ -510,11 +510,12 @@ static int nrf24l01_irqhandler(int irq, FAR void *context, FAR void *arg)
   return OK;
 }
 
-/* Configure IRQ pin  (falling edge) */
+/* Configure IRQ pin (falling edge) */
 
-static inline int nrf24l01_attachirq(FAR struct nrf24l01_dev_s *dev, xcpt_t isr)
+static inline int nrf24l01_attachirq(FAR struct nrf24l01_dev_s *dev, xcpt_t isr,
+                                     FAR void *arg)
 {
-  return dev->config->irqattach(isr);
+  return dev->config->irqattach(isr, arg);
 }
 
 static inline bool nrf24l01_chipenable(FAR struct nrf24l01_dev_s *dev, bool enable)
@@ -1175,7 +1176,7 @@ static int nrf24l01_unregister(FAR struct nrf24l01_dev_s *dev)
 
   /* Release IRQ */
 
-  nrf24l01_attachirq(dev, NULL);
+  nrf24l01_attachirq(dev, NULL, NULL);
 
   /* Free memory */
 
