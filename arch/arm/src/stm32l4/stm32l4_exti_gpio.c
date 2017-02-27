@@ -56,12 +56,22 @@
 #include "stm32l4_exti.h"
 
 /****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+struct gpio_callback_s
+{
+  xcptr_t callback;
+  void   *arg;
+};
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
 /* Interrupt handlers attached to each EXTI */
 
-static xcpt_t stm32l4_exti_callbacks[16];
+static struct gpio_callback_s g_gpio_handlers[16];
 
 /****************************************************************************
  * Private Functions
@@ -81,9 +91,12 @@ static int stm32l4_exti0_isr(int irq, void *context, FAR void *arg)
 
   /* And dispatch the interrupt to the handler */
 
-  if (stm32l4_exti_callbacks[0])
+  if (g_gpio_handlers[0].callback != NULL)
     {
-      ret = stm32l4_exti_callbacks[0](irq, context, arg);
+      xcpt_t callback = g_gpio_handlers[0].callback;
+      void  *cbarg    = g_gpio_handlers[0].arg;
+
+      ret = callback(irq, context, cbarg);
     }
 
   return ret;
@@ -99,9 +112,12 @@ static int stm32l4_exti1_isr(int irq, void *context, FAR void *arg)
 
   /* And dispatch the interrupt to the handler */
 
-  if (stm32l4_exti_callbacks[1])
+  if (g_gpio_handlers[1].callback != NULL)
     {
-      ret = stm32l4_exti_callbacks[1](irq, context, arg);
+      xcpt_t callback = g_gpio_handlers[1].callback;
+      void  *cbarg    = g_gpio_handlers[1].arg;
+
+      ret = callback(irq, context, cbarg);
     }
 
   return ret;
@@ -117,9 +133,12 @@ static int stm32l4_exti2_isr(int irq, void *context, FAR void *arg)
 
   /* And dispatch the interrupt to the handler */
 
-  if (stm32l4_exti_callbacks[2])
+  if (g_gpio_handlers[2].callback != NULL)
     {
-      ret = stm32l4_exti_callbacks[2](irq, context, arg);
+      xcpt_t callback = g_gpio_handlers[2].callback;
+      void  *cbarg    = g_gpio_handlers[2].arg;
+
+      ret = callback(irq, context, cbarg);
     }
 
   return ret;
@@ -135,9 +154,12 @@ static int stm32l4_exti3_isr(int irq, void *context, FAR void *arg)
 
   /* And dispatch the interrupt to the handler */
 
-  if (stm32l4_exti_callbacks[3])
+  if (g_gpio_handlers[3].callback != NULL)
     {
-      ret = stm32l4_exti_callbacks[3](irq, context, arg);
+      xcpt_t callback = g_gpio_handlers[3].callback;
+      void  *cbarg    = g_gpio_handlers[3].arg;
+
+      ret = callback(irq, context, cbarg);
     }
 
   return ret;
@@ -153,9 +175,12 @@ static int stm32l4_exti4_isr(int irq, void *context, FAR void *arg)
 
   /* And dispatch the interrupt to the handler */
 
-  if (stm32l4_exti_callbacks[4])
+  if (g_gpio_handlers[4].callback != NULL)
     {
-      ret = stm32l4_exti_callbacks[4](irq, context, arg);
+      xcpt_t callback = g_gpio_handlers[4].callback;
+      void  *cbarg    = g_gpio_handlers[4].arg;
+
+      ret = callback(irq, context, cbarg);
     }
 
   return ret;
@@ -186,10 +211,14 @@ static int stm32l4_exti_multiisr(int irq, void *context, void *arg, int first, i
 
           /* And dispatch the interrupt to the handler */
 
-          if (stm32l4_exti_callbacks[pin])
+          if (g_gpio_handlers[pin].callback != NULL)
             {
-              int tmp = stm32l4_exti_callbacks[pin](irq, context, arg);
-              if (tmp != OK)
+              xcpt_t callback = g_gpio_handlers[pin].callback;
+              void  *cbarg    = g_gpio_handlers[pin].arg;
+              int tmp;
+
+              tmp = callback(irq, context, cbarg);
+              if (tmp < 0)
                 {
                   ret = tmp;
                 }
@@ -226,6 +255,7 @@ static int stm32l4_exti1510_isr(int irq, void *context, FAR void *arg)
  *  - fallingedge: Enables interrupt on falling edges
  *  - event:       Generate event when set
  *  - func:        When non-NULL, generate interrupt
+ *  - arg:         Argument passed to the interrupt callback
  *
  * Returns:
  *   The previous value of the interrupt handler function pointer.  This
@@ -235,15 +265,15 @@ static int stm32l4_exti1510_isr(int irq, void *context, FAR void *arg)
  ****************************************************************************/
 
 xcpt_t stm32l4_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
-                          bool event, xcpt_t func)
+                          bool event, xcpt_t func, void *arg)
 {
+  struct gpio_callback_s *shared_cbs;
   uint32_t pin = pinset & GPIO_PIN_MASK;
   uint32_t exti = STM32L4_EXTI1_BIT(pin);
   int      irq;
   xcpt_t   handler;
   xcpt_t   oldhandler = NULL;
   int      nshared;
-  xcpt_t  *shared_cbs;
   int      i;
 
   /* Select the interrupt handler for this EXTI pin */
@@ -252,7 +282,7 @@ xcpt_t stm32l4_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
     {
       irq        = pin + STM32L4_IRQ_EXTI0;
       nshared    = 1;
-      shared_cbs = &stm32l4_exti_callbacks[pin];
+      shared_cbs = &g_gpio_handlers[pin];
       switch (pin)
         {
           case 0:
@@ -280,21 +310,22 @@ xcpt_t stm32l4_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
     {
       irq        = STM32L4_IRQ_EXTI95;
       handler    = stm32l4_exti95_isr;
-      shared_cbs = &stm32l4_exti_callbacks[5];
+      shared_cbs = &g_gpio_handlers[5];
       nshared    = 5;
     }
   else
     {
       irq        = STM32L4_IRQ_EXTI1510;
       handler    = stm32l4_exti1510_isr;
-      shared_cbs = &stm32l4_exti_callbacks[10];
+      shared_cbs = &g_gpio_handlers[10];
       nshared    = 6;
     }
 
   /* Get the previous GPIO IRQ handler; Save the new IRQ handler. */
 
-  oldhandler = stm32l4_exti_callbacks[pin];
-  stm32l4_exti_callbacks[pin] = func;
+  oldhandler                    = g_gpio_handlers[pin].callback;
+  g_gpio_handlers[pin].callback = func;
+  g_gpio_handlers[pin].arg      = arg;
 
   /* Install external interrupt handlers */
 
@@ -311,7 +342,7 @@ xcpt_t stm32l4_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
 
       for (i = 0; i < nshared; i++)
         {
-          if (shared_cbs[i] != NULL)
+          if (shared_cbs[i].callback != NULL)
             {
               break;
             }

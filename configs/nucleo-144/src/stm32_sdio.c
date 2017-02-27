@@ -132,7 +132,8 @@ int stm32_sdio_initialize(void)
 
   /* Register an interrupt handler for the card detect pin */
 
-  stm32_gpiosetevent(GPIO_SDMMC1_NCD, true, true, true, stm32_ncd_interrupt);
+  stm32_gpiosetevent(GPIO_SDMMC1_NCD, true, true, true,
+                     stm32_ncd_interrupt, NULL);
 #endif
 
   /* Mount the SDIO-based MMC/SD block driver */

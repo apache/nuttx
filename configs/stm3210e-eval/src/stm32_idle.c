@@ -177,7 +177,7 @@ static int stm32_alarm_exti(int irq, FAR void *context)
 #if defined(CONFIG_PM) && defined(CONFIG_RTC_ALARM)
 static void stm32_exti_cancel(void)
 {
-  (void)stm32_exti_alarm(false, false, false, NULL);
+  (void)stm32_exti_alarm(false, false, false, NULL, NULL);
 }
 #endif
 
@@ -201,7 +201,7 @@ static int stm32_rtc_alarm(time_t tv_sec, time_t tv_nsec, bool exti)
     {
       /* TODO: Make sure that that is no pending EXTI interrupt */
 
-      (void)stm32_exti_alarm(true, true, true, stm32_alarm_exti);
+      (void)stm32_exti_alarm(true, true, true, stm32_alarm_exti, NULL);
     }
 
   /* Configure the RTC alarm to Auto Wake the system */

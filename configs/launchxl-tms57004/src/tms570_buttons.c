@@ -85,7 +85,7 @@ static xcpt_t g_irq_button;
 
 #ifdef HAVE_IRQBUTTONS
 static xcpt_t board_button_irqx(gio_pinset_t pinset, int irq,
-                                xcpt_t irqhandler, xcpt_t *store)
+                                xcpt_t irqhandler, xcpt_t *store, void *arg)
 {
   xcpt_t oldhandler;
   irqstate_t flags;
@@ -108,7 +108,7 @@ static xcpt_t board_button_irqx(gio_pinset_t pinset, int irq,
       /* Configure the interrupt */
 
       tms570_gioirq(pinset);
-      (void)irq_attach(irq, irqhandler, NULL);
+      (void)irq_attach(irq, irqhandler, arg);
       tms570_gioirqenable(irq);
     }
   else
@@ -183,12 +183,13 @@ uint8_t board_buttons(void)
  *
  ****************************************************************************/
 
-xcpt_t board_button_irq(int id, xcpt_t irqhandler)
+xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
 #ifdef HAVE_IRQBUTTONS
   if (id == BUTTON_GIOA7)
     {
-      return board_button_irqx(GIO_BUTTON, IRQ_BUTTON, irqhandler, &g_irq_button);
+      return board_button_irqx(GIO_BUTTON, IRQ_BUTTON, irqhandler,i
+                               &g_irq_button, arg);
     }
 #endif
 

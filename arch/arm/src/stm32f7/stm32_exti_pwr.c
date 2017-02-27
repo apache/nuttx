@@ -70,7 +70,8 @@
 
 /* Interrupt handlers attached to the PVD EXTI */
 
-static xcpt_t stm32_exti_pvd_callback;
+static xcpt_t g_pvd_callback;
+static void  *g_callback_arg;
 
 /****************************************************************************
  * Public Data
@@ -98,9 +99,9 @@ static int stm32_exti_pvd_isr(int irq, void *context, FAR void *arg)
 
   /* And dispatch the interrupt to the handler */
 
-  if (stm32_exti_pvd_callback)
+  if (g_pvd_callback)
     {
-      ret = stm32_exti_pvd_callback(irq, context);
+      ret = g_pvd_callback(irq, context, g_callback_arg);
     }
 
   return ret;
@@ -135,8 +136,9 @@ xcpt_t stm32_exti_pvd(bool risingedge, bool fallingedge, bool event,
 
   /* Get the previous GPIO IRQ handler; Save the new IRQ handler. */
 
-  oldhandler = stm32_exti_pvd_callback;
-  stm32_exti_pvd_callback = func;
+  oldhandler     = g_pvd_callback;
+  g_pvd_callback = func;
+  g_callback_arg = arg;
 
   /* Install external interrupt handlers (if not already attached) */
 

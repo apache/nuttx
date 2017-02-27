@@ -87,9 +87,7 @@ static struct l3gd20_config_s g_l3gd20_config =
 
 static int l3gd20_attach(FAR struct l3gd20_config_s * cfg, xcpt_t irq)
 {
-  stm32_gpiosetevent(GPIO_L3GD20_DREADY, true, false, true, irq);
-
-  return OK;
+  stm32_gpiosetevent(GPIO_L3GD20_DREADY, true, false, true, irq, NULL);
 }
 
 /****************************************************************************

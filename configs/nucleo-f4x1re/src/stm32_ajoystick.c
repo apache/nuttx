@@ -377,7 +377,7 @@ static void ajoy_enable(FAR const struct ajoy_lowerhalf_s *lower,
                       i, rising, falling);
 
                (void)stm32_gpiosetevent(g_joygpio[i], rising, falling,
-                                        true, ajoy_interrupt);
+                                        true, ajoy_interrupt, NULL);
              }
         }
     }
@@ -403,7 +403,7 @@ static void ajoy_disable(void)
   flags = enter_critical_section();
   for (i = 0; i < AJOY_NGPIOS; i++)
     {
-      (void)stm32_gpiosetevent(g_joygpio[i], false, false, false, NULL);
+      (void)stm32_gpiosetevent(g_joygpio[i], false, false, false, NULL, NULL);
     }
 
   leave_critical_section(flags);

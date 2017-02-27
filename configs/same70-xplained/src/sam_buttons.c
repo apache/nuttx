@@ -89,7 +89,7 @@ static xcpt_t g_irq_sw0;
 
 #ifdef HAVE_IRQBUTTONS
 static xcpt_t board_button_irqx(gpio_pinset_t pinset, int irq,
-                                xcpt_t irqhandler, xcpt_t *store)
+                                xcpt_t irqhandler, xcpt_t *store, void *arg)
 {
   xcpt_t oldhandler;
   irqstate_t flags;
@@ -112,7 +112,7 @@ static xcpt_t board_button_irqx(gpio_pinset_t pinset, int irq,
       /* Configure the interrupt */
 
       sam_gpioirq(pinset);
-      (void)irq_attach(irq, irqhandler, NULL);
+      (void)irq_attach(irq, irqhandler, arg);
       sam_gpioirqenable(irq);
     }
   else
@@ -188,12 +188,12 @@ uint8_t board_buttons(void)
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_IRQBUTTONS
-xcpt_t board_button_irq(int id, xcpt_t irqhandler)
+xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
 #ifdef HAVE_IRQBUTTONS
   if (id == BUTTON_SW0)
     {
-      return board_button_irqx(GPIO_SW0, IRQ_SW0, irqhandler, &g_irq_sw0);
+      return board_button_irqx(GPIO_SW0, IRQ_SW0, irqhandler, &g_irq_sw0, arg);
     }
 #endif
 

@@ -152,7 +152,7 @@ uint8_t board_buttons(void)
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_IRQBUTTONS
-xcpt_t board_button_irq(int id, xcpt_t irqhandler)
+xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
 #ifdef CONFIG_PIC32MZ_GPIOIRQ_PORTB
   xcpt_t oldhandler = NULL;

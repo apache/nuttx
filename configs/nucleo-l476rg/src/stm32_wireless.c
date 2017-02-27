@@ -204,11 +204,13 @@ static void wl_enable_irq(FAR struct cc3000_config_s *state, bool enable)
   iinfo("enable:%d\n", enable);
   if (enable)
     {
-      (void)stm32_gpiosetevent(GPIO_WIFI_INT, false, true, false, priv->handler);
+      (void)stm32_gpiosetevent(GPIO_WIFI_INT, false, true, false,
+                               priv->handler, priv->arg);
     }
   else
     {
-      (void)stm32_gpiosetevent(GPIO_WIFI_INT, false, false, false, NULL);
+      (void)stm32_gpiosetevent(GPIO_WIFI_INT, false, false, false,
+                               NULL, NULL);
     }
 }
 

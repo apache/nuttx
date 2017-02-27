@@ -247,7 +247,7 @@ int stm32_usbhost_setup(void)
 #ifdef CONFIG_USBHOST
 xcpt_t stm32_setup_overcurrent(xcpt_t handler)
 {
-  return stm32_gpiosetevent(GPIO_OTGFS_OVER, true, true, true, handler);
+  return stm32_gpiosetevent(GPIO_OTGFS_OVER, true, true, true, handler, NULL);
 }
 #endif
 

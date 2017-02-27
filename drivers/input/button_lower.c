@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/input/button_lower.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -159,7 +159,7 @@ static void btn_enable(FAR const struct btn_lowerhalf_s *lower,
           mask = (1 << id);
           if ((either & mask) != 0)
             {
-              (void)board_button_irq(id, btn_interrupt);
+              (void)board_button_irq(id, btn_interrupt, NULL);
             }
         }
     }
@@ -185,7 +185,7 @@ static void btn_disable(void)
   flags = enter_critical_section();
   for (id = 0; id < NUM_BUTTONS; id++)
     {
-      (void)board_button_irq(id, NULL);
+      (void)board_button_irq(id, NULL, NULL);
     }
 
   /* Nullify the handler and argument */

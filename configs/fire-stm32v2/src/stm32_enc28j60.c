@@ -159,7 +159,8 @@ static void up_enable(FAR const struct enc_lower_s *lower)
   FAR struct stm32_lower_s *priv = (FAR struct stm32_lower_s *)lower;
 
   DEBUGASSERT(priv->handler);
-  (void)stm32_gpiosetevent(GPIO_ENC28J60_INTR, false, true, true, priv->handler);
+  (void)stm32_gpiosetevent(GPIO_ENC28J60_INTR, false, true, true,
+                           priv->handler, NULL);
 }
 
 static void up_disable(FAR const struct enc_lower_s *lower)

@@ -48,16 +48,26 @@
 #include "chip/stm32l4_exti.h"
 
 /****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+struct comp_callback_s
+{
+  xcptr_t callback;
+  void   *arg;
+};
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
 /* Interrupt handlers attached to the COMP EXTI lines */
 
-static xcpt_t stm32l4_exti_comp_handlers[STM32L4_COMP_NUM];
+static struct comp_callback_s g_comp_handlers[STM32L4_COMP_NUM];
 
 /* Comparator EXTI lines */
 
-static const uint32_t stm32l4_exti_comp_lines[STM32L4_COMP_NUM] =
+static const uint32_t g_comp_lines[STM32L4_COMP_NUM] =
 {
 #if defined(CONFIG_STM32L4_STM32L4X3) || defined (CONFIG_STM32L4_STM32L4X6)
   EXTI1_COMP1,
@@ -83,15 +93,17 @@ static int stm32l4_exti_comp_isr(int irq, void *context)
   pr = getreg32(STM32L4_EXTI1_PR);
   for (i = 0; i < STM32L4_COMP_NUM; i++)
     {
-      ln = stm32l4_exti_comp_lines[i];
+      ln = g_comp_lines[i];
       if ((pr & ln) != 0)
         {
           /* Clear the pending interrupt */
 
           putreg32(ln, STM32L4_EXTI1_PR);
-          if (stm32l4_exti_comp_handlers[i])
+          if (g_comp_handlers[i].callback != NULL)
             {
-              ret = stm32l4_exti_comp_handlers[i](irq, context);
+              xcpt_t callback = g_comp_handlers[i].callback;
+              vid   *arg      = g_comp_handlers[i].arg;
+              ret = callback(irq, context, arg);
             }
         }
     }
@@ -114,6 +126,7 @@ static int stm32l4_exti_comp_isr(int irq, void *context)
  *  - rising/falling edge: enables interrupt on rising/falling edget
  *  - event:  generate event when set
  *  - func:   when non-NULL, generate interrupt
+ *  - arg:    Argument passed to the interrupt callback
  *
  * Returns:
  *   The previous value of the interrupt handler function pointer.  This
@@ -123,11 +136,11 @@ static int stm32l4_exti_comp_isr(int irq, void *context)
  ****************************************************************************/
 
 xcpt_t stm32l4_exti_comp(int cmp, bool risingedge, bool fallingedge,
-                         bool event, xcpt_t func)
+                         bool event, xcpt_t func, void *arg)
 {
   xcpt_t oldhandler;
   irqstate_t flags;
-  uint32_t ln = stm32l4_exti_comp_lines[cmp];
+  uint32_t ln = g_comp_lines[cmp];
 
  /* Perform the following within a critical section so that the handler gets
   * installed correctly before the next interrupt is received.
@@ -159,8 +172,9 @@ xcpt_t stm32l4_exti_comp(int cmp, bool risingedge, bool fallingedge,
 
     /* Get the previous IRQ handler and save the new IRQ handler. */
 
-    oldhandler = stm32l4_exti_comp_handlers[cmp];
-    stm32l4_exti_comp_handlers[cmp] = func;
+    oldhandler                    = g_comp_handlers[cmp].callback;
+    g_comp_handlers[cmp].callback = func;
+    g_comp_handlers[cmp].arg      = arg;
 
     /* Leave the critical section */
 
