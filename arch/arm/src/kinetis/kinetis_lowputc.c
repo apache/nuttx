@@ -222,8 +222,10 @@ void up_lowputc(char ch)
 
 void kinetis_lowsetup(void)
 {
-#ifdef HAVE_UART_DEVICE
+#if defined(HAVE_UART_DEVICE) ||defined(HAVE_LUART_DEVICE)
   uint32_t regval;
+#endif
+#ifdef HAVE_UART_DEVICE
 
   /* Enable peripheral clocking for all enabled UARTs.  Clocking for UARTs
    * 0-3 is enabled in the SCGC4 register.
