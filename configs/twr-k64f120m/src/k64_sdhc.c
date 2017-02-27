@@ -136,7 +136,7 @@ static void k64_mediachange(void)
  * Name: k64_cdinterrupt
  ****************************************************************************/
 
-static int k64_cdinterrupt(int irq, FAR void *context)
+static int k64_cdinterrupt(int irq, FAR void *context, FAR void *arg)
 {
   /* All of the work is done by k64_mediachange() */
 

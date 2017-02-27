@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/kinetis/kinetis_i2c.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author:  Matias v01d <phreakuencies@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -129,16 +129,7 @@ static void kinetis_i2c_setfrequency(struct kinetis_i2cdev_s *priv,
                                      uint32_t frequency);
 static int  kinetis_i2c_start(struct kinetis_i2cdev_s *priv);
 static void kinetis_i2c_stop(struct kinetis_i2cdev_s *priv);
-static int  kinetis_i2c_interrupt(struct kinetis_i2cdev_s *priv);
-#ifdef CONFIG_KINETIS_I2C0
-static int  kinetis_i2c0_interrupt(int irq, void *context);
-#endif
-#ifdef CONFIG_KINETIS_I2C1
-static int  kinetis_i2c1_interrupt(int irq, void *context);
-#endif
-#ifdef CONFIG_KINETIS_I2C2
-static int  kinetis_i2c2_interrupt(int irq, void *context);
-#endif
+static int kinetis_i2c_interrupt(int irq, void *context, void *arg);
 static void kinetis_i2c_timeout(int argc, uint32_t arg, ...);
 static void kinetis_i2c_setfrequency(struct kinetis_i2cdev_s *priv,
                                      uint32_t frequency);
@@ -638,13 +629,16 @@ void kinetis_i2c_nextmsg(struct kinetis_i2cdev_s *priv)
  *
  ****************************************************************************/
 
-static int kinetis_i2c_interrupt(struct kinetis_i2cdev_s *priv)
+static int kinetis_i2c0_interrupt(int irq, void *context, void *arg)
 {
+  struct kinetis_i2cdev_s *priv = (struct kinetis_i2cdev_s *)arg;
   struct i2c_msg_s *msg;
   uint32_t state;
   int regval;
   int dummy;
   UNUSED(dummy);
+
+  DEBUGASSERT(priv != NULL);
 
   /* Get current state */
 
@@ -812,38 +806,6 @@ static int kinetis_i2c_interrupt(struct kinetis_i2cdev_s *priv)
 }
 
 /****************************************************************************
- * Name: kinetis_i2cN_interrupt
- *
- * Description:
- *   The I2CN interrupt handlers
- *
- ****************************************************************************/
-
-#ifdef CONFIG_KINETIS_I2C0
-static int kinetis_i2c0_interrupt(int irq, void *context)
-{
-  i2cinfo("I2C0 Interrupt...\n");
-  return kinetis_i2c_interrupt(&g_i2c0_dev);
-}
-#endif
-
-#ifdef CONFIG_KINETIS_I2C1
-static int kinetis_i2c1_interrupt(int irq, void *context)
-{
-  i2cinfo("I2C1 Interrupt...\n");
-  return kinetis_i2c_interrupt(&g_i2c1_dev);
-}
-#endif
-
-#ifdef CONFIG_KINETIS_I2C2
-static int kinetis_i2c2_interrupt(int irq, void *context)
-{
-  i2cinfo("I2C2 Interrupt...\n");
-  return kinetis_i2c_interrupt(&g_i2c2_dev);
-}
-#endif
-
-/****************************************************************************
  * Name: kinetis_i2c_transfer
  *
  * Description:
@@ -988,7 +950,6 @@ static int kinetis_i2c_reset(struct i2c_master_s *dev)
 struct i2c_master_s *kinetis_i2cbus_initialize(int port)
 {
   struct kinetis_i2cdev_s *priv;
-  xcpt_t handler;
 
   i2cinfo("port=%d\n", port);
 
@@ -1010,8 +971,6 @@ struct i2c_master_s *kinetis_i2cbus_initialize(int port)
       priv->base     = KINETIS_I2C0_BASE;
       priv->irqid    = KINETIS_IRQ_I2C0;
       priv->basefreq = BOARD_BUS_FREQ;
-
-      handler        = kinetis_i2c0_interrupt;
 
       /* Enable clock */
 
@@ -1038,8 +997,6 @@ struct i2c_master_s *kinetis_i2cbus_initialize(int port)
       priv->irqid    = KINETIS_IRQ_I2C1;
       priv->basefreq = BOARD_BUS_FREQ;
 
-      handler        = kinetis_i2c1_interrupt;
-
       /* Enable clock */
 
       regval         = getreg32(KINETIS_SIM_SCGC4);
@@ -1064,8 +1021,6 @@ struct i2c_master_s *kinetis_i2cbus_initialize(int port)
       priv->base     = KINETIS_I2C2_BASE;
       priv->irqid    = KINETIS_IRQ_I2C2;
       priv->basefreq = BOARD_BUS_FREQ;
-
-      handler        = kinetis_i2c2_interrupt;
 
       /* Enable clock */
 
@@ -1124,7 +1079,7 @@ struct i2c_master_s *kinetis_i2cbus_initialize(int port)
 
   /* Attach Interrupt Handler */
 
-  irq_attach(priv->irqid, handler, NULL);
+  irq_attach(priv->irqid, kinetis_i2c_interrupt, priv);
 
   /* Enable Interrupt Handler */
 

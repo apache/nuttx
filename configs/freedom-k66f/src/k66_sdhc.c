@@ -140,7 +140,7 @@ static void k66_mediachange(void)
  * Name: k66_cdinterrupt
  ****************************************************************************/
 
-static int k66_cdinterrupt(int irq, FAR void *context)
+static int k66_cdinterrupt(int irq, FAR void *context, FAR void *arg)
 {
   /* All of the work is done by k66_mediachange() */
 

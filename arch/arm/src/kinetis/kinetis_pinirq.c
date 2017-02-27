@@ -142,7 +142,7 @@ static int kinetis_portinterrupt(int irq, FAR void *context,
            * interrupt handler for the pin.
            */
 
-          if (isrtab[i])
+          if (isrtab[i].handler != NULL)
             {
               xcpt_t handler = isrtab[i].handler;
               void  *arg     = isrtab[i].arg;
