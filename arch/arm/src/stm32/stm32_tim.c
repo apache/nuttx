@@ -344,8 +344,7 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
 static int stm32_tim_setcompare(FAR struct stm32_tim_dev_s *dev, uint8_t channel,
                                 uint32_t compare);
 static int stm32_tim_getcapture(FAR struct stm32_tim_dev_s *dev, uint8_t channel);
-static int stm32_tim_setisr(FAR struct stm32_tim_dev_s *dev,
-                            int (*handler)(int irq, void *context),
+static int stm32_tim_setisr(FAR struct stm32_tim_dev_s *dev, xcpt_t handler,
                             int source);
 static void stm32_tim_enableint(FAR struct stm32_tim_dev_s *dev, int source);
 static void stm32_tim_disableint(FAR struct stm32_tim_dev_s *dev, int source);
