@@ -78,7 +78,7 @@ extern "C"
  *  - fallingedge: Enables interrupt on falling edges
  *  - event:       Generate event when set
  *  - func:        When non-NULL, generate interrupt
- *  - arg:          Argument passed to the interrupt callback
+ *  - arg:         Argument passed to the interrupt callback
  *
  * Returns:
  *   The previous value of the interrupt handler function pointer.  This

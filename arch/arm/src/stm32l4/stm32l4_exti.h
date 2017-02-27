@@ -87,7 +87,7 @@ extern "C"
  ************************************************************************************/
 
 xcpt_t stm32l4_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
-                          bool event, xcpt_t func, void *arg);
+                            bool event, xcpt_t func, void *arg);
 
 /****************************************************************************
  * Name: stm32l4_exti_alarm
