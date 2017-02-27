@@ -275,7 +275,7 @@ static int sam34_interrupt(int irq, FAR void *context, FAR void *arg)
            * upon return.
            */
 
-          priv->handler(irq, context);
+          priv->handler(irq, context, NULL);
         }
 
       /* The EWI interrupt is cleared by the WDT_SR register. */

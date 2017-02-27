@@ -90,7 +90,7 @@ static int up_lcdextcominisr(int irq, void *context)
       return OK;
     }
 
-  return g_isr(irq, context);
+  return g_isr(irq, context, NULL);
 }
 
 static int up_lcdirqattach(xcpt_t isr)
