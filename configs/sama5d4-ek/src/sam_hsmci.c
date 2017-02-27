@@ -136,7 +136,7 @@ static struct sam_hsmci_state_s g_hsmci0 =
 #endif
 
 #ifdef CONFIG_SAMA5_HSMCI1
-static int sam_hsmci1_cardetect(int irq, void *regs);
+static int sam_hsmci1_cardetect(int irq, void *regs, FAR void *arg);
 
 static struct sam_hsmci_state_s g_hsmci1 =
 {
@@ -202,7 +202,7 @@ static int sam_hsmci_cardetect(struct sam_hsmci_state_s *state)
 }
 
 #ifdef CONFIG_SAMA5_HSMCI0
-static int sam_hsmci0_cardetect(int irq, void *regs, FAR void *arg)
+static int sam_hsmci0_cardetect(int irq, FAR void *regs, FAR void *arg)
 {
   int ret;
 
@@ -224,7 +224,7 @@ static int sam_hsmci0_cardetect(int irq, void *regs, FAR void *arg)
 #endif
 
 #ifdef CONFIG_SAMA5_HSMCI1
-static int sam_hsmci1_cardetect(int irq, void *regs)
+static int sam_hsmci1_cardetect(int irq, FAR void *regs, FAR void *arg)
 {
   int ret;
 
