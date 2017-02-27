@@ -66,7 +66,7 @@
 /* Interrupt handlers attached to the PVD EXTI */
 
 static xcpt_t g_pvd_callback;
-static void  *g_callback_arg
+static void  *g_callback_arg;
 
 /****************************************************************************
  * Public Data

@@ -54,7 +54,7 @@
 struct comp_callback_s
 {
   xcpt_t callback;
-  void   *arg;
+  void  *arg;
 };
 
 /****************************************************************************
