@@ -399,7 +399,7 @@ static void kinetis_shutdown(struct uart_dev_s *dev)
 
   /* Reset hardware and disable Rx and Tx */
 
-  kinetis_uartreset(priv->uartbase);
+  kinetis_lpuartreset(priv->uartbase);
 }
 
 /****************************************************************************
