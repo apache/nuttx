@@ -199,7 +199,7 @@ struct nrf24l01_config_s
    * chipenable - Enable or disable the chip  (CE line)
    */
 
-  int  (*irqattach)(xcpt_t isr);
+  int  (*irqattach)(xcpt_t isr, FAR void *arg);
   void (*chipenable)(bool enable);
 };
 
