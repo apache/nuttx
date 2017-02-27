@@ -59,7 +59,6 @@
 
 #define khci_getreg(addr)      getreg8(addr)
 #define khci_putreg(val,addr)  putreg8(val,addr)
-#define SIM_CLKDIV2_USBDIV(n)  (uint32_t)(((n) & 0x07) << 1)
 
 /************************************************************************************
  * Public Functions
