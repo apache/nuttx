@@ -1079,9 +1079,9 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
     {
 #ifdef CONFIG_DEBUG_FEATURES
 #  warning "Revisit:  How are errors enabled?"
-      priv->ie |= UART_C2_RIE;
+      priv->ie &= ~UART_C2_RIE;
 #else
-      priv->ie |= UART_C2_RIE;
+      priv->ie &= ~UART_C2_RIE;
 #endif
       up_setuartint(priv);
     }
