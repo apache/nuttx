@@ -236,12 +236,6 @@ int nrf24l01_register(FAR struct spi_dev_s *spi, FAR struct nrf24l01_config_s *c
 int nrf24l01_init(FAR struct nrf24l01_dev_s *dev);
 
 /************************************************************************************
- * Get a pointer to the registered device
- ************************************************************************************/
-
-FAR struct nrf24l01_dev_s * nrf24l01_getinstance(void);
-
-/************************************************************************************
  * Set the default TX address.
  *
  * Input Parmeters:

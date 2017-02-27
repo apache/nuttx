@@ -137,6 +137,7 @@ struct stm32_stmpe811config_s
 
   STMPE811_HANDLE handle;   /* The STMPE811 driver handle */
   xcpt_t          handler;  /* The STMPE811 interrupt handler */
+  FAR void       *arg;      /* Interrupt handler argument */
 };
 
 /****************************************************************************
@@ -152,7 +153,8 @@ struct stm32_stmpe811config_s
  * clear   - Acknowledge/clear any pending GPIO interrupt
  */
 
-static int  stmpe811_attach(FAR struct stmpe811_config_s *state, xcpt_t isr);
+static int  stmpe811_attach(FAR struct stmpe811_config_s *state, xcpt_t isr,
+                            FAR void *arg);
 static void stmpe811_enable(FAR struct stmpe811_config_s *state, bool enable);
 static void stmpe811_clear(FAR struct stmpe811_config_s *state);
 
@@ -191,6 +193,7 @@ static struct stm32_stmpe811config_s g_stmpe811config =
     .clear     = stmpe811_clear,
   },
   .handler     = NULL,
+  .arg         = NULL,
 };
 #endif
 
@@ -207,7 +210,8 @@ static struct stm32_stmpe811config_s g_stmpe811config =
  * clear   - Acknowledge/clear any pending GPIO interrupt
  */
 
-static int stmpe811_attach(FAR struct stmpe811_config_s *state, xcpt_t isr)
+static int stmpe811_attach(FAR struct stmpe811_config_s *state, xcpt_t isr,
+                           FAR void *arg)
 {
   FAR struct stm32_stmpe811config_s *priv = (FAR struct stm32_stmpe811config_s *)state;
 
@@ -217,6 +221,7 @@ static int stmpe811_attach(FAR struct stmpe811_config_s *state, xcpt_t isr)
   /* Just save the handler.  We will use it when EXTI interruptsare enabled */
 
   priv->handler = isr;
+  priv->arg     = arg;
   return OK;
 }
 

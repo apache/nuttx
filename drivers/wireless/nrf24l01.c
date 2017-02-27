@@ -185,7 +185,7 @@ static uint8_t nrf24l01_setregbit(FAR struct nrf24l01_dev_s *dev, uint8_t reg,
 
 static void nrf24l01_tostate(FAR struct nrf24l01_dev_s *dev, nrf24l01_state_t state);
 
-static int nrf24l01_irqhandler(FAR int irq, FAR void *context);
+static int nrf24l01_irqhandler(FAR int irq, FAR void *context, FAR void *arg);
 
 static inline int nrf24l01_attachirq(FAR struct nrf24l01_dev_s *dev, xcpt_t isr);
 
@@ -221,8 +221,6 @@ static int nrf24l01_poll(FAR struct file *filep, FAR struct pollfd *fds,
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-
-static FAR struct nrf24l01_dev_s *g_nrf24l01dev;
 
 static const struct file_operations nrf24l01_fops =
 {
@@ -491,9 +489,9 @@ uint8_t fifoget(struct nrf24l01_dev_s *dev, uint8_t *buffer, uint8_t buflen, uin
 
 #endif
 
-static int nrf24l01_irqhandler(int irq, FAR void *context)
+static int nrf24l01_irqhandler(int irq, FAR void *context, FAR void *arg)
 {
-  FAR struct nrf24l01_dev_s *dev = g_nrf24l01dev;
+  FAR struct nrf24l01_dev_s *dev = (FAR struct nrf24l01_dev_s *)arg;
 
   winfo("*IRQ*");
 
@@ -501,7 +499,7 @@ static int nrf24l01_irqhandler(int irq, FAR void *context)
 
   /* If RX is enabled we delegate the actual work to bottom-half handler */
 
-  work_queue(HPWORK, &g_nrf24l01dev->irq_work, nrf24l01_worker, dev, 0);
+  work_queue(HPWORK, &priv->irq_work, nrf24l01_worker, dev, 0);
 #else
 
   /* Otherwise we simply wake up the send function */
@@ -1179,9 +1177,8 @@ static int nrf24l01_unregister(FAR struct nrf24l01_dev_s *dev)
 
   nrf24l01_attachirq(dev, NULL);
 
-  g_nrf24l01dev = NULL;
-
   /* Free memory */
+
 #ifdef CONFIG_WL_NRF24L01_RXSUPPORT
   kmm_free(dev->rx_fifo);
 #endif
@@ -1244,13 +1241,9 @@ int nrf24l01_register(FAR struct spi_dev_s *spi, FAR struct nrf24l01_config_s *c
   sem_setprotocol(&dev->sem_rx, SEM_PRIO_NONE);
 #endif
 
-  /* Set the global reference */
-
-  g_nrf24l01dev = dev;
-
   /* Configure IRQ pin  (falling edge) */
 
-  nrf24l01_attachirq(dev, nrf24l01_irqhandler);
+  nrf24l01_attachirq(dev, nrf24l01_irqhandler, dev);
 
   /* Register the device as an input device */
 
@@ -1264,11 +1257,6 @@ int nrf24l01_register(FAR struct spi_dev_s *spi, FAR struct nrf24l01_config_s *c
     }
 
   return result;
-}
-
-FAR struct nrf24l01_dev_s * nrf24l01_getinstance(void)
-{
-  return g_nrf24l01dev;
 }
 
 /* (re)set the device in a default initial state */
