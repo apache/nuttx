@@ -64,7 +64,7 @@ static void btn_enable(FAR const struct btn_lowerhalf_s *lower,
                        btn_handler_t handler, FAR void *arg);
 
 static void btn_disable(void);
-static int btn_interrupt(int irq, FAR void *context);
+static int btn_interrupt(int irq, FAR void *context, FAR void *arg);
 
 /****************************************************************************
  * Private Data
@@ -203,7 +203,7 @@ static void btn_disable(void)
  *
  ****************************************************************************/
 
-static int btn_interrupt(int irq, FAR void *context)
+static int btn_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   DEBUGASSERT(g_btnhandler);
 
