@@ -629,7 +629,7 @@ void kinetis_i2c_nextmsg(struct kinetis_i2cdev_s *priv)
  *
  ****************************************************************************/
 
-static int kinetis_i2c0_interrupt(int irq, void *context, void *arg)
+static int kinetis_i2c_interrupt(int irq, void *context, void *arg)
 {
   struct kinetis_i2cdev_s *priv = (struct kinetis_i2cdev_s *)arg;
   struct i2c_msg_s *msg;
