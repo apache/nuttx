@@ -61,7 +61,7 @@
 
 struct gpio_callback_s
 {
-  xcptr_t callback;
+  xcpt_t callback;
   void   *arg;
 };
 

@@ -74,8 +74,8 @@
 
 struct gpio_callback_s
 {
-  xcptr_t callback;
-  void   *arg;
+  xcpt_t callback;
+  void  *arg;
 };
 
 /****************************************************************************
@@ -106,8 +106,8 @@ static int stm32_exti0_isr(int irq, void *context)
 
   if (g_gpio_callbacks[0].callback != NULL)
     {
-       xcptr_t callback = g_gpio_callbacks[0].callback;
-       void   *arg      = g_gpio_callbacks[0].arg;
+       xcpt_t callback = g_gpio_callbacks[0].callback;
+       void   *arg     = g_gpio_callbacks[0].arg;
 
       ret = callback(irq, context, arg);
     }
@@ -127,8 +127,8 @@ static int stm32_exti1_isr(int irq, void *context)
 
   if (g_gpio_callbacks[1].callback != NULL)
     {
-       xcptr_t callback = g_gpio_callbacks[1].callback;
-       void   *arg      = g_gpio_callbacks[1].arg;
+       xcpt_t callback = g_gpio_callbacks[1].callback;
+       void   *arg     = g_gpio_callbacks[1].arg;
 
       ret = callback(irq, context, arg);
     }
@@ -148,8 +148,8 @@ static int stm32_exti2_isr(int irq, void *context)
 
   if (g_gpio_callbacks[2].callback != NULL)
     {
-       xcptr_t callback = g_gpio_callbacks[2].callback;
-       void   *arg      = g_gpio_callbacks[2].arg;
+       xcpt_t callback = g_gpio_callbacks[2].callback;
+       void   *arg     = g_gpio_callbacks[2].arg;
 
       ret = callback(irq, context, arg);
     }
@@ -169,8 +169,8 @@ static int stm32_exti3_isr(int irq, void *context)
 
   if (g_gpio_callbacks[3].callback != NULL)
     {
-       xcptr_t callback = g_gpio_callbacks[3].callback;
-       void   *arg      = g_gpio_callbacks[3].arg;
+       xcpt_t callback = g_gpio_callbacks[3].callback;
+       void   *arg     = g_gpio_callbacks[3].arg;
 
       ret = callback(irq, context, arg);
     }
@@ -190,8 +190,8 @@ static int stm32_exti4_isr(int irq, void *context)
 
   if (g_gpio_callbacks[4].callback != NULL)
     {
-       xcptr_t callback = g_gpio_callbacks[4].callback;
-       void   *arg      = g_gpio_callbacks[4].arg;
+       xcpt_t callback = g_gpio_callbacks[4].callback;
+       void   *arg     = g_gpio_callbacks[4].arg;
 
       ret = callback(irq, context, arg);
     }
@@ -226,8 +226,8 @@ static int stm32_exti_multiisr(int irq, void *context, int first, int last)
 
           if (g_gpio_callbacks[pin].callback != NULL)
             {
-              xcptr_t callback = g_gpio_callbacks[pin].callback;
-              void   *arg      = g_gpio_callbacks[pin].arg;
+              xcpt_t callback = g_gpio_callbacks[pin].callback;
+              void   *arg     = g_gpio_callbacks[pin].arg;
               int tmp;
 
               tmp = callback(irq, context, arg);
