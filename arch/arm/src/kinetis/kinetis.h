@@ -490,6 +490,7 @@ void kinetis_pinirqinitialize(void);
  * Parameters:
  *  - pinset:  Pin configuration
  *  - pinisr:  Pin interrupt service routine
+ *  - arg:     And argument that will be provided to the interrupt service routine.
  *
  * Returns:
  *   The previous value of the interrupt handler function pointer.  This value may,
@@ -498,7 +499,7 @@ void kinetis_pinirqinitialize(void);
  *
  ************************************************************************************/
 
-xcpt_t kinetis_pinirqattach(uint32_t pinset, xcpt_t pinisr);
+xcpt_t kinetis_pinirqattach(uint32_t pinset, xcpt_t pinisr, void *arg);
 
 /************************************************************************************
  * Name: kinetis_pinirqenable

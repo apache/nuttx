@@ -73,6 +73,12 @@
  * Private Types
  ****************************************************************************/
 
+struct kinetis_pinirq_s
+{
+   xcpt_t handler;
+   void *arg;
+};
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -84,19 +90,19 @@
  */
 
 #ifdef CONFIG_KINETIS_PORTAINTS
-static xcpt_t g_portaisrs[32];
+static struct kinetis_pinirq_s g_portaisrs[32];
 #endif
 #ifdef CONFIG_KINETIS_PORTBINTS
-static xcpt_t g_portbisrs[32];
+static struct kinetis_pinirq_s g_portbisrs[32];
 #endif
 #ifdef CONFIG_KINETIS_PORTCINTS
-static xcpt_t g_portcisrs[32];
+static struct kinetis_pinirq_s g_portcisrs[32];
 #endif
 #ifdef CONFIG_KINETIS_PORTDINTS
-static xcpt_t g_portdisrs[32];
+static struct kinetis_pinirq_s g_portdisrs[32];
 #endif
 #ifdef CONFIG_KINETIS_PORTEINTS
-static xcpt_t g_porteisrs[32];
+static struct kinetis_pinirq_s g_porteisrs[32];
 #endif
 
 /****************************************************************************
@@ -113,7 +119,7 @@ static xcpt_t g_porteisrs[32];
 
 #ifdef HAVE_PORTINTS
 static int kinetis_portinterrupt(int irq, FAR void *context,
-                                uintptr_t addr, xcpt_t *isrtab)
+                                uintptr_t addr, struct kinetis_pinirq_s *isrtab)
 {
   uint32_t isfr = getreg32(addr);
   int i;
@@ -138,9 +144,12 @@ static int kinetis_portinterrupt(int irq, FAR void *context,
 
           if (isrtab[i])
             {
+              xcpt_t handler = isrtab[i].handler;
+              void  *arg     = isrtab[i].arg;
+
               /* There is a registered interrupt handler... invoke it */
 
-              (void)isrtab[i](irq, context);
+              (void)handler(irq, context, arg);
             }
 
           /* Writing a one to the ISFR register will clear the pending
@@ -263,7 +272,7 @@ void kinetis_pinirqinitialize(void)
  *
  ****************************************************************************/
 
-xcpt_t kinetis_pinirqattach(uint32_t pinset, xcpt_t pinisr)
+xcpt_t kinetis_pinirqattach(uint32_t pinset, xcpt_t pinisr, void *arg)
 {
 #ifdef HAVE_PORTINTS
   xcpt_t      *isrtab;
