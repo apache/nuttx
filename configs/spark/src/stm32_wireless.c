@@ -96,6 +96,7 @@ struct stm32_config_s
 {
   struct cc3000_config_s dev;
   xcpt_t handler;
+  void *arg;
 };
 
 /****************************************************************************

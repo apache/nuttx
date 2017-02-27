@@ -539,13 +539,13 @@ static void sam_notransfer(struct sam_dev_s *priv);
 
 static int  sam_hsmci_interrupt(struct sam_dev_s *priv);
 #ifdef CONFIG_SAMA5_HSMCI0
-static int  sam_hsmci0_interrupt(int irq, void *context);
+static int  sam_hsmci0_interrupt(int irq, void *context, void *arg);
 #endif
 #ifdef CONFIG_SAMA5_HSMCI1
-static int  sam_hsmci1_interrupt(int irq, void *context);
+static int  sam_hsmci1_interrupt(int irq, void *context, void *arg);
 #endif
 #ifdef CONFIG_SAMA5_HSMCI2
-static int  sam_hsmci2_interrupt(int irq, void *context);
+static int  sam_hsmci2_interrupt(int irq, void *context, void *arg);
 #endif
 
 /* SDIO interface methods ***************************************************/
@@ -1677,21 +1677,21 @@ static int sam_hsmci_interrupt(struct sam_dev_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_HSMCI0
-static int sam_hsmci0_interrupt(int irq, void *context)
+static int sam_hsmci0_interrupt(int irq, void *context, void *arg)
 {
   return sam_hsmci_interrupt(&g_hsmci0);
 }
 #endif
 
 #ifdef CONFIG_SAMA5_HSMCI1
-static int sam_hsmci1_interrupt(int irq, void *context)
+static int sam_hsmci1_interrupt(int irq, void *context, void *arg)
 {
   return sam_hsmci_interrupt(&g_hsmci1);
 }
 #endif
 
 #ifdef CONFIG_SAMA5_HSMCI2
-static int sam_hsmci2_interrupt(int irq, void *context)
+static int sam_hsmci2_interrupt(int irq, void *context, void *arg)
 {
   return sam_hsmci_interrupt(&g_hsmci2);
 }
@@ -1984,7 +1984,7 @@ static int sam_attach(FAR struct sdio_dev_s *dev)
 
   /* Attach the HSMCI interrupt handler */
 
-  ret = irq_attach(irq, handler, NULL);
+  ret = irq_attach(irq, handler, priv);
   if (ret == OK)
     {
 
