@@ -70,7 +70,7 @@ void up_irqinitialize(void)
    * z80sim_timer_initialize()
    */
 
-  irq_attach(Z80_IRQ_SYSTIMER, (xcpt_t)z80sim_timerisr);
+  irq_attach(Z80_IRQ_SYSTIMER, (xcpt_t)z80sim_timerisr, NULL);
 
   /* And finally, enable interrupts (including the timer) */
 

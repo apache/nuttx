@@ -492,6 +492,7 @@ bool stm32_gpioread(uint32_t pinset);
  *  - rising/falling edge: enables
  *  - event:  generate event when set
  *  - func:   when non-NULL, generate interrupt
+ *  - arg:    Argument passed to the interrupt callback
  *
  * Returns:
  *  The previous value of the interrupt handler function pointer.  This value may,
@@ -501,7 +502,7 @@ bool stm32_gpioread(uint32_t pinset);
  ************************************************************************************/
 
 xcpt_t stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
-                          bool event, xcpt_t func);
+                          bool event, xcpt_t func, void *arg);
 
 /************************************************************************************
  * Function:  stm32_dumpgpio

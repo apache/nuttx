@@ -664,7 +664,7 @@ static void skel_irqworker(void *arg)
  *
  *   NOTE: A more typical prototype for an interrupt handler would be:
  *
- *     int skel_interrupt(int irq, FAR void *context)
+ *     int skel_interrupt(int irq, FAR void *context, FAR void *arg)
  *
  *   However, it is assume that the lower half, board specific interface
  *   can provide intercept the actual interrupt, and call this function with

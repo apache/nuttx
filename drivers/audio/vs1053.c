@@ -217,13 +217,6 @@ static const struct audio_ops_s g_audioops =
   vs1053_release        /* release        */
 };
 
-/* ISR context pointers */
-
-static struct vs1053_struct_s *g_isrdata[CONFIG_VS1053_DEVICE_COUNT] =
-{
-  NULL,
-};
-
 /* Volume control log table.  This table is in increments of 2% of
  * requested volume level and is the register value that should be
  * programmed to the VS1053 to achieve that volume pecentage.
@@ -1215,32 +1208,12 @@ err_out:
  *
  ****************************************************************************/
 
-static int vs1053_dreq_isr(int irq, FAR void *context)
+static int vs1053_dreq_isr(int irq, FAR void *context, FAR void *arg)
 {
-  struct vs1053_struct_s *dev = NULL;
+  struct vs1053_struct_s *dev = (struct vs1053_struct_s *)arg;
   struct audio_msg_s      msg;
 
-  /* Get the driver context */
-
-#if CONFIG_VS1053_DEVICE_COUNT == 1
-  dev = g_isrdata[0];       /* Simple case */
-#else
-  /* More complex case */
-  {
-    int x;
-
-    for (x = 0; x < CONFIG_VS1053_DEVICE_COUNT; x++)
-      {
-        if (g_isrdata[x]->hw_lower->irq == irq)
-          {
-            dev = g_isrdata[x];
-            break;
-          }
-      }
-
-    DEBUGASSERT(dev);
-  }
-#endif
+  DEBUGASSERT(dev != NULL);
 
   /* Now create a message and send it to the workerthread */
 
@@ -1909,33 +1882,10 @@ struct audio_lowerhalf_s *vs1053_initialize(FAR struct spi_dev_s *spi,
         }
 
       /* Attach our ISR to this device */
-      dev->hw_lower->attach(dev->hw_lower, vs1053_dreq_isr);
 
-      /* Find a slot to save the device context for ISR lookup */
+      dev->hw_lower->attach(dev->hw_lower, vs1053_dreq_isr, dev);
 
-#if CONFIG_VS1053_DEVICE_COUNT == 1
-      g_isrdata[0] = dev;         /* The simple case */
-#else
-      /* The more complex case */
-      {
-        int   x;
-
-        /* Initialize the ISR data if not alrady */
-
-        for (x = 0; x < CONFIG_VS1053_DEVICE_COUNT; x++)
-          {
-            /* Find an empty slot */
-
-            if (g_isrdata[x] == NULL)
-              {
-                g_isrdata[x] = dev;
-                break;
-              }
-          }
-      }
-#endif
-
-        /* Do some initialization of the codec */
+      /* Do some initialization of the codec */
 
       vs1053_shutdown(&dev->lower);                   /* Go to shutdown state */
     }

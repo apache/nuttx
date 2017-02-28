@@ -759,7 +759,7 @@ uint32_t *arm_decodeirq(uint32_t *regs);
  ****************************************************************************/
 
 #ifdef CONFIG_SMP
-int arm_start_handler(int irq, FAR void *context);
+int arm_start_handler(int irq, FAR void *context, FAR void *arg);
 #endif
 
 /****************************************************************************
@@ -783,7 +783,7 @@ int arm_start_handler(int irq, FAR void *context);
  ****************************************************************************/
 
 #ifdef CONFIG_SMP
-int arm_pause_handler(int irq, FAR void *context);
+int arm_pause_handler(int irq, FAR void *context, FAR void *arg);
 #endif
 
 /****************************************************************************

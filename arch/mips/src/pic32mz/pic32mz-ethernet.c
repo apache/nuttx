@@ -422,7 +422,7 @@ static void pic32mz_rxdone(struct pic32mz_driver_s *priv);
 static void pic32mz_txdone(struct pic32mz_driver_s *priv);
 
 static void pic32mz_interrupt_work(void *arg);
-static int  pic32mz_interrupt(int irq, void *context);
+static int  pic32mz_interrupt(int irq, void *context, FAR void *arg);
 
 /* Watchdog timer expirations */
 
@@ -1880,7 +1880,7 @@ static void pic32mz_interrupt_work(void *arg)
  *
  ****************************************************************************/
 
-static int pic32mz_interrupt(int irq, void *context)
+static int pic32mz_interrupt(int irq, void *context, FAR void *arg)
 {
   struct pic32mz_driver_s *priv;
   uint32_t status;
@@ -3427,9 +3427,9 @@ static inline int pic32mz_ethinitialize(int intf)
   /* Attach the IRQ to the driver */
 
 #if CONFIG_PIC32MZ_NINTERFACES > 1
-  ret = irq_attach(priv->pd_irq, pic32mz_interrupt);
+  ret = irq_attach(priv->pd_irq, pic32mz_interrupt, NULL);
 #else
-  ret = irq_attach(PIC32MZ_IRQ_ETH, pic32mz_interrupt);
+  ret = irq_attach(PIC32MZ_IRQ_ETH, pic32mz_interrupt, NULL);
 #endif
   if (ret != 0)
     {

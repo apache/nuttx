@@ -271,7 +271,7 @@ static void kinetis_endtransfer(struct kinetis_dev_s *priv, sdio_eventset_t wkup
 
 /* Interrupt Handling *******************************************************/
 
-static int  kinetis_interrupt(int irq, void *context);
+static int  kinetis_interrupt(int irq, void *context, FAR void *arg);
 
 /* SDIO interface methods ***************************************************/
 
@@ -1065,7 +1065,7 @@ static void kinetis_endtransfer(struct kinetis_dev_s *priv, sdio_eventset_t wkup
  *
  ****************************************************************************/
 
-static int kinetis_interrupt(int irq, void *context)
+static int kinetis_interrupt(int irq, void *context, FAR void *arg)
 {
   struct kinetis_dev_s *priv = &g_sdhcdev;
   uint32_t enabled;
@@ -1681,7 +1681,7 @@ static int kinetis_attach(FAR struct sdio_dev_s *dev)
 
   /* Attach the SDIO interrupt handler */
 
-  ret = irq_attach(KINETIS_IRQ_SDHC, kinetis_interrupt);
+  ret = irq_attach(KINETIS_IRQ_SDHC, kinetis_interrupt, NULL);
   if (ret == OK)
     {
 

@@ -142,7 +142,7 @@ static void ssp_cdirqsetup(int irq, xcpt_t irqhandler)
     {
       /* Attach then enable the new interrupt handler */
 
-      (void)irq_attach(irq, irqhandler);
+      (void)irq_attach(irq, irqhandler, NULL);
       up_enable_irq(irq);
     }
   else

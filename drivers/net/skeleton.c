@@ -157,7 +157,7 @@ static void skel_receive(FAR struct skel_driver_s *priv);
 static void skel_txdone(FAR struct skel_driver_s *priv);
 
 static void skel_interrupt_work(FAR void *arg);
-static int  skel_interrupt(int irq, FAR void *context);
+static int  skel_interrupt(int irq, FAR void *context, FAR void *arg);
 
 /* Watchdog timer expirations */
 
@@ -566,7 +566,7 @@ static void skel_interrupt_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static int skel_interrupt(int irq, FAR void *context)
+static int skel_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct skel_driver_s *priv = &g_skel[0];
 
@@ -1115,7 +1115,7 @@ int skel_initialize(int intf)
 
   /* Attach the IRQ to the driver */
 
-  if (irq_attach(CONFIG_skeleton_IRQ, skel_interrupt))
+  if (irq_attach(CONFIG_skeleton_IRQ, skel_interrupt, NULL))
     {
       /* We could not attach the ISR to the interrupt */
 

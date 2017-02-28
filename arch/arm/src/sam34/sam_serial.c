@@ -370,7 +370,7 @@ static int  up_setup(struct uart_dev_s *dev);
 static void up_shutdown(struct uart_dev_s *dev);
 static int  up_attach(struct uart_dev_s *dev);
 static void up_detach(struct uart_dev_s *dev);
-static int  up_interrupt(int irq, void *context);
+static int  up_interrupt(int irq, void *context, void *arg);
 static int  up_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int  up_receive(struct uart_dev_s *dev, uint32_t *status);
 static void up_rxint(struct uart_dev_s *dev, bool enable);
@@ -872,7 +872,7 @@ static int up_attach(struct uart_dev_s *dev)
 
   /* Attach and enable the IRQ */
 
-  ret = irq_attach(priv->irq, up_interrupt);
+  ret = irq_attach(priv->irq, up_interrupt, dev);
   if (ret == OK)
     {
       /* Enable the interrupt (RX and TX interrupts are still disabled
@@ -913,61 +913,16 @@ static void up_detach(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static int up_interrupt(int irq, void *context)
+static int up_interrupt(int irq, void *context, void *arg)
 {
-  struct uart_dev_s *dev = NULL;
+  struct uart_dev_s *dev = (struct uart_dev_s *)arg;
   struct up_dev_s   *priv;
   uint32_t           pending;
   uint32_t           imr;
   int                passes;
   bool               handled;
 
-#ifdef CONFIG_SAM34_UART0
-  if (g_uart0priv.irq == irq)
-    {
-      dev = &g_uart0port;
-    }
-  else
-#endif
-#ifdef CONFIG_SAM34_UART1
-  if (g_uart1priv.irq == irq)
-    {
-      dev = &g_uart1port;
-    }
-  else
-#endif
-#ifdef CONFIG_SAM34_USART0
-  if (g_usart0priv.irq == irq)
-    {
-      dev = &g_usart0port;
-    }
-  else
-#endif
-#ifdef CONFIG_SAM34_USART1
-  if (g_usart1priv.irq == irq)
-    {
-      dev = &g_usart1port;
-    }
-  else
-#endif
-#ifdef CONFIG_SAM34_USART2
-  if (g_usart2priv.irq == irq)
-    {
-      dev = &g_usart2port;
-    }
-  else
-#endif
-#ifdef CONFIG_SAM34_USART3
-  if (g_usart3priv.irq == irq)
-    {
-      dev = &g_usart3port;
-    }
-  else
-#endif
-    {
-      PANIC();
-    }
-
+  DEBUGASSERT(dev != NULL && dev->priv != NULL);
   priv = (struct up_dev_s *)dev->priv;
 
   /* Loop until there are no characters to be transferred or, until we have

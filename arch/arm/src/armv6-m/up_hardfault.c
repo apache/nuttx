@@ -75,7 +75,7 @@
  *
  ****************************************************************************/
 
-int up_hardfault(int irq, FAR void *context)
+int up_hardfault(int irq, FAR void *context, FAR void *arg)
 {
   uint32_t *regs = (uint32_t *)context;
 
@@ -115,7 +115,7 @@ int up_hardfault(int irq, FAR void *context)
       if (insn == INSN_SVC0)
         {
           hfinfo("Forward SVCall\n");
-          return up_svcall(irq, context);
+          return up_svcall(irq, context, NULL);
         }
     }
 

@@ -347,7 +347,7 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
       sam_gpioirq(pinset);
 
       phyinfo("Attach IRQ%d\n", irq);
-      (void)irq_attach(irq, handler);
+      (void)irq_attach(irq, handler, NULL);
     }
   else
     {

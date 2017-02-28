@@ -87,7 +87,7 @@
 #ifdef CONFIG_VECTORED_INTERRUPTS
 static int lpc214x_timerisr(uint32_t *regs)
 #else
-static int lpc214x_timerisr(int irq, uint32_t *regs)
+static int lpc214x_timerisr(int irq, uint32_t *regs, void *arg)
 #endif
 {
   /* Process timer interrupt */
@@ -157,7 +157,7 @@ void arm_timer_initialize(void)
   up_attach_vector(LPC214X_IRQ_SYSTIMER, LPC214X_SYSTIMER_VEC,
                    (vic_vector_t)lpc214x_timerisr);
 #else
-  (void)irq_attach(LPC214X_IRQ_SYSTIMER, (xcpt_t)lpc214x_timerisr);
+  (void)irq_attach(LPC214X_IRQ_SYSTIMER, (xcpt_t)lpc214x_timerisr, NULL);
 #endif
 
   /* And enable the timer interrupt */

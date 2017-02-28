@@ -82,7 +82,7 @@
  *
  ****************************************************************************/
 
-static int c5471_timerisr(int irq, uint32_t *regs)
+static int c5471_timerisr(int irq, uint32_t *regs, FAR void *arg)
 {
   /* Process timer interrupt */
 
@@ -118,6 +118,6 @@ void arm_timer_initialize(void)
 
   /* Attach and enable the timer interrupt */
 
-  irq_attach(C5471_IRQ_SYSTIMER, (xcpt_t)c5471_timerisr);
+  irq_attach(C5471_IRQ_SYSTIMER, (xcpt_t)c5471_timerisr, NULL);
   up_enable_irq(C5471_IRQ_SYSTIMER);
 }

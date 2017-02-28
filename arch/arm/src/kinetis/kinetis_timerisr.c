@@ -90,7 +90,7 @@
  *
  ****************************************************************************/
 
-static int kinetis_timerisr(int irq, uint32_t *regs)
+static int kinetis_timerisr(int irq, uint32_t *regs, FAR void *arg)
 {
   /* Process timer interrupt */
 
@@ -139,7 +139,7 @@ void arm_timer_initialize(void)
 
   /* Attach the timer interrupt vector */
 
-  (void)irq_attach(KINETIS_IRQ_SYSTICK, (xcpt_t)kinetis_timerisr);
+  (void)irq_attach(KINETIS_IRQ_SYSTICK, (xcpt_t)kinetis_timerisr, NULL);
 
   /* Enable SysTick interrupts */
 

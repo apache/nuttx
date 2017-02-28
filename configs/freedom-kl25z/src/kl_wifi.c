@@ -121,7 +121,8 @@ struct kl_config_s
  *   probe            - Debug support
  */
 
-static int  wl_attach_irq(FAR struct cc3000_config_s *state, xcpt_t handler);
+static int  wl_attach_irq(FAR struct cc3000_config_s *state, xcpt_t handler,
+                          FAR void *arg);
 static void wl_enable_irq(FAR struct cc3000_config_s *state, bool enable);
 static void wl_clear_irq(FAR struct cc3000_config_s *state);
 static void wl_select(FAR struct cc3000_config_s *state, bool enable);
@@ -160,6 +161,7 @@ static struct kl_config_s g_cc3000_info =
   .dev.probe            = probe, /* This is used for debugging */
 #endif
   .handler              = NULL,
+  .arg                  = NULL,
 };
 
 /****************************************************************************
@@ -182,13 +184,15 @@ static struct kl_config_s g_cc3000_info =
  *   probe            - Debug support
  */
 
-static int wl_attach_irq(FAR struct cc3000_config_s *state, xcpt_t handler)
+static int wl_attach_irq(FAR struct cc3000_config_s *state, xcpt_t handler,
+                         FAR void *arg)
 {
   FAR struct kl_config_s *priv = (FAR struct kl_config_s *)state;
 
   /* Just save the handler for use when the interrupt is enabled */
 
   priv->handler = handler;
+  priv->arg     = arg;
   return OK;
 }
 

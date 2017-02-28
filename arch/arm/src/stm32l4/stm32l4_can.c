@@ -163,9 +163,9 @@ static bool stm32l4can_txempty(FAR struct can_dev_s *dev);
 /* CAN interrupt handling */
 
 static int  stm32l4can_rxinterrupt(int irq, FAR void *context, int rxmb);
-static int  stm32l4can_rx0interrupt(int irq, FAR void *context);
-static int  stm32l4can_rx1interrupt(int irq, FAR void *context);
-static int  stm32l4can_txinterrupt(int irq, FAR void *context);
+static int  stm32l4can_rx0interrupt(int irq, FAR void *context, FAR void *arg);
+static int  stm32l4can_rx1interrupt(int irq, FAR void *context, FAR void *arg);
+static int  stm32l4can_txinterrupt(int irq, FAR void *context, FAR void *arg);
 
 /* Initialization */
 
@@ -627,7 +627,7 @@ static int stm32l4can_setup(FAR struct can_dev_s *dev)
    * The others are not used.
    */
 
-  ret = irq_attach(priv->canrx[0], stm32l4can_rx0interrupt);
+  ret = irq_attach(priv->canrx[0], stm32l4can_rx0interrupt, NULL);
   if (ret < 0)
     {
       canerr("ERROR: Failed to attach CAN%d RX0 IRQ (%d)",
@@ -635,7 +635,7 @@ static int stm32l4can_setup(FAR struct can_dev_s *dev)
       return ret;
     }
 
-  ret = irq_attach(priv->canrx[1], stm32l4can_rx1interrupt);
+  ret = irq_attach(priv->canrx[1], stm32l4can_rx1interrupt, NULL);
   if (ret < 0)
     {
       canerr("ERROR: Failed to attach CAN%d RX1 IRQ (%d)",
@@ -643,7 +643,7 @@ static int stm32l4can_setup(FAR struct can_dev_s *dev)
       return ret;
     }
 
-  ret = irq_attach(priv->cantx, stm32l4can_txinterrupt);
+  ret = irq_attach(priv->cantx, stm32l4can_txinterrupt, NULL);
   if (ret < 0)
     {
       canerr("ERROR: Failed to attach CAN%d TX IRQ (%d)",
@@ -1462,7 +1462,7 @@ errout:
  *
  ****************************************************************************/
 
-static int stm32l4can_rx0interrupt(int irq, FAR void *context)
+static int stm32l4can_rx0interrupt(int irq, FAR void *context, FAR void *arg)
 {
   return stm32l4can_rxinterrupt(irq, context, 0);
 }
@@ -1482,7 +1482,7 @@ static int stm32l4can_rx0interrupt(int irq, FAR void *context)
  *
  ****************************************************************************/
 
-static int stm32l4can_rx1interrupt(int irq, FAR void *context)
+static int stm32l4can_rx1interrupt(int irq, FAR void *context, FAR void *arg)
 {
   return stm32l4can_rxinterrupt(irq, context, 1);
 }
@@ -1502,7 +1502,7 @@ static int stm32l4can_rx1interrupt(int irq, FAR void *context)
  *
  ****************************************************************************/
 
-static int stm32l4can_txinterrupt(int irq, FAR void *context)
+static int stm32l4can_txinterrupt(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct can_dev_s *dev = NULL;
   FAR struct stm32l4_can_s *priv;

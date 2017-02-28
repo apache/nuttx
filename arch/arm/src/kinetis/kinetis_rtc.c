@@ -172,7 +172,7 @@ static void rtc_dumptime(FAR struct tm *tp, FAR const char *msg)
  ****************************************************************************/
 
 #if defined(CONFIG_RTC_ALARM)
-static int kinetis_rtc_interrupt(int irq, void *context)
+static int kinetis_rtc_interrupt(int irq, void *context, FAR void *arg)
 {
  uint16_t rtc_sr;
 
@@ -279,7 +279,7 @@ int up_rtc_irq_attach(void)
        * KINETIS_IRQ_RTCS is a separate interrupt for seconds if needed
        */
 
-      irq_attach(KINETIS_IRQ_RTC, kinetis_rtc_interrupt);
+      irq_attach(KINETIS_IRQ_RTC, kinetis_rtc_interrupt, NULL);
       up_enable_irq(KINETIS_IRQ_RTC);
     }
 

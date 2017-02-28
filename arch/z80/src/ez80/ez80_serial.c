@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z80/src/ez08/ez80_serial.c
  *
- *   Copyright (C) 2008-2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -85,7 +85,7 @@ static int  ez80_setup(struct uart_dev_s *dev);
 static void ez80_shutdown(struct uart_dev_s *dev);
 static int  ez80_attach(struct uart_dev_s *dev);
 static void ez80_detach(struct uart_dev_s *dev);
-static int  ez80_interrupt(int irq, void *context);
+static int  ez80_interrupt(int irq, void *context, void *arg);
 static int  ez80_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int  ez80_receive(struct uart_dev_s *dev, unsigned int *status);
 static void ez80_rxint(struct uart_dev_s *dev, bool enable);
@@ -438,7 +438,7 @@ static int ez80_attach(struct uart_dev_s *dev)
 
   /* Attach the IRQ */
 
-  return irq_attach(priv->irq, ez80_interrupt);
+  return irq_attach(priv->irq, ez80_interrupt, dev);
 }
 
 /****************************************************************************
@@ -471,29 +471,13 @@ static void ez80_detach(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static int ez80_interrupt(int irq, void *context)
+static int ez80_interrupt(int irq, void *context, void *arg)
 {
-  struct uart_dev_s *dev = NULL;
-  struct ez80_dev_s   *priv;
+  struct uart_dev_s *dev = (struct uart_dev_s *)arg;
+  struct ez80_dev_s *priv;
   volatile uint32_t  cause;
 
-#ifdef CONFIG_EZ80_UART0
-  if (g_uart0priv.irq == irq)
-    {
-      dev = &g_uart0port;
-    }
-  else
-#endif
-#ifdef CONFIG_EZ80_UART1
-  if (g_uart1priv.irq == irq)
-    {
-      dev = &g_uart1port;
-    }
-  else
-#endif
-    {
-      PANIC();
-    }
+  DEBUGASSERT(dev != NULL && dev->priv != NULL);
   priv = (struct ez80_dev_s*)dev->priv;
 
   cause = ez80_serialin(priv, EZ80_UART_IIR) & EZ80_UARTIIR_CAUSEMASK;

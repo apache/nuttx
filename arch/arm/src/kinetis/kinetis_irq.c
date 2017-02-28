@@ -170,7 +170,7 @@ static void kinetis_dumpnvic(const char *msg, int irq)
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_FEATURES
-static int kinetis_nmi(int irq, FAR void *context)
+static int kinetis_nmi(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
   _err("PANIC!!! NMI received\n");
@@ -178,7 +178,7 @@ static int kinetis_nmi(int irq, FAR void *context)
   return 0;
 }
 
-static int kinetis_busfault(int irq, FAR void *context)
+static int kinetis_busfault(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
   _err("PANIC!!! Bus fault recived\n");
@@ -186,7 +186,7 @@ static int kinetis_busfault(int irq, FAR void *context)
   return 0;
 }
 
-static int kinetis_usagefault(int irq, FAR void *context)
+static int kinetis_usagefault(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
   _err("PANIC!!! Usage fault received\n");
@@ -194,7 +194,7 @@ static int kinetis_usagefault(int irq, FAR void *context)
   return 0;
 }
 
-static int kinetis_pendsv(int irq, FAR void *context)
+static int kinetis_pendsv(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
   _err("PANIC!!! PendSV received\n");
@@ -202,7 +202,7 @@ static int kinetis_pendsv(int irq, FAR void *context)
   return 0;
 }
 
-static int kinetis_dbgmonitor(int irq, FAR void *context)
+static int kinetis_dbgmonitor(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
   _err("PANIC!!! Debug Monitor received\n");
@@ -210,7 +210,7 @@ static int kinetis_dbgmonitor(int irq, FAR void *context)
   return 0;
 }
 
-static int kinetis_reserved(int irq, FAR void *context)
+static int kinetis_reserved(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
   _err("PANIC!!! Reserved interrupt\n");
@@ -398,8 +398,8 @@ void up_irqinitialize(void)
    * under certain conditions.
    */
 
-  irq_attach(KINETIS_IRQ_SVCALL, up_svcall);
-  irq_attach(KINETIS_IRQ_HARDFAULT, up_hardfault);
+  irq_attach(KINETIS_IRQ_SVCALL, up_svcall, NULL);
+  irq_attach(KINETIS_IRQ_HARDFAULT, up_hardfault, NULL);
 
   /* Set the priority of the SVCall interrupt */
 
@@ -415,22 +415,22 @@ void up_irqinitialize(void)
    */
 
 #ifdef CONFIG_ARM_MPU
-  irq_attach(KINETIS_IRQ_MEMFAULT, up_memfault);
+  irq_attach(KINETIS_IRQ_MEMFAULT, up_memfault, NULL);
   up_enable_irq(KINETIS_IRQ_MEMFAULT);
 #endif
 
   /* Attach all other processor exceptions (except reset and sys tick) */
 
 #ifdef CONFIG_DEBUG_FEATURES
-  irq_attach(KINETIS_IRQ_NMI, kinetis_nmi);
+  irq_attach(KINETIS_IRQ_NMI, kinetis_nmi, NULL);
 #ifndef CONFIG_ARM_MPU
-  irq_attach(KINETIS_IRQ_MEMFAULT, up_memfault);
+  irq_attach(KINETIS_IRQ_MEMFAULT, up_memfault, NULL);
 #endif
-  irq_attach(KINETIS_IRQ_BUSFAULT, kinetis_busfault);
-  irq_attach(KINETIS_IRQ_USAGEFAULT, kinetis_usagefault);
-  irq_attach(KINETIS_IRQ_PENDSV, kinetis_pendsv);
-  irq_attach(KINETIS_IRQ_DBGMONITOR, kinetis_dbgmonitor);
-  irq_attach(KINETIS_IRQ_RESERVED, kinetis_reserved);
+  irq_attach(KINETIS_IRQ_BUSFAULT, kinetis_busfault, NULL);
+  irq_attach(KINETIS_IRQ_USAGEFAULT, kinetis_usagefault, NULL);
+  irq_attach(KINETIS_IRQ_PENDSV, kinetis_pendsv, NULL);
+  irq_attach(KINETIS_IRQ_DBGMONITOR, kinetis_dbgmonitor, NULL);
+  irq_attach(KINETIS_IRQ_RESERVED, kinetis_reserved, NULL);
 #endif
 
   kinetis_dumpnvic("initial", NR_IRQS);

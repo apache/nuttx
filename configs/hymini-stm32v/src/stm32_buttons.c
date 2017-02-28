@@ -128,7 +128,7 @@ uint8_t board_buttons(void)
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_IRQBUTTONS
-xcpt_t board_button_irq(int id, xcpt_t irqhandler)
+xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
   {
     xcpt_t oldhandler = NULL;
     uint32_t pinset = GPIO_BTN_KEYA;
@@ -139,8 +139,10 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
       }
     if (id < 2)
       {
-        oldhandler = stm32_gpiosetevent(pinset, true, true, true, irqhandler);
+        oldhandler = stm32_gpiosetevent(pinset, true, true, true,
+                                        irqhandler, arg);
       }
+
     return oldhandler;
   }
 #endif

@@ -77,7 +77,7 @@
  *
  ****************************************************************************/
 
-int up_memfault(int irq, FAR void *context)
+int up_memfault(int irq, FAR void *context, FAR void *arg)
 {
   /* Dump some memory management fault info */
 

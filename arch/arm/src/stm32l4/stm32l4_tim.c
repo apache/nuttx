@@ -1239,7 +1239,7 @@ static int stm32l4_tim_setisr(FAR struct stm32l4_tim_dev_s *dev,
 
   /* Otherwise set callback and enable interrupt */
 
-  irq_attach(vectorno, handler);
+  irq_attach(vectorno, handler, NULL);
   up_enable_irq(vectorno);
 
 #ifdef CONFIG_ARCH_IRQPRIO

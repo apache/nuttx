@@ -107,7 +107,7 @@ static void ajoy_enable(FAR const struct ajoy_lowerhalf_s *lower,
                          ajoy_handler_t handler, FAR void *arg);
 
 static void ajoy_disable(void);
-static int ajoy_interrupt(int irq, FAR void *context);
+static int ajoy_interrupt(int irq, FAR void *context, FAR void *arg);
 
 /****************************************************************************
  * Private Data
@@ -377,7 +377,7 @@ static void ajoy_disable(void)
  *
  ****************************************************************************/
 
-static int ajoy_interrupt(int irq, FAR void *context)
+static int ajoy_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   DEBUGASSERT(g_ajoyhandler);
   if (g_ajoyhandler)
@@ -442,7 +442,7 @@ int sam_ajoy_initialization(void)
        */
 
       sam_pioirq(g_joypio[i]);
-      (void)irq_attach(g_joyirq[i], ajoy_interrupt);
+      (void)irq_attach(g_joyirq[i], ajoy_interrupt, NULL);
       sam_pioirqdisable(g_joyirq[i]);
     }
 

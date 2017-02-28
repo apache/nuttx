@@ -841,7 +841,6 @@ struct sam_config_s
 {
   gpio_pinset_t rxpinset;   /* RX pin configuration */
   gpio_pinset_t txpinset;   /* TX pin configuration */
-  xcpt_t handler;           /* MCAN common interrupt handler */
   uintptr_t base;           /* Base address of the MCAN registers */
   uint32_t baud;            /* Configured baud */
   uint32_t btp;             /* Bit timing/prescaler register setting */
@@ -973,13 +972,7 @@ static void mcan_error(FAR struct can_dev_s *dev, uint32_t status,
 #endif
 static void mcan_receive(FAR struct can_dev_s *dev,
               FAR uint32_t *rxbuffer, unsigned long nwords);
-static void mcan_interrupt(FAR struct can_dev_s *dev);
-#ifdef CONFIG_SAMV7_MCAN0
-static int  mcan0_interrupt(int irq, void *context);
-#endif
-#ifdef CONFIG_SAMV7_MCAN1
-static int  mcan1_interrupt(int irq, void *context);
-#endif
+static int  mcan_interrupt(int irq, void *context, FAR void *arg);
 
 /* Hardware initialization */
 
@@ -1019,7 +1012,6 @@ static const struct sam_config_s g_mcan0const =
 {
   .rxpinset         = GPIO_MCAN0_RX,
   .txpinset         = GPIO_MCAN0_TX,
-  .handler          = mcan0_interrupt,
   .base             = SAM_MCAN0_BASE,
   .baud             = CONFIG_SAMV7_MCAN0_BITRATE,
   .btp              = MCAN_BTP_BRP(MCAN0_BRP) | MCAN_BTP_TSEG1(MCAN0_TSEG1) |
@@ -1096,7 +1088,6 @@ static const struct sam_config_s g_mcan1const =
 {
   .rxpinset         = GPIO_MCAN1_RX,
   .txpinset         = GPIO_MCAN1_TX,
-  .handler          = mcan1_interrupt,
   .base             = SAM_MCAN1_BASE,
   .baud             = CONFIG_SAMV7_MCAN1_BITRATE,
   .btp              = MCAN_BTP_BRP(MCAN1_BRP) | MCAN_BTP_TSEG1(MCAN1_TSEG1) |
@@ -2340,7 +2331,7 @@ static int mcan_setup(FAR struct can_dev_s *dev)
 
   /* Attach the MCAN interrupt handlers */
 
-  ret = irq_attach(config->irq0, config->handler);
+  ret = irq_attach(config->irq0, mcan_interrupt, dev);
   if (ret < 0)
     {
       canerr("ERROR: Failed to attach MCAN%d line 0 IRQ (%d)",
@@ -2348,7 +2339,7 @@ static int mcan_setup(FAR struct can_dev_s *dev)
       return ret;
     }
 
-  ret = irq_attach(config->irq1, config->handler);
+  ret = irq_attach(config->irq1, mcan_interrupt, dev);
   if (ret < 0)
     {
       canerr("ERROR: Failed to attach MCAN%d line 1 IRQ (%d)",
@@ -3378,9 +3369,10 @@ static void mcan_receive(FAR struct can_dev_s *dev, FAR uint32_t *rxbuffer,
  *
  ****************************************************************************/
 
-static void mcan_interrupt(FAR struct can_dev_s *dev)
+static int mcan_interrupt(int irq, void *context, FAR void *arg)
 {
-  FAR struct sam_mcan_s *priv = dev->cd_priv;
+  FAR struct can_dev_s *dev = (FAR struct can_dev_s *)arg;
+  FAR struct sam_mcan_s *priv;
   FAR const struct sam_config_s *config;
   uint32_t ir;
   uint32_t ie;
@@ -3390,6 +3382,8 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
   unsigned int ndx;
   bool handled;
 
+  DEBUGASSERT(dev != NULL);
+  priv = dev->cd_priv;
   DEBUGASSERT(priv && priv->config);
   config = priv->config;
 
@@ -3674,52 +3668,6 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
     }
   while (handled);
 }
-
-/****************************************************************************
- * Name: mcan0_interrupt
- *
- * Description:
- *   MCAN0 interrupt handler
- *
- * Input Parameters:
- *   irq     - The IRQ number of the interrupt.
- *   context - The register state save array at the time of the interrupt.
- *
- * Returned Value:
- *   Zero on success; a negated errno on failure
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SAMV7_MCAN0
-static int mcan0_interrupt(int irq, void *context)
-{
-  mcan_interrupt(&g_mcan0dev);
-  return OK;
-}
-#endif
-
-/****************************************************************************
- * Name: mcan1_interrupt
- *
- * Description:
- *   MCAN1 interrupt handler
- *
- * Input Parameters:
- *   irq     - The IRQ number of the interrupt.
- *   context - The register state save array at the time of the interrupt.
- *
- * Returned Value:
- *   Zero on success; a negated errno on failure
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SAMV7_MCAN1
-static int mcan1_interrupt(int irq, void *context)
-{
-  mcan_interrupt(&g_mcan1dev);
-  return OK;
-}
-#endif
 
 /****************************************************************************
  * Name: mcan_hw_initialize

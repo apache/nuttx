@@ -114,7 +114,7 @@ int stm32_lm75initialize(FAR const char *devpath)
 
 xcpt_t stm32_lm75attach(xcpt_t irqhandler)
 {
-  return stm32_gpiosetevent(GPIO_LM75_OSINT, true, true, true, irqhandler);
+  return stm32_gpiosetevent(GPIO_LM75_OSINT, true, true, true, irqhandler, NULL);
 }
 
 #endif /* CONFIG_I2C && CONFIG_I2C_LM75 && CONFIG_STM32_I2C1 */

@@ -415,7 +415,7 @@ static void        lpc43_ep0complete(struct lpc43_usbdev_s *priv, uint8_t epphy)
 static void        lpc43_ep0nak(struct lpc43_usbdev_s *priv, uint8_t epphy);
 static bool        lpc43_epcomplete(struct lpc43_usbdev_s *priv, uint8_t epphy);
 
-static int         lpc43_usbinterrupt(int irq, FAR void *context);
+static int         lpc43_usbinterrupt(int irq, FAR void *context, FAR void *arg);
 
 /* Endpoint operations *********************************************************/
 
@@ -1766,7 +1766,7 @@ bool lpc43_epcomplete(struct lpc43_usbdev_s *priv, uint8_t epphy)
  *
  ****************************************************************************/
 
-static int lpc43_usbinterrupt(int irq, FAR void *context)
+static int lpc43_usbinterrupt(int irq, FAR void *context, FAR void *arg)
 {
   struct lpc43_usbdev_s *priv = &g_usbdev;
   uint32_t disr, portsc1, n;
@@ -2722,7 +2722,7 @@ void up_usbinitialize(void)
 
   /* Attach USB controller interrupt handler */
 
-  irq_attach(LPC43M4_IRQ_USB0, lpc43_usbinterrupt);
+  irq_attach(LPC43M4_IRQ_USB0, lpc43_usbinterrupt, NULL);
   up_enable_irq(LPC43M4_IRQ_USB0);
 
   leave_critical_section(flags);

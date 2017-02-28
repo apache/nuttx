@@ -88,7 +88,7 @@
  *
  ****************************************************************************/
 
-static int sam_timerisr(int irq, uint32_t *regs)
+static int sam_timerisr(int irq, uint32_t *regs, void *arg)
 {
   /* "When CPIV and PICNT values are obtained by reading the Periodic
    *  Interval Value Register (PIT_PIVR), the overflow counter (PICNT) is
@@ -136,7 +136,7 @@ void arm_timer_initialize(void)
 
   /* Attach the timer interrupt vector */
 
-  (void)irq_attach(SAM_IRQ_PIT, (xcpt_t)sam_timerisr);
+  (void)irq_attach(SAM_IRQ_PIT, (xcpt_t)sam_timerisr, NULL);
 
   /* Set the PIT overflow value (PIV), enable the PIT, and enable
    * interrupts from the PIT.

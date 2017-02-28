@@ -267,7 +267,7 @@ static int tsc_attach(FAR struct ads7843e_config_s *state, xcpt_t isr)
   /* Attach the XPT2046 interrupt */
 
   iinfo("Attaching %p to IRQ %d\n", isr, SAM_TSC_IRQ);
-  return irq_attach(SAM_TSC_IRQ, isr);
+  return irq_attach(SAM_TSC_IRQ, isr, NULL);
 }
 
 static void tsc_enable(FAR struct ads7843e_config_s *state, bool enable)

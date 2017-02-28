@@ -401,7 +401,7 @@ static void c5471_txstatus(struct c5471_driver_s *priv);
 static void c5471_txdone(struct c5471_driver_s *priv);
 
 static void c5471_interrupt_work(FAR void *arg);
-static int  c5471_interrupt(int irq, FAR void *context);
+static int  c5471_interrupt(int irq, FAR void *context, FAR void *arg);
 
 /* Watchdog timer expirations */
 
@@ -1634,7 +1634,7 @@ static void c5471_interrupt_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static int c5471_interrupt(int irq, FAR void *context)
+static int c5471_interrupt(int irq, FAR void *context, FAR void *arg)
 {
 #if CONFIG_C5471_NET_NINTERFACES == 1
   register struct c5471_driver_s *priv = &g_c5471[0];
@@ -2449,7 +2449,7 @@ void up_netinitialize(void)
 {
   /* Attach the IRQ to the driver */
 
-  if (irq_attach(C5471_IRQ_ETHER, c5471_interrupt))
+  if (irq_attach(C5471_IRQ_ETHER, c5471_interrupt, NULL))
     {
       /* We could not attach the ISR to the ISR */
 

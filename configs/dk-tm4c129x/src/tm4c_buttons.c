@@ -150,7 +150,7 @@ uint8_t board_buttons(void)
  ************************************************************************************/
 
 #if defined(CONFIG_ARCH_IRQBUTTONS) && defined(CONFIG_TIVA_GPIOP_IRQS)
-xcpt_t board_button_irq(int id, xcpt_t irqhandler)
+xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
   static xcpt_t handler = NULL;
   xcpt_t oldhandler = handler;
@@ -175,7 +175,7 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
 
       if (irqhandler)
         {
-          ret = irq_attach(IRQ_SW4, irqhandler);
+          ret = irq_attach(IRQ_SW4, irqhandler, NULL);
           if (ret == OK)
             {
               handler = irqhandler;

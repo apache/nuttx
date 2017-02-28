@@ -517,7 +517,7 @@ static void   sam_ep0_setup(struct sam_usbdev_s *priv);
 static void   sam_dma_interrupt(struct sam_usbdev_s *priv, int epno);
 #endif
 static void   sam_ep_interrupt(struct sam_usbdev_s *priv, int epno);
-static int    sam_usbhs_interrupt(int irq, void *context);
+static int    sam_usbhs_interrupt(int irq, void *context, FAR void *arg);
 
 /* Endpoint helpers *********************************************************/
 
@@ -2992,7 +2992,7 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
  *
  ****************************************************************************/
 
-static int sam_usbhs_interrupt(int irq, void *context)
+static int sam_usbhs_interrupt(int irq, void *context, FAR void *arg)
 {
   /* For now there is only one USB controller, but we will always refer to
    * it using a pointer to make any future ports to multiple USBHS controllers
@@ -4862,7 +4862,7 @@ void up_usbinitialize(void)
    * them when we need them later.
    */
 
-  if (irq_attach(SAM_IRQ_USBHS, sam_usbhs_interrupt) != 0)
+  if (irq_attach(SAM_IRQ_USBHS, sam_usbhs_interrupt, NULL) != 0)
     {
       usbtrace(TRACE_DEVERROR(SAM_TRACEERR_IRQREGISTRATION),
                (uint16_t)SAM_IRQ_USBHS);

@@ -123,7 +123,7 @@ static void     adc_hw_reset(struct efm32_dev_s *priv, bool reset);
 
 /* ADC Interrupt Handler */
 
-static int adc_interrupt(FAR struct adc_dev_s *dev);
+static int adc_interrupt(int irq, FAR void * context, FAR struct adc_dev_s *dev);
 
 /* ADC Driver Methods */
 
@@ -1072,7 +1072,7 @@ static int adc_setup(FAR struct adc_dev_s *dev)
 
   /* Attach the ADC interrupt */
 
-  ret = irq_attach(priv->irq, priv->isr);
+  ret = irq_attach(priv->irq, priv->isr, dev);
   if (ret == OK)
     {
       /* Make sure that the ADC device is in the powered up, reset state */
@@ -1180,7 +1180,7 @@ static int adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int adc_interrupt(FAR struct adc_dev_s *dev)
+static int adc_interrupt(int irq, FAR void * context, FAR struct adc_dev_s *dev)
 {
   FAR struct efm32_dev_s *priv = (FAR struct efm32_dev_s *)dev->ad_priv;
   uint32_t adcsr;

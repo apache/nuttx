@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z16/src/z16f/z16f_serial.c
  *
- *   Copyright (C) 2008-2009, 2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2012, 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -95,8 +95,8 @@ static int  z16f_setup(struct uart_dev_s *dev);
 static void z16f_shutdown(struct uart_dev_s *dev);
 static int  z16f_attach(struct uart_dev_s *dev);
 static void z16f_detach(struct uart_dev_s *dev);
-static int  z16f_rxinterrupt(int irq, void *context);
-static int  z16f_txinterrupt(int irq, void *context);
+static int  z16f_rxinterrupt(int irq, void *context, void *arg);
+static int  z16f_txinterrupt(int irq, void *context, void *arg);
 static int  z16f_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int  z16f_receive(struct uart_dev_s *dev, uint32_t *status);
 static void z16f_rxint(struct uart_dev_s *dev, bool enable);
@@ -426,12 +426,12 @@ static int z16f_attach(struct uart_dev_s *dev)
 
   /* Attach the RX IRQ */
 
-  ret = irq_attach(priv->rxirq, z16f_rxinterrupt);
+  ret = irq_attach(priv->rxirq, z16f_rxinterrupt, dev);
   if (ret == OK)
     {
       /* Attach the TX IRQ */
 
-      ret = irq_attach(priv->txirq, z16f_txinterrupt);
+      ret = irq_attach(priv->txirq, z16f_txinterrupt, dev);
       if (ret != OK)
         {
           irq_detach(priv->rxirq);
@@ -471,30 +471,13 @@ static void z16f_detach(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static int z16f_rxinterrupt(int irq, void *context)
+static int z16f_rxinterrupt(int irq, void *context, void *arg)
 {
-  struct uart_dev_s  *dev = NULL;
+  struct uart_dev_s  *dev = (struct uart_dev_s *)arg;
   struct z16f_uart_s *priv;
   uint8_t            status;
 
-#ifdef CONFIG_Z16F_UART1
-  if (g_uart1priv.rxirq == irq)
-    {
-      dev = &g_uart1port;
-    }
-  else
-#endif
-#ifdef CONFIG_Z16F_UART0
-  if (g_uart0priv.rxirq == irq)
-    {
-      dev = &g_uart0port;
-    }
-  else
-#endif
-    {
-      PANIC();
-    }
-
+  DEBUGASSERT(dev != NULL && dev->priv != NULL);
   priv = (struct z16f_uart_s*)dev->priv;
 
   /* Check the LIN-UART status 0 register to determine whether the source of
@@ -526,30 +509,13 @@ static int z16f_rxinterrupt(int irq, void *context)
  *
  ****************************************************************************/
 
-static int z16f_txinterrupt(int irq, void *context)
+static int z16f_txinterrupt(int irq, void *context, FAR void *arg)
 {
-  struct uart_dev_s  *dev = NULL;
+  struct uart_dev_s  *dev = (struct uart_dev_s *)arg;
   struct z16f_uart_s *priv;
   uint8_t            status;
 
-#ifdef CONFIG_Z16F_UART1
-  if (g_uart1priv.txirq == irq)
-    {
-      dev = &g_uart1port;
-    }
-  else
-#endif
-#ifdef CONFIG_Z16F_UART0
-  if (g_uart0priv.txirq == irq)
-    {
-      dev = &g_uart0port;
-    }
-  else
-#endif
-    {
-      PANIC();
-    }
-
+  DEBUGASSERT(dev != NULL && dev->priv != NULL);
   priv = (struct z16f_uart_s*)dev->priv;
 
   /* Verify that the transmit data register is empty */

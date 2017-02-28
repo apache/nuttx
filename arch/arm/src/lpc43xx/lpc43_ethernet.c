@@ -594,7 +594,7 @@ static void lpc43_freeframe(FAR struct lpc43_ethmac_s *priv);
 static void lpc43_txdone(FAR struct lpc43_ethmac_s *priv);
 
 static void lpc43_interrupt_work(FAR void *arg);
-static int  lpc43_interrupt(int irq, FAR void *context);
+static int  lpc43_interrupt(int irq, FAR void *context, FAR void *arg);
 
 /* Watchdog timer expirations */
 
@@ -2019,7 +2019,7 @@ static void lpc43_interrupt_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static int lpc43_interrupt(int irq, FAR void *context)
+static int lpc43_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct lpc43_ethmac_s *priv = &g_lpc43ethmac;
   uint32_t dmasr;
@@ -3876,7 +3876,7 @@ static inline int lpc43_ethinitialize(void)
 
   /* Attach the IRQ to the driver */
 
-  if (irq_attach(LPC43M4_IRQ_ETHERNET, lpc43_interrupt))
+  if (irq_attach(LPC43M4_IRQ_ETHERNET, lpc43_interrupt, NULL))
     {
       /* We could not attach the ISR to the interrupt */
 

@@ -59,7 +59,13 @@
  * occurrence of an interrupt.
  */
 
-extern FAR xcpt_t g_irqvector[NR_IRQS];
+struct irq
+{
+  xcpt_t handler;
+  FAR void * arg;
+};
+
+extern struct irq g_irqvector[NR_IRQS];
 
 #ifdef CONFIG_SMP
 /* This is the spinlock that enforces critical sections when interrupts are
@@ -109,7 +115,7 @@ void weak_function irq_initialize(void);
  *
  ****************************************************************************/
 
-int irq_unexpected_isr(int irq, FAR void *context);
+int irq_unexpected_isr(int irq, FAR void *context, FAR void *arg);
 
 /****************************************************************************
  * Name:  irq_cpu_locked

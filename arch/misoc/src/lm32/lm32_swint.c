@@ -130,7 +130,7 @@ static void dispatch_syscall(void)
  *
  ****************************************************************************/
 
-int lm32_swint(int irq, FAR void *context)
+int lm32_swint(int irq, FAR void *context, FAR void *arg)
 {
   uint32_t *regs = (uint32_t *)context;
 

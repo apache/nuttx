@@ -72,7 +72,7 @@ static inline bool pic32mz_input(pinset_t pinset);
 static inline bool pic32mz_interrupt(pinset_t pinset);
 static inline bool pic32mz_pullup(pinset_t pinset);
 static inline bool pic32mz_pulldown(pinset_t pinset);
-static int pic32mz_cninterrupt(int irq, FAR void *context);
+static int pic32mz_cninterrupt(int irq, FAR void *context, FAR void *arg);
 
 /****************************************************************************
  * Public Data
@@ -204,7 +204,7 @@ static inline unsigned int pic32mz_pin(pinset_t pinset)
  *
  ****************************************************************************/
 
-static int pic32mz_cninterrupt(int irq, FAR void *context)
+static int pic32mz_cninterrupt(int irq, FAR void *context, FAR void *arg)
 {
   struct ioport_level2_s *handlers;
   xcpt_t handler;
@@ -334,7 +334,7 @@ void pic32mz_gpioirqinitialize(void)
            * each IRQ number is consecutive beginning with IOPORTA.
            */
 
-          ret = irq_attach(PIC32MZ_IRQ_PORTA + i, pic32mz_cninterrupt);
+          ret = irq_attach(PIC32MZ_IRQ_PORTA + i, pic32mz_cninterrupt, NULL);
           DEBUGASSERT(ret == OK);
           UNUSED(ret);
 

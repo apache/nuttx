@@ -168,7 +168,7 @@ uint8_t board_buttons(void)
  ****************************************************************************/
 
 #if defined(CONFIG_EFM32_GPIO_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
-xcpt_t board_button_irq(int id, xcpt_t irqhandler)
+xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
   xcpt_t oldhandler = NULL;
 
@@ -205,7 +205,7 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
 
           /* Attach and enable the interrupt */
 
-          (void)irq_attach(g_button_irqs[id], irqhandler);
+          (void)irq_attach(g_button_irqs[id], irqhandler, NULL);
           efm32_gpioirqenable(g_button_irqs[id]);
         }
       else

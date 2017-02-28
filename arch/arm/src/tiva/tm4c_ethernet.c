@@ -704,7 +704,7 @@ static void tiva_freeframe(FAR struct tiva_ethmac_s *priv);
 static void tiva_txdone(FAR struct tiva_ethmac_s *priv);
 
 static void tiva_interrupt_work(FAR void *arg);
-static int  tiva_interrupt(int irq, FAR void *context);
+static int  tiva_interrupt(int irq, FAR void *context, FAR void *arg);
 
 /* Watchdog timer expirations */
 
@@ -2116,7 +2116,7 @@ static void tiva_interrupt_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static int tiva_interrupt(int irq, FAR void *context)
+static int tiva_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct tiva_ethmac_s *priv = &g_tiva_ethmac[0];
   uint32_t dmaris;
@@ -2167,7 +2167,7 @@ static int tiva_interrupt(int irq, FAR void *context)
 
       if (priv->handler)
         {
-          (void)priv->handler(irq, context);
+          (void)priv->handler(irq, context, arg);
         }
     }
 #endif
@@ -4134,7 +4134,7 @@ int tiva_ethinitialize(int intf)
 
   /* Attach the IRQ to the driver */
 
-  if (irq_attach(TIVA_IRQ_ETHCON, tiva_interrupt))
+  if (irq_attach(TIVA_IRQ_ETHCON, tiva_interrupt, NULL))
     {
       /* We could not attach the ISR to the interrupt */
 

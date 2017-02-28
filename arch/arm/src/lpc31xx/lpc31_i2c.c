@@ -3,7 +3,7 @@
  *
  *   Author: David Hewson
  *
- *   Copyright (C) 2010-2011, 2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011, 2014, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -112,7 +112,7 @@ static struct lpc31_i2cdev_s i2cdevices[2];
  * Private Function Prototypes
  ****************************************************************************/
 
-static int  i2c_interrupt(int irq, FAR void *context);
+static int  i2c_interrupt(int irq, FAR void *context, FAR void *arg);
 static void i2c_progress(struct lpc31_i2cdev_s *priv);
 static void i2c_timeout(int argc, uint32_t arg, ...);
 static void i2c_hwreset(struct lpc31_i2cdev_s *priv);
@@ -184,18 +184,12 @@ static void i2c_setfrequency(struct lpc31_i2cdev_s *priv, uint32_t frequency)
  *
  ****************************************************************************/
 
-static int i2c_interrupt(int irq, FAR void *context)
+static int i2c_interrupt(int irq, FAR void *context, FAR void *arg)
 {
-  if (irq == LPC31_IRQ_I2C0)
-    {
-      i2c_progress(&i2cdevices[0]);
-    }
+  struct lpc31_i2cdev_s *priv = (struct lpc31_i2cdev_s *)arg;
 
-  if (irq == LPC31_IRQ_I2C1)
-    {
-      i2c_progress(&i2cdevices[1]);
-    }
-
+  DEBUGASSERT(priv != NULL);
+  i2c_progress(priv);
   return OK;
 }
 
@@ -585,7 +579,7 @@ struct i2c_master_s *lpc31_i2cbus_initialize(int port)
 
   /* Attach Interrupt Handler */
 
-  irq_attach(priv->irqid, i2c_interrupt);
+  irq_attach(priv->irqid, i2c_interrupt, priv);
 
   /* Enable Interrupt Handler */
 

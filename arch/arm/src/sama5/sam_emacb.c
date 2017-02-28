@@ -349,7 +349,6 @@ struct sam_emacattr_s
   /* Basic hardware information */
 
   uint32_t             base;         /* EMAC Register base address */
-  xcpt_t               handler;      /* EMAC interrupt handler */
   uint8_t              emac;         /* EMACn, n=0 or 1 */
   uint8_t              irq;          /* EMAC interrupt number */
 
@@ -481,13 +480,7 @@ static void sam_receive(struct sam_emac_s *priv);
 static void sam_txdone(struct sam_emac_s *priv);
 
 static void sam_interrupt_work(FAR void *arg);
-static int  sam_emac_interrupt(struct sam_emac_s *priv);
-#ifdef CONFIG_SAMA5_EMAC0
-static int sam_emac0_interrupt(int irq, void *context);
-#endif
-#ifdef CONFIG_SAMA5_EMAC1
-static int sam_emac1_interrupt(int irq, void *context);
-#endif
+static int  sam_emac_interrupt(int irq, void *context, FAR void *arg);
 
 /* Watchdog timer expirations */
 
@@ -633,7 +626,6 @@ static const struct sam_emacattr_s g_emac0_attr =
   /* Basic hardware information */
 
   .base         = SAM_EMAC0_VBASE,
-  .handler      = sam_emac0_interrupt,
   .emac         = EMAC0_INTF,
   .irq          = SAM_IRQ_EMAC0,
 
@@ -714,7 +706,6 @@ static const struct sam_emacattr_s g_emac1_attr =
   /* Basic hardware information */
 
   .base         = SAM_EMAC1_VBASE,
-  .handler      = sam_emac1_interrupt,
   .emac         = EMAC1_INTF,
   .irq          = SAM_IRQ_EMAC1,
 
@@ -2012,7 +2003,7 @@ static void sam_interrupt_work(FAR void *arg)
  *   Common hardware interrupt handler
  *
  * Parameters:
- *   priv    - Reference to the EMAC private state structure
+ *   Standard interrupt handler inputs
  *
  * Returned Value:
  *   OK on success
@@ -2021,9 +2012,12 @@ static void sam_interrupt_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static int sam_emac_interrupt(struct sam_emac_s *priv)
+static int sam_emac_interrupt(int irq, void *context, FAR void *arg)
 {
+  struct sam_emac_s *priv = (struct sam_emac_s *)arg;
   uint32_t tsr;
+
+  DEBUGASSERT(priv != NULL);
 
   /* Disable further Ethernet interrupts.  Because Ethernet interrupts are
    * also disabled if the TX timeout event occurs, there can be no race
@@ -2083,37 +2077,6 @@ static int sam_emac_interrupt(struct sam_emac_s *priv)
   work_queue(ETHWORK, &priv->work, sam_interrupt_work, priv, 0);
   return OK;
 }
-
-/****************************************************************************
- * Function: sam_emac0/1_interrupt
- *
- * Description:
- *   EMAC hardware interrupt handler
- *
- * Parameters:
- *   irq     - Number of the IRQ that generated the interrupt
- *   context - Interrupt register state save info (architecture-specific)
- *
- * Returned Value:
- *   OK on success
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SAMA5_EMAC0
-static int sam_emac0_interrupt(int irq, void *context)
-{
-  return sam_emac_interrupt(&g_emac0);
-}
-#endif
-
-#ifdef CONFIG_SAMA5_EMAC1
-static int sam_emac1_interrupt(int irq, void *context)
-{
-  return sam_emac_interrupt(&g_emac1);
-}
-#endif
 
 /****************************************************************************
  * Function: sam_txtimeout_work
@@ -4485,7 +4448,7 @@ int sam_emac_initialize(int intf)
    * the interface is in the 'up' state.
    */
 
-  ret = irq_attach(priv->attr->irq, priv->attr->handler);
+  ret = irq_attach(priv->attr->irq, sam_emac_interrupt, priv);
   if (ret < 0)
     {
       nerr("ERROR: Failed to attach the handler to the IRQ%d\n", priv->attr->irq);

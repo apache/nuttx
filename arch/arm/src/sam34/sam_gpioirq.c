@@ -210,42 +210,42 @@ static int sam_gpiointerrupt(uint32_t base, int irq0, void *context)
 }
 
 #ifdef CONFIG_SAM34_GPIOA_IRQ
-static int sam_gpioainterrupt(int irq, void *context)
+static int sam_gpioainterrupt(int irq, void *context, FAR void *arg)
 {
   return sam_gpiointerrupt(SAM_PIOA_BASE, SAM_IRQ_PA0, context);
 }
 #endif
 
 #ifdef CONFIG_SAM34_GPIOB_IRQ
-static int sam_gpiobinterrupt(int irq, void *context)
+static int sam_gpiobinterrupt(int irq, void *context, FAR void *arg)
 {
   return sam_gpiointerrupt(SAM_PIOB_BASE, SAM_IRQ_PB0, context);
 }
 #endif
 
 #ifdef CONFIG_SAM34_GPIOC_IRQ
-static int sam_gpiocinterrupt(int irq, void *context)
+static int sam_gpiocinterrupt(int irq, void *context, FAR void *arg)
 {
   return sam_gpiointerrupt(SAM_PIOC_BASE, SAM_IRQ_PC0, context);
 }
 #endif
 
 #ifdef CONFIG_SAM34_GPIOD_IRQ
-static int sam_gpiodinterrupt(int irq, void *context)
+static int sam_gpiodinterrupt(int irq, void *context, FAR void *arg)
 {
   return sam_gpiointerrupt(SAM_PIOD_BASE, SAM_IRQ_PD0, context);
 }
 #endif
 
 #ifdef CONFIG_SAM34_GPIOE_IRQ
-static int sam_gpioeinterrupt(int irq, void *context)
+static int sam_gpioeinterrupt(int irq, void *context, FAR void *arg)
 {
   return sam_gpiointerrupt(SAM_PIOE_BASE, SAM_IRQ_PE0, context);
 }
 #endif
 
 #ifdef CONFIG_SAM34_GPIOF_IRQ
-static int sam_gpiofinterrupt(int irq, void *context)
+static int sam_gpiofinterrupt(int irq, void *context, FAR void *arg)
 {
   return sam_gpiointerrupt(SAM_PIOF_BASE, SAM_IRQ_PF0, context);
 }
@@ -280,7 +280,7 @@ void sam_gpioirqinitialize(void)
 
   /* Attach and enable the GPIOA IRQ */
 
-  (void)irq_attach(SAM_IRQ_PIOA, sam_gpioainterrupt);
+  (void)irq_attach(SAM_IRQ_PIOA, sam_gpioainterrupt, NULL);
   up_enable_irq(SAM_IRQ_PIOA);
 #endif
 
@@ -298,7 +298,7 @@ void sam_gpioirqinitialize(void)
 
   /* Attach and enable the GPIOB IRQ */
 
-  (void)irq_attach(SAM_IRQ_PIOB, sam_gpiobinterrupt);
+  (void)irq_attach(SAM_IRQ_PIOB, sam_gpiobinterrupt, NULL);
   up_enable_irq(SAM_IRQ_PIOB);
 #endif
 
@@ -316,7 +316,7 @@ void sam_gpioirqinitialize(void)
 
   /* Attach and enable the GPIOC IRQ */
 
-  (void)irq_attach(SAM_IRQ_PIOC, sam_gpiocinterrupt);
+  (void)irq_attach(SAM_IRQ_PIOC, sam_gpiocinterrupt, NULL);
   up_enable_irq(SAM_IRQ_PIOC);
 #endif
 
@@ -334,7 +334,7 @@ void sam_gpioirqinitialize(void)
 
   /* Attach and enable the GPIOC IRQ */
 
-  (void)irq_attach(SAM_IRQ_PIOD, sam_gpiodinterrupt);
+  (void)irq_attach(SAM_IRQ_PIOD, sam_gpiodinterrupt, NULL);
   up_enable_irq(SAM_IRQ_PIOD);
 #endif
 
@@ -352,7 +352,7 @@ void sam_gpioirqinitialize(void)
 
   /* Attach and enable the GPIOE IRQ */
 
-  (void)irq_attach(SAM_IRQ_PIOE, sam_gpioeinterrupt);
+  (void)irq_attach(SAM_IRQ_PIOE, sam_gpioeinterrupt, NULL);
   up_enable_irq(SAM_IRQ_PIOE);
 #endif
 
@@ -370,7 +370,7 @@ void sam_gpioirqinitialize(void)
 
   /* Attach and enable the GPIOF IRQ */
 
-  (void)irq_attach(SAM_IRQ_PIOF, sam_gpiofinterrupt);
+  (void)irq_attach(SAM_IRQ_PIOF, sam_gpiofinterrupt, NULL);
   up_enable_irq(SAM_IRQ_PIOF);
 #endif
 }

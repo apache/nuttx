@@ -82,7 +82,7 @@ static xcpt_t g_irq_tamp;
 
 #if defined(CONFIG_SAM34_GPIOA_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
 static xcpt_t board_button_irqx(gpio_pinset_t pinset, int irq,
-                                xcpt_t irqhandler, xcpt_t *store)
+                                xcpt_t irqhandler, xcpt_t *store, void *arg)
 {
   xcpt_t oldhandler;
   irqstate_t flags;
@@ -105,7 +105,7 @@ static xcpt_t board_button_irqx(gpio_pinset_t pinset, int irq,
       /* Configure the interrupt */
 
       sam_gpioirq(pinset);
-      (void)irq_attach(irq, irqhandler);
+      (void)irq_attach(irq, irqhandler, arg);
       sam_gpioirqenable(irq);
     }
   else
@@ -189,25 +189,25 @@ uint8_t board_buttons(void)
  ****************************************************************************/
 
 #if defined(CONFIG_SAM34_GPIOA_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
-xcpt_t board_button_irq(int id, xcpt_t irqhandler)
+xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
   switch (id)
     {
       case BUTTON_SCROLLUP:
         return board_button_irqx(GPIO_SCROLLUP, IRQ_SCROLLUP,
-                                 irqhandler, &g_irq_scrollup);
+                                 irqhandler, &g_irq_scrollup, arg);
 
       case BUTTON_SCROLLDOWN:
         return board_button_irqx(GPIO_SCROLLDWN, IRQ_SCROLLDWN,
-                                 irqhandler, &g_irq_scrolldown);
+                                 irqhandler, &g_irq_scrolldown, arg);
 
       case BUTTON_WAKU:
         return board_button_irqx(GPIO_WAKU, IRQ_WAKU,
-                                 irqhandler, &g_irq_waku);
+                                 irqhandler, &g_irq_waku, arg);
 
       case BUTTON_TAMP:
         return board_button_irqx(GPIO_TAMP, IRQ_TAMP,
-                                 irqhandler, &g_irq_tamp);
+                                 irqhandler, &g_irq_tamp, arg);
 
       default:
         return NULL;

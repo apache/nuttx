@@ -163,7 +163,7 @@ static int  kinetis_setup(struct uart_dev_s *dev);
 static void kinetis_shutdown(struct uart_dev_s *dev);
 static int  kinetis_attach(struct uart_dev_s *dev);
 static void kinetis_detach(struct uart_dev_s *dev);
-static int  kinetis_interrupt(int irq, void *context);
+static int  kinetis_interrupt(int irq, void *context, void *arg);
 static int  kinetis_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int  kinetis_receive(struct uart_dev_s *dev, uint32_t *status);
 static void kinetis_rxint(struct uart_dev_s *dev, bool enable);
@@ -427,7 +427,7 @@ static int kinetis_attach(struct uart_dev_s *dev)
    * disabled in the LPUART_CTRL register.
    */
 
-  ret = irq_attach(priv->irq, kinetis_interrupt);
+  ret = irq_attach(priv->irq, kinetis_interrupt, dev);
   if (ret == OK)
     {
       up_enable_irq(priv->irq);
@@ -472,33 +472,15 @@ static void kinetis_detach(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static int kinetis_interrupt(int irq, void *context)
+static int kinetis_interrupt(int irq, void *context, void *arg)
 {
-  struct uart_dev_s *dev = NULL;
+  struct uart_dev_s *dev = (struct uart_dev_s *dev)arg;
   struct kinetis_dev_s *priv;
   uint32_t stat;
   uint32_t ctrl;
 
-#ifdef CONFIG_KINETIS_LPUART0
-  if (g_lpuart0priv.irq == irq)
-    {
-      dev = &g_lpuart0port;
-    }
-  else
-#endif
-#ifdef CONFIG_KINETIS_LPUART1
-  if (g_lpuart1priv.irq == irq)
-    {
-      dev = &g_lpuart1port;
-    }
-  else
-#endif
-    {
-      PANIC();
-    }
-
+  DEBUGASSERT(dev != NULL && dev->priv != NULL);
   priv = (struct kinetis_dev_s *)dev->priv;
-  DEBUGASSERT(priv);
 
   /* Read status register and qualify it with STAT bit corresponding CTRL IE bits */
 

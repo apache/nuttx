@@ -335,7 +335,7 @@ static void lpc17_response(struct lpc17_driver_s *priv);
 
 static void lpc17_txdone_work(FAR void *arg);
 static void lpc17_rxdone_work(FAR void *arg);
-static int  lpc17_interrupt(int irq, void *context);
+static int  lpc17_interrupt(int irq, void *context, FAR void *arg);
 
 /* Watchdog timer expirations */
 
@@ -1123,7 +1123,7 @@ static void lpc17_txdone_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static int lpc17_interrupt(int irq, void *context)
+static int lpc17_interrupt(int irq, void *context, FAR void *arg)
 {
   register struct lpc17_driver_s *priv;
   uint32_t status;
@@ -3111,9 +3111,9 @@ static inline int lpc17_ethinitialize(int intf)
   /* Attach the IRQ to the driver */
 
 #if CONFIG_LPC17_NINTERFACES > 1
-  ret = irq_attach(priv->irq, lpc17_interrupt);
+  ret = irq_attach(priv->irq, lpc17_interrupt, NULL);
 #else
-  ret = irq_attach(LPC17_IRQ_ETH, lpc17_interrupt);
+  ret = irq_attach(LPC17_IRQ_ETH, lpc17_interrupt, NULL);
 #endif
   if (ret != 0)
     {

@@ -258,7 +258,7 @@ static void adc_rccreset(FAR struct stm32_dev_s *priv, bool reset);
 /* ADC Interrupt Handler */
 
 static int adc_interrupt(FAR struct adc_dev_s *dev);
-static int adc123_interrupt(int irq, FAR void *context);
+static int adc123_interrupt(int irq, FAR void *context, FAR void * arg);
 
 /* ADC Driver Methods */
 
@@ -1373,7 +1373,7 @@ static int adc_setup(FAR struct adc_dev_s *dev)
 
   /* Attach the ADC interrupt */
 
-  ret = irq_attach(priv->irq, priv->isr);
+  ret = irq_attach(priv->irq, priv->isr, NULL);
   if (ret < 0)
     {
       ainfo("irq_attach failed: %d\n", ret);
@@ -1678,7 +1678,7 @@ static int adc_interrupt(FAR struct adc_dev_s *dev)
  *
  ****************************************************************************/
 
-static int adc123_interrupt(int irq, FAR void *context)
+static int adc123_interrupt(int irq, FAR void *context, FAR void * arg)
 {
 #ifdef CONFIG_STM32F7_ADC1
   adc_interrupt(&g_adcdev1);

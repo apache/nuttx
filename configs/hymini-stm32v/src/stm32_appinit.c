@@ -125,7 +125,7 @@ static FAR struct sdio_dev_s *g_sdiodev;
  ****************************************************************************/
 
 #ifdef NSH_HAVEMMCSD
-static int nsh_cdinterrupt(int irq, FAR void *context)
+static int nsh_cdinterrupt(int irq, FAR void *context, FAR void *arg)
 {
   static bool inserted = 0xff; /* Impossible value */
   bool present;
@@ -182,7 +182,7 @@ int board_app_initialize(uintptr_t arg)
 
   /* Register an interrupt handler for the card detect pin */
 
-  stm32_gpiosetevent(GPIO_SD_CD, true, true, true, nsh_cdinterrupt);
+  stm32_gpiosetevent(GPIO_SD_CD, true, true, true, nsh_cdinterrupt, NULL);
 
   /* Mount the SDIO-based MMC/SD block driver */
 

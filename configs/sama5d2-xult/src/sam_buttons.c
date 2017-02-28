@@ -133,7 +133,7 @@ uint8_t board_buttons(void)
  ****************************************************************************/
 
 #if defined(CONFIG_SAMA5_PIOB_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
-xcpt_t board_button_irq(int id, xcpt_t irqhandler)
+xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
   xcpt_t oldhandler = NULL;
 
@@ -159,7 +159,7 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
           /* Configure the interrupt */
 
           sam_pioirq(PIO_BTN_USER);
-          (void)irq_attach(IRQ_BTN_USER, irqhandler);
+          (void)irq_attach(IRQ_BTN_USER, irqhandler, NULL);
           sam_pioirqenable(IRQ_BTN_USER);
         }
       else

@@ -80,7 +80,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_IRQBUTTONS
-static int button_handler(int irq, FAR void *context);
+static int button_handler(int irq, FAR void *context, FAR void *arg);
 #endif /* CONFIG_ARCH_IRQBUTTONS */
 
 /****************************************************************************
@@ -96,7 +96,7 @@ static int button_handler(int irq, FAR void *context);
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_IRQBUTTONS
-static int button_handler(int irq, FAR void *context)
+static int button_handler(int irq, FAR void *context, FAR void *arg)
 {
   /* At this point the MCU should have already awakened.  The state
    * change will be handled in the IDLE loop when the system is re-awakened
@@ -130,7 +130,7 @@ void stm32_pm_buttons(void)
   board_button_initialize();
 
 #ifdef CONFIG_ARCH_IRQBUTTONS
-      xcpt_t oldhandler = board_button_irq(0, button_handler);
+      xcpt_t oldhandler = board_button_irq(0, button_handler, NULL);
 
       if (oldhandler != NULL)
         {

@@ -204,7 +204,7 @@ efm32_get_descriptor(struct dma_channel_s *dmach, bool alt)
  *
  ****************************************************************************/
 
-static int efm32_dmac_interrupt(int irq, void *context)
+static int efm32_dmac_interrupt(int irq, void *context, FAR void *arg)
 {
   struct dma_channel_s *dmach;
   unsigned int chndx;
@@ -297,7 +297,7 @@ void weak_function up_dmainitialize(void)
 
   /* Attach DMA interrupt vector */
 
-  (void)irq_attach(EFM32_IRQ_DMA, efm32_dmac_interrupt);
+  (void)irq_attach(EFM32_IRQ_DMA, efm32_dmac_interrupt, NULL);
 
   /* Enable the DMA controller */
 

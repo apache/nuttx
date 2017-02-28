@@ -352,10 +352,10 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
 #if defined(CONFIG_PWM_PULSECOUNT) && (defined(CONFIG_STM32_TIM1_PWM) || defined(CONFIG_STM32_TIM8_PWM))
 static int pwm_interrupt(struct stm32_pwmtimer_s *priv);
 #if defined(CONFIG_STM32_TIM1_PWM)
-static int pwm_tim1interrupt(int irq, void *context);
+static int pwm_tim1interrupt(int irq, void *context, FAR void *arg);
 #endif
 #if defined(CONFIG_STM32_TIM8_PWM)
-static int pwm_tim8interrupt(int irq, void *context);
+static int pwm_tim8interrupt(int irq, void *context, FAR void *arg);
 #endif
 static uint8_t pwm_pulsecount(uint32_t count);
 #endif
@@ -1985,14 +1985,14 @@ static int pwm_interrupt(struct stm32_pwmtimer_s *priv)
  ****************************************************************************/
 
 #if defined(CONFIG_PWM_PULSECOUNT) && defined(CONFIG_STM32_TIM1_PWM)
-static int pwm_tim1interrupt(int irq, void *context)
+static int pwm_tim1interrupt(int irq, void *context, FAR void *arg)
 {
   return pwm_interrupt(&g_pwm1dev);
 }
 #endif
 
 #if defined(CONFIG_PWM_PULSECOUNT) && defined(CONFIG_STM32_TIM8_PWM)
-static int pwm_tim8interrupt(int irq, void *context)
+static int pwm_tim8interrupt(int irq, void *context, FAR void *arg)
 {
   return pwm_interrupt(&g_pwm8dev);
 }
@@ -2603,7 +2603,7 @@ FAR struct pwm_lowerhalf_s *stm32_pwminitialize(int timer)
         /* Attach but disable the TIM1 update interrupt */
 
 #ifdef CONFIG_PWM_PULSECOUNT
-        irq_attach(lower->irq, pwm_tim1interrupt);
+        irq_attach(lower->irq, pwm_tim1interrupt, NULL);
         up_disable_irq(lower->irq);
 #endif
         break;
@@ -2640,7 +2640,7 @@ FAR struct pwm_lowerhalf_s *stm32_pwminitialize(int timer)
         /* Attach but disable the TIM8 update interrupt */
 
 #ifdef CONFIG_PWM_PULSECOUNT
-        irq_attach(lower->irq, pwm_tim8interrupt);
+        irq_attach(lower->irq, pwm_tim8interrupt, NULL);
         up_disable_irq(lower->irq);
 #endif
         break;

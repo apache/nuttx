@@ -121,7 +121,7 @@ static void     stm32_setwindow(FAR struct stm32_lowerhalf_s *priv,
 
 /* Interrupt hanlding *******************************************************/
 
-static int      stm32_interrupt(int irq, FAR void *context);
+static int      stm32_interrupt(int irq, FAR void *context, FAR void *arg);
 
 /* "Lower half" driver methods **********************************************/
 
@@ -286,7 +286,7 @@ static void stm32_setwindow(FAR struct stm32_lowerhalf_s *priv, uint8_t window)
  *
  ****************************************************************************/
 
-static int stm32_interrupt(int irq, FAR void *context)
+static int stm32_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct stm32_lowerhalf_s *priv = &g_wdgdev;
   uint16_t regval;
@@ -766,7 +766,7 @@ void stm32_wwdginitialize(FAR const char *devpath)
 
   /* Attach our EWI interrupt handler (But don't enable it yet) */
 
-  (void)irq_attach(STM32_IRQ_WWDG, stm32_interrupt);
+  (void)irq_attach(STM32_IRQ_WWDG, stm32_interrupt, NULL);
 
   /* Select an arbitrary initial timeout value.  But don't start the watchdog
    * yet. NOTE: If the "Hardware watchdog" feature is enabled through the

@@ -909,7 +909,7 @@ FAR struct spi_dev_s *pic32mx_spibus_initialize(int port)
    * resource is available.
    */
 
-  ret = irq_attach(priv->vector, spi_interrupt);
+  ret = irq_attach(priv->vector, spi_interrupt, NULL);
   if (ret < 0)
     {
       spierr("ERROR: Failed to attach vector: %d port: %d\n",

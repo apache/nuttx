@@ -162,13 +162,7 @@ static inline void twi_putrel(struct twi_dev_s *priv, unsigned int offset,
 
 static int  twi_wait(struct twi_dev_s *priv);
 static void twi_wakeup(struct twi_dev_s *priv, int result);
-static int  twi_interrupt(struct twi_dev_s *priv);
-#ifdef CONFIG_SAM34_TWI0
-static int  twi0_interrupt(int irq, FAR void *context);
-#endif
-#ifdef CONFIG_SAM34_TWI1
-static int  twi1_interrupt(int irq, FAR void *context);
-#endif
+static int  twi_interrupt(int irq, FAR void *context, FAR void *arg);
 static void twi_timeout(int argc, uint32_t arg, ...);
 
 static void twi_startread(struct twi_dev_s *priv, struct i2c_msg_s *msg);
@@ -436,13 +430,16 @@ static void twi_wakeup(struct twi_dev_s *priv, int result)
  *
  ****************************************************************************/
 
-static int twi_interrupt(struct twi_dev_s *priv)
+static int twi_interrupt(int irq, FAR void *context, FAR void *arg);
 {
+  struct twi_dev_s *priv = (struct twi_dev_s *)arg;
   struct i2c_msg_s *msg;
   uint32_t sr;
   uint32_t imr;
   uint32_t pending;
   uint32_t regval;
+
+  DEBUGASSERT(priv != NULL);
 
   /* Retrieve masked interrupt status */
 
@@ -553,20 +550,6 @@ static int twi_interrupt(struct twi_dev_s *priv)
 
   return OK;
 }
-
-#ifdef CONFIG_SAM34_TWI0
-static int twi0_interrupt(int irq, FAR void *context)
-{
-  return twi_interrupt(&g_twi0);
-}
-#endif
-
-#ifdef CONFIG_SAM34_TWI1
-static int twi1_interrupt(int irq, FAR void *context)
-{
-  return twi_interrupt(&g_twi1);
-}
-#endif
 
 /****************************************************************************
  * Name: twi_timeout
@@ -910,7 +893,6 @@ static void twi_hw_initialize(struct twi_dev_s *priv, unsigned int pid,
 struct i2c_master_s *sam_i2cbus_initialize(int bus)
 {
   struct twi_dev_s *priv;
-  xcpt_t handler;
   irqstate_t flags;
   uint32_t frequency;
   unsigned int pid;
@@ -938,9 +920,8 @@ struct i2c_master_s *sam_i2cbus_initialize(int bus)
       sam_configgpio(GPIO_TWI0_CK);
       sam_configgpio(GPIO_TWI0_D);
 
-      /* Select the interrupt handler, TWI frequency, and peripheral ID */
+      /* Select the TWI frequency, and peripheral ID */
 
-      handler    = twi0_interrupt;
       frequency  = CONFIG_SAM34_TWI0_FREQUENCY;
       pid        = SAM_PID_TWI0;
     }
@@ -965,9 +946,8 @@ struct i2c_master_s *sam_i2cbus_initialize(int bus)
       sam_configgpio(GPIO_TWI1_CK);
       sam_configgpio(GPIO_TWI1_D);
 
-      /* Select the interrupt handler, TWI frequency, and peripheral ID */
+      /* Select the TWI frequency, and peripheral ID */
 
-      handler    = twi1_interrupt;
       frequency  = CONFIG_SAMA5_TWI1_FREQUENCY;
       pid        = SAM_PID_TWI1;
     }
@@ -1006,7 +986,7 @@ struct i2c_master_s *sam_i2cbus_initialize(int bus)
 
   /* Attach Interrupt Handler */
 
-  irq_attach(priv->irq, handler);
+  irq_attach(priv->irq, twi_interrupt, priv);
 
   /* Enable Interrupts */
 

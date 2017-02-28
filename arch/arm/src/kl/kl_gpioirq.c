@@ -164,14 +164,14 @@ static int kl_portinterrupt(int irq, FAR void *context,
  ****************************************************************************/
 
 #ifdef CONFIG_KL_PORTAINTS
-static int kl_portainterrupt(int irq, FAR void *context)
+static int kl_portainterrupt(int irq, FAR void *context, FAR void *arg)
 {
   return kl_portinterrupt(irq, context, KL_PORTA_ISFR, g_portaisrs);
 }
 #endif
 
 #ifdef CONFIG_KL_PORTDINTS
-static int kl_portdinterrupt(int irq, FAR void *context)
+static int kl_portdinterrupt(int irq, FAR void *context, FAR void *arg)
 {
   return kl_portinterrupt(irq, context, KL_PORTD_ISFR, g_portdisrs);
 }
@@ -193,13 +193,13 @@ static int kl_portdinterrupt(int irq, FAR void *context)
 void kl_gpioirqinitialize(void)
 {
 #ifdef CONFIG_KL_PORTAINTS
-  (void)irq_attach(KL_IRQ_PORTA, kl_portainterrupt);
+  (void)irq_attach(KL_IRQ_PORTA, kl_portainterrupt, NULL);
   putreg32(0xffffffff, KL_PORTA_ISFR);
   up_enable_irq(KL_IRQ_PORTA);
 #endif
 
 #ifdef CONFIG_KL_PORTDINTS
-  (void)irq_attach(KL_IRQ_PORTD, kl_portdinterrupt);
+  (void)irq_attach(KL_IRQ_PORTD, kl_portdinterrupt, NULL);
   putreg32(0xffffffff, KL_PORTD_ISFR);
   up_enable_irq(KL_IRQ_PORTD);
 #endif

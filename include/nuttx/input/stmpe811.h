@@ -1,7 +1,7 @@
 /********************************************************************************************
  * include/nuttx/input/stmpe811.h
  *
- *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -500,7 +500,7 @@ struct stmpe811_config_s
    * clear   - Acknowledge/clear any pending GPIO interrupt
    */
 
-  int  (*attach)(FAR struct stmpe811_config_s *state, xcpt_t isr);
+  int  (*attach)(FAR struct stmpe811_config_s *state, xcpt_t isr, FAR void *arg);
   void (*enable)(FAR struct stmpe811_config_s *state, bool enable);
   void (*clear)(FAR struct stmpe811_config_s *state);
 };

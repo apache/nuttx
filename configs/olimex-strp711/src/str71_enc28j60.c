@@ -184,7 +184,7 @@ static const struct enc_lower_s g_enclower =
 
 static int up_attach(FAR const struct enc_lower_s *lower, xcpt_t handler)
 {
-  return irq_attach(ENC28J60_IRQ, handler);
+  return irq_attach(ENC28J60_IRQ, handler, NULL);
 }
 
 static void up_enable(FAR const struct enc_lower_s *lower)

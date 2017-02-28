@@ -124,7 +124,7 @@ uint8_t board_buttons(void)
  ****************************************************************************/
 
 #if defined(CONFIG_SAM34_GPIOA_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
-xcpt_t board_button_irq(int id, xcpt_t irqhandler)
+xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
   xcpt_t oldhandler = NULL;
 
@@ -150,7 +150,7 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
           /* Configure the interrupt */
 
           sam_gpioirq(GPIO_BP2);
-          (void)irq_attach(IRQ_BP2, irqhandler);
+          (void)irq_attach(IRQ_BP2, irqhandler, NULL);
           sam_gpioirqenable(IRQ_BP2);
         }
       else
