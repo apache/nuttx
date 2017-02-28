@@ -199,7 +199,6 @@ struct stm32l4_qeconfig_s
   uint32_t ti2cfg;  /* TI2 input pin configuration (20-bit encoding) */
   uint32_t base;    /* Register base address */
   uint32_t psc;     /* Encoder pulses prescaler */
-  xcpt_t   handler; /* Interrupt handler for this IRQ */
 };
 
 /* Overall, RAM-based state structure */
@@ -244,25 +243,7 @@ static FAR struct stm32l4_lowerhalf_s *stm32l4_tim2lower(int tim);
 /* Interrupt handling */
 
 #ifdef HAVE_16BIT_TIMERS
-static int stm32l4_interrupt(FAR struct stm32l4_lowerhalf_s *priv);
-#if defined(CONFIG_STM32L4_TIM1_QE) && TIM1_BITWIDTH == 16
-static int stm32l4_tim1interrupt(int irq, FAR void *context, FAR void * arg);
-#endif
-#if defined(CONFIG_STM32L4_TIM2_QE) && TIM2_BITWIDTH == 16
-static int stm32l4_tim2interrupt(int irq, FAR void *context, FAR void * arg);
-#endif
-#if defined(CONFIG_STM32L4_TIM3_QE) && TIM3_BITWIDTH == 16
-static int stm32l4_tim3interrupt(int irq, FAR void *context, FAR void * arg);
-#endif
-#if defined(CONFIG_STM32L4_TIM4_QE) && TIM4_BITWIDTH == 16
-static int stm32l4_tim4interrupt(int irq, FAR void *context, FAR void * arg);
-#endif
-#if defined(CONFIG_STM32L4_TIM5_QE) && TIM5_BITWIDTH == 16
-static int stm32l4_tim5interrupt(int irq, FAR void *context, FAR void * arg);
-#endif
-#if defined(CONFIG_STM32L4_TIM8_QE) && TIM8_BITWIDTH == 16
-static int stm32l4_tim8interrupt(int irq, FAR void *context, FAR void * arg);
-#endif
+static int stm32l4_interrupt(int irq, FAR void *context, FAR void *arg);
 #endif
 
 /* Lower-half Quadrature Encoder Driver Methods */
@@ -301,9 +282,6 @@ static const struct stm32l4_qeconfig_s g_tim1config =
   .psc      = CONFIG_STM32L4_TIM1_QEPSC,
   .ti1cfg   = GPIO_TIM1_CH1IN,
   .ti2cfg   = GPIO_TIM1_CH2IN,
-#if TIM1_BITWIDTH == 16
-  .handler  = stm32l4_tim1interrupt,
-#endif
 };
 
 static struct stm32l4_lowerhalf_s g_tim1lower =
@@ -327,9 +305,6 @@ static const struct stm32l4_qeconfig_s g_tim2config =
   .psc      = CONFIG_STM32L4_TIM2_QEPSC,
   .ti1cfg   = GPIO_TIM2_CH1IN,
   .ti2cfg   = GPIO_TIM2_CH2IN,
-#if TIM2_BITWIDTH == 16
-  .handler  = stm32l4_tim2interrupt,
-#endif
 };
 
 static struct stm32l4_lowerhalf_s g_tim2lower =
@@ -353,9 +328,6 @@ static const struct stm32l4_qeconfig_s g_tim3config =
   .psc      = CONFIG_STM32L4_TIM3_QEPSC,
   .ti1cfg   = GPIO_TIM3_CH1IN,
   .ti2cfg   = GPIO_TIM3_CH2IN,
-#if TIM3_BITWIDTH == 16
-  .handler  = stm32l4_tim3interrupt,
-#endif
 };
 
 static struct stm32l4_lowerhalf_s g_tim3lower =
@@ -379,9 +351,6 @@ static const struct stm32l4_qeconfig_s g_tim4config =
   .psc      = CONFIG_STM32L4_TIM4_QEPSC,
   .ti1cfg   = GPIO_TIM4_CH1IN,
   .ti2cfg   = GPIO_TIM4_CH2IN,
-#if TIM4_BITWIDTH == 16
-  .handler  = stm32l4_tim4interrupt,
-#endif
 };
 
 static struct stm32l4_lowerhalf_s g_tim4lower =
@@ -405,9 +374,6 @@ static const struct stm32l4_qeconfig_s g_tim5config =
   .psc      = CONFIG_STM32L4_TIM5_QEPSC,
   .ti1cfg   = GPIO_TIM5_CH1IN,
   .ti2cfg   = GPIO_TIM5_CH2IN,
-#if TIM5_BITWIDTH == 16
-  .handler  = stm32l4_tim5interrupt,
-#endif
 };
 
 static struct stm32l4_lowerhalf_s g_tim5lower =
@@ -431,9 +397,6 @@ static const struct stm32l4_qeconfig_s g_tim8config =
   .psc      = CONFIG_STM32L4_TIM8_QEPSC,
   .ti1cfg   = GPIO_TIM8_CH1IN,
   .ti2cfg   = GPIO_TIM8_CH2IN,
-#if TIM8_BITWIDTH == 16
-  .handler  = stm32l4_tim8interrupt,
-#endif
 };
 
 static struct stm32l4_lowerhalf_s g_tim8lower =
@@ -645,9 +608,12 @@ static FAR struct stm32l4_lowerhalf_s *stm32l4_tim2lower(int tim)
  ************************************************************************************/
 
 #ifdef HAVE_16BIT_TIMERS
-static int stm32l4_interrupt(FAR struct stm32l4_lowerhalf_s *priv)
+static int stm32l4_interrupt(int irq, FAR void *context, FAR void *arg)
 {
+  FAR struct stm32l4_lowerhalf_s *priv = (FAR struct stm32l4_lowerhalf_s *)arg;
   uint16_t regval;
+
+  DEBUGASSERT(priv != NULL);
 
   /* Verify that this is an update interrupt.  Nothing else is expected. */
 
@@ -673,56 +639,6 @@ static int stm32l4_interrupt(FAR struct stm32l4_lowerhalf_s *priv)
     }
 
   return OK;
-}
-#endif
-
-/************************************************************************************
- * Name: stm32l4_timNinterrupt
- *
- * Description:
- *   TIMN interrupt handler
- *
- ************************************************************************************/
-
-#if defined(CONFIG_STM32L4_TIM1_QE) && TIM1_BITWIDTH == 16
-static int stm32l4_tim1interrupt(int irq, FAR void *context, FAR void * arg)
-{
-  return stm32l4_interrupt(&g_tim1lower);
-}
-#endif
-
-#if defined(CONFIG_STM32L4_TIM2_QE) && TIM2_BITWIDTH == 16
-static int stm32l4_tim2interrupt(int irq, FAR void *context, FAR void * arg)
-{
-  return stm32l4_interrupt(&g_tim2lower);
-}
-#endif
-
-#if defined(CONFIG_STM32L4_TIM3_QE) && TIM3_BITWIDTH == 16
-static int stm32l4_tim3interrupt(int irq, FAR void *context, FAR void * arg)
-{
-  return stm32l4_interrupt(&g_tim3lower);
-}
-#endif
-
-#if defined(CONFIG_STM32L4_TIM4_QE) && TIM4_BITWIDTH == 16
-static int stm32l4_tim4interrupt(int irq, FAR void *context, FAR void * arg)
-{
-  return stm32l4_interrupt(&g_tim4lower);
-}
-#endif
-
-#if defined(CONFIG_STM32L4_TIM5_QE) && TIM5_BITWIDTH == 16
-static int stm32l4_tim5interrupt(int irq, FAR void *context, FAR void * arg)
-{
-  return stm32l4_interrupt(&g_tim5lower);
-}
-#endif
-
-#if defined(CONFIG_STM32L4_TIM8_QE) && TIM8_BITWIDTH == 16
-static int stm32l4_tim8interrupt(int irq, FAR void *context, FAR void * arg)
-{
-  return stm32l4_interrupt(&g_tim8lower);
 }
 #endif
 
@@ -912,7 +828,7 @@ static int stm32l4_setup(FAR struct qe_lowerhalf_s *lower)
     {
       /* Attach the interrupt handler */
 
-      ret = irq_attach(priv->config->irq, priv->config->handler, NULL);
+      ret = irq_attach(priv->config->irq, stm32l4_interrupt, priv);
       if (ret < 0)
         {
           stm32l4_shutdown(lower);

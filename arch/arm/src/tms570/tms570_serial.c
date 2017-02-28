@@ -132,7 +132,6 @@ struct tms570_dev_s
 {
   const uint32_t scibase;       /* Base address of SCI registers */
   struct sci_config_s config;   /* SCI configuration */
-  xcpt_t handler;               /* Interrupt handler */
   uint8_t irq;                  /* IRQ associated with this SCI */
 };
 
@@ -144,13 +143,7 @@ static int  tms570_setup(struct uart_dev_s *dev);
 static void tms570_shutdown(struct uart_dev_s *dev);
 static int  tms570_attach(struct uart_dev_s *dev);
 static void tms570_detach(struct uart_dev_s *dev);
-static int tms570_interrupt(struct uart_dev_s *dev);
-#ifdef CONFIG_TMS570_SCI1
-static int  tms570_sci1_interrupt(int irq, void *context, FAR void *arg);
-#endif
-#ifdef CONFIG_TMS570_SCI2
-static int  tms570_sci2_interrupt(int irq, void *context, FAR void *arg);
-#endif
+static int  tms570_interrupt(int irq, void *context, FAR void *arg);
 static int  tms570_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int  tms570_receive(struct uart_dev_s *dev, uint32_t *status);
 static void tms570_rxint(struct uart_dev_s *dev, bool enable);
@@ -207,7 +200,6 @@ static struct tms570_dev_s g_sci1priv =
     .bits         = CONFIG_SCI1_BITS,
     .stopbits2    = CONFIG_SCI1_2STOP,
   },
-  .handler        = tms570_sci1_interrupt,
   .irq            = TMS570_REQ_SCI1_0,
 };
 
@@ -241,7 +233,6 @@ static struct tms570_dev_s g_sci2priv =
     .bits         = CONFIG_SCI2_BITS,
     .stopbits2    = CONFIG_SCI2_2STOP,
   },
-  .handler        = tms570_sci2_interrupt,
   .irq            = TMS570_REQ_SCI2_0,
 };
 
@@ -387,7 +378,7 @@ static int tms570_attach(struct uart_dev_s *dev)
 
   /* Attach and enable the IRQ */
 
-  ret = irq_attach(priv->irq, priv->handler, NULL);
+  ret = irq_attach(priv->irq, tms570_interrupt, dev);
   if (ret == OK)
     {
       /* Enable the interrupt (RX and TX interrupts are still disabled
@@ -428,10 +419,11 @@ static void tms570_detach(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static int tms570_interrupt(struct uart_dev_s *dev)
+static int tms570_interrupt(int irq, void *context, FAR void *arg)
 {
+  struct uart_dev_s *dev = (struct uart_dev_s *)arg;
   struct tms570_dev_s *priv;
-  uint32_t          intvec;
+  uint32_t intvec;
 
   DEBUGASSERT(dev != NULL && dev->priv != NULL);
   priv = (struct tms570_dev_s *)dev->priv;
@@ -513,27 +505,6 @@ static int tms570_interrupt(struct uart_dev_s *dev)
 
   return OK;
 }
-
-/****************************************************************************
- * Name: tms570_sci[n]_interrupt
- *
- * Description:
- *   SCI interrupt handlers
- *
- ****************************************************************************/
-
-#ifdef CONFIG_TMS570_SCI1
-static int  tms570_sci1_interrupt(int irq, void *context, FAR void *arg)
-{
-  return tms570_interrupt(&g_sci1port);
-}
-#endif
-#ifdef CONFIG_TMS570_SCI2
-static int  tms570_sci2_interrupt(int irq, void *context, FAR void *arg)
-{
-  return tms570_interrupt(&g_sci2port);
-}
-#endif
 
 /****************************************************************************
  * Name: tms570_ioctl

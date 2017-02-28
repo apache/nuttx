@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/xtensa/src/esp32/esp32_serial.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -147,7 +147,6 @@
 struct esp32_config_s
 {
   const uint32_t uartbase;      /* Base address of UART registers */
-  xcpt_t   handler;             /* Interrupt handler */
   uint8_t  periph;              /* UART peripheral ID */
   uint8_t  irq;                 /* IRQ number assigned to the peripheral */
   uint8_t  txpin;               /* Tx pin number (0-39) */
@@ -186,16 +185,7 @@ static int  esp32_setup(struct uart_dev_s *dev);
 static void esp32_shutdown(struct uart_dev_s *dev);
 static int  esp32_attach(struct uart_dev_s *dev);
 static void esp32_detach(struct uart_dev_s *dev);
-static int  esp32_interrupt(struct uart_dev_s *dev);
-#ifdef CONFIG_ESP32_UART0
-static int  esp32_uart0_interrupt(int cpuint, void *context, FAR void *arg);
-#endif
-#ifdef CONFIG_ESP32_UART1
-static int  esp32_uart1_interrupt(int cpuint, void *context, FAR void *arg);
-#endif
-#ifdef CONFIG_ESP32_UART2
-static int  esp32_uart2_interrupt(int cpuint, void *context, FAR void *arg);
-#endif
+static int  esp32_interrupt(int cpuint, void *context, FAR void *arg);
 static int  esp32_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int  esp32_receive(struct uart_dev_s *dev, unsigned int *status);
 static void esp32_rxint(struct uart_dev_s *dev, bool enable);
@@ -249,7 +239,6 @@ static char g_uart2txbuffer[CONFIG_UART2_TXBUFSIZE];
 static const struct esp32_config_s g_uart0config =
 {
   .uartbase       = DR_REG_UART_BASE,
-  .handler        = esp32_uart0_interrupt,
   .periph         = ESP32_PERIPH_UART,
   .irq            = ESP32_IRQ_UART,
   .txpin          = CONFIG_ESP32_UART0_TXPIN,
@@ -296,7 +285,6 @@ static uart_dev_t g_uart0port =
 static const struct esp32_config_s g_uart1config =
 {
   .uartbase       = DR_REG_UART1_BASE,
-  .handler        = esp32_uart1_interrupt,
   .periph         = ESP32_PERIPH_UART1,
   .irq            = ESP32_IRQ_UART1,
   .txpin          = CONFIG_ESP32_UART1_TXPIN,
@@ -343,7 +331,6 @@ static uart_dev_t g_uart1port =
 static const struct esp32_config_s g_uart2config =
 {
   .uartbase       = DR_REG_UART2_BASE,
-  .handler        = esp32_uart2_interrupt,
   .periph         = ESP32_PERIPH_UART2,
   .irq            = ESP32_IRQ_UART2,
   .txpin          = CONFIG_ESP32_UART2_TXPIN,
@@ -675,7 +662,7 @@ static int esp32_attach(struct uart_dev_s *dev)
 
   /* Attach and enable the IRQ */
 
-  ret = irq_attach(priv->config->irq, priv->config->handler, NULL);
+  ret = irq_attach(priv->config->irq, esp32_interrupt, dev);
   if (ret == OK)
     {
       /* Enable the CPU interrupt (RX and TX interrupts are still disabled
@@ -735,8 +722,9 @@ static void esp32_detach(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static int esp32_interrupt(struct uart_dev_s *dev)
+static int esp32_interrupt(int cpuint, void *context, FAR void *arg)
 {
+  struct uart_dev_s *dev = (struct uart_dev_s *)arg;
   struct esp32_dev_s *priv;
   uint32_t regval;
   uint32_t status;
@@ -805,33 +793,6 @@ static int esp32_interrupt(struct uart_dev_s *dev)
 
   return OK;
 }
-
-/****************************************************************************
- * Name: esp32_uart[n]_interrupt
- *
- * Description:
- *   UART interrupt handlers
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ESP32_UART0
-static int  esp32_uart0_interrupt(int cpuint, void *context, FAR void *arg)
-{
-  return esp32_interrupt(&g_uart0port);
-}
-#endif
-#ifdef CONFIG_ESP32_UART1
-static int  esp32_uart1_interrupt(int cpuint, void *context, FAR void *arg)
-{
-  return esp32_interrupt(&g_uart1port);
-}
-#endif
-#ifdef CONFIG_ESP32_UART2
-static int  esp32_uart2_interrupt(int cpuint, void *context, FAR void *arg)
-{
-  return esp32_interrupt(&g_uart2port);
-}
-#endif
 
 /****************************************************************************
  * Name: esp32_ioctl
