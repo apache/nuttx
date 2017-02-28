@@ -159,7 +159,7 @@ static bool stm32can_txempty(FAR struct can_dev_s *dev);
 
 /* CAN interrupt handling */
 
-static int  stm32can_rxinterrupt(int irq, FAR void *context, int rxmb);
+static int  stm32can_rxinterrupt(FAR struct can_dev_s *dev, int rxmb);
 static int  stm32can_rx0interrupt(int irq, FAR void *context, FAR void *arg);
 static int  stm32can_rx1interrupt(int irq, FAR void *context, FAR void *arg);
 static int  stm32can_txinterrupt(int irq, FAR void *context, FAR void *arg);
@@ -654,7 +654,7 @@ static int stm32can_setup(FAR struct can_dev_s *dev)
    * The others are not used.
    */
 
-  ret = irq_attach(priv->canrx[0], stm32can_rx0interrupt, NULL);
+  ret = irq_attach(priv->canrx[0], stm32can_rx0interrupt, dev);
   if (ret < 0)
     {
       canerr("ERROR: Failed to attach CAN%d RX0 IRQ (%d)",
@@ -662,7 +662,7 @@ static int stm32can_setup(FAR struct can_dev_s *dev)
       return ret;
     }
 
-  ret = irq_attach(priv->canrx[1], stm32can_rx1interrupt, NULL);
+  ret = irq_attach(priv->canrx[1], stm32can_rx1interrupt, dev);
   if (ret < 0)
     {
       canerr("ERROR: Failed to attach CAN%d RX1 IRQ (%d)",
@@ -670,7 +670,7 @@ static int stm32can_setup(FAR struct can_dev_s *dev)
       return ret;
     }
 
-  ret = irq_attach(priv->cantx, stm32can_txinterrupt, NULL);
+  ret = irq_attach(priv->cantx, stm32can_txinterrupt, dev);
   if (ret < 0)
     {
       canerr("ERROR: Failed to attach CAN%d TX IRQ (%d)",
@@ -1371,9 +1371,8 @@ static bool stm32can_txempty(FAR struct can_dev_s *dev)
  *
  ****************************************************************************/
 
-static int stm32can_rxinterrupt(int irq, FAR void *context, int rxmb)
+static int stm32can_rxinterrupt(FAR struct can_dev_s *dev, int rxmb)
 {
-  FAR struct can_dev_s *dev = NULL;
   FAR struct stm32_can_s *priv;
   struct can_hdr_s hdr;
   uint8_t data[CAN_MAXDATALEN];
@@ -1381,24 +1380,7 @@ static int stm32can_rxinterrupt(int irq, FAR void *context, int rxmb)
   int npending;
   int ret;
 
-#if defined(CONFIG_STM32_CAN1) && defined(CONFIG_STM32_CAN2)
-  if (g_can1priv.canrx[rxmb] == irq)
-    {
-      dev = &g_can1dev;
-    }
-  else if (g_can2priv.canrx[rxmb] == irq)
-    {
-      dev = &g_can2dev;
-    }
-  else
-    {
-      PANIC();
-    }
-#elif defined(CONFIG_STM32_CAN1)
-  dev = &g_can1dev;
-#else /* defined(CONFIG_STM32_CAN2) */
-  dev = &g_can2dev;
-#endif
+  DEBUGASSERT(dev != NULL && dev->cd_priv != NULL);
   priv = dev->cd_priv;
 
   /* Verify that a message is pending in the FIFO */
@@ -1508,7 +1490,8 @@ errout:
 
 static int stm32can_rx0interrupt(int irq, FAR void *context, FAR void *arg)
 {
-  return stm32can_rxinterrupt(irq, context, 0);
+  FAR struct can_dev_s *dev = (FAR struct can_dev_s *)arg;
+  return stm32can_rxinterrupt(dev, 0);
 }
 
 /****************************************************************************
@@ -1528,7 +1511,8 @@ static int stm32can_rx0interrupt(int irq, FAR void *context, FAR void *arg)
 
 static int stm32can_rx1interrupt(int irq, FAR void *context, FAR void *arg)
 {
-  return stm32can_rxinterrupt(irq, context, 1);
+  FAR struct can_dev_s *dev = (FAR struct can_dev_s *)arg;
+  return stm32can_rxinterrupt(dev, 1);
 }
 
 /****************************************************************************
@@ -1548,28 +1532,11 @@ static int stm32can_rx1interrupt(int irq, FAR void *context, FAR void *arg)
 
 static int stm32can_txinterrupt(int irq, FAR void *context, FAR void *arg)
 {
-  FAR struct can_dev_s *dev = NULL;
+  FAR struct can_dev_s *dev = (FAR struct can_dev_s *)arg;
   FAR struct stm32_can_s *priv;
   uint32_t regval;
 
-#if defined(CONFIG_STM32_CAN1) && defined(CONFIG_STM32_CAN2)
-  if (g_can1priv.cantx == irq)
-    {
-      dev = &g_can1dev;
-    }
-  else if (g_can2priv.cantx == irq)
-    {
-      dev = &g_can2dev;
-    }
-  else
-    {
-      PANIC();
-    }
-#elif defined(CONFIG_STM32_CAN1)
-  dev = &g_can1dev;
-#else /* defined(CONFIG_STM32_CAN2) */
-  dev = &g_can2dev;
-#endif
+  DEBUGASSERT(dev != NULL && dev->cd_priv != NULL);
   priv = dev->cd_priv;
 
   /* Get the transmit status */

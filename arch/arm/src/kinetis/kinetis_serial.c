@@ -688,11 +688,11 @@ static int up_attach(struct uart_dev_s *dev)
    * disabled in the C2 register.
    */
 
-  ret = irq_attach(priv->irqs, up_interrupts, NULL);
+  ret = irq_attach(priv->irqs, up_interrupts, dev);
 #ifdef CONFIG_DEBUG_FEATURES
   if (ret == OK)
     {
-      ret = irq_attach(priv->irqe, up_interrupt, NULL);
+      ret = irq_attach(priv->irqe, up_interrupt, dev);
     }
 #endif
 
@@ -749,58 +749,12 @@ static void up_detach(struct uart_dev_s *dev)
 #ifdef CONFIG_DEBUG_FEATURES
 static int up_interrupt(int irq, void *context, FAR void *arg)
 {
-  struct uart_dev_s *dev = NULL;
+  struct uart_dev_s *dev = (struct uart_dev_s *)arg;
   struct up_dev_s   *priv;
   uint8_t            regval;
 
-#ifdef CONFIG_KINETIS_UART0
-  if (g_uart0priv.irqe == irq)
-    {
-      dev = &g_uart0port;
-    }
-  else
-#endif
-#ifdef CONFIG_KINETIS_UART1
-  if (g_uart1priv.irqe == irq)
-    {
-      dev = &g_uart1port;
-    }
-  else
-#endif
-#ifdef CONFIG_KINETIS_UART2
-  if (g_uart2priv.irqe == irq)
-    {
-      dev = &g_uart2port;
-    }
-  else
-#endif
-#ifdef CONFIG_KINETIS_UART3
-  if (g_uart3priv.irqe == irq)
-    {
-      dev = &g_uart3port;
-    }
-  else
-#endif
-#ifdef CONFIG_KINETIS_UART4
-  if (g_uart4priv.irqe == irq)
-    {
-      dev = &g_uart4port;
-    }
-  else
-#endif
-#ifdef CONFIG_KINETIS_UART5
-  if (g_uart5priv.irqe == irq)
-    {
-      dev = &g_uart5port;
-    }
-  else
-#endif
-    {
-      PANIC();
-    }
-
+  DEBUGASSERT(dev != NULL && dev->priv != NULL);
   priv = (struct up_dev_s *)dev->priv;
-  DEBUGASSERT(priv);
 
   /* Handle error interrupts.  This interrupt may be caused by:
    *
@@ -837,7 +791,7 @@ static int up_interrupt(int irq, void *context, FAR void *arg)
 
 static int up_interrupts(int irq, void *context, FAR void *arg)
 {
-  struct uart_dev_s *dev = NULL;
+  struct uart_dev_s *dev = (struct uart_dev_s *)arg;
   struct up_dev_s   *priv;
   int                passes;
 #ifdef CONFIG_KINETIS_UARTFIFOS
@@ -847,53 +801,8 @@ static int up_interrupts(int irq, void *context, FAR void *arg)
 #endif
   bool               handled;
 
-#ifdef CONFIG_KINETIS_UART0
-  if (g_uart0priv.irqs == irq)
-    {
-      dev = &g_uart0port;
-    }
-  else
-#endif
-#ifdef CONFIG_KINETIS_UART1
-  if (g_uart1priv.irqs == irq)
-    {
-      dev = &g_uart1port;
-    }
-  else
-#endif
-#ifdef CONFIG_KINETIS_UART2
-  if (g_uart2priv.irqs == irq)
-    {
-      dev = &g_uart2port;
-    }
-  else
-#endif
-#ifdef CONFIG_KINETIS_UART3
-  if (g_uart3priv.irqs == irq)
-    {
-      dev = &g_uart3port;
-    }
-  else
-#endif
-#ifdef CONFIG_KINETIS_UART4
-  if (g_uart4priv.irqs == irq)
-    {
-      dev = &g_uart4port;
-    }
-  else
-#endif
-#ifdef CONFIG_KINETIS_UART5
-  if (g_uart5priv.irqs == irq)
-    {
-      dev = &g_uart5port;
-    }
-  else
-#endif
-    {
-      PANIC();
-    }
+  DEBUGASSERT(dev != NULL && dev->priv != NULL);
   priv = (struct up_dev_s *)dev->priv;
-  DEBUGASSERT(priv);
 
   /* Loop until there are no characters to be transferred or,
    * until we have been looping for a long time.
