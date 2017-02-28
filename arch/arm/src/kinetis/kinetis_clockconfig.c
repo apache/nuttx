@@ -360,6 +360,16 @@ void kinetis_pllconfig(void)
   putreg32(regval32, KINETIS_SIM_SOPT2);
 #endif
 
+#if defined(BOARD_SIM_CLKDIV2_FREQ)
+  /* Set up the SIM_CLKDIV2[USBFRAC, USBDIV] */
+
+  regval32 = getreg32(KINETIS_SIM_CLKDIV2);
+  regval32 &= ~(SIM_CLKDIV2_USBFRAC_MASK | SIM_CLKDIV2_USBDIV_MASK);
+  regval32 |= (SIM_CLKDIV2_USBFRAC(BOARD_SIM_CLKDIV2_USBFRAC) |
+               SIM_CLKDIV2_USBDIV(BOARD_SIM_CLKDIV2_USBDIV));
+  putreg32(regval32, KINETIS_SIM_CLKDIV2);
+#endif
+
 #if defined(BOARD_SIM_CLKDIV3_FREQ)
   /* Set up the SIM_CLKDIV3 [PLLFLLFRAC, PLLFLLDIV] */
 

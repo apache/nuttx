@@ -78,7 +78,7 @@
  * provide some minimal implementation of up_putc.
  */
 
-#ifdef USE_SERIALDRIVER
+#if defined(HAVE_LPUART_DEVICE) && defined(USE_SERIALDRIVER)
 
 /* Which LPUART with be tty0/console and which tty1?  The console will always
  * be ttyS0.  If there is no console then will use the lowest numbered LPUART.
@@ -399,7 +399,7 @@ static void kinetis_shutdown(struct uart_dev_s *dev)
 
   /* Reset hardware and disable Rx and Tx */
 
-  kinetis_uartreset(priv->uartbase);
+  kinetis_lpuartreset(priv->uartbase);
 }
 
 /****************************************************************************
@@ -772,7 +772,7 @@ static bool kinetis_txready(struct uart_dev_s *dev)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_earlyserialinit
+ * Name: kinetis_lpuart_earlyserialinit
  *
  * Description:
  *   Performs the low level LPUART initialization early in debug so that the
@@ -783,7 +783,7 @@ static bool kinetis_txready(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-void up_earlyserialinit(void)
+void kinetis_lpuart_earlyserialinit(void)
 {
   /* Disable interrupts from all LPUARTS.  The console is enabled in
    * kinetis_setup()
@@ -803,28 +803,47 @@ void up_earlyserialinit(void)
 }
 
 /****************************************************************************
- * Name: up_serialinit
+ * Name: kinetis_lpuart_serialinit
  *
  * Description:
  *   Register serial console and serial ports.  This assumes
  *   that up_earlyserialinit was called previously.
  *
+ * Input Parameters:
+ *   first: - First TTY number to assign
+ *
+ * Returns Value:
+ *   The next TTY number available for assignment
+ *
  ****************************************************************************/
 
-void up_serialinit(void)
+unsigned int kinetis_lpuart_serialinit(unsigned int first)
 {
-  /* Register the console */
+#if defined(CONFIG_KINETIS_MERGE_TTY)
+  char devname[] = "/dev/ttySx";
+#endif
+
+/* Register the console */
 
 #ifdef HAVE_LPUART_CONSOLE
   (void)uart_register("/dev/console", &CONSOLE_DEV);
 #endif
-
-  /* Register all LPUARTs */
+#if !defined(CONFIG_KINETIS_MERGE_TTY)
+  /* Register all LPUARTs as LPn devices */
 
   (void)uart_register("/dev/ttyLP0", &TTYS0_DEV);
-#ifdef TTYS1_DEV
+#  ifdef TTYS1_DEV
   (void)uart_register("/dev/ttyLP1", &TTYS1_DEV);
+#  endif
+#else
+  devname[(sizeof(devname)/sizeof(devname[0]))-2] = '0' + first++;
+  (void)uart_register(devname, &TTYS0_DEV);
+#  ifdef TTYS1_DEV
+  devname[(sizeof(devname)/sizeof(devname[0]))-2] = '0' + first++;
+  (void)uart_register(devname, &TTYS1_DEV);
+#  endif
 #endif
+  return first;
 }
 
 /****************************************************************************
@@ -889,4 +908,4 @@ int up_putc(int ch)
 }
 #endif
 
-#endif /* USE_SERIALDRIVER */
+#endif /* HAVE_LPUART_DEVICE && USE_SERIALDRIVER) */

@@ -341,6 +341,48 @@ extern "C"
 
 void kinetis_clockconfig(void);
 
+/****************************************************************************
+ * Name: kinetis_earlyserialinit
+ *
+ * Description:
+ *   Performs the low level UART/LPUART initialization early in debug so that
+ *   the serial console will be available during bootup.  This must be called
+ *   before up_serialinit.
+ *
+ ****************************************************************************/
+
+#ifdef USE_EARLYSERIALINIT
+void kinetis_earlyserialinit(void);
+#endif
+
+/****************************************************************************
+ * Name: kinetis_uart_earlyserialinit
+ *
+ * Description:
+ *   Performs the low level UART initialization early in debug so that the
+ *   serial console will be available during bootup.  This must be called
+ *   before up_serialinit.
+ *
+ ****************************************************************************/
+
+#ifdef USE_EARLYSERIALINIT
+void kinetis_uart_earlyserialinit(void);
+#endif
+
+/****************************************************************************
+ * Name: kinetis_lpuart_earlyserialinit
+ *
+ * Description:
+ *   Performs the low level LPUART initialization early in debug so that the
+ *   serial console will be available during bootup.  This must be called
+ *   before up_serialinit.
+ *
+ ****************************************************************************/
+
+#ifdef USE_EARLYSERIALINIT
+void kinetis_lpuart_earlyserialinit(void);
+#endif
+
 /************************************************************************************
  * Name: kinetis_lowsetup
  *
@@ -352,6 +394,44 @@ void kinetis_clockconfig(void);
  ************************************************************************************/
 
 void kinetis_lowsetup(void);
+
+/****************************************************************************
+ * Name: kinetis_uart_serialinit
+ *
+ * Description:
+ *   Register all UART based serial console and serial ports.  This assumes
+ *   that kinetis_earlyserialinit was called previously.
+ *
+ * Input Parameters:
+ *   first: - First TTY number to assign
+ *
+ * Returns Value:
+ *   The next TTY number available for assignment
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_UART_DEVICE
+unsigned int kinetis_uart_serialinit(unsigned int first);
+#endif
+
+/****************************************************************************
+ * Name: kinetis_lpuart_serialinit
+ *
+ * Description:
+ *   Register all LPUART based serial console and serial ports.  This assumes
+ *   that kinetis_earlyserialinit was called previously.
+ *
+ * Input Parameters:
+ *   first: - First TTY number to assign
+ *
+ * Returns Value:
+ *   The next TTY number available for assignment
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_LPUART_DEVICE
+unsigned int kinetis_lpuart_serialinit(unsigned int first);
+#endif
 
 /****************************************************************************
  * Name: kinetis_uartreset
@@ -432,7 +512,7 @@ int kinetis_pinconfig(uint32_t cfgset);
  *   Configure the digital filter associated with a port. The digital filter
  *   capabilities of the PORT module are available in all digital pin muxing modes.
  *
- * Input parmeters:
+ * Input Parameters:
  *   port  - See KINETIS_PORTn definitions in kinetis_port.h
  *   lpo   - true: Digital Filters are clocked by the bus clock
  *           false: Digital Filters are clocked by the 1 kHz LPO clock
@@ -488,11 +568,12 @@ void kinetis_pinirqinitialize(void);
  *   3. Call kinetis_pinirqenable() to enable interrupts on the pin.
  *
  * Parameters:
- *  - pinset:  Pin configuration
- *  - pinisr:  Pin interrupt service routine
- *  - arg:     And argument that will be provided to the interrupt service routine.
+ *  pinset -  Pin configuration
+ *  pinisr -:wq
+:wq:  Pin interrupt service routine
+ *  arg:r  -   And argument that will be provided to the interrupt service routine.
  *
- * Returns:
+ * Return Value:
  *   The previous value of the interrupt handler function pointer.  This value may,
  *   for example, be used to restore the previous handler when multiple handlers are
  *   used.
@@ -584,7 +665,7 @@ void kinetis_clrpend(int irq);
  * Description:
  *   Initialize SDIO for operation.
  *
- * Input Parameters:
+ * Input parameters:
  *   slotno - Not used.
  *
  * Returned Values:

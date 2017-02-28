@@ -4393,36 +4393,23 @@ void up_usbinitialize(void)
    * it using a pointer to make any future ports to multiple USB controllers
    * easier.
    */
-#if 1
-#warning "This code needs to be driven by BOARD_ settings and SIM_SOPT2[PLLFLLSE] needs to be set globally"
-  /* 1: Select clock source */
+
+  /* Select clock source:
+   * SIM_SOPT2[PLLFLLSEL] and SIM_CLKDIV2[USBFRAC, USBDIV] will have been
+   * configured in kinetis_pllconfig. So here we select between USB_CLKIN
+   * or the output of SIM_CLKDIV2[USBFRAC, USBDIV]
+   */
 
   regval = getreg32(KINETIS_SIM_SOPT2);
-  regval |= SIM_SOPT2_PLLFLLSEL_MCGPLLCLK | SIM_SOPT2_USBSRC;
+  regval &= ~(SIM_SOPT2_USBSRC);
+  regval |= BOARD_USB_CLKSRC;
   putreg32(regval, KINETIS_SIM_SOPT2);
-
-  regval = getreg32(KINETIS_SIM_CLKDIV2);
-
-#if defined(CONFIG_TEENSY_3X_OVERCLOCK)
-  /* USBFRAC/USBDIV = 1/2 of 96Mhz clock = 48MHz */
-
-  regval = SIM_CLKDIV2_USBDIV(2) | SIM_CLKDIV2_USBFRAC(1);
-#else
-  /* USBFRAC/USBDIV = 2/3 of 72Mhz clock = 48MHz */
-  /* 72Mhz */
-
-  regval = SIM_CLKDIV2_USBDIV(3) | SIM_CLKDIV2_USBFRAC(2);
-#endif
-
-  putreg32(regval, KINETIS_SIM_CLKDIV2);
 
   /* 2: Gate USB clock */
 
   regval = getreg32(KINETIS_SIM_SCGC4);
   regval |= SIM_SCGC4_USBOTG;
   putreg32(regval, KINETIS_SIM_SCGC4);
-
-#endif
 
   usbtrace(TRACE_DEVINIT, 0);
 
