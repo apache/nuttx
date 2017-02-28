@@ -474,7 +474,7 @@ static void kinetis_detach(struct uart_dev_s *dev)
 
 static int kinetis_interrupt(int irq, void *context, void *arg)
 {
-  struct uart_dev_s *dev = (struct uart_dev_s *dev)arg;
+  struct uart_dev_s *dev = (struct uart_dev_s *)arg;
   struct kinetis_dev_s *priv;
   uint32_t stat;
   uint32_t ctrl;
