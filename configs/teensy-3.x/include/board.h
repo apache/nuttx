@@ -74,10 +74,10 @@
  * is 72MHz and 50MHz for the MK20DX128VLH5, but according to the PJRC website,
  * both can be overclocked at 96MHz
  *
- * MK20DX128VLH5 Rated Frequency 50MHz
+ * MK20DX128VLH5 Rated Frequency 50MHz (selecting 48Mhz to use USB)
  *
  *   PLL Input frequency:   PLLIN  = REFCLK/PRDIV = 16MHz/8 = 2MHz
- *   PLL Output frequency:  PLLOUT = PLLIN*VDIV   = 2Mhz*25  = 50MHz
+ *   PLL Output frequency:  PLLOUT = PLLIN*VDIV   = 2Mhz*24  = 48MHz
  *   MCG Frequency:         PLLOUT = 48MHz
  *
  * MK20DX256VLH7 Rated Frequency 72MHz
@@ -102,7 +102,7 @@
 
 #  define BOARD_OUTDIV1      1              /* Core        = MCG, 96MHz */
 #  define BOARD_OUTDIV2      2              /* Bus         = MCG/2, 48MHz */
-#  define BOARD_OUTDIV3      2              /* FlexBus     = MCG/2, 48MHz */
+#  define BOARD_OUTDIV3      0              /* N/A         = No  OUTDIV3 */
 #  define BOARD_OUTDIV4      4              /* Flash clock = MCG/4, 24MHz */
 
 #elif defined(CONFIG_ARCH_CHIP_MK20DX256VLH7)
@@ -116,21 +116,21 @@
 
 #  define BOARD_OUTDIV1      1              /* Core        = MCG, 72MHz */
 #  define BOARD_OUTDIV2      2              /* Bus         = MCG/2, 36MHz */
-#  define BOARD_OUTDIV3      2              /* FlexBus     = MCG/2, 36MHz */
+#  define BOARD_OUTDIV3      0              /* N/A         = No  OUTDIV3 */
 #  define BOARD_OUTDIV4      3              /* Flash clock = MCG/3, 72MHz */
 
 #elif defined(CONFIG_ARCH_CHIP_MK20DX128VLH5)
 /* PLL Configuration */
 
 #  define BOARD_PRDIV        8              /* PLL External Reference Divider */
-#  define BOARD_VDIV         25             /* PLL VCO Divider (frequency multiplier) */
+#  define BOARD_VDIV         24             /* PLL VCO Divider (frequency multiplier) */
 
 /* SIM CLKDIV1 dividers */
 
-#  define BOARD_OUTDIV1      1              /* Core        = MCG, 50MHz */
-#  define BOARD_OUTDIV2      1              /* Bus         = MCG/1, 50MHz */
-#  define BOARD_OUTDIV3      1              /* FlexBus     = MCG/1, 20MHz */
-#  define BOARD_OUTDIV4      2              /* Flash clock = MCG/2, 25MHz */
+#  define BOARD_OUTDIV1      1              /* Core        = MCG, 48MHz */
+#  define BOARD_OUTDIV2      1              /* Bus         = MCG/1, 48MHz */
+#  define BOARD_OUTDIV3      0              /* N/A         = No  OUTDIV3 */
+#  define BOARD_OUTDIV4      2              /* Flash clock = MCG/2, 24MHz */
 #endif
 
 #define BOARD_PLLIN_FREQ     (BOARD_EXTAL_FREQ / BOARD_PRDIV)
@@ -141,6 +141,44 @@
 #define BOARD_BUS_FREQ       (BOARD_MCG_FREQ / BOARD_OUTDIV2)
 #define BOARD_FLEXBUS_FREQ   (BOARD_MCG_FREQ / BOARD_OUTDIV3)
 #define BOARD_FLASHCLK_FREQ  (BOARD_MCG_FREQ / BOARD_OUTDIV4)
+
+/* Use MCGPLLCLK as the output SIM_SOPT2 MUX selected by
+ * SIM_SOPT2[PLLFLLSEL]
+ */
+
+#define BOARD_SOPT2_PLLFLLSEL        SIM_SOPT2_PLLFLLSEL_MCGPLLCLK
+#define BOARD_SOPT2_FREQ             BOARD_MCG_FREQ
+
+ /* Divider output clock = Divider input clock × [ (USBFRAC+1) / (USBDIV+1) ]
+ *     SIM_CLKDIV2_FREQ = BOARD_SOPT2_FREQ × [ (USBFRAC+1) / (USBDIV+1) ]
+ */
+
+#if BOARD_SOPT2_FREQ == 96000000
+  /* USBFRAC/USBDIV = 1/2 of 96Mhz clock = 48MHz */
+
+#  define BOARD_SIM_CLKDIV2_USBFRAC  1
+#  define BOARD_SIM_CLKDIV2_USBDIV   2
+#elif BOARD_SOPT2_FREQ == 72000000
+  /* USBFRAC/USBDIV = 2/3 of 72Mhz clock = 48MHz */
+
+#  define BOARD_SIM_CLKDIV2_USBFRAC  2
+#  define BOARD_SIM_CLKDIV2_USBDIV   3
+#elif BOARD_SOPT2_FREQ == 48000000
+  /* USBFRAC/USBDIV = 1/1 of 48Mhz clock = 48MHz */
+
+#  define BOARD_SIM_CLKDIV2_USBFRAC  1
+#  define BOARD_SIM_CLKDIV2_USBDIV   1
+#endif
+
+#define BOARD_SIM_CLKDIV2_FREQ       (BOARD_SOPT2_FREQ / \
+                                      BOARD_SIM_CLKDIV2_USBDIV * \
+                                      BOARD_SIM_CLKDIV2_USBFRAC)
+
+/* Use the output of SIM_SOPT2[PLLFLLSEL] as the USB clock source */
+
+#define BOARD_USB_CLKSRC              SIM_SOPT2_USBSRC
+#define BOARD_USB_FREQ                BOARD_SIM_CLKDIV2_FREQ
+
 
 /* PWM Configuration */
 /* FTM0 Channels */
