@@ -418,7 +418,7 @@ static void stm32_endtransfer(struct stm32_dev_s *priv, sdio_eventset_t wkupeven
 
 static int  stm32_interrupt(int irq, void *context, FAR void *arg);
 #ifdef CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE
-static int  stm32_rdyinterrupt(int irq, void *context);
+static int  stm32_rdyinterrupt(int irq, void *context, FAR void *arg);
 #endif
 
 /* SDIO interface methods ***************************************************/
@@ -668,14 +668,14 @@ static void stm32_configwaitints(struct stm32_dev_s *priv, uint32_t waitmask,
 
       /* Arm the SDIO_D Ready and install Isr */
 
-      stm32_gpiosetevent(pinset, true, false, false, stm32_rdyinterrupt);
+      stm32_gpiosetevent(pinset, true, false, false, stm32_rdyinterrupt, priv);
     }
 
   /* Disarm SDIO_D ready */
 
   if ((wkupevent & SDIOWAIT_WRCOMPLETE) != 0)
     {
-      stm32_gpiosetevent(GPIO_SDIO_D0, false, false, false , NULL);
+      stm32_gpiosetevent(GPIO_SDIO_D0, false, false, false , NULL, NULL);
       stm32_configgpio(GPIO_SDIO_D0);
     }
 #endif
@@ -1315,9 +1315,9 @@ static void stm32_endtransfer(struct stm32_dev_s *priv, sdio_eventset_t wkupeven
  ****************************************************************************/
 
 #ifdef CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE
-static int stm32_rdyinterrupt(int irq, void *context)
+static int stm32_rdyinterrupt(int irq, void *context, FAR void *arg)
 {
-  struct stm32_dev_s *priv = &g_sdiodev;
+  struct stm32_dev_s *priv = (struct stm32_dev_s *) arg;
   stm32_endwait(priv, SDIOWAIT_WRCOMPLETE);
   return OK;
 }

@@ -305,7 +305,7 @@ static int stm32_interrupt(int irq, FAR void *context, FAR void *arg)
            * upon return.
            */
 
-          priv->handler(irq, context);
+          priv->handler(irq, context, arg);
         }
 
       /* The EWI interrupt is cleared by writing '0' to the EWIF bit in the
@@ -780,7 +780,7 @@ void stm32_wwdginitialize(FAR const char *devpath)
 
   (void)watchdog_register(devpath, (FAR struct watchdog_lowerhalf_s *)priv);
 
-  /* When the microcontroller enters debug mode (Cortex™-M4F core halted),
+  /* When the microcontroller enters debug mode (Cortexï¿½-M4F core halted),
    * the WWDG counter either continues to work normally or stops, depending
    * on DBG_WWDG_STOP configuration bit in DBG module.
    */
