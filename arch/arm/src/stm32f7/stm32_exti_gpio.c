@@ -242,12 +242,12 @@ static int stm32_exti_multiisr(int irq, void *context, int first, int last)
   return ret;
 }
 
-static int stm32_exti95_isr(int irq, void *context)
+static int stm32_exti95_isr(int irq, void *context, void *arg)
 {
   return stm32_exti_multiisr(irq, context, 5, 9);
 }
 
-static int stm32_exti1510_isr(int irq, void *context)
+static int stm32_exti1510_isr(int irq, void *context, void *arg)
 {
   return stm32_exti_multiisr(irq, context, 10, 15);
 }

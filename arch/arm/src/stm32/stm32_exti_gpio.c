@@ -81,7 +81,7 @@ static struct gpio_callback_s g_gpio_callbacks[16];
  * Interrupt Service Routines - Dispatchers
  ****************************************************************************/
 
-static int stm32_exti0_isr(int irq, void *context, FAR void *arg)
+static int stm32_exti0_isr(int irq, void *context, void *arg)
 {
   int ret = OK;
 
@@ -123,7 +123,7 @@ static int stm32_exti1_isr(int irq, void *context, void *arg)
   return ret;
 }
 
-static int stm32_exti2_isr(int irq, void *context, FAR void *arg)
+static int stm32_exti2_isr(int irq, void *context, void *arg)
 {
   int ret = OK;
 
@@ -165,7 +165,7 @@ static int stm32_exti3_isr(int irq, void *context, void  * arg)
   return ret;
 }
 
-static int stm32_exti4_isr(int irq, void *context, FAR void *arg)
+static int stm32_exti4_isr(int irq, void *context, void *arg)
 {
   int ret = OK;
 
@@ -186,7 +186,8 @@ static int stm32_exti4_isr(int irq, void *context, FAR void *arg)
   return ret;
 }
 
-static int stm32_exti_multiisr(int irq, void *context, FAR void *arg, int first, int last)
+static int stm32_exti_multiisr(int irq, void *context, void *arg,
+                               int first, int last)
 {
   uint32_t pr;
   int pin;
@@ -229,7 +230,7 @@ static int stm32_exti_multiisr(int irq, void *context, FAR void *arg, int first,
   return ret;
 }
 
-static int stm32_exti95_isr(int irq, void *context, FAR void *arg)
+static int stm32_exti95_isr(int irq, void *context, void *arg)
 {
   return stm32_exti_multiisr(irq, context, arg, 5, 9);
 }
