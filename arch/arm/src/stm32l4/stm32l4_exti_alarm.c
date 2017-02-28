@@ -124,7 +124,7 @@ xcpt_t stm32l4_exti_alarm(bool risingedge, bool fallingedge, bool event,
 
   oldhandler       = g_alarm_callback;
   g_alarm_callback = func;
-  g__callback_arg  = arg;
+  g_callback_arg   = arg;
 
   /* Install external interrupt handlers (if not already attached) */
 

@@ -847,7 +847,7 @@ static inline void rtc_enable_alarm(void)
        * 3. Configure the RTC to generate RTC alarms (Alarm A or Alarm B).
        */
 
-      stm32_exti_alarm(true, false, true, stm32_rtc_alarm_handler);
+      stm32_exti_alarm(true, false, true, stm32_rtc_alarm_handler, NULL);
       g_alarm_enabled = true;
     }
 }
