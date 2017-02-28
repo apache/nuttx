@@ -530,7 +530,7 @@ static void sam_disableallints(struct sam_dev_s *priv)
 
 static int sam_interrupt(int irq, void *context, FAR void *arg)
 {
-  struct uart_dev_s *dev = (struct uart_dev_s )arg;
+  struct uart_dev_s *dev = (struct uart_dev_s *)arg;
   struct sam_dev_s *priv;
   uint8_t pending;
   uint8_t intflag;
