@@ -355,7 +355,7 @@ xcpt_t stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
 
       for (i = 0; i < nshared; i++)
         {
-          if (shared_cbs[i].handler != NULL)
+          if (shared_cbs[i].callback != NULL)
             {
               break;
             }

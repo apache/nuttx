@@ -306,7 +306,7 @@ static int  up_setup(struct uart_dev_s *dev);
 static void up_shutdown(struct uart_dev_s *dev);
 static int  up_attach(struct uart_dev_s *dev);
 static void up_detach(struct uart_dev_s *dev);
-static int  up_interrupt(int irq, void *context, FAR void *arg)
+static int  up_interrupt(int irq, void *context, FAR void *arg);
 static int  up_ioctl(struct file *filep, int cmd, unsigned long arg);
 #ifndef SERIAL_HAVE_ONLY_DMA
 static int  up_receive(struct uart_dev_s *dev, unsigned int *status);
