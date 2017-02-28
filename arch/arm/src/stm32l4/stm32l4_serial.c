@@ -243,8 +243,6 @@ struct stm32l4_serial_s
   const unsigned int rxdma_channel; /* DMA channel assigned */
 #endif
 
-  int (*const vector)(int irq, void *context, FAR void *arg); /* Interrupt handler */
-
   /* RX DMA state */
 
 #ifdef SERIAL_HAVE_DMA
@@ -271,7 +269,7 @@ static int  stm32l4serial_setup(FAR struct uart_dev_s *dev);
 static void stm32l4serial_shutdown(FAR struct uart_dev_s *dev);
 static int  stm32l4serial_attach(FAR struct uart_dev_s *dev);
 static void stm32l4serial_detach(FAR struct uart_dev_s *dev);
-static int  up_interrupt_common(FAR struct stm32l4_serial_s *dev);
+static int  up_interrupt((int irq, FAR void *context, FAR void *arg);
 static int  stm32l4serial_ioctl(FAR struct file *filep, int cmd,
                                 unsigned long arg);
 #ifndef SERIAL_HAVE_ONLY_DMA
@@ -305,22 +303,6 @@ static void stm32l4serial_pmnotify(FAR struct pm_callback_s *cb, int domain,
                                    enum pm_state_e pmstate);
 static int  stm32l4serial_pmprepare(FAR struct pm_callback_s *cb, int domain,
                                     enum pm_state_e pmstate);
-#endif
-
-#ifdef CONFIG_STM32L4_USART1
-static int up_interrupt_usart1(int irq, FAR void *context, FAR void *arg);
-#endif
-#ifdef CONFIG_STM32L4_USART2
-static int up_interrupt_usart2(int irq, FAR void *context, FAR void *arg);
-#endif
-#ifdef CONFIG_STM32L4_USART3
-static int up_interrupt_usart3(int irq, FAR void *context, FAR void *arg);
-#endif
-#ifdef CONFIG_STM32L4_UART4
-static int up_interrupt_uart4(int irq, FAR void *context, FAR void *arg);
-#endif
-#ifdef CONFIG_STM32L4_UART5
-static int up_interrupt_uart5(int irq, FAR void *context, FAR void *arg);
 #endif
 
 /****************************************************************************
@@ -460,7 +442,6 @@ static struct stm32l4_serial_s g_usart1priv =
   .rxdma_channel = DMAMAP_USART1_RX,
   .rxfifo        = g_usart1rxfifo,
 #endif
-  .vector        = up_interrupt_usart1,
 
 #ifdef CONFIG_USART1_RS485
   .rs485_dir_gpio = GPIO_USART1_RS485_DIR,
@@ -522,7 +503,6 @@ static struct stm32l4_serial_s g_usart2priv =
   .rxdma_channel = DMAMAP_USART2_RX,
   .rxfifo        = g_usart2rxfifo,
 #endif
-  .vector        = up_interrupt_usart2,
 
 #ifdef CONFIG_USART2_RS485
   .rs485_dir_gpio = GPIO_USART2_RS485_DIR,
@@ -584,7 +564,6 @@ static struct stm32l4_serial_s g_usart3priv =
   .rxdma_channel = DMAMAP_USART3_RX,
   .rxfifo        = g_usart3rxfifo,
 #endif
-  .vector        = up_interrupt_usart3,
 
 #ifdef CONFIG_USART3_RS485
   .rs485_dir_gpio = GPIO_USART3_RS485_DIR,
@@ -650,7 +629,6 @@ static struct stm32l4_serial_s g_uart4priv =
   .rxdma_channel = DMAMAP_UART4_RX,
   .rxfifo        = g_uart4rxfifo,
 #endif
-  .vector        = up_interrupt_uart4,
 
 #ifdef CONFIG_UART4_RS485
   .rs485_dir_gpio = GPIO_UART4_RS485_DIR,
@@ -716,7 +694,6 @@ static struct stm32l4_serial_s g_uart5priv =
   .rxdma_channel = DMAMAP_UART5_RX,
   .rxfifo        = g_uart5rxfifo,
 #endif
-  .vector         = up_interrupt_uart5,
 
 #ifdef CONFIG_UART5_RS485
   .rs485_dir_gpio = GPIO_UART5_RS485_DIR,
@@ -1399,7 +1376,7 @@ static int stm32l4serial_attach(FAR struct uart_dev_s *dev)
 
   /* Attach and enable the IRQ */
 
-  ret = irq_attach(priv->irq, priv->vector, NULL);
+  ret = irq_attach(priv->irq, up_interrupt, priv);
   if (ret == OK)
     {
       /* Enable the interrupt (RX and TX interrupts are still disabled
@@ -1429,7 +1406,7 @@ static void stm32l4serial_detach(FAR struct uart_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: up_interrupt_common
+ * Name: up_interrupt
  *
  * Description:
  *   This is the USART interrupt handler.  It will be invoked when an
@@ -1440,10 +1417,13 @@ static void stm32l4serial_detach(FAR struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static int up_interrupt_common(FAR struct stm32l4_serial_s *priv)
+static int up_interrupt((int irq, FAR void *context, FAR void *arg)
 {
+  FAR struct stm32l4_serial_s *priv = (FAR struct stm32l4_serial_s *)arg;
   int  passes;
   bool handled;
+
+  DEBUGASSERt(priv != NULL);
 
   /* Report serial activity to the power management logic */
 
@@ -2199,49 +2179,6 @@ static bool stm32l4serial_txready(FAR struct uart_dev_s *dev)
   FAR struct stm32l4_serial_s *priv = (FAR struct stm32l4_serial_s *)dev->priv;
   return ((stm32l4serial_getreg(priv, STM32L4_USART_ISR_OFFSET) & USART_ISR_TXE) != 0);
 }
-
-/****************************************************************************
- * Name: up_interrupt_u[s]art[n]
- *
- * Description:
- *   Interrupt handlers for U[S]ART[n] where n=1,..,6.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_STM32L4_USART1
-static int up_interrupt_usart1(int irq, FAR void *context, FAR void *arg)
-{
-  return up_interrupt_common(&g_usart1priv);
-}
-#endif
-
-#ifdef CONFIG_STM32L4_USART2
-static int up_interrupt_usart2(int irq, FAR void *context, FAR void *arg)
-{
-  return up_interrupt_common(&g_usart2priv);
-}
-#endif
-
-#ifdef CONFIG_STM32L4_USART3
-static int up_interrupt_usart3(int irq, FAR void *context, FAR void *arg)
-{
-  return up_interrupt_common(&g_usart3priv);
-}
-#endif
-
-#ifdef CONFIG_STM32L4_UART4
-static int up_interrupt_uart4(int irq, FAR void *context, FAR void *arg)
-{
-  return up_interrupt_common(&g_uart4priv);
-}
-#endif
-
-#ifdef CONFIG_STM32L4_UART5
-static int up_interrupt_uart5(int irq, FAR void *context, FAR void *arg)
-{
-  return up_interrupt_common(&g_uart5priv);
-}
-#endif
 
 /****************************************************************************
  * Name: stm32l4serial_dmarxcallback
