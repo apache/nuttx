@@ -2012,7 +2012,7 @@ static void sam_interrupt_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static int sam_emac_interrupt(int irq, void *context, FAR void *arg);
+static int sam_emac_interrupt(int irq, void *context, FAR void *arg)
 {
   struct sam_emac_s *priv = (struct sam_emac_s *)arg;
   uint32_t tsr;
