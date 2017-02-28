@@ -80,7 +80,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_IRQBUTTONS
-static int button_handler(int irq, FAR void *context);
+static int button_handler(int irq, FAR void *context, FAR void *arg);
 #endif /* CONFIG_ARCH_IRQBUTTONS */
 
 /****************************************************************************
