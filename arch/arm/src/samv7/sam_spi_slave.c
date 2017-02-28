@@ -146,13 +146,7 @@ static void     spi_semtake(struct sam_spidev_s *priv);
 
 /* Interrupt Handling */
 
-static int      spi_interrupt(struct sam_spidev_s *priv);
-#ifdef CONFIG_SAMV7_SPI0_SLAVE
-static int      spi0_interrupt(int irq, void *context, FAR void *arg);
-#endif
-#ifdef CONFIG_SAMV7_SPI1_SLAVE
-static int      spi1_interrupt(int irq, void *context, FAR void *arg);
-#endif
+static int      spi_interrupt(int irq, void *context, FAR void *arg);
 
 /* SPI Helpers */
 
@@ -395,12 +389,15 @@ static void spi_semtake(struct sam_spidev_s *priv)
  *
  ****************************************************************************/
 
-static int spi_interrupt(struct sam_spidev_s *priv)
+static int spi_interrupt(int irq, void *context, FAR void *arg)
 {
+  struct sam_spidev_s *priv = (struct sam_spidev_s *)arg;
   uint32_t sr;
   uint32_t imr;
   uint32_t pending;
   uint32_t regval;
+
+  DEBUGASSERT(priv != NULL);
 
   /* We loop because the TDRE interrupt will probably immediately follow the
    * RDRF interrupt and we might be able to catch it in this handler
@@ -552,48 +549,6 @@ static int spi_interrupt(struct sam_spidev_s *priv)
 
   return OK;
 }
-
-/****************************************************************************
- * Name: spi0_interrupt
- *
- * Description:
- *   SPI0 interrupt handler
- *
- * Input Parameters:
- *   Standard interrupt input parameters
- *
- * Returned Value:
- *   Standard interrupt return value.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SAMV7_SPI0_SLAVE
-static int spi0_interrupt(int irq, void *context, FAR void *arg)
-{
-  return spi_interrupt(&g_spi0_sctrlr);
-}
-#endif
-
-/****************************************************************************
- * Name: spi1_interrupt
- *
- * Description:
- *   SPI1 interrupt handler
- *
- * Input Parameters:
- *   Standard interrupt input parameters
- *
- * Returned Value:
- *   Standard interrupt return value.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SAMV7_SPI1_SLAVE
-static int spi1_interrupt(int irq, void *context, FAR void *arg)
-{
-  return spi_interrupt(&g_spi1_sctrlr);
-}
-#endif
 
 /****************************************************************************
  * Name: spi_dequeue
@@ -1177,9 +1132,8 @@ struct spi_sctrlr_s *sam_spi_slave_initialize(int port)
         {
           /* Set the SPI0 register base address and interrupt information */
 
-          priv->base    = SAM_SPI0_BASE,
-          priv->irq     = SAM_IRQ_SPI0;
-          priv->handler = spi0_interrupt;
+          priv->base = SAM_SPI0_BASE,
+          priv->irq  = SAM_IRQ_SPI0;
 
           /* Enable peripheral clocking to SPI0 */
 
@@ -1200,9 +1154,8 @@ struct spi_sctrlr_s *sam_spi_slave_initialize(int port)
         {
           /* Set the SPI1 register base address and interrupt information */
 
-          priv->base    = SAM_SPI1_BASE,
-          priv->irq     = SAM_IRQ_SPI1;
-          priv->handler = spi1_interrupt;
+          priv->base = SAM_SPI1_BASE,
+          priv->irq  = SAM_IRQ_SPI1;
 
           /* Enable peripheral clocking to SPI1 */
 
@@ -1255,7 +1208,7 @@ struct spi_sctrlr_s *sam_spi_slave_initialize(int port)
 
       /* Attach and enable interrupts at the NVIC */
 
-      DEBUGVERIFY(irq_attach(priv->irq, priv->handler, NULL));
+      DEBUGVERIFY(irq_attach(priv->irq, spi_interrupt, priv));
       up_enable_irq(priv->irq);
 
       spi_dumpregs(priv, "After initialization");

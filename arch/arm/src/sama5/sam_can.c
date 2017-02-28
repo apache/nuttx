@@ -150,7 +150,6 @@ struct sam_config_s
   uint8_t port;             /* CAN port number (1 or 2) */
   uint8_t pid;              /* CAN periperal ID/IRQ number */
   uint8_t nrecvmb;          /* Number of receive mailboxes */
-  xcpt_t handler;           /* CAN interrupt handler */
   uintptr_t base;           /* Base address of the CAN control registers */
   uint32_t baud;            /* Configured baud */
   pio_pinset_t rxpinset;    /* RX pin configuration */
@@ -225,13 +224,7 @@ static inline void can_rxinterrupt(FAR struct can_dev_s *dev, int mbndx,
                                    uint32_t msr);
 static inline void can_txinterrupt(FAR struct can_dev_s *dev, int mbndx);
 static inline void can_mbinterrupt(FAR struct can_dev_s *dev, int mbndx);
-static void can_interrupt(FAR struct can_dev_s *dev);
-#ifdef CONFIG_SAMA5_CAN0
-static int  can0_interrupt(int irq, void *context, FAR void *arg);
-#endif
-#ifdef CONFIG_SAMA5_CAN1
-static int  can1_interrupt(int irq, void *context, FAR void *arg);
-#endif
+static void can_interrupt(int irq, void *context, FAR void *arg);
 
 /* Hardware initialization */
 
@@ -265,7 +258,6 @@ static const struct sam_config_s g_can0const =
   .port             = 0,
   .pid              = SAM_PID_CAN0,
   .nrecvmb          = CONFIG_SAMA5_CAN0_NRECVMB,
-  .handler          = can0_interrupt,
   .base             = SAM_CAN0_VBASE,
   .baud             = CONFIG_SAMA5_CAN0_BAUD,
   .rxpinset         = PIO_CAN0_RX,
@@ -301,7 +293,6 @@ static const struct sam_config_s g_can1const =
   .port             = 1,
   .pid              = SAM_PID_CAN1,
   .nrecvmb          = CONFIG_SAMA5_CAN1_NRECVMB,
-  .handler          = can1_interrupt,
   .base             = SAM_CAN1_VBASE,
   .baud             = CONFIG_SAMA5_CAN1_BAUD,
   .rxpinset         = PIO_CAN1_RX,
@@ -860,7 +851,7 @@ static int can_setup(FAR struct can_dev_s *dev)
 
   /* Attach the CAN interrupt handler */
 
-  ret = irq_attach(config->pid, config->handler, NULL);
+  ret = irq_attach(config->pid, can_interrupt, dev);
   if (ret < 0)
     {
       canerr("ERROR: Failed to attach CAN%d IRQ (%d)", config->port, config->pid);
@@ -1437,21 +1428,24 @@ static inline void can_mbinterrupt(FAR struct can_dev_s *dev, int mbndx)
  *   Common CAN interrupt handler
  *
  * Input Parameters:
- *   priv - CAN-specific private data
+ *   Standard interrupt handler inputs
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static void can_interrupt(FAR struct can_dev_s *dev)
+static void can_interrupt(int irq, void *context, FAR void *arg)
 {
-  FAR struct sam_can_s *priv = dev->cd_priv;
+  FAR struct can_dev_s *dev = (FAR struct can_dev_s *)arg;
+  FAR struct sam_can_s *priv;
   uint32_t sr;
   uint32_t imr;
   uint32_t pending;
 
-  DEBUGASSERT(priv && priv->config);
+  DEBUGASSERT(dev != NULL);
+  FAR struct sam_can_s *priv = dev->cd_priv;
+  DEBUGASSERT(priv != NULL && priv->config != NULL);
 
   /* Get the set of pending interrupts.
    *
@@ -1519,52 +1513,6 @@ static void can_interrupt(FAR struct can_dev_s *dev)
              priv->config->port, sr, imr);
     }
 }
-
-/****************************************************************************
- * Name: can0_interrupt
- *
- * Description:
- *   CAN0 interrupt handler
- *
- * Input Parameters:
- *   irq - The IRQ number of the interrupt.
- *   context - The register state save array at the time of the interrupt.
- *
- * Returned Value:
- *   Zero on success; a negated errno on failure
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SAMA5_CAN0
-static int can0_interrupt(int irq, void *context, FAR void *arg)
-{
-  can_interrupt(&g_can0dev);
-  return OK;
-}
-#endif
-
-/****************************************************************************
- * Name: can0_interrupt
- *
- * Description:
- *   CAN0 interrupt handler
- *
- * Input Parameters:
- *   irq - The IRQ number of the interrupt.
- *   context - The register state save array at the time of the interrupt.
- *
- * Returned Value:
- *   Zero on success; a negated errno on failure
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SAMA5_CAN1
-static int can1_interrupt(int irq, void *context, FAR void *arg)
-{
-  can_interrupt(&g_can1dev);
-  return OK;
-}
-#endif
 
 /****************************************************************************
  * Name: can_bittiming

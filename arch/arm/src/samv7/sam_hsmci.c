@@ -472,13 +472,7 @@ static void sam_notransfer(struct sam_dev_s *priv);
 
 /* Interrupt Handling *******************************************************/
 
-static int  sam_hsmci_interrupt(struct sam_dev_s *priv);
-#ifdef CONFIG_SAMV7_HSMCI0
-static int  sam_hsmci0_interrupt(int irq, void *context);
-#endif
-#ifdef CONFIG_SAMV7_HSMCI1
-static int  sam_hsmci1_interrupt(int irq, void *context);
-#endif
+static int  sam_hsmci_interrupt(int irq, void *context, void *arg);
 
 /* SDIO interface methods ***************************************************/
 
@@ -1437,19 +1431,21 @@ static void sam_notransfer(struct sam_dev_s *priv)
  *   HSMCI interrupt handler
  *
  * Input Parameters:
- *   irq - IRQ number of the interrupts
- *   context - Saved machine context at the time of the interrupt
+ *   Standard interrupt handler arguments.
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static int sam_hsmci_interrupt(struct sam_dev_s *priv)
+static int sam_hsmci_interrupt(int irq, void *context, void *arg)
 {
+  struct sam_dev_s *priv = (struct sam_dev_s *)arg;
   uint32_t sr;
   uint32_t enabled;
   uint32_t pending;
+
+  DEBUGASSERT(priv != NULL);
 
   /* Loop while there are pending interrupts. */
 
@@ -1642,35 +1638,6 @@ static int sam_hsmci_interrupt(struct sam_dev_s *priv)
 
   return OK;
 }
-
-/****************************************************************************
- * Name: sam_hsmci0_interrupt, sam_hsmci1_interrupt, and sam_hsmci2_interrupt
- *
- * Description:
- *   HSMCI interrupt handler
- *
- * Input Parameters:
- *   irq - IRQ number of the interrupts
- *   context - Saved machine context at the time of the interrupt
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SAMV7_HSMCI0
-static int sam_hsmci0_interrupt(int irq, void *context)
-{
-  return sam_hsmci_interrupt(&g_hsmci0);
-}
-#endif
-
-#ifdef CONFIG_SAMV7_HSMCI1
-static int sam_hsmci1_interrupt(int irq, void *context)
-{
-  return sam_hsmci_interrupt(&g_hsmci1);
-}
-#endif
 
 /****************************************************************************
  * SDIO Interface Methods
@@ -1922,7 +1889,6 @@ static void sam_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
 static int sam_attach(FAR struct sdio_dev_s *dev)
 {
   struct sam_dev_s *priv = (struct sam_dev_s *)dev;
-  xcpt_t handler;
   int irq;
   int ret;
 
@@ -1931,16 +1897,14 @@ static int sam_attach(FAR struct sdio_dev_s *dev)
 #ifdef CONFIG_SAMV7_HSMCI0
   if (priv->hsmci == 0)
     {
-      handler = sam_hsmci0_interrupt;
-      irq     = SAM_IRQ_HSMCI0;
+      irq = SAM_IRQ_HSMCI0;
     }
   else
 #endif
 #ifdef CONFIG_SAMV7_HSMCI1
   if (priv->hsmci == 1)
     {
-      handler = sam_hsmci1_interrupt;
-      irq     = SAM_IRQ_HSMCI1;
+      irq = SAM_IRQ_HSMCI1;
     }
   else
 #endif
@@ -1951,7 +1915,7 @@ static int sam_attach(FAR struct sdio_dev_s *dev)
 
   /* Attach the HSMCI interrupt handler */
 
-  ret = irq_attach(irq, handler, NULL);
+  ret = irq_attach(irq, sam_hsmci_interrupt, priv);
   if (ret == OK)
     {
 

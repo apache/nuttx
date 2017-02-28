@@ -199,7 +199,6 @@
 
 struct imx_uart_s
 {
-  xcpt_t   handler;     /* Interrupt handler */
   uint32_t uartbase;    /* Base address of UART registers */
   uint32_t baud;        /* Configured baud */
   uint32_t ucr1;        /* Saved UCR1 value */
@@ -229,24 +228,7 @@ static int  imx_setup(struct uart_dev_s *dev);
 static void imx_shutdown(struct uart_dev_s *dev);
 static int  imx_attach(struct uart_dev_s *dev);
 static void imx_detach(struct uart_dev_s *dev);
-
-static int  imx_interrupt(struct uart_dev_s *dev);
-#ifdef CONFIG_IMX6_UART1
-static int  imx_uart1_interrupt(int irq, void *context, FAR void *arg);
-#endif
-#ifdef CONFIG_IMX6_UART2
-static int  imx_uart2_interrupt(int irq, void *context, FAR void *arg);
-#endif
-#ifdef CONFIG_IMX6_UART3
-static int  imx_uart3_interrupt(int irq, void *context, FAR void *arg);
-#endif
-#ifdef CONFIG_IMX6_UART4
-static int  imx_uart4_interrupt(int irq, void *context, FAR void *arg);
-#endif
-#ifdef CONFIG_IMX6_UART5
-static int  imx_uart5_interrupt(int irq, void *context, FAR void *arg);
-#endif
-
+static int  imx_interrupt(int irq, void *context, FAR void *arg);
 static int  imx_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int  imx_receive(struct uart_dev_s *dev, uint32_t *status);
 static void imx_rxint(struct uart_dev_s *dev, bool enable);
@@ -317,7 +299,6 @@ static char g_uart5txbuffer[CONFIG_UART5_TXBUFSIZE];
 #ifdef CONFIG_IMX6_UART1
 static struct imx_uart_s g_uart1priv =
 {
-  .handler        = imx_uart1_interrupt,
   .uartbase       = IMX_UART1_VBASE,
   .baud           = CONFIG_UART1_BAUD,
   .irq            = IMX_IRQ_UART1,
@@ -348,7 +329,6 @@ static struct uart_dev_s g_uart1port =
 #ifdef CONFIG_IMX6_UART2
 static struct imx_uart_s g_uart2priv =
 {
-  .handler        = imx_uart2_interrupt,
   .uartbase       = IMX_UART2_VBASE,
   .baud           = CONFIG_UART2_BAUD,
   .irq            = IMX_IRQ_UART2,
@@ -377,7 +357,6 @@ static struct uart_dev_s g_uart2port =
 #ifdef CONFIG_IMX6_UART3
 static struct imx_uart_s g_uart3priv =
 {
-  .handler        = imx_uart3_interrupt,
   .uartbase       = IMX_UART3_REGISTER_BASE,
   .baud           = IMX_UART3_VBASE,
   .irq            = IMX_IRQ_UART3,
@@ -406,7 +385,6 @@ static struct uart_dev_s g_uart3port =
 #ifdef CONFIG_IMX6_UART4
 static struct imx_uart_s g_uart4priv =
 {
-  .handler        = imx_uart4_interrupt,
   .uartbase       = IMX_UART4_REGISTER_BASE,
   .baud           = IMX_UART4_VBASE,
   .irq            = IMX_IRQ_UART4,
@@ -435,7 +413,6 @@ static struct uart_dev_s g_uart4port =
 #ifdef CONFIG_IMX6_UART5
 static struct imx_uart_s g_uart5priv =
 {
-  .handler        = imx_uart5_interrupt,
   .uartbase       = IMX_UART5_REGISTER_BASE,
   .baud           = IMX_UART5_VBASE,
   .irq            = IMX_IRQ_UART5,
@@ -618,7 +595,7 @@ static int imx_attach(struct uart_dev_s *dev)
 
   /* Attach and enable the IRQ */
 
-  ret = irq_attach(priv->irq, priv->handler, NULL);
+  ret = irq_attach(priv->irq, imx_interrupt, priv);
   if (ret == OK)
     {
       /* Configure as a (high) level interrupt */
@@ -663,11 +640,15 @@ static void imx_detach(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static int imx_interrupt(struct uart_dev_s *dev)
+static int imx_interrupt(int irq, void *context, FAR void *arg)
 {
-  struct imx_uart_s *priv = (struct imx_uart_s *)dev->priv;
+  struct uart_dev_s *dev = (struct uart_dev_s *)arg;
+  struct imx_uart_s *priv;
   uint32_t usr1;
   int passes = 0;
+
+  DEBUGASSERT(dev != NULL && dev->priv != NULL);
+  priv = (struct imx_uart_s *)dev->priv;
 
   /* Loop until there are no characters to be transferred or,
    * until we have been looping for a long time.
@@ -709,46 +690,6 @@ static int imx_interrupt(struct uart_dev_s *dev)
       passes++;
     }
 }
-
-/****************************************************************************
- * Name: imx_uart[n]_interrupt
- *
- * Description:
- *   UART-specific interrupt handlers just transfer control to the common
- *   UART interrupt handler, passing the relevant driver state structure.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_IMX6_UART1
-static int  imx_uart1_interrupt(int irq, void *context, FAR void *arg)
-{
-  return imx_interrupt(&g_uart1port);
-}
-#endif
-#ifdef CONFIG_IMX6_UART2
-static int  imx_uart2_interrupt(int irq, void *context, FAR void *arg)
-{
-  return imx_interrupt(&g_uart2port);
-}
-#endif
-#ifdef CONFIG_IMX6_UART3
-static int  imx_uart3_interrupt(int irq, void *context, FAR void *arg)
-{
-  return imx_interrupt(&g_uart3port);
-}
-#endif
-#ifdef CONFIG_IMX6_UART4
-static int  imx_uart4_interrupt(int irq, void *context, FAR void *arg)
-{
-  return imx_interrupt(&g_uart4port);
-}
-#endif
-#ifdef CONFIG_IMX6_UART5
-static int  imx_uart5_interrupt(int irq, void *context, FAR void *arg)
-{
-  return imx_interrupt(&g_uart5port);
-}
-#endif
 
 /****************************************************************************
  * Name: imx_ioctl

@@ -1785,11 +1785,14 @@ static void sam_dmaterminate(struct sam_dmach_s *dmach, int result)
  *
  ****************************************************************************/
 
-static int sam_dmac_interrupt(struct sam_dmac_s *dmac)
+static int sam_dmac_interrupt(int irq, void *context, FAR void *arg)
 {
+  struct sam_dmac_s *dmac = (struct sam_dmac_s *)arg;
   struct sam_dmach_s *dmach;
   unsigned int chndx;
   uint32_t regval;
+
+  DEBUGASSERT(dmac != NULL);
 
   /* Get the DMAC status register value.  Ignore all masked interrupt
    * status bits.
@@ -1850,28 +1853,6 @@ static int sam_dmac_interrupt(struct sam_dmac_s *dmac)
 }
 
 /****************************************************************************
- * Name: sam_dmac0_interrupt and sam_dmac1_interrupt
- *
- * Description:
- *  DMA interrupt handler
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SAMA5_DMAC0
-static int sam_dmac0_interrupt(int irq, void *context, FAR void *arg)
-{
-  return sam_dmac_interrupt(&g_dmac0);
-}
-#endif
-
-#ifdef CONFIG_SAMA5_DMAC1
-static int sam_dmac1_interrupt(int irq, void *context, FAR void *arg)
-{
-  return sam_dmac_interrupt(&g_dmac1);
-}
-#endif
-
-/****************************************************************************
  * Name: sam_dmainitialize
  *
  * Description:
@@ -1928,7 +1909,7 @@ void weak_function up_dmainitialize(void)
 
   /* Attach DMA interrupt vector */
 
-  (void)irq_attach(SAM_IRQ_DMAC0, sam_dmac0_interrupt, NULL);
+  (void)irq_attach(SAM_IRQ_DMAC0, sam_dmac_interrupt, &g_dmac0);
 
   /* Initialize the controller */
 
@@ -1948,7 +1929,7 @@ void weak_function up_dmainitialize(void)
 
   /* Attach DMA interrupt vector */
 
-  (void)irq_attach(SAM_IRQ_DMAC1, sam_dmac1_interrupt, NULL);
+  (void)irq_attach(SAM_IRQ_DMAC1, sam_dmac_interrupt, &g_dmac1);
 
   /* Initialize the controller */
 

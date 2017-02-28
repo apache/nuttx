@@ -133,19 +133,7 @@ static int pwm_timer(FAR struct efm32_pwmtimer_s *priv,
                                        defined(CONFIG_EFM32_TIMER2_PWM) || \
                                        defined(CONFIG_EFM32_TIMER3_PWM) \
                                        )
-static int pwm_interrupt(struct efm32_pwmtimer_s *priv);
-#if defined(CONFIG_EFM32_TIMER0_PWM)
-static int pwm_timer0_interrupt(int irq, void *context, FAR void *arg);
-#endif
-#if defined(CONFIG_EFM32_TIMER1_PWM)
-static int pwm_timer1_interrupt(int irq, void *context);
-#endif
-#if defined(CONFIG_EFM32_TIMER2_PWM)
-static int pwm_timer2_interrupt(int irq, void *context, FAR void *arg);
-#endif
-#if defined(CONFIG_EFM32_TIMER3_PWM)
-static int pwm_timer3_interrupt(int irq, void *context, FAR void *arg);
-#endif
+static int pwm_interrupt(int irq, void *context, FAR void *arg);
 static uint8_t pwm_pulsecount(uint32_t count);
 
 #endif
@@ -446,7 +434,7 @@ static int pwm_timer(FAR struct efm32_pwmtimer_s *priv,
  *   Handle timer interrupts.
  *
  * Input parameters:
- *   priv - A reference to the lower half PWM driver state structure
+ *   Standard interrupt handler arguments.
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure
@@ -459,11 +447,14 @@ static int pwm_timer(FAR struct efm32_pwmtimer_s *priv,
                                        defined(CONFIG_EFM32_TIMER3_PWM) \
                                        )
 #warning "not yet implemented"
-static int pwm_interrupt(struct efm32_pwmtimer_s *priv)
+static int pwm_interrupt(int irq, void *context, FAR void *arg)
 {
   /* TODO pwm_interrupt */
 #if 0
+  struct efm32_pwmtimer_s *priv = (struct efm32_pwmtimer_s *)arg;
   uint32_t regval;
+
+  DEBUGASSERT(priv != NULL);
 
   /* Verify that this is an update interrupt.  Nothing else is expected. */
 
@@ -529,48 +520,6 @@ static int pwm_interrupt(struct efm32_pwmtimer_s *priv)
 #else
   return -ENODEV;
 #endif
-}
-#endif
-
-/****************************************************************************
- * Name: pwm_timer1/3_interrupt
- *
- * Description:
- *   Handle timer 1..3 interrupts.
- *
- * Input parameters:
- *   Standard NuttX interrupt inputs
- *
- * Returned Value:
- *   Zero on success; a negated errno value on failure
- *
- ****************************************************************************/
-
-#if defined(CONFIG_PWM_PULSECOUNT) && defined(CONFIG_EFM32_TIMER0_PWM)
-static int pwm_timer0_interrupt(int irq, void *context, FAR void *arg)
-{
-  return pwm_interrupt(&g_pwm0dev);
-}
-#endif
-
-#if defined(CONFIG_PWM_PULSECOUNT) && defined(CONFIG_EFM32_TIMER1_PWM)
-static int pwm_timer1_interrupt(int irq, void *context)
-{
-  return pwm_interrupt(&g_pwm1dev);
-}
-#endif
-
-#if defined(CONFIG_PWM_PULSECOUNT) && defined(CONFIG_EFM32_TIMER2_PWM)
-static int pwm_timer2_interrupt(int irq, void *context, FAR void *arg)
-{
-  return pwm_interrupt(&g_pwm2dev);
-}
-#endif
-
-#if defined(CONFIG_PWM_PULSECOUNT) && defined(CONFIG_EFM32_TIMER3_PWM)
-static int pwm_timer3_interrupt(int irq, void *context, FAR void *arg)
-{
-  return pwm_interrupt(&g_pwm3dev);
 }
 #endif
 
@@ -866,50 +815,22 @@ FAR struct pwm_lowerhalf_s *efm32_pwminitialize(int timer)
 #ifdef CONFIG_EFM32_TIMER0_PWM
       case 0:
         lower = &g_pwm0dev;
-
-        /* Attach but disable the TIM1 update interrupt */
-
-#ifdef CONFIG_PWM_PULSECOUNT
-        irq_attach(lower->irq, pwm_timer0_interrupt, NULL);
-        up_disable_irq(lower->irq);
-#endif
         break;
 #endif
 
 #ifdef CONFIG_EFM32_TIMER1_PWM
       case 1:
         lower = &g_pwm1dev;
-
-        /* Attach but disable the TIM1 update interrupt */
-
-#ifdef CONFIG_PWM_PULSECOUNT
-        irq_attach(lower->irq, pwm_timer0_interrupt, NULL);
-        up_disable_irq(lower->irq);
-#endif
         break;
 #endif
 #ifdef CONFIG_EFM32_TIMER2_PWM
       case 2:
         lower = &g_pwm2dev;
-
-        /* Attach but disable the TIM1 update interrupt */
-
-#ifdef CONFIG_PWM_PULSECOUNT
-        irq_attach(lower->irq, pwm_timer2_interrupt, NULL);
-        up_disable_irq(lower->irq);
-#endif
         break;
 #endif
 #ifdef CONFIG_EFM32_TIMER3_PWM
       case 3:
         lower = &g_pwm3dev;
-
-        /* Attach but disable the TIM1 update interrupt */
-
-#ifdef CONFIG_PWM_PULSECOUNT
-        irq_attach(lower->irq, pwm_timer3_interrupt, NULL);
-        up_disable_irq(lower->irq);
-#endif
         break;
 #endif
 
@@ -917,6 +838,13 @@ FAR struct pwm_lowerhalf_s *efm32_pwminitialize(int timer)
         pwmerr("ERROR: No such timer configured\n");
         return NULL;
     }
+
+  /* Attach but disable the timer update interrupt */
+
+#ifdef CONFIG_PWM_PULSECOUNT
+  irq_attach(lower->irq, pwm_interrupt, lower);
+  up_disable_irq(lower->irq);
+#endif
 
   return (FAR struct pwm_lowerhalf_s *)lower;
 }
