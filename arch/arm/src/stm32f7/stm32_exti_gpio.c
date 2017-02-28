@@ -94,7 +94,7 @@ static struct gpio_callback_s g_gpio_callbacks[16];
  * Interrupt Service Routines - Dispatchers
  ****************************************************************************/
 
-static int stm32_exti0_isr(int irq, void *context)
+static int stm32_exti0_isr(int irq, void *context, void *arg)
 {
   int ret = OK;
 
@@ -115,7 +115,7 @@ static int stm32_exti0_isr(int irq, void *context)
   return ret;
 }
 
-static int stm32_exti1_isr(int irq, void *context)
+static int stm32_exti1_isr(int irq, void *context, void *arg)
 {
   int ret = OK;
 
@@ -136,7 +136,7 @@ static int stm32_exti1_isr(int irq, void *context)
   return ret;
 }
 
-static int stm32_exti2_isr(int irq, void *context)
+static int stm32_exti2_isr(int irq, void *context, void *arg)
 {
   int ret = OK;
 
@@ -157,7 +157,7 @@ static int stm32_exti2_isr(int irq, void *context)
   return ret;
 }
 
-static int stm32_exti3_isr(int irq, void *context)
+static int stm32_exti3_isr(int irq, void *context, void *arg)
 {
   int ret = OK;
 
@@ -178,7 +178,7 @@ static int stm32_exti3_isr(int irq, void *context)
   return ret;
 }
 
-static int stm32_exti4_isr(int irq, void *context)
+static int stm32_exti4_isr(int irq, void *context, void *arg)
 {
   int ret = OK;
 
@@ -268,6 +268,7 @@ static int stm32_exti1510_isr(int irq, void *context)
  *  - fallingedge: Enables interrupt on falling edges
  *  - event:       Generate event when set
  *  - func:        When non-NULL, generate interrupt
+ *  - arg:         Argument passed to the interrupt callback
  *
  * Returns:
  *   The previous value of the interrupt handler function pointer.  This
@@ -277,7 +278,7 @@ static int stm32_exti1510_isr(int irq, void *context)
  ****************************************************************************/
 
 xcpt_t stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
-                          bool event, xcpt_t func)
+                          bool event, xcpt_t func, void *arg)
 {
   struct gpio_callback_s *shared_cbs;
   uint32_t pin = pinset & GPIO_PIN_MASK;
