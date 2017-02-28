@@ -77,7 +77,7 @@
  * provide some minimal implementation of up_putc.
  */
 
-#ifdef USE_SERIALDRIVER
+#if defined(HAVE_UART_DEVICE) && defined(USE_SERIALDRIVER)
 
 /* Which UART with be tty0/console and which tty1-4?  The console will always
  * be ttyS0.  If there is no console then will use the lowest numbered UART.
@@ -1079,9 +1079,9 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
     {
 #ifdef CONFIG_DEBUG_FEATURES
 #  warning "Revisit:  How are errors enabled?"
-      priv->ie |= UART_C2_RIE;
+      priv->ie &= ~UART_C2_RIE;
 #else
-      priv->ie |= UART_C2_RIE;
+      priv->ie &= ~UART_C2_RIE;
 #endif
       up_setuartint(priv);
     }
@@ -1228,7 +1228,7 @@ static bool up_txempty(struct uart_dev_s *dev)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_earlyserialinit
+ * Name: kinetis_uart_earlyserialinit
  *
  * Description:
  *   Performs the low level UART initialization early in debug so that the
@@ -1239,7 +1239,8 @@ static bool up_txempty(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-void up_earlyserialinit(void)
+#if defined(USE_EARLYSERIALINIT)
+void kinetis_uart_earlyserialinit(void)
 {
   /* Disable interrupts from all UARTS.  The console is enabled in
    * pic32mx_consoleinit()
@@ -1269,18 +1270,27 @@ void up_earlyserialinit(void)
   up_setup(&CONSOLE_DEV);
 #endif
 }
+#endif
 
 /****************************************************************************
- * Name: up_serialinit
+ * Name: kinetis_uart_serialinit
  *
  * Description:
  *   Register serial console and serial ports.  This assumes
  *   that up_earlyserialinit was called previously.
  *
+ * Input Parameters:
+ *   first: - First TTY number to assign
+ *
+ * Returns Value:
+ *   The next TTY number available for assignment
+ *
  ****************************************************************************/
 
-void up_serialinit(void)
+unsigned int kinetis_uart_serialinit(unsigned int first)
 {
+  char devname[] = "/dev/ttySx";
+
   /* Register the console */
 
 #ifdef HAVE_UART_CONSOLE
@@ -1289,22 +1299,29 @@ void up_serialinit(void)
 
   /* Register all UARTs */
 
-  (void)uart_register("/dev/ttyS0", &TTYS0_DEV);
+  devname[(sizeof(devname)/sizeof(devname[0]))-2] = '0' + first++;
+  (void)uart_register(devname, &TTYS0_DEV);
 #ifdef TTYS1_DEV
-  (void)uart_register("/dev/ttyS1", &TTYS1_DEV);
+  devname[(sizeof(devname)/sizeof(devname[0]))-2] = '0' + first++;
+  (void)uart_register(devname, &TTYS1_DEV);
 #endif
 #ifdef TTYS2_DEV
-  (void)uart_register("/dev/ttyS2", &TTYS2_DEV);
+  devname[(sizeof(devname)/sizeof(devname[0]))-2] = '0' + first++;
+  (void)uart_register(devname, &TTYS2_DEV);
 #endif
 #ifdef TTYS3_DEV
-  (void)uart_register("/dev/ttyS3", &TTYS3_DEV);
+  devname[(sizeof(devname)/sizeof(devname[0]))-2] = '0' + first++;
+  (void)uart_register(devname, &TTYS3_DEV);
 #endif
 #ifdef TTYS4_DEV
-  (void)uart_register("/dev/ttyS4", &TTYS4_DEV);
+  devname[(sizeof(devname)/sizeof(devname[0]))-2] = '0' + first++;
+  (void)uart_register(devname, &TTYS4_DEV);
 #endif
 #ifdef TTYS5_DEV
-  (void)uart_register("/dev/ttyS5", &TTYS5_DEV);
+  devname[(sizeof(devname)/sizeof(devname[0]))-2] = '0' + first++;
+  (void)uart_register(devname, &TTYS5_DEV);
 #endif
+  return first;
 }
 
 /****************************************************************************
@@ -1369,5 +1386,5 @@ int up_putc(int ch)
 }
 #endif
 
-#endif /* USE_SERIALDRIVER */
+#endif /* HAVE_UART_DEVICE && USE_SERIALDRIVER) */
 
