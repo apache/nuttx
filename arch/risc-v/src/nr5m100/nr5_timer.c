@@ -202,8 +202,7 @@ static void nr5_timer_setperiod(FAR struct nr5_timer_dev_s *dev,
 }
 
 static int nr5_timer_setisr(FAR struct nr5_timer_dev_s *dev,
-                            int (*handler)(int irq, void *context),
-                            int source)
+                            xcpt_t handler, void * arg, int source)
 {
   int vectorno;
 
@@ -275,7 +274,7 @@ static int nr5_timer_setisr(FAR struct nr5_timer_dev_s *dev,
 
   /* Otherwise set callback and enable interrupt */
 
-  irq_attach(vectorno, handler, NULL);
+  irq_attach(vectorno, handler, arg);
   up_enable_irq(vectorno);
 
 #ifdef CONFIG_ARCH_IRQPRIO

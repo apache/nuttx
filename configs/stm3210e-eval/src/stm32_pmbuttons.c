@@ -136,75 +136,11 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_IRQBUTTONS
-static void button_handler(int id, int irq);
-
-#if MIN_BUTTON < 1
-static int button0_handler(int irq, FAR void *context);
-#endif
-#if MIN_BUTTON < 2 && MAX_BUTTON > 0
-static int button1_handler(int irq, FAR void *context);
-#endif
-#if MIN_BUTTON < 3 && MAX_BUTTON > 1
-static int button2_handler(int irq, FAR void *context);
-#endif
-#if MIN_BUTTON < 4 && MAX_BUTTON > 2
-static int button3_handler(int irq, FAR void *context);
-#endif
-#if MIN_BUTTON < 5 && MAX_BUTTON > 3
-static int button4_handler(int irq, FAR void *context);
-#endif
-#if MIN_BUTTON < 6 && MAX_BUTTON > 4
-static int button5_handler(int irq, FAR void *context);
-#endif
-#if MIN_BUTTON < 7 && MAX_BUTTON > 5
-static int button6_handler(int irq, FAR void *context);
-#endif
-#if MAX_BUTTON > 6
-static int button7_handler(int irq, FAR void *context);
-#endif
-#endif /* CONFIG_ARCH_IRQBUTTONS */
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/* Button interrupt handlers */
-
-#ifdef CONFIG_ARCH_IRQBUTTONS
-static const xcpt_t g_buttonhandlers[NUM_PMBUTTONS] =
-{
-#if MIN_BUTTON < 1
-    button0_handler,
-#endif
-#if MIN_BUTTON < 2 && MAX_BUTTON > 0
-    button1_handler,
-#endif
-#if MIN_BUTTON < 3 && MAX_BUTTON > 1
-    button2_handler,
-#endif
-#if MIN_BUTTON < 4 && MAX_BUTTON > 2
-    button3_handler,
-#endif
-#if MIN_BUTTON < 5 && MAX_BUTTON > 3
-    button4_handler,
-#endif
-#if MIN_BUTTON < 6 && MAX_BUTTON > 4
-    button5_handler,
-#endif
-#if MIN_BUTTON < 7 && MAX_BUTTON > 5
-    button6_handler,
-#endif
-#if MAX_BUTTON > 6
-    button7_handler,
-#endif
-};
-#endif /* CONFIG_ARCH_IRQBUTTONS */
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
+#ifdef CONFIG_ARCH_IRQBUTTONS
 /****************************************************************************
  * Name: button_handler
  *
@@ -212,9 +148,7 @@ static const xcpt_t g_buttonhandlers[NUM_PMBUTTONS] =
  *   Handle a button wake-up interrupt
  *
  ****************************************************************************/
-
-#ifdef CONFIG_ARCH_IRQBUTTONS
-static void button_handler(int id, int irq)
+static int button_handler(int irq, FAR void *context, FAR void *arg)
 {
   /* At this point the MCU should have already awakened.  The state
    * change will be handled in the IDLE loop when the system is re-awakened
@@ -224,71 +158,8 @@ static void button_handler(int id, int irq)
    */
 
   pm_activity(PM_IDLE_DOMAIN, CONFIG_PM_BUTTON_ACTIVITY);
+  return 0;
 }
-
-#if MIN_BUTTON < 1
-static int button0_handler(int irq, FAR void *context)
-{
-  button_handler(0, irq);
-  return OK;
-}
-#endif
-
-#if MIN_BUTTON < 2 && MAX_BUTTON > 0
-static int button1_handler(int irq, FAR void *context)
-{
-  button_handler(1, irq);
-  return OK;
-}
-#endif
-
-#if MIN_BUTTON < 3 && MAX_BUTTON > 1
-static int button2_handler(int irq, FAR void *context)
-{
-  button_handler(2, irq);
-  return OK;
-}
-#endif
-
-#if MIN_BUTTON < 4 && MAX_BUTTON > 2
-static int button3_handler(int irq, FAR void *context)
-{
-  button_handler(3, irq);
-  return OK;
-}
-#endif
-
-#if MIN_BUTTON < 5 && MAX_BUTTON > 3
-static int button4_handler(int irq, FAR void *context)
-{
-  button_handler(4, irq);
-  return OK;
-}
-#endif
-
-#if MIN_BUTTON < 6 && MAX_BUTTON > 4
-static int button5_handler(int irq, FAR void *context)
-{
-  button_handler(5, irq);
-  return OK;
-}
-#endif
-
-#if MIN_BUTTON < 7 && MAX_BUTTON > 5
-static int button6_handler(int irq, FAR void *context)
-{
-  button_handler(6, irq);
-  return OK;
-}
-#endif
-
-#if MAX_BUTTON > 6
-static int button7_handler(int irq, FAR void *context)
-{
-  button_handler(7, irq);
-  return OK;
-}
-#endif
 #endif /* CONFIG_ARCH_IRQBUTTONS */
 
 /****************************************************************************
@@ -315,7 +186,7 @@ void stm32_pmbuttons(void)
   for (i = CONFIG_PM_IRQBUTTONS_MIN; i <= CONFIG_PM_IRQBUTTONS_MAX; i++)
     {
       xcpt_t oldhandler =
-        board_button_irq(i, g_buttonhandlers[BUTTON_INDEX(i)], NULL);
+        board_button_irq(i, button_handler, (void*) i);
 
       if (oldhandler != NULL)
         {

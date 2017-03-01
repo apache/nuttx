@@ -81,7 +81,7 @@ struct memlcd_priv_s
    * setvcomfreq - Set timer frequency for EXTCOMIN.
    */
 
-  int (*attachirq) (xcpt_t isr);
+  int (*attachirq) (xcpt_t isr, void *arg);
   void (*dispcontrol) (bool on);
 #ifndef CONFIG_MEMLCD_EXTCOMIN_MODE_HW
   void (*setpolarity) (bool pol);

@@ -268,8 +268,7 @@ static int stm32l4_tim_setcompare(FAR struct stm32l4_tim_dev_s *dev,
 static int stm32l4_tim_getcapture(FAR struct stm32l4_tim_dev_s *dev,
                                   uint8_t channel);
 static int stm32l4_tim_setisr(FAR struct stm32l4_tim_dev_s *dev,
-                              int (*handler)(int irq, FAR void *context),
-                              int source);
+                              xcpt_t handler, void *arg, int source);
 static void stm32l4_tim_enableint(FAR struct stm32l4_tim_dev_s *dev,
                                   int source);
 static void stm32l4_tim_disableint(FAR struct stm32l4_tim_dev_s *dev,
@@ -1158,8 +1157,7 @@ static int stm32l4_tim_getcapture(FAR struct stm32l4_tim_dev_s *dev,
  ************************************************************************************/
 
 static int stm32l4_tim_setisr(FAR struct stm32l4_tim_dev_s *dev,
-                              int (*handler)(int irq, FAR void *context),
-                              int source)
+                              xcpt_t handler, void *arg, int source)
 {
   int vectorno;
 
@@ -1239,7 +1237,7 @@ static int stm32l4_tim_setisr(FAR struct stm32l4_tim_dev_s *dev,
 
   /* Otherwise set callback and enable interrupt */
 
-  irq_attach(vectorno, handler, NULL);
+  irq_attach(vectorno, handler, arg);
   up_enable_irq(vectorno);
 
 #ifdef CONFIG_ARCH_IRQPRIO

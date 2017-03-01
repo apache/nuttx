@@ -58,63 +58,13 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int stm32_oneshot_handler(struct stm32_oneshot_s *oneshot);
-static int stm32_oneshot1_handler(int irq, void *context);
-#if CONFIG_STM32_ONESHOT_MAXTIMERS > 1
-static int stm32_oneshot2_handler(int irq, void *context);
-#endif
-#if CONFIG_STM32_ONESHOT_MAXTIMERS > 2
-static int stm32_oneshot3_handler(int irq, void *context);
-#endif
-#if CONFIG_STM32_ONESHOT_MAXTIMERS > 3
-static int stm32_oneshot4_handler(int irq, void *context);
-#endif
-#if CONFIG_STM32_ONESHOT_MAXTIMERS > 4
-static int stm32_oneshot5_handler(int irq, void *context);
-#endif
-#if CONFIG_STM32_ONESHOT_MAXTIMERS > 5
-static int stm32_oneshot6_handler(int irq, void *context);
-#endif
-#if CONFIG_STM32_ONESHOT_MAXTIMERS > 6
-static int stm32_oneshot7_handler(int irq, void *context);
-#endif
-#if CONFIG_STM32_ONESHOT_MAXTIMERS > 7
-static int stm32_oneshot8_handler(int irq, void *context);
-#endif
+static int stm32_oneshot_handler(int irg_num, void * context, void *arg);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
 static struct stm32_oneshot_s *g_oneshot[CONFIG_STM32_ONESHOT_MAXTIMERS];
-
-#if CONFIG_STM32_ONESHOT_MAXTIMERS > 1
-static const xcpt_t g_callbacks[CONFIG_STM32_ONESHOT_MAXTIMERS] =
-{
-  stm32_oneshot1_handler,
-#if CONFIG_STM32_ONESHOT_MAXTIMERS > 1
-  stm32_oneshot2_handler,
-#endif
-#if CONFIG_STM32_ONESHOT_MAXTIMERS > 2
-  stm32_oneshot3_handler,
-#endif
-#if CONFIG_STM32_ONESHOT_MAXTIMERS > 3
-  stm32_oneshot4_handler,
-#endif
-#if CONFIG_STM32_ONESHOT_MAXTIMERS > 4
-  stm32_oneshot5_handler,
-#endif
-#if CONFIG_STM32_ONESHOT_MAXTIMERS > 5
-  stm32_oneshot6_handler,
-#endif
-#if CONFIG_STM32_ONESHOT_MAXTIMERS > 6
-  stm32_oneshot7_handler,
-#endif
-#if CONFIG_STM32_ONESHOT_MAXTIMERS > 7
-  stm32_oneshot8_handler,
-#endif
-};
-#endif
 
 /****************************************************************************
  * Private Functions
@@ -136,8 +86,9 @@ static const xcpt_t g_callbacks[CONFIG_STM32_ONESHOT_MAXTIMERS] =
  *
  ****************************************************************************/
 
-static int stm32_oneshot_handler(struct stm32_oneshot_s *oneshot)
+static int stm32_oneshot_handler(int irg_num, void * context, void *arg)
 {
+  struct stm32_oneshot_s * oneshot = (struct stm32_oneshot_s *) arg;
   oneshot_handler_t oneshot_handler;
   void *oneshot_arg;
 
@@ -148,7 +99,7 @@ static int stm32_oneshot_handler(struct stm32_oneshot_s *oneshot)
    * Disable the TC now and disable any further interrupts.
    */
 
-  STM32_TIM_SETISR(oneshot->tch, NULL, 0);
+  STM32_TIM_SETISR(oneshot->tch, NULL, NULL, 0);
   STM32_TIM_DISABLEINT(oneshot->tch, 0);
   STM32_TIM_SETMODE(oneshot->tch, STM32_TIM_MODE_DISABLED);
   STM32_TIM_ACKINT(oneshot->tch, 0);
@@ -167,84 +118,6 @@ static int stm32_oneshot_handler(struct stm32_oneshot_s *oneshot)
   oneshot_handler(oneshot_arg);
   return OK;
 }
-
-/****************************************************************************
- * Name: stm32_oneshot[N]_handler
- *
- * Description:
- *   Timer interrupt callbacks.  When a oneshot timer interrupt expires,
- *   one of these functions will be called.  These functions will forward
- *   the call to the nextlevel up.
- *
- * Input Parameters:
- *   Standard interrupt handler arguments.
- *
- * Returned Value:
- *   Always returns OK
- *
- ****************************************************************************/
-
-static int stm32_oneshot1_handler(int irq, void *context)
-{
-  DEBUGASSERT(g_oneshot[0] != NULL);
-  return stm32_oneshot_handler(g_oneshot[0]);
-}
-
-#if CONFIG_STM32_ONESHOT_MAXTIMERS > 1
-static int stm32_oneshot2_handler(int irq, void *context)
-{
-  DEBUGASSERT(g_oneshot[1] != NULL);
-  return stm32_oneshot_handler(g_oneshot[1]);
-}
-#endif
-
-#if CONFIG_STM32_ONESHOT_MAXTIMERS > 2
-static int stm32_oneshot3_handler(int irq, void *context)
-{
-  DEBUGASSERT(g_oneshot[2] != NULL);
-  return stm32_oneshot_handler(g_oneshot[2]);
-}
-#endif
-
-#if CONFIG_STM32_ONESHOT_MAXTIMERS > 3
-static int stm32_oneshot4_handler(int irq, void *context)
-{
-  DEBUGASSERT(g_oneshot[3] != NULL);
-  return stm32_oneshot_handler(g_oneshot[3]);
-}
-#endif
-
-#if CONFIG_STM32_ONESHOT_MAXTIMERS > 4
-static int stm32_oneshot5_handler(int irq, void *context)
-{
-  DEBUGASSERT(g_oneshot[4] != NULL);
-  return stm32_oneshot_handler(g_oneshot[4]);
-}
-#endif
-
-#if CONFIG_STM32_ONESHOT_MAXTIMERS > 5
-static int stm32_oneshot6_handler(int irq, void *context)
-{
-  DEBUGASSERT(g_oneshot[6] != NULL);
-  return stm32_oneshot_handler(g_oneshot[5]);
-}
-#endif
-
-#if CONFIG_STM32_ONESHOT_MAXTIMERS > 6
-static int stm32_oneshot7_handler(int irq, void *context)
-{
-  DEBUGASSERT(g_oneshot[7] != NULL);
-  return stm32_oneshot_handler(g_oneshot[6]);
-}
-#endif
-
-#if CONFIG_STM32_ONESHOT_MAXTIMERS > 7
-static int stm32_oneshot8_handler(int irq, void *context)
-{
-  DEBUGASSERT(g_oneshot[0] != NULL);
-  return stm32_oneshot_handler(g_oneshot[7]);
-}
-#endif
 
 /****************************************************************************
  * Name: stm32_allocate_handler
@@ -442,11 +315,7 @@ int stm32_oneshot_start(struct stm32_oneshot_s *oneshot,
 
   /* Set up to receive the callback when the interrupt occurs */
 
-#if CONFIG_STM32_ONESHOT_MAXTIMERS > 1
-  STM32_TIM_SETISR(oneshot->tch, g_callbacks[oneshot->cbndx], 0);
-#else
-  STM32_TIM_SETISR(oneshot->tch, stm32_oneshot1_handler, 0);
-#endif
+  STM32_TIM_SETISR(oneshot->tch, stm32_oneshot_handler, oneshot, 0);
 
   /* Set timer period */
 
@@ -539,7 +408,7 @@ int stm32_oneshot_cancel(struct stm32_oneshot_s *oneshot,
   /* Now we can disable the interrupt and stop the timer. */
 
   STM32_TIM_DISABLEINT(oneshot->tch, 0);
-  STM32_TIM_SETISR(oneshot->tch, NULL, 0);
+  STM32_TIM_SETISR(oneshot->tch, NULL, NULL, 0);
   STM32_TIM_SETMODE(oneshot->tch, STM32_TIM_MODE_DISABLED);
 
   oneshot->running = false;

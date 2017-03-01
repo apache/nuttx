@@ -58,7 +58,7 @@
  ************************************************************************************/
 
 #if defined(CONFIG_USBDEV)
-static int vbus_handler(int irq, FAR void *context)
+static int vbus_handler(int irq, FAR void *context, FAR void *arg)
 {
   return OK;
 }

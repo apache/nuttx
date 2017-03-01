@@ -54,7 +54,7 @@
 #include "up_arch.h"
 #include "stm32.h"
 #include "stm32_otgfs.h"
-#include "shenshou.h"
+#include "shenzhou.h"
 
 #ifdef CONFIG_STM32_OTGFS
 

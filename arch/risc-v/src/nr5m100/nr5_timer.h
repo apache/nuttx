@@ -56,7 +56,7 @@
 #define NR5_TIMER_SETCLOCK(d,freq)      ((d)->ops->setclock(d,freq))
 #define NR5_TIMER_SETPERIOD(d,period)   ((d)->ops->setperiod(d,period))
 #define NR5_TIMER_SETCOMPARE(d,ch,comp) ((d)->ops->setcompare(d,ch,comp))
-#define NR5_TIMER_SETISR(d,hnd,s)       ((d)->ops->setisr(d,hnd,s))
+#define NR5_TIMER_SETISR(d,hnd,arg,s)   ((d)->ops->setisr(d,hnd,arg,s))
 #define NR5_TIMER_ENABLEINT(d,s)        ((d)->ops->enableint(d,s))
 #define NR5_TIMER_DISABLEINT(d,s)       ((d)->ops->disableint(d,s))
 #define NR5_TIMER_ACKINT(d,s)           ((d)->ops->ackint(d,s))
@@ -112,7 +112,7 @@ struct nr5_timer_ops_s
 
   /* Timer Interrupt Operations */
 
-  int  (*setisr)(FAR struct nr5_timer_dev_s *dev, int (*handler)(int irq, void *context), int source);
+  int  (*setisr)(FAR struct nr5_timer_dev_s *dev, xcpt_t handler, void *arg, int source);
   void (*enableint)(FAR struct nr5_timer_dev_s *dev, int source);
   void (*disableint)(FAR struct nr5_timer_dev_s *dev, int source);
   void (*ackint)(FAR struct nr5_timer_dev_s *dev, int source);
