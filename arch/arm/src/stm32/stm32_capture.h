@@ -54,7 +54,7 @@
 #define STM32_CAP_SETCLOCK(d,clk_src,psc,max)   ((d)->ops->setclock(d,clk_src,psc,max))
 #define STM32_CAP_SETCHANNEL(d,ch,cfg)          ((d)->ops->setchannel(d,ch,cfg))
 #define STM32_CAP_GETCAPTURE(d,ch)              ((d)->ops->getcapture(d,ch))
-#define STM32_CAP_SETISR(d,hnd)                 ((d)->ops->setisr(d,hnd))
+#define STM32_CAP_SETISR(d,hnd,arg)             ((d)->ops->setisr(d,hnd,arg))
 #define STM32_CAP_ENABLEINT(d,s,on)             ((d)->ops->enableint(d,s,on))
 #define STM32_CAP_ACKFLAGS(d,f)                 ((d)->ops->ackflags(d,f))
 #define STM32_CAP_GETFLAGS(d)                   ((d)->ops->getflags(d))
@@ -178,7 +178,7 @@ struct stm32_cap_ops_s
   int  (*setclock)(  FAR struct stm32_cap_dev_s *dev, stm32_cap_clk_t clk, uint32_t prescaler, uint32_t max);
   int  (*setchannel)(FAR struct stm32_cap_dev_s *dev, uint8_t channel, stm32_cap_ch_cfg_t cfg);
   uint32_t (*getcapture)(FAR struct stm32_cap_dev_s *dev, uint8_t channel);
-  int  (*setisr)(    FAR struct stm32_cap_dev_s *dev, xcpt_t handler); 
+  int  (*setisr)(FAR struct stm32_cap_dev_s *dev, xcpt_t handler, void *arg);
   void (*enableint)( FAR struct stm32_cap_dev_s *dev, stm32_cap_flags_t src, bool on );
   void (*ackflags)(  FAR struct stm32_cap_dev_s *dev, int flags);
   stm32_cap_flags_t (*getflags)(FAR struct stm32_cap_dev_s *dev);
