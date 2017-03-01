@@ -56,7 +56,7 @@
  *
  ****************************************************************************/
 
-int irq_attach(int irq, xcpt_t isr, FAR void * arg)
+int irq_attach(int irq, xcpt_t isr, FAR void *arg)
 {
 #if NR_IRQS > 0
   int ret = ERROR;

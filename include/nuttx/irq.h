@@ -98,7 +98,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int irq_attach(int irq, xcpt_t isr, FAR void * arg);
+int irq_attach(int irq, xcpt_t isr, FAR void *arg);
 
 /****************************************************************************
  * Name: enter_critical_section

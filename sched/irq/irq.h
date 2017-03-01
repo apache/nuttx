@@ -54,16 +54,26 @@
  * Public Data
  ****************************************************************************/
 
-/* This is the list of interrupt handlers, one for each IRQ.  This is used
- * by irq_dispatch to transfer control to interrupt handlers after the
- * occurrence of an interrupt.
+/* This is the type of the list of interrupt handlers, one for each IRQ.
+ * This type provided all of the information necessary to irq_dispatch to
+ * transfer control to interrupt handlers after the occurrence of an
+ * interrupt.
  */
 
 struct irq
 {
-  xcpt_t handler;
-  FAR void * arg;
+  xcpt_t handler;  /* Address of the interrupt handler */
+  FAR void *arg;   /* The argument provided to the interrupt handler. */
 };
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* This is the list of interrupt handlers, one for each IRQ.  This is used
+ * by irq_dispatch to transfer control to interrupt handlers after the
+ * occurrence of an interrupt.
+ */
 
 extern struct irq g_irqvector[NR_IRQS];
 

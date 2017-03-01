@@ -364,20 +364,20 @@ static void adc_rccreset(FAR struct stm32_dev_s *priv, bool reset);
 
 static int adc_interrupt(FAR struct adc_dev_s *dev);
 #if defined(STM32_IRQ_ADC1) && defined(CONFIG_STM32_ADC1)
-static int adc1_interrupt(int irq, FAR void *context, FAR void * arg);
+static int adc1_interrupt(int irq, FAR void *context, FAR void *arg);
 #endif
 #if defined(STM32_IRQ_ADC12) && (defined(CONFIG_STM32_ADC1) || \
                                  defined(CONFIG_STM32_ADC2))
-static int adc12_interrupt(int irq, FAR void *context, FAR void * arg);
+static int adc12_interrupt(int irq, FAR void *context, FAR void *arg);
 #endif
 #if (defined(STM32_IRQ_ADC3) && defined(CONFIG_STM32_ADC3))
-static int adc3_interrupt(int irq, FAR void *context, FAR void * arg);
+static int adc3_interrupt(int irq, FAR void *context, FAR void *arg);
 #endif
 #if defined(STM32_IRQ_ADC4) && defined(CONFIG_STM32_ADC4)
-static int adc4_interrupt(int irq, FAR void *context, FAR void * arg);
+static int adc4_interrupt(int irq, FAR void *context, FAR void *arg);
 #endif
 #if defined(STM32_IRQ_ADC)
-static int adc123_interrupt(int irq, FAR void *context, FAR void * arg);
+static int adc123_interrupt(int irq, FAR void *context, FAR void *arg);
 #endif
 
 /* ADC Driver Methods */
@@ -2832,7 +2832,7 @@ static int adc_interrupt(FAR struct adc_dev_s *dev)
  ****************************************************************************/
 
 #if defined(STM32_IRQ_ADC1)
-static int adc1_interrupt(int irq, FAR void *context, FAR void * arg)
+static int adc1_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   adc_interrupt(&g_adcdev1);
 
@@ -2854,7 +2854,7 @@ static int adc1_interrupt(int irq, FAR void *context, FAR void * arg)
 
 #if defined(STM32_IRQ_ADC12) && \
     (defined(CONFIG_STM32_ADC1) || defined(CONFIG_STM32_ADC2))
-static int adc12_interrupt(int irq, FAR void *context, FAR void * arg)
+static int adc12_interrupt(int irq, FAR void *context, FAR void *arg)
 {
 #ifdef CONFIG_STM32_ADC1
   adc_interrupt(&g_adcdev1);
@@ -2881,7 +2881,7 @@ static int adc12_interrupt(int irq, FAR void *context, FAR void * arg)
  ****************************************************************************/
 
 #if defined(STM32_IRQ_ADC3) && defined(CONFIG_STM32_ADC3)
-static int adc3_interrupt(int irq, FAR void *context, FAR void * arg)
+static int adc3_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   adc_interrupt(&g_adcdev3);
 
@@ -2902,7 +2902,7 @@ static int adc3_interrupt(int irq, FAR void *context, FAR void * arg)
  ****************************************************************************/
 
 #if defined(STM32_IRQ_ADC4) && defined(CONFIG_STM32_ADC4)
-static int adc4_interrupt(int irq, FAR void *context, FAR void * arg)
+static int adc4_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   adc_interrupt(&g_adcdev4);
   return OK;
@@ -2922,7 +2922,7 @@ static int adc4_interrupt(int irq, FAR void *context, FAR void * arg)
  ****************************************************************************/
 
 #if defined(STM32_IRQ_ADC)
-static int adc123_interrupt(int irq, FAR void *context, FAR void * arg)
+static int adc123_interrupt(int irq, FAR void *context, FAR void *arg)
 {
 #ifdef CONFIG_STM32_ADC1
   adc_interrupt(&g_adcdev1);
