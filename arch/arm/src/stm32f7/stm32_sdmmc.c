@@ -846,14 +846,16 @@ static void stm32_configwaitints(struct stm32_dev_s *priv, uint32_t waitmask,
 
       /* Arm the SDMMC_D Ready and install Isr */
 
-      stm32_gpiosetevent(pinset, true, false, false, priv->wrchandler, priv);
+      stm32_gpiosetevent(pinset, true, false, false,
+                         priv->wrchandler, priv);
     }
 
   /* Disarm SDMMC_D ready */
 
   if ((wkupevent & SDIOWAIT_WRCOMPLETE) != 0)
     {
-      stm32_gpiosetevent(priv->d0_gpio, false, false, false , NULL, NULL);
+      stm32_gpiosetevent(priv->d0_gpio, false, false, false,
+                         NULL, NULL);
       stm32_configgpio(priv->d0_gpio);
     }
 #endif
@@ -1517,7 +1519,7 @@ static int stm32_sdmmc1_rdyinterrupt(int irq, void *context, void *arg)
 #  if defined(CONFIG_STM32F7_SDMMC2)
 static int stm32_sdmmc2_rdyinterrupt(int irq, void *context, void *arg)
 {
-  struct stm32_dev_s *priv = struct stm32_dev_s *)arg;
+  struct stm32_dev_s *priv = (struct stm32_dev_s *)arg;
   stm32_endwait(priv, SDIOWAIT_WRCOMPLETE);
   return OK;
 }

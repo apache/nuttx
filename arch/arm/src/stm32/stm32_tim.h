@@ -174,8 +174,7 @@ struct stm32_tim_ops_s
 
   /* Timer interrupts */
 
-  int  (*setisr)(FAR struct stm32_tim_dev_s *dev, xcpt_t handler,
-                 int source);
+  int  (*setisr)(FAR struct stm32_tim_dev_s *dev, xcpt_t handler, int source);
   void (*enableint)(FAR struct stm32_tim_dev_s *dev, int source);
   void (*disableint)(FAR struct stm32_tim_dev_s *dev, int source);
   void (*ackint)(FAR struct stm32_tim_dev_s *dev, int source);

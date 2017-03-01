@@ -488,8 +488,7 @@ static void stm32_tim_setperiod(FAR struct stm32_tim_dev_s *dev,
 }
 
 static int stm32_tim_setisr(FAR struct stm32_tim_dev_s *dev,
-                            xcpt_t handler,
-                            int source)
+                            xcpt_t handler, int source)
 {
   int vectorno;
 
