@@ -591,11 +591,11 @@ static void rtc_resume(void)
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-static int stm32_rtc_alarm_handler(int irq, void *context)
+static int stm32_rtc_alarm_handler(int irq, void *context, void *arg)
 {
   FAR struct alm_cbinfo_s *cbinfo;
   alm_callback_t cb;
-  FAR void *arg;
+  FAR void *cb_arg;
   uint32_t isr;
   uint32_t cr;
   int ret = OK;
@@ -615,12 +615,12 @@ static int stm32_rtc_alarm_handler(int irq, void *context)
               /* Alarm A callback */
 
               cb  = cbinfo->ac_cb;
-              arg = (FAR void *)cbinfo->ac_arg;
+              cb_arg = (FAR void *)cbinfo->ac_arg;
 
               cbinfo->ac_cb  = NULL;
               cbinfo->ac_arg = NULL;
 
-              cb(arg, RTC_ALARMA);
+              cb(cb_arg, RTC_ALARMA);
             }
 
           isr  = getreg32(STM32_RTC_ISR) & ~RTC_ISR_ALRAF;
@@ -640,12 +640,12 @@ static int stm32_rtc_alarm_handler(int irq, void *context)
               /* Alarm B callback */
 
               cb  = cbinfo->ac_cb;
-              arg = (FAR void *)cbinfo->ac_arg;
+              cb_arg = (FAR void *)cbinfo->ac_arg;
 
               cbinfo->ac_cb  = NULL;
               cbinfo->ac_arg = NULL;
 
-              cb(arg, RTC_ALARMB);
+              cb(cb_arg, RTC_ALARMB);
             }
 
           isr  = getreg32(STM32_RTC_ISR) & ~RTC_ISR_ALRBF;
