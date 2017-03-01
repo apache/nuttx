@@ -86,7 +86,7 @@ static bool g_sd_inserted = 0xff; /* Impossible value */
  ****************************************************************************/
 
 #ifdef HAVE_NCD
-static int stm32_ncd_interrupt(int irq, FAR void *context)
+static int stm32_ncd_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   bool present;
 
