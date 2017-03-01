@@ -59,7 +59,8 @@
 #  include "chip/stm32f10xxx_gpio.h"
 #elif defined(CONFIG_STM32_STM32F20XX)
 #  include "chip/stm32f20xxx_gpio.h"
-#elif defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
+#elif defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
+      defined(CONFIG_STM32_STM32F37XX)
 #  include "chip/stm32f30xxx_gpio.h"
 #elif defined(CONFIG_STM32_STM32F40XX)
 #  include "chip/stm32f40xxx_gpio.h"
@@ -201,8 +202,8 @@
 #define GPIO_PIN15                    (15 << GPIO_PIN_SHIFT)
 
 #elif defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F20XX) || \
-      defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX) || \
-      defined(CONFIG_STM32_STM32F40XX)
+      defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
+      defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32F40XX)
 
 /* Each port bit of the general-purpose I/O (GPIO) ports can be individually configured
  * by software in several modes:
@@ -491,6 +492,7 @@ bool stm32_gpioread(uint32_t pinset);
  *  - rising/falling edge: enables
  *  - event:  generate event when set
  *  - func:   when non-NULL, generate interrupt
+ *  - arg:    Argument passed to the interrupt callback
  *
  * Returns:
  *  The previous value of the interrupt handler function pointer.  This value may,
@@ -500,7 +502,7 @@ bool stm32_gpioread(uint32_t pinset);
  ************************************************************************************/
 
 xcpt_t stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
-                          bool event, xcpt_t func);
+                          bool event, xcpt_t func, void *arg);
 
 /************************************************************************************
  * Function:  stm32_dumpgpio

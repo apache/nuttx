@@ -142,7 +142,7 @@ static void cc3000_deselect_and_unlock(FAR struct spi_dev_s *spi);
 
 static void cc3000_notify(FAR struct cc3000_dev_s *priv);
 static void *cc3000_worker(FAR void *arg);
-static int cc3000_interrupt(int irq, FAR void *context);
+static int cc3000_interrupt(int irq, FAR void *context, FAR void *arg);
 
 /* Character driver methods */
 
@@ -462,7 +462,7 @@ static void cc3000_notify(FAR struct cc3000_dev_s *priv)
  * Name: cc3000_worker
  ****************************************************************************/
 
-static void * select_thread_func(FAR void *arg)
+static void *select_thread_func(FAR void *arg)
 {
   FAR struct cc3000_dev_s *priv = (FAR struct cc3000_dev_s *)arg;
   struct timeval timeout;
@@ -601,7 +601,7 @@ static void * select_thread_func(FAR void *arg)
  * Name: cc3000_worker
  ****************************************************************************/
 
-static void * cc3000_worker(FAR void *arg)
+static void *cc3000_worker(FAR void *arg)
 {
   FAR struct cc3000_dev_s *priv = (FAR struct cc3000_dev_s *)arg;
   int ret;
@@ -746,21 +746,11 @@ static void * cc3000_worker(FAR void *arg)
  * Name: cc3000_interrupt
  ****************************************************************************/
 
-static int cc3000_interrupt(int irq, FAR void *context)
+static int cc3000_interrupt(int irq, FAR void *context, FAR void *arg)
 {
-  FAR struct cc3000_dev_s    *priv;
+  FAR struct cc3000_dev_s *priv = (FAR struct cc3000_dev_s *)arg;
 
-  /* Which CC3000 device caused the interrupt? */
-
-#ifndef CONFIG_CC3000_MULTIPLE
-  priv = &g_cc3000;
-#else
-  for (priv = g_cc3000list;
-       priv && priv->configs->irq != irq;
-       priv = priv->flink);
-
-  ASSERT(priv != NULL);
-#endif
+  DEBUGASSERT(priv != NULL);
 
   /* Run the worker thread */
 
@@ -1522,7 +1512,7 @@ errout:
  ****************************************************************************/
 
 int cc3000_register(FAR struct spi_dev_s *spi,
-                      FAR struct cc3000_config_s *config, int minor)
+                    FAR struct cc3000_config_s *config, int minor)
 {
   FAR struct cc3000_dev_s *priv;
   char drvname[DEV_NAMELEN];
@@ -1577,7 +1567,7 @@ int cc3000_register(FAR struct spi_dev_s *spi,
 
   /* Attach the interrupt handler */
 
-  ret = config->irq_attach(config, cc3000_interrupt);
+  ret = config->irq_attach(config, cc3000_interrupt, priv);
   if (ret < 0)
     {
       nerr("ERROR: Failed to attach interrupt\n");

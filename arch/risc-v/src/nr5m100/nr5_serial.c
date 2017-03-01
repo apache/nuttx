@@ -158,7 +158,7 @@ static int  up_setup(struct uart_dev_s *dev);
 static void up_shutdown(struct uart_dev_s *dev);
 static int  up_attach(struct uart_dev_s *dev);
 static void up_detach(struct uart_dev_s *dev);
-static int  up_interrupt(int irq, void *context);
+static int  up_interrupt(int irq, void *context, FAR void *arg);
 static int  up_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int  up_receive(struct uart_dev_s *dev, uint32_t *status);
 static void up_rxint(struct uart_dev_s *dev, bool enable);
@@ -363,8 +363,8 @@ static int up_attach(struct uart_dev_s *dev)
   /* Initialize interrupt generation on the peripheral */
 
   up_serialout(priv, NR5_UART_CTRL_REG_OFFSET, IE_RX | IE_TX);
-  irq_attach(priv->irqrx, up_interrupt);
-  irq_attach(priv->irqtx, up_interrupt);
+  irq_attach(priv->irqrx, up_interrupt, dev);
+  irq_attach(priv->irqtx, up_interrupt, dev);
 
   /* Indicate no interrupts active in EPIC */
 
@@ -413,33 +413,16 @@ static void up_detach(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static int up_interrupt(int irq, void *context)
+static int up_interrupt(int irq, void *context, FAR void *arg)
 {
-  struct uart_dev_s *dev = NULL;
+  struct uart_dev_s *dev = (struct uart_dev_s *)arg;
   struct up_dev_s   *priv;
   int                passes;
   uint32_t           status;
   bool               handled;
 
-#ifdef CONFIG_NR5_UART1
-  if (g_uart1priv.irqrx == irq || g_uart1priv.irqtx == irq)
-    {
-      dev = &g_uart1port;
-    }
-  else
-#endif
-#ifdef CONFIG_NR5_UART2
-  if (g_uart2priv.irqrx == irq || g_uart2priv.irqtx == irq)
-    {
-      dev = &g_uart2port;
-    }
-  else
-#endif
-    {
-      PANIC();
-    }
+  DEBUGASSERT(dev != NULL && dev->priv != NULL);
   priv = (struct up_dev_s *)dev->priv;
-  DEBUGASSERT(priv);
 
   /* Loop until there are no characters to be transferred or,
    * until we have been looping for a long time.

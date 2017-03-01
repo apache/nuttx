@@ -85,14 +85,6 @@
 
 #define BUF ((struct eth_hdr_s *)cs89x0->cs_dev.d_buf)
 
-/* If there is only one CS89x0 instance, then mapping the CS89x0 IRQ to
- * a driver state instance is trivial.
- */
-
-#if CONFIG_CS89x0_NINTERFACES == 1
-#  define cs89x0_mapirq(irq) g_cs89x0[0]
-#endif
-
 #define PKTBUF_SIZE (MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE)
 
 /****************************************************************************
@@ -123,10 +115,7 @@ static int  cs89x0_txpoll(struct net_driver_s *dev);
 
 static void cs89x0_receive(struct cs89x0_driver_s *cs89x0);
 static void cs89x0_txdone(struct cs89x0_driver_s *cs89x0, uint16_t isq);
-#if CONFIG_CS89x0_NINTERFACES > 1
-static inline FAR struct cs89x0_driver_s *cs89x0_mapirq(int irq);
-#endif
-static int  cs89x0_interrupt(int irq, FAR void *context);
+static int  cs89x0_interrupt(int irq, FAR void *context, FAR void *arg);
 
 /* Watchdog timer expirations */
 
@@ -622,40 +611,6 @@ static void cs89x0_txdone(struct cs89x0_driver_s *cs89x0, uint16_t isq)
 }
 
 /****************************************************************************
- * Function: cs89x0_mapirq
- *
- * Description:
- *   Map an IRQ number to a CS89x0 device state instance.  This is only
- *   necessary to handler the case where the architecture includes more than
- *   on CS89x0 chip.
- *
- * Parameters:
- *   irq     - Number of the IRQ that generated the interrupt
- *
- * Returned Value:
- *   A reference to device state structure (NULL if irq does not correspond
- *   to any CS89x0 device).
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-#if CONFIG_CS89x0_NINTERFACES > 1
-static inline FAR struct cs89x0_driver_s *cs89x0_mapirq(int irq)
-{
-  int i;
-  for (i = 0; i < CONFIG_CS89x0_NINTERFACES; i++)
-    {
-      if (g_cs89x0[i] && g_cs89x0[i].irq == irq)
-        {
-          return g_cs89x0[i];
-        }
-    }
-  return NULL;
-}
-#endif
-
-/****************************************************************************
  * Function: cs89x0_interrupt
  *
  * Description:
@@ -672,17 +627,12 @@ static inline FAR struct cs89x0_driver_s *cs89x0_mapirq(int irq)
  *
  ****************************************************************************/
 
-static int cs89x0_interrupt(int irq, FAR void *context)
+static int cs89x0_interrupt(int irq, FAR void *context, FAR void *arg)
 {
-  register struct cs89x0_driver_s *cs89x0 = s89x0_mapirq(irq);
+  FAR struct cs89x0_driver_s *cs89x0 = (FAR struct cs89x0_driver_s *)arg;
   uint16_t isq;
 
-#ifdef CONFIG_DEBUG_FEATURES
-  if (!cs89x0)
-    {
-      return -ENODEV;
-    }
-#endif
+  DEBUGASSERT(cs89x0 != NULL);
 
   /* Read and process all of the events from the ISQ */
 
@@ -1023,7 +973,7 @@ int cs89x0_initialize(FAR const cs89x0_driver_s *cs89x0, int devno)
 
   /* Attach the IRQ to the driver */
 
-  if (irq_attach(cs89x0->irq, cs89x0_interrupt))
+  if (irq_attach(cs89x0->irq, cs89x0_interrupt, cs89x0))
     {
       /* We could not attach the ISR to the ISR */
 

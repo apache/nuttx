@@ -50,7 +50,7 @@ ifeq ($(CONFIG_AS5048B),y)
 endif
 
 ifeq ($(CONFIG_SENSOR_KXTJ9),y)
-  CSRCS += kxjt9.c
+  CSRCS += kxtj9.c
 endif
 
 ifeq ($(CONFIG_LIS3DSH),y)
@@ -128,6 +128,10 @@ endif
 
 ifeq ($(CONFIG_LIS3MDL),y)
   CSRCS += lis3mdl.c
+endif
+
+ifeq ($(CONFIG_SENSORS_L3GD20),y)
+  CSRCS += l3gd20.c
 endif
 
 endif # CONFIG_SPI

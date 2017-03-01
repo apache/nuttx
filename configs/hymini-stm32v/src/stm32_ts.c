@@ -98,7 +98,7 @@ static int hymini_ts_irq_attach(FAR struct ads7843e_config_s *state, xcpt_t isr)
   iinfo("hymini_ts_irq_attach\n");
 
   tc_isr = isr;
-  stm32_gpiosetevent(GPIO_TS_IRQ, true, true, true, isr);
+  stm32_gpiosetevent(GPIO_TS_IRQ, true, true, true, isr, NULL);
   return OK;
 }
 
@@ -108,7 +108,7 @@ static void hymini_ts_irq_enable(FAR struct ads7843e_config_s *state,
 {
   iinfo("%d\n", enable);
 
-  stm32_gpiosetevent(GPIO_TS_IRQ, true, true, true, enable? tc_isr:NULL);
+  stm32_gpiosetevent(GPIO_TS_IRQ, true, true, true, enable ? tc_isr : NULL, NULL);
 }
 
 /* Acknowledge/clear any pending GPIO interrupt */

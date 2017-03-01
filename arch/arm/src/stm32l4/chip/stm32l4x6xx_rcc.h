@@ -760,5 +760,5 @@
 #define RCC_CSR_WWDGRSTF            (1 << 30) /* Bit 30: Window watchdog reset flag */
 #define RCC_CSR_LPWRRSTF            (1 << 31) /* Bit 31: Low-Power reset flag */
 
-#endif /* CONFIG_STM32L4_STM32F427 || CONFIG_STM32L4_STM32F429 */
+#endif /* CONFIG_STM32L4_STM32L476XX || CONFIG_STM32L4_STM32L486XX */
 #endif /* __ARCH_ARM_SRC_STM32L4_CHIP_STM32F42XXX_RCC_H */

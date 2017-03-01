@@ -191,7 +191,7 @@ FAR struct stm32l4_tim_dev_s *stm32l4_tim_init(int timer);
 
 /* Power-down timer, mark it as unused */
 
-int stm32l4_tim_deinit(FAR struct stm32l4_tim_dev_s * dev);
+int stm32l4_tim_deinit(FAR struct stm32l4_tim_dev_s *dev);
 
 /****************************************************************************
  * Name: stm32l4_timer_initialize

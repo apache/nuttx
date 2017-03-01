@@ -473,18 +473,18 @@ static void stm32_endtransfer(struct stm32_dev_s *priv, sdio_eventset_t wkupeven
 static int  stm32_sdmmc_interrupt(struct stm32_dev_s *sdmmc_dev);
 
 #ifdef CONFIG_STM32F7_SDMMC1
-static int stm32_sdmmc1_interrupt(int irq, void *context);
+static int stm32_sdmmc1_interrupt(int irq, void *context, void *arg);
 #endif
 #ifdef CONFIG_STM32F7_SDMMC2
-static int stm32_sdmmc2_interrupt(int irq, void *context);
+static int stm32_sdmmc2_interrupt(int irq, void *context, void *arg);
 #endif
 
 #ifdef CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE
 #ifdef CONFIG_STM32F7_SDMMC1
-static int  stm32_sdmmc1_rdyinterrupt(int irq, void *context);
+static int  stm32_sdmmc1_rdyinterrupt(int irq, void *context, void *arg);
 #endif
 #ifdef CONFIG_STM32F7_SDMMC2
-static int  stm32_sdmmc2_rdyinterrupt(int irq, void *context);
+static int  stm32_sdmmc2_rdyinterrupt(int irq, void *context, void *arg);
 #endif
 #endif
 
@@ -846,14 +846,16 @@ static void stm32_configwaitints(struct stm32_dev_s *priv, uint32_t waitmask,
 
       /* Arm the SDMMC_D Ready and install Isr */
 
-      stm32_gpiosetevent(pinset, true, false, false, priv->wrchandler);
+      stm32_gpiosetevent(pinset, true, false, false,
+                         priv->wrchandler, priv);
     }
 
   /* Disarm SDMMC_D ready */
 
   if ((wkupevent & SDIOWAIT_WRCOMPLETE) != 0)
     {
-      stm32_gpiosetevent(priv->d0_gpio, false, false, false , NULL);
+      stm32_gpiosetevent(priv->d0_gpio, false, false, false,
+                         NULL, NULL);
       stm32_configgpio(priv->d0_gpio);
     }
 #endif
@@ -1506,18 +1508,18 @@ static void stm32_endtransfer(struct stm32_dev_s *priv,
 
 #ifdef CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE
 #  if defined(CONFIG_STM32F7_SDMMC1)
-static int stm32_sdmmc1_rdyinterrupt(int irq, void *context)
+static int stm32_sdmmc1_rdyinterrupt(int irq, void *context, void *arg)
 {
-  struct stm32_dev_s *priv = &g_sdmmcdev1;
+  struct stm32_dev_s *priv = (struct stm32_dev_s *)arg;
   stm32_endwait(priv, SDIOWAIT_WRCOMPLETE);
   return OK;
 }
 #  endif
 
 #  if defined(CONFIG_STM32F7_SDMMC2)
-static int stm32_sdmmc2_rdyinterrupt(int irq, void *context)
+static int stm32_sdmmc2_rdyinterrupt(int irq, void *context, void *arg)
 {
-  struct stm32_dev_s *priv = &g_sdmmcdev2;
+  struct stm32_dev_s *priv = (struct stm32_dev_s *)arg;
   stm32_endwait(priv, SDIOWAIT_WRCOMPLETE);
   return OK;
 }
@@ -1742,7 +1744,7 @@ static int stm32_sdmmc_interrupt(struct stm32_dev_s  *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_STM32F7_SDMMC1
-static int stm32_sdmmc1_interrupt(int irq, void *context)
+static int stm32_sdmmc1_interrupt(int irq, void *context, void *arg)
 {
   return stm32_sdmmc_interrupt(&g_sdmmcdev1);
 }
@@ -1764,7 +1766,7 @@ static int stm32_sdmmc1_interrupt(int irq, void *context)
  *
  ****************************************************************************/
 #ifdef CONFIG_STM32F7_SDMMC2
-static int stm32_sdmmc2_interrupt(int irq, void *context)
+static int stm32_sdmmc2_interrupt(int irq, void *context, void *arg)
 {
   return stm32_sdmmc_interrupt(&g_sdmmcdev2);
 }
@@ -2021,7 +2023,7 @@ static int stm32_attach(FAR struct sdio_dev_s *dev)
 
   /* Attach the SDIO interrupt handler */
 
-  ret = irq_attach(priv->nirq, priv->handler);
+  ret = irq_attach(priv->nirq, priv->handler, NULL);
 
   if (ret == OK)
     {

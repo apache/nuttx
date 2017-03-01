@@ -178,10 +178,10 @@ static int stm32l4pwm_timer(FAR struct stm32l4_pwmtimer_s *priv,
 #if defined(CONFIG_PWM_PULSECOUNT) && (defined(CONFIG_STM32L4_TIM1_PWM) || defined(CONFIG_STM32L4_TIM8_PWM))
 static int stm32l4pwm_interrupt(struct stm32l4_pwmtimer_s *priv);
 #if defined(CONFIG_STM32L4_TIM1_PWM)
-static int stm32l4pwm_tim1interrupt(int irq, void *context);
+static int stm32l4pwm_tim1interrupt(int irq, void *context, FAR void *arg);
 #endif
 #if defined(CONFIG_STM32L4_TIM8_PWM)
-static int stm32l4pwm_tim8interrupt(int irq, void *context);
+static int stm32l4pwm_tim8interrupt(int irq, void *context, FAR void *arg);
 #endif
 static uint8_t stm32l4pwm_pulsecount(uint32_t count);
 #endif
@@ -1527,14 +1527,14 @@ static int stm32l4pwm_interrupt(struct stm32l4_pwmtimer_s *priv)
  ****************************************************************************/
 
 #if defined(CONFIG_PWM_PULSECOUNT) && defined(CONFIG_STM32L4_TIM1_PWM)
-static int stm32l4pwm_tim1interrupt(int irq, void *context)
+static int stm32l4pwm_tim1interrupt(int irq, void *context, FAR void *arg)
 {
   return stm32l4pwm_interrupt(&g_pwm1dev);
 }
 #endif
 
 #if defined(CONFIG_PWM_PULSECOUNT) && defined(CONFIG_STM32L4_TIM8_PWM)
-static int stm32l4pwm_tim8interrupt(int irq, void *context)
+static int stm32l4pwm_tim8interrupt(int irq, void *context, FAR void *arg)
 {
   return stm32l4pwm_interrupt(&g_pwm8dev);
 }
@@ -2072,7 +2072,7 @@ FAR struct pwm_lowerhalf_s *stm32l4_pwminitialize(int timer)
         /* Attach but disable the TIM1 update interrupt */
 
 #ifdef CONFIG_PWM_PULSECOUNT
-        irq_attach(lower->irq, stm32l4pwm_tim1interrupt);
+        irq_attach(lower->irq, stm32l4pwm_tim1interrupt, NULL);
         up_disable_irq(lower->irq);
 #endif
         break;
@@ -2109,7 +2109,7 @@ FAR struct pwm_lowerhalf_s *stm32l4_pwminitialize(int timer)
         /* Attach but disable the TIM8 update interrupt */
 
 #ifdef CONFIG_PWM_PULSECOUNT
-        irq_attach(lower->irq, stm32l4pwm_tim8interrupt);
+        irq_attach(lower->irq, stm32l4pwm_tim8interrupt, NULL);
         up_disable_irq(lower->irq);
 #endif
         break;

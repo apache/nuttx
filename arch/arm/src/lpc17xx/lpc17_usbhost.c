@@ -347,7 +347,7 @@ static int lpc17_ctrltd(struct lpc17_usbhost_s *priv, struct lpc17_ed_s *ed,
 
 /* Interrupt handling **********************************************************/
 
-static int lpc17_usbinterrupt(int irq, void *context);
+static int lpc17_usbinterrupt(int irq, void *context, FAR void *arg);
 
 /* USB host controller operations **********************************************/
 
@@ -1633,7 +1633,7 @@ errout_with_xfrinfo:
  *
  ****************************************************************************/
 
-static int lpc17_usbinterrupt(int irq, void *context)
+static int lpc17_usbinterrupt(int irq, void *context, FAR void *arg)
 {
   struct lpc17_usbhost_s *priv = &g_usbhost;
   struct lpc17_ed_s *ed;
@@ -3844,7 +3844,7 @@ struct usbhost_connection_s *lpc17_usbhost_initialize(int controller)
 
   /* Attach USB host controller interrupt handler */
 
-  if (irq_attach(LPC17_IRQ_USB, lpc17_usbinterrupt) != 0)
+  if (irq_attach(LPC17_IRQ_USB, lpc17_usbinterrupt, NULL) != 0)
     {
       uerr("ERROR: Failed to attach IRQ\n");
       return NULL;

@@ -78,6 +78,7 @@ extern "C"
  *  - fallingedge: Enables interrupt on falling edges
  *  - event:       Generate event when set
  *  - func:        When non-NULL, generate interrupt
+ *  - arg:         Argument passed to the interrupt callback
  *
  * Returns:
  *   The previous value of the interrupt handler function pointer.  This
@@ -87,7 +88,7 @@ extern "C"
  ****************************************************************************/
 
 xcpt_t stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
-                          bool event, xcpt_t func);
+                          bool event, xcpt_t func, void *arg);
 
 /****************************************************************************
  * Name: stm32_exti_alarm
@@ -100,6 +101,7 @@ xcpt_t stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
  *  - fallingedge: Enables interrupt on falling edges
  *  - event:       Generate event when set
  *  - func:        When non-NULL, generate interrupt
+ *  - arg:         Argument passed to the interrupt callback
  *
  * Returns:
  *   The previous value of the interrupt handler function pointer.  This
@@ -109,7 +111,8 @@ xcpt_t stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-xcpt_t stm32_exti_alarm(bool risingedge, bool fallingedge, bool event, xcpt_t func);
+xcpt_t stm32_exti_alarm(bool risingedge, bool fallingedge, bool event,
+                        xcpt_t func, void *arg);
 #endif
 
 #undef EXTERN

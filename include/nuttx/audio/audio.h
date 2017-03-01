@@ -389,12 +389,12 @@ begin_packed_struct struct ap_buffer_s
 struct audio_msg_s
 {
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-  FAR void            *session;     /* Associated channel */
+  FAR void           *session;      /* Associated channel */
 #endif
   uint16_t            msgId;        /* Message ID */
   union
   {
-    FAR void *        pPtr;         /* Buffer being dequeued */
+    FAR void         *pPtr;         /* Buffer being dequeued */
     uint32_t          data;         /* Message data */
   } u;
 };

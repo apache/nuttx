@@ -385,7 +385,7 @@ static void dm9x_receive(struct dm9x_driver_s *priv);
 static void dm9x_txdone(struct dm9x_driver_s *priv);
 
 static void dm9x_interrupt_work(FAR void *arg);
-static int  dm9x_interrupt(int irq, FAR void *context);
+static int  dm9x_interrupt(int irq, FAR void *context, FAR void *arg);
 
 /* Watchdog timer expirations */
 
@@ -1238,7 +1238,7 @@ static void dm9x_interrupt_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static int dm9x_interrupt(int irq, FAR void *context)
+static int dm9x_interrupt(int irq, FAR void *context, FAR void *arg)
 {
 #if CONFIG_DM9X_NINTERFACES == 1
   FAR struct dm9x_driver_s *priv = &g_dm9x[0];
@@ -1453,7 +1453,8 @@ static void dm9x_poll_expiry(int argc, wdparm_t arg, ...)
        * cycle.
        */
 
-      (void)wd_start(priv->dm_txpoll, DM9X_WDDELAY, dm9x_poll_expiry, 1, arg);
+      (void)wd_start(priv->dm_txpoll, DM9X_WDDELAY, dm9x_poll_expiry,
+                     1, arg);
     }
 }
 
@@ -1951,7 +1952,7 @@ int dm9x_initialize(void)
 
   /* Attach the IRQ to the driver */
 
-  if (irq_attach(CONFIG_DM9X_IRQ, dm9x_interrupt))
+  if (irq_attach(CONFIG_DM9X_IRQ, dm9x_interrupt, NULL))
     {
       /* We could not attach the ISR to the ISR */
 

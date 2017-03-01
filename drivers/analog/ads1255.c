@@ -148,7 +148,7 @@ static int  adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg);
 /* Interrupt handling */
 
 static void adc_worker(FAR void *arg);
-static int  adc_interrupt(int irq, void *context);
+static int  adc_interrupt(int irq, void *context, FAR void *arg);
 
 /****************************************************************************
  * Private Data
@@ -312,7 +312,7 @@ static int adc_setup(FAR struct adc_dev_s *dev)
   DEBUGASSERT(priv != NULL && priv->spi != NULL);
   spi = priv->spi;
 
-  ret = irq_attach(priv->irq, adc_interrupt);
+  ret = irq_attach(priv->irq, adc_interrupt, NULL);
   if (ret == OK)
     {
       adc_lock(spi);
@@ -473,7 +473,7 @@ static void adc_worker(FAR void *arg)
  *
  ****************************************************************************/
 
-static int adc_interrupt(int irq, void *context)
+static int adc_interrupt(int irq, void *context, FAR void *arg)
 {
   FAR struct ads1255_dev_s *priv = (FAR struct ads1255_dev_s *)g_adcdev.ad_priv;
 

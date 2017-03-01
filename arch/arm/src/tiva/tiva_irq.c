@@ -196,7 +196,7 @@ static void tiva_dumpnvic(const char *msg, int irq)
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_FEATURES
-static int tiva_nmi(int irq, FAR void *context)
+static int tiva_nmi(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
   _err("PANIC!!! NMI received\n");
@@ -204,7 +204,7 @@ static int tiva_nmi(int irq, FAR void *context)
   return 0;
 }
 
-static int tiva_busfault(int irq, FAR void *context)
+static int tiva_busfault(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
   _err("PANIC!!! Bus fault recived\n");
@@ -212,7 +212,7 @@ static int tiva_busfault(int irq, FAR void *context)
   return 0;
 }
 
-static int tiva_usagefault(int irq, FAR void *context)
+static int tiva_usagefault(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
   _err("PANIC!!! Usage fault received\n");
@@ -220,7 +220,7 @@ static int tiva_usagefault(int irq, FAR void *context)
   return 0;
 }
 
-static int tiva_pendsv(int irq, FAR void *context)
+static int tiva_pendsv(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
   _err("PANIC!!! PendSV received\n");
@@ -228,7 +228,7 @@ static int tiva_pendsv(int irq, FAR void *context)
   return 0;
 }
 
-static int tiva_dbgmonitor(int irq, FAR void *context)
+static int tiva_dbgmonitor(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
   _err("PANIC!!! Debug Monitor received\n");
@@ -236,7 +236,7 @@ static int tiva_dbgmonitor(int irq, FAR void *context)
   return 0;
 }
 
-static int tiva_reserved(int irq, FAR void *context)
+static int tiva_reserved(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
   _err("PANIC!!! Reserved interrupt\n");
@@ -451,8 +451,8 @@ void up_irqinitialize(void)
    * under certain conditions.
    */
 
-  irq_attach(TIVA_IRQ_SVCALL, up_svcall);
-  irq_attach(TIVA_IRQ_HARDFAULT, up_hardfault);
+  irq_attach(TIVA_IRQ_SVCALL, up_svcall, NULL);
+  irq_attach(TIVA_IRQ_HARDFAULT, up_hardfault, NULL);
 
   /* Set the priority of the SVCall interrupt */
 
@@ -468,22 +468,22 @@ void up_irqinitialize(void)
    */
 
 #ifdef CONFIG_ARM_MPU
-  irq_attach(TIVA_IRQ_MEMFAULT, up_memfault);
+  irq_attach(TIVA_IRQ_MEMFAULT, up_memfault, NULL);
   up_enable_irq(TIVA_IRQ_MEMFAULT);
 #endif
 
   /* Attach all other processor exceptions (except reset and sys tick) */
 
 #ifdef CONFIG_DEBUG_FEATURES
-  irq_attach(TIVA_IRQ_NMI, tiva_nmi);
+  irq_attach(TIVA_IRQ_NMI, tiva_nmi, NULL);
 #ifndef CONFIG_ARM_MPU
-  irq_attach(TIVA_IRQ_MEMFAULT, up_memfault);
+  irq_attach(TIVA_IRQ_MEMFAULT, up_memfault, NULL);
 #endif
-  irq_attach(TIVA_IRQ_BUSFAULT, tiva_busfault);
-  irq_attach(TIVA_IRQ_USAGEFAULT, tiva_usagefault);
-  irq_attach(TIVA_IRQ_PENDSV, tiva_pendsv);
-  irq_attach(TIVA_IRQ_DBGMONITOR, tiva_dbgmonitor);
-  irq_attach(TIVA_IRQ_RESERVED, tiva_reserved);
+  irq_attach(TIVA_IRQ_BUSFAULT, tiva_busfault, NULL);
+  irq_attach(TIVA_IRQ_USAGEFAULT, tiva_usagefault, NULL);
+  irq_attach(TIVA_IRQ_PENDSV, tiva_pendsv, NULL);
+  irq_attach(TIVA_IRQ_DBGMONITOR, tiva_dbgmonitor, NULL);
+  irq_attach(TIVA_IRQ_RESERVED, tiva_reserved, NULL);
 #endif
 
   tiva_dumpnvic("initial", NR_IRQS);

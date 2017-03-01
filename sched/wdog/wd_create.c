@@ -57,8 +57,8 @@
  * Name: wd_create
  *
  * Description:
- *   The wd_create function will create a watchdog by allocating it from the
- *   list of free watchdogs.
+ *   The wd_create function will create a watchdog timer by allocating one
+ *   from the list of free watchdog timers.
  *
  * Parameters:
  *   None
@@ -66,8 +66,6 @@
  * Return Value:
  *   Pointer to watchdog (i.e., the watchdog ID), or NULL if insufficient
  *   watchdogs are available.
- *
- * Assumptions:
  *
  ****************************************************************************/
 

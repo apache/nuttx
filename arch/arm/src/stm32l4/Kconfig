@@ -37,35 +37,49 @@ endchoice # STM32 L4 Chip Selection
 
 # Chip families
 
-config STM32L4_STM32L476XX
+config STM32L4_STM32L4X3
 	bool
 	default n
-	select ARCH_HAVE_FPU
-	select ARCH_HAVE_DPFPU # REVISIT
-	select ARMV7M_HAVE_ITCM
-	select ARMV7M_HAVE_DTCM
+	select STM32L4_HAVE_USART1
+	select STM32L4_HAVE_USART2
+	select STM32L4_HAVE_USART3
+	select STM32L4_HAVE_LPTIM1
+	select STM32L4_HAVE_LPTIM2
+	select STM32L4_HAVE_COMP
+	select STM32L4_HAVE_SAI1
+	select STM32L4_HAVE_SAI2
+
+config STM32L4_STM32L4X6
+	bool
+	default n
 	select STM32L4_HAVE_USART1
 	select STM32L4_HAVE_USART2
 	select STM32L4_HAVE_USART3
 	select STM32L4_HAVE_UART4
 	select STM32L4_HAVE_UART5
+	select STM32L4_HAVE_LPTIM1
+	select STM32L4_HAVE_LPTIM2
+	select STM32L4_HAVE_COMP
 	select STM32L4_HAVE_SAI1
 	select STM32L4_HAVE_SAI2
+
+config STM32L4_STM32L476XX
+	bool
+	default n
+	select STM32L4_STM32L4X6
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU # REVISIT
+	select ARMV7M_HAVE_ITCM
+	select ARMV7M_HAVE_DTCM
 
 config STM32L4_STM32L486XX
 	bool
 	default n
+	select STM32L4_STM32L4X6
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_DPFPU # REVISIT
 	select ARMV7M_HAVE_ITCM
 	select ARMV7M_HAVE_DTCM
-	select STM32L4_HAVE_USART1
-	select STM32L4_HAVE_USART2
-	select STM32L4_HAVE_USART3
-	select STM32L4_HAVE_UART4
-	select STM32L4_HAVE_UART5
-	select STM32L4_HAVE_SAI1
-	select STM32L4_HAVE_SAI2
 	select STM32L4_FLASH_1024KB
 
 choice
@@ -122,6 +136,18 @@ config STM32L4_HAVE_LTDC
 	bool
 	default n
 
+config STM32L4_HAVE_LPTIM1
+	bool
+	default n
+
+config STM32L4_HAVE_LPTIM2
+	bool
+	default n
+
+config STM32L4_HAVE_COMP
+	bool
+	default n
+
 config STM32L4_HAVE_SAI1
 	bool
 	default n
@@ -166,8 +192,8 @@ config STM32L4_USART
 	default n
 
 config STM32L4_LPTIM
-    bool
-    default n
+	bool
+	default n
 
 # These are the peripheral selections proper
 
@@ -438,8 +464,8 @@ config STM32L4_TIM7
 	default n
 
 config STM32L4_LCD
-    bool "LCD"
-    default n
+	bool "LCD"
+	default n
 
 config STM32L4_SPI2
 	bool "SPI2"
@@ -525,13 +551,14 @@ config STM32L4_DAC2
 	select STM32L4_DAC
 
 config STM32L4_OPAMP
-    bool "OPAMP"
-    default n
+	bool "OPAMP"
+	default n
 
 config STM32L4_LPTIM1
 	bool "LPTIM1"
 	default n
-    select STM32L4_LPTIM
+	select STM32L4_LPTIM
+	depends on STM32L4_HAVE_LPTIM1
 
 config STM32L4_LPUART1
 	bool "LPUART1"
@@ -540,13 +567,14 @@ config STM32L4_LPUART1
 	select ARCH_HAVE_LPUART1
 
 config STM32L4_SWPMI
-    bool "SWPMI"
-    default n
+	bool "SWPMI"
+	default n
 
 config STM32L4_LPTIM2
 	bool "LPTIM2"
 	default n
-    select STM32L4_LPTIM
+	select STM32L4_LPTIM
+	depends on STM32L4_HAVE_LPTIM2
 
 comment "APB2 Peripherals"
 
@@ -597,17 +625,24 @@ config STM32L4_TIM17
 	bool "TIM17"
 	default n
 
+config STM32L4_COMP
+	bool "COMP"
+	default n
+	depends on STM32L4_HAVE_COMP
+
 config STM32L4_SAI1
 	bool "SAI1"
 	default n
+	depends on STM32L4_HAVE_SAI1
 
 config STM32L4_SAI2
 	bool "SAI2"
 	default n
+	depends on STM32L4_HAVE_SAI2
 
 config STM32L4_DFSDM
-    bool "DFSDM"
-    default n
+	bool "DFSDM"
+	default n
 
 comment "Other Peripherals"
 

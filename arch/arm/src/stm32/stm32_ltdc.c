@@ -550,7 +550,7 @@ static void stm32_ltdc_periphconfig(void);
 static void stm32_ltdc_bgcolor(uint32_t rgb);
 static void stm32_ltdc_dither(bool enable, uint8_t red,
                               uint8_t green, uint8_t blue);
-static int stm32_ltdcirq(int irq, void *context);
+static int stm32_ltdcirq(int irq, void *context, FAR void *arg);
 static int stm32_ltdc_waitforirq(void);
 static int stm32_ltdc_reload(uint8_t value, bool waitvblank);
 
@@ -1128,7 +1128,7 @@ static void stm32_ltdc_irqctrl(uint32_t setirqs, uint32_t clrirqs)
  *
  ****************************************************************************/
 
-static int stm32_ltdcirq(int irq, void *context)
+static int stm32_ltdcirq(int irq, void *context, FAR void *arg)
 {
   FAR struct stm32_interrupt_s *priv = &g_interrupt;
 
@@ -1298,7 +1298,7 @@ static void stm32_global_configure(void)
 
   /* Attach LTDC interrupt vector */
 
-  (void)irq_attach(g_interrupt.irq, stm32_ltdcirq);
+  (void)irq_attach(g_interrupt.irq, stm32_ltdcirq, NULL);
 
   /* Enable the IRQ at the NVIC */
 

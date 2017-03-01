@@ -232,7 +232,9 @@
 
 /* LLWU Control and Status Register */
 
-#define LLWU_CS_ACKISO             (1 << 7)  /* Bit 7:  Acknowledge Isolation */
+#if !defined(KINETIS_PMC_HAS_REGSC_ACKISO)
+#  define LLWU_CS_ACKISO           (1 << 7)  /* Bit 7:  Acknowledge Isolation */
+#endif
                                              /* Bits 2-6: Reserved */
 #define LLWU_CS_FLTEP              (1 << 1)  /* Bit 1:  Digital Filter on External Pin */
 #define LLWU_CS_FLTR               (1 << 0)  /* Bit 0:  Digital Filter on RESET Pin */

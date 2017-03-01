@@ -76,7 +76,7 @@
  *   OK on success; or ERROR on failure
  *
  * Assumeptions:
- *   Interrupts are disabled.
+ *   Executing within a critical section established by the caller.
  *
  ****************************************************************************/
 

@@ -45,8 +45,6 @@
 #ifndef __ASSEMBLY__
 # include <stdint.h>
 #endif
-#include "stm32_rcc.h"
-#include "stm32.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -234,6 +232,11 @@
 #define GPIO_USART3_TX    GPIO_USART3_TX_3  /* PD8  */
 #define GPIO_USART3_CTS   GPIO_USART3_CTS_2 /* PD11 */
 #define GPIO_USART3_RTS   GPIO_USART3_RTS_2 /* PD12 */
+
+/* USART6: */
+
+#define GPIO_USART6_RX    GPIO_USART6_RX_2  /* PG9  */
+#define GPIO_USART6_TX    GPIO_USART6_TX_1  /* PC6  */
 
 /* CAN: */
 

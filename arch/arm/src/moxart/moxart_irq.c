@@ -138,7 +138,7 @@ void up_irqinitialize(void)
 
   /* Setup UART shared interrupt */
 
-  irq_attach(CONFIG_UART_MOXA_SHARED_IRQ, uart_decodeirq);
+  irq_attach(CONFIG_UART_MOXA_SHARED_IRQ, uart_decodeirq, NULL);
   up_enable_irq(CONFIG_UART_MOXA_SHARED_IRQ);
 
   /* And finally, enable interrupts */

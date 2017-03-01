@@ -271,7 +271,7 @@ FAR struct usbhost_connection_s *sam_ohci_initialize(int controller);
  ************************************************************************************/
 
 #ifdef CONFIG_SAMA5_OHCI
-int sam_ohci_tophalf(int irq, FAR void *context);
+int sam_ohci_tophalf(int irq, FAR void *context, FAR void *arg);
 #endif
 
 /************************************************************************************

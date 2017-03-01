@@ -309,8 +309,8 @@ static void dm320_dispatchrequest(struct dm320_usbdev_s *priv,
               const struct usb_ctrlreq_s *ctrl);
 static inline void dm320_ep0setup(struct dm320_usbdev_s *priv);
 static inline uint32_t dm320_highestpriinterrupt(int intstatus);
-static int  dm320_ctlrinterrupt(int irq, FAR void *context);
-static int  dm320_attachinterrupt(int irq, FAR void *context);
+static int  dm320_ctlrinterrupt(int irq, FAR void *context, FAR void *arg);
+static int  dm320_attachinterrupt(int irq, FAR void *context, FAR void *arg);
 
 /* Initialization operations */
 
@@ -1513,7 +1513,7 @@ static inline uint32_t dm320_highestpriinterrupt(int intstatus)
  *
  ****************************************************************************/
 
-static int dm320_ctlrinterrupt(int irq, FAR void *context)
+static int dm320_ctlrinterrupt(int irq, FAR void *context, FAR void *arg)
 {
   struct dm320_usbdev_s *priv = &g_usbdev;
   struct dm320_ep_s *privep ;
@@ -1680,7 +1680,7 @@ static int dm320_ctlrinterrupt(int irq, FAR void *context)
  *
  ****************************************************************************/
 
-static int dm320_attachinterrupt(int irq, FAR void *context)
+static int dm320_attachinterrupt(int irq, FAR void *context, FAR void *arg)
 {
   struct dm320_usbdev_s *priv = &g_usbdev;
   uint16_t gio;
@@ -2438,7 +2438,7 @@ void up_usbinitialize(void)
 
   /* Attach host attach GIO interrupt */
 
-  if (irq_attach(IRQ_USBATTACH, dm320_attachinterrupt) != 0)
+  if (irq_attach(IRQ_USBATTACH, dm320_attachinterrupt, NULL) != 0)
     {
       usbtrace(TRACE_DEVERROR(DM320_TRACEERR_ATTACHIRQREG), 0);
       goto errout;
@@ -2448,7 +2448,7 @@ void up_usbinitialize(void)
    * enabled when the driver is bound
    */
 
-  if (irq_attach(DM320_IRQ_USB1, dm320_ctlrinterrupt) != 0)
+  if (irq_attach(DM320_IRQ_USB1, dm320_ctlrinterrupt, NULL) != 0)
     {
       usbtrace(TRACE_DEVERROR(DM320_TRACEERR_COREIRQREG), 0);
       goto errout;

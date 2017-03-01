@@ -58,6 +58,7 @@
  *  - rising/falling edge: enables interrupt on rising/falling edge
  *  - event:  generate event when set
  *  - func:   when non-NULL, generate interrupt
+ *  - arg:    Argument passed to the interrupt callback
  *
  * Returns:
  *   The previous value of the interrupt handler function pointer.  This
@@ -67,6 +68,6 @@
  ****************************************************************************/
 
 xcpt_t stm32_exti_pvd(bool risingedge, bool fallingedge, bool event,
-                      xcpt_t func);
+                      xcpt_t func, void *arg);
 
 #endif /* __ARCH_ARM_SRC_STM32F7_STM32_EXTI_PWR_H */

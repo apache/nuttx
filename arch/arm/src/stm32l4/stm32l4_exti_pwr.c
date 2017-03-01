@@ -65,11 +65,8 @@
 
 /* Interrupt handlers attached to the PVD EXTI */
 
-static xcpt_t stm32l4_exti_pvd_callback;
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
+static xcpt_t g_pvd_callback;
+static void  *g_callback_arg;
 
 /****************************************************************************
  * Private Functions
@@ -83,7 +80,7 @@ static xcpt_t stm32l4_exti_pvd_callback;
  *
  ****************************************************************************/
 
-static int stm32l4_exti_pvd_isr(int irq, void *context)
+static int stm32l4_exti_pvd_isr(int irq, void *context, FAR void *arg)
 {
   int ret = OK;
 
@@ -93,9 +90,9 @@ static int stm32l4_exti_pvd_isr(int irq, void *context)
 
   /* And dispatch the interrupt to the handler */
 
-  if (stm32l4_exti_pvd_callback)
+  if (g_pvd_callback != NULL)
     {
-      ret = stm32l4_exti_pvd_callback(irq, context);
+      ret = g_pvd_callback(irq, context, g_callback_arg);
     }
 
   return ret;
@@ -124,20 +121,21 @@ static int stm32l4_exti_pvd_isr(int irq, void *context)
  ****************************************************************************/
 
 xcpt_t stm32l4_exti_pvd(bool risingedge, bool fallingedge, bool event,
-                      xcpt_t func)
+                        xcpt_t func, void *arg)
 {
   xcpt_t oldhandler;
 
   /* Get the previous GPIO IRQ handler; Save the new IRQ handler. */
 
-  oldhandler = stm32l4_exti_pvd_callback;
-  stm32l4_exti_pvd_callback = func;
+  oldhandler     = g_pvd_callback;
+  g_pvd_callback = func;
+  g_callback_arg = arg;
 
   /* Install external interrupt handlers (if not already attached) */
 
   if (func)
     {
-      irq_attach(STM32L4_IRQ_PVD, stm32l4_exti_pvd_isr);
+      irq_attach(STM32L4_IRQ_PVD, stm32l4_exti_pvd_isr, NULL);
       up_enable_irq(STM32L4_IRQ_PVD);
     }
   else

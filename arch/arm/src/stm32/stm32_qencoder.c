@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/stm32/stm32_qencoder.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2017 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Diego Sanchez <dsanchez@nx-engineering.com>
  *
@@ -65,32 +65,6 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
-/* Clocking *************************************************************************/
-/* The CLKOUT value should not exceed the CLKIN value */
-
-#if defined(CONFIG_STM32_TIM1_QE) && CONFIG_STM32_TIM1_QECLKOUT > STM32_APB2_TIM1_CLKIN
-#  warning "CONFIG_STM32_TIM1_QECLKOUT exceeds STM32_APB2_TIM1_CLKIN"
-#endif
-
-#if defined(CONFIG_STM32_TIM2_QE) && CONFIG_STM32_TIM2_QECLKOUT > STM32_APB1_TIM2_CLKIN
-#  warning "CONFIG_STM32_TIM2_QECLKOUT exceeds STM32_APB2_TIM2_CLKIN"
-#endif
-
-#if defined(CONFIG_STM32_TIM3_QE) && CONFIG_STM32_TIM3_QECLKOUT >  STM32_APB1_TIM3_CLKIN
-#  warning "CONFIG_STM32_TIM3_QECLKOUT exceeds STM32_APB2_TIM3_CLKIN"
-#endif
-
-#if defined(CONFIG_STM32_TIM4_QE) && CONFIG_STM32_TIM4_QECLKOUT > STM32_APB1_TIM4_CLKIN
-#  warning "CONFIG_STM32_TIM4_QECLKOUT exceeds STM32_APB2_TIM4_CLKIN"
-#endif
-
-#if defined(CONFIG_STM32_TIM5_QE) && CONFIG_STM32_TIM5_QECLKOUT > STM32_APB1_TIM5_CLKIN
-#  warning "CONFIG_STM32_TIM5_QECLKOUT exceeds STM32_APB2_TIM5_CLKIN"
-#endif
-
-#if defined(CONFIG_STM32_TIM8_QE) && CONFIG_STM32_TIM8_QECLKOUT > STM32_APB2_TIM8_CLKIN
-#  warning "CONFIG_STM32_TIM8_QECLKOUT exceeds STM32_APB2_TIM8_CLKIN"
-#endif
 
 /* Timers ***************************************************************************/
 
@@ -269,21 +243,22 @@
 
 struct stm32_qeconfig_s
 {
-  uint8_t  timid;   /* Timer ID {1,2,3,4,5,8} */
-  uint8_t  irq;     /* Timer update IRQ */
+  uint8_t   timid;   /* Timer ID {1,2,3,4,5,8} */
+  uint8_t   irq;     /* Timer update IRQ */
 #ifdef HAVE_MIXEDWIDTH_TIMERS
-  uint8_t  width;   /* Timer width (16- or 32-bits) */
+  uint8_t   width;   /* Timer width (16- or 32-bits) */
 #endif
 #ifdef CONFIG_STM32_STM32F10XX
-  uint16_t ti1cfg;  /* TI1 input pin configuration (16-bit encoding) */
-  uint16_t ti2cfg;  /* TI2 input pin configuration (16-bit encoding) */
+  uint16_t  ti1cfg;  /* TI1 input pin configuration (16-bit encoding) */
+  uint16_t  ti2cfg;  /* TI2 input pin configuration (16-bit encoding) */
 #else
-  uint32_t ti1cfg;  /* TI1 input pin configuration (20-bit encoding) */
-  uint32_t ti2cfg;  /* TI2 input pin configuration (20-bit encoding) */
+  uint32_t  ti1cfg;  /* TI1 input pin configuration (20-bit encoding) */
+  uint32_t  ti2cfg;  /* TI2 input pin configuration (20-bit encoding) */
 #endif
-  uint32_t base;    /* Register base address */
-  uint32_t psc;     /* Timer input clock prescaler */
-  xcpt_t   handler; /* Interrupt handler for this IRQ */
+  uintptr_t regaddr; /* RCC clock enable register address */
+  uint32_t  enable;  /* RCC clock enable bit */
+  uint32_t  base;    /* Register base address */
+  uint32_t  psc;     /* Timer input clock prescaler */
 };
 
 /* Overall, RAM-based state structure */
@@ -328,25 +303,7 @@ static FAR struct stm32_lowerhalf_s *stm32_tim2lower(int tim);
 /* Interrupt handling */
 
 #ifdef HAVE_16BIT_TIMERS
-static int stm32_interrupt(FAR struct stm32_lowerhalf_s *priv);
-#if defined(CONFIG_STM32_TIM1_QE) && TIM1_BITWIDTH == 16
-static int stm32_tim1interrupt(int irq, FAR void *context);
-#endif
-#if defined(CONFIG_STM32_TIM2_QE) && TIM2_BITWIDTH == 16
-static int stm32_tim2interrupt(int irq, FAR void *context);
-#endif
-#if defined(CONFIG_STM32_TIM3_QE) && TIM3_BITWIDTH == 16
-static int stm32_tim3interrupt(int irq, FAR void *context);
-#endif
-#if defined(CONFIG_STM32_TIM4_QE) && TIM4_BITWIDTH == 16
-static int stm32_tim4interrupt(int irq, FAR void *context);
-#endif
-#if defined(CONFIG_STM32_TIM5_QE) && TIM5_BITWIDTH == 16
-static int stm32_tim5interrupt(int irq, FAR void *context);
-#endif
-#if defined(CONFIG_STM32_TIM8_QE) && TIM8_BITWIDTH == 16
-static int stm32_tim8interrupt(int irq, FAR void *context);
-#endif
+static int stm32_interrupt(int irq, FAR void *context, FAR void *arg);
 #endif
 
 /* Lower-half Quadrature Encoder Driver Methods */
@@ -381,13 +338,12 @@ static const struct stm32_qeconfig_s g_tim1config =
 #ifdef HAVE_MIXEDWIDTH_TIMERS
   .width    = TIM1_BITWIDTH,
 #endif
+  .regaddr  = STM32_RCC_APB2ENR,
+  .enable   = RCC_APB2ENR_TIM1EN,
   .base     = STM32_TIM1_BASE,
-  .psc      = (STM32_APB2_TIM1_CLKIN / CONFIG_STM32_TIM1_QECLKOUT) - 1,
+  .psc      = CONFIG_STM32_TIM1_QEPSC,
   .ti1cfg   = GPIO_TIM1_CH1IN,
   .ti2cfg   = GPIO_TIM1_CH2IN,
-#if TIM1_BITWIDTH == 16
-  .handler  = stm32_tim1interrupt,
-#endif
 };
 
 static struct stm32_lowerhalf_s g_tim1lower =
@@ -407,13 +363,12 @@ static const struct stm32_qeconfig_s g_tim2config =
 #ifdef HAVE_MIXEDWIDTH_TIMERS
   .width    = TIM2_BITWIDTH,
 #endif
+  .regaddr  = STM32_RCC_APB1ENR,
+  .enable   = RCC_APB1ENR_TIM2EN,
   .base     = STM32_TIM2_BASE,
-  .psc      = (STM32_APB1_TIM2_CLKIN / CONFIG_STM32_TIM2_QECLKOUT) - 1,
+  .psc      = CONFIG_STM32_TIM2_QEPSC,
   .ti1cfg   = GPIO_TIM2_CH1IN,
   .ti2cfg   = GPIO_TIM2_CH2IN,
-#if TIM2_BITWIDTH == 16
-  .handler  = stm32_tim2interrupt,
-#endif
 };
 
 static struct stm32_lowerhalf_s g_tim2lower =
@@ -433,13 +388,12 @@ static const struct stm32_qeconfig_s g_tim3config =
 #ifdef HAVE_MIXEDWIDTH_TIMERS
   .width    = TIM3_BITWIDTH,
 #endif
+  .regaddr  = STM32_RCC_APB1ENR,
+  .enable   = RCC_APB1ENR_TIM3EN,
   .base     = STM32_TIM3_BASE,
-  .psc      = (STM32_APB1_TIM3_CLKIN / CONFIG_STM32_TIM3_QECLKOUT) - 1,
+  .psc      = CONFIG_STM32_TIM3_QEPSC,
   .ti1cfg   = GPIO_TIM3_CH1IN,
   .ti2cfg   = GPIO_TIM3_CH2IN,
-#if TIM3_BITWIDTH == 16
-  .handler  = stm32_tim3interrupt,
-#endif
 };
 
 static struct stm32_lowerhalf_s g_tim3lower =
@@ -459,13 +413,12 @@ static const struct stm32_qeconfig_s g_tim4config =
 #ifdef HAVE_MIXEDWIDTH_TIMERS
   .width    = TIM4_BITWIDTH,
 #endif
+  .regaddr  = STM32_RCC_APB1ENR,
+  .enable   = RCC_APB1ENR_TIM4EN,
   .base     = STM32_TIM4_BASE,
-  .psc      = (STM32_APB1_TIM4_CLKIN / CONFIG_STM32_TIM4_QECLKOUT) - 1,
+  .psc      = CONFIG_STM32_TIM4_QEPSC,
   .ti1cfg   = GPIO_TIM4_CH1IN,
   .ti2cfg   = GPIO_TIM4_CH2IN,
-#if TIM4_BITWIDTH == 16
-  .handler  = stm32_tim4interrupt,
-#endif
 };
 
 static struct stm32_lowerhalf_s g_tim4lower =
@@ -485,13 +438,12 @@ static const struct stm32_qeconfig_s g_tim5config =
 #ifdef HAVE_MIXEDWIDTH_TIMERS
   .width    = TIM5_BITWIDTH,
 #endif
+  .regaddr  = STM32_RCC_APB1ENR,
+  .enable   = RCC_APB1ENR_TIM5EN,
   .base     = STM32_TIM5_BASE,
-  .psc      = (STM32_APB1_TIM5_CLKIN / CONFIG_STM32_TIM5_QECLKOUT) - 1,
+  .psc      = CONFIG_STM32_TIM5_QEPSC,
   .ti1cfg   = GPIO_TIM5_CH1IN,
   .ti2cfg   = GPIO_TIM5_CH2IN,
-#if TIM5_BITWIDTH == 16
-  .handler  = stm32_tim5interrupt,
-#endif
 };
 
 static struct stm32_lowerhalf_s g_tim5lower =
@@ -511,13 +463,12 @@ static const struct stm32_qeconfig_s g_tim8config =
 #ifdef HAVE_MIXEDWIDTH_TIMERS
   .width    = TIM8_BITWIDTH,
 #endif
+  .regaddr  = STM32_RCC_APB2ENR,
+  .enable   = RCC_APB2ENR_TIM8EN,
   .base     = STM32_TIM8_BASE,
-  .psc      = (STM32_APB2_TIM8_CLKIN / CONFIG_STM32_TIM8_QECLKOUT) - 1,
+  .psc      = CONFIG_STM32_TIM8_QEPSC,
   .ti1cfg   = GPIO_TIM8_CH1IN,
   .ti2cfg   = GPIO_TIM8_CH2IN,
-#if TIM8_BITWIDTH == 16
-  .handler  = stm32_tim8interrupt,
-#endif
 };
 
 static struct stm32_lowerhalf_s g_tim8lower =
@@ -725,9 +676,12 @@ static FAR struct stm32_lowerhalf_s *stm32_tim2lower(int tim)
  ************************************************************************************/
 
 #ifdef HAVE_16BIT_TIMERS
-static int stm32_interrupt(FAR struct stm32_lowerhalf_s *priv)
+static int stm32_interrupt(int irq, FAR void *context, FAR void *arg)
 {
+  FAR struct stm32_lowerhalf_s *priv = (FAR struct stm32_lowerhalf_s *)arg;
   uint16_t regval;
+
+  DEBUGASSERT(priv != NULL);
 
   /* Verify that this is an update interrupt.  Nothing else is expected. */
 
@@ -757,56 +711,6 @@ static int stm32_interrupt(FAR struct stm32_lowerhalf_s *priv)
 #endif
 
 /************************************************************************************
- * Name: stm32_intNinterrupt
- *
- * Description:
- *   TIMN interrupt handler
- *
- ************************************************************************************/
-
-#if defined(CONFIG_STM32_TIM1_QE) && TIM1_BITWIDTH == 16
-static int stm32_tim1interrupt(int irq, FAR void *context)
-{
-  return stm32_interrupt(&g_tim1lower);
-}
-#endif
-
-#if defined(CONFIG_STM32_TIM2_QE) && TIM2_BITWIDTH == 16
-static int stm32_tim2interrupt(int irq, FAR void *context)
-{
-  return stm32_interrupt(&g_tim2lower);
-}
-#endif
-
-#if defined(CONFIG_STM32_TIM3_QE) && TIM3_BITWIDTH == 16
-static int stm32_tim3interrupt(int irq, FAR void *context)
-{
-  return stm32_interrupt(&g_tim3lower);
-}
-#endif
-
-#if defined(CONFIG_STM32_TIM4_QE) && TIM4_BITWIDTH == 16
-static int stm32_tim4interrupt(int irq, FAR void *context)
-{
-  return stm32_interrupt(&g_tim4lower);
-}
-#endif
-
-#if defined(CONFIG_STM32_TIM5_QE) && TIM5_BITWIDTH == 16
-static int stm32_tim5interrupt(int irq, FAR void *context)
-{
-  return stm32_interrupt(&g_tim5lower);
-}
-#endif
-
-#if defined(CONFIG_STM32_TIM8_QE) && TIM8_BITWIDTH == 16
-static int stm32_tim8interrupt(int irq, FAR void *context)
-{
-  return stm32_interrupt(&g_tim8lower);
-}
-#endif
-
-/************************************************************************************
  * Name: stm32_setup
  *
  * Description:
@@ -820,8 +724,8 @@ static int stm32_setup(FAR struct qe_lowerhalf_s *lower)
 {
   FAR struct stm32_lowerhalf_s *priv = (FAR struct stm32_lowerhalf_s *)lower;
   uint16_t dier;
-  uint16_t smcr;
-  uint16_t ccmr1;
+  uint32_t smcr;
+  uint32_t ccmr1;
   uint16_t ccer;
   uint16_t cr1;
 #ifdef HAVE_16BIT_TIMERS
@@ -829,7 +733,9 @@ static int stm32_setup(FAR struct qe_lowerhalf_s *lower)
   int ret;
 #endif
 
-  /* NOTE: Clocking should have been enabled in the low-level RCC logic at boot-up */
+  /* Enable clocking to the timer */
+
+  modifyreg32(priv->config->regaddr, 0, priv->config->enable);
 
   /* Timer base configuration */
 
@@ -859,10 +765,14 @@ static int stm32_setup(FAR struct qe_lowerhalf_s *lower)
   stm32_putreg16(priv, STM32_GTIM_ARR_OFFSET, 0xffff);
 #endif
 
-  /* Set the timer prescaler value.  The clock input value (CLKIN) is based on the
-   * peripheral clock (PCLK) and a multiplier.  These CLKIN values are provided in
-   * the board.h file.  The prescaler value is then that CLKIN value divided by the
-   * configured CLKOUT value (minus one)
+  /* Set the timer prescaler value.
+   *
+   * If we are doing precise shaft positioning, each qe pulse is important.
+   * So the STM32 has direct config control on the pulse count prescaler.
+   * This input clock just limits the incoming pulse rate, which should be
+   * lower than the peripheral clock due to resynchronization, but it is the
+   * responsibility of the system designer to decide the correct prescaler
+   * value, because it has a direct influence on the encoder resolution.
    */
 
   stm32_putreg16(priv, STM32_GTIM_PSC_OFFSET, (uint16_t)priv->config->psc);
@@ -889,10 +799,10 @@ static int stm32_setup(FAR struct qe_lowerhalf_s *lower)
 
   /* Set the encoder Mode 3 */
 
-  smcr = stm32_getreg16(priv, STM32_GTIM_SMCR_OFFSET);
+  smcr  = stm32_getreg32(priv, STM32_GTIM_SMCR_OFFSET);
   smcr &= ~GTIM_SMCR_SMS_MASK;
   smcr |= GTIM_SMCR_ENCMD3;
-  stm32_putreg16(priv, STM32_GTIM_SMCR_OFFSET, smcr);
+  stm32_putreg32(priv, STM32_GTIM_SMCR_OFFSET, smcr);
 
   /* TI1 Channel Configuration */
   /* Disable the Channel 1: Reset the CC1E Bit */
@@ -901,8 +811,8 @@ static int stm32_setup(FAR struct qe_lowerhalf_s *lower)
   ccer &= ~GTIM_CCER_CC1E;
   stm32_putreg16(priv, STM32_GTIM_CCER_OFFSET, ccer);
 
-  ccmr1 = stm32_getreg16(priv, STM32_GTIM_CCMR1_OFFSET);
-  ccer = stm32_getreg16(priv, STM32_GTIM_CCER_OFFSET);
+  ccmr1 = stm32_getreg32(priv, STM32_GTIM_CCMR1_OFFSET);
+  ccer  = stm32_getreg16(priv, STM32_GTIM_CCER_OFFSET);
 
   /* Select the Input IC1=TI1 and set the filter fSAMPLING=fDTS/4, N=6 */
 
@@ -917,17 +827,17 @@ static int stm32_setup(FAR struct qe_lowerhalf_s *lower)
 
   /* Write to TIM CCMR1 and CCER registers */
 
-  stm32_putreg16(priv, STM32_GTIM_CCMR1_OFFSET, ccmr1);
+  stm32_putreg32(priv, STM32_GTIM_CCMR1_OFFSET, ccmr1);
   stm32_putreg16(priv, STM32_GTIM_CCER_OFFSET, ccer);
 
   /* Set the Input Capture Prescaler value: Capture performed each time an
    * edge is detected on the capture input.
    */
 
-  ccmr1  = stm32_getreg16(priv, STM32_GTIM_CCMR1_OFFSET);
+  ccmr1  = stm32_getreg32(priv, STM32_GTIM_CCMR1_OFFSET);
   ccmr1 &= ~GTIM_CCMR1_IC1PSC_MASK;
   ccmr1 |= (GTIM_CCMR_ICPSC_NOPSC << GTIM_CCMR1_IC1PSC_SHIFT);
-  stm32_putreg16(priv, STM32_GTIM_CCMR1_OFFSET, ccmr1);
+  stm32_putreg32(priv, STM32_GTIM_CCMR1_OFFSET, ccmr1);
 
   /* TI2 Channel Configuration */
   /* Disable the Channel 2: Reset the CC2E Bit */
@@ -936,7 +846,7 @@ static int stm32_setup(FAR struct qe_lowerhalf_s *lower)
   ccer &= ~GTIM_CCER_CC2E;
   stm32_putreg16(priv, STM32_GTIM_CCER_OFFSET, ccer);
 
-  ccmr1 = stm32_getreg16(priv, STM32_GTIM_CCMR1_OFFSET);
+  ccmr1 = stm32_getreg32(priv, STM32_GTIM_CCMR1_OFFSET);
   ccer  = stm32_getreg16(priv, STM32_GTIM_CCER_OFFSET);
 
   /* Select the Input IC2=TI2 and set the filter fSAMPLING=fDTS/4, N=6 */
@@ -952,21 +862,21 @@ static int stm32_setup(FAR struct qe_lowerhalf_s *lower)
 
   /* Write to TIM CCMR1 and CCER registers */
 
-  stm32_putreg16(priv, STM32_GTIM_CCMR1_OFFSET, ccmr1);
+  stm32_putreg32(priv, STM32_GTIM_CCMR1_OFFSET, ccmr1);
   stm32_putreg16(priv, STM32_GTIM_CCER_OFFSET, ccer);
 
   /* Set the Input Capture Prescaler value: Capture performed each time an
    * edge is detected on the capture input.
    */
 
-  ccmr1  = stm32_getreg16(priv, STM32_GTIM_CCMR1_OFFSET);
+  ccmr1  = stm32_getreg32(priv, STM32_GTIM_CCMR1_OFFSET);
   ccmr1 &= ~GTIM_CCMR1_IC2PSC_MASK;
   ccmr1 |= (GTIM_CCMR_ICPSC_NOPSC << GTIM_CCMR1_IC2PSC_SHIFT);
-  stm32_putreg16(priv, STM32_GTIM_CCMR1_OFFSET, ccmr1);
+  stm32_putreg32(priv, STM32_GTIM_CCMR1_OFFSET, ccmr1);
 
   /* Disable the update interrupt */
 
-  dier = stm32_getreg16(priv, STM32_GTIM_DIER_OFFSET);
+  dier  = stm32_getreg16(priv, STM32_GTIM_DIER_OFFSET);
   dier &= ~GTIM_DIER_UIE;
   stm32_putreg16(priv, STM32_GTIM_DIER_OFFSET, dier);
 
@@ -979,7 +889,7 @@ static int stm32_setup(FAR struct qe_lowerhalf_s *lower)
     {
       /* Attach the interrupt handler */
 
-      ret = irq_attach(priv->config->irq, priv->config->handler);
+      ret = irq_attach(priv->config->irq, stm32_interrupt, priv);
       if (ret < 0)
         {
           stm32_shutdown(lower);
@@ -1130,6 +1040,10 @@ static int stm32_shutdown(FAR struct qe_lowerhalf_s *lower)
   sninfo("regaddr: %08x resetbit: %08x\n", regaddr, resetbit);
   stm32_dumpregs(priv, "After stop");
 
+  /* Disable clocking to the timer */
+
+  modifyreg32(priv->config->regaddr, priv->config->enable, 0);
+
   /* Put the TI1 GPIO pin back to its default state */
 
   pincfg  = priv->config->ti1cfg & (GPIO_PORT_MASK | GPIO_PIN_MASK);
@@ -1239,6 +1153,8 @@ static int stm32_ioctl(FAR struct qe_lowerhalf_s *lower, int cmd, unsigned long 
 {
   /* No ioctl commands supported */
 
+  /* TODO add an IOCTL to control the encoder pulse count prescaler */
+
   return -ENOTTY;
 }
 
@@ -1284,7 +1200,7 @@ int stm32_qeinitialize(FAR const char *devpath, int tim)
       return -EBUSY;
     }
 
-  /* Register the priv-half driver */
+  /* Register the upper-half driver */
 
   ret = qe_register(devpath, (FAR struct qe_lowerhalf_s *)priv);
   if (ret < 0)

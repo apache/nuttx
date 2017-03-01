@@ -1276,7 +1276,7 @@ static void sam_dmaterminate(struct sam_dma_s *dmach, int result)
  *
  ****************************************************************************/
 
-static int sam_dmainterrupt(int irq, void *context)
+static int sam_dmainterrupt(int irq, void *context, FAR void *arg)
 {
   struct sam_dma_s *dmach;
   unsigned int chndx;
@@ -1370,7 +1370,7 @@ void weak_function up_dmainitialize(void)
 
   /* Attach DMA interrupt vector */
 
-  (void)irq_attach(SAM_IRQ_DMAC, sam_dmainterrupt);
+  (void)irq_attach(SAM_IRQ_DMAC, sam_dmainterrupt, NULL);
 
   /* Enable the IRQ at the NVIC (still disabled at the DMA controller) */
 

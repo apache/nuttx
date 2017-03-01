@@ -290,9 +290,18 @@ static uint32_t sched_process_scheduler(uint32_t ticks, bool noswitches)
   irqstate_t flags;
   int i;
 
-  /* Perform scheduler operations on all CPUs */
+  /* If we are running on a single CPU architecture, then we know interrupts
+   * a disabled an there is no need to explicitly call
+   * enter_critical_section().  However, in the SMP case,
+   * enter_critical_section() does much more than just disable interrupts on
+   * the local CPU; it also manages spinlocks to assure the stability of the
+   * TCB that we are manipulating.
+   */
 
   flags = enter_critical_section();
+
+  /* Perform scheduler operations on all CPUs */
+
   for (i = 0; i < CONFIG_SMP_NCPUS; i++)
     {
       timeslice = sched_cpu_scheduler(i, ticks, noswitches);

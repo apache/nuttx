@@ -1,0 +1,36 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_TWR_K64F120M
+
+config TWR_K64F120M_SDHC_AUTOMOUNT
+	bool "SDHC automounter"
+	default n
+	depends on FS_AUTOMOUNTER && KINETIS_SDHC
+
+if TWR_K64F120M_SDHC_AUTOMOUNT
+
+config TWR_K64F120M_SDHC_AUTOMOUNT_FSTYPE
+	string "SDHC file system type"
+	default "vfat"
+
+config TWR_K64F120M_SDHC_AUTOMOUNT_BLKDEV
+	string "SDHC block device"
+	default "/dev/mmcsd0"
+
+config TWR_K64F120M_SDHC_AUTOMOUNT_MOUNTPOINT
+	string "SDHC mount point"
+	default "/mnt/sdcard"
+
+config TWR_K64F120M_SDHC_AUTOMOUNT_DDELAY
+	int "SDHC debounce delay (milliseconds)"
+	default 1000
+
+config TWR_K64F120M_SDHC_AUTOMOUNT_UDELAY
+	int "SDHC unmount retry delay (milliseconds)"
+	default 2000
+
+endif # TWR_K64F120M_SDHC_AUTOMOUNT
+endif # ARCH_BOARD_TWR_K64F120M

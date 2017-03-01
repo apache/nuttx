@@ -36,11 +36,11 @@ config AUDIO_I2SCHAR_TXTIMEOUT
 endif # AUDIO_I2SCHAR
 
 config AUDIO_TONE
-        bool "Audio Tone Generator using PWM"
-        default n
-        depends on PWM && AUDIO_DEVICES
-        ---help---
-                This driver enables the Audio Tone Generator for NuttX.
+	bool "Audio Tone Generator using PWM"
+	default n
+	depends on PWM && AUDIO_DEVICES
+	---help---
+		This driver enables the Audio Tone Generator for NuttX.
 
 if AUDIO_TONE
 

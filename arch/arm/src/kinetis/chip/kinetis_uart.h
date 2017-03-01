@@ -1,8 +1,9 @@
 /************************************************************************************
  * arch/arm/src/kinetis/chip/kinetis_uart.h
  *
- *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2011, 2016-2017 Gregory Nutt. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane<david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -293,7 +294,7 @@
 
 #define UART_BDH_SBR_SHIFT           (0)       /* Bits 0-4: MS Bits 8-13 of the UART Baud Rate Bits */
 #define UART_BDH_SBR_MASK            (31 << UART_BDH_SBR_SHIFT)
-                                               /* Bit 5: Reserved */
+#define UART_BDH_SBNS                (1 << 5)  /* Bit 5:  Stop Bit Number Select */
 #define UART_BDH_RXEDGIE             (1 << 6)  /* Bit 6: RxD Input Active Edge Interrupt Enable */
 #define UART_BDH_LBKDIE              (1 << 7)  /* Bit 7: LIN Break Detect Interrupt Enable */
 

@@ -43,6 +43,8 @@
 
 #include <nuttx/config.h>
 #include <arch/kinetis/kinetis_mcg.h>
+#include <arch/kinetis/kinetis_sim.h>
+#include <arch/kinetis/kinetis_pmc.h>
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -1425,7 +1427,8 @@
 #  define KINETIS_NUSBDEV         1            /* One USB device controller */
 #  define KINETIS_NSDHC           1            /* SD host controller */
 #  define KINETIS_NI2C            4            /* Four I2C modules */
-#  define KINETIS_NUART           5            /* Five UART modues */
+#  define KINETIS_NUART           5            /* Five UART modules */
+#  define KINETIS_NLPUART         1            /* One LPUART modules */
 #  define KINETIS_NSPI            3            /* Three SPI modules */
 #  define KINETIS_NCAN            2            /* Two CAN controllers */
 #  define KINETIS_NI2S            1            /* One I2S modules */

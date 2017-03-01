@@ -184,11 +184,13 @@ xcpt_t up_irqio(int id, xcpt_t irqhandler)
 
   if (id == 0)
     {
-      oldhandler = stm32_gpiosetevent(GPIO_D14, true, true, true, irqhandler);
+      oldhandler = stm32_gpiosetevent(GPIO_D14, true, true, true,
+                                      irqhandler, NULL);
     }
   else if (id == 1)
     {
-      oldhandler = stm32_gpiosetevent(GPIO_D15, true, true, true, irqhandler);
+      oldhandler = stm32_gpiosetevent(GPIO_D15, true, true, true,
+                                      irqhandler, NULL);
     }
 
   return oldhandler;

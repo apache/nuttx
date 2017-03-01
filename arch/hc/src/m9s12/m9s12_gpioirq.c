@@ -181,7 +181,7 @@ static int hcs12_interrupt(uint16_t base, int irq0, uint8_t valid, void *context
 }
 
 #ifdef CONFIG_HCS12_PORTG_INTS
-static int hcs12_pginterrupt(int irq, void *context)
+static int hcs12_pginterrupt(int irq, void *context, FAR void *arg)
 {
   return hcs12_interrupt(HCS12_PIM_PORTG_BASE, HCS12_IRQ_PG0,
                          HCS12_IRQ_PGSET, context);
@@ -189,7 +189,7 @@ static int hcs12_pginterrupt(int irq, void *context)
 #endif
 
 #ifdef CONFIG_HCS12_PORTH_INTS
-static int hcs12_phinterrupt(int irq, void *context)
+static int hcs12_phinterrupt(int irq, void *context, FAR void *arg)
 {
   return hcs12_interrupt(HCS12_PIM_PORTH_BASE, HCS12_IRQ_PH0,
                          HCS12_IRQ_PHSET, context);
@@ -197,7 +197,7 @@ static int hcs12_phinterrupt(int irq, void *context)
 #endif
 
 #ifdef CONFIG_HCS12_PORTJ_INTS
-static int hcs12_pjinterrupt(int irq, void *context)
+static int hcs12_pjinterrupt(int irq, void *context, FAR void *arg)
 {
   return hcs12_interrupt(HCS12_PIM_PORTJ_BASE, HCS12_IRQ_PJ0,
                          HCS12_IRQ_PJSET, context);
@@ -230,13 +230,13 @@ void hcs12_gpioirqinitialize(void)
 
 #ifdef CONFIG_HCS12_GPIOIRQ
 # ifdef CONFIG_HCS12_PORTG_INTS
-  irq_attach(HCS12_IRQ_VPORTG, hcs12_pginterrupt);
+  irq_attach(HCS12_IRQ_VPORTG, hcs12_pginterrupt, NULL);
 # endif
 # ifdef CONFIG_HCS12_PORTH_INTS
-  irq_attach(HCS12_IRQ_VPORTH, hcs12_phinterrupt);
+  irq_attach(HCS12_IRQ_VPORTH, hcs12_phinterrupt, NULL);
 # endif
 # ifdef CONFIG_HCS12_PORTJ_INTS
-  irq_attach(HCS12_IRQ_VPORTJ, hcs12_pjinterrupt);
+  irq_attach(HCS12_IRQ_VPORTJ, hcs12_pjinterrupt, NULL);
 # endif
 #endif /* CONFIG_HCS12_GPIOIRQ */
 }

@@ -134,7 +134,7 @@ uint8_t board_buttons(void)
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_IRQBUTTONS
-xcpt_t board_button_irq(int id, xcpt_t irqhandler)
+xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
   uint16_t gpio;
 
@@ -151,7 +151,7 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
       return NULL;
     }
 
-  return stm32_gpiosetevent(gpio, true, true, true, irqhandler);
+  return stm32_gpiosetevent(gpio, true, true, true, irqhandler, arg);
 }
 #endif
 #endif /* CONFIG_ARCH_BUTTONS */

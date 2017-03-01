@@ -97,7 +97,7 @@ static void dac_shutdown(FAR struct dac_dev_s *dev);
 static void dac_txint(FAR struct dac_dev_s *dev, bool enable);
 static int  dac_send(FAR struct dac_dev_s *dev, FAR struct dac_msg_s *msg);
 static int  dac_ioctl(FAR struct dac_dev_s *dev, int cmd, unsigned long arg);
-static int  dac_interrupt(int irq, void *context);
+static int  dac_interrupt(int irq, void *context, FAR void *arg);
 
 /****************************************************************************
  * ad_private Data

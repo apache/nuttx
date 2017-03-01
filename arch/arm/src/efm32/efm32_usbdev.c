@@ -574,7 +574,7 @@ static inline void efm32_otginterrupt(FAR struct efm32_usbdev_s *priv);
 
 /* First level interrupt processing */
 
-static int         efm32_usbinterrupt(int irq, FAR void *context);
+static int         efm32_usbinterrupt(int irq, FAR void *context, FAR void *arg);
 
 /* Endpoint operations *********************************************************/
 /* Global OUT NAK controls */
@@ -3498,7 +3498,7 @@ static inline void efm32_otginterrupt(FAR struct efm32_usbdev_s *priv)
  *
  ****************************************************************************/
 
-static int efm32_usbinterrupt(int irq, FAR void *context)
+static int efm32_usbinterrupt(int irq, FAR void *context, FAR void *arg)
 {
   /* At present, there is only a single OTG FS device support. Hence it is
    * pre-allocated as g_otgfsdev.  However, in most code, the private data
@@ -5485,7 +5485,7 @@ void up_usbinitialize(void)
 
   /* Attach the OTG FS interrupt handler */
 
-  ret = irq_attach(EFM32_IRQ_USB, efm32_usbinterrupt);
+  ret = irq_attach(EFM32_IRQ_USB, efm32_usbinterrupt, NULL);
   if (ret < 0)
     {
       uerr("ERROR: irq_attach failed\n", ret);

@@ -112,13 +112,15 @@ static void stm32_emac0_phy_enable(bool enable)
     {
       /* Attach and enable GPIO interrupt (and event) on the falling edge */
 
-      (void)stm32_gpiosetevent(GPIO_EMAC_NINT, false, true, true, g_ethmac_handler);
+      (void)stm32_gpiosetevent(GPIO_EMAC_NINT, false, true, true,
+                               g_ethmac_handler, NULL);
     }
   else
     {
       /* Detach and disable GPIO interrupt */
 
-      (void)stm32_gpiosetevent(GPIO_EMAC_NINT, false, false, false, NULL);
+      (void)stm32_gpiosetevent(GPIO_EMAC_NINT, false, false, false,
+                               NULL, NULL);
     }
 }
 #endif

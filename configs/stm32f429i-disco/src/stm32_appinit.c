@@ -165,6 +165,8 @@ int board_app_initialize(uintptr_t arg)
   int ret;
 #elif defined(HAVE_USBHOST) || defined(HAVE_USBMONITOR)
   int ret;
+#elif defined(CONFIG_SENSORS_L3GD20)
+  int ret;
 #endif
 
   /* Configure SPI-based devices */
@@ -375,6 +377,14 @@ int board_app_initialize(uintptr_t arg)
   if (ret != OK)
     {
       syslog(LOG_ERR, "ERROR: Failed to start USB monitor: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_L3GD20
+  ret = stm32_l3gd20initialize("/dev/gyr0");
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize l3gd20 sensor: %d\n", ret);
     }
 #endif
 

@@ -267,7 +267,7 @@ static int  ssi_transfer(struct tiva_ssidev_s *priv, const void *txbuffer,
 
 #ifndef CONFIG_SSI_POLLWAIT
 static inline struct tiva_ssidev_s *ssi_mapirq(int irq);
-static int  ssi_interrupt(int irq, void *context);
+static int  ssi_interrupt(int irq, void *context, FAR void *arg);
 #endif
 
 /* SPI methods */
@@ -1004,7 +1004,7 @@ static inline struct tiva_ssidev_s *ssi_mapirq(int irq)
  ****************************************************************************/
 
 #ifndef CONFIG_SSI_POLLWAIT
-static int ssi_interrupt(int irq, void *context)
+static int ssi_interrupt(int irq, void *context, FAR void *arg)
 {
   struct tiva_ssidev_s *priv = ssi_mapirq(irq);
   uint32_t regval;
@@ -1682,9 +1682,9 @@ FAR struct spi_dev_s *tiva_ssibus_initialize(int port)
 
 #ifndef CONFIG_SSI_POLLWAIT
 #if NSSI_ENABLED > 1
-  irq_attach(priv->irq, (xcpt_t)ssi_interrupt);
+  irq_attach(priv->irq, (xcpt_t)ssi_interrupt, NULL);
 #else
-  irq_attach(SSI_IRQ, (xcpt_t)ssi_interrupt);
+  irq_attach(SSI_IRQ, (xcpt_t)ssi_interrupt, NULL);
 #endif
 #endif /* CONFIG_SSI_POLLWAIT */
 

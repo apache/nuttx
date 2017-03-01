@@ -124,7 +124,7 @@ static void *stm32_cd_thread(void *arg)
  *   Card detect interrupt handler.
  ****************************************************************************/
 
-static int stm32_cd(int irq, void *context)
+static int stm32_cd(int irq, void *context, void *arg)
 {
   static const int debounce_time = 100; /* [ms] */
   static uint32_t now = 0;
@@ -196,7 +196,7 @@ int stm32_mmcsd_initialize(int minor)
       return rv;
     }
 
-  stm32_gpiosetevent(GPIO_SD_CD, true, true, true, stm32_cd);
+  stm32_gpiosetevent(GPIO_SD_CD, true, true, true, stm32_cd, NULL);
 
   sem_init(&g_cdsem, 0, 0);
   pthread_attr_init(&pattr);

@@ -374,13 +374,13 @@ uint32_t *up_doirq(int irq, uint32_t *regs);
 
 /* Exception Handlers */
 
-int  up_svcall(int irq, FAR void *context);
-int  up_hardfault(int irq, FAR void *context);
+int  up_svcall(int irq, FAR void *context, FAR void *arg);
+int  up_hardfault(int irq, FAR void *context, FAR void *arg);
 
 #  if defined(CONFIG_ARCH_CORTEXM3) || defined(CONFIG_ARCH_CORTEXM4) || \
       defined(CONFIG_ARCH_CORTEXM7)
 
-int  up_memfault(int irq, FAR void *context);
+int  up_memfault(int irq, FAR void *context, FAR void *arg);
 
 #  endif /* CONFIG_ARCH_CORTEXM3,4,7 */
 

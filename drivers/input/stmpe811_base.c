@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/input/stmpe811_base.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -53,10 +53,6 @@
 #include "stmpe811.h"
 
 #if defined(CONFIG_INPUT) && defined(CONFIG_INPUT_STMPE811)
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
 
 /****************************************************************************
  * Private Data
@@ -155,30 +151,14 @@ static void stmpe811_worker(FAR void *arg)
  *
  ****************************************************************************/
 
-static int stmpe811_interrupt(int irq, FAR void *context)
+static int stmpe811_interrupt(int irq, FAR void *context, FAR void *arg)
 {
-  FAR struct stmpe811_dev_s    *priv;
+  FAR struct stmpe811_dev_s    *priv = (FAR struct stmpe811_dev_s *)arg;
   FAR struct stmpe811_config_s *config;
-  int                          ret;
+  int                           ret;
 
-  /* Which STMPE811 device caused the interrupt? */
-
-#ifndef CONFIG_STMPE811_MULTIPLE
-  priv = &g_stmpe811;
-#else
-  for (priv = g_stmpe811list;
-       priv && priv->config->irq != irq;
-       priv = priv->flink);
-
-  ASSERT(priv != NULL);
-#endif
-
-  /* Get a pointer the callbacks for convenience (and so the code is not so
-   * ugly).
-   */
-
+  DEBUGASSERT(priv != NULL && priv->config != NULL);
   config = priv->config;
-  DEBUGASSERT(config != NULL);
 
   /* Disable further interrupts */
 
@@ -359,7 +339,7 @@ STMPE811_HANDLE stmpe811_instantiate(FAR struct i2c_master_s *dev,
 
   /* Attach the STMPE811 interrupt handler. */
 
-  config->attach(config, stmpe811_interrupt);
+  config->attach(config, stmpe811_interrupt, priv);
 
   /* Clear any pending interrupts */
 

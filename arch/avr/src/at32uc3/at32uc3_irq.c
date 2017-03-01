@@ -174,7 +174,7 @@ static int up_getgrp(unsigned int irq)
  *
  ****************************************************************************/
 
-static int avr32_xcptn(int irq, FAR void *context)
+static int avr32_xcptn(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
   _alert("PANIC!!! Exception IRQ: %d\n", irq);
@@ -223,7 +223,7 @@ void up_irqinitialize(void)
 
   for (irq = 0; irq < AVR32_IRQ_NEVENTS; irq++)
     {
-      irq_attach(irq, avr32_xcptn);
+      irq_attach(irq, avr32_xcptn, NULL);
     }
 
   /* Initialize GPIO interrupt facilities */

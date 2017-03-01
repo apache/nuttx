@@ -85,6 +85,10 @@ void stm32_spidev_initialize(void)
 #ifdef CONFIG_WL_NRF24L01
   stm32_configgpio(GPIO_NRF24L01_CS);         /* nRF24L01 chip select */
 #endif
+
+#ifdef CONFIG_MMCSD_SPI
+  stm32_configgpio(GPIO_SDCARD_CS);           /* SD/MMC Card chip select */
+#endif
 }
 
 /****************************************************************************
@@ -136,6 +140,13 @@ void stm32_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
       stm32_gpiowrite(GPIO_NRF24L01_CS, !selected);
     }
 #endif
+
+#ifdef CONFIG_MMCSD_SPI
+  if (devid == SPIDEV_MMCSD)
+    {
+      stm32_gpiowrite(GPIO_SDCARD_CS, !selected);
+    }
+#endif
 }
 
 uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
@@ -144,6 +155,13 @@ uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 
 #ifdef CONFIG_WL_NRF24L01
   if (devid == SPIDEV_WIRELESS)
+    {
+       status |= SPI_STATUS_PRESENT;
+    }
+#endif
+
+#ifdef CONFIG_MMCSD_SPI
+  if (devid == SPIDEV_MMCSD)
     {
        status |= SPI_STATUS_PRESENT;
     }

@@ -197,7 +197,7 @@ static void mxt_clear(FAR const struct mxt_lower_s *lower)
   /* Does nothing */
 }
 
-static int mxt_interrupt(int irq, FAR void *context)
+static int mxt_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   /* Just forward the interrupt to the maXTouch driver */
 
@@ -269,7 +269,7 @@ int board_tsc_setup(int minor)
        /* Configure maXTouch CHG interrupts */
 
       sam_pioirq(PIO_CHG_MXT);
-      (void)irq_attach(IRQ_CHG_MXT, mxt_interrupt);
+      (void)irq_attach(IRQ_CHG_MXT, mxt_interrupt, NULL);
 
       /* Initialize and register the I2C touchscreen device */
 

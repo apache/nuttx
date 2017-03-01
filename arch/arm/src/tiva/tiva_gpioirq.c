@@ -308,7 +308,7 @@ static int tiva_gpioporthandler(uint8_t port, void *context)
                        g_gpioportirqvector[TIVA_GPIO_IRQ_IDX(port, pin)],
                        TIVA_GPIO_IRQ_IDX(port, pin));
 
-              g_gpioportirqvector[TIVA_GPIO_IRQ_IDX(port, pin)](irq, context);
+              g_gpioportirqvector[TIVA_GPIO_IRQ_IDX(port, pin)](irq, context, NULL);
             }
         }
     }
@@ -317,7 +317,7 @@ static int tiva_gpioporthandler(uint8_t port, void *context)
 }
 
 #ifdef CONFIG_TIVA_GPIOA_IRQS
-static int tiva_gpioahandler(int irq, FAR void *context)
+static int tiva_gpioahandler(int irq, FAR void *context, FAR void *arg)
 {
   irqstate_t flags;
   flags = enter_critical_section();
@@ -330,7 +330,7 @@ static int tiva_gpioahandler(int irq, FAR void *context)
 #endif
 
 #ifdef CONFIG_TIVA_GPIOB_IRQS
-static int tiva_gpiobhandler(int irq, FAR void *context)
+static int tiva_gpiobhandler(int irq, FAR void *context, FAR void *arg)
 {
   irqstate_t flags;
   flags = enter_critical_section();
@@ -343,7 +343,7 @@ static int tiva_gpiobhandler(int irq, FAR void *context)
 #endif
 
 #ifdef CONFIG_TIVA_GPIOC_IRQS
-static int tiva_gpiochandler(int irq, FAR void *context)
+static int tiva_gpiochandler(int irq, FAR void *context, FAR void *arg)
 {
   irqstate_t flags;
   flags = enter_critical_section();
@@ -356,7 +356,7 @@ static int tiva_gpiochandler(int irq, FAR void *context)
 #endif
 
 #ifdef CONFIG_TIVA_GPIOD_IRQS
-static int tiva_gpiodhandler(int irq, FAR void *context)
+static int tiva_gpiodhandler(int irq, FAR void *context, FAR void *arg)
 {
   irqstate_t flags;
   flags = enter_critical_section();
@@ -369,7 +369,7 @@ static int tiva_gpiodhandler(int irq, FAR void *context)
 #endif
 
 #ifdef CONFIG_TIVA_GPIOE_IRQS
-static int tiva_gpioehandler(int irq, FAR void *context)
+static int tiva_gpioehandler(int irq, FAR void *context, FAR void *arg)
 {
   irqstate_t flags;
   flags = enter_critical_section();
@@ -382,7 +382,7 @@ static int tiva_gpioehandler(int irq, FAR void *context)
 #endif
 
 #ifdef CONFIG_TIVA_GPIOF_IRQS
-static int tiva_gpiofhandler(int irq, FAR void *context)
+static int tiva_gpiofhandler(int irq, FAR void *context, FAR void *arg)
 {
   irqstate_t flags;
   flags = enter_critical_section();
@@ -395,7 +395,7 @@ static int tiva_gpiofhandler(int irq, FAR void *context)
 #endif
 
 #ifdef CONFIG_TIVA_GPIOG_IRQS
-static int tiva_gpioghandler(int irq, FAR void *context)
+static int tiva_gpioghandler(int irq, FAR void *context, FAR void *arg)
 {
   irqstate_t flags;
   flags = enter_critical_section();
@@ -408,7 +408,7 @@ static int tiva_gpioghandler(int irq, FAR void *context)
 #endif
 
 #ifdef CONFIG_TIVA_GPIOH_IRQS
-static int tiva_gpiohhandler(int irq, FAR void *context)
+static int tiva_gpiohhandler(int irq, FAR void *context, FAR void *arg)
 {
   irqstate_t flags;
   flags = enter_critical_section();
@@ -421,7 +421,7 @@ static int tiva_gpiohhandler(int irq, FAR void *context)
 #endif
 
 #ifdef CONFIG_TIVA_GPIOJ_IRQS
-static int tiva_gpiojhandler(int irq, FAR void *context)
+static int tiva_gpiojhandler(int irq, FAR void *context, FAR void *arg)
 {
   irqstate_t flags;
   flags = enter_critical_section();
@@ -434,7 +434,7 @@ static int tiva_gpiojhandler(int irq, FAR void *context)
 #endif
 
 #ifdef CONFIG_TIVA_GPIOK_IRQS
-static int tiva_gpiokhandler(int irq, FAR void *context)
+static int tiva_gpiokhandler(int irq, FAR void *context, FAR void *arg)
 {
   irqstate_t flags;
   flags = enter_critical_section();
@@ -447,7 +447,7 @@ static int tiva_gpiokhandler(int irq, FAR void *context)
 #endif
 
 #ifdef CONFIG_TIVA_GPIOL_IRQS
-static int tiva_gpiolhandler(int irq, FAR void *context)
+static int tiva_gpiolhandler(int irq, FAR void *context, FAR void *arg)
 {
   irqstate_t flags;
   flags = enter_critical_section();
@@ -460,7 +460,7 @@ static int tiva_gpiolhandler(int irq, FAR void *context)
 #endif
 
 #ifdef CONFIG_TIVA_GPIOM_IRQS
-static int tiva_gpiomhandler(int irq, FAR void *context)
+static int tiva_gpiomhandler(int irq, FAR void *context, FAR void *arg)
 {
   irqstate_t flags;
   flags = enter_critical_section();
@@ -473,7 +473,7 @@ static int tiva_gpiomhandler(int irq, FAR void *context)
 #endif
 
 #ifdef CONFIG_TIVA_GPION_IRQS
-static int tiva_gpionhandler(int irq, FAR void *context)
+static int tiva_gpionhandler(int irq, FAR void *context, FAR void *arg)
 {
   irqstate_t flags;
   flags = enter_critical_section();
@@ -486,7 +486,7 @@ static int tiva_gpionhandler(int irq, FAR void *context)
 #endif
 
 #ifdef CONFIG_TIVA_GPIOP_IRQS
-static int tiva_gpiophandler(int irq, FAR void *context)
+static int tiva_gpiophandler(int irq, FAR void *context, FAR void *arg)
 {
   irqstate_t flags;
   flags = enter_critical_section();
@@ -499,7 +499,7 @@ static int tiva_gpiophandler(int irq, FAR void *context)
 #endif
 
 #ifdef CONFIG_TIVA_GPIOQ_IRQS
-static int tiva_gpioqhandler(int irq, FAR void *context)
+static int tiva_gpioqhandler(int irq, FAR void *context, FAR void *arg)
 {
   irqstate_t flags;
   flags = enter_critical_section();
@@ -512,7 +512,7 @@ static int tiva_gpioqhandler(int irq, FAR void *context)
 #endif
 
 #ifdef CONFIG_TIVA_GPIOR_IRQS
-static int tiva_gpiorhandler(int irq, FAR void *context)
+static int tiva_gpiorhandler(int irq, FAR void *context, FAR void *arg)
 {
   irqstate_t flags;
   flags = enter_critical_section();
@@ -525,7 +525,7 @@ static int tiva_gpiorhandler(int irq, FAR void *context)
 #endif
 
 #ifdef CONFIG_TIVA_GPIOS_IRQS
-static int tiva_gpioshandler(int irq, FAR void *context)
+static int tiva_gpioshandler(int irq, FAR void *context, FAR void *arg)
 {
   irqstate_t flags;
   flags = enter_critical_section();
@@ -568,87 +568,87 @@ int tiva_gpioirqinitialize(void)
    */
 
 #ifdef CONFIG_TIVA_GPIOA_IRQS
-  irq_attach(TIVA_IRQ_GPIOA, tiva_gpioahandler);
+  irq_attach(TIVA_IRQ_GPIOA, tiva_gpioahandler, NULL);
   up_enable_irq(TIVA_IRQ_GPIOA);
 #endif
 
 #ifdef CONFIG_TIVA_GPIOB_IRQS
-  irq_attach(TIVA_IRQ_GPIOB, tiva_gpiobhandler);
+  irq_attach(TIVA_IRQ_GPIOB, tiva_gpiobhandler, NULL);
   up_enable_irq(TIVA_IRQ_GPIOB);
 #endif
 
 #ifdef CONFIG_TIVA_GPIOC_IRQS
-  irq_attach(TIVA_IRQ_GPIOC, tiva_gpiochandler);
+  irq_attach(TIVA_IRQ_GPIOC, tiva_gpiochandler, NULL);
   up_enable_irq(TIVA_IRQ_GPIOC);
 #endif
 
 #ifdef CONFIG_TIVA_GPIOD_IRQS
-  irq_attach(TIVA_IRQ_GPIOD, tiva_gpiodhandler);
+  irq_attach(TIVA_IRQ_GPIOD, tiva_gpiodhandler, NULL);
   up_enable_irq(TIVA_IRQ_GPIOD);
 #endif
 
 #ifdef CONFIG_TIVA_GPIOE_IRQS
-  irq_attach(TIVA_IRQ_GPIOE, tiva_gpioehandler);
+  irq_attach(TIVA_IRQ_GPIOE, tiva_gpioehandler, NULL);
   up_enable_irq(TIVA_IRQ_GPIOE);
 #endif
 
 #ifdef CONFIG_TIVA_GPIOF_IRQS
-  irq_attach(TIVA_IRQ_GPIOF, tiva_gpiofhandler);
+  irq_attach(TIVA_IRQ_GPIOF, tiva_gpiofhandler, NULL);
   up_enable_irq(TIVA_IRQ_GPIOF);
 #endif
 
 #ifdef CONFIG_TIVA_GPIOG_IRQS
-  irq_attach(TIVA_IRQ_GPIOG, tiva_gpioghandler);
+  irq_attach(TIVA_IRQ_GPIOG, tiva_gpioghandler, NULL);
   up_enable_irq(TIVA_IRQ_GPIOG);
 #endif
 
 #ifdef CONFIG_TIVA_GPIOH_IRQS
-  irq_attach(TIVA_IRQ_GPIOH, tiva_gpiohhandler);
+  irq_attach(TIVA_IRQ_GPIOH, tiva_gpiohhandler, NULL);
   up_enable_irq(TIVA_IRQ_GPIOH);
 #endif
 
 #ifdef CONFIG_TIVA_GPIOJ_IRQS
-  irq_attach(TIVA_IRQ_GPIOJ, tiva_gpiojhandler);
+  irq_attach(TIVA_IRQ_GPIOJ, tiva_gpiojhandler, NULL);
   up_enable_irq(TIVA_IRQ_GPIOJ);
 #endif
 
 #ifdef CONFIG_TIVA_GPIOK_IRQS
-  irq_attach(TIVA_IRQ_GPIOK, tiva_gpiokhandler);
+  irq_attach(TIVA_IRQ_GPIOK, tiva_gpiokhandler, NULL);
   up_enable_irq(TIVA_IRQ_GPIOK);
 #endif
 
 #ifdef CONFIG_TIVA_GPIOL_IRQS
-  irq_attach(TIVA_IRQ_GPIOL, tiva_gpiolhandler);
+  irq_attach(TIVA_IRQ_GPIOL, tiva_gpiolhandler, NULL);
   up_enable_irq(TIVA_IRQ_GPIOL);
 #endif
 
 #ifdef CONFIG_TIVA_GPIOM_IRQS
-  irq_attach(TIVA_IRQ_GPIOM, tiva_gpiomhandler);
+  irq_attach(TIVA_IRQ_GPIOM, tiva_gpiomhandler, NULL);
   up_enable_irq(TIVA_IRQ_GPIOM);
 #endif
 
 #ifdef CONFIG_TIVA_GPION_IRQS
-  irq_attach(TIVA_IRQ_GPION, tiva_gpionhandler);
+  irq_attach(TIVA_IRQ_GPION, tiva_gpionhandler, NULL);
   up_enable_irq(TIVA_IRQ_GPION);
 #endif
 
 #ifdef CONFIG_TIVA_GPIOP_IRQS
-  irq_attach(TIVA_IRQ_GPIOP, tiva_gpiophandler);
+  irq_attach(TIVA_IRQ_GPIOP, tiva_gpiophandler, NULL);
   up_enable_irq(TIVA_IRQ_GPIOP);
 #endif
 
 #ifdef CONFIG_TIVA_GPIOQ_IRQS
-  irq_attach(TIVA_IRQ_GPIOQ, tiva_gpioqhandler);
+  irq_attach(TIVA_IRQ_GPIOQ, tiva_gpioqhandler, NULL);
   up_enable_irq(TIVA_IRQ_GPIOQ);
 #endif
 
 #ifdef CONFIG_TIVA_GPIOR_IRQS
-  irq_attach(TIVA_IRQ_GPIOR, tiva_gpiorhandler);
+  irq_attach(TIVA_IRQ_GPIOR, tiva_gpiorhandler, NULL);
   up_enable_irq(TIVA_IRQ_GPIOR);
 #endif
 
 #ifdef CONFIG_TIVA_GPIOS_IRQS
-  irq_attach(TIVA_IRQ_GPIOS, tiva_gpioshandler);
+  irq_attach(TIVA_IRQ_GPIOS, tiva_gpioshandler, NULL);
   up_enable_irq(TIVA_IRQ_GPIOS);
 #endif
 
@@ -742,11 +742,11 @@ void tiva_gpioportirqattach(uint8_t port, xcpt_t isr)
       if (isr == NULL)
         {
           tiva_gpioirqdisable(port, 0xff);
-          irq_attach(irq, irq_unexpected_isr);
+          irq_attach(irq, irq_unexpected_isr, NULL);
         }
       else
         {
-          irq_attach(irq, isr);
+          irq_attach(irq, isr, NULL);
           tiva_gpioirqenable(port, 0xff);
         }
 

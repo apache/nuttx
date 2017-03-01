@@ -1,7 +1,7 @@
 /************************************************************************************
  * include/nuttx/wireless/wireless.h
  *
- *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Laurent Latil <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,7 +52,9 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
 /* IOCTL Commands *******************************************************************/
+/* Common wireless IOCTL commands */
 
 #define WLIOC_SETRADIOFREQ     _WLIOC(0x0001)  /* arg: Pointer to uint32_t, frequency value (in Mhz) */
 #define WLIOC_GETRADIOFREQ     _WLIOC(0x0002)  /* arg: Pointer to uint32_t, frequency value (in Mhz) */
@@ -61,14 +63,25 @@
 #define WLIOC_SETTXPOWER       _WLIOC(0x0005)  /* arg: Pointer to int32_t, output power (in dBm) */
 #define WLIOC_GETTXPOWER       _WLIOC(0x0006)  /* arg: Pointer to int32_t, output power (in dBm) */
 
-/* Wireless drivers can provide additional, device specific ioctl
- * commands, beginning with this value:
+#define WL_FIRST               0x0001          /* First common command */
+#define WL_NCMDS               6               /* Six common commands */
+
+/* User defined ioctl commands are also supported. These will be forwarded
+ * by the upper-half QE driver to the lower-half QE driver via the ioctl()
+ * method fo the QE lower-half interface.  However, the lower-half driver
+ * must reserve a block of commands as follows in order prevent IOCTL
+ * command numbers from overlapping.
  */
 
-#define WLIOC_USER              0x0007         /* Lowest, unused WL ioctl command */
+/* See include/nuttx/wireless/cc3000.h */
 
-#define _WLIOC_USER(nr)         _WLIOC(nr + WLIOC_USER)
+#define CC3000_FIRST           (WL_FIRST + WL_NCMDS)
+#define CC3000_NCMDS           7
 
-#endif
+/* See include/nuttx/wireless/nrf24l01.h */
 
-#endif  /* __INCLUDE_NUTTX_WIRELESS_H */
+#define NRF24L01_FIRST         (CC3000_FIRST + CC3000_NCMDS)
+#define NRF24L01_NCMDS         14
+
+#endif /* CONFIG_DRIVERS_WIRELESS */
+#endif /* __INCLUDE_NUTTX_WIRELESS_H */

@@ -178,7 +178,7 @@ uint8_t board_buttons(void)
  ****************************************************************************/
 
 #if defined(CONFIG_ARCH_IRQBUTTONS) && defined(CONFIG_LPC43_GPIO_IRQ)
-xcpt_t board_button_irq(int id, xcpt_t irqhandler)
+xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
   xcpt_t oldhandler = NULL;
   irqstate_t flags;
@@ -206,7 +206,7 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
         {
           /* Attach then enable the new interrupt handler */
 
-          (void)irq_attach(irq, irqhandler);
+          (void)irq_attach(irq, irqhandler, NULL);
           up_enable_irq(irq);
         }
       else

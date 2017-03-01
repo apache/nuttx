@@ -56,14 +56,6 @@
 #ifdef CONFIG_ARCH_BUTTONS
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -77,7 +69,7 @@
 
 #if defined(CONFIG_AVR32_GPIOIRQ) && defined(CONFIG_ARCH_IRQBUTTONS) && \
    (defined(CONFIG_AVR32DEV_BUTTON1_IRQ) || defined(CONFIG_AVR32DEV_BUTTON2_IRQ))
-static xcpt_t board_button_irqx(int irq, xcpt_t irqhandler)
+static xcpt_t board_button_irqx(int irq, xcpt_t irqhandler, void *arg)
 {
   xcpt_t oldhandler;
 
@@ -164,19 +156,19 @@ uint8_t board_buttons(void)
  ****************************************************************************/
 
 #if defined(CONFIG_AVR32_GPIOIRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
-xcpt_t board_button_irq(int id, xcpt_t irqhandler)
+xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
 #ifdef CONFIG_AVR32DEV_BUTTON1_IRQ
   if (id == BUTTON1)
     {
-      return board_button_irqx(GPIO_BUTTON1_IRQ, irqhandler);
+      return board_button_irqx(GPIO_BUTTON1_IRQ, irqhandler, arg);
     }
   else
 #endif
 #ifdef CONFIG_AVR32DEV_BUTTON2_IRQ
   if (id == BUTTON2)
     {
-      return board_button_irqx(GPIO_BUTTON2_IRQ, irqhandler);
+      return board_button_irqx(GPIO_BUTTON2_IRQ, irqhandler, arg);
     }
   else
 #endif

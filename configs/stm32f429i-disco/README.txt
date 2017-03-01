@@ -8,7 +8,7 @@ memory and 256kbytes. The board features:
 
   - On-board ST-LINK/V2 for programming and debugging,
   - On-board 64 Mbits (8 Mbytes) External SDRAM (1 Mbit x 16-bit x 4-bank)
-  - LIS302DL, ST MEMS motion sensor, 3-axis digital output accelerometer,
+  - L3GD20, ST MEMS motion sensor, 3-axis digital output gyroscope,
   - TFT 2.4" LCD, 262K color RGB, 240 x 320 pixels
   - Touchscreen controller
   - Two user LEDs and two push-buttons,

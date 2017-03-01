@@ -135,7 +135,7 @@ FAR struct nr5_timer_dev_s *nr5_timer_init(int timer);
 
 /* Power-down timer, mark it as unused */
 
-int nr5_timer_deinit(FAR struct nr5_timer_dev_s * dev);
+int nr5_timer_deinit(FAR struct nr5_timer_dev_s *dev);
 
 /****************************************************************************
  * Name: nr5_timer_initialize

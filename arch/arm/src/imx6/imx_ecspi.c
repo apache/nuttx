@@ -186,7 +186,6 @@ struct imx_spidev_s
   uint8_t  spindx;              /* SPI index */
 #ifndef CONFIG_SPI_POLLWAIT
   uint8_t  irq;                 /* SPI IRQ number */
-  xcpt_t   handler;             /* ECSPI interrupt handler */
 #endif
 
   /* Per SPI callouts to board-specific logic */
@@ -223,22 +222,7 @@ static int    spi_transfer(struct imx_spidev_s *priv, const void *txbuffer,
 /* Interrupt handling */
 
 #ifndef CONFIG_SPI_POLLWAIT
-static int    spi_interrupt(struct imx_spidev_s *priv);
-#ifdef CONFIG_IMX6_ECSPI1
-static int    ecspi1_interrupt(int irq, void *context);
-#endif
-#ifdef CONFIG_IMX6_ECSPI2
-static int    ecspi2_interrupt(int irq, void *context);
-#endif
-#ifdef CONFIG_IMX6_ECSPI3
-static int    ecspi3_interrupt(int irq, void *context);
-#endif
-#ifdef CONFIG_IMX6_ECSPI4
-static int    ecspi4_interrupt(int irq, void *context);
-#endif
-#ifdef CONFIG_IMX6_ECSPI5
-static int    ecspi5_interrupt(int irq, void *context);
-#endif
+static int    spi_interrupt(int irq, void *context, FAR void *arg);
 #endif
 
 /* SPI methods */
@@ -307,7 +291,6 @@ static struct imx_spidev_s g_spidev[] =
       .spindx  = SPI1_NDX,
 #ifndef CONFIG_SPI_POLLWAIT
       .irq     = IMX_IRQ_ECSPI1,
-      .handler = ecspi1_interrupt,
 #endif
       .select  = imx_spi1select,
       .status  = imx_spi1status,
@@ -324,7 +307,6 @@ static struct imx_spidev_s g_spidev[] =
       .spindx  = SPI2_NDX,
 #ifndef CONFIG_SPI_POLLWAIT
       .irq     = IMX_IRQ_ECSPI2,
-      .handler = ecspi2_interrupt,
 #endif
       .select  = imx_spi2select,
       .status  = imx_spi2status,
@@ -341,7 +323,6 @@ static struct imx_spidev_s g_spidev[] =
       .spindx  = SPI3_NDX,
 #ifndef CONFIG_SPI_POLLWAIT
       .irq     = IMX_IRQ_ECSPI3,
-      .handler = ecspi3_interrupt,
 #endif
       .select  = imx_spi3select,
       .status  = imx_spi3status,
@@ -358,7 +339,6 @@ static struct imx_spidev_s g_spidev[] =
       .spindx  = SPI4_NDX,
 #ifndef CONFIG_SPI_POLLWAIT
       .irq     = IMX_IRQ_ECSPI4,
-      .handler = ecspi4_interrupt,
 #endif
       .select  = imx_spi4select,
       .status  = imx_spi4status,
@@ -375,7 +355,6 @@ static struct imx_spidev_s g_spidev[] =
       .spindx  = SPI5_NDX,
 #ifndef CONFIG_SPI_POLLWAIT
       .irq     = IMX_IRQ_ECSPI5,
-      .handler = ecspi5_interrupt,
 #endif
       .select  = imx_spi5select,
       .status  = imx_spi5status,
@@ -759,8 +738,9 @@ static int spi_transfer(struct imx_spidev_s *priv, const void *txbuffer,
  ****************************************************************************/
 
 #ifndef CONFIG_SPI_POLLWAIT
-static int spi_interrupt(struct imx_spidev_s *priv)
+static int spi_interrupt(int irq, void *context, FAR void *arg)
 {
+  struct imx_spidev_s *priv = (struct imx_spidev_s *)arg;
   int ntxd;
 
   DEBUGASSERT(priv != NULL);
@@ -788,57 +768,6 @@ static int spi_interrupt(struct imx_spidev_s *priv)
 
   return OK;
 }
-#endif
-
-/****************************************************************************
- * Name: ecspiN_interrupt, N=1..5
- *
- * Description:
- *   Individual ECPSI interrupt handlers.
- *
- * Input Parameters:
- *   Standard interrupt handler inputs
- *
- * Returned Value:
- *   0: success, <0:Negated error number on failure
- *
- ****************************************************************************/
-
-#ifndef CONFIG_SPI_POLLWAIT
-#ifdef CONFIG_IMX6_ECSPI1
-static int ecspi1_interrupt(int irq, void *context)
-{
-  return spi_interrupt(&g_spidev[SPI1_NDX]);
-}
-#endif
-
-#ifdef CONFIG_IMX6_ECSPI2
-static int ecspi2_interrupt(int irq, void *context)
-{
-  return spi_interrupt(&g_spidev[SPI2_NDX]);
-}
-#endif
-
-#ifdef CONFIG_IMX6_ECSPI3
-static int ecspi3_interrupt(int irq, void *context)
-{
-  return spi_interrupt(&g_spidev[SPI3_NDX]);
-}
-#endif
-
-#ifdef CONFIG_IMX6_ECSPI4
-static int ecspi4_interrupt(int irq, void *context)
-{
-  return spi_interrupt(&g_spidev[SPI4_NDX]);
-}
-#endif
-
-#ifdef CONFIG_IMX6_ECSPI5
-static int ecspi5_interrupt(int irq, void *context)
-{
-  return spi_interrupt(&g_spidev[SPI5_NDX]);
-}
-#endif
 #endif
 
 /****************************************************************************
@@ -1425,7 +1354,7 @@ FAR struct spi_dev_s *imx_spibus_initialize(int port)
   /* Attach the interrupt */
 
 #ifndef CONFIG_SPI_POLLWAIT
-  DEBUGVERIFY(irq_attach(priv->irq, priv->handler));
+  DEBUGVERIFY(irq_attach(priv->irq, spi_interrupt, priv));
 #endif
 
   /* Enable SPI */

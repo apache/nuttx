@@ -32,6 +32,13 @@ config BMP180
 	---help---
 		Enable driver support for the Bosch BMP180 barometer sensor.
 
+config SENSORS_L3GD20
+	bool "ST L3GD20 Gyroscope Sensor support"
+	default n
+	select SPI
+	---help---
+		Enable driver support for the ST L3GD20 gyroscope sensor.
+
 config SENSOR_KXTJ9
 	bool "Kionix KXTJ9 Accelerometer support"
 	default n

@@ -45,17 +45,11 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
+#include "stm32_gpio.h"
+
 #include "olimex-stm32-p407.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -177,7 +171,7 @@ uint8_t board_buttons(void)
  ************************************************************************************/
 
 #ifdef CONFIG_ARCH_IRQBUTTONS
-xcpt_t board_button_irq(int id, xcpt_t irqhandler)
+xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
   xcpt_t oldhandler = NULL;
 
@@ -185,7 +179,8 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
 
   if (id >= MIN_IRQBUTTON && id <= MAX_IRQBUTTON)
     {
-      oldhandler = stm32_gpiosetevent(g_buttons[id], true, true, true, irqhandler);
+      oldhandler = stm32_gpiosetevent(g_buttons[id], true, true, true,
+                                      irqhandler, arg);
     }
 
   return oldhandler;

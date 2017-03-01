@@ -154,7 +154,7 @@ static void lpc43_dumpnvic(const char *msg, int irq)
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_FEATURES
-static int lpc43_nmi(int irq, FAR void *context)
+static int lpc43_nmi(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
   _err("PANIC!!! NMI received\n");
@@ -162,7 +162,7 @@ static int lpc43_nmi(int irq, FAR void *context)
   return 0;
 }
 
-static int lpc43_busfault(int irq, FAR void *context)
+static int lpc43_busfault(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
   _err("PANIC!!! Bus fault recived\n");
@@ -170,7 +170,7 @@ static int lpc43_busfault(int irq, FAR void *context)
   return 0;
 }
 
-static int lpc43_usagefault(int irq, FAR void *context)
+static int lpc43_usagefault(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
   _err("PANIC!!! Usage fault received\n");
@@ -178,7 +178,7 @@ static int lpc43_usagefault(int irq, FAR void *context)
   return 0;
 }
 
-static int lpc43_pendsv(int irq, FAR void *context)
+static int lpc43_pendsv(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
   _err("PANIC!!! PendSV received\n");
@@ -186,7 +186,7 @@ static int lpc43_pendsv(int irq, FAR void *context)
   return 0;
 }
 
-static int lpc43_dbgmonitor(int irq, FAR void *context)
+static int lpc43_dbgmonitor(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
   _err("PANIC!!! Debug Monitor received\n");
@@ -194,7 +194,7 @@ static int lpc43_dbgmonitor(int irq, FAR void *context)
   return 0;
 }
 
-static int lpc43_reserved(int irq, FAR void *context)
+static int lpc43_reserved(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
   _err("PANIC!!! Reserved interrupt\n");
@@ -364,8 +364,8 @@ void up_irqinitialize(void)
    * under certain conditions.
    */
 
-  irq_attach(LPC43_IRQ_SVCALL, up_svcall);
-  irq_attach(LPC43_IRQ_HARDFAULT, up_hardfault);
+  irq_attach(LPC43_IRQ_SVCALL, up_svcall, NULL);
+  irq_attach(LPC43_IRQ_HARDFAULT, up_hardfault, NULL);
 
   /* Set the priority of the SVCall interrupt */
 
@@ -381,22 +381,22 @@ void up_irqinitialize(void)
    */
 
 #ifdef CONFIG_ARM_MPU
-  irq_attach(LPC43_IRQ_MEMFAULT, up_memfault);
+  irq_attach(LPC43_IRQ_MEMFAULT, up_memfault, NULL);
   up_enable_irq(LPC43_IRQ_MEMFAULT);
 #endif
 
   /* Attach all other processor exceptions (except reset and sys tick) */
 
 #ifdef CONFIG_DEBUG_FEATURES
-  irq_attach(LPC43_IRQ_NMI, lpc43_nmi);
+  irq_attach(LPC43_IRQ_NMI, lpc43_nmi, NULL);
 #ifndef CONFIG_ARM_MPU
-  irq_attach(LPC43_IRQ_MEMFAULT, up_memfault);
+  irq_attach(LPC43_IRQ_MEMFAULT, up_memfault, NULL);
 #endif
-  irq_attach(LPC43_IRQ_BUSFAULT, lpc43_busfault);
-  irq_attach(LPC43_IRQ_USAGEFAULT, lpc43_usagefault);
-  irq_attach(LPC43_IRQ_PENDSV, lpc43_pendsv);
-  irq_attach(LPC43_IRQ_DBGMONITOR, lpc43_dbgmonitor);
-  irq_attach(LPC43_IRQ_RESERVED, lpc43_reserved);
+  irq_attach(LPC43_IRQ_BUSFAULT, lpc43_busfault, NULL);
+  irq_attach(LPC43_IRQ_USAGEFAULT, lpc43_usagefault, NULL);
+  irq_attach(LPC43_IRQ_PENDSV, lpc43_pendsv, NULL);
+  irq_attach(LPC43_IRQ_DBGMONITOR, lpc43_dbgmonitor, NULL);
+  irq_attach(LPC43_IRQ_RESERVED, lpc43_reserved, NULL);
 #endif
 
   lpc43_dumpnvic("initial", LPC43M4_IRQ_NIRQS);

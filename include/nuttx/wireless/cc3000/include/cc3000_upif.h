@@ -138,7 +138,7 @@ struct cc3000_config_s
    *   probe            - Debug support
    */
 
-  int  (*irq_attach)(FAR struct cc3000_config_s *state, xcpt_t isr);
+  int  (*irq_attach)(FAR struct cc3000_config_s *state, xcpt_t isr, FAR void *arg);
   void (*irq_enable)(FAR struct cc3000_config_s *state, bool enable);
   void (*irq_clear)(FAR struct cc3000_config_s *state);
   void (*power_enable)(FAR struct cc3000_config_s *state,bool enable);

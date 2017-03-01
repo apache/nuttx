@@ -190,7 +190,7 @@ static void lpc43_dmadone(struct lpc43_dmach_s *dmach)
  *
  ****************************************************************************/
 
-static int gpdma_interrupt(int irq, FAR void *context)
+static int gpdma_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   struct lpc43_dmach_s *dmach;
   uint32_t regval;
@@ -315,7 +315,7 @@ void weak_function up_dmainitialize(void)
 
   /* Attach and enable the common interrupt handler */
 
-  ret = irq_attach(LPC43M4_IRQ_DMA, gpdma_interrupt);
+  ret = irq_attach(LPC43M4_IRQ_DMA, gpdma_interrupt, NULL);
   if (ret == OK)
     {
       up_enable_irq(LPC43M4_IRQ_DMA);

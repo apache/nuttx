@@ -54,12 +54,28 @@
  * Public Data
  ****************************************************************************/
 
+/* This is the type of the list of interrupt handlers, one for each IRQ.
+ * This type provided all of the information necessary to irq_dispatch to
+ * transfer control to interrupt handlers after the occurrence of an
+ * interrupt.
+ */
+
+struct irq
+{
+  xcpt_t handler;  /* Address of the interrupt handler */
+  FAR void *arg;   /* The argument provided to the interrupt handler. */
+};
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
 /* This is the list of interrupt handlers, one for each IRQ.  This is used
  * by irq_dispatch to transfer control to interrupt handlers after the
  * occurrence of an interrupt.
  */
 
-extern FAR xcpt_t g_irqvector[NR_IRQS];
+extern struct irq g_irqvector[NR_IRQS];
 
 #ifdef CONFIG_SMP
 /* This is the spinlock that enforces critical sections when interrupts are
@@ -109,7 +125,7 @@ void weak_function irq_initialize(void);
  *
  ****************************************************************************/
 
-int irq_unexpected_isr(int irq, FAR void *context);
+int irq_unexpected_isr(int irq, FAR void *context, FAR void *arg);
 
 /****************************************************************************
  * Name:  irq_cpu_locked

@@ -168,7 +168,7 @@ void nr5_uart_init(int uart)
     {
       /* Attache the ISR and enable the IRQ with the EPIC */
 
-      //irq_attach(dev->regs->rx_irq, &nr5_uart_rx_isr);
+      //irq_attach(dev->regs->rx_irq, &nr5_uart_rx_isr, NULL);
       //up_enable_irq(dev->regs->rx_irq);
 
       // Set the baud rate

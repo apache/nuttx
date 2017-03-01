@@ -418,7 +418,6 @@
 
 struct up_dev_s
 {
-  xcpt_t   handler;   /* Interrupt handler */
   uint32_t usartbase; /* Base address of USART registers */
   uint32_t baud;      /* Configured baud */
   uint32_t sr;        /* Saved status bits */
@@ -435,38 +434,7 @@ struct up_dev_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static int  up_interrupt(struct uart_dev_s *dev);
-#ifdef CONFIG_SAMA5_UART0
-static int  up_uart0_interrupt(int irq, void *context);
-#endif
-#ifdef CONFIG_SAMA5_UART1
-static int  up_uart1_interrupt(int irq, void *context);
-#endif
-#ifdef CONFIG_SAMA5_UART2
-static int  up_uart2_interrupt(int irq, void *context);
-#endif
-#ifdef CONFIG_SAMA5_UART3
-static int  up_uart3_interrupt(int irq, void *context);
-#endif
-#ifdef CONFIG_SAMA5_UART4
-static int  up_uart4_interrupt(int irq, void *context);
-#endif
-#ifdef CONFIG_USART0_SERIALDRIVER
-static int  up_usart0_interrupt(int irq, void *context);
-#endif
-#ifdef CONFIG_USART1_SERIALDRIVER
-static int  up_usart1_interrupt(int irq, void *context);
-#endif
-#ifdef CONFIG_USART2_SERIALDRIVER
-static int  up_usart2_interrupt(int irq, void *context);
-#endif
-#ifdef CONFIG_USART3_SERIALDRIVER
-static int  up_usart3_interrupt(int irq, void *context);
-#endif
-#ifdef CONFIG_USART4_SERIALDRIVER
-static int  up_usart4_interrupt(int irq, void *context);
-#endif
-
+static int  up_interrupt(int irq, void *context, FAR void *arg);
 static int  up_setup(struct uart_dev_s *dev);
 static void up_shutdown(struct uart_dev_s *dev);
 static int  up_attach(struct uart_dev_s *dev);
@@ -561,7 +529,6 @@ static char g_usart4txbuffer[CONFIG_USART4_TXBUFSIZE];
 
 static struct up_dev_s g_uart0priv =
 {
-  .handler        = up_uart0_interrupt,
   .usartbase      = SAM_UART0_VBASE,
   .baud           = CONFIG_UART0_BAUD,
   .irq            = SAM_IRQ_UART0,
@@ -602,7 +569,6 @@ static uart_dev_t g_uart0port =
 
 static struct up_dev_s g_uart1priv =
 {
-  .handler        = up_uart1_interrupt,
   .usartbase      = SAM_UART1_VBASE,
   .baud           = CONFIG_UART1_BAUD,
   .irq            = SAM_IRQ_UART1,
@@ -643,7 +609,6 @@ static uart_dev_t g_uart1port =
 
 static struct up_dev_s g_uart2priv =
 {
-  .handler        = up_uart2_interrupt,
   .usartbase      = SAM_UART2_VBASE,
   .baud           = CONFIG_UART2_BAUD,
   .irq            = SAM_IRQ_UART2,
@@ -684,7 +649,6 @@ static uart_dev_t g_uart2port =
 
 static struct up_dev_s g_uart3priv =
 {
-  .handler        = up_uart3_interrupt,
   .usartbase      = SAM_UART3_VBASE,
   .baud           = CONFIG_UART3_BAUD,
   .irq            = SAM_IRQ_UART3,
@@ -725,7 +689,6 @@ static uart_dev_t g_uart3port =
 
 static struct up_dev_s g_uart4priv =
 {
-  .handler        = up_uart4_interrupt,
   .usartbase      = SAM_UART4_VBASE,
   .baud           = CONFIG_UART4_BAUD,
   .irq            = SAM_IRQ_UART4,
@@ -756,7 +719,6 @@ static uart_dev_t g_uart4port =
 #ifdef CONFIG_USART0_SERIALDRIVER
 static struct up_dev_s g_usart0priv =
 {
-  .handler        = up_usart0_interrupt,
   .usartbase      = SAM_USART0_VBASE,
   .baud           = CONFIG_USART0_BAUD,
   .irq            = SAM_IRQ_USART0,
@@ -790,7 +752,6 @@ static uart_dev_t g_usart0port =
 #ifdef CONFIG_USART1_SERIALDRIVER
 static struct up_dev_s g_usart1priv =
 {
-  .handler        = up_usart1_interrupt,
   .usartbase      = SAM_USART1_VBASE,
   .baud           = CONFIG_USART1_BAUD,
   .irq            = SAM_IRQ_USART1,
@@ -824,7 +785,6 @@ static uart_dev_t g_usart1port =
 #ifdef CONFIG_USART2_SERIALDRIVER
 static struct up_dev_s g_usart2priv =
 {
-  .handler        = up_usart2_interrupt,
   .usartbase      = SAM_USART2_VBASE,
   .baud           = CONFIG_USART2_BAUD,
   .irq            = SAM_IRQ_USART2,
@@ -858,7 +818,6 @@ static uart_dev_t g_usart2port =
 #ifdef CONFIG_USART3_SERIALDRIVER
 static struct up_dev_s g_usart3priv =
 {
-  .handler        = up_usart3_interrupt,
   .usartbase      = SAM_USART3_VBASE,
   .baud           = CONFIG_USART3_BAUD,
   .irq            = SAM_IRQ_USART3,
@@ -892,7 +851,6 @@ static uart_dev_t g_usart3port =
 #ifdef CONFIG_USART4_SERIALDRIVER
 static struct up_dev_s g_usart4priv =
 {
-  .handler        = up_usart4_interrupt,
   .usartbase      = SAM_USART4_VBASE,
   .baud           = CONFIG_USART4_BAUD,
   .irq            = SAM_IRQ_USART4,
@@ -989,8 +947,9 @@ static void up_disableallints(struct up_dev_s *priv, uint32_t *imr)
  *
  ****************************************************************************/
 
-static int up_interrupt(struct uart_dev_s *dev)
+static int up_interrupt(int irq, void *context, FAR void *arg)
 {
+  struct uart_dev_s *dev = (struct uart_dev_s *)arg;
   struct up_dev_s   *priv;
   uint32_t           pending;
   uint32_t           imr;
@@ -1042,67 +1001,6 @@ static int up_interrupt(struct uart_dev_s *dev)
 
   return OK;
 }
-
-#ifdef CONFIG_SAMA5_UART0
-static int  up_uart0_interrupt(int irq, void *context)
-{
-  return up_interrupt(&g_uart0port);
-}
-#endif
-#ifdef CONFIG_SAMA5_UART1
-static int  up_uart1_interrupt(int irq, void *context)
-{
-  return up_interrupt(&g_uart1port);
-}
-#endif
-#ifdef CONFIG_SAMA5_UART2
-static int  up_uart2_interrupt(int irq, void *context)
-{
-  return up_interrupt(&g_uart2port);
-}
-#endif
-#ifdef CONFIG_SAMA5_UART3
-static int  up_uart3_interrupt(int irq, void *context)
-{
-  return up_interrupt(&g_uart3port);
-}
-#endif
-#ifdef CONFIG_SAMA5_UART4
-static int  up_uart4_interrupt(int irq, void *context)
-{
-  return up_interrupt(&g_uart4port);
-}
-#endif
-#ifdef CONFIG_USART0_SERIALDRIVER
-static int  up_usart0_interrupt(int irq, void *context)
-{
-  return up_interrupt(&g_usart0port);
-}
-#endif
-#ifdef CONFIG_USART1_SERIALDRIVER
-static int  up_usart1_interrupt(int irq, void *context)
-{
-  return up_interrupt(&g_usart1port);
-}
-#endif
-#ifdef CONFIG_USART2_SERIALDRIVER
-static int  up_usart2_interrupt(int irq, void *context)
-{
-  return up_interrupt(&g_usart2port);
-}
-#endif
-#ifdef CONFIG_USART3_SERIALDRIVER
-static int  up_usart3_interrupt(int irq, void *context)
-{
-  return up_interrupt(&g_usart3port);
-}
-#endif
-#ifdef CONFIG_USART4_SERIALDRIVER
-static int  up_usart4_interrupt(int irq, void *context)
-{
-  return up_interrupt(&g_usart4port);
-}
-#endif
 
 /****************************************************************************
  * Name: up_setup
@@ -1294,7 +1192,7 @@ static int up_attach(struct uart_dev_s *dev)
 
   /* Attach and enable the IRQ */
 
-  ret = irq_attach(priv->irq, priv->handler);
+  ret = irq_attach(priv->irq, up_interrupt, dev);
   if (ret == OK)
     {
       /* Enable the interrupt (RX and TX interrupts are still disabled

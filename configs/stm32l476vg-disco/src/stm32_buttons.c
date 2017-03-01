@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/stm32l476vg-disco/src/stm32_buttons.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: dev@ziggurat29.com
  *
  * Redistribution and use in source and binary forms, with or without
@@ -176,7 +176,7 @@ static void button_pm_notify(struct pm_callback_s *cb, int domain,
 
 #if 0
 #ifdef CONFIG_ARCH_IRQBUTTONS
-static int button_handler(int irq, FAR void *context)
+static int button_handler(int irq, FAR void *context, FAR void *arg)
 {
 #ifdef CONFIG_PM
   /* At this point the MCU should have already awakened.  The state
@@ -325,7 +325,7 @@ uint8_t board_buttons(void)
  ************************************************************************************/
 
 #ifdef CONFIG_ARCH_IRQBUTTONS
-xcpt_t board_button_irq(int id, xcpt_t irqhandler)
+xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
   xcpt_t oldhandler = NULL;
 
@@ -333,7 +333,8 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
 
   if (id >= MIN_IRQBUTTON && id <= MAX_IRQBUTTON)
     {
-      oldhandler = stm32l4_gpiosetevent(g_buttons[id], true, true, true, irqhandler);
+      oldhandler = stm32l4_gpiosetevent(g_buttons[id], true, true, true,
+                                        irqhandler, arg);
     }
 
   return oldhandler;

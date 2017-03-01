@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/signal/sig_timedwait.c
  *
- *   Copyright (C) 2007-2009, 2012-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -76,12 +76,20 @@
  * Name: sig_timeout
  *
  * Description:
- *  A timeout elapsed while waiting for signals to be queued.
+ *   A timeout elapsed while waiting for signals to be queued.
+ *
+ * Assumptions:
+ *   This function executes in the context of the timer interrupt handler.
+ *   Local interrupts are assumed to be disabled on entry.
  *
  ****************************************************************************/
 
 static void sig_timeout(int argc, wdparm_t itcb)
 {
+#ifdef CONFIG_SMP
+  irqstate_t flags;
+#endif
+
   /* On many small machines, pointers are encoded and cannot be simply cast
    * from uint32_t to struct tcb_s *.  The following union works around this
    * (see wdogparm_t).  This odd logic could be conditioned on
@@ -96,6 +104,19 @@ static void sig_timeout(int argc, wdparm_t itcb)
 
   u.itcb = itcb;
   ASSERT(u.wtcb);
+
+#ifdef CONFIG_SMP
+  /* We must be in a critical section in order to call up_unblock_task()
+   * below.  If we are running on a single CPU architecture, then we know
+   * interrupts a disabled an there is no need to explicitly call
+   * enter_critical_section().  However, in the SMP case,
+   * enter_critical_section() does much more than just disable interrupts on
+   * the local CPU; it also manages spinlocks to assure the stability of the
+   * TCB that we are manipulating.
+   */
+
+  flags = enter_critical_section();
+#endif
 
   /* There may be a race condition -- make sure the task is
    * still waiting for a signal
@@ -113,6 +134,10 @@ static void sig_timeout(int argc, wdparm_t itcb)
 #endif
       up_unblock_task(u.wtcb);
     }
+
+#ifdef CONFIG_SMP
+  leave_critical_section(flags);
+#endif
 }
 
 /****************************************************************************

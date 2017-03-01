@@ -70,7 +70,7 @@ void up_irqinitialize(void)
    * xtrs_timer_initialize()
    */
 
-  irq_attach(Z80_IRQ_SYSTIMER, (xcpt_t)xtrs_timerisr);
+  irq_attach(Z80_IRQ_SYSTIMER, (xcpt_t)xtrs_timerisr, NULL);
 
   /* And finally, enable interrupts (including the timer) */
 

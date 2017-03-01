@@ -216,7 +216,6 @@
 
 struct flexus_dev_s
 {
-  xcpt_t   handler;   /* Interrupt handler */
   uint32_t usartbase; /* Base address of USART registers */
   uint32_t baud;      /* Configured baud */
   uint32_t sr;        /* Saved status bits */
@@ -233,23 +232,7 @@ struct flexus_dev_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static int  flexus_interrupt(struct uart_dev_s *dev);
-#ifdef CONFIG_USART0_SERIALDRIVER
-static int  flexus0_interrupt(int irq, void *context);
-#endif
-#ifdef CONFIG_USART1_SERIALDRIVER
-static int  flexus1_interrupt(int irq, void *context);
-#endif
-#ifdef CONFIG_USART2_SERIALDRIVER
-static int  flexus2_interrupt(int irq, void *context);
-#endif
-#ifdef CONFIG_USART3_SERIALDRIVER
-static int  flexus3_interrupt(int irq, void *context);
-#endif
-#ifdef CONFIG_USART4_SERIALDRIVER
-static int  flexus4_interrupt(int irq, void *context);
-#endif
-
+static int  flexus_interrupt(int irq, void *context, FAR void *arg);
 static int  flexus_setup(struct uart_dev_s *dev);
 static void flexus_shutdown(struct uart_dev_s *dev);
 static int  flexus_attach(struct uart_dev_s *dev);
@@ -314,7 +297,6 @@ static char g_flexus4txbuffer[CONFIG_USART4_TXBUFSIZE];
 #ifdef CONFIG_USART0_SERIALDRIVER
 static struct flexus_dev_s g_flexus0priv =
 {
-  .handler        = flexus0_interrupt,
   .usartbase      = SAM_FLEXCOM0_VBASE,
   .baud           = CONFIG_USART0_BAUD,
   .irq            = SAM_IRQ_FLEXCOM0,
@@ -348,7 +330,6 @@ static uart_dev_t g_flexus0port =
 #ifdef CONFIG_USART1_SERIALDRIVER
 static struct flexus_dev_s g_flexus1priv =
 {
-  .handler        = flexus1_interrupt,
   .usartbase      = SAM_FLEXCOM1_VBASE,
   .baud           = CONFIG_USART1_BAUD,
   .irq            = SAM_IRQ_FLEXCOM1,
@@ -382,7 +363,6 @@ static uart_dev_t g_flexus1port =
 #ifdef CONFIG_USART2_SERIALDRIVER
 static struct flexus_dev_s g_flexus2priv =
 {
-  .handler        = flexus2_interrupt,
   .usartbase      = SAM_FLEXCOM2_VBASE,
   .baud           = CONFIG_USART2_BAUD,
   .irq            = SAM_IRQ_FLEXCOM2,
@@ -416,7 +396,6 @@ static uart_dev_t g_flexus2port =
 #ifdef CONFIG_USART3_SERIALDRIVER
 static struct flexus_dev_s g_flexus3priv =
 {
-  .handler        = flexus3_interrupt,
   .usartbase      = SAM_FLEXCOM3_VBASE,
   .baud           = CONFIG_USART3_BAUD,
   .irq            = SAM_IRQ_FLEXCOM3,
@@ -450,7 +429,6 @@ static uart_dev_t g_flexus3port =
 #ifdef CONFIG_USART4_SERIALDRIVER
 static struct flexus_dev_s g_flexus4priv =
 {
-  .handler        = flexus4_interrupt,
   .usartbase      = SAM_FLEXCOM4_VBASE,
   .baud           = CONFIG_USART4_BAUD,
   .irq            = SAM_IRQ_FLEXCOM4,
@@ -549,13 +527,14 @@ static void flexus_disableallints(struct flexus_dev_s *priv, uint32_t *imr)
  *
  ****************************************************************************/
 
-static int flexus_interrupt(struct uart_dev_s *dev)
+static int flexus_interrupt(int irq, void *context, FAR void *arg)
 {
-  struct flexus_dev_s   *priv;
-  uint32_t           pending;
-  uint32_t           imr;
-  int                passes;
-  bool               handled;
+  struct uart_dev_s *dev = (struct uart_dev_s *)arg;
+  struct flexus_dev_s *priv;
+  uint32_t pending;
+  uint32_t imr;
+  int passes;
+  bool handled;
 
   DEBUGASSERT(dev != NULL && dev->priv != NULL);
   priv = (struct flexus_dev_s *)dev->priv;
@@ -602,47 +581,6 @@ static int flexus_interrupt(struct uart_dev_s *dev)
 
   return OK;
 }
-
-/****************************************************************************
- * Name: flexus*_interrupt
- *
- * Description:
- *   This is the specific UART/USART interrupt handler.  These simply map
- *   the interrupt to the device-specific data and passes control to the
- *   common interrupt handler.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_USART0_SERIALDRIVER
-static int  flexus0_interrupt(int irq, void *context)
-{
-  return flexus_interrupt(&g_flexus0port);
-}
-#endif
-#ifdef CONFIG_USART1_SERIALDRIVER
-static int  flexus1_interrupt(int irq, void *context)
-{
-  return flexus_interrupt(&g_flexus1port);
-}
-#endif
-#ifdef CONFIG_USART2_SERIALDRIVER
-static int  flexus2_interrupt(int irq, void *context)
-{
-  return flexus_interrupt(&g_flexus2port);
-}
-#endif
-#ifdef CONFIG_USART3_SERIALDRIVER
-static int  flexus3_interrupt(int irq, void *context)
-{
-  return flexus_interrupt(&g_flexus3port);
-}
-#endif
-#ifdef CONFIG_USART4_SERIALDRIVER
-static int  flexus4_interrupt(int irq, void *context)
-{
-  return flexus_interrupt(&g_flexus4port);
-}
-#endif
 
 /****************************************************************************
  * Name: flexus_setup
@@ -803,7 +741,7 @@ static int flexus_attach(struct uart_dev_s *dev)
 
   /* Attach and enable the IRQ */
 
-  ret = irq_attach(priv->irq, priv->handler);
+  ret = irq_attach(priv->irq, flexus_interrupt, dev);
   if (ret == OK)
     {
       /* Enable the interrupt (RX and TX interrupts are still disabled

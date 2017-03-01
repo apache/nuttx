@@ -89,6 +89,9 @@
 #define GPIO_NRF24L01_CS  (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
                            GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN4)
 
+#define GPIO_SDCARD_CS    (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                           GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN4)
+
 #define STM32_LCD_RST     (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
                            GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN3)
 
@@ -151,6 +154,18 @@ int stm32_bringup(void);
  ************************************************************************************/
 
 void stm32_spidev_initialize(void);
+
+/****************************************************************************
+ * Name: stm32_qencoder_initialize
+ *
+ * Description:
+ *   Initialize and register a qencoder
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_QENCODER
+int stm32_qencoder_initialize(FAR const char *devpath, int timer);
+#endif
 
 /****************************************************************************
  * Name stm32_rgbled_setup

@@ -46,9 +46,9 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-#define QEIOC_DIRECTION     _QEIOC(QEIOC_USER)
-#define QEIOC_VELOCITY      _QEIOC(QEIOC_USER+1)
-#define QEIOC_PPR           _QEIOC(QEIOC_USER+2)
+#define QEIOC_DIRECTION     _QEIOC(QE_TIVA_FIRST)
+#define QEIOC_VELOCITY      _QEIOC(QE_TIVA_FIRST+1)
+#define QEIOC_PPR           _QEIOC(QE_TIVA_FIRST+2)
 
 /****************************************************************************
 * Public Function Prototypes

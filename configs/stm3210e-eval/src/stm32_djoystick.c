@@ -213,7 +213,7 @@ static void djoy_enable(FAR const struct djoy_lowerhalf_s *lower,
                       i, rising, falling);
 
                (void)stm32_gpiosetevent(g_joygpio[i], rising, falling,
-                                        true, djoy_interrupt);
+                                        true, djoy_interrupt, NULL);
              }
         }
     }
@@ -239,7 +239,7 @@ static void djoy_disable(void)
   flags = enter_critical_section();
   for (i = 0; i < DJOY_NGPIOS; i++)
     {
-      (void)stm32_gpiosetevent(g_joygpio[i], false, false, false, NULL);
+      (void)stm32_gpiosetevent(g_joygpio[i], false, false, false, NULL, NULL);
     }
 
   leave_critical_section(flags);

@@ -61,6 +61,10 @@ ifeq ($(CONFIG_RGBLED),y)
 CSRCS += stm32_rgbled.c
 endif
 
+ifeq ($(CONFIG_MMCSD),y)
+CSRCS += stm32_mmcsd.c
+endif
+
 ifeq ($(CONFIG_AUDIO_TONE),y)
 CSRCS += stm32_tone.c
 endif
@@ -71,6 +75,10 @@ endif
 
 ifeq ($(CONFIG_LCD_ST7567),y)
 CSRCS += stm32_lcd.c
+endif
+
+ifeq ($(CONFIG_QENCODER),y)
+CSRCS += stm32_qencoder.c
 endif
 
 ifeq ($(CONFIG_VEML6070),y)

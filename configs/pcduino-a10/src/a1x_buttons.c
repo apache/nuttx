@@ -120,7 +120,7 @@ uint8_t board_buttons(void)
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_IRQBUTTONS
-xcpt_t board_button_irq(int id, xcpt_t irqhandler)
+xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
   xcpt_t oldhandler = NULL;
 
@@ -142,7 +142,7 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
       /* Configure the interrupt */
 
       a1x_pioirq(xxx);
-      (void)irq_attach(xxx, irqhandler);
+      (void)irq_attach(xxx, irqhandler, NULL);
       a1x_pioirqenable(xxx);
       leave_critical_section(flags);
     }

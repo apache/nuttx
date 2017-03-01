@@ -488,8 +488,7 @@ static void stm32_tim_setperiod(FAR struct stm32_tim_dev_s *dev,
 }
 
 static int stm32_tim_setisr(FAR struct stm32_tim_dev_s *dev,
-                            int (*handler)(int irq, void *context),
-                            int source)
+                            xcpt_t handler, int source)
 {
   int vectorno;
 
@@ -584,7 +583,7 @@ static int stm32_tim_setisr(FAR struct stm32_tim_dev_s *dev,
 
   /* Otherwise set callback and enable interrupt */
 
-  irq_attach(vectorno, handler);
+  irq_attach(vectorno, handler, NULL);
   up_enable_irq(vectorno);
 
 #ifdef CONFIG_ARCH_IRQPRIO

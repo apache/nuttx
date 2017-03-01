@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32f7/stm32_adc.c
  *
- *   Copyright (C) 2011, 2013, 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013, 2015-2017 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2015 Omni Hoverboards Inc. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Diego Sanchez <dsanchez@nx-engineering.com>
@@ -60,8 +60,9 @@
 #include <arch/board/board.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <nuttx/analog/adc.h>
 #include <nuttx/fs/ioctl.h>
+#include <nuttx/analog/adc.h>
+#include <nuttx/analog/ioctl.h>
 
 #include "up_internal.h"
 #include "up_arch.h"
@@ -257,7 +258,7 @@ static void adc_rccreset(FAR struct stm32_dev_s *priv, bool reset);
 /* ADC Interrupt Handler */
 
 static int adc_interrupt(FAR struct adc_dev_s *dev);
-static int adc123_interrupt(int irq, FAR void *context);
+static int adc123_interrupt(int irq, FAR void *context, FAR void *arg);
 
 /* ADC Driver Methods */
 
@@ -1372,7 +1373,7 @@ static int adc_setup(FAR struct adc_dev_s *dev)
 
   /* Attach the ADC interrupt */
 
-  ret = irq_attach(priv->irq, priv->isr);
+  ret = irq_attach(priv->irq, priv->isr, NULL);
   if (ret < 0)
     {
       ainfo("irq_attach failed: %d\n", ret);
@@ -1677,7 +1678,7 @@ static int adc_interrupt(FAR struct adc_dev_s *dev)
  *
  ****************************************************************************/
 
-static int adc123_interrupt(int irq, FAR void *context)
+static int adc123_interrupt(int irq, FAR void *context, FAR void *arg)
 {
 #ifdef CONFIG_STM32F7_ADC1
   adc_interrupt(&g_adcdev1);

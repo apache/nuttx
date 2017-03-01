@@ -59,10 +59,10 @@
 
 /* IOCTL Commands ***********************************************************/
 
-#define QEIOC_ZEROPOSITION    _QEIOC(QEIOC_USER+0) /* Arg: int32_t* pointer */
-#define QEIOC_AUTOGAINCTL     _QEIOC(QEIOC_USER+1) /* Arg: uint8_t* pointer */
-#define QEIOC_DIAGNOSTICS     _QEIOC(QEIOC_USER+2) /* Arg: uint8_t* pointer */
-#define QEIOC_MAGNITUDE       _QEIOC(QEIOC_USER+3) /* Arg: int32_t* pointer */
+#define QEIOC_ZEROPOSITION    _QEIOC(QE_AS5048B_FIRST+0) /* Arg: int32_t* pointer */
+#define QEIOC_AUTOGAINCTL     _QEIOC(QE_AS5048B_FIRST+1) /* Arg: uint8_t* pointer */
+#define QEIOC_DIAGNOSTICS     _QEIOC(QE_AS5048B_FIRST+2) /* Arg: uint8_t* pointer */
+#define QEIOC_MAGNITUDE       _QEIOC(QE_AS5048B_FIRST+3) /* Arg: int32_t* pointer */
 
 /* Resolution ***************************************************************/
 

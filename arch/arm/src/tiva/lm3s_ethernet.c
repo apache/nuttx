@@ -251,7 +251,7 @@ static void tiva_receive(struct tiva_driver_s *priv);
 static void tiva_txdone(struct tiva_driver_s *priv);
 
 static void tiva_interrupt_work(void *arg);
-static int  tiva_interrupt(int irq, void *context);
+static int  tiva_interrupt(int irq, void *context, FAR void *arg);
 
 /* Watchdog timer expirations */
 
@@ -1052,7 +1052,7 @@ static void tiva_interrupt_work(void *arg)
  *
  ****************************************************************************/
 
-static int tiva_interrupt(int irq, void *context)
+static int tiva_interrupt(int irq, void *context, FAR void *arg)
 {
   struct tiva_driver_s *priv;
   uint32_t ris;
@@ -1272,7 +1272,8 @@ static void tiva_poll_expiry(int argc, wdparm_t arg, ...)
        * cycle.
        */
 
-      (void)wd_start(priv->ld_txpoll, TIVA_WDDELAY, tiva_poll_expiry, 1, arg);
+      (void)wd_start(priv->ld_txpoll, TIVA_WDDELAY, tiva_poll_expiry,
+                     1, arg);
     }
 }
 
@@ -1425,7 +1426,8 @@ static int tiva_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  (void)wd_start(priv->ld_txpoll, TIVA_WDDELAY, tiva_poll_expiry, 1, (uint32_t)priv);
+  (void)wd_start(priv->ld_txpoll, TIVA_WDDELAY, tiva_poll_expiry,
+                 1, (uint32_t)priv);
 
   priv->ld_bifup = true;
   leave_critical_section(flags);
@@ -1739,9 +1741,9 @@ static inline int tiva_ethinitialize(int intf)
   /* Attach the IRQ to the driver */
 
 #if TIVA_NETHCONTROLLERS > 1
-  ret = irq_attach(priv->irq, tiva_interrupt);
+  ret = irq_attach(priv->irq, tiva_interrupt, NULL);
 #else
-  ret = irq_attach(TIVA_IRQ_ETHCON, tiva_interrupt);
+  ret = irq_attach(TIVA_IRQ_ETHCON, tiva_interrupt, NULL);
 #endif
   if (ret != 0)
     {

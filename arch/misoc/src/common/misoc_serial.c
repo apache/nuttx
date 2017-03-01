@@ -156,7 +156,7 @@ static int  misoc_setup(struct uart_dev_s *dev);
 static void misoc_shutdown(struct uart_dev_s *dev);
 static int  misoc_attach(struct uart_dev_s *dev);
 static void misoc_detach(struct uart_dev_s *dev);
-static int  misoc_uart_interrupt(int irq, void *context);
+static int  misoc_uart_interrupt(int irq, void *context, FAR void *arg);
 static int  misoc_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int  misoc_receive(struct uart_dev_s *dev, uint32_t *status);
 static void misoc_rxint(struct uart_dev_s *dev, bool enable);
@@ -313,7 +313,7 @@ static int misoc_attach(struct uart_dev_s *dev)
 {
   struct misoc_dev_s *priv = (struct misoc_dev_s *)dev->priv;
 
-  (void)irq_attach(priv->irq, misoc_uart_interrupt);
+  (void)irq_attach(priv->irq, misoc_uart_interrupt, NULL);
   up_enable_irq(priv->irq);
 
   return OK;
@@ -349,7 +349,7 @@ static void misoc_detach(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static int misoc_uart_interrupt(int irq, void *context)
+static int misoc_uart_interrupt(int irq, void *context, FAR void *arg)
 {
   uint32_t stat;
   struct uart_dev_s *dev = NULL;

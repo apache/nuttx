@@ -52,36 +52,36 @@
  * Pre-Processor Declarations
  ****************************************************************************/
 
-#define NRF24L01_MIN_ADDR_LEN 3      /* Minimal length (in bytes) of a pipe address */
-#define NRF24L01_MAX_ADDR_LEN 5      /* Maximum length (in bytes) of a pipe address */
-#define NRF24L01_MAX_PAYLOAD_LEN 32  /* Maximum length (in bytes) of a payload */
-#define NRF24L01_MAX_XMIT_RETR 15    /* Maximum auto retransmit count (for AA transmissions) */
-#define NRF24L01_PIPE_COUNT 6        /* Number of available pipes */
+#define NRF24L01_MIN_ADDR_LEN    3      /* Minimal length (in bytes) of a pipe address */
+#define NRF24L01_MAX_ADDR_LEN    5      /* Maximum length (in bytes) of a pipe address */
+#define NRF24L01_MAX_PAYLOAD_LEN 32     /* Maximum length (in bytes) of a payload */
+#define NRF24L01_MAX_XMIT_RETR   15     /* Maximum auto retransmit count (for AA transmissions) */
+#define NRF24L01_PIPE_COUNT      6      /* Number of available pipes */
 
-#define NRF24L01_MIN_FREQ       2400   /* Lower bound for RF frequency */
-#define NRF24L01_MAX_FREQ       2525   /* Upper bound for RF frequency */
+#define NRF24L01_MIN_FREQ        2400   /* Lower bound for RF frequency */
+#define NRF24L01_MAX_FREQ        2525   /* Upper bound for RF frequency */
 
-#define NRF24L01_DYN_LENGTH     33     /* Specific length value to use to enable dynamic packet length */
-#define NRF24L01_XMIT_MAXRT     255    /* Specific value returned by Number of available pipes */
+#define NRF24L01_DYN_LENGTH      33     /* Specific length value to use to enable dynamic packet length */
+#define NRF24L01_XMIT_MAXRT      255    /* Specific value returned by Number of available pipes */
 
-/* #define NRF24L01_DEBUG       1 */
+/* #define NRF24L01_DEBUG        1 */
 
 /* IOCTL commands */
 
-#define NRF24L01IOC_SETRETRCFG       _WLIOC_USER(0x0001)   /* arg: Pointer to nrf24l01_retrcfg_t structure */
-#define NRF24L01IOC_GETRETRCFG       _WLIOC_USER(0x0002)   /* arg: Pointer to nrf24l01_retrcfg_t structure */
-#define NRF24L01IOC_SETPIPESCFG      _WLIOC_USER(0x0003)   /* arg: Pointer to an array of nrf24l01_pipecfg_t pointers */
-#define NRF24L01IOC_GETPIPESCFG      _WLIOC_USER(0x0004)   /* arg: Pointer to an array of nrf24l01_pipecfg_t pointers */
-#define NRF24L01IOC_SETPIPESENABLED  _WLIOC_USER(0x0005)   /* arg: Pointer to a uint8_t value,  bit field of enabled / disabled pipes */
-#define NRF24L01IOC_GETPIPESENABLED  _WLIOC_USER(0x0006)   /* arg: Pointer to a uint8_t value,  bit field of enabled / disabled pipes */
-#define NRF24L01IOC_SETDATARATE      _WLIOC_USER(0x0007)   /* arg: Pointer to a nrf24l01_datarate_t value */
-#define NRF24L01IOC_GETDATARATE      _WLIOC_USER(0x0008)   /* arg: Pointer to a nrf24l01_datarate_t value */
-#define NRF24L01IOC_SETADDRWIDTH     _WLIOC_USER(0x0009)   /* arg: Pointer to an uint32_t value,  width of the address */
-#define NRF24L01IOC_GETADDRWIDTH     _WLIOC_USER(0x000A)   /* arg: Pointer to an uint32_t value,  width of the address */
-#define NRF24L01IOC_SETSTATE         _WLIOC_USER(0x000B)   /* arg: Pointer to a nrf24l01_state_t value */
-#define NRF24L01IOC_GETSTATE         _WLIOC_USER(0x000C)   /* arg: Pointer to a nrf24l01_state_t value */
-#define NRF24L01IOC_GETLASTXMITCOUNT _WLIOC_USER(0x000D)   /* arg: Pointer to an uint32_t value,  retransmission count of the last send operation (NRF24L01_XMIT_MAXRT if no ACK received)*/
-#define NRF24L01IOC_GETLASTPIPENO    _WLIOC_USER(0x000E)   /* arg: Pointer to an uint32_t value,  pipe # of the last received packet */
+#define NRF24L01IOC_SETRETRCFG       _WLIOC(NRF24L01_FIRST+0)   /* arg: Pointer to nrf24l01_retrcfg_t structure */
+#define NRF24L01IOC_GETRETRCFG       _WLIOC(NRF24L01_FIRST+1)   /* arg: Pointer to nrf24l01_retrcfg_t structure */
+#define NRF24L01IOC_SETPIPESCFG      _WLIOC(NRF24L01_FIRST+2)   /* arg: Pointer to an array of nrf24l01_pipecfg_t pointers */
+#define NRF24L01IOC_GETPIPESCFG      _WLIOC(NRF24L01_FIRST+3)   /* arg: Pointer to an array of nrf24l01_pipecfg_t pointers */
+#define NRF24L01IOC_SETPIPESENABLED  _WLIOC(NRF24L01_FIRST+4)   /* arg: Pointer to a uint8_t value, bit field of enabled / disabled pipes */
+#define NRF24L01IOC_GETPIPESENABLED  _WLIOC(NRF24L01_FIRST+5)   /* arg: Pointer to a uint8_t value, bit field of enabled / disabled pipes */
+#define NRF24L01IOC_SETDATARATE      _WLIOC(NRF24L01_FIRST+6)   /* arg: Pointer to a nrf24l01_datarate_t value */
+#define NRF24L01IOC_GETDATARATE      _WLIOC(NRF24L01_FIRST+7)   /* arg: Pointer to a nrf24l01_datarate_t value */
+#define NRF24L01IOC_SETADDRWIDTH     _WLIOC(NRF24L01_FIRST+8)   /* arg: Pointer to an uint32_t value, width of the address */
+#define NRF24L01IOC_GETADDRWIDTH     _WLIOC(NRF24L01_FIRST+9)   /* arg: Pointer to an uint32_t value, width of the address */
+#define NRF24L01IOC_SETSTATE         _WLIOC(NRF24L01_FIRST+10)  /* arg: Pointer to a nrf24l01_state_t value */
+#define NRF24L01IOC_GETSTATE         _WLIOC(NRF24L01_FIRST+11)  /* arg: Pointer to a nrf24l01_state_t value */
+#define NRF24L01IOC_GETLASTXMITCOUNT _WLIOC(NRF24L01_FIRST+12)  /* arg: Pointer to an uint32_t value, retransmission count of the last send operation (NRF24L01_XMIT_MAXRT if no ACK received)*/
+#define NRF24L01IOC_GETLASTPIPENO    _WLIOC(NRF24L01_FIRST+13)  /* arg: Pointer to an uint32_t value, pipe # of the last received packet */
 
 /* Aliased name for these commands */
 
@@ -92,7 +92,7 @@
 
 #ifdef NRF24L01_DEBUG
 # define werr(format, ...)           _err(format, ##__VA_ARGS__)
-# define werr(format, ...)         _err(format, ##__VA_ARGS__)
+# define werr(format, ...)           _err(format, ##__VA_ARGS__)
 # define winfo(format, ...)          _info(format, ##__VA_ARGS__)
 #else
 # define werr(x...)
@@ -199,7 +199,7 @@ struct nrf24l01_config_s
    * chipenable - Enable or disable the chip  (CE line)
    */
 
-  int  (*irqattach)(xcpt_t isr);
+  int  (*irqattach)(xcpt_t isr, FAR void *arg);
   void (*chipenable)(bool enable);
 };
 
@@ -234,12 +234,6 @@ int nrf24l01_register(FAR struct spi_dev_s *spi, FAR struct nrf24l01_config_s *c
  ************************************************************************************/
 
 int nrf24l01_init(FAR struct nrf24l01_dev_s *dev);
-
-/************************************************************************************
- * Get a pointer to the registered device
- ************************************************************************************/
-
-FAR struct nrf24l01_dev_s * nrf24l01_getinstance(void);
 
 /************************************************************************************
  * Set the default TX address.

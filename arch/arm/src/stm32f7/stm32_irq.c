@@ -186,7 +186,7 @@ static void stm32_dumpnvic(const char *msg, int irq)
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_FEATURES
-static int stm32_nmi(int irq, FAR void *context)
+static int stm32_nmi(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
   _err("PANIC!!! NMI received\n");
@@ -194,7 +194,7 @@ static int stm32_nmi(int irq, FAR void *context)
   return 0;
 }
 
-static int stm32_busfault(int irq, FAR void *context)
+static int stm32_busfault(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
   _err("PANIC!!! Bus fault received: %08x\n", getreg32(NVIC_CFAULTS));
@@ -202,7 +202,7 @@ static int stm32_busfault(int irq, FAR void *context)
   return 0;
 }
 
-static int stm32_usagefault(int irq, FAR void *context)
+static int stm32_usagefault(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
   _err("PANIC!!! Usage fault received: %08x\n", getreg32(NVIC_CFAULTS));
@@ -210,7 +210,7 @@ static int stm32_usagefault(int irq, FAR void *context)
   return 0;
 }
 
-static int stm32_pendsv(int irq, FAR void *context)
+static int stm32_pendsv(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
   _err("PANIC!!! PendSV received\n");
@@ -218,7 +218,7 @@ static int stm32_pendsv(int irq, FAR void *context)
   return 0;
 }
 
-static int stm32_dbgmonitor(int irq, FAR void *context)
+static int stm32_dbgmonitor(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
   _err("PANIC!!! Debug Monitor received\n");
@@ -226,7 +226,7 @@ static int stm32_dbgmonitor(int irq, FAR void *context)
   return 0;
 }
 
-static int stm32_reserved(int irq, FAR void *context)
+static int stm32_reserved(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
   _err("PANIC!!! Reserved interrupt\n");
@@ -469,8 +469,8 @@ void up_irqinitialize(void)
    * under certain conditions.
    */
 
-  irq_attach(STM32_IRQ_SVCALL, up_svcall);
-  irq_attach(STM32_IRQ_HARDFAULT, up_hardfault);
+  irq_attach(STM32_IRQ_SVCALL, up_svcall, NULL);
+  irq_attach(STM32_IRQ_HARDFAULT, up_hardfault, NULL);
 
   /* Set the priority of the SVCall interrupt */
 
@@ -486,22 +486,22 @@ void up_irqinitialize(void)
    */
 
 #ifdef CONFIG_ARM_MPU
-  irq_attach(STM32_IRQ_MEMFAULT, up_memfault);
+  irq_attach(STM32_IRQ_MEMFAULT, up_memfault, NULL);
   up_enable_irq(STM32_IRQ_MEMFAULT);
 #endif
 
   /* Attach all other processor exceptions (except reset and sys tick) */
 
 #ifdef CONFIG_DEBUG_FEATURES
-  irq_attach(STM32_IRQ_NMI, stm32_nmi);
+  irq_attach(STM32_IRQ_NMI, stm32_nmi, NULL);
 #ifndef CONFIG_ARM_MPU
-  irq_attach(STM32_IRQ_MEMFAULT, up_memfault);
+  irq_attach(STM32_IRQ_MEMFAULT, up_memfault, NULL);
 #endif
-  irq_attach(STM32_IRQ_BUSFAULT, stm32_busfault);
-  irq_attach(STM32_IRQ_USAGEFAULT, stm32_usagefault);
-  irq_attach(STM32_IRQ_PENDSV, stm32_pendsv);
-  irq_attach(STM32_IRQ_DBGMONITOR, stm32_dbgmonitor);
-  irq_attach(STM32_IRQ_RESERVED, stm32_reserved);
+  irq_attach(STM32_IRQ_BUSFAULT, stm32_busfault, NULL);
+  irq_attach(STM32_IRQ_USAGEFAULT, stm32_usagefault, NULL);
+  irq_attach(STM32_IRQ_PENDSV, stm32_pendsv, NULL);
+  irq_attach(STM32_IRQ_DBGMONITOR, stm32_dbgmonitor, NULL);
+  irq_attach(STM32_IRQ_RESERVED, stm32_reserved, NULL);
 #endif
 
   stm32_dumpnvic("initial", STM32_IRQ_NIRQS);

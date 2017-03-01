@@ -134,7 +134,7 @@ static void lpc11_dumpnvic(const char *msg, int irq)
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_FEATURES
-static int lpc11_nmi(int irq, FAR void *context)
+static int lpc11_nmi(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
   _err("PANIC!!! NMI received\n");
@@ -142,7 +142,7 @@ static int lpc11_nmi(int irq, FAR void *context)
   return 0;
 }
 
-static int lpc11_pendsv(int irq, FAR void *context)
+static int lpc11_pendsv(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
   _err("PANIC!!! PendSV received\n");
@@ -150,7 +150,7 @@ static int lpc11_pendsv(int irq, FAR void *context)
   return 0;
 }
 
-static int lpc11_reserved(int irq, FAR void *context)
+static int lpc11_reserved(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
   _err("PANIC!!! Reserved interrupt\n");
@@ -227,15 +227,15 @@ void up_irqinitialize(void)
    * under certain conditions.
    */
 
-  irq_attach(LPC11_IRQ_SVCALL, up_svcall);
-  irq_attach(LPC11_IRQ_HARDFAULT, up_hardfault);
+  irq_attach(LPC11_IRQ_SVCALL, up_svcall, NULL);
+  irq_attach(LPC11_IRQ_HARDFAULT, up_hardfault, NULL);
 
   /* Attach all other processor exceptions (except reset and sys tick) */
 
 #ifdef CONFIG_DEBUG_FEATURES
-  irq_attach(LPC11_IRQ_NMI, lpc11_nmi);
-  irq_attach(LPC11_IRQ_PENDSV, lpc11_pendsv);
-  irq_attach(LPC11_IRQ_RESERVED, lpc11_reserved);
+  irq_attach(LPC11_IRQ_NMI, lpc11_nmi, NULL);
+  irq_attach(LPC11_IRQ_PENDSV, lpc11_pendsv, NULL);
+  irq_attach(LPC11_IRQ_RESERVED, lpc11_reserved, NULL);
 #endif
 
   lpc11_dumpnvic("initial", NR_IRQS);

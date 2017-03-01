@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/net/enc28j60.c
  *
- *   Copyright (C) 2010-2012, 2014-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2012, 2014-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -327,7 +327,7 @@ static void enc_rxerif(FAR struct enc_driver_s *priv);
 static void enc_rxdispatch(FAR struct enc_driver_s *priv);
 static void enc_pktif(FAR struct enc_driver_s *priv);
 static void enc_irqworker(FAR void *arg);
-static int  enc_interrupt(int irq, FAR void *context);
+static int  enc_interrupt(int irq, FAR void *context, FAR void *arg);
 
 /* Watchdog timer expirations */
 
@@ -1275,6 +1275,8 @@ static void enc_linkstatus(FAR struct enc_driver_s *priv)
 
 static void enc_txif(FAR struct enc_driver_s *priv)
 {
+  int delay;
+
   /* Update statistics */
 
   NETDEV_TXDONE(&priv->dev);
@@ -1287,14 +1289,25 @@ static void enc_txif(FAR struct enc_driver_s *priv)
 
   wd_cancel(priv->txtimeout);
 
-  /* Then make sure that the TX poll timer is running (if it is already
-   * running, the following would restart it).  This is necessary to
-   * avoid certain race conditions where the polling sequence can be
-   * interrupted.
+  /* Check if the poll timer is running.  If it is not, then start it now.
+   * There is a race condition here:  We may test the time remaining on the
+   * poll timer and determine that it is still running, but then the timer
+   * expires immiately.  That should not be problem, however, the poll timer
+   * processing should be in the work queue and should execute immediately
+   * after we complete the TX poll. Inefficient, but not fatal.
    */
 
-  (void)wd_start(priv->txpoll, ENC_WDDELAY, enc_polltimer, 1,
-                 (wdparm_t)priv);
+  delay = wd_gettime(priv->txpoll);
+  if (delay <= 0)
+    {
+      /* The poll timer is not running .. restart it.  This is necessary to
+       * avoid certain race conditions where the polling sequence can be
+       * interrupted.
+       */
+
+      (void)wd_start(priv->txpoll, ENC_WDDELAY, enc_polltimer, 1,
+                     (wdparm_t)priv);
+    }
 
   /* Then poll the network for new XMIT data */
 
@@ -1840,7 +1853,7 @@ static void enc_irqworker(FAR void *arg)
  *
  ****************************************************************************/
 
-static int enc_interrupt(int irq, FAR void *context)
+static int enc_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   register FAR struct enc_driver_s *priv = &g_enc28j60[0];
 

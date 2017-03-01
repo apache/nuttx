@@ -174,7 +174,7 @@ static void sam_dumpnvic(const char *msg, int irq)
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_FEATURES
-static int sam_nmi(int irq, FAR void *context)
+static int sam_nmi(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
   _err("PANIC!!! NMI received\n");
@@ -182,7 +182,7 @@ static int sam_nmi(int irq, FAR void *context)
   return 0;
 }
 
-static int sam_busfault(int irq, FAR void *context)
+static int sam_busfault(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
   _err("PANIC!!! Bus fault received: %08x\n", getreg32(NVIC_CFAULTS));
@@ -190,7 +190,7 @@ static int sam_busfault(int irq, FAR void *context)
   return 0;
 }
 
-static int sam_usagefault(int irq, FAR void *context)
+static int sam_usagefault(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
   _err("PANIC!!! Usage fault received: %08x\n", getreg32(NVIC_CFAULTS));
@@ -198,7 +198,7 @@ static int sam_usagefault(int irq, FAR void *context)
   return 0;
 }
 
-static int sam_pendsv(int irq, FAR void *context)
+static int sam_pendsv(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
   _err("PANIC!!! PendSV received\n");
@@ -206,7 +206,7 @@ static int sam_pendsv(int irq, FAR void *context)
   return 0;
 }
 
-static int sam_dbgmonitor(int irq, FAR void *context)
+static int sam_dbgmonitor(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
   _err("PANIC!!! Debug Monitor received\n");
@@ -214,7 +214,7 @@ static int sam_dbgmonitor(int irq, FAR void *context)
   return 0;
 }
 
-static int sam_reserved(int irq, FAR void *context)
+static int sam_reserved(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
   _err("PANIC!!! Reserved interrupt\n");
@@ -435,8 +435,8 @@ void up_irqinitialize(void)
    * under certain conditions.
    */
 
-  irq_attach(SAM_IRQ_SVCALL, up_svcall);
-  irq_attach(SAM_IRQ_HARDFAULT, up_hardfault);
+  irq_attach(SAM_IRQ_SVCALL, up_svcall, NULL);
+  irq_attach(SAM_IRQ_HARDFAULT, up_hardfault, NULL);
 
   /* Set the priority of the SVCall interrupt */
 
@@ -452,22 +452,22 @@ void up_irqinitialize(void)
    */
 
 #ifdef CONFIG_ARM_MPU
-  irq_attach(SAM_IRQ_MEMFAULT, up_memfault);
+  irq_attach(SAM_IRQ_MEMFAULT, up_memfault, NULL);
   up_enable_irq(SAM_IRQ_MEMFAULT);
 #endif
 
   /* Attach all other processor exceptions (except reset and sys tick) */
 
 #ifdef CONFIG_DEBUG_FEATURES
-  irq_attach(SAM_IRQ_NMI, sam_nmi);
+  irq_attach(SAM_IRQ_NMI, sam_nmi, NULL);
 #ifndef CONFIG_ARM_MPU
-  irq_attach(SAM_IRQ_MEMFAULT, up_memfault);
+  irq_attach(SAM_IRQ_MEMFAULT, up_memfault, NULL);
 #endif
-  irq_attach(SAM_IRQ_BUSFAULT, sam_busfault);
-  irq_attach(SAM_IRQ_USAGEFAULT, sam_usagefault);
-  irq_attach(SAM_IRQ_PENDSV, sam_pendsv);
-  irq_attach(SAM_IRQ_DBGMONITOR, sam_dbgmonitor);
-  irq_attach(SAM_IRQ_RESERVED, sam_reserved);
+  irq_attach(SAM_IRQ_BUSFAULT, sam_busfault, NULL);
+  irq_attach(SAM_IRQ_USAGEFAULT, sam_usagefault, NULL);
+  irq_attach(SAM_IRQ_PENDSV, sam_pendsv, NULL);
+  irq_attach(SAM_IRQ_DBGMONITOR, sam_dbgmonitor, NULL);
+  irq_attach(SAM_IRQ_RESERVED, sam_reserved, NULL);
 #endif
 
   sam_dumpnvic("initial", SAM_IRQ_NIRQS);

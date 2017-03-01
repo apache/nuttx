@@ -428,7 +428,7 @@ static void lpc214x_dispatchrequest(struct lpc214x_usbdev_s *priv,
 static inline void lpc214x_ep0setup(struct lpc214x_usbdev_s *priv);
 static inline void lpc214x_ep0dataoutinterrupt(struct lpc214x_usbdev_s *priv);
 static inline void lpc214x_ep0dataininterrupt(struct lpc214x_usbdev_s *priv);
-static int lpc214x_usbinterrupt(int irq, FAR void *context);
+static int lpc214x_usbinterrupt(int irq, FAR void *context, FAR void *arg);
 
 #ifdef CONFIG_LPC214X_USBDEV_DMA
 static int  lpc214x_dmasetup(struct lpc214x_usbdev_s *priv, uint8_t epphy,
@@ -2014,7 +2014,7 @@ static inline void lpc214x_ep0dataininterrupt(struct lpc214x_usbdev_s *priv)
  *
  ****************************************************************************/
 
-static int lpc214x_usbinterrupt(int irq, FAR void *context)
+static int lpc214x_usbinterrupt(int irq, FAR void *context, FAR void *arg)
 {
   struct lpc214x_usbdev_s *priv = &g_usbdev;
   struct lpc214x_ep_s *privep ;
@@ -3235,7 +3235,7 @@ void up_usbinitialize(void)
 
   /* Attach USB controller interrupt handler */
 
-  if (irq_attach(LPC214X_USB_IRQ, lpc214x_usbinterrupt) != 0)
+  if (irq_attach(LPC214X_USB_IRQ, lpc214x_usbinterrupt, NULL) != 0)
     {
       usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_IRQREGISTRATION),
                (uint16_t)LPC214X_USB_IRQ);

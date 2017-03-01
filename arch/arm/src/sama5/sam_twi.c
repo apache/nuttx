@@ -199,21 +199,9 @@ static inline void twi_putrel(struct twi_dev_s *priv, unsigned int offset,
 
 /* I2C transfer helper functions */
 
-static int twi_wait(struct twi_dev_s *priv, unsigned int size);
+static int  twi_wait(struct twi_dev_s *priv, unsigned int size);
 static void twi_wakeup(struct twi_dev_s *priv, int result);
-static int twi_interrupt(struct twi_dev_s *priv);
-#ifdef CONFIG_SAMA5_TWI0
-static int twi0_interrupt(int irq, FAR void *context);
-#endif
-#ifdef CONFIG_SAMA5_TWI1
-static int twi1_interrupt(int irq, FAR void *context);
-#endif
-#ifdef CONFIG_SAMA5_TWI2
-static int twi2_interrupt(int irq, FAR void *context);
-#endif
-#ifdef CONFIG_SAMA5_TWI3
-static int twi3_interrupt(int irq, FAR void *context);
-#endif
+static int  twi_interrupt(int irq, FAR void *context, FAR void *arg);
 static void twi_timeout(int argc, uint32_t arg, ...);
 
 static void twi_startread(struct twi_dev_s *priv, struct i2c_msg_s *msg);
@@ -246,7 +234,6 @@ static const struct twi_attr_s g_twi0attr =
   .sclcfg  = PIO_TWI0_CK,
   .sdacfg  = PIO_TWI0_D,
   .base    = SAM_TWI0_VBASE,
-  .handler = twi0_interrupt,
 };
 
 static struct twi_dev_s g_twi0;
@@ -261,7 +248,6 @@ static const struct twi_attr_s g_twi1attr =
   .sclcfg  = PIO_TWI1_CK,
   .sdacfg  = PIO_TWI1_D,
   .base    = SAM_TWI1_VBASE,
-  .handler = twi1_interrupt,
 };
 
 static struct twi_dev_s g_twi1;
@@ -276,7 +262,6 @@ static const struct twi_attr_s g_twi2attr =
   .sclcfg  = PIO_TWI2_CK,
   .sdacfg  = PIO_TWI2_D,
   .base    = SAM_TWI2_VBASE,
-  .handler = twi2_interrupt,
 };
 
 static struct twi_dev_s g_twi2;
@@ -291,7 +276,6 @@ static const struct twi_attr_s g_twi3attr =
   .sclcfg  = PIO_TWI3_CK,
   .sdacfg  = PIO_TWI3_D,
   .base    = SAM_TWI3_VBASE,
-  .handler = twi3_interrupt,
 };
 
 static struct twi_dev_s g_twi3;
@@ -550,13 +534,16 @@ static void twi_wakeup(struct twi_dev_s *priv, int result)
  *
  ****************************************************************************/
 
-static int twi_interrupt(struct twi_dev_s *priv)
+static int twi_interrupt(int irq, FAR void *context, FAR void *arg)
 {
+  struct twi_dev_s *priv = (struct twi_dev_s *)arg;
   struct i2c_msg_s *msg;
   uint32_t sr;
   uint32_t imr;
   uint32_t pending;
   uint32_t regval;
+
+  DEBUGASSERT(priv != NULL);
 
   /* Retrieve masked interrupt status */
 
@@ -666,34 +653,6 @@ static int twi_interrupt(struct twi_dev_s *priv)
 
   return OK;
 }
-
-#ifdef CONFIG_SAMA5_TWI0
-static int twi0_interrupt(int irq, FAR void *context)
-{
-  return twi_interrupt(&g_twi0);
-}
-#endif
-
-#ifdef CONFIG_SAMA5_TWI1
-static int twi1_interrupt(int irq, FAR void *context)
-{
-  return twi_interrupt(&g_twi1);
-}
-#endif
-
-#ifdef CONFIG_SAMA5_TWI2
-static int twi2_interrupt(int irq, FAR void *context)
-{
-  return twi_interrupt(&g_twi2);
-}
-#endif
-
-#ifdef CONFIG_SAMA5_TWI3
-static int twi3_interrupt(int irq, FAR void *context)
-{
-  return twi_interrupt(&g_twi3);
-}
-#endif
 
 /****************************************************************************
  * Name: twi_timeout
@@ -1296,7 +1255,7 @@ struct i2c_master_s *sam_i2cbus_initialize(int bus)
 
   /* Attach Interrupt Handler */
 
-  ret = irq_attach(priv->attr->irq, priv->attr->handler);
+  ret = irq_attach(priv->attr->irq, twi_interrupt, priv);
   if (ret < 0)
     {
       ierr("ERROR: Failed to attach irq %d\n", priv->attr->irq);

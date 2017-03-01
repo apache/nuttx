@@ -120,7 +120,7 @@ static void     sam_putreg(uint32_t regval, uintptr_t regaddr);
 /* Interrupt hanlding *******************************************************/
 
 #ifdef CONFIG_SAMV7_RSWDT_INTERRUPT
-static int      sam_interrupt(int irq, FAR void *context);
+static int      sam_interrupt(int irq, FAR void *context, FAR void *arg);
 #endif
 
 /* "Lower half" driver methods **********************************************/
@@ -260,7 +260,7 @@ static void sam_putreg(uint32_t regval, uintptr_t regaddr)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMV7_RSWDT_INTERRUPT
-static int sam_interrupt(int irq, FAR void *context)
+static int sam_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct sam_lowerhalf_s *priv = &g_wdtdev;
 
@@ -684,7 +684,7 @@ int sam_rswdt_initialize(void)
 #ifdef CONFIG_SAMV7_RSWDT_INTERRUPT
   /* Attach our RSWDT interrupt handler (But don't enable it yet) */
 
-  (void)irq_attach(SAM_IRQ_RSWDT, sam_interrupt);
+  (void)irq_attach(SAM_IRQ_RSWDT, sam_interrupt, NULL);
 #endif
 
   /* Register the watchdog driver as /dev/rswdt */

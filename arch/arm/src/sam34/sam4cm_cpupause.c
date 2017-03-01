@@ -203,7 +203,7 @@ int up_cpu_paused(int cpu)
  *
  ****************************************************************************/
 
-int arm_pause_handler(int irq, void *c)
+int arm_pause_handler(int irq, void *c, FAR void *arg)
 {
   int cpu = up_cpu_index();
 

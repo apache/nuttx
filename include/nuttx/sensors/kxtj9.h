@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/sensors/kxjt9.h
+ * include/nuttx/sensors/kxtj9.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -35,8 +35,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_SENSORS_KXJT9_H
-#define __INCLUDE_NUTTX_SENSORS_KXJT9_H
+#ifndef __INCLUDE_NUTTX_SENSORS_KXTJ9_H
+#define __INCLUDE_NUTTX_SENSORS_KXTJ9_H
 
 /****************************************************************************
  * Included Files
@@ -91,15 +91,15 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: kxjt9_register
+ * Name: kxtj9_register
  *
  * Description:
- *   Register the KXJT9 accelerometer device as 'devpath'.
+ *   Register the KXTJ9 accelerometer device as 'devpath'.
  *
  * Input Parameters:
  *   devpath - The full path to the driver to register, e.g., "/dev/accel0".
  *   i2c     - An I2C driver instance.
- *   addr    - The I2C address of the KXJT9 accelerometer, gyroscope or
+ *   addr    - The I2C address of the KXTJ9 accelerometer, gyroscope or
  *             magnetometer.
  *
  * Returned Value:
@@ -108,7 +108,7 @@ extern "C"
  ****************************************************************************/
 
 struct i2c_master_s;
-int kxjt9_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
+int kxtj9_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
                    uint8_t address);
 
 #ifdef __cplusplus
@@ -116,4 +116,4 @@ int kxjt9_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 #endif
 
 #endif /* CONFIG_I2C && CONFIG_SENSOR_KXTJ9 */
-#endif /* __INCLUDE_NUTTX_SENSORS_KXJT9_H */
+#endif /* __INCLUDE_NUTTX_SENSORS_KXTJ9_H */

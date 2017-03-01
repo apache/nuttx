@@ -151,7 +151,8 @@
 #    endif
 
 #  elif defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F10XX) || \
-        defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F30XX)
+        defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
+        defined(CONFIG_STM32_STM32F37XX)
 
 #    if defined(CONFIG_USART1_RXDMA) || defined(CONFIG_USART2_RXDMA) || \
       defined(CONFIG_USART3_RXDMA)
@@ -188,7 +189,8 @@
 
 #  ifndef CONFIG_USART_DMAPRIO
 #    if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F10XX) || \
-        defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
+        defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
+        defined(CONFIG_STM32_STM32F37XX)
 #      define CONFIG_USART_DMAPRIO  DMA_CCR_PRIMED
 #    elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
 #      define CONFIG_USART_DMAPRIO  DMA_SCR_PRIMED
@@ -197,7 +199,8 @@
 #    endif
 #  endif
 #    if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F10XX) || \
-        defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
+        defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
+        defined(CONFIG_STM32_STM32F37XX)
 #    if (CONFIG_USART_DMAPRIO & ~DMA_CCR_PL_MASK) != 0
 #      error "Illegal value for CONFIG_USART_DMAPRIO"
 #    endif
@@ -312,8 +315,6 @@ struct up_dev_s
   const unsigned int rxdma_channel; /* DMA channel assigned */
 #endif
 
-  int (*const vector)(int irq, void *context); /* Interrupt handler */
-
   /* RX DMA state */
 
 #ifdef SERIAL_HAVE_DMA
@@ -338,7 +339,7 @@ static int  up_setup(struct uart_dev_s *dev);
 static void up_shutdown(struct uart_dev_s *dev);
 static int  up_attach(struct uart_dev_s *dev);
 static void up_detach(struct uart_dev_s *dev);
-static int  up_interrupt_common(struct up_dev_s *dev);
+static int  up_interrupt(int irq, void *context, void *arg);
 static int  up_ioctl(struct file *filep, int cmd, unsigned long arg);
 #ifndef SERIAL_HAVE_ONLY_DMA
 static int  up_receive(struct uart_dev_s *dev, unsigned int *status);
@@ -368,31 +369,6 @@ static void up_pm_notify(struct pm_callback_s *cb, int dowmin,
                          enum pm_state_e pmstate);
 static int  up_pm_prepare(struct pm_callback_s *cb, int domain,
                           enum pm_state_e pmstate);
-#endif
-
-#ifdef CONFIG_STM32_USART1_SERIALDRIVER
-static int up_interrupt_usart1(int irq, void *context);
-#endif
-#ifdef CONFIG_STM32_USART2_SERIALDRIVER
-static int up_interrupt_usart2(int irq, void *context);
-#endif
-#ifdef CONFIG_STM32_USART3_SERIALDRIVER
-static int up_interrupt_usart3(int irq, void *context);
-#endif
-#ifdef CONFIG_STM32_UART4_SERIALDRIVER
-static int up_interrupt_uart4(int irq, void *context);
-#endif
-#ifdef CONFIG_STM32_UART5_SERIALDRIVER
-static int up_interrupt_uart5(int irq, void *context);
-#endif
-#ifdef CONFIG_STM32_USART6_SERIALDRIVER
-static int up_interrupt_usart6(int irq, void *context);
-#endif
-#ifdef CONFIG_STM32_UART7_SERIALDRIVER
-static int up_interrupt_uart7(int irq, void *context);
-#endif
-#ifdef CONFIG_STM32_UART8_SERIALDRIVER
-static int up_interrupt_uart8(int irq, void *context);
 #endif
 
 /****************************************************************************
@@ -540,7 +516,11 @@ static struct up_dev_s g_usart1priv =
   .bits          = CONFIG_USART1_BITS,
   .stopbits2     = CONFIG_USART1_2STOP,
   .baud          = CONFIG_USART1_BAUD,
+#if defined(CONFIG_STM32_STM32F33XX)
+  .apbclock      = STM32_PCLK1_FREQUENCY, /* Errata 2.5.1 */
+#else
   .apbclock      = STM32_PCLK2_FREQUENCY,
+#endif
   .usartbase     = STM32_USART1_BASE,
   .tx_gpio       = GPIO_USART1_TX,
   .rx_gpio       = GPIO_USART1_RX,
@@ -556,7 +536,6 @@ static struct up_dev_s g_usart1priv =
   .rxdma_channel = DMAMAP_USART1_RX,
   .rxfifo        = g_usart1rxfifo,
 #endif
-  .vector        = up_interrupt_usart1,
 
 #ifdef CONFIG_USART1_RS485
   .rs485_dir_gpio = GPIO_USART1_RS485_DIR,
@@ -618,7 +597,6 @@ static struct up_dev_s g_usart2priv =
   .rxdma_channel = DMAMAP_USART2_RX,
   .rxfifo        = g_usart2rxfifo,
 #endif
-  .vector        = up_interrupt_usart2,
 
 #ifdef CONFIG_USART2_RS485
   .rs485_dir_gpio = GPIO_USART2_RS485_DIR,
@@ -680,7 +658,6 @@ static struct up_dev_s g_usart3priv =
   .rxdma_channel = DMAMAP_USART3_RX,
   .rxfifo        = g_usart3rxfifo,
 #endif
-  .vector        = up_interrupt_usart3,
 
 #ifdef CONFIG_USART3_RS485
   .rs485_dir_gpio = GPIO_USART3_RS485_DIR,
@@ -746,7 +723,6 @@ static struct up_dev_s g_uart4priv =
   .rxdma_channel = DMAMAP_UART4_RX,
   .rxfifo        = g_uart4rxfifo,
 #endif
-  .vector        = up_interrupt_uart4,
 
 #ifdef CONFIG_UART4_RS485
   .rs485_dir_gpio = GPIO_UART4_RS485_DIR,
@@ -812,7 +788,6 @@ static struct up_dev_s g_uart5priv =
   .rxdma_channel = DMAMAP_UART5_RX,
   .rxfifo        = g_uart5rxfifo,
 #endif
-  .vector         = up_interrupt_uart5,
 
 #ifdef CONFIG_UART5_RS485
   .rs485_dir_gpio = GPIO_UART5_RS485_DIR,
@@ -874,7 +849,6 @@ static struct up_dev_s g_usart6priv =
   .rxdma_channel = DMAMAP_USART6_RX,
   .rxfifo        = g_usart6rxfifo,
 #endif
-  .vector         = up_interrupt_usart6,
 
 #ifdef CONFIG_USART6_RS485
   .rs485_dir_gpio = GPIO_USART6_RS485_DIR,
@@ -936,7 +910,6 @@ static struct up_dev_s g_uart7priv =
   .rxdma_channel = DMAMAP_UART7_RX,
   .rxfifo        = g_uart7rxfifo,
 #endif
-  .vector         = up_interrupt_uart7,
 
 #ifdef CONFIG_UART7_RS485
   .rs485_dir_gpio = GPIO_UART7_RS485_DIR,
@@ -998,7 +971,6 @@ static struct up_dev_s g_uart8priv =
   .rxdma_channel = DMAMAP_UART8_RX,
   .rxfifo        = g_uart8rxfifo,
 #endif
-  .vector         = up_interrupt_uart8,
 
 #ifdef CONFIG_UART8_RS485
   .rs485_dir_gpio = GPIO_UART8_RS485_DIR,
@@ -1173,7 +1145,8 @@ static int up_dma_nextrx(struct up_dev_s *priv)
 static void up_set_format(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
-#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
+#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
+    defined(CONFIG_STM32_STM32F37XX)
   uint32_t usartdiv8;
 #else
   uint32_t usartdiv32;
@@ -1187,7 +1160,8 @@ static void up_set_format(struct uart_dev_s *dev)
 
   regval = up_serialin(priv, STM32_USART_CR1_OFFSET);
 
-#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
+#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX)|| \
+    defined(CONFIG_STM32_STM32F37XX)
   /* This first implementation is for U[S]ARTs that support oversampling
    * by 8 in additional to the standard oversampling by 16.
    * With baud rate of fCK / Divider for oversampling by 16.
@@ -1735,7 +1709,7 @@ static int up_attach(struct uart_dev_s *dev)
 
   /* Attach and enable the IRQ */
 
-  ret = irq_attach(priv->irq, priv->vector);
+  ret = irq_attach(priv->irq, up_interrupt, priv);
   if (ret == OK)
     {
       /* Enable the interrupt (RX and TX interrupts are still disabled
@@ -1744,6 +1718,7 @@ static int up_attach(struct uart_dev_s *dev)
 
       up_enable_irq(priv->irq);
     }
+
   return ret;
 }
 
@@ -1765,7 +1740,7 @@ static void up_detach(struct uart_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: up_interrupt_common
+ * Name: up_interrupt
  *
  * Description:
  *   This is the USART interrupt handler.  It will be invoked when an
@@ -1776,10 +1751,13 @@ static void up_detach(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static int up_interrupt_common(struct up_dev_s *priv)
+static int up_interrupt(int irq, void *context, void *arg)
 {
+  struct up_dev_s *priv = (struct up_dev_s *)arg;
   int  passes;
   bool handled;
+
+  DEBUGASSERT(priv != NULL);
 
   /* Report serial activity to the power management logic */
 
@@ -1855,7 +1833,8 @@ static int up_interrupt_common(struct up_dev_s *priv)
 
       else if ((priv->sr & (USART_SR_ORE | USART_SR_NE | USART_SR_FE)) != 0)
         {
-#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
+#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
+    defined(CONFIG_STM32_STM32F37XX)
           /* These errors are cleared by writing the corresponding bit to the
            * interrupt clear register (ICR).
            */
@@ -2500,70 +2479,6 @@ static bool up_txready(struct uart_dev_s *dev)
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   return ((up_serialin(priv, STM32_USART_SR_OFFSET) & USART_SR_TXE) != 0);
 }
-
-/****************************************************************************
- * Name: up_interrupt_u[s]art[n]
- *
- * Description:
- *   Interrupt handlers for U[S]ART[n] where n=1,..,6.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_STM32_USART1_SERIALDRIVER
-static int up_interrupt_usart1(int irq, void *context)
-{
-  return up_interrupt_common(&g_usart1priv);
-}
-#endif
-
-#ifdef CONFIG_STM32_USART2_SERIALDRIVER
-static int up_interrupt_usart2(int irq, void *context)
-{
-  return up_interrupt_common(&g_usart2priv);
-}
-#endif
-
-#ifdef CONFIG_STM32_USART3_SERIALDRIVER
-static int up_interrupt_usart3(int irq, void *context)
-{
-  return up_interrupt_common(&g_usart3priv);
-}
-#endif
-
-#ifdef CONFIG_STM32_UART4_SERIALDRIVER
-static int up_interrupt_uart4(int irq, void *context)
-{
-  return up_interrupt_common(&g_uart4priv);
-}
-#endif
-
-#ifdef CONFIG_STM32_UART5_SERIALDRIVER
-static int up_interrupt_uart5(int irq, void *context)
-{
-  return up_interrupt_common(&g_uart5priv);
-}
-#endif
-
-#ifdef CONFIG_STM32_USART6_SERIALDRIVER
-static int up_interrupt_usart6(int irq, void *context)
-{
-  return up_interrupt_common(&g_usart6priv);
-}
-#endif
-
-#ifdef CONFIG_STM32_UART7_SERIALDRIVER
-static int up_interrupt_uart7(int irq, void *context)
-{
-  return up_interrupt_common(&g_uart7priv);
-}
-#endif
-
-#ifdef CONFIG_STM32_UART8_SERIALDRIVER
-static int up_interrupt_uart8(int irq, void *context)
-{
-  return up_interrupt_common(&g_uart8priv);
-}
-#endif
 
 /****************************************************************************
  * Name: up_dma_rxcallback

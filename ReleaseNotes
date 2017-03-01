@@ -11813,7 +11813,7 @@ Additional new features and extended functionality:
 
     * Sensor Drivers:
 
-      - Add KXJT9 Accelerometer driver from the Motorola Moto Z MDK.
+      - Add KXTJ9 Accelerometer driver from the Motorola Moto Z MDK.
       - Add MFRC522 RFID ISO14443 and Mifare transceiver driver.  From Alan
         Carvalho de Assis.
       - Add driver for the LIS3MDL 3 axis magnetometer.  From Alexander

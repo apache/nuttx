@@ -90,8 +90,8 @@ static int  usart1_setup(struct uart_dev_s *dev);
 static void usart1_shutdown(struct uart_dev_s *dev);
 static int  usart1_attach(struct uart_dev_s *dev);
 static void usart1_detach(struct uart_dev_s *dev);
-static int  usart1_rxinterrupt(int irq, void *context);
-static int  usart1_txinterrupt(int irq, void *context);
+static int  usart1_rxinterrupt(int irq, void *context, FAR void *arg);
+static int  usart1_txinterrupt(int irq, void *context, FAR void *arg);
 static int  usart1_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int  usart1_receive(struct uart_dev_s *dev, FAR unsigned int *status);
 static void usart1_rxint(struct uart_dev_s *dev, bool enable);
@@ -245,9 +245,9 @@ static int usart1_attach(struct uart_dev_s *dev)
    *      written.
    */
 
-  (void)irq_attach(AT90USB_IRQ_U1RX, usart1_rxinterrupt);
-  (void)irq_attach(AT90USB_IRQ_U1DRE, usart1_txinterrupt);
-//(void)irq_attach(AT90USB_IRQ_U1TX, usart1_txinterrupt);
+  (void)irq_attach(AT90USB_IRQ_U1RX, usart1_rxinterrupt, NULL);
+  (void)irq_attach(AT90USB_IRQ_U1DRE, usart1_txinterrupt, NULL);
+//(void)irq_attach(AT90USB_IRQ_U1TX, usart1_txinterrupt, NULL);
   return OK;
 }
 
@@ -284,7 +284,7 @@ static void usart1_detach(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static int usart1_rxinterrupt(int irq, void *context)
+static int usart1_rxinterrupt(int irq, void *context, FAR void *arg)
 {
   uint8_t ucsr1a = UCSR1A;
 
@@ -310,7 +310,7 @@ static int usart1_rxinterrupt(int irq, void *context)
  *
  ****************************************************************************/
 
-static int usart1_txinterrupt(int irq, void *context)
+static int usart1_txinterrupt(int irq, void *context, FAR void *arg)
 {
   uint8_t ucsr1a = UCSR1A;
 

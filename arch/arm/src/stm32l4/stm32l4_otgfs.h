@@ -124,6 +124,5 @@ void stm32l4_usbsuspend(FAR struct usbdev_s *dev, bool resume);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* CONFIG_STM32_OTGFS */
-#endif /* __ARCH_ARM_SRC_STM32_STM32_OTGFS_H */
-
+#endif /* CONFIG_STM32L4_OTGFS */
+#endif /* __ARCH_ARM_SRC_STM32L4_STM32L4_OTGFS_H */

@@ -95,7 +95,7 @@ static struct sam_hsmci_state_s g_hsmci;
  ****************************************************************************/
 
 #ifdef CONFIG_MMCSD_HAVECARDDETECT
-static int sam_hsmci_cardetect_int(int irq, void *regs)
+static int sam_hsmci_cardetect_int(int irq, void *regs, FAR void *arg)
 {
   bool inserted;
 
@@ -168,7 +168,7 @@ int sam_hsmci_initialize(void)
       /* Configure card detect interrupts */
 
       sam_gpioirq(GPIO_MCI_CD);
-      (void)irq_attach(MCI_CD_IRQ, sam_hsmci_cardetect_int);
+      (void)irq_attach(MCI_CD_IRQ, sam_hsmci_cardetect_int, NULL);
       g_hsmci.inserted = sam_cardinserted(0);
 #else
       g_hsmci.inserted = true; /* An assumption? */

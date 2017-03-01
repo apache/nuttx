@@ -60,7 +60,8 @@
 
 /* Interrupt handlers attached to the ALARM EXTI */
 
-static xcpt_t stm32l4_exti_callback;
+static xcpt_t g_alarm_callback;
+static void  *g_callback_arg;
 
 /****************************************************************************
  * Private Functions
@@ -74,15 +75,15 @@ static xcpt_t stm32l4_exti_callback;
  *
  ****************************************************************************/
 
-static int stm32l4_exti_alarm_isr(int irq, void *context)
+static int stm32l4_exti_alarm_isr(int irq, void *context, FAR void *arg)
 {
   int ret = OK;
 
   /* Dispatch the interrupt to the handler */
 
-  if (stm32l4_exti_callback)
+  if (g_alarm_callback != NULL)
     {
-      ret = stm32l4_exti_callback(irq, context);
+      ret = g_alarm_callback(irq, context, g_callback_arg);
     }
 
   /* Clear the pending EXTI interrupt */
@@ -115,20 +116,21 @@ static int stm32l4_exti_alarm_isr(int irq, void *context)
  ****************************************************************************/
 
 xcpt_t stm32l4_exti_alarm(bool risingedge, bool fallingedge, bool event,
-                        xcpt_t func)
+                          xcpt_t func, void *arg)
 {
   xcpt_t oldhandler;
 
   /* Get the previous GPIO IRQ handler; Save the new IRQ handler. */
 
-  oldhandler          = stm32l4_exti_callback;
-  stm32l4_exti_callback = func;
+  oldhandler       = g_alarm_callback;
+  g_alarm_callback = func;
+  g_callback_arg   = arg;
 
   /* Install external interrupt handlers (if not already attached) */
 
   if (func)
     {
-      irq_attach(STM32L4_IRQ_RTCALRM, stm32l4_exti_alarm_isr);
+      irq_attach(STM32L4_IRQ_RTCALRM, stm32l4_exti_alarm_isr, NULL);
       up_enable_irq(STM32L4_IRQ_RTCALRM);
     }
   else

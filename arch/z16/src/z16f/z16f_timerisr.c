@@ -82,7 +82,7 @@ extern _Erom uint8_t SYS_CLK_FREQ;
  *
  ****************************************************************************/
 
-static int z16f_timerisr(int irq, uint32_t *regs)
+static int z16f_timerisr(int irq, uint32_t *regs, void *arg)
 {
   /* Process timer interrupt */
 
@@ -224,6 +224,6 @@ void z16_timer_initialize(void)
 
   /* Attach and enable the timer interrupt (leaving at priority 0) */
 
-  irq_attach(Z16F_IRQ_SYSTIMER, (xcpt_t)z16f_timerisr);
+  irq_attach(Z16F_IRQ_SYSTIMER, (xcpt_t)z16f_timerisr, NULL);
   up_enable_irq(Z16F_IRQ_SYSTIMER);
 }

@@ -63,7 +63,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_FPU
-static inline void stm32_fpuconfig(void);
+static inline void kinetis_fpuconfig(void);
 #endif
 #ifdef CONFIG_STACK_COLORATION
 static void go_os_start(void *pv, unsigned int nbytes)
@@ -128,7 +128,7 @@ void __start(void) __attribute__ ((no_instrument_function));
 #endif
 
 /****************************************************************************
- * Name: stm32_fpuconfig
+ * Name: kinetis_fpuconfig
  *
  * Description:
  *   Configure the FPU.  Relative bit settings:
@@ -153,7 +153,7 @@ void __start(void) __attribute__ ((no_instrument_function));
 #ifdef CONFIG_ARCH_FPU
 #if defined(CONFIG_ARMV7M_CMNVECTOR) && !defined(CONFIG_ARMV7M_LAZYFPU)
 
-static inline void stm32_fpuconfig(void)
+static inline void kinetis_fpuconfig(void)
 {
   uint32_t regval;
 
@@ -183,7 +183,7 @@ static inline void stm32_fpuconfig(void)
 
 #else
 
-static inline void stm32_fpuconfig(void)
+static inline void kinetis_fpuconfig(void)
 {
   uint32_t regval;
 
@@ -214,7 +214,7 @@ static inline void stm32_fpuconfig(void)
 #endif
 
 #else
-#  define stm32_fpuconfig()
+#  define kinetis_fpuconfig()
 #endif
 
 /****************************************************************************
@@ -327,10 +327,10 @@ void __start(void)
    * can get debug output as soon as possible (This depends on clock
    * configuration).
    */
-  stm32_fpuconfig();
+  kinetis_fpuconfig();
   kinetis_lowsetup();
 #ifdef USE_EARLYSERIALINIT
-  up_earlyserialinit();
+  kinetis_earlyserialinit();
 #endif
 
   /* For the case of the separate user-/kernel-space build, perform whatever

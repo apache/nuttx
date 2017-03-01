@@ -338,7 +338,8 @@ static int lo_ifup(FAR struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  (void)wd_start(priv->lo_polldog, LO_WDDELAY, lo_poll_expiry, 1, (wdparm_t)priv);
+  (void)wd_start(priv->lo_polldog, LO_WDDELAY, lo_poll_expiry,
+                 1, (wdparm_t)priv);
 
   priv->lo_bifup = true;
   return OK;

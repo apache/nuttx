@@ -9,7 +9,7 @@ Make.dep
 .*.swp
 core
 .gdbinit
-cscope.out
+/cscope.*
 /.config
 /.config.old
 /.version

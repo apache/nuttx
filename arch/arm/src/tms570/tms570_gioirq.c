@@ -70,7 +70,7 @@
  *
  ****************************************************************************/
 
-static int tms3570_gio_interrupt(int irq, void *context)
+static int tms3570_gio_interrupt(int irq, void *context, FAR void *arg)
 {
   uint32_t off1;
   int irq2;
@@ -113,7 +113,7 @@ void tms570_gioirq_initialize(void)
 
   /* Attach and enable the GIO level 0 interrupt */
 
-  DEBUGVERIFY(irq_attach(TMS570_REQ_GIO_0, tms3570_gio_interrupt));
+  DEBUGVERIFY(irq_attach(TMS570_REQ_GIO_0, tms3570_gio_interrupt, NULL));
   up_enable_irq(TMS570_REQ_GIO_0);
 }
 

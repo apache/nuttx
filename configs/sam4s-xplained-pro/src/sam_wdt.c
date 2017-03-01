@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/sam4s-xplained-pro/src/up_watchdog.c
+ * configs/sam4s-xplained-pro/src/up_wdt.c
  *
  *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>

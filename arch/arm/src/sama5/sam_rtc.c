@@ -255,7 +255,7 @@ static void rtc_worker(FAR void *arg)
  ************************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-static int rtc_interrupt(int irq, void *context)
+static int rtc_interrupt(int irq, void *context, FAR void *arg)
 {
   int ret;
 
@@ -321,7 +321,7 @@ int up_rtc_initialize(void)
 #ifdef CONFIG_RTC_ALARM
   /* Then attach the ALARM interrupt handler */
 
-  irq_attach(SAM_PID_SYS, rtc_interrupt);
+  irq_attach(SAM_PID_SYS, rtc_interrupt, NULL);
 
   /* Should RTC alarm interrupt be enabled at the peripheral?  Let's assume so
    * for now.  Let's say yes if the time is valid and a valid alarm has been

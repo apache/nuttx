@@ -209,7 +209,7 @@ static int nsh_waiter(int argc, char *argv[])
  ****************************************************************************/
 
 #ifdef NSH_HAVE_MMCSD_CDINT
-static int nsh_cdinterrupt(int irq, FAR void *context)
+static int nsh_cdinterrupt(int irq, FAR void *context, FAR void *arg)
 {
   static bool inserted = 0xff; /* Impossible value */
   bool present;
@@ -249,7 +249,7 @@ static int nsh_sdinitialize(void)
 
 #ifdef NSH_HAVE_MMCSD_CDINT
 
-   (void)irq_attach(LPC17_IRQ_P0p13, nsh_cdinterrupt);
+   (void)irq_attach(LPC17_IRQ_P0p13, nsh_cdinterrupt, NULL);
    up_enable_irq(LPC17_IRQ_P0p13);
 
 #endif

@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/stm32/stm32_exti.h
  *
- *   Copyright (C) 2009, 2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2012, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -77,6 +77,7 @@ extern "C"
  *  - rising/falling edge: enables
  *  - event:  generate event when set
  *  - func:   when non-NULL, generate interrupt
+ *  - arg:    Argument passed to the interrupt callback
  *
  * Returns:
  *  The previous value of the interrupt handler function pointer.  This value may,
@@ -86,7 +87,7 @@ extern "C"
  ************************************************************************************/
 
 xcpt_t stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
-                          bool event, xcpt_t func);
+                          bool event, xcpt_t func, void *arg);
 
 /************************************************************************************
  * Name: stm32_exti_alarm
@@ -98,6 +99,7 @@ xcpt_t stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
  *  - rising/falling edge: enables interrupt on rising/falling edges
  *  - event:  generate event when set
  *  - func:   when non-NULL, generate interrupt
+ *  - arg:    Argument passed to the interrupt callback
  *
  * Returns:
  *   The previous value of the interrupt handler function pointer.  This value may,
@@ -107,7 +109,8 @@ xcpt_t stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
  ************************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-xcpt_t stm32_exti_alarm(bool risingedge, bool fallingedge, bool event, xcpt_t func);
+xcpt_t stm32_exti_alarm(bool risingedge, bool fallingedge, bool event, xcpt_t func,
+                        void *arg);
 #endif
 
 #undef EXTERN

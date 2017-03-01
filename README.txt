@@ -1671,6 +1671,8 @@ nuttx/
  |   |   `- README.txt
  |   |- twr-k60n512/
  |   |   `- README.txt
+ |   |- twr-k64f120m/
+ |   |   `- README.txt
  |   |- u-blox-co27/
  |   |   `- README.txt
  |   |- ubw32/

@@ -172,7 +172,8 @@ int stm32_dumpgpio(uint32_t pinset, const char *msg)
             g_portchar[port], getreg32(STM32_RCC_AHBENR));
     }
 
-#elif defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
+#elif defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX) || \
+      defined(CONFIG_STM32_STM32F33XX)
   DEBUGASSERT(port < STM32_NGPIO_PORTS);
 
   _info("GPIO%c pinset: %08x base: %08x -- %s\n",

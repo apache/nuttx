@@ -461,6 +461,8 @@ __vector_table:
 	DCD	stm32_hash        /* Vector 16+80: Hash and Rng global interrupt */
 #elif defined(CONFIG_STM32_STM32F30XX)
 #  include "chip/stm32f30xxx_vectors.h"
+#elif defined(CONFIG_STM32_STM32F33XX)
+#  include "chip/stm32f33xxx_vectors.h"
 #elif defined(CONFIG_STM32_STM32F37XX)
 #  include "chip/stm32f37xxx_vectors.h"
 #elif defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429)
@@ -778,6 +780,8 @@ handlers:
 
 #elif defined(CONFIG_STM32_STM32F30XX)
 #  include "chip/stm32f30xxx_vectors.h"
+#elif defined(CONFIG_STM32_STM32F33XX)
+#  include "chip/stm32f33xxx_vectors.h"
 #elif defined(CONFIG_STM32_STM32F37XX)
 #  include "chip/stm32f37xxx_vectors.h"
 #elif defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429)

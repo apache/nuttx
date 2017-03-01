@@ -150,7 +150,7 @@ int pthread_mutex_lock(FAR pthread_mutex_t *mutex)
 
           ret = pthread_takesemaphore((FAR sem_t *)&mutex->sem);
 
-          /* If we succussfully obtained the semaphore, then indicate
+          /* If we successfully obtained the semaphore, then indicate
            * that we own it.
            */
 

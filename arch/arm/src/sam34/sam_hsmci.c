@@ -463,7 +463,7 @@ static void sam_notransfer(struct sam_dev_s *priv);
 
 /* Interrupt Handling *******************************************************/
 
-static int  sam_interrupt(int irq, void *context);
+static int  sam_interrupt(int irq, void *context, FAR void *arg);
 
 /* SDIO interface methods ***************************************************/
 
@@ -1248,7 +1248,7 @@ static void sam_notransfer(struct sam_dev_s *priv)
  *
  ****************************************************************************/
 
-static int sam_interrupt(int irq, void *context)
+static int sam_interrupt(int irq, void *context, FAR void *arg)
 {
   struct sam_dev_s *priv = &g_sdiodev;
   uint32_t sr;
@@ -1638,7 +1638,7 @@ static int sam_attach(FAR struct sdio_dev_s *dev)
 
   /* Attach the HSMCI interrupt handler */
 
-  ret = irq_attach(SAM_IRQ_HSMCI, sam_interrupt);
+  ret = irq_attach(SAM_IRQ_HSMCI, sam_interrupt, NULL);
   if (ret == OK)
     {
 

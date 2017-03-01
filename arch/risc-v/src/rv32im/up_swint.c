@@ -128,7 +128,7 @@ static void dispatch_syscall(void)
  *
  ****************************************************************************/
 
-int up_swint(int irq, FAR void *context)
+int up_swint(int irq, FAR void *context, FAR void *arg)
 {
   uint32_t *regs = (uint32_t *)context;
 

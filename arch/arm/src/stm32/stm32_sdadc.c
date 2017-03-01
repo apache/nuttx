@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_sdadc.c
  *
- *   Copyright (C) 2011, 2013, 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013, 2015-2017 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2016 Studelec. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Marc Rechté <mrechte@studelec-sa.com>
@@ -59,6 +59,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/analog/adc.h>
+#include <nuttx/analog/ioctl.h>
 
 #include "up_internal.h"
 #include "up_arch.h"
@@ -92,6 +93,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* RCC reset ****************************************************************/
 
 #define STM32_RCC_RSTR   STM32_RCC_APB2RSTR
@@ -133,7 +135,6 @@ struct stm32_dev_s
 #ifdef SDADC_HAVE_TIMER
   uint8_t trigger;      /* Timer trigger selection: see SDADCx_JEXTSEL_TIMxx */
 #endif
-  xcpt_t   isr;         /* Interrupt handler for this SDADC block */
   uint32_t base;        /* Base address of registers unique to this SDADC
                          * block */
 #ifdef SDADC_HAVE_TIMER
@@ -180,16 +181,7 @@ static void sdadc_rccreset(FAR struct stm32_dev_s *priv, bool reset);
 
 /* ADC Interrupt Handler */
 
-static int sdadc_interrupt(FAR struct adc_dev_s *dev);
-#if defined(CONFIG_STM32_SDADC1)
-static int sdadc1_interrupt(int irq, FAR void *context);
-#endif
-#if defined(CONFIG_STM32_SDADC2)
-static int sdadc2_interrupt(int irq, FAR void *context);
-#endif
-#if defined(CONFIG_STM32_SDADC3)
-static int sdadc3_interrupt(int irq, FAR void *context);
-#endif
+static int  sdadc_interrupt(int irq, FAR void *context, FAR void *arg);
 
 /* ADC Driver Methods */
 
@@ -239,7 +231,6 @@ static const struct adc_ops_s g_sdadcops =
 static struct stm32_dev_s g_sdadcpriv1 =
 {
   .irq         = STM32_IRQ_SDADC1,
-  .isr         = sdadc1_interrupt,
   .intf        = 1,
   .base        = STM32_SDADC1_BASE,
   .refv        = SDADC1_REFV,
@@ -269,8 +260,6 @@ static struct adc_dev_s g_sdadcdev1 =
 static struct stm32_dev_s g_sdadcpriv2 =
 {
   .irq         = STM32_IRQ_SDADC2,
-  .isr         = sdadc2_interrupt,
-  .intf        = 2,
   .base        = STM32_SDADC2_BASE,
   .refv        = SDADC2_REFV,
 #ifdef SDADC2_HAVE_TIMER
@@ -299,8 +288,6 @@ static struct adc_dev_s g_sdadcdev2 =
 static struct stm32_dev_s g_sdadcpriv3 =
 {
   .irq         = STM32_IRQ_SDADC3,
-  .isr         = sdadc3_interrupt,
-  .intf        = 3,
   .base        = STM32_SDADC3_BASE,
   .refv        = SDADC3_REFV,
 #ifdef SDADC3_HAVE_TIMER
@@ -996,7 +983,7 @@ static int sdadc_setup(FAR struct adc_dev_s *dev)
     {
       /* Attach the SDADC interrupt */
 
-      ret = irq_attach(priv->irq, priv->isr);
+      ret = irq_attach(priv->irq, sdadc_interrupt, dev);
       if (ret < 0)
         {
           ainfo("irq_attach failed: %d\n", ret);
@@ -1006,7 +993,7 @@ static int sdadc_setup(FAR struct adc_dev_s *dev)
 #else
   /* Attach the SDADC interrupt */
 
-  ret = irq_attach(priv->irq, priv->isr);
+  ret = irq_attach(priv->irq, sdadc_interrupt, dev);
   if (ret < 0)
     {
       ainfo("irq_attach failed: %d\n", ret);
@@ -1218,13 +1205,17 @@ static int sdadc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int sdadc_interrupt(FAR struct adc_dev_s *dev)
+static int sdadc_interrupt(int irq, FAR void *context, FAR void *arg)
 {
-  FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
+  FAR struct adc_dev_s *dev = (FAR struct adc_dev_s *)arg;
+  FAR struct stm32_dev_s *priv;
   uint32_t regval;
   uint32_t pending;
   int32_t  data;
   uint8_t  chan;
+
+  DEBUGASSERT(dev != NULL && dev->ad_priv != NULL);
+  priv = (FAR struct stm32_dev_s *)dev->ad_priv;
 
   regval  = sdadc_getreg(priv, STM32_SDADC_ISR_OFFSET);
   pending = regval & SDADC_ISR_ALLINTS;
@@ -1295,75 +1286,6 @@ static int sdadc_interrupt(FAR struct adc_dev_s *dev)
 
   return OK;
 }
-
-/****************************************************************************
- * Name: adc1_interrupt
- *
- * Description:
- *   ADC interrupt handler SDADC1
- *
- * Input Parameters:
- *   irq     - The IRQ number that generated the interrupt.
- *   context - Architecture specific register save information.
- *
- * Returned Value:
- *
- ****************************************************************************/
-
-#if defined(CONFIG_STM32_SDADC1)
-static int sdadc1_interrupt(int irq, FAR void *context)
-{
-  sdadc_interrupt(&g_sdadcdev1);
-
-  return OK;
-}
-#endif
-
-/****************************************************************************
- * Name: adc2_interrupt
- *
- * Description:
- *   ADC interrupt handler SDADC2
- *
- * Input Parameters:
- *   irq     - The IRQ number that generated the interrupt.
- *   context - Architecture specific register save information.
- *
- * Returned Value:
- *
- ****************************************************************************/
-
-#if defined(CONFIG_STM32_SDADC2)
-static int sdadc2_interrupt(int irq, FAR void *context)
-{
-  sdadc_interrupt(&g_sdadcdev2);
-
-  return OK;
-}
-#endif
-
-/****************************************************************************
- * Name: adc3_interrupt
- *
- * Description:
- *   ADC interrupt handler SDADC3
- *
- * Input Parameters:
- *   irq     - The IRQ number that generated the interrupt.
- *   context - Architecture specific register save information.
- *
- * Returned Value:
- *
- ****************************************************************************/
-
-#if defined(CONFIG_STM32_SDADC3)
-static int sdadc3_interrupt(int irq, FAR void *context)
-{
-  sdadc_interrupt(&g_sdadcdev3);
-
-  return OK;
-}
-#endif
 
 /****************************************************************************
  * Public Functions
