@@ -159,7 +159,7 @@ static void stm32_alarmcb(void)
  ****************************************************************************/
 
 #if defined(CONFIG_PM) && defined(CONFIG_RTC_ALARM)
-static int stm32_alarm_exti(int irq, FAR void *context)
+static int stm32_alarm_exti(int irq, FAR void *context, FAR void *arg)
 {
   stm32_alarmcb();
   return OK;
