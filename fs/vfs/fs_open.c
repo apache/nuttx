@@ -140,8 +140,7 @@ int open(const char *path, int oflags, ...)
   inode = desc.node;
   DEBUGASSERT(inode != NULL);
 
-#if !defined(CONFIG_DISABLE_PSEUDOFS_OPERATIONS) && \
-    !defined(CONFIG_DISABLE_MOUNTPOINT)
+#if !defined(CONFIG_DISABLE_MOUNTPOINT)
    /* If the inode is block driver, then we may return a character driver
     * proxy for the block driver.  block_proxy() will instantiate a BCH
     * character driver wrapper around the block driver, open(), then
