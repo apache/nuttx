@@ -160,7 +160,7 @@ FAR struct stm32l4_lptim_dev_s *stm32l4_lptim_init(int timer);
 
 /* Power-down timer, mark it as unused */
 
-int stm32l4_lptim_deinit(FAR struct stm32l4_lptim_dev_s * dev);
+int stm32l4_lptim_deinit(FAR struct stm32l4_lptim_dev_s *dev);
 
 #undef EXTERN
 #if defined(__cplusplus)

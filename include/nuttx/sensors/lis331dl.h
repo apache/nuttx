@@ -100,7 +100,7 @@ struct i2c_master_s;
  *
  ************************************************************************************/
 
-FAR struct lis331dl_dev_s *lis331dl_init(FAR struct i2c_master_s * i2c,
+FAR struct lis331dl_dev_s *lis331dl_init(FAR struct i2c_master_s *i2c,
                                          uint16_t address);
 
 /************************************************************************************
@@ -117,7 +117,7 @@ FAR struct lis331dl_dev_s *lis331dl_init(FAR struct i2c_master_s * i2c,
  *
  ************************************************************************************/
 
-int lis331dl_deinit(FAR struct lis331dl_dev_s * dev);
+int lis331dl_deinit(FAR struct lis331dl_dev_s *dev);
 
 /************************************************************************************
  * Name: lis331dl_powerup
@@ -127,7 +127,7 @@ int lis331dl_deinit(FAR struct lis331dl_dev_s * dev);
  *
  ************************************************************************************/
 
-int lis331dl_powerup(FAR struct lis331dl_dev_s * dev);
+int lis331dl_powerup(FAR struct lis331dl_dev_s *dev);
 
 /************************************************************************************
  * Name: lis331dl_powerdown
@@ -137,7 +137,7 @@ int lis331dl_powerup(FAR struct lis331dl_dev_s * dev);
  *
  ************************************************************************************/
 
-int lis331dl_powerdown(FAR struct lis331dl_dev_s * dev);
+int lis331dl_powerdown(FAR struct lis331dl_dev_s *dev);
 
 /************************************************************************************
  * Name: lis331dl_setconversion
@@ -155,7 +155,7 @@ int lis331dl_powerdown(FAR struct lis331dl_dev_s * dev);
  *
  ************************************************************************************/
 
-int lis331dl_setconversion(FAR struct lis331dl_dev_s * dev, bool full, bool fast);
+int lis331dl_setconversion(FAR struct lis331dl_dev_s *dev, bool full, bool fast);
 
 /************************************************************************************
  * Name: lis331dl_getprecision
@@ -168,7 +168,7 @@ int lis331dl_setconversion(FAR struct lis331dl_dev_s * dev, bool full, bool fast
  *
  ************************************************************************************/
 
-int lis331dl_getprecision(FAR struct lis331dl_dev_s * dev);
+int lis331dl_getprecision(FAR struct lis331dl_dev_s *dev);
 
 /************************************************************************************
  * Name: lis331dl_getsamplerate
@@ -181,7 +181,7 @@ int lis331dl_getprecision(FAR struct lis331dl_dev_s * dev);
  *
  ************************************************************************************/
 
-int lis331dl_getsamplerate(FAR struct lis331dl_dev_s * dev);
+int lis331dl_getsamplerate(FAR struct lis331dl_dev_s *dev);
 
 /************************************************************************************
  * Name: lis331dl_getreadings
@@ -200,7 +200,7 @@ int lis331dl_getsamplerate(FAR struct lis331dl_dev_s * dev);
  ************************************************************************************/
 
 FAR const struct lis331dl_vector_s *
-  lis331dl_getreadings(FAR struct lis331dl_dev_s * dev);
+  lis331dl_getreadings(FAR struct lis331dl_dev_s *dev);
 
 #undef EXTERN
 #if defined(__cplusplus)

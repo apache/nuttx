@@ -183,7 +183,7 @@ FAR struct stm32_tim_dev_s *stm32_tim_init(int timer);
 
 /* Power-down timer, mark it as unused */
 
-int stm32_tim_deinit(FAR struct stm32_tim_dev_s * dev);
+int stm32_tim_deinit(FAR struct stm32_tim_dev_s *dev);
 
 /****************************************************************************
  * Name: stm32_timer_initialize

@@ -345,7 +345,7 @@ struct dma2d_layer_s
  *
  ****************************************************************************/
 
-FAR struct dma2d_layer_s * up_dma2dgetlayer(int lid);
+FAR struct dma2d_layer_s *up_dma2dgetlayer(int lid);
 
 /****************************************************************************
  * Name: up_dma2dcreatelayer

@@ -83,7 +83,7 @@
  *
  ****************************************************************************/
 
-FAR struct dma2d_layer_s * stm32_dma2dinitltdc(FAR struct stm32_ltdc_s *layer);
+FAR struct dma2d_layer_s *stm32_dma2dinitltdc(FAR struct stm32_ltdc_s *layer);
 # endif /* CONFIG_STM32_LTDC_INTERFACE */
 
 #endif /* CONFIG_STM32_DMA2D */

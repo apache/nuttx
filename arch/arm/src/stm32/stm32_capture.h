@@ -194,7 +194,7 @@ FAR struct stm32_cap_dev_s *stm32_cap_init(int timer);
 
 /* Power-down timer, mark it as unused */
 
-int stm32_cap_deinit(FAR struct stm32_cap_dev_s * dev);
+int stm32_cap_deinit(FAR struct stm32_cap_dev_s *dev);
 
 #undef EXTERN
 #if defined(__cplusplus)

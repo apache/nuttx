@@ -672,7 +672,7 @@ void lpc31_setfdiv(enum lpc31_domainid_e dmnid, enum lpc31_clockid_e clkid,
  *
  **************************************************************************************************/
 
-void lpc31_pllconfig(const struct lpc31_pllconfig_s * const cfg);
+void lpc31_pllconfig(const struct lpc31_pllconfig_s *const cfg);
 
 /**********************************************************************************************
  * Name: lpc31_hp0pllconfig
