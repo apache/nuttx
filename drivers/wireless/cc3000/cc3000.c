@@ -462,7 +462,7 @@ static void cc3000_notify(FAR struct cc3000_dev_s *priv)
  * Name: cc3000_worker
  ****************************************************************************/
 
-static void * select_thread_func(FAR void *arg)
+static void *select_thread_func(FAR void *arg)
 {
   FAR struct cc3000_dev_s *priv = (FAR struct cc3000_dev_s *)arg;
   struct timeval timeout;
@@ -601,7 +601,7 @@ static void * select_thread_func(FAR void *arg)
  * Name: cc3000_worker
  ****************************************************************************/
 
-static void * cc3000_worker(FAR void *arg)
+static void *cc3000_worker(FAR void *arg)
 {
   FAR struct cc3000_dev_s *priv = (FAR struct cc3000_dev_s *)arg;
   int ret;

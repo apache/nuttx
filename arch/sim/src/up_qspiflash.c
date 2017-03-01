@@ -201,7 +201,7 @@ static int         qspiflash_command(FAR struct qspi_dev_s *dev,
                      FAR struct qspi_cmdinfo_s *cmd);
 static int         qspiflash_memory(FAR struct qspi_dev_s *dev,
                      FAR struct qspi_meminfo_s *mem);
-static FAR void *  qspiflash_alloc(FAR struct qspi_dev_s *dev, size_t buflen);
+static FAR void   *qspiflash_alloc(FAR struct qspi_dev_s *dev, size_t buflen);
 static void        qspiflash_free(FAR struct qspi_dev_s *dev, FAR void *buffer);
 
 static void qspiflash_writeword(FAR struct sim_qspiflashdev_s *priv,
