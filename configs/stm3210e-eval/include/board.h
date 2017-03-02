@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/stm3210e-eval/include/board.h
  *
- *   Copyright (C) 2009, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -289,14 +289,15 @@ int stm32_lm75initialize(FAR const char *devpath);
  *
  * Input parameters:
  *   irqhandler - the LM-75 interrupt handler
+ *   arg        - The argument that will accompany the interrupt
  *
  * Returned Value:
- *   The previous LM-75 interrupt handler
+ *   Zero (OK) returned on success; a negated errno value is returned on failure.
  *
  ************************************************************************************/
 
 #if defined(CONFIG_I2C) && defined(CONFIG_I2C_LM75) && defined(CONFIG_STM32_I2C1)
-xcpt_t stm32_lm75attach(xcpt_t irqhandler);
+int stm32_lm75attach(xcpt_t irqhandler, void *arg);
 #endif
 
 #undef EXTERN
