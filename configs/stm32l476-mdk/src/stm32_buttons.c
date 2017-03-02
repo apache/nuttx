@@ -152,15 +152,16 @@ uint8_t board_buttons(void)
 #ifdef CONFIG_ARCH_IRQBUTTONS
 xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
-  xcpt_t oldhandler = NULL;
+  int ret = OK;
 
   if (id >= MIN_IRQBUTTON && id <= MAX_IRQBUTTON)
     {
-      oldhandler = stm32l4_gpiosetevent(g_buttons[id], true, true, true,
-                                        irqhandler, arg);
+      ret = stm32l4_gpiosetevent(g_buttons[id], true, true, true,
+                                 irqhandler, arg);
     }
 
-  return oldhandler;
+  UNUSED(ret);
+  return NULL;
 }
 #endif
 #endif /* CONFIG_ARCH_BUTTONS */
