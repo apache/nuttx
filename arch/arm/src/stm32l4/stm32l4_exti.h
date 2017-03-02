@@ -102,15 +102,14 @@ xcpt_t stm32l4_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
  *  - arg:    Argument passed to the interrupt callback
  *
  * Returns:
- *   The previous value of the interrupt handler function pointer.  This
- *   value may, for example, be used to restore the previous handler when
- *   multiple handlers are used.
+ *   Zero (OK) on success; a negated errno value on failure indicating the
+ *   nature of the failure.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-xcpt_t stm32l4_exti_alarm(bool risingedge, bool fallingedge, bool event,
-                          xcpt_t func, void *arg);
+int stm32l4_exti_alarm(bool risingedge, bool fallingedge, bool event,
+                       xcpt_t func, void *arg);
 #endif
 
 /****************************************************************************
