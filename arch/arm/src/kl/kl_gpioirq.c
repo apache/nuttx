@@ -68,7 +68,7 @@
 #endif
 
 #if defined(CONFIG_KL_PORTBINTS) || defined(CONFIG_KL_PORTCINTS) || \
-    defined(CONFIG_KL_PORTEINTS) 
+    defined(CONFIG_KL_PORTEINTS)
 #  error Kinetis KL25 only supports interrupt on PORTA or PORTD
 #endif
 
@@ -78,7 +78,7 @@
 
 struct g_portisrs_s
 {
-  xcpt_t handler;   /* Entery hander entry point */
+  xcpt_t handler;   /* Interrupt handler entry point */
   void  *arg;       /* The argument that accompanies the interrupt handler */
 };
 

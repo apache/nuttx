@@ -340,7 +340,7 @@ void pic32mx_gpioirqinitialize(void);
 int pic32mx_gpioattach(uint32_t pinset, unsigned int cn, xcpt_t handler,
                        void *arg);
 #else
-#  define pic32mx_gpioattach(p,c,h,a) (NULL)
+#  define pic32mx_gpioattach(p,c,h,a) (0)
 #endif
 
 /************************************************************************************

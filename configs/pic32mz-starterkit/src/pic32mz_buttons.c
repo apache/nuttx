@@ -155,19 +155,19 @@ uint8_t board_buttons(void)
 xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
 #ifdef CONFIG_PIC32MZ_GPIOIRQ_PORTB
-  xcpt_t oldhandler = NULL;
+  int ret = OK;
 
   if ((unsigned)id < NUM_BUTTONS)
     {
       /* Perform the attach/detach operation */
 
-      oldhandler = pic32mz_gpioattach(g_buttons[id], irqhandler);
+      ret = pic32mz_gpioattach(g_buttons[id], irqhandler, arg);
 
       /* The interrupt is now disabled.  Are we attaching or detaching from
        * button interrupt?
        */
 
-      if (irqhandler)
+      if (ret >= 0)
         {
           /* Attaching... enable button interrupts now */
 
@@ -175,9 +175,9 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
         }
     }
 
-  return oldhandler;
+  return ret;
 #else
-  return NULL;
+  return -ENOSYS;
 #endif
 }
 #endif

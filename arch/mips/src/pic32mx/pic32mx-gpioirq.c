@@ -58,7 +58,7 @@
 
 struct g_cnisrs_s
 {
-  xcpt_t handler;   /* Entery hander entry point */
+  xcpt_t handler;   /* Interrupt handler entry point */
   void  *arg;       /* The argument that accompanies the interrupt handler */
 };
 
