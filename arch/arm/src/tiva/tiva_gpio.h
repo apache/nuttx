@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/tiva/tiva_gpio.h
  *
- *   Copyright (C) 2009-2010, 2013-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2013-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * With modifications from Calvin Maguranis <calvin.maguranis@trd2inc.com>
@@ -412,15 +412,19 @@ int weak_function tiva_gpioirqinitialize(void);
  * Name: tiva_gpioirqattach
  *
  * Description:
- *   Attach a GPIO interrupt to the provided 'isr'
+ *   Attach in GPIO interrupt to the provided 'isr'. If isr==NULL, then the
+ *   irq_unexpected_isr handler is assigned and the pin's interrupt mask is
+ *   disabled to stop further interrupts. Otherwise, the new isr is linked
+ *   and the pin's interrupt mask is set.
  *
- * Returns:
- *   oldhandler - the old interrupt handler assigned to this pin.
+ * Returned Value:
+ *   Zero (OK) is returned on success.  Otherwise a negated errno value is
+ *   return to indicate the nature of the failure.
  *
  ****************************************************************************/
 
-xcpt_t tiva_gpioirqattach(uint32_t pinset, xcpt_t isr);
-#  define tiva_gpioirqdetach(pinset) tiva_gpioirqattach(pinset, NULL)
+int tiva_gpioirqattach(uint32_t pinset, xcpt_t isr, void *arg);
+#  define tiva_gpioirqdetach(p) tiva_gpioirqattach((p),NULL,NULL)
 
 /****************************************************************************
  * Name: tiva_gpioportirqattach

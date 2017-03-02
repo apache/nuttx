@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/tm4c123g-launchpad/src/tm4c_buttons.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Bradley Noyes <bradley.noyes@trd2inc.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -151,8 +151,8 @@ uint8_t board_buttons(void)
 #ifdef CONFIG_ARCH_IRQBUTTONS
 xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
-  xcpt_t oldhandler = NULL;
-  uint32_t pinset= 0;
+  uint32_t pinset = 0;
+  int ret;
 
   /* Determine which switch to set the irq handler for */
 
@@ -174,16 +174,15 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 
     if (irqhandler != NULL)
       {
-        oldhandler = tiva_gpioirqattach(pinset, irqhandler);
+        ret = tiva_gpioirqattach(pinset, irqhandler, arg);
       }
     else
       {
-        oldhandler = tiva_gpioirqdetach(pinset);
+        ret = tiva_gpioirqdetach(pinset);
       }
 
-  /* Return the old button handler (so that it can be restored) */
-
-  return oldhandler;
+  UNUSED(ret);
+  return OK;
 }
 #endif
 
