@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/nucleo-f303re/src/stm32_buttons.c
  *
- *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015, 2017 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2015 Omni Hoverboards Inc. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Paul Alexander Patience <paul-a.patience@polymtl.ca>
@@ -120,13 +120,12 @@ uint8_t board_buttons(void)
  *   will be called when a button is depressed or released.  The ID value is
  *   a button enumeration value that uniquely identifies a button resource.
  *   See the BUTTON_* definitions in board.h for the meaning of the
- *   enumeration value.  The previous interrupt handler address is returned
- *   (so that it may be restored, if so desired).
+ *   enumeration value.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_IRQBUTTONS
-xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
+int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
   xcpt_t oldhandler = NULL;
 
@@ -136,7 +135,8 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
                                       irqhandler, arg);
     }
 
-  return oldhandler;
+  UNUSED(oldhandler);
+  return OK;
 }
 #endif
 

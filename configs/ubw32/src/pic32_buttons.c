@@ -41,6 +41,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <errno.h>
 #include <debug.h>
 
 #include <nuttx/board.h>
@@ -166,9 +167,7 @@ uint8_t board_buttons(void)
  *   board_button_irq() may be called to register an interrupt handler that will
  *   be called when a button is depressed or released.  The ID value is a
  *   button enumeration value that uniquely identifies a button resource. See the
- *   BUTTON_* definitions in board.h for the meaning of enumeration value.  The
- *   previous interrupt handler address is returned (so that it may restored, if
- *   so desired).
+ *   BUTTON_* definitions in board.h for the meaning of enumeration value.
  *
  *   Interrupts are automatically enabled when the button handler is attached and
  *   automatically disabled when the button handler is detached.
@@ -181,9 +180,9 @@ uint8_t board_buttons(void)
  ************************************************************************************/
 
 #ifdef CONFIG_ARCH_IRQBUTTONS
-xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
+int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
-  int ret = OK;
+  int ret = -EINVAL;
 
   if (id < NUM_BUTTONS)
     {

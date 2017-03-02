@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/olimex-efm32g880f128-stk/src/efm32_buttons.c
  *
- *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -75,9 +75,6 @@
  ****************************************************************************/
 
 #if defined(CONFIG_EFM32_GPIO_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
-#if 0 /* REVISIT -- See comments in board_button_irq() */
-static xcpt_t g_button_handlers[NUM_BUTTONS];
-#endif
 static const uint8_t g_button_irqs[NUM_BUTTONS];
 #endif
 
@@ -154,8 +151,7 @@ uint8_t board_buttons(void)
  * Description:
  *   This function may be called to register an interrupt handler that will
  *   be called when a button is depressed or released.  The ID value is one
- *   of the BUTTON* definitions provided above. The previous interrupt
- *   handler address is returned (so that it may restored, if so desired).
+ *   of the BUTTON* definitions provided above.
  *
  * Configuration Notes:
  *   Configuration CONFIG_EFM32_GPIO_IRQ must be selected to enable the
@@ -168,10 +164,8 @@ uint8_t board_buttons(void)
  ****************************************************************************/
 
 #if defined(CONFIG_EFM32_GPIO_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
-xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
+int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
-  xcpt_t oldhandler = NULL;
-
   if (id >=0 && id < NUM_BUTTONS)
     {
       irqstate_t flags;
@@ -181,19 +175,6 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
        */
 
       flags = enter_critical_section();
-
-      /* Get/set the old button handler
-       *
-       * REVISIT:  Keeping copies of the hander in RAM seems wasteful
-       * since the OS already has this information internally.
-       */
-
-#if 0 /* REVISIT */
-      oldhandler = g_button_handlers[id];
-      g_button_handlers[id] = irqhandler;
-#else
-      oldhandler = NULL;
-#endif
 
       /* Are we attaching or detaching? */
 
@@ -205,7 +186,7 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 
           /* Attach and enable the interrupt */
 
-          (void)irq_attach(g_button_irqs[id], irqhandler, NULL);
+          (void)irq_attach(g_button_irqs[id], irqhandler, arg);
           efm32_gpioirqenable(g_button_irqs[id]);
         }
       else
@@ -221,7 +202,7 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 
   /* Return the old button handler (so that it can be restored) */
 
-  return oldhandler;
+  return OK;
 }
 #endif
 

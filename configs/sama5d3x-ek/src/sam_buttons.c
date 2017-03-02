@@ -126,8 +126,7 @@ uint8_t board_buttons(void)
  * Description:
  *   This function may be called to register an interrupt handler that will
  *   be called when a button is depressed or released.  The ID value is one
- *   of the BUTTON* definitions provided above. The previous interrupt
- *   handler address isreturned (so that it may restored, if so desired).
+ *   of the BUTTON* definitions provided above.
  *
  * Configuration Notes:
  *   Configuration CONFIG_SAMA5_PIO_IRQ must be selected to enable the
