@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/stm32f3discovery/src/stm32_buttons.c
  *
- *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -151,7 +151,7 @@ uint8_t board_buttons(void)
  ************************************************************************************/
 
 #ifdef CONFIG_ARCH_IRQBUTTONS
-xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
+int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
   xcpt_t oldhandler = NULL;
 
@@ -163,7 +163,8 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
                                       irqhandler, arg);
     }
 
-  return oldhandler;
+  UNUSED(oldhandler);
+  return OK;
 }
 #endif
 #endif /* CONFIG_ARCH_BUTTONS */

@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <errno.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
@@ -149,9 +150,9 @@ uint8_t board_buttons(void)
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_IRQBUTTONS
-xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
+int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
-  int ret = OK;
+  int ret = -EINVAL;
 
   if (id >= MIN_IRQBUTTON && id <= MAX_IRQBUTTON)
     {
@@ -159,8 +160,7 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
                                  irqhandler, arg);
     }
 
-  UNUSED(ret);
-  return NULL;
+  return ret;
 }
 #endif
 #endif /* CONFIG_ARCH_BUTTONS */

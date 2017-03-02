@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/stm32f746g-disco/src/stm32_buttons.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,6 +38,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <errno.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/board.h>
@@ -103,9 +105,10 @@ uint8_t board_buttons(void)
  ************************************************************************************/
 
 #ifdef CONFIG_ARCH_IRQBUTTONS
-xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
+int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
 #warning Missing logic
+  return -ENOSYS;
 }
 #endif
 #endif /* CONFIG_ARCH_BUTTONS */

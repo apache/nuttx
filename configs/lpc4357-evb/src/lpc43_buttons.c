@@ -178,10 +178,11 @@ uint8_t board_buttons(void)
  ****************************************************************************/
 
 #if defined(CONFIG_ARCH_IRQBUTTONS) && defined(CONFIG_LPC43_GPIO_IRQ)
-xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
+int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
 #if 0 /* Not yet implemented */
   irqstate_t flags;
+  int ret = -EINVAL;
   int irq;
 
   /* Verify that the button ID is within range */
@@ -213,9 +214,10 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
         }
 
       leave_critical_section(flags);
+      ret = OK;
     }
 
-  return OK;
+  return ret;
 #else
   return -ENOSYS;
 #endif /* Not yet implemented */

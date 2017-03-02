@@ -244,19 +244,13 @@ void board_button_initialize(void)
     {
       stm32l4_configgpio(g_buttons[i]);
 
-  /* It's not clear if this is correct; I think so, but then there are
-   * conflicts with the 'buttons' sample app.
-   */
+      /* It's not clear if this is correct; I think so, but then there are
+       * conflicts with the 'buttons' sample app.
+       */
 
 #if 0
 #ifdef CONFIG_ARCH_IRQBUTTONS
-      xcpt_t oldhandler = board_button_irq(i, button_handler);
-      if (oldhandler != NULL)
-        {
-          warn("WARNING: oldhandler:%p is not NULL!  "
-               "Button events may be lost or aliased!\n",
-               oldhandler);
-        }
+      (void)board_button_irq(i, button_handler);
 #endif
 #endif
     }
@@ -324,9 +318,9 @@ uint8_t board_buttons(void)
  ************************************************************************************/
 
 #ifdef CONFIG_ARCH_IRQBUTTONS
-xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
+int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
-  int ret = OK;
+  int ret = -EINVAL;
 
   /* The following should be atomic */
 
@@ -335,8 +329,7 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
       ret = stm32l4_gpiosetevent(g_buttons[id], true, true, true, irqhandler, arg);
     }
 
-  UNUSED(ret);
-  return NULL;
+  return ret;
 }
 #endif
 #endif /* CONFIG_ARCH_BUTTONS */

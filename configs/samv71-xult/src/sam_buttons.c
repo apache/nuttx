@@ -84,8 +84,8 @@
  ****************************************************************************/
 
 #ifdef HAVE_IRQBUTTONS
-static xcpt_t board_button_irqx(gpio_pinset_t pinset, int irq,
-                                xcpt_t irqhandler, void *arg)
+static int board_button_irqx(gpio_pinset_t pinset, int irq, xcpt_t irqhandler,
+                             void *arg)
 {
   irqstate_t flags;
 
