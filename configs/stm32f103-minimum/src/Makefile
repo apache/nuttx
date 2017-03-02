@@ -89,4 +89,8 @@ ifeq ($(CONFIG_WL_NRF24L01),y)
 CSRCS += stm32_wireless.c
 endif
 
+ifeq ($(CONFIG_USBDEV),y)
+CSRCS += stm32_usbdev.c
+endif
+
 include $(TOPDIR)/configs/Board.mk
