@@ -211,12 +211,12 @@ static void wl_enable_irq(FAR struct cc3000_config_s *state, bool enable)
   iinfo("enable:%d\n", enable);
   if (enable)
     {
-      (void)kl_gpioirqattach(GPIO_WIFI_INT, priv->handler);
+      (void)kl_gpioirqattach(GPIO_WIFI_INT, priv->handler, priv->arg);
       kl_gpioirqenable(GPIO_WIFI_INT); 
     }
   else
     {
-      (void)kl_gpioirqattach(GPIO_WIFI_INT, NULL);
+      (void)kl_gpioirqattach(GPIO_WIFI_INT, NULL, NULL);
       kl_gpioirqdisable(GPIO_WIFI_INT); 
     }
 }

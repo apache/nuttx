@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/mips/src/pic32mx/pic32mx-gpio.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,22 +53,20 @@
 #ifdef CONFIG_PIC32MX_GPIOIRQ
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
  * Private Types
  ****************************************************************************/
 
-/****************************************************************************
- * Public Data
- ****************************************************************************/
+struct g_cnisrs_s
+{
+  xcpt_t handler;   /* Entery hander entry point */
+  void  *arg;       /* The argument that accompanies the interrupt handler */
+};
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static xcpt_t g_cnisrs[IOPORT_NUMCN];
+static struct g_cnisrs_s g_cnisrs[IOPORT_NUMCN];
 
 /****************************************************************************
  * Private Functions
@@ -113,11 +111,14 @@ static int pic32mx_cninterrupt(int irq, FAR void *context)
     {
       /* Is this one attached */
 
-      if (g_cnisrs[i])
+      if (g_cnisrs[i].handler != NULL)
         {
+          xcpt_t handler = irstab[i].handler;
+          void  *arg     = irstab[i].arg;
+
           /* Call the attached handler */
 
-          status = g_cnisrs[i](irq, context);
+          status = handler(irq, context, arg);
 
           /* Keep track of the status of the last handler that failed */
 
@@ -125,6 +126,7 @@ static int pic32mx_cninterrupt(int irq, FAR void *context)
             {
               ret = status;
             }
+        }
     }
 
   /* Clear the pending interrupt */
@@ -189,21 +191,21 @@ void pic32mx_gpioirqinitialize(void)
  *   In that case, all attached handlers will be called.  Each handler must
  *   maintain state and determine if the unlying GPIO input value changed.
  *
- * Parameters:
- *  - pinset:  GPIO pin configuration
- *  - cn:      The change notification number associated with the pin.
- *  - handler: Interrupt handler (may be NULL to detach)
+ * Input Parameters:
+ *   pinset  - GPIO pin configuration
+ *   cn      - The change notification number associated with the pin.
+ *   handler - Interrupt handler (may be NULL to detach)
+ *   arg     - The argument that accompanies the interrupt
  *
- * Returns:
- *  The previous value of the interrupt handler function pointer.  This
- *  value may, for example, be used to restore the previous handler when
- *  multiple handlers are used.
+ * Returned Value:
+ *   Zero (OK) is returned on success.  A negated error value is returned on
+ *   any failure to indicate the nature of the failure.
  *
  ****************************************************************************/
 
-xcpt_t pic32mx_gpioattach(uint32_t pinset, unsigned int cn, xcpt_t handler)
+int pic32mx_gpioattach(uint32_t pinset, unsigned int cn, xcpt_t handler,
+                       void *arg)
 {
-  xcpt_t oldhandler = NULL;
   irqstate_t flags;
 
   DEBUGASSERT(cn < IOPORT_NUMCN);
@@ -215,7 +217,6 @@ xcpt_t pic32mx_gpioattach(uint32_t pinset, unsigned int cn, xcpt_t handler)
       /* Get the previously attached handler as the return value */
 
       flags = enter_critical_section();
-      oldhandler = g_cnisrs[cn];
 
       /* Are we attaching or detaching? */
 
@@ -250,11 +251,12 @@ xcpt_t pic32mx_gpioattach(uint32_t pinset, unsigned int cn, xcpt_t handler)
 
       /* Set the new handler (perhaps NULLifying the current handler) */
 
-      g_cnisrs[cn] = handler;
+      g_cnisrs[cn].handler = handler;
+      g_cnisrs[cn].arg     = arg;
       leave_critical_section(flags);
     }
 
-  return oldhandler;
+  return OK;
 }
 
 /****************************************************************************
