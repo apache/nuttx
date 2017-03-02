@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <errno.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
@@ -50,12 +51,9 @@
 #ifdef CONFIG_ARCH_BUTTONS
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* Pin configuration for each STM3210E-EVAL button.  This array is indexed by
  * the BUTTON_* and JOYSTICK_* definitions in board.h
  */
@@ -64,10 +62,6 @@ static const uint32_t g_buttons[NUM_BUTTONS] =
 {
   GPIO_SW2, GPIO_SW3, GPIO_SW4
 };
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -153,18 +147,16 @@ uint8_t board_buttons(void)
 #ifdef CONFIG_ARCH_IRQBUTTONS
 int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
-  xcpt_t oldhandler = NULL;
+  int ret = -EINVAL;
 
   /* The following should be atomic */
 
   if (id >= MIN_IRQBUTTON && id <= MAX_IRQBUTTON)
     {
-      oldhandler = stm32_gpiosetevent(g_buttons[id], true, true, true,
-                                      irqhandler, arg);
+      ret = stm32_gpiosetevent(g_buttons[id], true, true, true, irqhandler, arg);
     }
 
-  UNUSED(oldhandler);
-  return OK;
+  return ret;
 }
 #endif
 #endif /* CONFIG_ARCH_BUTTONS */

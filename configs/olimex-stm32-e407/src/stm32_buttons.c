@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <errno.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
@@ -50,7 +51,7 @@
 #ifdef CONFIG_ARCH_BUTTONS
 
 /****************************************************************************
- * Private Functions
+ * Private Data
  ****************************************************************************/
 
 /* Pin configuration for each Olimex-STM32-H405 button.  This array is
@@ -134,18 +135,17 @@ uint8_t board_buttons(void)
 #ifdef CONFIG_ARCH_IRQBUTTONS
 int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
-  xcpt_t oldhandler = NULL;
+  int ret = -EINVAL;
 
   /* The following should be atomic */
 
   if (id >= MIN_IRQBUTTON && id <= MAX_IRQBUTTON)
     {
-      oldhandler =
-        stm32_gpiosetevent(g_buttons[id], true, true, true, irqhandler, arg);
+      ret = stm32_gpiosetevent(g_buttons[id], true, true, true, irqhandler,
+                               arg);
     }
 
-  UNUSED(oldhandler);
-  return OK;
+  return ret;
 }
 #endif
 #endif /* CONFIG_ARCH_BUTTONS */

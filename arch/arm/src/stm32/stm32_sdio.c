@@ -668,16 +668,16 @@ static void stm32_configwaitints(struct stm32_dev_s *priv, uint32_t waitmask,
 
       /* Arm the SDIO_D Ready and install Isr */
 
-      stm32_gpiosetevent(pinset, true, false, false,
-                         stm32_rdyinterrupt, priv);
+      (void)stm32_gpiosetevent(pinset, true, false, false,
+                               stm32_rdyinterrupt, priv);
     }
 
   /* Disarm SDIO_D ready */
 
   if ((wkupevent & SDIOWAIT_WRCOMPLETE) != 0)
     {
-      stm32_gpiosetevent(GPIO_SDIO_D0, false, false, false,
-                         NULL, NULL);
+      (void)stm32_gpiosetevent(GPIO_SDIO_D0, false, false, false,
+                               NULL, NULL);
       stm32_configgpio(GPIO_SDIO_D0);
     }
 #endif

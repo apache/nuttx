@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <errno.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
@@ -135,8 +136,8 @@ uint8_t board_buttons(void)
 #ifdef CONFIG_ARCH_IRQBUTTONS
 int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
-  xcpt_t oldhandler;
   uint16_t gpio;
+  int ret;
 
   if (id == BUTTON_KEY1)
     {
@@ -148,13 +149,10 @@ int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
     }
   else
     {
-      return NULL;
+      return -EINVAL;
     }
 
-  oldhandler = stm32_gpiosetevent(gpio, true, true, true, irqhandler, arg);
-
-  UNUSED(oldhandler);
-  return OK;
+  return stm32_gpiosetevent(gpio, true, true, true, irqhandler, arg);
 }
 #endif
 #endif /* CONFIG_ARCH_BUTTONS */

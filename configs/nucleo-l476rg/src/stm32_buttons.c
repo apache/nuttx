@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <errno.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
@@ -48,18 +49,6 @@
 #include "nucleo-l476rg.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -124,16 +113,14 @@ uint8_t board_buttons(void)
 #ifdef CONFIG_ARCH_IRQBUTTONS
 int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
-  xcpt_t oldhandler = NULL;
+  int ret = -EINVAL;
 
   if (id == BUTTON_USER)
     {
-      oldhandler = stm32_gpiosetevent(GPIO_BTN_USER, true, true, true,
-                                      irqhandler, arg);
+      ret = stm32_gpiosetevent(GPIO_BTN_USER, true, true, true, irqhandler, arg);
     }
 
-  UNUSED(oldhandler);
-  return OK;
+  return ret;
 }
 #endif
 #endif /* CONFIG_ARCH_BUTTONS */
