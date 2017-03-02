@@ -368,15 +368,15 @@ bool kl_gpioread(uint32_t pinset);
  * Parameters:
  *  - pinset:  Pin configuration
  *  - pinisr:  Pin interrupt service routine
+ *  - pinarg:  The argument that will accompany the pin interrupt
  *
  * Returns:
- *   The previous value of the interrupt handler function pointer.  This value may,
- *   for example, be used to restore the previous handler when multiple handlers are
- *   used.
+ *   Zero (OK) is returned on success; On any failure, a negated errno value is
+ *   returned to indicate the nature of the failure.
  *
  ************************************************************************************/
 
-xcpt_t kl_gpioirqattach(uint32_t pinset, xcpt_t pinisr);
+int kl_gpioirqattach(uint32_t pinset, xcpt_t pinisr, void *pinarg);
 
 /************************************************************************************
  * Name: kl_gpioirqenable
