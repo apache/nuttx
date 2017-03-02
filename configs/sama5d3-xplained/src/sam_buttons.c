@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/sama5d3-xplained/src/sam_buttons.c
  *
- *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,6 +55,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <errno.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
@@ -67,22 +68,6 @@
 #include "sama5d3-xplained.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-#if defined(CONFIG_SAMA5_PIOE_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
-static xcpt_t g_irquser1;
-#endif
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -136,9 +121,9 @@ uint8_t board_buttons(void)
  ****************************************************************************/
 
 #if defined(CONFIG_SAMA5_PIOE_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
-xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
+int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
-  xcpt_t oldhandler = NULL;
+  int ret = -EINVAL;
 
   if (id == BUTTON_USER)
     {
@@ -150,11 +135,6 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 
       flags = enter_critical_section();
 
-      /* Get the old button interrupt handler and save the new one */
-
-      oldhandler = g_irquser1;
-      g_irquser1 = irqhandler;
-
       /* Are we attaching or detaching? */
 
       if (irqhandler != NULL)
@@ -162,7 +142,7 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
           /* Configure the interrupt */
 
           sam_pioirq(PIO_USER);
-          (void)irq_attach(IRQ_USER1, irqhandler, NULL);
+          (void)irq_attach(IRQ_USER1, irqhandler, arg);
           sam_pioirqenable(IRQ_USER1);
         }
       else
@@ -172,14 +152,12 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
           sam_pioirqdisable(IRQ_USER1);
           (void)irq_detach(IRQ_USER1);
         }
-      /* Configure the interrupt */
 
       leave_critical_section(flags);
+      ret = OK;
     }
 
-  /* Return the old button handler (so that it can be restored) */
-
-  return oldhandler;
+  return ret;
 }
 #endif
 

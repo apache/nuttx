@@ -176,7 +176,7 @@ int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 
           /* Attach the new interrupt handler and enable the interrupt */
 
-          ret = irq_attach(ZKITARM_KEY5_IRQ, irqhandler, NULL);
+          ret = irq_attach(ZKITARM_KEY5_IRQ, irqhandler, arg);
           if (ret == OK)
             {
               up_enable_irq(ZKITARM_KEY5_IRQ);
