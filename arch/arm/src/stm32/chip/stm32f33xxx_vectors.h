@@ -102,7 +102,7 @@ VECTOR(stm32_usart3, STM32_IRQ_USART3)         /* 39: USART3 global or EXTI Line
 
 VECTOR(stm32_exti1510, STM32_IRQ_EXTI1510)     /* 40: EXTI Line[15:10] interrupts */
 VECTOR(stm32_rtcalrm, STM32_IRQ_RTCALRM)       /* 41: RTC alarm through EXTI line interrupt */
-UNUSED(STM32_IRQ_RESERVED42)                   /* 42: Reserved*/
+UNUSED(STM32_IRQ_RESERVED42)                   /* 42: Reserved */
 UNUSED(STM32_IRQ_RESERVED43)                   /* 43: Reserved */
 UNUSED(STM32_IRQ_RESERVED44)                   /* 44: Reserved */
 UNUSED(STM32_IRQ_RESERVED45)                   /* 45: Reserved */
@@ -113,7 +113,7 @@ UNUSED(STM32_IRQ_RESERVED49)                   /* 49: Reserved */
 
 UNUSED(STM32_IRQ_RESERVED50)                   /* 50: Reserved */
 UNUSED(STM32_IRQ_RESERVED51)                   /* 51: Reserved */
-UNUSED(STM32_IRQ_RESERVED51)                   /* 52: Reserved*/
+UNUSED(STM32_IRQ_RESERVED51)                   /* 52: Reserved */
 UNUSED(STM32_IRQ_RESERVED52)                   /* 53: Reserved */
 VECTOR(stm32_dac1, STM32_IRQ_DAC1)             /* 54: TIM6 global or DAC1 underrun interrupts */
 VECTOR(stm32_dac2, STM32_IRQ_DAC2)             /* 55: TIM7 global or DAC2 underrun interrupt */
