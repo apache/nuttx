@@ -2083,10 +2083,6 @@ size_t  up_check_intstack_remain(void);
 #endif
 
 /****************************************************************************
- * Board-specific button interfaces exported by the board-specific logic
- ****************************************************************************/
-
-/****************************************************************************
  * Name: up_rtc_initialize
  *
  * Description:
