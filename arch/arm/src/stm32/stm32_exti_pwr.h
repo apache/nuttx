@@ -60,13 +60,12 @@
  *  - arg:    Argument passed to the interrupt callback
  *
  * Returns:
- *   The previous value of the interrupt handler function pointer.  This
- *   value may, for example, be used to restore the previous handler when
- *   multiple handlers are used.
+ *   Zero (OK) returned on success; a negated errno value is returned on
+ *   failure.
  *
  ****************************************************************************/
 
-xcpt_t stm32_exti_pvd(bool risingedge, bool fallingedge, bool event,
-                      xcpt_t func, void *arg);
+int stm32_exti_pvd(bool risingedge, bool fallingedge, bool event,
+                   xcpt_t func, void *arg);
 
 #endif /* STM32_EXTI_PWR_H_ */
