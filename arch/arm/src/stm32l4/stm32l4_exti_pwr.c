@@ -157,7 +157,5 @@ int stm32l4_exti_pvd(bool risingedge, bool fallingedge, bool event,
               func ? 0 : EXTI1_PVD_LINE,
               func ? EXTI1_PVD_LINE : 0);
 
-  /* Return the old IRQ handler */
-
   return OK;
 }

@@ -129,16 +129,14 @@ static int stm32l4_exti_comp_isr(int irq, void *context)
  *  - arg:    Argument passed to the interrupt callback
  *
  * Returns:
- *   The previous value of the interrupt handler function pointer.  This
- *   value may, for example, be used to restore the previous handler when
- *   multiple handlers are used.
+ *   Zero (OK) returned on success; a negated errno value is returned on
+ *   failure.
  *
  ****************************************************************************/
 
-xcpt_t stm32l4_exti_comp(int cmp, bool risingedge, bool fallingedge,
-                         bool event, xcpt_t func, void *arg)
+int stm32l4_exti_comp(int cmp, bool risingedge, bool fallingedge,
+                      bool event, xcpt_t func, void *arg)
 {
-  xcpt_t oldhandler;
   irqstate_t flags;
   uint32_t ln = g_comp_lines[cmp];
 
@@ -152,7 +150,7 @@ xcpt_t stm32l4_exti_comp(int cmp, bool risingedge, bool fallingedge,
 
   if (func != NULL)
     {
-      irq_attach(STM32L4_IRQ_COMP, stm32l4_exti_comp_isr);
+      irq_attach(STM32L4_IRQ_COMP, stm32l4_exti_comp_isr, NULL);
       up_enable_irq(STM32L4_IRQ_COMP);
     }
   else
@@ -172,15 +170,11 @@ xcpt_t stm32l4_exti_comp(int cmp, bool risingedge, bool fallingedge,
 
     /* Get the previous IRQ handler and save the new IRQ handler. */
 
-    oldhandler                    = g_comp_handlers[cmp].callback;
     g_comp_handlers[cmp].callback = func;
     g_comp_handlers[cmp].arg      = arg;
 
     /* Leave the critical section */
 
     leave_critical_section(flags);
-
-    /* Return the old IRQ handler */
-
-    return oldhandler;
+    return OK;
 }

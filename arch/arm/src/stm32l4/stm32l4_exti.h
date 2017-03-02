@@ -127,15 +127,14 @@ xcpt_t stm32l4_exti_alarm(bool risingedge, bool fallingedge, bool event,
  *  - arg:    Argument passed to the interrupt callback
  *
  * Returns:
- *   The previous value of the interrupt handler function pointer.  This
- *   value may, for example, be used to restore the previous handler when
- *   multiple handlers are used.
+ *   Zero (OK) returned on success; a negated errno value is returned on
+ *   failure.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_STM32L4_COMP
-xcpt_t stm32l4_exti_comp(int cmp, bool risingedge, bool fallingedge,
-                         bool event, xcpt_t func, void *arg);
+int stm32l4_exti_comp(int cmp, bool risingedge, bool fallingedge,
+                      bool event, xcpt_t func, void *arg);
 #endif
 
 #undef EXTERN
