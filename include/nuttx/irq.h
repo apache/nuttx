@@ -57,7 +57,7 @@
  * is equivalent to setting a NULL interrupt handler.
  */
 
-# define irq_detach(isr) irq_attach(isr, NULL, NULL)
+#  define irq_detach(isr) irq_attach(isr, NULL, NULL)
 
 /* Maximum/minimum values of IRQ integer types */
 
@@ -76,6 +76,7 @@
 #      define IRQMAPPED_MAX UINT16_MAX
 #    else
 #      define IRQMAPPED_MAX UINT32_MAX
+#   endif
 #  endif
 
 #endif /* __ASSEMBLY__ */
