@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/irq.h
  *
- *   Copyright (C) 2007-2011, 2013, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2011, 2013, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,7 @@
 #include <nuttx/config.h>
 
 #ifndef __ASSEMBLY__
+# include <stdint.h>
 # include <assert.h>
 # include <arch/irq.h>
 #endif
@@ -50,6 +51,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* IRQ detach is a convenience definition.  Detaching an interrupt handler
  * is equivalent to setting a NULL interrupt handler.
  */
@@ -62,9 +64,19 @@
  * Public Types
  ****************************************************************************/
 
-/* This struct defines the way the registers are stored */
-
 #ifndef __ASSEMBLY__
+/* This type is an integer type large enough to hold the largest IRQ number. */
+
+#if NR_IRQS <= 256
+typedef uint8_t irq_t;
+#elif NR_IRQS <= 65536
+typedef uint16_t irq_t;
+#else
+typedef uint32_t irq_t;
+#endif
+
+/* This struct defines the form of an interrupt service routine */
+
 typedef int (*xcpt_t)(int irq, FAR void *context, FAR void *arg);
 #endif
 
