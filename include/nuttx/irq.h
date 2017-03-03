@@ -52,13 +52,33 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifndef __ASSEMBLY__
 /* IRQ detach is a convenience definition.  Detaching an interrupt handler
  * is equivalent to setting a NULL interrupt handler.
  */
 
-#ifndef __ASSEMBLY__
 # define irq_detach(isr) irq_attach(isr, NULL, NULL)
-#endif
+
+/* Maximum/minimum values of IRQ integer types */
+
+#  if NR_IRQS <= 256
+#    define IRQT_MAX UINT8_MAX
+#  elif NR_IRQS <= 65536
+#    define IRQT_MAX UINT16_MAX
+#  else
+#    define IRQT_MAX UINT32_MAX
+#  endif
+
+#  ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
+#    if CONFIG_ARCH_NUSER_INTERRUPTS <= 256
+#      define IRQMAPPED_MAX UINT8_MAX
+#    elif CONFIG_ARCH_NUSER_INTERRUPTS <= 65536
+#      define IRQMAPPED_MAX UINT16_MAX
+#    else
+#      define IRQMAPPED_MAX UINT32_MAX
+#  endif
+
+#endif /* __ASSEMBLY__ */
 
 /****************************************************************************
  * Public Types
