@@ -163,6 +163,15 @@ EXTERN uint32_t g_oneshot_maxticks;
 EXTERN volatile bool g_rtc_enabled;
 #endif
 
+#ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
+/* This is the interrupt vector mapping table.  This must be provided by
+ * architecture specific logic if CONFIG_ARCH_MINIMAL_VECTORTABLE is define
+ * in the configuration.  See declaration in include/nuttx/irq.h
+ */
+
+/* EXTERN const irq_mapped_t g_irqmap[NR_IRQS]; */
+#endif
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/

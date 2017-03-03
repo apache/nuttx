@@ -186,7 +186,7 @@ config JULIAN_TIME
 
 config START_YEAR
 	int "Start year"
-	default 2016
+	default 2017
 	range 1970 2106
 	---help---
 		NuttX uses an unsigned 32-bit integer for time_t which provides a
