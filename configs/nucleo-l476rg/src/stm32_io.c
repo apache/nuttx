@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/nucleo-l476rg/src/stm32_io.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <errno.h>
 
 #include <arch/board/board.h>
 #include "chip/stm32l4_tim.h"
@@ -47,18 +48,6 @@
 #include "nucleo-l476rg.h"
 
 #ifndef CONFIG_CC3000_PROBES
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -176,23 +165,21 @@ void up_write_outputs(int id, bool bits)
  *
  ****************************************************************************/
 
-xcpt_t up_irqio(int id, xcpt_t irqhandler)
+int up_irqio(int id, xcpt_t irqhandler, void *arg)
 {
-  xcpt_t oldhandler = NULL;
+  int ret = -EINVAL;
 
   /* The following should be atomic */
 
   if (id == 0)
     {
-      oldhandler = stm32_gpiosetevent(GPIO_D14, true, true, true,
-                                      irqhandler, NULL);
+      ret = stm32_gpiosetevent(GPIO_D14, true, true, true, irqhandler, arg);
     }
   else if (id == 1)
     {
-      oldhandler = stm32_gpiosetevent(GPIO_D15, true, true, true,
-                                      irqhandler, NULL);
+      ret = stm32_gpiosetevent(GPIO_D15, true, true, true, irqhandler, arg);
     }
 
-  return oldhandler;
+  return ret;
 }
 #endif /* CONFIG_CC3000_PROBES */

@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/stm32f429i-disco/src/stm32_l3gd20.c
  *
- *   Copyright (C) Gregory Nutt.  All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt.  All rights reserved.
  *   Author: Mateusz Szafoni <raiden00@railab.me>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -85,9 +85,9 @@ static struct l3gd20_config_s g_l3gd20_config =
  *
  ****************************************************************************/
 
-static int l3gd20_attach(FAR struct l3gd20_config_s * cfg, xcpt_t irq)
+static int l3gd20_attach(FAR struct l3gd20_config_s *cfg, xcpt_t irq)
 {
-  stm32_gpiosetevent(GPIO_L3GD20_DREADY, true, false, true, irq, NULL);
+  return stm32_gpiosetevent(GPIO_L3GD20_DREADY, true, false, true, irq, NULL);
 }
 
 /****************************************************************************

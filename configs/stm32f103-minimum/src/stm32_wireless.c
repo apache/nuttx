@@ -85,7 +85,7 @@ static int stm32tiny_wl_irq_attach(xcpt_t isr, FAR void *arg)
   winfo("Attach IRQ\n");
   g_isr = isr;
   g_arg = arg;
-  stm32_gpiosetevent(GPIO_NRF24L01_IRQ, false, true, false, g_isr, g_arg);
+  (void)stm32_gpiosetevent(GPIO_NRF24L01_IRQ, false, true, false, g_isr, g_arg);
   return OK;
 }
 
