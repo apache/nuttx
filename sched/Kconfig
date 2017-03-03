@@ -184,8 +184,6 @@ config JULIAN_TIME
 	---help---
 		Enables Julian time conversions
 
-if !RTC
-
 config START_YEAR
 	int "Start year"
 	default 2016
@@ -203,8 +201,6 @@ config START_DAY
 	int "Start day"
 	default 1
 	range 1 31
-
-endif # !RTC
 
 config MAX_WDOGPARMS
 	int "Maximum number of watchdog parameters"
