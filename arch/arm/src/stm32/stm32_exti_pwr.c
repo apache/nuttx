@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_exti_pwr.c
  *
- *   Copyright (C) 2009, 2011-2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011-2012, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2015 Haltian Ltd. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Dmitry Nikolaev <dmitry.nikolaev@haltian.com>
@@ -115,20 +115,16 @@ static int stm32_exti_pvd_isr(int irq, void *context, FAR void *arg)
  *  - arg:    Argument passed to the interrupt callback
  *
  * Returns:
- *   The previous value of the interrupt handler function pointer.  This
- *   value may, for example, be used to restore the previous handler when
- *   multiple handlers are used.
+ *   Zero (OK) returned on success; a negated errno value is returned on
+ *   failure.
  *
  ****************************************************************************/
 
-xcpt_t stm32_exti_pvd(bool risingedge, bool fallingedge, bool event,
-                      xcpt_t func, void *arg)
+int stm32_exti_pvd(bool risingedge, bool fallingedge, bool event,
+                   xcpt_t func, void *arg)
 {
-  xcpt_t oldhandler;
-
   /* Get the previous GPIO IRQ handler; Save the new IRQ handler. */
 
-  oldhandler     = g_pvd_callback;
   g_pvd_callback = func;
   g_callback_arg = arg;
 
@@ -162,7 +158,5 @@ xcpt_t stm32_exti_pvd(bool risingedge, bool fallingedge, bool event,
               func ? 0 : EXTI_PVD_LINE,
               func ? EXTI_PVD_LINE : 0);
 
-  /* Return the old IRQ handler */
-
-  return oldhandler;
+  return OK;
 }

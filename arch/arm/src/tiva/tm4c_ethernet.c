@@ -629,6 +629,7 @@ struct tiva_ethmac_s
   struct work_s        work;        /* For deferring work to the work queue */
 #ifdef CONFIG_TIVA_PHY_INTERRUPTS
   xcpt_t               handler;     /* Attached PHY interrupt handler */
+  void                *arg;         /* Argument that accompanies the interrupt */
 #endif
 
   /* This holds the information visible to the NuttX network */
@@ -2165,9 +2166,9 @@ static int tiva_interrupt(int irq, FAR void *context, FAR void *arg)
 
       /* Dispatch to the registered handler */
 
-      if (priv->handler)
+      if (priv->handler != NULL)
         {
-          (void)priv->handler(irq, context, arg);
+          (void)priv->handler(irq, context, priv->arg);
         }
     }
 #endif
@@ -4254,23 +4255,22 @@ void up_netinitialize(void)
  *             asserts an interrupt.  Must reside in OS space, but can
  *             signal tasks in user space.  A value of NULL can be passed
  *             in order to detach and disable the PHY interrupt.
+ *   arg     - The argument that will accompany the interrupt
  *   enable  - A function pointer that be unsed to enable or disable the
  *             PHY interrupt.
  *
  * Returned Value:
- *   The previous PHY interrupt handler address is returned.  This allows you
- *   to temporarily replace an interrupt handler, then restore the original
- *   interrupt handler.  NULL is returned if there is was not handler in
- *   place when the call was made.
+ *   Zero (OK) returned on success; a negated errno value is returned on
+ *   failure.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_TIVA_PHY_INTERRUPTS
-xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
+int arch_phy_irq(FAR const char *intf, xcpt_t handler, void *arg,
+                 phy_enable_t *enable)
 {
   struct tiva_ethmac_s *priv;
   irqstate_t flags;
-  xcpt_t oldhandler;
 
   DEBUGASSERT(intf);
   ninfo("%s: handler=%p\n", intf, handler);
@@ -4290,10 +4290,10 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
 
   flags = enter_critical_section();
 
-  /* Get the old interrupt handler and save the new one */
+  /* Save the new interrupt handler information */
 
-  oldhandler    = priv->handler;
   priv->handler = handler;
+  priv->arg     = arg;
 
   /* Return with the interrupt disabled in any case */
 
@@ -4306,10 +4306,8 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
       *enable = handler ? tiva_phy_intenable : NULL;
     }
 
-  /* Return the old handler (so that it can be restored) */
-
   leave_critical_section(flags);
-  return oldhandler;
+  return OK;
 }
 #endif /* CONFIG_TIVA_PHY_INTERRUPTS */
 

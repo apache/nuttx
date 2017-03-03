@@ -74,7 +74,6 @@
 
 int pause(void)
 {
-  struct siginfo value;
   sigset_t set;
   int ret;
 
@@ -93,7 +92,7 @@ int pause(void)
    * meaning that some unblocked signal was caught.
    */
 
-  ret = sigwaitinfo(&set, &value);
+  ret = sigwaitinfo(&set, NULL);
   leave_cancellation_point();
   return ret;
 }

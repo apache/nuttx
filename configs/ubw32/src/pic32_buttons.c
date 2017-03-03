@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/ubw32/src/pic32_buttons.c
  *
- *   Copyright (C) 2012, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <errno.h>
 #include <debug.h>
 
 #include <nuttx/board.h>
@@ -166,9 +167,7 @@ uint8_t board_buttons(void)
  *   board_button_irq() may be called to register an interrupt handler that will
  *   be called when a button is depressed or released.  The ID value is a
  *   button enumeration value that uniquely identifies a button resource. See the
- *   BUTTON_* definitions in board.h for the meaning of enumeration value.  The
- *   previous interrupt handler address is returned (so that it may restored, if
- *   so desired).
+ *   BUTTON_* definitions in board.h for the meaning of enumeration value.
  *
  *   Interrupts are automatically enabled when the button handler is attached and
  *   automatically disabled when the button handler is detached.
@@ -181,21 +180,21 @@ uint8_t board_buttons(void)
  ************************************************************************************/
 
 #ifdef CONFIG_ARCH_IRQBUTTONS
-xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
+int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
-  xcpt_t oldhandler = NULL;
+  int ret = -EINVAL;
 
   if (id < NUM_BUTTONS)
     {
       pic32mx_gpioirqdisable(g_buttoncn[id]);
-      oldhandler = pic32mx_gpioattach(g_buttonset[id], g_buttoncn[id], irqhandler);
-      if (irqhandler)
+      ret = pic32mx_gpioattach(g_buttonset[id], g_buttoncn[id], irqhandler, arg);
+      if (ret >= 0)
         {
           pic32mx_gpioirqenable(g_buttoncn[id]);
         }
     }
 
-  return oldhandler;
+  return ret;
 }
 #endif
 #endif /* CONFIG_ARCH_BUTTONS */

@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <errno.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
@@ -144,23 +145,22 @@ uint8_t board_buttons(void)
  *   will be called when a button is depressed or released.  The ID value
  *   is a button enumeration value that uniquely identifies a button resource.
  *   See the BUTTON_* definitions in board.h for the meaning of enumeration
- *   value.  The previous interrupt handler address is returned (so that it
- *   may be restored, if so desired).
+ *   value.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_IRQBUTTONS
-xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
+int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
-  xcpt_t oldhandler = NULL;
+  int ret = -EINVAL;
 
   if (id >= MIN_IRQBUTTON && id <= MAX_IRQBUTTON)
     {
-      oldhandler = stm32l4_gpiosetevent(g_buttons[id], true, true, true,
-                                        irqhandler, arg);
+      ret = stm32l4_gpiosetevent(g_buttons[id], true, true, true,
+                                 irqhandler, arg);
     }
 
-  return oldhandler;
+  return ret;
 }
 #endif
 #endif /* CONFIG_ARCH_BUTTONS */

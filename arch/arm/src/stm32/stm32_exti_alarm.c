@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_exti_alarm.c
  *
- *   Copyright (C) 2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Diego Sanchez <dsanchez@nx-engineering.com>
  *
@@ -109,20 +109,16 @@ static int stm32_exti_alarm_isr(int irq, void *context, FAR void *arg)
  *  - arg:    Argument passed to the interrupt callback
  *
  * Returns:
- *   The previous value of the interrupt handler function pointer.  This
- *   value may, for example, be used to restore the previous handler when
- *   multiple handlers are used.
+ *   Zero (OK) on success; a negated errno value on failure indicating the
+ *   nature of the failure.
  *
  ****************************************************************************/
 
-xcpt_t stm32_exti_alarm(bool risingedge, bool fallingedge, bool event,
-                        xcpt_t func, void *arg)
+int stm32_exti_alarm(bool risingedge, bool fallingedge, bool event,
+                     xcpt_t func, void *arg)
 {
-  xcpt_t oldhandler;
-
   /* Get the previous GPIO IRQ handler; Save the new IRQ handler. */
 
-  oldhandler       = g_alarm_callback;
   g_alarm_callback = func;
   g_callback_arg   = arg;
 
@@ -158,5 +154,5 @@ xcpt_t stm32_exti_alarm(bool risingedge, bool fallingedge, bool event,
 
   /* Return the old IRQ handler */
 
-  return oldhandler;
+  return OK;
 }

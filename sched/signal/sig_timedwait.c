@@ -171,9 +171,9 @@ static void sig_timeout(int argc, wdparm_t itcb)
  *                  empty message queue.
  *
  * Parameters:
- *   set - The pending signal set.
- *   info - The returned value
- *   timeout - The amount of time to wait
+ *   set     - The pending signal set.
+ *   info    - The returned value (may be NULL).
+ *   timeout - The amount of time to wait (may be NULL)
  *
  * Return Value:
  *   Signal number that cause the wait to be terminated, otherwise -1 (ERROR)
@@ -229,7 +229,7 @@ int sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *info,
 
       /* Return the signal info to the caller if so requested */
 
-      if (info)
+      if (info != NULL)
         {
           memcpy(info, &sigpend->info, sizeof(struct siginfo));
         }
@@ -254,7 +254,7 @@ int sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *info,
 
       /* Check if we should wait for the timeout */
 
-      if (timeout)
+      if (timeout != NULL)
         {
           /* Convert the timespec to system clock ticks, making sure that
            * the resulting delay is greater than or equal to the requested

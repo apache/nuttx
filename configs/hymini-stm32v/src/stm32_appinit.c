@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/hymini-stm32v/src/stm32_appinit.c
  *
- *   Copyright (C) 2009, 2011, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -182,7 +182,7 @@ int board_app_initialize(uintptr_t arg)
 
   /* Register an interrupt handler for the card detect pin */
 
-  stm32_gpiosetevent(GPIO_SD_CD, true, true, true, nsh_cdinterrupt, NULL);
+  (void)stm32_gpiosetevent(GPIO_SD_CD, true, true, true, nsh_cdinterrupt, NULL);
 
   /* Mount the SDIO-based MMC/SD block driver */
 

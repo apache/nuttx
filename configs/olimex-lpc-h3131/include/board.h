@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/olimex-lpc-h3131/include/board.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -187,14 +187,15 @@ void lpc31_boardinitialize(void);
  *
  * Input parameter:
  *   handler - New overcurrent interrupt handler
+ *   arg     - The argument that will accompany the interrupt
  *
  * Returned value:
- *   Old overcurrent interrupt handler
+ *   Zero (OK) returned on success; a negated errno value is returned on failure.
  *
  ************************************************************************************/
 
 #if 0 /* Not ready yet */
-xcpt_t lpc31_setup_overcurrent(xcpt_t handler);
+int lpc31_setup_overcurrent(xcpt_t handler, void *arg);
 #endif
 
 #endif /* __ASSEMBLY__ */

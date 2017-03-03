@@ -585,11 +585,10 @@ struct cc1101_dev_s *cc1101_init(struct spi_dev_s *spi, uint8_t isrpin,
 
   cc1101_setgdo(dev, dev->isrpin, CC1101_GDO_SYNC);
 
-  /* Bind to external interrupt line */
-
-  /* depends on STM32: TODO: Make that config within pinset and
-   * provide general gpio interface
-   * stm32_gpiosetevent(pinset, false, true, true, cc1101_eventcb);
+  /* Configure to receive interrupts on the external GPIO interrupt line.
+   *
+   * REVISIT:  There is no MCU-independent way to do this in this
+   * context.
    */
 
   return dev;
@@ -599,8 +598,11 @@ int cc1101_deinit(struct cc1101_dev_s *dev)
 {
   ASSERT(dev);
 
-  /* Release interrupt */
-  /* stm32_gpiosetevent(pinset, false, false, false, NULL); */
+  /* Release the external GPIO interrupt
+   *
+   * REVISIT:  There is no MCU-independent way to do this in this
+   * context.
+   */
 
   /* Power down chip */
 

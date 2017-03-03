@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/pcduino-a10/src/a1x_buttons.c
  *
- *   Copyright (C) 2013-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <errno.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
@@ -51,22 +52,6 @@
 #include "pcduino_a10.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-#ifdef CONFIG_ARCH_IRQBUTTONS
-static xcpt_t g_irqbutton[BOARD_NBUTTONS];
-#endif
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -110,8 +95,7 @@ uint8_t board_buttons(void)
  * Description:
  *   This function may be called to register an interrupt handler that will
  *   be called when a button is depressed or released.  The ID value is one
- *   of the BUTTON* definitions provided above. The previous interrupt
- *   handler address isreturned (so that it may restored, if so desired).
+ *   of the BUTTON* definitions provided above.
  *
  * Configuration Notes:
  *   Configuration CONFIG_ARCH_IRQBUTTONS must be selected to enable the
@@ -120,9 +104,9 @@ uint8_t board_buttons(void)
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_IRQBUTTONS
-xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
+int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
-  xcpt_t oldhandler = NULL;
+  int ret = -EINVAL;
 
   if (id < BOARD_NBUTTONS)
     {
@@ -134,22 +118,17 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 
       flags = enter_critical_section();
 
-      /* Get the old button interrupt handler and save the new one */
-
-      oldhandler      = g_irqbutton[id];
-      g_irqbutton[id] = irqhandler;
-
       /* Configure the interrupt */
 
       a1x_pioirq(xxx);
-      (void)irq_attach(xxx, irqhandler, NULL);
+      (void)irq_attach(xxx, irqhandler, arg);
       a1x_pioirqenable(xxx);
       leave_critical_section(flags);
+
+      ret = OK;
     }
 
-  /* Return the old button handler (so that it can be restored) */
-
-  return oldhandler;
+  return ret;
 }
 #endif
 

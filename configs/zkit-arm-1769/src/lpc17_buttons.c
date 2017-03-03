@@ -6,7 +6,7 @@
  *
  * Based on configs/stm3210e-eval/src/board_buttons.c
  *
- *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -75,10 +75,6 @@ static const uint16_t g_buttons[BOARD_NUM_BUTTONS] =
 {
   ZKITARM_KEY1, ZKITARM_KEY2, ZKITARM_KEY3, ZKITARM_KEY4, ZKITARM_KEY5
 };
-
-/* Old KEY5 interrupt handler */
-
-static xcpt_t g_oldhandler;
 
 /****************************************************************************
  * Public Functions
@@ -154,27 +150,21 @@ uint8_t board_buttons(void)
  *   be called when a button is depressed or released.  The ID value is a
  *   button enumeration value that uniquely identifies a button resource. See the
  *   BUTTON_* and JOYSTICK_* definitions in board.h for the meaning of enumeration
- *   value.  The previous interrupt handler address is returned (so that it may
- *   restored, if so desired).
+ *   value.
  *
  ************************************************************************************/
 
 #if defined CONFIG_ARCH_IRQBUTTONS && CONFIG_LPC17_GPIOIRQ
-xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
+int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
-  xcpt_t rethandler = NULL;
   irqstate_t flags;
-  int ret;
+  int ret = -EINVAL;
 
   /* Interrupts are supported on KEY5 only */
 
   if (id == BOARD_BUTTON_5)
     {
-      /* Return the previous value of the interrupt handler */
-
       flags = enter_critical_section();
-      rethandler   = g_oldhandler;
-      g_oldhandler = irqhandler;
 
       /* Attach or detach the interrupt handler for KEY5. */
 
@@ -186,7 +176,7 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 
           /* Attach the new interrupt handler and enable the interrupt */
 
-          ret = irq_attach(ZKITARM_KEY5_IRQ, irqhandler, NULL);
+          ret = irq_attach(ZKITARM_KEY5_IRQ, irqhandler, arg);
           if (ret == OK)
             {
               up_enable_irq(ZKITARM_KEY5_IRQ);
@@ -202,13 +192,13 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
           /* Configure KEY5 as a non-interrupting input */
 
           lpc17_configgpio(ZKITARM_KEY5);
-
+          ret = OK;
         }
 
       leave_critical_section(flags);
     }
 
-  return rethandler;
+  return ret;
 }
 
 #endif

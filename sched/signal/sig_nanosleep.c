@@ -107,7 +107,6 @@ int nanosleep(FAR const struct timespec *rqtp, FAR struct timespec *rmtp)
   irqstate_t flags;
   systime_t starttick;
   sigset_t set;
-  struct siginfo value;
   int errval;
 #ifdef CONFIG_DEBUG_ASSERTIONS /* Warning avoidance */
   int ret;
@@ -141,9 +140,9 @@ int nanosleep(FAR const struct timespec *rqtp, FAR struct timespec *rmtp)
   /* nanosleep is a simple application of sigtimedwait. */
 
 #ifdef CONFIG_DEBUG_ASSERTIONS /* Warning avoidance */
-  ret = sigtimedwait(&set, &value, rqtp);
+  ret = sigtimedwait(&set, NULL, rqtp);
 #else
-  (void)sigtimedwait(&set, &value, rqtp);
+  (void)sigtimedwait(&set, NULL, rqtp);
 #endif
 
   /* sigtimedwait() cannot succeed.  It should always return error with

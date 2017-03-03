@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/sam3u-ek/src/up_leds.c
  *
- *   Copyright (C) 2010, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2014-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <errno.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
@@ -54,19 +55,6 @@
 #ifdef CONFIG_ARCH_BUTTONS
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-#if defined(CONFIG_SAM34_GPIOA_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
-static xcpt_t g_irqbutton1;
-static xcpt_t g_irqbutton2;
-#endif
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -79,10 +67,9 @@ static xcpt_t g_irqbutton2;
  ****************************************************************************/
 
 #if defined(CONFIG_SAM34_GPIOA_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
-static xcpt_t board_button_irqx(gpio_pinset_t pinset, int irq,
-                                xcpt_t irqhandler, xcpt_t *store, void *arg)
+static int board_button_irqx(gpio_pinset_t pinset, int irq, xcpt_t irqhandler,
+                             void *arg)
 {
-  xcpt_t oldhandler;
   irqstate_t flags;
 
   /* Disable interrupts until we are done.  This guarantees that the following
@@ -90,11 +77,6 @@ static xcpt_t board_button_irqx(gpio_pinset_t pinset, int irq,
    */
 
   flags = enter_critical_section();
-
-  /* Get the old button interrupt handler and save the new one */
-
-  oldhandler = *store;
-  *store = irqhandler;
 
   /* Are we attaching or detaching? */
 
@@ -115,10 +97,7 @@ static xcpt_t board_button_irqx(gpio_pinset_t pinset, int irq,
     }
 
   leave_critical_section(flags);
-
-  /* Return the old button handler (so that it can be restored) */
-
-  return oldhandler;
+  return OK;
 }
 #endif
 
@@ -170,8 +149,7 @@ uint8_t board_buttons(void)
  * Description:
  *   This function may be called to register an interrupt handler that will
  *   be called when a button is depressed or released.  The ID value is one
- *   of the BUTTON* definitions provided above. The previous interrupt
- *   handler address isreturned (so that it may restored, if so desired).
+ *   of the BUTTON* definitions provided above.
  *
  * Configuration Notes:
  *   Configuration CONFIG_AVR32_GPIOIRQ must be selected to enable the
@@ -183,21 +161,19 @@ uint8_t board_buttons(void)
  ****************************************************************************/
 
 #if defined(CONFIG_SAM34_GPIOA_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
-xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
+int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
   if (id == BUTTON1)
     {
-      return board_button_irqx(GPIO_BUTTON1, IRQ_BUTTON1,
-                               irqhandler, &g_irqbutton1, arg);
+      return board_button_irqx(GPIO_BUTTON1, IRQ_BUTTON1, irqhandler, arg);
     }
   else if (id == BUTTON2)
     {
-      return board_button_irqx(GPIO_BUTTON2, IRQ_BUTTON2,
-                               irqhandler, &g_irqbutton2, arg);
+      return board_button_irqx(GPIO_BUTTON2, IRQ_BUTTON2, irqhandler, arg);
     }
   else
     {
-      return NULL;
+      return -EINVAL;
     }
 }
 #endif

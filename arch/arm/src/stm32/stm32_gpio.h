@@ -432,7 +432,7 @@ EXTERN const uint32_t g_gpiobase[STM32_NGPIO_PORTS];
  *   function, it must be unconfigured with stm32_unconfiggpio() with
  *   the same cfgset first before it can be set to non-alternative function.
  *
- * Returns:
+ * Returned Value:
  *   OK on success
  *   ERROR on invalid port, or when pin is locked as ALT function.
  *
@@ -453,7 +453,7 @@ int stm32_configgpio(uint32_t cfgset);
  *   operate in PWM mode could produce excessive on-board currents and trigger
  *   over-current/alarm function.
  *
- * Returns:
+ * Returned Value:
  *  OK on success
  *  ERROR on invalid port
  *
@@ -487,22 +487,21 @@ bool stm32_gpioread(uint32_t pinset);
  * Description:
  *   Sets/clears GPIO based event and interrupt triggers.
  *
- * Parameters:
+ * Input Parameters:
  *  - pinset: gpio pin configuration
  *  - rising/falling edge: enables
  *  - event:  generate event when set
  *  - func:   when non-NULL, generate interrupt
  *  - arg:    Argument passed to the interrupt callback
  *
- * Returns:
- *  The previous value of the interrupt handler function pointer.  This value may,
- *  for example, be used to restore the previous handler when multiple handlers are
- *  used.
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure indicating the
+ *   nature of the failure.
  *
  ************************************************************************************/
 
-xcpt_t stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
-                          bool event, xcpt_t func, void *arg);
+int stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
+                       bool event, xcpt_t func, void *arg);
 
 /************************************************************************************
  * Function:  stm32_dumpgpio

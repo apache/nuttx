@@ -13,6 +13,8 @@ Contents
   - Timer Inputs/Outputs
   - Using 128KiB of Flash instead of 64KiB
   - Quadrature Encoder
+  - SDCard support
+  - USB Console support
   - STM32F103 Minimum - specific Configuration Options
   - Configurations
 
@@ -304,6 +306,48 @@ SDCard support:
   And connect a SDCard/SPI board on SPI1. Connect the CS pin to PA4, SCK to
   PA5, MOSI to PA7 and MISO to PA6. Note: some chinese boards use MOSO instead
   of MISO.
+
+USB Console support:
+====================
+
+  The STM32F103C8 has a USB Device controller, then we can use NuttX support
+  to USB Device. We can the console over USB enabling these options:
+
+  System Type  --->
+    STM32 Peripheral Support  --->
+      [*] USB Device
+
+  It will enable:  CONFIG_STM32_USB=y
+
+  Board Selection  --->
+    -*- Enable boardctl() interface
+    [*]   Enable USB device controls
+
+  It will enable: CONFIG_BOARDCTL_USBDEVCTRL=y
+
+  Device Drivers  --->
+    -*- USB Device Driver Support  --->
+      [*]   USB Modem (CDC/ACM) support  --->
+
+  It will enable:  CONFIG_CDCACM=y and many default options.
+
+  Device Drivers  --->
+    -*- USB Device Driver Support  --->
+      [*]   USB Modem (CDC/ACM) support  --->
+        [*]   CDC/ACM console device
+
+  It will enable: CONFIG_CDCACM_CONSOLE=y
+
+  Device Drivers  --->
+    [*] Serial Driver Support  --->
+      Serial console (No serial console)  --->
+        (X) No serial console
+
+  It will enable: CONFIG_NO_SERIAL_CONSOLE=y
+
+  After flashing the firmware in the board, unplug and plug it in the computer
+  and it will create a /dev/ttyACM0 device in the Linux. Use minicom with this
+  device to get access to NuttX NSH console (press Enter three times to start)
 
 STM32F103 Minimum - specific Configuration Options
 ==================================================

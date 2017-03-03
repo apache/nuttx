@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/sama5d3-xplained/src/sam_ethernet.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -91,19 +91,6 @@
 #  define phyerr(x...)
 #  define phywarn(x...)
 #  define phyinfo(x...)
-#endif
-
-/************************************************************************************
- * Private Data
- ************************************************************************************/
-
-#ifdef CONFIG_SAMA5_PIOE_IRQ
-#ifdef CONFIG_SAMA5_EMACA
-static xcpt_t g_emac_handler;
-#endif
-#ifdef CONFIG_SAMA5_GMAC
-static xcpt_t g_gmac_handler;
-#endif
 #endif
 
 /************************************************************************************
@@ -255,23 +242,21 @@ void weak_function sam_netinitialize(void)
  *             asserts an interrupt.  Must reside in OS space, but can
  *             signal tasks in user space.  A value of NULL can be passed
  *             in order to detach and disable the PHY interrupt.
+ *   arg     - The argument that will accompany the interrupt
  *   enable  - A function pointer that be unsed to enable or disable the
  *             PHY interrupt.
  *
  * Returned Value:
- *   The previous PHY interrupt handler address is returned.  This allows you
- *   to temporarily replace an interrupt handler, then restore the original
- *   interrupt handler.  NULL is returned if there is was not handler in
- *   place when the call was made.
+ *   Zero (OK) returned on success; a negated errno value is returned on
+ *   failure.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_PIOE_IRQ
-xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
+int arch_phy_irq(FAR const char *intf, xcpt_t handler, void *arg,
+                 phy_enable_t *enable)
 {
   irqstate_t flags;
-  xcpt_t *phandler;
-  xcpt_t oldhandler;
   pio_pinset_t pinset;
   phy_enable_t enabler;
   int irq;
@@ -290,7 +275,6 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
   if (strcmp(intf, SAMA5_EMAC_DEVNAME) == 0)
     {
       phyinfo("Select EMAC\n");
-      phandler = &g_emac_handler;
       pinset   = PIO_INT_ETH1;
       irq      = IRQ_INT_ETH1;
       enabler  = sam_emac_phy_enable;
@@ -301,7 +285,6 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
   if (strcmp(intf, SAMA5_GMAC_DEVNAME) == 0)
     {
       phyinfo("Select GMAC\n");
-      phandler = &g_gmac_handler;
       pinset   = PIO_INT_ETH0;
       irq      = IRQ_INT_ETH0;
       enabler  = sam_gmac_phy_enable;
@@ -319,11 +302,6 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
 
   flags = enter_critical_section();
 
-  /* Get the old interrupt handler and save the new one */
-
-  oldhandler = *phandler;
-  *phandler = handler;
-
   /* Configure the interrupt */
 
   if (handler)
@@ -332,7 +310,7 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
       sam_pioirq(pinset);
 
       phyinfo("Attach IRQ%d\n", irq);
-      (void)irq_attach(irq, handler, NULL);
+      (void)irq_attach(irq, handler, arg);
     }
   else
     {
@@ -355,7 +333,7 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
   /* Return the old handler (so that it can be restored) */
 
   leave_critical_section(flags);
-  return oldhandler;
+  return OK;
 }
 #endif /* CONFIG_SAMA5_PIOE_IRQ */
 

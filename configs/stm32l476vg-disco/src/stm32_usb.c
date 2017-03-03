@@ -311,7 +311,8 @@ void stm32l4_usbhost_vbusdrive(int iface, bool enable)
 #ifdef CONFIG_USBHOST
 xcpt_t stm32l4_setup_overcurrent(xcpt_t handler)
 {
-  return stm32l4_gpiosetevent(GPIO_OTGFS_OVER, true, true, true, handler, NULL);
+  (void)stm32l4_gpiosetevent(GPIO_OTGFS_OVER, true, true, true, handler, NULL);
+  return NULL;
 }
 #endif
 

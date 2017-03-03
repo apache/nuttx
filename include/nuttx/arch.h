@@ -2083,10 +2083,6 @@ size_t  up_check_intstack_remain(void);
 #endif
 
 /****************************************************************************
- * Board-specific button interfaces exported by the board-specific logic
- ****************************************************************************/
-
-/****************************************************************************
  * Name: up_rtc_initialize
  *
  * Description:
@@ -2251,19 +2247,19 @@ int up_rtc_settime(FAR const struct timespec *tp);
  *             asserts an interrupt.  Must reside in OS space, but can
  *             signal tasks in user space.  A value of NULL can be passed
  *             in order to detach and disable the PHY interrupt.
+ *   arg     - The argument that will accompany the interrupt
  *   enable  - A function pointer that be unsed to enable or disable the
  *             PHY interrupt.
  *
  * Returned Value:
- *   The previous PHY interrupt handler address is returned.  This allows you
- *   to temporarily replace an interrupt handler, then restore the original
- *   interrupt handler.  NULL is returned if there is was not handler in
- *   place when the call was made.
+ *   Zero (OK) returned on success; a negated errno value is returned on
+ *   failure.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_PHY_INTERRUPT
-xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable);
+int arch_phy_irq(FAR const char *intf, xcpt_t handler, void *arg,
+                 phy_enable_t *enable);
 #endif
 
 /****************************************************************************

@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/hymini-stm32v/src/stm32_buttons.c
  *
- *   Copyright (C) 2009, 2011, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011, 2014-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <errno.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
@@ -69,39 +70,44 @@
  ****************************************************************************/
 
 void board_button_initialize(void)
-  {
-    stm32_configgpio(GPIO_BTN_KEYA);
-    stm32_configgpio(GPIO_BTN_KEYB);
-  }
+{
+  stm32_configgpio(GPIO_BTN_KEYA);
+  stm32_configgpio(GPIO_BTN_KEYB);
+}
 
 /****************************************************************************
  * Name: board_buttons
  ****************************************************************************/
 
 uint8_t board_buttons(void)
-  {
-    uint8_t ret = 0;
-    bool pinValue;
+{
+  uint8_t ret = 0;
+  bool pinValue;
 
-    /* Check that state of each key */
+  /* Check that state of each key */
 
-    /* Pin is pulled up */
-    pinValue = stm32_gpioread(GPIO_BTN_KEYA);
-    if (!pinValue)
-      {
-        // Button pressed
-        ret = 1 << BUTTON_KEYA;
-      }
+  /* Pin is pulled up */
 
-    /* Pin is pulled down */
-    pinValue = stm32_gpioread(GPIO_BTN_KEYB);
-    if (pinValue)
-      {
-        // Button pressed
-        ret |= 1 << BUTTON_KEYB;
-      }
-    return ret;
-  }
+  pinValue = stm32_gpioread(GPIO_BTN_KEYA);
+  if (!pinValue)
+    {
+      /* Button pressed */
+
+      ret = 1 << BUTTON_KEYA;
+    }
+
+  /* Pin is pulled down */
+
+  pinValue = stm32_gpioread(GPIO_BTN_KEYB);
+  if (pinValue)
+    {
+      /* Button pressed */
+
+      ret |= 1 << BUTTON_KEYB;
+    }
+
+  return ret;
+}
 
 /****************************************************************************
  * Button support.
@@ -122,28 +128,27 @@ uint8_t board_buttons(void)
  *   be called when a button is depressed or released.  The ID value is a
  *   button enumeration value that uniquely identifies a button resource. See
  *   the BUTTON_* definitions in board.h for the meaning of enumeration
- *   value.  The previous interrupt handler address is returned (so that it
- *    may be restored, if so desired).
+ *   value.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_IRQBUTTONS
-xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
-  {
-    xcpt_t oldhandler = NULL;
-    uint32_t pinset = GPIO_BTN_KEYA;
+int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
+{
+  uint32_t pinset = GPIO_BTN_KEYA;
+  int ret = -EINVAL;
 
-    if (id == 1)
-      {
-        pinset = GPIO_BTN_KEYB;
-      }
-    if (id < 2)
-      {
-        oldhandler = stm32_gpiosetevent(pinset, true, true, true,
-                                        irqhandler, arg);
-      }
+  if (id == 1)
+    {
+      pinset = GPIO_BTN_KEYB;
+    }
 
-    return oldhandler;
-  }
+  if (id < 2)
+    {
+      ret = stm32_gpiosetevent(pinset, true, true, true, irqhandler, arg);
+    }
+
+  return ret;
+}
 #endif
 #endif /* CONFIG_ARCH_BUTTONS */

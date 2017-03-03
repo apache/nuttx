@@ -67,16 +67,22 @@
 #define TIVA_GPIO_IRQ_IDX(port,pin) ((port*TIVA_NPINS)+(pin))
 
 /****************************************************************************
+ * Private types
+ ****************************************************************************/
+
+struct gpio_handler_s
+{
+  xcpt_t isr;    /* Interrupt service routine entry point */
+  void  *arg;    /* The argument that accompanies the interrupt */
+};
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
 /* A table of handlers for each GPIO port interrupt */
 
-static FAR xcpt_t g_gpioportirqvector[TIVA_NIRQ_PINS];
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
+static struct gpio_handler_s g_gpioportirqvector[TIVA_NIRQ_PINS];
 
 /****************************************************************************
  * Private Functions
@@ -303,12 +309,13 @@ static int tiva_gpioporthandler(uint8_t port, void *context)
         {
           if (((mis >> pin) & 1) != 0)
             {
-              gpioinfo("port=%d pin=%d irq=%p index=%d\n",
-                       port, pin,
-                       g_gpioportirqvector[TIVA_GPIO_IRQ_IDX(port, pin)],
-                       TIVA_GPIO_IRQ_IDX(port, pin));
+              int index = TIVA_GPIO_IRQ_IDX(port, pin);
+              FAR struct gpio_handler_s *handler = &g_gpioportirqvector[index];
 
-              g_gpioportirqvector[TIVA_GPIO_IRQ_IDX(port, pin)](irq, context, NULL);
+              gpioinfo("port=%d pin=%d isr=%p arg=%p index=%d\n",
+                       port, pin, handler->isr, handler->arg, index);
+
+              handler->isr(irq, context, handler->arg);
             }
         }
     }
@@ -557,7 +564,8 @@ int tiva_gpioirqinitialize(void)
 
   for (i = 0; i < TIVA_NIRQ_PINS; ++i)
     {
-      g_gpioportirqvector[i] = irq_unexpected_isr;
+      g_gpioportirqvector[i].isr = irq_unexpected_isr;
+      g_gpioportirqvector[i].arg = NULL;
     }
 
   gpioinfo("tiva_gpioirqinitialize isr=%d/%d irq_unexpected_isr=%p\n",
@@ -665,27 +673,25 @@ int tiva_gpioirqinitialize(void)
  *   and the pin's interrupt mask is set.
  *
  * Returns:
- *   oldhandler - the old interrupt handler assigned to this pin.
+ *   Zero (OK) is returned on success.  Otherwise a negated errno value is
+ *   return to indicate the nature of the failure.
  *
  ****************************************************************************/
 
-xcpt_t tiva_gpioirqattach(uint32_t pinset, xcpt_t isr)
+int tiva_gpioirqattach(uint32_t pinset, xcpt_t isr, void *arg)
 {
+  FAR stuct gpio_handler_s *handler;
   irqstate_t flags;
-  xcpt_t     oldhandler = NULL;
   uint8_t    port  = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
   uint8_t    pinno = (pinset & GPIO_PIN_MASK);
   uint8_t    pin   = 1 << pinno;
+  int        index;
 
-  /* assign per-pin interrupt handlers */
+  /* Assign per-pin interrupt handlers */
 
   if (port < TIVA_NPORTS)
     {
       flags = enter_critical_section();
-
-      /* store the older handler to return */
-
-      oldhandler = g_gpioportirqvector[TIVA_GPIO_IRQ_IDX(port, pinno)];
 
       /* If the new ISR is NULL, then the ISR is being detached.
        * In this case, disable the ISR and direct any interrupts
@@ -695,21 +701,24 @@ xcpt_t tiva_gpioirqattach(uint32_t pinset, xcpt_t isr)
       gpioinfo("assign port=%d pin=%d function=%p to idx=%d\n",
                port, pinno, isr, TIVA_GPIO_IRQ_IDX(port, pinno));
 
+      handler = &g_gpioportirqvector[TIVA_GPIO_IRQ_IDX(port, pinno)];
       if (isr == NULL)
         {
           tiva_gpioirqdisable(port, pin);
-          g_gpioportirqvector[TIVA_GPIO_IRQ_IDX(port, pinno)] = irq_unexpected_isr;
+          handler->isr = irq_unexpected_isr;
+          handler->arg = NULL;
         }
       else
         {
-          g_gpioportirqvector[TIVA_GPIO_IRQ_IDX(port, pinno)] = isr;
+          handler->isr = isr;
+          handler->arg = arg;
           tiva_gpioirqenable(port, pin);
         }
 
       leave_critical_section(flags);
     }
 
-  return oldhandler;
+  return OK;
 }
 
 /****************************************************************************

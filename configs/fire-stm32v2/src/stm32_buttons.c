@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/fire-stm32v2/src/stm32_buttons.c
  *
- *   Copyright (C) 2012, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <errno.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
@@ -128,15 +129,15 @@ uint8_t board_buttons(void)
  *   be called when a button is depressed or released.  The ID value is a
  *   button enumeration value that uniquely identifies a button resource. See
  *   the BUTTON_* and JOYSTICK_* definitions in board.h for the meaning of
- *   enumeration values.  The previous interrupt handler address is returned
- *   (so that it may restored, if so desired).
+ *   enumeration values.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_IRQBUTTONS
-xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
+int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
   uint16_t gpio;
+  int ret;
 
   if (id == BUTTON_KEY1)
     {
@@ -148,7 +149,7 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
     }
   else
     {
-      return NULL;
+      return -EINVAL;
     }
 
   return stm32_gpiosetevent(gpio, true, true, true, irqhandler, arg);

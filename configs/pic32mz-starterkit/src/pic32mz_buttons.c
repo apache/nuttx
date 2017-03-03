@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/pic32mz-starterkit/src/pic32mz_buttons.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <errno.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
@@ -146,28 +147,27 @@ uint8_t board_buttons(void)
  *   will be called when a button is depressed or released.  The ID value is
  *   a button enumeration value that uniquely identifies a button resource.
  *   See the BUTTON_* definitions in board.h for the meaning of enumeration
- *   value.  The previous interrupt handler address is returned (so that it
- *   may restored, if so desired).
+ *   value.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_IRQBUTTONS
-xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
+int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
 #ifdef CONFIG_PIC32MZ_GPIOIRQ_PORTB
-  xcpt_t oldhandler = NULL;
+  int ret = OK;
 
   if ((unsigned)id < NUM_BUTTONS)
     {
       /* Perform the attach/detach operation */
 
-      oldhandler = pic32mz_gpioattach(g_buttons[id], irqhandler);
+      ret = pic32mz_gpioattach(g_buttons[id], irqhandler, arg);
 
       /* The interrupt is now disabled.  Are we attaching or detaching from
        * button interrupt?
        */
 
-      if (irqhandler)
+      if (ret >= 0)
         {
           /* Attaching... enable button interrupts now */
 
@@ -175,9 +175,9 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
         }
     }
 
-  return oldhandler;
+  return ret;
 #else
-  return NULL;
+  return -ENOSYS;
 #endif
 }
 #endif

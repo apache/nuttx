@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/stm32f4discovery/src/stm32_pm_buttons.c
  *
- *   Copyright (C) 2012, 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2015-2017 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Diego Sanchez <dsanchez@nx-engineering.com>
  *
@@ -130,14 +130,7 @@ void stm32_pm_buttons(void)
   board_button_initialize();
 
 #ifdef CONFIG_ARCH_IRQBUTTONS
-      xcpt_t oldhandler = board_button_irq(0, button_handler, NULL);
-
-      if (oldhandler != NULL)
-        {
-          _warn("WARNING: oldhandler:%p is not NULL!  "
-                "Button events may be lost or aliased!\n",
-                oldhandler);
-        }
+  (void)board_button_irq(0, button_handler, NULL);
 #endif
 }
 

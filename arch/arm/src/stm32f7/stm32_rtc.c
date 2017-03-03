@@ -1037,7 +1037,7 @@ int up_rtc_initialize(void)
    * 3. Configure the RTC to generate RTC alarms (Alarm A or Alarm B).
    */
 
-  stm32_exti_alarm(true, false, true, stm32_rtc_alarm_handler);
+  (void)stm32_exti_alarm(true, false, true, stm32_rtc_alarm_handler, NULL);
   rtc_dumpregs("After InitExtiAlarm");
 #else
   rtc_dumpregs("After Initialization");

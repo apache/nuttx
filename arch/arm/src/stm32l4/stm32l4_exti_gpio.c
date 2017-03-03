@@ -61,8 +61,8 @@
 
 struct gpio_callback_s
 {
-  xcpt_t callback;
-  void  *arg;
+  xcpt_t callback;   /* Callback entry point */
+  void  *arg;        /* The argument that accompanies the callback */
 };
 
 /****************************************************************************
@@ -249,23 +249,25 @@ static int stm32l4_exti1510_isr(int irq, void *context, FAR void *arg)
  * Description:
  *   Sets/clears GPIO based event and interrupt triggers.
  *
- * Parameters:
- *  - pinset:      GPIO pin configuration
- *  - risingedge:  Enables interrupt on rising edges
- *  - fallingedge: Enables interrupt on falling edges
- *  - event:       Generate event when set
- *  - func:        When non-NULL, generate interrupt
- *  - arg:         Argument passed to the interrupt callback
+ * Description:
+ *   Sets/clears GPIO based event and interrupt triggers.
  *
- * Returns:
- *   The previous value of the interrupt handler function pointer.  This
- *   value may, for example, be used to restore the previous handler when
- *   multiple handlers are used.
+ * Input Parameters:
+ *  pinset      - GPIO pin configuration
+ *  risingedge  - Enables interrupt on rising edges
+ *  fallingedge - Enables interrupt on falling edges
+ *  event       - Generate event when set
+ *  func        - When non-NULL, generate interrupt
+ *  arg         - Argument passed to the interrupt callback
  *
- ****************************************************************************/
+ * Returned Value:
+ *  Zero (OK) is returned on success, otherwise a negated errno value is returned
+ *  to indicate the nature of the failure.
+ *
+ ************************************************************************************/
 
-xcpt_t stm32l4_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
-                          bool event, xcpt_t func, void *arg)
+int stm32l4_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
+                         bool event, xcpt_t func, void *arg)
 {
   struct gpio_callback_s *shared_cbs;
   uint32_t pin = pinset & GPIO_PIN_MASK;
@@ -323,7 +325,6 @@ xcpt_t stm32l4_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
 
   /* Get the previous GPIO IRQ handler; Save the new IRQ handler. */
 
-  oldhandler                    = g_gpio_handlers[pin].callback;
   g_gpio_handlers[pin].callback = func;
   g_gpio_handlers[pin].arg      = arg;
 
@@ -385,5 +386,5 @@ xcpt_t stm32l4_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
 
   /* Return the old IRQ handler */
 
-  return oldhandler;
+  return OK;
 }

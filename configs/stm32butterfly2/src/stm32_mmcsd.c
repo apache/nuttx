@@ -1,7 +1,7 @@
 /*****************************************************************************
  * configs/stm32butterfly2/src/stm32_mmcsd.c
  *
- *   Copyright (C) 2016 Michał Łyszczek. All rights reserved.
+ *   Copyright (C) 2016-2017 Michał Łyszczek. All rights reserved.
  *   Author: Michał Łyszczek <michal.lyszczek@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -196,7 +196,7 @@ int stm32_mmcsd_initialize(int minor)
       return rv;
     }
 
-  stm32_gpiosetevent(GPIO_SD_CD, true, true, true, stm32_cd, NULL);
+  (void)stm32_gpiosetevent(GPIO_SD_CD, true, true, true, stm32_cd, NULL);
 
   sem_init(&g_cdsem, 0, 0);
   pthread_attr_init(&pattr);

@@ -1,7 +1,7 @@
 /****************************************************************************
  *  arch/arm/src/kinetis/kinetis_pinirq.c
  *
- *   Copyright (C) 2011, 2013, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -262,21 +262,20 @@ void kinetis_pinirqinitialize(void)
  *   3. Call kinetis_pinirqenable() to enable interrupts on the pin.
  *
  * Parameters:
- *  - pinset:  Pin configuration
- *  - pinisr:  Pin interrupt service routine
+ *   pinset - Pin configuration
+ *   pinisr - Pin interrupt service routine
+ *   arg    - An argument that will be provided to the interrupt service routine.
  *
  * Returns:
- *   The previous value of the interrupt handler function pointer.  This
- *   value may, for example, be used to restore the previous handler whe
- *   multiple handlers are used.
+ *   Zero (OK) is returned on success; a negated errno value is returned on any
+ *   failure to indicate the nature of the failure.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
-xcpt_t kinetis_pinirqattach(uint32_t pinset, xcpt_t pinisr, void *arg)
+int kinetis_pinirqattach(uint32_t pinset, xcpt_t pinisr, void *arg)
 {
 #ifdef HAVE_PORTINTS
   struct kinetis_pinirq_s *isrtab;
-  xcpt_t oldisr;
   irqstate_t flags;
   unsigned int port;
   unsigned int pin;
@@ -331,16 +330,15 @@ xcpt_t kinetis_pinirqattach(uint32_t pinset, xcpt_t pinisr, void *arg)
 
    /* Get the old PIN ISR and set the new PIN ISR */
 
-   oldisr              = isrtab[pin].handler;
    isrtab[pin].handler = pinisr;
    isrtab[pin].arg     = arg;
 
    /* And return the old PIN isr address */
 
    leave_critical_section(flags);
-   return oldisr;
+   return OK;
 #else
-   return NULL;
+   return -ENOSYS;
 #endif /* HAVE_PORTINTS */
 }
 

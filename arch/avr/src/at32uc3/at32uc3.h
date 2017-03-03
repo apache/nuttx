@@ -296,7 +296,7 @@ void weak_function gpio_irqinitialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_AVR32_GPIOIRQ
-int gpio_irqattach(int irq, xcpt_t newisr, xcpt_t *oldisr);
+int gpio_irqattach(int irq, xcpt_t handler, void *arg);
 #endif
 
 /****************************************************************************
