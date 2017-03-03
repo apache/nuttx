@@ -75,8 +75,8 @@ void irq_dispatch(int irq, FAR void *context)
   else
     {
 #ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
-      int ndx = g_irqmap[irq];
-      if ((unsigned)ndx >= CONFIG_ARCH_NUSER_INTERRUPTS)
+      irq_mapped_t ndx = g_irqmap[irq];
+      if (ndx >= CONFIG_ARCH_NUSER_INTERRUPTS)
         {
           vector = irq_unexpected_isr;
           arg    = NULL;

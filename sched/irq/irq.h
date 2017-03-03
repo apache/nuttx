@@ -91,9 +91,16 @@ extern struct irq_info_s g_irqvector[NR_IRQS];
 #endif
 
 #ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
-/* This is the interrupt vector mapping table */
+/* This is the interrupt vector mapping table.  This must be provided by
+ * architecture specific logic if CONFIG_ARCH_MINIMAL_VECTORTABLE is define
+ * in the configuration.
+ *
+ * REVISIT: This should be declared in include/nuttx/irq.h.  The declaration
+ * at that location, however, introduces a circular include dependency so the
+ * declaration is here for the time being.
+ */
 
-extern const irq_t g_irqmap[NR_IRQS];
+extern const irq_mapped_t g_irqmap[NR_IRQS];
 #endif
 
 #ifdef CONFIG_SMP

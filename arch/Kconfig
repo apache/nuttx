@@ -636,19 +636,19 @@ config ARCH_MINIMAL_VECTORTABLE
 		provides:
 
 		  #include <nuttx/arch.h>
-		  const irq_t g_irqmap[NR_IRQS] =
+		  const irq_mapped_t g_irqmap[NR_IRQS] =
 		  {
 		    ... IRQ to index mapping values ...
 		  };
 
 		This table is index by the hardware IRQ number and provides a value
-		in the range of 0 to CONFIG_ARCH_NUSER_INTERRUPTS that the new,
+		in the range of 0 to CONFIG_ARCH_NUSER_INTERRUPTS that is the new,
 		mapped index into the vector table.  Unused, unmapped interrupts
-		should be set to (irq_t)-1.  So, for example, if g_irqmap[37] == 24,
-		Then the hardware interrupt vector 37 will be mapped to the interrupt
-		vector table at index 24.  if g_irqmap[42] == (irq_t)-1, then hardware
-		interrupt vector 42 is not used and if it occurs will result in an
-		unexpected interrupt crash.
+		should be set to (irq_mapped_t)-1.  So, for example, if g_irqmap[37]
+		== 24, then the hardware interrupt vector 37 will be mapped to the
+		interrupt vector table at index 24.  if g_irqmap[42] ==
+		(irq_mapped_t)-1, then hardware interrupt vector 42 is not used and
+		if it occurs will result in an unexpected interrupt crash.
 
 config ARCH_NUSER_INTERRUPTS
 	int "Number of interrupts"
