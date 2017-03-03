@@ -2172,13 +2172,9 @@ static void stm32_txtimeout_expiry(int argc, uint32_t arg, ...)
 
   up_disable_irq(STM32_IRQ_ETH);
 
-  /* Cancel any pending interrupt work.  This will have no effect on work that
-   * has already been started.
+  /* Schedule to perform the TX timeout processing on the worker thread,
+   * perhaps canceling any pending IRQ processing.
    */
-
-  work_cancel(ETHWORK, &priv->irqwork);
-
-  /* Schedule to perform the TX timeout processing on the worker thread. */
 
   work_queue(ETHWORK, &priv->irqwork, stm32_txtimeout_work, priv, 0);
 }
@@ -2277,24 +2273,9 @@ static void stm32_poll_expiry(int argc, uint32_t arg, ...)
 {
   FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)arg;
 
-  /* Is our single work structure available?  It may not be if there are
-   * pending interrupt actions.
-   */
+  /* Schedule to perform the interrupt processing on the worker thread. */
 
-  if (work_available(&priv->pollwork))
-    {
-      /* Schedule to perform the interrupt processing on the worker thread. */
-
-      work_queue(ETHWORK, &priv->pollwork, stm32_poll_work, priv, 0);
-    }
-  else
-    {
-      /* No.. Just re-start the watchdog poll timer, missing one polling
-       * cycle.
-       */
-
-      (void)wd_start(priv->txpoll, STM32_WDDELAY, stm32_poll_expiry, 1, (uint32_t)priv);
-    }
+  work_queue(ETHWORK, &priv->pollwork, stm32_poll_work, priv, 0);
 }
 
 /****************************************************************************

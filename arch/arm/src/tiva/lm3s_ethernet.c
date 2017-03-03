@@ -202,7 +202,8 @@ struct tiva_driver_s
   bool     ld_bifup;           /* true:ifup false:ifdown */
   WDOG_ID  ld_txpoll;          /* TX poll timer */
   WDOG_ID  ld_txtimeout;       /* TX timeout timer */
-  struct work_s ld_work;       /* For deferring work to the work queue */
+  struct work_s ld_irqwork;    /* For deferring interrupt work to the work queue */
+  struct work_s ld_pollwork;   /* For deferring poll work to the work queue */
 
   /* This holds the information visible to the NuttX network */
 
@@ -1093,13 +1094,9 @@ static int tiva_interrupt(int irq, void *context, FAR void *arg)
        wd_cancel(priv->ld_txtimeout);
     }
 
-  /* Cancel any pending poll work */
-
-  work_cancel(ETHWORK, &priv->ld_work);
-
   /* Schedule to perform the interrupt processing on the worker thread. */
 
-  work_queue(ETHWORK, &priv->ld_work, tiva_interrupt_work, priv, 0);
+  work_queue(ETHWORK, &priv->ld_irqwork, tiva_interrupt_work, priv, 0);
   return OK;
 }
 
@@ -1176,15 +1173,9 @@ static void tiva_txtimeout_expiry(int argc, wdparm_t arg, ...)
   up_disable_irq(TIVA_IRQ_ETHCON);
 #endif
 
-  /* Cancel any pending poll or interrupt work.  This will have no effect
-   * on work that has already been started.
-   */
-
-  work_cancel(ETHWORK, &priv->ld_work);
-
   /* Schedule to perform the TX timeout processing on the worker thread. */
 
-  work_queue(ETHWORK, &priv->ld_work, tiva_txtimeout_work, priv, 0);
+  work_queue(ETHWORK, &priv->ld_irqwork, tiva_txtimeout_work, priv, 0);
 }
 
 /****************************************************************************
@@ -1256,25 +1247,9 @@ static void tiva_poll_expiry(int argc, wdparm_t arg, ...)
 {
   struct tiva_driver_s *priv = (struct tiva_driver_s *)arg;
 
-  /* Is our single work structure available?  It may not be if there are
-   * pending interrupt actions.
-   */
+  /* Schedule to perform the interrupt processing on the worker thread. */
 
-  if (work_available(&priv->ld_work))
-    {
-      /* Schedule to perform the interrupt processing on the worker thread. */
-
-      work_queue(ETHWORK, &priv->ld_work, tiva_poll_work, priv, 0);
-    }
-  else
-    {
-      /* No.. Just re-start the watchdog poll timer, missing one polling
-       * cycle.
-       */
-
-      (void)wd_start(priv->ld_txpoll, TIVA_WDDELAY, tiva_poll_expiry,
-                     1, arg);
-    }
+  work_queue(ETHWORK, &priv->ld_pollwork, tiva_poll_work, priv, 0);
 }
 
 /****************************************************************************
@@ -1587,11 +1562,11 @@ static int tiva_txavail(struct net_driver_s *dev)
    * availability action.
    */
 
-  if (work_available(&priv->ld_work))
+  if (work_available(&priv->ld_pollwork))
     {
       /* Schedule to serialize the poll on the worker thread. */
 
-      work_queue(ETHWORK, &priv->ld_work, tiva_txavail_work, priv, 0);
+      work_queue(ETHWORK, &priv->ld_pollwork, tiva_txavail_work, priv, 0);
     }
 
   return OK;

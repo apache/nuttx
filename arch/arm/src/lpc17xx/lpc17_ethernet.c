@@ -1221,11 +1221,9 @@ static int lpc17_interrupt(int irq, void *context, FAR void *arg)
               priv->lp_inten &= ~ETH_RXINTS;
               lpc17_putreg(priv->lp_inten, LPC17_ETH_INTEN);
 
-              /* Cancel any pending RX done work */
-
-              work_cancel(ETHWORK, &priv->lp_rxwork);
-
-              /* Schedule RX-related work to be performed on the work thread */
+              /* Schedule RX-related work to be performed on the work thread,
+               * perhaps cancelling any pending RX work.
+               */
 
               work_queue(ETHWORK, &priv->lp_rxwork, (worker_t)lpc17_rxdone_work,
                          priv, 0);
@@ -1262,8 +1260,6 @@ static int lpc17_interrupt(int irq, void *context, FAR void *arg)
 
           if ((status & ETH_INT_TXDONE) != 0)
             {
-              int delay;
-
               NETDEV_TXDONE(&priv->lp_dev);
 
               /* A packet transmission just completed */
@@ -1285,30 +1281,9 @@ static int lpc17_interrupt(int irq, void *context, FAR void *arg)
 
               work_cancel(ETHWORK, &priv->lp_txwork);
 
-              /* Check if the poll timer is running.  If it is not, then
-               * start it now.  There is a race condition here:  We may test
-               * the time remaining on the poll timer and determine that it
-               * is still running, but then the timer expires immiately.
-               * That should not be problem, however, the poll timer is
-               * queued for processing should be in the work queue and
-               * should execute immediately after we complete the TX poll.
-               * Inefficient, but not fatal.
+              /* Schedule TX-related work to be performed on the work thread,
+               * perhaps cancelling any pending TX work.
                */
-
-              delay = wd_gettime(priv->lp_txpoll);
-              if (delay <= 0)
-                {
-                  /* The poll timer is not running .. restart it.  This is
-                   * necessary to avoid certain race conditions where the
-                   * polling sequence can be interrupted.
-                   */
-
-
-                  (void)wd_start(priv->lp_txpoll, LPC17_WDDELAY,
-                                 lpc17_poll_expiry, 1, priv);
-                }
-
-              /* Schedule TX-related work to be performed on the work thread */
 
               work_queue(ETHWORK, &priv->lp_txwork, (worker_t)lpc17_txdone_work,
                          priv, 0);
@@ -1496,24 +1471,9 @@ static void lpc17_poll_expiry(int argc, uint32_t arg, ...)
 
   DEBUGASSERT(arg);
 
-  /* Is our single work structure available?  It may not be if there are
-   * pending interrupt actions.
-   */
+  /* Schedule to perform the interrupt processing on the worker thread. */
 
-  if (work_available(&priv->lp_pollwork))
-    {
-      /* Schedule to perform the interrupt processing on the worker thread. */
-
-      work_queue(ETHWORK, &priv->lp_pollwork, lpc17_poll_work, priv, 0);
-    }
-  else
-    {
-      /* No.. Just re-start the watchdog poll timer, missing one polling
-       * cycle.
-       */
-
-      (void)wd_start(priv->lp_txpoll, LPC17_WDDELAY, lpc17_poll_expiry, 1, arg);
-    }
+  work_queue(ETHWORK, &priv->lp_pollwork, lpc17_poll_work, priv, 0);
 }
 
 /****************************************************************************

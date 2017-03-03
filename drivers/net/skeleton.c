@@ -116,7 +116,8 @@ struct skel_driver_s
   bool sk_bifup;               /* true:ifup false:ifdown */
   WDOG_ID sk_txpoll;           /* TX poll timer */
   WDOG_ID sk_txtimeout;        /* TX timeout timer */
-  struct work_s sk_work;       /* For deferring work to the work queue */
+  struct work_s sk_irqwork;    /* For deferring interupt work to the work queue */
+  struct work_s sk_pollwork;   /* For deferring poll work to the work queue */
 
   /* This holds the information visible to the NuttX network */
 
@@ -477,26 +478,6 @@ static void skel_txdone(FAR struct skel_driver_s *priv)
 
   wd_cancel(priv->sk_txtimeout);
 
-  /* Check if the poll timer is running.  If it is not, then start it now.
-   * There is a race condition here:  We may test the time remaining on the
-   * poll timer and determine that it is still running, but then the timer
-   * expires immiately.  That should not be problem, however, the poll timer
-   * processing should be in the work queue and should execute immediately
-   * after we complete the TX poll. Inefficient, but not fatal.
-   */
-
-  delay = wd_gettime(priv->sk_txpoll);
-  if (delay <= 0)
-    {
-      /* The poll timer is not running .. restart it.  This is necessary to
-       * avoid certain race conditions where the polling sequence can be
-       * interrupted.
-       */
-
-      (void)wd_start(priv->sk_txpoll, skeleton_WDDELAY, skel_poll_expiry,
-                     1, (wdparm_t)priv);
-    }
-
   /* And disable further TX interrupts. */
 
   /* In any event, poll the network for new TX data */
@@ -588,13 +569,9 @@ static int skel_interrupt(int irq, FAR void *context, FAR void *arg)
        wd_cancel(priv->sk_txtimeout);
     }
 
-  /* Cancel any pending poll work */
-
-  work_cancel(ETHWORK, &priv->sk_work);
-
   /* Schedule to perform the interrupt processing on the worker thread. */
 
-  work_queue(ETHWORK, &priv->sk_work, skel_interrupt_work, priv, 0);
+  work_queue(ETHWORK, &priv->sk_irqwork, skel_interrupt_work, priv, 0);
   return OK;
 }
 
@@ -662,15 +639,9 @@ static void skel_txtimeout_expiry(int argc, wdparm_t arg, ...)
 
   up_disable_irq(CONFIG_skeleton_IRQ);
 
-  /* Cancel any pending poll or interrupt work.  This will have no effect
-   * on work that has already been started.
-   */
-
-  work_cancel(ETHWORK, &priv->sk_work);
-
   /* Schedule to perform the TX timeout processing on the worker thread. */
 
-  work_queue(ETHWORK, &priv->sk_work, skel_txtimeout_work, priv, 0);
+  work_queue(ETHWORK, &priv->sk_irqwork, skel_txtimeout_work, priv, 0);
 }
 
 /****************************************************************************
@@ -758,24 +729,9 @@ static void skel_poll_expiry(int argc, wdparm_t arg, ...)
 {
   FAR struct skel_driver_s *priv = (FAR struct skel_driver_s *)arg;
 
-  /* Is our single work structure available?  It may not be if there are
-   * pending interrupt actions.
-   */
+  /* Schedule to perform the interrupt processing on the worker thread. */
 
-  if (work_available(&priv->sk_work))
-    {
-      /* Schedule to perform the interrupt processing on the worker thread. */
-
-      work_queue(ETHWORK, &priv->sk_work, skel_poll_work, priv, 0);
-    }
-  else
-    {
-      /* No.. Just re-start the watchdog poll timer, missing one polling
-       * cycle.
-       */
-
-      (void)wd_start(priv->sk_txpoll, skeleton_WDDELAY, skel_poll_expiry, 1, arg);
-    }
+  work_queue(ETHWORK, &priv->sk_pollwork, skel_poll_work, priv, 0);
 }
 
 /****************************************************************************
@@ -940,11 +896,11 @@ static int skel_txavail(FAR struct net_driver_s *dev)
    * availability action.
    */
 
-  if (work_available(&priv->sk_work))
+  if (work_available(&priv->sk_pollwork))
     {
       /* Schedule to serialize the poll on the worker thread. */
 
-      work_queue(ETHWORK, &priv->sk_work, skel_txavail_work, priv, 0);
+      work_queue(ETHWORK, &priv->sk_pollwork, skel_txavail_work, priv, 0);
     }
 
   return OK;

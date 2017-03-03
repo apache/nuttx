@@ -626,7 +626,9 @@ struct tiva_ethmac_s
   uint8_t              fduplex : 1; /* Full (vs. half) duplex */
   WDOG_ID              txpoll;      /* TX poll timer */
   WDOG_ID              txtimeout;   /* TX timeout timer */
-  struct work_s        work;        /* For deferring work to the work queue */
+  struct work_s        irqwork;     /* For deferring interrupt work to the work queue */
+  struct work_s        pollwork;    /* For deferring poll work to the work queue */
+
 #ifdef CONFIG_TIVA_PHY_INTERRUPTS
   xcpt_t               handler;     /* Attached PHY interrupt handler */
   void                *arg;         /* Argument that accompanies the interrupt */
@@ -1956,32 +1958,9 @@ static void tiva_txdone(FAR struct tiva_ethmac_s *priv)
 
   if (priv->inflight <= 0)
     {
-      int delay;
-
       /* Cancel the TX timeout */
 
       wd_cancel(priv->txtimeout);
-
-      /* Check if the poll timer is running.  If it is not, then start it
-       * now.  There is a race condition here:  We may test the time
-       * remaining on the poll timer and determine that it is still running,
-       * but then the timer expires immiately.  That should not be problem,
-       * however, the poll timer processing should be in the work queue and
-       * should execute immediately after we complete the TX poll.
-       * Inefficient, but not fatal.
-       */
-
-      delay = wd_gettime(priv->txpoll);
-      if (delay <= 0)
-        {
-          /* The poll timer is not running .. restart it.  This is necessary
-           * to avoid certain race conditions where the polling sequence can
-           * be interrupted.
-           */
-
-          (void)wd_start(priv->txpoll, TIVA_WDDELAY, tiva_poll_expiry,
-                         1, (uint32_t)priv);
-        }
 
       /* And disable further TX interrupts. */
 
@@ -2146,13 +2125,9 @@ static int tiva_interrupt(int irq, FAR void *context, FAR void *arg)
            wd_cancel(priv->txtimeout);
         }
 
-      /* Cancel any pending poll work */
-
-      work_cancel(ETHWORK, &priv->work);
-
       /* Schedule to perform the interrupt processing on the worker thread. */
 
-      work_queue(ETHWORK, &priv->work, tiva_interrupt_work, priv, 0);
+      work_queue(ETHWORK, &priv->irqwork, tiva_interrupt_work, priv, 0);
     }
 
 #ifdef CONFIG_TIVA_PHY_INTERRUPTS
@@ -2243,15 +2218,9 @@ static void tiva_txtimeout_expiry(int argc, uint32_t arg, ...)
 
   up_disable_irq(TIVA_IRQ_ETHCON);
 
-  /* Cancel any pending poll or interrupt work.  This will have no effect
-   * on work that has already been started.
-   */
-
-  work_cancel(ETHWORK, &priv->work);
-
   /* Schedule to perform the TX timeout processing on the worker thread. */
 
-  work_queue(ETHWORK, &priv->work, tiva_txtimeout_work, priv, 0);
+  work_queue(ETHWORK, &priv->irqwork, tiva_txtimeout_work, priv, 0);
 }
 
 /****************************************************************************
@@ -2349,25 +2318,9 @@ static void tiva_poll_expiry(int argc, uint32_t arg, ...)
 {
   FAR struct tiva_ethmac_s *priv = (FAR struct tiva_ethmac_s *)arg;
 
-  /* Is our single work structure available?  It may not be if there are
-   * pending interrupt actions.
-   */
+  /* Schedule to perform the interrupt processing on the worker thread. */
 
-  if (work_available(&priv->work))
-    {
-      /* Schedule to perform the interrupt processing on the worker thread. */
-
-      work_queue(ETHWORK, &priv->work, tiva_poll_work, priv, 0);
-    }
-  else
-    {
-      /* No.. Just re-start the watchdog poll timer, missing one polling
-       * cycle.
-       */
-
-      (void)wd_start(priv->txpoll, TIVA_WDDELAY, tiva_poll_expiry,
-                     1, (uint32_t)priv);
-    }
+  work_queue(ETHWORK, &priv->pollwork, tiva_poll_work, priv, 0);
 }
 
 /****************************************************************************
@@ -2537,11 +2490,11 @@ static int tiva_txavail(struct net_driver_s *dev)
    * availability action.
    */
 
-  if (work_available(&priv->work))
+  if (work_available(&priv->pollwork))
     {
       /* Schedule to serialize the poll on the worker thread. */
 
-      work_queue(ETHWORK, &priv->work, tiva_txavail_work, priv, 0);
+      work_queue(ETHWORK, &priv->pollwork, tiva_txavail_work, priv, 0);
     }
 
   return OK;
