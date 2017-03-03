@@ -325,7 +325,7 @@ int kinetis_pinirqattach(uint32_t pinset, xcpt_t pinisr, void *arg)
 #endif
       default:
         leave_critical_section(flags);
-        return NULL;
+        return -EINVAL;
     }
 
    /* Get the old PIN ISR and set the new PIN ISR */
