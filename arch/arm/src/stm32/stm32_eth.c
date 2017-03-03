@@ -1928,8 +1928,6 @@ static void stm32_txdone(FAR struct stm32_ethmac_s *priv)
 
   if (priv->inflight <= 0)
     {
-      int delay;
-
       /* Cancel the TX timeout */
 
       wd_cancel(priv->txtimeout);
