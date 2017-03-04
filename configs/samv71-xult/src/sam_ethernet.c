@@ -319,7 +319,7 @@ int arch_phy_irq(FAR const char *intf, xcpt_t handler, void *arg,
   else
     {
       nerr("ERROR: Unsupported interface: %s\n", intf);
-      return NULL;
+      return -EINVAL;
     }
 
   /* Disable interrupts until we are done.  This guarantees that the
