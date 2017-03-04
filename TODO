@@ -1055,8 +1055,12 @@ o Network (net/, drivers/net)
                additional mechanism would have to be added to enforce that
                serialization.
 
-               See nuttx/drivers/net/skeleton.c for an example of how
-               serialization may be added to an Ethernet driver.
+               NOTE:  Most drivers will call net_lock() and net_unlock() around
+               the critical portions of the driver work.  In that case, all work
+               will be properly serialized.  This issue only applies to drivers
+               that may perform operations that require protection outside of
+               the net_lock'ed region.  Sometimes, this may require extending
+               the netlock() to be beginning of the driver work function.
 
   Status:      Open
   Priority:    High if you happen to be using Ethernet in this configuration.

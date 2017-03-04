@@ -1223,14 +1223,14 @@ config SCHED_LPNTHREADS
 		Such behavior is necessary to support asynchronous I/O, AIO (for
 		example).
 
-		CAUTION: Some drivers, such as most Ethernet drivers, use the work
-		queue to serialize network operations.  The will also use the low-
-		priority work queue if it is available.  If there are multiple low-
-		priority worker thread, then this can result in the loss of that
-		serialization.  There may be concurrent Ethernet operations running
-		on different LP threads and this could lead to a failure.  You may
-		need to visit the use of the LP work queue on your configuration
-		is you select CONFIG_SCHED_LPNTHREADS > 1
+		CAUTION: Some drivers may use the work queue to serialize
+		operations.  The may also use the low-priority work queue if it is
+		available.  If there are multiple low-priority worker thread, then
+		this can result in the loss of that serialization.  There may be
+		concurrent driver operations running on different LP threads and
+		this could lead to a failure.  You may need to visit the use of the
+		LP work queue on your configuration is you select
+		CONFIG_SCHED_LPNTHREADS > 1
 
 config SCHED_LPWORKPRIORITY
 	int "Low priority worker thread priority"
