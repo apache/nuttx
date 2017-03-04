@@ -524,7 +524,7 @@ static inline int task_stackargsetup(FAR struct task_tcb_s *tcb,
    */
 
   argc = 0;
-  if (argv)
+  if (argv != NULL)
     {
       /* A NULL argument terminates the list */
 
