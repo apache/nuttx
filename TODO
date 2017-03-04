@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated February 12, 2017)
+NuttX TODO List (Last updated March 4, 2017)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -1054,6 +1054,12 @@ o Network (net/, drivers/net)
                serialize data.  In the case of muliple LP threads, some
                additional mechanism would have to be added to enforce that
                serialization.
+
+               See nuttx/drivers/net/skeleton.c for an example of how
+               serialization may be added to an Ethernet driver.
+
+  Status:      Open
+  Priority:    High if you happen to be using Ethernet in this configuration.
 
 o USB (drivers/usbdev, drivers/usbhost)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

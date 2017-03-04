@@ -43,6 +43,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <time.h>
+#include <semaphore.h>
 #include <string.h>
 #include <errno.h>
 #include <assert.h>
@@ -68,19 +69,30 @@
  * is required.
  */
 
+#undef ETH_SERIALIZATION
+
 #if !defined(CONFIG_SCHED_WORKQUEUE)
 #  error Work queue support is required in this configuration (CONFIG_SCHED_WORKQUEUE)
 #else
 
-  /* Use the low priority work queue if possible */
+   /* Use the low priority work queue if possible */
 
 #  if defined(CONFIG_skeleton_HPWORK)
 #    define ETHWORK HPWORK
 #  elif defined(CONFIG_skeleton_LPWORK)
 #    define ETHWORK LPWORK
+
+     /* Serialization may be required in the special case where there are
+      * multiple low priority work queues.
+      */
+
+#    if CONFIG_SCHED_LPNTHREADS > 1
+#      define ETH_SERIALIZATION 1
+#    endif
 #  else
 #    error Neither CONFIG_skeleton_HPWORK nor CONFIG_skeleton_LPWORK defined
 #  endif
+
 #endif
 
 /* CONFIG_skeleton_NINTERFACES determines the number of physical interfaces
@@ -118,6 +130,9 @@ struct skel_driver_s
   WDOG_ID sk_txtimeout;        /* TX timeout timer */
   struct work_s sk_irqwork;    /* For deferring interupt work to the work queue */
   struct work_s sk_pollwork;   /* For deferring poll work to the work queue */
+#ifdef ETH_SERIALIZATION
+  sem_t sk_lock;               /* Serialization semaphore */
+#endif
 
   /* This holds the information visible to the NuttX network */
 
@@ -146,6 +161,17 @@ static struct skel_driver_s g_skel[CONFIG_skeleton_NINTERFACES];
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
+#ifdef ETH_SERIALIZATION
+/* Serialization support */
+
+static void skel_lock(FAR struct skel_driver_s *priv);
+#  define skel_unlock(p) (void)sem_post(&(p)->sk_lock)
+
+#else
+#  define skel_lock(p)
+#  define skel_unlock(p)
+#endif
 
 /* Common TX logic */
 
@@ -189,6 +215,36 @@ static void skel_ipv6multicast(FAR struct skel_driver_s *priv);
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Function: skel_lock
+ *
+ * Description:
+ *   When there are multiple LP work queues, we must force serialization of
+ *   work.
+ *
+ * Parameters:
+ *   priv - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Called in the context of thread of the LP work queue.
+ *
+ ****************************************************************************/
+
+#ifdef ETH_SERIALIZATION
+static void skel_lock(FAR struct skel_driver_s *priv)
+{
+  while (sem_wait(&priv->sk_lock) < 0)
+    {
+      /* EINTR is the only expected error value */
+
+      DEBUGASSERT(errno == EINTR);
+    }
+}
+#endif
 
 /****************************************************************************
  * Function: skel_transmit
@@ -506,6 +562,8 @@ static void skel_interrupt_work(FAR void *arg)
 {
   FAR struct skel_driver_s *priv = (FAR struct skel_driver_s *)arg;
 
+  skel_lock(priv);
+
   /* Process pending Ethernet interrupts */
 
   /* Get and clear interrupt status bits */
@@ -528,6 +586,7 @@ static void skel_interrupt_work(FAR void *arg)
   /* Re-enable Ethernet interrupts */
 
   up_enable_irq(CONFIG_skeleton_IRQ);
+  skel_unlock(priv);
 }
 
 /****************************************************************************
@@ -596,6 +655,8 @@ static void skel_txtimeout_work(FAR void *arg)
 {
   FAR struct skel_driver_s *priv = (FAR struct skel_driver_s *)arg;
 
+  skel_lock(priv);
+
   /* Increment statistics and dump debug info */
 
   NETDEV_TXTIMEOUTS(priv->sk_dev);
@@ -607,6 +668,8 @@ static void skel_txtimeout_work(FAR void *arg)
   net_lock();
   (void)devif_poll(&priv->sk_dev, skel_txpoll);
   net_unlock();
+
+  skel_unlock(priv);
 }
 
 /****************************************************************************
@@ -686,6 +749,8 @@ static void skel_poll_work(FAR void *arg)
 {
   FAR struct skel_driver_s *priv = (FAR struct skel_driver_s *)arg;
 
+  skel_lock(priv);
+
   /* Perform the poll */
 
   /* Check if there is room in the send another TX packet.  We cannot perform
@@ -705,6 +770,8 @@ static void skel_poll_work(FAR void *arg)
   (void)wd_start(priv->sk_txpoll, skeleton_WDDELAY, skel_poll_expiry, 1,
                  (wdparm_t)priv);
   net_unlock();
+
+  skel_unlock(priv);
 }
 
 /****************************************************************************
@@ -853,6 +920,8 @@ static void skel_txavail_work(FAR void *arg)
 {
   FAR struct skel_driver_s *priv = (FAR struct skel_driver_s *)arg;
 
+  skel_lock(priv);
+
   /* Ignore the notification if the interface is not yet up */
 
   net_lock();
@@ -866,6 +935,7 @@ static void skel_txavail_work(FAR void *arg)
     }
 
   net_unlock();
+  skel_unlock(priv);
 }
 
 /****************************************************************************
@@ -1095,6 +1165,12 @@ int skel_initialize(int intf)
 
   priv->sk_txpoll       = wd_create();    /* Create periodic poll timer */
   priv->sk_txtimeout    = wd_create();    /* Create TX timeout timer */
+
+#ifdef ETH_SERIALIZATION
+  /* Initialize the serialization semaphore */
+
+  sem_init(&priv->sk_lock, 0, 1);
+#endif
 
   /* Put the interface in the down state.  This usually amounts to resetting
    * the device and/or calling skel_ifdown().
