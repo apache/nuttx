@@ -253,7 +253,7 @@ static void stmpe811_enable(FAR struct stmpe811_config_s *state, bool enable)
      (void)stm32_gpiosetevent(GPIO_IO_EXPANDER, false, false, false,
                               NULL, NULL);
     }
-`
+
   leave_critical_section(flags);
 }
 
