@@ -1423,7 +1423,7 @@ static int up_interrupt(int irq, FAR void *context, FAR void *arg)
   int  passes;
   bool handled;
 
-  DEBUGASSERt(priv != NULL);
+  DEBUGASSERT(priv != NULL);
 
   /* Report serial activity to the power management logic */
 
