@@ -2060,4 +2060,4 @@
 #define HRTIM_BDMADR_SHIFT             0         /* Bits 0-31: Burst DMA Data register */
 #define HRTIM_BDMADR_MASK              (0xffffffff << HRTIM_BDMADR_SHIFT)
 
-#endif                          /* __ARCH_ARM_SRC_STM32_CHIP_STM32_HRTIM_H */
+#endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32_HRTIM_H */
