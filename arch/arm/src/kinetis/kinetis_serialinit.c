@@ -69,6 +69,7 @@
  *
  ****************************************************************************/
 
+#ifdef defined(USE_EARLYSERIALINIT)
 void kinetis_earlyserialinit(void)
 {
 #if defined(HAVE_UART_DEVICE)
@@ -83,6 +84,7 @@ void kinetis_earlyserialinit(void)
   kinetis_lpuart_earlyserialinit();
 #endif
 }
+#endif
 
 #ifdef USE_SERIALDRIVER
 
