@@ -69,7 +69,7 @@
  *
  ****************************************************************************/
 
-#ifdef defined(USE_EARLYSERIALINIT)
+#if defined(USE_EARLYSERIALINIT)
 void kinetis_earlyserialinit(void)
 {
 #if defined(HAVE_UART_DEVICE)
@@ -86,7 +86,7 @@ void kinetis_earlyserialinit(void)
 }
 #endif
 
-#ifdef USE_SERIALDRIVER
+#if defined(USE_SERIALDRIVER)
 
 /****************************************************************************
  * Name: up_serialinit
