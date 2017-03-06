@@ -68,7 +68,7 @@ static int statpseudofs(FAR struct inode *inode, FAR struct statfs *buf)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stat
+ * Name: statfs
  *
  * Return: Zero on success; -1 on failure with errno set:
  *

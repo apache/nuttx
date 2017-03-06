@@ -94,7 +94,7 @@ volatile uint32_t *g_current_regs[1];
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_FEATURES
-static int sam_nmi(int irq, FAR void *context)
+static int sam_nmi(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
   _err("PANIC!!! NMI received\n");
@@ -102,7 +102,7 @@ static int sam_nmi(int irq, FAR void *context)
   return 0;
 }
 
-static int sam_pendsv(int irq, FAR void *context)
+static int sam_pendsv(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
   _err("PANIC!!! PendSV received\n");
@@ -110,7 +110,7 @@ static int sam_pendsv(int irq, FAR void *context)
   return 0;
 }
 
-static int sam_reserved(int irq, FAR void *context)
+static int sam_reserved(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
   _err("PANIC!!! Reserved interrupt\n");
@@ -187,15 +187,15 @@ void up_irqinitialize(void)
    * under certain conditions.
    */
 
-  irq_attach(SAM_IRQ_SVCALL, up_svcall);
-  irq_attach(SAM_IRQ_HARDFAULT, up_hardfault);
+  irq_attach(SAM_IRQ_SVCALL, up_svcall, NULL);
+  irq_attach(SAM_IRQ_HARDFAULT, up_hardfault, NULL);
 
   /* Attach all other processor exceptions (except reset and sys tick) */
 
 #ifdef CONFIG_DEBUG_FEATURES
-  irq_attach(SAM_IRQ_NMI, sam_nmi);
-  irq_attach(SAM_IRQ_PENDSV, sam_pendsv);
-  irq_attach(SAM_IRQ_RESERVED, sam_reserved);
+  irq_attach(SAM_IRQ_NMI, sam_nmi, NULL);
+  irq_attach(SAM_IRQ_PENDSV, sam_pendsv, NULL);
+  irq_attach(SAM_IRQ_RESERVED, sam_reserved, NULL);
 #endif
 
   sam_dumpnvic("initial", NR_IRQS);

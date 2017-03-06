@@ -64,7 +64,7 @@
  *
  ****************************************************************************/
 
-static int imx_timerisr(int irq, uint32_t *regs)
+static int imx_timerisr(int irq, uint32_t *regs, FAR void *arg)
 {
   uint32_t tstat;
   int    ret = -EIO;
@@ -150,7 +150,7 @@ void arm_timer_initialize(void)
 
   /* Attach and enable the timer interrupt */
 
-  irq_attach(IMX_IRQ_SYSTIMER, (xcpt_t)imx_timerisr);
+  irq_attach(IMX_IRQ_SYSTIMER, (xcpt_t)imx_timerisr, NULL);
   up_enable_irq(IMX_IRQ_SYSTIMER);
 }
 

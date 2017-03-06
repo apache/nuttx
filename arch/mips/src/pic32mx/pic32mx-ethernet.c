@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/mips/src/pic32mx/pic32mx_ethernet.c
  *
- *   Copyright (C) 2012, 2014-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * This driver derives from the PIC32MX Ethernet Driver
@@ -321,7 +321,8 @@ struct pic32mx_driver_s
   uint32_t   pd_inten;          /* Shadow copy of INTEN register */
   WDOG_ID    pd_txpoll;         /* TX poll timer */
   WDOG_ID    pd_txtimeout;      /* TX timeout timer */
-  struct work_s pd_work;        /* For deferring work to the work queue */
+  struct work_s pd_irqwork;     /* For deferring interrupt work to the work queue */
+  struct work_s pd_pollwork;    /* For deferring poll work to the work queue */
 
   sq_queue_t pd_freebuffers;    /* The free buffer list */
 
@@ -395,7 +396,7 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv);
 static void pic32mx_txdone(struct pic32mx_driver_s *priv);
 
 static void pic32mx_interrupt_work(void *arg);
-static int  pic32mx_interrupt(int irq, void *context);
+static int  pic32mx_interrupt(int irq, void *context, FAR void *arg);
 
 /* Watchdog timer expirations */
 
@@ -1853,7 +1854,7 @@ static void pic32mx_interrupt_work(void *arg)
  *
  ****************************************************************************/
 
-static int pic32mx_interrupt(int irq, void *context)
+static int pic32mx_interrupt(int irq, void *context, FAR void *arg)
 {
   struct pic32mx_driver_s *priv;
   uint32_t status;
@@ -1891,13 +1892,9 @@ static int pic32mx_interrupt(int irq, void *context)
        wd_cancel(priv->pd_txtimeout);
     }
 
-  /* Cancel any pending poll work */
-
-  work_cancel(HPWORK, &priv->pd_work);
-
   /* Schedule to perform the interrupt processing on the worker thread. */
 
-  work_queue(ETHWORK, &priv->pd_work, pic32mx_interrupt_work, priv, 0);
+  work_queue(ETHWORK, &priv->pd_irqwork, pic32mx_interrupt_work, priv, 0);
   return OK;
 }
 
@@ -1978,15 +1975,9 @@ static void pic32mx_txtimeout_expiry(int argc, wdparm_t arg, ...)
   up_disable_irq(PIC32MX_IRQSRC_ETH);
 #endif
 
-  /* Cancel any pending poll or interrupt work.  This will have no effect
-   * on work that has already been started.
-   */
-
-  work_cancel(ETHWORK, &priv->pd_work);
-
   /* Schedule to perform the TX timeout processing on the worker thread. */
 
-  work_queue(ETHWORK, &priv->pd_work, pic32mx_txtimeout_work, priv, 0);
+  work_queue(ETHWORK, &priv->pd_irqwork, pic32mx_txtimeout_work, priv, 0);
 }
 
 /****************************************************************************
@@ -2054,25 +2045,9 @@ static void pic32mx_poll_expiry(int argc, wdparm_t arg, ...)
 {
   struct pic32mx_driver_s *priv = (struct pic32mx_driver_s *)arg;
 
-  /* Is our single work structure available?  It may not be if there are
-   * pending interrupt actions.
-   */
+  /* Schedule to perform the interrupt processing on the worker thread. */
 
-  if (work_available(&priv->pd_work))
-    {
-      /* Schedule to perform the interrupt processing on the worker thread. */
-
-      work_queue(ETHWORK, &priv->pd_work, pic32mx_poll_work, priv, 0);
-    }
-  else
-    {
-      /* No.. Just re-start the watchdog poll timer, missing one polling
-       * cycle.
-       */
-
-      (void)wd_start(priv->pd_txpoll, PIC32MX_WDDELAY, pic32mx_poll_expiry,
-                     1, arg);
-    }
+  work_queue(ETHWORK, &priv->pd_pollwork, pic32mx_poll_work, priv, 0);
 }
 
 /****************************************************************************
@@ -2491,11 +2466,11 @@ static int pic32mx_txavail(struct net_driver_s *dev)
    * availability action.
    */
 
-  if (work_available(&priv->pd_work))
+  if (work_available(&priv->pd_pollwork))
     {
       /* Schedule to serialize the poll on the worker thread. */
 
-      work_queue(ETHWORK, &priv->pd_work, pic32mx_txavail_work, priv, 0);
+      work_queue(ETHWORK, &priv->pd_pollwork, pic32mx_txavail_work, priv, 0);
     }
 
   return OK;
@@ -3388,9 +3363,9 @@ static inline int pic32mx_ethinitialize(int intf)
   /* Attach the IRQ to the driver */
 
 #if CONFIG_PIC32MX_NINTERFACES > 1
-  ret = irq_attach(priv->pd_irq, pic32mx_interrupt);
+  ret = irq_attach(priv->pd_irq, pic32mx_interrupt, NULL);
 #else
-  ret = irq_attach(PIC32MX_IRQ_ETH, pic32mx_interrupt);
+  ret = irq_attach(PIC32MX_IRQ_ETH, pic32mx_interrupt, NULL);
 #endif
   if (ret != 0)
     {

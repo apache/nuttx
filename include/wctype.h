@@ -81,6 +81,14 @@ typedef int wctrans_t;
  * Public Function Prototypes
  ****************************************************************************/
 
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
 /* "The <wchar.h> header declares the following as functions and may also
  *  define them as macros. Function prototypes must be provided for use with
  *  an ISO C compiler."
@@ -107,5 +115,10 @@ wint_t            towupper(wint_t);
 wctrans_t         wctrans(FAR const char *);
 int               iswctype(wint_t, wctype_t);
 wctype_t          wctype(FAR const char *);
+
+#undef EXTERN
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* INCLUDE_WTYPE_H */

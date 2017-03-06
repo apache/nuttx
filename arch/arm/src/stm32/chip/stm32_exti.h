@@ -55,7 +55,7 @@
 #    define STM32_NEXTI          19
 #    define STM32_EXTI_MASK      0x0007ffff
 #  endif
-#elif defined(CONFIG_STM32_STM32F30XX)
+#elif defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX)
 #    define STM32_NEXTI1         31
 #    define STM32_EXTI1_MASK     0xffffffff
 #    define STM32_NEXTI2         4
@@ -69,7 +69,7 @@
 
 /* Register Offsets *****************************************************************/
 
-#if defined(CONFIG_STM32_STM32F30XX)
+#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX)
 #  define STM32_EXTI1_OFFSET     0x0000  /* Offset to EXTI1 registers */
 #  define STM32_EXTI2_OFFSET     0x0018  /* Offset to EXTI2 registers */
 #endif
@@ -83,7 +83,7 @@
 
 /* Register Addresses ***************************************************************/
 
-#if defined(CONFIG_STM32_STM32F30XX)
+#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX)
 #  define STM32_EXTI1_BASE       (STM32_EXTI_BASE+STM32_EXTI1_OFFSET)
 #  define STM32_EXTI2_BASE       (STM32_EXTI_BASE+STM32_EXTI2_OFFSET)
 
@@ -146,7 +146,8 @@
 #  define EXTI_RTC_TAMPER        (1 << 21) /* EXTI line 21 is connected to the RTC Tamper and TimeStamp events */
 #  define EXTI_RTC_TIMESTAMP     (1 << 21) /* EXTI line 21 is connected to the RTC Tamper and TimeStamp events */
 #  define EXTI_RTC_WAKEUP        (1 << 22) /* EXTI line 22 is connected to the RTC Wakeup event */
-#elif defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
+#elif defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
+      defined(CONFIG_STM32_STM32F37XX)
 #  define EXTI_PVD_LINE          (1 << 16) /* EXTI line 16 is connected to the PVD output */
 #  define EXTI_RTC_ALARM         (1 << 17) /* EXTI line 17 is connected to the RTC Alarm event */
 #  define EXTI_OTGFS_WAKEUP      (1 << 18) /* EXTI line 18 is connected to the USB OTG FS Wakeup event */
@@ -193,7 +194,7 @@
 
 /* Compatibility Definitions ********************************************************/
 
-#if defined(CONFIG_STM32_STM32F30XX)
+#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX)
 #  define STM32_NEXTI            STM32_NEXTI1
 #  define STM32_EXTI_MASK        STM32_EXTI1_MASK
 #  define STM32_EXTI_IMR         STM32_EXTI1_IMR

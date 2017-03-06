@@ -402,7 +402,7 @@ static void lpc17_gpiodemux(uint32_t intbase, uint32_t intmask,
  *
  ****************************************************************************/
 
-static int lpc17_gpiointerrupt(int irq, void *context)
+static int lpc17_gpiointerrupt(int irq, void *context, FAR void *arg)
 {
   /* Get the GPIO interrupt status */
 
@@ -468,7 +468,7 @@ void lpc17_gpioirqinitialize(void)
    * position in the NVIC with External Interrupt 3
    */
 
-  (void)irq_attach(LPC17_IRQ_EINT3, lpc17_gpiointerrupt);
+  (void)irq_attach(LPC17_IRQ_EINT3, lpc17_gpiointerrupt, NULL);
   up_enable_irq(LPC17_IRQ_EINT3);
 
 #elif defined(LPC178x)
@@ -476,7 +476,7 @@ void lpc17_gpioirqinitialize(void)
    * GPIO2.
    */
 
-  (void)irq_attach(LPC17_IRQ_GPIO, lpc17_gpiointerrupt);
+  (void)irq_attach(LPC17_IRQ_GPIO, lpc17_gpiointerrupt, NULL);
   up_enable_irq(LPC17_IRQ_GPIO);
 
 #endif

@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/shenzhou/src/stm32_usb.c
  *
- *   Copyright (C) 2012-2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,7 +54,7 @@
 #include "up_arch.h"
 #include "stm32.h"
 #include "stm32_otgfs.h"
-#include "shenshou.h"
+#include "shenzhou.h"
 
 #ifdef CONFIG_STM32_OTGFS
 
@@ -273,16 +273,18 @@ void stm32_usbhost_vbusdrive(int iface, bool enable)
  *
  * Input Parameter:
  *   handler - New overcurrent interrupt handler
+ *   arg     - The argument provided for the interrupt handler
  *
  * Returned value:
- *   Old overcurrent interrupt handler
+ *   Zero (OK) is returned on success.  Otherwise, a negated errno value is returned
+ *   to indicate the nature of the failure.
  *
  ************************************************************************************/
 
 #ifdef CONFIG_USBHOST
-xcpt_t stm32_setup_overcurrent(xcpt_t handler)
+int stm32_setup_overcurrent(xcpt_t handler, void *arg)
 {
-  return NULL;
+  return -ENOSYS;
 }
 #endif
 

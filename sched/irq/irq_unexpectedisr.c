@@ -58,7 +58,7 @@
  *
  ****************************************************************************/
 
-int irq_unexpected_isr(int irq, FAR void *context)
+int irq_unexpected_isr(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
   _err("ERROR irq: %d\n", irq);

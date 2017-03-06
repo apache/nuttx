@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/tiva/tiva_adclow.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2015 TRD2 Inc. All rights reserved.
  *   Author: Calvin Maguranis <calvin.maguranis@trd2inc.com>
  *           Gregory Nutt <gnutt@nuttx.org>
@@ -58,12 +58,9 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/arch.h>
-#include <nuttx/wqueue.h>
-#include <nuttx/analog/adc.h>
+#include <nuttx/config.h>
 
 #include <sys/types.h>
-
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -71,6 +68,11 @@
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
+
+#include <nuttx/arch.h>
+#include <nuttx/wqueue.h>
+#include <nuttx/analog/adc.h>
+#include <nuttx/analog/ioctl.h>
 
 #include <arch/board/board.h>
 

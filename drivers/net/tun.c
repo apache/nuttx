@@ -115,7 +115,7 @@ struct tun_device_s
 {
   bool              bifup;   /* true:ifup false:ifdown */
   WDOG_ID           txpoll;  /* TX poll timer */
-  struct work_s     work;    /* For deferring work to the work queue */
+  struct work_s     work;    /* For deferring poll work to the work queue */
 
   FAR struct file  *filep;
 
@@ -591,24 +591,9 @@ static void tun_poll_expiry(int argc, wdparm_t arg, ...)
 {
   FAR struct tun_device_s *priv = (FAR struct tun_device_s *)arg;
 
-  /* Is our single work structure available?  It may not be if there are
-   * pending interrupt actions.
-   */
+  /* Schedule to perform the timer expiration on the worker thread. */
 
-  if (work_available(&priv->work))
-    {
-      /* Schedule to perform the timer expiration on the worker thread. */
-
-      work_queue(TUNWORK, &priv->work, tun_poll_work, priv, 0);
-    }
-  else
-    {
-      /* No.. Just re-start the watchdog poll timer, missing one polling
-       * cycle.
-       */
-
-      (void)wd_start(priv->txpoll, TUN_WDDELAY, tun_poll_expiry, 1, arg);
-    }
+  work_queue(TUNWORK, &priv->work, tun_poll_work, priv, 0);
 }
 
 /****************************************************************************
@@ -656,7 +641,8 @@ static int tun_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  (void)wd_start(priv->txpoll, TUN_WDDELAY, tun_poll_expiry, 1, (wdparm_t)priv);
+  (void)wd_start(priv->txpoll, TUN_WDDELAY, tun_poll_expiry,
+                 1, (wdparm_t)priv);
 
   priv->bifup = true;
   return OK;

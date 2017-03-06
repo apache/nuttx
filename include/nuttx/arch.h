@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/arch.h
  *
- *   Copyright (C) 2007-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -161,6 +161,15 @@ EXTERN uint32_t g_oneshot_maxticks;
  */
 
 EXTERN volatile bool g_rtc_enabled;
+#endif
+
+#ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
+/* This is the interrupt vector mapping table.  This must be provided by
+ * architecture specific logic if CONFIG_ARCH_MINIMAL_VECTORTABLE is define
+ * in the configuration.  See declaration in include/nuttx/irq.h
+ */
+
+/* EXTERN const irq_mapped_t g_irqmap[NR_IRQS]; */
 #endif
 
 /****************************************************************************
@@ -2083,10 +2092,6 @@ size_t  up_check_intstack_remain(void);
 #endif
 
 /****************************************************************************
- * Board-specific button interfaces exported by the board-specific logic
- ****************************************************************************/
-
-/****************************************************************************
  * Name: up_rtc_initialize
  *
  * Description:
@@ -2251,19 +2256,19 @@ int up_rtc_settime(FAR const struct timespec *tp);
  *             asserts an interrupt.  Must reside in OS space, but can
  *             signal tasks in user space.  A value of NULL can be passed
  *             in order to detach and disable the PHY interrupt.
+ *   arg     - The argument that will accompany the interrupt
  *   enable  - A function pointer that be unsed to enable or disable the
  *             PHY interrupt.
  *
  * Returned Value:
- *   The previous PHY interrupt handler address is returned.  This allows you
- *   to temporarily replace an interrupt handler, then restore the original
- *   interrupt handler.  NULL is returned if there is was not handler in
- *   place when the call was made.
+ *   Zero (OK) returned on success; a negated errno value is returned on
+ *   failure.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_PHY_INTERRUPT
-xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable);
+int arch_phy_irq(FAR const char *intf, xcpt_t handler, void *arg,
+                 phy_enable_t *enable);
 #endif
 
 /****************************************************************************

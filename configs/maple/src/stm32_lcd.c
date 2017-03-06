@@ -80,7 +80,7 @@ static xcpt_t g_isr;
  * Private Functions
  ****************************************************************************/
 
-static int up_lcdextcominisr(int irq, void *context)
+static int up_lcdextcominisr(int irq, void *context, void *arg)
 {
   STM32_TIM_ACKINT(tim, 0);
   if (g_isr == NULL)
@@ -90,21 +90,21 @@ static int up_lcdextcominisr(int irq, void *context)
       return OK;
     }
 
-  return g_isr(irq, context);
+  return g_isr(irq, context, arg);
 }
 
-static int up_lcdirqattach(xcpt_t isr)
+static int up_lcdirqattach(xcpt_t isr, void * arg)
 {
   lcdinfo("%s IRQ\n", isr == NULL ? "Detach" : "Attach");
 
   if (isr != NULL)
     {
-      STM32_TIM_SETISR(tim, up_lcdextcominisr, 0);
+      STM32_TIM_SETISR(tim, up_lcdextcominisr, arg, 0);
       g_isr = isr;
     }
   else
     {
-      STM32_TIM_SETISR(tim, NULL, 0);
+      STM32_TIM_SETISR(tim, NULL, NULL, 0);
       g_isr = NULL;
     }
 

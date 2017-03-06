@@ -145,7 +145,6 @@ int sched_unlock(void)
            * we should go ahead and release the pending tasks.  See the logic
            * leave_critical_section():  It will call up_release_pending()
            * BEFORE it clears IRQ lock.
-           * BEFORE it clears IRQ lock.
            */
 
           if (!spin_islocked(&g_cpu_schedlock) && !irq_cpu_locked(cpu) &&

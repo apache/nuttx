@@ -66,12 +66,16 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 /* CONFIG_PWM - Enables because PWM driver support
  * CONFIG_PWM_PULSECOUNT - Some hardware will support generation of a fixed
  *   number of pulses.  This might be used, for example to support a stepper
  *   motor.  If the hardware will support a fixed pulse count, then this
  *   configuration should be set to enable the capability.
+ * CONFIG_PWM_MULTICHAN - Enables support for multiple output channels per
+ *   timer.  If selected, then CONFIG_PWM_NCHANNELS must be provided to
+ *   indicated the maximum number of supported PWM output channels.
  * CONFIG_DEBUG_PWM_INFO - This will generate output that can be use to
  *   debug the PWM driver.
  */
@@ -122,6 +126,10 @@
  * Public Types
  ****************************************************************************/
 
+/* If the PWM peripheral supports multiple output channels, then this
+ * structure describes the output state on one channel.
+ */
+
 #ifdef CONFIG_PWM_MULTICHAN
 struct pwm_chan_s
 {
@@ -135,8 +143,11 @@ struct pwm_chan_s
 struct pwm_info_s
 {
   uint32_t           frequency; /* Frequency of the pulse train */
+
 #ifdef CONFIG_PWM_MULTICHAN
+                                /* Per-channel output state */
   struct pwm_chan_s  channels[CONFIG_PWM_NCHANNELS];
+
 #else
   ub16_t             duty;      /* Duty of the pulse train, "1"-to-"0" duration.
                                  * Maximum: 65535/65536 (0x0000ffff)
@@ -145,7 +156,7 @@ struct pwm_info_s
   uint32_t           count;     /* The number of pulse to generate.  0 means to
                                  * generate an indefinite number of pulses */
 #  endif
-#endif
+#endif /* CONFIG_PWM_MULTICHAN */
 };
 
 /* This structure is a set a callback functions used to call from the upper-
@@ -184,7 +195,7 @@ struct pwm_ops_s
                     FAR const struct pwm_info_s *info);
 #endif
 
-  /* Stop the pulsed output and reset the timer resources*/
+  /* Stop the pulsed output and reset the timer resources */
 
   CODE int (*stop)(FAR struct pwm_lowerhalf_s *dev);
 

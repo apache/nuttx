@@ -163,42 +163,40 @@ static void nrf24l01_lock(FAR struct spi_dev_s *spi);
 static void nrf24l01_unlock(FAR struct spi_dev_s *spi);
 
 static uint8_t nrf24l01_access(FAR struct nrf24l01_dev_s *dev,
-    nrf24l01_access_mode_t mode, uint8_t cmd, uint8_t *buf, int length);
+             nrf24l01_access_mode_t mode, uint8_t cmd, uint8_t *buf,
+             int length);
 static uint8_t nrf24l01_flush_rx(FAR struct nrf24l01_dev_s *dev);
 static uint8_t nrf24l01_flush_tx(FAR struct nrf24l01_dev_s *dev);
 
 /* Read register from nrf24 */
 
 static uint8_t nrf24l01_readreg(FAR struct nrf24l01_dev_s *dev, uint8_t reg,
-    uint8_t *value, int len);
+             FAR uint8_t *value, int len);
 
 /* Read single byte value from a register of nrf24 */
 
 static uint8_t nrf24l01_readregbyte(FAR struct nrf24l01_dev_s *dev,
-    uint8_t reg);
-
-static void nrf24l01_writeregbyte(FAR struct nrf24l01_dev_s *dev, uint8_t reg,
-    uint8_t value);
-
-static uint8_t nrf24l01_setregbit(FAR struct nrf24l01_dev_s *dev, uint8_t reg,
-    uint8_t value, bool set);
-
-static void nrf24l01_tostate(FAR struct nrf24l01_dev_s *dev, nrf24l01_state_t state);
-
-static int nrf24l01_irqhandler(FAR int irq, FAR void *context);
-
-static inline int nrf24l01_attachirq(FAR struct nrf24l01_dev_s *dev, xcpt_t isr);
-
-static int dosend(FAR struct nrf24l01_dev_s *dev, FAR const uint8_t *data, size_t datalen);
-
+             uint8_t reg);
+static void nrf24l01_writeregbyte(FAR struct nrf24l01_dev_s *dev,
+             uint8_t reg, uint8_t value);
+static uint8_t nrf24l01_setregbit(FAR struct nrf24l01_dev_s *dev,
+             uint8_t reg, uint8_t value, bool set);
+static void nrf24l01_tostate(FAR struct nrf24l01_dev_s *dev,
+             nrf24l01_state_t state);
+static int nrf24l01_irqhandler(FAR int irq, FAR void *context,
+             FAR void *arg);
+static inline int nrf24l01_attachirq(FAR struct nrf24l01_dev_s *dev,
+             xcpt_t isr, FAR void *arg);
+static int dosend(FAR struct nrf24l01_dev_s *dev, FAR const uint8_t *data,
+             size_t datalen);
 static int nrf24l01_unregister(FAR struct nrf24l01_dev_s *dev);
 
 #ifdef CONFIG_WL_NRF24L01_RXSUPPORT
 
-void fifoput(struct nrf24l01_dev_s *dev, uint8_t pipeno, uint8_t *buffer, uint8_t buflen);
-
-uint8_t fifoget(struct nrf24l01_dev_s *dev, uint8_t *buffer, uint8_t buflen, uint8_t *pipeno);
-
+void fifoput(struct nrf24l01_dev_s *dev, uint8_t pipeno,
+             FAR uint8_t *buffer, uint8_t buflen);
+uint8_t fifoget(struct nrf24l01_dev_s *dev, FAR uint8_t *buffer,
+             uint8_t buflen, FAR uint8_t *pipeno);
 static void nrf24l01_worker(FAR void *arg);
 
 #endif
@@ -206,23 +204,19 @@ static void nrf24l01_worker(FAR void *arg);
 /* POSIX API */
 
 static int nrf24l01_open(FAR struct file *filep);
-
 static int nrf24l01_close(FAR struct file *filep);
-
-static ssize_t nrf24l01_read(FAR struct file *filep, FAR char *buffer, size_t buflen);
-
-static ssize_t nrf24l01_write(FAR struct file *filep, FAR const char *buffer, size_t buflen);
-
-static int nrf24l01_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
-
+static ssize_t nrf24l01_read(FAR struct file *filep, FAR char *buffer,
+             size_t buflen);
+static ssize_t nrf24l01_write(FAR struct file *filep,
+             FAR const char *buffer, size_t buflen);
+static int nrf24l01_ioctl(FAR struct file *filep, int cmd,
+             unsigned long arg);
 static int nrf24l01_poll(FAR struct file *filep, FAR struct pollfd *fds,
-                        bool setup);
+             bool setup);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-
-static FAR struct nrf24l01_dev_s *g_nrf24l01dev;
 
 static const struct file_operations nrf24l01_fops =
 {
@@ -491,9 +485,9 @@ uint8_t fifoget(struct nrf24l01_dev_s *dev, uint8_t *buffer, uint8_t buflen, uin
 
 #endif
 
-static int nrf24l01_irqhandler(int irq, FAR void *context)
+static int nrf24l01_irqhandler(int irq, FAR void *context, FAR void *arg)
 {
-  FAR struct nrf24l01_dev_s *dev = g_nrf24l01dev;
+  FAR struct nrf24l01_dev_s *dev = (FAR struct nrf24l01_dev_s *)arg;
 
   winfo("*IRQ*");
 
@@ -501,7 +495,7 @@ static int nrf24l01_irqhandler(int irq, FAR void *context)
 
   /* If RX is enabled we delegate the actual work to bottom-half handler */
 
-  work_queue(HPWORK, &g_nrf24l01dev->irq_work, nrf24l01_worker, dev, 0);
+  work_queue(HPWORK, &dev->irq_work, nrf24l01_worker, dev, 0);
 #else
 
   /* Otherwise we simply wake up the send function */
@@ -512,11 +506,12 @@ static int nrf24l01_irqhandler(int irq, FAR void *context)
   return OK;
 }
 
-/* Configure IRQ pin  (falling edge) */
+/* Configure IRQ pin (falling edge) */
 
-static inline int nrf24l01_attachirq(FAR struct nrf24l01_dev_s *dev, xcpt_t isr)
+static inline int nrf24l01_attachirq(FAR struct nrf24l01_dev_s *dev, xcpt_t isr,
+                                     FAR void *arg)
 {
-  return dev->config->irqattach(isr);
+  return dev->config->irqattach(isr, arg);
 }
 
 static inline bool nrf24l01_chipenable(FAR struct nrf24l01_dev_s *dev, bool enable)
@@ -1177,11 +1172,10 @@ static int nrf24l01_unregister(FAR struct nrf24l01_dev_s *dev)
 
   /* Release IRQ */
 
-  nrf24l01_attachirq(dev, NULL);
-
-  g_nrf24l01dev = NULL;
+  nrf24l01_attachirq(dev, NULL, NULL);
 
   /* Free memory */
+
 #ifdef CONFIG_WL_NRF24L01_RXSUPPORT
   kmm_free(dev->rx_fifo);
 #endif
@@ -1244,13 +1238,9 @@ int nrf24l01_register(FAR struct spi_dev_s *spi, FAR struct nrf24l01_config_s *c
   sem_setprotocol(&dev->sem_rx, SEM_PRIO_NONE);
 #endif
 
-  /* Set the global reference */
-
-  g_nrf24l01dev = dev;
-
   /* Configure IRQ pin  (falling edge) */
 
-  nrf24l01_attachirq(dev, nrf24l01_irqhandler);
+  nrf24l01_attachirq(dev, nrf24l01_irqhandler, dev);
 
   /* Register the device as an input device */
 
@@ -1264,11 +1254,6 @@ int nrf24l01_register(FAR struct spi_dev_s *spi, FAR struct nrf24l01_config_s *c
     }
 
   return result;
-}
-
-FAR struct nrf24l01_dev_s * nrf24l01_getinstance(void)
-{
-  return g_nrf24l01dev;
 }
 
 /* (re)set the device in a default initial state */

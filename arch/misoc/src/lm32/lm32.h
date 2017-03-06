@@ -139,7 +139,7 @@ uint32_t *lm32_doirq(int irq, uint32_t *regs);
 
 /* Software interrupts ******************************************************/
 
-int lm32_swint(int irq, FAR void *context);
+int lm32_swint(int irq, FAR void *context, FAR void *arg);
 
 /* System timer *************************************************************/
 

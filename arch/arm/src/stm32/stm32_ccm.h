@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/stm32_ccm.h
+ * arch/arm/src/stm32/stm32_ccm.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -58,7 +58,8 @@
 #if defined(CONFIG_STM32_STM32F30XX)
 #  define CCM_START 0x10000000
 #  define CCM_END   0x10002000
-#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX) || \
+      defined(CONFIG_STM32_STM32F33XX)
 #  define CCM_START 0x10000000
 #  define CCM_END   0x10010000
 #else

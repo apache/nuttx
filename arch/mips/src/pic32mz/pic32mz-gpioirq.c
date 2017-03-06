@@ -72,15 +72,21 @@ static inline bool pic32mz_input(pinset_t pinset);
 static inline bool pic32mz_interrupt(pinset_t pinset);
 static inline bool pic32mz_pullup(pinset_t pinset);
 static inline bool pic32mz_pulldown(pinset_t pinset);
-static int pic32mz_cninterrupt(int irq, FAR void *context);
+static int pic32mz_cninterrupt(int irq, FAR void *context, FAR void *arg);
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
+struct ioport_handler_s
+{
+  xcpt_t entry;     /* Interrupt handler entry point */
+  void  *arg;       /* The argument that accompanies the interrupt handler */
+};
+
 struct ioport_level2_s
 {
-  xcpt_t handler[16];
+  struct ioport_handler_s handler[16];
 };
 
 /****************************************************************************
@@ -204,7 +210,7 @@ static inline unsigned int pic32mz_pin(pinset_t pinset)
  *
  ****************************************************************************/
 
-static int pic32mz_cninterrupt(int irq, FAR void *context)
+static int pic32mz_cninterrupt(int irq, FAR void *context, FAR void *arg)
 {
   struct ioport_level2_s *handlers;
   xcpt_t handler;
@@ -260,12 +266,12 @@ static int pic32mz_cninterrupt(int irq, FAR void *context)
             {
               /* Yes.. Has the user attached a handler? */
 
-              handler = handlers->handler[i];
+              handler = handlers->handler[i].entry;
               if (handler)
                 {
                   /* Yes.. call the attached handler */
 
-                  status = handler(irq, context);
+                  status = handler(irq, context, handlers->handler[i].arg);
 
                   /* Keep track of the status of the last handler that
                    * failed.
@@ -334,7 +340,7 @@ void pic32mz_gpioirqinitialize(void)
            * each IRQ number is consecutive beginning with IOPORTA.
            */
 
-          ret = irq_attach(PIC32MZ_IRQ_PORTA + i, pic32mz_cninterrupt);
+          ret = irq_attach(PIC32MZ_IRQ_PORTA + i, pic32mz_cninterrupt, NULL);
           DEBUGASSERT(ret == OK);
           UNUSED(ret);
 
@@ -365,22 +371,21 @@ void pic32mz_gpioirqinitialize(void)
  *   In that case, all attached handlers will be called.  Each handler must
  *   maintain state and determine if the underlying GPIO input value changed.
  *
- * Parameters:
- *  - pinset:  GPIO pin configuration
- *  - pin:      The change notification number associated with the pin.
- *  - handler: Interrupt handler (may be NULL to detach)
+ * Input Parameters:
+ *   pinset  - GPIO pin configuration
+ *   handler - Interrupt handler (may be NULL to detach)
+ *   arg     - The argument that accompanies the interrupt
  *
- * Returns:
- *  The previous value of the interrupt handler function pointer.  This
- *  value may, for example, be used to restore the previous handler when
- *  multiple handlers are used.
+ * Returned Value:
+ *   Zero (OK) is returned on success.  A negated error value is returned on
+ *   any failure to indicate the nature of the failure.
  *
  ****************************************************************************/
 
-xcpt_t pic32mz_gpioattach(pinset_t pinset, xcpt_t handler)
+#ifdef CONFIG_PIC32MZ_GPIOIRQ
+int pic32mz_gpioattach(uint32_t pinset, xcpt_t handler, void *arg)
 {
   struct ioport_level2_s *handlers;
-  xcpt_t oldhandler = NULL;
   irqstate_t flags;
   uintptr_t base;
   int ioport;
@@ -415,7 +420,6 @@ xcpt_t pic32mz_gpioattach(pinset_t pinset, xcpt_t handler)
           /* Get the previously attached handler as the return value */
 
           flags = enter_critical_section();
-          oldhandler = handlers->handler[pin];
 
           /* Are we attaching or detaching? */
 
@@ -467,12 +471,13 @@ xcpt_t pic32mz_gpioattach(pinset_t pinset, xcpt_t handler)
 
           /* Set the new handler (perhaps NULLifying the current handler) */
 
-          handlers->handler[pin] = handler;
+          handlers->handler[pin].entry = handler;
+          handlers->handler[pin].arg   = arg;
           leave_critical_section(flags);
         }
     }
 
-  return oldhandler;
+  return OK;
 }
 
 /****************************************************************************

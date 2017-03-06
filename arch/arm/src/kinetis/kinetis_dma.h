@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/kenetis/kinetis_dma.h
+ * arch/arm/src/kinetis/kinetis_dma.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>

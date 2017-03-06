@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/wdog/wd_cancel.c
  *
- *   Copyright (C) 2007-2009, 2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2014, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,7 @@
 
 #include <stdbool.h>
 #include <assert.h>
+#include <errno.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
@@ -64,9 +65,8 @@
  *   wdog - ID of the watchdog to cancel.
  *
  * Return Value:
- *   OK or ERROR
- *
- * Assumptions:
+ *   Zero (OK) is returned on success;  A negated errno value is returned to
+ *   indicate the nature of any failure.
  *
  ****************************************************************************/
 
@@ -75,7 +75,7 @@ int wd_cancel(WDOG_ID wdog)
   FAR struct wdog_s *curr;
   FAR struct wdog_s *prev;
   irqstate_t flags;
-  int ret = ERROR;
+  int ret = -EINVAL;
 
   /* Prohibit timer interactions with the timer queue until the
    * cancellation is complete
@@ -87,7 +87,7 @@ int wd_cancel(WDOG_ID wdog)
    * active.
    */
 
-  if (wdog && WDOG_ISACTIVE(wdog))
+  if (wdog != NULL && WDOG_ISACTIVE(wdog))
     {
       /* Search the g_wdactivelist for the target FCB.  We can't use sq_rem
        * to do this because there are additional operations that need to be

@@ -81,6 +81,12 @@
 #  include "stm32_rtc.h"
 #endif
 
+#ifdef CONFIG_NSH_MMCSDMINOR
+#  define MMCSD_MINOR CONFIG_NSH_MMCSDMINOR
+#else
+#  define MMCSD_MINOR 0
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -105,6 +111,15 @@ int stm32_bringup(void)
   struct oneshot_lowerhalf_s *os = NULL;
 #endif
   int ret = OK;
+
+#ifdef CONFIG_MMCSD
+  ret = stm32_mmcsd_initialize(MMCSD_MINOR);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize SD slot %d: %d\n", ret);
+      return ret;
+    }
+#endif
 
 #ifdef CONFIG_PWM
   /* Initialize PWM and register the PWM device. */
@@ -160,6 +175,18 @@ int stm32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_QENCODER
+  /* Initialize and register the qencoder driver */
+
+  ret = stm32_qencoder_initialize("/dev/qe0", CONFIG_STM32F103MINIMUM_QETIMER);
+  if (ret != OK)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to register the qencoder: %d\n",
+             ret);
     }
 #endif
 

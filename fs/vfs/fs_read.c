@@ -92,7 +92,7 @@ ssize_t file_read(FAR struct file *filep, FAR void *buf, size_t nbytes)
    * method?
    */
 
-  else if (inode && inode->u.i_ops && inode->u.i_ops->read)
+  else if (inode != NULL && inode->u.i_ops && inode->u.i_ops->read)
     {
       /* Yes.. then let it perform the read.  NOTE that for the case of the
        * mountpoint, we depend on the read methods being identical in

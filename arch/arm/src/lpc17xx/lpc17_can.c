@@ -217,7 +217,7 @@ static bool can_txempty(FAR struct can_dev_s *dev);
 /* CAN interrupts */
 
 static void can_interrupt(FAR struct can_dev_s *dev);
-static int  can12_interrupt(int irq, void *context);
+static int  can12_interrupt(int irq, void *context, FAR void *arg);
 
 /* Initialization */
 
@@ -543,7 +543,7 @@ static int can_setup(FAR struct can_dev_s *dev)
 
   caninfo("CAN%d\n", priv->port);
 
-  ret = irq_attach(LPC17_IRQ_CAN, can12_interrupt);
+  ret = irq_attach(LPC17_IRQ_CAN, can12_interrupt, NULL);
   if (ret == OK)
     {
       up_enable_irq(LPC17_IRQ_CAN);
@@ -1045,7 +1045,7 @@ static void can_interrupt(FAR struct can_dev_s *dev)
  *
  ****************************************************************************/
 
-static int can12_interrupt(int irq, void *context)
+static int can12_interrupt(int irq, void *context, FAR void *arg)
 {
   /* Handle CAN1/2 interrupts */
 

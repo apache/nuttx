@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/pthread/pthread_create.c
  *
- *   Copyright (C) 2007-2009, 2011, 2013-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2013-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -75,9 +75,11 @@ const pthread_attr_t g_default_pthread_attr = PTHREAD_ATTR_INITIALIZER;
  * Private Data
  ****************************************************************************/
 
+#if CONFIG_TASK_NAME_SIZE > 0
 /* This is the name for name-less pthreads */
 
 static const char g_pthreadname[] = "<pthread>";
+#endif
 
 /****************************************************************************
  * Private Functions

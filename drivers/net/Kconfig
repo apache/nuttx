@@ -503,7 +503,7 @@ config ETH0_PHY_KSZ90x1
 	bool "Micrel KSZ9021/31 PHY"
 
 config ETH0_PHY_DP83848C
-	bool "National Semiconduction DP83848C PHY"
+	bool "National Semiconductor DP83848C PHY"
 
 config ETH0_PHY_LAN8720
 	bool "SMSC LAN8720 PHY"
@@ -552,7 +552,7 @@ config ETH1_PHY_KSZ90x1
 	bool "Micrel KSZ9021/31 PHY"
 
 config ETH1_PHY_DP83848C
-	bool "National Semiconduction DP83848C PHY"
+	bool "National Semiconductor DP83848C PHY"
 
 config ETH1_PHY_LAN8720
 	bool "SMSC LAN8720 PHY"

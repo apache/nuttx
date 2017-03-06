@@ -512,7 +512,7 @@ static void rtc_resume(void)
  ************************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-static int stm32l4_rtc_alarm_handler(int irq, FAR void *context)
+static int stm32l4_rtc_alarm_handler(int irq, FAR void *context, FAR void *rtc_handler_arg)
 {
   FAR struct alm_cbinfo_s *cbinfo;
   alm_callback_t cb;
@@ -801,7 +801,7 @@ static inline void rtc_enable_alarm(void)
        * 3. Configure the RTC to generate RTC alarms (Alarm A or Alarm B).
        */
 
-      stm32l4_exti_alarm(true, false, true, stm32l4_rtc_alarm_handler);
+      (void)stm32l4_exti_alarm(true, false, true, stm32l4_rtc_alarm_handler, NULL);
       g_alarm_enabled = true;
     }
 }

@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/board.h
  *
- *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -603,8 +603,6 @@ uint8_t board_buttons(void);
  *   This function may be called to register an interrupt handler that will
  *   be called when a button is depressed or released.  The ID value is a
  *   button enumeration value that uniquely identifies a button resource.
- *   The previous interrupt handler address is returned (so that it may
- *   restored, if so desired).
  *
  *   NOTE: This interface may or may not be supported by board-specific
  *   logic.  If the board supports any button interfaces, then
@@ -614,7 +612,7 @@ uint8_t board_buttons(void);
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_IRQBUTTONS
-xcpt_t board_button_irq(int id, xcpt_t irqhandler);
+int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg);
 #endif
 
 /****************************************************************************

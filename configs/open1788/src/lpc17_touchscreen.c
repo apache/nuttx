@@ -169,7 +169,7 @@ static int tsc_attach(FAR struct ads7843e_config_s *state, xcpt_t handler)
 {
   /* Attach then enable the touchscreen interrupt handler */
 
-  (void)irq_attach(LPC17_IRQ_PENIRQ, handler);
+  (void)irq_attach(LPC17_IRQ_PENIRQ, handler, NULL);
   return OK;
 }
 

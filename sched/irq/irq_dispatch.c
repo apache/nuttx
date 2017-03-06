@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/irq/irq_dispatch.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -62,23 +62,42 @@
 void irq_dispatch(int irq, FAR void *context)
 {
   xcpt_t vector;
+  FAR void *arg;
 
   /* Perform some sanity checks */
 
 #if NR_IRQS > 0
-  if ((unsigned)irq >= NR_IRQS || g_irqvector[irq] == NULL)
+  if ((unsigned)irq >= NR_IRQS)
     {
       vector = irq_unexpected_isr;
+      arg    = NULL;
     }
   else
     {
-      vector = g_irqvector[irq];
+#ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
+      irq_mapped_t ndx = g_irqmap[irq];
+      if (ndx >= CONFIG_ARCH_NUSER_INTERRUPTS)
+        {
+          vector = irq_unexpected_isr;
+          arg    = NULL;
+        }
+      else
+        {
+          vector = g_irqvector[ndx].handler;
+          arg    = g_irqvector[ndx].arg;
+        }
+#else
+      vector = g_irqvector[irq].handler;
+      arg    = g_irqvector[irq].arg;
+#endif
     }
+
 #else
   vector = irq_unexpected_isr;
+  arg    = NULL;
 #endif
 
   /* Then dispatch to the interrupt handler */
 
-  vector(irq, context);
+  vector(irq, context, arg);
 }

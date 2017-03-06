@@ -42,6 +42,7 @@
 
 #include <sys/types.h>
 #include <stdint.h>
+#include <errno.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
@@ -54,14 +55,6 @@
 #include "avr32dev1.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -77,28 +70,26 @@
 
 #if defined(CONFIG_AVR32_GPIOIRQ) && defined(CONFIG_ARCH_IRQBUTTONS) && \
    (defined(CONFIG_AVR32DEV_BUTTON1_IRQ) || defined(CONFIG_AVR32DEV_BUTTON2_IRQ))
-static xcpt_t board_button_irqx(int irq, xcpt_t irqhandler)
+static int board_button_irqx(int irq, xcpt_t irqhandler, void *arg)
 {
-  xcpt_t oldhandler;
-
   /* Attach the handler */
 
-  gpio_irqattach(irq, irqhandler, &oldhandler);
-
-  /* Enable/disable the interrupt */
-
-  if (irqhandler)
+  int ret = gpio_irqattach(irq, irqhandler, &oldhandler, arg);
+  if (ret >= 0)
     {
-      gpio_irqenable(irq);
-    }
-  else
-    {
-      gpio_irqdisable(irq);
+      /* Enable/disable the interrupt */
+
+      if (irqhandler != NULL)
+        {
+          gpio_irqenable(irq);
+        }
+      else
+        {
+         gpio_irqdisable(irq);
+       }
     }
 
-  /* Return the old button handler (so that it can be restored) */
-
-  return oldhandler;
+  return OK;
 }
 #endif
 
@@ -151,8 +142,7 @@ uint8_t board_buttons(void)
  * Description:
  *   This function may be called to register an interrupt handler that will
  *   be called when a button is depressed or released.  The ID value is one
- *   of the BUTTON* definitions provided above. The previous interrupt
- *   handler address isreturned (so that it may restored, if so desired).
+ *   of the BUTTON* definitions provided above.
  *
  * Configuration Notes:
  *   Configuration CONFIG_AVR32_GPIOIRQ must be selected to enable the
@@ -164,25 +154,29 @@ uint8_t board_buttons(void)
  ****************************************************************************/
 
 #if defined(CONFIG_AVR32_GPIOIRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
-xcpt_t board_button_irq(int id, xcpt_t irqhandler)
+int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
+  int ret;
+
 #ifdef CONFIG_AVR32DEV_BUTTON1_IRQ
   if (id == BUTTON1)
     {
-      return board_button_irqx(GPIO_BUTTON1_IRQ, irqhandler);
+      ret = board_button_irqx(GPIO_BUTTON1_IRQ, irqhandler, arg);
     }
   else
 #endif
 #ifdef CONFIG_AVR32DEV_BUTTON2_IRQ
   if (id == BUTTON2)
     {
-      return board_button_irqx(GPIO_BUTTON2_IRQ, irqhandler);
+      ret = board_button_irqx(GPIO_BUTTON2_IRQ, irqhandler, arg);
     }
   else
 #endif
     {
-      return NULL;
+      ret = -EINVAL;
     }
+
+  return ret;
 }
 #endif
 #endif /* CONFIG_ARCH_BUTTONS */

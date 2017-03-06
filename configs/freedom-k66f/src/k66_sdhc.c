@@ -140,7 +140,7 @@ static void k66_mediachange(void)
  * Name: k66_cdinterrupt
  ****************************************************************************/
 
-static int k66_cdinterrupt(int irq, FAR void *context)
+static int k66_cdinterrupt(int irq, FAR void *context, FAR void *arg)
 {
   /* All of the work is done by k66_mediachange() */
 
@@ -170,7 +170,7 @@ int k66_sdhc_initialize(void)
 
   /* Attached the card detect interrupt (but don't enable it yet) */
 
-  kinetis_pinirqattach(GPIO_SD_CARDDETECT, k66_cdinterrupt);
+  (void)kinetis_pinirqattach(GPIO_SD_CARDDETECT, k66_cdinterrupt, NULL);
 
   /* Configure the write protect GPIO -- None */
 

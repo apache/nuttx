@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32f7/stm32_ethernet.c
  *
- *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -607,7 +607,8 @@ struct stm32_ethmac_s
   uint8_t              intf;        /* Ethernet interface number */
   WDOG_ID              txpoll;      /* TX poll timer */
   WDOG_ID              txtimeout;   /* TX timeout timer */
-  struct work_s        work;        /* For deferring work to the work queue */
+  struct work_s        irqwork;     /* For deferring interrupt work to the work queue */
+  struct work_s        pollwork;    /* For deferring poll work to the work queue */
 
   /* This holds the information visible to the NuttX network */
 
@@ -701,7 +702,7 @@ static void stm32_freeframe(struct stm32_ethmac_s *priv);
 static void stm32_txdone(struct stm32_ethmac_s *priv);
 
 static void stm32_interrupt_work(void *arg);
-static int  stm32_interrupt(int irq, void *context);
+static int  stm32_interrupt(int irq, void *context, FAR void *arg);
 
 /* Watchdog timer expirations */
 
@@ -2044,14 +2045,6 @@ static void stm32_txdone(struct stm32_ethmac_s *priv)
 
       wd_cancel(priv->txtimeout);
 
-      /* Then make sure that the TX poll timer is running (if it is already
-       * running, the following would restart it).  This is necessary to
-       * avoid certain race conditions where the polling sequence can be
-       * interrupted.
-       */
-
-      (void)wd_start(priv->txpoll, STM32_WDDELAY, stm32_poll_expiry, 1, priv);
-
       /* And disable further TX interrupts. */
 
       stm32_disableint(priv, ETH_DMAINT_TI);
@@ -2185,7 +2178,7 @@ static void stm32_interrupt_work(void *arg)
  *
  ****************************************************************************/
 
-static int stm32_interrupt(int irq, void *context)
+static int stm32_interrupt(int irq, void *context, FAR void *arg)
 {
   struct stm32_ethmac_s *priv = &g_stm32ethmac[0];
   uint32_t dmasr;
@@ -2214,13 +2207,9 @@ static int stm32_interrupt(int irq, void *context)
            wd_cancel(priv->txtimeout);
         }
 
-      /* Cancel any pending poll work */
-
-      work_cancel(ETHWORK, &priv->work);
-
       /* Schedule to perform the interrupt processing on the worker thread. */
 
-      work_queue(ETHWORK, &priv->work, stm32_interrupt_work, priv, 0);
+      work_queue(ETHWORK, &priv->irqwork, stm32_interrupt_work, priv, 0);
     }
 
   return OK;
@@ -2293,15 +2282,9 @@ static void stm32_txtimeout_expiry(int argc, uint32_t arg, ...)
 
   up_disable_irq(STM32_IRQ_ETH);
 
-  /* Cancel any pending poll or interrupt work.  This will have no effect
-   * on work that has already been started.
-   */
-
-  work_cancel(ETHWORK, &priv->work);
-
   /* Schedule to perform the TX timeout processing on the worker thread. */
 
-  work_queue(ETHWORK, &priv->work, stm32_txtimeout_work, priv, 0);
+  work_queue(ETHWORK, &priv->irqwork, stm32_txtimeout_work, priv, 0);
 }
 
 /****************************************************************************
@@ -2398,24 +2381,9 @@ static void stm32_poll_expiry(int argc, uint32_t arg, ...)
 {
   struct stm32_ethmac_s *priv = (struct stm32_ethmac_s *)arg;
 
-  /* Is our single work structure available?  It may not be if there are
-   * pending interrupt actions.
-   */
+  /* Schedule to perform the interrupt processing on the worker thread. */
 
-  if (work_available(&priv->work))
-    {
-      /* Schedule to perform the interrupt processing on the worker thread. */
-
-      work_queue(ETHWORK, &priv->work, stm32_poll_work, priv, 0);
-    }
-  else
-    {
-      /* No.. Just re-start the watchdog poll timer, missing one polling
-       * cycle.
-       */
-
-      (void)wd_start(priv->txpoll, STM32_WDDELAY, stm32_poll_expiry, 1, (uint32_t)priv);
-    }
+  work_queue(ETHWORK, &priv->pollwork, stm32_poll_work, priv, 0);
 }
 
 /****************************************************************************
@@ -2584,11 +2552,11 @@ static int stm32_txavail(struct net_driver_s *dev)
    * availability action.
    */
 
-  if (work_available(&priv->work))
+  if (work_available(&priv->pollwork))
     {
       /* Schedule to serialize the poll on the worker thread. */
 
-      work_queue(ETHWORK, &priv->work, stm32_txavail_work, priv, 0);
+      work_queue(ETHWORK, &priv->pollwork, stm32_txavail_work, priv, 0);
     }
 
   return OK;
@@ -4121,7 +4089,7 @@ int stm32_ethinitialize(int intf)
 
   /* Attach the IRQ to the driver */
 
-  if (irq_attach(STM32_IRQ_ETH, stm32_interrupt))
+  if (irq_attach(STM32_IRQ_ETH, stm32_interrupt, NULL))
     {
       /* We could not attach the ISR to the interrupt */
 

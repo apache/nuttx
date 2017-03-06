@@ -12483,7 +12483,7 @@
 	  to unregister a signal handler (2016-08-01).
 	* configs/sim: Add simulator-based test support for apps/examples/gpio
 	  2016-08-01).
-	* drivers/sensors:  Add KXJT9 Accelerometer driver from the Motorola
+	* drivers/sensors:  Add KXTJ9 Accelerometer driver from the Motorola
 	  Moto Z MDK (2016-08-02).
 	* arch/arm/sim: Add a simulated I/O Expander driver (2016-08-03).
 	* configs/sim: Add logic to set the simulated I/O expander for testing

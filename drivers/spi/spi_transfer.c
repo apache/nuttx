@@ -90,7 +90,7 @@ int spi_transfer(FAR struct spi_dev_s *spi, FAR struct spi_sequence_s *seq)
   ret = SPI_SETDELAY(spi, seq->a, seq->b, seq->c);
   if (ret < 0)
     {
-      spierr("ERROR: SPI_SETDELAY failed: %d\n", ret)
+      spierr("ERROR: SPI_SETDELAY failed: %d\n", ret);
       SPI_LOCK(spi, false);
       return ret;  
     }
@@ -115,7 +115,7 @@ int spi_transfer(FAR struct spi_dev_s *spi, FAR struct spi_sequence_s *seq)
       ret = SPI_HWFEATURES(spi, trans->hwfeat);
       if (ret < 0)
         {
-          spierr("ERROR: SPI_HWFEATURES failed: %d\n", ret)
+          spierr("ERROR: SPI_HWFEATURES failed: %d\n", ret);
           break;
         }
 #endif
@@ -124,7 +124,7 @@ int spi_transfer(FAR struct spi_dev_s *spi, FAR struct spi_sequence_s *seq)
       ret = SPI_CMDDATA(spi, seq->dev, trans->cmd);
       if (ret < 0)
         {
-          spierr("ERROR: SPI_CMDDATA failed: %d\n", ret)
+          spierr("ERROR: SPI_CMDDATA failed: %d\n", ret);
           break;
         }
 #endif

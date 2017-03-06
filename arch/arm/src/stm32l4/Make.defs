@@ -1,6 +1,7 @@
 ############################################################################
 # arch/arm/src/stm32l4/Make.defs
 #
+#   Copyright (C) 2017 Gregory Nutt. All rights reserved.
 #   Copyright (C) 2015-2016 Sebastien Lorquet. All rights reserved.
 #   Author: Sebastien Lorquet <sebastien@lorquet.fr>
 #
@@ -159,6 +160,15 @@ endif
 endif
 endif
 
+ifeq ($(CONFIG_PM),y)
+CHIP_CSRCS += stm32l4_pmlpr.c stm32l4_pmsleep.c stm32l4_pmstandby.c
+CHIP_CSRCS += stm32l4_pmstop.c
+
+ifneq ($(CONFIG_ARCH_CUSTOM_PMINIT),y)
+CHIP_CSRCS += stm32l4_pminitialize.c
+endif
+endif
+
 ifeq ($(CONFIG_STM32L4_PWR),y)
 CHIP_CSRCS += stm32l4_exti_pwr.c
 endif
@@ -177,8 +187,20 @@ ifeq ($(CONFIG_DEBUG_FEATURES),y)
 CHIP_CSRCS += stm32l4_dumpgpio.c
 endif
 
+ifeq ($(CONFIG_STM32L4_COMP),y)
+CHIP_CSRCS += stm32l4_comp.c stm32l4_exti_comp.c
+endif
+
 ifeq ($(CONFIG_STM32L4_RNG),y)
 CHIP_CSRCS += stm32l4_rng.c
+endif
+
+ifeq ($(CONFIG_STM32L4_SAI),y)
+CHIP_CSRCS += stm32l4_sai.c
+endif
+
+ifeq ($(CONFIG_STM32L4_LPTIM),y)
+CHIP_CSRCS += stm32l4_lptim.c
 endif
 
 ifeq ($(CONFIG_PWM),y)

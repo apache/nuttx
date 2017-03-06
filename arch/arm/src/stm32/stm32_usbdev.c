@@ -484,8 +484,8 @@ static void   stm32_ep0in(struct stm32_usbdev_s *priv);
 static inline void
               stm32_ep0done(struct stm32_usbdev_s *priv, uint16_t istr);
 static void   stm32_lptransfer(struct stm32_usbdev_s *priv);
-static int    stm32_hpinterrupt(int irq, void *context);
-static int    stm32_lpinterrupt(int irq, void *context);
+static int    stm32_hpinterrupt(int irq, void *context, FAR void *arg);
+static int    stm32_lpinterrupt(int irq, void *context, FAR void *arg);
 
 /* Endpoint helpers *********************************************************/
 
@@ -2413,7 +2413,7 @@ static void stm32_lptransfer(struct stm32_usbdev_s *priv)
  * Name: stm32_hpinterrupt
  ****************************************************************************/
 
-static int stm32_hpinterrupt(int irq, void *context)
+static int stm32_hpinterrupt(int irq, void *context, FAR void *arg)
 {
   /* For now there is only one USB controller, but we will always refer to
    * it using a pointer to make any future ports to multiple USB controllers
@@ -2455,7 +2455,7 @@ static int stm32_hpinterrupt(int irq, void *context)
  * Name: stm32_lpinterrupt
  ****************************************************************************/
 
-static int stm32_lpinterrupt(int irq, void *context)
+static int stm32_lpinterrupt(int irq, void *context, FAR void *arg)
 {
   /* For now there is only one USB controller, but we will always refer to
    * it using a pointer to make any future ports to multiple USB controllers
@@ -3752,14 +3752,14 @@ void up_usbinitialize(void)
    * them when we need them later.
    */
 
-  if (irq_attach(STM32_IRQ_USBHP, stm32_hpinterrupt) != 0)
+  if (irq_attach(STM32_IRQ_USBHP, stm32_hpinterrupt, NULL) != 0)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_IRQREGISTRATION),
                (uint16_t)STM32_IRQ_USBHP);
       goto errout;
     }
 
-  if (irq_attach(STM32_IRQ_USBLP, stm32_lpinterrupt) != 0)
+  if (irq_attach(STM32_IRQ_USBLP, stm32_lpinterrupt, NULL) != 0)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_IRQREGISTRATION),
                (uint16_t)STM32_IRQ_USBLP);

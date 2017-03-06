@@ -57,15 +57,15 @@
  *  - rising/falling edge: enables interrupt on rising/falling edge
  *  - event:  generate event when set
  *  - func:   when non-NULL, generate interrupt
+ *  - arg:    Argument passed to the interrupt callback
  *
  * Returns:
- *   The previous value of the interrupt handler function pointer.  This
- *   value may, for example, be used to restore the previous handler when
- *   multiple handlers are used.
+ *   Zero (OK) returned on success; a negated errno value is returned on
+ *   failure.
  *
  ****************************************************************************/
 
-xcpt_t stm32l4_exti_pvd(bool risingedge, bool fallingedge, bool event,
-                      xcpt_t func);
+int stm32l4_exti_pvd(bool risingedge, bool fallingedge, bool event,
+                     xcpt_t func, void *arg);
 
 #endif /* STM32L4_EXTI_PWR_H_ */

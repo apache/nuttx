@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs//nucleo-144/src/stm32_usb.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            David Sidrane <david_s5@nscdg.com>
  *
@@ -295,16 +295,18 @@ void stm32_usbhost_vbusdrive(int iface, bool enable)
  *
  * Input Parameter:
  *   handler - New overcurrent interrupt handler
+ *   arg     - The argument provided for the interrupt handler
  *
  * Returned value:
- *   Old overcurrent interrupt handler
+ *   Zero (OK) is returned on success.  Otherwise, a negated errno value is returned
+ *   to indicate the nature of the failure.
  *
  ************************************************************************************/
 
 #ifdef CONFIG_USBHOST
-xcpt_t stm32_setup_overcurrent(xcpt_t handler)
+int stm32_setup_overcurrent(xcpt_t handler, void *arg)
 {
-  return stm32_gpiosetevent(GPIO_OTGFS_OVER, true, true, true, handler);
+  return stm32_gpiosetevent(GPIO_OTGFS_OVER, true, true, true, handler, arg);
 }
 #endif
 

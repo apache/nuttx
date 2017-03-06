@@ -195,7 +195,7 @@ struct tiva_i2c_config_s
   uint32_t scl_pin;           /* GPIO configuration for SCL as SCL */
   uint32_t sda_pin;           /* GPIO configuration for SDA as SDA */
 #ifndef CONFIG_I2C_POLLED
-  int (*isr)(int, void *);    /* Interrupt handler */
+  int (*isr)(int, void *, void *);    /* Interrupt handler */
   uint8_t irq;                /* IRQ number */
 #endif
   uint8_t devno;              /* I2Cn where n = devno */
@@ -286,34 +286,34 @@ static int tiva_i2c_interrupt(struct tiva_i2c_priv_s * priv, uint32_t status);
 
 #ifndef CONFIG_I2C_POLLED
 #ifdef CONFIG_TIVA_I2C0
-static int tiva_i2c0_interrupt(int irq, void *context);
+static int tiva_i2c0_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_TIVA_I2C1
-static int tiva_i2c1_interrupt(int irq, void *context);
+static int tiva_i2c1_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_TIVA_I2C2
-static int tiva_i2c2_interrupt(int irq, void *context);
+static int tiva_i2c2_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_TIVA_I2C3
-static int tiva_i2c3_interrupt(int irq, void *context);
+static int tiva_i2c3_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_TIVA_I2C4
-static int tiva_i2c4_interrupt(int irq, void *context);
+static int tiva_i2c4_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_TIVA_I2C5
-static int tiva_i2c5_interrupt(int irq, void *context);
+static int tiva_i2c5_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_TIVA_I2C6
-static int tiva_i2c6_interrupt(int irq, void *context);
+static int tiva_i2c6_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_TIVA_I2C7
-static int tiva_i2c7_interrupt(int irq, void *context);
+static int tiva_i2c7_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_TIVA_I2C8
-static int tiva_i2c8_interrupt(int irq, void *context);
+static int tiva_i2c8_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_TIVA_I2C9
-static int tiva_i2c9_interrupt(int irq, void *context);
+static int tiva_i2c9_interrupt(int irq, void *context, FAR void *arg);
 #endif
 #endif /* !CONFIG_I2C_POLLED */
 
@@ -1419,7 +1419,7 @@ static int tiva_i2c_interrupt(struct tiva_i2c_priv_s *priv, uint32_t status)
  ************************************************************************************/
 
 #if !defined(CONFIG_I2C_POLLED) && defined(CONFIG_TIVA_I2C0)
-static int tiva_i2c0_interrupt(int irq, void *context)
+static int tiva_i2c0_interrupt(int irq, void *context, void *arg)
 {
   struct tiva_i2c_priv_s *priv;
   uint32_t status;
@@ -1444,7 +1444,7 @@ static int tiva_i2c0_interrupt(int irq, void *context)
  ************************************************************************************/
 
 #if !defined(CONFIG_I2C_POLLED) && defined(CONFIG_TIVA_I2C1)
-static int tiva_i2c1_interrupt(int irq, void *context)
+static int tiva_i2c1_interrupt(int irq, void *context, FAR void *arg)
 {
   struct tiva_i2c_priv_s *priv;
   uint32_t status;
@@ -1469,7 +1469,7 @@ static int tiva_i2c1_interrupt(int irq, void *context)
  ************************************************************************************/
 
 #if !defined(CONFIG_I2C_POLLED) && defined(CONFIG_TIVA_I2C2)
-static int tiva_i2c2_interrupt(int irq, void *context)
+static int tiva_i2c2_interrupt(int irq, void *context, FAR void *arg)
 {
   struct tiva_i2c_priv_s *priv;
   uint32_t status;
@@ -1494,7 +1494,7 @@ static int tiva_i2c2_interrupt(int irq, void *context)
  ************************************************************************************/
 
 #if !defined(CONFIG_I2C_POLLED) && defined(CONFIG_TIVA_I2C3)
-static int tiva_i2c3_interrupt(int irq, void *context)
+static int tiva_i2c3_interrupt(int irq, void *context, FAR void *arg)
 {
   struct tiva_i2c_priv_s *priv;
   uint32_t status;
@@ -1519,7 +1519,7 @@ static int tiva_i2c3_interrupt(int irq, void *context)
  ************************************************************************************/
 
 #if !defined(CONFIG_I2C_POLLED) && defined(CONFIG_TIVA_I2C4)
-static int tiva_i2c4_interrupt(int irq, void *context)
+static int tiva_i2c4_interrupt(int irq, void *context, FAR void *arg)
 {
   struct tiva_i2c_priv_s *priv;
   uint32_t status;
@@ -1544,7 +1544,7 @@ static int tiva_i2c4_interrupt(int irq, void *context)
  ************************************************************************************/
 
 #if !defined(CONFIG_I2C_POLLED) && defined(CONFIG_TIVA_I2C5)
-static int tiva_i2c5_interrupt(int irq, void *context)
+static int tiva_i2c5_interrupt(int irq, void *context, FAR void *arg)
 {
   struct tiva_i2c_priv_s *priv;
   uint32_t status;
@@ -1569,7 +1569,7 @@ static int tiva_i2c5_interrupt(int irq, void *context)
  ************************************************************************************/
 
 #if !defined(CONFIG_I2C_POLLED) && defined(CONFIG_TIVA_I2C6)
-static int tiva_i2c6_interrupt(int irq, void *context)
+static int tiva_i2c6_interrupt(int irq, void *context, FAR void *arg)
 {
   struct tiva_i2c_priv_s *priv;
   uint32_t status;
@@ -1594,7 +1594,7 @@ static int tiva_i2c6_interrupt(int irq, void *context)
  ************************************************************************************/
 
 #if !defined(CONFIG_I2C_POLLED) && defined(CONFIG_TIVA_I2C7)
-static int tiva_i2c7_interrupt(int irq, void *context)
+static int tiva_i2c7_interrupt(int irq, void *context, FAR void *arg)
 {
   struct tiva_i2c_priv_s *priv;
   uint32_t status;
@@ -1619,7 +1619,7 @@ static int tiva_i2c7_interrupt(int irq, void *context)
  ************************************************************************************/
 
 #if !defined(CONFIG_I2C_POLLED) && defined(CONFIG_TIVA_I2C8)
-static int tiva_i2c8_interrupt(int irq, void *context)
+static int tiva_i2c8_interrupt(int irq, void *context, FAR void *arg)
 {
   struct tiva_i2c_priv_s *priv;
   uint32_t status;
@@ -1644,7 +1644,7 @@ static int tiva_i2c8_interrupt(int irq, void *context)
  ************************************************************************************/
 
 #if !defined(CONFIG_I2C_POLLED) && defined(CONFIG_TIVA_I2C9)
-static int tiva_i2c9_interrupt(int irq, void *context)
+static int tiva_i2c9_interrupt(int irq, void *context, FAR void *arg)
 {
   struct tiva_i2c_priv_s *priv;
   uint32_t status;
@@ -1758,7 +1758,7 @@ static int tiva_i2c_initialize(struct tiva_i2c_priv_s *priv, uint32_t frequency)
    */
 
 #ifndef CONFIG_I2C_POLLED
-  (void)irq_attach(config->irq, config->isr);
+  (void)irq_attach(config->irq, config->isr, NULL);
   up_enable_irq(config->irq);
 #endif
 

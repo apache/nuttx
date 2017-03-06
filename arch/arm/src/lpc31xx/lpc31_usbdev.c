@@ -396,7 +396,7 @@ static void        lpc31_ep0complete(struct lpc31_usbdev_s *priv, uint8_t epphy)
 static void        lpc31_ep0nak(struct lpc31_usbdev_s *priv, uint8_t epphy);
 static bool        lpc31_epcomplete(struct lpc31_usbdev_s *priv, uint8_t epphy);
 
-static int         lpc31_usbinterrupt(int irq, FAR void *context);
+static int         lpc31_usbinterrupt(int irq, FAR void *context, FAR void *arg);
 
 /* Endpoint operations *********************************************************/
 
@@ -1677,7 +1677,7 @@ bool lpc31_epcomplete(struct lpc31_usbdev_s *priv, uint8_t epphy)
  *
  ****************************************************************************/
 
-static int lpc31_usbinterrupt(int irq, FAR void *context)
+static int lpc31_usbinterrupt(int irq, FAR void *context, FAR void *arg)
 {
   struct lpc31_usbdev_s *priv = &g_usbdev;
   uint32_t disr, portsc1, n;
@@ -2572,7 +2572,7 @@ void up_usbinitialize(void)
 
   /* Attach USB controller interrupt handler */
 
-  if (irq_attach(LPC31_IRQ_USBOTG, lpc31_usbinterrupt) != 0)
+  if (irq_attach(LPC31_IRQ_USBOTG, lpc31_usbinterrupt, NULL) != 0)
     {
       usbtrace(TRACE_DEVERROR(LPC31_TRACEERR_IRQREGISTRATION),
                (uint16_t)LPC31_IRQ_USBOTG);

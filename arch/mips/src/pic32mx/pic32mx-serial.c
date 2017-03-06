@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/mips/src/pic32mx/pic32mx-serial.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -173,7 +173,7 @@ static int  up_setup(struct uart_dev_s *dev);
 static void up_shutdown(struct uart_dev_s *dev);
 static int  up_attach(struct uart_dev_s *dev);
 static void up_detach(struct uart_dev_s *dev);
-static int  up_interrupt(int irq, void *context);
+static int  up_interrupt(int irq, void *context, void *arg);
 static int  up_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int  up_receive(struct uart_dev_s *dev, uint32_t *status);
 static void up_rxint(struct uart_dev_s *dev, bool enable);
@@ -413,7 +413,7 @@ static int up_attach(struct uart_dev_s *dev)
 
   /* Attach the IRQ */
 
-  return irq_attach(priv->irq, up_interrupt);
+  return irq_attach(priv->irq, up_interrupt, dev);
 }
 
 /****************************************************************************
@@ -451,32 +451,15 @@ static void up_detach(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static int up_interrupt(int irq, void *context)
+static int up_interrupt(int irq, void *context, void *arg)
 {
-  struct uart_dev_s *dev = NULL;
+  struct uart_dev_s *dev = (struct uart_dev_s *)arg;
   struct up_dev_s   *priv;
   int                passes;
   bool               handled;
 
-#ifdef CONFIG_PIC32MX_UART1
-  if (g_uart1priv.irq == irq)
-    {
-      dev = &g_uart1port;
-    }
-  else
-#endif
-#ifdef CONFIG_PIC32MX_UART2
-  if (g_uart2priv.irq == irq)
-    {
-      dev = &g_uart2port;
-    }
-  else
-#endif
-    {
-      PANIC();
-    }
+  DEBUGASSERT(dev != NULL && dev->priv != NULL);
   priv = (struct up_dev_s *)dev->priv;
-  DEBUGASSERT(priv);
 
   /* Loop until there are no characters to be transferred or,
    * until we have been looping for a long time.

@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/stm32_tiny/src/stm32_wireless.c
  *
- *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Laurent Latil <laurent@latil.nom.fr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,7 +57,7 @@
  * Private Function Prototypes
  ************************************************************************************/
 
-static int stm32tiny_wl_irq_attach(xcpt_t isr);
+static int stm32tiny_wl_irq_attach(xcpt_t isr, FAR void *arg);
 
 static void stm32tiny_wl_chip_enable(bool enable);
 
@@ -72,16 +72,18 @@ static FAR struct nrf24l01_config_s nrf_cfg =
 };
 
 static xcpt_t g_isr;
+static FAR void *g_arg;
 
 /************************************************************************************
  * Private Functions
  ************************************************************************************/
 
-static int stm32tiny_wl_irq_attach(xcpt_t isr)
+static int stm32tiny_wl_irq_attach(xcpt_t isr, FAR void *arg)
 {
   _info("Attach IRQ\n");
   g_isr = isr;
-  stm32_gpiosetevent(GPIO_NRF24L01_IRQ, false, true, false, g_isr);
+  g_arg = arg;
+  (void)stm32_gpiosetevent(GPIO_NRF24L01_IRQ, false, true, false, g_isr, g_arg);
   return OK;
 }
 

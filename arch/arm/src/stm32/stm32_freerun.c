@@ -53,12 +53,6 @@
 #ifdef CONFIG_STM32_FREERUN
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-static struct stm32_freerun_s *g_freerun;
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -81,9 +75,9 @@ static struct stm32_freerun_s *g_freerun;
  ****************************************************************************/
 
 #ifndef CONFIG_CLOCK_TIMEKEEPING
-static int stm32_freerun_handler(int irq, void *context)
+static int stm32_freerun_handler(int irq, void *context, void *arg)
 {
-  struct stm32_freerun_s *freerun = g_freerun;
+  struct stm32_freerun_s *freerun = (struct stm32_freerun_s *) arg;
 
   DEBUGASSERT(freerun != NULL && freerun->overflow < UINT32_MAX);
   freerun->overflow++;
@@ -151,11 +145,10 @@ int stm32_freerun_initialize(struct stm32_freerun_s *freerun, int chan,
 
 #ifndef CONFIG_CLOCK_TIMEKEEPING
   freerun->overflow     = 0;
-  g_freerun             = freerun;
 
   /* Set up to receive the callback when the counter overflow occurs */
 
-  STM32_TIM_SETISR(freerun->tch, stm32_freerun_handler, 0);
+  STM32_TIM_SETISR(freerun->tch, stm32_freerun_handler, freerun, 0);
 #endif
 
   /* Set timer period */
@@ -305,14 +298,13 @@ int stm32_freerun_uninitialize(struct stm32_freerun_s *freerun)
 
   STM32_TIM_DISABLEINT(freerun->tch, 0);
   STM32_TIM_SETMODE(freerun->tch, STM32_TIM_MODE_DISABLED);
-  STM32_TIM_SETISR(freerun->tch, NULL, 0);
+  STM32_TIM_SETISR(freerun->tch, NULL, NULL, 0);
 
   /* Free the timer */
 
   stm32_tim_deinit(freerun->tch);
   freerun->tch = NULL;
 
-  g_freerun = NULL;
   return OK;
 }
 

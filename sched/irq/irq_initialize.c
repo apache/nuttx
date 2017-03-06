@@ -44,10 +44,28 @@
 #include "irq/irq.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* This is the number of entries in the interrupt vector table */
+
+#ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
+#  define TAB_SIZE CONFIG_ARCH_NUSER_INTERRUPTS
+#else
+#  define TAB_SIZE NR_IRQS
+#endif
+
+/****************************************************************************
  * Public Data
  ****************************************************************************/
 
-FAR xcpt_t g_irqvector[NR_IRQS];
+/* This is the interrupt vector table */
+
+#ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
+struct irq_info_s g_irqvector[CONFIG_ARCH_NUSER_INTERRUPTS];
+#else
+struct irq_info_s g_irqvector[NR_IRQS];
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -67,8 +85,9 @@ void irq_initialize(void)
 
   /* Point all interrupt vectors to the unexpected interrupt */
 
-  for (i = 0; i < NR_IRQS; i++)
+  for (i = 0; i < TAB_SIZE; i++)
     {
-      g_irqvector[i] = irq_unexpected_isr;
+      g_irqvector[i].handler = irq_unexpected_isr;
+      g_irqvector[i].arg     = NULL;
     }
 }

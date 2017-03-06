@@ -61,7 +61,7 @@
  ****************************************************************************/
 
 static int stm32_rng_initialize(void);
-static int stm32_interrupt(int irq, void *context);
+static int stm32_interrupt(int irq, void *context, FAR void *arg);
 static void stm32_enable(void);
 static void stm32_disable(void);
 static ssize_t stm32_read(struct file *filep, char *buffer, size_t);
@@ -113,7 +113,7 @@ static int stm32_rng_initialize()
 
   sem_init(&g_rngdev.rd_devsem, 0, 1);
 
-  if (irq_attach(STM32_IRQ_RNG, stm32_interrupt))
+  if (irq_attach(STM32_IRQ_RNG, stm32_interrupt, NULL))
     {
       /* We could not attach the ISR to the interrupt */
 
@@ -152,7 +152,7 @@ static void stm32_disable()
   putreg32(regval, STM32_RNG_CR);
 }
 
-static int stm32_interrupt(int irq, void *context)
+static int stm32_interrupt(int irq, void *context, FAR void *arg)
 {
   uint32_t rngsr;
   uint32_t data;

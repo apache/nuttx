@@ -117,7 +117,7 @@ static void   sam_takedsem(void);
 static inline void sam_givedsem(void);
 #endif
 static void   sam_dmaterminate(struct sam_dmach_s *dmach, int result);
-static int    sam_dmainterrupt(int irq, void *context);
+static int    sam_dmainterrupt(int irq, void *context, FAR void *arg);
 static struct dma_desc_s *sam_alloc_desc(struct sam_dmach_s *dmach);
 static struct dma_desc_s *sam_append_desc(struct sam_dmach_s *dmach,
                 uint16_t btctrl, uint16_t btcnt,
@@ -275,7 +275,7 @@ static void sam_dmaterminate(struct sam_dmach_s *dmach, int result)
  *
  ****************************************************************************/
 
-static int sam_dmainterrupt(int irq, void *context)
+static int sam_dmainterrupt(int irq, void *context, FAR void *arg)
 {
   struct sam_dmach_s *dmach;
   unsigned int chndx;
@@ -807,7 +807,7 @@ void weak_function up_dmainitialize(void)
 
   /* Attach DMA interrupt vector */
 
-  (void)irq_attach(SAM_IRQ_DMAC, sam_dmainterrupt);
+  (void)irq_attach(SAM_IRQ_DMAC, sam_dmainterrupt, NULL);
 
   /* Set the LPRAM DMA descriptor table addresses.  These can only be
    * written when the DMAC is disabled.

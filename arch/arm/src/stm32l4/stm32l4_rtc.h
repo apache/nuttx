@@ -54,8 +54,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define STM32_RTC_PRESCALER_SECOND  32767  /* Default prescaler to get a second base */
-#define STM32_RTC_PRESCALER_MIN         1  /* Maximum speed of 16384 Hz */
+#define STM32L4_RTC_PRESCALER_SECOND  32767  /* Default prescaler to get a second base */
+#define STM32L4_RTC_PRESCALER_MIN         1  /* Maximum speed of 16384 Hz */
 
 /****************************************************************************
  * Public Types
@@ -146,7 +146,7 @@ bool rtc_is_inits(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32_HAVE_RTC_SUBSECONDS
+#ifdef CONFIG_STM32L4_HAVE_RTC_SUBSECONDS
 int stm32l4_rtc_getdatetime_with_subseconds(FAR struct tm *tp, FAR long *nsec);
 #endif
 

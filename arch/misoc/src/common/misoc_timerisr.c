@@ -95,7 +95,7 @@
  *
  ****************************************************************************/
 
-int misoc_timer_isr(int irq, void *context)
+int misoc_timer_isr(int irq, void *context, void *arg)
 {
   /* Clear event pending */
 
@@ -139,7 +139,7 @@ void misoc_timer_initialize(void)
 
   /* Attach the timer interrupt vector */
 
-  (void)irq_attach(TIMER0_INTERRUPT, misoc_timer_isr);
+  (void)irq_attach(TIMER0_INTERRUPT, misoc_timer_isr, NULL);
 
   /* And enable the timer interrupt */
 

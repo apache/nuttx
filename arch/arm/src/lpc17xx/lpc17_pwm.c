@@ -350,7 +350,7 @@ static int pwm_interrupt(struct lpc17_pwmtimer_s *priv)
  *
  ****************************************************************************/
 
-static int pwm_tim1interrupt(int irq, void *context)
+static int pwm_tim1interrupt(int irq, void *context, FAR void *arg)
 {
   return pwm_interrupt(&g_pwm1dev);
 }

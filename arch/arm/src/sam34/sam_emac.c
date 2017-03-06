@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sam34/sam_emac.c
  *
- *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * This logic derives from the SAM34D3 Ethernet driver.
@@ -270,7 +270,8 @@ struct sam_emac_s
   uint8_t               ifup    : 1; /* true:ifup false:ifdown */
   WDOG_ID               txpoll;      /* TX poll timer */
   WDOG_ID               txtimeout;   /* TX timeout timer */
-  struct work_s         work;        /* For deferring work to the work queue */
+  struct work_s         irqwork;     /* For deferring interrupt work to the work queue */
+  struct work_s         pollwork;    /* For deferring poll work to the work queue */
 
   /* This holds the information visible to the NuttX network */
 
@@ -381,7 +382,7 @@ static void sam_receive(struct sam_emac_s *priv);
 static void sam_txdone(struct sam_emac_s *priv);
 
 static void sam_interrupt_work(FAR void *arg);
-static int  sam_emac_interrupt(int irq, void *context);
+static int  sam_emac_interrupt(int irq, void *context, FAR void *arg);
 
 /* Watchdog timer expirations */
 
@@ -1614,7 +1615,7 @@ static void sam_interrupt_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static int sam_emac_interrupt(int irq, void *context)
+static int sam_emac_interrupt(int irq, void *context, FAR void *arg)
 {
   struct sam_emac_s *priv = &g_emac;
 
@@ -1643,24 +1644,12 @@ static int sam_emac_interrupt(int irq, void *context)
        * expiration and the deferred interrupt processing.
        */
 
-       wd_cancel(priv->txtimeout);
-
-      /* Make sure that the TX poll timer is running (if it is already
-       * running, the following would restart it).  This is necessary to
-       * avoid certain race conditions where the polling sequence can be
-       * interrupted.
-       */
-
-      (void)wd_start(priv->txpoll, SAM_WDDELAY, sam_poll_expiry, 1, priv);
+      wd_cancel(priv->txtimeout);
     }
-
-  /* Cancel any pending poll work */
-
-  work_cancel(ETHWORK, &priv->work);
 
   /* Schedule to perform the interrupt processing on the worker thread. */
 
-  work_queue(ETHWORK, &priv->work, sam_interrupt_work, priv, 0);
+  work_queue(ETHWORK, &priv->irqwork, sam_interrupt_work, priv, 0);
   return OK;
 }
 
@@ -1731,15 +1720,9 @@ static void sam_txtimeout_expiry(int argc, uint32_t arg, ...)
 
   up_disable_irq(SAM_IRQ_EMAC);
 
-  /* Cancel any pending poll or interrupt work.  This will have no effect
-   * on work that has already been started.
-   */
-
-  work_cancel(ETHWORK, &priv->work);
-
   /* Schedule to perform the TX timeout processing on the worker thread. */
 
-  work_queue(ETHWORK, &priv->work, sam_txtimeout_work, priv, 0);
+  work_queue(ETHWORK, &priv->irqwork, sam_txtimeout_work, priv, 0);
 }
 
 /****************************************************************************
@@ -1804,24 +1787,9 @@ static void sam_poll_expiry(int argc, uint32_t arg, ...)
 {
   FAR struct sam_emac_s *priv = (FAR struct sam_emac_s *)arg;
 
-  /* Is our single work structure available?  It may not be if there are
-   * pending interrupt actions.
-   */
+  /* Schedule to perform the interrupt processing on the worker thread. */
 
-  if (work_available(&priv->work))
-    {
-      /* Schedule to perform the interrupt processing on the worker thread. */
-
-      work_queue(ETHWORK, &priv->work, sam_poll_work, priv, 0);
-    }
-  else
-    {
-      /* No.. Just re-start the watchdog poll timer, missing one polling
-       * cycle.
-       */
-
-      (void)wd_start(priv->txpoll, SAM_WDDELAY, sam_poll_expiry, 1, arg);
-    }
+  work_queue(ETHWORK, &priv->pollwork, sam_poll_work, priv, 0);
 }
 
 /****************************************************************************
@@ -2012,11 +1980,11 @@ static int sam_txavail(struct net_driver_s *dev)
    * availability action.
    */
 
-  if (work_available(&priv->work))
+  if (work_available(&priv->pollwork))
     {
       /* Schedule to serialize the poll on the worker thread. */
 
-      work_queue(ETHWORK, &priv->work, sam_txavail_work, priv, 0);
+      work_queue(ETHWORK, &priv->pollwork, sam_txavail_work, priv, 0);
     }
 
   return OK;
@@ -3700,7 +3668,7 @@ void up_netinitialize(void)
    * the interface is in the 'up' state.
    */
 
-  ret = irq_attach(SAM_IRQ_EMAC, sam_emac_interrupt);
+  ret = irq_attach(SAM_IRQ_EMAC, sam_emac_interrupt, NULL);
   if (ret < 0)
     {
       nerr("ERROR: Failed to attach the handler to the IRQ%d\n", SAM_IRQ_EMAC);

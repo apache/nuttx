@@ -1506,7 +1506,7 @@ static void sam_dmaterminate(struct sam_xdmach_s *xdmach, int result)
  *
  ****************************************************************************/
 
-static int sam_xdmac_interrupt(int irq, void *context)
+static int sam_xdmac_interrupt(int irq, void *context, FAR void *arg)
 {
   struct sam_xdmac_s *xdmac = &g_xdmac;
   struct sam_xdmach_s *xdmach;
@@ -1624,7 +1624,7 @@ void weak_function up_dmainitialize(void)
 
   /* Attach DMA interrupt vector */
 
-  (void)irq_attach(SAM_IRQ_XDMAC, sam_xdmac_interrupt);
+  (void)irq_attach(SAM_IRQ_XDMAC, sam_xdmac_interrupt, NULL);
 
   /* Initialize the controller */
 

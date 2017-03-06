@@ -119,7 +119,7 @@
  *
  ****************************************************************************/
 
-static int m16c_timerisr(int irq, uint32_t *regs)
+static int m16c_timerisr(int irq, uint32_t *regs, void *arg)
 {
   /* Process timer interrupt */
 
@@ -166,7 +166,7 @@ void renesas_timer_initialize(void)
 
   /* Attach the interrupt handler */
 
-  irq_attach(M16C_SYSTIMER_IRQ, (xcpt_t)m16c_timerisr);
+  irq_attach(M16C_SYSTIMER_IRQ, (xcpt_t)m16c_timerisr, NULL);
 
   /* Enable timer interrupts */
 

@@ -99,19 +99,19 @@ struct tiva_pwm_chan_s
  ************************************************************************************/
 
 #if defined(CONFIG_PWM_PULSECOUNT) && defined(CONFIG_TIVA_PWM0_CHAN0)
-static int tiva_pwm_gen0_interrupt(int irq, FAR void *context);
+static int tiva_pwm_gen0_interrupt(int irq, FAR void *context, FAR void *arg);
 #endif
 
 #if defined(CONFIG_PWM_PULSECOUNT) && defined(CONFIG_TIVA_PWM0_CHAN2)
-static int tiva_pwm_gen1_interrupt(int irq, FAR void *context);
+static int tiva_pwm_gen1_interrupt(int irq, FAR void *context, FAR void *arg);
 #endif
 
 #if defined(CONFIG_PWM_PULSECOUNT) && defined(CONFIG_TIVA_PWM0_CHAN4)
-static int tiva_pwm_gen2_interrupt(int irq, FAR void *context);
+static int tiva_pwm_gen2_interrupt(int irq, FAR void *context, FAR void *arg);
 #endif
 
 #if defined(CONFIG_PWM_PULSECOUNT) && defined(CONFIG_TIVA_PWM0_CHAN6)
-static int tiva_pwm_gen3_interrupt(int irq, FAR void *context);
+static int tiva_pwm_gen3_interrupt(int irq, FAR void *context, FAR void *arg);
 #endif
 
 #if defined(CONFIG_PWM_PULSECOUNT) && \
@@ -321,28 +321,28 @@ static struct tiva_pwm_chan_s g_pwm_chan7 =
  ************************************************************************************/
 
 #if defined(CONFIG_PWM_PULSECOUNT) && defined(CONFIG_TIVA_PWM0_CHAN0)
-static int tiva_pwm_gen0_interrupt(int irq, FAR void *context)
+static int tiva_pwm_gen0_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   return tiva_pwm_interrupt(&g_pwm_chan0);
 }
 #endif
 
 #if defined(CONFIG_PWM_PULSECOUNT) && defined(CONFIG_TIVA_PWM0_CHAN2)
-static int tiva_pwm_gen1_interrupt(int irq, FAR void *context)
+static int tiva_pwm_gen1_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   return tiva_pwm_interrupt(&g_pwm_chan2);
 }
 #endif
 
 #if defined(CONFIG_PWM_PULSECOUNT) && defined(CONFIG_TIVA_PWM0_CHAN4)
-static int tiva_pwm_gen2_interrupt(int irq, FAR void *context)
+static int tiva_pwm_gen2_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   return tiva_pwm_interrupt(&g_pwm_chan4);
 }
 #endif
 
 #if defined(CONFIG_PWM_PULSECOUNT) && defined(CONFIG_TIVA_PWM0_CHAN6)
-static int tiva_pwm_gen3_interrupt(int irq, FAR void *context)
+static int tiva_pwm_gen3_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   return tiva_pwm_interrupt(&g_pwm_chan6);
 }
@@ -832,28 +832,28 @@ FAR struct pwm_lowerhalf_s *tiva_pwm_initialize(int channel)
     {
 #ifdef CONFIG_TIVA_PWM0_CHAN0
       case 0:
-        irq_attach(chan->irq, tiva_pwm_gen0_interrupt);
+        irq_attach(chan->irq, tiva_pwm_gen0_interrupt, NULL);
         up_enable_irq(chan->irq);
         break;
 #endif
 
 #ifdef CONFIG_TIVA_PWM0_CHAN2
       case 2:
-        irq_attach(chan->irq, tiva_pwm_gen1_interrupt);
+        irq_attach(chan->irq, tiva_pwm_gen1_interrupt, NULL);
         up_enable_irq(chan->irq);
         break;
 #endif
 
 #ifdef CONFIG_TIVA_PWM0_CHAN4
       case 4:
-        irq_attach(chan->irq, tiva_pwm_gen2_interrupt);
+        irq_attach(chan->irq, tiva_pwm_gen2_interrupt, NULL);
         up_enable_irq(chan->irq);
         break;
 #endif
 
 #ifdef CONFIG_TIVA_PWM0_CHAN6
       case 6:
-        irq_attach(chan->irq, tiva_pwm_gen3_interrupt);
+        irq_attach(chan->irq, tiva_pwm_gen3_interrupt, NULL);
         up_enable_irq(chan->irq);
         break;
 #endif

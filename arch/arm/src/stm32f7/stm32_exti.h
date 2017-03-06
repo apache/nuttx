@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32f7/stm32_exti.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -72,22 +72,22 @@ extern "C"
  * Description:
  *   Sets/clears GPIO based event and interrupt triggers.
  *
- * Parameters:
+ * Input Parameters:
  *  - pinset:      GPIO pin configuration
  *  - risingedge:  Enables interrupt on rising edges
  *  - fallingedge: Enables interrupt on falling edges
  *  - event:       Generate event when set
  *  - func:        When non-NULL, generate interrupt
+ *  - arg:         Argument passed to the interrupt callback
  *
- * Returns:
- *   The previous value of the interrupt handler function pointer.  This
- *   value may, for example, be used to restore the previous handler when
- *   multiple handlers are used.
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure indicating the
+ *   nature of the failure.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
-xcpt_t stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
-                          bool event, xcpt_t func);
+int stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
+                       bool event, xcpt_t func, void *arg);
 
 /****************************************************************************
  * Name: stm32_exti_alarm
@@ -95,21 +95,22 @@ xcpt_t stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
  * Description:
  *   Sets/clears EXTI alarm interrupt.
  *
- * Parameters:
+ * Input Parameters:
  *  - risingedge:  Enables interrupt on rising edges
  *  - fallingedge: Enables interrupt on falling edges
  *  - event:       Generate event when set
  *  - func:        When non-NULL, generate interrupt
+ *  - arg:         Argument passed to the interrupt callback
  *
- * Returns:
- *   The previous value of the interrupt handler function pointer.  This
- *   value may, for example, be used to restore the previous handler when
- *   multiple handlers are used.
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure indicating the
+ *   nature of the failure.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-xcpt_t stm32_exti_alarm(bool risingedge, bool fallingedge, bool event, xcpt_t func);
+int stm32_exti_alarm(bool risingedge, bool fallingedge, bool event,
+                     xcpt_t func, void *arg);
 #endif
 
 #undef EXTERN

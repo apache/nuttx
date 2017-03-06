@@ -84,7 +84,7 @@
  *
  ****************************************************************************/
 
-static int z180_timerisr(int irq, chipreg_t *regs)
+static int z180_timerisr(int irq, chipreg_t *regs, void *arg)
 {
   /* "When TMDR0 decrements to 0, TIF0 is set to 1. This generates an interrupt
    * request if enabled by TIE0 = 1. TIF0 is reset to 0 when TCR is read and
@@ -142,7 +142,7 @@ void z80_timer_initialize(void)
 
   /* Attach the timer interrupt vector */
 
-  (void)irq_attach(Z180_PRT0, (xcpt_t)z180_timerisr);
+  (void)irq_attach(Z180_PRT0, (xcpt_t)z180_timerisr, NULL);
 
   /* And enable the timer interrupt */
 

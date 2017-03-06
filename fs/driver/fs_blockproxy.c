@@ -55,8 +55,8 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/drivers/drivers.h>
 
-#if !defined(CONFIG_DISABLE_PSEUDOFS_OPERATIONS) && \
-    !defined(CONFIG_DISABLE_MOUNTPOINT)
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && \
+    !defined(CONFIG_DISABLE_PSEUDOFS_OPERATIONS)
 
 /****************************************************************************
  * Private Data
@@ -231,4 +231,4 @@ errout_with_chardev:
   return ret;
 }
 
-#endif /* !CONFIG_DISABLE_PSEUDOFS_OPERATIONS && !CONFIG_DISABLE_MOUNTPOINT */
+#endif /* !CONFIG_DISABLE_MOUNTPOINT && !CONFIG_DISABLE_PSEUDOFS_OPERATIONS */

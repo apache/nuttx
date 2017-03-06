@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/tm4c123g-launchpad/src/tm4c_buttons.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Bradley Noyes <bradley.noyes@trd2inc.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,6 +38,8 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <errno.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
@@ -143,16 +145,15 @@ uint8_t board_buttons(void)
  * Description:
  *   This function may be called to register an interrupt handler that will
  *   be called when a button is depressed or released.  The ID value is one
- *   of the BUTTON* definitions provided above. The previous interrupt
- *   handler address is returned (so that it may restored, if so desired).
+ *   of the BUTTON* definitions provided above.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_IRQBUTTONS
-xcpt_t board_button_irq(int id, xcpt_t irqhandler)
+int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
-  xcpt_t oldhandler = NULL;
-  uint32_t pinset= 0;
+  uint32_t pinset = 0;
+  int ret;
 
   /* Determine which switch to set the irq handler for */
 
@@ -167,23 +168,21 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
         break;
 
       default:
-        return NULL;
+        return -EINVAL;
     }
 
     /* Are we attaching or detaching? */
 
     if (irqhandler != NULL)
       {
-        oldhandler = tiva_gpioirqattach(pinset, irqhandler);
+        ret = tiva_gpioirqattach(pinset, irqhandler, arg);
       }
     else
       {
-        oldhandler = tiva_gpioirqdetach(pinset);
+        ret = tiva_gpioirqdetach(pinset);
       }
 
-  /* Return the old button handler (so that it can be restored) */
-
-  return oldhandler;
+  return ret;
 }
 #endif
 

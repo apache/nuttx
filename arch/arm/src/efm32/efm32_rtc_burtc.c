@@ -175,7 +175,7 @@ volatile bool g_rtc_enabled = false;
  *
  ************************************************************************************/
 
-static int efm32_rtc_burtc_interrupt(int irq, void *context)
+static int efm32_rtc_burtc_interrupt(int irq, void *context, FAR void *arg)
 {
   uint32_t source = getreg32(EFM32_BURTC_IF);
 
@@ -378,7 +378,7 @@ int up_rtc_initialize(void)
 
   /* Configure RTC interrupt to catch overflow and alarm interrupts. */
 
-  irq_attach(EFM32_IRQ_BURTC, efm32_rtc_burtc_interrupt);
+  irq_attach(EFM32_IRQ_BURTC, efm32_rtc_burtc_interrupt, NULL);
   up_enable_irq(EFM32_IRQ_BURTC);
 
   g_rtc_enabled = true;

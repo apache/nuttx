@@ -322,14 +322,15 @@
 #  define SYS_stat                     (__SYS_filedesc+11)
 #  define SYS_fstat                    (__SYS_filedesc+12)
 #  define SYS_statfs                   (__SYS_filedesc+13)
-#  define SYS_telldir                  (__SYS_filedesc+14)
+#  define SYS_fstatfs                  (__SYS_filedesc+14)
+#  define SYS_telldir                  (__SYS_filedesc+15)
 
 #  if defined(CONFIG_PSEUDOFS_SOFTLINKS)
-#    define SYS_link                   (__SYS_filedesc+15)
-#    define SYS_readlink               (__SYS_filedesc+16)
-#    define __SYS_pipes                (__SYS_filedesc+17)
+#    define SYS_link                   (__SYS_filedesc+16)
+#    define SYS_readlink               (__SYS_filedesc+17)
+#    define __SYS_pipes                (__SYS_filedesc+18)
 #  else
-#    define __SYS_pipes                (__SYS_filedesc+15)
+#    define __SYS_pipes                (__SYS_filedesc+16)
 #  endif
 
 #  if defined(CONFIG_PIPES) && CONFIG_DEV_PIPE_SIZE > 0

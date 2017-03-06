@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/stm32f429i-disco/src/stm32_usbdev.c
  *
- *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -279,16 +279,18 @@ void stm32_usbhost_vbusdrive(int iface, bool enable)
  *
  * Input Parameters:
  *   handler - New overcurrent interrupt handler
+ *   arg     - The argument provided for the interrupt handler
  *
- * Returned Value:
- *   Old overcurrent interrupt handler
+ * Returned value:
+ *   Zero (OK) is returned on success.  Otherwise, a negated errno value is returned
+ *   to indicate the nature of the failure.
  *
  ************************************************************************************/
 
 #ifdef CONFIG_USBHOST
-xcpt_t stm32_setup_overcurrent(xcpt_t handler)
+int stm32_setup_overcurrent(xcpt_t handler, void *arg)
 {
-  return stm32_gpiosetevent(GPIO_OTGHS_OVER, true, true, true, handler);
+  return stm32_gpiosetevent(GPIO_OTGHS_OVER, true, true, true, handler, arg);
 }
 #endif
 

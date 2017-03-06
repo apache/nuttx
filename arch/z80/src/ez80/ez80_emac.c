@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z80/src/ez80/ez80_emac.c
  *
- *   Copyright (C) 2009-2010, 2012, 2014-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2012, 2014-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -400,13 +400,13 @@ static int  ez80emac_receive(struct ez80emac_driver_s *priv);
 /* Interrupt handling */
 
 static void ez80emac_txinterrupt_work(FAR void *arg);
-static int  ez80emac_txinterrupt(int irq, FAR void *context);
+static int  ez80emac_txinterrupt(int irq, FAR void *context, FAR void *arg);
 
 static void ez80emac_rxinterrupt_work(FAR void *arg);
-static int  ez80emac_rxinterrupt(int irq, FAR void *context);
+static int  ez80emac_rxinterrupt(int irq, FAR void *context, FAR void *arg);
 
 static void ez80emac_sysinterrupt_work(FAR void *arg);
-static int  ez80emac_sysinterrupt(int irq, FAR void *context);
+static int  ez80emac_sysinterrupt(int irq, FAR void *context, FAR void *arg);
 
 /* Watchdog timer expirations */
 
@@ -1581,7 +1581,7 @@ static void ez80emac_txinterrupt_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static int ez80emac_txinterrupt(int irq, FAR void *context)
+static int ez80emac_txinterrupt(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct ez80emac_driver_s *priv = &g_emac;
   uint8_t istat;
@@ -1683,7 +1683,7 @@ static void ez80emac_rxinterrupt_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static int ez80emac_rxinterrupt(int irq, FAR void *context)
+static int ez80emac_rxinterrupt(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct ez80emac_driver_s *priv = &g_emac;
 
@@ -1804,7 +1804,7 @@ static void ez80emac_sysinterrupt_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static int ez80emac_sysinterrupt(int irq, FAR void *context)
+static int ez80emac_sysinterrupt(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct ez80emac_driver_s *priv = &g_emac;
 
@@ -1814,10 +1814,6 @@ static int ez80emac_sysinterrupt(int irq, FAR void *context)
    */
 
   up_disable_irq(EZ80_EMACSYS_IRQ);
-
-  /* Cancel any pending poll work */
-
-  work_cancel(ETHWORK, &priv->syswork);
 
   /* Schedule to perform the interrupt processing on the worker thread. */
 
@@ -1899,12 +1895,6 @@ static void ez80emac_txtimeout_expiry(int argc, wdparm_t arg, ...)
 
   up_disable_irq(EZ80_EMACTX_IRQ);
 
-  /* Cancel any pending poll or Tx interrupt work.  This will have no
-   * effect on work that has already been started.
-   */
-
-  work_cancel(ETHWORK, &priv->txwork);
-
   /* Schedule to perform the TX timeout processing on the worker thread. */
 
   work_queue(ETHWORK, &priv->txwork, ez80emac_txtimeout_work, priv, 0);
@@ -1980,7 +1970,8 @@ static void ez80emac_poll_expiry(int argc, wdparm_t arg, ...)
        * cycle.
        */
 
-      (void)wd_start(priv->txpoll, EMAC_WDDELAY, ez80emac_poll_expiry, 1, arg);
+      (void)wd_start(priv->txpoll, EMAC_WDDELAY, ez80emac_poll_expiry,
+                     1, arg);
     }
 }
 
@@ -2509,7 +2500,7 @@ int up_netinitialize(void)
 
   /* Attach IRQs */
 
-  ret = irq_attach(EZ80_EMACSYS_IRQ, ez80emac_sysinterrupt);
+  ret = irq_attach(EZ80_EMACSYS_IRQ, ez80emac_sysinterrupt, NULL);
   if (ret < 0)
     {
       nerr("ERROR: Unable to attach IRQ %d\n", EZ80_EMACSYS_IRQ);
@@ -2517,7 +2508,7 @@ int up_netinitialize(void)
       goto errout;
     }
 
-  ret = irq_attach(EZ80_EMACRX_IRQ, ez80emac_rxinterrupt);
+  ret = irq_attach(EZ80_EMACRX_IRQ, ez80emac_rxinterrupt, NULL);
   if (ret < 0)
     {
       nerr("ERROR: Unable to attach IRQ %d\n", EZ80_EMACRX_IRQ);
@@ -2525,7 +2516,7 @@ int up_netinitialize(void)
       goto errout;
     }
 
-  ret = irq_attach(EZ80_EMACTX_IRQ, ez80emac_txinterrupt);
+  ret = irq_attach(EZ80_EMACTX_IRQ, ez80emac_txinterrupt, NULL);
   if (ret < 0)
     {
       nerr("ERROR: Unable to attach IRQ %d\n", EZ80_EMACTX_IRQ);

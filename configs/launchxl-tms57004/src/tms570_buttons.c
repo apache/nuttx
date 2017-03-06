@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/sam4e-ek/src/tms570_buttons.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <errno.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
@@ -84,10 +85,9 @@ static xcpt_t g_irq_button;
  ****************************************************************************/
 
 #ifdef HAVE_IRQBUTTONS
-static xcpt_t board_button_irqx(gio_pinset_t pinset, int irq,
-                                xcpt_t irqhandler, xcpt_t *store)
+static int board_button_irqx(gio_pinset_t pinset, int irq,
+                             xcpt_t irqhandler, xcpt_t *store, void *arg)
 {
-  xcpt_t oldhandler;
   irqstate_t flags;
 
   /* Disable interrupts until we are done.  This guarantees that the following
@@ -98,7 +98,6 @@ static xcpt_t board_button_irqx(gio_pinset_t pinset, int irq,
 
   /* Get the old button interrupt handler and save the new one */
 
-  oldhandler = *store;
   *store = irqhandler;
 
   /* Are we attaching or detaching? */
@@ -108,7 +107,7 @@ static xcpt_t board_button_irqx(gio_pinset_t pinset, int irq,
       /* Configure the interrupt */
 
       tms570_gioirq(pinset);
-      (void)irq_attach(irq, irqhandler);
+      (void)irq_attach(irq, irqhandler, arg);
       tms570_gioirqenable(irq);
     }
   else
@@ -123,7 +122,7 @@ static xcpt_t board_button_irqx(gio_pinset_t pinset, int irq,
 
   /* Return the old button handler (so that it can be restored) */
 
-  return oldhandler;
+  return OK;
 }
 #endif
 
@@ -171,8 +170,7 @@ uint8_t board_buttons(void)
  * Description:
  *   This function may be called to register an interrupt handler that will
  *   be called when a button is depressed or released.  The ID value is one
- *   of the BUTTON* definitions provided above. The previous interrupt
- *   handler address is returned (so that it may restored, if so desired).
+ *   of the BUTTON* definitions provided above.
  *
  * Configuration Notes:
  *   Configuration CONFIG_AVR32_GIOIRQ must be selected to enable the
@@ -183,17 +181,17 @@ uint8_t board_buttons(void)
  *
  ****************************************************************************/
 
-xcpt_t board_button_irq(int id, xcpt_t irqhandler)
+int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
 #ifdef HAVE_IRQBUTTONS
   if (id == BUTTON_GIOA7)
     {
-      return board_button_irqx(GIO_BUTTON, IRQ_BUTTON, irqhandler, &g_irq_button);
+      return board_button_irqx(GIO_BUTTON, IRQ_BUTTON, irqhandler,i
+                               &g_irq_button, arg);
     }
 #endif
 
-  return NULL;
-
+  return -EINVAL;
 }
 
 #endif /* CONFIG_ARCH_BUTTONS */

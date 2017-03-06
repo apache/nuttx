@@ -92,8 +92,8 @@ namespace std
   // Operations on file paths
 
   using ::access;
-  using ::unlink;
   using ::rmdir;
+  using ::unlink;
 #ifdef CONFIG_PSEUDOFS_SOFTLINKS
   using ::link;
   using ::readlink;

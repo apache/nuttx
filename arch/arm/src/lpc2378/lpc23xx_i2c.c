@@ -134,7 +134,7 @@ struct lpc2378_i2cdev_s
 
 static int  lpc2378_i2c_start(struct lpc2378_i2cdev_s *priv);
 static void lpc2378_i2c_stop(struct lpc2378_i2cdev_s *priv);
-static int  lpc2378_i2c_interrupt(int irq, FAR void *context);
+static int  lpc2378_i2c_interrupt(int irq, FAR void *context, FAR void *arg);
 static void lpc2378_i2c_timeout(int argc, uint32_t arg, ...);
 static void lpc2378_i2c_setfrequency(struct lpc2378_i2cdev_s *priv,
               uint32_t frequency);
@@ -296,36 +296,13 @@ static void lpc2378_stopnext(struct lpc2378_i2cdev_s *priv)
  *
  ****************************************************************************/
 
-static int lpc2378_i2c_interrupt(int irq, FAR void *context)
+static int lpc2378_i2c_interrupt(int irq, FAR void *context, FAR void *arg)
 {
-  struct lpc2378_i2cdev_s *priv;
+  struct lpc2378_i2cdev_s *priv = (struct lpc2378_i2cdev_s *)arg;
   struct i2c_msg_s *msg;
   uint32_t state;
 
-#ifdef CONFIG_LPC2378_I2C0
-  if (irq == I2C0_IRQ)
-    {
-      priv = &g_i2c0dev;
-    }
-  else
-#endif
-#ifdef CONFIG_LPC2378_I2C1
-  if (irq == I2C1_IRQ)
-    {
-      priv = &g_i2c1dev;
-    }
-  else
-#endif
-#ifdef CONFIG_LPC2378_I2C2
-  if (irq == I2C2_IRQ)
-    {
-      priv = &g_i2c2dev;
-    }
-  else
-#endif
-    {
-      PANIC();
-    }
+  DEBUGASSERT(priv != NULL);
 
   /* Reference UM10360 19.10.5 */
 
@@ -619,7 +596,7 @@ struct i2c_master_s *lpc2378_i2cbus_initialize(int port)
 
   /* Attach Interrupt Handler */
 
-  irq_attach(priv->irqid, lpc2378_i2c_interrupt);
+  irq_attach(priv->irqid, lpc2378_i2c_interrupt, priv);
 
   /* Enable Interrupt Handler */
 

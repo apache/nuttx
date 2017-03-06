@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated February 12, 2017)
+NuttX TODO List (Last updated March 4, 2017)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -19,7 +19,7 @@ nuttx/:
   (8)  Kernel/Protected Build
   (3)  C++ Support
   (6)  Binary loaders (binfmt/)
- (12)  Network (net/, drivers/net)
+ (13)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
   (0)  Other drivers (drivers/)
  (12)  Libraries (libc/, libm/)
@@ -438,7 +438,7 @@ o pthreads (sched/pthreads)
                serve as cancellation points.  They are, however, simple wrappers around nanosleep
                which is a true cancellation point.
                NOTE 02: system() is actually implemented in apps/ as part of NSH.  It cannot be
-               a cancellation point either.
+               a cancellation point.
                NOTE 03: sigpause() is a user-space function in the C library and cannot serve as
                cancellation points.  It is, however, a simple wrapper around sigsuspend()
                which is a true cancellation point.
@@ -1031,6 +1031,39 @@ o Network (net/, drivers/net)
                is the size of one pointer.
   Status:      Open
   Priority:    Low
+
+  Title:       ETHERNET WITH MULTIPLE LPWORK THREADS
+  Description: Recently, Ethernet drivers were modified to support multiple
+               work queue structures.  The question was raised: "My only
+               reservation would be, how would this interact in the case of having CONFIG_STM32_ETHMAC_LPWORK and CONFIG_SCHED_LPNTHREADS
+               > 1? Can it be guaranteed that one work item won't be
+               interrupted and execution switched to another? I think so but
+               am not 100% confident."
+
+               I suspect that you right.  There are probably vulnerabilities
+               in the CONFIG_STM32_ETHMAC_LPWORK with CONFIG_SCHED_LPNTHREADS
+               > 1 case.  But that really doesn't depend entirely upon the
+               change to add more work queue structures.  Certainly with only
+               work queue structure you would have concurrent Ethernet
+               operations in that multiple LP threads; just because the work
+               structure is available, does not mean that there is not dequeued
+               work in progress.  The multiple structures probably widens the
+               window for that concurrency, but does not create it.
+
+               The current Ethernet designs depend upon a single work queue to
+               serialize data.  In the case of muliple LP threads, some
+               additional mechanism would have to be added to enforce that
+               serialization.
+
+               NOTE:  Most drivers will call net_lock() and net_unlock() around
+               the critical portions of the driver work.  In that case, all work
+               will be properly serialized.  This issue only applies to drivers
+               that may perform operations that require protection outside of
+               the net_lock'ed region.  Sometimes, this may require extending
+               the netlock() to be beginning of the driver work function.
+
+  Status:      Open
+  Priority:    High if you happen to be using Ethernet in this configuration.
 
 o USB (drivers/usbdev, drivers/usbhost)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

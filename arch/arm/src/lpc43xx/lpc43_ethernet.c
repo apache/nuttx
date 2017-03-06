@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc43/lpc43_eth.c
  *
- *   Copyright (C) 2011-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -519,7 +519,8 @@ struct lpc43_ethmac_s
   uint8_t              fduplex : 1; /* Full (vs. half) duplex */
   WDOG_ID              txpoll;      /* TX poll timer */
   WDOG_ID              txtimeout;   /* TX timeout timer */
-  struct work_s        work;        /* For deferring work to the work queue */
+  struct work_s        irqwork;     /* For deferring work to the work queue */
+  struct work_s        pollwork;    /* For deferring work to the work queue */
 
   /* This holds the information visible to the NuttX network */
 
@@ -594,7 +595,7 @@ static void lpc43_freeframe(FAR struct lpc43_ethmac_s *priv);
 static void lpc43_txdone(FAR struct lpc43_ethmac_s *priv);
 
 static void lpc43_interrupt_work(FAR void *arg);
-static int  lpc43_interrupt(int irq, FAR void *context);
+static int  lpc43_interrupt(int irq, FAR void *context, FAR void *arg);
 
 /* Watchdog timer expirations */
 
@@ -1866,14 +1867,6 @@ static void lpc43_txdone(FAR struct lpc43_ethmac_s *priv)
 
       wd_cancel(priv->txtimeout);
 
-      /* Then make sure that the TX poll timer is running (if it is already
-       * running, the following would restart it).  This is necessary to
-       * avoid certain race conditions where the polling sequence can be
-       * interrupted.
-       */
-
-      (void)wd_start(priv->txpoll, LPC43_WDDELAY, lpc43_poll_expiry, 1, priv);
-
       /* And disable further TX interrupts. */
 
       lpc43_disableint(priv, ETH_DMAINT_TI);
@@ -2004,7 +1997,7 @@ static void lpc43_interrupt_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static int lpc43_interrupt(int irq, FAR void *context)
+static int lpc43_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct lpc43_ethmac_s *priv = &g_lpc43ethmac;
   uint32_t dmasr;
@@ -2033,13 +2026,9 @@ static int lpc43_interrupt(int irq, FAR void *context)
            wd_cancel(priv->txtimeout);
         }
 
-      /* Cancel any pending poll work */
-
-      work_cancel(ETHWORK, &priv->work);
-
       /* Schedule to perform the interrupt processing on the worker thread. */
 
-      work_queue(ETHWORK, &priv->work, lpc43_interrupt_work, priv, 0);
+      work_queue(ETHWORK, &priv->irqwork, lpc43_interrupt_work, priv, 0);
     }
 
   return OK;
@@ -2114,15 +2103,11 @@ static void lpc43_txtimeout_expiry(int argc, uint32_t arg, ...)
 
   up_disable_irq(LPC43M4_IRQ_ETHERNET);
 
-  /* Cancel any pending poll or interrupt work.  This will have no effect
-   * on work that has already been started.
+  /* Schedule to perform the TX timeout processing on the worker thread,
+   * perhaps cancelling any pending IRQ processing.
    */
 
-  work_cancel(ETHWORK, &priv->work);
-
-  /* Schedule to perform the TX timeout processing on the worker thread. */
-
-  work_queue(ETHWORK, &priv->work, lpc43_txtimeout_work, priv, 0);
+  work_queue(ETHWORK, &priv->irqwork, lpc43_txtimeout_work, priv, 0);
 }
 
 /****************************************************************************
@@ -2219,25 +2204,9 @@ static void lpc43_poll_expiry(int argc, uint32_t arg, ...)
 {
   FAR struct lpc43_ethmac_s *priv = (FAR struct lpc43_ethmac_s *)arg;
 
-  /* Is our single work structure available?  It may not be if there are
-   * pending interrupt actions.
-   */
+  /* Schedule to perform the interrupt processing on the worker thread. */
 
-  if (work_available(&priv->work))
-    {
-      /* Schedule to perform the interrupt processing on the worker thread. */
-
-      work_queue(ETHWORK, &priv->work, lpc43_poll_work, priv, 0);
-    }
-  else
-    {
-      /* No.. Just re-start the watchdog poll timer, missing one polling
-       * cycle.
-       */
-
-      (void)wd_start(priv->txpoll, LPC43_WDDELAY, lpc43_poll_expiry, 1,
-                     (uint32_t)priv);
-    }
+  work_queue(ETHWORK, &priv->pollwork, lpc43_poll_work, priv, 0);
 }
 
 /****************************************************************************
@@ -2406,11 +2375,11 @@ static int lpc43_txavail(struct net_driver_s *dev)
    * availability action.
    */
 
-  if (work_available(&priv->work))
+  if (work_available(&priv->pollwork))
     {
       /* Schedule to serialize the poll on the worker thread. */
 
-      work_queue(ETHWORK, &priv->work, lpc43_txavail_work, priv, 0);
+      work_queue(ETHWORK, &priv->pollwork, lpc43_txavail_work, priv, 0);
     }
 
   return OK;
@@ -3861,7 +3830,7 @@ static inline int lpc43_ethinitialize(void)
 
   /* Attach the IRQ to the driver */
 
-  if (irq_attach(LPC43M4_IRQ_ETHERNET, lpc43_interrupt))
+  if (irq_attach(LPC43M4_IRQ_ETHERNET, lpc43_interrupt, NULL))
     {
       /* We could not attach the ISR to the interrupt */
 

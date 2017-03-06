@@ -124,8 +124,8 @@ void arm_gic0_initialize(void)
 #ifdef CONFIG_SMP
   /* Attach SGI interrupt handlers.  This attaches the handler for all CPUs. */
 
-  DEBUGVERIFY(irq_attach(GIC_IRQ_SGI1, arm_start_handler));
-  DEBUGVERIFY(irq_attach(GIC_IRQ_SGI2, arm_pause_handler));
+  DEBUGVERIFY(irq_attach(GIC_IRQ_SGI1, arm_start_handler, NULL));
+  DEBUGVERIFY(irq_attach(GIC_IRQ_SGI2, arm_pause_handler, NULL));
 #endif
 
   arm_gic_dump("Exit arm_gic0_initialize", true, 0);

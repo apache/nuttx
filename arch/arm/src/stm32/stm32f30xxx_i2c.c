@@ -222,7 +222,7 @@ struct stm32_i2c_config_s
   uint32_t scl_pin;           /* GPIO configuration for SCL as SCL */
   uint32_t sda_pin;           /* GPIO configuration for SDA as SDA */
 #ifndef CONFIG_I2C_POLLED
-  int (*isr)(int, void *);    /* Interrupt handler */
+  int (*isr)(int, void *, void *);    /* Interrupt handler */
   uint32_t ev_irq;            /* Event IRQ */
   uint32_t er_irq;            /* Error IRQ */
 #endif
@@ -304,13 +304,13 @@ static inline uint32_t stm32_i2c_getstatus(FAR struct stm32_i2c_priv_s *priv);
 static int stm32_i2c_isr(struct stm32_i2c_priv_s * priv);
 #ifndef CONFIG_I2C_POLLED
 #ifdef CONFIG_STM32_I2C1
-static int stm32_i2c1_isr(int irq, void *context);
+static int stm32_i2c1_isr(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_STM32_I2C2
-static int stm32_i2c2_isr(int irq, void *context);
+static int stm32_i2c2_isr(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_STM32_I2C3
-static int stm32_i2c3_isr(int irq, void *context);
+static int stm32_i2c3_isr(int irq, void *context, FAR void *arg);
 #endif
 #endif
 static int stm32_i2c_init(FAR struct stm32_i2c_priv_s *priv);
@@ -1493,7 +1493,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
 
 #ifndef CONFIG_I2C_POLLED
 #ifdef CONFIG_STM32_I2C1
-static int stm32_i2c1_isr(int irq, void *context)
+static int stm32_i2c1_isr(int irq, void *context, FAR void *arg)
 {
   return stm32_i2c_isr(&stm32_i2c1_priv);
 }
@@ -1508,7 +1508,7 @@ static int stm32_i2c1_isr(int irq, void *context)
  ************************************************************************************/
 
 #ifdef CONFIG_STM32_I2C2
-static int stm32_i2c2_isr(int irq, void *context)
+static int stm32_i2c2_isr(int irq, void *context, FAR void *arg)
 {
   return stm32_i2c_isr(&stm32_i2c2_priv);
 }
@@ -1523,7 +1523,7 @@ static int stm32_i2c2_isr(int irq, void *context)
  ************************************************************************************/
 
 #ifdef CONFIG_STM32_I2C3
-static int stm32_i2c3_isr(int irq, void *context)
+static int stm32_i2c3_isr(int irq, void *context, FAR void *arg)
 {
   return stm32_i2c_isr(&stm32_i2c3_priv);
 }
@@ -1568,8 +1568,8 @@ static int stm32_i2c_init(FAR struct stm32_i2c_priv_s *priv)
   /* Attach ISRs */
 
 #ifndef CONFIG_I2C_POLLED
-  irq_attach(priv->config->ev_irq, priv->config->isr);
-  irq_attach(priv->config->er_irq, priv->config->isr);
+  irq_attach(priv->config->ev_irq, priv->config->isr, NULL);
+  irq_attach(priv->config->er_irq, priv->config->isr, NULL);
   up_enable_irq(priv->config->ev_irq);
   up_enable_irq(priv->config->er_irq);
 #endif

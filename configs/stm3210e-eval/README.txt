@@ -365,7 +365,7 @@ Temperature Sensor
 
   More complex temperature sensor operations are also available.  See the
   IOCTL commands enumerated in include/nuttx/sensors/lm75.h.  Also read the 
-  escriptions of the stm32_lm75initialize() and stm32_lm75attach()
+  descriptions of the stm32_lm75initialize() and stm32_lm75attach()
   interfaces in the arch/board/board.h file (sames as
   configs/stm3210e-eval/include/board.h).
 

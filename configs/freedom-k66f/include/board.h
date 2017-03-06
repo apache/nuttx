@@ -42,10 +42,11 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
 #endif
+
+#include <arch/chip/chip.h>
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -59,10 +60,9 @@
  * is 12 MHz oscillator
  *
  * X501 a High-frequency, low-power Xtal
- *
  */
 
-#define BOARD_EXTAL_LP		 1
+#define BOARD_EXTAL_LP       1
 #define BOARD_EXTAL_FREQ     12000000       /* 12MHz Oscillator */
 #define BOARD_XTAL32_FREQ    32768          /* 32KHz RTC Oscillator */
 
@@ -98,10 +98,50 @@
 #define BOARD_OUTDIV3        3              /* FlexBus     = MCG / 3, 60   MHz */
 #define BOARD_OUTDIV4        7              /* Flash clock = MCG / 7, 25.7 MHz */
 
-#define BOARD_CORECLK_FREQ  (BOARD_MCG_FREQ / BOARD_OUTDIV1)
-#define BOARD_BUS_FREQ      (BOARD_MCG_FREQ / BOARD_OUTDIV2)
-#define BOARD_FLEXBUS_FREQ  (BOARD_MCG_FREQ / BOARD_OUTDIV3)
-#define BOARD_FLASHCLK_FREQ (BOARD_MCG_FREQ / BOARD_OUTDIV4)
+#define BOARD_CORECLK_FREQ   (BOARD_MCG_FREQ / BOARD_OUTDIV1)
+#define BOARD_BUS_FREQ       (BOARD_MCG_FREQ / BOARD_OUTDIV2)
+#define BOARD_FLEXBUS_FREQ   (BOARD_MCG_FREQ / BOARD_OUTDIV3)
+#define BOARD_FLASHCLK_FREQ  (BOARD_MCG_FREQ / BOARD_OUTDIV4)
+
+/* Use BOARD_MCG_FREQ as the output SIM_SOPT2 MUX selected by
+ * SIM_SOPT2[PLLFLLSEL]
+ */
+
+#define BOARD_SOPT2_PLLFLLSEL   SIM_SOPT2_PLLFLLSEL_MCGPLLCLK
+#define BOARD_SOPT2_FREQ        BOARD_MCG_FREQ
+
+/* N.B. The above BOARD_SOPT2_FREQ precludes use of USB with a 12 Mhz Xtal
+ * Divider output clock = Divider input clock × [ (USBFRAC+1) / (USBDIV+1) ]
+ *     SIM_CLKDIV2_FREQ = BOARD_SOPT2_FREQ × [ (USBFRAC+1) / (USBDIV+1) ]
+ *                48Mhz = 168Mhz X [(1 + 1) / (6 + 1)]
+ *                48Mhz = 168Mhz / (6 + 1) * (1 + 1)
+ */
+
+#if (BOARD_MCG_FREQ == 168000000L)
+#  define BOARD_SIM_CLKDIV2_USBFRAC     2
+#  define BOARD_SIM_CLKDIV2_USBDIV      7
+#  define BOARD_SIM_CLKDIV2_FREQ        (BOARD_SOPT2_FREQ / \
+                                         BOARD_SIM_CLKDIV2_USBDIV * \
+                                         BOARD_SIM_CLKDIV2_USBFRAC)
+#endif
+
+/* Divider output clock = Divider input clock * ((PLLFLLFRAC+1)/(PLLFLLDIV+1))
+ *  SIM_CLKDIV3_FREQ = BOARD_SOPT2_FREQ × [ (PLLFLLFRAC+1) / (PLLFLLDIV+1)]
+ *            90 Mhz = 180 Mhz X [(0 + 1) / (1 + 1)]
+ *            90 Mhz = 180 Mhz / (1 + 1) * (0 + 1)
+ */
+
+#define BOARD_SIM_CLKDIV3_PLLFLLFRAC  1
+#define BOARD_SIM_CLKDIV3_PLLFLLDIV   2
+#define BOARD_SIM_CLKDIV3_FREQ        (BOARD_SOPT2_FREQ / \
+                                       BOARD_SIM_CLKDIV3_PLLFLLDIV * \
+                                       BOARD_SIM_CLKDIV3_PLLFLLFRAC)
+
+#define BOARD_LPUART0_CLKSRC SIM_SOPT2_LPUARTSRC_MCGCLK
+#define BOARD_LPUART0_FREQ   BOARD_SIM_CLKDIV3_FREQ
+
+#define BOARD_TPM_CLKSRC     SIM_SOPT2_TPMSRC_MCGCLK
+#define BOARD_TPM_FREQ       BOARD_SIM_CLKDIV3_FREQ
 
 /* SDHC clocking ********************************************************************/
 
@@ -275,6 +315,18 @@
 
 #define PIN_UART4_RX      PIN_UART4_RX_1
 #define PIN_UART4_TX      PIN_UART4_TX_1
+
+/* LPUART
+ *
+ *  J1 Pin     Name        K66   Name
+ *  -------- ------------ ------ ---------
+ *      7    I2S_RX_BCLK  PTE9 LPUART0_RX
+ *      11   I2S_RX_FS    PTE8 LPUART0_TX
+ *  -------- ----- ------ ---------
+ */
+
+#define PIN_LPUART0_RX      PIN_LPUART0_RX_1
+#define PIN_LPUART0_TX      PIN_LPUART0_TX_1
 
 /* I2C INERTIAL SENSOR (Gyroscope)
  *

@@ -127,7 +127,7 @@ static int  emac_txpoll(struct net_driver_s *dev);
 
 static void emac_receive(FAR struct emac_driver_s *priv);
 static void emac_txdone(FAR struct emac_driver_s *priv);
-static int  emac_interrupt(int irq, FAR void *context);
+static int  emac_interrupt(int irq, FAR void *context, FAR void *arg);
 
 /* Watchdog timer expirations */
 
@@ -442,7 +442,7 @@ static void emac_txdone(FAR struct emac_driver_s *priv)
  *
  ****************************************************************************/
 
-static int emac_interrupt(int irq, FAR void *context)
+static int emac_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   register FAR struct emac_driver_s *priv = &g_emac[0];
 
@@ -752,7 +752,7 @@ int emac_initialize(int intf)
 
   /* Attach the IRQ to the driver */
 
-  if (irq_attach(CONFIG_HCS12_IRQ, emac_interrupt))
+  if (irq_attach(CONFIG_HCS12_IRQ, emac_interrupt, NULL))
     {
       /* We could not attach the ISR to the interrupt */
 

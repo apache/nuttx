@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/net/enc28j60.c
  *
- *   Copyright (C) 2010-2012, 2014-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2012, 2014-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -327,7 +327,7 @@ static void enc_rxerif(FAR struct enc_driver_s *priv);
 static void enc_rxdispatch(FAR struct enc_driver_s *priv);
 static void enc_pktif(FAR struct enc_driver_s *priv);
 static void enc_irqworker(FAR void *arg);
-static int  enc_interrupt(int irq, FAR void *context);
+static int  enc_interrupt(int irq, FAR void *context, FAR void *arg);
 
 /* Watchdog timer expirations */
 
@@ -1287,15 +1287,6 @@ static void enc_txif(FAR struct enc_driver_s *priv)
 
   wd_cancel(priv->txtimeout);
 
-  /* Then make sure that the TX poll timer is running (if it is already
-   * running, the following would restart it).  This is necessary to
-   * avoid certain race conditions where the polling sequence can be
-   * interrupted.
-   */
-
-  (void)wd_start(priv->txpoll, ENC_WDDELAY, enc_polltimer, 1,
-                 (wdparm_t)priv);
-
   /* Then poll the network for new XMIT data */
 
   (void)devif_poll(&priv->dev, enc_txpoll);
@@ -1840,7 +1831,7 @@ static void enc_irqworker(FAR void *arg)
  *
  ****************************************************************************/
 
-static int enc_interrupt(int irq, FAR void *context)
+static int enc_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   register FAR struct enc_driver_s *priv = &g_enc28j60[0];
 

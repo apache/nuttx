@@ -1,5 +1,5 @@
 /************************************************************************************
- * arm/arm/src/stm32/stm32_tim.c
+ * arch/arm/src/stm32/stm32_tim.c
  *
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
  *   Author: Uros Platise <uros.platise@isotel.eu>
@@ -344,9 +344,8 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
 static int stm32_tim_setcompare(FAR struct stm32_tim_dev_s *dev, uint8_t channel,
                                 uint32_t compare);
 static int stm32_tim_getcapture(FAR struct stm32_tim_dev_s *dev, uint8_t channel);
-static int stm32_tim_setisr(FAR struct stm32_tim_dev_s *dev,
-                            int (*handler)(int irq, void *context),
-                            int source);
+static int stm32_tim_setisr(FAR struct stm32_tim_dev_s *dev, xcpt_t handler,
+                            void *arg, int source);
 static void stm32_tim_enableint(FAR struct stm32_tim_dev_s *dev, int source);
 static void stm32_tim_disableint(FAR struct stm32_tim_dev_s *dev, int source);
 static void stm32_tim_ackint(FAR struct stm32_tim_dev_s *dev, int source);
@@ -1484,9 +1483,8 @@ static int stm32_tim_getcapture(FAR struct stm32_tim_dev_s *dev, uint8_t channel
  * Name: stm32_tim_setisr
  ************************************************************************************/
 
-static int stm32_tim_setisr(FAR struct stm32_tim_dev_s *dev,
-                            int (*handler)(int irq, void *context),
-                            int source)
+static int stm32_tim_setisr(FAR struct stm32_tim_dev_s *dev, xcpt_t handler,
+                            void * arg, int source)
 {
   int vectorno;
 
@@ -1596,7 +1594,7 @@ static int stm32_tim_setisr(FAR struct stm32_tim_dev_s *dev,
 
   /* Otherwise set callback and enable interrupt */
 
-  irq_attach(vectorno, handler);
+  irq_attach(vectorno, handler ,arg);
   up_enable_irq(vectorno);
 
 #ifdef CONFIG_ARCH_IRQPRIO

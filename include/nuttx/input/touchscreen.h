@@ -1,7 +1,7 @@
 /************************************************************************************
  * include/nuttx/input/touchscreen.h
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,18 +57,41 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
 /* IOCTL Commands *******************************************************************/
+/* Common TSC IOCTL commands */
 
 #define TSIOC_SETCALIB       _TSIOC(0x0001)  /* arg: Pointer to int calibration value */
 #define TSIOC_GETCALIB       _TSIOC(0x0002)  /* arg: Pointer to int calibration value */
 #define TSIOC_SETFREQUENCY   _TSIOC(0x0003)  /* arg: Pointer to uint32_t frequency value */
 #define TSIOC_GETFREQUENCY   _TSIOC(0x0004)  /* arg: Pointer to uint32_t frequency value */
 
-/* Specific touchscreen drivers may support additional, device specific ioctl
- * commands, beginning with this value:
- */
+#define TSC_FIRST            0x0001          /* First common command */
+#define TSC_NCMDS            4               /* Four common commands */
 
-#define TSIOC_USER           0x0005         /* Lowest, unused TSC ioctl command */
+/* User defined ioctl commands are also supported.  However, the TSC driver must
+ * reserve a block of commands as follows in order prevent IOCTL command numbers
+ * from overlapping.
+ *
+ * This is generally done as follows.  The first reservation for TSC driver A would
+ * look like:
+ *
+ *   TSC_A_FIRST                 (TSC_FIRST + TSC_NCMDS)     <- First command
+ *   TSC_A_NCMDS                 42                          <- Number of commands
+ *
+ * IOCTL commands for TSC driver A would then be defined in a TSC A header file like:
+ *
+ *   TSCIOC_A_CMD1               _TSIOC(TSC_A_FIRST+0)
+ *   TSCIOC_A_CMD2               _TSIOC(TSC_A_FIRST+1)
+ *   TSCIOC_A_CMD3               _TSIOC(TSC_A_FIRST+2)
+ *   ...
+ *   TSCIOC_A_CMD42              _TSIOC(TSC_A_FIRST+41)
+ *
+ * The next reservation would look like:
+ *
+ *   TSC_B_FIRST                 (TSC_A_FIRST + TSC_A_NCMDS) <- Next command
+ *   TSC_B_NCMDS                 77                          <- Number of commands
+ */
 
 /* These definitions provide the meaning of all of the bits that may be
  * reported in the struct touch_point_s flags.

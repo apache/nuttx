@@ -71,12 +71,12 @@ config ARCH_BOARD_CLOUDCTRL
 		board design.
 
 config ARCH_BOARD_DEMOS92S12NEC64
-	bool "Freescale DMO9S12NE64 board"
+	bool "NXP/FreeScale DMO9S12NE64 board"
 	depends on ARCH_CHIP_MCS92S12NEC64
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	---help---
-	Freescale DMO9S12NE64 board based on the MC9S12NE64 hcs12 cpu.  This
+	NXP/FreeScale DMO9S12NE64 board based on the MC9S12NE64 hcs12 cpu.  This
 	port uses the m9s12x GCC toolchain.  STATUS:  (Still) under development; it
 	is code complete but has not yet been verified.
 
@@ -185,7 +185,7 @@ config ARCH_BOARD_FREEDOM_K64F
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		development board.
-		This port uses the FreeScale FREEDOM-K64F development board. This
+		This port uses the NXP/FreeScale FREEDOM-K64F development board. This
 		board uses the Kinetis K64 MK64FN1M0VLL12 Cortex-M4 MCU.
 
 config ARCH_BOARD_FREEDOM_K66F
@@ -196,23 +196,23 @@ config ARCH_BOARD_FREEDOM_K66F
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		development board.
-		This port uses the FreeScale FREEDOM-K66F development board. This
+		This port uses the NXP/FreeScale FREEDOM-K66F development board. This
 		board uses the Kinetis K66 MK66FN2M0VMD18 Cortex-M4 MCU.
 
 config ARCH_BOARD_FREEDOM_KL25Z
-	bool "Freescale Freedom KL25Z"
+	bool "NXP/FreeScale Freedom KL25Z"
 	depends on ARCH_CHIP_MKL25Z128
 	select ARCH_HAVE_LEDS
 	---help---
-		This is the configuration for the Freescale Freedom KL25Z board.  This
+		This is the configuration for the NXP/FreeScale Freedom KL25Z board.  This
 		board has the K25Z120LE3AN chip with a built-in SDA debugger.
 
 config ARCH_BOARD_FREEDOM_KL26Z
-	bool "Freescale Freedom KL26Z"
+	bool "NXP/FreeScale Freedom KL26Z"
 	depends on ARCH_CHIP_MKL26Z128
 	select ARCH_HAVE_LEDS
 	---help---
-		This is the configuration for the Freescale Freedom KL26Z board.  This
+		This is the configuration for the NXP/FreeScale Freedom KL26Z board.  This
 		board has the K26Z128VLH4 chip with a built-in SDA debugger.
 
 config ARCH_BOARD_HYMINI_STM32V
@@ -235,13 +235,13 @@ config ARCH_BOARD_LINCOLN60
 		Micromint Lincoln 60 board using the NXP LPC1769 MCU.
 
 config ARCH_BOARD_KWIKSTIK_K40
-	bool "FreeScale KwikStik-K40 development board"
+	bool "NXP/FreeScale KwikStik-K40 development board"
 	depends on ARCH_CHIP_MK40X256VLQ100
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
-		Kinetis K40 Cortex-M4 MCU.  This port uses the FreeScale KwikStik-K40
+		Kinetis K40 Cortex-M4 MCU.  This port uses the NXP/FreeScale KwikStik-K40
 		development board.
 
 config ARCH_BOARD_LAUNCHXL_TMS57004
@@ -387,7 +387,7 @@ config ARCH_BOARD_MX1ADS
 	select ARCH_HAVE_LEDS
 	---help---
 		This is a port to the Motorola MX1ADS development board.  That board
-		is based on the Freescale i.MX1 processor.  The i.MX1 is an ARM920T.
+		is based on the NXP/FreeScale i.MX1 processor.  The i.MX1 is an ARM920T.
 		STATUS:  This port is nearly code complete but was never fully
 		integrated due to tool-related issues.
 
@@ -713,6 +713,15 @@ config ARCH_BOARD_NUCLEO_F303RE
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		STMicro Nucleo F303RE board based on the STMicro STM32F303RET6 MCU.
+
+config ARCH_BOARD_NUCLEO_F334R8
+	bool "STM32F334 Nucleo F334R8"
+	depends on ARCH_CHIP_STM32F334R8
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		STMicro Nucleo F334R8 board based on the STMicro STM32F334R8 MCU.
 
 config ARCH_BOARD_NUCLEO_F401RE
 	bool "STM32F401 Nucleo F401RE"
@@ -1180,13 +1189,23 @@ config ARCH_BOARD_CC3200_LAUNCHPAD
 		Tiva CC3200 Launchpad.
 
 config ARCH_BOARD_TWR_K60N512
-	bool "FreeScale TWR-K60N512d evelopment board"
+	bool "FreeScale TWR-K60N512 development board"
 	depends on ARCH_CHIP_MK60N512VMD100
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		Kinetis K60 Cortex-M4 MCU.  This port uses the FreeScale TWR-K60N512
+		development board.
+
+config ARCH_BOARD_TWR_K64F120M
+	bool "Freescale TWR-K64F120M development board"
+	depends on ARCH_CHIP_MK64FN1M0VMD12
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		Kinetis K64 Cortex-M4 MCU. This port uses the Freescale TWR-K64F120M
 		development board.
 
 config ARCH_BOARD_U_BLOX_C027
@@ -1437,6 +1456,7 @@ config ARCH_BOARD
 	default "pic32mz-starterkit"       if ARCH_BOARD_PIC32MZ_STARTERKIT
 	default "nucleo-144"               if ARCH_BOARD_NUCLEO_144
 	default "nucleo-f303re"            if ARCH_BOARD_NUCLEO_F303RE
+	default "nucleo-f334r8"            if ARCH_BOARD_NUCLEO_F334R8
 	default "nucleo-f4x1re"            if ARCH_BOARD_NUCLEO_F401RE || ARCH_BOARD_NUCLEO_F411RE
 	default "nucleo-l476rg"            if ARCH_BOARD_NUCLEO_L476RG
 	default "qemu-i486"                if ARCH_BOARD_QEMU_I486
@@ -1484,6 +1504,7 @@ config ARCH_BOARD
 	default "tm4c1294-launchpad"       if ARCH_BOARD_TM4C1294_LAUNCHPAD
 	default "cc3200-launchpad"         if ARCH_BOARD_CC3200_LAUNCHPAD
 	default "twr-k60n512"              if ARCH_BOARD_TWR_K60N512
+	default "twr-k64f120m"             if ARCH_BOARD_TWR_K64F120M
 	default "u-blox-c027"              if ARCH_BOARD_U_BLOX_C027
 	default "ubw32"                    if ARCH_BOARD_UBW32
 	default "us7032evb1"               if ARCH_BOARD_US7032EVB1
@@ -1737,6 +1758,9 @@ endif
 if ARCH_BOARD_NUCLEO_F303RE
 source "configs/nucleo-f303re/Kconfig"
 endif
+if ARCH_BOARD_NUCLEO_F334R8
+source "configs/nucleo-f334r8/Kconfig"
+endif
 if ARCH_BOARD_NUCLEO_F401RE || ARCH_BOARD_NUCLEO_F411RE
 source "configs/nucleo-f4x1re/Kconfig"
 endif
@@ -1871,6 +1895,9 @@ source "configs/cc3200-launchpad/Kconfig"
 endif
 if ARCH_BOARD_TWR_K60N512
 source "configs/twr-k60n512/Kconfig"
+endif
+if ARCH_BOARD_TWR_K64F120M
+source "configs/twr-k64f120m/Kconfig"
 endif
 if ARCH_BOARD_U_BLOX_C027
 source "configs/u-blox-c027/Kconfig"

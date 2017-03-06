@@ -95,7 +95,7 @@ static const struct xtiregs_s g_xtiregs[2] =
  *
  ********************************************************************************/
 
-static int str71x_xtiinterrupt(int irq, FAR void *context)
+static int str71x_xtiinterrupt(int irq, FAR void *context, FAR void *arg)
 {
   uint16_t enabled = (uint16_t)getreg8(STR71X_XTI_MRH) << 8 |
                      (uint16_t)getreg8(STR71X_XTI_MRL);
@@ -168,7 +168,7 @@ int str71x_xtiinitialize(void)
 
   /* Attach the XTI interrupt */
 
-  ret = irq_attach(STR71X_IRQ_XTI, str71x_xtiinterrupt);
+  ret = irq_attach(STR71X_IRQ_XTI, str71x_xtiinterrupt, NULL);
   if (ret == OK)
     {
       /* Enable the XTI interrupt at the XTI */

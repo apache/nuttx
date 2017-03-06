@@ -133,8 +133,6 @@
 #define KHCI_ENDP_BIT(ep)     (1 << (ep))
 #define KHCI_ENDP_ALLSET      0xffff
 
-#define SIM_CLKDIV2_USBDIV(n) (uint32_t)(((n) & 0x07) << 1)
-
 /* BDT Table Indexing.  The BDT is addressed in the hardware as follows:
  *
  *   Bits 9-31:  These come the BDT address bits written into the BDTP3,
@@ -564,7 +562,7 @@ static void   khci_ep0outcomplete(struct khci_usbdev_s *priv);
 static void   khci_ep0incomplete(struct khci_usbdev_s *priv);
 static void   khci_ep0transfer(struct khci_usbdev_s *priv,
                 uint16_t ustat);
-static int    khci_interrupt(int irq, void *context);
+static int    khci_interrupt(int irq, void *context, FAR void *arg);
 
 /* Endpoint helpers *********************************************************/
 
@@ -2715,7 +2713,7 @@ static void khci_ep0transfer(struct khci_usbdev_s *priv, uint16_t ustat)
  * Name: khci_interrupt
  ****************************************************************************/
 
-static int khci_interrupt(int irq, void *context)
+static int khci_interrupt(int irq, void *context, FAR void *arg)
 {
   /* For now there is only one USB controller, but we will always refer to
    * it using a pointer to make any future ports to multiple USB controllers
@@ -4395,32 +4393,23 @@ void up_usbinitialize(void)
    * it using a pointer to make any future ports to multiple USB controllers
    * easier.
    */
-#if 1
-  /* 1: Select clock source */
+
+  /* Select clock source:
+   * SIM_SOPT2[PLLFLLSEL] and SIM_CLKDIV2[USBFRAC, USBDIV] will have been
+   * configured in kinetis_pllconfig. So here we select between USB_CLKIN
+   * or the output of SIM_CLKDIV2[USBFRAC, USBDIV]
+   */
 
   regval = getreg32(KINETIS_SIM_SOPT2);
-  regval |= SIM_SOPT2_PLLFLLSEL | SIM_SOPT2_USBSRC;
+  regval &= ~(SIM_SOPT2_USBSRC);
+  regval |= BOARD_USB_CLKSRC;
   putreg32(regval, KINETIS_SIM_SOPT2);
-
-  regval = getreg32(KINETIS_SIM_CLKDIV2);
-#if defined(CONFIG_TEENSY_3X_OVERCLOCK)
-  /* (USBFRAC + 0)/(USBDIV + 1) = (1 + 0)/(1 + 1) = 1/2 for 96Mhz clock */
-
-  regval = SIM_CLKDIV2_USBDIV(1);
-#else
-  /* 72Mhz */
-
-  regval = SIM_CLKDIV2_USBDIV(2) | SIM_CLKDIV2_USBFRAC;
-#endif
-  putreg32(regval, KINETIS_SIM_CLKDIV2);
 
   /* 2: Gate USB clock */
 
   regval = getreg32(KINETIS_SIM_SCGC4);
   regval |= SIM_SCGC4_USBOTG;
   putreg32(regval, KINETIS_SIM_SCGC4);
-
-#endif
 
   usbtrace(TRACE_DEVINIT, 0);
 
@@ -4442,7 +4431,7 @@ void up_usbinitialize(void)
    * them when we need them later.
    */
 
-  if (irq_attach(KINETIS_IRQ_USBOTG, khci_interrupt) != 0)
+  if (irq_attach(KINETIS_IRQ_USBOTG, khci_interrupt, NULL) != 0)
     {
       usbtrace(TRACE_DEVERROR(KHCI_TRACEERR_IRQREGISTRATION),
                (uint16_t)KINETIS_IRQ_USBOTG);

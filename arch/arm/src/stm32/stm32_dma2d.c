@@ -285,7 +285,7 @@ static const uintptr_t stm32_cmar_layer_t[DMA2D_NLAYERS - 1] =
 static int stm32_dma2d_pixelformat(uint8_t fmt, uint8_t *fmtmap);
 static int stm32_dma2d_bpp(uint8_t fmt, uint8_t *bpp);
 static void stm32_dma2d_control(uint32_t setbits, uint32_t clrbits);
-static int stm32_dma2dirq(int irq, void *context);
+static int stm32_dma2dirq(int irq, void *context, FAR void *arg);
 static int stm32_dma2d_waitforirq(void);
 static int stm32_dma2d_start(void);
 #ifdef CONFIG_STM32_DMA2D_L8
@@ -425,7 +425,7 @@ static void stm32_dma2d_control(uint32_t setbits, uint32_t clrbits)
  *
  ****************************************************************************/
 
-static int stm32_dma2dirq(int irq, void *context)
+static int stm32_dma2dirq(int irq, void *context, FAR void *arg)
 {
   uint32_t regval = getreg32(STM32_DMA2D_ISR);
   FAR struct stm32_interrupt_s *priv = &g_interrupt;
@@ -2190,7 +2190,7 @@ int up_dma2dinitialize(void)
 
       /* Attach DMA2D interrupt vector */
 
-      (void)irq_attach(g_interrupt.irq, stm32_dma2dirq);
+      (void)irq_attach(g_interrupt.irq, stm32_dma2dirq, NULL);
 
       /* Enable the IRQ at the NVIC */
 

@@ -31,6 +31,7 @@ Contents
   - PWM
   - UARTs
   - Timer Inputs/Outputs
+  - Quadrature Encoder
   - FPU
   - STM32F4DIS-BB
   - FSMC SRAM
@@ -447,16 +448,52 @@ TIM14
    free I/O pins.
 ** Port H pins are not supported by the MCU
 
-Quadrature Encode Timer Inputs
-------------------------------
+Quadrature Encoder:
+===================
 
-If enabled (by setting CONFIG_QENCODER=y), then quadrature encoder will
-use either TIM2 or TIM8 (see nsh/defconfig).  If TIM2 is selected, the input
-pins PA15 and PA1 for CH1 and CH2, respectively).  If TIM8 is selected, then
-PC6 and PI5 will be used for CH1 and CH2  (see include board.h for pin
-definitions).
+  The nsh configuration has been used to test the Quadrture Encoder
+  (QEncoder, QE) with the following modifications to the configuration
+  file:
 
-Selected via CONFIG_STM32F4DISCO_QETIMER
+  - These setting enable support for the common QEncode upper half driver:
+
+   CONFIG_BOARD_INITIALIZE=y
+
+   CONFIG_SENSORS=y
+     CONFIG_QENCODER=y
+
+  - The timer 2 needs to be enabled:
+
+  CONFIG_STM32_TIM2=y
+
+  - This is a board setting that selected timer 2 for use with the
+    quadrature encode:
+
+    CONFIG_STM32F4DISCO_QETIMER=2
+
+  - These settings enable the STM32 Quadrature encoder on timer 2:
+
+    CONFIG_STM32_TIM2_QE=y
+    CONFIG_STM32_TIM4_QECLKOUT=2800000
+    CONFIG_STM32_QENCODER_FILTER=y
+    CONFIG_STM32_QENCODER_SAMPLE_EVENT_6=y
+    CONFIG_STM32_QENCODER_SAMPLE_FDTS_4=y
+
+  - These settings enable the test case at apps/examples/qencoder:
+
+    CONFIG_EXAMPLES_QENCODER=y
+    CONFIG_EXAMPLES_QENCODER_DELAY=100
+    CONFIG_EXAMPLES_QENCODER_DEVPATH="/dev/qe0"
+
+  In this configuration, the QEncoder inputs will be on the TIM2 inputs of
+  PA15 and PA1 (CH1 and CH2 respectively).
+
+  You can also use QEncoder with other timers, but keep in mind that only TIM2
+  and TIM5 are 32bits timers, all other timers are 16-bit then the QE counter
+  will overflow after 65535.
+
+  If TIM4 is selected, then PB6 and PB7 will be used for CH1 and CH2.
+  If TIM8 is selected, then PC6 and PI5 will be used for CH1 and CH2.
 
 FPU
 ===

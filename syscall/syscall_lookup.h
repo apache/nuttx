@@ -231,6 +231,7 @@ SYSCALL_LOOKUP(up_assert,                 2, STUB_up_assert)
   SYSCALL_LOOKUP(stat,                    2, STUB_stat)
   SYSCALL_LOOKUP(fstat,                   2, STUB_fstat)
   SYSCALL_LOOKUP(statfs,                  2, STUB_statfs)
+  SYSCALL_LOOKUP(fstatfs,                 2, STUB_fstatfs)
   SYSCALL_LOOKUP(telldir,                 1, STUB_telldir)
 
 #  if defined(CONFIG_PSEUDOFS_SOFTLINKS)

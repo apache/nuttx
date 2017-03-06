@@ -130,7 +130,7 @@ static struct lpc43_i2cdev_s g_i2c1dev;
 
 static int  lpc43_i2c_start(struct lpc43_i2cdev_s *priv);
 static void lpc43_i2c_stop(struct lpc43_i2cdev_s *priv);
-static int  lpc43_i2c_interrupt(int irq, FAR void *context);
+static int  lpc43_i2c_interrupt(int irq, FAR void *context, FAR void *arg);
 static void lpc43_i2c_timeout(int argc, uint32_t arg, ...);
 static void lpc43_i2c_setfrequency(struct lpc43_i2cdev_s *priv,
               uint32_t frequency);
@@ -277,29 +277,13 @@ void lpc32_i2c_nextmsg(struct lpc43_i2cdev_s *priv)
  *
  ****************************************************************************/
 
-static int lpc43_i2c_interrupt(int irq, FAR void *context)
+static int lpc43_i2c_interrupt(int irq, FAR void *context, FAR void *arg)
 {
-  struct lpc43_i2cdev_s *priv;
+  struct lpc43_i2cdev_s *priv = (struct lpc43_i2cdev_s *)arg;
   struct i2c_msg_s *msg;
   uint32_t state;
 
-#ifdef CONFIG_LPC43_I2C0
-  if (irq == LPC43M0_IRQ_I2C0)
-    {
-      priv = &g_i2c0dev;
-    }
-  else
-#endif
-#ifdef CONFIG_LPC43_I2C1
-  if (irq == LPC43_IRQ_I2C1)
-    {
-      priv = &g_i2c1dev;
-    }
-    else
-#endif
-    {
-      PANIC();
-    }
+  DEBUGASSERT(priv != NULL);
 
   /* Reference UM10360 19.10.5 */
 
@@ -558,7 +542,7 @@ struct i2c_master_s *lpc43_i2cbus_initialize(int port)
 
   /* Attach Interrupt Handler */
 
-  irq_attach(priv->irqid, lpc43_i2c_interrupt);
+  irq_attach(priv->irqid, lpc43_i2c_interrupt, priv);
 
   /* Enable Interrupt Handler */
 

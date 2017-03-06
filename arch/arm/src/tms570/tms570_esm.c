@@ -145,7 +145,7 @@ int tms570_esm_initialize(void)
  *
  ****************************************************************************/
 
-int tms570_esm_interrupt(int irq, void *context)
+int tms570_esm_interrupt(int irq, void *context, FAR void *arg)
 {
   /* Save the saved processor context in CURRENT_REGS where it can be accessed
    * for register dumps and possibly context switching.

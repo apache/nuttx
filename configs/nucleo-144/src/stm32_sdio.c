@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/nucleo-144/src/stm32_sdio.c
  *
- *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -132,7 +132,8 @@ int stm32_sdio_initialize(void)
 
   /* Register an interrupt handler for the card detect pin */
 
-  stm32_gpiosetevent(GPIO_SDMMC1_NCD, true, true, true, stm32_ncd_interrupt);
+  (void)stm32_gpiosetevent(GPIO_SDMMC1_NCD, true, true, true,
+                           stm32_ncd_interrupt, NULL);
 #endif
 
   /* Mount the SDIO-based MMC/SD block driver */

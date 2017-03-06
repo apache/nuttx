@@ -1825,13 +1825,16 @@ static void sam_dmaterminate(struct sam_xdmach_s *xdmach, int result)
  *
  ****************************************************************************/
 
-static int sam_xdmac_interrupt(struct sam_xdmac_s *xdmac)
+static int sam_xdmac_interrupt(int irq, void *context, FAR void *arg)
 {
+  struct sam_xdmac_s *xdmac = (struct sam_xdmac_s *)arg;
   struct sam_xdmach_s *xdmach;
   unsigned int chndx;
   uint32_t gpending;
   uint32_t chpending;
   uint32_t bit;
+
+  DEBUGASSERT(xdmac != NULL);
 
   /* Get the set of pending, unmasked global XDMAC interrupts */
 
@@ -1891,28 +1894,6 @@ static int sam_xdmac_interrupt(struct sam_xdmac_s *xdmac)
 }
 
 /****************************************************************************
- * Name: sam_xdmac0_interrupt and sam_xdmac1_interrupt
- *
- * Description:
- *  DMA interrupt handler
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SAMA5_XDMAC0
-static int sam_xdmac0_interrupt(int irq, void *context)
-{
-  return sam_xdmac_interrupt(&g_xdmac0);
-}
-#endif
-
-#ifdef CONFIG_SAMA5_XDMAC1
-static int sam_xdmac1_interrupt(int irq, void *context)
-{
-  return sam_xdmac_interrupt(&g_xdmac1);
-}
-#endif
-
-/****************************************************************************
  * Name: sam_dmainitialize
  *
  * Description:
@@ -1965,7 +1946,7 @@ void weak_function up_dmainitialize(void)
 
   /* Attach DMA interrupt vector */
 
-  (void)irq_attach(SAM_IRQ_XDMAC0, sam_xdmac0_interrupt);
+  (void)irq_attach(SAM_IRQ_XDMAC0, sam_xdmac_interrupt, &g_xdmac0);
 
   /* Initialize the controller */
 
@@ -1985,7 +1966,7 @@ void weak_function up_dmainitialize(void)
 
   /* Attach DMA interrupt vector */
 
-  (void)irq_attach(SAM_IRQ_XDMAC1, sam_xdmac1_interrupt);
+  (void)irq_attach(SAM_IRQ_XDMAC1, sam_xdmac_interrupt, &g_xdmac1);
 
   /* Initialize the controller */
 

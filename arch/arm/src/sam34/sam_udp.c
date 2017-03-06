@@ -395,7 +395,7 @@ static void   sam_ep0_setup(struct sam_usbdev_s *priv);
 static void   sam_ep_bankinterrupt(struct sam_usbdev_s *priv,
                 struct sam_ep_s *privep, uint32_t csr, int bank);
 static void   sam_ep_interrupt(struct sam_usbdev_s *priv, int epno);
-static int    sam_udp_interrupt(int irq, void *context);
+static int    sam_udp_interrupt(int irq, void *context, FAR void *arg);
 
 /* Endpoint helpers *********************************************************/
 
@@ -2218,7 +2218,7 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
  *
  ****************************************************************************/
 
-static int sam_udp_interrupt(int irq, void *context)
+static int sam_udp_interrupt(int irq, void *context, FAR void *arg)
 {
   /* For now there is only one USB controller, but we will always refer to
    * it using a pointer to make any future ports to multiple UDP controllers
@@ -3915,7 +3915,7 @@ void up_usbinitialize(void)
    * them when we need them later.
    */
 
-  if (irq_attach(SAM_IRQ_UDP, sam_udp_interrupt) != 0)
+  if (irq_attach(SAM_IRQ_UDP, sam_udp_interrupt, NULL) != 0)
     {
       usbtrace(TRACE_DEVERROR(SAM_TRACEERR_IRQREGISTRATION),
                (uint16_t)SAM_IRQ_UDP);

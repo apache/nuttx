@@ -291,12 +291,12 @@ struct cc1101_dev_s
 {
   const struct c1101_rfsettings_s *rfsettings;
 
-  struct spi_dev_s *  spi;
-  uint8_t             isrpin; /* CC1101 pin used to trigger interrupts */
-  uint32_t            pinset; /* GPIO of the MCU */
-  uint8_t             flags;
-  uint8_t             channel;
-  uint8_t             power;
+  struct spi_dev_s *spi;
+  uint8_t           isrpin;     /* CC1101 pin used to trigger interrupts */
+  uint32_t          pinset;     /* GPIO of the MCU */
+  uint8_t           flags;
+  uint8_t           channel;
+  uint8_t           power;
 };
 
 /****************************************************************************
@@ -309,7 +309,7 @@ static volatile int cc1101_interrupt = 0;
  * Private Functions
  ****************************************************************************/
 
-void cc1101_access_begin(FAR struct cc1101_dev_s * dev)
+void cc1101_access_begin(FAR struct cc1101_dev_s *dev)
 {
   (void)SPI_LOCK(dev->spi, true);
   SPI_SELECT(dev->spi, SPIDEV_WIRELESS, true);
@@ -318,7 +318,7 @@ void cc1101_access_begin(FAR struct cc1101_dev_s * dev)
   (void)SPI_HWFEATURES(dev->spi, 0);
 }
 
-void cc1101_access_end(FAR struct cc1101_dev_s * dev)
+void cc1101_access_end(FAR struct cc1101_dev_s *dev)
 {
   SPI_SELECT(dev->spi, SPIDEV_WIRELESS, false);
   (void)SPI_LOCK(dev->spi, false);
@@ -338,7 +338,7 @@ void cc1101_access_end(FAR struct cc1101_dev_s * dev)
  *   OK on success or errno is set.
  */
 
-int cc1101_access(FAR struct cc1101_dev_s * dev, uint8_t addr,
+int cc1101_access(FAR struct cc1101_dev_s *dev, uint8_t addr,
                   FAR uint8_t *buf, int length)
 {
   int stabyte;
@@ -407,7 +407,7 @@ int cc1101_access(FAR struct cc1101_dev_s * dev, uint8_t addr,
  *  pending in RX FIFO.
  */
 
-inline uint8_t cc1101_strobe(struct cc1101_dev_s * dev, uint8_t command)
+inline uint8_t cc1101_strobe(struct cc1101_dev_s *dev, uint8_t command)
 {
   uint8_t status;
 
@@ -421,13 +421,13 @@ inline uint8_t cc1101_strobe(struct cc1101_dev_s * dev, uint8_t command)
   return status;
 }
 
-int cc1101_reset(struct cc1101_dev_s * dev)
+int cc1101_reset(struct cc1101_dev_s *dev)
 {
   cc1101_strobe(dev, CC1101_SRES);
   return OK;
 }
 
-int cc1101_checkpart(struct cc1101_dev_s * dev)
+int cc1101_checkpart(struct cc1101_dev_s *dev)
 {
   uint8_t partnum;
   uint8_t version;
@@ -446,7 +446,7 @@ int cc1101_checkpart(struct cc1101_dev_s * dev)
   return ERROR;
 }
 
-void cc1101_dumpregs(struct cc1101_dev_s * dev, uint8_t addr, uint8_t length)
+void cc1101_dumpregs(struct cc1101_dev_s *dev, uint8_t addr, uint8_t length)
 {
   uint8_t buf[0x30], i;
 
@@ -463,7 +463,7 @@ void cc1101_dumpregs(struct cc1101_dev_s * dev, uint8_t addr, uint8_t length)
   printf("\n");
 }
 
-void cc1101_setpacketctrl(struct cc1101_dev_s * dev)
+void cc1101_setpacketctrl(struct cc1101_dev_s *dev)
 {
   uint8_t values[3];
 
@@ -524,10 +524,10 @@ int cc1101_eventcb(int irq, FAR void *context)
  * Public Functions
  ****************************************************************************/
 
-struct cc1101_dev_s * cc1101_init(struct spi_dev_s * spi, uint8_t isrpin,
-    uint32_t pinset, const struct c1101_rfsettings_s * rfsettings)
+struct cc1101_dev_s *cc1101_init(struct spi_dev_s *spi, uint8_t isrpin,
+    uint32_t pinset, const struct c1101_rfsettings_s *rfsettings)
 {
-  struct cc1101_dev_s * dev;
+  struct cc1101_dev_s *dev;
 
   ASSERT(spi);
 
@@ -585,22 +585,24 @@ struct cc1101_dev_s * cc1101_init(struct spi_dev_s * spi, uint8_t isrpin,
 
   cc1101_setgdo(dev, dev->isrpin, CC1101_GDO_SYNC);
 
-  /* Bind to external interrupt line */
-
-  /* depends on STM32: TODO: Make that config within pinset and
-   * provide general gpio interface
-   * stm32_gpiosetevent(pinset, false, true, true, cc1101_eventcb);
+  /* Configure to receive interrupts on the external GPIO interrupt line.
+   *
+   * REVISIT:  There is no MCU-independent way to do this in this
+   * context.
    */
 
   return dev;
 }
 
-int cc1101_deinit(struct cc1101_dev_s * dev)
+int cc1101_deinit(struct cc1101_dev_s *dev)
 {
   ASSERT(dev);
 
-  /* Release interrupt */
-  /* stm32_gpiosetevent(pinset, false, false, false, NULL); */
+  /* Release the external GPIO interrupt
+   *
+   * REVISIT:  There is no MCU-independent way to do this in this
+   * context.
+   */
 
   /* Power down chip */
 
@@ -612,19 +614,19 @@ int cc1101_deinit(struct cc1101_dev_s * dev)
   return 0;
 }
 
-int cc1101_powerup(struct cc1101_dev_s * dev)
+int cc1101_powerup(struct cc1101_dev_s *dev)
 {
   ASSERT(dev);
   return 0;
 }
 
-int cc1101_powerdown(struct cc1101_dev_s * dev)
+int cc1101_powerdown(struct cc1101_dev_s *dev)
 {
   ASSERT(dev);
   return 0;
 }
 
-int cc1101_setgdo(struct cc1101_dev_s * dev, uint8_t pin, uint8_t function)
+int cc1101_setgdo(struct cc1101_dev_s *dev, uint8_t pin, uint8_t function)
 {
   ASSERT(dev);
   ASSERT(pin <= CC1101_IOCFG0);
@@ -658,7 +660,7 @@ int cc1101_setgdo(struct cc1101_dev_s * dev, uint8_t pin, uint8_t function)
   return cc1101_access(dev, pin, &function, -1);
 }
 
-int cc1101_setrf(struct cc1101_dev_s * dev, const struct c1101_rfsettings_s *settings)
+int cc1101_setrf(struct cc1101_dev_s *dev, const struct c1101_rfsettings_s *settings)
 {
   ASSERT(dev);
   ASSERT(settings);
@@ -696,7 +698,7 @@ int cc1101_setrf(struct cc1101_dev_s * dev, const struct c1101_rfsettings_s *set
   return OK;
 }
 
-int cc1101_setchannel(struct cc1101_dev_s * dev, uint8_t channel)
+int cc1101_setchannel(struct cc1101_dev_s *dev, uint8_t channel)
 {
   ASSERT(dev);
 
@@ -719,7 +721,7 @@ int cc1101_setchannel(struct cc1101_dev_s * dev, uint8_t channel)
   return dev->flags & FLAGS_RXONLY;
 }
 
-uint8_t cc1101_setpower(struct cc1101_dev_s * dev, uint8_t power)
+uint8_t cc1101_setpower(struct cc1101_dev_s *dev, uint8_t power)
 {
   ASSERT(dev);
 
@@ -765,7 +767,7 @@ int cc1101_calcRSSIdBm(int rssi)
   return (rssi >> 1) - 74;
 }
 
-int cc1101_receive(struct cc1101_dev_s * dev)
+int cc1101_receive(struct cc1101_dev_s *dev)
 {
   ASSERT(dev);
 
@@ -778,7 +780,7 @@ int cc1101_receive(struct cc1101_dev_s * dev)
   return 0;
 }
 
-int cc1101_read(struct cc1101_dev_s * dev, uint8_t * buf, size_t size)
+int cc1101_read(struct cc1101_dev_s *dev, uint8_t * buf, size_t size)
 {
   ASSERT(dev);
 
@@ -828,7 +830,7 @@ int cc1101_read(struct cc1101_dev_s * dev, uint8_t * buf, size_t size)
   return 0;
 }
 
-int cc1101_write(struct cc1101_dev_s * dev, const uint8_t * buf, size_t size)
+int cc1101_write(struct cc1101_dev_s *dev, const uint8_t *buf, size_t size)
 {
   uint8_t packetlen;
 
@@ -857,7 +859,7 @@ int cc1101_write(struct cc1101_dev_s * dev, const uint8_t * buf, size_t size)
   return 0;
 }
 
-int cc1101_send(struct cc1101_dev_s * dev)
+int cc1101_send(struct cc1101_dev_s *dev)
 {
   ASSERT(dev);
 
@@ -877,7 +879,7 @@ int cc1101_send(struct cc1101_dev_s * dev)
   return 0;
 }
 
-int cc1101_idle(struct cc1101_dev_s * dev)
+int cc1101_idle(struct cc1101_dev_s *dev)
 {
   ASSERT(dev);
   cc1101_strobe(dev, CC1101_SIDLE);

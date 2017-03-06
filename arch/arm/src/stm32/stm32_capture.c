@@ -1,5 +1,5 @@
 /************************************************************************************
- * arm/arm/src/stm32/stm32_capture.c
+ * arch/arm/src/stm32/stm32_capture.c
  *
  *   Copyright (C) 2015 Bouteville Pierre-Noel. All rights reserved.
  *   Author: Bouteville Pierre-Noel <pnb990@gmail.com>
@@ -702,7 +702,7 @@ static int stm32_cap_setclock(FAR struct stm32_cap_dev_s *dev, stm32_cap_clk_t c
   return prescaler;
 }
 
-static int stm32_cap_setisr(FAR struct stm32_cap_dev_s *dev, xcpt_t handler)
+static int stm32_cap_setisr(FAR struct stm32_cap_dev_s *dev, xcpt_t handler, void *arg)
 {
   const struct stm32_cap_priv_s *priv = (const struct stm32_cap_priv_s *)dev;
   int irq;
@@ -736,13 +736,13 @@ static int stm32_cap_setisr(FAR struct stm32_cap_dev_s *dev, xcpt_t handler)
 
   /* Otherwise set callback and enable interrupt */
 
-  irq_attach(irq, handler);
+  irq_attach(irq, handler, arg);
   up_enable_irq(irq);
 
 #ifdef USE_ADVENCED_TIM
   if (priv->irq_of)
     {
-      irq_attach(priv->irq_of, handler);
+      irq_attach(priv->irq_of, handler, arg);
       up_enable_irq(priv->irq_of);
     }
 #endif

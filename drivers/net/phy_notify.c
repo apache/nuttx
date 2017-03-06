@@ -102,7 +102,6 @@ struct phy_notify_s
 {
   bool assigned;
   uint8_t signo;
-  uint8_t index;
 #ifdef CONFIG_NETDEV_MULTINIC
   char intf[CONFIG_PHY_NOTIFICATION_MAXINTFLEN+1];
 #endif
@@ -115,17 +114,11 @@ struct phy_notify_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static int phy_handler(FAR struct phy_notify_s *client);
-static int phy_handler_0(int irq, FAR void *context);
-#if CONFIG_PHY_NOTIFICATION_NCLIENTS > 1
-static int phy_handler_1(int irq, FAR void *context);
-#if CONFIG_PHY_NOTIFICATION_NCLIENTS > 2
-static int phy_handler_2(int irq, FAR void *context);
-#if CONFIG_PHY_NOTIFICATION_NCLIENTS > 3
-static int phy_handler_3(int irq, FAR void *context);
-#endif
-#endif
-#endif
+static void phy_semtake(void);
+static FAR struct phy_notify_s *phy_find_unassigned(void);
+static FAR struct phy_notify_s *phy_find_assigned(FAR const char *intf,
+                                                  pid_t pid);
+static int phy_handler(int irq, FAR void *context, FAR void *arg);
 
 /****************************************************************************
  * Private Data
@@ -137,22 +130,6 @@ static sem_t g_notify_clients_sem = SEM_INITIALIZER(1);
 /* This is a array the hold information for each PHY notification client */
 
 static struct phy_notify_s g_notify_clients[CONFIG_PHY_NOTIFICATION_NCLIENTS];
-
-/* Handler addresses accessed with the same index as g_notify_clients[] */
-
-static const xcpt_t g_notify_handler[CONFIG_PHY_NOTIFICATION_NCLIENTS] =
-{
-    phy_handler_0
-#if CONFIG_PHY_NOTIFICATION_NCLIENTS > 1
-    , phy_handler_1
-#if CONFIG_PHY_NOTIFICATION_NCLIENTS > 2
-    , phy_handler_2
-#if CONFIG_PHY_NOTIFICATION_NCLIENTS > 3
-    , phy_handler_3
-#endif
-#endif
-#endif
-};
 
 /****************************************************************************
  * Private Functions
@@ -197,7 +174,6 @@ static FAR struct phy_notify_s *phy_find_unassigned(void)
 
           client->assigned = true;
           client->signo    = 0;
-          client->index    = i;
 #ifdef CONFIG_NETDEV_MULTINIC
           client->intf[0]  = '\0';
 #endif
@@ -258,16 +234,16 @@ static FAR struct phy_notify_s *phy_find_assigned(FAR const char *intf,
  * Name: phy_handler
  ****************************************************************************/
 
-static int phy_handler(FAR struct phy_notify_s *client)
+static int phy_handler(int irq, FAR void *context, FAR void *arg)
 {
+  FAR struct phy_notify_s *client = (FAR struct phy_notify_s *)arg;
 #ifdef CONFIG_CAN_PASS_STRUCTS
   union sigval value;
 #endif
   int ret;
 
-  DEBUGASSERT(client && client->assigned && client->enable);
-  phyinfo("Entry client %d, signalling PID=%d with signal %d\n",
-          client->index, client->pid, client->signo);
+  DEBUGASSERT(client != NULL && client->assigned && client->enable);
+  phyinfo("Signalling PID=%d with signal %d\n", client->pid, client->signo);
 
   /* Disable further interrupts */
 
@@ -293,36 +269,6 @@ static int phy_handler(FAR struct phy_notify_s *client)
 
   return OK;
 }
-
-/****************************************************************************
- * Name: phy_handler_0, phy_handler_1, ...
- ****************************************************************************/
-
-static int phy_handler_0(int irq, FAR void *context)
-{
-  return phy_handler(&g_notify_clients[0]);
-}
-
-#if CONFIG_PHY_NOTIFICATION_NCLIENTS > 1
-static int phy_handler_1(int irq, FAR void *context)
-{
-  return phy_handler(&g_notify_clients[1]);
-}
-#endif
-
-#if CONFIG_PHY_NOTIFICATION_NCLIENTS > 2
-static int phy_handler_2(int irq, FAR void *context)
-{
-  return phy_handler(&g_notify_clients[2]);
-}
-#endif
-
-#if CONFIG_PHY_NOTIFICATION_NCLIENTS > 3
-static int phy_handler_3(int irq, FAR void *context)
-{
-  return phy_handler(&g_notify_clients[3]);
-}
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -358,6 +304,8 @@ int phy_notify_subscribe(FAR const char *intf, pid_t pid, int signo,
                          FAR void *arg)
 {
   FAR struct phy_notify_s *client;
+  int ret = OK;
+
   DEBUGASSERT(intf);
 
   ninfo("%s: PID=%d signo=%d arg=%p\n", intf, pid, signo, arg);
@@ -403,14 +351,14 @@ int phy_notify_subscribe(FAR const char *intf, pid_t pid, int signo,
 
       /* Attach/re-attach the PHY interrupt */
 
-      (void)arch_phy_irq(intf, g_notify_handler[client->index], &client->enable);
+      ret = arch_phy_irq(intf, phy_handler, client, &client->enable);
     }
 
   /* Enable/re-enable the PH interrupt */
 
   DEBUGASSERT(client->enable);
   client->enable(true);
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -453,7 +401,7 @@ int phy_notify_unsubscribe(FAR const char *intf, pid_t pid)
   /* Detach and disable the PHY interrupt */
 
   phy_semtake();
-  (void)arch_phy_irq(intf, NULL, NULL);
+  (void)arch_phy_irq(intf, NULL, NULL, NULL);
 
   /* Un-initialize the client entry */
 

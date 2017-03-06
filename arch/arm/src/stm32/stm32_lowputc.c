@@ -62,7 +62,11 @@
 #ifdef HAVE_CONSOLE
 #  if defined(CONFIG_USART1_SERIAL_CONSOLE)
 #    define STM32_CONSOLE_BASE     STM32_USART1_BASE
-#    define STM32_APBCLOCK         STM32_PCLK2_FREQUENCY
+#    if defined(CONFIG_STM32_STM32F33XX)
+#      define STM32_APBCLOCK         STM32_PCLK1_FREQUENCY /* Errata 2.5.1 */
+#    else
+#      define STM32_APBCLOCK         STM32_PCLK2_FREQUENCY
+#    endif
 #    define STM32_CONSOLE_APBREG   STM32_RCC_APB2ENR
 #    define STM32_CONSOLE_APBEN    RCC_APB2ENR_USART1EN
 #    define STM32_CONSOLE_BAUD     CONFIG_USART1_BAUD
@@ -230,7 +234,8 @@
 #    define USART_CR1_PARITY_VALUE 0
 #  endif
 
-#  if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
+#  if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
+   defined(CONFIG_STM32_STM32F37XX)
 #    define USART_CR1_CLRBITS\
       (USART_CR1_UESM | USART_CR1_RE | USART_CR1_TE | USART_CR1_PS | \
        USART_CR1_PCE | USART_CR1_WAKE | USART_CR1_M | USART_CR1_MME | \
@@ -252,7 +257,8 @@
 #    define USART_CR2_STOP2_VALUE 0
 #  endif
 
-#  if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
+#  if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
+   defined(CONFIG_STM32_STM32F37XX)
 #    define USART_CR2_CLRBITS \
       (USART_CR2_ADDM7 | USART_CR2_LBDL | USART_CR2_LBDIE | USART_CR2_LBCL | \
        USART_CR2_CPHA | USART_CR2_CPOL | USART_CR2_CLKEN | USART_CR2_STOP_MASK | \
@@ -268,7 +274,8 @@
 
   /* CR3 settings */
 
-#  if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
+#  if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
+   defined(CONFIG_STM32_STM32F37XX)
 
 #    define USART_CR3_CLRBITS \
       (USART_CR3_EIE | USART_CR3_IREN | USART_CR3_IRLP | USART_CR3_HDSEL | \
@@ -288,7 +295,8 @@
 
   /* Calculate USART BAUD rate divider */
 
-#  if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
+#  if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
+   defined(CONFIG_STM32_STM32F37XX)
 
     /* Baud rate for standard USART (SPI mode included):
      *
@@ -563,8 +571,8 @@ void stm32_lowsetup(void)
 }
 
 #elif defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F20XX) || \
-      defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX) || \
-      defined(CONFIG_STM32_STM32F40XX)
+      defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
+      defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32F40XX)
 
 void stm32_lowsetup(void)
 {

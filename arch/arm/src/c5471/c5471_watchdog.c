@@ -95,7 +95,7 @@
 static inline unsigned int wdt_prescaletoptv(unsigned int prescale);
 
 static int     wdt_setusec(uint32_t usec);
-static int     wdt_interrupt(int irq, void *context);
+static int     wdt_interrupt(int irq, void *context, FAR void *arg);
 
 static int     wdt_open(struct file *filep);
 static int     wdt_close(struct file *filep);
@@ -232,7 +232,7 @@ static int wdt_setusec(uint32_t usec)
  * Name: wdt_interrupt
  ****************************************************************************/
 
-static int wdt_interrupt(int irq, void *context)
+static int wdt_interrupt(int irq, void *context, FAR void *arg)
 {
   wdinfo("expired\n");
 
@@ -382,7 +382,7 @@ int up_wdtinit(void)
 
   /* Request the interrupt. */
 
-  ret = irq_attach(C5471_IRQ_WATCHDOG, wdt_interrupt);
+  ret = irq_attach(C5471_IRQ_WATCHDOG, wdt_interrupt, NULL);
   if (ret)
     {
       unregister_driver("/dev/wdt");

@@ -48,7 +48,7 @@ CSRCS += fs_findblockdriver.c fs_openblockdriver.c fs_closeblockdriver.c
 ifneq ($(CONFIG_DISABLE_PSEUDOFS_OPERATIONS),y)
 CSRCS += fs_blockproxy.c
 endif
-endif
+endif # CONFIG_DISABLE_MOUNTPOINT
 
 # Include driver build support
 

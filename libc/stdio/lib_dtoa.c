@@ -819,21 +819,11 @@ static const double bigtens[] =
   1e16, 1e32, 1e64, 1e128, 1e256
 };
 
-static const double tinytens[] =
-{
-  1e-16, 1e-32, 1e-64, 1e-128, 1e-256
-};
-
 #  define n_bigtens 5
 #else
 static const double bigtens[] =
 {
   1e16, 1e32
-};
-
-static const double tinytens[] =
-{
-  1e-16, 1e-32
 };
 
 #  define n_bigtens 2

@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <errno.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
@@ -144,22 +145,19 @@ uint8_t board_buttons(void)
  *   be called when a button is depressed or released.  The ID value is a
  *   button enumeration value that uniquely identifies a button resource. See the
  *   BUTTON_* and JOYSTICK_* definitions in board.h for the meaning of enumeration
- *   value.  The previous interrupt handler address is returned (so that it may
- *   restored, if so desired).
+ *   value.
  *
  ************************************************************************************/
 
 #if defined(CONFIG_ARCH_IRQBUTTONS) && defined(CONFIG_TIVA_GPIOP_IRQS)
-xcpt_t board_button_irq(int id, xcpt_t irqhandler)
+int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
-  static xcpt_t handler = NULL;
-  xcpt_t oldhandler = handler;
   irqstate_t flags;
-  int ret;
+  int ret = -EINVAL;
 
   /* Interrupts are supported only on ports P and Q and, hence, only on button SW4 */
 
-  if (id >= BUTTON_SW4)
+  if (id == BUTTON_SW4)
     {
       /* The following should be atomic */
 
@@ -169,16 +167,14 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
 
       up_disable_irq(IRQ_SW4);
       irq_detach(IRQ_SW4);
-      handler = NULL;
 
       /* Attach the new handler if so requested */
 
-      if (irqhandler)
+      if (irqhandler != NULL)
         {
-          ret = irq_attach(IRQ_SW4, irqhandler);
+          ret = irq_attach(IRQ_SW4, irqhandler, arg);
           if (ret == OK)
             {
-              handler = irqhandler;
               up_enable_irq(IRQ_SW4);
             }
         }
@@ -186,7 +182,7 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
       leave_critical_section(flags);
     }
 
-  return oldhandler;
+  return ret;
 }
 #endif
 #endif /* CONFIG_ARCH_BUTTONS */

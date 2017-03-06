@@ -130,7 +130,7 @@ static void imx_output_compare(uint32_t sr, uint32_t of)
  *
  ****************************************************************************/
 
-static int imx_timerisr(int irq, uint32_t *regs)
+static int imx_timerisr(int irq, uint32_t *regs, FAR void *arg)
 {
   /* Sample the SR (once) */
 
@@ -260,7 +260,7 @@ void arm_timer_initialize(void)
 
   /* Attach the timer interrupt vector */
 
-  (void)irq_attach(IMX_IRQ_GPT, (xcpt_t)imx_timerisr);
+  (void)irq_attach(IMX_IRQ_GPT, (xcpt_t)imx_timerisr, NULL);
 
   /* Enable all three GPT output compare interrupts */
 

@@ -95,7 +95,6 @@ struct stm32l4_lowerhalf_s
   FAR struct stm32l4_tim_dev_s *tim;        /* stm32 timer driver */
   tccb_t                        callback;   /* Current upper half interrupt callback */
   FAR void                     *arg;        /* Argument passed to upper half callback */
-  const xcpt_t                  timhandler; /* Current timer interrupt handler */
   bool                          started;    /* True: Timer has been started */
   const uint8_t                 resolution; /* Number of bits in the timer (16 or 32 bits) */
 };
@@ -106,41 +105,7 @@ struct stm32l4_lowerhalf_s
 
 /* Interrupt handling *******************************************************/
 
-#ifdef CONFIG_STM32L4_TIM1
-static int stm32l4_tim1_interrupt(int irq, FAR void *context);
-#endif
-#ifdef CONFIG_STM32L4_TIM2
-static int stm32l4_tim2_interrupt(int irq, FAR void *context);
-#endif
-#ifdef CONFIG_STM32L4_TIM3
-static int stm32l4_tim3_interrupt(int irq, FAR void *context);
-#endif
-#ifdef CONFIG_STM32L4_TIM4
-static int stm32l4_tim4_interrupt(int irq, FAR void *context);
-#endif
-#ifdef CONFIG_STM32L4_TIM5
-static int stm32l4_tim5_interrupt(int irq, FAR void *context);
-#endif
-#ifdef CONFIG_STM32L4_TIM6
-static int stm32l4_tim6_interrupt(int irq, FAR void *context);
-#endif
-#ifdef CONFIG_STM32L4_TIM7
-static int stm32l4_tim7_interrupt(int irq, FAR void *context);
-#endif
-#ifdef CONFIG_STM32L4_TIM8
-static int stm32l4_tim8_interrupt(int irq, FAR void *context);
-#endif
-#ifdef CONFIG_STM32L4_TIM15
-static int stm32l4_tim15_interrupt(int irq, FAR void *context);
-#endif
-#ifdef CONFIG_STM32L4_TIM16
-static int stm32l4_tim16_interrupt(int irq, FAR void *context);
-#endif
-#ifdef CONFIG_STM32L4_TIM17
-static int stm32l4_tim17_interrupt(int irq, FAR void *context);
-#endif
-
-static int stm32l4_timer_handler(FAR struct stm32l4_lowerhalf_s *lower);
+static int stm32l4_timer_handler(int irq, void *context, void *arg);
 
 /* "Lower half" driver methods **********************************************/
 
@@ -170,7 +135,6 @@ static const struct timer_ops_s g_timer_ops =
 static struct stm32l4_lowerhalf_s g_tim1_lowerhalf =
 {
   .ops         = &g_timer_ops,
-  .timhandler  = stm32l4_tim1_interrupt,
   .resolution  = STM32L4_TIM1_RES,
 };
 #endif
@@ -179,7 +143,6 @@ static struct stm32l4_lowerhalf_s g_tim1_lowerhalf =
 static struct stm32l4_lowerhalf_s g_tim2_lowerhalf =
 {
   .ops         = &g_timer_ops,
-  .timhandler  = stm32l4_tim2_interrupt,
   .resolution  = STM32L4_TIM2_RES,
 };
 #endif
@@ -188,7 +151,6 @@ static struct stm32l4_lowerhalf_s g_tim2_lowerhalf =
 static struct stm32l4_lowerhalf_s g_tim3_lowerhalf =
 {
   .ops         = &g_timer_ops,
-  .timhandler  = stm32l4_tim3_interrupt,
   .resolution  = STM32L4_TIM3_RES,
 };
 #endif
@@ -197,7 +159,6 @@ static struct stm32l4_lowerhalf_s g_tim3_lowerhalf =
 static struct stm32l4_lowerhalf_s g_tim4_lowerhalf =
 {
   .ops         = &g_timer_ops,
-  .timhandler  = stm32l4_tim4_interrupt,
   .resolution  = STM32L4_TIM4_RES,
 };
 #endif
@@ -206,7 +167,6 @@ static struct stm32l4_lowerhalf_s g_tim4_lowerhalf =
 static struct stm32l4_lowerhalf_s g_tim5_lowerhalf =
 {
   .ops         = &g_timer_ops,
-  .timhandler  = stm32l4_tim5_interrupt,
   .resolution  = STM32L4_TIM5_RES,
 };
 #endif
@@ -215,7 +175,6 @@ static struct stm32l4_lowerhalf_s g_tim5_lowerhalf =
 static struct stm32l4_lowerhalf_s g_tim6_lowerhalf =
 {
   .ops         = &g_timer_ops,
-  .timhandler  = stm32l4_tim6_interrupt,
   .resolution  = STM32L4_TIM6_RES,
 };
 #endif
@@ -224,7 +183,6 @@ static struct stm32l4_lowerhalf_s g_tim6_lowerhalf =
 static struct stm32l4_lowerhalf_s g_tim7_lowerhalf =
 {
   .ops         = &g_timer_ops,
-  .timhandler  = stm32l4_tim7_interrupt,
   .resolution  = STM32L4_TIM7_RES,
 };
 #endif
@@ -233,7 +191,6 @@ static struct stm32l4_lowerhalf_s g_tim7_lowerhalf =
 static struct stm32l4_lowerhalf_s g_tim8_lowerhalf =
 {
   .ops         = &g_timer_ops,
-  .timhandler  = stm32l4_tim8_interrupt,
   .resolution  = STM32L4_TIM8_RES,
 };
 #endif
@@ -242,7 +199,6 @@ static struct stm32l4_lowerhalf_s g_tim8_lowerhalf =
 static struct stm32l4_lowerhalf_s g_tim15_lowerhalf =
 {
   .ops         = &g_timer_ops,
-  .timhandler  = stm32l4_tim15_interrupt,
   .resolution  = STM32L4_TIM15_RES,
 };
 #endif
@@ -251,7 +207,6 @@ static struct stm32l4_lowerhalf_s g_tim15_lowerhalf =
 static struct stm32l4_lowerhalf_s g_tim16_lowerhalf =
 {
   .ops         = &g_timer_ops,
-  .timhandler  = stm32l4_tim16_interrupt,
   .resolution  = STM32L4_TIM16_RES,
 };
 #endif
@@ -260,7 +215,6 @@ static struct stm32l4_lowerhalf_s g_tim16_lowerhalf =
 static struct stm32l4_lowerhalf_s g_tim17_lowerhalf =
 {
   .ops         = &g_timer_ops,
-  .timhandler  = stm32l4_tim17_interrupt,
   .resolution  = STM32L4_TIM17_RES,
 };
 #endif
@@ -268,91 +222,6 @@ static struct stm32l4_lowerhalf_s g_tim17_lowerhalf =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: stm32l4_timN_interrupt, N=1..14
- *
- * Description:
- *   Individual interrupt handlers for each timer
- *
- ****************************************************************************/
-
-#ifdef CONFIG_STM32L4_TIM1
-static int stm32l4_tim1_interrupt(int irq, FAR void *context)
-{
-  return stm32l4_timer_handler(&g_tim1_lowerhalf);
-}
-#endif
-
-#ifdef CONFIG_STM32L4_TIM2
-static int stm32l4_tim2_interrupt(int irq, FAR void *context)
-{
-  return stm32l4_timer_handler(&g_tim2_lowerhalf);
-}
-#endif
-
-#ifdef CONFIG_STM32L4_TIM3
-static int stm32l4_tim3_interrupt(int irq, FAR void *context)
-{
-  return stm32l4_timer_handler(&g_tim3_lowerhalf);
-}
-#endif
-
-#ifdef CONFIG_STM32L4_TIM4
-static int stm32l4_tim4_interrupt(int irq, FAR void *context)
-{
-  return stm32l4_timer_handler(&g_tim4_lowerhalf);
-}
-#endif
-
-#ifdef CONFIG_STM32L4_TIM5
-static int stm32l4_tim5_interrupt(int irq, FAR void *context)
-{
-  return stm32l4_timer_handler(&g_tim5_lowerhalf);
-}
-#endif
-
-#ifdef CONFIG_STM32L4_TIM6
-static int stm32l4_tim6_interrupt(int irq, FAR void *context)
-{
-  return stm32l4_timer_handler(&g_tim6_lowerhalf);
-}
-#endif
-
-#ifdef CONFIG_STM32L4_TIM7
-static int stm32l4_tim7_interrupt(int irq, FAR void *context)
-{
-  return stm32l4_timer_handler(&g_tim7_lowerhalf);
-}
-#endif
-
-#ifdef CONFIG_STM32L4_TIM8
-static int stm32l4_tim8_interrupt(int irq, FAR void *context)
-{
-  return stm32l4_timer_handler(&g_tim8_lowerhalf);
-}
-#endif
-
-#ifdef CONFIG_STM32L4_TIM15
-static int stm32l4_tim15_interrupt(int irq, FAR void *context)
-{
-  return stm32l4_timer_handler(&g_tim15_lowerhalf);
-}
-#endif
-
-#ifdef CONFIG_STM32L4_TIM16
-static int stm32l4_tim16_interrupt(int irq, FAR void *context)
-{
-  return stm32l4_timer_handler(&g_tim16_lowerhalf);
-}
-#endif
-
-#ifdef CONFIG_STM32L4_TIM17
-static int stm32l4_tim17_interrupt(int irq, FAR void *context)
-{
-  return stm32l4_timer_handler(&g_tim17_lowerhalf);
-}
-#endif
 
 /****************************************************************************
  * Name: stm32l4_timer_handler
@@ -366,8 +235,9 @@ static int stm32l4_tim17_interrupt(int irq, FAR void *context)
  *
  ****************************************************************************/
 
-static int stm32l4_timer_handler(FAR struct stm32l4_lowerhalf_s *lower)
+static int stm32l4_timer_handler(int irq, void *context, void *arg)
 {
+  FAR struct stm32l4_lowerhalf_s *lower = (FAR struct stm32l4_lowerhalf_s *) arg;
   uint32_t next_interval_us = 0;
 
   STM32L4_TIM_ACKINT(lower->tim, 0);
@@ -412,7 +282,7 @@ static int stm32l4_start(FAR struct timer_lowerhalf_s *lower)
 
       if (priv->callback != NULL)
         {
-          STM32L4_TIM_SETISR(priv->tim, priv->timhandler, 0);
+          STM32L4_TIM_SETISR(priv->tim, stm32l4_timer_handler, priv, 0);
           STM32L4_TIM_ENABLEINT(priv->tim, 0);
         }
 
@@ -448,7 +318,7 @@ static int stm32l4_stop(FAR struct timer_lowerhalf_s *lower)
     {
       STM32L4_TIM_SETMODE(priv->tim, STM32L4_TIM_MODE_DISABLED);
       STM32L4_TIM_DISABLEINT(priv->tim, 0);
-      STM32L4_TIM_SETISR(priv->tim, 0, 0);
+      STM32L4_TIM_SETISR(priv->tim, NULL, NULL, 0);
       priv->started = false;
       return OK;
     }
@@ -534,13 +404,13 @@ static void stm32l4_setcallback(FAR struct timer_lowerhalf_s *lower,
 
   if (callback != NULL && priv->started)
     {
-      STM32L4_TIM_SETISR(priv->tim, priv->timhandler, 0);
+      STM32L4_TIM_SETISR(priv->tim, stm32l4_timer_handler, priv, 0);
       STM32L4_TIM_ENABLEINT(priv->tim, 0);
     }
   else
     {
       STM32L4_TIM_DISABLEINT(priv->tim, 0);
-      STM32L4_TIM_SETISR(priv->tim, 0, 0);
+      STM32L4_TIM_SETISR(priv->tim, NULL, NULL, 0);
     }
 
   leave_critical_section(flags);

@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/stm32l4/stm32l4_exti.h
  *
- *   Copyright (C) 2009, 2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2012, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -72,23 +72,24 @@ extern "C"
  * Description:
  *   Sets/clears GPIO based event and interrupt triggers.
  *
- * Parameters:
- *  - pinset: gpio pin configuration
- *  - rising/falling edge: enables
- *  - event:  generate event when set
- *  - func:   when non-NULL, generate interrupt
+ * Input Parameters:
+ *  pinset      - GPIO pin configuration
+ *  risingedge  - Enables interrupt on rising edges
+ *  fallingedge - Enables interrupt on falling edges
+ *  event       - Generate event when set
+ *  func        - When non-NULL, generate interrupt
+ *  arg         - Argument passed to the interrupt callback
  *
- * Returns:
- *  The previous value of the interrupt handler function pointer.  This value may,
- *  for example, be used to restore the previous handler when multiple handlers are
- *  used.
+ * Returned Value:
+ *  Zero (OK) is returned on success, otherwise a negated errno value is returned
+ *  to indicate the nature of the failure.
  *
  ************************************************************************************/
 
-xcpt_t stm32l4_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
-                          bool event, xcpt_t func);
+int stm32l4_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
+                         bool event, xcpt_t func, void *arg);
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32l4_exti_alarm
  *
  * Description:
@@ -98,16 +99,41 @@ xcpt_t stm32l4_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
  *  - rising/falling edge: enables interrupt on rising/falling edges
  *  - event:  generate event when set
  *  - func:   when non-NULL, generate interrupt
+ *  - arg:    Argument passed to the interrupt callback
  *
  * Returns:
- *   The previous value of the interrupt handler function pointer.  This value may,
- *   for example, be used to restore the previous handler when multiple handlers are
- *   used.
+ *   Zero (OK) on success; a negated errno value on failure indicating the
+ *   nature of the failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-xcpt_t stm32l4_exti_alarm(bool risingedge, bool fallingedge, bool event, xcpt_t func);
+int stm32l4_exti_alarm(bool risingedge, bool fallingedge, bool event,
+                       xcpt_t func, void *arg);
+#endif
+
+/****************************************************************************
+ * Name: stm32l4_exti_comp
+ *
+ * Description:
+ *   Sets/clears comparator based events and interrupt triggers.
+ *
+ * Parameters:
+ *  - cmp: comparator
+ *  - rising/falling edge: enables interrupt on rising/falling edget
+ *  - event:  generate event when set
+ *  - func:   when non-NULL, generate interrupt
+ *  - arg:    Argument passed to the interrupt callback
+ *
+ * Returns:
+ *   Zero (OK) returned on success; a negated errno value is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_STM32L4_COMP
+int stm32l4_exti_comp(int cmp, bool risingedge, bool fallingedge,
+                      bool event, xcpt_t func, void *arg);
 #endif
 
 #undef EXTERN

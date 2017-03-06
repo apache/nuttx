@@ -59,7 +59,7 @@
  *
  ****************************************************************************/
 
-int xtrs_timerisr(int irq, FAR chipreg_t *regs)
+int xtrs_timerisr(int irq, FAR chipreg_t *regs, FAR void *arg)
 {
    /* Process timer interrupt */
 

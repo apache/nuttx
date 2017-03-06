@@ -109,7 +109,7 @@
  *
  ****************************************************************************/
 
-static int dm320_timerisr(int irq, uint32_t *regs)
+static int dm320_timerisr(int irq, uint32_t *regs, FAR void *arg)
 {
   /* Process timer interrupt */
 
@@ -147,7 +147,7 @@ void arm_timer_initialize(void)
 
   /* Attach and enable the timer interrupt */
 
-  irq_attach(DM320_IRQ_SYSTIMER, (xcpt_t)dm320_timerisr);
+  irq_attach(DM320_IRQ_SYSTIMER, (xcpt_t)dm320_timerisr, NULL);
   up_enable_irq(DM320_IRQ_SYSTIMER);
 }
 

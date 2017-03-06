@@ -201,13 +201,15 @@ static void tsc_enable(FAR struct ads7843e_config_s *state, bool enable)
     {
       /* Configure the EXTI interrupt using the SAVED handler */
 
-      (void)stm32_gpiosetevent(GPIO_LCDTP_IRQ, true, true, true, priv->handler);
+      (void)stm32_gpiosetevent(GPIO_LCDTP_IRQ, true, true, true,
+                               priv->handler, NULL);
     }
   else
     {
       /* Configure the EXTI interrupt with a NULL handler to disable it */
 
-     (void)stm32_gpiosetevent(GPIO_LCDTP_IRQ, false, false, false, NULL);
+     (void)stm32_gpiosetevent(GPIO_LCDTP_IRQ, false, false, false,
+                              NULL, NULL);
     }
 
   leave_critical_section(flags);

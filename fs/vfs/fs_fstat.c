@@ -117,7 +117,7 @@ int fstat(int fd, FAR struct stat *buf)
        * supports the fstat() method
        */
 
-      ret = OK;
+      ret = -ENOSYS;
       if (inode->u.i_mops && inode->u.i_mops->fstat)
         {
           /* Perform the fstat() operation */
@@ -137,20 +137,11 @@ int fstat(int fd, FAR struct stat *buf)
 
   if (ret < 0)
     {
-      ret = -ret;
-      goto errout_with_inode;
+      set_errno(-ret);
+      return ERROR;
     }
 
   /* Successfully fstat'ed the file */
 
-  inode_release(inode);
   return OK;
-
-/* Failure conditions always set the errno appropriately */
-
-errout_with_inode:
-  inode_release(inode);
-
-  set_errno(ret);
-  return ERROR;
 }

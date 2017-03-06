@@ -186,27 +186,27 @@ static inline void sam_chan_putreg(struct sam_chan_s *chan,
 static int sam_tc_interrupt(struct sam_tc_s *tc, struct sam_chan_s *chan);
 
 #ifdef CONFIG_SAMV7_TC0
-static int sam_tc0_interrupt(int irq, void *context);
-static int sam_tc1_interrupt(int irq, void *context);
-static int sam_tc2_interrupt(int irq, void *context);
+static int sam_tc0_interrupt(int irq, void *context, FAR void *arg);
+static int sam_tc1_interrupt(int irq, void *context, FAR void *arg);
+static int sam_tc2_interrupt(int irq, void *context, FAR void *arg);
 #endif
 
 #ifdef CONFIG_SAMV7_TC1
-static int sam_tc3_interrupt(int irq, void *context);
-static int sam_tc4_interrupt(int irq, void *context);
-static int sam_tc5_interrupt(int irq, void *context);
+static int sam_tc3_interrupt(int irq, void *context, FAR void *arg);
+static int sam_tc4_interrupt(int irq, void *context, FAR void *arg);
+static int sam_tc5_interrupt(int irq, void *context, FAR void *arg);
 #endif
 
 #ifdef CONFIG_SAMV7_TC2
-static int sam_tc6_interrupt(int irq, void *context);
-static int sam_tc7_interrupt(int irq, void *context);
-static int sam_tc8_interrupt(int irq, void *context);
+static int sam_tc6_interrupt(int irq, void *context, FAR void *arg);
+static int sam_tc7_interrupt(int irq, void *context, FAR void *arg);
+static int sam_tc8_interrupt(int irq, void *context, FAR void *arg);
 #endif
 
 #ifdef CONFIG_SAMV7_TC3
-static int sam_tc9_interrupt(int irq, void *context);
-static int sam_tc10_interrupt(int irq, void *context);
-static int sam_tc11_interrupt(int irq, void *context);
+static int sam_tc9_interrupt(int irq, void *context, FAR void *arg);
+static int sam_tc10_interrupt(int irq, void *context, FAR void *arg);
+static int sam_tc11_interrupt(int irq, void *context, FAR void *arg);
 #endif
 
 /* Initialization ***********************************************************/
@@ -893,68 +893,68 @@ static int sam_tc_interrupt(struct sam_tc_s *tc, struct sam_chan_s *chan)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMV7_TC0
-static int sam_tc0_interrupt(int irq, void *context)
+static int sam_tc0_interrupt(int irq, void *context, FAR void *arg)
 {
   return sam_tc_interrupt(&g_tc012, &g_tc012.channel[0]);
 }
 
-static int sam_tc1_interrupt(int irq, void *context)
+static int sam_tc1_interrupt(int irq, void *context, FAR void *arg)
 {
   return sam_tc_interrupt(&g_tc012, &g_tc012.channel[1]);
 }
 
-static int sam_tc2_interrupt(int irq, void *context)
+static int sam_tc2_interrupt(int irq, void *context, FAR void *arg)
 {
   return sam_tc_interrupt(&g_tc012, &g_tc012.channel[2]);
 }
 #endif
 
 #ifdef CONFIG_SAMV7_TC1
-static int sam_tc3_interrupt(int irq, void *context)
+static int sam_tc3_interrupt(int irq, void *context, FAR void *arg)
 {
   return sam_tc_interrupt(&g_tc345, &g_tc345.channel[0]);
 }
 
-static int sam_tc4_interrupt(int irq, void *context)
+static int sam_tc4_interrupt(int irq, void *context, FAR void *arg)
 {
   return sam_tc_interrupt(&g_tc345, &g_tc345.channel[1]);
 }
 
-static int sam_tc5_interrupt(int irq, void *context)
+static int sam_tc5_interrupt(int irq, void *context, FAR void *arg)
 {
   return sam_tc_interrupt(&g_tc345, &g_tc345.channel[2]);
 }
 #endif
 
 #ifdef CONFIG_SAMV7_TC2
-static int sam_tc6_interrupt(int irq, void *context)
+static int sam_tc6_interrupt(int irq, void *context, FAR void *arg)
 {
   return sam_tc_interrupt(&g_tc678, &g_tc678.channel[0]);
 }
 
-static int sam_tc7_interrupt(int irq, void *context)
+static int sam_tc7_interrupt(int irq, void *context, FAR void *arg)
 {
   return sam_tc_interrupt(&g_tc678, &g_tc678.channel[1]);
 }
 
-static int sam_tc8_interrupt(int irq, void *context)
+static int sam_tc8_interrupt(int irq, void *context, FAR void *arg)
 {
   return sam_tc_interrupt(&g_tc678, &g_tc678.channel[2]);
 }
 #endif
 
 #ifdef CONFIG_SAMV7_TC3
-static int sam_tc9_interrupt(int irq, void *context)
+static int sam_tc9_interrupt(int irq, void *context, FAR void *arg)
 {
   return sam_tc_interrupt(&g_tc901, &g_tc901.channel[0]);
 }
 
-static int sam_tc10_interrupt(int irq, void *context)
+static int sam_tc10_interrupt(int irq, void *context, FAR void *arg)
 {
   return sam_tc_interrupt(&g_tc901, &g_tc901.channel[1]);
 }
 
-static int sam_tc11_interrupt(int irq, void *context)
+static int sam_tc11_interrupt(int irq, void *context, FAR void *arg)
 {
   return sam_tc_interrupt(&g_tc901, &g_tc901.channel[2]);
 }
@@ -1279,7 +1279,7 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
 
   /* Attach the timer interrupt handler and enable the timer interrupts */
 
-  (void)irq_attach(chconfig->irq, chconfig->handler);
+  (void)irq_attach(chconfig->irq, chconfig->handler, NULL);
   up_enable_irq(chconfig->irq);
 
   /* Mark the channel "inuse" */

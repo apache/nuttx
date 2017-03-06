@@ -112,7 +112,7 @@ static int  adc_setup(FAR struct adc_dev_s *dev);
 static void adc_shutdown(FAR struct adc_dev_s *dev);
 static void adc_rxint(FAR struct adc_dev_s *dev, bool enable);
 static int  adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg);
-static int  adc_interrupt(int irq, void *context);
+static int  adc_interrupt(int irq, void *context, FAR void *arg);
 
 /****************************************************************************
  * Private Data
@@ -304,7 +304,7 @@ static int adc_setup(FAR struct adc_dev_s *dev)
   FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->ad_priv;
   int i;
 
-  int ret = irq_attach(priv->irq, adc_interrupt);
+  int ret = irq_attach(priv->irq, adc_interrupt, NULL);
   if (ret == OK)
     {
       for (i = 0; i < 8; i++)
@@ -406,7 +406,7 @@ static int adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int adc_interrupt(int irq, void *context)
+static int adc_interrupt(int irq, void *context, FAR void *arg)
 {
 #ifndef CONFIG_ADC_BURSTMODE
 #ifdef CONFIG_ADC_CHANLIST

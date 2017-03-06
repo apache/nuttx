@@ -90,7 +90,7 @@ static struct sam_hsmci_state_s g_hsmci;
  *
  ****************************************************************************/
 
-static int sam_hsmci_cardetect(int irq, void *regs)
+static int sam_hsmci_cardetect(int irq, void *regs, FAR void *arg)
 {
   bool inserted;
 
@@ -160,7 +160,7 @@ int sam_hsmci_initialize(int minor)
       /* Configure card detect interrupts */
 
       sam_gpioirq(GPIO_MCI_CD);
-      (void)irq_attach(MCI_CD_IRQ, sam_hsmci_cardetect);
+      (void)irq_attach(MCI_CD_IRQ, sam_hsmci_cardetect, NULL);
 
       /* Then inform the HSMCI driver if there is or is not a card in the slot. */
 

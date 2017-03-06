@@ -376,7 +376,7 @@ static inline void memlcd_clear(FAR struct memlcd_dev_s *mlcd)
  *
  ****************************************************************************/
 
-static int memlcd_extcominisr(int irq, FAR void *context)
+static int memlcd_extcominisr(int irq, FAR void *context, void *arg)
 {
   static bool pol = 0;
   struct memlcd_dev_s *mlcd = &g_memlcddev;
@@ -723,7 +723,7 @@ FAR struct lcd_dev_s *memlcd_initialize(FAR struct spi_dev_s *spi,
   mlcd->priv = priv;
   mlcd->spi = spi;
 
-  mlcd->priv->attachirq(memlcd_extcominisr);
+  mlcd->priv->attachirq(memlcd_extcominisr, mlcd);
 
   lcdinfo("done\n");
   return &mlcd->dev;

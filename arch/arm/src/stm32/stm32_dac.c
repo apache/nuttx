@@ -94,6 +94,12 @@
 #     undef CONFIG_STM32_DAC1_DMA
 #     undef CONFIG_STM32_DAC2_DMA
 #   endif
+# elif defined(CONFIG_STM32_STM32F33XX)
+#   ifndef CONFIG_STM32_DMA1
+#     warning "STM32 F334 DAC DMA support requires CONFIG_STM32_DMA1"
+#     undef CONFIG_STM32_DAC1_DMA
+#     undef CONFIG_STM32_DAC2_DMA
+#   endif
 # elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
 #   ifndef CONFIG_STM32_DMA1
 #     warning "STM32 F4 DAC DMA support requires CONFIG_STM32_DMA1"
@@ -147,7 +153,8 @@
 #   define DAC_DMA         2
 #   define DAC1_DMA_CHAN   DMACHAN_DAC_CHAN1
 #   define DAC2_DMA_CHAN   DMACHAN_DAC_CHAN2
-# elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+# elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX) || \
+  defined(CONFIG_STM32_STM32F33XX)
 #   define HAVE_DMA        1
 #   define DAC_DMA         1
 #   define DAC1_DMA_CHAN   DMAMAP_DAC1
@@ -375,7 +382,7 @@ static void     tim_putreg(FAR struct stm32_chan_s *chan, int offset,
 /* Interrupt handler */
 
 #if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
-static int  dac_interrupt(int irq, FAR void *context);
+static int  dac_interrupt(int irq, FAR void *context, FAR void *arg);
 #endif
 
 /* DAC methods */
@@ -614,7 +621,7 @@ static void tim_modifyreg(FAR struct stm32_chan_s *chan, int offset,
  ****************************************************************************/
 
 #if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
-static int dac_interrupt(int irq, FAR void *context)
+static int dac_interrupt(int irq, FAR void *context, FAR void *arg)
 {
 #warning "Missing logic"
   return OK;
@@ -847,7 +854,6 @@ static int dac_timinit(FAR struct stm32_chan_s *chan)
    * default) will be enabled
    */
 
-  pclk    = STM32_TIM27_FREQUENCY;
   regaddr = STM32_RCC_APB1ENR;
 
   switch (chan->timer)
@@ -855,31 +861,37 @@ static int dac_timinit(FAR struct stm32_chan_s *chan)
 #ifdef NEED_TIM2
       case 2:
         setbits = RCC_APB1ENR_TIM2EN;
+        pclk    = BOARD_TIM2_FREQUENCY;
         break;
 #endif
 #ifdef NEED_TIM3
       case 3:
         setbits = RCC_APB1ENR_TIM3EN;
+        pclk    = BOARD_TIM3_FREQUENCY;
         break;
 #endif
 #ifdef NEED_TIM4
       case 4:
         setbits = RCC_APB1ENR_TIM4EN;
+        pclk    = BOARD_TIM4_FREQUENCY;
         break;
 #endif
 #ifdef NEED_TIM5
       case 5:
         setbits = RCC_APB1ENR_TIM5EN;
+        pclk    = BOARD_TIM5_FREQUENCY;
         break;
 #endif
 #ifdef NEED_TIM6
       case 6:
         setbits = RCC_APB1ENR_TIM6EN;
+        pclk    = BOARD_TIM6_FREQUENCY;
         break;
 #endif
 #ifdef NEED_TIM7
       case 7:
         setbits = RCC_APB1ENR_TIM7EN;
+        pclk    = BOARD_TIM7_FREQUENCY;
         break;
 #endif
 #ifdef NEED_TIM8
@@ -891,7 +903,7 @@ static int dac_timinit(FAR struct stm32_chan_s *chan)
 #endif
       default:
         aerr("ERROR: Could not enable timer\n");
-        break;
+        return -EINVAL;
     }
 
   /* Enable the timer. */

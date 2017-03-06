@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/tiva/tm4c_ethernet.c
  *
- *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -626,9 +626,12 @@ struct tiva_ethmac_s
   uint8_t              fduplex : 1; /* Full (vs. half) duplex */
   WDOG_ID              txpoll;      /* TX poll timer */
   WDOG_ID              txtimeout;   /* TX timeout timer */
-  struct work_s        work;        /* For deferring work to the work queue */
+  struct work_s        irqwork;     /* For deferring interrupt work to the work queue */
+  struct work_s        pollwork;    /* For deferring poll work to the work queue */
+
 #ifdef CONFIG_TIVA_PHY_INTERRUPTS
   xcpt_t               handler;     /* Attached PHY interrupt handler */
+  void                *arg;         /* Argument that accompanies the interrupt */
 #endif
 
   /* This holds the information visible to the NuttX network */
@@ -704,7 +707,7 @@ static void tiva_freeframe(FAR struct tiva_ethmac_s *priv);
 static void tiva_txdone(FAR struct tiva_ethmac_s *priv);
 
 static void tiva_interrupt_work(FAR void *arg);
-static int  tiva_interrupt(int irq, FAR void *context);
+static int  tiva_interrupt(int irq, FAR void *context, FAR void *arg);
 
 /* Watchdog timer expirations */
 
@@ -1959,14 +1962,6 @@ static void tiva_txdone(FAR struct tiva_ethmac_s *priv)
 
       wd_cancel(priv->txtimeout);
 
-      /* Then make sure that the TX poll timer is running (if it is already
-       * running, the following would restart it).  This is necessary to
-       * avoid certain race conditions where the polling sequence can be
-       * interrupted.
-       */
-
-      (void)wd_start(priv->txpoll, TIVA_WDDELAY, tiva_poll_expiry, 1, (uint32_t)priv);
-
       /* And disable further TX interrupts. */
 
       tiva_disableint(priv, EMAC_DMAINT_TI);
@@ -2101,7 +2096,7 @@ static void tiva_interrupt_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static int tiva_interrupt(int irq, FAR void *context)
+static int tiva_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct tiva_ethmac_s *priv = &g_tiva_ethmac[0];
   uint32_t dmaris;
@@ -2130,13 +2125,9 @@ static int tiva_interrupt(int irq, FAR void *context)
            wd_cancel(priv->txtimeout);
         }
 
-      /* Cancel any pending poll work */
-
-      work_cancel(ETHWORK, &priv->work);
-
       /* Schedule to perform the interrupt processing on the worker thread. */
 
-      work_queue(ETHWORK, &priv->work, tiva_interrupt_work, priv, 0);
+      work_queue(ETHWORK, &priv->irqwork, tiva_interrupt_work, priv, 0);
     }
 
 #ifdef CONFIG_TIVA_PHY_INTERRUPTS
@@ -2150,9 +2141,9 @@ static int tiva_interrupt(int irq, FAR void *context)
 
       /* Dispatch to the registered handler */
 
-      if (priv->handler)
+      if (priv->handler != NULL)
         {
-          (void)priv->handler(irq, context);
+          (void)priv->handler(irq, context, priv->arg);
         }
     }
 #endif
@@ -2227,15 +2218,9 @@ static void tiva_txtimeout_expiry(int argc, uint32_t arg, ...)
 
   up_disable_irq(TIVA_IRQ_ETHCON);
 
-  /* Cancel any pending poll or interrupt work.  This will have no effect
-   * on work that has already been started.
-   */
-
-  work_cancel(ETHWORK, &priv->work);
-
   /* Schedule to perform the TX timeout processing on the worker thread. */
 
-  work_queue(ETHWORK, &priv->work, tiva_txtimeout_work, priv, 0);
+  work_queue(ETHWORK, &priv->irqwork, tiva_txtimeout_work, priv, 0);
 }
 
 /****************************************************************************
@@ -2306,7 +2291,8 @@ static void tiva_poll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  (void)wd_start(priv->txpoll, TIVA_WDDELAY, tiva_poll_expiry, 1, (uint32_t)priv);
+  (void)wd_start(priv->txpoll, TIVA_WDDELAY, tiva_poll_expiry,
+                 1, (uint32_t)priv);
   net_unlock();
 }
 
@@ -2332,24 +2318,9 @@ static void tiva_poll_expiry(int argc, uint32_t arg, ...)
 {
   FAR struct tiva_ethmac_s *priv = (FAR struct tiva_ethmac_s *)arg;
 
-  /* Is our single work structure available?  It may not be if there are
-   * pending interrupt actions.
-   */
+  /* Schedule to perform the interrupt processing on the worker thread. */
 
-  if (work_available(&priv->work))
-    {
-      /* Schedule to perform the interrupt processing on the worker thread. */
-
-      work_queue(ETHWORK, &priv->work, tiva_poll_work, priv, 0);
-    }
-  else
-    {
-      /* No.. Just re-start the watchdog poll timer, missing one polling
-       * cycle.
-       */
-
-      (void)wd_start(priv->txpoll, TIVA_WDDELAY, tiva_poll_expiry, 1, (uint32_t)priv);
-    }
+  work_queue(ETHWORK, &priv->pollwork, tiva_poll_work, priv, 0);
 }
 
 /****************************************************************************
@@ -2396,7 +2367,8 @@ static int tiva_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  (void)wd_start(priv->txpoll, TIVA_WDDELAY, tiva_poll_expiry, 1, (uint32_t)priv);
+  (void)wd_start(priv->txpoll, TIVA_WDDELAY, tiva_poll_expiry,
+                 1, (uint32_t)priv);
 
   /* Enable the Ethernet interrupt */
 
@@ -2518,11 +2490,11 @@ static int tiva_txavail(struct net_driver_s *dev)
    * availability action.
    */
 
-  if (work_available(&priv->work))
+  if (work_available(&priv->pollwork))
     {
       /* Schedule to serialize the poll on the worker thread. */
 
-      work_queue(ETHWORK, &priv->work, tiva_txavail_work, priv, 0);
+      work_queue(ETHWORK, &priv->pollwork, tiva_txavail_work, priv, 0);
     }
 
   return OK;
@@ -4116,7 +4088,7 @@ int tiva_ethinitialize(int intf)
 
   /* Attach the IRQ to the driver */
 
-  if (irq_attach(TIVA_IRQ_ETHCON, tiva_interrupt))
+  if (irq_attach(TIVA_IRQ_ETHCON, tiva_interrupt, NULL))
     {
       /* We could not attach the ISR to the interrupt */
 
@@ -4236,23 +4208,22 @@ void up_netinitialize(void)
  *             asserts an interrupt.  Must reside in OS space, but can
  *             signal tasks in user space.  A value of NULL can be passed
  *             in order to detach and disable the PHY interrupt.
+ *   arg     - The argument that will accompany the interrupt
  *   enable  - A function pointer that be unsed to enable or disable the
  *             PHY interrupt.
  *
  * Returned Value:
- *   The previous PHY interrupt handler address is returned.  This allows you
- *   to temporarily replace an interrupt handler, then restore the original
- *   interrupt handler.  NULL is returned if there is was not handler in
- *   place when the call was made.
+ *   Zero (OK) returned on success; a negated errno value is returned on
+ *   failure.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_TIVA_PHY_INTERRUPTS
-xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
+int arch_phy_irq(FAR const char *intf, xcpt_t handler, void *arg,
+                 phy_enable_t *enable)
 {
   struct tiva_ethmac_s *priv;
   irqstate_t flags;
-  xcpt_t oldhandler;
 
   DEBUGASSERT(intf);
   ninfo("%s: handler=%p\n", intf, handler);
@@ -4272,10 +4243,10 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
 
   flags = enter_critical_section();
 
-  /* Get the old interrupt handler and save the new one */
+  /* Save the new interrupt handler information */
 
-  oldhandler    = priv->handler;
   priv->handler = handler;
+  priv->arg     = arg;
 
   /* Return with the interrupt disabled in any case */
 
@@ -4288,10 +4259,8 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
       *enable = handler ? tiva_phy_intenable : NULL;
     }
 
-  /* Return the old handler (so that it can be restored) */
-
   leave_critical_section(flags);
-  return oldhandler;
+  return OK;
 }
 #endif /* CONFIG_TIVA_PHY_INTERRUPTS */
 

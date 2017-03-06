@@ -130,7 +130,7 @@
  *
  ****************************************************************************/
 
-static int tms570_timerisr(int irq, uint32_t *regs)
+static int tms570_timerisr(int irq, uint32_t *regs, void *arg)
 {
   /* Cleear the RTI Compare 0 interrupts */
 
@@ -194,7 +194,7 @@ void arm_timer_initialize(void)
 
   /* Attach the interrupt handler to the RTI Compare 0 interrupt */
 
-  DEBUGVERIFY(irq_attach(TMS570_REQ_RTICMP0, (xcpt_t)tms570_timerisr));
+  DEBUGVERIFY(irq_attach(TMS570_REQ_RTICMP0, (xcpt_t)tms570_timerisr), NULL);
 
   /* Enable RTI compare 0 interrupts at the VIM */
 

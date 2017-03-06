@@ -154,7 +154,7 @@ static struct stm32_xen1210config_s g_xen1210config =
 
 /* This is the XEN1210 Interrupt handler */
 
-int xen1210_interrupt(int irq, FAR void *context)
+int xen1210_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   /* Verify that we have a handler attached */
 
@@ -211,13 +211,14 @@ static void xen1210_enable(FAR struct xen1210_config_s *state, bool enable)
 
       stm32_configgpio(GPIO_XEN1210_INT);
       (void)stm32_gpiosetevent(GPIO_XEN1210_INT, false, true,
-                               true, xen1210_interrupt);
+                               true, xen1210_interrupt, NULL);
     }
   else
     {
       /* Configure the interrupt with a NULL handler to disable it */
 
-      (void)stm32_gpiosetevent(GPIO_XEN1210_INT, false, false, false, NULL);
+      (void)stm32_gpiosetevent(GPIO_XEN1210_INT, false, false, false,
+                               NULL, NULL);
     }
 
   leave_critical_section(flags);

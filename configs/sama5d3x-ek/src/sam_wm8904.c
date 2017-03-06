@@ -204,7 +204,7 @@ static bool wm8904_enable(FAR const struct wm8904_lower_s *lower, bool enable)
   return ret;
 }
 
-static int wm8904_interrupt(int irq, FAR void *context)
+static int wm8904_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   /* Just forward the interrupt to the WM8904 driver */
 
@@ -311,7 +311,7 @@ int sam_wm8904_initialize(int minor)
       /* Configure WM8904 interrupts */
 
       sam_pioirq(PIO_INT_WM8904);
-      ret = irq_attach(IRQ_INT_WM8904, wm8904_interrupt);
+      ret = irq_attach(IRQ_INT_WM8904, wm8904_interrupt, NULL);
       if (ret < 0)
         {
           auderr("ERROR: Failed to attach WM8904 interrupt: %d\n", ret);

@@ -395,8 +395,8 @@ EXTERN const struct c1101_rfsettings_s cc1101_rfsettings_ISM2_905MHzGFSK250kbps;
  *
  ****************************************************************************/
 
-struct cc1101_dev_s * cc1101_init(struct spi_dev_s * spi, uint8_t isrpin,
-    uint32_t pinset, const struct c1101_rfsettings_s * rfsettings);
+struct cc1101_dev_s *cc1101_init(struct spi_dev_s *spi, uint8_t isrpin,
+    uint32_t pinset, const struct c1101_rfsettings_s *rfsettings);
 
 /****************************************************************************
  ** Deinitialize Chipcon CC1101 Chip
@@ -409,31 +409,31 @@ struct cc1101_dev_s * cc1101_init(struct spi_dev_s * spi, uint8_t isrpin,
  *
  ****************************************************************************/
 
-int cc1101_deinit(struct cc1101_dev_s * dev);
+int cc1101_deinit(struct cc1101_dev_s *dev);
 
 /****************************************************************************
  * Power up device, start conversion. Returns zero on success.
  ****************************************************************************/
 
-int cc1101_powerup(struct cc1101_dev_s * dev);
+int cc1101_powerup(struct cc1101_dev_s *dev);
 
 /****************************************************************************
  * Power down device, stop conversion. Returns zero on success.
  ****************************************************************************/
 
-int cc1101_powerdown(struct cc1101_dev_s * dev);
+int cc1101_powerdown(struct cc1101_dev_s *dev);
 
 /****************************************************************************
  * Set Multi Purpose Output Function. Returns zero on success.
  ****************************************************************************/
 
-int cc1101_setgdo(struct cc1101_dev_s * dev, uint8_t pin, uint8_t function);
+int cc1101_setgdo(struct cc1101_dev_s *dev, uint8_t pin, uint8_t function);
 
 /****************************************************************************
  * Set RF settings. Use one from the database above.
  ****************************************************************************/
 
-int cc1101_setrf(struct cc1101_dev_s * dev,
+int cc1101_setrf(struct cc1101_dev_s *dev,
                  const struct c1101_rfsettings_s *settings);
 
 /****************************************************************************
@@ -447,7 +447,7 @@ int cc1101_setrf(struct cc1101_dev_s * dev,
  *
  ****************************************************************************/
 
-int cc1101_setchannel(struct cc1101_dev_s * dev, uint8_t channel);
+int cc1101_setchannel(struct cc1101_dev_s *dev, uint8_t channel);
 
 /****************************************************************************
  * Set Output Power
@@ -465,7 +465,7 @@ int cc1101_setchannel(struct cc1101_dev_s * dev, uint8_t channel);
  *
  ****************************************************************************/
 
-uint8_t cc1101_setpower(struct cc1101_dev_s * dev, uint8_t power);
+uint8_t cc1101_setpower(struct cc1101_dev_s *dev, uint8_t power);
 
 /****************************************************************************
  * Convert RSSI as obtained from CC1101 to [dBm] */
@@ -486,7 +486,7 @@ int cc1101_calcRSSIdBm(int rssi);
  *
  ****************************************************************************/
 
-int cc1101_receive(struct cc1101_dev_s * dev);
+int cc1101_receive(struct cc1101_dev_s *dev);
 
 /****************************************************************************
  * Read received packet
@@ -508,7 +508,7 @@ int cc1101_receive(struct cc1101_dev_s * dev);
  *
  ****************************************************************************/
 
-int cc1101_read(struct cc1101_dev_s * dev, uint8_t * buf, size_t size);
+int cc1101_read(struct cc1101_dev_s *dev, uint8_t *buf, size_t size);
 
 /****************************************************************************
  * Write data to be send, using the cc1101_send()
@@ -522,7 +522,7 @@ int cc1101_read(struct cc1101_dev_s * dev, uint8_t * buf, size_t size);
  *
  ****************************************************************************/
 
-int cc1101_write(struct cc1101_dev_s * dev, const uint8_t * buf, size_t size);
+int cc1101_write(struct cc1101_dev_s *dev, const uint8_t *buf, size_t size);
 
 /****************************************************************************
  * Send data previously written using cc1101_write()
@@ -535,7 +535,7 @@ int cc1101_write(struct cc1101_dev_s * dev, const uint8_t * buf, size_t size);
  *
  ****************************************************************************/
 
-int cc1101_send(struct cc1101_dev_s * dev);
+int cc1101_send(struct cc1101_dev_s *dev);
 
 /****************************************************************************
  * Enter idle state (after reception and transmission completes).
@@ -545,7 +545,7 @@ int cc1101_send(struct cc1101_dev_s * dev);
  *
  ****************************************************************************/
 
-int cc1101_idle(struct cc1101_dev_s * dev);
+int cc1101_idle(struct cc1101_dev_s *dev);
 
 #undef EXTERN
 #if defined(__cplusplus)

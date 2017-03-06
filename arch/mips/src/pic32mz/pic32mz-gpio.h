@@ -199,22 +199,20 @@ void pic32mz_gpioirqinitialize(void);
  *   case, all attached handlers will be called.  Each handler must maintain state
  *   and determine if the underlying GPIO input value changed.
  *
- * Parameters:
- *  - pinset:  GPIO pin configuration
- *  - cn:      The change notification number associated with the pin
- *  - handler: Interrupt handler (may be NULL to detach)
+ *   pinset  - GPIO pin configuration
+ *   handler - Interrupt handler (may be NULL to detach)
+ *   arg     - The argument that accompanies the interrupt
  *
- * Returns:
- *  The previous value of the interrupt handler function pointer.  This value may,
- *  for example, be used to restore the previous handler when multiple handlers are
- *  used.
+ * Returned Value:
+ *   Zero (OK) is returned on success.  A negated error value is returned on
+ *   any failure to indicate the nature of the failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_PIC32MZ_GPIOIRQ
-xcpt_t pic32mz_gpioattach(pinset_t pinset, xcpt_t handler);
+int pic32mz_gpioattach(uint32_t pinset, xcpt_t handler, void *arg);
 #else
-#  define pic32mz_gpioattach(p,f) (NULL)
+#  define pic32mz_gpioattach(p,h,a) (0)
 #endif
 
 /************************************************************************************

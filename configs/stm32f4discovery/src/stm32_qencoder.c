@@ -78,5 +78,3 @@ int stm32_qencoder_initialize(FAR const char *devpath, int timer)
 
   return ret;
 }
-
-#endif /* HAVE_QENCODER */

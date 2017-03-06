@@ -50,6 +50,8 @@
 #include "chip.h"
 #include "chip/stm32_tim.h"
 
+#include <nuttx/irq.h>
+
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
@@ -62,7 +64,7 @@
 #define STM32_TIM_SETCHANNEL(d,ch,mode) ((d)->ops->setchannel(d,ch,mode))
 #define STM32_TIM_SETCOMPARE(d,ch,comp) ((d)->ops->setcompare(d,ch,comp))
 #define STM32_TIM_GETCAPTURE(d,ch)      ((d)->ops->getcapture(d,ch))
-#define STM32_TIM_SETISR(d,hnd,s)       ((d)->ops->setisr(d,hnd,s))
+#define STM32_TIM_SETISR(d,hnd,arg,s)   ((d)->ops->setisr(d,hnd,arg,s))
 #define STM32_TIM_ENABLEINT(d,s)        ((d)->ops->enableint(d,s))
 #define STM32_TIM_DISABLEINT(d,s)       ((d)->ops->disableint(d,s))
 #define STM32_TIM_ACKINT(d,s)           ((d)->ops->ackint(d,s))
@@ -172,8 +174,7 @@ struct stm32_tim_ops_s
 
   /* Timer interrupts */
 
-  int  (*setisr)(FAR struct stm32_tim_dev_s *dev,
-                 int (*handler)(int irq, void *context), int source);
+  int  (*setisr)(FAR struct stm32_tim_dev_s *dev, xcpt_t handler, void * arg, int source);
   void (*enableint)(FAR struct stm32_tim_dev_s *dev, int source);
   void (*disableint)(FAR struct stm32_tim_dev_s *dev, int source);
   void (*ackint)(FAR struct stm32_tim_dev_s *dev, int source);
@@ -190,7 +191,7 @@ FAR struct stm32_tim_dev_s *stm32_tim_init(int timer);
 
 /* Power-down timer, mark it as unused */
 
-int stm32_tim_deinit(FAR struct stm32_tim_dev_s * dev);
+int stm32_tim_deinit(FAR struct stm32_tim_dev_s *dev);
 
 /****************************************************************************
  * Name: stm32_timer_initialize

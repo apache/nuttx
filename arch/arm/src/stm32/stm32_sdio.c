@@ -416,9 +416,9 @@ static void stm32_endtransfer(struct stm32_dev_s *priv, sdio_eventset_t wkupeven
 
 /* Interrupt Handling *******************************************************/
 
-static int  stm32_interrupt(int irq, void *context);
+static int  stm32_interrupt(int irq, void *context, void *arg);
 #ifdef CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE
-static int  stm32_rdyinterrupt(int irq, void *context);
+static int  stm32_rdyinterrupt(int irq, void *context, void *arg);
 #endif
 
 /* SDIO interface methods ***************************************************/
@@ -668,14 +668,16 @@ static void stm32_configwaitints(struct stm32_dev_s *priv, uint32_t waitmask,
 
       /* Arm the SDIO_D Ready and install Isr */
 
-      stm32_gpiosetevent(pinset, true, false, false, stm32_rdyinterrupt);
+      (void)stm32_gpiosetevent(pinset, true, false, false,
+                               stm32_rdyinterrupt, priv);
     }
 
   /* Disarm SDIO_D ready */
 
   if ((wkupevent & SDIOWAIT_WRCOMPLETE) != 0)
     {
-      stm32_gpiosetevent(GPIO_SDIO_D0, false, false, false , NULL);
+      (void)stm32_gpiosetevent(GPIO_SDIO_D0, false, false, false,
+                               NULL, NULL);
       stm32_configgpio(GPIO_SDIO_D0);
     }
 #endif
@@ -1315,9 +1317,9 @@ static void stm32_endtransfer(struct stm32_dev_s *priv, sdio_eventset_t wkupeven
  ****************************************************************************/
 
 #ifdef CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE
-static int stm32_rdyinterrupt(int irq, void *context)
+static int stm32_rdyinterrupt(int irq, void *context, FAR void *arg)
 {
-  struct stm32_dev_s *priv = &g_sdiodev;
+  struct stm32_dev_s *priv = (struct stm32_dev_s *)arg;
   stm32_endwait(priv, SDIOWAIT_WRCOMPLETE);
   return OK;
 }
@@ -1337,7 +1339,7 @@ static int stm32_rdyinterrupt(int irq, void *context)
  *
  ****************************************************************************/
 
-static int stm32_interrupt(int irq, void *context)
+static int stm32_interrupt(int irq, void *context, FAR void *arg)
 {
   struct stm32_dev_s *priv = &g_sdiodev;
   uint32_t enabled;
@@ -1768,7 +1770,7 @@ static int stm32_attach(FAR struct sdio_dev_s *dev)
 
   /* Attach the SDIO interrupt handler */
 
-  ret = irq_attach(STM32_IRQ_SDIO, stm32_interrupt);
+  ret = irq_attach(STM32_IRQ_SDIO, stm32_interrupt, NULL);
   if (ret == OK)
     {
 

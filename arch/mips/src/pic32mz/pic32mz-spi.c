@@ -1294,7 +1294,7 @@ FAR struct spi_dev_s *pic32mz_spibus_initialize(int port)
    * resources are available.
    */
 
-  ret = irq_attach(priv->config->rxirq, spi_interrupt);
+  ret = irq_attach(priv->config->rxirq, spi_interrupt, NULL);
   if (ret < 0)
     {
       spierr("ERROR: Failed to attach RX interrupt: %d port: %d\n",
@@ -1302,7 +1302,7 @@ FAR struct spi_dev_s *pic32mz_spibus_initialize(int port)
       goto errout;
     }
 
-  ret = irq_attach(priv->config->txirq, spi_interrupt);
+  ret = irq_attach(priv->config->txirq, spi_interrupt, NULL);
   if (ret < 0)
     {
       spierr("ERROR: Failed to attach TX interrupt: %d port: %d\n",
@@ -1310,7 +1310,7 @@ FAR struct spi_dev_s *pic32mz_spibus_initialize(int port)
       goto errout_with_rxirq;
     }
 
-  ret = irq_attach(priv->config->firq, spi_interrupt);
+  ret = irq_attach(priv->config->firq, spi_interrupt, NULL);
   if (ret < 0)
     {
       spierr("ERROR: Failed to attach fault interrupt: %d port: %d\n",

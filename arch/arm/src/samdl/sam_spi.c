@@ -163,26 +163,7 @@ static void     spi_dumpregs(struct sam_spidev_s *priv, const char *msg);
 /* Interrupt handling */
 
 #if 0 /* Not used */
-static int  spi_interrupt(struct sam_spidev_s *dev);
-
-#ifdef SAMDL_HAVE_SPI0
-static int  spi0_interrupt(int irq, void *context);
-#endif
-#ifdef SAMDL_HAVE_SPI1
-static int  spi1_interrupt(int irq, void *context);
-#endif
-#ifdef SAMDL_HAVE_SPI2
-static int  spi2_interrupt(int irq, void *context);
-#endif
-#ifdef SAMDL_HAVE_SPI3
-static int  spi3_interrupt(int irq, void *context);
-#endif
-#ifdef SAMDL_HAVE_SPI4
-static int  spi4_interrupt(int irq, void *context);
-#endif
-#ifdef SAMDL_HAVE_SPI5
-static int  spi5_interrupt(int irq, void *context);
-#endif
+static int  spi_interrupt(int irq, void *context, FAR void *arg);
 #endif
 
 /* SPI methods */
@@ -255,9 +236,6 @@ static struct sam_spidev_s g_spi0dev =
   .muxconfig = BOARD_SERCOM0_MUXCONFIG,
   .srcfreq   = BOARD_SERCOM0_FREQUENCY,
   .base      = SAM_SERCOM0_BASE,
-#if 0 /* Not used */
-  .handler   = spi0_interrupt,
-#endif
   .spilock   = SEM_INITIALIZER(1),
 };
 #endif
@@ -304,9 +282,6 @@ static struct sam_spidev_s g_spi1dev =
   .muxconfig = BOARD_SERCOM1_MUXCONFIG,
   .srcfreq   = BOARD_SERCOM1_FREQUENCY,
   .base      = SAM_SERCOM1_BASE,
-#if 0 /* Not used */
-  .handler   = spi1_interrupt,
-#endif
   .spilock   = SEM_INITIALIZER(1),
 };
 #endif
@@ -353,9 +328,6 @@ static struct sam_spidev_s g_spi2dev =
   .muxconfig = BOARD_SERCOM2_MUXCONFIG,
   .srcfreq   = BOARD_SERCOM2_FREQUENCY,
   .base      = SAM_SERCOM2_BASE,
-#if 0 /* Not used */
-  .handler   = spi2_interrupt,
-#endif
   .spilock   = SEM_INITIALIZER(1),
 };
 #endif
@@ -402,9 +374,6 @@ static struct sam_spidev_s g_spi3dev =
   .muxconfig = BOARD_SERCOM3_MUXCONFIG,
   .srcfreq   = BOARD_SERCOM3_FREQUENCY,
   .base      = SAM_SERCOM3_BASE,
-#if 0 /* Not used */
-  .handler   = spi3_interrupt,
-#endif
   .spilock   = SEM_INITIALIZER(1),
 };
 #endif
@@ -451,9 +420,6 @@ static struct sam_spidev_s g_spi4dev =
   .muxconfig = BOARD_SERCOM4_MUXCONFIG,
   .srcfreq   = BOARD_SERCOM4_FREQUENCY,
   .base      = SAM_SERCOM4_BASE,
-#if 0 /* Not used */
-  .handler   = spi4_interrupt,
-#endif
   .spilock   = SEM_INITIALIZER(1),
 };
 #endif
@@ -500,9 +466,6 @@ static struct sam_spidev_s g_spi5dev =
   .muxconfig = BOARD_SERCOM5_MUXCONFIG,
   .srcfreq   = BOARD_SERCOM5_FREQUENCY,
   .base      = SAM_SERCOM5_BASE,
-#if 0 /* Not used */
-  .handler   = spi5_interrupt,
-#endif
   .spilock   = SEM_INITIALIZER(1),
 };
 #endif
@@ -748,12 +711,14 @@ static void spi_dumpregs(struct sam_spidev_s *priv, const char *msg)
  ****************************************************************************/
 
 #if 0 /* Not used */
-static int spi_interrupt(struct sam_spidev_s *dev)
+static int spi_interrupt(int irq, void *context, FAR void *arg)
 {
-  struct sam_dev_s *priv = (struct sam_dev_s *)dev->priv;
+  struct sam_dev_s *priv = (struct sam_dev_s *)arg
   uint8_t pending;
   uint8_t intflag;
   uint8_t inten;
+
+  DEBUGASSERT(priv != NULL);
 
   /* Get the set of pending SPI interrupts (we are only interested in the
    * unmasked interrupts).
@@ -789,59 +754,6 @@ static int spi_interrupt(struct sam_spidev_s *dev)
 
   return OK;
 }
-#endif
-
-/****************************************************************************
- * Name: spiN_interrupt
- *
- * Description:
- *   Handle each SERCOM SPI interrupt by calling the common interrupt
- *   handling logic with the SPI-specific state.
- *
- ****************************************************************************/
-
-#if 0 /* Not used */
-#ifdef SAMDL_HAVE_SPI0
-static int  spi0_interrupt(int irq, void *context)
-{
-  return spi_interrupt(&g_spi0dev);
-}
-#endif
-
-#ifdef SAMDL_HAVE_SPI1
-static int  spi1_interrupt(int irq, void *context)
-{
-  return spi_interrupt(&g_spi1dev);
-}
-#endif
-
-#ifdef SAMDL_HAVE_SPI2
-static int  spi2_interrupt(int irq, void *context)
-{
-  return spi_interrupt(&g_spi2dev);
-}
-#endif
-
-#ifdef SAMDL_HAVE_SPI3
-static int  spi3_interrupt(int irq, void *context)
-{
-  return spi_interrupt(&g_spi3dev);
-}
-#endif
-
-#ifdef SAMDL_HAVE_SPI4
-static int  spi4_interrupt(int irq, void *context)
-{
-  return spi_interrupt(&g_spi4dev);
-}
-#endif
-
-#ifdef SAMDL_HAVE_SPI5
-static int  spi5_interrupt(int irq, void *context)
-{
-  return spi_interrupt(&g_spi5dev);
-}
-#endif
 #endif
 
 /****************************************************************************
@@ -1546,7 +1458,7 @@ struct spi_dev_s *sam_spibus_initialize(int port)
 #if 0 /* Not used */
   /* Attach and enable the SERCOM interrupt handler */
 
-  ret = irq_attach(priv->irq, priv->handler);
+  ret = irq_attach(priv->irq, spi_interrupt, priv);
   if (ret < 0)
     {
       spierr("ERROR: Failed to attach interrupt: %d\n", irq);

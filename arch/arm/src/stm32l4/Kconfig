@@ -37,31 +37,49 @@ endchoice # STM32 L4 Chip Selection
 
 # Chip families
 
-config STM32L4_STM32L476XX
+config STM32L4_STM32L4X3
 	bool
 	default n
-	select ARCH_HAVE_FPU
-	select ARCH_HAVE_DPFPU # REVISIT
-	select ARMV7M_HAVE_ITCM
-	select ARMV7M_HAVE_DTCM
+	select STM32L4_HAVE_USART1
+	select STM32L4_HAVE_USART2
+	select STM32L4_HAVE_USART3
+	select STM32L4_HAVE_LPTIM1
+	select STM32L4_HAVE_LPTIM2
+	select STM32L4_HAVE_COMP
+	select STM32L4_HAVE_SAI1
+	select STM32L4_HAVE_SAI2
+
+config STM32L4_STM32L4X6
+	bool
+	default n
 	select STM32L4_HAVE_USART1
 	select STM32L4_HAVE_USART2
 	select STM32L4_HAVE_USART3
 	select STM32L4_HAVE_UART4
 	select STM32L4_HAVE_UART5
+	select STM32L4_HAVE_LPTIM1
+	select STM32L4_HAVE_LPTIM2
+	select STM32L4_HAVE_COMP
+	select STM32L4_HAVE_SAI1
+	select STM32L4_HAVE_SAI2
+
+config STM32L4_STM32L476XX
+	bool
+	default n
+	select STM32L4_STM32L4X6
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU # REVISIT
+	select ARMV7M_HAVE_ITCM
+	select ARMV7M_HAVE_DTCM
 
 config STM32L4_STM32L486XX
 	bool
 	default n
+	select STM32L4_STM32L4X6
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_DPFPU # REVISIT
 	select ARMV7M_HAVE_ITCM
 	select ARMV7M_HAVE_DTCM
-	select STM32L4_HAVE_USART1
-	select STM32L4_HAVE_USART2
-	select STM32L4_HAVE_USART3
-	select STM32L4_HAVE_UART4
-	select STM32L4_HAVE_UART5
 	select STM32L4_FLASH_1024KB
 
 choice
@@ -118,6 +136,26 @@ config STM32L4_HAVE_LTDC
 	bool
 	default n
 
+config STM32L4_HAVE_LPTIM1
+	bool
+	default n
+
+config STM32L4_HAVE_LPTIM2
+	bool
+	default n
+
+config STM32L4_HAVE_COMP
+	bool
+	default n
+
+config STM32L4_HAVE_SAI1
+	bool
+	default n
+
+config STM32L4_HAVE_SAI2
+	bool
+	default n
+
 # These "hidden" settings are the OR of individual peripheral selections
 # indicating that the general capability is required.
 
@@ -154,8 +192,8 @@ config STM32L4_USART
 	default n
 
 config STM32L4_LPTIM
-    bool
-    default n
+	bool
+	default n
 
 # These are the peripheral selections proper
 
@@ -211,6 +249,38 @@ config STM32L4_RNG
 	bool "RNG"
 	default n
 	select ARCH_HAVE_RNG
+
+config STM32L4_SAI1_A
+	bool "SAI1 Block A"
+	default n
+	select AUDIO
+	select I2S
+	select SCHED_WORKQUEUE
+	select STM32L4_SAI
+
+config STM32L4_SAI1_B
+	bool "SAI1 Block B"
+	default n
+	select AUDIO
+	select I2S
+	select SCHED_WORKQUEUE
+	select STM32L4_SAI
+
+config STM32L4_SAI2_A
+	bool "SAI2 Block A"
+	default n
+	select AUDIO
+	select I2S
+	select SCHED_WORKQUEUE
+	select STM32L4_SAI
+
+config STM32L4_SAI2_B
+	bool "SAI2 Block B"
+	default n
+	select AUDIO
+	select I2S
+	select SCHED_WORKQUEUE
+	select STM32L4_SAI
 
 comment "AHB3 Peripherals"
 
@@ -394,8 +464,8 @@ config STM32L4_TIM7
 	default n
 
 config STM32L4_LCD
-    bool "LCD"
-    default n
+	bool "LCD"
+	default n
 
 config STM32L4_SPI2
 	bool "SPI2"
@@ -481,13 +551,14 @@ config STM32L4_DAC2
 	select STM32L4_DAC
 
 config STM32L4_OPAMP
-    bool "OPAMP"
-    default n
+	bool "OPAMP"
+	default n
 
 config STM32L4_LPTIM1
 	bool "LPTIM1"
 	default n
-    select STM32L4_LPTIM
+	select STM32L4_LPTIM
+	depends on STM32L4_HAVE_LPTIM1
 
 config STM32L4_LPUART1
 	bool "LPUART1"
@@ -496,13 +567,14 @@ config STM32L4_LPUART1
 	select ARCH_HAVE_LPUART1
 
 config STM32L4_SWPMI
-    bool "SWPMI"
-    default n
+	bool "SWPMI"
+	default n
 
 config STM32L4_LPTIM2
 	bool "LPTIM2"
 	default n
-    select STM32L4_LPTIM
+	select STM32L4_LPTIM
+	depends on STM32L4_HAVE_LPTIM2
 
 comment "APB2 Peripherals"
 
@@ -553,19 +625,24 @@ config STM32L4_TIM17
 	bool "TIM17"
 	default n
 
+config STM32L4_COMP
+	bool "COMP"
+	default n
+	depends on STM32L4_HAVE_COMP
+
 config STM32L4_SAI1
 	bool "SAI1"
 	default n
-	select STM32L4_SAI
+	depends on STM32L4_HAVE_SAI1
 
 config STM32L4_SAI2
 	bool "SAI2"
 	default n
-	select STM32L4_SAI
+	depends on STM32L4_HAVE_SAI2
 
 config STM32L4_DFSDM
-    bool "DFSDM"
-    default n
+	bool "DFSDM"
+	default n
 
 comment "Other Peripherals"
 
@@ -2993,6 +3070,70 @@ config STM32L4_QENCODER_SAMPLE_EVENT_8
 	bool "8"
 
 endchoice
+
+endmenu
+
+menu "SAI Configuration"
+	depends on STM32L4_SAI
+
+choice
+	prompt "Operation mode"
+	default STM32L4_SAI_DMA
+	---help---
+		Select the operation mode the SAI driver should use.
+
+config STM32L4_SAI_POLLING
+	bool "Polling"
+	---help---
+		The SAI registers are polled for events.
+
+config STM32L4_SAI_INTERRUPTS
+	bool "Interrupt"
+	---help---
+		Select to enable interrupt driven SAI support.
+
+config STM32L4_SAI_DMA
+	bool "DMA"
+	---help---
+		Use DMA to improve SAI transfer performance.
+
+endchoice # Operation mode
+
+choice
+	prompt "SAI1 synchronization enable"
+	default STM32L4_SAI1_BOTH_ASYNC
+	depends on STM32L4_SAI1_A && STM32L4_SAI1_B
+	---help---
+		Select the synchronization mode of the SAI sub-blocks
+
+config STM32L4_SAI1_BOTH_ASYNC
+	bool "Both asynchronous"
+
+config STM32L4_SAI1_A_SYNC_WITH_B
+	bool "Block A is synchronous with Block B"
+
+config STM32L4_SAI1_B_SYNC_WITH_A
+	bool "Block B is synchronous with Block A"
+
+endchoice # SAI1 synchronization enable
+
+choice
+	prompt "SAI2 synchronization enable"
+	default STM32L4_SAI2_BOTH_ASYNC
+	depends on STM32L4_SAI2_A && STM32L4_SAI2_B
+	---help---
+		Select the synchronization mode of the SAI sub-blocks
+
+config STM32L4_SAI2_BOTH_ASYNC
+	bool "Both asynchronous"
+
+config STM32L4_SAI2_A_SYNC_WITH_B
+	bool "Block A is synchronous with Block B"
+
+config STM32L4_SAI2_B_SYNC_WITH_A
+	bool "Block B is synchronous with Block A"
+
+endchoice # SAI2 synchronization enable
 
 endmenu
 

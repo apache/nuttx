@@ -505,7 +505,7 @@ static inline void lpc43_portsc_bottomhalf(void);
 static inline void lpc43_syserr_bottomhalf(void);
 static inline void lpc43_async_advance_bottomhalf(void);
 static void lpc43_ehci_bottomhalf(FAR void *arg);
-static int lpc43_ehci_interrupt(int irq, FAR void *context);
+static int lpc43_ehci_interrupt(int irq, FAR void *context, FAR void *arg);
 
 /* USB Host Controller Operations **********************************************/
 
@@ -3194,7 +3194,7 @@ static void lpc43_ehci_bottomhalf(FAR void *arg)
  *
  ****************************************************************************/
 
-static int lpc43_ehci_interrupt(int irq, FAR void *context)
+static int lpc43_ehci_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   uint32_t usbsts;
   uint32_t pending;
@@ -5089,7 +5089,7 @@ FAR struct usbhost_connection_s *lpc43_ehci_initialize(int controller)
 
   /* Interrupt Configuration ***************************************************/
 
-  ret = irq_attach(LPC43M4_IRQ_USB0, lpc43_ehci_interrupt);
+  ret = irq_attach(LPC43M4_IRQ_USB0, lpc43_ehci_interrupt, NULL);
   if (ret != 0)
     {
       usbhost_trace1(EHCI_TRACE1_IRQATTACH_FAILED, LPC43M4_IRQ_USB0);

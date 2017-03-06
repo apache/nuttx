@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/audio/tone.h
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Alan Carvalho de Assis <acassis@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -76,6 +76,9 @@ extern "C"
  *     filesystem.  The recommended convention is to name all PWM drivers
  *     as "/dev/tone0", "/dev/tone1", etc.  where the driver path
  *     differs only in the "minor" number at the end of the device name.
+ *   channel - The the PWM peripheral supports multiple output channels, then
+ *     this value must be provided to indicate the output channel that drives
+ *     the tone.
  *   tone - A pointer to an instance of lower half PWM driver tone. This
  *     instance will be bound to the Audio Tone driver and must persists as
  *     long as that driver persists.
@@ -86,6 +89,9 @@ extern "C"
  ****************************************************************************/
 
 int tone_register(FAR const char *path, FAR struct pwm_lowerhalf_s *tone,
+#ifdef CONFIG_PWM_MULTICHAN
+                  int channel,
+#endif
                   FAR struct oneshot_lowerhalf_s *oneshot);
 
 #undef EXTERN

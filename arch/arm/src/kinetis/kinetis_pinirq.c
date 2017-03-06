@@ -1,7 +1,7 @@
 /****************************************************************************
  *  arch/arm/src/kinetis/kinetis_pinirq.c
  *
- *   Copyright (C) 2011, 2013, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,7 @@
 #include <nuttx/config.h>
 
 #include <assert.h>
+#include <errno.h>
 #include <debug.h>
 
 #include <nuttx/irq.h>
@@ -73,6 +74,12 @@
  * Private Types
  ****************************************************************************/
 
+struct kinetis_pinirq_s
+{
+   xcpt_t handler;
+   void *arg;
+};
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -84,19 +91,19 @@
  */
 
 #ifdef CONFIG_KINETIS_PORTAINTS
-static xcpt_t g_portaisrs[32];
+static struct kinetis_pinirq_s g_portaisrs[32];
 #endif
 #ifdef CONFIG_KINETIS_PORTBINTS
-static xcpt_t g_portbisrs[32];
+static struct kinetis_pinirq_s g_portbisrs[32];
 #endif
 #ifdef CONFIG_KINETIS_PORTCINTS
-static xcpt_t g_portcisrs[32];
+static struct kinetis_pinirq_s g_portcisrs[32];
 #endif
 #ifdef CONFIG_KINETIS_PORTDINTS
-static xcpt_t g_portdisrs[32];
+static struct kinetis_pinirq_s g_portdisrs[32];
 #endif
 #ifdef CONFIG_KINETIS_PORTEINTS
-static xcpt_t g_porteisrs[32];
+static struct kinetis_pinirq_s g_porteisrs[32];
 #endif
 
 /****************************************************************************
@@ -113,7 +120,7 @@ static xcpt_t g_porteisrs[32];
 
 #ifdef HAVE_PORTINTS
 static int kinetis_portinterrupt(int irq, FAR void *context,
-                                uintptr_t addr, xcpt_t *isrtab)
+                                uintptr_t addr, struct kinetis_pinirq_s *isrtab)
 {
   uint32_t isfr = getreg32(addr);
   int i;
@@ -136,11 +143,14 @@ static int kinetis_portinterrupt(int irq, FAR void *context,
            * interrupt handler for the pin.
            */
 
-          if (isrtab[i])
+          if (isrtab[i].handler != NULL)
             {
+              xcpt_t handler = isrtab[i].handler;
+              void  *arg     = isrtab[i].arg;
+
               /* There is a registered interrupt handler... invoke it */
 
-              (void)isrtab[i](irq, context);
+              (void)handler(irq, context, arg);
             }
 
           /* Writing a one to the ISFR register will clear the pending
@@ -169,31 +179,31 @@ static int kinetis_portinterrupt(int irq, FAR void *context,
  ****************************************************************************/
 
 #ifdef CONFIG_KINETIS_PORTAINTS
-static int kinetis_portainterrupt(int irq, FAR void *context)
+static int kinetis_portainterrupt(int irq, FAR void *context, FAR void *arg)
 {
   return kinetis_portinterrupt(irq, context, KINETIS_PORTA_ISFR, g_portaisrs);
 }
 #endif
 #ifdef CONFIG_KINETIS_PORTBINTS
-static int kinetis_portbinterrupt(int irq, FAR void *context)
+static int kinetis_portbinterrupt(int irq, FAR void *context, FAR void *arg)
 {
   return kinetis_portinterrupt(irq, context, KINETIS_PORTB_ISFR, g_portbisrs);
 }
 #endif
 #ifdef CONFIG_KINETIS_PORTCINTS
-static int kinetis_portcinterrupt(int irq, FAR void *context)
+static int kinetis_portcinterrupt(int irq, FAR void *context, FAR void *arg)
 {
   return kinetis_portinterrupt(irq, context, KINETIS_PORTC_ISFR, g_portcisrs);
 }
 #endif
 #ifdef CONFIG_KINETIS_PORTDINTS
-static int kinetis_portdinterrupt(int irq, FAR void *context)
+static int kinetis_portdinterrupt(int irq, FAR void *context, FAR void *arg)
 {
   return kinetis_portinterrupt(irq, context, KINETIS_PORTD_ISFR, g_portdisrs);
 }
 #endif
 #ifdef CONFIG_KINETIS_PORTEINTS
-static int kinetis_porteinterrupt(int irq, FAR void *context)
+static int kinetis_porteinterrupt(int irq, FAR void *context, FAR void *arg)
 {
   return kinetis_portinterrupt(irq, context, KINETIS_PORTE_ISFR, g_porteisrs);
 }
@@ -215,27 +225,27 @@ static int kinetis_porteinterrupt(int irq, FAR void *context)
 void kinetis_pinirqinitialize(void)
 {
 #ifdef CONFIG_KINETIS_PORTAINTS
-  (void)irq_attach(KINETIS_IRQ_PORTA, kinetis_portainterrupt);
+  (void)irq_attach(KINETIS_IRQ_PORTA, kinetis_portainterrupt, NULL);
   putreg32(0xffffffff, KINETIS_PORTA_ISFR);
   up_enable_irq(KINETIS_IRQ_PORTA);
 #endif
 #ifdef CONFIG_KINETIS_PORTBINTS
-  (void)irq_attach(KINETIS_IRQ_PORTB, kinetis_portbinterrupt);
+  (void)irq_attach(KINETIS_IRQ_PORTB, kinetis_portbinterrupt, NULL);
   putreg32(0xffffffff, KINETIS_PORTB_ISFR);
   up_enable_irq(KINETIS_IRQ_PORTB);
 #endif
 #ifdef CONFIG_KINETIS_PORTCINTS
-  (void)irq_attach(KINETIS_IRQ_PORTC, kinetis_portcinterrupt);
+  (void)irq_attach(KINETIS_IRQ_PORTC, kinetis_portcinterrupt, NULL);
   putreg32(0xffffffff, KINETIS_PORTC_ISFR);
   up_enable_irq(KINETIS_IRQ_PORTC);
 #endif
 #ifdef CONFIG_KINETIS_PORTDINTS
-  (void)irq_attach(KINETIS_IRQ_PORTD, kinetis_portdinterrupt);
+  (void)irq_attach(KINETIS_IRQ_PORTD, kinetis_portdinterrupt, NULL);
   putreg32(0xffffffff, KINETIS_PORTD_ISFR);
   up_enable_irq(KINETIS_IRQ_PORTD);
 #endif
 #ifdef CONFIG_KINETIS_PORTEINTS
-  (void)irq_attach(KINETIS_IRQ_PORTE, kinetis_porteinterrupt);
+  (void)irq_attach(KINETIS_IRQ_PORTE, kinetis_porteinterrupt, NULL);
   putreg32(0xffffffff, KINETIS_PORTE_ISFR);
   up_enable_irq(KINETIS_IRQ_PORTE);
 #endif
@@ -253,22 +263,21 @@ void kinetis_pinirqinitialize(void)
  *   3. Call kinetis_pinirqenable() to enable interrupts on the pin.
  *
  * Parameters:
- *  - pinset:  Pin configuration
- *  - pinisr:  Pin interrupt service routine
+ *   pinset - Pin configuration
+ *   pinisr - Pin interrupt service routine
+ *   arg    - An argument that will be provided to the interrupt service routine.
  *
  * Returns:
- *   The previous value of the interrupt handler function pointer.  This
- *   value may, for example, be used to restore the previous handler whe
- *   multiple handlers are used.
+ *   Zero (OK) is returned on success; a negated errno value is returned on any
+ *   failure to indicate the nature of the failure.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
-xcpt_t kinetis_pinirqattach(uint32_t pinset, xcpt_t pinisr)
+int kinetis_pinirqattach(uint32_t pinset, xcpt_t pinisr, void *arg)
 {
 #ifdef HAVE_PORTINTS
-  xcpt_t      *isrtab;
-  xcpt_t       oldisr;
-  irqstate_t   flags;
+  struct kinetis_pinirq_s *isrtab;
+  irqstate_t flags;
   unsigned int port;
   unsigned int pin;
 
@@ -317,20 +326,20 @@ xcpt_t kinetis_pinirqattach(uint32_t pinset, xcpt_t pinisr)
 #endif
       default:
         leave_critical_section(flags);
-        return NULL;
+        return -EINVAL;
     }
 
    /* Get the old PIN ISR and set the new PIN ISR */
 
-   oldisr      = isrtab[pin];
-   isrtab[pin] = pinisr;
+   isrtab[pin].handler = pinisr;
+   isrtab[pin].arg     = arg;
 
    /* And return the old PIN isr address */
 
    leave_critical_section(flags);
-   return oldisr;
+   return OK;
 #else
-   return NULL;
+   return -ENOSYS;
 #endif /* HAVE_PORTINTS */
 }
 

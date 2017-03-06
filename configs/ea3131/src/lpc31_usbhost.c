@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/ea3131/src/lpc31_usbhost.c
  *
- *   Copyright (C) 2013, 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2015-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -81,12 +81,6 @@
 /* Retained device driver handle */
 
 static struct usbhost_connection_s *g_ehciconn;
-
-/* Overcurrent interrupt handler */
-
-#if 0 /* Not yet implemented */
-static xcpt_t g_ochandler;
-#endif
 
 /************************************************************************************
  * Private Functions
@@ -292,16 +286,16 @@ void lpc31_usbhost_vbusdrive(int rhport, bool enable)
  *
  * Input parameter:
  *   handler - New overcurrent interrupt handler
+ *   arg     - The argument that will accompany the interrupt
  *
  * Returned value:
- *   Old overcurrent interrupt handler
+ *   Zero (OK) returned on success; a negated errno value is returned on failure.
  *
  ************************************************************************************/
 
 #if 0 /* Not ready yet */
-xcpt_t lpc31_setup_overcurrent(xcpt_t handler)
+int lpc31_setup_overcurrent(xcpt_t handler, void *arg)
 {
-  xcpt_t oldhandler;
   irqstate_t flags;
 
   /* Disable interrupts until we are done.  This guarantees that the
@@ -310,18 +304,11 @@ xcpt_t lpc31_setup_overcurrent(xcpt_t handler)
 
   flags = enter_critical_section();
 
-  /* Get the old button interrupt handler and save the new one */
-
-  oldhandler  = g_ochandler;
-  g_ochandler = handler;
-
   /* Configure the interrupt */
 #warning Missing logic
 
-  /* Return the old button handler (so that it can be restored) */
-
   leave_critical_section(flags);
-  return oldhandler;
+  return OK;
 }
 #endif /* 0 */
 

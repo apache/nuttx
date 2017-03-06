@@ -165,7 +165,7 @@ static int    spi_transfer(struct imx_spidev_s *priv, const void *txbuffer,
 
 #ifndef CONFIG_SPI_POLLWAIT
 static inline struct imx_spidev_s *spi_mapirq(int irq);
-static int    spi_interrupt(int irq, void *context);
+static int    spi_interrupt(int irq, void *context, FAR void *arg, FAR void *arg);
 #endif
 
 /* SPI methods */
@@ -653,7 +653,7 @@ static inline struct imx_spidev_s *spi_mapirq(int irq)
  ****************************************************************************/
 
 #ifndef CONFIG_SPI_POLLWAIT
-static int spi_interrupt(int irq, void *context)
+static int spi_interrupt(int irq, void *context, FAR void *arg, FAR void *arg)
 {
   struct imx_spidev_s *priv = spi_mapirq(irq);
   int ntxd;
@@ -1168,7 +1168,7 @@ FAR struct spi_dev_s *imx_spibus_initialize(int port)
   /* Attach the interrupt */
 
 #ifndef CONFIG_SPI_POLLWAIT
-  irq_attach(priv->irq, (xcpt_t)spi_interrupt);
+  irq_attach(priv->irq, (xcpt_t)spi_interrupt, NULL);
 #endif
 
   /* Enable SPI */

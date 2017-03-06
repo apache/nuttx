@@ -41,6 +41,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <errno.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
@@ -131,16 +132,15 @@ uint8_t board_buttons(void)
  *   will be called when a button is depressed or released.  The ID value is
  *   a button enumeration value that uniquely identifies a button resource.
  *   See the BUTTON_* and JOYSTICK_* definitions in board.h for the meaning
- *   of enumeration value.  The previous interrupt handler address is
- *   returned (so that it may restored, if so desired).
+ *   of enumeration value.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_IRQBUTTONS
-xcpt_t board_button_irq(int id, xcpt_t irqhandler)
+int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
-  xcpt_t oldhandler;
   uint32_t pinset;
+  int ret;
 
   /* Map the button id to the GPIO bit set. */
 
@@ -154,7 +154,7 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
     }
   else
     {
-      return NULL;
+      return -EINVAL;
     }
 
   /* The button has already been configured as an interrupting input (by
@@ -163,12 +163,15 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
    * Attach the new button handler.
    */
 
-  oldhandler = kinetis_pinirqattach(pinset, irqhandler);
+  ret = kinetis_pinirqattach(pinset, irqhandler, NULL);
+  if (ret >= 0)
+    {
+      /* Then make sure that interrupts are enabled on the pin */
 
-  /* Then make sure that interrupts are enabled on the pin */
+      kinetis_pinirqenable(pinset);
+    }
 
-  kinetis_pinirqenable(pinset);
-  return oldhandler;
+  return ret;
 }
 #endif
 #endif /* CONFIG_ARCH_BUTTONS */

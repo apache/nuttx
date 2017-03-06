@@ -70,7 +70,7 @@ extern uint32_t get_freq(void);
  *
  ****************************************************************************/
 
-static int z8_timerisr(int irq, uint32_t *regs)
+static int z8_timerisr(int irq, uint32_t *regs, void *arg)
 {
   /* Process timer interrupt */
 
@@ -137,7 +137,7 @@ void z80_timer_initialize(void)
 
   /* Attach and enable the timer interrupt (leaving at priority 0 */
 
-  irq_attach(Z8_IRQ_SYSTIMER, (xcpt_t)z8_timerisr);
+  irq_attach(Z8_IRQ_SYSTIMER, (xcpt_t)z8_timerisr, NULL);
   up_enable_irq(Z8_IRQ_SYSTIMER);
 }
 

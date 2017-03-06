@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_STC_STM32_CHIP_STM32L4_RNG_H
-#define __ARCH_ARM_STC_STM32_CHIP_STM32L4_RNG_H
+#ifndef __ARCH_ARM_STC_STM32L4_CHIP_STM32L4_RNG_H
+#define __ARCH_ARM_STC_STM32L4_CHIP_STM32L4_RNG_H
 
 /************************************************************************************
  * Included Files
@@ -74,4 +74,4 @@
 #define RNG_SR_CEIS               (1 << 5) /* Bit 5: Clock error interrupt status */
 #define RNG_SR_SEIS               (1 << 6) /* Bit 6: Seed error interrupt status */
 
-#endif /* __ARCH_ARM_STC_STM32_CHIP_STM32L4_RNG_H */
+#endif /* __ARCH_ARM_STC_STM32L4_CHIP_STM32L4_RNG_H */
