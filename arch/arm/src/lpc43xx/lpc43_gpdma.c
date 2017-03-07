@@ -323,7 +323,7 @@ void weak_function up_dmainitialize(void)
 
   /* Enable the DMA controller (for little endian operation) */
 
-  putreg32(GPDMA_CONFIG_ENA, LPC43_GPDMA_CONFIG);
+  putreg32(GPDMA_CONFIG_ENA, LPC43_GPDMA_GLOBAL_CONFIG);
 }
 
 /****************************************************************************
@@ -667,16 +667,16 @@ void lpc43_dmasample(DMA_HANDLE handle, struct lpc43_dmaregs_s *regs)
   /* Sample the global DMA registers */
 
   regs->gbl.intst         = getreg32(LPC43_GPDMA_INTSTAT);
-  regs->gbl.inttcstat     = getreg32(LPC43_GPDMA_INTTCSTAT);
-  regs->gbl.interrstat    = getreg32(LPC43_GPDMA_INTERRSTAT);
-  regs->gbl.rawinttcstat  = getreg32(LPC43_GPDMA_RAWINTTCSTAT);
-  regs->gbl.rawinterrstat = getreg32(LPC43_GPDMA_RAWINTERRSTAT);
+  regs->gbl.inttcst       = getreg32(LPC43_GPDMA_INTTCSTAT);
+  regs->gbl.interrst      = getreg32(LPC43_GPDMA_INTERRSTAT);
+  regs->gbl.rawinttcst    = getreg32(LPC43_GPDMA_RAWINTTCSTAT);
+  regs->gbl.rawinterrst   = getreg32(LPC43_GPDMA_RAWINTERRSTAT);
   regs->gbl.enbldchns     = getreg32(LPC43_GPDMA_ENBLDCHNS);
   regs->gbl.softbreq      = getreg32(LPC43_GPDMA_SOFTBREQ);
   regs->gbl.softsreq      = getreg32(LPC43_GPDMA_SOFTSREQ);
   regs->gbl.softlbreq     = getreg32(LPC43_GPDMA_SOFTLBREQ);
   regs->gbl.softlsreq     = getreg32(LPC43_GPDMA_SOFTLSREQ);
-  regs->gbl.config        = getreg32(LPC43_GPDMA_CONFIG);
+  regs->gbl.config        = getreg32(LPC43_GPDMA_GLOBAL_CONFIG);
   regs->gbl.sync          = getreg32(LPC43_GPDMA_SYNC);
 
   /* Sample the DMA channel registers */
@@ -712,13 +712,13 @@ void lpc43_dmadump(DMA_HANDLE handle, const struct lpc43_dmaregs_s *regs, const 
   dmainfo("       INTST[%08x]: %08x\n",
           LPC43_GPDMA_INTSTAT, regs->gbl.intst);
   dmainfo("     INTTCSTAT[%08x]: %08x\n",
-          LPC43_GPDMA_INTTCSTAT, regs->gbl.inttcstat);
+          LPC43_GPDMA_INTTCSTAT, regs->gbl.inttcst);
   dmainfo("    INTERRSTAT[%08x]: %08x\n",
-          LPC43_GPDMA_INTERRSTAT, regs->gbl.interrstat);
+          LPC43_GPDMA_INTERRSTAT, regs->gbl.interrst);
   dmainfo("  RAWINTTCSTAT[%08x]: %08x\n",
-          LPC43_GPDMA_RAWINTTCSTAT, regs->gbl.rawinttcstat);
+          LPC43_GPDMA_RAWINTTCSTAT, regs->gbl.rawinttcst);
   dmainfo(" RAWINTERRSTAT[%08x]: %08x\n",
-          LPC43_GPDMA_RAWINTERRSTAT, regs->gbl.rawinterrstat);
+          LPC43_GPDMA_RAWINTERRSTAT, regs->gbl.rawinterrst);
   dmainfo("   ENBLDCHNS[%08x]: %08x\n",
           LPC43_GPDMA_ENBLDCHNS, regs->gbl.enbldchns);
   dmainfo("    SOFTBREQ[%08x]: %08x\n",
@@ -730,7 +730,7 @@ void lpc43_dmadump(DMA_HANDLE handle, const struct lpc43_dmaregs_s *regs, const 
   dmainfo("   SOFTLSREQ[%08x]: %08x\n",
           LPC43_GPDMA_SOFTLSREQ, regs->gbl.softlsreq);
   dmainfo("      CONFIG[%08x]: %08x\n",
-          LPC43_GPDMA_CONFIG, regs->gbl.config);
+          LPC43_GPDMA_GLOBAL_CONFIG, regs->gbl.config);
   dmainfo("        SYNC[%08x]: %08x\n",
           LPC43_GPDMA_SYNC, regs->gbl.sync);
 
