@@ -2591,9 +2591,10 @@ static inline void stm32_gint_hcinisr(FAR struct stm32_usbhost_s *priv,
         {
           /* Re-activate the channel by clearing CHDIS and assuring that
            * CHENA is set
+           *
+           * TODO: set channel reason to NACK?
            */
 
-          // TODO: set channel reason to NACK?
           regval  = stm32_getreg(STM32_OTGHS_HCCHAR(chidx));
           regval |= OTGHS_HCCHAR_CHENA;
           regval &= ~OTGHS_HCCHAR_CHDIS;

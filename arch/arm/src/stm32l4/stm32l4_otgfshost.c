@@ -1831,20 +1831,20 @@ static ssize_t stm32l4_in_transfer(FAR struct stm32l4_usbhost_s *priv,
                                    size_t buflen)
 {
   FAR struct stm32l4_chan_s *chan;
-  systime_t start;
-  systime_t elapsed;
+  ssize_t xfrd;
   int ret;
 
   /* Loop until the transfer completes (i.e., buflen is decremented to zero)
-   * or a fatal error occurs (any error other than a simple NAK)
+   * or a fatal error occurs any error other than a simple NAK.  NAK would
+   * simply indicate the end of the transfer (short-transfer).
    */
 
   chan         = &priv->chan[chidx];
   chan->buffer = buffer;
   chan->buflen = buflen;
   chan->xfrd   = 0;
+  xfrd         = 0;
 
-  start = clock_systimer();
   while (chan->xfrd < chan->buflen)
     {
       /* Set up for the wait BEFORE starting the transfer */
@@ -1869,36 +1869,48 @@ static ssize_t stm32l4_in_transfer(FAR struct stm32l4_usbhost_s *priv,
 
       ret = stm32l4_chan_wait(priv, chan);
 
-      /* EAGAIN indicates that the device NAKed the transfer and we need
-       * do try again.  Anything else (success or other errors) will
-       * cause use to return
+      /* EAGAIN indicates that the device NAKed the transfer.  In the case
+       * of a NAK, we do not retry but rather assume that the transfer is
+       * commplete and return the data that we have received.  Retry could
+       * be handled in class driver.
        */
 
       if (ret < 0)
         {
-          usbhost_trace1(OTGFS_TRACE1_TRNSFRFAILED, ret);
-
-          /* Check for a special case:  If (1) the transfer was NAKed and (2)
-           * no Tx FIFO empty or Rx FIFO not-empty event occurred, then we
-           * should be able to just flush the Rx and Tx FIFOs and try again.
-           * We can detect this latter case because the then the transfer
-           * buffer pointer and buffer size will be unaltered.
+          /* The transfer failed.  If we received a NAK, return all data
+           * buffered so far (if any).
            */
 
-          elapsed = clock_systimer() - start;
-          if (ret != -EAGAIN ||                  /* Not a NAK condition OR */
-              elapsed >= STM32L4_DATANAK_DELAY ||  /* Timeout has elapsed OR */
-              chan->xfrd > 0)                    /* Data has been partially transferred */
+          if (ret == -EAGAIN)
             {
-              /* Break out and return the error */
+              /* Was data buffered prior to the NAK? */
 
-              uerr("ERROR: stm32l4_chan_wait failed: %d\n", ret);
-              return (ssize_t)ret;
+              if (xfrd > 0)
+                {
+                  /* Yes, return the amount of data received */
+
+                  return xfrd;
+                }
+              else
+                {
+                  /* No... Break out and return the NAK */
+
+                  return (ssize_t)ret;
+                }
             }
+
+          usbhost_trace1(OTGFS_TRACE1_TRNSFRFAILED, ret);
+
+          /* Break out and return the error */
+
+          uerr("ERROR: stm32l4_chan_wait failed: %d\n", ret);
+          return (ssize_t)ret;
         }
+
+      xfrd += chan->xfrd;
     }
 
-  return (ssize_t)chan->xfrd;
+  return xfrd;
 }
 
 /****************************************************************************
@@ -2562,7 +2574,8 @@ static inline void stm32l4_gint_hcinisr(FAR struct stm32l4_usbhost_s *priv,
 #if 1
       /* Halt the interrupt channel */
 
-      if (chan->eptype == OTGFS_EPTYPE_INTR)
+      if (chan->eptype == OTGFS_EPTYPE_INTR ||
+          chan->eptype == OTGFS_EPTYPE_BULK)
         {
           /* Halt the channel -- the CHH interrupt is expected next */
 
@@ -2573,11 +2586,13 @@ static inline void stm32l4_gint_hcinisr(FAR struct stm32l4_usbhost_s *priv,
        * REVISIT: This can cause a lot of interrupts!
        */
 
-      else if (chan->eptype == OTGFS_EPTYPE_CTRL ||
-               chan->eptype == OTGFS_EPTYPE_BULK)
+      else if (chan->eptype == OTGFS_EPTYPE_CTRL /*||
+               chan->eptype == OTGFS_EPTYPE_BULK*/)
         {
           /* Re-activate the channel by clearing CHDIS and assuring that
            * CHENA is set
+           *
+           * TODO: set channel reason to NACK?
            */
 
           regval  = stm32l4_getreg(STM32L4_OTGFS_HCCHAR(chidx));
@@ -2585,6 +2600,7 @@ static inline void stm32l4_gint_hcinisr(FAR struct stm32l4_usbhost_s *priv,
           regval &= ~OTGFS_HCCHAR_CHDIS;
           stm32l4_putreg(STM32L4_OTGFS_HCCHAR(chidx), regval);
         }
+
 #else
       /* Halt all transfers on the NAK -- the CHH interrupt is expected next */
 
