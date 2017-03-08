@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: December 26, 2016</p>
+      <p>Last Updated: March 8, 2017</p>
     </td>
   </tr>
 </table>
@@ -360,7 +360,7 @@
   <td><br></td>
   <td>
     <p>
-      <li>Loadable kernel modules.</li>
+      <li>Loadable kernel modules; lightweight, embedded shared libraries.</li>
     </p>
   </td>
 </tr>
@@ -1339,11 +1339,11 @@
 <h2>Released Versions</h2>
 <p>
   In addition to the ever-changing GIT repository, there are frozen released versions of NuttX available.
-  The current release is NuttX 7.19.
-  NuttX 7.19 is the 119<sup>th</sup> release of NuttX.
-  It was released on December 26, 2016, and is available for download from the
+  The current release is NuttX 7.20.
+  NuttX 7.20 is the 120<sup>th</sup> release of NuttX.
+  It was released on March 8, 2016, and is available for download from the
   <a href="https://bitbucket.org/nuttx/nuttx/downloads/">Bitbucket.org</a> website.
-  Note that the release consists of two tarballs:  <code>nuttx-7.19.tar.gz</code> and <code>apps-7.19.tar.gz</code>.
+  Note that the release consists of two tarballs:  <code>nuttx-7.20.tar.gz</code> and <code>apps-7.20.tar.gz</code>.
   Both may be needed (see the top-level <code>nuttx/README.txt</code> file for build information).
 </p>
 
@@ -1352,7 +1352,7 @@
 <ul>
   <li><b>nuttx</b>.
     <ul><p>
-      Release notes for NuttX 7.19 are available <a href="https://bitbucket.org/nuttx/nuttx/downloads/">here</a>.
+      Release notes for NuttX 7.20 are available <a href="https://bitbucket.org/nuttx/nuttx/downloads/">here</a>.
       Release notes for all released versions on NuttX are available in the <a href="https://bitbucket.org/nuttx/nuttx/src/master/ReleaseNotes" target="_blank">Bitbucket GIT</a>.
       The ChangeLog for all releases of NuttX is available in the ChangeLog file that can viewed in the <a href="https://bitbucket.org/nuttx/nuttx/src/master/ChangeLog" target="_blank">Bitbucket GIT</a>.
       The ChangeLog for the current release is at the bottom of that file.
@@ -1360,7 +1360,7 @@
   </li></ul>
   <li><b>apps</b>.
     <ul><p>
-      Release notes for NuttX 7.19 are available <a href="https://bitbucket.org/nuttx/apps/downloads/">here</a>.
+      Release notes for NuttX 7.20 are available <a href="https://bitbucket.org/nuttx/apps/downloads/">here</a>.
       Release notes for all released versions on NuttX are available in the <a href="https://bitbucket.org/nuttx/nuttx/src/master/ReleaseNotes" target="_blank">Bitbucket GIT</a>
       The ChangeLog for the all releases of <code>apps/</code> is available in the ChangeLog file that can viewed in the <a href="https://bitbucket.org/nuttx/apps/src/master/ChangeLog.txt" target="_blank">Bitbucket GIT</a>.
       The ChangeLog for the current release is at the bottom of that file.
@@ -1418,7 +1418,7 @@
       <li><a href="#armcortexr4">ARM Cortex-R4</a> (1)</li>
       <li><a href="#armcortexm0">ARM Cortex-M0/M0+</a> (7)</li>
       <li><a href="#armcortexm3">ARM Cortex-M3</a> (35)</li>
-      <li><a href="#armcortexm4">ARM Cortex-M4</a> (32)</li>
+      <li><a href="#armcortexm4">ARM Cortex-M4</a> (34)</li>
       <li><a href="#armcortexm7">ARM Cortex-M7</a> (7)</li>
     </ul>
   <li>Atmel AVR
@@ -1517,20 +1517,7 @@
   </li>
   <li>Expressif
     <ul>
-      <li><a href="#esp32">ESP32</a> <small>(Dual Xtensa LX6)</small</li>
-    </ul>
-  </li>
-  <li>Freescale
-    <ul>
-      <li><a href="#m68hcs12">M68HCS12</a></li>
-      <li><a href="#freescaleimx1">Freescale i.MX1</a> <small>(ARM920-T)</small></li>
-      <li><a href="#freescaleimx6">Freescale i.MX6</a> <small>(ARM Cortex-A9)</small></li>
-      <li><a href="#freescalekl25z">FreeScale KL25Z</a> <small>(ARM Cortex-M0+)</small></li>
-      <li><a href="#freescalekl26z">FreeScale KL26Z</a> <small>(ARM Cortex-M0+)</small></li>
-      <li><a href="#kinetisk20">FreeScale Kinetis K20</a> <small>(ARM Cortex-M4)</small></li>
-      <li><a href="#kinetisk40">FreeScale Kinetis K40</a> <small>(ARM Cortex-M4)</small></li>
-      <li><a href="#kinetisk60">FreeScale Kinetis K60</a> <small>(ARM Cortex-M4)</small></li>
-      <li><a href="#kinetisk64">FreeScale Kinetis K64</a> <small>(ARM Cortex-M4)</small></li>
+      <li><a href="#esp32">ESP32</a> <small>(Dual Xtensa LX6)</small></li>
     </ul>
   </li>
   <li>Host PC based simulations
@@ -1556,14 +1543,32 @@
       <li><a href="#moxart">Moxa NP51x0</a> <small>(ARMv4)</small></li>
     </ul>
   </li>
-  </td>
-  <td bgcolor="#e4e4e4" valign="top" width="33%">
   <li>nuvoTon
     <ul>
       <li><a href="#nuvotonnu120">nuvoTon NUC120</a> <small>(ARM Cortex-M0)</small></li>
     </ul>
   </li>
-  <li>NXP
+  <li>NXP/Freescale
+    <ul>
+      <li><a href="#m68hcs12">M68HCS12</a></li>
+    </ul>
+    <ul>
+      <li><a href="#freescaleimx1">Freescale i.MX1</a> <small>(ARM920-T)</small></li>
+      <li><a href="#freescaleimx6">Freescale i.MX6</a> <small>(ARM Cortex-A9)</small></li>
+    </ul>
+  </li>
+  </td>
+  <td bgcolor="#e4e4e4" valign="top" width="33%">
+  <li>NXP/Freescale (Continued)
+    <ul>
+      <li><a href="#freescalekl25z">FreeScale KL25Z</a> <small>(ARM Cortex-M0+)</small></li>
+      <li><a href="#freescalekl26z">FreeScale KL26Z</a> <small>(ARM Cortex-M0+)</small></li>
+      <li><a href="#kinetisk20">FreeScale Kinetis K20</a> <small>(ARM Cortex-M4)</small></li>
+      <li><a href="#kinetisk40">FreeScale Kinetis K40</a> <small>(ARM Cortex-M4)</small></li>
+      <li><a href="#kinetisk60">FreeScale Kinetis K60</a> <small>(ARM Cortex-M4)</small></li>
+      <li><a href="#kinetisk64">FreeScale Kinetis K64</a> <small>(ARM Cortex-M4)</small></li>
+      <li><a href="#kinetisk66">FreeScale Kinetis K66</a> <small>(ARM Cortex-M4)</small></li>
+    </ul>
     <ul>
       <li><a href="#nxplpc11xx">NXP LPC11xx</a> <small>(Cortex-M0)</small></li>
       <li><a href="#nxplpc214x">NXP LPC214x</a> <small>(ARM7TDMI)</small></li>
@@ -1602,13 +1607,14 @@
       <li><a href="#stm32f207x">STMicro STM32F207x</a> <small>(STM32 F2 family, ARM Cortex-M3)</small></li>
       <li><a href="#stm32302x">STMicro STM32F302x</a> <small>(STM32 F3 family, ARM Cortex-M4)</small></li>
       <li><a href="#stm32303x">STMicro STM32F303x</a> <small>(STM32 F3 family, ARM Cortex-M4)</small></li>
+      <li><a href="#stm32f372x">STMicro STM32 F372/F373</a> <small>(ARM Cortex-M4)</small></li>
+      <li><a href="#stm32f401x">STMicro STM32F401x</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
     </ul>
   </li>
   </td>
   <td bgcolor="#e4e4e4" valign="top" width="33%">
+  <li>STMicroelectronics (Continued)
     <ul>
-      <li><a href="#stm32f372x">STMicro STM32 F372/F373</a> <small>(ARM Cortex-M4)</small></li>
-      <li><a href="#stm32f401x">STMicro STM32F401x</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
       <li><a href="#stm32f407x">STMicro STM32F407x</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
       <li><a href="#stm32f427x">STMicro STM32 F427/F437</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
       <li><a href="#stm32f429x">STMicro STM32 F429</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
@@ -3530,7 +3536,7 @@ nsh>
   <td>
     <p>
       <a name="kinetisk60"><b>FreeScale Kinetis K60</b>.</a>
-      This port uses the Freescale Kinetis TWR-K60N512 tower system.
+      This port uses the <b>Freescale Kinetis TWR-K60N512</b> tower system.
       Refer to the <a href="http://www.freescale.com/webapp/sps/site/prod_summary.jsp?code=TWR-K60N512-KIT">Freescale web site</a> for further information about this board.
       The TWR-K60N51 includes with the FreeScale Tower System which provides (among other things) a DBP UART connection.
     </p>
@@ -3552,13 +3558,27 @@ nsh>
 </tr>
 <tr>
   <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
   <td>
     <p>
       <a name="kinetisk64"><b>FreeScale Kinetis K64</b>.</a>
-      Support for the Kinetis K64 family and specifically for the NXP/Freescale Freedom K64F board was added in NuttX 7.17.
+      Support for the Kinetis K64 family and specifically for the <b>NXP/Freescale Freedom K64F</b> board was added in NuttX 7.17.
       Initial release includes two NSH configurations with support for on-board LEDs, buttons, and Ethernet with the on-board KSZ8081 PHY.
       SDHC supported has been integrated, but not verified.
       Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/freedom-k64f/README.txt" target="_blank">README</a> file for further information.
+    </p>
+    <p>
+      <b>MK64FN1M0VMD12</b>.
+      Architecture support for the _MK64FN1M0VMD12 was contributed by Maciej Skrzypek in NuttX-7.20.
+    </p>
+    <p>
+      <b>Freescale Kinetis TWR-K64F120M</b>.
+      Support for the Freescale Kinetis TWR-K64F120M was contributed in NuttX-7.20 by Maciej Skrzypek.  Refer to the <a href="http://www.nxp.com/products/sensors/accelerometers/3-axis-accelerometers/kinetis-k64-mcu-tower-system-module:TWR-K64F120M">Freescale web site</a> for further information about this board.
+      The board may be complemented by <a href="http://www.nxp.com/pages/serial-usb-ethernet-can-rs232-485-tower-system-module:TWR-SER">TWR-SER</a> which includes (among other things), an RS232 and Ethernet connections.
+      Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/twr-k64f120m/README.txt" target="_blank">README</a> file for further information.
     </p>
   </td>
 </tr>
@@ -3586,6 +3606,36 @@ nsh>
       </li>
     </ul>
   </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <a name="kinetisk66"><b>FreeScale Kinetis K66</b>.</a>
+      Support for the Kinetis K64 family and specifically for the <b>NXP/Freescale Freedom K66F</b> board was contributed by David Sidrane in NuttX 7.20.
+      Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/freedom-k66f/README.txt" target="_blank">README</a> file for further information.
+    </p>
+  </td>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <b>Driver Status</b>.
+    </p>
+    <ul>
+      <li>
+        Most K6x drivers are compatible with the K66.
+      </li>
+      <li>
+        <b>NuttX-7.20</b>.  David Sidrane also contributed support for a serial driver on the K66's LPUART.
+      </li>
+    </ul>
+  </td>
+</tr>
 </tr>
 <tr>
   <td><br></td>
@@ -3977,6 +4027,16 @@ nsh>
     <ul>
       <li>Oneshot timer driver.</li>
       <li>Quadrature encode contributed by Sebastien Lorquet.</li>
+    </ul>
+    <p>
+      <b>NuttX-7.20</b>.
+      Additional drivers were added:
+    </p>
+    <ul>
+      <li>Serial Audio Interface (SAI).</li>
+      <li>Power Managmement.</li>
+      <li>LPTIM.</li>
+      <li>Comparator (COMP).</li>
     </ul>
   </td>
 </tr>

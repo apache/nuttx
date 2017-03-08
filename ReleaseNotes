@@ -13176,7 +13176,7 @@ Additional new features and extended functionality:
 
     * NXP Freescale Kinetis:
 
-      - Kinetis: Added support for CHIP_MK60FN1M0VLQ12 chip.  From Maciej
+      - Kinetis:  Added support for CHIP_MK60FN1M0VLQ12 chip.  From Maciej
         Skrzypek.
       - Kinetis:  Add support for K64/K66 RTC lower half driver. From Neil
         Hancock.
