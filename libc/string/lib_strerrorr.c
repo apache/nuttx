@@ -49,6 +49,19 @@
 
 /****************************************************************************
  * Name: strerror_r
+ *
+ * Description:
+ *   The strerror_r() function is similar to strerror(), but is thread safe.
+ *   It returns the error string in the user-supplied buffer 'buf' of length
+ *  'buflen'.
+ *
+ * Returned Value:
+ *  strerror_r() returns 0 on success. On error, a (positive) error number is
+ *  returned.
+ *
+ * Portability:
+ *   Specified in POSIX.1-2001
+ *
  ****************************************************************************/
 
 int strerror_r(int errnum, FAR char *buf, size_t buflen)
@@ -56,6 +69,6 @@ int strerror_r(int errnum, FAR char *buf, size_t buflen)
   FAR const char *errstr = strerror(errnum);
 
   DEBUGASSERT(buf != NULL);
-  strncpy(buf, errstr, buflen);
+  (void)strncpy(buf, errstr, buflen);
   return OK;
 }
