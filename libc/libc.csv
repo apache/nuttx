@@ -202,6 +202,7 @@
 "wcsftime","wchar.h","defined(CONFIG_LIBC_WCHAR)","size_t","FAR wchar_t *","size_t","FAR const wchar_t *","FAR const struct tm *"
 "wcslcpy","wchar.h","defined(CONFIG_LIBC_WCHAR)","size_t","FAR const wchar_t *","FAR const wchar_t *","size_t"
 "wcslen","wchar.h","defined(CONFIG_LIBC_WCHAR)","size_t","FAR const wchar_t *"
+"wcstod","wchar.h","defined(CONFIG_LIBC_WCHAR)","","FAR const wchar_t *","FAR wchar_t **"
 "wcstof","wchar.h","defined(CONFIG_LIBC_WCHAR)","float","FAR const wchar_t *","FAR wchar_t **"
 "wcstol","wchar.h","defined(CONFIG_LIBC_WCHAR)","long int","FAR const wchar_t *","FAR wchar_t **","int"
 "wcstold","wchar.h","defined(CONFIG_LIBC_WCHAR)","long double","FAR const wchar_t *","FAR wchar_t **"
