@@ -111,6 +111,7 @@ namespace std
   using ::wcsspn;
   using ::wcsstr;
   using ::wcstod;
+  using ::wcstof;
   using ::wcstok;
   using ::wcstol;
   using ::wcstoll;

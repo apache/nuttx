@@ -215,6 +215,7 @@ size_t            wcsrtombs(FAR char *, FAR const wchar_t **, size_t,
 size_t            wcsspn(FAR const wchar_t *, FAR const wchar_t *);
 FAR wchar_t      *wcsstr(FAR const wchar_t *, FAR const wchar_t *);
 double            wcstod(FAR const wchar_t *, FAR wchar_t **);
+float             wcstof(FAR const wchar_t *, FAR wchar_t **);
 FAR wchar_t      *wcstok(FAR wchar_t *, FAR const wchar_t *, FAR wchar_t **);
 long int          wcstol(FAR const wchar_t *, FAR wchar_t **, int);
 long double       wcstold(FAR const wchar_t *, FAR wchar_t **);
