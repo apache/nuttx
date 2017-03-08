@@ -202,6 +202,7 @@
 "wcsftime","wchar.h","defined(CONFIG_LIBC_WCHAR)","size_t", "FAR wchar_t *", "size_t", "FAR const wchar_t *", "FAR const struct tm *"
 "wcslcpy","wchar.h","defined(CONFIG_LIBC_WCHAR)","size_t","FAR const wchar_t *","FAR const wchar_t *","size_t"
 "wcslen","wchar.h","defined(CONFIG_LIBC_WCHAR)","size_t","FAR const wchar_t *"
+"wcstoll", "wchar.h", "defined(CONFIG_LIBC_WCHAR)", "long long int", "FAR const wchar_t *", "FAR wchar_t **", "int"
 "wcsxfrm","wchar.h","defined(CONFIG_LIBC_WCHAR)","size_t","wchar_t *","FAR const wchar_t *","size_t"
 "wctob","wchar.h","defined(CONFIG_LIBC_WCHAR)","int","wchar_t"
 "wctomb","wchar.h","defined(CONFIG_LIBC_WCHAR)","int","FAR char *","wchar_t"

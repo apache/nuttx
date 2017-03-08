@@ -41,6 +41,7 @@
 
 #include <sys/types.h>
 #include <string.h>
+#include <assert.h>
 
 /****************************************************************************
  * Public Functions

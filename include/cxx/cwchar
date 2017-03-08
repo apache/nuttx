@@ -113,6 +113,7 @@ namespace std
   using ::wcstod;
   using ::wcstok;
   using ::wcstol;
+  using ::wcstoll;
   using ::wcstoul;
   using ::wcswcs;
   using ::wcswidth;
