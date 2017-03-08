@@ -225,6 +225,7 @@ long int          wcstol(FAR const wchar_t *, FAR wchar_t **, int);
 long double       wcstold(FAR const wchar_t *, FAR wchar_t **);
 long long int     wcstoll(FAR const wchar_t *, FAR wchar_t **, int);
 unsigned long int wcstoul(FAR const wchar_t *, FAR wchar_t **, int);
+unsigned long long int wcstoull(FAR const wchar_t *, FAR wchar_t **, int);
 FAR wchar_t      *wcswcs(FAR const wchar_t *, FAR const wchar_t *);
 int               wcswidth(FAR const wchar_t *, size_t);
 size_t            wcsxfrm(wchar_t *, FAR const wchar_t *, size_t);
