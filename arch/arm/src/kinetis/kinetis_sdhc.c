@@ -2916,6 +2916,8 @@ void sdhc_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot)
       priv->cdstatus &= ~SDIO_STATUS_PRESENT;
     }
 
+  leave_critical_section(flags);
+
   mcinfo("cdstatus OLD: %02x NEW: %02x\n", cdstatus, priv->cdstatus);
 
   /* Perform any requested callback if the status has changed */
@@ -2924,8 +2926,6 @@ void sdhc_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot)
     {
       kinetis_callback(priv);
     }
-
-  leave_critical_section(flags);
 }
 
 /****************************************************************************
