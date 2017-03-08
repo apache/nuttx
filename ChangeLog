@@ -13475,7 +13475,7 @@
 	  those cases, the release of the pending tasks must be deferred until
 	  those conditions are met (2016-12-26).
 
-7.20 2017-xx-xx Gregory Nutt <gnutt@nuttx.org>
+7.20 2017-03-08 Gregory Nutt <gnutt@nuttx.org>
 
 	* i.MX6 SMP/NSH configuration: Enable examples/smp test (2016-12-27).
 	* SMP: There were certain conditions that we must avoid by preventing the
@@ -13526,7 +13526,7 @@
 	  From Alan Carvalho de Assis (2017-01-07).
 	* STM32F429i-DISCO: Enable keyboard input in nxwm configuration
 	  (2017-01-07).
-	* STM32F428i-DISCO:  Change NxWM cursor character from 137 (graphics
+	* STM32F429i-DISCO:  Change NxWM cursor character from 137 (graphics
 	  block) to 95 (underscore).  NxWM is configured to use a 7-bit character
 	  set so 137 is not a valid character code (2017-01-07).
 	* NX server: Correct message queue names.  Should not be at /dev, but
@@ -13568,7 +13568,7 @@
 	* STM32 Oneshot: Fix logic so that it can support multiple oneshot timers
 	  (2017-01-18).
 	* STM32L4:  Port fix for multiple oneshot timers from STM32.  Also fixes a
-	  few issues with original STM32 implementation (2017-01-xx).
+	  few issues with original STM32 implementation (2017-01-18).
 	* SAM3/4: Add support for ATSAM4S4C.  From Wolfgang Reißnegger (2017-01-18).
 	* Math library: Leverage optimized ARM functions from BSD license ARM file
 	  (2017-01-19).
@@ -13608,7 +13608,7 @@
 	* STM32: Add missing STM32_BKP_BASE.  From David Sidrane (2017-01-23).
 	* Configurations that enable OSTEST must not disable signals (2017-01-24).
 	* Add missing sched_note_*() calls to sam4cm SMP functions (2017-01-24).
-	* Fix return falue if x is NaN.  From Aleksandr Vyhovanec (2017-01-25).
+	* Fix return value if x is NaN.  From Aleksandr Vyhovanec (2017-01-25).
 	* MMCSD_SDIO: Only wait for card ejected if card detection is supported.
 	  From Alan Carvalho de Assis (2017-01-26).
 	* LPC43 pinset definitions:  Add more 1 bit to pinset to reach
@@ -13648,7 +13648,7 @@
 	  with STM32F7_; Eliminate CONFIG_SDMMC1/2_DMA altogether.  Does not
 	  appear to be used (2017-01-31).
 	* STM32F429-DISCO:  Move some board initialization logic that is not
-	  usuable because it lacks the configuration options to make it so
+	  usable because it lacks the configuration options to make it so
 	  (2017-01-31).
 	* Cancellation points:  Fix some backward logic in conditional compilation
 	  (2017-02-02).
@@ -13681,7 +13681,7 @@
 	* Added MCG settings that are defiend on the K64 SoC.  Added
 	  BOARD_MCG_C2_FCFTRIM and BOARD_MCG_C2_LOCRE0 to configure the MCG_C2
 	  register cleanup of some comments.  From David Sidrane (2017-02-07).
-	* Better granualarity and erro checking of the board's MCG settings.
+	* Better granualarity and errno checking of the board's MCG settings.
 	  Allow for complete MCG_C2 definition from the boart.h file.  Moved
 	  #ifdef out of code by setting default values.  Allow for individule bit
 	  setting in MCG_C2 for BOARD_EXTCLOCK_MCG_C2, BOARD_MCG_C2_FCFTRIM,
@@ -13695,8 +13695,6 @@
 	* setvbuf: Add support for configuration of line buffering (2017-02-08).
 	* Bamboo-200E: Add netnsh configuration.  From Alan Carvalho de Assis
 	  (2017-02-08).
-	* Remove comment about being based on a Newlib implementation.  That is
-	  not true.  This is an original work (2017-02-08).
 	* USBMSC: Always set LUN readonly flag.  From Wolfgang Reißnegger
 	  (2017-02-08).
 	* drivers/lcd:  ssd1306_configspi() must have global scope (2017-02-09).
@@ -13706,7 +13704,7 @@
 	  enable/disable buffering (2017-02-09).
 	* C Library:  Clean-up buffer selections in Kconfig (2017-02-09).
 	* sem_open():  Fix a compiler error introduced with the setvbuf() changes
-	  (2017-02-xx).
+	  (2017-02-09).
 	* MMC/SD SDIO:  Some drivers need to start DMA before sending CMD24 and
 	  some AFTER.  From Alan Carvalho de Assis (2017-02-09).
 	* Kinetis SDHC driver fixes.  From Marc Rechté (2017-02-09).
@@ -13735,7 +13733,7 @@
 	  which not have Verified MCG configurations.
 
 	  From David Sidrane (2017-02-09).
-	* Kinetis chip Adding K66 and inlcuding MCG versioning.  This includes
+	* Kinetis chip Adding K66 and including MCG versioning.  This includes
 	  arch/arm/include/kinetis/kinetis_mcg.h to bring in the MCG versioning
 	  and defines the KINETIS_K66 family for the added SoCs:
 
@@ -13749,14 +13747,6 @@
 	     MK66FX1M0VLQ18  180 MHz 144 LQFP    1.25 MB  1 MB   4 KB  256 KB 100
 
 	  From David Sidrane (2017-02-09).
-	* Kinetis: MCG defines are based on the MCG feature configuration.   We
-	  define the bits as a common set of names. This means that an index may
-	  be added to a name i.e. LOCK is LOCK0 as that is the superset name.
-	  From David Sidrane (2017-02-09).
-	* Fixes ill defined BOARD_FR_DIV with BOARD_FRDIV from MCG.  Original
-	  BOARD_FR_DIV was never used - that is a good thing because the value was
-	  defined shifted and the code also shifited it.  From David Sidrane
-	  (2017-02-09).
 	* STM32: Fixes the bkp reference counter issue.  From David Sidrane
 	  (2017-02-09).
 	* STM32F7: Fixes the bkp reference counter issue.  From David Sidrane
@@ -13764,7 +13754,7 @@
 	* C Library: Add setbuf() which is a trivial wrapper around setvbuf()
 	  (2017-02-09).
 	* tools/mkconfig.c: Add logic to keep all of the buffering options in sync
-	  (2017-02-xx).
+	  (2017-02-10).
 	* VFS rename: Fix issues with rename to subdirectories and some softlink
 	  issues (2017-02-11).
 	* Add logic to VFS rename:  If target of rename exists and is a directory,
@@ -13777,7 +13767,7 @@
 	  pseudo file system, (2) Fix path naming calculation when the path is the
 	  root directory of a mounted file system, and (3) dont't do the rename if
 	  the source and destination of the rename are the same (2017-02-12).
-	* Add basic fstat() support (2017-02-x12x).
+	* Add basic fstat() support (2017-02-12).
 	* Add fstat support to binfs (2017-02-12).
 	* fstat:  Add fstat() support to romfs (2017-02-12).
 	* fstat:  Add fstat() support to unionfs (2017-02-12).
@@ -13821,8 +13811,8 @@
 	  define secondary access via AIPS1 to these peripherals.  From David
 	  Sidrane (2017-02-14).
 	* Kinetis:  Add support for K66.  From David Sidrane (2017-02-14).
-	* procfs:  stat() left several fields in uninitialized state (2017-02-xx).
-	* hostfs: Add support for fstat() (2017-02-xx).
+	* procfs:  stat() left several fields in uninitialized state (2017-02-14).
+	* hostfs: Add support for fstat() (2017-02-14).
 	* procfs: Add support for fstat() (2017-02-14).
 	* smartfs: Add support for fstat() (2017-02-14).
 	* Kinetis Freedom K66F:  Add Ethernet support.  From David Sidrane
@@ -13864,7 +13854,7 @@
 	  raiden00 (2017-02-19).
 	* STM32L4 COMP: Port from Motorola MDK (2017-02-19).
 	* Add twr-k64f120m config and fix some ENET related problems.  From Marc
-	  Rechté (2017-02-xx).
+	  Rechté (2017-02-19).
 	* STM32 F7: stm32_allocateheap: allow use DTCM memory for heap.  STM32F7
 	  has up to 128KiB of DTCM memory that is currently left unused.  This
 	  change adds DTCM to main heap if CONFIG_STM32F7_DTCMEXCLUDE is not
@@ -13915,7 +13905,7 @@
 
 	  The exceptions are the CONFIG_ARCH_CHIP_MK60FN1M0VLQ12,
 	  CONFIG_ARCH_CHIP_MK20DXxxxVLH7 All K64 and K66 have been verified PMC
-	  configurations.  From David Sidrane (2017-02-xx).
+	  configurations.  From David Sidrane (2017-02-22).
 	* Kinetis: kinetis_clockconfig uses the correct ACKISO. ACKISO is located
 	  in the PMC_REGSC on the majority of the Kinetis SoCs. With the exception
 	  of the MK40DXxxxZVLQ10 where ACKISO is located in LLWU_CS (2017-02-22).
@@ -13933,7 +13923,7 @@
 	* drivers/spi/Kconfig:  There is too much SPI in the configuration menu;
 	  SPI Driver Support menu is empty.  From Maciej Wójcik (2017-02-23).
 	* Kinetis:  SIM add paramiterized SIM_CLKDIVx_xxFRAC|DIV macros. The makes
-	  for cleaner board definitions.  From David Sidrane (2017-02-xx).
+	  for cleaner board definitions.  From David Sidrane (2017-02-23).
 	* kinetis_enet.c add #define for number of loops for auto negotiation to
 	  complete.  From Marc Rechté (2017-02-23).
 	* STM32F4 Discovery: Fix issues with QEncoder support.  From Alan Carvalho
@@ -13944,7 +13934,7 @@
 	  leave_critical_section() must be called in order to manage spinlocks
 	  correctly (2017-02-23).
 	* Fix QEncoder driver, based on STM32L4 driver.  From Alan Carvalho de
-	  Assis (2017-02-xx).
+	  Assis (2017-02-23).
 	* STM32 QEncoder.  Enable clocking to the timer on QE setup; disable clock
 	  on QE teardown (2017-02-23).
 	* Kinetis:  Extend clockconfig to support SOPT2_PLLFLLSEL and
@@ -14007,7 +13997,7 @@
 	  facilitate bring up both UARTs and LPUARTs as devices and a console.
 	  Support ordering and merging of serial devices names.  From David
 	  Sidrane (2017-02-27).
-	* Adapt more drivers to utilize the IRQ argument feature (20167-02-28).
+	* Adapt more drivers to utilize the IRQ argument feature (2107-02-28).
 	* irq_attach() and type xcpt_t.  irq_attach now accepts a argument that
 	  will be provided to the interrupt handler when the interrupt ocurrs.
 	  This affects many files by replace ad hoc parameter passing logic with a
@@ -14090,6 +14080,16 @@
 	  (2017-03-05).
 	* SAMA5D4-EK:  Eliminate warning.  Correct type of return value
 	  (2017-03-05).
-	* STM32F103 Minimum: Eliminate warning stm32_usbdev.o give twice in same
-	  rule (2017-03-).
+	* STM32F103 Minimum: Eliminate warning stm32_usbdev.o givne twice in same
+	  rule (2017-03-05).
+	* STM32 OTGHS host:  stm32_in_transfer() fails and returns NAK if a
+	  short transfer is received.  This causes problems from class drivers
+	  like CDC/ACM where short packets are expected.  In those protocols,
+	  any transfer may be terminated by sending short or NUL packet.  From
+	  Janne Rosberg.  Adapt Janne Rosberg's patch to STM32 OTGHS host to
+	  OTGFS host, and to similar USB host implementations for STM32 L4 and
+	  F7 (2017-03-07).
+	* usbhost_cdcacm: fix tx outbuffer overflow and remove now invalid
+	  assert.  From Janne Rosberg (2017-03-07).
 
+7.21 2017-xx-xx Gregory Nutt <gnutt@nuttx.org>

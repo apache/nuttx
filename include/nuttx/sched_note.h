@@ -119,7 +119,7 @@ struct note_common_s
   uint8_t nc_cpu;              /* CPU thread/task running on */
 #endif
   uint8_t nc_pid[2];           /* ID of the thread/task */
-  uint8_t nc_systime[4];       /* Time when note buffered */
+  uint8_t nc_systime[4];       /* Time when note was buffered */
 };
 
 /* This is the specific form of the NOTE_START note */
