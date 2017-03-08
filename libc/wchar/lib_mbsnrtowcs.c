@@ -1,8 +1,8 @@
 /****************************************************************************
- * libc/wchar/lib_swprintf.c
+ * libc/wchar/lib_mbsnrtowcs.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Author: Alan Carvalho de Assis <acassis@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -37,15 +37,8 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
 #include <sys/types.h>
-#include <stdarg.h>
-#include <stdio.h>
 #include <wchar.h>
-#include "libc.h"
-
-#include <nuttx/streams.h>
 
 #ifdef CONFIG_LIBC_WCHAR
 
@@ -54,28 +47,45 @@
  ****************************************************************************/
 
 /****************************************************************************
- * swprintf
+ * Name: mbsnrtowcs
+ *
+ * Description:
+ *   The 'mbsrtowcs' function converts a sequence of multibyte characters
+ *   pointed to indirectly by 'src' into a sequence of corresponding wide
+ *   characters and stores at most 'len' of them in the wchar_t array pointed
+ *   to by 'dst', until it encounters a terminating null character ('\0').
+ *
+ *   If 'dst' is NULL, no characters are stored.
+ *
+ *   If 'dst' is not NULL, the pointer pointed to by 'src' is updated to
+ *   point to the character after the one that conversion stopped at.  If
+ *   conversion stops because a null character is encountered, *'src' is set
+ *   to NULL.
+ *
+ *   The mbstate_t argument, 'ps', is used to keep track of the shift state.
+ *   If it is NULL, 'mbsrtowcs' uses an internal, static mbstate_t object,
+ *   which is initialized to the initial conversion state at program startup.
+ *
+ *   The 'mbsnrtowcs' function behaves identically to 'mbsrtowcs', except
+ *   that conversion stops after reading at most 'nms' bytes from the buffer
+ *   pointed to by 'src'.
+ *
+ * Returned Value:
+ *   The 'mbsrtowcs' and 'mbsnrtowcs' functions return the number of wide
+ *   characters stored in the array pointed to by 'dst' if successful,
+ *   otherwise it returns (size_t)-1.
+ *
+ * Portability:
+ *   'mbsrtowcs' is defined by the C99 standard.
+ *   'mbsnrtowcs' is defined by the POSIX.1-2008 standard.
+ *
  ****************************************************************************/
 
-int swprintf(FAR wchar_t *buf, size_t maxlen, FAR const wchar_t *fmt, ...)
+size_t mbsnrtowcs(FAR wchar_t *dst, FAR const char **src, size_t nms,
+                  size_t len, FAR mbstate_t *ps)
 {
-  struct lib_memoutstream_s memoutstream;
-  va_list ap;
-  int n;
-
-  /* Initialize a memory stream to write to the buffer */
-
-  lib_memoutstream((FAR struct lib_memoutstream_s *)&memoutstream,
-                   (FAR char *) buf, LIB_BUFLEN_UNKNOWN);
-
-  /* Then let lib_vsprintf do the real work */
-
-  va_start(ap, fmt);
-  n = lib_vsprintf((FAR struct lib_outstream_s *)&memoutstream.public,
-                   (FAR const char *)fmt, ap);
-  va_end(ap);
-
-  return n;
+  return len;
 }
 
 #endif /* CONFIG_LIBC_WCHAR */
+

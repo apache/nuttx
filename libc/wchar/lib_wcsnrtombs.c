@@ -1,7 +1,7 @@
 /****************************************************************************
- * libc/wchar/lib_swprintf.c
+ * libc/stdio/lib_asprintf.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,15 +37,12 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
 #include <sys/types.h>
-#include <stdarg.h>
-#include <stdio.h>
 #include <wchar.h>
-#include "libc.h"
 
-#include <nuttx/streams.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <errno.h>
 
 #ifdef CONFIG_LIBC_WCHAR
 
@@ -54,28 +51,43 @@
  ****************************************************************************/
 
 /****************************************************************************
- * swprintf
+ * Name:
+ *
+ * Description:
+ *   The 'wcsrtombs' function converts a string of wide characters
+ *   indirectly pointed to by 'src' to a corresponding multibyte character
+ *   string stored in the array pointed to by 'dst'.  No more than 'len'
+ *   bytes are written to'dst'.
+ *
+ *   If 'dst' is NULL, no characters are stored.
+ *
+ *   If 'dst' is not NULL, the pointer pointed to by 'src' is updated to
+ *   point to the character after the one that conversion stopped at.  If
+ *   conversion stops because a null character is encountered, *'src' is set
+ *   to NULL.
+ *
+ *   The mbstate_t argument, 'ps', is used to keep track of the shift state.
+ *   If it is NULL, 'wcsrtombs' uses an internal, static mbstate_t object,
+ *   which is initialized to the initial conversion state at program startup.
+ *
+ *   The 'wcsnrtombs' function behaves identically to 'wcsrtombs', except
+ *   that conversion stops after reading at most 'nwc' characters from the
+ *   buffer pointed to by 'src'.
+ *
+ * Returned Value:
+ *   The 'wcsrtombs' and 'wcsnrtombs' functions return the number of bytes
+ *   stored in the array pointed to by 'dst' (not including any terminating
+ *   null), if successful, otherwise it returns (size_t)-1.
+ *
+ * Portability:
+ *   'wcsrtombs' is defined by C99 standard.
+ *   'wcsnrtombs' is defined by the POSIX.1-2008 standard.
  ****************************************************************************/
 
-int swprintf(FAR wchar_t *buf, size_t maxlen, FAR const wchar_t *fmt, ...)
+size_t wcsnrtombs(FAR char *dst, FAR const wchar_t **src, size_t nwc,
+                  size_t len, mbstate_t *ps)
 {
-  struct lib_memoutstream_s memoutstream;
-  va_list ap;
-  int n;
-
-  /* Initialize a memory stream to write to the buffer */
-
-  lib_memoutstream((FAR struct lib_memoutstream_s *)&memoutstream,
-                   (FAR char *) buf, LIB_BUFLEN_UNKNOWN);
-
-  /* Then let lib_vsprintf do the real work */
-
-  va_start(ap, fmt);
-  n = lib_vsprintf((FAR struct lib_outstream_s *)&memoutstream.public,
-                   (FAR const char *)fmt, ap);
-  va_end(ap);
-
-  return n;
+  return len;
 }
 
 #endif /* CONFIG_LIBC_WCHAR */
