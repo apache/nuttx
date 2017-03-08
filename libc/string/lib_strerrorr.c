@@ -1,7 +1,7 @@
 /****************************************************************************
- * include/string.h
+ * libc/string/lib_strerrorr.c
  *
- *   Copyright (C) 2007-2012, 2014, 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,68 +33,28 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_STRING_H
-#define __INCLUDE_STRING_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <stddef.h>
+#include <sys/types.h>
+#include <string.h>
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Function Prototypes
+ * Name: strerror_r
  ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
+int strerror_r(int errnum, FAR char *buf, size_t buflen)
 {
-#else
-#define EXTERN extern
-#endif
+  FAR const char *errstr = strerror(errnum);
 
-FAR char  *strdup(FAR const char *s);
-FAR char  *strndup(FAR const char *s, size_t size);
-FAR const char *strerror(int);
-int        strerror_r(int, FAR char *, size_t);
-size_t     strlen(FAR const char *);
-size_t     strnlen(FAR const char *, size_t);
-FAR char  *strcat(FAR char *, FAR const char *);
-FAR char  *strncat(FAR char *, FAR const char *, size_t);
-int        strcmp(FAR const char *, FAR const char *);
-int        strncmp(FAR const char *, FAR const char *, size_t);
-int        strcoll(FAR const char *, FAR const char *s2);
-FAR char  *strcpy(FAR char *dest, FAR const char *src);
-FAR char  *stpcpy(FAR char *dest, FAR const char *src);
-FAR char  *strncpy(FAR char *, FAR const char *, size_t);
-FAR char  *strpbrk(FAR const char *, FAR const char *);
-FAR char  *strchr(FAR const char *s, int c);
-FAR char  *strrchr(FAR const char *s, int c);
-size_t     strspn(FAR const char *, FAR const char *);
-size_t     strcspn(FAR const char *, FAR const char *);
-FAR char  *strstr(FAR const char *, FAR const char *);
-FAR char  *strcasestr(FAR const char *, FAR const char *);
-FAR char  *strtok(FAR char *, FAR const char *);
-FAR char  *strtok_r(FAR char *, FAR const char *, FAR char **);
-size_t     strxfrm(FAR char *, FAR const char *, size_t n);
-
-FAR void  *memchr(FAR const void *s, int c, size_t n);
-FAR void  *memccpy(FAR void *s1, FAR const void *s2, int c, size_t n);
-int        memcmp(FAR const void *s1, FAR const void *s2, size_t n);
-FAR void  *memcpy(FAR void *dest, FAR const void *src, size_t n);
-FAR void  *memmove(FAR void *dest, FAR const void *src, size_t count);
-FAR void  *memset(FAR void *s, int c, size_t n);
-
-#undef EXTERN
-#if defined(__cplusplus)
+  DEBUGASSERT(buf != NULL);
+  strncpy(buf, errstr, buflen);
+  return OK;
 }
-#endif
-#endif /* __INCLUDE_STRING_H */
