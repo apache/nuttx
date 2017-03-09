@@ -130,7 +130,7 @@ extern "C"
  ****************************************************************************/
 
 FAR struct qe_lowerhalf_s *as5048b_initialize(FAR struct i2c_master_s *i2c,
-                                              uint8_t addr);
+                                              uint8_t addr, uint32_t frequency);
 
 #undef EXTERN
 #ifdef __cplusplus
