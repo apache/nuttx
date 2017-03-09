@@ -470,7 +470,7 @@ static int adc_interrupt(int irq, void *context, FAR void *arg)
     }
   else
     {
-      if (priv->freq == 0 && priv->m_ch) /* clear burst mode */
+      if (priv->freq == 0 && !priv->m_ch) /* clear burst mode */
         {
           regval = getreg32(LPC43_ADC0_CR);
           regval &= ~ADC_CR_BURST;
