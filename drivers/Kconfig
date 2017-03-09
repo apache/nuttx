@@ -313,7 +313,7 @@ if PWM_MULTICHAN
 config PWM_NCHANNELS
 	int "Number of Output Channels Per Timer"
 	default 1
-	range 1 4
+	range 1 6
 	---help---
 		Specifies the number of output channels per timer.  Each timer
 		may support fewer output channels than this value.
