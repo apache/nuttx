@@ -1827,6 +1827,7 @@ static ssize_t stm32_in_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
                                  FAR uint8_t *buffer, size_t buflen)
 {
   FAR struct stm32_chan_s *chan;
+  systime_t start;
   ssize_t xfrd;
   int ret;
 
@@ -1841,6 +1842,7 @@ static ssize_t stm32_in_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
   chan->xfrd   = 0;
   xfrd         = 0;
 
+  start = clock_systimer();
   while (chan->xfrd < chan->buflen)
     {
       /* Set up for the wait BEFORE starting the transfer */
@@ -1865,11 +1867,7 @@ static ssize_t stm32_in_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
 
       ret = stm32_chan_wait(priv, chan);
 
-      /* EAGAIN indicates that the device NAKed the transfer.  In the case
-       * of a NAK, we do not retry but rather assume that the transfer is
-       * commplete and return the data that we have received.  Retry could
-       * be handled in class driver.
-       */
+      /* EAGAIN indicates that the device NAKed the transfer. */
 
       if (ret < 0)
         {
@@ -1889,21 +1887,43 @@ static ssize_t stm32_in_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
                 }
               else
                 {
-                  /* No... Break out and return the NAK */
+                  /* Get the elapsed time.  Has the timeout elapsed?
+                   * if not then try again.
+                   */
 
-                  return (ssize_t)ret;
+                  systime_t elapsed = clock_systimer() - start;
+                  if (elapsed >= STM32_DATANAK_DELAY)
+                    {
+                      /* Timeout out... break out returning the NAK as
+                       * as a failure.
+                       */
+
+                      return (ssize_t)ret;
+                    }
                 }
             }
+          else
+            {
+              /* Some unexpected, fatal error occurred. */
 
-          usbhost_trace1(OTGFS_TRACE1_TRNSFRFAILED, ret);
+              usbhost_trace1(OTGFS_TRACE1_TRNSFRFAILED, ret);
 
-          /* Break out and return the error */
+              /* Break out and return the error */
 
-          uerr("ERROR: stm32_chan_wait failed: %d\n", ret);
-          return (ssize_t)ret;
+              uerr("ERROR: stm32_chan_wait failed: %d\n", ret);
+              return (ssize_t)ret;
+            }
         }
+      else
+        {
+          /* Successfully received another chunk of data... add that to the
+           * runing total.  Then continue reading until we read 'buflen'
+           * bytes of data or until the the devices NAKs (implying a short
+           * packet).
+           */
 
-      xfrd += chan->xfrd;
+          xfrd += chan->xfrd;
+        }
     }
 
   return xfrd;

@@ -339,7 +339,15 @@ must be is one of the following.
        above under "OTGFS Host".
 
        STATUS: I have seen this work with some FLASH sticks but not with
-       others.  This probably needs a little TLC to get 100% reliable.
+       others.  I have not studied the failure case carefully.  They seem
+       to fail because the request is NAKed.  That is not a failure, however,
+       that is normal behavior when the FLASH is not ready.
+
+       There have been other cases like this with the STM32 host drivers:
+       in the event of NAKs, other drivers retry and wait for the data.  The
+       STM32 does not but returns the NAK failure immediately.  My guess is
+       that there needs to be be some retry logic to the driver 100%
+       reliable.
 
     2. Kernel Modules / Shared Libraries
 
