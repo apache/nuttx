@@ -380,6 +380,7 @@ static void ssp_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 
   if (mode != priv->mode)
     {
+      spiinfo("Setting mode to %d.\n", mode);
       /* Yes... Set CR0 appropriately */
 
       regval = ssp_getreg(priv, LPC43_SSP_CR0_OFFSET);
@@ -442,12 +443,14 @@ static void ssp_setbits(FAR struct spi_dev_s *dev, int nbits)
 
   if (nbits != priv->nbits)
     {
+      spiinfo("Settings bits per word to %d.\n", nbits);
       /* Yes... Set CR1 appropriately */
 
       regval = ssp_getreg(priv, LPC43_SSP_CR0_OFFSET);
       regval &= ~SSP_CR0_DSS_MASK;
       regval |= ((nbits - 1) << SSP_CR0_DSS_SHIFT);
-      regval = ssp_getreg(priv, LPC43_SSP_CR0_OFFSET);
+      ssp_putreg(priv, LPC43_SSP_CR0_OFFSET, regval);
+      spiinfo("SSP Control Register 0 (CR0) after setting DSS: 0x%08X.\n", regval);
 
       /* Save the selection so the subsequence re-configurations will be faster */
 
