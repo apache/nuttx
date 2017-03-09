@@ -381,6 +381,7 @@ static void ssp_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
   if (mode != priv->mode)
     {
       spiinfo("Setting mode to %d.\n", mode);
+
       /* Yes... Set CR0 appropriately */
 
       regval = ssp_getreg(priv, LPC43_SSP_CR0_OFFSET);
@@ -443,7 +444,8 @@ static void ssp_setbits(FAR struct spi_dev_s *dev, int nbits)
 
   if (nbits != priv->nbits)
     {
-      spiinfo("Settings bits per word to %d.\n", nbits);
+      spiinfo("Setting bits per word to %d.\n", nbits);
+
       /* Yes... Set CR1 appropriately */
 
       regval = ssp_getreg(priv, LPC43_SSP_CR0_OFFSET);
