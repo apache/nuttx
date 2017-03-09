@@ -94,7 +94,7 @@ int nxffs_blockstats(FAR struct nxffs_volume_s *volume,
       ret = MTD_BREAD(volume->mtd, ioblock, volume->blkper, volume->pack);
       if (ret < volume->blkper)
         {
-          fdbg("ERROR: Failed to read erase block %d: %d\n",
+          ferr("ERROR: Failed to read erase block %d: %d\n",
                ioblock / volume->blkper, ret);
           return ret;
         }
@@ -147,11 +147,11 @@ int nxffs_blockstats(FAR struct nxffs_volume_s *volume,
         }
     }
 
-  fdbg("Number blocks:        %d\n", stats->nblocks);
-  fdbg("  Good blocks:        %d\n", stats->ngood);
-  fdbg("  Bad blocks:         %d\n", stats->nbad);
-  fdbg("  Unformatted blocks: %d\n", stats->nunformat);
-  fdbg("  Corrupt blocks:     %d\n", stats->ncorrupt);
+  finfo("Number blocks:        %d\n", stats->nblocks);
+  finfo("  Good blocks:        %d\n", stats->ngood);
+  finfo("  Bad blocks:         %d\n", stats->nbad);
+  finfo("  Unformatted blocks: %d\n", stats->nunformat);
+  finfo("  Corrupt blocks:     %d\n", stats->ncorrupt);
 
 #else
   for (ioblock = 0; ioblock < volume->nblocks; ioblock++)
@@ -175,7 +175,7 @@ int nxffs_blockstats(FAR struct nxffs_volume_s *volume,
            * of unreadable blocks.
            */
 
-          fdbg("ERROR: Failed to read block %d: %d\n", ioblock, ret);
+          ferr("ERROR: Failed to read block %d: %d\n", ioblock, ret);
 
           /* Increment the count of un-readable blocks */
 
@@ -221,12 +221,12 @@ int nxffs_blockstats(FAR struct nxffs_volume_s *volume,
         }
     }
 
-  fdbg("Number blocks:        %d\n", stats->nblocks);
-  fdbg("  Good blocks:        %d\n", stats->ngood);
-  fdbg("  Bad blocks:         %d\n", stats->nbad);
-  fdbg("  Unformatted blocks: %d\n", stats->nunformat);
-  fdbg("  Corrupt blocks:     %d\n", stats->ncorrupt);
-  fdbg("  Unreadable blocks:  %d\n", stats->nbadread);
+  finfo("Number blocks:        %d\n", stats->nblocks);
+  finfo("  Good blocks:        %d\n", stats->ngood);
+  finfo("  Bad blocks:         %d\n", stats->nbad);
+  finfo("  Unformatted blocks: %d\n", stats->nunformat);
+  finfo("  Corrupt blocks:     %d\n", stats->ncorrupt);
+  finfo("  Unreadable blocks:  %d\n", stats->nbadread);
 
 #endif
   return OK;

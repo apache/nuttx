@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/input/button_lower.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -64,7 +64,7 @@ static void btn_enable(FAR const struct btn_lowerhalf_s *lower,
                        btn_handler_t handler, FAR void *arg);
 
 static void btn_disable(void);
-static int btn_interrupt(int irq, FAR void *context);
+static int btn_interrupt(int irq, FAR void *context, FAR void *arg);
 
 /****************************************************************************
  * Private Data
@@ -98,7 +98,7 @@ static FAR void *g_btnarg;
 
 static btn_buttonset_t btn_supported(FAR const struct btn_lowerhalf_s *lower)
 {
-  ivdbg("NUM_BUTTONS: %02x\n", NUM_BUTTONS);
+  iinfo("NUM_BUTTONS: %02x\n", NUM_BUTTONS);
   return (btn_buttonset_t)((1 << NUM_BUTTONS) - 1);
 }
 
@@ -138,8 +138,8 @@ static void btn_enable(FAR const struct btn_lowerhalf_s *lower,
   flags = enter_critical_section();
   btn_disable();
 
-  illvdbg("press: %02x release: %02x handler: %p arg: %p\n",
-          press, release, handler, arg);
+  iinfo("press: %02x release: %02x handler: %p arg: %p\n",
+        press, release, handler, arg);
 
   /* If no events are indicated or if no handler is provided, then this
    * must really be a request to disable interrupts.
@@ -159,7 +159,7 @@ static void btn_enable(FAR const struct btn_lowerhalf_s *lower,
           mask = (1 << id);
           if ((either & mask) != 0)
             {
-              (void)board_button_irq(id, btn_interrupt);
+              (void)board_button_irq(id, btn_interrupt, NULL);
             }
         }
     }
@@ -185,7 +185,7 @@ static void btn_disable(void)
   flags = enter_critical_section();
   for (id = 0; id < NUM_BUTTONS; id++)
     {
-      (void)board_button_irq(id, NULL);
+      (void)board_button_irq(id, NULL, NULL);
     }
 
   /* Nullify the handler and argument */
@@ -203,7 +203,7 @@ static void btn_disable(void)
  *
  ****************************************************************************/
 
-static int btn_interrupt(int irq, FAR void *context)
+static int btn_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   DEBUGASSERT(g_btnhandler);
 

@@ -543,21 +543,21 @@
 
 /* AT91SAM4S Family *****************************************************************/
 /*
- * FEATURE       SAM4SD32C SAM4SD32B SAM4SD16C SAM4SD16B SAM4SA16C SAM4SA16B SAM4S16C SAM4S16B SAM4S8C SAM4S8B
- * ------------- --------- --------- --------- --------- --------- --------- -------- -------- ------- -------
- * Flash         2x1MB     2x1MB     2x512KB   1x1MB     1x1MB     1x1MB     1x1MB    1x1MB    1x512KB 1x512KB
- * SRAM          160KB     160KB     160KB     160KB     160KB     160KB     128KB    128KB    128KB   128KB
- * HCACHE        2KB       2KB       2KB       2KB       2KB       2KB       -        -        -       -
- * Pins          100       64        100       64        100       64        100      64       100     64
- * No. PIOs      79        47        79        47        79        47        79       47       79      47
- * Ext. BUS      Yes       No        Yes       No        Yes       No        Yes      No       Yes     No
- * 12-bit ADC    16 ch     11 ch     16 ch     11 ch     16 ch     11 ch     16 ch    11 ch    16 ch   11 ch
- * 12-bit DAC    2 ch      2 ch      2 ch      2 ch      2 ch      2 ch      2 ch     2 ch     2 ch    2 ch
- * Timer Counter 6 ch      3 ch      6 ch      3 ch      6 ch      3 ch      6 ch     3 ch     6 ch    3 ch
- * PDC           22 ch     22 ch     22 ch     22 ch     22 ch     22 ch     22 ch    22 ch    22 ch   22 ch
- * USART         2         2         2         2         2         2         2        2        2       2
- * UART          2         2         2         2         2         2         2        2        2       2
- * HSMCI         Yes       Yes       Yes       Yes       Yes       Yes      Yes      Yes      Yes      Yes
+ * FEATURE       SAM4SD32C SAM4SD32B SAM4SD16C SAM4SD16B SAM4SA16C SAM4SA16B SAM4S16C SAM4S16B SAM4S8C SAM4S8B SAM4S4C
+ * ------------- --------- --------- --------- --------- --------- --------- -------- -------- ------- ------- -------
+ * Flash         2x1MB     2x1MB     2x512KB   1x1MB     1x1MB     1x1MB     1x1MB    1x1MB    1x512KB 1x512KB 1x256KB
+ * SRAM          160KB     160KB     160KB     160KB     160KB     160KB     128KB    128KB    128KB   128KB   64KB
+ * HCACHE        2KB       2KB       2KB       2KB       2KB       2KB       -        -        -       -       -
+ * Pins          100       64        100       64        100       64        100      64       100     64      100
+ * No. PIOs      79        47        79        47        79        47        79       47       79      47      79
+ * Ext. BUS      Yes       No        Yes       No        Yes       No        Yes      No       Yes     No      Yes
+ * 12-bit ADC    16 ch     11 ch     16 ch     11 ch     16 ch     11 ch     16 ch    11 ch    16 ch   11 ch   16 ch
+ * 12-bit DAC    2 ch      2 ch      2 ch      2 ch      2 ch      2 ch      2 ch     2 ch     2 ch    2 ch    2 ch
+ * Timer Counter 6 ch      3 ch      6 ch      3 ch      6 ch      3 ch      6 ch     3 ch     6 ch    3 ch    6 ch
+ * PDC           22 ch     22 ch     22 ch     22 ch     22 ch     22 ch     22 ch    22 ch    22 ch   22 ch   22 ch
+ * USART         2         2         2         2         2         2         2        2        2       2       2
+ * UART          2         2         2         2         2         2         2        2        2       2       2
+ * HSMCI         Yes       Yes       Yes       Yes       Yes       Yes       Yes      Yes      Yes     Yes     Yes
  */
 
 #elif defined(CONFIG_ARCH_CHIP_ATSAM4SD32C)
@@ -745,6 +745,26 @@
 
 #  define SAM34_FLASH_SIZE            (512*1024)    /* 512KB */
 #  define SAM34_SRAM0_SIZE            (128*1024)    /* 128KB */
+#  define SAM34_SRAM1_SIZE            0             /* None */
+#  define SAM34_NFCSRAM_SIZE          0             /* None */
+
+/* Peripherals */
+
+#  define SAM34_NDMACHAN              0             /* No DMAC Channels */
+#  define SAM34_NPDCCHAN              22            /* 22 PDC Channels */
+#  define SAM34_NMCI2                 1             /* 1 memory card interface */
+#  define SAM34_NSLCD                 0             /* No segment LCD interface */
+#  define SAM34_NAESA                 0             /* No advanced encryption standard */
+#  define SAM34_NUDPHS                0             /* No USB high speed device */
+#  define SAM34_NUHPHS                0             /* No USB high speed embedded host */
+#  define SAM34_NUDPFS                1             /* 1 USB full speed device */
+#  define SAM34_NUHPFS                0             /* No USB full speed embedded host */
+
+#elif defined(CONFIG_ARCH_CHIP_ATSAM4S4C)
+/* Internal memory */
+
+#  define SAM34_FLASH_SIZE            (256*1024)    /* 256KB */
+#  define SAM34_SRAM0_SIZE            (64*1024)     /* 64KB */
 #  define SAM34_SRAM1_SIZE            0             /* None */
 #  define SAM34_NFCSRAM_SIZE          0             /* None */
 

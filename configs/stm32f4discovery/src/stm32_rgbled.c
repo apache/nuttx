@@ -42,7 +42,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/pwm.h>
+#include <nuttx/drivers/pwm.h>
 #include <nuttx/leds/rgbled.h>
 #include <arch/board/board.h>
 
@@ -93,11 +93,10 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: board_pwm_setup
+ * Name: stm32_rgbled_setup
  *
  * Description:
- *   All STM32 architectures must provide the following interface to work with
- *   examples/pwm.
+ *   Configure the RGB LED.
  *
  ************************************************************************************/
 
@@ -119,7 +118,7 @@ int stm32_rgbled_setup(void)
       ledr = stm32_pwminitialize(1);
       if (!ledr)
         {
-          dbg("Failed to get the STM32 PWM lower half to LEDR\n");
+          lederr("ERROR: Failed to get the STM32 PWM lower half to LEDR\n");
           return -ENODEV;
         }
 
@@ -138,7 +137,7 @@ int stm32_rgbled_setup(void)
       ledg = stm32_pwminitialize(2);
       if (!ledg)
         {
-          dbg("Failed to get the STM32 PWM lower half to LEDG\n");
+          lederr("ERROR: Failed to get the STM32 PWM lower half to LEDG\n");
           return -ENODEV;
         }
 
@@ -152,7 +151,7 @@ int stm32_rgbled_setup(void)
       ledb = stm32_pwminitialize(3);
       if (!ledb)
         {
-          dbg("Failed to get the STM32 PWM lower half to LEDB\n");
+          lederr("ERROR: Failed to get the STM32 PWM lower half to LEDB\n");
           return -ENODEV;
         }
 
@@ -166,7 +165,7 @@ int stm32_rgbled_setup(void)
       ret = rgbled_register("/dev/rgbled0", ledr, ledg, ledb);
       if (ret < 0)
         {
-          dbg("rgbled_register failed: %d\n", ret);
+          lederr("ERROR: rgbled_register failed: %d\n", ret);
           return ret;
         }
 

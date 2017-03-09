@@ -41,7 +41,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/fs/ioctl.h>
+#include <nuttx/sensors/ioctl.h>
 
 #if defined(CONFIG_I2C) && defined(CONFIG_MB7040)
 
@@ -56,12 +56,6 @@
  * CONFIG_MB7040
  *   Enables support for the MB7040 driver
  */
-
-/* IOCTL Commands ***********************************************************/
-
-#define SNIOC_MEASURE          _SNIOC(0x0001) /* Arg: None */
-#define SNIOC_RANGE            _SNIOC(0x0002) /* Arg: int32_t* pointer */
-#define SNIOC_CHANGEADDR       _SNIOC(0x0003) /* Arg: uint8_t value */
 
 /* I2C Addresses ************************************************************/
 

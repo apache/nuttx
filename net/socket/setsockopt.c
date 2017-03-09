@@ -105,14 +105,13 @@
 int psock_setsockopt(FAR struct socket *psock, int level, int option,
                      FAR const void *value, socklen_t value_len)
 {
-  net_lock_t flags;
-  int err;
+  int errcode;
 
   /* Verify that the socket option if valid (but might not be supported ) */
 
   if (!_SO_SETVALID(option) || !value)
     {
-      err = EINVAL;
+      errcode = EINVAL;
       goto errout;
     }
 
@@ -141,7 +140,7 @@ int psock_setsockopt(FAR struct socket *psock, int level, int option,
 
           if (value_len != sizeof(int))
             {
-              err = EINVAL;
+              errcode = EINVAL;
               goto errout;
             }
 
@@ -153,7 +152,7 @@ int psock_setsockopt(FAR struct socket *psock, int level, int option,
            * level access to options.
            */
 
-           flags = net_lock();
+           net_lock();
 
           /* Set or clear the option bit */
 
@@ -166,7 +165,7 @@ int psock_setsockopt(FAR struct socket *psock, int level, int option,
               _SO_CLROPT(psock->s_options, option);
             }
 
-          net_unlock(flags);
+          net_unlock();
         }
         break;
 
@@ -180,7 +179,7 @@ int psock_setsockopt(FAR struct socket *psock, int level, int option,
 
           if (tv == NULL || value_len != sizeof(struct timeval))
             {
-              err = EINVAL;
+              errcode = EINVAL;
               goto errout;
             }
 
@@ -223,7 +222,7 @@ int psock_setsockopt(FAR struct socket *psock, int level, int option,
 
           if (value_len < sizeof(FAR struct linger))
             {
-              err = EINVAL;
+              errcode = EINVAL;
               goto errout;
             }
 
@@ -235,7 +234,7 @@ int psock_setsockopt(FAR struct socket *psock, int level, int option,
            * level access to options.
            */
 
-           flags = net_lock();
+           net_lock();
 
           /* Set or clear the linger option bit and linger time (in deciseconds) */
 
@@ -250,7 +249,7 @@ int psock_setsockopt(FAR struct socket *psock, int level, int option,
               psock->s_linger = 0;
             }
 
-          net_unlock(flags);
+          net_unlock();
         }
         break;
 #endif
@@ -268,14 +267,14 @@ int psock_setsockopt(FAR struct socket *psock, int level, int option,
       case SO_TYPE:       /* Reports the socket type */
 
       default:
-        err = ENOPROTOOPT;
+        errcode = ENOPROTOOPT;
         goto errout;
     }
 
   return OK;
 
 errout:
-  set_errno(err);
+  set_errno(errcode);
   return ERROR;
 }
 

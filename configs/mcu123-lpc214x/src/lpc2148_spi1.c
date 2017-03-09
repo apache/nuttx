@@ -86,20 +86,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Enables debug output from this file */
-
-#ifdef CONFIG_DEBUG_SPI
-#  define spidbg  lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
-#    define spivdbg lldbg
-#  else
-#    define spivdbg(x...)
-#  endif
-#else
-#  define spidbg(x...)
-#  define spivdbg(x...)
-#endif
-
 /* Clocking */
 
 #define LPC214X_CCLKFREQ  (LPC214X_FOSC*LPC214X_PLL_M)
@@ -232,14 +218,14 @@ static void spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sel
     {
       /* Enable slave select (low enables) */
 
-      spidbg("CS asserted\n");
+      spiinfo("CS asserted\n");
       putreg32(bit, CS_CLR_REGISTER);
     }
   else
     {
       /* Disable slave select (low enables) */
 
-      spidbg("CS de-asserted\n");
+      spiinfo("CS de-asserted\n");
       putreg32(bit, CS_SET_REGISTER);
 
       /* Wait for the TX FIFO not full indication */
@@ -296,7 +282,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
   divisor = (divisor + 1) & ~1;
   putreg8(divisor, LPC214X_SPI1_CPSR);
 
-  spidbg("Frequency %d->%d\n", frequency, LPC214X_PCLKFREQ / divisor);
+  spiinfo("Frequency %d->%d\n", frequency, LPC214X_PCLKFREQ / divisor);
   return LPC214X_PCLKFREQ / divisor;
 }
 
@@ -321,7 +307,7 @@ static uint8_t spi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
    * board.
    */
 
-  spidbg("Return SPI_STATUS_PRESENT\n");
+  spiinfo("Return SPI_STATUS_PRESENT\n");
   return SPI_STATUS_PRESENT;
 }
 
@@ -392,7 +378,7 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
   /* Get the value from the RX FIFO and return it */
 
   regval = getreg16(LPC214X_SPI1_DR);
-  spidbg("%04x->%04x\n", wd, regval);
+  spiinfo("%04x->%04x\n", wd, regval);
   return regval;
 }
 
@@ -422,7 +408,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
 
   /* Loop while thre are bytes remaining to be sent */
 
-  spidbg("nwords: %d\n", nwords);
+  spiinfo("nwords: %d\n", nwords);
   while (nwords > 0)
     {
       /* While the TX FIFO is not full and there are bytes left to send */
@@ -439,7 +425,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
 
   /* Then discard all card responses until the RX & TX FIFOs are emptied. */
 
-  spidbg("discarding\n");
+  spiinfo("discarding\n");
   do
     {
       /* Is there anything in the RX fifo? */
@@ -493,7 +479,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
 
   /* While there is remaining to be sent (and no synchronization error has occurred) */
 
-  spidbg("nwords: %d\n", nwords);
+  spiinfo("nwords: %d\n", nwords);
   while (nwords || rxpending)
     {
       /* Fill the transmit FIFO with 0xff...
@@ -502,7 +488,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
        * and (3) there are more bytes to be sent.
        */
 
-      spivdbg("TX: rxpending: %d nwords: %d\n", rxpending, nwords);
+      spiinfo("TX: rxpending: %d nwords: %d\n", rxpending, nwords);
       while ((getreg8(LPC214X_SPI1_SR) & LPC214X_SPI1SR_TNF) &&
              (rxpending < LPC214X_SPI1_FIFOSZ) && nwords)
         {
@@ -513,7 +499,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
 
       /* Now, read the RX data from the RX FIFO while the RX FIFO is not empty */
 
-      spivdbg("RX: rxpending: %d\n", rxpending);
+      spiinfo("RX: rxpending: %d\n", rxpending);
       while (getreg8(LPC214X_SPI1_SR) & LPC214X_SPI1SR_RNE)
         {
           *ptr++ = (uint8_t)getreg16(LPC214X_SPI1_DR);
@@ -548,7 +534,7 @@ FAR struct spi_dev_s *lpc214x_spibus_initialize(int port)
 
   /* Only the SPI1 interface is supported */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (port != 1)
     {
       return NULL;

@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/arch.h
  *
- *   Copyright (C) 2007-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -161,6 +161,15 @@ EXTERN uint32_t g_oneshot_maxticks;
  */
 
 EXTERN volatile bool g_rtc_enabled;
+#endif
+
+#ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
+/* This is the interrupt vector mapping table.  This must be provided by
+ * architecture specific logic if CONFIG_ARCH_MINIMAL_VECTORTABLE is define
+ * in the configuration.  See declaration in include/nuttx/irq.h
+ */
+
+/* EXTERN const irq_mapped_t g_irqmap[NR_IRQS]; */
 #endif
 
 /****************************************************************************
@@ -1402,8 +1411,9 @@ int up_prioritize_irq(int irq, int priority);
  * is suppressed and the platform specific code is expected to provide the
  * following custom functions.
  *
- *   void up_timer_initialize(void): Initializes the timer facilities.  Called
- *     early in the intialization sequence (by up_intialize()).
+ *   Architecture specific timer initialiation logic initializes the timer
+ *     facilities.  This happens early in the intialization sequence (via
+ *     up_intialize()).
  *   int up_timer_gettime(FAR struct timespec *ts):  Returns the current
  *     time from the platform specific time source.
  *
@@ -1435,41 +1445,12 @@ int up_prioritize_irq(int irq, int priority);
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_timer_initialize
- *
- * Description:
- *   Initializes all platform-specific timer facilities.  This function is
- *   called early in the initialization sequence by up_intialize().
- *   On return, the current up-time should be available from
- *   up_timer_gettime() and the interval timer is ready for use (but not
- *   actively timing).
- *
- *   Provided by platform-specific code and called from the architecture-
- *   specific logic.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Called early in the initialization sequence before any special
- *   concurrency protections are required.
- *
- ****************************************************************************/
-
-#if 0 /* Prototyped in up_internal.h in all cases. */
-void up_timer_initialize(void);
-#endif
-
-/****************************************************************************
  * Name: up_timer_gettime
  *
  * Description:
  *   Return the elapsed time since power-up (or, more correctly, since
- *   up_timer_initialize() was called).  This function is functionally
- *   equivalent to:
+ *   the archtecture-specific timer was initialized).  This function is
+ *   functionally equivalent to:
  *
  *      int clock_gettime(clockid_t clockid, FAR struct timespec *ts);
  *
@@ -1496,8 +1477,13 @@ void up_timer_initialize(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SCHED_TICKLESS
+#if defined(CONFIG_SCHED_TICKLESS) && !defined(CONFIG_CLOCK_TIMEKEEPING)
 int up_timer_gettime(FAR struct timespec *ts);
+#endif
+
+#ifdef CONFIG_CLOCK_TIMEKEEPING
+int up_timer_getcounter(FAR uint64_t *cycles);
+void up_timer_getmask(FAR uint64_t *mask);
 #endif
 
 /****************************************************************************
@@ -1684,7 +1670,7 @@ int up_timer_start(FAR const struct timespec *ts);
  * Name: up_testset
  *
  * Description:
- *   Perform and atomic test and set operation on the provided spinlock.
+ *   Perform an atomic test and set operation on the provided spinlock.
  *
  * Input Parameters:
  *   lock - The address of spinlock object.
@@ -1816,10 +1802,64 @@ int up_cpu_start(int cpu);
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
  *
+ * Assumptions:
+ *   Called from within a critical section; up_cpu_resume() must be called
+ *   later while still within the same critical section.
+ *
  ****************************************************************************/
 
 #ifdef CONFIG_SMP
 int up_cpu_pause(int cpu);
+#endif
+
+/****************************************************************************
+ * Name: up_cpu_pausereq
+ *
+ * Description:
+ *   Return true if a pause request is pending for this CPU.
+ *
+ * Input Parameters:
+ *   cpu - The index of the CPU to be queried
+ *
+ * Returned Value:
+ *   true   = a pause request is pending.
+ *   false = no pasue request is pending.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+bool up_cpu_pausereq(int cpu);
+#endif
+
+/****************************************************************************
+ * Name: up_cpu_paused
+ *
+ * Description:
+ *   Handle a pause request from another CPU.  Normally, this logic is
+ *   executed from interrupt handling logic within the architecture-specific
+ *   However, it is sometimes necessary necessary to perform the pending
+ *   pause operation in other contexts where the interrupt cannot be taken
+ *   in order to avoid deadlocks.
+ *
+ *   This function performs the following operations:
+ *
+ *   1. It saves the current task state at the head of the current assigned
+ *      task list.
+ *   2. It waits on a spinlock, then
+ *   3. Returns from interrupt, restoring the state of the new task at the
+ *      head of the ready to run list.
+ *
+ * Input Parameters:
+ *   cpu - The index of the CPU to be paused
+ *
+ * Returned Value:
+ *   On success, OK is returned.  Otherwise, a negated errno value indicating
+ *   the nature of the failure is returned.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+int up_cpu_paused(int cpu);
 #endif
 
 /****************************************************************************
@@ -1838,6 +1878,10 @@ int up_cpu_pause(int cpu);
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
+ *
+ * Assumptions:
+ *   Called from within a critical section; up_cpu_pause() must have
+ *   previously been called within the same critical section.
  *
  ****************************************************************************/
 
@@ -1929,7 +1973,7 @@ void up_cxxinitialize(void);
  *   CONFIG_SCHED_TICKLESS is *not* defined).  The timer interrupt logic
  *   itself is implemented in the architecture specific code, but must call
  *   the following OS function periodically -- the calling interval must
- *   be MSEC_PER_TICK.
+ *   be CONFIG_USEC_PER_TICK.
  *
  ****************************************************************************/
 
@@ -2046,10 +2090,6 @@ size_t  up_check_intstack(void);
 size_t  up_check_intstack_remain(void);
 #endif
 #endif
-
-/****************************************************************************
- * Board-specific button interfaces exported by the board-specific logic
- ****************************************************************************/
 
 /****************************************************************************
  * Name: up_rtc_initialize
@@ -2216,19 +2256,19 @@ int up_rtc_settime(FAR const struct timespec *tp);
  *             asserts an interrupt.  Must reside in OS space, but can
  *             signal tasks in user space.  A value of NULL can be passed
  *             in order to detach and disable the PHY interrupt.
+ *   arg     - The argument that will accompany the interrupt
  *   enable  - A function pointer that be unsed to enable or disable the
  *             PHY interrupt.
  *
  * Returned Value:
- *   The previous PHY interrupt handler address is returned.  This allows you
- *   to temporarily replace an interrupt handler, then restore the original
- *   interrupt handler.  NULL is returned if there is was not handler in
- *   place when the call was made.
+ *   Zero (OK) returned on success; a negated errno value is returned on
+ *   failure.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_PHY_INTERRUPT
-xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable);
+int arch_phy_irq(FAR const char *intf, xcpt_t handler, void *arg,
+                 phy_enable_t *enable);
 #endif
 
 /****************************************************************************
@@ -2244,16 +2284,6 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable);
  ****************************************************************************/
 
 int up_putc(int ch);
-
-/****************************************************************************
- * Name: up_getc
- *
- * Description:
- *   Get one character on the console
- *
- ****************************************************************************/
-
-int up_getc(void);
 
 /****************************************************************************
  * Name: up_puts
@@ -2289,9 +2319,8 @@ void arch_sporadic_resume(FAR struct tcb_s *tcb);
 #endif
 
 #undef EXTERN
-#ifdef __cplusplus
+#if defined(__cplusplus)
 }
 #endif
 
 #endif /* __INCLUDE_NUTTX_ARCH_H */
-

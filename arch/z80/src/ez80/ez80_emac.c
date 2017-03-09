@@ -1,7 +1,7 @@
 /****************************************************************************
- * drivers/net/ez80_emac.c
+ * arch/z80/src/ez80/ez80_emac.c
  *
- *   Copyright (C) 2009-2010, 2012, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2012, 2014-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -56,6 +56,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include <nuttx/wdog.h>
+#include <nuttx/wqueue.h>
 #include <nuttx/net/mii.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
@@ -74,6 +75,25 @@
  ****************************************************************************/
 
 /* Configuration ************************************************************/
+
+/* If processing is not done at the interrupt level, then work queue support
+ * is required.
+ */
+
+#if !defined(CONFIG_SCHED_WORKQUEUE)
+#  error Work queue support is required in this configuration (CONFIG_SCHED_WORKQUEUE)
+#else
+
+  /* Use the low priority work queue if possible */
+
+#  if defined(CONFIG_EZ80_EMAC_HPWORK)
+#    define ETHWORK HPWORK
+#  elif defined(CONFIG_EZ80_EMAC_LPWORK)
+#    define ETHWORK LPWORK
+#  else
+#    error Neither CONFIG_EZ80_EMAC_HPWORK nor CONFIG_EZ80_EMAC_LPWORK defined
+#  endif
+#endif
 
 #ifndef CONFIG_EZ80_RAMADDR
 #  define CONFIG_EZ80_RAMADDR EZ80_EMACSRAM
@@ -244,7 +264,7 @@
 
 /* EMAC statistics (debug only) */
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
+#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_NET)
 struct ez80mac_statistics_s
 {
   uint32_t rx_int;         /* Number of Rx interrupts received */
@@ -321,7 +341,11 @@ struct ez80emac_driver_s
   WDOG_ID txpoll;           /* TX poll timer */
   WDOG_ID txtimeout;        /* TX timeout timer */
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
+  struct work_s txwork;     /* For deferring Tx-related work to the work queue */
+  struct work_s rxwork;     /* For deferring Rx-related work to the work queue */
+  struct work_s syswork;    /* For deferring system work to the work queue */
+
+#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_NET)
   struct ez80mac_statistics_s stat;
 #endif
 
@@ -333,6 +357,10 @@ struct ez80emac_driver_s
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+/* A single packet buffer is used */
+
+static uint8_t g_pktbuf[MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE];
 
 /* There is only a single instance of driver private data (because there is
  * only one EMAC interface.
@@ -371,20 +399,31 @@ static int  ez80emac_receive(struct ez80emac_driver_s *priv);
 
 /* Interrupt handling */
 
-static int  ez80emac_txinterrupt(int irq, FAR void *context);
-static int  ez80emac_rxinterrupt(int irq, FAR void *context);
-static int  ez80emac_sysinterrupt(int irq, FAR void *context);
+static void ez80emac_txinterrupt_work(FAR void *arg);
+static int  ez80emac_txinterrupt(int irq, FAR void *context, FAR void *arg);
+
+static void ez80emac_rxinterrupt_work(FAR void *arg);
+static int  ez80emac_rxinterrupt(int irq, FAR void *context, FAR void *arg);
+
+static void ez80emac_sysinterrupt_work(FAR void *arg);
+static int  ez80emac_sysinterrupt(int irq, FAR void *context, FAR void *arg);
 
 /* Watchdog timer expirations */
 
-static void ez80emac_polltimer(int argc, uint32_t arg, ...);
-static void ez80emac_txtimeout(int argc, uint32_t arg, ...);
+static void ez80emac_txtimeout_work(FAR void *arg);
+static void ez80emac_txtimeout_expiry(int argc, uint32_t arg, ...);
+
+static void ez80emac_poll_work(FAR void *arg);
+static void ez80emac_poll_expiry(int argc, uint32_t arg, ...);
 
 /* NuttX callback functions */
 
 static int  ez80emac_ifup(struct net_driver_s *dev);
 static int  ez80emac_ifdown(struct net_driver_s *dev);
+
+static void ez80emac_txavail_work(FAR void *arg);
 static int  ez80emac_txavail(struct net_driver_s *dev);
+
 #ifdef CONFIG_NET_IGMP
 static int ez80emac_addmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 static int ez80emac_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac);
@@ -574,11 +613,11 @@ static int ez80emac_miiconfigure(FAR struct ez80emac_driver_s *priv)
 
   /* Verify that the detect PHY is an AMD Am87c874 as expected */
 
-#ifdef CONFIG_DEBUG /* Parameter checking only done when DEBUG is enabled */
+#ifdef CONFIG_DEBUG_FEATURES /* Parameter checking only done when DEBUG is enabled */
   phyval = ez80emac_miiread(priv, MII_PHYID1);
   if (phyval != MII_PHYID1_AM79C874)
     {
-      ndbg("Not an Am79c874 PHY: PHY1=%04x vs %04x\n", phyval, MII_PHYID1_AM79C874);
+      nerr("ERROR: Not an Am79c874 PHY: PHY1=%04x vs %04x\n", phyval, MII_PHYID1_AM79C874);
       ret = -ENODEV;
       goto dumpregs;
     }
@@ -586,7 +625,7 @@ static int ez80emac_miiconfigure(FAR struct ez80emac_driver_s *priv)
   phyval = ez80emac_miiread(priv, MII_PHYID2);
   if (phyval != MII_PHYID2_AM79C874)
     {
-      ndbg("Not an Am79c874 PHY: PHY2=%04x vs %04x\n", phyval, MII_PHYID2_AM79C874);
+      nerr("ERROR: Not an Am79c874 PHY: PHY2=%04x vs %04x\n", phyval, MII_PHYID2_AM79C874);
       ret = -ENODEV;
       goto dumpregs;
     }
@@ -618,7 +657,7 @@ static int ez80emac_miiconfigure(FAR struct ez80emac_driver_s *priv)
 
 #if CONFIG_EZ80_PHYCONFIG == EZ80_EMAC_AUTONEG
 
-   ndbg("Configure autonegotiation\n");
+   ninfo("Configure autonegotiation\n");
    if (bauto)
     {
       ez80emac_miiwrite(priv, MII_ADVERTISE,
@@ -628,12 +667,12 @@ static int ez80emac_miiconfigure(FAR struct ez80emac_driver_s *priv)
     }
   else
     {
-      ndbg("Am79c784 is not capable of autonegotiation\n");
+      nerr("ERROR: Am79c784 is not capable of autonegotiation\n");
     }
 
 #elif CONFIG_EZ80_PHYCONFIG == EZ80_EMAC_100BFD
 
-  ndbg("100BASETX full duplex\n");
+  ninfo("100BASETX full duplex\n");
   phyval |= MII_MCR_SPEED100 | MII_MCR_FULLDPLX;
   ez80emac_miiwrite(priv, MII_ADVERTISE,
                     MII_ADVERTISE_100BASETXFULL|MII_ADVERTISE_100BASETXHALF|
@@ -642,7 +681,7 @@ static int ez80emac_miiconfigure(FAR struct ez80emac_driver_s *priv)
 
 #elif CONFIG_EZ80_PHYCONFIG == EZ80_EMAC_100BHD
 
-  ndbg("100BASETX half duplex\n");
+  ninfo("100BASETX half duplex\n");
   phyval |= MII_MCR_SPEED100;
   ez80emac_miiwrite(priv, MII_ADVERTISE,
                     MII_ADVERTISE_100BASETXHALF|MII_ADVERTISE_10BASETXFULL|
@@ -650,14 +689,14 @@ static int ez80emac_miiconfigure(FAR struct ez80emac_driver_s *priv)
 
 #elif CONFIG_EZ80_PHYCONFIG == EZ80_EMAC_10BFD
 
-  ndbg("10BASETX full duplex\n");
+  ninfo("10BASETX full duplex\n");
   phyval |= MII_MCR_FULLDPLX;
   ez80emac_miiwrite(priv, MII_ADVERTISE,
                     MII_ADVERTISE_10BASETXFULL|MII_ADVERTISE_10BASETXHALF|MII_ADVERTISE_CSMA);
 
 #elif CONFIG_EZ80_PHYCONFIG == EZ80_EMAC_10BHD
 
-  ndbg("10BASETX half duplex\n");
+  ninfo("10BASETX half duplex\n");
   ez80emac_miiwrite(priv, MII_ADVERTISE,
                     MII_ADVERTISE_10BASETXHALF|MII_ADVERTISE_CSMA);
 
@@ -681,7 +720,7 @@ static int ez80emac_miiconfigure(FAR struct ez80emac_driver_s *priv)
 
   if ((phyval & MII_MSR_LINKSTATUS) == 0)
     {
-      ndbg("Failed to establish link\n");
+      nerr("ERROR: Failed to establish link\n");
       ret = -ETIMEDOUT;
     }
   else
@@ -700,16 +739,16 @@ static int ez80emac_miiconfigure(FAR struct ez80emac_driver_s *priv)
     }
 
 dumpregs:
-  nvdbg("Am79c874 MII registers (FIAD=%lx)\n", CONFIG_EZ80_FIAD);
-  nvdbg("  MII_MCR:         %04x\n", ez80emac_miiread(priv, MII_MCR));
-  nvdbg("  MII_MSR:         %04x\n", ez80emac_miiread(priv, MII_MSR));
-  nvdbg("  MII_PHYID1:      %04x\n", ez80emac_miiread(priv, MII_PHYID1));
-  nvdbg("  MII_PHYID2:      %04x\n", ez80emac_miiread(priv, MII_PHYID2));
-  nvdbg("  MII_ADVERTISE:   %04x\n", ez80emac_miiread(priv, MII_ADVERTISE));
-  nvdbg("  MII_LPA:         %04x\n", ez80emac_miiread(priv, MII_LPA));
-  nvdbg("  MII_EXPANSION:   %04x\n", ez80emac_miiread(priv, MII_EXPANSION));
-  nvdbg("  MII_DIAGNOSTICS: %04x\n", ez80emac_miiread(priv, MII_AM79C874_DIAGNOSTIC));
-  nvdbg("EMAC CFG1:         %02x\n", inp(EZ80_EMAC_CFG1));
+  ninfo("Am79c874 MII registers (FIAD=%lx)\n", CONFIG_EZ80_FIAD);
+  ninfo("  MII_MCR:         %04x\n", ez80emac_miiread(priv, MII_MCR));
+  ninfo("  MII_MSR:         %04x\n", ez80emac_miiread(priv, MII_MSR));
+  ninfo("  MII_PHYID1:      %04x\n", ez80emac_miiread(priv, MII_PHYID1));
+  ninfo("  MII_PHYID2:      %04x\n", ez80emac_miiread(priv, MII_PHYID2));
+  ninfo("  MII_ADVERTISE:   %04x\n", ez80emac_miiread(priv, MII_ADVERTISE));
+  ninfo("  MII_LPA:         %04x\n", ez80emac_miiread(priv, MII_LPA));
+  ninfo("  MII_EXPANSION:   %04x\n", ez80emac_miiread(priv, MII_EXPANSION));
+  ninfo("  MII_DIAGNOSTICS: %04x\n", ez80emac_miiread(priv, MII_AM79C874_DIAGNOSTIC));
+  ninfo("EMAC CFG1:         %02x\n", inp(EZ80_EMAC_CFG1));
   return ret;
 }
 #else
@@ -731,21 +770,21 @@ static int ez80emac_miiconfigure(FAR struct ez80emac_driver_s *priv)
 
   if (!ez80emac_miipoll(priv, MII_MCR, MII_MCR_ANRESTART, false))
     {
-      ndbg("Autonegotiation didn't start.\n");
+      nerr("ERROR: Autonegotiation didn't start.\n");
     }
 
   /* Wait for auto-negotiation to complete */
 
   if (!ez80emac_miipoll(priv, MII_MSR, MII_MSR_ANEGCOMPLETE, true))
     {
-      ndbg("Autonegotiation didn't complete.\n");
+      nerr("ERROR: Autonegotiation didn't complete.\n");
     }
 
   /* Wait link */
 
   if (!ez80emac_miipoll(priv, MII_MSR, MII_MSR_LINKSTATUS, true))
     {
-      ndbg("Link is down!\n");
+      nwarn("WARNING: Link is down!\n");
       priv->blinkok = false;
     }
   else
@@ -763,7 +802,7 @@ static int ez80emac_miiconfigure(FAR struct ez80emac_driver_s *priv)
 
   if ((advertise & MII_ADVERTISE_100BASETXFULL) && (lpa & MII_LPA_100BASETXFULL))
     {
-      ndbg("100BASETX full duplex\n");
+      ninfo("100BASETX full duplex\n");
       regval            = inp(EZ80_EMAC_CFG1);
       regval           |= EMAC_CFG1_FULLHD; /* Enable full duplex mode */
       outp(EZ80_EMAC_CFG1, regval);
@@ -775,7 +814,7 @@ static int ez80emac_miiconfigure(FAR struct ez80emac_driver_s *priv)
 
   else if ((advertise & MII_ADVERTISE_100BASETXHALF) && (lpa & MII_LPA_100BASETXHALF))
     {
-      ndbg("100BASETX half duplex\n");
+      ninfo("100BASETX half duplex\n");
       regval            = inp(EZ80_EMAC_CFG1);
       regval           &= ~EMAC_CFG1_FULLHD; /* Disable full duplex mode */
       outp(EZ80_EMAC_CFG1, regval);
@@ -787,7 +826,7 @@ static int ez80emac_miiconfigure(FAR struct ez80emac_driver_s *priv)
 
   else if ((advertise & MII_ADVERTISE_10BASETXFULL) && (lpa & MII_LPA_10BASETXFULL))
     {
-      ndbg("10BASETX full duplex\n");
+      ninfo("10BASETX full duplex\n");
       regval            = inp(EZ80_EMAC_CFG1);
       regval           |= EMAC_CFG1_FULLHD; /* Enable full duplex mode */
       outp(EZ80_EMAC_CFG1, regval);
@@ -799,7 +838,7 @@ static int ez80emac_miiconfigure(FAR struct ez80emac_driver_s *priv)
 
   else if ((advertise & MII_ADVERTISE_10BASETXHALF) && (lpa & MII_LPA_10BASETXHALF))
     {
-      ndbg("10BASETX half duplex\n");
+      ninfo("10BASETX half duplex\n");
       regval            = inp(EZ80_EMAC_CFG1);
       regval           &= ~EMAC_CFG1_FULLHD; /* Disable full duplex mode */
       outp(EZ80_EMAC_CFG1, regval);
@@ -808,7 +847,7 @@ static int ez80emac_miiconfigure(FAR struct ez80emac_driver_s *priv)
     }
   else
     {
-      ndbg("No valid connection; force 10Mbps half-duplex.\n");
+      nwarn("WARNING: No valid connection; force 10Mbps half-duplex.\n");
       regval            = inp(EZ80_EMAC_CFG1);
       regval           &= ~EMAC_CFG1_FULLHD; /* Disable full duplex mode */
       outp(EZ80_EMAC_CFG1, regval);
@@ -838,15 +877,15 @@ static int ez80emac_miiconfigure(FAR struct ez80emac_driver_s *priv)
   mcr |= MII_MCR_ANENABLE;
   ez80emac_miiwrite(priv, MII_MCR, mcr);
 
-  nvdbg("MII registers (FIAD=%lx)\n", CONFIG_EZ80_FIAD);
-  nvdbg("  MII_MCR:       %04x\n", ez80emac_miiread(priv, MII_MCR));
-  nvdbg("  MII_MSR:       %04x\n", ez80emac_miiread(priv, MII_MSR));
-  nvdbg("  MII_PHYID1:    %04x\n", ez80emac_miiread(priv, MII_PHYID1));
-  nvdbg("  MII_PHYID2:    %04x\n", ez80emac_miiread(priv, MII_PHYID2));
-  nvdbg("  MII_ADVERTISE: %04x\n", ez80emac_miiread(priv, MII_ADVERTISE));
-  nvdbg("  MII_LPA:       %04x\n", ez80emac_miiread(priv, MII_LPA));
-  nvdbg("  MII_EXPANSION: %04x\n", ez80emac_miiread(priv, MII_EXPANSION));
-  nvdbg("EMAC CFG1:         %02x\n", inp(EZ80_EMAC_CFG11));
+  ninfo("MII registers (FIAD=%lx)\n", CONFIG_EZ80_FIAD);
+  ninfo("  MII_MCR:       %04x\n", ez80emac_miiread(priv, MII_MCR));
+  ninfo("  MII_MSR:       %04x\n", ez80emac_miiread(priv, MII_MSR));
+  ninfo("  MII_PHYID1:    %04x\n", ez80emac_miiread(priv, MII_PHYID1));
+  ninfo("  MII_PHYID2:    %04x\n", ez80emac_miiread(priv, MII_PHYID2));
+  ninfo("  MII_ADVERTISE: %04x\n", ez80emac_miiread(priv, MII_ADVERTISE));
+  ninfo("  MII_LPA:       %04x\n", ez80emac_miiread(priv, MII_LPA));
+  ninfo("  MII_EXPANSION: %04x\n", ez80emac_miiread(priv, MII_EXPANSION));
+  ninfo("EMAC CFG1:         %02x\n", inp(EZ80_EMAC_CFG11));
   return OK;
 }
 #endif
@@ -960,9 +999,9 @@ static int ez80emac_transmit(struct ez80emac_driver_s *priv)
    * handler and, therefore, may be suspended when debug output is generated!
    */
 
-  nllvdbg("txnext=%p {%06x, %u, %04x} trp=%02x%02x\n",
-          priv->txnext, priv->txnext->np, priv->txnext->pktsize, priv->txnext->stat,
-          inp(EZ80_EMAC_TRP_H), inp(EZ80_EMAC_TRP_L));
+  ninfo("txnext=%p {%06x, %u, %04x} trp=%02x%02x\n",
+        priv->txnext, priv->txnext->np, priv->txnext->pktsize, priv->txnext->stat,
+        inp(EZ80_EMAC_TRP_H), inp(EZ80_EMAC_TRP_L));
 
   /* Increment statistics */
 
@@ -1039,15 +1078,16 @@ static int ez80emac_transmit(struct ez80emac_driver_s *priv)
   outp(EZ80_EMAC_PTMR, EMAC_PTMR);
   leave_critical_section(flags);
 
-  nllvdbg("txdesc=%p {%06x, %u, %04x}\n",
-          txdesc, txdesc->np, txdesc->pktsize, txdesc->stat);
-  nllvdbg("txnext=%p {%06x, %u, %04x} trp=%02x%02x\n",
-          txnext, txnext->np, txnext->pktsize, txnext->stat,
-          inp(EZ80_EMAC_TRP_H), inp(EZ80_EMAC_TRP_L));
+  ninfo("txdesc=%p {%06x, %u, %04x}\n",
+        txdesc, txdesc->np, txdesc->pktsize, txdesc->stat);
+  ninfo("txnext=%p {%06x, %u, %04x} trp=%02x%02x\n",
+        txnext, txnext->np, txnext->pktsize, txnext->stat,
+        inp(EZ80_EMAC_TRP_H), inp(EZ80_EMAC_TRP_L));
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  (void)wd_start(priv->txtimeout, EMAC_TXTIMEOUT, ez80emac_txtimeout, 1, (uint32_t)priv);
+  (void)wd_start(priv->txtimeout, EMAC_TXTIMEOUT,
+                 ez80emac_txtimeout_expiry, 1, (uint32_t)priv);
   return OK;
 }
 
@@ -1082,7 +1122,7 @@ static int ez80emac_txpoll(struct net_driver_s *dev)
    * the field d_len is set to a value > 0.
    */
 
-  nvdbg("Poll result: d_len=%d\n", priv->dev.d_len);
+  ninfo("Poll result: d_len=%d\n", priv->dev.d_len);
   if (priv->dev.d_len > 0)
     {
       /* Look up the destination MAC address and add it to the Ethernet
@@ -1197,7 +1237,7 @@ static int ez80emac_receive(struct ez80emac_driver_s *priv)
    */
 
   rwp = ez80emac_rwp();
-  nvdbg("rxnext=%p {%06x, %u, %04x} rrp=%06x rwp=%06x blkslft=%02x\n",
+  ninfo("rxnext=%p {%06x, %u, %04x} rrp=%06x rwp=%06x blkslft=%02x\n",
         rxdesc, rxdesc->np, rxdesc->pktsize, rxdesc->stat,
         ez80emac_rrp(), rwp,
         inp(EZ80_EMAC_BLKSLFT_H), inp(EZ80_EMAC_BLKSLFT_L));
@@ -1222,7 +1262,7 @@ static int ez80emac_receive(struct ez80emac_driver_s *priv)
 
       if ((rxdesc->stat & EMAC_RXDESC_OK) == 0)
         {
-          nvdbg("Skipping bad RX pkt: %04x\n", rxdesc->stat);
+          ninfo("Skipping bad RX pkt: %04x\n", rxdesc->stat);
           EMAC_STAT(priv, rx_errors);
           EMAC_STAT(priv, rx_nok);
           continue;
@@ -1234,7 +1274,7 @@ static int ez80emac_receive(struct ez80emac_driver_s *priv)
 
       if (rxdesc->pktsize > CONFIG_NET_ETH_MTU)
         {
-          nvdbg("Truncated oversize RX pkt: %d->%d\n", rxdesc->pktsize, CONFIG_NET_ETH_MTU);
+          ninfo("Truncated oversize RX pkt: %d->%d\n", rxdesc->pktsize, CONFIG_NET_ETH_MTU);
           pktlen = CONFIG_NET_ETH_MTU;
         }
       else
@@ -1252,7 +1292,7 @@ static int ez80emac_receive(struct ez80emac_driver_s *priv)
      if ((FAR uint8_t*)(psrc + pktlen) > (FAR uint8_t*)priv->rxendp1)
         {
           int nbytes = (int)((FAR uint8_t*)priv->rxendp1 - (FAR uint8_t*)psrc);
-          nvdbg("RX wraps after %d bytes\n", nbytes + SIZEOF_EMACSDESC);
+          ninfo("RX wraps after %d bytes\n", nbytes + SIZEOF_EMACSDESC);
 
           memcpy(pdest, psrc, nbytes);
           memcpy(&pdest[nbytes], priv->rxstart, pktlen - nbytes);
@@ -1288,7 +1328,7 @@ static int ez80emac_receive(struct ez80emac_driver_s *priv)
       outp(EZ80_EMAC_RRP_L, (uint8_t)((uint24_t)rxdesc & 0xff));
       outp(EZ80_EMAC_RRP_H, (uint8_t)(((uint24_t)rxdesc >> 8) & 0xff));
 
-      nvdbg("rxnext=%p {%06x, %u, %04x} rrp=%06x rwp=%06x blkslft=%02x\n",
+      ninfo("rxnext=%p {%06x, %u, %04x} rrp=%06x rwp=%06x blkslft=%02x\n",
             rxdesc, rxdesc->np, rxdesc->pktsize, rxdesc->stat,
             ez80emac_rrp(), rwp,
             inp(EZ80_EMAC_BLKSLFT_H), inp(EZ80_EMAC_BLKSLFT_L));
@@ -1304,7 +1344,7 @@ static int ez80emac_receive(struct ez80emac_driver_s *priv)
 #ifdef CONFIG_NET_IPv4
       if (ETHBUF->type == HTONS(ETHTYPE_IP))
         {
-          nllvdbg("IPv4 frame\n");
+          ninfo("IPv4 frame\n");
 
           /* Handle ARP on input then give the IPv4 packet to the network
            * layer
@@ -1345,7 +1385,7 @@ static int ez80emac_receive(struct ez80emac_driver_s *priv)
 #ifdef CONFIG_NET_IPv6
       if (ETHBUF->type == HTONS(ETHTYPE_IP6))
         {
-          nllvdbg("Iv6 frame\n");
+          ninfo("Iv6 frame\n");
 
           /* Give the IPv6 packet to the network layer */
 
@@ -1383,7 +1423,7 @@ static int ez80emac_receive(struct ez80emac_driver_s *priv)
 #ifdef CONFIG_NET_ARP
       if (ETHBUF->type == htons(ETHTYPE_ARP))
         {
-          nvdbg("ARP packet received (%02x)\n", ETHBUF->type);
+          ninfo("ARP packet received (%02x)\n", ETHBUF->type);
           EMAC_STAT(priv, rx_arp);
 
           arp_arpin(&priv->dev);
@@ -1400,7 +1440,7 @@ static int ez80emac_receive(struct ez80emac_driver_s *priv)
       else
 #endif
         {
-          ndbg("Unsupported packet type dropped (%02x)\n", ETHBUF->type);
+          ninfo("Unsupported packet type dropped (%02x)\n", ETHBUF->type);
           EMAC_STAT(priv, rx_dropped);
         }
 
@@ -1410,26 +1450,32 @@ static int ez80emac_receive(struct ez80emac_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: ez80emac_txinterrupt
+ * Function: ez80emac_txinterrupt_work
  *
  * Description:
- *   Process Rx-related interrupt events
+ *   Perform Tx interrupt related work from the worker thread
  *
  * Parameters:
- *   priv  - Driver data instance
- *   istat - Snapshot of ISTAT register containing Rx events to provess
+ *   arg - The argument passed when work_queue() was called.
  *
  * Returned Value:
- *  None
+ *   OK on success
+ *
+ * Assumptions:
+ *   The network is locked.
  *
  ****************************************************************************/
 
-static int ez80emac_txinterrupt(int irq, FAR void *context)
+static void ez80emac_txinterrupt_work(FAR void *arg)
 {
-  FAR struct ez80emac_driver_s *priv = &g_emac;
+  FAR struct ez80emac_driver_s *priv = (FAR struct ez80emac_driver_s *)arg;
   FAR struct ez80emac_desc_s *txhead = priv->txhead;
   uint8_t regval;
   uint8_t istat;
+
+  /* Process pending Ethernet Tx interrupts */
+
+  net_lock();
 
   /* EMAC Tx interrupts:
    *
@@ -1448,7 +1494,7 @@ static int ez80emac_txinterrupt(int irq, FAR void *context)
 
   /* All events are packet/control frame transmit complete events */
 
-  nvdbg("txhead=%p {%06x, %u, %04x} trp=%02x%02x istat=%02x\n",
+  ninfo("txhead=%p {%06x, %u, %04x} trp=%02x%02x istat=%02x\n",
         txhead, txhead->np, txhead->pktsize, txhead->stat,
         inp(EZ80_EMAC_TRP_H), inp(EZ80_EMAC_TRP_L), istat);
 
@@ -1458,9 +1504,9 @@ static int ez80emac_txinterrupt(int irq, FAR void *context)
     {
       if ((txhead->stat & EMAC_TXDESC_ABORT) != 0)
         {
-          ndbg("Descriptor %p aborted {%06x, %u, %04x} trp=%02x%02x\n",
-               txhead, txhead->np, txhead->pktsize, txhead->stat,
-               inp(EZ80_EMAC_TRP_H), inp(EZ80_EMAC_TRP_L));
+          nwarn("WARNING: Descriptor %p aborted {%06x, %u, %04x} trp=%02x%02x\n",
+                txhead, txhead->np, txhead->pktsize, txhead->stat,
+                inp(EZ80_EMAC_TRP_H), inp(EZ80_EMAC_TRP_L));
 
           EMAC_STAT(priv, tx_errors);
           EMAC_STAT(priv, tx_abterrors);
@@ -1471,7 +1517,7 @@ static int ez80emac_txinterrupt(int irq, FAR void *context)
       txhead = (FAR struct ez80emac_desc_s *)txhead->np;
       if (txhead)
         {
-          nvdbg("txhead=%p {%06x, %u, %04x} trp=%02x%02x\n",
+          ninfo("txhead=%p {%06x, %u, %04x} trp=%02x%02x\n",
                 txhead, txhead->np, txhead->pktsize, txhead->stat,
                 inp(EZ80_EMAC_TRP_H), inp(EZ80_EMAC_TRP_L));
         }
@@ -1484,7 +1530,7 @@ static int ez80emac_txinterrupt(int irq, FAR void *context)
   priv->txhead = txhead;
   if (!priv->txhead)
     {
-      nvdbg("No pending Tx.. Stopping XMIT function.\n");
+      ninfo("No pending Tx.. Stopping XMIT function.\n");
 
       /* Stop the Tx poll timer. (It will get restarted when we have
        * something to send
@@ -1511,28 +1557,87 @@ static int ez80emac_txinterrupt(int irq, FAR void *context)
       wd_cancel(priv->txtimeout);
     }
 
+  net_unlock();
+
+  /* Re-enable Ethernet Tx interrupts */
+
+  up_enable_irq(EZ80_EMACRX_IRQ);
+}
+
+/****************************************************************************
+ * Function: ez80emac_txinterrupt
+ *
+ * Description:
+ *   Process Tx-related interrupt events
+ *
+ * Parameters:
+ *   irq     - Number of the IRQ that generated the interrupt
+ *   context - Interrupt register state save info (architecture-specific)
+ *
+ * Returned Value:
+ *   OK on success
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static int ez80emac_txinterrupt(int irq, FAR void *context, FAR void *arg)
+{
+  FAR struct ez80emac_driver_s *priv = &g_emac;
+  uint8_t istat;
+
+  /* Disable further Ethernet Tx interrupts.  Because Ethernet interrupts are
+   * also disabled if the TX timeout event occurs, there can be no race
+   * condition here.
+   */
+
+  up_disable_irq(EZ80_EMACTX_IRQ);
+
+  /* Determine if a TX transfer just completed */
+
+  istat = inp(EZ80_EMAC_ISTAT);
+  if ((istat & EMAC_ISTAT_TXDONE) != 0)
+    {
+      /* If a TX transfer just completed, then cancel the TX timeout so
+       * there will be no race condition between any subsequent timeout
+       * expiration and the deferred interrupt processing.
+       */
+
+       wd_cancel(priv->txtimeout);
+    }
+
+  /* Schedule to perform the Tx interrupt processing on the worker thread. */
+
+  work_queue(ETHWORK, &priv->txwork, ez80emac_txinterrupt_work, priv, 0);
+
   return OK;
 }
 
 /****************************************************************************
- * Function: ez80emac_rxinterrupt
+ * Function: ez80emac_rxinterrupt_work
  *
  * Description:
- *   Process Rx-related interrupt events
+ *   Perform Rx interrupt related work from the worker thread
  *
  * Parameters:
- *   priv  - Driver data instance
- *   istat - Snapshot of ISTAT register containing Rx events to provess
+ *   arg - The argument passed when work_queue() was called.
  *
  * Returned Value:
- *   None
+ *   OK on success
+ *
+ * Assumptions:
+ *   The network is locked.
  *
  ****************************************************************************/
 
-static int ez80emac_rxinterrupt(int irq, FAR void *context)
+static void ez80emac_rxinterrupt_work(FAR void *arg)
 {
-  FAR struct ez80emac_driver_s *priv   = &g_emac;
+  FAR struct ez80emac_driver_s *priv = (FAR struct ez80emac_driver_s *)arg;
   uint8_t  istat;
+
+  /* Process pending Ethernet Rx interrupts */
+
+  net_lock();
 
   /* EMAC Rx interrupts:
    *
@@ -1554,14 +1659,18 @@ static int ez80emac_rxinterrupt(int irq, FAR void *context)
   /* Process any RX packets pending the RX buffer */
 
   (void)ez80emac_receive(priv);
-  return OK;
+  net_unlock();
+
+  /* Re-enable Ethernet Rx interrupts */
+
+  up_enable_irq(EZ80_EMACRX_IRQ);
 }
 
 /****************************************************************************
- * Function: ez80emac_sysinterrupt
+ * Function: ez80emac_rxinterrupt
  *
  * Description:
- *   Hardware interrupt handler
+ *   Process Rx-related interrupt events
  *
  * Parameters:
  *   irq     - Number of the IRQ that generated the interrupt
@@ -1574,11 +1683,49 @@ static int ez80emac_rxinterrupt(int irq, FAR void *context)
  *
  ****************************************************************************/
 
-static int ez80emac_sysinterrupt(int irq, FAR void *context)
+static int ez80emac_rxinterrupt(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct ez80emac_driver_s *priv = &g_emac;
+
+  /* Disable further Ethernet Rx interrupts.  Because Ethernet interrupts are
+   * also disabled if the TX timeout event occurs, there can be no race
+   * condition here.
+   */
+
+  up_disable_irq(EZ80_EMACRX_IRQ);
+
+  /* Schedule to perform the Rx interrupt processing on the worker thread. */
+
+  work_queue(ETHWORK, &priv->rxwork,  ez80emac_rxinterrupt_work, priv, 0);
+  return OK;
+}
+
+/****************************************************************************
+ * Function: ez80emac_sysinterrupt_work
+ *
+ * Description:
+ *   Perform system interrupt related work from the worker thread
+ *
+ * Parameters:
+ *   arg - The argument passed when work_queue() was called.
+ *
+ * Returned Value:
+ *   OK on success
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+static void ez80emac_sysinterrupt_work(FAR void *arg)
+{
+  FAR struct ez80emac_driver_s *priv = (FAR struct ez80emac_driver_s *)arg;
   uint8_t events;
   uint8_t istat;
+
+  /* Process pending system interrupts */
+
+  net_lock();
 
   /* EMAC system interrupts :
    *
@@ -1604,7 +1751,7 @@ static int ez80emac_sysinterrupt(int irq, FAR void *context)
 
   if ((istat & EMAC_ISTAT_TXFSMERR) != 0)
     {
-      ndbg("Tx FSMERR txhead=%p {%06x, %u, %04x} trp=%02x%02x istat=%02x\n",
+      nwarn("WARNING: Tx FSMERR txhead=%p {%06x, %u, %04x} trp=%02x%02x istat=%02x\n",
            priv->txhead, priv->txhead->np, priv->txhead->pktsize, priv->txhead->stat,
            inp(EZ80_EMAC_TRP_H), inp(EZ80_EMAC_TRP_L), istat);
 
@@ -1620,7 +1767,7 @@ static int ez80emac_sysinterrupt(int irq, FAR void *context)
 
   if ((istat & EMAC_ISTAT_RXOVR) != 0)
     {
-      ndbg("Rx OVR rxnext=%p {%06x, %u, %04x} rrp=%02x%02x rwp=%02x%02x blkslft=%02x istat=%02x\n",
+      nwarn("WARNING: Rx OVR rxnext=%p {%06x, %u, %04x} rrp=%02x%02x rwp=%02x%02x blkslft=%02x istat=%02x\n",
            priv->rxnext, priv->rxnext->np, priv->rxnext->pktsize, priv->rxnext->stat,
            inp(EZ80_EMAC_RRP_H), inp(EZ80_EMAC_RRP_L),
            inp(EZ80_EMAC_RWP_H), inp(EZ80_EMAC_RWP_L),
@@ -1632,31 +1779,73 @@ static int ez80emac_sysinterrupt(int irq, FAR void *context)
       EMAC_STAT(priv, rx_errors);
       EMAC_STAT(priv, rx_ovrerrors);
     }
-  return OK;
+
+  net_unlock();
+
+  /* Re-enable Ethernet system interrupts */
+
+  up_enable_irq(EZ80_EMACSYS_IRQ);
 }
 
 /****************************************************************************
- * Function: ez80emac_txtimeout
+ * Function: ez80emac_sysinterrupt
  *
  * Description:
- *   Our TX watchdog timed out.  Called from the timer interrupt handler.
- *   The last TX never completed.  Reset the hardware and start again.
+ *   System interrupt handler
  *
  * Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   irq     - Number of the IRQ that generated the interrupt
+ *   context - Interrupt register state save info (architecture-specific)
  *
  * Returned Value:
- *   None
+ *   OK on success
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-static void ez80emac_txtimeout(int argc, uint32_t arg, ...)
+static int ez80emac_sysinterrupt(int irq, FAR void *context, FAR void *arg)
+{
+  FAR struct ez80emac_driver_s *priv = &g_emac;
+
+  /* Disable further Ethernet interrupts.  Because Ethernet interrupts are
+   * also disabled if the TX timeout event occurs, there can be no race
+   * condition here.
+   */
+
+  up_disable_irq(EZ80_EMACSYS_IRQ);
+
+  /* Schedule to perform the interrupt processing on the worker thread. */
+
+  work_queue(ETHWORK, &priv->syswork,  ez80emac_sysinterrupt_work, priv, 0);
+  return OK;
+}
+
+/****************************************************************************
+ * Function: ez80emac_txtimeout_work
+ *
+ * Description:
+ *   Perform TX timeout related work from the worker thread
+ *
+ * Parameters:
+ *   arg - The argument passed when work_queue() as called.
+ *
+ * Returned Value:
+ *   OK on success
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+static void ez80emac_txtimeout_work(FAR void *arg)
 {
   FAR struct ez80emac_driver_s *priv = (FAR struct ez80emac_driver_s *)arg;
   irqstate_t flags;
+
+  /* Process pending Ethernet interrupts */
+
+  net_lock();
 
   /* Increment statistics and dump debug info */
 
@@ -1673,10 +1862,78 @@ static void ez80emac_txtimeout(int argc, uint32_t arg, ...)
   /* Then poll the network for new XMIT data */
 
   (void)devif_poll(&priv->dev, ez80emac_txpoll);
+  net_unlock();
 }
 
 /****************************************************************************
- * Function: ez80emac_polltimer
+ * Function: ez80emac_txtimeout_expiry
+ *
+ * Description:
+ *   Our TX watchdog timed out.  Called from the timer interrupt handler.
+ *   The last TX never completed.  Reset the hardware and start again.
+ *
+ * Parameters:
+ *   argc - The number of available arguments
+ *   arg  - The first argument
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Global interrupts are disabled by the watchdog logic.
+ *
+ ****************************************************************************/
+
+static void ez80emac_txtimeout_expiry(int argc, wdparm_t arg, ...)
+{
+  FAR struct ez80emac_driver_s *priv = (FAR struct ez80emac_driver_s *)arg;
+
+  /* Disable further Ethernet Tx interrupts.  This will prevent some race
+   * conditions with interrupt work.  There is still a potential race
+   * condition with interrupt work that is already queued and in progress.
+   */
+
+  up_disable_irq(EZ80_EMACTX_IRQ);
+
+  /* Schedule to perform the TX timeout processing on the worker thread. */
+
+  work_queue(ETHWORK, &priv->txwork, ez80emac_txtimeout_work, priv, 0);
+}
+
+/****************************************************************************
+ * Function: ez80emac_poll_work
+ *
+ * Description:
+ *   Perform periodic polling from the worker thread
+ *
+ * Parameters:
+ *   arg - The argument passed when work_queue() as called.
+ *
+ * Returned Value:
+ *   OK on success
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+static void ez80emac_poll_work(FAR void *arg)
+{
+  FAR struct ez80emac_driver_s *priv = (FAR struct ez80emac_driver_s *)arg;
+
+  /* Poll the network for new XMIT data */
+
+  net_lock();
+  (void)devif_timer(&priv->dev, ez80emac_txpoll);
+
+  /* Setup the watchdog poll timer again */
+
+  (void)wd_start(priv->txpoll, EMAC_WDDELAY, ez80emac_poll_expiry, 1, priv);
+  net_unlock();
+}
+
+/****************************************************************************
+ * Function: ez80emac_poll_expiry
  *
  * Description:
  *   Periodic timer handler.  Called from the timer interrupt handler.
@@ -1689,20 +1946,33 @@ static void ez80emac_txtimeout(int argc, uint32_t arg, ...)
  *   None
  *
  * Assumptions:
+ *   Global interrupts are disabled by the watchdog logic.
  *
  ****************************************************************************/
 
-static void ez80emac_polltimer(int argc, uint32_t arg, ...)
+static void ez80emac_poll_expiry(int argc, wdparm_t arg, ...)
 {
-  struct ez80emac_driver_s *priv = (struct ez80emac_driver_s *)arg;
+  FAR struct ez80emac_driver_s *priv = (FAR struct ez80emac_driver_s *)arg;
 
-  /* Poll the network for new XMIT data */
+  /* Is our single work structure available?  It may not be if there are
+   * pending interrupt actions.
+   */
 
-  (void)devif_timer(&priv->dev, ez80emac_txpoll);
+  if (work_available(&priv->syswork))
+    {
+      /* Schedule to perform the interrupt processing on the worker thread. */
 
-  /* Setup the watchdog poll timer again */
+      work_queue(ETHWORK, &priv->syswork, ez80emac_poll_work, priv, 0);
+    }
+  else
+    {
+      /* No.. Just re-start the watchdog poll timer, missing one polling
+       * cycle.
+       */
 
-  (void)wd_start(priv->txpoll, EMAC_WDDELAY, ez80emac_polltimer, 1, arg);
+      (void)wd_start(priv->txpoll, EMAC_WDDELAY, ez80emac_poll_expiry,
+                     1, arg);
+    }
 }
 
 /****************************************************************************
@@ -1728,13 +1998,13 @@ static int ez80emac_ifup(FAR struct net_driver_s *dev)
   uint8_t regval;
   int ret;
 
-  ndbg("Bringing up: MAC %02x:%02x:%02x:%02x:%02x:%02x\n",
-       dev->d_mac.ether_addr_octet[0], dev->d_mac.ether_addr_octet[1],
-       dev->d_mac.ether_addr_octet[2], dev->d_mac.ether_addr_octet[3],
-       dev->d_mac.ether_addr_octet[4], dev->d_mac.ether_addr_octet[5]);
-  ndbg("             IP  %d.%d.%d.%d\n",
-       dev->d_ipaddr >> 24,       (dev->d_ipaddr >> 16) & 0xff,
-      (dev->d_ipaddr >> 8) & 0xff, dev->d_ipaddr & 0xff);
+  ninfo("Bringing up: MAC %02x:%02x:%02x:%02x:%02x:%02x\n",
+        dev->d_mac.ether_addr_octet[0], dev->d_mac.ether_addr_octet[1],
+        dev->d_mac.ether_addr_octet[2], dev->d_mac.ether_addr_octet[3],
+        dev->d_mac.ether_addr_octet[4], dev->d_mac.ether_addr_octet[5]);
+  ninfo("             IP  %d.%d.%d.%d\n",
+        dev->d_ipaddr >> 24,       (dev->d_ipaddr >> 16) & 0xff,
+       (dev->d_ipaddr >> 8) & 0xff, dev->d_ipaddr & 0xff);
 
   /* Bring up the interface -- Must be down right now */
 
@@ -1788,7 +2058,8 @@ static int ez80emac_ifup(FAR struct net_driver_s *dev)
 
       /* Set and activate a timer process */
 
-     (void)wd_start(priv->txpoll, EMAC_WDDELAY, ez80emac_polltimer, 1, (uint32_t)priv);
+     (void)wd_start(priv->txpoll, EMAC_WDDELAY, ez80emac_poll_expiry,
+                    1, (uint32_t)priv);
 
       /* Enable the Ethernet interrupts */
 
@@ -1851,6 +2122,42 @@ static int ez80emac_ifdown(struct net_driver_s *dev)
 }
 
 /****************************************************************************
+ * Function: ez80emac_txavail_work
+ *
+ * Description:
+ *   Perform an out-of-cycle poll on the worker thread.
+ *
+ * Parameters:
+ *   arg - Reference to the NuttX driver state structure (cast to void*)
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Called on the higher priority worker thread.
+ *
+ ****************************************************************************/
+
+static void ez80emac_txavail_work(FAR void *arg)
+{
+  FAR struct ez80emac_driver_s *priv = (FAR struct ez80emac_driver_s *)arg;
+
+  /* Ignore the notification if the interface is not yet up */
+
+  net_lock();
+  if (priv->bifup)
+    {
+      /* Check if there is room in the hardware to hold another outgoing packet. */
+
+      /* If so, then poll the network for new XMIT data */
+
+      (void)devif_poll(&priv->dev, ez80emac_txpoll);
+    }
+
+  net_unlock();
+}
+
+/****************************************************************************
  * Function: ez80emac_txavail
  *
  * Description:
@@ -1859,7 +2166,7 @@ static int ez80emac_ifdown(struct net_driver_s *dev)
  *   latency.
  *
  * Parameters:
- *   dev  - Reference to the NuttX driver state structure
+ *   dev - Reference to the NuttX driver state structure
  *
  * Returned Value:
  *   None
@@ -1869,26 +2176,22 @@ static int ez80emac_ifdown(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static int ez80emac_txavail(struct net_driver_s *dev)
+static int ez80emac_txavail(FAR struct net_driver_s *dev)
 {
-  struct ez80emac_driver_s *priv = (struct ez80emac_driver_s *)dev->d_private;
-  irqstate_t flags;
+  FAR struct ez80emac_driver_s *priv = (FAR struct ez80emac_driver_s *)dev->d_private;
 
-  flags = enter_critical_section();
+  /* Is our single work structure available?  It may not be if there are
+   * pending interrupt actions and we will have to ignore the Tx
+   * availability action.
+   */
 
-  /* Ignore the notification if the interface is not yet up */
-
-  if (priv->bifup)
+  if (work_available(&priv->syswork))
     {
+      /* Schedule to serialize the poll on the worker thread. */
 
-      /* Check if there is room in the hardware to hold another outgoing packet. */
-
-      /* If so, then poll the network for new XMIT data */
-
-      (void)devif_poll(&priv->dev, ez80emac_txpoll);
+      work_queue(ETHWORK, &priv->syswork, ez80emac_txavail_work, priv, 0);
     }
 
-  leave_critical_section(flags);
   return OK;
 }
 
@@ -2009,7 +2312,7 @@ static int ez80_emacinitialize(void)
   priv->txnext->pktsize = 0;
   priv->txnext->stat    = 0;
 
-  nvdbg("txnext=%p {%06x, %u, %04x} tlbp=%02x%02x trp=%02x%02x\n",
+  ninfo("txnext=%p {%06x, %u, %04x} tlbp=%02x%02x trp=%02x%02x\n",
         priv->txnext, priv->txnext->np, priv->txnext->pktsize, priv->txnext->stat,
         inp(EZ80_EMAC_TLBP_H), inp(EZ80_EMAC_TLBP_L),
         inp(EZ80_EMAC_TRP_H), inp(EZ80_EMAC_TRP_L));
@@ -2030,7 +2333,7 @@ static int ez80_emacinitialize(void)
   priv->rxnext->pktsize = 0;
   priv->rxnext->stat    = 0;
 
-  nvdbg("rxnext=%p {%06x, %u, %04x} bp=%02x%02x\n",
+  ninfo("rxnext=%p {%06x, %u, %04x} bp=%02x%02x\n",
         priv->rxnext, priv->rxnext->np, priv->rxnext->pktsize, priv->rxnext->stat,
         inp(EZ80_EMAC_BP_H), inp(EZ80_EMAC_BP_L));
 
@@ -2050,7 +2353,7 @@ static int ez80_emacinitialize(void)
   outp(EZ80_EMAC_RRP_L, (uint8_t)(addr & 0xff));
   outp(EZ80_EMAC_RRP_H, (uint8_t)((addr >> 8) & 0xff));
 
-  nvdbg("rrp=%02x%02x rwp=%02x%02x\n",
+  ninfo("rrp=%02x%02x rwp=%02x%02x\n",
         inp(EZ80_EMAC_RRP_H), inp(EZ80_EMAC_RRP_L),
         inp(EZ80_EMAC_RWP_H), inp(EZ80_EMAC_RWP_L));
 
@@ -2063,7 +2366,7 @@ static int ez80_emacinitialize(void)
   outp(EZ80_EMAC_RHBP_H, (uint8_t)((addr >> 8) & 0xff));
   priv->rxendp1 = (FAR struct ez80emac_desc_s *)addr;
 
-  nvdbg("rxendp1=%p rhbp=%02x%02x\n",
+  ninfo("rxendp1=%p rhbp=%02x%02x\n",
         priv->rxendp1,
         inp(EZ80_EMAC_RHBP_H), inp(EZ80_EMAC_RHBP_L));
 
@@ -2072,7 +2375,7 @@ static int ez80_emacinitialize(void)
    */
 
   outp(EZ80_EMAC_BUFSZ, EMAC_BUFSZ);
-  nvdbg("bufsz=%02x blksleft=%02x%02x\n",
+  ninfo("bufsz=%02x blksleft=%02x%02x\n",
         inp(EZ80_EMAC_BUFSZ), inp(EZ80_EMAC_BLKSLFT_H), inp(EZ80_EMAC_BLKSLFT_L));
 
   /* Software reset */
@@ -2084,7 +2387,7 @@ static int ez80_emacinitialize(void)
   regval &= ~EMAC_RST_SRST;
   outp(EZ80_EMAC_RST, regval);
 
-  nvdbg("After soft reset: rwp=%02x%02x trp=%02x%02x\n",
+  ninfo("After soft reset: rwp=%02x%02x trp=%02x%02x\n",
         inp(EZ80_EMAC_RWP_H), inp(EZ80_EMAC_RWP_L),
         inp(EZ80_EMAC_TRP_H), inp(EZ80_EMAC_TRP_L));
 
@@ -2094,7 +2397,7 @@ static int ez80_emacinitialize(void)
   ez80emac_miiwrite(priv, MII_MCR, MII_MCR_RESET);
   if (!ez80emac_miipoll(priv, MII_MCR, MII_MCR_RESET, false))
     {
-      ndbg("PHY reset error.\n");
+      nerr("ERROR: PHY reset error.\n");
     }
 
   /*  Initialize MAC */
@@ -2149,7 +2452,7 @@ static int ez80_emacinitialize(void)
   ez80emac_miiwrite(priv, MII_MCR, MII_MCR_RESET);
   if (!ez80emac_miipoll(priv, MII_MCR, MII_MCR_RESET, false))
     {
-      ndbg("PHY reset error.\n");
+      nerr("ERROR: PHY reset error.\n");
       ret = -EIO;
       goto errout;
     }
@@ -2197,26 +2500,26 @@ int up_netinitialize(void)
 
   /* Attach IRQs */
 
-  ret = irq_attach(EZ80_EMACSYS_IRQ, ez80emac_sysinterrupt);
+  ret = irq_attach(EZ80_EMACSYS_IRQ, ez80emac_sysinterrupt, NULL);
   if (ret < 0)
     {
-      nlldbg("Unable to attach IRQ %d\n", EZ80_EMACSYS_IRQ);
+      nerr("ERROR: Unable to attach IRQ %d\n", EZ80_EMACSYS_IRQ);
       ret = -EAGAIN;
       goto errout;
     }
 
-  ret = irq_attach(EZ80_EMACRX_IRQ, ez80emac_rxinterrupt);
+  ret = irq_attach(EZ80_EMACRX_IRQ, ez80emac_rxinterrupt, NULL);
   if (ret < 0)
     {
-      nlldbg("Unable to attach IRQ %d\n", EZ80_EMACRX_IRQ);
+      nerr("ERROR: Unable to attach IRQ %d\n", EZ80_EMACRX_IRQ);
       ret = -EAGAIN;
       goto errout;
     }
 
-  ret = irq_attach(EZ80_EMACTX_IRQ, ez80emac_txinterrupt);
+  ret = irq_attach(EZ80_EMACTX_IRQ, ez80emac_txinterrupt, NULL);
   if (ret < 0)
     {
-      nlldbg("Unable to attach IRQ %d\n", EZ80_EMACTX_IRQ);
+      nerr("ERROR: Unable to attach IRQ %d\n", EZ80_EMACTX_IRQ);
       ret = -EAGAIN;
       goto errout;
     }
@@ -2224,6 +2527,7 @@ int up_netinitialize(void)
   /* Initialize the driver structure */
 
   memset(&g_emac, 0, sizeof(struct ez80emac_driver_s));
+  priv->dev.d_buf     = g_pktbuf;           /* Single packet buffer */
   priv->dev.d_ifup    = ez80emac_ifup;      /* I/F down callback */
   priv->dev.d_ifdown  = ez80emac_ifdown;    /* I/F up (new IP address) callback */
   priv->dev.d_txavail = ez80emac_txavail;   /* New TX data callback */

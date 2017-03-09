@@ -46,7 +46,6 @@
 #include <time.h>
 
 #include "sam4cm_tc.h"
-#include "sam4cm_freerun.h"
 
 #ifdef CONFIG_SAM34_ONESHOT
 
@@ -83,11 +82,13 @@ struct sam_oneshot_s
   volatile oneshot_handler_t handler; /* Oneshot expiration callback */
   volatile void *arg;                 /* The argument that will accompany
                                        * the callback */
+#ifdef CONFIG_SAM34_FREERUN
   volatile uint32_t start_count;      /* Stores the value of the freerun counter,
                                        * at each start of the onshot timer. Is neccesary
                                        * to find out if the onshot counter was updated
                                        * correctly at the time of the call to
                                        * sam_oneshot_cancel or not. */
+#endif
 };
 
 /****************************************************************************
@@ -130,6 +131,14 @@ extern "C"
 int sam_oneshot_initialize(struct sam_oneshot_s *oneshot, int chan,
                            uint16_t resolution);
 
+/****************************************************************************
+ * Name: sam_oneshot_max_delay
+ *
+ * Description:
+ *   Determine the maximum delay of the one-shot timer (in microseconds)
+ *
+ ****************************************************************************/
+
 int sam_oneshot_max_delay(struct sam_oneshot_s *oneshot, uint64_t *usec);
 
 /****************************************************************************
@@ -144,7 +153,8 @@ int sam_oneshot_max_delay(struct sam_oneshot_s *oneshot, uint64_t *usec);
  *           sam_oneshot_initialize();
  *   freerun Caller allocated instance of the freerun state structure. This
  *           structure must have been previously initialized via a call to
- *           sam_freerun_initialize();
+ *           sam_freerun_initialize().  May be NULL if there is no matching
+ *           free-running timer.
  *   handler The function to call when when the oneshot timer expires.
  *   arg     An opaque argument that will accompany the callback.
  *   ts      Provides the duration of the one shot timer.
@@ -155,8 +165,11 @@ int sam_oneshot_max_delay(struct sam_oneshot_s *oneshot, uint64_t *usec);
  *
  ****************************************************************************/
 
-int sam_oneshot_start(struct sam_oneshot_s *oneshot, struct sam_freerun_s *freerun,
-                      oneshot_handler_t handler, void *arg, const struct timespec *ts);
+struct sam_freerun_s;
+int sam_oneshot_start(struct sam_oneshot_s *oneshot,
+                      struct sam_freerun_s *freerun,
+                      oneshot_handler_t handler, void *arg,
+                      const struct timespec *ts);
 
 /****************************************************************************
  * Name: sam_oneshot_cancel
@@ -173,7 +186,8 @@ int sam_oneshot_start(struct sam_oneshot_s *oneshot, struct sam_freerun_s *freer
  *           sam_oneshot_initialize();
  *   freerun Caller allocated instance of the freerun state structure. This
  *           structure must have been previously initialized via a call to
- *           sam_freerun_initialize();
+ *           sam_freerun_initialize().  May be NULL if there is no matching
+ *           free-running timer.
  *   ts      The location in which to return the time remaining on the
  *           oneshot timer.  A time of zero is returned if the timer is
  *           not running.
@@ -185,8 +199,9 @@ int sam_oneshot_start(struct sam_oneshot_s *oneshot, struct sam_freerun_s *freer
  *
  ****************************************************************************/
 
-int sam_oneshot_cancel(struct sam_oneshot_s *oneshot, struct sam_freerun_s *freerun,
-                       struct timespec *ts);
+struct sam_freerun_s;
+int sam_oneshot_cancel(struct sam_oneshot_s *oneshot,
+                       struct sam_freerun_s *freerun, struct timespec *ts);
 
 #undef EXTERN
 #ifdef __cplusplus

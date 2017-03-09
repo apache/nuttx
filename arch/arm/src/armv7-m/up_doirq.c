@@ -51,22 +51,6 @@
 #include "up_internal.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -83,7 +67,7 @@ uint32_t *up_doirq(int irq, uint32_t *regs)
    * CURRENT_REGS is handled and (2) the design associated with
    * CONFIG_ARCH_INTERRUPTSTACK.  The savestate variable will not work for
    * that purpose as implemented here because only the outermost nested
-   * interrupt can result in a context switch (it can probably be deleted).
+   * interrupt can result in a context switch.
    */
 
   /* Current regs non-zero indicates that we are processing an interrupt;

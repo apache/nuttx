@@ -198,7 +198,7 @@ static uint8_t bmp180_getreg8(FAR struct bmp180_dev_s *priv, uint8_t regaddr)
   ret = i2c_write(priv->i2c, &config, &regaddr, 1);
   if (ret < 0)
     {
-      sndbg("i2c_write failed: %d\n", ret);
+      snerr("ERROR: i2c_write failed: %d\n", ret);
       return ret;
     }
 
@@ -207,7 +207,7 @@ static uint8_t bmp180_getreg8(FAR struct bmp180_dev_s *priv, uint8_t regaddr)
   ret = i2c_read(priv->i2c, &config, &regval, 1);
   if (ret < 0)
     {
-      sndbg("i2c_read failed: %d\n", ret);
+      snerr("ERROR: i2c_read failed: %d\n", ret);
       return ret;
     }
 
@@ -240,7 +240,7 @@ static uint16_t bmp180_getreg16(FAR struct bmp180_dev_s *priv, uint8_t regaddr)
   ret = i2c_write(priv->i2c, &config, &regaddr, 1);
   if (ret < 0)
     {
-      sndbg("i2c_write failed: %d\n", ret);
+      snerr("ERROR: i2c_write failed: %d\n", ret);
       return ret;
     }
 
@@ -249,7 +249,7 @@ static uint16_t bmp180_getreg16(FAR struct bmp180_dev_s *priv, uint8_t regaddr)
   ret = i2c_read(priv->i2c, &config, (uint8_t *)&regval, 2);
   if (ret < 0)
     {
-      sndbg("i2c_read failed: %d\n", ret);
+      snerr("ERROR: i2c_read failed: %d\n", ret);
       return ret;
     }
 
@@ -292,7 +292,7 @@ static void bmp180_putreg8(FAR struct bmp180_dev_s *priv, uint8_t regaddr,
   ret = i2c_write(priv->i2c, &config, (uint8_t *) &data, 2);
   if (ret < 0)
     {
-      sndbg("i2c_write failed: %d\n", ret);
+      snerr("ERROR: i2c_write failed: %d\n", ret);
       return;
     }
 
@@ -314,13 +314,13 @@ static int bmp180_checkid(FAR struct bmp180_dev_s *priv)
   /* Read device ID */
 
   devid = bmp180_getreg8(priv, BMP180_DEVID);
-  snvdbg("devid: 0x%02x\n", devid);
+  sninfo("devid: 0x%02x\n", devid);
 
   if (devid != (uint16_t) DEVID)
     {
       /* ID is not Correct */
 
-      sndbg("Wrong Device ID!\n");
+      snerr("ERROR: Wrong Device ID!\n");
       return -ENODEV;
     }
 
@@ -421,8 +421,8 @@ static void bmp180_read_press_temp(FAR struct bmp180_dev_s *priv)
   priv->bmp180_upress |= bmp180_getreg8(priv, BMP180_ADC_OUT_XLSB);
   priv->bmp180_upress = priv->bmp180_upress >> (8 - (oss >> 6));
 
-  snvdbg("Uncompensated temperature = %d\n", priv->bmp180_utemp);
-  snvdbg("Uncompensated pressure = %d\n", priv->bmp180_upress);
+  sninfo("Uncompensated temperature = %d\n", priv->bmp180_utemp);
+  sninfo("Uncompensated pressure = %d\n", priv->bmp180_upress);
 }
 
 /****************************************************************************
@@ -470,7 +470,7 @@ static int bmp180_getpressure(FAR struct bmp180_dev_s *priv)
   x2 = (priv->bmp180_cal_mc << 11) / (x1 + priv->bmp180_cal_md);
   b5 = x1 + x2;
   temp = (b5 + 8) >> 4;
-  snvdbg("Compensated temperature = %d\n", temp);
+  sninfo("Compensated temperature = %d\n", temp);
 
   /* Calculate true pressure */
 
@@ -500,7 +500,7 @@ static int bmp180_getpressure(FAR struct bmp180_dev_s *priv)
 
   press = press + ((x1 + x2 + 3791) >> 4);
 
-  snvdbg("Compressed pressure = %d\n", press);
+  sninfo("Compressed pressure = %d\n", press);
   return press;
 }
 
@@ -543,13 +543,13 @@ static ssize_t bmp180_read(FAR struct file *filep, FAR char *buffer,
 
   if (!buffer)
     {
-      sndbg("Buffer is null\n");
+      snerr("ERROR: Buffer is null\n");
       return -1;
     }
 
   if (buflen != 4)
     {
-      sndbg("You can't read something other than 32 bits (4 bytes)\n");
+      snerr("ERROR: You can't read something other than 32 bits (4 bytes)\n");
       return -1;
     }
 
@@ -602,7 +602,7 @@ int bmp180_register(FAR const char *devpath, FAR struct i2c_master_s *i2c)
   priv = (FAR struct bmp180_dev_s *)kmm_malloc(sizeof(struct bmp180_dev_s));
   if (!priv)
     {
-      sndbg("Failed to allocate instance\n");
+      snerr("ERROR: Failed to allocate instance\n");
       return -ENOMEM;
     }
 
@@ -615,7 +615,7 @@ int bmp180_register(FAR const char *devpath, FAR struct i2c_master_s *i2c)
   ret = bmp180_checkid(priv);
   if (ret < 0)
     {
-      sndbg("Failed to register driver: %d\n", ret);
+      snerr("ERROR: Failed to register driver: %d\n", ret);
       kmm_free(priv);
       return ret;
     }
@@ -629,11 +629,11 @@ int bmp180_register(FAR const char *devpath, FAR struct i2c_master_s *i2c)
   ret = register_driver(devpath, &g_bmp180fops, 0666, priv);
   if (ret < 0)
     {
-      sndbg("Failed to register driver: %d\n", ret);
+      snerr("ERROR: Failed to register driver: %d\n", ret);
       kmm_free(priv);
     }
 
-  snvdbg("BMP180 driver loaded successfully!\n");
+  sninfo("BMP180 driver loaded successfully!\n");
   return ret;
 }
 

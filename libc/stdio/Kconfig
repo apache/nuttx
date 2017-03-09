@@ -1,0 +1,118 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menu "Standard C I/O"
+
+config STDIO_DISABLE_BUFFERING
+	bool "Disable STDIO Buffering"
+	default n
+	---help---
+		Tiny systems may need to disable all support for I/O buffering in
+		order to minimize the memory footprint.
+
+		NOTE that even if STDIO buffering is enabled, you can still disable
+		buffering by setting CONFIG_STDIO_BUFFER_SIZE=0 or dynamically
+		through the setvbuf() interface.  In this case, however,  memory
+		used for buffering will be eliminated, of course, but there will be
+		no reduction in static code size.  Only setting
+		CONFIG_STDIO_DISABLE_BUFFERING will reduce static code size.
+
+		The setvbuf() interface is not available if
+		CONFIG_STDIO_DISABLE_BUFFERING is selected.
+
+if !STDIO_DISABLE_BUFFERING
+
+config STDIO_BUFFER_SIZE
+	int "STDIO buffer size"
+	default 64
+	---help---
+		Size of buffers using within the C buffered I/O interfaces (printf,
+		putchar, fwrite, etc.).  This function sets the initial I/O buffer
+		size.  Zero disables I/O buffering initially.  Any buffer size may
+		be subsequently modified using setvbuf().
+
+config STDIO_LINEBUFFER
+	bool "STDIO line buffering"
+	default y
+	---help---
+		Sets the default behavior to flush buffered I/O whenever a newline
+		character is found in the output data stream.  This setting just
+		sets the initial default behavior of all streams.  The behavior of
+		an individual stream can be changed via setvbuf().
+
+endif # !STDIO_DISABLE_BUFFERING
+
+config NUNGET_CHARS
+	int "Number unget() characters"
+	default 2
+	---help---
+		Number of characters that can be buffered by ungetc() (Only if NFILE_STREAMS > 0)
+
+config NOPRINTF_FIELDWIDTH
+	bool "Disable sprintf support fieldwidth"
+	default n
+	---help---
+		sprintf-related logic is a little smaller if we do not support field
+		widths.
+
+config LIBC_FLOATINGPOINT
+	bool "Enable floating point in printf"
+	default n
+	---help---
+		By default, floating point
+		support in printf, sscanf, etc. is disabled.
+
+config LIBC_LONG_LONG
+	bool "Enable long long support in printf"
+	default y if !DEFAULT_SMALL
+	default n if DEFAULT_SMALL
+	---help---
+		Enables support for long long formats in printf, sscanf, etc. is
+		enabled.  This is enabled by default but if you are trying to
+		reduce the FLASH footprint, then disabling this feature is one
+		option.  The FLASH saves comes not from disabling the long long
+		formats, but rather from omitting the large long long arithmetic
+		libraries that will be drawn into the build if long long support
+		is enabled.
+
+config LIBC_SCANSET
+	bool "Scanset support"
+	default n
+	---help---
+		Add scanset support to sscanf().
+
+choice
+	prompt "Newline Options"
+	default EOL_IS_EITHER_CRLF
+	---help---
+		This selection determines the line terminating character that is used.
+		Some environments may return CR as end-of-line, others LF, and others
+		both.  If not specified, the default is either CR or LF (but not both)
+		as the line terminating charactor.
+
+config EOL_IS_CR
+	bool "EOL is CR"
+
+config EOL_IS_LF
+	bool "EOL is LF"
+
+config EOL_IS_BOTH_CRLF
+	bool "EOL is CR and LF"
+
+config EOL_IS_EITHER_CRLF
+	bool "EOL is CR or LF"
+
+endchoice
+
+config MEMCPY_VIK
+	bool "Vik memcpy()"
+	default n
+	depends on !LIBC_ARCH_MEMCPY
+	---help---
+		Select this option to use the optimized memcpy() function by Daniel Vik.
+		Select this option for improved performance at the expense of increased
+		size. See licensing information in the top-level COPYING file.
+
+endmenu #Standard C I/O

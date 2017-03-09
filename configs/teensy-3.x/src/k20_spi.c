@@ -51,30 +51,8 @@
 #include "kinetis.h"
 #include "teensy-3x.h"
 
-#if defined(CONFIG_KINETIS_SPI1) || defined(CONFIG_KINETIS_SPI2)
-
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-
-/* Enables debug output from this file (needs CONFIG_DEBUG too) */
-
-#ifdef CONFIG_DEBUG_SPI
-#  define spidbg  lldbg
-#  ifdef CONFIG_DEBUG_SPI_VERBOSE
-#    define spivdbg lldbg
-#  else
-#    define spivdbg(x...)
-#  endif
-#else
-#  undef CONFIG_DEBUG_SPI_VERBOSE
-#  define spidbg(x...)
-#  define spivdbg(x...)
-#endif
-
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
+#if defined(CONFIG_KINETIS_SPI0) || defined(CONFIG_KINETIS_SPI1) || \
+	defined(CONFIG_KINETIS_SPI2)
 
 /************************************************************************************
  * Public Functions
@@ -94,10 +72,10 @@ void weak_function kinetis_spidev_initialize(void)
 }
 
 /************************************************************************************
- * Name:  kinetis_spi1/2/3select and kinetis_spi1/2/3status
+ * Name:  kinetis_spi0/1/2select and kinetis_spi0/1/2status
  *
  * Description:
- *   The external functions, kinetis_spi1/2/3select and kinetis_spi1/2/3status must be
+ *   The external functions, kinetis_spi0/1/2select and kinetis_spi0/1/2status must be
  *   provided by board-specific logic.  They are implementations of the select
  *   and status methods of the SPI interface defined by struct spi_ops_s (see
  *   include/nuttx/spi/spi.h). All other methods (including kinetis_spibus_initialize())
@@ -106,7 +84,7 @@ void weak_function kinetis_spidev_initialize(void)
  *
  *   1. Provide logic in kinetis_boardinitialize() to configure SPI chip select
  *      pins.
- *   2. Provide kinetis_spi1/2/3select() and kinetis_spi1/2/3status() functions in your
+ *   2. Provide kinetis_spi0/1/2select() and kinetis_spi0/1/2status() functions in your
  *      board-specific logic.  These functions will perform chip selection and
  *      status operations using GPIOs in the way your board is configured.
  *   3. Add a calls to kinetis_spibus_initialize() in your low level application
@@ -118,10 +96,24 @@ void weak_function kinetis_spidev_initialize(void)
  *
  ************************************************************************************/
 
+#ifdef CONFIG_KINETIS_SPI0
+void kinetis_spi0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+{
+  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+# warning "Missing logic"
+}
+
+uint8_t kinetis_spi0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+{
+# warning "Missing logic"
+  return SPI_STATUS_PRESENT;
+}
+#endif
+
 #ifdef CONFIG_KINETIS_SPI1
 void kinetis_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 # warning "Missing logic"
 }
 
@@ -135,7 +127,7 @@ uint8_t kinetis_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 #ifdef CONFIG_KINETIS_SPI2
 void kinetis_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 # warning "Missing logic"
 }
 
@@ -146,18 +138,4 @@ uint8_t kinetis_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 }
 #endif
 
-#ifdef CONFIG_KINETIS_SPI3
-void kinetis_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
-{
-  spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
-# warning "Missing logic"
-}
-
-uint8_t kinetis_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
-{
-# warning "Missing logic"
-  return SPI_STATUS_PRESENT;
-}
-#endif
-
-#endif /* CONFIG_KINETIS_SPI1 || CONFIG_KINETIS_SPI2 */
+#endif /* CONFIG_KINETIS_SPI0 || CONFIG_KINETIS_SPI1 || CONFIG_KINETIS_SPI2 */

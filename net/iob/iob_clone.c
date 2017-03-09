@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_IOB_DEBUG)
+#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_IOB_DEBUG)
 /* Force debug output (from this file only) */
 
 #  undef  CONFIG_DEBUG_NET
@@ -146,7 +146,7 @@ int iob_clone(FAR struct iob_s *iob1, FAR struct iob_s *iob2, bool throttled)
 
               iob1 = iob1->io_flink;
             }
-          while (iob1->io_len <= 0);
+          while (iob1 && iob1->io_len <= 0);
 
           /* Reset the offset to the beginning of the I/O buffer */
 
@@ -168,7 +168,7 @@ int iob_clone(FAR struct iob_s *iob1, FAR struct iob_s *iob2, bool throttled)
           next = iob_alloc(throttled);
           if (!next)
             {
-              ndbg("Failed to allocate an I/O buffer/n");
+              nerr("ERROR: Failed to allocate an I/O buffer/n");
               return -ENOMEM;
             }
 

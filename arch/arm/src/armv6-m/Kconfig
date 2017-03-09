@@ -7,12 +7,12 @@ comment "ARMV6M Configuration Options"
 
 choice
 	prompt "Toolchain Selection"
-	default ARMV6M_TOOLCHAIN_GNU_EABIW if HOST_WINDOWS
-	default ARMV6M_TOOLCHAIN_GNU_EABIL if !HOST_WINDOWS
+	default ARMV6M_TOOLCHAIN_GNU_EABIW if TOOLCHAIN_WINDOWS
+	default ARMV6M_TOOLCHAIN_GNU_EABIL if !TOOLCHAIN_WINDOWS
 
 config ARMV6M_TOOLCHAIN_ATOLLIC
 	bool "Atollic Lite/Pro for Windows"
-	depends on HOST_WINDOWS
+	depends on TOOLCHAIN_WINDOWS
 
 config ARMV6M_TOOLCHAIN_BUILDROOT
 	bool "Buildroot (Cygwin or Linux)"
@@ -24,7 +24,7 @@ config ARMV6M_TOOLCHAIN_CODEREDL
 
 config ARMV6M_TOOLCHAIN_CODEREDW
 	bool "CodeRed for Windows"
-	depends on HOST_WINDOWS
+	depends on TOOLCHAIN_WINDOWS
 
 config ARMV6M_TOOLCHAIN_CODESOURCERYL
 	bool "CodeSourcery GNU toolchain under Linux"
@@ -32,11 +32,11 @@ config ARMV6M_TOOLCHAIN_CODESOURCERYL
 
 config ARMV6M_TOOLCHAIN_CODESOURCERYW
 	bool "CodeSourcery GNU toolchain under Windows"
-	depends on HOST_WINDOWS
+	depends on TOOLCHAIN_WINDOWS
 
 config ARMV6M_TOOLCHAIN_DEVKITARM
 	bool "devkitARM GNU toolchain"
-	depends on HOST_WINDOWS
+	depends on TOOLCHAIN_WINDOWS
 
 config ARMV6M_TOOLCHAIN_GNU_EABIL
 	bool "Generic GNU EABI toolchain under Linux (or other POSIX environment)"
@@ -46,7 +46,7 @@ config ARMV6M_TOOLCHAIN_GNU_EABIL
 
 config ARMV6M_TOOLCHAIN_GNU_EABIW
 	bool "Generic GNU EABI toolchain under Windows"
-	depends on HOST_WINDOWS
+	depends on TOOLCHAIN_WINDOWS
 	---help---
 		This option should work for any modern GNU toolchain (GCC 4.5 or newer)
 		configured for arm-none-eabi.

@@ -62,15 +62,11 @@
 /* Non-standard debug that may be enabled just for testing the modem driver */
 
 #ifdef CONFIG_MODEM_U_BLOX_DEBUG
-#  define m_dbg    dbg
-#  define m_vdbg   vdbg
-#  define m_vlldbg  lldbg
-#  define m_vllvdbg llvdbg
+#  define m_err     _err
+#  define m_info    _info
 #else
-#  define m_dbg(x...)
-#  define m_vdbg(x...)
-#  define m_lldbg(x...)
-#  define m_llvdbg(x...)
+#  define m_err(x...)
+#  define m_info(x...)
 #endif
 
 #define UBXMDM_REGISTER_COUNT                           \

@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/fixedmath/lib_umul32x64.c
+ * libc/misc/lib_umul32x64.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -37,7 +37,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/math32.h>
+#include <nuttx/lib/math32.h>
 
 /****************************************************************************
  * Public Functions

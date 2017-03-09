@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/hc/src/m9s12/m9s12_timerisr.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -119,19 +119,11 @@
 #define MODCNT_VALUE  ((((uint32_t)HCS12_OSCCLK  + (MODCNT_DENOM/2))/ MODCNT_DENOM) - 1)
 
 /****************************************************************************
- * Private Types
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Function:  up_timerisr
+ * Function:  m9s12_timerisr
  *
  * Description:
  *   The timer ISR will perform a variety of services for various portions
@@ -139,7 +131,7 @@
  *
  ****************************************************************************/
 
-int up_timerisr(int irq, uint32_t *regs)
+static int m9s12_timerisr(int irq, uint32_t *regs, void *arg)
 {
   /* Clear real time interrupt flag */
 
@@ -152,7 +144,11 @@ int up_timerisr(int irq, uint32_t *regs)
 }
 
 /****************************************************************************
- * Function:  up_timer_initialize
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Function:  hc_timer_initialize
  *
  * Description:
  *   This function is called during start-up to initialize the system timer
@@ -160,7 +156,7 @@ int up_timerisr(int irq, uint32_t *regs)
  *
  ****************************************************************************/
 
-void up_timer_initialize(void)
+void hc_timer_initialize(void)
 {
   uint32_t tmp;
   uint8_t  regval;
@@ -175,7 +171,7 @@ void up_timer_initialize(void)
 
   /* Attach the timer interrupt vector */
 
-  (void)irq_attach(HCS12_IRQ_VRTI, (xcpt_t)up_timerisr);
+  (void)irq_attach(HCS12_IRQ_VRTI, (xcpt_t)m9s12_timerisr, NULL);
 
   /* Enable RTI interrupt by setting the RTIE bit */
 

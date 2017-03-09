@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/bch/bchlib_setup.c
  *
- *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,22 +55,6 @@
 #include "bch.h"
 
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -96,7 +80,7 @@ int bchlib_setup(const char *blkdev, bool readonly, FAR void **handle)
   bch = (FAR struct bchlib_s *)kmm_zalloc(sizeof(struct bchlib_s));
   if (!bch)
     {
-      fdbg("Failed to allocate BCH structure\n");
+      ferr("ERROR: Failed to allocate BCH structure\n");
       return -ENOMEM;
     }
 
@@ -105,7 +89,7 @@ int bchlib_setup(const char *blkdev, bool readonly, FAR void **handle)
   ret = open_blockdriver(blkdev, readonly ? MS_RDONLY : 0, &bch->inode);
   if (ret < 0)
     {
-      fdbg("Failed to open driver %s: %d\n", blkdev, -ret);
+      ferr("ERROR: Failed to open driver %s: %d\n", blkdev, -ret);
       goto errout_with_bch;
     }
 
@@ -114,20 +98,20 @@ int bchlib_setup(const char *blkdev, bool readonly, FAR void **handle)
   ret = bch->inode->u.i_bops->geometry(bch->inode, &geo);
   if (ret < 0)
     {
-      fdbg("geometry failed: %d\n", -ret);
+      ferr("ERROR: geometry failed: %d\n", -ret);
       goto errout_with_bch;
     }
 
   if (!geo.geo_available)
     {
-      fdbg("geometry failed: %d\n", -ret);
+      ferr("ERROR: geometry failed: %d\n", -ret);
       ret = -ENODEV;
       goto errout_with_bch;
     }
 
   if (!readonly && (!bch->inode->u.i_bops->write || !geo.geo_writeenabled))
     {
-      fdbg("write access not supported\n");
+      ferr("ERROR: write access not supported\n");
       ret = -EACCES;
       goto errout_with_bch;
     }
@@ -145,7 +129,7 @@ int bchlib_setup(const char *blkdev, bool readonly, FAR void **handle)
   bch->buffer = (FAR uint8_t *)kmm_malloc(bch->sectsize);
   if (!bch->buffer)
     {
-      fdbg("Failed to allocate sector buffer\n");
+      ferr("ERROR: Failed to allocate sector buffer\n");
       ret = -ENOMEM;
       goto errout_with_bch;
     }

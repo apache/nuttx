@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/mount/fs_mount.c
  *
- *   Copyright (C) 2007-2009, 2011-2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2013, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <sys/mount.h>
+#include <stdbool.h>
 #include <string.h>
 #include <errno.h>
 #include <assert.h>
@@ -234,6 +235,9 @@ int mount(FAR const char *source, FAR const char *target,
 #endif
   FAR struct inode *mountpt_inode;
   FAR const struct mountpt_operations *mops;
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  struct inode_search_s desc;
+#endif
   void *fshandle;
   int errcode;
   int ret;
@@ -256,7 +260,7 @@ int mount(FAR const char *source, FAR const char *target,
       ret = find_blockdriver(source, mountflags, &blkdrvr_inode);
       if (ret < 0)
         {
-          fdbg("ERROR: Failed to find block driver %s\n", source);
+          ferr("ERROR: Failed to find block driver %s\n", source);
           errcode = -ret;
           goto errout;
         }
@@ -270,7 +274,7 @@ int mount(FAR const char *source, FAR const char *target,
   else
 #endif /* NONBDFS_SUPPORT */
     {
-      fdbg("ERROR: Failed to find file system %s\n", filesystemtype);
+      ferr("ERROR: Failed to find file system %s\n", filesystemtype);
       errcode = ENODEV;
       goto errout;
     }
@@ -280,25 +284,29 @@ int mount(FAR const char *source, FAR const char *target,
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   /* Check if the inode already exists */
 
-  mountpt_inode = inode_find(target, NULL);
-  if (mountpt_inode != NULL)
+  SETUP_SEARCH(&desc, target, false);
+
+  ret = inode_find(&desc);
+  if (ret >= 0)
     {
-      /* Yes... Is is a directory node (i.e., not a driver or other special
-       * node.
-       */
-
-      if (INODE_IS_SPECIAL(mountpt_inode))
-        {
-          fdbg("ERROR: target %s exists and is a special nodes\n", target);
-          errcode = -ENOTDIR;
-          goto errout_with_semaphore;
-        }
-
       /* Successfully found.  The reference count on the inode has been
        * incremented.
        */
 
-      DEBUGASSERT(mountpt_inode->u.i_mops != NULL);
+      mountpt_inode = desc.node;
+      DEBUGASSERT(mountpt_inode != NULL);
+
+      /* But is it a directory node (i.e., not a driver or other special
+       * node)?
+       */
+
+      if (INODE_IS_SPECIAL(mountpt_inode))
+        {
+          ferr("ERROR: target %s exists and is a special node\n", target);
+          errcode = -ENOTDIR;
+          inode_release(mountpt_inode);
+          goto errout_with_semaphore;
+        }
     }
   else
 #endif
@@ -321,7 +329,7 @@ int mount(FAR const char *source, FAR const char *target,
            *  -ENOMEM - Failed to allocate in-memory resources for the operation
            */
 
-          fdbg("ERROR: Failed to reserve inode for target %s\n", target);
+          ferr("ERROR: Failed to reserve inode for target %s\n", target);
           errcode = -ret;
           goto errout_with_semaphore;
         }
@@ -336,7 +344,7 @@ int mount(FAR const char *source, FAR const char *target,
     {
       /* The filesystem does not support the bind operation ??? */
 
-      fdbg("ERROR: Filesystem does not support bind\n");
+      ferr("ERROR: Filesystem does not support bind\n");
       errcode = EINVAL;
       goto errout_with_mountpt;
     }
@@ -366,7 +374,7 @@ int mount(FAR const char *source, FAR const char *target,
        * error.
        */
 
-      fdbg("ERROR: Bind method failed: %d\n", ret);
+      ferr("ERROR: Bind method failed: %d\n", ret);
 #ifdef BDFS_SUPPORT
 #ifdef NONBDFS_SUPPORT
       if (blkdrvr_inode)
@@ -405,6 +413,9 @@ int mount(FAR const char *source, FAR const char *target,
     }
 #endif
 
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  RELEASE_SEARCH(&desc);
+#endif
   return OK;
 
   /* A lot of goto's!  But they make the error handling much simpler */
@@ -423,10 +434,14 @@ errout_with_mountpt:
 #endif
 
   inode_release(mountpt_inode);
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  RELEASE_SEARCH(&desc);
+#endif
   goto errout;
 
 errout_with_semaphore:
   inode_semgive();
+
 #ifdef BDFS_SUPPORT
 #ifdef NONBDFS_SUPPORT
   if (blkdrvr_inode)
@@ -436,12 +451,16 @@ errout_with_semaphore:
     }
 #endif
 
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  RELEASE_SEARCH(&desc);
+#endif
+
 errout:
   set_errno(errcode);
   return ERROR;
 
 #else
-  fdbg("ERROR: No filesystems enabled\n");
+  ferr("ERROR: No filesystems enabled\n");
   set_errno(ENOSYS);
   return ERROR;
 #endif /* BDFS_SUPPORT || NONBDFS_SUPPORT */

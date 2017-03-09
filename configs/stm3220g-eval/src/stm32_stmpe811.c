@@ -137,6 +137,7 @@ struct stm32_stmpe811config_s
 
   STMPE811_HANDLE handle;   /* The STMPE811 driver handle */
   xcpt_t          handler;  /* The STMPE811 interrupt handler */
+  void           *arg;      /* Interrupt handler argument */
 };
 
 /****************************************************************************
@@ -152,7 +153,8 @@ struct stm32_stmpe811config_s
  * clear   - Acknowledge/clear any pending GPIO interrupt
  */
 
-static int  stmpe811_attach(FAR struct stmpe811_config_s *state, xcpt_t isr);
+static int  stmpe811_attach(FAR struct stmpe811_config_s *state, xcpt_t isr,
+                            FAR void *arg);
 static void stmpe811_enable(FAR struct stmpe811_config_s *state, bool enable);
 static void stmpe811_clear(FAR struct stmpe811_config_s *state);
 
@@ -191,6 +193,7 @@ static struct stm32_stmpe811config_s g_stmpe811config =
     .clear     = stmpe811_clear,
   },
   .handler     = NULL,
+  .arg         = NULL,
 };
 #endif
 
@@ -207,16 +210,18 @@ static struct stm32_stmpe811config_s g_stmpe811config =
  * clear   - Acknowledge/clear any pending GPIO interrupt
  */
 
-static int stmpe811_attach(FAR struct stmpe811_config_s *state, xcpt_t isr)
+static int stmpe811_attach(FAR struct stmpe811_config_s *state, xcpt_t isr,
+                           FAR void *arg)
 {
   FAR struct stm32_stmpe811config_s *priv = (FAR struct stm32_stmpe811config_s *)state;
 
-  ivdbg("Saving handler %p\n", isr);
+  iinfo("Saving handler %p\n", isr);
   DEBUGASSERT(priv);
 
   /* Just save the handler.  We will use it when EXTI interruptsare enabled */
 
   priv->handler = isr;
+  priv->arg     = arg;
   return OK;
 }
 
@@ -235,14 +240,17 @@ static void stmpe811_enable(FAR struct stmpe811_config_s *state, bool enable)
     {
       /* Configure the EXTI interrupt using the SAVED handler */
 
-      (void)stm32_gpiosetevent(GPIO_IO_EXPANDER, true, true, true, priv->handler);
+      (void)stm32_gpiosetevent(GPIO_IO_EXPANDER, true, true, true,
+                               priv->handler, priv->arg);
     }
   else
     {
       /* Configure the EXTI interrupt with a NULL handler to disable it */
 
-     (void)stm32_gpiosetevent(GPIO_IO_EXPANDER, false, false, false, NULL);
+     (void)stm32_gpiosetevent(GPIO_IO_EXPANDER, false, false, false,
+                              NULL, NULL);
     }
+
   leave_critical_section(flags);
 }
 
@@ -279,14 +287,14 @@ int board_tsc_setup(int minor)
   FAR struct i2c_master_s *dev;
   int ret;
 
-  idbg("minor %d\n", minor);
+  iinfo("minor %d\n", minor);
   DEBUGASSERT(minor == 0);
 
   /* Check if we are already initialized */
 
   if (!g_stmpe811config.handle)
     {
-      ivdbg("Initializing\n");
+      iinfo("Initializing\n");
 
       /* Configure the STMPE811 interrupt pin as an input */
 
@@ -297,7 +305,7 @@ int board_tsc_setup(int minor)
       dev = stm32_i2cbus_initialize(CONFIG_STMPE811_I2CDEV);
       if (!dev)
         {
-          idbg("Failed to initialize I2C bus %d\n", CONFIG_STMPE811_I2CDEV);
+          ierr("ERROR: Failed to initialize I2C bus %d\n", CONFIG_STMPE811_I2CDEV);
           return -ENODEV;
         }
 
@@ -307,7 +315,7 @@ int board_tsc_setup(int minor)
         stmpe811_instantiate(dev, (FAR struct stmpe811_config_s *)&g_stmpe811config);
       if (!g_stmpe811config.handle)
         {
-          idbg("Failed to instantiate the STMPE811 driver\n");
+          ierr("ERROR: Failed to instantiate the STMPE811 driver\n");
           return -ENODEV;
         }
 
@@ -316,7 +324,7 @@ int board_tsc_setup(int minor)
       ret = stmpe811_register(g_stmpe811config.handle, CONFIG_STMPE811_DEVMINOR);
       if (ret < 0)
         {
-          idbg("Failed to register STMPE driver: %d\n", ret);
+          ierr("ERROR: Failed to register STMPE driver: %d\n", ret);
           /* stm32_i2cbus_uninitialize(dev); */
           return -ENODEV;
         }

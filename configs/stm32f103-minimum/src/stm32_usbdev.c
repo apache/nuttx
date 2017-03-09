@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/stm32f103-minimum/src/stm32_usbdev.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Laurent Latil <laurent@latil.nom.fr>
  *
@@ -60,7 +60,7 @@
  * Name: stm32_usbinitialize
  *
  * Description:
- *   Called to setup USB-related GPIO pins for the Hy-Mini STM32v board.
+ *   Called to setup USB-related GPIO pins for the STM32F103 Minimum board.
  *
  ************************************************************************************/
 
@@ -103,5 +103,5 @@ int stm32_usbpullup(FAR struct usbdev_s *dev, bool enable)
 
 void stm32_usbsuspend(FAR struct usbdev_s *dev, bool resume)
 {
-  ulldbg("resume: %d\n", resume);
+  uinfo("resume: %d\n", resume);
 }

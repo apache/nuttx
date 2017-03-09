@@ -186,27 +186,23 @@
 
 #ifdef CONFIG_VNCSERVER_UPDATE_DEBUG
 #  ifdef CONFIG_CPP_HAVE_VARARGS
-#    define upddbg(format, ...)    dbg(format, ##__VA_ARGS__)
-#    define updlldbg(format, ...)  lldbg(format, ##__VA_ARGS__)
-#    define updvdbg(format, ...)   vdbg(format, ##__VA_ARGS__)
-#    define updllvdbg(format, ...) llvdbg(format, ##__VA_ARGS__)
+#    define upderr(format, ...)    _err(format, ##__VA_ARGS__)
+#    define updinfo(format, ...)   _info(format, ##__VA_ARGS__)
+#    define updinfo(format, ...)   _info(format, ##__VA_ARGS__)
 #  else
-#   define upddbg                  dbg
-#   define updlldbg                lldbg
-#   define updvdbg                 vdbg
-#   define updllvdbg               llvdbg
+#   define upderr                  _err
+#   define updwarn                 _warn
+#   define updinfo                 _info
 #  endif
 #else
 #  ifdef CONFIG_CPP_HAVE_VARARGS
-#    define upddbg(x...)
-#    define updlldbg(x...)
-#    define updvdbg(x...)
-#    define updllvdbg(x...)
+#    define upderr(x...)
+#    define updwarn(x...)
+#    define updinfo(x...)
 #  else
-#    define upddbg                 (void)
-#    define updlldbg               (void)
-#    define updvdbg                (void)
-#    define updllvdbg              (void)
+#    define upderr                 (void)
+#    define updwarn                (void)
+#    define updinfo                (void)
 #  endif
 #endif
 

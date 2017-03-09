@@ -49,11 +49,11 @@
  * Pre-processor Definitions
  ************************************************************************************/
 /* Configuration ********************************************************************/
-/* Should we initialize the NX server?  This is done for NxWidgets (CONFIG_NXWIDGETS=y)
- * if nx_start() is available (CONFIG_NX_NXSTART=y) and if the NxWidget::CNxServer
- * class expects the RTOS to do the NX initialization (CONFIG_NXWIDGET_SERVERINIT=n).
- * This combination of settings is normally only used in the kernel build mode
- * (CONFIG_BUILD_PROTECTED) when NxWidgets is unable to initialize NX from user-space.
+/* Should we initialize the NX server using nx_start?  This is done for NxWidgets
+ * (CONFIG_NXWIDGETS=y) and if the NxWidget::CNxServer class expects the RTOS do the
+ * the NX initialization (CONFIG_NXWIDGET_SERVERINIT=n).  This combination of
+ * settings is normally only used in the kernel build mode* (CONFIG_BUILD_PROTECTED)
+ * when NxWidgets is unable to initialize NX from user-space.
  */
 
 #undef HAVE_NXSTART
@@ -62,17 +62,9 @@
 #  undef CONFIG_NX_START
 #endif
 
-#if defined(CONFIG_NXWIDGETS)
-#  if defined(CONFIG_NX_NXSTART)
-#    if !defined(CONFIG_NXWIDGET_SERVERINIT)
-#      define HAVE_NXSTART
-#      include <nuttx/nx/nx.h>
-#    endif
-#  else
-#    if !defined(CONFIG_NXWIDGET_SERVERINIT) && defined(CONFIG_BUILD_PROTECTED)
-#      error CONFIG_NX_NXSTART=y is needed
-#    endif
-#  endif
+#if defined(CONFIG_NXWIDGETS) && !defined(CONFIG_NXWIDGET_SERVERINIT)
+#   define HAVE_NXSTART
+#   include <nuttx/nx/nx.h>
 #endif
 
 /* Should we initialize the touchscreen for the NxWM (CONFIG_NXWM=y)?  This
@@ -164,7 +156,7 @@ static int board_initthread(int argc, char *argv[])
   ret = board_app_initialize(0);
   if (ret < 0)
     {
-      gdbg("ERROR: board_app_initialize failed: %d\n", ret);
+      gerr("ERROR: board_app_initialize failed: %d\n", ret);
     }
 #endif
 
@@ -174,7 +166,7 @@ static int board_initthread(int argc, char *argv[])
   ret = nx_start();
   if (ret < 0)
     {
-      gdbg("ERROR: nx_start failed: %d\n", ret);
+      gerr("ERROR: nx_start failed: %d\n", ret);
     }
 #endif
 
@@ -184,7 +176,7 @@ static int board_initthread(int argc, char *argv[])
   ret = board_tsc_setup(CONFIG_NXWM_TOUCHSCREEN_DEVNO);
   if (ret < 0)
     {
-      gdbg("ERROR: board_tsc_setup failed: %d\n", ret);
+      gerr("ERROR: board_tsc_setup failed: %d\n", ret);
     }
 #endif
 

@@ -484,6 +484,16 @@ config ARCH_CHIP_STM32F105VB
 	select STM32_HAVE_I2C2
 	select STM32_HAVE_TIM4
 
+config ARCH_CHIP_STM32F105RB
+	bool "STM32F105RB"
+	select ARCH_CORTEXM3
+	select STM32_STM32F10XX
+	select STM32_CONNECTIVITYLINE
+	select STM32_HAVE_DAC1
+	select STM32_HAVE_DAC2
+	select STM32_HAVE_I2C2
+	select STM32_HAVE_TIM4
+
 config ARCH_CHIP_STM32F107VC
 	bool "STM32F107VC"
 	select ARCH_CORTEXM3
@@ -626,6 +636,7 @@ config ARCH_CHIP_STM32F303CB
 	select STM32_STM32F303
 	select ARCH_HAVE_FPU
 	select STM32_HAVE_ADC3
+	select STM32_HAVE_ADC4
 	select STM32_HAVE_I2C2
 	select STM32_HAVE_SPI2
 	select STM32_HAVE_SPI3
@@ -641,6 +652,7 @@ config ARCH_CHIP_STM32F303CC
 	select STM32_STM32F303
 	select ARCH_HAVE_FPU
 	select STM32_HAVE_ADC3
+	select STM32_HAVE_ADC4
 	select STM32_HAVE_I2C2
 	select STM32_HAVE_SPI2
 	select STM32_HAVE_SPI3
@@ -656,6 +668,7 @@ config ARCH_CHIP_STM32F303RB
 	select STM32_STM32F303
 	select ARCH_HAVE_FPU
 	select STM32_HAVE_ADC3
+	select STM32_HAVE_ADC4
 	select STM32_HAVE_I2C2
 	select STM32_HAVE_SPI2
 	select STM32_HAVE_SPI3
@@ -673,6 +686,7 @@ config ARCH_CHIP_STM32F303RC
 	select STM32_STM32F303
 	select ARCH_HAVE_FPU
 	select STM32_HAVE_ADC3
+	select STM32_HAVE_ADC4
 	select STM32_HAVE_I2C2
 	select STM32_HAVE_SPI2
 	select STM32_HAVE_SPI3
@@ -730,6 +744,7 @@ config ARCH_CHIP_STM32F303VB
 	select STM32_STM32F303
 	select ARCH_HAVE_FPU
 	select STM32_HAVE_ADC3
+	select STM32_HAVE_ADC4
 	select STM32_HAVE_I2C2
 	select STM32_HAVE_SPI2
 	select STM32_HAVE_SPI3
@@ -747,6 +762,7 @@ config ARCH_CHIP_STM32F303VC
 	select STM32_STM32F303
 	select ARCH_HAVE_FPU
 	select STM32_HAVE_ADC3
+	select STM32_HAVE_ADC4
 	select STM32_HAVE_I2C2
 	select STM32_HAVE_SPI2
 	select STM32_HAVE_SPI3
@@ -756,6 +772,60 @@ config ARCH_CHIP_STM32F303VC
 	select STM32_HAVE_UART4
 	select STM32_HAVE_UART5
 	select STM32_HAVE_USBDEV
+
+config ARCH_CHIP_STM32F334K4
+	bool "STM32F334K4"
+	select ARCH_CORTEXM4
+	select STM32_STM32F33XX
+	select ARCH_HAVE_FPU
+
+config ARCH_CHIP_STM32F334K6
+	bool "STM32F334K6"
+	select ARCH_CORTEXM4
+	select STM32_STM32F33XX
+	select ARCH_HAVE_FPU
+
+config ARCH_CHIP_STM32F334K8
+	bool "STM32F334K8"
+	select ARCH_CORTEXM4
+	select STM32_STM32F33XX
+	select ARCH_HAVE_FPU
+
+config ARCH_CHIP_STM32F334C4
+	bool "STM32F334C4"
+	select ARCH_CORTEXM4
+	select STM32_STM32F33XX
+	select ARCH_HAVE_FPU
+
+config ARCH_CHIP_STM32F334C6
+	bool "STM32F334C6"
+	select ARCH_CORTEXM4
+	select STM32_STM32F33XX
+	select ARCH_HAVE_FPU
+
+config ARCH_CHIP_STM32F334C8
+	bool "STM32F334C8"
+	select ARCH_CORTEXM4
+	select STM32_STM32F33XX
+	select ARCH_HAVE_FPU
+
+config ARCH_CHIP_STM32F334R4
+	bool "STM32F334R4"
+	select ARCH_CORTEXM4
+	select STM32_STM32F33XX
+	select ARCH_HAVE_FPU
+
+config ARCH_CHIP_STM32F334R6
+	bool "STM32F334R6"
+	select ARCH_CORTEXM4
+	select STM32_STM32F33XX
+	select ARCH_HAVE_FPU
+
+config ARCH_CHIP_STM32F334R8
+	bool "STM32F334R8"
+	select ARCH_CORTEXM4
+	select STM32_STM32F33XX
+	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F372C8
 	bool "STM32F372C8"
@@ -1196,7 +1266,6 @@ config STM32_CONNECTIVITYLINE
 	select STM32_HAVE_TIM5
 	select STM32_HAVE_TIM6
 	select STM32_HAVE_TIM7
-	select STM32_HAVE_TIM8
 	select STM32_HAVE_ADC2
 	select STM32_HAVE_CAN1
 	select STM32_HAVE_CAN2
@@ -1373,6 +1442,25 @@ config STM32_STM32F303
 	select STM32_HAVE_DAC2
 	select STM32_HAVE_TIM7
 
+config STM32_STM32F33XX
+	bool
+       	default n
+	select STM32_HAVE_HRTIM1
+	select STM32_HAVE_COMP2
+	select STM32_HAVE_COMP4
+	select STM32_HAVE_COMP6
+	select STM32_HAVE_OPAMP
+	select STM32_HAVE_CCM
+	select STM32_HAVE_TIM1
+	select STM32_HAVE_TIM15
+	select STM32_HAVE_TIM16
+	select STM32_HAVE_TIM17
+	select STM32_HAVE_ADC2
+	select STM32_HAVE_CAN1
+	select STM32_HAVE_DAC1
+	select STM32_HAVE_DAC2
+	select STM32_HAVE_USART3
+
 config STM32_STM32F37XX
 	bool
 	default n
@@ -1385,10 +1473,15 @@ config STM32_STM32F37XX
 	select STM32_HAVE_TIM15
 	select STM32_HAVE_TIM16
 	select STM32_HAVE_TIM17
+	select STM32_HAVE_SDADC1
+	select STM32_HAVE_SDADC2
+	select STM32_HAVE_SDADC3
 	select STM32_HAVE_CAN1
 	select STM32_HAVE_DAC1
 	select STM32_HAVE_DAC2
 	select STM32_HAVE_I2C2
+	select STM32_HAVE_SPI2
+	select STM32_HAVE_SPI3
 	select STM32_HAVE_USART3
 
 config STM32_STM32F40XX
@@ -1560,6 +1653,10 @@ config STM32_STM32F446
 	select STM32_HAVE_UART5
 	select STM32_HAVE_USART6
 	select STM32_HAVE_TIM1
+	select STM32_HAVE_TIM2
+	select STM32_HAVE_TIM3
+	select STM32_HAVE_TIM4
+	select STM32_HAVE_TIM5
 	select STM32_HAVE_TIM6
 	select STM32_HAVE_TIM7
 	select STM32_HAVE_TIM8
@@ -1593,6 +1690,10 @@ config STM32_STM32F469
 	select STM32_HAVE_UART7
 	select STM32_HAVE_UART8
 	select STM32_HAVE_TIM1
+	select STM32_HAVE_TIM2
+	select STM32_HAVE_TIM3
+	select STM32_HAVE_TIM4
+	select STM32_HAVE_TIM5
 	select STM32_HAVE_TIM6
 	select STM32_HAVE_TIM7
 	select STM32_HAVE_TIM8
@@ -1612,6 +1713,9 @@ config STM32_STM32F469
 	select STM32_HAVE_SPI4
 	select STM32_HAVE_SPI5
 	select STM32_HAVE_SPI6
+        select STM32_HAVE_SAIPLL
+        select STM32_HAVE_I2SPLL
+
 
 config STM32_DFU
 	bool "DFU bootloader"
@@ -1639,6 +1743,10 @@ config STM32_HAVE_OTGFS
 	default n
 
 config STM32_HAVE_FSMC
+	bool
+	default n
+
+config STM32_HAVE_HRTIM1
 	bool
 	default n
 
@@ -1766,6 +1874,30 @@ config STM32_HAVE_ADC4_DMA
 	bool
 	default n
 
+config STM32_HAVE_SDADC1
+	bool
+	default n
+
+config STM32_HAVE_SDADC2
+	bool
+	default n
+
+config STM32_HAVE_SDADC3
+	bool
+	default n
+
+config STM32_HAVE_SDADC1_DMA
+	bool
+	default n
+
+config STM32_HAVE_SDADC2_DMA
+	bool
+	default n
+
+config STM32_HAVE_SDADC3_DMA
+	bool
+	default n
+
 config STM32_HAVE_CAN1
 	bool
 	default n
@@ -1773,6 +1905,18 @@ config STM32_HAVE_CAN1
 config STM32_HAVE_CAN2
 	bool
 	default n
+
+config STM32_HAVE_COMP2
+       bool
+       default n
+
+config STM32_HAVE_COMP4
+       bool
+       default n
+
+config STM32_HAVE_COMP6
+       bool
+       default n
 
 config STM32_HAVE_DAC1
 	bool
@@ -1826,6 +1970,10 @@ config STM32_HAVE_I2SPLL
 	bool
 	default n
 
+config STM32_HAVE_OPAMP
+       bool
+       default n
+
 # These are the peripheral selections proper
 
 config STM32_ADC1
@@ -1833,6 +1981,7 @@ config STM32_ADC1
 	default n
 	select STM32_ADC
 	select STM32_HAVE_ADC1_DMA if STM32_STM32F10XX && STM32_DMA1
+	select STM32_HAVE_ADC1_DMA if STM32_STM32F37XX && STM32_DMA1
 	select STM32_HAVE_ADC1_DMA if !STM32_STM32F10XX && STM32_DMA2
 
 config STM32_ADC2
@@ -1856,10 +2005,46 @@ config STM32_ADC4
 	depends on STM32_HAVE_ADC4
 	select STM32_HAVE_ADC4_DMA if STM32_DMA2
 
+config STM32_SDADC1
+	bool "SDADC1"
+	default n
+	select STM32_SDADC
+	depends on STM32_HAVE_SDADC1
+	select STM32_HAVE_SDADC1_DMA if STM32_DMA2
+
+config STM32_SDADC2
+	bool "SDADC2"
+	default n
+	select STM32_SDADC
+	depends on STM32_HAVE_SDADC2
+	select STM32_HAVE_SDADC2_DMA if STM32_DMA2
+
+config STM32_SDADC3
+	bool "SDADC3"
+	default n
+	select STM32_SDADC
+	depends on STM32_HAVE_SDADC3
+	select STM32_HAVE_SDADC3_DMA if STM32_DMA2
+
 config STM32_COMP
 	bool "COMP"
 	default n
 	depends on STM32_STM32L15XX
+
+config STM32_COMP2
+	bool "COMP2"
+	default n
+	depends on STM32_HAVE_COMP2
+
+config STM32_COMP4
+	bool "COMP4"
+	default n
+	depends on STM32_HAVE_COMP4
+
+config STM32_COMP6
+	bool "COMP6"
+	default n
+	depends on STM32_HAVE_COMP6
 
 config STM32_BKP
 	bool "BKP"
@@ -1956,6 +2141,11 @@ config STM32_HASH
 	default n
 	depends on STM32_STM32F207 || STM32_STM32F40XX
 
+config STM32_HRTIM1
+	bool "HRTIM1"
+	default n
+	depends on STM32_HAVE_HRTIM1
+
 config STM32_I2C1
 	bool "I2C1"
 	default n
@@ -1990,6 +2180,11 @@ config STM32_DMA2D
 	---help---
 		The STM32 DMA2D is an Chrom-Art Accelerator for image manipulation
 		available on the STM32F429 and STM32F439 devices.
+
+config STM32_OPAMP
+	bool "OPAMP"
+	default n
+	depends on STM32_HAVE_OPAMP
 
 config STM32_OTGFS
 	bool "OTG FS"
@@ -2065,7 +2260,7 @@ config STM32_SPI6
 config STM32_SYSCFG
 	bool "SYSCFG"
 	default y
-	depends on STM32_STM32L15XX || STM32_STM32F30XX || STM32_STM32F37XX || STM32_STM32F207 || STM32_STM32F40XX
+	depends on STM32_STM32L15XX || STM32_STM32F30XX || STM32_STM32F37XX || STM32_STM32F207 || STM32_STM32F40XX || STM32_CONNECTIVITYLINE
 
 config STM32_TIM1
 	bool "TIM1"
@@ -2226,6 +2421,9 @@ config STM32_WWDG
 endmenu
 
 config STM32_ADC
+	bool
+
+config STM32_SDADC
 	bool
 
 config STM32_DAC
@@ -2531,6 +2729,67 @@ config STM32_FSMC_SRAM
 	select ARCH_HAVE_HEAP2
 	---help---
 		In addition to internal SRAM, SRAM may also be available through the FSMC.
+
+menu "Timer Configuration"
+
+if SCHED_TICKLESS
+
+config STM32_ONESHOT
+	bool
+	default y
+
+config STM32_FREERUN
+	bool
+	default y
+
+config STM32_TICKLESS_ONESHOT
+	int "Tickless one-shot timer channel"
+	default 2
+	range 1 14
+	depends on STM32_ONESHOT
+	---help---
+		If the Tickless OS feature is enabled, the one clock must be
+		assigned to provided the one-shot timer needed by the OS.
+
+config STM32_TICKLESS_FREERUN
+	int "Tickless free-running timer channel"
+	default 5
+	range 1 14
+	depends on STM32_FREERUN
+	---help---
+		If the Tickless OS feature is enabled, the one clock must be
+		assigned to provided the free-running timer needed by the OS.
+
+endif # SCHED_TICKLESS
+
+if !SCHED_TICKLESS
+
+config STM32_ONESHOT
+	bool "TIM one-shot wrapper"
+	default n
+	---help---
+		Enable a wrapper around the low level timer/counter functions to
+		support one-shot timer.
+
+config STM32_FREERUN
+	bool "TIM free-running wrapper"
+	default n
+	---help---
+		Enable a wrapper around the low level timer/counter functions to
+		support a free-running timer.
+
+endif # !SCHED_TICKLESS
+
+config STM32_ONESHOT_MAXTIMERS
+	int "Maximum number of oneshot timers"
+	default 1
+	range 1 8
+	depends on STM32_ONESHOT
+	---help---
+		Determines the maximum number of oneshot timers that can be
+		supported.  This setting pre-allocates some minimal support for each
+		of the timers and places an upper limit on the number of oneshot
+		timers that you can use.
 
 config STM32_TIM1_PWM
 	bool "TIM1 PWM"
@@ -5299,6 +5558,8 @@ config STM32_TIM14_CAP
 		Timer devices may be used for different purposes.  One special purpose is
 		to capture input.
 
+endmenu # Timer Configuration
+
 menu "ADC Configuration"
 	depends on STM32_ADC
 
@@ -5336,6 +5597,38 @@ config STM32_ADC4_DMA
 	---help---
 		If DMA is selected, then the ADC may be configured to support
 		DMA transfer, which is necessary if multiple channels are read
+		or if very high trigger frequencies are used.
+
+endmenu
+
+menu "SDADC Configuration"
+	depends on STM32_SDADC
+
+config STM32_SDADC1_DMA
+	bool "SDADC1 DMA"
+	depends on STM32_SDADC1 && STM32_HAVE_SDADC1_DMA
+	default n
+	---help---
+		If DMA is selected, then the SDADC may be configured to support
+		DMA transfer, which is advisable if multiple channels are read
+		or if very high trigger frequencies are used.
+
+config STM32_SDADC2_DMA
+	bool "SDADC2 DMA"
+	depends on STM32_SDADC2 && STM32_HAVE_SDADC2_DMA
+	default n
+	---help---
+		If DMA is selected, then the SDADC may be configured to support
+		DMA transfer, which is advisable if multiple channels are read
+		or if very high trigger frequencies are used.
+
+config STM32_SDADC3_DMA
+	bool "SDADC3 DMA"
+	depends on STM32_SDADC3 && STM32_HAVE_SDADC3_DMA
+	default n
+	---help---
+		If DMA is selected, then the SDADC may be configured to support
+		DMA transfer, which is advisable if multiple channels are read
 		or if very high trigger frequencies are used.
 
 endmenu
@@ -5901,21 +6194,23 @@ endmenu
 menu "SDIO Configuration"
 	depends on STM32_SDIO
 
-config SDIO_DMA
+config STM32_SDIO_DMA
 	bool "Support DMA data transfers"
 	default y if STM32_DMA2
+	default n if !STM32_DMA2
+	select SDIO_DMA
 	depends on STM32_DMA2
 	---help---
 		Support DMA data transfers.  Requires STM32_SDIO and config STM32_DMA2.
 
-config SDIO_PRI
+config STM32_SDIO_PRI
 	hex "SDIO interrupt priority"
 	default 128
 	depends on ARCH_IRQPRIO && EXPERIMENTAL
 	---help---
 		Select SDIO interrupt priority.  Default: 128.
 
-config SDIO_DMAPRIO
+config STM32_SDIO_DMAPRIO
 	hex "SDIO DMA priority"
 	default 0x00001000 if STM32_STM32F10XX
 	default 0x00010000 if !STM32_STM32F10XX
@@ -5928,7 +6223,7 @@ config SDIO_DMAPRIO
 		For other STM32's, options are: 0x00000000 low, 0x00010000 medium,
 		0x00020000 high, 0x00030000 very high.  Default: medium.
 
-config SDIO_WIDTH_D1_ONLY
+config STM32_SDIO_WIDTH_D1_ONLY
 	bool "Use D1 only"
 	default n
 	---help---
@@ -5993,8 +6288,8 @@ config RTC_HSECLOCK
 
 endchoice
 
-if STM32_ETHMAC
 menu "Ethernet MAC configuration"
+	depends on STM32_ETHMAC
 
 config STM32_PHYADDR
 	int "PHY address"
@@ -6198,15 +6493,34 @@ config STM32_RMII_EXTCLK
 
 endchoice
 
+choice
+	prompt "Work queue"
+	default STM32_ETHMAC_LPWORK if SCHED_LPWORK
+	default STM32_ETHMAC_HPWORK if !SCHED_LPWORK && SCHED_HPWORK
+	depends on SCHED_WORKQUEUE
+	---help---
+		Work queue support is required to use the Ethernet driver.  If the
+		low priority work queue is available, then it should be used by the
+		driver.
+
+config STM32_ETHMAC_HPWORK
+	bool "High priority"
+	depends on SCHED_HPWORK
+
+config STM32_ETHMAC_LPWORK
+	bool "Low priority"
+	depends on SCHED_LPWORK
+
+endchoice # Work queue
+
 config STM32_ETHMAC_REGDEBUG
 	bool "Register-Level Debug"
 	default n
-	depends on DEBUG
+	depends on DEBUG_NET_INFO
 	---help---
-		Enable very low-level register access debug.  Depends on DEBUG.
+		Enable very low-level register access debug.  Depends on CONFIG_DEBUG_FEATURES.
 
-endmenu
-endif
+endmenu # Ethernet MAC configuration
 
 menu "USB FS Host Configuration"
 
@@ -6291,16 +6605,16 @@ menu "USB Host Debug Configuration"
 config STM32_USBHOST_REGDEBUG
 	bool "Register-Level Debug"
 	default n
-	depends on USBHOST && (STM32_OTGFS || STM32_OTGHS)
+	depends on USBHOST && DEBUG_USB_INFO && (STM32_OTGFS || STM32_OTGHS)
 	---help---
-		Enable very low-level register access debug.  Depends on DEBUG.
+		Enable very low-level register access debug.
 
 config STM32_USBHOST_PKTDUMP
 	bool "Packet Dump Debug"
 	default n
-	depends on USBHOST && (STM32_OTGFS || STM32_OTGHS)
+	depends on USBHOST && DEBUG_USB_INFO && (STM32_OTGFS || STM32_OTGHS)
 	---help---
-		Dump all incoming and outgoing USB packets. Depends on DEBUG.
+		Dump all incoming and outgoing USB packets.
 
 endmenu
 
@@ -6319,21 +6633,21 @@ config STM32_USB_ITRMP
 		F3 family and selects the use of the dedicated USB interrupts.
 
 menu "CAN driver configuration"
-	depends on STM32_CAN1 || STM32_CAN2
+	depends on STM32_CAN
 
 config CAN1_BAUD
 	int "CAN1 BAUD"
 	default 250000
 	depends on STM32_CAN1
 	---help---
-		CAN1 BAUD rate.  Required if STM32_CAN1 is defined.
+		CAN1 BAUD rate.  Required if CONFIG_STM32_CAN1 is defined.
 
 config CAN2_BAUD
 	int "CAN2 BAUD"
 	default 250000
 	depends on STM32_CAN2
 	---help---
-		CAN2 BAUD rate.  Required if STM32_CAN2 is defined.
+		CAN2 BAUD rate.  Required if CONFIG_STM32_CAN2 is defined.
 
 config CAN_TSEG1
 	int "TSEG1 quanta"
@@ -6346,6 +6660,15 @@ config CAN_TSEG2
 	default 7
 	---help---
 		The number of CAN time quanta in segment 2. Default: 7
+
+config STM32_CAN_REGDEBUG
+	bool "CAN Register level debug"
+	depends on DEBUG_CAN_INFO
+	default n
+	---help---
+		Output detailed register-level CAN device debug information.
+		Requires also CONFIG_DEBUG_CAN_INFO.
+
 endmenu
 
 if STM32_LTDC
@@ -6563,11 +6886,12 @@ config STM32_TIM1_QE
 
 if STM32_TIM1_QE
 
-config STM32_TIM1_QECLKOUT
-	int "TIM1 output clock"
-	default 2800000
+config STM32_TIM1_QEPSC
+	int "TIM1 pulse prescaler"
+	default 1
 	---help---
-		The output clock of TIM1.
+		This prescaler divides the number of recorded encoder pulses,
+		limiting the count rate at the expense of resolution.
 
 endif
 
@@ -6580,11 +6904,12 @@ config STM32_TIM2_QE
 
 if STM32_TIM2_QE
 
-config STM32_TIM2_QECLKOUT
-	int "TIM2 output clock"
-	default 2800000
+config STM32_TIM2_QEPSC
+	int "TIM2 pulse prescaler"
+	default 1
 	---help---
-		The output clock of TIM2.
+		This prescaler divides the number of recorded encoder pulses,
+		limiting the count rate at the expense of resolution.
 
 endif
 
@@ -6597,11 +6922,12 @@ config STM32_TIM3_QE
 
 if STM32_TIM3_QE
 
-config STM32_TIM3_QECLKOUT
-	int "TIM3 output clock"
-	default 2800000
+config STM32_TIM3_QEPSC
+	int "TIM3 pulse prescaler"
+	default 1
 	---help---
-		The output clock of TIM3.
+		This prescaler divides the number of recorded encoder pulses,
+		limiting the count rate at the expense of resolution.
 
 endif
 
@@ -6614,11 +6940,12 @@ config STM32_TIM4_QE
 
 if STM32_TIM4_QE
 
-config STM32_TIM4_QECLKOUT
-	int "TIM4 output clock"
-	default 2800000
+config STM32_TIM4_QEPSC
+	int "TIM4 pulse prescaler"
+	default 1
 	---help---
-		The output clock of TIM4.
+		This prescaler divides the number of recorded encoder pulses,
+		limiting the count rate at the expense of resolution.
 
 endif
 
@@ -6631,11 +6958,12 @@ config STM32_TIM5_QE
 
 if STM32_TIM5_QE
 
-config STM32_TIM5_QECLKOUT
-	int "TIM5 output clock"
-	default 2800000
+config STM32_TIM5_QEPSC
+	int "TIM5 pulse prescaler"
+	default 1
 	---help---
-		The output clock of TIM5.
+		This prescaler divides the number of recorded encoder pulses,
+		limiting the count rate at the expense of resolution.
 
 endif
 
@@ -6648,11 +6976,12 @@ config STM32_TIM8_QE
 
 if STM32_TIM8_QE
 
-config STM32_TIM8_QECLKOUT
-	int "TIM8 output clock"
-	default 2800000
+config STM32_TIM8_QEPSC
+	int "TIM8 pulse prescaler"
+	default 1
 	---help---
-		The output clock of TIM8.
+		This prescaler divides the number of recorded encoder pulses,
+		limiting the count rate at the expense of resolution.
 
 endif
 

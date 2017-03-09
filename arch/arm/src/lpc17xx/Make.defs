@@ -70,10 +70,6 @@ ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
 CMN_CSRCS += up_ramvec_initialize.c up_ramvec_attach.c
 endif
 
-ifeq ($(CONFIG_ARCH_MEMCPY),y)
-CMN_ASRCS += up_memcpy.S
-endif
-
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CMN_CSRCS += up_mpu.c up_task_start.c up_pthread_start.c
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
@@ -90,12 +86,6 @@ ifeq ($(CONFIG_NET),y)
 ifneq ($(CONFIG_LPC17_ETHERNET),y)
 CMN_CSRCS += up_etherstub.c
 endif
-endif
-
-ifeq ($(CONFIG_ELF),y)
-CMN_CSRCS += up_elf.c
-else ifeq ($(CONFIG_MODULE),y)
-CMN_CSRCS += up_elf.c
 endif
 
 ifeq ($(CONFIG_ARCH_FPU),y)
@@ -133,11 +123,11 @@ ifeq ($(CONFIG_LPC17_EMC),y)
 CHIP_CSRCS += lpc17_emc.c
 endif
 
-ifeq ($(CONFIG_GPIO_IRQ),y)
+ifeq ($(CONFIG_LPC17_GPIOIRQ),y)
 CHIP_CSRCS += lpc17_gpioint.c
 endif
 
-ifeq ($(CONFIG_DEBUG_GPIO),y)
+ifeq ($(CONFIG_DEBUG_GPIO_INFO),y)
 CHIP_CSRCS += lpc17_gpiodbg.c
 endif
 

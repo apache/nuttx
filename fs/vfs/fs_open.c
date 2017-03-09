@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/vfs/fs_open.c
  *
- *   Copyright (C) 2007-2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2012, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <stdbool.h>
 #include <fcntl.h>
 #include <sched.h>
 #include <errno.h>
@@ -48,14 +49,11 @@
 #include <stdarg.h>
 #endif
 
+#include <nuttx/cancelpt.h>
 #include <nuttx/fs/fs.h>
 
 #include "inode/inode.h"
 #include "driver/driver.h"
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -92,9 +90,9 @@ int inode_checkflags(FAR struct inode *inode, int oflags)
 
 int open(const char *path, int oflags, ...)
 {
+  struct inode_search_s desc;
   FAR struct file *filep;
   FAR struct inode *inode;
-  FAR const char *relpath = NULL;
 #if defined(CONFIG_FILE_MODE) || !defined(CONFIG_DISABLE_MOUNTPOINT)
   mode_t mode = 0666;
 #endif
@@ -105,6 +103,10 @@ int open(const char *path, int oflags, ...)
 #  ifdef CONFIG_CPP_HAVE_WARNING
 #    warning "File creation not implemented"
 #  endif
+
+  /* open() is a cancellation point */
+
+  (void)enter_cancellation_point();
 
   /* If the file is opened for creation, then get the mode bits */
 
@@ -119,20 +121,27 @@ int open(const char *path, int oflags, ...)
 
   /* Get an inode for this file */
 
-  inode = inode_find(path, &relpath);
-  if (!inode)
+  SETUP_SEARCH(&desc, path, false);
+
+  ret = inode_find(&desc);
+  if (ret < 0)
     {
       /* "O_CREAT is not set and the named file does not exist.  Or, a
        * directory component in pathname does not exist or is a dangling
        * symbolic link."
        */
 
-      ret = ENOENT;
-      goto errout;
+      ret = -ret;
+      goto errout_with_search;
     }
 
-#if !defined(CONFIG_DISABLE_PSEUDOFS_OPERATIONS) && \
-    !defined(CONFIG_DISABLE_MOUNTPOINT)
+  /* Get the search results */
+
+  inode = desc.node;
+  DEBUGASSERT(inode != NULL);
+
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && \
+    !defined(CONFIG_DISABLE_PSEUDOFS_OPERATIONS)
    /* If the inode is block driver, then we may return a character driver
     * proxy for the block driver.  block_proxy() will instantiate a BCH
     * character driver wrapper around the block driver, open(), then
@@ -154,11 +163,13 @@ int open(const char *path, int oflags, ...)
        if (fd < 0)
          {
            ret = fd;
-           goto errout;
+           goto errout_with_search;
          }
 
        /* Return the file descriptor */
 
+       RELEASE_SEARCH(&desc);
+       leave_cancellation_point();
        return fd;
      }
    else
@@ -204,7 +215,7 @@ int open(const char *path, int oflags, ...)
     {
       /* The errno value has already been set */
 
-      return ERROR;
+      goto errout;
     }
 
   /* Perform the driver open operation.  NOTE that the open method may be
@@ -218,7 +229,7 @@ int open(const char *path, int oflags, ...)
 #ifndef CONFIG_DISABLE_MOUNTPOINT
       if (INODE_IS_MOUNTPT(inode))
         {
-          ret = inode->u.i_mops->open(filep, relpath, oflags, mode);
+          ret = inode->u.i_mops->open(filep, desc.relpath, oflags, mode);
         }
       else
 #endif
@@ -233,13 +244,52 @@ int open(const char *path, int oflags, ...)
       goto errout_with_fd;
     }
 
+#ifdef CONFIG_PSEUDOTERM_SUSV1
+  /* If the return value from the open method is > 0, then it may actually
+   * be an encoded file descriptor.  This kind of logic is currently only
+   * needed for /dev/ptmx:  When dev ptmx is opened, it does not return a
+   * file descriptor associated with the /dev/ptmx inode, but rather with
+   * the inode of master device created by the /dev/ptmx open method.
+   *
+   * The encoding supports (a) returning file descriptor 0 (which really
+   * should not happen), and (b) avoiding confusion if some other open
+   * method returns a positive, non-zero value which is not a file
+   * descriptor.
+   */
+
+  if (OPEN_ISFD(ret))
+    {
+      /* Release file descriptor and inode that we allocated.  We don't
+       * need those.
+       */
+
+      files_release(fd);
+      inode_release(inode);
+
+      /* Instead, decode and return the descriptor associated with the
+       * master side device.
+       */
+
+      fd = (int)OPEN_GETFD(ret);
+      DEBUGASSERT((unsigned)fd < (CONFIG_NFILE_DESCRIPTORS + CONFIG_NSOCKET_DESCRIPTORS));
+    }
+#endif
+
+  RELEASE_SEARCH(&desc);
+  leave_cancellation_point();
   return fd;
 
 errout_with_fd:
   files_release(fd);
+
 errout_with_inode:
   inode_release(inode);
-errout:
+
+errout_with_search:
+  RELEASE_SEARCH(&desc);
   set_errno(ret);
+
+errout:
+  leave_cancellation_point();
   return ERROR;
 }

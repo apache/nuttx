@@ -255,7 +255,7 @@ static int lio_sigsetup(FAR struct aiocb * const *list, int nent,
   sighand = (FAR struct lio_sighand_s *)lib_zalloc(sizeof(struct lio_sighand_s));
   if (!sighand)
     {
-      fdbg("ERROR: lib_zalloc failed\n");
+      ferr("ERROR: lib_zalloc failed\n");
       return -ENOMEM;
     }
 
@@ -296,7 +296,7 @@ static int lio_sigsetup(FAR struct aiocb * const *list, int nent,
   if (status != OK)
     {
       int errcode = get_errno();
-      fdbg("ERROR sigprocmask failed: %d\n", errcode);
+      ferr("ERROR sigprocmask failed: %d\n", errcode);
       DEBUGASSERT(errcode > 0);
       return -errcode;
     }
@@ -314,7 +314,7 @@ static int lio_sigsetup(FAR struct aiocb * const *list, int nent,
   if (status != OK)
     {
       int errcode = get_errno();
-      fdbg("ERROR sigaction failed: %d\n", errcode);
+      ferr("ERROR sigaction failed: %d\n", errcode);
       DEBUGASSERT(errcode > 0);
       return -errcode;
     }
@@ -379,7 +379,7 @@ static int lio_waitall(FAR struct aiocb * const *list, int nent)
            */
 
           int errcode = get_errno();
-          fdbg("ERROR: sigwaitinfo failed: %d\n", errcode);
+          ferr("ERROR: sigwaitinfo failed: %d\n", errcode);
           DEBUGASSERT(errcode > 0);
           return -errcode;
         }
@@ -600,7 +600,7 @@ int lio_listio(int mode, FAR struct aiocb *const list[], int nent,
                     /* Failed to queue the I/O.  Set up the error return. */
 
                     errcode = get_errno();
-                    fdbg("ERROR: aio_read/write failed: %d\n", errcode);
+                    ferr("ERROR: aio_read/write failed: %d\n", errcode);
                     DEBUGASSERT(errcode > 0);
                     aiocbp->aio_result = -errcode;
                     ret = ERROR;
@@ -618,7 +618,7 @@ int lio_listio(int mode, FAR struct aiocb *const list[], int nent,
               {
                 /* Make the invalid operation complete with an error */
 
-                fdbg("ERROR: Unrecognized opcode: %d\n", aiocbp->aio_lio_opcode);
+                ferr("ERROR: Unrecognized opcode: %d\n", aiocbp->aio_lio_opcode);
                 aiocbp->aio_result = -EINVAL;
                 ret = ERROR;
               }

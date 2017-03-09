@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/armv7-a/arm_dataabort.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,17 +38,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-/* Output debug info if stack dump is selected -- even if debug is not
- * selected.
- */
-
-#ifdef CONFIG_ARCH_STACKDUMP
-# undef  CONFIG_DEBUG
-# undef  CONFIG_DEBUG_VERBOSE
-# define CONFIG_DEBUG 1
-# define CONFIG_DEBUG_VERBOSE 1
-#endif
 
 #include <stdint.h>
 #include <debug.h>
@@ -115,7 +104,7 @@ uint32_t *arm_dataabort(uint32_t *regs, uint32_t dfar, uint32_t dfsr)
    * fatal error.
    */
 
-  pglldbg("DFSR: %08x DFAR: %08x\n", dfsr, dfar);
+  pginfo("DFSR: %08x DFAR: %08x\n", dfsr, dfar);
   if ((dfsr & FSR_MASK) != FSR_PAGE)
     {
       goto segfault;
@@ -126,7 +115,7 @@ uint32_t *arm_dataabort(uint32_t *regs, uint32_t dfar, uint32_t dfsr)
    * (It has not yet been saved in the register context save area).
    */
 
-  pgllvdbg("VBASE: %08x VEND: %08x\n", PG_PAGED_VBASE, PG_PAGED_VEND);
+  pginfo("VBASE: %08x VEND: %08x\n", PG_PAGED_VBASE, PG_PAGED_VEND);
   if (dfar < PG_PAGED_VBASE || dfar >= PG_PAGED_VEND)
     {
       goto segfault;
@@ -163,7 +152,7 @@ uint32_t *arm_dataabort(uint32_t *regs, uint32_t dfar, uint32_t dfsr)
   return regs;
 
 segfault:
-  lldbg("Data abort. PC: %08x DFAR: %08x DFSR: %08x\n",
+  _alert("Data abort. PC: %08x DFAR: %08x DFSR: %08x\n",
         regs[REG_PC], dfar, dfsr);
   PANIC();
   return regs; /* To keep the compiler happy */
@@ -181,7 +170,7 @@ uint32_t *arm_dataabort(uint32_t *regs, uint32_t dfar, uint32_t dfsr)
 
   /* Crash -- possibly showing diagnostic debug information. */
 
-  lldbg("Data abort. PC: %08x DFAR: %08x DFSR: %08x\n",
+  _alert("Data abort. PC: %08x DFAR: %08x DFSR: %08x\n",
         regs[REG_PC], dfar, dfsr);
   PANIC();
   return regs; /* To keep the compiler happy */

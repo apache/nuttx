@@ -1,4 +1,4 @@
-/********************************************************************************
+/****************************************************************************
  * sched/timer/timer_delete.c
  *
  *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -46,34 +46,34 @@
 
 #ifndef CONFIG_DISABLE_POSIX_TIMERS
 
-/********************************************************************************
+/****************************************************************************
  * Public Functions
- ********************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************
+/****************************************************************************
  * Name: timer_delete
  *
  * Description:
- *   The timer_delete() function deletes the specified timer, timerid, previously
- *   created by the timer_create() function. If the timer is armed when
- *   timer_delete() is called, the timer will be automatically disarmed before
- *   removal. The disposition of pending signals for the deleted timer is
- *   unspecified.
+ *   The timer_delete() function deletes the specified timer, timerid,
+ *   previously created by the timer_create() function. If the timer is
+ *   armed when timer_delete() is called, the timer will be automatically
+ *   disarmed before removal. The disposition of pending signals for the
+ *   deleted timer is unspecified.
  *
  * Parameters:
  *   timerid - The per-thread timer, previously created by the call to
  *   timer_create(), to be deleted.
  *
  * Return Value:
- *   If the call succeeds, timer_create() will return 0 (OK).  Otherwise, the
- *   function will return a value of -1 (ERROR) and set errno to indicate the
- *   error.
+ *   If the call succeeds, timer_create() will return 0 (OK).  Otherwise,
+ *   the function will return a value of -1 (ERROR) and set errno to
+ *   indicate the error.
  *
  *   EINVAL - The timer specified timerid is not valid.
  *
  * Assumptions:
  *
- ********************************************************************************/
+ ****************************************************************************/
 
 int timer_delete(timer_t timerid)
 {

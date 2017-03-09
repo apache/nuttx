@@ -254,31 +254,31 @@ int sam_sdinitialize(int minor)
 
   /* Get the SPI driver instance for the SD chip select */
 
-  fvdbg("Initializing bit bang SPI for the MMC/SD slot\n");
+  finfo("Initializing bit bang SPI for the MMC/SD slot\n");
 
   spi = sam_mmcsd_spiinitialize();
   if (!spi)
     {
-      fdbg("Failed to bit bang SPI for the MMC/SD slot\n");
+      ferr("ERROR: Failed to bit bang SPI for the MMC/SD slot\n");
       return -ENODEV;
     }
 
-  fvdbg("Successfully initialized bit bang SPI for the MMC/SD slot\n");
+  finfo("Successfully initialized bit bang SPI for the MMC/SD slot\n");
 
   /* Bind the SPI device for the chip select to the slot */
 
-  fvdbg("Binding bit bang SPI device to MMC/SD slot %d\n",
+  finfo("Binding bit bang SPI device to MMC/SD slot %d\n",
         SAM34_MMCSDSLOTNO);
 
   ret = mmcsd_spislotinitialize(minor, SAM34_MMCSDSLOTNO, spi);
   if (ret < 0)
     {
-      fdbg("Failed to bind  bit bang SPI device to MMC/SD slot %d: %d\n",
+      ferr("ERROR: Failed to bind  bit bang SPI device to MMC/SD slot %d: %d\n",
             SAM34_MMCSDSLOTNO, ret);
       return ret;
     }
 
-  fvdbg("Successfuly bound  bit bang SPI device to MMC/SD slot %d\n",
+  finfo("Successfuly bound  bit bang SPI device to MMC/SD slot %d\n",
         SAM34_MMCSDSLOTNO);
 
   return OK;

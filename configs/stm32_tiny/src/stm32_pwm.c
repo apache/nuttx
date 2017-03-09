@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/stm32_tiny/src/stm32_pwm.c
  *
- *   Copyright (C) 2012-2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,7 @@
 #include <debug.h>
 
 #include <nuttx/board.h>
-#include <nuttx/pwm.h>
+#include <nuttx/drivers/pwm.h>
 
 #include <arch/board/board.h>
 
@@ -64,23 +64,18 @@
 #ifdef CONFIG_PWM
 
 /************************************************************************************
- * Private Functions
- ************************************************************************************/
-
-/************************************************************************************
  * Public Functions
  ************************************************************************************/
 
 /************************************************************************************
- * Name: board_pwm_setup
+ * Name: stm32_pwm_setup
  *
  * Description:
- *   All STM32 architectures must provide the following interface to work with
- *   examples/pwm.
+ *   Initialize PWM and register the PWM device.
  *
  ************************************************************************************/
 
-int board_pwm_setup(void)
+int stm32_pwm_setup(void)
 {
   static bool initialized = false;
   struct pwm_lowerhalf_s *pwm;
@@ -95,7 +90,7 @@ int board_pwm_setup(void)
       pwm = stm32_pwminitialize(STM32TINY_PWMTIMER);
       if (!pwm)
         {
-          adbg("Failed to get the STM32 PWM lower half\n");
+          aerr("ERROR: Failed to get the STM32 PWM lower half\n");
           return -ENODEV;
         }
 
@@ -104,7 +99,7 @@ int board_pwm_setup(void)
       ret = pwm_register("/dev/pwm0", pwm);
       if (ret < 0)
         {
-          adbg("pwm_register failed: %d\n", ret);
+          aerr("ERROR: pwm_register failed: %d\n", ret);
           return ret;
         }
 

@@ -1,6 +1,5 @@
 /****************************************************************************
  * arch/hc/src/m9s12/m9s12_start.S
- * arch/hc/src/chip/m9s12_start.S
  *
  *	 Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *	 Author: Gregory Nutt <gnutt@nuttx.org>
@@ -82,7 +81,7 @@
  */
 
 	.macro	showprogress, code
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 	ldab	\code
 #ifdef CONFIG_HCS12_SERIALMON
 	jsr		#PutChar

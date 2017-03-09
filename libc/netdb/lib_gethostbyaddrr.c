@@ -265,7 +265,7 @@ int lib_hostfile_lookup(FAR const void *addr, socklen_t len, int type,
     {
       int errcode = errno;
 
-      ndbg("ERROR:  Failed to open the hosts file %s: %d\n",
+      nerr("ERROR:  Failed to open the hosts file %s: %d\n",
            CONFIG_NETDB_HOSTCONF_PATH, errcode);
       UNUSED(errcode);
 
@@ -309,7 +309,7 @@ int lib_hostfile_lookup(FAR const void *addr, socklen_t len, int type,
           FAR char *hostaddr = host->h_addr;
           if (hostaddr != NULL)
             {
-              nvdbg("Comparing addresses...\n");
+              ninfo("Comparing addresses...\n");
               if (memcmp(addr, hostaddr, len) == 0)
                 {
                    /* We have a match */

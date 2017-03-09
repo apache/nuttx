@@ -243,9 +243,6 @@ SMP
 
   You can enable SMP for ostest configuration by enabling:
 
-    -# CONFIG_EXPERIMENTAL is not set
-    +CONFIG_EXPERIMENTAL=y
-
     +CONFIG_SPINLOCK=y
     +CONFIG_SMP=y
     +CONFIG_SMP_NCPUS=2
@@ -489,6 +486,11 @@ cxxtest
      To really use this example, I will have to think of some way to
      postpone running C++ static initializers until NuttX has been
      initialized.
+
+minibasic
+
+  This configuration was used to test the Mini Basic port at
+  apps/interpreters/minibasic.
 
 mount
 

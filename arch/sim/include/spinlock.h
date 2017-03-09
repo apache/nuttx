@@ -46,6 +46,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Must match definitions in up_testset.c */
 
 #define SP_UNLOCKED false  /* The Un-locked state */
@@ -66,7 +67,7 @@ typedef bool spinlock_t;
  * Name: up_testset
  *
  * Description:
- *   Perform and atomic test and set operation on the provided spinlock.
+ *   Perform an atomic test and set operation on the provided spinlock.
  *
  *   This function must be provided via the architecture-specific logoic.
  *

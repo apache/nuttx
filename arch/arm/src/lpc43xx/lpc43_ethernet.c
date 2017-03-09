@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc43/lpc43_eth.c
  *
- *   Copyright (C) 2011-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,11 +53,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include <nuttx/wdog.h>
-
-#ifdef CONFIG_NET_NOINTS
-#  include <nuttx/wqueue.h>
-#endif
-
+#include <nuttx/wqueue.h>
 #include <nuttx/net/mii.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
@@ -83,12 +79,23 @@
  ****************************************************************************/
 /* Configuration ************************************************************/
 
-/* If processing is not done at the interrupt level, then high priority
- * work queue support is required.
+/* If processing is not done at the interrupt level, then work queue support
+ * is required.
  */
 
-#if defined(CONFIG_NET_NOINTS) && !defined(CONFIG_SCHED_HPWORK)
-#  error High priority work queue support is required
+#if !defined(CONFIG_SCHED_WORKQUEUE)
+#  error Work queue support is required
+#else
+
+  /* Select work queue */
+
+#  if defined(CONFIG_LPC43_ETHERNET_HPWORK)
+#    define ETHWORK HPWORK
+#  elif defined(CONFIG_LPC43_ETHERNET_LPWORK)
+#    define ETHWORK LPWORK
+#  else
+#    error Neither CONFIG_LPC43_ETHERNET_HPWORK nor CONFIG_LPC43_ETHERNET_LPWORK defined
+#  endif
 #endif
 
 #ifndef CONFIG_LPC43_PHYADDR
@@ -103,11 +110,10 @@
 #  error "Both CONFIG_LPC43_MII and CONFIG_LPC43_RMII defined"
 #endif
 
+#ifdef CONFIG_LPC43_AUTONEG
 #  ifndef CONFIG_LPC43_PHYSR
 #    error "CONFIG_LPC43_PHYSR must be defined in the NuttX configuration"
 #  endif
-
-#ifndef CONFIG_LPC43_AUTONEG
 #  ifdef CONFIG_LPC43_PHYSR_ALTCONFIG
 #    ifndef CONFIG_LPC43_PHYSR_ALTMODE
 #      error "CONFIG_LPC43_PHYSR_ALTMODE must be defined in the NuttX configuration"
@@ -152,12 +158,6 @@
 #undef CONFIG_LPC43_ETH_ENHANCEDDESC
 #undef CONFIG_LPC43_ETH_HWCHECKSUM
 
-/* Ethernet buffer sizes, number of buffers, and number of descriptors */
-
-#ifndef CONFIG_NET_MULTIBUFFER
-#  error "CONFIG_NET_MULTIBUFFER is required"
-#endif
-
 /* Add 4 to the configured buffer size to account for the 2 byte checksum
  * memory needed at the end of the maximum size packet.  Buffer sizes must
  * be an even multiple of 4, 8, or 16 bytes (depending on buswidth).  We
@@ -197,7 +197,7 @@
  * enabled.
  */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_NET_INFO
 #  undef CONFIG_LPC43_ETHMAC_REGDEBUG
 #endif
 
@@ -518,9 +518,8 @@ struct lpc43_ethmac_s
   uint8_t              fduplex : 1; /* Full (vs. half) duplex */
   WDOG_ID              txpoll;      /* TX poll timer */
   WDOG_ID              txtimeout;   /* TX timeout timer */
-#ifdef CONFIG_NET_NOINTS
-  struct work_s        work;        /* For deferring work to the work queue */
-#endif
+  struct work_s        irqwork;     /* For deferring work to the work queue */
+  struct work_s        pollwork;    /* For deferring work to the work queue */
 
   /* This holds the information visible to the NuttX network */
 
@@ -559,7 +558,7 @@ static struct lpc43_ethmac_s g_lpc43ethmac;
  ****************************************************************************/
 /* Register operations ******************************************************/
 
-#if defined(CONFIG_LPC43_ETHMAC_REGDEBUG) && defined(CONFIG_DEBUG)
+#ifdef CONFIG_LPC43_ETHMAC_REGDEBUG
 static uint32_t lpc43_getreg(uint32_t addr);
 static void lpc43_putreg(uint32_t val, uint32_t addr);
 static void lpc43_checksetup(void);
@@ -593,34 +592,26 @@ static int  lpc43_recvframe(FAR struct lpc43_ethmac_s *priv);
 static void lpc43_receive(FAR struct lpc43_ethmac_s *priv);
 static void lpc43_freeframe(FAR struct lpc43_ethmac_s *priv);
 static void lpc43_txdone(FAR struct lpc43_ethmac_s *priv);
-#ifdef CONFIG_NET_NOINTS
+
 static void lpc43_interrupt_work(FAR void *arg);
-#endif
-static int  lpc43_interrupt(int irq, FAR void *context);
+static int  lpc43_interrupt(int irq, FAR void *context, FAR void *arg);
 
 /* Watchdog timer expirations */
 
-static inline void lpc43_txtimeout_process(FAR struct lpc43_ethmac_s *priv);
-#ifdef CONFIG_NET_NOINTS
 static void lpc43_txtimeout_work(FAR void *arg);
-#endif
 static void lpc43_txtimeout_expiry(int argc, uint32_t arg, ...);
 
-static inline void lpc43_poll_process(FAR struct lpc43_ethmac_s *priv);
-#ifdef CONFIG_NET_NOINTS
 static void lpc43_poll_work(FAR void *arg);
-#endif
 static void lpc43_poll_expiry(int argc, uint32_t arg, ...);
 
 /* NuttX callback functions */
 
 static int  lpc43_ifup(struct net_driver_s *dev);
 static int  lpc43_ifdown(struct net_driver_s *dev);
-static inline void lpc43_txavail_process(FAR struct lpc43_ethmac_s *priv);
-#ifdef CONFIG_NET_NOINTS
+
 static void lpc43_txavail_work(FAR void *arg);
-#endif
 static int  lpc43_txavail(struct net_driver_s *dev);
+
 #if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
 static int  lpc43_addmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif
@@ -683,7 +674,7 @@ static int  lpc43_ethconfig(FAR struct lpc43_ethmac_s *priv);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_LPC43_ETHMAC_REGDEBUG) && defined(CONFIG_DEBUG)
+#ifdef CONFIG_LPC43_ETHMAC_REGDEBUG
 static uint32_t lpc43_getreg(uint32_t addr)
 {
   static uint32_t prevaddr = 0;
@@ -704,7 +695,7 @@ static uint32_t lpc43_getreg(uint32_t addr)
         {
           if (count == 4)
             {
-              lldbg("...\n");
+              ninfo("...\n");
             }
 
           return val;
@@ -721,7 +712,7 @@ static uint32_t lpc43_getreg(uint32_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          lldbg("[repeats %d more times]\n", count-3);
+          ninfo("[repeats %d more times]\n", count-3);
         }
 
       /* Save the new address, value, and count */
@@ -733,7 +724,7 @@ static uint32_t lpc43_getreg(uint32_t addr)
 
   /* Show the register value read */
 
-  lldbg("%08x->%08x\n", addr, val);
+  ninfo("%08x->%08x\n", addr, val);
   return val;
 }
 #endif
@@ -755,12 +746,12 @@ static uint32_t lpc43_getreg(uint32_t addr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_LPC43_ETHMAC_REGDEBUG) && defined(CONFIG_DEBUG)
+#ifdef CONFIG_LPC43_ETHMAC_REGDEBUG
 static void lpc43_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  lldbg("%08x<-%08x\n", addr, val);
+  ninfo("%08x<-%08x\n", addr, val);
 
   /* Write the value */
 
@@ -782,7 +773,7 @@ static void lpc43_putreg(uint32_t val, uint32_t addr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_LPC43_ETHMAC_REGDEBUG) && defined(CONFIG_DEBUG)
+#ifdef CONFIG_LPC43_ETHMAC_REGDEBUG
 static void lpc43_checksetup(void)
 {
 }
@@ -947,8 +938,8 @@ static int lpc43_transmit(FAR struct lpc43_ethmac_s *priv)
   txdesc  = priv->txhead;
   txfirst = txdesc;
 
-  nllvdbg("d_len: %d d_buf: %p txhead: %p tdes0: %08x\n",
-          priv->dev.d_len, priv->dev.d_buf, txdesc, txdesc->tdes0);
+  ninfo("d_len: %d d_buf: %p txhead: %p tdes0: %08x\n",
+        priv->dev.d_len, priv->dev.d_buf, txdesc, txdesc->tdes0);
 
   DEBUGASSERT(txdesc && (txdesc->tdes0 & ETH_TDES0_OWN) == 0);
 
@@ -964,7 +955,7 @@ static int lpc43_transmit(FAR struct lpc43_ethmac_s *priv)
       bufcount = (priv->dev.d_len + (CONFIG_LPC43_ETH_BUFSIZE-1)) / CONFIG_LPC43_ETH_BUFSIZE;
       lastsize = priv->dev.d_len - (bufcount - 1) * CONFIG_LPC43_ETH_BUFSIZE;
 
-      nllvdbg("bufcount: %d lastsize: %d\n", bufcount, lastsize);
+      ninfo("bufcount: %d lastsize: %d\n", bufcount, lastsize);
 
       /* Set the first segment bit in the first TX descriptor */
 
@@ -1074,8 +1065,8 @@ static int lpc43_transmit(FAR struct lpc43_ethmac_s *priv)
 
   priv->inflight++;
 
-  nllvdbg("txhead: %p txtail: %p inflight: %d\n",
-          priv->txhead, priv->txtail, priv->inflight);
+  ninfo("txhead: %p txtail: %p inflight: %d\n",
+        priv->txhead, priv->txtail, priv->inflight);
 
   /* If all TX descriptors are in-flight, then we have to disable receive interrupts
    * too.  This is because receive events can trigger more un-stoppable transmit
@@ -1373,7 +1364,7 @@ static void lpc43_freesegment(FAR struct lpc43_ethmac_s *priv,
   struct eth_rxdesc_s *rxdesc;
   int i;
 
-  nllvdbg("rxfirst: %p segments: %d\n", rxfirst, segments);
+  ninfo("rxfirst: %p segments: %d\n", rxfirst, segments);
 
   /* Set OWN bit in RX descriptors.  This gives the buffers back to DMA */
 
@@ -1431,8 +1422,8 @@ static int lpc43_recvframe(FAR struct lpc43_ethmac_s *priv)
   uint8_t *buffer;
   int i;
 
-  nllvdbg("rxhead: %p rxcurr: %p segments: %d\n",
-          priv->rxhead, priv->rxcurr, priv->segments);
+  ninfo("rxhead: %p rxcurr: %p segments: %d\n",
+        priv->rxhead, priv->rxcurr, priv->segments);
 
   /* Check if there are free buffers.  We cannot receive new frames in this
    * design unless there is at least one free buffer.
@@ -1440,7 +1431,7 @@ static int lpc43_recvframe(FAR struct lpc43_ethmac_s *priv)
 
   if (!lpc43_isfreebuffer(priv))
     {
-      nlldbg("No free buffers\n");
+      nerr("ERROR: No free buffers\n");
       return -ENOMEM;
     }
 
@@ -1497,7 +1488,7 @@ static int lpc43_recvframe(FAR struct lpc43_ethmac_s *priv)
               rxcurr = priv->rxcurr;
             }
 
-          nllvdbg("rxhead: %p rxcurr: %p segments: %d\n",
+          ninfo("rxhead: %p rxcurr: %p segments: %d\n",
               priv->rxhead, priv->rxcurr, priv->segments);
 
           /* Check if any errors are reported in the frame */
@@ -1536,8 +1527,8 @@ static int lpc43_recvframe(FAR struct lpc43_ethmac_s *priv)
               priv->rxhead   = (struct eth_rxdesc_s *)rxdesc->rdes3;
               lpc43_freesegment(priv, rxcurr, priv->segments);
 
-              nllvdbg("rxhead: %p d_buf: %p d_len: %d\n",
-                      priv->rxhead, dev->d_buf, dev->d_len);
+              ninfo("rxhead: %p d_buf: %p d_len: %d\n",
+                    priv->rxhead, dev->d_buf, dev->d_len);
 
               return OK;
             }
@@ -1547,7 +1538,7 @@ static int lpc43_recvframe(FAR struct lpc43_ethmac_s *priv)
                * scanning logic, and continue scanning with the next frame.
                */
 
-              nlldbg("DROPPED: RX descriptor errors: %08x\n", rxdesc->rdes0);
+              nwarn("WARNING: Dropped, RX descriptor errors: %08x\n", rxdesc->rdes0);
               lpc43_freesegment(priv, rxcurr, priv->segments);
             }
         }
@@ -1563,8 +1554,8 @@ static int lpc43_recvframe(FAR struct lpc43_ethmac_s *priv)
 
   priv->rxhead = rxdesc;
 
-  nllvdbg("rxhead: %p rxcurr: %p segments: %d\n",
-          priv->rxhead, priv->rxcurr, priv->segments);
+  ninfo("rxhead: %p rxcurr: %p segments: %d\n",
+        priv->rxhead, priv->rxcurr, priv->segments);
 
   return -EAGAIN;
 }
@@ -1608,7 +1599,7 @@ static void lpc43_receive(FAR struct lpc43_ethmac_s *priv)
 
       if (dev->d_len > CONFIG_NET_ETH_MTU)
         {
-          nlldbg("DROPPED: Too big: %d\n", dev->d_len);
+          nwarn("WARNING: Dropped, Too big: %d\n", dev->d_len);
           /* Free dropped packet buffer */
 
           if (dev->d_buf)
@@ -1632,7 +1623,7 @@ static void lpc43_receive(FAR struct lpc43_ethmac_s *priv)
 #ifdef CONFIG_NET_IPv4
       if (BUF->type == HTONS(ETHTYPE_IP))
         {
-          nllvdbg("IPv4 frame\n");
+          ninfo("IPv4 frame\n");
 
           /* Handle ARP on input then give the IPv4 packet to the network
            * layer
@@ -1668,11 +1659,11 @@ static void lpc43_receive(FAR struct lpc43_ethmac_s *priv)
             }
         }
       else
-#endif
+#endif /* CONFIG_NET_IPv4 */
 #ifdef CONFIG_NET_IPv6
       if (BUF->type == HTONS(ETHTYPE_IP6))
         {
-          nllvdbg("Iv6 frame\n");
+          ninfo("Iv6 frame\n");
 
           /* Give the IPv6 packet to the network layer */
 
@@ -1705,11 +1696,11 @@ static void lpc43_receive(FAR struct lpc43_ethmac_s *priv)
             }
         }
       else
-#endif
+#endif /* CONFIG_NET_IPv6 */
 #ifdef CONFIG_NET_ARP
       if (BUF->type == htons(ETHTYPE_ARP))
         {
-          nllvdbg("ARP frame\n");
+          ninfo("ARP frame\n");
 
           /* Handle ARP packet */
 
@@ -1727,7 +1718,7 @@ static void lpc43_receive(FAR struct lpc43_ethmac_s *priv)
       else
 #endif
         {
-          nlldbg("DROPPED: Unknown type: %04x\n", BUF->type);
+          nwarn("WARNING: Dropped, Unknown type: %04x\n", BUF->type);
         }
 
       /* We are finished with the RX buffer.  NOTE:  If the buffer is
@@ -1768,8 +1759,8 @@ static void lpc43_freeframe(FAR struct lpc43_ethmac_s *priv)
   struct eth_txdesc_s *txdesc;
   int i;
 
-  nllvdbg("txhead: %p txtail: %p inflight: %d\n",
-          priv->txhead, priv->txtail, priv->inflight);
+  ninfo("txhead: %p txtail: %p inflight: %d\n",
+        priv->txhead, priv->txtail, priv->inflight);
 
   /* Scan for "in-flight" descriptors owned by the CPU */
 
@@ -1784,8 +1775,8 @@ static void lpc43_freeframe(FAR struct lpc43_ethmac_s *priv)
            * TX descriptors.
            */
 
-          nllvdbg("txtail: %p tdes0: %08x tdes2: %08x tdes3: %08x\n",
-                  txdesc, txdesc->tdes0, txdesc->tdes2, txdesc->tdes3);
+          ninfo("txtail: %p tdes0: %08x tdes2: %08x tdes3: %08x\n",
+                txdesc, txdesc->tdes0, txdesc->tdes2, txdesc->tdes3);
 
           DEBUGASSERT(txdesc->tdes2 != 0);
 
@@ -1837,8 +1828,8 @@ static void lpc43_freeframe(FAR struct lpc43_ethmac_s *priv)
 
       priv->txtail = txdesc;
 
-      nllvdbg("txhead: %p txtail: %p inflight: %d\n",
-              priv->txhead, priv->txtail, priv->inflight);
+      ninfo("txhead: %p txtail: %p inflight: %d\n",
+            priv->txhead, priv->txtail, priv->inflight);
     }
 }
 
@@ -1875,14 +1866,6 @@ static void lpc43_txdone(FAR struct lpc43_ethmac_s *priv)
 
       wd_cancel(priv->txtimeout);
 
-      /* Then make sure that the TX poll timer is running (if it is already
-       * running, the following would restart it).  This is necessary to
-       * avoid certain race conditions where the polling sequence can be
-       * interrupted.
-       */
-
-      (void)wd_start(priv->txpoll, LPC43_WDDELAY, lpc43_poll_expiry, 1, priv);
-
       /* And disable further TX interrupts. */
 
       lpc43_disableint(priv, ETH_DMAINT_TI);
@@ -1894,29 +1877,32 @@ static void lpc43_txdone(FAR struct lpc43_ethmac_s *priv)
 }
 
 /****************************************************************************
- * Function: lpc43_interrupt_process
+ * Function: lpc43_interrupt_work
  *
  * Description:
- *   Interrupt processing.  This may be performed either within the interrupt
- *   handler or on the worker thread, depending upon the configuration
+ *   Perform interrupt related work from the worker thread
  *
  * Parameters:
- *   priv  - Reference to the driver state structure
+ *   arg - The argument passed when work_queue() was called.
  *
  * Returned Value:
- *   None
+ *   OK on success
  *
  * Assumptions:
  *   Ethernet interrupts are disabled
  *
  ****************************************************************************/
 
-static inline void lpc43_interrupt_process(FAR struct lpc43_ethmac_s *priv)
+static void lpc43_interrupt_work(FAR void *arg)
 {
+  FAR struct lpc43_ethmac_s *priv = (FAR struct lpc43_ethmac_s *)arg;
   uint32_t dmasr;
+
+  DEBUGASSERT(priv);
 
   /* Get the DMA interrupt status bits (no MAC interrupts are expected) */
 
+  net_lock();
   dmasr = lpc43_getreg(LPC43_ETH_DMASTAT);
 
   /* Mask only enabled interrupts.  This depends on the fact that the interrupt
@@ -1968,14 +1954,13 @@ static inline void lpc43_interrupt_process(FAR struct lpc43_ethmac_s *priv)
   /* Handle error interrupt only if CONFIG_DEBUG_NET is eanbled */
 
 #ifdef CONFIG_DEBUG_NET
-
   /* Check if there are pending "abnormal" interrupts */
 
   if ((dmasr & ETH_DMAINT_AIS) != 0)
     {
       /* Just let the user know what happened */
 
-      nlldbg("Abnormal event(s): %08x\n", dmasr);
+      nerr("ERROR: Abnormal event(s): %08x\n", dmasr);
 
       /* Clear all pending abnormal events */
 
@@ -1985,45 +1970,14 @@ static inline void lpc43_interrupt_process(FAR struct lpc43_ethmac_s *priv)
 
       lpc43_putreg(ETH_DMAINT_AIS, LPC43_ETH_DMASTAT);
     }
-#endif
-}
+#endif /* CONFIG_DEBUG_NET */
 
-/****************************************************************************
- * Function: lpc43_interrupt_work
- *
- * Description:
- *   Perform interrupt related work from the worker thread
- *
- * Parameters:
- *   arg - The argument passed when work_queue() was called.
- *
- * Returned Value:
- *   OK on success
- *
- * Assumptions:
- *   Ethernet interrupts are disabled
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_NOINTS
-static void lpc43_interrupt_work(FAR void *arg)
-{
-  FAR struct lpc43_ethmac_s *priv = (FAR struct lpc43_ethmac_s *)arg;
-  net_lock_t state;
-
-  DEBUGASSERT(priv);
-
-  /* Process pending Ethernet interrupts */
-
-  state = net_lock();
-  lpc43_interrupt_process(priv);
-  net_unlock(state);
+  net_unlock();
 
   /* Re-enable Ethernet interrupts at the NVIC */
 
   up_enable_irq(LPC43M4_IRQ_ETHERNET);
 }
-#endif
 
 /****************************************************************************
  * Function: lpc43_interrupt
@@ -2042,11 +1996,9 @@ static void lpc43_interrupt_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static int lpc43_interrupt(int irq, FAR void *context)
+static int lpc43_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct lpc43_ethmac_s *priv = &g_lpc43ethmac;
-
-#ifdef CONFIG_NET_NOINTS
   uint32_t dmasr;
 
   /* Get the DMA interrupt status bits (no MAC interrupts are expected) */
@@ -2073,56 +2025,12 @@ static int lpc43_interrupt(int irq, FAR void *context)
            wd_cancel(priv->txtimeout);
         }
 
-      /* Cancel any pending poll work */
-
-      work_cancel(HPWORK, &priv->work);
-
       /* Schedule to perform the interrupt processing on the worker thread. */
 
-      work_queue(HPWORK, &priv->work, lpc43_interrupt_work, priv, 0);
+      work_queue(ETHWORK, &priv->irqwork, lpc43_interrupt_work, priv, 0);
     }
 
-#else
-  /* Process the interrupt now */
-
-  lpc43_interrupt_process(priv);
-#endif
-
   return OK;
-}
-
-/****************************************************************************
- * Function: lpc43_txtimeout_process
- *
- * Description:
- *   Process a TX timeout.  Called from the either the watchdog timer
- *   expiration logic or from the worker thread, depending upon the
- *   configuration.  The timeout means that the last TX never completed.
- *   Reset the hardware and start again.
- *
- * Parameters:
- *   priv  - Reference to the driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Global interrupts are disabled by the watchdog logic.
- *
- ****************************************************************************/
-
-static inline void lpc43_txtimeout_process(FAR struct lpc43_ethmac_s *priv)
-{
-  /* Then reset the hardware.  Just take the interface down, then back
-   * up again.
-   */
-
-  lpc43_ifdown(&priv->dev);
-  lpc43_ifup(&priv->dev);
-
-  /* Then poll the network for new XMIT data */
-
-  lpc43_dopoll(priv);
 }
 
 /****************************************************************************
@@ -2142,19 +2050,23 @@ static inline void lpc43_txtimeout_process(FAR struct lpc43_ethmac_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_NOINTS
 static void lpc43_txtimeout_work(FAR void *arg)
 {
   FAR struct lpc43_ethmac_s *priv = (FAR struct lpc43_ethmac_s *)arg;
-  net_lock_t state;
 
-  /* Process pending Ethernet interrupts */
+  /* Then reset the hardware.  Just take the interface down, then back
+   * up again.
+   */
 
-  state = net_lock();
-  lpc43_txtimeout_process(priv);
-  net_unlock(state);
+  net_lock();
+  lpc43_ifdown(&priv->dev);
+  lpc43_ifup(&priv->dev);
+
+  /* Then poll the network for new XMIT data */
+
+  lpc43_dopoll(priv);
+  net_unlock();
 }
-#endif
 
 /****************************************************************************
  * Function: lpc43_txtimeout_expiry
@@ -2179,9 +2091,8 @@ static void lpc43_txtimeout_expiry(int argc, uint32_t arg, ...)
 {
   FAR struct lpc43_ethmac_s *priv = (FAR struct lpc43_ethmac_s *)arg;
 
-  nlldbg("Timeout!\n");
+  ninfo("Timeout!\n");
 
-#ifdef CONFIG_NET_NOINTS
   /* Disable further Ethernet interrupts.  This will prevent some race
    * conditions with interrupt work.  There is still a potential race
    * condition with interrupt work that is already queued and in progress.
@@ -2191,42 +2102,33 @@ static void lpc43_txtimeout_expiry(int argc, uint32_t arg, ...)
 
   up_disable_irq(LPC43M4_IRQ_ETHERNET);
 
-  /* Cancel any pending poll or interrupt work.  This will have no effect
-   * on work that has already been started.
+  /* Schedule to perform the TX timeout processing on the worker thread,
+   * perhaps cancelling any pending IRQ processing.
    */
 
-  work_cancel(HPWORK, &priv->work);
-
-  /* Schedule to perform the TX timeout processing on the worker thread. */
-
-  work_queue(HPWORK, &priv->work, lpc43_txtimeout_work, priv, 0);
-
-#else
-  /* Process the timeout now */
-
-  lpc43_txtimeout_process(priv);
-#endif
+  work_queue(ETHWORK, &priv->irqwork, lpc43_txtimeout_work, priv, 0);
 }
 
 /****************************************************************************
- * Function: lpc43_poll_process
+ * Function: lpc43_poll_work
  *
  * Description:
- *   Perform the periodic poll.  This may be called either from watchdog
- *   timer logic or from the worker thread, depending upon the configuration.
+ *   Perform periodic polling from the worker thread
  *
  * Parameters:
- *   priv  - Reference to the driver state structure
+ *   arg - The argument passed when work_queue() as called.
  *
  * Returned Value:
- *   None
+ *   OK on success
  *
  * Assumptions:
+ *   Ethernet interrupts are disabled
  *
  ****************************************************************************/
 
-static inline void lpc43_poll_process(FAR struct lpc43_ethmac_s *priv)
+static void lpc43_poll_work(FAR void *arg)
 {
+  FAR struct lpc43_ethmac_s *priv = (FAR struct lpc43_ethmac_s *)arg;
   FAR struct net_driver_s   *dev  = &priv->dev;
 
   /* Check if the next TX descriptor is owned by the Ethernet DMA or CPU.  We
@@ -2240,6 +2142,7 @@ static inline void lpc43_poll_process(FAR struct lpc43_ethmac_s *priv)
    * CONFIG_LPC43_ETH_NTXDESC).
    */
 
+  net_lock();
   if ((priv->txhead->tdes0 & ETH_TDES0_OWN) == 0 &&
        priv->txhead->tdes2 == 0)
     {
@@ -2275,38 +2178,8 @@ static inline void lpc43_poll_process(FAR struct lpc43_ethmac_s *priv)
   /* Setup the watchdog poll timer again */
 
   (void)wd_start(priv->txpoll, LPC43_WDDELAY, lpc43_poll_expiry, 1, priv);
+  net_unlock();
 }
-
-/****************************************************************************
- * Function: lpc43_poll_work
- *
- * Description:
- *   Perform periodic polling from the worker thread
- *
- * Parameters:
- *   arg - The argument passed when work_queue() as called.
- *
- * Returned Value:
- *   OK on success
- *
- * Assumptions:
- *   Ethernet interrupts are disabled
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_NOINTS
-static void lpc43_poll_work(FAR void *arg)
-{
-  FAR struct lpc43_ethmac_s *priv = (FAR struct lpc43_ethmac_s *)arg;
-  net_lock_t state;
-
-  /* Perform the poll */
-
-  state = net_lock();
-  lpc43_poll_process(priv);
-  net_unlock(state);
-}
-#endif
 
 /****************************************************************************
  * Function: lpc43_poll_expiry
@@ -2330,32 +2203,9 @@ static void lpc43_poll_expiry(int argc, uint32_t arg, ...)
 {
   FAR struct lpc43_ethmac_s *priv = (FAR struct lpc43_ethmac_s *)arg;
 
-#ifdef CONFIG_NET_NOINTS
-  /* Is our single work structure available?  It may not be if there are
-   * pending interrupt actions.
-   */
+  /* Schedule to perform the interrupt processing on the worker thread. */
 
-  if (work_available(&priv->work))
-    {
-      /* Schedule to perform the interrupt processing on the worker thread. */
-
-      work_queue(HPWORK, &priv->work, lpc43_poll_work, priv, 0);
-    }
-  else
-    {
-      /* No.. Just re-start the watchdog poll timer, missing one polling
-       * cycle.
-       */
-
-      (void)wd_start(priv->txpoll, LPC43_WDDELAY, lpc43_poll_expiry, 1,
-                     (uint32_t)priv);
-    }
-
-#else
-  /* Process the interrupt now */
-
-  lpc43_poll_process(priv);
-#endif
+  work_queue(ETHWORK, &priv->pollwork, lpc43_poll_work, priv, 0);
 }
 
 /****************************************************************************
@@ -2381,15 +2231,15 @@ static int lpc43_ifup(struct net_driver_s *dev)
   int ret;
 
 #ifdef CONFIG_NET_IPv4
-  ndbg("Bringing up: %d.%d.%d.%d\n",
-       dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+  ninfo("Bringing up: %d.%d.%d.%d\n",
+        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
+        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 #endif
 #ifdef CONFIG_NET_IPv6
-  ndbg("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-       dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
-       dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
-       dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
+  ninfo("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+        dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
+        dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
+        dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
 #endif
 
   /* Configure the Ethernet interface for DMA operation. */
@@ -2435,7 +2285,7 @@ static int lpc43_ifdown(struct net_driver_s *dev)
   FAR struct lpc43_ethmac_s *priv = (FAR struct lpc43_ethmac_s *)dev->d_private;
   irqstate_t flags;
 
-  ndbg("Taking the network down\n");
+  ninfo("Taking the network down\n");
 
   /* Disable the Ethernet interrupt */
 
@@ -2462,37 +2312,6 @@ static int lpc43_ifdown(struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: lpc43_txavail_process
- *
- * Description:
- *   Perform an out-of-cycle poll.
- *
- * Parameters:
- *   priv - Reference to the NuttX driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Called in normal user mode
- *
- ****************************************************************************/
-
-static inline void lpc43_txavail_process(FAR struct lpc43_ethmac_s *priv)
-{
-  nvdbg("ifup: %d\n", priv->ifup);
-
-  /* Ignore the notification if the interface is not yet up */
-
-  if (priv->ifup)
-    {
-      /* Poll for new XMIT data */
-
-      lpc43_dopoll(priv);
-    }
-}
-
-/****************************************************************************
  * Function: lpc43_txavail_work
  *
  * Description:
@@ -2509,19 +2328,23 @@ static inline void lpc43_txavail_process(FAR struct lpc43_ethmac_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_NOINTS
 static void lpc43_txavail_work(FAR void *arg)
 {
   FAR struct lpc43_ethmac_s *priv = (FAR struct lpc43_ethmac_s *)arg;
-  net_lock_t state;
 
-  /* Perform the poll */
+  /* Ignore the notification if the interface is not yet up */
 
-  state = net_lock();
-  lpc43_txavail_process(priv);
-  net_unlock(state);
+  net_lock();
+  ninfo("ifup: %d\n", priv->ifup);
+  if (priv->ifup)
+    {
+      /* Poll for new XMIT data */
+
+      lpc43_dopoll(priv);
+    }
+
+  net_unlock();
 }
-#endif
 
 /****************************************************************************
  * Function: lpc43_txavail
@@ -2546,33 +2369,17 @@ static int lpc43_txavail(struct net_driver_s *dev)
 {
   FAR struct lpc43_ethmac_s *priv = (FAR struct lpc43_ethmac_s *)dev->d_private;
 
-#ifdef CONFIG_NET_NOINTS
   /* Is our single work structure available?  It may not be if there are
    * pending interrupt actions and we will have to ignore the Tx
    * availability action.
    */
 
-  if (work_available(&priv->work))
+  if (work_available(&priv->pollwork))
     {
       /* Schedule to serialize the poll on the worker thread. */
 
-      work_queue(HPWORK, &priv->work, lpc43_txavail_work, priv, 0);
+      work_queue(ETHWORK, &priv->pollwork, lpc43_txavail_work, priv, 0);
     }
-
-#else
-  irqstate_t flags;
-
-  /* Disable interrupts because this function may be called from interrupt
-   * level processing.
-   */
-
-  flags = enter_critical_section();
-
-  /* Perform the out-of-cycle poll now */
-
-  lpc43_txavail_process(priv);
-  leave_critical_section(flags);
-#endif
 
   return OK;
 }
@@ -2647,8 +2454,8 @@ static int lpc43_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
   uint32_t temp;
   uint32_t registeraddress;
 
-  nllvdbg("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
-          mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+  ninfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+        mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
   /* Add the MAC address to the hardware multicast hash table */
 
@@ -2704,8 +2511,8 @@ static int lpc43_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
   uint32_t temp;
   uint32_t registeraddress;
 
-  nllvdbg("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
-          mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+  ninfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+        mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
   /* Remove the MAC address to the hardware multicast hash table */
 
@@ -3065,7 +2872,7 @@ static int lpc43_phyread(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t *val
         }
     }
 
-  ndbg("MII transfer timed out: phydevaddr: %04x phyregaddr: %04x\n",
+  nerr("ERROR: MII transfer timed out: phydevaddr: %04x phyregaddr: %04x\n",
        phydevaddr, phyregaddr);
 
   return -ETIMEDOUT;
@@ -3124,7 +2931,7 @@ static int lpc43_phywrite(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t val
         }
     }
 
-  ndbg("MII transfer timed out: phydevaddr: %04x phyregaddr: %04x value: %04x\n",
+  nerr("ERROR: MII transfer timed out: phydevaddr: %04x phyregaddr: %04x value: %04x\n",
        phydevaddr, phyregaddr, value);
 
   return -ETIMEDOUT;
@@ -3161,7 +2968,7 @@ static inline int lpc43_dm9161(FAR struct lpc43_ethmac_s *priv)
   ret = lpc43_phyread(CONFIG_LPC43_PHYADDR, MII_PHYID1, &phyval);
   if (ret < 0)
     {
-      ndbg("Failed to read the PHY ID1: %d\n", ret);
+      nerr("ERROR: Failed to read the PHY ID1: %d\n", ret);
       return ret;
     }
 
@@ -3172,14 +2979,14 @@ static inline int lpc43_dm9161(FAR struct lpc43_ethmac_s *priv)
       up_systemreset();
     }
 
-  nvdbg("PHY ID1: 0x%04X\n", phyval);
+  ninfo("PHY ID1: 0x%04X\n", phyval);
 
   /* Now check the "DAVICOM Specified Configuration Register (DSCR)", Register 16 */
 
   ret = lpc43_phyread(CONFIG_LPC43_PHYADDR, 16, &phyval);
   if (ret < 0)
     {
-      ndbg("Failed to read the PHY Register 0x10: %d\n", ret);
+      nerr("ERROR: Failed to read the PHY Register 0x10: %d\n", ret);
       return ret;
     }
 
@@ -3236,7 +3043,7 @@ static int lpc43_phyinit(FAR struct lpc43_ethmac_s *priv)
   ret = lpc43_phywrite(CONFIG_LPC43_PHYADDR, MII_MCR, MII_MCR_RESET);
   if (ret < 0)
     {
-      ndbg("Failed to reset the PHY: %d\n", ret);
+      nerr("ERROR: Failed to reset the PHY: %d\n", ret);
       return ret;
     }
 
@@ -3248,7 +3055,7 @@ static int lpc43_phyinit(FAR struct lpc43_ethmac_s *priv)
   ret = lpc43_phy_boardinitialize(0);
   if (ret < 0)
     {
-      ndbg("Failed to initialize the PHY: %d\n", ret);
+      nerr("ERROR: Failed to initialize the PHY: %d\n", ret);
       return ret;
     }
 #endif
@@ -3273,7 +3080,7 @@ static int lpc43_phyinit(FAR struct lpc43_ethmac_s *priv)
       ret = lpc43_phyread(CONFIG_LPC43_PHYADDR, MII_MSR, &phyval);
       if (ret < 0)
         {
-          ndbg("Failed to read the PHY MSR: %d\n", ret);
+          nerr("ERROR: Failed to read the PHY MSR: %d\n", ret);
           return ret;
         }
       else if ((phyval & MII_MSR_LINKSTATUS) != 0)
@@ -3284,7 +3091,7 @@ static int lpc43_phyinit(FAR struct lpc43_ethmac_s *priv)
 
   if (timeout >= PHY_RETRY_TIMEOUT)
     {
-      ndbg("Timed out waiting for link status: %04x\n", phyval);
+      nerr("ERROR: Timed out waiting for link status: %04x\n", phyval);
       return -ETIMEDOUT;
     }
 
@@ -3293,7 +3100,7 @@ static int lpc43_phyinit(FAR struct lpc43_ethmac_s *priv)
   ret = lpc43_phywrite(CONFIG_LPC43_PHYADDR, MII_MCR, MII_MCR_ANENABLE);
   if (ret < 0)
     {
-      ndbg("Failed to enable auto-negotiation: %d\n", ret);
+      nerr("ERROR: Failed to enable auto-negotiation: %d\n", ret);
       return ret;
     }
 
@@ -3304,7 +3111,7 @@ static int lpc43_phyinit(FAR struct lpc43_ethmac_s *priv)
       ret = lpc43_phyread(CONFIG_LPC43_PHYADDR, MII_MSR, &phyval);
       if (ret < 0)
         {
-          ndbg("Failed to read the PHY MSR: %d\n", ret);
+          nerr("ERROR: Failed to read the PHY MSR: %d\n", ret);
           return ret;
         }
       else if ((phyval & MII_MSR_ANEGCOMPLETE) != 0)
@@ -3315,7 +3122,7 @@ static int lpc43_phyinit(FAR struct lpc43_ethmac_s *priv)
 
   if (timeout >= PHY_RETRY_TIMEOUT)
     {
-      ndbg("Timed out waiting for auto-negotiation\n");
+      nerr("ERROR: Timed out waiting for auto-negotiation\n");
       return -ETIMEDOUT;
     }
 
@@ -3324,13 +3131,13 @@ static int lpc43_phyinit(FAR struct lpc43_ethmac_s *priv)
   ret = lpc43_phyread(CONFIG_LPC43_PHYADDR, CONFIG_LPC43_PHYSR, &phyval);
   if (ret < 0)
     {
-      ndbg("Failed to read PHY status register\n");
+      nerr("ERROR: Failed to read PHY status register\n");
       return ret;
     }
 
   /* Remember the selected speed and duplex modes */
 
-  nvdbg("PHYSR[%d]: %04x\n", CONFIG_LPC43_PHYSR, phyval);
+  ninfo("PHYSR[%d]: %04x\n", CONFIG_LPC43_PHYSR, phyval);
 
 #ifdef CONFIG_ETH0_PHY_LAN8720
   if ((phyval & (MII_MSR_100BASETXHALF | MII_MSR_100BASETXFULL)) != 0)
@@ -3392,6 +3199,9 @@ static int lpc43_phyinit(FAR struct lpc43_ethmac_s *priv)
       priv->mbps100 = 1;
     }
 #endif
+#endif
+
+#else /* Auto-negotion not selected */
 
 #ifdef CONFIG_LPC43_ETHFD
   priv->mbps100 = 1;
@@ -3400,11 +3210,9 @@ static int lpc43_phyinit(FAR struct lpc43_ethmac_s *priv)
 #ifdef CONFIG_LPC43_ETH100MBPS
   priv->fduplex = 1;
 #endif
-#endif
-
-  /* However we got here, commit to the hardware */
 
   phyval = 0;
+
   if (priv->mbps100)
     {
       phyval |= MII_MCR_FULLDPLX;
@@ -3418,7 +3226,7 @@ static int lpc43_phyinit(FAR struct lpc43_ethmac_s *priv)
   ret = lpc43_phywrite(CONFIG_LPC43_PHYADDR, MII_MCR, phyval);
   if (ret < 0)
     {
-     ndbg("Failed to write the PHY MCR: %d\n", ret);
+     nerr("ERROR: Failed to write the PHY MCR: %d\n", ret);
       return ret;
     }
 
@@ -3434,9 +3242,9 @@ static int lpc43_phyinit(FAR struct lpc43_ethmac_s *priv)
 #endif
 #endif
 
-  ndbg("Duplex: %s Speed: %d MBps\n",
-       priv->fduplex ? "FULL" : "HALF",
-       priv->mbps100 ? 100 : 10);
+  ninfo("Duplex: %s Speed: %d MBps\n",
+        priv->fduplex ? "FULL" : "HALF",
+        priv->mbps100 ? 100 : 10);
 
   return OK;
 }
@@ -3528,21 +3336,22 @@ static inline void lpc43_ethgpioconfig(FAR struct lpc43_ethmac_s *priv)
    * MII_RX_DV, MII_CRS, MII_COL, MDC, MDIO
    */
 
-  lpc43_pin_config(GPIO_ETH_MII_COL);
-  lpc43_pin_config(GPIO_ETH_MII_CRS);
-  lpc43_pin_config(GPIO_ETH_MII_RXD0);
-  lpc43_pin_config(GPIO_ETH_MII_RXD1);
-  lpc43_pin_config(GPIO_ETH_MII_RXD2);
-  lpc43_pin_config(GPIO_ETH_MII_RXD3);
-  lpc43_pin_config(GPIO_ETH_MII_RX_CLK);
-  lpc43_pin_config(GPIO_ETH_MII_RX_DV);
-  lpc43_pin_config(GPIO_ETH_MII_RX_ER);
-  lpc43_pin_config(GPIO_ETH_MII_TXD0);
-  lpc43_pin_config(GPIO_ETH_MII_TXD1);
-  lpc43_pin_config(GPIO_ETH_MII_TXD2);
-  lpc43_pin_config(GPIO_ETH_MII_TXD3);
-  lpc43_pin_config(GPIO_ETH_MII_TX_CLK);
-  lpc43_pin_config(GPIO_ETH_MII_TX_EN);
+  lpc43_pin_config(PINCONF_ENET_MII_COL);
+  lpc43_pin_config(PINCONF_ENET_MII_CRS);
+  lpc43_pin_config(PINCONF_ENET_MII_RXD0);
+  lpc43_pin_config(PINCONF_ENET_MII_RXD1);
+  lpc43_pin_config(PINCONF_ENET_MII_RXD2);
+  lpc43_pin_config(PINCONF_ENET_MII_RXD3);
+  lpc43_pin_config(PINCONF_ENET_MII_RX_CLK);
+  lpc43_pin_config(PINCONF_ENET_MII_RX_DV);
+  lpc43_pin_config(PINCONF_ENET_MII_RX_ER);
+  lpc43_pin_config(PINCONF_ENET_MII_TXD0);
+  lpc43_pin_config(PINCONF_ENET_MII_TXD1);
+  lpc43_pin_config(PINCONF_ENET_MII_TXD2);
+  lpc43_pin_config(PINCONF_ENET_MII_TXD3);
+  lpc43_pin_config(PINCONF_ENET_MII_TX_CLK);
+  lpc43_pin_config(PINCONF_ENET_MII_TX_EN);
+  lpc43_pin_config(PINCONF_ENET_MII_TX_ER);
 
   /* Set up the RMII interface. */
 
@@ -3718,11 +3527,11 @@ static void lpc43_macaddress(FAR struct lpc43_ethmac_s *priv)
   FAR struct net_driver_s *dev = &priv->dev;
   uint32_t regval;
 
-  nllvdbg("%s MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
-          dev->d_ifname,
-          dev->d_mac.ether_addr_octet[0], dev->d_mac.ether_addr_octet[1],
-          dev->d_mac.ether_addr_octet[2], dev->d_mac.ether_addr_octet[3],
-          dev->d_mac.ether_addr_octet[4], dev->d_mac.ether_addr_octet[5]);
+  ninfo("%s MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+        dev->d_ifname,
+        dev->d_mac.ether_addr_octet[0], dev->d_mac.ether_addr_octet[1],
+        dev->d_mac.ether_addr_octet[2], dev->d_mac.ether_addr_octet[3],
+        dev->d_mac.ether_addr_octet[4], dev->d_mac.ether_addr_octet[5]);
 
   /* Set the MAC address high register */
 
@@ -3786,7 +3595,7 @@ static void lpc43_ipv6multicast(FAR struct lpc43_ethmac_s *priv)
   mac[4] = tmp16 & 0xff;
   mac[5] = tmp16 >> 8;
 
-  nvdbg("IPv6 Multicast: %02x:%02x:%02x:%02x:%02x:%02x\n",
+  ninfo("IPv6 Multicast: %02x:%02x:%02x:%02x:%02x:%02x\n",
         mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
   (void)lpc43_addmac(dev, mac);
@@ -3925,12 +3734,12 @@ static int lpc43_ethconfig(FAR struct lpc43_ethmac_s *priv)
 
   /* Reset the Ethernet block */
 
-  nllvdbg("Reset the Ethernet block\n");
+  ninfo("Reset the Ethernet block\n");
   lpc43_ethreset(priv);
 
   /* Initialize the PHY */
 
-  nllvdbg("Initialize the PHY\n");
+  ninfo("Initialize the PHY\n");
   ret = lpc43_phyinit(priv);
   if (ret < 0)
     {
@@ -3945,7 +3754,7 @@ static int lpc43_ethconfig(FAR struct lpc43_ethmac_s *priv)
 
   /* Initialize the MAC and DMA */
 
-  nllvdbg("Initialize the MAC and DMA\n");
+  ninfo("Initialize the MAC and DMA\n");
   ret = lpc43_macconfig(priv);
   if (ret < 0)
     {
@@ -3966,7 +3775,7 @@ static int lpc43_ethconfig(FAR struct lpc43_ethmac_s *priv)
 
   /* Enable normal MAC operation */
 
-  nllvdbg("Enable normal operation\n");
+  ninfo("Enable normal operation\n");
   return lpc43_macenable(priv);
 }
 
@@ -4021,7 +3830,7 @@ static inline int lpc43_ethinitialize(void)
 
   /* Attach the IRQ to the driver */
 
-  if (irq_attach(LPC43M4_IRQ_ETHERNET, lpc43_interrupt))
+  if (irq_attach(LPC43M4_IRQ_ETHERNET, lpc43_interrupt, NULL))
     {
       /* We could not attach the ISR to the interrupt */
 

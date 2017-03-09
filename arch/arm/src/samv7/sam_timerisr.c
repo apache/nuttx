@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/samv7/sam_timerisr.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -86,19 +86,11 @@
 #endif
 
 /****************************************************************************
- * Private Types
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Function:  up_timerisr
+ * Function:  sam_timerisr
  *
  * Description:
  *   The timer ISR will perform a variety of services for various portions
@@ -106,7 +98,7 @@
  *
  ****************************************************************************/
 
-int up_timerisr(int irq, uint32_t *regs)
+static int sam_timerisr(int irq, uint32_t *regs, void *arg)
 {
   /* Process timer interrupt */
 
@@ -115,7 +107,11 @@ int up_timerisr(int irq, uint32_t *regs)
 }
 
 /****************************************************************************
- * Function:  up_timer_initialize
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Function:  arm_timer_initialize
  *
  * Description:
  *   This function is called during start-up to initialize the timer
@@ -123,7 +119,7 @@ int up_timerisr(int irq, uint32_t *regs)
  *
  ****************************************************************************/
 
-void up_timer_initialize(void)
+void arm_timer_initialize(void)
 {
   uint32_t regval;
 
@@ -134,7 +130,7 @@ void up_timer_initialize(void)
 
   /* Attach the timer interrupt vector */
 
-  (void)irq_attach(SAM_IRQ_SYSTICK, (xcpt_t)up_timerisr);
+  (void)irq_attach(SAM_IRQ_SYSTICK, (xcpt_t)sam_timerisr, NULL);
 
   /* Enable SysTick interrupts (no divide-by-8) */
 

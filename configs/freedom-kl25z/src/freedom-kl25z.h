@@ -1,8 +1,7 @@
 /****************************************************************************************************
  * configs/freedom-kl25z/src/freedom-kl25z.h
- * arch/arm/src/board/freedom-kl25z.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -137,6 +136,17 @@ void weak_function kl_usbinitialize(void);
 void kl_led_initialize(void);
 #endif
 
+/************************************************************************************
+ * Name: kl_pwm_setup
+ *
+ * Description:
+ *   Initialize PWM and register the PWM device.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_PWM
+int kl_pwm_setup(void);
+#endif
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_FREEDOM_KL25Z_SRC_FREEDOM_KL25Z_H */

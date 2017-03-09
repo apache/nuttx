@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/olimex-stm32-p207/src/stm32_usb.c
  *
- *   Copyright (C) 2012-2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -105,13 +105,13 @@ static int usbhost_waiter(int argc, char *argv[])
 {
   struct usbhost_hubport_s *hport;
 
-  uvdbg("Running\n");
+  uinfo("Running\n");
   for (;;)
     {
       /* Wait for the device to change state */
 
       DEBUGVERIFY(CONN_WAIT(g_usbconn, &hport));
-      uvdbg("%s\n", hport->connected ? "connected" : "disconnected");
+      uinfo("%s\n", hport->connected ? "connected" : "disconnected");
 
       /* Did we just become connected? */
 
@@ -177,7 +177,7 @@ int stm32_usbhost_initialize(void)
    * that we care about:
    */
 
-  uvdbg("Register class drivers\n");
+  uinfo("Register class drivers\n");
 
 #ifdef CONFIG_USBHOST_HUB
   /* Initialize USB hub class support */
@@ -185,7 +185,7 @@ int stm32_usbhost_initialize(void)
   ret = usbhost_hub_initialize();
   if (ret < 0)
     {
-      udbg("ERROR: usbhost_hub_initialize failed: %d\n", ret);
+      uerr("ERROR: usbhost_hub_initialize failed: %d\n", ret);
     }
 #endif
 
@@ -195,7 +195,7 @@ int stm32_usbhost_initialize(void)
   ret = usbhost_msc_initialize();
   if (ret != OK)
     {
-      udbg("ERROR: Failed to register the mass storage class: %d\n", ret);
+      uerr("ERROR: Failed to register the mass storage class: %d\n", ret);
     }
 #endif
 
@@ -205,19 +205,19 @@ int stm32_usbhost_initialize(void)
   ret = usbhost_cdcacm_initialize();
   if (ret != OK)
     {
-      udbg("ERROR: Failed to register the CDC/ACM serial class: %d\n", ret);
+      uerr("ERROR: Failed to register the CDC/ACM serial class: %d\n", ret);
     }
 #endif
 
   /* Then get an instance of the USB host interface */
 
-  uvdbg("Initialize USB host\n");
+  uinfo("Initialize USB host\n");
   g_usbconn = stm32_otgfshost_initialize(0);
   if (g_usbconn)
     {
       /* Start a thread to handle device connection. */
 
-      uvdbg("Start usbhost_waiter\n");
+      uinfo("Start usbhost_waiter\n");
 
       pid = task_create("usbhost", CONFIG_USBHOST_DEFPRIO,
                         CONFIG_USBHOST_STACKSIZE,
@@ -238,16 +238,18 @@ int stm32_usbhost_initialize(void)
  *
  * Input Parameter:
  *   handler - New overcurrent interrupt handler
+ *   arg     - The argument provided for the interrupt handler
  *
  * Returned value:
- *   Old overcurrent interrupt handler
+ *   Zero (OK) is returned on success.  Otherwise, a negated errno value is returned
+ *   to indicate the nature of the failure.
  *
  ************************************************************************************/
 
 #ifdef CONFIG_USBHOST
-xcpt_t stm32_setup_overcurrent(xcpt_t handler)
+int stm32_setup_overcurrent(xcpt_t handler, void *arg)
 {
-  return stm32_gpiosetevent(GPIO_OTGFS_OVER, true, true, true, handler);
+  return stm32_gpiosetevent(GPIO_OTGFS_OVER, true, true, true, handler, arg);
 }
 #endif
 
@@ -311,7 +313,7 @@ void stm32_usbhost_vbusdrive(int iface, bool enable)
 #ifdef CONFIG_USBDEV
 void stm32_usbsuspend(FAR struct usbdev_s *dev, bool resume)
 {
-  ulldbg("resume: %d\n", resume);
+  uinfo("resume: %d\n", resume);
 }
 #endif
 

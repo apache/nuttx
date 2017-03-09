@@ -1,7 +1,7 @@
 /****************************************************************************
  * nuttx/graphics/nxterm/nxterm_register.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,21 +48,10 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 
 #include "nxterm.h"
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -77,7 +66,9 @@ FAR struct nxterm_state_s *
                  FAR const struct nxterm_operations_s *ops, int minor)
 {
   FAR struct nxterm_state_s *priv;
+  FAR const struct nx_font_s *fontset;
   char devname[NX_DEVNAME_SIZE];
+  NXHANDLE hfont;
   int ret;
 
   DEBUGASSERT(handle && wndo && ops && (unsigned)minor < 256);
@@ -87,7 +78,7 @@ FAR struct nxterm_state_s *
   priv = (FAR struct nxterm_state_s *)kmm_zalloc(sizeof(struct nxterm_state_s));
   if (!priv)
     {
-      gdbg("Failed to allocate the NX driver structure\n");
+      gerr("ERROR: Failed to allocate the NX driver structure\n");
       return NULL;
     }
 
@@ -99,30 +90,46 @@ FAR struct nxterm_state_s *
   memcpy(&priv->wndo, wndo, sizeof(struct nxterm_window_s));
 
   sem_init(&priv->exclsem, 0, 1);
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   priv->holder  = NO_HOLDER;
 #endif
 
 #ifdef CONFIG_NXTERM_NXKBDIN
+  /* The waitsem semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
   sem_init(&priv->waitsem, 0, 0);
+  sem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
 #endif
 
-  /* Select the font */
+  /* Connect to the font cache for the configured font characteristics */
 
-  priv->font = nxf_getfonthandle(wndo->fontid);
-  if (!priv->font)
+  priv->fcache = nxf_cache_connect(wndo->fontid, wndo->fcolor[0],
+                                   wndo->wcolor[0], CONFIG_NXTERM_BPP,
+                                   CONFIG_NXTERM_CACHESIZE);
+  if (priv->fcache == NULL)
     {
-      gdbg("Failed to get font ID %d: %d\n", wndo->fontid, errno);
+      gerr("ERROR: Failed to connect to font cache for font ID %d: %d\n",
+           wndo->fontid, errno);
       goto errout;
     }
 
-  FAR const struct nx_font_s *fontset;
+  /* Get the handle of the font managed by the font cache */
+
+  hfont = nxf_cache_getfonthandle(priv->fcache);
+  if (hfont == NULL)
+    {
+      gerr("ERROR: Failed to get handlr for font ID %d: %d\n",
+           wndo->fontid, errno);
+      goto errout;
+    }
 
   /* Get information about the font set being used and save this in the
    * state structure
    */
 
-  fontset         = nxf_getfontset(priv->font);
+  fontset         = nxf_getfontset(hfont);
   priv->fheight   = fontset->mxheight;
   priv->fwidth    = fontset->mxwidth;
   priv->spwidth   = fontset->spwidth;
@@ -130,10 +137,6 @@ FAR struct nxterm_state_s *
   /* Set up the text cache */
 
   priv->maxchars  = CONFIG_NXTERM_MXCHARS;
-
-  /* Set up the font glyph bitmap cache */
-
-  priv->maxglyphs = CONFIG_NXTERM_CACHESIZE;
 
   /* Set the initial display position */
 
@@ -150,8 +153,9 @@ FAR struct nxterm_state_s *
   ret = register_driver(devname, &g_nxterm_drvrops, 0666, priv);
   if (ret < 0)
     {
-      gdbg("Failed to register %s\n", devname);
+      gerr("ERROR: Failed to register %s\n", devname);
     }
+
   return (NXTERM)priv;
 
 errout:

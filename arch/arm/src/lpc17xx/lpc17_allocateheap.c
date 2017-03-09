@@ -136,7 +136,7 @@
 #    endif /* LPC17_HAVE_BANK1 && LPC17_BANK1_HEAPSIZE */
 #  else /* !LPC17_BANK0_HEAPSIZE */
 
-     /* We have Bnak 0, but no memory is available for the heap there.
+     /* We have Bank 0, but no memory is available for the heap there.
       * Do we have Bank 1? Is any heap memory available in Bank 1?
       */
 

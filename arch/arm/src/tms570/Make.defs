@@ -53,10 +53,6 @@ ifeq ($(CONFIG_ARCH_FPU),y)
 CMN_ASRCS += arm_fpuconfig.S
 endif
 
-ifeq ($(CONFIG_ARCH_MEMCPY),y)
-CMN_ASRCS += arm_memcpy.S
-endif
-
 # Common C source files
 
 CMN_CSRCS  = up_allocateheap.c up_initialize.c up_idle.c up_interruptcontext.c
@@ -85,9 +81,9 @@ CMN_CSRCS += arm_l2cc_pl310.c
 endif
 
 ifeq ($(CONFIG_ELF),y)
-CMN_CSRCS += arm_elf.c arm_coherent_dcache.c
+CMN_CSRCS += arm_coherent_dcache.c
 else ifeq ($(CONFIG_MODULE),y)
-CMN_CSRCS += arm_elf.c arm_coherent_dcache.c
+CMN_CSRCS += arm_coherent_dcache.c
 endif
 
 ifeq ($(CONFIG_ARCH_FPU),y)

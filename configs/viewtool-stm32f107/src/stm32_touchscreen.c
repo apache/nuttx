@@ -173,12 +173,12 @@ static int tsc_attach(FAR struct ads7843e_config_s *state, xcpt_t isr)
        * be attached when the interrupt is next enabled.
        */
 
-      ivdbg("Attaching %p\n", isr);
+      iinfo("Attaching %p\n", isr);
       priv->handler = isr;
     }
   else
     {
-      ivdbg("Detaching %p\n", priv->handler);
+      iinfo("Detaching %p\n", priv->handler);
       tsc_enable(state, false);
       priv->handler = NULL;
     }
@@ -201,13 +201,15 @@ static void tsc_enable(FAR struct ads7843e_config_s *state, bool enable)
     {
       /* Configure the EXTI interrupt using the SAVED handler */
 
-      (void)stm32_gpiosetevent(GPIO_LCDTP_IRQ, true, true, true, priv->handler);
+      (void)stm32_gpiosetevent(GPIO_LCDTP_IRQ, true, true, true,
+                               priv->handler, NULL);
     }
   else
     {
       /* Configure the EXTI interrupt with a NULL handler to disable it */
 
-     (void)stm32_gpiosetevent(GPIO_LCDTP_IRQ, false, false, false, NULL);
+     (void)stm32_gpiosetevent(GPIO_LCDTP_IRQ, false, false, false,
+                              NULL, NULL);
     }
 
   leave_critical_section(flags);
@@ -228,7 +230,7 @@ static bool tsc_pendown(FAR struct ads7843e_config_s *state)
   /* The /PENIRQ value is active low */
 
   bool pendown = !stm32_gpioread(GPIO_LCDTP_IRQ);
-  ivdbg("pendown=%d\n", pendown);
+  iinfo("pendown=%d\n", pendown);
   return pendown;
 }
 
@@ -260,7 +262,7 @@ int board_tsc_setup(int minor)
   static bool initialized = false;
   int ret;
 
-  idbg("minor %d\n", minor);
+  iinfo("minor %d\n", minor);
   DEBUGASSERT(minor == 0);
 
   /* Have we already initialized?  Since we never uninitialize we must prevent
@@ -280,7 +282,7 @@ int board_tsc_setup(int minor)
       dev = stm32_spibus_initialize(TSC_DEVNUM);
       if (!dev)
         {
-          idbg("Failed to initialize SPI%d\n", TSC_DEVNUM);
+          ierr("ERROR: Failed to initialize SPI%d\n", TSC_DEVNUM);
           return -ENODEV;
         }
 
@@ -289,7 +291,7 @@ int board_tsc_setup(int minor)
       ret = ads7843e_register(dev, &g_tscinfo.config, CONFIG_ADS7843E_DEVMINOR);
       if (ret < 0)
         {
-          idbg("Failed to register touchscreen device\n");
+          ierr("ERROR: Failed to register touchscreen device\n");
           /* up_spiuninitialize(dev); */
           return -ENODEV;
         }

@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/socket/accept.c
  *
- *   Copyright (C) 2007-2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2012, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,6 +48,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/cancelpt.h>
 #include <arch/irq.h>
 
 #include "tcp/tcp.h"
@@ -127,16 +128,20 @@
 int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
                  FAR socklen_t *addrlen, FAR struct socket *newsock)
 {
-  int err;
+  int errcode;
   int ret;
 
   DEBUGASSERT(psock != NULL);
+
+  /* Treat as a cancellation point */
+
+  (void)enter_cancellation_point();
 
   /* Is the socket a stream? */
 
   if (psock->s_type != SOCK_STREAM)
     {
-      err = EOPNOTSUPP;
+      errcode = EOPNOTSUPP;
       goto errout;
     }
 
@@ -144,7 +149,7 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 
   if (!_SS_ISLISTENING(psock->s_flags))
     {
-      err = EINVAL;
+      errcode = EINVAL;
       goto errout;
     }
 
@@ -167,7 +172,7 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
           {
             if (*addrlen < sizeof(struct sockaddr_in))
               {
-                err = EBADF;
+                errcode = EBADF;
                 goto errout;
               }
           }
@@ -179,7 +184,7 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
           {
             if (*addrlen < sizeof(struct sockaddr_in6))
               {
-                err = EBADF;
+                errcode = EBADF;
                 goto errout;
               }
           }
@@ -191,7 +196,7 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
           {
             if (*addrlen < sizeof(sa_family_t))
               {
-                err = EBADF;
+                errcode = EBADF;
                 goto errout;
               }
           }
@@ -200,7 +205,7 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 
         default:
           DEBUGPANIC();
-          err = EINVAL;
+          errcode = EINVAL;
           goto errout;
         }
     }
@@ -222,7 +227,7 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
       ret = psock_local_accept(psock, addr, addrlen, &newsock->s_conn);
       if (ret < 0)
         {
-          err = -ret;
+          errcode = -ret;
           goto errout;
         }
     }
@@ -233,16 +238,14 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
   else
 #endif
     {
-      net_lock_t state;
-
       /* Perform the local accept operation (with the network locked) */
 
-      state = net_lock();
+      net_lock();
       ret = psock_tcp_accept(psock, addr, addrlen, &newsock->s_conn);
       if (ret < 0)
         {
-          net_unlock(state);
-          err = -ret;
+          net_unlock();
+          errcode = -ret;
           goto errout;
         }
 
@@ -258,12 +261,12 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
            * called.  Undo everything we have done and return a failure.
            */
 
-          net_unlock(state);
-          err = -ret;
+          net_unlock();
+          errcode = -ret;
           goto errout_after_accept;
         }
 
-      net_unlock(state);
+      net_unlock();
     }
 #endif /* CONFIG_NET_TCP */
 
@@ -271,13 +274,16 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 
   newsock->s_flags |= _SF_CONNECTED;
   newsock->s_flags &= ~_SF_CLOSED;
+
+  leave_cancellation_point();
   return OK;
 
 errout_after_accept:
   psock_close(newsock);
 
 errout:
-  set_errno(err);
+  set_errno(errcode);
+  leave_cancellation_point();
   return ERROR;
 }
 
@@ -354,8 +360,12 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
   FAR struct socket *psock = sockfd_socket(sockfd);
   FAR struct socket *newsock;
   int newfd;
-  int err;
+  int errcode;
   int ret;
+
+  /* accept() is a cancellation point */
+
+  (void)enter_cancellation_point();
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
@@ -369,12 +379,12 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
 #if CONFIG_NFILE_DESCRIPTORS > 0
       if ((unsigned int)sockfd < CONFIG_NFILE_DESCRIPTORS)
         {
-          err = ENOTSOCK;
+          errcode = ENOTSOCK;
         }
       else
 #endif
         {
-          err = EBADF;
+          errcode = EBADF;
         }
 
       goto errout;
@@ -387,14 +397,14 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
   newfd = sockfd_allocate(0);
   if (newfd < 0)
     {
-      err = ENFILE;
+      errcode = ENFILE;
       goto errout;
     }
 
   newsock = sockfd_socket(newfd);
   if (newsock == NULL)
     {
-      err = ENFILE;
+      errcode = ENFILE;
       goto errout_with_socket;
     }
 
@@ -404,16 +414,19 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
       /* The errno value has already been set */
 
       sockfd_release(newfd);
+      leave_cancellation_point();
       return ERROR;
     }
 
+  leave_cancellation_point();
   return newfd;
 
 errout_with_socket:
   sockfd_release(newfd);
 
 errout:
-  set_errno(err);
+  set_errno(errcode);
+  leave_cancellation_point();
   return ERROR;
 }
 

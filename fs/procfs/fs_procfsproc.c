@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/procfs/fs_procfsproc.c
  *
- *   Copyright (C) 2013-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -316,6 +316,9 @@ static FAR const char *g_statenames[] =
   "Invalid",
   "Waiting,Unlock",
   "Ready",
+#ifdef CONFIG_SMP
+  "Assigned",
+#endif
   "Running",
   "Inactive",
   "Waiting,Semaphore",
@@ -389,7 +392,7 @@ static ssize_t proc_status(FAR struct proc_file_s *procfile,
                            FAR struct tcb_s *tcb, FAR char *buffer,
                            size_t buflen, off_t offset)
 {
-#ifdef HAVE_GROUPID
+#ifdef CONFIG_SCHED_HAVE_PARENT
   FAR struct task_group_s *group;
 #endif
   FAR const char *policy;
@@ -439,15 +442,15 @@ static ssize_t proc_status(FAR struct proc_file_s *procfile,
     }
 
 #ifdef CONFIG_SCHED_HAVE_PARENT
-#ifdef HAVE_GROUPID
   group = tcb->group;
   DEBUGASSERT(group);
 
+#ifdef HAVE_GROUPID
   linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s%d\n", "Group:",
                         group->tg_pgid);
 #else
   linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s%d\n", "PPID:",
-                        tcb->ppid);
+                        group->tg_ppid);
 #endif
 
   copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining, &offset);
@@ -957,7 +960,7 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
 #endif
 
 #if CONFIG_NSOCKET_DESCRIPTORS > 0
-  linesize   = snprintf(procfile->line, STATUS_LINELEN, "\n%3-s %-2s %-3s %s\n",
+  linesize   = snprintf(procfile->line, STATUS_LINELEN, "\n%-3s %-2s %-3s %s\n",
                         "SD", "RF", "TYP", "FLAGS");
   copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining, &offset);
 
@@ -980,7 +983,7 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
         {
           linesize   = snprintf(procfile->line, STATUS_LINELEN, "%3d %2d %3d %02x",
                                 i + CONFIG_NFILE_DESCRIPTORS,
-                                (long)socket->s_crefs, socket->s_type, socket->s_flags);
+                                socket->s_crefs, socket->s_type, socket->s_flags);
           copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining, &offset);
 
           totalsize += copysize;
@@ -1013,7 +1016,7 @@ static int proc_open(FAR struct file *filep, FAR const char *relpath,
   unsigned long tmp;
   pid_t pid;
 
-  fvdbg("Open '%s'\n", relpath);
+  finfo("Open '%s'\n", relpath);
 
   /* PROCFS is read-only.  Any attempt to open with any kind of write
    * access is not permitted.
@@ -1023,7 +1026,7 @@ static int proc_open(FAR struct file *filep, FAR const char *relpath,
 
   if ((oflags & O_WRONLY) != 0 || (oflags & O_RDONLY) == 0)
     {
-      fdbg("ERROR: Only O_RDONLY supported\n");
+      ferr("ERROR: Only O_RDONLY supported\n");
       return -EACCES;
     }
 
@@ -1034,7 +1037,7 @@ static int proc_open(FAR struct file *filep, FAR const char *relpath,
 
   if (!ptr || *ptr != '/')
     {
-      fdbg("ERROR: Invalid path \"%s\"\n", relpath);
+      ferr("ERROR: Invalid path \"%s\"\n", relpath);
       return -ENOENT;
     }
 
@@ -1048,7 +1051,7 @@ static int proc_open(FAR struct file *filep, FAR const char *relpath,
 
   if (tmp >= 32768)
     {
-      fdbg("ERROR: Invalid PID %ld\n", tmp);
+      ferr("ERROR: Invalid PID %ld\n", tmp);
       return -ENOENT;
     }
 
@@ -1062,7 +1065,7 @@ static int proc_open(FAR struct file *filep, FAR const char *relpath,
 
   if (!tcb)
     {
-      fdbg("ERROR: PID %d is no longer valid\n", (int)pid);
+      ferr("ERROR: PID %d is no longer valid\n", (int)pid);
       return -ENOENT;
     }
 
@@ -1073,7 +1076,7 @@ static int proc_open(FAR struct file *filep, FAR const char *relpath,
   node = proc_findnode(ptr);
   if (!node)
     {
-      fdbg("ERROR: Invalid path \"%s\"\n", relpath);
+      ferr("ERROR: Invalid path \"%s\"\n", relpath);
       return -ENOENT;
     }
 
@@ -1081,7 +1084,7 @@ static int proc_open(FAR struct file *filep, FAR const char *relpath,
 
   if (!DIRENT_ISFILE(node->dtype))
     {
-      fdbg("ERROR: Path \"%s\" is not a regular file\n", relpath);
+      ferr("ERROR: Path \"%s\" is not a regular file\n", relpath);
       return -EISDIR;
     }
 
@@ -1090,7 +1093,7 @@ static int proc_open(FAR struct file *filep, FAR const char *relpath,
   procfile = (FAR struct proc_file_s *)kmm_zalloc(sizeof(struct proc_file_s));
   if (!procfile)
     {
-      fdbg("ERROR: Failed to allocate file container\n");
+      ferr("ERROR: Failed to allocate file container\n");
       return -ENOMEM;
     }
 
@@ -1137,7 +1140,7 @@ static ssize_t proc_read(FAR struct file *filep, FAR char *buffer,
   irqstate_t flags;
   ssize_t ret;
 
-  fvdbg("buffer=%p buflen=%d\n", buffer, (int)buflen);
+  finfo("buffer=%p buflen=%d\n", buffer, (int)buflen);
 
   /* Recover our private data from the struct file instance */
 
@@ -1151,7 +1154,7 @@ static ssize_t proc_read(FAR struct file *filep, FAR char *buffer,
 
   if (!tcb)
     {
-      fdbg("ERROR: PID %d is not valid\n", (int)procfile->pid);
+      ferr("ERROR: PID %d is not valid\n", (int)procfile->pid);
       leave_critical_section(flags);
       return -ENODEV;
     }
@@ -1215,7 +1218,7 @@ static int proc_dup(FAR const struct file *oldp, FAR struct file *newp)
   FAR struct proc_file_s *oldfile;
   FAR struct proc_file_s *newfile;
 
-  fvdbg("Dup %p->%p\n", oldp, newp);
+  finfo("Dup %p->%p\n", oldp, newp);
 
   /* Recover our private data from the old struct file instance */
 
@@ -1227,7 +1230,7 @@ static int proc_dup(FAR const struct file *oldp, FAR struct file *newp)
   newfile = (FAR struct proc_file_s *)kmm_malloc(sizeof(struct proc_file_s));
   if (!newfile)
     {
-      fdbg("ERROR: Failed to allocate file container\n");
+      ferr("ERROR: Failed to allocate file container\n");
       return -ENOMEM;
     }
 
@@ -1259,7 +1262,7 @@ static int proc_opendir(FAR const char *relpath, FAR struct fs_dirent_s *dir)
   FAR char *ptr;
   pid_t pid;
 
-  fvdbg("relpath: \"%s\"\n", relpath ? relpath : "NULL");
+  finfo("relpath: \"%s\"\n", relpath ? relpath : "NULL");
   DEBUGASSERT(relpath && dir && !dir->u.procfs);
 
   /* The relative must be either:
@@ -1277,7 +1280,7 @@ static int proc_opendir(FAR const char *relpath, FAR struct fs_dirent_s *dir)
     {
       /* strtoul failed or there is something in the path after the pid */
 
-      fdbg("ERROR: Invalid path \"%s\"\n", relpath);
+      ferr("ERROR: Invalid path \"%s\"\n", relpath);
       return -ENOENT;
    }
 
@@ -1287,7 +1290,7 @@ static int proc_opendir(FAR const char *relpath, FAR struct fs_dirent_s *dir)
 
   if (tmp >= 32768)
     {
-      fdbg("ERROR: Invalid PID %ld\n", tmp);
+      ferr("ERROR: Invalid PID %ld\n", tmp);
       return -ENOENT;
     }
 
@@ -1301,7 +1304,7 @@ static int proc_opendir(FAR const char *relpath, FAR struct fs_dirent_s *dir)
 
   if (!tcb)
     {
-      fdbg("ERROR: PID %d is not valid\n", (int)pid);
+      ferr("ERROR: PID %d is not valid\n", (int)pid);
       return -ENOENT;
     }
 
@@ -1313,7 +1316,7 @@ static int proc_opendir(FAR const char *relpath, FAR struct fs_dirent_s *dir)
   procdir = (FAR struct proc_dir_s *)kmm_zalloc(sizeof(struct proc_dir_s));
   if (!procdir)
     {
-      fdbg("ERROR: Failed to allocate the directory structure\n");
+      ferr("ERROR: Failed to allocate the directory structure\n");
       return -ENOMEM;
     }
 
@@ -1329,7 +1332,7 @@ static int proc_opendir(FAR const char *relpath, FAR struct fs_dirent_s *dir)
       node = proc_findnode(ptr);
       if (!node)
         {
-          fdbg("ERROR: Invalid path \"%s\"\n", relpath);
+          ferr("ERROR: Invalid path \"%s\"\n", relpath);
           kmm_free(procdir);
           return -ENOENT;
         }
@@ -1338,7 +1341,7 @@ static int proc_opendir(FAR const char *relpath, FAR struct fs_dirent_s *dir)
 
       if (!DIRENT_ISDIRECTORY(node->dtype))
         {
-          fdbg("ERROR: Path \"%s\" is not a directory\n", relpath);
+          ferr("ERROR: Path \"%s\" is not a directory\n", relpath);
           kmm_free(procdir);
           return -ENOTDIR;
         }
@@ -1415,7 +1418,7 @@ static int proc_readdir(struct fs_dirent_s *dir)
        * error -ENOENT
        */
 
-      fvdbg("Entry %d: End of directory\n", index);
+      finfo("Entry %d: End of directory\n", index);
       ret = -ENOENT;
     }
 
@@ -1433,7 +1436,7 @@ static int proc_readdir(struct fs_dirent_s *dir)
 
       if (!tcb)
         {
-          fdbg("ERROR: PID %d is no longer valid\n", (int)pid);
+          ferr("ERROR: PID %d is no longer valid\n", (int)pid);
           return -ENOENT;
         }
 
@@ -1519,7 +1522,7 @@ static int proc_stat(const char *relpath, struct stat *buf)
 
   if (!ptr)
     {
-      fdbg("ERROR: Invalid path \"%s\"\n", relpath);
+      ferr("ERROR: Invalid path \"%s\"\n", relpath);
       return -ENOENT;
    }
 
@@ -1529,7 +1532,7 @@ static int proc_stat(const char *relpath, struct stat *buf)
 
   if (tmp >= 32768)
     {
-      fdbg("ERROR: Invalid PID %ld\n", tmp);
+      ferr("ERROR: Invalid PID %ld\n", tmp);
       return -ENOENT;
     }
 
@@ -1543,12 +1546,13 @@ static int proc_stat(const char *relpath, struct stat *buf)
 
   if (!tcb)
     {
-      fdbg("ERROR: PID %d is no longer valid\n", (int)pid);
+      ferr("ERROR: PID %d is no longer valid\n", (int)pid);
       return -ENOENT;
     }
 
   /* Was the <pid> the final element of the path? */
 
+  memset(buf, 0, sizeof(struct stat));
   if (*ptr == '\0' || strcmp(ptr, "/") == 0)
     {
       /* Yes ... It's a read-only directory */
@@ -1562,7 +1566,7 @@ static int proc_stat(const char *relpath, struct stat *buf)
     {
       /* We are required to return -ENOENT all all invalid paths */
 
-      fdbg("ERROR: Bad delimiter '%c' in relpath '%s'\n", *ptr, relpath);
+      ferr("ERROR: Bad delimiter '%c' in relpath '%s'\n", *ptr, relpath);
       return -ENOENT;
     }
   else
@@ -1580,7 +1584,7 @@ static int proc_stat(const char *relpath, struct stat *buf)
       node = proc_findnode(ptr);
       if (!node)
         {
-          fdbg("ERROR: Invalid path \"%s\"\n", relpath);
+          ferr("ERROR: Invalid path \"%s\"\n", relpath);
           return -ENOENT;
         }
 
@@ -1598,11 +1602,6 @@ static int proc_stat(const char *relpath, struct stat *buf)
         }
     }
 
-  /* File/directory size, access block size */
-
-  buf->st_size    = 0;
-  buf->st_blksize = 0;
-  buf->st_blocks  = 0;
   return OK;
 }
 

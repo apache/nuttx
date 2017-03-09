@@ -51,7 +51,7 @@
 #include "chip.h"
 #include "lpc11_gpio.h"
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_LPC11_GPIOIRQ
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -402,7 +402,7 @@ static void lpc11_gpiodemux(uint32_t intbase, uint32_t intmask,
  *
  ****************************************************************************/
 
-static int lpc11_gpiointerrupt(int irq, void *context)
+static int lpc11_gpiointerrupt(int irq, void *context, FAR void *arg)
 {
   /* Get the GPIO interrupt status */
 
@@ -468,7 +468,7 @@ void lpc11_gpioirqinitialize(void)
    * position in the NVIC with External Interrupt 3
    */
 
-  (void)irq_attach(LPC11_IRQ_EINT3, lpc11_gpiointerrupt);
+  (void)irq_attach(LPC11_IRQ_EINT3, lpc11_gpiointerrupt, NULL);
   up_enable_irq(LPC11_IRQ_EINT3);
 
 #elif defined(LPC178x)
@@ -476,7 +476,7 @@ void lpc11_gpioirqinitialize(void)
    * GPIO2.
    */
 
-  (void)irq_attach(LPC11_IRQ_GPIO, lpc11_gpiointerrupt);
+  (void)irq_attach(LPC11_IRQ_GPIO, lpc11_gpiointerrupt, NULL);
   up_enable_irq(LPC11_IRQ_GPIO);
 
 #endif
@@ -543,5 +543,5 @@ void lpc11_gpioirqdisable(int irq)
     }
 }
 
-#endif /* CONFIG_GPIO_IRQ */
+#endif /* CONFIG_LPC11_GPIOIRQ */
 

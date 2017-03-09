@@ -38,6 +38,10 @@ CSRCS += clock_time2ticks.c clock_abstime2ticks.c clock_ticks2time.c
 CSRCS += clock_systimer.c clock_systimespec.c clock_timespec_add.c
 CSRCS += clock_timespec_subtract.c
 
+ifeq ($(CONFIG_CLOCK_TIMEKEEPING),y)
+CSRCS += clock_timekeeping.c
+endif
+
 # Include clock build support
 
 DEPPATH += --dep-path clock

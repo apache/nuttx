@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/samv7/sam_trng.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Derives from the SAMA5D3 TRNG Nuttx driver which, in turn, derives, in
@@ -53,6 +53,9 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/semaphore.h>
+#include <nuttx/fs/fs.h>
+#include <nuttx/drivers/drivers.h>
 
 #include "up_arch.h"
 #include "up_internal.h"
@@ -60,13 +63,16 @@
 #include "sam_periphclks.h"
 #include "sam_trng.h"
 
+#if defined(CONFIG_SAMV7_TRNG)
+#if defined(CONFIG_DEV_RANDOM) || defined(CONFIG_DEV_URANDOM_ARCH)
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
 /* Interrupts */
 
-static int sam_interrupt(int irq, void *context);
+static int sam_interrupt(int irq, void *context, FAR void *arg);
 
 /* Character driver methods */
 
@@ -122,7 +128,7 @@ static const struct file_operations g_trngops =
  *
  ****************************************************************************/
 
-static int sam_interrupt(int irq, void *context)
+static int sam_interrupt(int irq, void *context, FAR void *arg)
 {
   uint32_t odata;
 
@@ -244,7 +250,7 @@ static ssize_t sam_read(struct file *filep, char *buffer, size_t buflen)
   ssize_t retval;
   int ret;
 
-  fvdbg("buffer=%p buflen=%d\n", buffer, (int)buflen);
+  finfo("buffer=%p buflen=%d\n", buffer, (int)buflen);
 
   /* Get exclusive access to the TRNG harware */
 
@@ -284,7 +290,7 @@ static ssize_t sam_read(struct file *filep, char *buffer, size_t buflen)
     {
       ret = sem_wait(&g_trngdev.waitsem);
 
-      fvdbg("Awakened: nsamples=%d maxsamples=%d ret=%d\n",
+      finfo("Awakened: nsamples=%d maxsamples=%d ret=%d\n",
             g_trngdev.nsamples, g_trngdev.maxsamples, ret);
 
       if (ret < 0)
@@ -321,19 +327,15 @@ errout:
 
   sem_post(&g_trngdev.exclsem);
 
-  fvdbg("Return %d\n", (int)retval);
+  finfo("Return %d\n", (int)retval);
   return retval;
 }
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: up_rnginitialize
+ * Name: sam_rng_initialize
  *
  * Description:
- *   Initialize the TRNG hardware and register the /dev/randome driver.
+ *   Initialize the TRNG hardware.
  *
  * Input Parameters:
  *   None
@@ -343,17 +345,26 @@ errout:
  *
  ****************************************************************************/
 
-void up_rnginitialize(void)
+static int sam_rng_initialize(void)
 {
   int ret;
 
-  fvdbg("Initializing TRNG hardware\n");
+  finfo("Initializing TRNG hardware\n");
 
   /* Initialize the device structure */
 
   memset(&g_trngdev, 0, sizeof(struct trng_dev_s));
+
+  /* Initialize semaphores */
+
   sem_init(&g_trngdev.exclsem, 0, 1);
   sem_init(&g_trngdev.waitsem, 0, 0);
+
+  /* The waitsem semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
+  sem_setprotocol(&g_trngdev.waitsem, SEM_PRIO_NONE);
 
   /* Enable clocking to the TRNG */
 
@@ -361,10 +372,11 @@ void up_rnginitialize(void)
 
   /* Initialize the TRNG interrupt */
 
-  if (irq_attach(SAM_IRQ_TRNG, sam_interrupt))
+  ret = irq_attach(SAM_IRQ_TRNG, sam_interrupt, NULL);
+  if (ret < 0)
     {
-      fdbg("ERROR: Failed to attach to IRQ%d\n", SAM_IRQ_TRNG);
-      return;
+      ferr("ERROR: Failed to attach to IRQ%d\n", SAM_IRQ_TRNG);
+      return ret;
     }
 
   /* Disable the interrupts at the TRNG */
@@ -375,16 +387,80 @@ void up_rnginitialize(void)
 
   putreg32(TRNG_CR_DISABLE | TRNG_CR_KEY, SAM_TRNG_CR);
 
-  /* Register the character driver */
-
-  ret = register_driver("/dev/random", &g_trngops, 0644, NULL);
-  if (ret < 0)
-    {
-      fdbg("ERROR: Failed to register /dev/random\n");
-      return;
-    }
-
   /* Enable the TRNG interrupt at the AIC */
 
   up_enable_irq(SAM_IRQ_TRNG);
+  return OK;
 }
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: devrandom_register
+ *
+ * Description:
+ *   Initialize the TRNG hardware and register the /dev/random driver.
+ *   Must be called BEFORE devurandom_register.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEV_RANDOM
+void devrandom_register(void)
+{
+  int ret;
+
+  ret = sam_rng_initialize();
+  if (ret >= 0)
+    {
+      ret = register_driver("/dev/random", &g_trngops, 0644, NULL);
+      if (ret < 0)
+        {
+          ferr("ERROR: Failed to register /dev/random\n");
+        }
+    }
+}
+#endif
+
+/****************************************************************************
+ * Name: devurandom_register
+ *
+ * Description:
+ *   Register /dev/urandom
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEV_URANDOM_ARCH
+void devurandom_register(void)
+{
+  int ret;
+
+#ifndef CONFIG_DEV_RANDOM
+  ret = sam_rng_initialize();
+  if (ret >= 0)
+#endif
+    {
+      ret = register_driver("/dev/urandom", &g_trngops, 0644, NULL);
+      if (ret < 0)
+        {
+          ferr("ERROR: Failed to register /dev/urandom\n");
+        }
+    }
+}
+#endif
+
+#endif /* CONFIG_DEV_RANDOM || CONFIG_DEV_URANDOM_ARCH */
+#endif /* CONFIG_SAMV7_TRNG */

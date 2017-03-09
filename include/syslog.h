@@ -129,14 +129,6 @@
 #define LOG_ALL       0xff
 
 /****************************************************************************
- * Public Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
@@ -145,8 +137,60 @@ extern "C"
 {
 #endif
 
+/****************************************************************************
+ * Name: openlog
+ *
+ * Description:
+ *   The openlog() function sets process attributes that affect subsequent
+ *   calls to syslog(). The ident argument is a string that is prepended to
+ *   every message. The logopt argument indicates logging options. Values
+ *   for logopt are constructed by a bitwise-inclusive OR of zero or more of
+ *   the following:
+ *
+ *     LOG_PID - Log the process ID with each message. This is useful for
+ *       identifying specific processes.
+ *
+ *     LOG_CONS - Write messages to the system console if they cannot be
+ *       sent to the logging facility. The syslog() function ensures that
+ *       the process does not acquire the console as a controlling terminal
+ *       in the process of writing the message.
+ *
+ *     LOG_NDELAY - Open the connection to the logging facility immediately.
+ *       Normally the open is delayed until the first message is logged.
+ *       This is useful for programs that need to manage the order in which
+ *       file descriptors are allocated.
+ *
+ *     LOG_ODELAY - Delay open until syslog() is called.
+ *
+ *     LOG_NOWAIT - Do not wait for child processes that may have been
+ *       created during the course of logging the message. This option
+ *       should be used by processes that enable notification of child
+ *       termination using SIGCHLD, since syslog() may otherwise block
+ *       waiting for a child whose exit status has already been collected.
+ *
+ *   The facility argument encodes a default facility to be assigned to all
+ *   messages that do not have an explicit facility already encoded. The
+ *   initial default facility is LOG_USER.
+ *
+ *   It is not necessary to call openlog() prior to calling syslog().
+ *
+ ****************************************************************************/
+
 #if 0 /* Not supported */
 void openlog(FAR const char *ident, int option, int facility);
+#endif
+
+/****************************************************************************
+ * Name: closelog
+ *
+ * Description:
+ *   The openlog() and syslog() functions may allocate a file descriptor.
+ *   The closelog() function will close any open file descriptors allocated
+ *   by previous calls to openlog() or syslog().
+ *
+ ****************************************************************************/
+
+#if 0 /* Not supported */
 void closelog(void);
 #endif
 
@@ -172,48 +216,6 @@ int syslog(int priority, FAR const IPTR char *format, ...);
 int vsyslog(int priority, FAR const IPTR char *src, va_list ap);
 
 /****************************************************************************
- * Name: lowsyslog and lowvsyslog
- *
- * Description:
- *   syslog() generates a log message. The priority argument is formed by
- *   ORing the facility and the level values (see include/syslog.h). The
- *   remaining arguments are a format, as in printf and any arguments to the
- *   format.
- *
- *   This is a non-standard, low-level system logging interface.  The
- *   difference between syslog() and lowsyslog() is that the syslog()
- *   interface writes to the syslog device (usually fd=1, stdout) whereas
- *   lowsyslog() uses a lower level interface that works even from interrupt
- *   handlers.
- *
- *   If the platform cannot support lowsyslog, then we will substitute the
- *   standard syslogging functions.  These will, however, probably cause
- *   problems if called from interrupt handlers, depending upon the nature of
- *   the underlying syslog device.
- *
- *   The function lowvsyslog() performs the same task as lowsyslog() with
- *   the difference that it takes a set of arguments which have been
- *   obtained using the stdarg variable argument list macros.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ARCH_LOWPUTC
-
-int lowsyslog(int priority, FAR const IPTR char *format, ...);
-int lowvsyslog(int priority, FAR const IPTR char *format, va_list ap);
-
-#else
-
-#  ifdef CONFIG_CPP_HAVE_VARARGS
-#    define lowsyslog(p,f,...) syslog(p,f,##__VA_ARGS__)
-#  else
-#    define lowsyslog (void)
-#  endif
-#  define lowvsyslog(p,f,a) vsyslog(p,f,a)
-
-#endif
-
-/****************************************************************************
  * Name: setlogmask
  *
  * Description:
@@ -225,8 +227,12 @@ int lowvsyslog(int priority, FAR const IPTR char *format, va_list ap);
  *   to a priority p is LOG_MASK(p); LOG_UPTO(p) provides the mask of all
  *   priorities in the above list up to and including p.
  *
+ *   Per OpenGroup.org "If the maskpri argument is 0, the current log mask
+ *   is not modified."  In this implementation, the value zero is permitted
+ *   in order to disable all syslog levels.
+ *
  *   REVISIT: Per POSIX the syslog mask should be a per-process value but in
- *   NuttX, the scope of the mask is dependent on the nature of the build.
+ *   NuttX, the scope of the mask is dependent on the nature of the build:
  *
  *   Flat Build:  There is one, global SYSLOG mask that controls all output.
  *   Protected Build:  There are two SYSLOG masks.  One within the kernel

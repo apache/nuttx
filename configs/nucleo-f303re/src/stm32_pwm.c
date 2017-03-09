@@ -46,7 +46,7 @@
 #include <debug.h>
 
 #include <nuttx/board.h>
-#include <nuttx/pwm.h>
+#include <nuttx/drivers/pwm.h>
 
 #include "stm32_pwm.h"
 #include "nucleo-f303re.h"
@@ -54,50 +54,18 @@
 #ifdef CONFIG_PWM
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Debug ********************************************************************/
-/* Non-standard debug that may be enabled just for testing PWM */
-
-#ifdef CONFIG_DEBUG_PWM
-#  define pwmdbg    dbg
-#  define pwmvdbg   vdbg
-#  define pwmlldbg  lldbg
-#  define pwmllvdbg llvdbg
-#else
-#  define pwmdbg(x...)
-#  define pwmvdbg(x...)
-#  define pwmlldbg(x...)
-#  define pwmllvdbg(x...)
-#endif
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: board_pwm_setup
+/************************************************************************************
+ * Name: stm32_pwm_setup
  *
  * Description:
- *   All STM32 architectures must provide the following interface to work
- *   with examples/pwm.
+ *   Initialize PWM and register the PWM device.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
-int board_pwm_setup(void)
+int stm32_pwm_setup(void)
 {
   static bool initialized = false;
   struct pwm_lowerhalf_s *pwm;
@@ -112,7 +80,7 @@ int board_pwm_setup(void)
       pwm = stm32_pwminitialize(NUCLEO_F303RE_PWMTIMER);
       if (pwm == NULL)
         {
-          pwmdbg("Failed to get the STM32 PWM lower half\n");
+          pwmerr("ERROR: Failed to get the STM32 PWM lower half\n");
           return -ENODEV;
         }
 
@@ -121,7 +89,7 @@ int board_pwm_setup(void)
       ret = pwm_register("/dev/pwm0", pwm);
       if (ret < 0)
         {
-          pwmdbg("pwm_register failed: %d\n", ret);
+          pwmerr("ERROR: pwm_register failed: %d\n", ret);
           return ret;
         }
 

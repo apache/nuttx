@@ -151,12 +151,14 @@ static void up_enable(FAR const struct enc_lower_s *lower)
   FAR struct stm32_lower_s *priv = (FAR struct stm32_lower_s *)lower;
 
   DEBUGASSERT(priv->handler);
-  (void)stm32_gpiosetevent(GPIO_ENCX24J600_INTR, false, true, true, priv->handler);
+  (void)stm32_gpiosetevent(GPIO_ENCX24J600_INTR, false, true, true,
+                           priv->handler, NULL);
 }
 
 static void up_disable(FAR const struct enc_lower_s *lower)
 {
-  (void)stm32_gpiosetevent(GPIO_ENCX24J600_INTR, false, true, true, NULL);
+  (void)stm32_gpiosetevent(GPIO_ENCX24J600_INTR, false, true, true,
+                           NULL, NULL);
 }
 
 /****************************************************************************
@@ -180,7 +182,7 @@ void up_netinitialize(void)
   spi = stm32_spibus_initialize(ENCX24J600_SPI_PORTNO);
   if (!spi)
     {
-      nlldbg("Failed to initialize SPI port %d\n", ENCX24J600_SPI_PORTNO);
+      nerr("ERROR: Failed to initialize SPI port %d\n", ENCX24J600_SPI_PORTNO);
       return;
     }
 
@@ -190,13 +192,13 @@ void up_netinitialize(void)
 
   if (ret < 0)
     {
-      nlldbg("Failed to bind SPI port %d ENCX24J600 device %d: %d\n",
-             ENCX24J600_SPI_PORTNO, ENCX24J600_DEVNO, ret);
+      nerr("ERROR: Failed to bind SPI port %d ENCX24J600 device %d: %d\n",
+           ENCX24J600_SPI_PORTNO, ENCX24J600_DEVNO, ret);
       return;
     }
 
-  nllvdbg("Bound SPI port %d to ENCX24J600 device %d\n",
-          ENCX24J600_SPI_PORTNO, ENCX24J600_DEVNO);
+  ninfo("Bound SPI port %d to ENCX24J600 device %d\n",
+        ENCX24J600_SPI_PORTNO, ENCX24J600_DEVNO);
 }
 
 #endif /* CONFIG_ENCX24J600 */

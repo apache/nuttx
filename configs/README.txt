@@ -123,7 +123,7 @@ Make.defs -- This makefile fragment provides architecture and
 
   Definitions in the Make.defs file probably depend on some of the
   settings in the .config file.  For example, the CFLAGS will most likely be
-  different if CONFIG_DEBUG=y.
+  different if CONFIG_DEBUG_FEATURES=y.
 
   The included tools/Config.mk file contains additional definitions that may
   be overriden in the architecture-specific Make.defs file as necessary:
@@ -191,6 +191,9 @@ configs/avr32dev1
   Atmel website.  STATUS: This port is functional but very basic.  There
   are configurations for NSH and the OS test.
 
+configs/bambino-200e
+  Micromint Bambino board. This board is based on the LPC4330FBD144.
+
 configs/c5471evm
   This is a port to the Spectrum Digital C5471 evaluation board.  The
   TMS320C5471 is a dual core processor from TI with an ARM7TDMI general
@@ -203,15 +206,8 @@ configs/cloudctrl
   board. Based on the Shenzhou IV development board design.  It is based on
   the STM32F107VC MCU.
 
-configs/compal_e86, compal_e88 and compal_e99
-  These directories contain the board support for compal e86, e88 and e99 phones.
-  These ports are based on patches contributed by Denis Carikli for both the
-  compal e99 and e88.  The patches were made by Alan Carvalho de Assis and
-  Denis Carikli using the Stefan Richter's Osmocom-bb patches.  The variant
-  for the e86 was submitted by Craig Comstock.
-
 configs/demo9s12ne64
-  Freescale DMO9S12NE64 board based on the MC9S12NE64 hcs12 cpu.  This
+  NXP/FreeScale DMO9S12NE64 board based on the MC9S12NE64 hcs12 cpu.  This
   port uses the m9s12x GCC toolchain.  STATUS:  (Still) under development; it
   is code complete but has not yet been verified.
 
@@ -246,6 +242,14 @@ configs/ekk-lm3s9b96
   TI/Stellaris EKK-LM3S9B96 board.  This board is based on the
   an EKK-LM3S9B96 which is a Cortex-M3.
 
+configs/esp-core
+  The ESP32 is a dual-core system from Expressif with two Harvard
+  architecture Xtensa LX6 CPUs. All embedded memory, external memory and
+  nd peripherals are located on the data bus and/or the instruction bus of
+  bus of these CPUs. With some minor exceptions, the address mapping of two
+  CPUs is symmetric, meaning they use the same addresses to access the same
+  memory.
+
 configs/ez80f0910200kitg
   ez80Acclaim! Microcontroller.  This port use the Zilog ez80f0910200kitg
   development kit, eZ80F091 part, and the Zilog ZDS-II Windows command line
@@ -261,9 +265,13 @@ configs/fire-stm32v2
   STM32F103VET6 chip.  See http://firestm32.taobao.com .  Version 2 and 3 of
   the boards are supported but only version 2 has been tested.
 
+configs/freedom-k64f
+  This port uses the NXP/FreeScale FREEDOM-K64F development board. This board
+  uses the Kinetis K64 MK64FN1M0VLL12 Cortex-M4 MCU.
+
 configs/freedom-kl25z
 configs/freedom-kl26z
-  These configurations are for the Freescale Freedom KL25Z and very similar
+  These configurations are for the NXP/FreeScale Freedom KL25Z and very similar
   KL26Z board.  The Freedom-KL25Z features the K25Z120LE3AN chip; the
   Freedom-KL26Z has the K26Z128VLH4 chip.  These are separate configurations
   because of minor differences in the on-board logic.  Both include a
@@ -274,7 +282,7 @@ configs/hymini-stm32v
   STM32F103VCT chip.
 
 configs/kwikstik-k40.
-  Kinetis K40 Cortex-M4 MCU.  This port uses the FreeScale KwikStik-K40
+  Kinetis K40 Cortex-M4 MCU.  This port uses the NXP/FreeScale KwikStik-K40
   development board.
 
 configs/launchxl-tms57004
@@ -367,7 +375,7 @@ configs/moxa
 
 configs/mx1ads
   This is a port to the Motorola MX1ADS development board.  That board
-  is based on the Freescale i.MX1 processor.  The i.MX1 is an ARM920T.
+  is based on the NXP/FreeScale i.MX1 processor.  The i.MX1 is an ARM920T.
   STATUS:  This port is nearly code complete but was never fully
   integrated due to tool-related issues.
 
@@ -393,9 +401,12 @@ configs/ntosd-dm320
   NuttX 0.2.1 release.
 
 configs/nucleo-144
-  STMicro Nucleo-144 development board featuring the STM32F746ZGT6U MCU. The
-  STM32F746ZGT6U is a 216MHz Cortex-M7 operation with 1024Kb Flash memory
-  and 300Kb SRAM.
+  STMicro Nucleo-144 development board family.  Included support for (1) the
+  Nucleo-F767ZG board featuring the STM32F746ZGT6U MCU. The STM32F746ZGT6U
+  is a 216MHz Cortex-M7 operation with 1024Kb Flash memory and 320Kb SRAM.
+  And (2) the Nucleo-F746ZG board featuring the STM32F767ZIT6 MCU. The
+  STM32F767ZIT6 is a 216MHz Cortex-M7 operation with 2048Kb Flash memory
+  and 512Kb SRAM.
 
 configs/nucleo-f4x1re
   STMicro ST Nucleo F401RE and F411RE boards.  See
@@ -435,6 +446,10 @@ configs/olimex-stm32-h407
   further information. This board features the STMicro STM32F407ZGT6 (144
   pins). Contributed by Neil Hancock.
 
+configs/olimex-stm32-e407
+  Olimex STM32 E407 board based on the STMicro STM32F407ZGT6 (144pins).
+  Contributed by Mateusz Szafoni.
+
 configs/olimex-stm32-p107
   This port uses the Olimex STM32-P107 board (STM32F107VC) and a GNU arm-nuttx-elf
   toolchain* under Linux or Cygwin. See the https://www.olimex.com/dev/stm32-p107.html
@@ -444,6 +459,11 @@ configs/olimex-stm32-p207
   This port uses the Olimex STM32-P207 board (STM32F207ZE) and a GNU arm-nuttx-elf
   toolchain under Linux or Cygwin. See the https://www.olimex.com/dev/stm32-p207.html
   for further information.  Contributed by Martin Lederhilger.
+
+configs/olimex-stm32-p407
+  This port uses the Olimex STM32-P407 board (STM32F407ZG) and a GNU arm-nuttx-elf
+  toolchain under Linux or Cygwin. See the https://www.olimex.com/dev/stm32-p407.html
+  for further information.
 
 configs/olimexino-stm32
   This port uses the Olimexino STM32 board (STM32F103RBT6) and a GNU arm-nuttx-elf
@@ -509,7 +529,6 @@ configs/pic32mx7mmb
   Mikroelektronika PIC32MX7 Multimedia Board (MMB).  See
   http://www.mikroe.com/ for further information.
 
-configs/pirelli_dpl10
 configs/pic32mz-starterkit
   This directory contains the port of NuttX to the Microchip PIC32MZ
   Embedded Connectivity (EC) Starter Kit.  There are two configurations of
@@ -522,23 +541,12 @@ configs/pic32mz-starterkit
 
   See www.microchip.com for further information.
 
-  This directory contains the board support for Pirelli "Discus" DP-L10 phones.
-  It is a variant of the compal_e88 config with the small changes for the
-  differences in the board.
-
 configs/qemu-i486
   Port of NuttX to QEMU in i486 mode.  This port will also run on real i486
   hardwared (Google the Bifferboard).
 
-configs/rgmp
-  RGMP stands for RTOS and GPOS on Multi-Processor.  RGMP is a project for
-  running GPOS and RTOS simultaneously on multi-processor platforms. You can
-  port your favorite RTOS to RGMP together with an unmodified Linux to form a
-  hybrid operating system. This makes your application able to use both RTOS
-  and GPOS features.
-
-  See http://rgmp.sourceforge.net/wiki/index.php/Main_Page for further
-  information about RGMP.
+configs/nr5m100-nexys4
+  Port of NuttX to RISC-V platform on IQ-Analog NR5M100 RISC-V FPGA platform.
 
 configs/sabre-6quad
   This directory holds a port of NuttX to the NXP/Freescale Sabre board
@@ -584,6 +592,9 @@ configs/samd21-xplained
 
 configs/sam3u-ek
   The port of NuttX to the Atmel SAM3U-EK development board.
+
+configs/sam4cmp-db
+  The port of NuttX to the Atmel SAM4CMP-DB development board.
 
 configs/sam4e-ek
   The port of NuttX to the Atmel SAM4E-EK development board.  This board
@@ -637,6 +648,10 @@ configs/stm3240g-eval
   microcontroller (ARM Cortex-M4 with FPU).  This port uses a GNU Cortex-M4
   toolchain (such as CodeSourcery).
 
+configs/stm32butterfly2
+  Kamami stm32butterfly2 development board with optional ETH phy.  See
+  https://kamami.pl/zestawy-uruchomieniowe-stm32/178507-stm32butterfly2.html
+
 configs/stm32f103-minimum
   Generic STM32F103C8T6 Minimum ARM Development Board.
 
@@ -654,6 +669,14 @@ configs/stm32f746g-disco
   STMicro STM32F746G-DISCO development board featuring the STM32F746NGH6
   MCU. The STM32F746NGH6  is a 216MHz Cortex-M7 operation with 1024Kb Flash
   memory and 300Kb SRAM.
+
+configs/stm32f746g-ws
+  Waveshare STM32F746 development board featuring the STM32F746IG MCU.
+
+configs/stm32l476-mdk
+  Motorola Mods Development Board (MDK) features  STM32L476ME MCU.
+  The STM32L476ME  is a Cortex-M4 optimised for low-power operation
+  at up to 80MHz operation with 1024Kb Flash memory and 96+32Kb SRAM.
 
 configs/stm32l476vg-disco
   STMicro STM32L476VG_DISCO development board featuring the STM32L476VG
@@ -712,6 +735,10 @@ configs/tm4c1294-launchpad
 
 configs/twr-k60n512
   Kinetis K60 Cortex-M4 MCU.  This port uses the FreeScale TWR-K60N512
+  development board.
+
+configs/twr-k64f120m
+  Kinetis K64 Cortex-M4 MCU.  This port uses the FreeScale TWR-K64F120M
   development board.
 
 configs/ubw32

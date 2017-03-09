@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/x86/include/i486/arch.h
  *
- *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -317,7 +317,7 @@
 
 /* This structure defines one segment */
 
-struct gdt_entry_s
+begin_packed_struct struct gdt_entry_s
 {
   uint16_t lowlimit;           /* The lower 16 bits of the limit */
   uint16_t lowbase;            /* The lower 16 bits of the base */
@@ -325,17 +325,17 @@ struct gdt_entry_s
   uint8_t  access;             /* Access flags, determine ring segment can be used in */
   uint8_t  granularity;
   uint8_t  hibase;             /* The last 8 bits of the base */
-} packed_struct;
+} end_packed_struct;
 
 /* This structure refers to the array of GDT entries, and is in the format
  * required by the lgdt instruction.
  */
 
-struct gdt_ptr_s
+begin_packed_struct struct gdt_ptr_s
 {
   uint16_t limit;               /* The upper 16 bits of all selector limits */
   uint32_t base;                /* The address of the first GDT entry */
-} packed_struct;
+} end_packed_struct;
 
 /* IDT data structures ******************************************************
  *
@@ -344,24 +344,24 @@ struct gdt_ptr_s
  * processor to determine the correct response to interrupts and exceptions.
  */
 
-struct idt_entry_s
+begin_packed_struct struct idt_entry_s
 {
   uint16_t lobase;           /* Lower 16-bits of vector address for interrupt */
   uint16_t sel;              /* Kernel segment selector */
   uint8_t  zero;             /* This must always be zero */
   uint8_t  flags;            /* (See documentation) */
   uint16_t hibase;           /* Upper 16-bits of vector address for interrupt */
-} packed_struct;
+} end_packed_struct;
 
 /* A struct describing a pointer to an array of interrupt handlers.  This is
  * in a format suitable for giving to 'lidt'.
  */
 
-struct idt_ptr_s
+begin_packed_struct struct idt_ptr_s
 {
   uint16_t limit;
   uint32_t base;             /* The address of the first GDT entry */
-} packed_struct;
+} end_packed_struct;
 
 /****************************************************************************
  * Inline functions

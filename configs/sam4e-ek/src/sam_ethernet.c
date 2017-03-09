@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/sam4e-ek/src/sam_ethernet.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,8 +42,8 @@
 /* Force verbose debug on in this file only to support unit-level testing. */
 
 #ifdef CONFIG_NETDEV_PHY_DEBUG
-#  undef  CONFIG_DEBUG_VERBOSE
-#  define CONFIG_DEBUG_VERBOSE 1
+#  undef  CONFIG_DEBUG_INFO
+#  define CONFIG_DEBUG_INFO 1
 #  undef  CONFIG_DEBUG_NET
 #  define CONFIG_DEBUG_NET 1
 #endif
@@ -74,19 +74,13 @@
  */
 
 #ifdef CONFIG_NETDEV_PHY_DEBUG
-#  define phydbg    dbg
-#  define phylldbg  lldbg
+#  define phyerr    _err
+#  define phywarn   _warn
+#  define phyinfo   _info
 #else
-#  define phydbg(x...)
-#  define phylldbg(x...)
-#endif
-
-/************************************************************************************
- * Private Data
- ************************************************************************************/
-
-#ifdef CONFIG_SAM34_GPIOD_IRQ
-static xcpt_t g_emac_handler;
+#  define phyerr(x...)
+#  define phywarn(x...)
+#  define phyinfo(x...)
 #endif
 
 /************************************************************************************
@@ -100,7 +94,7 @@ static xcpt_t g_emac_handler;
 #ifdef CONFIG_SAM34_GPIOD_IRQ
 static void sam_emac_phy_enable(bool enable)
 {
-  phydbg("IRQ%d: enable=%d\n", SAM_PHY_IRQ, enable);
+  phyinfo("IRQ%d: enable=%d\n", SAM_PHY_IRQ, enable);
   if (enable)
     {
       sam_gpioirqenable(SAM_PHY_IRQ);
@@ -126,7 +120,7 @@ static void sam_emac_phy_enable(bool enable)
 
 void weak_function sam_netinitialize(void)
 {
-  phydbg("Configuring %08x\n", GPIO_PHY_IRQ);
+  phyinfo("Configuring %08x\n", GPIO_PHY_IRQ);
   sam_configgpio(GPIO_PHY_IRQ);
 }
 
@@ -182,43 +176,40 @@ void weak_function sam_netinitialize(void)
  *             asserts an interrupt.  Must reside in OS space, but can
  *             signal tasks in user space.  A value of NULL can be passed
  *             in order to detach and disable the PHY interrupt.
+ *   arg     - The argument that will accompany the interrupt
  *   enable  - A function pointer that be unsed to enable or disable the
  *             PHY interrupt.
  *
  * Returned Value:
- *   The previous PHY interrupt handler address is returned.  This allows you
- *   to temporarily replace an interrupt handler, then restore the original
- *   interrupt handler.  NULL is returned if there is was not handler in
- *   place when the call was made.
+ *   Zero (OK) returned on success; a negated errno value is returned on
+ *   failure.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_SAM34_GPIOD_IRQ
-xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
+int arch_phy_irq(FAR const char *intf, xcpt_t handler, void *arg,
+                 phy_enable_t *enable)
 {
   irqstate_t flags;
-  xcpt_t *phandler;
-  xcpt_t oldhandler;
   gpio_pinset_t pinset;
   phy_enable_t enabler;
   int irq;
 
   DEBUGASSERT(intf);
 
-  nvdbg("%s: handler=%p\n", intf, handler);
-  phydbg("EMAC: devname=%s\n", SAM34_EMAC_DEVNAME);
+  ninfo("%s: handler=%p\n", intf, handler);
+  phyinfo("EMAC: devname=%s\n", SAM34_EMAC_DEVNAME);
 
   if (strcmp(intf, SAM34_EMAC_DEVNAME) == 0)
     {
-      phydbg("Select EMAC\n");
-      phandler = &g_emac_handler;
+      phyinfo("Select EMAC\n");
       pinset   = GPIO_PHY_IRQ;
       irq      = SAM_PHY_IRQ;
       enabler  = sam_emac_phy_enable;
     }
   else
     {
-      ndbg("Unsupported interface: %s\n", intf);
+      nerr("ERROR: Unsupported interface: %s\n", intf);
       return NULL;
     }
 
@@ -228,24 +219,19 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
 
   flags = enter_critical_section();
 
-  /* Get the old interrupt handler and save the new one */
-
-  oldhandler = *phandler;
-  *phandler  = handler;
-
   /* Configure the interrupt */
 
   if (handler)
     {
-      phydbg("Configure pin: %08x\n", pinset);
+      phyinfo("Configure pin: %08x\n", pinset);
       sam_gpioirq(pinset);
 
-      phydbg("Attach IRQ%d\n", irq);
-      (void)irq_attach(irq, handler);
+      phyinfo("Attach IRQ%d\n", irq);
+      (void)irq_attach(irq, handler, arg);
     }
   else
     {
-      phydbg("Detach IRQ%d\n", irq);
+      phyinfo("Detach IRQ%d\n", irq);
       (void)irq_detach(irq);
       enabler = NULL;
     }
@@ -264,7 +250,7 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
   /* Return the old handler (so that it can be restored) */
 
   leave_critical_section(flags);
-  return oldhandler;
+  return OK;
 }
 #endif /* CONFIG_SAM34_GPIOD_IRQ */
 

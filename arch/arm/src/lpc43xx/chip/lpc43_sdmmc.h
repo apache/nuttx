@@ -143,10 +143,11 @@
 #define SDMMC_CTRL_CEATAINT              (1 << 11) /* Bit 11: CE-ATA device interrupts enabled */
                                                    /* Bits 12-15:  Reserved */
 #define SDMMC_CTRL_CDVA0                 (1 << 16) /* Bit 16: Controls SD_VOLT0 pin */
-#define SDMMC_CTRL_CDVA0                 (1 << 17) /* Bit 17: Controls SD_VOLT1 pin */
-#define SDMMC_CTRL_CDVA0                 (1 << 18) /* Bit 18: Controls SD_VOLT2 pin */
+#define SDMMC_CTRL_CDVA1                 (1 << 17) /* Bit 17: Controls SD_VOLT1 pin */
+#define SDMMC_CTRL_CDVA2                 (1 << 18) /* Bit 18: Controls SD_VOLT2 pin */
                                                    /* Bits 19-23:  Reserved */
-#define SDMMC_CTRL_INTDMA                (1 << 25) /* Bit 24: SD/MMC DMA use */
+                                                   /* Bit 24: Reserved - always write it as 0 */
+#define SDMMC_CTRL_INTDMA                (1 << 25) /* Bit 25: SD/MMC DMA use */
                                                    /* Bits 26-31:  Reserved */
 /* Power Enable Register (PWREN) */
 

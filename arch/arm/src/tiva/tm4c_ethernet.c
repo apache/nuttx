@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/tiva/tm4c_ethernet.c
  *
- *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,11 +53,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include <nuttx/wdog.h>
-
-#ifdef CONFIG_NET_NOINTS
-#  include <nuttx/wqueue.h>
-#endif
-
+#include <nuttx/wqueue.h>
 #include <nuttx/net/mii.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
@@ -98,12 +94,23 @@
 #  error Logic to support multiple Ethernet interfaces is incomplete
 #endif
 
-/* If processing is not done at the interrupt level, then high priority
- * work queue support is required.
+/* If processing is not done at the interrupt level, then work queue support
+ * is required.
  */
 
-#if defined(CONFIG_NET_NOINTS) && !defined(CONFIG_SCHED_HPWORK)
-#  error High priority work queue support is required
+#if !defined(CONFIG_SCHED_WORKQUEUE)
+#  error Work queue support is required
+#else
+
+  /* Select work queue */
+
+#  if defined(CONFIG_TIVA_ETHERNET_HPWORK)
+#    define ETHWORK HPWORK
+#  elif defined(CONFIG_TIVA_ETHERNET_LPWORK)
+#    define ETHWORK LPWORK
+#  else
+#    error Neither CONFIG_TIVA_ETHERNET_HPWORK nor CONFIG_TIVA_ETHERNET_LPWORK defined
+#  endif
 #endif
 
 /* Are we using the internal PHY or an external PHY? */
@@ -207,10 +214,6 @@
 
 /* Ethernet buffer sizes, number of buffers, and number of descriptors */
 
-#ifndef CONFIG_NET_MULTIBUFFER
-#  error CONFIG_NET_MULTIBUFFER is required
-#endif
-
 #ifndef CONFIG_TIVA_EMAC_NRXDESC
 #  define CONFIG_TIVA_EMAC_NRXDESC 8
 #endif
@@ -247,7 +250,7 @@
  * enabled.
  */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_INFO
 #  undef CONFIG_TIVA_ETHERNET_REGDEBUG
 #endif
 
@@ -623,11 +626,12 @@ struct tiva_ethmac_s
   uint8_t              fduplex : 1; /* Full (vs. half) duplex */
   WDOG_ID              txpoll;      /* TX poll timer */
   WDOG_ID              txtimeout;   /* TX timeout timer */
-#ifdef CONFIG_NET_NOINTS
-  struct work_s        work;        /* For deferring work to the work queue */
-#endif
+  struct work_s        irqwork;     /* For deferring interrupt work to the work queue */
+  struct work_s        pollwork;    /* For deferring poll work to the work queue */
+
 #ifdef CONFIG_TIVA_PHY_INTERRUPTS
   xcpt_t               handler;     /* Attached PHY interrupt handler */
+  void                *arg;         /* Argument that accompanies the interrupt */
 #endif
 
   /* This holds the information visible to the NuttX network */
@@ -667,7 +671,7 @@ static struct tiva_ethmac_s g_tiva_ethmac[TIVA_NETHCONTROLLERS];
  ****************************************************************************/
 /* Register operations ******************************************************/
 
-#if defined(CONFIG_TIVA_ETHERNET_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_TIVA_ETHERNET_REGDEBUG) && defined(CONFIG_DEBUG_INFO)
 static uint32_t tiva_getreg(uint32_t addr);
 static void tiva_putreg(uint32_t val, uint32_t addr);
 static void tiva_checksetup(void);
@@ -701,35 +705,26 @@ static int  tiva_recvframe(FAR struct tiva_ethmac_s *priv);
 static void tiva_receive(FAR struct tiva_ethmac_s *priv);
 static void tiva_freeframe(FAR struct tiva_ethmac_s *priv);
 static void tiva_txdone(FAR struct tiva_ethmac_s *priv);
-static inline void tiva_interrupt_process(FAR struct tiva_ethmac_s *priv);
-#ifdef CONFIG_NET_NOINTS
+
 static void tiva_interrupt_work(FAR void *arg);
-#endif
-static int  tiva_interrupt(int irq, FAR void *context);
+static int  tiva_interrupt(int irq, FAR void *context, FAR void *arg);
 
 /* Watchdog timer expirations */
 
-static inline void tiva_txtimeout_process(FAR struct tiva_ethmac_s *priv);
-#ifdef CONFIG_NET_NOINTS
 static void tiva_txtimeout_work(FAR void *arg);
-#endif
 static void tiva_txtimeout_expiry(int argc, uint32_t arg, ...);
 
-static inline void tiva_poll_process(FAR struct tiva_ethmac_s *priv);
-#ifdef CONFIG_NET_NOINTS
 static void tiva_poll_work(FAR void *arg);
-#endif
 static void tiva_poll_expiry(int argc, uint32_t arg, ...);
 
 /* NuttX callback functions */
 
 static int  tiva_ifup(struct net_driver_s *dev);
 static int  tiva_ifdown(struct net_driver_s *dev);
-static inline void tiva_txavail_process(FAR struct tiva_ethmac_s *priv);
-#ifdef CONFIG_NET_NOINTS
+
 static void tiva_txavail_work(FAR void *arg);
-#endif
 static int  tiva_txavail(struct net_driver_s *dev);
+
 #if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
 static int  tiva_addmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif
@@ -787,7 +782,7 @@ static int  tive_emac_configure(FAR struct tiva_ethmac_s *priv);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_TIVA_ETHERNET_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_TIVA_ETHERNET_REGDEBUG) && defined(CONFIG_DEBUG_INFO)
 static uint32_t tiva_getreg(uint32_t addr)
 {
   static uint32_t prevaddr = 0;
@@ -808,7 +803,7 @@ static uint32_t tiva_getreg(uint32_t addr)
         {
           if (count == 4)
             {
-              lldbg("...\n");
+              _info("...\n");
             }
 
           return val;
@@ -825,7 +820,7 @@ static uint32_t tiva_getreg(uint32_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          lldbg("[repeats %d more times]\n", count-3);
+          _info("[repeats %d more times]\n", count-3);
         }
 
       /* Save the new address, value, and count */
@@ -837,7 +832,7 @@ static uint32_t tiva_getreg(uint32_t addr)
 
   /* Show the register value read */
 
-  lldbg("%08x->%08x\n", addr, val);
+  _info("%08x->%08x\n", addr, val);
   return val;
 }
 #endif
@@ -859,12 +854,12 @@ static uint32_t tiva_getreg(uint32_t addr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_TIVA_ETHERNET_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_TIVA_ETHERNET_REGDEBUG) && defined(CONFIG_DEBUG_INFO)
 static void tiva_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  lldbg("%08x<-%08x\n", addr, val);
+  _info("%08x<-%08x\n", addr, val);
 
   /* Write the value */
 
@@ -886,7 +881,7 @@ static void tiva_putreg(uint32_t val, uint32_t addr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_TIVA_ETHERNET_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_TIVA_ETHERNET_REGDEBUG) && defined(CONFIG_DEBUG_INFO)
 static void tiva_checksetup(void)
 {
 }
@@ -1051,7 +1046,7 @@ static int tiva_transmit(FAR struct tiva_ethmac_s *priv)
   txdesc  = priv->txhead;
   txfirst = txdesc;
 
-  nvdbg("d_len: %d d_buf: %p txhead: %p tdes0: %08x\n",
+  ninfo("d_len: %d d_buf: %p txhead: %p tdes0: %08x\n",
         priv->dev.d_len, priv->dev.d_buf, txdesc, txdesc->tdes0);
 
   DEBUGASSERT(txdesc && (txdesc->tdes0 & EMAC_TDES0_OWN) == 0);
@@ -1068,7 +1063,7 @@ static int tiva_transmit(FAR struct tiva_ethmac_s *priv)
       bufcount = (priv->dev.d_len + (OPTIMAL_EMAC_BUFSIZE-1)) / OPTIMAL_EMAC_BUFSIZE;
       lastsize = priv->dev.d_len - (bufcount - 1) * OPTIMAL_EMAC_BUFSIZE;
 
-      nvdbg("bufcount: %d lastsize: %d\n", bufcount, lastsize);
+      ninfo("bufcount: %d lastsize: %d\n", bufcount, lastsize);
 
       /* Set the first segment bit in the first TX descriptor */
 
@@ -1178,7 +1173,7 @@ static int tiva_transmit(FAR struct tiva_ethmac_s *priv)
 
   priv->inflight++;
 
-  nvdbg("txhead: %p txtail: %p inflight: %d\n",
+  ninfo("txhead: %p txtail: %p inflight: %d\n",
         priv->txhead, priv->txtail, priv->inflight);
 
   /* If all TX descriptors are in-flight, then we have to disable receive interrupts
@@ -1477,7 +1472,7 @@ static void tiva_freesegment(FAR struct tiva_ethmac_s *priv,
   struct emac_rxdesc_s *rxdesc;
   int i;
 
-  nvdbg("rxfirst: %p segments: %d\n", rxfirst, segments);
+  ninfo("rxfirst: %p segments: %d\n", rxfirst, segments);
 
   /* Set OWN bit in RX descriptors.  This gives the buffers back to DMA */
 
@@ -1535,7 +1530,7 @@ static int tiva_recvframe(FAR struct tiva_ethmac_s *priv)
   uint8_t *buffer;
   int i;
 
-  nvdbg("rxhead: %p rxcurr: %p segments: %d\n",
+  ninfo("rxhead: %p rxcurr: %p segments: %d\n",
         priv->rxhead, priv->rxcurr, priv->segments);
 
   /* Check if there are free buffers.  We cannot receive new frames in this
@@ -1544,7 +1539,7 @@ static int tiva_recvframe(FAR struct tiva_ethmac_s *priv)
 
   if (!tiva_isfreebuffer(priv))
     {
-      nlldbg("No free buffers\n");
+      nerr("ERROR: No free buffers\n");
       return -ENOMEM;
     }
 
@@ -1601,7 +1596,7 @@ static int tiva_recvframe(FAR struct tiva_ethmac_s *priv)
               rxcurr = priv->rxcurr;
             }
 
-          nvdbg("rxhead: %p rxcurr: %p segments: %d\n",
+          ninfo("rxhead: %p rxcurr: %p segments: %d\n",
                 priv->rxhead, priv->rxcurr, priv->segments);
 
           /* Check if any errors are reported in the frame */
@@ -1640,7 +1635,7 @@ static int tiva_recvframe(FAR struct tiva_ethmac_s *priv)
               priv->rxhead   = (struct emac_rxdesc_s *)rxdesc->rdes3;
               tiva_freesegment(priv, rxcurr, priv->segments);
 
-              nvdbg("rxhead: %p d_buf: %p d_len: %d\n",
+              ninfo("rxhead: %p d_buf: %p d_len: %d\n",
                     priv->rxhead, dev->d_buf, dev->d_len);
 
               return OK;
@@ -1651,7 +1646,7 @@ static int tiva_recvframe(FAR struct tiva_ethmac_s *priv)
                * scanning logic, and continue scanning with the next frame.
                */
 
-              nlldbg("DROPPED: RX descriptor errors: %08x\n", rxdesc->rdes0);
+              nwarn("DROPPED: RX descriptor errors: %08x\n", rxdesc->rdes0);
               tiva_freesegment(priv, rxcurr, priv->segments);
             }
         }
@@ -1667,7 +1662,7 @@ static int tiva_recvframe(FAR struct tiva_ethmac_s *priv)
 
   priv->rxhead = rxdesc;
 
-  nvdbg("rxhead: %p rxcurr: %p segments: %d\n",
+  ninfo("rxhead: %p rxcurr: %p segments: %d\n",
         priv->rxhead, priv->rxcurr, priv->segments);
 
   return -EAGAIN;
@@ -1712,7 +1707,7 @@ static void tiva_receive(FAR struct tiva_ethmac_s *priv)
 
       if (dev->d_len > CONFIG_NET_ETH_MTU)
         {
-          nlldbg("DROPPED: Too big: %d\n", dev->d_len);
+          nwarn("DROPPED: Too big: %d\n", dev->d_len);
         }
       else
 
@@ -1721,7 +1716,7 @@ static void tiva_receive(FAR struct tiva_ethmac_s *priv)
 #ifdef CONFIG_NET_IPv4
       if (BUF->type == HTONS(ETHTYPE_IP))
         {
-          nllvdbg("IPv4 frame\n");
+          ninfo("IPv4 frame\n");
 
           /* Handle ARP on input then give the IPv4 packet to the network
            * layer
@@ -1760,7 +1755,7 @@ static void tiva_receive(FAR struct tiva_ethmac_s *priv)
 #ifdef CONFIG_NET_IPv6
       if (BUF->type == HTONS(ETHTYPE_IP6))
         {
-          nllvdbg("IPv6 frame\n");
+          ninfo("IPv6 frame\n");
 
           /* Give the IPv6 packet to the network layer */
 
@@ -1797,7 +1792,7 @@ static void tiva_receive(FAR struct tiva_ethmac_s *priv)
 #ifdef CONFIG_NET_ARP
       if (BUF->type == htons(ETHTYPE_ARP))
         {
-          nvdbg("ARP frame\n");
+          ninfo("ARP frame\n");
 
           /* Handle ARP packet */
 
@@ -1815,7 +1810,7 @@ static void tiva_receive(FAR struct tiva_ethmac_s *priv)
       else
 #endif
         {
-          nlldbg("DROPPED: Unknown type: %04x\n", BUF->type);
+          nwarn("DROPPED: Unknown type: %04x\n", BUF->type);
         }
 
       /* We are finished with the RX buffer.  NOTE:  If the buffer is
@@ -1856,7 +1851,7 @@ static void tiva_freeframe(FAR struct tiva_ethmac_s *priv)
   FAR struct emac_txdesc_s *txdesc;
   int i;
 
-  nvdbg("txhead: %p txtail: %p inflight: %d\n",
+  ninfo("txhead: %p txtail: %p inflight: %d\n",
         priv->txhead, priv->txtail, priv->inflight);
 
   /* Scan for "in-flight" descriptors owned by the CPU */
@@ -1872,7 +1867,7 @@ static void tiva_freeframe(FAR struct tiva_ethmac_s *priv)
            * TX descriptors.
            */
 
-          nvdbg("txtail: %p tdes0: %08x tdes2: %08x tdes3: %08x\n",
+          ninfo("txtail: %p tdes0: %08x tdes2: %08x tdes3: %08x\n",
                 txdesc, txdesc->tdes0, txdesc->tdes2, txdesc->tdes3);
 
           DEBUGASSERT(txdesc->tdes2 != 0);
@@ -1925,7 +1920,7 @@ static void tiva_freeframe(FAR struct tiva_ethmac_s *priv)
 
       priv->txtail = txdesc;
 
-      nvdbg("txhead: %p txtail: %p inflight: %d\n",
+      ninfo("txhead: %p txtail: %p inflight: %d\n",
             priv->txhead, priv->txtail, priv->inflight);
     }
 }
@@ -1967,14 +1962,6 @@ static void tiva_txdone(FAR struct tiva_ethmac_s *priv)
 
       wd_cancel(priv->txtimeout);
 
-      /* Then make sure that the TX poll timer is running (if it is already
-       * running, the following would restart it).  This is necessary to
-       * avoid certain race conditions where the polling sequence can be
-       * interrupted.
-       */
-
-      (void)wd_start(priv->txpoll, TIVA_WDDELAY, tiva_poll_expiry, 1, (uint32_t)priv);
-
       /* And disable further TX interrupts. */
 
       tiva_disableint(priv, EMAC_DMAINT_TI);
@@ -1986,26 +1973,32 @@ static void tiva_txdone(FAR struct tiva_ethmac_s *priv)
 }
 
 /****************************************************************************
- * Function: tiva_interrupt_process
+ * Function: tiva_interrupt_work
  *
  * Description:
- *   Interrupt processing.  This may be performed either within the interrupt
- *   handler or on the worker thread, depending upon the configuration
+ *   Perform interrupt related work from the worker thread
  *
  * Parameters:
- *   priv  - Reference to the driver state structure
+ *   arg - The argument passed when work_queue() was called.
  *
  * Returned Value:
- *   None
+ *   OK on success
  *
  * Assumptions:
  *   Ethernet interrupts are disabled
  *
  ****************************************************************************/
 
-static inline void tiva_interrupt_process(FAR struct tiva_ethmac_s *priv)
+static void tiva_interrupt_work(FAR void *arg)
 {
+  FAR struct tiva_ethmac_s *priv = (FAR struct tiva_ethmac_s *)arg;
   uint32_t dmaris;
+
+  DEBUGASSERT(priv);
+
+  /* Process pending Ethernet interrupts */
+
+  net_lock();
 
   /* Get the DMA interrupt status bits (no MAC interrupts are expected) */
 
@@ -2067,7 +2060,7 @@ static inline void tiva_interrupt_process(FAR struct tiva_ethmac_s *priv)
     {
       /* Just let the user know what happened */
 
-      nlldbg("Abnormal event(s): %08x\n", dmaris);
+      nerr("ERROR: Abnormal event(s): %08x\n", dmaris);
 
       /* Clear all pending abnormal events */
 
@@ -2078,44 +2071,13 @@ static inline void tiva_interrupt_process(FAR struct tiva_ethmac_s *priv)
       tiva_putreg(EMAC_DMAINT_AIS, TIVA_EMAC_DMARIS);
     }
 #endif
-}
 
-/****************************************************************************
- * Function: tiva_interrupt_work
- *
- * Description:
- *   Perform interrupt related work from the worker thread
- *
- * Parameters:
- *   arg - The argument passed when work_queue() was called.
- *
- * Returned Value:
- *   OK on success
- *
- * Assumptions:
- *   Ethernet interrupts are disabled
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_NOINTS
-static void tiva_interrupt_work(FAR void *arg)
-{
-  FAR struct tiva_ethmac_s *priv = (FAR struct tiva_ethmac_s *)arg;
-  net_lock_t state;
-
-  DEBUGASSERT(priv);
-
-  /* Process pending Ethernet interrupts */
-
-  state = net_lock();
-  tiva_interrupt_process(priv);
-  net_unlock(state);
+  net_unlock();
 
   /* Re-enable Ethernet interrupts at the NVIC */
 
   up_enable_irq(TIVA_IRQ_ETHCON);
 }
-#endif
 
 /****************************************************************************
  * Function: tiva_interrupt
@@ -2134,11 +2096,9 @@ static void tiva_interrupt_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static int tiva_interrupt(int irq, FAR void *context)
+static int tiva_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct tiva_ethmac_s *priv = &g_tiva_ethmac[0];
-
-#ifdef CONFIG_NET_NOINTS
   uint32_t dmaris;
 
   /* Get the raw interrupt status. */
@@ -2165,20 +2125,10 @@ static int tiva_interrupt(int irq, FAR void *context)
            wd_cancel(priv->txtimeout);
         }
 
-      /* Cancel any pending poll work */
-
-      work_cancel(HPWORK, &priv->work);
-
       /* Schedule to perform the interrupt processing on the worker thread. */
 
-      work_queue(HPWORK, &priv->work, tiva_interrupt_work, priv, 0);
+      work_queue(ETHWORK, &priv->irqwork, tiva_interrupt_work, priv, 0);
     }
-
-#else
-  /* Process the interrupt now */
-
-  tiva_interrupt_process(priv);
-#endif
 
 #ifdef CONFIG_TIVA_PHY_INTERRUPTS
   /* Check for pending PHY interrupts */
@@ -2191,46 +2141,14 @@ static int tiva_interrupt(int irq, FAR void *context)
 
       /* Dispatch to the registered handler */
 
-      if (priv->handler)
+      if (priv->handler != NULL)
         {
-          (void)priv->handler(irq, context);
+          (void)priv->handler(irq, context, priv->arg);
         }
     }
 #endif
 
   return OK;
-}
-
-/****************************************************************************
- * Function: tiva_txtimeout_process
- *
- * Description:
- *   Process a TX timeout.  Called from the either the watchdog timer
- *   expiration logic or from the worker thread, depending upon the
- *   configuration.  The timeout means that the last TX never completed.
- *   Reset the hardware and start again.
- *
- * Parameters:
- *   priv  - Reference to the driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Global interrupts are disabled by the watchdog logic.
- *
- ****************************************************************************/
-
-static inline void tiva_txtimeout_process(FAR struct tiva_ethmac_s *priv)
-{
-  /* Reset the hardware.  Just take the interface down, then back up again. */
-
-  tiva_ifdown(&priv->dev);
-  tiva_ifup(&priv->dev);
-
-  /* Then poll the network for new XMIT data */
-
-  tiva_dopoll(priv);
 }
 
 /****************************************************************************
@@ -2250,19 +2168,21 @@ static inline void tiva_txtimeout_process(FAR struct tiva_ethmac_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_NOINTS
 static void tiva_txtimeout_work(FAR void *arg)
 {
   FAR struct tiva_ethmac_s *priv = (FAR struct tiva_ethmac_s *)arg;
-  net_lock_t state;
 
-  /* Process pending Ethernet interrupts */
+  /* Reset the hardware.  Just take the interface down, then back up again. */
 
-  state = net_lock();
-  tiva_txtimeout_process(priv);
-  net_unlock(state);
+  net_lock();
+  tiva_ifdown(&priv->dev);
+  tiva_ifup(&priv->dev);
+
+  /* Then poll the network for new XMIT data */
+
+  tiva_dopoll(priv);
+  net_unlock();
 }
-#endif
 
 /****************************************************************************
  * Function: tiva_txtimeout_expiry
@@ -2287,9 +2207,8 @@ static void tiva_txtimeout_expiry(int argc, uint32_t arg, ...)
 {
   FAR struct tiva_ethmac_s *priv = (FAR struct tiva_ethmac_s *)arg;
 
-  nlldbg("Timeout!\n");
+  nerr("ERROR: Timeout!\n");
 
-#ifdef CONFIG_NET_NOINTS
   /* Disable further Ethernet interrupts.  This will prevent some race
    * conditions with interrupt work.  There is still a potential race
    * condition with interrupt work that is already queued and in progress.
@@ -2299,42 +2218,31 @@ static void tiva_txtimeout_expiry(int argc, uint32_t arg, ...)
 
   up_disable_irq(TIVA_IRQ_ETHCON);
 
-  /* Cancel any pending poll or interrupt work.  This will have no effect
-   * on work that has already been started.
-   */
-
-  work_cancel(HPWORK, &priv->work);
-
   /* Schedule to perform the TX timeout processing on the worker thread. */
 
-  work_queue(HPWORK, &priv->work, tiva_txtimeout_work, priv, 0);
-
-#else
-  /* Process the timeout now */
-
-  tiva_txtimeout_process(priv);
-#endif
+  work_queue(ETHWORK, &priv->irqwork, tiva_txtimeout_work, priv, 0);
 }
 
 /****************************************************************************
- * Function: tiva_poll_process
+ * Function: tiva_poll_work
  *
  * Description:
- *   Perform the periodic poll.  This may be called either from watchdog
- *   timer logic or from the worker thread, depending upon the configuration.
+ *   Perform periodic polling from the worker thread
  *
  * Parameters:
- *   priv  - Reference to the driver state structure
+ *   arg - The argument passed when work_queue() as called.
  *
  * Returned Value:
- *   None
+ *   OK on success
  *
  * Assumptions:
+ *   Ethernet interrupts are disabled
  *
  ****************************************************************************/
 
-static inline void tiva_poll_process(FAR struct tiva_ethmac_s *priv)
+static void tiva_poll_work(FAR void *arg)
 {
+  FAR struct tiva_ethmac_s *priv = (FAR struct tiva_ethmac_s *)arg;
   FAR struct net_driver_s *dev  = &priv->dev;
 
   /* Check if the next TX descriptor is owned by the Ethernet DMA or CPU.  We
@@ -2348,6 +2256,7 @@ static inline void tiva_poll_process(FAR struct tiva_ethmac_s *priv)
    * CONFIG_TIVA_EMAC_NTXDESC).
    */
 
+  net_lock();
   if ((priv->txhead->tdes0 & EMAC_TDES0_OWN) == 0 &&
        priv->txhead->tdes2 == 0)
     {
@@ -2382,39 +2291,10 @@ static inline void tiva_poll_process(FAR struct tiva_ethmac_s *priv)
 
   /* Setup the watchdog poll timer again */
 
-  (void)wd_start(priv->txpoll, TIVA_WDDELAY, tiva_poll_expiry, 1, (uint32_t)priv);
+  (void)wd_start(priv->txpoll, TIVA_WDDELAY, tiva_poll_expiry,
+                 1, (uint32_t)priv);
+  net_unlock();
 }
-
-/****************************************************************************
- * Function: tiva_poll_work
- *
- * Description:
- *   Perform periodic polling from the worker thread
- *
- * Parameters:
- *   arg - The argument passed when work_queue() as called.
- *
- * Returned Value:
- *   OK on success
- *
- * Assumptions:
- *   Ethernet interrupts are disabled
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_NOINTS
-static void tiva_poll_work(FAR void *arg)
-{
-  FAR struct tiva_ethmac_s *priv = (FAR struct tiva_ethmac_s *)arg;
-  net_lock_t state;
-
-  /* Perform the poll */
-
-  state = net_lock();
-  tiva_poll_process(priv);
-  net_unlock(state);
-}
-#endif
 
 /****************************************************************************
  * Function: tiva_poll_expiry
@@ -2438,31 +2318,9 @@ static void tiva_poll_expiry(int argc, uint32_t arg, ...)
 {
   FAR struct tiva_ethmac_s *priv = (FAR struct tiva_ethmac_s *)arg;
 
-#ifdef CONFIG_NET_NOINTS
-  /* Is our single work structure available?  It may not be if there are
-   * pending interrupt actions.
-   */
+  /* Schedule to perform the interrupt processing on the worker thread. */
 
-  if (work_available(&priv->work))
-    {
-      /* Schedule to perform the interrupt processing on the worker thread. */
-
-      work_queue(HPWORK, &priv->work, tiva_poll_work, priv, 0);
-    }
-  else
-    {
-      /* No.. Just re-start the watchdog poll timer, missing one polling
-       * cycle.
-       */
-
-      (void)wd_start(priv->txpoll, TIVA_WDDELAY, tiva_poll_expiry, 1, (uint32_t)priv);
-    }
-
-#else
-  /* Process the interrupt now */
-
-  tiva_poll_process(priv);
-#endif
+  work_queue(ETHWORK, &priv->pollwork, tiva_poll_work, priv, 0);
 }
 
 /****************************************************************************
@@ -2488,15 +2346,15 @@ static int tiva_ifup(struct net_driver_s *dev)
   int ret;
 
 #ifdef CONFIG_NET_IPv4
-  ndbg("Bringing up: %d.%d.%d.%d\n",
-       dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+  ninfo("Bringing up: %d.%d.%d.%d\n",
+        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
+        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 #endif
 #ifdef CONFIG_NET_IPv6
-  ndbg("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-       dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
-       dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
-       dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
+  ninfo("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+        dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
+        dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
+        dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
 #endif
 
   /* Configure the Ethernet interface for DMA operation. */
@@ -2509,7 +2367,8 @@ static int tiva_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  (void)wd_start(priv->txpoll, TIVA_WDDELAY, tiva_poll_expiry, 1, (uint32_t)priv);
+  (void)wd_start(priv->txpoll, TIVA_WDDELAY, tiva_poll_expiry,
+                 1, (uint32_t)priv);
 
   /* Enable the Ethernet interrupt */
 
@@ -2541,7 +2400,7 @@ static int tiva_ifdown(struct net_driver_s *dev)
   FAR struct tiva_ethmac_s *priv = (FAR struct tiva_ethmac_s *)dev->d_private;
   irqstate_t flags;
 
-  nvdbg("Taking the network down\n");
+  ninfo("Taking the network down\n");
 
   /* Disable the Ethernet interrupt */
 
@@ -2568,37 +2427,6 @@ static int tiva_ifdown(struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: tiva_txavail_process
- *
- * Description:
- *   Perform an out-of-cycle poll.
- *
- * Parameters:
- *   priv - Reference to the NuttX driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Called in normal user mode
- *
- ****************************************************************************/
-
-static inline void tiva_txavail_process(FAR struct tiva_ethmac_s *priv)
-{
-  nvdbg("ifup: %d\n", priv->ifup);
-
-  /* Ignore the notification if the interface is not yet up */
-
-  if (priv->ifup)
-    {
-      /* Poll the network for new XMIT data */
-
-      tiva_dopoll(priv);
-    }
-}
-
-/****************************************************************************
  * Function: tiva_txavail_work
  *
  * Description:
@@ -2615,19 +2443,24 @@ static inline void tiva_txavail_process(FAR struct tiva_ethmac_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_NOINTS
 static void tiva_txavail_work(FAR void *arg)
 {
   FAR struct tiva_ethmac_s *priv = (FAR struct tiva_ethmac_s *)arg;
-  net_lock_t state;
 
-  /* Perform the poll */
+  ninfo("ifup: %d\n", priv->ifup);
 
-  state = net_lock();
-  tiva_txavail_process(priv);
-  net_unlock(state);
+  /* Ignore the notification if the interface is not yet up */
+
+  net_lock();
+  if (priv->ifup)
+    {
+      /* Poll the network for new XMIT data */
+
+      tiva_dopoll(priv);
+    }
+
+  net_unlock();
 }
-#endif
 
 /****************************************************************************
  * Function: tiva_txavail
@@ -2652,33 +2485,17 @@ static int tiva_txavail(struct net_driver_s *dev)
 {
   FAR struct tiva_ethmac_s *priv = (FAR struct tiva_ethmac_s *)dev->d_private;
 
-#ifdef CONFIG_NET_NOINTS
   /* Is our single work structure available?  It may not be if there are
    * pending interrupt actions and we will have to ignore the Tx
    * availability action.
    */
 
-  if (work_available(&priv->work))
+  if (work_available(&priv->pollwork))
     {
       /* Schedule to serialize the poll on the worker thread. */
 
-      work_queue(HPWORK, &priv->work, tiva_txavail_work, priv, 0);
+      work_queue(ETHWORK, &priv->pollwork, tiva_txavail_work, priv, 0);
     }
-
-#else
-  irqstate_t flags;
-
-  /* Disable interrupts because this function may be called from interrupt
-   * level processing.
-   */
-
-  flags = enter_critical_section();
-
-  /* Perform the out-of-cycle poll now */
-
-  tiva_txavail_process(priv);
-  leave_critical_section(flags);
-#endif
 
   return OK;
 }
@@ -2753,7 +2570,7 @@ static int tiva_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
   uint32_t temp;
   uint32_t registeraddress;
 
-  nvdbg("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+  ninfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
         mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
   /* Add the MAC address to the hardware multicast hash table */
@@ -2810,7 +2627,7 @@ static int tiva_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
   uint32_t temp;
   uint32_t registeraddress;
 
-  nvdbg("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+  ninfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
         mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
   /* Remove the MAC address to the hardware multicast hash table */
@@ -3236,7 +3053,7 @@ static int tiva_phyread(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t *valu
         }
     }
 
-  ndbg("MII transfer timed out: phydevaddr: %04x phyregaddr: %04x\n",
+  nerr("ERROR: MII transfer timed out: phydevaddr: %04x phyregaddr: %04x\n",
        phydevaddr, phyregaddr);
 
   return -ETIMEDOUT;
@@ -3295,7 +3112,7 @@ static int tiva_phywrite(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t valu
         }
     }
 
-  ndbg("MII transfer timed out: phydevaddr: %04x phyregaddr: %04x value: %04x\n",
+  nerr("ERROR: MII transfer timed out: phydevaddr: %04x phyregaddr: %04x value: %04x\n",
        phydevaddr, phyregaddr, value);
 
   return -ETIMEDOUT;
@@ -3343,7 +3160,7 @@ static int tiva_phyinit(FAR struct tiva_ethmac_s *priv)
   ret = tiva_phywrite(CONFIG_TIVA_PHYADDR, MII_MCR, MII_MCR_RESET);
   if (ret < 0)
     {
-      ndbg("Failed to reset the PHY: %d\n", ret);
+      nerr("ERROR: Failed to reset the PHY: %d\n", ret);
       return ret;
     }
 
@@ -3359,7 +3176,7 @@ static int tiva_phyinit(FAR struct tiva_ethmac_s *priv)
       ret = tiva_phyread(CONFIG_TIVA_PHYADDR, MII_MSR, &phyval);
       if (ret < 0)
         {
-          ndbg("Failed to read the PHY MSR: %d\n", ret);
+          nerr("ERROR: Failed to read the PHY MSR: %d\n", ret);
           return ret;
         }
       else if ((phyval & MII_MSR_LINKSTATUS) != 0)
@@ -3370,7 +3187,7 @@ static int tiva_phyinit(FAR struct tiva_ethmac_s *priv)
 
   if (timeout >= PHY_RETRY_TIMEOUT)
     {
-      ndbg("Timed out waiting for link status: %04x\n", phyval);
+      nerr("ERROR: Timed out waiting for link status: %04x\n", phyval);
       return -ETIMEDOUT;
     }
 
@@ -3379,7 +3196,7 @@ static int tiva_phyinit(FAR struct tiva_ethmac_s *priv)
   ret = tiva_phywrite(CONFIG_TIVA_PHYADDR, MII_MCR, MII_MCR_ANENABLE);
   if (ret < 0)
     {
-      ndbg("Failed to enable auto-negotiation: %d\n", ret);
+      nerr("ERROR: Failed to enable auto-negotiation: %d\n", ret);
       return ret;
     }
 
@@ -3390,7 +3207,7 @@ static int tiva_phyinit(FAR struct tiva_ethmac_s *priv)
       ret = tiva_phyread(CONFIG_TIVA_PHYADDR, MII_MSR, &phyval);
       if (ret < 0)
         {
-          ndbg("Failed to read the PHY MSR: %d\n", ret);
+          nerr("ERROR: Failed to read the PHY MSR: %d\n", ret);
           return ret;
         }
       else if ((phyval & MII_MSR_ANEGCOMPLETE) != 0)
@@ -3401,7 +3218,7 @@ static int tiva_phyinit(FAR struct tiva_ethmac_s *priv)
 
   if (timeout >= PHY_RETRY_TIMEOUT)
     {
-      ndbg("Timed out waiting for auto-negotiation\n");
+      nerr("ERROR: Timed out waiting for auto-negotiation\n");
       return -ETIMEDOUT;
     }
 
@@ -3410,13 +3227,13 @@ static int tiva_phyinit(FAR struct tiva_ethmac_s *priv)
   ret = tiva_phyread(CONFIG_TIVA_PHYADDR, CONFIG_TIVA_PHYSR, &phyval);
   if (ret < 0)
     {
-      ndbg("Failed to read PHY status register\n");
+      nerr("ERROR: Failed to read PHY status register\n");
       return ret;
     }
 
   /* Remember the selected speed and duplex modes */
 
-  nvdbg("PHYSR[%d]: %04x\n", CONFIG_TIVA_PHYSR, phyval);
+  ninfo("PHYSR[%d]: %04x\n", CONFIG_TIVA_PHYSR, phyval);
 
   /* Different PHYs present speed and mode information in different ways.  IF
    * This CONFIG_TIVA_PHYSR_ALTCONFIG is selected, this indicates that the PHY
@@ -3480,7 +3297,7 @@ static int tiva_phyinit(FAR struct tiva_ethmac_s *priv)
   ret = tiva_phywrite(CONFIG_TIVA_PHYADDR, MII_MCR, phyval);
   if (ret < 0)
     {
-     ndbg("Failed to write the PHY MCR: %d\n", ret);
+     nerr("ERROR: Failed to write the PHY MCR: %d\n", ret);
       return ret;
     }
   up_mdelay(PHY_CONFIG_DELAY);
@@ -3495,9 +3312,9 @@ static int tiva_phyinit(FAR struct tiva_ethmac_s *priv)
 #endif
 #endif
 
-  ndbg("Duplex: %s Speed: %d MBps\n",
-       priv->fduplex ? "FULL" : "HALF",
-       priv->mbps100 ? 100 : 10);
+  ninfo("Duplex: %s Speed: %d MBps\n",
+        priv->fduplex ? "FULL" : "HALF",
+        priv->mbps100 ? 100 : 10);
 
   return OK;
 }
@@ -3599,7 +3416,7 @@ static inline void tiva_phy_initialize(FAR struct tiva_ethmac_s *priv)
 {
   /* Enable the clock to the PHY module */
 
-  nllvdbg("Enable EPHY clocking\n");
+  ninfo("Enable EPHY clocking\n");
   tiva_ephy_enableclk();
 
   /* What until the PREPHY register indicates that the PHY is ready before
@@ -3611,7 +3428,7 @@ static inline void tiva_phy_initialize(FAR struct tiva_ethmac_s *priv)
 
   /* Enable power to the Ethernet PHY */
 
-  nllvdbg("Enable EPHY power\n");
+  ninfo("Enable EPHY power\n");
   tiva_ephy_enablepwr();
 
   /* What until the PREPHY register indicates that the PHY registers are ready
@@ -3621,11 +3438,11 @@ static inline void tiva_phy_initialize(FAR struct tiva_ethmac_s *priv)
   while (!tiva_ephy_periphrdy());
   up_udelay(250);
 
-  nllvdbg("RCGCEPHY: %08x PCEPHY: %08x PREPHY: %08x\n",
-          getreg32(TIVA_SYSCON_RCGCEPHY),
-          getreg32(TIVA_SYSCON_PCEPHY),
-          getreg32(TIVA_SYSCON_PREPHY));
-  nllvdbg("Configure PHY GPIOs\n");
+  ninfo("RCGCEPHY: %08x PCEPHY: %08x PREPHY: %08x\n",
+        getreg32(TIVA_SYSCON_RCGCEPHY),
+        getreg32(TIVA_SYSCON_PCEPHY),
+        getreg32(TIVA_SYSCON_PREPHY));
+  ninfo("Configure PHY GPIOs\n");
 
 #ifdef CONFIG_TIVA_PHY_INTERNAL
   /* Integrated PHY:
@@ -3757,7 +3574,6 @@ static inline void tiva_phy_initialize(FAR struct tiva_ethmac_s *priv)
   tiva_configgpio(GPIO_EN0_RMII_RXD1);
   tiva_configgpio(GPIO_EN0_RMII_TXD0);
   tiva_configgpio(GPIO_EN0_RMII_TXD1);
-  /* tiva_configgpio(GPIO_EN0_RMII_TX_CLK); not needed? */
   tiva_configgpio(GPIO_EN0_RMII_TX_EN);
 
 #endif
@@ -3931,7 +3747,7 @@ static void tiva_macaddress(FAR struct tiva_ethmac_s *priv)
   FAR struct net_driver_s *dev = &priv->dev;
   uint32_t regval;
 
-  nvdbg("%s MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+  ninfo("%s MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
         dev->d_ifname,
         dev->d_mac.ether_addr_octet[0], dev->d_mac.ether_addr_octet[1],
         dev->d_mac.ether_addr_octet[2], dev->d_mac.ether_addr_octet[3],
@@ -3999,7 +3815,7 @@ static void tiva_ipv6multicast(FAR struct tiva_ethmac_s *priv)
   mac[4] = tmp16 & 0xff;
   mac[5] = tmp16 >> 8;
 
-  nvdbg("IPv6 Multicast: %02x:%02x:%02x:%02x:%02x:%02x\n",
+  ninfo("IPv6 Multicast: %02x:%02x:%02x:%02x:%02x:%02x\n",
         mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
   (void)tiva_addmac(dev, mac);
@@ -4129,12 +3945,12 @@ static int tive_emac_configure(FAR struct tiva_ethmac_s *priv)
 
   /* Reset the Ethernet block */
 
-  nvdbg("Reset the Ethernet block\n");
+  ninfo("Reset the Ethernet block\n");
   tiva_ethreset(priv);
 
   /* Initialize the PHY */
 
-  nvdbg("Initialize the PHY\n");
+  ninfo("Initialize the PHY\n");
   ret = tiva_phyinit(priv);
   if (ret < 0)
     {
@@ -4143,7 +3959,7 @@ static int tive_emac_configure(FAR struct tiva_ethmac_s *priv)
 
   /* Initialize the MAC and DMA */
 
-  nvdbg("Initialize the MAC and DMA\n");
+  ninfo("Initialize the MAC and DMA\n");
   ret = tiva_macconfig(priv);
   if (ret < 0)
     {
@@ -4164,7 +3980,7 @@ static int tive_emac_configure(FAR struct tiva_ethmac_s *priv)
 
   /* Enable normal MAC operation */
 
-  nvdbg("Enable normal operation\n");
+  ninfo("Enable normal operation\n");
   return tiva_macenable(priv);
 }
 
@@ -4201,7 +4017,7 @@ int tiva_ethinitialize(int intf)
   struct tiva_ethmac_s *priv;
   uint32_t regval;
 
-  nllvdbg("intf: %d\n", intf);
+  ninfo("intf: %d\n", intf);
 
   /* Get the interface structure associated with this interface number. */
 
@@ -4247,7 +4063,7 @@ int tiva_ethinitialize(int intf)
    *   bringing it a fully functional state.
    */
 
-  nllvdbg("Enable EMAC clocking\n");
+  ninfo("Enable EMAC clocking\n");
   tiva_emac_enablepwr();   /* Ethernet MAC Power Control */
   tiva_emac_enableclk();   /* Ethernet MAC Run Mode Clock Gating Control */
 
@@ -4260,11 +4076,11 @@ int tiva_ethinitialize(int intf)
 
   /* Show all EMAC clocks */
 
-  nllvdbg("RCGCEMAC: %08x PCEMAC: %08x PREMAC: %08x MOSCCTL: %08x\n",
-          getreg32(TIVA_SYSCON_RCGCEMAC),
-          getreg32(TIVA_SYSCON_PCEMAC),
-          getreg32(TIVA_SYSCON_PREMAC),
-          getreg32(TIVA_SYSCON_MOSCCTL));
+  ninfo("RCGCEMAC: %08x PCEMAC: %08x PREMAC: %08x MOSCCTL: %08x\n",
+        getreg32(TIVA_SYSCON_RCGCEMAC),
+        getreg32(TIVA_SYSCON_PCEMAC),
+        getreg32(TIVA_SYSCON_PREMAC),
+        getreg32(TIVA_SYSCON_MOSCCTL));
 
   /* Configure clocking and GPIOs to support the internal/eternal PHY */
 
@@ -4272,7 +4088,7 @@ int tiva_ethinitialize(int intf)
 
   /* Attach the IRQ to the driver */
 
-  if (irq_attach(TIVA_IRQ_ETHCON, tiva_interrupt))
+  if (irq_attach(TIVA_IRQ_ETHCON, tiva_interrupt, NULL))
     {
       /* We could not attach the ISR to the interrupt */
 
@@ -4309,7 +4125,7 @@ int tiva_ethinitialize(int intf)
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
-  nllvdbg("Registering Ethernet device\n");
+  ninfo("Registering Ethernet device\n");
   return netdev_register(&priv->dev, NET_LL_ETHERNET);
 }
 
@@ -4392,26 +4208,25 @@ void up_netinitialize(void)
  *             asserts an interrupt.  Must reside in OS space, but can
  *             signal tasks in user space.  A value of NULL can be passed
  *             in order to detach and disable the PHY interrupt.
+ *   arg     - The argument that will accompany the interrupt
  *   enable  - A function pointer that be unsed to enable or disable the
  *             PHY interrupt.
  *
  * Returned Value:
- *   The previous PHY interrupt handler address is returned.  This allows you
- *   to temporarily replace an interrupt handler, then restore the original
- *   interrupt handler.  NULL is returned if there is was not handler in
- *   place when the call was made.
+ *   Zero (OK) returned on success; a negated errno value is returned on
+ *   failure.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_TIVA_PHY_INTERRUPTS
-xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
+int arch_phy_irq(FAR const char *intf, xcpt_t handler, void *arg,
+                 phy_enable_t *enable)
 {
   struct tiva_ethmac_s *priv;
   irqstate_t flags;
-  xcpt_t oldhandler;
 
   DEBUGASSERT(intf);
-  nvdbg("%s: handler=%p\n", intf, handler);
+  ninfo("%s: handler=%p\n", intf, handler);
 
   /* Get the interface structure associated with this interface. */
 
@@ -4428,10 +4243,10 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
 
   flags = enter_critical_section();
 
-  /* Get the old interrupt handler and save the new one */
+  /* Save the new interrupt handler information */
 
-  oldhandler    = priv->handler;
   priv->handler = handler;
+  priv->arg     = arg;
 
   /* Return with the interrupt disabled in any case */
 
@@ -4444,10 +4259,8 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
       *enable = handler ? tiva_phy_intenable : NULL;
     }
 
-  /* Return the old handler (so that it can be restored) */
-
   leave_critical_section(flags);
-  return oldhandler;
+  return OK;
 }
 #endif /* CONFIG_TIVA_PHY_INTERRUPTS */
 

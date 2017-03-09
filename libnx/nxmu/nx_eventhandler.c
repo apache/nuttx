@@ -53,22 +53,6 @@
 #include "nxcontext.h"
 
 /****************************************************************************
- * Pre-Processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -164,7 +148,7 @@ int nx_eventhandler(NXHANDLE handle)
                 }
               else
                 {
-                  gdbg("mq_receive failed: %d\n", errno);
+                  gerr("ERROR: mq_receive failed: %d\n", errno);
                   return ERROR;
                 }
             }
@@ -177,7 +161,7 @@ int nx_eventhandler(NXHANDLE handle)
   /* Dispatch the message appropriately */
 
   msg = (struct nxsvrmsg_s *)buffer;
-  gvdbg("Received msgid=%d\n", msg->msgid);
+  ginfo("Received msgid=%d\n", msg->msgid);
   switch (msg->msgid)
     {
     case NX_CLIMSG_CONNECTED:
@@ -254,7 +238,8 @@ int nx_eventhandler(NXHANDLE handle)
       break;
 
     default:
-      gdbg("Unrecognized message opcode: %d\n", ((FAR struct nxsvrmsg_s *)buffer)->msgid);
+      gerr("ERROR: Unrecognized message opcode: %d\n",
+           ((FAR struct nxsvrmsg_s *)buffer)->msgid);
       break;
     }
 

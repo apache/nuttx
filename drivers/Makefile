@@ -66,15 +66,16 @@ include net$(DELIM)Make.defs
 include pipes$(DELIM)Make.defs
 include power$(DELIM)Make.defs
 include sensors$(DELIM)Make.defs
-include sercomm$(DELIM)Make.defs
 include serial$(DELIM)Make.defs
 include spi$(DELIM)Make.defs
 include syslog$(DELIM)Make.defs
 include timers$(DELIM)Make.defs
 include usbdev$(DELIM)Make.defs
 include usbhost$(DELIM)Make.defs
+include usbmonitor$(DELIM)Make.defs
 include video$(DELIM)Make.defs
 include wireless$(DELIM)Make.defs
+include contactless$(DELIM)Make.defs
 
 ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
   CSRCS += dev_null.c dev_zero.c
@@ -97,7 +98,13 @@ endif
 ifeq ($(CONFIG_PWM),y)
   CSRCS += pwm.c
 endif
+
+ifeq ($(CONFIG_DEV_URANDOM),y)
+ifneq ($(CONFIG_DEV_URANDOM_ARCH),y)
+  CSRCS += dev_urandom.c
 endif
+endif
+endif # CONFIG_NFILE_DESCRIPTORS != 0
 
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 COBJS = $(CSRCS:.c=$(OBJEXT))

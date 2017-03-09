@@ -3,7 +3,7 @@
  *
  * Based on onfigs/lpcexpresso-lpc1768/lpc17_pwm.c
  *
- *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,7 @@
 #include <debug.h>
 
 #include <nuttx/board.h>
-#include <nuttx/pwm.h>
+#include <nuttx/drivers/pwm.h>
 
 #include <arch/board/board.h>
 
@@ -67,23 +67,18 @@ FAR struct pwm_lowerhalf_s *lpc17_mcpwminitialize(int timer);
 FAR struct pwm_lowerhalf_s *lpc17_timerinitialize(int timer);
 
 /************************************************************************************
- * Private Functions
- ************************************************************************************/
-
-/************************************************************************************
  * Public Functions
  ************************************************************************************/
 
 /************************************************************************************
- * Name: board_pwm_setup
+ * Name: mbed_pwm_setup
  *
  * Description:
- *   All LPC17 architectures must provide the following interface to work with
- *   examples/pwm.
+ *   Initialize PWM and register the PWM device.
  *
  ************************************************************************************/
 
-int board_pwm_setup(void)
+int mbed_pwm_setup(void)
 {
   static bool initialized = false;
   struct pwm_lowerhalf_s *pwm;
@@ -100,7 +95,7 @@ int board_pwm_setup(void)
       pwm = lpc17_pwminitialize(0);
       if (!pwm)
         {
-          adbg("Failed to get the LPC17XX PWM lower half\n");
+          aerr("ERROR: Failed to get the LPC17XX PWM lower half\n");
           return -ENODEV;
         }
 
@@ -109,14 +104,14 @@ int board_pwm_setup(void)
       ret = pwm_register("/dev/pwm0", pwm);
       if (ret < 0)
         {
-          adbg("pwm_register failed: %d\n", ret);
+          aerr("ERROR: pwm_register failed: %d\n", ret);
           return ret;
         }
 
       mcpwm = lpc17_mcpwminitialize(0);
       if (!mcpwm)
         {
-          adbg("Failed to get the LPC17XX MOTOR PWM lower half\n");
+          aerr("ERROR: Failed to get the LPC17XX MOTOR PWM lower half\n");
           return -ENODEV;
         }
 
@@ -125,14 +120,14 @@ int board_pwm_setup(void)
       ret = pwm_register("/dev/mcpwm0", mcpwm);
       if (ret < 0)
         {
-          adbg("mcpwm_register failed: %d\n", ret);
+          aerr("ERROR: mcpwm_register failed: %d\n", ret);
           return ret;
         }
 
       timer = lpc17_timerinitialize(0);
       if (!timer)
         {
-          adbg("Failed to get the LPC17XX TIMER lower half\n");
+          aerr("ERROR: Failed to get the LPC17XX TIMER lower half\n");
           return -ENODEV;
         }
 
@@ -141,7 +136,7 @@ int board_pwm_setup(void)
       ret = pwm_register("/dev/timer0", timer);
       if (ret < 0)
         {
-          adbg("timer_register failed: %d\n", ret);
+          aerr("ERROR: timer_register failed: %d\n", ret);
           return ret;
         }
 

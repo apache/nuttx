@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/stm32f4discovery/src/stm32_ethernet.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,8 +42,8 @@
 /* Force verbose debug on in this file only to support unit-level testing. */
 
 #ifdef CONFIG_NETDEV_PHY_DEBUG
-#  undef  CONFIG_DEBUG_VERBOSE
-#  define CONFIG_DEBUG_VERBOSE 1
+#  undef  CONFIG_DEBUG_INFO
+#  define CONFIG_DEBUG_INFO 1
 #  undef  CONFIG_DEBUG_NET
 #  define CONFIG_DEBUG_NET 1
 #endif
@@ -79,11 +79,13 @@
  */
 
 #ifdef CONFIG_NETDEV_PHY_DEBUG
-#  define phydbg    dbg
-#  define phylldbg  lldbg
+#  define phyerr    _err
+#  define phywarn   _warn
+#  define phyinfo   _info
 #else
-#  define phydbg(x...)
-#  define phylldbg(x...)
+#  define phyerr(x...)
+#  define phywarn(x...)
+#  define phyinfo(x...)
 #endif
 
 /************************************************************************************
@@ -92,6 +94,7 @@
 
 #ifdef HAVE_NETMONITOR
 static xcpt_t g_ethmac_handler;
+static void  *g_ethmac_arg;
 #endif
 
 /************************************************************************************
@@ -105,18 +108,20 @@ static xcpt_t g_ethmac_handler;
 #ifdef HAVE_NETMONITOR
 static void stm32_emac0_phy_enable(bool enable)
 {
-  phydbg("enable=%d\n", enable);
+  phyinfo("enable=%d\n", enable);
   if (enable && g_ethmac_handler != NULL)
     {
       /* Attach and enable GPIO interrupt (and event) on the falling edge */
 
-      (void)stm32_gpiosetevent(GPIO_EMAC_NINT, false, true, true, g_ethmac_handler);
+      (void)stm32_gpiosetevent(GPIO_EMAC_NINT, false, true, true,
+                               g_ethmac_handler, g_ethmac_arg);
     }
   else
     {
       /* Detach and disable GPIO interrupt */
 
-      (void)stm32_gpiosetevent(GPIO_EMAC_NINT, false, false, false, NULL);
+      (void)stm32_gpiosetevent(GPIO_EMAC_NINT, false, false, false,
+                               NULL, NULL);
     }
 }
 #endif
@@ -138,7 +143,7 @@ void weak_function stm32_netinitialize(void)
 #ifdef HAVE_NETMONITOR
   /* Configure the PHY interrupt GPIO */
 
-  phydbg("Configuring %08x\n", GPIO_EMAC_NINT);
+  phyinfo("Configuring %08x\n", GPIO_EMAC_NINT);
   stm32_configgpio(GPIO_EMAC_NINT);
 #endif
 
@@ -199,41 +204,40 @@ void weak_function stm32_netinitialize(void)
  *             asserts an interrupt.  Must reside in OS space, but can
  *             signal tasks in user space.  A value of NULL can be passed
  *             in order to detach and disable the PHY interrupt.
+ *   arg     - The argument that will accompany the interrupt
  *   enable  - A function pointer that be unsed to enable or disable the
  *             PHY interrupt.
  *
  * Returned Value:
- *   The previous PHY interrupt handler address is returned.  This allows you
- *   to temporarily replace an interrupt handler, then restore the original
- *   interrupt handler.  NULL is returned if there is was not handler in
- *   place when the call was made.
+ *   Zero (OK) returned on success; a negated errno value is returned on
+ *   failure.
  *
  ****************************************************************************/
 
 #ifdef HAVE_NETMONITOR
-xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
+int arch_phy_irq(FAR const char *intf, xcpt_t handler, void *arg,
+                 phy_enable_t *enable)
 {
   phy_enable_t enabler;
-  xcpt_t oldhandler;
   irqstate_t flags;
 
-  nvdbg("%s: handler=%p\n", intf, handler);
-  phydbg("ETHMAC: devname=%s\n", STM32_ETHMAC_DEVNAME);
+  ninfo("%s: handler=%p\n", intf, handler);
+  phyinfo("ETHMAC: devname=%s\n", STM32_ETHMAC_DEVNAME);
 
   DEBUGASSERT(intf);
 
-  flags      = enter_critical_section();
-  oldhandler = g_ethmac_handler;
+  flags = enter_critical_section();
 
   if (strcmp(intf, STM32_ETHMAC_DEVNAME) == 0)
     {
-      phydbg("Select ETHMAC\n");
+      phyinfo("Select ETHMAC\n");
       g_ethmac_handler = handler;
+      g_ethmac_arg     = arg;
       enabler          = stm32_emac0_phy_enable;
     }
   else
     {
-      ndbg("Unsupported interface: %s\n", intf);
+      nerr("ERROR: Unsupported interface: %s\n", intf);
       enabler          = NULL;
     }
 
@@ -243,7 +247,7 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
     }
 
   leave_critical_section(flags);
-  return oldhandler;
+  return OK;
 }
 #endif
 

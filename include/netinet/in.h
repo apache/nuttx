@@ -80,6 +80,7 @@
 #define IPPROTO_COMP          108  /* Compression Header protocol */
 #define IPPROTO_SCTP          132  /* Stream Control Transport Protocol */
 #define IPPROTO_UDPLITE       136  /* UDP-Lite (RFC 3828) */
+#define IPPROTO_MPLS          137  /* MPLS in IP (RFC 4023) */
 #define IPPROTO_RAW           255  /* Raw IP packets */
 
 /* Values used with SIOCSIFMCFILTER and SIOCGIFMCFILTER ioctl's */

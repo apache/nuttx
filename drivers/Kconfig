@@ -29,6 +29,61 @@ config DEV_RANDOM
 	bool "Enable /dev/random"
 	default y
 	depends on ARCH_HAVE_RNG
+	---help---
+		Enable support for /dev/urandom provided by a hardware TRNG.
+
+config DEV_URANDOM
+	bool "Enable /dev/urandom"
+	default n
+	---help---
+		Enable support for /dev/urandom provided by either a hardware TRNG or
+		by a software PRNG implementation.
+
+		NOTE:  This option may not be cryptographially secure and should not
+		be enabled if you are concerned about cyptographically secure
+		pseudo-random numbers (CPRNG) and do not know the characteristics
+		of the software PRNG impelementation!
+
+if DEV_URANDOM
+
+choice
+	prompt "/dev/urandom algorithm"
+	default DEV_URANDOM_ARCH if ARCH_HAVE_RNG
+	default DEV_URANDOM_XORSHIFT128 if !ARCH_HAVE_RNG
+
+config DEV_URANDOM_XORSHIFT128
+	bool "xorshift128"
+	---help---
+		xorshift128 is a pseudorandom number generator that is simple,
+		portable, and can also be used on 8-bit and 16-bit MCUs.
+
+		NOTE: Not cyptographically secure
+
+config DEV_URANDOM_CONGRUENTIAL
+	bool "Conguential"
+	---help---
+		Use the same congruential general used with srand().  This algorithm
+		is computationally more intense and uses double precision floating
+		point.  NOTE: Good randomness from the congruential generator also
+		requires that you also select CONFIG_LIB_RAND_ORDER > 2
+
+		NOTE: Not cyptographically secure
+
+config DEV_URANDOM_ARCH
+	bool "Architecture-specific"
+	depends on ARCH_HAVE_RNG
+	---help---
+		The implementation of /dev/urandom is provided in archtecture-
+		specific logic using hardware TRNG logic.  architecture-specific
+		logic must provide the whole implementation in this case, including
+		the function devurandom_register().  In this case, /dev/urandom may
+		refer to the same driver as /dev/random.
+
+		NOTE: May or may not be cyptographically secure, depending upon the
+		implementation.
+
+endchoice # /dev/urandom algorithm
+endif # DEV_URANDOM
 
 source drivers/loop/Kconfig
 
@@ -86,14 +141,14 @@ config RAMDISK
 	---help---
 		Can be used to set up a block of memory or (read-only) FLASH as
 		a block driver that can be mounted as a files system.  See
-		include/nuttx/fs/ramdisk.h.
+		include/nuttx/drivers/ramdisk.h.
 
 menuconfig CAN
 	bool "CAN Driver Support"
 	default n
 	---help---
 		This selection enables building of the "upper-half" CAN driver.
-		See include/nuttx/can.h for further CAN driver information.
+		See include/nuttx/drivers/can.h for further CAN driver information.
 
 if CAN
 
@@ -208,6 +263,14 @@ config CAN_LOOPBACK
 		driver does support loopback mode, the setting will enable it. (If the
 		driver does not, this setting will have no effect).
 
+config CAN_NPOLLWAITERS
+	int "Number of poll waiters"
+	default 2
+	depends on !DISABLE_POLL
+	---help---
+		The maximum number of threads that may be waiting on the
+		poll method.
+
 endif # CAN
 
 config ARCH_HAVE_PWM_PULSECOUNT
@@ -223,7 +286,7 @@ menuconfig PWM
 	default n
 	---help---
 		This selection enables building of the "upper-half" PWM driver.
-		See include/nuttx/pwm.h for further PWM driver information.
+		See include/nuttx/drivers/pwm.h for further PWM driver information.
 
 if PWM
 
@@ -250,7 +313,7 @@ if PWM_MULTICHAN
 config PWM_NCHANNELS
 	int "Number of Output Channels Per Timer"
 	default 1
-	range 1 4
+	range 1 6
 	---help---
 		Specifies the number of output channels per timer.  Each timer
 		may support fewer output channels than this value.
@@ -274,17 +337,7 @@ if I2C
 source drivers/i2c/Kconfig
 endif
 
-menuconfig SPI
-	bool "SPI Driver Support"
-	default n
-	---help---
-		This selection enables selection of common SPI options.  This option
-		should be enabled by all platforms that support SPI interfaces.
-		See include/nuttx/spi/spi.h for further SPI driver information.
-
-if SPI
 source drivers/spi/Kconfig
-endif
 
 menuconfig I2S
 	bool "I2S Driver Support"
@@ -343,8 +396,8 @@ menuconfig BCH
 	---help---
 		Contains logic that may be used to convert a block driver into
 		a character driver.  This is the complementary conversion as that
-		performed by loop.c.  See include/nuttx/fs/fs.h for registration
-		information.
+		performed by loop.c.  See include/nuttx/drivers/drivers.h for
+		registration information.
 
 if BCH
 source drivers/bch/Kconfig
@@ -362,17 +415,7 @@ if INPUT
 source drivers/input/Kconfig
 endif # INPUT
 
-menuconfig IOEXPANDER
-	bool "IO Expander Support"
-	default n
-	---help---
-		This directory holds implementations of IO expander drivers.
-		See include/nuttx/ioexpander/ioexpander.h for registration information.
-
-if IOEXPANDER
 source drivers/ioexpander/Kconfig
-endif # IOEXPANDER
-
 source drivers/lcd/Kconfig
 source drivers/leds/Kconfig
 
@@ -468,23 +511,6 @@ if SENSORS
 source drivers/sensors/Kconfig
 endif # SENSORS
 
-menuconfig SERCOMM_CONSOLE
-	bool "Osmocom-bb Sercomm Driver Support"
-	default n
-	---help---
-		Sercomm is the transport used by osmocom-bb that runs on top of serial.
-		See http://bb.osmocom.org/trac/wiki/nuttx-bb/run for detailed the usage
-		of nuttx with sercomm.
-
-		drivers/sercomm is only built if SERCOMM_CONSOLE in the NuttX
-		configuration file.  If you attempt to build this driver without
-		osmocom-bb, you will get compilation errors because of header files
-		that are needed from the osmocom-bb.
-
-if SERCOMM_CONSOLE
-source drivers/sercomm/Kconfig
-endif # SERCOMM_CONSOLE
-
 menuconfig SERIAL
 	bool "Serial Driver Support"
 	default y
@@ -517,6 +543,24 @@ if USBHOST
 source drivers/usbhost/Kconfig
 endif # USBHOST
 
+config HAVE_USBTRACE
+	bool
+	default n
+
+menuconfig USBMONITOR
+	bool "USB Monitor"
+	default n
+	depends on HAVE_USBTRACE
+	---help---
+		If USB device tracing (USBDEV_TRACE) AND/OR USB host tracing
+		(USBHOST_TRACE) are enabled then this option will select the USB
+		monitor.  The USB monitor is a daemon that will periodically collect
+		the buffered USB trace data and dump it to the SYSLOG device.
+
+if USBMONITOR
+source drivers/usbmonitor/Kconfig
+endif # USBMONITOR
+
 menuconfig DRIVERS_WIRELESS
 	bool "Wireless Device Support"
 	default n
@@ -525,6 +569,12 @@ menuconfig DRIVERS_WIRELESS
 
 source drivers/wireless/Kconfig
 
-comment "System Logging Device Options"
+menuconfig DRIVERS_CONTACTLESS
+	bool "Contactless Device Support"
+	default n
+	---help---
+		Drivers for various contactless devices.
+
+source drivers/contactless/Kconfig
 
 source drivers/syslog/Kconfig

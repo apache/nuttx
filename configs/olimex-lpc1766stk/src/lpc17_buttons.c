@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/olimex-lpc1766stk/src/lpc17_buttons.c
  *
- *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -70,13 +70,7 @@ static const uint16_t g_buttoncfg[BOARD_NUM_BUTTONS] =
   LPC1766STK_UP,   LPC1766STK_DOWN, LPC1766STK_LEFT,   LPC1766STK_RIGHT
 };
 
-/* This array defines all of the interrupt handlers current attached to
- * button events.
- */
-
-#if defined(CONFIG_ARCH_IRQBUTTONS) && defined(CONFIG_GPIO_IRQ)
-static xcpt_t g_buttonisr[BOARD_NUM_BUTTONS];
-
+#if defined(CONFIG_ARCH_IRQBUTTONS) && defined(CONFIG_LPC17_GPIOIRQ)
 /* This array provides the mapping from button ID numbers to button IRQ
  * numbers.
  */
@@ -171,8 +165,7 @@ uint8_t board_buttons(void)
  *   be called when a button is depressed or released.  The ID value is a
  *   button enumeration value that uniquely identifies a button resource. See the
  *   BOARD_BUTTON_* and BOARD_JOYSTICK_* definitions in board.h for the meaning
- *   of enumeration values.  The previous interrupt handler address is returned
- *   (so that it may restored, if so desired).
+ *   of enumeration values.
  *
  *   Note that board_button_irq() also enables button interrupts.  Button
  *   interrupts will remain enabled after the interrupt handler is attached.
@@ -181,10 +174,9 @@ uint8_t board_buttons(void)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_IRQBUTTONS) && defined(CONFIG_GPIO_IRQ)
-xcpt_t board_button_irq(int id, xcpt_t irqhandler)
+#if defined(CONFIG_ARCH_IRQBUTTONS) && defined(CONFIG_LPC17_GPIOIRQ)
+int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
-  xcpt_t oldhandler = NULL;
   irqstate_t flags;
   int irq;
 
@@ -192,11 +184,6 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
 
   if ((unsigned)id < BOARD_NUM_BUTTONS)
     {
-      /* Return the current button handler and set the new interrupt handler */
-
-      oldhandler      = g_buttonisr[id];
-      g_buttonisr[id] = irqhandler;
-
       /* Disable interrupts until we are done */
 
       flags = enter_critical_section();
@@ -210,7 +197,7 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
         {
           /* Attach then enable the new interrupt handler */
 
-          (void)irq_attach(irq, irqhandler);
+          (void)irq_attach(irq, irqhandler, arg);
           up_enable_irq(irq);
         }
       else
@@ -220,9 +207,11 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
           up_disable_irq(irq);
           (void)irq_detach(irq);
         }
+
       leave_critical_section(flags);
     }
-  return oldhandler;
+
+  return OK;
 }
 #endif
 

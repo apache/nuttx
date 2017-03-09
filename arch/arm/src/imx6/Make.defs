@@ -62,10 +62,6 @@ CMN_ASRCS += arm_testset.S
 CMN_ASRCS += cp15_coherent_dcache.S cp15_invalidate_dcache.S
 CMN_ASRCS += cp15_clean_dcache.S cp15_flush_dcache.S cp15_invalidate_dcache_all.S
 
-ifeq ($(CONFIG_ARCH_MEMCPY),y)
-CMN_ASRCS += arm_memcpy.S
-endif
-
 # Common C source files
 
 CMN_CSRCS  = up_initialize.c up_idle.c up_interruptcontext.c up_exit.c
@@ -81,9 +77,10 @@ CMN_CSRCS += arm_unblocktask.c arm_undefinedinsn.c
 
 ifeq ($(CONFIG_SMP),y)
 CMN_CSRCS += arm_cpuindex.c arm_cpustart.c arm_cpupause.c arm_cpuidlestack.c
+CMN_CSRCS += arm_scu.c
 endif
 
-ifeq ($(CONFIG_DEBUG_IRQ),y)
+ifeq ($(CONFIG_DEBUG_IRQ_INFO),y)
 CMN_CSRCS += arm_gicv2_dump.c
 endif
 
@@ -123,9 +120,9 @@ endif
 endif
 
 ifeq ($(CONFIG_ELF),y)
-CMN_CSRCS += arm_elf.c arm_coherent_dcache.c
+CMN_CSRCS += arm_coherent_dcache.c
 else ifeq ($(CONFIG_MODULE),y)
-CMN_CSRCS += arm_elf.c arm_coherent_dcache.c
+CMN_CSRCS += arm_coherent_dcache.c
 endif
 
 ifeq ($(CONFIG_ARCH_FPU),y)

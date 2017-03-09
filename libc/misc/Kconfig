@@ -1,0 +1,104 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config LIBC_IOCTL_VARIADIC
+	bool "Enable variadic ioctl()"
+	default n
+	---help---
+		By default, NuttX implements the "old style," three-parameter,
+		ioctl() interface with this function prototype:
+
+			int ioctl(int fd, int req, unsigned long arg);
+
+		That function is implemented as part of the VFS.  If
+		LIBC_IOCTL_VARIADIC is selected, then an additional compatibility
+		layer will be provided in the C library.  The enabled, then function
+		prototype will become:
+
+			int ioctl(int fd, int req, ...);
+
+		The ioctl() is not controlled by any standard so it is really
+		arbitrary which format you used.  You may select the variadic
+		function prototype with this option.  That will slightly increase
+		code size and ioctl() processing time.  It will not support a
+		variable number of arguments and it still always expects to see a
+		third argument of type 'unsigned long'.  The only benefit of this
+		alternative function signature is that it may provide greater
+		compatibility if you are porting code from other platforms that use
+		the variadic ioctl() function.
+
+		WARNING:  Use of this option could cause subtle system errors is
+		the third argument is omitted or if the sizeof the thread argument
+		is anything other than sizeof (unsigned long).  Most small integers
+		will be promoted to 'int'.  The following assertion appears in ioctl():
+
+			DEBUGASSERT(sizeof(int)        == sizeof(unsigned long) &&
+			            sizeof(FAR void *) == sizeof(unsigned long));
+
+		Do not enable this option if the above is not true.  32-bit ARM
+		should pass this test with all three types having sizeof(type) == 4
+		bytes.  'float' should also be tested.  But 'long long' and 'double'
+		are out of the question!  Don't event try to pass them.
+
+		And what will happen if no third argument is passed?  In most cases,
+		this should just result in a garbage value for arg.  But you may
+		discover cases where something worse happens!
+
+config LIB_SENDFILE_BUFSIZE
+	int "sendfile() buffer size"
+	default 512
+	---help---
+		Size of the I/O buffer to allocate in sendfile().  Default: 512b
+
+comment "Non-standard Library Support"
+
+config LIB_CRC64_FAST
+	bool "Fast CRC64"
+	default n
+	---help---
+		Enable the CRC64 lookup table to compute the CRC64 faster.
+
+config LIB_KBDCODEC
+	bool "Keyboard CODEC"
+	default n
+	---help---
+		In NuttX, a keyboard/keypad driver is simply a character driver that
+		may have an (optional) encoding/decoding layer on the data returned
+		by the character driver. A keyboard may return simple text data
+		(alphabetic, numeric, and punctuaction) or control characters
+		(enter, control-C, etc.).  However, in addition, most keyboards
+		support actions that cannot be represented as text data. Such
+		actions include things like cursor controls (home, up arrow,
+		page down, etc.), editing functions (insert, delete, etc.), volume
+		controls, (mute, volume up, etc.) and other special functions.
+		Some special encoding may be required to multiplex these two classes
+		of data.
+
+		This option enables the functions that implement the encoding and
+		decoding of keyboard data.  These are the interfaces prototyped in
+		include/nuttx/input/kbd_codec.h.  While not correctly a part of
+		the C library, it is included here because the decoding side of this
+		interface must be accessible by end user programs.
+
+config LIB_SLCDCODEC
+	bool "Segment LCD CODEC"
+	default n
+	---help---
+		In NuttX, a character-oriented, segment LCD (SLCD) driver is simply
+		a character device that may have an (optional) encoding/decoding
+		layer on the data provided to the SLCD driver.  The application may
+		provide simple text data (alphabetic, numeric, and punctuaction) or
+		control characters (enter, control-C, etc.).  However, in addition,
+		most SLCDs support actions that cannot be represented as text data.
+		Such actions include things like cursor controls (home, up arrow,
+		page down, etc.) and other special functions (e.g., blinking).  Some
+		special encoding may be required to multiplex these two classes of
+		data.
+
+		This option enables the functions that implement the encoding and
+		decoding of SLCD data.  These are the interfaces prototyped in
+		include/nuttx/lcd/slcd_codec.h.  While not correctly a part of the C
+		library, it is included here because the encoding side of this
+		interface must be accessible by end user programs.

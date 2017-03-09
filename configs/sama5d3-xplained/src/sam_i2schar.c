@@ -99,7 +99,7 @@ int i2schar_devinit(void)
       i2s = sam_ssc_initialize(CONFIG_SAMA5D3XPLAINED_SSC_PORT);
       if (!i2s)
         {
-          dbg("ERROR: Failed to get the SAMA5 SSC/I2S driver for SSC%d\n",
+          _err("ERROR: Failed to get the SAMA5 SSC/I2S driver for SSC%d\n",
               CONFIG_SAMA5D3XPLAINED_SSC_PORT);
           return -ENODEV;
         }
@@ -109,7 +109,7 @@ int i2schar_devinit(void)
       ret = i2schar_register(i2s, CONFIG_SAMA5D3XPLAINED_I2SCHAR_MINOR);
       if (ret < 0)
         {
-          adbg("ERROR: i2schar_register failed: %d\n", ret);
+          aerr("ERROR: i2schar_register failed: %d\n", ret);
           return ret;
         }
 

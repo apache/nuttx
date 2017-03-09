@@ -60,7 +60,6 @@
 	.cpu	cortex-r4f
 #endif
 	.syntax	unified
-	.file	"arm_fullcontextrestore.S"
 
 /****************************************************************************
  * Public Functions
@@ -157,20 +156,11 @@ up_fullcontextrestore:
 	 */
 
 	ldr		r1, [r0, #(4*REG_CPSR)]	/* Fetch the stored CPSR value */
-	msr		cpsr, r1				/* Set the CPSR */
+	msr		spsr_cxsf, r1				/* Set the SPSR */
 
-	/* Now recover r0 and r1 */
+	/* Now recover r0-r1, pc and cpsr, destroying the stack frame */
 
-	ldr		r0, [sp]
-	ldr		r1, [sp, #4]
-	add		sp, sp, #(2*4)
-
-	/* Then return to the address at the stop of the stack,
-	 * destroying the stack frame
-	 */
-
-	ldr		pc, [sp], #4
-
+	ldmia		sp!, {r0-r1, pc}^
 #endif
 
 	.size up_fullcontextrestore, . - up_fullcontextrestore

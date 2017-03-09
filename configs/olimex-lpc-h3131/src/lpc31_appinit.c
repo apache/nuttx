@@ -46,8 +46,8 @@
 
 #include <nuttx/board.h>
 
-#ifdef CONFIG_SYSTEM_USBMONITOR
-#  include <apps/usbmonitor.h>
+#ifdef CONFIG_USBMONITOR
+#  include <nuttx/usb/usbmonitor.h>
 #endif
 
 #include "lpc31.h"
@@ -137,7 +137,7 @@ int board_app_initialize(uintptr_t arg)
   /* Start the USB Monitor */
 
   syslog(LOG_ERR, "ERROR: Failed to start the USB monitor\n");
-  ret = usbmonitor_start(0, NULL);
+  ret = usbmonitor_start();
   if (ret != OK)
     {
       syslog(LOG_ERR, "ERROR: Failed to start USB monitor: %d\n", ret);

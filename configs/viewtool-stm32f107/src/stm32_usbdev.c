@@ -118,7 +118,7 @@ int stm32_usbpullup(FAR struct usbdev_s *dev, bool enable)
 
 void stm32_usbsuspend(FAR struct usbdev_s *dev, bool resume)
 {
-  ulldbg("resume: %d\n", resume);
+  uinfo("resume: %d\n", resume);
 }
 
 #endif /* CONFIG_STM32_OTGFS || CONFIG_STM32_USB*/

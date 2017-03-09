@@ -73,8 +73,8 @@
  *   When SPI_SELECT is called with devid=SPIDEV_MUX.
  *
  * Other settings that effect the driver:
- *   CONFIG_DEBUG_SPI -- With CONFIG_DEBUG and CONFIG_DEBUG_VERBOSE,
- *     this will enable debug output from the PGA117 driver.
+ *   CONFIG_DEBUG_SPI_ERR/WARN/INFO -- This will enable debug output from
+ *   the PGA117 driver.
  */
 
 #ifndef CONFIG_PGA11X_SPIFREQUENCY

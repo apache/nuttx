@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/sama5d4-ek/src/sam_adc.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,31 +51,18 @@
 #ifdef CONFIG_ADC
 
 /************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-
-/************************************************************************************
- * Private Data
- ************************************************************************************/
-
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
-
-/************************************************************************************
  * Public Functions
  ************************************************************************************/
 
 /************************************************************************************
- * Name: board_adc_setup
+ * Name: sam_adc_setup
  *
  * Description:
- *   All STM32 architectures must provide the following interface to work with
- *   examples/adc.
+ *   Initialize ADC and register the ADC driver.
  *
  ************************************************************************************/
 
-int board_adc_setup(void)
+int sam_adc_setup(void)
 {
 #ifdef CONFIG_SAMA5_ADC
   static bool initialized = false;
@@ -91,7 +78,7 @@ int board_adc_setup(void)
       adc = sam_adc_initialize();
       if (adc == NULL)
         {
-          adbg("ERROR: Failed to get ADC interface\n");
+          aerr("ERROR: Failed to get ADC interface\n");
           return -ENODEV;
         }
 
@@ -100,7 +87,7 @@ int board_adc_setup(void)
       ret = adc_register("/dev/adc0", adc);
       if (ret < 0)
         {
-          adbg("adc_register failed: %d\n", ret);
+          aerr("ERROR: adc_register failed: %d\n", ret);
           return ret;
         }
 

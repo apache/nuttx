@@ -94,10 +94,6 @@ volatile uint32_t *g_current_regs[1];
 extern uint32_t _vectors[];
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -109,44 +105,46 @@ extern uint32_t _vectors[];
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_IRQ)
+#if defined(CONFIG_DEBUG_IRQ_INFO)
 static void efm32_dumpnvic(const char *msg, int irq)
 {
   irqstate_t flags;
 
   flags = enter_critical_section();
-  lldbg("NVIC (%s, irq=%d):\n", msg, irq);
-  lldbg("  INTCTRL:    %08x VECTAB:  %08x\n",
-        getreg32(NVIC_INTCTRL), getreg32(NVIC_VECTAB));
-  lldbg("  SYSH ENABLE MEMFAULT: %08x BUSFAULT: %08x USGFAULT: %08x SYSTICK: %08x\n",
-        getreg32(NVIC_SYSHCON_MEMFAULTENA), getreg32(NVIC_SYSHCON_BUSFAULTENA),
-        getreg32(NVIC_SYSHCON_USGFAULTENA), getreg32(NVIC_SYSTICK_CTRL_ENABLE));
-  lldbg("  IRQ ENABLE: %08x %08x %08x\n",
-        getreg32(NVIC_IRQ0_31_ENABLE), getreg32(NVIC_IRQ32_63_ENABLE),
-        getreg32(NVIC_IRQ64_95_ENABLE));
-  lldbg("  SYSH_PRIO:  %08x %08x %08x\n",
-        getreg32(NVIC_SYSH4_7_PRIORITY), getreg32(NVIC_SYSH8_11_PRIORITY),
-        getreg32(NVIC_SYSH12_15_PRIORITY));
-  lldbg("  IRQ PRIO:   %08x %08x %08x %08x\n",
-        getreg32(NVIC_IRQ0_3_PRIORITY), getreg32(NVIC_IRQ4_7_PRIORITY),
-        getreg32(NVIC_IRQ8_11_PRIORITY), getreg32(NVIC_IRQ12_15_PRIORITY));
-  lldbg("              %08x %08x %08x %08x\n",
-        getreg32(NVIC_IRQ16_19_PRIORITY), getreg32(NVIC_IRQ20_23_PRIORITY),
-        getreg32(NVIC_IRQ24_27_PRIORITY), getreg32(NVIC_IRQ28_31_PRIORITY));
+
+  irqinfo("NVIC (%s, irq=%d):\n", msg, irq);
+  irqinfo("  INTCTRL:    %08x VECTAB:  %08x\n",
+          getreg32(NVIC_INTCTRL), getreg32(NVIC_VECTAB));
+  irqinfo("  SYSH ENABLE MEMFAULT: %08x BUSFAULT: %08x USGFAULT: %08x SYSTICK: %08x\n",
+          getreg32(NVIC_SYSHCON_MEMFAULTENA), getreg32(NVIC_SYSHCON_BUSFAULTENA),
+          getreg32(NVIC_SYSHCON_USGFAULTENA), getreg32(NVIC_SYSTICK_CTRL_ENABLE));
+  irqinfo("  IRQ ENABLE: %08x %08x %08x\n",
+          getreg32(NVIC_IRQ0_31_ENABLE), getreg32(NVIC_IRQ32_63_ENABLE),
+          getreg32(NVIC_IRQ64_95_ENABLE));
+  irqinfo("  SYSH_PRIO:  %08x %08x %08x\n",
+          getreg32(NVIC_SYSH4_7_PRIORITY), getreg32(NVIC_SYSH8_11_PRIORITY),
+          getreg32(NVIC_SYSH12_15_PRIORITY));
+  irqinfo("  IRQ PRIO:   %08x %08x %08x %08x\n",
+          getreg32(NVIC_IRQ0_3_PRIORITY), getreg32(NVIC_IRQ4_7_PRIORITY),
+          getreg32(NVIC_IRQ8_11_PRIORITY), getreg32(NVIC_IRQ12_15_PRIORITY));
+  irqinfo("              %08x %08x %08x %08x\n",
+          getreg32(NVIC_IRQ16_19_PRIORITY), getreg32(NVIC_IRQ20_23_PRIORITY),
+          getreg32(NVIC_IRQ24_27_PRIORITY), getreg32(NVIC_IRQ28_31_PRIORITY));
 #if NR_VECTORS >= (EFM32_IRQ_INTERRUPTS + 32)
-  lldbg("              %08x %08x %08x %08x\n",
-        getreg32(NVIC_IRQ32_35_PRIORITY), getreg32(NVIC_IRQ36_39_PRIORITY),
-        getreg32(NVIC_IRQ40_43_PRIORITY), getreg32(NVIC_IRQ44_47_PRIORITY));
+  irqinfo("              %08x %08x %08x %08x\n",
+          getreg32(NVIC_IRQ32_35_PRIORITY), getreg32(NVIC_IRQ36_39_PRIORITY),
+          getreg32(NVIC_IRQ40_43_PRIORITY), getreg32(NVIC_IRQ44_47_PRIORITY));
 #if NR_VECTORS >= (EFM32_IRQ_INTERRUPTS + 48)
-  lldbg("              %08x %08x %08x %08x\n",
-        getreg32(NVIC_IRQ48_51_PRIORITY), getreg32(NVIC_IRQ52_55_PRIORITY),
-        getreg32(NVIC_IRQ56_59_PRIORITY), getreg32(NVIC_IRQ60_63_PRIORITY));
+  irqinfo("              %08x %08x %08x %08x\n",
+          getreg32(NVIC_IRQ48_51_PRIORITY), getreg32(NVIC_IRQ52_55_PRIORITY),
+          getreg32(NVIC_IRQ56_59_PRIORITY), getreg32(NVIC_IRQ60_63_PRIORITY));
 #if NR_VECTORS >= (EFM32_IRQ_INTERRUPTS + 64)
-  lldbg("              %08x\n",
-        getreg32(NVIC_IRQ64_67_PRIORITY));
+  irqinfo("              %08x\n",
+          getreg32(NVIC_IRQ64_67_PRIORITY));
 #endif
 #endif
 #endif
+
   leave_critical_section(flags);
 }
 #else
@@ -164,51 +162,51 @@ static void efm32_dumpnvic(const char *msg, int irq)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG
-static int efm32_nmi(int irq, FAR void *context)
+#ifdef CONFIG_DEBUG_FEATURES
+static int efm32_nmi(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! NMI received\n");
+  _err("PANIC!!! NMI received\n");
   PANIC();
   return 0;
 }
 
-static int efm32_busfault(int irq, FAR void *context)
+static int efm32_busfault(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! Bus fault received: %08x\n", getreg32(NVIC_CFAULTS));
+  _err("PANIC!!! Bus fault received: %08x\n", getreg32(NVIC_CFAULTS));
   PANIC();
   return 0;
 }
 
-static int efm32_usagefault(int irq, FAR void *context)
+static int efm32_usagefault(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! Usage fault received: %08x\n", getreg32(NVIC_CFAULTS));
+  _err("PANIC!!! Usage fault received: %08x\n", getreg32(NVIC_CFAULTS));
   PANIC();
   return 0;
 }
 
-static int efm32_pendsv(int irq, FAR void *context)
+static int efm32_pendsv(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! PendSV received\n");
+  _err("PANIC!!! PendSV received\n");
   PANIC();
   return 0;
 }
 
-static int efm32_dbgmonitor(int irq, FAR void *context)
+static int efm32_dbgmonitor(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! Debug Monitor received\n");
+  _err("PANIC!!! Debug Monitor received\n");
   PANIC();
   return 0;
 }
 
-static int efm32_reserved(int irq, FAR void *context)
+static int efm32_reserved(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! Reserved interrupt\n");
+  _err("PANIC!!! Reserved interrupt\n");
   PANIC();
   return 0;
 }
@@ -249,61 +247,19 @@ static inline void efm32_prioritize_syscall(int priority)
 static int efm32_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
                          uintptr_t offset)
 {
+  int n;
+
   DEBUGASSERT(irq >= EFM32_IRQ_NMI && irq < NR_IRQS);
 
-  /* Check for external interrupt or (a second level GPIO interrupt) */
+  /* Check for external interrupt or a second level GPIO interrupt */
 
   if (irq >= EFM32_IRQ_INTERRUPTS)
     {
-      /* Is this an external interrupt? */
-
       if (irq < NR_VECTORS)
         {
-          /* Yes.. We have support implemented for vectors 0-95 */
-
-          DEBUGASSERT(irq < (EFM32_IRQ_INTERRUPTS + 96));
-
-#if NR_VECTORS >= (EFM32_IRQ_INTERRUPTS + 32)
-          /* Check for vectors 0-31 */
-
-          if (irq < EFM32_IRQ_INTERRUPTS + 32)
-#endif
-            {
-              *regaddr = (NVIC_IRQ0_31_ENABLE + offset);
-              *bit     = 1 << (irq - EFM32_IRQ_INTERRUPTS);
-            }
-#if NR_VECTORS >= (EFM32_IRQ_INTERRUPTS + 32)
-          /* Yes..  Check for vectors 32-63 */
-
-          else
-#if NR_VECTORS >= (EFM32_IRQ_INTERRUPTS + 64)
-          if (irq < EFM32_IRQ_INTERRUPTS + 64)
-#endif
-            {
-              *regaddr = (NVIC_IRQ32_63_ENABLE + offset);
-              *bit     = 1 << (irq - EFM32_IRQ_INTERRUPTS - 32);
-            }
-#if NR_VECTORS >= (EFM32_IRQ_INTERRUPTS + 64)
-          /* Yes..  Check for vectors 64-95 */
-
-          else
-#if NR_VECTORS >= (EFM32_IRQ_INTERRUPTS + 96)
-          /* Yes..  Check for vectors 64-95 */
-
-          if (irq < NR_VECTORS)
-#endif
-            {
-              *regaddr = (NVIC_IRQ64_95_ENABLE + offset);
-              *bit     = 1 << (irq - EFM32_IRQ_INTERRUPTS - 64);
-            }
-#if NR_VECTORS >= (EFM32_IRQ_INTERRUPTS + 96)
-          else
-            {
-              return -EINVAL; /* We should never get here */
-            }
-#endif
-#endif
-#endif
+          n        = irq - EFM32_IRQ_INTERRUPTS;
+          *regaddr = NVIC_IRQ_ENABLE(n) + offset;
+          *bit     = (uint32_t)1 << (n & 0x1f);
         }
       else
         {
@@ -354,16 +310,14 @@ void up_irqinitialize(void)
 {
   uint32_t regaddr;
   int num_priority_registers;
+  int i;
 
   /* Disable all interrupts */
 
-  putreg32(0, NVIC_IRQ0_31_ENABLE);
-#if NR_VECTORS >= (EFM32_IRQ_INTERRUPTS + 32)
-  putreg32(0, NVIC_IRQ32_63_ENABLE);
-#if NR_VECTORS >= (EFM32_IRQ_INTERRUPTS + 64)
-  putreg32(0, NVIC_IRQ64_95_ENABLE);
-#endif
-#endif
+  for (i = 0; i < NR_VECTORS - EFM32_IRQ_INTERRUPTS; i += 32)
+    {
+      putreg32(0xffffffff, NVIC_IRQ_CLEAR(i));
+    }
 
 #if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 3
   /* Colorize the interrupt stack for debug purposes */
@@ -428,8 +382,8 @@ void up_irqinitialize(void)
    * under certain conditions.
    */
 
-  irq_attach(EFM32_IRQ_SVCALL, up_svcall);
-  irq_attach(EFM32_IRQ_HARDFAULT, up_hardfault);
+  irq_attach(EFM32_IRQ_SVCALL, up_svcall, NULL);
+  irq_attach(EFM32_IRQ_HARDFAULT, up_hardfault, NULL);
 
   /* Set the priority of the SVCall interrupt */
 
@@ -442,22 +396,22 @@ void up_irqinitialize(void)
    */
 
 #ifdef CONFIG_ARM_MPU
-  irq_attach(EFM32_IRQ_MEMFAULT, up_memfault);
+  irq_attach(EFM32_IRQ_MEMFAULT, up_memfault, NULL);
   up_enable_irq(EFM32_IRQ_MEMFAULT);
 #endif
 
   /* Attach all other processor exceptions (except reset and sys tick) */
 
-#ifdef CONFIG_DEBUG
-  irq_attach(EFM32_IRQ_NMI, efm32_nmi);
+#ifdef CONFIG_DEBUG_FEATURES
+  irq_attach(EFM32_IRQ_NMI, efm32_nmi, NULL);
 #ifndef CONFIG_ARM_MPU
-  irq_attach(EFM32_IRQ_MEMFAULT, up_memfault);
+  irq_attach(EFM32_IRQ_MEMFAULT, up_memfault, NULL);
 #endif
-  irq_attach(EFM32_IRQ_BUSFAULT, efm32_busfault);
-  irq_attach(EFM32_IRQ_USAGEFAULT, efm32_usagefault);
-  irq_attach(EFM32_IRQ_PENDSV, efm32_pendsv);
-  irq_attach(EFM32_IRQ_DBGMONITOR, efm32_dbgmonitor);
-  irq_attach(EFM32_IRQ_RESERVED, efm32_reserved);
+  irq_attach(EFM32_IRQ_BUSFAULT, efm32_busfault, NULL);
+  irq_attach(EFM32_IRQ_USAGEFAULT, efm32_usagefault, NULL);
+  irq_attach(EFM32_IRQ_PENDSV, efm32_pendsv, NULL);
+  irq_attach(EFM32_IRQ_DBGMONITOR, efm32_dbgmonitor, NULL);
+  irq_attach(EFM32_IRQ_RESERVED, efm32_reserved, NULL);
 #endif
 
   efm32_dumpnvic("initial", NR_VECTORS);

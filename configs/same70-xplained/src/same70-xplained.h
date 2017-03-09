@@ -91,12 +91,12 @@
 #  define CONFIG_NSH_MMCSDMINOR 0
 #endif
 
-#ifndef CONFIG_NSH_MMCSDMINOR
+#ifndef CONFIG_NSH_MMCSDSLOTNO
 #  define CONFIG_NSH_MMCSDSLOTNO 0
 #endif
 
-#if CONFIG_NSH_MMCSDMINOR != 0
-#  error SAME70 has only one MMC/SD slot (CONFIG_NSH_MMCSDMINOR)
+#if CONFIG_NSH_MMCSDSLOTNO != 0
+#  error SAME70 has only one MMC/SD slot (CONFIG_NSH_MMCSDSLOTNO)
 #  undef CONFIG_NSH_MMCSDSLOTNO
 #  define CONFIG_NSH_MMCSDSLOTNO 0
 #endif
@@ -157,7 +157,7 @@
 #  undef CONFIG_USBDEV_TRACE
 #endif
 
-#if !defined(CONFIG_SYSTEM_USBMONITOR) || !defined(CONFIG_USBDEV_TRACE)
+#if !defined(CONFIG_USBMONITOR) || !defined(CONFIG_USBDEV_TRACE)
 #  undef HAVE_USBMONITOR
 #endif
 
@@ -350,6 +350,18 @@ int sam_bringup(void);
 #endif
 
 /************************************************************************************
+ * Name: sam_dacdev_initialize
+ *
+ * Description:
+ *   Called to configure DAC peripheral module
+ *
+ ************************************************************************************/
+
+#if defined(CONFIG_SAMV7_DAC0) || defined(CONFIG_SAMV7_DAC1)
+int sam_dacdev_initialize(void);
+#endif
+
+/************************************************************************************
  * Name: sam_spidev_initialize
  *
  * Description:
@@ -386,6 +398,18 @@ int sam_hsmci_initialize(int slot, int minor);
 
 #ifdef HAVE_USB
 void sam_usbinitialize(void);
+#endif
+
+/****************************************************************************
+ * Name: sam_can_setup
+ *
+ * Description:
+ *  Initialize CAN and register the CAN device
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SAMV7_MCAN
+int sam_can_setup(void);
 #endif
 
 /************************************************************************************

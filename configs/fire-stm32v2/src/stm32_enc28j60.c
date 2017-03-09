@@ -159,12 +159,14 @@ static void up_enable(FAR const struct enc_lower_s *lower)
   FAR struct stm32_lower_s *priv = (FAR struct stm32_lower_s *)lower;
 
   DEBUGASSERT(priv->handler);
-  (void)stm32_gpiosetevent(GPIO_ENC28J60_INTR, false, true, true, priv->handler);
+  (void)stm32_gpiosetevent(GPIO_ENC28J60_INTR, false, true, true,
+                           priv->handler, NULL);
 }
 
 static void up_disable(FAR const struct enc_lower_s *lower)
 {
-  (void)stm32_gpiosetevent(GPIO_ENC28J60_INTR, false, true, true, NULL);
+  (void)stm32_gpiosetevent(GPIO_ENC28J60_INTR, false, true, true,
+                           NULL, NULL);
 }
 
 /****************************************************************************
@@ -188,7 +190,7 @@ void up_netinitialize(void)
   spi = stm32_spibus_initialize(ENC28J60_SPI_PORTNO);
   if (!spi)
     {
-      nlldbg("Failed to initialize SPI port %d\n", ENC28J60_SPI_PORTNO);
+      nerr("ERROR: Failed to initialize SPI port %d\n", ENC28J60_SPI_PORTNO);
       return;
     }
 
@@ -201,12 +203,12 @@ void up_netinitialize(void)
   ret = enc_initialize(spi, &g_enclower.lower, ENC28J60_DEVNO);
   if (ret < 0)
     {
-      nlldbg("Failed to bind SPI port %d ENC28J60 device %d: %d\n",
-             ENC28J60_SPI_PORTNO, ENC28J60_DEVNO, ret);
+      nerr("ERROR: Failed to bind SPI port %d ENC28J60 device %d: %d\n",
+           ENC28J60_SPI_PORTNO, ENC28J60_DEVNO, ret);
       return;
     }
 
-  nllvdbg("Bound SPI port %d to ENC28J60 device %d\n",
+  ninfo("Bound SPI port %d to ENC28J60 device %d\n",
         ENC28J60_SPI_PORTNO, ENC28J60_DEVNO);
 }
 

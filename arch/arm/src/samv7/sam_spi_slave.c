@@ -74,26 +74,8 @@
 #  define CONFIG_SAMV7_SPI_SLAVE_QSIZE 8
 #endif
 
-/* Debug *******************************************************************/
-/* Check if SPI debug is enabled (non-standard.. no support in
- * include/debug.h
- */
-
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
-#  undef CONFIG_DEBUG_SPI
-#endif
-
-#ifdef CONFIG_DEBUG_SPI
-#  define spidbg lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
-#    define spivdbg lldbg
-#  else
-#    define spivdbg(x...)
-#  endif
-#else
-#  define spidbg(x...)
-#  define spivdbg(x...)
+#ifndef CONFIG_DEBUG_SPI_INFO
+#  undef CONFIG_SAMV7_SPI_REGDEBUG
 #endif
 
 /****************************************************************************
@@ -153,7 +135,7 @@ static uint32_t spi_getreg(struct sam_spidev_s *priv,
 static void     spi_putreg(struct sam_spidev_s *priv, uint32_t value,
                   unsigned int offset);
 
-#if defined(CONFIG_DEBUG_SPI) && defined(CONFIG_DEBUG_VERBOSE)
+#ifdef CONFIG_DEBUG_SPI_INFO
 static void     spi_dumpregs(struct sam_spidev_s *priv, const char *msg);
 #else
 # define        spi_dumpregs(priv,msg)
@@ -164,13 +146,7 @@ static void     spi_semtake(struct sam_spidev_s *priv);
 
 /* Interrupt Handling */
 
-static int      spi_interrupt(struct sam_spidev_s *priv);
-#ifdef CONFIG_SAMV7_SPI0_SLAVE
-static int      spi0_interrupt(int irq, void *context);
-#endif
-#ifdef CONFIG_SAMV7_SPI1_SLAVE
-static int      spi1_interrupt(int irq, void *context);
-#endif
+static int      spi_interrupt(int irq, void *context, FAR void *arg);
 
 /* SPI Helpers */
 
@@ -270,7 +246,7 @@ static bool spi_checkreg(struct sam_spidev_s *priv, bool wr, uint32_t value,
         {
           /* Yes... show how many times we did it */
 
-          lldbg("...[Repeats %d times]...\n", priv->ntimes);
+          spiinfo("...[Repeats %d times]...\n", priv->ntimes);
         }
 
       /* Save information about the new access */
@@ -303,7 +279,7 @@ static uint32_t spi_getreg(struct sam_spidev_s *priv, unsigned int offset)
 #ifdef CONFIG_SAMV7_SPI_REGDEBUG
   if (spi_checkreg(priv, false, value, address))
     {
-      lldbg("%08x->%08x\n", address, value);
+      spiinfo("%08x->%08x\n", address, value);
     }
 #endif
 
@@ -326,7 +302,7 @@ static void spi_putreg(struct sam_spidev_s *priv, uint32_t value,
 #ifdef CONFIG_SAMV7_SPI_REGDEBUG
   if (spi_checkreg(priv, true, value, address))
     {
-      lldbg("%08x<-%08x\n", address, value);
+      spiinfo("%08x<-%08x\n", address, value);
     }
 #endif
 
@@ -348,20 +324,20 @@ static void spi_putreg(struct sam_spidev_s *priv, uint32_t value,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_SPI) && defined(CONFIG_DEBUG_VERBOSE)
+#ifdef CONFIG_DEBUG_SPI_INFO
 static void spi_dumpregs(struct sam_spidev_s *priv, const char *msg)
 {
-  spivdbg("%s:\n", msg);
-  spivdbg("    MR:%08x   SR:%08x  IMR:%08x\n",
+  spiinfo("%s:\n", msg);
+  spiinfo("    MR:%08x   SR:%08x  IMR:%08x\n",
           getreg32(priv->base + SAM_SPI_MR_OFFSET),
           getreg32(priv->base + SAM_SPI_SR_OFFSET),
           getreg32(priv->base + SAM_SPI_IMR_OFFSET));
-  spivdbg("  CSR0:%08x CSR1:%08x CSR2:%08x CSR3:%08x\n",
+  spiinfo("  CSR0:%08x CSR1:%08x CSR2:%08x CSR3:%08x\n",
           getreg32(priv->base + SAM_SPI_CSR0_OFFSET),
           getreg32(priv->base + SAM_SPI_CSR1_OFFSET),
           getreg32(priv->base + SAM_SPI_CSR2_OFFSET),
           getreg32(priv->base + SAM_SPI_CSR3_OFFSET));
-  spivdbg("  WPCR:%08x WPSR:%08x\n",
+  spiinfo("  WPCR:%08x WPSR:%08x\n",
           getreg32(priv->base + SAM_SPI_WPCR_OFFSET),
           getreg32(priv->base + SAM_SPI_WPSR_OFFSET));
 }
@@ -413,12 +389,15 @@ static void spi_semtake(struct sam_spidev_s *priv)
  *
  ****************************************************************************/
 
-static int spi_interrupt(struct sam_spidev_s *priv)
+static int spi_interrupt(int irq, void *context, FAR void *arg)
 {
+  struct sam_spidev_s *priv = (struct sam_spidev_s *)arg;
   uint32_t sr;
   uint32_t imr;
   uint32_t pending;
   uint32_t regval;
+
+  DEBUGASSERT(priv != NULL);
 
   /* We loop because the TDRE interrupt will probably immediately follow the
    * RDRF interrupt and we might be able to catch it in this handler
@@ -457,14 +436,14 @@ static int spi_interrupt(struct sam_spidev_s *priv)
        * bit.
        */
 
-#ifdef CONFIG_DEBUG_SPI
+#ifdef CONFIG_DEBUG_SPI_ERROR
       /* Check the RX data overflow condition */
 
       if ((pending & SPI_INT_OVRES) != 0)
         {
           /* If debug is enabled, report any overrun errors */
 
-          spidbg("Error: Overrun (OVRES): %08x\n", pending);
+          spierr("ERROR: Overrun (OVRES): %08x\n", pending);
 
           /* OVRES was cleared by the status read. */
         }
@@ -524,14 +503,14 @@ static int spi_interrupt(struct sam_spidev_s *priv)
        * Underrun Error Status Flag (UNDES) is set in the SPI_SR.
        */
 
-#ifdef CONFIG_DEBUG_SPI
+#ifdef CONFIG_DEBUG_SPI_ERROR
       /* Check the TX data underflow condition */
 
       if ((pending & SPI_INT_UNDES) != 0)
         {
           /* If debug is enabled, report any overrun errors */
 
-          spidbg("Error: Underrun (UNDEX): %08x\n", pending);
+          spierr("ERROR: Underrun (UNDEX): %08x\n", pending);
 
           /* UNDES was cleared by the status read. */
         }
@@ -570,48 +549,6 @@ static int spi_interrupt(struct sam_spidev_s *priv)
 
   return OK;
 }
-
-/****************************************************************************
- * Name: spi0_interrupt
- *
- * Description:
- *   SPI0 interrupt handler
- *
- * Input Parameters:
- *   Standard interrupt input parameters
- *
- * Returned Value:
- *   Standard interrupt return value.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SAMV7_SPI0_SLAVE
-static int spi0_interrupt(int irq, void *context)
-{
-  return spi_interrupt(&g_spi0_sctrlr);
-}
-#endif
-
-/****************************************************************************
- * Name: spi1_interrupt
- *
- * Description:
- *   SPI1 interrupt handler
- *
- * Input Parameters:
- *   Standard interrupt input parameters
- *
- * Returned Value:
- *   Standard interrupt return value.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SAMV7_SPI1_SLAVE
-static int spi1_interrupt(int irq, void *context)
-{
-  return spi_interrupt(&g_spi1_sctrlr);
-}
-#endif
 
 /****************************************************************************
  * Name: spi_dequeue
@@ -699,7 +636,7 @@ static void spi_setmode(struct sam_spidev_s *priv, enum spi_smode_e mode)
 {
   uint32_t regval;
 
-  spivdbg("mode=%d\n", mode);
+  spiinfo("mode=%d\n", mode);
 
   /* Has the mode changed? */
 
@@ -741,7 +678,7 @@ static void spi_setmode(struct sam_spidev_s *priv, enum spi_smode_e mode)
         }
 
       spi_putreg(priv, regval, SAM_SPI_CSR0_OFFSET);
-      spivdbg("csr0=%08x\n", regval);
+      spiinfo("csr0=%08x\n", regval);
 
       /* Save the mode so that subsequent re-configurations will be faster */
 
@@ -768,7 +705,7 @@ static void spi_setbits(struct sam_spidev_s *priv, int nbits)
 {
   uint32_t regval;
 
-  spivdbg("nbits=%d\n", nbits);
+  spiinfo("nbits=%d\n", nbits);
   DEBUGASSERT(priv && nbits > 7 && nbits < 17);
 
   /* Has the number of bits changed? */
@@ -782,7 +719,7 @@ static void spi_setbits(struct sam_spidev_s *priv, int nbits)
       regval |= SPI_CSR_BITS(nbits);
       spi_putreg(priv, regval, SAM_SPI_CSR0_OFFSET);
 
-      spivdbg("csr0=%08x\n", regval);
+      spiinfo("csr0=%08x\n", regval);
 
       /* Save the selection so the subsequence re-configurations will be faster */
 
@@ -819,7 +756,7 @@ static void spi_bind(struct spi_sctrlr_s *sctrlr,
   struct sam_spidev_s *priv = (struct sam_spidev_s *)sctrlr;
   uint32_t regval;
 
-  spivdbg("sdev=%p mode=%d nbits=%d\n", sdv, mode, nbits);
+  spiinfo("sdev=%p mode=%d nbits=%d\n", sdv, mode, nbits);
 
   DEBUGASSERT(priv != NULL && priv->sdev == NULL && sdev != NULL);
 
@@ -891,7 +828,7 @@ static void spi_bind(struct spi_sctrlr_s *sctrlr,
    */
 
   regval  = (SPI_INT_RDRF | SPI_INT_NSSR);
-#ifdef CONFIG_DEBUG_SPI
+#ifdef CONFIG_DEBUG_SPI_ERROR
   regval |= SPI_INT_OVRES;
 #endif
 
@@ -921,7 +858,7 @@ static void spi_unbind(struct spi_sctrlr_s *sctrlr)
   struct sam_spidev_s *priv = (struct sam_spidev_s *)sctrlr;
 
   DEBUGASSERT(priv != NULL);
-  spivdbg("Unbinding %p\n", priv->sdev);
+  spiinfo("Unbinding %p\n", priv->sdev);
 
   DEBUGASSERT(priv->sdev != NULL);
 
@@ -978,7 +915,7 @@ static int spi_enqueue(struct spi_sctrlr_s *sctrlr, uint16_t data)
   int next;
   int ret;
 
-  spivdbg("data=%04x\n", data);
+  spiinfo("data=%04x\n", data);
   DEBUGASSERT(priv != NULL && priv->sdev != NULL);
 
   /* Get exclusive access to the SPI device */
@@ -1095,7 +1032,7 @@ static void spi_qflush(struct spi_sctrlr_s *sctrlr)
   struct sam_spidev_s *priv = (struct sam_spidev_s *)sctrlr;
   irqstate_t flags;
 
-  spivdbg("data=%04x\n", data);
+  spiinfo("data=%04x\n", data);
 
   DEBUGASSERT(priv != NULL && priv->sdev != NULL);
 
@@ -1140,7 +1077,7 @@ struct spi_sctrlr_s *sam_spi_slave_initialize(int port)
 
   /* The support SAM parts have only a single SPI port */
 
-  spivdbg("port: %d spino: %d\n", port, spino);
+  spiinfo("port: %d spino: %d\n", port, spino);
 
 #if defined(CONFIG_SAMV7_SPI0_SLAVE) && defined(CONFIG_SAMV7_SPI1_SLAVE)
   DEBUGASSERT(spino >= 0 && spino <= 1);
@@ -1195,9 +1132,8 @@ struct spi_sctrlr_s *sam_spi_slave_initialize(int port)
         {
           /* Set the SPI0 register base address and interrupt information */
 
-          priv->base    = SAM_SPI0_BASE,
-          priv->irq     = SAM_IRQ_SPI0;
-          priv->handler = spi0_interrupt;
+          priv->base = SAM_SPI0_BASE,
+          priv->irq  = SAM_IRQ_SPI0;
 
           /* Enable peripheral clocking to SPI0 */
 
@@ -1218,9 +1154,8 @@ struct spi_sctrlr_s *sam_spi_slave_initialize(int port)
         {
           /* Set the SPI1 register base address and interrupt information */
 
-          priv->base    = SAM_SPI1_BASE,
-          priv->irq     = SAM_IRQ_SPI1;
-          priv->handler = spi1_interrupt;
+          priv->base = SAM_SPI1_BASE,
+          priv->irq  = SAM_IRQ_SPI1;
 
           /* Enable peripheral clocking to SPI1 */
 
@@ -1273,7 +1208,7 @@ struct spi_sctrlr_s *sam_spi_slave_initialize(int port)
 
       /* Attach and enable interrupts at the NVIC */
 
-      DEBUGVERIFY(irq_attach(priv->irq, priv->handler));
+      DEBUGVERIFY(irq_attach(priv->irq, spi_interrupt, priv));
       up_enable_irq(priv->irq);
 
       spi_dumpregs(priv, "After initialization");
@@ -1287,7 +1222,7 @@ struct spi_sctrlr_s *sam_spi_slave_initialize(int port)
   spi_putreg(priv, regval, SAM_SPI_CSR0_OFFSET);
 
   priv->nbits = 8;
-  spivdbg("csr[offset=%02x]=%08x\n", offset, regval);
+  spiinfo("csr[offset=%02x]=%08x\n", offset, regval);
 
   return &priv->sctrlr;
 }

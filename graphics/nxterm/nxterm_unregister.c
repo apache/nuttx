@@ -51,22 +51,6 @@
 #include "nxterm.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -89,7 +73,6 @@ void nxterm_unregister(NXTERM handle)
 {
   FAR struct nxterm_state_s *priv;
   char devname[NX_DEVNAME_SIZE];
-  int i;
 
   DEBUGASSERT(handle);
 
@@ -101,16 +84,9 @@ void nxterm_unregister(NXTERM handle)
   sem_destroy(&priv->waitsem);
 #endif
 
-  /* Free all allocated glyph bitmap */
+  /* Free the font cache */
 
-  for (i = 0; i < CONFIG_NXTERM_CACHESIZE; i++)
-    {
-      FAR struct nxterm_glyph_s *glyph = &priv->glyph[i];
-      if (glyph->bitmap)
-        {
-          kmm_free(glyph->bitmap);
-        }
-    }
+  nxf_cache_disconnect(priv->fcache);
 
   /* Unregister the driver */
 

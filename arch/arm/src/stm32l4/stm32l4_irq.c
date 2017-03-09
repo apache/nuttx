@@ -1,8 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32l4/stm32l4_irq.c
- * arch/arm/src/chip/stm32l4_irq.c
  *
- *   Copyright (C) 2009-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -91,10 +90,6 @@ volatile uint32_t *g_current_regs[1];
 extern uint32_t _vectors[];
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -106,40 +101,42 @@ extern uint32_t _vectors[];
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_IRQ)
+#if defined(CONFIG_DEBUG_IRQ_INFO)
 static void stm32l4_dumpnvic(const char *msg, int irq)
 {
   irqstate_t flags;
 
   flags = enter_critical_section();
-  lldbg("NVIC (%s, irq=%d):\n", msg, irq);
-  lldbg("  INTCTRL:    %08x VECTAB:  %08x\n",
-        getreg32(NVIC_INTCTRL), getreg32(NVIC_VECTAB));
+
+  irqinfo("NVIC (%s, irq=%d):\n", msg, irq);
+  irqinfo("  INTCTRL:    %08x VECTAB:  %08x\n",
+          getreg32(NVIC_INTCTRL), getreg32(NVIC_VECTAB));
 #if 0
-  lldbg("  SYSH ENABLE MEMFAULT: %08x BUSFAULT: %08x USGFAULT: %08x SYSTICK: %08x\n",
-        getreg32(NVIC_SYSHCON_MEMFAULTENA), getreg32(NVIC_SYSHCON_BUSFAULTENA),
-        getreg32(NVIC_SYSHCON_USGFAULTENA), getreg32(NVIC_SYSTICK_CTRL_ENABLE));
+  irqinfo("  SYSH ENABLE MEMFAULT: %08x BUSFAULT: %08x USGFAULT: %08x SYSTICK: %08x\n",
+          getreg32(NVIC_SYSHCON_MEMFAULTENA), getreg32(NVIC_SYSHCON_BUSFAULTENA),
+          getreg32(NVIC_SYSHCON_USGFAULTENA), getreg32(NVIC_SYSTICK_CTRL_ENABLE));
 #endif
-  lldbg("  IRQ ENABLE: %08x %08x %08x\n",
-        getreg32(NVIC_IRQ0_31_ENABLE), getreg32(NVIC_IRQ32_63_ENABLE),
-        getreg32(NVIC_IRQ64_95_ENABLE));
-  lldbg("  SYSH_PRIO:  %08x %08x %08x\n",
-        getreg32(NVIC_SYSH4_7_PRIORITY), getreg32(NVIC_SYSH8_11_PRIORITY),
-        getreg32(NVIC_SYSH12_15_PRIORITY));
-  lldbg("  IRQ PRIO:   %08x %08x %08x %08x\n",
-        getreg32(NVIC_IRQ0_3_PRIORITY), getreg32(NVIC_IRQ4_7_PRIORITY),
-        getreg32(NVIC_IRQ8_11_PRIORITY), getreg32(NVIC_IRQ12_15_PRIORITY));
-  lldbg("              %08x %08x %08x %08x\n",
-        getreg32(NVIC_IRQ16_19_PRIORITY), getreg32(NVIC_IRQ20_23_PRIORITY),
-        getreg32(NVIC_IRQ24_27_PRIORITY), getreg32(NVIC_IRQ28_31_PRIORITY));
-  lldbg("              %08x %08x %08x %08x\n",
-        getreg32(NVIC_IRQ32_35_PRIORITY), getreg32(NVIC_IRQ36_39_PRIORITY),
-        getreg32(NVIC_IRQ40_43_PRIORITY), getreg32(NVIC_IRQ44_47_PRIORITY));
-  lldbg("              %08x %08x %08x %08x\n",
-        getreg32(NVIC_IRQ48_51_PRIORITY), getreg32(NVIC_IRQ52_55_PRIORITY),
-        getreg32(NVIC_IRQ56_59_PRIORITY), getreg32(NVIC_IRQ60_63_PRIORITY));
-  lldbg("              %08x\n",
-        getreg32(NVIC_IRQ64_67_PRIORITY));
+  irqinfo("  IRQ ENABLE: %08x %08x %08x\n",
+          getreg32(NVIC_IRQ0_31_ENABLE), getreg32(NVIC_IRQ32_63_ENABLE),
+          getreg32(NVIC_IRQ64_95_ENABLE));
+  irqinfo("  SYSH_PRIO:  %08x %08x %08x\n",
+          getreg32(NVIC_SYSH4_7_PRIORITY), getreg32(NVIC_SYSH8_11_PRIORITY),
+          getreg32(NVIC_SYSH12_15_PRIORITY));
+  irqinfo("  IRQ PRIO:   %08x %08x %08x %08x\n",
+          getreg32(NVIC_IRQ0_3_PRIORITY), getreg32(NVIC_IRQ4_7_PRIORITY),
+          getreg32(NVIC_IRQ8_11_PRIORITY), getreg32(NVIC_IRQ12_15_PRIORITY));
+  irqinfo("              %08x %08x %08x %08x\n",
+          getreg32(NVIC_IRQ16_19_PRIORITY), getreg32(NVIC_IRQ20_23_PRIORITY),
+          getreg32(NVIC_IRQ24_27_PRIORITY), getreg32(NVIC_IRQ28_31_PRIORITY));
+  irqinfo("              %08x %08x %08x %08x\n",
+          getreg32(NVIC_IRQ32_35_PRIORITY), getreg32(NVIC_IRQ36_39_PRIORITY),
+          getreg32(NVIC_IRQ40_43_PRIORITY), getreg32(NVIC_IRQ44_47_PRIORITY));
+  irqinfo("              %08x %08x %08x %08x\n",
+          getreg32(NVIC_IRQ48_51_PRIORITY), getreg32(NVIC_IRQ52_55_PRIORITY),
+          getreg32(NVIC_IRQ56_59_PRIORITY), getreg32(NVIC_IRQ60_63_PRIORITY));
+  irqinfo("              %08x\n",
+          getreg32(NVIC_IRQ64_67_PRIORITY));
+
   leave_critical_section(flags);
 }
 #else
@@ -157,51 +154,51 @@ static void stm32l4_dumpnvic(const char *msg, int irq)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG
-static int stm32l4_nmi(int irq, FAR void *context)
+#ifdef CONFIG_DEBUG_FEATURES
+static int stm32l4_nmi(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! NMI received\n");
+  _err("PANIC!!! NMI received\n");
   PANIC();
   return 0;
 }
 
-static int stm32l4_busfault(int irq, FAR void *context)
+static int stm32l4_busfault(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! Bus fault received: %08x\n", getreg32(NVIC_CFAULTS));
+  _err("PANIC!!! Bus fault received: %08x\n", getreg32(NVIC_CFAULTS));
   PANIC();
   return 0;
 }
 
-static int stm32l4_usagefault(int irq, FAR void *context)
+static int stm32l4_usagefault(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! Usage fault received: %08x\n", getreg32(NVIC_CFAULTS));
+  _err("PANIC!!! Usage fault received: %08x\n", getreg32(NVIC_CFAULTS));
   PANIC();
   return 0;
 }
 
-static int stm32l4_pendsv(int irq, FAR void *context)
+static int stm32l4_pendsv(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! PendSV received\n");
+  _err("PANIC!!! PendSV received\n");
   PANIC();
   return 0;
 }
 
-static int stm32l4_dbgmonitor(int irq, FAR void *context)
+static int stm32l4_dbgmonitor(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! Debug Monitor received\n");
+  _err("PANIC!!! Debug Monitor received\n");
   PANIC();
   return 0;
 }
 
-static int stm32l4_reserved(int irq, FAR void *context)
+static int stm32l4_reserved(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! Reserved interrupt\n");
+  _err("PANIC!!! Reserved interrupt\n");
   PANIC();
   return 0;
 }
@@ -242,31 +239,17 @@ static inline void stm32l4_prioritize_syscall(int priority)
 static int stm32l4_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
                          uintptr_t offset)
 {
+  int n;
+
   DEBUGASSERT(irq >= STM32L4_IRQ_NMI && irq < NR_IRQS);
 
   /* Check for external interrupt */
 
   if (irq >= STM32L4_IRQ_FIRST)
     {
-      if (irq < STM32L4_IRQ_FIRST + 32)
-        {
-           *regaddr = (NVIC_IRQ0_31_ENABLE + offset);
-           *bit     = 1 << (irq - STM32L4_IRQ_FIRST);
-        }
-      else if (irq < STM32L4_IRQ_FIRST + 64)
-        {
-           *regaddr = (NVIC_IRQ32_63_ENABLE + offset);
-           *bit     = 1 << (irq - STM32L4_IRQ_FIRST - 32);
-        }
-      else if (irq < NR_IRQS)
-        {
-           *regaddr = (NVIC_IRQ64_95_ENABLE + offset);
-           *bit     = 1 << (irq - STM32L4_IRQ_FIRST - 64);
-        }
-      else
-        {
-          return ERROR; /* Invalid interrupt */
-        }
+      n        = irq - STM32L4_IRQ_FIRST;
+      *regaddr = NVIC_IRQ_ENABLE(n) + offset;
+      *bit     = (uint32_t)1 << (n & 0x1f);
     }
 
   /* Handle processor exceptions.  Only a few can be disabled */
@@ -312,11 +295,14 @@ void up_irqinitialize(void)
 {
   uint32_t regaddr;
   int num_priority_registers;
+  int i;
 
   /* Disable all interrupts */
 
-  putreg32(0, NVIC_IRQ0_31_ENABLE);
-  putreg32(0, NVIC_IRQ32_63_ENABLE);
+  for (i = 0; i < NR_IRQS - STM32L4_IRQ_FIRST; i += 32)
+    {
+      putreg32(0xffffffff, NVIC_IRQ_CLEAR(i));
+    }
 
   /* Colorize the interrupt stack for debug purposes */
 
@@ -380,8 +366,8 @@ void up_irqinitialize(void)
    * under certain conditions.
    */
 
-  irq_attach(STM32L4_IRQ_SVCALL, up_svcall);
-  irq_attach(STM32L4_IRQ_HARDFAULT, up_hardfault);
+  irq_attach(STM32L4_IRQ_SVCALL, up_svcall, NULL);
+  irq_attach(STM32L4_IRQ_HARDFAULT, up_hardfault, NULL);
 
   /* Set the priority of the SVCall interrupt */
 
@@ -397,22 +383,22 @@ void up_irqinitialize(void)
    */
 
 #ifdef CONFIG_ARM_MPU
-  irq_attach(STM32L4_IRQ_MEMFAULT, up_memfault);
+  irq_attach(STM32L4_IRQ_MEMFAULT, up_memfault, NULL);
   up_enable_irq(STM32L4_IRQ_MEMFAULT);
 #endif
 
   /* Attach all other processor exceptions (except reset and sys tick) */
 
-#ifdef CONFIG_DEBUG
-  irq_attach(STM32L4_IRQ_NMI, stm32l4_nmi);
+#ifdef CONFIG_DEBUG_FEATURES
+  irq_attach(STM32L4_IRQ_NMI, stm32l4_nmi, NULL);
 #ifndef CONFIG_ARM_MPU
-  irq_attach(STM32L4_IRQ_MEMFAULT, up_memfault);
+  irq_attach(STM32L4_IRQ_MEMFAULT, up_memfault, NULL);
 #endif
-  irq_attach(STM32L4_IRQ_BUSFAULT, stm32l4_busfault);
-  irq_attach(STM32L4_IRQ_USAGEFAULT, stm32l4_usagefault);
-  irq_attach(STM32L4_IRQ_PENDSV, stm32l4_pendsv);
-  irq_attach(STM32L4_IRQ_DBGMONITOR, stm32l4_dbgmonitor);
-  irq_attach(STM32L4_IRQ_RESERVED, stm32l4_reserved);
+  irq_attach(STM32L4_IRQ_BUSFAULT, stm32l4_busfault, NULL);
+  irq_attach(STM32L4_IRQ_USAGEFAULT, stm32l4_usagefault, NULL);
+  irq_attach(STM32L4_IRQ_PENDSV, stm32l4_pendsv, NULL);
+  irq_attach(STM32L4_IRQ_DBGMONITOR, stm32l4_dbgmonitor, NULL);
+  irq_attach(STM32L4_IRQ_RESERVED, stm32l4_reserved, NULL);
 #endif
 
   stm32l4_dumpnvic("initial", NR_IRQS);

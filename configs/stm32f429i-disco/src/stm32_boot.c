@@ -52,9 +52,50 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
+/* Configuration ********************************************************************/
+/* Should we initialize the NX server using nx_start?  This is done for NxWidgets
+ * (CONFIG_NXWIDGETS=y) and if the NxWidget::CNxServer class expects the RTOS do the
+ * the NX initialization (CONFIG_NXWIDGET_SERVERINIT=n).  This combination of
+ * settings is normally only used in the kernel build mode* (CONFIG_BUILD_PROTECTED)
+ * when NxWidgets is unable to initialize NX from user-space.
+ */
+
+#undef HAVE_NXSTART
+
+#if !defined(CONFIG_NX_MULTIUSER)
+#  undef CONFIG_NX_START
+#endif
+
+#if defined(CONFIG_NXWIDGETS) && !defined(CONFIG_NXWIDGET_SERVERINIT)
+#   define HAVE_NXSTART
+#   include <nuttx/nx/nx.h>
+#endif
+
+/* Should we initialize the touchscreen for the NxWM (CONFIG_NXWM=y)?  This
+ * is done if we have a touchscreen (CONFIG_INPUT_STMPE811=y), NxWM uses the
+ * touchscreen (CONFIG_NXWM_TOUCHSCREEN=y), and if we were asked to
+ * initialize the touchscreen for NxWM (NXWM_TOUCHSCREEN_DEVINIT=n). This
+ * combination of settings is normally only used in the kernel build mode
+ * (CONFIG_BUILD_PROTECTED) when NxWidgets is unable to initialize NX from
+ * user-space.
+ */
+
+#undef HAVE_TCINIT
+
+#if defined(CONFIG_NXWM_TOUCHSCREEN)
+#  if !defined(CONFIG_NXWM_TOUCHSCREEN_DEVNO)
+#    error CONFIG_NXWM_TOUCHSCREEN_DEVNO is not defined
+#  elif defined(CONFIG_INPUT_STMPE811)
+#    if !defined(CONFIG_NXWM_TOUCHSCREEN_DEVINIT)
+#      define HAVE_TCINIT
+#      include <nuttx/input/touchscreen.h>
+#    endif
+#  else
+#    if !defined(CONFIG_NXWM_TOUCHSCREEN_DEVINIT) && defined(CONFIG_BUILD_PROTECTED)
+#      error CONFIG_INPUT_STMPE811=y is needed
+#    endif
+#  endif
+#endif
 
 /************************************************************************************
  * Public Functions

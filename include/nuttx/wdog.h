@@ -165,11 +165,117 @@ extern "C"
 #define EXTERN extern
 #endif
 
+/****************************************************************************
+ * Name: wd_create
+ *
+ * Description:
+ *   The wd_create function will create a watchdog timer by allocating one
+ *   from the list of free watchdog timers.
+ *
+ * Parameters:
+ *   None
+ *
+ * Return Value:
+ *   Pointer to watchdog (i.e., the watchdog ID), or NULL if insufficient
+ *   watchdogs are available.
+ *
+ ****************************************************************************/
+
 WDOG_ID wd_create(void);
-int     wd_delete(WDOG_ID wdog);
-int     wd_start(WDOG_ID wdog, int32_t delay, wdentry_t wdentry, int argc, ...);
-int     wd_cancel(WDOG_ID wdog);
-int     wd_gettime(WDOG_ID wdog);
+
+/****************************************************************************
+ * Name: wd_delete
+ *
+ * Description:
+ *   The wd_delete() function will deallocate a watchdog timer by returning
+ *   it to the free pool of watchdog timers.  The watchdog timer will be
+ *   removed from the active timer queue if had been started.
+ *
+ * Parameters:
+ *   wdog - The watchdog ID to delete.  This is actually a pointer to a
+ *          watchdog structure.
+ *
+ * Return Value:
+ *   Returns OK or ERROR
+ *
+ * Assumptions:
+ *   The caller has assured that the watchdog is no longer in use.
+ *
+ ****************************************************************************/
+
+int wd_delete(WDOG_ID wdog);
+
+/****************************************************************************
+ * Name: wd_start
+ *
+ * Description:
+ *   This function adds a watchdog timer to the actuve timer queue.  The
+ *   specified watchdog function at 'wdentry' will be called from the
+ *   interrupt level after the specified number of ticks has elapsed.
+ *   Watchdog timers may be started from the interrupt level.
+ *
+ *   Watchdog timers execute in the address environment that was in effect
+ *   when wd_start() is called.
+ *
+ *   Watchdog timers execute only once.
+ *
+ *   To replace either the timeout delay or the function to be executed,
+ *   call wd_start again with the same wdog; only the most recent wdStart()
+ *   on a given watchdog ID has any effect.
+ *
+ * Parameters:
+ *   wdog     - watchdog ID
+ *   delay    - Delay count in clock ticks
+ *   wdentry  - function to call on timeout
+ *   parm1..4 - parameters to pass to wdentry
+ *
+ * Return Value:
+ *   OK or ERROR
+ *
+ * Assumptions:
+ *   The watchdog routine runs in the context of the timer interrupt handler
+ *   and is subject to all ISR restrictions.
+ *
+ ****************************************************************************/
+
+int wd_start(WDOG_ID wdog, int32_t delay, wdentry_t wdentry, int argc, ...);
+
+/****************************************************************************
+ * Name: wd_cancel
+ *
+ * Description:
+ *   This function cancels a currently running watchdog timer. Watchdog
+ *   timers may be cancelled from the interrupt level.
+ *
+ * Parameters:
+ *   wdog - ID of the watchdog to cancel.
+ *
+ * Return Value:
+ *   Zero (OK) is returned on success;  A negated errno value is returned to
+ *   indicate the nature of any failure.
+ *
+ ****************************************************************************/
+
+int wd_cancel(WDOG_ID wdog);
+
+/****************************************************************************
+ * Name: wd_gettime
+ *
+ * Description:
+ *   This function returns the time remaining before the specified watchdog
+ *   timer expires.
+ *
+ * Parameters:
+ *   wdog - watchdog ID
+ *
+ * Return Value:
+ *   The time in system ticks remaining until the watchdog time expires.
+ *   Zero means either that wdog is not valid or that the wdog has already
+ *   expired.
+ *
+ ****************************************************************************/
+
+int wd_gettime(WDOG_ID wdog);
 
 #undef EXTERN
 #ifdef __cplusplus

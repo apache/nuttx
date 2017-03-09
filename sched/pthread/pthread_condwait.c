@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/pthread/pthread_condwait.c
  *
- *   Copyright (C) 2007-2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,8 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/cancelpt.h>
+
 #include "pthread/pthread.h"
 
 /****************************************************************************
@@ -71,11 +73,15 @@ int pthread_cond_wait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex)
 {
   int ret;
 
-  sdbg("cond=0x%p mutex=0x%p\n", cond, mutex);
+  sinfo("cond=0x%p mutex=0x%p\n", cond, mutex);
+
+  /* pthread_cond_wait() is a cancellation point */
+
+  (void)enter_cancellation_point();
 
   /* Make sure that non-NULL references were provided. */
 
-  if (!cond || !mutex)
+  if (cond == NULL || mutex == NULL)
     {
       ret = EINVAL;
     }
@@ -90,7 +96,7 @@ int pthread_cond_wait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex)
     {
       /* Give up the mutex */
 
-      sdbg("Give up mutex / take cond\n");
+      sinfo("Give up mutex / take cond\n");
 
       sched_lock();
       mutex->pid = -1;
@@ -101,17 +107,22 @@ int pthread_cond_wait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex)
       ret |= pthread_takesemaphore((FAR sem_t *)&cond->sem);
       sched_unlock();
 
-      /* Reacquire the mutex */
+      /* Reacquire the mutex.
+       *
+       * REVISIT: When cancellation points are enabled, we will almost
+       * certainly hold the mutex when the pthread is canceled.
+       */
 
-      sdbg("Reacquire mutex...\n");
+      sinfo("Reacquire mutex...\n");
       ret |= pthread_takesemaphore((FAR sem_t *)&mutex->sem);
-      if (!ret)
+      if (ret == OK)
         {
           mutex->pid = getpid();
         }
     }
 
-  sdbg("Returning %d\n", ret);
+  leave_cancellation_point();
+  sinfo("Returning %d\n", ret);
   return ret;
 }
 

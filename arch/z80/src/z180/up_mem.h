@@ -1,5 +1,5 @@
 /************************************************************************************
- * common/sdcc.h
+ * arch/z80/common/sdcc.h
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_Z180_SRC_COMMON_UP_MEM_H
-#define __ARCH_Z180_SRC_COMMON_UP_MEM_H
+#ifndef __ARCH_Z80_SRC_Z180_UP_MEM_H
+#define __ARCH_Z80_SRC_Z180_UP_MEM_H
 
 /************************************************************************************
  * Included Files
@@ -72,4 +72,4 @@
 
 extern const uint16_t g_heapbase;
 
-#endif  /* __ARCH_Z180_SRC_COMMON_UP_MEM_H */
+#endif  /* __ARCH_Z80_SRC_Z180_UP_MEM_H */

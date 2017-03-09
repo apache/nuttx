@@ -175,25 +175,30 @@
 /* Special values of of sa_handler used by sigaction and sigset.  They are all
  * treated like NULL for now.  This is okay for SIG_DFL and SIG_IGN because
  * in NuttX, the default action for all signals is to ignore them.
- *
- * REVISIT:  Need to distinguish the value of SIG_HOLD.  It is needed in the
- * implementation of sigset() but would need to be recognized in all signal
- * functions that deal with signal disposition.
  */
 
-#define SIG_ERR         ((CODE void *)-1)  /* And error occurred */
-#define SIG_DFL         ((CODE void *)0)   /* Default is SIG_IGN for all signals */
-#define SIG_IGN         ((CODE void *)0)   /* Ignore the signal */
-#define SIG_HOLD        ((CODE void *)1)   /* Used only with sigset() */
+#define SIG_ERR         ((_sa_handler_t)-1)  /* And error occurred */
+#define SIG_DFL         ((_sa_handler_t)0)   /* Default is SIG_IGN for all signals */
+#define SIG_IGN         ((_sa_handler_t)0)   /* Ignore the signal */
+#define SIG_HOLD        ((_sa_handler_t)1)   /* Used only with sigset() */
 
 /********************************************************************************
  * Public Type Definitions
  ********************************************************************************/
 
-/* This defines a set of 32 signals (numbered 0 through 31). */
+/* This defines a set of 32 signals (numbered 0 through 31).
+ * REVISIT: Signal 0 is, however, not generally usable since that value has
+ * special meaning in some circumstances (e.g., kill()).
+ */
 
 typedef uint32_t sigset_t;   /* Bit set of 32 signals */
 #define __SIGSET_T_DEFINED 1
+
+/* Possibly volatile-qualified integer type of an object that can be accessed
+ * as an atomic entity, even in the presence of asynchronous interrupts.
+ */
+
+typedef volatile int sig_atomic_t;
 
 /* This defines the type of the siginfo si_value field */
 
@@ -281,8 +286,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-int kill(pid_t, int);
-int sigaction(int sig, FAR const struct sigaction *act,
+int kill(pid_t pid, int signo);
+int raise(int signo);
+int sigaction(int signo, FAR const struct sigaction *act,
               FAR struct sigaction *oact);
 int sigaddset(FAR sigset_t *set, int signo);
 int sigdelset(FAR sigset_t *set, int signo);
@@ -291,17 +297,17 @@ int sigfillset(FAR sigset_t *set);
 int sighold(int signo);
 int sigismember(FAR const sigset_t *set, int signo);
 int sigignore(int signo);
-CODE void (*signal(int sig, CODE void (*func)(int signo)))(int signo);
-int sigprocmask(int how, FAR const sigset_t *set, FAR sigset_t *oset);
+CODE void (*signal(int signo, CODE void (*func)(int signo)))(int signo);
 int sigpause(int signo);
 int sigpending(FAR sigset_t *set);
+int sigprocmask(int how, FAR const sigset_t *set, FAR sigset_t *oset);
 #ifdef CONFIG_CAN_PASS_STRUCTS
 int sigqueue(int pid, int signo, union sigval value);
 #else
 int sigqueue(int pid, int signo, FAR void *sival_ptr);
 #endif
 int sigrelse(int signo);
-CODE void (*sigset(int sig, CODE void (*func)(int signo)))(int signo);
+CODE void (*sigset(int signo, CODE void (*func)(int signo)))(int signo);
 int sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *value,
                  FAR const struct timespec *timeout);
 int sigsuspend(FAR const sigset_t *sigmask);

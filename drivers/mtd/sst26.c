@@ -208,15 +208,11 @@
 /* Debug ****************************************************************************/
 
 #ifdef CONFIG_SST26_DEBUG
-# define sstdbg(format, ...)    dbg(format, ##__VA_ARGS__)
-# define sstlldbg(format, ...)  lldbg(format, ##__VA_ARGS__)
-# define sstvdbg(format, ...)   vdbg(format, ##__VA_ARGS__)
-# define sstllvdbg(format, ...) llvdbg(format, ##__VA_ARGS__)
+# define ssterr(format, ...)    _err(format, ##__VA_ARGS__)
+# define sstinfo(format, ...)   _info(format, ##__VA_ARGS__)
 #else
-# define sstdbg(x...)
-# define sstlldbg(x...)
-# define sstvdbg(x...)
-# define sstllvdbg(x...)
+# define ssterr(x...)
+# define sstinfo(x...)
 #endif
 
 /************************************************************************************
@@ -249,6 +245,7 @@ static inline void sst26_unlock(FAR struct spi_dev_s *dev);
 static inline int sst26_readid(struct sst26_dev_s *priv);
 static void sst26_waitwritecomplete(struct sst26_dev_s *priv);
 static void sst26_writeenable(struct sst26_dev_s *priv);
+static void sst26_writedisable(struct sst26_dev_s *priv);
 static void sst26_globalunlock(struct sst26_dev_s *priv);
 static inline void sst26_sectorerase(struct sst26_dev_s *priv, off_t offset, uint8_t type);
 static inline int  sst26_chiperase(struct sst26_dev_s *priv);
@@ -321,7 +318,7 @@ static inline int sst26_readid(struct sst26_dev_s *priv)
   uint16_t memory;
   uint16_t capacity;
 
-  sstvdbg("priv: %p\n", priv);
+  sstinfo("priv: %p\n", priv);
 
   /* Lock the SPI bus, configure the bus, and select this FLASH part. */
 
@@ -340,8 +337,8 @@ static inline int sst26_readid(struct sst26_dev_s *priv)
   SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
   sst26_unlock(priv->dev);
 
-  lldbg("manufacturer: %02x memory: %02x capacity: %02x\n",
-        manufacturer, memory, capacity);
+  sstinfo("manufacturer: %02x memory: %02x capacity: %02x\n",
+          manufacturer, memory, capacity);
 
   /* Check for a valid manufacturer and memory type */
 
@@ -416,7 +413,7 @@ static void sst26_waitwritecomplete(struct sst26_dev_s *priv)
     }
   while ((status & SST26_SR_WIP) != 0);
 
-  sstvdbg("Complete\n");
+  sstinfo("Complete\n");
 }
 
 /************************************************************************************
@@ -431,7 +428,7 @@ static void sst26_globalunlock(struct sst26_dev_s *priv)
 
   SPI_SELECT(priv->dev, SPIDEV_FLASH, true);
 
-  /* Send "Write Enable (WREN)" command */
+  /* Send "Global Unlock (ULBPR)" command */
 
   (void)SPI_SEND(priv->dev, SST26_ULBPR);
 
@@ -439,7 +436,7 @@ static void sst26_globalunlock(struct sst26_dev_s *priv)
 
   SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
 
-  sstvdbg("Device unlocked.\n");
+  sstinfo("Device unlocked.\n");
 }
 
 /************************************************************************************
@@ -460,7 +457,28 @@ static void sst26_writeenable(struct sst26_dev_s *priv)
 
   SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
 
-  sstvdbg("Enabled\n");
+  sstinfo("Enabled\n");
+}
+
+/************************************************************************************
+ * Name:  sst26_writedisable
+ ************************************************************************************/
+
+static void sst26_writedisable(struct sst26_dev_s *priv)
+{
+  /* Select this FLASH part */
+
+  SPI_SELECT(priv->dev, SPIDEV_FLASH, true);
+
+  /* Send "Write Disable (WRDI)" command */
+
+  (void)SPI_SEND(priv->dev, SST26_WRDI);
+
+  /* Deselect the FLASH */
+
+  SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
+
+  sstinfo("Disabled\n");
 }
 
 /************************************************************************************
@@ -473,7 +491,7 @@ static void sst26_sectorerase(struct sst26_dev_s *priv, off_t sector, uint8_t ty
 
   offset = sector << priv->sectorshift;
 
-  sstvdbg("sector: %08lx\n", (long)sector);
+  sstinfo("sector: %08lx\n", (long)sector);
 
   /* Send write enable instruction */
 
@@ -504,7 +522,7 @@ static void sst26_sectorerase(struct sst26_dev_s *priv, off_t sector, uint8_t ty
 
   sst26_waitwritecomplete(priv);
 
-  sstvdbg("Erased\n");
+  sstinfo("Erased\n");
 }
 
 /************************************************************************************
@@ -513,7 +531,7 @@ static void sst26_sectorerase(struct sst26_dev_s *priv, off_t sector, uint8_t ty
 
 static inline int sst26_chiperase(struct sst26_dev_s *priv)
 {
-  sstvdbg("priv: %p\n", priv);
+  sstinfo("priv: %p\n", priv);
 
   /* Send write enable instruction */
 
@@ -533,7 +551,7 @@ static inline int sst26_chiperase(struct sst26_dev_s *priv)
 
   sst26_waitwritecomplete(priv);
 
-  sstvdbg("Return: OK\n");
+  sstinfo("Return: OK\n");
   return OK;
 }
 
@@ -546,7 +564,7 @@ static inline void sst26_pagewrite(struct sst26_dev_s *priv,
 {
   off_t offset = page << priv->pageshift;
 
-  sstvdbg("page: %08lx offset: %08lx\n", (long)page, (long)offset);
+  sstinfo("page: %08lx offset: %08lx\n", (long)page, (long)offset);
 
   /* Enable the write access to the FLASH */
 
@@ -576,7 +594,7 @@ static inline void sst26_pagewrite(struct sst26_dev_s *priv,
 
   sst26_waitwritecomplete(priv);
 
-  sstvdbg("Written\n");
+  sstinfo("Written\n");
 }
 
 /************************************************************************************
@@ -588,7 +606,7 @@ static inline void sst26_bytewrite(struct sst26_dev_s *priv,
                                    FAR const uint8_t *buffer, off_t offset,
                                    uint16_t count)
 {
-  sstvdbg("offset: %08lx  count:%d\n", (long)offset, count);
+  sstinfo("offset: %08lx  count:%d\n", (long)offset, count);
 
   /* Enable the write access to the FLASH */
 
@@ -619,7 +637,7 @@ static inline void sst26_bytewrite(struct sst26_dev_s *priv,
 
   sst26_waitwritecomplete(priv);
 
-  sstvdbg("Written\n");
+  sstinfo("Written\n");
 }
 #endif
 
@@ -634,7 +652,7 @@ static int sst26_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nbloc
   FAR struct sst26_dev_s *priv = (FAR struct sst26_dev_s *)dev;
   size_t blocksleft = nblocks;
 
-  sstvdbg("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
+  sstinfo("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
 
   /* Lock access to the SPI bus until we complete the erase */
 
@@ -664,7 +682,7 @@ static ssize_t sst26_bread(FAR struct mtd_dev_s *dev, off_t startblock,
   FAR struct sst26_dev_s *priv = (FAR struct sst26_dev_s *)dev;
   ssize_t nbytes;
 
-  sstvdbg("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
+  sstinfo("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
 
   /* On this device, we can handle the block read just like the byte-oriented read */
 
@@ -689,7 +707,7 @@ static ssize_t sst26_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t 
   size_t blocksleft = nblocks;
   size_t pagesize = 1 << priv->pageshift;
 
-  sstvdbg("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
+  sstinfo("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
 
   /* Lock the SPI bus and write each page to FLASH */
 
@@ -714,7 +732,7 @@ static ssize_t sst26_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes
 {
   FAR struct sst26_dev_s *priv = (FAR struct sst26_dev_s *)dev;
 
-  sstvdbg("offset: %08lx nbytes: %d\n", (long)offset, (int)nbytes);
+  sstinfo("offset: %08lx nbytes: %d\n", (long)offset, (int)nbytes);
 
   /* Lock the SPI bus and select this FLASH part */
 
@@ -743,7 +761,7 @@ static ssize_t sst26_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes
 
   SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
   sst26_unlock(priv->dev);
-  sstvdbg("return nbytes: %d\n", (int)nbytes);
+  sstinfo("return nbytes: %d\n", (int)nbytes);
   return nbytes;
 }
 
@@ -763,7 +781,7 @@ static ssize_t sst26_write(FAR struct mtd_dev_s *dev, off_t offset, size_t nbyte
   int    pagesize;
   int    bytestowrite;
 
-  sstvdbg("offset: %08lx nbytes: %d\n", (long)offset, (int)nbytes);
+  sstinfo("offset: %08lx nbytes: %d\n", (long)offset, (int)nbytes);
 
   /* We must test if the offset + count crosses one or more pages
    * and perform individual writes.  The devices can only write in
@@ -830,7 +848,7 @@ static int sst26_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
   FAR struct sst26_dev_s *priv = (FAR struct sst26_dev_s *)dev;
   int ret = -EINVAL; /* Assume good command with bad parameters */
 
-  sstvdbg("cmd: %d \n", cmd);
+  sstinfo("cmd: %d \n", cmd);
 
   switch (cmd)
     {
@@ -854,7 +872,7 @@ static int sst26_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 
               ret = OK;
 
-              sstvdbg("blocksize: %d erasesize: %d neraseblocks: %d\n",
+              sstinfo("blocksize: %d erasesize: %d neraseblocks: %d\n",
                       geo->blocksize, geo->erasesize, geo->neraseblocks);
             }
         }
@@ -876,7 +894,7 @@ static int sst26_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
         break;
     }
 
-  sstvdbg("return %d\n", ret);
+  sstinfo("return %d\n", ret);
   return ret;
 }
 
@@ -899,7 +917,7 @@ FAR struct mtd_dev_s *sst26_initialize_spi(FAR struct spi_dev_s *dev)
   FAR struct sst26_dev_s *priv;
   int ret;
 
-  sstvdbg("dev: %p\n", dev);
+  sstinfo("dev: %p\n", dev);
 
   /* Allocate a state structure (we allocate the structure instead of using
    * a fixed, static allocation so that we can handle multiple FLASH devices.
@@ -936,15 +954,16 @@ FAR struct mtd_dev_s *sst26_initialize_spi(FAR struct spi_dev_s *dev)
         {
           /* Unrecognized! Discard all of that work we just did and return NULL */
 
-          sstdbg("Unrecognized\n");
+          ssterr("ERROR: Unrecognized\n");
           kmm_free(priv);
-          priv = NULL;
+          return NULL;
         }
       else
         {
           /* Make sure that the FLASH is unprotected so that we can write into it */
-
+          sst26_writeenable(priv);
           sst26_globalunlock(priv);
+          sst26_writedisable(priv);
 
 #ifdef CONFIG_MTD_REGISTRATION
           /* Register the MTD with the procfs system if enabled */
@@ -956,6 +975,6 @@ FAR struct mtd_dev_s *sst26_initialize_spi(FAR struct spi_dev_s *dev)
 
   /* Return the implementation-specific state structure as the MTD device */
 
-  sstvdbg("Return %p\n", priv);
+  sstinfo("Return %p\n", priv);
   return (FAR struct mtd_dev_s *)priv;
 }

@@ -55,8 +55,8 @@
 #  include <nuttx/mtd/mtd.h>
 #endif
 
-#ifdef CONFIG_SYSTEM_USBMONITOR
-#  include <apps/usbmonitor.h>
+#ifdef CONFIG_USBMONITOR
+#  include <nuttx/usb/usbmonitor.h>
 #endif
 
 #ifndef CONFIG_STM32F429I_DISCO_FLASH_MINOR
@@ -65,7 +65,7 @@
 
 #ifdef CONFIG_STM32F429I_DISCO_FLASH_CONFIG_PART
 #ifdef CONFIG_PLATFORM_CONFIGDATA
-#  include <nuttx/configdata.h>
+#  include <nuttx/mtd/configdata.h>
 #endif
 #endif
 
@@ -109,7 +109,7 @@
 
 /* Check if we should enable the USB monitor before starting NSH */
 
-#if !defined(CONFIG_USBDEV_TRACE) || !defined(CONFIG_SYSTEM_USBMONITOR)
+#if !defined(CONFIG_USBDEV_TRACE) || !defined(CONFIG_USBMONITOR)
 #  undef HAVE_USBMONITOR
 #endif
 
@@ -165,6 +165,8 @@ int board_app_initialize(uintptr_t arg)
   int ret;
 #elif defined(HAVE_USBHOST) || defined(HAVE_USBMONITOR)
   int ret;
+#elif defined(CONFIG_SENSORS_L3GD20)
+  int ret;
 #endif
 
   /* Configure SPI-based devices */
@@ -205,7 +207,7 @@ int board_app_initialize(uintptr_t arg)
       ret = mtd->ioctl(mtd, MTDIOC_GEOMETRY, (unsigned long)((uintptr_t)&geo));
       if (ret < 0)
         {
-          fdbg("ERROR: mtd->ioctl failed: %d\n", ret);
+          ferr("ERROR: mtd->ioctl failed: %d\n", ret);
           return ret;
         }
 
@@ -242,7 +244,7 @@ int board_app_initialize(uintptr_t arg)
 
             if (partszbytes < erasesize)
               {
-                fdbg("ERROR: Partition size is lesser than erasesize!\n");
+                ferr("ERROR: Partition size is lesser than erasesize!\n");
                 return -1;
               }
 
@@ -250,7 +252,7 @@ int board_app_initialize(uintptr_t arg)
 
             if ((partszbytes % erasesize) != 0)
               {
-                fdbg("ERROR: Partition size is not multiple of erasesize!\n");
+                ferr("ERROR: Partition size is not multiple of erasesize!\n");
                 return -1;
               }
 
@@ -284,7 +286,7 @@ int board_app_initialize(uintptr_t arg)
 
             if (mtd_part == NULL)
               {
-                dbg("Error: failed to create partition %s\n", partname);
+                ferr("ERROR: failed to create partition %s\n", partname);
                 return -1;
               }
 
@@ -371,10 +373,18 @@ int board_app_initialize(uintptr_t arg)
 #ifdef HAVE_USBMONITOR
   /* Start the USB Monitor */
 
-  ret = usbmonitor_start(0, NULL);
+  ret = usbmonitor_start();
   if (ret != OK)
     {
       syslog(LOG_ERR, "ERROR: Failed to start USB monitor: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_L3GD20
+  ret = stm32_l3gd20initialize("/dev/gyr0");
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize l3gd20 sensor: %d\n", ret);
     }
 #endif
 

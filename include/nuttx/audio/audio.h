@@ -1,6 +1,7 @@
 /****************************************************************************
  * include/nuttx/audio/audio.h
  *
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2013 Ken Pettit. All rights reserved.
  *   Author: Ken Pettit <pettitkd@gmail.com>
  *
@@ -67,8 +68,8 @@
  ****************************************************************************/
 /* Configuration ************************************************************/
 /* CONFIG_AUDIO - Enables Audio driver support
- * CONFIG_DEBUG_AUDIO - If enabled (with CONFIG_DEBUG and, optionally,
- *   CONFIG_DEBUG_VERBOSE), this will generate output that can be used to
+ * CONFIG_DEBUG_AUDIO - If enabled (with CONFIG_DEBUG_FEATURES and, optionally,
+ *   CONFIG_DEBUG_INFO), this will generate output that can be used to
  *   debug Audio drivers.
  */
 
@@ -363,7 +364,7 @@ struct ap_buffer_info_s
 
 /* This structure describes an Audio Pipeline Buffer */
 
-struct ap_buffer_s
+begin_packed_struct struct ap_buffer_s
 {
   struct dq_entry_s     dq_entry;   /* Double linked queue entry */
   struct audio_info_s   i;          /* The info for samples in this buffer */
@@ -377,7 +378,7 @@ struct ap_buffer_s
   uint16_t              flags;      /* Buffer flags */
   uint16_t              crefs;      /* Number of reference counts */
   uint8_t               samp[0];    /* Offset of the first sample */
-} packed_struct;
+} end_packed_struct;
 
 /* Structure defining the messages passed to a listening audio thread
  * for dequeuing buffers and other operations.  Also used to allocate
@@ -388,12 +389,12 @@ struct ap_buffer_s
 struct audio_msg_s
 {
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-  FAR void            *session;     /* Associated channel */
+  FAR void           *session;      /* Associated channel */
 #endif
   uint16_t            msgId;        /* Message ID */
   union
   {
-    FAR void *        pPtr;         /* Buffer being dequeued */
+    FAR void         *pPtr;         /* Buffer being dequeued */
     uint32_t          data;         /* Message data */
   } u;
 };

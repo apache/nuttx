@@ -86,13 +86,13 @@ static inline int mkfatfs_getgeometry(FAR struct fat_format_s *fmt,
   ret = DEV_GEOMETRY(geometry);
   if (ret < 0)
     {
-      fdbg("ERROR: geometry() returned %d\n", ret);
+      ferr("ERROR: geometry() returned %d\n", ret);
       return ret;
     }
 
   if (!geometry.geo_available || !geometry.geo_writeenabled)
     {
-      fdbg("ERROR: Media is not available\n", ret);
+      ferr("ERROR: Media is not available\n", ret);
       return -ENODEV;
     }
 
@@ -104,7 +104,7 @@ static inline int mkfatfs_getgeometry(FAR struct fat_format_s *fmt,
     {
       if (fmt->ff_nsectors > geometry.geo_nsectors)
         {
-          fdbg("ERROR: User maxblocks (%d) exceeds blocks on device (%d)\n",
+          ferr("ERROR: User maxblocks (%d) exceeds blocks on device (%d)\n",
                fmt->ff_nsectors, geometry.geo_nsectors);
 
           return -EINVAL;
@@ -139,7 +139,7 @@ static inline int mkfatfs_getgeometry(FAR struct fat_format_s *fmt,
         break;
 
       default:
-        fdbg("ERROR: Unsupported sector size: %d\n", var->fv_sectorsize);
+        ferr("ERROR: Unsupported sector size: %d\n", var->fv_sectorsize);
         return -EPERM;
     }
 
@@ -193,17 +193,17 @@ int mkfatfs(FAR const char *pathname, FAR struct fat_format_s *fmt)
 
   /* Verify format options (only when DEBUG enabled) */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!pathname)
     {
-      fdbg("ERROR: No block driver path\n");
+      ferr("ERROR: No block driver path\n");
       ret = -EINVAL;
       goto errout;
     }
 
   if (fmt->ff_nfats < 1 || fmt->ff_nfats > 4)
     {
-      fdbg("ERROR: Invalid number of fats: %d\n", fmt->ff_nfats);
+      ferr("ERROR: Invalid number of fats: %d\n", fmt->ff_nfats);
       ret = -EINVAL;
       goto errout;
     }
@@ -211,7 +211,7 @@ int mkfatfs(FAR const char *pathname, FAR struct fat_format_s *fmt)
   if (fmt->ff_fattype != 0  && fmt->ff_fattype != 12 &&
       fmt->ff_fattype != 16 && fmt->ff_fattype != 32)
     {
-      fdbg("ERROR: Invalid FAT size: %d\n", fmt->ff_fattype);
+      ferr("ERROR: Invalid FAT size: %d\n", fmt->ff_fattype);
       ret = -EINVAL;
       goto errout;
     }
@@ -228,10 +228,10 @@ int mkfatfs(FAR const char *pathname, FAR struct fat_format_s *fmt)
    * means that we should autoselect the cluster sizel.
    */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (fmt->ff_clustshift > 7 && fmt->ff_clustshift != 0xff)
     {
-      fdbg("ERROR: Invalid cluster shift value: %d\n", fmt->ff_clustshift);
+      ferr("ERROR: Invalid cluster shift value: %d\n", fmt->ff_clustshift);
 
       ret = -EINVAL;
       goto errout;
@@ -240,7 +240,7 @@ int mkfatfs(FAR const char *pathname, FAR struct fat_format_s *fmt)
    if (fmt->ff_rootdirentries != 0 &&
        (fmt->ff_rootdirentries < 16 || fmt->ff_rootdirentries > 32767))
     {
-      fdbg("ERROR: Invalid number of root dir entries: %d\n",
+      ferr("ERROR: Invalid number of root dir entries: %d\n",
            fmt->ff_rootdirentries);
 
       ret = -EINVAL;
@@ -250,7 +250,7 @@ int mkfatfs(FAR const char *pathname, FAR struct fat_format_s *fmt)
    if (fmt->ff_rsvdseccount != 0 && (fmt->ff_rsvdseccount < 1 ||
        fmt->ff_rsvdseccount > 32767))
     {
-      fdbg("ERROR: Invalid number of reserved sectors: %d\n",
+      ferr("ERROR: Invalid number of reserved sectors: %d\n",
            fmt->ff_rsvdseccount);
 
       ret = -EINVAL;
@@ -263,7 +263,7 @@ int mkfatfs(FAR const char *pathname, FAR struct fat_format_s *fmt)
   ret = open_blockdriver(pathname, 0, &var.fv_inode);
   if (ret < 0)
     {
-      fdbg("ERROR: Failed to open %s\n", pathname);
+      ferr("ERROR: Failed to open %s\n", pathname);
       goto errout;
     }
 
@@ -271,7 +271,7 @@ int mkfatfs(FAR const char *pathname, FAR struct fat_format_s *fmt)
 
   if (!var.fv_inode->u.i_bops->write || !var.fv_inode->u.i_bops->geometry)
     {
-      fdbg("ERROR: %s does not support write or geometry methods\n",
+      ferr("ERROR: %s does not support write or geometry methods\n",
             pathname);
 
       ret = -EACCES;
@@ -306,7 +306,7 @@ int mkfatfs(FAR const char *pathname, FAR struct fat_format_s *fmt)
 
   if (!var.fv_sect)
     {
-      fdbg("ERROR: Failed to allocate working buffers\n");
+      ferr("ERROR: Failed to allocate working buffers\n");
       goto errout_with_driver;
     }
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/stdio/lib_lowoutstream.c
  *
- *   Copyright (C) 2007-2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -88,9 +88,7 @@ static void lowoutstream_putc(FAR struct lib_outstream_s *this, int ch)
 void lib_lowoutstream(FAR struct lib_outstream_s *stream)
 {
   stream->put   = lowoutstream_putc;
-#ifdef CONFIG_STDIO_LINEBUFFER
   stream->flush = lib_noflush;
-#endif
   stream->nput  = 0;
 }
 

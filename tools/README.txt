@@ -104,6 +104,16 @@ kconfig2html.c
     <Kconfig root> is the directory containing the root Kconfig file.
          Default <Kconfig directory>: .
 
+  NOTE: In order to use this tool, some configuration must be in-place will
+  all necessary symbolic links.  You can establish the configured symbolic
+  links with:
+
+    make context
+
+  or more quickly with:
+
+    make dirlinks
+
 mkconfigvars.sh
 ---------------
 
@@ -259,7 +269,7 @@ bdf-convert.c
     2. Use the bdf-converter program to convert the BDF font to the NuttX
        font format.  This will result in a C header file containing
        definitions.  That header file should be installed at, for example,
-       graphics/nxfonts/nxfonts_myfont.h.
+       libnx/nxfonts/nxfonts_myfont.h.
 
   Create a new NuttX configuration variable.  For example, suppose
   you define the following variable:  CONFIG_NXFONT_MYFONT.  Then
@@ -314,7 +324,7 @@ bdf-convert.c
           @$(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=2 EXTRADEFINES=$(EXTRADEFINES)
         endif
 
-    6. nuttx/graphics/nxfonts/Make.defs.  Set the make variable NXFSET_CSRCS.
+    6. nuttx/libnx/nxfonts/Make.defs.  Set the make variable NXFSET_CSRCS.
        NXFSET_CSRCS determines the name of the font C file to build when
        NXFONTS_FONTID=2:
 
@@ -325,12 +335,12 @@ bdf-convert.c
        NXFSET_CSRCS    += nxfonts_bitmaps_myfont.c
        endif
 
-    7. nuttx/graphics/nxfonts/Makefile.sources.  This is the Makefile used
+    7. nuttx/libnx/nxfonts/Makefile.sources.  This is the Makefile used
        in step 5 that will actually generate the font C file.  So, given
        your NXFONTS_FONTID=2, it needs to determine a prefix to use for
        auto-generated variable and function names and (again) the name of
        the auto-generated file to create (this must be the same name that
-       was used in nuttx/graphics/nxfonts/Make.defs):
+       was used in nuttx/libnx/nxfonts/Make.defs):
 
        ifeq ($(NXFONTS_FONTID),1)
        NXFONTS_PREFIX    := g_sans23x27_
@@ -341,9 +351,9 @@ bdf-convert.c
        GEN_CSRC    = nxfonts_bitmaps_myfont.c
        endif
 
-    8. graphics/nxfonts/nxfonts_bitmaps.c.  This is the file that contains
+    8. graphics/libnx/nxfonts_bitmaps.c.  This is the file that contains
        the generic font structures.  It is used as a "template" file by
-       nuttx/graphics/nxfonts/Makefile.sources to create your customized
+       nuttx/libnx/nxfonts/Makefile.sources to create your customized
        font data set.
 
        #if NXFONTS_FONTID == 1
@@ -357,7 +367,7 @@ bdf-convert.c
        Where nxfonts_myfont.h is the NuttX font file that we generated in
        step 2 using the bdf-converter tool.
 
-    9. graphics/nxfonts/nxfonts_getfont.c.  Finally, we need to extend the
+    9. libnx/nxfonts/nxfonts_getfont.c.  Finally, we need to extend the
        logic that does the run-time font lookups so that can find our new
        font.  The lookup function is NXHANDLE nxf_getfonthandle(enum nx_fontid_e fontid).
        The new font information needs to be added to data structures used by
@@ -554,8 +564,8 @@ indent.sh
 ---------
 
   This script can be used to indent .c and .h files in a manner similar
-  to my coding NuttX coding style.  It doesn't do a really good job,
-  however (see the comments at the top of the indent.sh file).
+  to the NuttX coding style.  It doesn't do a really good job, however
+  (see below and the comments at the top of the indent.sh file).
 
   USAGE:
     ./indent.sh [-d] -o <out-file> <in-file>
@@ -575,12 +585,74 @@ indent.sh
     -h
       Show this help message and exit
 
+  The conversions make by the indent.sh script differs from the NuttX coding
+  style in that:
+
+    1. I normally put the trailing */ of a multi-line comment on a separate
+       line.  If your C file already has properly formatted comments then
+       using -nfca instead of -fca eliminates that bad behavior
+    2. I usually align things vertically (like '=' in assignments),
+    3. indent.sh puts a bogus blank line at the top of the file,
+    4. I don't like the way it handles nested conditional compilation
+       intermixed with code.  I prefer the preprocessor conditiona tests
+       be all right justified in that case.
+    5. I also indent brackets differently on structures than does this script.
+    6. I normally use no spaces in casts.  indent.sh adds spaces in casts like
+      "(FAR void *)&foo" becomes "(FAR void *) & foo".
+    7. When used with header files, the initial idempotence conditional test
+       causes all preprecessor directives to be indented in the file.  So for
+       header files, you will need to substitute "^#  " with "#" in the
+       converted header file.
+
+   You will manually need to check for the issues listed above after
+   performing the conversions.
+
+sethost.sh
+----------
+
+  Saved configurations may run on Linux, Cygwin (32- or 64-bit), or other
+  platforms.  The platform characteristics can be changed use 'make
+  menuconfig'.  Sometimes this can be confusing due to the differences
+  between the platforms.  Enter sethost.sh
+
+  sethost.sh is a simple script that changes a configuration to your
+  host platform.  This can greatly simplify life if you use many different
+  configurations.  For example, if you are running on Linux and you
+  configure like this:
+
+    $ cd tools
+    $ ./configure.sh board/configuration
+    $ cd ..
+
+  The you can use the following command to both (1) make sure that the
+  configuration is up to date, AND (2) the configuration is set up
+  correctly for Linux:
+
+    $ tools/sethost.sh -l
+
+  Or, if you are on a Windows/Cygwin 64-bit platform:
+
+    $ tools/sethost.sh -w
+
+  Other options are available:
+
+    $ tools/sethost.sh -h
+
+    USAGE: tools/sethost.sh [-w|l] [-c|n] [-32|64] [<config>]
+           tools/sethost.sh -h
+
+    Where:
+      -w|l selects Windows (w) or Linux (l).  Default: Linux
+      -c|n selects Windows native (n) or Cygwin (c).  Default Cygwin
+      -32|64 selects 32- or 64-bit host (Only for Cygwin).  Default 64
+      -h will show this help test and terminate
+
 refresh.sh
 ----------
 
   This is a bash script that automatics refreshing of board default
   configuration (defconfig) files.  It does not do anything special
-  thet you cannot do manually, but is useful for me when I have to
+  that you cannot do manually, but is useful for me when I have to
   update dozens of confuration files.
 
   Configuration files have to be updated because over time, the
@@ -637,6 +709,18 @@ refresh.sh
      option, this file copy will occur autiomatically.  Otherwise,
      refresh.sh will prompt you first to avoid overwriting the
      defconfig file with changes that you may not want.
+
+showsize.sh
+-----------
+
+  Show the top 10 biggest memory hogs in code and data spaces.  This
+  must be executed from the top-level NuttX directory like:
+
+    $ tools/showsize.sh
+    TOP 10 BIG DATA
+    ...
+    TOP 10 BIG CODE
+    ...
 
 testbuild.sh
 ------------

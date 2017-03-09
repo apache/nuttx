@@ -66,6 +66,16 @@
 #  undef CONFIG_STM32_SPI3
 #endif
 
+/* STMPE811 on I2C3 */
+
+//#define GPIO_I2C3_SCL GPIO_I2C3_SCL_1
+//#define GPIO_I2C3_SDA GPIO_I2C3_SDA_1
+
+#define STMPE811_ADDR1    0x41
+#define STMPE811_ADDR2    0x44
+
+#define GPIO_IO_EXPANDER (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTA|GPIO_PIN15)
+
 /* STM32F429 Discovery GPIOs **************************************************************************/
 /* LEDs */
 
@@ -103,6 +113,11 @@
                          GPIO_OUTPUT_CLEAR|GPIO_PORTF|GPIO_PIN10)
 #define GPIO_CS_SST25   (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
                          GPIO_OUTPUT_SET|GPIO_PORTE|GPIO_PIN4)
+
+/* L3GD20 MEMS */
+
+#define GPIO_L3GD20_DREADY (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTA|GPIO_PIN2)
+#define L3GD20_IRQ      (2 + STM32_IRQ_EXTI0)
 
 /* USB OTG HS
  *
@@ -220,7 +235,6 @@ void stm32_ledpminitialize(void);
 void stm32_pmbuttons(void);
 #endif
 
-#ifdef CONFIG_STM32F429I_DISCO_ILI9341
 /****************************************************************************
  * Name:  stm32_ili93414ws_initialize
  *
@@ -236,10 +250,10 @@ void stm32_pmbuttons(void);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_STM32F429I_DISCO_ILI9341
 FAR struct ili9341_lcd_s *stm32_ili93414ws_initialize(void);
 #endif
 
-#ifdef CONFIG_STM32_SPI5
 /****************************************************************************
  * Name: stm32_spi5initialize
  *
@@ -262,7 +276,27 @@ FAR struct ili9341_lcd_s *stm32_ili93414ws_initialize(void);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_STM32_SPI5
 FAR struct spi_dev_s *stm32_spi5initialize(void);
+#endif
+
+
+/****************************************************************************
+ * Name: stm32_l3gd20initialize()
+ *
+ * Description:
+ *   Initialize and register the L3GD20 3 axis gyroscope sensor driver.
+ *
+ * Input parameters:
+ *   devpath - The full path to the driver to register. E.g., "/dev/gyro0"
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SPI) & defined(CONFIG_SENSORS_L3GD20)
+int stm32_l3gd20initialize(FAR const char *devpath);
 #endif
 
 #endif /* __ASSEMBLY__ */

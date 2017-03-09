@@ -98,8 +98,8 @@
 
 /* We expect to receive GPIO interrupts for card insertion events */
 
-#ifndef CONFIG_GPIO_IRQ
-#  error "CONFIG_GPIO_IRQ required for card detect interrupt"
+#ifndef CONFIG_KINETIS_GPIOIRQ
+#  error "CONFIG_KINETIS_GPIOIRQ required for card detect interrupt"
 #endif
 
 #ifndef CONFIG_KINETIS_PORTEINTS
@@ -224,7 +224,7 @@ int board_app_initialize(uintptr_t arg)
   /* Attached the card detect interrupt (but don't enable it yet) */
 
   kinetis_pinconfig(GPIO_SD_CARDDETECT);
-  kinetis_pinirqattach(GPIO_SD_CARDDETECT, kinetis_cdinterrupt);
+  (void)kinetis_pinirqattach(GPIO_SD_CARDDETECT, kinetis_cdinterrupt, NULL);
 
   /* Configure the write protect GPIO */
 

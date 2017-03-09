@@ -51,6 +51,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/spi/spi.h>
 
@@ -341,7 +342,7 @@ static uint8_t mrf24j40_getreg(FAR struct spi_dev_s *spi, uint32_t addr)
   SPI_SELECT     (spi, SPIDEV_IEEE802154, false);
   mrf24j40_unlock(spi);
 
-  /*dbg("r[%04X]=%02X\n",addr,rx[len-1]);*/
+  /*winfo("r[%04X]=%02X\n", addr, rx[len-1]);*/
   return rx[len-1];
 }
 
@@ -481,7 +482,7 @@ static int mrf24j40_setrxmode(FAR struct mrf24j40_radio_s *dev, int mode)
   mrf24j40_setreg(dev->spi, MRF24J40_RXMCR, reg);
 
   dev->rxmode = mode;
-  dbg("%u\n",(unsigned)mode);
+  winfo("%u\n", (unsigned)mode);
   return OK;
 }
 
@@ -505,10 +506,9 @@ static int mrf24j40_setchannel(FAR struct ieee802154_radio_s *ieee,
                                uint8_t chan)
 {
   FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)ieee;
-  
   if (chan<11 || chan>26)
     {
-      dbg("Invalid chan: %d\n",chan);
+      werr("ERROR: Invalid chan: %d\n",chan);
       return -EINVAL;
     }
 
@@ -523,7 +523,7 @@ static int mrf24j40_setchannel(FAR struct ieee802154_radio_s *ieee,
   mrf24j40_resetrfsm(dev);
 
   dev->channel = chan;
-  //dbg("%u\n",(unsigned)chan);
+  //winfo("%u\n", (unsigned)chan);
 
   return OK;
 }
@@ -563,7 +563,7 @@ static int mrf24j40_setpanid(FAR struct ieee802154_radio_s *ieee,
   mrf24j40_setreg(dev->spi, MRF24J40_PANIDL, (uint8_t)(panid&0xFF));
 
   dev->panid = panid;
-  dbg("%04X\n",(unsigned)panid);
+  winfo("%04X\n", (unsigned)panid);
 
   return OK;
 }
@@ -605,7 +605,7 @@ static int mrf24j40_setsaddr(FAR struct ieee802154_radio_s *ieee,
   mrf24j40_setreg(dev->spi, MRF24J40_SADRL, (uint8_t)(saddr&0xFF));
 
   dev->saddr = saddr;
-  dbg("%04X\n",(unsigned)saddr);  
+  winfo("%04X\n", (unsigned)saddr);
   return OK;
 }
 
@@ -817,7 +817,7 @@ static int mrf24j40_settxpower(FAR struct ieee802154_radio_s *ieee,
       return -EINVAL;
     }
 
-  lldbg("remaining attenuation: %d mBm\n",txpwr);
+  winfo("remaining attenuation: %d mBm\n",txpwr);
 
   switch(txpwr/100)
     {
@@ -935,7 +935,7 @@ static int mrf24j40_regdump(FAR struct mrf24j40_radio_s *dev)
   char buf[4+16*3+2+1];
   int len=0;
 
-  dbg("Short regs:\n");
+  winfo("Short regs:\n");
 
   for (i = 0; i < 0x40; i++)
     {
@@ -948,11 +948,11 @@ static int mrf24j40_regdump(FAR struct mrf24j40_radio_s *dev)
       if ((i & 15) == 15)
         {
           sprintf(buf+len, "\n");
-          dbg("%s",buf);
+          winfo("%s", buf);
         }
     }
 
-  dbg("Long regs:\n");
+  winfo("Long regs:\n");
   for (i=0x80000200;i<0x80000250;i++)
     {
       if ((i&15)==0)
@@ -964,7 +964,7 @@ static int mrf24j40_regdump(FAR struct mrf24j40_radio_s *dev)
       if ((i & 15) == 15)
         {
           sprintf(buf+len, "\n");
-          dbg("%s",buf);
+          winfo("%s", buf);
         }
     }
 
@@ -990,7 +990,7 @@ static int mrf24j40_ioctl(FAR struct ieee802154_radio_s *ieee, int cmd,
         return mrf24j40_regdump(dev);
 
       case 1001: dev->paenabled = (uint8_t)arg;
-        dbg("PA %sabled\n",arg?"en":"dis");
+        winfo("PA %sabled\n", arg ? "en" : "dis");
         return OK;
 
       default:
@@ -1075,13 +1075,13 @@ static int mrf24j40_transmit(FAR struct ieee802154_radio_s *ieee, FAR struct iee
   reg  = mrf24j40_getreg(dev->spi, MRF24J40_INTCON);
   reg &= ~MRF24J40_INTCON_TXNIE;
   mrf24j40_setreg(dev->spi, MRF24J40_INTCON, reg);
- 
+
   /* Analyze frame control to compute header length */
 
   fc1 = packet->data[0];
   fc2 = packet->data[1];
 
- // dbg("fc1 %02X fc2 %02X\n", fc1,fc2);
+ // winfo("fc1 %02X fc2 %02X\n", fc1,fc2);
 
   if ((fc2 & IEEE802154_FC2_DADDR) == IEEE802154_DADDR_SHORT)
     {
@@ -1111,7 +1111,7 @@ static int mrf24j40_transmit(FAR struct ieee802154_radio_s *ieee, FAR struct iee
       hlen += 8; /* Ext saddr */
     }
 
-//  dbg("hlen %d\n",hlen);
+//  winfo("hlen %d\n",hlen);
 
   /* Header len, 0, TODO for security modes */
 
@@ -1128,7 +1128,7 @@ static int mrf24j40_transmit(FAR struct ieee802154_radio_s *ieee, FAR struct iee
       mrf24j40_setreg(dev->spi, addr++, packet->data[ret]);
     }
 
-  /* If the frame control field contains 
+  /* If the frame control field contains
    * an acknowledgment request, set the TXNACKREQ bit.
    * See IEEE 802.15.4/2003 7.2.1.1 page 112 for info.
    */
@@ -1170,6 +1170,10 @@ static void mrf24j40_irqwork_tx(FAR struct mrf24j40_radio_s *dev)
   dev->ieee.txretries = (reg & MRF24J40_TXSTAT_X_MASK) >> MRF24J40_TXSTAT_X_SHIFT;
   dev->ieee.txbusy    = (reg & MRF24J40_TXSTAT_CCAFAIL) == MRF24J40_TXSTAT_CCAFAIL;
 
+  //winfo("TXSTAT%02X!\n", txstat);
+#warning TODO report errors
+  UNUSED(txstat);
+
   /* Disable tx int */
 
   reg  = mrf24j40_getreg(dev->spi, MRF24J40_INTCON);
@@ -1194,7 +1198,7 @@ static int mrf24j40_rxenable(FAR struct ieee802154_radio_s *ieee, bool state,
 {
   FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)ieee;
   uint8_t reg;
-  
+
   if (state)
     {
       mrf24j40_pacontrol(dev, MRF24J40_PA_AUTO);
@@ -1228,7 +1232,7 @@ static void mrf24j40_irqwork_rx(FAR struct mrf24j40_radio_s *dev)
   uint32_t index;
   uint8_t  reg;
 
-  /*dbg("!\n");*/
+  /*winfo("!\n");*/
 
   /* Disable rx int */
 
@@ -1244,7 +1248,7 @@ static void mrf24j40_irqwork_rx(FAR struct mrf24j40_radio_s *dev)
 
   addr = MRF24J40_RXBUF_BASE;
   dev->ieee.rxbuf->len = mrf24j40_getreg(dev->spi, addr++);
-  /*dbg("len %3d\n", dev->ieee.rxbuf->len);*/
+  /*winfo("len %3d\n", dev->ieee.rxbuf->len);*/
 
   for (index = 0; index < dev->ieee.rxbuf->len; index++)
     {
@@ -1299,7 +1303,7 @@ static void mrf24j40_irqworker(FAR void *arg)
   /* Read and store INTSTAT - this clears the register. */
 
   intstat = mrf24j40_getreg(dev->spi, MRF24J40_INTSTAT);
-//  dbg("INT%02X\n", intstat);
+//  winfo("INT%02X\n", intstat);
 
   /* Do work according to the pending interrupts */
 
@@ -1405,12 +1409,22 @@ FAR struct ieee802154_radio_s *mrf24j40_init(FAR struct spi_dev_s *spi,
     }
 
   dev->ieee.ops = &mrf24j40_devops;
+
+  /* Initialize semaphores */
+
   sem_init(&dev->ieee.rxsem, 0, 0);
   sem_init(&dev->ieee.txsem, 0, 0);
 
+  /* These semaphores are all used for signaling and, hence, should
+   * not have priority inheritance enabled.
+   */
+
+  sem_setprotocol(&dev->ieee.rxsem, SEM_PRIO_NONE);
+  sem_setprotocol(&dev->ieee.txsem, SEM_PRIO_NONE);
+
   dev->lower    = lower;
   dev->spi      = spi;
-  
+
   mrf24j40_initialize(dev);
 
   mrf24j40_setchannel(&dev->ieee, 11);

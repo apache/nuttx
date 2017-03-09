@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/vfs/fs_sendfile.c
  *
- *   Copyright (C) 2007, 2009, 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011, 2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -103,7 +103,6 @@
 ssize_t sendfile(int outfd, int infd, off_t *offset, size_t count)
 {
 #if defined(CONFIG_NET_TCP) && CONFIG_NSOCKET_DESCRIPTORS > 0
-
   /* Check the destination file descriptor:  Is it a (probable) file
    * descriptor?  Check the source file:  Is it a normal file?
    */
@@ -117,7 +116,7 @@ ssize_t sendfile(int outfd, int infd, off_t *offset, size_t count)
        * structure.
        */
 
-      filep = fs_getfilep(fd);
+      filep = fs_getfilep(infd);
       if (!filep)
         {
           /* The errno value has already been set */

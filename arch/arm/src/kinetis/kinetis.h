@@ -1,8 +1,9 @@
 /************************************************************************************
  * arch/arm/src/kinetis/kinetis.h
  *
- *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2011, 2013, 2017 Gregory Nutt. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -52,7 +53,7 @@
 #include "up_internal.h"
 #include "kinetis_config.h"
 #include "chip.h"
-#include "kinetis_port.h"
+#include "chip/kinetis_port.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -132,8 +133,8 @@
 #define GPIO_OUTPUT            (_PIN_MODE_GPIO | _PIN_OUTPUT)
 #define GPIO_FAST              (_PIN_MODE_GPIO | _PIN_OUTPUT_FAST)
 #define GPIO_SLOW              (_PIN_MODE_GPIO | _PIN_OUTPUT_SLOW)
-#define GPIO_OPENDRAIN         (_PIN_MODE_GPIO | _PIN_OUTPUT_LOWDRIVE)
-#define GPIO_LOWDRIVE          (_PIN_MODE_GPIO | _PIN_OUTPUT_OPENDRAIN)
+#define GPIO_OPENDRAIN         (_PIN_MODE_GPIO | _PIN_OUTPUT_OPENDRAIN)
+#define GPIO_LOWDRIVE          (_PIN_MODE_GPIO | _PIN_OUTPUT_LOWDRIVE)
 #define GPIO_HIGHDRIVE         (_PIN_MODE_GPIO | _PIN_OUTPUT_HIGHDRIVE)
 
 #define PIN_ALT2               _PIN_MODE_ALT2
@@ -143,8 +144,8 @@
 #define PIN_ALT2_OUTPUT        (_PIN_MODE_ALT2 | _PIN_OUTPUT)
 #define PIN_ALT2_FAST          (_PIN_MODE_ALT2 | _PIN_OUTPUT_FAST)
 #define PIN_ALT2_SLOW          (_PIN_MODE_ALT2 | _PIN_OUTPUT_SLOW)
-#define PIN_ALT2_OPENDRAIN     (_PIN_MODE_ALT2 | _PIN_OUTPUT_LOWDRIVE)
-#define PIN_ALT2_LOWDRIVE      (_PIN_MODE_ALT2 | _PIN_OUTPUT_OPENDRAIN)
+#define PIN_ALT2_OPENDRAIN     (_PIN_MODE_ALT2 | _PIN_OUTPUT_OPENDRAIN)
+#define PIN_ALT2_LOWDRIVE      (_PIN_MODE_ALT2 | _PIN_OUTPUT_LOWDRIVE)
 #define PIN_ALT2_HIGHDRIVE     (_PIN_MODE_ALT2 | _PIN_OUTPUT_HIGHDRIVE)
 
 #define PIN_ALT3               _PIN_MODE_ALT3
@@ -154,8 +155,8 @@
 #define PIN_ALT3_OUTPUT        (_PIN_MODE_ALT3 | _PIN_OUTPUT)
 #define PIN_ALT3_FAST          (_PIN_MODE_ALT3 | _PIN_OUTPUT_FAST)
 #define PIN_ALT3_SLOW          (_PIN_MODE_ALT3 | _PIN_OUTPUT_SLOW)
-#define PIN_ALT3_OPENDRAIN     (_PIN_MODE_ALT3 | _PIN_OUTPUT_LOWDRIVE)
-#define PIN_ALT3_LOWDRIVE      (_PIN_MODE_ALT3 | _PIN_OUTPUT_OPENDRAIN)
+#define PIN_ALT3_OPENDRAIN     (_PIN_MODE_ALT3 | _PIN_OUTPUT_OPENDRAIN)
+#define PIN_ALT3_LOWDRIVE      (_PIN_MODE_ALT3 | _PIN_OUTPUT_LOWDRIVE)
 #define PIN_ALT3_HIGHDRIVE     (_PIN_MODE_ALT3 | _PIN_OUTPUT_HIGHDRIVE)
 
 #define PIN_ALT4               _PIN_MODE_ALT4
@@ -165,8 +166,8 @@
 #define PIN_ALT4_OUTPUT        (_PIN_MODE_ALT4 | _PIN_OUTPUT)
 #define PIN_ALT4_FAST          (_PIN_MODE_ALT4 | _PIN_OUTPUT_FAST)
 #define PIN_ALT4_SLOW          (_PIN_MODE_ALT4 | _PIN_OUTPUT_SLOW)
-#define PIN_ALT4_OPENDRAIN     (_PIN_MODE_ALT4 | _PIN_OUTPUT_LOWDRIVE)
-#define PIN_ALT4_LOWDRIVE      (_PIN_MODE_ALT4 | _PIN_OUTPUT_OPENDRAIN)
+#define PIN_ALT4_OPENDRAIN     (_PIN_MODE_ALT4 | _PIN_OUTPUT_OPENDRAIN)
+#define PIN_ALT4_LOWDRIVE      (_PIN_MODE_ALT4 | _PIN_OUTPUT_LOWDRIVE)
 #define PIN_ALT4_HIGHDRIVE     (_PIN_MODE_ALT4 | _PIN_OUTPUT_HIGHDRIVE)
 
 #define PIN_ALT5               _PIN_MODE_ALT5
@@ -176,8 +177,8 @@
 #define PIN_ALT5_OUTPUT        (_PIN_MODE_ALT5 | _PIN_OUTPUT)
 #define PIN_ALT5_FAST          (_PIN_MODE_ALT5 | _PIN_OUTPUT_FAST)
 #define PIN_ALT5_SLOW          (_PIN_MODE_ALT5 | _PIN_OUTPUT_SLOW)
-#define PIN_ALT5_OPENDRAIN     (_PIN_MODE_ALT5 | _PIN_OUTPUT_LOWDRIVE)
-#define PIN_ALT5_LOWDRIVE      (_PIN_MODE_ALT5 | _PIN_OUTPUT_OPENDRAIN)
+#define PIN_ALT5_OPENDRAIN     (_PIN_MODE_ALT5 | _PIN_OUTPUT_OPENDRAIN)
+#define PIN_ALT5_LOWDRIVE      (_PIN_MODE_ALT5 | _PIN_OUTPUT_LOWDRIVE)
 #define PIN_ALT5_HIGHDRIVE     (_PIN_MODE_ALT5 | _PIN_OUTPUT_HIGHDRIVE)
 
 #define PIN_ALT6               _PIN_MODE_ALT6
@@ -187,8 +188,8 @@
 #define PIN_ALT6_OUTPUT        (_PIN_MODE_ALT6 | _PIN_OUTPUT)
 #define PIN_ALT6_FAST          (_PIN_MODE_ALT6 | _PIN_OUTPUT_FAST)
 #define PIN_ALT6_SLOW          (_PIN_MODE_ALT6 | _PIN_OUTPUT_SLOW)
-#define PIN_ALT6_OPENDRAIN     (_PIN_MODE_ALT6 | _PIN_OUTPUT_LOWDRIVE)
-#define PIN_ALT6_LOWDRIVE      (_PIN_MODE_ALT6 | _PIN_OUTPUT_OPENDRAIN)
+#define PIN_ALT6_OPENDRAIN     (_PIN_MODE_ALT6 | _PIN_OUTPUT_OPENDRAIN)
+#define PIN_ALT6_LOWDRIVE      (_PIN_MODE_ALT6 | _PIN_OUTPUT_LOWDRIVE)
 #define PIN_ALT6_HIGHDRIVE     (_PIN_MODE_ALT6 | _PIN_OUTPUT_HIGHDRIVE)
 
 #define PIN_ALT7               _PIN_MODE_ALT7
@@ -198,8 +199,8 @@
 #define PIN_ALT7_OUTPUT        (_PIN_MODE_ALT7 | _PIN_OUTPUT)
 #define PIN_ALT7_FAST          (_PIN_MODE_ALT7 | _PIN_OUTPUT_FAST)
 #define PIN_ALT7_SLOW          (_PIN_MODE_ALT7 | _PIN_OUTPUT_SLOW)
-#define PIN_ALT7_OPENDRAIN     (_PIN_MODE_ALT7 | _PIN_OUTPUT_LOWDRIVE)
-#define PIN_ALT7_LOWDRIVE      (_PIN_MODE_ALT7 | _PIN_OUTPUT_OPENDRAIN)
+#define PIN_ALT7_OPENDRAIN     (_PIN_MODE_ALT7 | _PIN_OUTPUT_OPENDRAIN)
+#define PIN_ALT7_LOWDRIVE      (_PIN_MODE_ALT7 | _PIN_OUTPUT_LOWDRIVE)
 #define PIN_ALT7_HIGHDRIVE     (_PIN_MODE_ALT7 | _PIN_OUTPUT_HIGHDRIVE)
 
 /* The initial value for GPIO (Alternative 1 outputs):
@@ -306,40 +307,6 @@
 #define PIN31                  (31 << _PIN_SHIFT)
 
 /************************************************************************************
- * Public Types
- ************************************************************************************/
-
-typedef FAR void *DMA_HANDLE;
-typedef void (*dma_callback_t)(DMA_HANDLE handle, void *arg, int result);
-
-/* The following is used for sampling DMA registers when CONFIG DEBUG_DMA is selected */
-
-#ifdef CONFIG_DEBUG_DMA
-struct kinetis_dmaglobalregs_s
-{
-#warning "Missing logic"
-  /* Global Registers */
-};
-
-struct kinetis_dmachanregs_s
-{
-#warning "Missing logic"
-  /* Channel Registers */
-};
-
-struct kinetis_dmaregs_s
-{
-  /* Global Registers */
-
-  struct kinetis_dmaglobalregs_s gbl;
-
-  /* Channel Registers */
-
-  struct kinetis_dmachanregs_s   ch;
-};
-#endif
-
-/************************************************************************************
  * Inline Functions
  ************************************************************************************/
 
@@ -374,6 +341,48 @@ extern "C"
 
 void kinetis_clockconfig(void);
 
+/****************************************************************************
+ * Name: kinetis_earlyserialinit
+ *
+ * Description:
+ *   Performs the low level UART/LPUART initialization early in debug so that
+ *   the serial console will be available during bootup.  This must be called
+ *   before up_serialinit.
+ *
+ ****************************************************************************/
+
+#ifdef USE_EARLYSERIALINIT
+void kinetis_earlyserialinit(void);
+#endif
+
+/****************************************************************************
+ * Name: kinetis_uart_earlyserialinit
+ *
+ * Description:
+ *   Performs the low level UART initialization early in debug so that the
+ *   serial console will be available during bootup.  This must be called
+ *   before up_serialinit.
+ *
+ ****************************************************************************/
+
+#ifdef USE_EARLYSERIALINIT
+void kinetis_uart_earlyserialinit(void);
+#endif
+
+/****************************************************************************
+ * Name: kinetis_lpuart_earlyserialinit
+ *
+ * Description:
+ *   Performs the low level LPUART initialization early in debug so that the
+ *   serial console will be available during bootup.  This must be called
+ *   before up_serialinit.
+ *
+ ****************************************************************************/
+
+#ifdef USE_EARLYSERIALINIT
+void kinetis_lpuart_earlyserialinit(void);
+#endif
+
 /************************************************************************************
  * Name: kinetis_lowsetup
  *
@@ -385,6 +394,44 @@ void kinetis_clockconfig(void);
  ************************************************************************************/
 
 void kinetis_lowsetup(void);
+
+/****************************************************************************
+ * Name: kinetis_uart_serialinit
+ *
+ * Description:
+ *   Register all UART based serial console and serial ports.  This assumes
+ *   that kinetis_earlyserialinit was called previously.
+ *
+ * Input Parameters:
+ *   first: - First TTY number to assign
+ *
+ * Returns Value:
+ *   The next TTY number available for assignment
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_UART_DEVICE
+unsigned int kinetis_uart_serialinit(unsigned int first);
+#endif
+
+/****************************************************************************
+ * Name: kinetis_lpuart_serialinit
+ *
+ * Description:
+ *   Register all LPUART based serial console and serial ports.  This assumes
+ *   that kinetis_earlyserialinit was called previously.
+ *
+ * Input Parameters:
+ *   first: - First TTY number to assign
+ *
+ * Returns Value:
+ *   The next TTY number available for assignment
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_LPUART_DEVICE
+unsigned int kinetis_lpuart_serialinit(unsigned int first);
+#endif
 
 /****************************************************************************
  * Name: kinetis_uartreset
@@ -399,6 +446,18 @@ void kinetis_uartreset(uintptr_t uart_base);
 #endif
 
 /****************************************************************************
+ * Name: kinetis_lpuartreset
+ *
+ * Description:
+ *   Reset a UART.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_LPUART_DEVICE
+void kinetis_lpuartreset(uintptr_t uart_base);
+#endif
+
+/****************************************************************************
  * Name: kinetis_uartconfigure
  *
  * Description:
@@ -408,7 +467,22 @@ void kinetis_uartreset(uintptr_t uart_base);
 
 #ifdef HAVE_UART_DEVICE
 void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud, uint32_t clock,
-                           unsigned int parity, unsigned int nbits);
+                           unsigned int parity, unsigned int nbits,
+                           unsigned int stop2);
+#endif
+
+/****************************************************************************
+ * Name: kinetis_lpuartconfigure
+ *
+ * Description:
+ *   Configure a UART as a RS-232 UART.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_LPUART_DEVICE
+void kinetis_lpuartconfigure(uintptr_t uart_base, uint32_t baud, uint32_t clock,
+                           unsigned int parity, unsigned int nbits,
+                           unsigned int stop2);
 #endif
 
 /************************************************************************************
@@ -438,7 +512,7 @@ int kinetis_pinconfig(uint32_t cfgset);
  *   Configure the digital filter associated with a port. The digital filter
  *   capabilities of the PORT module are available in all digital pin muxing modes.
  *
- * Input parmeters:
+ * Input Parameters:
  *   port  - See KINETIS_PORTn definitions in kinetis_port.h
  *   lpo   - true: Digital Filters are clocked by the bus clock
  *           false: Digital Filters are clocked by the 1 kHz LPO clock
@@ -476,7 +550,7 @@ bool kinetis_gpioread(uint32_t pinset);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_KINETIS_GPIOIRQ
 void kinetis_pinirqinitialize(void);
 #else
 #  define kinetis_pinirqinitialize()
@@ -494,17 +568,17 @@ void kinetis_pinirqinitialize(void);
  *   3. Call kinetis_pinirqenable() to enable interrupts on the pin.
  *
  * Parameters:
- *  - pinset:  Pin configuration
- *  - pinisr:  Pin interrupt service routine
+ *   pinset -  Pin configuration
+ *   pinisr -  Pin interrupt service routine
+ *   arg    -  An argument that will be provided to the interrupt service routine.
  *
- * Returns:
- *   The previous value of the interrupt handler function pointer.  This value may,
- *   for example, be used to restore the previous handler when multiple handlers are
- *   used.
+ * Return Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on any
+ *   failure to indicate the nature of the failure.
  *
  ************************************************************************************/
 
-xcpt_t kinetis_pinirqattach(uint32_t pinset, xcpt_t pinisr);
+int kinetis_pinirqattach(uint32_t pinset, xcpt_t pinisr, void *arg);
 
 /************************************************************************************
  * Name: kinetis_pinirqenable
@@ -514,7 +588,7 @@ xcpt_t kinetis_pinirqattach(uint32_t pinset, xcpt_t pinisr);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_KINETIS_GPIOIRQ
 void kinetis_pinirqenable(uint32_t pinset);
 #else
 #  define kinetis_pinirqenable(pinset)
@@ -528,7 +602,7 @@ void kinetis_pinirqenable(uint32_t pinset);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_KINETIS_GPIOIRQ
 void kinetis_pinirqdisable(uint32_t pinset);
 #else
 #  define kinetis_pinirqdisable(pinset)
@@ -566,8 +640,8 @@ void kinetis_pindmadisable(uint32_t pinset);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_DEBUG_GPIO
-int kinetis_pindump(uint32_t pinset, const char *msg);
+#ifdef CONFIG_DEBUG_GPIO_INFO
+void kinetis_pindump(uint32_t pinset, const char *msg);
 #else
 #  define kinetis_pindump(p,m)
 #endif
@@ -583,209 +657,13 @@ int kinetis_pindump(uint32_t pinset, const char *msg);
 
 void kinetis_clrpend(int irq);
 
-/************************************************************************************
- * Name:  kinetis_spi[n]select, kinetis_spi[n]status, and kinetis_spi[n]cmddata
- *
- * Description:
- *   These external functions must be provided by board-specific logic.  They are
- *   implementations of the select, status, and cmddata methods of the SPI interface
- *   defined by struct spi_ops_s (see include/nuttx/spi/spi.h). All other methods
- *   including kinetis_spibus_initialize()) are provided by common Kinetis logic.  To use
- *   this common SPI logic on your board:
- *
- *   1. Provide logic in kinetis_boardinitialize() to configure SPI chip select
- *      pins.
- *   2. Provide kinetis_spi[n]select() and kinetis_spi[n]status() functions
- *      in your board-specific logic.  These functions will perform chip selection
- *      and status operations using GPIOs in the way your board is configured.
- *   2. If CONFIG_SPI_CMDDATA is defined in the NuttX configuration, provide
- *      kinetis_spi[n]cmddata() functions in your board-specific logic.  These
- *      functions will perform cmd/data selection operations using GPIOs in the way
- *      your board is configured.
- *   3. Add a call to kinetis_spibus_initialize() in your low level application
- *      initialization logic
- *   4. The handle returned by kinetis_spibus_initialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling
- *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
- *      the SPI MMC/SD driver).
- *
- ************************************************************************************/
-
-struct spi_dev_s;
-enum spi_dev_e;
-
-#ifdef CONFIG_KINETIS_SPI0
-void  kinetis_spi0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-uint8_t kinetis_spi0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
-#ifdef CONFIG_SPI_CMDDATA
-int kinetis_spi0cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
-#endif
-#endif
-#ifdef CONFIG_KINETIS_SPI1
-void  kinetis_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-uint8_t kinetis_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
-#ifdef CONFIG_SPI_CMDDATA
-int kinetis_spi1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
-#endif
-#endif
-#ifdef CONFIG_KINETIS_SPI2
-void  kinetis_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-uint8_t kinetis_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
-#ifdef CONFIG_SPI_CMDDATA
-int kinetis_spi2cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
-#endif
-#endif
-
-/****************************************************************************
- * Name: ssp_flush
- *
- * Description:
- *   Flush and discard any words left in the RX fifo.  This can be called
- *   from spi[n]select after a device is deselected (if you worry about such
- *   things).
- *
- * Input Parameters:
- *   dev - Device-specific state data
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#if defined(CONFIG_KINETIS_SPI0) || defined(CONFIG_KINETIS_SPI0) || defined(CONFIG_KINETIS_SPI2)
-struct spi_dev_s;
-void spi_flush(FAR struct spi_dev_s *dev);
-#endif
-
-/****************************************************************************
- * Name: kinetis_dmainitialize
- *
- * Description:
- *   Initialize the GPDMA subsystem.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifdef CONFIG_KINETIS_DMA
-void kinetis_dmainitilaize(void);
-#endif
-
-/****************************************************************************
- * Name: kinetis_dmachannel
- *
- * Description:
- *   Allocate a DMA channel.  This function sets aside a DMA channel and
- *   gives the caller exclusive access to the DMA channel.
- *
- * Returned Value:
- *   One success, this function returns a non-NULL, void* DMA channel
- *   handle.  NULL is returned on any failure.  This function can fail only
- *   if no DMA channel is available.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_KINETIS_DMA
-DMA_HANDLE kinetis_dmachannel(void);
-#endif
-
-/****************************************************************************
- * Name: kinetis_dmafree
- *
- * Description:
- *   Release a DMA channel.  NOTE:  The 'handle' used in this argument must
- *   NEVER be used again until kinetis_dmachannel() is called again to re-gain
- *   a valid handle.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifdef CONFIG_KINETIS_DMA
-void kinetis_dmafree(DMA_HANDLE handle);
-#endif
-
-/****************************************************************************
- * Name: kinetis_dmasetup
- *
- * Description:
- *   Configure DMA for one transfer.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_KINETIS_DMA
-int kinetis_dmarxsetup(DMA_HANDLE handle, uint32_t control, uint32_t config,
-                       uint32_t srcaddr, uint32_t destaddr, size_t nbytes);
-#endif
-
-/****************************************************************************
- * Name: kinetis_dmastart
- *
- * Description:
- *   Start the DMA transfer
- *
- ****************************************************************************/
-
-#ifdef CONFIG_KINETIS_DMA
-int kinetis_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg);
-#endif
-
-/****************************************************************************
- * Name: kinetis_dmastop
- *
- * Description:
- *   Cancel the DMA.  After kinetis_dmastop() is called, the DMA channel is
- *   reset and kinetis_dmasetup() must be called before kinetis_dmastart() can be
- *   called again
- *
- ****************************************************************************/
-
-#ifdef CONFIG_KINETIS_DMA
-void kinetis_dmastop(DMA_HANDLE handle);
-#endif
-
-/****************************************************************************
- * Name: kinetis_dmasample
- *
- * Description:
- *   Sample DMA register contents
- *
- ****************************************************************************/
-
-#ifdef CONFIG_KINETIS_DMA
-#ifdef CONFIG_DEBUG_DMA
-void kinetis_dmasample(DMA_HANDLE handle, struct kinetis_dmaregs_s *regs);
-#else
-#  define kinetis_dmasample(handle,regs)
-#endif
-#endif
-
-/****************************************************************************
- * Name: kinetis_dmadump
- *
- * Description:
- *   Dump previously sampled DMA register contents
- *
- ****************************************************************************/
-
-#ifdef CONFIG_KINETIS_DMA
-#ifdef CONFIG_DEBUG_DMA
-void kinetis_dmadump(DMA_HANDLE handle, const struct kinetis_dmaregs_s *regs,
-                     const char *msg);
-#else
-#  define kinetis_dmadump(handle,regs,msg)
-#endif
-#endif
-
 /****************************************************************************
  * Name: sdhc_initialize
  *
  * Description:
  *   Initialize SDIO for operation.
  *
- * Input Parameters:
+ * Input parameters:
  *   slotno - Not used.
  *
  * Returned Values:

@@ -54,10 +54,14 @@
 #include <nuttx/time.h>
 
 #include "clock/clock.h"
+#ifdef CONFIG_CLOCK_TIMEKEEPING
+#  include "clock/clock_timekeeping.h"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Standard time definitions (in units of seconds) */
 
 #define SEC_PER_MIN  ((time_t)60)
@@ -148,7 +152,7 @@ static inline int clock_basetime(FAR struct timespec *tp)
    * month, and date
    */
 
-  jdn = clock_calendar2utc(CONFIG_START_YEAR, CONFIG_START_MONTH,
+  jdn = clock_calendar2utc(CONFIG_START_YEAR, CONFIG_START_MONTH - 1,
                            CONFIG_START_DAY);
 
   /* Set the base time as seconds into this julian day. */
@@ -172,9 +176,15 @@ static void clock_inittime(void)
 {
   /* (Re-)initialize the time value to match the RTC */
 
-  (void)clock_basetime(&g_basetime);
+#ifndef CONFIG_CLOCK_TIMEKEEPING
+#ifndef CONFIG_RTC_HIRES
+  clock_basetime(&g_basetime);
+#endif
 #ifndef CONFIG_SCHED_TICKLESS
   g_system_timer = 0;
+#endif
+#else
+  clock_inittimekeeping();
 #endif
 }
 

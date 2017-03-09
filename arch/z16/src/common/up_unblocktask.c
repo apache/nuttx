@@ -1,5 +1,5 @@
 /****************************************************************************
- * common/up_unblocktask.c
+ * arch/z16/src/common/up_unblocktask.c
  *
  *   Copyright (C) 2008-2009, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -79,7 +79,7 @@ void up_unblock_task(FAR struct tcb_s *tcb)
   ASSERT((tcb->task_state >= FIRST_BLOCKED_STATE) &&
          (tcb->task_state <= LAST_BLOCKED_STATE));
 
-  /* dbg("Unblocking TCB=%p\n", tcb); */
+  /* sinfo("Unblocking TCB=%p\n", tcb); */
 
   /* Remove the task from the blocked task list */
 

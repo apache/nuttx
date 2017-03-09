@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/module.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,82 +44,6 @@
 
 #include <sys/types.h>
 
-#include <stdint.h>
-#include <stdbool.h>
-#include <elf32.h>
-
-#include <nuttx/arch.h>
-#include <nuttx/symtab.h>
-#include <nuttx/binfmt/binfmt.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-/* Configuration ************************************************************/
-
-#ifndef CONFIG_MODULE_ALIGN_LOG2
-#  define CONFIG_MODULE_ALIGN_LOG2 2
-#endif
-
-#ifndef CONFIG_MODULE_BUFFERSIZE
-#  define CONFIG_MODULE_BUFFERSIZE 128
-#endif
-
-#ifndef CONFIG_MODULE_BUFFERINCR
-#  define CONFIG_MODULE_BUFFERINCR 32
-#endif
-
-#define MODULENAME_MAX 16
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/* This is the type of the function that is called to uninitialize the
- * the loaded module.  This may mean, for example, un-registering a device
- * driver. If the module is successfully initialized, its memory will be
- * deallocated.
- *
- * Input Parameters:
- *   arg - An opaque argument that was previously returned by the initializer
- *         function.
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on any failure to
- *   initialize the module.  If zero is returned, then the module memory
- *   will be deallocated.  If the module is still in use (for example with
- *   open driver instances), the uninitialization function should fail with
- *   -EBUSY
- */
-
-typedef CODE int (*mod_uninitializer_t)(FAR void *arg);
-
-/* A NuttX module is expected to export a function called module_initialize()
- * that has the following function prototype.  This function should appear as
- * the entry point in the ELF module file and will be called bythe binfmt
- * logic after the module has been loaded into kernel memory.
- *
- * Input Parameters:
- *   uninitializer - The pointer to the uninitialization function.  NULL may
- *     be returned if no uninitialization is needed (i.e, the the module
- *     memory can be deallocated at any time).
- *   arg - An argument that will be passed to the uninitialization function.
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on any failure to
- *   initialize the module.
- */
-
-typedef CODE int (*mod_initializer_t)(mod_uninitializer_t *uninitializer,
-                                      FAR void **arg);
-
-#ifdef __KERNEL__
-/* This is the type of the callback function used by mod_registry_foreach() */
-
-struct module_s;
-typedef CODE int (*mod_callback_t)(FAR struct module_s *modp, FAR void *arg);
-#endif
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -134,68 +58,32 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: mod_getsymtab
- *
- * Description:
- *   Get the current kernel symbol table selection as an atomic operation.
- *
- * Input Parameters:
- *   symtab - The location to store the symbol table.
- *   nsymbols - The location to store the number of symbols in the symbol table.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifdef __KERNEL__
-void mod_getsymtab(FAR const struct symtab_s **symtab, FAR int *nsymbols);
-#endif
-
-/****************************************************************************
- * Name: mod_setsymtab
- *
- * Description:
- *   Select a new kernel symbol table selection as an atomic operation.
- *
- * Input Parameters:
- *   symtab - The new symbol table.
- *   nsymbols - The number of symbols in the symbol table.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifdef __KERNEL__
-void mod_setsymtab(FAR const struct symtab_s *symtab, int nsymbols);
-#endif
-
-/****************************************************************************
  * Name: insmod
  *
  * Description:
  *   Verify that the file is an ELF module binary and, if so, load the
  *   module into kernel memory and initialize it for use.
  *
- *   NOTE: mod_setsymtab had to have been called in board-specific OS logic
+ *   NOTE: modlib_setsymtab had to have been called in board-specific OS logic
  *   prior to calling this function from application logic (perhaps via
  *   boardctl(BOARDIOC_OS_SYMTAB).  Otherwise, insmod will be unable to
  *   resolve symbols in the OS module.
  *
  * Input Parameters:
  *
- *   filename   - Full path to the module binary to be loaded
- *   modulename - The name that can be used to refer to the module after
+ *   filename - Full path to the module binary to be loaded
+ *   modname  - The name that can be used to refer to the module after
  *     it has been loaded.
  *
  * Returned Value:
- *   Zero (OK) on success.  On any failure, -1 (ERROR) is returned the
- *   errno value is set appropriately.
+ *   A non-NULL module handle that can be used on subsequent calls to other
+ *   module interfaces is returned on success.  If insmod() was unable to
+ *   load the module insmod() will return a NULL handle and the errno
+ *   variable will be set appropriately.
  *
  ****************************************************************************/
 
-int insmod(FAR const char *filename, FAR const char *modulename);
+FAR void *insmod(FAR const char *filename, FAR const char *modname);
 
 /****************************************************************************
  * Name: rmmod
@@ -204,9 +92,7 @@ int insmod(FAR const char *filename, FAR const char *modulename);
  *   Remove a previously installed module from memory.
  *
  * Input Parameters:
- *
- *   modulename - The module name.  This is the name module name that was
- *     provided to insmod when the module was loaded.
+ *   handle - The module handler previously returned by insmod().
  *
  * Returned Value:
  *   Zero (OK) on success.  On any failure, -1 (ERROR) is returned the
@@ -214,33 +100,55 @@ int insmod(FAR const char *filename, FAR const char *modulename);
  *
  ****************************************************************************/
 
-int rmmod(FAR const char *modulename);
+int rmmod(FAR void *handle);
 
 /****************************************************************************
- * Name: mod_registry_foreach
+ * Name: modsym
  *
  * Description:
- *   Visit each module in the registry.  This is an internal OS interface and
- *   not available for use by applications.
+ *   modsym() returns the address of a symbol defined within the object that
+ *   was previously made accessible through a insmod() call.  handle is the
+ *   value returned from a call to insmod() (and which has not since been
+ *   released via a call to rmmod()), name is the symbol's name as a
+ *   character string.
+ *
+ *   The returned symbol address will remain valid until rmmod() is called.
  *
  * Input Parameters:
- *   callback - This callback function was be called for each entry in the
- *     registry.
- *   arg - This opaque argument will be passed to the callback function.
+ *   handle - The opaque, non-NULL value returned by a previous successful
+ *            call to insmod().
+ *   name   - A pointer to the symbol name string.
  *
  * Returned Value:
- *   This function normally returns zero (OK).  If, however, any callback
- *   function returns a non-zero value, the traversal will be terminated and
- *   that non-zero value will be returned.
- *
- * Assumptions:
- *   The caller does NOT hold the lock on the module registry.
+ *   The address associated with the symbol is returned on success.
+ *   If handle does not refer to a valid module opened by insmod(), or if
+ *   the named symbol cannot be found within any of the objects associated
+ *   with handle, modsym() will return NULL and the errno variable will be
+ *   set appropriately.
  *
  ****************************************************************************/
 
-#ifdef __KERNEL__
-int mod_registry_foreach(mod_callback_t callback, FAR void *arg);
-#endif
+FAR const void *modsym(FAR void *handle, FAR const char *name);
+
+/****************************************************************************
+ * Name: modhandle
+ *
+ * Description:
+ *   modhandle() returns the module handle for the installed module with the
+ *   provided name.  A secondary use of this function is to determin if a
+ *   module has been loaded or not.
+ *
+ * Input Parameters:
+ *   name   - A pointer to the module name string.
+ *
+ * Returned Value:
+ *   The non-NULL module handle previously returned by insmod() is returned
+ *   on success.  If no module with that name is installed, modhandle() will
+ *   return a NULL handle and the errno variable will be set appropriately.
+ *
+ ****************************************************************************/
+
+FAR void *modhandle(FAR const char *name);
 
 #undef EXTERN
 #if defined(__cplusplus)

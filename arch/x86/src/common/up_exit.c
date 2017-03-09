@@ -1,7 +1,7 @@
 /****************************************************************************
  * common/up_exit.c
  *
- *   Copyright (C) 2011, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013-2014, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,10 +41,11 @@
 
 #include <sched.h>
 #include <debug.h>
-#include <nuttx/arch.h>
 
+#include <nuttx/arch.h>
+#include <nuttx/irq.h>
 #ifdef CONFIG_DUMP_ON_EXIT
-#include <nuttx/fs/fs.h>
+#  include <nuttx/fs/fs.h>
 #endif
 
 #include "task/task.h"
@@ -56,9 +57,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
+#ifndef CONFIG_DEBUG_SCHED_INFO
+#  undef CONFIG_DUMP_ON_EXIT
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -74,7 +75,7 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DUMP_ON_EXIT) && defined(CONFIG_DEBUG)
+#ifdef CONFIG_DUMP_ON_EXIT
 static void _up_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
 {
 #if CONFIG_NFILE_DESCRIPTORS > 0
@@ -85,8 +86,8 @@ static void _up_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
   int i;
 #endif
 
-  sdbg("  TCB=%p name=%s pid=%d\n", tcb, tcb->argv[0], tcb->pid);
-  sdbg("    priority=%d state=%d\n", tcb->sched_priority, tcb->task_state);
+  sinfo("  TCB=%p name=%s pid=%d\n", tcb, tcb->argv[0], tcb->pid);
+  sinfo("    priority=%d state=%d\n", tcb->sched_priority, tcb->task_state);
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
   filelist = tcb->group->tg_filelist;
@@ -95,8 +96,8 @@ static void _up_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
       struct inode *inode = filelist->fl_files[i].f_inode;
       if (inode)
         {
-          sdbg("      fd=%d refcount=%d\n",
-               i, inode->i_crefs);
+          sinfo("      fd=%d refcount=%d\n",
+                i, inode->i_crefs);
         }
     }
 #endif
@@ -108,13 +109,18 @@ static void _up_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
       struct file_struct *filep = &streamlist->sl_streams[i];
       if (filep->fs_fd >= 0)
         {
-#if CONFIG_STDIO_BUFFER_SIZE > 0
-          sdbg("      fd=%d nbytes=%d\n",
-               filep->fs_fd,
-               filep->fs_bufpos - filep->fs_bufstart);
-#else
-          sdbg("      fd=%d\n", filep->fs_fd);
+#ifndef CONFIG_STDIO_DISABLE_BUFFERING
+          if (filep->fs_bufstart != NULL)
+            {
+              sinfo("      fd=%d nbytes=%d\n",
+                    filep->fs_fd,
+                    filep->fs_bufpos - filep->fs_bufstart);
+            }
+          else
 #endif
+            {
+              sinfo("      fd=%d\n", filep->fs_fd);
+            }
         }
     }
 #endif
@@ -140,16 +146,16 @@ void _exit(int status)
 {
   struct tcb_s* tcb;
 
-  /* Disable interrupts.  They will be restored when the next
-   * task is started.
+  /* Make sure that we are in a critical section with local interrupts.
+   * The IRQ state will be restored when the next task is started.
    */
 
-  (void)up_irq_save();
+  (void)enter_critical_section();
 
-  slldbg("TCB=%p exiting\n", this_task());
+  sinfo("TCB=%p exiting\n", this_task());
 
-#if defined(CONFIG_DUMP_ON_EXIT) && defined(CONFIG_DEBUG)
-  slldbg("Other tasks:\n");
+#ifdef CONFIG_DUMP_ON_EXIT
+  sinfo("Other tasks:\n");
   sched_foreach(_up_dumponexit, NULL);
 #endif
 

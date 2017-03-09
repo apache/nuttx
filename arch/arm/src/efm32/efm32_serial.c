@@ -205,7 +205,7 @@
 #define EFM32_TXERR_INTS      (USART_IEN_TXOF)
 #define EFM32_RXERR_INTS      (USART_IEN_RXOF | USART_IEN_RXUF | \
                                USART_IEN_PERR | USART_IEN_FERR)
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 #  define EFM32_TX_INTS       (USART_IEN_TXBL | EFM32_TXERR_INTS)
 #  define EFM32_RX_INTS       (USART_IEN_RXDATAV | EFM32_RXERR_INTS)
 #else
@@ -220,8 +220,6 @@
 struct efm32_config_s
 {
   uintptr_t uartbase;  /* Base address of UART registers */
-  xcpt_t    rxhandler; /* RX interrupt handler */
-  xcpt_t    txhandler; /* TX interrupt handler */
   uint32_t  baud;      /* Configured baud */
   uint8_t   rxirq;     /* RX IRQ associated with this UART (for enable) */
   uint8_t   txirq;     /* TX IRQ associated with this UART (for enable) */
@@ -257,38 +255,8 @@ static int  efm32_setup(struct uart_dev_s *dev);
 static void efm32_shutdown(struct uart_dev_s *dev);
 static int  efm32_attach(struct uart_dev_s *dev);
 static void efm32_detach(struct uart_dev_s *dev);
-static int  efm32_rxinterrupt(struct uart_dev_s *dev);
-#if defined(CONFIG_EFM32_USART0_ISUART)
-static int  efm32_usart0_rxinterrupt(int irq, void *context);
-#endif
-#if defined(CONFIG_EFM32_USART1_ISUART)
-static int  efm32_usart1_rxinterrupt(int irq, void *context);
-#endif
-#if defined(CONFIG_EFM32_USART2_ISUART)
-static int  efm32_usart2_rxinterrupt(int irq, void *context);
-#endif
-#if defined(CONFIG_EFM32_UART0)
-static int  efm32_uart0_rxinterrupt(int irq, void *context);
-#endif
-#if defined(CONFIG_EFM32_UART1)
-static int  efm32_uart1_rxinterrupt(int irq, void *context);
-#endif
-static int  efm32_txinterrupt(struct uart_dev_s *dev);
-#if defined(CONFIG_EFM32_USART0_ISUART)
-static int  efm32_usart0_txinterrupt(int irq, void *context);
-#endif
-#if defined(CONFIG_EFM32_USART1_ISUART)
-static int  efm32_usart1_txinterrupt(int irq, void *context);
-#endif
-#if defined(CONFIG_EFM32_USART2_ISUART)
-static int  efm32_usart2_txinterrupt(int irq, void *context);
-#endif
-#if defined(CONFIG_EFM32_UART0)
-static int  efm32_uart0_txinterrupt(int irq, void *context);
-#endif
-#if defined(CONFIG_EFM32_UART1)
-static int  efm32_uart1_txinterrupt(int irq, void *context);
-#endif
+static int  efm32_rxinterrupt(int irq, void *context, void *arg);
+static int  efm32_txinterrupt((int irq, void *context, void *arg);
 static int  efm32_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int  efm32_receive(struct uart_dev_s *dev, uint32_t *status);
 static void efm32_rxint(struct uart_dev_s *dev, bool enable);
@@ -350,8 +318,6 @@ static char g_uart1txbuffer[CONFIG_UART1_TXBUFSIZE];
 static const struct efm32_usart_s g_usart0config =
 {
   .uartbase  = EFM32_USART0_BASE,
-  .rxhandler = efm32_usart0_rxinterrupt,
-  .txhandler = efm32_usart0_txinterrupt,
   .baud      = CONFIG_USART0_BAUD,
   .rxirq     = EFM32_IRQ_USART0_RX,
   .txirq     = EFM32_IRQ_USART0_TX,
@@ -388,8 +354,6 @@ static struct uart_dev_s g_usart0port =
 static struct efm32_config_s g_usart1config =
 {
   .uartbase  = EFM32_USART1_BASE,
-  .rxhandler = efm32_usart1_rxinterrupt,
-  .txhandler = efm32_usart1_txinterrupt,
   .baud      = CONFIG_USART1_BAUD,
   .rxirq     = EFM32_IRQ_USART1_RX,
   .txirq     = EFM32_IRQ_USART1_TX,
@@ -426,8 +390,6 @@ static struct uart_dev_s g_usart1port =
 static struct efm32_config_s g_usart2config =
 {
   .uartbase  = EFM32_USART2_BASE,
-  .rxhandler = efm32_usart2_rxinterrupt,
-  .txhandler = efm32_usart2_txinterrupt,
   .baud      = CONFIG_USART2_BAUD,
   .rxirq     = EFM32_IRQ_USART2_RX,
   .txirq     = EFM32_IRQ_USART2_TX,
@@ -464,8 +426,6 @@ static struct uart_dev_s g_usart2port =
 static struct efm32_config_s g_uart0config =
 {
   .uartbase  = EFM32_UART0_BASE,
-  .rxhandler = efm32_uart0_rxinterrupt,
-  .txhandler = efm32_uart0_txinterrupt,
   .baud      = CONFIG_UART0_BAUD,
   .rxirq     = EFM32_IRQ_UART0_RX,
   .txirq     = EFM32_IRQ_UART0_TX,
@@ -502,8 +462,6 @@ static struct uart_dev_s g_uart0port =
 static struct efm32_usart_s g_uart1config =
 {
   .uartbase  = EFM32_UART1_BASE,
-  .rxhandler = efm32_uart1_rxinterrupt,
-  .txhandler = efm32_uart1_txinterrupt,
   .baud      = CONFIG_UART1_BAUD,
   .rxirq     = EFM32_IRQ_UART1_RX,
   .txirq     = EFM32_IRQ_UART1_TX,
@@ -689,13 +647,13 @@ static int efm32_attach(struct uart_dev_s *dev)
    * disabled in the C2 register.
    */
 
-  ret = irq_attach(config->rxirq, config->rxhandler);
+  ret = irq_attach(config->rxirq, efm32_rxinterrupt, dev);
   if (ret < 0)
     {
       return ret;
     }
 
-  ret = irq_attach(config->txirq, config->txhandler);
+  ret = irq_attach(config->txirq, efm32_txinterrupt, dev);
   if (ret < 0)
     {
       irq_detach(config->rxirq);
@@ -742,12 +700,14 @@ static void efm32_detach(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static int  efm32_rxinterrupt(struct uart_dev_s *dev)
+static int efm32_rxinterrupt(int irq, void *context, void *arg)
 {
-  struct efm32_usart_s *priv = (struct efm32_usart_s *)dev->priv;
+  struct uart_dev_s *dev = (struct uart_dev_s *)arg;
+  struct efm32_usart_s *priv;
   uint32_t intflags;
 
-  DEBUGASSERT(priv);
+  DEBUGASSERT(dev != NULL && dev->priv != NULL);
+  priv = (struct efm32_usart_s *)dev->priv;
 
   /* Read the interrupt flags register */
 
@@ -768,7 +728,7 @@ static int  efm32_rxinterrupt(struct uart_dev_s *dev)
       uart_recvchars(dev);
     }
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   /* Check for receive errors */
 
   if ((intflags & EFM32_RXERR_INTS) != 0)
@@ -780,47 +740,12 @@ static int  efm32_rxinterrupt(struct uart_dev_s *dev)
        * FERR - Framing Error Interrupt Enable
        */
 
-      lldbg("RX ERROR: %08x\n", intflags);
+      _err("RX ERROR: %08x\n", intflags);
     }
 #endif
 
   return OK;
 }
-
-#if defined(CONFIG_EFM32_USART0_ISUART)
-static int efm32_usart0_rxinterrupt(int irq, void *context)
-{
-  return efm32_rxinterrupt(&g_usart0port);
-}
-#endif
-
-#if defined(CONFIG_EFM32_USART1_ISUART)
-static int  efm32_usart1_rxinterrupt(int irq, void *context)
-{
-  return efm32_rxinterrupt(&g_usart1port);
-}
-#endif
-
-#if defined(CONFIG_EFM32_USART2_ISUART)
-static int  efm32_usart2_rxinterrupt(int irq, void *context)
-{
-  return efm32_rxinterrupt(&g_usart2port);
-}
-#endif
-
-#if defined(CONFIG_EFM32_UART0)
-static int  efm32_uart0_rxinterrupt(int irq, void *context)
-{
-  return efm32_rxinterrupt(&g_uart0port);
-}
-#endif
-
-#if defined(CONFIG_EFM32_UART1)
-static int  efm32_uart1_rxinterrupt(int irq, void *context)
-{
-  return efm32_rxinterrupt(&g_uart1port);
-}
-#endif
 
 /****************************************************************************
  * Name: efm32_txinterrupt
@@ -830,12 +755,14 @@ static int  efm32_uart1_rxinterrupt(int irq, void *context)
  *
  ****************************************************************************/
 
-static int  efm32_txinterrupt(struct uart_dev_s *dev)
+static int efm32_txinterrupt((int irq, void *context, void *arg)
 {
-  struct efm32_usart_s *priv = (struct efm32_usart_s *)dev->priv;
+  struct uart_dev_s *dev = (struct uart_dev_s *)arg;
+  struct efm32_usart_s *priv;
   uint32_t intflags;
 
-  DEBUGASSERT(priv);
+  DEBUGASSERT(dev != NULL && dev->priv != NULL);
+  priv = (struct efm32_usart_s *)dev->priv;
 
   /* Read the interrupt flags register */
 
@@ -856,54 +783,19 @@ static int  efm32_txinterrupt(struct uart_dev_s *dev)
       uart_xmitchars(dev);
     }
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   /* Check for transmit errors */
 
   if ((intflags & EFM32_TXERR_INTS) != 0)
     {
       /* TXOF - TX Overflow Interrupt Enable */
 
-      lldbg("RX ERROR: %08x\n", intflags);
+      _err("RX ERROR: %08x\n", intflags);
     }
 #endif
 
   return OK;
 }
-
-#if defined(CONFIG_EFM32_USART0_ISUART)
-static int efm32_usart0_txinterrupt(int irq, void *context)
-{
-  return efm32_txinterrupt(&g_usart0port);
-}
-#endif
-
-#if defined(CONFIG_EFM32_USART1_ISUART)
-static int  efm32_usart1_txinterrupt(int irq, void *context)
-{
-  return efm32_txinterrupt(&g_usart1port);
-}
-#endif
-
-#if defined(CONFIG_EFM32_USART2_ISUART)
-static int  efm32_usart2_txinterrupt(int irq, void *context)
-{
-  return efm32_txinterrupt(&g_usart2port);
-}
-#endif
-
-#if defined(CONFIG_EFM32_UART0)
-static int  efm32_uart0_txinterrupt(int irq, void *context)
-{
-  return efm32_txinterrupt(&g_uart0port);
-}
-#endif
-
-#if defined(CONFIG_EFM32_UART1)
-static int  efm32_uart1_txinterrupt(int irq, void *context)
-{
-  return efm32_txinterrupt(&g_uart1port);
-}
-#endif
 
 /****************************************************************************
  * Name: efm32_ioctl

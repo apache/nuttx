@@ -146,7 +146,7 @@ static int audio_open(FAR struct file *filep)
   uint8_t tmp;
   int ret;
 
-  audvdbg("crefs: %d\n", upper->crefs);
+  audinfo("crefs: %d\n", upper->crefs);
 
   /* Get exclusive access to the device structures */
 
@@ -198,7 +198,7 @@ static int audio_close(FAR struct file *filep)
   FAR struct audio_upperhalf_s *upper = inode->i_private;
   int ret;
 
-  audvdbg("crefs: %d\n", upper->crefs);
+  audinfo("crefs: %d\n", upper->crefs);
 
   /* Get exclusive access to the device structures */
 
@@ -228,7 +228,7 @@ static int audio_close(FAR struct file *filep)
       /* Disable the Audio device */
 
       DEBUGASSERT(lower->ops->shutdown != NULL);
-      audvdbg("calling shutdown: %d\n");
+      audinfo("calling shutdown: %d\n");
 
       lower->ops->shutdown(lower);
     }
@@ -358,7 +358,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 #endif
   int ret;
 
-  audvdbg("cmd: %d arg: %ld\n", cmd, arg);
+  audinfo("cmd: %d arg: %ld\n", cmd, arg);
 
   /* Get exclusive access to the device structures */
 
@@ -382,7 +382,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           FAR struct audio_caps_s *caps = (FAR struct audio_caps_s *)((uintptr_t)arg);
           DEBUGASSERT(lower->ops->getcaps != NULL);
 
-          audvdbg("AUDIOIOC_GETCAPS: Device=%d\n", caps->ac_type);
+          audinfo("AUDIOIOC_GETCAPS: Device=%d\n", caps->ac_type);
 
           /* Call the lower-half driver capabilities handler */
 
@@ -396,7 +396,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             (FAR const struct audio_caps_desc_s *)((uintptr_t)arg);
           DEBUGASSERT(lower->ops->configure != NULL);
 
-          audvdbg("AUDIOIOC_INITIALIZE: Device=%d\n", caps->caps.ac_type);
+          audinfo("AUDIOIOC_INITIALIZE: Device=%d\n", caps->caps.ac_type);
 
           /* Call the lower-half driver configure handler */
 
@@ -412,7 +412,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           DEBUGASSERT(lower->ops->shutdown != NULL);
 
-          audvdbg("AUDIOIOC_SHUTDOWN\n");
+          audinfo("AUDIOIOC_SHUTDOWN\n");
 
           /* Call the lower-half driver initialize handler */
           ret = lower->ops->shutdown(lower);
@@ -427,7 +427,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case AUDIOIOC_START:
         {
-          audvdbg("AUDIOIOC_START\n");
+          audinfo("AUDIOIOC_START\n");
           DEBUGASSERT(lower->ops->start != NULL);
 
           /* Start the audio stream */
@@ -449,7 +449,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 #ifndef CONFIG_AUDIO_EXCLUDE_STOP
       case AUDIOIOC_STOP:
         {
-          audvdbg("AUDIOIOC_STOP\n");
+          audinfo("AUDIOIOC_STOP\n");
           DEBUGASSERT(lower->ops->stop != NULL);
 
           if (upper->started)
@@ -475,7 +475,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case AUDIOIOC_PAUSE:
         {
-          audvdbg("AUDIOIOC_PAUSE\n");
+          audinfo("AUDIOIOC_PAUSE\n");
           DEBUGASSERT(lower->ops->pause != NULL);
 
           if (upper->started)
@@ -497,7 +497,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case AUDIOIOC_RESUME:
         {
-          audvdbg("AUDIOIOC_RESUME\n");
+          audinfo("AUDIOIOC_RESUME\n");
           DEBUGASSERT(lower->ops->resume != NULL);
 
           if (upper->started)
@@ -521,7 +521,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case AUDIOIOC_ALLOCBUFFER:
         {
-          audvdbg("AUDIOIOC_ALLOCBUFFER\n");
+          audinfo("AUDIOIOC_ALLOCBUFFER\n");
 
           bufdesc = (FAR struct audio_buf_desc_s *) arg;
           if (lower->ops->allocbuffer)
@@ -544,7 +544,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case AUDIOIOC_FREEBUFFER:
         {
-          audvdbg("AUDIOIOC_FREEBUFFER\n");
+          audinfo("AUDIOIOC_FREEBUFFER\n");
 
           bufdesc = (FAR struct audio_buf_desc_s *) arg;
           if (lower->ops->freebuffer)
@@ -569,7 +569,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case AUDIOIOC_ENQUEUEBUFFER:
         {
-          audvdbg("AUDIOIOC_ENQUEUEBUFFER\n");
+          audinfo("AUDIOIOC_ENQUEUEBUFFER\n");
 
           DEBUGASSERT(lower->ops->enqueuebuffer != NULL);
 
@@ -585,7 +585,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case AUDIOIOC_REGISTERMQ:
         {
-          audvdbg("AUDIOIOC_REGISTERMQ\n");
+          audinfo("AUDIOIOC_REGISTERMQ\n");
 
           upper->usermq = (mqd_t) arg;
           ret = OK;
@@ -599,7 +599,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case AUDIOIOC_UNREGISTERMQ:
         {
-          audvdbg("AUDIOIOC_UNREGISTERMQ\n");
+          audinfo("AUDIOIOC_UNREGISTERMQ\n");
 
           upper->usermq = NULL;
           ret = OK;
@@ -613,7 +613,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case AUDIOIOC_RESERVE:
         {
-          audvdbg("AUDIOIOC_RESERVE\n");
+          audinfo("AUDIOIOC_RESERVE\n");
           DEBUGASSERT(lower->ops->reserve != NULL);
 
           /* Call lower-half to perform the reservation */
@@ -633,7 +633,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case AUDIOIOC_RELEASE:
         {
-          audvdbg("AUDIOIOC_RELEASE\n");
+          audinfo("AUDIOIOC_RELEASE\n");
           DEBUGASSERT(lower->ops->release != NULL);
 
           /* Call lower-half to perform the release */
@@ -650,7 +650,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       default:
         {
-          audvdbg("Forwarding unrecognized cmd: %d arg: %ld\n", cmd, arg);
+          audinfo("Forwarding unrecognized cmd: %d arg: %ld\n", cmd, arg);
           DEBUGASSERT(lower->ops->ioctl != NULL);
           ret = lower->ops->ioctl(lower, cmd, arg);
         }
@@ -704,7 +704,7 @@ static inline void audio_dequeuebuffer(FAR struct audio_upperhalf_s *upper,
 {
   struct audio_msg_s    msg;
 
-  audllvdbg("Entry\n");
+  audinfo("Entry\n");
 
   /* Send a dequeue message to the user if a message queue is registered */
 
@@ -742,7 +742,7 @@ static inline void audio_complete(FAR struct audio_upperhalf_s *upper,
 {
   struct audio_msg_s    msg;
 
-  audllvdbg("Entry\n");
+  audinfo("Entry\n");
 
   /* Send a dequeue message to the user if a message queue is registered */
 
@@ -791,7 +791,7 @@ static void audio_callback(FAR void *handle, uint16_t reason,
 {
   FAR struct audio_upperhalf_s *upper = (FAR struct audio_upperhalf_s *)handle;
 
-  audllvdbg("Entry\n");
+  audinfo("Entry\n");
 
   /* Perform operation based on reason code */
 
@@ -832,7 +832,7 @@ static void audio_callback(FAR void *handle, uint16_t reason,
 
       default:
         {
-          auddbg("Unknown callback reason code %d\n", reason);
+          auderr("ERROR: Unknown callback reason code %d\n", reason);
           break;
         }
     }
@@ -885,7 +885,7 @@ int audio_register(FAR const char *name, FAR struct audio_lowerhalf_s *dev)
   upper = (FAR struct audio_upperhalf_s *)kmm_zalloc(sizeof(struct audio_upperhalf_s));
   if (!upper)
     {
-      auddbg("Allocation failed\n");
+      auderr("ERROR: Allocation failed\n");
       return -ENOMEM;
     }
 
@@ -995,7 +995,7 @@ int audio_register(FAR const char *name, FAR struct audio_lowerhalf_s *dev)
   dev->upper = audio_callback;
   dev->priv = upper;
 
-  audvdbg("Registering %s\n", path);
+  audinfo("Registering %s\n", path);
   return register_driver(path, &g_audioops, 0666, upper);
 }
 

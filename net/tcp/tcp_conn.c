@@ -273,7 +273,8 @@ static FAR struct tcp_conn_s *tcp_listener(uint16_t portno)
  *     selected.
  *
  * Return:
- *   0 on success, negated errno on failure:
+ *   Selected or verified port number in host order on success, a negated
+ *   errno on failure:
  *
  *   EADDRINUSE
  *     The given address is already in use.
@@ -305,6 +306,7 @@ static int tcp_selectport(uint16_t portno)
           /* Guess that the next available port number will be the one after
            * the last port number assigned.
            */
+
           portno = ++g_last_tcp_port;
 
           /* Make sure that the port number is within range */
@@ -338,7 +340,7 @@ static int tcp_selectport(uint16_t portno)
         }
     }
 
-  /* Return the selected or verified port number */
+  /* Return the selected or verified port number (host byte order) */
 
   return portno;
 }
@@ -512,15 +514,14 @@ static inline FAR struct tcp_conn_s *
 static inline int tcp_ipv4_bind(FAR struct tcp_conn_s *conn,
                                 FAR const struct sockaddr_in *addr)
 {
-  net_lock_t flags;
   int port;
   int ret;
 
   /* Verify or select a local port and address */
 
-  flags = net_lock();
+  net_lock();
 
-  /* Verify or select a local port */
+  /* Verify or select a local port (host byte order) */
 
 #ifdef CONFIG_NETDEV_MULTINIC
   port = tcp_selectport(PF_INET,
@@ -532,13 +533,13 @@ static inline int tcp_ipv4_bind(FAR struct tcp_conn_s *conn,
 
   if (port < 0)
     {
-      ndbg("tcp_selectport failed: %d\n", port);
+      nerr("ERROR: tcp_selectport failed: %d\n", port);
       return port;
     }
 
-  /* Save the local address in the connection structure. */
+  /* Save the local address in the connection structure (network byte order). */
 
-  conn->lport = addr->sin_port;
+  conn->lport = htons(port);
 #ifdef CONFIG_NETDEV_MULTINIC
   net_ipv4addr_copy(conn->u.ipv4.laddr, addr->sin_addr.s_addr);
 #endif
@@ -552,7 +553,7 @@ static inline int tcp_ipv4_bind(FAR struct tcp_conn_s *conn,
     {
       /* If no device is found, then the address is not reachable */
 
-      ndbg("tcp_local_ipv4_device failed: %d\n", ret);
+      nerr("ERROR: tcp_local_ipv4_device failed: %d\n", ret);
 
       /* Back out the local address setting */
 
@@ -563,7 +564,7 @@ static inline int tcp_ipv4_bind(FAR struct tcp_conn_s *conn,
       return ret;
     }
 
-  net_unlock(flags);
+  net_unlock();
   return OK;
 }
 #endif /* CONFIG_NET_IPv4 */
@@ -587,15 +588,14 @@ static inline int tcp_ipv4_bind(FAR struct tcp_conn_s *conn,
 static inline int tcp_ipv6_bind(FAR struct tcp_conn_s *conn,
                                 FAR const struct sockaddr_in6 *addr)
 {
-  net_lock_t flags;
   int port;
   int ret;
 
   /* Verify or select a local port and address */
 
-  flags = net_lock();
+  net_lock();
 
-  /* Verify or select a local port */
+  /* Verify or select a local port (host byte order) */
 
 #ifdef CONFIG_NETDEV_MULTINIC
   /* The port number must be unique for this address binding */
@@ -613,13 +613,13 @@ static inline int tcp_ipv6_bind(FAR struct tcp_conn_s *conn,
 
   if (port < 0)
     {
-      ndbg("tcp_selectport failed: %d\n", port);
+      nerr("ERROR: tcp_selectport failed: %d\n", port);
       return port;
     }
 
-  /* Save the local address in the connection structure. */
+  /* Save the local address in the connection structure (network byte order). */
 
-  conn->lport = addr->sin6_port;
+  conn->lport = htons(port);
 #ifdef CONFIG_NETDEV_MULTINIC
   net_ipv6addr_copy(conn->u.ipv6.laddr, addr->sin6_addr.in6_u.u6_addr16);
 #endif
@@ -633,7 +633,7 @@ static inline int tcp_ipv6_bind(FAR struct tcp_conn_s *conn,
     {
       /* If no device is found, then the address is not reachable */
 
-      ndbg("tcp_local_ipv6_device failed: %d\n", ret);
+      nerr("ERROR: tcp_local_ipv6_device failed: %d\n", ret);
 
       /* Back out the local address setting */
 
@@ -644,7 +644,7 @@ static inline int tcp_ipv6_bind(FAR struct tcp_conn_s *conn,
       return ret;
     }
 
-  net_unlock(flags);
+  net_unlock();
   return OK;
 }
 #endif /* CONFIG_NET_IPv6 */
@@ -698,14 +698,13 @@ void tcp_initialize(void)
 FAR struct tcp_conn_s *tcp_alloc(uint8_t domain)
 {
   FAR struct tcp_conn_s *conn;
-  net_lock_t flags;
 
   /* Because this routine is called from both interrupt level and
    * and from user level, we have not option but to disable interrupts
    * while accessing g_free_tcp_connections[];
    */
 
-  flags = net_lock();
+  net_lock();
 
   /* Return the entry from the head of the free list */
 
@@ -727,7 +726,7 @@ FAR struct tcp_conn_s *tcp_alloc(uint8_t domain)
 
       while (tmp)
         {
-          nllvdbg("conn: %p state: %02x\n", tmp, tmp->tcpstateflags);
+          ninfo("conn: %p state: %02x\n", tmp, tmp->tcpstateflags);
 
           /* Is this connection in a state we can sacrifice. */
 
@@ -760,7 +759,7 @@ FAR struct tcp_conn_s *tcp_alloc(uint8_t domain)
 
       if (conn != NULL)
         {
-          nlldbg("Closing unestablished connection: %p\n", conn);
+          nwarn("WARNING: Closing unestablished connection: %p\n", conn);
 
           /* Yes... free it.  This will remove the connection from the list
            * of active connections and release all resources held by the
@@ -784,7 +783,7 @@ FAR struct tcp_conn_s *tcp_alloc(uint8_t domain)
     }
 #endif
 
-  net_unlock(flags);
+  net_unlock();
 
   /* Mark the connection allocated */
 
@@ -816,7 +815,6 @@ void tcp_free(FAR struct tcp_conn_s *conn)
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   FAR struct tcp_wrbuffer_s *wrbuffer;
 #endif
-  net_lock_t flags;
 
   /* Because g_free_tcp_connections is accessed from user level and interrupt
    * level, code, it is necessary to keep interrupts disabled during this
@@ -824,7 +822,7 @@ void tcp_free(FAR struct tcp_conn_s *conn)
    */
 
   DEBUGASSERT(conn->crefs == 0);
-  flags = net_lock();
+  net_lock();
 
   /* Free remaining callbacks, actually there should be only the close callback
    * left.
@@ -889,7 +887,7 @@ void tcp_free(FAR struct tcp_conn_s *conn)
 
   conn->tcpstateflags = TCP_CLOSED;
   dq_addlast(&conn->node, &g_free_tcp_connections);
-  net_unlock(flags);
+  net_unlock();
 }
 
 /****************************************************************************
@@ -1066,7 +1064,7 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
            * probably really just assert here.
            */
 
-          ndbg("Failed to find network device: %d\n", ret);
+          nerr("ERROR: Failed to find network device: %d\n", ret);
           tcp_free(conn);
           return NULL;
         }
@@ -1083,11 +1081,12 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
       conn->tcpstateflags = TCP_SYN_RCVD;
 
       tcp_initsequence(conn->sndseq);
-      conn->unacked = 1;
+      conn->unacked       = 1;
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-      conn->expired = 0;
-      conn->isn     = 0;
-      conn->sent    = 0;
+      conn->expired       = 0;
+      conn->isn           = 0;
+      conn->sent          = 0;
+      conn->sndseq_max    = 0;
 #endif
 
       /* rcvseq should be the seqno from the incoming packet + 1. */
@@ -1181,7 +1180,6 @@ int tcp_bind(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
 
 int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
 {
-  net_lock_t flags;
   int port;
   int ret;
 
@@ -1200,7 +1198,7 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
    * but the port may still be INPORT_ANY.
    */
 
-  flags = net_lock();
+  net_lock();
 
 #ifdef CONFIG_NETDEV_MULTINIC
   /* If there are multiple network devices, then we need to pass the local,
@@ -1216,7 +1214,9 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
   if (conn->domain == PF_INET)
 #endif
     {
-      /* Select a port that is unique for this IPv4 local address */
+      /* Select a port that is unique for this IPv4 local address (host
+       * order).
+       */
 
       port = tcp_selectport(PF_INET,
                             (FAR const union ip_addr_u *)&conn->u.ipv4.laddr,
@@ -1229,7 +1229,9 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
   else
 #endif
     {
-      /* Select a port that is unique for this IPv6 local address */
+      /* Select a port that is unique for this IPv6 local address (host
+       * order).
+       */
 
       port = tcp_selectport(PF_INET6,
                             (FAR const union ip_addr_u *)conn->u.ipv6.laddr,
@@ -1320,7 +1322,7 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
        * just assert here.
        */
 
-      ndbg("Failed to find network device: %d\n", ret);
+      nerr("ERROR: Failed to find network device: %d\n", ret);
       goto errout_with_lock;
     }
 
@@ -1344,6 +1346,7 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
   conn->expired    = 0;
   conn->isn        = 0;
   conn->sent       = 0;
+  conn->sndseq_max = 0;
 #endif
 
 #ifdef CONFIG_NET_TCP_READAHEAD
@@ -1365,7 +1368,7 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
   ret = OK;
 
 errout_with_lock:
-  net_unlock(flags);
+  net_unlock();
   return ret;
 }
 

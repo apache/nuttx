@@ -39,17 +39,22 @@
 
 #include <nuttx/config.h>
 
+/* Output debug info even if debug output is not selected. */
+
+#undef  CONFIG_DEBUG_ERROR
+#undef  CONFIG_DEBUG_WARN
+#undef  CONFIG_DEBUG_INFO
+#define CONFIG_DEBUG_ERROR 1
+#define CONFIG_DEBUG_WARN 1
+#define CONFIG_DEBUG_INFO 1
+
 #include <spawn.h>
 #include <assert.h>
 #include <debug.h>
 
 #include <nuttx/spawn.h>
 
-#ifdef CONFIG_DEBUG
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
+#ifdef CONFIG_DEBUG_FEATURES
 
 /****************************************************************************
  * Public Functions
@@ -75,10 +80,10 @@ void posix_spawn_file_actions_dump(FAR posix_spawn_file_actions_t *file_actions)
 
   DEBUGASSERT(file_actions);
 
-  dbg("File Actions[%p->%p]:\n", file_actions, *file_actions);
+  _err("File Actions[%p->%p]:\n", file_actions, *file_actions);
   if (!*file_actions)
     {
-      dbg("  NONE\n");
+      _err("  NONE\n");
       return;
     }
 
@@ -95,7 +100,7 @@ void posix_spawn_file_actions_dump(FAR posix_spawn_file_actions_t *file_actions)
             FAR struct spawn_close_file_action_s *action =
               (FAR struct spawn_close_file_action_s *)entry;
 
-            dbg("  CLOSE: fd=%d\n", action->fd);
+            _err("  CLOSE: fd=%d\n", action->fd);
           }
           break;
 
@@ -104,7 +109,7 @@ void posix_spawn_file_actions_dump(FAR posix_spawn_file_actions_t *file_actions)
             FAR struct spawn_dup2_file_action_s *action =
               (FAR struct spawn_dup2_file_action_s *)entry;
 
-            dbg("  DUP2: %d->%d\n", action->fd1, action->fd2);
+            _err("  DUP2: %d->%d\n", action->fd1, action->fd2);
           }
           break;
 
@@ -113,18 +118,18 @@ void posix_spawn_file_actions_dump(FAR posix_spawn_file_actions_t *file_actions)
             FAR struct spawn_open_file_action_s *action =
               (FAR struct spawn_open_file_action_s *)entry;
 
-            dbg("  OPEN: path=%s oflags=%04x mode=%04x fd=%d\n",
+            _err("  OPEN: path=%s oflags=%04x mode=%04x fd=%d\n",
                 action->path, action->oflags, action->mode, action->fd);
           }
           break;
 
         case SPAWN_FILE_ACTION_NONE:
         default:
-          dbg("  ERROR: Unknown action: %d\n", entry->action);
+          _err("  ERROR: Unknown action: %d\n", entry->action);
           break;
         }
     }
 }
 
-#endif /* CONFIG_DEBUG */
+#endif /* CONFIG_DEBUG_FEATURES */
 

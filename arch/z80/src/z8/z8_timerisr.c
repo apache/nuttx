@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z80/src/z8/z8_timerisr.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,18 +50,6 @@
 #include "up_internal.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -70,7 +58,11 @@
 extern uint32_t get_freq(void);
 
 /****************************************************************************
- * Function:  up_timerisr
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Function:  z8_timerisr
  *
  * Description:
  *   The timer ISR will perform a variety of services for various portions
@@ -78,16 +70,20 @@ extern uint32_t get_freq(void);
  *
  ****************************************************************************/
 
-int up_timerisr(int irq, uint32_t *regs)
+static int z8_timerisr(int irq, uint32_t *regs, void *arg)
 {
-   /* Process timer interrupt */
+  /* Process timer interrupt */
 
-   sched_process_timer();
-   return 0;
+  sched_process_timer();
+  return 0;
 }
 
 /****************************************************************************
- * Function:  up_timer_initialize
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Function:  z80_timer_initialize
  *
  * Description:
  *   This function is called during start-up to initialize the timer
@@ -95,7 +91,7 @@ int up_timerisr(int irq, uint32_t *regs)
  *
  ****************************************************************************/
 
-void up_timer_initialize(void)
+void z80_timer_initialize(void)
 {
   uint32_t reload;
 
@@ -141,7 +137,7 @@ void up_timer_initialize(void)
 
   /* Attach and enable the timer interrupt (leaving at priority 0 */
 
-  irq_attach(Z8_IRQ_SYSTIMER, (xcpt_t)up_timerisr);
+  irq_attach(Z8_IRQ_SYSTIMER, (xcpt_t)z8_timerisr, NULL);
   up_enable_irq(Z8_IRQ_SYSTIMER);
 }
 

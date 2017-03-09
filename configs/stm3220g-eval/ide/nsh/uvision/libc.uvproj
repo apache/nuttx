@@ -954,11 +954,6 @@
               <FilePath>../../../../../libc/stdio/lib_memsostream.c</FilePath>
             </File>
             <File>
-              <FileName>lib_lowinstream.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../../../../../libc/stdio/lib_lowinstream.c</FilePath>
-            </File>
-            <File>
               <FileName>lib_lowoutstream.c</FileName>
               <FileType>1</FileType>
               <FilePath>../../../../../libc/stdio/lib_lowoutstream.c</FilePath>
@@ -1477,16 +1472,6 @@
               <FileName>symtab_findorderedbyvalue.c</FileName>
               <FileType>1</FileType>
               <FilePath>../../../../../libc/symtab/symtab_findorderedbyvalue.c</FilePath>
-            </File>
-            <File>
-              <FileName>lib_syslog.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../../../../../libc/syslog/lib_syslog.c</FilePath>
-            </File>
-            <File>
-              <FileName>lib_lowsyslog.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../../../../../libc/syslog/lib_lowsyslog.c</FilePath>
             </File>
             <File>
               <FileName>lib_setlogmask.c</FileName>

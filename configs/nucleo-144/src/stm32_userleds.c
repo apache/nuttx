@@ -2,8 +2,9 @@
  * configs/nucleo-144/src/stm32_userleds.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *   Author: Mark Olsson <post@markolsson.se>
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            Mark Olsson <post@markolsson.se>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -43,6 +44,7 @@
 #include <stdbool.h>
 #include <debug.h>
 
+#include <nuttx/board.h>
 #include <arch/board/board.h>
 
 #include "stm32_gpio.h"
@@ -54,27 +56,21 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG
- * with CONFIG_DEBUG_VERBOSE too)
- */
-
-#ifdef CONFIG_DEBUG_LEDS
-#  define leddbg  lldbg
-#  define ledvdbg llvdbg
-#else
-#  define leddbg(x...)
-#  define ledvdbg(x...)
-#endif
+#define ARRAYSIZE(x) (sizeof((x)) / sizeof((x)[0]))
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-/* This array maps an LED number to GPIO pin configuration */
+/* This array maps an LED number to GPIO pin configuration and is indexed by
+ * BOARD_LED_<color>
+ */
 
-static const uint32_t g_ledcfg[3] =
+static const uint32_t g_ledcfg[BOARD_NLEDS] =
 {
-  GPIO_LD1, GPIO_LD2, GPIO_LD3
+  GPIO_LED_GREEN,
+  GPIO_LED_BLUE,
+  GPIO_LED_RED,
 };
 
 /****************************************************************************
@@ -98,7 +94,7 @@ void board_userled_initialize(void)
 
   /* Configure LED1-3 GPIOs for output */
 
-  for (i = 0; i < 3; i++)
+  for (i = 0; i < ARRAYSIZE(g_ledcfg); i++)
     {
       stm32_configgpio(g_ledcfg[i]);
     }
@@ -116,10 +112,10 @@ void board_userled_initialize(void)
 
 void board_userled(int led, bool ledon)
 {
-  if ((unsigned)led < 3)
-  {
-    stm32_gpiowrite(g_ledcfg[led], ledon);
-  }
+  if ((unsigned)led < ARRAYSIZE(g_ledcfg))
+    {
+      stm32_gpiowrite(g_ledcfg[led], ledon);
+    }
 }
 
 /****************************************************************************
@@ -139,7 +135,7 @@ void board_userled_all(uint8_t ledset)
 
   /* Configure LED1-3 GPIOs for output */
 
-  for (i = 0; i < 3; i++)
+  for (i = 0; i < ARRAYSIZE(g_ledcfg); i++)
     {
       stm32_gpiowrite(g_ledcfg[i], (ledset & (1 << i)) != 0);
     }

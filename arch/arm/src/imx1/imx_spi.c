@@ -50,6 +50,7 @@
 #include <nuttx/spi/spi.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/semaphore.h>
 #include <arch/board/board.h>
 
 #include "up_internal.h"
@@ -164,7 +165,7 @@ static int    spi_transfer(struct imx_spidev_s *priv, const void *txbuffer,
 
 #ifndef CONFIG_SPI_POLLWAIT
 static inline struct imx_spidev_s *spi_mapirq(int irq);
-static int    spi_interrupt(int irq, void *context);
+static int    spi_interrupt(int irq, void *context, FAR void *arg, FAR void *arg);
 #endif
 
 /* SPI methods */
@@ -652,7 +653,7 @@ static inline struct imx_spidev_s *spi_mapirq(int irq)
  ****************************************************************************/
 
 #ifndef CONFIG_SPI_POLLWAIT
-static int spi_interrupt(int irq, void *context)
+static int spi_interrupt(int irq, void *context, FAR void *arg, FAR void *arg)
 {
   struct imx_spidev_s *priv = spi_mapirq(irq);
   int ntxd;
@@ -1116,7 +1117,13 @@ FAR struct spi_dev_s *imx_spibus_initialize(int port)
   /* Initialize the state structure */
 
 #ifndef CONFIG_SPI_POLLWAIT
+  /* Initialize the semaphore that is used to wake up the waiting
+   * thread when the DMA transfer completes.  This semaphore is used for
+   * signaling and, hence, should not have priority inheritance enabled.
+   */
+
    sem_init(&priv->waitsem, 0, 0);
+   sem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
 #endif
    sem_init(&priv->exclsem, 0, 1);
 
@@ -1161,7 +1168,7 @@ FAR struct spi_dev_s *imx_spibus_initialize(int port)
   /* Attach the interrupt */
 
 #ifndef CONFIG_SPI_POLLWAIT
-  irq_attach(priv->irq, (xcpt_t)spi_interrupt);
+  irq_attach(priv->irq, (xcpt_t)spi_interrupt, NULL);
 #endif
 
   /* Enable SPI */

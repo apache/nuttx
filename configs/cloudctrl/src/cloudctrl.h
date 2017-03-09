@@ -1,8 +1,7 @@
 /****************************************************************************************************
  * configs/cloudctrl/src/cloudctrl.h
- * arch/arm/src/board/cloudctrl.n
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Darcy Gong <darcy.gong@gmail.com>
  *
@@ -253,6 +252,18 @@ void weak_function stm32_usbinitialize(void);
 
 #if defined(CONFIG_STM32_OTGFS) && defined(CONFIG_USBHOST)
 int stm32_usbhost_initialize(void);
+#endif
+
+/************************************************************************************
+ * Name: stm32_adc_setup
+ *
+ * Description:
+ *   Initialize ADC and register the ADC driver.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_ADC
+int stm32_adc_setup(void);
 #endif
 
 /****************************************************************************

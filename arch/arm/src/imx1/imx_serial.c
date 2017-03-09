@@ -112,7 +112,7 @@ static void up_shutdown(struct uart_dev_s *dev);
 static int  up_attach(struct uart_dev_s *dev);
 static void up_detach(struct uart_dev_s *dev);
 static inline struct uart_dev_s *up_mapirq(int irq);
-static int  up_interrupt(int irq, void *context);
+static int  up_interrupt(int irq, void *context, FAR void *arg);
 static int  up_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int  up_receive(struct uart_dev_s *dev, uint32_t *status);
 static void up_rxint(struct uart_dev_s *dev, bool enable);
@@ -753,13 +753,13 @@ static int up_attach(struct uart_dev_s *dev)
   /* Attach and enable the IRQ */
 
 #if defined(CONFIG_ARCH_CHIP_IMX1) || defined(CONFIG_ARCH_CHIP_IMXL)
-  ret = irq_attach(priv->rxirq, up_interrupt);
+  ret = irq_attach(priv->rxirq, up_interrupt, NULL);
   if (ret < 0)
     {
       return ret;
     }
 
-  ret = irq_attach(priv->txirq, up_interrupt);
+  ret = irq_attach(priv->txirq, up_interrupt, NULL);
   if (ret < 0)
     {
       irq_detach(priv->rxirq);
@@ -772,7 +772,7 @@ static int up_attach(struct uart_dev_s *dev)
   up_enable_irq(priv->txirq);
 
 #else
-  ret = irq_attach(priv->irq, up_interrupt);
+  ret = irq_attach(priv->irq, up_interrupt, NULL);
   if (ret == OK)
     {
       /* Enable the interrupt (RX and TX interrupts are still disabled
@@ -877,7 +877,7 @@ static inline struct uart_dev_s *up_mapirq(int irq)
  *
  ****************************************************************************/
 
-static int up_interrupt(int irq, void *context)
+static int up_interrupt(int irq, void *context, FAR void *arg)
 {
   struct uart_dev_s *dev;
   struct up_dev_s   *priv;

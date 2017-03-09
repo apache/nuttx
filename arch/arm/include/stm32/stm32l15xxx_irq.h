@@ -1,5 +1,5 @@
 /****************************************************************************************************
- * arch/arm/include/stm32s/stm32l15xxx_irq.h
+ * arch/arm/include/stm32/stm32l15xxx_irq.h
  * For STM32L100xx, STM32L151xx, STM32L152xx and STM32L162xx advanced ARM-based 32-bit MCUs
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.

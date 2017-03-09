@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/include/stm32s/irq.h
+ * arch/arm/include/stm32/irq.h
  *
- *   Copyright (C) 2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,7 +59,7 @@
 
 /* Processor Exceptions (vectors 0-15) */
 
-#define STM32_IRQ_RESERVED       (0) /* Reserved vector (only used with CONFIG_DEBUG) */
+#define STM32_IRQ_RESERVED       (0) /* Reserved vector (only used with CONFIG_DEBUG_FEATURES) */
                                      /* Vector  0: Reset stack pointer value */
                                      /* Vector  1: Reset (not handler as an IRQ) */
 #define STM32_IRQ_NMI            (2) /* Vector  2: Non-Maskable Interrupt (NMI) */
@@ -85,6 +85,8 @@
 #  include <arch/stm32/stm32f20xxx_irq.h>
 #elif defined(CONFIG_STM32_STM32F30XX)
 #  include <arch/stm32/stm32f30xxx_irq.h>
+#elif defined(CONFIG_STM32_STM32F33XX)
+#  include <arch/stm32/stm32f33xxx_irq.h>
 #elif defined(CONFIG_STM32_STM32F37XX)
 #  include <arch/stm32/stm32f37xxx_irq.h>
 #elif defined(CONFIG_STM32_STM32F40XX)

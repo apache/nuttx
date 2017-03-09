@@ -1,5 +1,5 @@
 /****************************************************************************
- * common/up_releasestack.c
+ * arch/z80/src/common/up_releasestack.c
  *
  *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -97,7 +97,7 @@ int nx_bitmap(NXWINDOW hwnd, FAR const struct nxgl_rect_s *dest,
               FAR const void *src[CONFIG_NX_NPLANES],
               FAR const struct nxgl_point_s *origin, unsigned int stride)
 {
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!hwnd || !dest || !src || !origin)
     {
       errno = EINVAL;

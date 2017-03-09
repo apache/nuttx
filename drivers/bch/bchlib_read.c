@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/bch/bchlib_read.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,8 +45,6 @@
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
-
-#include <nuttx/fs/fs.h>
 
 #include "bch.h"
 
@@ -160,7 +158,7 @@ ssize_t bchlib_read(FAR void *handle, FAR char *buffer, size_t offset, size_t le
                                        sector, nsectors);
       if (ret < 0)
         {
-          fdbg("Read failed: %d\n");
+          ferr("ERROR: Read failed: %d\n");
           return ret;
         }
 

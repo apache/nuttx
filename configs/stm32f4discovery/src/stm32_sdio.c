@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/stm32f4discovery/src/stm32_sdio.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -86,7 +86,7 @@ static bool g_sd_inserted = 0xff; /* Impossible value */
  ****************************************************************************/
 
 #ifdef HAVE_NCD
-static int stm32_ncd_interrupt(int irq, FAR void *context)
+static int stm32_ncd_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   bool present;
 
@@ -128,39 +128,40 @@ int stm32_sdio_initialize(void)
 
   /* Register an interrupt handler for the card detect pin */
 
-  stm32_gpiosetevent(GPIO_SDIO_NCD, true, true, true, stm32_ncd_interrupt);
+  (void)stm32_gpiosetevent(GPIO_SDIO_NCD, true, true, true,
+                           stm32_ncd_interrupt, NULL);
 #endif
 
   /* Mount the SDIO-based MMC/SD block driver */
   /* First, get an instance of the SDIO interface */
 
-  fvdbg("Initializing SDIO slot %d\n", SDIO_SLOTNO);
+  finfo("Initializing SDIO slot %d\n", SDIO_SLOTNO);
 
   g_sdio_dev = sdio_initialize(SDIO_SLOTNO);
   if (!g_sdio_dev)
     {
-      fdbg("Failed to initialize SDIO slot %d\n", SDIO_SLOTNO);
+      ferr("ERROR: Failed to initialize SDIO slot %d\n", SDIO_SLOTNO);
       return -ENODEV;
     }
 
   /* Now bind the SDIO interface to the MMC/SD driver */
 
-  fvdbg("Bind SDIO to the MMC/SD driver, minor=%d\n", SDIO_MINOR);
+  finfo("Bind SDIO to the MMC/SD driver, minor=%d\n", SDIO_MINOR);
 
   ret = mmcsd_slotinitialize(SDIO_MINOR, g_sdio_dev);
   if (ret != OK)
     {
-      fdbg("Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
+      ferr("ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
       return ret;
     }
 
-  fvdbg("Successfully bound SDIO to the MMC/SD driver\n");
+  finfo("Successfully bound SDIO to the MMC/SD driver\n");
 
 #ifdef HAVE_NCD
   /* Use SD card detect pin to check if a card is g_sd_inserted */
 
   cd_status = !stm32_gpioread(GPIO_SDIO_NCD);
-  fvdbg("Card detect : %d\n", cd_status);
+  finfo("Card detect : %d\n", cd_status);
 
   sdio_mediachange(g_sdio_dev, cd_status);
 #else

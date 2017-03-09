@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/procfs/fs_procfs.c
  *
- *   Copyright (C) 2013-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,7 +60,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/procfs.h>
 #include <nuttx/fs/dirent.h>
-#include <nuttx/regex.h>
+#include <nuttx/lib/regex.h>
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_PROCFS)
 
@@ -183,6 +183,8 @@ static int     procfs_ioctl(FAR struct file *filep, int cmd,
 
 static int     procfs_dup(FAR const struct file *oldp,
                  FAR struct file *newp);
+static int     procfs_fstat(FAR const struct file *filep,
+                 FAR struct stat *buf);
 
 static int     procfs_opendir(FAR struct inode *mountpt, const char *relpath,
                  FAR struct fs_dirent_s *dir);
@@ -235,6 +237,7 @@ const struct mountpt_operations procfs_operations =
 
   NULL,              /* sync */
   procfs_dup,        /* dup */
+  procfs_fstat,      /* fstat */
 
   procfs_opendir,    /* opendir */
   procfs_closedir,   /* closedir */
@@ -322,7 +325,7 @@ static int procfs_open(FAR struct file *filep, FAR const char *relpath,
 {
   int x, ret = -ENOENT;
 
-  fvdbg("Open '%s'\n", relpath);
+  finfo("Open '%s'\n", relpath);
 
   /* Perform the stat based on the procfs_entry operations */
 
@@ -382,7 +385,7 @@ static ssize_t procfs_read(FAR struct file *filep, FAR char *buffer,
   FAR struct procfs_file_s *handler;
   ssize_t ret = 0;
 
-  fvdbg("buffer=%p buflen=%d\n", buffer, (int)buflen);
+  finfo("buffer=%p buflen=%d\n", buffer, (int)buflen);
 
   /* Recover our private data from the struct file instance */
 
@@ -406,7 +409,7 @@ static ssize_t procfs_write(FAR struct file *filep, FAR const char *buffer,
   FAR struct procfs_file_s *handler;
   ssize_t ret = 0;
 
-  fvdbg("buffer=%p buflen=%d\n", buffer, (int)buflen);
+  finfo("buffer=%p buflen=%d\n", buffer, (int)buflen);
 
   /* Recover our private data from the struct file instance */
 
@@ -429,7 +432,7 @@ static ssize_t procfs_write(FAR struct file *filep, FAR const char *buffer,
 
 static int procfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-  fvdbg("cmd: %d arg: %08lx\n", cmd, arg);
+  finfo("cmd: %d arg: %08lx\n", cmd, arg);
 
   /* No IOCTL commands supported */
 
@@ -448,7 +451,7 @@ static int procfs_dup(FAR const struct file *oldp, FAR struct file *newp)
 {
   FAR struct procfs_file_s *oldattr;
 
-  fvdbg("Dup %p->%p\n", oldp, newp);
+  finfo("Dup %p->%p\n", oldp, newp);
 
   /* Recover our private data from the old struct file instance */
 
@@ -458,6 +461,46 @@ static int procfs_dup(FAR const struct file *oldp, FAR struct file *newp)
   /* Allow lower-level handler do the dup to get it's extra data */
 
   return oldattr->procfsentry->ops->dup(oldp, newp);
+}
+
+/****************************************************************************
+ * Name: procfs_fstat
+ *
+ * Description:
+ *   Obtain information about an open file associated with the file
+ *   descriptor 'fd', and will write it to the area pointed to by 'buf'.
+ *
+ ****************************************************************************/
+
+static int procfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
+{
+  FAR struct procfs_file_s *handler;
+
+  finfo("buf=%p\n", buf);
+
+  /* Recover our private data from the struct file instance */
+
+  handler = (FAR struct procfs_file_s *)filep->f_priv;
+  DEBUGASSERT(handler);
+
+  /* The procfs file system contains only directory and data file entries.
+   * Since the file has been opened, we know that this is a data file and,
+   * at a minimum, readable.
+   */
+
+  memset(buf, 0, sizeof(struct stat));
+  buf->st_mode = S_IFREG | S_IROTH | S_IRGRP | S_IRUSR;
+
+  /* If the write method is provided, then let's also claim that the file is
+   * writable.
+   */
+
+  if (handler->procfsentry->ops->write != NULL)
+    {
+      buf->st_mode |= S_IWOTH | S_IWGRP | S_IWUSR;
+    }
+
+  return OK;
 }
 
 /****************************************************************************
@@ -476,7 +519,7 @@ static int procfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
   FAR void *priv = NULL;
   irqstate_t flags;
 
-  fvdbg("relpath: \"%s\"\n", relpath ? relpath : "NULL");
+  finfo("relpath: \"%s\"\n", relpath ? relpath : "NULL");
   DEBUGASSERT(mountpt && relpath && dir && !dir->u.procfs);
 
   /* The relative must be either:
@@ -496,7 +539,7 @@ static int procfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 
       if (!level0)
         {
-          fdbg("ERROR: Failed to allocate the level0 directory structure\n");
+          ferr("ERROR: Failed to allocate the level0 directory structure\n");
           return -ENOMEM;
         }
 
@@ -575,7 +618,7 @@ static int procfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 
               if (!level1)
                 {
-                  fdbg("ERROR: Failed to allocate the level0 directory structure\n");
+                  ferr("ERROR: Failed to allocate the level0 directory structure\n");
                   return -ENOMEM;
                 }
 
@@ -717,7 +760,7 @@ static int procfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
                * error -ENOENT
                */
 
-              fvdbg("Entry %d: End of directory\n", index);
+              finfo("Entry %d: End of directory\n", index);
               ret = -ENOENT;
             }
           else
@@ -757,7 +800,7 @@ static int procfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
 
           if (!tcb)
             {
-              fdbg("ERROR: PID %d is no longer valid\n", (int)pid);
+              ferr("ERROR: PID %d is no longer valid\n", (int)pid);
               return -ENOENT;
             }
 
@@ -946,6 +989,7 @@ static int procfs_stat(struct inode *mountpt, const char *relpath,
    *   is a file.
    */
 
+  memset(buf, 0, sizeof(struct stat));
   if (!relpath || relpath[0] == '\0')
     {
       /* The path refers to the top level directory */
@@ -988,11 +1032,6 @@ static int procfs_stat(struct inode *mountpt, const char *relpath,
         }
     }
 
-  /* File/directory size, access block size */
-
-  buf->st_size    = 0;
-  buf->st_blksize = 0;
-  buf->st_blocks  = 0;
   return ret;
 }
 

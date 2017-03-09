@@ -70,7 +70,7 @@
 	xdef	_up_lowputc
 #endif
 #ifdef CONFIG_Z16_LOWGETC
-	xdef	_up_lowgetc
+	xdef	_z16_lowgetc
 #endif
 
 /*************************************************************************
@@ -222,7 +222,7 @@ _z16f_xmitc1:
 #endif /* CONFIG_Z16_LOWPUTC */
 
 /*************************************************************************
- * Name: _up_lowgetc
+ * Name: _z16_lowgetc
  *
  * Description:
  *   Get a character from the serial port
@@ -236,34 +236,34 @@ _z16f_xmitc1:
  *************************************************************************/
 
 #ifdef CONFIG_Z16_LOWGETC
-_up_lowgetc:
-_up_lowgetc1:
+_z16_lowgetc:
+_z16_lowgetc1:
 
 #ifdef HAVE_Z16F_SERIAL_CONSOLE
 	ld		r0, #Z16F_UARTSTAT0_RDA	/* RDA=Receive data available */
 
 #ifdef CONFIG_UART1_SERIAL_CONSOLE
 	tm.b	Z16F_UART1_STAT0, r0
-	jp		eq, _up_lowgetc1		/* While (!Z16F_UART1_STAT0 & RDA)) */
+	jp		eq, _z16_lowgetc1		/* While (!Z16F_UART1_STAT0 & RDA)) */
 	ld.ub	r0, Z16F_UART1_RXD		/* r0 = Z16F_UART1_RXD */
 
 #else
 	tm.b	Z16F_UART0_STAT0,r0		/* While (!Z16F_UART0_STAT0 & RDA) */
-	jp		eq, _up_lowgetc1
+	jp		eq, _z16_lowgetc1
 	ld.ub	r0, Z16F_UART0_RXD		/* r0 = Z16F_UART0_RXD */
 
 #endif
 
 	cp		r0, #%0d				/* Test for '\r' */
-	jp		eq, _up_lowgetc2
+	jp		eq, _z16_lowgetc2
 
 	cp		r0, #%0d				/* Test \r + high bit */
-	jp		ne, _up_lowgetc3
+	jp		ne, _z16_lowgetc3
 
-_up_lowgetc2:
+_z16_lowgetc2:
 	ld		r0, #%0a				/* Convert '\r' to '\n' */
 
-_up_lowgetc3:						/* Return value in r0 */
+_z16_lowgetc3:						/* Return value in r0 */
 #endif /* HAVE_Z16F_SERIAL_CONSOLE */
 
 	ret								/* Return */

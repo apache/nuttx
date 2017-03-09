@@ -2,7 +2,7 @@
  * arch/arm/src/imx1/imx_timerisr.c
  * arch/arm/src/chip/imx_timerisr.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,23 +52,11 @@
 #include "up_internal.h"
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Function:  up_timerisr
+ * Function:  imx_timerisr
  *
  * Description:
  *   The timer ISR will perform a variety of services for various portions
@@ -76,7 +64,7 @@
  *
  ****************************************************************************/
 
-int up_timerisr(int irq, uint32_t *regs)
+static int imx_timerisr(int irq, uint32_t *regs, FAR void *arg)
 {
   uint32_t tstat;
   int    ret = -EIO;
@@ -100,7 +88,11 @@ int up_timerisr(int irq, uint32_t *regs)
 }
 
 /****************************************************************************
- * Function:  up_timer_initialize
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Function:  arm_timer_initialize
  *
  * Description:
  *   This function is called during start-up to initialize the timer
@@ -108,7 +100,7 @@ int up_timerisr(int irq, uint32_t *regs)
  *
  ****************************************************************************/
 
-void up_timer_initialize(void)
+void arm_timer_initialize(void)
 {
   uint32_t tctl;
 
@@ -158,7 +150,7 @@ void up_timer_initialize(void)
 
   /* Attach and enable the timer interrupt */
 
-  irq_attach(IMX_IRQ_SYSTIMER, (xcpt_t)up_timerisr);
+  irq_attach(IMX_IRQ_SYSTIMER, (xcpt_t)imx_timerisr, NULL);
   up_enable_irq(IMX_IRQ_SYSTIMER);
 }
 

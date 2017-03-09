@@ -62,6 +62,7 @@ static ssize_t nxterm_write(FAR struct file *filep, FAR const char *buffer,
 /****************************************************************************
  * Public Data
  ****************************************************************************/
+
 /* This is the common NX driver file operations */
 
 #ifdef CONFIG_NXTERM_NXKBDIN
@@ -99,10 +100,6 @@ const struct file_operations g_nxterm_drvrops =
 #endif /* CONFIG_NXTERM_NXKBDIN */
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -128,7 +125,7 @@ static int nxterm_open(FAR struct file *filep)
 #ifndef CONFIG_NXTERM_NXKBDIN
   if ((filep->f_oflags & O_RDOK) != 0)
     {
-      gdbg("ERROR: Attempted open with read access\n");
+      gerr("ERROR: Attempted open with read access\n");
       return -EACCES;
     }
 #endif

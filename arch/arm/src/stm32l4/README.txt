@@ -1,5 +1,5 @@
 This is a port of NuttX to the STM32L4 Family
-Used development board is the Nucleo L476RG
+Used development board is the Nucleo L476RG, STM32L4VGDiscovery
 
 The status is HIGHLY EXPERIMENTAL.
 
@@ -16,23 +16,24 @@ IRQs     : OK
 GPIO     : OK
 EXTI     : OK, to be tested.
 HSI      : OK
-HSE      : To be tested
+HSE      : OK
 PLL      : Works @ 80 MHz
-MSI      : TODO
-LSE      : works, but TODO autotrim of MSI, etc
+MSI      : OK
+LSE      : OK
 RCC      : All registers defined, peripherals enabled, basic clock working
 SYSCTL   : All registers defined
 USART    : Working in normal mode (no DMA, to be tested, code is written)
 DMA      : works; at least tested with QSPI
-SRAM2    : Should work with enough MM regions
+SRAM2    : OK; can be included in MM region or left separate for special app purposes
 FIREWALL : Code written, to be tested, requires support from ldscript
 SPI      : Code written, to be tested, including DMA
 I2C      : Registers defined
 RTC      : works
 QSPI     : works in polling, interrupt, DMA, and also memory-mapped modes
 CAN      : TODO
-OTGFS    : TODO
-Timers   : TODO
+OTGFS    : dev implemented, tested, outstanding issue with CDCACM (ACM_SET_LINE_CODING, but otherwise works);
+         : host implemented, only build smoke-tested (i.e. builds, but no functional testing yet)
+Timers   : Implemented, with PWM oneshot and freerun, tickless OS support.  Limited testing (focused on tickless OS so far)
 PM       : TODO, PWR registers defined
 FSMC     : TODO
 AES      : TODO

@@ -97,16 +97,6 @@
 #  define RESET_DIR_REGISTER (LPC214X_GPIO0_BASE+LPC214X_GPIO_DIR_OFFSET)
 #endif
 
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_DEBUG_LCD
-#  define lcddbg(format, ...)   dbg(format, ##__VA_ARGS__)
-#  define lcdvdbg(format, ...)  vdbg(format, ##__VA_ARGS__)
-#else
-#  define lcddbg(x...)
-#  define lcdvdbg(x...)
-#endif
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -143,7 +133,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
   regval32 = getreg32(RESET_DIR_REGISTER);
   putreg32(regval32 | bits32, RESET_DIR_REGISTER);
 
-  lcdvdbg("RESET Pin Config: PINSEL1: %08x PIN: %08x DIR: %08x\n",
+  lcdinfo("RESET Pin Config: PINSEL1: %08x PIN: %08x DIR: %08x\n",
           getreg32(LPC214X_PINSEL1), getreg32(RESET_PIN_REGISTER),
           getreg32(RESET_DIR_REGISTER));
 
@@ -152,7 +142,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
   up_mdelay(20);
   putreg32(bits32, RESET_SET_REGISTER);
 
-  lcdvdbg("RESET release: PIN: %08x DIR: %08x\n",
+  lcdinfo("RESET release: PIN: %08x DIR: %08x\n",
           getreg32(RESET_PIN_REGISTER), getreg32(RESET_DIR_REGISTER));
 
   /* Get the SPI1 port interface */
@@ -160,7 +150,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
   spi = lpc214x_spibus_initialize(1);
   if (!spi)
     {
-      lcddbg("Failed to initialize SPI port 1\n");
+      lcderr("ERROR: Failed to initialize SPI port 1\n");
     }
   else
     {
@@ -169,11 +159,11 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
       dev = ug2864ambag01_initialize(spi, devno);
       if (!dev)
         {
-          lcddbg("Failed to bind SPI port 1 to OLED %d: %d\n", devno);
+          lcderr("ERROR: Failed to bind SPI port 1 to OLED %d: %d\n", devno);
         }
      else
         {
-          lcdvdbg("Bound SPI port 1 to OLED %d\n", devno);
+          lcdinfo("Bound SPI port 1 to OLED %d\n", devno);
 
           /* And turn the OLED on */
 

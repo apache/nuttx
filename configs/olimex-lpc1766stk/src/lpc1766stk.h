@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/olimex-lpc1766stk/src/lpc1766stk.h
  *
- *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -259,6 +259,18 @@
  ************************************************************************************/
 
 void weak_function lpc1766stk_sspdev_initialize(void);
+
+/************************************************************************************
+ * Name: lpc1766stk_can_setup
+ *
+ * Description:
+ *  Initialize CAN and register the CAN device
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_CAN
+int lpc1766stk_can_setup(void);
+#endif
 
 #endif /* __ASSEMBLY__ */
 #endif /* _CONFIGS_OLIMEX_LPC1766STK_SRC_LPC1766STK_H */

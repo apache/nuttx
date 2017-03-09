@@ -53,6 +53,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
 #include <nuttx/clock.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/spi/spi.h>
 
 #include <arch/board/board.h>
@@ -90,26 +91,6 @@
 #define SPI_DMA8NULL_CONFIG   (EFM32_DMA_XFERSIZE_BYTE | EFM32_DMA_NOINCR)
 #define SPI_DMA16_CONFIG      (EFM32_DMA_XFERSIZE_HWORD | EFM32_DMA_MEMINCR)
 #define SPI_DMA16NULL_CONFIG  (EFM32_DMA_XFERSIZE_HWORD | EFM32_DMA_NOINCR)
-
-/* Debug ********************************************************************/
-/* Check if SPI debug is enabled */
-
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
-#  undef CONFIG_DEBUG_SPI
-#endif
-
-#ifdef CONFIG_DEBUG_SPI
-#  define spidbg lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
-#    define spivdbg lldbg
-#  else
-#    define spivdbg(x...)
-#  endif
-#else
-#  define spidbg(x...)
-#  define spivdbg(x...)
-#endif
 
 /****************************************************************************
  * Private Types
@@ -205,6 +186,10 @@ static uint32_t  spi_setfrequency(struct spi_dev_s *dev,
                    uint32_t frequency);
 static void      spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode);
 static void      spi_setbits(struct spi_dev_s *dev, int nbits);
+#ifdef CONFIG_SPI_HWFEATURES
+static int       spi_hwfeatures(FAR struct spi_dev_s *dev,
+                                spi_hwfeatures_t features);
+#endif
 static uint8_t   spi_status(struct spi_dev_s *dev, enum spi_dev_e devid);
 #ifdef CONFIG_SPI_CMDDATA
 static int       spi_cmddata(struct spi_dev_s *dev, enum spi_dev_e devid,
@@ -238,7 +223,7 @@ static const struct spi_ops_s g_spiops =
   .setmode           = spi_setmode,
   .setbits           = spi_setbits,
 #ifdef CONFIG_SPI_HWFEATURES
-  .hwfeatures        = 0,
+  .hwfeatures        = spi_hwfeatures,
 #endif
   .status            = spi_status,
 #ifdef CONFIG_SPI_CMDDATA
@@ -897,7 +882,7 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
        */
 
       actual = (BOARD_HFPERCLK_FREQUENCY << 7) / (256 + clkdiv);
-      spivdbg("frequency=%u actual=%u\n", frequency, actual);
+      spiinfo("frequency=%u actual=%u\n", frequency, actual);
 
       /* Save the frequency selection so that subsequent reconfigurations
        * will be faster.
@@ -932,7 +917,7 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
   uint32_t setting;
   uint32_t regval;
 
-  spivdbg("mode=%d\n", mode);
+  spiinfo("mode=%d\n", mode);
 
   DEBUGASSERT(priv && priv->config);
   config = priv->config;
@@ -996,47 +981,16 @@ static void spi_setbits(struct spi_dev_s *dev, int nbits)
   const struct efm32_spiconfig_s *config;
   uint32_t regval;
   uint32_t setting;
-  bool lsbfirst;
 
-  spivdbg("nbits=%d\n", nbits);
+  spiinfo("nbits=%d\n", nbits);
 
   DEBUGASSERT(priv && priv->config);
   config = priv->config;
 
-  /* Bit order is encoded by the sign of nbits */
+  /* Has the number of bits changed? */
 
-  if (nbits < 0)
+  if (nbits != priv->nbits)
     {
-      /* LSB first */
-
-      lsbfirst = true;
-      nbits    = -nbits;
-    }
-  else
-    {
-      /* MSH first */
-
-      lsbfirst = false;
-    }
-
-  /* Has the number of bits or the bit order changed? */
-
-  if (nbits != priv->nbits || lsbfirst != priv->lsbfirst)
-    {
-      /* Set the new bit order */
-
-      regval = spi_getreg(config, EFM32_USART_CTRL_OFFSET);
-      if (lsbfirst)
-        {
-          regval &= ~USART_CTRL_MSBF;
-        }
-      else
-        {
-          regval |= USART_CTRL_MSBF;
-        }
-
-      spi_putreg(config, EFM32_USART_CTRL_OFFSET, regval);
-
       /* Select the new number of bits */
 
       switch (nbits)
@@ -1106,10 +1060,77 @@ static void spi_setbits(struct spi_dev_s *dev, int nbits)
        * faster
        */
 
-      priv->nbits    = nbits;
-      priv->lsbfirst = lsbfirst;
+      priv->nbits = nbits;
     }
 }
+
+/****************************************************************************
+ * Name: spi_hwfeatures
+ *
+ * Description:
+ *   Set hardware-specific feature flags.
+ *
+ * Input Parameters:
+ *   dev      - Device-specific state data
+ *   features - H/W feature flags
+ *
+ * Returned Value:
+ *   Zero (OK) if the selected H/W features are enabled; A negated errno
+ *   value if any H/W feature is not supportable.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SPI_HWFEATURES
+static int spi_hwfeatures(FAR struct spi_dev_s *dev, spi_hwfeatures_t features)
+{
+#ifdef CONFIG_SPI_BITORDER
+  struct efm32_spidev_s *priv = (struct efm32_spidev_s *)dev;
+  const struct efm32_spiconfig_s *config;
+  uint32_t regval;
+  bool lsbfirst;
+
+  spiinfo("features=%08x\n", features);
+
+  DEBUGASSERT(priv && priv->config);
+  config = priv->config;
+
+  /* Bit order is encoded by the sign of nbits */
+
+  lsbfirst = ((features & HWFEAT_LSBFIRST) != 0);
+
+  /* Has the number of bits or the bit order changed? */
+
+  if (lsbfirst != priv->lsbfirst)
+    {
+      /* Set the new bit order */
+
+      regval = spi_getreg(config, EFM32_USART_CTRL_OFFSET);
+      if (lsbfirst)
+        {
+          regval &= ~USART_CTRL_MSBF;
+        }
+      else
+        {
+          regval |= USART_CTRL_MSBF;
+        }
+
+      spi_putreg(config, EFM32_USART_CTRL_OFFSET, regval);
+
+      /* Save the selection so the subsequence re-configurations will be
+       * faster
+       */
+
+      priv->lsbfirst = lsbfirst;
+    }
+
+  /* Other H/W features are not supported */
+
+  return ((features & ~HWFEAT_LSBFIRST) == 0) ? OK : -ENOSYS;
+#else
+  return -ENOSYS;
+#endif
+}
+#endif
 
 /****************************************************************************
  * Name: spi_status
@@ -1222,7 +1243,7 @@ static uint16_t spi_send(struct spi_dev_s *dev, uint16_t wd)
   spi_wait_status(config, _USART_STATUS_RXDATAV_MASK, USART_STATUS_RXDATAV);
   ret = (uint16_t)spi_getreg(config, EFM32_USART_RXDATA_OFFSET);
 
-  spivdbg("Sent: %04x Return: %04x \n", wd, ret);
+  spiinfo("Sent: %04x Return: %04x \n", wd, ret);
   return ret;
 }
 
@@ -1263,7 +1284,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
   DEBUGASSERT(priv && priv->config);
   config = priv->config;
 
-  spivdbg("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
+  spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
 
   /* Flush any unread data */
 
@@ -1427,7 +1448,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
   else
 #endif
     {
-      spivdbg("txbuffer=%p rxbuffer=%p nwords=%d\n",
+      spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n",
               txbuffer, rxbuffer, nwords);
 
       /* Pre-calculate the timeout value */
@@ -1456,7 +1477,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
       ret = wd_start(priv->wdog, (int)ticks, spi_dma_timeout, 1, (uint32_t)priv);
       if (ret < 0)
         {
-          spidbg("ERROR: Failed to start timeout\n");
+          spierr("ERROR: Failed to start timeout\n");
         }
 
       /* Then wait for each to complete.  TX should complete first */
@@ -1492,7 +1513,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 static void spi_sndblock(struct spi_dev_s *dev, const void *txbuffer,
                          size_t nwords)
 {
-  spivdbg("txbuffer=%p nwords=%d\n", txbuffer, nwords);
+  spiinfo("txbuffer=%p nwords=%d\n", txbuffer, nwords);
   return spi_exchange(dev, txbuffer, NULL, nwords);
 }
 #endif
@@ -1521,7 +1542,7 @@ static void spi_sndblock(struct spi_dev_s *dev, const void *txbuffer,
 static void spi_recvblock(struct spi_dev_s *dev, void *rxbuffer,
                           size_t nwords)
 {
-  spivdbg("rxbuffer=%p nwords=%d\n", rxbuffer, nwords);
+  spiinfo("rxbuffer=%p nwords=%d\n", rxbuffer, nwords);
   return spi_exchange(dev, NULL, rxbuffer, nwords);
 }
 #endif
@@ -1594,7 +1615,7 @@ static int spi_portinitialize(struct efm32_spidev_s *priv)
   priv->rxdmach = efm32_dmachannel();
   if (!priv->rxdmach)
     {
-      spidbg("ERROR: Failed to allocate the RX DMA channel for SPI port: %d\n",
+      spierr("ERROR: Failed to allocate the RX DMA channel for SPI port: %d\n",
              port);
       goto errout;
     }
@@ -1602,7 +1623,7 @@ static int spi_portinitialize(struct efm32_spidev_s *priv)
   priv->txdmach = efm32_dmachannel();
   if (!priv->txdmach)
     {
-      spidbg("ERROR: Failed to allocate the TX DMA channel for SPI port: %d\n",
+      spierr("ERROR: Failed to allocate the TX DMA channel for SPI port: %d\n",
              port);
       goto errout_with_rxdmach;
     }
@@ -1612,7 +1633,7 @@ static int spi_portinitialize(struct efm32_spidev_s *priv)
   priv->wdog = wd_create();
   if (!priv->wdog)
     {
-      spidbg("ERROR: Failed to create a timer for SPI port: %d\n", port);
+      spierr("ERROR: Failed to create a timer for SPI port: %d\n", port);
       goto errout_with_txdmach;
     }
 
@@ -1620,6 +1641,13 @@ static int spi_portinitialize(struct efm32_spidev_s *priv)
 
   (void)sem_init(&priv->rxdmasem, 0, 0);
   (void)sem_init(&priv->txdmasem, 0, 0);
+
+  /* These semaphores are used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
+   sem_setprotocol(&priv->rxdmasem, SEM_PRIO_NONE);
+   sem_setprotocol(&priv->txdmasem, SEM_PRIO_NONE);
 #endif
 
   /* Enable SPI */
@@ -1709,7 +1737,7 @@ struct spi_dev_s *efm32_spibus_initialize(int port)
   else
 #endif
     {
-      spidbg("ERROR: Unsupported SPI port: %d\n", port);
+      spierr("ERROR: Unsupported SPI port: %d\n", port);
       return NULL;
     }
 
@@ -1731,7 +1759,7 @@ struct spi_dev_s *efm32_spibus_initialize(int port)
       ret = spi_portinitialize(priv);
       if (ret < 0)
         {
-          spidbg("ERROR: Failed to initialize SPI port %d\n", port);
+          spierr("ERROR: Failed to initialize SPI port %d\n", port);
           leave_critical_section(flags);
           return NULL;
         }

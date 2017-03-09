@@ -1,5 +1,5 @@
 /**************************************************************************
- * arch/arm/src/m9s12/m9s12_saveusercontext.S
+ * arch/hc/src/m9s12/m9s12_saveusercontext.S
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

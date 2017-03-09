@@ -42,16 +42,16 @@
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
+
 #include <stdbool.h>
+
+#include <nuttx/modem/ioctl.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define MODEM_IOC_POWERON    _MODEMIOC(1)
-#define MODEM_IOC_POWEROFF   _MODEMIOC(2)
-#define MODEM_IOC_RESET      _MODEMIOC(3)
-#define MODEM_IOC_GETSTATUS  _MODEMIOC(4)
+/* See IOCTL definitions in include/nuttx/modem/ioctl.h */
 
 /****************************************************************************
  * Public Types

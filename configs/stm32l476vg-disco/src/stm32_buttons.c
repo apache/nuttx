@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/stm32l476vg-disco/src/stm32_buttons.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: dev@ziggurat29.com
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <errno.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
@@ -176,7 +177,7 @@ static void button_pm_notify(struct pm_callback_s *cb, int domain,
 
 #if 0
 #ifdef CONFIG_ARCH_IRQBUTTONS
-static int button_handler(int irq, FAR void *context)
+static int button_handler(int irq, FAR void *context, FAR void *arg)
 {
 #ifdef CONFIG_PM
   /* At this point the MCU should have already awakened.  The state
@@ -244,19 +245,13 @@ void board_button_initialize(void)
     {
       stm32l4_configgpio(g_buttons[i]);
 
-  /* It's not clear if this is correct; I think so, but then there are
-   * conflicts with the 'buttons' sample app.
-   */
+      /* It's not clear if this is correct; I think so, but then there are
+       * conflicts with the 'buttons' sample app.
+       */
 
 #if 0
 #ifdef CONFIG_ARCH_IRQBUTTONS
-      xcpt_t oldhandler = board_button_irq(i, button_handler);
-      if (oldhandler != NULL)
-        {
-          lowsyslog(LOG_WARNING, "WARNING: oldhandler:%p is not NULL!  "
-                   "Button events may be lost or aliased!\n",
-                   oldhandler);
-        }
+      (void)board_button_irq(i, button_handler);
 #endif
 #endif
     }
@@ -319,24 +314,23 @@ uint8_t board_buttons(void)
  *   be called when a button is depressed or released.  The ID value is a
  *   button enumeration value that uniquely identifies a button resource. See the
  *   BUTTON_* definitions in board.h for the meaning of enumeration
- *   value.  The previous interrupt handler address is returned (so that it may
- *   restored, if so desired).
+ *   value.
  *
  ************************************************************************************/
 
 #ifdef CONFIG_ARCH_IRQBUTTONS
-xcpt_t board_button_irq(int id, xcpt_t irqhandler)
+int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
-  xcpt_t oldhandler = NULL;
+  int ret = -EINVAL;
 
   /* The following should be atomic */
 
   if (id >= MIN_IRQBUTTON && id <= MAX_IRQBUTTON)
     {
-      oldhandler = stm32l4_gpiosetevent(g_buttons[id], true, true, true, irqhandler);
+      ret = stm32l4_gpiosetevent(g_buttons[id], true, true, true, irqhandler, arg);
     }
 
-  return oldhandler;
+  return ret;
 }
 #endif
 #endif /* CONFIG_ARCH_BUTTONS */

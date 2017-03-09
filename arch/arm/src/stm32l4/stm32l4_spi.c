@@ -76,6 +76,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/spi/spi.h>
 
 #include <arch/board/board.h>
@@ -136,27 +137,6 @@
 #define SPI_TXDMA16NULL_CONFIG    (SPI_DMA_PRIO|DMA_CCR_MSIZE_8BITS |DMA_CCR_PSIZE_16BITS             |DMA_CCR_DIR)
 #define SPI_TXDMA8NULL_CONFIG     (SPI_DMA_PRIO|DMA_CCR_MSIZE_8BITS |DMA_CCR_PSIZE_8BITS              |DMA_CCR_DIR)
 
-
-/* Debug ****************************************************************************/
-/* Check if (non-standard) SPI debug is enabled */
-
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
-#  undef CONFIG_DEBUG_SPI
-#endif
-
-#ifdef CONFIG_DEBUG_SPI
-#  define spidbg lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
-#    define spivdbg lldbg
-#  else
-#    define spivdbg(x...)
-#  endif
-#else
-#  define spidbg(x...)
-#  define spivdbg(x...)
-#endif
-
 /************************************************************************************
  * Private Types
  ************************************************************************************/
@@ -184,7 +164,7 @@ struct stm32l4_spidev_s
   sem_t            exclsem;    /* Held while chip is selected for mutual exclusion */
   uint32_t         frequency;  /* Requested clock frequency */
   uint32_t         actual;     /* Actual clock frequency */
-  int8_t           nbits;      /* Width of word in bits (8 or 16) */
+  uint8_t          nbits;      /* Width of word in bits (4 through 16) */
   uint8_t          mode;       /* Mode 0,1,2,3 */
 };
 
@@ -224,6 +204,10 @@ static int         spi_lock(FAR struct spi_dev_s *dev, bool lock);
 static uint32_t    spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency);
 static void        spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
 static void        spi_setbits(FAR struct spi_dev_s *dev, int nbits);
+#ifdef CONFIG_SPI_HWFEATURES
+static int         spi_hwfeatures(FAR struct spi_dev_s *dev,
+                                  spi_hwfeatures_t features);
+#endif
 static uint16_t    spi_send(FAR struct spi_dev_s *dev, uint16_t wd);
 static void        spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
                                 FAR void *rxbuffer, size_t nwords);
@@ -251,7 +235,7 @@ static const struct spi_ops_s g_spi1ops =
   .setmode           = spi_setmode,
   .setbits           = spi_setbits,
 #ifdef CONFIG_SPI_HWFEATURES
-  .hwfeatures        = 0,                   /* Not supported */
+  .hwfeatures        = spi_hwfeatures,
 #endif
   .status            = stm32l4_spi1status,
 #ifdef CONFIG_SPI_CMDDATA
@@ -295,6 +279,9 @@ static const struct spi_ops_s g_spi2ops =
   .setfrequency      = spi_setfrequency,
   .setmode           = spi_setmode,
   .setbits           = spi_setbits,
+#ifdef CONFIG_SPI_HWFEATURES
+  .hwfeatures        = spi_hwfeatures,
+#endif
   .status            = stm32l4_spi2status,
 #ifdef CONFIG_SPI_CMDDATA
   .cmddata           = stm32l4_spi2cmddata,
@@ -336,6 +323,9 @@ static const struct spi_ops_s g_spi3ops =
   .setfrequency      = spi_setfrequency,
   .setmode           = spi_setmode,
   .setbits           = spi_setbits,
+#ifdef CONFIG_SPI_HWFEATURES
+  .hwfeatures        = spi_hwfeatures,
+#endif
   .status            = stm32l4_spi3status,
 #ifdef CONFIG_SPI_CMDDATA
   .cmddata           = stm32l4_spi3cmddata,
@@ -368,12 +358,6 @@ static struct stm32l4_spidev_s g_spi3dev =
 #endif
 };
 #endif
-
-/*endif?*/
-
-/************************************************************************************
- * Public Data
- ************************************************************************************/
 
 /************************************************************************************
  * Private Functions
@@ -578,22 +562,7 @@ static inline void spi_writebyte(FAR struct stm32l4_spidev_s *priv, uint8_t byte
 
 static inline bool spi_16bitmode(FAR struct stm32l4_spidev_s *priv)
 {
-  uint8_t bits = priv->nbits;
-
-  /* Get the real number of bits */
-
-  if (bits < 0)
-    {
-      bits = -bits;
-    }
-
-  return (bits > 8);
-
-  /* Should we read the hardware regs? seems to be equivalent ~~ sebastien lorquet
-   * (20160413)
-   */
-
-//  return ((spi_getreg(priv, STM32L4_SPI_CR2_OFFSET) & SPI_CR2_DS_MASK) == SPI_CR2_DS_16BIT);
+  return (priv->nbits > 8);
 }
 
 /************************************************************************************
@@ -866,7 +835,8 @@ static inline void spi_dmatxstart(FAR struct stm32l4_spidev_s *priv)
  *
  ************************************************************************************/
 
-static void spi_modifycr(uint32_t addr, FAR struct stm32l4_spidev_s *priv, uint16_t setbits, uint16_t clrbits)
+static void spi_modifycr(uint32_t addr, FAR struct stm32l4_spidev_s *priv,
+                         uint16_t setbits, uint16_t clrbits)
 {
   uint16_t cr;
 
@@ -1020,7 +990,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
        * faster.
        */
 
-      spivdbg("Frequency %d->%d\n", frequency, actual);
+      spiinfo("Frequency %d->%d\n", frequency, actual);
 
       priv->frequency = frequency;
       priv->actual    = actual;
@@ -1050,7 +1020,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
   uint16_t setbits;
   uint16_t clrbits;
 
-  spivdbg("mode=%d\n", mode);
+  spiinfo("mode=%d\n", mode);
 
   /* Has the mode changed? */
 
@@ -1113,40 +1083,27 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 {
   FAR struct stm32l4_spidev_s *priv = (FAR struct stm32l4_spidev_s *)dev;
-  uint16_t setbits1, setbits2;
-  uint16_t clrbits1, clrbits2;
+  uint16_t setbits;
+  uint16_t clrbits;
   int savbits = nbits;
 
-  spivdbg("nbits=%d\n", nbits);
+  spiinfo("nbits=%d\n", nbits);
 
   /* Has the number of bits changed? */
 
   if (nbits != priv->nbits)
     {
-      /* Yes... Set CR1/2 appropriately */
-      /* Negative sign means LSBFIRST, set this in CR1*/
-
-      if (nbits < 0)
-        {
-          setbits1 = SPI_CR1_LSBFIRST;
-          clrbits1 = 0;
-          nbits    = -nbits;
-        }
-      else
-        {
-          setbits1 = 0;
-          clrbits1 = SPI_CR1_LSBFIRST;
-        }
-
+      /* Yes... Set CR2 appropriately */
       /* Set the number of bits (valid range 4-16) */
 
       if (nbits < 4 || nbits > 16)
         {
+          spierr("ERROR: nbits out of range: %d\n", nbits);
           return;
         }
 
-      clrbits2 = SPI_CR2_DS_MASK;
-      setbits2 = SPI_CR2_DS_VAL(nbits);
+      clrbits = SPI_CR2_DS_MASK;
+      setbits = SPI_CR2_DS_VAL(nbits);
 
       /* If nbits is <=8, then we are in byte mode and FRXTH shall be set
        * (else, transaction will not complete).
@@ -1154,16 +1111,15 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 
       if (nbits < 9)
         {
-          setbits2 |= SPI_CR2_FRXTH; /* RX FIFO Threshold = 1 byte */
+          setbits |= SPI_CR2_FRXTH; /* RX FIFO Threshold = 1 byte */
         }
       else
         {
-          clrbits2 |= SPI_CR2_FRXTH; /* RX FIFO Threshold = 2 bytes */
+          clrbits |= SPI_CR2_FRXTH; /* RX FIFO Threshold = 2 bytes */
         }
 
       spi_modifycr(STM32L4_SPI_CR1_OFFSET, priv, 0, SPI_CR1_SPE);
-      spi_modifycr(STM32L4_SPI_CR1_OFFSET, priv, setbits1, clrbits1);
-      spi_modifycr(STM32L4_SPI_CR2_OFFSET, priv, setbits2, clrbits2);
+      spi_modifycr(STM32L4_SPI_CR2_OFFSET, priv, setbits, clrbits);
       spi_modifycr(STM32L4_SPI_CR1_OFFSET, priv, SPI_CR1_SPE, 0);
 
       /* Save the selection so the subsequence re-configurations will be faster */
@@ -1171,6 +1127,58 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
       priv->nbits = savbits; // nbits has been clobbered... save the signed value.
     }
 }
+
+/****************************************************************************
+ * Name: spi_hwfeatures
+ *
+ * Description:
+ *   Set hardware-specific feature flags.
+ *
+ * Input Parameters:
+ *   dev      - Device-specific state data
+ *   features - H/W feature flags
+ *
+ * Returned Value:
+ *   Zero (OK) if the selected H/W features are enabled; A negated errno
+ *   value if any H/W feature is not supportable.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SPI_HWFEATURES
+static int spi_hwfeatures(FAR struct spi_dev_s *dev, spi_hwfeatures_t features)
+{
+#ifdef CONFIG_SPI_BITORDER
+  FAR struct stm32l4_spidev_s *priv = (FAR struct stm32l4_spidev_s *)dev;
+  uint16_t setbits;
+  uint16_t clrbits;
+
+  spiinfo("features=%08x\n", features);
+
+  /* Transfer data LSB first? */
+
+  if ((features & HWFEAT_LSBFIRST) != 0)
+    {
+      setbits = SPI_CR1_LSBFIRST;
+      clrbits = 0;
+    }
+  else
+    {
+      setbits = 0;
+      clrbits = SPI_CR1_LSBFIRST;
+    }
+
+  spi_modifycr(STM32L4_SPI_CR1_OFFSET, priv, 0, SPI_CR1_SPE);
+  spi_modifycr(STM32L4_SPI_CR1_OFFSET, priv, setbits, clrbits);
+  spi_modifycr(STM32L4_SPI_CR1_OFFSET, priv, SPI_CR1_SPE, 0);
+
+  /* Other H/W features are not supported */
+
+  return ((features & ~HWFEAT_LSBFIRST) == 0) ? OK : -ENOSYS;
+#else
+  return -ENOSYS;
+#endif
+}
+#endif
 
 /************************************************************************************
  * Name: spi_send
@@ -1220,11 +1228,11 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
 
   if (spi_16bitmode(priv))
     {
-      spivdbg("Sent: %04x Return: %04x Status: %02x\n", wd, ret, regval);
+      spiinfo("Sent: %04x Return: %04x Status: %02x\n", wd, ret, regval);
     }
   else
     {
-      spivdbg("Sent: %02x Return: %02x Status: %02x\n", wd, ret, regval);
+      spiinfo("Sent: %02x Return: %02x Status: %02x\n", wd, ret, regval);
     }
 
   UNUSED(regval);
@@ -1263,7 +1271,7 @@ static void spi_exchange_nodma(FAR struct spi_dev_s *dev, FAR const void *txbuff
   FAR struct stm32l4_spidev_s *priv = (FAR struct stm32l4_spidev_s *)dev;
   DEBUGASSERT(priv && priv->spibase);
 
-  spivdbg("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
+  spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
 
   /* 8- or 16-bit mode? */
 
@@ -1376,7 +1384,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
       static uint16_t rxdummy = 0xffff;
       static const uint16_t txdummy = 0xffff;
 
-      spivdbg("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
+      spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
       DEBUGASSERT(priv && priv->spibase);
 
       /* Setup DMAs */
@@ -1419,7 +1427,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 #ifndef CONFIG_SPI_EXCHANGE
 static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *txbuffer, size_t nwords)
 {
-  spivdbg("txbuffer=%p nwords=%d\n", txbuffer, nwords);
+  spiinfo("txbuffer=%p nwords=%d\n", txbuffer, nwords);
   return spi_exchange(dev, txbuffer, NULL, nwords);
 }
 #endif
@@ -1446,7 +1454,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *txbuffer, si
 #ifndef CONFIG_SPI_EXCHANGE
 static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer, size_t nwords)
 {
-  spivdbg("rxbuffer=%p nwords=%d\n", rxbuffer, nwords);
+  spiinfo("rxbuffer=%p nwords=%d\n", rxbuffer, nwords);
   return spi_exchange(dev, NULL, rxbuffer, nwords);
 }
 #endif
@@ -1510,6 +1518,13 @@ static void spi_bus_initialize(FAR struct stm32l4_spidev_s *priv)
   sem_init(&priv->rxsem, 0, 0);
   sem_init(&priv->txsem, 0, 0);
 
+  /* These semaphores are used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
+  sem_setprotocol(&priv->rxsem, SEM_PRIO_NONE);
+  sem_setprotocol(&priv->txsem, SEM_PRIO_NONE);
+
   /* Get DMA channels.  NOTE: stm32l4_dmachannel() will always assign the DMA channel.
    * if the channel is not available, then stm32l4_dmachannel() will block and wait
    * until the channel becomes available.  WARNING: If you have another device sharing
@@ -1522,7 +1537,7 @@ static void spi_bus_initialize(FAR struct stm32l4_spidev_s *priv)
   priv->txdma = stm32l4_dmachannel(priv->txch);
   DEBUGASSERT(priv->rxdma && priv->txdma);
 
-  spi_putreg(priv, STM32L4_SPI_CR2_OFFSET, SPI_CR2_RXDMAEN | SPI_CR2_TXDMAEN);
+  spi_modifycr(STM32L4_SPI_CR2_OFFSET, priv, SPI_CR2_RXDMAEN | SPI_CR2_TXDMAEN, 0);
 #endif
 
   /* Enable spi */
@@ -1627,7 +1642,7 @@ FAR struct spi_dev_s *stm32l4_spibus_initialize(int bus)
   else
 #endif
     {
-      spidbg("ERROR: Unsupbused SPI bus: %d\n", bus);
+      spierr("ERROR: Unsupported SPI bus: %d\n", bus);
       return NULL;
     }
 

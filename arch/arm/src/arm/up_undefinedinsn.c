@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/arm/up_undefinedinsn.c
  *
- *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,17 +39,6 @@
 
 #include <nuttx/config.h>
 
-/* Output debug info if stack dump is selected -- even if debug is not
- * selected.
- */
-
-#ifdef CONFIG_ARCH_STACKDUMP
-# undef  CONFIG_DEBUG
-# undef  CONFIG_DEBUG_VERBOSE
-# define CONFIG_DEBUG 1
-# define CONFIG_DEBUG_VERBOSE 1
-#endif
-
 #include <stdint.h>
 #include <assert.h>
 #include <debug.h>
@@ -57,18 +46,6 @@
 #include <arch/irq.h>
 
 #include "up_internal.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -80,7 +57,7 @@
 
 void up_undefinedinsn(uint32_t *regs)
 {
-  lldbg("Undefined instruction at 0x%x\n", regs[REG_PC]);
+  _alert("Undefined instruction at 0x%x\n", regs[REG_PC]);
   CURRENT_REGS = regs;
   PANIC();
 }

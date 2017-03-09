@@ -52,6 +52,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/clock.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbhost.h>
 #include <nuttx/usb/usbhost_devaddr.h>
@@ -92,9 +93,9 @@
  *  CONFIG_EFM32_OTGFS_SOFINTR - Enable SOF interrupts.  Why would you ever
  *    want to do that?
  *  CONFIG_EFM32_USBHOST_REGDEBUG - Enable very low-level register access
- *    debug.  Depends on CONFIG_DEBUG.
+ *    debug.  Depends on CONFIG_DEBUG_FEATURES.
  *  CONFIG_EFM32_USBHOST_PKTDUMP - Dump all incoming and outgoing USB
- *    packets. Depends on CONFIG_DEBUG.
+ *    packets. Depends on CONFIG_DEBUG_FEATURES.
  */
 
 /* Default RxFIFO size */
@@ -121,9 +122,9 @@
 #  define CONFIG_EFM32_OTGFS_DESCSIZE 128
 #endif
 
-/* Register/packet debug depends on CONFIG_DEBUG */
+/* Register/packet debug depends on CONFIG_DEBUG_FEATURES */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_USB_INFO
 #  undef CONFIG_EFM32_USBHOST_REGDEBUG
 #  undef CONFIG_EFM32_USBHOST_PKTDUMP
 #endif
@@ -416,7 +417,7 @@ static inline void efm32_gint_ipxfrisr(FAR struct efm32_usbhost_s *priv);
 
 /* First level, global interrupt handler */
 
-static int efm32_gint_isr(int irq, FAR void *context);
+static int efm32_gint_isr(int irq, FAR void *context, FAR void *arg);
 
 /* Interrupt controls */
 
@@ -582,7 +583,7 @@ static const struct efm32_usbhost_trace_s g_trace2[TRACE2_NSTRINGS] =
 #ifdef CONFIG_EFM32_USBHOST_REGDEBUG
 static void efm32_printreg(uint32_t addr, uint32_t val, bool iswrite)
 {
-  lldbg("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
+  uinfo("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
 }
 #endif
 
@@ -632,7 +633,7 @@ static void efm32_checkreg(uint32_t addr, uint32_t val, bool iswrite)
             {
               /* No.. More than one. */
 
-              lldbg("[repeats %d more times]\n", count);
+              uinfo("[repeats %d more times]\n", count);
             }
         }
 
@@ -1362,7 +1363,7 @@ static int efm32_ctrlep_alloc(FAR struct efm32_usbhost_s *priv,
   ctrlep = (FAR struct efm32_ctrlinfo_s *)kmm_malloc(sizeof(struct efm32_ctrlinfo_s));
   if (ctrlep == NULL)
     {
-      udbg("ERROR: Failed to allocate control endpoint container\n");
+      uerr("ERROR: Failed to allocate control endpoint container\n");
       return -ENOMEM;
     }
 
@@ -1372,7 +1373,7 @@ static int efm32_ctrlep_alloc(FAR struct efm32_usbhost_s *priv,
                              hport->funcaddr, hport->speed, ctrlep);
   if (ret < 0)
     {
-      udbg("ERROR: efm32_ctrlchan_alloc failed: %d\n", ret);
+      uerr("ERROR: efm32_ctrlchan_alloc failed: %d\n", ret);
       kmm_free(ctrlep);
       return ret;
     }
@@ -1424,7 +1425,7 @@ static int efm32_xfrep_alloc(FAR struct efm32_usbhost_s *priv,
   chidx = efm32_chan_alloc(priv);
   if (chidx < 0)
     {
-      udbg("ERROR: Failed to allocate a host channel\n");
+      uerr("ERROR: Failed to allocate a host channel\n");
       return -ENOMEM;
     }
 
@@ -1934,7 +1935,7 @@ static ssize_t efm32_in_transfer(FAR struct efm32_usbhost_s *priv, int chidx,
       ret = efm32_in_setup(priv, chidx);
       if (ret < 0)
         {
-          udbg("ERROR: efm32_in_setup failed: %d\n", ret);
+          uerr("ERROR: efm32_in_setup failed: %d\n", ret);
           return  (ssize_t)ret;
         }
 
@@ -1965,7 +1966,7 @@ static ssize_t efm32_in_transfer(FAR struct efm32_usbhost_s *priv, int chidx,
             {
               /* Break out and return the error */
 
-              udbg("ERROR: efm32_chan_wait failed: %d\n", ret);
+              uerr("ERROR: efm32_chan_wait failed: %d\n", ret);
               return (ssize_t)ret;
             }
         }
@@ -2010,13 +2011,13 @@ static void efm32_in_next(FAR struct efm32_usbhost_s *priv,
           return;
         }
 
-      udbg("ERROR: efm32_in_setup failed: %d\n", ret);
+      uerr("ERROR: efm32_in_setup failed: %d\n", ret);
       result = ret;
     }
 
   /* The transfer is complete, with or without an error */
 
-  uvdbg("Transfer complete:  %d\n", result);
+  uinfo("Transfer complete:  %d\n", result);
 
   /* Extract the callback information */
 
@@ -2068,7 +2069,7 @@ static int efm32_in_asynch(FAR struct efm32_usbhost_s *priv, int chidx,
   ret = efm32_chan_asynchsetup(priv, chan, callback, arg);
   if (ret < 0)
     {
-      udbg("ERROR: efm32_chan_asynchsetup failed: %d\n", ret);
+      uerr("ERROR: efm32_chan_asynchsetup failed: %d\n", ret);
       return ret;
     }
 
@@ -2077,7 +2078,7 @@ static int efm32_in_asynch(FAR struct efm32_usbhost_s *priv, int chidx,
   ret = efm32_in_setup(priv, chidx);
   if (ret < 0)
     {
-      udbg("ERROR: efm32_in_setup failed: %d\n", ret);
+      uerr("ERROR: efm32_in_setup failed: %d\n", ret);
     }
 
   /* And return with the transfer pending */
@@ -2203,7 +2204,7 @@ static ssize_t efm32_out_transfer(FAR struct efm32_usbhost_s *priv, int chidx,
       ret = efm32_out_setup(priv, chidx);
       if (ret < 0)
         {
-          udbg("ERROR: efm32_out_setup failed: %d\n", ret);
+          uerr("ERROR: efm32_out_setup failed: %d\n", ret);
           return (ssize_t)ret;
         }
 
@@ -2231,7 +2232,7 @@ static ssize_t efm32_out_transfer(FAR struct efm32_usbhost_s *priv, int chidx,
             {
               /* Break out and return the error */
 
-              udbg("ERROR: efm32_chan_wait failed: %d\n", ret);
+              uerr("ERROR: efm32_chan_wait failed: %d\n", ret);
               return (ssize_t)ret;
             }
 
@@ -2296,13 +2297,13 @@ static void efm32_out_next(FAR struct efm32_usbhost_s *priv,
           return;
         }
 
-      udbg("ERROR: efm32_out_setup failed: %d\n", ret);
+      uerr("ERROR: efm32_out_setup failed: %d\n", ret);
       result = ret;
     }
 
   /* The transfer is complete, with or without an error */
 
-  uvdbg("Transfer complete:  %d\n", result);
+  uinfo("Transfer complete:  %d\n", result);
 
   /* Extract the callback information */
 
@@ -2354,7 +2355,7 @@ static int efm32_out_asynch(FAR struct efm32_usbhost_s *priv, int chidx,
   ret = efm32_chan_asynchsetup(priv, chan, callback, arg);
   if (ret < 0)
     {
-      udbg("ERROR: efm32_chan_asynchsetup failed: %d\n", ret);
+      uerr("ERROR: efm32_chan_asynchsetup failed: %d\n", ret);
       return ret;
     }
 
@@ -2363,7 +2364,7 @@ static int efm32_out_asynch(FAR struct efm32_usbhost_s *priv, int chidx,
   ret = efm32_out_setup(priv, chidx);
   if (ret < 0)
     {
-      udbg("ERROR: efm32_out_setup failed: %d\n", ret);
+      uerr("ERROR: efm32_out_setup failed: %d\n", ret);
     }
 
   /* And return with the transfer pending */
@@ -2448,7 +2449,7 @@ static inline void efm32_gint_hcinisr(FAR struct efm32_usbhost_s *priv,
   /* AND the two to get the set of enabled, pending HC interrupts */
 
   pending &= regval;
-  ullvdbg("HCINTMSK%d: %08x pending: %08x\n", chidx, regval, pending);
+  uinfo("HCINTMSK%d: %08x pending: %08x\n", chidx, regval, pending);
 
   /* Check for a pending ACK response received/transmitted (ACK) interrupt */
 
@@ -2709,7 +2710,7 @@ static inline void efm32_gint_hcoutisr(FAR struct efm32_usbhost_s *priv,
   /* AND the two to get the set of enabled, pending HC interrupts */
 
   pending &= regval;
-  ullvdbg("HCINTMSK%d: %08x pending: %08x\n", chidx, regval, pending);
+  uinfo("HCINTMSK%d: %08x pending: %08x\n", chidx, regval, pending);
 
   /* Check for a pending ACK response received/transmitted (ACK) interrupt */
 
@@ -3012,7 +3013,7 @@ static inline void efm32_gint_rxflvlisr(FAR struct efm32_usbhost_s *priv)
   /* Read and pop the next status from the Rx FIFO */
 
   grxsts = efm32_getreg(EFM32_USB_GRXSTSP);
-  ullvdbg("GRXSTS: %08x\n", grxsts);
+  uinfo("GRXSTS: %08x\n", grxsts);
 
   /* Isolate the channel number/index in the status word */
 
@@ -3166,8 +3167,8 @@ static inline void efm32_gint_nptxfeisr(FAR struct efm32_usbhost_s *priv)
 
   /* Write the next group of packets into the Tx FIFO */
 
-  ullvdbg("HNPTXSTS: %08x chidx: %d avail: %d buflen: %d xfrd: %d wrsize: %d\n",
-           regval, chidx, avail, chan->buflen, chan->xfrd, wrsize);
+  uinfo("HNPTXSTS: %08x chidx: %d avail: %d buflen: %d xfrd: %d wrsize: %d\n",
+         regval, chidx, avail, chan->buflen, chan->xfrd, wrsize);
 
   efm32_gint_wrpacket(priv, chan->buffer, chidx, wrsize);
 }
@@ -3254,8 +3255,8 @@ static inline void efm32_gint_ptxfeisr(FAR struct efm32_usbhost_s *priv)
 
   /* Write the next group of packets into the Tx FIFO */
 
-  ullvdbg("HPTXSTS: %08x chidx: %d avail: %d buflen: %d xfrd: %d wrsize: %d\n",
-           regval, chidx, avail, chan->buflen, chan->xfrd, wrsize);
+  uinfo("HPTXSTS: %08x chidx: %d avail: %d buflen: %d xfrd: %d wrsize: %d\n",
+        regval, chidx, avail, chan->buflen, chan->xfrd, wrsize);
 
   efm32_gint_wrpacket(priv, chan->buffer, chidx, wrsize);
 }
@@ -3494,7 +3495,7 @@ static inline void efm32_gint_ipxfrisr(FAR struct efm32_usbhost_s *priv)
  *
  ****************************************************************************/
 
-static int efm32_gint_isr(int irq, FAR void *context)
+static int efm32_gint_isr(int irq, FAR void *context, FAR void *arg)
 {
   /* At present, there is only support for a single OTG FS host. Hence it is
    * pre-allocated as g_usbhost.  However, in most code, the private data
@@ -3827,7 +3828,7 @@ static int efm32_wait(FAR struct usbhost_connection_s *conn,
           *hport = connport;
           leave_critical_section(flags);
 
-          uvdbg("RHport Connected: %s\n", connport->connected ? "YES" : "NO");
+          uinfo("RHport Connected: %s\n", connport->connected ? "YES" : "NO");
           return OK;
         }
 
@@ -3844,7 +3845,7 @@ static int efm32_wait(FAR struct usbhost_connection_s *conn,
           *hport = connport;
           leave_critical_section(flags);
 
-          uvdbg("Hub port Connected: %s\n", connport->connected ? "YES" : "NO");
+          uinfo("Hub port Connected: %s\n", connport->connected ? "YES" : "NO");
           return OK;
         }
 #endif
@@ -3932,7 +3933,7 @@ static int efm32_rh_enumerate(FAR struct efm32_usbhost_s *priv,
   ret = efm32_ctrlchan_alloc(priv, 0, 0, priv->rhport.hport.speed, &priv->ep0);
   if (ret < 0)
     {
-      udbg("ERROR: Failed to allocate a control endpoint: %d\n", ret);
+      uerr("ERROR: Failed to allocate a control endpoint: %d\n", ret);
     }
 
   return ret;
@@ -3964,7 +3965,7 @@ static int efm32_enumerate(FAR struct usbhost_connection_s *conn,
 
   /* Then let the common usbhost_enumerate do the real enumeration. */
 
-  uvdbg("Enumerate the device\n");
+  uinfo("Enumerate the device\n");
   priv->smstate = SMSTATE_ENUM;
   ret = usbhost_enumerate(hport, &hport->devclass);
 
@@ -3978,7 +3979,7 @@ static int efm32_enumerate(FAR struct usbhost_connection_s *conn,
     {
       /* Return to the disconnected state */
 
-      udbg("ERROR: Enumeration failed: %d\n", ret);
+      uerr("ERROR: Enumeration failed: %d\n", ret);
       efm32_gint_disconnected(priv);
     }
 
@@ -4380,7 +4381,7 @@ static int efm32_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
   DEBUGASSERT(priv != NULL && ep0info != NULL && req != NULL);
   usbhost_vtrace2(USBHOST_VTRACE2_CTRLIN, req->type, req->req);
-  uvdbg("type:%02x req:%02x value:%02x%02x index:%02x%02x len:%02x%02x\n",
+  uinfo("type:%02x req:%02x value:%02x%02x index:%02x%02x len:%02x%02x\n",
         req->type, req->req, req->value[1], req->value[0],
         req->index[1], req->index[0], req->len[1], req->len[0]);
 
@@ -4465,7 +4466,7 @@ static int efm32_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
   DEBUGASSERT(priv != NULL && ep0info != NULL && req != NULL);
   usbhost_vtrace2(USBHOST_VTRACE2_CTRLOUT, req->type, req->req);
-  uvdbg("type:%02x req:%02x value:%02x%02x index:%02x%02x len:%02x%02x\n",
+  uinfo("type:%02x req:%02x value:%02x%02x index:%02x%02x len:%02x%02x\n",
         req->type, req->req, req->value[1], req->value[0],
         req->index[1], req->index[0], req->len[1], req->len[0]);
 
@@ -4583,7 +4584,7 @@ static ssize_t efm32_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep
   unsigned int chidx = (unsigned int)ep;
   ssize_t nbytes;
 
-  uvdbg("chidx: %d buflen: %d\n",  (unsigned int)ep, buflen);
+  uinfo("chidx: %d buflen: %d\n",  (unsigned int)ep, buflen);
 
   DEBUGASSERT(priv && buffer && chidx < EFM32_MAX_TX_FIFOS && buflen > 0);
 
@@ -4650,7 +4651,7 @@ static int efm32_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
   unsigned int chidx = (unsigned int)ep;
   int ret;
 
-  uvdbg("chidx: %d buflen: %d\n",  (unsigned int)ep, buflen);
+  uinfo("chidx: %d buflen: %d\n",  (unsigned int)ep, buflen);
 
   DEBUGASSERT(priv && buffer && chidx < EFM32_MAX_TX_FIFOS && buflen > 0);
 
@@ -4700,7 +4701,7 @@ static int efm32_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
   unsigned int chidx = (unsigned int)ep;
   irqstate_t flags;
 
-  uvdbg("chidx: %u: %d\n",  chidx);
+  uinfo("chidx: %u: %d\n",  chidx);
 
   DEBUGASSERT(priv && chidx < EFM32_MAX_TX_FIFOS);
   chan = &priv->chan[chidx];
@@ -4795,7 +4796,8 @@ static int efm32_connect(FAR struct usbhost_driver_s *drvr,
   /* Set the connected/disconnected flag */
 
   hport->connected = connected;
-  ullvdbg("Hub port %d connected: %s\n", hport->port, connected ? "YES" : "NO");
+  uinfo("Hub port %d connected: %s\n",
+        hport->port, connected ? "YES" : "NO");
 
   /* Report the connection event */
 
@@ -5156,6 +5158,12 @@ static inline void efm32_sw_initialize(FAR struct efm32_usbhost_s *priv)
   sem_init(&priv->pscsem,  0, 0);
   sem_init(&priv->exclsem, 0, 1);
 
+  /* The pscsem semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
+  sem_setprotocol(&priv->pscsem, SEM_PRIO_NONE);
+
   /* Initialize the driver state data */
 
   priv->smstate   = SMSTATE_DETACHED;
@@ -5171,8 +5179,15 @@ static inline void efm32_sw_initialize(FAR struct efm32_usbhost_s *priv)
   for (i = 0; i < EFM32_MAX_TX_FIFOS; i++)
     {
       FAR struct efm32_chan_s *chan = &priv->chan[i];
+
       chan->chidx = i;
+
+      /* The waitsem semaphore is used for signaling and, hence, should not
+       * have priority inheritance enabled.
+       */
+
       sem_init(&chan->waitsem,  0, 0);
+      sem_setprotocol(&chan->waitsem, SEM_PRIO_NONE);
     }
 }
 
@@ -5359,7 +5374,7 @@ FAR struct usbhost_connection_s *efm32_usbhost_initialize(int controller)
 
   /* Attach USB host controller interrupt handler */
 
-  if (irq_attach(EFM32_IRQ_USB, efm32_gint_isr) != 0)
+  if (irq_attach(EFM32_IRQ_USB, efm32_gint_isr, NULL) != 0)
     {
       usbhost_trace1(USBHOST_TRACE1_IRQATTACH, 0);
       return NULL;

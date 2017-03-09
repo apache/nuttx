@@ -13,7 +13,7 @@
       <h1><big><font color="#3c34ec"><i>NuttX Operating System<p>User's Manual</i></font></big></h1>
       <p><small>by</small></p>
       <p>Gregory Nutt<p>
-      <p>Last Updated: July 24, 2015</p>
+      <p>Last Updated: February 16, 2017</p>
     </td>
   </tr>
 </table>
@@ -205,47 +205,56 @@ paragraphs.
   <li><a href="#taskrestart">2.1.5 task_restart</a></li>
 </ul>
 <p>
+  Non-standard extensions to VxWorks-like interfaces to support POSIX <a href="http://www.nuttx.org/doku.php?id=wiki:nxinternal:cancellation-points">Cancellation Points</a>.
+</p>
+<ul>
+  <li><a href="#tasksetcancelstate">2.1.6 task_setcancelstate</a></li>
+  <li><a href="#tasksetcanceltype">2.1.7 task_setcanceltype</a></li>
+  <li><a href="#tasktestcancel">2.1.8 task_testcancel</a></li>
+</ul>
+<p>
   Standard interfaces
 </p>
 <ul>
-  <li><a href="#exit">2.1.6 exit</a></li>
-  <li><a href="#getpid">2.1.7 getpid</a></li>
+  <li><a href="#exit">2.1.9 exit</a></li>
+  <li><a href="#getpid">2.1.10 getpid</a></li>
 </ul>
 <p>
   Standard <code>vfork</code> and <code>exec[v|l]</code> interfaces:
 </p>
 <ul>
-  <li><a href="#vfork">2.1.8 vfork</a></li>
-  <li><a href="#execv">2.1.9 execv</a></li>
-  <li><a href="#execl">2.1.10 execl</a></li>
+  <li><a href="#vfork">2.1.11 vfork</a></li>
+  <li><a href="#execv">2.1.12 execv</a></li>
+  <li><a href="#execl">2.1.13 execl</a></li>
 </ul>
 <p>
   Standard <code>posix_spawn</code> interfaces:
 </p>
 <ul>
-  <li><a href="#posix_spawn">2.1.11 posix_spawn and posix_spawnp</a></li>
-  <li><a href="#posix_spawn_file_actions_init">2.1.12 posix_spawn_file_actions_init</a></li>
-  <li><a href="#posix_spawn_file_actions_destroy">2.1.13 posix_spawn_file_actions_destroy</a></li>
-  <li><a href="#posix_spawn_file_actions_addclose">2.1.14 posix_spawn_file_actions_addclose</a></li>
-  <li><a href="#posix_spawn_file_actions_adddup2">2.1.15 posix_spawn_file_actions_adddup2</a></li>
-  <li><a href="#posix_spawn_file_actions_addopen">2.1.16 posix_spawn_file_actions_addopen</a></li>
-  <li><a href="#posix_spawnattr_init">2.1.17 posix_spawnattr_init</a></li>
-  <li><a href="#posix_spawnattr_getflags">2.1.18 posix_spawnattr_getflags</a></li>
-  <li><a href="#posix_spawnattr_getschedparam">2.1.19 posix_spawnattr_getschedparam</a></li>
-  <li><a href="#posix_spawnattr_getschedpolicy">2.1.20 posix_spawnattr_getschedpolicy</a></li>
-  <li><a href="#posix_spawnattr_getsigmask">2.1.21 posix_spawnattr_getsigmask</a></li>
-  <li><a href="#posix_spawnattr_setflags">2.1.22 posix_spawnattr_setflags</a></li>
-  <li><a href="#posix_spawnattr_setschedparam">2.1.23 posix_spawnattr_setschedparam</a></li>
-  <li><a href="#posix_spawnattr_setschedpolicy">2.1.24 posix_spawnattr_setschedpolicy</a></li>
-  <li><a href="#posix_spawnattr_setsigmask">2.1.25 posix_spawnattr_setsigmask</a></li>
+  <li><a href="#posix_spawn">2.1.14 posix_spawn and posix_spawnp</a></li>
+  <li><a href="#posix_spawn_file_actions_init">2.1.15 posix_spawn_file_actions_init</a></li>
+  <li><a href="#posix_spawn_file_actions_destroy">2.1.16 posix_spawn_file_actions_destroy</a></li>
+  <li><a href="#posix_spawn_file_actions_addclose">2.1.17 posix_spawn_file_actions_addclose</a></li>
+  <li><a href="#posix_spawn_file_actions_adddup2">2.1.18 posix_spawn_file_actions_adddup2</a></li>
+  <li><a href="#posix_spawn_file_actions_addopen">2.1.19 posix_spawn_file_actions_addopen</a></li>
+  <li><a href="#posix_spawnattr_init">2.1.20 posix_spawnattr_init</a></li>
+  <li><a href="#posix_spawnattr_getflags">2.1.21 posix_spawnattr_getflags</a></li>
+  <li><a href="#posix_spawnattr_getschedparam">2.1.22 posix_spawnattr_getschedparam</a></li>
+  <li><a href="#posix_spawnattr_getschedpolicy">2.1.23 posix_spawnattr_getschedpolicy</a></li>
+  <li><a href="#posix_spawnattr_getsigmask">2.1.24 posix_spawnattr_getsigmask</a></li>
+  <li><a href="#posix_spawnattr_setflags">2.1.25 posix_spawnattr_setflags</a></li>
+  <li><a href="#posix_spawnattr_setschedparam">2.1.26 posix_spawnattr_setschedparam</a></li>
+  <li><a href="#posix_spawnattr_setschedpolicy">2.1.27 posix_spawnattr_setschedpolicy</a></li>
+  <li><a href="#posix_spawnattr_setsigmask">2.1.28 posix_spawnattr_setsigmask</a></li>
 </ul>
 <p>
   Non-standard task control interfaces inspired by <code>posix_spawn</code>:
 </p>
 <ul>
-  <li><a href="#task_spawn">2.1.26 task_spawn</a></li>
-  <li><a href="#task_spawnattr_getstacksize">2.1.27 task_spawnattr_getstacksize</a></li>
-  <li><a href="#task_spawnattr_setstacksize">2.1.28 task_spawnattr_setstacksize</a></li>
+  <li><a href="#task_spawn">2.1.29 task_spawn</a></li>
+  <li><a href="#task_spawnattr_getstacksize">2.1.30 task_spawnattr_getstacksize</a></li>
+  <li><a href="#task_spawnattr_setstacksize">2.1.31 task_spawnattr_setstacksize</a></li>
+  <li><a href="#posix_spawn_file_actions_init">2.1.32 posix_spawn_file_actions_init</a></li>
 </ul>
 
 <H3><a name="taskcreate">2.1.1 task_create</a></H3>
@@ -469,8 +478,21 @@ int task_delete(pid_t pid);
 
 <p>
   <b>Description:</b>
-  This function causes a specified task to cease to exist -- its stack and TCB will be deallocated.
-  This function is the companion to task_create().
+  This function causes a specified task to cease to exist.
+  Its  stack and TCB will be deallocated.
+  This function is the companion to <code>task_create()</code>.
+  This is the version of the function exposed to the user;
+  it is simply a wrapper around the internal, <code>task_terminate()</code> function.
+</p>
+<p>
+  The logic in this function only deletes non-running tasks.
+  If the  <code>pid</code> parameter refers to to the currently runing task, then processing is redirected to <code>exit()</code>.
+  This can only happen if a task calls <code>task_delete()</code> in order to delete itself.
+</p>
+<p>
+  This function obeys the semantics of pthread cancellation:
+  task deletion is deferred if cancellation is disabled or if deferred cancellation is supported (with <a href="http://www.nuttx.org/doku.php?id=wiki:nxinternal:cancellation-points">Cancellation Points</a> enabled).
+</p>
 <p>
 <b>Input Parameters:</b>
 <ul>
@@ -485,7 +507,8 @@ int task_delete(pid_t pid);
 <ul>
   <li>
     <code>OK</code>, or <code>ERROR</code> if the task cannot be deleted.
-    This function can fail if the provided pid does not correspond to a task (<a href="#ErrnoAccess"><code>errno</code></a> is not set).
+    The <a href="#ErrnoAccess"><code>errno</code></a> is set to indicate the nature of the failure.
+    This function can fail, for example, if the provided pid does not correspond to a currently executing task.
   </li>
 </ul>
 <p>
@@ -583,7 +606,128 @@ VxWorks provides the following similar interface:
   </li>
 </ul>
 
-<H3><a name="exit">2.1.6 exit</a></H3>
+<H3><a name="tasksetcancelstate">2.1.6 task_setcancelstate</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
+<pre>
+    #include &lt;sched.h&gt;
+    int task_setcancelstate(int state, int *oldstate);
+</pre>
+<p>
+<b>Description:</b>
+The <code>task_setcancelstate()</code> function atomically
+sets both the calling task's cancelability state to the indicated
+state and returns the previous cancelability  state at the location
+referenced by oldstate.
+Legal values for state are TASK_CANCEL_ENABLE and TASK_CANCEL_DISABLE.
+</p>
+<p>
+Any pending thread cancellation may occur at the time that the
+cancellation state is set to TASK_CANCEL_ENABLE.
+</p>
+<p>
+The cancelability state and type of any newly created tasks are TASK_CANCEL_ENABLE and TASK_CANCEL_DEFERRED respectively.
+<p>
+<b>Input Parameters:</b>
+</p>
+<p>
+<ul>
+<li><code>state</code>
+New cancellation state.  One of PTHREAD_CANCEL_ENABLE or PTHREAD_CANCEL_DISABLE.</li>
+<li><code>oldstate</code>.
+Location to return the previous cancellation state.
+</ul>
+</p>
+<p>
+<b>Returned Value:</b>
+</p>
+<p>
+Zero (<code>OK</code>) on success; <code>ERROR</code> is returned on any failure with the <code>errno</code> value set appropriately:
+</p>
+<p>
+<ul>
+<li><code>ESRCH</code>.
+No thread could be found corresponding to that specified by the given thread ID.</li>
+</ul>
+</p>
+<b>Assumptions/Limitations:</b>
+<p>
+<b>POSIX Compatibility:</b> This is a non-standard interface.  It extends the functionality of <code>pthread_setcancelstate()</code> to tasks and supports use of <code>task_delete()</code>.
+</p>
+
+<H3><a name="tasksetcanceltype">2.1.7 task_setcanceltype</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
+<pre>
+    #include &lt;sched.h&gt;
+    int task_setcanceltype(int type, FAR int *oldtype);
+</pre>
+<p>
+<b>Description:</b>
+The <code>task_setcanceltype()</code> function atomically both sets the calling task's cancelability type to the indicated type and returns the previous cancelability type at the location referenced by <code>oldtype</code>.
+Legal values for type are <code>TASK_CANCEL_DEFERRED</code> and <code>TASK_CANCEL_ASYNCHRONOUS</code>.
+</p>
+<p>
+The cancelability state and type of any newly created tasks are <code>TASK_CANCEL_ENABLE</code> and <code>TASK_CANCEL_DEFERRED</code> respectively.
+</p>
+<p>
+<b>Input Parameters:</b>
+</p>
+<p>
+<ul>
+<li><code>type</code>
+New cancellation state.  One of <code>PTHREAD_CANCEL_DEFERRED</code> or <code>PTHREAD_CANCEL_ASYNCHRONOUS</code>.</li>
+<li><code>oldtype</code>.
+Location to return the previous cancellation type.
+</ul>
+</p>
+<p>
+<b>Returned Value:</b>
+</p>
+<p>
+Zero (<code>OK</code>) on success; <code>ERROR</code> is returned on any failure with the <code>errno</code> value set appropriately:
+</p>
+<p>
+<ul>
+<li><code>ESRCH</code>.
+No thread could be found corresponding to that specified by the given thread ID.</li>
+</ul>
+</p>
+<p>
+<b>POSIX Compatibility:</b> This is a non-standard interface.  It extends the functionality of <code>pthread_setcanceltype()</code> to tasks and supports use of <code>task_delete()</code>.
+</p>
+
+<H3><a name="tasktestcancel">2.1.8 task_testcancel</a></H3>
+<p>
+<b>Function Prototype:</b>
+</p>
+<p>
+<pre>
+    #include &lt;sched.h&gt;
+    void task_testcancel(void);
+</pre>
+</p>
+<p>
+<b>Description:</b>
+</p>
+<p>
+The <code>task_testcancel()</code> function creates a <a href="http://www.nuttx.org/doku.php?id=wiki:nxinternal:cancellation-points">Cancellation Point</a> in the calling task.
+The <code>task_testcancel()</code> function has no effect if cancelability is disabled.
+</p>
+<p>
+<b>Input Parameters:</b> None
+</p>
+<p>
+<b>Returned Value:</b> None
+</p>
+<p>
+<b>POSIX Compatibility:</b> This is a non-standard interface.  It extends the functionality of <code>pthread_testcancel()</code> to tasks and supports use of <code>task_delete()</code>.
+</p>
+
+
+<H3><a name="exit">2.1.9 exit</a></H3>
 
 <p>
 <b>Function Prototype:</b>
@@ -629,7 +773,7 @@ And the UNIX interface:
 <li>The <code>code</code> parameter is ignored.
 </ul>
 
-<H3><a name="getpid">2.1.7 getpid</a></H3>
+<H3><a name="getpid">2.1.10 getpid</a></H3>
 
 <p>
 <b>Function Prototype:</b>
@@ -657,7 +801,7 @@ level.
 Compatible with the POSIX interface of the same name.
 </p>
 
-<H3><a name="vfork">2.1.8 vfork</a></H3>
+<H3><a name="vfork">2.1.11 vfork</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -691,7 +835,7 @@ pid_t vfork(void);
   Compatible with the Unix interface of the same name.
 </p>
 
-<H3><a name="execv">2.1.9 execv</a></H3>
+<H3><a name="execv">2.1.12 execv</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -777,7 +921,7 @@ int execv(FAR const char *path, FAR char *const argv[]);
   There are, however, several compatibility issues as detailed in the description above.
 </p>
 
-<H3><a name="execl">2.1.10 execl</a></H3>
+<H3><a name="execl">2.1.13 execl</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -821,7 +965,7 @@ int execl(FAR const char *path, ...);
   There are, however, several compatibility issues as detailed in the description of <a href="#execv">execv()</a>.
 </p>
 
-<h3><a name="posix_spawn">2.1.11 posix_spawn and posix_spawnp</a></h3>
+<h3><a name="posix_spawn">2.1.14 posix_spawn and posix_spawnp</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -964,7 +1108,7 @@ int posix_spawnp(FAR pid_t *pid, FAR const char *file,
   For the caller of <code>posix_spawn()</code>, the provided argv[0] will correspond to <code>argv[1]</code> received by the new task.
 </p>
 
-<h3><a name="posix_spawn_file_actions_init">2.1.12 posix_spawn_file_actions_init</a></h3>
+<h3><a name="posix_spawn_file_actions_init">2.1.15 posix_spawn_file_actions_init</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -990,7 +1134,7 @@ int posix_spawn_file_actions_init(FAR posix_spawn_file_actions_t *file_actions);
   On success, this function returns 0; on failure it will return an error number from <code>&lt;errno.h&gt;</code>.
 <p>
 
-<h3><a name="posix_spawn_file_actions_destroy">2.1.13 posix_spawn_file_actions_destroy</a></h3>
+<h3><a name="posix_spawn_file_actions_destroy">2.1.16 posix_spawn_file_actions_destroy</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -1017,7 +1161,7 @@ int posix_spawn_file_actions_destroy(FAR posix_spawn_file_actions_t *file_action
   On success, this function returns 0; on failure it will return an error number from <code>&lt;errno.h&gt;</code>
 <p>
 
-<h3><a name="posix_spawn_file_actions_addclose">2.1.14 posix_spawn_file_actions_addclose</a></h3>
+<h3><a name="posix_spawn_file_actions_addclose">2.1.17 posix_spawn_file_actions_addclose</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -1048,7 +1192,7 @@ int posix_spawn_file_actions_addclose(FAR posix_spawn_file_actions_t *file_actio
   On success, this function returns 0; on failure it will return an error number from <code>&lt;errno.h&gt;</code>
 </p>
 
-<h3><a name="posix_spawn_file_actions_adddup2">2.1.15 posix_spawn_file_actions_adddup2</a></h3>
+<h3><a name="posix_spawn_file_actions_adddup2">2.1.18 posix_spawn_file_actions_adddup2</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -1085,7 +1229,7 @@ int posix_spawn_file_actions_adddup2(FAR posix_spawn_file_actions_t *file_action
   On success, this function returns 0; on failure it will return an error number from <code>&lt;errno.h&gt;</code>
 </p>
 
-<h3><a name="posix_spawn_file_actions_addopen">2.1.16 posix_spawn_file_actions_addopen</a></h3>
+<h3><a name="posix_spawn_file_actions_addopen">2.1.19 posix_spawn_file_actions_addopen</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -1130,7 +1274,7 @@ int posix_spawn_file_actions_addopen(FAR posix_spawn_file_actions_t *file_action
   On success, this function returns 0; on failure it will return an error number from <code>&lt;errno.h&gt;</code>
 </p>
 
-<h3><a name="posix_spawnattr_init">2.1.17 posix_spawnattr_init</a></h3>
+<h3><a name="posix_spawnattr_init">2.1.20 posix_spawnattr_init</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -1166,7 +1310,7 @@ int posix_spawnattr_init(FAR posix_spawnattr_t *attr);
   On success, this function returns 0; on failure it will return an error number from <code>&lt;errno.h&gt;</code>
 </p>
 
-<h3><a name="posix_spawnattr_getflags">2.1.18 posix_spawnattr_getflags</a></h3>
+<h3><a name="posix_spawnattr_getflags">2.1.21 posix_spawnattr_getflags</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -1196,7 +1340,7 @@ int posix_spawnattr_getflags(FAR const posix_spawnattr_t *attr, FAR short *flags
   On success, this function returns 0; on failure it will return an error number from <code>&lt;errno.h&gt;</code>
 </p>
 
-<h3><a name="posix_spawnattr_getschedparam">2.1.19 posix_spawnattr_getschedparam</a></h3>
+<h3><a name="posix_spawnattr_getschedparam">2.1.22 posix_spawnattr_getschedparam</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -1226,7 +1370,7 @@ int posix_spawnattr_getschedparam(FAR const posix_spawnattr_t *attr, FAR struct 
   On success, this function returns 0; on failure it will return an error number from <code>&lt;errno.h&gt;</code>
 </p>
 
-<h3><a name="posix_spawnattr_getschedpolicy">2.1.20 posix_spawnattr_getschedpolicy</a></h3>
+<h3><a name="posix_spawnattr_getschedpolicy">2.1.23 posix_spawnattr_getschedpolicy</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -1256,7 +1400,7 @@ int posix_spawnattr_getschedpolicy(FAR const posix_spawnattr_t *attr, FAR int *p
   On success, this function returns 0; on failure it will return an error number from <code>&lt;errno.h&gt;</code>
 </p>
 
-<h3><a name="posix_spawnattr_getsigmask">2.1.21 posix_spawnattr_getsigmask</a></h3>
+<h3><a name="posix_spawnattr_getsigmask">2.1.24 posix_spawnattr_getsigmask</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -1288,7 +1432,7 @@ int posix_spawnattr_getsigmask(FAR const posix_spawnattr_t *attr, FAR sigset_t *
   On success, this function returns 0; on failure it will return an error number from <code>&lt;errno.h&gt;</code>
 </p>
 
-<h3><a name="posix_spawnattr_setflags">2.1.22 posix_spawnattr_setflags</a></h3>
+<h3><a name="posix_spawnattr_setflags">2.1.25 posix_spawnattr_setflags</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -1318,7 +1462,7 @@ int posix_spawnattr_setflags(FAR posix_spawnattr_t *attr, short flags);
   On success, this function returns 0; on failure it will return an error number from <code>&lt;errno.h&gt;</code>
 </p>
 
-<h3><a name="posix_spawnattr_setschedparam">2.1.23 posix_spawnattr_setschedparam</a></h3>
+<h3><a name="posix_spawnattr_setschedparam">2.1.26 posix_spawnattr_setschedparam</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -1348,7 +1492,7 @@ int posix_spawnattr_setschedparam(FAR posix_spawnattr_t *attr, FAR const struct 
   On success, this function returns 0; on failure it will return an error number from <code>&lt;errno.h&gt;</code>
 </p>
 
-<h3><a name="posix_spawnattr_setschedpolicy">2.1.24 posix_spawnattr_setschedpolicy</a></h3>
+<h3><a name="posix_spawnattr_setschedpolicy">2.1.27 posix_spawnattr_setschedpolicy</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -1378,7 +1522,7 @@ int posix_spawnattr_setschedpolicy(FAR posix_spawnattr_t *attr, int policy);
   On success, this function returns 0; on failure it will return an error number from <code>&lt;errno.h&gt;</code>
 </p>
 
-<h3><a name="posix_spawnattr_setsigmask">2.1.25 posix_spawnattr_setsigmask</a></h3>
+<h3><a name="posix_spawnattr_setsigmask">2.1.28 posix_spawnattr_setsigmask</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -1410,7 +1554,7 @@ int posix_spawnattr_setsigmask(FAR posix_spawnattr_t *attr, FAR const sigset_t *
   On success, this function returns 0; on failure it will return an error number from <code>&lt;errno.h&gt;</code>
 </p>
 
-<h3><a name="task_spawn">2.1.26 task_spawn</a></h3>
+<h3><a name="task_spawn">2.1.29 task_spawn</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -1524,7 +1668,7 @@ int task_spawn(FAR pid_t *pid, FAR const char *name, main_t entry,
   This is a non-standard interface inspired by <code>posix_spawn()</code>.
 </p>
 
-<h3><a name="task_spawnattr_getstacksize">2.1.26 task_spawnattr_getstacksize</a></h3>
+<h3><a name="task_spawnattr_getstacksize">2.1.30 task_spawnattr_getstacksize</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -1554,7 +1698,7 @@ int task_spawnattr_getstacksize(FAR const posix_spawnattr_t *attr, FAR size_t *s
   On success, this function returns 0; on failure it will return an error number from <code>&lt;errno.h&gt;</code>
 </p>
 
-<h3><a name="task_spawnattr_setstacksize">2.1.26 task_spawnattr_setstacksize</a></h3>
+<h3><a name="task_spawnattr_setstacksize">2.1.31 task_spawnattr_setstacksize</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -1584,7 +1728,7 @@ int task_spawnattr_setstacksize(FAR posix_spawnattr_t *attr, size_t stacksize);
   On success, this function returns 0; on failure it will return an error number from <code>&lt;errno.h&gt;</code>
 </p>
 
-<h3><a name="posix_spawn_file_actions_init">2.1.12 posix_spawn_file_actions_init</a></h3>
+<h3><a name="posix_spawn_file_actions_init">2.1.32 posix_spawn_file_actions_init</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -3381,6 +3525,29 @@ interface of the same name.
   </li>
 </ul>
 <p>
+  <a name="lockingvssignaling"><b>Locking versus Signaling Semaphores</b></a>.
+  Semaphores (and mutexes) may be used for many different purposes.
+  One typical use of for mutual exclusion and locking of resources:
+  In this usage, the thread that needs exclusive access to a resources takes the semaphore to get access to the resource.
+  The same thread subsequently releases the seamphore count when it no longer needs exclusive access.
+  Priority inheritance is intended just for this usage case.
+</p>
+<p>
+  In a different usage case, a semaphore may to be used to signal an event:
+  One thread A waits on a semaphore for an event to occur.
+  When the event occurs, another thread B will post the semaphore waking the waiting thread A.
+  This is a completely different usage model; notice that in the mutual exclusion case, the same thread takes and posts the semaphore.  In the signaling case, one thread takes the seamphore and a different thread posts the samphore.  Priority inheritance should <i>never</i> be used in this signaling case.
+  Subtle, strange behaviors may result.
+</p>
+<p>
+  When priority inheritance is enabled with <code>CONFIG_PRIORITY_INHERITANCE</code>, the default <i>protocol</i> for the semaphore will be to use priority inheritance.
+  For signaling semaphores, priority inheritance must be explicitly disabled by calling <a href="#semsetprotocol"><code>sem_setprotocol</code></a> with <code>SEM_PRIO_NONE</code>.
+  For the case of pthread mutexes, <a href="#pthreadmutexattrsetprotocol"><code>pthread_mutexattr_setprotocol</code></a> with <code>PTHREAD_PRIO_NONE</code>.
+</p>
+<p>
+  This is discussed in much more detail on this <a href="http://www.nuttx.org/doku.php?id=wiki:howtos:signalling-semaphores">Wiki page</a>.
+</p>
+<p>
   <b>POSIX semaphore interfaces:</b>
 </p>
 <ul>
@@ -3394,6 +3561,8 @@ interface of the same name.
   <li><a href="#semtrywait">2.5.8 sem_trywait</a></li>
   <li><a href="#sempost">2.5.9 sem_post</a></li>
   <li><a href="#semgetvalue">2.5.10 sem_getvalue</a></li>
+  <li><a href="#semgetprotocol">2.5.11 sem_getprotocol</a></li>
+  <li><a href="#semsetprotocol">2.5.12 sem_setprotocol</a></li>
 </ul>
 
 <H3><a name="seminit">2.5.1 sem_init</a></H3>
@@ -3866,6 +4035,75 @@ number of tasks waiting for the semaphore.
 <p>
 <b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
+</p>
+
+<H3><a name="semgetprotocol">2.5.11 sem_getprotocol</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
+<pre>
+    #include &lt;nuttx/semaphore.h&gt;
+    int sem_getprotocol(FAR const pthread_mutexattr_t *attr, FAR int *protocol);
+</pre>
+<p>
+<b>Description:</b> Return the value of the semaphore protocol attribute.
+</p>
+<p>
+<b>Input Parameters:</b>
+</p>
+<p>
+<ul>
+  <li><code>attr</code>. A pointer to the semaphore to be queried</li>
+  <li><code>protocol</code>. The user provided location in which to store the protocol value.  May be one of <code>SEM_PRIO_NONE</code>, or <code>SEM_PRIO_INHERIT</code>, <code>SEM_PRIO_PROTECT</code>.</li>
+</ul>
+</p>
+<p>
+<b>Returned Value:</b>
+</p>
+<p>
+If successful, the <code>sem_getprotocol()</code> function will return zero (<code>OK</code>).
+Otherwise, an -1 (<code>ERROR</code>) will be returned and the <code>errno</code> value will be set to indicate the nature of the error.
+</p>
+<p>
+<b>Assumptions/Limitations:</b>
+</p>
+<p>
+<b>POSIX Compatibility:</b> Non-standard NuttX interface.  Should not be used in portable code.  Analogous to <code>pthread_muxtexattr_getprotocol()</code>.
+</p>
+
+<H3><a name="semsetprotocol">2.5.12 sem_setprotocol</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
+<pre>
+    #include &lt;nuttx/semaphore.h&gt;
+    int sem_setprotocol(FAR pthread_mutexattr_t *attr, int protocol);
+</pre>
+<p>
+<b>Description:</b> Set semaphore protocol attribute.  See the paragraph <a href="#lockingvssignaling">Locking versus Signaling Semaphores</a> for some important information about the use of this interface.
+
+</p>
+<p>
+<b>Input Parameters:</b>
+</p>
+<p>
+<ul>
+  <li><code>attr</code>. A pointer to the semaphore to be modified</li>
+  <li><code>protocol</code>. The new protocol to use.  One of <code>SEM_PRIO_NONE</code>, or <code>SEM_PRIO_INHERIT</code>, <code>SEM_PRIO_PROTECT</code>.  <code>SEM_PRIO_INHERIT</code> is supported only if  <code>CONFIG_PRIORITY_INHERITANCE</code> is defined;  <code>SEM_PRIO_PROTECT</code> is not currently supported in any configuration.</li>
+</ul>
+</p>
+<p>
+<b>Returned Value:</b>
+</p>
+<p>
+If successful, the <code>sem_getprotocol()</code> function will return zero (<code>OK</code>).
+Otherwise, an -1 (<code>ERROR</code>) will be returned and the <code>errno</code> value will be set to indicate the nature of the error.
+</p>
+<p>
+<b>Assumptions/Limitations:</b>
+</p>
+<p>
+<b>POSIX Compatibility:</b> Non-standard NuttX interface.  Should not be used in portable code.  Analogous to <code>pthread_muxtexattr_setprotocol()</code>.
 </p>
 
 <table width ="100%">
@@ -4587,9 +4825,9 @@ interface of the same name.
   See the <a href="http://www.nuttx.org/doku.php?id=wiki:nxinternal:nxtasking">NuttX Threading Wiki</a> page and the <a href="http://www.nuttx.org/doku.php?id=wiki:nxinternal:tasksnthreads">Tasks vs. Threads FAQ</a> for additional information on tasks and threads in NuttX.
 </small></blockquote>
 <p>
-  <b>Signalling Multi-threaded Task Groups</b>.
+  <b>Signaling Multi-threaded Task Groups</b>.
   The behavior of signals in the multi-thread task group is complex.
-  NuttX emulates a process model with task groups and follows the POSIX rules for signalling behavior.
+  NuttX emulates a process model with task groups and follows the POSIX rules for signaling behavior.
   Normally when you signal the task group you would signal using the task ID of the main task that created the group (in practice, a different task should not know the IDs of the internal threads created within the task group); that ID is remembered by the task group (even if the main task thread exits).
 </p>
 <p>
@@ -5424,12 +5662,15 @@ be sent.
     <li><a href="#pthreadexit">2.8.13 pthread_exit</a></li>
     <li><a href="#pthreadcancel">2.8.14 pthread_cancel</a></li>
     <li><a href="#pthreadsetcancelstate">2.8.15 pthread_setcancelstate</a></li>
-    <li><a href="#pthreadtestcancelstate">2.8.16 pthread_testcancelstate</a></li>
-    <li><a href="#pthreadjoin">2.8.17 pthread_join</a></li>
-    <li><a href="#pthreadyield">2.8.18 pthread_yield</a></li>
-    <li><a href="#pthreadself">2.8.19 pthread_self</a></li>
-    <li><a href="#pthreadgetschedparam">2.8.20 pthread_getschedparam</a></li>
-    <li><a href="#pthreadsetschedparam">2.8.21 pthread_setschedparam</a></li>
+    <li><a href="#pthreadsetcanceltype">2.8.16 pthread_setcanceltype</a></li>
+    <li><a href="#pthreadtestcancel">2.8.17 pthread_testcancel</a></li>
+    <li><a href="#pthreadcleauppop">2.8.18 pthread_cleanup_pop</a></li>
+    <li><a href="#pthreadcleauppush">2.8.19 pthread_cleanup_push</a></li>
+    <li><a href="#pthreadjoin">2.8.20 pthread_join</a></li>
+    <li><a href="#pthreadyield">2.8.21 pthread_yield</a></li>
+    <li><a href="#pthreadself">2.8.22 pthread_self</a></li>
+    <li><a href="#pthreadgetschedparam">2.8.23 pthread_getschedparam</a></li>
+    <li><a href="#pthreadsetschedparam">2.8.24 pthread_setschedparam</a></li>
   </ul>
   <p>
     <b>Thread Specific Data</b>.
@@ -5439,64 +5680,66 @@ be sent.
     (2) The main task thread does not had thread-specific data.
   </p>
   <ul>
-    <li><a href="#pthreadkeycreate">2.8.22 pthread_key_create</a></li>
-    <li><a href="#pthreadsetspecific">2.8.23 pthread_setspecific</a></li>
-    <li><a href="#pthreadgetspecific">2.8.24 pthread_getspecific</a></li>
-    <li><a href="#pthreadkeydelete">2.8.25 pthread_key_delete</a></li>
+    <li><a href="#pthreadkeycreate">2.8.25 pthread_key_create</a></li>
+    <li><a href="#pthreadsetspecific">2.8.26 pthread_setspecific</a></li>
+    <li><a href="#pthreadgetspecific">2.8.27 pthread_getspecific</a></li>
+    <li><a href="#pthreadkeydelete">2.8.28 pthread_key_delete</a></li>
   </ul>
   <p>
     <b>pthread Mutexes</b>.
   </p>
   <ul>
-    <li><a href="#pthreadmutexattrinit">2.8.26 pthread_mutexattr_init</a></li>
-    <li><a href="#pthreadmutexattrdestroy">2.8.27 pthread_mutexattr_destroy</a></li>
-    <li><a href="#pthreadmutexattrgetpshared">2.8.28 pthread_mutexattr_getpshared</a></li>
-    <li><a href="#pthreadmutexattrsetpshared">2.8.29 pthread_mutexattr_setpshared</a></li>
-    <li><a href="#pthreadmutexattrgettype">2.8.30 pthread_mutexattr_gettype</a></li>
-    <li><a href="#pthreadmutexattrsettype">2.8.31 pthread_mutexattr_settype</a></li>
-    <li><a href="#pthreadmutexinit">2.8.32 pthread_mutex_init</a></li>
-    <li><a href="#pthreadmutexdestrory">2.8.33 pthread_mutex_destroy</a></li>
-    <li><a href="#pthreadmutexlock">2.8.34 pthread_mutex_lock</a></li>
-    <li><a href="#pthreadmutextrylock">2.8.35 pthread_mutex_trylock</a></li>
-    <li><a href="#pthreadmutexunlock">2.8.36 pthread_mutex_unlock</a></li>
+    <li><a href="#pthreadmutexattrinit">2.8.29 pthread_mutexattr_init</a></li>
+    <li><a href="#pthreadmutexattrdestroy">2.8.30 pthread_mutexattr_destroy</a></li>
+    <li><a href="#pthreadmutexattrgetpshared">2.8.31 pthread_mutexattr_getpshared</a></li>
+    <li><a href="#pthreadmutexattrsetpshared">2.8.32 pthread_mutexattr_setpshared</a></li>
+    <li><a href="#pthreadmutexattrgettype">2.8.33 pthread_mutexattr_gettype</a></li>
+    <li><a href="#pthreadmutexattrsettype">2.8.34 pthread_mutexattr_settype</a></li>
+    <li><a href="#pthreadmutexattrgetprotocol">2.8.35 pthread_mutexattr_getprotocol</a></li>
+    <li><a href="#pthreadmutexattrsetprotocol">2.8.36 pthread_mutexattr_setprotocol</a></li>
+    <li><a href="#pthreadmutexinit">2.8.37 pthread_mutex_init</a></li>
+    <li><a href="#pthreadmutexdestrory">2.8.38 pthread_mutex_destroy</a></li>
+    <li><a href="#pthreadmutexlock">2.8.39 pthread_mutex_lock</a></li>
+    <li><a href="#pthreadmutextrylock">2.8.40 pthread_mutex_trylock</a></li>
+    <li><a href="#pthreadmutexunlock">2.8.41 pthread_mutex_unlock</a></li>
   </ul>
   <p>
     <b>Condition Variables</b>.
   </p>
   <ul>
-    <li><a href="#pthreadconaddrinit">2.8.37 pthread_condattr_init</a></li>
-    <li><a href="#pthreadocndattrdestroy">2.8.38 pthread_condattr_destroy</a></li>
-    <li><a href="#pthreadcondinit">2.8.39 pthread_cond_init</a></li>
-    <li><a href="#pthreadconddestroy">2.8.40 pthread_cond_destroy</a></li>
-    <li><a href="#pthreadcondbroadcast">2.8.41 pthread_cond_broadcast</a></li>
-    <li><a href="#pthreadcondsignal">2.8.42 pthread_cond_signal</a></li>
-    <li><a href="#pthreadcondwait">2.8.43 pthread_cond_wait</a></li>
-    <li><a href="#pthreadcondtimedwait">2.8.44 pthread_cond_timedwait</a></li>
+    <li><a href="#pthreadconaddrinit">2.8.42 pthread_condattr_init</a></li>
+    <li><a href="#pthreadocndattrdestroy">2.8.43 pthread_condattr_destroy</a></li>
+    <li><a href="#pthreadcondinit">2.8.44 pthread_cond_init</a></li>
+    <li><a href="#pthreadconddestroy">2.8.45 pthread_cond_destroy</a></li>
+    <li><a href="#pthreadcondbroadcast">2.8.46 pthread_cond_broadcast</a></li>
+    <li><a href="#pthreadcondsignal">2.8.47 pthread_cond_signal</a></li>
+    <li><a href="#pthreadcondwait">2.8.48 pthread_cond_wait</a></li>
+    <li><a href="#pthreadcondtimedwait">2.8.49 pthread_cond_timedwait</a></li>
   </ul>
   <p>
     <b>Barriers</b>.
   </p>
   <ul>
-    <li><a href="#pthreadbarrierattrinit">2.8.45 pthread_barrierattr_init</a></li>
-    <li><a href="#pthreadbarrierattrdestroy">2.8.46 pthread_barrierattr_destroy</a></li>
-    <li><a href="#pthreadbarrierattrsetpshared">2.8.47 pthread_barrierattr_setpshared</a></li>
-    <li><a href="#pthreadbarrierattrgetpshared">2.8.48 pthread_barrierattr_getpshared</a></li>
-    <li><a href="#pthreadbarrierinit">2.8.49 pthread_barrier_init</a></li>
-    <li><a href="#pthreadbarrierdestroy">2.8.50 pthread_barrier_destroy</a></li>
-    <li><a href="#pthreadbarrierwait">2.8.51 pthread_barrier_wait</a></li>
+    <li><a href="#pthreadbarrierattrinit">2.8.50 pthread_barrierattr_init</a></li>
+    <li><a href="#pthreadbarrierattrdestroy">2.8.51 pthread_barrierattr_destroy</a></li>
+    <li><a href="#pthreadbarrierattrsetpshared">2.8.52 pthread_barrierattr_setpshared</a></li>
+    <li><a href="#pthreadbarrierattrgetpshared">2.8.53 pthread_barrierattr_getpshared</a></li>
+    <li><a href="#pthreadbarrierinit">2.8.54 pthread_barrier_init</a></li>
+    <li><a href="#pthreadbarrierdestroy">2.8.55 pthread_barrier_destroy</a></li>
+    <li><a href="#pthreadbarrierwait">2.8.56 pthread_barrier_wait</a></li>
   </ul>
   <p>
     <b>Initialization</b>.
   </p>
   <ul>
-    <li><a href="#pthreadonce">2.8.52 pthread_once</a></li>
+    <li><a href="#pthreadonce">2.8.57 pthread_once</a></li>
   </ul>
   <p>
     <b>Signals</b>.
   </p>
   <ul>
-    <li><a href="#pthreadkill">2.8.53 pthread_kill</a></li>
-    <li><a href="#pthreadsigmask">2.8.54 pthread_sigmask</a></li>
+    <li><a href="#pthreadkill">2.8.58 pthread_kill</a></li>
+    <li><a href="#pthreadsigmask">2.8.59 pthread_sigmask</a></li>
   </ul>
 </ul>
 <p>
@@ -5515,8 +5758,6 @@ be sent.
   <li><code>pthread_attr_setscope</code>. get and set the contentionscope attribute.</li>
   <li><code>pthread_attr_setstack</code>. get and set stack attributes.</li>
   <li><code>pthread_attr_setstackaddr</code>. get and set the stackaddr attribute.</li>
-  <li><code>pthread_cleanup_pop</code>. establish cancellation handlers.</li>
-  <li><code>pthread_cleanup_push</code>. establish cancellation handlers.</li>
   <li><code>pthread_condattr_getclock</code>. set the clock selection condition variable attribute.</li>
   <li><code>pthread_condattr_getpshared</code>. get the process-shared condition variable attribute.</li>
   <li><code>pthread_condattr_setclock</code>. set the clock selection condition variable attribute.</li>
@@ -5527,9 +5768,7 @@ be sent.
   <li><code>pthread_mutex_setprioceiling</code>. get and set the priority ceiling of a mutex.</li>
   <li><code>pthread_mutex_timedlock</code>. lock a mutex.</li>
   <li><code>pthread_mutexattr_getprioceiling</code>. get and set the prioceiling attribute of the mutex attributes object.</li>
-  <li><code>pthread_mutexattr_getprotocol</code>. get and set the protocol attribute of the mutex attributes object.</li>
   <li><code>pthread_mutexattr_setprioceiling</code>. get and set the prioceiling attribute of the mutex attributes object.</li>
-  <li><code>pthread_mutexattr_setprotocol</code>. get and set the protocol attribute of the mutex attributes object.</li>
   <li><code>pthread_rwlock_destroy</code>. destroy and initialize a read-write lock object.</li>
   <li><code>pthread_rwlock_init</code>. destroy and initialize a read-write lock object.</li>
   <li><code>pthread_rwlock_rdlock</code>. lock a read-write lock object for reading.</li>
@@ -5543,14 +5782,12 @@ be sent.
   <li><code>pthread_rwlockattr_getpshared</code>. get and set the process-shared attribute of the read-write lock attributes object.</li>
   <li><code>pthread_rwlockattr_init</code>. destroy and initialize the read-write lock attributes object.</li>
   <li><code>pthread_rwlockattr_setpshared</code>. get and set the process-shared attribute of the read-write lock attributes object.</li>
-  <li><code>pthread_setcanceltype</code>. set cancelability state.</li>
   <li><code>pthread_setconcurrency</code>. get and set the level of concurrency.</li>
   <li><code>pthread_spin_destroy</code>. destroy or initialize a spin lock object.</li>
   <li><code>pthread_spin_init</code>. destroy or initialize a spin lock object.</li>
   <li><code>pthread_spin_lock</code>. lock a spin lock object.</li>
   <li><code>pthread_spin_trylock</code>. lock a spin lock object.</li>
   <li><code>pthread_spin_unlock</code>. unlock a spin lock object.</li>
-  <li><code>pthread_testcancel</code>. set cancelability state.</li>
 </ul>
 
 <H3><a name="pthreadattrinit">2.8.1 pthread_attr_init</a></H3>
@@ -5985,19 +6222,15 @@ interface of the same name.
 <p>
 <b>Description:</b>
 
-<p>The <code>pthread_cancel()</code> function will request that thread
-be canceled. The target thread's cancelability state determines
-when the cancellation takes effect. When the
-cancellation is acted on, thread will be terminated.</p>
+<p>The <code>pthread_cancel()</code> function will request that thread be canceled.
+The target thread's cancelability state, enabled, or disabled, determines when the cancellation takes effect:  When the cancellation is acted on, thread will be terminated.
+When cancelability is disabled, all cancellations are held pending in the target thread until the thread re-enables cancelability.</p>
 
-<p>When cancelability is disabled, all cancels are held pending
-in the target thread until the thread changes the cancelability.
-When cancelability is deferred, all cancels are held pending in
-the target thread until the thread changes the cancelability or
-calls pthread_testcancel().</p>
+<p>The target thread's cancelability state determines how the cancellation is acted on:
+Either asychronrously or deferred.
+Asynchronous cancellations we be acted upon immediately (when enabled), interrupting the thread with its processing in an abritray state.</p>
 
-<p>Cancelability is asynchronous; all cancels are acted upon
-immediately (when enable), interrupting the thread with its processing.</p>
+<p>When cancelability is deferred, all cancellations are held pending in the target thread until the thread changes the cancelability type or a <a href="http://www.nuttx.org/doku.php?id=wiki:nxinternal:cancellation-points">Cancellation Point</a> function such as <a href="#pthreadtestcancel"><code>pthread_testcancel()</code></a> is entered.</p>
 
 <p>
 <b>Input Parameters:</b>
@@ -6018,16 +6251,10 @@ No thread could be found corresponding to that specified by the given thread ID.
 </ul>
 <b>Assumptions/Limitations:</b>
 <p>
-<b>POSIX Compatibility:</b> Comparable to the POSIX
-interface of the same name.  Except:</p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.  Except:</p>
 <ul>
-<li>The thread-specific data destructor functions will be called for thread.
-However, these destructors are not currently supported.</li>
-<li>Cancellation types are not supported.  The thread will be canceled
-at the time that pthread_cancel() is called or, if cancellation is disabled, at
-the time when cancellation is re-enabled.</li>
-<li><tt>pthread_testcancel()</tt> is not supported.</li>
-<li>Thread cancellation at <i>cancellation points</i> is not supported.</li>
+<li>The thread-specific data destructor functions will be not called for thread
+These destructors are not currently supported.</li>
 </ul>
 
 <H3><a name="pthreadsetcancelstate">2.8.15 pthread_setcancelstate</a></H3>
@@ -6040,23 +6267,29 @@ the time when cancellation is re-enabled.</li>
 </pre>
 <p>
 <b>Description:</b>
-<p>The <code>pthread_setcancelstate()</code> function atomically
+</p>
+<p>
+The <code>pthread_setcancelstate()</code> function atomically
 sets both the calling thread's cancelability state to the indicated
 state and returns the previous cancelability  state at the location
 referenced by oldstate.
-Legal values for state are PTHREAD_CANCEL_ENABLE and PTHREAD_CANCEL_DISABLE.<.li>
-
-<p>Any pending thread cancellation may occur at the time that the
-cancellation state is set to PTHREAD_CANCEL_ENABLE.</p>
-
+Legal values for state are PTHREAD_CANCEL_ENABLE and PTHREAD_CANCEL_DISABLE.
+</p>
+<p>
+Any pending thread cancellation may occur at the time that the
+cancellation state is set to PTHREAD_CANCEL_ENABLE.
+</p>
+<p>
 <b>Input Parameters:</b>
+</p>
 <p>
 <ul>
 <li><code>state</code>
-New cancellation state.  One of PTHREAD_CANCEL_ENABLE or PTHREAD_CANCEL_DISABLE.<.li>
+New cancellation state.  One of PTHREAD_CANCEL_ENABLE or PTHREAD_CANCEL_DISABLE.</li>
 <li><code>oldstate</code>.
 Location to return the previous cancellation state.
 </ul>
+</p>
 <p>
 <b>Returned Value:</b>
 <p>
@@ -6072,38 +6305,149 @@ No thread could be found corresponding to that specified by the given thread ID.
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadtestcancelstate">2.8.16 pthread_testcancelstate</a></H3>
+<H3><a name="pthreadsetcanceltype">2.8.16 pthread_setcanceltype</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
 <pre>
     #include &lt;pthread.h&gt;
-    int pthread_setcancelstate(void);
+    int pthread_setcanceltype(int type, FAR int *oldtype);
 </pre>
 <p>
 <b>Description:</b>
-<p><b>NOT SUPPORTED</b>
+The <code>pthread_setcanceltype()</code> function atomically both sets the calling thread's cancelability type to the indicated type and returns the previous cancelability type at the location referenced by <code>oldtype</code>.
+Legal values for type are <code>PTHREAD_CANCEL_DEFERRED</code> and <code>PTHREAD_CANCEL_ASYNCHRONOUS</code>.
+</p>
+<p>
+The cancelability state and type of any newly created threads are <code>PTHREAD_CANCEL_ENABLE</code> and <code>PTHREAD_CANCEL_DEFERRED respectively</code>.
+</p>
+<p>
+<b>Input Parameters:</b>
+</p>
+<p>
+<ul>
+<li><code>type</code>
+New cancellation state.  One of <code>PTHREAD_CANCEL_DEFERRED</code> or <code>PTHREAD_CANCEL_ASYNCHRONOUS</code>.</li>
+<li><code>oldtype</code>.
+Location to return the previous cancellation type.
+</ul>
+</p>
+<p>
+<b>Returned Value:</b>
+<p>
+If successful, the <code>pthread_setcancelstate()</code> function will return
+zero (<code>OK</code>).  Otherwise, an error number will be
+returned to indicate the error.
+</p>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
+</p>
+
+<H3><a name="pthreadtestcancel">2.8.17 pthread_testcancel</a></H3>
+<p>
+<b>Function Prototype:</b>
+</p>
+<p>
+<pre>
+    #include &lt;pthread.h&gt;
+    void pthread_testcancel(void);
+</pre>
+</p>
+<p>
+<b>Description:</b>
+</p>
+<p>
+The <code>pthread_testcancel()</code> function creates a <a href="http://www.nuttx.org/doku.php?id=wiki:nxinternal:cancellation-points">Cancellation Point</a> in the calling thread.
+The <code>pthread_testcancel()</code> function has no effect if cancelability is disabled.
+</p>
+<p>
+<b>Input Parameters:</b> None
+</p>
+<p>
+<b>Returned Value:</b> None
+</p>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
+</p>
+
+<H3><a name="pthreadcleauppop">2.8.18 pthread_cleanup_pop</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
+<pre>
+    #include &lt;pthread.h&gt;
+    void pthread_cleanup_pop(int execute);
+</pre>
+<p>
+<b>Description:</b>
+</p>
+<p>
+The <code>pthread_cleanup_pop()</code> function will remove the routine at the top of the calling thread's cancellation cleanup stack and optionally invoke it (if <code>execute</code> is non-zero).
+</p>
+<p>
+<b>Input Parameters:</b>
+</p>
+<p>
+<ul>
+  <li><code>execute</code>.  Execute the popped cleanup function immediately.</li>
+</ul>
+</p>
+<p>
+<b>Returned Value:</b>
+</p>
+<p>
+If successful, the <code>pthread_setcancelstate()</code> function will return
+zero (<code>OK</code>).  Otherwise, an error number will be
+returned to indicate the error:
+<p>
+</p>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
+</p>
+
+<H3><a name="pthreadcleauppush">2.8.19 pthread_cleanup_push</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
+<pre>
+    #include &lt;pthread.h&gt;
+    void pthread_cleanup_push(CODE void (*routine)(FAR void *), FAR void *arg);
+</pre>
+<p>
+<b>Description:</b>
+</p>
+<p>
+The <code>pthread_cleanup_push()</code> function will push the specified cancellation cleanup handler routine onto the calling thread's cancellation cleanup stack.
+</p>
+<p>
+The cancellation cleanup handler will be popped from the cancellation cleanup stack and invoked with the argument arg when:
+</p>
+<p>
+<ul>
+<li>The thread exits (that is, calls <code>pthread_exit()</code>).</li>
+<li>The thread acts upon a cancellation request.</li>
+<li>The thread calls <code>pthread_cleanup_pop()</code> with a non-zero execute argument.</li>
+</ul>
+</p>
+<p>
 <b>Input Parameters:</b>
 <p>
 <ul>
-  <li><code>To be provided</code>.</li>
+  <li><code>routine</code>.  The cleanup routine to be pushed on the the cleanup stack.</li>
+  <li><code>arg</code>.  An argument that will accompany the callback.</li>
 </ul>
 <p>
 <b>Returned Value:</b>
 <p>
 If successful, the <code>pthread_setcancelstate()</code> function will return
 zero (<code>OK</code>).  Otherwise, an error number will be
-returned to indicate the error:
+returned to indicate the error.
+</p>
 <p>
-<ul>
-  <li><code>To be provided</code>. </li>
-</ul>
-<b>Assumptions/Limitations:</b>
-<p>
-<b>POSIX Compatibility:</b> Comparable to the POSIX
-interface of the same name.
+<b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
+</p>
 
-<H3><a name="pthreadjoin">2.8.17 pthread_join</a></H3>
+<H3><a name="pthreadjoin">2.8.20 pthread_join</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6136,7 +6480,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadyield">2.8.18 pthread_yield</a></H3>
+<H3><a name="pthreadyield">2.8.21 pthread_yield</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6169,7 +6513,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadself">2.8.19 pthread_self</a></H3>
+<H3><a name="pthreadself">2.8.22 pthread_self</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6201,7 +6545,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadgetschedparam">2.8.20 pthread_getschedparam</a></H3>
+<H3><a name="pthreadgetschedparam">2.8.23 pthread_getschedparam</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -6248,16 +6592,16 @@ interface of the same name.
 </p>
 <ul>
   <li><code>sched_ss_low_priority</code>
-    Low scheduling priority for sporadic server. 
+    Low scheduling priority for sporadic server.
   </li>
   <li><code>sched_ss_repl_period</code>
-    Replenishment period for sporadic server. 
+    Replenishment period for sporadic server.
   </li>
   <li><code>sched_ss_init_budget</code>
-    Initial budget for sporadic server. 
+    Initial budget for sporadic server.
   </li>
   <li><code>sched_ss_max_repl</code>
-    Maximum pending replenishments for  sporadic server. 
+    Maximum pending replenishments for  sporadic server.
   </li>
 </ul>
 <p>
@@ -6291,7 +6635,7 @@ interface of the same name.
   Comparable to the POSIX interface of the same name.
 </p>
 
-<H3><a name="pthreadsetschedparam">2.8.21 pthread_setschedparam</a></H3>
+<H3><a name="pthreadsetschedparam">2.8.24 pthread_setschedparam</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -6383,7 +6727,7 @@ interface of the same name.
   Comparable to the POSIX interface of the same name.
 </p>
 
-<H3><a name="pthreadkeycreate">2.8.22 pthread_key_create</a></H3>
+<H3><a name="pthreadkeycreate">2.8.25 pthread_key_create</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6438,7 +6782,7 @@ interface of the same name.
 <li>The present implementation ignores the destructor argument.
 </ul>
 
-<H3><a name="pthreadsetspecific">2.8.23 pthread_setspecific</a></H3>
+<H3><a name="pthreadsetspecific">2.8.26 pthread_setspecific</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6488,7 +6832,7 @@ interface of the same name.
 destructor function.
 </ul>
 
-<H3><a name="pthreadgetspecific">2.8.24 pthread_getspecific</a></H3>
+<H3><a name="pthreadgetspecific">2.8.27 pthread_getspecific</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6529,7 +6873,7 @@ interface of the same name.
 destructor function.
 </ul>
 
-<H3><a name="pthreadkeydelete">2.8.25 pthread_key_delete</a></H3>
+<H3><a name="pthreadkeydelete">2.8.28 pthread_key_delete</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6561,7 +6905,7 @@ this function does nothing in the present implementation.
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutexattrinit">2.8.26 pthread_mutexattr_init</a></H3>
+<H3><a name="pthreadmutexattrinit">2.8.29 pthread_mutexattr_init</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6592,7 +6936,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutexattrdestroy">2.8.27 pthread_mutexattr_destroy</a></H3>
+<H3><a name="pthreadmutexattrdestroy">2.8.30 pthread_mutexattr_destroy</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6623,7 +6967,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutexattrgetpshared">2.8.28 pthread_mutexattr_getpshared</a></H3>
+<H3><a name="pthreadmutexattrgetpshared">2.8.31 pthread_mutexattr_getpshared</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6655,7 +6999,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutexattrsetpshared">2.8.29 pthread_mutexattr_setpshared</a></H3>
+<H3><a name="pthreadmutexattrsetpshared">2.8.32 pthread_mutexattr_setpshared</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6687,7 +7031,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<h3><a name="pthreadmutexattrgettype">2.8.30 pthread_mutexattr_gettype</a></h3>
+<h3><a name="pthreadmutexattrgettype">2.8.33 pthread_mutexattr_gettype</a></h3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6722,7 +7066,7 @@ returned to indicate the error:
 <p>
 <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 
-<h3><a name="pthreadmutexattrsettype">2.8.31 pthread_mutexattr_settype</a></h3>
+<h3><a name="pthreadmutexattrsettype">2.8.34 pthread_mutexattr_settype</a></h3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6776,7 +7120,77 @@ returned to indicate the error:
 <p>
 <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 
-<H3><a name="pthreadmutexinit">2.8.32 pthread_mutex_init</a></H3>
+<H3><a name="pthreadmutexattrgetprotocol">2.8.35 pthread_mutexattr_getprotocol</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
+<pre>
+    #include &lt;pthread.h&gt;
+    int pthread_mutexattr_getprotocol(FAR const pthread_mutexattr_t *attr,
+                                      FAR int *protocol);
+</pre>
+<p>
+<b>Description:</b> Return the value of the mutex protocol attribute..
+</p>
+<p>
+<b>Input Parameters:</b>
+</p>
+<p>
+<ul>
+  <li><code>attr</code>. A pointer to the mutex attributes to be queried</li>
+  <li><code>protocol</code>. The user provided location in which to store the protocol value.  May be one of <code>PTHREAD_PRIO_NONE</code>, or <code>PTHREAD_PRIO_INHERIT</code>, <code>PTHREAD_PRIO_PROTECT</code>.</li>
+</ul>
+</p>
+<p>
+<b>Returned Value:</b>
+</p>
+<p>
+If successful, the <code>pthread_mutexattr_getprotocol()</code> function will return zero (<code>OK</code>).
+Otherwise, an error number will be returned to indicate the error.
+</p>
+<p>
+<b>Assumptions/Limitations:</b>
+</p>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
+</p>
+
+<H3><a name="pthreadmutexattrsetprotocol">2.8.36 pthread_mutexattr_setprotocol</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
+<pre>
+    #include &lt;pthread.h&gt;
+    int pthread_mutexattr_setprotocol(FAR pthread_mutexattr_t *attr,
+                                      int protocol);
+</pre>
+<p>
+<b>Description:</b> Set mutex protocol attribute.  See the paragraph <a href="#lockingvssignaling">Locking versus Signaling Semaphores</a> for some important information about the use of this interface.
+</p>
+<p>
+<b>Input Parameters:</b>
+</p>
+<p>
+<ul>
+  <li><code>attr</code>. A pointer to the mutex attributes to be modified</li>
+  <li><code>protocol</code>. The new protocol to use.  One of <code>PTHREAD_PRIO_NONE</code>, or <code>PTHREAD_PRIO_INHERIT</code>, <code>PTHREAD_PRIO_PROTECT</code>.  <code>PTHREAD_PRIO_INHERIT</code> is supported only if  <code>CONFIG_PRIORITY_INHERITANCE</code> is defined;  <code>PTHREAD_PRIO_PROTECT</code> is not currently supported in any configuration.</li>
+</ul>
+</p>
+<p>
+<b>Returned Value:</b>
+</p>
+<p>
+If successful, the <code>pthread_mutexattr_setprotocol()</code> function will return zero (<code>OK</code>).
+Otherwise, an error number will be returned to indicate the error.
+</p>
+<p>
+<b>Assumptions/Limitations:</b>
+</p>
+<p>
+<b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
+</p>
+
+<H3><a name="pthreadmutexinit">2.8.37 pthread_mutex_init</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6805,10 +7219,9 @@ returned to indicate the error:
 </ul>
 <b>Assumptions/Limitations:</b>
 <p>
-<b>POSIX Compatibility:</b> Comparable to the POSIX
-interface of the same name.
+<b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 
-<H3><a name="pthreadmutexdestrory">2.8.33 pthread_mutex_destroy</a></H3>
+<H3><a name="pthreadmutexdestrory">2.8.38 pthread_mutex_destroy</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6839,7 +7252,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutexlock">2.8.34 pthread_mutex_lock</a></H3>
+<H3><a name="pthreadmutexlock">2.8.39 pthread_mutex_lock</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6905,7 +7318,7 @@ Otherwise, an error number will be returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutextrylock">2.8.35 pthread_mutex_trylock</a></H3>
+<H3><a name="pthreadmutextrylock">2.8.40 pthread_mutex_trylock</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6945,7 +7358,7 @@ Otherwise, an error number will be returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutexunlock">2.8.36 pthread_mutex_unlock</a></H3>
+<H3><a name="pthreadmutexunlock">2.8.41 pthread_mutex_unlock</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6991,7 +7404,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadconaddrinit">2.8.37 pthread_condattr_init</a></H3>
+<H3><a name="pthreadconaddrinit">2.8.42 pthread_condattr_init</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -7022,7 +7435,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadocndattrdestroy">2.8.38 pthread_condattr_destroy</a></H3>
+<H3><a name="pthreadocndattrdestroy">2.8.43 pthread_condattr_destroy</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -7053,7 +7466,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadcondinit">2.8.39 pthread_cond_init</a></H3>
+<H3><a name="pthreadcondinit">2.8.44 pthread_cond_init</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -7084,7 +7497,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadconddestroy">2.8.40 pthread_cond_destroy</a></H3>
+<H3><a name="pthreadconddestroy">2.8.45 pthread_cond_destroy</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -7115,7 +7528,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadcondbroadcast">2.8.41 pthread_cond_broadcast</a></H3>
+<H3><a name="pthreadcondbroadcast">2.8.46 pthread_cond_broadcast</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -7146,7 +7559,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadcondsignal">2.8.42 pthread_cond_signal</a></H3>
+<H3><a name="pthreadcondsignal">2.8.47 pthread_cond_signal</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -7177,7 +7590,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadcondwait">2.8.43 pthread_cond_wait</a></H3>
+<H3><a name="pthreadcondwait">2.8.48 pthread_cond_wait</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -7208,7 +7621,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadcondtimedwait">2.8.44 pthread_cond_timedwait</a></H3>
+<H3><a name="pthreadcondtimedwait">2.8.49 pthread_cond_timedwait</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -7245,7 +7658,7 @@ interface of the same name.
   <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 </p>
 
-<h3><a name="pthreadbarrierattrinit">2.8.45 pthread_barrierattr_init</a></h3>
+<h3><a name="pthreadbarrierattrinit">2.8.50 pthread_barrierattr_init</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -7278,7 +7691,7 @@ interface of the same name.
   <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 </p>
 
-<h3><a name="pthreadbarrierattrdestroy">2.8.46 pthread_barrierattr_destroy</a></h3>
+<h3><a name="pthreadbarrierattrdestroy">2.8.51 pthread_barrierattr_destroy</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -7310,7 +7723,7 @@ interface of the same name.
   <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 </p>
 
-<h3><a name="pthreadbarrierattrsetpshared">2.8.47 pthread_barrierattr_setpshared</a></h3>
+<h3><a name="pthreadbarrierattrsetpshared">2.8.52 pthread_barrierattr_setpshared</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -7348,7 +7761,7 @@ interface of the same name.
   <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 </p>
 
-<h3><a name="pthreadbarrierattrgetpshared">2.8.48 pthread_barrierattr_getpshared</a></h3>
+<h3><a name="pthreadbarrierattrgetpshared">2.8.53 pthread_barrierattr_getpshared</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -7380,7 +7793,7 @@ interface of the same name.
   <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 </p>
 
-<h3><a name="pthreadbarrierinit">2.8.49 pthread_barrier_init</a></h3>
+<h3><a name="pthreadbarrierinit">2.8.54 pthread_barrier_init</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -7450,7 +7863,7 @@ interface of the same name.
   <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 </p>
 
-<h3><a name="pthreadbarrierdestroy">2.8.50 pthread_barrier_destroy</a></h3>
+<h3><a name="pthreadbarrierdestroy">2.8.55 pthread_barrier_destroy</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -7494,7 +7907,7 @@ interface of the same name.
   <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 </p>
 
-<h3><a name="pthreadbarrierwait">2.8.51 pthread_barrier_wait</a></h3>
+<h3><a name="pthreadbarrierwait">2.8.56 pthread_barrier_wait</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -7554,7 +7967,7 @@ interface of the same name.
 </p>
 
 
-<h3><a name="pthreadonce">2.8.52 pthread_once</a></h3>
+<h3><a name="pthreadonce">2.8.57 pthread_once</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -7598,7 +8011,7 @@ interface of the same name.
   <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 </p>
 
-<h3><a name="pthreadkill">2.8.53 pthread_kill</a></h3>
+<h3><a name="pthreadkill">2.8.58 pthread_kill</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -7660,7 +8073,7 @@ interface of the same name.
   <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 </p>
 
-<h3><a name="pthreadsigmask">2.8.54 pthread_sigmask</a></h3>
+<h3><a name="pthreadsigmask">2.8.59 pthread_sigmask</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -8171,12 +8584,16 @@ int        telldir(FAR DIR *dirp);
 <ul><pre>
 #include &lt;unistd.h&gt;
 
+/* Task Control Interfaces */
+
 pid_t   vfork(void);
 pid_t   getpid(void);
 void    _exit(int status) noreturn_function;
 unsigned int sleep(unsigned int seconds);
 void    usleep(unsigned long usec);
 int     pause(void);
+
+/* File descriptor operations */
 
 int     close(int fd);
 int     dup(int fd);
@@ -8185,27 +8602,66 @@ int     fsync(int fd);
 off_t   lseek(int fd, off_t offset, int whence);
 ssize_t read(int fd, FAR void *buf, size_t nbytes);
 ssize_t write(int fd, FAR const void *buf, size_t nbytes);
+ssize_t pread(int fd, FAR void *buf, size_t nbytes, off_t offset);
+ssize_t pwrite(int fd, FAR const void *buf, size_t nbytes, off_t offset);
+
+/* Check if a file descriptor corresponds to a terminal I/O file */
+
+int     isatty(int fd);
+
+/* Memory management */
+
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_MM_PGALLOC) && \
+    defined(CONFIG_ARCH_USE_MMU)
+FAR void *sbrk(intptr_t incr);
+#endif
+
+/* Special devices */
 
 int     pipe(int fd[2]);
+
+/* Working directory operations */
 
 int     chdir(FAR const char *path);
 FAR char *getcwd(FAR char *buf, size_t size);
 
-int     unlink(FAR const char *pathname);
+/* File path operations */
+
+int     access(FAR const char *path, int amode);
 int     rmdir(FAR const char *pathname);
+int     unlink(FAR const char *pathname);
+
+#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+int     link(FAR const char *path1, FAR const char *path2);
+ssize_t readlink(FAR const char *path, FAR char *buf, size_t bufsize);
+#endif
+
+/* Execution of programs from files */
 
 #ifdef CONFIG_LIBC_EXECFUNCS
 int     execl(FAR const char *path, ...);
 int     execv(FAR const char *path, FAR char *const argv[]);
 #endif
 
+/* Networking */
+
+#ifdef CONFIG_NET
+int     gethostname(FAR char *name, size_t size);
+int     sethostname(FAR const char *name, size_t size);
+#endif
+
+/* Other */
+
 int     getopt(int argc, FAR char *const argv[], FAR const char *optstring);
+
 </pre></ul>
 </a>
 
 <h3><a name="standardio">2.10.5 Standard I/O</a></h3>
 <ul><pre>
 #include &lt;stdio.h&gt;
+
+/* Operations on streams (FILE) */
 
 void   clearerr(register FILE *stream);
 int    fclose(FILE *stream);
@@ -8216,18 +8672,24 @@ int    fileno(FAR FILE *stream);
 int    fgetc(FILE *stream);
 int    fgetpos(FILE *stream, fpos_t *pos);
 char  *fgets(char *s, int n, FILE *stream);
-FILE  *fdopen(int fd, const char *type);
 FILE  *fopen(const char *path, const char *type);
 int    fprintf(FILE *stream, const char *format, ...);
 int    fputc(int c, FILE *stream);
 int    fputs(const char *s, FILE *stream);
 size_t fread(void *ptr, size_t size, size_t n_items, FILE *stream);
+FAR FILE *freopen(FAR const char *path, FAR const char *mode,
+         FAR FILE *stream);
 int    fseek(FILE *stream, long int offset, int whence);
 int    fsetpos(FILE *stream, fpos_t *pos);
 long   ftell(FILE *stream);
 size_t fwrite(const void *ptr, size_t size, size_t n_items, FILE *stream);
-char  *gets(char *s);
+FAR char *gets(char *s);
+FAR char *gets_s(FAR char *s, rsize_t n);
+void   setbuf(FAR FILE *stream, FAR char *buf);
+int    setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size);
 int    ungetc(int c, FAR FILE *stream);
+
+/* Operations on the stdout stream, buffers, paths, and the whole printf-family *    /
 
 int    printf(const char *format, ...);
 int    puts(const char *s);
@@ -8245,21 +8707,29 @@ int    vasprintf(FAR char **ptr, const char *fmt, va_list ap);
 int    vsnprintf(FAR char *buf, size_t size, const char *format, va_list ap);
 int    vsscanf(char *buf, const char *s, va_list ap);
 
+/* Operations on file descriptors including:
+ *
+ * POSIX-like File System Interfaces (fdopen), and
+ * Extensions from the Open Group Technical Standard, 2006, Extended API Set
+ *   Part 1 (dprintf and vdprintf)
+ */
+
 FAR FILE *fdopen(int fd, FAR const char *type);
 int    dprintf(int fd, FAR const char *fmt, ...);
 int    vdprintf(int fd, FAR const char *fmt, va_list ap);
 
+/* Operations on paths */
+
 FAR char *tmpnam(FAR char *s);
 FAR char *tempnam(FAR const char *dir, FAR const char *pfx);
+int       remove(FAR const char *path);
 
 #include &lt;sys/stat.h&gt;
 
 int mkdir(FAR const char *pathname, mode_t mode);
 int mkfifo(FAR const char *pathname, mode_t mode);
 int stat(const char *path, FAR struct stat *buf);
-#if 0 /* Not yet supported */
 int fstat(int fd, FAR struct stat *buf);
-#endif
 
 #include &lt;sys/statfs.h&gt;
 
@@ -8326,7 +8796,17 @@ void  *memcpy(void *dest, const void *src, size_t n);
 int    memcmp(const void *s1, const void *s2, size_t n);
 void  *memmove(void *dest, const void *src, size_t count);
 
-# define bzero(s,n) (void)memset(s,0,n)
+#include &lt;strings.h&gt;
+
+#define bcmp(b1,b2,len)  memcmp(b1,b2,(size_t)len)
+#define bcopy(b1,b2,len) (void)memmove(b2,b1,len)
+#define bzero(s,n)       (void)memset(s,0,n)
+#define index(s,c)       strchr(s,c)
+#define rindex(s,c)      strrchr(s,c)
+
+int    ffs(int j);
+int    strcasecmp(const char *, const char *);
+int    strncasecmp(const char *, const char *, size_t);
 </pre></ul>
 
 <h3><a name="PipesNFifos">2.10.9 Pipes and FIFOs</a></h3>
@@ -9975,6 +10455,7 @@ notify a task when a message is available on a queue.
   <li><a href="#aio">lio_listio</a></li>
   <li><a href="#listen">listen</a></li>
   <li><a href="#localtimer">localtime_r</a></li>
+  <li><a href="#lockingvssignaling">Locking versus Signaling Semaphores</a></li>
   <li><a href="#drvrunistdops">lseek</a></li>
   <li><a href="#Message_Queue">Named Message Queue Interfaces</a>
   <li><a href="#standardio">mkdir</a></li>
@@ -9992,9 +10473,9 @@ notify a task when a message is available on a queue.
   <li><a href="#mqtimedsend">mq_timedsend</a></li>
   <li><a href="#mqunlink">mq_unlink</a></li>
   <li><a href="#mmap">mmap</a></li>
+  <li><a href="#Network">Network Interfaces</a></li>
 </td>
 <td valign="top" width="33%">
-  <li><a href="#Network">Network Interfaces</a></li>
   <li><a href="#onexit">on_exit</a>
   <li><a href="#drvrfcntlops">open</a></li>
   <li><a href="#dirdirentops">opendir</a></li>
@@ -10060,9 +10541,11 @@ notify a task when a message is available on a queue.
   <li><a href="#pthreadkeydelete">pthread_key_delete</a></li>
   <li><a href="#pthreadkill">pthread_kill</a></li>
   <li><a href="#pthreadmutexattrdestroy">pthread_mutexattr_destroy</a></li>
+  <li><a href="#pthreadmutexattrgetprotocol">pthread_mutexattr_getprotocol</a></li>
   <li><a href="#pthreadmutexattrgetpshared">pthread_mutexattr_getpshared</a></li>
   <li><a href="#pthreadmutexattrgettype">pthread_mutexattr_gettype</a></li>
   <li><a href="#pthreadmutexattrinit">pthread_mutexattr_init</a></li>
+  <li><a href="#pthreadmutexattrsetprotocol">pthread_mutexattr_setprotocol</a></li>
   <li><a href="#pthreadmutexattrsetpshared">pthread_mutexattr_setpshared</a></li>
   <li><a href="#pthreadmutexattrsettype">pthread_mutexattr_settype</a></li>
   <li><a href="#pthreadmutexdestrory">pthread_mutex_destroy</a></li>
@@ -10074,10 +10557,11 @@ notify a task when a message is available on a queue.
   <li><a href="#pthreadonce">pthread_once</a></li>
   <li><a href="#pthreadself">pthread_self</a></li>
   <li><a href="#pthreadsetcancelstate">pthread_setcancelstate</a></li>
+  <li><a href="#pthreadsetcanceltype">pthread_setcanceltype</a></li>
   <li><a href="#pthreadsetschedparam">pthread_setschedparam</a></li>
   <li><a href="#pthreadsetspecific">pthread_setspecific</a></li>
   <li><a href="#pthreadsigmask">pthread_sigmask</a></li>
-  <li><a href="#pthreadtestcancelstate">pthread_testcancelstate</a></li>
+  <li><a href="#pthreadtestcancel">pthread_testcancel</a></li>
   <li><a href="#pthreadyield">pthread_yield</a></li>
   <li><a href="#standardio">puts</a></li>
   <li><a href="#mmapxip">RAM disk driver</a></li>
@@ -10107,10 +10591,12 @@ notify a task when a message is available on a queue.
   <li><a href="#Semaphores">Counting Semaphore Interfaces</a>
   <li><a href="#semclose">sem_close</a></li>
   <li><a href="#semdestroy">sem_destroy</a></li>
+  <li><a href="#semgetprotocol">sem_getprotocol</a></li>
   <li><a href="#semgetvalue">sem_getvalue</a></li>
   <li><a href="#seminit">sem_init</a></li>
   <li><a href="#semopen">sem_open</a></li>
   <li><a href="#sempost">sem_post</a></li>
+  <li><a href="#semsetprotocol">sem_setprotocol</a></li>
   <li><a href="#semtrywait">sem_trywait</a></li>
   <li><a href="#semunlink">sem_unlink</a></li>
   <li><a href="#semwait">sem_wait</a></li>
@@ -10147,10 +10633,13 @@ notify a task when a message is available on a queue.
   <li><a href="#taskinit">task_init</a></li>
   <li><a href="#taskrestart">task_restart</a></li>
   <li><a href="#Task_Schedule">Task Scheduling Interfaces</a>
+  <li><a href="#tasksetcancelstate">task_setcancelstate</a></li>
+  <li><a href="#tasksetcanceltype>task_setcanceltype</a></li>
   <li><a href="#task_spawn">task_spawn</a></li>
   <li><a href="#task_spawnattr_getstacksize">task_spawnattr_getstacksize</a></li>
   <li><a href="#task_spawnattr_setstacksize">task_spawnattr_setstacksize</a></li>
   <li><a href="#Task_Switch">Task Switching Interfaces</a>
+  <li><a href="#tasktestcancel">task_testcancel</a></li>
   <li><a href="#dirdirentops">telldir</a></li>
   <li><a href="#timercreate">timer_create</a></li>
   <li><a href="#timerdelete">timer_delete</a></li>

@@ -1,0 +1,54 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_RISCV
+comment "RISC-V Options"
+
+choice
+	prompt "RISC-V chip selection"
+	default ARCH_CHIP_NR5M100
+
+config ARCH_CHIP_NR5
+	bool "NEXT NanoRisc5"
+	select ARCH_RV32IM
+	---help---
+		NEXT RISC-V NR5Mxx architectures (RISC-V RV32IM cores).
+
+endchoice
+
+config ARCH_RV32I
+	bool
+	default n
+
+config ARCH_RV32IM
+	bool
+	default n
+
+config ARCH_FAMILY
+	string
+	default "rv32im"	if ARCH_RM32IM
+
+config ARCH_CHIP
+	string
+	default "nr5m100"	if ARCH_CHIP_NR5M100
+
+config NR5_MPU
+	bool "MPU support"
+	default n
+	depends on ARCH_HAVE_MPU
+	select ARCH_USE_MPU
+	---help---
+		Build in support for the RISC-V Memory Protection Unit (MPU).
+		Check your chip specifications first; not all RISC-V architectures
+		support the MPU.
+
+if ARCH_RV32IM
+source arch/risc-v/src/rv32im/Kconfig
+endif
+if ARCH_CHIP_NR5
+source arch/risc-v/src/nr5m100/Kconfig
+endif
+
+endif

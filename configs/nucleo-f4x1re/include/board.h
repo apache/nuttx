@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/nucleo-f4x1re/include/board.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -215,6 +215,9 @@
 #define NUM_BUTTONS        1
 
 #define BUTTON_USER_BIT    (1 << BUTTON_USER)
+
+#define GPIO_TIM2_CH1IN (GPIO_TIM2_CH1IN_1 | GPIO_PULLUP)
+#define GPIO_TIM2_CH2IN (GPIO_TIM2_CH2IN_1 | GPIO_PULLUP)
 
 /************************************************************************************
  * Public Data

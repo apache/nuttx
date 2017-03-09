@@ -82,23 +82,23 @@ void kinetis_clrpend(int irq)
 {
   /* Check for external interrupt */
 
-  if (irq >= KINETIS_IRQ_EXTINT)
+  if (irq >= KINETIS_IRQ_FIRST)
     {
-      if (irq < (KINETIS_IRQ_EXTINT+32))
+      if (irq < (KINETIS_IRQ_FIRST+32))
         {
-          putreg32(1 << (irq - KINETIS_IRQ_EXTINT), NVIC_IRQ0_31_CLRPEND);
+          putreg32(1 << (irq - KINETIS_IRQ_FIRST), NVIC_IRQ0_31_CLRPEND);
         }
-      else if (irq < (KINETIS_IRQ_EXTINT+64))
+      else if (irq < (KINETIS_IRQ_FIRST+64))
         {
-          putreg32(1 << (irq - KINETIS_IRQ_EXTINT - 32), NVIC_IRQ32_63_CLRPEND);
+          putreg32(1 << (irq - KINETIS_IRQ_FIRST - 32), NVIC_IRQ32_63_CLRPEND);
         }
-      else if (irq < (KINETIS_IRQ_EXTINT+96))
+      else if (irq < (KINETIS_IRQ_FIRST+96))
         {
-          putreg32(1 << (irq - KINETIS_IRQ_EXTINT - 64), NVIC_IRQ64_95_CLRPEND);
+          putreg32(1 << (irq - KINETIS_IRQ_FIRST - 64), NVIC_IRQ64_95_CLRPEND);
         }
       else if (irq < NR_IRQS)
         {
-          putreg32(1 << (irq - KINETIS_IRQ_EXTINT - 96), NVIC_IRQ96_127_CLRPEND);
+          putreg32(1 << (irq - KINETIS_IRQ_FIRST - 96), NVIC_IRQ96_127_CLRPEND);
         }
     }
 }

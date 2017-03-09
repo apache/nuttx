@@ -1,0 +1,79 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_MISOC
+
+choice
+	prompt "Misoc Chip Selection"
+	default ARCH_CHIP_LM32
+
+config ARCH_CHIP_LM32
+	bool "LM32"
+	select MISOC_HAVE_UART1
+	---help---
+		LM32 Chip Selected
+
+config ARCH_CHIP_MOR1K
+	bool "MOR1K"
+	---help---
+		MOR1K Chip Selected
+
+endchoice # Misoc Chip Selection
+
+config ARCH_CHIP
+	string
+	default "lm32"		if ARCH_CHIP_LM32
+	default "mor1k"		if ARCH_CHIP_MOR1K
+
+menu "MISOC Peripheral Support"
+
+# These "hidden" settings determine is a peripheral option is available for the
+# selection MCU
+
+config MISOC_HAVE_UART1
+	bool
+	default n
+	select UART1_SERIALDRIVER
+
+config MISOC_UART1
+	bool "UART1"
+	default n
+	select ARCH_HAVE_UART1
+	select MISOC_UART
+
+config MISOC_ETHERNET
+	bool "Ethernet"
+	default n
+	select NETDEVICES
+	select ARCH_HAVE_PHY
+	select ARCH_HAVE_NETDEV_STATISTICS
+
+endmenu # MISOC Peripheral Support
+
+config MISOC_UART
+	bool
+
+config MISOC_UART_RX_BUF_SIZE
+	int "UART RX Bufer size"
+	default 64
+	depends on MISOC_UART
+	---help---
+		Size of RX buffers for MISOC UARTs
+
+config MISOC_UART_TX_BUF_SIZE
+	int "UART TX Bufer size"
+	default 64
+	depends on MISOC_UART
+	---help---
+		Size of TX buffers for MISOC UARTs
+
+if ARCH_CHIP_LM32
+source arch/misoc/src/lm32/Kconfig
+endif
+if ARCH_CHIP_MOR1K
+#source arch/misoc/src/mor1k/Kconfig
+endif
+
+endif # ARCH_MISOC

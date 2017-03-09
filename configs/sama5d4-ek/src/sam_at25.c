@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/sama5d4-ek/src/sam_at25.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,10 +46,10 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/fs/fs.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/fs/nxffs.h>
+#include <nuttx/drivers/drivers.h>
 
 #include "sam_spi.h"
 #include "sama5d4-ek.h"
@@ -92,7 +92,7 @@ int sam_at25_automount(int minor)
       spi = sam_spibus_initialize(AT25_PORT);
       if (!spi)
         {
-          fdbg("ERROR: Failed to initialize SPI port %d\n", AT25_PORT);
+          ferr("ERROR: Failed to initialize SPI port %d\n", AT25_PORT);
           return -ENODEV;
         }
 
@@ -101,7 +101,7 @@ int sam_at25_automount(int minor)
       mtd = at25_initialize(spi);
       if (!mtd)
         {
-          fdbg("ERROR: Failed to bind SPI port %d to the AT25 FLASH driver\n");
+          ferr("ERROR: Failed to bind SPI port %d to the AT25 FLASH driver\n");
           return -ENODEV;
         }
 
@@ -113,7 +113,7 @@ int sam_at25_automount(int minor)
       ret = ftl_initialize(minor, mtd);
       if (ret < 0)
         {
-          fdbg("ERROR: Failed to initialize the FTL layer: %d\n", ret);
+          ferr("ERROR: Failed to initialize the FTL layer: %d\n", ret);
           return ret;
         }
 
@@ -123,7 +123,7 @@ int sam_at25_automount(int minor)
       ret = ftl_initialize(minor, mtd);
       if (ret < 0)
         {
-          fdbg("ERROR: Failed to initialize the FTL layer: %d\n", ret);
+          ferr("ERROR: Failed to initialize the FTL layer: %d\n", ret);
           return ret;
         }
 
@@ -137,7 +137,7 @@ int sam_at25_automount(int minor)
       ret = bchdev_register(blockdev, chardev, false);
       if (ret < 0)
         {
-          fdbg("ERROR: bchdev_register %s failed: %d\n", chardev, ret);
+          ferr("ERROR: bchdev_register %s failed: %d\n", chardev, ret);
           return ret;
         }
 
@@ -147,7 +147,7 @@ int sam_at25_automount(int minor)
       ret = nxffs_initialize(mtd);
       if (ret < 0)
         {
-          fdbg("ERROR: NXFFS initialization failed: %d\n", ret);
+          ferr("ERROR: NXFFS initialization failed: %d\n", ret);
           return ret;
         }
 
@@ -156,7 +156,7 @@ int sam_at25_automount(int minor)
       ret = mount(NULL, "/mnt/at25", "nxffs", 0, NULL);
       if (ret < 0)
         {
-          fdbg("ERROR: Failed to mount the NXFFS volume: %d\n", errno);
+          ferr("ERROR: Failed to mount the NXFFS volume: %d\n", errno);
           return ret;
         }
 

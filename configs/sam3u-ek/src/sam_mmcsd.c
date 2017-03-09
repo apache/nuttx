@@ -112,7 +112,7 @@ bool sam_cardinserted(unsigned char slot)
     {
 #ifdef GPIO_MCI_CD
       bool inserted = sam_gpioread(GPIO_MCI_CD);
-      fvdbg("inserted: %s\n", inserted ? "NO" : "YES");
+      finfo("inserted: %s\n", inserted ? "NO" : "YES");
       return !inserted;
 #else
       return true;
@@ -135,7 +135,7 @@ bool sam_writeprotected(unsigned char slot)
     {
 #ifdef GPIO_MCI_WP
       bool protected = sam_gpioread(GPIO_MCI_WP);
-      fvdbg("protected: %s\n", inserted ? "YES" : "NO");
+      finfo("protected: %s\n", inserted ? "YES" : "NO");
       return protected;
 #else
       return false;

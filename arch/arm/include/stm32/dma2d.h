@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/include/stm32/dma2d.h
+ * arch/arm/include/stm32/dma2d.h
  *
  *   Copyright (C) 2015 Marco Krahl. All rights reserved.
  *   Author: Marco Krahl <ocram.lhark@gmail.com>
@@ -345,7 +345,7 @@ struct dma2d_layer_s
  *
  ****************************************************************************/
 
-FAR struct dma2d_layer_s * up_dma2dgetlayer(int lid);
+FAR struct dma2d_layer_s *up_dma2dgetlayer(int lid);
 
 /****************************************************************************
  * Name: up_dma2dcreatelayer

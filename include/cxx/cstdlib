@@ -1,7 +1,7 @@
 //***************************************************************************
 // include/cxx/cstdlib
 //
-//   Copyright (C) 2009, 2012, 2015 Gregory Nutt. All rights reserved.
+//   Copyright (C) 2009, 2012, 2015-2017 Gregory Nutt. All rights reserved.
 //   Author: Gregory Nutt <gnutt@nuttx.org>
 //
 // Redistribution and use in source and binary forms, with or without
@@ -54,9 +54,9 @@ namespace std
   using ::srand;
   using ::rand;
 
+#ifndef CONFIG_DISABLE_ENVIRON
   // Environment variable support
 
-#ifndef CONFIG_DISABLE_ENVIRON
   using ::get_environ_ptr;
   using ::getenv;
   using ::putenv;
@@ -76,6 +76,12 @@ namespace std
   using ::on_exit;
 #endif
 
+#ifndef __KERNEL__
+  // System command
+
+  using ::system;
+#endif
+
   // String to binary conversions
 
   using ::strtol;
@@ -84,11 +90,24 @@ namespace std
   using ::strtoll;
   using ::strtoull;
 #endif
+  using ::strtof;
+#ifdef CONFIG_HAVE_DOUBLE
   using ::strtod;
+#endif
+#ifdef CONFIG_HAVE_LONG_DOUBLE
+  using ::strtold;
+#endif
 
   // Binary to string conversions
 
   using ::itoa;
+
+  // Wide character operations
+
+#ifdef CONFIG_LIBC_WCHAR
+  using ::mbtowc;
+  using ::wctomb;
+#endif
 
   // Memory Management
 
@@ -99,6 +118,16 @@ namespace std
   using ::zalloc;
   using ::calloc;
   using ::mallinfo;
+
+#ifdef CONFIG_PSEUDOTERM
+  // Pseudo-Terminals
+
+#ifdef CONFIG_PSEUDOTERM_SUSV1
+  using ::ptsname;
+  using ::ptsname_r;
+#endif
+  using ::unlockpt;
+#endif
 
   // Arithmetic
 
@@ -124,6 +153,10 @@ namespace std
   // Sorting
 
   using ::qsort;
+
+  // Binary search
+
+  using ::bsearch;
 }
 
 #endif // __INCLUDE_CXX_CSTDLIB

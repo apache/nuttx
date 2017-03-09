@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated May 28, 2016)
+NuttX TODO List (Last updated March 7, 2017)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -9,28 +9,30 @@ issues related to each board port.
 
 nuttx/:
 
- (13)  Task/Scheduler (sched/)
+ (10)  Task/Scheduler (sched/)
+  (1)  SMP
   (1)  Memory Management (mm/)
+  (0)  Power Management (drivers/pm)
   (3)  Signals (sched/signal, arch/)
   (2)  pthreads (sched/pthread)
   (0)  Message Queues (sched/mqueue)
-  (9)  Kernel/Protected Build
+  (8)  Kernel/Protected Build
   (3)  C++ Support
   (6)  Binary loaders (binfmt/)
- (12)  Network (net/, drivers/net)
+ (13)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
   (0)  Other drivers (drivers/)
- (11)  Libraries (libc/, libm/)
- (11)  File system/Generic drivers (fs/, drivers/)
-  (8)  Graphics subsystem (graphics/)
-  (1)  Build system / Toolchains
+ (12)  Libraries (libc/, libm/)
+ (10)  File system/Generic drivers (fs/, drivers/)
+  (9)  Graphics Subsystem (graphics/)
+  (2)  Build system / Toolchains
   (3)  Linux/Cywgin simulation (arch/sim)
   (4)  ARM (arch/arm/)
 
 apps/ and other Add-Ons:
 
-  (3)  Network Utilities (apps/netutils/)
-  (2)  NuttShell (NSH) (apps/nshlib)
+  (2)  Network Utilities (apps/netutils/)
+  (1)  NuttShell (NSH) (apps/nshlib)
   (1)  System libraries apps/system (apps/system)
   (1)  Pascal add-on (pcode/)
   (4)  Other Applications & Tests (apps/examples/)
@@ -99,16 +101,37 @@ o Task/Scheduler (sched/)
   Status:      Open
   Priority:    Medium Low for now
 
-  Title:       ISSUES WITH atexit() AND on_exit()
+  Title:       ISSUES WITH atexit(), on_exit(), AND pthread_cleanup_pop()
   Description: These functions execute with the following bad properties:
 
                1. They run with interrupts disabled,
                2. They run in supervisor mode (if applicable), and
                3. They do not obey any setup of PIC or address
                   environments. Do they need to?
+               4. In the case of task_delete() and pthread_cancel(), these
+                  callbacks will run on the thread of execution and address
+                  context of the caller of task.  That is very bad!
 
                The fix for all of these issues it to have the callbacks
-               run on the caller's thread (as with signal handlers).
+               run on the caller's thread as is currently done with
+               signal handlers.  Signals are delivered differently in
+               PROTECTED and KERNEL modes:  The deliver is involes a
+               signal handling trampoline function in the user address
+               space and two signal handlers:  One to call the signal
+               handler trampoline in user mode (SYS_signal_handler) and
+               on in with the signal handler trampoline to return to
+               supervisor mode (SYS_signal_handler_return)
+
+               The primary difference is in the location of the signal
+               handling trampoline:
+
+               - In PROTECTED mode, there is on a single user space blob
+                 with a header at the beginning of the block (at a well-
+                 known location.  There is a pointer to the signal handler
+                 trampoline function in that header.
+               - In the KERNEL mode, a special process signal handler
+                 trampoline is used at a well-known location in every
+                 process address space (ARCH_DATA_RESERVE->ar_sigtramp).
   Status:      Open
   Priority:    Medium Low.  This is an important change to some less
                important interfaces.  For the average user, these
@@ -142,84 +165,11 @@ o Task/Scheduler (sched/)
                incompatibilities could show up in porting some code).
   Priority:    Low
 
-  Title:       REMOVE TASK_DELETE
-  Description: Need to remove or fix task delete.  This interface is non-
-               standard and not safe.  Arbitrary deleting tasks can cause
-               serious problems such as memory leaks.  Better to remove it
-               than to retain it as a latent bug.
-
-               Currently used within the OS and also part of the
-               implementation of pthread_cancel() and task_restart() (which
-               should also go for the same reasons).  It is used in
-               NxWM::CNxConsole to terminate console tasks and also in
-               apps/netutils/thttpd to kill CGI tasks that timeout.
-  Status:      Open
-  Priority:    Low and not easily removable.
-
-  Title:       RELEASE SEMAPHORES HELD BY CANCELED THREADS:
-  Description: Commit: fecb9040d0e54baf14b729e556a832febfe8229e: "In
-                case a thread is doing a blocking operation (e.g. read())
-                on a serial device, while it is being terminated by
-                pthread_cancel(), then uart_close() gets called, but
-                the semaphore (dev->recv.sem in the above example) is
-                still blocked.
-
-               "This means that once the serial device is opened next
-                time, data will arrive on the serial port (and driver
-                interrupts handled as normal), but the received characters
-                never arrive in the reader thread.
-
-                This patch addresses the problem by re-initializing the
-                semaphores on the last uart_close() on the device."
-
-               Yahoo! Groups message 7726: "I think that the system
-                should be required to handle pthread_cancel safely in
-                all cases.  In the NuttX model, a task is like a Unix
-                process and a pthread is like a Unix thread.  Canceling
-                threads should always be safe (or at least as unsafe) as
-                under Unix because the model is complete for pthreads...
-
-               "So, in my opinion, this is a generic system issue, not
-                specific to the serial driver.  I could also implement
-                logic to release all semaphores held by a thread when
-                it exits -- but only if priority inheritance is enabled;
-                because only in that case does the code have any memory
-                of which threads actually hold the semaphore.
-
-               "The patch I just incorporated is also insufficient.  It
-                works only if the serial driver is shut down when the
-                thread is canceled.  But what if there are other open
-                references to the driver?  Then the driver will not be
-                shut down, the semaphores will not be re-initialized, and
-                the semaphore counts will still be off by one.
-
-               "I think that the system needs to automatically release any
-                semaphores held by a thread being killed asynchronously?
-                It seems necessary to me."
-
-               UPDATE; The logic enabled when priority inheritance is
-               enabled for this purpose is insufficient.  It provides
-               hooks so that given a semaphore it can traverse all
-               holders.  What is needed would be logic so that given
-               a task, you can traverse all semaphores held by the task,
-               releasing each semaphore count held by the exiting task.
-               Nothing like this exists now so that solution is not
-               imminent.
-
-               UPDATE: The basic fix to release the semaphore count if
-               a thread is killed via pthread_cancel() or task_delete()
-               has been implemented (2014-12-13).  See the new file:
-               sched/semaphore/sem_recover.c  However, the general
-               issue of freeing semaphores when a thread exists still
-               exists.
-  Status:      Open
-  Priority:    Medium-ish
-
   Title:       SCALABILITY
   Description: Task control information is retained in simple lists.  This
                is completely appropriate for small embedded systems where
                the number of tasks, N, is relatively small.  Most list
-               operations are O(N).  This could become as issue if N gets
+               operations are O(N).  This could become an issue if N gets
                very large.
 
                In that case, these simple lists should be replaced with
@@ -234,6 +184,37 @@ o Task/Scheduler (sched/)
   Status:      Open
   Priority:    Low.  Things are just the way that we want them for the way
                that NuttX is used today.
+
+o SMP
+  ^^^
+
+  Title:       SMP AND DATA CACHES
+  Description: When spinlocks, semaphores, etc. are used in an SMP system with
+               a data cache, then there may be problems with cache coherency
+               in some CPU architectures:  When one CPU modifies the shared
+               object, the changes may not be visible to another CPU if it
+               does not share the data cache. That would cause failure in
+               the IPC logic.
+
+               Flushing the D-cache on writes and invalidating before a read is
+               not really an option.  That would essentially effect every memory
+               access and there may be side-effects due to cache line sizes
+               and alignment.
+
+               For the same reason a separate, non-cacheable memory region is
+               not an option.  Essentially all data would have to go in the
+               non-cached region and you would have no benefit from the data
+               cache.
+
+               On ARM Cortex-A, each CPU has a separate data cache.  However,
+               the MPCore's Snoop Controller Unit supports coherency among
+               the different caches.  The SCU is enabled by the SCU control
+               register and each CPU participates in the SMP coherency by
+               setting the ACTLR_SMP bit in the auxiliary control register
+               (ACTLR).
+
+  Status:      Closed
+  Priority:    High on platforms that may have the issue.
 
 o Memory Management (mm/)
   ^^^^^^^^^^^^^^^^^^^^^^^
@@ -306,7 +287,7 @@ o Memory Management (mm/)
 
                So in this case, NuttX work just link Linux or or *nix systems:
                All memory allocated by processes or threads in processes will
-               be recovered when the process exists.
+               be recovered when the process exits.
 
                But not for the flat memory build.  In that case, the issues
                above do apply.  There is no safe way to recover the memory in
@@ -319,16 +300,21 @@ o Memory Management (mm/)
                it is inherently unsafe, I would never incorporate anything
                like that into NuttX.
 
-  Status:      Open.  No changes are planned.
+  Status:      Open.  No changes are planned.  NOTE: This applies to the FLAT
+               and PROTECTED builds only.  There is no such leaking of memory
+               in the KERNEL build mode.
   Priority:    Medium/Low, a good feature to prevent memory leaks but would
                have negative impact on memory usage and code size.
+
+o Power Management (drivers/pm)
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 o Signals (sched/signal, arch/)
   ^^^^^^^^^^^^^^^^^^^^^^^
 
   Title:       STANDARD SIGNALS
   Description: 'Standard' signals and signal actions are not supported.
-               (e.g., SIGINT, SIGSEGV, etc).
+               (e.g., SIGINT, SIGSEGV, etc).  Default is only SIG_IGN.
 
                Update:  SIGCHLD is supported if so configured.
   Status:      Open.  No further changes are planned.
@@ -362,29 +348,27 @@ o Signals (sched/signal, arch/)
 o pthreads (sched/pthreads)
   ^^^^^^^^^^^^^^^^^
 
-  Title:       CANCELLATION POINTS
-  Description: pthread_cancel():  Should implement cancellation points and
-               pthread_testcancel()
-  Status:      Open.  No changes are planned.
-  Priority:    Low, probably not that useful
-
   Title:       PTHREAD_PRIO_PROTECT
-  Description: Extended pthread_mutexattr_setprotocol() support PTHREAD_PRIO_PROTECT:
+  Description: Extend pthread_mutexattr_setprotocol().  It should support
+               PTHREAD_PRIO_PROTECT (and so should its non-standard counterpart
+               sem_setproto()).
+
                "When a thread owns one or more mutexes initialized with the
                PTHREAD_PRIO_PROTECT protocol, it shall execute at the higher of its
                priority  or  the  highest  of the priority ceilings of all the mutexes
                owned by this thread and initialized with this attribute, regardless of
                whether other threads are blocked on any of these mutexes or not.
 
-               "While  a  thread is holding a mutex which has been initialized with
+               "While a thread is holding a mutex which has been initialized with
                the PTHREAD_PRIO_INHERIT or PTHREAD_PRIO_PROTECT protocol attributes,
                it shall not be subject to being moved to the tail of the scheduling queue
                at its priority in the event that its original priority is changed,
                such as by a call to sched_setparam(). Likewise, when a thread unlocks
                a mutex that has been initialized with the PTHREAD_PRIO_INHERIT or
                PTHREAD_PRIO_PROTECT protocol attributes, it shall not be subject to
-               being moved to the tail of the scheduling queue at its priority in  the
+               being moved to the tail of the scheduling queue at its priority in the
                event that its original priority is changed."
+
   Status:      Open.  No changes planned.
   Priority:    Low -- about zero, probably not that useful. Priority inheritance is
                already supported and is a much better solution.  And it turns out
@@ -392,39 +376,77 @@ o pthreads (sched/pthreads)
                Excerpted from my post in a Linked-In discussion:
 
                "I started to implement this HLS/"PCP" semaphore in an RTOS that I
-               work with (http://www.nuttx.org) and I discovered after doing the
-               analysis and basic code framework that a complete solution for the
-               case of a counting semaphore is still quite complex -- essentially
-               as complex as is priority inheritance.
+                work with (http://www.nuttx.org) and I discovered after doing the
+                analysis and basic code framework that a complete solution for the
+                case of a counting semaphore is still quite complex -- essentially
+                as complex as is priority inheritance.
 
                "For example, suppose that a thread takes 3 different HLS semaphores
-               A, B, and C. Suppose that they are prioritized in that order with
-               A the lowest and C the highest. Suppose the thread takes 5 counts
-               from A, 3 counts from B, and 2 counts from C. What priority should
-               it run at? It would have to run at the priority of the highest
-               priority semaphore C. This means that the RTOS must maintain
-               internal information of the priority of every semaphore held by
-               the thread.
+                A, B, and C. Suppose that they are prioritized in that order with
+                A the lowest and C the highest. Suppose the thread takes 5 counts
+                from A, 3 counts from B, and 2 counts from C. What priority should
+                it run at? It would have to run at the priority of the highest
+                priority semaphore C. This means that the RTOS must maintain
+                internal information of the priority of every semaphore held by
+                the thread.
 
                "Now suppose it releases one count on semaphore B. How does the
-               RTOS know that it still holds 2 counts on B? With some complex
-               internal data structure. The RTOS would have to maintain internal
-               information about how many counts from each semaphore are held
-               by each thread.
+                RTOS know that it still holds 2 counts on B? With some complex
+                internal data structure. The RTOS would have to maintain internal
+                information about how many counts from each semaphore are held
+                by each thread.
 
                "How does the RTOS know that it should not decrement the priority
-               from the priority of C? Again, only with internal complexity. It
-               would have to know the priority of every semaphore held by
-               every thread.
+                from the priority of C? Again, only with internal complexity. It
+                would have to know the priority of every semaphore held by
+                every thread.
 
                "Providing the HLS capability on a simple pthread mutex would not
-               be such quite such a complex job if you allow only one mutex per
-               thread. However, the more general case seems almost as complex
-               as priority inheritance. I decided that the implementation does
-               not have value to me. I only wanted it for its reduced
-               complexity; in all other ways I believe that it is the inferior
-               solution. So I discarded a few hours of programming. Not a
-               big loss from the experience I gained."
+                be such quite such a complex job if you allow only one mutex per
+                thread. However, the more general case seems almost as complex
+                as priority inheritance. I decided that the implementation does
+                not have value to me. I only wanted it for its reduced
+                complexity; in all other ways I believe that it is the inferior
+                solution. So I discarded a few hours of programming. Not a
+                big loss from the experience I gained."
+
+  Title:       ISSUES WITH CANCELLATION POINTS
+  Description: According to POIX cancellation points must occur when a thread is executing
+               the following functions.  There are some execptions as noted:
+
+                accept()             mq_timedsend()           NA putpmsg()          sigtimedwait()
+             04 aio_suspend()     NA msgrcv()                    pwrite()        NA sigwait()
+             NA clock_nanosleep() NA msgsnd()                    read()             sigwaitinfo()
+                close()           NA msync()                  NA readv()         01 sleep()
+                connect()            nanosleep()                 recv()          02 system()
+             -- creat()              open()                      recvfrom()      NA tcdrain()
+                fcntl()              pause()                  NA recvmsg()       01 usleep()
+             NA fdatasync()          poll()                      select()        -- wait()
+                fsync()              pread()                     sem_timedwait()    waitid()
+             NA getmsg()          NA pselect()                   sem_wait()         waitpid()
+             NA getpmsg()            pthread_cond_timedwait()    send()             write()
+             NA lockf()              pthread_cond_wait()      NA sendmsg()       NA writev()
+                mq_receive()         pthread_join()              sendto()
+                mq_send()            pthread_testcancel()     03 sigpause()
+                mq_timedreceive() NA putmsg()                    sigsuspend()
+
+                  NA Not supported
+                  -- Doesn't need instrumentation.  Handled by lower level calls.
+                  nn See note nn
+
+               NOTE 01: sleep() and usleep() are user-space functions in the C library and cannot
+               serve as cancellation points.  They are, however, simple wrappers around nanosleep
+               which is a true cancellation point.
+               NOTE 02: system() is actually implemented in apps/ as part of NSH.  It cannot be
+               a cancellation point.
+               NOTE 03: sigpause() is a user-space function in the C library and cannot serve as
+               cancellation points.  It is, however, a simple wrapper around sigsuspend()
+               which is a true cancellation point.
+               NOTE 04: aio_suspend() is a user-space function in the C library and cannot serve as
+               cancellation points.  It does call around sigtimedwait() which is a true cancellation
+               point.
+  Status:      Not really open.  This is just the way it is.
+  Priority:    Nothing additional is planned.
 
 o Message Queues (sched/mqueue)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -447,6 +469,7 @@ o Kernel/Protected Build
                mkfatfs  mkfatfs
                mkrd     ramdisk_register()
                ping     icmp_ping()
+               mount    foreach_mountpoint()
 
                The busybox mkfatfs does not involve any OS calls; it does
                its job by simply opening the block driver (using open/xopen)
@@ -582,14 +605,6 @@ o Kernel/Protected Build
   Priority:    Low.  This is a good idea and certainly an architectural
                improvement.  However, there is no strong motivation now do
                do that partitioning work.
-
-  Title:       TIMER INTERRUPT CALLBACK
-  Description: The timer upper half driver at drivers/timers/timer.c performs
-               interrupt level callbacks into applications.  This, of course,
-               will never work in anything but a non-secure, flat build.
-  Status:      Open
-  Priority:    Medium.  The driver is only usable with all of its features
-               in a FLAT build.
 
   Title:       USER MODE TASKS CAN MODIFY PRIVILEGED TASKS
   Description: Certain interfaces, such as sched_setparam(),
@@ -818,7 +833,7 @@ o Binary loaders (binfmt/)
                "Read-Only Data in RAM" at
                http://nuttx.org/Documentation/NuttXNxFlat.html#limitations).
 
-               The newer 4.6.3compiler generated PC relative relocations to the strings:
+               The newer 4.6.3 compiler generated PC relative relocations to the strings:
 
                .L2:
                   .word   .LC0-(.LPIC0+4)
@@ -919,40 +934,18 @@ o Network (net/, drivers/net)
   Priority:    Medium.  Important on slow applications that will not accept
                connections promptly.
 
-  Title:       INTERRUPT LEVEL PROCESSING IN ETHERNET DRIVERS
-  Description: Too many Ethernet drivers do interrupt-level processing with
-               the network stack.  The network stack supports either interrupt
-               level processing or normal task level processing (depending on
-               CONFIG_NET_NOINTS).  This is really a very bad use of CPU
-               resources;  All of the network stack processing should be
-               modified to use a work queue (and, all use of CONFIG_NET_NOINTS=n
-               should be eliminated).  This applies to almost all Ethernet
-               drivers:
+  Title:       IPv6 REQUIRES ADDRESS FILTER SUPPORT
+  Description: IPv6 requires that the Ethernet driver support NuttX address
+               filter interfaces.  Several Ethernet drivers do support there,
+               however.  Others support the address filtering interfaces but
+               have never been verifed:
 
-               ARCHITECTURE   CONFIG_NET_NOINTS?      ADDRESS FILTER SUPPORT?
-               C5471          NO                      NO
-               STM32          YES                     YES
-               STM32F7        YES                     YES
-               TIVA           ----------------------- ------
-                 LM3S         NO                      NO
-                 TM4C         YES                     YES
-               eZ80           NO                      NO
-               LPC17xx        YES                     YES (not tested)
-               DMxxx NIC      NO                      NO
-               PIC32          NO                      NO
-               RGMP           ???                     ???
-               SAM3/4         YES                     YES
-               SAMA5D         ----------------------- ------
-                 EMACA        NO                      YES (not tested)
-                 EMACB        YES                     YES
-                 GMAC         NO                      YES (not tested)
-               SAMV7          YES                     YES
-               SIM            N/A  (No interrupts)    NO
+               C5471, LM3X, ez80, DM0x90 NIC, PIC: Do not support address
+                 filteringing.
+               Kinetis, LPC17xx, LPC43xx:  Untested address filter support
 
-               The general outline of how this might be done is included in
-               drivers/net/skeleton.c
   Status:      Open
-  Priority:    Pretty high if you want a well behaved system.
+  Priority:    Pretty high if you want a to use IPv6 on these platforms.
 
   Title:       UDP MULTICAST RECEPTION
   Description: The logic in udp_input() expects either a single receive socket or
@@ -1029,6 +1022,48 @@ o Network (net/, drivers/net)
                getaddrinfo(), freeaddrinfo(), getnameinfo(), etc.
   Status:      Open
   Priority:    Low
+
+  Title:       REMOVE CONFIG_NET_MULTIBUFFER
+  Description: The CONFIG_NET_MULTIBUFFER controls some details in the layout
+               of the network device structure. This is really a unnecessary
+               complexity and should be removed.  The cost for those network
+               drivers that currently do not support CONFIG_NET_MULTIBUFFER
+               is the size of one pointer.
+  Status:      Open
+  Priority:    Low
+
+  Title:       ETHERNET WITH MULTIPLE LPWORK THREADS
+  Description: Recently, Ethernet drivers were modified to support multiple
+               work queue structures.  The question was raised: "My only
+               reservation would be, how would this interact in the case of having CONFIG_STM32_ETHMAC_LPWORK and CONFIG_SCHED_LPNTHREADS
+               > 1? Can it be guaranteed that one work item won't be
+               interrupted and execution switched to another? I think so but
+               am not 100% confident."
+
+               I suspect that you right.  There are probably vulnerabilities
+               in the CONFIG_STM32_ETHMAC_LPWORK with CONFIG_SCHED_LPNTHREADS
+               > 1 case.  But that really doesn't depend entirely upon the
+               change to add more work queue structures.  Certainly with only
+               work queue structure you would have concurrent Ethernet
+               operations in that multiple LP threads; just because the work
+               structure is available, does not mean that there is not dequeued
+               work in progress.  The multiple structures probably widens the
+               window for that concurrency, but does not create it.
+
+               The current Ethernet designs depend upon a single work queue to
+               serialize data.  In the case of muliple LP threads, some
+               additional mechanism would have to be added to enforce that
+               serialization.
+
+               NOTE:  Most drivers will call net_lock() and net_unlock() around
+               the critical portions of the driver work.  In that case, all work
+               will be properly serialized.  This issue only applies to drivers
+               that may perform operations that require protection outside of
+               the net_lock'ed region.  Sometimes, this may require extending
+               the netlock() to be beginning of the driver work function.
+
+  Status:      Open
+  Priority:    High if you happen to be using Ethernet in this configuration.
 
 o USB (drivers/usbdev, drivers/usbhost)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1161,7 +1196,7 @@ o USB (drivers/usbdev, drivers/usbhost)
                from being usable:
 
               - The driver works fine when configured for reduced or bulk-
-                only protocol.
+                only protocol on the Olimex LPC1766STK.
 
               - Testing has not been performed with the interrupt IN channel
                 enabled (ie., I have not enabled FLOW control nor do I have
@@ -1186,6 +1221,32 @@ o USB (drivers/usbdev, drivers/usbhost)
                 Apparently the host driver is trashing memory on receipt
                 of data.
 
+                UPDATE:  This behavior needs to be retested with:
+                  commit ce2845c5c3c257d081f624857949a6afd4a4668a
+                  Author: Janne Rosberg <janne.rosberg@offcode.fi>
+                  Date:   Tue Mar 7 06:58:32 2017 -0600
+
+                    usbhost_cdcacm: fix tx outbuffer overflow and remove now
+                    invalid assert
+
+                  commit 3331e9c49aaaa6dcc3aefa6a9e2c80422ffedcd3
+                  Author: Janne Rosberg <janne.rosberg@offcode.fi>
+                  Date:   Tue Mar 7 06:57:06 2017 -0600
+
+                    STM32 OTGHS host:  stm32_in_transfer() fails and returns NAK
+                    if a short transfer is received.  This causes problems from
+                    class drivers like CDC/ACM where short packets are expected.
+                    In those protocols, any transfer may be terminated by sending
+                    short or NUL packet.
+
+                  commit 0631c1aafa76dbaa41b4c37e18db98be47b60481
+                  Author: Gregory Nutt <gnutt@nuttx.org>
+                  Date:   Tue Mar 7 07:17:24 2017 -0600
+
+                    STM32 OTGFS, STM32 L4 and F7: Adapt Janne Rosberg's patch to
+                    STM32 OTGHS host to OTGFS host, and to similar implements for
+                    L4 and F7.
+
               - The SAMA5D EHCI and the LPC31 EHCI drivers both take semaphores
                 in the cancel method.  The current CDC/ACM class driver calls
                 the cancel() method from an interrupt handler.  This will
@@ -1199,15 +1260,18 @@ o USB (drivers/usbdev, drivers/usbhost)
                configurations if you use it.
 
                That all being said, I know of know no issues with the current
-               CDC/ACM driver if the interrupt IN endpoint is not used, i.e.,
-               in "reduced" mode.  The only loss of functionality is output
-               flow control.
+               CDC/ACM driver on the Olimex LPC1766STK platform if the interrupt
+               IN endpoint is not used, i.e., in "reduced" mode.  The only loss
+               of functionality is output flow control.
+
+               UPDATE: The CDC/ACM class driver may also now be functional on
+               the STM32.  That needs to be verified.
 
   Status:      Open
   Priority:    Medium-Low unless you really need host CDC/ACM support.
 
-o Libraries (libc/)
-  ^^^^^^^^^^^^^^^^^
+o Libraries (libc/, libm/)
+  ^^^^^^^^^^^^^^^^^^^^^^^^
 
   Title:       SIGNED time_t
   Description: The NuttX time_t is type uint32_t. I think this is consistent
@@ -1291,8 +1355,8 @@ o Libraries (libc/)
   Priority:    ??
 
   Title:       FLOATING POINT FORMATS
-  Description: Only the %f floating point format is supported.  Others are accepted
-               but treated like %f.
+  Description: Only the %f floating point format is supported.  Others are
+               accepted but treated like %f.
   Status:      Open
   Priority:    Medium (this might important to someone).
 
@@ -1337,24 +1401,80 @@ o Libraries (libc/)
 
                UPDATE: 2015-09-01: A fix for the noted problems with asin()
                has been applied.
+               2016-07-30: Numerous fixes and performance improvements from
+               David Alessio.
 
-Status:        Open
-Priority:      Low for casual users but clearly high if you need care about
+  Status:      Open
+  Priority:    Low for casual users but clearly high if you need care about
                these incorrect corner case behaviors in the math libraries.
+
+  Title:       REPARTITION LIBC FUNCTIONALITY
+  Description: There are many things implemented within the kernel (for example
+               under sched/pthread) that probably should be migrated in the
+               C library where it belongs.
+
+               I would really like to see a little flavor of a micro-kernel
+               at the OS interface:  I would like to see more primitive OS
+               system calls with more higher level logic in the C library.
+
+               One awkward thing is the incompatibility of KERNEL vs FLAT
+               builds:  In the kernel build, it would be nice to move many
+               of the thread-specific data items out of the TCB and into
+               the process address environment where they belong.  It is
+               difficult to make this compatible with the FLAT build,
+               however.
+  Status:      Open
+  Priority:    Low
 
 o File system / Generic drivers (fs/, drivers/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   NOTE:  The NXFFS file system has its own TODO list at nuttx/fs/nxffs/README.txt
 
-  Title:       CHMOD(), TRUNCATE(), AND FSTAT()
-  Description: Implement chmod(), truncate(), and fstat().
-  Status:      Open
-  Priority:    Low
+  Title:       MISSING FILE SYSTEM FEATURES
+  Description: Implement missing file system features:
 
-  Title:       CAN POLL SUPPORT
-  Description: At present, the CAN driver does not support the poll() method.
-               See drivers/can.c
+               chmod() is probably not relevant since file modes are not
+                 currently supported.
+
+                 File privileges would also be good to support.  But this is
+                 really a small part of a much larger feature.  NuttX has no
+                 user IDs, there are no groups, there are no privileges
+                 associated with either.  User's don't need credentials.
+                 This is really a system wide issues of which chmod is only
+                 a small part.
+
+                 User privileges never seemed important to me since NuttX is
+                 intended for deeply embedded environments where there are
+                 not multiple users with varying levels of trust.
+
+               truncate - The standard way of setting a fixed file size.
+                 Often used with random access, data base files.  There is no
+                 simple way of doing that now (other than just writing data
+                 to the file).
+
+               link, unlink, softlink, readlink - For symbolic links.  Only
+                 the ROMFS file system currently supports hard and soft links,
+                 so this is not too important.
+
+               File locking
+
+               Special files - NuttX support special files only in the top-
+                 level pseudo file system.  Unix systems support many
+                 different special files via mknod().  This would be
+                 important only if it is an objective of NuttX to become a
+                 true Unix OS.  Again only supported by ROMFS.
+
+               True inodes - Standard Unix inodes.  Currently only supported
+                 by ROMFs.
+
+               The primary obstacle to all these is that each would require
+               changes to all existing file systems.  That number is pretty
+               large.  The number of file system implementations that would
+               need to be reviewed and modified  As of this writing this
+               would include binfs, fat, hostfs, nfs, nxffs, procfs, romfs,
+               tmpfs, unionfs, plus pseduo-file system support.
+
   Status:      Open
   Priority:    Low
 
@@ -1403,6 +1523,15 @@ o File system / Generic drivers (fs/, drivers/)
                socket structures.  There really should be one array that
                is a union of file and socket descriptors.  Then socket and
                file descriptors could lie in the same range.
+
+               Another example of how the current implementation limits
+               functionality:  I recently started to implement of the FILEMAX
+               (using pctl() instead sysctl()).  My objective was to be able
+               to control the number of available file descriptors on a task-
+               by-task basis.  The complexity due to the partitioning of
+               desciptor space in a range for file descriptors and a range
+               for socket descriptors made this feature nearly impossible to
+               implement.
   Status:      Open
   Priority:    Low
 
@@ -1427,15 +1556,6 @@ o File system / Generic drivers (fs/, drivers/)
 
   Status:      Open
   Priority:    Low
-
-  Title:       FAT LONG FILENAME COMPATIBILITY
-  Description: Recently there have been reports that file with long file
-               names created by NuttX don't have long file names when viewed
-               on Windows.  The long file name support has been around for a
-               long time and I don't ever having seen this before so I am
-               suspecting that some evil has crept in.
-  Status:      Open
-  Priority:    Medium
 
   Title:       MISSING FILES IN NSH 'LS' OF A DIRECTORY
   Description: I have seen cases where (1) long file names are enabled,
@@ -1494,7 +1614,7 @@ o File system / Generic drivers (fs/, drivers/)
                   ignored by readder() logic.  This the file does not
                   appear in the 'ls'.
 
-o Graphics subsystem (graphics/)
+o Graphics Subsystem (graphics/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   See also the NxWidgets TODO list file for related issues.
@@ -1537,18 +1657,6 @@ o Graphics subsystem (graphics/)
   Status:      Open
   Priority:    Medium low
 
-  Title:       IMPROVED NxTERM FONT CACHING
-  Description: Now each NxTerm instance has its own private font cache
-               whose size is determined by CONFIG_NXTERM_MXCHARS.  If there
-               are multiple NxTerm instances using the same font, each will
-               have a separate font cache.  This is inefficient and wasteful
-               of memory:  Each NxTerm instance should share a common font
-               cache.
-  Status:      Open
-  Priority:    Medium.  Not important for day-to-day testing but would be
-               a critical improvement if NxTerm were to be used in a
-               product.
-
   Title:       NxTERM VT100 SUPPORT
   Description: If the NxTerm will be used with the Emacs-like command line
                editor (CLE), then it will need to support VT100 cursor control
@@ -1585,6 +1693,37 @@ o Graphics subsystem (graphics/)
   Priority:    Low, not a serious issue but worth noting.  There is no plan
                to change this behavior.
 
+  Title:       REMOVE SINGLE USER MODE
+  Description: NX graphics supports two modes:  A simple single user mode and
+               more complex multi-user mode selected with CONFIG_NX_MULTIUSER=y.
+               In this configuration, an application can start the NX server
+               with boardctrl(BOARDIOC_NX_START);  After that, all graphic
+               interactions are via a thin layer in libnx/.   The OS
+               interface is only via messages sent and received using POSIX
+               message queues.  So this is good code and respects all of the
+               POSIX interfacing rules.  Hence, it works well in all build
+               modes (FLAT, PROTECTED, and KERNEL builds).
+
+               But without CONFIG_NX_MULTIUSER, the single user applications
+               violate all of the rules and calls internal NX functions
+               directly.  This includes all calls to internal OSfunctions
+               with names like, nx_open, up_fbinitialize, board_lcd_*, and
+               others.  This is a violation of interfacing standard in all
+               cases and can only be made to work in the FLAT build mode.
+
+               The single user mode does have some desirable properties:  It
+               is lighter weight and so more suitable for very resource limited
+               platforms.  But I think that in the long run the only reasonable
+               solution is to eliminate the single user mode and provide only
+               the multi-user mode with the message queue interface.
+  Status:      Open
+  Priority:    Low-Medium, not a serious issue but worth noting.  Single user
+               mode is a blemish on the OS and not compatible with the RTOS
+               roadmap.  But neither is there any critical necessity to
+               remove the offending code immediately.  Be aware:  If you use
+               the single user mode, it will be yanked out from under your
+               feet in the not-so-distant future.
+
 o Build system
   ^^^^^^^^^^^^
 
@@ -1600,6 +1739,19 @@ o Build system
                   some new argument, perhaps -u.
   Status:      Open
   Priority:    Low.
+
+  Title:       NATIVE WINDOWS BUILD BROKEN
+  Description: The way that apps/ now generates Kmenu files depends on changes added
+               to apps/tools/mkkconfig.sh.  Similar changes need to be made to
+               apps/tools/mkkconfig.bat to restore the Windows Native build.
+               UPDATE: The mkkconfig.bat script has been updated and appears to work.
+               A native build has still not been attempted and there could likely be
+               issues the carriage returns in Kconfig files.  There are also some
+               issues the interpreters/ficl and bas directories during 'make menuconfig'
+               that still need to be investigated.
+  Status:      Open
+  Priority:    Low, since I am not aware of anyone using the Windows Native build.
+               But, of course, very high if you want to use it.
 
 o Other drivers (drivers/)
   ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1716,7 +1868,7 @@ o ARM (arch/arm/)
                upon return. This could be improved as well:  If there is no
                context switch, then the static registers need not be restored
                because they will not be modified by the called C code.
-               (see arch/sh/src/sh1/sh1_vector.S for example)
+               (see arch/renesas/src/sh1/sh1_vector.S for example)
   Status:      Open
   Priority:    Low
 
@@ -1787,18 +1939,12 @@ o Network Utilities (apps/netutils/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   Title:       UNVERIFIED THTTPD FEATURES
-  Description: Not all THTTPD features/options have been verified.  In particular, there is no
-               test case of a CGI program receiving POST input.  Only the configuration of
-               apps/examples/thttpd has been tested.
+  Description: Not all THTTPD features/options have been verified.  In
+               particular, there is no test case of a CGI program receiving
+               POST input.  Only the configuration of apps/examples/thttpd
+               has been tested.
   Status:      Open
   Priority:    Medium
-
-  Title:       THTTPD WARNINGS
-  Description: If the network is enabled, but THTTPD is not configured, it spews out lots
-               of pointless warnings.  This is kind of annoying and unprofessional; needs to
-               be fixed someday.
-  Status:      Open.  An annoyance, but not a real problem.
-  Priority:    Low
 
   Title:       NETWORK MONITOR NOT GENERALLY AVAILABLE
   Description: The NSH network management logic has general applicability
@@ -1818,11 +1964,6 @@ o NuttShell (NSH) (apps/nshlib)
                still show status for all interfaces.
   Status:      Open
   Priority:    Low
-
-  Title:       ARPPING COMMAND
-  Description: Add an arping command
-  Status:      Open
-  Priority:    Low (enhancement)
 
 o System libraries apps/system (apps/system)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1879,7 +2020,12 @@ o Other Applications & Tests (apps/examples/)
                it stops rendering.  This is not a problem for the examples/nx
                code because it uses so few fonts, but if the logic were
                leveraged for more general purposes, it would be a problem.
+
                Update: see examples/nxtext for some improved font cache handling.
+               Update: The NXTERM font cache has been generalized and is now
+               offered as the standard, common font cache for all applications.
+               both the nx and nxtext examples should be modified to use this
+               common font cache.  See interfaces defined in nxfonts.h.
   Status:      Open
   Priority:    Low.  This is not really a problem because examples/nx works
                fine with its bogus font caching.
@@ -1893,3 +2039,4 @@ o Other Applications & Tests (apps/examples/)
                the artifact is larger.
   Status:      Open
   Priority:    Medium.
+

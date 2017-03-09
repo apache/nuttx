@@ -91,7 +91,7 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
   if (stream == NULL)
     {
       int errcode = errno;
-      ndbg("ERROR: Failed to open %s: %d\n",
+      nerr("ERROR: Failed to open %s: %d\n",
            CONFIG_NETDB_RESOLVCONF_PATH, errcode);
       DEBUGASSERT(errcode > 0);
       return -errcode;
@@ -114,7 +114,7 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
           if (inet_ntop(AF_INET, &in4->sin_addr, addrstr, DNS_MAX_ADDRSTR) == NULL)
             {
               ret = -errno;
-              ndbg("ERROR: inet_ntop failed: %d\n", errcode);
+              nerr("ERROR: inet_ntop failed: %d\n", errcode);
               DEBUGASSERT(errcode < 0);
               goto errout;
             }
@@ -146,7 +146,7 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
           if (inet_ntop(AF_INET6, &in6->sin6_addr, addrstr, DNS_MAX_ADDRSTR) == NULL)
             {
               ret = -errno;
-              ndbg("ERROR: inet_ntop failed: %d\n", errcode);
+              nerr("ERROR: inet_ntop failed: %d\n", errcode);
               DEBUGASSERT(errcode < 0);
               goto errout;
             }
@@ -161,7 +161,7 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
   else
 #endif
     {
-      nvdbg("ERROR: Unsupported family: %d\n",
+      nerr("ERROR: Unsupported family: %d\n",
             g_dns_server.addr.sa_family);
       ret = -ENOSYS;
       goto errout;
@@ -193,7 +193,7 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
   if (status < 0)
     {
       ret = -errno;
-      ndbg("ERROR: fprintf failed: %d\n", errcode);
+      nerr("ERROR: fprintf failed: %d\n", errcode);
       DEBUGASSERT(errcode < 0);
       goto errout;
     }
@@ -242,7 +242,7 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
   else
 #endif
     {
-      nvdbg("ERROR: Unsupported family: %d\n", addr->sa_family);
+      nerr("ERROR: Unsupported family: %d\n", addr->sa_family);
       return -ENOSYS;
     }
 
@@ -250,7 +250,7 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
 
   if (addrlen < copylen)
     {
-      nvdbg("ERROR: Invalid addrlen %ld for family %d\n",
+      nerr("ERROR: Invalid addrlen %ld for family %d\n",
             (long)addrlen, addr->sa_family);
       return -EINVAL;
     }

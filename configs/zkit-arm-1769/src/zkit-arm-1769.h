@@ -6,7 +6,7 @@
  *
  * Based on configs/lpcxpresso-lpc1768/src/lpcxpresso.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -160,7 +160,7 @@
  */
 
 #define ZKITARM_SD_CS (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT0 | GPIO_PIN16)
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_LPC17_GPIOIRQ
 #  define ZKITARM_SD_CD (GPIO_INTBOTH | GPIO_PULLUP | GPIO_PORT2 | GPIO_PIN12)
 #else
 #  define ZKITARM_SD_CD (GPIO_INPUT   | GPIO_PULLUP | GPIO_PORT2 | GPIO_PIN12)
@@ -182,7 +182,7 @@
  */
 
 #define ZKITARM_USB_CONNECT (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT2 | GPIO_PIN9)
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_LPC17_GPIOIRQ
 #  define ZKITARM_USB_VBUSSENSE (GPIO_INTBOTH | GPIO_PULLUP | GPIO_PORT1 | GPIO_PIN30)
 #else
 #  define ZKITARM_USB_VBUSSENSE (GPIO_INPUT   | GPIO_PULLUP | GPIO_PORT1 | GPIO_PIN30)
@@ -248,6 +248,30 @@ void weak_function zkit_sspdev_initialize(void);
  ************************************************************************************/
 
 void weak_function zkit_spidev_initialize(void);
+
+/************************************************************************************
+ * Name: zkit_adc_setup
+ *
+ * Description:
+ *   Initialize ADC and register the ADC driver.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_ADC
+int zkit_adc_setup(void);
+#endif
+
+/************************************************************************************
+ * Name: zkit_can_setup
+ *
+ * Description:
+ *  Initialize CAN and register the CAN device
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_CAN
+int zkit_can_setup(void);
+#endif
 
 #endif /* __ASSEMBLY__ */
 #endif /* _CONFIGS_ZKITARM_LPC1768_SRC_ZKITARM_H */

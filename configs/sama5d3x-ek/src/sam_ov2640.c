@@ -88,14 +88,14 @@ static inline FAR struct fb_vtable_s *ov2640_lcd_initialize(void)
   ret = up_fbinitialize(0);
   if (ret < 0)
     {
-      gdbg("ERROR: up_fbinitialize failed: %d\n", -ret);
+      gerr("ERROR: up_fbinitialize failed: %d\n", -ret);
       return NULL;
     }
 
   vplane = up_fbgetvplane(0, 0);
   if (!vplane)
     {
-      gdbg("ERROR: up_fbgetvplane failed\n");
+      gerr("ERROR: up_fbgetvplane failed\n");
     }
 
   return vplane;
@@ -161,7 +161,7 @@ static inline int ov2640_camera_initialize(void)
   i2c = sam_i2cbus_initialize(OV2640_BUS);
   if (!i2c)
     {
-      gdbg("ERROR: Failed to initialize TWI%d\n", OV2640_BUS);
+      gerr("ERROR: Failed to initialize TWI%d\n", OV2640_BUS);
       return EXIT_FAILURE;
     }
 
@@ -196,7 +196,7 @@ static inline int ov2640_camera_initialize(void)
   /* Configure and enable the PCK1 output */
 
   actual = sam_pck_configure(PCK1, PCKSRC_MCK, OV2640_FREQUENCY);
-  gvdbg("Desired PCK1 frequency: %ld Actual: %ld\n",
+  ginfo("Desired PCK1 frequency: %ld Actual: %ld\n",
         (long)OV2640_FREQUENCY, (long)actual);
   UNUSED(actual);
 
@@ -210,7 +210,7 @@ static inline int ov2640_camera_initialize(void)
   ret = ov2640_initialize(i2c);
   if (ret < 0)
     {
-      gdbg("ERROR: Failed to initialize the OV2640: %d\n", ret);
+      gerr("ERROR: Failed to initialize the OV2640: %d\n", ret);
       return EXIT_FAILURE;
     }
 
@@ -239,7 +239,7 @@ int ov2640_main(int argc, char *argv[])
   vplane = ov2640_lcd_initialize();
   if (!vplane)
     {
-      gdbg("ERROR: ov2640_lcd_initialize failed\n");
+      gerr("ERROR: ov2640_lcd_initialize failed\n");
       return  EXIT_FAILURE;
     }
 
@@ -248,7 +248,7 @@ int ov2640_main(int argc, char *argv[])
   ret = ov2640_camera_initialize();
   if (ret != EXIT_SUCCESS)
     {
-      gdbg("ERROR: ov2640_camera_initialize failed\n");
+      gerr("ERROR: ov2640_camera_initialize failed\n");
       return  EXIT_FAILURE;
     }
 

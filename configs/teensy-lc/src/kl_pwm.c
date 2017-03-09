@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/teensy-lc/src/kl_pwm.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Alan Carvalho de Assis <acassis@gmail.com>
  *
@@ -45,7 +45,7 @@
 #include <debug.h>
 
 #include <nuttx/board.h>
-#include <nuttx/pwm.h>
+#include <nuttx/drivers/pwm.h>
 
 #include <arch/board/board.h>
 
@@ -67,23 +67,18 @@
 extern struct pwm_lowerhalf_s *kl_pwminitialize(int timer);
 
 /************************************************************************************
- * Private Functions
- ************************************************************************************/
-
-/************************************************************************************
  * Public Functions
  ************************************************************************************/
 
 /************************************************************************************
- * Name: board_pwm_setup
+ * Name: kl_pwm_setup
  *
  * Description:
- *   All Kinetis KL architectures must provide the following interface to work with
- *   examples/pwm.
+ *   Initialize PWM and register the PWM device.
  *
  ************************************************************************************/
 
-int board_pwm_setup(void)
+int kl_pwm_setup(void)
 {
   static bool initialized = false;
   struct pwm_lowerhalf_s *pwm;
@@ -98,7 +93,7 @@ int board_pwm_setup(void)
       pwm = kl_pwminitialize(0);
       if (!pwm)
         {
-          adbg("Failed to get the KL25 PWM lower half\n");
+          aerr("ERROR: Failed to get the KL25 PWM lower half\n");
           return -ENODEV;
         }
 
@@ -107,7 +102,7 @@ int board_pwm_setup(void)
       ret = pwm_register("/dev/pwm0", pwm);
       if (ret < 0)
         {
-          adbg("pwm_register failed: %d\n", ret);
+          aerr("ERROR: pwm_register failed: %d\n", ret);
           return ret;
         }
 

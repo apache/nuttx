@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/stm32l4/chip/stm32_pinmap.h
+ * arch/arm/src/stm32l4/chip/stm32l4_pinmap.h
  *
  *   Copyright (C) 2015 Sebastien Lorquet. All rights reserved.
  *   Author: Sebastien Lorquet <sebastien@lorquet.fr>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32L4_CHIP_STM32_PINMAP_H
-#define __ARCH_ARM_SRC_STM32L4_CHIP_STM32_PINMAP_H
+#ifndef __ARCH_ARM_SRC_STM32L4_CHIP_STM32L4_PINMAP_H
+#define __ARCH_ARM_SRC_STM32L4_CHIP_STM32L4_PINMAP_H
 
 /************************************************************************************
  * Included Files
@@ -49,5 +49,5 @@
 #  error "Unsupported STM32 L4 pin map"
 #endif
 
-#endif /* __ARCH_ARM_SRC_STM32L4_CHIP_STM32_PINMAP_H */
+#endif /* __ARCH_ARM_SRC_STM32L4_CHIP_STM32L4_PINMAP_H */
 

@@ -46,6 +46,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/cancelpt.h>
 
 #include "sched/sched.h"
 #include "semaphore/semaphore.h"
@@ -84,21 +85,35 @@ int sem_wait(FAR sem_t *sem)
 
   /* This API should not be called from interrupt handlers */
 
-  DEBUGASSERT(up_interrupt_context() == false);
+  DEBUGASSERT(sem != NULL && up_interrupt_context() == false);
 
-  /* Assume any errors reported are due to invalid arguments. */
+  /* The following operations must be performed with interrupts
+   * disabled because sem_post() may be called from an interrupt
+   * handler.
+   */
 
-  set_errno(EINVAL);
+  flags = enter_critical_section();
 
-  if (sem)
+  /* sem_wait() is a cancellation point */
+
+  if (enter_cancellation_point())
     {
-      /* The following operations must be performed with interrupts
-       * disabled because sem_post() may be called from an interrupt
-       * handler.
+#ifdef CONFIG_CANCELLATION_POINTS
+      /* If there is a pending cancellation, then do not perform
+       * the wait.  Exit now with ECANCELED.
        */
 
-      flags = enter_critical_section();
+      set_errno(ECANCELED);
+      leave_cancellation_point();
+      leave_critical_section(flags);
+      return ERROR;
+#endif
+    }
 
+  /* Make sure we were supplied with a valid semaphore. */
+
+  if (sem != NULL)
+    {
       /* Check if the lock is available */
 
       if (sem->semcount > 0)
@@ -175,9 +190,12 @@ int sem_wait(FAR sem_t *sem)
 
           if (get_errno() != EINTR && get_errno() != ETIMEDOUT)
             {
-              /* Not awakened by a signal or a timeout... We hold the semaphore */
+              /* Not awakened by a signal or a timeout...
+               *
+               * NOTE that in this case sem_addholder() was called by logic
+               * in sem_wait() fore this thread was restarted.
+               */
 
-              sem_addholder(sem);
               ret = OK;
             }
 
@@ -185,11 +203,13 @@ int sem_wait(FAR sem_t *sem)
           sched_unlock();
 #endif
         }
-
-      /* Interrupts may now be enabled. */
-
-      leave_critical_section(flags);
+    }
+  else
+    {
+      set_errno(EINVAL);
     }
 
+  leave_cancellation_point();
+  leave_critical_section(flags);
   return ret;
 }

@@ -199,7 +199,7 @@ struct pg_source_s
 
   /* This the device geometry */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   FAR struct mtd_geometry_s geo;
 #endif
 };
@@ -244,7 +244,7 @@ static inline void lpc31_initsrc(void)
       char devname[16];
 #endif
 
-      pgllvdbg("Initializing %s\n", CONFIG_PAGING_BINPATH);
+      pginfo("Initializing %s\n", CONFIG_PAGING_BINPATH);
 
       /* No, do we need to mount an SD device? */
 
@@ -289,7 +289,7 @@ static inline void lpc31_initsrc(void)
 static inline void lpc31_initsrc(void)
 {
   FAR struct spi_dev_s *spi;
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   uint32_t capacity;
   int ret;
 #endif
@@ -300,7 +300,7 @@ static inline void lpc31_initsrc(void)
     {
       /* No... the initialize now */
 
-      pgllvdbg("Initializing\n");
+      pginfo("Initializing\n");
 
       /* First get an instance of the SPI device interface */
 
@@ -318,7 +318,7 @@ static inline void lpc31_initsrc(void)
 
       /* Verify that we can use the device */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
       /* Get the device geometry. (casting to uintptr_t first eliminates
        * complaints on some architectures where the sizeof long is different
        * from the size of a pointer).
@@ -327,7 +327,7 @@ static inline void lpc31_initsrc(void)
       ret = MTD_IOCTL(g_pgsrc.mtd, MTDIOC_GEOMETRY, (unsigned long)&g_pgsrc.geo);
       DEBUGASSERT(ret >= 0);
       capacity = g_pgsrc.geo.erasesize*g_pgsrc.geo.neraseblocks;
-      pgllvdbg("capacity: %d\n", capacity);
+      pginfo("capacity: %d\n", capacity);
       DEBUGASSERT(capacity >= (CONFIG_EA3152_PAGING_BINOFFSET + PG_TEXT_VSIZE));
 #endif
 
@@ -412,7 +412,7 @@ int up_fillpage(FAR struct tcb_s *tcb, FAR void *vpage)
   off_t   offset;
 #endif
 
-  pglldbg("TCB: %p vpage: %p far: %08x\n", tcb, vpage, tcb->xcp.far);
+  pginfo("TCB: %p vpage: %p far: %08x\n", tcb, vpage, tcb->xcp.far);
   DEBUGASSERT(tcb->xcp.far >= PG_PAGED_VBASE && tcb->xcp.far < PG_PAGED_VEND);
 
   /* If BINPATH is defined, then it is the full path to a file on a mounted file
@@ -475,7 +475,7 @@ int up_fillpage(FAR struct tcb_s *tcb, FAR void *vpage)
 
 int up_fillpage(FAR struct tcb_s *tcb, FAR void *vpage, up_pgcallback_t pg_callback)
 {
-  pglldbg("TCB: %p vpage: %d far: %08x\n", tcb, vpage, tcb->xcp.far);
+  pginfo("TCB: %p vpage: %d far: %08x\n", tcb, vpage, tcb->xcp.far);
   DEBUGASSERT(tcb->xcp.far >= PG_PAGED_VBASE && tcb->xcp.far < PG_PAGED_VEND);
 
 #if defined(CONFIG_PAGING_BINPATH)

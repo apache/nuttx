@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/tiva/tiva_gpio.h
  *
- *   Copyright (C) 2009-2010, 2013-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2013-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * With modifications from Calvin Maguranis <calvin.maguranis@trd2inc.com>
@@ -319,46 +319,16 @@
 #  define GPIO_PIN_6                  (6 << GPIO_PIN_SHIFT)
 #  define GPIO_PIN_7                  (7 << GPIO_PIN_SHIFT)
 
-/* Debug ********************************************************************/
-
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_GPIO
-#endif
-
-#ifdef CONFIG_DEBUG_GPIO
-# define gpiodbg(format, ...)    dbg(format, ##__VA_ARGS__)
-# define gpiolldbg(format, ...)  lldbg(format, ##__VA_ARGS__)
-# define gpiovdbg(format, ...)   vdbg(format, ##__VA_ARGS__)
-# define gpiollvdbg(format, ...) llvdbg(format, ##__VA_ARGS__)
-#else
-# define gpiodbg(x...)
-# define gpiolldbg(x...)
-# define gpiovdbg(x...)
-# define gpiollvdbg(x...)
-#endif
-
 /****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/****************************************************************************
- * Inline Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
 
 #if defined(__cplusplus)
 extern "C"
 {
 #endif
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
 
 uintptr_t tiva_gpiobaseaddress(unsigned int port);
 
@@ -413,8 +383,18 @@ int tiva_dumpgpio(uint32_t pinset, const char *msg);
 
 void tiva_gpio_lockport(uint32_t pinset, bool lock);
 
-#ifdef CONFIG_DEBUG_GPIO
+/****************************************************************************
+ * Function:  tiva_dumpgpio
+ *
+ * Description:
+ *   Dump all GPIO registers associated with the provided base address
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_GPIO_INFO
 void tiva_gpio_dumpconfig(uint32_t pinset);
+#else
+# define tiva_gpio_dumpconfig(p)
 #endif
 
 #ifdef CONFIG_TIVA_GPIO_IRQS
@@ -432,15 +412,19 @@ int weak_function tiva_gpioirqinitialize(void);
  * Name: tiva_gpioirqattach
  *
  * Description:
- *   Attach a GPIO interrupt to the provided 'isr'
+ *   Attach in GPIO interrupt to the provided 'isr'. If isr==NULL, then the
+ *   irq_unexpected_isr handler is assigned and the pin's interrupt mask is
+ *   disabled to stop further interrupts. Otherwise, the new isr is linked
+ *   and the pin's interrupt mask is set.
  *
- * Returns:
- *   oldhandler - the old interrupt handler assigned to this pin.
+ * Returned Value:
+ *   Zero (OK) is returned on success.  Otherwise a negated errno value is
+ *   return to indicate the nature of the failure.
  *
  ****************************************************************************/
 
-xcpt_t tiva_gpioirqattach(uint32_t pinset, xcpt_t isr);
-#  define tiva_gpioirqdetach(pinset) tiva_gpioirqattach(pinset, NULL)
+int tiva_gpioirqattach(uint32_t pinset, xcpt_t isr, void *arg);
+#  define tiva_gpioirqdetach(p) tiva_gpioirqattach((p),NULL,NULL)
 
 /****************************************************************************
  * Name: tiva_gpioportirqattach

@@ -358,14 +358,14 @@ Code Red IDE/Tools
   in debugging symbols.
 
   NOTE 3:  There are few things that NuttX has to do differently if you
-  are using a debugger.  Make sure that you also set CONFIG_DEBUG=y.  Nothing
+  are using a debugger.  Make sure that you also set CONFIG_DEBUG_FEATURES=y.  Nothing
   also is needed and no debug output will be generated; but NuttX will
-  use CONFIG_DEBUG=y to mean that a debugger is attached and will deal
+  use CONFIG_DEBUG_FEATURES=y to mean that a debugger is attached and will deal
   with certain resets and debug controls appropriately.
 
   So you should have:
 
-    CONFIG_DEBUG=y
+    CONFIG_DEBUG_FEATURES=y
     CONFIG_DEBUG_SYMBOLS=y
 
   NOTE 4: Every time that you control-C out of the command line GDB, you
@@ -856,9 +856,9 @@ LPC4337-ws Configuration Options
     CONFIG_NET_NRXDESC - Configured number of Rx descriptors. Default: 18
     CONFIG_NET_WOL - Enable Wake-up on Lan (not fully implemented).
     CONFIG_NET_REGDEBUG - Enabled low level register debug.  Also needs
-      CONFIG_DEBUG.
+      CONFIG_DEBUG_FEATURES.
     CONFIG_NET_DUMPPACKET - Dump all received and transmitted packets.
-      Also needs CONFIG_DEBUG.
+      Also needs CONFIG_DEBUG_FEATURES.
     CONFIG_NET_HASH - Enable receipt of near-perfect match frames.
 
   LPC43xx USB Device Configuration
@@ -967,7 +967,7 @@ Where <subdir> is one of the following:
            from the SPI address space after each write.
          CONFIG_DEBUG_SPIFI_DUMP - Debug option to dump read/write buffers.  You
            probably do not want to enable this unless you want to dig through a
-           *lot* of debug output!  Also required CONFIG_DEBUG, CONFIG_DEBUG_VERBOSE,
+           *lot* of debug output!  Also required CONFIG_DEBUG_FEATURES, CONFIG_DEBUG_INFO,
            and CONFIG_DEBUG_FS,
 
     5. In my experience, there were some missing function pointers in the LPC43xx

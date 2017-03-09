@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/mtd/mtd_config.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2013 Ken Pettit. All rights reserved.
  *   Author: Ken Pettit <pettitkd@gmail.com>
  *           With Updates from Gregory Nutt <gnutt@nuttx.org>
@@ -61,7 +61,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/mtd/mtd.h>
-#include <nuttx/configdata.h>
+#include <nuttx/mtd/configdata.h>
 
 #ifdef CONFIG_MTD_CONFIG
 
@@ -101,13 +101,13 @@ struct mtdconfig_struct_s
   FAR uint8_t *buffer;        /* Temp block read buffer */
 };
 
-struct mtdconfig_header_s
+begin_packed_struct struct mtdconfig_header_s
 {
   uint8_t      flags;         /* Entry control flags */
   uint8_t      instance;      /* Instance of the item */
   uint16_t     id;            /* ID of the config data item */
   uint16_t     len;           /* Length of the data block */
-} packed_struct;
+} end_packed_struct;
 
 /****************************************************************************
  * Private Function Prototypes
@@ -1353,7 +1353,7 @@ int mtdconfig_register(FAR struct mtd_dev_s *mtd)
       ret = MTD_IOCTL(mtd, MTDIOC_GEOMETRY, (unsigned long)((uintptr_t)&geo));
       if (ret < 0)
         {
-          fdbg("MTD ioctl(MTDIOC_GEOMETRY) failed: %d\n", ret);
+          ferr("ERROR: MTD ioctl(MTDIOC_GEOMETRY) failed: %d\n", ret);
           kmm_free(dev);
           goto errout;
         }

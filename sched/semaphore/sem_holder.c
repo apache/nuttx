@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/semaphore/sem_holder.c
  *
- *   Copyright (C) 2009-2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2011, 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -116,7 +116,7 @@ static inline FAR struct semholder_s *sem_allocholder(sem_t *sem)
 #endif
   else
     {
-      sdbg("Insufficient pre-allocated holders\n");
+      serr("ERROR: Insufficient pre-allocated holders\n");
       pholder = NULL;
     }
 
@@ -283,7 +283,7 @@ static int sem_boostholderprio(FAR struct semholder_s *pholder,
 
   if (!sched_verifytcb(htcb))
     {
-      sdbg("TCB 0x%08x is a stale handle, counts lost\n", htcb);
+      serr("ERROR: TCB 0x%08x is a stale handle, counts lost\n", htcb);
       sem_freeholder(sem, pholder);
     }
 
@@ -321,7 +321,7 @@ static int sem_boostholderprio(FAR struct semholder_s *pholder,
                 }
               else
                 {
-                  sdbg("CONFIG_SEM_NNESTPRIO exceeded\n");
+                  serr("ERROR: CONFIG_SEM_NNESTPRIO exceeded\n");
                 }
             }
 
@@ -372,7 +372,7 @@ static int sem_boostholderprio(FAR struct semholder_s *pholder,
  * Name: sem_verifyholder
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_ASSERTIONS
 static int sem_verifyholder(FAR struct semholder_s *pholder, FAR sem_t *sem,
                             FAR void *arg)
 {
@@ -397,15 +397,15 @@ static int sem_verifyholder(FAR struct semholder_s *pholder, FAR sem_t *sem,
  * Name: sem_dumpholder
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_SEM_PHDEBUG)
+#if defined(CONFIG_DEBUG_INFO) && defined(CONFIG_SEM_PHDEBUG)
 static int sem_dumpholder(FAR struct semholder_s *pholder, FAR sem_t *sem,
                           FAR void *arg)
 {
 #if CONFIG_SEM_PREALLOCHOLDERS > 0
-  dbg("  %08x: %08x %08x %04x\n",
+  _info("  %08x: %08x %08x %04x\n",
       pholder, pholder->flink, pholder->htcb, pholder->counts);
 #else
-  dbg("  %08x: %08x %04x\n", pholder, pholder->htcb, pholder->counts);
+  _info("  %08x: %08x %04x\n", pholder, pholder->htcb, pholder->counts);
 #endif
   return 0;
 }
@@ -434,7 +434,7 @@ static int sem_restoreholderprio(FAR struct semholder_s *pholder,
 
   if (!sched_verifytcb(htcb))
     {
-      sdbg("TCB 0x%08x is a stale handle, counts lost\n", htcb);
+      serr("ERROR: TCB 0x%08x is a stale handle, counts lost\n", htcb);
       sem_freeholder(sem, pholder);
     }
 
@@ -648,7 +648,7 @@ static inline void sem_restorebaseprio_irq(FAR struct tcb_s *stcb,
    * should be at their base priority.
    */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_ASSERTIONS
   else
     {
       (void)sem_foreachholder(sem, sem_verifyholder, NULL);
@@ -723,7 +723,7 @@ static inline void sem_restorebaseprio_task(FAR struct tcb_s *stcb,
    * should be at their base priority.
    */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_ASSERTIONS
   else
     {
       (void)sem_foreachholder(sem, sem_verifyholder, NULL);
@@ -790,7 +790,7 @@ void sem_initholders(void)
  * Name: sem_destroyholder
  *
  * Description:
- *   Called from sem_destroy() to handle any holders of a semaphore when
+ *   Called from sem_destroyholder() to handle any holders of a semaphore when
  *   it is destroyed.
  *
  * Parameters:
@@ -819,17 +819,62 @@ void sem_destroyholder(FAR sem_t *sem)
 #if CONFIG_SEM_PREALLOCHOLDERS > 0
   if (sem->hhead)
     {
-      sdbg("Semaphore destroyed with holders\n");
+      serr("ERROR: Semaphore destroyed with holders\n");
       (void)sem_foreachholder(sem, sem_recoverholders, NULL);
     }
 #else
   if (sem->holder.htcb)
     {
-      sdbg("Semaphore destroyed with holder\n");
+      serr("ERROR: Semaphore destroyed with holder\n");
     }
 
   sem->holder.htcb = NULL;
 #endif
+}
+
+/****************************************************************************
+ * Name: sem_addholder_tcb
+ *
+ * Description:
+ *   Called from sem_wait() when the calling thread obtains the semaphore;
+ *   Called from sem_post() when the waiting thread obtains the semaphore.
+ *
+ * Parameters:
+ *   htcb - TCB of the thread that just obtained the semaphore
+ *   sem  - A reference to the incremented semaphore
+ *
+ * Return Value:
+ *   0 (OK) or -1 (ERROR) if unsuccessful
+ *
+ * Assumptions:
+ *   Interrupts are disabled.
+ *
+ ****************************************************************************/
+
+void sem_addholder_tcb(FAR struct tcb_s *htcb, FAR sem_t *sem)
+{
+  FAR struct semholder_s *pholder;
+
+  /* If priority inheritance is disabled for this thread, then do not add
+   * the holder.  If there are never holders of the semaphore, the priority
+   * inheritance is effectively disabled.
+   */
+
+  if ((sem->flags & PRIOINHERIT_FLAGS_DISABLE) == 0)
+    {
+      /* Find or allocate a container for this new holder */
+
+      pholder = sem_findorallocateholder(sem, htcb);
+      if (pholder != NULL)
+        {
+          /* Then set the holder and increment the number of counts held by this
+           * holder
+           */
+
+          pholder->htcb = htcb;
+          pholder->counts++;
+        }
+    }
 }
 
 /****************************************************************************
@@ -845,26 +890,13 @@ void sem_destroyholder(FAR sem_t *sem)
  *   0 (OK) or -1 (ERROR) if unsuccessful
  *
  * Assumptions:
+ *   Interrupts are disabled.
  *
  ****************************************************************************/
 
 void sem_addholder(FAR sem_t *sem)
 {
-  FAR struct tcb_s *rtcb = this_task();
-  FAR struct semholder_s *pholder;
-
-  /* Find or allocate a container for this new holder */
-
-  pholder = sem_findorallocateholder(sem, rtcb);
-  if (pholder)
-    {
-      /* Then set the holder and increment the number of counts held by this
-       * holder
-       */
-
-      pholder->htcb = rtcb;
-      pholder->counts++;
-    }
+  sem_addholder_tcb(this_task(), sem);
 }
 
 /****************************************************************************
@@ -1036,10 +1068,12 @@ void sem_canceled(FAR struct tcb_s *stcb, FAR sem_t *sem)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_SEM_PHDEBUG)
+#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_SEM_PHDEBUG)
 void sem_enumholders(FAR sem_t *sem)
 {
+#ifdef CONFIG_DEBUG_INFO
   (void)sem_foreachholder(sem, sem_dumpholder, NULL);
+#endif
 }
 #endif
 
@@ -1060,7 +1094,7 @@ void sem_enumholders(FAR sem_t *sem)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_SEM_PHDEBUG)
+#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_SEM_PHDEBUG)
 int sem_nfreeholders(void)
 {
 #if CONFIG_SEM_PREALLOCHOLDERS > 0

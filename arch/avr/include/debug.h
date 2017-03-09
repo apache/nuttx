@@ -72,18 +72,14 @@
     } \
   while(0)
 
-/* __arch_syslog() and __arch_lowsyslog() override behavior of NuttX
- * dbg macros. They put the format string into program memory and
- * utilize IPTR (__memx) parameter of syslog to take the format
- * directly from program memory.  This reduces amount of RAM held by
- * the format strings used in debug statements.
+/* __arch_syslog() overrides the behavior of NuttX debug macros. They put
+ * the format string into program memory and utilize IPTR (__memx) parameter
+ * of syslog to take the format directly from program memory.  This reduces
+ * amount of RAM held by the format strings used in debug statements.
  */
 
 #define __arch_syslog(...) \
    __dbg_expand(syslog, ##__VA_ARGS__)
-
-#define __arch_lowsyslog(...) \
-   __dbg_expand(lowsyslog, ##__VA_ARGS__)
 
 #endif /* CONFIG_AVR_HAS_MEMX_PTR */
 

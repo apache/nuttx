@@ -93,12 +93,11 @@ static int group_signal_handler(pid_t pid, FAR void *arg)
   FAR sigactq_t *sigact;
   int ret;
 
-  DEBUGASSERT(tcb != NULL && tcb->group != NULL && info != NULL);
-
   /* Get the TCB associated with the group member */
 
   tcb = sched_gettcb(pid);
-  DEBUGASSERT(tcb ! = NULL);
+  DEBUGASSERT(tcb != NULL && tcb->group != NULL && info != NULL);
+
   if (tcb)
     {
       /* Set this one as the default if we have not already set the default. */

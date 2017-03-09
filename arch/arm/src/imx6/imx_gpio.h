@@ -288,7 +288,7 @@ void imx_gpioirq_disable(int irq);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_DEBUG_GPIO
+#ifdef CONFIG_DEBUG_GPIO_INFO
 int imx_dump_gpio(uint32_t pinset, const char *msg);
 #else
 #  define imx_dumpgpio(p,m)

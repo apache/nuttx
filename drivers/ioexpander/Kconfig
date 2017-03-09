@@ -3,10 +3,21 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+menu "IO Expander/GPIO Support"
+
+config IOEXPANDER
+	bool "Enable IO Expander Support"
+	default n
+	---help---
+		This directory holds implementations of IO expander drivers.
+		See include/nuttx/ioexpander/ioexpander.h for registration information.
+
+if IOEXPANDER
+
 config IOEXPANDER_PCA9555
 	bool "PCA9555 I2C IO expander"
 	default n
-	select I2C
+	depends on I2C
 	---help---
 		Enable support for the NXP PCA9555 IO Expander
 
@@ -26,13 +37,134 @@ config PCA9555_INT_ENABLE
 	---help---
 		Enable driver interrupt functionality
 
+config PCA9555_INT_NCALLBACKS
+	int "Max number of interrupt callbacks"
+	default 4
+	depends on PCA9555_INT_ENABLE
+	---help---
+		This is the maximum number of interrupt callbacks supported
+
+config PCA9555_SHADOW_MODE
+	bool "Use Shadow Mode instead of Read-Modify-Write Operations"
+	default n
+	---help---
+		This setting enables a mode where the output and pin
+		configuration registers are held in RAM.
+		With this for example we do not need to read back the
+		output-register every time we want to change one pin.
+		We do instead change the bit in the internal register
+		and then just write this register to the IO-Expander.
+		This reduces bus traffic and eliminates the problem of
+		EMC-caused toggling of output pins.
+
+config PCA9555_RETRY
+	bool "Retry to send commands and data at I2C communication errors"
+	default n
+	---help---
+		Retry to send commands and data if a I2C-communication
+		error occurs (eg. caused by EMC).
+
 endif # IOEXPANDER_PCA9555
+
+config IOEXPANDER_TCA64XX
+	bool "TCA64XX I2C IO expander"
+	default n
+	depends on I2C && EXPERIMENTAL
+	---help---
+		Enable support for the TCA64XX IO Expander
+
+if IOEXPANDER_TCA64XX
+
+config TCA64XX_MULTIPLE
+	bool "Multiple TCA64XX Devices"
+	default n
+	---help---
+		Can be defined to support multiple TCA64XX devices on board.
+
+config TCA64XX_INT_ENABLE
+	bool "Enable TCA64XX Interrupt Support"
+	default n
+	select IOEXPANDER_INT_ENABLE
+	---help---
+		Enable driver interrupt functionality
+
+config TCA64XX_INT_NCALLBACKS
+	int "Max number of interrupt callbacks"
+	default 4
+	depends on TCA64XX_INT_ENABLE
+	---help---
+		This is the maximum number of interrupt callbacks supported
+
+config TCA64XX_INT_POLL
+	bool "Enable interrupt poll"
+	default n
+	---help---
+		Enable polling for missed interrupts.
+
+config TCA64XX_INT_POLLDELAY
+	int "Interrupt poll delay (used)"
+	default 500000
+	depends on TCA64XX_INT_POLL
+	---help---
+		This microsecond delay defines the polling rate for missed interrupts.
+
+endif # IOEXPANDER_TCA64XX
+
+config IOEXPANDER_PCF8574
+	bool "PCF8574 I2C IO expander"
+	default n
+	depends on I2C && EXPERIMENTAL
+	---help---
+		Enable support for the PCF8574 IO Expander
+
+if IOEXPANDER_PCF8574
+
+config PCF8574_MULTIPLE
+	bool "Multiple PCF8574 Devices"
+	default n
+	---help---
+		Can be defined to support multiple PCF8574 devices on board.
+
+config PCF8574_INT_ENABLE
+	bool "Enable PCF8574 Interrupt Support"
+	default n
+	select IOEXPANDER_INT_ENABLE
+	---help---
+		Enable driver interrupt functionality
+
+config PCF8574_INT_NCALLBACKS
+	int "Max number of interrupt callbacks"
+	default 4
+	depends on PCF8574_INT_ENABLE
+	---help---
+		This is the maximum number of interrupt callbacks supported
+
+config PCF8574_INT_POLL
+	bool "Enable interrupt poll"
+	default n
+	---help---
+		Enable polling for missed interrupts.
+
+config PCF8574_INT_POLLDELAY
+	int "Interrupt poll delay (used)"
+	default 500000
+	depends on PCF8574_INT_POLL
+	---help---
+		This microsecond delay defines the polling rate for missed interrupts.
+
+endif # IOEXPANDER_PCF8574
 
 config IOEXPANDER_INT_ENABLE
 	bool
-	default y if PCA9555_INT_ENABLE
+	default n
 	---help---
 		This is the global INT supported flag for io expanders
+
+config IOEXPANDER_NPINS
+	int "Number of pins"
+	default 16
+	---help---
+		Maximum number of pins supported per driver.
 
 config IOEXPANDER_MULTIPIN
 	bool "Support multi-pin access routines"
@@ -40,3 +172,22 @@ config IOEXPANDER_MULTIPIN
 	---help---
 		This settings enable the definition of routines for
 		optimized simultaneous access to multiple pins.
+
+endif # IOEXPANDER
+
+config DEV_GPIO
+	bool "GPIO driver"
+	default n
+	---help---
+		Enables a simple GPIO input/output driver to support application-
+		space testing of hardware.
+
+config GPIO_LOWER_HALF
+	bool "GPIO Lower Half"
+	default n
+	depends on DEV_GPIO && IOEXPANDER
+	---help---
+		Enable support for a lower half driver that provides GPIO driver
+		support for I/O expander pins.
+
+endmenu # IO Expander/GPIO Support

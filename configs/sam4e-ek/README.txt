@@ -815,7 +815,7 @@ USB Full-Speed Device
   --------------------
 
   There is normal console debug output available that can be enabled with
-  CONFIG_DEBUG + CONFIG_DEBUG_USB.  However, USB device operation is very
+  CONFIG_DEBUG_FEATURES + CONFIG_DEBUG_USB.  However, USB device operation is very
   time critical and enabling this debug output WILL interfere with the
   operation of the UDP.  USB device tracing is a less invasive way to get
   debug information:  If tracing is enabled, the USB device will save
@@ -837,15 +837,15 @@ USB Full-Speed Device
       CONFIG_NSH_ARCHINIT=y                   : Automatically start the USB monitor
 
     Application Configuration -> System NSH Add-Ons:
-      CONFIG_SYSTEM_USBMONITOR=y              : Enable the USB monitor daemon
-      CONFIG_SYSTEM_USBMONITOR_STACKSIZE=2048 : USB monitor daemon stack size
-      CONFIG_SYSTEM_USBMONITOR_PRIORITY=50    : USB monitor daemon priority
-      CONFIG_SYSTEM_USBMONITOR_INTERVAL=1     : Dump trace data every second
-      CONFIG_SYSTEM_USBMONITOR_TRACEINIT=y    : Enable TRACE output
-      CONFIG_SYSTEM_USBMONITOR_TRACECLASS=y
-      CONFIG_SYSTEM_USBMONITOR_TRACETRANSFERS=y
-      CONFIG_SYSTEM_USBMONITOR_TRACECONTROLLER=y
-      CONFIG_SYSTEM_USBMONITOR_TRACEINTERRUPTS=y
+      CONFIG_USBMONITOR=y              : Enable the USB monitor daemon
+      CONFIG_USBMONITOR_STACKSIZE=2048 : USB monitor daemon stack size
+      CONFIG_USBMONITOR_PRIORITY=50    : USB monitor daemon priority
+      CONFIG_USBMONITOR_INTERVAL=1     : Dump trace data every second
+      CONFIG_USBMONITOR_TRACEINIT=y    : Enable TRACE output
+      CONFIG_USBMONITOR_TRACECLASS=y
+      CONFIG_USBMONITOR_TRACETRANSFERS=y
+      CONFIG_USBMONITOR_TRACECONTROLLER=y
+      CONFIG_USBMONITOR_TRACEINTERRUPTS=y
 
   NOTE: If USB debug output is also enabled, both outputs will appear on the
   serial console.  However, the debug output will be asynchronous with the
@@ -943,9 +943,9 @@ Touchscreen
     debug output on UART0 can be enabled with:
 
     Build Setup:
-      CONFIG_DEBUG=y                    : Enable debug features
-      CONFIG_DEBUG_VERBOSE=y            : Enable verbose debug output
-      CONFIG_DEBUG_INPUT=y              : Enable debug output from input devices
+      CONFIG_DEBUG_FEATURES=y               : Enable debug features
+      CONFIG_DEBUG_INFO=y                   : Enable verbose debug output
+      CONFIG_DEBUG_INPUT=y                  : Enable debug output from input devices
 
     STATUS: Verified 2014-05-14
 
@@ -1439,8 +1439,8 @@ Configurations
        debug output on UART0 can be enabled with:
 
        Build Setup:
-         CONFIG_DEBUG=y                    : Enable debug features
-         CONFIG_DEBUG_VERBOSE=y            : Enable verbose debug output
+         CONFIG_DEBUG_FEATURES=y           : Enable debug features
+         CONFIG_DEBUG_INFO=y               : Enable verbose debug output
          CONFIG_DEBUG_INPUT=y              : Enable debug output from input devices
 
    10. This configuration can be re-configured to test the on-board LCD
@@ -1554,7 +1554,6 @@ Configurations
        the system logging device:
 
            File Systems -> Advanced SYSLOG Features
-             CONFIG_SYSLOG=y               : Enable output to syslog, not console
              CONFIG_SYSLOG_CHAR=y          : Use a character device for system logging
              CONFIG_SYSLOG_DEVPATH="/dev/ttyS0" : UART0 will be /dev/ttyS0
 

@@ -43,10 +43,11 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
+#include <nuttx/sched_note.h>
 
 #include "up_internal.h"
-#include "gic.h"
 #include "cp15_cacheops.h"
+#include "gic.h"
 #include "sched/sched.h"
 
 #ifdef CONFIG_SMP
@@ -64,19 +65,19 @@ static inline void arm_registerdump(FAR struct tcb_s *tcb)
 {
   int regndx;
 
-  lldbg("CPU%d:\n", up_cpu_index());
+  _info("CPU%d:\n", up_cpu_index());
 
   /* Dump the startup registers */
 
   for (regndx = REG_R0; regndx <= REG_R15; regndx += 8)
     {
       uint32_t *ptr = (uint32_t *)&tcb->xcp.regs[regndx];
-      lldbg("R%d: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-             regndx, ptr[0], ptr[1], ptr[2], ptr[3],
-             ptr[4], ptr[5], ptr[6], ptr[7]);
+      _info("R%d: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+            regndx, ptr[0], ptr[1], ptr[2], ptr[3],
+            ptr[4], ptr[5], ptr[6], ptr[7]);
     }
 
-  lldbg("CPSR: %08x\n", tcb->xcp.regs[REG_CPSR]);
+  _info("CPSR: %08x\n", tcb->xcp.regs[REG_CPSR]);
 }
 #else
 # define arm_registerdump(tcb)
@@ -102,15 +103,20 @@ static inline void arm_registerdump(FAR struct tcb_s *tcb)
  *
  ****************************************************************************/
 
-int arm_start_handler(int irq, FAR void *context)
+int arm_start_handler(int irq, FAR void *context, FAR void *arg)
 {
-  FAR struct tcb_s *tcb;
+  FAR struct tcb_s *tcb = this_task();
 
-  sllvdbg("CPU%d Started\n", up_cpu_index());
+  sinfo("CPU%d Started\n", this_cpu());
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION
+  /* Notify that this CPU has started */
+
+  sched_note_cpu_started(tcb);
+#endif
 
   /* Reset scheduler parameters */
 
-  tcb = this_task();
   sched_resume_scheduler(tcb);
 
   /* Dump registers so that we can see what is going to happen on return */
@@ -155,9 +161,15 @@ int arm_start_handler(int irq, FAR void *context)
 
 int up_cpu_start(int cpu)
 {
-  sllvdbg("Starting CPU%d\n", cpu);
+  sinfo("Starting CPU%d\n", cpu);
 
   DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS && cpu != this_cpu());
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION
+  /* Notify of the start event */
+
+  sched_note_cpu_start(this_task(), cpu);
+#endif
 
   /* Make the content of CPU0 L1 cache has been written to coherent L2 */
 

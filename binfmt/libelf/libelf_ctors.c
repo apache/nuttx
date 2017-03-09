@@ -103,7 +103,7 @@ int elf_loadctors(FAR struct elf_loadinfo_s *loadinfo)
   ret = elf_allocbuffer(loadinfo);
   if (ret < 0)
     {
-      bdbg("elf_allocbuffer failed: %d\n", ret);
+      berr("elf_allocbuffer failed: %d\n", ret);
       return -ENOMEM;
     }
 
@@ -121,7 +121,7 @@ int elf_loadctors(FAR struct elf_loadinfo_s *loadinfo)
        * static constructor section.
        */
 
-      bvdbg("elf_findsection .ctors section failed: %d\n", ctoridx);
+      binfo("elf_findsection .ctors section failed: %d\n", ctoridx);
       return ret == -ENOENT ? OK : ret;
     }
 
@@ -138,7 +138,7 @@ int elf_loadctors(FAR struct elf_loadinfo_s *loadinfo)
   ctorsize         = shdr->sh_size;
   loadinfo->nctors = ctorsize / sizeof(binfmt_ctor_t);
 
-  bvdbg("ctoridx=%d ctorsize=%d sizeof(binfmt_ctor_t)=%d nctors=%d\n",
+  binfo("ctoridx=%d ctorsize=%d sizeof(binfmt_ctor_t)=%d nctors=%d\n",
         ctoridx, ctorsize,  sizeof(binfmt_ctor_t), loadinfo->nctors);
 
   /* Check if there are any constructors.  It is not an error if there
@@ -166,7 +166,7 @@ int elf_loadctors(FAR struct elf_loadinfo_s *loadinfo)
           loadinfo->ctoralloc = (binfmt_ctor_t *)kumm_malloc(ctorsize);
           if (!loadinfo->ctoralloc)
             {
-              bdbg("Failed to allocate memory for .ctors\n");
+              berr("Failed to allocate memory for .ctors\n");
               return -ENOMEM;
             }
 
@@ -178,7 +178,7 @@ int elf_loadctors(FAR struct elf_loadinfo_s *loadinfo)
                          shdr->sh_offset);
           if (ret < 0)
             {
-              bdbg("Failed to allocate .ctors: %d\n", ret);
+              berr("Failed to allocate .ctors: %d\n", ret);
               return ret;
             }
 
@@ -191,7 +191,7 @@ int elf_loadctors(FAR struct elf_loadinfo_s *loadinfo)
             {
               FAR uintptr_t *ptr = (uintptr_t *)((FAR void *)(&loadinfo->ctors)[i]);
 
-              bvdbg("ctor %d: %08lx + %08lx = %08lx\n",
+              binfo("ctor %d: %08lx + %08lx = %08lx\n",
                     i, *ptr, (unsigned long)loadinfo->textalloc,
                     (unsigned long)(*ptr + loadinfo->textalloc));
 

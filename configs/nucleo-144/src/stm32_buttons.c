@@ -1,8 +1,9 @@
 /****************************************************************************
  * configs/nucleo-144/src/stm32_buttons.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,8 +40,13 @@
 
 #include <nuttx/config.h>
 
+#include <stddef.h>
+#include <errno.h>
+
 #include <nuttx/irq.h>
 #include <nuttx/board.h>
+
+#include <arch/board/board.h>
 
 #include "stm32_gpio.h"
 #include "nucleo-144.h"
@@ -94,15 +100,21 @@ uint8_t board_buttons(void)
  *   be called when a button is depressed or released.  The ID value is a
  *   button enumeration value that uniquely identifies a button resource. See the
  *   BUTTON_* definitions in board.h for the meaning of enumeration
- *   value.  The previous interrupt handler address is returned (so that it may
- *   restored, if so desired).
+ *   value.
  *
  ************************************************************************************/
 
 #ifdef CONFIG_ARCH_IRQBUTTONS
-xcpt_t board_button_irq(int id, xcpt_t irqhandler)
+int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
-#warning Missing logic
+  int ret = -EINVAL;
+
+  if (id == BUTTON_USER)
+    {
+      ret = stm32_gpiosetevent(GPIO_BTN_USER, true, true, true, irqhandler, arg);
+    }
+
+  return ret;
 }
 #endif
 #endif /* CONFIG_ARCH_BUTTONS */

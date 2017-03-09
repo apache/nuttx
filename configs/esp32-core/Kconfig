@@ -1,0 +1,41 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_ESP32CORE
+
+choice
+	prompt "On-board Crystal Frequency"
+	default ESP32CORE_XTAL_40MZ
+
+config ESP32CORE_XTAL_40MZ
+	bool "40MHz"
+
+config ESP32CORE_XTAL_26MHz
+	bool "26MHz"
+
+endchoice # On-board Crystal Frequency
+
+config ESP32CORE_RUN_IRAM
+	bool "Run from IRAM"
+	default n
+	---help---
+		The default configuration is set up run from IRAM.  However, the
+		current (2016-11-14) OpenOCD for ESP32 does not support writing to
+		FLASH.  This option sets up the linker scripts to support execution
+		from IRAM.  In this case, OpenOCD can be used to load directly into
+		IRAM.
+
+		At this stage the nuttx image is small enough to be entirely memory-
+		resident.  Once board support is more mature you can add flash cache
+		mapping code to run from SPI flash after initial boot. There are at
+		least two possible approaches you could take: You can add the flash
+		cache mapping code into nuttx directly, so it is self-contained -
+		early nuttx initialisation runs from IRAM and enables flash cache,
+		and then off you go. Or you can use the esp-idf software bootloader
+		and partition table scheme and have nuttx be an esp-idf "app" which
+		allows interoperability with the esp-idf system but makes you
+		reliant on the esp-idf design for these parts. Both are possible.
+
+endif # ARCH_BOARD_ESP32CORE

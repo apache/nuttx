@@ -45,17 +45,14 @@
 #include <stdint.h>
 #include <limits.h>
 
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* Bit definitions for the struct sem_s flags field */
+
+#define PRIOINHERIT_FLAGS_DISABLE (1 << 0)  /* Bit 0: Priority inheritance
+                                             * is disabled for this semaphore. */
 
 /****************************************************************************
  * Public Type Declarations
@@ -92,6 +89,7 @@ struct sem_s
    */
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
+  uint8_t flags;                 /* See PRIOINHERIT_FLAGS_* definitions */
 # if CONFIG_SEM_PREALLOCHOLDERS > 0
   FAR struct semholder_s *hhead; /* List of holders of semaphore counts */
 # else
@@ -106,9 +104,9 @@ typedef struct sem_s sem_t;
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
 # if CONFIG_SEM_PREALLOCHOLDERS > 0
-#  define SEM_INITIALIZER(c) {(c), NULL}  /* semcount, hhead */
+#  define SEM_INITIALIZER(c) {(c), 0, NULL}  /* semcount, flags, hhead */
 # else
-#  define SEM_INITIALIZER(c) {(c), SEMHOLDER_INITIALIZER} /* semcount, holder */
+#  define SEM_INITIALIZER(c) {(c), 0, SEMHOLDER_INITIALIZER} /* semcount, flags, holder */
 # endif
 #else
 #  define SEM_INITIALIZER(c) {(c)} /* semcount */
@@ -117,6 +115,14 @@ typedef struct sem_s sem_t;
 /****************************************************************************
  * Public Data
  ****************************************************************************/
+
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
 
 /****************************************************************************
  * Public Function Prototypes

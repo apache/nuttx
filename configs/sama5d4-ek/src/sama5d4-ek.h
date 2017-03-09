@@ -352,7 +352,7 @@
 
 /* Check if we should enable the USB monitor before starting NSH */
 
-#ifndef CONFIG_SYSTEM_USBMONITOR
+#ifndef CONFIG_USBMONITOR
 #  undef HAVE_USBMONITOR
 #endif
 
@@ -1071,6 +1071,30 @@ void weak_function sam_usbinitialize(void);
 
 #ifdef HAVE_USBHOST
 int sam_usbhost_initialize(void);
+#endif
+
+/************************************************************************************
+ * Name: sam_pwm_setup
+ *
+ * Description:
+ *   Initialize PWM and register the PWM device.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_PWM
+int sam_pwm_setup(void);
+#endif
+
+/************************************************************************************
+ * Name: sam_adc_setup
+ *
+ * Description:
+ *   Initialize ADC and register the ADC driver.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_ADC
+int sam_adc_setup(void);
 #endif
 
 /************************************************************************************

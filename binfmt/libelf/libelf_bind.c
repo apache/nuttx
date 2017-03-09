@@ -55,11 +55,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* CONFIG_DEBUG, CONFIG_DEBUG_VERBOSE, and CONFIG_DEBUG_BINFMT have to be
+/* CONFIG_DEBUG_FEATURES, CONFIG_DEBUG_INFO, and CONFIG_DEBUG_BINFMT have to be
  * defined or CONFIG_ELF_DUMPBUFFER does nothing.
  */
 
-#if !defined(CONFIG_DEBUG_VERBOSE) || !defined (CONFIG_DEBUG_BINFMT)
+#if !defined(CONFIG_DEBUG_INFO) || !defined (CONFIG_DEBUG_BINFMT)
 #  undef CONFIG_ELF_DUMPBUFFER
 #endif
 
@@ -68,7 +68,7 @@
 #endif
 
 #ifdef CONFIG_ELF_DUMPBUFFER
-# define elf_dumpbuffer(m,b,n) bvdbgdumpbuffer(m,b,n)
+# define elf_dumpbuffer(m,b,n) binfodumpbuffer(m,b,n)
 #else
 # define elf_dumpbuffer(m,b,n)
 #endif
@@ -103,7 +103,7 @@ static inline int elf_readrel(FAR struct elf_loadinfo_s *loadinfo,
 
   if (index < 0 || index > (relsec->sh_size / sizeof(Elf32_Rel)))
     {
-      bdbg("Bad relocation symbol index: %d\n", index);
+      berr("Bad relocation symbol index: %d\n", index);
       return -EINVAL;
     }
 
@@ -156,7 +156,7 @@ static int elf_relocate(FAR struct elf_loadinfo_s *loadinfo, int relidx,
       ret = elf_readrel(loadinfo, relsec, i, &rel);
       if (ret < 0)
         {
-          bdbg("Section %d reloc %d: Failed to read relocation entry: %d\n",
+          berr("Section %d reloc %d: Failed to read relocation entry: %d\n",
                relidx, i, ret);
           return ret;
         }
@@ -172,7 +172,7 @@ static int elf_relocate(FAR struct elf_loadinfo_s *loadinfo, int relidx,
       ret = elf_readsym(loadinfo, symidx, &sym);
       if (ret < 0)
         {
-          bdbg("Section %d reloc %d: Failed to read symbol[%d]: %d\n",
+          berr("Section %d reloc %d: Failed to read symbol[%d]: %d\n",
                relidx, i, symidx, ret);
           return ret;
         }
@@ -194,13 +194,13 @@ static int elf_relocate(FAR struct elf_loadinfo_s *loadinfo, int relidx,
 
           if (ret == -ESRCH)
             {
-              bdbg("Section %d reloc %d: Undefined symbol[%d] has no name: %d\n",
+              berr("Section %d reloc %d: Undefined symbol[%d] has no name: %d\n",
                   relidx, i, symidx, ret);
               psym = NULL;
             }
           else
             {
-              bdbg("Section %d reloc %d: Failed to get value of symbol[%d]: %d\n",
+              berr("Section %d reloc %d: Failed to get value of symbol[%d]: %d\n",
                   relidx, i, symidx, ret);
               return ret;
             }
@@ -210,7 +210,7 @@ static int elf_relocate(FAR struct elf_loadinfo_s *loadinfo, int relidx,
 
       if (rel.r_offset < 0 || rel.r_offset > dstsec->sh_size - sizeof(uint32_t))
         {
-          bdbg("Section %d reloc %d: Relocation address out of range, offset %d size %d\n",
+          berr("Section %d reloc %d: Relocation address out of range, offset %d size %d\n",
                relidx, i, rel.r_offset, dstsec->sh_size);
           return -EINVAL;
         }
@@ -222,7 +222,7 @@ static int elf_relocate(FAR struct elf_loadinfo_s *loadinfo, int relidx,
       ret = up_relocate(&rel, psym, addr);
       if (ret < 0)
         {
-          bdbg("ERROR: Section %d reloc %d: Relocation failed: %d\n", relidx, i, ret);
+          berr("ERROR: Section %d reloc %d: Relocation failed: %d\n", relidx, i, ret);
           return ret;
         }
     }
@@ -233,7 +233,7 @@ static int elf_relocate(FAR struct elf_loadinfo_s *loadinfo, int relidx,
 static int elf_relocateadd(FAR struct elf_loadinfo_s *loadinfo, int relidx,
                            FAR const struct symtab_s *exports, int nexports)
 {
-  bdbg("Not implemented\n");
+  berr("Not implemented\n");
   return -ENOSYS;
 }
 
@@ -278,7 +278,7 @@ int elf_bind(FAR struct elf_loadinfo_s *loadinfo,
   ret = elf_allocbuffer(loadinfo);
   if (ret < 0)
     {
-      bdbg("elf_allocbuffer failed: %d\n", ret);
+      berr("elf_allocbuffer failed: %d\n", ret);
       return -ENOMEM;
     }
 
@@ -291,7 +291,7 @@ int elf_bind(FAR struct elf_loadinfo_s *loadinfo,
   ret = elf_addrenv_select(loadinfo);
   if (ret < 0)
     {
-      bdbg("ERROR: elf_addrenv_select() failed: %d\n", ret);
+      berr("ERROR: elf_addrenv_select() failed: %d\n", ret);
       return ret;
     }
 #endif
@@ -352,7 +352,7 @@ int elf_bind(FAR struct elf_loadinfo_s *loadinfo,
   status = elf_addrenv_restore(loadinfo);
   if (status < 0)
     {
-      bdbg("ERROR: elf_addrenv_restore() failed: %d\n", status);
+      berr("ERROR: elf_addrenv_restore() failed: %d\n", status);
       if (ret == OK)
         {
           ret = status;

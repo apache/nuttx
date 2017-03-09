@@ -110,7 +110,7 @@ void stm32_usbinitialize(void)
 #ifdef CONFIG_USBDEV
 void stm32_usbsuspend(FAR struct usbdev_s *dev, bool resume)
 {
-  ulldbg("resume: %d\n", resume);
+  uinfo("resume: %d\n", resume);
 }
 #endif
 

@@ -45,6 +45,7 @@
 #include <errno.h>
 
 #include <nuttx/board.h>
+#include <nuttx/timers/oneshot.h>
 
 #include "stm32.h"
 #include "stm32f103_minimum.h"
@@ -80,5 +81,7 @@
 
 int board_app_initialize(uintptr_t arg)
 {
-  return OK;
+  /* Perform board initialization here */
+
+  return stm32_bringup();
 }

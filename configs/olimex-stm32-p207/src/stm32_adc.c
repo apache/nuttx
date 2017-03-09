@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/olimex-stm32-p207/src/stm32_adc.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -98,36 +98,18 @@ static const uint32_t g_pinlist[ADC1_NCHANNELS]  = {GPIO_ADC1_IN10};
 #endif
 
 /************************************************************************************
- * Private Functions
- ************************************************************************************/
-
-/************************************************************************************
  * Public Functions
  ************************************************************************************/
 
 /************************************************************************************
- * Name: board_adc_setup
+ * Name: stm32_adc_setup
  *
  * Description:
- *   All STM32 architectures must provide the following interface to work with
- *   examples/adc.
+ *   Initialize ADC and register the ADC driver.
  *
  ************************************************************************************/
 
-int board_adc_setup(void)
-{
-  return stm32_adc_initialize();
-}
-
-/************************************************************************************
- * Name: stm32_adc_initialize
- *
- * Description:
- *   Called at application startup time to initialize the ADC functionality.
- *
- ************************************************************************************/
-
-int stm32_adc_initialize(void)
+int stm32_adc_setup(void)
 {
 #ifdef CONFIG_STM32_ADC1
   static bool initialized = false;
@@ -151,7 +133,7 @@ int stm32_adc_initialize(void)
       adc = stm32_adcinitialize(1, g_chanlist, ADC1_NCHANNELS);
       if (adc == NULL)
         {
-          adbg("ERROR: Failed to get ADC interface\n");
+          aerr("ERROR: Failed to get ADC interface\n");
           return -ENODEV;
         }
 
@@ -160,7 +142,7 @@ int stm32_adc_initialize(void)
       ret = adc_register("/dev/adc0", adc);
       if (ret < 0)
         {
-          adbg("adc_register failed: %d\n", ret);
+          aerr("ERROR: adc_register failed: %d\n", ret);
           return ret;
         }
 

@@ -58,27 +58,6 @@
 #include <nuttx/leds/userled.h>
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
-#  undef CONFIG_DEBUG_LEDS
-#endif
-
-#ifdef CONFIG_DEBUG_LEDS
-#  define ddbg lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
-#    define dvdbg lldbg
-#  else
-#    define dvdbg(x...)
-#  endif
-#else
-#  define ddbg(x...)
-#  define dvdbg(x...)
-#endif
-
-/****************************************************************************
  * Private Types
  ****************************************************************************/
 
@@ -197,7 +176,7 @@ static int userled_open(FAR struct file *filep)
   ret = userled_takesem(&priv->lu_exclsem);
   if (ret < 0)
     {
-      dvdbg("ERROR: userled_takesem failed: %d\n", ret);
+      lcderr("ERROR: userled_takesem failed: %d\n", ret);
       return ret;
     }
 
@@ -206,7 +185,7 @@ static int userled_open(FAR struct file *filep)
   opriv = (FAR struct userled_open_s *)kmm_zalloc(sizeof(struct userled_open_s));
   if (!opriv)
     {
-      dvdbg("ERROR: Failled to allocate open structure\n");
+      lcderr("ERROR: Failled to allocate open structure\n");
       ret = -ENOMEM;
       goto errout_with_sem;
     }
@@ -274,7 +253,7 @@ static int userled_close(FAR struct file *filep)
   ret = userled_takesem(&priv->lu_exclsem);
   if (ret < 0)
     {
-      dvdbg("ERROR: userled_takesem failed: %d\n", ret);
+      lcderr("ERROR: userled_takesem failed: %d\n", ret);
       return ret;
     }
 
@@ -287,7 +266,7 @@ static int userled_close(FAR struct file *filep)
   DEBUGASSERT(curr);
   if (!curr)
     {
-      dvdbg("ERROR: Failed to find open entry\n");
+      lcderr("ERROR: Failed to find open entry\n");
       ret = -ENOENT;
       goto errout_with_exclsem;
     }
@@ -339,7 +318,7 @@ static ssize_t userled_write(FAR struct file *filep, FAR const char *buffer,
 
   if (len < sizeof(userled_set_t))
     {
-      dvdbg("ERROR: buffer too small: %lu\n", (unsigned long)len);
+      lcderr("ERROR: buffer too small: %lu\n", (unsigned long)len);
       return -EINVAL;
     }
 
@@ -356,7 +335,7 @@ static ssize_t userled_write(FAR struct file *filep, FAR const char *buffer,
   ret = userled_takesem(&priv->lu_exclsem);
   if (ret < 0)
     {
-      dvdbg("ERROR: userled_takesem failed: %d\n", ret);
+      lcderr("ERROR: userled_takesem failed: %d\n", ret);
       return ret;
     }
 
@@ -391,7 +370,7 @@ static int userled_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   ret = userled_takesem(&priv->lu_exclsem);
   if (ret < 0)
     {
-      dvdbg("ERROR: userled_takesem failed: %d\n", ret);
+      lcderr("ERROR: userled_takesem failed: %d\n", ret);
       return ret;
     }
 
@@ -521,7 +500,7 @@ static int userled_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       break;
 
     default:
-      dvdbg("ERROR: Unrecognized command: %ld\n", cmd);
+      lcderr("ERROR: Unrecognized command: %ld\n", cmd);
       ret = -ENOTTY;
       break;
     }
@@ -569,7 +548,7 @@ int userled_register(FAR const char *devname,
 
   if (!priv)
     {
-      dvdbg("ERROR: Failed to allocate device structure\n");
+      lcderr("ERROR: Failed to allocate device structure\n");
       return -ENOMEM;
     }
 
@@ -590,7 +569,7 @@ int userled_register(FAR const char *devname,
   ret = register_driver(devname, &userled_fops, 0666, priv);
   if (ret < 0)
     {
-      dvdbg("ERROR: register_driver failed: %d\n", ret);
+      lcderr("ERROR: register_driver failed: %d\n", ret);
       goto errout_with_priv;
     }
 

@@ -95,7 +95,7 @@ static struct sam_hsmci_state_s g_hsmci;
  ****************************************************************************/
 
 #ifdef CONFIG_MMCSD_HAVECARDDETECT
-static int sam_hsmci_cardetect_int(int irq, void *regs)
+static int sam_hsmci_cardetect_int(int irq, void *regs, FAR void *arg)
 {
   bool inserted;
 
@@ -135,7 +135,7 @@ static int sam_hsmci_cardetect_int(int irq, void *regs)
 int sam_hsmci_initialize(void)
 {
   int ret;
-  fdbg("Initializing SDIO\n");
+  finfo("Initializing SDIO\n");
 
   /* Have we already initialized? */
 
@@ -147,7 +147,7 @@ int sam_hsmci_initialize(void)
       g_hsmci.hsmci = sdio_initialize(CONFIG_NSH_MMCSDSLOTNO);
       if (!g_hsmci.hsmci)
         {
-          fdbg("Failed to initialize SDIO\n");
+          ferr("ERROR: Failed to initialize SDIO\n");
           return -ENODEV;
         }
 
@@ -156,7 +156,7 @@ int sam_hsmci_initialize(void)
       ret = mmcsd_slotinitialize(CONFIG_NSH_MMCSDMINOR, g_hsmci.hsmci);
       if (ret != OK)
         {
-          fdbg("Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
+          ferr("ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
           return ret;
         }
 
@@ -168,7 +168,7 @@ int sam_hsmci_initialize(void)
       /* Configure card detect interrupts */
 
       sam_gpioirq(GPIO_MCI_CD);
-      (void)irq_attach(MCI_CD_IRQ, sam_hsmci_cardetect_int);
+      (void)irq_attach(MCI_CD_IRQ, sam_hsmci_cardetect_int, NULL);
       g_hsmci.inserted = sam_cardinserted(0);
 #else
       g_hsmci.inserted = true; /* An assumption? */
@@ -207,7 +207,7 @@ bool sam_cardinserted(int slotno)
   /* Get the state of the GPIO pin */
 
   removed = sam_gpioread(GPIO_MCI_CD);
-  fllvdbg("Slot %d inserted: %s\n", slotno, removed ? "NO" : "YES");
+  finfo("Slot %d inserted: %s\n", slotno, removed ? "NO" : "YES");
 
   return !removed;
 }

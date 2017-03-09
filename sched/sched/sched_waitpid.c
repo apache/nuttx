@@ -45,6 +45,7 @@
 #include <errno.h>
 
 #include <nuttx/sched.h>
+#include <nuttx/cancelpt.h>
 
 #include "sched/sched.h"
 #include "group/group.h"
@@ -180,17 +181,22 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
   FAR struct tcb_s *ctcb;
   FAR struct task_group_s *group;
   bool mystat = false;
-  int err;
+  int errcode;
   int ret;
 
   DEBUGASSERT(stat_loc);
 
+  /* waitpid() is a cancellation point */
+
+  (void)enter_cancellation_point();
+
   /* None of the options are supported */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (options != 0)
     {
       set_errno(ENOSYS);
+      leave_cancellation_point();
       return ERROR;
     }
 #endif
@@ -202,9 +208,9 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
   /* Get the TCB corresponding to this PID */
 
   ctcb = sched_gettcb(pid);
-  if (!ctcb)
+  if (ctcb == NULL)
     {
-      err = ECHILD;
+      errcode = ECHILD;
       goto errout_with_errno;
     }
 
@@ -268,12 +274,14 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
 
   /* On success, return the PID */
 
+  leave_cancellation_point();
   sched_unlock();
   return pid;
 
 errout_with_errno:
-  set_errno(err);
+  set_errno(errcode);
 errout:
+  leave_cancellation_point();
   sched_unlock();
   return ERROR;
 }
@@ -302,17 +310,22 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
 #endif
   FAR struct siginfo info;
   sigset_t set;
-  int err;
+  int errcode;
   int ret;
 
   DEBUGASSERT(stat_loc);
 
+  /* waitpid() is a cancellation point */
+
+  (void)enter_cancellation_point();
+
   /* None of the options are supported */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (options != 0)
     {
       set_errno(ENOSYS);
+      leave_cancellation_point();
       return ERROR;
     }
 #endif
@@ -337,21 +350,24 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
 
   if (rtcb->group->tg_children == NULL && retains)
     {
-      err = ECHILD;
+      errcode = ECHILD;
       goto errout_with_errno;
     }
   else if (pid != (pid_t)-1)
     {
-      /* Get the TCB corresponding to this PID and make sure it is our child. */
+      /* Get the TCB corresponding to this PID and make sure that the
+       * thread it is our child.
+       */
 
       ctcb = sched_gettcb(pid);
+
 #ifdef HAVE_GROUP_MEMBERS
-      if (!ctcb || ctcb->group->tg_pgid != rtcb->group->tg_gid)
+      if (ctcb == NULL || ctcb->group->tg_pgid != rtcb->group->tg_gid)
 #else
-      if (!ctcb || ctcb->ppid != rtcb->pid)
+      if (ctcb == NULL || ctcb->group->tg_ppid != rtcb->pid)
 #endif
         {
-          err = ECHILD;
+          errcode = ECHILD;
           goto errout_with_errno;
         }
 
@@ -363,7 +379,7 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
 
           if (group_findchild(rtcb->group, pid) == NULL)
             {
-              err = ECHILD;
+              errcode = ECHILD;
               goto errout_with_errno;
             }
         }
@@ -371,25 +387,28 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
 
 #else /* CONFIG_SCHED_CHILD_STATUS */
 
-  if (rtcb->nchildren == 0)
+  if (rtcb->group->tg_nchildren == 0)
     {
       /* There are no children */
 
-      err = ECHILD;
+      errcode = ECHILD;
       goto errout_with_errno;
     }
   else if (pid != (pid_t)-1)
     {
-      /* Get the TCB corresponding to this PID and make sure it is our child. */
+      /* Get the TCB corresponding to this PID and make sure that the
+       * thread it is our child.
+       */
 
       ctcb = sched_gettcb(pid);
+
 #ifdef HAVE_GROUP_MEMBERS
-      if (!ctcb || ctcb->group->tg_pgid != rtcb->group->tg_gid)
+      if (ctcb == NULL || ctcb->group->tg_pgid != rtcb->group->tg_gid)
 #else
-      if (!ctcb || ctcb->ppid != rtcb->pid)
+      if (ctcb == NULL || ctcb->group->tg_ppid != rtcb->pid)
 #endif
         {
-          err = ECHILD;
+          errcode = ECHILD;
           goto errout_with_errno;
         }
     }
@@ -472,7 +491,7 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
                * to reported ECHILD than bogus status.
                */
 
-              err = ECHILD;
+              errcode = ECHILD;
               goto errout_with_errno;
             }
         }
@@ -485,7 +504,7 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
        * instead).
        */
 
-      if (rtcb->nchildren == 0 ||
+      if (rtcb->group->tg_nchildren == 0 ||
           (pid != (pid_t)-1 && (ret = kill(pid, 0)) < 0))
         {
           /* We know that the child task was running okay we stared,
@@ -493,7 +512,7 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
            * Let's return ECHILD.. that is at least informative.
            */
 
-          err = ECHILD;
+          errcode = ECHILD;
           goto errout_with_errno;
         }
 
@@ -522,13 +541,15 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
         }
     }
 
+  leave_cancellation_point();
   sched_unlock();
   return (int)pid;
 
 errout_with_errno:
-  set_errno(err);
+  set_errno(errcode);
 
 errout_with_lock:
+  leave_cancellation_point();
   sched_unlock();
   return ERROR;
 }

@@ -35,14 +35,27 @@
 ############################################################################
 #
 # This script uses the Linux 'indent' utility to re-format C source files
-# to match the coding style that I use.  It differs from my coding style in that
+# to match the coding style that I use.  It differs from the NuttX coding
+# style in that:
 #
-# - I normally put the trailing */ of a multi-line comment on a separate line,
-# - I usually align things vertically (like '=' in assignments),
-# - indent puts a bogus blank line at the top of the file,
-# - I don't like the way it handles nested conditional compilation intermixed with code.
-# - I also indent brackets differently on structures than does this script.
+# 1. I normally put the trailing */ of a multi-line comment on a separate
+#    line.  If your C file already has properly formatted comments then
+#    using -nfca instead of -fca eliminates that bad behavior
+# 2. I usually align things vertically (like '=' in assignments),
+# 3. indent.sh puts a bogus blank line at the top of the file,
+# 4. I don't like the way it handles nested conditional compilation
+#    intermixed with code.  I prefer the preprocessor conditiona tests
+#    be all right justified in that case.
+# 5. I also indent brackets differently on structures than does this script.
+# 6. I normally use no spaces in casts.  indent.sh adds spaces in casts like
+#   "(FAR void *)&foo" becomes "(FAR void *) & foo".
+# 7. When used with header files, the initial idempotence conditional test
+#    causes all preprecessor directives to be indented in the file.  So for
+#    header files, you will need to substitute "^#  " with "#" in the
+#    converted header file.
 #
+# You will manually need to check for the issues listed above after
+# performing the conversion.
 
 # Constants
 

@@ -46,8 +46,9 @@
 #include <assert.h>
 
 #include <nuttx/board.h>
-#include <nuttx/module.h>
+#include <nuttx/lib/modlib.h>
 #include <nuttx/binfmt/symtab.h>
+#include <nuttx/nx/nx.h>
 
 #ifdef CONFIG_BOARDCTL_USBDEVCTRL
 #  include <nuttx/usb/cdcacm.h>
@@ -356,7 +357,7 @@ int boardctl(unsigned int cmd, uintptr_t arg)
             (FAR const struct boardioc_symtab_s *)arg;
 
          DEBUGASSERT(symdesc != NULL);
-         mod_setsymtab(symdesc->symtab, symdesc->nsymbols);
+         modlib_setsymtab(symdesc->symtab, symdesc->nsymbols);
          ret = OK;
         }
         break;
@@ -377,6 +378,21 @@ int boardctl(unsigned int cmd, uintptr_t arg)
 
           DEBUGASSERT(ctrl != NULL);
           ret = boardctl_usbdevctrl(ctrl);
+        }
+        break;
+#endif
+
+#ifdef CONFIG_NX_MULTIUSER
+      /* CMD:           BOARDIOC_NX_START
+       * DESCRIPTION:   Start the NX servier
+       * ARG:           None
+       * CONFIGURATION: CONFIG_NX_MULTIUSER
+       * DEPENDENCIES:  Base graphics logic provides nx_start()
+       */
+
+      case BOARDIOC_NX_START:
+        {
+          ret = nx_start();
         }
         break;
 #endif
@@ -410,58 +426,13 @@ int boardctl(unsigned int cmd, uintptr_t arg)
         break;
 #endif
 
-#ifdef CONFIG_BOARDCTL_ADCTEST
-      /* CMD:           BOARDIOC_ADCTEST_SETUP
-       * DESCRIPTION:   ADC controller test configuration
-       * ARG:           None
-       * CONFIGURATION: CONFIG_LIB_BOARDCTL && CONFIG_BOARDCTL_ADCTEST
-       * DEPENDENCIES:  Board logic must provide board_adc_setup()
-       */
-
-      case BOARDIOC_ADCTEST_SETUP:
-        {
-          ret = board_adc_setup();
-        }
-        break;
-#endif
-
-#ifdef CONFIG_BOARDCTL_PWMTEST
-      /* CMD:           BOARDIOC_PWMTEST_SETUP
-       * DESCRIPTION:   PWM controller test configuration
-       * ARG:           None
-       * CONFIGURATION: CONFIG_LIB_BOARDCTL && CONFIG_BOARDCTL_PWMTEST
-       * DEPENDENCIES:  Board logic must provide board_pwm_setup()
-       */
-
-      case BOARDIOC_PWMTEST_SETUP:
-        {
-          ret = board_pwm_setup();
-        }
-        break;
-#endif
-
-#ifdef CONFIG_BOARDCTL_CANINIT
-      /* CMD:           BOARDIOC_CAN_INITIALIZE
-       * DESCRIPTION:   CAN device initialization
-       * ARG:           None
-       * CONFIGURATION: CONFIG_LIB_BOARDCTL && CONFIG_BOARDCTL_CANINIT
-       * DEPENDENCIES:  Board logic must provide board_can_initialize()
-       */
-
-      case BOARDIOC_CAN_INITIALIZE:
-        {
-          ret = board_can_initialize();
-        }
-        break;
-#endif
-
 #ifdef CONFIG_BOARDCTL_GRAPHICS
       /* CMD:           BOARDIOC_GRAPHICS_SETUP
        * DESCRIPTION:   Configure graphics that require special initialization
        *                procedures
        * ARG:           A pointer to an instance of struct boardioc_graphics_s
        * CONFIGURATION: CONFIG_LIB_BOARDCTL && CONFIG_BOARDCTL_GRAPHICS
-       * DEPENDENCIES:  Board logic must provide board_adc_setup()
+       * DEPENDENCIES:  Board logic must provide board_graphics_setup()
        */
 
       case BOARDIOC_GRAPHICS_SETUP:

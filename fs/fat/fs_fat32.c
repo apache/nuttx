@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fat/fs_fat32.c
  *
- *   Copyright (C) 2007-2009, 2011-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -84,6 +84,8 @@ static int     fat_ioctl(FAR struct file *filep, int cmd,
 
 static int     fat_sync(FAR struct file *filep);
 static int     fat_dup(FAR const struct file *oldp, FAR struct file *newp);
+static int     fat_fstat(FAR const struct file *filep,
+                 FAR struct stat *buf);
 
 static int     fat_opendir(FAR struct inode *mountpt,
                  FAR const char *relpath, FAR struct fs_dirent_s *dir);
@@ -106,6 +108,12 @@ static int     fat_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
 static int     fat_rmdir(FAR struct inode *mountpt, FAR const char *relpath);
 static int     fat_rename(FAR struct inode *mountpt,
                  FAR const char *oldrelpath, FAR const char *newrelpath);
+static int     fat_stat_common(FAR struct fat_mountpt_s *fs,
+                 FAR uint8_t *direntry, FAR struct stat *buf);
+static int     fat_stat_file(FAR struct fat_mountpt_s *fs,
+                 FAR uint8_t *direntry, FAR struct stat *buf);
+static int     fat_stat_root(FAR struct fat_mountpt_s *fs,
+                 FAR uint8_t *direntry, FAR struct stat *buf);
 static int     fat_stat(struct inode *mountpt, const char *relpath,
                  FAR struct stat *buf);
 
@@ -129,6 +137,7 @@ const struct mountpt_operations fat_operations =
 
   fat_sync,          /* sync */
   fat_dup,           /* dup */
+  fat_fstat,         /* fstat */
 
   fat_opendir,       /* opendir */
   NULL,              /* closedir */
@@ -624,7 +633,7 @@ fat_read_restart:
 
               if (ret == -EFAULT && !force_indirect)
                 {
-                  fdbg("DMA: read alignment error, restarting indirect\n");
+                  ferr("ERROR: DMA read alignment error, restarting indirect\n");
                   force_indirect = true;
                   goto fat_read_restart;
                 }
@@ -884,7 +893,7 @@ fat_write_restart:
 
               if (ret == -EFAULT && !force_indirect)
                 {
-                  fdbg("DMA: write alignment error, restarting indirect\n");
+                  ferr("ERROR: DMA write alignment error, restarting indirect\n");
                   force_indirect = true;
                   goto fat_write_restart;
                 }
@@ -1052,6 +1061,18 @@ static off_t fat_seek(FAR struct file *filep, off_t offset, int whence)
 
       default:
           return -EINVAL;
+    }
+
+  /* Special case:  We are seeking to the current position.  This would
+   * happen normally with ftell() which does lseek(fd, 0, SEEK_CUR) but can
+   * also happen in other situation such as when SEEK_SET is used to assure
+   * assure sequential access in a multi-threaded environment where there
+   * may be are multiple users to the file descriptor.
+   */
+
+  if (position == filep->f_pos)
+    {
+      return OK;
     }
 
   /* Make sure that the mount is still healthy */
@@ -1397,7 +1418,7 @@ static int fat_dup(FAR const struct file *oldp, FAR struct file *newp)
   FAR struct fat_file_s *newff;
   int ret;
 
-  fvdbg("Dup %p->%p\n", oldp, newp);
+  finfo("Dup %p->%p\n", oldp, newp);
 
   /* Sanity checks */
 
@@ -1588,6 +1609,76 @@ static int fat_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 
   fat_semgive(fs);
   return OK;
+
+errout_with_semaphore:
+  fat_semgive(fs);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: fat_fstat
+ *
+ * Description:
+ *   Obtain information about an open file associated with the file
+ *   descriptor 'fd', and will write it to the area pointed to by 'buf'.
+ *
+ ****************************************************************************/
+
+static int fat_fstat(FAR const struct file *filep, FAR struct stat *buf)
+{
+  FAR struct inode *inode;
+  FAR struct fat_mountpt_s *fs;
+  FAR struct fat_file_s *ff;
+  uint8_t *direntry;
+  int ret;
+
+  /* Sanity checks */
+
+  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
+
+  /* Get the mountpoint inode reference from the file structure and the
+   * mountpoint private data from the inode structure
+   */
+
+  inode = filep->f_inode;
+  fs    = inode->i_private;
+
+  DEBUGASSERT(fs != NULL);
+
+  /* Check if the mount is still healthy */
+
+  fat_semtake(fs);
+  ret = fat_checkmount(fs);
+  if (ret != OK)
+    {
+      goto errout_with_semaphore;
+    }
+
+  /* Recover our private data from the struct file instance */
+
+  ff = filep->f_priv;
+
+  /* Update the directory entry.  First read the directory
+   * entry into the fs_buffer (preserving the ff_buffer)
+   */
+
+  ret = fat_fscacheread(fs, ff->ff_dirsector);
+  if (ret < 0)
+    {
+      goto errout_with_semaphore;
+    }
+
+  /* Recover a pointer to the specific directory entry in the sector using
+   * the saved directory index.
+   */
+
+  direntry = &fs->fs_buffer[(ff->ff_dirindex & DIRSEC_NDXMASK(fs)) * DIR_SIZE];
+
+  /* Call fat_stat_file() to create the buf and to save information to
+   * it.
+   */
+
+  ret = fat_stat_file(fs, direntry, buf);
 
 errout_with_semaphore:
   fat_semgive(fs);
@@ -2407,7 +2498,10 @@ int fat_rename(FAR struct inode *mountpt, FAR const char *oldrelpath,
     {
       if (ret == OK)
         {
-          /* It is an error if the object at newrelpath already exists */
+          /* It is an error if the directory entry at newrelpath already
+           * exists.  The necessary steps to avoid this case should have
+           * been handled by higher level logic in the VFS.
+           */
 
           ret = -EEXIST;
         }
@@ -2473,6 +2567,123 @@ errout_with_semaphore:
 }
 
 /****************************************************************************
+ * Name: fat_stat_common
+ *
+ * Description:
+ *   Common logic used by fat_stat_file() and fat_fstat_root().
+ *
+ ****************************************************************************/
+
+static int fat_stat_common(FAR struct fat_mountpt_s *fs,
+                           FAR uint8_t *direntry, FAR struct stat *buf)
+{
+  uint16_t fatdate;
+  uint16_t date2;
+  uint16_t fattime;
+
+  /* Times */
+
+  fatdate           = DIR_GETWRTDATE(direntry);
+  fattime           = DIR_GETWRTTIME(direntry);
+  buf->st_mtime     = fat_fattime2systime(fattime, fatdate);
+
+  date2             = DIR_GETLASTACCDATE(direntry);
+  if (fatdate == date2)
+    {
+      buf->st_atime = buf->st_mtime;
+    }
+  else
+    {
+      buf->st_atime = fat_fattime2systime(0, date2);
+    }
+
+  fatdate           = DIR_GETCRDATE(direntry);
+  fattime           = DIR_GETCRTIME(direntry);
+  buf->st_ctime     = fat_fattime2systime(fattime, fatdate);
+
+  /* File/directory size, access block size */
+
+  buf->st_size      = DIR_GETFILESIZE(direntry);
+  buf->st_blksize   = fs->fs_fatsecperclus * fs->fs_hwsectorsize;
+  buf->st_blocks    = (buf->st_size + buf->st_blksize - 1) / buf->st_blksize;
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: fat_stat_file
+ *
+ * Description:
+ *   Function to return the status associated with a file in the FAT file
+ *   system.  Used by fat_stat() and fat_fstat().
+ *
+ ****************************************************************************/
+
+static int fat_stat_file(FAR struct fat_mountpt_s *fs,
+                         FAR uint8_t *direntry, FAR struct stat *buf)
+{
+  uint8_t  attribute;
+
+  /* Initialize the "struct stat" */
+
+  memset(buf, 0, sizeof(struct stat));
+
+  /* Get attribute from direntry */
+
+  attribute = DIR_GETATTRIBUTES(direntry);
+  if ((attribute & FATATTR_VOLUMEID) != 0)
+    {
+      return -ENOENT;
+    }
+
+  /* Set the access permissions.  The file/directory is always readable
+   * by everyone but may be writeable by no-one.
+   */
+
+  buf->st_mode = S_IROTH | S_IRGRP | S_IRUSR;
+  if ((attribute & FATATTR_READONLY) == 0)
+    {
+      buf->st_mode |= S_IWOTH | S_IWGRP | S_IWUSR;
+    }
+
+  /* We will report only types file or directory */
+
+  if ((attribute & FATATTR_DIRECTORY) != 0)
+    {
+      buf->st_mode |= S_IFDIR;
+    }
+  else
+    {
+      buf->st_mode |= S_IFREG;
+    }
+
+  return fat_stat_common(fs, direntry, buf);
+}
+
+/****************************************************************************
+ * Name: fat_stat_root
+ *
+ * Description:
+ *   Logic to stat the root directory.  Used by fat_stat().
+ *
+ ****************************************************************************/
+
+static int fat_stat_root(FAR struct fat_mountpt_s *fs,
+                         FAR uint8_t *direntry, FAR struct stat *buf)
+{
+  /* Clear the "struct stat"  */
+
+  memset(buf, 0, sizeof(struct stat));
+
+  /* It's directory name of the mount point */
+
+  buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR | S_IWOTH |
+                 S_IWGRP | S_IWUSR;
+
+  return fat_stat_common(fs, direntry, buf);
+}
+
+/****************************************************************************
  * Name: fat_stat
  *
  * Description: Return information about a file or directory
@@ -2484,11 +2695,7 @@ static int fat_stat(FAR struct inode *mountpt, FAR const char *relpath,
 {
   FAR struct fat_mountpt_s *fs;
   struct fat_dirinfo_s dirinfo;
-  uint16_t fatdate;
-  uint16_t date2;
-  uint16_t fattime;
   FAR uint8_t *direntry;
-  uint8_t attribute;
   int ret;
 
   /* Sanity checks */
@@ -2519,75 +2726,24 @@ static int fat_stat(FAR struct inode *mountpt, FAR const char *relpath,
       goto errout_with_semaphore;
     }
 
-  memset(buf, 0, sizeof(struct stat));
-  if (dirinfo.fd_root)
-    {
-      /* It's directory name of the mount point */
+  /* Get a pointer to the directory entry */
 
-      buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR | S_IWOTH |
-                     S_IWGRP | S_IWUSR;
-      ret = OK;
-      goto errout_with_semaphore;
-    }
+  direntry = &fs->fs_buffer[dirinfo.fd_seq.ds_offset];
 
   /* Get the FAT attribute and map it so some meaningful mode_t values */
 
-  direntry  = &fs->fs_buffer[dirinfo.fd_seq.ds_offset];
-  attribute = DIR_GETATTRIBUTES(direntry);
-  if ((attribute & FATATTR_VOLUMEID) != 0)
+  if (dirinfo.fd_root)
     {
-      ret = -ENOENT;
-      goto errout_with_semaphore;
-    }
-
-  /* Set the access permissions.  The file/directory is always readable
-   * by everyone but may be writeable by no-one.
-   */
-
-  buf->st_mode = S_IROTH | S_IRGRP | S_IRUSR;
-  if ((attribute & FATATTR_READONLY) == 0)
-    {
-      buf->st_mode |= S_IWOTH | S_IWGRP | S_IWUSR;
-    }
-
-  /* We will report only types file or directory */
-
-  if ((attribute & FATATTR_DIRECTORY) != 0)
-    {
-      buf->st_mode |= S_IFDIR;
+      ret = fat_stat_root(fs, direntry, buf);
     }
   else
     {
-      buf->st_mode |= S_IFREG;
+      /* Call fat_stat_file() to create the buf and to save information to
+       * the stat buffer.
+       */
+
+      ret = fat_stat_file(fs, direntry, buf);
     }
-
-  /* File/directory size, access block size */
-
-  buf->st_size      = DIR_GETFILESIZE(direntry);
-  buf->st_blksize   = fs->fs_fatsecperclus * fs->fs_hwsectorsize;
-  buf->st_blocks    = (buf->st_size + buf->st_blksize - 1) / buf->st_blksize;
-
-  /* Times */
-
-  fatdate           = DIR_GETWRTDATE(direntry);
-  fattime           = DIR_GETWRTTIME(direntry);
-  buf->st_mtime     = fat_fattime2systime(fattime, fatdate);
-
-  date2             = DIR_GETLASTACCDATE(direntry);
-  if (fatdate == date2)
-    {
-      buf->st_atime = buf->st_mtime;
-    }
-  else
-    {
-      buf->st_atime = fat_fattime2systime(0, date2);
-    }
-
-  fatdate           = DIR_GETCRDATE(direntry);
-  fattime           = DIR_GETCRTIME(direntry);
-  buf->st_ctime     = fat_fattime2systime(fattime, fatdate);
-
-  ret = OK;
 
 errout_with_semaphore:
   fat_semgive(fs);

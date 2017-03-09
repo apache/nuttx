@@ -1,0 +1,36 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_FREEDOM_K64F
+
+config FRDMK64F_SDHC_AUTOMOUNT
+	bool "SDHC automounter"
+	default n
+	depends on FS_AUTOMOUNTER && KINETIS_SDHC
+
+if FRDMK64F_SDHC_AUTOMOUNT
+
+config FRDMK64F_SDHC_AUTOMOUNT_FSTYPE
+	string "SDHC file system type"
+	default "vfat"
+
+config FRDMK64F_SDHC_AUTOMOUNT_BLKDEV
+	string "SDHC block device"
+	default "/dev/mmcsd0"
+
+config FRDMK64F_SDHC_AUTOMOUNT_MOUNTPOINT
+	string "SDHC mount point"
+	default "/mnt/sdcard"
+
+config FRDMK64F_SDHC_AUTOMOUNT_DDELAY
+	int "SDHC debounce delay (milliseconds)"
+	default 1000
+
+config FRDMK64F_SDHC_AUTOMOUNT_UDELAY
+	int "SDHC unmount retry delay (milliseconds)"
+	default 2000
+
+endif # FRDMK64F_SDHC_AUTOMOUNT
+endif # ARCH_BOARD_FREEDOM_K64F

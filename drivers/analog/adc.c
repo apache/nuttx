@@ -58,6 +58,7 @@
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/arch.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/analog/adc.h>
 
 #include <nuttx/irq.h>
@@ -233,7 +234,7 @@ static ssize_t adc_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
   int                   ret   = 0;
   int                   msglen;
 
-  avdbg("buflen: %d\n", (int)buflen);
+  ainfo("buflen: %d\n", (int)buflen);
 
   if (buflen % 5 == 0)
     msglen = 5;
@@ -351,7 +352,7 @@ return_with_irqdisabled:
       leave_critical_section(flags);
     }
 
-  avdbg("Returning: %d\n", ret);
+  ainfo("Returning: %d\n", ret);
   return ret;
 }
 
@@ -377,7 +378,7 @@ static int adc_receive(FAR struct adc_dev_s *dev, uint8_t ch, int32_t data)
 {
   FAR struct adc_fifo_s *fifo = &dev->ad_recv;
   int                    nexttail;
-  int                    err = -ENOMEM;
+  int                    errcode = -ENOMEM;
 
   /* Check if adding this new message would over-run the drivers ability to enqueue
    * read data.
@@ -407,9 +408,10 @@ static int adc_receive(FAR struct adc_dev_s *dev, uint8_t ch, int32_t data)
           sem_post(&fifo->af_sem);
         }
 
-      err = OK;
+      errcode = OK;
     }
-    return err;
+
+  return errcode;
 }
 
 /****************************************************************************
@@ -432,7 +434,7 @@ int adc_register(FAR const char *path, FAR struct adc_dev_s *dev)
   ret = dev->ad_ops->ao_bind(dev, &g_adc_callback);
   if (ret < 0)
     {
-      adbg("ERROR: Failed to bind callbacks: %d\n", ret);
+      aerr("ERROR: Failed to bind callbacks: %d\n", ret);
       return ret;
     }
 
@@ -440,8 +442,16 @@ int adc_register(FAR const char *path, FAR struct adc_dev_s *dev)
 
   dev->ad_ocount = 0;
 
+  /* Initialize semaphores */
+
   sem_init(&dev->ad_recv.af_sem, 0, 0);
   sem_init(&dev->ad_closesem, 0, 1);
+
+  /* The receive semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
+  sem_setprotocol(&dev->ad_recv.af_sem, SEM_PRIO_NONE);
 
   /* Reset the ADC hardware */
 

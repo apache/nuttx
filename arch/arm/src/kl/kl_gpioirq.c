@@ -1,7 +1,7 @@
 /****************************************************************************
  *  arch/arm/src/kl/kl_gpioirq.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,7 +51,7 @@
 #include "chip/kl_port.h"
 #include "kl_gpio.h"
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_KL_GPIOIRQ
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -68,13 +68,19 @@
 #endif
 
 #if defined(CONFIG_KL_PORTBINTS) || defined(CONFIG_KL_PORTCINTS) || \
-    defined(CONFIG_KL_PORTEINTS) 
+    defined(CONFIG_KL_PORTEINTS)
 #  error Kinetis KL25 only supports interrupt on PORTA or PORTD
 #endif
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
+struct g_portisrs_s
+{
+  xcpt_t handler;   /* Interrupt handler entry point */
+  void  *arg;       /* The argument that accompanies the interrupt handler */
+};
 
 /****************************************************************************
  * Private Data
@@ -87,11 +93,11 @@
  */
 
 #ifdef CONFIG_KL_PORTAINTS
-static xcpt_t g_portaisrs[32];
+static struct g_portisrs_s g_portaisrs[32];
 #endif
 
 #ifdef CONFIG_KL_PORTDINTS
-static xcpt_t g_portdisrs[32];
+static struct g_portisrs_s g_portdisrs[32];
 #endif
 
 /****************************************************************************
@@ -131,11 +137,14 @@ static int kl_portinterrupt(int irq, FAR void *context,
            * interrupt handler for the pin.
            */
 
-          if (isrtab[i])
+          if (isrtab[i].handler != NULL)
             {
+              xcpt_t handler = irstab[i].handler;
+              void  *arg     = irstab[i].arg;
+
               /* There is a registered interrupt handler... invoke it */
 
-              (void)isrtab[i](irq, context);
+              (void)handler(irq, context, arg);
             }
 
           /* Writing a one to the ISFR register will clear the pending
@@ -164,14 +173,14 @@ static int kl_portinterrupt(int irq, FAR void *context,
  ****************************************************************************/
 
 #ifdef CONFIG_KL_PORTAINTS
-static int kl_portainterrupt(int irq, FAR void *context)
+static int kl_portainterrupt(int irq, FAR void *context, FAR void *arg)
 {
   return kl_portinterrupt(irq, context, KL_PORTA_ISFR, g_portaisrs);
 }
 #endif
 
 #ifdef CONFIG_KL_PORTDINTS
-static int kl_portdinterrupt(int irq, FAR void *context)
+static int kl_portdinterrupt(int irq, FAR void *context, FAR void *arg)
 {
   return kl_portinterrupt(irq, context, KL_PORTD_ISFR, g_portdisrs);
 }
@@ -193,13 +202,13 @@ static int kl_portdinterrupt(int irq, FAR void *context)
 void kl_gpioirqinitialize(void)
 {
 #ifdef CONFIG_KL_PORTAINTS
-  (void)irq_attach(KL_IRQ_PORTA, kl_portainterrupt);
+  (void)irq_attach(KL_IRQ_PORTA, kl_portainterrupt, NULL);
   putreg32(0xffffffff, KL_PORTA_ISFR);
   up_enable_irq(KL_IRQ_PORTA);
 #endif
 
 #ifdef CONFIG_KL_PORTDINTS
-  (void)irq_attach(KL_IRQ_PORTD, kl_portdinterrupt);
+  (void)irq_attach(KL_IRQ_PORTD, kl_portdinterrupt, NULL);
   putreg32(0xffffffff, KL_PORTD_ISFR);
   up_enable_irq(KL_IRQ_PORTD);
 #endif
@@ -219,20 +228,20 @@ void kl_gpioirqinitialize(void)
  * Parameters:
  *  - pinset:  Pin configuration
  *  - pinisr:  Pin interrupt service routine
+ *  - pinarg:  The argument that will accompany the pin interrupt
  *
  * Returns:
- *   The previous value of the interrupt handler function pointer.  This
- *   value may, for example, be used to restore the previous handler when
- *   multiple handlers are used.
+ * Returns:
+ *   Zero (OK) is returned on success; On any failure, a negated errno value is
+ *   returned to indicate the nature of the failure.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
-xcpt_t kl_gpioirqattach(uint32_t pinset, xcpt_t pinisr)
+int kl_gpioirqattach(uint32_t pinset, xcpt_t pinisr, void *pinarg)
 {
 #ifdef HAVE_PORTINTS
-  xcpt_t      *isrtab;
-  xcpt_t       oldisr;
-  irqstate_t   flags;
+  struct g_portisrs_s *isrtab;
+  irqstate_t flags;
   unsigned int port;
   unsigned int pin;
 
@@ -271,16 +280,16 @@ xcpt_t kl_gpioirqattach(uint32_t pinset, xcpt_t pinisr)
 
    /* Get the old PIN ISR and set the new PIN ISR */
 
-   oldisr      = isrtab[pin];
-   isrtab[pin] = pinisr;
+   isrtab[pin].handler = pinisr;
+   isrtab[pin].arg     = pinarg;
 
    /* And return the old PIN isr address */
 
    leave_critical_section(flags);
-   return oldisr;
+   return OK;
 
 #else
-   return NULL;
+   return -ENOSYS;
 #endif /* HAVE_PORTINTS */
 }
 
@@ -396,4 +405,4 @@ void kl_gpioirqdisable(uint32_t pinset)
     }
 #endif /* HAVE_PORTINTS */
 }
-#endif /* CONFIG_GPIO_IRQ */
+#endif /* CONFIG_KL_GPIOIRQ */

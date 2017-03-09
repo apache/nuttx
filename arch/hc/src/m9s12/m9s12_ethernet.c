@@ -1,7 +1,7 @@
 /****************************************************************************
- * drivers/net/m9s12_ethernet.c
+ * arch/hc/src/m9s12/m9s12_ethernet.c
  *
- *   Copyright (C) 2011, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -106,6 +106,12 @@ struct emac_driver_s
  * Private Data
  ****************************************************************************/
 
+/* A single packet buffer is used */
+
+static uint8_t g_pktbuf[MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE];
+
+/* Driver state structure */
+
 static struct emac_driver_s g_emac[CONFIG_HCS12_NINTERFACES];
 
 /****************************************************************************
@@ -121,7 +127,7 @@ static int  emac_txpoll(struct net_driver_s *dev);
 
 static void emac_receive(FAR struct emac_driver_s *priv);
 static void emac_txdone(FAR struct emac_driver_s *priv);
-static int  emac_interrupt(int irq, FAR void *context);
+static int  emac_interrupt(int irq, FAR void *context, FAR void *arg);
 
 /* Watchdog timer expirations */
 
@@ -294,7 +300,7 @@ static void emac_receive(FAR struct emac_driver_s *priv)
 #ifdef CONFIG_NET_IPv4
       if (BUF->type == HTONS(ETHTYPE_IP))
         {
-          nllvdbg("IPv4 frame\n");
+          ninfo("IPv4 frame\n");
 
           /* Handle ARP on input then give the IPv4 packet to the network
            * layer
@@ -334,7 +340,7 @@ static void emac_receive(FAR struct emac_driver_s *priv)
 #ifdef CONFIG_NET_IPv6
       if (BUF->type == HTONS(ETHTYPE_IP6))
         {
-          nllvdbg("Iv6 frame\n");
+          ninfo("Iv6 frame\n");
 
           /* Give the IPv6 packet to the network layer */
 
@@ -436,7 +442,7 @@ static void emac_txdone(FAR struct emac_driver_s *priv)
  *
  ****************************************************************************/
 
-static int emac_interrupt(int irq, FAR void *context)
+static int emac_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   register FAR struct emac_driver_s *priv = &g_emac[0];
 
@@ -549,9 +555,9 @@ static int emac_ifup(struct net_driver_s *dev)
 {
   FAR struct emac_driver_s *priv = (FAR struct emac_driver_s *)dev->d_private;
 
-  ndbg("Bringing up: %d.%d.%d.%d\n",
-       dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24 );
+  ninfo("Bringing up: %d.%d.%d.%d\n",
+        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
+        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24 );
 
   /* Initialize PHYs, the Ethernet interface, and setup up Ethernet interrupts */
 
@@ -746,7 +752,7 @@ int emac_initialize(int intf)
 
   /* Attach the IRQ to the driver */
 
-  if (irq_attach(CONFIG_HCS12_IRQ, emac_interrupt))
+  if (irq_attach(CONFIG_HCS12_IRQ, emac_interrupt, NULL))
     {
       /* We could not attach the ISR to the interrupt */
 
@@ -756,6 +762,7 @@ int emac_initialize(int intf)
   /* Initialize the driver structure */
 
   memset(priv, 0, sizeof(struct emac_driver_s));
+  priv->d_dev.d_buf     = g_pktbuf;      /* Single packet buffer */
   priv->d_dev.d_ifup    = emac_ifup;     /* I/F down callback */
   priv->d_dev.d_ifdown  = emac_ifdown;   /* I/F up (new IP address) callback */
   priv->d_dev.d_txavail = emac_txavail;  /* New TX data callback */
@@ -767,8 +774,8 @@ int emac_initialize(int intf)
 
   /* Create a watchdog for timing polling for and timing of transmisstions */
 
-  priv->d_txpoll       = wd_create();   /* Create periodic poll timer */
-  priv->d_txtimeout    = wd_create();   /* Create TX timeout timer */
+  priv->d_txpoll       = wd_create();    /* Create periodic poll timer */
+  priv->d_txtimeout    = wd_create();    /* Create TX timeout timer */
 
   /* Put the interface in the down state.  This usually amounts to resetting
    * the device and/or calling emac_ifdown().

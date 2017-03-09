@@ -54,9 +54,10 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
-#include <nuttx/1wire.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/clock.h>
+#include <nuttx/semaphore.h>
+#include <nuttx/drivers/1wire.h>
 
 #include <arch/board/board.h>
 
@@ -81,7 +82,11 @@
 #define WRITE_TX0       0x00
 #define WRITE_TX1       0xFF
 
-#define PIN_OPENDRAIN(GPIO) ((GPIO) | GPIO_OPENDRAIN)
+#define PIN_OPENDRAIN(GPIO) ((GPIO) | GPIO_CNF_OUTOD)
+
+#if defined(CONFIG_STM32_STM32F10XX)
+#  define USART_CR3_ONEBIT (0)
+#endif
 
 /****************************************************************************
  * Private Types
@@ -112,7 +117,6 @@ struct stm32_1wire_config_s
   const uint32_t apbclock;  /* PCLK 1 or 2 frequency */
   const uint32_t data_pin;  /* GPIO configuration for DATA */
   const uint8_t  irq;       /* IRQ associated with this USART */
-  int (*const vector)(int irq, void *context);  /* Interrupt handler */
 };
 
 /* 1-Wire device Private Data */
@@ -156,33 +160,7 @@ static inline void stm32_1wire_sem_wait(FAR struct stm32_1wire_priv_s *priv);
 static inline void stm32_1wire_sem_post(FAR struct stm32_1wire_priv_s *priv);
 static int stm32_1wire_process(struct stm32_1wire_priv_s *priv,
                                FAR const struct stm32_1wire_msg_s *msgs, int count);
-static int stm32_1wire_isr(struct stm32_1wire_priv_s *priv);
-
-#ifdef CONFIG_STM32_USART1_1WIREDRIVER
-static int stm32_interrupt_1wire1(int irq, void *context);
-#endif
-#ifdef CONFIG_STM32_USART2_1WIREDRIVER
-static int stm32_interrupt_1wire2(int irq, void *context);
-#endif
-#ifdef CONFIG_STM32_USART3_1WIREDRIVER
-static int stm32_interrupt_1wire3(int irq, void *context);
-#endif
-#ifdef CONFIG_STM32_UART4_1WIREDRIVER
-static int stm32_interrupt_1wire4(int irq, void *context);
-#endif
-#ifdef CONFIG_STM32_UART5_1WIREDRIVER
-static int stm32_interrupt_1wire5(int irq, void *context);
-#endif
-#ifdef CONFIG_STM32_USART6_1WIREDRIVER
-static int stm32_interrupt_1wire6(int irq, void *context);
-#endif
-#ifdef CONFIG_STM32_UART7_1WIREDRIVER
-static int stm32_interrupt_1wire7(int irq, void *context);
-#endif
-#ifdef CONFIG_STM32_UART8_1WIREDRIVER
-static int stm32_interrupt_1wire8(int irq, void *context);
-#endif
-
+static int stm32_1wire_isr(int irq, void *context, void *arg);
 static int stm32_1wire_reset(FAR struct onewire_dev_s *dev);
 static int stm32_1wire_write(FAR struct onewire_dev_s *dev,
                              const uint8_t *buffer, int buflen);
@@ -206,7 +184,6 @@ static const struct stm32_1wire_config_s stm32_1wire1_config =
   .apbclock   = STM32_PCLK2_FREQUENCY,
   .data_pin   = PIN_OPENDRAIN(GPIO_USART1_TX),
   .irq        = STM32_IRQ_USART1,
-  .vector     = stm32_interrupt_1wire1,
 };
 
 static struct stm32_1wire_priv_s stm32_1wire1_priv =
@@ -226,7 +203,6 @@ static const struct stm32_1wire_config_s stm32_1wire2_config =
   .apbclock   = STM32_PCLK1_FREQUENCY,
   .data_pin   = PIN_OPENDRAIN(GPIO_USART2_TX),
   .irq        = STM32_IRQ_USART2,
-  .vector     = stm32_interrupt_1wire2,
 };
 
 static struct stm32_1wire_priv_s stm32_1wire2_priv =
@@ -246,7 +222,6 @@ static const struct stm32_1wire_config_s stm32_1wire3_config =
   .apbclock   = STM32_PCLK1_FREQUENCY,
   .data_pin   = PIN_OPENDRAIN(GPIO_USART3_TX),
   .irq        = STM32_IRQ_USART3,
-  .vector     = stm32_interrupt_1wire3,
 };
 
 static struct stm32_1wire_priv_s stm32_1wire3_priv =
@@ -266,7 +241,6 @@ static const struct stm32_1wire_config_s stm32_1wire4_config =
   .apbclock   = STM32_PCLK1_FREQUENCY,
   .data_pin   = PIN_OPENDRAIN(GPIO_UART4_TX),
   .irq        = STM32_IRQ_UART4,
-  .vector     = stm32_interrupt_1wire4,
 };
 
 static struct stm32_1wire_priv_s stm32_1wire4_priv =
@@ -286,7 +260,6 @@ static const struct stm32_1wire_config_s stm32_1wire5_config =
   .apbclock   = STM32_PCLK1_FREQUENCY,
   .data_pin   = PIN_OPENDRAIN(GPIO_UART5_TX),
   .irq        = STM32_IRQ_UART5,
-  .vector     = stm32_interrupt_1wire5,
 };
 
 static struct stm32_1wire_priv_s stm32_1wire5_priv =
@@ -306,7 +279,6 @@ static const struct stm32_1wire_config_s stm32_1wire6_config =
   .apbclock   = STM32_PCLK2_FREQUENCY,
   .data_pin   = PIN_OPENDRAIN(GPIO_USART6_TX),
   .irq        = STM32_IRQ_USART6,
-  .vector     = stm32_interrupt_1wire6,
 };
 
 static struct stm32_1wire_priv_s stm32_1wire6_priv =
@@ -326,7 +298,6 @@ static const struct stm32_1wire_config_s stm32_1wire7_config =
   .apbclock   = STM32_PCLK1_FREQUENCY,
   .data_pin   = PIN_OPENDRAIN(GPIO_UART7_TX),
   .irq        = STM32_IRQ_UART7,
-  .vector     = stm32_interrupt_1wire7,
 };
 
 static struct stm32_1wire_priv_s stm32_1wire7_priv =
@@ -346,7 +317,6 @@ static const struct stm32_1wire_config_s stm32_1wire8_config =
   .apbclock   = STM32_PCLK1_FREQUENCY,
   .data_pin   = PIN_OPENDRAIN(GPIO_UART8_TX),
   .irq        = STM32_IRQ_UART8,
-  .vector     = stm32_interrupt_1wire8,
 };
 
 static struct stm32_1wire_priv_s stm32_1wire8_priv =
@@ -568,13 +538,13 @@ static void stm32_1wire_set_apb_clock(struct stm32_1wire_priv_s *priv,
       regaddr = STM32_RCC_APB1ENR;
       break;
 #endif
-#ifdef CONFIG_STM32_UART4
+#ifdef CONFIG_STM32_UART4_1WIREDRIVER
     case STM32_UART4_BASE:
       rcc_en = RCC_APB1ENR_UART4EN;
       regaddr = STM32_RCC_APB1ENR;
       break;
 #endif
-#ifdef CONFIG_STM32_UART5
+#ifdef CONFIG_STM32_UART5_1WIREDRIVER
     case STM32_UART5_BASE:
       rcc_en = RCC_APB1ENR_UART5EN;
       regaddr = STM32_RCC_APB1ENR;
@@ -586,13 +556,13 @@ static void stm32_1wire_set_apb_clock(struct stm32_1wire_priv_s *priv,
       regaddr = STM32_RCC_APB2ENR;
       break;
 #endif
-#ifdef CONFIG_STM32_UART7
+#ifdef CONFIG_STM32_UART7_1WIREDRIVER
     case STM32_UART7_BASE:
       rcc_en = RCC_APB1ENR_UART7EN;
       regaddr = STM32_RCC_APB1ENR;
       break;
 #endif
-#ifdef CONFIG_STM32_UART8
+#ifdef CONFIG_STM32_UART8_1WIREDRIVER
     case STM32_UART8_BASE:
       rcc_en = RCC_APB1ENR_UART8EN;
       regaddr = STM32_RCC_APB1ENR;
@@ -674,7 +644,7 @@ static int stm32_1wire_init(FAR struct stm32_1wire_priv_s *priv)
 
   stm32_configgpio(config->data_pin);
 
-  ret = irq_attach(config->irq, config->vector);
+  ret = irq_attach(config->irq, stm32_1wire_isr, priv);
   if (ret == OK)
     {
       up_enable_irq(config->irq);
@@ -740,6 +710,12 @@ static inline void stm32_1wire_sem_init(FAR struct stm32_1wire_priv_s *priv)
 {
   sem_init(&priv->sem_excl, 0, 1);
   sem_init(&priv->sem_isr, 0, 0);
+
+  /* The sem_isr semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
+  sem_setprotocol(&priv->sem_isr, SEM_PRIO_NONE);
 }
 
 /****************************************************************************
@@ -906,9 +882,13 @@ static int stm32_1wire_process(struct stm32_1wire_priv_s *priv,
  *  Common Interrupt Service Routine
  ****************************************************************************/
 
-static int stm32_1wire_isr(struct stm32_1wire_priv_s *priv)
+static int stm32_1wire_isr(int irq, void *context, void *arg)
 {
-  uint32_t sr, dr;
+  struct stm32_1wire_priv_s *priv = (struct stm32_1wire_priv_s *)arg;
+  uint32_t sr;
+  uint32_t dr;
+
+  DEBUGASSERT(priv != NULL);
 
   /* Get the masked USART status word. */
 
@@ -1029,55 +1009,6 @@ static int stm32_1wire_isr(struct stm32_1wire_priv_s *priv)
 
   return OK;
 }
-
-#ifdef CONFIG_STM32_USART1_1WIREDRIVER
-static int stm32_interrupt_1wire1(int irq, void *context)
-{
-  return stm32_1wire_isr(&stm32_1wire1_priv);
-}
-#endif
-#ifdef CONFIG_STM32_USART2_1WIREDRIVER
-static int stm32_interrupt_1wire2(int irq, void *context)
-{
-  return stm32_1wire_isr(&stm32_1wire2_priv);
-}
-#endif
-#ifdef CONFIG_STM32_USART3_1WIREDRIVER
-static int stm32_interrupt_1wire3(int irq, void *context)
-{
-  return stm32_1wire_isr(&stm32_1wire3_priv);
-}
-#endif
-#ifdef CONFIG_STM32_UART4_1WIREDRIVER
-static int stm32_interrupt_1wire4(int irq, void *context)
-{
-  return stm32_1wire_isr(&stm32_1wire4_priv);
-}
-#endif
-#ifdef CONFIG_STM32_UART5_1WIREDRIVER
-static int stm32_interrupt_1wire5(int irq, void *context)
-{
-  return stm32_1wire_isr(&stm32_1wire5_priv);
-}
-#endif
-#ifdef CONFIG_STM32_USART6_1WIREDRIVER
-static int stm32_interrupt_1wire6(int irq, void *context)
-{
-  return stm32_1wire_isr(&stm32_1wire6_priv);
-}
-#endif
-#ifdef CONFIG_STM32_UART7_1WIREDRIVER
-static int stm32_interrupt_1wire7(int irq, void *context)
-{
-  return stm32_1wire_isr(&stm32_1wire7_priv);
-}
-#endif
-#ifdef CONFIG_STM32_UART8_1WIREDRIVER
-static int stm32_interrupt_1wire8(int irq, void *context)
-{
-  return stm32_1wire_isr(&stm32_1wire8_priv);
-}
-#endif
 
 /****************************************************************************
  * Name: stm32_1wire_reset

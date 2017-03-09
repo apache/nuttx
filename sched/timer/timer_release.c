@@ -1,4 +1,4 @@
-/********************************************************************************
+/****************************************************************************
  * sched/timer/timer_release.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -49,19 +49,19 @@
 
 #ifndef CONFIG_DISABLE_POSIX_TIMERS
 
-/********************************************************************************
+/****************************************************************************
  * Private Functions
- ********************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************
+/****************************************************************************
  * Name: timer_free
  *
  * Description:
- *   Remove the timer from the allocated timer list and free it or return it to
- *   the free list (depending on whether or not the timer is one of the
+ *   Remove the timer from the allocated timer list and free it or return it
+ *   to the free list (depending on whether or not the timer is one of the
  *   preallocated timers)
  *
- ********************************************************************************/
+ ****************************************************************************/
 
 static inline void timer_free(struct posix_timer_s *timer)
 {
@@ -90,29 +90,30 @@ static inline void timer_free(struct posix_timer_s *timer)
     }
 }
 
-/********************************************************************************
+/****************************************************************************
  * Public Functions
- ********************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************
+/****************************************************************************
  * Name: timer_release
  *
  * Description:
- *   timer_release implements the heart of timer_delete.  It is private to the
- *   the OS internals and differs only in that return value of 1 means that the
- *   timer was not actually deleted.
+ *   timer_release implements the heart of timer_delete.  It is private to
+ *   the OS internals and differs only in that return value of 1 means that
+ *   the timer was not actually deleted.
  *
  * Parameters:
  *   timer - The per-thread timer, previously created by the call to
  *     timer_create(), to be deleted.
  *
  * Return Value:
- *   If the call succeeds, timer_release() will return 0 (OK) or 1 (meaning that
- *   the timer is still valid).  Otherwise, the function will return a negated errno:
+ *   If the call succeeds, timer_release() will return 0 (OK) or 1 (meaning
+ *   that the timer is still valid).  Otherwise, the function will return a
+ *   negated errno value:
  *
  *   -EINVAL - The timer specified timerid is not valid.
  *
- ********************************************************************************/
+ ****************************************************************************/
 
 int timer_release(FAR struct posix_timer_s *timer)
 {

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/include/stm32/ltdc.h
+ * arch/arm/include/stm32/ltdc.h
  *
  *   Copyright (C) 2014-2015 Marco Krahl. All rights reserved.
  *   Author: Marco Krahl <ocram.lhark@gmail.com>

@@ -1,0 +1,83 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menu "Time/Time Zone Support"
+
+config LIBC_LOCALTIME
+	bool "localtime API call support"
+	default "n"
+	depends on !DISABLE_ENVIRON
+	---help---
+		localtime API call support
+
+		Logic currently depends on file system support with, at a minimum, these
+		files in the zoneinfo directory:  GMT and posixrules.  An additional
+		timezone file is required for any additional, local time zone(s) and the
+		environment variable TZ must be set to the name of that timezone file
+		when tzset() is called.
+
+		See https://www.iana.org/time-zones .  See also nuttx/zoneinfo
+		which provides a framework for incorporating the TZ database into a
+		NuttX build.
+
+if LIBC_LOCALTIME
+
+config LIBC_TZ_MAX_TIMES
+	int "Maximum number of times in timezone"
+	default 370
+	---help---
+		Timezone files with more than this number of times will not be usedi
+		(tmecnt).
+
+		Warning: Some files in IANA TZ database include many times.  The current
+		posixrules file, for example, has timecnt = 236.  The value of
+		TX_MAX_ITMES in the tzfile.h header file on my Linux system is 370, the
+		default used here.  You may want to reduce this value for a smaller
+		footprint.
+
+config LIBC_TZ_MAX_TYPES
+	int "Maximum number of TZ types"
+	default 20
+	---help---
+		Maximum number of local time types.  You may want to reduce this value
+		for a smaller footprint.
+
+config LIBC_TZDIR
+	string "zoneinfo directory path"
+	default "/etc/zoneinfo"
+	---help---
+		This is the full path to the location where the TZ database is expected
+		to be found.
+
+config LIB_ZONEINFO
+	bool "TZ database"
+	default n
+	---help---
+		Download and build the TZ/Olson database.
+
+if LIB_ZONEINFO
+
+config LIB_ZONEINFO_ROMFS
+	bool "Build ROMFS filesystem"
+	default n
+	depends on FS_ROMFS
+	---help---
+		Build a mountable ROMFS filesystem containing the TZ/Olson database
+
+endif # LIB_ZONEINFO
+endif # LIBC_LOCALTIME
+
+config TIME_EXTENDED
+	bool "Add day of week, year support"
+	default "n"
+	depends on !LIBC_LOCALTIME
+	---help---
+		Selecting TIME_EXTENDED adds tm_wday, tm_yday and tm_isdst
+		to the tm struct. This allows integration with 3rd party libraries
+		that expect the tm struct to contain these members.
+
+		Note: tm_isdst is always 0
+
+endmenu # Time/Time Zone Support

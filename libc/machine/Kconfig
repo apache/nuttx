@@ -1,0 +1,163 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+# These are library functions that may be overriden by architecture-
+# specific implementations.  Not all architectures support implementations
+# for every library function.
+
+menu "Architecture-Specific Support"
+
+config ARCH_LOWPUTC
+	bool "Low-level console output"
+	default "y"
+	---help---
+		architecture supports low-level, boot time console output
+
+config ARCH_ROMGETC
+	bool "Support for ROM string access"
+	default n
+	---help---
+		In Harvard architectures, data accesses and instruction accesses
+		occur on different buses, perhaps concurrently.  All data accesses
+		are performed on the data bus unless special machine instructions
+		are used to read data from the instruction address space.  Also, in
+		the typical MCU, the available SRAM data memory is much smaller that
+		the non-volatile FLASH instruction memory.  So if the application
+		requires many constant strings, the only practical solution may be
+		to store those constant strings in FLASH memory where they can only
+		be accessed using architecture-specific machine instructions.
+
+		If ARCH_ROMGETC is defined, then the architecture logic must export
+		the function up_romgetc().  up_romgetc() will simply read one byte
+		of data from the instruction space.
+
+		If ARCH_ROMGETC is selected, certain C stdio functions are effected: (1)
+		All format strings in printf, fprintf, sprintf, etc. are assumed to lie
+		in FLASH (string arguments for %s are still assumed to reside in SRAM).
+		And (2), the string argument to puts and fputs is assumed to reside
+		in FLASH.  Clearly, these assumptions may have to modified for the
+		particular needs of your environment.  There is no "one-size-fits-all"
+		solution for this problem.
+
+# Default settings for C library functions that may be replaced with
+# architecture-specific versions.
+
+config LIBC_ARCH_MEMCPY
+	bool
+	default n
+
+config LIBC_ARCH_MEMCMP
+	bool
+	default n
+
+config LIBC_ARCH_MEMMOVE
+	bool
+	default n
+
+config LIBC_ARCH_MEMSET
+	bool
+	default n
+
+config LIBC_ARCH_STRCHR
+	bool
+	default n
+
+config LIBC_ARCH_STRCMP
+	bool
+	default n
+
+config LIBC_ARCH_STRCPY
+	bool
+	default n
+
+config LIBC_ARCH_STRNCPY
+	bool
+	default n
+
+config LIBC_ARCH_STRLEN
+	bool
+	default n
+
+config LIBC_ARCH_STRNLEN
+	bool
+	default n
+
+config LIBC_ARCH_ELF
+	bool
+	default n
+
+config LIBM_ARCH_CEIL
+	bool
+	default n
+	depends on LIBM && ARCH_CORTEXM33
+
+config LIBM_ARCH_FLOOR
+	bool
+	default n
+	depends on LIBM && ARCH_CORTEXM33
+
+config LIBM_ARCH_NEARBYINT
+	bool
+	default n
+	depends on LIBM && ARCH_CORTEXM33
+
+config LIBM_ARCH_RINT
+	bool
+	default n
+	depends on LIBM && ARCH_CORTEXM33
+
+config LIBM_ARCH_ROUND
+	bool
+	default n
+	depends on LIBM && ARCH_CORTEXM33
+
+config LIBM_ARCH_TRUNC
+	bool
+	default n
+	depends on LIBM && ARCH_CORTEXM33
+
+config LIBM_ARCH_CEILF
+	bool
+	default n
+	depends on LIBM && ARCH_CORTEXM33
+
+config LIBM_ARCH_FLOORF
+	bool
+	default n
+	depends on LIBM && ARCH_CORTEXM33
+
+config LIBM_ARCH_NEARBYINTF
+	bool
+	default n
+	depends on LIBM && ARCH_CORTEXM33
+
+config LIBM_ARCH_RINTF
+	bool
+	default n
+	depends on LIBM && ARCH_CORTEXM33
+
+config LIBM_ARCH_ROUNDF
+	bool
+	default n
+	depends on LIBM && ARCH_CORTEXM33
+
+config LIBM_ARCH_TRUNCF
+	bool
+	default n
+	depends on LIBM && ARCH_CORTEXM33
+
+# One or more the of above may be selected by architecture specific logic
+
+if ARCH_ARM
+source libc/machine/arm/Kconfig
+endif
+if ARCH_SIM
+source libc/machine/sim/Kconfig
+endif
+if ARCH_X86
+source libc/machine/x86/Kconfig
+endif
+
+endmenu # Architecture-Specific Spport

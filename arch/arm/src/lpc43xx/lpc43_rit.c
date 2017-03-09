@@ -86,7 +86,7 @@ struct timespec g_ts;
  * Private Functions
  ****************************************************************************/
 
-static int lpc43_RIT_isr(int irq, FAR void *context)
+static int lpc43_RIT_isr(int irq, FAR void *context, FAR void *arg)
 {
   irqstate_t flags;
 
@@ -154,7 +154,7 @@ static inline void lpc43_RIT_timer_stop(void)
  * Public Functions
  ****************************************************************************/
 
-void up_timer_initialize(void)
+void arm_timer_initialize(void)
 {
   uint32_t ticks_per_int;
   uint32_t mask_bits = 0;
@@ -166,7 +166,7 @@ void up_timer_initialize(void)
 
   /* Set up the IRQ here */
 
-  irq_attach(LPC43M4_IRQ_RITIMER, lpc43_RIT_isr);
+  irq_attach(LPC43M4_IRQ_RITIMER, lpc43_RIT_isr, NULL);
 
   /* Compute how many seconds per tick we have on the main clock.  If it is
    * 204MHz for example, then there should be about 4.90ns per tick
@@ -201,8 +201,8 @@ void up_timer_initialize(void)
       mask_bits++;
     }
 
-  lldbg("mask_bits = %d, mask = %X, ticks_per_int = %d\r\n",
-        mask_bits, (0xffffffff << (32 - mask_bits)), ticks_per_int);
+  tmrinfo("mask_bits = %d, mask = %X, ticks_per_int = %d\r\n",
+          mask_bits, (0xffffffff << (32 - mask_bits)), ticks_per_int);
 
   /* Set the mask and compare value so we get interrupts every
    * RIT_TIMER_RESOLUTION cycles.

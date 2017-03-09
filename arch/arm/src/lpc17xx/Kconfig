@@ -489,8 +489,8 @@ config ADC0_AVERAGE
 	default 200
 
 config ADC0_MASK
-	int "ADC0 mask"
-	default 1
+	hex "ADC0 mask"
+	default 0x01
 
 config ADC0_SPS
 	int "ADC0 SPS"
@@ -594,16 +594,17 @@ config CAN_LOOPBACK
 	---help---
 		Enable CAN loopback mode
 
-config CAN_REGDEBUG
+config LPC17_CAN_REGDEBUG
 	bool "Register level debug"
-	depends on DEBUG
+	depends on DEBUG_CAN_INFO
 	default n
 	---help---
-		Output detailed register-level CAN debug information.  Requires also DEBUG and DEBUG_CAN.
+		Output detailed register-level CAN debug information.  Requires also
+		CONFIG_DEBUG_CAN_INFO.
 
 endmenu
 
-config GPIO_IRQ
+config LPC17_GPIOIRQ
 	bool "GPIO interrupt support"
 	default n
 	---help---
@@ -629,20 +630,21 @@ config LPC17_I2C2_FREQUENCY
 
 endmenu
 
-menu "SDIO Configuration"
+menu "SDCARD Configuration"
 	depends on LPC17_SDCARD
 
-config SDIO_DMA
+config LPC17_SDCARD_DMA
 	bool "Support DMA data transfers"
 	default y if LPC17_GPDMA
+	select SDIO_DMA
 	depends on LPC17_GPDMA
 	---help---
 		Support DMA data transfers.
-		Enable SD card DMA data transfers.  This is a marginally optional.
+		Enable SD card DMA data transfers.  This is marginally optional.
 		For most usages, SD accesses will cause data overruns if used without
-		DMA.  Requires LPC17_SDCARD and config LPC17_GPDMA.
+		DMA.
 
-config SDIO_WIDTH_D1_ONLY
+config LPC17_SDCARD_WIDTH_D1_ONLY
 	bool "Use D1 only"
 	default n
 	---help---
@@ -703,12 +705,12 @@ config NET_WOL
 	---help---
 		Enable Wake-up on Lan (not fully implemented).
 
-config NET_REGDEBUG
+config LPC17_NET_REGDEBUG
 	bool "Ethernet register-level debug"
-	depends on DEBUG
+	depends on DEBUG_NET_INFO
 	default n
 	---help---
-		Enable low level register debug.  Also needs DEBUG.
+		Enable low level register debug.  Also needs CONFIG_DEBUG_NET_INFO.
 
 config NET_HASH
 	bool "Hashing"
@@ -723,6 +725,26 @@ config LPC17_MULTICAST
 	---help---
 		Enable receipt of multicast (and unicast) frames. Automatically set
 		if NET_IGMP is selected.
+
+choice
+	prompt "Work queue"
+	default LPC17_ETHERNET_LPWORK if SCHED_LPWORK
+	default LPC17_ETHERNET_HPWORK if !SCHED_LPWORK && SCHED_HPWORK
+	depends on SCHED_WORKQUEUE
+	---help---
+		Work queue support is required to use the Ethernet driver.  If the
+		low priority work queue is available, then it should be used by the
+		driver.
+
+config LPC17_ETHERNET_HPWORK
+	bool "High priority"
+	depends on SCHED_HPWORK
+
+config LPC17_ETHERNET_LPWORK
+	bool "Low priority"
+	depends on SCHED_LPWORK
+
+endchoice # Work queue
 endmenu
 
 menu "LCD device driver options"
@@ -900,10 +922,11 @@ config LPC17_USBDEV_NOLED
 
 config LPC17_USBDEV_REGDEBUG
 	bool "Register level debug"
-	depends on DEBUG
+	depends on DEBUG_USB_INFO
 	default n
 	---help---
-		Output detailed register-level USB device debug information.  Requires also DEBUG.
+		Output detailed register-level USB device debug information.  Requires
+		also CONFIG_DEBUG_USB_INFO.
 
 endmenu
 
@@ -976,9 +999,10 @@ config USBHOST_ISOC_DISABLE
 
 config LPC17_USBHOST_REGDEBUG
 	bool "Register level debug"
-	depends on DEBUG
+	depends on DEBUG_USB_INFO
 	default n
 	---help---
-		Output detailed register-level USB host debug information.  Requires also DEBUG.
+		Output detailed register-level USB host debug information.  Requires
+		also CONFIG_DEBUG_USB_INFO.
 
 endmenu

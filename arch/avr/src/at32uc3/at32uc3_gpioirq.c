@@ -57,8 +57,14 @@
 #ifdef CONFIG_AVR32_GPIOIRQ
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Private Types
  ****************************************************************************/
+
+struct g_gpiohandler_s
+{
+  xcpt_t handler;   /* Interrupt handler entry point */
+  void  *arg;       /* The argument that accompanies the interrupt handler */
+};
 
 /****************************************************************************
  * Private Data
@@ -66,11 +72,7 @@
 
 /* A table of handlers for each GPIO interrupt */
 
-static FAR xcpt_t g_gpiohandler[NR_GPIO_IRQS];
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
+static struct g_gpiohandler_s g_gpiohandler[NR_GPIO_IRQS];
 
 /****************************************************************************
  * Private Functions
@@ -221,15 +223,15 @@ static void gpio_porthandler(uint32_t regbase, int irqbase, uint32_t irqset, voi
 
               /* Dispatch handling for this pin */
 
-              xcpt_t handler = g_gpiohandler[irq];
-              if (handler)
+              xcpt_t handler = g_gpiohandler[irq].handler;
+              if (handler != NULL)
                 {
-                  handler(irq, context);
+                  handler(irq, contex, g_gpiohandler[irq].arg);
                 }
               else
                 {
-                  lldbg("No handler: pin=%d ifr=%08x irqset=%08x",
-                        pin, ifr, irqset);
+                  _err("ERROR: No handler: pin=%d ifr=%08x irqset=%08x",
+                       pin, ifr, irqset);
                 }
             }
 
@@ -247,8 +249,8 @@ static void gpio_porthandler(uint32_t regbase, int irqbase, uint32_t irqset, voi
           putreg32(bit, regbase + AVR32_GPIO_IFRC_OFFSET);
           ifr &= ~bit;
 
-          lldbg("IRQ on unconfigured pin: pin=%d ifr=%08x irqset=%08x",
-                pin, ifr, irqset);
+          warn("WARNING: IRQ on unconfigured pin: pin=%d ifr=%08x irqset=%08x",
+               pin, ifr, irqset);
         }
     }
 }
@@ -262,7 +264,7 @@ static void gpio_porthandler(uint32_t regbase, int irqbase, uint32_t irqset, voi
  ****************************************************************************/
 
 #if CONFIG_AVR32_GPIOIRQSETA != 0
-static int gpio0_interrupt(int irq, FAR void *context)
+static int gpio0_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   gpio_porthandler(AVR32_GPIO0_BASE, __IRQ_GPIO_PA0,
                    CONFIG_AVR32_GPIOIRQSETA, context);
@@ -271,7 +273,7 @@ static int gpio0_interrupt(int irq, FAR void *context)
 #endif
 
 #if CONFIG_AVR32_GPIOIRQSETB != 0
-static int gpio1_interrupt(int irq, FAR void *context)
+static int gpio1_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   gpio_porthandler(AVR32_GPIO1_BASE, __IRQ_GPIO_PB0,
                    CONFIG_AVR32_GPIOIRQSETB, context);
@@ -304,16 +306,17 @@ void gpio_irqinitialize(void)
 
   for (i = 0; i < NR_GPIO_IRQS; i++)
     {
-      g_gpiohandler[i] = irq_unexpected_isr;
+      g_gpiohandler[i].handler = irq_unexpected_isr;
+      g_gpiohandler[i].arg     = NULL;
     }
 
   /* Then attach the GPIO interrupt handlers */
 
 #if CONFIG_AVR32_GPIOIRQSETA != 0
-  irq_attach(AVR32_IRQ_GPIO0, gpio0_interrupt);
+  irq_attach(AVR32_IRQ_GPIO0, gpio0_interrupt, NULL);
 #endif
 #if CONFIG_AVR32_GPIOIRQSETB != 0
-  irq_attach(AVR32_IRQ_GPIO1, gpio1_interrupt);
+  irq_attach(AVR32_IRQ_GPIO1, gpio1_interrupt, NULL);
 #endif
 }
 
@@ -325,7 +328,7 @@ void gpio_irqinitialize(void)
  *
  ****************************************************************************/
 
-int gpio_irqattach(int irq, xcpt_t newisr, xcpt_t *oldisr)
+int gpio_irqattach(int irq, xcpt_t handler, void *arg)
 {
   irqstate_t flags;
   int        ret = -EINVAL;
@@ -338,25 +341,23 @@ int gpio_irqattach(int irq, xcpt_t newisr, xcpt_t *oldisr)
        */
 
       flags = enter_critical_section();
-      if (newisr == NULL)
+      if (handler == NULL)
         {
            gpio_irqdisable(irq);
-           newisr = irq_unexpected_isr;
+
+           handler = irq_unexpected_isr;
+           arg     = NULL;
         }
 
-      /* Return the old ISR (in case the caller ever wants to restore it) */
+      /* Save the new ISR in the table. */
 
-      if (oldisr)
-        {
-          *oldisr = g_gpiohandler[irq];
-        }
+      g_gpiohandler[irq].handler = handler;
+      g_gpiohandler[irq].arg     = arg;
 
-      /* Then save the new ISR in the table. */
-
-      g_gpiohandler[irq] = newisr;
       leave_critical_section(flags);
       ret = OK;
     }
+
   return ret;
 }
 

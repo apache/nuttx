@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/stdio/lib_memoutstream.c
  *
- *   Copyright (C) 2007-2009, 2011-2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2012, 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -93,9 +93,7 @@ void lib_memoutstream(FAR struct lib_memoutstream_s *outstream,
                       FAR char *bufstart, int buflen)
 {
   outstream->public.put   = memoutstream_putc;
-#ifdef CONFIG_STDIO_LINEBUFFER
   outstream->public.flush = lib_noflush;
-#endif
   outstream->public.nput  = 0;          /* Will be buffer index */
   outstream->buffer       = bufstart;   /* Start of buffer */
   outstream->buflen       = buflen - 1; /* Save space for null terminator */

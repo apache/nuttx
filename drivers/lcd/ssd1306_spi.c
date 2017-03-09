@@ -45,13 +45,13 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/lcd/ssd1306.h>
-
+#include <nuttx/spi/spi.h>
 #include "ssd1306.h"
 
 #if defined(CONFIG_LCD_SSD1306) && defined(CONFIG_LCD_SSD1306_SPI)
 
 /****************************************************************************
- * Private Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -61,9 +61,9 @@
  *
  ****************************************************************************/
 
-static inline void ssd1306_configspi(FAR struct spi_dev_s *spi)
+void ssd1306_configspi(FAR struct spi_dev_s *spi)
 {
-  lcdvdbg("Mode: %d Bits: 8 Frequency: %d\n",
+  lcdinfo("Mode: %d Bits: 8 Frequency: %d\n",
           CONFIG_SSD1306_SPIMODE, CONFIG_SSD1306_FREQUENCY);
 
   /* Configure SPI for the SSD1306 */
@@ -73,10 +73,6 @@ static inline void ssd1306_configspi(FAR struct spi_dev_s *spi)
   (void)SPI_HWFEATURES(spi, 0);
   (void)SPI_SETFREQUENCY(spi, CONFIG_SSD1306_FREQUENCY);
 }
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Name: ssd1306_sendbyte
@@ -89,7 +85,7 @@ static inline void ssd1306_configspi(FAR struct spi_dev_s *spi)
 void ssd1306_sendbyte(FAR struct ssd1306_dev_s *priv, uint8_t regval)
 {
 #ifdef CONFIG_LCD_SSD1306_REGDEBUG
-  lldbg("->0x%02x\n", regval);
+  _err("->0x%02x\n", regval);
 #endif
 
   /* Send byte value to display */
@@ -109,7 +105,7 @@ void ssd1306_sendblk(FAR struct ssd1306_dev_s *priv, uint8_t *data, uint8_t len)
 {
   /* Send byte value to display */
 
-  (void)SPI_SNDBLOCK(priv, data, len);
+  (void)SPI_SNDBLOCK(priv->spi, data, len);
 }
 
 /****************************************************************************

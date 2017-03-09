@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/hymini-stm32v/src/stm32_appinit.c
  *
- *   Copyright (C) 2009, 2011, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -125,7 +125,7 @@ static FAR struct sdio_dev_s *g_sdiodev;
  ****************************************************************************/
 
 #ifdef NSH_HAVEMMCSD
-static int nsh_cdinterrupt(int irq, FAR void *context)
+static int nsh_cdinterrupt(int irq, FAR void *context, FAR void *arg)
 {
   static bool inserted = 0xff; /* Impossible value */
   bool present;
@@ -182,7 +182,7 @@ int board_app_initialize(uintptr_t arg)
 
   /* Register an interrupt handler for the card detect pin */
 
-  stm32_gpiosetevent(GPIO_SD_CD, true, true, true, nsh_cdinterrupt);
+  (void)stm32_gpiosetevent(GPIO_SD_CD, true, true, true, nsh_cdinterrupt, NULL);
 
   /* Mount the SDIO-based MMC/SD block driver */
 
@@ -216,7 +216,7 @@ int board_app_initialize(uintptr_t arg)
   /* Use SD card detect pin to check if a card is inserted */
 
   cd_status = !stm32_gpioread(GPIO_SD_CD);
-  vdbg("Card detect : %hhu\n", cd_status);
+  _info("Card detect : %hhu\n", cd_status);
 
   sdio_mediachange(g_sdiodev, cd_status);
 #endif

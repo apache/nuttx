@@ -39,8 +39,12 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
+#include <syslog.h>
+
 #include <nuttx/board.h>
 
+#include "kinetis_usbotg.h"
 #include "teensy-3x.h"
 
 /****************************************************************************
@@ -74,5 +78,26 @@
 
 int board_app_initialize(uintptr_t arg)
 {
+  int ret;
+
+#ifdef CONFIG_USBDEV
+  /* Teensy is powered from usb and (bug?) only boots from being programmed, 
+   * so if usb is compiled in signal the controller driver that we're attached now.
+   */
+
+  khci_usbattach();
+#endif
+
+#ifdef CONFIG_PWM
+  /* Initialize PWM and register the PWM device. */
+
+  ret = kinetis_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: kinetis_pwm_setup() failed: %d\n", ret);
+    }
+#endif
+
+  UNUSED(ret);
   return OK;
 }

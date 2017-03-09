@@ -1,7 +1,7 @@
 /****************************************************************************
  * syscall/syscall_stublookup.c
  *
- *   Copyright (C) 2011-2013, 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013, 2015-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -85,16 +85,24 @@ uintptr_t STUB_sem_destroy(int nbr, uintptr_t parm1);
 uintptr_t STUB_sem_open(int nbr, uintptr_t parm1, uintptr_t parm2,
             uintptr_t parm3, uintptr_t parm4, uintptr_t parm5, uintptr_t parm6);
 uintptr_t STUB_sem_post(int nbr, uintptr_t parm1);
+uintptr_t STUB_sem_setprotocol(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_sem_timedwait(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_sem_trywait(int nbr, uintptr_t parm1);
 uintptr_t STUB_sem_unlink(int nbr, uintptr_t parm1);
 uintptr_t STUB_sem_wait(int nbr, uintptr_t parm1);
+
 uintptr_t STUB_pgalloc(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_task_create(int nbr, uintptr_t parm1, uintptr_t parm2,
             uintptr_t parm3, uintptr_t parm4, uintptr_t parm5);
 uintptr_t STUB_task_delete(int nbr, uintptr_t parm1);
 uintptr_t STUB_task_restart(int nbr, uintptr_t parm1);
+uintptr_t STUB_task_setcancelstate(int nbr, uintptr_t parm1,
+            uintptr_t parm2);
 uintptr_t STUB_up_assert(int nbr, uintptr_t parm1, uintptr_t parm2);
+
+uintptr_t STUB_task_setcanceltype(int nbr, uintptr_t parm1,
+            uintptr_t parm2);
+uintptr_t STUB_task_testcancel(int nbr);
 
 /* The following can be individually enabled */
 
@@ -114,6 +122,7 @@ uintptr_t STUB_waitid(int nbr, uintptr_t parm1, uintptr_t parm2,
 #ifdef CONFIG_MODULE
 uintptr_t STUB_insmod(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_rmmod(int nbr, uintptr_t parm1);
+uintptr_t STUB_modhandle(int nbr, uintptr_t parm1, uintptr_t parm2);
 #endif
 
 /* The following can only be defined if we are configured to execute
@@ -154,6 +163,7 @@ uintptr_t STUB_clock_systimer(int nbr);
 uintptr_t STUB_clock_getres(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_clock_gettime(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_clock_settime(int nbr, uintptr_t parm1, uintptr_t parm2);
+uintptr_t STUB_adjtime(int nbr, uintptr_t parm1, uintptr_t parm2);
 
 /* The following are defined only if POSIX timers are supported */
 
@@ -164,6 +174,11 @@ uintptr_t STUB_timer_getoverrun(int nbr, uintptr_t parm1);
 uintptr_t STUB_timer_gettime(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_timer_settime(int nbr, uintptr_t parm1, uintptr_t parm2,
             uintptr_t parm3, uintptr_t parm4);
+
+/* System logging */
+
+uintptr_t STUB__vsyslog(int nbr, uintptr_t parm1, uintptr_t parm2,
+            uintptr_t parm3);
 
 /* The following are defined if either file or socket descriptor are
  * enabled.
@@ -209,7 +224,6 @@ uintptr_t STUB_fcntl(int nbr, uintptr_t parm1, uintptr_t parm2,
             uintptr_t parm6);
 uintptr_t STUB_lseek(int nbr, uintptr_t parm1, uintptr_t parm2,
             uintptr_t parm3);
-uintptr_t STUB_mkfifo(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_mmap(int nbr, uintptr_t parm1, uintptr_t parm2,
             uintptr_t parm3, uintptr_t parm4, uintptr_t parm5,
             uintptr_t parm6);
@@ -217,13 +231,22 @@ uintptr_t STUB_open(int nbr, uintptr_t parm1, uintptr_t parm2,
             uintptr_t parm3, uintptr_t parm4, uintptr_t parm5,
             uintptr_t parm6);
 uintptr_t STUB_opendir(int nbr, uintptr_t parm1);
-uintptr_t STUB_pipe(int nbr, uintptr_t parm1);
 uintptr_t STUB_readdir(int nbr, uintptr_t parm1);
 uintptr_t STUB_rewinddir(int nbr, uintptr_t parm1);
 uintptr_t STUB_seekdir(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_stat(int nbr, uintptr_t parm1, uintptr_t parm2);
+uintptr_t STUB_fstat(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_statfs(int nbr, uintptr_t parm1, uintptr_t parm2);
+uintptr_t STUB_fstatfs(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_telldir(int nbr, uintptr_t parm1);
+
+uintptr_t STUB_link(int nbr, uintptr_t parm1, uintptr_t parm2);
+uintptr_t STUB_readlink(int nbr, uintptr_t parm1, uintptr_t parm2,
+            uintptr_t parm3);
+
+uintptr_t STUB_pipe2(int nbr, uintptr_t parm1, uintptr_t parm2);
+uintptr_t STUB_mkfifo2(int nbr, uintptr_t parm1, uintptr_t parm2,
+            uintptr_t parm3);
 
 uintptr_t STUB_fs_fdopen(int nbr, uintptr_t parm1, uintptr_t parm2,
             uintptr_t parm3);
@@ -280,8 +303,6 @@ uintptr_t STUB_pthread_mutex_lock(int nbr, uintptr_t parm1);
 uintptr_t STUB_pthread_mutex_trylock(int nbr, uintptr_t parm1);
 uintptr_t STUB_pthread_mutex_unlock(int nbr, uintptr_t parm1);
 uintptr_t STUB_pthread_once(int nbr, uintptr_t parm1, uintptr_t parm2);
-uintptr_t STUB_pthread_setcancelstate(int nbr, uintptr_t parm1,
-            uintptr_t parm2);
 uintptr_t STUB_pthread_setschedparam(int nbr, uintptr_t parm1,
             uintptr_t parm2, uintptr_t parm3);
 uintptr_t STUB_pthread_setschedprio(int nbr, uintptr_t parm1,
@@ -300,6 +321,10 @@ uintptr_t STUB_pthread_cond_timedwait(int nbr, uintptr_t parm1,
 uintptr_t STUB_pthread_kill(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_pthread_sigmask(int nbr, uintptr_t parm1, uintptr_t parm2,
             uintptr_t parm3);
+
+uintptr_t STUB_pthread_cleanup_pop(int nbr, uintptr_t parm1);
+uintptr_t STUB_pthread_cleanup_push(int nbr, uintptr_t parm1,
+            uintptr_t parm2);
 
 /* The following are defined only if message queues are enabled */
 

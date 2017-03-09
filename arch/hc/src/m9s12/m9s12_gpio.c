@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/m9s12/m9s12_gpio.c
+ * arch/hc/src/m9s12/m9s12_gpio.c
  *
  *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -304,7 +304,7 @@ static inline void pim_configgpio(uint16_t cfgset, uint8_t portndx, uint8_t pin)
 
   DEBUGASSERT(portndx < HCS12_PIM_NPORTS);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if ((cfgset & GPIO_INT_ENABLE) != 0)
     {
       /* Yes.. then it must not be tagged as an output */

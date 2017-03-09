@@ -131,7 +131,7 @@ void icmp_send(FAR struct net_driver_s *dev, FAR in_addr_t *destaddr)
           picmp->icmpchksum = 0xffff;
         }
 
-      nllvdbg("Outgoing ICMP packet length: %d (%d)\n",
+      ninfo("Outgoing ICMP packet length: %d (%d)\n",
               dev->d_len, (picmp->len[0] << 8) | picmp->len[1]);
 
 #ifdef CONFIG_NET_STATISTICS

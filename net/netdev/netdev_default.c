@@ -76,11 +76,10 @@
 FAR struct net_driver_s *netdev_default(void)
 {
   FAR struct net_driver_s *dev;
-  net_lock_t save;
 
   /* Examine each registered network device */
 
-  save = net_lock();
+  net_lock();
   for (dev = g_netdevices; dev; dev = dev->flink)
     {
       /* Is the interface in the "up" state? */
@@ -91,12 +90,12 @@ FAR struct net_driver_s *netdev_default(void)
            * state.
            */
 
-          net_unlock(save);
+          net_unlock();
           return dev;
         }
     }
 
-  net_unlock(save);
+  net_unlock();
   return NULL;
 }
 

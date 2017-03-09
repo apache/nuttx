@@ -90,34 +90,34 @@ volatile uint32_t *g_current_regs[1];
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_IRQ)
+#if defined(CONFIG_DEBUG_IRQ_INFO)
 static void kl_dumpnvic(const char *msg, int irq)
 {
   irqstate_t flags;
 
   flags = enter_critical_section();
 
-  lldbg("NVIC (%s, irq=%d):\n", msg, irq);
-  lldbg("  ISER:       %08x ICER:   %08x\n",
-        getreg32(ARMV6M_NVIC_ISER), getreg32(ARMV6M_NVIC_ICER));
-  lldbg("  ISPR:       %08x ICPR:   %08x\n",
-        getreg32(ARMV6M_NVIC_ISPR), getreg32(ARMV6M_NVIC_ICPR));
-  lldbg("  IRQ PRIO:   %08x %08x %08x %08x\n",
-        getreg32(ARMV6M_NVIC_IPR0), getreg32(ARMV6M_NVIC_IPR1),
-        getreg32(ARMV6M_NVIC_IPR2), getreg32(ARMV6M_NVIC_IPR3));
-  lldbg("              %08x %08x %08x %08x\n",
-        getreg32(ARMV6M_NVIC_IPR4), getreg32(ARMV6M_NVIC_IPR5),
-        getreg32(ARMV6M_NVIC_IPR6), getreg32(ARMV6M_NVIC_IPR7));
+  irqinfo("NVIC (%s, irq=%d):\n", msg, irq);
+  irqinfo("  ISER:       %08x ICER:   %08x\n",
+          getreg32(ARMV6M_NVIC_ISER), getreg32(ARMV6M_NVIC_ICER));
+  irqinfo("  ISPR:       %08x ICPR:   %08x\n",
+          getreg32(ARMV6M_NVIC_ISPR), getreg32(ARMV6M_NVIC_ICPR));
+  irqinfo("  IRQ PRIO:   %08x %08x %08x %08x\n",
+          getreg32(ARMV6M_NVIC_IPR0), getreg32(ARMV6M_NVIC_IPR1),
+          getreg32(ARMV6M_NVIC_IPR2), getreg32(ARMV6M_NVIC_IPR3));
+  irqinfo("              %08x %08x %08x %08x\n",
+          getreg32(ARMV6M_NVIC_IPR4), getreg32(ARMV6M_NVIC_IPR5),
+          getreg32(ARMV6M_NVIC_IPR6), getreg32(ARMV6M_NVIC_IPR7));
 
-  lldbg("SYSCON:\n");
-  lldbg("  CPUID:      %08x\n",
-        getreg32(ARMV6M_SYSCON_CPUID));
-  lldbg("  ICSR:       %08x AIRCR:  %08x\n",
-        getreg32(ARMV6M_SYSCON_ICSR), getreg32(ARMV6M_SYSCON_AIRCR));
-  lldbg("  SCR:        %08x CCR:    %08x\n",
-        getreg32(ARMV6M_SYSCON_SCR), getreg32(ARMV6M_SYSCON_CCR));
-  lldbg("  SHPR2:      %08x SHPR3:  %08x\n",
-        getreg32(ARMV6M_SYSCON_SHPR2), getreg32(ARMV6M_SYSCON_SHPR3));
+  irqinfo("SYSCON:\n");
+  irqinfo("  CPUID:      %08x\n",
+          getreg32(ARMV6M_SYSCON_CPUID));
+  irqinfo("  ICSR:       %08x AIRCR:  %08x\n",
+          getreg32(ARMV6M_SYSCON_ICSR), getreg32(ARMV6M_SYSCON_AIRCR));
+  irqinfo("  SCR:        %08x CCR:    %08x\n",
+          getreg32(ARMV6M_SYSCON_SCR), getreg32(ARMV6M_SYSCON_CCR));
+  irqinfo("  SHPR2:      %08x SHPR3:  %08x\n",
+         getreg32(ARMV6M_SYSCON_SHPR2), getreg32(ARMV6M_SYSCON_SHPR3));
 
   leave_critical_section(flags);
 }
@@ -137,27 +137,27 @@ static void kl_dumpnvic(const char *msg, int irq)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG
-static int kl_nmi(int irq, FAR void *context)
+#ifdef CONFIG_DEBUG_FEATURES
+static int kl_nmi(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! NMI received\n");
+  _err("PANIC!!! NMI received\n");
   PANIC();
   return 0;
 }
 
-static int kl_pendsv(int irq, FAR void *context)
+static int kl_pendsv(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! PendSV received\n");
+  _err("PANIC!!! PendSV received\n");
   PANIC();
   return 0;
 }
 
-static int kl_reserved(int irq, FAR void *context)
+static int kl_reserved(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! Reserved interrupt\n");
+  _err("PANIC!!! Reserved interrupt\n");
   PANIC();
   return 0;
 }
@@ -231,15 +231,15 @@ void up_irqinitialize(void)
    * under certain conditions.
    */
 
-  irq_attach(KL_IRQ_SVCALL, up_svcall);
-  irq_attach(KL_IRQ_HARDFAULT, up_hardfault);
+  irq_attach(KL_IRQ_SVCALL, up_svcall, NULL);
+  irq_attach(KL_IRQ_HARDFAULT, up_hardfault, NULL);
 
   /* Attach all other processor exceptions (except reset and sys tick) */
 
-#ifdef CONFIG_DEBUG
-  irq_attach(KL_IRQ_NMI, kl_nmi);
-  irq_attach(KL_IRQ_PENDSV, kl_pendsv);
-  irq_attach(KL_IRQ_RESERVED, kl_reserved);
+#ifdef CONFIG_DEBUG_FEATURES
+  irq_attach(KL_IRQ_NMI, kl_nmi, NULL);
+  irq_attach(KL_IRQ_PENDSV, kl_pendsv, NULL);
+  irq_attach(KL_IRQ_RESERVED, kl_reserved, NULL);
 #endif
 
   kl_dumpnvic("initial", NR_IRQS);
@@ -248,7 +248,7 @@ void up_irqinitialize(void)
    * configured pin interrupts.
    */
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_KL_GPIOIRQ
   kl_gpioirqinitialize();
 #endif
 

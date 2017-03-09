@@ -52,6 +52,7 @@
 #include "chip.h"
 #include "arm.h"
 #include "mmu.h"
+#include "scu.h"
 #include "cache.h"
 #include "fpu.h"
 #include "up_internal.h"
@@ -63,6 +64,16 @@
 #include "imx_lowputc.h"
 #include "imx_serial.h"
 #include "imx_boot.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_FEATURES
+#  define PROGRESS(c) imx_lowputc(c)
+#else
+#  define PROGRESS(c)
+#endif
 
 /****************************************************************************
  * Public Data
@@ -388,8 +399,10 @@ static inline void imx_wdtdisable(void)
 
 void arm_boot(void)
 {
-#ifdef CONFIG_ARCH_RAMFUNCS
+#if defined(CONFIG_ARCH_RAMFUNCS)
   const uint32_t *src;
+#endif
+#if defined(CONFIG_ARCH_RAMFUNCS) || defined(CONFIG_SMP) && defined(SMP_INTERCPU_NONCACHED)
   uint32_t *dest;
 #endif
 
@@ -398,7 +411,7 @@ void arm_boot(void)
    */
 
   imx_setupmappings();
-  imx_lowputc('A');
+  PROGRESS('A');
 
   /* Make sure that all other CPUs are in the disabled state.  This is a
    * formality because the other CPUs are actually running then we have
@@ -406,13 +419,21 @@ void arm_boot(void)
    */
 
   imx_cpu_disable();
+  PROGRESS('B');
+
+#ifdef CONFIG_SMP
+  /* Enable SMP cache coherency for CPU0 */
+
+  arm_enable_smp(0);
+  PROGRESS('C');
+#endif
 
   /* Provide a special mapping for the OCRAM interrupt vector positioned in
    * high memory.
    */
 
   imx_vectormapping();
-  imx_lowputc('B');
+  PROGRESS('D');
 
 #ifdef CONFIG_ARCH_RAMFUNCS
   /* Copy any necessary code sections from FLASH to RAM.  The correct
@@ -426,14 +447,14 @@ void arm_boot(void)
       *dest++ = *src++;
     }
 
-  imx_lowputc('C');
+  PROGRESS('E');
 
   /* Flush the copied RAM functions into physical RAM so that will
    * be available when fetched into the I-Cache.
    */
 
   arch_clean_dcache((uintptr_t)&_sramfuncs, (uintptr_t)&_eramfuncs)
-  imx_lowputc('D');
+  PROGRESS('F');
 #endif
 
   /* Setup up vector block.  _vector_start and _vector_end are exported from
@@ -441,37 +462,35 @@ void arm_boot(void)
    */
 
   imx_copyvectorblock();
-  imx_lowputc('E');
+  PROGRESS('G');
 
   /* Disable the watchdog timer */
 
   imx_wdtdisable();
-  imx_lowputc('F');
+  PROGRESS('H');
 
   /* Initialize clocking to settings provided by board-specific logic */
 
   imx_clockconfig();
-  imx_lowputc('G');
+  PROGRESS('I');
 
 #ifdef CONFIG_ARCH_FPU
   /* Initialize the FPU */
 
   arm_fpuconfig();
-  imx_lowputc('H');
+  PROGRESS('J');
 #endif
 
-  /* Perform board-specific initialization,  This must include:
-   *
-   * - Initialization of board-specific memory resources (e.g., SDRAM)
-   * - Configuration of board specific resources (PIOs, LEDs, etc).
+  /* Perform board-specific memroy initialization,  This must include
+   * initialization of board-specific memory resources (e.g., SDRAM)
    *
    * NOTE: We must use caution prior to this point to make sure that
    * the logic does not access any global variables that might lie
    * in SDRAM.
    */
 
-  imx_board_initialize();
-  imx_lowputc('I');
+  imx_memory_initialize();
+  PROGRESS('K');
 
 #ifdef NEED_SDRAM_REMAPPING
   /* SDRAM was configured in a temporary state to support low-level
@@ -480,7 +499,7 @@ void arm_boot(void)
    */
 
   imx_remap();
-  imx_lowputc('J');
+  PROGRESS('L');
 #endif
 
 #ifdef CONFIG_BOOT_SDRAM_DATA
@@ -489,13 +508,20 @@ void arm_boot(void)
    */
 
   arm_data_initialize();
-  imx_lowputc('K');
+  PROGRESS('M');
 #endif
+
+  /* Perform board-specific device initialization. This would include
+   * configuration of board specific resources such as GPIOs, LEDs, etc.
+   */
+
+  imx_board_initialize();
+  PROGRESS('N');
 
   /* Perform common, low-level chip initialization (might do nothing) */
 
   imx_lowsetup();
-  imx_lowputc('L');
+  PROGRESS('O');
 
 #ifdef USE_EARLYSERIALINIT
   /* Perform early serial initialization if we are going to use the serial
@@ -503,7 +529,7 @@ void arm_boot(void)
    */
 
   imx_earlyserialinit();
-  imx_lowputc('M');
+  PROGRESS('P');
 #endif
 
   /* Now we can enable all other CPUs.  The enabled CPUs will start execution
@@ -512,6 +538,6 @@ void arm_boot(void)
    */
 
   imx_cpu_enable();
-  imx_lowputc('N');
-  imx_lowputc('\n');
+  PROGRESS('Q');
+  PROGRESS('\n');
 }

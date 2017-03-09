@@ -64,6 +64,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/i2c/i2c_master.h>
 
 #include <nuttx/irq.h>
@@ -133,7 +134,7 @@ struct lpc2378_i2cdev_s
 
 static int  lpc2378_i2c_start(struct lpc2378_i2cdev_s *priv);
 static void lpc2378_i2c_stop(struct lpc2378_i2cdev_s *priv);
-static int  lpc2378_i2c_interrupt(int irq, FAR void *context);
+static int  lpc2378_i2c_interrupt(int irq, FAR void *context, FAR void *arg);
 static void lpc2378_i2c_timeout(int argc, uint32_t arg, ...);
 static void lpc2378_i2c_setfrequency(struct lpc2378_i2cdev_s *priv,
               uint32_t frequency);
@@ -295,36 +296,13 @@ static void lpc2378_stopnext(struct lpc2378_i2cdev_s *priv)
  *
  ****************************************************************************/
 
-static int lpc2378_i2c_interrupt(int irq, FAR void *context)
+static int lpc2378_i2c_interrupt(int irq, FAR void *context, FAR void *arg)
 {
-  struct lpc2378_i2cdev_s *priv;
+  struct lpc2378_i2cdev_s *priv = (struct lpc2378_i2cdev_s *)arg;
   struct i2c_msg_s *msg;
   uint32_t state;
 
-#ifdef CONFIG_LPC2378_I2C0
-  if (irq == I2C0_IRQ)
-    {
-      priv = &g_i2c0dev;
-    }
-  else
-#endif
-#ifdef CONFIG_LPC2378_I2C1
-  if (irq == I2C1_IRQ)
-    {
-      priv = &g_i2c1dev;
-    }
-  else
-#endif
-#ifdef CONFIG_LPC2378_I2C2
-  if (irq == I2C2_IRQ)
-    {
-      priv = &g_i2c2dev;
-    }
-  else
-#endif
-    {
-      PANIC();
-    }
+  DEBUGASSERT(priv != NULL);
 
   /* Reference UM10360 19.10.5 */
 
@@ -490,7 +468,7 @@ struct i2c_master_s *lpc2378_i2cbus_initialize(int port)
 
   if (port > 1)
     {
-      dbg("lpc I2C Only support 0,1\n");
+      l2cerr("ERROR: lpc I2C Only support 0,1\n");
       return NULL;
     }
 
@@ -600,8 +578,16 @@ struct i2c_master_s *lpc2378_i2cbus_initialize(int port)
 
   putreg32(I2C_CONSET_I2EN, priv->base + I2C_CONSET_OFFSET);
 
+  /* Initialize semaphores */
+
   sem_init(&priv->mutex, 0, 1);
   sem_init(&priv->wait, 0, 0);
+
+  /* The wait semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
+  sem_setprotocol(&priv->wait, SEM_PRIO_NONE);
 
   /* Allocate a watchdog timer */
 
@@ -610,7 +596,7 @@ struct i2c_master_s *lpc2378_i2cbus_initialize(int port)
 
   /* Attach Interrupt Handler */
 
-  irq_attach(priv->irqid, lpc2378_i2c_interrupt);
+  irq_attach(priv->irqid, lpc2378_i2c_interrupt, priv);
 
   /* Enable Interrupt Handler */
 

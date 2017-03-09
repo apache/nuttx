@@ -40,6 +40,9 @@ config ARCH_CHIP_LPC4337JBD144
 config ARCH_CHIP_LPC4337JET100
 	bool "LPC4337JET100"
 
+config ARCH_CHIP_LPC4337FET256
+	bool "LPC4337FET256"
+
 config ARCH_CHIP_LPC4350FBD208
 	bool "LPC4350FBD208"
 
@@ -81,36 +84,43 @@ config ARCH_FAMILY_LPC4320
 	bool
 	default y if ARCH_CHIP_LPC4320FBD144 || ARCH_CHIP_LPC4320FET100
 	select ARCH_HAVE_TICKLESS
+	select ARCH_HAVE_AHB_SRAM_BANK1
 
 config ARCH_FAMILY_LPC4330
 	bool
 	default y if ARCH_CHIP_LPC4330FBD144 || ARCH_CHIP_LPC4330FET100 || ARCH_CHIP_LPC4330FET180 || ARCH_CHIP_LPC4330FET256 || ARCH_CHIP_LPC4337JET100
 	select ARCH_HAVE_TICKLESS
+	select ARCH_HAVE_AHB_SRAM_BANK1
 
 config ARCH_FAMILY_LPC4337
 	bool
-	default y if ARCH_CHIP_LPC4337JBD144
+	default y if ARCH_CHIP_LPC4337JBD144 || ARCH_CHIP_LPC4337FET256
 	select ARCH_HAVE_TICKLESS
+	select ARCH_HAVE_AHB_SRAM_BANK1
 
 config ARCH_FAMILY_LPC4350
 	bool
 	default y if ARCH_CHIP_LPC4350FBD208 || ARCH_CHIP_LPC4350FET180 || ARCH_CHIP_LPC4350FET256
 	select ARCH_HAVE_TICKLESS
+	select ARCH_HAVE_AHB_SRAM_BANK1
 
 config ARCH_FAMILY_LPC4353
 	bool
 	default y if ARCH_CHIP_LPC4353FBD208 || ARCH_CHIP_LPC4353FET180 || ARCH_CHIP_LPC4353FET256
 	select ARCH_HAVE_TICKLESS
+	select ARCH_HAVE_AHB_SRAM_BANK1
 
 config ARCH_FAMILY_LPC4357
 	bool
 	default y if ARCH_CHIP_LPC4357FET180 || ARCH_CHIP_LPC4357FBD208 || ARCH_CHIP_LPC4357FET256
 	select ARCH_HAVE_TICKLESS
+	select ARCH_HAVE_AHB_SRAM_BANK1
 
 config ARCH_FAMILY_LPC4370
 	bool
 	default y if ARCH_CHIP_LPC4370FET100
 	select ARCH_HAVE_TICKLESS
+	select ARCH_HAVE_AHB_SRAM_BANK1
 
 choice
 	prompt "LPC43XX Boot Configuration"
@@ -177,9 +187,15 @@ config LPC43_DAC
 config LPC43_EMC
 	bool "External Memory Controller (EMC)"
 	default n
+	select ARCH_HAVE_EXTSDRAM0
+	select ARCH_HAVE_EXTSDRAM1
+	select ARCH_HAVE_EXTSDRAM2
+	select ARCH_HAVE_EXTSDRAM3
 
 config LPC43_ETHERNET
 	bool "Ethernet"
+	select NETDEVICES
+	select ARCH_HAVE_PHY
 	default n
 
 config LPC43_EVNTMNTR
@@ -256,8 +272,9 @@ config LPC43_SSP1
 	default n
 
 config LPC43_TMR0
-	bool "ADC1"
+	bool "Timer 0"
 	default n
+	select LPC43_TIMER
 
 config LPC43_TMR1
 	bool "Timer 1"
@@ -266,10 +283,17 @@ config LPC43_TMR1
 config LPC43_TMR2
 	bool "Timer 2"
 	default n
+	select LPC43_TIMER
 
 config LPC43_TMR3
 	bool "Timer 3"
 	default n
+	select LPC43_TIMER
+
+config LPC43_TIMER
+        bool
+        default n
+        select ARCH_HAVE_EXTCLK
 
 config LPC43_USART0
 	bool "USART0"
@@ -314,8 +338,179 @@ config LPC43_WWDT
 
 endmenu # LPC43xx Peripheral Support
 
-if LPC43_ETHERNET
+menu "ADC driver options"
+	depends on LPC43_ADC0 || LPC43_ADC1
+
+config ADC0_MASK
+	hex "ADC0 mask"
+	default 0x01
+
+config ADC0_FREQ
+	int "ADC0 frequency"
+	default 4500000
+
+endmenu # ADC driver options
+
+config LPC43_GPIO_IRQ
+	bool "GPIO interrupt support"
+	default n
+	---help---
+		Enable support for GPIO interrupts
+
+menu "Internal Memory Configuration"
+
+config ARCH_HAVE_AHB_SRAM_BANK1
+	bool
+
+if !LPC43_BOOT_SRAM
+
+config LPC43_USE_LOCSRAM_BANK1
+	bool "Use local SRAM bank 1 memory region"
+	default n
+	---help---
+		Add local SRAM bank 1 memory region.
+
+endif # LPC43_BOOT_SRAM
+
+config LPC43_USE_AHBSRAM_BANK0
+	bool "Use AHB SRAM bank 0 memory region"
+	default n
+	---help---
+		Add local AHB SRAM bank 0 memory region.
+
+config LPC43_USE_AHBSRAM_BANK1
+	bool "Use AHB SRAM bank 1 memory region"
+	default n
+	depends on ARCH_HAVE_AHB_SRAM_BANK1
+	---help---
+		Add local AHB SRAM bank 1 memory region.
+
+config LPC43_HEAP_AHBSRAM_BANK2
+	bool "Use AHB SRAM bank 2 (ETB SRAM) memory region"
+	default n
+	---help---
+		Add local AHB SRAM bank 2 (ETB SRAM) memory region.
+
+endmenu # LPC43xx Internal Memory Configuration
+
+menu "External Memory Configuration"
+
+config ARCH_HAVE_EXTSDRAM0
+	bool
+
+config ARCH_HAVE_EXTSDRAM1
+	bool
+
+config ARCH_HAVE_EXTSDRAM2
+	bool
+
+config ARCH_HAVE_EXTSDRAM3
+	bool
+
+config LPC43_EXTSDRAM0
+	bool "Configure external SDRAM0 (on DYNCS0)"
+	default n
+	depends on ARCH_HAVE_EXTSDRAM0
+	select ARCH_HAVE_EXTSDRAM
+	---help---
+		Configure external SDRAM memory and, if applicable, map then external
+		SDRAM into the memory map.
+
+if LPC43_EXTSDRAM0
+
+config LPC43_EXTSDRAM0_SIZE
+	int "External SDRAM0 size"
+	default 0
+	---help---
+		Size of the external SDRAM on DYNCS0 in bytes.
+
+config LPC43_EXTSDRAM0_HEAP
+	bool "Add external SDRAM on DYNCS0 to the heap"
+	default y
+	---help---
+		Add the external SDRAM on DYNCS0 into the heap.
+
+endif # LCP43_EXTSDRAM0
+
+config LPC43_EXTSDRAM1
+	bool "Configure external SDRAM1 (on DYNCS1)"
+	default n
+	depends on ARCH_HAVE_EXTSDRAM1
+	select ARCH_HAVE_EXTSDRAM
+	---help---
+		Configure external SDRAM memoryand, if applicable, map then external
+		SDRAM into the memory map.
+
+if LPC43_EXTSDRAM1
+
+config LPC43_EXTSDRAM1_SIZE
+	int "External SDRAM1 size"
+	default 0
+	---help---
+		Size of the external SDRAM on DYNCS1 in bytes.
+
+config LPC43_EXTSDRAM1_HEAP
+	bool "Add external SDRAM on DYNCS1 to the heap"
+	default y
+	---help---
+		Add the external SDRAM on DYNCS1 into the heap.
+
+endif # LCP43_EXTSDRAM1
+
+config LPC43_EXTSDRAM2
+	bool "Configure external SDRAM2 (on DYNCS2)"
+	default n
+	depends on ARCH_HAVE_EXTSDRAM2
+	select ARCH_HAVE_EXTSDRAM
+	---help---
+		Configure external SDRAM memoryand, if applicable, map then external
+		SDRAM into the memory map.
+
+if LPC43_EXTSDRAM2
+
+config LPC43_EXTSDRAM2_SIZE
+	int "External SDRAM2 size"
+	default 0
+	---help---
+		Size of the external SDRAM on DYNCS2 in bytes.
+
+config LPC43_EXTSDRAM2_HEAP
+    bool "Add external SDRAM on DYNCS2 to the heap"
+	default y
+	---help---
+	    Add the external SDRAM on DYNCS2 into the heap.
+
+endif # LCP43_EXTSDRAM2
+
+config LPC43_EXTSDRAM3
+	bool "Configure external SDRAM3 (on DYNCS3)"
+	default n
+	depends on ARCH_HAVE_EXTSDRAM3
+	select ARCH_HAVE_EXTSDRAM
+	---help---
+		Configure external SDRAM memoryand, if applicable, map then external
+		SDRAM into the memory map.
+
+if LPC43_EXTSDRAM3
+
+config LPC43_EXTSDRAM3_SIZE
+	int "External SDRAM3 size"
+	default 0
+	---help---
+		Size of the external SDRAM in bytes.
+
+config LPC43_EXTSDRAM3_HEAP
+	bool "Add external SDRAM on DYNCS3 to the heap"
+	default y
+	---help---
+		Add the external SDRAM on DYNCS3 into the heap.
+
+endif # LCP43_EXTSDRAM3
+
+endmenu # External Memory Configuration
+
 menu "Ethernet MAC configuration"
+	depends on LPC43_ETHERNET
 
 config LPC43_PHYADDR
 	int "PHY address"
@@ -448,15 +643,34 @@ config LPC43_RMII
 	bool
 	default y if !LPC43_MII
 
+choice
+	prompt "Work queue"
+	default LPC43_ETHERNET_LPWORK if SCHED_LPWORK
+	default LPC43_ETHERNET_HPWORK if !SCHED_LPWORK && SCHED_HPWORK
+	depends on SCHED_WORKQUEUE
+	---help---
+		Work queue support is required to use the Ethernet driver.  If the
+		low priority work queue is available, then it should be used by the
+		driver.
+
+config LPC43_ETHERNET_HPWORK
+	bool "High priority"
+	depends on SCHED_HPWORK
+
+config LPC43_ETHERNET_LPWORK
+	bool "Low priority"
+	depends on SCHED_LPWORK
+
+endchoice # Work queue
+
 config LPC43_ETHERNET_REGDEBUG
 	bool "Register-Level Debug"
 	default n
-	depends on DEBUG
+	depends on DEBUG_NET_INFO
 	---help---
-		Enable very low-level register access debug.  Depends on DEBUG.
+		Enable very low-level register access debug.  Depends on CONFIG_DEBUG_NET_INFO.
 
 endmenu # Ethernet MAC configuration
-endif # LPC43_ETHERNET
 
 menu "RS-485 Configuration"
 if LPC43_USART0
@@ -467,11 +681,16 @@ config USART0_RS485MODE
 	---help---
 		Enable RS-485 interface on USART0.
 
-config USART0_RS485_DTRDIR
-	bool "USART0 DTR for DIR"
+if USART0_RS485_MODE
+	config USART0_RS485DIROIN
+	bool "Invert direction control pin polarity"
 	default n
 	---help---
-		Use the USART DTR pin for the DIR pin
+		If disabled, control pin will be driven to logic 0 when the
+		transmitter has data to be sent.  It will be driven to logic 1 after
+		the last bit of data has been transmitted.
+
+endif # USART0_RS485MODE
 
 endif # LPC43_USART0
 
@@ -499,11 +718,15 @@ config USART2_RS485MODE
 	---help---
 		Enable RS-485 interface on USART2.
 
-config USART2_RS485_DTRDIR
-	bool "USART2 DTR for DIR"
+if USART2_RS485MODE
+	config USART0_RS485DIROIN
+	bool "Invert direction control pin polarity"
 	default n
 	---help---
-		Use the USART DTR pin for the DIR pin
+		If disabled, control pin will be driven to logic 0 when the transmitter has data to be sent.
+		It will be driven to logic 1 after the last bit of data has been transmitted.
+
+endif # USART2_RS485MODE
 
 endif # LPC43_USART2
 
@@ -515,11 +738,15 @@ config USART3_RS485MODE
 	---help---
 		Enable RS-485 interface on USART3.
 
-config USART3_RS485_DTRDIR
-	bool "USART3 DTR for DIR"
+if USART3_RS485MODE
+config USART3_RS485DIROIN
+	bool "Invert direction control pin polarity"
 	default n
 	---help---
-		Use the USART DTR pin for the DIR pin
+		If disabled, control pin will be driven to logic 0 when the transmitter has data to be sent.
+		It will be driven to logic 1 after the last bit of data has been transmitted.
+
+endif # USART3_RS485MODE
 
 endif # LPC43_USART3
 endmenu # RS-485 Configuration

@@ -1,5 +1,5 @@
 /****************************************************************************
- * common/up_releasepending.c
+ * arch/z16/src/common/up_releasepending.c
  *
  *   Copyright (C) 2008-2009, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -68,7 +68,7 @@ void up_release_pending(void)
 {
   FAR struct tcb_s *rtcb = this_task();
 
-  slldbg("From TCB=%p\n", rtcb);
+  sinfo("From TCB=%p\n", rtcb);
 
   /* Merge the g_pendingtasks list into the ready-to-run task list */
 

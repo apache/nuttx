@@ -115,7 +115,7 @@ static inline void nxbe_pushrectangle(FAR struct nxbe_clipstack_s *stack,
                              sizeof(struct nxbe_cliprect_s) * mxrects);
       if (!newstack)
         {
-          gdbg("Failed to reallocate stack\n");
+          gerr("ERROR: Failed to reallocate stack\n");
           return;
         }
 

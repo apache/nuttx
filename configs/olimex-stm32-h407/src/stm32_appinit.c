@@ -46,8 +46,8 @@
 
 #include <nuttx/board.h>
 
-#ifdef CONFIG_SYSTEM_USBMONITOR
-#  include <apps/usbmonitor.h>
+#ifdef CONFIG_USBMONITOR
+#  include <nuttx/usb/usbmonitor.h>
 #endif
 
 #ifdef CONFIG_STM32_OTGFS
@@ -58,10 +58,6 @@
 #include "olimex-stm32-h407.h"
 
 #ifdef CONFIG_LIB_BOARDCTL
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions

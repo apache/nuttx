@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/vfs/fs_unlink.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,8 +39,11 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
 #include <unistd.h>
+#include <assert.h>
 #include <errno.h>
+
 #include <nuttx/fs/fs.h>
 
 #include "inode/inode.h"
@@ -80,21 +83,30 @@
 
 int unlink(FAR const char *pathname)
 {
+  struct inode_search_s desc;
   FAR struct inode *inode;
-  const char       *relpath = NULL;
-  int               errcode;
-  int               ret;
+  int errcode;
+  int ret;
 
-  /* Get an inode for this file */
+  /* Get an inode for this file (without deference the final node in the path
+   * which may be a symbolic link)
+   */
 
-  inode = inode_find(pathname, &relpath);
-  if (!inode)
+  SETUP_SEARCH(&desc, pathname, true);
+
+  ret = inode_find(&desc);
+  if (ret < 0)
     {
       /* There is no inode that includes in this path */
 
-      errcode = ENOENT;
-      goto errout;
+      errcode = -ret;
+      goto errout_with_search;
     }
+
+  /* Get the search results */
+
+  inode = desc.node;
+  DEBUGASSERT(inode != NULL);
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT
   /* Check if the inode is a valid mountpoint. */
@@ -107,7 +119,7 @@ int unlink(FAR const char *pathname)
 
       if (inode->u.i_mops->unlink)
         {
-          ret = inode->u.i_mops->unlink(inode, relpath);
+          ret = inode->u.i_mops->unlink(inode, desc.relpath);
           if (ret < 0)
             {
               errcode = -ret;
@@ -124,17 +136,23 @@ int unlink(FAR const char *pathname)
 #endif
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  /* If this is a "dangling" pseudo-file node (i.e., it has operations) then rm
-   * should remove the node.
+  /* If this is a "dangling" pseudo-file node (i.e., it has no operations)
+   * or a soft link, then rm should remove the node.
    */
 
-  if (!INODE_IS_SPECIAL(inode) && inode->u.i_ops)
+#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+  /* A soft link is the only "specal" file that we can remove via unlink(). */
+
+  if (!INODE_IS_SPECIAL(inode) || INODE_IS_SOFTLINK(inode))
+#else
+  if (!INODE_IS_SPECIAL(inode))
+#endif
     {
       /* If this is a pseudo-file node (i.e., it has no operations)
-       * then rmdir should remove the node.
+       * then unlink should remove the node.
        */
 
-      if (inode->u.i_ops)
+      if (inode->u.i_ops != NULL)
         {
           inode_semtake();
 
@@ -211,11 +229,14 @@ int unlink(FAR const char *pathname)
   /* Successfully unlinked */
 
   inode_release(inode);
+  RELEASE_SEARCH(&desc);
   return OK;
 
 errout_with_inode:
   inode_release(inode);
-errout:
+
+errout_with_search:
+  RELEASE_SEARCH(&desc);
   set_errno(errcode);
   return ERROR;
 }

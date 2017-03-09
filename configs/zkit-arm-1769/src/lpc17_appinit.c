@@ -6,7 +6,7 @@
  *
  * Based on config/lpcxpresso-lpc1768/src/lpc17_appinit.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,6 +53,7 @@
 #include <nuttx/mmcsd.h>
 
 #include "lpc17_spi.h"
+#include "zkit-arm-1769.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -116,14 +117,14 @@
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_CPP_HAVE_VARARGS
-#  ifdef CONFIG_DEBUG
-#    define message(...) lib_lowprintf(__VA_ARGS__)
+#  ifdef CONFIG_DEBUG_INFO
+#    define message(...) _info(__VA_ARGS__)
 #  else
 #    define message(...) printf(__VA_ARGS__)
 #  endif
 #else
-#  ifdef CONFIG_DEBUG
-#    define message lib_lowprintf
+#  ifdef CONFIG_DEBUG_INFO
+#    define message _info
 #  else
 #    define message printf
 #  endif
@@ -160,9 +161,10 @@
 
 int board_app_initialize(uintptr_t arg)
 {
+  int ret;
+
 #ifdef CONFIG_NSH_HAVEMMCSD
   FAR struct spi_dev_s *spi;
-  int ret;
 
   /* Get the SPI port */
 
@@ -190,5 +192,27 @@ int board_app_initialize(uintptr_t arg)
   message("Successfuly bound SPI port %d to MMC/SD slot %d\n",
           CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO);
 #endif
+
+#ifdef CONFIG_ADC
+  /* Initialize ADC and register the ADC driver. */
+
+  ret = zkit_adc_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: zkit_adc_setup failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_CAN
+  /* Initialize CAN and register the CAN driver. */
+
+  ret = zkit_can_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: zkit_can_setup failed: %d\n", ret);
+    }
+#endif
+
+  UNUSED(ret);
   return OK;
 }

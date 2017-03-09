@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sched/sched_processtimer.c
  *
- *   Copyright (C) 2007, 2009, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2014-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,36 +51,28 @@
 #include "clock/clock.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifndef CONFIG_SCHED_CPULOAD_TIMECONSTANT
-#  define CONFIG_SCHED_CPULOAD_TIMECONSTANT 2
-#endif
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  sched_process_scheduler
+ * Name:  sched_cpu_scheduler
  *
  * Description:
  *   Check for operations specific to scheduling policy of the currently
- *   active task.
+ *   active task on one CPU.
  *
- * Inputs:
- *   None
+ * Input Parameters:
+ *   cpu - The CPU that we are performing the scheduler operations on.
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
 
 #if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
-static inline void sched_process_scheduler(void)
+static inline void sched_cpu_scheduler(int cpu)
 {
-  FAR struct tcb_s *rtcb  = this_task();
+  FAR struct tcb_s *rtcb = current_task(cpu);
 
 #if CONFIG_RR_INTERVAL > 0
   /* Check if the currently executing task uses round robin scheduling. */
@@ -106,6 +98,55 @@ static inline void sched_process_scheduler(void)
 
       (void)sched_sporadic_process(rtcb, 1, false);
     }
+#endif
+}
+#endif
+
+/****************************************************************************
+ * Name:  sched_process_scheduler
+ *
+ * Description:
+ *   Check for operations specific to scheduling policy of the currently
+ *   active task on all configured CPUs.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
+static inline void sched_process_scheduler(void)
+{
+#ifdef CONFIG_SMP
+  irqstate_t flags;
+  int i;
+
+  /* If we are running on a single CPU architecture, then we know interrupts
+   * a disabled an there is no need to explicitly call
+   * enter_critical_section().  However, in the SMP case,
+   * enter_critical_section() does much more than just disable interrupts on
+   * the local CPU; it also manages spinlocks to assure the stability of the
+   * TCB that we are manipulating.
+   */
+
+  flags = enter_critical_section();
+
+  /* Perform scheduler operations on all CPUs */
+
+  for (i = 0; i < CONFIG_SMP_NCPUS; i++)
+    {
+      sched_cpu_scheduler(i);
+    }
+
+  leave_critical_section(flags);
+
+#else
+  /* Perform scheduler operations on the single CPUs */
+
+  sched_cpu_scheduler(0);
 #endif
 }
 #else
@@ -134,16 +175,22 @@ static inline void sched_process_scheduler(void)
  *   function periodically -- the calling interval must be
  *   USEC_PER_TICK
  *
- * Inputs:
+ * Input Parameters:
  *   None
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
 
 void sched_process_timer(void)
 {
+#ifdef CONFIG_CLOCK_TIMEKEEPING
+  /* Process wall time */
+
+  clock_update_wall_time();
+#endif
+
   /* Increment the system time (if in the link) */
 
 #ifdef CONFIG_HAVE_WEAKFUNCTIONS

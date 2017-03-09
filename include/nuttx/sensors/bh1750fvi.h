@@ -43,6 +43,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/irq.h>
+#include <nuttx/sensors/ioctl.h>
 
 #if defined(CONFIG_BH1750FVI)
 
@@ -50,17 +51,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* IOCTL Commands ***********************************************************/
-
-#define SNIOC_CHRM          _SNIOC(0x0001) /* Contin. H-Res Mode Arg: None   */
-#define SNIOC_CHRM2         _SNIOC(0x0002) /* Contin. H-Res Mode2 Arg: None  */
-#define SNIOC_CLRM          _SNIOC(0x0003) /* Contin. L-Res Mode Arg: None   */
-#define SNIOC_OTHRM         _SNIOC(0x0004) /* One Time H-Res Mode Arg: None  */
-#define SNIOC_OTHRM2        _SNIOC(0x0005) /* One Time H-Res Mode2 Arg: None */
-#define SNIOC_OTLRM         _SNIOC(0x0006) /* One Time L-Res Mode Arg: None  */
-#define SNIOC_CHMEATIME     _SNIOC(0x0007) /* Change Meas. Time Arg: uint8_t */
-
-/* Device I2C Address*/
+/* Device I2C Address */
 
 #define BH1750FVI_I2C_ADDR        0x23
 

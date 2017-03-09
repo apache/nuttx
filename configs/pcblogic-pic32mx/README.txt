@@ -626,8 +626,8 @@ Configuration sub-directories
        To enable LCD debug output:
 
        Build Setup:
-         CONFIG_DEBUG=y                          : Enable debug features
-         CONFIG_DEBUG_VERBOSE=y                  : Enable LCD debug
+         CONFIG_DEBUG_FEATURES=y                 : Enable debug features
+         CONFIG_DEBUG_INFO=y                     : Enable LCD debug
 
        NOTES:
        a. I do not have the LCD1602 working.  I may just be getting lost in the

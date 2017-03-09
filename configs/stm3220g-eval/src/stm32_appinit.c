@@ -142,14 +142,14 @@ static void stm32_i2c_register(int bus)
   i2c = stm32_i2cbus_initialize(bus);
   if (i2c == NULL)
     {
-      dbg("ERROR: Failed to get I2C%d interface\n", bus);
+      _err("ERROR: Failed to get I2C%d interface\n", bus);
     }
   else
     {
       ret = i2c_register(i2c, bus);
       if (ret < 0)
         {
-          dbg("ERROR: Failed to register I2C%d driver: %d\n", bus, ret);
+          _err("ERROR: Failed to register I2C%d driver: %d\n", bus, ret);
           stm32_i2cbus_uninitialize(i2c);
         }
     }
@@ -219,9 +219,7 @@ int board_app_initialize(uintptr_t arg)
 #ifdef HAVE_MMCSD
   FAR struct sdio_dev_s *sdio;
 #endif
-#if defined(HAVE_MMCSD) || defined (HAVE_USBHOST)
   int ret;
-#endif
 
   /* Register I2C drivers on behalf of the I2C tool */
 
@@ -294,5 +292,36 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
+#ifdef CONFIG_PWM
+  /* Initialize PWM and register the PWM device. */
+
+  ret = stm32_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_pwm_setup() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ADC
+  /* Initialize ADC and register the ADC driver. */
+
+  ret = stm32_adc_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_adc_setup failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_CAN
+  /* Initialize CAN and register the CAN driver. */
+
+  ret = stm32_can_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_can_setup failed: %d\n", ret);
+    }
+#endif
+
+  UNUSED(ret);
   return OK;
 }

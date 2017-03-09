@@ -237,7 +237,7 @@
 
 /* Check if we should enable the USB monitor before starting NSH */
 
-#ifndef CONFIG_SYSTEM_USBMONITOR
+#ifndef CONFIG_USBMONITOR
 #  undef HAVE_USBMONITOR
 #endif
 
@@ -725,17 +725,54 @@ bool sam_writeprotected(int slotno);
 void weak_function sam_usbinitialize(void);
 #endif
 
-/****************************************************************************************************
+/************************************************************************************
  * Name: stm32_usbhost_initialize
  *
  * Description:
- *   Called at application startup time to initialize the USB host functionality. This function will
- *   start a thread that will monitor for device connection/disconnection events.
+ *   Called at application startup time to initialize the USB host functionality.
+ *   This function will start a thread that will monitor for device connection/
+ *   disconnection events.
  *
- ****************************************************************************************************/
+ ************************************************************************************/
 
 #ifdef HAVE_USBHOST
 int sam_usbhost_initialize(void);
+#endif
+
+/************************************************************************************
+ * Name: sam_pwm_setup
+ *
+ * Description:
+ *   Initialize PWM and register the PWM device.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_PWM
+int sam_pwm_setup(void);
+#endif
+
+/************************************************************************************
+ * Name: sam_adc_setup
+ *
+ * Description:
+ *   Initialize ADC and register the ADC driver.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_ADC
+int sam_adc_setup(void);
+#endif
+
+/************************************************************************************
+ * Name: sam_can_setup
+ *
+ * Description:
+ *  Initialize CAN and register the CAN device
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_CAN
+int sam_can_setup(void);
 #endif
 
 /************************************************************************************
@@ -748,18 +785,6 @@ int sam_usbhost_initialize(void);
 
 #ifdef HAVE_NETWORK
 void weak_function sam_netinitialize(void);
-#endif
-
-/************************************************************************************
- * Name: board_adc_initialize
- *
- * Description:
- *   Initialize and register the ADC driver
- *
- ************************************************************************************/
-
-#ifdef CONFIG_SAMA5_ADC
-int board_adc_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

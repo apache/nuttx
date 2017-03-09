@@ -62,6 +62,10 @@
 #undef  CONFIG_SUPPRESS_UART_CONFIG   /* DEFINED: Do not reconfig UART */
 #undef  CONFIG_DUMP_ON_EXIT           /* DEFINED: Dump task state on exit */
 
+#ifndef CONFIG_DEBUG_SCHED_INFO
+#  undef CONFIG_DUMP_ON_EXIT          /* Needs CONFIG_DEBUG_SCHED_INFO */
+#endif
+
 /* Determine which (if any) console driver to use.  If a console is enabled
  * and no other console device is specified, then a serial console is
  * assumed.
@@ -94,13 +98,6 @@
 
 #if !defined(USE_SERIALDRIVER) && defined(CONFIG_STANDARD_SERIAL)
 #  define USE_SERIALDRIVER 1
-#endif
-
-/* Determine which device to use as the system logging device */
-
-#ifndef CONFIG_SYSLOG
-#  undef CONFIG_SYSLOG_CHAR
-#  undef CONFIG_RAMLOG_SYSLOG
 #endif
 
 /* Check if an interrupt stack size is configured */
@@ -218,7 +215,7 @@ void up_addregion(void);
 # define up_addregion()
 #endif
 
-/* Defined in up_serial.c */
+/* Defined in xyz_serial.c */
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
 void up_earlyserialinit(void);
@@ -236,13 +233,13 @@ void lowconsole_init(void);
 # define lowconsole_init()
 #endif
 
-/* Defined in up_watchdog.c */
+/* Defined in xyz_watchdog.c */
 
 void up_wdtinit(void);
 
-/* Defined in up_timerisr.c */
+/* Defined in xyz_timerisr.c */
 
-void up_timer_initialize(void);
+void x86_timer_initialize(void);
 
 /* Defined in board/up_network.c */
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/inode/fs_registerreserve.c
  *
- *   Copyright (C) 2007-2009, 2011-2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2012, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -163,32 +163,44 @@ static void inode_insert(FAR struct inode *node,
 
 int inode_reserve(FAR const char *path, FAR struct inode **inode)
 {
-  FAR const char   *name = path;
+  struct inode_search_s desc;
   FAR struct inode *left;
   FAR struct inode *parent;
+  FAR const char *name;
+  int ret;
 
   /* Assume failure */
 
-  DEBUGASSERT(path && inode);
+  DEBUGASSERT(path != NULL && inode != NULL);
   *inode = NULL;
 
   /* Handle paths that are interpreted as the root directory */
 
-  if (path[0] == '\0' || path[0] != '/' || path[1] == '\0')
+  if (path[0] == '\0' || path[0] != '/')
     {
       return -EINVAL;
     }
 
   /* Find the location to insert the new subtree */
 
-  if (inode_search(&name, &left, &parent, (FAR const char **)NULL) != NULL)
-    {
-      /* It is an error if the node already exists in the tree */
+  SETUP_SEARCH(&desc, path, false);
 
-      return -EEXIST;
+  ret = inode_search(&desc);
+  if (ret >= 0)
+    {
+      /* It is an error if the node already exists in the tree (or if it
+       * lies within a mountpoint, we don't distinguish here).
+       */
+
+      ret = -EEXIST;
+      goto errout_with_search;
     }
 
   /* Now we now where to insert the subtree */
+
+  name   = desc.path;
+  left   = desc.peer;
+  parent = desc.parent;
 
   for (; ; )
     {
@@ -199,19 +211,19 @@ int inode_reserve(FAR const char *path, FAR struct inode **inode)
        * by looking at the next name.
        */
 
-      FAR const char *next_name = inode_nextname(name);
-      if (*next_name)
+      FAR const char *nextname = inode_nextname(name);
+      if (*nextname != '\0')
         {
           /* Insert an operationless node */
 
           node = inode_alloc(name);
-          if (node)
+          if (node != NULL)
             {
               inode_insert(node, left, parent);
 
               /* Set up for the next time through the loop */
 
-              name   = next_name;
+              name   = nextname;
               left   = NULL;
               parent = node;
               continue;
@@ -220,16 +232,22 @@ int inode_reserve(FAR const char *path, FAR struct inode **inode)
       else
         {
           node = inode_alloc(name);
-          if (node)
+          if (node != NULL)
             {
               inode_insert(node, left, parent);
               *inode = node;
-              return OK;
+              ret = OK;
+              break;
             }
         }
 
       /* We get here on failures to allocate node memory */
 
-      return -ENOMEM;
+      ret = -ENOMEM;
+      break;
     }
+
+errout_with_search:
+  RELEASE_SEARCH(&desc);
+  return ret;
 }

@@ -138,23 +138,20 @@ void up_irqinitialize(void)
 
   /* Setup UART shared interrupt */
 
-  irq_attach(CONFIG_UART_MOXA_SHARED_IRQ, uart_decodeirq);
+  irq_attach(CONFIG_UART_MOXA_SHARED_IRQ, uart_decodeirq, NULL);
   up_enable_irq(CONFIG_UART_MOXA_SHARED_IRQ);
 
   /* And finally, enable interrupts */
 
-#if 1
-#define REG(x) (*(volatile uint32_t *)(x))
-  lldbg("\n=============================================================\n");
-  lldbg("TM CNTL=%08x INTRS=%08x MASK=%08x LOAD=%08x COUNT=%08x M1=%08x\n",
-        REG(0x98400030), REG(0x98400034), REG(0x98400038), REG(0x98400004),
-        REG(0x98400000), REG(0x98400008));
-  lldbg("IRQ STATUS=%08x MASK=%08x MODE=%08x LEVEL=%08x\n",
-        REG(0x98800014), REG(0x98800004), REG(0x9880000C), REG(0x98800010));
-  lldbg("FIQ STATUS=%08x MASK=%08x MODE=%08x LEVEL=%08x\n",
-        REG(0x98800034), REG(0x98800024), REG(0x9880002C), REG(0x98800020));
-  lldbg("=============================================================\n");
-#endif
+  irqinfo("TM CNTL=%08x INTRS=%08x MASK=%08x LOAD=%08x COUNT=%08x M1=%08x\n",
+          getreg32(0x98400030), getreg32(0x98400034), getreg32(0x98400038),
+          getreg32(0x98400004), getreg32(0x98400000), getreg32(0x98400008));
+  irqinfo("IRQ STATUS=%08x MASK=%08x MODE=%08x LEVEL=%08x\n",
+          getreg32(0x98800014), getreg32(0x98800004), getreg32(0x9880000C),
+          getreg32(0x98800010));
+  irqinfo("FIQ STATUS=%08x MASK=%08x MODE=%08x LEVEL=%08x\n",
+          getreg32(0x98800034), getreg32(0x98800024), getreg32(0x9880002C),
+          getreg32(0x98800020));
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
   up_irq_restore(SVC_MODE | PSR_F_BIT);

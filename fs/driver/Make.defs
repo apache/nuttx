@@ -48,15 +48,7 @@ CSRCS += fs_findblockdriver.c fs_openblockdriver.c fs_closeblockdriver.c
 ifneq ($(CONFIG_DISABLE_PSEUDOFS_OPERATIONS),y)
 CSRCS += fs_blockproxy.c
 endif
-endif
-
-# System logging to a character device (or file)
-
-ifeq ($(CONFIG_SYSLOG),y)
-ifeq ($(CONFIG_SYSLOG_CHAR),y)
-CSRCS += fs_devsyslog.c
-endif
-endif
+endif # CONFIG_DISABLE_MOUNTPOINT
 
 # Include driver build support
 

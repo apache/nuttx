@@ -52,7 +52,7 @@
 
 #undef CONFIG_MMCSD_DUMPALL /* MUST BE DEFINED MANUALLY */
 
-#if !defined(CONFIG_DEBUG_VERBOSE) || !defined(CONFIG_DEBUG_FS)
+#if !defined(CONFIG_DEBUG_INFO) || !defined(CONFIG_DEBUG_FS)
 #  undef CONFIG_MMCSD_DUMPALL
 #endif
 
@@ -87,12 +87,12 @@ extern "C" {
 #endif
 
 #ifdef CONFIG_MMCSD_DUMPALL
-#  define mmcsd_dumpbuffer(m,b,l) fvdbgdumpbuffer(m,b,l)
+#  define mmcsd_dumpbuffer(m,b,l) finfodumpbuffer(m,b,l)
 #else
 #  define mmcsd_dumpbuffer(m,b,l)
 #endif
 
-#if defined(CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_FS)
+#if defined(CONFIG_DEBUG_INFO) && defined(CONFIG_DEBUG_FS)
 EXTERN void mmcsd_dmpcsd(FAR const uint8_t *csd, uint8_t cardtype);
 #else
 #  define mmcsd_dmpcsd(csd,cadtype)

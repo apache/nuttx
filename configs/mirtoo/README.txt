@@ -592,7 +592,7 @@ Analog Input
   spi = pic32mx_spibus_initialize(2);
   if (!spi)
     {
-      dbg("ERROR: Failed to initialize SPI port 2\n");
+      _err("ERROR: Failed to initialize SPI port 2\n");
       return -ENODEV;
     }
 
@@ -601,7 +601,7 @@ Analog Input
   handle = pga11x_initialize(spi);
   if (!handle)
     {
-      dbg("ERROR: Failed to bind SPI port 2 to the PGA117 driver\n");
+      _err("ERROR: Failed to bind SPI port 2 to the PGA117 driver\n");
       return -ENODEV;
     }
 
@@ -617,7 +617,7 @@ Analog Input
   ret = pga11x_select(handle, &settings);
   if (ret < 0)
     {
-      dbg("ERROR: Failed to select channel 2, gain 2\n");
+      _err("ERROR: Failed to select channel 2, gain 2\n");
       return -EIO;
     }
 

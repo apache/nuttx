@@ -106,15 +106,17 @@ int stm32_lm75initialize(FAR const char *devpath)
  *
  * Input parameters:
  *   irqhandler - the LM-75 interrupt handler
+ *   arg        - The argument that will accompany the interrupt
  *
  * Returned Value:
- *   The previous LM-75 interrupt handler
+ *   Zero (OK) returned on success; a negated errno value is returned on failure.
  *
  ************************************************************************************/
 
-xcpt_t stm32_lm75attach(xcpt_t irqhandler)
+int stm32_lm75attach(xcpt_t irqhandler, void *arg)
 {
-  return stm32_gpiosetevent(GPIO_LM75_OSINT, true, true, true, irqhandler);
+  (void)stm32_gpiosetevent(GPIO_LM75_OSINT, true, true, true, irqhandler, arg);
+  return OK;
 }
 
 #endif /* CONFIG_I2C && CONFIG_I2C_LM75 && CONFIG_STM32_I2C1 */

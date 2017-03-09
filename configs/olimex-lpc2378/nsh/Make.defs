@@ -76,7 +76,7 @@ ifneq ($(HOSTOS),Cygwin)
 endif
 endif
 
-ifeq ("${CONFIG_DEBUG}","y")
+ifeq ("${CONFIG_DEBUG_FEATURES}","y")
   ARCHOPTIMIZATION = -g
 endif
 
@@ -91,7 +91,7 @@ else
 endif
 
 ARCHCFLAGS = -fno-builtin
-ARCHCXXFLAGS = -fno-builtin -fno-exceptions
+ARCHCXXFLAGS = -fno-builtin -fno-exceptions -fcheck-new
 ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
@@ -120,7 +120,7 @@ EXEEXT =
 ifneq ($(CROSSDEV),arm-nuttx-elf-)
   LDFLAGS += -nostartfiles -nodefaultlibs
 endif
-ifeq ($(CONFIG_DEBUG),y)
+ifeq ($(CONFIG_DEBUG_FEATURES),y)
   LDFLAGS += -g
 endif
 

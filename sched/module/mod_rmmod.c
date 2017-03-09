@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/module/module.c
+ * sched/module/mod_rmmod.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,14 +40,12 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <stdint.h>
-#include <string.h>
+#include <assert.h>
 #include <errno.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/module.h>
-
-#include "module/module.h"
+#include <nuttx/lib/modlib.h>
 
 #ifdef CONFIG_MODULE
 
@@ -62,9 +60,7 @@
  *   Remove a previously installed module from memory.
  *
  * Input Parameters:
- *
- *   modulename - The module name.  This is the name module name that was
- *     provided to insmod when the module was loaded.
+ *   handle - The module handler previously returned by insmod().
  *
  * Returned Value:
  *   Zero (OK) on success.  On any failure, -1 (ERROR) is returned the
@@ -72,50 +68,62 @@
  *
  ****************************************************************************/
 
-int rmmod(FAR const char *modulename)
+int rmmod(FAR void *handle)
 {
-  FAR struct module_s *modp;
-  int ret = OK;
+  FAR struct module_s *modp = (FAR struct module_s *)handle;
+  int ret;
 
-  DEBUGASSERT(modulename != NULL);
+  DEBUGASSERT(modp != NULL);
 
   /* Get exclusive access to the module registry */
 
-  mod_registry_lock();
+  modlib_registry_lock();
 
-  /* Find the module entry for this modulename in the registry */
+  /* Verify that the module is in the registry */
 
-  modp = mod_registry_find(modulename);
-  if (modp == NULL)
+  ret = modlib_registry_verify(modp);
+  if (ret < 0)
     {
-      sdbg("ERROR: Failed to find module %s: %d\n", modulename, ret);
-      ret = -ENOENT;
+      serr("ERROR: Failed to verify module: %d\n", ret);
       goto errout_with_lock;
     }
 
+#if CONFIG_MODLIB_MAXDEPEND > 0
+  /* Refuse to remove any module that other modules may depend upon. */
+
+  if (modp->dependents > 0)
+    {
+      serr("ERROR: Module has dependents: %d\n", modp->dependents);
+      ret = -EBUSY;
+      goto errout_with_lock;
+    }
+#endif
+
   /* Is there an uninitializer? */
 
-  if (modp->uninitializer != NULL)
+  if (modp->modinfo.uninitializer != NULL)
     {
-      /* Try to uninitializer the module */
+      /* Try to uninitialize the module */
 
-      ret = modp->uninitializer(modp->arg);
+      ret = modp->modinfo.uninitializer(modp->modinfo.arg);
 
       /* Did the module sucessfully uninitialize? */
 
       if (ret < 0)
         {
-          sdbg("ERROR: Failed to uninitialize the module: %d\n", ret);
+          serr("ERROR: Failed to uninitialize the module: %d\n", ret);
           goto errout_with_lock;
         }
 
       /* Nullify so that the uninitializer cannot be called again */
 
+      modp->modinfo.uninitializer = NULL;
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
-      modp->initializer = NULL;
+      modp->initializer           = NULL;
+      modp->modinfo.arg           = NULL;
+      modp->modinfo.exports       = NULL;
+      modp->modinfo.nexports      = 0;
 #endif
-      modp->uninitializer = NULL;
-      modp->arg = NULL;
     }
 
   /* Release resources held by the module */
@@ -137,14 +145,19 @@ int rmmod(FAR const char *modulename)
 
   /* Remove the module from the registry */
 
-  ret = mod_registry_del(modp);
+  ret = modlib_registry_del(modp);
   if (ret < 0)
     {
-      sdbg("ERROR: Failed to remove the module from the registry: %d\n", ret);
+      serr("ERROR: Failed to remove the module from the registry: %d\n", ret);
       goto errout_with_lock;
     }
 
-  mod_registry_unlock();
+#if CONFIG_MODLIB_MAXDEPEND > 0
+  /* Eliminate any dependencies that this module has on other modules */
+
+  (void)modlib_undepend(modp);
+#endif
+  modlib_registry_unlock();
 
   /* And free the registry entry */
 
@@ -152,7 +165,7 @@ int rmmod(FAR const char *modulename)
   return OK;
 
 errout_with_lock:
-  mod_registry_unlock();
+  modlib_registry_unlock();
   set_errno(-ret);
   return ERROR;
 }

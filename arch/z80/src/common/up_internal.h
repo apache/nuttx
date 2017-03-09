@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z80/src/common/up_internal.h
  *
- *   Copyright (C) 2007-2009, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,6 +51,10 @@
 #undef  CONFIG_SUPPRESS_UART_CONFIG   /* Do not reconfig UART */
 #undef  CONFIG_DUMP_ON_EXIT           /* Dump task state on exit */
 
+#ifndef CONFIG_DEBUG_SCHED_INFO
+#  undef CONFIG_DUMP_ON_EXIT          /* Needs CONFIG_DEBUG_SCHED_INFO */
+#endif
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -88,7 +92,7 @@
 #  if defined(CONFIG_RAMLOG_CONSOLE)
 #    undef  USE_SERIALDRIVER
 #    undef  CONFIG_DEV_LOWCONSOLE
-#  elif defined(CONFIG_SYSLOG_CONSOLE)
+#  elif defined(CONFIG_CONSOLE_SYSLOG)
 #    undef  USE_SERIALDRIVER
 #    undef  CONFIG_DEV_LOWCONSOLE
 #  elif defined(CONFIG_DEV_LOWCONSOLE)
@@ -129,7 +133,6 @@ extern "C"
 /* Supplied by chip- or board-specific logic */
 
 void up_irqinitialize(void);
-int  up_timerisr(int irq, FAR chipreg_t *regs);
 
 #ifdef USE_LOWSERIALINIT
 void up_lowserialinit(void);
@@ -139,7 +142,7 @@ void up_lowserialinit(void);
 
 FAR chipreg_t *up_doirq(uint8_t irq, FAR chipreg_t *regs);
 
-/* Define in up_sigdeliver */
+/* Define in zyz_sigdeliver */
 
 void up_sigdeliver(void);
 
@@ -149,13 +152,13 @@ void up_sigdeliver(void);
 int up_mmuinit(void);
 #endif
 
-/* Defined in up_allocateheap.c */
+/* Defined in xyz_allocateheap.c */
 
 #if CONFIG_MM_REGIONS > 1
 void up_addregion(void);
 #endif
 
-/* Defined in up_serial.c */
+/* Defined in xyz_serial.c */
 
 #ifdef USE_SERIALDRIVER
 void up_serialinit(void);
@@ -173,7 +176,7 @@ void lowconsole_init(void);
 
 /* Defined in drivers/syslog_console.c */
 
-#ifdef CONFIG_SYSLOG_CONSOLE
+#ifdef CONFIG_CONSOLE_SYSLOG
 void syslog_console_init();
 #else
 # define syslog_console_init()
@@ -191,9 +194,9 @@ void ramlog_consoleinit(void);
 
 void up_puts(const char *str);
 
-/* Defined in up_timerisr.c */
+/* Defined in xyz_timerisr.c */
 
-void up_timer_initialize(void);
+void z80_timer_initialize(void);
 
 /* Architecture specific hook into the timer interrupt handler */
 

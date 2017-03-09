@@ -57,18 +57,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG
- * with CONFIG_DEBUG_VERBOSE too)
- */
-
-#ifdef CONFIG_DEBUG_LEDS
-#  define leddbg  lldbg
-#  define ledvdbg llvdbg
-#else
-#  define leddbg(x...)
-#  define ledvdbg(x...)
-#endif
-
 /* The following definitions map the encoded LED setting to GPIO settings */
 
 #define HYMINI_STM32_LED1     (1 << 0)
@@ -90,48 +78,56 @@
 #define OFF_CLRBITS(v)    (CLRBITS(OFF_BITS(v))
 
 /* On: !LED1 + !LED2   Off: - */
+
 #define LED_STARTED_ON_SETBITS       ((0) << ON_SETBITS_SHIFT)
 #define LED_STARTED_ON_CLRBITS       ((HYMINI_STM32_LED1|HYMINI_STM32_LED2) << ON_CLRBITS_SHIFT)
 #define LED_STARTED_OFF_SETBITS      (0 << OFF_SETBITS_SHIFT)
 #define LED_STARTED_OFF_CLRBITS      (0 << OFF_CLRBITS_SHIFT)
 
 /* On: LED1+!LED2   Off: N/A */
+
 #define LED_HEAPALLOCATE_ON_SETBITS  ((HYMINI_STM32_LED1) << ON_SETBITS_SHIFT)
 #define LED_HEAPALLOCATE_ON_CLRBITS  ((HYMINI_STM32_LED2) << ON_CLRBITS_SHIFT)
 #define LED_HEAPALLOCATE_OFF_SETBITS (0)
 #define LED_HEAPALLOCATE_OFF_CLRBITS (0)
 
 /* On: LED2+!LED1   Off: N/A */
+
 #define LED_IRQSENABLED_ON_SETBITS   ((HYMINI_STM32_LED2) << ON_SETBITS_SHIFT)
 #define LED_IRQSENABLED_ON_CLRBITS   ((HYMINI_STM32_LED1) << ON_CLRBITS_SHIFT)
 #define LED_IRQSENABLED_OFF_SETBITS  (0)
 #define LED_IRQSENABLED_OFF_CLRBITS  (0)
 
 /* On: LED1+!LED2   Off: N/A */
+
 #define LED_STACKCREATED_ON_SETBITS  ((HYMINI_STM32_LED1) << ON_SETBITS_SHIFT)
 #define LED_STACKCREATED_ON_CLRBITS  ((HYMINI_STM32_LED2) << ON_CLRBITS_SHIFT)
 #define LED_STACKCREATED_OFF_SETBITS (0)
 #define LED_STACKCREATED_OFF_CLRBITS (0)
 
 /* On: !LED1   Off: LED1 */
+
 #define LED_INIRQ_ON_SETBITS         ((0) << ON_SETBITS_SHIFT)
 #define LED_INIRQ_ON_CLRBITS         ((HYMINI_STM32_LED1) << ON_CLRBITS_SHIFT)
 #define LED_INIRQ_OFF_SETBITS        ((HYMINI_STM32_LED1) << OFF_SETBITS_SHIFT)
 #define LED_INIRQ_OFF_CLRBITS        ((0) << OFF_CLRBITS_SHIFT)
 
 /* On: LED2   Off: !LED2 */
+
 #define LED_SIGNAL_ON_SETBITS        ((HYMINI_STM32_LED2) << ON_SETBITS_SHIFT)
 #define LED_SIGNAL_ON_CLRBITS        ((0) << ON_CLRBITS_SHIFT)
 #define LED_SIGNAL_OFF_SETBITS       ((0) << OFF_SETBITS_SHIFT)
 #define LED_SIGNAL_OFF_CLRBITS       ((HYMINI_STM32_LED2) << OFF_CLRBITS_SHIFT)
 
 /* On: LED1+LED2   Off: - */
+
 #define LED_ASSERTION_ON_SETBITS     ((HYMINI_STM32_LED2|HYMINI_STM32_LED2) << ON_SETBITS_SHIFT)
 #define LED_ASSERTION_ON_CLRBITS     ((0) << ON_CLRBITS_SHIFT)
 #define LED_ASSERTION_OFF_SETBITS    ((0) << OFF_SETBITS_SHIFT)
 #define LED_ASSERTION_OFF_CLRBITS    ((0) << OFF_CLRBITS_SHIFT)
 
 /* On: LED1   Off: LED2 */
+
 #define LED_PANIC_ON_SETBITS         ((HYMINI_STM32_LED1) << ON_SETBITS_SHIFT)
 #define LED_PANIC_ON_CLRBITS         ((HYMINI_STM32_LED2) << ON_CLRBITS_SHIFT)
 #define LED_PANIC_OFF_SETBITS        ((HYMINI_STM32_LED2) << OFF_SETBITS_SHIFT)

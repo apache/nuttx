@@ -122,6 +122,16 @@
 #define IMX_MMDCDDR_PSECTION     0x10000000  /* 10000000-ffffffff 3840 MB MMDC-DDR Controller */
                                              /* 10000000-7fffffff 1792 MB */
 
+/* By default, NuttX uses a 1-1 memory mapping.  So the unused, reserved
+ * address in the top-level memory map are candidates for other mapping uses:
+ *
+ *  00018000-000fffff Reserved -- Not used
+ *  00400000-007fffff Reserved -- Not used
+ *  00d00000-00ffffff Reserved -- Not used
+ *  0220c000-023fffff Reserved -- Not used
+ *  80000000-efffffff Reserved -- Level 2 page table (See below)
+ */
+
 /* i.MX6 DMA PSECTION Offsets */
 
 #define IMX_CAAMRAM_OFFSET       0x00000000  /* 00000000-00003fff  16 KB CAAM (16K secure RAM) */
@@ -897,7 +907,7 @@
  *   0x80000000-0xefffffff: Undefined (1.75 GB)
  *
  * That is the offset where the main L2 page tables will be positioned.  This
- * corresponds to page table offsets 0x000002000 up to 0x000003c00.  That
+ * corresponds to page table offsets 0x00002000 up to 0x00003c00.  That
  * is 1792 entries, each mapping 4KB of address for a total of 7MB of virtual
  * address space)
  *
@@ -918,6 +928,14 @@
  */
 
 #ifndef CONFIG_ARCH_LOWVECTORS
+  /* Memory map
+   * VIRTUAL ADDRESS RANGE L1 PG TABLE L2 PG TABLE  DESCRIPTION
+   * START      END        OFFSET      SIZE
+   * ---------- ---------- ------------ ----------------------------
+   * 0x80000000 0x803fffff 0x000002000 0x000000400  Vectors (1MiB)
+   * 0x80100000 0x806fffff 0x000002400 0x000001800  Paging  (6MiB)
+   */
+
   /* Vector L2 page table offset/size */
 
 #  define VECTOR_L2_OFFSET        0x000002000
@@ -939,10 +957,18 @@
 #  define PGTABLE_L2_SIZE         0x000001800
 
 #else
+  /* Memory map
+   * VIRTUAL ADDRESS RANGE L1 PG TABLE L2 PG TABLE  DESCRIPTION
+   * START      END        OFFSET      SIZE
+   * ---------- ---------- ------------ ----------------------------
+   * 0x80000000 0x806fffff 0x000002000 0x000001c00  Paging  (7MiB)
+   */
+
   /* Paging L2 page table offset/size */
 
 #  define PGTABLE_L2_OFFSET       0x000002000
 #  define PGTABLE_L2_SIZE         0x000001c00
+
 #endif
 
 /* Paging L2 page table base addresses
@@ -974,14 +1000,30 @@
  */
 
 #ifdef CONFIG_ARCH_LOWVECTORS  /* Vectors located at 0x0000:0000  */
-
-  /* Vectors will always lie at the beginnin of OCRAM */
+/* Vectors will always lie at the beginning of OCRAM
+ *
+ * OCRAM Memory Map:
+ * ---------- ---------- ---------------------------
+ * START      END        CONTENT
+ * ---------- ---------- ---------------------------
+ * 0x00000000 0x00010000 Vectors (VECTOR_TABLE_SIZE)
+ * 0x00010000 0x0003c000 Unused
+ * 0x0003c000 0x00004000 Page table (PGTABLE_SIZE)
+ */
 
 #  define IMX_VECTOR_PADDR        IMX_OCRAM_PBASE
 #  define IMX_VECTOR_VSRAM        IMX_OCRAM_VBASE
 #  define IMX_VECTOR_VADDR        0x00000000
 
 #else  /* Vectors located at 0xffff:0000 -- this probably does not work */
+/* OCRAM Memory Map:
+ * ---------- ---------- ---------------------------
+ * START      END        CONTENT
+ * ---------- ---------- ---------------------------
+ * 0x00000000 0x00004000 Page table (PGTABLE_SIZE)
+ * 0x00004000 0x00030000 Unused
+ * 0x00030000 0x00010000 Vectors (VECTOR_TABLE_SIZE)
+ */
 
 #  define IMX_VECTOR_PADDR        (IMX_OCRAM_PBASE + IMX_OCRAM_SIZE - VECTOR_TABLE_SIZE)
 #  define IMX_VECTOR_VSRAM        (IMX_OCRAM_VBASE + IMX_OCRAM_SIZE - VECTOR_TABLE_SIZE)

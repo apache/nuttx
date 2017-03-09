@@ -81,7 +81,7 @@ static void go_os_start(void *pv, unsigned int nbytes)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 #  define showprogress(c) up_lowputc(c)
 #else
 #  define showprogress(c)
@@ -281,6 +281,12 @@ void __start(void)
     }
 
   showprogress('C');
+
+#ifdef CONFIG_ARMV7M_ITMSYSLOG
+  /* Perform ARMv7-M ITM SYSLOG initialization */
+
+  itm_syslog_initialize();
+#endif
 
   /* Perform early serial initialization */
 

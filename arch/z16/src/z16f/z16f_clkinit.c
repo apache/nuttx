@@ -1,5 +1,5 @@
 /****************************************************************************
- * z16f/z16f_clkinit.c
+ * arch/z16/src/z16f/z16f_clkinit.c
  *
  *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -59,7 +59,7 @@ extern _Erom unsigned long SYS_CLK_FREQ;
  * Private Functions
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 /****************************************************************************
  *  System clock initialization--DEBUG. Code Using Frequency Input from
  *  ZDS IDE.
@@ -206,7 +206,7 @@ static void z16f_sysclkinit(int clockid, uint32_t frequency)
     for (count = 0; count < 10000; count++);
 }
 
-#else /* CONFIG_DEBUG */
+#else /* CONFIG_DEBUG_FEATURES */
 /****************************************************************************
  * System Clock Initialization Recommended for Release Code
  *
@@ -247,7 +247,7 @@ static void z16f_sysclkinit(int clockid, uint32_t frequency)
        putreg8(0xe0 | 1, Z16F_OSC_CTL); /* Use the external osc/clock as system clock */
     }
 }
-#endif /* CONFIG_DEBUG */
+#endif /* CONFIG_DEBUG_FEATURES */
 
 /****************************************************************************
  * Public Functions

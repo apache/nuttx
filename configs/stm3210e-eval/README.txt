@@ -365,7 +365,7 @@ Temperature Sensor
 
   More complex temperature sensor operations are also available.  See the
   IOCTL commands enumerated in include/nuttx/sensors/lm75.h.  Also read the 
-  escriptions of the stm32_lm75initialize() and stm32_lm75attach()
+  descriptions of the stm32_lm75initialize() and stm32_lm75attach()
   interfaces in the arch/board/board.h file (sames as
   configs/stm3210e-eval/include/board.h).
 
@@ -635,10 +635,10 @@ STM3210E-EVAL-specific Configuration Options
 
     CONFIG_SDIO_DMA - Support DMA data transfers.  Requires CONFIG_STM32_SDIO
       and CONFIG_STM32_DMA2.
-    CONFIG_SDIO_PRI - Select SDIO interrupt prority.  Default: 128
-    CONFIG_SDIO_DMAPRIO - Select SDIO DMA interrupt priority.
+    CONFIG_STM32_SDIO_PRI - Select SDIO interrupt prority.  Default: 128
+    CONFIG_STM32_SDIO_DMAPRIO - Select SDIO DMA interrupt priority.
       Default:  Medium
-    CONFIG_SDIO_WIDTH_D1_ONLY - Select 1-bit transfer mode.  Default:
+    CONFIG_STM32_SDIO_WIDTH_D1_ONLY - Select 1-bit transfer mode.  Default:
       4-bit transfer mode.
 
   STM3210E-EVAL CAN Configuration
@@ -657,7 +657,7 @@ STM3210E-EVAL-specific Configuration Options
     CONFIG_CAN2_BAUD - CAN1 BAUD rate.  Required if CONFIG_STM32_CAN2 is defined.
     CONFIG_CAN_TSEG1 - The number of CAN time quanta in segment 1. Default: 6
     CONFIG_CAN_TSEG2 - the number of CAN time quanta in segment 2. Default: 7
-    CONFIG_CAN_REGDEBUG - If CONFIG_DEBUG is set, this will generate an
+    CONFIG_STM32_CAN_REGDEBUG - If CONFIG_DEBUG_FEATURES is set, this will generate an
       dump of all CAN registers.
 
   STM3210E-EVAL LCD Hardware Configuration
@@ -704,14 +704,6 @@ can be selected as follow:
     . ./setenv.sh
 
 Where <subdir> is one of the following:
-
-  buttons:
-  --------
-
-    Uses apps/examples/buttons to exercise STM3210E-EVAL buttons and
-    button interrupts.
-
-    CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y  : CodeSourcery under Windows
 
   composite
   ---------
@@ -1064,11 +1056,11 @@ Where <subdir> is one of the following:
     USB debug output can be enabled as by changing the following
     settings in the configuration file:
 
-      -CONFIG_DEBUG=n
-      -CONFIG_DEBUG_VERBOSE=n
+      -CONFIG_DEBUG_FEATURES=n
+      -CONFIG_DEBUG_INFO=n
       -CONFIG_DEBUG_USB=n
-      +CONFIG_DEBUG=y
-      +CONFIG_DEBUG_VERBOSE=y
+      +CONFIG_DEBUG_FEATURES=y
+      +CONFIG_DEBUG_INFO=y
       +CONFIG_DEBUG_USB=y
 
       -CONFIG_EXAMPLES_USBSERIAL_TRACEINIT=n

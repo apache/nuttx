@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/string.h
  *
- *   Copyright (C) 2007-2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2012, 2014, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,13 +47,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Compatibility definitions */
-
-#ifndef CONFIG_ARCH_BZERO
-# define bzero(s,n) (void)memset(s,0,n)
-#endif
-
-#define bcopy(b1,b2,len) (void)memmove(b2,b1,len)
 
 /****************************************************************************
  * Public Function Prototypes
@@ -71,17 +64,17 @@ extern "C"
 FAR char  *strdup(FAR const char *s);
 FAR char  *strndup(FAR const char *s, size_t size);
 FAR const char *strerror(int);
+int        strerror_r(int, FAR char *, size_t);
 size_t     strlen(FAR const char *);
 size_t     strnlen(FAR const char *, size_t);
 FAR char  *strcat(FAR char *, FAR const char *);
 FAR char  *strncat(FAR char *, FAR const char *, size_t);
 int        strcmp(FAR const char *, FAR const char *);
 int        strncmp(FAR const char *, FAR const char *, size_t);
-int        strcasecmp(FAR const char *, FAR const char *);
-int        strncasecmp(FAR const char *, FAR const char *, size_t);
-FAR char  *strcpy(char *dest, FAR const char *src);
-FAR char  *stpcpy(char *dest, FAR const char *src);
-FAR char  *strncpy(char *, FAR const char *, size_t);
+int        strcoll(FAR const char *, FAR const char *s2);
+FAR char  *strcpy(FAR char *dest, FAR const char *src);
+FAR char  *stpcpy(FAR char *dest, FAR const char *src);
+FAR char  *strncpy(FAR char *, FAR const char *, size_t);
 FAR char  *strpbrk(FAR const char *, FAR const char *);
 FAR char  *strchr(FAR const char *s, int c);
 FAR char  *strrchr(FAR const char *s, int c);
@@ -91,6 +84,7 @@ FAR char  *strstr(FAR const char *, FAR const char *);
 FAR char  *strcasestr(FAR const char *, FAR const char *);
 FAR char  *strtok(FAR char *, FAR const char *);
 FAR char  *strtok_r(FAR char *, FAR const char *, FAR char **);
+size_t     strxfrm(FAR char *, FAR const char *, size_t n);
 
 FAR void  *memchr(FAR const void *s, int c, size_t n);
 FAR void  *memccpy(FAR void *s1, FAR const void *s2, int c, size_t n);

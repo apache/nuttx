@@ -81,19 +81,11 @@
 #define T0_TICKS_COUNT      ((CCLK / T0_PCLK_DIV) / TICK_PER_SEC)
 
 /****************************************************************************
- * Private Types
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Function:  up_timerisr
+ * Function:  lpc23xx_timerisr
  *
  * Description:
  *   The timer ISR will perform a variety of services for
@@ -102,9 +94,9 @@
  ****************************************************************************/
 
 #ifdef CONFIG_VECTORED_INTERRUPTS
-int up_timerisr(uint32_t * regs)
+static int lpc23xx_timerisr(uint32_t * regs)
 #else
-int up_timerisr(int irq, uint32_t * regs)
+static int lpc23xx_timerisr(int irq, uint32_t * regs, FAR void *arg)
 #endif
 {
   static uint32_t tick;
@@ -138,7 +130,11 @@ int up_timerisr(int irq, uint32_t * regs)
 }
 
 /****************************************************************************
- * Function:  up_timer_initialize
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Function:  arm_timer_initialize
  *
  * Description:
  *   This function is called during start-up to initialize
@@ -146,7 +142,7 @@ int up_timerisr(int irq, uint32_t * regs)
  *
  ****************************************************************************/
 
-void up_timer_initialize(void)
+void arm_timer_initialize(void)
 {
   uint16_t mcr;
 
@@ -191,9 +187,9 @@ void up_timer_initialize(void)
   /* Attach the timer interrupt vector */
 
 #ifdef CONFIG_VECTORED_INTERRUPTS
-  up_attach_vector(IRQ_SYSTIMER, ???, (vic_vector_t) up_timerisr);
+  up_attach_vector(IRQ_SYSTIMER, ???, (vic_vector_t) lpc23xx_timerisr);
 #else
-  (void)irq_attach(IRQ_SYSTIMER, (xcpt_t) up_timerisr);
+  (void)irq_attach(IRQ_SYSTIMER, (xcpt_t)lpc23xx_timerisr, NULL);
 #ifdef CONFIG_ARCH_IRQPRIO
   up_prioritize_irq(IRQ_SYSTIMER, PRIORITY_HIGHEST);
 #endif

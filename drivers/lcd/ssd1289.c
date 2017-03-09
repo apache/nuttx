@@ -100,20 +100,6 @@
 #  define CONFIG_LCD_LANDSCAPE 1
 #endif
 
-/* Define CONFIG_DEBUG_LCD to enable detailed LCD debug output. Verbose debug must
- * also be enabled.
- */
-
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
-#  undef CONFIG_DEBUG_GRAPHICS
-#  undef CONFIG_DEBUG_LCD
-#endif
-
-#ifndef CONFIG_DEBUG_VERBOSE
-#  undef CONFIG_DEBUG_LCD
-#endif
-
 /* Display/Color Properties ***********************************************************/
 /* Display Resolution */
 
@@ -224,16 +210,6 @@
 
 #  define PWRCTRL5_SETTING (SSD1289_PWRCTRL5_VCM(60) | SSD1289_PWRCTRL5_NOTP)
 
-#endif
-
-/* Debug ******************************************************************************/
-
-#ifdef CONFIG_DEBUG_LCD
-#  define lcddbg  dbg
-#  define lcdvdbg vdbg
-#else
-#  define lcddbg(x...)
-#  define lcdvdbg(x...)
 #endif
 
 /**************************************************************************************
@@ -543,18 +519,18 @@ static void ssd1289_showrun(FAR struct ssd1289_dev_s *priv, fb_coord_t row,
 
       if (priv->firstrow != priv->lastrow)
         {
-          lcddbg("...\n");
-          lcddbg("%s row: %d col: %d npixels: %d\n",
-                 priv->put ? "PUT" : "GET",
-                 priv->lastrow, priv->col, priv->npixels);
+          lcdinfo("...\n");
+          lcdinfo("%s row: %d col: %d npixels: %d\n",
+                  priv->put ? "PUT" : "GET",
+                  priv->lastrow, priv->col, priv->npixels);
         }
 
       /* And we are starting a new sequence.  Output the first run of the
        * new sequence
        */
 
-      lcddbg("%s row: %d col: %d npixels: %d\n",
-             put ? "PUT" : "GET", row, col, npixels);
+      lcdinfo("%s row: %d col: %d npixels: %d\n",
+              put ? "PUT" : "GET", row, col, npixels);
 
       /* And save information about the run so that we can detect continuations
        * of the sequence.
@@ -846,7 +822,7 @@ static int ssd1289_getvideoinfo(FAR struct lcd_dev_s *dev,
                                  FAR struct fb_videoinfo_s *vinfo)
 {
   DEBUGASSERT(dev && vinfo);
-  lcdvdbg("fmt: %d xres: %d yres: %d nplanes: 1\n",
+  lcdinfo("fmt: %d xres: %d yres: %d nplanes: 1\n",
           SSD1289_COLORFMT, SSD1289_XRES, SSD1289_YRES);
 
   vinfo->fmt     = SSD1289_COLORFMT;    /* Color format: RGB16-565: RRRR RGGG GGGB BBBB */
@@ -870,7 +846,7 @@ static int ssd1289_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
   FAR struct ssd1289_dev_s *priv = (FAR struct ssd1289_dev_s *)dev;
 
   DEBUGASSERT(dev && pinfo && planeno == 0);
-  lcdvdbg("planeno: %d bpp: %d\n", planeno, SSD1289_BPP);
+  lcdinfo("planeno: %d bpp: %d\n", planeno, SSD1289_BPP);
 
   pinfo->putrun = ssd1289_putrun;                 /* Put a run into LCD memory */
   pinfo->getrun = ssd1289_getrun;                 /* Get a run from LCD memory */
@@ -890,7 +866,7 @@ static int ssd1289_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
 
 static int ssd1289_getpower(FAR struct lcd_dev_s *dev)
 {
-  lcdvdbg("power: %d\n", 0);
+  lcdinfo("power: %d\n", 0);
   return g_lcddev.power;
 }
 
@@ -933,7 +909,7 @@ static int ssd1289_setpower(FAR struct lcd_dev_s *dev, int power)
   FAR struct ssd1289_dev_s *priv = (FAR struct ssd1289_dev_s *)dev;
   FAR struct ssd1289_lcd_s *lcd  = priv->lcd;
 
-  lcdvdbg("power: %d\n", power);
+  lcdinfo("power: %d\n", power);
   DEBUGASSERT((unsigned)power <= CONFIG_LCD_MAXPOWER);
 
   /* Set new power level */
@@ -974,7 +950,7 @@ static int ssd1289_setpower(FAR struct lcd_dev_s *dev, int power)
 
 static int ssd1289_getcontrast(FAR struct lcd_dev_s *dev)
 {
-  lcdvdbg("Not implemented\n");
+  lcdinfo("Not implemented\n");
   return -ENOSYS;
 }
 
@@ -988,7 +964,7 @@ static int ssd1289_getcontrast(FAR struct lcd_dev_s *dev)
 
 static int ssd1289_setcontrast(FAR struct lcd_dev_s *dev, unsigned int contrast)
 {
-  lcdvdbg("contrast: %d\n", contrast);
+  lcdinfo("contrast: %d\n", contrast);
   return -ENOSYS;
 }
 
@@ -1020,7 +996,7 @@ static inline int ssd1289_hwinitialize(FAR struct ssd1289_dev_s *priv)
   id = ssd1289_readreg(lcd, SSD1289_DEVCODE);
   if (id != 0)
     {
-      lcddbg("LCD ID: %04x\n", id);
+      lcdinfo("LCD ID: %04x\n", id);
     }
 
   /* If we could not get the ID, then let's just assume that this is an SSD1289.
@@ -1030,7 +1006,7 @@ static inline int ssd1289_hwinitialize(FAR struct ssd1289_dev_s *priv)
 
   else
     {
-      lcddbg("No LCD ID, assuming SSD1289\n");
+      lcdwarn("WARNING: No LCD ID, assuming SSD1289\n");
       id = SSD1289_DEVCODE_VALUE;
     }
 
@@ -1273,7 +1249,7 @@ static inline int ssd1289_hwinitialize(FAR struct ssd1289_dev_s *priv)
 #ifndef CONFIG_LCD_NOGETRUN
   else
     {
-      lcddbg("Unsupported LCD type\n");
+      lcderr("ERROR: Unsupported LCD type\n");
       ret = -ENODEV;
     }
 #endif
@@ -1302,7 +1278,7 @@ FAR struct lcd_dev_s *ssd1289_lcdinitialize(FAR struct ssd1289_lcd_s *lcd)
 {
   int ret;
 
-  lcdvdbg("Initializing\n");
+  lcdinfo("Initializing\n");
 
   /* If we ccould support multiple SSD1289 devices, this is where we would allocate
    * a new driver data structure... but we can't.  Why not?  Because of a bad should

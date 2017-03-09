@@ -422,7 +422,7 @@ CONFIGURATION
             CONFIG_SPI_EXCHANGE=n             : exchange() method is not supported
 
           System Type:
-            CONFIG_GPIO_IRQ=y                 : GPIO interrupt support
+            CONFIG_LPC17_GPIOIRQ=y                 : GPIO interrupt support
             CONFIG_LPC17_SSP1=y               : Enable support for SSP1
 
           RTOS Features:
@@ -438,8 +438,8 @@ CONFIGURATION
           debug output can be enabled with:
 
           Build Setup:
-            CONFIG_DEBUG=y                    : Enable debug features
-            CONFIG_DEBUG_VERBOSE=y            : Enable verbose debug output
+            CONFIG_DEBUG_FEATURES=y           : Enable debug features
+            CONFIG_DEBUG_INFO=y               : Enable verbose debug output
             CONFIG_DEBUG_INPUT=y              : Enable debug output from input devices
 
        c) You will also have to disable SD card support to use this test.  The
@@ -463,35 +463,9 @@ CONFIGURATION
           For touchscreen debug output:
 
           Build Setup:
-            CONFIG_DEBUG=y
-            CONFIG_DEBUG_VERBOSE=y
+            CONFIG_DEBUG_FEATURES=y
+            CONFIG_DEBUG_INFO=y
             CONFIG_DEBUG_INPUT=y
-
-    7. The button test (apps/examples/buttons) can be built-in by adding
-       the following options.  See apps/examples/README.txt for further
-       information about the button test.
-
-       System Type:
-         CONFIG_GPIO_IRQ=y
-
-       Board Selection:
-        CONFIG_ARCH_BUTTONS=y
-        CONFIG_ARCH_IRQBUTTONS=y
-
-        Application Configuration:
-        CONFIG_EXAMPLES_BUTTONS=y
-        CONFIG_EXAMPLES_BUTTONS_MIN=0
-        CONFIG_EXAMPLES_BUTTONS_MAX=7
-        CONFIG_EXAMPLES_IRQBUTTONS_MIN=1
-        CONFIG_EXAMPLES_IRQBUTTONS_MAX=7
-        CONFIG_EXAMPLES_BUTTONS_NAME0="USER1"
-        CONFIG_EXAMPLES_BUTTONS_NAME1="USER2"
-        CONFIG_EXAMPLES_BUTTONS_NAME2="USER3"
-        CONFIG_EXAMPLES_BUTTONS_NAME3="JOYSTICK_A"
-        CONFIG_EXAMPLES_BUTTONS_NAME4="JOYSTICK_B"
-        CONFIG_EXAMPLES_BUTTONS_NAME5="JOYSTICK_C"
-        CONFIG_EXAMPLES_BUTTONS_NAME6="JOYSTICK_D"
-        CONFIG_EXAMPLES_BUTTONS_NAME7="JOYSTICK_CTR"
 
   nxlines
   -------

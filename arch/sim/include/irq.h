@@ -1,5 +1,5 @@
 /****************************************************************************
- * irq.h
+ * arch/sim/include/irq.h
  *
  *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -37,8 +37,8 @@
  * only indirectly through nuttx/irq.h
  */
 
-#ifndef __ARCH_IRQ_H
-#define __ARCH_IRQ_H
+#ifndef __ARCH_SIM_INCLUDE_IRQ_H
+#define __ARCH_SIM_INCLUDE_IRQ_H
 
 /****************************************************************************
  * Included Files
@@ -132,5 +132,5 @@ extern "C"
 }
 #endif
 
-#endif /* __ARCH_IRQ_H */
+#endif /* __ARCH_SIM_INCLUDE_IRQ_H */
 

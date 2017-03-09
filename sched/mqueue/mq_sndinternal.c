@@ -1,5 +1,5 @@
 /****************************************************************************
- *  sched/mqueue/mq_send.c
+ *  sched/mqueue/mq_sndinternal.c
  *
  *   Copyright (C) 2007, 2009, 2013-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -53,6 +53,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
 #include <nuttx/signal.h>
+#include <nuttx/cancelpt.h>
 
 #include "sched/sched.h"
 #ifndef CONFIG_DISABLE_SIGNALS
@@ -158,7 +159,7 @@ FAR struct mqueue_msg_s *mq_msgalloc(void)
       /* Try the general free list */
 
       mqmsg = (FAR struct mqueue_msg_s *)sq_remfirst(&g_msgfree);
-      if (!mqmsg)
+      if (mqmsg == NULL)
         {
           /* Try the free list reserved for interrupt handlers */
 
@@ -178,16 +179,23 @@ FAR struct mqueue_msg_s *mq_msgalloc(void)
       mqmsg = (FAR struct mqueue_msg_s *)sq_remfirst(&g_msgfree);
       leave_critical_section(flags);
 
-      /* If we cannot a message from the free list, then we will have to allocate one. */
+      /* If we cannot a message from the free list, then we will have to
+       * allocate one.
+       */
 
-      if (!mqmsg)
+      if (mqmsg == NULL)
         {
-          mqmsg = (FAR struct mqueue_msg_s *)kmm_malloc((sizeof (struct mqueue_msg_s)));
+          mqmsg = (FAR struct mqueue_msg_s *)
+            kmm_malloc((sizeof (struct mqueue_msg_s)));
 
-          /* Check if we got an allocated message */
+          /* Check if we allocated the message */
 
-          ASSERT(mqmsg);
-          mqmsg->type = MQ_ALLOC_DYN;
+          if (mqmsg != NULL)
+            {
+              /* Yes... remember that this message was dynamically allocated */
+
+              mqmsg->type = MQ_ALLOC_DYN;
+            }
         }
     }
 
@@ -208,7 +216,7 @@ FAR struct mqueue_msg_s *mq_msgalloc(void)
  *   On success, mq_send() returns 0 (OK); on error, -1 (ERROR) is
  *   returned, with errno set to indicate the error:
  *
- *   EAGAIN   The queue was empty, and the O_NONBLOCK flag was set for the
+ *   EAGAIN   The queue was full and the O_NONBLOCK flag was set for the
  *            message queue description referred to by mqdes.
  *   EINTR    The call was interrupted by a signal handler.
  *   ETIMEOUT A timeout expired before the message queue became non-full
@@ -216,7 +224,7 @@ FAR struct mqueue_msg_s *mq_msgalloc(void)
  *
  * Assumptions/restrictions:
  * - The caller has verified the input parameters using mq_verifysend().
- * - Interrupts are disabled.
+ * - Executes within a critical section established by the caller.
  *
  ****************************************************************************/
 
@@ -224,6 +232,23 @@ int mq_waitsend(mqd_t mqdes)
 {
   FAR struct tcb_s *rtcb;
   FAR struct mqueue_inode_s *msgq;
+
+  /* mq_waitsend() is not a cancellation point, but it is always called from
+   * a cancellation point.
+   */
+
+  if (enter_cancellation_point())
+    {
+#ifdef CONFIG_CANCELLATION_POINTS
+      /* If there is a pending cancellation, then do not perform
+       * the wait.  Exit now with ECANCELED.
+       */
+
+      set_errno(ECANCELED);
+      leave_cancellation_point();
+      return ERROR;
+#endif
+    }
 
   /* Get a pointer to the message queue */
 
@@ -242,6 +267,7 @@ int mq_waitsend(mqd_t mqdes)
           /* No... We will return an error to the caller. */
 
           set_errno(EAGAIN);
+          leave_cancellation_point();
           return ERROR;
         }
 
@@ -276,12 +302,14 @@ int mq_waitsend(mqd_t mqdes)
 
               if (get_errno() != OK)
                 {
+                  leave_cancellation_point();
                   return ERROR;
                 }
             }
         }
     }
 
+  leave_cancellation_point();
   return OK;
 }
 

@@ -56,10 +56,10 @@
 
 #define LINE_SIZE        1024
 #define SCRATCH_SIZE     2048
-#define MAX_DEPENDENCIES 100
+#define MAX_DEPENDENCIES 128
 #define MAX_LEVELS       100
 #define MAX_SELECT       64
-#define MAX_DEFAULTS     128
+#define MAX_DEFAULTS     196
 #define TAB_SIZE         4
 #define VAR_SIZE         80
 #define HTML_VAR_SIZE    (2*VAR_SIZE + 64)
@@ -2245,33 +2245,44 @@ static char *parse_kconfigfile(FILE *stream, const char *kconfigdir)
                 {
                   /* Get the relative path from the Kconfig file line */
 
-                  char *relpath = get_token();
+                  char *source = get_token();
 
                   /* Remove optional quoting */
 
-                  relpath = dequote(relpath);
-                  if (relpath)
+                  source = dequote(source);
+                  if (source)
                     {
-                      char *subdir = dirname(relpath);
+                      char *subdir = dirname(source);
                       char *dirpath;
 
-                      /* Check if the directory path contains $APPSDIR */
+                      /* Check for an absolute path */
 
-                      char *appsdir = strstr(subdir, "$APPSDIR");
-                      if (appsdir)
+                      if (source[0] == '/')
                         {
-                          char *tmp = appsdir + strlen("$APPSDIR");
-
-                          *appsdir = '\0';
-                          asprintf(&dirpath, "%s/%s%s%s", g_kconfigroot, subdir, g_appsdir, tmp);
+                          dirpath = strdup(subdir);
                         }
                       else
                         {
-                          asprintf(&dirpath, "%s/%s", g_kconfigroot, subdir);
+                          /* Check if the directory path contains $APPSDIR */
+
+                          char *appsdir = strstr(subdir, "$APPSDIR");
+                          if (appsdir)
+                            {
+                              char *tmp = appsdir + strlen("$APPSDIR");
+
+                              *appsdir = '\0';
+                              asprintf(&dirpath, "%s/%s%s%s",
+                                       g_kconfigroot, subdir, g_appsdir, tmp);
+                            }
+                          else
+                            {
+                              asprintf(&dirpath, "%s/%s", g_kconfigroot, subdir);
+                            }
+
                         }
 
                       debug("parse_kconfigfile: Recursing for TOKEN_SOURCE\n");
-                      debug("  relpath:     %s\n", relpath);
+                      debug("  source:      %s\n", source);
                       debug("  subdir:      %s\n", subdir);
                       debug("  dirpath:     %s\n", dirpath);
 

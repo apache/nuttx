@@ -186,7 +186,7 @@ int posix_spawn_file_actions_addopen(FAR posix_spawn_file_actions_t *file_action
 int posix_spawnattr_init(FAR posix_spawnattr_t *attr);
 
 /* int posix_spawnattr_destroy(FAR posix_spawnattr_t *); */
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 #  define posix_spawnattr_destroy(attr) (attr ? 0 : EINVAL)
 #else
 #  define posix_spawnattr_destroy(attr) (0)
@@ -234,7 +234,7 @@ int task_spawnattr_setstacksize(FAR posix_spawnattr_t *attr,
 
 /* Non standard debug functions */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 void posix_spawn_file_actions_dump(FAR posix_spawn_file_actions_t *file_actions);
 void posix_spawnattr_dump(FAR posix_spawnattr_t *attr);
 #else

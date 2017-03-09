@@ -1,6 +1,5 @@
 /****************************************************************************
  * arch/mips/src/pic32mx/pic32mx-irq.c
- * arch/mips/src/chip/pic32mx-irq.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -155,7 +154,7 @@ void up_irqinitialize(void)
 
   /* Attach and enable software interrupts */
 
-  irq_attach(PIC32MX_IRQ_CS0, up_swint0);
+  irq_attach(PIC32MX_IRQ_CS0, up_swint0, NULL);
   up_enable_irq(PIC32MX_IRQSRC_CS0);
 
   /* currents_regs is non-NULL only while processing an interrupt */

@@ -1,7 +1,7 @@
 /****************************************************************************
- * pthread_join.c
+ * sched/pthread/pthread_join.c
  *
- *   Copyright (C) 2007, 2008, 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2011, 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,11 +37,15 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <sys/types.h>
 #include <unistd.h>
 #include <pthread.h>
 #include <errno.h>
 #include <debug.h>
+
+#include <nuttx/cancelpt.h>
 
 #include "sched/sched.h"
 #include "group/group.h"
@@ -87,8 +91,12 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
   FAR struct join_s *pjoin;
   int ret;
 
-  sdbg("thread=%d group=%p\n", thread, group);
+  sinfo("thread=%d group=%p\n", thread, group);
   DEBUGASSERT(group);
+
+  /* pthread_join() is a cancellation point */
+
+  (void)enter_cancellation_point();
 
   /* First make sure that this is not an attempt to join to
    * ourself.
@@ -96,6 +104,7 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
 
   if ((pid_t)thread == getpid())
     {
+      leave_cancellation_point();
       return EDEADLK;
     }
 
@@ -121,7 +130,7 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
 
       FAR struct tcb_s *tcb = sched_gettcb((pthread_t)thread);
 
-      sdbg("Could not find thread data\n");
+      serr("ERROR: Could not find thread data\n");
 
       /* Case (1) or (3) -- we can't tell which.  Assume (3) */
 
@@ -159,19 +168,19 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
 
       if (pjoin->terminated)
         {
-          sdbg("Thread has terminated\n");
+          sinfo("Thread has terminated\n");
 
           /* Get the thread exit value from the terminated thread. */
 
           if (pexit_value)
             {
-              sdbg("exit_value=0x%p\n", pjoin->exit_value);
+              sinfo("exit_value=0x%p\n", pjoin->exit_value);
               *pexit_value = pjoin->exit_value;
             }
         }
       else
         {
-          sdbg("Thread is still running\n");
+          sinfo("Thread is still running\n");
 
           /* Relinquish the data set semaphore.  Since pre-emption is
            * disabled, we can be certain that no task has the
@@ -195,7 +204,7 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
           if (pexit_value)
             {
              *pexit_value = pjoin->exit_value;
-              sdbg("exit_value=0x%p\n", pjoin->exit_value);
+              sinfo("exit_value=0x%p\n", pjoin->exit_value);
             }
 
           /* Post the thread's data semaphore so that the exiting thread
@@ -230,6 +239,7 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
       ret = OK;
     }
 
-  sdbg("Returning %d\n", ret);
+  leave_cancellation_point();
+  sinfo("Returning %d\n", ret);
   return ret;
 }

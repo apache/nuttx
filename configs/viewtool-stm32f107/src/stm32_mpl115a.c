@@ -92,7 +92,7 @@ int stm32_mpl115ainitialize(FAR const char *devpath)
   ret = mpl115a_register(devpath, spi);
   if (ret < 0)
     {
-      sndbg("Error registering MPL115A\n");
+      snerr("ERROR: Error registering MPL115A\n");
     }
 
   return ret;

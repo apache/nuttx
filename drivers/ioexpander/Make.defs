@@ -1,8 +1,9 @@
 ############################################################################
 # drivers/ioexpander/Make.defs
 #
-#   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
 #   Author: Sebastien Lorquet <sebastien@lorquet.fr>
+#           Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -42,6 +43,37 @@ ifeq ($(CONFIG_IOEXPANDER),y)
 ifeq ($(CONFIG_IOEXPANDER_PCA9555),y)
   CSRCS += pca9555.c
 endif
+
+ifeq ($(CONFIG_IOEXPANDER_TCA64XX),y)
+  CSRCS += tca64xx.c
+endif
+
+ifeq ($(CONFIG_IOEXPANDER_PCF8574),y)
+  CSRCS += pcf8574.c
+endif
+
+endif # CONFIG_IOEXPANDER
+
+# GPIO test device driver (independent of IOEXPANDERS)
+
+ifeq ($(CONFIG_DEV_GPIO),y)
+  CSRCS += gpio.c
+ifeq ($(CONFIG_GPIO_LOWER_HALF),y)
+  CSRCS += gpio_lower_half.c
+endif
+endif
+
+# The folling implements an awkward OR
+
+ifeq ($(CONFIG_IOEXPANDER),y)
+
+# Include ioexpander I/O device driver build support
+
+DEPPATH += --dep-path ioexpander
+VPATH += :ioexpander
+CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)ioexpander}
+
+else ifeq ($(CONFIG_DEV_GPIO),y)
 
 # Include ioexpander I/O device driver build support
 

@@ -254,7 +254,7 @@
 #define TIVA_SYSCON_UNIQUEID2_OFFSET   0x0f28 /* Unique ID 2 */
 #define TIVA_SYSCON_UNIQUEID3_OFFSET   0x0f2c /* Unique ID 3 */
 
-/*( CCM System Control Registers (CCM Control Offset) */
+/* CCM System Control Registers (CCM Control Offset) */
 
 #define TIVA_SYSCON_CCMCGREQ_OFFSET    0x0204 /* Cryptographic Modules Clock Gating Request */
 
@@ -1895,11 +1895,15 @@
 
 /* PWM Power Control */
 
-#define SYSCON_PCPWM_P0                (1 << 0)   /* Bit 0:  PWM Module 0 Power Control */
+#define SYSCON_PCPWM(n)                (1 << (n)) /* Bit n:  PWM module n Power Control */
+#  define SYSCON_PCPWM_P0              (1 << 0)   /* Bit 0:  PWM Module 0 Power Control */
+#  define SYSCON_PCPWM_P1              (1 << 1)   /* Bit 1:  PWM Module 1 Power Control */
 
 /* QE Interface Power Control */
 
-#define SYSCON_PCQEI_P0                (1 << 0)   /* Bit 0: QEI Module 0 Power Control */
+#define SYSCON_PCQEI(n)                (1 << (n)) /* Bit n:  QEI module n Power Control */
+#  define SYSCON_PCQEI_P0              (1 << 0)   /* Bit 0:  QEI Module 0 Power Control */
+#  define SYSCON_PCQEI_P1              (1 << 1)   /* Bit 1:  QEI Module 1 Power Control */
 
 /* EEPROM Power Control */
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/vfs/fs_close.c
  *
- *   Copyright (C) 2007-2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,8 @@
 #include <unistd.h>
 #include <sched.h>
 #include <errno.h>
+
+#include <nuttx/cancelpt.h>
 #include <nuttx/fs/fs.h>
 
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
@@ -79,10 +81,16 @@
 
 int close(int fd)
 {
-  int err;
+  int errcode;
 #if CONFIG_NFILE_DESCRIPTORS > 0
   int ret;
+#endif
 
+  /* close() is a cancellation point */
+
+  (void)enter_cancellation_point();
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
   /* Did we get a valid file descriptor? */
 
   if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS)
@@ -93,12 +101,14 @@ int close(int fd)
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
       if ((unsigned int)fd < (CONFIG_NFILE_DESCRIPTORS+CONFIG_NSOCKET_DESCRIPTORS))
         {
-          return net_close(fd);
+          ret = net_close(fd);
+          leave_cancellation_point();
+          return ret;
         }
       else
 #endif
         {
-          err = EBADF;
+          errcode = EBADF;
           goto errout;
         }
     }
@@ -119,16 +129,17 @@ int close(int fd)
     {
       /* An error occurred while closing the driver */
 
-      err = -ret;
+      errcode = -ret;
       goto errout;
     }
 
+  leave_cancellation_point();
   return OK;
 
 #endif
 
 errout:
-  set_errno(err);
+  set_errno(errcode);
+  leave_cancellation_point();
   return ERROR;
 }
-

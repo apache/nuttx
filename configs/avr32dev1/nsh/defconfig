@@ -20,7 +20,7 @@ CONFIG_WINDOWS_CYGWIN=y
 #
 # Build Configuration
 #
-CONFIG_APPS_DIR="../apps"
+# CONFIG_APPS_DIR="../apps"
 # CONFIG_BUILD_2PASS is not set
 
 #
@@ -42,7 +42,7 @@ CONFIG_INTELHEX_BINARY=y
 #
 # Debug Options
 #
-# CONFIG_DEBUG is not set
+# CONFIG_DEBUG_FEATURES is not set
 # CONFIG_ARCH_HAVE_STACKCHECK is not set
 # CONFIG_ARCH_HAVE_HEAPCHECK is not set
 # CONFIG_DEBUG_SYMBOLS is not set
@@ -58,8 +58,7 @@ CONFIG_DEBUG_FULLOPT=y
 CONFIG_ARCH_AVR=y
 # CONFIG_ARCH_HC is not set
 # CONFIG_ARCH_MIPS is not set
-# CONFIG_ARCH_RGMP is not set
-# CONFIG_ARCH_SH is not set
+# CONFIG_ARCH_RENESAS is not set
 # CONFIG_ARCH_SIM is not set
 # CONFIG_ARCH_X86 is not set
 # CONFIG_ARCH_Z16 is not set
@@ -272,7 +271,6 @@ CONFIG_DEV_NULL=y
 # CONFIG_PM is not set
 # CONFIG_POWER is not set
 # CONFIG_SENSORS is not set
-# CONFIG_SERCOMM_CONSOLE is not set
 CONFIG_SERIAL=y
 # CONFIG_DEV_LOWCONSOLE is not set
 # CONFIG_16550_UART is not set
@@ -345,7 +343,6 @@ CONFIG_FS_FAT=y
 # System Logging
 #
 
-# CONFIG_SYSLOG is not set
 
 #
 # Graphics Support
@@ -404,7 +401,6 @@ CONFIG_TASK_SPAWN_DEFAULT_STACKSIZE=2048
 CONFIG_ARCH_LOWPUTC=y
 CONFIG_LIB_SENDFILE_BUFSIZE=512
 # CONFIG_ARCH_ROMGETC is not set
-# CONFIG_ARCH_OPTIMIZED_FUNCTIONS is not set
 
 #
 # Non-standard Library Support
@@ -464,7 +460,6 @@ CONFIG_EXAMPLES_NSH=y
 # CONFIG_EXAMPLES_POLL is not set
 # CONFIG_EXAMPLES_POSIXSPAWN is not set
 # CONFIG_EXAMPLES_QENCODER is not set
-# CONFIG_EXAMPLES_RGMP is not set
 # CONFIG_EXAMPLES_ROMFS is not set
 # CONFIG_EXAMPLES_SENDMAIL is not set
 # CONFIG_EXAMPLES_SERLOOP is not set

@@ -49,8 +49,8 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/mmcsd.h>
 
-#ifdef CONFIG_SYSTEM_USBMONITOR
-#  include <apps/usbmonitor.h>
+#ifdef CONFIG_USBMONITOR
+#  include <nuttx/usb/usbmonitor.h>
 #endif
 
 #ifdef CONFIG_USBDEV
@@ -105,5 +105,16 @@ int board_app_initialize(uintptr_t arg)
 #endif
 #endif
 
+#ifdef CONFIG_CAN
+  /* Initialize CAN and register the CAN driver. */
+
+  ret = stm32_can_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_can_setup failed: %d\n", ret);
+    }
+#endif
+
+  UNUSED(ret);
   return ret;
 }

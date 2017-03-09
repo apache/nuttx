@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/tiva/tiva_serial.c
  *
- *   Copyright (C) 2009-2010, 2012-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2012-2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -109,13 +109,16 @@
 #    define UART4_ASSIGNED      1
 #elif defined(CONFIG_UART5_SERIAL_CONSOLE)
 #    define CONSOLE_DEV         g_uart5port /* UART5 is console */
-#    define TTYS5_DEV           g_uart5port /* UART5 is ttyS0 */
+#    define TTYS0_DEV           g_uart5port /* UART5 is ttyS0 */
+#    define UART5_ASSIGNED      1
 #elif defined(CONFIG_UART6_SERIAL_CONSOLE)
 #    define CONSOLE_DEV         g_uart6port /* UART6 is console */
-#    define TTYS5_DEV           g_uart6port /* UART6 is ttyS0 */
+#    define TTYS0_DEV           g_uart6port /* UART6 is ttyS0 */
+#    define UART6_ASSIGNED      1
 #elif defined(CONFIG_UART7_SERIAL_CONSOLE)
 #    define CONSOLE_DEV         g_uart7port /* UART7 is console */
-#    define TTYS5_DEV           g_uart7port /* UART7 is ttyS0 */
+#    define TTYS0_DEV           g_uart7port /* UART7 is ttyS0 */
+#    define UART7_ASSIGNED      1
 #else
 #  undef CONSOLE_DEV                        /* No console */
 #  if defined(CONFIG_TIVA_UART0)
@@ -302,13 +305,13 @@
 
 struct up_dev_s
 {
-  uint32_t uartbase; /* Base address of UART registers */
-  uint32_t baud;     /* Configured baud */
-  uint32_t im;       /* Saved IM value */
-  uint8_t  irq;      /* IRQ associated with this UART */
-  uint8_t  parity;   /* 0=none, 1=odd, 2=even */
-  uint8_t  bits;     /* Number of bits (7 or 8) */
-  bool    stopbits2; /* true: Configure with 2 stop bits instead of 1 */
+  uint32_t uartbase;  /* Base address of UART registers */
+  uint32_t baud;      /* Configured baud */
+  uint32_t im;        /* Saved IM value */
+  uint8_t  irq;       /* IRQ associated with this UART */
+  uint8_t  parity;    /* 0=none, 1=odd, 2=even */
+  uint8_t  bits;      /* Number of bits (7 or 8) */
+  bool     stopbits2; /* true: Configure with 2 stop bits instead of 1 */
 };
 
 /****************************************************************************
@@ -319,7 +322,7 @@ static int  up_setup(struct uart_dev_s *dev);
 static void up_shutdown(struct uart_dev_s *dev);
 static int  up_attach(struct uart_dev_s *dev);
 static void up_detach(struct uart_dev_s *dev);
-static int  up_interrupt(int irq, void *context);
+static int  up_interrupt(int irq, void *context, void *arg);
 static int  up_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int  up_receive(struct uart_dev_s *dev, uint32_t *status);
 static void up_rxint(struct uart_dev_s *dev, bool enable);
@@ -900,7 +903,7 @@ static int up_attach(struct uart_dev_s *dev)
 
   /* Attach and enable the IRQ */
 
-  ret = irq_attach(priv->irq, up_interrupt);
+  ret = irq_attach(priv->irq, up_interrupt, dev);
   if (ret == OK)
     {
       /* Enable the interrupt (RX and TX interrupts are still disabled
@@ -943,74 +946,15 @@ static void up_detach(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static int up_interrupt(int irq, void *context)
+static int up_interrupt(int irq, void *context, void *arg)
 {
-  struct uart_dev_s *dev = NULL;
+  struct uart_dev_s *dev = (struct uart_dev_s *)arg;
   struct up_dev_s   *priv;
   uint32_t           mis;
   int                passes;
   bool               handled;
 
-#ifdef CONFIG_TIVA_UART0
-  if (g_uart0priv.irq == irq)
-    {
-      dev = &g_uart0port;
-    }
-  else
-#endif
-#ifdef CONFIG_TIVA_UART1
-  if (g_uart1priv.irq == irq)
-    {
-      dev = &g_uart1port;
-    }
-  else
-#endif
-#ifdef CONFIG_TIVA_UART2
-  if (g_uart2priv.irq == irq)
-    {
-      dev = &g_uart2port;
-    }
-  else
-#endif
-#ifdef CONFIG_TIVA_UART3
-  if (g_uart3priv.irq == irq)
-    {
-      dev = &g_uart3port;
-    }
-  else
-#endif
-#ifdef CONFIG_TIVA_UART4
-  if (g_uart4priv.irq == irq)
-    {
-      dev = &g_uart4port;
-    }
-  else
-#endif
-#ifdef CONFIG_TIVA_UART5
-  if (g_uart5priv.irq == irq)
-    {
-      dev = &g_uart5port;
-    }
-  else
-#endif
-#ifdef CONFIG_TIVA_UART6
-  if (g_uart6priv.irq == irq)
-    {
-      dev = &g_uart6port;
-    }
-  else
-#endif
-#ifdef CONFIG_TIVA_UART7
-  if (g_uart7priv.irq == irq)
-    {
-      dev = &g_uart7port;
-    }
-  else
-#endif
-    {
-      PANIC();
-    }
-
+  DEBUGASSERT(dev != NULL && dev->priv != NULL);
   priv = (struct up_dev_s *)dev->priv;
 
   /* Loop until there are no characters to be transferred or,

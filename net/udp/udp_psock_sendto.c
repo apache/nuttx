@@ -47,6 +47,7 @@
 #include <debug.h>
 #include <assert.h>
 
+#include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/udp.h>
@@ -224,7 +225,7 @@ static uint16_t sendto_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
 {
   FAR struct sendto_s *pstate = (FAR struct sendto_s *)pvpriv;
 
-  nllvdbg("flags: %04x\n", flags);
+  ninfo("flags: %04x\n", flags);
   if (pstate)
     {
       /* If the network device has gone down, then we will have terminate
@@ -235,7 +236,7 @@ static uint16_t sendto_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
         {
           /* Terminate the transfer with an error. */
 
-          nlldbg("ERROR: Network is down\n");
+          nwarn("WARNING: Network is down\n");
           pstate->st_sndlen = -ENETUNREACH;
         }
 
@@ -257,7 +258,7 @@ static uint16_t sendto_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
             {
               /* Yes.. report the timeout */
 
-              nlldbg("ERROR: SEND timeout\n");
+              nwarn("WARNING: SEND timeout\n");
               pstate->st_sndlen = -ETIMEDOUT;
             }
           else
@@ -339,7 +340,6 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
   FAR struct udp_conn_s *conn;
   FAR struct net_driver_s *dev;
   struct sendto_s state;
-  net_lock_t save;
   int ret;
 
 #if defined(CONFIG_NET_ARP_SEND) || defined(CONFIG_NET_ICMPv6_NEIGHBOR)
@@ -375,7 +375,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
 
   if (ret < 0)
     {
-      ndbg("ERROR: Peer not reachable\n");
+      nerr("ERROR: Peer not reachable\n");
       return -ENETUNREACH;
     }
 #endif /* CONFIG_NET_ARP_SEND || CONFIG_NET_ICMPv6_NEIGHBOR */
@@ -389,9 +389,16 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
    * are ready.
    */
 
-  save = net_lock();
+  net_lock();
   memset(&state, 0, sizeof(struct sendto_s));
+
+  /* This semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
   sem_init(&state.st_sem, 0, 0);
+  sem_setprotocol(&state.st_sem, SEM_PRIO_NONE);
+
   state.st_buflen = len;
   state.st_buffer = buf;
 
@@ -419,7 +426,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
   ret = udp_connect(conn, to);
   if (ret < 0)
     {
-      ndbg("ERROR: udp_connect failed: %d\n", ret);
+      nerr("ERROR: udp_connect failed: %d\n", ret);
       goto errout_with_lock;
     }
 
@@ -430,7 +437,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
   dev = udp_find_raddr_device(conn);
   if (dev == NULL)
     {
-      ndbg("ERROR: udp_find_raddr_device failed\n");
+      nerr("ERROR: udp_find_raddr_device failed\n");
       ret = -ENETUNREACH;
       goto errout_with_lock;
    }
@@ -476,7 +483,7 @@ errout_with_lock:
 
   /* Unlock the network and return the result of the sendto() operation */
 
-  net_unlock(save);
+  net_unlock();
   return ret;
 }
 

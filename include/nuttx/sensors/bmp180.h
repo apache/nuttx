@@ -33,8 +33,8 @@
  *
  ********************************************************************************************/
 
-#ifndef __DRIVERS_SENSORS_BMP180_H
-#define __DRIVERS_SENSORS_BMP180_H
+#ifndef __INCLUDE_NUTTX_SENSORS_BMP180_H
+#define __INCLUDE_NUTTX_SENSORS_BMP180_H
 
 #include <nuttx/config.h>
 
@@ -52,7 +52,7 @@
  * CONFIG_BMP180
  *   Enables support for the BMP180 driver
  * CONFIG_BMP180_REGDEBUG
- *   Enable very low register-level debug output.  Requires CONFIG_DEBUG.
+ *   Enable very low register-level debug output.  Requires CONFIG_DEBUG_FEATURES.
  */
 
 /****************************************************************************
@@ -97,4 +97,4 @@ int bmp180_register(FAR const char *devpath, FAR struct i2c_master_s *i2c);
 #endif
 
 #endif /* CONFIG_I2C && CONFIG_BMP180 */
-#endif /* __DRIVERS_BMP180_H */
+#endif /* __INCLUDE_NUTTX_SENSORS_BMP180_H */

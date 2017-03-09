@@ -58,10 +58,10 @@
  *
  ****************************************************************************/
 
-int irq_unexpected_isr(int irq, FAR void *context)
+int irq_unexpected_isr(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
-  lldbg("irq: %d\n", irq);
+  _err("ERROR irq: %d\n", irq);
   PANIC();
   return OK; /* Won't get here */
 }

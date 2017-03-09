@@ -50,21 +50,18 @@
  ****************************************************************************/
 /* Configuration ************************************************************/
 
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
+#ifndef CONFIG_DEBUG_ERROR
 #  undef CONFIG_EFM32_RMU_DEBUG
 #endif
 
 #ifdef CONFIG_EFM32_RMU_DEBUG
-#  define rmudbg lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
-#    define rmuvdbg lldbg
-#  else
-#    define rmuvdbg(x...)
-#  endif
+#  define rmuerr   _err
+#  define rmuwarn  _warn
+#  define rmuinfo  _info
 #else
-#  define rmudbg(x...)
-#  define rmuvdbg(x...)
+#  define rmuerr(x...)
+#  define rmuwarn(x...)
+#  define rmuinfo(x...)
 #endif
 
 /****************************************************************************

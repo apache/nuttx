@@ -119,14 +119,14 @@ int chdir(FAR const char *path)
   struct stat buf;
   char *oldpwd;
   char *alloc;
-  int err;
+  int errcode;
   int ret;
 
   /* Verify the input parameters */
 
   if (!path)
     {
-      err = ENOENT;
+      errcode = ENOENT;
       goto errout;
     }
 
@@ -135,7 +135,7 @@ int chdir(FAR const char *path)
   ret = stat(path, &buf);
   if (ret != 0)
     {
-      err = ENOENT;
+      errcode = ENOENT;
       goto errout;
     }
 
@@ -143,7 +143,7 @@ int chdir(FAR const char *path)
 
   if (!S_ISDIR(buf.st_mode))
     {
-      err = ENOTDIR;
+      errcode = ENOTDIR;
       goto errout;
     }
 
@@ -173,7 +173,7 @@ int chdir(FAR const char *path)
   return OK;
 
 errout:
-  set_errno(err);
+  set_errno(errcode);
   return ERROR;
 }
 #endif /* CONFIG_NFILE_DESCRIPTORS && !CONFIG_DISABLE_ENVIRON */

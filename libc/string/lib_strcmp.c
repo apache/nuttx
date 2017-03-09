@@ -45,7 +45,7 @@
  * Public Functions
  ****************************************************************************/
 
-#ifndef CONFIG_ARCH_STRCMP
+#ifndef CONFIG_LIBC_ARCH_STRCMP
 int strcmp(FAR const char *cs, FAR const char *ct)
 {
   register signed char result;

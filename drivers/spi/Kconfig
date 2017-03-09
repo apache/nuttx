@@ -3,6 +3,26 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+config ARCH_HAVE_SPI_CRCGENERATION
+	bool
+	default n
+
+config ARCH_HAVE_SPI_CS_CONTROL
+	bool
+	default n
+
+config ARCH_HAVE_SPI_BITORDER
+	bool
+	default n
+
+menuconfig SPI
+	bool "SPI Driver Support"
+	default n
+	---help---
+		This selection enables selection of common SPI options.  This option
+		should be enabled by all platforms that support SPI interfaces.
+		See include/nuttx/spi/spi.h for further SPI driver information.
+
 if SPI
 
 config SPI_SLAVE
@@ -47,13 +67,6 @@ config SPI_CALLBACK
 		the SPI-based MMC/SD driver to get a notification of changes in the
 		card status when an SD card is inserted or removed.
 
-config SPI_BITBANG
-	bool "SPI bit-bang device"
-	default n
-	---help---
-		Enable support for a generic SPI bit-bang device.
-		See include/nuttx/spi/spi_bitbang.h for further information.
-
 config SPI_HWFEATURES
 	bool
 	default n
@@ -66,10 +79,57 @@ config SPI_CRCGENERATION
 	bool
 	default n
 	select SPI_HWFEATURES
+	depends on ARCH_HAVE_SPI_CRCGENERATION
 	---help---
 		Selected by MCU Kconfig logic if implementation supports automatic
 		generation of SPI CRCs.  Enables the HWFEAT_CRCGENERATION option
 		as well as the hwfeartures() interface method.
+
+config SPI_CS_CONTROL
+	bool "SPI CS Behavior Control"
+	default n
+	select SPI_HWFEATURES
+	depends on ARCH_HAVE_SPI_CS_CONTROL
+	---help---
+		Enables possibilities to define the behavior of CS.
+		Also enables the hwfeatures() interface method.
+
+config SPI_BITORDER
+	bool "SPI Bit Order Control"
+	default n
+	select SPI_HWFEATURES
+	depends on ARCH_HAVE_SPI_BITORDER
+	---help---
+		Enables capability to select MSB- or LSB-first hardware feature for
+		data transfers.
+
+config SPI_CS_DELAY_CONTROL
+	bool "SPI CS Delay Control"
+	default n
+	---help---
+		Enables possibilities to define the SPI-ChipSelect-Delays like
+		time between ChipSelect assertion and first Data-Bit, the time
+		between the last Data-Bit and the de-assertion and the minimum
+		delay between two ChipSelects.
+
+		This option enables the setdelay() interface method.
+
+config SPI_DRIVER
+	bool "SPI character driver"
+	default n
+	depends on SPI_EXCHANGE
+	---help---
+		Build in support for a character driver at /dev/spi[N] that may be
+		used to perform SPI bus transfers from applications.  The intent of
+		this driver is to support SPI testing.  It is not suitable for use
+		in any real driver application.
+
+config SPI_BITBANG
+	bool "SPI bit-bang device"
+	default n
+	---help---
+		Enable support for a generic SPI bit-bang device.
+		See include/nuttx/spi/spi_bitbang.h for further information.
 
 if SPI_BITBANG
 

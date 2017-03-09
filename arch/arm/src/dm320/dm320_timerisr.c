@@ -2,7 +2,7 @@
  * arch/arm/src/dm320/dm320_timerisr.c
  * arch/arm/src/chip/dm320_timerisr.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -97,19 +97,11 @@
 #define DM320_TMR0_PRSCL 9                      /* (see above) */
 
 /****************************************************************************
- * Private Types
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Function:  up_timerisr
+ * Function:  dm320_timerisr
  *
  * Description:
  *   The timer ISR will perform a variety of services for various portions
@@ -117,7 +109,7 @@
  *
  ****************************************************************************/
 
-int up_timerisr(int irq, uint32_t *regs)
+static int dm320_timerisr(int irq, uint32_t *regs, FAR void *arg)
 {
   /* Process timer interrupt */
 
@@ -126,7 +118,11 @@ int up_timerisr(int irq, uint32_t *regs)
 }
 
 /****************************************************************************
- * Function:  up_timer_initialize
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Function:  arm_timer_initialize
  *
  * Description:
  *   This function is called during start-up to initialize the timer
@@ -134,7 +130,7 @@ int up_timerisr(int irq, uint32_t *regs)
  *
  ****************************************************************************/
 
-void up_timer_initialize(void)
+void arm_timer_initialize(void)
 {
   up_disable_irq(DM320_IRQ_SYSTIMER);
 
@@ -151,7 +147,7 @@ void up_timer_initialize(void)
 
   /* Attach and enable the timer interrupt */
 
-  irq_attach(DM320_IRQ_SYSTIMER, (xcpt_t)up_timerisr);
+  irq_attach(DM320_IRQ_SYSTIMER, (xcpt_t)dm320_timerisr, NULL);
   up_enable_irq(DM320_IRQ_SYSTIMER);
 }
 

@@ -51,6 +51,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbhost.h>
 #include <nuttx/usb/ehci.h>
@@ -112,7 +113,7 @@
 
 /* Debug options */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_USB_INFO
 #  undef CONFIG_SAMA5_EHCI_REGDEBUG
 #endif
 
@@ -125,13 +126,6 @@
 
 #ifdef CONFIG_SAMA5_UDPHS
 #  undef CONFIG_SAMA5_UHPHS_RHPORT1
-#endif
-
-/* Simplify DEBUG checks */
-
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
-#  undef CONFIG_DEBUG_USB
 #endif
 
 /* For now, suppress use of PORTA in any event.  I use that for SAM-BA and
@@ -394,7 +388,7 @@ static inline void sam_portsc_bottomhalf(void);
 static inline void sam_syserr_bottomhalf(void);
 static inline void sam_async_advance_bottomhalf(void);
 static void sam_ehci_bottomhalf(FAR void *arg);
-static int sam_ehci_tophalf(int irq, FAR void *context);
+static int sam_ehci_tophalf(int irq, FAR void *context, FAR void *arg);
 
 /* USB Host Controller Operations **********************************************/
 
@@ -635,7 +629,7 @@ static uint32_t sam_swap32(uint32_t value)
 static void sam_printreg(volatile uint32_t *regaddr, uint32_t regval,
                           bool iswrite)
 {
-  lldbg("%08x%s%08x\n", (uintptr_t)regaddr, iswrite ? "<-" : "->", regval);
+  uinfo("%08x%s%08x\n", (uintptr_t)regaddr, iswrite ? "<-" : "->", regval);
 }
 #endif
 
@@ -686,7 +680,7 @@ static void sam_checkreg(volatile uint32_t *regaddr, uint32_t regval, bool iswri
             {
               /* No.. More than one. */
 
-              lldbg("[repeats %d more times]\n", count);
+              uinfo("[repeats %d more times]\n", count);
             }
         }
 
@@ -1275,13 +1269,13 @@ static int sam_qh_flush(struct sam_qh_s *qh)
 #ifdef CONFIG_SAMA5_EHCI_REGDEBUG
 static void sam_qtd_print(struct sam_qtd_s *qtd)
 {
-  udbg("  QTD[%p]:\n", qtd);
-  udbg("    hw:\n");
-  udbg("      nqp: %08x alt: %08x token: %08x\n",
-       qtd->hw.nqp, qtd->hw.alt, qtd->hw.token);
-  udbg("      bpl: %08x %08x %08x %08x %08x\n",
-       qtd->hw.bpl[0], qtd->hw.bpl[1], qtd->hw.bpl[2],
-       qtd->hw.bpl[3], qtd->hw.bpl[4]);
+  uinfo("  QTD[%p]:\n", qtd);
+  uinfo("    hw:\n");
+  uinfo("      nqp: %08x alt: %08x token: %08x\n",
+        qtd->hw.nqp, qtd->hw.alt, qtd->hw.token);
+  uinfo("      bpl: %08x %08x %08x %08x %08x\n",
+        qtd->hw.bpl[0], qtd->hw.bpl[1], qtd->hw.bpl[2],
+        qtd->hw.bpl[3], qtd->hw.bpl[4]);
 }
 #endif
 
@@ -1299,30 +1293,30 @@ static void sam_qh_print(struct sam_qh_s *qh)
   struct sam_epinfo_s *epinfo;
   struct ehci_overlay_s *overlay;
 
-  udbg("QH[%p]:\n", qh);
-  udbg("  hw:\n");
-  udbg("    hlp: %08x epchar: %08x epcaps: %08x cqp: %08x\n",
-       qh->hw.hlp, qh->hw.epchar, qh->hw.epcaps, qh->hw.cqp);
+  uinfo("QH[%p]:\n", qh);
+  uinfo("  hw:\n");
+  uinfo("    hlp: %08x epchar: %08x epcaps: %08x cqp: %08x\n",
+        qh->hw.hlp, qh->hw.epchar, qh->hw.epcaps, qh->hw.cqp);
 
   overlay = &qh->hw.overlay;
-  udbg("  overlay:\n");
-  udbg("    nqp: %08x alt: %08x token: %08x\n",
-       overlay->nqp, overlay->alt, overlay->token);
-  udbg("    bpl: %08x %08x %08x %08x %08x\n",
-       overlay->bpl[0], overlay->bpl[1], overlay->bpl[2],
-       overlay->bpl[3], overlay->bpl[4]);
+  uinfo("  overlay:\n");
+  uinfo("    nqp: %08x alt: %08x token: %08x\n",
+        overlay->nqp, overlay->alt, overlay->token);
+  uinfo("    bpl: %08x %08x %08x %08x %08x\n",
+        overlay->bpl[0], overlay->bpl[1], overlay->bpl[2],
+        overlay->bpl[3], overlay->bpl[4]);
 
-  udbg("  fqp:\n", qh->fqp);
+  uinfo("  fqp:\n", qh->fqp);
 
   epinfo = qh->epinfo;
-  udbg("  epinfo[%p]:\n", epinfo);
+  uinfo("  epinfo[%p]:\n", epinfo);
   if (epinfo)
     {
-      udbg("    EP%d DIR=%s FA=%08x TYPE=%d MaxPacket=%d\n",
-           epinfo->epno, epinfo->dirin ? "IN" : "OUT", epinfo->devaddr,
-           epinfo->xfrtype, epinfo->maxpacket);
-      udbg("    Toggle=%d iocwait=%d speed=%d result=%d\n",
-           epinfo->toggle, epinfo->iocwait, epinfo->speed, epinfo->result);
+      uinfo("    EP%d DIR=%s FA=%08x TYPE=%d MaxPacket=%d\n",
+            epinfo->epno, epinfo->dirin ? "IN" : "OUT", epinfo->devaddr,
+            epinfo->xfrtype, epinfo->maxpacket);
+      uinfo("    Toggle=%d iocwait=%d speed=%d result=%d\n",
+            epinfo->toggle, epinfo->iocwait, epinfo->speed, epinfo->result);
     }
 }
 #endif
@@ -1928,7 +1922,7 @@ static int sam_async_setup(struct sam_rhport_s *rhport,
 #ifdef CONFIG_USBHOST_TRACE
   usbhost_vtrace2(EHCI_VTRACE2_ASYNCXFR, epinfo->epno, buflen);
 #else
-  uvdbg("RHport%d EP%d: buffer=%p, buflen=%d, req=%p\n",
+  uinfo("RHport%d EP%d: buffer=%p, buflen=%d, req=%p\n",
         RHPORT(rhport), epinfo->epno, buffer, buflen, req);
 #endif
 
@@ -2206,7 +2200,7 @@ static int sam_intr_setup(struct sam_rhport_s *rhport,
 #ifdef CONFIG_USBHOST_TRACE
   usbhost_vtrace2(EHCI_VTRACE2_INTRXFR, epinfo->epno, buflen);
 #else
-  uvdbg("RHport%d EP%d: buffer=%p, buflen=%d\n",
+  uinfo("RHport%d EP%d: buffer=%p, buflen=%d\n",
         RHPORT(rhport), epinfo->epno, buffer, buflen);
 #endif
 
@@ -3173,7 +3167,7 @@ static void sam_ehci_bottomhalf(FAR void *arg)
  *
  ****************************************************************************/
 
-static int sam_ehci_tophalf(int irq, FAR void *context)
+static int sam_ehci_tophalf(int irq, FAR void *context, FAR void *arg)
 {
   uint32_t usbsts;
   uint32_t pending;
@@ -3187,7 +3181,7 @@ static int sam_ehci_tophalf(int irq, FAR void *context)
 #ifdef CONFIG_USBHOST_TRACE
   usbhost_vtrace1(EHCI_VTRACE1_TOPHALF, usbsts & regval);
 #else
-  ullvdbg("USBSTS: %08x USBINTR: %08x\n", usbsts, regval);
+  uinfo("USBSTS: %08x USBINTR: %08x\n", usbsts, regval);
 #endif
 
   /* Handle all unmasked interrupt sources */
@@ -3234,15 +3228,15 @@ static int sam_ehci_tophalf(int irq, FAR void *context)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_OHCI
-static int sam_uhphs_interrupt(int irq, FAR void *context)
+static int sam_uhphs_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   int ohci;
   int ehci;
 
   /* Provide the interrupting event to both the EHCI and OHCI top half */
 
-  ohci = sam_ohci_tophalf(irq, context);
-  ehci = sam_ehci_tophalf(irq, context);
+  ohci = sam_ohci_tophalf(irq, context, arg);
+  ehci = sam_ehci_tophalf(irq, context, arg);
 
   /* Return OK only if both handlers returned OK */
 
@@ -3730,7 +3724,7 @@ static int sam_epalloc(FAR struct usbhost_driver_s *drvr,
 #ifdef CONFIG_USBHOST_TRACE
   usbhost_vtrace2(EHCI_VTRACE2_EPALLOC, epdesc->addr, epdesc->xfrtype);
 #else
-  uvdbg("EP%d DIR=%s FA=%08x TYPE=%d Interval=%d MaxPacket=%d\n",
+  uinfo("EP%d DIR=%s FA=%08x TYPE=%d Interval=%d MaxPacket=%d\n",
         epdesc->addr, epdesc->in ? "IN" : "OUT", hport->funcaddr,
         epdesc->xfrtype, epdesc->interval, epdesc->mxpacketsize);
 #endif
@@ -3759,7 +3753,13 @@ static int sam_epalloc(FAR struct usbhost_driver_s *drvr,
   epinfo->maxpacket = epdesc->mxpacketsize;
   epinfo->xfrtype   = epdesc->xfrtype;
   epinfo->speed     = hport->speed;
+
+  /* The endpoint iocsem semaphore is used for signaling and, hence,
+   * should not have priority inheritance enabled.
+   */
+
   sem_init(&epinfo->iocsem, 0, 0);
+  sem_setprotocol(&epinfo->iocsem, SEM_PRIO_NONE);
 
   /* Success.. return an opaque reference to the endpoint information structure
    * instance
@@ -4019,7 +4019,7 @@ static int sam_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 #ifdef CONFIG_USBHOST_TRACE
   usbhost_vtrace2(EHCI_VTRACE2_CTRLINOUT, RHPORT(rhport), req->req);
 #else
-  uvdbg("RHPort%d type: %02x req: %02x value: %02x%02x index: %02x%02x len: %04x\n",
+  uinfo("RHPort%d type: %02x req: %02x value: %02x%02x index: %02x%02x len: %04x\n",
         RHPORT(rhport), req->type, req->req, req->value[1], req->value[0],
         req->index[1], req->index[0], len);
 #endif
@@ -4042,7 +4042,7 @@ static int sam_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
   ret = sam_async_setup(rhport, ep0info, req, buffer, len);
   if (ret < 0)
     {
-      udbg("ERROR: sam_async_setup failed: %d\n", ret);
+      uerr("ERROR: sam_async_setup failed: %d\n", ret);
       goto errout_with_iocwait;
     }
 
@@ -4160,7 +4160,7 @@ static ssize_t sam_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
 
   if (ret < 0)
     {
-      udbg("ERROR: Transfer setup failed: %d\n", ret);
+      uerr("ERROR: Transfer setup failed: %d\n", ret);
       goto errout_with_iocwait;
     }
 
@@ -4500,7 +4500,7 @@ static int sam_connect(FAR struct usbhost_driver_s *drvr,
   /* Set the connected/disconnected flag */
 
   hport->connected = connected;
-  ullvdbg("Hub port %d connected: %s\n", hport->port, connected ? "YES" : "NO");
+  uinfo("Hub port %d connected: %s\n", hport->port, connected ? "YES" : "NO");
 
   /* Report the connection event */
 
@@ -4701,7 +4701,7 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
   FAR struct usbhost_hubport_s *hport;
   irqstate_t flags;
   uint32_t regval;
-#if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_ASSERTIONS)
   uint16_t regval16;
   unsigned int nports;
 #endif
@@ -4794,6 +4794,12 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
   sem_init(&g_ehci.exclsem, 0, 1);
   sem_init(&g_ehci.pscsem,  0, 0);
 
+  /* The pscsem semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
+  sem_setprotocol(&g_ehci.pscsem, SEM_PRIO_NONE);
+
   /* Initialize EP0 */
 
   sem_init(&g_ehci.ep0.iocsem, 0, 1);
@@ -4830,7 +4836,13 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
       rhport->ep0.xfrtype         = USB_EP_ATTR_XFER_CONTROL;
       rhport->ep0.speed           = USB_SPEED_FULL;
       rhport->ep0.maxpacket       = 8;
+
+      /* The endpoint 0 iocsem semaphore is used for signaling and, hence,
+       * should not have priority inheritance enabled.
+       */
+
       sem_init(&rhport->ep0.iocsem, 0, 0);
+      sem_setprotocol(&rhport->ep0.iocsem, SEM_PRIO_NONE);
 
       /* Initialize the public port representation */
 
@@ -4952,7 +4964,7 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
 
   sam_putreg(EHCI_INT_ALLINTS, &HCOR->usbsts);
 
-#if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_ASSERTIONS)
   /* Show the EHCI version */
 
   regval16 = sam_swap16(HCCR->hciversion);
@@ -5086,9 +5098,9 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
    */
 
 #ifdef CONFIG_SAMA5_OHCI
-  ret = irq_attach(SAM_IRQ_UHPHS, sam_uhphs_interrupt);
+  ret = irq_attach(SAM_IRQ_UHPHS, sam_uhphs_interrupt, NULL);
 #else
-  ret = irq_attach(SAM_IRQ_UHPHS, sam_ehci_tophalf);
+  ret = irq_attach(SAM_IRQ_UHPHS, sam_ehci_tophalf, NULL);
 #endif
   if (ret != 0)
     {

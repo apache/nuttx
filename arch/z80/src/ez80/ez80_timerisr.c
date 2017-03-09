@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z80/src/ez80/ez80_timerisr.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,23 +50,11 @@
 #include "up_internal.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Function:  up_timerisr
+ * Function:  ez80_timerisr
  *
  * Description:
  *   The timer ISR will perform a variety of services for various portions
@@ -74,7 +62,7 @@
  *
  ****************************************************************************/
 
-int up_timerisr(int irq, chipreg_t *regs)
+static int ez80_timerisr(int irq, chipreg_t *regs, void *arg)
 {
   /* Read the appropriate timer0 register to clear the interrupt */
 
@@ -100,7 +88,11 @@ int up_timerisr(int irq, chipreg_t *regs)
 }
 
 /****************************************************************************
- * Function:  up_timer_initialize
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Function:  z80_timer_initialize
  *
  * Description:
  *   This function is called during start-up to initialize the timer
@@ -108,7 +100,7 @@ int up_timerisr(int irq, chipreg_t *regs)
  *
  ****************************************************************************/
 
-void up_timer_initialize(void)
+void z80_timer_initialize(void)
 {
   uint16_t reload;
 
@@ -118,7 +110,7 @@ void up_timer_initialize(void)
 
   /* Attach system timer interrupts */
 
-  irq_attach(EZ80_IRQ_SYSTIMER, (xcpt_t)up_timerisr);
+  irq_attach(EZ80_IRQ_SYSTIMER, (xcpt_t)ez80_timerisr, NULL);
 
   /* Set up the timer reload value */
   /* Write to the timer reload register to set the reload value.

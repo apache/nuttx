@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/avr/src/at32uc3/at32uc3_timerisr.c
  *
- *   Copyright (C) 2010, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -131,10 +131,6 @@
 #endif
 
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -153,11 +149,7 @@ static void rtc_waitnotbusy(void)
 }
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Function:  up_timerisr
+ * Function:  at32uc3_timerisr
  *
  * Description:
  *   The timer ISR will perform a variety of services for various portions
@@ -165,7 +157,7 @@ static void rtc_waitnotbusy(void)
  *
  ****************************************************************************/
 
-int up_timerisr(int irq, uint32_t *regs)
+static int at32uc3_timerisr(int irq, uint32_t *regs, void *arg)
 {
   /* Clear the pending timer interrupt */
 
@@ -178,7 +170,11 @@ int up_timerisr(int irq, uint32_t *regs)
 }
 
 /****************************************************************************
- * Function:  up_timer_initialize
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Function:  avr_timer_initialize
  *
  * Description:
  *   This function is called during start-up to initialize the timer
@@ -187,7 +183,7 @@ int up_timerisr(int irq, uint32_t *regs)
  *
  ****************************************************************************/
 
-void up_timer_initialize(void)
+void avr_timer_initialize(void)
 {
   uint32_t regval;
 
@@ -223,7 +219,7 @@ void up_timer_initialize(void)
 
   /* Attach the timer interrupt vector */
 
-  (void)irq_attach(AVR32_IRQ_RTC, (xcpt_t)up_timerisr);
+  (void)irq_attach(AVR32_IRQ_RTC, (xcpt_t)at32uc3_timerisr, NULL);
 
   /* Enable RTC interrupts */
 

@@ -203,21 +203,6 @@
 #  define CONFIG_SAMV71XULT_LCD_BGCOLOR 0
 #endif
 
-/* Define CONFIG_DEBUG_LCD to enable detailed LCD debug output. Verbose debug must
- * also be enabled.
- */
-
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
-#  undef CONFIG_DEBUG_GRAPHICS
-#  undef CONFIG_DEBUG_LCD
-#  undef CONFIG_LCD_REGDEBUG
-#endif
-
-#ifndef CONFIG_DEBUG_VERBOSE
-#  undef CONFIG_DEBUG_LCD
-#endif
-
 /* Display/Color Properties **************************************************/
 /* Display Resolution */
 
@@ -299,14 +284,6 @@
 #endif
 
 /* Debug *********************************************************************/
-
-#ifdef CONFIG_DEBUG_LCD
-#  define lcddbg              dbg
-#  define lcdvdbg             vdbg
-#else
-#  define lcddbg(x...)
-#  define lcdvdbg(x...)
-#endif
 
 #ifdef CONFIG_DEBUG_DMA
 #  define SAMPLENDX_BEFORE_SETUP  0
@@ -548,7 +525,7 @@ static int sam_sendcmd(FAR struct sam_dev_s *priv, uint16_t cmd)
   ret = sam_lcd_txtransfer(priv, &cmd, sizeof(uint16_t));
   if (ret < 0)
     {
-      lcddbg("ERROR: Failed to send command %02x: %d\n", cmd, ret);
+      lcderr("ERROR: Failed to send command %02x: %d\n", cmd, ret);
     }
 
   /* Make sure that the CMD/DATA GPIO is reset for commands.  I don't understand
@@ -592,7 +569,7 @@ static int sam_lcd_put(FAR struct sam_dev_s *priv, uint16_t cmd,
       ret = sam_lcd_txtransfer(priv, buffer, buflen);
       if (ret < 0)
         {
-          lcddbg("ERROR: Failed to send command %02x data: %d\n", cmd, ret);
+          lcderr("ERROR: Failed to send command %02x data: %d\n", cmd, ret);
        }
     }
 
@@ -674,7 +651,7 @@ static int sam_setwindow(FAR struct sam_dev_s *priv, sam_color_t row,
   uint16_t buffer[4];
   int ret;
 
-  lcdvdbg("row=%d col=%d width=%d height=%d\n", row, col, width, height);
+  lcdinfo("row=%d col=%d width=%d height=%d\n", row, col, width, height);
 
   /* Set Column Address Position */
 
@@ -770,7 +747,7 @@ static void sam_disable_backlight(void)
 
 static int sam_set_backlight(unsigned int power)
 {
-  lcdvdbg("power=%d\n", power);
+  lcdinfo("power=%d\n", power);
 
   /* PWM support is not yet available.  Backlight is currently just
    * configured as a GPIO output.
@@ -803,7 +780,7 @@ static int sam_poweroff(FAR struct sam_dev_s *priv)
 {
   int ret;
 
-  lcdvdbg("OFF\n");
+  lcdinfo("OFF\n");
 
   /* Turn the display off */
 
@@ -874,7 +851,7 @@ static void sam_lcd_dumpone(struct sam_dev_s *priv, int index,
     }
   else
     {
-      fdbg("%s: Not collected\n", msg);
+      finfo("%s: Not collected\n", msg);
     }
 }
 #endif
@@ -994,7 +971,7 @@ static int sam_lcd_dmawait(FAR struct sam_dev_s *priv, uint32_t timeout)
                  1, (uint32_t)priv);
   if (ret < 0)
     {
-      lcddbg("ERROR: wd_start failed: %d\n", errno);
+      lcderr("ERROR: wd_start failed: %d\n", errno);
     }
 
   /* Loop until the event (or the timeout occurs). */
@@ -1152,7 +1129,7 @@ static int sam_putrun(fb_coord_t row, fb_coord_t col,
 
   /* Buffer must be provided and aligned to a 16-bit address boundary */
 
-  lcdvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
+  lcdinfo("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
 
   /* Determine the refresh window area */
@@ -1160,7 +1137,7 @@ static int sam_putrun(fb_coord_t row, fb_coord_t col,
   ret = sam_setwindow(priv, row, col, npixels, 1);
   if (ret < 0)
     {
-      lcddbg("ERROR: sam_setwindow failed: %d\n",  ret);
+      lcderr("ERROR: sam_setwindow failed: %d\n",  ret);
       return ret;
     }
 
@@ -1193,7 +1170,7 @@ static int sam_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
 
   /* Buffer must be provided and aligned to a 16-bit address boundary */
 
-  lcdvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
+  lcdinfo("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
 
   /* Determine the refresh window area */
@@ -1201,7 +1178,7 @@ static int sam_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
   ret = sam_setwindow(priv, row, col, npixels, 1);
   if (ret < 0)
     {
-      lcddbg("ERROR: sam_setwindow failed: %d\n",  ret);
+      lcderr("ERROR: sam_setwindow failed: %d\n",  ret);
       return ret;
     }
 
@@ -1223,7 +1200,7 @@ static int sam_getvideoinfo(FAR struct lcd_dev_s *dev,
                             FAR struct fb_videoinfo_s *vinfo)
 {
   DEBUGASSERT(dev && vinfo);
-  lcdvdbg("fmt: %d xres: %d yres: %d nplanes: %d\n",
+  lcdinfo("fmt: %d xres: %d yres: %d nplanes: %d\n",
           g_videoinfo.fmt, g_videoinfo.xres, g_videoinfo.yres,
           g_videoinfo.nplanes);
 
@@ -1243,7 +1220,7 @@ static int sam_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
                               FAR struct lcd_planeinfo_s *pinfo)
 {
   DEBUGASSERT(dev && pinfo && planeno == 0);
-  lcdvdbg("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
+  lcdinfo("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
   memcpy(pinfo, &g_planeinfo, sizeof(struct lcd_planeinfo_s));
   return OK;
 }
@@ -1262,7 +1239,7 @@ static int sam_getpower(struct lcd_dev_s *dev)
 {
   FAR struct sam_dev_s *priv = (FAR struct sam_dev_s *)dev;
 
-  lcdvdbg("power: %d\n", 0);
+  lcdinfo("power: %d\n", 0);
   return priv->power;
 }
 
@@ -1281,7 +1258,7 @@ static int sam_setpower(struct lcd_dev_s *dev, int power)
   FAR struct sam_dev_s *priv = (FAR struct sam_dev_s *)dev;
   int ret;
 
-  lcdvdbg("power: %d\n", power);
+  lcdinfo("power: %d\n", power);
   DEBUGASSERT((unsigned)power <= CONFIG_LCD_MAXPOWER);
 
   /* Set new power level */
@@ -1340,7 +1317,7 @@ static int sam_setpower(struct lcd_dev_s *dev, int power)
 
 static int sam_getcontrast(struct lcd_dev_s *dev)
 {
-  lcdvdbg("Not implemented\n");
+  lcdinfo("Not implemented\n");
   return -ENOSYS;
 }
 
@@ -1354,7 +1331,7 @@ static int sam_getcontrast(struct lcd_dev_s *dev)
 
 static int sam_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 {
-  lcdvdbg("contrast: %d\n", contrast);
+  lcdinfo("contrast: %d\n", contrast);
   return -ENOSYS;
 }
 
@@ -1480,11 +1457,11 @@ static inline int sam_lcd_initialize(void)
     }
 
   id = ((uint16_t)buffer[2] << 8) | ((uint16_t)buffer[3] & 0xff);
-  lcdvdbg("ID: %04x\n", id);
+  lcdinfo("ID: %04x\n", id);
 
   if (id != ILI9488_DEVICE_CODE)
     {
-      lcddbg("ERROR: Unsupported LCD ID: %04x (vs. %04x)\n",
+      lcderr("ERROR: Unsupported LCD ID: %04x (vs. %04x)\n",
              id, ILI9488_DEVICE_CODE);
       return -ENODEV;
     }
@@ -1556,7 +1533,7 @@ int board_lcd_initialize(void)
   FAR struct sam_dev_s *priv = &g_lcddev;
   int ret;
 
-  lcdvdbg("Initializing\n");
+  lcdinfo("Initializing\n");
 
   /* Configure all LCD pins pins (backlight is initially off) */
 
@@ -1575,7 +1552,7 @@ int board_lcd_initialize(void)
   priv->dmach = sam_dmachannel(0, DMA_FLAGS);
   if (!priv->dmach)
     {
-      lcddbg("ERROR: Failed to allocate a DMA channel\n");
+      lcderr("ERROR: Failed to allocate a DMA channel\n");
       ret =  -EAGAIN;
       goto errout_with_waitsem;
     }
@@ -1585,7 +1562,7 @@ int board_lcd_initialize(void)
   priv->dmadog = wd_create();
   if (!priv->dmadog)
     {
-      lcddbg("ERROR: Failed to allocate a timer\n");
+      lcderr("ERROR: Failed to allocate a timer\n");
       ret = -EAGAIN;
       goto errout_with_dmach;
     }
@@ -1596,7 +1573,7 @@ int board_lcd_initialize(void)
   ret = sam_lcd_initialize();
   if (ret < 0)
     {
-      lcddbg("ERROR: sam_lcd_initialize failed: %d\n", ret);
+      lcderr("ERROR: sam_lcd_initialize failed: %d\n", ret);
       goto errout_with_dmadog;
     }
 
@@ -1609,7 +1586,7 @@ int board_lcd_initialize(void)
   ret = sam_poweroff(priv);
   if (ret < 0)
     {
-      lcddbg("ERROR: sam_poweroff failed: %d\n", ret);
+      lcderr("ERROR: sam_poweroff failed: %d\n", ret);
       goto errout_with_dmadog;
     }
 
@@ -1705,7 +1682,7 @@ void sam_lcdclear(uint16_t color)
   ret = sam_setwindow(priv, 0, 0, SAM_XRES, SAM_YRES);
   if (ret < 0)
     {
-      lcddbg("ERROR: sam_setwindow failed: %d\n",  ret);
+      lcderr("ERROR: sam_setwindow failed: %d\n",  ret);
       return;
     }
 
@@ -1714,7 +1691,7 @@ void sam_lcdclear(uint16_t color)
       ret = sam_putrun(row, 0, (FAR const uint8_t *)g_runbuffer, SAM_XRES);
       if (ret < 0)
         {
-          lcddbg("ERROR: sam_putrun failed on row %d: %d\n", row, ret);
+          lcderr("ERROR: sam_putrun failed on row %d: %d\n", row, ret);
           return;
         }
     }

@@ -46,6 +46,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/semaphore.h>
 
 #include "environ/environ.h"
 #include "group/group.h"
@@ -241,10 +242,21 @@ int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
       return ret;
     }
 
+#ifndef CONFIG_DISABLE_PTHREAD
   /* Initialize the pthread join semaphore */
 
-#ifndef CONFIG_DISABLE_PTHREAD
   (void)sem_init(&group->tg_joinsem, 0, 1);
+#endif
+
+#if defined(CONFIG_SCHED_WAITPID) && !defined(CONFIG_SCHED_HAVE_PARENT)
+  /* Initialize the exit/wait semaphores
+   *
+   * This semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
+  (void)sem_init(&group->tg_exitsem, 0, 0);
+  (void)sem_setprotocol(&group->tg_exitsem, SEM_PRIO_NONE);
 #endif
 
   return OK;

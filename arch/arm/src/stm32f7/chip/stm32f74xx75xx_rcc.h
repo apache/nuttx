@@ -1,8 +1,9 @@
 /****************************************************************************************************
  * arch/arm/src/stm32f7/chip/stm32f74xx75xx_rcc.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -573,13 +574,13 @@
 #  define RCC_PLLI2SCFGR_PLLI2SN(n)  ((uint32_t)(n) << RCC_PLLI2SCFGR_PLLI2SN_SHIFT)
 #define RCC_PLLI2SCFGR_PLLI2SP_SHIFT (16)      /* Bits 16-17: PLLI2S division factor for SPDIFRX clock */
 #define RCC_PLLI2SCFGR_PLLI2SP_MASK  (3 << RCC_PLLI2SCFGR_PLLI2SP_SHIFT)
-#  define RCC_PLLI2SCFGR_PLLI2SP(n)  ((uint32_t)(n) << RCC_PLLI2SCFGR_PLLI2SP_SHIFT)
+#  define RCC_PLLI2SCFGR_PLLI2SP(n)  ((((n)>>1)-1) << RCC_PLLI2SCFGR_PLLI2SP_SHIFT)
 #define RCC_PLLI2SCFGR_PLLI2SQ_SHIFT (24)      /* Bits 24-27: PLLI2S division factor for SAIs clock */
 #define RCC_PLLI2SCFGR_PLLI2SQ_MASK  (15 << RCC_PLLI2SCFGR_PLLI2SQ_SHIFT)
 #  define RCC_PLLI2SCFGR_PLLI2SQ(n)  ((uint32_t)(n) << RCC_PLLI2SCFGR_PLLI2SQ_SHIFT)
 #define RCC_PLLI2SCFGR_PLLI2SR_SHIFT (28)      /* Bits 28-30: PLLI2S division factor for I2S clocks */
 #define RCC_PLLI2SCFGR_PLLI2SR_MASK  (7 << RCC_PLLI2SCFGR_PLLI2SR_SHIFT)
-#  define RCC_PLLI2SCFGR_PLLI2SR(n)  (uint32_t)(n) << RCC_PLLI2SCFGR_PLLI2SR_SHIFT)
+#  define RCC_PLLI2SCFGR_PLLI2SR(n)  ((uint32_t)(n) << RCC_PLLI2SCFGR_PLLI2SR_SHIFT)
 
 /* PLLSAI configuration register */
 
@@ -588,7 +589,7 @@
 #  define RCC_PLLSAICFGR_PLLSAIN(n)  ((n) << RCC_PLLSAICFGR_PLLSAIN_SHIFT)
 #define RCC_PLLSAICFGR_PLLSAIP_SHIFT (16)      /* Bits 16-17: PLLSAI division factor for 48MHz clock */
 #define RCC_PLLSAICFGR_PLLSAIP_MASK  (3 << RCC_PLLSAICFGR_PLLSAIP_SHIFT)
-#  define RCC_PLLSAICFGR_PLLSAIP(n)  ((n) << RCC_PLLSAICFGR_PLLSAIP_SHIFT)
+#  define RCC_PLLSAICFGR_PLLSAIP(n)  ((((n)>>1)-1) << RCC_PLLSAICFGR_PLLSAIP_SHIFT)
 #define RCC_PLLSAICFGR_PLLSAIQ_SHIFT (24)      /* Bits 24-27: PLLSAI division factor for SAI clock */
 #define RCC_PLLSAICFGR_PLLSAIQ_MASK  (0x0F << RCC_PLLSAICFGR_PLLSAIQ_SHIFT)
 #  define RCC_PLLSAICFGR_PLLSAIQ(n)  ((n) << RCC_PLLSAICFGR_PLLSAIQ_SHIFT)
@@ -616,7 +617,7 @@
 #define RCC_DCKCFGR1_SAI2SEL_SHIFT   (22)      /* Bits 22-23: SAI 2 clock source selection */
 #define RCC_DCKCFGR1_SAI2SEL_MASK    (0x3 << RCC_DCKCFGR1_SAI2SEL_SHIFT)
 #  define RCC_DCKCFGR1_SAI2SEL(n)    ((n) << RCC_DCKCFGR1_SAI2SEL_SHIFT)
-#define RCC_DCKCFGR1_TIMPRE          (1 << 24) /* Bit 24: Timer clock prescaler selection */
+#define RCC_DCKCFGR1_TIMPRESEL       (1 << 24) /* Bit 24: Timer clock prescaler selection */
 
 /* Dedicated clocks configuration register 2 */
 

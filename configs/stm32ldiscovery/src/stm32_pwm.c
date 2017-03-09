@@ -1,8 +1,7 @@
 /************************************************************************************
  * configs/stm32ldiscovery/src/up_pwm.c
- * arch/arm/src/board/up_pwm.c
  *
- *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,7 +43,7 @@
 #include <debug.h>
 
 #include <nuttx/board.h>
-#include <nuttx/pwm.h>
+#include <nuttx/drivers/pwm.h>
 
 #include <arch/board/board.h>
 
@@ -59,9 +58,9 @@
 /* Configuration *******************************************************************/
 /* PWM
  *
- * The stm32ldiscovery has no real on-board PWM devices, but the board can be configured to output
- * a pulse train using TIM4 CH2.  This pin is used by FSMC is connect to CN5 just for this
- * purpose:
+ * The stm32ldiscovery has no real on-board PWM devices, but the board can be
+ * configured to output a pulse train using TIM4 CH2.  This pin is used by FSMC is
+ * connected to CN5 just for this purpose:
  *
  * PD13 FSMC_A18 / MC_TIM4_CH2OUT pin 33 (EnB)
  *
@@ -86,27 +85,21 @@
 #  undef HAVE_PWM
 #endif
 
-#ifdef HAVE_PWM
-
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
-
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
 /************************************************************************************
- * Name: board_pwm_setup
+ * Name: stm32_pwm_setup
  *
  * Description:
- *   All STM32 architectures must provide the following interface to work with
- *   examples/pwm.
+ *   Initialize PWM and register the PWM device.
  *
  ************************************************************************************/
 
-int board_pwm_setup(void)
+int stm32_pwm_setup(void)
 {
+#ifdef HAVE_PWM
   static bool initialized = false;
   struct pwm_lowerhalf_s *pwm;
   int ret;
@@ -120,7 +113,7 @@ int board_pwm_setup(void)
       pwm = stm32_pwminitialize(STM32F3DISCOVERY_PWMTIMER);
       if (!pwm)
         {
-          dbg("Failed to get the STM32 PWM lower half\n");
+          _err("ERROR: Failed to get the STM32 PWM lower half\n");
           return -ENODEV;
         }
 
@@ -129,7 +122,7 @@ int board_pwm_setup(void)
       ret = pwm_register("/dev/pwm0", pwm);
       if (ret < 0)
         {
-          adbg("pwm_register failed: %d\n", ret);
+          aerr("ERROR: pwm_register failed: %d\n", ret);
           return ret;
         }
 
@@ -139,6 +132,8 @@ int board_pwm_setup(void)
     }
 
   return OK;
+#else
+  return -ENODEV;
+#endif
 }
 
-#endif /* HAVE_PWM */

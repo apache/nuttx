@@ -47,19 +47,23 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/semaphore.h>
+#include <nuttx/fs/fs.h>
+#include <nuttx/drivers/drivers.h>
 
 #include "up_arch.h"
 #include "chip/stm32l4_rng.h"
 #include "up_internal.h"
 
-#ifdef CONFIG_STM32L4_RNG
+#if defined(CONFIG_STM32L4_RNG)
+#if defined(CONFIG_DEV_RANDOM) || defined(CONFIG_DEV_URANDOM_ARCH)
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static int stm32l4_rnginitialize(void);
-static int stm32l4_rnginterrupt(int irq, void *context);
+static int stm32l4_rng_initialize(void);
+static int stm32l4_rnginterrupt(int irq, void *context, FAR void *arg);
 static void stm32l4_rngenable(void);
 static void stm32l4_rngdisable(void);
 static ssize_t stm32l4_rngread(struct file *filep, char *buffer, size_t);
@@ -105,19 +109,19 @@ static const struct file_operations g_rngops =
  * Private functions
  ****************************************************************************/
 
-static int stm32l4_rnginitialize(void)
+static int stm32l4_rng_initialize(void)
 {
-  vdbg("Initializing RNG\n");
+  _info("Initializing RNG\n");
 
   memset(&g_rngdev, 0, sizeof(struct rng_dev_s));
 
   sem_init(&g_rngdev.rd_devsem, 0, 1);
 
-  if (irq_attach(STM32L4_IRQ_RNG, stm32l4_rnginterrupt))
+  if (irq_attach(STM32L4_IRQ_RNG, stm32l4_rnginterrupt, NULL))
     {
       /* We could not attach the ISR to the interrupt */
 
-      vdbg("Could not attach IRQ.\n");
+      _info("Could not attach IRQ.\n");
 
       return -EAGAIN;
     }
@@ -153,7 +157,7 @@ static void stm32l4_rngdisable()
   putreg32(regval, STM32L4_RNG_CR);
 }
 
-static int stm32l4_rnginterrupt(int irq, void *context)
+static int stm32l4_rnginterrupt(int irq, void *context, FAR void *arg)
 {
   uint32_t rngsr;
   uint32_t data;
@@ -256,11 +260,14 @@ static ssize_t stm32l4_rngread(struct file *filep, char *buffer, size_t buflen)
     {
       /* We've got the device semaphore, proceed with reading */
 
-      /* Initialize the operation semaphore with 0 for blocking until
-       * the buffer is filled from interrupts.
+      /* Initialize the operation semaphore with 0 for blocking until the
+       * buffer is filled from interrupts.  The waitsem semaphore is used
+       * for signaling and, hence, should not have priority inheritance
+       * enabled.
        */
 
       sem_init(&g_rngdev.rd_readsem, 0, 0);
+      sem_setprotocol(&g_rngdev.rd_readsem, SEM_PRIO_NONE);
 
       g_rngdev.rd_buflen = buflen;
       g_rngdev.rd_buf = buffer;
@@ -289,10 +296,52 @@ static ssize_t stm32l4_rngread(struct file *filep, char *buffer, size_t buflen)
  * Public Functions
  ****************************************************************************/
 
-void up_rnginitialize(void)
-{
-  stm32l4_rnginitialize();
-  register_driver("/dev/random", &g_rngops, 0444, NULL);
-}
+/****************************************************************************
+ * Name: devrandom_register
+ *
+ * Description:
+ *   Initialize the RNG hardware and register the /dev/random driver.
+ *   Must be called BEFORE devurandom_register.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
 
+#ifdef CONFIG_DEV_RANDOM
+void devrandom_register(void)
+{
+  stm32l4_rng_initialize();
+  (void)register_driver("/dev/random", &g_rngops, 0444, NULL);
+}
+#endif
+
+/****************************************************************************
+ * Name: devurandom_register
+ *
+ * Description:
+ *   Register /dev/urandom
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEV_URANDOM_ARCH
+void devurandom_register(void)
+{
+#ifndef CONFIG_DEV_RANDOM
+  stm32l4_rng_initialize();
+#endif
+  (void)register_driver("/dev/urandom", &g_rngops, 0444, NULL);
+}
+#endif
+
+#endif /* CONFIG_DEV_RANDOM || CONFIG_DEV_URANDOM_ARCH */
 #endif /* CONFIG_STM32L4_RNG */

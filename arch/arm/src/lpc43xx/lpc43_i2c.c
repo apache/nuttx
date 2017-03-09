@@ -62,6 +62,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/i2c/i2c_master.h>
 
 #include <nuttx/irq.h>
@@ -129,7 +130,7 @@ static struct lpc43_i2cdev_s g_i2c1dev;
 
 static int  lpc43_i2c_start(struct lpc43_i2cdev_s *priv);
 static void lpc43_i2c_stop(struct lpc43_i2cdev_s *priv);
-static int  lpc43_i2c_interrupt(int irq, FAR void *context);
+static int  lpc43_i2c_interrupt(int irq, FAR void *context, FAR void *arg);
 static void lpc43_i2c_timeout(int argc, uint32_t arg, ...);
 static void lpc43_i2c_setfrequency(struct lpc43_i2cdev_s *priv,
               uint32_t frequency);
@@ -276,29 +277,13 @@ void lpc32_i2c_nextmsg(struct lpc43_i2cdev_s *priv)
  *
  ****************************************************************************/
 
-static int lpc43_i2c_interrupt(int irq, FAR void *context)
+static int lpc43_i2c_interrupt(int irq, FAR void *context, FAR void *arg)
 {
-  struct lpc43_i2cdev_s *priv;
+  struct lpc43_i2cdev_s *priv = (struct lpc43_i2cdev_s *)arg;
   struct i2c_msg_s *msg;
   uint32_t state;
 
-#ifdef CONFIG_LPC43_I2C0
-  if (irq == LPC43M0_IRQ_I2C0)
-    {
-      priv = &g_i2c0dev;
-    }
-  else
-#endif
-#ifdef CONFIG_LPC43_I2C1
-  if (irq == LPC43_IRQ_I2C1)
-    {
-      priv = &g_i2c1dev;
-    }
-    else
-#endif
-    {
-      PANIC();
-    }
+  DEBUGASSERT(priv != NULL);
 
   /* Reference UM10360 19.10.5 */
 
@@ -464,7 +449,7 @@ struct i2c_master_s *lpc43_i2cbus_initialize(int port)
 
   if (port > 1)
     {
-      dbg("lpc I2C Only support 0,1\n");
+      i2cerr("ERROR: lpc I2C Only suppors ports 0 and 1\n");
       return NULL;
     }
 
@@ -478,7 +463,7 @@ struct i2c_master_s *lpc43_i2cbus_initialize(int port)
     {
       priv           = &g_i2c0dev;
       priv->base     = LPC43_I2C0_BASE;
-      priv->irqid    = LPC43M0_IRQ_I2C0;
+      priv->irqid    = LPC43M4_IRQ_I2C0;
       priv->baseFreq = BOARD_ABP1_FREQUENCY;
 
       /* Enable, set mode */
@@ -511,7 +496,7 @@ struct i2c_master_s *lpc43_i2cbus_initialize(int port)
     {
       priv        = &g_i2c1dev;
       priv->base  = LPC43_I2C1_BASE;
-      priv->irqid = LPC43M0_IRQ_I2C1;
+      priv->irqid = LPC43M4_IRQ_I2C1;
       priv->baseFreq = BOARD_ABP3_FREQUENCY;
 
       /* No need to enable */
@@ -539,8 +524,16 @@ struct i2c_master_s *lpc43_i2cbus_initialize(int port)
 
   putreg32(I2C_CONSET_I2EN, priv->base + LPC43_I2C_CONSET_OFFSET);
 
+  /* Initialize semaphores */
+
   sem_init(&priv->mutex, 0, 1);
   sem_init(&priv->wait, 0, 0);
+
+  /* The wait semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
+  sem_setprotocol(&priv->wait, SEM_PRIO_NONE);
 
   /* Allocate a watchdog timer */
 
@@ -549,7 +542,7 @@ struct i2c_master_s *lpc43_i2cbus_initialize(int port)
 
   /* Attach Interrupt Handler */
 
-  irq_attach(priv->irqid, lpc43_i2c_interrupt);
+  irq_attach(priv->irqid, lpc43_i2c_interrupt, priv);
 
   /* Enable Interrupt Handler */
 

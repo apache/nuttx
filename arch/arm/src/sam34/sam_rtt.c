@@ -74,18 +74,8 @@
 
 /* Configuration ************************************************************/
 
-/* Debug ********************************************************************/
-/* Non-standard debug that may be enabled just for testing the timer
- * driver.  NOTE: that only lldbg types are used so that the output is
- * immediately available.
- */
-
-#ifdef CONFIG_DEBUG_RTT
-#  define rttdbg    lldbg
-#  define rttvdbg   llvdbg
-#else
-#  define rttdbg(x...)
-#  define rttvdbg(x...)
+#ifndef CONFIG_DEBUG_TIMER_INFO
+#  undef CONFIG_SAM34_RTT_REGDEBUG
 #endif
 
 /****************************************************************************
@@ -102,12 +92,13 @@ struct sam34_lowerhalf_s
 
   /* Private data */
 
-  tccb_t   handler;         /* Current user interrupt handler */
-  uint32_t timeout;         /* The current timeout value (us) */
-  uint32_t clkticks;        /* actual clock ticks for current interval */
-  uint32_t val;             /* rtt value of current timeout */
-  uint32_t adjustment;      /* time lost due to clock resolution truncation (us) */
-  bool     started;         /* The timer has been started */
+  tccb_t    callback;        /* Current user interrupt callback */
+  FAR void *arg;             /* Argument that accompanies the callback */
+  uint32_t  timeout;         /* The current timeout value (us) */
+  uint32_t  clkticks;        /* Actual clock ticks for current interval */
+  uint32_t  val;             /* rtt value of current timeout */
+  uint32_t  adjustment;      /* Time lost due to clock resolution truncation (us) */
+  bool      started;         /* The timer has been started */
 };
 
 /****************************************************************************
@@ -115,7 +106,7 @@ struct sam34_lowerhalf_s
  ****************************************************************************/
 /* Register operations ******************************************************/
 
-#if defined(CONFIG_SAM34_RTT_REGDEBUG) && defined(CONFIG_DEBUG)
+#ifdef CONFIG_SAM34_RTT_REGDEBUG
 static uint32_t sam34_getreg(uint32_t addr);
 static void     sam34_putreg(uint32_t val, uint32_t addr);
 #else
@@ -125,7 +116,7 @@ static void     sam34_putreg(uint32_t val, uint32_t addr);
 
 /* Interrupt handling *******************************************************/
 
-static int      sam34_interrupt(int irq, FAR void *context);
+static int      sam34_interrupt(int irq, FAR void *context, FAR void *arg);
 
 /* "Lower half" driver methods **********************************************/
 
@@ -135,8 +126,8 @@ static int      sam34_getstatus(FAR struct timer_lowerhalf_s *lower,
                   FAR struct timer_status_s *status);
 static int      sam34_settimeout(FAR struct timer_lowerhalf_s *lower,
                   uint32_t timeout);
-static tccb_t   sam34_sethandler(FAR struct timer_lowerhalf_s *lower,
-                  tccb_t handler);
+static void    sam34_setcallback(FAR struct timer_lowerhalf_s *lower,
+                  tccb_t callback, FAR void *arg);
 static int      sam34_ioctl(FAR struct timer_lowerhalf_s *lower, int cmd,
                   unsigned long arg);
 
@@ -147,12 +138,12 @@ static int      sam34_ioctl(FAR struct timer_lowerhalf_s *lower, int cmd,
 
 static const struct timer_ops_s g_tcops =
 {
-  .start      = sam34_start,
-  .stop       = sam34_stop,
-  .getstatus  = sam34_getstatus,
-  .settimeout = sam34_settimeout,
-  .sethandler = sam34_sethandler,
-  .ioctl      = sam34_ioctl,
+  .start       = sam34_start,
+  .stop        = sam34_stop,
+  .getstatus   = sam34_getstatus,
+  .settimeout  = sam34_settimeout,
+  .setcallback = sam34_setcallback,
+  .ioctl       = sam34_ioctl,
 };
 
 /* "Lower half" driver state */
@@ -170,6 +161,7 @@ static struct sam34_lowerhalf_s g_tcdev;
  *   Get the contents of the value register.
  *
  ****************************************************************************/
+
 static inline uint32_t sam34_readvr(void)
 {
   register uint32_t v;
@@ -193,7 +185,7 @@ static inline uint32_t sam34_readvr(void)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SAM34_RTT_REGDEBUG) && defined(CONFIG_DEBUG)
+#ifdef CONFIG_SAM34_RTT_REGDEBUG
 static uint32_t sam34_getreg(uint32_t addr)
 {
   static uint32_t prevaddr = 0;
@@ -214,7 +206,7 @@ static uint32_t sam34_getreg(uint32_t addr)
         {
           if (count == 4)
             {
-              lldbg("...\n");
+              tmrinfo("...\n");
             }
 
           return val;
@@ -231,7 +223,7 @@ static uint32_t sam34_getreg(uint32_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          lldbg("[repeats %d more times]\n", count-3);
+          tmrinfo("[repeats %d more times]\n", count-3);
         }
 
       /* Save the new address, value, and count */
@@ -243,7 +235,7 @@ static uint32_t sam34_getreg(uint32_t addr)
 
   /* Show the register value read */
 
-  lldbg("%08lx->%08lx\n", addr, val);
+  tmrinfo("%08lx->%08lx\n", addr, val);
   return val;
 }
 #endif
@@ -256,12 +248,12 @@ static uint32_t sam34_getreg(uint32_t addr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SAM34_RTT_REGDEBUG) && defined(CONFIG_DEBUG)
+#ifdef CONFIG_SAM34_RTT_REGDEBUG
 static void sam34_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  lldbg("%08lx<-%08lx\n", addr, val);
+  tmrinfo("%08lx<-%08lx\n", addr, val);
 
   /* Write the value */
 
@@ -283,12 +275,12 @@ static void sam34_putreg(uint32_t val, uint32_t addr)
  *
  ****************************************************************************/
 
-static int sam34_interrupt(int irq, FAR void *context)
+static int sam34_interrupt(int irq, FAR void *context, FAR void *arg)
 {
-  FAR struct sam34_lowerhalf_s *priv = &g_tcdev;
+  FAR struct sam34_lowerhalf_s *priv = (FAR struct sam34_lowerhalf_s *)arg;
 
-  rttvdbg("Entry\n");
-  DEBUGASSERT(irq == SAM_IRQ_RTT);
+  tmrinfo("Entry\n");
+  DEBUGASSERT(priv != NULL);
 
   /* Check if the interrupt is really pending */
 
@@ -299,9 +291,9 @@ static int sam34_interrupt(int irq, FAR void *context)
       uint32_t vr;
       uint32_t lateticks;
 
-      /* Is there a registered handler? */
+      /* Is there a registered callback? */
 
-      if (priv->handler && priv->handler(&priv->timeout))
+      if (priv->callback && priv->callback(&priv->timeout, priv->arg))
         {
           /* Disable int before writing new alarm */
 
@@ -373,7 +365,7 @@ static int sam34_start(FAR struct timer_lowerhalf_s *lower)
   uint32_t mr;
   uint32_t vr;
 
-  rttvdbg("Entry\n");
+  tmrinfo("Entry\n");
   DEBUGASSERT(priv);
 
   if (priv->started)
@@ -398,7 +390,7 @@ static int sam34_start(FAR struct timer_lowerhalf_s *lower)
   priv->val = vr + priv->clkticks;       /* value at end of interval */
   sam34_putreg(priv->val-1, SAM_RTT_AR); /* Set interval */
 
-  if (priv->handler)
+  if (priv->callback)
     {
       /* Clear status and enable interrupt */
 
@@ -433,7 +425,7 @@ static int sam34_start(FAR struct timer_lowerhalf_s *lower)
 static int sam34_stop(FAR struct timer_lowerhalf_s *lower)
 {
   FAR struct sam34_lowerhalf_s *priv = (FAR struct sam34_lowerhalf_s *)lower;
-  rttvdbg("Entry\n");
+  tmrinfo("Entry\n");
   DEBUGASSERT(priv);
 
   if (!priv->started)
@@ -474,7 +466,7 @@ static int sam34_getstatus(FAR struct timer_lowerhalf_s *lower,
 {
   FAR struct sam34_lowerhalf_s *priv = (FAR struct sam34_lowerhalf_s *)lower;
 
-  rttvdbg("Entry\n");
+  tmrinfo("Entry\n");
   DEBUGASSERT(priv);
 
   /* Return the status bit */
@@ -485,7 +477,7 @@ static int sam34_getstatus(FAR struct timer_lowerhalf_s *lower,
       status->flags |= TCFLAGS_ACTIVE;
     }
 
-  if (priv->handler)
+  if (priv->callback)
     {
       status->flags |= TCFLAGS_HANDLER;
     }
@@ -498,9 +490,9 @@ static int sam34_getstatus(FAR struct timer_lowerhalf_s *lower,
 
   status->timeleft = 1000000ULL*(sam34_getreg(SAM_RTT_AR) - sam34_readvr())/RTT_FCLK;
 
-  rttvdbg("  flags    : %08x\n", status->flags);
-  rttvdbg("  timeout  : %d\n", status->timeout);
-  rttvdbg("  timeleft : %d\n", status->timeleft);
+  tmrinfo("  flags    : %08x\n", status->flags);
+  tmrinfo("  timeout  : %d\n", status->timeout);
+  tmrinfo("  timeleft : %d\n", status->timeleft);
   return OK;
 }
 
@@ -526,7 +518,7 @@ static int sam34_settimeout(FAR struct timer_lowerhalf_s *lower,
   FAR struct sam34_lowerhalf_s *priv = (FAR struct sam34_lowerhalf_s *)lower;
 
   DEBUGASSERT(priv);
-  rttvdbg("Entry: timeout=%d\n", timeout);
+  tmrinfo("Entry: timeout=%d\n", timeout);
 
   if (priv->started)
     {
@@ -537,7 +529,7 @@ static int sam34_settimeout(FAR struct timer_lowerhalf_s *lower,
 
   if (timeout < 1 || timeout > RTT_MAXTIMEOUT)
     {
-      rttdbg("Cannot represent timeout=%lu > %lu\n",
+      tmrerr("ERROR: Cannot represent timeout=%lu > %lu\n",
             timeout, RTT_MAXTIMEOUT);
       return -ERANGE;
     }
@@ -547,24 +539,25 @@ static int sam34_settimeout(FAR struct timer_lowerhalf_s *lower,
   timeout = (1000000ULL * priv->clkticks) / RTT_FCLK;          /* Truncated timeout */
   priv->adjustment = priv->timeout - timeout;                  /* Truncated time to be added to next interval (dither) */
 
-  rttvdbg("fclk=%d clkticks=%d timout=%d, adjustment=%d\n",
+  tmrinfo("fclk=%d clkticks=%d timout=%d, adjustment=%d\n",
          RTT_FCLK, priv->clkticks, priv->timeout, priv->adjustment);
 
   return OK;
 }
 
 /****************************************************************************
- * Name: sam34_sethandler
+ * Name: sam34_setcallback
  *
  * Description:
- *   Call this user provided timeout handler.
+ *   Call this user provided timeout callback.
  *
  * Input Parameters:
- *   lower      - A pointer the publicly visible representation of the "lower-half"
- *                driver state structure.
- *   newhandler - The new timer expiration function pointer.  If this
- *                function pointer is NULL, then the reset-on-expiration
- *                behavior is restored,
+ *   lower    - A pointer the publicly visible representation of the "lower-half"
+ *              driver state structure.
+ *   callback - The new timer expiration function pointer.  If this
+ *              function pointer is NULL, then the reset-on-expiration
+ *              behavior is restored,
+ *   arg      - Argument that will be provided in the callback
  *
  * Returned Values:
  *   The previous timer expiration function pointer or NULL is there was
@@ -572,28 +565,23 @@ static int sam34_settimeout(FAR struct timer_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static tccb_t sam34_sethandler(FAR struct timer_lowerhalf_s *lower,
-                               tccb_t handler)
+static void sam34_setcallback(FAR struct timer_lowerhalf_s *lower,
+                              tccb_t callback, FAR void *arg)
 {
   FAR struct sam34_lowerhalf_s *priv = (FAR struct sam34_lowerhalf_s *)lower;
   irqstate_t flags;
-  tccb_t oldhandler;
 
   flags = enter_critical_section();
 
   DEBUGASSERT(priv);
-  rttvdbg("Entry: handler=%p\n", handler);
+  tmrinfo("Entry: callback=%p\n", callback);
 
-  /* Get the old handler return value */
+  /* Save the new callback and argument */
 
-  oldhandler = priv->handler;
-
-  /* Save the new handler */
-
-   priv->handler = handler;
+  priv->callback = callback;
+  priv->arg      = arg;
 
   leave_critical_section(flags);
-  return oldhandler;
 }
 
 /****************************************************************************
@@ -623,7 +611,7 @@ static int sam34_ioctl(FAR struct timer_lowerhalf_s *lower, int cmd,
   int ret = -ENOTTY;
 
   DEBUGASSERT(priv);
-  rttvdbg("Entry: cmd=%d arg=%ld\n", cmd, arg);
+  tmrinfo("Entry: cmd=%d arg=%ld\n", cmd, arg);
   UNUSED(priv);
 
   return ret;
@@ -653,7 +641,7 @@ void sam_rttinitialize(FAR const char *devpath)
 {
   FAR struct sam34_lowerhalf_s *priv = &g_tcdev;
 
-  rttvdbg("Entry: devpath=%s\n", devpath);
+  tmrinfo("Entry: devpath=%s\n", devpath);
 
   /* Initialize the driver state structure.  Here we assume: (1) the state
    * structure lies in .bss and was zeroed at reset time.  (2) This function
@@ -662,7 +650,7 @@ void sam_rttinitialize(FAR const char *devpath)
 
   priv->ops = &g_tcops;
 
-  (void)irq_attach(SAM_IRQ_RTT, sam34_interrupt);
+  (void)irq_attach(SAM_IRQ_RTT, sam34_interrupt, priv);
 
   /* Enable NVIC interrupt. */
 

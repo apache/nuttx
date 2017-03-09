@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/module/mod_procfs.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,10 +52,9 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/module.h>
+#include <nuttx/lib/modlib.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/procfs.h>
-
-#include "module.h"
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_PROCFS) && \
     !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
@@ -147,10 +146,11 @@ static int modprocfs_callback(FAR struct module_s *modp, FAR void *arg)
   DEBUGASSERT(modp != NULL && arg != NULL);
   priv = (FAR struct modprocfs_file_s *)arg;
 
-  linesize = snprintf(priv->line, MOD_LINELEN, "%s,%p,%p,%p,%p,%lu,%p,%lu\n",
-                      modp->modulename, modp->initializer,
-                      modp->uninitializer, modp->arg,
-                      modp->alloc, (unsigned long)modp->textsize,
+  linesize = snprintf(priv->line, MOD_LINELEN, "%s,%p,%p,%p,%u,%p,%lu,%p,%lu\n",
+                      modp->modname, modp->initializer,
+                      modp->modinfo.uninitializer, modp->modinfo.arg,
+                      modp->modinfo.nexports, modp->alloc,
+                      (unsigned long)modp->textsize,
                       (FAR uint8_t *)modp->alloc + modp->textsize,
                       (unsigned long)modp->datasize);
   copysize = procfs_memcpy(priv->line, linesize, priv->buffer,
@@ -171,7 +171,7 @@ static int modprocfs_open(FAR struct file *filep, FAR const char *relpath,
 {
   FAR struct modprocfs_file_s *priv;
 
-  fvdbg("Open '%s'\n", relpath);
+  finfo("Open '%s'\n", relpath);
 
   /* PROCFS is read-only.  Any attempt to open with any kind of write
    * access is not permitted.
@@ -181,7 +181,7 @@ static int modprocfs_open(FAR struct file *filep, FAR const char *relpath,
 
   if (((oflags & O_WRONLY) != 0 || (oflags & O_RDONLY) == 0))
     {
-      fdbg("ERROR: Only O_RDONLY supported\n");
+      ferr("ERROR: Only O_RDONLY supported\n");
       return -EACCES;
     }
 
@@ -190,7 +190,7 @@ static int modprocfs_open(FAR struct file *filep, FAR const char *relpath,
   priv = (FAR struct modprocfs_file_s *)kmm_zalloc(sizeof(struct modprocfs_file_s));
   if (!priv)
     {
-      fdbg("ERROR: Failed to allocate file attributes\n");
+      ferr("ERROR: Failed to allocate file attributes\n");
       return -ENOMEM;
     }
 
@@ -232,7 +232,7 @@ static ssize_t modprocfs_read(FAR struct file *filep, FAR char *buffer,
   FAR struct modprocfs_file_s *priv;
   int ret;
 
-  fvdbg("buffer=%p buflen=%lu\n", buffer, (unsigned long)buflen);
+  finfo("buffer=%p buflen=%lu\n", buffer, (unsigned long)buflen);
 
   /* Recover our private data from the struct file instance */
 
@@ -247,7 +247,7 @@ static ssize_t modprocfs_read(FAR struct file *filep, FAR char *buffer,
   priv->buflen    = buflen;
   priv->offset    = filep->f_pos;
 
-  ret = mod_registry_foreach(modprocfs_callback, priv);
+  ret = modlib_registry_foreach(modprocfs_callback, priv);
   if (ret >= 0)
     {
       filep->f_pos += priv->totalsize;
@@ -270,7 +270,7 @@ static int modprocfs_dup(FAR const struct file *oldp, FAR struct file *newp)
   FAR struct modprocfs_file_s *oldpriv;
   FAR struct modprocfs_file_s *newpriv;
 
-  fvdbg("Dup %p->%p\n", oldp, newp);
+  finfo("Dup %p->%p\n", oldp, newp);
 
   /* Recover our private data from the old struct file instance */
 
@@ -282,7 +282,7 @@ static int modprocfs_dup(FAR const struct file *oldp, FAR struct file *newp)
   newpriv = (FAR struct modprocfs_file_s *)kmm_zalloc(sizeof(struct modprocfs_file_s));
   if (!newpriv)
     {
-      fdbg("ERROR: Failed to allocate file attributes\n");
+      ferr("ERROR: Failed to allocate file attributes\n");
       return -ENOMEM;
     }
 

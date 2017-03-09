@@ -1,7 +1,7 @@
 /****************************************************************************************************
  * arch/arm/src/lpc43xx/chip/lpc43_emc.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,7 @@
 /****************************************************************************************************
  * Pre-processor Definitions
  ****************************************************************************************************/
+
 /* Register Offsets *********************************************************************************/
 
 #define LPC43_EMC_CONTROL_OFFSET          0x0000 /* EMC Control register */
@@ -213,6 +214,7 @@
 #define EMC_CONTROL_LOWPOWER              (1 << 2)  /* Bit 2:  Low-power mode */
                                                     /* Bits 3-31: Reserved */
 /* EMC Status register */
+
 #define EMC__
 #define EMC_STATUS_BUSY                   (1 << 0)  /* Bit 0:  Busy */
 #define EMC_STATUS_WB                     (1 << 1)  /* Bit 1:  Write buffer status */
@@ -333,13 +335,64 @@
 #  define EMC_DYNCONFIG_MD_SDRAM           (0 << EMC_DYNCONFIG_MD_SHIFT) /* SDRAM (POR reset value) */
                                                      /* Bits 5-6: Reserved */
 #define EMC_DYNCONFIG_AM0_SHIFT            (7)       /* Bits 7-12: AM0 Address mapping (see user manual) */
-#define EMC_DYNCONFIG_AM0_MASK             (0x3f << EMC_DYNCONFIG_AM0_SHIFT)
+#define EMC_DYNCONFIG_AM0_MASK             (0x3F << EMC_DYNCONFIG_AM0_SHIFT)
                                                      /* Bit 13: Reserved */
 #define EMC_DYNCONFIG_AM1                  (1 << 14) /* Bit 14: AM1 Address mapping (see user manual) */
                                                      /* Bits 15-18: Reserved */
-#define EMC_DYNCONFIG_BENA                 (1 << 10) /* Bit 19: Buffer enable */
+#define EMC_DYNCONFIG_BENA                 (1 << 19) /* Bit 19: Buffer enable */
 #define EMC_DYNCONFIG_WP                   (1 << 20) /* Bit 20: Write protect. */
                                                      /* Bits 21-31: Reserved */
+
+/* Dynamic Memory Configuration register  Memory Configuration Values */
+/* TODO: complete configuration */
+
+/* Data Bus Width Value in LPC43_EMC_DYNCONFIG register (bit 14) */
+
+#define EMC_DYNCONFIG_DATA_BUS_16          (0 << 14) /* Data bus width 16 bit */
+#define EMC_DYNCONFIG_DATA_BUS_32          (1 << 14) /* Data bus width 32 bit */
+
+/* Low power SDRAM value in LPC43_EMC_DYNCONFIG register (bit 12) */
+
+#define EMC_DYNCONFIG_LPSDRAM              (1 << 12) /* Low power SDRAM value (Bank, Row, Column)*/
+#define EMC_DYNCONFIG_HPSDRAM              (0 << 12) /* High performance SDRAM value (Row, Bank, Column)*/
+
+/* Address mapping table for LPC43_EMC_DYNCONFIG register (bits 7-11) */
+
+/* Device size bits in LPC43_EMC_DYNCONFIG register (bits 9-11) */
+
+#define EMC_DYNCONFIG_DEV_SIZE_SHIFT       (9)
+#define EMC_DYNCONFIG_DEV_SIZE_MASK        (0x7)
+#  define EMC_DYNCONFIG_DEV_SIZE_16Mb      (0x00 << EMC_DYNCONFIG_DEV_SIZE_SHIFT)
+#  define EMC_DYNCONFIG_DEV_SIZE_64Mb      (0x01 << EMC_DYNCONFIG_DEV_SIZE_SHIFT)
+#  define EMC_DYNCONFIG_DEV_SIZE_128Mb     (0x02 << EMC_DYNCONFIG_DEV_SIZE_SHIFT)
+#  define EMC_DYNCONFIG_DEV_SIZE_256Mb     (0x03 << EMC_DYNCONFIG_DEV_SIZE_SHIFT)
+#  define EMC_DYNCONFIG_DEV_SIZE_512Mb     (0x04 << EMC_DYNCONFIG_DEV_SIZE_SHIFT)
+
+/* Bus width bits in LPC43_EMC_DYNCONFIG register (bits 7-8) */
+
+#define EMC_DYNCONFIG_DEV_BUS_SHIFT        (7)
+#define EMC_DYNCONFIG_DEV_BUS_MASK         (0x3)
+#  define EMC_DYNCONFIG_DEV_BUS_8          (0x00 << EMC_DYNCONFIG_DEV_BUS_SHIFT)
+#  define EMC_DYNCONFIG_DEV_BUS_16         (0x01 << EMC_DYNCONFIG_DEV_BUS_SHIFT)
+#  define EMC_DYNCONFIG_DEV_BUS_32         (0x02 << EMC_DYNCONFIG_DEV_BUS_SHIFT)
+
+#define EMC_DYNCONFIG_2Mx8_2BANKS_11ROWS_9COLS    ((0x0 << 9) | (0x0 << 7))  /* 16Mb  (2Mx8),   2 banks, row length = 11, column length = 9  */
+#define EMC_DYNCONFIG_1Mx16_2BANKS_11ROWS_8COLS   ((0x0 << 9) | (0x1 << 7))  /* 16Mb  (1Mx16),  2 banks, row length = 11, column length = 8  */
+#define EMC_DYNCONFIG_8Mx8_4BANKS_12ROWS_9COLS    ((0x1 << 9) | (0x0 << 7))  /* 64Mb  (8Mx8),   4 banks, row length = 12, column length = 9  */
+#define EMC_DYNCONFIG_4Mx16_4BANKS_12ROWS_8COLS   ((0x1 << 9) | (0x1 << 7))  /* 64Mb  (4Mx16),  4 banks, row length = 12, column length = 8  */
+#define EMC_DYNCONFIG_2Mx32_4BANKS_11ROWS_8COLS   ((0x1 << 9) | (0x2 << 7))  /* 64Mb  (2Mx32),  4 banks, row length = 11, column length = 8, 32 bit bus only */
+#define EMC_DYNCONFIG_16Mx8_4BANKS_12ROWS_10COLS  ((0x2 << 9) | (0x0 << 7))  /* 128Mb (16Mx8),  4 banks, row length = 12, column length = 10 */
+#define EMC_DYNCONFIG_8Mx16_4BANKS_12ROWS_9COLS   ((0x2 << 9) | (0x1 << 7))  /* 128Mb (8Mx16),  4 banks, row length = 12, column length = 9  */
+#define EMC_DYNCONFIG_4Mx32_4BANKS_12ROWS_8COLS   ((0x2 << 9) | (0x2 << 7))  /* 128Mb (4Mx32),  4 banks, row length = 12, column length = 8  */
+#define EMC_DYNCONFIG_32Mx8_4BANKS_13ROWS_10COLS  ((0x3 << 9) | (0x0 << 7))  /* 256Mb (32Mx8),  4 banks, row length = 13, column length = 10, 32 bit bus only */
+#define EMC_DYNCONFIG_16Mx16_4BANKS_13ROWS_9COLS  ((0x3 << 9) | (0x1 << 7))  /* 256Mb (16Mx16), 4 banks, row length = 13, column length = 9  */
+#define EMC_DYNCONFIG_8Mx32_4BANKS_13ROWS_8COLS   ((0x3 << 9) | (0x2 << 7))  /* 256Mb (8Mx32),  4 banks, row length = 13, column length = 8, 32 bit bus only  */
+#define EMC_DYNCONFIG_8Mx32_4BANKS_12ROWS_9COLS   ((0x2 << 9) | (0x1 << 7))  /* 256Mb (8Mx32),  4 banks, row length = 12, column length = 9, 32 bit bus only  */
+#define EMC_DYNCONFIG_64Mx8_4BANKS_13ROWS_10COLS  ((0x4 << 9) | (0x0 << 7))  /* 512Mb (64Mx8),  4 banks, row length = 13, column length = 11 */
+#define EMC_DYNCONFIG_32Mx16_4BANKS_13ROWS_10COLS ((0x4 << 9) | (0x1 << 7))  /* 512Mb (32Mx16), 4 banks, row length = 13, column length = 10 */
+#define EMC_DYNCONFIG_16Mx32_4BANKS_13ROWS_9COLS  ((0x3 << 9) | (0x1 << 7))  /* 512Mb (16Mx32), 4 banks, row length = 13, column length = 9, 32 bit bus only  */
+#define EMC_DYNCONFIG_32Mx32_4BANKS_13ROWS_10COLS ((0x4 << 9) | (0x1 << 7))  /* 1Gb   (32Mx32), 4 banks, row length = 13, column length = 10,32 bit bus only  */
+
 /* Dynamic Memory RAS & CAS Delay registers */
 
 #define EMC_DYNRASCAS_RAS_SHIFT            (0)       /* Bits 0-1: RAS latency (active to read/write delay) */
@@ -354,6 +407,35 @@
 #  define EMC_DYNRASCAS_CAS_2CCLK          (2 << EMC_DYNRASCAS_CAS_SHIFT) /* Two CCLK cycles */
 #  define EMC_DYNRASCAS_CAS_3CCLK          (3 << EMC_DYNRASCAS_CAS_SHIFT) /* Three CCLK cycles (POR reset value) */
                                                      /* Bits 10-31: Reserved */
+
+/* Dynamic SDRAM mode register definitions */
+
+                                                     /* Bits 0-2: Burst length. All other values are reserved. */
+#define EMC_DYNMODE_BURST_LENGTH_SHIFT     (0)
+#define EMC_DYNMODE_BURST_LENGTH_MASK      (0x7)
+#  define EMC_DYNMODE_BURST_LENGTH_1       (0 << EMC_DYNMODE_BURST_LENGTH_SHIFT)
+#  define EMC_DYNMODE_BURST_LENGTH_2       (1 << EMC_DYNMODE_BURST_LENGTH_SHIFT)
+#  define EMC_DYNMODE_BURST_LENGTH_4       (2 << EMC_DYNMODE_BURST_LENGTH_SHIFT)
+#  define EMC_DYNMODE_BURST_LENGTH_8       (3 << EMC_DYNMODE_BURST_LENGTH_SHIFT)
+                                                     /* Bit 3: Burst mode type */
+#define EMC_DYNMODE_BURST_TYPE_SHIFT            (3)
+#  define EMC_DYNMODE_BURST_TYPE_SEQUENTIAL     (0 << EMC_DYNMODE_BURST_TYPE_SHIFT)       /* burst type sequential */
+#  define EMC_DYNMODE_BURST_TYPE_INTERLEAVED    (1 << EMC_DYNMODE_BURST_TYPE_INTERLEAVED) /* burst type interleaved */
+                                                     /* Bits 4-6: Latency mode. All other values are reserved. */
+#define EMC_DYNMODE_CAS_SHIFT              (4)
+#define EMC_DYNMODE_CAS_MASK               (0x7)
+#  define EMC_DYNMODE_CAS_2                (2 << EMC_DYNMODE_CAS_SHIFT) /* CAS latency of 2 cycles */
+#  define EMC_DYNMODE_CAS_3                (3 << EMC_DYNMODE_CAS_SHIFT) /* CAS latency of 3 cycles */
+                                                     /* Bits 7-8: Operating mode. All other values are reserved. */
+#define EMC_DYNMODE_OPMODE_SHIFT           (7)
+#define EMC_DYNMODE_OPMODE_MASK            (0x3)
+#  define EMC_DYNMODE_OPMODE_STANDARD      (0 << EMC_DYNMODE_OPMODE_SHIFT) /* dynamic standard operation mode */
+                                                    /* Bit 9: Write burst mode */
+#define EMC_DYNMODE_WBMODE_SHIFT           (9)
+#  define EMC_DYNMODE_WBMODE_PROGRAMMED    (0 << EMC_DYNMODE_WBMODE_SHIFT) /* write burst mode programmed */
+#  define EMC_DYNMODE_WBMODE_SINGLE_LOC    (1 << EMC_DYNMODE_WBMODE_SHIFT) /* write burst mode single loc */
+                                                    /* Bits 10-11: Reserved */
+
 /* Static Memory Configuration registers */
 
 #define EMC_STATCONFIG_MW_SHIFT            (0)       /* Bits 0-1: Memory width */

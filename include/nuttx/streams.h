@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/streams.h
  *
- *   Copyright (C) 2009, 2011-2012, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011-2012, 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef _INCLUDE_NUTTX_STREAMS_H
-#define _INCLUDE_NUTTX_STREAMS_H
+#ifndef __INCLUDE_NUTTX_STREAMS_H
+#define __INCLUDE_NUTTX_STREAMS_H
 
 /****************************************************************************
  * Included Files
@@ -70,9 +70,7 @@ struct lib_instream_s
 struct lib_outstream_s
 {
   lib_putc_t             put;     /* Put one character to the outstream */
-#ifdef CONFIG_STDIO_LINEBUFFER
   lib_flush_t            flush;   /* Flush any buffered characters in the outstream */
-#endif
   int                    nput;    /* Total number of characters put.  Written
                                    * by put method, readable by user */
 };
@@ -101,9 +99,7 @@ struct lib_sistream_s
 struct lib_sostream_s
 {
   lib_soputc_t           put;     /* Put one character to the outstream */
-#ifdef CONFIG_STDIO_LINEBUFFER
   lib_soflush_t          flush;   /* Flush any buffered characters in the outstream */
-#endif
   lib_soseek_t           seek;    /* Seek a position in the output stream */
   int                    nput;    /* Total number of characters put.  Written
                                    * by put method, readable by user */
@@ -299,15 +295,13 @@ void lib_rawsistream(FAR struct lib_rawsistream_s *instream, int fd);
 void lib_rawsostream(FAR struct lib_rawsostream_s *outstream, int fd);
 
 /****************************************************************************
- * Name: lib_lowinstream, lib_lowoutstream
+ * Name: lib_lowoutstream
  *
  * Description:
- *   Initializes a stream for use with low-level, architecture-specific I/O.
- *   Defined in lib/stdio/lib_lowinstream.c and lib/stdio/lib_lowoutstream.c
+ *   Initializes a stream for use with low-level, architecture-specific output.
+ *   Defined in ib/stdio/lib_lowoutstream.c
  *
  * Input parameters:
- *   lowinstream  - User allocated, uninitialized instance of struct
- *                  lib_lowinstream_s to be initialized.
  *   lowoutstream - User allocated, uninitialized instance of struct
  *                  lib_lowoutstream_s to be initialized.
  *
@@ -316,9 +310,6 @@ void lib_rawsostream(FAR struct lib_rawsostream_s *outstream, int fd);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_LOWGETC
-void lib_lowinstream(FAR struct lib_instream_s *lowinstream);
-#endif
 #ifdef CONFIG_ARCH_LOWPUTC
 void lib_lowoutstream(FAR struct lib_outstream_s *lowoutstream);
 #endif
@@ -354,46 +345,61 @@ void lib_nullinstream(FAR struct lib_instream_s *nullinstream);
 void lib_nulloutstream(FAR struct lib_outstream_s *nulloutstream);
 
 /****************************************************************************
- * Name: lib_sylogstream
+ * Name: syslogstream
  *
  * Description:
  *   Initializes a stream for use with the configured syslog interface.
+ *   Only accessible from with the OS SYSLOG logic.
  *
  * Input parameters:
- *   lowoutstream - User allocated, uninitialized instance of struct
- *                  lib_lowoutstream_s to be initialized.
+ *   stream - User allocated, uninitialized instance of struct
+ *            lib_lowoutstream_s to be initialized.
  *
  * Returned Value:
  *   None (User allocated instance initialized).
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SYSLOG
-void lib_syslogstream(FAR struct lib_outstream_s *stream);
-#endif
+void syslogstream(FAR struct lib_outstream_s *stream);
+
+/****************************************************************************
+ * Name: emergstream
+ *
+ * Description:
+ *   Initializes a stream for use with the configured emergency syslog
+ *   interface.  Only accessible from with the OS SYSLOG logic.
+ *
+ * Input parameters:
+ *   stream - User allocated, uninitialized instance of struct
+ *            lib_lowoutstream_s to be initialized.
+ *
+ * Returned Value:
+ *   None (User allocated instance initialized).
+ *
+ ****************************************************************************/
+
+void emergstream(FAR struct lib_outstream_s *stream);
 
 /****************************************************************************
  * Name: lib_noflush
  *
  * Description:
  *  lib_noflush() provides a common, dummy flush method for output streams
- *  that are not flushable.  Only used if CONFIG_STDIO_LINEBUFFER is selected.
+ *  that are not flushable.
  *
  * Return:
  *  Always returns OK
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STDIO_LINEBUFFER
 int lib_noflush(FAR struct lib_outstream_s *stream);
-#endif
 
 /****************************************************************************
  * Name: lib_snoflush
  *
  * Description:
  *  lib_snoflush() provides a common, dummy flush method for seekable output
- *  streams that are not flushable.  Only used if CONFIG_STDIO_LINEBUFFER
+ *  streams that are not flushable.
  *  is selected.
  *
  * Return:
@@ -401,9 +407,7 @@ int lib_noflush(FAR struct lib_outstream_s *stream);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STDIO_LINEBUFFER
 int lib_snoflush(FAR struct lib_sostream_s *this);
-#endif
 
 /****************************************************************************
  * Name: lib_sprintf and lib_vsprintf
@@ -423,4 +427,4 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj,
 }
 #endif
 
-#endif /* _INCLUDE_NUTTX_STREAMS_H */
+#endif /* __INCLUDE_NUTTX_STREAMS_H */

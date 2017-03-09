@@ -1,4 +1,3 @@
-
 /****************************************************************************
  * libc/string/lib_memset.c
  *
@@ -63,7 +62,7 @@
  * Public Functions
  ****************************************************************************/
 
-#ifndef CONFIG_ARCH_MEMSET
+#ifndef CONFIG_LIBC_ARCH_MEMSET
 FAR void *memset(FAR void *s, int c, size_t n)
 {
 #ifdef CONFIG_MEMSET_OPTSPEED

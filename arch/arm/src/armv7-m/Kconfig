@@ -48,12 +48,12 @@ config ARMV7M_DTCM
 
 choice
 	prompt "Toolchain Selection"
-	default ARMV7M_TOOLCHAIN_GNU_EABIW if HOST_WINDOWS
-	default ARMV7M_TOOLCHAIN_GNU_EABIL if !HOST_WINDOWS
+	default ARMV7M_TOOLCHAIN_GNU_EABIW if TOOLCHAIN_WINDOWS
+	default ARMV7M_TOOLCHAIN_GNU_EABIL if !TOOLCHAIN_WINDOWS
 
 config ARMV7M_TOOLCHAIN_IARW
 	bool "IAR for Windows"
-	depends on HOST_WINDOWS
+	depends on TOOLCHAIN_WINDOWS
 	select ARM_TOOLCHAIN_IAR
 
 config ARMV7M_TOOLCHAIN_IARL
@@ -63,7 +63,7 @@ config ARMV7M_TOOLCHAIN_IARL
 
 config ARMV7M_TOOLCHAIN_ATOLLIC
 	bool "Atollic Lite/Pro for Windows"
-	depends on HOST_WINDOWS
+	depends on TOOLCHAIN_WINDOWS
 	select ARM_TOOLCHAIN_GNU
 
 config ARMV7M_TOOLCHAIN_BUILDROOT
@@ -78,7 +78,7 @@ config ARMV7M_TOOLCHAIN_CODEREDL
 
 config ARMV7M_TOOLCHAIN_CODEREDW
 	bool "CodeRed for Windows"
-	depends on HOST_WINDOWS
+	depends on TOOLCHAIN_WINDOWS
 	select ARM_TOOLCHAIN_GNU
 
 config ARMV7M_TOOLCHAIN_CODESOURCERYL
@@ -88,12 +88,12 @@ config ARMV7M_TOOLCHAIN_CODESOURCERYL
 
 config ARMV7M_TOOLCHAIN_CODESOURCERYW
 	bool "CodeSourcery GNU toolchain under Windows"
-	depends on HOST_WINDOWS
+	depends on TOOLCHAIN_WINDOWS
 	select ARM_TOOLCHAIN_GNU
 
 config ARMV7M_TOOLCHAIN_DEVKITARM
 	bool "devkitARM GNU toolchain"
-	depends on HOST_WINDOWS
+	depends on TOOLCHAIN_WINDOWS
 	select ARM_TOOLCHAIN_GNU
 
 config ARMV7M_TOOLCHAIN_GNU_EABIL
@@ -106,7 +106,7 @@ config ARMV7M_TOOLCHAIN_GNU_EABIL
 
 config ARMV7M_TOOLCHAIN_GNU_EABIW
 	bool "Generic GNU EABI toolchain under Windows"
-	depends on HOST_WINDOWS
+	depends on TOOLCHAIN_WINDOWS
 	select ARM_TOOLCHAIN_GNU
 	---help---
 		This option should work for any modern GNU toolchain (GCC 4.5 or newer)
@@ -114,7 +114,7 @@ config ARMV7M_TOOLCHAIN_GNU_EABIW
 
 config ARMV7M_TOOLCHAIN_RAISONANCE
 	bool "STMicro Raisonance for Windows"
-	depends on HOST_WINDOWS
+	depends on TOOLCHAIN_WINDOWS
 	select ARM_TOOLCHAIN_GNU
 
 endchoice
@@ -160,6 +160,7 @@ config ARMV7M_STACKCHECK
 config ARMV7M_ITMSYSLOG
 	bool "ITM SYSLOG support"
 	default n
+	select ARCH_SYSLOG
 	select SYSLOG
 	---help---
 		Enable hooks to support ITM syslog output.  This requires additional

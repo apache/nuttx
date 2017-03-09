@@ -88,7 +88,7 @@ static int psock_fifo_read(FAR struct socket *psock, FAR void *buf,
 
       if (ret == -ECONNRESET)
         {
-          ndbg("ERROR: Lost connection: %d\n", ret);
+          nerr("ERROR: Lost connection: %d\n", ret);
 
           /* Report an ungraceful loss of connection.  This should
            * eventually be reported as ENOTCONN.
@@ -111,7 +111,7 @@ static int psock_fifo_read(FAR struct socket *psock, FAR void *buf,
         }
       else
         {
-          ndbg("ERROR: Failed to read packet: %d\n", ret);
+          nerr("ERROR: Failed to read packet: %d\n", ret);
           return ret;
         }
     }
@@ -155,7 +155,7 @@ psock_stream_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   if (conn->lc_state != LOCAL_STATE_CONNECTED)
     {
-      ndbg("ERROR: not connected\n");
+      nerr("ERROR: not connected\n");
       return -ENOTCONN;
     }
 
@@ -174,12 +174,12 @@ psock_stream_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
       ret = local_sync(conn->lc_infd);
       if (ret < 0)
         {
-          ndbg("ERROR: Failed to get packet length: %d\n", ret);
+          nerr("ERROR: Failed to get packet length: %d\n", ret);
           return ret;
         }
       else if (ret > UINT16_MAX)
         {
-          ndbg("ERROR: Packet is too big: %d\n", ret);
+          nerr("ERROR: Packet is too big: %d\n", ret);
           return -E2BIG;
         }
 
@@ -259,7 +259,7 @@ psock_dgram_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
     {
       /* Either not bound to address or it is connected */
 
-      ndbg("ERROR: Connected or not bound\n");
+      nerr("ERROR: Connected or not bound\n");
       return -EISCONN;
     }
 
@@ -272,7 +272,7 @@ psock_dgram_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
   ret = local_create_halfduplex(conn, conn->lc_path);
   if (ret < 0)
     {
-      ndbg("ERROR: Failed to create FIFO for %s: %d\n",
+      nerr("ERROR: Failed to create FIFO for %s: %d\n",
            conn->lc_path, ret);
       return ret;
     }
@@ -282,7 +282,7 @@ psock_dgram_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
   ret = local_open_receiver(conn, _SS_ISNONBLOCK(psock->s_flags));
   if (ret < 0)
     {
-      ndbg("ERROR: Failed to open FIFO for %s: %d\n",
+      nerr("ERROR: Failed to open FIFO for %s: %d\n",
            conn->lc_path, ret);
       goto errout_with_halfduplex;
       return ret;
@@ -295,12 +295,12 @@ psock_dgram_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
   ret = local_sync(conn->lc_infd);
   if (ret < 0)
     {
-      ndbg("ERROR: Failed to get packet length: %d\n", ret);
+      nerr("ERROR: Failed to get packet length: %d\n", ret);
       goto errout_with_infd;
     }
   else if (ret > UINT16_MAX)
     {
-      ndbg("ERROR: Packet is too big: %d\n", ret);
+      nerr("ERROR: Packet is too big: %d\n", ret);
       goto errout_with_infd;
     }
 
@@ -439,7 +439,7 @@ ssize_t psock_local_recvfrom(FAR struct socket *psock, FAR void *buf,
 #endif
     {
       DEBUGPANIC();
-      ndbg("ERROR: Unrecognized socket type: %s\n", psock->s_type);
+      nerr("ERROR: Unrecognized socket type: %s\n", psock->s_type);
       return -EINVAL;
     }
 }

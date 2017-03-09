@@ -44,9 +44,10 @@
 #include <stdint.h>
 #include <poll.h>
 #include <errno.h>
-#include <stdlib.h>
 #include <string.h>
 #include <debug.h>
+
+#include <nuttx/kmalloc.h>
 
 #ifndef CONFIG_DISABLE_POLL
 
@@ -68,13 +69,17 @@
 int epoll_create(int size)
 {
   FAR struct epoll_head *eph =
-    (FAR struct epoll_head *)malloc(sizeof(struct epoll_head));
+    (FAR struct epoll_head *)kmm_malloc(sizeof(struct epoll_head));
 
   eph->size = size;
   eph->occupied = 0;
-  eph->evs = malloc(sizeof(struct epoll_event) * eph->size);
+  eph->evs = kmm_malloc(sizeof(struct epoll_event) * eph->size);
 
-  return (int)eph;
+  /* REVISIT: This will not work on machines where:
+   * sizeof(struct epoll_head *) > sizeof(int)
+   */
+
+  return (int)((intptr_t)eph);
 }
 
 /****************************************************************************
@@ -90,10 +95,14 @@ int epoll_create(int size)
 
 void epoll_close(int epfd)
 {
-  struct epoll_head *eph = (struct epoll_head *)epfd;
+  /* REVISIT: This will not work on machines where:
+   * sizeof(struct epoll_head *) > sizeof(int)
+   */
 
-  free(eph->evs);
-  free(eph);
+  FAR struct epoll_head *eph = (FAR struct epoll_head *)((intptr_t)epfd);
+
+  kmm_free(eph->evs);
+  kmm_free(eph);
 }
 
 /****************************************************************************
@@ -109,12 +118,16 @@ void epoll_close(int epfd)
 
 int epoll_ctl(int epfd, int op, int fd, struct epoll_event *ev)
 {
-  FAR struct epoll_head *eph = (FAR struct epoll_head *)epfd;
+  /* REVISIT: This will not work on machines where:
+   * sizeof(struct epoll_head *) > sizeof(int)
+   */
+
+  FAR struct epoll_head *eph = (FAR struct epoll_head *)((intptr_t)epfd);
 
   switch (op)
     {
       case EPOLL_CTL_ADD:
-        fvdbg("%08x CTL ADD(%d): fd=%d ev=%08x\n",
+        finfo("%08x CTL ADD(%d): fd=%d ev=%08x\n",
               epfd, eph->occupied, fd, ev->events);
 
         eph->evs[eph->occupied].events = ev->events | POLLERR | POLLHUP;
@@ -147,7 +160,7 @@ int epoll_ctl(int epfd, int op, int fd, struct epoll_event *ev)
         {
           int i;
 
-          fvdbg("%08x CTL MOD(%d): fd=%d ev=%08x\n",
+          finfo("%08x CTL MOD(%d): fd=%d ev=%08x\n",
                 epfd, eph->occupied, fd, ev->events);
 
           for (i = 0; i < eph->occupied; i++)
@@ -180,9 +193,13 @@ int epoll_ctl(int epfd, int op, int fd, struct epoll_event *ev)
 int epoll_wait(int epfd, FAR struct epoll_event *evs, int maxevents,
                int timeout)
 {
-  int i;
+  /* REVISIT: This will not work on machines where:
+   * sizeof(struct epoll_head *) > sizeof(int)
+   */
+
+  FAR struct epoll_head *eph = (FAR struct epoll_head *)((intptr_t)epfd);
   int rc;
-  FAR struct epoll_head *eph = (FAR struct epoll_head *)epfd;
+  int i;
 
   rc = poll((FAR struct pollfd *)eph->evs, eph->occupied, timeout);
 
@@ -190,12 +207,12 @@ int epoll_wait(int epfd, FAR struct epoll_event *evs, int maxevents,
     {
       if (rc < 0)
         {
-          fdbg("%08x poll fail: %d for %d, %d msecs\n",
+          ferr("ERROR: %08x poll fail: %d for %d, %d msecs\n",
                epfd, rc, eph->occupied, timeout);
 
           for (i = 0; i < eph->occupied; i++)
             {
-              fdbg("%02d: fd=%d\n", i, eph->evs[i].data.fd);
+              ferr("  %02d: fd=%d\n", i, eph->evs[i].data.fd);
             }
         }
 

@@ -122,10 +122,10 @@ void arm_gic0_initialize(void)
     }
 
 #ifdef CONFIG_SMP
-  /* Attach SGI interrupt handlers */
+  /* Attach SGI interrupt handlers.  This attaches the handler for all CPUs. */
 
-  DEBUGVERIFY(irq_attach(GIC_IRQ_SGI1, arm_start_handler));
-  DEBUGVERIFY(irq_attach(GIC_IRQ_SGI2, arm_pause_handler));
+  DEBUGVERIFY(irq_attach(GIC_IRQ_SGI1, arm_start_handler, NULL));
+  DEBUGVERIFY(irq_attach(GIC_IRQ_SGI2, arm_pause_handler, NULL));
 #endif
 
   arm_gic_dump("Exit arm_gic0_initialize", true, 0);
@@ -387,7 +387,7 @@ uint32_t *arm_decodeirq(uint32_t *regs)
   regval = getreg32(GIC_ICCIAR);
   irq    = (regval & GIC_ICCIAR_INTID_MASK) >> GIC_ICCIAR_INTID_SHIFT;
 
-  gicllvdbg("irq=%d\n", irq);
+  irqinfo("irq=%d\n", irq);
 
   /* Ignore spurions IRQs.  ICCIAR will report 1023 if there is no pending
    * interrupt.
@@ -573,6 +573,5 @@ int arm_gic_irq_trigger(int irq, bool edge)
 
   return -EINVAL;
 }
-
 
 #endif /* CONFIG_ARMV7A_HAVE_GICv2 */

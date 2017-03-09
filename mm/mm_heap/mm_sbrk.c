@@ -94,12 +94,12 @@ FAR void *mm_sbrk(FAR struct mm_heap_s *heap, intptr_t incr,
   uintptr_t allocbase;
   unsigned int pgincr;
   size_t bytesize;
-  int err;
+  int errcode;
 
   DEBUGASSERT(incr >= 0);
   if (incr < 0)
     {
-      err = ENOSYS;
+      errcode = ENOSYS;
       goto errout;
     }
 
@@ -119,7 +119,7 @@ FAR void *mm_sbrk(FAR struct mm_heap_s *heap, intptr_t incr,
 
       if ((brkaddr > 0) && ((maxbreak - brkaddr) < (pgincr << MM_PGSHIFT)))
         {
-          err = ENOMEM;
+          errcode = ENOMEM;
           goto errout;
         }
 
@@ -132,7 +132,7 @@ FAR void *mm_sbrk(FAR struct mm_heap_s *heap, intptr_t incr,
       allocbase = pgalloc(brkaddr, pgincr);
       if (allocbase == 0)
         {
-          err = EAGAIN;
+          errcode = EAGAIN;
           goto errout;
         }
 
@@ -158,7 +158,7 @@ FAR void *mm_sbrk(FAR struct mm_heap_s *heap, intptr_t incr,
   return (FAR void *)brkaddr;
 
 errout:
-  set_errno(err);
+  set_errno(errcode);
   return (FAR void *)-1;
 }
 #endif /* CONFIG_BUILD_KERNEL */

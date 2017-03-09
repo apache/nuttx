@@ -1,8 +1,9 @@
 /************************************************************************************
  * arch/arm/src/stm32/stm32_pwr.h
  *
- *   Copyright (C) 2009, 2013, 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2009, 2013, 2015, 2017 Gregory Nutt. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -67,21 +68,64 @@ extern "C"
  ************************************************************************************/
 
 /************************************************************************************
+ * Name: stm32_pwr_enablesdadc
+ *
+ * Description:
+ *   Enables SDADC power
+ *
+ * Input Parameters:
+ *   sdadc - SDADC number 1-3
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
+
+#if defined(CONFIG_STM32_STM32F37XX)
+void stm32_pwr_enablesdadc(uint8_t sdadc);
+#endif
+
+/************************************************************************************
+ * Name: stm32_pwr_initbkp
+ *
+ * Description:
+ *   Insures the referenced count access to the backup domain (RTC registers,
+ *   RTC backup data registers and backup SRAM is consistent with the HW state
+ *   without relying on a variable.
+ *
+ *   NOTE: This function should only be called by SoC Start up code.
+ *
+ * Input Parameters:
+ *   writable - set the initial state of the enable and the
+ *              bkp_writable_counter
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
+
+void stm32_pwr_initbkp(bool writable);
+
+/************************************************************************************
  * Name: stm32_pwr_enablebkp
  *
  * Description:
  *   Enables access to the backup domain (RTC registers, RTC backup data registers
  *   and backup SRAM).
  *
+ *   NOTE: Reference counting is used in order to supported nested calls to this
+ *   function.  As a consequence, every call to stm32_pwr_enablebkp(true) must
+ *   be followed by a matching call to stm32_pwr_enablebkp(false).
+ *
  * Input Parameters:
  *   writable - True: enable ability to write to backup domain registers
  *
  * Returned Value:
- *   True: The backup domain was previously writable.
+ *   None
  *
  ************************************************************************************/
 
-bool stm32_pwr_enablebkp(bool writable);
+void stm32_pwr_enablebkp(bool writable);
 
 /************************************************************************************
  * Name: stm32_pwr_enablebreg

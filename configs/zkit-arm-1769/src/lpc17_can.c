@@ -6,7 +6,7 @@
  *
  *   Based on configs/olimex-lpc1766stk/src/lpc17_can.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,7 +47,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/can.h>
+#include <nuttx/drivers/can.h>
 #include <arch/board/board.h>
 
 #include "chip.h"
@@ -56,104 +56,78 @@
 #include "lpc17_can.h"
 #include "zkit-arm-1769.h"
 
-#if defined(CONFIG_CAN) && (defined(CONFIG_LPC17_CAN1) || defined(CONFIG_LPC17_CAN2))
+#ifdef CONFIG_CAN
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
 /* Configuration ********************************************************************/
+
 #define CAN_PORT1 1
 #define CAN_PORT2 2
-
-
-/* Debug ***************************************************************************/
-/* Non-standard debug that may be enabled just for testing CAN */
-
-#ifdef CONFIG_DEBUG_CAN
-#  define candbg    dbg
-#  define canvdbg   vdbg
-#  define canlldbg  lldbg
-#  define canllvdbg llvdbg
-#else
-#  define candbg(x...)
-#  define canvdbg(x...)
-#  define canlldbg(x...)
-#  define canllvdbg(x...)
-#endif
-
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
 /************************************************************************************
- * Name: board_can_initialize
+ * Name: zkit_can_setup
  *
  * Description:
- *   All LPC17 architectures must provide the following interface to work with
- *   examples/can.
+ *  Initialize CAN and register the CAN device
  *
  ************************************************************************************/
 
-int board_can_initialize(void)
+int zkit_can_setup(void)
 {
-  static bool initialized = false;
+#if defined(CONFIG_LPC17_CAN1) || defined(CONFIG_LPC17_CAN2)
   struct can_dev_s *can;
   int ret;
 
-  /* Check if we have already initialized */
-
-  if (!initialized)
-    {
 #ifdef CONFIG_LPC17_CAN1
-      /* Call lpc17_caninitialize() to get an instance of the CAN1 interface */
+  /* Call lpc17_caninitialize() to get an instance of the CAN1 interface */
 
-      can = lpc17_caninitialize(CAN_PORT1);
-      if (can == NULL)
-        {
-          candbg("ERROR:  Failed to get CAN1 interface\n");
-          return -ENODEV;
-        }
+  can = lpc17_caninitialize(CAN_PORT1);
+  if (can == NULL)
+    {
+      canerr("ERROR:  Failed to get CAN1 interface\n");
+      return -ENODEV;
+    }
 
-      /* Register the CAN1 driver at "/dev/can0" */
+  /* Register the CAN1 driver at "/dev/can0" */
 
-      ret = can_register("/dev/can0", can);
-      if (ret < 0)
-        {
-          candbg("ERROR: CAN1 register failed: %d\n", ret);
-          return ret;
-        }
+  ret = can_register("/dev/can0", can);
+  if (ret < 0)
+    {
+      canerr("ERROR: CAN1 register failed: %d\n", ret);
+      return ret;
+    }
 #endif
 
 #ifdef CONFIG_LPC17_CAN2
-      /* Call lpc17_caninitialize() to get an instance of the CAN2 interface */
+  /* Call lpc17_caninitialize() to get an instance of the CAN2 interface */
 
-      can = lpc17_caninitialize(CAN_PORT2);
-      if (can == NULL)
-        {
-          candbg("ERROR:  Failed to get CAN2 interface\n");
-          return -ENODEV;
-        }
-
-      /* Register the CAN2 driver at "/dev/can1" */
-
-      ret = can_register("/dev/can1", can);
-      if (ret < 0)
-        {
-          candbg("ERROR: CAN2 register failed: %d\n", ret);
-          return ret;
-        }
-#endif
-
-      /* Now we are initialized */
-
-      initialized = true;
+  can = lpc17_caninitialize(CAN_PORT2);
+  if (can == NULL)
+    {
+      canerr("ERROR:  Failed to get CAN2 interface\n");
+      return -ENODEV;
     }
 
+  /* Register the CAN2 driver at "/dev/can1" */
+
+  ret = can_register("/dev/can1", can);
+  if (ret < 0)
+    {
+      canerr("ERROR: CAN2 register failed: %d\n", ret);
+      return ret;
+    }
+#endif
+
   return OK;
+#else
+  return -ENODEV;
+#endif
 }
 
-#endif /* CONFIG_CAN && (CONFIG_LPC17_CAN1 || CONFIG_LPC17_CAN2) */
+#endif /* CONFIG_CAN */

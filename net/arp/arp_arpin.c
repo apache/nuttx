@@ -76,16 +76,16 @@
  *   that we previously sent out, the ARP cache will be filled in with
  *   the values from the ARP reply.  If the incoming ARP packet is an ARP
  *   request for our IP address, an ARP reply packet is created and put
- *   into the d_buf[] buffer.
+ *   into the d_buf buffer.
  *
  *   On entry, this function expects that an ARP packet with a prepended
- *   Ethernet header is present in the d_buf[] buffer and that the length of
+ *   Ethernet header is present in the d_buf buffer and that the length of
  *   the packet is set in the d_len field.
  *
  *   When the function returns, the value of the field d_len indicates whether
  *   the device driver should send out the ARP reply packet or not. If d_len
  *   is zero, no packet should be sent; If d_len is non-zero, it contains the
- *   length of the outbound packet that is present in the d_buf[] buffer.
+ *   length of the outbound packet that is present in the d_buf buffer.
  *
  ****************************************************************************/
 
@@ -96,7 +96,7 @@ void arp_arpin(FAR struct net_driver_s *dev)
 
   if (dev->d_len < (sizeof(struct arp_hdr_s) + ETH_HDRLEN))
     {
-      nlldbg("Too small\n");
+      nerr("ERROR: Packet Too small\n");
       dev->d_len = 0;
       return;
     }
@@ -107,7 +107,7 @@ void arp_arpin(FAR struct net_driver_s *dev)
   switch (arp->ah_opcode)
     {
       case HTONS(ARP_REQUEST):
-        nllvdbg("ARP request for IP %04lx\n", (long)ipaddr);
+        ninfo("ARP request for IP %04lx\n", (long)ipaddr);
 
         /* ARP request. If it asked for our address, we send out a reply. */
 
@@ -139,7 +139,7 @@ void arp_arpin(FAR struct net_driver_s *dev)
         break;
 
       case HTONS(ARP_REPLY):
-        nllvdbg("ARP reply for IP %04lx\n", (long)ipaddr);
+        ninfo("ARP reply for IP %04lx\n", (long)ipaddr);
 
         /* ARP reply. We insert or update the ARP table if it was meant
          * for us.

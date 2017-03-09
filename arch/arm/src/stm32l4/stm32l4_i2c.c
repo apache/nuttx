@@ -81,8 +81,9 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
-#include <nuttx/i2c/i2c_master.h>
 #include <nuttx/clock.h>
+#include <nuttx/semaphore.h>
+#include <nuttx/i2c/i2c_master.h>
 
 #include <arch/board/board.h>
 
@@ -146,15 +147,6 @@
 #define STATUS_BUSY(status)    (status & I2C_ISR_BUSY)
 
 /* Debug ****************************************************************************/
-/* CONFIG_DEBUG_I2C + CONFIG_DEBUG enables general I2C debug output. */
-
-#ifdef CONFIG_DEBUG_I2C
-#  define i2cdbg dbg
-#  define i2cvdbg vdbg
-#else
-#  define i2cdbg(x...)
-#  define i2cvdbg(x...)
-#endif
 
 /* I2C event trace logic.  NOTE:  trace uses the internal, non-standard, low-level
  * debug interface syslog() but does not require that any other debug
@@ -222,7 +214,7 @@ struct stm32l4_i2c_config_s
   uint32_t scl_pin;           /* GPIO configuration for SCL as SCL */
   uint32_t sda_pin;           /* GPIO configuration for SDA as SDA */
 #ifndef CONFIG_I2C_POLLED
-  int (*isr)(int, void *);    /* Interrupt handler */
+  int (*isr)(int, void *, void *);    /* Interrupt handler */
   uint32_t ev_irq;            /* Event IRQ */
   uint32_t er_irq;            /* Error IRQ */
 #endif
@@ -300,13 +292,13 @@ static inline uint32_t stm32l4_i2c_getstatus(FAR struct stm32l4_i2c_priv_s *priv
 static int stm32l4_i2c_isr(struct stm32l4_i2c_priv_s * priv);
 #ifndef CONFIG_I2C_POLLED
 #ifdef CONFIG_STM32L4_I2C1
-static int stm32l4_i2c1_isr(int irq, void *context);
+static int stm32l4_i2c1_isr(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_STM32L4_I2C2
-static int stm32l4_i2c2_isr(int irq, void *context);
+static int stm32l4_i2c2_isr(int irq, void *context, FAR void *arg);
 #endif
 #ifdef CONFIG_STM32L4_I2C3
-static int stm32l4_i2c3_isr(int irq, void *context);
+static int stm32l4_i2c3_isr(int irq, void *context, FAR void *arg);
 #endif
 #endif
 static int stm32l4_i2c_init(FAR struct stm32l4_i2c_priv_s *priv);
@@ -365,8 +357,8 @@ struct stm32l4_i2c_priv_s stm32l4_i2c1_priv =
 static const struct stm32l4_i2c_config_s stm32l4_i2c2_config =
 {
   .base       = STM32L4_I2C2_BASE,
-  .clk_bit    = RCC_APB1ENR_I2C2EN,
-  .reset_bit  = RCC_APB1RSTR_I2C2RST,
+  .clk_bit    = RCC_APB1ENR1_I2C2EN,
+  .reset_bit  = RCC_APB1RSTR1_I2C2RST,
   .scl_pin    = GPIO_I2C2_SCL,
   .sda_pin    = GPIO_I2C2_SDA,
 #ifndef CONFIG_I2C_POLLED
@@ -395,8 +387,8 @@ struct stm32l4_i2c_priv_s stm32l4_i2c2_priv =
 static const struct stm32l4_i2c_config_s stm32l4_i2c3_config =
 {
   .base       = STM32L4_I2C3_BASE,
-  .clk_bit    = RCC_APB1ENR_I2C3EN,
-  .reset_bit  = RCC_APB1RSTR_I2C3RST,
+  .clk_bit    = RCC_APB1ENR1_I2C3EN,
+  .reset_bit  = RCC_APB1RSTR1_I2C3RST,
   .scl_pin    = GPIO_I2C3_SCL,
   .sda_pin    = GPIO_I2C3_SDA,
 #ifndef CONFIG_I2C_POLLED
@@ -671,7 +663,7 @@ static inline int stm32l4_i2c_sem_waitdone(FAR struct stm32l4_i2c_priv_s *priv)
 
   while (priv->intstate != INTSTATE_DONE && elapsed < timeout);
 
-  i2cvdbg("intstate: %d elapsed: %ld threshold: %ld status: %08x\n",
+  i2cinfo("intstate: %d elapsed: %ld threshold: %ld status: %08x\n",
           priv->intstate, (long)elapsed, (long)timeout, priv->status);
 
   /* Set the interrupt state back to IDLE */
@@ -825,7 +817,7 @@ static inline void stm32l4_i2c_sem_waitstop(FAR struct stm32l4_i2c_priv_s *priv)
    * still pending.
    */
 
-  i2cvdbg("Timeout with CR: %04x SR: %04x\n", cr, sr);
+  i2cinfo("Timeout with CR: %04x SR: %04x\n", cr, sr);
 }
 
 /************************************************************************************
@@ -852,8 +844,14 @@ static inline void stm32l4_i2c_sem_post(FAR struct stm32l4_i2c_priv_s *priv)
 static inline void stm32l4_i2c_sem_init(FAR struct stm32l4_i2c_priv_s *priv)
 {
   sem_init(&priv->sem_excl, 0, 1);
+
 #ifndef CONFIG_I2C_POLLED
+  /* This semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
   sem_init(&priv->sem_isr, 0, 0);
+  sem_setprotocol(&priv->sem_isr, SEM_PRIO_NONE);
 #endif
 }
 
@@ -919,7 +917,7 @@ static void stm32l4_i2c_tracenew(FAR struct stm32l4_i2c_priv_s *priv,
 
           if (priv->tndx >= (CONFIG_I2C_NTRACE-1))
             {
-              i2cdbg("Trace table overflow\n");
+              i2cerr("ERROR: Trace table overflow\n");
               return;
             }
 
@@ -960,7 +958,7 @@ static void stm32l4_i2c_traceevent(FAR struct stm32l4_i2c_priv_s *priv,
 
       if (priv->tndx >= (CONFIG_I2C_NTRACE-1))
         {
-          i2cdbg("Trace table overflow\n");
+          i2cerr("ERROR: Trace table overflow\n");
           return;
         }
 
@@ -1517,7 +1515,7 @@ static int stm32l4_i2c_isr(struct stm32l4_i2c_priv_s *priv)
 
 #ifndef CONFIG_I2C_POLLED
 #ifdef CONFIG_STM32L4_I2C1
-static int stm32l4_i2c1_isr(int irq, void *context)
+static int stm32l4_i2c1_isr(int irq, void *context, FAR void *arg)
 {
   return stm32l4_i2c_isr(&stm32l4_i2c1_priv);
 }
@@ -1532,7 +1530,7 @@ static int stm32l4_i2c1_isr(int irq, void *context)
  ************************************************************************************/
 
 #ifdef CONFIG_STM32L4_I2C2
-static int stm32l4_i2c2_isr(int irq, void *context)
+static int stm32l4_i2c2_isr(int irq, void *context, FAR void *arg)
 {
   return stm32l4_i2c_isr(&stm32l4_i2c2_priv);
 }
@@ -1547,7 +1545,7 @@ static int stm32l4_i2c2_isr(int irq, void *context)
  ************************************************************************************/
 
 #ifdef CONFIG_STM32L4_I2C3
-static int stm32l4_i2c3_isr(int irq, void *context)
+static int stm32l4_i2c3_isr(int irq, void *context, FAR void *arg)
 {
   return stm32l4_i2c_isr(&stm32l4_i2c3_priv);
 }
@@ -1592,8 +1590,8 @@ static int stm32l4_i2c_init(FAR struct stm32l4_i2c_priv_s *priv)
   /* Attach ISRs */
 
 #ifndef CONFIG_I2C_POLLED
-  irq_attach(priv->config->ev_irq, priv->config->isr);
-  irq_attach(priv->config->er_irq, priv->config->isr);
+  irq_attach(priv->config->ev_irq, priv->config->isr, NULL);
+  irq_attach(priv->config->er_irq, priv->config->isr, NULL);
   up_enable_irq(priv->config->ev_irq);
   up_enable_irq(priv->config->er_irq);
 #endif
@@ -1731,7 +1729,7 @@ static int stm32l4_i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg
       status = stm32l4_i2c_getstatus(priv);
       ret = -ETIMEDOUT;
 
-      i2cdbg("Timed out: CR1: %08x status: %08x\n",
+      i2cerr("ERROR: Timed out: CR1: %08x status: %08x\n",
              stm32l4_i2c_getreg32(priv, STM32L4_I2C_CR1_OFFSET), status);
 
       /* "Note: When the STOP, START or PEC bit is set, the software must

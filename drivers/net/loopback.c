@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/net/loopback.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -67,12 +67,18 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_NET_NOINTS
-#  error CONFIG_NET_NOINTS must be selected
-#endif
+/* We need to have the work queue to handle SPI interrupts */
 
-#ifndef CONFIG_SCHED_HPWORK
-#  error High priority work queue support is required (CONFIG_SCHED_HPWORK)
+#if !defined(CONFIG_SCHED_WORKQUEUE)
+#  error Worker thread support is required (CONFIG_SCHED_WORKQUEUE)
+#else
+#  if defined(CONFIG_LOOPBACK_HPWORK)
+#    define LPBKWORK HPWORK
+#  elif defined(CONFIG_LOOPBACK_LPWORK)
+#    define LPBKWORK LPWORK
+#  else
+#    error Neither CONFIG_LOOPBACK_HPWORK nor CONFIG_LOOPBACK_LPWORK defined
+#  endif
 #endif
 
 /* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per second */
@@ -97,7 +103,7 @@ struct lo_driver_s
   bool lo_bifup;               /* true:ifup false:ifdown */
   bool lo_txdone;              /* One RX packet was looped back */
   WDOG_ID lo_polldog;          /* TX poll timer */
-  struct work_s lo_work;       /* For deferring work to the work queue */
+  struct work_s lo_work;       /* For deferring poll work to the work queue */
 
   /* This holds the information visible to the NuttX network */
 
@@ -109,10 +115,7 @@ struct lo_driver_s
  ****************************************************************************/
 
 static struct lo_driver_s g_loopback;
-
-#ifdef CONFIG_NET_MULTIBUFFER
 static uint8_t g_iobuffer[MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE];
-#endif
 
 /****************************************************************************
  * Private Function Prototypes
@@ -187,7 +190,7 @@ static int lo_txpoll(FAR struct net_driver_s *dev)
 #ifdef CONFIG_NET_IPv4
       if ((IPv4BUF->vhl & IP_VERSION_MASK) == IPv4_VERSION)
         {
-          nllvdbg("IPv4 frame\n");
+          ninfo("IPv4 frame\n");
           NETDEV_RXIPV4(&priv->lo_dev);
           ipv4_input(&priv->lo_dev);
         }
@@ -196,14 +199,14 @@ static int lo_txpoll(FAR struct net_driver_s *dev)
 #ifdef CONFIG_NET_IPv6
       if ((IPv6BUF->vtc & IP_VERSION_MASK) == IPv6_VERSION)
         {
-          nllvdbg("Iv6 frame\n");
+          ninfo("Iv6 frame\n");
           NETDEV_RXIPV6(&priv->lo_dev);
           ipv6_input(&priv->lo_dev);
         }
       else
 #endif
         {
-          ndbg("WARNING: Unrecognized packet type dropped: %02x\n", IPv4BUF->vhl);
+          nwarn("WARNING: Unrecognized packet type dropped: %02x\n", IPv4BUF->vhl);
           NETDEV_RXDROPPED(&priv->lo_dev);
           priv->lo_dev.d_len = 0;
         }
@@ -235,11 +238,10 @@ static int lo_txpoll(FAR struct net_driver_s *dev)
 static void lo_poll_work(FAR void *arg)
 {
   FAR struct lo_driver_s *priv = (FAR struct lo_driver_s *)arg;
-  net_lock_t state;
 
   /* Perform the poll */
 
-  state = net_lock();
+  net_lock();
   priv->lo_txdone = false;
   (void)devif_timer(&priv->lo_dev, lo_txpoll);
 
@@ -256,7 +258,7 @@ static void lo_poll_work(FAR void *arg)
   /* Setup the watchdog poll timer again */
 
   (void)wd_start(priv->lo_polldog, LO_WDDELAY, lo_poll_expiry, 1, priv);
-  net_unlock(state);
+  net_unlock();
 }
 
 /****************************************************************************
@@ -281,24 +283,9 @@ static void lo_poll_expiry(int argc, wdparm_t arg, ...)
 {
   FAR struct lo_driver_s *priv = (FAR struct lo_driver_s *)arg;
 
-  /* Is our single work structure available?  It may not be if there are
-   * pending interrupt actions.
-   */
+  /* Schedule to perform the interrupt processing on the worker thread. */
 
-  if (work_available(&priv->lo_work))
-    {
-      /* Schedule to perform the interrupt processing on the worker thread. */
-
-      work_queue(HPWORK, &priv->lo_work, lo_poll_work, priv, 0);
-    }
-  else
-    {
-      /* No.. Just re-start the watchdog poll timer, missing one polling
-       * cycle.
-       */
-
-      (void)wd_start(priv->lo_polldog, LO_WDDELAY, lo_poll_expiry, 1, arg);
-    }
+  work_queue(LPBKWORK, &priv->lo_work, lo_poll_work, priv, 0);
 }
 
 /****************************************************************************
@@ -323,20 +310,21 @@ static int lo_ifup(FAR struct net_driver_s *dev)
   FAR struct lo_driver_s *priv = (FAR struct lo_driver_s *)dev->d_private;
 
 #ifdef CONFIG_NET_IPv4
-  ndbg("Bringing up: %d.%d.%d.%d\n",
-       dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+  ninfo("Bringing up: %d.%d.%d.%d\n",
+        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
+        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 #endif
 #ifdef CONFIG_NET_IPv6
-  ndbg("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-       dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
-       dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
-       dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
+  ninfo("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+        dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
+        dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
+        dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
 #endif
 
   /* Set and activate a timer process */
 
-  (void)wd_start(priv->lo_polldog, LO_WDDELAY, lo_poll_expiry, 1, (wdparm_t)priv);
+  (void)wd_start(priv->lo_polldog, LO_WDDELAY, lo_poll_expiry,
+                 1, (wdparm_t)priv);
 
   priv->lo_bifup = true;
   return OK;
@@ -392,11 +380,10 @@ static int lo_ifdown(FAR struct net_driver_s *dev)
 static void lo_txavail_work(FAR void *arg)
 {
   FAR struct lo_driver_s *priv = (FAR struct lo_driver_s *)arg;
-  net_lock_t state;
 
   /* Ignore the notification if the interface is not yet up */
 
-  state = net_lock();
+  net_lock();
   if (priv->lo_bifup)
     {
       do
@@ -409,7 +396,7 @@ static void lo_txavail_work(FAR void *arg)
       while (priv->lo_txdone);
     }
 
-  net_unlock(state);
+  net_unlock();
 }
 
 /****************************************************************************
@@ -444,7 +431,7 @@ static int lo_txavail(FAR struct net_driver_s *dev)
     {
       /* Schedule to serialize the poll on the worker thread. */
 
-      work_queue(HPWORK, &priv->lo_work, lo_txavail_work, priv, 0);
+      work_queue(LPBKWORK, &priv->lo_work, lo_txavail_work, priv, 0);
     }
 
   return OK;
@@ -543,9 +530,7 @@ int localhost_initialize(void)
   priv->lo_dev.d_addmac  = lo_addmac;    /* Add multicast MAC address */
   priv->lo_dev.d_rmmac   = lo_rmmac;     /* Remove multicast MAC address */
 #endif
-#ifdef CONFIG_NET_MULTIBUFFER
   priv->lo_dev.d_buf     = g_iobuffer;   /* Attach the IO buffer */
-#endif
   priv->lo_dev.d_private = (FAR void *)priv; /* Used to recover private state from dev */
 
   /* Create a watchdog for timing polling for and timing of transmissions */

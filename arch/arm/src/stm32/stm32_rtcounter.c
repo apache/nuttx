@@ -324,7 +324,7 @@ static inline void stm32_rtc_breakout(FAR const struct timespec *tp,
  ************************************************************************************/
 
 #if defined(CONFIG_RTC_HIRES) || defined(CONFIG_RTC_ALARM)
-static int stm32_rtc_interrupt(int irq, void *context)
+static int stm32_rtc_interrupt(int irq, void *context, FAR void *arg)
 {
   uint16_t source = getreg16(STM32_RTC_CRL);
 
@@ -377,14 +377,13 @@ int up_rtc_initialize(void)
    * registers and backup SRAM).
    */
 
-  (void)stm32_pwr_enablebkp(true);
-
-  /* Set access to the peripheral, enable the backup domain (BKP) and the lower
-   * power external 32,768Hz (Low-Speed External, LSE) oscillator.  Configure the
-   * LSE to drive the RTC.
-   */
-
-  stm32_rcc_enablelse();
+  stm32_pwr_enablebkp(true);
+  
+  /* Select the lower power external 32,768Hz (Low-Speed External, LSE) oscillator
+   * as RTC Clock Source and enable the Clock */
+  
+  modifyreg16(STM32_RCC_BDCR, RCC_BDCR_RTCSEL_MASK, RCC_BDCR_RTCSEL_LSE);
+  modifyreg16(STM32_RCC_BDCR, 0, RCC_BDCR_RTCEN);
 
   /* TODO: Get state from this function, if everything is
    *   okay and whether it is already enabled (if it was disabled
@@ -407,7 +406,7 @@ int up_rtc_initialize(void)
   /* Configure RTC interrupt to catch overflow and alarm interrupts. */
 
 #if defined(CONFIG_RTC_HIRES) || defined(CONFIG_RTC_ALARM)
-  irq_attach(STM32_IRQ_RTC, stm32_rtc_interrupt);
+  irq_attach(STM32_IRQ_RTC, stm32_rtc_interrupt, NULL);
   up_enable_irq(STM32_IRQ_RTC);
 #endif
 
@@ -428,7 +427,7 @@ int up_rtc_initialize(void)
    * registers and backup SRAM).
    */
 
-  (void)stm32_pwr_enablebkp(false);
+  stm32_pwr_enablebkp(false);
 
   return OK;
 }
@@ -605,7 +604,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
   /* Enable write access to the backup domain */
 
   flags = enter_critical_section();
-  (void)stm32_pwr_enablebkp(true);
+  stm32_pwr_enablebkp(true);
 
   /* Then write the broken out values to the RTC counter and BKP overflow register
    * (hi-res mode only)
@@ -625,7 +624,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
   putreg16(regvals.ovf, RTC_TIMEMSB_REG);
 #endif
 
-  (void)stm32_pwr_enablebkp(false);
+  stm32_pwr_enablebkp(false);
   leave_critical_section(flags);
   return OK;
 }

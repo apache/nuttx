@@ -39,18 +39,26 @@ config ARCH_MIPS
 	---help---
 		MIPS architectures (PIC32)
 
-config ARCH_RGMP
-	bool "RGMP"
+config ARCH_MISOC
+	bool "MISOC"
+	select ARCH_HAVE_INTERRUPTSTACK
+	select ARCH_HAVE_CUSTOMOPT
 	---help---
-		RTOS and GPOS on Multi-Processor (RGMP) architecture.  See
-		http://rgmp.sourceforge.net/wiki/index.php/Main_Page.
+		MISOC
 
-config ARCH_SH
+config ARCH_RENESAS
 	bool "Renesas"
 	select ARCH_NOINTC
 	select ARCH_HAVE_INTERRUPTSTACK
 	---help---
 		Renesas architectures (SH and M16C).
+
+config ARCH_RISCV
+	bool "RISC-V"
+	select ARCH_HAVE_INTERRUPTSTACK
+	select ARCH_HAVE_CUSTOMOPT
+	---help---
+		RISC-V 32 and 64-bit RV32 / RV64 architectures.
 
 config ARCH_SIM
 	bool "Simulation"
@@ -58,6 +66,7 @@ config ARCH_SIM
 	select ARCH_HAVE_TLS
 	select ARCH_HAVE_TICKLESS
 	select ARCH_HAVE_POWEROFF
+	select SERIAL_CONSOLE
 	---help---
 		Linux/Cywgin user-mode simulation.
 
@@ -65,6 +74,13 @@ config ARCH_X86
 	bool "x86"
 	---help---
 		Intel x86 architectures.
+
+config ARCH_XTENSA
+	bool "Xtensa"
+	select ARCH_HAVE_STACKCHECK
+	select ARCH_HAVE_CUSTOMOPT
+	---help---
+		Cadence® Tensilica® Xtensa® actictures.
 
 config ARCH_Z16
 	bool "ZNEO"
@@ -82,25 +98,29 @@ endchoice
 
 config ARCH
 	string
-	default "arm"	if ARCH_ARM
-	default "avr"	if ARCH_AVR
-	default "hc"	if ARCH_HC
-	default "mips"	if ARCH_MIPS
-	default "rgmp"	if ARCH_RGMP
-	default "sh"	if ARCH_SH
-	default "sim"	if ARCH_SIM
-	default "x86"	if ARCH_X86
-	default "z16"	if ARCH_Z16
-	default "z80"	if ARCH_Z80
+	default "arm"     if ARCH_ARM
+	default "avr"     if ARCH_AVR
+	default "hc"      if ARCH_HC
+	default "mips"    if ARCH_MIPS
+	default "misoc"   if ARCH_MISOC
+	default "renesas" if ARCH_RENESAS
+	default "risc-v"  if ARCH_RISCV
+	default "sim"     if ARCH_SIM
+	default "x86"     if ARCH_X86
+	default "xtensa"  if ARCH_XTENSA
+	default "z16"     if ARCH_Z16
+	default "z80"     if ARCH_Z80
 
 source arch/arm/Kconfig
 source arch/avr/Kconfig
 source arch/hc/Kconfig
 source arch/mips/Kconfig
-source arch/rgmp/Kconfig
-source arch/sh/Kconfig
+source arch/misoc/Kconfig
+source arch/renesas/Kconfig
+source arch/risc-v/Kconfig
 source arch/sim/Kconfig
 source arch/x86/Kconfig
+source arch/xtensa/Kconfig
 source arch/z16/Kconfig
 source arch/z80/Kconfig
 
@@ -525,6 +545,7 @@ config ARCH_IRQPRIO
 config ARCH_STACKDUMP
 	bool "Dump stack on assertions"
 	default n
+	select DEBUG_ALERT
 	---help---
 		Enable to do stack dumps after assertions
 
@@ -538,6 +559,7 @@ config ARCH_USBDUMP
 config ENDIAN_BIG
 	bool "Big Endian Architecture"
 	default n
+	depends on !ARCH_RISCV
 	---help---
 		Select if architecture operates using big-endian byte ordering.
 
@@ -598,6 +620,44 @@ config ARCH_RAMVECTORS
 	---help---
 		If ARCH_RAMVECTORS is defined, then the architecture will support
 		modifiable vectors in a RAM-based vector table.
+
+config ARCH_MINIMAL_VECTORTABLE
+	bool "Minimal RAM usage for vector table"
+	default n
+	---help---
+		Use a minimum amount of RAM for the vector table.
+
+		Instead of allowing irq_attach() to work for all interrupt vectors,
+		restrict to only working for a select few (defined in your board
+		configuration). This can dramatically reduce the amount of RAM used
+		be your vector table.
+
+		To use this setting, you must have a file in your board config that
+		provides:
+
+		  #include <nuttx/arch.h>
+		  const irq_mapped_t g_irqmap[NR_IRQS] =
+		  {
+		    ... IRQ to index mapping values ...
+		  };
+
+		This table is index by the hardware IRQ number and provides a value
+		in the range of 0 to CONFIG_ARCH_NUSER_INTERRUPTS that is the new,
+		mapped index into the vector table.  Unused, unmapped interrupts
+		should be set to IRQMAPPED_MAX.  So, for example, if g_irqmap[37]
+		== 24, then the hardware interrupt vector 37 will be mapped to the
+		interrupt vector table at index 24.  if g_irqmap[42] ==
+		IRQMAPPED_MAX, then hardware interrupt vector 42 is not used and
+		if it occurs will result in an unexpected interrupt crash.
+
+config ARCH_NUSER_INTERRUPTS
+	int "Number of interrupts"
+	default 0
+	depends on ARCH_MINIMAL_VECTORTABLE
+	---help---
+		If CONFIG_ARCH_MINIMAL_VECTORTABLE is defined, then this setting
+		defines the actual number of valid, mapped interrupts in g_irqmap.
+		This number will be the new size of the OS vector table
 
 comment "Board Settings"
 

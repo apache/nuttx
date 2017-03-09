@@ -72,26 +72,6 @@
 #  error "CONFIG_SPI_EXCHANGE must not be defined in the configuration"
 #endif
 
-/* Debug ********************************************************************/
-/* The following enable debug output from this file:
- *
- * CONFIG_DEBUG         - Define to enable general debug features
- * CONFIG_DEBUG_SPI     - Define to enable basic SSP debug (needs CONFIG_DEBUG)
- * CONFIG_DEBUG_VERBOSE - Define to enable verbose SSP debug
- */
-
-#ifdef CONFIG_DEBUG_SPI
-#  define sspdbg  lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
-#    define spivdbg lldbg
-#  else
-#    define spivdbg(x...)
-#  endif
-#else
-#  define sspdbg(x...)
-#  define spivdbg(x...)
-#endif
-
 /* SSP Clocking *************************************************************/
 
 #if defined(LPC111x)
@@ -474,7 +454,7 @@ static uint32_t ssp_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
   priv->frequency = frequency;
   priv->actual    = actual;
 
-  sspdbg("Frequency %d->%d\n", frequency, actual);
+  spiinfo("Frequency %d->%d\n", frequency, actual);
   return actual;
 }
 
@@ -525,7 +505,7 @@ static void ssp_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
           break;
 
         default:
-          sspdbg("Bad mode: %d\n", mode);
+          spierr("ERROR: Bad mode: %d\n", mode);
           DEBUGASSERT(FALSE);
           return;
         }
@@ -613,7 +593,7 @@ static uint16_t ssp_send(FAR struct spi_dev_s *dev, uint16_t wd)
   /* Get the value from the RX FIFO and return it */
 
   regval = ssp_getreg(priv, LPC11_SSP_DR_OFFSET);
-  sspdbg("%04x->%04x\n", wd, regval);
+  spiinfo("%04x->%04x\n", wd, regval);
   return (uint16_t)regval;
 }
 
@@ -651,7 +631,7 @@ static void ssp_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
 
   /* Loop while thre are bytes remaining to be sent */
 
-  sspdbg("nwords: %d\n", nwords);
+  spiinfo("nwords: %d\n", nwords);
   u.pv = buffer;
   while (nwords > 0)
     {
@@ -679,7 +659,7 @@ static void ssp_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
 
   /* Then discard all card responses until the RX & TX FIFOs are emptied. */
 
-  sspdbg("discarding\n");
+  spiinfo("discarding\n");
   do
     {
       /* Is there anything in the RX fifo? */
@@ -744,7 +724,7 @@ static void ssp_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
    * occurred).
    */
 
-  sspdbg("nwords: %d\n", nwords);
+  spiinfo("nwords: %d\n", nwords);
   u.pv = buffer;
   while (nwords || rxpending)
     {
@@ -754,7 +734,7 @@ static void ssp_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
        * and (3) there are more bytes to be sent.
        */
 
-      spivdbg("TX: rxpending: %d nwords: %d\n", rxpending, nwords);
+      spiinfo("TX: rxpending: %d nwords: %d\n", rxpending, nwords);
       while ((ssp_getreg(priv, LPC11_SSP_SR_OFFSET) & SSP_SR_TNF) &&
              (rxpending < LPC11_SSP_FIFOSZ) && nwords)
         {
@@ -767,7 +747,7 @@ static void ssp_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
        * empty.
        */
 
-      spivdbg("RX: rxpending: %d\n", rxpending);
+      spiinfo("RX: rxpending: %d\n", rxpending);
       while (ssp_getreg(priv, LPC11_SSP_SR_OFFSET) & SSP_SR_RNE)
         {
           data = (uint8_t)ssp_getreg(priv, LPC11_SSP_DR_OFFSET);

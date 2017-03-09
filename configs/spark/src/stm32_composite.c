@@ -54,8 +54,8 @@
 #  include <sys/mount.h>
 #endif
 
-#ifdef CONFIG_SYSTEM_USBMONITOR
-#  include <apps/usbmonitor.h>
+#ifdef CONFIG_USBMONITOR
+#  include <nuttx/usb/usbmonitor.h>
 #endif
 
 #ifdef CONFIG_USBDEV
@@ -112,7 +112,7 @@
 
 /* Check if we should enable the USB monitor before starting NSH */
 
-#if !defined(CONFIG_USBDEV_TRACE) || !defined(CONFIG_SYSTEM_USBMONITOR)
+#if !defined(CONFIG_USBDEV_TRACE) || !defined(CONFIG_USBMONITOR)
 #  undef HAVE_USBMONITOR
 #endif
 
@@ -140,30 +140,30 @@ static int stm32_composite_initialize(void)
 
   /* Get the SPI port */
 
-  fvdbg("Initializing SPI port %d\n", CONFIG_SPARK_FLASH_SPI);
+  finfo("Initializing SPI port %d\n", CONFIG_SPARK_FLASH_SPI);
 
   spi = stm32_spibus_initialize(CONFIG_SPARK_FLASH_SPI);
   if (!spi)
     {
-      fdbg("ERROR: Failed to initialize SPI port %d\n",
+      ferr("ERROR: Failed to initialize SPI port %d\n",
            CONFIG_SPARK_FLASH_SPI);
       return -ENODEV;
     }
 
-  fvdbg("Successfully initialized SPI port %d\n", CONFIG_SPARK_FLASH_SPI);
+  finfo("Successfully initialized SPI port %d\n", CONFIG_SPARK_FLASH_SPI);
 
   /* Now bind the SPI interface to the SST25 SPI FLASH driver */
 
-  fvdbg("Bind SPI to the SPI flash driver\n");
+  finfo("Bind SPI to the SPI flash driver\n");
   mtd = sst25_initialize(spi);
   if (!mtd)
     {
-      fdbg("ERROR: Failed to bind SPI port %d to the SPI FLASH driver\n",
+      ferr("ERROR: Failed to bind SPI port %d to the SPI FLASH driver\n",
            CONFIG_SPARK_FLASH_SPI);
     }
   else
     {
-      fvdbg("Successfully bound SPI port %d to the SPI FLASH driver\n",
+      finfo("Successfully bound SPI port %d to the SPI FLASH driver\n",
             CONFIG_SPARK_FLASH_SPI);
     }
 
@@ -174,7 +174,7 @@ static int stm32_composite_initialize(void)
   ret = ftl_initialize(CONFIG_SPARK_FLASH_MINOR, mtd);
   if (ret < 0)
     {
-      fdbg("ERROR: Initialize the FTL layer\n");
+      ferr("ERROR: Initialize the FTL layer\n");
       return ret;
     }
 
@@ -194,7 +194,7 @@ static int stm32_composite_initialize(void)
   ret = mount(partname, mntpoint, "vfat", 0, NULL);
   if (ret < 0)
     {
-      fdbg("ERROR: Failed to mount the FAT volume: %d\n", errno);
+      ferr("ERROR: Failed to mount the FAT volume: %d\n", errno);
       return ret;
     }
 
@@ -228,7 +228,7 @@ static int stm32_composite_initialize(void)
           ret = ftl_initialize(partno, mtd_part);
           if (ret < 0)
             {
-              fdbg("ERROR: Initialize the FTL layer\n");
+              ferr("ERROR: Initialize the FTL layer\n");
               return ret;
             }
 
@@ -241,7 +241,7 @@ static int stm32_composite_initialize(void)
           ret = mount(partname, mntpoint, "vfat", 0, NULL);
           if (ret < 0)
             {
-              fdbg("ERROR: Failed to mount the FAT volume: %d\n", errno);
+              ferr("ERROR: Failed to mount the FAT volume: %d\n", errno);
               return ret;
             }
 
@@ -269,10 +269,10 @@ static int stm32_composite_initialize(void)
 #ifdef HAVE_USBMONITOR
   /* Start the USB Monitor */
 
-  ret = usbmonitor_start(0, NULL);
+  ret = usbmonitor_start();
   if (ret != OK)
     {
-      fdbg("ERROR: Failed to start USB monitor: %d\n", ret);
+      ferr("ERROR: Failed to start USB monitor: %d\n", ret);
     }
 #endif
 

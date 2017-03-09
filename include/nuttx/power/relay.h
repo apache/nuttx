@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef __CONFIGS_NUTTX_INCLUDE_RELAY_H
-#define __CONFIGS_NUTTX_INCLUDE_RELAY_H
+#ifndef __INCLUDE_NUTTX_POWER_RELAY_H
+#define __INCLUDE_NUTTX_POWER_RELAY_H
 
 /****************************************************************************
  * Included Files
@@ -62,4 +62,4 @@
  * Public Types
  ****************************************************************************/
 
-#endif  /* __CONFIGS_NUTTX_INCLUDE_RELAY_H */
+#endif  /* __INCLUDE_NUTTX_POWER_RELAY_H */

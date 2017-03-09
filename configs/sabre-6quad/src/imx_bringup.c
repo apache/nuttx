@@ -40,25 +40,10 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <debug.h>
+#include <sys/mount.h>
+#include <syslog.h>
 
 #include "sabre-6quad.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_BOARD_INITIALIZE
-#  define SYSLOG lldbg
-#else
-#  define SYSLOG dbg
-#endif
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -74,5 +59,18 @@
 
 int imx_bringup(void)
 {
+  int ret;
+
+#ifdef CONFIG_FS_PROCFS
+  /* Mount the procfs file system */
+
+  ret = mount(NULL, "/proc", "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
+    }
+#endif
+
+  UNUSED(ret);
   return OK;
 }

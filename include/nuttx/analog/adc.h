@@ -1,12 +1,12 @@
 /************************************************************************************
  * include/nuttx/analog/adc.h
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2011 Li Zhuoyi. All rights reserved.
  *   Author: Li Zhuoyi <lzyy.cn@gmail.com>
  *           Gregory Nutt <gnutt@nuttx.org>
  *
- * Derived from include/nuttx/can.h
+ * Derived from include/nuttx/drivers/can.h
  *
  *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -72,6 +72,12 @@
 #  define CONFIG_ADC_FIFOSIZE 255
 #endif
 
+#define ADC_RESET(dev)         ((dev)->ad_ops->ao_reset((dev)))
+#define ADC_SETUP(dev)         ((dev)->ad_ops->ao_setup((dev)))
+#define ADC_SHUTDOWN(dev)      ((dev)->ad_ops->ao_shutdown((dev)))
+#define ADC_RXINT(dev)         ((dev)->ad_ops->ao_rxint((dev)))
+#define ADC_IOCTL(dev,cmd,arg) ((dev)->ad_ops->ao_ioctl((dev),(cmd),(arg)))
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/
@@ -97,11 +103,11 @@ struct adc_callback_s
 
 /* This describes on ADC message */
 
-struct adc_msg_s
+begin_packed_struct struct adc_msg_s
 {
   uint8_t      am_channel;               /* The 8-bit ADC Channel */
   int32_t      am_data;                  /* ADC convert result (4 bytes) */
-} packed_struct;
+} end_packed_struct;
 
 /* This describes a FIFO of ADC messages */
 

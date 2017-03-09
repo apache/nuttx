@@ -1,7 +1,7 @@
 ############################################################################
 # configs/teensy-3.x/src/Makefile
 #
-#   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2015, 2016 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -36,16 +36,23 @@
 -include $(TOPDIR)/Make.defs
 
 ASRCS =
-CSRCS = k20_boot.c k20_spi.c
+CSRCS = k20_boot.c k20_spi.c k20_i2c.c
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += k20_autoleds.c
 else
 CSRCS += k20_userleds.c
 endif
+ifeq ($(CONFIG_KINETIS_USBOTG),y)
+CSRCS += k20_usbdev.c
+endif
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += k20_appinit.c
+endif
+
+ifeq ($(CONFIG_PWM),y)
+CSRCS += k20_pwm.c
 endif
 
 include $(TOPDIR)/configs/Board.mk

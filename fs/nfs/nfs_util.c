@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/nfs/nfs_util.c
  *
- *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,7 @@
 #include <queue.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <time.h>
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
@@ -103,7 +104,7 @@ static inline int nfs_pathsegment(FAR const char **path, FAR char *buffer,
         }
       else if (nbytes >= NAME_MAX)
         {
-          fdbg("File name segment is too long: %d\n", *path);
+          ferr("ERROR: File name segment is too long: %d\n", *path);
           return EFBIG;
         }
       else
@@ -205,7 +206,7 @@ tryagain:
                           request, reqlen, response, resplen);
   if (error != 0)
     {
-      fdbg("ERROR: rpcclnt_request failed: %d\n", error);
+      ferr("ERROR: rpcclnt_request failed: %d\n", error);
       return error;
     }
 
@@ -237,11 +238,11 @@ tryagain:
           goto tryagain;
         }
 
-      fdbg("ERROR: NFS error %d from server\n", error);
+      ferr("ERROR: NFS error %d from server\n", error);
       return error;
     }
 
-  fvdbg("NFS_SUCCESS\n");
+  finfo("NFS_SUCCESS\n");
   return OK;
 }
 
@@ -277,7 +278,7 @@ int nfs_lookup(struct nfsmount *nmp, FAR const char *filename,
   namelen = strlen(filename);
   if (namelen > NAME_MAX)
     {
-      fdbg("Length of the string is too big: %d\n", namelen);
+      ferr("ERROR: Length of the string is too long: %d\n", namelen);
       return E2BIG;
     }
 
@@ -312,7 +313,7 @@ int nfs_lookup(struct nfsmount *nmp, FAR const char *filename,
 
   if (error)
     {
-      fdbg("ERROR: nfs_request failed: %d\n", error);
+      ferr("ERROR: nfs_request failed: %d\n", error);
       return error;
     }
 
@@ -329,7 +330,7 @@ int nfs_lookup(struct nfsmount *nmp, FAR const char *filename,
   value = fxdr_unsigned(uint32_t, value);
   if (value > NFSX_V3FHMAX)
     {
-      fdbg("ERROR: Bad file handle length: %d\n", value);
+      ferr("ERROR: Bad file handle length: %d\n", value);
       return EIO;
     }
 
@@ -427,7 +428,7 @@ int nfs_findnode(struct nfsmount *nmp, FAR const char *relpath,
         {
           /* The filename segment contains is too long. */
 
-          fdbg("nfs_pathsegment of \"%s\" failed after \"%s\": %d\n",
+          ferr("ERROR: nfs_pathsegment of \"%s\" failed after \"%s\": %d\n",
                relpath, buffer, error);
           return error;
         }
@@ -437,7 +438,7 @@ int nfs_findnode(struct nfsmount *nmp, FAR const char *relpath,
       error = nfs_lookup(nmp, buffer, fhandle, obj_attributes, dir_attributes);
       if (error != OK)
         {
-          fdbg("nfs_lookup of \"%s\" failed at \"%s\": %d\n",
+          ferr("ERROR: nfs_lookup of \"%s\" failed at \"%s\": %d\n",
                 relpath, buffer, error);
           return error;
         }
@@ -466,7 +467,7 @@ int nfs_findnode(struct nfsmount *nmp, FAR const char *relpath,
         {
           /* Ooops.. we found something else */
 
-          fdbg("ERROR: Intermediate segment \"%s\" of \'%s\" is not a directory\n",
+          ferr("ERROR: Intermediate segment \"%s\" of \'%s\" is not a directory\n",
                buffer, path);
           return ENOTDIR;
         }
@@ -521,7 +522,7 @@ int nfs_finddir(struct nfsmount *nmp, FAR const char *relpath,
         {
           /* The filename segment contains is too long. */
 
-          fdbg("nfs_pathsegment of \"%s\" failed after \"%s\": %d\n",
+          ferr("ERROR: nfs_pathsegment of \"%s\" failed after \"%s\": %d\n",
                relpath, filename, error);
           return error;
         }
@@ -545,7 +546,7 @@ int nfs_finddir(struct nfsmount *nmp, FAR const char *relpath,
       error = nfs_lookup(nmp, filename, fhandle, attributes, NULL);
       if (error != OK)
         {
-          fdbg("nfs_lookup of \"%s\" failed at \"%s\": %d\n",
+          ferr("ERROR: fs_lookup of \"%s\" failed at \"%s\": %d\n",
                 relpath, filename, error);
           return error;
         }
@@ -557,7 +558,7 @@ int nfs_finddir(struct nfsmount *nmp, FAR const char *relpath,
         {
           /* Ooops.. we found something else */
 
-          fdbg("ERROR: Intermediate segment \"%s\" of \'%s\" is not a directory\n",
+          ferr("ERROR: Intermediate segment \"%s\" of \'%s\" is not a directory\n",
                filename, path);
           return ENOTDIR;
         }
@@ -577,10 +578,17 @@ int nfs_finddir(struct nfsmount *nmp, FAR const char *relpath,
 
 void nfs_attrupdate(FAR struct nfsnode *np, FAR struct nfs_fattr *attributes)
 {
-  /* Save a few of the files attribute values in file structur (host order) */
+  struct timespec ts;
 
-  np->n_type   = fxdr_unsigned(uint32_t, attributes->fa_type);
+  /* Save a few of the files attribute values in file structure (host order) */
+
+  np->n_type   = fxdr_unsigned(uint8_t, attributes->fa_type);
+  np->n_mode   = fxdr_unsigned(uint16_t, attributes->fa_mode);
   np->n_size   = fxdr_hyper(&attributes->fa_size);
-  fxdr_nfsv3time(&attributes->fa_mtime, &np->n_mtime)
-  np->n_ctime  = fxdr_hyper(&attributes->fa_ctime);
+
+  fxdr_nfsv3time(&attributes->fa_mtime, &ts);
+  np->n_mtime  = ts.tv_sec;
+
+  fxdr_nfsv3time(&attributes->fa_ctime, &ts);
+  np->n_ctime  = ts.tv_sec;
 }

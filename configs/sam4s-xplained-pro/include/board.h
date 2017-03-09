@@ -46,7 +46,7 @@
 
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
-#  ifdef CONFIG_GPIO_IRQ
+#  ifdef CONFIG_SAM34_GPIO_IRQ
 #    include <arch/irq.h>
 #  endif
 #endif

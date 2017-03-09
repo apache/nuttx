@@ -7,8 +7,8 @@ if ARCH_CHIP_Z180
 
 choice
 	prompt "Toolchain Selection"
-	default Z180_TOOLCHAIN_SDCCW if HOST_WINDOWS
-	default Z180_TOOLCHAIN_SDCCL if !HOST_WINDOWS
+	default Z180_TOOLCHAIN_SDCCW if TOOLCHAIN_WINDOWS
+	default Z180_TOOLCHAIN_SDCCL if !TOOLCHAIN_WINDOWS
 
 config Z180_TOOLCHAIN_SDCCL
         bool "SDCC for Linux, MAC OSX, or Cygwin"
@@ -16,7 +16,7 @@ config Z180_TOOLCHAIN_SDCCL
 
 config Z180_TOOLCHAIN_SDCCW
 	bool "SDCC for Windows"
-	depends on HOST_WINDOWS
+	depends on TOOLCHAIN_WINDOWS
 
 endchoice
 

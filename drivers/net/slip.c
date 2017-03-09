@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/net/slip.c
  *
- *   Copyright (C) 2011-2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Reference: RFC 1055
@@ -55,8 +55,9 @@
 #include <debug.h>
 
 #include <nuttx/irq.h>
-#include <nuttx/net/net.h>
 #include <nuttx/clock.h>
+#include <nuttx/semaphore.h>
+#include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/slip.h>
@@ -74,14 +75,6 @@
  */
 
 /* Configuration ************************************************************/
-
-#ifndef CONFIG_NET_NOINTS
-#  warning "CONFIG_NET_NOINTS must be set"
-#endif
-
-#ifndef CONFIG_NET_MULTIBUFFER
-#  warning "CONFIG_NET_MULTIBUFFER must be set"
-#endif
 
 #ifndef CONFIG_NET_SLIP_STACKSIZE
 #  define CONFIG_NET_SLIP_STACKSIZE 2048
@@ -287,7 +280,7 @@ static int slip_transmit(FAR struct slip_driver_s *priv)
 
   /* Increment statistics */
 
-  nvdbg("Sending packet size %d\n", priv->dev.d_len);
+  ninfo("Sending packet size %d\n", priv->dev.d_len);
   NETDEV_TXPACKETS(&priv->dev);
 
   /* Send an initial END character to flush out any data that may have
@@ -433,12 +426,11 @@ static void slip_txtask(int argc, FAR char *argv[])
 {
   FAR struct slip_driver_s *priv;
   unsigned int index = *(argv[1]) - '0';
-  net_lock_t flags;
-  systime_t msec_start;
-  systime_t msec_now;
+  systime_t start_ticks;
+  systime_t now_ticks;
   unsigned int hsec;
 
-  ndbg("index: %d\n", index);
+  nerr("index: %d\n", index);
   DEBUGASSERT(index < CONFIG_NET_SLIP_NINTERFACES);
 
   /* Get our private data structure instance and wake up the waiting
@@ -450,7 +442,7 @@ static void slip_txtask(int argc, FAR char *argv[])
 
   /* Loop forever */
 
-  msec_start = clock_systimer() * MSEC_PER_TICK;
+  start_ticks = clock_systimer();
   for (;  ; )
     {
       /* Wait for the timeout to expire (or until we are signaled by by  */
@@ -479,19 +471,19 @@ static void slip_txtask(int argc, FAR char *argv[])
 
           /* Poll the networking layer for new XMIT data. */
 
-          flags = net_lock();
+          net_lock();
           priv->dev.d_buf = priv->txbuf;
 
           /* Has a half second elapsed since the last timer poll? */
 
-          msec_now = clock_systimer() * MSEC_PER_TICK;
-          hsec = (unsigned int)(msec_now - msec_start) / (MSEC_PER_SEC / 2);
-          if (hsec)
+          now_ticks = clock_systimer();
+          hsec = (unsigned int)((now_ticks - start_ticks) / TICK_PER_HSEC);
+          if (hsec > 0)
             {
               /* Yes, perform the timer poll */
 
               (void)devif_timer(&priv->dev, slip_txpoll);
-              msec_start += hsec * (MSEC_PER_SEC / 2);
+              start_ticks += hsec * TICK_PER_HSEC;
             }
           else
             {
@@ -500,7 +492,7 @@ static void slip_txtask(int argc, FAR char *argv[])
               (void)devif_poll(&priv->dev, slip_txpoll);
             }
 
-          net_unlock(flags);
+          net_unlock();
           slip_semgive(priv);
         }
     }
@@ -555,7 +547,7 @@ static inline void slip_receive(FAR struct slip_driver_s *priv)
    * packet if we run out of room.
    */
 
-  nvdbg("Receiving packet\n");
+  ninfo("Receiving packet\n");
   for (; ; )
     {
       /* Get the next character in the stream. */
@@ -572,7 +564,7 @@ static inline void slip_receive(FAR struct slip_driver_s *priv)
 
         case SLIP_END:
           {
-            nvdbg("END\n");
+            ninfo("END\n");
 
             /* A minor optimization: if there is no data in the packet,
              * ignore it. This is meant to avoid bothering IP with all the
@@ -582,7 +574,7 @@ static inline void slip_receive(FAR struct slip_driver_s *priv)
 
             if (priv->rxlen > 0)
               {
-                nvdbg("Received packet size %d\n", priv->rxlen);
+                ninfo("Received packet size %d\n", priv->rxlen);
                 return;
               }
           }
@@ -595,7 +587,7 @@ static inline void slip_receive(FAR struct slip_driver_s *priv)
 
         case SLIP_ESC:
           {
-            nvdbg("ESC\n");
+            ninfo("ESC\n");
             ch = slip_getc(priv);
 
             /* if "ch" is not one of these two, then we have a protocol
@@ -606,17 +598,17 @@ static inline void slip_receive(FAR struct slip_driver_s *priv)
             switch (ch)
               {
               case SLIP_ESC_END:
-                nvdbg("ESC-END\n");
+                ninfo("ESC-END\n");
                 ch = SLIP_END;
                 break;
 
                case SLIP_ESC_ESC:
-                nvdbg("ESC-ESC\n");
+                ninfo("ESC-ESC\n");
                 ch = SLIP_ESC;
                 break;
 
               default:
-                ndbg("ERROR: Protocol violation: %02x\n", ch);
+                nerr("ERROR: Protocol violation: %02x\n", ch);
                 break;
               }
 
@@ -658,10 +650,9 @@ static int slip_rxtask(int argc, FAR char *argv[])
 {
   FAR struct slip_driver_s *priv;
   unsigned int index = *(argv[1]) - '0';
-  net_lock_t flags;
   int ch;
 
-  ndbg("index: %d\n", index);
+  nerr("index: %d\n", index);
   DEBUGASSERT(index < CONFIG_NET_SLIP_NINTERFACES);
 
   /* Get our private data structure instance and wake up the waiting
@@ -677,7 +668,7 @@ static int slip_rxtask(int argc, FAR char *argv[])
     {
       /* Wait for the next character to be available on the input stream. */
 
-      nvdbg("Waiting...\n");
+      ninfo("Waiting...\n");
       ch = slip_getc(priv);
 
       /* Ignore any input that we receive before the interface is up. */
@@ -731,7 +722,7 @@ static int slip_rxtask(int argc, FAR char *argv[])
           priv->dev.d_buf = priv->rxbuf;
           priv->dev.d_len = priv->rxlen;
 
-          flags = net_lock();
+          net_lock();
           ipv4_input(&priv->dev);
 
           /* If the above function invocation resulted in data that should
@@ -744,7 +735,8 @@ static int slip_rxtask(int argc, FAR char *argv[])
               slip_transmit(priv);
               kill(priv->txpid, SIGALRM);
             }
-          net_unlock(flags);
+
+          net_unlock();
           slip_semgive(priv);
         }
       else
@@ -779,7 +771,7 @@ static int slip_ifup(FAR struct net_driver_s *dev)
 {
   FAR struct slip_driver_s *priv = (FAR struct slip_driver_s *)dev->d_private;
 
-  ndbg("Bringing up: %d.%d.%d.%d\n",
+  nerr("Bringing up: %d.%d.%d.%d\n",
        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
@@ -958,13 +950,14 @@ int slip_initialize(int intf, FAR const char *devname)
   priv->fd            = open(devname, O_RDWR, 0666);
   if (priv->fd < 0)
     {
-      ndbg("ERROR: Failed to open %s: %d\n", devname, errno);
+      nerr("ERROR: Failed to open %s: %d\n", devname, errno);
       return -errno;
     }
 
   /* Initialize the wait semaphore */
 
   sem_init(&priv->waitsem, 0, 0);
+  sem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
 
   /* Put the interface in the down state.  This usually amounts to resetting
    * the device and/or calling slip_ifdown().
@@ -983,7 +976,7 @@ int slip_initialize(int intf, FAR const char *devname)
                             (FAR char * const *)argv);
   if (priv->rxpid < 0)
     {
-      ndbg("ERROR: Failed to start receiver task\n");
+      nerr("ERROR: Failed to start receiver task\n");
       return -errno;
     }
 
@@ -998,7 +991,7 @@ int slip_initialize(int intf, FAR const char *devname)
                             (FAR char * const *)argv);
   if (priv->txpid < 0)
     {
-      ndbg("ERROR: Failed to start receiver task\n");
+      nerr("ERROR: Failed to start receiver task\n");
       return -errno;
     }
 

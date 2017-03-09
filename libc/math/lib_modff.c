@@ -6,7 +6,7 @@
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Ported by: Darcy Gong
  *
- * It derives from the Rhombs OS math library by Nick Johnson which has
+ * It derives from the Rhombus OS math library by Nick Johnson which has
  * a compatibile, MIT-style license:
  *
  * Copyright (C) 2009-2011 Nick Johnson <nickbjohnson4224 at gmail.com>
@@ -37,14 +37,14 @@
 
 float modff(float x, float *iptr)
 {
-  if (fabsf(x) >= 8388608.0)
+  if (fabsf(x) >= 8388608.0F)
     {
       *iptr = x;
-      return 0.0;
+      return 0.0F;
     }
-  else if (fabs(x) < 1.0)
+  else if (fabsf(x) < 1.0F)
     {
-      *iptr = 0.0;
+      *iptr = 0.0F;
       return x;
     }
   else

@@ -88,7 +88,7 @@ void nxmu_releasebkgd(FAR struct nxfe_state_s *fe)
 {
   FAR struct nxbe_state_s *be = &fe->be;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!fe)
     {
       return;

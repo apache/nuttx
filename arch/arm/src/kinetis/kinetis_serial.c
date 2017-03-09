@@ -1,8 +1,9 @@
 /****************************************************************************
- * arch/mips/src/kinetis/kinetis_serial.c
+ * arch/arm/src/kinetis/kinetis_serial.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2011-2012, 2017 Gregory Nutt. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -59,7 +60,7 @@
 
 #include "kinetis_config.h"
 #include "chip.h"
-#include "kinetis_uart.h"
+#include "chip/kinetis_uart.h"
 #include "kinetis.h"
 
 /****************************************************************************
@@ -76,7 +77,7 @@
  * provide some minimal implementation of up_putc.
  */
 
-#ifdef USE_SERIALDRIVER
+#if defined(HAVE_UART_DEVICE) && defined(USE_SERIALDRIVER)
 
 /* Which UART with be tty0/console and which tty1-4?  The console will always
  * be ttyS0.  If there is no console then will use the lowest numbered UART.
@@ -232,7 +233,7 @@ struct up_dev_s
   uintptr_t uartbase;  /* Base address of UART registers */
   uint32_t  baud;      /* Configured baud */
   uint32_t  clock;     /* Clocking frequency of the UART module */
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   uint8_t   irqe;      /* Error IRQ associated with this UART (for enable) */
 #endif
   uint8_t   irqs;      /* Status IRQ associated with this UART (for enable) */
@@ -240,6 +241,7 @@ struct up_dev_s
   uint8_t   ie;        /* Interrupts enabled */
   uint8_t   parity;    /* 0=none, 1=odd, 2=even */
   uint8_t   bits;      /* Number of bits (8 or 9) */
+  uint8_t   stop2;     /* Use 2 stop bits */
 };
 
 /****************************************************************************
@@ -250,10 +252,10 @@ static int  up_setup(struct uart_dev_s *dev);
 static void up_shutdown(struct uart_dev_s *dev);
 static int  up_attach(struct uart_dev_s *dev);
 static void up_detach(struct uart_dev_s *dev);
-#ifdef CONFIG_DEBUG
-static int  up_interrupte(int irq, void *context);
+#ifdef CONFIG_DEBUG_FEATURES
+static int  up_interrupt(int irq, void *context, FAR void *arg);
 #endif
-static int  up_interrupts(int irq, void *context);
+static int  up_interrupts(int irq, void *context, FAR void *arg);
 static int  up_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int  up_receive(struct uart_dev_s *dev, uint32_t *status);
 static void up_rxint(struct uart_dev_s *dev, bool enable);
@@ -327,13 +329,14 @@ static struct up_dev_s g_uart0priv =
   .uartbase       = KINETIS_UART0_BASE,
   .clock          = BOARD_CORECLK_FREQ,
   .baud           = CONFIG_UART0_BAUD,
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   .irqe           = KINETIS_IRQ_UART0E,
 #endif
   .irqs           = KINETIS_IRQ_UART0S,
   .irqprio        = CONFIG_KINETIS_UART0PRIO,
   .parity         = CONFIG_UART0_PARITY,
   .bits           = CONFIG_UART0_BITS,
+  .stop2          = CONFIG_UART0_2STOP,
 };
 
 static uart_dev_t g_uart0port =
@@ -361,13 +364,14 @@ static struct up_dev_s g_uart1priv =
   .uartbase       = KINETIS_UART1_BASE,
   .clock          = BOARD_CORECLK_FREQ,
   .baud           = CONFIG_UART1_BAUD,
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   .irqe           = KINETIS_IRQ_UART1E,
 #endif
   .irqs           = KINETIS_IRQ_UART1S,
   .irqprio        = CONFIG_KINETIS_UART1PRIO,
   .parity         = CONFIG_UART1_PARITY,
   .bits           = CONFIG_UART1_BITS,
+  .stop2          = CONFIG_UART1_2STOP,
 };
 
 static uart_dev_t g_uart1port =
@@ -395,13 +399,14 @@ static struct up_dev_s g_uart2priv =
   .uartbase       = KINETIS_UART2_BASE,
   .clock          = BOARD_BUS_FREQ,
   .baud           = CONFIG_UART2_BAUD,
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   .irqe           = KINETIS_IRQ_UART2E,
 #endif
   .irqs           = KINETIS_IRQ_UART2S,
   .irqprio        = CONFIG_KINETIS_UART2PRIO,
   .parity         = CONFIG_UART2_PARITY,
   .bits           = CONFIG_UART2_BITS,
+  .stop2          = CONFIG_UART2_2STOP,
 };
 
 static uart_dev_t g_uart2port =
@@ -429,13 +434,14 @@ static struct up_dev_s g_uart3priv =
   .uartbase       = KINETIS_UART3_BASE,
   .clock          = BOARD_BUS_FREQ,
   .baud           = CONFIG_UART3_BAUD,
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   .irqe           = KINETIS_IRQ_UART3E,
 #endif
   .irqs           = KINETIS_IRQ_UART3S,
   .irqprio        = CONFIG_KINETIS_UART3PRIO,
   .parity         = CONFIG_UART3_PARITY,
   .bits           = CONFIG_UART3_BITS,
+  .stop2          = CONFIG_UART3_2STOP,
 };
 
 static uart_dev_t g_uart3port =
@@ -463,13 +469,14 @@ static struct up_dev_s g_uart4priv =
   .uartbase       = KINETIS_UART4_BASE,
   .clock          = BOARD_BUS_FREQ,
   .baud           = CONFIG_UART4_BAUD,
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   .irqe           = KINETIS_IRQ_UART4E,
 #endif
   .irqs           = KINETIS_IRQ_UART4S,
   .irqprio        = CONFIG_KINETIS_UART4PRIO,
   .parity         = CONFIG_UART4_PARITY,
   .bits           = CONFIG_UART4_BITS,
+  .stop2          = CONFIG_UART4_2STOP,
 };
 
 static uart_dev_t g_uart4port =
@@ -497,13 +504,14 @@ static struct up_dev_s g_uart5priv =
   .uartbase       = KINETIS_UART5_BASE,
   .clock          = BOARD_BUS_FREQ,
   .baud           = CONFIG_UART5_BAUD,
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   .irqe           = KINETIS_IRQ_UART5E,
 #endif
   .irqs           = KINETIS_IRQ_UART5S,
   .irqprio        = CONFIG_KINETIS_UART5PRIO,
   .parity         = CONFIG_UART5_PARITY,
   .bits           = CONFIG_UART5_BITS,
+  .stop2          = CONFIG_UART5_2STOP,
 };
 
 static uart_dev_t g_uart5port =
@@ -615,7 +623,7 @@ static int up_setup(struct uart_dev_s *dev)
   /* Configure the UART as an RS-232 UART */
 
   kinetis_uartconfigure(priv->uartbase, priv->baud, priv->clock,
-                        priv->parity, priv->bits);
+                        priv->parity, priv->bits, priv->stop2);
 #endif
 
   /* Make sure that all interrupts are disabled */
@@ -626,7 +634,7 @@ static int up_setup(struct uart_dev_s *dev)
   /* Set up the interrupt priority */
 
   up_prioritize_irq(priv->irqs, priv->irqprio);
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   up_prioritize_irq(priv->irqe, priv->irqprio);
 #endif
 #endif
@@ -680,17 +688,17 @@ static int up_attach(struct uart_dev_s *dev)
    * disabled in the C2 register.
    */
 
-  ret = irq_attach(priv->irqs, up_interrupts);
-#ifdef CONFIG_DEBUG
+  ret = irq_attach(priv->irqs, up_interrupts, dev);
+#ifdef CONFIG_DEBUG_FEATURES
   if (ret == OK)
     {
-      ret = irq_attach(priv->irqe, up_interrupte);
+      ret = irq_attach(priv->irqe, up_interrupt, dev);
     }
 #endif
 
   if (ret == OK)
     {
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
       up_enable_irq(priv->irqe);
 #endif
       up_enable_irq(priv->irqs);
@@ -716,7 +724,7 @@ static void up_detach(struct uart_dev_s *dev)
   /* Disable interrupts */
 
   up_restoreuartint(priv, 0);
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   up_disable_irq(priv->irqe);
 #endif
   up_disable_irq(priv->irqs);
@@ -724,13 +732,13 @@ static void up_detach(struct uart_dev_s *dev)
   /* Detach from the interrupt(s) */
 
   irq_detach(priv->irqs);
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   irq_detach(priv->irqe);
 #endif
 }
 
 /****************************************************************************
- * Name: up_interrupte
+ * Name: up_interrupt
  *
  * Description:
  *   This is the UART error interrupt handler.  It will be invoked when an
@@ -738,60 +746,15 @@ static void up_detach(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG
-static int up_interrupte(int irq, void *context)
+#ifdef CONFIG_DEBUG_FEATURES
+static int up_interrupt(int irq, void *context, FAR void *arg)
 {
-  struct uart_dev_s *dev = NULL;
+  struct uart_dev_s *dev = (struct uart_dev_s *)arg;
   struct up_dev_s   *priv;
   uint8_t            regval;
 
-#ifdef CONFIG_KINETIS_UART0
-  if (g_uart0priv.irqe == irq)
-    {
-      dev = &g_uart0port;
-    }
-  else
-#endif
-#ifdef CONFIG_KINETIS_UART1
-  if (g_uart1priv.irqe == irq)
-    {
-      dev = &g_uart1port;
-    }
-  else
-#endif
-#ifdef CONFIG_KINETIS_UART2
-  if (g_uart2priv.irqe == irq)
-    {
-      dev = &g_uart2port;
-    }
-  else
-#endif
-#ifdef CONFIG_KINETIS_UART3
-  if (g_uart3priv.irqe == irq)
-    {
-      dev = &g_uart3port;
-    }
-  else
-#endif
-#ifdef CONFIG_KINETIS_UART4
-  if (g_uart4priv.irqe == irq)
-    {
-      dev = &g_uart4port;
-    }
-  else
-#endif
-#ifdef CONFIG_KINETIS_UART5
-  if (g_uart5priv.irqe == irq)
-    {
-      dev = &g_uart5port;
-    }
-  else
-#endif
-    {
-      PANIC();
-    }
+  DEBUGASSERT(dev != NULL && dev->priv != NULL);
   priv = (struct up_dev_s *)dev->priv;
-  DEBUGASSERT(priv);
 
   /* Handle error interrupts.  This interrupt may be caused by:
    *
@@ -804,11 +767,15 @@ static int up_interrupte(int irq, void *context)
    */
 
   regval = up_serialin(priv, KINETIS_UART_S1_OFFSET);
-  lldbg("S1: %02x\n", regval);
+  _info("S1: %02x\n", regval);
+  UNUSED(regval);
+
   regval = up_serialin(priv, KINETIS_UART_D_OFFSET);
+  UNUSED(regval);
+
   return OK;
 }
-#endif /* CONFIG_DEBUG */
+#endif /* CONFIG_DEBUG_FEATURES */
 
 /****************************************************************************
  * Name: up_interrupts
@@ -822,9 +789,9 @@ static int up_interrupte(int irq, void *context)
  *
  ****************************************************************************/
 
-static int up_interrupts(int irq, void *context)
+static int up_interrupts(int irq, void *context, FAR void *arg)
 {
-  struct uart_dev_s *dev = NULL;
+  struct uart_dev_s *dev = (struct uart_dev_s *)arg;
   struct up_dev_s   *priv;
   int                passes;
 #ifdef CONFIG_KINETIS_UARTFIFOS
@@ -834,53 +801,8 @@ static int up_interrupts(int irq, void *context)
 #endif
   bool               handled;
 
-#ifdef CONFIG_KINETIS_UART0
-  if (g_uart0priv.irqs == irq)
-    {
-      dev = &g_uart0port;
-    }
-  else
-#endif
-#ifdef CONFIG_KINETIS_UART1
-  if (g_uart1priv.irqs == irq)
-    {
-      dev = &g_uart1port;
-    }
-  else
-#endif
-#ifdef CONFIG_KINETIS_UART2
-  if (g_uart2priv.irqs == irq)
-    {
-      dev = &g_uart2port;
-    }
-  else
-#endif
-#ifdef CONFIG_KINETIS_UART3
-  if (g_uart3priv.irqs == irq)
-    {
-      dev = &g_uart3port;
-    }
-  else
-#endif
-#ifdef CONFIG_KINETIS_UART4
-  if (g_uart4priv.irqs == irq)
-    {
-      dev = &g_uart4port;
-    }
-  else
-#endif
-#ifdef CONFIG_KINETIS_UART5
-  if (g_uart5priv.irq == irqs)
-    {
-      dev = &g_uart5port;
-    }
-  else
-#endif
-    {
-      PANIC();
-    }
+  DEBUGASSERT(dev != NULL && dev->priv != NULL);
   priv = (struct up_dev_s *)dev->priv;
-  DEBUGASSERT(priv);
 
   /* Loop until there are no characters to be transferred or,
    * until we have been looping for a long time.
@@ -1064,11 +986,11 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
     }
   else
     {
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 #  warning "Revisit:  How are errors enabled?"
-      priv->ie |= UART_C2_RIE;
+      priv->ie &= ~UART_C2_RIE;
 #else
-      priv->ie |= UART_C2_RIE;
+      priv->ie &= ~UART_C2_RIE;
 #endif
       up_setuartint(priv);
     }
@@ -1215,7 +1137,7 @@ static bool up_txempty(struct uart_dev_s *dev)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_earlyserialinit
+ * Name: kinetis_uart_earlyserialinit
  *
  * Description:
  *   Performs the low level UART initialization early in debug so that the
@@ -1226,7 +1148,8 @@ static bool up_txempty(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-void up_earlyserialinit(void)
+#if defined(USE_EARLYSERIALINIT)
+void kinetis_uart_earlyserialinit(void)
 {
   /* Disable interrupts from all UARTS.  The console is enabled in
    * pic32mx_consoleinit()
@@ -1251,47 +1174,63 @@ void up_earlyserialinit(void)
 
   /* Configuration whichever one is the console */
 
-#ifdef HAVE_SERIAL_CONSOLE
+#ifdef HAVE_UART_CONSOLE
   CONSOLE_DEV.isconsole = true;
   up_setup(&CONSOLE_DEV);
 #endif
 }
+#endif
 
 /****************************************************************************
- * Name: up_serialinit
+ * Name: kinetis_uart_serialinit
  *
  * Description:
  *   Register serial console and serial ports.  This assumes
  *   that up_earlyserialinit was called previously.
  *
+ * Input Parameters:
+ *   first: - First TTY number to assign
+ *
+ * Returns Value:
+ *   The next TTY number available for assignment
+ *
  ****************************************************************************/
 
-void up_serialinit(void)
+unsigned int kinetis_uart_serialinit(unsigned int first)
 {
+  char devname[] = "/dev/ttySx";
+
   /* Register the console */
 
-#ifdef HAVE_SERIAL_CONSOLE
+#ifdef HAVE_UART_CONSOLE
   (void)uart_register("/dev/console", &CONSOLE_DEV);
 #endif
 
   /* Register all UARTs */
 
-  (void)uart_register("/dev/ttyS0", &TTYS0_DEV);
+  devname[(sizeof(devname)/sizeof(devname[0]))-2] = '0' + first++;
+  (void)uart_register(devname, &TTYS0_DEV);
 #ifdef TTYS1_DEV
-  (void)uart_register("/dev/ttyS1", &TTYS1_DEV);
+  devname[(sizeof(devname)/sizeof(devname[0]))-2] = '0' + first++;
+  (void)uart_register(devname, &TTYS1_DEV);
 #endif
 #ifdef TTYS2_DEV
-  (void)uart_register("/dev/ttyS2", &TTYS2_DEV);
+  devname[(sizeof(devname)/sizeof(devname[0]))-2] = '0' + first++;
+  (void)uart_register(devname, &TTYS2_DEV);
 #endif
 #ifdef TTYS3_DEV
-  (void)uart_register("/dev/ttyS3", &TTYS3_DEV);
+  devname[(sizeof(devname)/sizeof(devname[0]))-2] = '0' + first++;
+  (void)uart_register(devname, &TTYS3_DEV);
 #endif
 #ifdef TTYS4_DEV
-  (void)uart_register("/dev/ttyS4", &TTYS4_DEV);
+  devname[(sizeof(devname)/sizeof(devname[0]))-2] = '0' + first++;
+  (void)uart_register(devname, &TTYS4_DEV);
 #endif
 #ifdef TTYS5_DEV
-  (void)uart_register("/dev/ttyS5", &TTYS5_DEV);
+  devname[(sizeof(devname)/sizeof(devname[0]))-2] = '0' + first++;
+  (void)uart_register(devname, &TTYS5_DEV);
 #endif
+  return first;
 }
 
 /****************************************************************************
@@ -1302,9 +1241,10 @@ void up_serialinit(void)
  *
  ****************************************************************************/
 
+#ifdef HAVE_UART_PUTC
 int up_putc(int ch)
 {
-#ifdef HAVE_SERIAL_CONSOLE
+#ifdef HAVE_UART_CONSOLE
   struct up_dev_s *priv = (struct up_dev_s *)CONSOLE_DEV.priv;
   uint8_t ie;
 
@@ -1324,6 +1264,7 @@ int up_putc(int ch)
 #endif
   return ch;
 }
+#endif
 
 #else /* USE_SERIALDRIVER */
 
@@ -1335,9 +1276,10 @@ int up_putc(int ch)
  *
  ****************************************************************************/
 
+#ifdef HAVE_UART_PUTC
 int up_putc(int ch)
 {
-#ifdef HAVE_SERIAL_CONSOLE
+#ifdef HAVE_UART_CONSOLE
   /* Check for LF */
 
   if (ch == '\n')
@@ -1351,6 +1293,7 @@ int up_putc(int ch)
 #endif
   return ch;
 }
+#endif
 
-#endif /* USE_SERIALDRIVER */
+#endif /* HAVE_UART_DEVICE && USE_SERIALDRIVER) */
 

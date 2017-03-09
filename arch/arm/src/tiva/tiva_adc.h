@@ -52,7 +52,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_TIVA_ADC_REGDEBUG
 #endif
 

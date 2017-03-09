@@ -80,6 +80,18 @@
 
 int board_app_initialize(uintptr_t arg)
 {
+#ifdef CONFIG_PWM
+  int ret;
+
+  /* Initialize PWM and register the PWM device. */
+
+  ret = stm32_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_pwm_setup() failed: %d\n", ret);
+    }
+#endif
+
 #if defined(CONFIG_WL_NRF24L01)
   syslog(LOG_INFO, "Register the nRF24L01 module");
   stm32_wlinitialize();

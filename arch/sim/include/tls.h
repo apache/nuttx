@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sin/include/tls.h
+ * arch/sim/include/tls.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

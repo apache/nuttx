@@ -1,8 +1,10 @@
 README
 ^^^^^^
 
-  o Installation
+  o Environments
     - Installing Cygwin
+    - Ubuntu Bash under Windows 10
+  o Installation
     - Download and Unpack
     - Semi-Optional apps/ Package
     - Installation Directories with Spaces in the Path
@@ -15,6 +17,7 @@ README
     - NuttX Configuration Tool
     - Finding Selections in the Configuration Menus
     - Reveal Hidden Configuration Options
+    - Make Sure that You on on the Right Platform
     - Comparing Two Configurations
     - Incompatibilities with Older Configurations
     - NuttX Configuration Tool under DOS
@@ -33,21 +36,49 @@ README
     - Window Native Toolchain Issues
   o Documentation
 
-INSTALLATION
+ENVIRONMENTS
 ^^^^^^^^^^^^
 
-  NuttX may be installed and built on a Linux system or on a Windows
-  system if Cygwin is installed.  The MSYS environment is an option
-  to Cygwin on the Windows platform.  However, I have little experience
-  that that configuration and it will not be discussed in this README
-  file.
+  NuttX requires a POSIX development environment such as you would find under
+  Linux or OSX.  NuttX may be also be installed and built on Windows system
+  if you also provde such a POSIX development environment.  Options for a
+  POSIX development environment under Windows include:
 
-  Instructions for installation of Cygwin on Windows system are provided
-  in the following paragraph.
+    - An installation of Linux on a virtual machine (VM) in Windows.  I have
+      not been happy using a VM myself.  I have had stability problems with
+      open source VMs and commercial VMs cost more than I want to spend.
+      Sharing files with Linux running in a VM is awkward;  sharing devices
+      connected to the Windows box with Linux in a VM is, at the very least,
+      confusing;  Using Windows tools (such as Segger J-Link) with files
+      built under the Linux VM is not a possibility.
 
-  NuttX can also be installed and built on a native Windows system, but
-  with some potential tool-related issues (see the discussion "Native
-  Windows Build" below).
+    - The Cygwin environment.  Instructions for installation of Cygwin on a
+      Windows system are provided in the following paragraph, "Installing
+      Cygwin".  Cygwin is a mature, well-tested, and very convenient
+      environment.  It is especially expecially convenient if you  need to
+      integrate with Windows tools and files.  Downsides are that the
+      installation time is very long and the compile times are slow.
+
+    - Ubuntu/Bash shell under Windows 10.  This is a new option under
+      Windows 10.  See the section "Ubuntu Bash under Windows 10" below.
+      This is an improvement over Cygwin if your concern is compile time;
+      its build performance is comparable to native Linux, certainly better
+      than the Cygwin build time.  It also installs in a tiny fraction of
+      the time as Cygwin, perhaps 20 minutes for the basic Ubuntu install
+      (vs. more than a day for the complete Cygwin install).
+
+    - The MSYS environment.  I have no experience using the MSYS environment
+      and that configuration will not be discussed in this README file.
+      See http://www.mingw.org/wiki/MSYS if you are interested in
+      using MSYS.  People report to me that they have used MSYS
+      successfully.  I suppose that the advantages of the MSYS environemnt
+      is that it is closer to a native Windows environment and uses only a
+      minimal of add-on POSIX-land tools.
+
+    - NuttX can also be installed and built on a native Windows system, but
+      with some potential tool-related issues (see the discussion "Native
+      Windows Build" under "Building NuttX" below).  GNUWin32 is used to
+      provide compatible native windows tools.
 
 Installing Cygwin
 -----------------
@@ -83,6 +114,9 @@ Installing Cygwin
      "Publishing".  You can try omitting KDE, Gnome, GTK, and other
      graphics packages if you don't plan to use them.
 
+     Perhaps a minimum set would be those packages listed below for the
+     "Ubuntu Bash under Windows 10" installation?
+
   After installing Cygwin, you will get lots of links for installed
   tools and shells.  I use the RXVT native shell.  It is fast and reliable
   and does not require you to run the Cygwin X server (which is neither
@@ -94,6 +128,136 @@ Installing Cygwin
   about 5GiB.  The server I selected was also very slow so it took
   over a day to do the whole install!
 
+Ubuntu Bash under Windows 10
+----------------------------
+
+  A better version of a command-line only Ubuntu under Windows 10 (beta)
+  has recently been made available from Microsoft.
+
+  Installation
+  ------------
+  Installation instructions abound on the Internet complete with screen
+  shots.  I will attempt to duplicate those instructions in full here.
+  Here are the simplified installation steps:
+
+    - Open "Settings".
+    - Click on "Update & security".
+    - Click on "For Developers".
+    - Under "Use developer features", select the "Developer mode" option to
+      setup the environment to install Bash.
+    - A message box should pop up.  Click "Yes" to turn on developer mode.
+    - After the necessary components install, you'll need to restart your
+      computer.
+
+  Once your computer reboots:
+
+    - Open "Control Panel".
+    - Click on "Programs".
+    - Click on "Turn Windows features on or off".
+    - A list of features will pop up, check the "Windows Subsystem for Linux
+      (beta)" option.
+    - Click OK.
+    - Once the components installed on your computer, click the "Restart
+      now" button to complete the task.
+
+  After your computer restarts, you will notice that Bash will not appear in
+  the "Recently added" list of apps, this is because Bash isn't actually
+  installed yet. Now that you have setup the necessary components, use the
+  following steps to complete the installation of Bash:
+
+    - Open "Start", do a search for bash.exe, and press "Enter".
+    - On the command prompt, type y and press Enter to download and install
+      Bash from the Windows Store.  This will take awhile.
+    - Then you'll need to create a default UNIX user account. This account
+      doesn't have to be the same as your Windows account. Enter the
+      username in the required field and press Enter (you can't use the
+      username "admin").
+    - Close the "bash.exe" command prompt.
+
+  Now that you completed the installation and setup, you can open the Bash
+  tool from the Start menu like you would with any other app.
+
+  Accessing Windows Files from Ubuntu
+  -----------------------------------
+  File sysems will be mounted under "/mnt" so for example "C:\Program Files"
+  appears at "/mnt/c/Program Files".  This is as opposed to Cgwin where
+  the same directory would appear at "/cygdrive/c/Program Files".
+
+  With these differences (perhaps a few other Windows quirks) the Ubuntu
+  install works just like Ubuntu running natively on your PC.
+
+  Accessing Ubuntu Files From Windows
+  -----------------------------------
+  In Ubuntu Userspace for Windows, the Ubuntu file system root directory is
+  at:
+
+    %localappdata%\lxss\rootfs
+
+  Or
+
+    C:\Users\Username\AppData\Local\lxss\rootfs
+
+  Install Linux Software.
+  -----------------------
+  Use "sudo apt-get install <package name>".  As examples, this is how
+  you would get GIT:
+
+    $ sudo apt-get install git
+
+  This will get you a compiler for your host PC:
+
+    $ sudo apt-get install gcc
+
+  This will get you an ARM compiler for your target:
+
+    $ sudo apt-get install gcc-arm-none-eabi
+
+  NOTE: That is just an example.  I am not sure if apt-get will give you a
+  current or usable compiler.  You should carefully select your toolchain
+  for the needs of your project.]
+
+  You will also need to the get the kconfig-frontends configuration as
+  described below under "NuttX Configuration tool".  In order build the
+  kconfig-frontends configuration tool you will also need:  make, gperf,
+  flex, bison, and libncurses-dev.
+
+  That is enough to do a basic NuttX build.
+
+  Integrating with Windows Tools
+  ------------------------------
+  If you want to integrate with Windows native tools, then you would need
+  deal with the same kind of craziness as with integrating Cygwin with
+  native toolchains, see the section "Cygwin Build Problems" below.
+
+  However, there is currently no build support for using Windows native
+  tools with Ubuntu under Windows.  This tool combination is made to work
+  with Cygwin through the use of the 'cygpath -w' tool that converts paths
+  from say '/cydrive/c/Program Files' to 'C:\Program Files'.  There is,
+  however, no corresponding tool to convert '/mnt/c/Program Files' in the
+  Ubuntu environment.
+
+  Graphics Support
+  ----------------
+  The Ubuntu version support by Microsoft is a command-line only version.
+  There is no support for Linux graphics utilities.
+
+  This limititation is not a limitation of Ubuntu, however, only in what
+  Microsoft is willing to support.  If you install a X-Server, then you
+  can also use basic graphics utilities.  See for example:
+
+    http://www.howtogeek.com/261575/how-to-run-graphical-linux-desktop-applications-from-windows-10s-bash-shell/
+
+  Many Linux graphics programs would, however, also require a graphics
+  framework like GTK or Qt.  So this might be a trip down the rabbit hole.
+
+INSTALLATION
+^^^^^^^^^^^^
+
+  There are two ways to get NuttX:  You may download released, stable
+  tarballs from wither the Bitbucket or Sourceforge download locations.
+  Or you may get NuttX by cloning the Bitbucket GIT repositories.  Let's
+  consider the released tarballs first:
+
 Download and Unpack
 -------------------
 
@@ -103,6 +267,11 @@ Download and Unpack
   version number). You might want to rename that directory nuttx to
   match the various instructions in the documentation and some scripts
   in the source tree.
+
+  Download locations:
+
+    https://bitbucket.org/nuttx/nuttx/downloads
+    https://sourceforge.net/projects/nuttx/files/nuttx/
 
 Semi-Optional apps/ Package
 ---------------------------
@@ -321,13 +490,13 @@ Notes about Header Files
 
     If you have a custom, architecture specific math.h header file, then
     that header file should be placed at arch/<cpu>/include/math.h.  There
-    is a stub math.h header file located at include/nuttx/math.h.  This stub
+    is a stub math.h header file located at include/nuttx/lib/math.h.  This stub
     header file can be used to "redirect" the inclusion to an architecture-
     specific math.h header file.  If you add an architecture specific math.h
     header file then you should also define CONFIG_ARCH_MATH_H=y in your
     NuttX Configuration file.  If CONFIG_ARCH_MATH_H is selected, then the
     top-level Makefile will copy the stub math.h header file from
-    include/nuttx/math.h to include/math.h where it will become the system
+    include/nuttx/lib/math.h to include/math.h where it will become the system
     math.h header file.  The stub math.h header file does nothing other
     than to include that architecture-specific math.h header file as the
     system math.h header file.
@@ -575,6 +744,38 @@ Reveal Hidden Configuration Options
   will be shown the '-' for the selection and for the value (since it
   cannot be selected and has no value).  About all you do is to select
   the <Help> option to see what the dependencies are.
+
+Make Sure that You on on the Right Platform
+-------------------------------------------
+
+  Saved configurations may run on Linux, Cygwin (32- or 64-bit), or other
+  platforms.  The platform characteristics can be changed use 'make
+  menuconfig'.  Sometimes this can be confusing due to the differences
+  between the platforms.  Enter sethost.sh
+
+  sethost.sh is a simple script that changes a configuration to your
+  host platform.  This can greatly simplify life if you use many different
+  configurations.  For example, if you are running on Linux and you
+  configure like this:
+
+    $ cd tools
+    $ ./configure.sh board/configuration
+    $ cd ..
+
+  The you can use the following command to both (1) make sure that the
+  configuration is up to date, AND (2) the configuration is set up
+  correctly for Linux:
+
+    $ tools/sethost.sh -l
+
+  Or, if you are on a Windows/Cygwin 64-bit platform:
+
+    $ tools/sethost.sh -w
+
+  Other options are available from the help option built into the
+  script.  You can see all options with:
+
+    $ tools/sethost.sh -h
 
 Comparing Two Configurations
 ----------------------------
@@ -948,8 +1149,12 @@ Native Windows Build
 --------------------
 
   The beginnings of a Windows native build are in place but still not often
-  used as of this writing.  The windows native build logic initiated
-  if CONFIG_WINDOWS_NATIVE=y is defined in the NuttX configuration file:
+  used as of this writing.  The build was functional but because of lack of
+  use may find some issues to be resolved with this build configuration.
+
+  The windows native build logic initiated if CONFIG_WINDOWS_NATIVE=y is
+  defined in the NuttX configuration file:
+
 
   This build:
 
@@ -960,10 +1165,13 @@ Native Windows Build
   In this build, you cannot use a Cygwin or MSYS shell. Rather the build must
   be performed in a Windows console window. Here is a better terminal than the
   standard issue, CMD.exe terminal:  ConEmu which can be downloaded from:
-  http://code.google.com/p/conemu-maximus5/
+  https://sourceforge.net/projects/conemu/ or https://conemu.github.io/ .
 
   Build Tools.  The build still relies on some Unix-like commands.  I use
-  the GNUWin32 tools that can be downloaded from http://gnuwin32.sourceforge.net/.
+  the GNUWin32 tools that can be downloaded from http://gnuwin32.sourceforge.net/
+  using the 'Download all' selection.  Individual packages can be download
+  instead if you know what you are doing and want a faster download (No, I
+  can't tell you which packages you should or should not download).
 
   Host Compiler:  I use the MingGW GCC compiler which can be downloaded from
   http://www.mingw.org/.  If you are using GNUWin32, then it is recommended
@@ -971,12 +1179,13 @@ Native Windows Build
 
   This capability should still be considered a work in progress because:
 
-  (1) It has not been verified on all targets and tools, and
-  (2) it still lacks some of the creature-comforts of the more mature environments.
+    (1) It has not been verified on all targets and tools, and
+    (2) it still lacks some of the creature-comforts of the more mature
+        environments.
 
-   There is an alternative to the setenv.sh script available for the Windows
-   native environment: tools/configure.bat.  See tools/README.txt for additional
-   information.
+  There is an alternative to the setenv.sh script available for the Windows
+  native environment: tools/configure.bat.  See tools/README.txt for additional
+  information.
 
 Installing GNUWin32
 -------------------
@@ -1209,7 +1418,7 @@ nuttx/
  |   |- arm/
  |   |   `- src
  |   |       `- lpc214x/README.txt
- |   |- sh/
+ |   |- renesas/
  |   |   |- include/
  |   |   |   `-README.txt
  |   |   |- src/
@@ -1238,17 +1447,13 @@ nuttx/
  |   |   `- README.txt
  |   |- avr32dev1/
  |   |   `- README.txt
+ |   |- bambino-200e/
+ |   |   `- README.txt
  |   |- c5471evm/
  |   |   `- README.txt
  |   |- cc3200-launchpad/
  |   |   `- README.txt
  |   |- cloudctrl
- |   |   `- README.txt
- |   |- compal_e86
- |   |   `- README.txt
- |   |- compal_e88
- |   |   `- README.txt
- |   |- compal_e99
  |   |   `- README.txt
  |   |- demo0s12ne64/
  |   |   `- README.txt
@@ -1278,6 +1483,10 @@ nuttx/
  |   |   |- poll/README.txt
  |   |   `- README.txt
  |   |- fire-stm32v2/
+ |   |   `- README.txt
+ |   |- freedom-k64f/
+ |   |   `- README.txt
+ |   |- freedom-k66f/
  |   |   `- README.txt
  |   |- freedom-kl25z/
  |   |   `- README.txt
@@ -1321,7 +1530,7 @@ nuttx/
  |   |   `- README.txt
  |   |- mirtoo/
  |   |   `- README.txt
- |   |- mt-db-x3/
+ |   |- misoc/
  |   |   `- README.txt
  |   |- moteino-mega/
  |   |   `- README.txt
@@ -1354,6 +1563,8 @@ nuttx/
  |   |   `- README.txt
  |   |- olimex-stm32-p207/
  |   |   `- README.txt
+ |   |- olimex-stm32-p407/
+ |   |   `- README.txt
  |   |- olimex-strp711/
  |   |   `- README.txt
  |   |- open1788/
@@ -1370,11 +1581,7 @@ nuttx/
  |   |   `- README.txt
  |   |- pic32mz-starterkit/
  |   |   `- README.txt
- |   |- pirelli_dpl10/
- |   |   `- README.txt
  |   |- qemu-i486/
- |   |   `- README.txt
- |   |- rgmp/
  |   |   `- README.txt
  |   |- sabre-6quad/
  |   |   `- README.txt
@@ -1393,6 +1600,8 @@ nuttx/
  |   |- saml21-xplained/
  |   |   `- README.txt
  |   |- sam3u-ek/
+ |   |   `- README.txt
+ |   |- sam4cmp-db
  |   |   `- README.txt
  |   |- sam4e-ek/
  |   |   `- README.txt
@@ -1440,6 +1649,8 @@ nuttx/
  |   |   `- README.txt
  |   |- stm32f746g-disco/
  |   |   `- README.txt
+ |   |- stm32l476-mdk/
+ |   |   `- README.txt
  |   |- stm32l476vg-disco/
  |   |   `- README.txt
  |   |- stm32ldiscovery/
@@ -1459,6 +1670,8 @@ nuttx/
  |   |- tm4c1294-launchpad/
  |   |   `- README.txt
  |   |- twr-k60n512/
+ |   |   `- README.txt
+ |   |- twr-k64f120m/
  |   |   `- README.txt
  |   |- u-blox-co27/
  |   |   `- README.txt
@@ -1497,8 +1710,6 @@ nuttx/
  |   |   `- README.txt
  |   |- sensors/
  |   |   `- README.txt
- |   |- sercomm/
- |   |   `- README.txt
  |   |- syslog/
  |   |   `- README.txt
  |   `- README.txt
@@ -1520,6 +1731,8 @@ nuttx/
  |- lib/
  |   `- README.txt
  |- libc/
+ |   |- zoneinfo
+ |   |   `- README.txt
  |   `- README.txt
  |- libnx/
  |   `- README.txt
@@ -1548,7 +1761,8 @@ apps/
  |- gpsutils/
  |   `- minmea/README.txt
  |- graphics/
- |   `- tiff/README.txt
+ |   |- tiff/README.txt
+ |   `- traveler/tools/tcledit/README.txt
  |- interpreters/
  |   |- bas
  |   |  `- README.txt
@@ -1586,9 +1800,7 @@ apps/
  |   |   `- README.txt
  |   |- usbmsc
  |   |  `- README.txt
- |   |- zmodem
- |   |  `- README.txt
- |   `- zoneinfo
+ |   `- zmodem
  |      `- README.txt
  `- README.txt
 

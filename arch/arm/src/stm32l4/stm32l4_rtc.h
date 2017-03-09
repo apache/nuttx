@@ -54,8 +54,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define STM32_RTC_PRESCALER_SECOND  32767  /* Default prescaler to get a second base */
-#define STM32_RTC_PRESCALER_MIN         1  /* Maximum speed of 16384 Hz */
+#define STM32L4_RTC_PRESCALER_SECOND  32767  /* Default prescaler to get a second base */
+#define STM32L4_RTC_PRESCALER_MIN         1  /* Maximum speed of 16384 Hz */
 
 /****************************************************************************
  * Public Types
@@ -105,6 +105,26 @@ extern "C"
  * Public Functions
  ****************************************************************************/
 
+/************************************************************************************
+ * Name: rtc_is_inits
+ *
+ * Description:
+ *    Returns 'true' if the RTC has been initialized (according to the RTC itself).
+ *    It will be 'false' if the RTC has never been initialized since first time power
+ *    up, and the counters are stopped until it is first initialized.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   bool -- true if the INITS flag is set in the ISR.
+ *
+ ************************************************************************************/
+#ifdef CONFIG_RTC_DRIVER
+bool rtc_is_inits(void);
+#endif
+
+
 /****************************************************************************
  * Name: stm32l4_rtc_getdatetime_with_subseconds
  *
@@ -126,7 +146,7 @@ extern "C"
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32_HAVE_RTC_SUBSECONDS
+#ifdef CONFIG_STM32L4_HAVE_RTC_SUBSECONDS
 int stm32l4_rtc_getdatetime_with_subseconds(FAR struct tm *tp, FAR long *nsec);
 #endif
 

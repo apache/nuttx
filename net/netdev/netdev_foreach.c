@@ -73,12 +73,11 @@
 int netdev_foreach(netdev_callback_t callback, FAR void *arg)
 {
   FAR struct net_driver_s *dev;
-  net_lock_t save;
   int ret = 0;
 
   if (callback)
     {
-      save = net_lock();
+      net_lock();
       for (dev = g_netdevices; dev; dev = dev->flink)
         {
           if (callback(dev, arg) != 0)
@@ -88,7 +87,7 @@ int netdev_foreach(netdev_callback_t callback, FAR void *arg)
             }
         }
 
-      net_unlock(save);
+      net_unlock();
     }
 
   return ret;

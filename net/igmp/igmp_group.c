@@ -2,7 +2,7 @@
  * net/igmp/igmp_group.c
  * IGMP group data structure management logic
  *
- *   Copyright (C) 2010, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2013-2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * The NuttX implementation of IGMP was inspired by the IGMP add-on for the
@@ -55,6 +55,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/igmp.h>
@@ -88,27 +89,19 @@
 
 #ifdef CONFIG_CPP_HAVE_VARARGS
 #  ifdef IGMP_GRPDEBUG
-#    define grpdbg(format, ...)    ndbg(format, ##__VA_ARGS__)
-#    define grplldbg(format, ...)  nlldbg(format, ##__VA_ARGS__)
-#    define grpvdbg(format, ...)   nvdbg(format, ##__VA_ARGS__)
-#    define grpllvdbg(format, ...) nllvdbg(format, ##__VA_ARGS__)
+#    define grperr(format, ...)    nerr(format, ##__VA_ARGS__)
+#    define grpinfo(format, ...)   ninfo(format, ##__VA_ARGS__)
 #  else
-#    define grpdbg(x...)
-#    define grplldbg(x...)
-#    define grpvdbg(x...)
-#    define grpllvdbg(x...)
+#    define grperr(x...)
+#    define grpinfo(x...)
 #  endif
 #else
 #  ifdef IGMP_GRPDEBUG
-#    define grpdbg    ndbg
-#    define grplldbg  nlldbg
-#    define grpvdbg   nvdbg
-#    define grpllvdbg nllvdbg
+#    define grperr    nerr
+#    define grpinfo   ninfo
 #  else
-#    define grpdbg    (void)
-#    define grplldbg  (void)
-#    define grpvdbg   (void)
-#    define grpllvdbg (void)
+#    define grperr    (void)
+#    define grpinfo   (void)
 #  endif
 #endif
 
@@ -194,7 +187,7 @@ void igmp_grpinit(void)
   FAR struct igmp_group_s *group;
   int i;
 
-  grplldbg("Initializing\n");
+  grpinfo("Initializing\n");
 
 #if CONFIG_PREALLOC_IGMPGROUPS > 0
   for (i = 0; i < CONFIG_PREALLOC_IGMPGROUPS; i++)
@@ -220,26 +213,25 @@ FAR struct igmp_group_s *igmp_grpalloc(FAR struct net_driver_s *dev,
                                        FAR const in_addr_t *addr)
 {
   FAR struct igmp_group_s *group;
-  net_lock_t flags;
 
-  nllvdbg("addr: %08x dev: %p\n", *addr, dev);
+  ninfo("addr: %08x dev: %p\n", *addr, dev);
   if (up_interrupt_context())
     {
 #if CONFIG_PREALLOC_IGMPGROUPS > 0
-      grplldbg("Use a pre-allocated group entry\n");
+      grpinfo("Use a pre-allocated group entry\n");
       group = igmp_grpprealloc();
 #else
-      grplldbg("Cannot allocate from interrupt handler\n");
+      grperr("ERROR: Cannot allocate from interrupt handler\n");
       group = NULL;
 #endif
     }
   else
     {
-      grplldbg("Allocate from the heap\n");
+      grpinfo("Allocate from the heap\n");
       group = igmp_grpheapalloc();
     }
 
-  grplldbg("group: %p\n", group);
+  grpinfo("group: %p\n", group);
 
   /* Check if we successfully allocated a group structure */
 
@@ -248,7 +240,13 @@ FAR struct igmp_group_s *igmp_grpalloc(FAR struct net_driver_s *dev,
       /* Initialize the non-zero elements of the group structure */
 
       net_ipv4addr_copy(group->grpaddr, *addr);
+
+      /* This semaphore is used for signaling and, hence, should not have
+       * priority inheritance enabled.
+       */
+
       sem_init(&group->sem, 0, 0);
+      sem_setprotocol(&group->sem, SEM_PRIO_NONE);
 
       /* Initialize the group timer (but don't start it yet) */
 
@@ -257,12 +255,12 @@ FAR struct igmp_group_s *igmp_grpalloc(FAR struct net_driver_s *dev,
 
       /* Interrupts must be disabled in order to modify the group list */
 
-      flags = net_lock();
+      net_lock();
 
       /* Add the group structure to the list in the device structure */
 
       sq_addfirst((FAR sq_entry_t *)group, &dev->grplist);
-      net_unlock(flags);
+      net_unlock();
     }
 
   return group;
@@ -283,28 +281,27 @@ FAR struct igmp_group_s *igmp_grpfind(FAR struct net_driver_s *dev,
                                       FAR const in_addr_t *addr)
 {
   FAR struct igmp_group_s *group;
-  net_lock_t flags;
 
-  grplldbg("Searching for addr %08x\n", (int)*addr);
+  grpinfo("Searching for addr %08x\n", (int)*addr);
 
   /* We must disable interrupts because we don't which context we were
    * called from.
    */
 
-  flags = net_lock();
+  net_lock();
   for (group = (FAR struct igmp_group_s *)dev->grplist.head;
        group;
        group = group->next)
     {
-      grplldbg("Compare: %08x vs. %08x\n", group->grpaddr, *addr);
+      grpinfo("Compare: %08x vs. %08x\n", group->grpaddr, *addr);
       if (net_ipv4addr_cmp(group->grpaddr, *addr))
         {
-          grplldbg("Match!\n");
+          grpinfo("Match!\n");
           break;
         }
     }
 
-  net_unlock(flags);
+  net_unlock();
   return group;
 }
 
@@ -325,13 +322,13 @@ FAR struct igmp_group_s *igmp_grpallocfind(FAR struct net_driver_s *dev,
 {
   FAR struct igmp_group_s *group = igmp_grpfind(dev, addr);
 
-  grplldbg("group: %p addr: %08x\n", group, (int)*addr);
+  grpinfo("group: %p addr: %08x\n", group, (int)*addr);
   if (!group)
     {
       group = igmp_grpalloc(dev, addr);
     }
 
-  grplldbg("group: %p\n", group);
+  grpinfo("group: %p\n", group);
   return group;
 }
 
@@ -348,13 +345,11 @@ FAR struct igmp_group_s *igmp_grpallocfind(FAR struct net_driver_s *dev,
 
 void igmp_grpfree(FAR struct net_driver_s *dev, FAR struct igmp_group_s *group)
 {
-  net_lock_t flags;
-
-  grplldbg("Free: %p flags: %02x\n", group, group->flags);
+  grpinfo("Free: %p flags: %02x\n", group, group->flags);
 
   /* Cancel the wdog */
 
-  flags = net_lock();
+  net_lock();
   wd_cancel(group->wdog);
 
   /* Remove the group structure from the group list in the device structure */
@@ -376,9 +371,9 @@ void igmp_grpfree(FAR struct net_driver_s *dev, FAR struct igmp_group_s *group)
 #if CONFIG_PREALLOC_IGMPGROUPS > 0
   if (IS_PREALLOCATED(group->flags))
     {
-      grplldbg("Put back on free list\n");
+      grpinfo("Put back on free list\n");
       sq_addlast((FAR sq_entry_t *)group, &g_freelist);
-      net_unlock(flags);
+      net_unlock();
     }
   else
 #endif
@@ -387,8 +382,8 @@ void igmp_grpfree(FAR struct net_driver_s *dev, FAR struct igmp_group_s *group)
        * this function is executing within an interrupt handler.
        */
 
-      net_unlock(flags);
-      grplldbg("Call sched_kfree()\n");
+      net_unlock();
+      grpinfo("Call sched_kfree()\n");
       sched_kfree(group);
     }
 }

@@ -58,8 +58,8 @@
 #include <arch/board/board.h>
 #include <arch/board/boardctl.h>
 
-#include <nuttx/fs/fs.h>
-#include <nuttx/fs/ramdisk.h>
+#include <nuttx/drivers/drivers.h>
+#include <nuttx/drivers/ramdisk.h>
 #include <nuttx/fs/nxffs.h>
 #include <nuttx/fs/mkfatfs.h>
 #include <nuttx/binfmt/elf.h>
@@ -87,26 +87,6 @@
 #endif
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_BOARD_INITIALIZE
-#  define SYSLOG lldbg
-#else
-#  define SYSLOG dbg
-#endif
-
-/****************************************************************************
- * Private Type Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
- /****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -188,7 +168,7 @@ FAR struct mtd_dev_s *mtd_temp;
   rtclower = stm32l4_rtc_lowerhalf();
   if (!rtclower)
     {
-      sdbg("ERROR: Failed to instantiate the RTC lower-half driver\n");
+      serr("ERROR: Failed to instantiate the RTC lower-half driver\n");
       return -ENOMEM;
     }
   else
@@ -200,7 +180,7 @@ FAR struct mtd_dev_s *mtd_temp;
       ret = rtc_initialize(0, rtclower);
       if (ret < 0)
         {
-          sdbg("ERROR: Failed to bind/register the RTC driver: %d\n", ret);
+          serr("ERROR: Failed to bind/register the RTC driver: %d\n", ret);
           return ret;
         }
     }
@@ -212,7 +192,7 @@ FAR struct mtd_dev_s *mtd_temp;
   g_qspi = stm32l4_qspi_initialize(0);
   if (!g_qspi)
     {
-      SYSLOG("ERROR: stm32l4_qspi_initialize failed\n");
+      _err("ERROR: stm32l4_qspi_initialize failed\n");
       return ret;
     }
   else
@@ -224,34 +204,72 @@ FAR struct mtd_dev_s *mtd_temp;
       mtd_temp = n25qxxx_initialize(g_qspi, true);
       if (!mtd_temp)
         {
-          SYSLOG("ERROR: n25qxxx_initialize failed\n");
+          _err("ERROR: n25qxxx_initialize failed\n");
           return ret;
         }
       g_mtd_fs = mtd_temp;
         
 #ifdef CONFIG_MTD_PARTITION
-      /* Setup a partition of 256KiB for our file system. */
+      {
+        FAR struct mtd_geometry_s geo;
+        off_t nblocks;
 
-#if defined(CONFIG_N25QXXX_SECTOR512)
-      mtd_temp = mtd_partition(g_mtd_fs, 0, 512);
-#else
-      mtd_temp = mtd_partition(g_mtd_fs, 0, 64);
+        /* Setup a partition of 256KiB for our file system. */
+
+        ret = MTD_IOCTL(g_mtd_fs, MTDIOC_GEOMETRY, (unsigned long)(uintptr_t)&geo);
+        if (ret < 0)
+          {
+            _err("ERROR: MTDIOC_GEOMETRY failed\n");
+            return ret;
+          }
+
+        nblocks = (256*1024) / geo.blocksize;
+
+        mtd_temp = mtd_partition(g_mtd_fs, 0, nblocks);
+        if (!mtd_temp)
+          {
+            _err("ERROR: mtd_partition failed\n");
+            return ret;
+          }
+
+        g_mtd_fs = mtd_temp;
+      }
 #endif
-      if (!g_mtd_fs)
+
+#ifdef HAVE_N25QXXX_SMARTFS
+      /* Configure the device with no partition support */
+
+      ret = smart_initialize(N25QXXX_SMART_MINOR, g_mtd_fs, NULL);
+      if (ret != OK)
         {
-          SYSLOG("ERROR: mtd_partition failed\n");
+          _err("ERROR: Failed to initialize SmartFS: %d\n", ret);
+        }
+
+#elif defined(HAVE_N25QXXX_NXFFS)
+      /* Initialize to provide NXFFS on the N25QXXX MTD interface */
+
+      ret = nxffs_initialize(g_mtd_fs);
+      if (ret < 0)
+        {
+         _err("ERROR: NXFFS initialization failed: %d\n", ret);
+        }
+
+      /* Mount the file system at /mnt/nxffs */
+
+      ret = mount(NULL, "/mnt/nxffs", "nxffs", 0, NULL);
+      if (ret < 0)
+        {
+          _err("ERROR: Failed to mount the NXFFS volume: %d\n", errno);
           return ret;
         }
 
-      g_mtd_fs = mtd_temp;
-#endif
-
+#else /* if  defined(HAVE_N25QXXX_CHARDEV) */
       /* Use the FTL layer to wrap the MTD driver as a block driver */
 
       ret = ftl_initialize(N25QXXX_MTD_MINOR, g_mtd_fs);
       if (ret < 0)
         {
-          SYSLOG("ERROR: Failed to initialize the FTL layer: %d\n", ret);
+          _err("ERROR: Failed to initialize the FTL layer: %d\n", ret);
           return ret;
         }
 
@@ -273,9 +291,34 @@ FAR struct mtd_dev_s *mtd_temp;
       ret = bchdev_register(blockdev, chardev, false);
       if (ret < 0)
         {
-          SYSLOG("ERROR: bchdev_register %s failed: %d\n", chardev, ret);
+          _err("ERROR: bchdev_register %s failed: %d\n", chardev, ret);
           return ret;
         }
+#endif
+    }
+#endif
+
+#ifdef HAVE_USBHOST
+  /* Initialize USB host operation.  stm32l4_usbhost_initialize() starts a thread
+   * will monitor for USB connection and disconnection events.
+   */
+
+  ret = stm32l4_usbhost_initialize();
+  if (ret != OK)
+    {
+      udbg("ERROR: Failed to initialize USB host: %d\n", ret);
+      return ret;
+    }
+#endif
+
+#ifdef HAVE_USBMONITOR
+  /* Start the USB Monitor */
+
+  ret = usbmonitor_start(0, NULL);
+  if (ret != OK)
+    {
+      udbg("ERROR: Failed to start USB monitor: %d\n", ret);
+      return ret;
     }
 #endif
 

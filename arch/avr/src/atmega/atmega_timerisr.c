@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/avr/src/atmega/atmega_timerisr.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -102,19 +102,11 @@
  */
 
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Function:  up_timerisr
+ * Function:  atmega_timerisr
  *
  * Description:
  *   The timer ISR will perform a variety of services for various portions
@@ -122,7 +114,7 @@
  *
  ****************************************************************************/
 
-int up_timerisr(int irq, uint32_t *regs)
+static int atmega_timerisr(int irq, uint32_t *regs, FAR void *arg)
 {
   /* Process timer interrupt */
 
@@ -131,7 +123,11 @@ int up_timerisr(int irq, uint32_t *regs)
 }
 
 /****************************************************************************
- * Function:  up_timer_initialize
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Function:  avr_timer_initialize
  *
  * Description:
  *   This function is called during start-up to initialize the timer
@@ -140,7 +136,7 @@ int up_timerisr(int irq, uint32_t *regs)
  *
  ****************************************************************************/
 
-void up_timer_initialize(void)
+void avr_timer_initialize(void)
 {
   /* Setup timer 1 compare match A to generate a tick interrupt.
    *
@@ -173,9 +169,9 @@ void up_timer_initialize(void)
   /* Attach the timer interrupt vector */
 
 #if defined(ATMEGA_IRQ_T1COMPA)
-  (void)irq_attach(ATMEGA_IRQ_T1COMPA, (xcpt_t)up_timerisr);
+  (void)irq_attach(ATMEGA_IRQ_T1COMPA, (xcpt_t)atmega_timerisr, NULL);
 #elif defined(ATMEGA_IRQ_TIM1_COMPA)
-  (void)irq_attach(ATMEGA_IRQ_TIM1_COMPA, (xcpt_t)up_timerisr);
+  (void)irq_attach(ATMEGA_IRQ_TIM1_COMPA, (xcpt_t)atmega_timerisr, NULL);
 #else
 # error "Unable to find IRQ for timer"
 #endif

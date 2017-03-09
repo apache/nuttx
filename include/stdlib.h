@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/stdlib.h
  *
- *   Copyright (C) 2007-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
+
 #include <sys/types.h>
 #include <stdint.h>
 
@@ -143,9 +144,9 @@ extern "C"
 void      srand(unsigned int seed);
 int       rand(void);
 
+#ifndef CONFIG_DISABLE_ENVIRON
 /* Environment variable support */
 
-#ifndef CONFIG_DISABLE_ENVIRON
 FAR char **get_environ_ptr(void);
 FAR char *getenv(FAR const char *name);
 int       putenv(FAR const char *string);
@@ -170,6 +171,16 @@ int       on_exit(CODE void (*func)(int, FAR void *), FAR void *arg);
 void      _exit(int status); /* See unistd.h */
 #define   _Exit(s) _exit(s)
 
+/* System() command is not implemented in the NuttX libc because it is so
+ * entangled with shell logic.  There is an experimental version at
+ * apps/system/system.  system() is prototyped here, however, for
+ * standards compatibility.
+ */
+
+#ifndef __KERNEL__
+int       system(FAR char *cmd);
+#endif
+
 /* String to binary conversions */
 
 long      strtol(FAR const char *nptr, FAR char **endptr, int base);
@@ -179,18 +190,33 @@ long long strtoll(FAR const char *nptr, FAR char **endptr, int base);
 unsigned long long strtoull(FAR const char *nptr, FAR char **endptr,
                             int base);
 #endif
-double_t  strtod(FAR const char *str, FAR char **endptr);
+float     strtof(FAR const char *str, FAR char **endptr);
+#ifdef CONFIG_HAVE_DOUBLE
+double    strtod(FAR const char *str, FAR char **endptr);
+#endif
+#ifdef CONFIG_HAVE_LONG_DOUBLE
+long double strtold(FAR const char *str, FAR char **endptr);
+#endif
 
 #define atoi(nptr)  ((int)strtol((nptr), NULL, 10))
 #define atol(nptr)  strtol((nptr), NULL, 10)
 #ifdef CONFIG_HAVE_LONG_LONG
 #define atoll(nptr) strtoll((nptr), NULL, 10)
 #endif
+#ifdef CONFIG_HAVE_DOUBLE
 #define atof(nptr)  strtod((nptr), NULL)
+#endif
 
 /* Binary to string conversions */
 
 FAR char *itoa(int val, FAR char *str, int base);
+
+/* Wide character operations */
+
+#ifdef CONFIG_LIBC_WCHAR
+int       mbtowc(FAR wchar_t *pwc, FAR const char *s, size_t n);
+int       wctomb(FAR char *s, wchar_t wchar);
+#endif
 
 /* Memory Management */
 
@@ -205,6 +231,21 @@ FAR void *calloc(size_t, size_t);
 struct mallinfo mallinfo(void);
 #else
 int      mallinfo(FAR struct mallinfo *info);
+#endif
+
+/* Pseudo-Terminals */
+
+#ifdef CONFIG_PSEUDOTERM_SUSV1
+FAR char *ptsname(int fd);
+int ptsname_r(int fd, FAR char *buf, size_t buflen);
+#endif
+
+#ifdef CONFIG_PSEUDOTERM
+int unlockpt(int fd);
+
+/* int grantpt(int fd); Not implemented */
+
+#define grantpt(fd) (0)
 #endif
 
 /* Arithmetic */

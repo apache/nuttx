@@ -63,7 +63,7 @@
  * Private Types
  ************************************************************************************/
 
-#ifdef CONFIG_EFM32_RMU_DEBUG
+#if defined(CONFIG_EFM32_RMU_DEBUG) && defined(CONFIG_DEBUG_WARN)
 typedef struct
 {
   const uint32_t val;
@@ -76,7 +76,7 @@ typedef struct
  * Private Data
  ************************************************************************************/
 
-#ifdef CONFIG_EFM32_RMU_DEBUG
+#if defined(CONFIG_EFM32_RMU_DEBUG) && defined(CONFIG_DEBUG_WARN)
 static efm32_reset_cause_list_t efm32_reset_cause_list[] =
 {
   {
@@ -191,7 +191,7 @@ uint32_t g_efm32_rstcause;
  *
  ************************************************************************************/
 
-#ifdef CONFIG_EFM32_RMU_DEBUG
+#if defined(CONFIG_EFM32_RMU_DEBUG) && defined(CONFIG_DEBUG_WARN)
 const char *efm32_reset_cause_list_str(uint32_t reg, unsigned int *idx)
 {
   int len = sizeof(efm32_reset_cause_list)/sizeof(efm32_reset_cause_list[0]);
@@ -261,8 +261,8 @@ void efm32_rmu_initialize(void)
       putreg32(EMU_LOCK_LOCKKEY_LOCK, EMU_LOCK_LOCKKEY_LOCK);
     }
 
-#ifdef CONFIG_EFM32_RMU_DEBUG
-  rmudbg("RMU => reg = 0x%08X\n", g_efm32_rstcause);
+#if defined(CONFIG_EFM32_RMU_DEBUG) && defined(CONFIG_DEBUG_WARN)
+  rmuwarn("RMU => reg = 0x%08X\n", g_efm32_rstcause);
   for (; ; )
     {
       const char *str;
@@ -273,7 +273,7 @@ void efm32_rmu_initialize(void)
           break;
         }
 
-      rmudbg("RMU => %s\n", str);
+      rmuwarn("RMU => %s\n", str);
     }
 #endif
 }

@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/tcp/tcp_send_unbuffered.c
  *
- *   Copyright (C) 2007-2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2014, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,7 +52,9 @@
 #include <debug.h>
 
 #include <arch/irq.h>
+
 #include <nuttx/clock.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/arp.h>
@@ -177,24 +179,21 @@ static inline int send_timeout(FAR struct send_s *pstate)
 
 #ifdef NEED_IPDOMAIN_SUPPORT
 static inline void tcpsend_ipselect(FAR struct net_driver_s *dev,
-                                    FAR struct send_s *pstate)
+                                    FAR struct tcp_conn_s *conn)
 {
-  FAR struct socket *psock = pstate->snd_sock;
-  DEBUGASSERT(psock);
-
   /* Which domain the the socket support */
 
-  if (psock->s_domain == PF_INET)
+  if (conn->domain == PF_INET)
     {
       /* Select the IPv4 domain */
 
       tcp_ipv4_select(dev);
     }
-  else /* if (psock->s_domain == PF_INET6) */
+  else /* if (conn->domain == PF_INET6) */
     {
       /* Select the IPv6 domain */
 
-      DEBUGASSERT(psock->s_domain == PF_INET6);
+      DEBUGASSERT(conn->domain == PF_INET6);
       tcp_ipv4_select(dev);
     }
 }
@@ -302,8 +301,8 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
     }
 #endif
 
-  nllvdbg("flags: %04x acked: %d sent: %d\n",
-          flags, pstate->snd_acked, pstate->snd_sent);
+  ninfo("flags: %04x acked: %d sent: %d\n",
+        flags, pstate->snd_acked, pstate->snd_sent);
 
   /* If this packet contains an acknowledgement, then update the count of
    * acknowledged bytes.
@@ -348,8 +347,8 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
        */
 
       pstate->snd_acked = tcp_getsequence(tcp->ackno) - pstate->snd_isn;
-      nllvdbg("ACK: acked=%d sent=%d buflen=%d\n",
-              pstate->snd_acked, pstate->snd_sent, pstate->snd_buflen);
+      ninfo("ACK: acked=%d sent=%d buflen=%d\n",
+            pstate->snd_acked, pstate->snd_sent, pstate->snd_buflen);
 
       /* Have all of the bytes in the buffer been sent and acknowledged? */
 
@@ -392,7 +391,7 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
     {
       /* Report not connected */
 
-      nllvdbg("Lost connection\n");
+      ninfo("Lost connection\n");
 
       net_lostconnection(pstate->snd_sock, flags);
       pstate->snd_sent = -ENOTCONN;
@@ -526,7 +525,7 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
            */
 
           seqno = pstate->snd_sent + pstate->snd_isn;
-          nllvdbg("SEND: sndseq %08x->%08x\n", conn->sndseq, seqno);
+          ninfo("SEND: sndseq %08x->%08x\n", conn->sndseq, seqno);
           tcp_setsequence(conn->sndseq, seqno);
 
 #ifdef NEED_IPDOMAIN_SUPPORT
@@ -536,7 +535,7 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
            * place and we need do nothing.
            */
 
-          tcpsend_ipselect(dev, pstate);
+          tcpsend_ipselect(dev, conn);
 #endif
           /* Then set-up to send that amount of data. (this won't actually
            * happen until the polling cycle completes).
@@ -554,8 +553,8 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
               /* Update the amount of data sent (but not necessarily ACKed) */
 
               pstate->snd_sent += sndlen;
-              nllvdbg("SEND: acked=%d sent=%d buflen=%d\n",
-                      pstate->snd_acked, pstate->snd_sent, pstate->snd_buflen);
+              ninfo("SEND: acked=%d sent=%d buflen=%d\n",
+                    pstate->snd_acked, pstate->snd_sent, pstate->snd_buflen);
 
             }
         }
@@ -570,7 +569,7 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
     {
       /* Yes.. report the timeout */
 
-      nlldbg("SEND timeout\n");
+      nwarn("WARNING: SEND timeout\n");
       pstate->snd_sent = -ETIMEDOUT;
       goto end_wait;
     }
@@ -718,16 +717,15 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
 {
   FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)psock->s_conn;
   struct send_s state;
-  net_lock_t save;
-  int err;
+  int errcode;
   int ret = OK;
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
   if (!psock || psock->s_crefs <= 0)
     {
-      ndbg("ERROR: Invalid socket\n");
-      err = EBADF;
+      nerr("ERROR: Invalid socket\n");
+      errcode = EBADF;
       goto errout;
     }
 
@@ -735,8 +733,8 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
 
   if (psock->s_type != SOCK_STREAM || !_SS_ISCONNECTED(psock->s_flags))
     {
-      ndbg("ERROR: Not connected\n");
-      err = ENOTCONN;
+      nerr("ERROR: Not connected\n");
+      errcode = ENOTCONN;
       goto errout;
     }
 
@@ -773,8 +771,8 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
 
   if (ret < 0)
     {
-      ndbg("ERROR: Not reachable\n");
-      err = ENETUNREACH;
+      nerr("ERROR: Not reachable\n");
+      errcode = ENETUNREACH;
       goto errout;
     }
 #endif /* CONFIG_NET_ARP_SEND || CONFIG_NET_ICMPv6_NEIGHBOR */
@@ -790,9 +788,16 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
    * are ready.
    */
 
-  save                = net_lock();
+  net_lock();
   memset(&state, 0, sizeof(struct send_s));
+
+  /* This semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
   (void)sem_init(&state.snd_sem, 0, 0);    /* Doesn't really fail */
+  (void)sem_setprotocol(&state.snd_sem, SEM_PRIO_NONE);
+
   state.snd_sock      = psock;             /* Socket descriptor to use */
   state.snd_buflen    = len;               /* Number of bytes to send */
   state.snd_buffer    = buf;               /* Buffer to send from */
@@ -845,7 +850,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
     }
 
   sem_destroy(&state.snd_sem);
-  net_unlock(save);
+  net_unlock();
 
   /* Set the socket state to idle */
 
@@ -857,7 +862,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
 
   if (state.snd_sent < 0)
     {
-      err = state.snd_sent;
+      errcode = state.snd_sent;
       goto errout;
     }
 
@@ -867,7 +872,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
 
   if (ret < 0)
     {
-      err = -ret;
+      errcode = -ret;
       goto errout;
     }
 
@@ -876,7 +881,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
   return state.snd_sent;
 
 errout:
-  set_errno(err);
+  set_errno(errcode);
   return ERROR;
 }
 

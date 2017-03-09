@@ -71,7 +71,7 @@
 
 static inline int is_real(double x)
 {
-  const double_t infinite = 1.0/0.0;
+  const double infinite = 1.0/0.0;
   return (x < infinite) && (x >= -infinite);
 }
 
@@ -87,17 +87,17 @@ static inline int is_real(double x)
  *
  ****************************************************************************/
 
-double_t strtod(FAR const char *str, FAR char **endptr)
+double strtod(FAR const char *str, FAR char **endptr)
 {
-  double_t number;
+  double number;
   int exponent;
   int negative;
-  char *p = (char *) str;
+  FAR char *p = (FAR char *) str;
   double p10;
   int n;
   int num_digits;
   int num_decimals;
-  const double_t infinite = 1.0/0.0;
+  const double infinite = 1.0/0.0;
 
   /* Skip leading whitespace */
 
@@ -115,6 +115,8 @@ double_t strtod(FAR const char *str, FAR char **endptr)
       negative = 1; /* Fall through to increment position */
     case '+':
       p++;
+    default:
+      break;
     }
 
   number       = 0.;
@@ -138,12 +140,12 @@ double_t strtod(FAR const char *str, FAR char **endptr)
       p++;
 
       while (isdigit(*p))
-      {
-        number = number * 10. + (*p - '0');
-        p++;
-        num_digits++;
-        num_decimals++;
-      }
+        {
+          number = number * 10. + (*p - '0');
+          p++;
+          num_digits++;
+          num_decimals++;
+        }
 
       exponent -= num_decimals;
     }
@@ -151,7 +153,8 @@ double_t strtod(FAR const char *str, FAR char **endptr)
   if (num_digits == 0)
     {
       set_errno(ERANGE);
-      return 0.0;
+      number = 0.0;
+      goto errout;
     }
 
   /* Correct for sign */
@@ -174,6 +177,8 @@ double_t strtod(FAR const char *str, FAR char **endptr)
           negative = 1;   /* Fall through to increment pos */
         case '+':
           p++;
+        default:
+          break;
         }
 
       /* Process string of digits */
@@ -199,14 +204,19 @@ double_t strtod(FAR const char *str, FAR char **endptr)
       exponent > __DBL_MAX_EXP__)
     {
       set_errno(ERANGE);
-      return infinite;
+      number = infinite;
+      goto errout;
     }
 
   /* Scale the result */
 
   p10 = 10.;
   n = exponent;
-  if (n < 0) n = -n;
+  if (n < 0)
+    {
+      n = -n;
+    }
+
   while (n)
     {
       if (n & 1)
@@ -220,6 +230,7 @@ double_t strtod(FAR const char *str, FAR char **endptr)
               number *= p10;
             }
         }
+
       n >>= 1;
       p10 *= p10;
     }
@@ -229,6 +240,7 @@ double_t strtod(FAR const char *str, FAR char **endptr)
       set_errno(ERANGE);
     }
 
+errout:
   if (endptr)
     {
       *endptr = p;

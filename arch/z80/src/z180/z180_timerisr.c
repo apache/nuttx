@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z80/src/z180/z180_timerisr.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -72,19 +72,11 @@
 #define A180_PRT0_RELOAD (Z180_PRT_CLOCK / CLK_TCK)
 
 /****************************************************************************
- * Private Types
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Function: up_timerisr
+ * Function: z180_timerisr
  *
  * Description:
  *   The timer ISR will perform a variety of services for various portions
@@ -92,7 +84,7 @@
  *
  ****************************************************************************/
 
-int up_timerisr(int irq, chipreg_t *regs)
+static int z180_timerisr(int irq, chipreg_t *regs, void *arg)
 {
   /* "When TMDR0 decrements to 0, TIF0 is set to 1. This generates an interrupt
    * request if enabled by TIE0 = 1. TIF0 is reset to 0 when TCR is read and
@@ -110,7 +102,11 @@ int up_timerisr(int irq, chipreg_t *regs)
 }
 
 /****************************************************************************
- * Function: up_timer_initialize
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Function: z80_timer_initialize
  *
  * Description:
  *   This function is called during start-up to initialize the timer
@@ -118,7 +114,7 @@ int up_timerisr(int irq, chipreg_t *regs)
  *
  ****************************************************************************/
 
-void up_timer_initialize(void)
+void z80_timer_initialize(void)
 {
   uint8_t regval;
 
@@ -146,7 +142,7 @@ void up_timer_initialize(void)
 
   /* Attach the timer interrupt vector */
 
-  (void)irq_attach(Z180_PRT0, (xcpt_t)up_timerisr);
+  (void)irq_attach(Z180_PRT0, (xcpt_t)z180_timerisr, NULL);
 
   /* And enable the timer interrupt */
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/sys/boardctl.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -109,6 +109,12 @@
  * CONFIGURATION: CONFIG_LIB_BOARDCTL && CONFIG_BOARDCTL_USBDEVCTRL
  * DEPENDENCIES:  Board logic must provide board_<usbdev>_initialize()
  *
+ * CMD:           BOARDIOC_NX_START
+ * DESCRIPTION:   Start the NX servier
+ * ARG:           None
+ * CONFIGURATION: CONFIG_NX_MULTIUSER
+ * DEPENDENCIES:  Base graphics logic provides nx_start()
+ *
  * CMD:           BOARDIOC_TSCTEST_SETUP
  * DESCRIPTION:   Touchscreen controller test configuration
  * ARG:           Touch controller device minor number
@@ -121,30 +127,12 @@
  * CONFIGURATION: CONFIG_LIB_BOARDCTL && CONFIG_BOARDCTL_TSCTEST
  * DEPENDENCIES:  Board logic must provide board_tsc_teardown()
  *
- * CMD:           BOARDIOC_ADCTEST_SETUP
- * DESCRIPTION:   ADC controller test configuration
- * ARG:           None
- * CONFIGURATION: CONFIG_LIB_BOARDCTL && CONFIG_BOARDCTL_ADCTEST
- * DEPENDENCIES:  Board logic must provide board_adc_setup()
- *
- * CMD:           BOARDIOC_PWMTEST_SETUP
- * DESCRIPTION:   PWM controller test configuration
- * ARG:           None
- * CONFIGURATION: CONFIG_LIB_BOARDCTL && CONFIG_BOARDCTL_PWMTEST
- * DEPENDENCIES:  Board logic must provide board_pwm_setup()
- *
- * CMD:           BOARDIOC_CAN_INITIALIZE
- * DESCRIPTION:   CAN device initialization
- * ARG:           None
- * CONFIGURATION: CONFIG_LIB_BOARDCTL && CONFIG_BOARDCTL_CANINIT
- * DEPENDENCIES:  Board logic must provide board_can_initialize()
- *
  * CMD:           BOARDIOC_GRAPHICS_SETUP
  * DESCRIPTION:   Configure graphics that require special initialization
  *                procedures
  * ARG:           A pointer to an instance of struct boardioc_graphics_s
  * CONFIGURATION: CONFIG_LIB_BOARDCTL && CONFIG_BOARDCTL_GRAPHICS
- * DEPENDENCIES:  Board logic must provide board_adc_setup()
+ * DEPENDENCIES:  Board logic must provide board_graphics_setup()
  */
 
 #define BOARDIOC_INIT              _BOARDIOC(0x0001)
@@ -154,12 +142,10 @@
 #define BOARDIOC_APP_SYMTAB        _BOARDIOC(0x0005)
 #define BOARDIOC_OS_SYMTAB         _BOARDIOC(0x0006)
 #define BOARDIOC_USBDEV_CONTROL    _BOARDIOC(0x0007)
-#define BOARDIOC_TSCTEST_SETUP     _BOARDIOC(0x0008)
-#define BOARDIOC_TSCTEST_TEARDOWN  _BOARDIOC(0x0009)
-#define BOARDIOC_ADCTEST_SETUP     _BOARDIOC(0x000a)
-#define BOARDIOC_PWMTEST_SETUP     _BOARDIOC(0x000b)
-#define BOARDIOC_CAN_INITIALIZE    _BOARDIOC(0x000c)
-#define BOARDIOC_GRAPHICS_SETUP    _BOARDIOC(0x000d)
+#define BOARDIOC_NX_START          _BOARDIOC(0x0008)
+#define BOARDIOC_TSCTEST_SETUP     _BOARDIOC(0x0009)
+#define BOARDIOC_TSCTEST_TEARDOWN  _BOARDIOC(0x000a)
+#define BOARDIOC_GRAPHICS_SETUP    _BOARDIOC(0x000b)
 
 /* If CONFIG_BOARDCTL_IOCTL=y, then boad-specific commands will be support.
  * In this case, all commands not recognized by boardctl() will be forwarded
@@ -266,6 +252,19 @@ struct boardioc_usbdev_ctrl_s
 #endif /* CONFIG_BOARDCTL_USBDEVCTRL */
 
 /****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
@@ -298,6 +297,11 @@ struct boardioc_usbdev_ctrl_s
  ****************************************************************************/
 
 int boardctl(unsigned int cmd, uintptr_t arg);
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
 
 #endif /* CONFIG_LIB_BOARDCTL */
 #endif /* __INCLUDE_SYS_BOARDCTL_H */

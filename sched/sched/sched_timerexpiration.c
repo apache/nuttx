@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sched/sched_timerexpiration.c
  *
- *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,6 +52,10 @@
 #include "sched/sched.h"
 #include "wdog/wdog.h"
 #include "clock/clock.h"
+
+#ifdef CONFIG_CLOCK_TIMEKEEPING
+# include "clock/clock_timekeeping.h"
+#endif
 
 #ifdef CONFIG_SCHED_TICKLESS
 
@@ -109,8 +113,22 @@ uint32_t g_oneshot_maxticks = UINT32_MAX;
 #endif
 
 /****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+#if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
+static uint32_t sched_cpu_scheduler(int cpu, uint32_t ticks, bool noswitches);
+#endif
+#if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
+static uint32_t sched_process_scheduler(uint32_t ticks, bool noswitches);
+#endif
+static unsigned int sched_timer_process(unsigned int ticks, bool noswitches);
+static void sched_timer_start(unsigned int ticks);
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* This is the duration of the currently active timer or, when
  * sched_timer_expiration() is called, the duration of interval timer
  * that just expired.  The value zero means that no timer was active.
@@ -138,13 +156,14 @@ static struct timespec g_stop_time;
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  sched_process_scheduler
+ * Name:  sched_cpu_scheduler
  *
  * Description:
  *   Check for operations specific to scheduling policy of the currently
- *   active task.
+ *   active task on a single CPU.
  *
  * Inputs:
+ *   cpu - The CPU that we are performing the scheduler operations on.
  *   ticks - The number of ticks that have elapsed on the interval timer.
  *   noswitches - True: Can't do context switches now.
  *
@@ -162,10 +181,10 @@ static struct timespec g_stop_time;
  ****************************************************************************/
 
 #if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
-static inline uint32_t sched_process_scheduler(uint32_t ticks, bool noswitches)
+static uint32_t sched_cpu_scheduler(int cpu, uint32_t ticks, bool noswitches)
 {
-  FAR struct tcb_s *rtcb  = this_task();
-  FAR struct tcb_s *ntcb  = this_task();
+  FAR struct tcb_s *rtcb  = current_task(cpu);
+  FAR struct tcb_s *ntcb  = current_task(cpu);
   uint32_t ret = 0;
 
 #if CONFIG_RR_INTERVAL > 0
@@ -212,7 +231,7 @@ static inline uint32_t sched_process_scheduler(uint32_t ticks, bool noswitches)
    * the new task at the head of the ready to run list.
    */
 
-  ntcb = this_task();
+  ntcb = current_task(cpu);
 
   /* Check if the new task at the head of the ready-to-run has changed. */
 
@@ -235,6 +254,71 @@ static inline uint32_t sched_process_scheduler(uint32_t ticks, bool noswitches)
 #endif
 
   return ret;
+}
+#endif
+
+/****************************************************************************
+ * Name: sched_process_scheduler
+ *
+ * Description:
+ *   Check for operations specific to scheduling policy of the currently
+ *   active task on a single CPU.
+ *
+ * Inputs:
+ *   ticks - The number of ticks that have elapsed on the interval timer.
+ *   noswitches - True: Can't do context switches now.
+ *
+ * Return Value:
+ *   The number if ticks remaining until the next time slice expires.
+ *   Zero is returned if there is no time slicing (i.e., the task at the
+ *   head of the ready-to-run list does not support round robin
+ *   scheduling).
+ *
+ *   The value one may returned under certain circumstances that probably
+ *   can't happen.  The value one is the minimal timer setup and it means
+ *   that a context switch is needed now, but cannot be performed because
+ *   noswitches == true.
+ *
+ ****************************************************************************/
+
+#if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
+static uint32_t sched_process_scheduler(uint32_t ticks, bool noswitches)
+{
+#ifdef CONFIG_SMP
+  uint32_t minslice = UINT32_MAX;
+  uint32_t timeslice;
+  irqstate_t flags;
+  int i;
+
+  /* If we are running on a single CPU architecture, then we know interrupts
+   * a disabled an there is no need to explicitly call
+   * enter_critical_section().  However, in the SMP case,
+   * enter_critical_section() does much more than just disable interrupts on
+   * the local CPU; it also manages spinlocks to assure the stability of the
+   * TCB that we are manipulating.
+   */
+
+  flags = enter_critical_section();
+
+  /* Perform scheduler operations on all CPUs */
+
+  for (i = 0; i < CONFIG_SMP_NCPUS; i++)
+    {
+      timeslice = sched_cpu_scheduler(i, ticks, noswitches);
+      if (timeslice > 0 && timeslice < minslice)
+        {
+          minslice = timeslice;
+        }
+    }
+
+  leave_critical_section(flags);
+  return minslice < UINT32_MAX ? minslice : 0;
+
+#else
+  /* Perform scheduler operations on the single CPUs */
+
+  return sched_cpu_scheduler(0, ticks, noswitches);
+#endif
 }
 #else
 #  define sched_process_scheduler(t,n) (0)
@@ -261,6 +345,12 @@ static unsigned int sched_timer_process(unsigned int ticks, bool noswitches)
   unsigned int cmptime = UINT_MAX;
   unsigned int rettime  = 0;
   unsigned int tmp;
+
+#ifdef CONFIG_CLOCK_TIMEKEEPING
+  /* Process wall time */
+
+  clock_update_wall_time();
+#endif
 
   /* Process watchdogs */
 
@@ -362,7 +452,7 @@ static void sched_timer_start(unsigned int ticks)
 
       if (ret < 0)
         {
-          slldbg("ERROR: up_timer_start/up_alarm_start failed: %d\n");
+          serr("ERROR: up_timer_start/up_alarm_start failed: %d\n");
           UNUSED(ret);
         }
     }
@@ -646,4 +736,5 @@ void sched_timer_reassess(void)
   nexttime = sched_timer_cancel();
   sched_timer_start(nexttime);
 }
+
 #endif /* CONFIG_SCHED_TICKLESS */

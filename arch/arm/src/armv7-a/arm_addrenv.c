@@ -257,7 +257,7 @@ int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
 {
   int ret;
 
-  bvdbg("addrenv=%p textsize=%lu datasize=%lu\n",
+  binfo("addrenv=%p textsize=%lu datasize=%lu\n",
         addrenv, (unsigned long)textsize, (unsigned long)datasize);
 
   DEBUGASSERT(addrenv);
@@ -278,7 +278,7 @@ int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
                                   MMU_L2_UTEXTFLAGS);
   if (ret < 0)
     {
-      bdbg("ERROR: Failed to create .text region: %d\n", ret);
+      berr("ERROR: Failed to create .text region: %d\n", ret);
       goto errout;
     }
 
@@ -293,7 +293,7 @@ int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
                                   MMU_L2_UDATAFLAGS);
   if (ret < 0)
     {
-      bdbg("ERROR: Failed to create .bss/.data region: %d\n", ret);
+      berr("ERROR: Failed to create .bss/.data region: %d\n", ret);
       goto errout;
     }
 
@@ -305,7 +305,7 @@ int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
   ret = up_addrenv_initdata((uintptr_t)addrenv->data[0] & PMD_PTE_PADDR_MASK);
   if (ret < 0)
     {
-      bdbg("ERROR: Failed to initialize .bss/.data region: %d\n", ret);
+      berr("ERROR: Failed to initialize .bss/.data region: %d\n", ret);
       goto errout;
     }
 #endif
@@ -318,7 +318,7 @@ int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
                                   MMU_L2_UDATAFLAGS);
   if (ret < 0)
     {
-      bdbg("ERROR: Failed to create heap region: %d\n", ret);
+      berr("ERROR: Failed to create heap region: %d\n", ret);
       goto errout;
     }
 
@@ -353,7 +353,7 @@ errout:
 
 int up_addrenv_destroy(FAR group_addrenv_t *addrenv)
 {
-  bvdbg("addrenv=%p\n", addrenv);
+  binfo("addrenv=%p\n", addrenv);
   DEBUGASSERT(addrenv);
 
   /* Destroy the .text region */
@@ -405,7 +405,7 @@ int up_addrenv_destroy(FAR group_addrenv_t *addrenv)
 
 int up_addrenv_vtext(FAR group_addrenv_t *addrenv, FAR void **vtext)
 {
-  bvdbg("return=%p\n", (FAR void *)CONFIG_ARCH_TEXT_VBASE);
+  binfo("return=%p\n", (FAR void *)CONFIG_ARCH_TEXT_VBASE);
 
   /* Not much to do in this case */
 
@@ -439,7 +439,7 @@ int up_addrenv_vtext(FAR group_addrenv_t *addrenv, FAR void **vtext)
 int up_addrenv_vdata(FAR group_addrenv_t *addrenv, uintptr_t textsize,
                      FAR void **vdata)
 {
-  bvdbg("return=%p\n",
+  binfo("return=%p\n",
         (FAR void *)(CONFIG_ARCH_DATA_VBASE + ARCH_DATA_RESERVE_SIZE));
 
   /* Not much to do in this case */
@@ -636,7 +636,7 @@ int up_addrenv_restore(FAR const save_addrenv_t *oldenv)
   uintptr_t vaddr;
   int i;
 
-  bvdbg("oldenv=%p\n", oldenv);
+  binfo("oldenv=%p\n", oldenv);
   DEBUGASSERT(oldenv);
 
   for (vaddr = CONFIG_ARCH_TEXT_VBASE, i = 0;
@@ -752,7 +752,7 @@ int up_addrenv_coherent(FAR const group_addrenv_t *addrenv)
 int up_addrenv_clone(FAR const group_addrenv_t *src,
                      FAR group_addrenv_t *dest)
 {
-  bvdbg("src=%p dest=%p\n", src, dest);
+  binfo("src=%p dest=%p\n", src, dest);
   DEBUGASSERT(src && dest);
 
   /* Just copy the address environment from the source to the destination */
@@ -784,7 +784,7 @@ int up_addrenv_clone(FAR const group_addrenv_t *src,
 
 int up_addrenv_attach(FAR struct task_group_s *group, FAR struct tcb_s *tcb)
 {
-  bvdbg("group=%p tcb=%p\n", group, tcb);
+  binfo("group=%p tcb=%p\n", group, tcb);
 
   /* Nothing needs to be done in this implementation */
 
@@ -817,7 +817,7 @@ int up_addrenv_attach(FAR struct task_group_s *group, FAR struct tcb_s *tcb)
 
 int up_addrenv_detach(FAR struct task_group_s *group, FAR struct tcb_s *tcb)
 {
-  bvdbg("group=%p tcb=%p\n", group, tcb);
+  binfo("group=%p tcb=%p\n", group, tcb);
 
   /* Nothing needs to be done in this implementation */
 

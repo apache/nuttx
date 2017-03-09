@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/sama5d3x-ek/src/sam_ethernet.c
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,8 +42,8 @@
 /* Force verbose debug on in this file only to support unit-level testing. */
 
 #ifdef CONFIG_NETDEV_PHY_DEBUG
-#  undef  CONFIG_DEBUG_VERBOSE
-#  define CONFIG_DEBUG_VERBOSE 1
+#  undef  CONFIG_DEBUG_INFO
+#  define CONFIG_DEBUG_INFO 1
 #  undef  CONFIG_DEBUG_NET
 #  define CONFIG_DEBUG_NET 1
 #endif
@@ -84,24 +84,13 @@
  */
 
 #ifdef CONFIG_NETDEV_PHY_DEBUG
-#  define phydbg    dbg
-#  define phylldbg  lldbg
+#  define phyerr    _err
+#  define phywarn   _warn
+#  define phyinfo   _info
 #else
-#  define phydbg(x...)
-#  define phylldbg(x...)
-#endif
-
-/************************************************************************************
- * Private Data
- ************************************************************************************/
-
-#ifdef CONFIG_SAMA5_PIOE_IRQ
-#ifdef CONFIG_SAMA5_EMACA
-static xcpt_t g_emac_handler;
-#endif
-#ifdef CONFIG_SAMA5_GMAC
-static xcpt_t g_gmac_handler;
-#endif
+#  define phyerr(x...)
+#  define phywarn(x...)
+#  define phyinfo(x...)
 #endif
 
 /************************************************************************************
@@ -116,7 +105,7 @@ static xcpt_t g_gmac_handler;
 #ifdef CONFIG_SAMA5_EMACA
 static void sam_emac_phy_enable(bool enable)
 {
-  phydbg("IRQ%d: enable=%d\n", IRQ_INT_ETH1, enable);
+  phyinfo("IRQ%d: enable=%d\n", IRQ_INT_ETH1, enable);
   if (enable)
     {
       sam_pioirqenable(IRQ_INT_ETH1);
@@ -132,7 +121,7 @@ static void sam_emac_phy_enable(bool enable)
 #ifdef CONFIG_SAMA5_GMAC
 static void sam_gmac_phy_enable(bool enable)
 {
-  phydbg("IRQ%d: enable=%d\n", IRQ_INT_ETH0, enable);
+  phyinfo("IRQ%d: enable=%d\n", IRQ_INT_ETH0, enable);
   if (enable)
     {
       sam_pioirqenable(IRQ_INT_ETH0);
@@ -179,7 +168,7 @@ void weak_function sam_netinitialize(void)
    * The KSZ8051 PHY interrupt is available on PE30 INT_ETH1
    */
 
-  phydbg("Configuring %08x\n", PIO_INT_ETH1);
+  phyinfo("Configuring %08x\n", PIO_INT_ETH1);
   sam_configpio(PIO_INT_ETH1);
 #endif
 
@@ -196,7 +185,7 @@ void weak_function sam_netinitialize(void)
    * The KSZ9021/31 interrupt is available on PB35 INT_GETH0
    */
 
-  phydbg("Configuring %08x\n", PIO_INT_ETH0);
+  phyinfo("Configuring %08x\n", PIO_INT_ETH0);
   sam_configpio(PIO_INT_ETH0);
 #endif
 }
@@ -253,42 +242,39 @@ void weak_function sam_netinitialize(void)
  *             asserts an interrupt.  Must reside in OS space, but can
  *             signal tasks in user space.  A value of NULL can be passed
  *             in order to detach and disable the PHY interrupt.
+ *   arg     - The argument that will accompany the interrupt
  *   enable  - A function pointer that be unsed to enable or disable the
  *             PHY interrupt.
  *
  * Returned Value:
- *   The previous PHY interrupt handler address is returned.  This allows you
- *   to temporarily replace an interrupt handler, then restore the original
- *   interrupt handler.  NULL is returned if there is was not handler in
- *   place when the call was made.
+ *   Zero (OK) returned on success; a negated errno value is returned on
+ *   failure.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_PIOE_IRQ
-xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
+int arch_phy_irq(FAR const char *intf, xcpt_t handler, void *arg,
+                 phy_enable_t *enable)
 {
   irqstate_t flags;
-  xcpt_t *phandler;
-  xcpt_t oldhandler;
   pio_pinset_t pinset;
   phy_enable_t enabler;
   int irq;
 
   DEBUGASSERT(intf);
 
-  nvdbg("%s: handler=%p\n", intf, handler);
+  ninfo("%s: handler=%p\n", intf, handler);
 #ifdef CONFIG_SAMA5_EMACA
-  phydbg("EMAC: devname=%s\n", SAMA5_EMAC_DEVNAME);
+  phyinfo("EMAC: devname=%s\n", SAMA5_EMAC_DEVNAME);
 #endif
 #ifdef CONFIG_SAMA5_GMAC
-  phydbg("GMAC: devname=%s\n", SAMA5_GMAC_DEVNAME);
+  phyinfo("GMAC: devname=%s\n", SAMA5_GMAC_DEVNAME);
 #endif
 
 #ifdef CONFIG_SAMA5_EMACA
   if (strcmp(intf, SAMA5_EMAC_DEVNAME) == 0)
     {
-      phydbg("Select EMAC\n");
-      phandler = &g_emac_handler;
+      phyinfo("Select EMAC\n");
       pinset   = PIO_INT_ETH1;
       irq      = IRQ_INT_ETH1;
       enabler  = sam_emac_phy_enable;
@@ -298,8 +284,7 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
 #ifdef CONFIG_SAMA5_GMAC
   if (strcmp(intf, SAMA5_GMAC_DEVNAME) == 0)
     {
-      phydbg("Select GMAC\n");
-      phandler = &g_gmac_handler;
+      phyinfo("Select GMAC\n");
       pinset   = PIO_INT_ETH0;
       irq      = IRQ_INT_ETH0;
       enabler  = sam_gmac_phy_enable;
@@ -307,7 +292,7 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
   else
 #endif
     {
-      ndbg("Unsupported interface: %s\n", intf);
+      nerr("ERROR: Unsupported interface: %s\n", intf);
       return NULL;
     }
 
@@ -317,24 +302,19 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
 
   flags = enter_critical_section();
 
-  /* Get the old interrupt handler and save the new one */
-
-  oldhandler = *phandler;
-  *phandler = handler;
-
   /* Configure the interrupt */
 
   if (handler)
     {
-      phydbg("Configure pin: %08x\n", pinset);
+      phyinfo("Configure pin: %08x\n", pinset);
       sam_pioirq(pinset);
 
-      phydbg("Attach IRQ%d\n", irq);
-      (void)irq_attach(irq, handler);
+      phyinfo("Attach IRQ%d\n", irq);
+      (void)irq_attach(irq, handler, arg);
     }
   else
     {
-      phydbg("Detach IRQ%d\n", irq);
+      phyinfo("Detach IRQ%d\n", irq);
       (void)irq_detach(irq);
       enabler = NULL;
     }
@@ -353,7 +333,7 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
   /* Return the old handler (so that it can be restored) */
 
   leave_critical_section(flags);
-  return oldhandler;
+  return OK;
 }
 #endif /* CONFIG_SAMA5_PIOE_IRQ */
 

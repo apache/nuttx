@@ -1,6 +1,7 @@
 /****************************************************************************
- *  wlan.c  - CC3000 Host Driver Implementation.
- *  Copyright (C) 2011 Texas Instruments Incorporated - http://www.ti.com/
+ *  drivers/wireless/cc3000/wlan.c  - CC3000 Host Driver Implementation.
+ *
+ *    Copyright (C) 2011 Texas Instruments Incorporated - http://www.ti.com/
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions
@@ -261,7 +262,7 @@ void SpiReceiveHandler(void *pvBuffer)
   STREAM_TO_UINT16((char *)tSLInformation.pucReceivedData,
                    HCI_EVENT_OPCODE_OFFSET, event_type);
 
-  nllvdbg("Evnt:0x%x\n", event_type);
+  ninfo("Evnt:0x%x\n", event_type);
   UNUSED(event_type);
 
   hci_unsolicited_event_handler();

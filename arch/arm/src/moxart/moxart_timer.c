@@ -2,7 +2,7 @@
  * arch/arm/src/moxart/moxart_timer.c
  * MoxaRT internal Timer Driver
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Anton D. Kachalov <mouse@mayc.ru>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -90,7 +90,7 @@ static uint32_t cmp = BOARD_32KOSC_FREQUENCY / 100;
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  up_timerisr
+ * Function:  moxart_timerisr
  *
  * Description:
  *   The timer ISR will perform a variety of services for various portions
@@ -98,7 +98,7 @@ static uint32_t cmp = BOARD_32KOSC_FREQUENCY / 100;
  *
  ****************************************************************************/
 
-int up_timerisr(int irq, uint32_t *regs)
+static int moxart_timerisr(int irq, uint32_t *regs, void *arg)
 {
   uint32_t state;
 
@@ -117,7 +117,11 @@ int up_timerisr(int irq, uint32_t *regs)
 }
 
 /****************************************************************************
- * Function:  up_timer_initialize
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Function:  arm_timer_initialize
  *
  * Description:
  *   Setup MoxaRT timer 0 to cause system ticks.
@@ -127,7 +131,7 @@ int up_timerisr(int irq, uint32_t *regs)
  *
  ****************************************************************************/
 
-void up_timer_initialize(void)
+void arm_timer_initialize(void)
 {
   uint32_t tmp;
 
@@ -144,7 +148,7 @@ void up_timer_initialize(void)
 
   /* Attach and enable the timer interrupt */
 
-  irq_attach(IRQ_SYSTIMER, (xcpt_t)up_timerisr);
+  irq_attach(IRQ_SYSTIMER, (xcpt_t)moxart_timerisr, NULL);
   up_enable_irq(IRQ_SYSTIMER);
   ftintc010_set_trig_mode(IRQ_SYSTIMER, 1);
   ftintc010_set_trig_level(IRQ_SYSTIMER, 0);

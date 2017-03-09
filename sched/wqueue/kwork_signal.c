@@ -85,12 +85,11 @@ int work_signal(int qid)
 #ifdef CONFIG_SCHED_LPWORK
   if (qid == LPWORK)
     {
-      int wndx;
       int i;
 
       /* Find an IDLE worker thread */
 
-      for (wndx = 0, i = 0; i < CONFIG_SCHED_LPNTHREADS; i++)
+      for (i = 0; i < CONFIG_SCHED_LPNTHREADS; i++)
         {
           /* Is this worker thread busy? */
 
@@ -98,16 +97,20 @@ int work_signal(int qid)
             {
               /* No.. select this thread */
 
-              wndx = i;
               break;
             }
         }
 
-      /* Use the process ID of the IDLE worker thread (or the ID of worker
-       * thread 0 if all of the worker threads are busy).
-       */
+      /* If all of the IDLE threads are busy, then just return successfully */
 
-      pid = g_lpwork.worker[wndx].pid;
+      if (i >= CONFIG_SCHED_LPNTHREADS)
+        {
+          return OK;
+        }
+
+      /* Otherwise, signal the first IDLE thread found */
+
+      pid = g_lpwork.worker[i].pid;
     }
   else
 #endif

@@ -69,27 +69,11 @@
 #endif
 
 /* Debug ********************************************************************/
-/* Define the CONFIG_DEBUG_LCD to enable detailed debug output (stuff you
- * would never want to see unless you are debugging this file).
- *
- * Verbose debug must also be enabled
- */
-
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
-#  undef CONFIG_DEBUG_GRAPHICS
-#endif
-
-#ifndef CONFIG_DEBUG_VERBOSE
-#  undef CONFIG_DEBUG_LCD
-#endif
 
 #ifdef CONFIG_DEBUG_LCD
-#  define ugdbg(format, ...)  vdbg(format, ##__VA_ARGS__)
 #  define oleddc_dumpgpio(m)  lpc17_dumpgpio(LPCXPRESSO_OLED_POWER, m)
 #  define oledcs_dumpgpio(m)  lpc17_dumpgpio(LPCXPRESSO_OLED_CS, m)
 #else
-#  define ugdbg(x...)
 #  define oleddc_dumpgpio(m)
 #  define oledcs_dumpgpio(m)
 #endif
@@ -128,7 +112,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
   spi = lpc17_sspbus_initialize(1);
   if (!spi)
     {
-      glldbg("Failed to initialize SPI port 1\n");
+      gerr("ERROR: Failed to initialize SPI port 1\n");
     }
   else
     {
@@ -137,11 +121,11 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
       dev = ug_initialize(spi, devno);
       if (!dev)
         {
-          glldbg("Failed to bind SPI port 1 to OLED %d: %d\n", devno);
+          gerr("ERROR: Failed to bind SPI port 1 to OLED %d: %d\n", devno);
         }
      else
         {
-          gllvdbg("Bound SPI port 1 to OLED %d\n", devno);
+          ginfo("Bound SPI port 1 to OLED %d\n", devno);
 
           /* And turn the OLED on (dim) */
 
@@ -209,7 +193,7 @@ int lpc17_ssp1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
 #ifdef CONFIG_UG9664HSWAG01_POWER
 void ug_power(unsigned int devno, bool on)
 {
-  gllvdbg("power %s\n", on ? "ON" : "OFF");
+  ginfo("power %s\n", on ? "ON" : "OFF");
   (void)lpc17_gpiowrite(LPCXPRESSO_OLED_POWER, on);
 }
 #endif

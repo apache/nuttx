@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/sama5d4-ek/src/sam_bringup.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,11 +46,11 @@
 #include <errno.h>
 #include <debug.h>
 
-#ifdef CONFIG_SYSTEM_USBMONITOR
-#  include <apps/usbmonitor.h>
+#ifdef CONFIG_USBMONITOR
+#  include <nuttx/usb/usbmonitor.h>
 #endif
 
-#include <nuttx/fs/ramdisk.h>
+#include <nuttx/drivers/ramdisk.h>
 #include <nuttx/binfmt/elf.h>
 #include <nuttx/i2c/i2c_master.h>
 
@@ -68,14 +68,6 @@
 #define NSECTORS(n) \
   (((n)+CONFIG_SAMA5D4EK_ROMFS_ROMDISK_SECTSIZE-1) / \
    CONFIG_SAMA5D4EK_ROMFS_ROMDISK_SECTSIZE)
-
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_BOARD_INITIALIZE
-#  define SYSLOG lldbg
-#else
-#  define SYSLOG dbg
-#endif
 
 /****************************************************************************
  * Private Functions
@@ -98,14 +90,14 @@ static void sam_i2c_register(int bus)
   i2c = sam_i2cbus_initialize(bus);
   if (i2c == NULL)
     {
-      dbg("ERROR: Failed to get I2C%d interface\n", bus);
+      _err("ERROR: Failed to get I2C%d interface\n", bus);
     }
   else
     {
       ret = i2c_register(i2c, bus);
       if (ret < 0)
         {
-          dbg("ERROR: Failed to register I2C%d driver: %d\n", bus, ret);
+          _err("ERROR: Failed to register I2C%d driver: %d\n", bus, ret);
           sam_i2cbus_uninitialize(i2c);
         }
     }
@@ -154,12 +146,7 @@ static void sam_i2ctool(void)
 
 int sam_bringup(void)
 {
-#if defined(HAVE_NAND) || defined(HAVE_AT25) || defined(HAVE_HSMCI)  || \
-    defined(HAVE_USBHOST) || defined(HAVE_USBMONITOR) || defined(HAVE_WM8904) || \
-    defined(HAVE_AUTOMOUNTER) || defined(HAVE_ELF) || defined(HAVE_ROMFS) || \
-    defined(CONFIG_FS_PROCFS)
   int ret;
-#endif
 
   /* Register I2C drivers on behalf of the I2C tool */
 
@@ -171,7 +158,7 @@ int sam_bringup(void)
   ret = sam_nand_automount(NAND_MINOR);
   if (ret < 0)
     {
-      SYSLOG("ERROR: sam_nand_automount failed: %d\n", ret);
+      _err("ERROR: sam_nand_automount failed: %d\n", ret);
     }
 #endif
 
@@ -181,7 +168,7 @@ int sam_bringup(void)
   ret = sam_at25_automount(AT25_MINOR);
   if (ret < 0)
     {
-      SYSLOG("ERROR: sam_at25_automount failed: %d\n", ret);
+      _err("ERROR: sam_at25_automount failed: %d\n", ret);
     }
 #endif
 
@@ -192,8 +179,8 @@ int sam_bringup(void)
   ret = sam_hsmci_initialize(HSMCI0_SLOTNO, HSMCI0_MINOR);
   if (ret < 0)
     {
-      SYSLOG("ERROR: sam_hsmci_initialize(%d,%d) failed: %d\n",
-             HSMCI0_SLOTNO, HSMCI0_MINOR, ret);
+      _err("ERROR: sam_hsmci_initialize(%d,%d) failed: %d\n",
+           HSMCI0_SLOTNO, HSMCI0_MINOR, ret);
     }
 
 #ifdef CONFIG_SAMA5D4EK_HSMCI0_MOUNT
@@ -209,8 +196,8 @@ int sam_bringup(void)
 
       if (ret < 0)
         {
-          SYSLOG("ERROR: Failed to mount %s: %d\n",
-                 CONFIG_SAMA5D4EK_HSMCI0_MOUNT_MOUNTPOINT, errno);
+          _err("ERROR: Failed to mount %s: %d\n",
+               CONFIG_SAMA5D4EK_HSMCI0_MOUNT_MOUNTPOINT, errno);
         }
     }
 #endif
@@ -222,8 +209,8 @@ int sam_bringup(void)
   ret = sam_hsmci_initialize(HSMCI1_SLOTNO, HSMCI1_MINOR);
   if (ret < 0)
     {
-      SYSLOG("ERROR: sam_hsmci_initialize(%d,%d) failed: %d\n",
-             HSMCI1_SLOTNO, HSMCI1_MINOR, ret);
+      _err("ERROR: sam_hsmci_initialize(%d,%d) failed: %d\n",
+           HSMCI1_SLOTNO, HSMCI1_MINOR, ret);
     }
 
 #ifdef CONFIG_SAMA5D4EK_HSMCI1_MOUNT
@@ -239,8 +226,8 @@ int sam_bringup(void)
 
       if (ret < 0)
         {
-          SYSLOG("ERROR: Failed to mount %s: %d\n",
-                 CONFIG_SAMA5D4EK_HSMCI1_MOUNT_MOUNTPOINT, errno);
+          _err("ERROR: Failed to mount %s: %d\n",
+               CONFIG_SAMA5D4EK_HSMCI1_MOUNT_MOUNTPOINT, errno);
         }
     }
 #endif
@@ -261,7 +248,7 @@ int sam_bringup(void)
                          CONFIG_SAMA5D4EK_ROMFS_ROMDISK_SECTSIZE);
   if (ret < 0)
     {
-      SYSLOG("ERROR: romdisk_register failed: %d\n", -ret);
+      _err("ERROR: romdisk_register failed: %d\n", -ret);
     }
   else
     {
@@ -272,9 +259,9 @@ int sam_bringup(void)
                   "romfs", MS_RDONLY, NULL);
       if (ret < 0)
         {
-          SYSLOG("ERROR: mount(%s,%s,romfs) failed: %d\n",
-                 CONFIG_SAMA5D4EK_ROMFS_ROMDISK_DEVNAME,
-                 CONFIG_SAMA5D4EK_ROMFS_MOUNT_MOUNTPOINT, errno);
+          _err("ERROR: mount(%s,%s,romfs) failed: %d\n",
+               CONFIG_SAMA5D4EK_ROMFS_ROMDISK_DEVNAME,
+               CONFIG_SAMA5D4EK_ROMFS_MOUNT_MOUNTPOINT, errno);
         }
     }
 #endif
@@ -287,17 +274,37 @@ int sam_bringup(void)
   ret = sam_usbhost_initialize();
   if (ret != OK)
     {
-      SYSLOG("ERROR: Failed to initialize USB host: %d\n", ret);
+      _err("ERROR: Failed to initialize USB host: %d\n", ret);
     }
 #endif
 
 #ifdef HAVE_USBMONITOR
   /* Start the USB Monitor */
 
-  ret = usbmonitor_start(0, NULL);
+  ret = usbmonitor_start();
   if (ret != OK)
     {
-      SYSLOG("ERROR: Failed to start the USB monitor: %d\n", ret);
+      _err("ERROR: Failed to start the USB monitor: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_PWM
+  /* Initialize PWM and register the PWM device. */
+
+  ret = sam_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: sam_pwm_setup() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ADC
+  /* Initialize ADC and register the ADC driver. */
+
+  ret = sam_adc_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: sam_adc_setup failed: %d\n", ret);
     }
 #endif
 
@@ -307,7 +314,7 @@ int sam_bringup(void)
   ret = sam_wm8904_initialize(0);
   if (ret != OK)
     {
-      SYSLOG("ERROR: Failed to initialize WM8904 audio: %d\n", ret);
+      _err("ERROR: Failed to initialize WM8904 audio: %d\n", ret);
     }
 #endif
 
@@ -317,18 +324,18 @@ int sam_bringup(void)
   ret = sam_audio_null_initialize(0);
   if (ret != OK)
     {
-      SYSLOG("ERROR: Failed to initialize the NULL audio device: %d\n", ret);
+      _err("ERROR: Failed to initialize the NULL audio device: %d\n", ret);
     }
 #endif
 
 #ifdef HAVE_ELF
   /* Initialize the ELF binary loader */
 
-  SYSLOG("Initializing the ELF binary loader\n");
+  _err("Initializing the ELF binary loader\n");
   ret = elf_initialize();
   if (ret < 0)
     {
-      SYSLOG("ERROR: Initialization of the ELF loader failed: %d\n", ret);
+      _err("ERROR: Initialization of the ELF loader failed: %d\n", ret);
     }
 #endif
 
@@ -338,8 +345,8 @@ int sam_bringup(void)
   ret = mount(NULL, SAMA5_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
   if (ret < 0)
     {
-      SYSLOG("ERROR: Failed to mount procfs at %s: %d\n",
-             SAMA5_PROCFS_MOUNTPOINT, ret);
+      _err("ERROR: Failed to mount procfs at %s: %d\n",
+           SAMA5_PROCFS_MOUNTPOINT, ret);
     }
 #endif
 
@@ -348,5 +355,6 @@ int sam_bringup(void)
    * capabilities.
    */
 
+  UNUSED(ret);
   return OK;
 }

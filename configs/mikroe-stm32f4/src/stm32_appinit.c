@@ -55,13 +55,13 @@
 #  include <nuttx/mtd/mtd.h>
 #endif
 
-#ifdef CONFIG_SYSTEM_USBMONITOR
-#  include <apps/usbmonitor.h>
+#ifdef CONFIG_USBMONITOR
+#  include <nuttx/usb/usbmonitor.h>
 #endif
 
 #ifdef CONFIG_MIKROE_FLASH_CONFIG_PART
 #ifdef CONFIG_PLATFORM_CONFIGDATA
-#  include <nuttx/configdata.h>
+#  include <nuttx/mtd/configdata.h>
 #endif
 #endif
 
@@ -110,7 +110,7 @@
 
 /* Check if we should enable the USB monitor before starting NSH */
 
-#if !defined(CONFIG_USBDEV_TRACE) || !defined(CONFIG_SYSTEM_USBMONITOR)
+#if !defined(CONFIG_USBDEV_TRACE) || !defined(CONFIG_USBMONITOR)
 #  undef HAVE_USBMONITOR
 #endif
 
@@ -180,11 +180,7 @@ int board_app_initialize(uintptr_t arg)
   FAR struct spi_dev_s *spi;
   FAR struct mtd_dev_s *mtd;
 #endif
-#if defined(NSH_HAVEMMCSD) || defined(HAVE_USBHOST) || \
-    defined(HAVE_USBMONITOR) || defined(CONFIG_LCD_MIO283QT2) || \
-    defined(CONFIG_LCD_MIO283QT9A)
-  int ret;
-#endif
+  int ret = OK;
 
   /* Configure SPI-based devices */
 
@@ -347,10 +343,20 @@ int board_app_initialize(uintptr_t arg)
 #ifdef HAVE_USBMONITOR
   /* Start the USB Monitor */
 
-  ret = usbmonitor_start(0, NULL);
+  ret = usbmonitor_start();
   if (ret != OK)
     {
       syslog(LOG_ERR, "ERROR: Failed to start USB monitor: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_PWM
+  /* Initialize PWM and register the PWM device. */
+
+  ret = stm32_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_pwm_setup() failed: %d\n", ret);
     }
 #endif
 
@@ -367,13 +373,24 @@ int board_app_initialize(uintptr_t arg)
 
 #endif
 
-  /* Configure the Audio sub-system if enabled and bind it to SPI 3 */
+#ifdef CONFIG_QENCODER
+  /* Initialize and register the qencoder driver */
 
-#ifdef CONFIG_AUDIO
-
-  up_vs1053initialize(spi);
-
+  ret = stm32_qencoder_initialize("/dev/qe0", CONFIG_MIKROE_QETIMER);
+  if (ret != OK)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to register the qencoder: %d\n",
+             ret);
+      return ret;
+    }
 #endif
 
-  return OK;
+#ifdef CONFIG_AUDIO
+  /* Configure the Audio sub-system if enabled and bind it to SPI 3 */
+
+  up_vs1053initialize(spi);
+#endif
+
+  return ret;
 }

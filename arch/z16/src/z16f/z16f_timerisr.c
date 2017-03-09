@@ -1,7 +1,7 @@
 /****************************************************************************
- * z16f/z16f_timerisr.c
+ * arch/z16/src/z16f/z16f_timerisr.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -70,19 +70,11 @@ extern _Erom uint8_t SYS_CLK_FREQ;
 #define _DEFCLK ((uint32_t)&SYS_CLK_FREQ)
 
 /****************************************************************************
- * Private Types
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Function:  up_timerisr
+ * Function:  z16f_timerisr
  *
  * Description:
  *   The timer ISR will perform a variety of services for various portions
@@ -90,16 +82,20 @@ extern _Erom uint8_t SYS_CLK_FREQ;
  *
  ****************************************************************************/
 
-int up_timerisr(int irq, uint32_t *regs)
+static int z16f_timerisr(int irq, uint32_t *regs, void *arg)
 {
-   /* Process timer interrupt */
+  /* Process timer interrupt */
 
-   sched_process_timer();
-   return 0;
+  sched_process_timer();
+  return 0;
 }
 
 /****************************************************************************
- * Function:  up_timer_initialize
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Function:  z16_timer_initialize
  *
  * Description:
  *   This function is called during start-up to initialize
@@ -107,7 +103,7 @@ int up_timerisr(int irq, uint32_t *regs)
  *
  ****************************************************************************/
 
-void up_timer_initialize(void)
+void z16_timer_initialize(void)
 {
   uint32_t reload;
   uint32_t scaledfreq;
@@ -228,6 +224,6 @@ void up_timer_initialize(void)
 
   /* Attach and enable the timer interrupt (leaving at priority 0) */
 
-  irq_attach(Z16F_IRQ_SYSTIMER, (xcpt_t)up_timerisr);
+  irq_attach(Z16F_IRQ_SYSTIMER, (xcpt_t)z16f_timerisr, NULL);
   up_enable_irq(Z16F_IRQ_SYSTIMER);
 }

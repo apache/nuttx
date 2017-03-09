@@ -6,7 +6,7 @@
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Ported by: Darcy Gong
  *
- * It derives from the Rhombs OS math library by Nick Johnson which has
+ * It derives from the Rhombus OS math library by Nick Johnson which has
  * a compatibile, MIT-style license:
  *
  * Copyright (C) 2009-2011 Nick Johnson <nickbjohnson4224 at gmail.com>
@@ -89,8 +89,8 @@ float expf(float x)
 
   /* Perform Taylor series approximation with eleven terms */
 
-  value = 0.0;
-  x0 = 1.0;
+  value = 0.0F;
+  x0 = 1.0F;
   for (i = 0; i < 10; i++)
     {
       value += x0 * _flt_inv_fact[i];
@@ -99,11 +99,11 @@ float expf(float x)
 
   /* Multiply by exp of the integer component */
 
-  value *= lib_expi(int_part);
+  value *= lib_expif(int_part);
 
   if (invert)
     {
-      return (1.0 / value);
+      return (1.0F / value);
     }
   else
     {

@@ -55,8 +55,9 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/fs/fs.h>
 #include <nuttx/arch.h>
+#include <nuttx/semaphore.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/analog/dac.h>
 
 #include <nuttx/irq.h>
@@ -478,6 +479,7 @@ static int dac_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 int dac_txdone(FAR struct dac_dev_s *dev)
 {
   int ret = -ENOENT;
+  int sval;
 
   /* Verify that the xmit FIFO is not empty */
 
@@ -497,7 +499,11 @@ int dac_txdone(FAR struct dac_dev_s *dev)
         {
           /* Inform any waiting threads that new xmit space is available */
 
-          ret = sem_post(&dev->ad_xmit.af_sem);
+          ret = sem_getvalue(&dev->ad_xmit.af_sem, &sval);
+          if (ret == OK && sval <= 0)
+            {
+              ret = sem_post(&dev->ad_xmit.af_sem);
+            }
         }
     }
 
@@ -510,8 +516,16 @@ int dac_register(FAR const char *path, FAR struct dac_dev_s *dev)
 
   dev->ad_ocount = 0;
 
+  /* Initialize semaphores */
+
   sem_init(&dev->ad_xmit.af_sem, 0, 0);
   sem_init(&dev->ad_closesem, 0, 1);
+
+  /* The transmit semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
+  sem_setprotocol(&dev->ad_xmit.af_sem, SEM_PRIO_NONE);
 
   dev->ad_ops->ao_reset(dev);
 

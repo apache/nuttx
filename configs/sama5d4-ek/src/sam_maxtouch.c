@@ -163,13 +163,13 @@ static int mxt_attach(FAR const struct mxt_lower_s *lower, mxt_handler_t isr,
        * new handler will called via mxt_interrupt() when the interrupt occurs.
        */
 
-      ivdbg("Attaching %p\n", isr);
+      iinfo("Attaching %p\n", isr);
       g_mxtinfo.handler = isr;
       g_mxtinfo.arg = arg;
     }
   else
     {
-      ivdbg("Detaching %p\n", g_mxtinfo.handler);
+      iinfo("Detaching %p\n", g_mxtinfo.handler);
       mxt_enable(lower, false);
       g_mxtinfo.handler = NULL;
       g_mxtinfo.arg = NULL;
@@ -197,7 +197,7 @@ static void mxt_clear(FAR const struct mxt_lower_s *lower)
   /* Does nothing */
 }
 
-static int mxt_interrupt(int irq, FAR void *context)
+static int mxt_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   /* Just forward the interrupt to the maXTouch driver */
 
@@ -242,7 +242,7 @@ int board_tsc_setup(int minor)
   static bool initialized = false;
   int ret;
 
-  idbg("minor %d\n", minor);
+  iinfo("minor %d\n", minor);
   DEBUGASSERT(minor == 0);
 
   /* Have we already initialized?  Since we never uninitialize we must prevent
@@ -262,21 +262,21 @@ int board_tsc_setup(int minor)
       i2c = sam_i2cbus_initialize(MXT_TWI_BUS);
       if (!i2c)
         {
-          idbg("Failed to initialize I2C%d\n", MXT_TWI_BUS);
+          ierr("ERROR: Failed to initialize I2C%d\n", MXT_TWI_BUS);
           return -ENODEV;
         }
 
        /* Configure maXTouch CHG interrupts */
 
       sam_pioirq(PIO_CHG_MXT);
-      (void)irq_attach(IRQ_CHG_MXT, mxt_interrupt);
+      (void)irq_attach(IRQ_CHG_MXT, mxt_interrupt, NULL);
 
       /* Initialize and register the I2C touchscreen device */
 
       ret = mxt_register(i2c, &g_mxtinfo.lower, CONFIG_SAMA5D4EK_MXT_DEVMINOR);
       if (ret < 0)
         {
-          idbg("ERROR: Failed to register touchscreen device\n");
+          ierr("ERROR: Failed to register touchscreen device\n");
           irq_detach(IRQ_CHG_MXT);
           /* sam_i2cbus_uninitialize(i2c); */
           return -ENODEV;

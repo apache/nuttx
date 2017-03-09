@@ -2,7 +2,7 @@
  * include/sys/syscall.h
  * This file contains the system call numbers.
  *
- *   Copyright (C) 2011-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -91,15 +91,22 @@
 #define SYS_sem_trywait                (CONFIG_SYS_RESERVED+18)
 #define SYS_sem_wait                   (CONFIG_SYS_RESERVED+19)
 
+#ifdef CONFIG_PRIORITY_INHERITANCE
+#  define SYS_sem_setprotocol          (CONFIG_SYS_RESERVED+20)
+#  define __SYS_named_sem              (CONFIG_SYS_RESERVED+21)
+#else
+#  define __SYS_named_sem              (CONFIG_SYS_RESERVED+20)
+#endif
+
 /* Named semaphores */
 
 #ifdef CONFIG_FS_NAMED_SEMAPHORES
-#  define SYS_sem_open                 (CONFIG_SYS_RESERVED+20)
-#  define SYS_sem_close                (CONFIG_SYS_RESERVED+21)
-#  define SYS_sem_unlink               (CONFIG_SYS_RESERVED+22)
-#  define __SYS_task_create            (CONFIG_SYS_RESERVED+23)
+#  define SYS_sem_open                 __SYS_named_sem
+#  define SYS_sem_close                (__SYS_named_sem+1)
+#  define SYS_sem_unlink               (__SYS_named_sem+2)
+#  define __SYS_task_create            (__SYS_named_sem+3)
 #else
-#  define __SYS_task_create            (CONFIG_SYS_RESERVED+20)
+#  define __SYS_task_create            __SYS_named_sem
 #endif
 
 /* Task creation APIs based on global entry points cannot be use with
@@ -121,8 +128,16 @@
 
 #  define SYS_task_delete              __SYS_task_delete
 #  define SYS_task_restart             (__SYS_task_delete+1)
-#  define SYS_up_assert                (__SYS_task_delete+2)
-#  define __SYS_vfork                  (__SYS_task_delete+3)
+#  define SYS_task_setcancelstate      (__SYS_task_delete+2)
+#  define SYS_up_assert                (__SYS_task_delete+3)
+
+#  ifdef CONFIG_CANCELLATION_POINTS
+#    define SYS_task_setcanceltype     (__SYS_task_delete+4)
+#    define SYS_task_testcancel        (__SYS_task_delete+5)
+#    define __SYS_vfork                (__SYS_task_delete+6)
+#  else
+#    define __SYS_vfork                (__SYS_task_delete+4)
+#  endif
 
 /* The following can be individually enabled */
 
@@ -167,7 +182,8 @@
 #ifdef CONFIG_MODULE
 #  define SYS_insmod                   __SYS_insmod
 #  define SYS_rmmod                   (__SYS_insmod+1)
-#  define __SYS_posix_spawn           (__SYS_insmod+2)
+#  define SYS_modhandle               (__SYS_insmod+2)
+#  define __SYS_posix_spawn           (__SYS_insmod+3)
 #else
 #  define __SYS_posix_spawn            __SYS_insmod
 #endif
@@ -215,7 +231,12 @@
 #define SYS_clock_getres               (__SYS_clock+1)
 #define SYS_clock_gettime              (__SYS_clock+2)
 #define SYS_clock_settime              (__SYS_clock+3)
-#define __SYS_timers                   (__SYS_clock+4)
+#ifdef CONFIG_CLOCK_TIMEKEEPING
+#  define SYS_adjtime                  (__SYS_clock+4)
+#  define __SYS_timers                 (__SYS_clock+5)
+#else
+#  define __SYS_timers                 (__SYS_clock+4)
+#endif
 
 /* The following are defined only if POSIX timers are supported */
 
@@ -225,10 +246,15 @@
 #  define SYS_timer_getoverrun         (__SYS_timers+2)
 #  define SYS_timer_gettime            (__SYS_timers+3)
 #  define SYS_timer_settime            (__SYS_timers+4)
-#  define __SYS_descriptors            (__SYS_timers+5)
+#  define __SYS_syslog                 (__SYS_timers+5)
 #else
-#  define __SYS_descriptors             __SYS_timers
+#  define __SYS_syslog                 __SYS_timers
 #endif
+
+/* Unconditional system logging */
+
+#define SYS__vsyslog                   (__SYS_syslog+0)
+#define __SYS_descriptors              (__SYS_syslog+1)
 
 /* The following are defined if either file or socket descriptor are
  * enabled.
@@ -287,24 +313,46 @@
 #  define SYS_dup2                     (__SYS_filedesc+2)
 #  define SYS_fcntl                    (__SYS_filedesc+3)
 #  define SYS_lseek                    (__SYS_filedesc+4)
-#  define SYS_mkfifo                   (__SYS_filedesc+5)
-#  define SYS_mmap                     (__SYS_filedesc+6)
-#  define SYS_open                     (__SYS_filedesc+7)
-#  define SYS_opendir                  (__SYS_filedesc+8)
-#  define SYS_pipe                     (__SYS_filedesc+9)
-#  define SYS_readdir                  (__SYS_filedesc+10)
-#  define SYS_rewinddir                (__SYS_filedesc+11)
-#  define SYS_seekdir                  (__SYS_filedesc+12)
-#  define SYS_stat                     (__SYS_filedesc+13)
-#  define SYS_statfs                   (__SYS_filedesc+14)
+#  define SYS_mmap                     (__SYS_filedesc+5)
+#  define SYS_open                     (__SYS_filedesc+6)
+#  define SYS_opendir                  (__SYS_filedesc+7)
+#  define SYS_readdir                  (__SYS_filedesc+8)
+#  define SYS_rewinddir                (__SYS_filedesc+9)
+#  define SYS_seekdir                  (__SYS_filedesc+10)
+#  define SYS_stat                     (__SYS_filedesc+11)
+#  define SYS_fstat                    (__SYS_filedesc+12)
+#  define SYS_statfs                   (__SYS_filedesc+13)
+#  define SYS_fstatfs                  (__SYS_filedesc+14)
 #  define SYS_telldir                  (__SYS_filedesc+15)
 
-#  if CONFIG_NFILE_STREAMS > 0
-#    define SYS_fs_fdopen              (__SYS_filedesc+16)
-#    define SYS_sched_getstreams       (__SYS_filedesc+17)
-#    define __SYS_sendfile             (__SYS_filedesc+18)
+#  if defined(CONFIG_PSEUDOFS_SOFTLINKS)
+#    define SYS_link                   (__SYS_filedesc+16)
+#    define SYS_readlink               (__SYS_filedesc+17)
+#    define __SYS_pipes                (__SYS_filedesc+18)
 #  else
-#    define __SYS_sendfile             (__SYS_filedesc+16)
+#    define __SYS_pipes                (__SYS_filedesc+16)
+#  endif
+
+#  if defined(CONFIG_PIPES) && CONFIG_DEV_PIPE_SIZE > 0
+#    define SYS_pipe2                  (__SYS_pipes+0)
+#    define __SYS_mkfifo2              (__SYS_pipes+1)
+#  else
+#    define __SYS_mkfifo2              (__SYS_pipes+0)
+#  endif
+
+#  if defined(CONFIG_PIPES) && CONFIG_DEV_FIFO_SIZE > 0
+#    define SYS_mkfifo2                (__SYS_mkfifo2+0)
+#    define __SYS_fs_fdopen            (__SYS_mkfifo2+1)
+#  else
+#    define __SYS_fs_fdopen            (__SYS_mkfifo2+0)
+#  endif
+
+#  if CONFIG_NFILE_STREAMS > 0
+#    define SYS_fs_fdopen              (__SYS_fs_fdopen+0)
+#    define SYS_sched_getstreams       (__SYS_fs_fdopen+1)
+#    define __SYS_sendfile             (__SYS_fs_fdopen+2)
+#  else
+#    define __SYS_sendfile             (__SYS_fs_fdopen+0)
 #  endif
 
 #  if defined(CONFIG_NET_SENDFILE)
@@ -371,27 +419,35 @@
 #  define SYS_pthread_mutex_trylock    (__SYS_pthread+20)
 #  define SYS_pthread_mutex_unlock     (__SYS_pthread+21)
 #  define SYS_pthread_once             (__SYS_pthread+22)
-#  define SYS_pthread_setcancelstate   (__SYS_pthread+23)
-#  define SYS_pthread_setschedparam    (__SYS_pthread+24)
-#  define SYS_pthread_setschedprio     (__SYS_pthread+25)
-#  define SYS_pthread_setspecific      (__SYS_pthread+26)
-#  define SYS_pthread_yield            (__SYS_pthread+27)
+#  define SYS_pthread_setschedparam    (__SYS_pthread+23)
+#  define SYS_pthread_setschedprio     (__SYS_pthread+24)
+#  define SYS_pthread_setspecific      (__SYS_pthread+25)
+#  define SYS_pthread_yield            (__SYS_pthread+26)
+#  define __SYS_pthread_smp            (__SYS_pthread+27)
 
-#  ifndef CONFIG_SMP
-#    define SYS_pthread_setaffinity_np (__SYS_pthread+28)
-#    define SYS_pthread_getaffinity_np (__SYS_pthread+29)
-#    define __SYS_pthread_signals      (__SYS_pthread+30)
+#  ifdef CONFIG_SMP
+#    define SYS_pthread_setaffinity_np (__SYS_pthread_smp+0)
+#    define SYS_pthread_getaffinity_np (__SYS_pthread_smp+1)
+#    define __SYS_pthread_signals      (__SYS_pthread_smp+2)
 #  else
-#    define __SYS_pthread_signals      (__SYS_pthread+28)
+#    define __SYS_pthread_signals      __SYS_pthread_smp
 #  endif
 
 #  ifndef CONFIG_DISABLE_SIGNALS
 #    define SYS_pthread_cond_timedwait (__SYS_pthread_signals+0)
 #    define SYS_pthread_kill           (__SYS_pthread_signals+1)
 #    define SYS_pthread_sigmask        (__SYS_pthread_signals+2)
-#    define __SYS_mqueue               (__SYS_pthread_signals+3)
+#    define __SYS_pthread_cleanup      (__SYS_pthread_signals+3)
 #  else
-#    define __SYS_mqueue               __SYS_pthread_signals
+#    define __SYS_pthread_cleanup      __SYS_pthread_signals
+#  endif
+
+#  ifdef CONFIG_PTHREAD_CLEANUP
+#    define __SYS_pthread_cleanup_push (__SYS_pthread_cleanup+0)
+#    define __SYS_pthread_cleanup_pop  (__SYS_pthread_cleanup+1)
+#    define __SYS_mqueue               (__SYS_pthread_cleanup+2)
+#  else
+#    define __SYS_mqueue               __SYS_pthread_cleanup
 #  endif
 
 #else

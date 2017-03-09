@@ -225,6 +225,10 @@ ifeq ($(CONFIG_NXFONT_X11_MISC_FIXED_10X20),y)
 	$(Q) $(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=42 EXTRADEFINES=$(EXTRADEFINES)
 endif
 
+ifeq ($(CONFIG_NXFONT_TOM_THUMB_4X6),y)
+	$(Q) $(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=43 EXTRADEFINES=$(EXTRADEFINES)
+endif
+
 gensources: gen1bppsources gen2bppsource gen4bppsource gen8bppsource gen16bppsource gen24bppsource gen32bppsources genfontsources
 
 $(AOBJS): $(BINDIR)$(DELIM)%$(OBJEXT): %.S

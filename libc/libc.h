@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/libc.h
  *
- *   Copyright (C) 2007-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2014, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,6 +53,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* This configuration directory is used in environment variable processing
  * when we need to reference the user's home directory.  There are no user
  * directories in NuttX so, by default, this always refers to the root
@@ -67,7 +68,7 @@
  * protection.
  */
 
-#if CONFIG_STDIO_BUFFER_SIZE <= 0
+#ifdef CONFIG_STDIO_DISABLE_BUFFERING
 #  define lib_sem_initialize(s)
 #  define lib_take_semaphore(s)
 #  define lib_give_semaphore(s)
@@ -186,7 +187,7 @@ int lib_wrflush(FAR FILE *stream);
 
 /* Defined in lib_sem.c */
 
-#if CONFIG_STDIO_BUFFER_SIZE > 0
+#ifndef CONFIG_STDIO_DISABLE_BUFFERING
 void lib_sem_initialize(FAR struct file_struct *stream);
 void lib_take_semaphore(FAR struct file_struct *stream);
 void lib_give_semaphore(FAR struct file_struct *stream);
@@ -211,6 +212,7 @@ int lib_checkbase(int base, const char **pptr);
 /* Defined in lib_expi.c */
 
 #ifdef CONFIG_LIBM
+float  lib_expif(size_t n);
 double lib_expi(size_t n);
 #endif
 

@@ -2,7 +2,8 @@
  * arch/arm/src/stm32f7/chip/stm32f74xx75xx_pinmap.h
  *
  *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -50,7 +51,7 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* Alternate Pin Functions.  All members of the STM32F40xxx family share the same
+/* Alternate Pin Functions.  All members of the STM32F74|5xxx family share the same
  * pin multiplexing (although they may differ in the pins physically available).
  *
  * Alternative pin selections are provided with a numeric suffix like _1, _2, etc.
@@ -241,7 +242,6 @@
 #define GPIO_ETH_RMII_TXD0_2  (GPIO_ALT|GPIO_AF11|GPIO_SPEED_100MHz|GPIO_PUSHPULL|GPIO_PORTG|GPIO_PIN13)
 #define GPIO_ETH_RMII_TXD1_1  (GPIO_ALT|GPIO_AF11|GPIO_SPEED_100MHz|GPIO_PUSHPULL|GPIO_PORTB|GPIO_PIN13)
 #define GPIO_ETH_RMII_TXD1_2  (GPIO_ALT|GPIO_AF11|GPIO_SPEED_100MHz|GPIO_PUSHPULL|GPIO_PORTG|GPIO_PIN14)
-#define GPIO_ETH_RMII_TX_CLK  (GPIO_ALT|GPIO_AF11|GPIO_SPEED_100MHz|GPIO_PUSHPULL|GPIO_PORTC|GPIO_PIN3)
 #define GPIO_ETH_RMII_TX_EN_1 (GPIO_ALT|GPIO_AF11|GPIO_SPEED_100MHz|GPIO_PUSHPULL|GPIO_PORTB|GPIO_PIN11)
 #define GPIO_ETH_RMII_TX_EN_2 (GPIO_ALT|GPIO_AF11|GPIO_SPEED_100MHz|GPIO_PUSHPULL|GPIO_PORTG|GPIO_PIN11)
 

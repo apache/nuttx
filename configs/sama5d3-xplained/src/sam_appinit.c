@@ -48,8 +48,8 @@
 
 #include <nuttx/board.h>
 
-#ifdef CONFIG_SYSTEM_USBMONITOR
-#  include <apps/usbmonitor.h>
+#ifdef CONFIG_USBMONITOR
+#  include <nuttx/usb/usbmonitor.h>
 #endif
 
 #include "sama5d3-xplained.h"
@@ -85,11 +85,7 @@
 
 int board_app_initialize(uintptr_t arg)
 {
-#if defined(HAVE_NAND) || defined(HAVE_AT25) || defined(HAVE_HSMCI) || \
-    defined(HAVE_USBHOST) || defined(HAVE_USBMONITOR) || \\
-    defined(CONFIG_AJOYSTICK) || defined(CONFIG_FS_PROCFS)
   int ret;
-#endif
 
 #ifdef HAVE_NAND
   /* Initialize the NAND driver */
@@ -155,10 +151,20 @@ int board_app_initialize(uintptr_t arg)
 #ifdef HAVE_USBMONITOR
   /* Start the USB Monitor */
 
-  ret = usbmonitor_start(0, NULL);
+  ret = usbmonitor_start();
   if (ret != OK)
     {
       syslog(LOG_ERR, "ERROR: Failed to start USB monitor: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ADC
+  /* Initialize ADC and register the ADC driver. */
+
+  ret = sam_adc_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: sam_adc_setup failed: %d\n", ret);
     }
 #endif
 
@@ -175,6 +181,27 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
+#ifdef CONFIG_PWM
+  /* Initialize PWM and register the PWM device. */
+
+  ret = sam_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: sam_pwm_setup() failed: %d\n", ret);
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_CAN
+  /* Initialize CAN and register the CAN driver. */
+
+  ret = sam_can_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: sam_can_setup failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
 
@@ -184,8 +211,10 @@ int board_app_initialize(uintptr_t arg)
       syslog(LOG_ERR,
              "ERROR: Failed to mount procfs at %s: %d\n",
              SAMA5_PROCFS_MOUNTPOINT, ret);
+      return ret;
     }
 #endif
 
+  UNUSED(ret);
   return OK;
 }

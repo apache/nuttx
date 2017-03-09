@@ -160,14 +160,14 @@ static void stm32_i2c_register(int bus)
   i2c = stm32_i2cbus_initialize(bus);
   if (i2c == NULL)
     {
-      dbg("ERROR: Failed to get I2C%d interface\n", bus);
+      _err("ERROR: Failed to get I2C%d interface\n", bus);
     }
   else
     {
       ret = i2c_register(i2c, bus);
       if (ret < 0)
         {
-          dbg("ERROR: Failed to register I2C%d driver: %d\n", bus, ret);
+          _err("ERROR: Failed to register I2C%d driver: %d\n", bus, ret);
           stm32_i2cbus_uninitialize(i2c);
         }
     }
@@ -240,9 +240,7 @@ int board_app_initialize(uintptr_t arg)
 #ifdef HAVE_MMCSD
   FAR struct sdio_dev_s *sdio;
 #endif
-#if defined(HAVE_MMCSD) || defined(HAVE_USBHOST) || defined(HAVE_RTC_DRIVER)
   int ret;
-#endif
 
   /* Register I2C drivers on behalf of the I2C tool */
 
@@ -254,7 +252,8 @@ int board_app_initialize(uintptr_t arg)
   lower = stm32_rtc_lowerhalf();
   if (!lower)
     {
-      sdbg("ERROR: Failed to instantiate the RTC lower-half driver\n");
+      syslog(LOG_ERR,
+             "ERROR: Failed to instantiate the RTC lower-half driver\n");
       return -ENOMEM;
     }
   else
@@ -266,7 +265,9 @@ int board_app_initialize(uintptr_t arg)
       ret = rtc_initialize(0, lower);
       if (ret < 0)
         {
-          sdbg("ERROR: Failed to bind/register the RTC driver: %d\n", ret);
+          syslog(LOG_ERR,
+                 "ERROR: Failed to bind/register the RTC driver: %d\n",
+                 ret);
           return ret;
         }
     }
@@ -289,21 +290,22 @@ int board_app_initialize(uintptr_t arg)
   mtd = m25p_initialize(spi);
   if (!mtd)
     {
-      syslog(LOG_ERR, "ERROR: Failed to bind SPI port 0 to the SPI FLASH driver\n");
+      syslog(LOG_ERR,
+             "ERROR: Failed to bind SPI port 0 to the SPI FLASH driver\n");
       return -ENODEV;
     }
 #warning "Now what are we going to do with this SPI FLASH driver?"
 #endif
 
-  /* Mount the SDIO-based MMC/SD block driver */
-
 #ifdef HAVE_MMCSD
+  /* Mount the SDIO-based MMC/SD block driver */
   /* First, get an instance of the SDIO interface */
 
   sdio = sdio_initialize(CONFIG_NSH_MMCSDSLOTNO);
   if (!sdio)
     {
-      syslog(LOG_ERR, "ERROR: Failed to initialize SDIO slot %d\n",
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize SDIO slot %d\n",
              CONFIG_NSH_MMCSDSLOTNO);
       return -ENODEV;
     }
@@ -313,7 +315,9 @@ int board_app_initialize(uintptr_t arg)
   ret = mmcsd_slotinitialize(CONFIG_NSH_MMCSDMINOR, sdio);
   if (ret != OK)
     {
-      syslog(LOG_ERR, "ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
+      syslog(LOG_ERR,
+             "ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n",
+             ret);
       return ret;
     }
 
@@ -338,5 +342,36 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
+#ifdef CONFIG_PWM
+  /* Initialize PWM and register the PWM device. */
+
+  ret = stm32_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_pwm_setup() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ADC
+  /* Initialize ADC and register the ADC driver. */
+
+  ret = stm32_adc_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_adc_setup failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_CAN
+  /* Initialize CAN and register the CAN driver. */
+
+  ret = stm32_can_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_can_setup failed: %d\n", ret);
+    }
+#endif
+
+  UNUSED(ret);
   return OK;
 }

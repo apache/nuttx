@@ -41,7 +41,7 @@ CSRCS += lib_fileno.c lib_printf.c lib_sprintf.c lib_asprintf.c
 CSRCS += lib_snprintf.c lib_libsprintf.c lib_vsprintf.c lib_vasprintf.c
 CSRCS += lib_vsnprintf.c lib_libvsprintf.c lib_dprintf.c lib_vdprintf.c
 CSRCS += lib_meminstream.c lib_memoutstream.c lib_memsistream.c
-CSRCS += lib_memsostream.c lib_lowinstream.c lib_lowoutstream.c
+CSRCS += lib_memsostream.c lib_lowoutstream.c
 CSRCS += lib_zeroinstream.c lib_nullinstream.c lib_nulloutstream.c
 CSRCS += lib_sscanf.c
 
@@ -50,7 +50,8 @@ CSRCS += lib_sscanf.c
 ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
 
 CSRCS += lib_rawinstream.c lib_rawoutstream.c lib_rawsistream.c
-CSRCS += lib_rawsostream.c
+CSRCS += lib_rawsostream.c lib_libnoflush.c lib_libsnoflush.c
+CSRCS += lib_remove.c
 
 # And these depend upon both file descriptors and C streams
 
@@ -71,16 +72,16 @@ endif
 ifeq ($(CONFIG_FS_WRITABLE),y)
 CSRCS += lib_tempnam.c lib_tmpnam.c
 endif
+
+ifneq ($(CONFIG_STDIO_DISABLE_BUFFERING),y)
+CSRCS += lib_setbuf.c lib_setvbuf.c
+endif
 endif
 
 # Other support that depends on specific, configured features.
 
 ifeq ($(CONFIG_LIBC_FLOATINGPOINT),y)
 CSRCS += lib_dtoa.c
-endif
-
-ifeq ($(CONFIG_STDIO_LINEBUFFER),y)
-CSRCS += lib_libnoflush.c lib_libsnoflush.c
 endif
 
 # Add the stdio directory to the build

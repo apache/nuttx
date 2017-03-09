@@ -1,5 +1,5 @@
 /****************************************************************************
- * pthread_getaffinity.c
+ * sched/pthread/pthread_getaffinity.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -80,8 +80,8 @@ int pthread_getaffinity_np(pthread_t thread, size_t cpusetsize,
 {
   int ret;
 
-  sdbg("thread ID=%d cpusetsize=%d cpuset=%p\n",
-       (int)thread, (int)cpusetsize, cpusetsize);
+  sinfo("thread ID=%d cpusetsize=%d cpuset=%p\n",
+        (int)thread, (int)cpusetsize, cpusetsize);
 
   DEBUGASSERT(thread > 0 && cpusetsize == sizeof(cpu_set_t) &&
               cpuset != NULL);

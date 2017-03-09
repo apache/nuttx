@@ -48,32 +48,21 @@
 #include "sam_adc.h"
 #include "sama5d3-xplained.h"
 
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-
-/************************************************************************************
- * Private Data
- ************************************************************************************/
-
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
+#ifdef CONFIG_SAMA5_ADC
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
 /************************************************************************************
- * Name: board_adc_initialize
+ * Name: sam_adc_setup
  *
  * Description:
- *   Initialize and register the ADC driver
+ *   Initialize ADC and register the ADC driver.
  *
  ************************************************************************************/
 
-#ifdef CONFIG_SAMA5_ADC
-int board_adc_initialize(void)
+int sam_adc_setup(void)
 {
   static bool initialized = false;
   struct adc_dev_s *adc;
@@ -88,7 +77,7 @@ int board_adc_initialize(void)
       adc = sam_adc_initialize();
       if (adc == NULL)
         {
-          adbg("ERROR: Failed to get ADC interface\n");
+          aerr("ERROR: Failed to get ADC interface\n");
           return -ENODEV;
         }
 
@@ -97,7 +86,7 @@ int board_adc_initialize(void)
       ret = adc_register("/dev/adc0", adc);
       if (ret < 0)
         {
-          adbg("adc_register failed: %d\n", ret);
+          aerr("ERROR: adc_register failed: %d\n", ret);
           return ret;
         }
 
@@ -108,24 +97,5 @@ int board_adc_initialize(void)
 
   return OK;
 }
+
 #endif /* CONFIG_ADC */
-
-/************************************************************************************
- * Name: board_adc_setup
- *
- * Description:
- *   All SAMA5 architectures must provide the following interface to work with
- *   examples/adc.
- *
- ************************************************************************************/
-
-#ifdef CONFIG_EXAMPLES_ADC
-int board_adc_setup(void)
-{
-#ifdef CONFIG_SAMA5_ADC
-  return board_adc_initialize();
-#else
-  return -ENOSYS;
-#endif
-}
-#endif /* CONFIG_EXAMPLES_ADC */

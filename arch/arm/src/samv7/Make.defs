@@ -90,10 +90,6 @@ ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
 CMN_CSRCS += up_ramvec_initialize.c up_ramvec_attach.c
 endif
 
-ifeq ($(CONFIG_ARCH_MEMCPY),y)
-CMN_ASRCS += up_memcpy.S
-endif
-
 ifeq ($(CONFIG_ARM_MPU),y)
 CMN_CSRCS += up_mpu.c
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
@@ -106,9 +102,9 @@ endif
 endif
 
 ifeq ($(CONFIG_ELF),y)
-CMN_CSRCS += up_elf.c up_coherent_dcache.c
+CMN_CSRCS += up_coherent_dcache.c
 else ifeq ($(CONFIG_MODULE),y)
-CMN_CSRCS += up_elf.c up_coherent_dcache.c
+CMN_CSRCS += up_coherent_dcache.c
 endif
 
 ifeq ($(CONFIG_STACK_COLORATION),y)
@@ -181,7 +177,7 @@ endif
 ifeq ($(CONFIG_SAMV7_HAVE_TC),y)
 CHIP_CSRCS += sam_tc.c
 ifeq ($(CONFIG_SAMV7_ONESHOT),y)
-CHIP_CSRCS += sam_oneshot.c
+CHIP_CSRCS += sam_oneshot.c sam_oneshot_lowerhalf.c
 endif
 ifeq ($(CONFIG_SAMV7_FREERUN),y)
 CHIP_CSRCS += sam_freerun.c
@@ -213,4 +209,8 @@ endif
 
 ifeq ($(CONFIG_SAMV7_PROGMEM),y)
 CHIP_CSRCS += sam_progmem.c
+endif
+
+ifeq ($(CONFIG_SAMV7_DAC),y)
+CHIP_CSRCS += sam_dac.c
 endif

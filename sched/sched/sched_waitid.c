@@ -44,6 +44,7 @@
 #include <errno.h>
 
 #include <nuttx/sched.h>
+#include <nuttx/cancelpt.h>
 
 #include "sched/sched.h"
 #include "group/group.h"
@@ -161,8 +162,12 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
   bool retains;
 #endif
   sigset_t set;
-  int err;
+  int errcode;
   int ret;
+
+  /* waitid() is a cancellation point */
+
+  (void)enter_cancellation_point();
 
   /* MISSING LOGIC:   If WNOHANG is provided in the options, then this function
    * should returned immediately.  However, there is no mechanism available now
@@ -175,7 +180,7 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
    * distinguish any other events.
    */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (options != WEXITED)
     {
       set_errno(ENOSYS);
@@ -205,21 +210,24 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
     {
       /* There are no children */
 
-      err = ECHILD;
+      errcode = ECHILD;
       goto errout_with_errno;
     }
   else if (idtype == P_PID)
     {
-      /* Get the TCB corresponding to this PID and make sure it is our child. */
+      /* Get the TCB corresponding to this PID and make sure that the
+       * thread it is our child.
+       */
 
       ctcb = sched_gettcb((pid_t)id);
+
 #ifdef HAVE_GROUP_MEMBERS
-      if (!ctcb || ctcb->group->tg_pgid != rtcb->group->tg_gid)
+      if (ctcb == NULL || ctcb->group->tg_pgid != rtcb->group->tg_gid)
 #else
-      if (!ctcb || ctcb->ppid != rtcb->pid)
+      if (ctcb == NULL || ctcb->group>tg_ppid != rtcb->pid)
 #endif
         {
-          err = ECHILD;
+          errcode = ECHILD;
           goto errout_with_errno;
         }
 
@@ -233,31 +241,36 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
             {
               /* This specific pid is not a child */
 
-              err = ECHILD;
+              errcode = ECHILD;
               goto errout_with_errno;
             }
         }
     }
 #else
-  if (rtcb->nchildren == 0)
+  /* Child status is not retained. */
+
+  if (rtcb->group->tg_nchildren == 0)
     {
       /* There are no children */
 
-      err = ECHILD;
+      errcode = ECHILD;
       goto errout_with_errno;
     }
   else if (idtype == P_PID)
     {
-      /* Get the TCB corresponding to this PID and make sure it is our child. */
+      /* Get the TCB corresponding to this PID and make sure that the
+       * thread is our child.
+       */
 
       ctcb = sched_gettcb((pid_t)id);
+
 #ifdef HAVE_GROUP_MEMBERS
-      if (!ctcb || ctcb->group->tg_pgid != rtcb->group->tg_gid)
+      if (ctcb == NULL || ctcb->group->tg_pgid != rtcb->group->tg_gid)
 #else
-      if (!ctcb || ctcb->ppid != rtcb->pid)
+      if (ctcb == NULL || ctcb->group->tg_ppid != rtcb->pid)
 #endif
         {
-          err = ECHILD;
+          errcode = ECHILD;
           goto errout_with_errno;
         }
     }
@@ -327,7 +340,7 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
                * to reported ECHILD than bogus status.
                */
 
-              err = ECHILD;
+              errcode = ECHILD;
               goto errout_with_errno;
             }
         }
@@ -338,7 +351,7 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
        * instead).
        */
 
-      if (rtcb->nchildren == 0 ||
+      if (rtcb->group->tg_nchildren == 0 ||
           (idtype == P_PID && (ret = kill((pid_t)id, 0)) < 0))
         {
           /* We know that the child task was running okay we stared,
@@ -346,7 +359,7 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
            * Let's return ECHILD.. that is at least informative.
            */
 
-          err = ECHILD;
+          errcode = ECHILD;
           goto errout_with_errno;
         }
 #endif
@@ -396,12 +409,14 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
         }
     }
 
+  leave_cancellation_point();
   sched_unlock();
   return OK;
 
 errout_with_errno:
-  set_errno(err);
+  set_errno(errcode);
 errout:
+  leave_cancellation_point();
   sched_unlock();
   return ERROR;
 }

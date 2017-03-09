@@ -35,10 +35,38 @@
 
 -include $(TOPDIR)/Make.defs
 
+# Determine if there is a Kconfig file for any custom board configuration
+
+ifeq ($(CONFIG_ARCH_BOARD_CUSTOM),y)
+  CUSTOM_DIR = $(patsubst "%",%,$(CONFIG_ARCH_BOARD_CUSTOM_DIR))
+  ifeq ($(CONFIG_ARCH_BOARD_CUSTOM_DIR_RELPATH),y)
+    CUSTOM_KPATH = $(TOPDIR)$(DELIM)$(CUSTOM_DIR)$(DELIM)Kconfig
+  else
+    CUSTOM_KPATH = $(CUSTOM_DIR)$(DELIM)Kconfig
+  endif
+  CUSTOM_KCONFIG = $(if $(wildcard $(CUSTOM_KPATH)),y,)
+else
+  CUSTOM_KCONFIG =
+endif
+
+ifeq ($(CUSTOM_KCONFIG),y)
+  BOARD_KCONFIG = $(CUSTOM_KPATH)
+else
+  BOARD_KCONFIG = $(TOPDIR)$(DELIM)configs$(DELIM)dummy$(DELIM)dummy_kconfig
+endif
+
+DUMMY_KCONFIG = $(TOPDIR)$(DELIM)configs$(DELIM)dummy$(DELIM)Kconfig
+
+# The board configuration should be installed in the arch/ directory
+
+BOARD_DIR = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board
+BOARD_INSTALLED = $(if $(wildcard $(BOARD_DIR)$(DELIM)Makefile),y,)
+
 # Basic
 
 CONFIG_ASRCS =
 CONFIG_CSRCS =
+CONFIG_CXXSRCS =
 
 # boardctl support
 
@@ -52,13 +80,16 @@ AOBJS = $(ASRCS:.S=$(OBJEXT))
 CSRCS = $(CONFIG_CSRCS)
 COBJS = $(CSRCS:.c=$(OBJEXT))
 
+CXXSRCS = $(CONFIG_CXXSRCS)
+CXXOBJS = $(CXXSRCS:.cxx=$(OBJEXT))
+
 SRCS = $(ASRCS) $(CSRCS)
 OBJS = $(AOBJS) $(COBJS)
 
 BIN = libconfigs$(LIBEXT)
 
 all: $(BIN)
-.PHONY: depend clean distclean
+.PHONY: depend ccontext clean_context clean distclean
 
 $(AOBJS): %$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
@@ -66,18 +97,38 @@ $(AOBJS): %$(OBJEXT): %.S
 $(COBJS): %$(OBJEXT): %.c
 	$(call COMPILE, $<, $@)
 
-$(BIN): $(OBJS)
-	$(call ARCHIVE, $@, $(OBJS))
+$(CXXOBJS): %$(OBJEXT): %.cxx
+	$(call COMPILEXX, $<, $@)
 
-.depend: Makefile $(SRCS)
+$(BIN): $(OBJS) $(CXXOBJS)
+	$(call ARCHIVE, $@, $(OBJS) $(CXXOBJS))
+
+.depend: Makefile $(SRCS) $(CXXSRCS)
 ifneq ($(SRCS),)
 	$(Q) $(MKDEP) --dep-path . "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
+endif
+ifneq ($(CXXSRCS),)
+	$(Q) $(MKDEP) --dep-path . "$(CXX)" -- $(CXXFLAGS) -- $(CXXSRCS) >>Make.dep
 endif
 	$(Q) touch $@
 
 depend: .depend
 
-clean:
+$(DUMMY_KCONFIG): $(BOARD_KCONFIG)
+	$(call DELFILE, $(DUMMY_KCONFIG))
+	$(Q) cp -f $(BOARD_KCONFIG) $(DUMMY_KCONFIG)
+
+dirlinks: $(DUMMY_KCONFIG)
+
+context: $(DUMMY_KCONFIG)
+ifeq ($(BOARD_INSTALLED),y)
+	$(Q) $(MAKE) -C $(BOARD_DIR) TOPDIR="$(TOPDIR)" context
+endif
+
+clean_context:
+	$(call DELFILE, $(DUMMY_KCONFIG))
+
+clean: clean_context
 	$(call DELFILE, $(BIN))
 	$(call CLEAN)
 

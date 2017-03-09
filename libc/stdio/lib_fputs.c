@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/stdio/lib_fputs.c
  *
- *   Copyright (C) 2007, 2008, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2011-2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,10 +34,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Compilation Switches
- ****************************************************************************/
-
-/****************************************************************************
  * Included Files
  ****************************************************************************/
 
@@ -50,38 +46,6 @@
 #include <nuttx/arch.h>
 
 #include "libc.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Public Constant Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Constant Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -104,7 +68,7 @@ int fputs(FAR const char *s, FAR FILE *stream)
 
   /* Make sure that a string was provided. */
 
-#ifdef CONFIG_DEBUG /* Most parameter checking is disabled if DEBUG is off */
+#ifdef CONFIG_DEBUG_FEATURES /* Most parameter checking is disabled if DEBUG is off */
   if (!s)
     {
       set_errno(EINVAL);
@@ -126,52 +90,7 @@ int fputs(FAR const char *s, FAR FILE *stream)
 
       /* Flush the buffer if a newline was written to the buffer */
 
-#ifdef CONFIG_STDIO_LINEBUFFER
-      if (ch == '\n')
-        {
-          ret = lib_fflush(stream, true);
-          if (ret < 0)
-            {
-              return EOF;
-            }
-        }
-#endif
-    }
-
-  return nput;
-}
-
-#elif defined(CONFIG_STDIO_LINEBUFFER)
-int fputs(FAR const char *s, FAR FILE *stream)
-{
-  int nput;
-  int ret;
-
-  /* Make sure that a string was provided. */
-
-#ifdef CONFIG_DEBUG /* Most parameter checking is disabled if DEBUG is off */
-  if (!s)
-    {
-      set_errno(EINVAL);
-      return EOF;
-    }
-#endif
-
-  /* Write the string.  Loop until the null terminator is encountered */
-
-  for (nput = 0; *s; nput++, s++)
-    {
-      /* Write the next character to the stream buffer */
-
-      ret = lib_fwrite(s, 1, stream);
-      if (ret <= 0)
-        {
-          return EOF;
-        }
-
-      /* Flush the buffer if a newline was written to the buffer */
-
-      if (*s == '\n')
+      if (ch == '\n' && (stream->fs_flags & __FS_FLAG_LBF) != 0)
         {
           ret = lib_fflush(stream, true);
           if (ret < 0)
@@ -187,34 +106,75 @@ int fputs(FAR const char *s, FAR FILE *stream)
 #else
 int fputs(FAR const char *s, FAR FILE *stream)
 {
-  int ntowrite;
   int nput;
 
   /* Make sure that a string was provided. */
 
-#ifdef CONFIG_DEBUG /* Most parameter checking is disabled if DEBUG is off */
-  if (!s)
+#ifdef CONFIG_DEBUG_FEATURES /* Most parameter checking is disabled if DEBUG is off */
+  if (s == NULL || stream == NULL)
     {
       set_errno(EINVAL);
       return EOF;
     }
 #endif
 
-  /* Get the length of the string. */
+  /* If line buffering is enabled, then we will have to output one character
+   * at a time, checking for a newline character each time.
+   */
 
-  ntowrite = strlen(s);
-  if (ntowrite == 0)
+  if ((stream->fs_flags & __FS_FLAG_LBF) != 0)
     {
-      return 0;
+      int ret;
+
+      /* Write the string.  Loop until the null terminator is encountered */
+
+      for (nput = 0; *s; nput++, s++)
+        {
+          /* Write the next character to the stream buffer */
+
+          ret = lib_fwrite(s, 1, stream);
+          if (ret <= 0)
+            {
+              return EOF;
+            }
+
+          /* Flush the buffer if a newline was written to the buffer */
+
+          if (*s == '\n')
+            {
+              ret = lib_fflush(stream, true);
+              if (ret < 0)
+                {
+                  return EOF;
+                }
+            }
+        }
     }
 
-  /* Write the string */
+  /* Without line buffering, we can write the whole string in one operation. */
 
-  nput = lib_fwrite(s, ntowrite, stream);
-  if (nput < 0)
+  else
     {
-      return EOF;
+      int ntowrite;
+
+      /* Get the length of the string. */
+
+      ntowrite = strlen(s);
+      if (ntowrite == 0)
+        {
+          return 0;
+        }
+
+      /* Write the string */
+
+      nput = lib_fwrite(s, ntowrite, stream);
+      if (nput < 0)
+        {
+          return EOF;
+        }
+
     }
+
   return nput;
 }
 #endif

@@ -37,11 +37,23 @@
  * Included Files
  ****************************************************************************/
 
-#include <arch/board/board.h>
 #include <nuttx/config.h>
+
+#include <stdint.h>
+#include <stdbool.h>
+#include <errno.h>
+#include <debug.h>
+
+#include <arch/board/board.h>
 
 #include <nuttx/arch.h>
 #include "up_internal.h"
+
+#include "kinetis_config.h"
+#include "chip.h"
+#include "kinetis.h"
+
+
 
 #ifdef CONFIG_KINETIS_DMA
 

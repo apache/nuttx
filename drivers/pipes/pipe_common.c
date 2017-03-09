@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/pipes/pipe_common.c
  *
- *   Copyright (C) 2008-2009, 2011, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,16 +53,17 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/kmalloc.h>
-#include <nuttx/fs/fs.h>
-#include <nuttx/fs/ioctl.h>
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 #  include <nuttx/arch.h>
 #endif
+#include <nuttx/kmalloc.h>
+#include <nuttx/semaphore.h>
+#include <nuttx/fs/fs.h>
+#include <nuttx/fs/ioctl.h>
 
 #include "pipe_common.h"
 
-#if CONFIG_DEV_PIPE_SIZE > 0
+#ifdef CONFIG_PIPES
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -122,6 +123,7 @@ static void pipecommon_pollnotify(FAR struct pipe_dev_s *dev,
   for (i = 0; i < CONFIG_DEV_PIPE_NPOLLWAITERS; i++)
     {
       FAR struct pollfd *fds = dev->d_fds[i];
+
       if (fds)
         {
           fds->revents |= eventset & (fds->events | POLLERR | POLLHUP);
@@ -135,7 +137,7 @@ static void pipecommon_pollnotify(FAR struct pipe_dev_s *dev,
 
           if (fds->revents != 0)
             {
-              fvdbg("Report events: %02x\n", fds->revents);
+              finfo("Report events: %02x\n", fds->revents);
               sem_post(fds->sem);
             }
         }
@@ -153,9 +155,11 @@ static void pipecommon_pollnotify(FAR struct pipe_dev_s *dev,
  * Name: pipecommon_allocdev
  ****************************************************************************/
 
-FAR struct pipe_dev_s *pipecommon_allocdev(void)
+FAR struct pipe_dev_s *pipecommon_allocdev(size_t bufsize)
 {
   FAR struct pipe_dev_s *dev;
+
+  DEBUGASSERT(bufsize <= CONFIG_DEV_PIPE_MAXSIZE);
 
   /* Allocate a private structure to manage the pipe */
 
@@ -168,6 +172,15 @@ FAR struct pipe_dev_s *pipecommon_allocdev(void)
       sem_init(&dev->d_bfsem, 0, 1);
       sem_init(&dev->d_rdsem, 0, 0);
       sem_init(&dev->d_wrsem, 0, 0);
+
+     /* The read/write wait semaphores are used for signaling and, hence,
+      * should not have priority inheritance enabled.
+      */
+
+     sem_setprotocol(&dev->d_rdsem, SEM_PRIO_NONE);
+     sem_setprotocol(&dev->d_wrsem, SEM_PRIO_NONE);
+
+      dev->d_bufsize = bufsize;
     }
 
   return dev;
@@ -205,7 +218,7 @@ int pipecommon_open(FAR struct file *filep)
   ret = sem_wait(&dev->d_bfsem);
   if (ret != OK)
     {
-      fdbg("sem_wait failed: %d\n", get_errno());
+      ferr("ERROR: sem_wait failed: %d\n", get_errno());
       DEBUGASSERT(get_errno() > 0);
       return -get_errno();
     }
@@ -217,7 +230,7 @@ int pipecommon_open(FAR struct file *filep)
 
   if (dev->d_refs == 0 && dev->d_buffer == NULL)
     {
-      dev->d_buffer = (FAR uint8_t *)kmm_malloc(CONFIG_DEV_PIPE_SIZE);
+      dev->d_buffer = (FAR uint8_t *)kmm_malloc(dev->d_bufsize);
       if (!dev->d_buffer)
         {
           (void)sem_post(&dev->d_bfsem);
@@ -283,7 +296,7 @@ int pipecommon_open(FAR struct file *filep)
            * a signal.
            */
 
-          fdbg("sem_wait failed: %d\n", get_errno());
+          ferr("ERROR: sem_wait failed: %d\n", get_errno());
           DEBUGASSERT(get_errno() > 0);
           ret = -get_errno();
 
@@ -397,7 +410,7 @@ int pipecommon_close(FAR struct file *filep)
           return OK;
         }
 #endif
-   }
+    }
 
   sem_post(&dev->d_bfsem);
   return OK;
@@ -471,10 +484,11 @@ ssize_t pipecommon_read(FAR struct file *filep, FAR char *buffer, size_t len)
   while ((size_t)nread < len && dev->d_wrndx != dev->d_rdndx)
     {
       *buffer++ = dev->d_buffer[dev->d_rdndx];
-      if (++dev->d_rdndx >= CONFIG_DEV_PIPE_SIZE)
+      if (++dev->d_rdndx >= dev->d_bufsize)
         {
           dev->d_rdndx = 0;
         }
+
       nread++;
     }
 
@@ -519,9 +533,9 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
   /* At present, this method cannot be called from interrupt handlers.  That is
    * because it calls sem_wait (via pipecommon_semtake below) and sem_wait cannot
    * be called from interrupt level.  This actually happens fairly commonly
-   * IF dbg() is called from interrupt handlers and stdout is being redirected
+   * IF [a-z]err() is called from interrupt handlers and stdout is being redirected
    * via a pipe.  In that case, the debug output will try to go out the pipe
-   * (interrupt handlers should use the lldbg() APIs).
+   * (interrupt handlers should use the  _err() APIs).
    *
    * On the other hand, it would be very valuable to be able to feed the pipe
    * from an interrupt handler!  TODO:  Consider disabling interrupts instead
@@ -545,7 +559,7 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
       /* Calculate the write index AFTER the next byte is written */
 
       nxtwrndx = dev->d_wrndx + 1;
-      if (nxtwrndx >= CONFIG_DEV_PIPE_SIZE)
+      if (nxtwrndx >= dev->d_bufsize)
         {
           nxtwrndx = 0;
         }
@@ -594,6 +608,7 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
                   sem_post(&dev->d_rdsem);
                 }
             }
+
           last = nwritten;
 
           /* If O_NONBLOCK was set, then return partial bytes written or EGAIN */
@@ -604,6 +619,7 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
                 {
                   nwritten = -EAGAIN;
                 }
+
               sem_post(&dev->d_bfsem);
               return nwritten;
             }
@@ -676,14 +692,14 @@ int pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds,
         }
       else
         {
-          nbytes = (CONFIG_DEV_PIPE_SIZE-1) + dev->d_wrndx - dev->d_rdndx;
+          nbytes = (dev->d_bufsize - 1) + dev->d_wrndx - dev->d_rdndx;
         }
 
       /* Notify the POLLOUT event if the pipe is not full, but only if
        * there is readers. */
 
       eventset = 0;
-      if (nbytes < (CONFIG_DEV_PIPE_SIZE-1))
+      if (nbytes < (dev->d_bufsize - 1))
         {
           eventset |= POLLOUT;
         }
@@ -722,7 +738,7 @@ int pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
       if (!slot)
         {
           ret              = -EIO;
@@ -752,7 +768,7 @@ int pipecommon_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct pipe_dev_s *dev   = inode->i_private;
   int                    ret   = -EINVAL;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   /* Some sanity checking */
 
   if (dev == NULL)
@@ -780,31 +796,44 @@ int pipecommon_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
-      case FIONREAD:
+      case FIONWRITE:  /* Number of bytes waiting in send queue */
+      case FIONREAD:   /* Number of bytes available for reading */
         {
           int count;
 
-          /* Determine the number of bytes available in the buffer */
+          /* Determine the number of bytes written to the buffer.  This is,
+           * of course, also the number of bytes that may be read from the
+           * buffer.
+           *
+           *   d_rdndx - index to remove next byte from the buffer
+           *   d_wrndx - Index to next location to add a byte to the buffer.
+           */
 
           if (dev->d_wrndx < dev->d_rdndx)
             {
-              count = (CONFIG_DEV_PIPE_SIZE - dev->d_rdndx) + dev->d_wrndx;
+              count = (dev->d_bufsize - dev->d_rdndx) + dev->d_wrndx;
             }
           else
             {
               count = dev->d_wrndx - dev->d_rdndx;
             }
 
-          *(FAR int *)arg = count;
+          *(FAR int *)((uintptr_t)arg) = count;
           ret = 0;
         }
         break;
 
-      case FIONWRITE:
+      /* Free space in buffer */
+
+      case FIONSPACE:
         {
           int count;
 
-          /* Determine the number of bytes free in the buffer */
+          /* Determine the number of bytes free in the buffer.
+           *
+           *   d_rdndx - index to remove next byte from the buffer
+           *   d_wrndx - Index to next location to add a byte to the buffer.
+           */
 
           if (dev->d_wrndx < dev->d_rdndx)
             {
@@ -812,10 +841,10 @@ int pipecommon_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             }
           else
             {
-              count = ((CONFIG_DEV_PIPE_SIZE - dev->d_wrndx) + dev->d_rdndx) - 1;
+              count = ((dev->d_bufsize - dev->d_wrndx) + dev->d_rdndx) - 1;
             }
 
-          *(FAR int *)arg = count;
+          *(FAR int *)((uintptr_t)arg) = count;
           ret = 0;
         }
         break;
@@ -864,4 +893,4 @@ int pipecommon_unlink(FAR struct inode *inode)
 }
 #endif
 
-#endif /* CONFIG_DEV_PIPE_SIZE > 0 */
+#endif /* CONFIG_PIPES */

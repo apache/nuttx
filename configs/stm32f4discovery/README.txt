@@ -31,6 +31,7 @@ Contents
   - PWM
   - UARTs
   - Timer Inputs/Outputs
+  - Quadrature Encoder
   - FPU
   - STM32F4DIS-BB
   - FSMC SRAM
@@ -447,14 +448,52 @@ TIM14
    free I/O pins.
 ** Port H pins are not supported by the MCU
 
-Quadrature Encode Timer Inputs
-------------------------------
+Quadrature Encoder:
+===================
 
-If enabled (by setting CONFIG_QENCODER=y), then quadrature encoder will
-use either TIM2 or TIM8 (see nsh/defconfig).  If TIM2 is selected, the input
-pins PA15 and PA1 for CH1 and CH2, respectively).  If TIM8 is selected, then
-PC6 and PI5 will be used for CH1 and CH2  (see include board.h for pin
-definitions).
+  The nsh configuration has been used to test the Quadrture Encoder
+  (QEncoder, QE) with the following modifications to the configuration
+  file:
+
+  - These setting enable support for the common QEncode upper half driver:
+
+   CONFIG_BOARD_INITIALIZE=y
+
+   CONFIG_SENSORS=y
+     CONFIG_QENCODER=y
+
+  - The timer 2 needs to be enabled:
+
+  CONFIG_STM32_TIM2=y
+
+  - This is a board setting that selected timer 2 for use with the
+    quadrature encode:
+
+    CONFIG_STM32F4DISCO_QETIMER=2
+
+  - These settings enable the STM32 Quadrature encoder on timer 2:
+
+    CONFIG_STM32_TIM2_QE=y
+    CONFIG_STM32_TIM4_QECLKOUT=2800000
+    CONFIG_STM32_QENCODER_FILTER=y
+    CONFIG_STM32_QENCODER_SAMPLE_EVENT_6=y
+    CONFIG_STM32_QENCODER_SAMPLE_FDTS_4=y
+
+  - These settings enable the test case at apps/examples/qencoder:
+
+    CONFIG_EXAMPLES_QENCODER=y
+    CONFIG_EXAMPLES_QENCODER_DELAY=100
+    CONFIG_EXAMPLES_QENCODER_DEVPATH="/dev/qe0"
+
+  In this configuration, the QEncoder inputs will be on the TIM2 inputs of
+  PA15 and PA1 (CH1 and CH2 respectively).
+
+  You can also use QEncoder with other timers, but keep in mind that only TIM2
+  and TIM5 are 32bits timers, all other timers are 16-bit then the QE counter
+  will overflow after 65535.
+
+  If TIM4 is selected, then PB6 and PB7 will be used for CH1 and CH2.
+  If TIM8 is selected, then PC6 and PI5 will be used for CH1 and CH2.
 
 FPU
 ===
@@ -1024,7 +1063,7 @@ STM32F4Discovery-specific Configuration Options
     CONFIG_CAN2_BAUD - CAN1 BAUD rate.  Required if CONFIG_STM32_CAN2 is defined.
     CONFIG_CAN_TSEG1 - The number of CAN time quanta in segment 1. Default: 6
     CONFIG_CAN_TSEG2 - the number of CAN time quanta in segment 2. Default: 7
-    CONFIG_CAN_REGDEBUG - If CONFIG_DEBUG is set, this will generate an
+    CONFIG_STM32_CAN_REGDEBUG - If CONFIG_DEBUG_FEATURES is set, this will generate an
       dump of all CAN registers.
 
   STM32F4Discovery SPI Configuration
@@ -1039,10 +1078,10 @@ STM32F4Discovery-specific Configuration Options
 
     CONFIG_SDIO_DMA - Support DMA data transfers.  Requires CONFIG_STM32_SDIO
       and CONFIG_STM32_DMA2.
-    CONFIG_SDIO_PRI - Select SDIO interrupt prority.  Default: 128
-    CONFIG_SDIO_DMAPRIO - Select SDIO DMA interrupt priority.
+    CONFIG_STM32_SDIO_PRI - Select SDIO interrupt prority.  Default: 128
+    CONFIG_STM32_SDIO_DMAPRIO - Select SDIO DMA interrupt priority.
       Default:  Medium
-    CONFIG_SDIO_WIDTH_D1_ONLY - Select 1-bit transfer mode.  Default:
+    CONFIG_STM32_SDIO_WIDTH_D1_ONLY - Select 1-bit transfer mode.  Default:
       4-bit transfer mode.
 
   STM32 USB OTG FS Host Driver Support
@@ -1067,9 +1106,9 @@ STM32F4Discovery-specific Configuration Options
    CONFIG_STM32_OTGFS_SOFINTR - Enable SOF interrupts.  Why would you ever
      want to do that?
    CONFIG_STM32_USBHOST_REGDEBUG - Enable very low-level register access
-     debug.  Depends on CONFIG_DEBUG.
+     debug.  Depends on CONFIG_DEBUG_FEATURES.
    CONFIG_STM32_USBHOST_PKTDUMP - Dump all incoming and outgoing USB
-     packets. Depends on CONFIG_DEBUG.
+     packets. Depends on CONFIG_DEBUG_FEATURES.
 
 BASIC
 =====
@@ -1566,7 +1605,7 @@ Where <subdir> is one of the following:
 
        Special PWM-only debug options:
 
-       CONFIG_DEBUG_PWM
+       CONFIG_DEBUG_PWM_INFO
 
     5. This example supports the Quadrature Encode test (apps/examples/qencoder)
        but this must be manually enabled by selecting:
@@ -1652,14 +1691,14 @@ Where <subdir> is one of the following:
 
         - /dev/console still exists and still refers to the serial port. So
           you can still use certain kinds of debug output (see include/debug.h, all
-          of the interfaces based on lowsyslog will work in this configuration).
+          of the debug output from interrupt handlers will be lost.
 
         - But don't enable USB debug output!  Since USB is console is used for
           USB debug output and you are using a USB console, there will be
           infinite loops and deadlocks:  Debug output generates USB debug
           output which generatates USB debug output, etc.  If you want USB
           debug output, you should consider enabling USB trace
-          (CONFIG_USBDEV_TRACE) and perhaps the USB monitor (CONFIG_SYSTEM_USBMONITOR).
+          (CONFIG_USBDEV_TRACE) and perhaps the USB monitor (CONFIG_USBMONITOR).
 
           See the usbnsh configuration below for more information on configuring
           USB trace output and the USB monitor.
@@ -1934,6 +1973,18 @@ Where <subdir> is one of the following:
     3. By default, this project assumes that you are *NOT* using the DFU
        bootloader.
 
+  pseudoterm:
+  -----------
+
+    This is a configuration to test the Pseudo Terminal support for NuttX.
+
+    To test it you will need two USB/Serial dongles. The first dongle as
+    usual will be used to main NSH console port in UART2 (PA2 and PA3) and
+    the second dongle you will connect to UART3 (PB10 and PB11).
+
+    In the main NSH console (in UART2) type: "pts_test &". It will create a
+    new console in UART3. Just press ENTER and start typing commands on it.
+
   rgbled:
   -------
 
@@ -1979,7 +2030,6 @@ Where <subdir> is one of the following:
     3. This configuration does have UART2 output enabled and set up as
        the system logging device:
 
-       CONFIG_SYSLOG=y                    : Enable output to syslog, not console
        CONFIG_SYSLOG_CHAR=y               : Use a character device for system logging
        CONFIG_SYSLOG_DEVPATH="/dev/ttyS0" : UART2 will be /dev/ttyS0
 
@@ -2003,16 +2053,16 @@ Where <subdir> is one of the following:
        CONFIG_USBDEV_TRACE_NRECORDS=128        : Buffer 128 records in memory
        CONFIG_NSH_USBDEV_TRACE=n               : No builtin tracing from NSH
        CONFIG_NSH_ARCHINIT=y                   : Automatically start the USB monitor
-       CONFIG_SYSTEM_USBMONITOR=y              : Enable the USB monitor daemon
-       CONFIG_SYSTEM_USBMONITOR_STACKSIZE=2048 : USB monitor daemon stack size
-       CONFIG_SYSTEM_USBMONITOR_PRIORITY=50    : USB monitor daemon priority
-       CONFIG_SYSTEM_USBMONITOR_INTERVAL=2     : Dump trace data every 2 seconds
+       CONFIG_USBMONITOR=y              : Enable the USB monitor daemon
+       CONFIG_USBMONITOR_STACKSIZE=2048 : USB monitor daemon stack size
+       CONFIG_USBMONITOR_PRIORITY=50    : USB monitor daemon priority
+       CONFIG_USBMONITOR_INTERVAL=2     : Dump trace data every 2 seconds
 
-       CONFIG_SYSTEM_USBMONITOR_TRACEINIT=y    : Enable TRACE output
-       CONFIG_SYSTEM_USBMONITOR_TRACECLASS=y
-       CONFIG_SYSTEM_USBMONITOR_TRACETRANSFERS=y
-       CONFIG_SYSTEM_USBMONITOR_TRACECONTROLLER=y
-       CONFIG_SYSTEM_USBMONITOR_TRACEINTERRUPTS=y
+       CONFIG_USBMONITOR_TRACEINIT=y    : Enable TRACE output
+       CONFIG_USBMONITOR_TRACECLASS=y
+       CONFIG_USBMONITOR_TRACETRANSFERS=y
+       CONFIG_USBMONITOR_TRACECONTROLLER=y
+       CONFIG_USBMONITOR_TRACEINTERRUPTS=y
 
     5. By default, this project assumes that you are *NOT* using the DFU
        bootloader.

@@ -155,7 +155,7 @@ static FAR uint8_t *s512_cacheread(struct s512_dev_s *priv, off_t sector512)
   /* Get the erase block containing this sector */
 
   eblockno = sector512 / priv->stdperblock;
-  fvdbg("sector512: %lu eblockno: %lu\n",
+  finfo("sector512: %lu eblockno: %lu\n",
         (unsigned long)sector512, (unsigned long)eblockno);
 
   /* Check if the requested erase block is already in the cache */
@@ -173,7 +173,7 @@ static FAR uint8_t *s512_cacheread(struct s512_dev_s *priv, off_t sector512)
                                 priv->eblock);
       if (result < 0)
         {
-          fdbg("ERROR: bread(%lu, %lu) returned %ld\n",
+          ferr("ERROR: bread(%lu, %lu) returned %ld\n",
                (unsigned long)sector, (unsigned long)priv->eblocksize,
                (long)result);
 
@@ -221,7 +221,7 @@ static void s512_cacheflush(struct s512_dev_s *priv)
       result = priv->dev->bwrite(priv->dev, sector, priv->sectperblock, priv->eblock);
       if (result < 0)
         {
-          fdbg("ERROR: bwrite(%lu, %lu) returned %ld\n",
+          ferr("ERROR: bwrite(%lu, %lu) returned %ld\n",
                (unsigned long)sector, (unsigned long)priv->eblocksize,
                (long)result);
 
@@ -251,7 +251,7 @@ static int s512_erase(FAR struct mtd_dev_s *dev, off_t sector512, size_t nsector
   size_t eblockno;
   int ret;
 
-  fvdbg("sector512: %08lx nsectors: %lu\n",
+  finfo("sector512: %08lx nsectors: %lu\n",
         (unsigned long)sector512, (unsigned int)nsectors);
 
   while (sectorsleft-- > 0)
@@ -263,7 +263,7 @@ static int s512_erase(FAR struct mtd_dev_s *dev, off_t sector512, size_t nsector
       dest = s512_cacheread(priv, sector512);
       if (!dest)
         {
-          fdbg("ERROR: s512_cacheread(%ul) failed\n", (unsigned long)sector512);
+          ferr("ERROR: s512_cacheread(%ul) failed\n", (unsigned long)sector512);
           DEBUGPANIC();
           return -EIO;
         }
@@ -276,13 +276,13 @@ static int s512_erase(FAR struct mtd_dev_s *dev, off_t sector512, size_t nsector
       if (!IS_ERASED(priv))
         {
           eblockno  = sector512 / priv->stdperblock;
-          fvdbg("sector512: %lu eblockno: %lu\n",
+          finfo("sector512: %lu eblockno: %lu\n",
                 (unsigned long)sector512, (unsigned long)eblockno);
 
           ret = priv->dev->erase(priv->dev, eblockno, 1);
           if (ret < 0)
             {
-              fdbg("ERROR: Failed to erase block %lu: %d\n",
+              ferr("ERROR: Failed to erase block %lu: %d\n",
                    (unsigned long)eblockno, ret);
               return ret;
             }
@@ -320,7 +320,7 @@ static ssize_t s512_bread(FAR struct mtd_dev_s *dev, off_t sector512,
   ssize_t remaining;
   ssize_t result = nsectors;
 
-  fvdbg("sector512: %08lx nsectors: %d\n", (long)sector512, (int)nsectors);
+  finfo("sector512: %08lx nsectors: %d\n", (long)sector512, (int)nsectors);
 
   /* Read each 512 byte sector from the block via the erase block cache */
 
@@ -331,7 +331,7 @@ static ssize_t s512_bread(FAR struct mtd_dev_s *dev, off_t sector512,
       src = s512_cacheread(priv, sector512);
       if (!src)
         {
-          fdbg("ERROR: s512_cacheread(%ul) failed\n", (unsigned long)sector512);
+          ferr("ERROR: s512_cacheread(%ul) failed\n", (unsigned long)sector512);
           DEBUGPANIC();
 
           result = (ssize_t)nsectors - remaining;
@@ -369,7 +369,7 @@ static ssize_t s512_bwrite(FAR struct mtd_dev_s *dev, off_t sector512, size_t ns
   ssize_t result;
   off_t eblockno;
 
-  fvdbg("sector512: %08lx nsectors: %d\n", (long)sector512, (int)nsectors);
+  finfo("sector512: %08lx nsectors: %d\n", (long)sector512, (int)nsectors);
 
   FAR uint8_t *dest;
 
@@ -399,13 +399,13 @@ static ssize_t s512_bwrite(FAR struct mtd_dev_s *dev, off_t sector512, size_t ns
       if (!IS_ERASED(priv))
         {
           eblockno  = sector512 / priv->stdperblock;
-          fvdbg("sector512: %lu eblockno: %lu\n",
+          finfo("sector512: %lu eblockno: %lu\n",
                 (unsigned long)sector512, (unsigned long)eblockno);
 
           result = priv->dev->erase(priv->dev, eblockno, 1);
           if (result < 0)
             {
-              fdbg("ERROR: Failed to erase block %lu: %ld\n",
+              ferr("ERROR: Failed to erase block %lu: %ld\n",
                    (unsigned long)eblockno, (long)result);
               return result;
             }
@@ -445,7 +445,7 @@ static ssize_t s512_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
   off_t sectoffset;
   off_t sector;
 
-  fvdbg("offset: %08lx nbytes: %lu\n",
+  finfo("offset: %08lx nbytes: %lu\n",
         (unsigned long)offset, (unsigned long)nbytes);
 
   /* Convert the offset into 512 byte sector address and a byte offset */
@@ -464,7 +464,7 @@ static ssize_t s512_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
         {
           int result;
 
-          fdbg("ERROR: s512_cacheread(%ul) failed\n", (unsigned long)sector);
+          ferr("ERROR: s512_cacheread(%ul) failed\n", (unsigned long)sector);
           DEBUGPANIC();
 
           result = (ssize_t)nbytes - remaining;
@@ -488,7 +488,7 @@ static ssize_t s512_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
       buffer += xfrsize;
     }
 
-  fvdbg("return nbytes: %d\n", (int)nbytes);
+  finfo("return nbytes: %d\n", (int)nbytes);
   return nbytes;
 }
 
@@ -501,7 +501,7 @@ static int s512_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
   FAR struct s512_dev_s *priv = (FAR struct s512_dev_s *)dev;
   int ret = -EINVAL; /* Assume good command with bad parameters */
 
-  fvdbg("cmd: %d \n", cmd);
+  finfo("cmd: %d \n", cmd);
 
   switch (cmd)
     {
@@ -524,7 +524,7 @@ static int s512_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
               geo->neraseblocks = priv->neblocks * priv->stdperblock;
               ret               = OK;
 
-              fvdbg("blocksize: %d erasesize: %d neraseblocks: %d\n",
+              finfo("blocksize: %d erasesize: %d neraseblocks: %d\n",
                     geo->blocksize, geo->erasesize, geo->neraseblocks);
             }
         }
@@ -550,7 +550,7 @@ static int s512_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
         break;
     }
 
-  fvdbg("return %d\n", ret);
+  finfo("return %d\n", ret);
   return ret;
 }
 
@@ -578,7 +578,7 @@ FAR struct mtd_dev_s *s512_initialize(FAR struct mtd_dev_s *mtd)
   FAR struct mtd_geometry_s geo;
   int ret;
 
-  fvdbg("mtd: %p\n", mtd);
+  finfo("mtd: %p\n", mtd);
 
   /* Get the device geometry */
 
@@ -590,7 +590,7 @@ FAR struct mtd_dev_s *s512_initialize(FAR struct mtd_dev_s *mtd)
   if (ret < 0 || geo.erasesize <= SECTOR_512 ||
      (geo.erasesize & ~MASK_512) != geo.erasesize)
     {
-      fdbg("ERROR: MTDIOC_GEOMETRY ioctl returned %d, eraseize=%d\n",
+      ferr("ERROR: MTDIOC_GEOMETRY ioctl returned %d, eraseize=%d\n",
            ret, geo.erasesize);
       DEBUGPANIC();
       return NULL;
@@ -629,7 +629,7 @@ FAR struct mtd_dev_s *s512_initialize(FAR struct mtd_dev_s *mtd)
         {
           /* Allocation failed! Discard all of that work we just did and return NULL */
 
-          fdbg("Allocation failed\n");
+          ferr("ERROR: Allocation failed\n");
           kmm_free(priv);
           priv = NULL;
         }
@@ -643,6 +643,6 @@ FAR struct mtd_dev_s *s512_initialize(FAR struct mtd_dev_s *mtd)
 
   /* Return the implementation-specific state structure as the MTD device */
 
-  fvdbg("Return %p\n", priv);
+  finfo("Return %p\n", priv);
   return &priv->mtd;
 }

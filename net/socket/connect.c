@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/socket/connect.c
  *
- *   Copyright (C) 2007-2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2012, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,6 +49,9 @@
 #include <debug.h>
 
 #include <arch/irq.h>
+
+#include <nuttx/semaphore.h>
+#include <nuttx/cancelpt.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/udp.h>
@@ -107,7 +110,13 @@ static inline int psock_setup_callbacks(FAR struct socket *psock,
 
   /* Initialize the TCP state structure */
 
+  /* This semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
   (void)sem_init(&pstate->tc_sem, 0, 0); /* Doesn't really fail */
+  (void)sem_setprotocol(&pstate->tc_sem, SEM_PRIO_NONE);
+
   pstate->tc_conn   = conn;
   pstate->tc_psock  = psock;
   pstate->tc_result = -EAGAIN;
@@ -185,7 +194,7 @@ static uint16_t psock_connect_interrupt(FAR struct net_driver_s *dev,
 {
   struct tcp_connect_s *pstate = (struct tcp_connect_s *)pvpriv;
 
-  nllvdbg("flags: %04x\n", flags);
+  ninfo("flags: %04x\n", flags);
 
   /* 'priv' might be null in some race conditions (?) */
 
@@ -261,7 +270,7 @@ static uint16_t psock_connect_interrupt(FAR struct net_driver_s *dev,
           return flags & ~TCP_NEWDATA;
         }
 
-      nllvdbg("Resuming: %d\n", pstate->tc_result);
+      ninfo("Resuming: %d\n", pstate->tc_result);
 
       /* Stop further callbacks */
 
@@ -338,7 +347,6 @@ static inline int psock_tcp_connect(FAR struct socket *psock,
                                     FAR const struct sockaddr *addr)
 {
   struct tcp_connect_s state;
-  net_lock_t           flags;
   int                  ret = OK;
 
   /* Interrupts must be disabled through all of the following because
@@ -346,7 +354,7 @@ static inline int psock_tcp_connect(FAR struct socket *psock,
    * setup.
    */
 
-  flags = net_lock();
+  net_lock();
 
   /* Get the connection reference from the socket */
 
@@ -423,7 +431,7 @@ static inline int psock_tcp_connect(FAR struct socket *psock,
         }
     }
 
-  net_unlock(flags);
+  net_unlock();
   return ret;
 }
 #endif /* CONFIG_NET_TCP */
@@ -507,13 +515,17 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
 #if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_UDP) || defined(CONFIG_NET_LOCAL)
   int ret;
 #endif
-  int err;
+  int errcode;
+
+  /* Treat as a cancellation point */
+
+  (void)enter_cancellation_point();
 
   /* Verify that the psock corresponds to valid, allocated socket */
 
   if (!psock || psock->s_crefs <= 0)
     {
-      err = EBADF;
+      errcode = EBADF;
       goto errout;
     }
 
@@ -526,7 +538,7 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
       {
         if (addrlen < sizeof(struct sockaddr_in))
           {
-            err = EBADF;
+            errcode = EBADF;
             goto errout;
           }
       }
@@ -538,7 +550,7 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
       {
         if (addrlen < sizeof(struct sockaddr_in6))
           {
-            err = EBADF;
+            errcode = EBADF;
             goto errout;
           }
       }
@@ -550,7 +562,7 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
       {
         if (addrlen < sizeof(sa_family_t))
           {
-            err = EBADF;
+            errcode = EBADF;
             goto errout;
           }
       }
@@ -559,7 +571,7 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
 
     default:
       DEBUGPANIC();
-      err = EAFNOSUPPORT;
+      errcode = EAFNOSUPPORT;
       goto errout;
     }
 
@@ -574,7 +586,7 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
 
           if (_SS_ISCONNECTED(psock->s_flags))
             {
-              err = EISCONN;
+              errcode = EISCONN;
               goto errout;
             }
 
@@ -604,7 +616,7 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
 
           if (ret < 0)
             {
-              err = -ret;
+              errcode = -ret;
               goto errout;
             }
         }
@@ -644,7 +656,7 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
 
           if (ret < 0)
             {
-              err = -ret;
+              errcode = -ret;
               goto errout;
             }
         }
@@ -652,14 +664,16 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
 #endif /* CONFIG_NET_UDP || CONFIG_NET_LOCAL_DGRAM */
 
       default:
-        err = EBADF;
+        errcode = EBADF;
         goto errout;
     }
 
+  leave_cancellation_point();
   return OK;
 
 errout:
-  set_errno(err);
+  set_errno(errcode);
+  leave_cancellation_point();
   return ERROR;
 }
 
@@ -734,13 +748,21 @@ errout:
 
 int connect(int sockfd, FAR const struct sockaddr *addr, socklen_t addrlen)
 {
+  int ret;
+
+  /* accept() is a cancellation point */
+
+  (void)enter_cancellation_point();
+
   /* Get the underlying socket structure */
 
   FAR struct socket *psock = sockfd_socket(sockfd);
 
   /* Then let psock_connect() do all of the work */
 
-  return psock_connect(psock, addr, addrlen);
+  ret = psock_connect(psock, addr, addrlen);
+  leave_cancellation_point();
+  return ret;
 }
 
 #endif /* CONFIG_NET */

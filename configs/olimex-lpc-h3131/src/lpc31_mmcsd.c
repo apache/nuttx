@@ -76,25 +76,25 @@ int lpc31_mmcsd_initialize(int slot, int minor)
 
   /* First, get an instance of the SDIO interface */
 
-  fvdbg("Initializing SDIO slot %d\n", slot);
+  finfo("Initializing SDIO slot %d\n", slot);
   sdio = sdio_initialize(slot);
   if (!sdio)
     {
-      fdbg("ERROR: Failed to initialize SDIO slot %d\n", slot);
+      ferr("ERROR: Failed to initialize SDIO slot %d\n", slot);
       return -ENODEV;
     }
 
   /* Now bind the SPI interface to the MMC/SD driver */
 
-  fvdbg("Bind SDIO to the MMC/SD driver, minor=%d\n", minor);
+  finfo("Bind SDIO to the MMC/SD driver, minor=%d\n", minor);
   ret = mmcsd_slotinitialize(minor, sdio);
   if (ret != OK)
     {
-      fdbg("ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
+      ferr("ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
       return ret;
     }
 
-  fvdbg("Successfully bound SDIO to the MMC/SD driver\n");
+  finfo("Successfully bound SDIO to the MMC/SD driver\n");
 
   /* Then let's guess and say that there is a card in the slot.  I need to check to
    * see if the LPC-H3131 board supports a GPIO to detect if there is a card in

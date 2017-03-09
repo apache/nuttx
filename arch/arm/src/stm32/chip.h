@@ -109,6 +109,9 @@
 #  elif defined(CONFIG_ARCH_CHIP_STM32F105VB)
 #    include "chip/stm32f105v_pinmap.h"
 
+#  elif defined(CONFIG_ARCH_CHIP_STM32F105RB)
+#    include "chip/stm32f105r_pinmap.h"
+
 #  elif defined(CONFIG_ARCH_CHIP_STM32F107VC)
 #    include "chip/stm32f107v_pinmap.h"
 #  else
@@ -124,6 +127,8 @@
 
 #elif defined(CONFIG_STM32_STM32F30XX)
 #  include "chip/stm32f30xxx_pinmap.h"
+#elif defined(CONFIG_STM32_STM32F33XX)
+#  include "chip/stm32f33xxx_pinmap.h"
 #elif defined(CONFIG_STM32_STM32F37XX)
 #  include "chip/stm32f37xxx_pinmap.h"
 
@@ -148,6 +153,8 @@
 #    include "chip/stm32f20xxx_vectors.h"
 #  elif defined(CONFIG_STM32_STM32F30XX)
 #    include "chip/stm32f30xxx_vectors.h"
+#  elif defined(CONFIG_STM32_STM32F33XX)
+#    include "chip/stm32f33xxx_vectors.h"
 #  elif defined(CONFIG_STM32_STM32F37XX)
 #    include "chip/stm32f37xxx_vectors.h"
 #  elif defined(CONFIG_STM32_STM32F40XX)

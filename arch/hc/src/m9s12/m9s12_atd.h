@@ -1,6 +1,6 @@
 /************************************************************************************
  * arch/hc/src/m9s12/m9s12_atd.h
- * Defintions for ATD10b8c v3
+ * Definitions for ATD10b8c v3
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

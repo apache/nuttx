@@ -78,13 +78,15 @@ struct stm32_lower_s
 {
   const struct vs1053_lower_s lower;    /* Low-level MCU interface */
   xcpt_t                      handler;  /* VS1053 interrupt handler */
+  FAR void                   *arg;      /* Interrupt handler argument */
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static int  up_attach(FAR const struct vs1053_lower_s *lower, xcpt_t handler);
+static int  up_attach(FAR const struct vs1053_lower_s *lower, xcpt_t handler,
+                      FAR void *arg);
 static void up_enable(FAR const struct vs1053_lower_s *lower);
 static void up_disable(FAR const struct vs1053_lower_s *lower);
 static void up_reset(FAR const struct vs1053_lower_s *lower, bool state);
@@ -110,6 +112,7 @@ static struct stm32_lower_s g_vs1053lower =
     .irq        = GPIO_VS1053_DREQ_IRQ
   },
   .handler      = NULL,
+  .arg          = NULL,
 };
 
 /****************************************************************************
@@ -120,11 +123,13 @@ static struct stm32_lower_s g_vs1053lower =
  * Name: struct vs1053_lower_s methods
  ****************************************************************************/
 
-static int up_attach(FAR const struct vs1053_lower_s *lower, xcpt_t handler)
+static int up_attach(FAR const struct vs1053_lower_s *lower, xcpt_t handler,
+                     FAR void *arg)
 {
   FAR struct stm32_lower_s *priv = (FAR struct stm32_lower_s *)lower;
 
   priv->handler = handler;    /* Save the handler for later */
+  priv->arg     = arg;        /* Along with the handler argument */
   return 0;
 }
 
@@ -133,12 +138,13 @@ static void up_enable(FAR const struct vs1053_lower_s *lower)
   FAR struct stm32_lower_s *priv = (FAR struct stm32_lower_s *)lower;
 
   DEBUGASSERT(priv->handler);
-  (void)stm32_gpiosetevent(GPIO_VS1053_DREQ, true, false, false, priv->handler);
+  (void)stm32_gpiosetevent(GPIO_VS1053_DREQ, true, false, false,
+                           priv->handler, priv->arg);
 }
 
 static void up_disable(FAR const struct vs1053_lower_s *lower)
 {
-  (void)stm32_gpiosetevent(GPIO_VS1053_DREQ, false, false, false, NULL);
+  (void)stm32_gpiosetevent(GPIO_VS1053_DREQ, false, false, false, NULL, NULL);
 }
 
 static void up_reset(FAR const struct vs1053_lower_s *lower, bool state)
@@ -187,7 +193,7 @@ void up_vs1053initialize(FAR struct spi_dev_s* spi)
   pVs1053 = vs1053_initialize(spi, &g_vs1053lower.lower, VS1053_DEVNO);
   if (pVs1053 == NULL)
     {
-      audlldbg("Failed to bind SPI port %d VS1053 device\n", VS1053_DEVNO);
+      auderr("ERROR: Failed to bind SPI port %d VS1053 device\n", VS1053_DEVNO);
       return;
     }
 
@@ -197,10 +203,10 @@ void up_vs1053initialize(FAR struct spi_dev_s* spi)
   ret = audio_register(name, pVs1053);
   if (ret < 0)
     {
-      auddbg("up_vs1053initialize: Failed to register VS1053 Audio device\n");
+      auderr("ERROR: Failed to register VS1053 Audio device\n");
     }
 
-  audllvdbg("Bound SPI port to VS1053 device %s\n", name);
+  audinfo("Bound SPI port to VS1053 device %s\n", name);
 }
 
 #endif /* CONFIG_VS1053 */

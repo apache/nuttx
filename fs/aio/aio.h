@@ -277,5 +277,10 @@ int aio_queue(FAR struct aio_container_s *aioc, worker_t worker);
 
 int aio_signal(pid_t pid, FAR struct aiocb *aiocbp);
 
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
 #endif /* CONFIG_FS_AIO */
 #endif /* __FS_AIO_AIO_H */

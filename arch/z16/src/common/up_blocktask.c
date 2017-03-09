@@ -1,5 +1,5 @@
 /****************************************************************************
- * common/up_blocktask.c
+ * arch/z16/src/common/up_blocktask.c
  *
  *   Copyright (C) 2008-2009, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -83,7 +83,7 @@ void up_block_task(FAR struct tcb_s *tcb, tstate_t task_state)
   ASSERT((tcb->task_state >= FIRST_READY_TO_RUN_STATE) &&
          (tcb->task_state <= LAST_READY_TO_RUN_STATE));
 
-  /* dbg("Blocking TCB=%p\n", tcb); */
+  /* sinfo("Blocking TCB=%p\n", tcb); */
 
   /* Remove the tcb task from the ready-to-run list.  If we
    * are blocking the task at the head of the task list (the

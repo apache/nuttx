@@ -189,13 +189,13 @@ static ssize_t max31855_read(FAR struct file *filep, FAR char *buffer, size_t bu
 
   if (!buffer)
     {
-      sndbg("Buffer is null\n");
+      snerr("ERROR: Buffer is null\n");
       return -EINVAL;
     }
 
   if (buflen != 2)
     {
-      sndbg("You can't read something other than 16 bits (2 bytes)\n");
+      snerr("ERROR: You can't read something other than 16 bits (2 bytes)\n");
       return -EINVAL;
     }
 
@@ -218,7 +218,7 @@ static ssize_t max31855_read(FAR struct file *filep, FAR char *buffer, size_t bu
   regval |= (regmsb & 0xFF00) << 8;
   regval |= (regmsb & 0xFF) << 24;
 
-  sndbg("Read from MAX31855 = 0x%08X\n", regval);
+  sninfo("Read from MAX31855 = 0x%08X\n", regval);
 
   /* If negative, fix signal bits */
 
@@ -235,21 +235,21 @@ static ssize_t max31855_read(FAR struct file *filep, FAR char *buffer, size_t bu
 
   if (regval & MAX31855_FAULT)
     {
-      sndbg("Error: A fault was detected by MAX31855:\n");
+      snerr("ERROR: A fault was detected by MAX31855:\n");
 
       if (regval & MAX31855_SHORT_VCC)
         {
-          sndbg("The thermocouple input is shorted to VCC!\n");
+          snerr("  The thermocouple input is shorted to VCC!\n");
         }
 
       if (regval & MAX31855_SHORT_GND)
         {
-          sndbg("The thermocouple input is shorted to GND!\n");
+          snerr("  The thermocouple input is shorted to GND!\n");
         }
 
       if (regval & MAX31855_OPEN_CIRCUIT)
         {
-          sndbg("The thermocouple input is not connected!\n");
+          snerr("  The thermocouple input is not connected!\n");
         }
 
       ret = -EINVAL;
@@ -308,7 +308,7 @@ int max31855_register(FAR const char *devpath, FAR struct spi_dev_s *spi)
   priv = (FAR struct max31855_dev_s *)kmm_malloc(sizeof(struct max31855_dev_s));
   if (priv == NULL)
     {
-      sndbg("Failed to allocate instance\n");
+      snerr("ERROR: Failed to allocate instance\n");
       return -ENOMEM;
     }
 
@@ -320,7 +320,7 @@ int max31855_register(FAR const char *devpath, FAR struct spi_dev_s *spi)
   ret = register_driver(devpath, &g_max31855fops, 0666, priv);
   if (ret < 0)
     {
-      sndbg("Failed to register driver: %d\n", ret);
+      snerr("ERROR: Failed to register driver: %d\n", ret);
       kmm_free(priv);
     }
 

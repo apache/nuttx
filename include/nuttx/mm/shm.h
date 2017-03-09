@@ -77,19 +77,19 @@
 
 #ifdef CONFIG_CPP_HAVE_VARARGS
 #  ifdef CONFIG_DEBUG_SHM
-#    define shmdbg(format, ...)       dbg(format, ##__VA_ARGS__)
-#    define shmvdbg(format, ...)      vdbg(format, ##__VA_ARGS__)
+#    define shmerr(format, ...)       _err(format, ##__VA_ARGS__)
+#    define shminfo(format, ...)      _info(format, ##__VA_ARGS__)
 #  else
-#    define shmdbg(format, ...)       mdbg(format, ##__VA_ARGS__)
-#    define shmvdbg(format, ...)      mvdbg(format, ##__VA_ARGS__)
+#    define shmerr(format, ...)       merr(format, ##__VA_ARGS__)
+#    define shminfo(format, ...)      minfo(format, ##__VA_ARGS__)
 #  endif
 #else
 #  ifdef CONFIG_DEBUG_SHM
-#    define shmdbg                    dbg
-#    define shmvdbg                   vdbg
+#    define shmerr                    _err
+#    define shminfo                   _info
 #  else
-#    define shmdbg                    (void)
-#    define shmvdbg                   (void)
+#    define shmerr                    (void)
+#    define shminfo                   (void)
 #  endif
 #endif
 

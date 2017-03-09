@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/stm32f4discovery/src/stm32f4discovery.h
  *
- *   Copyright (C) 2011-2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,6 +49,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration *************************************************************/
+
+/* Define what timer and channel to use as XEN1210 CLK */
+
+#define XEN1210_PWMTIMER   1
+#define XEN1210_PWMCHANNEL 1
+
 /* How many SPI modules does this chip support? */
 
 #if STM32_NSPI < 1
@@ -98,7 +104,7 @@
 
 /* Check if we should enable the USB monitor before starting NSH */
 
-#if !defined(CONFIG_USBDEV_TRACE) || !defined(CONFIG_SYSTEM_USBMONITOR)
+#if !defined(CONFIG_USBDEV_TRACE) || !defined(CONFIG_USBMONITOR)
 #  undef HAVE_USBMONITOR
 #endif
 
@@ -229,6 +235,14 @@
 
 #define GPIO_MAX6675_CS  (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
                            GPIO_OUTPUT_SET|GPIO_PORTD|GPIO_PIN8)
+
+/* XEN1210 magnetic sensor */
+
+#define GPIO_XEN1210_INT (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|\
+                          GPIO_OPENDRAIN|GPIO_PORTA|GPIO_PIN5)
+
+#define GPIO_CS_XEN1210  (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                          GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN4)
 
 /* USB OTG FS
  *
@@ -425,6 +439,30 @@ int stm32_usbhost_initialize(void);
 #endif
 
 /****************************************************************************
+ * Name: stm32_pwm_setup
+ *
+ * Description:
+ *   Initialize PWM and register the PWM device.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PWM
+int stm32_pwm_setup(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_can_setup
+ *
+ * Description:
+ *  Initialize CAN and register the CAN device
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_CAN
+int stm32_can_setup(void);
+#endif
+
+/****************************************************************************
  * Name: stm32_extmemgpios
  *
  * Description:
@@ -511,22 +549,6 @@ void stm32_pm_buttons(void);
 #endif
 
 /****************************************************************************
- * Name: stm32_bringup
- *
- * Description:
- *   Perform architecture-specific initialization
- *
- *   CONFIG_BOARD_INITIALIZE=y :
- *     Called from board_initialize().
- *
- *   CONFIG_BOARD_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y :
- *     Called from the NSH library
- *
- ****************************************************************************/
-
-int stm32_bringup(void);
-
-/****************************************************************************
  * Name: stm32_sdio_initialize
  *
  * Description:
@@ -548,6 +570,18 @@ int stm32_sdio_initialize(void);
 
 #ifdef HAVE_NETMONITOR
 void weak_function stm32_netinitialize(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_qencoder_initialize
+ *
+ * Description:
+ *   Initialize and register a qencoder
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_QENCODER
+int stm32_qencoder_initialize(FAR const char *devpath, int timer);
 #endif
 
 /****************************************************************************
@@ -633,6 +667,26 @@ int stm32_rgbled_setup(void);
 
 #ifdef CONFIG_TIMER
 int stm32_timer_driver_setup(FAR const char *devpath, int timer);
+#endif
+
+/****************************************************************************
+ * Name xen1210_archinitialize
+ *
+ * Description:
+ *   This function is called by board initialization logic to configure the
+ *   XEN1210 driver.  This function will register the driver as /dev/mag0
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_XEN1210
+int xen1210_archinitialize(int minor);
 #endif
 
 #endif /* __ASSEMBLY__ */

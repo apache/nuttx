@@ -174,10 +174,10 @@ static int up_getgrp(unsigned int irq)
  *
  ****************************************************************************/
 
-static int avr32_xcptn(int irq, FAR void *context)
+static int avr32_xcptn(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
-  lldbg("PANIC!!! Exception IRQ: %d\n", irq);
+  _alert("PANIC!!! Exception IRQ: %d\n", irq);
   PANIC();
   return 0;
 }
@@ -223,7 +223,7 @@ void up_irqinitialize(void)
 
   for (irq = 0; irq < AVR32_IRQ_NEVENTS; irq++)
     {
-      irq_attach(irq, avr32_xcptn);
+      irq_attach(irq, avr32_xcptn, NULL);
     }
 
   /* Initialize GPIO interrupt facilities */
@@ -321,11 +321,11 @@ unsigned int avr32_intirqno(unsigned int level)
           mask <<= 1;
         }
 
-       lldbg("Spurious interrupt: group=%d IRR=%08x\n", group, irr);
+       _err("ERROR: Spurious interrupt: group=%d IRR=%08x\n", group, irr);
        return -ENODEV;
     }
 
-  lldbg("Bad group: %d\n", group);
+  _err("ERROR: Bad group: %d\n", group);
   return AVR32_IRQ_BADVECTOR;
 }
 

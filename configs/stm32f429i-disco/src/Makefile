@@ -64,8 +64,16 @@ ifeq ($(CONFIG_STM32_OTGHS),y)
 CSRCS += stm32_usb.c
 endif
 
+ifeq ($(CONFIG_INPUT_STMPE811),y)
+CSRCS += stm32_stmpe811.c
+endif
+
 ifeq ($(CONFIG_STM32F429I_DISCO_ILI9341),y)
 CSRCS += stm32_ili93414ws.c
+endif
+
+ifeq ($(CONFIG_SENSORS_L3GD20),y)
+CSRCS += stm32_l3gd20.c
 endif
 
 ifeq ($(and \

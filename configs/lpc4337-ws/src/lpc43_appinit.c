@@ -46,8 +46,9 @@
 #include <nuttx/board.h>
 #include <nuttx/i2c/i2c_master.h>
 
-#include "lpc43_i2c.h"
 #include "chip.h"
+#include "lpc43_i2c.h"
+#include "lpc4337-ws.h"
 
 /****************************************************************************
  * Private Functions
@@ -70,14 +71,14 @@ static void lpc43_i2c_register(int bus)
   i2c = lpc43_i2cbus_initialize(bus);
   if (i2c == NULL)
     {
-      dbg("ERROR: Failed to get I2C%d interface\n", bus);
+      _err("ERROR: Failed to get I2C%d interface\n", bus);
     }
   else
     {
       ret = i2c_register(i2c, bus);
       if (ret < 0)
         {
-          dbg("ERROR: Failed to register I2C%d driver: %d\n", bus, ret);
+          _err("ERROR: Failed to register I2C%d driver: %d\n", bus, ret);
           lpc43_i2cbus_uninitialize(i2c);
         }
     }
@@ -135,8 +136,22 @@ static void lpc43_i2ctool(void)
 
 int board_app_initialize(uintptr_t arg)
 {
+  int ret;
+
   /* Register I2C drivers on behalf of the I2C tool */
 
   lpc43_i2ctool();
+
+#ifdef CONFIG_LPC43_ADC0
+  /* Initialize ADC and register the ADC driver. */
+
+  ret = lpc43_adc_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: lpc43_adc_setup failed: %d\n", ret);
+    }
+#endif
+
+  UNUSED(ret);
   return OK;
 }

@@ -1,5 +1,5 @@
 /****************************************************************************
- * common/up_internal.h
+ * arch/z16/src/common/up_internal.h
  *
  *   Copyright (C) 2008-2009, 2011-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __UP_INTERNAL_H
-#define __UP_INTERNAL_H
+#ifndef __ARCH_Z16_SRC_COMMON_UP_INTERNAL_H
+#define __ARCH_Z16_SRC_COMMON_UP_INTERNAL_H
 
 /****************************************************************************
  * Included Files
@@ -58,7 +58,11 @@
 #undef  CONFIG_SUPPRESS_UART_CONFIG   /* Do not reconfig UART */
 #undef  CONFIG_DUMP_ON_EXIT           /* Dump task state on exit */
 #undef  CONFIG_Z16_LOWPUTC            /* Support up_lowputc for debug */
-#undef  CONFIG_Z16_LOWGETC            /* support up_lowgetc for debug */
+#undef  CONFIG_Z16_LOWGETC            /* support z16_lowgetc for debug */
+
+#ifndef CONFIG_DEBUG_SCHED_INFO
+#  undef CONFIG_DUMP_ON_EXIT          /* Needs CONFIG_DEBUG_SCHED_INFO */
+#endif
 
 /* Determine which (if any) console driver to use.  If a console is enabled
  * and no other console device is specified, then a serial console is
@@ -96,13 +100,6 @@
 
 #if !defined(USE_SERIALDRIVER) && defined(CONFIG_STANDARD_SERIAL)
 #  define USE_SERIALDRIVER 1
-#endif
-
-/* Determine which device to use as the system logging device */
-
-#ifndef CONFIG_SYSLOG
-#  undef CONFIG_SYSLOG_CHAR
-#  undef CONFIG_RAMLOG_SYSLOG
 #endif
 
 /* Macros for portability */
@@ -149,7 +146,6 @@ void up_restoreusercontext(FAR chipreg_t *regs);
 void up_irqinitialize(void);
 int  up_saveusercontext(FAR chipreg_t *regs);
 void up_sigdeliver(void);
-int  up_timerisr(int irq, FAR chipreg_t *regs);
 
 #if defined(CONFIG_Z16_LOWPUTC) || defined(CONFIG_Z16_LOWGETC)
 void up_lowputc(char ch);
@@ -157,13 +153,13 @@ void up_lowputc(char ch);
 # define up_lowputc(ch)
 #endif
 
-/* Defined in up_allocateheap.c */
+/* Defined in xyz_allocateheap.c */
 
 #if CONFIG_MM_REGIONS > 1
 void up_addregion(void);
 #endif
 
-/* Defined in up_serial.c */
+/* Defined in xyz_serial.c */
 
 #ifdef USE_SERIALDRIVER
 void up_earlyserialinit(void);
@@ -174,15 +170,15 @@ void up_serialinit(void);
 void lowconsole_init(void);
 #endif
 
-/* Defined in up_timerisr.c */
+/* Defined in xyz_timerisr.c */
 
-void up_timer_initialize(void);
+void z16_timer_initialize(void);
 
-/* Defined in up_irq.c */
+/* Defined in xyz_irq.c */
 
 void up_ack_irq(int irq);
 
-/* Defined in board/up_network.c */
+/* Defined in board/xyz_network.c */
 
 #ifdef CONFIG_NET
 void up_netinitialize(void);
@@ -206,4 +202,4 @@ void up_registerdump(void);
 
 #endif /* __ASSEMBLY__ */
 
-#endif  /* __UP_INTERNAL_H */
+#endif  /* __ARCH_Z16_SRC_COMMON_UP_INTERNAL_H */

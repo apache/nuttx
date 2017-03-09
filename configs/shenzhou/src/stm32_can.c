@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/shenzhou/src/stm32_can.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/can.h>
+#include <nuttx/drivers/can.h>
 #include <arch/board/board.h>
 
 #include "chip.h"
@@ -52,7 +52,7 @@
 #include "stm32_can.h"
 #include "shenzhou.h"
 
-#if defined(CONFIG_CAN) && (defined(CONFIG_STM32_CAN1) || defined(CONFIG_STM32_CAN2))
+#ifdef CONFIG_CAN
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -60,74 +60,57 @@
 /* Configuration ********************************************************************/
 /* The STM32F107VC supports CAN1 and CAN2 */
 
-#define CAN_PORT 1
-
-/* Debug ***************************************************************************/
-/* Non-standard debug that may be enabled just for testing CAN */
-
-#ifdef CONFIG_DEBUG_CAN
-#  define candbg    dbg
-#  define canvdbg   vdbg
-#  define canlldbg  lldbg
-#  define canllvdbg llvdbg
-#else
-#  define candbg(x...)
-#  define canvdbg(x...)
-#  define canlldbg(x...)
-#  define canllvdbg(x...)
+#if defined(CONFIG_STM32_CAN1) && defined(CONFIG_STM32_CAN2)
+#  warning "Both CAN1 and CAN2 are enabled.  Only CAN1 is connected."
+#  undef CONFIG_STM32_CAN2
 #endif
 
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
+#ifdef CONFIG_STM32_CAN1
+#  define CAN_PORT 1
+#else
+#  define CAN_PORT 2
+#endif
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
 /************************************************************************************
- * Name: board_can_initialize
+ * Name: stm32_can_setup
  *
  * Description:
- *   All STM32 architectures must provide the following interface to work with
- *   examples/can.
+ *  Initialize CAN and register the CAN device
  *
  ************************************************************************************/
 
-int board_can_initialize(void)
+int stm32_can_setup(void)
 {
-  static bool initialized = false;
+#if defined(CONFIG_STM32_CAN1) || defined(CONFIG_STM32_CAN2)
   struct can_dev_s *can;
   int ret;
 
-  /* Check if we have already initialized */
+  /* Call stm32_caninitialize() to get an instance of the CAN interface */
 
-  if (!initialized)
+  can = stm32_caninitialize(CAN_PORT);
+  if (can == NULL)
     {
-      /* Call stm32_caninitialize() to get an instance of the CAN interface */
+      canerr("ERROR:  Failed to get CAN interface\n");
+      return -ENODEV;
+    }
 
-      can = stm32_caninitialize(CAN_PORT);
-      if (can == NULL)
-        {
-          candbg("ERROR:  Failed to get CAN interface\n");
-          return -ENODEV;
-        }
+  /* Register the CAN driver at "/dev/can0" */
 
-      /* Register the CAN driver at "/dev/can0" */
-
-      ret = can_register("/dev/can0", can);
-      if (ret < 0)
-        {
-          candbg("ERROR: can_register failed: %d\n", ret);
-          return ret;
-        }
-
-      /* Now we are initialized */
-
-      initialized = true;
+  ret = can_register("/dev/can0", can);
+  if (ret < 0)
+    {
+      canerr("ERROR: can_register failed: %d\n", ret);
+      return ret;
     }
 
   return OK;
+#else
+  return -ENODEV;
+#endif
 }
 
-#endif /* CONFIG_CAN && CONFIG_STM32_CAN1 */
+#endif /* CONFIG_CAN */

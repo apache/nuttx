@@ -59,18 +59,12 @@ ifeq ($(CONFIG_STACK_COLORATION),y)
 CMN_CSRCS += up_checkstack.c
 endif
 
-ifeq ($(CONFIG_ELF),y)
-CMN_CSRCS += up_elf.c
-else ifeq ($(CONFIG_MODULE),y)
-CMN_CSRCS += up_elf.c
-endif
-
-ifeq ($(CONFIG_DEBUG),y)
+ifeq ($(CONFIG_DEBUG_FEATURES),y)
 CMN_CSRCS += up_dumpnvic.c
 endif
 
 CHIP_ASRCS  =
-CHIP_CSRCS  = kl_clockconfig.c kl_gpio.c kl_idle.c kl_irq.c kl_lowgetc.c
+CHIP_CSRCS  = kl_clockconfig.c kl_gpio.c kl_idle.c kl_irq.c
 CHIP_CSRCS += kl_lowputc.c kl_serial.c kl_start.c kl_cfmconfig.c
 
 ifneq ($(CONFIG_SCHED_TICKLESS),y)
@@ -81,7 +75,7 @@ ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CHIP_CSRCS += kl_userspace.c
 endif
 
-ifeq ($(CONFIG_GPIO_IRQ),y)
+ifeq ($(CONFIG_KL_GPIOIRQ),y)
 CHIP_CSRCS += kl_gpioirq.c
 endif
 
@@ -101,6 +95,6 @@ ifeq ($(CONFIG_PWM),y)
 CHIP_CSRCS += kl_pwm.c
 endif
 
-ifeq ($(CONFIG_DEBUG),y)
+ifeq ($(CONFIG_DEBUG_FEATURES),y)
 CHIP_CSRCS += kl_dumpgpio.c
 endif

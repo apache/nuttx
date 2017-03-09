@@ -105,23 +105,20 @@ uint32_t sched_roundrobin_process(FAR struct tcb_s *tcb, uint32_t ticks,
   /* How much can we decrement the timeslice delay?  If 'ticks' is greater
    * than the timeslice value, then we ignore any excess amount.
    *
-   * 'ticks' should never be greater than the remaining timeslice.  We try
-   * to handle that gracefully but it would be an error in the scheduling
-   * if there ever were the case.
+   * 'ticks' should not be greater than the remaining timeslice.  But that
+   * event seems to be possible, perhaps in cases where pre-emption has been
+   * disabled or the noswitches flag is set.  This might cause jitter of a
+   * few ticks in the slicing because the excess amount is not handled.
    */
 
-  DEBUGASSERT(tcb != NULL && ticks <= tcb->timeslice);
+  DEBUGASSERT(tcb != NULL);
   decr = MIN(tcb->timeslice, ticks);
 
   /* Decrement the timeslice counter */
 
   tcb->timeslice -= decr;
 
-  /* Did decrementing the timeslice counter cause the timeslice to expire?
-   *
-   * If the task has pre-emption disabled. Then we will let the timeslice
-   * count go negative as a indication of this situation.
-   */
+  /* Did decrementing the timeslice counter cause the timeslice to expire? */
 
   ret = tcb->timeslice;
   if (tcb->timeslice <= 0 && !sched_islocked(tcb))

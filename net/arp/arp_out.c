@@ -123,13 +123,13 @@ static const uint8_t g_multicast_ethaddr[3] =
  *   beginning of the packet and the function returns.
  *
  *   If no ARP cache entry is found for the destination IP address, the
- *   packet in the d_buf[] is replaced by an ARP request packet for the
+ *   packet in the d_buf is replaced by an ARP request packet for the
  *   IP address. The IP packet is dropped and it is assumed that the
  *   higher level protocols (e.g., TCP) eventually will retransmit the
  *   dropped packet.
  *
  *   Upon return in either the case, a packet to be sent is present in the
- *   d_buf[] buffer and the d_len field holds the length of the Ethernet
+ *   d_buf buffer and the d_len field holds the length of the Ethernet
  *   frame that should be transmitted.
  *
  ****************************************************************************/
@@ -231,7 +231,7 @@ void arp_out(FAR struct net_driver_s *dev)
       tabptr = arp_find(ipaddr);
       if (!tabptr)
         {
-           nllvdbg("ARP request for IP %08lx\n", (unsigned long)ipaddr);
+           ninfo("ARP request for IP %08lx\n", (unsigned long)ipaddr);
 
           /* The destination address was not in our ARP table, so we
            * overwrite the IP packet with an ARP request.

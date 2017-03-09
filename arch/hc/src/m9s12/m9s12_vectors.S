@@ -1,6 +1,5 @@
 /************************************************************************************
  * arch/hc/src/m9s12/m9s12_vectors.S
- * arch/hc/src/chip/m9s12_vectors.S
  *
  *	 Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *	 Author: Gregory Nutt <gnutt@nuttx.org>

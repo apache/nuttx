@@ -58,7 +58,7 @@
  ****************************************************************************/
 
 #ifdef VFAT_STANDALONE
-# define sdbg(format, ...) printf(format, ##__VA_ARGS__)
+# define serr(format, ...) printf(format, ##__VA_ARGS__)
 # define kmm_malloc(size)   malloc(size)
 # define kmm_free(mem)     free(mem)
 #endif
@@ -223,7 +223,7 @@ char *up_deviceimage(void)
   ret           = inflateInit(&strm);
   if (ret != Z_OK)
     {
-      sdbg("inflateInit FAILED: ret=%d msg=\"%s\"\n",
+      serr("ERROR: inflateInit FAILED: ret=%d msg=\"%s\"\n",
            ret, strm.msg ? strm.msg : "No message");
       return NULL;
     }
@@ -260,7 +260,7 @@ char *up_deviceimage(void)
           case Z_DATA_ERROR:
           case Z_MEM_ERROR:
           case Z_STREAM_ERROR:
-              sdbg("inflate FAILED: ret=%d msg=\"%s\"\n",
+              serr("ERROR: inflate FAILED: ret=%d msg=\"%s\"\n",
                     ret, strm.msg ? strm.msg : "No message");
               (void)inflateEnd(&strm);
               kmm_free(pbuffer);

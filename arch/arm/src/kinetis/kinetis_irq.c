@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/lpc17/kinetis_irq.c
+ * arch/arm/src/kinetis/kinetis_irq.c
  *
  *   Copyright (C) 2011, 2013-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -105,50 +105,51 @@ extern uint32_t _vectors[];
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_IRQ)
+#if defined(CONFIG_DEBUG_IRQ_INFO)
 static void kinetis_dumpnvic(const char *msg, int irq)
 {
   irqstate_t flags;
 
   flags = enter_critical_section();
-  lldbg("NVIC (%s, irq=%d):\n", msg, irq);
-  lldbg("  INTCTRL:    %08x VECTAB: %08x\n",
-        getreg32(NVIC_INTCTRL), getreg32(NVIC_VECTAB));
+
+  irqinfo("NVIC (%s, irq=%d):\n", msg, irq);
+  irqinfo("  INTCTRL:    %08x VECTAB: %08x\n",
+          getreg32(NVIC_INTCTRL), getreg32(NVIC_VECTAB));
 #if 0
-  lldbg("  SYSH ENABLE MEMFAULT: %08x BUSFAULT: %08x USGFAULT: %08x SYSTICK: %08x\n",
-        getreg32(NVIC_SYSHCON_MEMFAULTENA), getreg32(NVIC_SYSHCON_BUSFAULTENA),
-        getreg32(NVIC_SYSHCON_USGFAULTENA), getreg32(NVIC_SYSTICK_CTRL_ENABLE));
+  irqinfo("  SYSH ENABLE MEMFAULT: %08x BUSFAULT: %08x USGFAULT: %08x SYSTICK: %08x\n",
+          getreg32(NVIC_SYSHCON_MEMFAULTENA), getreg32(NVIC_SYSHCON_BUSFAULTENA),
+          getreg32(NVIC_SYSHCON_USGFAULTENA), getreg32(NVIC_SYSTICK_CTRL_ENABLE));
 #endif
-  lldbg("  IRQ ENABLE: %08x %08x %08x %08x\n",
-        getreg32(NVIC_IRQ0_31_ENABLE), getreg32(NVIC_IRQ32_63_ENABLE),
-        getreg32(NVIC_IRQ64_95_ENABLE), getreg32(NVIC_IRQ96_127_ENABLE));
-  lldbg("  SYSH_PRIO:  %08x %08x %08x\n",
-        getreg32(NVIC_SYSH4_7_PRIORITY), getreg32(NVIC_SYSH8_11_PRIORITY),
-        getreg32(NVIC_SYSH12_15_PRIORITY));
-  lldbg("  IRQ PRIO:   %08x %08x %08x %08x\n",
-        getreg32(NVIC_IRQ0_3_PRIORITY), getreg32(NVIC_IRQ4_7_PRIORITY),
-        getreg32(NVIC_IRQ8_11_PRIORITY), getreg32(NVIC_IRQ12_15_PRIORITY));
-  lldbg("              %08x %08x %08x %08x\n",
-        getreg32(NVIC_IRQ16_19_PRIORITY), getreg32(NVIC_IRQ20_23_PRIORITY),
-        getreg32(NVIC_IRQ24_27_PRIORITY), getreg32(NVIC_IRQ28_31_PRIORITY));
-  lldbg("              %08x %08x %08x %08x\n",
-        getreg32(NVIC_IRQ32_35_PRIORITY), getreg32(NVIC_IRQ36_39_PRIORITY),
-        getreg32(NVIC_IRQ40_43_PRIORITY), getreg32(NVIC_IRQ44_47_PRIORITY));
-  lldbg("              %08x %08x %08x %08x\n",
-        getreg32(NVIC_IRQ48_51_PRIORITY), getreg32(NVIC_IRQ52_55_PRIORITY),
-        getreg32(NVIC_IRQ56_59_PRIORITY), getreg32(NVIC_IRQ60_63_PRIORITY));
-  lldbg("              %08x %08x %08x %08x\n",
-        getreg32(NVIC_IRQ64_67_PRIORITY), getreg32(NVIC_IRQ68_71_PRIORITY),
-        getreg32(NVIC_IRQ72_75_PRIORITY), getreg32(NVIC_IRQ76_79_PRIORITY));
-  lldbg("              %08x %08x %08x %08x\n",
-        getreg32(NVIC_IRQ80_83_PRIORITY), getreg32(NVIC_IRQ84_87_PRIORITY),
-        getreg32(NVIC_IRQ88_91_PRIORITY), getreg32(NVIC_IRQ92_95_PRIORITY));
-  lldbg("              %08x %08x %08x %08x\n",
-        getreg32(NVIC_IRQ96_99_PRIORITY), getreg32(NVIC_IRQ100_103_PRIORITY),
-        getreg32(NVIC_IRQ104_107_PRIORITY), getreg32(NVIC_IRQ108_111_PRIORITY));
+  irqinfo("  IRQ ENABLE: %08x %08x %08x %08x\n",
+          getreg32(NVIC_IRQ0_31_ENABLE), getreg32(NVIC_IRQ32_63_ENABLE),
+          getreg32(NVIC_IRQ64_95_ENABLE), getreg32(NVIC_IRQ96_127_ENABLE));
+  irqinfo("  SYSH_PRIO:  %08x %08x %08x\n",
+          getreg32(NVIC_SYSH4_7_PRIORITY), getreg32(NVIC_SYSH8_11_PRIORITY),
+          getreg32(NVIC_SYSH12_15_PRIORITY));
+  irqinfo("  IRQ PRIO:   %08x %08x %08x %08x\n",
+          getreg32(NVIC_IRQ0_3_PRIORITY), getreg32(NVIC_IRQ4_7_PRIORITY),
+          getreg32(NVIC_IRQ8_11_PRIORITY), getreg32(NVIC_IRQ12_15_PRIORITY));
+  irqinfo("              %08x %08x %08x %08x\n",
+          getreg32(NVIC_IRQ16_19_PRIORITY), getreg32(NVIC_IRQ20_23_PRIORITY),
+          getreg32(NVIC_IRQ24_27_PRIORITY), getreg32(NVIC_IRQ28_31_PRIORITY));
+  irqinfo("              %08x %08x %08x %08x\n",
+          getreg32(NVIC_IRQ32_35_PRIORITY), getreg32(NVIC_IRQ36_39_PRIORITY),
+          getreg32(NVIC_IRQ40_43_PRIORITY), getreg32(NVIC_IRQ44_47_PRIORITY));
+  irqinfo("              %08x %08x %08x %08x\n",
+          getreg32(NVIC_IRQ48_51_PRIORITY), getreg32(NVIC_IRQ52_55_PRIORITY),
+          getreg32(NVIC_IRQ56_59_PRIORITY), getreg32(NVIC_IRQ60_63_PRIORITY));
+  irqinfo("              %08x %08x %08x %08x\n",
+          getreg32(NVIC_IRQ64_67_PRIORITY), getreg32(NVIC_IRQ68_71_PRIORITY),
+          getreg32(NVIC_IRQ72_75_PRIORITY), getreg32(NVIC_IRQ76_79_PRIORITY));
+  irqinfo("              %08x %08x %08x %08x\n",
+          getreg32(NVIC_IRQ80_83_PRIORITY), getreg32(NVIC_IRQ84_87_PRIORITY),
+          getreg32(NVIC_IRQ88_91_PRIORITY), getreg32(NVIC_IRQ92_95_PRIORITY));
+  irqinfo("              %08x %08x %08x %08x\n",
+          getreg32(NVIC_IRQ96_99_PRIORITY), getreg32(NVIC_IRQ100_103_PRIORITY),
+          getreg32(NVIC_IRQ104_107_PRIORITY), getreg32(NVIC_IRQ108_111_PRIORITY));
 #if NR_VECTORS > 111
-  lldbg("              %08x %08x\n",
-        getreg32(NVIC_IRQ112_115_PRIORITY), getreg32(NVIC_IRQ116_119_PRIORITY));
+  irqinfo("              %08x %08x\n",
+          getreg32(NVIC_IRQ112_115_PRIORITY), getreg32(NVIC_IRQ116_119_PRIORITY));
 #endif
 
   leave_critical_section(flags);
@@ -168,51 +169,51 @@ static void kinetis_dumpnvic(const char *msg, int irq)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG
-static int kinetis_nmi(int irq, FAR void *context)
+#ifdef CONFIG_DEBUG_FEATURES
+static int kinetis_nmi(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! NMI received\n");
+  _err("PANIC!!! NMI received\n");
   PANIC();
   return 0;
 }
 
-static int kinetis_busfault(int irq, FAR void *context)
+static int kinetis_busfault(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! Bus fault recived\n");
+  _err("PANIC!!! Bus fault recived\n");
   PANIC();
   return 0;
 }
 
-static int kinetis_usagefault(int irq, FAR void *context)
+static int kinetis_usagefault(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! Usage fault received\n");
+  _err("PANIC!!! Usage fault received\n");
   PANIC();
   return 0;
 }
 
-static int kinetis_pendsv(int irq, FAR void *context)
+static int kinetis_pendsv(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! PendSV received\n");
+  _err("PANIC!!! PendSV received\n");
   PANIC();
   return 0;
 }
 
-static int kinetis_dbgmonitor(int irq, FAR void *context)
+static int kinetis_dbgmonitor(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! Debug Monitor received\n");
+  _err("PANIC!!! Debug Monitor received\n");
   PANIC();
   return 0;
 }
 
-static int kinetis_reserved(int irq, FAR void *context)
+static int kinetis_reserved(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! Reserved interrupt\n");
+  _err("PANIC!!! Reserved interrupt\n");
   PANIC();
   return 0;
 }
@@ -257,27 +258,27 @@ static int kinetis_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
 
   /* Check for external interrupt */
 
-  if (irq >= KINETIS_IRQ_EXTINT)
+  if (irq >= KINETIS_IRQ_FIRST)
     {
-      if (irq < (KINETIS_IRQ_EXTINT+32))
+      if (irq < (KINETIS_IRQ_FIRST+32))
         {
            *regaddr = (NVIC_IRQ0_31_ENABLE + offset);
-           *bit     = 1 << (irq - KINETIS_IRQ_EXTINT);
+           *bit     = 1 << (irq - KINETIS_IRQ_FIRST);
         }
-      else if (irq < (KINETIS_IRQ_EXTINT+64))
+      else if (irq < (KINETIS_IRQ_FIRST+64))
         {
            *regaddr = (NVIC_IRQ32_63_ENABLE + offset);
-           *bit     = 1 << (irq - KINETIS_IRQ_EXTINT - 32);
+           *bit     = 1 << (irq - KINETIS_IRQ_FIRST - 32);
         }
-      else if (irq < (KINETIS_IRQ_EXTINT+96))
+      else if (irq < (KINETIS_IRQ_FIRST+96))
         {
            *regaddr = (NVIC_IRQ64_95_ENABLE + offset);
-           *bit     = 1 << (irq - KINETIS_IRQ_EXTINT - 64);
+           *bit     = 1 << (irq - KINETIS_IRQ_FIRST - 64);
         }
       else if (irq < NR_IRQS)
         {
            *regaddr = (NVIC_IRQ96_127_ENABLE + offset);
-           *bit     = 1 << (irq - KINETIS_IRQ_EXTINT - 96);
+           *bit     = 1 << (irq - KINETIS_IRQ_FIRST - 96);
         }
       else
         {
@@ -397,8 +398,8 @@ void up_irqinitialize(void)
    * under certain conditions.
    */
 
-  irq_attach(KINETIS_IRQ_SVCALL, up_svcall);
-  irq_attach(KINETIS_IRQ_HARDFAULT, up_hardfault);
+  irq_attach(KINETIS_IRQ_SVCALL, up_svcall, NULL);
+  irq_attach(KINETIS_IRQ_HARDFAULT, up_hardfault, NULL);
 
   /* Set the priority of the SVCall interrupt */
 
@@ -414,22 +415,22 @@ void up_irqinitialize(void)
    */
 
 #ifdef CONFIG_ARM_MPU
-  irq_attach(KINETIS_IRQ_MEMFAULT, up_memfault);
+  irq_attach(KINETIS_IRQ_MEMFAULT, up_memfault, NULL);
   up_enable_irq(KINETIS_IRQ_MEMFAULT);
 #endif
 
   /* Attach all other processor exceptions (except reset and sys tick) */
 
-#ifdef CONFIG_DEBUG
-  irq_attach(KINETIS_IRQ_NMI, kinetis_nmi);
+#ifdef CONFIG_DEBUG_FEATURES
+  irq_attach(KINETIS_IRQ_NMI, kinetis_nmi, NULL);
 #ifndef CONFIG_ARM_MPU
-  irq_attach(KINETIS_IRQ_MEMFAULT, up_memfault);
+  irq_attach(KINETIS_IRQ_MEMFAULT, up_memfault, NULL);
 #endif
-  irq_attach(KINETIS_IRQ_BUSFAULT, kinetis_busfault);
-  irq_attach(KINETIS_IRQ_USAGEFAULT, kinetis_usagefault);
-  irq_attach(KINETIS_IRQ_PENDSV, kinetis_pendsv);
-  irq_attach(KINETIS_IRQ_DBGMONITOR, kinetis_dbgmonitor);
-  irq_attach(KINETIS_IRQ_RESERVED, kinetis_reserved);
+  irq_attach(KINETIS_IRQ_BUSFAULT, kinetis_busfault, NULL);
+  irq_attach(KINETIS_IRQ_USAGEFAULT, kinetis_usagefault, NULL);
+  irq_attach(KINETIS_IRQ_PENDSV, kinetis_pendsv, NULL);
+  irq_attach(KINETIS_IRQ_DBGMONITOR, kinetis_dbgmonitor, NULL);
+  irq_attach(KINETIS_IRQ_RESERVED, kinetis_reserved, NULL);
 #endif
 
   kinetis_dumpnvic("initial", NR_IRQS);
@@ -438,7 +439,7 @@ void up_irqinitialize(void)
    * configured pin interrupts.
    */
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_KINETIS_GPIOIRQ
   kinetis_pinirqinitialize();
 #endif
 
@@ -471,7 +472,7 @@ void up_disable_irq(int irq)
        * clear the bit in the System Handler Control and State Register.
        */
 
-      if (irq >= KINETIS_IRQ_EXTINT)
+      if (irq >= KINETIS_IRQ_FIRST)
         {
           putreg32(bit, regaddr);
         }
@@ -508,7 +509,7 @@ void up_enable_irq(int irq)
        * set the bit in the System Handler Control and State Register.
        */
 
-      if (irq >= KINETIS_IRQ_EXTINT)
+      if (irq >= KINETIS_IRQ_FIRST)
         {
           putreg32(bit, regaddr);
         }
@@ -559,7 +560,7 @@ int up_prioritize_irq(int irq, int priority)
   DEBUGASSERT(irq >= KINETIS_IRQ_MEMFAULT && irq < NR_IRQS &&
               (unsigned)priority <= NVIC_SYSH_PRIORITY_MIN);
 
-  if (irq < KINETIS_IRQ_EXTINT)
+  if (irq < KINETIS_IRQ_FIRST)
     {
       /* NVIC_SYSH_PRIORITY() maps {0..15} to one of three priority
        * registers (0-3 are invalid)
@@ -572,7 +573,7 @@ int up_prioritize_irq(int irq, int priority)
     {
       /* NVIC_IRQ_PRIORITY() maps {0..} to one of many priority registers */
 
-      irq    -= KINETIS_IRQ_EXTINT;
+      irq    -= KINETIS_IRQ_FIRST;
       regaddr = NVIC_IRQ_PRIORITY(irq);
     }
 

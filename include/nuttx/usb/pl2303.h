@@ -39,8 +39,8 @@
  *
  ************************************************************************************/
 
-#ifndef _INCLUDE_NUTTX_USB_PL2303_H
-#define _INCLUDE_NUTTX_USB_PL2303_H
+#ifndef __INCLUDE_NUTTX_USB_PL2303_H
+#define __INCLUDE_NUTTX_USB_PL2303_H
 
 /************************************************************************************
  * Included Files
@@ -88,4 +88,4 @@ int usbdev_serialinitialize(int minor);
 }
 #endif
 
-#endif /* _INCLUDE_NUTTX_USB_PL2303_H */
+#endif /* __INCLUDE_NUTTX_USB_PL2303_H */

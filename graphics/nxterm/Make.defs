@@ -44,7 +44,7 @@ ifeq ($(CONFIG_NXTERM_NXKBDIN),y)
 CSRCS += nxterm_kbdin.c
 endif
 
-ifeq ($(CONFIG_DEBUG),y)
+ifeq ($(CONFIG_DEBUG_FEATURES),y)
 CSRCS += nxterm_sem.c
 endif
 

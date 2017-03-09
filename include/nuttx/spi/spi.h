@@ -128,6 +128,28 @@
 #define SPI_SETFREQUENCY(d,f) ((d)->ops->setfrequency(d,f))
 
 /****************************************************************************
+ * Name: SPI_SETDELAY
+ *
+ * Description:
+ *   Set the SPI Delays in nanoseconds. Optional.
+ *
+ * Input Parameters:
+ *   dev        - Device-specific state data
+ *   startdelay - The delay between CS active and first CLK
+ *   stopdelay  - The delay between last CLK and CS inactive
+ *   csdelay    - The delay between CS inactive and CS active again
+ *
+ * Returned Value:
+ *   Returns zero (OK) on success; a negated errno value is return on any
+ *   failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SPI_CS_DELAY_CONTROL
+#  define SPI_SETDELAY(d,a,b,c) ((d)->ops->setdelay(d,a,b,c))
+#endif
+
+/****************************************************************************
  * Name: SPI_SETMODE
  *
  * Description:
@@ -153,9 +175,7 @@
  *
  * Input Parameters:
  *   dev -  Device-specific state data
- *   nbits - The number of bits requests.
- *           If value is greater > 0 then it implies MSB first
- *           If value is below < 0, then it implies LSB first with -nbits
+ *   nbits - The number of bits in an SPI word.
  *
  * Returned Value:
  *   none
@@ -172,8 +192,8 @@
  *   Set hardware-specific feature flags.
  *
  * Input Parameters:
- *   dev   - Device-specific state data
- *   flags - H/W feature flags
+ *   dev      - Device-specific state data
+ *   features - H/W feature flags
  *
  * Returned Value:
  *   Zero (OK) if the selected H/W features are enabled; A negated errno
@@ -189,15 +209,43 @@
 #  define SPI_HWFEATURES(d,f) \
   (((d)->ops->hwfeatures) ? (d)->ops->hwfeatures(d,f) : ((f) == 0 ? OK : -ENOSYS))
 
-  /* These are currently defined feature flags */
+  /* These are currently defined feature flags:
+   *
+   *   Bit 0: HWFEAT_CRCGENERATION
+   *          Hardware CRC generation
+   *   Bit 1: HWFEAT_FORCE_CS_INACTIVE_AFTER_TRANSFER
+   *          CS rises after every Transmission, also if we provide new data
+   *          immediately
+   *   Bit 2: HWFEAT_FORCE_CS_ACTIVE_AFTER_TRANSFER
+   *          CS does not rise automatically after a transmission, also if
+   *          the spi runs out of data (for a long time)
+   *   Bit 3: HWFEAT_ESCAPE_LASTXFER
+   *          Do not set the LASTXFER-Bit at the last word of the next
+   *          exchange, Flag is auto-resetting after the next LASTXFER
+   *          condition. (see spi_exchange)
+   *   Bit 4: HWFEAT_LSBFIRST
+   *          Data transferred LSB first (default is MSB first)
+   */
 
 #  ifdef CONFIG_SPI_CRCGENERATION
-#    HWFEAT_CRCGENERATION (1 << 0) /* Bit 0: Hardward CRC generation */
+#    define HWFEAT_CRCGENERATION                     (1 << 0)
+#  endif
+
+#  ifdef CONFIG_SPI_CS_CONTROL
+#    define HWFEAT_FORCE_CS_CONTROL_MASK             (7 << 1)
+#    define HWFEAT_FORCE_CS_INACTIVE_AFTER_TRANSFER  (1 << 1)
+#    define HWFEAT_FORCE_CS_ACTIVE_AFTER_TRANSFER    (1 << 2)
+#    define HWFEAT_ESCAPE_LASTXFER                   (1 << 3)
+#  endif
+
+#  ifdef CONFIG_SPI_BITORDER
+#    define HWFEAT_MSBFIRST                          (0 << 4)
+#    define HWFEAT_LSBFIRST                          (1 << 4)
 #  endif
 
 #else
   /* Any attempt to select hardware features with CONFIG_SPI_HWFEATURES
-   * deselected will cause an assertion.
+   * deselected will return an -ENOSYS error.
    */
 
 #  define SPI_HWFEATURES(d,f) (((f) == 0) ? OK : -ENOSYS)
@@ -403,6 +451,7 @@ enum spi_dev_e
   SPIDEV_BAROMETER,     /* Select SPI Pressure/Barometer device */
   SPIDEV_TEMPERATURE,   /* Select SPI Temperature sensor device */
   SPIDEV_IEEE802154,    /* Select SPI IEEE 802.15.4 wireless device */
+  SPIDEV_CONTACTLESS,   /* Select SPI Contactless device */
   SPIDEV_USER           /* Board-specific values start here */
 };
 
@@ -431,6 +480,10 @@ struct spi_ops_s
   CODE void     (*select)(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
                   bool selected);
   CODE uint32_t (*setfrequency)(FAR struct spi_dev_s *dev, uint32_t frequency);
+#ifdef CONFIG_SPI_CS_DELAY_CONTROL
+  CODE int      (*setdelay)(FAR struct spi_dev_s *dev, uint32_t a, uint32_t b,
+                  uint32_t c);
+#endif
   CODE void     (*setmode)(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
   CODE void     (*setbits)(FAR struct spi_dev_s *dev, int nbits);
 #ifdef CONFIG_SPI_HWFEATURES

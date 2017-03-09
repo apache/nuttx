@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/board.h
  *
- *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -316,40 +316,6 @@ int board_tsc_setup(int minor);
 void board_tsc_teardown(void);
 
 /****************************************************************************
- * Name: board_adc_setup
- *
- * Description:
- *   All architectures must provide the following interface in order to
- *   work with examples/adc.
- *
- *   This is an internal OS interface but may be invoked indirectly from
- *   application-level graphics logic.  If CONFIG_LIB_BOARDCTL=y and
- *   CONFIG_BOARDCTL_ADCTEST=y, then this functions will be invoked via the
- *   (non-standard) boardctl() interface using the BOARDIOC_ADCTEST_SETUP
- *   command.
- *
- ****************************************************************************/
-
-int board_adc_setup(void);
-
-/****************************************************************************
- * Name: board_pwm_setup
- *
- * Description:
- *   All architectures must provide the following interface in order to
- *   work with examples/pwm.
- *
- *   This is an internal OS interface but may be invoked indirectly from
- *   application-level graphics logic.  If CONFIG_LIB_BOARDCTL=y and
- *   CONFIG_BOARDCTL_PWMTEST=y, then this functions will be invoked via the
- *   (non-standard) boardctl() interface using the commands
- *   BOARDIOC_PWMTEST_SETUP command.
- *
- ****************************************************************************/
-
-int board_pwm_setup(void);
-
-/****************************************************************************
  * Name: board_graphics_setup
  *
  * Description:
@@ -370,25 +336,6 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno);
 #else
 struct fb_vtable_s;
 FAR struct fb_vtable_s *board_graphics_setup(unsigned int devno);
-#endif
-
-/****************************************************************************
- * Name: board_can_initialize
- *
- * Description:
- *   Perform one-time CAN initialization.  This is currently only needed for
- *   apps/examples/can.
- *
- *   This is an internal OS interface but may be invoked indirectly from
- *   application-level graphics logic.  If CONFIG_LIB_BOARDCTL=y and
- *   CONFIG_BOARDCTL_CANINIT=y, then this functions will be invoked via the
- *   (non-standard) boardctl() interface using the BOARDIOC_CAN_INITIALIZE
- *   command.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_BOARDCTL_CANINIT
-int board_can_initialize(void);
 #endif
 
 /****************************************************************************
@@ -656,8 +603,6 @@ uint8_t board_buttons(void);
  *   This function may be called to register an interrupt handler that will
  *   be called when a button is depressed or released.  The ID value is a
  *   button enumeration value that uniquely identifies a button resource.
- *   The previous interrupt handler address is returned (so that it may
- *   restored, if so desired).
  *
  *   NOTE: This interface may or may not be supported by board-specific
  *   logic.  If the board supports any button interfaces, then
@@ -667,7 +612,7 @@ uint8_t board_buttons(void);
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_IRQBUTTONS
-xcpt_t board_button_irq(int id, xcpt_t irqhandler);
+int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg);
 #endif
 
 /****************************************************************************

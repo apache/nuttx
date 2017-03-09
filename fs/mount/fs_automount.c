@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/mount/fs_automount.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -124,9 +124,7 @@ static int  automount_interrupt(FAR const struct automount_lower_s *lower,
 
 static int automount_findinode(FAR const char *path)
 {
-  FAR struct inode *node;
-  FAR const char *srchpath;
-  FAR const char *relpath;
+  struct inode_search_s desc;
   int ret;
 
   /* Make sure that we were given an absolute path */
@@ -139,12 +137,13 @@ static int automount_findinode(FAR const char *path)
 
   /* Find the inode */
 
-  srchpath = path;
-  node = inode_search(&srchpath, (FAR struct inode**)NULL,
-                      (FAR struct inode**)NULL, &relpath);
+  SETUP_SEARCH(&desc, path, false);
+
+  ret = inode_search(&desc);
+
   /* Did we find it? */
 
-  if (!node)
+  if (ret < 0)
     {
       /* No.. Not found */
 
@@ -153,7 +152,7 @@ static int automount_findinode(FAR const char *path)
 
   /* Yes.. is it a mount point? */
 
-  else if (INODE_IS_MOUNTPT(node))
+  else if (INODE_IS_MOUNTPT(desc.node))
     {
       /* Yes.. we found a mountpoint at this path */
 
@@ -161,7 +160,7 @@ static int automount_findinode(FAR const char *path)
     }
   else
     {
-      /* No.. then somethin is in the way */
+      /* No.. then something is in the way */
 
       ret = -ENOTDIR;
     }
@@ -169,6 +168,7 @@ static int automount_findinode(FAR const char *path)
   /* Relinquish our exclusive access to the inode try and return the result */
 
   inode_semgive();
+  RELEASE_SEARCH(&desc);
   return ret;
 }
 
@@ -191,7 +191,7 @@ static void automount_mount(FAR struct automounter_state_s *priv)
   FAR const struct automount_lower_s *lower = priv->lower;
   int ret;
 
-  fvdbg("Mounting %s\n", lower->mountpoint);
+  finfo("Mounting %s\n", lower->mountpoint);
 
   /* Check if the something is already mounted at the mountpoint. */
 
@@ -204,13 +204,13 @@ static void automount_mount(FAR struct automounter_state_s *priv)
        * try to unmount again because the mount might be stale.
        */
 
-      fdbg("WARNING: Mountpoint %s already exists\n", lower->mountpoint);
+      fwarn("WARNING: Mountpoint %s already exists\n", lower->mountpoint);
       ret = automount_unmount(priv);
       if (ret < 0)
         {
           /* We failed to unmount (again?).  Complain and abort. */
 
-          fdbg("ERROR: automount_unmount failed: %d\n", ret);
+          ferr("ERROR: automount_unmount failed: %d\n", ret);
           return;
         }
 
@@ -232,7 +232,7 @@ static void automount_mount(FAR struct automounter_state_s *priv)
           int errcode = get_errno();
           DEBUGASSERT(errcode > 0);
 
-          fdbg("ERROR: Mount failed: %d\n", errcode);
+          ferr("ERROR: Mount failed: %d\n", errcode);
           UNUSED(errcode);
           return;
         }
@@ -243,7 +243,7 @@ static void automount_mount(FAR struct automounter_state_s *priv)
       break;
 
     default:
-      fdbg("ERROR: automount_findinode failed: %d\n", ret);
+      ferr("ERROR: automount_findinode failed: %d\n", ret);
       break;
     }
 }
@@ -268,7 +268,7 @@ static int automount_unmount(FAR struct automounter_state_s *priv)
   FAR const struct automount_lower_s *lower = priv->lower;
   int ret;
 
-  fvdbg("Unmounting %s\n", lower->mountpoint);
+  finfo("Unmounting %s\n", lower->mountpoint);
 
   /* Check if the something is already mounted at the mountpoint. */
 
@@ -295,7 +295,7 @@ static int automount_unmount(FAR struct automounter_state_s *priv)
 
           if (errcode == EBUSY)
             {
-              fvdbg("WARNING: Volume is busy, try again later\n");
+              finfo("WARNING: Volume is busy, try again later\n");
 
               /* Start a timer to retry the umount2 after a delay */
 
@@ -306,7 +306,7 @@ static int automount_unmount(FAR struct automounter_state_s *priv)
                   errcode = get_errno();
                   DEBUGASSERT(errcode > 0);
 
-                  fdbg("ERROR: wd_start failed: %d\n", errcode);
+                  ferr("ERROR: wd_start failed: %d\n", errcode);
                   return -ret;
                 }
             }
@@ -315,7 +315,7 @@ static int automount_unmount(FAR struct automounter_state_s *priv)
 
           else
             {
-              fvdbg("ERROR: umount2 failed: %d\n", errcode);
+              ferr("ERROR: umount2 failed: %d\n", errcode);
               return -errcode;
             }
         }
@@ -332,7 +332,7 @@ static int automount_unmount(FAR struct automounter_state_s *priv)
       return OK;
 
     default:
-      fdbg("ERROR: automount_findinode failed: %d\n", ret);
+      ferr("ERROR: automount_findinode failed: %d\n", ret);
       return ret;
     }
 }
@@ -363,7 +363,7 @@ static void automount_timeout(int argc, uint32_t arg1, ...)
     (FAR struct automounter_state_s *)((uintptr_t)arg1);
   int ret;
 
-  fllvdbg("Timeout!\n");
+  finfo("Timeout!\n");
   DEBUGASSERT(argc == 1 && priv);
 
   /* Check the state of things.  This timeout at the interrupt level and
@@ -372,7 +372,7 @@ static void automount_timeout(int argc, uint32_t arg1, ...)
    * there should be no pending work.
    */
 
-  fllvdbg("inserted=%d\n", priv->inserted);
+  finfo("inserted=%d\n", priv->inserted);
   DEBUGASSERT(!priv->inserted && work_available(&priv->work));
 
   /* Queue work to occur immediately. */
@@ -382,7 +382,7 @@ static void automount_timeout(int argc, uint32_t arg1, ...)
     {
       /* NOTE: Currently, work_queue only returns success */
 
-      fdbg("ERROR: Failed to schedule work: %d\n", ret);
+      ferr("ERROR: Failed to schedule work: %d\n", ret);
     }
 }
 
@@ -463,7 +463,7 @@ static int automount_interrupt(FAR const struct automount_lower_s *lower,
 
   DEBUGASSERT(lower && priv && priv->lower == lower);
 
-  fllvdbg("inserted=%d\n", inserted);
+  finfo("inserted=%d\n", inserted);
 
   /* Cancel any pending work.  We could get called multiple times if, for
    * example there is bounce in the detection mechanism.  Work is performed
@@ -475,7 +475,7 @@ static int automount_interrupt(FAR const struct automount_lower_s *lower,
     {
       /* NOTE: Currently, work_cancel only returns success */
 
-      fdbg("ERROR: Failed to cancel work: %d\n", ret);
+      ferr("ERROR: Failed to cancel work: %d\n", ret);
     }
 
   /* Set the media insertion/removal state */
@@ -485,7 +485,7 @@ static int automount_interrupt(FAR const struct automount_lower_s *lower,
   /* Queue work to occur after a delay.  The delays performs debouncing:
    * If the insertion/removal detection logic has "chatter", then we may
    * receive this interrupt numerous times.  Each time, the previous work
-   * will be cancelled (above) and the new work will scheduled with the
+   * will be canceled (above) and the new work will scheduled with the
    * delay.  So the final mount operation will not be performed until the
    * insertion state is stable for that delay.
    */
@@ -496,7 +496,7 @@ static int automount_interrupt(FAR const struct automount_lower_s *lower,
     {
       /* NOTE: Currently, work_queue only returns success */
 
-      fdbg("ERROR: Failed to schedule work: %d\n", ret);
+      ferr("ERROR: Failed to schedule work: %d\n", ret);
     }
   else
     {
@@ -532,7 +532,7 @@ FAR void *automount_initialize(FAR const struct automount_lower_s *lower)
   FAR struct automounter_state_s *priv;
   int ret;
 
-  fvdbg("lower=%p\n", lower);
+  finfo("lower=%p\n", lower);
   DEBUGASSERT(lower);
 
   /* Allocate an auto-mounter state structure */
@@ -542,7 +542,7 @@ FAR void *automount_initialize(FAR const struct automount_lower_s *lower)
 
   if (!priv)
     {
-      fdbg("ERROR: Failed to allocate state structure\n");
+      ferr("ERROR: Failed to allocate state structure\n");
       return NULL;
     }
 
@@ -555,7 +555,7 @@ FAR void *automount_initialize(FAR const struct automount_lower_s *lower)
   priv->wdog  = wd_create();
   if (!priv->wdog)
     {
-      fdbg("ERROR: Failed to create a timer\n");
+      ferr("ERROR: Failed to create a timer\n");
       automount_uninitialize(priv);
       return NULL;
     }
@@ -574,7 +574,7 @@ FAR void *automount_initialize(FAR const struct automount_lower_s *lower)
     {
       /* NOTE: Currently, work_queue only returns success */
 
-      fdbg("ERROR: Failed to schedule work: %d\n", ret);
+      ferr("ERROR: Failed to schedule work: %d\n", ret);
     }
 
   /* Attach and enable automounter interrupts */
@@ -582,7 +582,7 @@ FAR void *automount_initialize(FAR const struct automount_lower_s *lower)
   ret = AUTOMOUNT_ATTACH(lower, automount_interrupt, priv);
   if (ret < 0)
     {
-      fdbg("ERROR: Failed to attach automount interrupt: %d\n", ret);
+      ferr("ERROR: Failed to attach automount interrupt: %d\n", ret);
       automount_uninitialize(priv);
       return NULL;
     }

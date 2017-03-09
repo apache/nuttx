@@ -637,7 +637,7 @@ STM32F3Discovery-specific Configuration Options
     CONFIG_CAN2_BAUD - CAN1 BAUD rate.  Required if CONFIG_STM32_CAN2 is defined.
     CONFIG_CAN_TSEG1 - The number of CAN time quanta in segment 1. Default: 6
     CONFIG_CAN_TSEG2 - the number of CAN time quanta in segment 2. Default: 7
-    CONFIG_CAN_REGDEBUG - If CONFIG_DEBUG is set, this will generate an
+    CONFIG_STM32_CAN_REGDEBUG - If CONFIG_DEBUG_FEATURES is set, this will generate an
       dump of all CAN registers.
 
   STM32F3Discovery SPI Configuration
@@ -778,7 +778,6 @@ Where <subdir> is one of the following:
        the system logging device:
 
        Device Drivers -> System Logging Device Options:
-         CONFIG_SYSLOG=y                    : Enable output to syslog, not console
          CONFIG_SYSLOG_CHAR=y               : Use a character device for system logging
          CONFIG_SYSLOG_DEVPATH="/dev/ttyS0" : USART2 will be /dev/ttyS0
 
@@ -807,15 +806,15 @@ Where <subdir> is one of the following:
           CONFIG_NSH_ARCHINIT=y                   : Automatically start the USB monitor
 
         Application Configuration -> System NSH Add-Ons:
-          CONFIG_SYSTEM_USBMONITOR=y              : Enable the USB monitor daemon
-          CONFIG_SYSTEM_USBMONITOR_STACKSIZE=2048 : USB monitor daemon stack size
-          CONFIG_SYSTEM_USBMONITOR_PRIORITY=50    : USB monitor daemon priority
-          CONFIG_SYSTEM_USBMONITOR_INTERVAL=1     : Dump trace data every second
-          CONFIG_SYSTEM_USBMONITOR_TRACEINIT=y    : Enable TRACE output
-          CONFIG_SYSTEM_USBMONITOR_TRACECLASS=y
-          CONFIG_SYSTEM_USBMONITOR_TRACETRANSFERS=y
-          CONFIG_SYSTEM_USBMONITOR_TRACECONTROLLER=y
-          CONFIG_SYSTEM_USBMONITOR_TRACEINTERRUPTS=y
+          CONFIG_USBMONITOR=y              : Enable the USB monitor daemon
+          CONFIG_USBMONITOR_STACKSIZE=2048 : USB monitor daemon stack size
+          CONFIG_USBMONITOR_PRIORITY=50    : USB monitor daemon priority
+          CONFIG_USBMONITOR_INTERVAL=1     : Dump trace data every second
+          CONFIG_USBMONITOR_TRACEINIT=y    : Enable TRACE output
+          CONFIG_USBMONITOR_TRACECLASS=y
+          CONFIG_USBMONITOR_TRACETRANSFERS=y
+          CONFIG_USBMONITOR_TRACECONTROLLER=y
+          CONFIG_USBMONITOR_TRACEINTERRUPTS=y
 
        NOTE: USB debug output also be enabled in this case.  Both will appear
        on the serial SYSLOG output.  However, the debug output will be

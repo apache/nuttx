@@ -54,26 +54,6 @@
 #include "nxterm.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -85,6 +65,7 @@
  *   we can read the displays framebuffer memory, then the job is pretty
  *   easy.  However, many displays (such as SPI-based LCDs) are often read-
  *   only.
+ *
  ****************************************************************************/
 
 #ifdef CONFIG_NX_WRITEONLY
@@ -118,7 +99,7 @@ static inline void nxterm_movedisplay(FAR struct nxterm_state_s *priv,
       ret = priv->ops->fill(priv, &rect, priv->wndo.wcolor);
       if (ret < 0)
         {
-          gdbg("Fill failed: %d\n", errno);
+          gerr("ERROR: Fill failed: %d\n", errno);
         }
 
       /* Fill each character that might lie within in the bounding box */
@@ -141,7 +122,7 @@ static inline void nxterm_movedisplay(FAR struct nxterm_state_s *priv,
   ret = priv->ops->fill(priv, &rect, priv->wndo.wcolor);
   if (ret < 0)
     {
-      gdbg("Fill failed: %d\n", errno);
+      gerr("ERROR: Fill failed: %d\n", errno);
     }
 }
 #else
@@ -177,7 +158,7 @@ static inline void nxterm_movedisplay(FAR struct nxterm_state_s *priv,
   ret = priv->ops->move(priv, &rect, &offset);
   if (ret < 0)
     {
-      gdbg("Move failed: %d\n", errno);
+      gerr("ERROR: Move failed: %d\n", errno);
     }
 
   /* Finally, clear the vacated bottom part of the display */
@@ -187,7 +168,7 @@ static inline void nxterm_movedisplay(FAR struct nxterm_state_s *priv,
   ret = priv->ops->fill(priv, &rect, priv->wndo.wcolor);
   if (ret < 0)
     {
-      gdbg("Fill failed: %d\n", errno);
+      gerr("ERROR: Fill failed: %d\n", errno);
     }
 }
 #endif
@@ -219,7 +200,8 @@ void nxterm_scroll(FAR struct nxterm_state_s *priv, int scrollheight)
 
           for (j = i; j < priv->nchars-1; j++)
             {
-              memcpy(&priv->bm[j], &priv->bm[j+1], sizeof(struct nxterm_bitmap_s));
+              memcpy(&priv->bm[j], &priv->bm[j+1],
+                     sizeof(struct nxterm_bitmap_s));
             }
 
           /* Decrement the number of cached characters ('i' is not incremented

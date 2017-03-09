@@ -44,6 +44,7 @@
 #include <nuttx/compiler.h>
 #include <stdint.h>
 #include <arch/kinetis/chip.h>
+#include <nuttx/i2c/i2c_master.h>
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -76,6 +77,8 @@
  * Public data
  ************************************************************************************/
 
+FAR struct i2c_master_s* i2c_dev;
+
 #ifndef __ASSEMBLY__
 
 /************************************************************************************
@@ -93,6 +96,16 @@
 extern void weak_function kinetis_spidev_initialize(void);
 
 /************************************************************************************
+ * Name: kinetis_i2cdev_initialize
+ *
+ * Description:
+ *   Called to configure I2C
+ *
+ ************************************************************************************/
+
+void kinetis_i2cdev_initialize(void);
+
+/************************************************************************************
  * Name: kinetis_usbinitialize
  *
  * Description:
@@ -101,6 +114,18 @@ extern void weak_function kinetis_spidev_initialize(void);
  ************************************************************************************/
 
 extern void weak_function kinetis_usbinitialize(void);
+
+/************************************************************************************
+ * Name: kinetis_pwm_setup
+ *
+ * Description:
+ *   Initialize PWM and register the PWM device.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_PWM
+int kinetis_pwm_setup(void);
+#endif
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_TEENSY_3X_SRC_TEENSY_3X_H */

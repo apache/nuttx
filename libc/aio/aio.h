@@ -69,5 +69,10 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
 #endif /* CONFIG_FS_AIO */
 #endif /* __LIBC_AIO_AIO_H */

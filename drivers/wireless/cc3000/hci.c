@@ -1,6 +1,7 @@
 /****************************************************************************
- *  hci.c  - CC3000 Host Driver Implementation.
- *  Copyright (C) 2011 Texas Instruments Incorporated - http://www.ti.com/
+ *  drivers/wireless/cc3000/hci.c  - CC3000 Host Driver Implementation.
+ *
+ *    Copyright (C) 2011 Texas Instruments Incorporated - http://www.ti.com/
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions
@@ -79,7 +80,7 @@ uint16_t hci_command_send(uint16_t usOpcode, uint8_t *pucBuff,
 
   stream = (pucBuff + SPI_HEADER_SIZE);
 
-  nllvdbg("Send 0x%x\n", usOpcode);
+  ninfo("Send 0x%x\n", usOpcode);
   UINT8_TO_STREAM(stream, HCI_TYPE_CMND);
   stream = UINT16_TO_STREAM(stream, usOpcode);
   UINT8_TO_STREAM(stream, ucArgsLength);
@@ -87,7 +88,7 @@ uint16_t hci_command_send(uint16_t usOpcode, uint8_t *pucBuff,
   /* Update the opcode of the event we will be waiting for */
 
   cc3000_write(pucBuff, ucArgsLength + SIMPLE_LINK_HCI_CMND_HEADER_SIZE);
-  nllvdbg("Send of 0x%x Completed\n", usOpcode);
+  ninfo("Send of 0x%x Completed\n", usOpcode);
 
   return 0;
 }

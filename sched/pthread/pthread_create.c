@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/pthread/pthread_create.c
  *
- *   Copyright (C) 2007-2009, 2011, 2013-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2013-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,9 +49,10 @@
 #include <errno.h>
 #include <queue.h>
 
+#include <nuttx/arch.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/pthread.h>
-#include <nuttx/arch.h>
 
 #include "sched/sched.h"
 #include "group/group.h"
@@ -74,9 +75,11 @@ const pthread_attr_t g_default_pthread_attr = PTHREAD_ATTR_INITIALIZER;
  * Private Data
  ****************************************************************************/
 
+#if CONFIG_TASK_NAME_SIZE > 0
 /* This is the name for name-less pthreads */
 
 static const char g_pthreadname[] = "<pthread>";
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -183,6 +186,16 @@ static void pthread_start(void)
   pjoin->started = true;
   (void)pthread_givesemaphore(&pjoin->data_sem);
 
+  /* The priority of this thread may have been boosted to avoid priority
+   * inversion problems.  If that is the case, then drop to the correct
+   * execution priority.
+   */
+
+  if (ptcb->cmn.sched_priority > ptcb->cmn.init_priority)
+    {
+      DEBUGVERIFY(sched_setpriority(&ptcb->cmn, ptcb->cmn.init_priority));
+    }
+
   /* Pass control to the thread entry point. In the kernel build this has to
    * be handled differently if we are starting a user-space pthread; we have
    * to switch to user-mode before calling into the pthread.
@@ -249,7 +262,7 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
   ptcb = (FAR struct pthread_tcb_s *)kmm_zalloc(sizeof(struct pthread_tcb_s));
   if (!ptcb)
     {
-      sdbg("ERROR: Failed to allocate TCB\n");
+      serr("ERROR: Failed to allocate TCB\n");
       return ENOMEM;
     }
 
@@ -282,7 +295,7 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
   pjoin = (FAR struct join_s *)kmm_zalloc(sizeof(struct join_s));
   if (!pjoin)
     {
-      sdbg("ERROR: Failed to allocate join\n");
+      serr("ERROR: Failed to allocate join\n");
       errcode = ENOMEM;
       goto errout_with_tcb;
     }
@@ -472,6 +485,12 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
 #endif
     }
 
+#ifdef CONFIG_CANCELLATION_POINTS
+  /* Set the deferred cancellation type */
+
+  ptcb->cmn.flags |= TCB_FLAG_CANCEL_DEFERRED;
+#endif
+
   /* Get the assigned pid before we start the task (who knows what
    * could happen to ptcb after this!).  Copy this ID into the join structure
    * as well.
@@ -488,7 +507,41 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
       ret = sem_init(&pjoin->exit_sem, 0, 0);
     }
 
-  /* Activate the task */
+  /* Thse semaphores are used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
+  if (ret == OK)
+    {
+      ret = sem_setprotocol(&pjoin->data_sem, SEM_PRIO_NONE);
+    }
+
+  if (ret == OK)
+    {
+      ret = sem_setprotocol(&pjoin->exit_sem, SEM_PRIO_NONE);
+    }
+
+  /* If the priority of the new pthread is lower than the priority of the
+   * parent thread, then starting the pthread could result in both the
+   * parent and the pthread to be blocked.  This is a recipe for priority
+   * inversion issues.
+   *
+   * We avoid this here by boosting the priority of the (inactive) pthread
+   * so it has the same priority as the parent thread.
+   */
+
+  if (ret == OK)
+    {
+      FAR struct tcb_s *parent = this_task();
+      DEBUGASSERT(parent != NULL);
+
+      if (ptcb->cmn.sched_priority < parent->sched_priority)
+        {
+          ret = sched_setpriority(&ptcb->cmn, parent->sched_priority);
+        }
+    }
+
+  /* Then activate the task */
 
   sched_lock();
   if (ret == OK)

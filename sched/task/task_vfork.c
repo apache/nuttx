@@ -41,6 +41,7 @@
 
 #include <sys/wait.h>
 #include <stdint.h>
+#include <sched.h>
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
@@ -268,7 +269,7 @@ FAR struct task_tcb_s *task_vforksetup(start_t retaddr)
   child = (FAR struct task_tcb_s *)kmm_zalloc(sizeof(struct task_tcb_s));
   if (!child)
     {
-      sdbg("ERROR: Failed to allocate TCB\n");
+      serr("ERROR: Failed to allocate TCB\n");
       set_errno(ENOMEM);
       return NULL;
     }
@@ -303,14 +304,14 @@ FAR struct task_tcb_s *task_vforksetup(start_t retaddr)
 
   /* Initialize the task control block.  This calls up_initial_state() */
 
-  svdbg("Child priority=%d start=%p\n", priority, retaddr);
+  sinfo("Child priority=%d start=%p\n", priority, retaddr);
   ret = task_schedsetup(child, priority, retaddr, parent->entry.main, ttype);
   if (ret < OK)
     {
       goto errout_with_tcb;
     }
 
-  svdbg("parent=%p, returning child=%p\n", parent, child);
+  sinfo("parent=%p, returning child=%p\n", parent, child);
   return child;
 
 errout_with_tcb:
@@ -369,7 +370,7 @@ pid_t task_vforkstart(FAR struct task_tcb_s *child)
   int rc;
   int ret;
 
-  svdbg("Starting Child TCB=%p, parent=%p\n", child, this_task());
+  sinfo("Starting Child TCB=%p, parent=%p\n", child, this_task());
   DEBUGASSERT(child);
 
   /* Duplicate the original argument list in the forked child TCB */
@@ -396,50 +397,54 @@ pid_t task_vforkstart(FAR struct task_tcb_s *child)
 
   pid = (int)child->cmn.pid;
 
+  /* Eliminate a race condition by disabling pre-emption.  The child task
+   * can be instantiated, but cannot run until we call waitpid().  This
+   * assures us that we cannot miss the the death-of-child signal (only
+   * needed in the SMP case).
+   */
+
+  sched_lock();
+
   /* Activate the task */
 
   ret = task_activate((FAR struct tcb_s *)child);
   if (ret < OK)
     {
       task_vforkabort(child, -ret);
+      sched_unlock();
       return ERROR;
     }
 
-  /* Since the child task has the same priority as the parent task, it is
-   * now ready to run, but has not yet ran.  It is a requirement that
-   * the parent environment be stable while vfork runs; the child thread
-   * is still dependent on things in the parent thread... like the pointers
-   * into parent thread's stack which will still appear in the child's
-   * registers and environment.
+  /* The child task has not yet ran because pre-emption is disabled.
+   * The child task has the same priority as the parent task, so that
+   * would typically be the case anyway.  However, in the SMP
+   * configuration, the child thread might have already ran on
+   * another CPU if pre-emption were not disabled.
    *
-   * We do not have SIG_CHILD, so we have to do some silly things here.
-   * The simplest way to make sure that the child thread runs to completion
-   * is simply to yield here.  Since the child can only do exit() or
-   * execv/l(), that should be all that is needed.
+   * It is a requirement that the parent environment be stable while
+   * vfork runs; the child thread is still dependent on things in the
+   * parent thread... like the pointers into parent thread's stack
+   * which will still appear in the child's registers and environment.
    *
-   * Hmmm.. this is probably not sufficient.  What if we are running
-   * SCHED_RR?  What if the child thread is suspended and rescheduled
-   * after the parent thread again?
-   */
-
-  /* We can also exploit a bug in the execv() implementation:  The PID
-   * of the task exec'ed by the child will not be the same as the PID of
-   * the child task.  Therefore, waitpid() on the child task's PID will
-   * accomplish what we need to do.
+   * We assure that by waiting for the child thread to exit before
+   * returning to the parent thread.  NOTE that pre-emption will be
+   * re-enabled while we are waiting, giving the child thread the
+   * opportunity to run.
    */
 
   rc = 0;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   ret = waitpid(pid, &rc, 0);
   if (ret < 0)
     {
-      sdbg("ERROR: waitpid failed: %d\n", errno);
+      serr("ERROR: waitpid failed: %d\n", errno);
     }
 #else
   (void)waitpid(pid, &rc, 0);
 #endif
 
+  sched_unlock();
   return pid;
 }
 

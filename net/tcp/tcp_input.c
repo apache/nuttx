@@ -71,9 +71,9 @@
  *   Handle incoming TCP input
  *
  * Parameters:
- *   dev      - The device driver structure containing the received TCP packet.
- *   tcp      - A pointer to the TCP header in the packet
- *   tcpiplen - Combined length of the IP and TCP headers
+ *   dev   - The device driver structure containing the received TCP packet.
+ *   tcp   - A pointer to the TCP header in the packet
+ *   iplen - Combined length of the IP and TCP headers
  *
  * Return:
  *   None
@@ -126,7 +126,7 @@ static void tcp_input(FAR struct net_driver_s *dev, unsigned int iplen)
       g_netstats.tcp.drop++;
       g_netstats.tcp.chkerr++;
 #endif
-      nlldbg("Bad TCP checksum\n");
+      nwarn("WARNING: Bad TCP checksum\n");
       goto drop;
     }
 
@@ -206,7 +206,7 @@ static void tcp_input(FAR struct net_driver_s *dev, unsigned int iplen)
 #ifdef CONFIG_NET_STATISTICS
               g_netstats.tcp.syndrop++;
 #endif
-              nlldbg("No free TCP connections\n");
+              nerr("ERROR: No free TCP connections\n");
               goto drop;
             }
 
@@ -308,7 +308,7 @@ found:
   if ((tcp->flags & TCP_RST) != 0)
     {
       conn->tcpstateflags = TCP_CLOSED;
-      nlldbg("RESET - TCP state: TCP_CLOSED\n");
+      nwarn("WARNING: RESET - TCP state: TCP_CLOSED\n");
 
       (void)tcp_callback(dev, conn, TCP_ABORT);
       goto drop;
@@ -364,7 +364,7 @@ found:
        */
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-      unackseq = conn->isn + conn->sent;
+      unackseq = conn->sndseq_max;
 #else
       unackseq = tcp_addsequence(conn->sndseq, conn->unacked);
 #endif
@@ -398,8 +398,8 @@ found:
 
           if ((conn->tcpstateflags & TCP_STATE_MASK) == TCP_ESTABLISHED)
             {
-              nlldbg("ERROR: conn->sndseq %d, conn->unacked %d\n",
-                     tcp_getsequence(conn->sndseq), conn->unacked);
+              nwarn("WARNING: conn->sndseq %d, conn->unacked %d\n",
+                    tcp_getsequence(conn->sndseq), conn->unacked);
               goto reset;
             }
         }
@@ -409,8 +409,8 @@ found:
        * be beyond ackseq.
        */
 
-      nllvdbg("sndseq: %08x->%08x unackseq: %08x new unacked: %d\n",
-              conn->sndseq, ackseq, unackseq, conn->unacked);
+      ninfo("sndseq: %08x->%08x unackseq: %08x new unacked: %d\n",
+            conn->sndseq, ackseq, unackseq, conn->unacked);
       tcp_setsequence(conn->sndseq, ackseq);
 
       /* Do RTT estimation, unless we have done retransmissions. */
@@ -468,10 +468,11 @@ found:
             conn->isn           = tcp_getsequence(tcp->ackno);
             tcp_setsequence(conn->sndseq, conn->isn);
             conn->sent          = 0;
+            conn->sndseq_max    = 0;
 #endif
             conn->unacked       = 0;
             flags               = TCP_CONNECTED;
-            nllvdbg("TCP state: TCP_ESTABLISHED\n");
+            ninfo("TCP state: TCP_ESTABLISHED\n");
 
             if (dev->d_len > 0)
               {
@@ -571,7 +572,7 @@ found:
             dev->d_len          = 0;
             dev->d_sndlen       = 0;
 
-            nllvdbg("TCP state: TCP_ESTABLISHED\n");
+            ninfo("TCP state: TCP_ESTABLISHED\n");
             result = tcp_callback(dev, conn, TCP_CONNECTED | TCP_NEWDATA);
             tcp_appsend(dev, conn, result);
             return;
@@ -584,7 +585,7 @@ found:
         /* The connection is closed after we send the RST */
 
         conn->tcpstateflags = TCP_CLOSED;
-        nllvdbg("Connection failed - TCP state: TCP_CLOSED\n");
+        ninfo("Connection failed - TCP state: TCP_CLOSED\n");
 
         /* We do not send resets in response to resets. */
 
@@ -640,7 +641,7 @@ found:
             conn->tcpstateflags = TCP_LAST_ACK;
             conn->unacked       = 1;
             conn->nrtx          = 0;
-            nllvdbg("TCP state: TCP_LAST_ACK\n");
+            ninfo("TCP state: TCP_LAST_ACK\n");
 
             tcp_send(dev, conn, TCP_FIN | TCP_ACK, tcpiplen);
             return;
@@ -748,7 +749,7 @@ found:
         if ((flags & TCP_ACKDATA) != 0)
           {
             conn->tcpstateflags = TCP_CLOSED;
-            nllvdbg("TCP_LAST_ACK TCP state: TCP_CLOSED\n");
+            ninfo("TCP_LAST_ACK TCP state: TCP_CLOSED\n");
 
             (void)tcp_callback(dev, conn, TCP_CLOSE);
           }
@@ -772,12 +773,12 @@ found:
                 conn->tcpstateflags = TCP_TIME_WAIT;
                 conn->timer         = 0;
                 conn->unacked       = 0;
-                nllvdbg("TCP state: TCP_TIME_WAIT\n");
+                ninfo("TCP state: TCP_TIME_WAIT\n");
               }
             else
               {
                 conn->tcpstateflags = TCP_CLOSING;
-                nllvdbg("TCP state: TCP_CLOSING\n");
+                ninfo("TCP state: TCP_CLOSING\n");
               }
 
             net_incr32(conn->rcvseq, 1);
@@ -789,7 +790,7 @@ found:
           {
             conn->tcpstateflags = TCP_FIN_WAIT_2;
             conn->unacked = 0;
-            nllvdbg("TCP state: TCP_FIN_WAIT_2\n");
+            ninfo("TCP state: TCP_FIN_WAIT_2\n");
             goto drop;
           }
 
@@ -811,7 +812,7 @@ found:
           {
             conn->tcpstateflags = TCP_TIME_WAIT;
             conn->timer         = 0;
-            nllvdbg("TCP state: TCP_TIME_WAIT\n");
+            ninfo("TCP state: TCP_TIME_WAIT\n");
 
             net_incr32(conn->rcvseq, 1);
             (void)tcp_callback(dev, conn, TCP_CLOSE);
@@ -836,7 +837,7 @@ found:
           {
             conn->tcpstateflags = TCP_TIME_WAIT;
             conn->timer        = 0;
-            nllvdbg("TCP state: TCP_TIME_WAIT\n");
+            ninfo("TCP state: TCP_TIME_WAIT\n");
           }
 
       default:

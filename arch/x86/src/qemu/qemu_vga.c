@@ -498,7 +498,7 @@ FAR struct lcd_dev_s *qemu_vga_initialize(void)
   int ret = init_graph_vga(VGA_XRES, VGA_YRES, 1);
   if (ret < 0)
     {
-      gdbg("ERROR: init_graph_vga returned %d\n",ret);
+      gerr("ERROR: init_graph_vga returned %d\n",ret);
     }
 
   memset(g_pscreen, 0, VGA_XRES * VGA_YRES);
@@ -510,7 +510,7 @@ void qemu_vga(void)
   int ret = init_graph_vga(VGA_XRES, VGA_YRES, 1);
   if (ret < 0)
     {
-      gdbg("ERROR: init_graph_vga returned %d\n",ret);
+      gerr("ERROR: init_graph_vga returned %d\n",ret);
     }
 
   memset(g_pscreen, g_bg_color, VGA_XRES * VGA_YRES);

@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/icmpv6/icmpv6_ping.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,6 +50,7 @@
 #include <net/if.h>
 
 #include <nuttx/clock.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
@@ -164,7 +165,7 @@ static void icmpv6_echo_request(FAR struct net_driver_s *dev,
   uint16_t reqlen;
   int i;
 
-  nllvdbg("Send ECHO request: seqno=%d\n", pstate->png_seqno);
+  ninfo("Send ECHO request: seqno=%d\n", pstate->png_seqno);
 
   /* Set up the IPv6 header (most is probably already in place) */
 
@@ -217,8 +218,8 @@ static void icmpv6_echo_request(FAR struct net_driver_s *dev,
   dev->d_sndlen = reqlen;
   dev->d_len    = reqlen + IPv6_HDRLEN;
 
-  nllvdbg("Outgoing ICMPv6 Echo Request length: %d (%d)\n",
-          dev->d_len, (icmp->len[0] << 8) | icmp->len[1]);
+  ninfo("Outgoing ICMPv6 Echo Request length: %d (%d)\n",
+        dev->d_len, (icmp->len[0] << 8) | icmp->len[1]);
 
 #ifdef CONFIG_NET_STATISTICS
   g_netstats.icmpv6.sent++;
@@ -253,7 +254,7 @@ static uint16_t ping_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
 {
   FAR struct icmpv6_ping_s *pstate = (struct icmpv6_ping_s *)pvpriv;
 
-  nllvdbg("flags: %04x\n", flags);
+  ninfo("flags: %04x\n", flags);
 
   if (pstate)
     {
@@ -261,7 +262,7 @@ static uint16_t ping_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
 
       if ((flags & NETDEV_DOWN) != 0)
         {
-          nlldbg("ERROR: Interface is down\n");
+          nerr("ERROR: Interface is down\n");
           pstate->png_result = -ENETUNREACH;
           goto end_wait;
         }
@@ -276,8 +277,8 @@ static uint16_t ping_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
         {
           FAR struct icmpv6_echo_reply_s *reply = ICMPv6ECHOREPLY;
 
-          nllvdbg("ECHO reply: id=%d seqno=%d\n",
-                  ntohs(reply->id), ntohs(reply->seqno));
+          ninfo("ECHO reply: id=%d seqno=%d\n",
+                ntohs(reply->id), ntohs(reply->seqno));
 
           if (ntohs(reply->id) == pstate->png_id)
             {
@@ -336,12 +337,12 @@ static uint16_t ping_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
                * reason is that the destination address is not reachable.
                */
 
-              nlldbg("Not reachable\n");
+              nerr("ERROR: Not reachable\n");
               failcode = -ENETUNREACH;
             }
           else
             {
-              nlldbg("Ping timeout\n");
+              nerr("ERROR: Ping timeout\n");
               failcode = -ETIMEDOUT;
             }
 
@@ -357,7 +358,7 @@ static uint16_t ping_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
   return flags;
 
 end_wait:
-  nllvdbg("Resuming\n");
+  ninfo("Resuming\n");
 
   /* Do not allow any further callbacks */
 
@@ -407,7 +408,6 @@ int icmpv6_ping(net_ipv6addr_t addr, uint16_t id, uint16_t seqno,
 {
   FAR struct net_driver_s *dev;
   struct icmpv6_ping_s state;
-  net_lock_t save;
 
 #ifdef CONFIG_NET_ICMPv6_NEIGHBOR
   int ret;
@@ -417,7 +417,7 @@ int icmpv6_ping(net_ipv6addr_t addr, uint16_t id, uint16_t seqno,
   ret = icmpv6_neighbor(addr);
   if (ret < 0)
     {
-      ndbg("ERROR: Not reachable\n");
+      nerr("ERROR: Not reachable\n");
       return -ENETUNREACH;
     }
 #endif /* CONFIG_NET_ICMPv6_NEIGHBOR */
@@ -431,13 +431,19 @@ int icmpv6_ping(net_ipv6addr_t addr, uint16_t id, uint16_t seqno,
 #endif
   if (dev == 0)
     {
-      ndbg("ERROR: Not reachable\n");
+      nerr("ERROR: Not reachable\n");
       return -ENETUNREACH;
     }
 
   /* Initialize the state structure */
 
+  /* This semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
   sem_init(&state.png_sem, 0, 0);
+  sem_setprotocol(&state.png_sem, SEM_PRIO_NONE);
+
   state.png_ticks  = DSEC2TICK(dsecs);     /* System ticks to wait */
   state.png_result = -ENOMEM;              /* Assume allocation failure */
   state.png_id     = id;                   /* The ID to use in the ECHO request */
@@ -447,7 +453,7 @@ int icmpv6_ping(net_ipv6addr_t addr, uint16_t id, uint16_t seqno,
 
   net_ipv6addr_copy(state.png_addr, addr); /* Address of the peer to be ping'ed */
 
-  save             = net_lock();
+  net_lock();
   state.png_time   = clock_systimer();
 
   /* Set up the callback */
@@ -471,13 +477,13 @@ int icmpv6_ping(net_ipv6addr_t addr, uint16_t id, uint16_t seqno,
        * re-enabled when the task restarts.
        */
 
-      nllvdbg("Start time: 0x%08x seqno: %d\n", state.png_time, seqno);
+      ninfo("Start time: 0x%08x seqno: %d\n", state.png_time, seqno);
       net_lockedwait(&state.png_sem);
 
       icmpv6_callback_free(dev, state.png_cb);
     }
 
-  net_unlock(save);
+  net_unlock();
 
   /* Return the negated error number in the event of a failure, or the
    * sequence number of the ECHO reply on success.
@@ -485,12 +491,12 @@ int icmpv6_ping(net_ipv6addr_t addr, uint16_t id, uint16_t seqno,
 
   if (!state.png_result)
     {
-      nllvdbg("Return seqno=%d\n", state.png_seqno);
+      ninfo("Return seqno=%d\n", state.png_seqno);
       return (int)state.png_seqno;
     }
   else
     {
-      nlldbg("Return error=%d\n", -state.png_result);
+      nerr("ERROR: Return error=%d\n", -state.png_result);
       return state.png_result;
     }
 }

@@ -80,13 +80,12 @@ static void devif_callback_free(FAR struct net_driver_s *dev,
 {
   FAR struct devif_callback_s *prev;
   FAR struct devif_callback_s *curr;
-  net_lock_t save;
 
   if (cb)
     {
-      save = net_lock();
+      net_lock();
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
       /* Check for double freed callbacks */
 
       curr = g_cbfreelist;
@@ -159,7 +158,7 @@ static void devif_callback_free(FAR struct net_driver_s *dev,
       cb->nxtconn  = g_cbfreelist;
       cb->nxtdev   = NULL;
       g_cbfreelist = cb;
-      net_unlock(save);
+      net_unlock();
     }
 }
 
@@ -210,11 +209,10 @@ FAR struct devif_callback_s *
                        FAR struct devif_callback_s **list)
 {
   FAR struct devif_callback_s *ret;
-  net_lock_t save;
 
   /* Check  the head of the free list */
 
-  save = net_lock();
+  net_lock();
   ret  = g_cbfreelist;
   if (ret)
     {
@@ -241,7 +239,7 @@ FAR struct devif_callback_s *
               /* No.. release the callback structure and fail */
 
               devif_callback_free(NULL, NULL, list);
-              net_unlock(save);
+              net_unlock();
               return NULL;
             }
 
@@ -257,14 +255,14 @@ FAR struct devif_callback_s *
            *list = ret;
         }
     }
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   else
     {
-      nlldbg("Failed to allocate callback\n");
+      nerr("ERROR: Failed to allocate callback\n");
     }
 #endif
 
-  net_unlock(save);
+  net_unlock();
   return ret;
 }
 
@@ -385,13 +383,12 @@ uint16_t devif_conn_event(FAR struct net_driver_s *dev, void *pvconn,
                           uint16_t flags, FAR struct devif_callback_s *list)
 {
   FAR struct devif_callback_s *next;
-  net_lock_t save;
 
   /* Loop for each callback in the list and while there are still events
    * set in the flags set.
    */
 
-  save = net_lock();
+  net_lock();
   while (list && flags)
     {
       /* Save the pointer to the next callback in the lists.  This is done
@@ -410,7 +407,7 @@ uint16_t devif_conn_event(FAR struct net_driver_s *dev, void *pvconn,
            * beginning of the list (which will be ignored on this pass)
            */
 
-          nllvdbg("Call event=%p with flags=%04x\n", list->event, flags);
+          ninfo("Call event=%p with flags=%04x\n", list->event, flags);
           flags = list->event(dev, pvconn, list->priv, flags);
         }
 
@@ -419,7 +416,7 @@ uint16_t devif_conn_event(FAR struct net_driver_s *dev, void *pvconn,
       list = next;
     }
 
-  net_unlock(save);
+  net_unlock();
   return flags;
 }
 
@@ -450,13 +447,12 @@ uint16_t devif_dev_event(FAR struct net_driver_s *dev, void *pvconn,
 {
   FAR struct devif_callback_s *cb;
   FAR struct devif_callback_s *next;
-  net_lock_t save;
 
   /* Loop for each callback in the list and while there are still events
    * set in the flags set.
    */
 
-  save = net_lock();
+  net_lock();
   for (cb = dev->d_devcb; cb != NULL && flags != 0; cb = next)
     {
       /* Save the pointer to the next callback in the lists.  This is done
@@ -475,7 +471,7 @@ uint16_t devif_dev_event(FAR struct net_driver_s *dev, void *pvconn,
            * beginning of the list (which will be ignored on this pass)
            */
 
-          nllvdbg("Call event=%p with flags=%04x\n", cb->event, flags);
+          ninfo("Call event=%p with flags=%04x\n", cb->event, flags);
           flags = cb->event(dev, pvconn, cb->priv, flags);
         }
 
@@ -484,7 +480,7 @@ uint16_t devif_dev_event(FAR struct net_driver_s *dev, void *pvconn,
       cb = next;
     }
 
-  net_unlock(save);
+  net_unlock();
   return flags;
 }
 

@@ -81,7 +81,7 @@ void up_unblock_task(FAR struct tcb_s *tcb)
   ASSERT((tcb->task_state >= FIRST_BLOCKED_STATE) &&
          (tcb->task_state <= LAST_BLOCKED_STATE));
 
-  /* dbg("Unblocking TCB=%p\n", tcb); */
+  /* _info("Unblocking TCB=%p\n", tcb); */
 
   /* Remove the task from the blocked task list */
 

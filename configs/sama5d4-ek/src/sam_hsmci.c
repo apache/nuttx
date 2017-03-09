@@ -124,7 +124,7 @@ struct sam_hsmci_state_s
 /* HSCMI device state */
 
 #ifdef CONFIG_SAMA5_HSMCI0
-static int sam_hsmci0_cardetect(int irq, void *regs);
+static int sam_hsmci0_cardetect(int irq, void *regs, FAR void *arg);
 
 static struct sam_hsmci_state_s g_hsmci0 =
 {
@@ -136,7 +136,7 @@ static struct sam_hsmci_state_s g_hsmci0 =
 #endif
 
 #ifdef CONFIG_SAMA5_HSMCI1
-static int sam_hsmci1_cardetect(int irq, void *regs);
+static int sam_hsmci1_cardetect(int irq, void *regs, FAR void *arg);
 
 static struct sam_hsmci_state_s g_hsmci1 =
 {
@@ -167,7 +167,7 @@ bool sam_cardinserted_internal(struct sam_hsmci_state_s *state)
   /* Get the state of the PIO pin */
 
   inserted = sam_pioread(state->cdcfg);
-  fllvdbg("Slot %d inserted: %s\n", state->slotno, inserted ? "NO" : "YES");
+  finfo("Slot %d inserted: %s\n", state->slotno, inserted ? "NO" : "YES");
   return !inserted;
 }
 
@@ -202,7 +202,7 @@ static int sam_hsmci_cardetect(struct sam_hsmci_state_s *state)
 }
 
 #ifdef CONFIG_SAMA5_HSMCI0
-static int sam_hsmci0_cardetect(int irq, void *regs)
+static int sam_hsmci0_cardetect(int irq, FAR void *regs, FAR void *arg)
 {
   int ret;
 
@@ -224,7 +224,7 @@ static int sam_hsmci0_cardetect(int irq, void *regs)
 #endif
 
 #ifdef CONFIG_SAMA5_HSMCI1
-static int sam_hsmci1_cardetect(int irq, void *regs)
+static int sam_hsmci1_cardetect(int irq, FAR void *regs, FAR void *arg)
 {
   int ret;
 
@@ -300,7 +300,7 @@ int sam_hsmci_initialize(int slotno, int minor)
   state = sam_hsmci_state(slotno);
   if (!state)
     {
-      fdbg("ERROR: No state for slotno %d\n", slotno);
+      ferr("ERROR: No state for slotno %d\n", slotno);
       return -EINVAL;
     }
 
@@ -321,7 +321,7 @@ int sam_hsmci_initialize(int slotno, int minor)
   state->hsmci = sdio_initialize(slotno);
   if (!state->hsmci)
     {
-      fdbg("ERROR: Failed to initialize SDIO slot %d\n",  slotno);
+      ferr("ERROR: Failed to initialize SDIO slot %d\n",  slotno);
       return -ENODEV;
     }
 
@@ -330,14 +330,14 @@ int sam_hsmci_initialize(int slotno, int minor)
   ret = mmcsd_slotinitialize(minor, state->hsmci);
   if (ret != OK)
     {
-      fdbg("ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
+      ferr("ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
       return ret;
     }
 
   /* Configure card detect interrupts */
 
   sam_pioirq(state->cdcfg);
-  (void)irq_attach(state->irq, state->handler);
+  (void)irq_attach(state->irq, state->handler, NULL);
 
   /* Then inform the HSMCI driver if there is or is not a card in the slot. */
 
@@ -367,7 +367,7 @@ bool sam_cardinserted(int slotno)
   state = sam_hsmci_state(slotno);
   if (!state)
     {
-      fdbg("ERROR: No state for slotno %d\n", slotno);
+      ferr("ERROR: No state for slotno %d\n", slotno);
       return false;
     }
 

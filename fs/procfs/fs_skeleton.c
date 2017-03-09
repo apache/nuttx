@@ -1,6 +1,7 @@
 /****************************************************************************
  * fs/procfs/fs_skeleton.c
  *
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2015 Ken Pettit. All rights reserved.
  *   Author: Ken Pettit <pettitkd@gmail.com>
  *
@@ -71,6 +72,7 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* This enumeration identifies all of the thread attributes that can be
  * accessed via the procfs file system.
  */
@@ -106,7 +108,9 @@ static int     skel_open(FAR struct file *filep, FAR const char *relpath,
 static int     skel_close(FAR struct file *filep);
 static ssize_t skel_read(FAR struct file *filep, FAR char *buffer,
                  size_t buflen);
-
+/* TODO:  Should not support skel_write if read-only */
+static ssize_t skel_write(FAR struct file *filep, FAR const char *buffer,
+                 size_t buflen);
 static int     skel_dup(FAR const struct file *oldp,
                  FAR struct file *newp);
 
@@ -136,9 +140,12 @@ const struct procfs_operations skel_procfsoperations =
   skel_open,       /* open */
   skel_close,      /* close */
   skel_read,       /* read */
-
-  /* TODO:  Decide if this driver supports write */
+  /* TODO:  Decide if this procfs entry supports write access */
+#if 0 /* NULL if the procfs entry does not support write access. */
   NULL,            /* write */
+#else
+  skel_write,      /* write */
+#endif
 
   skel_dup,        /* dup */
 
@@ -163,18 +170,17 @@ static int skel_open(FAR struct file *filep, FAR const char *relpath,
 {
   FAR struct skel_file_s *priv;
 
-  fvdbg("Open '%s'\n", relpath);
+  finfo("Open '%s'\n", relpath);
 
-  /* PROCFS is read-only.  Any attempt to open with any kind of write
-   * access is not permitted.
-   *
-   * REVISIT:  Write-able proc files could be quite useful.
+  /* If PROCFS is read-only, then the (1) the skel_write() method must not
+   * be provided and (2) any attempt to open with any kind of write access
+   * can not be permitted.
    */
 
   if (((oflags & O_WRONLY) != 0 || (oflags & O_RDONLY) == 0) &&
       (skel_procfsoperations.write == NULL))
     {
-      fdbg("ERROR: Only O_RDONLY supported\n");
+      ferr("ERROR: Only O_RDONLY supported\n");
       return -EACCES;
     }
 
@@ -183,12 +189,11 @@ static int skel_open(FAR struct file *filep, FAR const char *relpath,
   priv = (FAR struct skel_file_s *)kmm_zalloc(sizeof(struct skel_file_s));
   if (!priv)
     {
-      fdbg("ERROR: Failed to allocate file attributes\n");
+      ferr("ERROR: Failed to allocate file attributes\n");
       return -ENOMEM;
     }
 
-  /* TODO: Initialize the context specific data here */
-
+  /* TODO:  Initialize the context specific data here */
 
   /* Save the open file structure as the open-specific state in
    * filep->f_priv.
@@ -220,6 +225,10 @@ static int skel_close(FAR struct file *filep)
 
 /****************************************************************************
  * Name: skel_read
+ *
+ * Description:
+ *   Handle read from procfs file.
+ *
  ****************************************************************************/
 
 static ssize_t skel_read(FAR struct file *filep, FAR char *buffer,
@@ -228,14 +237,58 @@ static ssize_t skel_read(FAR struct file *filep, FAR char *buffer,
   FAR struct skel_file_s *priv;
   ssize_t ret;
 
-  fvdbg("buffer=%p buflen=%d\n", buffer, (int)buflen);
+  finfo("buffer=%p buflen=%d\n", buffer, (int)buflen);
 
   /* Recover our private data from the struct file instance */
 
   priv = (FAR struct skel_file_s *)filep->f_priv;
   DEBUGASSERT(priv);
 
-  /* TODO: Provide the requested data */
+  /* TODO:  Provide the requested data.
+   *        Take into account current filep->f_pos and 'buflen'.  The read
+   *        could require several calls to skel_read().
+   */
+
+  ret = 0;
+
+  /* Update the file offset */
+
+  if (ret > 0)
+    {
+      filep->f_pos += ret;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: skel_write
+ *
+ * Description:
+ *   Handle write3 to procfs file.
+ *
+ ****************************************************************************/
+
+/* TODO: Should not support skel_write if read-only */
+static ssize_t skel_write(FAR struct file *filep, FAR const char *buffer,
+                          size_t buflen)
+{
+  FAR struct skel_file_s *priv;
+  ssize_t ret;
+
+  finfo("buffer=%p buflen=%d\n", buffer, (int)buflen);
+
+  /* Recover our private data from the struct file instance */
+
+  priv = (FAR struct skel_file_s *)filep->f_priv;
+  DEBUGASSERT(priv);
+
+  /* TODO:  Verify that the write is within range */
+
+  /* TODO:  Handle the write data as appropriate to function of file.
+   *        Take into account current filep->f_pos and 'buflen' since the
+   *        write may require several calls to skel_write().
+   */
 
   ret = 0;
 
@@ -262,7 +315,7 @@ static int skel_dup(FAR const struct file *oldp, FAR struct file *newp)
   FAR struct skel_file_s *oldpriv;
   FAR struct skel_file_s *newpriv;
 
-  fvdbg("Dup %p->%p\n", oldp, newp);
+  finfo("Dup %p->%p\n", oldp, newp);
 
   /* Recover our private data from the old struct file instance */
 
@@ -274,7 +327,7 @@ static int skel_dup(FAR const struct file *oldp, FAR struct file *newp)
   newpriv = (FAR struct skel_file_s *)kmm_zalloc(sizeof(struct skel_file_s));
   if (!newpriv)
     {
-      fdbg("ERROR: Failed to allocate file attributes\n");
+      ferr("ERROR: Failed to allocate file attributes\n");
       return -ENOMEM;
     }
 
@@ -300,7 +353,7 @@ static int skel_opendir(FAR const char *relpath, FAR struct fs_dirent_s *dir)
 {
   FAR struct skel_level1_s *level1;
 
-  fvdbg("relpath: \"%s\"\n", relpath ? relpath : "NULL");
+  finfo("relpath: \"%s\"\n", relpath ? relpath : "NULL");
   DEBUGASSERT(relpath && dir && !dir->u.procfs);
 
   /* The path refers to the 1st level sbdirectory.  Allocate the level1
@@ -312,12 +365,11 @@ static int skel_opendir(FAR const char *relpath, FAR struct fs_dirent_s *dir)
 
   if (!level1)
     {
-      fdbg("ERROR: Failed to allocate the level1 directory structure\n");
+      ferr("ERROR: Failed to allocate the level1 directory structure\n");
       return -ENOMEM;
     }
 
-  /* TODO:  Initialze context specific data */
-
+  /* TODO:  Initialize context specific data */
 
   /* Initialze base structure components */
 
@@ -369,9 +421,9 @@ static int skel_readdir(FAR struct fs_dirent_s *dir)
   DEBUGASSERT(dir && dir->u.procfs);
   level1 = dir->u.procfs;
 
-  /* TODO: Perform device specific readdir function here.  This may
-   *       or may not involve validating the nentries variable
-   *       in the base depending on the implementation.
+  /* TODO:  Perform device specific readdir function here.  This may
+   *        or may not involve validating the nentries variable
+   *        in the base depending on the implementation.
    */
 
   /* Have we reached the end of the directory */
@@ -383,7 +435,7 @@ static int skel_readdir(FAR struct fs_dirent_s *dir)
        * error -ENOENT
        */
 
-      fvdbg("Entry %d: End of directory\n", index);
+      finfo("Entry %d: End of directory\n", index);
       ret = -ENOENT;
     }
 
@@ -393,7 +445,7 @@ static int skel_readdir(FAR struct fs_dirent_s *dir)
     {
       DEBUGASSERT(level1->base.level == 1);
 
-      /* TODO: Add device specific entries */
+      /* TODO:  Add device specific entries */
 
       strcpy(filename, "dummy");
 
@@ -438,7 +490,7 @@ static int skel_rewinddir(FAR struct fs_dirent_s *dir)
  *
  ****************************************************************************/
 
-static int skel_stat(FAR const char *relpath, FAR truct stat *buf)
+static int skel_stat(FAR const char *relpath, FAR struct stat *buf)
 {
   int ret = -ENOENT;
 
@@ -446,14 +498,16 @@ static int skel_stat(FAR const char *relpath, FAR truct stat *buf)
    *        or a directory and set it's permissions.
    */
 
+  memset(buf, 0, sizeof(struct stat));
   buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR;
+
+  /* TODO:  Set S_IFREG if the relpath refers to a file.
+  /* TODO:  If the skel_write() method is supported, then stat must also
+   *        report S_IWOTH | S_IWGRP | S_IWUSR for files (but not for
+   *        directories) as well.
+  /* TODO:  Other 'struct buf' settings may be appropriate (optional) */
+
   ret = OK;
-
-  /* File/directory size, access block size */
-
-  buf->st_size    = 0;
-  buf->st_blksize = 0;
-  buf->st_blocks  = 0;
 
   return ret;
 }

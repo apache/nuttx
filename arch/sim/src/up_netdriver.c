@@ -79,14 +79,17 @@ struct timer
 };
 
 /****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
 
 static struct timer g_periodic_timer;
+
+/* A single packet buffer is used */
+
+static uint8_t g_pktbuf[MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE];
+
+/* Ethernet peripheral state */
+
 static struct net_driver_s g_sim_dev;
 
 /****************************************************************************
@@ -213,7 +216,7 @@ void netdriver_loop(void)
 #ifdef CONFIG_NET_IPv4
           if (eth->type == HTONS(ETHTYPE_IP) && is_ours)
             {
-              nllvdbg("IPv4 frame\n");
+              ninfo("IPv4 frame\n");
 
               /* Handle ARP on input then give the IPv4 packet to the network
                * layer
@@ -254,7 +257,7 @@ void netdriver_loop(void)
 #ifdef CONFIG_NET_IPv6
           if (eth->type == HTONS(ETHTYPE_IP6) && is_ours)
             {
-              nllvdbg("Iv6 frame\n");
+              ninfo("Iv6 frame\n");
 
               /* Give the IPv6 packet to the network layer */
 
@@ -340,6 +343,7 @@ int netdriver_init(void)
 
   /* Set callbacks */
 
+  g_sim_dev.d_buf    = g_pktbuf;         /* Single packet buffer */
   g_sim_dev.d_ifup   = netdriver_ifup;
   g_sim_dev.d_ifdown = netdriver_ifdown;
 

@@ -3,7 +3,7 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-comment "ARMv7-A Configuration Options"
+comment "ARMv7-R Configuration Options"
 
 config ARMV7R_MEMINIT
 	bool
@@ -18,6 +18,29 @@ config ARMV7R_MEMINIT
 		and the platform-specific implementation of arm_boot() must perform
 		the memory initialization first, then explicitly call
 		arm_data_initialize().
+
+config ARMV7R_HAVE_ICACHE
+	bool
+	default n
+
+config ARMV7R_HAVE_DCACHE
+	bool
+	default n
+
+config ARMV7R_ICACHE
+	bool "Use I-Cache"
+	default n
+	depends on ARMV7R_HAVE_ICACHE
+
+config ARMV7R_DCACHE
+	bool "Use D-Cache"
+	default n
+	depends on ARMV7R_HAVE_DCACHE
+
+config ARMV7R_DCACHE_WRITETHROUGH
+	bool "D-Cache Write-Through"
+	default n
+	depends on ARMV7R_DCACHE
 
 config ARMV7R_HAVE_L2CC
 	bool
@@ -121,15 +144,17 @@ endif # ARMV7R_HAVE_L2CC
 
 choice
 	prompt "Toolchain Selection"
-	default ARMV7R_TOOLCHAIN_GNU_EABIW if HOST_WINDOWS
-	default ARMV7R_TOOLCHAIN_GNU_EABIL if !HOST_WINDOWS
+	default ARMV7R_TOOLCHAIN_GNU_EABIW if TOOLCHAIN_WINDOWS
+	default ARMV7R_TOOLCHAIN_GNU_EABIL if !TOOLCHAIN_WINDOWS
 
 config ARMV7R_TOOLCHAIN_BUILDROOT
 	bool "Buildroot (Cygwin or Linux)"
+	select ARM_TOOLCHAIN_GNU
 	depends on !WINDOWS_NATIVE
 
 config ARMV7R_TOOLCHAIN_CODESOURCERYL
 	bool "CodeSourcery GNU toolchain under Linux"
+	select ARM_TOOLCHAIN_GNU
 	depends on HOST_LINUX
 	---help---
 		For use with the GNU toolchain built with the NuttX buildroot package.
@@ -138,31 +163,36 @@ config ARMV7R_TOOLCHAIN_CODESOURCERYL
 
 config ARMV7R_TOOLCHAIN_CODESOURCERYW
 	bool "CodeSourcery GNU toolchain under Windows"
-	depends on HOST_WINDOWS
+	select ARM_TOOLCHAIN_GNU
+	depends on TOOLCHAIN_WINDOWS
 
 config ARMV7R_TOOLCHAIN_DEVKITARM
 	bool "devkitARM GNU toolchain"
-	depends on HOST_WINDOWS
+	select ARM_TOOLCHAIN_GNU
+	depends on TOOLCHAIN_WINDOWS
 
 config ARMV7R_TOOLCHAIN_GNU_EABIL
 	bool "Generic GNU EABI toolchain under Linux (or other POSIX environment)"
+	select ARM_TOOLCHAIN_GNU
 	---help---
 		This option should work for any modern GNU toolchain (GCC 4.5 or newer)
 		configured for arm-none-eabi-.
 
 config ARMV7R_TOOLCHAIN_GNU_EABIW
 	bool "Generic GNU EABI toolchain under Windows"
-	depends on HOST_WINDOWS
+	select ARM_TOOLCHAIN_GNU
+	depends on TOOLCHAIN_WINDOWS
 	---help---
 		This option should work for any modern GNU toolchain (GCC 4.5 or newer)
 		configured for arm-none-eabi-.
 
 config ARMV7R_TOOLCHAIN_GNU_OABI
 	bool "Generic GNU OABI toolchain"
+	select ARM_TOOLCHAIN_GNU
 	---help---
 		This option should work for any GNU toolchain configured for arm-elf-.
 
-endchoice # ARMV7R_HAVE_L2CC
+endchoice # Toolchain Selection
 
 config ARMV7R_OABI_TOOLCHAIN
 	bool "OABI (vs EABI)"

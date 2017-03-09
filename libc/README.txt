@@ -29,9 +29,15 @@ in the include/ directory provides the prototype for library functions.  So
 we have:
 
   audio     - This part of the audio system: nuttx/audio/audio.h
+  dllfcn    - dllfcn.h
+  hex2bin   - hex2bin.h
   libgen    - libgen.h
+  locale    - locale.h
   fixedmath - fixedmath.h
+  inttypes  - inttypes.h
+  machine   - Various architecture-specifica implementations.
   math      - math.h
+  modlib    - Part of module and shared libary logic: nuttx/lib/modlib.h
   net       - Various network-related header files: netinet/ether.h, arpa/inet.h
   pthread   - pthread.h
   queue     - queue.h
@@ -39,9 +45,14 @@ we have:
   semaphore - semaphore.h
   stdio     - stdio.h
   stdlib    - stdlib.h
-  string    - string.h
+  string    - string.h (and legacy strings.h)
   time      - time.h
   unistd    - unistd.h
+  wchar     - wchar.h
+  wctype    - wctype.h
+
+Most of these are "standard" header files; some are not: hex2bin.h and
+fixemath.h are non-standard.
 
 There is also a misc/ subdirectory that contains various internal functions
 and interfaces from header files that are too few to warrant their own sub-

@@ -704,7 +704,6 @@ Selecting the GMAC peripheral
 
   Networking Support
     CONFIG_NET=y                         : Enable Neworking
-    CONFIG_NET_NOINTS=y                  : Use the work queue, not interrupts for processing
     CONFIG_NET_SOCKOPTS=y                : Enable socket operations
     CONFIG_NET_ETH_MTU=562               : Maximum packet size (MTU) 1518 is more standard
     CONFIG_NET_ETH_TCP_RECVWNDO=562      : Should be the same as CONFIG_NET_ETH_MTU
@@ -1323,10 +1322,6 @@ MCAN1 Loopback Test
        CONFIG_SAMV7_MCAN1_TXFIFOQ_SIZE=8       # There are 8 queue elements
        CONFIG_SAMV7_MCAN1_TXEVENTFIFO_SIZE=0   # The event FIFO is not used
 
-    Board Selection
-       CONFIG_LIB_BOARDCTL=y                   # Needed for CAN initialization
-       CONFIG_BOARDCTL_CANINIT=y               # Enabled CAN initialization
-
     Enabling the CAN Loopback Test
     ------------------------------
     Application Configuration -> Examples -> CAN Example
@@ -1335,9 +1330,9 @@ MCAN1 Loopback Test
     Enabling CAN Debug Output
     -------------------------
     Build Setup -> Debug Options
-      CONFIG_DEBUG=y                           # Enables general debug features
-      CONFIG_DEBUG_VERBOSE=y                   # Enables verbose output
-      CONFIG_DEBUG_CAN=y                       # Enables debug output from CAN
+      CONFIG_DEBUG_FEATURES=y                  # Enables general debug features
+      CONFIG_DEBUG_INFO=y                      # Enables verbose output
+      CONFIG_DEBUG_CAN_INFO=y                  # Enables debug output from CAN
 
       CONFIG_STACK_COLORATION=y                # Monitor stack usage
       CONFIG_DEBUG_SYMBOLS=y                   # Needed only for use with a debugger
@@ -1657,7 +1652,7 @@ Configuration sub-directories
   knsh:
 
     This is identical to the nsh configuration below except that NuttX
-    is built as a kernel-mode, monolithic module and the user applications
+    is built as a protected mode, monolithic module and the user applications
     are built separately.  There are four very similar NSH configurations:
 
       - knsh.  This is a somewhat simplified version of the nsh configuration
@@ -1760,6 +1755,35 @@ Configuration sub-directories
       - mxtxplnd.  This configuration is identical to the nsh configuration
         but assumes that you have a maXTouch Xplained Pro LCD attached
         and includes extra tests for the touchscreen and LCD.
+
+    NOTES:
+
+    1. Kernel Modules / Shared Libraries
+
+       I intend to use this configuration for testing NuttX kernel modules
+       in the FLAT build with the following configuration additions to the
+       configuration file:
+
+         CONFIG_BOARDCTL_OS_SYMTAB=y
+         CONFIG_EXAMPLES_MODULE=y
+         CONFIG_EXAMPLES_MODULE_BINDIR="/mnt/sdcard"
+         CONFIG_FS_ROMFS=y
+         CONFIG_LIBC_ARCH_ELF=y
+         CONFIG_MODULE=y
+         CONFIG_LIBC_MODLIB=y
+         CONFIG_MODLIB_ALIGN_LOG2=2
+         CONFIG_MODLIB_BUFFERINCR=32
+         CONFIG_MODLIB_BUFFERSIZE=128
+
+       Add the following for testing shared libraries in the FLAT
+       build:
+
+         CONFIG_LIBC_DLLFCN=y
+         CONFIG_EXAMPLES_SOTEST=y
+         CONFIG_EXAMPLES_SOTEST_BINDIR="/mnt/sdcard"
+
+    STATUS:
+    2017-01-30: Does not yet run correctly.
 
   mxtxplnd:
 
@@ -2053,36 +2077,7 @@ Configuration sub-directories
          RAMTest: Address-in-address test: 70000000 2097152
          nsh>
 
-    5. The button test at apps/examples/buttons is included in the
-       configuration.  This configuration illustrates (1) use of the buttons
-       on the evaluation board, and (2) the use of PIO interrupts.  Example
-       usage:
-
-       NuttShell (NSH) NuttX-7.8
-       nsh> help
-       help usage:  help [-v] [<cmd>]
-       ...
-       Builtin Apps:
-         buttons
-       nsh> buttons 3
-       maxbuttons: 3
-       Attached handler at 4078f7 to button 0 [SW0], oldhandler:0
-       Attached handler at 4078e9 to button 1 [SW1], oldhandler:0
-       IRQ:125 Button 1:SW1 SET:00:
-         SW1 released
-       IRQ:125 Button 1:SW1 SET:02:
-         SW1 depressed
-       IRQ:125 Button 1:SW1 SET:00:
-         SW1 released
-       IRQ:90 Button 0:SW0 SET:01:
-         SW0 depressed
-       IRQ:90 Button 0:SW0 SET:00:
-         SW0 released
-       IRQ:125 Button 1:SW1 SET:02:
-         SW1 depressed
-       nsh>
-
-    6. TWI/I2C
+    5. TWI/I2C
 
        TWIHS0 is enabled in this configuration.  The SAM V71 Xplained Ultra
        supports two devices on the one on-board I2C device on the TWIHS0 bus:
@@ -2159,11 +2154,11 @@ Configuration sub-directories
        the AT2 EEPROM (I am not sure what the other address, 0x37, is
        as this writing).
 
-    7. TWIHS0 is also used to support 256 byte non-volatile storage for
+    6. TWIHS0 is also used to support 256 byte non-volatile storage for
        configuration data using the MTD configuration as described above
        under the heading, "MTD Configuration Data".
 
-    8. Support for HSMCI is built-in by default. The SAMV71-XULT provides
+    7. Support for HSMCI is built-in by default. The SAMV71-XULT provides
        one full-size SD memory card slot.  Refer to the section entitled
        "SD card" for configuration-related information.
 
@@ -2172,7 +2167,7 @@ Configuration sub-directories
        The auto-mounter is not enabled.  See the section above entitled
        "Auto-Mounter".
 
-    9. Performance-related Configuration settings:
+    8. Performance-related Configuration settings:
 
        CONFIG_ARMV7M_ICACHE=y                : Instruction cache is enabled
        CONFIG_ARMV7M_DCACHE=y                : Data cache is enabled
@@ -2511,8 +2506,10 @@ Configuration sub-directories
            rect = (FAR struct vnc_fbupdate_s *)sq_remfirst(&session->updqueue);
            DEBUGASSERT(rect != NULL);
 
-        I would think that could mean only that the semaphore counting is
-        out of sync with the number of updates in the queue.
+         I would think that could mean only that the semaphore counting is
+         out of sync with the number of updates in the queue.
 
-        But also the assertion at devif/devif_iobsend.c line: 102 which
-        probably means some kind of memory corruption.
+         But also the assertion at devif/devif_iobsend.c line: 102 which
+         probably means some kind of memory corruption.
+
+       2017-01-30: knsh configuration does not yet run correctly.

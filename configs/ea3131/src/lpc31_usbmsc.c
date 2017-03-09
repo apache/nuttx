@@ -50,7 +50,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/mkfatfs.h>
-#include <nuttx/fs/ramdisk.h>
+#include <nuttx/drivers/ramdisk.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -93,8 +93,7 @@ int board_usbmsc_initialize(int port)
   pbuffer = (uint8_t *)kmm_malloc(BUFFER_SIZE);
   if (!pbuffer)
     {
-      lowsyslog(LOG_ERR, "ERROR: Failed to allocate ramdisk of size %d\n",
-                BUFFER_SIZE);
+      err("ERROR: Failed to allocate ramdisk of size %d\n", BUFFER_SIZE);
       return -ENOMEM;
     }
 
@@ -107,9 +106,8 @@ int board_usbmsc_initialize(int port)
                          RDFLAG_WRENABLED | RDFLAG_FUNLINK);
   if (ret < 0)
     {
-      syslog(LOG_ERR,
-             "ERROR: create_ramdisk: Failed to register ramdisk at %s: %d\n",
-             g_source, -ret);
+      err("ERROR: create_ramdisk: Failed to register ramdisk at %s: %d\n",
+          g_source, -ret);
       kmm_free(pbuffer);
       return ret;
     }
@@ -119,9 +117,8 @@ int board_usbmsc_initialize(int port)
   ret = mkfatfs(g_source, &g_fmt);
   if (ret < 0)
     {
-      syslog(LOG_ERR,
-             "ERROR: create_ramdisk: Failed to create FAT filesystem on ramdisk at %s\n",
-             g_source);
+      err("ERROR: create_ramdisk: Failed to create FAT filesystem on ramdisk at %s\n",
+          g_source);
       /* kmm_free(pbuffer); -- RAM disk is registered */
       return ret;
     }

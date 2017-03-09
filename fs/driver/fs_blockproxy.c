@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/driver/fs_blockproxy.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,10 +53,10 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
-#include <nuttx/fs/fs.h>
+#include <nuttx/drivers/drivers.h>
 
-#if !defined(CONFIG_DISABLE_PSEUDOFS_OPERATIONS) && \
-    !defined(CONFIG_DISABLE_MOUNTPOINT)
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && \
+    !defined(CONFIG_DISABLE_PSEUDOFS_OPERATIONS)
 
 /****************************************************************************
  * Private Data
@@ -174,7 +174,7 @@ int block_proxy(FAR const char *blkdev, int oflags)
   chardev = unique_chardev();
   if (chardev == NULL)
     {
-      fdbg("ERROR: Failed to create temporary device name\n");
+      ferr("ERROR: Failed to create temporary device name\n");
       return -ENOMEM;
     }
 
@@ -187,7 +187,7 @@ int block_proxy(FAR const char *blkdev, int oflags)
   ret = bchdev_register(blkdev, chardev, readonly);
   if (ret < 0)
     {
-      fdbg("ERROR: bchdev_register(%s, %s) failed: %d\n",
+      ferr("ERROR: bchdev_register(%s, %s) failed: %d\n",
            blkdev, chardev, ret);
 
       goto errout_with_chardev;
@@ -200,7 +200,7 @@ int block_proxy(FAR const char *blkdev, int oflags)
   if (fd < 0)
     {
       ret = -errno;
-      fdbg("ERROR: Failed to open %s: %d\n", chardev, ret);
+      ferr("ERROR: Failed to open %s: %d\n", chardev, ret);
       goto errout_with_bchdev;
     }
 
@@ -213,7 +213,7 @@ int block_proxy(FAR const char *blkdev, int oflags)
   if (ret < 0)
     {
       ret = -errno;
-      fdbg("ERROR: Failed to unlink %s: %d\n", chardev, ret);
+      ferr("ERROR: Failed to unlink %s: %d\n", chardev, ret);
     }
 
   /* Free the allocate character driver name and return the open file
@@ -231,4 +231,4 @@ errout_with_chardev:
   return ret;
 }
 
-#endif /* !CONFIG_DISABLE_PSEUDOFS_OPERATIONS && !CONFIG_DISABLE_MOUNTPOINT */
+#endif /* !CONFIG_DISABLE_MOUNTPOINT && !CONFIG_DISABLE_PSEUDOFS_OPERATIONS */

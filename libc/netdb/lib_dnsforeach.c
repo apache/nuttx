@@ -105,7 +105,7 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
   if (stream == NULL)
     {
       int errcode = errno;
-      ndbg("ERROR: Failed to open %s: %d\n",
+      nerr("ERROR: Failed to open %s: %d\n",
         CONFIG_NETDB_RESOLVCONF_PATH, errcode);
       DEBUGASSERT(errcode > 0);
       return -errcode;
@@ -123,7 +123,7 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
           addrstr = skip_spaces(ptr);
           if (*addrstr == '\0')
             {
-              ndbg("ERROR: Missing address in %s record\n",
+              nerr("ERROR: Missing address in %s record\n",
                    CONFIG_NETDB_RESOLVCONF_PATH);
               continue;
             }
@@ -155,7 +155,7 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
               ptr = strchr(addrstr, ']');
               if (ptr == NULL)
                 {
-                  ndbg("ERROR: Missing right bracket after %s\n", line);
+                  nerr("ERROR: Missing right bracket after %s\n", line);
                   continue;
                 }
 
@@ -224,7 +224,7 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
               else
 #endif
                 {
-                  ndbg("ERROR: Unrecognized address: %s\n", addrstr)
+                  nerr("ERROR: Unrecognized address: %s\n", addrstr)
                   ret = OK;
                 }
 #ifdef CONFIG_NET_IPv6
@@ -276,7 +276,7 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
       else
 #endif
         {
-          nvdbg("ERROR: Unsupported family: %d\n",
+          nerr("ERROR: Unsupported family: %d\n",
                 g_dns_server.addr.sa_family);
           ret = -ENOSYS;
         }

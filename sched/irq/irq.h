@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/irq/irq.h
  *
- *   Copyright (C) 2007, 2008, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2013-2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,10 +44,36 @@
 #include <nuttx/compiler.h>
 
 #include <sys/types.h>
+#include <stdbool.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include <nuttx/spinlock.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_MINIMAL_VECTORTABLE) && \
+   !defined(CONFIG_ARCH_NUSER_INTERRUPTS)
+#  error CONFIG_ARCH_NUSER_INTERRUPTS is not defined
+#endif
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+/* This is the type of the list of interrupt handlers, one for each IRQ.
+ * This type provided all of the information necessary to irq_dispatch to
+ * transfer control to interrupt handlers after the occurrence of an
+ * interrupt.
+ */
+
+struct irq_info_s
+{
+  xcpt_t handler;  /* Address of the interrupt handler */
+  FAR void *arg;   /* The argument provided to the interrupt handler. */
+};
 
 /****************************************************************************
  * Public Data
@@ -58,19 +84,40 @@
  * occurrence of an interrupt.
  */
 
-extern FAR xcpt_t g_irqvector[NR_IRQS+1];
+#ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
+extern struct irq_info_s g_irqvector[CONFIG_ARCH_NUSER_INTERRUPTS];
+#else
+extern struct irq_info_s g_irqvector[NR_IRQS];
+#endif
+
+#ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
+/* This is the interrupt vector mapping table.  This must be provided by
+ * architecture specific logic if CONFIG_ARCH_MINIMAL_VECTORTABLE is define
+ * in the configuration.
+ *
+ * REVISIT: This should be declared in include/nuttx/irq.h.  The declaration
+ * at that location, however, introduces a circular include dependency so the
+ * declaration is here for the time being.
+ */
+
+extern const irq_mapped_t g_irqmap[NR_IRQS];
+#endif
 
 #ifdef CONFIG_SMP
 /* This is the spinlock that enforces critical sections when interrupts are
  * disabled.
  */
 
-extern volatile spinlock_t g_cpu_irqlock;
+extern volatile spinlock_t g_cpu_irqlock SP_SECTION;
 
 /* Used to keep track of which CPU(s) hold the IRQ lock. */
 
-extern volatile spinlock_t g_cpu_irqsetlock;
-extern volatile cpu_set_t g_cpu_irqset;
+extern volatile spinlock_t g_cpu_irqsetlock SP_SECTION;
+extern volatile cpu_set_t g_cpu_irqset SP_SECTION;
+
+/* Handles nested calls to enter_critical section from interrupt handlers */
+
+extern volatile uint8_t g_cpu_nestcount[CONFIG_SMP_NCPUS];
 #endif
 
 /****************************************************************************
@@ -104,7 +151,34 @@ void weak_function irq_initialize(void);
  *
  ****************************************************************************/
 
-int irq_unexpected_isr(int irq, FAR void *context);
+int irq_unexpected_isr(int irq, FAR void *context, FAR void *arg);
+
+/****************************************************************************
+ * Name:  irq_cpu_locked
+ *
+ * Description:
+ *   Test if the IRQ lock set OR if this CPU holds the IRQ lock
+ *   There is an interaction with pre-emption controls and IRQ locking:
+ *   Even if the pre-emption is enabled, tasks will be forced to pend if
+ *   the IRQ lock is also set UNLESS the CPU starting the task is the
+ *   holder of the IRQ lock.
+ *
+ * Inputs:
+ *   rtcb - Points to the blocked TCB that is ready-to-run
+ *
+ * Return Value:
+ *   true  - IRQs are locked by a different CPU.
+ *   false - IRQs are unlocked OR if they are locked BUT this CPU
+ *           is the holder of the lock.
+ *
+ *   Warning: This values are volatile at only valid at the instance that
+ *   the CPU set was queried.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+bool irq_cpu_locked(int cpu);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

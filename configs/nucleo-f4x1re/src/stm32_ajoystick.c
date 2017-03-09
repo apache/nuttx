@@ -122,7 +122,7 @@ static void ajoy_enable(FAR const struct ajoy_lowerhalf_s *lower,
                          ajoy_handler_t handler, FAR void *arg);
 
 static void ajoy_disable(void);
-static int ajoy_interrupt(int irq, FAR void *context);
+static int ajoy_interrupt(int irq, FAR void *context, FAR void *arg);
 
 /****************************************************************************
  * Private Data
@@ -179,7 +179,7 @@ static FAR void *g_ajoyarg;
 
 static ajoy_buttonset_t ajoy_supported(FAR const struct ajoy_lowerhalf_s *lower)
 {
-  ivdbg("Supported: %02x\n", AJOY_SUPPORTED);
+  iinfo("Supported: %02x\n", AJOY_SUPPORTED);
   return (ajoy_buttonset_t)AJOY_SUPPORTED;
 }
 
@@ -206,20 +206,21 @@ static int ajoy_sample(FAR const struct ajoy_lowerhalf_s *lower,
    * channels are enabled).
    */
 
-  nread = file_read(&g_adcfile, adcmsg, MAX_ADC_CHANNELS * sizeof(struct adc_msg_s));
+  nread = file_read(&g_adcfile, adcmsg,
+                    MAX_ADC_CHANNELS * sizeof(struct adc_msg_s));
   if (nread < 0)
     {
       int errcode = get_errno();
       if (errcode != EINTR)
         {
-          idbg("ERROR: read failed: %d\n", errcode);
+          ierr("ERROR: read failed: %d\n", errcode);
         }
 
       return -errcode;
     }
   else if (nread < NJOYSTICK_CHANNELS * sizeof(struct adc_msg_s))
     {
-      idbg("ERROR: read too small: %ld\n", (long)nread);
+      ierr("ERROR: read too small: %ld\n", (long)nread);
       return -EIO;
     }
 
@@ -249,7 +250,7 @@ static int ajoy_sample(FAR const struct ajoy_lowerhalf_s *lower,
           sample->as_x = (int16_t)tmp;
           have |= 1;
 
-          ivdbg("X sample: %ld -> %d\n", (long)tmp, (int)sample->as_x);
+          iinfo("X sample: %ld -> %d\n", (long)tmp, (int)sample->as_x);
         }
 
 #ifdef CONFIG_ADC_DMA
@@ -259,14 +260,14 @@ static int ajoy_sample(FAR const struct ajoy_lowerhalf_s *lower,
           sample->as_y = (int16_t)tmp;
           have |= 2;
 
-          ivdbg("Y sample: %ld -> %d\n", (long)tmp, (int)sample->as_y);
+          iinfo("Y sample: %ld -> %d\n", (long)tmp, (int)sample->as_y);
         }
 #endif
     }
 
   if (have != 3)
     {
-      idbg("ERROR: Could not find joystick channels\n");
+      ierr("ERROR: Could not find joystick channels\n");
       return -EIO;
     }
 
@@ -280,7 +281,7 @@ static int ajoy_sample(FAR const struct ajoy_lowerhalf_s *lower,
   /* Sample the discrete button inputs */
 
   sample->as_buttons = ajoy_buttons(lower);
-  ivdbg("Returning: %02x\n", sample->as_buttons);
+  iinfo("Returning: %02x\n", sample->as_buttons);
   return OK;
 }
 
@@ -311,7 +312,7 @@ static ajoy_buttonset_t ajoy_buttons(FAR const struct ajoy_lowerhalf_s *lower)
         }
     }
 
-  ivdbg("Returning: %02x\n", ret);
+  iinfo("Returning: %02x\n", ret);
   return ret;
 }
 
@@ -340,8 +341,8 @@ static void ajoy_enable(FAR const struct ajoy_lowerhalf_s *lower,
   flags = enter_critical_section();
   ajoy_disable();
 
-  illvdbg("press: %02x release: %02x handler: %p arg: %p\n",
-          press, release, handler, arg);
+  iinfo("press: %02x release: %02x handler: %p arg: %p\n",
+        press, release, handler, arg);
 
   /* If no events are indicated or if no handler is provided, then this
    * must really be a request to disable interrupts.
@@ -372,11 +373,11 @@ static void ajoy_enable(FAR const struct ajoy_lowerhalf_s *lower,
                falling = ((press & bit) != 0);
                rising  = ((release & bit) != 0);
 
-               illvdbg("GPIO %d: rising: %d falling: %d\n",
-                        i, rising, falling);
+               iinfo("GPIO %d: rising: %d falling: %d\n",
+                      i, rising, falling);
 
                (void)stm32_gpiosetevent(g_joygpio[i], rising, falling,
-                                        true, ajoy_interrupt);
+                                        true, ajoy_interrupt, NULL);
              }
         }
     }
@@ -402,7 +403,7 @@ static void ajoy_disable(void)
   flags = enter_critical_section();
   for (i = 0; i < AJOY_NGPIOS; i++)
     {
-      (void)stm32_gpiosetevent(g_joygpio[i], false, false, false, NULL);
+      (void)stm32_gpiosetevent(g_joygpio[i], false, false, false, NULL, NULL);
     }
 
   leave_critical_section(flags);
@@ -421,7 +422,7 @@ static void ajoy_disable(void)
  *
  ****************************************************************************/
 
-static int ajoy_interrupt(int irq, FAR void *context)
+static int ajoy_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   DEBUGASSERT(g_ajoyhandler);
 
@@ -453,24 +454,16 @@ int board_ajoy_initialize(void)
 #ifndef NO_JOYSTICK_ADC
   int fd;
 
-  ivdbg("Initialize ADC driver: /dev/adc0\n");
+  iinfo("Initialize ADC driver: /dev/adc0\n");
 
-  /* Initialize ADC.  We will need this to read the ADC inputs */
-
-  ret = board_adc_initialize();
-  if (ret < 0)
-    {
-      idbg("ERROR: board_adc_initialize() failed: %d\n", ret);
-      return ret;
-    }
-
+  /* NOTE: The ADC driver was initialized earlier in the bring-up sequence. */
   /* Open the ADC driver for reading. */
 
   fd = open("/dev/adc0", O_RDONLY);
   if (fd < 0)
     {
       int errcode = get_errno();
-      idbg("ERROR: Failed to open /dev/adc0: %d\n", errcode);
+      ierr("ERROR: Failed to open /dev/adc0: %d\n", errcode);
       return -errcode;
     }
 
@@ -481,7 +474,7 @@ int board_ajoy_initialize(void)
   ret = file_detach(fd, &g_adcfile);
   if (ret < 0)
     {
-      idbg("ERROR: Failed to detach from file descriptor: %d\n", ret);
+      ierr("ERROR: Failed to detach from file descriptor: %d\n", ret);
       (void)close(fd);
       return ret;
     }
@@ -501,12 +494,12 @@ int board_ajoy_initialize(void)
 
   /* Register the joystick device as /dev/ajoy0 */
 
-  ivdbg("Initialize joystick driver: /dev/ajoy0\n");
+  iinfo("Initialize joystick driver: /dev/ajoy0\n");
 
   ret = ajoy_register("/dev/ajoy0", &g_ajoylower);
   if (ret < 0)
     {
-      idbg("ERROR: ajoy_register failed: %d\n", ret);
+      ierr("ERROR: ajoy_register failed: %d\n", ret);
 #ifndef NO_JOYSTICK_ADC
       file_close_detached(&g_adcfile);
 #endif

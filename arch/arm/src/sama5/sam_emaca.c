@@ -4,7 +4,7 @@
  * 10/100 Base-T Ethernet driver for the SAMA5D3.  Denoted as 'A' to
  * distinguish it from the SAMA5D4 EMAC driver.
  *
- *   Copyright (C) 2013-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -65,6 +65,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/wqueue.h>
 #include <nuttx/net/mii.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
@@ -93,6 +94,25 @@
  * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
+
+/* If processing is not done at the interrupt level, then work queue support
+ * is required.
+ */
+
+#if !defined(CONFIG_SCHED_WORKQUEUE)
+#  error Work queue support is required
+#else
+
+  /* Select work queue */
+
+#  if defined(CONFIG_SAMA5_EMACA_HPWORK)
+#    define ETHWORK HPWORK
+#  elif defined(CONFIG_SAMA5_EMACA_LPWORK)
+#    define ETHWORK LPWORK
+#  else
+#    error Neither CONFIG_SAMA5_EMACA_HPWORK nor CONFIG_SAMA5_EMACA_LPWORK defined
+#  endif
+#endif
 
 /* Number of buffers for RX */
 
@@ -199,18 +219,7 @@
 
 #endif
 
-/* EMAC buffer sizes, number of buffers, and number of descriptors.
- *
- * REVISIT: The CONFIG_NET_MULTIBUFFER might be useful.  It might be possible
- * to use this option to send and receive messages directly into the DMA
- * buffers, saving a copy.  There might be complications on the receiving
- * side, however, where buffers may wrap and where the size of the received
- * frame will typically be smaller than a full packet.
- */
-
-#ifdef CONFIG_NET_MULTIBUFFER
-#  error CONFIG_NET_MULTIBUFFER must not be set
-#endif
+/* EMAC buffer sizes, number of buffers, and number of descriptors. *********/
 
 #define EMAC_RX_UNITSIZE 128                 /* Fixed size for RX buffer  */
 #define EMAC_TX_UNITSIZE CONFIG_NET_ETH_MTU  /* MAX size for Ethernet packet */
@@ -223,7 +232,7 @@
  * enabled.
  */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_NET_INFO
 #  undef CONFIG_SAMA5_EMACA_REGDEBUG
 #endif
 
@@ -266,6 +275,8 @@ struct sam_emac_s
   uint8_t               ifup    : 1; /* true:ifup false:ifdown */
   WDOG_ID               txpoll;      /* TX poll timer */
   WDOG_ID               txtimeout;   /* TX timeout timer */
+  struct work_s         irqwork;     /* For deferring interrupt work to the work queue */
+  struct work_s         pollwork;    /* For deferring poll work to the work queue */
 
   /* This holds the information visible to the NuttX network */
 
@@ -301,6 +312,17 @@ struct sam_emac_s
 
 static struct sam_emac_s g_emac;
 
+/* A single packet buffer is used
+ *
+ * REVISIT:  It might be possible to use this option to send and receive
+ * messages directly into the DMA buffers, saving a copy.  There might be
+ * complications on the receiving side, however, where buffers may wrap
+ * and where the size of the received frame will typically be smaller than
+ * a full packet.
+ */
+
+static uint8_t g_pktbuf[MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE];
+
 #ifdef CONFIG_SAMA5_EMACA_PREALLOCATE
 /* Preallocated data */
 /* TX descriptors list */
@@ -335,7 +357,7 @@ static uint8_t g_rxbuffer[CONFIG_SAMA5_EMAC_NRXBUFFERS * EMAC_RX_UNITSIZE]
  ****************************************************************************/
 /* Register operations ******************************************************/
 
-#if defined(CONFIG_SAMA5_EMACA_REGDEBUG) && defined(CONFIG_DEBUG)
+#ifdef CONFIG_SAMA5_EMACA_REGDEBUG
 static bool sam_checkreg(struct sam_emac_s *priv, bool wr,
                          uint32_t regval, uintptr_t address);
 static uint32_t sam_getreg(struct sam_emac_s *priv, uintptr_t addr);
@@ -363,17 +385,24 @@ static void sam_dopoll(struct sam_emac_s *priv);
 static int  sam_recvframe(struct sam_emac_s *priv);
 static void sam_receive(struct sam_emac_s *priv);
 static void sam_txdone(struct sam_emac_s *priv);
-static int  sam_emac_interrupt(int irq, void *context);
+
+static void sam_interrupt_work(FAR void *arg);
+static int  sam_emac_interrupt(int irq, void *context, FAR void *arg);
 
 /* Watchdog timer expirations */
 
-static void sam_polltimer(int argc, uint32_t arg, ...);
-static void sam_txtimeout(int argc, uint32_t arg, ...);
+static void sam_txtimeout_work(FAR void *arg);
+static void sam_txtimeout_expiry(int argc, uint32_t arg, ...);
+
+static void sam_poll_work(FAR void *arg);
+static void sam_poll_expiry(int argc, uint32_t arg, ...);
 
 /* NuttX callback functions */
 
 static int  sam_ifup(struct net_driver_s *dev);
 static int  sam_ifdown(struct net_driver_s *dev);
+
+static void sam_txavail_work(FAR void *arg);
 static int  sam_txavail(struct net_driver_s *dev);
 
 #if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
@@ -390,7 +419,7 @@ static int  sam_ioctl(struct net_driver_s *dev, int cmd, long arg);
 
 /* PHY Initialization */
 
-#if defined(CONFIG_DEBUG_NET) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_NET) && defined(CONFIG_DEBUG_INFO)
 static void sam_phydump(struct sam_emac_s *priv);
 #else
 #  define sam_phydump(priv)
@@ -461,7 +490,7 @@ static bool sam_checkreg(struct sam_emac_s *priv, bool wr, uint32_t regval,
         {
           /* Yes... show how many times we did it */
 
-          lldbg("...[Repeats %d times]...\n", priv->ntimes);
+          ninfo("...[Repeats %d times]...\n", priv->ntimes);
         }
 
       /* Save information about the new access */
@@ -493,7 +522,7 @@ static uint32_t sam_getreg(struct sam_emac_s *priv, uintptr_t address)
 
   if (sam_checkreg(priv, false, regval, address))
     {
-      lldbg("%08x->%08x\n", address, regval);
+      ninfo("%08x->%08x\n", address, regval);
     }
 
   return regval;
@@ -514,7 +543,7 @@ static void sam_putreg(struct sam_emac_s *priv, uintptr_t address,
 {
   if (sam_checkreg(priv, true, regval, address))
     {
-      lldbg("%08x<-%08x\n", address, regval);
+      ninfo("%08x<-%08x\n", address, regval);
     }
 
   putreg32(regval, address);
@@ -607,7 +636,7 @@ static int sam_buffer_initialize(struct sam_emac_s *priv)
   priv->txdesc = (struct emac_txdesc_s *)kmm_memalign(8, allocsize);
   if (!priv->txdesc)
     {
-      nlldbg("ERROR: Failed to allocate TX descriptors\n");
+      nerr("ERROR: Failed to allocate TX descriptors\n");
       return -ENOMEM;
     }
 
@@ -617,7 +646,7 @@ static int sam_buffer_initialize(struct sam_emac_s *priv)
   priv->rxdesc = (struct emac_rxdesc_s *)kmm_memalign(8, allocsize);
   if (!priv->rxdesc)
     {
-      nlldbg("ERROR: Failed to allocate RX descriptors\n");
+      nerr("ERROR: Failed to allocate RX descriptors\n");
       sam_buffer_free(priv);
       return -ENOMEM;
     }
@@ -628,7 +657,7 @@ static int sam_buffer_initialize(struct sam_emac_s *priv)
   priv->txbuffer = (uint8_t *)kmm_memalign(8, allocsize);
   if (!priv->txbuffer)
     {
-      nlldbg("ERROR: Failed to allocate TX buffer\n");
+      nerr("ERROR: Failed to allocate TX buffer\n");
       sam_buffer_free(priv);
       return -ENOMEM;
     }
@@ -637,7 +666,7 @@ static int sam_buffer_initialize(struct sam_emac_s *priv)
   priv->rxbuffer = (uint8_t *)kmm_memalign(8, allocsize);
   if (!priv->rxbuffer)
     {
-      nlldbg("ERROR: Failed to allocate RX buffer\n");
+      nerr("ERROR: Failed to allocate RX buffer\n");
       sam_buffer_free(priv);
       return -ENOMEM;
     }
@@ -725,14 +754,14 @@ static int sam_transmit(struct sam_emac_s *priv)
   uint32_t regval;
   uint32_t status;
 
-  nllvdbg("d_len: %d txhead: %d\n",  dev->d_len, priv->txhead);
+  ninfo("d_len: %d txhead: %d\n",  dev->d_len, priv->txhead);
   sam_dumppacket("Transmit packet", dev->d_buf, dev->d_len);
 
   /* Check parameter */
 
   if (dev->d_len > EMAC_TX_UNITSIZE)
     {
-      nlldbg("ERROR: Packet too big: %d\n", dev->d_len);
+      nerr("ERROR: Packet too big: %d\n", dev->d_len);
       return -EINVAL;
     }
 
@@ -744,7 +773,7 @@ static int sam_transmit(struct sam_emac_s *priv)
 
   if (sam_txfree(priv) < 1)
     {
-      nlldbg("ERROR: No free TX descriptors\n");
+      nerr("ERROR: No free TX descriptors\n");
       return -EBUSY;
     }
 
@@ -788,7 +817,7 @@ static int sam_transmit(struct sam_emac_s *priv)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  (void)wd_start(priv->txtimeout, SAM_TXTIMEOUT, sam_txtimeout, 1,
+  (void)wd_start(priv->txtimeout, SAM_TXTIMEOUT, sam_txtimeout_expiry, 1,
                  (uint32_t)priv);
 
   /* Set d_len to zero meaning that the d_buf[] packet buffer is again
@@ -806,7 +835,7 @@ static int sam_transmit(struct sam_emac_s *priv)
 
   if (sam_txfree(priv) < 1)
     {
-      nllvdbg("Disabling RX interrupts\n");
+      ninfo("Disabling RX interrupts\n");
       sam_putreg(priv, SAM_EMAC_IDR, EMAC_INT_RCOMP);
     }
 
@@ -903,7 +932,7 @@ static int sam_txpoll(struct net_driver_s *dev)
  *
  *   1. After completion of a transmission (sam_txdone),
  *   2. When new TX data is available (sam_txavail), and
- *   3. After a TX timeout to restart the sending process (sam_txtimeout).
+ *   3. After a TX timeout to restart the sending process (sam_txtimeout_expiry).
  *
  * Parameters:
  *   priv - Reference to the driver state structure
@@ -986,7 +1015,7 @@ static int sam_recvframe(struct sam_emac_s *priv)
   arch_invalidate_dcache((uintptr_t)rxdesc,
                          (uintptr_t)rxdesc + sizeof(struct emac_rxdesc_s));
 
-  nllvdbg("rxndx: %d\n", rxndx);
+  ninfo("rxndx: %d\n", rxndx);
 
   while ((rxdesc->addr & EMACRXD_ADDR_OWNER) != 0)
     {
@@ -1042,7 +1071,7 @@ static int sam_recvframe(struct sam_emac_s *priv)
         {
           if (rxndx == priv->rxndx)
             {
-              nllvdbg("ERROR: No EOF (Invalid of buffers too small)\n");
+              nerr("ERROR: No EOF (Invalid of buffers too small)\n");
               do
                 {
                   /* Give ownership back to the EMAC */
@@ -1097,7 +1126,7 @@ static int sam_recvframe(struct sam_emac_s *priv)
               /* Frame size from the EMAC */
 
               dev->d_len = (rxdesc->status & EMACRXD_STA_FRLEN_MASK);
-              nllvdbg("packet %d-%d (%d)\n", priv->rxndx, rxndx, dev->d_len);
+              ninfo("packet %d-%d (%d)\n", priv->rxndx, rxndx, dev->d_len);
 
               /* All data have been copied in the application frame buffer,
                * release the RX descriptor
@@ -1128,11 +1157,11 @@ static int sam_recvframe(struct sam_emac_s *priv)
                * all of the data.
                */
 
-              nllvdbg("rxndx: %d d_len: %d\n", priv->rxndx, dev->d_len);
+              ninfo("rxndx: %d d_len: %d\n", priv->rxndx, dev->d_len);
 
               if (pktlen < dev->d_len)
                 {
-                  nlldbg("ERROR: Buffer size %d; frame size %d\n", dev->d_len, pktlen);
+                  nerr("ERROR: Buffer size %d; frame size %d\n", dev->d_len, pktlen);
                   return -E2BIG;
                 }
 
@@ -1172,7 +1201,7 @@ static int sam_recvframe(struct sam_emac_s *priv)
   /* No packet was found */
 
   priv->rxndx = rxndx;
-  nllvdbg("rxndx: %d\n", priv->rxndx);
+  ninfo("rxndx: %d\n", priv->rxndx);
   return -EAGAIN;
 }
 
@@ -1212,7 +1241,7 @@ static void sam_receive(struct sam_emac_s *priv)
 
       if (dev->d_len > CONFIG_NET_ETH_MTU)
         {
-          nlldbg("DROPPED: Too big: %d\n", dev->d_len);
+          nwarn("WARNING: Dropped, Too big: %d\n", dev->d_len);
           continue;
         }
 
@@ -1227,7 +1256,7 @@ static void sam_receive(struct sam_emac_s *priv)
 #ifdef CONFIG_NET_IPv4
       if (BUF->type == HTONS(ETHTYPE_IP))
         {
-          nllvdbg("IPv4 frame\n");
+          ninfo("IPv4 frame\n");
 
           /* Handle ARP on input then give the IPv4 packet to the network
            * layer
@@ -1267,7 +1296,7 @@ static void sam_receive(struct sam_emac_s *priv)
 #ifdef CONFIG_NET_IPv6
       if (BUF->type == HTONS(ETHTYPE_IP6))
         {
-          nllvdbg("Iv6 frame\n");
+          ninfo("Iv6 frame\n");
 
           /* Give the IPv6 packet to the network layer */
 
@@ -1304,7 +1333,7 @@ static void sam_receive(struct sam_emac_s *priv)
 #ifdef CONFIG_NET_ARP
       if (BUF->type == htons(ETHTYPE_ARP))
         {
-          nllvdbg("ARP frame\n");
+          ninfo("ARP frame\n");
 
           /* Handle ARP packet */
 
@@ -1322,7 +1351,7 @@ static void sam_receive(struct sam_emac_s *priv)
       else
 #endif
         {
-          nlldbg("DROPPED: Unknown type: %04x\n", BUF->type);
+          nwarn("WARNING: Dropped, Unknown type: %04x\n", BUF->type);
         }
     }
 }
@@ -1416,25 +1445,25 @@ static void sam_txdone(struct sam_emac_s *priv)
 }
 
 /****************************************************************************
- * Function: sam_emac_interrupt
+ * Function: sam_interrupt_work
  *
  * Description:
- *   Hardware interrupt handler
+ *   Perform interrupt related work from the worker thread
  *
  * Parameters:
- *   irq     - Number of the IRQ that generated the interrupt
- *   context - Interrupt register state save info (architecture-specific)
+ *   arg - The argument passed when work_queue() was called.
  *
  * Returned Value:
  *   OK on success
  *
  * Assumptions:
+ *   Ethernet interrupts are disabled
  *
  ****************************************************************************/
 
-static int sam_emac_interrupt(int irq, void *context)
+static void sam_interrupt_work(FAR void *arg)
 {
-  struct sam_emac_s *priv = &g_emac;
+  FAR struct sam_emac_s *priv = (FAR struct sam_emac_s *)arg;
   uint32_t isr;
   uint32_t rsr;
   uint32_t tsr;
@@ -1443,13 +1472,16 @@ static int sam_emac_interrupt(int irq, void *context)
   uint32_t pending;
   uint32_t clrbits;
 
+  /* Process pending Ethernet interrupts */
+
+  net_lock();
   isr = sam_getreg(priv, SAM_EMAC_ISR);
   rsr = sam_getreg(priv, SAM_EMAC_RSR);
   tsr = sam_getreg(priv, SAM_EMAC_TSR);
   imr = sam_getreg(priv, SAM_EMAC_IMR);
 
   pending = isr & ~(imr | EMAC_INT_UNUSED);
-  nllvdbg("isr: %08x pending: %08x\n", isr, pending);
+  ninfo("isr: %08x pending: %08x\n", isr, pending);
 
   /* Check for the completion of a transmission.  This should be done before
    * checking for received data (because receiving can cause another transmission
@@ -1475,7 +1507,7 @@ static int sam_emac_interrupt(int irq, void *context)
           clrbits = EMAC_TSR_RLES | sam_txinuse(priv);
           sam_txreset(priv);
 
-          nlldbg("ERROR: Retry Limit Exceeded TSR: %08x\n", tsr);
+          nerr("ERROR: Retry Limit Exceeded TSR: %08x\n", tsr);
 
           regval = sam_getreg(priv, SAM_EMAC_NCR);
           regval |= EMAC_NCR_TE;
@@ -1486,7 +1518,7 @@ static int sam_emac_interrupt(int irq, void *context)
 
       if ((tsr & EMAC_TSR_COL) != 0)
         {
-          nlldbg("ERROR: Collision occurred TSR: %08x\n", tsr);
+          nerr("ERROR: Collision occurred TSR: %08x\n", tsr);
           clrbits |= EMAC_TSR_COL;
         }
 
@@ -1494,7 +1526,7 @@ static int sam_emac_interrupt(int irq, void *context)
 
       if ((tsr & EMAC_TSR_BEX) != 0)
         {
-          nlldbg("ERROR: Buffers exhausted mid-frame TSR: %08x\n", tsr);
+          nerr("ERROR: Buffers exhausted mid-frame TSR: %08x\n", tsr);
           clrbits |= EMAC_TSR_BEX;
         }
 
@@ -1509,7 +1541,7 @@ static int sam_emac_interrupt(int irq, void *context)
 
       if ((tsr & EMAC_TSR_UND) != 0)
         {
-          nlldbg("ERROR: Transmit Underrun TSR: %08x\n", tsr);
+          nerr("ERROR: Transmit Underrun TSR: %08x\n", tsr);
           clrbits |= EMAC_TSR_UND;
         }
 
@@ -1546,7 +1578,7 @@ static int sam_emac_interrupt(int irq, void *context)
 
       if ((rsr & EMAC_RSR_OVR) != 0)
         {
-          nlldbg("ERROR: Receiver overrun RSR: %08x\n", rsr);
+          nerr("ERROR: Receiver overrun RSR: %08x\n", rsr);
           clrbits |= EMAC_RSR_OVR;
         }
 
@@ -1563,7 +1595,7 @@ static int sam_emac_interrupt(int irq, void *context)
 
       if ((rsr & EMAC_RSR_BNA) != 0)
         {
-          nlldbg("ERROR: Buffer not available RSR: %08x\n", rsr);
+          nerr("ERROR: Buffer not available RSR: %08x\n", rsr);
           clrbits |= EMAC_RSR_BNA;
         }
 
@@ -1584,7 +1616,7 @@ static int sam_emac_interrupt(int irq, void *context)
 
   if ((pending & EMAC_INT_PFR) != 0)
     {
-      nlldbg("Pause frame received\n");
+      nwarn("WARNING: Pause frame received\n");
     }
 
   /* Check for Pause Time Zero (PTZ)
@@ -1594,15 +1626,108 @@ static int sam_emac_interrupt(int irq, void *context)
 
   if ((pending & EMAC_INT_PTZ) != 0)
     {
-      nlldbg("Pause TO!\n");
+      nwarn("WARNING: Pause TO!\n");
     }
 #endif
 
+  net_unlock();
+
+  /* Re-enable Ethernet interrupts */
+
+  up_enable_irq(SAM_IRQ_EMAC);
+}
+
+/****************************************************************************
+ * Function: sam_emac_interrupt
+ *
+ * Description:
+ *   Hardware interrupt handler
+ *
+ * Parameters:
+ *   irq     - Number of the IRQ that generated the interrupt
+ *   context - Interrupt register state save info (architecture-specific)
+ *
+ * Returned Value:
+ *   OK on success
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static int sam_emac_interrupt(int irq, void *context, FAR void *arg)
+{
+  struct sam_emac_s *priv = &g_emac;
+  uint32_t tsr;
+
+  /* Disable further Ethernet interrupts.  Because Ethernet interrupts are
+   * also disabled if the TX timeout event occurs, there can be no race
+   * condition here.
+   */
+
+  up_disable_irq(SAM_IRQ_EMAC);
+
+  /* Check for the completion of a transmission.  Careful:
+   *
+   * ISR:TCOMP is set when a frame has been transmitted. Cleared on read (so
+   *   we cannot read it here).
+   * TSR:TXCOMP is set when a frame has been transmitted. Cleared by writing a
+   *   one to this bit.
+   */
+
+  tsr = sam_getreg(priv, SAM_EMAC_TSR_OFFSET);
+  if ((tsr & EMAC_TSR_COMP) != 0)
+    {
+      /* If a TX transfer just completed, then cancel the TX timeout so
+       * there will be do race condition between any subsequent timeout
+       * expiration and the deferred interrupt processing.
+       */
+
+      wd_cancel(priv->txtimeout);
+    }
+
+  /* Schedule to perform the interrupt processing on the worker thread. */
+
+  work_queue(ETHWORK, &priv->irqwork, sam_interrupt_work, priv, 0);
   return OK;
 }
 
 /****************************************************************************
- * Function: sam_txtimeout
+ * Function: sam_txtimeout_work
+ *
+ * Description:
+ *   Perform TX timeout related work from the worker thread
+ *
+ * Parameters:
+ *   arg - The argument passed when work_queue() as called.
+ *
+ * Returned Value:
+ *   OK on success
+ *
+ * Assumptions:
+ *   Ethernet interrupts are disabled
+ *
+ ****************************************************************************/
+
+static void sam_txtimeout_work(FAR void *arg)
+{
+  FAR struct sam_emac_s *priv = (FAR struct sam_emac_s *)arg;
+
+  nerr("ERROR: Timeout!\n");
+
+  /* Reset the hardware.  Just take the interface down, then back up again. */
+
+  net_lock();
+  sam_ifdown(&priv->dev);
+  sam_ifup(&priv->dev);
+
+  /* Then poll the network for new XMIT data */
+
+  sam_dopoll(priv);
+  net_unlock();
+}
+
+/****************************************************************************
+ * Function: sam_txtimeout_expiry
  *
  * Description:
  *   Our TX watchdog timed out.  Called from the timer interrupt handler.
@@ -1620,26 +1745,64 @@ static int sam_emac_interrupt(int irq, void *context)
  *
  ****************************************************************************/
 
-static void sam_txtimeout(int argc, uint32_t arg, ...)
+static void sam_txtimeout_expiry(int argc, uint32_t arg, ...)
 {
-  struct sam_emac_s *priv = (struct sam_emac_s *)arg;
+  FAR struct sam_emac_s *priv = (FAR struct sam_emac_s *)arg;
 
-  nlldbg("Timeout!\n");
-
-  /* Then reset the hardware.  Just take the interface down, then back
-   * up again.
+  /* Disable further Ethernet interrupts.  This will prevent some race
+   * conditions with interrupt work.  There is still a potential race
+   * condition with interrupt work that is already queued and in progress.
    */
 
-  sam_ifdown(&priv->dev);
-  sam_ifup(&priv->dev);
+  up_disable_irq(SAM_IRQ_EMAC);
 
-  /* Then poll the network for new XMIT data */
+  /* Schedule to perform the TX timeout processing on the worker thread. */
 
-  sam_dopoll(priv);
+  work_queue(ETHWORK, &priv->irqwork, sam_txtimeout_work, priv, 0);
 }
 
 /****************************************************************************
- * Function: sam_polltimer
+ * Function: sam_poll_work
+ *
+ * Description:
+ *   Perform periodic polling from the worker thread
+ *
+ * Parameters:
+ *   arg - The argument passed when work_queue() as called.
+ *
+ * Returned Value:
+ *   OK on success
+ *
+ * Assumptions:
+ *   Ethernet interrupts are disabled
+ *
+ ****************************************************************************/
+
+static void sam_poll_work(FAR void *arg)
+{
+  FAR struct sam_emac_s *priv = (FAR struct sam_emac_s *)arg;
+  struct net_driver_s *dev  = &priv->dev;
+
+  /* Check if the there are any free TX descriptors.  We cannot perform the
+   * TX poll if we do not have buffering for another packet.
+   */
+
+  net_lock();
+  if (sam_txfree(priv) > 0)
+    {
+      /* Update TCP timing states and poll the network for new XMIT data. */
+
+      (void)devif_timer(dev, sam_txpoll);
+    }
+
+  /* Setup the watchdog poll timer again */
+
+  (void)wd_start(priv->txpoll, SAM_WDDELAY, sam_poll_expiry, 1, priv);
+  net_unlock();
+}
+
+/****************************************************************************
+ * Function: sam_poll_expiry
  *
  * Description:
  *   Periodic timer handler.  Called from the timer interrupt handler.
@@ -1656,25 +1819,13 @@ static void sam_txtimeout(int argc, uint32_t arg, ...)
  *
  ****************************************************************************/
 
-static void sam_polltimer(int argc, uint32_t arg, ...)
+static void sam_poll_expiry(int argc, uint32_t arg, ...)
 {
-  struct sam_emac_s *priv = (struct sam_emac_s *)arg;
-  struct net_driver_s   *dev  = &priv->dev;
+  FAR struct sam_emac_s *priv = (FAR struct sam_emac_s *)arg;
 
-  /* Check if the there are any free TX descriptors.  We cannot perform the
-   * TX poll if we do not have buffering for another packet.
-   */
+  /* Schedule to perform the interrupt processing on the worker thread. */
 
-  if (sam_txfree(priv) > 0)
-    {
-      /* Update TCP timing states and poll the network for new XMIT data. */
-
-      (void)devif_timer(dev, sam_txpoll);
-    }
-
-  /* Setup the watchdog poll timer again */
-
-  (void)wd_start(priv->txpoll, SAM_WDDELAY, sam_polltimer, 1, arg);
+  work_queue(ETHWORK, &priv->pollwork, sam_poll_work, priv, 0);
 }
 
 /****************************************************************************
@@ -1699,13 +1850,13 @@ static int sam_ifup(struct net_driver_s *dev)
   struct sam_emac_s *priv = (struct sam_emac_s *)dev->d_private;
   int ret;
 
-  nlldbg("Bringing up: %d.%d.%d.%d\n",
-         dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-         (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+  ninfo("Bringing up: %d.%d.%d.%d\n",
+        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
+        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
   /* Configure the EMAC interface for normal operation. */
 
-  nllvdbg("Initialize the EMAC\n");
+  ninfo("Initialize the EMAC\n");
   sam_emac_configure(priv);
 
   /* Set the MAC address (should have been configured while we were down) */
@@ -1723,7 +1874,7 @@ static int sam_ifup(struct net_driver_s *dev)
   ret = sam_phyinit(priv);
   if (ret < 0)
     {
-      nlldbg("ERROR: sam_phyinit failed: %d\n", ret);
+      nerr("ERROR: sam_phyinit failed: %d\n", ret);
       return ret;
     }
 
@@ -1732,20 +1883,20 @@ static int sam_ifup(struct net_driver_s *dev)
   ret = sam_autonegotiate(priv);
   if (ret < 0)
     {
-      nlldbg("ERROR: sam_autonegotiate failed: %d\n", ret);
+      nerr("ERROR: sam_autonegotiate failed: %d\n", ret);
       return ret;
     }
 
   while (sam_linkup(priv) == 0);
-  nllvdbg("Link detected \n");
+  ninfo("Link detected \n");
 
   /* Enable normal MAC operation */
 
-  nllvdbg("Enable normal operation\n");
+  ninfo("Enable normal operation\n");
 
   /* Set and activate a timer process */
 
-  (void)wd_start(priv->txpoll, SAM_WDDELAY, sam_polltimer, 1, (uint32_t)priv);
+  (void)wd_start(priv->txpoll, SAM_WDDELAY, sam_poll_expiry, 1, (uint32_t)priv);
 
   /* Enable the EMAC interrupt */
 
@@ -1775,7 +1926,7 @@ static int sam_ifdown(struct net_driver_s *dev)
   struct sam_emac_s *priv = (struct sam_emac_s *)dev->d_private;
   irqstate_t flags;
 
-  nlldbg("Taking the network down\n");
+  ninfo("Taking the network down\n");
 
   /* Disable the EMAC interrupt */
 
@@ -1802,6 +1953,42 @@ static int sam_ifdown(struct net_driver_s *dev)
 }
 
 /****************************************************************************
+ * Function: sam_txavail_work
+ *
+ * Description:
+ *   Perform an out-of-cycle poll on the worker thread.
+ *
+ * Parameters:
+ *   arg - Reference to the NuttX driver state structure (cast to void*)
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Called on the higher priority worker thread.
+ *
+ ****************************************************************************/
+
+static void sam_txavail_work(FAR void *arg)
+{
+  FAR struct sam_emac_s *priv = (FAR struct sam_emac_s *)arg;
+
+  ninfo("ifup: %d\n", priv->ifup);
+
+  /* Ignore the notification if the interface is not yet up */
+
+  net_lock();
+  if (priv->ifup)
+    {
+      /* Poll the network for new XMIT data */
+
+      sam_dopoll(priv);
+    }
+
+  net_unlock();
+}
+
+/****************************************************************************
  * Function: sam_txavail
  *
  * Description:
@@ -1810,7 +1997,7 @@ static int sam_ifdown(struct net_driver_s *dev)
  *   latency.
  *
  * Parameters:
- *   dev  - Reference to the NuttX driver state structure
+ *   dev - Reference to the NuttX driver state structure
  *
  * Returned Value:
  *   None
@@ -1822,27 +2009,20 @@ static int sam_ifdown(struct net_driver_s *dev)
 
 static int sam_txavail(struct net_driver_s *dev)
 {
-  struct sam_emac_s *priv = (struct sam_emac_s *)dev->d_private;
-  irqstate_t flags;
+  FAR struct sam_emac_s *priv = (FAR struct sam_emac_s *)dev->d_private;
 
-  nllvdbg("ifup: %d\n", priv->ifup);
-
-  /* Disable interrupts because this function may be called from interrupt
-   * level processing.
+  /* Is our single work structure available?  It may not be if there are
+   * pending interrupt actions and we will have to ignore the Tx
+   * availability action.
    */
 
-  flags = enter_critical_section();
-
-  /* Ignore the notification if the interface is not yet up */
-
-  if (priv->ifup)
+  if (work_available(&priv->pollwork))
     {
-      /* Poll the network for new XMIT data */
+      /* Schedule to serialize the poll on the worker thread. */
 
-      sam_dopoll(priv);
+      work_queue(ETHWORK, &priv->pollwork, sam_txavail_work, priv, 0);
     }
 
-  leave_critical_section(flags);
   return OK;
 }
 
@@ -2003,8 +2183,8 @@ static int sam_addmac(struct net_driver_s *dev, const uint8_t *mac)
   unsigned int bit;
   UNUSED(priv);
 
-  nllvdbg("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
-          mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+  ninfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+        mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
   /* Calculate the 6-bit has table index */
 
@@ -2077,8 +2257,8 @@ static int sam_rmmac(struct net_driver_s *dev, const uint8_t *mac)
   unsigned int bit;
   UNUSED(priv);
 
-  nllvdbg("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
-          mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+  ninfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+        mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
   /* Calculate the 6-bit has table index */
 
@@ -2260,7 +2440,7 @@ static int sam_ioctl(struct net_driver_s *dev, int cmd, long arg)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_NET) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_NET) && defined(CONFIG_DEBUG_INFO)
 static void sam_phydump(struct sam_emac_s *priv)
 {
   uint32_t regval;
@@ -2273,21 +2453,21 @@ static void sam_phydump(struct sam_emac_s *priv)
   sam_putreg(priv, SAM_EMAC_NCR, regval);
 
 #ifdef CONFIG_SAMA5_EMAC_RMII
-  nllvdbg("RMII Registers (Address %02x)\n", priv->phyaddr);
+  ninfo("RMII Registers (Address %02x)\n", priv->phyaddr);
 #else /* defined(CONFIG_SAMA5_EMAC_MII) */
-  nllvdbg("MII Registers (Address %02x)\n", priv->phyaddr);
+  ninfo("MII Registers (Address %02x)\n", priv->phyaddr);
 #endif
 
   sam_phyread(priv, priv->phyaddr, MII_MCR, &phyval);
-  nllvdbg("  MCR:       %04x\n", phyval);
+  ninfo("  MCR:       %04x\n", phyval);
   sam_phyread(priv, priv->phyaddr, MII_MSR, &phyval);
-  nllvdbg("  MSR:       %04x\n", phyval);
+  ninfo("  MSR:       %04x\n", phyval);
   sam_phyread(priv, priv->phyaddr, MII_ADVERTISE, &phyval);
-  nllvdbg("  ADVERTISE: %04x\n", phyval);
+  ninfo("  ADVERTISE: %04x\n", phyval);
   sam_phyread(priv, priv->phyaddr, MII_LPA, &phyval);
-  nllvdbg("  LPR:       %04x\n", phyval);
+  ninfo("  LPR:       %04x\n", phyval);
   sam_phyread(priv, priv->phyaddr, CONFIG_SAMA5_EMAC_PHYSR, &phyval);
-  nllvdbg("  PHYSR:     %04x\n", phyval);
+  ninfo("  PHYSR:     %04x\n", phyval);
 
   /* Disable management port */
 
@@ -2410,7 +2590,7 @@ static int sam_phyreset(struct sam_emac_s *priv)
   int timeout;
   int ret;
 
-  nllvdbg(" sam_phyreset\n");
+  ninfo(" sam_phyreset\n");
 
   /* Enable management port */
 
@@ -2423,7 +2603,7 @@ static int sam_phyreset(struct sam_emac_s *priv)
   ret = sam_phywrite(priv, priv->phyaddr, MII_MCR, MII_MCR_RESET);
   if (ret < 0)
     {
-      nlldbg("ERROR: sam_phywrite failed: %d\n", ret);
+      nerr("ERROR: sam_phywrite failed: %d\n", ret);
     }
 
   /* Wait for the PHY reset to complete */
@@ -2435,7 +2615,7 @@ static int sam_phyreset(struct sam_emac_s *priv)
       int result = sam_phyread(priv, priv->phyaddr, MII_MCR, &mcr);
       if (result < 0)
         {
-          nlldbg("ERROR: Failed to read the MCR register: %d\n", ret);
+          nerr("ERROR: Failed to read the MCR register: %d\n", ret);
           ret = result;
         }
       else if ((mcr & MII_MCR_RESET) == 0)
@@ -2477,7 +2657,7 @@ static int sam_phyfind(struct sam_emac_s *priv, uint8_t *phyaddr)
   unsigned int offset;
   int ret = -ESRCH;
 
-  nllvdbg("Find a valid PHY address\n");
+  ninfo("Find a valid PHY address\n");
 
   /* Enable management port */
 
@@ -2500,8 +2680,8 @@ static int sam_phyfind(struct sam_emac_s *priv, uint8_t *phyaddr)
 
   else
     {
-      nlldbg("ERROR: sam_phyread failed for PHY address %02x: %d\n",
-             candidate, ret);
+      nerr("ERROR: sam_phyread failed for PHY address %02x: %d\n",
+           candidate, ret);
 
       for (offset = 0; offset < 32; offset++)
         {
@@ -2522,10 +2702,10 @@ static int sam_phyfind(struct sam_emac_s *priv, uint8_t *phyaddr)
 
   if (ret == OK)
     {
-      nllvdbg("  PHYID1: %04x PHY addr: %d\n", phyval, candidate);
+      ninfo("  PHYID1: %04x PHY addr: %d\n", phyval, candidate);
       *phyaddr = candidate;
       sam_phyread(priv, candidate, CONFIG_SAMA5_EMAC_PHYSR, &phyval);
-      nllvdbg("  PHYSR:  %04x PHY addr: %d\n", phyval, candidate);
+      ninfo("  PHYSR:  %04x PHY addr: %d\n", phyval, candidate);
     }
 
   /* Disable management port */
@@ -2566,7 +2746,7 @@ static int sam_phyread(struct sam_emac_s *priv, uint8_t phyaddr,
   ret = sam_phywait(priv);
   if (ret < 0)
     {
-      nlldbg("ERROR: sam_phywait failed: %d\n", ret);
+      nerr("ERROR: sam_phywait failed: %d\n", ret);
       return ret;
     }
 
@@ -2581,7 +2761,7 @@ static int sam_phyread(struct sam_emac_s *priv, uint8_t phyaddr,
   ret = sam_phywait(priv);
   if (ret < 0)
     {
-      nlldbg("ERROR: sam_phywait failed: %d\n", ret);
+      nerr("ERROR: sam_phywait failed: %d\n", ret);
       return ret;
     }
 
@@ -2621,7 +2801,7 @@ static int sam_phywrite(struct sam_emac_s *priv, uint8_t phyaddr,
   ret = sam_phywait(priv);
   if (ret < 0)
     {
-      nlldbg("ERROR: sam_phywait failed: %d\n", ret);
+      nerr("ERROR: sam_phywait failed: %d\n", ret);
       return ret;
     }
 
@@ -2636,7 +2816,7 @@ static int sam_phywrite(struct sam_emac_s *priv, uint8_t phyaddr,
   ret = sam_phywait(priv);
   if (ret < 0)
     {
-      nlldbg("ERROR: sam_phywait failed: %d\n", ret);
+      nerr("ERROR: sam_phywait failed: %d\n", ret);
       return ret;
     }
 
@@ -2680,32 +2860,32 @@ static int sam_autonegotiate(struct sam_emac_s *priv)
   ret = sam_phyread(priv, priv->phyaddr, MII_PHYID1, &phyid1);
   if (ret < 0)
     {
-      nlldbg("ERROR: Failed to read PHYID1\n");
+      nerr("ERROR: Failed to read PHYID1\n");
       goto errout;
     }
 
-  nllvdbg("PHYID1: %04x PHY address: %02x\n", phyid1, priv->phyaddr);
+  ninfo("PHYID1: %04x PHY address: %02x\n", phyid1, priv->phyaddr);
 
   ret = sam_phyread(priv, priv->phyaddr, MII_PHYID2, &phyid2);
   if (ret < 0)
     {
-      nlldbg("ERROR: Failed to read PHYID2\n");
+      nerr("ERROR: Failed to read PHYID2\n");
       goto errout;
     }
 
-  nllvdbg("PHYID2: %04x PHY address: %02x\n", phyid2, priv->phyaddr);
+  ninfo("PHYID2: %04x PHY address: %02x\n", phyid2, priv->phyaddr);
 
   if (phyid1 == MII_OUI_MSB &&
      ((phyid2 & MII_PHYID2_OUI_MASK) >> MII_PHYID2_OUI_SHIFT) == MII_OUI_LSB)
     {
-      nllvdbg("  Vendor Model Number:   %04x\n",
-             (phyid2 & MII_PHYID2_MODEL_MASK) >> MII_PHYID2_MODEL_SHIFT);
-      nllvdbg("  Model Revision Number: %04x\n",
-             (phyid2 & MII_PHYID2_REV_MASK) >> MII_PHYID2_REV_SHIFT);
+      ninfo("  Vendor Model Number:   %04x\n",
+           (phyid2 & MII_PHYID2_MODEL_MASK) >> MII_PHYID2_MODEL_SHIFT);
+      ninfo("  Model Revision Number: %04x\n",
+           (phyid2 & MII_PHYID2_REV_MASK) >> MII_PHYID2_REV_SHIFT);
     }
   else
     {
-      nlldbg("ERROR: PHY not recognized\n");
+      nerr("ERROR: PHY not recognized\n");
     }
 
   /* Setup control register */
@@ -2713,7 +2893,7 @@ static int sam_autonegotiate(struct sam_emac_s *priv)
   ret = sam_phyread(priv, priv->phyaddr, MII_MCR, &mcr);
   if (ret < 0)
     {
-      nlldbg("ERROR: Failed to read MCR\n");
+      nerr("ERROR: Failed to read MCR\n");
       goto errout;
     }
 
@@ -2724,7 +2904,7 @@ static int sam_autonegotiate(struct sam_emac_s *priv)
   ret = sam_phywrite(priv, priv->phyaddr, MII_MCR, mcr);
   if (ret < 0)
     {
-      nlldbg("ERROR: Failed to write MCR\n");
+      nerr("ERROR: Failed to write MCR\n");
       goto errout;
     }
 
@@ -2739,7 +2919,7 @@ static int sam_autonegotiate(struct sam_emac_s *priv)
   ret = sam_phywrite(priv, priv->phyaddr, MII_ADVERTISE, advertise);
   if (ret < 0)
     {
-      nlldbg("ERROR: Failed to write ANAR\n");
+      nerr("ERROR: Failed to write ANAR\n");
       goto errout;
     }
 
@@ -2748,7 +2928,7 @@ static int sam_autonegotiate(struct sam_emac_s *priv)
   ret = sam_phyread(priv, priv->phyaddr, MII_MCR, &mcr);
   if (ret < 0)
     {
-      nlldbg("ERROR: Failed to read MCR\n");
+      nerr("ERROR: Failed to read MCR\n");
       goto errout;
     }
 
@@ -2756,7 +2936,7 @@ static int sam_autonegotiate(struct sam_emac_s *priv)
   ret = sam_phywrite(priv, priv->phyaddr, MII_MCR, mcr);
   if (ret < 0)
     {
-      nlldbg("ERROR: Failed to write MCR\n");
+      nerr("ERROR: Failed to write MCR\n");
       goto errout;
     }
 
@@ -2768,11 +2948,11 @@ static int sam_autonegotiate(struct sam_emac_s *priv)
   ret = sam_phywrite(priv, priv->phyaddr, MII_MCR, mcr);
   if (ret < 0)
     {
-      nlldbg("ERROR: Failed to write MCR\n");
+      nerr("ERROR: Failed to write MCR\n");
       goto errout;
     }
 
-  nllvdbg("  MCR: %04x\n", mcr);
+  ninfo("  MCR: %04x\n", mcr);
 
   /* Check AutoNegotiate complete */
 
@@ -2782,7 +2962,7 @@ static int sam_autonegotiate(struct sam_emac_s *priv)
       ret = sam_phyread(priv, priv->phyaddr, MII_MSR, &msr);
       if (ret < 0)
         {
-          nlldbg("ERROR: Failed to read MSR\n");
+          nerr("ERROR: Failed to read MSR\n");
           goto errout;
         }
 
@@ -2792,7 +2972,7 @@ static int sam_autonegotiate(struct sam_emac_s *priv)
         {
           /* Yes.. break out of the loop */
 
-          nllvdbg("AutoNegotiate complete\n");
+          ninfo("AutoNegotiate complete\n");
           break;
         }
 
@@ -2800,7 +2980,7 @@ static int sam_autonegotiate(struct sam_emac_s *priv)
 
       if (++timeout >= PHY_RETRY_MAX)
         {
-          nlldbg("ERROR: TimeOut\n");
+          nerr("ERROR: TimeOut\n");
           sam_phydump(priv);
           ret = -ETIMEDOUT;
           goto errout;
@@ -2812,7 +2992,7 @@ static int sam_autonegotiate(struct sam_emac_s *priv)
   ret = sam_phyread(priv, priv->phyaddr, MII_LPA, &lpa);
   if (ret < 0)
     {
-      nlldbg("ERROR: Failed to read ANLPAR\n");
+      nerr("ERROR: Failed to read ANLPAR\n");
       goto errout;
     }
 
@@ -2902,13 +3082,13 @@ static bool sam_linkup(struct sam_emac_s *priv)
   ret = sam_phyread(priv, priv->phyaddr, MII_MSR, &msr);
   if (ret < 0)
     {
-      nlldbg("ERROR: Failed to read MSR: %d\n", ret);
+      nerr("ERROR: Failed to read MSR: %d\n", ret);
       goto errout;
     }
 
   if ((msr & MII_MSR_LINKSTATUS) == 0)
     {
-      nlldbg("ERROR: MSR LinkStatus: %04x\n", msr);
+      nerr("ERROR: MSR LinkStatus: %04x\n", msr);
       goto errout;
     }
 
@@ -2917,7 +3097,7 @@ static bool sam_linkup(struct sam_emac_s *priv)
   ret = sam_phyread(priv, priv->phyaddr, CONFIG_SAMA5_EMAC_PHYSR, &physr);
   if (ret < 0)
     {
-      nlldbg("ERROR: Failed to read PHYSR: %d\n", ret);
+      nerr("ERROR: Failed to read PHYSR: %d\n", ret);
       goto errout;
     }
 
@@ -2955,7 +3135,7 @@ static bool sam_linkup(struct sam_emac_s *priv)
 
   /* Start the EMAC transfers */
 
-  nllvdbg("Link is up\n");
+  ninfo("Link is up\n");
   linkup = true;
 
 errout:
@@ -2996,7 +3176,7 @@ static int sam_phyinit(struct sam_emac_s *priv)
   mck = BOARD_MCK_FREQUENCY;
   if (mck > (160*1000*1000))
     {
-      ndbg("ERROR: Cannot realize PHY clock\n");
+      nerr("ERROR: Cannot realize PHY clock\n");
       return -EINVAL;
     }
   else if (mck > (80*1000*1000))
@@ -3024,7 +3204,7 @@ static int sam_phyinit(struct sam_emac_s *priv)
   ret = sam_phyfind(priv, &priv->phyaddr);
   if (ret < 0)
     {
-      nlldbg("ERROR: sam_phyfind failed: %d\n", ret);
+      nerr("ERROR: sam_phyfind failed: %d\n", ret);
       return ret;
     }
 
@@ -3276,11 +3456,11 @@ static void sam_macaddress(struct sam_emac_s *priv)
   struct net_driver_s *dev = &priv->dev;
   uint32_t regval;
 
-  nllvdbg("%s MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
-          dev->d_ifname,
-          dev->d_mac.ether_addr_octet[0], dev->d_mac.ether_addr_octet[1],
-          dev->d_mac.ether_addr_octet[2], dev->d_mac.ether_addr_octet[3],
-          dev->d_mac.ether_addr_octet[4], dev->d_mac.ether_addr_octet[5]);
+  ninfo("%s MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+        dev->d_ifname,
+        dev->d_mac.ether_addr_octet[0], dev->d_mac.ether_addr_octet[1],
+        dev->d_mac.ether_addr_octet[2], dev->d_mac.ether_addr_octet[3],
+        dev->d_mac.ether_addr_octet[4], dev->d_mac.ether_addr_octet[5]);
 
   /* Set the MAC address */
 
@@ -3342,7 +3522,7 @@ static void sam_ipv6multicast(struct sam_emac_s *priv)
   mac[4] = tmp16 & 0xff;
   mac[5] = tmp16 >> 8;
 
-  nvdbg("IPv6 Multicast: %02x:%02x:%02x:%02x:%02x:%02x\n",
+  ninfo("IPv6 Multicast: %02x:%02x:%02x:%02x:%02x:%02x\n",
         mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
   (void)sam_addmac(dev, mac);
@@ -3388,7 +3568,7 @@ static int sam_emac_configure(struct sam_emac_s *priv)
 {
   uint32_t regval;
 
-  nllvdbg("Entry\n");
+  ninfo("Entry\n");
 
   /* Enable clocking to the EMAC peripheral */
 
@@ -3484,6 +3664,7 @@ int sam_emac_initialize(void)
   /* Initialize the driver structure */
 
   memset(priv, 0, sizeof(struct sam_emac_s));
+  priv->dev.d_buf     = g_pktbuf;        /* Single packet buffer */
   priv->dev.d_ifup    = sam_ifup;        /* I/F up (new IP address) callback */
   priv->dev.d_ifdown  = sam_ifdown;      /* I/F down callback */
   priv->dev.d_txavail = sam_txavail;     /* New TX data callback */
@@ -3501,7 +3682,7 @@ int sam_emac_initialize(void)
   priv->txpoll = wd_create();
   if (!priv->txpoll)
     {
-      ndbg("ERROR: Failed to create periodic poll timer\n");
+      nerr("ERROR: Failed to create periodic poll timer\n");
       ret = -EAGAIN;
       goto errout;
     }
@@ -3509,7 +3690,7 @@ int sam_emac_initialize(void)
   priv->txtimeout = wd_create();         /* Create TX timeout timer */
   if (!priv->txtimeout)
     {
-      ndbg("ERROR: Failed to create periodic poll timer\n");
+      nerr("ERROR: Failed to create periodic poll timer\n");
       ret = -EAGAIN;
       goto errout_with_txpoll;
     }
@@ -3523,7 +3704,7 @@ int sam_emac_initialize(void)
   ret = sam_buffer_initialize(priv);
   if (ret < 0)
     {
-      ndbg("ERROR: sam_buffer_initialize failed: %d\n", ret);
+      nerr("ERROR: sam_buffer_initialize failed: %d\n", ret);
       goto errout_with_txtimeout;
     }
 
@@ -3531,10 +3712,10 @@ int sam_emac_initialize(void)
    * the interface is in the 'up' state.
    */
 
-  ret = irq_attach(SAM_IRQ_EMAC, sam_emac_interrupt);
+  ret = irq_attach(SAM_IRQ_EMAC, sam_emac_interrupt, NULL);
   if (ret < 0)
     {
-      ndbg("ERROR: Failed to attach the handler to the IRQ%d\n", SAM_IRQ_EMAC);
+      nerr("ERROR: Failed to attach the handler to the IRQ%d\n", SAM_IRQ_EMAC);
       goto errout_with_buffers;
     }
 
@@ -3547,7 +3728,7 @@ int sam_emac_initialize(void)
   ret = sam_ifdown(&priv->dev);
   if (ret < 0)
     {
-      ndbg("ERROR: Failed to put the interface in the down state: %d\n", ret);
+      nerr("ERROR: Failed to put the interface in the down state: %d\n", ret);
       goto errout_with_buffers;
     }
 
@@ -3559,7 +3740,7 @@ int sam_emac_initialize(void)
       return ret;
     }
 
-  ndbg("ERROR: netdev_register() failed: %d\n", ret);
+  nerr("ERROR: netdev_register() failed: %d\n", ret);
 
 errout_with_buffers:
   sam_buffer_free(priv);

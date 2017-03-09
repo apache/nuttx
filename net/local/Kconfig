@@ -9,6 +9,7 @@ menu "Unix Domain Socket Support"
 config NET_LOCAL
 	bool "Unix domain (local) sockets"
 	default n
+	select PIPES
 	---help---
 		Enable or disable Unix domain (aka Local) sockets.
 

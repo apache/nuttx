@@ -92,7 +92,7 @@ int up_shmat(FAR uintptr_t *pages, unsigned int npages, uintptr_t vaddr)
   unsigned int nmapped;
   unsigned int shmndx;
 
-  shmvdbg("pages=%p npages=%d vaddr=%08lx\n",
+  shminfo("pages=%p npages=%d vaddr=%08lx\n",
           pages, npages, (unsigned long)vaddr);
 
   /* Sanity checks */
@@ -241,7 +241,7 @@ int up_shmdt(uintptr_t vaddr, unsigned int npages)
   unsigned int nunmapped;
   unsigned int shmndx;
 
-  shmvdbg("npages=%d vaddr=%08lx\n", npages, (unsigned long)vaddr);
+  shminfo("npages=%d vaddr=%08lx\n", npages, (unsigned long)vaddr);
 
   /* Sanity checks */
 

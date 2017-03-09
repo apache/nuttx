@@ -46,7 +46,7 @@
 #include <stdint.h>
 
 #include "chip.h"
-#include "chip/stm32_otgfs.h"
+#include "chip/stm32fxxxxx_otgfs.h"
 #include "chip/stm32_otghs.h"
 
 #if (defined(CONFIG_STM32_OTGFS) || defined(CONFIG_STM32_OTGHS)) && defined(CONFIG_USBHOST)
@@ -236,7 +236,7 @@ enum usbhost_trace1codes_e
  *    want to do that?
  *
  *  CONFIG_STM32_USBHOST_REGDEBUG - Enable very low-level register access
- *    debug.  Depends on CONFIG_DEBUG.
+ *    debug.  Depends on CONFIG_DEBUG_FEATURES.
  */
 
 /************************************************************************************

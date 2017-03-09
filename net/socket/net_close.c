@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/socket/net_close.c
  *
- *   Copyright (C) 2007-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,6 +49,8 @@
 #include <assert.h>
 
 #include <arch/irq.h>
+
+#include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/tcp.h>
@@ -161,7 +163,7 @@ static uint16_t netclose_interrupt(FAR struct net_driver_s *dev,
 
   DEBUGASSERT(conn != NULL);
 
-  nllvdbg("conn: %p flags: %04x\n", conn, flags);
+  ninfo("conn: %p flags: %04x\n", conn, flags);
 
   /* TCP_DISCONN_EVENTS:
    *   TCP_CLOSE:    The remote host has closed the connection
@@ -209,7 +211,7 @@ static uint16_t netclose_interrupt(FAR struct net_driver_s *dev,
     {
       /* Yes.. Wake up the waiting thread and report the timeout */
 
-      nlldbg("CLOSE timeout\n");
+      nerr("ERROR: CLOSE timeout\n");
       pstate->cl_result = -ETIMEDOUT;
       goto end_wait;
     }
@@ -250,7 +252,7 @@ end_wait:
   pstate->cl_cb->event = NULL;
   sem_post(&pstate->cl_sem);
 
-  nllvdbg("Resuming\n");
+  ninfo("Resuming\n");
   return 0;
 #endif
 }
@@ -335,7 +337,6 @@ static inline int netclose_disconnect(FAR struct socket *psock)
 {
   struct tcp_close_s state;
   FAR struct tcp_conn_s *conn;
-  net_lock_t flags;
 #ifdef CONFIG_NET_SOLINGER
   bool linger;
 #endif
@@ -343,7 +344,7 @@ static inline int netclose_disconnect(FAR struct socket *psock)
 
   /* Interrupts are disabled here to avoid race conditions */
 
-  flags = net_lock();
+  net_lock();
   conn = (FAR struct tcp_conn_s *)psock->s_conn;
 
   /* If we have a semi-permanent write buffer callback in place, then
@@ -388,7 +389,13 @@ static inline int netclose_disconnect(FAR struct socket *psock)
 
           state.cl_psock     = psock;
           state.cl_result    = -EBUSY;
+
+          /* This semaphore is used for signaling and, hence, should not have
+           * priority inheritance enabled.
+           */
+
           sem_init(&state.cl_sem, 0, 0);
+          sem_setprotocol(&state.cl_sem, SEM_PRIO_NONE);
 
           /* Record the time that we started the wait (in ticks) */
 
@@ -441,7 +448,7 @@ static inline int netclose_disconnect(FAR struct socket *psock)
       tcp_free(conn);
     }
 
-  net_unlock(flags);
+  net_unlock();
   return ret;
 }
 #endif /* CONFIG_NET_TCP */
@@ -507,13 +514,13 @@ static void local_close(FAR struct socket *psock)
 
 int psock_close(FAR struct socket *psock)
 {
-  int err;
+  int errcode;
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
   if (!psock || psock->s_crefs <= 0)
     {
-      err = EBADF;
+      errcode = EBADF;
       goto errout;
     }
 
@@ -565,8 +572,8 @@ int psock_close(FAR struct socket *psock)
 
                       /* Break any current connections */
 
-                      err = netclose_disconnect(psock);
-                      if (err < 0)
+                      errcode = netclose_disconnect(psock);
+                      if (errcode < 0)
                         {
                           /* This would normally occur only if there is a
                            * timeout from a lingering close.
@@ -662,7 +669,7 @@ int psock_close(FAR struct socket *psock)
 #endif
 
           default:
-            err = EBADF;
+            errcode = EBADF;
             goto errout;
         }
     }
@@ -678,7 +685,7 @@ errout_with_psock:
 #endif
 
 errout:
-  set_errno(err);
+  set_errno(errcode);
   return ERROR;
 }
 

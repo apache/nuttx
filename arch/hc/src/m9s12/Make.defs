@@ -1,5 +1,5 @@
 ############################################################################
-# arch/arm/src/m9s12/Make.defs
+# arch/hc/src/m9s12/Make.defs
 #
 #   Copyright (C) 2009, 2011, 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -50,6 +50,6 @@ ifneq ($(CONFIG_SCHED_TICKLESS),y)
 CHIP_CSRCS += m9s12_timerisr.c
 endif
 
-ifeq ($(CONFIG_DEBUG_GPIO),y)
+ifeq ($(CONFIG_DEBUG_GPIO_INFO),y)
 CHIP_CSRCS+= m9s12_dumpgpio.c
 endif

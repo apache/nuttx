@@ -66,12 +66,11 @@
 
 int net_clone(FAR struct socket *psock1, FAR struct socket *psock2)
 {
-  net_lock_t flags;
   int ret = OK;
 
   /* Parts of this operation need to be atomic */
 
-  flags = net_lock();
+  net_lock();
 
   /* Duplicate the socket state */
 
@@ -116,11 +115,11 @@ int net_clone(FAR struct socket *psock1, FAR struct socket *psock2)
   else
 #endif
     {
-      ndbg("Unsupported type: %d\n", psock2->s_type);
+      nerr("ERROR: Unsupported type: %d\n", psock2->s_type);
       ret = -EBADF;
     }
 
-  net_unlock(flags);
+  net_unlock();
   return ret;
 }
 

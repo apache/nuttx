@@ -71,26 +71,6 @@
 #  error "CONFIG_SPI_EXCHANGE must not be defined in the configuration"
 #endif
 
-/* Debug ********************************************************************/
-/* The following enable debug output from this file:
- *
- * CONFIG_DEBUG         - Define to enable general debug features
- * CONFIG_DEBUG_SPI     - Define to enable basic SSP debug (needs CONFIG_DEBUG)
- * CONFIG_DEBUG_VERBOSE - Define to enable verbose SSP debug
- */
-
-#ifdef CONFIG_DEBUG_SPI
-#  define spidbg  lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
-#    define spivdbg lldbg
-#  else
-#    define spivdbg(x...)
-#  endif
-#else
-#  define spidbg(x...)
-#  define spivdbg(x...)
-#endif
-
 /* SSP Clocking *************************************************************/
 /* The CPU clock by 1, 2, 4, or 8 to get the SPI peripheral clock (SPI_CLOCK).
  * SPI_CLOCK may be further divided by 8-254 to get the SPI clock.  If we
@@ -287,7 +267,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
   priv->frequency = frequency;
   priv->actual    = actual;
 
-  spidbg("Frequency %d->%d\n", frequency, actual);
+  spiinfo("Frequency %d->%d\n", frequency, actual);
   return actual;
 }
 
@@ -449,7 +429,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
   FAR uint8_t *ptr = (FAR uint8_t *)buffer;
   uint8_t data;
 
-  spidbg("nwords: %d\n", nwords);
+  spiinfo("nwords: %d\n", nwords);
   while (nwords)
     {
       /* Write the data to transmitted to the SPI Data Register */
@@ -494,7 +474,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
 {
   FAR uint8_t *ptr = (FAR uint8_t *)buffer;
 
-  spidbg("nwords: %d\n", nwords);
+  spiinfo("nwords: %d\n", nwords);
   while (nwords)
     {
       /* Write some dummy data to the SPI Data Register in order to clock the

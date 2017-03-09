@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/olimex-lpc-h3131/src/lpc31_usbhost.c
  *
- *   Copyright (C) 2013, 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2015-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -104,7 +104,7 @@ static int ehci_waiter(int argc, char *argv[])
 {
   FAR struct usbhost_hubport_s *hport;
 
-  uvdbg("ehci_waiter:  Running\n");
+  uinfo("ehci_waiter:  Running\n");
   for (;;)
     {
       /* Wait for the device to change state */
@@ -195,7 +195,7 @@ int lpc31_usbhost_initialize(void)
   ret = usbhost_msc_initialize();
   if (ret != OK)
     {
-      udbg("ERROR: Failed to register the mass storage class: %d\n", ret);
+      uerr("ERROR: Failed to register the mass storage class: %d\n", ret);
     }
 #endif
 
@@ -205,7 +205,7 @@ int lpc31_usbhost_initialize(void)
   ret = usbhost_cdcacm_initialize();
   if (ret != OK)
     {
-      udbg("ERROR: Failed to register the CDC/ACM serial class\n");
+      uerr("ERROR: Failed to register the CDC/ACM serial class\n");
     }
 #endif
 
@@ -215,7 +215,7 @@ int lpc31_usbhost_initialize(void)
   ret = usbhost_kbdinit();
   if (ret != OK)
     {
-      udbg("ERROR: Failed to register the KBD class\n");
+      uerr("ERROR: Failed to register the KBD class\n");
     }
 #endif
 
@@ -224,7 +224,7 @@ int lpc31_usbhost_initialize(void)
   g_ehciconn = lpc31_ehci_initialize(0);
   if (!g_ehciconn)
     {
-      udbg("ERROR: lpc31_ehci_initialize failed\n");
+      uerr("ERROR: lpc31_ehci_initialize failed\n");
       return -ENODEV;
     }
 
@@ -234,7 +234,7 @@ int lpc31_usbhost_initialize(void)
                     (main_t)ehci_waiter, (FAR char * const *)NULL);
   if (pid < 0)
     {
-      udbg("ERROR: Failed to create ehci_waiter task: %d\n", ret);
+      uerr("ERROR: Failed to create ehci_waiter task: %d\n", ret);
       return -ENODEV;
     }
 
@@ -261,7 +261,7 @@ int lpc31_usbhost_initialize(void)
 
 void lpc31_usbhost_vbusdrive(int rhport, bool enable)
 {
-  uvdbg("RHPort%d: enable=%d\n", rhport+1, enable);
+  uinfo("RHPort%d: enable=%d\n", rhport+1, enable);
 
   /* The LPC3131 has only a single root hub port */
 
@@ -293,16 +293,16 @@ void lpc31_usbhost_vbusdrive(int rhport, bool enable)
  *
  * Input parameter:
  *   handler - New overcurrent interrupt handler
+ *   arg     - The argument that will accompany the interrupt
  *
  * Returned value:
- *   Old overcurrent interrupt handler
+ *   Zero (OK) returned on success; a negated errno value is returned on failure.
  *
  ************************************************************************************/
 
 #if 0 /* Not ready yet */
-xcpt_t lpc31_setup_overcurrent(xcpt_t handler)
+int lpc31_setup_overcurrent(xcpt_t handler, void *arg)
 {
-  xcpt_t oldhandler;
   irqstate_t flags;
 
   /* Disable interrupts until we are done.  This guarantees that the
@@ -311,15 +311,8 @@ xcpt_t lpc31_setup_overcurrent(xcpt_t handler)
 
   flags = enter_critical_section();
 
-  /* Get the old button interrupt handler and save the new one */
-
-  oldhandler  = g_ochandler;
-  g_ochandler = handler;
-
   /* Configure the interrupt */
 #warning Missing logic
-
-  /* Return the old button handler (so that it can be restored) */
 
   leave_critical_section(flags);
   return oldhandler;

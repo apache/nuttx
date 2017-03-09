@@ -51,10 +51,6 @@ ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
 CMN_CSRCS += up_ramvec_initialize.c up_ramvec_attach.c
 endif
 
-ifeq ($(CONFIG_ARCH_MEMCPY),y)
-CMN_ASRCS += up_memcpy.S
-endif
-
 ifeq ($(CONFIG_STACK_COLORATION),y)
 CMN_CSRCS += up_checkstack.c
 endif
@@ -69,16 +65,13 @@ else
 CMN_CSRCS += up_allocateheap.c
 endif
 
-ifeq ($(CONFIG_ELF),y)
-CMN_CSRCS += up_elf.c
-else ifeq ($(CONFIG_MODULE),y)
-CMN_CSRCS += up_elf.c
-endif
-
 CHIP_ASRCS  =
 CHIP_CSRCS  = tiva_allocateheap.c tiva_start.c tiva_irq.c tiva_gpio.c
 CHIP_CSRCS += tiva_gpioirq.c tiva_lowputc.c tiva_serial.c tiva_ssi.c
+
+ifeq ($(CONFIG_DEBUG_GPIO_INFO),y)
 CHIP_CSRCS += tiva_dumpgpio.c
+endif
 
 ifeq ($(CONFIG_ARCH_CHIP_TM4C129),y)
 CHIP_CSRCS += tm4c129_syscontrol.c
@@ -96,6 +89,14 @@ endif
 
 ifeq ($(CONFIG_TIVA_I2C),y)
 CHIP_CSRCS += tiva_i2c.c
+endif
+
+ifeq ($(CONFIG_TIVA_PWM),y)
+CHIP_CSRCS += tiva_pwm.c
+endif
+
+ifeq ($(CONFIG_TIVA_QEI),y)
+CHIP_CSRCS += tiva_qencoder.c
 endif
 
 ifeq ($(CONFIG_TIVA_TIMER),y)

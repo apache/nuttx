@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z80/src/ez80/ez80_registerdump.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,13 +39,6 @@
 
 #include <nuttx/config.h>
 
-/* Output debug info -- even if debug is not selected. */
-
-#undef  CONFIG_DEBUG
-#undef  CONFIG_DEBUG_VERBOSE
-#define CONFIG_DEBUG 1
-#define CONFIG_DEBUG_VERBOSE 1
-
 #include <debug.h>
 
 #include <nuttx/irq.h>
@@ -77,22 +70,22 @@ static void ez80_registerdump(void)
   if (g_current_regs)
     {
 #ifdef CONFIG_EZ80_Z80MODE
-      lldbg("AF: %04x  I: %04x\n",
+      _alert("AF: %04x  I: %04x\n",
             g_current_regs[XCPT_AF], g_current_regs[XCPT_I]);
-      lldbg("BC: %04x DE: %04x HL: %04x\n",
+      _alert("BC: %04x DE: %04x HL: %04x\n",
             g_current_regs[XCPT_BC], g_current_regs[XCPT_DE], g_current_regs[XCPT_HL]);
-      lldbg("IX: %04x IY: %04x\n",
+      _alert("IX: %04x IY: %04x\n",
             g_current_regs[XCPT_IX], g_current_regs[XCPT_IY]);
-      lldbg("SP: %04x PC: %04x\n"
+      _alert("SP: %04x PC: %04x\n"
             g_current_regs[XCPT_SP], g_current_regs[XCPT_PC]);
 #else
-      lldbg("AF: %06x  I: %06x\n",
+      _alert("AF: %06x  I: %06x\n",
             g_current_regs[XCPT_AF], g_current_regs[XCPT_I]);
-      lldbg("BC: %06x DE: %06x HL: %06x\n",
+      _alert("BC: %06x DE: %06x HL: %06x\n",
             g_current_regs[XCPT_BC], g_current_regs[XCPT_DE], g_current_regs[XCPT_HL]);
-      lldbg("IX: %06x IY: %06x\n",
+      _alert("IX: %06x IY: %06x\n",
             g_current_regs[XCPT_IX], g_current_regs[XCPT_IY]);
-      lldbg("SP: %06x PC: %06x\n"
+      _alert("SP: %06x PC: %06x\n"
             g_current_regs[XCPT_SP], g_current_regs[XCPT_PC]);
 #endif
     }

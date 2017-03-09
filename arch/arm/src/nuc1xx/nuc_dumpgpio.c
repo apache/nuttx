@@ -49,14 +49,13 @@
 #include "chip.h"
 #include "nuc_gpio.h"
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_GPIO_INFO
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 /* Port letters for prettier debug output */
 
-#ifdef CONFIG_DEBUG
 static const char g_portchar[NUC_GPIO_NPORTS] =
 {
 #if NUC_GPIO_NPORTS > 9
@@ -83,15 +82,6 @@ static const char g_portchar[NUC_GPIO_NPORTS] =
 #  error "Bad number of GPIOs"
 #endif
 };
-#endif
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -124,22 +114,22 @@ void nuc_dumpgpio(gpio_cfgset_t pinset, const char *msg)
 
   flags = enter_critical_section();
 
-  lldbg("GPIO%c pinset: %08x base: %08x -- %s\n",
-        g_portchar[port], pinset, base, msg);
-  lldbg("  PMD: %08x  OFFD: %08x  DOUT: %08x DMASK: %08x\n",
-        getreg32(base + NUC_GPIO_PMD_OFFSET),
-        getreg32(base + NUC_GPIO_OFFD_OFFSET),
-        getreg32(base + NUC_GPIO_DOUT_OFFSET),
-        getreg32(base + NUC_GPIO_DMASK_OFFSET));
-  lldbg("  PIN: %08x  DBEN: %08x   IMD: %08x   IEN: %08x\n",
-        getreg32(base + NUC_GPIO_PIN_OFFSET),
-        getreg32(base + NUC_GPIO_DBEN_OFFSET),
-        getreg32(base + NUC_GPIO_IMD_OFFSET),
-        getreg32(base + NUC_GPIO_IEN_OFFSET));
-  lldbg(" ISRC: %08x\n",
-        getreg32(base + NUC_GPIO_ISRC_OFFSET));
+  gpioinfo("GPIO%c pinset: %08x base: %08x -- %s\n",
+           g_portchar[port], pinset, base, msg);
+  gpioinfo("  PMD: %08x  OFFD: %08x  DOUT: %08x DMASK: %08x\n",
+           getreg32(base + NUC_GPIO_PMD_OFFSET),
+           getreg32(base + NUC_GPIO_OFFD_OFFSET),
+           getreg32(base + NUC_GPIO_DOUT_OFFSET),
+           getreg32(base + NUC_GPIO_DMASK_OFFSET));
+  gpioinfo("  PIN: %08x  DBEN: %08x   IMD: %08x   IEN: %08x\n",
+           getreg32(base + NUC_GPIO_PIN_OFFSET),
+           getreg32(base + NUC_GPIO_DBEN_OFFSET),
+           getreg32(base + NUC_GPIO_IMD_OFFSET),
+           getreg32(base + NUC_GPIO_IEN_OFFSET));
+  gpioinfo(" ISRC: %08x\n",
+           getreg32(base + NUC_GPIO_ISRC_OFFSET));
 
   leave_critical_section(flags);
 }
 
-#endif /* CONFIG_DEBUG */
+#endif /* CONFIG_DEBUG_GPIO_INFO */

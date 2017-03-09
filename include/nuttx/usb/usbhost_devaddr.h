@@ -40,8 +40,8 @@
  *
  ****************************************************************************/
 
-#ifndef _INCLUDE_NUTTX_USB_USBHOST_DEVADDR_H
-#define _INCLUDE_NUTTX_USB_USBHOST_DEVADDR_H
+#ifndef __INCLUDE_NUTTX_USB_USBHOST_DEVADDR_H
+#define __INCLUDE_NUTTX_USB_USBHOST_DEVADDR_H
 
 /****************************************************************************
  * Included Files
@@ -151,4 +151,4 @@ void usbhost_devaddr_destroy(FAR struct usbhost_hubport_s *hport,
 }
 #endif
 
-#endif /* _INCLUDE_NUTTX_USB_USBHOST_DEVADDR_H */
+#endif /* __INCLUDE_NUTTX_USB_USBHOST_DEVADDR_H */

@@ -78,20 +78,19 @@ FAR struct net_driver_s *netdev_findbyindex(int index)
 {
 #ifdef CONFIG_NETDEV_MULTINIC
   FAR struct net_driver_s *dev;
-  net_lock_t save;
   int i;
 
-  save = net_lock();
+  net_lock();
   for (i = 0, dev = g_netdevices; dev; i++, dev = dev->flink)
     {
       if (i == index)
         {
-          net_unlock(save);
+          net_unlock();
           return dev;
         }
     }
 
-  net_unlock(save);
+  net_unlock();
   return NULL;
 #else
   return (index == 0) ? g_netdevices : NULL;

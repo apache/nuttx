@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/stdio/lib_libfwrite.c
  *
- *   Copyright (C) 2007-2009, 2011, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2013-2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,34 +49,6 @@
 #include "libc.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Public Constant Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Constant Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -85,7 +57,7 @@
  ****************************************************************************/
 
 ssize_t lib_fwrite(FAR const void *ptr, size_t count, FAR FILE *stream)
-#if CONFIG_STDIO_BUFFER_SIZE > 0
+#ifndef CONFIG_STDIO_DISABLE_BUFFERING
 {
   FAR const unsigned char *start = ptr;
   FAR const unsigned char *src   = ptr;
@@ -100,11 +72,21 @@ ssize_t lib_fwrite(FAR const void *ptr, size_t count, FAR FILE *stream)
       return ret;
     }
 
+  /* Check if write access is permitted */
+
   if ((stream->fs_oflags & O_WROK) == 0)
     {
       set_errno(EBADF);
       goto errout;
     }
+
+  /* If there is no I/O buffer, then output data immediately */
+
+  if (stream->fs_bufstart == NULL)
+   {
+     ret = write(stream->fs_fd, ptr, count);
+     goto errout;
+   }
 
   /* Get exclusive access to the stream */
 
@@ -170,7 +152,7 @@ ssize_t lib_fwrite(FAR const void *ptr, size_t count, FAR FILE *stream)
 
   /* Return the number of bytes written */
 
-  ret = src - start;
+  ret = (uintptr_t)src - (uintptr_t)start;
 
 errout_with_semaphore:
   lib_give_semaphore(stream);
@@ -193,4 +175,4 @@ errout:
 
   return ret;
 }
-#endif /* CONFIG_STDIO_BUFFER_SIZE */
+#endif /* CONFIG_STDIO_DISABLE_BUFFERING */

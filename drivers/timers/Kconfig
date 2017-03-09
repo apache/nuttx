@@ -5,13 +5,21 @@
 
 menu "Timer Driver Support"
 
-menuconfig TIMER
+config TIMER
 	bool "Timer Support"
 	default n
 	---help---
 		This selection enables building of the "upper-half" timer
 		driver. See include/nuttx/timers/timer.h for further timer driver
 		information.
+
+config ONESHOT
+	bool "Oneshot timer driver"
+	default n
+	---help---
+		This selection enables building of the "upper-half" oneshot timer
+		driver. See include/nuttx/timers/oneshot.h for further oneshot timer
+		driver information.
 
 menuconfig RTC
 	bool "RTC Driver Support"
@@ -237,11 +245,11 @@ if TIMERS_CS2100CP
 
 config CS2100CP_DEBUG
 	bool "Enable CS2100-CP Debug Features"
-	depends on DEBUG
+	depends on DEBUG_FEATURES
 
 config CS2100CP_REGDEBUG
 	bool "Enable CS2100-CP Register Debug"
-	depends on DEBUG
+	depends on DEBUG_FEATURES
 
 endif # TIMERS_CS2100CP
 endmenu  # Timer Driver Support

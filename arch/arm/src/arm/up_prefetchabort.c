@@ -1,7 +1,7 @@
 /****************************************************************************
  *  arch/arm/src/arm/up_prefetchabort.c
  *
- *   Copyright (C) 2007-2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2011, 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,17 +38,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-/* Output debug info if stack dump is selected -- even if debug is not
- * selected.
- */
-
-#ifdef CONFIG_ARCH_STACKDUMP
-# undef  CONFIG_DEBUG
-# undef  CONFIG_DEBUG_VERBOSE
-# define CONFIG_DEBUG 1
-# define CONFIG_DEBUG_VERBOSE 1
-#endif
 
 #include <stdint.h>
 #include <debug.h>
@@ -110,8 +99,8 @@ void up_prefetchabort(uint32_t *regs)
    * virtual addresses.
    */
 
-  pglldbg("VADDR: %08x VBASE: %08x VEND: %08x\n",
-          regs[REG_PC], PG_PAGED_VBASE, PG_PAGED_VEND);
+  pginfo("VADDR: %08x VBASE: %08x VEND: %08x\n",
+         regs[REG_PC], PG_PAGED_VBASE, PG_PAGED_VEND);
 
   if (regs[REG_R15] >= PG_PAGED_VBASE && regs[REG_R15] < PG_PAGED_VEND)
     {
@@ -148,7 +137,7 @@ void up_prefetchabort(uint32_t *regs)
   else
 #endif
     {
-      lldbg("Prefetch abort. PC: %08x\n", regs[REG_PC]);
+      _alert("Prefetch abort. PC: %08x\n", regs[REG_PC]);
       PANIC();
     }
 }

@@ -118,7 +118,8 @@ struct stm32_config_s
  *   wl_read_irq        - Return the state of the interrupt GPIO input
  */
 
-static int  wl_attach_irq(FAR struct cc3000_config_s *state, xcpt_t handler);
+static int  wl_attach_irq(FAR struct cc3000_config_s *state, xcpt_t handler,
+                          FAR void *arg);
 static void wl_enable_irq(FAR struct cc3000_config_s *state, bool enable);
 static void wl_clear_irq(FAR struct cc3000_config_s *state);
 static void wl_select(FAR struct cc3000_config_s *state, bool enable);
@@ -157,6 +158,7 @@ static struct stm32_config_s g_cc3000_info =
   .dev.probe            = probe, /* This is used for debugging */
 #endif
   .handler              = NULL,
+  .arg                  = NULL,
 };
 
 /****************************************************************************
@@ -175,13 +177,15 @@ static struct stm32_config_s g_cc3000_info =
  * pendown - Return the state of the pen down GPIO input
  */
 
-static int wl_attach_irq(FAR struct cc3000_config_s *state, xcpt_t handler)
+static int wl_attach_irq(FAR struct cc3000_config_s *state, xcpt_t handler,
+                         FAR void *arg)
 {
   FAR struct stm32_config_s *priv = (FAR struct stm32_config_s *)state;
 
   /* Just save the handler for use when the interrupt is enabled */
 
   priv->handler = handler;
+  priv->arg     = arg;
   return OK;
 }
 
@@ -197,20 +201,22 @@ static void wl_enable_irq(FAR struct cc3000_config_s *state, bool enable)
 
   /* Attach and enable, or detach and disable */
 
-  ivdbg("enable:%d\n", enable);
+  iinfo("enable:%d\n", enable);
   if (enable)
     {
-      (void)stm32_gpiosetevent(GPIO_WIFI_INT, false, true, false, priv->handler);
+      (void)stm32_gpiosetevent(GPIO_WIFI_INT, false, true, false,
+                               priv->handler, priv->arg);
     }
   else
     {
-      (void)stm32_gpiosetevent(GPIO_WIFI_INT, false, false, false, NULL);
+      (void)stm32_gpiosetevent(GPIO_WIFI_INT, false, false, false,
+                               NULL, NULL);
     }
 }
 
 static void wl_enable_power(FAR struct cc3000_config_s *state, bool enable)
 {
-  ivdbg("enable:%d\n", enable);
+  iinfo("enable:%d\n", enable);
 
   /* Active high enable */
 
@@ -219,7 +225,7 @@ static void wl_enable_power(FAR struct cc3000_config_s *state, bool enable)
 
 static void wl_select(FAR struct cc3000_config_s *state, bool enable)
 {
-  ivdbg("enable:%d\n", enable);
+  iinfo("enable:%d\n", enable);
 
   /* Active high enable */
 
@@ -280,7 +286,7 @@ int wireless_archinitialize(size_t max_rx_size)
 
   /* Init SPI bus */
 
-  idbg("minor %d\n", minor);
+  iinfo("minor %d\n", minor);
   DEBUGASSERT(CONFIG_CC3000_DEVMINOR == 0);
 
 #ifdef CONFIG_CC3000_PROBES
@@ -295,7 +301,7 @@ int wireless_archinitialize(size_t max_rx_size)
   spi = stm32_spibus_initialize(CONFIG_CC3000_SPIDEV);
   if (!spi)
     {
-      idbg("Failed to initialize SPI bus %d\n", CONFIG_CC3000_SPIDEV);
+      ierr("ERROR: Failed to initialize SPI bus %d\n", CONFIG_CC3000_SPIDEV);
       return -ENODEV;
     }
 
@@ -305,7 +311,7 @@ int wireless_archinitialize(size_t max_rx_size)
   int ret = cc3000_register(spi, &g_cc3000_info.dev, CONFIG_CC3000_DEVMINOR);
   if (ret < 0)
     {
-      idbg("Failed to initialize SPI bus %d\n", CONFIG_CC3000_SPIDEV);
+      ierr("ERROR: Failed to initialize SPI bus %d\n", CONFIG_CC3000_SPIDEV);
       return -ENODEV;
     }
 

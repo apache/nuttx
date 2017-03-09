@@ -1,7 +1,7 @@
 /****************************************************************************
  * nuttx/graphics/nxterm/nxterm.h
  *
- *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __GRAPHICS_NXTERM_NXTERM_INTERNAL_H
-#define __GRAPHICS_NXTERM_NXTERM_INTERNAL_H
+#ifndef __GRAPHICS_NXTERM_NXTERM_H
+#define __GRAPHICS_NXTERM_NXTERM_H
 
 /****************************************************************************
  * Included Files
@@ -61,10 +61,6 @@
 #define BMFLAGS_NOGLYPH    (1 << 0) /* No glyph available, use space */
 #define BM_ISSPACE(bm)     (((bm)->flags & BMFLAGS_NOGLYPH) != 0)
 
-/* Sizes and maximums */
-
-#define MAX_USECNT         255  /* Limit to range of a uint8_t */
-
 /* Device path formats */
 
 #define NX_DEVNAME_FORMAT  "/dev/nxterm%d"
@@ -81,6 +77,7 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
 /* Identifies the state of the VT100 escape sequence processing */
 
 enum nxterm_vt100state_e
@@ -111,18 +108,6 @@ struct nxterm_operations_s
                 unsigned int stride);
 };
 
-/* Describes one cached glyph bitmap */
-
-struct nxterm_glyph_s
-{
-  uint8_t code;                        /* Character code */
-  uint8_t height;                      /* Height of this glyph (in rows) */
-  uint8_t width;                       /* Width of this glyph (in pixels) */
-  uint8_t stride;                      /* Width of the glyph row (in bytes) */
-  uint8_t usecnt;                      /* Use count */
-  FAR uint8_t *bitmap;                 /* Allocated bitmap memory */
-};
-
 /* Describes on character on the display */
 
 struct nxterm_bitmap_s
@@ -138,10 +123,9 @@ struct nxterm_state_s
 {
   FAR const struct nxterm_operations_s *ops; /* Window operations */
   FAR void *handle;                         /* The window handle */
-  FAR struct nxterm_window_s wndo;           /* Describes the window and font */
-  NXHANDLE font;                            /* The current font handle */
+  FAR struct nxterm_window_s wndo;          /* Describes the window and font */
   sem_t exclsem;                            /* Forces mutually exclusive access */
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   pid_t holder;                             /* Deadlock avoidance */
 #endif
   uint8_t minor;                            /* Device minor number */
@@ -151,7 +135,6 @@ struct nxterm_state_s
   uint8_t fheight;                          /* Max height of a font in pixels */
   uint8_t fwidth;                           /* Max width of a font in pixels */
   uint8_t spwidth;                          /* The width of a space */
-  uint8_t maxglyphs;                        /* Size of the glyph[] array */
 
   uint16_t maxchars;                        /* Size of the bm[] array */
   uint16_t nchars;                          /* Number of chars in the bm[] array */
@@ -165,12 +148,9 @@ struct nxterm_state_s
 
   /* Font cache data storage */
 
+  FCACHE fcache;                            /* Font cache handle */
   struct nxterm_bitmap_s cursor;
   struct nxterm_bitmap_s bm[CONFIG_NXTERM_MXCHARS];
-
-  /* Glyph cache data storage */
-
-  struct nxterm_glyph_s  glyph[CONFIG_NXTERM_CACHESIZE];
 
   /* Keyboard input support */
 
@@ -206,7 +186,7 @@ extern const struct file_operations g_nxterm_drvrops;
  ****************************************************************************/
 /* Semaphore helpers */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 int nxterm_semwait(FAR struct nxterm_state_s *priv);
 int nxterm_sempost(FAR struct nxterm_state_s *priv);
 #else
@@ -235,8 +215,8 @@ enum nxterm_vt100state_e nxterm_vt100(FAR struct nxterm_state_s *priv, char ch);
 
 void nxterm_home(FAR struct nxterm_state_s *priv);
 void nxterm_newline(FAR struct nxterm_state_s *priv);
-FAR const struct nxterm_bitmap_s *nxterm_addchar(NXHANDLE hfont,
-    FAR struct nxterm_state_s *priv, uint8_t ch);
+FAR const struct nxterm_bitmap_s *nxterm_addchar(FAR struct nxterm_state_s *priv,
+    uint8_t ch);
 int nxterm_hidechar(FAR struct nxterm_state_s *priv,
     FAR const struct nxterm_bitmap_s *bm);
 int nxterm_backspace(FAR struct nxterm_state_s *priv);
@@ -251,4 +231,4 @@ void nxterm_hidecursor(FAR struct nxterm_state_s *priv);
 
 void nxterm_scroll(FAR struct nxterm_state_s *priv, int scrollheight);
 
-#endif /* __GRAPHICS_NXTERM_NXTERM_INTERNAL_H */
+#endif /* __GRAPHICS_NXTERM_NXTERM_H */

@@ -1,7 +1,7 @@
 //***************************************************************************
 // include/cxx/cstdio
 //
-//   Copyright (C) 2009, 2014 Gregory Nutt. All rights reserved.
+//   Copyright (C) 2009, 2014, 2017 Gregory Nutt. All rights reserved.
 //   Author: Gregory Nutt <gnutt@nuttx.org>
 //
 // Redistribution and use in source and binary forms, with or without
@@ -69,12 +69,15 @@ namespace std
   using ::fputc;
   using ::fputs;
   using ::fread;
+  using ::freopen;
   using ::fseek;
   using ::fsetpos;
   using ::ftell;
   using ::fwrite;
   using ::gets;
   using ::gets_s;
+  using ::setbuf;
+  using ::setvbuf;
   using ::ungetc;
 
   // Operations on the stdout stream, buffers, paths, and the whole printf-family
@@ -105,6 +108,7 @@ namespace std
 
   using ::tmpnam;
   using ::tempnam;
+  using ::remove;
 }
 
 #endif // __INCLUDE_CXX_CSTDIO

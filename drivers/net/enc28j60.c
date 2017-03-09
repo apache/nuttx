@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/net/enc28j60.c
  *
- *   Copyright (C) 2010-2012, 2014-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2012, 2014-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -115,8 +115,16 @@
 
 /* We need to have the work queue to handle SPI interrupts */
 
-#ifndef CONFIG_SCHED_WORKQUEUE
+#if !defined(CONFIG_SCHED_WORKQUEUE)
 #  error "Worker thread support is required (CONFIG_SCHED_WORKQUEUE)"
+#else
+#  if defined(CONFIG_ENC28J60_HPWORK)
+#    define ENCWORK HPWORK
+#  elif defined(CONFIG_ENC28J60_LPWORK)
+#    define ENCWORK LPWORK
+#  else
+#    error "Neither CONFIG_ENC28J60_HPWORK nor CONFIG_ENC28J60_LPWORK defined"
+#  endif
 #endif
 
 /* CONFIG_ENC28J60_DUMPPACKET will dump the contents of each packet to the console. */
@@ -127,15 +135,9 @@
 #  define enc_dumppacket(m,a,n)
 #endif
 
-/* The ENC28J60 will not do interrupt level processing */
-
-#ifndef CONFIG_NET_NOINTS
-#  warrning "CONFIG_NET_NOINTS should be set"
-#endif
-
 /* Low-level register debug */
 
-#if !defined(CONFIG_DEBUG) || !defined(CONFIG_DEBUG_NET)
+#if !defined(CONFIG_DEBUG_FEATURES) || !defined(CONFIG_DEBUG_NET)
 #  undef CONFIG_ENC28J60_REGDEBUG
 #endif
 
@@ -195,13 +197,13 @@
 
 #ifdef CONFIG_ENC28J60_REGDEBUG
 #  define enc_wrdump(a,v) \
-   lowsyslog(LOG_DEBUG, "ENC28J60: %02x<-%02x\n", a, v);
+   syslog(LOG_DEBUG, "ENC28J60: %02x<-%02x\n", a, v);
 #  define enc_rddump(a,v) \
-   lowsyslog(LOG_DEBUG, "ENC28J60: %02x->%02x\n", a, v);
+   syslog(LOG_DEBUG, "ENC28J60: %02x->%02x\n", a, v);
 #  define enc_cmddump(c) \
-   lowsyslog(LOG_DEBUG, "ENC28J60: CMD: %02x\n", c);
+   syslog(LOG_DEBUG, "ENC28J60: CMD: %02x\n", c);
 #  define enc_bmdump(c,b,s) \
-   lowsyslog(LOG_DEBUG, "ENC28J60: CMD: %02x buffer: %p length: %d\n", c, b, s);
+   syslog(LOG_DEBUG, "ENC28J60: CMD: %02x buffer: %p length: %d\n", c, b, s);
 #else
 #  define enc_wrdump(a,v)
 #  define enc_rddump(a,v)
@@ -261,6 +263,12 @@ struct enc_driver_s
  * Private Data
  ****************************************************************************/
 
+/* A single packet buffer is used */
+
+static uint8_t g_pktbuf[MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE];
+
+/* Driver status structure */
+
 static struct enc_driver_s g_enc28j60[CONFIG_ENC28J60_NINTERFACES];
 
 /****************************************************************************
@@ -319,7 +327,7 @@ static void enc_rxerif(FAR struct enc_driver_s *priv);
 static void enc_rxdispatch(FAR struct enc_driver_s *priv);
 static void enc_pktif(FAR struct enc_driver_s *priv);
 static void enc_irqworker(FAR void *arg);
-static int  enc_interrupt(int irq, FAR void *context);
+static int  enc_interrupt(int irq, FAR void *context, FAR void *arg);
 
 /* Watchdog timer expirations */
 
@@ -774,56 +782,56 @@ static int enc_waitbreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg,
 #if 0 /* Sometimes useful */
 static void enc_rxdump(FAR struct enc_driver_s *priv)
 {
-  lowsyslog(LOG_DEBUG, "Rx Registers:\n");
-  lowsyslog(LOG_DEBUG, "  EIE:      %02x EIR:      %02x\n",
-            enc_rdgreg(priv, ENC_EIE), enc_rdgreg(priv, ENC_EIR));
-  lowsyslog(LOG_DEBUG, "  ESTAT:    %02x ECON1:    %02x ECON2:    %02x\n",
-            enc_rdgreg(priv, ENC_ESTAT), enc_rdgreg(priv, ENC_ECON1),
-            enc_rdgreg(priv, ENC_ECON2));
-  lowsyslog(LOG_DEBUG, "  ERXST:    %02x %02x\n",
-            enc_rdbreg(priv, ENC_ERXSTH), enc_rdbreg(priv, ENC_ERXSTL));
-  lowsyslog(LOG_DEBUG, "  ERXND:    %02x %02x\n",
-            enc_rdbreg(priv, ENC_ERXNDH), enc_rdbreg(priv, ENC_ERXNDL));
-  lowsyslog(LOG_DEBUG, "  ERXRDPT:  %02x %02x\n",
-            enc_rdbreg(priv, ENC_ERXRDPTH), enc_rdbreg(priv, ENC_ERXRDPTL));
-  lowsyslog(LOG_DEBUG, "  ERXFCON:  %02x EPKTCNT:  %02x\n",
-            enc_rdbreg(priv, ENC_ERXFCON), enc_rdbreg(priv, ENC_EPKTCNT));
-  lowsyslog(LOG_DEBUG, "  MACON1:   %02x MACON3:   %02x\n",
-            enc_rdbreg(priv, ENC_MACON1), enc_rdbreg(priv, ENC_MACON3));
-  lowsyslog(LOG_DEBUG, "  MAMXFL:   %02x %02x\n",
-            enc_rdbreg(priv, ENC_MAMXFLH), enc_rdbreg(priv, ENC_MAMXFLL));
-  lowsyslog(LOG_DEBUG, "  MAADR:    %02x:%02x:%02x:%02x:%02x:%02x\n",
-            enc_rdbreg(priv, ENC_MAADR1), enc_rdbreg(priv, ENC_MAADR2),
-            enc_rdbreg(priv, ENC_MAADR3), enc_rdbreg(priv, ENC_MAADR4),
-            enc_rdbreg(priv, ENC_MAADR5), enc_rdbreg(priv, ENC_MAADR6));
+  syslog(LOG_DEBUG, "Rx Registers:\n");
+  syslog(LOG_DEBUG, "  EIE:      %02x EIR:      %02x\n",
+         enc_rdgreg(priv, ENC_EIE), enc_rdgreg(priv, ENC_EIR));
+  syslog(LOG_DEBUG, "  ESTAT:    %02x ECON1:    %02x ECON2:    %02x\n",
+         enc_rdgreg(priv, ENC_ESTAT), enc_rdgreg(priv, ENC_ECON1),
+         enc_rdgreg(priv, ENC_ECON2));
+  syslog(LOG_DEBUG, "  ERXST:    %02x %02x\n",
+         enc_rdbreg(priv, ENC_ERXSTH), enc_rdbreg(priv, ENC_ERXSTL));
+  syslog(LOG_DEBUG, "  ERXND:    %02x %02x\n",
+         enc_rdbreg(priv, ENC_ERXNDH), enc_rdbreg(priv, ENC_ERXNDL));
+  syslog(LOG_DEBUG, "  ERXRDPT:  %02x %02x\n",
+         enc_rdbreg(priv, ENC_ERXRDPTH), enc_rdbreg(priv, ENC_ERXRDPTL));
+  syslog(LOG_DEBUG, "  ERXFCON:  %02x EPKTCNT:  %02x\n",
+         enc_rdbreg(priv, ENC_ERXFCON), enc_rdbreg(priv, ENC_EPKTCNT));
+  syslog(LOG_DEBUG, "  MACON1:   %02x MACON3:   %02x\n",
+         enc_rdbreg(priv, ENC_MACON1), enc_rdbreg(priv, ENC_MACON3));
+  syslog(LOG_DEBUG, "  MAMXFL:   %02x %02x\n",
+         enc_rdbreg(priv, ENC_MAMXFLH), enc_rdbreg(priv, ENC_MAMXFLL));
+  syslog(LOG_DEBUG, "  MAADR:    %02x:%02x:%02x:%02x:%02x:%02x\n",
+         enc_rdbreg(priv, ENC_MAADR1), enc_rdbreg(priv, ENC_MAADR2),
+         enc_rdbreg(priv, ENC_MAADR3), enc_rdbreg(priv, ENC_MAADR4),
+         enc_rdbreg(priv, ENC_MAADR5), enc_rdbreg(priv, ENC_MAADR6));
 }
 #endif
 
 #if 0 /* Sometimes useful */
 static void enc_txdump(FAR struct enc_driver_s *priv)
 {
-  lowsyslog(LOG_DEBUG, "Tx Registers:\n");
-  lowsyslog(LOG_DEBUG, "  EIE:      %02x EIR:      %02x\n",
-            enc_rdgreg(priv, ENC_EIE), enc_rdgreg(priv, ENC_EIR));
-  lowsyslog(LOG_DEBUG, "  ESTAT:    %02x ECON1:    %02x\n",
-            enc_rdgreg(priv, ENC_ESTAT), enc_rdgreg(priv, ENC_ECON1));
-  lowsyslog(LOG_DEBUG, "  ETXST:    %02x %02x\n",
-            enc_rdbreg(priv, ENC_ETXSTH), enc_rdbreg(priv, ENC_ETXSTL));
-  lowsyslog(LOG_DEBUG, "  ETXND:    %02x %02x\n",
-            enc_rdbreg(priv, ENC_ETXNDH), enc_rdbreg(priv, ENC_ETXNDL));
-  lowsyslog(LOG_DEBUG, "  MACON1:   %02x MACON3:   %02x MACON4:   %02x\n",
-            enc_rdbreg(priv, ENC_MACON1), enc_rdbreg(priv, ENC_MACON3),
-            enc_rdbreg(priv, ENC_MACON4));
-  lowsyslog(LOG_DEBUG, "  MACON1:   %02x MACON3:   %02x MACON4:   %02x\n",
-            enc_rdbreg(priv, ENC_MACON1), enc_rdbreg(priv, ENC_MACON3),
-            enc_rdbreg(priv, ENC_MACON4));
-  lowsyslog(LOG_DEBUG, "  MABBIPG:  %02x MAIPG %02x %02x\n",
-            enc_rdbreg(priv, ENC_MABBIPG), enc_rdbreg(priv, ENC_MAIPGH),
-            enc_rdbreg(priv, ENC_MAIPGL));
-  lowsyslog(LOG_DEBUG, "  MACLCON1: %02x MACLCON2:   %02x\n",
-            enc_rdbreg(priv, ENC_MACLCON1), enc_rdbreg(priv, ENC_MACLCON2));
-  lowsyslog(LOG_DEBUG, "  MAMXFL:   %02x %02x\n",
-            enc_rdbreg(priv, ENC_MAMXFLH), enc_rdbreg(priv, ENC_MAMXFLL));
+  syslog(LOG_DEBUG, "Tx Registers:\n");
+  syslog(LOG_DEBUG, "  EIE:      %02x EIR:      %02x\n",
+         enc_rdgreg(priv, ENC_EIE), enc_rdgreg(priv, ENC_EIR));
+  syslog(LOG_DEBUG, "  ESTAT:    %02x ECON1:    %02x\n",
+         enc_rdgreg(priv, ENC_ESTAT), enc_rdgreg(priv, ENC_ECON1));
+  syslog(LOG_DEBUG, "  ETXST:    %02x %02x\n",
+         enc_rdbreg(priv, ENC_ETXSTH), enc_rdbreg(priv, ENC_ETXSTL));
+  syslog(LOG_DEBUG, "  ETXND:    %02x %02x\n",
+         enc_rdbreg(priv, ENC_ETXNDH), enc_rdbreg(priv, ENC_ETXNDL));
+  syslog(LOG_DEBUG, "  MACON1:   %02x MACON3:   %02x MACON4:   %02x\n",
+         enc_rdbreg(priv, ENC_MACON1), enc_rdbreg(priv, ENC_MACON3),
+         enc_rdbreg(priv, ENC_MACON4));
+  syslog(LOG_DEBUG, "  MACON1:   %02x MACON3:   %02x MACON4:   %02x\n",
+         enc_rdbreg(priv, ENC_MACON1), enc_rdbreg(priv, ENC_MACON3),
+         enc_rdbreg(priv, ENC_MACON4));
+  syslog(LOG_DEBUG, "  MABBIPG:  %02x MAIPG %02x %02x\n",
+         enc_rdbreg(priv, ENC_MABBIPG), enc_rdbreg(priv, ENC_MAIPGH),
+         enc_rdbreg(priv, ENC_MAIPGL));
+  syslog(LOG_DEBUG, "  MACLCON1: %02x MACLCON2:   %02x\n",
+         enc_rdbreg(priv, ENC_MACLCON1), enc_rdbreg(priv, ENC_MACLCON2));
+  syslog(LOG_DEBUG, "  MAMXFL:   %02x %02x\n",
+         enc_rdbreg(priv, ENC_MAMXFLH), enc_rdbreg(priv, ENC_MAMXFLL));
 }
 #endif
 
@@ -1092,7 +1100,7 @@ static int enc_transmit(FAR struct enc_driver_s *priv)
 
   /* Increment statistics */
 
-  nllvdbg("Sending packet, pktlen: %d\n", priv->dev.d_len);
+  ninfo("Sending packet, pktlen: %d\n", priv->dev.d_len);
   NETDEV_TXPACKETS(&priv->dev);
 
   /* Verify that the hardware is ready to send another packet.  The driver
@@ -1180,7 +1188,7 @@ static int enc_txpoll(struct net_driver_s *dev)
    * the field d_len is set to a value > 0.
    */
 
-  nllvdbg("Poll result: d_len=%d\n", priv->dev.d_len);
+  ninfo("Poll result: d_len=%d\n", priv->dev.d_len);
   if (priv->dev.d_len > 0)
     {
       /* Look up the destination MAC address and add it to the Ethernet
@@ -1278,15 +1286,6 @@ static void enc_txif(FAR struct enc_driver_s *priv)
   /* If no further xmits are pending, then cancel the TX timeout */
 
   wd_cancel(priv->txtimeout);
-
-  /* Then make sure that the TX poll timer is running (if it is already
-   * running, the following would restart it).  This is necessary to
-   * avoid certain race conditions where the polling sequence can be
-   * interrupted.
-   */
-
-  (void)wd_start(priv->txpoll, ENC_WDDELAY, enc_polltimer, 1,
-                 (wdparm_t)priv);
 
   /* Then poll the network for new XMIT data */
 
@@ -1388,7 +1387,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
 #ifdef CONFIG_NET_IPv4
   if (BUF->type == HTONS(ETHTYPE_IP))
     {
-      nllvdbg("IPv4 frame\n");
+      ninfo("IPv4 frame\n");
       NETDEV_RXIPV4(&priv->dev);
 
       /* Handle ARP on input then give the IPv4 packet to the network
@@ -1429,7 +1428,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
 #ifdef CONFIG_NET_IPv6
   if (BUF->type == HTONS(ETHTYPE_IP6))
     {
-      nllvdbg("Iv6 frame\n");
+      ninfo("Iv6 frame\n");
       NETDEV_RXIPV6(&priv->dev);
 
       /* Give the IPv6 packet to the network layer */
@@ -1467,7 +1466,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
 #ifdef CONFIG_NET_ARP
   if (BUF->type == htons(ETHTYPE_ARP))
     {
-      nllvdbg("ARP packet received (%02x)\n", BUF->type);
+      ninfo("ARP packet received (%02x)\n", BUF->type);
       NETDEV_RXARP(&priv->dev);
 
       arp_arpin(&priv->dev);
@@ -1484,7 +1483,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
   else
 #endif
     {
-      nlldbg("Unsupported packet type dropped (%02x)\n", htons(BUF->type));
+      nerr("ERROR: Unsupported packet type dropped (%02x)\n", htons(BUF->type));
       NETDEV_RXDROPPED(&priv->dev);
     }
 }
@@ -1543,14 +1542,14 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
   pktlen        = (uint16_t)rsv[3] << 8 | (uint16_t)rsv[2];
   rxstat        = (uint16_t)rsv[5] << 8 | (uint16_t)rsv[4];
 
-  nllvdbg("Receiving packet, nextpkt: %04x pktlen: %d rxstat: %04x\n",
-          priv->nextpkt, pktlen, rxstat);
+  ninfo("Receiving packet, nextpkt: %04x pktlen: %d rxstat: %04x\n",
+        priv->nextpkt, pktlen, rxstat);
 
   /* Check if the packet was received OK */
 
   if ((rxstat & RXSTAT_OK) == 0)
     {
-      nlldbg("ERROR: RXSTAT: %04x\n", rxstat);
+      nerr("ERROR: RXSTAT: %04x\n", rxstat);
       NETDEV_RXERRORS(&priv->dev);
     }
 
@@ -1558,7 +1557,7 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
 
   else if (pktlen > (CONFIG_NET_ETH_MTU + 4) || pktlen <= (ETH_HDRLEN + 4))
     {
-      nlldbg("Bad packet size dropped (%d)\n", pktlen);
+      nerr("ERROR: Bad packet size dropped (%d)\n", pktlen);
       NETDEV_RXERRORS(&priv->dev);
     }
 
@@ -1615,14 +1614,13 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
 static void enc_irqworker(FAR void *arg)
 {
   FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)arg;
-  net_lock_t lock;
   uint8_t eir;
 
   DEBUGASSERT(priv);
 
   /* Get exclusive access to both the network and the SPI bus. */
 
-  lock = net_lock();
+  net_lock();
   enc_lock(priv);
 
   /* Disable further interrupts by clearing the global interrupt enable bit.
@@ -1647,7 +1645,7 @@ static void enc_irqworker(FAR void *arg)
        * settings.
        */
 
-      nllvdbg("EIR: %02x\n", eir);
+      ninfo("EIR: %02x\n", eir);
 
       /* DMAIF: The DMA interrupt indicates that the DMA module has completed
        * its memory copy or checksum calculation. Additionally, this interrupt
@@ -1767,7 +1765,7 @@ static void enc_irqworker(FAR void *arg)
           uint8_t pktcnt = enc_rdbreg(priv, ENC_EPKTCNT);
           if (pktcnt > 0)
             {
-              nllvdbg("EPKTCNT: %02x\n", pktcnt);
+              nerr("EPKTCNT: %02x\n", pktcnt);
 
               /* Handle packet receipt */
 
@@ -1813,7 +1811,7 @@ static void enc_irqworker(FAR void *arg)
   /* Release lock on the SPI bus and the network */
 
   enc_unlock(priv);
-  net_unlock(lock);
+  net_unlock();
 }
 
 /****************************************************************************
@@ -1833,7 +1831,7 @@ static void enc_irqworker(FAR void *arg)
  *
  ****************************************************************************/
 
-static int enc_interrupt(int irq, FAR void *context)
+static int enc_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   register FAR struct enc_driver_s *priv = &g_enc28j60[0];
 
@@ -1852,7 +1850,7 @@ static int enc_interrupt(int irq, FAR void *context)
    */
 
   priv->lower->disable(priv->lower);
-  return work_queue(HPWORK, &priv->irqwork, enc_irqworker, (FAR void *)priv, 0);
+  return work_queue(ENCWORK, &priv->irqwork, enc_irqworker, (FAR void *)priv, 0);
 }
 
 /****************************************************************************
@@ -1875,15 +1873,14 @@ static int enc_interrupt(int irq, FAR void *context)
 static void enc_toworker(FAR void *arg)
 {
   FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)arg;
-  net_lock_t lock;
   int ret;
 
-  nlldbg("Tx timeout\n");
+  nerr("ERROR: Tx timeout\n");
   DEBUGASSERT(priv);
 
   /* Get exclusive access to the network */
 
-  lock = net_lock();
+  net_lock();
 
   /* Increment statistics and dump debug info */
 
@@ -1905,7 +1902,7 @@ static void enc_toworker(FAR void *arg)
 
   /* Release lock on the network */
 
-  net_unlock(lock);
+  net_unlock();
 }
 
 /****************************************************************************
@@ -1944,7 +1941,7 @@ static void enc_txtimeout(int argc, uint32_t arg, ...)
    * can occur until we restart the Tx timeout watchdog.
    */
 
-  ret = work_queue(HPWORK, &priv->towork, enc_toworker, (FAR void *)priv, 0);
+  ret = work_queue(ENCWORK, &priv->towork, enc_toworker, (FAR void *)priv, 0);
   DEBUGASSERT(ret == OK);
   UNUSED(ret);
 }
@@ -1969,13 +1966,12 @@ static void enc_txtimeout(int argc, uint32_t arg, ...)
 static void enc_pollworker(FAR void *arg)
 {
   FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)arg;
-  net_lock_t lock;
 
   DEBUGASSERT(priv);
 
   /* Get exclusive access to both the network and the SPI bus. */
 
-  lock = net_lock();
+  net_lock();
   enc_lock(priv);
 
   /* Verify that the hardware is ready to send another packet.  The driver
@@ -1997,7 +1993,7 @@ static void enc_pollworker(FAR void *arg)
   /* Release lock on the SPI bus and the network */
 
   enc_unlock(priv);
-  net_unlock(lock);
+  net_unlock();
 
   /* Setup the watchdog poll timer again */
 
@@ -2040,7 +2036,7 @@ static void enc_polltimer(int argc, uint32_t arg, ...)
    * occur until we restart the poll timeout watchdog.
    */
 
-  ret = work_queue(HPWORK, &priv->pollwork, enc_pollworker, (FAR void *)priv, 0);
+  ret = work_queue(ENCWORK, &priv->pollwork, enc_pollworker, (FAR void *)priv, 0);
   DEBUGASSERT(ret == OK);
   UNUSED(ret);
 }
@@ -2067,8 +2063,8 @@ static int enc_ifup(struct net_driver_s *dev)
   FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)dev->d_private;
   int ret;
 
-  nlldbg("Bringing up: %d.%d.%d.%d\n",
-         dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
+  ninfo("Bringing up: %d.%d.%d.%d\n",
+        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
         (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
   /* Lock the SPI bus so that we have exclusive access */
@@ -2139,9 +2135,9 @@ static int enc_ifdown(struct net_driver_s *dev)
   irqstate_t flags;
   int ret;
 
-  nlldbg("Taking down: %d.%d.%d.%d\n",
-         dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-         (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+  ninfo("Taking down: %d.%d.%d.%d\n",
+        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
+        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
   /* Lock the SPI bus so that we have exclusive access */
 
@@ -2336,7 +2332,7 @@ static int enc_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 
 static void enc_pwrsave(FAR struct enc_driver_s *priv)
 {
-  nllvdbg("Set PWRSV\n");
+  ninfo("Set PWRSV\n");
 
   /* 1. Turn off packet reception by clearing ECON1.RXEN. */
 
@@ -2396,7 +2392,7 @@ static void enc_pwrsave(FAR struct enc_driver_s *priv)
 
 static void enc_pwrfull(FAR struct enc_driver_s *priv)
 {
-  nllvdbg("Clear PWRSV\n");
+  ninfo("Clear PWRSV\n");
 
   /* 1. Wake-up by clearing ECON2.PWRSV. */
 
@@ -2473,7 +2469,7 @@ static int enc_reset(FAR struct enc_driver_s *priv)
 {
   uint8_t regval;
 
-  nlldbg("Reset\n");
+  nwarn("WARNING: Reset\n");
 
   /* Configure SPI for the ENC28J60 */
 
@@ -2524,11 +2520,11 @@ static int enc_reset(FAR struct enc_driver_s *priv)
   regval = enc_rdbreg(priv, ENC_EREVID);
   if (regval == 0x00 || regval == 0xff)
     {
-      nlldbg("Bad Rev ID: %02x\n", regval);
+      nerr("ERROR: Bad Rev ID: %02x\n", regval);
       return -ENODEV;
     }
 
-  nllvdbg("Rev ID: %02x\n", regval);
+  ninfo("Rev ID: %02x\n", regval);
 
   /* Set filter mode: unicast OR broadcast AND crc valid */
 
@@ -2623,6 +2619,7 @@ int enc_initialize(FAR struct spi_dev_s *spi,
   /* Initialize the driver structure */
 
   memset(g_enc28j60, 0, CONFIG_ENC28J60_NINTERFACES*sizeof(struct enc_driver_s));
+  priv->dev.d_buf     = g_pktbuf;     /* Single packet buffer */
   priv->dev.d_ifup    = enc_ifup;     /* I/F down callback */
   priv->dev.d_ifdown  = enc_ifdown;   /* I/F up (new IP address) callback */
   priv->dev.d_txavail = enc_txavail;  /* New TX data callback */

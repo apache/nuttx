@@ -50,6 +50,8 @@
 
 #include <nuttx/wdog.h>
 #include <nuttx/clock.h>
+
+#include <nuttx/wqueue.h>
 #include <nuttx/ioexpander/ioexpander.h>
 #include <nuttx/ioexpander/pca9555.h>
 
@@ -61,6 +63,7 @@
 /********************************************************************************************
  * Pre-processor Definitions
  ********************************************************************************************/
+
 /* Configuration ****************************************************************************/
 /* Prerequisites:
  *   CONFIG_I2C
@@ -74,10 +77,21 @@
  *   Enables support for the PCA9555 driver (Needs CONFIG_INPUT)
  * CONFIG_PCA9555_MULTIPLE
  *   Can be defined to support multiple PCA9555 devices on board.
- * CONFIG_PCA9555_INT_DISABLE
- *   Disable driver GPIO interrupt functionality (ignored if GPIO functionality is
- *   disabled).
+ * CONFIG_PCA9555_INT_NCALLBACKS
+ *   Maximum number of supported pin interrupt callbacks.
  */
+
+#ifdef CONFIG_IOEXPANDER_INT_ENABLE
+#  ifndef CONFIG_PCA9555_INT_NCALLBACKS
+#    define CONFIG_PCA9555_INT_NCALLBACKS 4
+#  endif
+#endif
+
+#ifdef CONFIG_IOEXPANDER_INT_ENABLE
+#  ifndef CONFIG_SCHED_WORKQUEUE
+#    error Work queue support required.  CONFIG_SCHED_WORKQUEUE must be selected.
+#  endif
+#endif
 
 #undef CONFIG_PCA9555_REFCNT
 
@@ -112,20 +126,41 @@
  * Public Types
  ********************************************************************************************/
 
+#ifdef CONFIG_IOEXPANDER_INT_ENABLE
+/* This type represents on registered pin interrupt callback */
+
+struct pca9555_callback_s
+{
+   ioe_pinset_t pinset;                 /* Set of pin interrupts that will generate
+                                         * the callback. */
+   ioe_callback_t cbfunc;               /* The saved callback function pointer */
+   FAR void *cbarg;                       /* Callback argument */
+};
+#endif
+
 /* This structure represents the state of the PCA9555 driver */
 
 struct pca9555_dev_s
 {
   struct ioexpander_dev_s      dev;     /* Nested structure to allow casting as public gpio
                                          * expander. */
-
+#ifdef CONFIG_PCA9555_SHADOW_MODE
+  uint8_t sreg[8];                      /* Shadowed registers of the PCA9555 */
+#endif
 #ifdef CONFIG_PCA9555_MULTIPLE
   FAR struct pca9555_dev_s    *flink;   /* Supports a singly linked list of drivers */
 #endif
-
   FAR struct pca9555_config_s *config;  /* Board configuration data */
   FAR struct i2c_master_s     *i2c;     /* Saved I2C driver instance */
   sem_t                        exclsem; /* Mutual exclusion */
+
+#ifdef CONFIG_IOEXPANDER_INT_ENABLE
+  struct work_s work;                   /* Supports the interrupt handling "bottom half" */
+
+  /* Saved callback information for each I/O expander client */
+
+  struct pca9555_callback_s cb[CONFIG_PCA9555_INT_NCALLBACKS];
+#endif
 };
 
 #endif /* CONFIG_IOEXPANDER && CONFIG_IOEXPANDER_PCA9555 */

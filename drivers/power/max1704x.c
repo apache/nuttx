@@ -160,12 +160,12 @@
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_DEBUG_MAX1704X
-#  define batdbg dbg
+#  define baterr  _err
 #else
 #  ifdef CONFIG_CPP_HAVE_VARARGS
-#    define batdbg(x...)
+#    define baterr(x...)
 #  else
-#    define batdbg (void)
+#    define baterr (void)
 #  endif
 #endif
 
@@ -258,7 +258,7 @@ static int max1704x_getreg16(FAR struct max1704x_dev_s *priv, uint8_t regaddr,
   ret = i2c_write(priv->i2c, &config, &regaddr, 1);
   if (ret < 0)
     {
-      batdbg("i2c_write failed: %d\n", ret);
+      baterr("i2c_write failed: %d\n", ret);
       return ret;
     }
 
@@ -267,7 +267,7 @@ static int max1704x_getreg16(FAR struct max1704x_dev_s *priv, uint8_t regaddr,
   ret = i2c_read(priv->i2c, &config, buffer, 2);
   if (ret < 0)
     {
-      batdbg("i2c_read failed: %d\n", ret);
+      baterr("i2c_read failed: %d\n", ret);
       return ret;
     }
 
@@ -292,7 +292,7 @@ static int max1704x_putreg16(FAR struct max1704x_dev_s *priv, uint8_t regaddr,
   struct i2c_config_s config;
   uint8_t buffer[3];
 
-  batdbg("addr: %02x regval: %08x\n", regaddr, regval);
+  baterr("addr: %02x regval: %08x\n", regaddr, regval);
 
   /* Set up a 3 byte message to send */
 
@@ -554,7 +554,7 @@ FAR struct battery_gauge_dev_s *max1704x_initialize(FAR struct i2c_master_s *i2c
       ret = max1704x_reset(priv);
       if (ret < 0)
         {
-          batdbg("Failed to reset the MAX1704x: %d\n", ret);
+          baterr("Failed to reset the MAX1704x: %d\n", ret);
           kmm_free(priv);
           return NULL;
         }

@@ -94,6 +94,12 @@
 #     undef CONFIG_STM32_DAC1_DMA
 #     undef CONFIG_STM32_DAC2_DMA
 #   endif
+# elif defined(CONFIG_STM32_STM32F33XX)
+#   ifndef CONFIG_STM32_DMA1
+#     warning "STM32 F334 DAC DMA support requires CONFIG_STM32_DMA1"
+#     undef CONFIG_STM32_DAC1_DMA
+#     undef CONFIG_STM32_DAC2_DMA
+#   endif
 # elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
 #   ifndef CONFIG_STM32_DMA1
 #     warning "STM32 F4 DAC DMA support requires CONFIG_STM32_DMA1"
@@ -147,7 +153,8 @@
 #   define DAC_DMA         2
 #   define DAC1_DMA_CHAN   DMACHAN_DAC_CHAN1
 #   define DAC2_DMA_CHAN   DMACHAN_DAC_CHAN2
-# elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+# elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX) || \
+  defined(CONFIG_STM32_STM32F33XX)
 #   define HAVE_DMA        1
 #   define DAC_DMA         1
 #   define DAC1_DMA_CHAN   DMAMAP_DAC1
@@ -348,7 +355,9 @@ struct stm32_chan_s
   uint8_t    timer;      /* Timer number 2-8 */
 #endif
   uint8_t    intf;       /* DAC zero-based interface number (0 or 1) */
+  uint32_t   pin;        /* Pin configuration */
   uint32_t   dro;        /* Data output register */
+  uint32_t   cr;         /* Control register */
   uint32_t   tsel;       /* CR trigger select value */
 #ifdef HAVE_DMA
   uint16_t   dmachan;    /* DMA channel needed by this DAC */
@@ -373,7 +382,7 @@ static void     tim_putreg(FAR struct stm32_chan_s *chan, int offset,
 /* Interrupt handler */
 
 #if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
-static int  dac_interrupt(int irq, FAR void *context);
+static int  dac_interrupt(int irq, FAR void *context, FAR void *arg);
 #endif
 
 /* DAC methods */
@@ -408,10 +417,20 @@ static const struct dac_ops_s g_dacops =
 };
 
 #ifdef CONFIG_STM32_DAC1
+/* Channel 1 */
+
 static struct stm32_chan_s g_dac1priv =
 {
   .intf       = 0,
+#if STM32_NDAC < 2
+  .pin        = GPIO_DAC1_OUT,
   .dro        = STM32_DAC_DHR12R1,
+  .cr         = STM32_DAC_CR,
+#else
+  .pin        = GPIO_DAC1_OUT1,
+  .dro        = STM32_DAC1_DHR12R1,
+  .cr         = STM32_DAC1_CR,
+#endif
 #ifdef CONFIG_STM32_DAC1_DMA
   .hasdma     = 1,
   .dmachan    = DAC1_DMA_CHAN,
@@ -427,13 +446,21 @@ static struct dac_dev_s g_dac1dev =
   .ad_ops  = &g_dacops,
   .ad_priv = &g_dac1priv,
 };
-#endif
 
-#ifdef CONFIG_STM32_DAC2
+/* Channel 2 */
+
 static struct stm32_chan_s g_dac2priv =
 {
   .intf       = 1,
+#if STM32_NDAC < 2
+  .pin        = GPIO_DAC2_OUT,
   .dro        = STM32_DAC_DHR12R2,
+  .cr         = STM32_DAC_CR,
+#else
+  .pin        = GPIO_DAC1_OUT2,
+  .dro        = STM32_DAC1_DHR12R2,
+  .cr         = STM32_DAC1_CR,
+#endif
 #ifdef CONFIG_STM32_DAC2_DMA
   .hasdma     = 1,
   .dmachan    = DAC2_DMA_CHAN,
@@ -448,6 +475,24 @@ static struct dac_dev_s g_dac2dev =
 {
   .ad_ops  = &g_dacops,
   .ad_priv = &g_dac2priv,
+};
+#endif
+
+#ifdef CONFIG_STM32_DAC2
+/* Channel 3 */
+
+static struct stm32_chan_s g_dac3priv =
+{
+  .intf       = 2,
+  .pin        = GPIO_DAC2_OUT1,
+  .dro        = STM32_DAC2_DHR12R1,
+  .cr         = STM32_DAC2_CR,
+};
+
+static struct dac_dev_s g_dac3dev =
+{
+  .ad_ops  = &g_dacops,
+  .ad_priv = &g_dac3priv,
 };
 #endif
 
@@ -476,10 +521,19 @@ static struct stm32_dac_s g_dacblock;
 static inline void stm32_dac_modify_cr(FAR struct stm32_chan_s *chan,
                                        uint32_t clearbits, uint32_t setbits)
 {
-  uint32_t shift;
+  unsigned int shift;
 
-  shift = chan->intf * 16;
-  modifyreg32(STM32_DAC_CR, clearbits << shift, setbits << shift);
+  /* DAC1 channels 1 and 2 share the STM32_DAC[1]_CR control register.  DAC2
+   * channel 1 (and perhaps channel 2) uses the STM32_DAC2_CR control
+   * register.  In either case, bit 0 of the interface number provides the
+   * correct shift.
+   *
+   *   Bit 0 = 0: Shift = 0
+   *   Bit 0 = 1: Shift = 16
+   */
+
+  shift = (chan->intf & 1) << 4;
+  modifyreg32(chan->cr, clearbits << shift, setbits << shift);
 }
 
 /****************************************************************************
@@ -567,7 +621,7 @@ static void tim_modifyreg(FAR struct stm32_chan_s *chan, int offset,
  ****************************************************************************/
 
 #if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
-static int dac_interrupt(int irq, FAR void *context)
+static int dac_interrupt(int irq, FAR void *context, FAR void *arg)
 {
 #warning "Missing logic"
   return OK;
@@ -738,16 +792,7 @@ static int dac_send(FAR struct dac_dev_s *dev, FAR struct dac_msg_s *msg)
       /* Non-DMA transfer */
 
       putreg16(msg->am_data, chan->dro);
-#ifdef CONFIG_STM32_DAC2
-      if (chan->intf)
-        {
-          dac_txdone(&g_dac2dev);
-        }
-      else
-#endif
-        {
-          dac_txdone(&g_dac1dev);
-        }
+      dac_txdone(dev);
     }
 
   /* Reset counters (generate an update) */
@@ -809,7 +854,6 @@ static int dac_timinit(FAR struct stm32_chan_s *chan)
    * default) will be enabled
    */
 
-  pclk    = STM32_TIM27_FREQUENCY;
   regaddr = STM32_RCC_APB1ENR;
 
   switch (chan->timer)
@@ -817,43 +861,49 @@ static int dac_timinit(FAR struct stm32_chan_s *chan)
 #ifdef NEED_TIM2
       case 2:
         setbits = RCC_APB1ENR_TIM2EN;
+        pclk    = BOARD_TIM2_FREQUENCY;
         break;
 #endif
 #ifdef NEED_TIM3
       case 3:
         setbits = RCC_APB1ENR_TIM3EN;
+        pclk    = BOARD_TIM3_FREQUENCY;
         break;
 #endif
 #ifdef NEED_TIM4
       case 4:
         setbits = RCC_APB1ENR_TIM4EN;
+        pclk    = BOARD_TIM4_FREQUENCY;
         break;
 #endif
 #ifdef NEED_TIM5
       case 5:
         setbits = RCC_APB1ENR_TIM5EN;
+        pclk    = BOARD_TIM5_FREQUENCY;
         break;
 #endif
 #ifdef NEED_TIM6
       case 6:
         setbits = RCC_APB1ENR_TIM6EN;
+        pclk    = BOARD_TIM6_FREQUENCY;
         break;
 #endif
 #ifdef NEED_TIM7
       case 7:
         setbits = RCC_APB1ENR_TIM7EN;
+        pclk    = BOARD_TIM7_FREQUENCY;
         break;
 #endif
 #ifdef NEED_TIM8
       case 8:
         regaddr = STM32_RCC_APB2ENR;
         setbits = RCC_APB2ENR_TIM8EN;
-        pclk    = STM32_TIM18_FREQUENCY;
+        pclk    = BOARD_TIM8_FREQUENCY;
         break;
 #endif
       default:
-        adbg("Could not enable timer\n");
-        break;
+        aerr("ERROR: Could not enable timer\n");
+        return -EINVAL;
     }
 
   /* Enable the timer. */
@@ -978,7 +1028,7 @@ static int dac_chaninit(FAR struct stm32_chan_s *chan)
    * should first be configured to analog (AIN)".
    */
 
-  stm32_configgpio(chan->intf ? GPIO_DAC2_OUT : GPIO_DAC1_OUT);
+  stm32_configgpio(chan->pin);
 
   /* DAC channel configuration:
    *
@@ -1016,7 +1066,7 @@ static int dac_chaninit(FAR struct stm32_chan_s *chan)
       chan->dma = stm32_dmachannel(chan->dmachan);
       if (!chan->dma)
         {
-          adbg("Failed to allocate a DMA channel\n");
+          aerr("ERROR: Failed to allocate a DMA channel\n");
           return -EBUSY;
         }
 
@@ -1025,7 +1075,7 @@ static int dac_chaninit(FAR struct stm32_chan_s *chan)
       ret = dac_timinit(chan);
       if (ret < 0)
         {
-          adbg("Failed to initialize the DMA timer: %d\n", ret);
+          aerr("ERROR: Failed to initialize the DMA timer: %d\n", ret);
           return ret;
         }
     }
@@ -1041,7 +1091,7 @@ static int dac_chaninit(FAR struct stm32_chan_s *chan)
  * Name: dac_blockinit
  *
  * Description:
- *   All ioctl calls will be routed through this method.
+ *   Initialize the DAC block.
  *
  * Input Parameters:
  *
@@ -1055,7 +1105,7 @@ static int dac_blockinit(void)
   irqstate_t flags;
   uint32_t regval;
 
-  /* Has the DMA block already been initialized? */
+  /* Has the DAC block already been initialized? */
 
   if (g_dacblock.init)
     {
@@ -1068,12 +1118,30 @@ static int dac_blockinit(void)
 
   flags   = enter_critical_section();
   regval  = getreg32(STM32_RCC_APB1RSTR);
+#if STM32_NDAC < 2
   regval |= RCC_APB1RSTR_DACRST;
+#else
+#ifdef CONFIG_STM32_DAC1
+  regval |= RCC_APB1RSTR_DAC1RST;
+#endif
+#ifdef CONFIG_STM32_DAC2
+  regval |= RCC_APB1RSTR_DAC2RST;
+#endif
+#endif
   putreg32(regval, STM32_RCC_APB1RSTR);
 
   /* Take the DAC out of reset state */
 
+#if STM32_NDAC < 2
   regval &= ~RCC_APB1RSTR_DACRST;
+#else
+#ifdef CONFIG_STM32_DAC1
+  regval &= ~RCC_APB1RSTR_DAC1RST;
+#endif
+#ifdef CONFIG_STM32_DAC2
+  regval &= ~RCC_APB1RSTR_DAC2RST;
+#endif
+#endif
   putreg32(regval, STM32_RCC_APB1RSTR);
   leave_critical_section(flags);
 
@@ -1114,21 +1182,27 @@ FAR struct dac_dev_s *stm32_dacinitialize(int intf)
 #ifdef CONFIG_STM32_DAC1
   if (intf == 1)
     {
-      avdbg("DAC1 Selected\n");
+      ainfo("DAC1-1 Selected\n");
       dev = &g_dac1dev;
     }
   else
-#endif
-#ifdef CONFIG_STM32_DAC2
   if (intf == 2)
     {
-      avdbg("DAC2 Selected\n");
+      ainfo("DAC1-2 Selected\n");
       dev = &g_dac2dev;
     }
   else
 #endif
+#ifdef CONFIG_STM32_DAC2
+  if (intf == 3)
     {
-      adbg("No such DAC interface: %d\n", intf);
+      ainfo("DAC2-1 Selected\n");
+      dev = &g_dac3dev;
+    }
+  else
+#endif
+    {
+      aerr("ERROR: No such DAC interface: %d\n", intf);
       errno = ENODEV;
       return NULL;
     }
@@ -1138,7 +1212,7 @@ FAR struct dac_dev_s *stm32_dacinitialize(int intf)
   ret = dac_blockinit();
   if (ret < 0)
     {
-      adbg("Failed to initialize the DAC block: %d\n", ret);
+      aerr("ERROR: Failed to initialize the DAC block: %d\n", ret);
       errno = -ret;
       return NULL;
     }
@@ -1149,7 +1223,7 @@ FAR struct dac_dev_s *stm32_dacinitialize(int intf)
   ret  = dac_chaninit(chan);
   if (ret < 0)
     {
-      adbg("Failed to initialize DAC channel %d: %d\n", intf, ret);
+      aerr("ERROR: Failed to initialize DAC channel %d: %d\n", intf, ret);
       errno = -ret;
       return NULL;
     }

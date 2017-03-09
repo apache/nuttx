@@ -34,22 +34,21 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Compilation Switches
- ****************************************************************************/
-
-/****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <nuttx/fs/fs.h>
+
 #include <stdio.h>
 #include <unistd.h>
 #include <semaphore.h>
 #include <fcntl.h>
 #include <errno.h>
+
+#include <nuttx/fs/fs.h>
+#include <nuttx/drivers/drivers.h>
 
 #include "pipe_common.h"
 
@@ -167,16 +166,21 @@ static int pipe_close(FAR struct file *filep)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pipe
+ * Name: pipe2
  *
  * Description:
  *   pipe() creates a pair of file descriptors, pointing to a pipe inode,
  *   and  places them in the array pointed to by 'fd'. fd[0] is for reading,
  *   fd[1] is for writing.
  *
+ *   NOTE: mkfifo2 is a special, non-standard, NuttX-only interface.  Since
+ *   the NuttX FIFOs are based in in-memory, circular buffers, the ability
+ *   to control the size of those buffers is critical for system tuning.
+ *
  * Inputs:
  *   fd[2] - The user provided array in which to catch the pipe file
  *   descriptors
+ *   bufsize - The size of the in-memory, circular buffer in bytes.
  *
  * Return:
  *   0 is returned on success; otherwise, -1 is returned with errno set
@@ -184,12 +188,12 @@ static int pipe_close(FAR struct file *filep)
  *
  ****************************************************************************/
 
-int pipe(int fd[2])
+int pipe2(int fd[2], size_t bufsize)
 {
   FAR struct pipe_dev_s *dev = NULL;
   char devname[16];
   int pipeno;
-  int err;
+  int errcode;
   int ret;
 
   /* Get exclusive access to the pipe allocation data */
@@ -208,7 +212,7 @@ int pipe(int fd[2])
   if (pipeno < 0)
     {
       (void)sem_post(&g_pipesem);
-      err = -pipeno;
+      errcode = -pipeno;
       goto errout;
     }
 
@@ -222,11 +226,11 @@ int pipe(int fd[2])
     {
       /* No.. Allocate and initialize a new device structure instance */
 
-      dev = pipecommon_allocdev();
+      dev = pipecommon_allocdev(bufsize);
       if (!dev)
         {
           (void)sem_post(&g_pipesem);
-          err = ENOMEM;
+          errcode = ENOMEM;
           goto errout_with_pipe;
         }
 
@@ -238,7 +242,7 @@ int pipe(int fd[2])
       if (ret != 0)
         {
           (void)sem_post(&g_pipesem);
-          err = -ret;
+          errcode = -ret;
           goto errout_with_dev;
         }
 
@@ -254,7 +258,7 @@ int pipe(int fd[2])
   fd[1] = open(devname, O_WRONLY);
   if (fd[1] < 0)
     {
-      err = -fd[1];
+      errcode = -fd[1];
       goto errout_with_driver;
     }
 
@@ -263,7 +267,7 @@ int pipe(int fd[2])
   fd[0] = open(devname, O_RDONLY);
   if (fd[0] < 0)
     {
-      err = -fd[0];
+      errcode = -fd[0];
       goto errout_with_wrfd;
     }
 
@@ -285,7 +289,7 @@ errout_with_pipe:
   pipe_free(pipeno);
 
 errout:
-  set_errno(err);
+  set_errno(errcode);
   return ERROR;
 }
 

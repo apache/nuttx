@@ -59,7 +59,6 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <arch/board/board.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/analog/adc.h>
@@ -79,6 +78,12 @@
 #include "chip/lpc43_timer.h"
 
 #include "lpc43_pinconfig.h"
+
+/* board.h should be included last because it depends on the previous
+ * inclusions and may need to modify other definitions.
+ */
+
+#include <arch/board/board.h>
 
 #if defined(CONFIG_LPC43_ADC0) /* TODO ADC1 */
 
@@ -136,7 +141,7 @@ static int  adc_setup(FAR struct adc_dev_s *dev);
 static void adc_shutdown(FAR struct adc_dev_s *dev);
 static void adc_rxint(FAR struct adc_dev_s *dev, bool enable);
 static int  adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg);
-static int  adc_interrupt(int irq, void *context);
+static int  adc_interrupt(int irq, void *context, FAR void *arg);
 
 /****************************************************************************
  * Private Data
@@ -346,7 +351,7 @@ static int adc_setup(FAR struct adc_dev_s *dev)
 {
   FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->ad_priv;
 
-  int ret = irq_attach(priv->irq, adc_interrupt);
+  int ret = irq_attach(priv->irq, adc_interrupt, NULL);
   if (ret == OK)
     {
       up_enable_irq(priv->irq);
@@ -452,7 +457,7 @@ static int adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int adc_interrupt(int irq, void *context)
+static int adc_interrupt(int irq, void *context, FAR void *arg)
 {
 
   FAR struct up_dev_s *priv = (FAR struct up_dev_s *)g_adcdev.ad_priv;
@@ -465,7 +470,7 @@ static int adc_interrupt(int irq, void *context)
     }
   else
     {
-      if (priv->freq == 0 && priv->m_ch) /* clear burst mode */
+      if (priv->freq == 0 && !priv->m_ch) /* clear burst mode */
         {
           regval = getreg32(LPC43_ADC0_CR);
           regval &= ~ADC_CR_BURST;

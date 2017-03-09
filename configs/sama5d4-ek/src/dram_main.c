@@ -41,9 +41,9 @@
 
 #include <stdio.h>
 #include <debug.h>
+#include <hex2bin.h>
 
 #include <arch/irq.h>
-#include <apps/hex2bin.h>
 
 #include "up_arch.h"
 #include "mmu.h"

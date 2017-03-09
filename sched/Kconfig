@@ -167,27 +167,40 @@ config CLOCK_MONOTONIC
 
 		The value of the CLOCK_MONOTONIC clock cannot be set via clock_settime().
 
+config ARCH_HAVE_TIMEKEEPING
+	bool
+	default n
+
+config CLOCK_TIMEKEEPING
+	bool "Support timekeeping algorithms"
+	default n
+	depends on EXPERIMENTAL && ARCH_HAVE_TIMEKEEPING
+	---help---
+		CLOCK_TIMEKEEPING enables experimental time management algorithms.
+
 config JULIAN_TIME
 	bool "Enables Julian time conversions"
 	default n
 	---help---
 		Enables Julian time conversions
 
-if !RTC
-
 config START_YEAR
 	int "Start year"
-	default 2014
+	default 2017
+	range 1970 2106
+	---help---
+		NuttX uses an unsigned 32-bit integer for time_t which provides a
+		range from 1970 to 2106.
 
 config START_MONTH
 	int "Start month"
 	default 1
+	range 1 12
 
 config START_DAY
 	int "Start day"
 	default 1
-
-endif # !RTC
+	range 1 31
 
 config MAX_WDOGPARMS
 	int "Maximum number of watchdog parameters"
@@ -232,7 +245,6 @@ menu "Tasks and Scheduling"
 config SPINLOCK
 	bool "Support Spinlocks"
 	default n
-	depends on EXPERIMENTAL
 	---help---
 		Enables suppport for spinlocks.  Spinlocks are current used only for
 		SMP suppport.
@@ -240,7 +252,7 @@ config SPINLOCK
 config SMP
 	bool "Symmetric Multi-Processing (SMP)"
 	default n
-	depends on ARCH_HAVE_MULTICPU && EXPERIMENTAL
+	depends on ARCH_HAVE_MULTICPU
 	select SPINLOCK
 	---help---
 		Enables support for Symmetric Multi-Processing (SMP) on a multi-CPU
@@ -484,7 +496,7 @@ config PREALLOC_CHILDSTATUS
 config DEBUG_CHILDSTATUS
 	bool "Enable Child Status Debug Output"
 	default n
-	depends on SCHED_CHILD_STATUS && DEBUG
+	depends on SCHED_CHILD_STATUS && DEBUG_FEATURES
 	---help---
 		Very detailed... I am sure that you do not want this.
 
@@ -520,7 +532,36 @@ config NPTHREAD_KEYS
 		The number of items of thread-
 		specific data that can be retained
 
+config PTHREAD_CLEANUP
+	bool "pthread cleanup stack"
+	default n
+	---help---
+		Select to enable support for pthread exit cleanup stacks.  This
+		enables the interfaces pthread_cleanup_push() and
+		pthread_cleanup_pop().
+
+config PTHREAD_CLEANUP_STACKSIZE
+	int "pthread cleanup stack size"
+	default 1
+	range 1 32
+	depends on PTHREAD_CLEANUP
+	---help---
+		The maximum number of cleanup actions that may be pushed by
+		pthread_clean_push().  This setting will increase the size of EVERY
+		pthread task control block by about n * CONFIG_PTHREAD_CLEANUP_STACKSIZE
+		where n is the size of a pointer, 2* sizeof(uintptr_t), this would be
+		8 for a CPU with 32-bit addressing and 4 for a CPU with 16-bit
+		addressing.
+
 endmenu # Pthread Options
+
+config CANCELLATION_POINTS
+	bool "Cancellation points"
+	default n
+	---help---
+		Enable POSIX cancellation points for pthread_cancel().  If selected,
+		cancellation points will also used with the () task_delete() API even if
+		pthreads are not enabled.
 
 menu "Performance Monitoring"
 
@@ -571,17 +612,62 @@ config SCHED_CPULOAD_EXTCLK
 		sched_process_cpuload() at each timer expiration with interrupts
 		disabled.
 
+if SCHED_CPULOAD_EXTCLK
+
 config SCHED_CPULOAD_TICKSPERSEC
 	int "External clock rate"
 	default 100
-	depends on SCHED_CPULOAD_EXTCLK
 	---help---
 		If an external clock is used to drive the sampling for the CPU load
 		calculations, then this value must be provided.  This value provides
-		the rate of the external clock in units of ticks per second.  The
-		default value of 100 corresponds to 100Hz clock.  NOTE: that 100Hz
-		is the default frequency of the system time and, hence, the worst
-		possible choice in most cases.
+		the rate of the external clock interrupts in units of ticks per
+		second.  The default value of 100 corresponds to a 100Hz clock.  NOTE:
+		that 100Hz is the default frequency of the system time and, hence,
+		the worst possible choice in most cases.
+
+config CPULOAD_ONESHOT
+	bool "Use Oneshot timer"
+	default n
+	---help---
+		Use an MCU-specific oneshot timer as the external clock.  The
+		oneshot timer must be configured by board specific logic which must
+		then call:
+
+			void sched_oneshot_extclk(FAR struct oneshot_lowerhalf_s *lower);
+
+		To start the CPU load measurement. See include/nuttx/clock.h
+
+		NOTE that in this configuration, CONFIG_SCHED_CPULOAD_TICKSPERSEC is
+		the sample rate that will be accomplished by programming the oneshot
+		time repeatedly.  If CPULOAD_ONESHOT_ENTROPY is also selected, then
+		the underly frequency driving the oneshote timer must be
+		significantly faster than CONFIG_SCHED_CPULOAD_TICKSPERSE to permit
+		precise modulation the sample periods.
+
+config CPULOAD_ONESHOT_ENTROPY
+	int "Bits of entropy"
+	default 6
+	range 0 30
+	---help---
+		This is the number of bits of entropy that will be applied. The
+		oneshot will be set to this interval:
+
+			CPULOAD_ONESHOT_NOMINAL - (CPULOAD_ONESHOT_ENTROPY / 2) +
+			error + nrand(CPULOAD_ONESHOT_ENTROPY)
+
+		Where
+
+			CPULOAD_ONESHOT_NOMINAL is the nominal sample internval implied
+			by CONFIG_SCHED_CPULOAD_TICKSPERSEC in units of microseconds.
+			CPULOAD_ONESHOT_ENTROPY is (1 << CONFIG_CPULOAD_ONESHOT_ENTROPY),
+			and
+			'error' is an error value that is retained from interval to
+			interval so that although individual intervals are randomized,
+			the average will still be CONFIG_SCHED_CPULOAD_TICKSPERSEC.
+
+		This special value of zero disables entropy.
+
+endif # SCHED_CPULOAD_EXTCLK
 
 config SCHED_CPULOAD_TIMECONSTANT
 	int "CPU load time constant"
@@ -606,6 +692,14 @@ config SCHED_INSTRUMENTATION
 			void sched_note_suspend(FAR struct tcb_s *tcb);
 			void sched_note_resume(FAR struct tcb_s *tcb);
 
+		If CONFIG_SMP is enabled, then these additional interfaces are
+		expected:
+
+			void sched_note_cpu_pause(FAR struct tcb_s *tcb, int cpu);
+			void sched_note_cpu_paused(FAR struct tcb_s *tcb);
+			void sched_note_cpu_resume(FAR struct tcb_s *tcb, int cpu);
+			void sched_note_cpu_resumed(FAR struct tcb_s *tcb);
+
 		NOTE: These are internal OS interfaces and are called at at very
 		critical locations in the OS. There is very little that can be
 		done in these interfaces.  For example, normal devices may not be
@@ -614,6 +708,13 @@ config SCHED_INSTRUMENTATION
 		An option is to use SCHED_INSTRUMENTATION_BUFFER below.
 
 if SCHED_INSTRUMENTATION
+
+config SCHED_INSTRUMENTATION_CPUSET
+	hex "CPU bit set"
+	default 0xffff
+	depends on SMP
+	---help---
+		Monitor only CPUs in the bitset.  Bit 0=CPU0, Bit1=CPU1, etc.
 
 config SCHED_INSTRUMENTATION_PREEMPTION
 	bool "Preemption monitor hooks"
@@ -627,7 +728,6 @@ config SCHED_INSTRUMENTATION_PREEMPTION
 config SCHED_INSTRUMENTATION_CSECTION
 	bool "Critical section monitor hooks"
 	default n
-	depends on EXPERIMENTAL || !SCHED_INSTRUMENTATION_BUFFER
 	---help---
 		Enables additional hooks for entry and exit from critical sections.
 		Interrupts are disabled while within a critical section.  Board-
@@ -635,13 +735,17 @@ config SCHED_INSTRUMENTATION_CSECTION
 
 			void sched_note_csection(FAR struct tcb_s *tcb, bool state);
 
-		NOTE: This option is marked EXPERIMENTAL because there is a logical
-		error in the design when this feature is used with
-		CONFIG_SCHED_INSTRUMENTATION_BUFFER.  That error is that
-		sched_note_get() calls enter_ and leave_critical_section.  That
-		means that each call to sched_note_get() causes two entries to be
-		added from the note buffer in order to remove one entry.  Not
-		very useful in its current state!
+config SCHED_INSTRUMENTATION_SPINLOCKS
+	bool "Spinlock monitor hooks"
+	default n
+	---help---
+		Enables additional hooks for spinlock state.  Board-specific logic
+		must provide this additional logic.
+
+			void sched_note_spinlock(FAR struct tcb_s *tcb, bool state);
+			void sched_note_spinlocked(FAR struct tcb_s *tcb, bool state);
+			void sched_note_spinunlock(FAR struct tcb_s *tcb, bool state);
+			void sched_note_spinabort(FAR struct tcb_s *tcb, bool state);
 
 config SCHED_INSTRUMENTATION_BUFFER
 	bool "Buffer instrumentation data in memory"
@@ -667,14 +771,35 @@ config SCHED_INSTRUMENTATION_BUFFER
 		does not occur.  See include/nuttx/sched_note.h for additional
 		information.
 
+if SCHED_INSTRUMENTATION_BUFFER
+
 config SCHED_NOTE_BUFSIZE
 	int "Instrumentation buffer size"
 	default 2048
-	depends on SCHED_INSTRUMENTATION_BUFFER
 	---help---
 		The size of the in-memory, circular instrumentation buffer (in
 		bytes).
 
+config SCHED_NOTE_GET
+	int "Callable interface to get instrumentatin data"
+	default 2048
+	depends on !SCHED_INSTRUMENTATION_CSECTION && (!SCHED_INSTRUMENTATION_SPINLOCK || !SMP)
+	---help---
+		Add support for interfaces to get the size of the next note and also
+		to extract the next note from the instrumentation buffer:
+
+			ssize_t sched_note_get(FAR uint8_t *buffer, size_t buflen);
+			ssize_t sched_note_size(void);
+
+		NOTE: This option is not available if critical sections are being
+		monitor (nor if spinlocks are being monitored in SMP configuration)
+		because there would be a logical error in the design in those cases.
+		That error is that these interfaces call enter_ and leave_critical_section
+		(and which us spinlocks in SMP mode).  That means that each call to
+		sched_note_get() causes several additional entries to be added from
+		the note buffer in order to remove one entry.
+
+endif # SCHED_INSTRUMENTATION_BUFFER
 endif # SCHED_INSTRUMENTATION
 endmenu # Performance Monitoring
 
@@ -748,6 +873,18 @@ menuconfig PRIORITY_INHERITANCE
 	default n
 	---help---
 		Set to enable support for priority inheritance on mutexes and semaphores.
+		When this option is enabled, the initial configuration of all seamphores
+		and mutexes will be with priority inheritance enabled.  That configuration
+		may not be appropriate in all cases (such as when the semaphore or mutex
+		is used for signaling).  In such cases, priority inheritance be be
+		disabled for individual semaphores by calling:
+
+			int ret = sem_setprotocol(&sem, SEM_PRIO_NONE);
+
+		And for individual pthread mutexes by setting the protocol attribute
+		before initializing the mutex:
+
+			int ret = pthread_mutexattr_setprotocol(&attr, PTHREAD_PRIO_NONE);
 
 if PRIORITY_INHERITANCE
 
@@ -978,46 +1115,13 @@ config MQ_MAXMSGSIZE
 
 endmenu # POSIX Message Queue Options
 
-menuconfig MODULE
+config MODULE
 	bool "Enable loadable OS modules"
 	default n
+	select LIBC_MODLIB
+	select LIBC_ARCH_ELF
 	---help---
 		Enable support for loadable OS modules.  Default: n
-
-if MODULE
-
-config MODULE_ALIGN_LOG2
-	int "Log2 Section Alignment"
-	default 2
-	---help---
-		Align all sections to this Log2 value:  0->1, 1->2, 2->4, etc.
-
-config MODULE_BUFFERSIZE
-	int "Module I/O Buffer Size"
-	default 128
-	---help---
-		This is an I/O buffer that is used to access the module file.
-		Variable length items will need to be read (such as symbol names).
-		This is really just this initial size of the buffer; it will be
-		reallocated as necessary to hold large symbol names).  Default: 128
-
-config MODULE_BUFFERINCR
-	int "Module I/O Buffer Realloc Increment"
-	default 32
-	---help---
-		This is an I/O buffer that is used to access the module file.
-		Variable length items will need to be read (such as symbol names).
-		This value specifies the size increment to use each time the
-		buffer is reallocated.  Default: 32
-
-config MODULE_DUMPBUFFER
-	bool "Dump module buffers"
-	default n
-	depends on DEBUG && DEBUG_VERBOSE
-	---help---
-		Dump various module buffers for debug purposes
-
-endif
 
 menu "Work queue support"
 
@@ -1116,7 +1220,17 @@ config SCHED_LPNTHREADS
 		This options is required to support, for example, I/O operations
 		that stall waiting for input.  If there is only a single thread,
 		then the entire low-priority queue processing stalls in such cases.
-		Such behavior is necessary to support asynchronous I/O, AIO (for example).
+		Such behavior is necessary to support asynchronous I/O, AIO (for
+		example).
+
+		CAUTION: Some drivers may use the work queue to serialize
+		operations.  The may also use the low-priority work queue if it is
+		available.  If there are multiple low-priority worker thread, then
+		this can result in the loss of that serialization.  There may be
+		concurrent driver operations running on different LP threads and
+		this could lead to a failure.  You may need to visit the use of the
+		LP work queue on your configuration is you select
+		CONFIG_SCHED_LPNTHREADS > 1
 
 config SCHED_LPWORKPRIORITY
 	int "Low priority worker thread priority"

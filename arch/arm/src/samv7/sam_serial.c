@@ -333,7 +333,6 @@
 struct sam_dev_s
 {
   const uint32_t usartbase;     /* Base address of USART registers */
-  xcpt_t   handler;             /* Interrupt handler */
   uint32_t baud;                /* Configured baud */
   uint32_t sr;                  /* Saved status bits */
   uint8_t  irq;                 /* IRQ associated with this USART */
@@ -353,31 +352,7 @@ static int  sam_setup(struct uart_dev_s *dev);
 static void sam_shutdown(struct uart_dev_s *dev);
 static int  sam_attach(struct uart_dev_s *dev);
 static void sam_detach(struct uart_dev_s *dev);
-static int sam_interrupt(struct uart_dev_s *dev);
-#ifdef CONFIG_SAMV7_UART0
-static int  sam_uart0_interrupt(int irq, void *context);
-#endif
-#ifdef CONFIG_SAMV7_UART1
-static int  sam_uart1_interrupt(int irq, void *context);
-#endif
-#ifdef CONFIG_SAMV7_UART2
-static int  sam_uart2_interrupt(int irq, void *context);
-#endif
-#ifdef CONFIG_SAMV7_UART3
-static int  sam_uart3_interrupt(int irq, void *context);
-#endif
-#ifdef CONFIG_SAMV7_UART4
-static int  sam_uart4_interrupt(int irq, void *context);
-#endif
-#if defined(CONFIG_SAMV7_USART0) &&  defined(CONFIG_USART0_SERIALDRIVER)
-static int  sam_usart0_interrupt(int irq, void *context);
-#endif
-#if defined(CONFIG_SAMV7_USART1) &&  defined(CONFIG_USART1_SERIALDRIVER)
-static int  sam_usart1_interrupt(int irq, void *context);
-#endif
-#if defined(CONFIG_SAMV7_USART2) &&  defined(CONFIG_USART2_SERIALDRIVER)
-static int  sam_usart2_interrupt(int irq, void *context);
-#endif
+static int  sam_interrupt(int irq, void *context, FAR void *arg);
 static int  sam_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int  sam_receive(struct uart_dev_s *dev, uint32_t *status);
 static void sam_rxint(struct uart_dev_s *dev, bool enable);
@@ -451,7 +426,6 @@ static char g_usart2txbuffer[CONFIG_USART2_TXBUFSIZE];
 static struct sam_dev_s g_uart0priv =
 {
   .usartbase      = SAM_UART0_BASE,
-  .handler        = sam_uart0_interrupt,
   .baud           = CONFIG_UART0_BAUD,
   .irq            = SAM_IRQ_UART0,
   .parity         = CONFIG_UART0_PARITY,
@@ -482,7 +456,6 @@ static uart_dev_t g_uart0port =
 static struct sam_dev_s g_uart1priv =
 {
   .usartbase      = SAM_UART1_BASE,
-  .handler        = sam_uart1_interrupt,
   .baud           = CONFIG_UART1_BAUD,
   .irq            = SAM_IRQ_UART1,
   .parity         = CONFIG_UART1_PARITY,
@@ -513,7 +486,6 @@ static uart_dev_t g_uart1port =
 static struct sam_dev_s g_uart2priv =
 {
   .usartbase      = SAM_UART2_BASE,
-  .handler        = sam_uart2_interrupt,
   .baud           = CONFIG_UART2_BAUD,
   .irq            = SAM_IRQ_UART2,
   .parity         = CONFIG_UART2_PARITY,
@@ -544,7 +516,6 @@ static uart_dev_t g_uart2port =
 static struct sam_dev_s g_uart3priv =
 {
   .usartbase      = SAM_UART3_BASE,
-  .handler        = sam_uart3_interrupt,
   .baud           = CONFIG_UART3_BAUD,
   .irq            = SAM_IRQ_UART3,
   .parity         = CONFIG_UART3_PARITY,
@@ -575,7 +546,6 @@ static uart_dev_t g_uart3port =
 static struct sam_dev_s g_uart4priv =
 {
   .usartbase      = SAM_UART4_BASE,
-  .handler        = sam_uart4_interrupt,
   .baud           = CONFIG_UART4_BAUD,
   .irq            = SAM_IRQ_UART4,
   .parity         = CONFIG_UART4_PARITY,
@@ -606,7 +576,6 @@ static uart_dev_t g_uart4port =
 static struct sam_dev_s g_usart0priv =
 {
   .usartbase      = SAM_USART0_BASE,
-  .handler        = sam_usart0_interrupt,
   .baud           = CONFIG_USART0_BAUD,
   .irq            = SAM_IRQ_USART0,
   .parity         = CONFIG_USART0_PARITY,
@@ -640,7 +609,6 @@ static uart_dev_t g_usart0port =
 static struct sam_dev_s g_usart1priv =
 {
   .usartbase      = SAM_USART1_BASE,
-  .handler        = sam_usart1_interrupt,
   .baud           = CONFIG_USART1_BAUD,
   .irq            = SAM_IRQ_USART1,
   .parity         = CONFIG_USART1_PARITY,
@@ -674,7 +642,6 @@ static uart_dev_t g_usart1port =
 static struct sam_dev_s g_usart2priv =
 {
   .usartbase      = SAM_USART2_BASE,
-  .handler        = sam_usart2_interrupt,
   .baud           = CONFIG_USART2_BAUD,
   .irq            = SAM_IRQ_USART2,
   .parity         = CONFIG_USART2_PARITY,
@@ -973,7 +940,7 @@ static int sam_attach(struct uart_dev_s *dev)
 
   /* Attach and enable the IRQ */
 
-  ret = irq_attach(priv->irq, priv->handler);
+  ret = irq_attach(priv->irq, sam_interrupt, dev);
   if (ret == OK)
     {
       /* Enable the interrupt (RX and TX interrupts are still disabled
@@ -1014,15 +981,16 @@ static void sam_detach(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static int sam_interrupt(struct uart_dev_s *dev)
+static int sam_interrupt(int irq, void *context, FAR void *arg)
 {
+  struct uart_dev_s *dev = (struct uart_dev_s *)arg;
   struct sam_dev_s *priv;
-  uint32_t          pending;
-  uint32_t          imr;
-  int               passes;
-  bool              handled;
+  uint32_t pending;
+  uint32_t imr;
+  int passes;
+  bool handled;
 
-  DEBUGASSERT(dev && dev->priv);
+  DEBUGASSERT(dev != NULL && dev->priv != NULL);
   priv = (struct sam_dev_s *)dev->priv;
 
   /* Loop until there are no characters to be transferred or, until we have
@@ -1067,72 +1035,6 @@ static int sam_interrupt(struct uart_dev_s *dev)
 
   return OK;
 }
-
-/****************************************************************************
- * Name: sam_uart[n]_interrupt
- *
- * Description:
- *   UART interrupt handlers
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SAMV7_UART0
-static int  sam_uart0_interrupt(int irq, void *context)
-{
-  return sam_interrupt(&g_uart0port);
-}
-#endif
-#ifdef CONFIG_SAMV7_UART1
-static int  sam_uart1_interrupt(int irq, void *context)
-{
-  return sam_interrupt(&g_uart1port);
-}
-#endif
-#ifdef CONFIG_SAMV7_UART2
-static int  sam_uart2_interrupt(int irq, void *context)
-{
-  return sam_interrupt(&g_uart2port);
-}
-#endif
-#ifdef CONFIG_SAMV7_UART3
-static int  sam_uart3_interrupt(int irq, void *context)
-{
-  return sam_interrupt(&g_uart3port);
-}
-#endif
-#ifdef CONFIG_SAMV7_UART4
-static int  sam_uart4_interrupt(int irq, void *context)
-{
-  return sam_interrupt(&g_uart4port);
-}
-#endif
-
-/****************************************************************************
- * Name: sam_usart[n]_interrupt
- *
- * Description:
- *   USART interrupt handlers
- *
- ****************************************************************************/
-
-#if defined(CONFIG_SAMV7_USART0) && defined(CONFIG_USART0_SERIALDRIVER)
-static int  sam_usart0_interrupt(int irq, void *context)
-{
-  return sam_interrupt(&g_usart0port);
-}
-#endif
-#if defined(CONFIG_SAMV7_USART1) && defined(CONFIG_USART1_SERIALDRIVER)
-static int  sam_usart1_interrupt(int irq, void *context)
-{
-  return sam_interrupt(&g_usart1port);
-}
-#endif
-#if defined(CONFIG_SAMV7_USART2) && defined(CONFIG_USART2_SERIALDRIVER)
-static int  sam_usart2_interrupt(int irq, void *context)
-{
-  return sam_interrupt(&g_usart2port);
-}
-#endif
 
 /****************************************************************************
  * Name: sam_ioctl

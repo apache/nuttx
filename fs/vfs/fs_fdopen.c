@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/vfs/fs_fdopen.c
  *
- *   Copyright (C) 2007-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -129,7 +129,7 @@ FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb)
 {
   FAR struct streamlist *slist;
   FAR FILE              *stream;
-  int                    err = OK;
+  int                    errcode = OK;
   int                    ret;
   int                    i;
 
@@ -137,7 +137,7 @@ FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb)
 
   if (fd < 0)
     {
-      err = EBADF;
+      errcode = EBADF;
       goto errout;
     }
 
@@ -173,7 +173,7 @@ FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb)
 #else
       /* No networking... it is just a bad descriptor */
 
-      err = EBADF;
+      errcode = EBADF;
       goto errout;
 #endif
     }
@@ -193,7 +193,7 @@ FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb)
     {
       /* No... return the reported error */
 
-      err = -ret;
+      errcode = -ret;
       goto errout;
     }
 
@@ -221,17 +221,18 @@ FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb)
         {
           /* Zero the structure */
 
-#if CONFIG_STDIO_BUFFER_SIZE > 0
+#ifndef CONFIG_STDIO_DISABLE_BUFFERING
           memset(stream, 0, sizeof(FILE));
 #elif CONFIG_NUNGET_CHARS > 0
           stream->fs_nungotten = 0;
 #endif
 
-#if CONFIG_STDIO_BUFFER_SIZE > 0
+#ifndef CONFIG_STDIO_DISABLE_BUFFERING
           /* Initialize the semaphore the manages access to the buffer */
 
           (void)sem_init(&stream->fs_sem, 0, 1);
 
+#if CONFIG_STDIO_BUFFER_SIZE > 0
           /* Allocate the IO buffer at the appropriate privilege level for
            * the group.
            */
@@ -241,7 +242,7 @@ FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb)
 
           if (!stream->fs_bufstart)
             {
-              err = ENOMEM;
+              errcode = ENOMEM;
               goto errout_with_sem;
             }
 
@@ -249,9 +250,17 @@ FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb)
 
           stream->fs_bufend  = &stream->fs_bufstart[CONFIG_STDIO_BUFFER_SIZE];
           stream->fs_bufpos  = stream->fs_bufstart;
-          stream->fs_bufpos  = stream->fs_bufstart;
           stream->fs_bufread = stream->fs_bufstart;
-#endif
+
+#ifdef CONFIG_STDIO_LINEBUFFER
+          /* Setup buffer flags */
+
+          stream->fs_flags  |= __FS_FLAG_LBF; /* Line buffering */
+
+#endif /* CONFIG_STDIO_LINEBUFFER */
+#endif /* CONFIG_STDIO_BUFFER_SIZE > 0 */
+#endif /* !CONFIG_STDIO_DISABLE_BUFFERING */
+
           /* Save the file description and open flags.  Setting the
            * file descriptor locks this stream.
            */
@@ -266,15 +275,15 @@ FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb)
 
   /* No free stream available.. report ENFILE */
 
-  err = ENFILE;
+  errcode = ENFILE;
 
-#if CONFIG_STDIO_BUFFER_SIZE > 0
+#if !defined(CONFIG_STDIO_DISABLE_BUFFERING) && CONFIG_STDIO_BUFFER_SIZE > 0
 errout_with_sem:
 #endif
   sem_post(&slist->sl_sem);
 
 errout:
-  set_errno(err);
+  set_errno(errcode);
 errout_with_errno:
   return NULL;
 }

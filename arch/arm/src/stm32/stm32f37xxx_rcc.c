@@ -80,7 +80,7 @@ static inline void rcc_reset(void)
   regval |= RCC_CR_HSION;
   putreg32(regval, STM32_RCC_CR);
 
-  regval  = getreg32(STM32_RCC_CFGR);       /* Reset SW, HPRE, PPRE1, PPRE2, USBPRE, and MCO bits */
+  regval  = getreg32(STM32_RCC_CFGR);       /* Reset SW, HPRE, PPRE1, PPRE2, ADCPRE, USBPRE, MCO, SDADC bits */
   regval &= ~(RCC_CFGR_SW_MASK | RCC_CFGR_HPRE_MASK | RCC_CFGR_PPRE1_MASK |
               RCC_CFGR_PPRE2_MASK | RCC_CFGR_USBPRE | RCC_CFGR_MCO_MASK);
   putreg32(regval, STM32_RCC_CFGR);
@@ -106,6 +106,7 @@ static inline void rcc_reset(void)
 
   putreg32(0, STM32_RCC_CIR);               /* Disable all interrupts */
 }
+
 
 /****************************************************************************
  * Name: rcc_enableahb
@@ -169,7 +170,7 @@ static inline void rcc_enableapb1(void)
 
 #ifdef CONFIG_STM32_USB
   /* USB clock divider. This bit must be valid before enabling the USB
-   * clock in the RCC_APB1ENR register. This bit can’t be reset if the USB
+   * clock in the RCC_APB1ENR register. This bit can't be reset if the USB
    * clock is enabled.
    */
 
@@ -356,6 +357,28 @@ static inline void rcc_enableapb2(void)
 {
   uint32_t regval;
 
+#if defined(CONFIG_STM32_SDADC) || defined(CONFIG_STM32_ADC)
+  /* Adjust clock of selected peripherals */
+
+  regval = getreg32(STM32_RCC_CFGR);
+
+#ifdef CONFIG_STM32_ADC
+  /* ADC clock divider */
+
+  regval &= ~RCC_CFGR_ADCPRE_MASK;
+  regval |= STM32_RCC_ADCPRE;
+#endif
+
+#ifdef CONFIG_STM32_SDADC
+  /* SDADC clock divider */
+
+  regval &= ~RCC_CFGR_SDPRE_MASK;
+  regval |= STM32_RCC_SDPRE;
+#endif
+
+  putreg32(regval, STM32_RCC_CFGR);
+#endif
+
   /* Set the appropriate bits in the APB2ENR register to enabled the
    * selected APB2 peripherals.
    */
@@ -366,6 +389,12 @@ static inline void rcc_enableapb2(void)
   /* SYSCFG clock */
 
   regval |= RCC_APB2ENR_SYSCFGEN;
+#endif
+
+#ifdef CONFIG_STM32_ADC1
+  /* ADC clock enable */
+
+  regval |= RCC_APB2ENR_ADC1EN;
 #endif
 
 #ifdef CONFIG_STM32_SPI1
@@ -410,6 +439,24 @@ static inline void rcc_enableapb2(void)
 #ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB2ENR_TIM17EN;
 #endif
+#endif
+
+#ifdef CONFIG_STM32_SDADC1
+  /* SDCADC1 clock enable */
+
+  regval |= RCC_APB2ENR_SDADC1EN;
+#endif
+
+#ifdef CONFIG_STM32_SDADC2
+  /* SDCADC2 clock enable */
+
+  regval |= RCC_APB2ENR_SDADC2EN;
+#endif
+
+#ifdef CONFIG_STM32_SDADC3
+  /* SDCADC3 clock enable */
+
+  regval |= RCC_APB2ENR_SDADC3EN;
 #endif
 
   putreg32(regval, STM32_RCC_APB2ENR);
@@ -469,13 +516,13 @@ static void stm32_stdclockconfig(void)
 
   /* If this is a value-line part and we are using the HSE as the PLL */
 
-# if (STM32_CFGR_PLLXTPRE >> 17) != (STM32_CFGR2_PREDIV1 & 1)
-#  error STM32_CFGR_PLLXTPRE must match the LSB of STM32_CFGR2_PREDIV1
+# if (STM32_CFGR_PLLXTPRE >> 17) != (STM32_CFGR2_PREDIV & 1)
+#  error STM32_CFGR_PLLXTPRE must match the LSB of STM32_CFGR2_PREDIV
 # endif
 
   /* Set the HSE prescaler */
 
-  regval = STM32_CFGR2_PREDIV1;
+  regval = STM32_CFGR2_PREDIV;
   putreg32(regval, STM32_RCC_CFGR2);
 
 # endif

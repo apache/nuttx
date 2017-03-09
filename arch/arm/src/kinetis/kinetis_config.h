@@ -1,8 +1,9 @@
 /************************************************************************************
  * arch/arm/src/kinetis/kinetis_config.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2011, 2017 Gregory Nutt. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane<david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_KINETISXX_KINETIS_CONFIG_H
-#define __ARCH_ARM_SRC_KINETISXX_KINETIS_CONFIG_H
+#ifndef __ARCH_ARM_SRC_KINETIS_KINETIS_CONFIG_H
+#define __ARCH_ARM_SRC_KINETIS_KINETIS_CONFIG_H
 
 /************************************************************************************
  * Included Files
@@ -50,7 +51,11 @@
  ************************************************************************************/
 
 /* Configuration *********************************************************************/
-/* Make that no unsupported UARTs are enabled */
+/* Make sure that no unsupported UARTs are enabled */
+
+#ifndef KINETIS_NLPUART
+#  define KINETIS_NLPUART 0
+#endif
 
 #ifndef KINETIS_NISO7816
 #  define KINETIS_NISO7816 0
@@ -75,69 +80,151 @@
 #  endif
 #endif
 
-/* Are any UARTs enabled? */
+#if KINETIS_NLPUART < 1
+#  undef CONFIG_KINETIS_LPUART0
+#endif
+
+/* Are any UARTs or LPUARTs enabled? */
 
 #undef HAVE_UART_DEVICE
 #if defined(CONFIG_KINETIS_UART0) || defined(CONFIG_KINETIS_UART1) || \
     defined(CONFIG_KINETIS_UART2) || defined(CONFIG_KINETIS_UART3) || \
-    defined(CONFIG_KINETIS_UART5)
+    defined(CONFIG_KINETIS_UART4) || defined(CONFIG_KINETIS_UART5)
 #  define HAVE_UART_DEVICE 1
+#endif
+
+#undef HAVE_LPUART_DEVICE
+#if defined(CONFIG_KINETIS_LPUART0) || defined(CONFIG_KINETIS_LPUART1)
+#  define HAVE_LPUART_DEVICE 1
 #endif
 
 /* Is there a serial console? There should be at most one defined.  It could be on
  * any UARTn, n=0,1,2,3,4,5
  */
 
-#if defined(CONFIG_UART0_SERIAL_CONSOLE) && defined(CONFIG_KINETIS_UART0)
-#  undef CONFIG_UART1_SERIAL_CONSOLE
-#  undef CONFIG_UART2_SERIAL_CONSOLE
-#  undef CONFIG_UART3_SERIAL_CONSOLE
-#  undef CONFIG_UART4_SERIAL_CONSOLE
-#  undef CONFIG_UART5_SERIAL_CONSOLE
-#  define HAVE_SERIAL_CONSOLE 1
-#elif defined(CONFIG_UART1_SERIAL_CONSOLE) && defined(CONFIG_KINETIS_UART1)
-#  undef CONFIG_UART0_SERIAL_CONSOLE
-#  undef CONFIG_UART2_SERIAL_CONSOLE
-#  undef CONFIG_UART3_SERIAL_CONSOLE
-#  undef CONFIG_UART4_SERIAL_CONSOLE
-#  undef CONFIG_UART5_SERIAL_CONSOLE
-#  define HAVE_SERIAL_CONSOLE 1
-#elif defined(CONFIG_UART2_SERIAL_CONSOLE) && defined(CONFIG_KINETIS_UART2)
-#  undef CONFIG_UART0_SERIAL_CONSOLE
-#  undef CONFIG_UART1_SERIAL_CONSOLE
-#  undef CONFIG_UART3_SERIAL_CONSOLE
-#  undef CONFIG_UART4_SERIAL_CONSOLE
-#  undef CONFIG_UART5_SERIAL_CONSOLE
-#  define HAVE_SERIAL_CONSOLE 1
-#elif defined(CONFIG_UART3_SERIAL_CONSOLE) && defined(CONFIG_KINETIS_UART3)
-#  undef CONFIG_UART0_SERIAL_CONSOLE
-#  undef CONFIG_UART1_SERIAL_CONSOLE
-#  undef CONFIG_UART2_SERIAL_CONSOLE
-#  undef CONFIG_UART4_SERIAL_CONSOLE
-#  undef CONFIG_UART5_SERIAL_CONSOLE
-#  define HAVE_SERIAL_CONSOLE 1
-#elif defined(CONFIG_UART4_SERIAL_CONSOLE) && defined(CONFIG_KINETIS_UART4)
-#  undef CONFIG_UART0_SERIAL_CONSOLE
-#  undef CONFIG_UART1_SERIAL_CONSOLE
-#  undef CONFIG_UART2_SERIAL_CONSOLE
-#  undef CONFIG_UART3_SERIAL_CONSOLE
-#  undef CONFIG_UART5_SERIAL_CONSOLE
-#  define HAVE_SERIAL_CONSOLE 1
-#elif defined(CONFIG_UART5_SERIAL_CONSOLE) && defined(CONFIG_KINETIS_UART5)
-#  undef CONFIG_UART0_SERIAL_CONSOLE
-#  undef CONFIG_UART1_SERIAL_CONSOLE
-#  undef CONFIG_UART2_SERIAL_CONSOLE
-#  undef CONFIG_UART3_SERIAL_CONSOLE
-#  undef CONFIG_UART4_SERIAL_CONSOLE
-#  define HAVE_SERIAL_CONSOLE 1
+#undef HAVE_UART_CONSOLE
+#undef HAVE_LPUART_CONSOLE
+
+#if defined(CONFIG_CONSOLE_SYSLOG)
+#    undef CONFIG_UART0_SERIAL_CONSOLE
+#    undef CONFIG_UART1_SERIAL_CONSOLE
+#    undef CONFIG_UART2_SERIAL_CONSOLE
+#    undef CONFIG_UART3_SERIAL_CONSOLE
+#    undef CONFIG_UART4_SERIAL_CONSOLE
+#    undef CONFIG_UART5_SERIAL_CONSOLE
+#    undef CONFIG_LPUART0_SERIAL_CONSOLE
+#    undef CONFIG_LPUART1_SERIAL_CONSOLE
 #else
-#  undef CONFIG_UART0_SERIAL_CONSOLE
-#  undef CONFIG_UART1_SERIAL_CONSOLE
-#  undef CONFIG_UART2_SERIAL_CONSOLE
-#  undef CONFIG_UART3_SERIAL_CONSOLE
-#  undef CONFIG_UART4_SERIAL_CONSOLE
-#  undef CONFIG_UART5_SERIAL_CONSOLE
-#  undef HAVE_SERIAL_CONSOLE
+#  if defined(CONFIG_UART0_SERIAL_CONSOLE) && defined(CONFIG_KINETIS_UART0)
+#    undef CONFIG_UART1_SERIAL_CONSOLE
+#    undef CONFIG_UART2_SERIAL_CONSOLE
+#    undef CONFIG_UART3_SERIAL_CONSOLE
+#    undef CONFIG_UART4_SERIAL_CONSOLE
+#    undef CONFIG_UART5_SERIAL_CONSOLE
+#    undef CONFIG_LPUART0_SERIAL_CONSOLE
+#    undef CONFIG_LPUART1_SERIAL_CONSOLE
+#    define HAVE_UART_CONSOLE 1
+#  elif defined(CONFIG_UART1_SERIAL_CONSOLE) && defined(CONFIG_KINETIS_UART1)
+#    undef CONFIG_UART0_SERIAL_CONSOLE
+#    undef CONFIG_UART2_SERIAL_CONSOLE
+#    undef CONFIG_UART3_SERIAL_CONSOLE
+#    undef CONFIG_UART4_SERIAL_CONSOLE
+#    undef CONFIG_UART5_SERIAL_CONSOLE
+#    undef CONFIG_LPUART0_SERIAL_CONSOLE
+#    undef CONFIG_LPUART1_SERIAL_CONSOLE
+#    define HAVE_UART_CONSOLE 1
+#  elif defined(CONFIG_UART2_SERIAL_CONSOLE) && defined(CONFIG_KINETIS_UART2)
+#    undef CONFIG_UART0_SERIAL_CONSOLE
+#    undef CONFIG_UART1_SERIAL_CONSOLE
+#    undef CONFIG_UART3_SERIAL_CONSOLE
+#    undef CONFIG_UART4_SERIAL_CONSOLE
+#    undef CONFIG_UART5_SERIAL_CONSOLE
+#    undef CONFIG_LPUART0_SERIAL_CONSOLE
+#    undef CONFIG_LPUART1_SERIAL_CONSOLE
+#    define HAVE_UART_CONSOLE 1
+#  elif defined(CONFIG_UART3_SERIAL_CONSOLE) && defined(CONFIG_KINETIS_UART3)
+#    undef CONFIG_UART0_SERIAL_CONSOLE
+#    undef CONFIG_UART1_SERIAL_CONSOLE
+#    undef CONFIG_UART2_SERIAL_CONSOLE
+#    undef CONFIG_UART4_SERIAL_CONSOLE
+#    undef CONFIG_UART5_SERIAL_CONSOLE
+#    undef CONFIG_LPUART0_SERIAL_CONSOLE
+#    undef CONFIG_LPUART1_SERIAL_CONSOLE
+#    define HAVE_UART_CONSOLE 1
+#  elif defined(CONFIG_UART4_SERIAL_CONSOLE) && defined(CONFIG_KINETIS_UART4)
+#    undef CONFIG_UART0_SERIAL_CONSOLE
+#    undef CONFIG_UART1_SERIAL_CONSOLE
+#    undef CONFIG_UART2_SERIAL_CONSOLE
+#    undef CONFIG_UART3_SERIAL_CONSOLE
+#    undef CONFIG_UART5_SERIAL_CONSOLE
+#    undef CONFIG_LPUART0_SERIAL_CONSOLE
+#    undef CONFIG_LPUART1_SERIAL_CONSOLE
+#    define HAVE_UART_CONSOLE 1
+#  elif defined(CONFIG_UART5_SERIAL_CONSOLE) && defined(CONFIG_KINETIS_UART5)
+#    undef CONFIG_UART0_SERIAL_CONSOLE
+#    undef CONFIG_UART1_SERIAL_CONSOLE
+#    undef CONFIG_UART2_SERIAL_CONSOLE
+#    undef CONFIG_UART3_SERIAL_CONSOLE
+#    undef CONFIG_UART4_SERIAL_CONSOLE
+#    undef CONFIG_LPUART0_SERIAL_CONSOLE
+#    undef CONFIG_LPUART1_SERIAL_CONSOLE
+#    define HAVE_UART_CONSOLE 1
+#  elif defined(CONFIG_LPUART0_SERIAL_CONSOLE) && defined(CONFIG_KINETIS_LPUART0)
+#    undef CONFIG_UART0_SERIAL_CONSOLE
+#    undef CONFIG_UART1_SERIAL_CONSOLE
+#    undef CONFIG_UART2_SERIAL_CONSOLE
+#    undef CONFIG_UART3_SERIAL_CONSOLE
+#    undef CONFIG_UART4_SERIAL_CONSOLE
+#    undef CONFIG_UART5_SERIAL_CONSOLE
+#    undef CONFIG_LPUART1_SERIAL_CONSOLE
+#    define HAVE_LPUART_CONSOLE 1
+#  elif defined(CONFIG_LPUART1_SERIAL_CONSOLE) && defined(CONFIG_KINETIS_LPUART1)
+#    undef CONFIG_UART0_SERIAL_CONSOLE
+#    undef CONFIG_UART1_SERIAL_CONSOLE
+#    undef CONFIG_UART2_SERIAL_CONSOLE
+#    undef CONFIG_UART3_SERIAL_CONSOLE
+#    undef CONFIG_UART4_SERIAL_CONSOLE
+#    undef CONFIG_UART5_SERIAL_CONSOLE
+#    undef CONFIG_LPUART0_SERIAL_CONSOLE
+#    define HAVE_LPUART_CONSOLE 1
+#  else
+#    ifdef CONFIG_DEV_CONSOLE
+#      warning "No valid CONFIG_[LP]UART[n]_SERIAL_CONSOLE Setting"
+#    endif
+#    undef CONFIG_UART0_SERIAL_CONSOLE
+#    undef CONFIG_UART1_SERIAL_CONSOLE
+#    undef CONFIG_UART2_SERIAL_CONSOLE
+#    undef CONFIG_UART3_SERIAL_CONSOLE
+#    undef CONFIG_UART4_SERIAL_CONSOLE
+#    undef CONFIG_UART5_SERIAL_CONSOLE
+#    undef CONFIG_LPUART0_SERIAL_CONSOLE
+#    undef CONFIG_LPUART1_SERIAL_CONSOLE
+#  endif
+#endif
+
+/* Which version of up_putc() should be built?
+ *
+ * --------------------+-------------------+-----------------+------------------
+ *                      HAVE_UART_DEVICE && HAVE_UART_DEVICE  HAVE_LPUART_DEVICE
+ *                      HAVE_LPUART_DEVICE  (only)            (only)
+ * --------------------+-------------------+-----------------+------------------
+ * HAVE_UART_CONSOLE    kinetis_serial      kinetis_serial    (impossible)
+ * HAVE_LPUART_CONSOLE  kinetis_lpserial    (impossible)      kinetis_lpserial
+ * No serial console    kinetis_serial      kinetis_serial    kinetis_lpserial
+ * --------------------+-------------------+-----------------+------------------
+ */
+
+#undef HAVE_UART_PUTC
+#undef HAVE_LPUART_PUTC
+
+#if defined(HAVE_LPUART_CONSOLE)
+#  define HAVE_LPUART_PUTC 1
+#elif defined(HAVE_UART_CONSOLE)
+#  define HAVE_UART_PUTC   1
+#elif defined(HAVE_UART_DEVICE)
+#  define HAVE_UART_PUTC   1
+#elif defined(HAVE_LPUART_DEVICE)
+#  define HAVE_LPUART_PUTC 1
 #endif
 
 /* Check UART flow control (Not yet supported) */
@@ -148,6 +235,8 @@
 # undef CONFIG_UART3_FLOWCONTROL
 # undef CONFIG_UART4_FLOWCONTROL
 # undef CONFIG_UART5_FLOWCONTROL
+# undef CONFIG_LPUART0_FLOWCONTROL
+# undef CONFIG_LPUART1_FLOWCONTROL
 
 /* UART FIFO support is not fully implemented.
  *
@@ -183,6 +272,12 @@
 #ifndef CONFIG_KINETIS_UART5PRIO
 #  define CONFIG_KINETIS_UART5PRIO NVIC_SYSH_PRIORITY_DEFAULT
 #endif
+#ifndef CONFIG_KINETIS_LPUART0PRIO
+#  define CONFIG_KINETIS_LPUART0PRIO NVIC_SYSH_PRIORITY_DEFAULT
+#endif
+#ifndef CONFIG_KINETIS_LPUART1PRIO
+#  define CONFIG_KINETIS_LPUART1PRIO NVIC_SYSH_PRIORITY_DEFAULT
+#endif
 
 /* Ethernet controller configuration */
 
@@ -197,8 +292,8 @@
 #  define CONFIG_ENET_PHYADDR 1
 #endif
 
-#ifndef CONFIG_ENET_NETHIFS
-# define CONFIG_ENET_NETHIFS 1
+#ifndef CONFIG_ENETNETHIFS
+# define CONFIG_ENETNETHIFS 1
 #endif
 
 /* EMAC Default Interrupt Priorities */
@@ -232,4 +327,4 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_KINETISXX_KINETIS_CONFIG_H */
+#endif /* __ARCH_ARM_SRC_KINETIS_KINETIS_CONFIG_H */

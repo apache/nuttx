@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/stdio/lib_stdsostream.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -82,10 +82,12 @@ static void stdsostream_putc(FAR struct lib_sostream_s *this, int ch)
  * Name: stdsostream_flush
  ****************************************************************************/
 
-#if defined(CONFIG_STDIO_LINEBUFFER) && CONFIG_STDIO_BUFFER_SIZE > 0
+#ifndef CONFIG_STDIO_DISABLE_BUFFERING
 static int stdsostream_flush(FAR struct lib_sostream_s *this)
 {
   FAR struct lib_stdsostream_s *sthis = (FAR struct lib_stdsostream_s *)this;
+
+  DEBUGASSERT(sthis != NULL && sthis->stream != NULL);
   return lib_fflush(sthis->stream, true);
 }
 #endif
@@ -97,10 +99,10 @@ static int stdsostream_flush(FAR struct lib_sostream_s *this)
 static off_t stdsostream_seek(FAR struct lib_sostream_s *this, off_t offset,
                               int whence)
 {
-  FAR struct lib_stdsostream_s *mthis = (FAR struct lib_stdsostream_s *)this;
+  FAR struct lib_stdsostream_s *sthis = (FAR struct lib_stdsostream_s *)this;
 
-  DEBUGASSERT(this);
-  return fseek(mthis->stream, offset, whence);
+  DEBUGASSERT(sthis != NULL && sthis->stream != NULL);
+  return fseek(sthis->stream, offset, whence);
 }
 
 /****************************************************************************
@@ -138,9 +140,8 @@ void lib_stdsostream(FAR struct lib_stdsostream_s *outstream,
    * meaning.
    */
 
-#ifdef CONFIG_STDIO_LINEBUFFER
-#if CONFIG_STDIO_BUFFER_SIZE > 0
-  if ((stream->fs_oflags & O_BINARY) == 0)
+#ifndef CONFIG_STDIO_DISABLE_BUFFERING
+  if (stream->fs_bufstart != NULL && (stream->fs_oflags & O_BINARY) == 0)
     {
       outstream->public.flush = stdsostream_flush;
     }
@@ -149,7 +150,6 @@ void lib_stdsostream(FAR struct lib_stdsostream_s *outstream,
     {
       outstream->public.flush = lib_snoflush;
     }
-#endif
 
   /* Select the seek operation */
 

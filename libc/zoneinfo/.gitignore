@@ -1,0 +1,10 @@
+/.built
+/.tzbuilt
+/.tzunpack
+/romfs_zoneinfo.img
+/romfs_zoneinfo.h
+/tzbin
+/tzcode-latest.tar.gz
+/tzcode
+/tzdata-latest.tar.gz
+

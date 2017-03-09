@@ -59,6 +59,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/i2c/i2c_master.h>
 
 #include <nuttx/irq.h>
@@ -128,7 +129,7 @@ struct lpc11_i2cdev_s
 
 static int  lpc11_i2c_start(struct lpc11_i2cdev_s *priv);
 static void lpc11_i2c_stop(struct lpc11_i2cdev_s *priv);
-static int  lpc11_i2c_interrupt(int irq, FAR void *context);
+static int  lpc11_i2c_interrupt(int irq, FAR void *context, void *arg);
 static void lpc11_i2c_timeout(int argc, uint32_t arg, ...);
 static void lpc11_i2c_setfrequency(struct lpc11_i2cdev_s *priv,
               uint32_t frequency);
@@ -303,7 +304,7 @@ static int lpc11_i2c_transfer(FAR struct i2c_master_s *dev,
 }
 
 /****************************************************************************
- * Name: lpc11_i2c_interrupt
+ * Name: lpc11_stopnext
  *
  * Description:
  *   Check if we need to issue STOP at the next message
@@ -333,36 +334,13 @@ static void lpc11_stopnext(struct lpc11_i2cdev_s *priv)
  *
  ****************************************************************************/
 
-static int lpc11_i2c_interrupt(int irq, FAR void *context)
+static int lpc11_i2c_interrupt(int irq, FAR void *context, void *arg)
 {
-  struct lpc11_i2cdev_s *priv;
+  struct lpc11_i2cdev_s *priv = (struct lpc11_i2cdev_s *)arg;
   struct i2c_msg_s *msg;
   uint32_t state;
 
-#ifdef CONFIG_LPC11_I2C0
-  if (irq == LPC11_IRQ_I2C0)
-    {
-      priv = &g_i2c0dev;
-    }
-  else
-#endif
-#ifdef CONFIG_LPC11_I2C1
-  if (irq == LPC11_IRQ_I2C1)
-    {
-      priv = &g_i2c1dev;
-    }
-  else
-#endif
-#ifdef CONFIG_LPC11_I2C2
-  if (irq == LPC11_IRQ_I2C2)
-    {
-      priv = &g_i2c2dev;
-    }
-  else
-#endif
-    {
-      PANIC();
-    }
+  DEBUGASSERT(priv != NULL);
 
   /* Reference UM10360 19.10.5 */
 
@@ -485,7 +463,7 @@ struct i2c_master_s *lpc11_i2cbus_initialize(int port)
 
   if (port > 1)
     {
-      dbg("lpc I2C Only support 0,1\n");
+      i2cerr("ERROR: LPC I2C only supports ports 0 and 1\n");
       return NULL;
     }
 
@@ -584,8 +562,16 @@ struct i2c_master_s *lpc11_i2cbus_initialize(int port)
 
   putreg32(I2C_CONSET_I2EN, priv->base + LPC11_I2C_CONSET_OFFSET);
 
+  /* Initialize semaphores */
+
   sem_init(&priv->mutex, 0, 1);
   sem_init(&priv->wait, 0, 0);
+
+  /* The wait semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
+  sem_setprotocol(&priv->wait, SEM_PRIO_NONE);
 
   /* Allocate a watchdog timer */
 
@@ -594,7 +580,7 @@ struct i2c_master_s *lpc11_i2cbus_initialize(int port)
 
   /* Attach Interrupt Handler */
 
-  irq_attach(priv->irqid, lpc11_i2c_interrupt);
+  irq_attach(priv->irqid, lpc11_i2c_interrupt, priv);
 
   /* Enable Interrupt Handler */
 

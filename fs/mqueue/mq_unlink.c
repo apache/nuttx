@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/mqueue/mq_unlink.c
  *
- *   Copyright (C) 2007, 2009, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <mqueue.h>
 #include <assert.h>
@@ -75,7 +76,7 @@
 int mq_unlink(FAR const char *mq_name)
 {
   FAR struct inode *inode;
-  FAR const char *relpath = NULL;
+  struct inode_search_s desc;
   char fullpath[MAX_MQUEUE_PATH];
   int errcode;
   int ret;
@@ -86,15 +87,22 @@ int mq_unlink(FAR const char *mq_name)
 
   /* Get the inode for this message queue. */
 
+  SETUP_SEARCH(&desc, fullpath, false);
+
   sched_lock();
-  inode = inode_find(fullpath, &relpath);
-  if (!inode)
+  ret = inode_find(&desc);
+  if (ret < 0)
     {
       /* There is no inode that includes in this path */
 
-      errcode = ENOENT;
-      goto errout;
+      errcode = -ret;
+      goto errout_with_search;
     }
+
+  /* Get the search results */
+
+  inode = desc.node;
+  DEBUGASSERT(inode != NULL);
 
   /* Verify that what we found is, indeed, a message queue */
 
@@ -140,14 +148,18 @@ int mq_unlink(FAR const char *mq_name)
 
   inode_semgive();
   mq_inode_release(inode);
+  RELEASE_SEARCH(&desc);
   sched_unlock();
   return OK;
 
 errout_with_semaphore:
   inode_semgive();
+
 errout_with_inode:
   inode_release(inode);
-errout:
+
+errout_with_search:
+  RELEASE_SEARCH(&desc);
   set_errno(errcode);
   sched_unlock();
   return ERROR;

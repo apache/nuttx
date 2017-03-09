@@ -35,11 +35,7 @@
 
 # Add the internal C files to the build
 
-CSRCS += lib_syslog.c lib_lowsyslog.c lib_setlogmask.c
-
-ifeq ($(CONFIG_SYSLOG),y)
-CSRCS += lib_syslogstream.c
-endif
+CSRCS += lib_syslog.c lib_setlogmask.c
 
 # Add the syslog directory to the build
 

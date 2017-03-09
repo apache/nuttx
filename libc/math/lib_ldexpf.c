@@ -6,7 +6,7 @@
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Ported by: Darcy Gong
  *
- * It derives from the Rhombs OS math library by Nick Johnson which has
+ * It derives from the Rhombus OS math library by Nick Johnson which has
  * a compatibile, MIT-style license:
  *
  * Copyright (C) 2009-2011 Nick Johnson <nickbjohnson4224 at gmail.com>
@@ -37,5 +37,5 @@
 
 float ldexpf(float x, int n)
 {
-  return (x * powf(2.0, (float)n));
+  return (x * powf(2.0F, (float)n));
 }

@@ -127,14 +127,13 @@
 int igmp_leavegroup(struct net_driver_s *dev, FAR const struct in_addr *grpaddr)
 {
   struct igmp_group_s *group;
-  net_lock_t flags;
 
   DEBUGASSERT(dev && grpaddr);
 
   /* Find the entry corresponding to the address leaving the group */
 
   group = igmp_grpfind(dev, &grpaddr->s_addr);
-  ndbg("Leaving group: %p\n", group);
+  ninfo("Leaving group: %p\n", group);
   if (group)
     {
       /* Cancel the timer and discard any queued Membership Reports.  Canceling
@@ -143,11 +142,11 @@ int igmp_leavegroup(struct net_driver_s *dev, FAR const struct in_addr *grpaddr)
        * could interfere with the Leave Group.
        */
 
-      flags = net_lock();
+      net_lock();
       wd_cancel(group->wdog);
       CLR_SCHEDMSG(group->flags);
       CLR_WAITMSG(group->flags);
-      net_unlock(flags);
+      net_unlock();
 
       IGMP_STATINCR(g_netstats.igmp.leaves);
 
@@ -155,7 +154,7 @@ int igmp_leavegroup(struct net_driver_s *dev, FAR const struct in_addr *grpaddr)
 
       if (IS_LASTREPORT(group->flags))
         {
-          ndbg("Schedule Leave Group message\n");
+          ninfo("Schedule Leave Group message\n");
           IGMP_STATINCR(g_netstats.igmp.leave_sched);
           igmp_waitmsg(group, IGMP_LEAVE_GROUP);
         }
@@ -172,7 +171,7 @@ int igmp_leavegroup(struct net_driver_s *dev, FAR const struct in_addr *grpaddr)
 
   /* Return ENOENT if the address is not a member of the group */
 
-  nvdbg("Return -ENOENT\n");
+  ninfo("Return -ENOENT\n");
   return -ENOENT;
 }
 

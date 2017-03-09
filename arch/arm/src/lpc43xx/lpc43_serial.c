@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc43xx/lpc43_serial.c
  *
- *   Copyright (C) 2012-2013, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -92,6 +92,8 @@ struct up_dev_s
   uint8_t   bits;      /* Number of bits (7 or 8) */
   bool      stopbits2; /* true: Configure with 2 stop bits instead of 1 */
 #ifdef HAVE_RS485
+  bool      dctrl;     /* Hardware RS485 direction control */
+  bool      diroinv;   /* Direction pin polarity invert */
   bool      dtrdir;    /* DTR pin is the direction bit */
 #endif
 };
@@ -104,8 +106,15 @@ static int  up_setup(struct uart_dev_s *dev);
 static void up_shutdown(struct uart_dev_s *dev);
 static int  up_attach(struct uart_dev_s *dev);
 static void up_detach(struct uart_dev_s *dev);
-static int  up_interrupt(int irq, void *context);
+static int  up_interrupt(int irq, void *context, void *arg);
 static int  up_ioctl(struct file *filep, int cmd, unsigned long arg);
+#ifdef HAVE_RS485
+static inline int up_set_rs485_mode(struct up_dev_s *priv,
+                                    const struct serial_rs485 *mode);
+
+static inline int up_get_rs485_mode(struct up_dev_s *priv,
+                                    struct serial_rs485 *mode);
+#endif
 static int  up_receive(struct uart_dev_s *dev, uint32_t *status);
 static void up_rxint(struct uart_dev_s *dev, bool enable);
 static bool up_rxavailable(struct uart_dev_s *dev);
@@ -140,26 +149,26 @@ static const struct uart_ops_s g_uart_ops =
 /* I/O buffers */
 
 #ifdef CONFIG_LPC43_USART0
-static char g_uart0rxbuffer[CONFIG_USART0_RXBUFSIZE];
-static char g_uart0txbuffer[CONFIG_USART0_TXBUFSIZE];
+static char g_usart0rxbuffer[CONFIG_USART0_RXBUFSIZE];
+static char g_usart0txbuffer[CONFIG_USART0_TXBUFSIZE];
 #endif
 #ifdef CONFIG_LPC43_UART1
 static char g_uart1rxbuffer[CONFIG_UART1_RXBUFSIZE];
 static char g_uart1txbuffer[CONFIG_UART1_TXBUFSIZE];
 #endif
 #ifdef CONFIG_LPC43_USART2
-static char g_uart2rxbuffer[CONFIG_USART2_RXBUFSIZE];
-static char g_uart2txbuffer[CONFIG_USART2_TXBUFSIZE];
+static char g_usart2rxbuffer[CONFIG_USART2_RXBUFSIZE];
+static char g_usart2txbuffer[CONFIG_USART2_TXBUFSIZE];
 #endif
 #ifdef CONFIG_LPC43_USART3
-static char g_uart3rxbuffer[CONFIG_USART3_RXBUFSIZE];
-static char g_uart3txbuffer[CONFIG_USART3_TXBUFSIZE];
+static char g_usart3rxbuffer[CONFIG_USART3_RXBUFSIZE];
+static char g_usart3txbuffer[CONFIG_USART3_TXBUFSIZE];
 #endif
 
 /* This describes the state of the LPC43xx uart0 port. */
 
 #ifdef CONFIG_LPC43_USART0
-static struct up_dev_s g_uart0priv =
+static struct up_dev_s g_usart0priv =
 {
   .uartbase       = LPC43_USART0_BASE,
   .basefreq       = BOARD_USART0_BASEFREQ,
@@ -169,25 +178,32 @@ static struct up_dev_s g_uart0priv =
   .parity         = CONFIG_USART0_PARITY,
   .bits           = CONFIG_USART0_BITS,
   .stopbits2      = CONFIG_USART0_2STOP,
-#if defined(CONFIG_USART0_RS485MODE) && defined(CONFIG_USART0_RS485_DTRDIR)
-  .dtrdir         = true;
+#if defined(CONFIG_USART0_RS485MODE)
+  .dctrl          = true,
+#  if defined(CONFIG_USART0_RS485DIROIN)
+  .diroinv        = true,
+#  else
+  .diroinv        = false,
+#  endif
+#elif defined(HAVE_RS485) /* RS485 supported, but not on USART0 */
+  .dctrl          = false,
 #endif
 };
 
-static uart_dev_t g_uart0port =
+static uart_dev_t g_usart0port =
 {
   .recv     =
   {
     .size   = CONFIG_USART0_RXBUFSIZE,
-    .buffer = g_uart0rxbuffer,
+    .buffer = g_usart0rxbuffer,
   },
   .xmit     =
   {
     .size   = CONFIG_USART0_TXBUFSIZE,
-    .buffer = g_uart0txbuffer,
+    .buffer = g_usart0txbuffer,
   },
   .ops      = &g_uart_ops,
-  .priv     = &g_uart0priv,
+  .priv     = &g_usart0priv,
 };
 #endif
 
@@ -205,7 +221,7 @@ static struct up_dev_s g_uart1priv =
   .bits           = CONFIG_UART1_BITS,
   .stopbits2      = CONFIG_UART1_2STOP,
 #if defined(CONFIG_UART1_RS485MODE) && defined(CONFIG_UART1_RS485_DTRDIR)
-  .dtrdir         = true;
+  .dtrdir         = true,
 #endif
 };
 
@@ -229,7 +245,7 @@ static uart_dev_t g_uart1port =
 /* This describes the state of the LPC43xx uart1 port. */
 
 #ifdef CONFIG_LPC43_USART2
-static struct up_dev_s g_uart2priv =
+static struct up_dev_s g_usart2priv =
 {
   .uartbase       = LPC43_USART2_BASE,
   .basefreq       = BOARD_USART2_BASEFREQ,
@@ -239,32 +255,39 @@ static struct up_dev_s g_uart2priv =
   .parity         = CONFIG_USART2_PARITY,
   .bits           = CONFIG_USART2_BITS,
   .stopbits2      = CONFIG_USART2_2STOP,
-#if defined(CONFIG_USART2_RS485MODE) && defined(CONFIG_USART2_RS485_DTRDIR)
-  .dtrdir         = true;
+#if defined(CONFIG_USART2_RS485MODE)
+  .dctrl          = true,
+#  if defined(CONFIG_USART2_RS485DIROIN)
+  .diroinv        = true,
+#  else
+  .diroinv        = false,
+#  endif
+#elif defined(HAVE_RS485) /* RS485 supported, but not on USART2 */
+  .dctrl          = false,
 #endif
 };
 
-static uart_dev_t g_uart2port =
+static uart_dev_t g_usart2port =
 {
   .recv     =
   {
     .size   = CONFIG_USART2_RXBUFSIZE,
-    .buffer = g_uart2rxbuffer,
+    .buffer = g_usart2rxbuffer,
   },
   .xmit     =
   {
     .size   = CONFIG_USART2_TXBUFSIZE,
-    .buffer = g_uart2txbuffer,
+    .buffer = g_usart2txbuffer,
   },
   .ops      = &g_uart_ops,
-  .priv     = &g_uart2priv,
+  .priv     = &g_usart2priv,
 };
 #endif
 
 /* This describes the state of the LPC43xx uart1 port. */
 
 #ifdef CONFIG_LPC43_USART3
-static struct up_dev_s g_uart3priv =
+static struct up_dev_s g_usart3priv =
 {
   .uartbase       = LPC43_USART3_BASE,
   .basefreq       = BOARD_USART3_BASEFREQ,
@@ -274,228 +297,125 @@ static struct up_dev_s g_uart3priv =
   .parity         = CONFIG_USART3_PARITY,
   .bits           = CONFIG_USART3_BITS,
   .stopbits2      = CONFIG_USART3_2STOP,
-#if defined(CONFIG_USART3_RS485MODE) && defined(CONFIG_USART3_RS485_DTRDIR)
-  .dtrdir         = true;
+#if defined(CONFIG_USART3_RS485MODE)
+  .dctrl          = true,
+#  if defined(CONFIG_USART3_RS485DIROIN)
+  .diroinv        = true,
+#  else
+  .diroinv        = false,
+#  endif
+#elif defined(HAVE_RS485) /* RS485 supported, but not on USART3 */
+  .dctrl          = false,
 #endif
 };
 
-static uart_dev_t g_uart3port =
+static uart_dev_t g_usart3port =
 {
   .recv     =
   {
     .size   = CONFIG_USART3_RXBUFSIZE,
-    .buffer = g_uart3rxbuffer,
+    .buffer = g_usart3rxbuffer,
   },
   .xmit     =
   {
     .size   = CONFIG_USART3_TXBUFSIZE,
-    .buffer = g_uart3txbuffer,
+    .buffer = g_usart3txbuffer,
   },
   .ops      = &g_uart_ops,
-  .priv     = &g_uart3priv,
+  .priv     = &g_usart3priv,
 };
 #endif
 
 /* Which UART with be tty0/console and which tty1? tty2? tty3? */
 
-#ifdef HAVE_CONSOLE
+#undef CONSOLE_DEV                          /* Assume no console */
+#undef TTYS0_DEV                            /* Assume no ttyS0 */
+#undef TTYS1_DEV                            /* Assume no ttyS1 */
+#undef TTYS2_DEV                            /* Assume no ttyS2 */
+#undef TTYS3_DEV                            /* Assume no ttyS3 */
+#undef USART0_ASSIGNED                      /* USART0 has not been assigned */
+#undef UART1_ASSIGNED                       /* UART1 has not been assigned */
+#undef USART2_ASSIGNED                      /* USART2 has not been assigned */
+#undef USART3_ASSIGNED                      /* USART3 has not been assigned */
+
+/* Assign the console device and ttyS0 */
+
+#ifdef HAVE_SERIAL_CONSOLE
 #  if defined(CONFIG_USART0_SERIAL_CONSOLE)
-#    define CONSOLE_DEV     g_uart0port      /* USART0=console */
-#    define TTYS0_DEV       g_uart0port      /* USART0=ttyS0 */
-#    ifdef CONFIG_LPC43_UART1
-#      define TTYS1_DEV     g_uart1port      /* USART0=ttyS0;UART1=ttyS1 */
-#      ifdef CONFIG_LPC43_USART2
-#        define TTYS2_DEV   g_uart2port      /* USART0=ttyS0;UART1=ttyS1;USART2=ttyS2 */
-#        ifdef CONFIG_LPC43_USART3
-#          define TTYS3_DEV g_uart3port      /* USART0=ttyS0;UART1=ttyS1;USART2=ttyS2;USART3=ttyS3 */
-#        else
-#          undef TTYS3_DEV                   /* USART0=ttyS0;UART1=ttyS1;USART2=ttyS;No ttyS3 */
-#        endif
-#      else
-#        ifdef CONFIG_LPC43_USART3
-#          define TTYS2_DEV g_uart3port     /* USART0=ttyS0;UART1=ttyS1;USART3=ttys2;No ttyS3 */
-#        else
-#          undef TTYS2_DEV                  /* USART0=ttyS0;UART1=ttyS1;No ttyS2;No ttyS3 */
-#        endif
-#        undef TTYS3_DEV                    /* No ttyS3 */
-#      endif
-#    else
-#      ifdef CONFIG_LPC43_USART2
-#        define TTYS1_DEV   g_uart2port    /* USART0=ttyS0;USART2=ttyS1;No ttyS3 */
-#        ifdef CONFIG_LPC43_USART3
-#          define TTYS2_DEV g_uart3port    /* USART0=ttyS0;USART2=ttyS1;USART3=ttyS2;No ttyS3 */
-#        else
-#          undef TTYS2_DEV                 /* USART0=ttyS0;USART2=ttyS1;No ttyS2;No ttyS3 */
-#        endif
-#        undef TTYS3_DEV                   /* No ttyS3 */
-#      else
-#        ifdef CONFIG_LPC43_USART3
-#          define TTYS1_DEV g_uart3port    /* USART0=ttyS0;USART3=ttyS1;No ttyS2;No ttyS3 */
-#        else
-#          undef TTYS1_DEV                 /* USART0=ttyS0;No ttyS1;No ttyS2;No ttyS3 */
-#        endif
-#          undef TTYS2_DEV                  /* No ttyS2 */
-#        undef TTYS3_DEV                    /* No ttyS3 */
-#      endif
-#    endif
+#    define CONSOLE_DEV     g_usart0port    /* USART0=console */
+#    define TTYS0_DEV       g_usart0port    /* USART0=ttyS0 */
+#    define USART0_ASSIGNED 1
 #  elif defined(CONFIG_UART1_SERIAL_CONSOLE)
 #    define CONSOLE_DEV     g_uart1port     /* UART1=console */
 #    define TTYS0_DEV       g_uart1port     /* UART1=ttyS0 */
-#    ifdef CONFIG_LPC43_USART0
-#      define TTYS1_DEV     g_uart0port     /* UART1=ttyS0;USART0=ttyS1 */
-#      ifdef CONFIG_LPC43_USART2
-#        define TTYS2_DEV   g_uart2port     /* UART1=ttyS0;USART0=ttyS1;USART2=ttyS2 */
-#        ifdef CONFIG_LPC43_USART3
-#          define TTYS3_DEV g_uart3port     /* UART1=ttyS0;USART0=ttyS1;USART2=ttyS2;USART3=ttyS3 */
-#        else
-#          undef TTYS3_DEV                  /* UART1=ttyS0;USART0=ttyS1;USART2=ttyS;No ttyS3 */
-#        endif
-#      else
-#        ifdef CONFIG_LPC43_USART3
-#          define TTYS2_DEV g_uart3port     /* UART1=ttyS0;USART0=ttyS1;USART3=ttys2;No ttyS3 */
-#        else
-#          undef TTYS2_DEV                  /* UART1=ttyS0;USART0=ttyS1;No ttyS2;No ttyS3 */
-#        endif
-#        undef TTYS3_DEV                    /* No ttyS3 */
-#      endif
-#    else
-#      ifdef CONFIG_LPC43_USART2
-#        define TTYS1_DEV   g_uart2port     /* UART1=ttyS0;USART2=ttyS1 */
-#        ifdef CONFIG_LPC43_USART3
-#          define TTYS2_DEV g_uart3port     /* UART1=ttyS0;USART2=ttyS1;USART3=ttyS2;No ttyS3 */
-#        else
-#          undef TTYS2_DEV                  /* UART1=ttyS0;USART2=ttyS1;No ttyS2;No ttyS3 */
-#        endif
-#        undef TTYS3_DEV                    /* No ttyS3 */
-#      else
-#        ifdef CONFIG_LPC43_USART3
-#          define TTYS1_DEV   g_uart3port   /* UART1=ttyS0;USART3=ttyS1;No ttyS2;No ttyS3 */
-#        else
-#          undef TTYS1_DEV                  /* UART1=ttyS0;No ttyS1;No ttyS2;No ttyS3 */
-#        endif
-#        undef TTYS2_DEV                    /* No ttyS2 */
-#        undef TTYS3_DEV                    /* No ttyS3 */
-#      endif
-#    endif
+#    define UART1_ASSIGNED  1
 #  elif defined(CONFIG_USART2_SERIAL_CONSOLE)
-#    define CONSOLE_DEV     g_uart2port     /* USART2=console */
-#    define TTYS0_DEV       g_uart2port     /* USART2=ttyS0 */
-#    ifdef CONFIG_LPC43_USART0
-#      define TTYS1_DEV     g_uart0port     /* USART2=ttyS0;USART0=ttyS1 */
-#      ifdef CONFIG_LPC43_UART1
-#        define TTYS2_DEV   g_uart1port     /* USART2=ttyS0;USART0=ttyS1;UART1=ttyS2 */
-#        ifdef CONFIG_LPC43_USART3
-#          define TTYS3_DEV g_uart3port     /* USART2=ttyS0;USART0=ttyS1;UART1=ttyS2;USART3=ttyS3 */
-#        else
-#          undef TTYS3_DEV                  /* USART2=ttyS0;USART0=ttyS1;UART1=ttyS;No ttyS3 */
-#        endif
-#      else
-#        ifdef CONFIG_LPC43_USART3
-#          define TTYS2_DEV g_uart3port     /* USART2=ttyS0;USART0=ttyS1;USART3=ttys2;No ttyS3 */
-#        else
-#          undef TTYS2_DEV                  /* USART2=ttyS0;USART0=ttyS1;No ttyS2;No ttyS3 */
-#        endif
-#        undef TTYS3_DEV                    /* No ttyS3 */
-#      endif
-#    else
-#      ifdef CONFIG_LPC43_UART1
-#        define TTYS1_DEV   g_uart1port    /* USART2=ttyS0;UART1=ttyS1 */
-#        ifdef CONFIG_LPC43_USART3
-#          define TTYS2_DEV g_uart3port    /* USART2=ttyS0;UART1=ttyS1;USART3=ttyS2 */
-#        else
-#          undef TTYS2_DEV                 /* USART2=ttyS0;UART1=ttyS1;No ttyS2;No ttyS3 */
-#        endif
-#        undef TTYS3_DEV                   /* No ttyS3 */
-#      else
-#        ifdef CONFIG_LPC43_USART3
-#          define TTYS1_DEV g_uart3port    /* USART2=ttyS0;USART3=ttyS1;No ttyS3 */
-#        else
-#          undef TTYS1_DEV                 /* USART2=ttyS0;No ttyS1;No ttyS2;No ttyS3 */
-#        endif
-#        undef TTYS2_DEV                   /* No ttyS2 */
-#        undef TTYS3_DEV                   /* No ttyS3 */
-#      endif
-#    endif
-#  elif defined(CONFIG_USART3_SERIAL_CONSOLE)
-#    define CONSOLE_DEV     g_uart3port    /* USART3=console */
-#    define TTYS0_DEV       g_uart3port    /* USART3=ttyS0 */
-#    ifdef CONFIG_LPC43_USART0
-#      define TTYS1_DEV     g_uart0port    /* USART3=ttyS0;USART0=ttyS1 */
-#      ifdef CONFIG_LPC43_UART1
-#        define TTYS2_DEV   g_uart1port    /* USART3=ttyS0;USART0=ttyS1;UART1=ttyS2 */
-#        ifdef CONFIG_LPC43_USART2
-#          define TTYS3_DEV g_uart2port    /* USART3=ttyS0;USART0=ttyS1;UART1=ttyS2;USART2=ttyS3 */
-#        else
-#          undef TTYS3_DEV                 /* USART3=ttyS0;USART0=ttyS1;UART1=ttyS;No ttyS3 */
-#        endif
-#      else
-#        ifdef CONFIG_LPC43_USART2
-#          define TTYS2_DEV g_uart2port    /* USART3=ttyS0;USART0=ttyS1;USART2=ttys2;No ttyS3 */
-#        else
-#          undef TTYS2_DEV                 /* USART3=ttyS0;USART0=ttyS1;No ttyS2;No ttyS3 */
-#        endif
-#          undef TTYS3_DEV                 /* No ttyS3 */
-#      endif
-#    else
-#      ifdef CONFIG_LPC43_UART1
-#        define TTYS1_DEV   g_uart1port    /* USART3=ttyS0;UART1=ttyS1 */
-#        ifdef CONFIG_LPC43_USART2
-#          define TTYS2_DEV g_uart2port    /* USART3=ttyS0;UART1=ttyS1;USART2=ttyS2;No ttyS3 */
-#        else
-#          undef TTYS2_DEV                 /* USART3=ttyS0;UART1=ttyS1;No ttyS2;No ttyS3 */
-#        endif
-#        undef TTYS3_DEV                   /* No ttyS3 */
-#      else
-#        ifdef CONFIG_LPC43_USART2
-#          define TTYS1_DEV   g_uart2port  /* USART3=ttyS0;USART2=ttyS1;No ttyS3;No ttyS3 */
-#          undef TTYS3_DEV                 /* USART3=ttyS0;USART2=ttyS1;No ttyS2;No ttyS3 */
-#        else
-#          undef TTYS1_DEV                 /* USART3=ttyS0;No ttyS1;No ttyS2;No ttyS3 */
-#        endif
-#        undef TTYS2_DEV                   /* No ttyS2 */
-#        undef TTYS3_DEV                   /* No ttyS3 */
-#      endif
-#    endif
-#  endif
-#else /* No console */
-#  define TTYS0_DEV       g_uart0port      /* USART0=ttyS0 */
-#  ifdef CONFIG_LPC43_UART1
-#    define TTYS1_DEV     g_uart1port      /* USART0=ttyS0;UART1=ttyS1 */
-#    ifdef CONFIG_LPC43_USART2
-#      define TTYS2_DEV   g_uart2port      /* USART0=ttyS0;UART1=ttyS1;USART2=ttyS2 */
-#      ifdef CONFIG_LPC43_USART3
-#        define TTYS3_DEV g_uart3port      /* USART0=ttyS0;UART1=ttyS1;USART2=ttyS2;USART3=ttyS3 */
-#      else
-#        undef TTYS3_DEV                   /* USART0=ttyS0;UART1=ttyS1;USART2=ttyS;No ttyS3 */
-#      endif
-#    else
-#      ifdef CONFIG_LPC43_USART3
-#        define TTYS2_DEV g_uart3port      /* USART0=ttyS0;UART1=ttyS1;USART3=ttys2;No ttyS3 */
-#      else
-#        undef TTYS2_DEV                   /* USART0=ttyS0;UART1=ttyS1;No ttyS2;No ttyS3 */
-#      endif
-#      undef TTYS3_DEV                     /* No ttyS3 */
-#    endif
-#  else
-#    ifdef CONFIG_LPC43_USART2
-#      define TTYS1_DEV   g_uart2port     /* USART0=ttyS0;USART2=ttyS1;No ttyS3 */
-#      ifdef CONFIG_LPC43_USART3
-#        define TTYS2_DEV g_uart3port     /* USART0=ttyS0;USART2=ttyS1;USART3=ttyS2;No ttyS3 */
-#      else
-#        undef TTYS2_DEV                  /* USART0=ttyS0;USART2=ttyS1;No ttyS2;No ttyS3 */
-#      endif
-#      undef TTYS3_DEV                    /* No ttyS3 */
-#    else
-#      ifdef CONFIG_LPC43_USART3
-#        define TTYS1_DEV g_uart3port     /* USART0=ttyS0;USART3=ttyS1;No ttyS2;No ttyS3 */
-#      else
-#        undef TTYS1_DEV                  /* USART0=ttyS0;No ttyS1;No ttyS2;No ttyS3 */
-#      endif
-#        undef TTYS2_DEV                  /* No ttyS2 */
-#      undef TTYS3_DEV                    /* No ttyS3 */
-#    endif
-#  endif
-#endif /* HAVE_CONSOLE */
+#    define CONSOLE_DEV     g_usart2port    /* USART2=console */
+#    define TTYS0_DEV       g_usart2port    /* USART2=ttyS0 */
+#    define USART2_ASSIGNED 1
+#  else /* elif defined(CONFIG_USART3_SERIAL_CONSOLE) */
+#    define CONSOLE_DEV     g_usart3port    /* USART3=console */
+#    define TTYS0_DEV       g_usart3port    /* USART3=ttyS0 */
+#    define USART3_ASSIGNED 1
+# endif
+#else
+/* No console, assign only ttyS0 */
+
+#  if defined(CONFIG_LPC43_USART0)
+#    define TTYS0_DEV       g_usart0port    /* USART0=ttyS0 */
+#    define USART0_ASSIGNED 1
+#  elif defined(CONFIG_LPC43_UART1)
+#    define TTYS0_DEV       g_uart1port     /* UART1=ttyS0 */
+#    define UART1_ASSIGNED  1
+#  elif defined(CONFIG_LPC43_USART2)
+#    define TTYS0_DEV       g_usart2port    /* USART2=ttyS0 */
+#    define USART2_ASSIGNED 1
+#  else /* elif defined(CONFIG_LPC43_USART3) */
+#    define TTYS0_DEV       g_usart3port    /* USART3=ttyS0 */
+#    define USART3_ASSIGNED 1
+# endif
+#endif
+
+/* Assign ttyS1 */
+
+#if defined(CONFIG_LPC43_USART0) && !defined(USART0_ASSIGNED)
+#  define TTYS1_DEV         g_usart0port    /* USART0=ttyS1 */
+#  define USART0_ASSIGNED 1
+#elif defined(CONFIG_LPC43_UART1) && !defined(UART1_ASSIGNED)
+#  define TTYS1_DEV         g_usart1port    /* USART1=ttyS1 */
+#  define UART1_ASSIGNED 1
+#elif defined(CONFIG_LPC43_USART2) && !defined(USART2_ASSIGNED)
+#  define TTYS1_DEV         g_usart2port    /* USART2=ttyS1 */
+#  define USART2_ASSIGNED 1
+#elif defined(CONFIG_LPC43_USART3) && !defined(USART3_ASSIGNED)
+#  define TTYS1_DEV         g_usart3port    /* USART3=ttyS1 */
+#  define USART3_ASSIGNED 1
+#endif
+
+/* Assign ttyS2.  USART0 has already been assigned if it was configured. */
+
+#if defined(CONFIG_LPC43_UART1) && !defined(UART1_ASSIGNED)
+#  define TTYS2_DEV         g_usart1port    /* USART1=ttyS2 */
+#  define UART1_ASSIGNED 1
+#elif defined(CONFIG_LPC43_USART2) && !defined(USART2_ASSIGNED)
+#  define TTYS2_DEV         g_usart2port    /* USART2=ttyS2 */
+#  define USART2_ASSIGNED 1
+#elif defined(CONFIG_LPC43_USART3) && !defined(USART3_ASSIGNED)
+#  define TTYS2_DEV         g_usart3port    /* USART3=ttyS2 */
+#  define USART3_ASSIGNED 1
+#endif
+
+/* Assign ttyS3.  USART0 and UART1 have already been assigned if they were
+ * configured.
+ */
+
+#if defined(CONFIG_LPC43_USART2) && !defined(USART2_ASSIGNED)
+#  define TTYS3_DEV         g_usart2port    /* USART2=ttyS3 */
+#  define USART2_ASSIGNED 1
+#elif defined(CONFIG_LPC43_USART3) && !defined(USART3_ASSIGNED)
+#  define TTYS3_DEV         g_usart3port    /* USART3=ttyS3 */
+#  define USART3_ASSIGNED 1
+#endif
 
 /****************************************************************************
  * Inline Functions
@@ -581,6 +501,9 @@ static int up_setup(struct uart_dev_s *dev)
 {
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+#ifdef HAVE_RS485
+  struct serial_rs485 rs485mode;
+#endif
   uint32_t lcr;
 
   /* Clear fifos */
@@ -642,6 +565,24 @@ static int up_setup(struct uart_dev_s *dev)
   if (priv->id == 1)
     {
       up_serialout(priv, LPC43_UART_MCR_OFFSET, (UART_MCR_RTSEN | UART_MCR_CTSEN));
+    }
+#endif
+
+  /* Setup initial RS485 settings */
+
+#ifdef HAVE_RS485
+  if (priv->dctrl)
+    {
+      rs485mode.flags                 = SER_RS485_ENABLED;
+      rs485mode.delay_rts_after_send  = 0;
+      rs485mode.delay_rts_before_send = 0;
+
+      if (priv->diroinv)
+        {
+          rs485mode.flags |= SER_RS485_RTS_ON_SEND;
+        }
+
+      up_set_rs485_mode(priv, &rs485mode);
     }
 #endif
 
@@ -720,7 +661,7 @@ static int up_attach(struct uart_dev_s *dev)
 
   /* Attach and enable the IRQ */
 
-  ret = irq_attach(priv->irq, up_interrupt);
+  ret = irq_attach(priv->irq, up_interrupt, dev);
   if (ret == OK)
     {
       /* Enable the interrupt (RX and TX interrupts are still disabled
@@ -761,44 +702,14 @@ static void up_detach(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static int up_interrupt(int irq, void *context)
+static int up_interrupt(int irq, void *context, void *arg)
 {
-  struct uart_dev_s *dev = NULL;
+  struct uart_dev_s *dev = (struct uart_dev_s *)arg;
   struct up_dev_s   *priv;
   uint32_t           status;
   int                passes;
 
-#ifdef CONFIG_LPC43_USART0
-  if (g_uart0priv.irq == irq)
-    {
-      dev = &g_uart0port;
-    }
-  else
-#endif
-#ifdef CONFIG_LPC43_UART1
-  if (g_uart1priv.irq == irq)
-    {
-      dev = &g_uart1port;
-    }
-  else
-#endif
-#ifdef CONFIG_LPC43_USART2
-  if (g_uart2priv.irq == irq)
-    {
-      dev = &g_uart2port;
-    }
-  else
-#endif
-#ifdef CONFIG_LPC43_USART3
-  if (g_uart3priv.irq == irq)
-    {
-      dev = &g_uart3port;
-    }
-  else
-#endif
-    {
-      PANIC();
-    }
+  DEBUGASSERT(dev != NULL && dev->priv != NULL);
   priv = (struct up_dev_s *)dev->priv;
 
   /* Loop until there are no characters to be transferred or,
@@ -854,7 +765,7 @@ static int up_interrupt(int irq, void *context)
               /* Read the modem status register (MSR) to clear */
 
               status = up_serialin(priv, LPC43_UART_MSR_OFFSET);
-              vdbg("MSR: %02x\n", status);
+              _info("MSR: %02x\n", status);
               break;
             }
 
@@ -865,7 +776,7 @@ static int up_interrupt(int irq, void *context)
               /* Read the line status register (LSR) to clear */
 
               status = up_serialin(priv, LPC43_UART_LSR_OFFSET);
-              vdbg("LSR: %02x\n", status);
+              _info("LSR: %02x\n", status);
               break;
             }
 
@@ -873,7 +784,7 @@ static int up_interrupt(int irq, void *context)
 
           default:
             {
-              dbg("Unexpected IIR: %02x\n", status);
+              _err("ERROR: Unexpected IIR: %02x\n", status);
               break;
             }
         }
@@ -942,7 +853,7 @@ static inline int up_set_rs485_mode(struct up_dev_s *priv,
 
   /* Are we enabling or disabling RS-485 support? */
 
-  if ((mode->flags && SER_RS485_RTS_ON_SEND) != 0)
+  if ((mode->flags & SER_RS485_ENABLED) == 0)
     {
       /* Disable all RS-485 features */
 
@@ -970,7 +881,7 @@ static inline int up_set_rs485_mode(struct up_dev_s *priv,
        * be inverted.
        */
 
-      if ((mode->flags && SER_RS485_RTS_ON_SEND) != 0)
+      if ((mode->flags & SER_RS485_RTS_ON_SEND) != 0)
         {
           regval |= UART_RS485CTRL_OINV;
         }
@@ -1372,7 +1283,7 @@ void up_earlyserialinit(void)
 #ifndef CONFIG_USART0_SERIAL_CONSOLE
   lpc43_usart0_setup();
 #endif
-  up_disableuartint(&g_uart0priv, NULL);
+  up_disableuartint(&g_usart0priv, NULL);
 #endif
 
 #ifdef CONFIG_LPC43_UART1
@@ -1386,14 +1297,14 @@ void up_earlyserialinit(void)
 #ifndef CONFIG_USART2_SERIAL_CONSOLE
   lpc43_usart2_setup();
 #endif
-  up_disableuartint(&g_uart2priv, NULL);
+  up_disableuartint(&g_usart2priv, NULL);
 #endif
 
 #ifdef CONFIG_LPC43_USART3
 #ifndef CONFIG_USART3_SERIAL_CONSOLE
   lpc43_usart3_setup();
 #endif
-  up_disableuartint(&g_uart3priv, NULL);
+  up_disableuartint(&g_usart3priv, NULL);
 #endif
 
   /* Configuration whichever one is the console */
@@ -1443,7 +1354,7 @@ void up_serialinit(void)
 
 int up_putc(int ch)
 {
-#ifdef HAVE_CONSOLE
+#ifdef HAVE_SERIAL_CONSOLE
   struct up_dev_s *priv = (struct up_dev_s *)CONSOLE_DEV.priv;
   uint32_t ier;
   up_disableuartint(priv, &ier);
@@ -1459,7 +1370,7 @@ int up_putc(int ch)
     }
 
   up_lowputc(ch);
-#ifdef HAVE_CONSOLE
+#ifdef HAVE_SERIAL_CONSOLE
   up_restoreuartint(priv, ier);
 #endif
 

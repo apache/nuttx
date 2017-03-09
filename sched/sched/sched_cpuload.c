@@ -65,13 +65,21 @@
 #  define CPULOAD_TICKSPERSEC CLOCKS_PER_SEC
 #endif
 
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
+/* When g_cpuload_total exceeds the following time constant, the load and
+ * the counds will be scaled back by two.  In the CONFIG_SMP, g_cpuload_total
+ * will be incremented multiple times per tick.
+ */
 
-/****************************************************************************
- * Public Data
- ****************************************************************************/
+#ifdef CONFIG_SMP
+#  define CPULOAD_TIMECONSTANT \
+    (CONFIG_SMP_NCPUS * \
+     CONFIG_SCHED_CPULOAD_TIMECONSTANT * \
+     CPULOAD_TICKSPERSEC)
+#else
+#  define CPULOAD_TIMECONSTANT \
+    (CONFIG_SCHED_CPULOAD_TIMECONSTANT * \
+     CPULOAD_TICKSPERSEC)
+#endif
 
 /****************************************************************************
  * Private Data
@@ -79,6 +87,15 @@
 
 /* This is the total number of clock tick counts.  Essentially the
  * 'denominator' for all CPU load calculations.
+ *
+ * For a single CPU, this value is increment once per sample interval.  So,
+ * for example, if nothing is running but the IDLE thread, that IDLE thread
+ * will get 100% of the load.
+ *
+ * But for the case of multiple CPUs (with CONFIG_SMP=y), this value is
+ * incremented for each CPU on each sample interval. So, as an example, if
+ * there are four CPUs and is nothing is running but the IDLE threads, then
+ * each would have a load of 25% of the total.
  */
 
 volatile uint32_t g_cpuload_total;
@@ -86,6 +103,48 @@ volatile uint32_t g_cpuload_total;
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: sched_cpu_process_cpuload
+ *
+ * Description:
+ *   Collect data that can be used for CPU load measurements.
+ *
+ * Inputs:
+ *   cpu - The CPU that we are performing the load operations on.
+ *
+ * Return Value:
+ *   None
+ *
+ * Assumptions/Limitations:
+ *   This function is called from a timer interrupt handler with all
+ *   interrupts disabled.
+ *
+ ****************************************************************************/
+
+static inline void sched_cpu_process_cpuload(int cpu)
+{
+  FAR struct tcb_s *rtcb  = current_task(cpu);
+  int hash_index;
+
+  /* Increment the count on the currently executing thread
+   *
+   * NOTE also that CPU load measurement data is retained in the g_pidhash
+   * table vs. in the TCB which would seem to be the more logic place.  It
+   * is place in the hash table, instead, to facilitate CPU load adjustments
+   * on all threads during timer interrupt handling. sched_foreach() could
+   * do this too, but this would require a little more overhead.
+   */
+
+  hash_index = PIDHASH(rtcb->pid);
+  g_pidhash[hash_index].ticks++;
+
+  /* Increment tick count.  NOTE that the count is increment once for each
+   * CPU on each sample interval.
+   */
+
+  g_cpuload_total++;
+}
 
 /****************************************************************************
  * Public Functions
@@ -111,27 +170,31 @@ volatile uint32_t g_cpuload_total;
 
 void weak_function sched_process_cpuload(void)
 {
-  FAR struct tcb_s *rtcb  = this_task();
-  int hash_index;
   int i;
 
-  /* Increment the count on the currently executing thread
-   *
-   * NOTE also that CPU load measurement data is retained in the g_pidhash
-   * table vs. in the TCB which would seem to be the more logic place.  It
-   * is place in the hash table, instead, to facilitate CPU load adjustments
-   * on all threads during timer interrupt handling. sched_foreach() could
-   * do this too, but this would require a little more overhead.
+#ifdef CONFIG_SMP
+  irqstate_t flags;
+
+  /* Perform scheduler operations on all CPUs. */
+
+  flags = enter_critical_section();
+  for (i = 0; i < CONFIG_SMP_NCPUS; i++)
+    {
+      sched_cpu_process_cpuload(i);
+    }
+
+#else
+  /* Perform scheduler operations on the single CPU. */
+
+  sched_cpu_process_cpuload(0);
+
+#endif
+
+  /* If the accumulated tick value exceed a time constant, then shift the
+   * accumulators and recalculate the total.
    */
 
-  hash_index = PIDHASH(rtcb->pid);
-  g_pidhash[hash_index].ticks++;
-
-  /* Increment tick count.  If the accumulated tick value exceed a time
-   * constant, then shift the accumulators.
-   */
-
-  if (++g_cpuload_total > (CONFIG_SCHED_CPULOAD_TIMECONSTANT * CPULOAD_TICKSPERSEC))
+  if (g_cpuload_total > CPULOAD_TIMECONSTANT)
     {
       uint32_t total = 0;
 
@@ -149,6 +212,10 @@ void weak_function sched_process_cpuload(void)
 
       g_cpuload_total = total;
     }
+
+#ifdef CONFIG_SMP
+  leave_critical_section(flags);
+#endif
 }
 
 /****************************************************************************

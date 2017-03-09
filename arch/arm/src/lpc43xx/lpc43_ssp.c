@@ -62,33 +62,7 @@
 #include "lpc43_ccu.h"
 #include "lpc43_pinconfig.h"
 
-
 #if defined(CONFIG_LPC43_SSP0) || defined(CONFIG_LPC43_SSP1)
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* The following enable debug output from this file (needs CONFIG_DEBUG too).
- *
- * CONFIG_SSP_DEBUG - Define to enable basic SSP debug
- * CONFIG_SSP_VERBOSE - Define to enable verbose SSP debug
- */
-
-#ifdef CONFIG_SSP_DEBUG
-#  define sspdbg  lldbg
-#  ifdef CONFIG_SSP_VERBOSE
-#    define spivdbg lldbg
-#  else
-#    define spivdbg(x...)
-#  endif
-#else
-#  undef CONFIG_SSP_VERBOSE
-#  define sspdbg(x...)
-#  define spivdbg(x...)
-#endif
-
-
 
 /****************************************************************************
  * Private Types
@@ -378,7 +352,7 @@ static uint32_t ssp_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
   priv->frequency = frequency;
   priv->actual    = actual;
 
-  sspdbg("Frequency %d->%d\n", frequency, actual);
+  spiinfo("Frequency %d->%d\n", frequency, actual);
   return actual;
 }
 
@@ -406,6 +380,8 @@ static void ssp_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 
   if (mode != priv->mode)
     {
+      spiinfo("Setting mode to %d.\n", mode);
+
       /* Yes... Set CR0 appropriately */
 
       regval = ssp_getreg(priv, LPC43_SSP_CR0_OFFSET);
@@ -429,7 +405,7 @@ static void ssp_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
           break;
 
         default:
-          sspdbg("Bad mode: %d\n", mode);
+          spierr("ERROR: Bad mode: %d\n", mode);
           DEBUGASSERT(FALSE);
           return;
         }
@@ -468,12 +444,15 @@ static void ssp_setbits(FAR struct spi_dev_s *dev, int nbits)
 
   if (nbits != priv->nbits)
     {
+      spiinfo("Setting bits per word to %d.\n", nbits);
+
       /* Yes... Set CR1 appropriately */
 
       regval = ssp_getreg(priv, LPC43_SSP_CR0_OFFSET);
       regval &= ~SSP_CR0_DSS_MASK;
       regval |= ((nbits - 1) << SSP_CR0_DSS_SHIFT);
-      regval = ssp_getreg(priv, LPC43_SSP_CR0_OFFSET);
+      ssp_putreg(priv, LPC43_SSP_CR0_OFFSET, regval);
+      spiinfo("SSP Control Register 0 (CR0) after setting DSS: 0x%08X.\n", regval);
 
       /* Save the selection so the subsequence re-configurations will be faster */
 
@@ -517,7 +496,7 @@ static uint16_t ssp_send(FAR struct spi_dev_s *dev, uint16_t wd)
   /* Get the value from the RX FIFO and return it */
 
   regval = ssp_getreg(priv, LPC43_SSP_DR_OFFSET);
-  sspdbg("%04x->%04x\n", wd, regval);
+  spiinfo("%04x->%04x\n", wd, regval);
   return (uint16_t)regval;
 }
 
@@ -564,7 +543,7 @@ static void ssp_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 
   /* While there is remaining to be sent (and no synchronization error has occurred) */
 
-  sspdbg("nwords: %d\n", nwords);
+  spiinfo("nwords: %d\n", nwords);
 
   tx.pv = txbuffer;
   rx.pv = rxbuffer;
@@ -576,7 +555,7 @@ static void ssp_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
        * and (3) there are more bytes to be sent.
        */
 
-      spivdbg("TX: rxpending: %d nwords: %d\n", rxpending, nwords);
+      spiinfo("TX: rxpending: %d nwords: %d\n", rxpending, nwords);
       while ((ssp_getreg(priv, LPC43_SSP_SR_OFFSET) & SSP_SR_TNF) &&
              (rxpending < LPC43_SSP_FIFOSZ) && nwords)
         {
@@ -599,7 +578,7 @@ static void ssp_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 
       /* Now, read the RX data from the RX FIFO while the RX FIFO is not empty */
 
-      spivdbg("RX: rxpending: %d\n", rxpending);
+      spiinfo("RX: rxpending: %d\n", rxpending);
       while (ssp_getreg(priv, LPC43_SSP_SR_OFFSET) & SSP_SR_RNE)
         {
           data = ssp_getreg(priv, LPC43_SSP_DR_OFFSET);

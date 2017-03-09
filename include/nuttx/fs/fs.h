@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/fs/fs.h
  *
- *   Copyright (C) 2007-2009, 2011-2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2013, 2015-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,10 +60,95 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Stream flags for the fs_flags field of in struct file_struct */
 
 #define __FS_FLAG_EOF   (1 << 0) /* EOF detected by a read operation */
 #define __FS_FLAG_ERROR (1 << 1) /* Error detected by any operation */
+#define __FS_FLAG_LBF   (1 << 2) /* Line buffered */
+#define __FS_FLAG_UBF   (1 << 3) /* Buffer allocated by caller of setvbuf */
+
+/* Inode i_flag values:
+ *
+ *   Bit 0-3: Inode type (Bit 4 indicates internal OS types)
+ *   Bit 4:   Set if inode has been unlinked and is pending removal.
+ */
+
+#define FSNODEFLAG_TYPE_MASK       0x00000007 /* Isolates type field        */
+#define   FSNODEFLAG_TYPE_DRIVER   0x00000000 /*   Character driver         */
+#define   FSNODEFLAG_TYPE_BLOCK    0x00000001 /*   Block driver             */
+#define   FSNODEFLAG_TYPE_MOUNTPT  0x00000002 /*   Mount point              */
+#define FSNODEFLAG_TYPE_SPECIAL    0x00000004 /* Special OS type            */
+#define   FSNODEFLAG_TYPE_NAMEDSEM 0x00000004 /*   Named semaphore          */
+#define   FSNODEFLAG_TYPE_MQUEUE   0x00000005 /*   Message Queue            */
+#define   FSNODEFLAG_TYPE_SHM      0x00000006 /*   Shared memory region     */
+#define   FSNODEFLAG_TYPE_SOFTLINK 0x00000007 /*   Soft link                */
+#define FSNODEFLAG_DELETED         0x00000008 /* Unlinked                   */
+
+#define INODE_IS_TYPE(i,t) \
+  (((i)->i_flags & FSNODEFLAG_TYPE_MASK) == (t))
+#define INODE_IS_SPECIAL(i) \
+  (((i)->i_flags & FSNODEFLAG_TYPE_SPECIAL) != 0)
+
+#define INODE_IS_DRIVER(i)    INODE_IS_TYPE(i,FSNODEFLAG_TYPE_DRIVER)
+#define INODE_IS_BLOCK(i)     INODE_IS_TYPE(i,FSNODEFLAG_TYPE_BLOCK)
+#define INODE_IS_MOUNTPT(i)   INODE_IS_TYPE(i,FSNODEFLAG_TYPE_MOUNTPT)
+#define INODE_IS_NAMEDSEM(i)  INODE_IS_TYPE(i,FSNODEFLAG_TYPE_NAMEDSEM)
+#define INODE_IS_MQUEUE(i)    INODE_IS_TYPE(i,FSNODEFLAG_TYPE_MQUEUE)
+#define INODE_IS_SHM(i)       INODE_IS_TYPE(i,FSNODEFLAG_TYPE_SHM)
+#define INODE_IS_SOFTLINK(i)  INODE_IS_TYPE(i,FSNODEFLAG_TYPE_SOFTLINK)
+
+#define INODE_GET_TYPE(i)     ((i)->i_flags & FSNODEFLAG_TYPE_MASK)
+#define INODE_SET_TYPE(i,t) \
+  do \
+    { \
+      (i)->i_flags = ((i)->i_flags & ~FSNODEFLAG_TYPE_MASK) | (t); \
+    } \
+  while (0)
+
+#define INODE_SET_DRIVER(i)   INODE_SET_TYPE(i,FSNODEFLAG_TYPE_DRIVER)
+#define INODE_SET_BLOCK(i)    INODE_SET_TYPE(i,FSNODEFLAG_TYPE_BLOCK)
+#define INODE_SET_MOUNTPT(i)  INODE_SET_TYPE(i,FSNODEFLAG_TYPE_MOUNTPT)
+#define INODE_SET_NAMEDSEM(i) INODE_SET_TYPE(i,FSNODEFLAG_TYPE_NAMEDSEM)
+#define INODE_SET_MQUEUE(i)   INODE_SET_TYPE(i,FSNODEFLAG_TYPE_MQUEUE)
+#define INODE_SET_SHM(i)      INODE_SET_TYPE(i,FSNODEFLAG_TYPE_SHM)
+#define INODE_SET_SOFTLINK(i) INODE_SET_TYPE(i,FSNODEFLAG_TYPE_SOFTLINK)
+
+/* Mountpoint fd_flags values */
+
+#define DIRENTFLAGS_PSEUDONODE 1
+
+#define DIRENT_SETPSEUDONODE(f) do (f) |= DIRENTFLAGS_PSEUDONODE; while (0)
+#define DIRENT_ISPSEUDONODE(f) (((f) & DIRENTFLAGS_PSEUDONODE) != 0)
+
+/* The struct file_operations open(0) normally returns zero on success and
+ * a negated errno value on failure.  There is one case, however, where
+ * the open method will redirect to another driver and return a file
+ * descriptor instead.
+ *
+ * This case is when SUSv1 pseudo-terminals are used (CONFIG_PSEUDOTERM_SUSV1=y).
+ * In this case, the output is encoded and decoded using these macros in
+ * order to support (a) returning file descriptor 0 (which really should
+ * not happen), and (b) avoiding confusion if some other open method returns
+ * a positive, non-zero value which is not a file descriptor.
+ *
+ *   OPEN_ISFD(r) tests if the return value from the open method is
+ *     really a file descriptor.
+ *   OPEN_SETFD(f) is used by an implementation of the open() method
+ *     in order to encode a file descriptor in the return value.
+ *   OPEN_GETFD(r) is use by the upper level open() logic to decode
+ *     the file descriptor encoded in the return value.
+ *
+ * REVISIT: This only works for file descriptors in the in range 0-255.
+ */
+
+#define OPEN_MAGIC      0x4200
+#define OPEN_MASK       0x00ff
+#define OPEN_MAXFD      0x00ff
+
+#define OPEN_ISFD(r)    (((r) & ~OPEN_MASK) == OPEN_MAGIC)
+#define OPEN_SETFD(f)   ((f) | OPEN_MAGIC)
+#define OPEN_GETFD(r)   ((r) & OPEN_MASK)
 
 /****************************************************************************
  * Public Type Definitions
@@ -180,6 +265,7 @@ struct mountpt_operations
 
   int     (*sync)(FAR struct file *filep);
   int     (*dup)(FAR const struct file *oldp, FAR struct file *newp);
+  int     (*fstat)(FAR const struct file *filep, FAR struct stat *buf);
 
   /* Directory operations */
 
@@ -233,16 +319,19 @@ struct mountpt_operations
 
 union inode_ops_u
 {
-  FAR const struct file_operations      *i_ops;    /* Driver operations for inode */
+  FAR const struct file_operations     *i_ops;    /* Driver operations for inode */
 #ifndef CONFIG_DISABLE_MOUNTPOINT
-  FAR const struct block_operations     *i_bops;   /* Block driver operations */
-  FAR const struct mountpt_operations   *i_mops;   /* Operations on a mountpoint */
+  FAR const struct block_operations    *i_bops;   /* Block driver operations */
+  FAR const struct mountpt_operations  *i_mops;   /* Operations on a mountpoint */
 #endif
 #ifdef CONFIG_FS_NAMED_SEMAPHORES
-  FAR struct nsem_inode_s               *i_nsem;   /* Named semaphore */
+  FAR struct nsem_inode_s              *i_nsem;   /* Named semaphore */
 #endif
 #ifndef CONFIG_DISABLE_MQUEUE
-  FAR struct mqueue_inode_s             *i_mqueue; /* POSIX message queue */
+  FAR struct mqueue_inode_s            *i_mqueue; /* POSIX message queue */
+#endif
+#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+  FAR char                             *i_link;   /* Full path to link target */
 #endif
 };
 
@@ -261,6 +350,7 @@ struct inode
   FAR void         *i_private;  /* Per inode driver private data */
   char              i_name[1];  /* Name of inode (variable) */
 };
+
 #define FSNODE_SIZE(n) (sizeof(struct inode) + (n))
 
 /* This is the underlying representation of an open file.  A file
@@ -272,7 +362,7 @@ struct file
 {
   int               f_oflags;   /* Open mode flags */
   off_t             f_pos;      /* File position */
-  FAR struct inode *f_inode;    /* Driver interface */
+  FAR struct inode *f_inode;    /* Driver or file system interface */
   void             *f_priv;     /* Per file driver private data */
 };
 
@@ -316,7 +406,7 @@ struct filelist
 struct file_struct
 {
   int                fs_fd;        /* File descriptor associated with stream */
-#if CONFIG_STDIO_BUFFER_SIZE > 0
+#ifndef CONFIG_STDIO_DISABLE_BUFFERING
   sem_t              fs_sem;       /* For thread safety */
   pid_t              fs_holder;    /* Holder of sem */
   int                fs_counts;    /* Number of times sem is held */
@@ -422,8 +512,9 @@ int foreach_mountpoint(foreach_mountpoint_t handler, FAR void *arg);
  *
  ****************************************************************************/
 
-int register_driver(FAR const char *path, FAR const struct file_operations *fops,
-                    mode_t mode, FAR void *priv);
+int register_driver(FAR const char *path,
+                    FAR const struct file_operations *fops, mode_t mode,
+                    FAR void *priv);
 
 /****************************************************************************
  * Name: register_blockdriver
@@ -450,8 +541,8 @@ int register_driver(FAR const char *path, FAR const struct file_operations *fops
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT
 int register_blockdriver(FAR const char *path,
-                         FAR const struct block_operations *bops, mode_t mode,
-                         FAR void *priv);
+                         FAR const struct block_operations *bops,
+                         mode_t mode, FAR void *priv);
 #endif
 
 /****************************************************************************
@@ -462,7 +553,7 @@ int register_blockdriver(FAR const char *path,
  *
  ****************************************************************************/
 
-int unregister_driver(const char *path);
+int unregister_driver(FAR const char *path);
 
 /****************************************************************************
  * Name: unregister_blockdriver
@@ -472,7 +563,7 @@ int unregister_driver(const char *path);
  *
  ****************************************************************************/
 
-int unregister_blockdriver(const char *path);
+int unregister_blockdriver(FAR const char *path);
 
 /****************************************************************************
  * Name: inode_checkflags
@@ -850,6 +941,26 @@ int file_fsync(FAR struct file *filep);
 #endif
 
 /****************************************************************************
+ * Name: file_ioctl
+ *
+ * Description:
+ *   Perform device specific operations.
+ *
+ * Parameters:
+ *   file     File structure instance
+ *   req      The ioctl command
+ *   arg      The argument of the ioctl cmd
+ *
+ * Return:
+ *   See ioctl() below.
+ *
+ ****************************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+int file_ioctl(FAR struct file *filep, int req, unsigned long arg);
+#endif
+
+/****************************************************************************
  * Name: file_vfcntl
  *
  * Description:
@@ -867,6 +978,29 @@ int file_vfcntl(FAR struct file *filep, int cmd, va_list ap);
  * Function: file_poll
  *
  * Description:
+ *   Low-level poll operation based on struc file.  This is used both to (1)
+ *   support detached file, and also (2) by fdesc_poll() to perform all
+ *   normal operations on file descriptors descriptors.
+ *
+ * Input Parameters:
+ *   file     File structure instance
+ *   fds   - The structure describing the events to be monitored, OR NULL if
+ *           this is a request to stop monitoring events.
+ *   setup - true: Setup up the poll; false: Teardown the poll
+ *
+ * Returned Value:
+ *  0: Success; Negated errno on failure
+ *
+ ****************************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+int file_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup);
+#endif
+
+/****************************************************************************
+ * Function: fdesc_poll
+ *
+ * Description:
  *   The standard poll() operation redirects operations on file descriptors
  *   to this function.
  *
@@ -882,111 +1016,8 @@ int file_vfcntl(FAR struct file *filep, int cmd, va_list ap);
  ****************************************************************************/
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
-int file_poll(int fd, FAR struct pollfd *fds, bool setup);
+int fdesc_poll(int fd, FAR struct pollfd *fds, bool setup);
 #endif
-
-/****************************************************************************
- * Name: devnull_register
- *
- * Description:
- *   Register /dev/null
- *
- ****************************************************************************/
-
-void devnull_register(void);
-
-/****************************************************************************
- * Name: devcrypto_register
- *
- * Description:
- *   Register /dev/crypto
- *
- ****************************************************************************/
-
-void devcrypto_register(void);
-
-/****************************************************************************
- * Name: devzero_register
- *
- * Description:
- *   Register /dev/zero
- *
- ****************************************************************************/
-
-void devzero_register(void);
-
-/****************************************************************************
- * Name: bchdev_register
- *
- * Description:
- *   Setup so that it exports the block driver referenced by 'blkdev' as a
- *   character device 'chardev'
- *
- ****************************************************************************/
-
-int bchdev_register(FAR const char *blkdev, FAR const char *chardev,
-                    bool readonly);
-
-/****************************************************************************
- * Name: bchdev_unregister
- *
- * Description:
- *   Unregister character driver access to a block device that was created
- *   by a previous call to bchdev_register().
- *
- ****************************************************************************/
-
-int bchdev_unregister(FAR const char *chardev);
-
-/* Low level, direct access.  NOTE:  low-level access and character driver access
- * are incompatible.  One and only one access method should be implemented.
- */
-
-/****************************************************************************
- * Name: bchlib_setup
- *
- * Description:
- *   Setup so that the block driver referenced by 'blkdev' can be accessed
- *   similar to a character device.
- *
- ****************************************************************************/
-
-int bchlib_setup(FAR const char *blkdev, bool readonly, FAR void **handle);
-
-/****************************************************************************
- * Name: bchlib_teardown
- *
- * Description:
- *   Setup so that the block driver referenced by 'blkdev' can be accessed
- *   similar to a character device.
- *
- ****************************************************************************/
-
-int bchlib_teardown(FAR void *handle);
-
-/****************************************************************************
- * Name: bchlib_read
- *
- * Description:
- *   Read from the block device set-up by bchlib_setup as if it were a
- *   character device.
- *
- ****************************************************************************/
-
-ssize_t bchlib_read(FAR void *handle, FAR char *buffer, size_t offset,
-                    size_t len);
-
-/****************************************************************************
- * Name: bchlib_write
- *
- * Description:
- *   Write to the block device set-up by bchlib_setup as if it were a
- *   character device.
- *
- ****************************************************************************/
-
-ssize_t bchlib_write(FAR void *handle, FAR const char *buffer, size_t offset,
-                     size_t len);
 
 #undef EXTERN
 #if defined(__cplusplus)

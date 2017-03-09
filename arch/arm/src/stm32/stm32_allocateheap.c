@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32/up_allocateheap.c
+ * arch/arm/src/stm32/stm32_allocateheap.c
  *
  *   Copyright (C) 2011-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -41,6 +41,7 @@
 
 #include <sys/types.h>
 #include <stdint.h>
+#include <string.h>
 #include <assert.h>
 #include <debug.h>
 
@@ -221,6 +222,76 @@
 #      endif
 #    endif
 
+/* All members of the STM32F33xxx families have 16 Kbi ram and 4 KB CCM SRAM.
+ * No external RAM is supported (the F3 family has no FSMC).
+ *
+ * As a complication, CCM SRAM cannot be used for DMA.  So, if STM32 DMA is
+ * enabled, CCM SRAM should probably be excluded from the heap.
+ */
+#elif defined(CONFIG_STM32_STM32F33XX)
+
+   /* Set the end of system SRAM */
+
+#  define SRAM1_END CONFIG_RAM_END
+
+/* Set the range of CCM SRAM as well (although we may not use it) */
+
+#  define SRAM2_START 0x10000000
+#  define SRAM2_END   0x10001000
+
+   /* There is no FSMC */
+
+#  undef CONFIG_STM32_FSMC_SRAM
+
+   /* There are 2 possible SRAM configurations:
+    *
+    * Configuration 1. System SRAM (only)
+    *                  CONFIG_MM_REGIONS == 1
+    *                  CONFIG_STM32_CCMEXCLUDE defined
+    * Configuration 2. System SRAM and CCM SRAM
+    *                  CONFIG_MM_REGIONS == 2
+    *                  CONFIG_STM32_CCMEXCLUDE NOT defined
+    */
+
+#    if CONFIG_MM_REGIONS < 2
+
+       /* Only one memory region.  Force Configuration 1 */
+
+#      ifndef CONFIG_STM32_CCMEXCLUDE
+#        if CONFIG_STM32_HAVE_CCM
+#          warning "CCM SRAM excluded from the heap"
+#        endif
+#        define CONFIG_STM32_CCMEXCLUDE 1
+#      endif
+
+   /* CONFIG_MM_REGIONS may be 2 if CCM SRAM is included in the head */
+
+#    elif CONFIG_MM_REGIONS >= 2
+#      if CONFIG_MM_REGIONS > 2
+#         error "No more than two memory regions can be supported (CONFIG_MM_REGIONS)"
+#         undef CONFIG_MM_REGIONS
+#         define CONFIG_MM_REGIONS 2
+#      endif
+
+     /* Two memory regions is okay if CCM SRAM is not disabled. */
+
+#      ifdef CONFIG_STM32_CCMEXCLUDE
+
+         /* Configuration 1: CONFIG_MM_REGIONS should have been 2 */
+
+#        error "CONFIG_MM_REGIONS >= 2 but but CCM SRAM is excluded (CONFIG_STM32_CCMEXCLUDE)"
+#        undef CONFIG_MM_REGIONS
+#        define CONFIG_MM_REGIONS 1
+#      else
+
+         /* Configuration 2: DMA should be disabled */
+
+#        ifdef CONFIG_ARCH_DMA
+#          warning "CCM SRAM is included in the heap AND DMA is enabled"
+#        endif
+#      endif
+#  endif
+
 /* All members of the STM32F37xxx families have 16-32 Kib ram in a single
  * bank. No external RAM is supported (the F3 family has no FSMC).
  */
@@ -244,7 +315,6 @@
 #  if CONFIG_MM_REGIONS > 1
 #    error "CONFIG_MM_REGIONS > 1.  The STM32L15X has only one memory region."
 #  endif
-
 
 /* Most members of both the STM32F20xxx and STM32F40xxx families have 128Kib
  * in two banks:
@@ -294,6 +364,10 @@
 #    define SRAM1_END 0x20018000
 #  elif defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429)
 #    define SRAM1_END 0x20030000
+#  elif defined(CONFIG_STM32_STM32F446)
+#    define SRAM1_END 0x20020000
+#  elif defined(CONFIG_STM32_STM32F469)
+#    define SRAM1_END 0x20050000
 #  else
 #    define SRAM1_END 0x20020000
 #  endif
@@ -438,7 +512,7 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_HEAP
+#ifdef CONFIG_HEAP_COLORATION
 static inline void up_heap_color(FAR void *start, size_t size)
 {
   memset(start, HEAP_COLOR, size);

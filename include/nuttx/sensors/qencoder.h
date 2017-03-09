@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/qencoder.h
  *
- *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __NUTTX_SENSORS_QENCODER_H
-#define __NUTTX_SENSORS_QENCODER_H
+#ifndef __INCLUDE_NUTTX_SENSORS_QENCODER_H
+#define __INCLUDE_NUTTX_SENSORS_QENCODER_H
 
 /****************************************************************************
  * Included Files
@@ -54,9 +54,9 @@
 
 /* IOCTL Commands ***********************************************************/
 /* The Quadrature Encode module uses a standard character driver framework.
- * However, since the driver is a devices control interface and not a data
- * transfer interface, the majority of the functionality is implemented in
- * driver ioctl calls.  The PWM ioctl commands are listed below:
+ * However, since the driver is a device control interface rather than a
+ * data transfer interface, the majority of the functionality is implemented
+ * in driver ioctl calls.  The PWM ioctl commands are listed below:
  *
  * QEIOC_POSITION - Get the current position from the encoder.
  *   Argument: int32_t pointer to the location to return the position.
@@ -67,14 +67,25 @@
 #define QEIOC_POSITION     _QEIOC(0x0001) /* Arg: int32_t* pointer */
 #define QEIOC_RESET        _QEIOC(0x0002) /* Arg: None */
 
-/* User defined ioctl cms should use QEIOC_USER like this:
- *
- * #define QEIOC_MYCMD1    _QEIOC(QEIOC_USER)
- * #define QEIOC_MYCMD2    _QEIOC(QEIOC_USER+1)
- * ...
+#define QE_FIRST           0x0001         /* First required command */
+#define QE_NCMDS           2              /* Two required commands */
+
+/* User defined ioctl commands are also supported. These will be forwarded
+ * by the upper-half QE driver to the lower-half QE driver via the ioctl()
+ * method fo the QE lower-half interface.  However, the lower-half driver
+ * must reserve a block of commands as follows in order prevent IOCTL
+ * command numbers from overlapping.
  */
 
-#define QEIOC_USER         0x0003
+/* See arch/arm/src/tiva/tiva_qencoder.h (Not usable at that location) */
+
+#define QE_TIVA_FIRST      (QE_FIRST + QE_NCMDS)
+#define QE_TIVA_NCMDS      3
+
+/* See include/nuttx/sensors/as5048b.h */
+
+#define QE_AS5048B_FIRST   (QE_TIVA_FIRST + QEIOC_TIVA_NCMDS)
+#define QE_AS5048B_NCMDS   4
 
 /****************************************************************************
  * Public Types
@@ -177,4 +188,4 @@ int qe_register(FAR const char *devpath, FAR struct qe_lowerhalf_s *lower);
 #endif
 
 #endif /* CONFIG_QENCODER */
-#endif /* __NUTTX_SENSORS_QENCODER_H */
+#endif /* __INCLUDE_NUTTX_SENSORS_QENCODER_H */

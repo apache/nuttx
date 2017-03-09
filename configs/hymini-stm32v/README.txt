@@ -478,10 +478,10 @@ HY-Mini specific Configuration Options
 
     CONFIG_SDIO_DMA - Support DMA data transfers.  Requires CONFIG_STM32_SDIO
       and CONFIG_STM32_DMA2.
-    CONFIG_SDIO_PRI - Select SDIO interrupt prority.  Default: 128
-    CONFIG_SDIO_DMAPRIO - Select SDIO DMA interrupt priority.
+    CONFIG_STM32_SDIO_PRI - Select SDIO interrupt prority.  Default: 128
+    CONFIG_STM32_SDIO_DMAPRIO - Select SDIO DMA interrupt priority.
       Default:  Medium
-    CONFIG_SDIO_WIDTH_D1_ONLY - Select 1-bit transfer mode.  Default:
+    CONFIG_STM32_SDIO_WIDTH_D1_ONLY - Select 1-bit transfer mode.  Default:
       4-bit transfer mode.
     CONFIG_MMCSD_HAVECARDDETECT - Select if SDIO driver card detection
       is 100% accurate  (it is on the  HY-MiniSTM32V)
@@ -502,7 +502,7 @@ HY-Mini specific Configuration Options
     CONFIG_CAN2_BAUD - CAN1 BAUD rate.  Required if CONFIG_STM32_CAN2 is defined.
     CONFIG_CAN_TSEG1 - The number of CAN time quanta in segment 1. Default: 6
     CONFIG_CAN_TSEG2 - the number of CAN time quanta in segment 2. Default: 7
-    CONFIG_CAN_REGDEBUG - If CONFIG_DEBUG is set, this will generate an
+    CONFIG_STM32_CAN_REGDEBUG - If CONFIG_DEBUG_FEATURES is set, this will generate an
       dump of all CAN registers.
 
   HY-MiniSTM32V LCD Hardware Configuration.  The HY-Mini board may be delivered with
@@ -561,14 +561,6 @@ can be selected as follow:
 
 Where <subdir> is one of the following:
 
-  buttons:
-  --------
-
-    Uses apps/examples/buttons to exercise HY-MiniSTM32V buttons and
-    button interrupts.
-
-    CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL=y  : Generic GNU EABI toolchain
-
   nsh and nsh2:
   ------------
     Configure the NuttShell (nsh) located at examples/nsh.
@@ -599,7 +591,6 @@ Where <subdir> is one of the following:
     Built-in    None                    apps/examples/nx
     Apps                                apps/examples/nxhello
                                         apps/system/usbmsc (4)
-                                        apps/examples/buttons
                                         apps/examples/nximage
     =========== ======================= ================================
 
@@ -650,7 +641,6 @@ Where <subdir> is one of the following:
     1. This configuration does have UART2 output enabled and set up as
        the system logging device:
 
-       CONFIG_SYSLOG=y                    : Enable output to syslog, not console
        CONFIG_SYSLOG_CHAR=y               : Use a character device for system logging
        CONFIG_SYSLOG_DEVPATH="/dev/ttyS0" : UART2 will be /dev/ttyS0
 
@@ -668,16 +658,16 @@ Where <subdir> is one of the following:
        CONFIG_USBDEV_TRACE_NRECORDS=128        : Buffer 128 records in memory
        CONFIG_NSH_USBDEV_TRACE=n               : No builtin tracing from NSH
        CONFIG_NSH_ARCHINIT=y                   : Automatically start the USB monitor
-       CONFIG_SYSTEM_USBMONITOR=y              : Enable the USB monitor daemon
-       CONFIG_SYSTEM_USBMONITOR_STACKSIZE=2048 : USB monitor daemon stack size
-       CONFIG_SYSTEM_USBMONITOR_PRIORITY=50    : USB monitor daemon priority
-       CONFIG_SYSTEM_USBMONITOR_INTERVAL=2     : Dump trace data every 2 seconds
+       CONFIG_USBMONITOR=y              : Enable the USB monitor daemon
+       CONFIG_USBMONITOR_STACKSIZE=2048 : USB monitor daemon stack size
+       CONFIG_USBMONITOR_PRIORITY=50    : USB monitor daemon priority
+       CONFIG_USBMONITOR_INTERVAL=2     : Dump trace data every 2 seconds
 
-       CONFIG_SYSTEM_USBMONITOR_TRACEINIT=y    : Enable TRACE output
-       CONFIG_SYSTEM_USBMONITOR_TRACECLASS=y
-       CONFIG_SYSTEM_USBMONITOR_TRACETRANSFERS=y
-       CONFIG_SYSTEM_USBMONITOR_TRACECONTROLLER=y
-       CONFIG_SYSTEM_USBMONITOR_TRACEINTERRUPTS=y
+       CONFIG_USBMONITOR_TRACEINIT=y    : Enable TRACE output
+       CONFIG_USBMONITOR_TRACECLASS=y
+       CONFIG_USBMONITOR_TRACETRANSFERS=y
+       CONFIG_USBMONITOR_TRACECONTROLLER=y
+       CONFIG_USBMONITOR_TRACEINTERRUPTS=y
 
 
     Using the Prolifics PL2303 Emulation
@@ -702,11 +692,11 @@ Where <subdir> is one of the following:
     USB debug output can be enabled as by changing the following
     settings in the configuration file:
 
-      -CONFIG_DEBUG=n
-      -CONFIG_DEBUG_VERBOSE=n
+      -CONFIG_DEBUG_FEATURES=n
+      -CONFIG_DEBUG_INFO=n
       -CONFIG_DEBUG_USB=n
-      +CONFIG_DEBUG=y
-      +CONFIG_DEBUG_VERBOSE=y
+      +CONFIG_DEBUG_FEATURES=y
+      +CONFIG_DEBUG_INFO=y
       +CONFIG_DEBUG_USB=y
 
       -CONFIG_EXAMPLES_USBSERIAL_TRACEINIT=n

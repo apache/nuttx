@@ -159,7 +159,7 @@ static void stm32_alarmcb(void)
  ****************************************************************************/
 
 #if defined(CONFIG_PM) && defined(CONFIG_RTC_ALARM)
-static int stm32_alarm_exti(int irq, FAR void *context)
+static int stm32_alarm_exti(int irq, FAR void *context, FAR void *arg)
 {
   stm32_alarmcb();
   return OK;
@@ -177,7 +177,7 @@ static int stm32_alarm_exti(int irq, FAR void *context)
 #if defined(CONFIG_PM) && defined(CONFIG_RTC_ALARM)
 static void stm32_exti_cancel(void)
 {
-  (void)stm32_exti_alarm(false, false, false, NULL);
+  (void)stm32_exti_alarm(false, false, false, NULL, NULL);
 }
 #endif
 
@@ -201,7 +201,7 @@ static int stm32_rtc_alarm(time_t tv_sec, time_t tv_nsec, bool exti)
     {
       /* TODO: Make sure that that is no pending EXTI interrupt */
 
-      (void)stm32_exti_alarm(true, true, true, stm32_alarm_exti);
+      (void)stm32_exti_alarm(true, true, true, stm32_alarm_exti, NULL);
     }
 
   /* Configure the RTC alarm to Auto Wake the system */
@@ -229,7 +229,7 @@ static int stm32_rtc_alarm(time_t tv_sec, time_t tv_nsec, bool exti)
   ret = stm32_rtc_setalarm(&alarmtime, stm32_alarmcb);
   if (ret < 0)
     {
-      lldbg("Warning: The alarm is already set\n");
+      serr("ERROR: Warning: The alarm is already set\n");
     }
 
   return ret;
@@ -290,7 +290,7 @@ static void stm32_idlepm(void)
 
   if (newstate != oldstate)
     {
-      llvdbg("newstate= %d oldstate=%d\n", newstate, oldstate);
+      _info("newstate= %d oldstate=%d\n", newstate, oldstate);
 
       sched_lock();
 
@@ -366,7 +366,7 @@ static void stm32_idlepm(void)
             ret = stm32_rtc_cancelalarm();
             if (ret < 0)
               {
-                lldbg("Warning: Cancel alarm failed\n");
+                swarn("WARNING: Cancel alarm failed\n");
               }
 #endif
             /* Note:  See the additional PM_STANDBY related logic at the

@@ -236,7 +236,7 @@ static uint16_t z8_i2c_getbrg(uint32_t frequency)
 
   if (frequency > 400*1000)
     {
-      dbg("Invalid inputs\n");
+      _err("ERROR: Invalid inputs\n");
       frequency = 400*1000;
     }
 

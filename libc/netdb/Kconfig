@@ -1,0 +1,253 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config LIBC_NETDB
+	bool
+	default n
+
+menu "NETDB Support"
+
+menuconfig NETDB_HOSTFILE
+	bool "Network host file support"
+	default n
+	depends on FS_READABLE
+	select LIBC_NETDB
+	---help---
+		Enable network host table look ups via gethostbyname() and
+		gethostbyaddr().
+
+if NETDB_HOSTFILE
+
+config NETDB_HOSTCONF_PATH
+	string "Path to host configuration file"
+	default "/etc/hosts"
+
+config NETDB_MAX_ALTNAMES
+	int "Max number of alternate host names"
+	default 4
+
+config NETDB_BUFSIZE
+	int "gethostname() buffer size"
+	default 128
+
+endif # NETDB_HOSTFILE
+
+menuconfig NETDB_DNSCLIENT
+	bool "DNS Name resolution"
+	default n
+	depends on NET && NET_UDP
+	select LIBC_NETDB
+	---help---
+		Enable support for the name resolution; Enable network host
+		resolution via gethostbyname().
+
+if NETDB_DNSCLIENT
+
+config NETDB_DNSCLIENT_ENTRIES
+	int "Number of DNS resolver entries"
+	default 0 if DEFAULT_SMALL
+	default 8 if !DEFAULT_SMALL
+	range 0 255
+	---help---
+		Number of cached DNS resolver entries.  Default: 8.  Zero disables
+		all cached name resolutions.
+
+		Disabling the DNS cache means that each access call to
+		gethostbyname() will result in a new DNS network query.  If
+		CONFIG_NETDB_DNSCLIENT_ENTRIES is non-zero, then entries will be
+		cached and if the name mapping can be found in that cache, the
+		network query can be avoid.  Of course, this is only useful if you
+		query the same name often and if the IP address of the name is
+		stable.  If the IP address can change, then cachin DNS address
+		might have undesirable side-effects (see help for
+		CONFIG_NETDB_DNSCLIENT_LIFESEC).
+
+config NETDB_DNSCLIENT_NAMESIZE
+	int "Max size of a cached hostname"
+	default 32
+	---help---
+		The size of a hostname string in the DNS resolver cache is fixed.
+		This setting provides the maximum size of a hostname.  Names longer
+		than this will be aliased!  Default: 32
+
+config NETDB_DNSCLIENT_LIFESEC
+	int "Life of a DNS cache entry (seconds)"
+	default 3600
+	---help---
+		Cached entries in the name resolution cache older than this will not
+		be used.  Default: 1 hour.  Zero means that entries will not expire.
+
+		Small values of CONFIG_NETDB_DNSCLIENT_LIFESEC may result in more
+		network DNS queries; larger values can make a host unreachable for
+		the entire duration of the timeout value.  This might happen, for
+		example, if the remote host was assigned a different IP address by
+		a DHCP server.
+
+config NETDB_DNSCLIENT_MAXRESPONSE
+	int "Max response size"
+	default 96
+	---help---
+		This setting determines the maximum size of response message that
+		can be received by the DNS resolver.  The default is 96 but may
+		need to be larger on enterprise networks (perhaps 176).
+
+
+config NETDB_RESOLVCONF
+	bool "DNS resolver file support"
+	default n
+	depends on FS_READABLE
+	---help---
+		Enable DNS server look ups in resolver file like /etc/resolv.conf.
+
+if NETDB_RESOLVCONF
+
+config NETDB_RESOLVCONF_PATH
+	string "Path to host configuration file"
+	default "/etc/resolv.conf"
+
+config NETDB_RESOLVCONF_NONSTDPORT
+	bool "Non-standard port support"
+	default n
+	---help---
+		By default, the resolv.conf file will hold only records like:
+
+			nameserver xx.xx.xx.xx
+			nameserver xxxx:::::::xxxx
+
+		The default port of 53 is always assumed.
+
+		If this option is selected, then OpenBSD style resolv.conf files
+		will be supported.  This adds logic for a bracket port notation
+		like:
+
+			nameserver [xx.xx.xx.xx]:ppppp
+			nameserver [xxxx:::::::xxxx]:ppppp
+
+endif # NETDB_RESOLVCONF
+
+choice
+	prompt "DNS server address type"
+	default NETDB_DNSSERVER_IPv4 if NET_IPv4
+	default NETDB_DNSSERVER_IPv6 if !NET_IPv4 && NET_IPv6
+	default NETDB_DNSSERVER_NOADDR if !NET_IPv4 && !NET_IPv6
+	depends on !NETDB_RESOLVCONF
+
+config NETDB_DNSSERVER_NOADDR
+	bool "No default DNS server address"
+	---help---
+		There is not default DNS nameserver address.  Application must call
+		dns_add_server() at runtime to add the DNS server address.
+
+config NETDB_DNSSERVER_IPv4
+	bool "IPv4 DNS server address"
+	depends on NET_IPv4
+	---help---
+		An IPv4 default DNS nameserver address will be provided.  Application
+		may overwrite this start default server address by calling
+		dns_add_server() at runtime.
+
+config NETDB_DNSSERVER_IPv6
+	bool "IPv6 DNS server address"
+	depends on NET_IPv6
+	---help---
+		An IPv6 default DNS nameserver address will be provided.  Application
+		may overwrite this start default server address by calling
+		dns_add_server() at runtime.
+
+endchoice # DNS server address type
+
+config NETDB_DNSSERVER_IPv4ADDR
+	hex "Target IPv4 address"
+	default 0x0a000001
+	depends on NETDB_DNSSERVER_IPv4
+	---help---
+		Default DNS server IPv4 address in host byte order.  Default value
+		10.0.0.0.1.  This may be changed via dns_add_nameserver().
+
+if NETDB_DNSSERVER_IPv6
+
+config NETDB_DNSSERVER_IPv6ADDR_1
+	hex "[0]"
+	default 0xfc00
+	range 0x0 0xffff
+	---help---
+		This is the default IP address of the DNS server.  This is a 16-bit
+		integer value in host order.  Each of the eight values forming the
+		full IPv6 address must be specified individually.  This is the first
+		of the 8-values.  The default for all eight values is fc00::1.
+
+config NETDB_DNSSERVER_IPv6ADDR_2
+	hex "[1]"
+	default 0x0000
+	range 0x0 0xffff
+	---help---
+		This is the default IP address of the DNS server.  This is a 16-bit
+		integer value in host order.  Each of the eight values forming the
+		full IPv6 address must be specified individually.  This is the second
+		of the 8-values.  The default for all eight values is fc00::1.
+
+config NETDB_DNSSERVER_IPv6ADDR_3
+	hex "[2]"
+	default 0x0000
+	range 0x0 0xffff
+	---help---
+		This is the default IP address of the DNS server.  This is a 16-bit
+		integer value in host order.  Each of the eight values forming the
+		full IPv6 address must be specified individually.  This is the third
+		of the 8-values.  The default for all eight values is fc00::1.
+
+config NETDB_DNSSERVER_IPv6ADDR_4
+	hex "[3]"
+	default 0x0000
+	range 0x0 0xffff
+	---help---
+		This is the default IP address of the DNS server.  This is a 16-bit
+		integer value in host order.  Each of the eight values forming the
+		full IPv6 address must be specified individually.  This is the fourth
+		of the 8-values.  The default for all eight values is fc00::1.
+
+config NETDB_DNSSERVER_IPv6ADDR_5
+	hex "[4]"
+	default 0x0000
+	range 0x0 0xffff
+	---help---
+		This is the default IP address of the DNS server.  This is a 16-bit
+		integer value in host order.  Each of the eight values forming the
+		full IPv6 address must be specified individually.  This is the fifth
+		of the 8-values.  The default for all eight values is fc00::1.
+
+config NETDB_DNSSERVER_IPv6ADDR_6
+	hex "[5]"
+	default 0x0000
+	range 0x0 0xffff
+	---help---
+		This is the default IP address of the DNS server.  This is a 16-bit
+		integer value in host order.  Each of the eight values forming the
+		full IPv6 address must be specified individually.  This is the sixth
+		of the 8-values.  The default for all eight values is fc00::1.
+
+config NETDB_DNSSERVER_IPv6ADDR_7
+	hex "[6]"
+	default 0x0000
+	range 0x0 0xffff
+	---help---
+		This is the default IP address of the DNS server.  This is a 16-bit
+		integer value in host order.  Each of the eight values forming the
+		full IPv6 address must be specified individually.  This is the seventh
+		of the 8-values.  The default for all eight values is fc00::1.
+
+config NETDB_DNSSERVER_IPv6ADDR_8
+	hex "[7]"
+	default 0x0001
+	range 0x0 0xffff
+	---help---
+		This is the default IP address of the DNS server.  This is a 16-bit
+		integer value in host order.  Each of the eight values forming the
+		full IPv6 address must be specified individually.  This is the last
+		of the 8-values.  The default for all eight values is fc00::1.
+
+endif # NETDB_DNSSERVER_IPv6
+endif # NETDB_DNSCLIENT
+endmenu # NETDB Support

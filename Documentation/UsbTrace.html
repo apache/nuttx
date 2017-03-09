@@ -125,7 +125,7 @@
 </p>
 <ul>
   <li><code>CONFIG_USBDEV_TRACE</code>, or</li>
-  <li><code>CONFIG_DEBUG and CONFIG_DEBUG_USB</code></li>
+  <li><code>CONFIG_DEBUG_FEATURES and CONFIG_DEBUG_USB</code></li>
 </ul>
 <p><b>Log Data Sink</b>.
   The logged data itself may go to either (1) an internal circular buffer, or (2) may be provided on the console.
@@ -137,7 +137,7 @@
   Here is an example of USB trace output using <code>apps/examples/usbserial</code> for an LPC1768 platform with the following NuttX configuration settings:
 </p>
 <ul>
-  <li><code>CONFIG_DEBUG</code>, <code>CONFIG_DEBUG_VERBOSE</code>, <code>CONFIG_USB</code>
+  <li><code>CONFIG_DEBUG_FEATURES</code>, <code>CONFIG_DEBUG_INFO</code>, <code>CONFIG_USB</code>
   <li><code>CONFIG_EXAMPLES_USBSERIAL_TRACEINIT</code>, <code>CONFIG_EXAMPLES_USBSERIAL_TRACECLASS</code>,
     <code>CONFIG_EXAMPLES_USBSERIAL_TRACETRANSFERS</code>, <code>CONFIG_EXAMPLES_USBSERIAL_TRACECONTROLLER</code>,
     <code>CONFIG_EXAMPLES_USBSERIAL_TRACEINTERRUPTS</code>
@@ -396,7 +396,7 @@ static int pl2303_setup(FAR struct uart_dev_s *dev)
   </tr>
   <tr>
     <td width="30%" align="left" valign="top">
-      <code>CONFIG_SYSTEM_USBMONITOR=y</code>
+      <code>CONFIG_USBMONITOR=y</code>
     </td>
     <td align="left" valign="top">
       Enable the USB monitor daemon
@@ -404,7 +404,7 @@ static int pl2303_setup(FAR struct uart_dev_s *dev)
   </tr>
   <tr>
     <td width="30%" align="left" valign="top">
-      <code>CONFIG_SYSTEM_USBMONITOR_STACKSIZE=<i>nnnn</i></code>
+      <code>CONFIG_USBMONITOR_STACKSIZE=<i>nnnn</i></code>
     </td>
     <td align="left" valign="top">
       Sets the USB monitor daemon stack size to <i>nnnn</i>.
@@ -413,7 +413,7 @@ static int pl2303_setup(FAR struct uart_dev_s *dev)
   </tr>
   <tr>
     <td width="30%" align="left" valign="top">
-      <code>CONFIG_SYSTEM_USBMONITOR_PRIORITY=50</code>
+      <code>CONFIG_USBMONITOR_PRIORITY=50</code>
     </td>
     <td align="left" valign="top">
       Sets the USB monitor daemon priority to <i>nnnn</i>.
@@ -423,7 +423,7 @@ static int pl2303_setup(FAR struct uart_dev_s *dev)
   </tr>
   <tr>
     <td width="30%" align="left" valign="top">
-      <code>CONFIG_SYSTEM_USBMONITOR_INTERVAL=<i>nnnn</i></code>
+      <code>CONFIG_USBMONITOR_INTERVAL=<i>nnnn</i></code>
     </td>
     <td align="left" valign="top">
       Dump the buffered USB data every <i>nnnn</i> seconds.
@@ -432,11 +432,11 @@ static int pl2303_setup(FAR struct uart_dev_s *dev)
   </tr>
   <tr>
     <td width="30%" align="left" valign="top">
-      <code>CONFIG_SYSTEM_USBMONITOR_TRACEINIT=y</code><br>
-      <code>CONFIG_SYSTEM_USBMONITOR_TRACECLASS=y</code><br>
-      <code>CONFIG_SYSTEM_USBMONITOR_TRACETRANSFERS=y</code><br>
-      <code>CONFIG_SYSTEM_USBMONITOR_TRACECONTROLLER=y</code><br>
-      <code>CONFIG_SYSTEM_USBMONITOR_TRACEINTERRUPTS=y</code><br>
+      <code>CONFIG_USBMONITOR_TRACEINIT=y</code><br>
+      <code>CONFIG_USBMONITOR_TRACECLASS=y</code><br>
+      <code>CONFIG_USBMONITOR_TRACETRANSFERS=y</code><br>
+      <code>CONFIG_USBMONITOR_TRACECONTROLLER=y</code><br>
+      <code>CONFIG_USBMONITOR_TRACEINTERRUPTS=y</code><br>
     </td>
     <td align="left" valign="top">
       Selects which USB event(s) that you want to be traced.

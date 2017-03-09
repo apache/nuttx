@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/bch/bchdev_register.c
  *
- *   Copyright (C) 2008-2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,23 +44,10 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/fs/fs.h>
+#include <nuttx/drivers/drivers.h>
+
 #include "bch.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -86,7 +73,7 @@ int bchdev_register(FAR const char *blkdev, FAR const char *chardev,
   ret = bchlib_setup(blkdev, readonly, &handle);
   if (ret < 0)
     {
-      fdbg("bchlib_setup failed: %d\n", -ret);
+      ferr("ERROR: bchlib_setup failed: %d\n", -ret);
       return ret;
     }
 
@@ -95,7 +82,7 @@ int bchdev_register(FAR const char *blkdev, FAR const char *chardev,
   ret = register_driver(chardev, &bch_fops, 0666, handle);
   if (ret < 0)
     {
-      fdbg("register_driver failed: %d\n", -ret);
+      ferr("ERROR: register_driver failed: %d\n", -ret);
       bchlib_teardown(handle);
       handle = NULL;
     }

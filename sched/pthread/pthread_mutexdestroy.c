@@ -41,6 +41,7 @@
 
 #include <pthread.h>
 #include <semaphore.h>
+#include <signal.h>
 #include <sched.h>
 #include <errno.h>
 #include <debug.h>
@@ -72,9 +73,9 @@ int pthread_mutex_destroy(FAR pthread_mutex_t *mutex)
   int ret = OK;
   int status;
 
-  sdbg("mutex=0x%p\n", mutex);
+  sinfo("mutex=0x%p\n", mutex);
 
-  if (!mutex)
+  if (mutex == NULL)
     {
       ret = EINVAL;
     }
@@ -90,7 +91,29 @@ int pthread_mutex_destroy(FAR pthread_mutex_t *mutex)
 
       if (mutex->pid != -1)
         {
-          ret = EBUSY;
+#ifndef CONFIG_DISABLE_SIGNALS
+          /* Verify that the PID still exists.  We may be destroying the
+           * mutex after cancelling a pthread and the mutex may have been
+           * in a bad state owned by the dead pthread.
+           */
+
+         ret = kill(mutex->pid, 0);
+         if (ret < 0)
+           {
+             /* The thread associated with the PID no longer exists */
+
+             mutex->pid = -1;
+
+             /* Destroy the semaphore */
+
+             status = sem_destroy((FAR sem_t *)&mutex->sem);
+             ret = (status != OK) ? get_errno() : OK;
+            }
+         else
+#endif
+           {
+             ret = EBUSY;
+           }
         }
       else
         {
@@ -99,13 +122,13 @@ int pthread_mutex_destroy(FAR pthread_mutex_t *mutex)
           status = sem_destroy((FAR sem_t *)&mutex->sem);
           if (status != OK)
             {
-              ret = EINVAL;
+              ret = get_errno();
             }
         }
 
       sched_unlock();
     }
 
-  sdbg("Returning %d\n", ret);
+  sinfo("Returning %d\n", ret);
   return ret;
 }

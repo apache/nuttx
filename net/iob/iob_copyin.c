@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_IOB_DEBUG)
+#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_IOB_DEBUG)
 /* Force debug output (from this file only) */
 
 #  undef  CONFIG_DEBUG_NET
@@ -97,14 +97,14 @@ static int iob_copyin_internal(FAR struct iob_s *iob, FAR const uint8_t *src,
   unsigned int avail;
   unsigned int total = len;
 
-  nllvdbg("iob=%p len=%u offset=%u\n", iob, len, offset);
+  ninfo("iob=%p len=%u offset=%u\n", iob, len, offset);
   DEBUGASSERT(iob && src);
 
   /* The offset must applied to data that is already in the I/O buffer chain */
 
   if (offset > iob->io_pktlen)
     {
-      ndbg("ERROR: offset is past the end of data: %u > %u\n",
+      nerr("ERROR: offset is past the end of data: %u > %u\n",
            offset, iob->io_pktlen);
       return -ESPIPE;
     }
@@ -130,7 +130,7 @@ static int iob_copyin_internal(FAR struct iob_s *iob, FAR const uint8_t *src,
       dest  = &iob->io_data[iob->io_offset + offset];
       avail = iob->io_len - offset;
 
-      nllvdbg("iob=%p avail=%u len=%u next=%p\n", iob, avail, len, next);
+      ninfo("iob=%p avail=%u len=%u next=%p\n", iob, avail, len, next);
 
       /* Will the rest of the copy fit into this buffer, overwriting
        * existing data.
@@ -187,8 +187,8 @@ static int iob_copyin_internal(FAR struct iob_s *iob, FAR const uint8_t *src,
       /* Copy from the user buffer to the I/O buffer.  */
 
       memcpy(dest, src, ncopy);
-      nllvdbg("iob=%p Copy %u bytes new len=%u\n",
-              iob, ncopy, iob->io_len);
+      ninfo("iob=%p Copy %u bytes new len=%u\n",
+            iob, ncopy, iob->io_len);
 
       /* Adjust the total length of the copy and the destination address in
        * the user buffer.
@@ -220,14 +220,14 @@ static int iob_copyin_internal(FAR struct iob_s *iob, FAR const uint8_t *src,
 
           if (next == NULL)
             {
-              ndbg("ERROR: Failed to allocate I/O buffer\n");
+              nerr("ERROR: Failed to allocate I/O buffer\n");
               return len;
             }
 
           /* Add the new, empty I/O buffer to the end of the buffer chain. */
 
           iob->io_flink = next;
-          nllvdbg("iob=%p added to the chain\n", iob);
+          ninfo("iob=%p added to the chain\n", iob);
         }
 
       iob = next;

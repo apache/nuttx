@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/wireless/cc3000.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2017 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            David Sidrane <david_s5@nscdg.com>
  *
@@ -56,24 +56,24 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define DEV_FORMAT   "/dev/wireless%d" /* The device Name*/
-#define DEV_NAMELEN  17                /* The buffer size to hold formatted string*/
+#define DEV_FORMAT    "/dev/wireless%d" /* The device Name*/
+#define DEV_NAMELEN   17                /* The buffer size to hold formatted string*/
 
-#define QUEUE_FORMAT   "wlq%d"         /* The Queue name */
-#define QUEUE_NAMELEN  8               /* The buffer size to hold formatted string*/
+#define QUEUE_FORMAT  "wlq%d"           /* The Queue name */
+#define QUEUE_NAMELEN 8                 /* The buffer size to hold formatted string*/
 
-#define SEM_FORMAT   "wls%d"           /* The Spi Resume Senaphore name*/
-#define SEM_NAMELEN   8                /* The buffer size to hold formatted string*/
+#define SEM_FORMAT    "wls%d"           /* The Spi Resume Senaphore name*/
+#define SEM_NAMELEN   8                 /* The buffer size to hold formatted string*/
 
 /* IOCTL commands */
 
-#define CC3000IOC_GETQUESEMID  _WLIOC_USER(0x0001) /* arg: Address of int for number*/
-#define CC3000IOC_ADDSOCKET    _WLIOC_USER(0x0002) /* arg: Address of int for result*/
-#define CC3000IOC_REMOVESOCKET _WLIOC_USER(0x0003) /* arg: Address of int for result*/
-#define CC3000IOC_SELECTDATA   _WLIOC_USER(0x0004) /* arg: Address of int for result*/
-#define CC3000IOC_SELECTACCEPT _WLIOC_USER(0x0005) /* arg: Address of struct cc3000_acceptcfg_s */
-#define CC3000IOC_SETRX_SIZE   _WLIOC_USER(0x0006) /* arg: Address of int for new size */
-#define CC3000IOC_REMOTECLOSEDSOCKET _WLIOC_USER(0x0007) /* arg: Address of int for result*/
+#define CC3000IOC_GETQUESEMID  _WLIOC(CC3000_FIRST+0) /* arg: Address of int for number*/
+#define CC3000IOC_ADDSOCKET    _WLIOC(CC3000_FIRST+1) /* arg: Address of int for result*/
+#define CC3000IOC_REMOVESOCKET _WLIOC(CC3000_FIRST+2) /* arg: Address of int for result*/
+#define CC3000IOC_SELECTDATA   _WLIOC(CC3000_FIRST+3) /* arg: Address of int for result*/
+#define CC3000IOC_SELECTACCEPT _WLIOC(CC3000_FIRST+4) /* arg: Address of struct cc3000_acceptcfg_s */
+#define CC3000IOC_SETRX_SIZE   _WLIOC(CC3000_FIRST+5) /* arg: Address of int for new size */
+#define CC3000IOC_REMOTECLOSEDSOCKET _WLIOC(CC3000_FIRST+6) /* arg: Address of int for result*/
 
 /****************************************************************************
  * Public Types

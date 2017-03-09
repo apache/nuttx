@@ -158,11 +158,12 @@ struct romfs_mountpt_s
 
 struct romfs_file_s
 {
-  struct romfs_file_s *rf_next;     /* Retained in a singly linked list */
+  FAR struct romfs_file_s *rf_next; /* Retained in a singly linked list */
   uint32_t rf_startoffset;          /* Offset to the start of the file data */
   uint32_t rf_size;                 /* Size of the file in bytes */
   uint32_t rf_cachesector;          /* Current sector in the rf_buffer */
   uint8_t *rf_buffer;               /* File sector buffer, allocated if rm_xipbase==0 */
+  uint8_t rf_type;                  /* File type (for fstat()) */
 };
 
 /* This structure is used internally for describing the result of

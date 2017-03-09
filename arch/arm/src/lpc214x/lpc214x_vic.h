@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __LPC214X_VIC_H
-#define __LPC214X_VIC_H
+#ifndef __ARCH_ARM_SRC_LPC214X_LPC214X_VIC_H
+#define __ARCH_ARM_SRC_LPC214X_LPC214X_VIC_H
 
 /************************************************************************************
  * Included Files
@@ -67,4 +67,4 @@
  * Public Function Prototypes
  ************************************************************************************/
 
-#endif  /* __LPC214X_VIC_H */
+#endif  /* __ARCH_ARM_SRC_LPC214X_LPC214X_VIC_H */

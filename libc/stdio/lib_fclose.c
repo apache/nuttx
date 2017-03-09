@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/stdio/lib_fclose.c
  *
- *   Copyright (C) 2007-2009, 2011, 3013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -69,7 +69,7 @@
 
 int fclose(FAR FILE *stream)
 {
-  int err = EINVAL;
+  int errcode = EINVAL;
   int ret = ERROR;
   int status;
 
@@ -89,7 +89,7 @@ int fclose(FAR FILE *stream)
           if ((stream->fs_oflags & O_WROK) != 0)
             {
               ret = lib_fflush(stream, true);
-              err = errno;
+              errcode = errno;
             }
 
           /* Close the underlying file descriptor and save the return status */
@@ -103,18 +103,19 @@ int fclose(FAR FILE *stream)
           if (ret == OK)
             {
               ret = status;
-              err = errno;
+              errcode = errno;
             }
         }
 
-#if CONFIG_STDIO_BUFFER_SIZE > 0
+#ifndef CONFIG_STDIO_DISABLE_BUFFERING
       /* Destroy the semaphore */
 
       sem_destroy(&stream->fs_sem);
 
       /* Release the buffer */
 
-      if (stream->fs_bufstart)
+      if (stream->fs_bufstart != NULL &&
+          (stream->fs_flags & __FS_FLAG_UBF) == 0)
         {
           lib_free(stream->fs_bufstart);
         }
@@ -122,6 +123,7 @@ int fclose(FAR FILE *stream)
       /* Clear the whole structure */
 
       memset(stream, 0, sizeof(FILE));
+
 #else
 #if CONFIG_NUNGET_CHARS > 0
       /* Reset the number of ungetc characters */
@@ -132,6 +134,7 @@ int fclose(FAR FILE *stream)
 
       stream->fs_oflags = 0;
 #endif
+
       /* Setting the file descriptor to -1 makes the stream available for reuse */
 
       stream->fs_fd = -1;
@@ -143,7 +146,7 @@ int fclose(FAR FILE *stream)
 
   if (ret != OK)
     {
-      set_errno(err);
+      set_errno(errcode);
       return EOF;
     }
 

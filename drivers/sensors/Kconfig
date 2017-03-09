@@ -18,12 +18,46 @@ config BH1750FVI
 	---help---
 		Enable driver support for the Rohm BH1750FVI light sensor.
 
+config BMG160
+	bool "Bosch BMG160 Gyroscope Sensor support"
+	default n
+	select SPI
+	---help---
+		Enable driver support for the Bosch BMG160 gyroscope sensor.
+
 config BMP180
 	bool "Bosch BMP180 Barometer Sensor support"
 	default n
 	select I2C
 	---help---
 		Enable driver support for the Bosch BMP180 barometer sensor.
+
+config SENSORS_L3GD20
+	bool "ST L3GD20 Gyroscope Sensor support"
+	default n
+	select SPI
+	---help---
+		Enable driver support for the ST L3GD20 gyroscope sensor.
+
+config SENSOR_KXTJ9
+	bool "Kionix KXTJ9 Accelerometer support"
+	default n
+	select I2C
+
+if SENSOR_KXTJ9
+
+config SENSOR_KXTJ9_I2C_BUS_SPEED
+	int "Kionix KXTJ9 Bus Speed in Hz"
+	default 400000
+
+endif # SENSOR_KXTJ9
+
+config LIS3DSH
+	bool "STMicro LIS3DSH 3-Axis acclerometer support"
+	default n
+	select SPI
+	---help---
+		Enable driver support for the STMicro LIS3DSH 3-Axis acclerometer.
 
 config LIS331DL
 	bool "ST LIS331DL device support"
@@ -61,6 +95,13 @@ config MB7040_I2C_FREQUENCY
 	default 400000
 	range 1 400000
 	depends on MB7040
+
+config MLX90393
+	bool "MLX90393 3-Axis Magnetometer"
+	default n
+	select SPI
+	---help---
+		Enable driver support for the Melex MLX90393 3-Axis magnetometer.
 
 config MCP9844
 	bool "MCP9844 Temperature Sensor"
@@ -136,7 +177,7 @@ config ADXL345_ACTIVELOW
 config ADXL345_REGDEBUG
 	bool "Enable Register-Level ADXL345 Debug"
 	default n
-	depends on DEBUG
+	depends on DEBUG_FEATURES
 	---help---
 		Enable very low register-level debug output.
 
@@ -159,6 +200,13 @@ config MAX6675
 config I2C_LM75
 	bool
 	default y if LM75
+
+config LIS3MDL
+	bool "STMicro LIS3MDL 3-Axis magnetometer support"
+	default n
+	select SPI
+	---help---
+		Enable driver support for the ST LIS3MDL 3-axis magnetometer.
 
 config LM75
 	bool "STMicro LM-75 Temperature Sensor support"
@@ -192,6 +240,20 @@ config LM92_I2C_FREQUENCY
 config QENCODER
 	bool "Qencoder"
 	default n
+
+config VEML6070
+	bool "Vishay VEML6070 UV-A Light Sensor support"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the Vishay VEML6070 UV-A light sensor.
+
+config XEN1210
+	bool "Sensixs XEN1210 Magnetometer"
+	default n
+	select SPI
+	---help---
+		Enable driver support for the Sensixs XEN1210 Magnetometer.
 
 config ZEROCROSS
 	bool "Zero Cross Sensor"

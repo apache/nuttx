@@ -49,11 +49,12 @@
 #include  <nuttx/sched.h>
 #include  <nuttx/fs/fs.h>
 #include  <nuttx/net/net.h>
-#include  <nuttx/lib.h>
+#include  <nuttx/lib/lib.h>
 #include  <nuttx/mm/mm.h>
 #include  <nuttx/mm/shm.h>
 #include  <nuttx/kmalloc.h>
 #include  <nuttx/sched_note.h>
+#include  <nuttx/syslog/syslog.h>
 #include  <nuttx/init.h>
 
 #include  "sched/sched.h"
@@ -218,8 +219,8 @@ volatile pid_t g_lastpid;
  * 1. This hash table greatly speeds the determination of a new unique
  *    process ID for a task, and
  * 2. Is used to quickly map a process ID into a TCB.
- * It has the side effects of using more memory and limiting
  *
+ * It has the side effects of using more memory and limiting
  * the number of tasks to CONFIG_MAX_TASKS.
  */
 
@@ -372,7 +373,7 @@ void os_start(void)
 #endif
   int i;
 
-  slldbg("Entry\n");
+  sinfo("Entry\n");
 
   /* Boot up is complete */
 
@@ -441,7 +442,7 @@ void os_start(void)
        * that has pid == 0 and sched_priority == 0.
        */
 
-      bzero((void *)&g_idletcb[cpu], sizeof(struct task_tcb_s));
+      memset((void *)&g_idletcb[cpu], 0, sizeof(struct task_tcb_s));
       g_idletcb[cpu].cmn.pid        = g_lastpid;
       g_idletcb[cpu].cmn.task_state = TSTATE_TASK_RUNNING;
 
@@ -469,10 +470,11 @@ void os_start(void)
        */
 
 #ifdef CONFIG_SMP
-      g_idletcb[cpu].cmn.flags = (TCB_FLAG_TTYPE_KERNEL | TCB_FLAG_CPU_LOCKED);
+      g_idletcb[cpu].cmn.flags = (TCB_FLAG_TTYPE_KERNEL | TCB_FLAG_NONCANCELABLE |
+                                  TCB_FLAG_CPU_LOCKED);
       g_idletcb[cpu].cmn.cpu   = cpu;
 #else
-      g_idletcb[cpu].cmn.flags = TCB_FLAG_TTYPE_KERNEL;
+      g_idletcb[cpu].cmn.flags = (TCB_FLAG_TTYPE_KERNEL | TCB_FLAG_NONCANCELABLE);
 #endif
 
 #ifdef CONFIG_SMP
@@ -757,7 +759,15 @@ void os_start(void)
       DEBUGVERIFY(group_initialize(&g_idletcb[cpu]));
       g_idletcb[cpu].cmn.group->tg_flags = GROUP_FLAG_NOCLDWAIT;
 #endif
-}
+    }
+
+  /* Start SYSLOG ***********************************************************/
+  /* Late initialization of the system logging device.  Some SYSLOG channel
+   * must be initialized late in the initialization sequence because it may
+   * depend on having IDLE task file structures setup.
+   */
+
+  syslog_initialize(SYSLOG_INIT_LATE);
 
 #ifdef CONFIG_SMP
   /* Start all CPUs *********************************************************/
@@ -797,7 +807,7 @@ void os_start(void)
   /* The IDLE Loop **********************************************************/
   /* When control is return to this point, the system is idle. */
 
-  sdbg("CPU0: Beginning Idle Loop\n");
+  sinfo("CPU0: Beginning Idle Loop\n");
   for (; ; )
     {
       /* Perform garbage collection (if it is not being done by the worker

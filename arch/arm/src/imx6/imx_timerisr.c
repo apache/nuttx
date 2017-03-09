@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/imx6/imx_timerisr.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -102,23 +102,19 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  up_output_compare
+ * Function:  imx_output_compare
  *
  * Description:
  *   Handle one pending output compare interrupt.
  *
  ****************************************************************************/
 
-static void up_output_compare(uint32_t sr, uint32_t of)
+static void imx_output_compare(uint32_t sr, uint32_t of)
 {
   /* Check for a pending output compare interrupt */
 
   if ((sr & of) != 0)
     {
-      /* Clear the pending output compare interrupt */
-
-      putreg32(of, IMX_GPT_SR);
-
       /* Process timer interrupt event */
 
       sched_process_timer();
@@ -126,11 +122,7 @@ static void up_output_compare(uint32_t sr, uint32_t of)
 }
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Function:  up_timerisr
+ * Function:  imx_timerisr
  *
  * Description:
  *   The timer ISR will perform a variety of services for various portions
@@ -138,19 +130,30 @@ static void up_output_compare(uint32_t sr, uint32_t of)
  *
  ****************************************************************************/
 
-int up_timerisr(int irq, uint32_t *regs)
+static int imx_timerisr(int irq, uint32_t *regs, FAR void *arg)
 {
-  /* Sample the SR (once) and process all pending output compare interrupt */
+  /* Sample the SR (once) */
 
   uint32_t sr = getreg32(IMX_GPT_SR);
-  up_output_compare(sr, GPT_INT_OF1);
-  up_output_compare(sr, GPT_INT_OF2);
-  up_output_compare(sr, GPT_INT_OF3);
+
+  /* Clear GPT status register */
+
+  putreg32(sr, IMX_GPT_SR);
+
+  /* Process all pending output compare interrupt */
+
+  imx_output_compare(sr, GPT_INT_OF1);
+  imx_output_compare(sr, GPT_INT_OF2);
+  imx_output_compare(sr, GPT_INT_OF3);
   return OK;
 }
 
 /****************************************************************************
- * Function:  up_timer_initialize
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Function:  arm_timer_initialize
  *
  * Description:
  *   This function is called during start-up to initialize
@@ -158,7 +161,7 @@ int up_timerisr(int irq, uint32_t *regs)
  *
  ****************************************************************************/
 
-void up_timer_initialize(void)
+void arm_timer_initialize(void)
 {
   uint32_t regval;
   uint32_t cr;
@@ -257,7 +260,7 @@ void up_timer_initialize(void)
 
   /* Attach the timer interrupt vector */
 
-  (void)irq_attach(IMX_IRQ_GPT, (xcpt_t)up_timerisr);
+  (void)irq_attach(IMX_IRQ_GPT, (xcpt_t)imx_timerisr, NULL);
 
   /* Enable all three GPT output compare interrupts */
 

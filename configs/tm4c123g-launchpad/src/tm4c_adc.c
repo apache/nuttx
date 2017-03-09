@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/tm4c123g-launchpad/tm4c_adc.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,34 +50,23 @@
 #include "tm4c123g-launchpad.h"
 #include "chip/tiva_pinmap.h"
 
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-
-/************************************************************************************
- * Private Data
- ************************************************************************************/
-
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
+#ifdef CONFIG_TIVA_ADC
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
 /************************************************************************************
- * Name: board_adc_initialize
+ * Name: tm4c_adc_setup
  *
  * Description:
- *   Initialize and register the ADC driver.
+ *   Initialize ADC and register the ADC driver.
  *
  ************************************************************************************/
 
-#ifdef CONFIG_TIVA_ADC
-int board_adc_initialize(void)
+int tm4c_adc_setup(void)
 {
-#  if defined (CONFIG_TIVA_ADC) && defined (CONFIG_ADC)
+#ifdef CONFIG_ADC
   static bool initialized = false;
   int ret;
   uint8_t srate = 0;
@@ -90,11 +79,11 @@ int board_adc_initialize(void)
   };
 
   sse_cfg0.priority = 0;
-#    ifdef CONFIG_EXAMPLES_ADC_SWTRIG
+#ifdef CONFIG_EXAMPLES_ADC_SWTRIG
   sse_cfg0.trigger = TIVA_ADC_TRIG_SW;
-#    else
+#else
   sse_cfg0.trigger = TIVA_ADC_TRIG_ALWAYS;
-#    endif
+#endif
 
   adc_cfg.adc = 0;
   adc_cfg.sse[0] = true;
@@ -105,11 +94,11 @@ int board_adc_initialize(void)
   adc_cfg.steps = 1;
   adc_cfg.stepcfg = step_cfg;
 
-#    ifdef CONFIG_EXAMPLES_ADC_SWTRIG
+#ifdef CONFIG_EXAMPLES_ADC_SWTRIG
   srate = TIVA_ADC_SAMPLE_RATE_FASTEST;
-#    else
+#else
   srate = TIVA_ADC_SAMPLE_RATE_SLOWEST;
-#    endif
+#endif
 
   /* Check if we have already initialized */
 
@@ -132,35 +121,11 @@ int board_adc_initialize(void)
 
       initialized = true;
     }
-  return OK;
-}
 #endif /* CONFIG_ADC */
 
-/************************************************************************************
- * Name: board_adc_setup
- *
- * Description:
- *   All Tiva architectures must provide the following interface to work with
- *   examples/adc.
- *
- ************************************************************************************/
-
-#ifdef CONFIG_EXAMPLES_ADC
-int board_adc_setup(void)
-{
-#ifdef CONFIG_TIVA_ADC
-  return board_adc_initialize();
-#else
-  return -ENOSYS;
-#endif
+  return OK;
 }
-#endif /* CONFIG_EXAMPLES_ADC */
 
-#if defined (CONFIG_TIVA_ADC) && defined (CONFIG_TIVA_TIMER)
-
-/* Tiva timer interface does not currently support user configuration */
-
-#if 0
 /************************************************************************************
  * Name: adc_timer_init
  *
@@ -169,6 +134,9 @@ int board_adc_setup(void)
  *
  ************************************************************************************/
 
+/* Tiva timer interface does not currently support user configuration */
+
+#if 0 /* defined(CONFIG_TIVA_TIMER) */
 TIMER_HANDLE adc_timer_init(void)
 {
   struct tiva_gptm32config_s adctimer =
@@ -189,6 +157,6 @@ TIMER_HANDLE adc_timer_init(void)
 
   return tiva_gptm_configure((const struct tiva_gptmconfig_s *)&adctimer);
 }
+#endif /* CONFIG_TIVA_TIMER */
 
-#endif
-#endif /* defined (CONFIG_TIVA_ADC) && defined (CONFIG_TIVA_TIMER) */
+#endif /* CONFIG_TIVA_ADC */

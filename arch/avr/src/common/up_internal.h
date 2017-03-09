@@ -67,6 +67,10 @@
 #undef  CONFIG_SUPPRESS_UART_CONFIG   /* DEFINED: Do not reconfig UART */
 #undef  CONFIG_DUMP_ON_EXIT           /* DEFINED: Dump task state on exit */
 
+#ifndef CONFIG_DEBUG_SCHED_INFO
+#  undef CONFIG_DUMP_ON_EXIT          /* Needs CONFIG_DEBUG_SCHED_INFO */
+#endif
+
 /* Check if an interrupt stack size is configured */
 
 #ifndef CONFIG_ARCH_INTERRUPTSTACK
@@ -139,7 +143,6 @@ void up_irqinitialize(void);
 void weak_function up_dmainitialize(void);
 #endif
 void up_sigdeliver(void);
-int  up_timerisr(int irq, uint32_t *regs);
 void up_lowputc(char ch);
 void up_puts(const char *str);
 void up_lowputs(const char *str);
@@ -181,7 +184,7 @@ void lowconsole_init(void);
 
 /* Defined in chip/xxx_timerisr.c */
 
-void up_timer_initialize(void);
+void avr_timer_initialize(void);
 
 /* Defined in chip/xxx_ethernet.c */
 

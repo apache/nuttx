@@ -275,7 +275,7 @@ static void stm32l4_dmachandisable(struct stm32l4_dma_s *dmach)
  *
  ************************************************************************************/
 
-static int stm32l4_dmainterrupt(int irq, void *context)
+static int stm32l4_dmainterrupt(int irq, void *context, FAR void *arg)
 {
   struct stm32l4_dma_s *dmach;
   uint32_t isr;
@@ -351,7 +351,7 @@ void weak_function up_dmainitialize(void)
 
       /* Attach DMA interrupt vectors */
 
-      (void)irq_attach(dmach->irq, stm32l4_dmainterrupt);
+      (void)irq_attach(dmach->irq, stm32l4_dmainterrupt, NULL);
 
       /* Disable the DMA channel */
 
@@ -727,7 +727,7 @@ bool stm32l4_dmacapable(uint32_t maddr, uint32_t count, uint32_t ccr)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_DMA
+#ifdef CONFIG_DEBUG_DMA_INFO
 void stm32l4_dmasample(DMA_HANDLE handle, struct stm32l4_dmaregs_s *regs)
 {
   struct stm32l4_dma_s *dmach = (struct stm32l4_dma_s *)handle;
@@ -755,20 +755,19 @@ void stm32l4_dmasample(DMA_HANDLE handle, struct stm32l4_dmaregs_s *regs)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_DMA
+#ifdef CONFIG_DEBUG_DMA_INFO
 void stm32l4_dmadump(DMA_HANDLE handle, const struct stm32l4_dmaregs_s *regs,
                    const char *msg)
 {
   struct stm32l4_dma_s *dmach = (struct stm32l4_dma_s *)handle;
   uint32_t dmabase = DMA_BASE(dmach->base);
 
-  dmadbg("DMA Registers: %s\n", msg);
-  dmadbg("    ISR[%08x]: %08x\n", dmabase + STM32L4_DMA_ISR_OFFSET, regs->isr);
-  dmadbg("  CSELR[%08x]: %08x\n", dmabase + STM32L4_DMA_CSELR_OFFSET, regs->cselr);
-  dmadbg("    CCR[%08x]: %08x\n", dmach->base + STM32L4_DMACHAN_CCR_OFFSET, regs->ccr);
-  dmadbg("  CNDTR[%08x]: %08x\n", dmach->base + STM32L4_DMACHAN_CNDTR_OFFSET, regs->cndtr);
-  dmadbg("   CPAR[%08x]: %08x\n", dmach->base + STM32L4_DMACHAN_CPAR_OFFSET, regs->cpar);
-  dmadbg("   CMAR[%08x]: %08x\n", dmach->base + STM32L4_DMACHAN_CMAR_OFFSET, regs->cmar);
+  dmainfo("DMA Registers: %s\n", msg);
+  dmainfo("    ISR[%08x]: %08x\n", dmabase + STM32L4_DMA_ISR_OFFSET, regs->isr);
+  dmainfo("  CSELR[%08x]: %08x\n", dmabase + STM32L4_DMA_CSELR_OFFSET, regs->cselr);
+  dmainfo("    CCR[%08x]: %08x\n", dmach->base + STM32L4_DMACHAN_CCR_OFFSET, regs->ccr);
+  dmainfo("  CNDTR[%08x]: %08x\n", dmach->base + STM32L4_DMACHAN_CNDTR_OFFSET, regs->cndtr);
+  dmainfo("   CPAR[%08x]: %08x\n", dmach->base + STM32L4_DMACHAN_CPAR_OFFSET, regs->cpar);
+  dmainfo("   CMAR[%08x]: %08x\n", dmach->base + STM32L4_DMACHAN_CMAR_OFFSET, regs->cmar);
 }
 #endif
-

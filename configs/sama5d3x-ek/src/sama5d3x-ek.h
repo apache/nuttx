@@ -297,7 +297,7 @@
 
 /* Check if we should enable the USB monitor before starting NSH */
 
-#ifndef CONFIG_SYSTEM_USBMONITOR
+#ifndef CONFIG_USBMONITOR
 #  undef HAVE_USBMONITOR
 #endif
 
@@ -807,14 +807,15 @@ bool sam_writeprotected(int slotno);
 void weak_function sam_usbinitialize(void);
 #endif
 
-/****************************************************************************************************
+/************************************************************************************
  * Name: stm32_usbhost_initialize
  *
  * Description:
- *   Called at application startup time to initialize the USB host functionality. This function will
- *   start a thread that will monitor for device connection/disconnection events.
+ *   Called at application startup time to initialize the USB host functionality. 
+ *   This function will start a thread that will monitor for device connection/
+ *   disconnection events.
  *
- ****************************************************************************************************/
+ ************************************************************************************/
 
 #ifdef HAVE_USBHOST
 int sam_usbhost_initialize(void);
@@ -832,7 +833,43 @@ int sam_usbhost_initialize(void);
 void weak_function sam_netinitialize(void);
 #endif
 
-/****************************************************************************
+/************************************************************************************
+ * Name: sam_pwm_setup
+ *
+ * Description:
+ *   Initialize PWM and register the PWM device.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_PWM
+int sam_pwm_setup(void);
+#endif
+
+/************************************************************************************
+ * Name: sam_adc_setup
+ *
+ * Description:
+ *   Initialize ADC and register the ADC driver.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_ADC
+int sam_adc_setup(void);
+#endif
+
+/************************************************************************************
+ * Name: sam_can_setup
+ *
+ * Description:
+ *  Initialize CAN and register the CAN device
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_CAN
+int sam_can_setup(void);
+#endif
+
+/************************************************************************************
  * Name: sam_wm8904_initialize
  *
  * Description:
@@ -847,7 +884,7 @@ void weak_function sam_netinitialize(void);
  *   Zero is returned on success.  Otherwise, a negated errno value is
  *   returned to indicate the nature of the failure.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef HAVE_WM8904
 int sam_wm8904_initialize(int minor);

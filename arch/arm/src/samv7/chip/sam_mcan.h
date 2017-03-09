@@ -747,7 +747,7 @@
 #define STDFILTER_S0_SFID1_SHIFT   (16)      /* Bits 16-26: Standard Filter ID 2 */
 #define STDFILTER_S0_SFID1_MASK    (0x3ff << STDFILTER_S0_SFID1_SHIFT)
 #  define STDFILTER_S0_SFID1(n)    ((uint32_t)(n) << STDFILTER_S0_SFID1_SHIFT)
-#define STDFILTER_S0_SFEC_SHIFT    (17)      /* Bits 27-29: Standard Filter Element Configuration */
+#define STDFILTER_S0_SFEC_SHIFT    (27)      /* Bits 27-29: Standard Filter Element Configuration */
 #define STDFILTER_S0_SFEC_MASK     (7 << STDFILTER_S0_SFEC_SHIFT)
 #  define STDFILTER_S0_SFEC_DISABLE   (0 << STDFILTER_S0_SFEC_SHIFT) /* Disable filter element */
 #  define STDFILTER_S0_SFEC_FIFO0     (1 << STDFILTER_S0_SFEC_SHIFT) /* Store in Rx FIFO 0 on match */

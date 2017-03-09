@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/stm3240g-eval/src/stm32_adc.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -100,23 +100,18 @@ static const uint32_t g_pinlist[ADC3_NCHANNELS]  = {GPIO_ADC3_IN7};
 #endif
 
 /************************************************************************************
- * Private Functions
- ************************************************************************************/
-
-/************************************************************************************
  * Public Functions
  ************************************************************************************/
 
 /************************************************************************************
- * Name: board_adc_setup
+ * Name: stm32_adc_setup
  *
  * Description:
- *   All STM32 architectures must provide the following interface to work with
- *   examples/adc.
+ *   Initialize ADC and register the ADC driver.
  *
  ************************************************************************************/
 
-int board_adc_setup(void)
+int stm32_adc_setup(void)
 {
 #ifdef CONFIG_STM32_ADC3
   static bool initialized = false;
@@ -140,7 +135,7 @@ int board_adc_setup(void)
       adc = stm32_adcinitialize(3, g_chanlist, ADC3_NCHANNELS);
       if (adc == NULL)
         {
-          adbg("ERROR: Failed to get ADC interface\n");
+          aerr("ERROR: Failed to get ADC interface\n");
           return -ENODEV;
         }
 
@@ -149,7 +144,7 @@ int board_adc_setup(void)
       ret = adc_register("/dev/adc0", adc);
       if (ret < 0)
         {
-          adbg("adc_register failed: %d\n", ret);
+          aerr("ERROR: adc_register failed: %d\n", ret);
           return ret;
         }
 

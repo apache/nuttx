@@ -87,6 +87,8 @@ libboard$(LIBEXT): $(OBJS)
 
 depend: .depend
 
+context:
+
 clean:
 	$(call DELFILE, libboard$(LIBEXT))
 	$(call CLEAN)

@@ -46,8 +46,8 @@
 
 #include <nuttx/board.h>
 
-#ifdef CONFIG_SYSTEM_USBMONITOR
-#  include <apps/usbmonitor.h>
+#ifdef CONFIG_USBMONITOR
+#  include <nuttx/usb/usbmonitor.h>
 #endif
 
 #ifdef CONFIG_STM32_OTGFS
@@ -103,29 +103,28 @@
 
 int board_app_initialize(uintptr_t arg)
 {
-#if defined(CONFIG_CAN) || defined(CONFIG_ADC)
   int ret;
+
+#ifdef CONFIG_ADC
+  /* Initialize ADC and register the ADC driver. */
+
+  ret = stm32_adc_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_adc_setup failed: %d\n", ret);
+    }
 #endif
 
 #ifdef CONFIG_CAN
-  /* Configure on-board CAN if CAN support has been selected. */
+  /* Initialize CAN and register the CAN driver. */
 
-  ret = stm32_can_initialize();
-  if (ret != OK)
+  ret = stm32_can_setup();
+  if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Failed to initialize CAN: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: stm32_can_setup failed: %d\n", ret);
     }
 #endif
 
-#ifdef CONFIG_ADC
-  /* Configure on-board ADCs if ADC support has been selected. */
-
-  ret = stm32_adc_initialize();
-  if (ret != OK)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to initialize ADC: %d\n", ret);
-    }
-#endif
-
+  UNUSED(ret);
   return OK;
 }

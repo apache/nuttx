@@ -119,7 +119,7 @@
 #define EFM32_TXERR_INTS      (LEUART_IEN_TXOF)
 #define EFM32_RXERR_INTS      (LEUART_IEN_RXOF | LEUART_IEN_PERR | \
                                LEUART_IEN_FERR)
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 #  define EFM32_TX_INTS       (LEUART_IEN_TXBL | EFM32_TXERR_INTS)
 #  define EFM32_RX_INTS       (LEUART_IEN_RXDATAV | EFM32_RXERR_INTS)
 #else
@@ -134,7 +134,6 @@
 struct efm32_config_s
 {
   uintptr_t uartbase;  /* Base address of UART registers */
-  xcpt_t    handler;   /* Interrupt handler */
   uint32_t  baud;      /* Configured baud */
   uint8_t   irq;       /* IRQ associated with this LEUART (for enable) */
   uint8_t   parity;    /* 0=none, 1=odd, 2=even */
@@ -163,13 +162,7 @@ static int  efm32_setup(struct uart_dev_s *dev);
 static void efm32_shutdown(struct uart_dev_s *dev);
 static int  efm32_attach(struct uart_dev_s *dev);
 static void efm32_detach(struct uart_dev_s *dev);
-static int  efm32_interrupt(struct uart_dev_s *dev);
-#if defined(CONFIG_EFM32_LEUART0)
-static int  efm32_leuart0_interrupt(int irq, void *context);
-#endif
-#if defined(CONFIG_EFM32_LEUART1)
-static int  efm32_leuart1_interrupt(int irq, void *context);
-#endif
+static int  efm32_interrupt(int irq, void *context, FAR void *arg);
 static int  efm32_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int  efm32_receive(struct uart_dev_s *dev, uint32_t *status);
 static void efm32_rxint(struct uart_dev_s *dev, bool enable);
@@ -219,7 +212,6 @@ static char g_leuart1txbuffer[CONFIG_LEUART1_TXBUFSIZE];
 static const struct efm32_config_s g_leuart0config =
 {
   .uartbase  = EFM32_LEUART0_BASE,
-  .handler   = efm32_leuart0_interrupt,
   .baud      = CONFIG_LEUART0_BAUD,
   .irq       = EFM32_IRQ_LEUART0,
   .parity    = CONFIG_LEUART0_PARITY,
@@ -255,7 +247,6 @@ static struct uart_dev_s g_leuart0port =
 static struct efm32_config_s g_leuart1config =
 {
   .uartbase  = EFM32_LEUART1_BASE,
-  .handler   = efm32_leuart1_interrupt,
   .baud      = CONFIG_LEUART1_BAUD,
   .irq       = EFM32_IRQ_LEUART1,
   .parity    = CONFIG_LEUART1_PARITY,
@@ -429,7 +420,7 @@ static int efm32_attach(struct uart_dev_s *dev)
    * disabled in the C2 register.
    */
 
-  ret = irq_attach(config->irq, config->handler);
+  ret = irq_attach(config->irq, efm32_interrupt, dev);
   if (ret >= 0)
     {
       up_enable_irq(config->irq);
@@ -471,12 +462,14 @@ static void efm32_detach(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static int  efm32_interrupt(struct uart_dev_s *dev)
+static int efm32_interrupt(int irq, void *context, FAR void *arg)
 {
-  struct efm32_leuart_s *priv = (struct efm32_leuart_s *)dev->priv;
+  struct uart_dev_s *dev = (struct uart_dev_s *)arg;
+  struct efm32_leuart_s *priv;
   uint32_t intflags;
 
-  DEBUGASSERT(priv);
+  DEBUGASSERT(dev != NULL && dev->priv != NULL);
+  priv = (struct efm32_leuart_s *)dev->priv;
 
   /* Read the interrupt flags register */
 
@@ -506,7 +499,7 @@ static int  efm32_interrupt(struct uart_dev_s *dev)
       uart_xmitchars(dev);
     }
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   /* Check for receive errors */
 
   if ((intflags & EFM32_RXERR_INTS) != 0)
@@ -518,7 +511,7 @@ static int  efm32_interrupt(struct uart_dev_s *dev)
        * FERR - Framing Error Interrupt Enable
        */
 
-      lldbg("RX ERROR: %08x\n", intflags);
+      _err("RX ERROR: %08x\n", intflags);
     }
 
   /* Check for transmit errors */
@@ -527,26 +520,12 @@ static int  efm32_interrupt(struct uart_dev_s *dev)
     {
       /* TXOF - TX Overflow Interrupt Enable */
 
-      lldbg("RX ERROR: %08x\n", intflags);
+      _err("RX ERROR: %08x\n", intflags);
     }
 #endif
 
   return OK;
 }
-
-#if defined(CONFIG_EFM32_LEUART0)
-static int efm32_leuart0_interrupt(int irq, void *context)
-{
-  return efm32_interrupt(&g_leuart0port);
-}
-#endif
-
-#if defined(CONFIG_EFM32_LEUART1)
-static int  efm32_leuart1_interrupt(int irq, void *context)
-{
-  return efm32_interrupt(&g_leuart1port);
-}
-#endif
 
 /****************************************************************************
  * Name: efm32_ioctl

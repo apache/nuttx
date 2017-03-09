@@ -115,7 +115,7 @@
 #  define WRB_TRIM(wrb,n) \
   do { (wrb)->wb_iob = iob_trimhead((wrb)->wb_iob,(n)); } while (0)
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 #  define WRB_DUMP(msg,wrb,len,offset) \
      tcp_wrbuffer_dump(msg,wrb,len,offset)
 #else
@@ -206,6 +206,8 @@ struct tcp_conn_s
                            * it can only be updated at TCP_ESTABLISHED state */
   uint32_t   sent;        /* The number of bytes sent (ACKed and un-ACKed) */
   uint32_t   isn;         /* Initial sequence number */
+  uint32_t   sndseq_max;  /* The sequence number of next not-retransmitted
+                           * segment (next greater sndseq) */
 #endif
 
 #ifdef CONFIG_NET_TCPBACKLOG
@@ -665,7 +667,7 @@ void tcp_poll(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn);
  * Parameters:
  *   dev  - The device driver structure to use in the send operation
  *   conn - The TCP "connection" to poll for TX data
- *   hsed - The polling interval in halves of a second
+ *   hsec - The polling interval in halves of a second
  *
  * Return:
  *   None
@@ -1251,7 +1253,7 @@ int tcp_wrbuffer_test(void);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 void tcp_wrbuffer_dump(FAR const char *msg, FAR struct tcp_wrbuffer_s *wrb,
                        unsigned int len, unsigned int offset);
 #else

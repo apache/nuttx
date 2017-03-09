@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/arp/arp_send.c
  *
- *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,6 +48,7 @@
 #include <netinet/in.h>
 #include <net/if.h>
 
+#include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/ip.h>
@@ -102,7 +103,7 @@ static uint16_t arp_send_interrupt(FAR struct net_driver_s *dev,
 {
   FAR struct arp_send_s *state = (FAR struct arp_send_s *)priv;
 
-  nllvdbg("flags: %04x sent: %d\n", flags, state->snd_sent);
+  ninfo("flags: %04x sent: %d\n", flags, state->snd_sent);
 
   if (state)
     {
@@ -110,7 +111,7 @@ static uint16_t arp_send_interrupt(FAR struct net_driver_s *dev,
 
       if ((flags & NETDEV_DOWN) != 0)
         {
-          nlldbg("ERROR: Interface is down\n");
+          nerr("ERROR: Interface is down\n");
           arp_send_terminate(state, -ENETUNREACH);
           return flags;
         }
@@ -191,7 +192,6 @@ int arp_send(in_addr_t ipaddr)
   struct arp_notify_s notify;
   struct timespec delay;
   struct arp_send_s state;
-  net_lock_t save;
   int ret;
 
   /* First check if destination is a local broadcast. */
@@ -230,7 +230,7 @@ int arp_send(in_addr_t ipaddr)
 #endif
   if (!dev)
     {
-      ndbg("ERROR: Unreachable: %08lx\n", (unsigned long)ipaddr);
+      nerr("ERROR: Unreachable: %08lx\n", (unsigned long)ipaddr);
       ret = -EHOSTUNREACH;
       goto errout;
     }
@@ -281,11 +281,11 @@ int arp_send(in_addr_t ipaddr)
    * want anything to happen until we are ready.
    */
 
-  save = net_lock();
+  net_lock();
   state.snd_cb = arp_callback_alloc(dev);
   if (!state.snd_cb)
     {
-      ndbg("ERROR: Failed to allocate a callback\n");
+      nerr("ERROR: Failed to allocate a callback\n");
       ret = -ENOMEM;
       goto errout_with_lock;
     }
@@ -294,7 +294,13 @@ int arp_send(in_addr_t ipaddr)
    * disabled
    */
 
+  /* This semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
   (void)sem_init(&state.snd_sem, 0, 0); /* Doesn't really fail */
+  sem_setprotocol(&state.snd_sem, SEM_PRIO_NONE);
+
   state.snd_retries   = 0;              /* No retries yet */
   state.snd_ipaddr    = ipaddr;         /* IP address to query */
 
@@ -368,7 +374,7 @@ int arp_send(in_addr_t ipaddr)
         {
           /* Break out on a send failure */
 
-          ndbg("ERROR: Send failed: %d\n", ret);
+          nerr("ERROR: Send failed: %d\n", ret);
           break;
         }
 
@@ -396,13 +402,13 @@ int arp_send(in_addr_t ipaddr)
       /* Increment the retry count */
 
       state.snd_retries++;
-      ndbg("ERROR: arp_wait failed: %d\n", ret);
+      nerr("ERROR: arp_wait failed: %d\n", ret);
     }
 
   sem_destroy(&state.snd_sem);
   arp_callback_free(dev, state.snd_cb);
 errout_with_lock:
-  net_unlock(save);
+  net_unlock();
 errout:
   return ret;
 }

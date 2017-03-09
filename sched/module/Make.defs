@@ -1,7 +1,7 @@
 ############################################################################
 # sched/module/Make.defs
 #
-#   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -37,13 +37,7 @@ ifeq ($(CONFIG_MODULE),y)
 
 # OS module interfaces
 
-CSRCS += mod_insmod.c mod_rmmod.c
-
-# loadable module library
-
-CSRCS += mod_bind.c mod_init.c mod_iobuffer.c mod_load.c mod_read.c
-CSRCS += mod_registry.c mod_sections.c mod_symbols.c mod_symtab.c
-CSRCS += mod_uninit.c mod_unload.c mod_verify.c
+CSRCS += mod_insmod.c mod_rmmod.c mod_modsym.c mod_modhandle.c
 
 # procfs support
 

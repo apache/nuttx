@@ -52,7 +52,7 @@
 #  include <arch/irq.h>
 #  ifdef CONFIG_SMP
 #    include <nuttx/sched.h>
-#    include <arch/spinlock.h>
+#    include <nuttx/spinlock.h>
 #  endif
 #endif
 
@@ -94,13 +94,6 @@
 #  else
 #    define USE_DEVCONSOLE 1
 #  endif
-#endif
-
-/* Determine which device to use as the system logging device */
-
-#ifndef CONFIG_SYSLOG
-#  undef CONFIG_SYSLOG_CHAR
-#  undef CONFIG_RAMLOG_SYSLOG
 #endif
 
 /* The design for how we signal UART data availability is up in the air */
@@ -206,6 +199,25 @@ extern volatile int g_eventloop;
 extern volatile int g_uart_data_available;
 #endif
 
+#ifdef CONFIG_SMP
+/* These spinlocks are used in the SMP configuration in order to implement
+ * up_cpu_pause().  The protocol for CPUn to pause CPUm is as follows
+ *
+ * 1. The up_cpu_pause() implementation on CPUn locks both g_cpu_wait[m]
+ *    and g_cpu_paused[m].  CPUn then waits spinning on g_cpu_paused[m].
+ * 2. CPUm receives the interrupt it (1) unlocks g_cpu_paused[m] and
+ *    (2) locks g_cpu_wait[m].  The first unblocks CPUn and the second
+ *    blocks CPUm in the interrupt handler.
+ *
+ * When CPUm resumes, CPUn unlocks g_cpu_wait[m] and the interrupt handler
+ * on CPUm continues.  CPUm must, of course, also then unlock g_cpu_wait[m]
+ * so that it will be ready for the next pause operation.
+ */
+
+volatile spinlock_t g_cpu_wait[CONFIG_SMP_NCPUS] SP_SECTION;
+volatile spinlock_t g_cpu_paused[CONFIG_SMP_NCPUS] SP_SECTION;
+#endif
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -303,6 +315,13 @@ int up_buttonevent(int x, int y, int buttons);
 int sim_ajoy_initialize(void);
 #endif
 
+/* up_ioexpander.c ********************************************************/
+
+#ifdef CONFIG_SIM_IOEXPANDER
+struct ioexpander_dev_s;
+FAR struct ioexpander_dev_s *sim_ioexpander_initialize(void);
+#endif
+
 /* up_tapdev.c ************************************************************/
 
 #if defined(CONFIG_NET_ETHERNET) && !defined(__CYGWIN__)
@@ -343,7 +362,12 @@ void netdriver_loop(void);
 
 #ifdef CONFIG_SIM_SPIFLASH
 struct spi_dev_s;
-struct spi_dev_s *up_spiflashinitialize(void);
+struct spi_dev_s *up_spiflashinitialize(FAR const char *name);
+#endif
+
+#ifdef CONFIG_SIM_QSPIFLASH
+struct qspi_dev_s;
+struct qspi_dev_s *up_qspiflashinitialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

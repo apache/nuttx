@@ -111,7 +111,7 @@ static void zcross_enable(FAR const struct zc_lowerhalf_s *lower,
   flags = enter_critical_section();
   zcross_disable();
 
-  snllvdbg("handler: %p arg: %p\n", handler, arg);
+  sninfo("handler: %p arg: %p\n", handler, arg);
 
   if (handler)
     {
@@ -120,7 +120,7 @@ static void zcross_enable(FAR const struct zc_lowerhalf_s *lower,
     }
 
   (void)stm32_gpiosetevent(GPIO_ZEROCROSS, rising, falling,
-                           true, zcross_interrupt);
+                           true, zcross_interrupt, NULL);
 
   leave_critical_section(flags);
 }

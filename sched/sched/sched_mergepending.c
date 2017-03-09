@@ -48,6 +48,7 @@
 #  include <nuttx/spinlock.h>
 #endif
 
+#include "irq/irq.h"
 #include "sched/sched.h"
 
 /****************************************************************************
@@ -196,15 +197,16 @@ bool sched_mergepending(void)
   FAR struct tcb_s *tcb;
   bool ret = false;
   int cpu;
+  int me;
 
   /* Remove and process every TCB in the g_pendingtasks list.
    *
-   * This function is only called in the context where locking is known to
-   * disabled on one CPU.  However, we must do nothing if pre-emption is
-   * still locked because of actions of other CPUs.
+   * Do nothing if (1) pre-emption is still disabled (by any CPU), or (2) if
+   * some CPU other than this one is in a critical section.
    */
 
-  if (!spin_islocked(&g_cpu_schedlock))
+  me = this_cpu();
+  if (!spin_islocked(&g_cpu_schedlock) && !irq_cpu_locked(me))
     {
       /* Find the CPU that is executing the lowest priority task */
 
@@ -243,7 +245,7 @@ bool sched_mergepending(void)
            * Check if that happened.
            */
 
-          if (spin_islocked(&g_cpu_schedlock))
+          if (spin_islocked(&g_cpu_schedlock) || irq_cpu_locked(me))
             {
               /* Yes.. then we may have incorrectly placed some TCBs in the
                * g_readytorun list (unlikely, but possible).  We will have to
@@ -271,11 +273,11 @@ bool sched_mergepending(void)
               return ret;
             }
 
-          cpu = sched_cpu_select(ALL_CPUS /* ptcb->affinity */);
+          cpu  = sched_cpu_select(ALL_CPUS /* ptcb->affinity */);
           rtcb = current_task(cpu);
         }
 
-      /* No more pending tasks can be made running.  Move any reamaining
+      /* No more pending tasks can be made running.  Move any remaining
        * tasks in the pending task list to the ready-to-run task list.
        */
 

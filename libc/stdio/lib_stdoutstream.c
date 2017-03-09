@@ -82,10 +82,12 @@ static void stdoutstream_putc(FAR struct lib_outstream_s *this, int ch)
  * Name: stdoutstream_flush
  ****************************************************************************/
 
-#if defined(CONFIG_STDIO_LINEBUFFER) && CONFIG_STDIO_BUFFER_SIZE > 0
+#ifndef CONFIG_STDIO_DISABLE_BUFFERING
 static int stdoutstream_flush(FAR struct lib_outstream_s *this)
 {
   FAR struct lib_stdoutstream_s *sthis = (FAR struct lib_stdoutstream_s *)this;
+
+  DEBUGASSERT(sthis != NULL && sthis->stream != NULL);
   return lib_fflush(sthis->stream, true);
 }
 #endif
@@ -125,9 +127,8 @@ void lib_stdoutstream(FAR struct lib_stdoutstream_s *outstream,
    * meaning.
    */
 
-#ifdef CONFIG_STDIO_LINEBUFFER
-#if CONFIG_STDIO_BUFFER_SIZE > 0
-  if ((stream->fs_oflags & O_BINARY) == 0)
+#ifndef CONFIG_STDIO_DISABLE_BUFFERING
+  if (stream->fs_bufstart != NULL && (stream->fs_oflags & O_BINARY) == 0)
     {
       outstream->public.flush = stdoutstream_flush;
     }
@@ -136,7 +137,6 @@ void lib_stdoutstream(FAR struct lib_stdoutstream_s *outstream,
     {
       outstream->public.flush = lib_noflush;
     }
-#endif
 
   /* Set the number of bytes put to zero and remember the stream */
 

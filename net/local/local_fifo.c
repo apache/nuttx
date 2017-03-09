@@ -189,7 +189,7 @@ static int local_create_fifo(FAR const char *path)
           int errcode = get_errno();
           DEBUGASSERT(errcode > 0);
 
-          ndbg("ERROR: Failed to create FIFO %s: %d\n", path, errcode);
+          nerr("ERROR: Failed to create FIFO %s: %d\n", path, errcode);
           return -errcode;
         }
     }
@@ -230,7 +230,7 @@ static int local_release_fifo(FAR const char *path)
           int errcode = get_errno();
           DEBUGASSERT(errcode > 0);
 
-          ndbg("ERROR: Failed to unlink FIFO %s: %d\n", path, errcode);
+          nerr("ERROR: Failed to unlink FIFO %s: %d\n", path, errcode);
           return -errcode;
         }
     }
@@ -260,7 +260,7 @@ static int local_rx_open(FAR struct local_conn_s *conn, FAR const char *path,
       int errcode = get_errno();
       DEBUGASSERT(errcode > 0);
 
-      ndbg("ERROR: Failed on open %s for reading: %d\n",
+      nerr("ERROR: Failed on open %s for reading: %d\n",
            path, errcode);
 
       /* Map the errcode to something consistent with the return
@@ -296,7 +296,7 @@ static int local_tx_open(FAR struct local_conn_s *conn, FAR const char *path,
       int errcode = get_errno();
       DEBUGASSERT(errcode > 0);
 
-      ndbg("ERROR: Failed on open %s for writing: %d\n",
+      nerr("ERROR: Failed on open %s for writing: %d\n",
            path, errcode);
 
       /* Map the errcode to something consistent with the return
@@ -336,7 +336,7 @@ static int local_set_policy(int fd, unsigned long policy)
       int errcode = get_errno();
       DEBUGASSERT(errcode > 0);
 
-      ndbg("ERROR: Failed to set FIFO buffer policty: %d\n", errcode);
+      nerr("ERROR: Failed to set FIFO buffer policty: %d\n", errcode);
       return -errcode;
     }
 

@@ -73,6 +73,14 @@ static inline void task_atexit(FAR struct tcb_s *tcb)
   /* Make sure that we have not already left the group.  Only the final
    * exiting thread in the task group should trigger the atexit()
    * callbacks.
+   *
+   * REVISIT: This is a security problem In the PROTECTED and KERNEL builds:
+   * We must not call the registered function in supervisor mode!  See also
+   * on_exit() and pthread_cleanup_pop() callbacks.
+   *
+   * REVISIT:  In the case of task_delete(), the callback would execute in
+   * the context the caller of task_delete() cancel, not in the context of
+   * the exiting task (or process).
    */
 
   if (group && group->tg_nmembers == 1)
@@ -133,6 +141,14 @@ static inline void task_onexit(FAR struct tcb_s *tcb, int status)
   /* Make sure that we have not already left the group.  Only the final
    * exiting thread in the task group should trigger the atexit()
    * callbacks.
+   *
+   * REVISIT: This is a security problem In the PROTECTED and KERNEL builds:
+   * We must not call the registered function in supervisor mode!  See also
+   * atexit() and pthread_cleanup_pop() callbacks.
+   *
+   * REVISIT:  In the case of task_delete(), the callback would execute in
+   * he context the caller of task_delete() cancel, not in the context of
+   * the exiting task (or process).
    */
 
   if (group && group->tg_nmembers == 1)
@@ -360,11 +376,12 @@ static inline void task_sigchild(FAR struct tcb_s *ptcb,
       task_exitstatus(ptcb->group, status);
 
 #else /* CONFIG_SCHED_CHILD_STATUS */
+      /* Exit status is not retained.  Just decrement the number of
+       * children from this parent.
+       */
 
-      /* Decrement the number of children from this parent */
-
-      DEBUGASSERT(ptcb->nchildren > 0);
-      ptcb->nchildren--;
+      DEBUGASSERT(ptcb->group != NULL && ptcb->group->tg_nchildren > 0);
+      ptcb->group->tg_nchildren--;
 
 #endif /* CONFIG_SCHED_CHILD_STATUS */
 
@@ -429,13 +446,13 @@ static inline void task_signalparent(FAR struct tcb_s *ctcb, int status)
   sched_lock();
 
   /* Get the TCB of the receiving, parent task.  We do this early to
-   * handle multiple calls to task_signalparent.  ctcb->ppid is set to an
-   * invalid value below and the following call will fail if we are
-   * called again.
+   * handle multiple calls to task_signalparent.  ctcb->group->tg_ppid is
+   * set to an invalid value below and the following call will fail if we
+   * are called again.
    */
 
-  ptcb = sched_gettcb(ctcb->ppid);
-  if (!ptcb)
+  ptcb = sched_gettcb(ctcb->group->tg_ppid);
+  if (ptcb == NULL)
     {
       /* The parent no longer exists... bail */
 
@@ -449,7 +466,7 @@ static inline void task_signalparent(FAR struct tcb_s *ctcb, int status)
 
   /* Forget who our parent was */
 
-  ctcb->ppid = INVALID_PROCESS_ID;
+  ctcb->group->tg_ppid = INVALID_PROCESS_ID;
   sched_unlock();
 #endif
 }
@@ -594,6 +611,17 @@ void task_exithook(FAR struct tcb_s *tcb, int status, bool nonblocking)
     {
       return;
     }
+
+#ifdef CONFIG_CANCELLATION_POINTS
+   /* Mark the task as non-cancelable to avoid additional calls to exit()
+    * due to any cancellation point logic that might get kicked off by
+    * actions taken during exit processing.
+    */
+
+   tcb->flags  |= TCB_FLAG_NONCANCELABLE;
+   tcb->flags  &= ~TCB_FLAG_CANCEL_PENDING;
+   tcb->cpcount = 0;
+#endif
 
 #if defined(CONFIG_SCHED_ATEXIT) || defined(CONFIG_SCHED_ONEXIT)
   /* If exit function(s) were registered, call them now before we do any un-

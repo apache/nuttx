@@ -268,7 +268,7 @@ EXTERN const uint32_t g_gpiobase[STM32L4_NPORTS];
  * Description:
  *   Configure a GPIO pin based on bit-encoded description of the pin.
  *   Once it is configured as Alternative (GPIO_ALT|GPIO_CNF_AFPP|...)
- *   function, it must be unconfigured with stm32_unconfiggpio() with
+ *   function, it must be unconfigured with stm32l4_unconfiggpio() with
  *   the same cfgset first before it can be set to non-alternative function.
  *
  * Returns:
@@ -326,21 +326,22 @@ bool stm32l4_gpioread(uint32_t pinset);
  * Description:
  *   Sets/clears GPIO based event and interrupt triggers.
  *
- * Parameters:
- *  - pinset: gpio pin configuration
- *  - rising/falling edge: enables
- *  - event:  generate event when set
- *  - func:   when non-NULL, generate interrupt
+ * Input Parameters:
+ *  pinset      - GPIO pin configuration
+ *  risingedge  - Enables interrupt on rising edges
+ *  fallingedge - Enables interrupt on falling edges
+ *  event       - Generate event when set
+ *  func        - When non-NULL, generate interrupt
+ *  arg         - Argument passed to the interrupt callback
  *
- * Returns:
- *  The previous value of the interrupt handler function pointer.  This value may,
- *  for example, be used to restore the previous handler when multiple handlers are
- *  used.
+ * Returned Value:
+ *  Zero (OK) is returned on success, otherwise a negated errno value is returned
+ *  to indicate the nature of the failure.
  *
  ************************************************************************************/
 
-xcpt_t stm32l4_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
-                            bool event, xcpt_t func);
+int stm32l4_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
+                         bool event, xcpt_t func, void *arg);
 
 /************************************************************************************
  * Function:  stm32l4_dumpgpio
@@ -350,7 +351,7 @@ xcpt_t stm32l4_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
  *
  ************************************************************************************/
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 int stm32l4_dumpgpio(uint32_t pinset, const char *msg);
 #else
 #  define stm32l4_dumpgpio(p,m)

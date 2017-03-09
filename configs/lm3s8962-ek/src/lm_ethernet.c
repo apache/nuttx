@@ -83,7 +83,7 @@ void tiva_ethernetmac(struct ether_addr *ethaddr)
   user0 = getreg32(TIVA_FLASH_USERREG0);
   user1 = getreg32(TIVA_FLASH_USERREG1);
 
-  nlldbg("user: %06x:%06x\n", user1 & 0x00ffffff, user0 & 0x00ffffff);
+  ninfo("user: %06x:%06x\n", user1 & 0x00ffffff, user0 & 0x00ffffff);
   DEBUGASSERT(user0 != 0xffffffff && user1 != 0xffffffff);
 
   /* Re-format that MAC address the way that the network expects to see it */

@@ -6,7 +6,7 @@
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Ported by: Darcy Gong
  *
- * It derives from the Rhombs OS math library by Nick Johnson which has
+ * It derives from the Rhombus OS math library by Nick Johnson which has
  * a compatibile, MIT-style license:
  *
  * Copyright (C) 2009-2011 Nick Johnson <nickbjohnson4224 at gmail.com>
@@ -37,5 +37,5 @@
 
 float cosf(float x)
 {
-  return sinf(x + M_PI_2);
+  return sinf(x + M_PI_2_F);
 }

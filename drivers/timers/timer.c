@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/timers/timer.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Bob Doiron
  *
@@ -46,6 +46,7 @@
 #include <string.h>
 #include <semaphore.h>
 #include <fcntl.h>
+#include <signal.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
@@ -58,24 +59,6 @@
 #ifdef CONFIG_TIMER
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-/* Debug ********************************************************************/
-/* Non-standard debug that may be enabled just for testing the timer driver */
-
-#ifdef CONFIG_DEBUG_TIMER
-#  define tmrdbg    dbg
-#  define tmrvdbg   vdbg
-#  define tmrlldbg  lldbg
-#  define tmrllvdbg llvdbg
-#else
-#  define tmrdbg(x...)
-#  define tmrvdbg(x...)
-#  define tmrlldbg(x...)
-#  define tmrllvdbg(x...)
-#endif
-
-/****************************************************************************
  * Private Type Definitions
  ****************************************************************************/
 
@@ -83,8 +66,11 @@
 
 struct timer_upperhalf_s
 {
-  uint8_t   crefs;    /* The number of times the device has been opened */
-  FAR char *path;     /* Registration path */
+  uint8_t   crefs;         /* The number of times the device has been opened */
+  uint8_t   signo;         /* The signal number to use in the notification */
+  pid_t     pid;           /* The ID of the task/thread to receive the signal */
+  FAR void *arg;           /* An argument to pass with the signal */
+  FAR char *path;          /* Registration path */
 
   /* The contained lower-half driver */
 
@@ -95,6 +81,7 @@ struct timer_upperhalf_s
  * Private Function Prototypes
  ****************************************************************************/
 
+static bool    timer_notifier(FAR uint32_t *next_interval_us, FAR void *arg);
 static int     timer_open(FAR struct file *filep);
 static int     timer_close(FAR struct file *filep);
 static ssize_t timer_read(FAR struct file *filep, FAR char *buffer,
@@ -129,6 +116,37 @@ static const struct file_operations g_timerops =
  ****************************************************************************/
 
 /************************************************************************************
+ * Name: timer_notifier
+ *
+ * Description:
+ *   Notify the application via a signal when the timer interrupt occurs
+ *
+ * REVISIT: This function prototype is insufficient to support signaling
+ *
+ ************************************************************************************/
+
+static bool timer_notifier(FAR uint32_t *next_interval_us, FAR void *arg)
+{
+  FAR struct timer_upperhalf_s *upper = (FAR struct timer_upperhalf_s *)arg;
+#ifdef CONFIG_CAN_PASS_STRUCTS
+  union sigval value;
+#endif
+
+  DEBUGASSERT(upper != NULL);
+
+  /* Signal the waiter.. if there is one */
+
+#ifdef CONFIG_CAN_PASS_STRUCTS
+  value.sival_ptr = upper->arg;
+  (void)sigqueue(upper->pid, upper->signo, value);
+#else
+  (void)sigqueue(upper->pid, upper->signo, upper->arg);
+#endif
+
+  return true;
+}
+
+/************************************************************************************
  * Name: timer_open
  *
  * Description:
@@ -138,12 +156,12 @@ static const struct file_operations g_timerops =
 
 static int timer_open(FAR struct file *filep)
 {
-  FAR struct inode                *inode = filep->f_inode;
+  FAR struct inode             *inode = filep->f_inode;
   FAR struct timer_upperhalf_s *upper = inode->i_private;
-  uint8_t                          tmp;
-  int                              ret;
+  uint8_t                       tmp;
+  int                           ret;
 
-  tmrvdbg("crefs: %d\n", upper->crefs);
+  tmrinfo("crefs: %d\n", upper->crefs);
 
   /* Increment the count of references to the device.  If this the first
    * time that the driver has been opened for this device, then initialize
@@ -181,7 +199,7 @@ static int timer_close(FAR struct file *filep)
   FAR struct inode *inode = filep->f_inode;
   FAR struct timer_upperhalf_s *upper = inode->i_private;
 
-  tmrvdbg("crefs: %d\n", upper->crefs);
+  tmrinfo("crefs: %d\n", upper->crefs);
 
   /* Decrement the references to the driver.  If the reference count will
    * decrement to 0, then uninitialize the driver.
@@ -240,7 +258,7 @@ static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct timer_lowerhalf_s *lower = upper->lower;
   int                           ret;
 
-  tmrvdbg("cmd: %d arg: %ld\n", cmd, arg);
+  tmrinfo("cmd: %d arg: %ld\n", cmd, arg);
   DEBUGASSERT(upper && lower);
 
   /* Handle built-in ioctl commands */
@@ -276,7 +294,7 @@ static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       {
         /* Stop the timer */
 
-        if (lower->ops->start)
+        if (lower->ops->stop)
           {
             ret = lower->ops->stop(lower);
           }
@@ -340,51 +358,39 @@ static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       }
       break;
 
-    /* cmd:         TCIOC_SETHANDLER
-     * Description: Call this handler on timeout
-     * Argument:    A pointer to struct timer_sethandler_s.
+    /* cmd:         TCIOC_NOTIFICATION
+     * Description: Notify application via a signal when the timer expires.
+     * Argument:    signal number
      *
      * NOTE: This ioctl cannot be support in the kernel build mode. In that
      * case direct callbacks from kernel space into user space is forbidden.
      */
 
-#if !defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_BUILD_KERNEL)
-    case TCIOC_SETHANDLER:
+    case TCIOC_NOTIFICATION:
       {
-        FAR struct timer_sethandler_s *sethandler;
+        FAR struct timer_notify_s *notify =
+          (FAR struct timer_notify_s *)((uintptr_t)arg);
 
-        /* Don't reset on timer timeout; instead, call this user
-         * provider timeout handler.  NOTE:  Providing handler==NULL will
-         * restore the reset behavior.
-         */
-
-        if (lower->ops->sethandler) /* Optional */
+        if (notify != NULL)
           {
-            sethandler = (FAR struct timer_sethandler_s *)((uintptr_t)arg);
-            if (sethandler)
-              {
-                sethandler->oldhandler =
-                  lower->ops->sethandler(lower, sethandler->newhandler);
-                ret = OK;
-              }
-            else
-              {
-                ret = -EINVAL;
-              }
+            upper->signo = notify->signo;
+            upper->pid   = notify->pid;
+            upper->arg   = notify->arg;
+
+            ret = timer_setcallback((FAR void *)upper, timer_notifier, upper);
           }
         else
           {
-            ret = -ENOSYS;
+            ret = -EINVAL;
           }
       }
       break;
-#endif
 
     /* Any unrecognized IOCTL commands might be platform-specific ioctl commands */
 
     default:
       {
-        tmrvdbg("Forwarding unrecognized cmd: %d arg: %ld\n", cmd, arg);
+        tmrinfo("Forwarding unrecognized cmd: %d arg: %ld\n", cmd, arg);
 
         /* An ioctl commands that are not recognized by the "upper-half"
          * driver are forwarded to the lower half driver through this
@@ -443,7 +449,7 @@ FAR void *timer_register(FAR const char *path,
   int ret;
 
   DEBUGASSERT(path && lower);
-  tmrvdbg("Entry: path=%s\n", path);
+  tmrinfo("Entry: path=%s\n", path);
 
   /* Allocate the upper-half data structure */
 
@@ -451,7 +457,7 @@ FAR void *timer_register(FAR const char *path,
     kmm_zalloc(sizeof(struct timer_upperhalf_s));
   if (!upper)
     {
-      tmrdbg("Upper half allocation failed\n");
+      tmrerr("ERROR: Upper half allocation failed\n");
       goto errout;
     }
 
@@ -466,7 +472,7 @@ FAR void *timer_register(FAR const char *path,
   upper->path = strdup(path);
   if (!upper->path)
     {
-      tmrdbg("Path allocation failed\n");
+      tmrerr("ERROR: Path allocation failed\n");
       goto errout_with_upper;
     }
 
@@ -475,7 +481,7 @@ FAR void *timer_register(FAR const char *path,
   ret = register_driver(path, &g_timerops, 0666, upper);
   if (ret < 0)
     {
-      tmrdbg("register_driver failed: %d\n", ret);
+      tmrerr("ERROR: register_driver failed: %d\n", ret);
       goto errout_with_path;
     }
 
@@ -514,10 +520,10 @@ void timer_unregister(FAR void *handle)
   /* Recover the pointer to the upper-half driver state */
 
   upper = (FAR struct timer_upperhalf_s *)handle;
+  DEBUGASSERT(upper != NULL && upper->lower != NULL);
   lower = upper->lower;
-  DEBUGASSERT(upper && lower);
 
-  tmrvdbg("Unregistering: %s\n", upper->path);
+  tmrinfo("Unregistering: %s\n", upper->path);
 
   /* Disable the timer */
 
@@ -532,6 +538,49 @@ void timer_unregister(FAR void *handle)
 
   kmm_free(upper->path);
   kmm_free(upper);
+}
+
+/****************************************************************************
+ * Name: timer_setcallback
+ *
+ * Description:
+ *   This function can be called to add a callback into driver-related code
+ *   to handle timer expirations.  This is a strictly OS internal interface
+ *   and may NOT be used by appliction code.
+ *
+ * Input parameters:
+ *   handle   - This is the handle that was returned by timer_register()
+ *   callback - The new timer interrupt callback
+ *   arg      - Argument to be provided with the callback
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+int timer_setcallback(FAR void *handle, tccb_t callback, FAR void *arg)
+{
+  FAR struct timer_upperhalf_s *upper;
+  FAR struct timer_lowerhalf_s *lower;
+
+  /* Recover the pointer to the upper-half driver state */
+
+  upper = (FAR struct timer_upperhalf_s *)handle;
+  DEBUGASSERT(upper != NULL && upper->lower != NULL);
+  lower = upper->lower;
+  DEBUGASSERT(lower->ops != NULL);
+
+  /* Check if the lower half driver supports the setcallback method */
+
+  if (lower->ops->setcallback != NULL) /* Optional */
+    {
+      /* Yes.. Defer the hander attachment to the lower half driver */
+
+      lower->ops->setcallback(lower, callback, arg);
+      return OK;
+    }
+
+  return -ENOSYS;
 }
 
 #endif /* CONFIG_TIMER */

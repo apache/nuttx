@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/vfs/fs_fcntl.c
  *
- *   Copyright (C) 2009, 2012-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2012-2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,19 +44,12 @@
 #include <errno.h>
 #include <assert.h>
 
+#include <nuttx/sched.h>
+#include <nuttx/cancelpt.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
-#include <nuttx/sched.h>
 
 #include "inode/inode.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -75,14 +68,14 @@
 #if CONFIG_NFILE_DESCRIPTORS > 0
 int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
 {
-  int err = 0;
+  int errcode = 0;
   int ret = OK;
 
   /* Was this file opened ? */
 
   if (!filep->f_inode)
     {
-      err = EBADF;
+      errcode = EBADF;
       goto errout;
     }
 
@@ -119,7 +112,7 @@ int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
          * successful execution of one  of  the  exec  functions.
          */
 
-        err = ENOSYS;
+        errcode = ENOSYS;
         break;
 
       case F_GETFL:
@@ -169,7 +162,7 @@ int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
          * fd does not refer to a socket, the results are unspecified.
          */
 
-        err = EBADF; /* Only valid on socket descriptors */
+        errcode = EBADF; /* Only valid on socket descriptors */
         break;
 
       case F_GETLK:
@@ -199,18 +192,18 @@ int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
          * not be done.
          */
 
-        err = ENOSYS; /* Not implemented */
+        errcode = ENOSYS; /* Not implemented */
         break;
 
       default:
-        err = EINVAL;
+        errcode = EINVAL;
         break;
     }
 
 errout:
-  if (err != 0)
+  if (errcode != 0)
     {
-      set_errno(err);
+      set_errno(errcode);
       return ERROR;
     }
 
@@ -228,6 +221,10 @@ int fcntl(int fd, int cmd, ...)
   va_list ap;
   int ret;
 
+  /* fcntl() is a cancellation point */
+
+  (void)enter_cancellation_point();
+
   /* Setup to access the variable argument list */
 
   va_start(ap, cmd);
@@ -244,6 +241,8 @@ int fcntl(int fd, int cmd, ...)
         {
           /* The errno value has already been set */
 
+          va_end(ap);
+          leave_cancellation_point();
           return ERROR;
         }
 
@@ -273,5 +272,6 @@ int fcntl(int fd, int cmd, ...)
     }
 
   va_end(ap);
+  leave_cancellation_point();
   return ret;
 }

@@ -52,28 +52,6 @@
 #if defined(CONFIG_KL_SPI0) || defined(CONFIG_KL_SPI1)
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Enables debug output from this file (needs CONFIG_DEBUG too) */
-
-#ifdef CONFIG_DEBUG_SPI
-#  define spidbg  lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
-#    define spivdbg lldbg
-#  else
-#    define spivdbg(x...)
-#  endif
-#else
-#  define spidbg(x...)
-#  define spivdbg(x...)
-#endif
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -164,7 +142,7 @@ void weak_function kl_spidev_initialize(void)
 void kl_spi0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
                    bool selected)
 {
-  spivdbg("devid: %d CS: %s\n",
+  spiinfo("devid: %d CS: %s\n",
            (int)devid, selected ? "assert" : "de-assert");
 
 #ifdef CONFIG_ADXL345_SPI
@@ -190,7 +168,7 @@ void kl_spi0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
 void kl_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
                    bool selected)
 {
-  spivdbg("devid: %d CS: %s\n",
+  spiinfo("devid: %d CS: %s\n",
            (int)devid, selected ? "assert" : "de-assert");
 }
 #endif

@@ -60,10 +60,6 @@ ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
 CMN_CSRCS += up_ramvec_initialize.c up_ramvec_attach.c
 endif
 
-ifeq ($(CONFIG_ARCH_MEMCPY),y)
-CMN_ASRCS += up_memcpy.S
-endif
-
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CMN_CSRCS += up_mpu.c up_task_start.c up_pthread_start.c
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
@@ -74,12 +70,6 @@ endif
 
 ifeq ($(CONFIG_STACK_COLORATION),y)
 CMN_CSRCS += up_checkstack.c
-endif
-
-ifeq ($(CONFIG_ELF),y)
-CMN_CSRCS += up_elf.c
-else ifeq ($(CONFIG_MODULE),y)
-CMN_CSRCS += up_elf.c
 endif
 
 ifeq ($(CONFIG_ARCH_FPU),y)
@@ -110,7 +100,7 @@ ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += lpc43_idle.c
 endif
 
-ifeq ($(CONFIG_DEBUG),y)
+ifeq ($(CONFIG_DEBUG_FEATURES),y)
 CHIP_CSRCS += lpc43_debug.c
 endif
 
@@ -118,12 +108,16 @@ ifeq ($(CONFIG_LPC43_GPDMA),y)
 CHIP_CSRCS += lpc43_gpdma.c
 endif
 
-ifeq ($(CONFIG_GPIO_IRQ),y)
+ifeq ($(CONFIG_LPC43_GPIO_IRQ),y)
 CHIP_CSRCS += lpc43_gpioint.c
 endif
 
 ifeq ($(CONFIG_LPC43_ETHERNET),y)
 CHIP_CSRCS += lpc43_ethernet.c
+endif
+
+ifeq ($(CONFIG_LPC43_EMC),y)
+CHIP_CSRCS += lpc43_emc.c
 endif
 
 ifeq ($(CONFIG_LPC43_SPI),y)
@@ -148,6 +142,10 @@ else
 ifeq ($(CONFIG_LPC43_SSP1),y)
 CHIP_CSRCS += lpc43_ssp.c
 endif
+endif
+
+ifeq ($(CONFIG_LPC43_TIMER),y)
+CHIP_CSRCS += lpc43_timer.c
 endif
 
 ifeq ($(CONFIG_LPC43_RIT),y)

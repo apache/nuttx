@@ -118,7 +118,7 @@ ssize_t nxterm_read(FAR struct file *filep, FAR char *buffer, size_t len)
   ret = nxterm_semwait(priv);
   if (ret < 0)
     {
-      gdbg("ERROR: nxterm_semwait failed\n");
+      gerr("ERROR: nxterm_semwait failed\n");
       return ret;
     }
 
@@ -191,7 +191,7 @@ ssize_t nxterm_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
               int errval = errno;
 
-              gdbg("ERROR: nxterm_semwait failed\n");
+              gerr("ERROR: nxterm_semwait failed\n");
 
               /* Were we awakened by a signal?  Did we read anything before
                * we received the signal?
@@ -277,7 +277,7 @@ int nxterm_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
   ret = nxterm_semwait(priv);
   if (ret < 0)
     {
-      gdbg("ERROR: nxterm_semwait failed\n");
+      gerr("ERROR: nxterm_semwait failed\n");
       return ret;
     }
 
@@ -305,7 +305,7 @@ int nxterm_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
 
       if (i >= CONFIG_NXTERM_NPOLLWAITERS)
         {
-          gdbg("ERROR: Too many poll waiters\n");
+          gerr("ERROR: Too many poll waiters\n");
 
           fds->priv    = NULL;
           ret          = -EBUSY;
@@ -337,10 +337,10 @@ int nxterm_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
 
       struct pollfd **slot = (struct pollfd **)fds->priv;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
       if (!slot)
         {
-          gdbg("ERROR: No slot\n");
+          gerr("ERROR: No slot\n");
 
           ret = -EIO;
           goto errout;
@@ -393,7 +393,7 @@ void nxterm_kbdin(NXTERM handle, FAR const uint8_t *buffer, uint8_t buflen)
   char ch;
   int ret;
 
-  gvdbg("buflen=%d\n");
+  ginfo("buflen=%d\n");
   DEBUGASSERT(handle);
 
   /* Get the reference to the driver structure from the handle */
@@ -405,7 +405,7 @@ void nxterm_kbdin(NXTERM handle, FAR const uint8_t *buffer, uint8_t buflen)
   ret = nxterm_semwait(priv);
   if (ret < 0)
     {
-      gdbg("ERROR: nxterm_semwait failed\n");
+      gerr("ERROR: nxterm_semwait failed\n");
       return;
     }
 
@@ -440,7 +440,7 @@ void nxterm_kbdin(NXTERM handle, FAR const uint8_t *buffer, uint8_t buflen)
         {
           /* Yes... Return an indication that nothing was saved in the buffer. */
 
-          gdbg("ERROR: Keyboard data overrun\n");
+          gerr("ERROR: Keyboard data overrun\n");
           break;
         }
 

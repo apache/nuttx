@@ -90,7 +90,7 @@
 int nx_fill(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
             nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
 {
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!hwnd || !rect || !color)
     {
       errno = EINVAL;

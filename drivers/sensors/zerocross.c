@@ -34,10 +34,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Compilation Switches
- ****************************************************************************/
-
-/****************************************************************************
  * Included Files
  ****************************************************************************/
 
@@ -64,14 +60,13 @@
 
 #ifdef CONFIG_ZEROCROSS
 
-#ifdef CONFIG_DISABLE_SIGNALS
-#error "This driver needs SIGNAL support, remove CONFIG_DISABLE_SIGNALS"
-#endif
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Debug ********************************************************************/
+
+#ifdef CONFIG_DISABLE_SIGNALS
+#  error "This driver needs SIGNAL support, remove CONFIG_DISABLE_SIGNALS"
+#endif
 
 /****************************************************************************
  * Private Type Definitions
@@ -132,14 +127,17 @@ static void    zerocross_interrupt(FAR const struct zc_lowerhalf_s *lower,
 
 static const struct file_operations g_zcops =
 {
-  zc_open,  /* open */
-  zc_close, /* close */
-  zc_read,  /* read */
-  zc_write, /* write */
+  zc_open,   /* open */
+  zc_close,  /* close */
+  zc_read,   /* read */
+  zc_write,  /* write */
   0,         /* seek */
-  zc_ioctl  /* ioctl */
+  zc_ioctl   /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
   , 0        /* poll */
+#endif
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , 0        /* unlink */
 #endif
 };
 
@@ -244,7 +242,7 @@ static int zc_open(FAR struct file *filep)
   ret = sem_wait(&priv->exclsem);
   if (ret < 0)
     {
-      snvdbg("ERROR: sem_wait failed: %d\n", ret);
+      snerr("ERROR: sem_wait failed: %d\n", ret);
       return ret;
     }
 
@@ -253,7 +251,7 @@ static int zc_open(FAR struct file *filep)
   opriv = (FAR struct zc_open_s *)kmm_zalloc(sizeof(struct zc_open_s));
   if (!opriv)
     {
-      snvdbg("ERROR: Failled to allocate open structure\n");
+      snerr("ERROR: Failled to allocate open structure\n");
       ret = -ENOMEM;
       goto errout_with_sem;
     }
@@ -325,7 +323,7 @@ static int zc_close(FAR struct file *filep)
   ret = sem_wait(&priv->exclsem);
   if (ret < 0)
     {
-      snvdbg("ERROR: sem_wait failed: %d\n", ret);
+      snerr("ERROR: sem_wait failed: %d\n", ret);
       return ret;
     }
 
@@ -338,7 +336,7 @@ static int zc_close(FAR struct file *filep)
   DEBUGASSERT(curr);
   if (!curr)
     {
-      snvdbg("ERROR: Failed to find open entry\n");
+      snerr("ERROR: Failed to find open entry\n");
       ret = -ENOENT;
       goto errout_with_exclsem;
     }
@@ -414,7 +412,7 @@ static int zc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct zc_lowerhalf_s *lower;
   int                        ret;
 
-  snvdbg("cmd: %d arg: %ld\n", cmd, arg);
+  sninfo("cmd: %d arg: %ld\n", cmd, arg);
   DEBUGASSERT(filep && filep->f_priv && filep->f_inode);
   opriv = filep->f_priv;
   inode = filep->f_inode;
@@ -467,7 +465,7 @@ static int zc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       default:
         {
-          snvdbg("Forwarding unrecognized cmd: %d arg: %ld\n", cmd, arg);
+          snerr("ERROR: Unrecognized cmd: %d arg: %ld\n", cmd, arg);
           ret = -ENOTTY;
         }
         break;
@@ -485,7 +483,7 @@ static int zc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  * Name: zc_register
  *
  * Description:
- *   Register the Zero Cross lower half device as 'devpath'
+ *   Register the Zero Cross character device as 'devpath'
  *
  * Input Parameters:
  *   devpath - The full path to the driver to register. E.g., "/dev/zc0"
@@ -516,7 +514,7 @@ int zc_register(FAR const char *devname, FAR struct zc_lowerhalf_s *lower)
 
   if (!priv)
     {
-      snvdbg("ERROR: Failed to allocate device structure\n");
+      snerr("ERROR: Failed to allocate device structure\n");
       return -ENOMEM;
     }
 
@@ -535,7 +533,7 @@ int zc_register(FAR const char *devname, FAR struct zc_lowerhalf_s *lower)
   ret = register_driver(devname, &g_zcops, 0666, priv);
   if (ret < 0)
     {
-      snvdbg("ERROR: register_driver failed: %d\n", ret);
+      snerr("ERROR: register_driver failed: %d\n", ret);
       sem_destroy(&priv->exclsem);
       kmm_free(priv);
     }

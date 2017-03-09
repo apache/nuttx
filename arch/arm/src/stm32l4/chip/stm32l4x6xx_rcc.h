@@ -381,6 +381,7 @@
 
 /* AHB2 peripheral reset register */
 
+#define RCC_AHB1ENR_GPIOEN(port)    (1 << port)
 #define RCC_AHB2RSTR_GPIOARST       (1 << 0)  /* Bit 0:  IO port A reset */
 #define RCC_AHB2RSTR_GPIOBRST       (1 << 1)  /* Bit 1:  IO port B reset */
 #define RCC_AHB2RSTR_GPIOCRST       (1 << 2)  /* Bit 2:  IO port C reset */
@@ -759,5 +760,5 @@
 #define RCC_CSR_WWDGRSTF            (1 << 30) /* Bit 30: Window watchdog reset flag */
 #define RCC_CSR_LPWRRSTF            (1 << 31) /* Bit 31: Low-Power reset flag */
 
-#endif /* CONFIG_STM32L4_STM32F427 || CONFIG_STM32L4_STM32F429 */
+#endif /* CONFIG_STM32L4_STM32L476XX || CONFIG_STM32L4_STM32L486XX */
 #endif /* __ARCH_ARM_SRC_STM32L4_CHIP_STM32F42XXX_RCC_H */

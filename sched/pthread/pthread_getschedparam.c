@@ -1,5 +1,5 @@
 /****************************************************************************
- * pthread_getschedparam.c
+ * sched/pthread/pthread_getschedparam.c
  *
  *   Copyright (C) 2007, 2008, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -88,7 +88,7 @@ int pthread_getschedparam(pthread_t thread, FAR int *policy,
 {
   int ret;
 
-  sdbg("Thread ID=%d policy=0x%p param=0x%p\n", thread, policy, param);
+  sinfo("Thread ID=%d policy=0x%p param=0x%p\n", thread, policy, param);
 
   if (!policy || !param)
     {
@@ -113,7 +113,7 @@ int pthread_getschedparam(pthread_t thread, FAR int *policy,
         }
     }
 
-  sdbg("Returning %d\n", ret);
+  sinfo("Returning %d\n", ret);
   return ret;
 }
 

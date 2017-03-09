@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/net/cs89x0.c
  *
- *   Copyright (C) 2009-2011, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2011, 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -85,17 +85,7 @@
 
 #define BUF ((struct eth_hdr_s *)cs89x0->cs_dev.d_buf)
 
-/* If there is only one CS89x0 instance, then mapping the CS89x0 IRQ to
- * a driver state instance is trivial.
- */
-
-#if CONFIG_CS89x0_NINTERFACES == 1
-#  define cs89x0_mapirq(irq) g_cs89x0[0]
-#endif
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
+#define PKTBUF_SIZE (MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE)
 
 /****************************************************************************
  * Private Data
@@ -125,10 +115,7 @@ static int  cs89x0_txpoll(struct net_driver_s *dev);
 
 static void cs89x0_receive(struct cs89x0_driver_s *cs89x0);
 static void cs89x0_txdone(struct cs89x0_driver_s *cs89x0, uint16_t isq);
-#if CONFIG_CS89x0_NINTERFACES > 1
-static inline FAR struct cs89x0_driver_s *cs89x0_mapirq(int irq);
-#endif
-static int  cs89x0_interrupt(int irq, FAR void *context);
+static int  cs89x0_interrupt(int irq, FAR void *context, FAR void *arg);
 
 /* Watchdog timer expirations */
 
@@ -467,7 +454,7 @@ static void cs89x0_receive(FAR struct cs89x0_driver_s *cs89x0, uint16_t isq)
 #ifdef CONFIG_NET_IPv4
   if (BUF->type == HTONS(ETHTYPE_IP))
     {
-      nllvdbg("IPv4 frame\n");
+      ninfo("IPv4 frame\n");
       NETDEV_RXIPV4(&priv->cs_dev);
 
       /* Handle ARP on input then give the IPv4 packet to the network
@@ -508,7 +495,7 @@ static void cs89x0_receive(FAR struct cs89x0_driver_s *cs89x0, uint16_t isq)
 #ifdef CONFIG_NET_IPv6
   if (BUF->type == HTONS(ETHTYPE_IP6))
     {
-      nllvdbg("Iv6 frame\n");
+      ninfo("Iv6 frame\n");
       NETDEV_RXIPV6(&priv->cs_dev);
 
       /* Give the IPv6 packet to the network layer */
@@ -561,7 +548,7 @@ static void cs89x0_receive(FAR struct cs89x0_driver_s *cs89x0, uint16_t isq)
   else
 #endif
     {
-      nllvdbg("Unrecognized packet type %02x\n", BUF->type);
+      ninfo("Unrecognized packet type %02x\n", BUF->type);
       NETDEV_RXDROPPED(&priv->cs_dev);
     }
 }
@@ -624,40 +611,6 @@ static void cs89x0_txdone(struct cs89x0_driver_s *cs89x0, uint16_t isq)
 }
 
 /****************************************************************************
- * Function: cs89x0_mapirq
- *
- * Description:
- *   Map an IRQ number to a CS89x0 device state instance.  This is only
- *   necessary to handler the case where the architecture includes more than
- *   on CS89x0 chip.
- *
- * Parameters:
- *   irq     - Number of the IRQ that generated the interrupt
- *
- * Returned Value:
- *   A reference to device state structure (NULL if irq does not correspond
- *   to any CS89x0 device).
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-#if CONFIG_CS89x0_NINTERFACES > 1
-static inline FAR struct cs89x0_driver_s *cs89x0_mapirq(int irq)
-{
-  int i;
-  for (i = 0; i < CONFIG_CS89x0_NINTERFACES; i++)
-    {
-      if (g_cs89x0[i] && g_cs89x0[i].irq == irq)
-        {
-          return g_cs89x0[i];
-        }
-    }
-  return NULL;
-}
-#endif
-
-/****************************************************************************
  * Function: cs89x0_interrupt
  *
  * Description:
@@ -674,23 +627,18 @@ static inline FAR struct cs89x0_driver_s *cs89x0_mapirq(int irq)
  *
  ****************************************************************************/
 
-static int cs89x0_interrupt(int irq, FAR void *context)
+static int cs89x0_interrupt(int irq, FAR void *context, FAR void *arg)
 {
-  register struct cs89x0_driver_s *cs89x0 = s89x0_mapirq(irq);
+  FAR struct cs89x0_driver_s *cs89x0 = (FAR struct cs89x0_driver_s *)arg;
   uint16_t isq;
 
-#ifdef CONFIG_DEBUG
-  if (!cs89x0)
-    {
-      return -ENODEV;
-    }
-#endif
+  DEBUGASSERT(cs89x0 != NULL);
 
   /* Read and process all of the events from the ISQ */
 
   while ((isq = cs89x0_getreg(dev, CS89x0_ISQ_OFFSET)) != 0)
     {
-      nvdbg("ISQ: %04x\n", isq);
+      ninfo("ISQ: %04x\n", isq);
       switch (isq & ISQ_EVENTMASK)
         {
         case ISQ_RXEVENT:
@@ -704,7 +652,7 @@ static int cs89x0_interrupt(int irq, FAR void *context)
         case ISQ_BUFEVENT:
             if ((isq & ISQ_BUFEVENT_TXUNDERRUN) != 0)
               {
-                ndbg("Transmit underrun\n");
+                nerr("ERROR: Transmit underrun\n");
 #ifdef CONFIG_CS89x0_XMITEARLY
                 cd89x0->cs_txunderrun++;
                 if (cd89x0->cs_txunderrun == 3)
@@ -819,9 +767,9 @@ static int cs89x0_ifup(struct net_driver_s *dev)
 {
   struct cs89x0_driver_s *cs89x0 = (struct cs89x0_driver_s *)dev->d_private;
 
-  ndbg("Bringing up: %d.%d.%d.%d\n",
-       dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+  ninfo("Bringing up: %d.%d.%d.%d\n",
+        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
+        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
   /* Initialize the Ethernet interface */
 #warning "Missing logic"
@@ -1008,9 +956,11 @@ static int cs89x0_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 
 int cs89x0_initialize(FAR const cs89x0_driver_s *cs89x0, int devno)
 {
+  FAR uint8_t *pktbuf;
+
   /* Sanity checks -- only performed with debug enabled */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!cs89x0 || (unsigned)devno > CONFIG_CS89x0_NINTERFACES || g_cs89x00[devno])
     {
       return -EINVAL;
@@ -1023,16 +973,25 @@ int cs89x0_initialize(FAR const cs89x0_driver_s *cs89x0, int devno)
 
   /* Attach the IRQ to the driver */
 
-  if (irq_attach(cs89x0->irq, cs89x0_interrupt))
+  if (irq_attach(cs89x0->irq, cs89x0_interrupt, cs89x0))
     {
       /* We could not attach the ISR to the ISR */
 
       return -EAGAIN;
     }
 
+  /* Allocate a packet buffer */
+
+  pktbuf = (FAR uint_t *)kmm_alloc(MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE);
+  if (pktbuf == NULL)
+    {
+      return -ENOMEM;
+    }
+
   /* Initialize the driver structure */
 
   g_cs89x[devno]           = cs89x0;             /* Used to map IRQ back to instance */
+  cs89x0->cs_dev.d_buf     = g_pktbuf;           /* Single packet buffer */
   cs89x0->cs_dev.d_ifup    = cs89x0_ifup;        /* I/F down callback */
   cs89x0->cs_dev.d_ifdown  = cs89x0_ifdown;      /* I/F up (new IP address) callback */
   cs89x0->cs_dev.d_txavail = cs89x0_txavail;     /* New TX data callback */
@@ -1056,4 +1015,3 @@ int cs89x0_initialize(FAR const cs89x0_driver_s *cs89x0, int devno)
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_CS89x0 */
-

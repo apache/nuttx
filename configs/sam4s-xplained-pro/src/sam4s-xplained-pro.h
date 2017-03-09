@@ -106,7 +106,7 @@
 #  undef CONFIG_USBDEV_TRACE
 #endif
 
-#if !defined(CONFIG_SYSTEM_USBMONITOR) && !defined(CONFIG_USBDEV_TRACE)
+#if !defined(CONFIG_USBMONITOR) && !defined(CONFIG_USBDEV_TRACE)
 #  undef HAVE_USBMONITOR
 #endif
 
@@ -213,20 +213,6 @@ bool sam_cardinserted(int slotno);
 bool sam_writeprotected(int slotno);
 #else
 #  define sam_writeprotected(slotno) (false)
-#endif
-
-/************************************************************************************
- * Name: sam_timerinitialize()
- *
- * Description:
- *   Perform architecture-specific initialization of the timer hardware.
- *
- ************************************************************************************/
-
-#ifdef CONFIG_TIMER
-int sam_timerinitialize(void);
-#else
-#  define sam_timerinitialize() (0)
 #endif
 
 /****************************************************************************

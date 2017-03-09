@@ -55,10 +55,6 @@
 #define SEC_PER_DAY  ((time_t)24 * SEC_PER_HOUR)
 
 /****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
@@ -90,8 +86,7 @@ static void   clock_utc2julian(time_t jdn, int *year, int *month, int *day);
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  clock_calendar2utc, clock_gregorian2utc,
- *            and clock_julian2utc
+ * Function:  clock_utc2calendar, clock_utc2gregorian, and clock_utc2julian
  *
  * Description:
  *    Calendar to UTC conversion routines.  These conversions
@@ -317,7 +312,7 @@ FAR struct tm *gmtime_r(FAR const time_t *timer, FAR struct tm *result)
   /* Get the seconds since the EPOCH */
 
   epoch = *timer;
-  sdbg("timer=%d\n", (int)epoch);
+  linfo("timer=%d\n", (int)epoch);
 
   /* Convert to days, hours, minutes, and seconds since the EPOCH */
 
@@ -332,15 +327,15 @@ FAR struct tm *gmtime_r(FAR const time_t *timer, FAR struct tm *result)
 
   sec    = epoch;
 
-  sdbg("hour=%d min=%d sec=%d\n",
-       (int)hour, (int)min, (int)sec);
+  linfo("hour=%d min=%d sec=%d\n",
+        (int)hour, (int)min, (int)sec);
 
   /* Convert the days since the EPOCH to calendar day */
 
   clock_utc2calendar(jdn, &year, &month, &day);
 
-  sdbg("jdn=%d year=%d month=%d day=%d\n",
-       (int)jdn, (int)year, (int)month, (int)day);
+  linfo("jdn=%d year=%d month=%d day=%d\n",
+        (int)jdn, (int)year, (int)month, (int)day);
 
   /* Then return the struct tm contents */
 

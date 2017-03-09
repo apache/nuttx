@@ -2,7 +2,7 @@
  * net/devif/ipv6_input.c
  * Device driver IPv6 packet receipt interface
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
@@ -109,18 +109,6 @@
 #define IPv6BUF  ((FAR struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -142,6 +130,7 @@
 int ipv6_input(FAR struct net_driver_s *dev)
 {
   FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
+  uint16_t hdrlen;
   uint16_t pktlen;
 
   /* This is where the input processing starts. */
@@ -162,9 +151,20 @@ int ipv6_input(FAR struct net_driver_s *dev)
       g_netstats.ipv6.vhlerr++;
 #endif
 
-      nlldbg("ERROR: Invalid IPv6 version: %d\n", ipv6->vtc >> 4);
+      nwarn("WARNING: Invalid IPv6 version: %d\n", ipv6->vtc >> 4);
       goto drop;
     }
+
+  /* Get the size of the packet minus the size of link layer header */
+
+  hdrlen = NET_LL_HDRLEN(dev);
+  if ((hdrlen + IPv6_HDRLEN) > dev->d_len)
+    {
+      nwarn("WARNING: Packet shorter than IPv6 header\n");
+      goto drop;
+    }
+
+  dev->d_len -= hdrlen;
 
   /* Check the size of the packet. If the size reported to us in d_len is
    * smaller the size reported in the IP header, we assume that the packet
@@ -173,13 +173,13 @@ int ipv6_input(FAR struct net_driver_s *dev)
    * we set d_len to the correct value.
    *
    * The length reported in the IPv6 header is the length of the payload
-   * that follows the header. The device interface uses the d_len variable for
-   * holding the size of the entire packet, including the IP header and link
-   * layer header.
+   * that follows the header.  The device interface uses the d_len variable
+   * for holding the size of the entire packet, including the IP header but
+   * without the link layer header.
    */
 
   pktlen = ((uint16_t)ipv6->len[0] << 8) + (uint16_t)ipv6->len[1] +
-           IPv6_HDRLEN + netdev_ipv6_hdrlen(dev);
+           IPv6_HDRLEN;
 
   if (pktlen <= dev->d_len)
     {
@@ -187,7 +187,7 @@ int ipv6_input(FAR struct net_driver_s *dev)
     }
   else
     {
-      nlldbg("ERROR: IP packet shorter than length in IP header\n");
+      nwarn("WARNING: IP packet shorter than length in IP header\n");
       goto drop;
     }
 
@@ -216,7 +216,7 @@ int ipv6_input(FAR struct net_driver_s *dev)
        * packets.
        */
 
-      nlldbg("ERROR: No IP address assigned\n");
+      nwarn("WARNING: No IP address assigned\n");
       goto drop;
     }
 
@@ -279,7 +279,7 @@ int ipv6_input(FAR struct net_driver_s *dev)
         g_netstats.ipv6.protoerr++;
 #endif
 
-        nlldbg("ERROR: Unrecognized IP protocol: %04x\n", ipv6->proto);
+        nwarn("WARNING: Unrecognized IP protocol: %04x\n", ipv6->proto);
         goto drop;
     }
 

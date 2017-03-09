@@ -84,6 +84,10 @@
 #  define CONFIG_STM32_IWDG_DEFTIMOUT IWDG_MAXTIMEOUT
 #endif
 
+#ifndef CONFIG_DEBUG_WATCHDOG_INFO
+#  undef CONFIG_STM32_IWDG_REGDEBUG
+#endif
+
 /* REVISIT:  It appears that you can only setup the prescaler and reload
  * registers once.  After that, the SR register's PVU and RVU bits never go
  * to zero.  So we defer setting up these registers until the watchdog
@@ -103,20 +107,6 @@
 
 #if defined(CONFIG_STM32_IWDG_ONETIMESETUP) && defined(CONFIG_STM32_IWDG_DEFERREDSETUP)
 #  error "Both CONFIG_STM32_IWDG_ONETIMESETUP and CONFIG_STM32_IWDG_DEFERREDSETUP are defined"
-#endif
-
-/* Debug ********************************************************************/
-/* Non-standard debug that may be enabled just for testing the watchdog
- * driver.  NOTE: that only lldbg types are used so that the output is
- * immediately available.
- */
-
-#ifdef CONFIG_DEBUG_WATCHDOG
-#  define wddbg    lldbg
-#  define wdvdbg   llvdbg
-#else
-#  define wddbg(x...)
-#  define wdvdbg(x...)
 #endif
 
 /****************************************************************************
@@ -143,7 +133,7 @@ struct stm32_lowerhalf_s
  ****************************************************************************/
 /* Register operations ******************************************************/
 
-#if defined(CONFIG_STM32_IWDG_REGDEBUG) && defined(CONFIG_DEBUG)
+#ifdef CONFIG_STM32_IWDG_REGDEBUG
 static uint16_t stm32_getreg(uint32_t addr);
 static void     stm32_putreg(uint16_t val, uint32_t addr);
 #else
@@ -195,7 +185,7 @@ static struct stm32_lowerhalf_s g_wdgdev;
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32_IWDG_REGDEBUG) && defined(CONFIG_DEBUG)
+#ifdef CONFIG_STM32_IWDG_REGDEBUG
 static uint16_t stm32_getreg(uint32_t addr)
 {
   static uint32_t prevaddr = 0;
@@ -216,7 +206,7 @@ static uint16_t stm32_getreg(uint32_t addr)
         {
           if (count == 4)
             {
-              lldbg("...\n");
+              wdinfo("...\n");
             }
 
           return val;
@@ -233,7 +223,7 @@ static uint16_t stm32_getreg(uint32_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          lldbg("[repeats %d more times]\n", count-3);
+          wdinfo("[repeats %d more times]\n", count-3);
         }
 
       /* Save the new address, value, and count */
@@ -245,7 +235,7 @@ static uint16_t stm32_getreg(uint32_t addr)
 
   /* Show the register value read */
 
-  lldbg("%08x->%04x\n", addr, val);
+  wdinfo("%08x->%04x\n", addr, val);
   return val;
 }
 #endif
@@ -258,12 +248,12 @@ static uint16_t stm32_getreg(uint32_t addr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32_IWDG_REGDEBUG) && defined(CONFIG_DEBUG)
+#ifdef CONFIG_STM32_IWDG_REGDEBUG
 static void stm32_putreg(uint16_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  lldbg("%08x<-%04x\n", addr, val);
+  wdinfo("%08x<-%04x\n", addr, val);
 
   /* Write the value */
 
@@ -339,7 +329,7 @@ static int stm32_start(FAR struct watchdog_lowerhalf_s *lower)
   FAR struct stm32_lowerhalf_s *priv = (FAR struct stm32_lowerhalf_s *)lower;
   irqstate_t flags;
 
-  wdvdbg("Entry: started=%d\n");
+  wdinfo("Entry: started=%d\n");
   DEBUGASSERT(priv);
 
   /* Have we already been started? */
@@ -394,7 +384,7 @@ static int stm32_stop(FAR struct watchdog_lowerhalf_s *lower)
 {
   /* There is no way to disable the IDWG timer once it has been started */
 
-  wdvdbg("Entry\n");
+  wdinfo("Entry\n");
   return -ENOSYS;
 }
 
@@ -420,7 +410,7 @@ static int stm32_keepalive(FAR struct watchdog_lowerhalf_s *lower)
   FAR struct stm32_lowerhalf_s *priv = (FAR struct stm32_lowerhalf_s *)lower;
   irqstate_t flags;
 
-  wdvdbg("Entry\n");
+  wdinfo("Entry\n");
 
   /* Reload the IWDG timer */
 
@@ -455,7 +445,7 @@ static int stm32_getstatus(FAR struct watchdog_lowerhalf_s *lower,
   uint32_t ticks;
   uint32_t elapsed;
 
-  wdvdbg("Entry\n");
+  wdinfo("Entry\n");
   DEBUGASSERT(priv);
 
   /* Return the status bit */
@@ -484,10 +474,10 @@ static int stm32_getstatus(FAR struct watchdog_lowerhalf_s *lower,
 
   status->timeleft = priv->timeout - elapsed;
 
-  wdvdbg("Status     :\n");
-  wdvdbg("  flags    : %08x\n", status->flags);
-  wdvdbg("  timeout  : %d\n", status->timeout);
-  wdvdbg("  timeleft : %d\n", status->timeleft);
+  wdinfo("Status     :\n");
+  wdinfo("  flags    : %08x\n", status->flags);
+  wdinfo("  timeout  : %d\n", status->timeout);
+  wdinfo("  timeleft : %d\n", status->timeleft);
   return OK;
 }
 
@@ -516,14 +506,14 @@ static int stm32_settimeout(FAR struct watchdog_lowerhalf_s *lower,
   int prescaler;
   int shift;
 
-  wdvdbg("Entry: timeout=%d\n", timeout);
+  wdinfo("Entry: timeout=%d\n", timeout);
   DEBUGASSERT(priv);
 
   /* Can this timeout be represented? */
 
   if (timeout < 1 || timeout > IWDG_MAXTIMEOUT)
     {
-      wddbg("Cannot represent timeout=%d > %d\n",
+      wderr("ERROR: Cannot represent timeout=%d > %d\n",
             timeout, IWDG_MAXTIMEOUT);
       return -ERANGE;
     }
@@ -536,7 +526,7 @@ static int stm32_settimeout(FAR struct watchdog_lowerhalf_s *lower,
 #ifdef CONFIG_STM32_IWDG_ONETIMESETUP
   if (priv->started)
     {
-      wddbg("Timer is already started\n");
+      wdwarn("WARNING: Timer is already started\n");
       return -EBUSY;
     }
 #endif
@@ -631,7 +621,7 @@ static int stm32_settimeout(FAR struct watchdog_lowerhalf_s *lower,
     }
 #endif
 
-  wdvdbg("prescaler=%d fiwdg=%d reload=%d\n", prescaler, fiwdg, reload);
+  wdinfo("prescaler=%d fiwdg=%d reload=%d\n", prescaler, fiwdg, reload);
 
   return OK;
 }
@@ -662,7 +652,7 @@ void stm32_iwdginitialize(FAR const char *devpath, uint32_t lsifreq)
 {
   FAR struct stm32_lowerhalf_s *priv = &g_wdgdev;
 
-  wdvdbg("Entry: devpath=%s lsifreq=%d\n", devpath, lsifreq);
+  wdinfo("Entry: devpath=%s lsifreq=%d\n", devpath, lsifreq);
 
   /* NOTE we assume that clocking to the IWDG has already been provided by
    * the RCC initialization logic.
@@ -682,7 +672,7 @@ void stm32_iwdginitialize(FAR const char *devpath, uint32_t lsifreq)
    */
 
   stm32_rcc_enablelsi();
-  wdvdbg("RCC CSR: %08x\n", getreg32(STM32_RCC_CSR));
+  wdinfo("RCC CSR: %08x\n", getreg32(STM32_RCC_CSR));
 
   /* Select an arbitrary initial timeout value.  But don't start the watchdog
    * yet. NOTE: If the "Hardware watchdog" feature is enabled through the

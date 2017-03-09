@@ -49,6 +49,8 @@
 
 #include <stdint.h>
 
+#include <arch/inttypes.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -175,13 +177,13 @@ extern "C"
  *  macros. Function prototypes shall be provided."
  */
 
-intmax_t  imaxabs(intmax_t);
-imaxdiv_t imaxdiv(intmax_t, intmax_t);
-intmax_t  strtoimax(const char *, char **, int);
-uintmax_t strtoumax(const char *, char **, int);
+intmax_t  imaxabs(intmax_t j);
+imaxdiv_t imaxdiv(intmax_t numer, intmax_t denom);
+intmax_t  strtoimax(FAR const char *nptr, FAR char **endptr, int base);
+uintmax_t strtoumax(FAR const char *nptr, FAR char **endptr, int base);
 
-intmax_t  wcstoimax(const wchar_t *, wchar_t **, int);
-uintmax_t wcstoumax(const wchar_t *, wchar_t **, int);
+intmax_t  wcstoimax(FAR const wchar_t *nptr, FAR wchar_t **endptr, int base);
+uintmax_t wcstoumax(FAR const wchar_t *nptr, FAR wchar_t **endptr, int base);
 
 #undef EXTERN
 #ifdef __cplusplus

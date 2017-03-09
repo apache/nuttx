@@ -1,0 +1,59 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config LIBC_MODLIB
+	bool
+	default n
+
+menu "Module library configuration"
+	depends on LIBC_MODLIB
+
+config MODLIB_MAXDEPEND
+	int "Max dependencies"
+	default 2
+	---help---
+		This setting controls the number of other modules that a new module
+		may depend on.  That is, when a new module in inserted via 'insmod'
+		it may depend on symbols exported by other, already installed
+		modules.  This is the maximum number of modules that export symbols
+		to the new module.  This maximum is artificial; it is used in the
+		current design because it uses some very simple, pre-allocated data
+		structures.
+
+		All dependencies logic my be eliminated by sett CONFIG_MODLIB_MAXDEPEND
+		to zero.
+
+config MODLIB_ALIGN_LOG2
+	int "Log2 Section Alignment"
+	default 2
+	---help---
+		Align all sections to this Log2 value:  0->1, 1->2, 2->4, etc.
+
+config MODLIB_BUFFERSIZE
+	int "Module I/O Buffer Size"
+	default 128
+	---help---
+		This is an I/O buffer that is used to access the module file.
+		Variable length items will need to be read (such as symbol names).
+		This is really just this initial size of the buffer; it will be
+		reallocated as necessary to hold large symbol names).  Default: 128
+
+config MODLIB_BUFFERINCR
+	int "Module I/O Buffer Realloc Increment"
+	default 32
+	---help---
+		This is an I/O buffer that is used to access the module file.
+		Variable length items will need to be read (such as symbol names).
+		This value specifies the size increment to use each time the
+		buffer is reallocated.  Default: 32
+
+config MODLIB_DUMPBUFFER
+	bool "Dump module buffers"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Dump various module buffers for debug purposes
+
+endmenu # Module library configuration

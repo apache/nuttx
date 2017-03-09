@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_exti_alarm.c
  *
- *   Copyright (C) 2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Diego Sanchez <dsanchez@nx-engineering.com>
  *
@@ -54,20 +54,13 @@
 #include "stm32_exti.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
 
 /* Interrupt handlers attached to the ALARM EXTI */
 
-static xcpt_t stm32_exti_callback;
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
+static xcpt_t g_alarm_callback;
+static void  *g_callback_arg;
 
 /****************************************************************************
  * Private Functions
@@ -81,7 +74,7 @@ static xcpt_t stm32_exti_callback;
  *
  ****************************************************************************/
 
-static int stm32_exti_alarm_isr(int irq, void *context)
+static int stm32_exti_alarm_isr(int irq, void *context, FAR void *arg)
 {
   int ret = OK;
 
@@ -91,9 +84,9 @@ static int stm32_exti_alarm_isr(int irq, void *context)
 
   /* And dispatch the interrupt to the handler */
 
-  if (stm32_exti_callback)
+  if (g_alarm_callback)
     {
-      ret = stm32_exti_callback(irq, context);
+      ret = g_alarm_callback(irq, context, g_callback_arg);
     }
 
   return ret;
@@ -113,29 +106,27 @@ static int stm32_exti_alarm_isr(int irq, void *context)
  *  - rising/falling edge: enables interrupt on rising/falling edget
  *  - event:  generate event when set
  *  - func:   when non-NULL, generate interrupt
+ *  - arg:    Argument passed to the interrupt callback
  *
  * Returns:
- *   The previous value of the interrupt handler function pointer.  This
- *   value may, for example, be used to restore the previous handler when
- *   multiple handlers are used.
+ *   Zero (OK) on success; a negated errno value on failure indicating the
+ *   nature of the failure.
  *
  ****************************************************************************/
 
-xcpt_t stm32_exti_alarm(bool risingedge, bool fallingedge, bool event,
-                        xcpt_t func)
+int stm32_exti_alarm(bool risingedge, bool fallingedge, bool event,
+                     xcpt_t func, void *arg)
 {
-  xcpt_t oldhandler;
-
   /* Get the previous GPIO IRQ handler; Save the new IRQ handler. */
 
-  oldhandler          = stm32_exti_callback;
-  stm32_exti_callback = func;
+  g_alarm_callback = func;
+  g_callback_arg   = arg;
 
   /* Install external interrupt handlers (if not already attached) */
 
   if (func)
     {
-      irq_attach(STM32_IRQ_RTCALRM, stm32_exti_alarm_isr);
+      irq_attach(STM32_IRQ_RTCALRM, stm32_exti_alarm_isr, NULL);
       up_enable_irq(STM32_IRQ_RTCALRM);
     }
   else
@@ -163,5 +154,5 @@ xcpt_t stm32_exti_alarm(bool risingedge, bool fallingedge, bool event,
 
   /* Return the old IRQ handler */
 
-  return oldhandler;
+  return OK;
 }

@@ -75,21 +75,6 @@
 #  error CONFIG_SPI_EXCHANGE is not supported by this driver
 #endif
 
-/* Debug ********************************************************************/
-/* CONFIG_DEBUG_SPI enables debug output from this file */
-
-#ifdef CONFIG_DEBUG_SPI
-#  define spidbg  lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
-#    define spivdbg lldbg
-#  else
-#    define spivdbg(x...)
-#  endif
-#else
-#  define spidbg(x...)
-#  define spivdbg(x...)
-#endif
-
 /* SPI Clocking.
  *
  * The CPU clock is divided by by 1, 2, 4, or 8 to get the SPI peripheral
@@ -289,7 +274,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
   priv->frequency = frequency;
   priv->actual    = actual;
 
-  spidbg("Frequency %d->%d\n", frequency, actual);
+  spiinfo("Frequency %d->%d\n", frequency, actual);
   return actual;
 }
 
@@ -453,7 +438,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
   FAR uint8_t *ptr = (FAR uint8_t *)buffer;
   uint8_t data;
 
-  spidbg("nwords: %d\n", nwords);
+  spiinfo("nwords: %d\n", nwords);
   while (nwords)
     {
       /* Write the data to transmitted to the SPI Data Register */
@@ -498,7 +483,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
 {
   FAR uint8_t *ptr = (FAR uint8_t *)buffer;
 
-  spidbg("nwords: %d\n", nwords);
+  spiinfo("nwords: %d\n", nwords);
   while (nwords)
     {
       /* Write some dummy data to the SPI Data Register in order to clock the

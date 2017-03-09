@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <sched.h>
@@ -51,7 +52,11 @@
 
 #include "nxfe.h"
 
-#ifdef CONFIG_NX_NXSTART
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static bool g_nxserver_started;
 
 /****************************************************************************
  * Private Functions
@@ -84,7 +89,7 @@ int nx_server(int argc, char *argv[])
   dev = board_graphics_setup(CONFIG_NXSTART_DEVNO);
   if (!dev)
     {
-      gdbg("ERROR: board_graphics_setup failed, devno=%d\n", CONFIG_NXSTART_DEVNO);
+      gerr("ERROR: board_graphics_setup failed, devno=%d\n", CONFIG_NXSTART_DEVNO);
       return EXIT_FAILURE;
     }
 
@@ -94,7 +99,7 @@ int nx_server(int argc, char *argv[])
   ret = board_lcd_initialize();
   if (ret < 0)
     {
-      gdbg("ERROR: board_lcd_initialize failed: %d\n", ret);
+      gerr("ERROR: board_lcd_initialize failed: %d\n", ret);
       return EXIT_FAILURE;
     }
 
@@ -103,7 +108,7 @@ int nx_server(int argc, char *argv[])
   dev = board_lcd_getdev(CONFIG_NXSTART_DEVNO);
   if (!dev)
     {
-      gdbg("ERROR: board_lcd_getdev failed, devno=%d\n", CONFIG_NXSTART_DEVNO);
+      gerr("ERROR: board_lcd_getdev failed, devno=%d\n", CONFIG_NXSTART_DEVNO);
       return EXIT_FAILURE;
     }
 
@@ -116,17 +121,17 @@ int nx_server(int argc, char *argv[])
    * REVISIT: display == 0 is assumed.
    */
 
-  ret = up_fbinitialize(0);
+  ret = up_fbinitialize(CONFIG_NXSTART_DISPLAYNO);
   if (ret < 0)
     {
-      gdbg("ERROR: up_fbinitialize failed: %d\n", ret);
+      gerr("ERROR: up_fbinitialize failed: %d\n", ret);
       return EXIT_FAILURE;
     }
 
-  dev = up_fbgetvplane(0, CONFIG_NXSTART_VPLANE);
+  dev = up_fbgetvplane(CONFIG_NXSTART_DISPLAYNO, CONFIG_NXSTART_VPLANE);
   if (!dev)
     {
-      gdbg("ERROR: up_fbgetvplane failed, vplane=%d\n", CONFIG_NXSTART_VPLANE);
+      gerr("ERROR: up_fbgetvplane failed, vplane=%d\n", CONFIG_NXSTART_VPLANE);
       return EXIT_FAILURE;
     }
 
@@ -135,7 +140,7 @@ int nx_server(int argc, char *argv[])
   /* Then start the server (nx_run does not normally return) */
 
   ret = nx_run(dev);
-  gvdbg("nx_run returned: %d\n", ret);
+  ginfo("nx_run returned: %d\n", ret);
   return EXIT_FAILURE;
 }
 
@@ -155,6 +160,9 @@ int nx_server(int argc, char *argv[])
  *   work in the NuttX kernel build because the resources required by the
  *   NX server are private to the kernel mode logic.
  *
+ *   nx_start() can be called (indirectly) from applications via the
+ *   boardctl() interface with the BOARDIOC_NX_START command.
+ *
  * Input Parameters:
  *   None
  *
@@ -170,28 +178,34 @@ int nx_server(int argc, char *argv[])
 
 int nx_start(void)
 {
-  pid_t server;
+  /* Do nothing is the server has already been started */
 
-  /* Start the server kernel thread */
-
-  gvdbg("Starting server task\n");
-  server = kernel_thread("NX Server", CONFIG_NXSTART_SERVERPRIO,
-                         CONFIG_NXSTART_SERVERSTACK, nx_server, NULL);
-  if (server < 0)
+  if (!g_nxserver_started)
     {
-      int errcode = errno;
-      DEBUGASSERT(errcode > 0);
+      pid_t server;
 
-      gdbg("ERROR: Failed to create nx_server kernel thread: %d\n", errcode);
-      return -errcode;
+      /* Start the server kernel thread */
+
+      ginfo("Starting server task\n");
+      server = kernel_thread("NX Server", CONFIG_NXSTART_SERVERPRIO,
+                             CONFIG_NXSTART_SERVERSTACK, nx_server, NULL);
+      if (server < 0)
+        {
+          int errcode = errno;
+          DEBUGASSERT(errcode > 0);
+
+          gerr("ERROR: Failed to create nx_server kernel thread: %d\n", errcode);
+          return -errcode;
+        }
+
+      g_nxserver_started = true;
+
+      /* Wait a bit to make sure that the server get started.  NOTE that
+       * this operation cannot be done from the IDLE thread!
+       */
+
+      usleep(50*1000);
     }
 
-  /* Wait a bit to make sure that the server get started.  NOTE that this
-   * operation cannot be done from the IDLE thread!
-   */
-
-  usleep(50*1000);
   return OK;
 }
-
-#endif /* CONFIG_NX_NXSTART */

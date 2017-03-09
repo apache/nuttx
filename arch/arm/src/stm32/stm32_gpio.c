@@ -55,8 +55,8 @@
 #include "stm32_gpio.h"
 
 #if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F20XX) || \
-    defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX) || \
-    defined(CONFIG_STM32_STM32F40XX)
+    defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
+    defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32F40XX)
 #  include "chip/stm32_syscfg.h"
 #endif
 
@@ -427,8 +427,8 @@ int stm32_configgpio(uint32_t cfgset)
  ****************************************************************************/
 
 #if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F20XX) || \
-    defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX) || \
-    defined(CONFIG_STM32_STM32F40XX)
+    defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
+    defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32F40XX)
 int stm32_configgpio(uint32_t cfgset)
 {
   uintptr_t base;
@@ -469,6 +469,7 @@ int stm32_configgpio(uint32_t cfgset)
         break;
 
       case GPIO_OUTPUT:     /* General purpose output mode */
+        stm32_gpiowrite(cfgset, (cfgset & GPIO_OUTPUT_SET) != 0); /* Set the initial output value */
         pinmode = GPIO_MODER_OUTPUT;
         break;
 
@@ -584,7 +585,8 @@ int stm32_configgpio(uint32_t cfgset)
             setting = GPIO_OSPEED_50MHz;
             break;
 
-#if !defined(CONFIG_STM32_STM32F30XX) && !defined(CONFIG_STM32_STM32F37XX)
+#if !defined(CONFIG_STM32_STM32F30XX) && !defined(CONFIG_STM32_STM32F33XX) && \
+    !defined(CONFIG_STM32_STM32F37XX)
           case GPIO_SPEED_100MHz:   /* 100 MHz High speed output */
             setting = GPIO_OSPEED_100MHz;
             break;
@@ -619,17 +621,9 @@ int stm32_configgpio(uint32_t cfgset)
 
   putreg32(regval, base + STM32_GPIO_OTYPER_OFFSET);
 
-  /* If it is an output... set the pin to the correct initial state. */
-
-  if (pinmode == GPIO_MODER_OUTPUT)
-    {
-      bool value = ((cfgset & GPIO_OUTPUT_SET) != 0);
-      stm32_gpiowrite(cfgset, value);
-    }
-
   /* Otherwise, it is an input pin.  Should it configured as an EXTI interrupt? */
 
-  else if ((cfgset & GPIO_EXTI) != 0)
+  if (pinmode != GPIO_MODER_OUTPUT && (cfgset & GPIO_EXTI) != 0)
     {
       /* "In STM32 F1 the selection of the EXTI line source is performed through
        *  the EXTIx bits in the AFIO_EXTICRx registers, while in F2 series this
@@ -688,8 +682,8 @@ int stm32_unconfiggpio(uint32_t cfgset)
 #if defined(CONFIG_STM32_STM32F10XX)
   cfgset |= GPIO_INPUT | GPIO_CNF_INFLOAT | GPIO_MODE_INPUT;
 #elif defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F20XX) || \
-      defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX) || \
-      defined(CONFIG_STM32_STM32F40XX)
+      defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
+      defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32F40XX)
   cfgset |= GPIO_INPUT | GPIO_FLOAT;
 #else
 # error "Unsupported STM32 chip"
@@ -714,8 +708,8 @@ void stm32_gpiowrite(uint32_t pinset, bool value)
 #if defined(CONFIG_STM32_STM32F10XX)
   uint32_t offset;
 #elif defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F20XX) || \
-      defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX) || \
-      defined(CONFIG_STM32_STM32F40XX)
+      defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
+      defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32F40XX)
   uint32_t bit;
 #endif
   unsigned int port;
@@ -748,8 +742,8 @@ void stm32_gpiowrite(uint32_t pinset, bool value)
       putreg32((1 << pin), base + offset);
 
 #elif defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F20XX) || \
-      defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX) || \
-      defined(CONFIG_STM32_STM32F40XX)
+      defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
+      defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32F40XX)
 
       if (value)
         {
@@ -794,5 +788,6 @@ bool stm32_gpioread(uint32_t pinset)
       pin = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
       return ((getreg32(base + STM32_GPIO_IDR_OFFSET) & (1 << pin)) != 0);
     }
+
   return 0;
 }

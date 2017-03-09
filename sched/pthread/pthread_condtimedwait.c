@@ -51,6 +51,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/wdog.h>
+#include <nuttx/cancelpt.h>
 
 #include "sched/sched.h"
 #include "pthread/pthread.h"
@@ -174,9 +175,13 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
   int ret = OK;
   int status;
 
-  sdbg("cond=0x%p mutex=0x%p abstime=0x%p\n", cond, mutex, abstime);
+  sinfo("cond=0x%p mutex=0x%p abstime=0x%p\n", cond, mutex, abstime);
 
   DEBUGASSERT(rtcb->waitdog == NULL);
+
+  /* pthread_cond_timedwait() is a cancellation point */
+
+  (void)enter_cancellation_point();
 
   /* Make sure that non-NULL references were provided. */
 
@@ -212,7 +217,7 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
         }
       else
         {
-          sdbg("Give up mutex...\n");
+          sinfo("Give up mutex...\n");
 
           /* We must disable pre-emption and interrupts here so that
            * the time stays valid until the wait begins.   This adds
@@ -292,7 +297,7 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
 
                           if (get_errno() == EINTR)
                             {
-                              sdbg("Timedout!\n");
+                              serr("ERROR: Timedout!\n");
                               ret = ETIMEDOUT;
                             }
                           else
@@ -312,7 +317,7 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
 
                   /* Reacquire the mutex (retaining the ret). */
 
-                  sdbg("Re-locking...\n");
+                  sinfo("Re-locking...\n");
                   status = pthread_takesemaphore((FAR sem_t *)&mutex->sem);
                   if (!status)
                     {
@@ -338,7 +343,8 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
         }
     }
 
-  sdbg("Returning %d\n", ret);
+  leave_cancellation_point();
+  sinfo("Returning %d\n", ret);
   return ret;
 }
 

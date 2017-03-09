@@ -45,8 +45,8 @@
 #include <debug.h>
 #include <errno.h>
 
-#ifdef CONFIG_SYSTEM_USBMONITOR
-#  include <apps/usbmonitor.h>
+#ifdef CONFIG_USBMONITOR
+#  include <nuttx/usb/usbmonitor.h>
 #endif
 
 #include <nuttx/binfmt/elf.h>
@@ -120,7 +120,7 @@ int stm32_bringup(void)
   ret = stm32_pca9635_initialize();
   if (ret < 0)
     {
-      sdbg("ERROR: stm32_pca9635_initialize failed: %d\n", ret);
+      serr("ERROR: stm32_pca9635_initialize failed: %d\n", ret);
     }
 #endif
 
@@ -130,7 +130,7 @@ int stm32_bringup(void)
   ret = stm32_sdio_initialize();
   if (ret != OK)
     {
-      fdbg("ERROR: Failed to initialize MMC/SD driver: %d\n", ret);
+      ferr("ERROR: Failed to initialize MMC/SD driver: %d\n", ret);
       return ret;
     }
 #endif
@@ -143,7 +143,7 @@ int stm32_bringup(void)
   ret = stm32_usbhost_initialize();
   if (ret != OK)
     {
-      udbg("ERROR: Failed to initialize USB host: %d\n", ret);
+      uerr("ERROR: Failed to initialize USB host: %d\n", ret);
       return ret;
     }
 #endif
@@ -151,10 +151,43 @@ int stm32_bringup(void)
 #ifdef HAVE_USBMONITOR
   /* Start the USB Monitor */
 
-  ret = usbmonitor_start(0, NULL);
+  ret = usbmonitor_start();
   if (ret != OK)
     {
-      udbg("ERROR: Failed to start USB monitor: %d\n", ret);
+      uerr("ERROR: Failed to start USB monitor: %d\n", ret);
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_PWM
+  /* Initialize PWM and register the PWM device. */
+
+  ret = stm32_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_pwm_setup() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_CAN
+  /* Initialize CAN and register the CAN driver. */
+
+  ret = stm32_can_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_can_setup failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_QENCODER
+  /* Initialize and register the qencoder driver */
+
+  ret = stm32_qencoder_initialize("/dev/qe0", CONFIG_STM32F4DISCO_QETIMER);
+  if (ret != OK)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to register the qencoder: %d\n",
+             ret);
       return ret;
     }
 #endif
@@ -165,7 +198,7 @@ int stm32_bringup(void)
   lower = stm32_rtc_lowerhalf();
   if (!lower)
     {
-      sdbg("ERROR: Failed to instantiate the RTC lower-half driver\n");
+      serr("ERROR: Failed to instantiate the RTC lower-half driver\n");
       return -ENOMEM;
     }
   else
@@ -177,7 +210,7 @@ int stm32_bringup(void)
       ret = rtc_initialize(0, lower);
       if (ret < 0)
         {
-          sdbg("ERROR: Failed to bind/register the RTC driver: %d\n", ret);
+          serr("ERROR: Failed to bind/register the RTC driver: %d\n", ret);
           return ret;
         }
     }
@@ -189,7 +222,7 @@ int stm32_bringup(void)
   ret = elf_initialize();
   if (ret < 0)
     {
-      sdbg("ERROR: Initialization of the ELF loader failed: %d\n", ret);
+      serr("ERROR: Initialization of the ELF loader failed: %d\n", ret);
     }
 #endif
 
@@ -207,9 +240,13 @@ int stm32_bringup(void)
   ret = mount(NULL, STM32_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
   if (ret < 0)
     {
-      sdbg("ERROR: Failed to mount procfs at %s: %d\n",
+      serr("ERROR: Failed to mount procfs at %s: %d\n",
            STM32_PROCFS_MOUNTPOINT, ret);
     }
+#endif
+
+#ifdef CONFIG_XEN1210
+  ret = xen1210_archinitialize(0);
 #endif
 
   return ret;

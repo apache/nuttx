@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/bch/bchdev_unregister.c
  *
- *   Copyright (C) 2008-2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,24 +51,9 @@
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
+#include <nuttx/drivers/drivers.h>
 
 #include "bch.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -91,7 +76,7 @@ int bchdev_unregister(FAR const char *chardev)
 
   /* Sanity check */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!chardev)
     {
       return -EINVAL;
@@ -103,7 +88,7 @@ int bchdev_unregister(FAR const char *chardev)
   fd = open(chardev, O_RDONLY);
   if (fd < 0)
     {
-      dbg("Failed to open %s: %d\n", chardev, errno);
+      _err("ERROR: Failed to open %s: %d\n", chardev, errno);
       return -errno;
     }
 
@@ -116,7 +101,7 @@ int bchdev_unregister(FAR const char *chardev)
 
   if (ret < 0)
     {
-      dbg("ioctl failed: %d\n", errno);
+      _err("ERROR: ioctl failed: %d\n", errno);
       return -errno;
     }
 

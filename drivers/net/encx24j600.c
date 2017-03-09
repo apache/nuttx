@@ -120,8 +120,16 @@
 
 /* We need to have the work queue to handle SPI interrupts */
 
-#ifndef CONFIG_SCHED_WORKQUEUE
+#if !defined(CONFIG_SCHED_WORKQUEUE)
 #  error "Worker thread support is required (CONFIG_SCHED_WORKQUEUE)"
+#else
+#  if defined(CONFIG_ENCX24J600_HPWORK)
+#    define ENCWORK HPWORK
+#  elif defined(CONFIG_ENCX24J600_LPWORK)
+#    define ENCWORK LPWORK
+#  else
+#    error "Neither CONFIG_ENCX24J600_HPWORK nor CONFIG_ENCX24J600_LPWORK defined"
+#  endif
 #endif
 
 /* CONFIG_ENCX24J600_DUMPPACKET will dump the contents of each packet to the console. */
@@ -132,15 +140,9 @@
 #  define enc_dumppacket(m,a,n)
 #endif
 
-/* The ENCX24J600 will not do interrupt level processing */
-
-#ifndef CONFIG_NET_NOINTS
-#  warning "CONFIG_NET_NOINTS should be set"
-#endif
-
 /* Low-level register debug */
 
-#if !defined(CONFIG_DEBUG) || !defined(CONFIG_DEBUG_NET)
+#if !defined(CONFIG_DEBUG_FEATURES) || !defined(CONFIG_DEBUG_NET)
 #  undef CONFIG_ENCX24J600_REGDEBUG
 #endif
 
@@ -187,17 +189,17 @@
 
 #ifdef CONFIG_ENCX24J600_REGDEBUG
 #  define enc_wrdump(a,v) \
-   lowsyslog(LOG_DEBUG, "ENCX24J600: %02x<-%04x\n", a, v);
+   syslog(LOG_DEBUG, "ENCX24J600: %02x<-%04x\n", a, v);
 #  define enc_rddump(a,v) \
-   lowsyslog(LOG_DEBUG, "ENCX24J600: %02x->%04x\n", a, v);
+   syslog(LOG_DEBUG, "ENCX24J600: %02x->%04x\n", a, v);
 #  define enc_bfsdump(a,m) \
-   lowsyslog(LOG_DEBUG, "ENCX24J600: %02x|=%04x\n", a, m);
+   syslog(LOG_DEBUG, "ENCX24J600: %02x|=%04x\n", a, m);
 #  define enc_bfcdump(a,m) \
-   lowsyslog(LOG_DEBUG, "ENCX24J600: %02x&=~%04x\n", a, m);
+   syslog(LOG_DEBUG, "ENCX24J600: %02x&=~%04x\n", a, m);
 #  define enc_cmddump(c) \
-   lowsyslog(LOG_DEBUG, "ENCX24J600: CMD: %02x\n", c);
+   syslog(LOG_DEBUG, "ENCX24J600: CMD: %02x\n", c);
 #  define enc_bmdump(c,b,s) \
-   lowsyslog(LOG_DEBUG, "ENCX24J600: CMD: %02x buffer: %p length: %d\n", c, b, s);
+   syslog(LOG_DEBUG, "ENCX24J600: CMD: %02x buffer: %p length: %d\n", c, b, s);
 #else
 #  define enc_wrdump(a,v)
 #  define enc_rddump(a,v)
@@ -273,6 +275,12 @@ struct enc_driver_s
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+/* A single packet buffer is used */
+
+static uint8_t g_pktbuf[MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE];
+
+/* Driver status structure */
 
 static struct enc_driver_s g_encx24j600[CONFIG_ENCX24J600_NINTERFACES];
 
@@ -482,7 +490,7 @@ static inline void enc_setethrst(FAR struct enc_driver_s *priv)
 {
   DEBUGASSERT(priv && priv->spi);
 
-  /* Select ENC28J60 chip */
+  /* Select ENCX24J600 chip */
 
   SPI_SELECT(priv->spi, SPIDEV_ETHERNET, true);
 
@@ -492,7 +500,7 @@ static inline void enc_setethrst(FAR struct enc_driver_s *priv)
 
   up_udelay(25);
 
-  /* De-select ENC28J60 chip. */
+  /* De-select ENCX24J600 chip. */
 
   SPI_SELECT(priv->spi, SPIDEV_ETHERNET, false);
   enc_cmddump(ENC_SETETHRST);
@@ -764,56 +772,56 @@ static void enc_bfc(FAR struct enc_driver_s *priv, uint16_t ctrlreg,
 #if 0 /* Sometimes useful */
 static void enc_rxdump(FAR struct enc_driver_s *priv)
 {
-  lowsyslog(LOG_DEBUG, "Rx Registers:\n");
-  lowsyslog(LOG_DEBUG, "  EIE:      %02x EIR:      %02x\n",
-            enc_rdgreg(priv, ENC_EIE), enc_rdgreg(priv, ENC_EIR));
-  lowsyslog(LOG_DEBUG, "  ESTAT:    %02x ECON1:    %02x ECON2:    %02x\n",
-            enc_rdgreg(priv, ENC_ESTAT), enc_rdgreg(priv, ENC_ECON1),
-            enc_rdgreg(priv, ENC_ECON2));
-  lowsyslog(LOG_DEBUG, "  ERXST:    %02x %02x\n",
-            enc_rdbreg(priv, ENC_ERXSTH), enc_rdbreg(priv, ENC_ERXSTL));
-  lowsyslog(LOG_DEBUG, "  ERXND:    %02x %02x\n",
-            enc_rdbreg(priv, ENC_ERXNDH), enc_rdbreg(priv, ENC_ERXNDL));
-  lowsyslog(LOG_DEBUG, "  ERXRDPT:  %02x %02x\n",
-            enc_rdbreg(priv, ENC_ERXRDPTH), enc_rdbreg(priv, ENC_ERXRDPTL));
-  lowsyslog(LOG_DEBUG, "  ERXFCON:  %02x EPKTCNT:  %02x\n",
-            enc_rdbreg(priv, ENC_ERXFCON), enc_rdbreg(priv, ENC_EPKTCNT));
-  lowsyslog(LOG_DEBUG, "  MACON1:   %02x MACON3:   %02x\n",
-            enc_rdbreg(priv, ENC_MACON1), enc_rdbreg(priv, ENC_MACON3));
-  lowsyslog(LOG_DEBUG, "  MAMXFL:   %02x %02x\n",
-            enc_rdbreg(priv, ENC_MAMXFLH), enc_rdbreg(priv, ENC_MAMXFLL));
-  lowsyslog(LOG_DEBUG, "  MAADR:    %02x:%02x:%02x:%02x:%02x:%02x\n",
-            enc_rdbreg(priv, ENC_MAADR1), enc_rdbreg(priv, ENC_MAADR2),
-            enc_rdbreg(priv, ENC_MAADR3), enc_rdbreg(priv, ENC_MAADR4),
-            enc_rdbreg(priv, ENC_MAADR5), enc_rdbreg(priv, ENC_MAADR6));
+  syslog(LOG_DEBUG, "Rx Registers:\n");
+  syslog(LOG_DEBUG, "  EIE:      %02x EIR:      %02x\n",
+         enc_rdgreg(priv, ENC_EIE), enc_rdgreg(priv, ENC_EIR));
+  syslog(LOG_DEBUG, "  ESTAT:    %02x ECON1:    %02x ECON2:    %02x\n",
+         enc_rdgreg(priv, ENC_ESTAT), enc_rdgreg(priv, ENC_ECON1),
+         enc_rdgreg(priv, ENC_ECON2));
+  syslog(LOG_DEBUG, "  ERXST:    %02x %02x\n",
+         enc_rdbreg(priv, ENC_ERXSTH), enc_rdbreg(priv, ENC_ERXSTL));
+  syslog(LOG_DEBUG, "  ERXND:    %02x %02x\n",
+         enc_rdbreg(priv, ENC_ERXNDH), enc_rdbreg(priv, ENC_ERXNDL));
+  syslog(LOG_DEBUG, "  ERXRDPT:  %02x %02x\n",
+         enc_rdbreg(priv, ENC_ERXRDPTH), enc_rdbreg(priv, ENC_ERXRDPTL));
+  syslog(LOG_DEBUG, "  ERXFCON:  %02x EPKTCNT:  %02x\n",
+         enc_rdbreg(priv, ENC_ERXFCON), enc_rdbreg(priv, ENC_EPKTCNT));
+  syslog(LOG_DEBUG, "  MACON1:   %02x MACON3:   %02x\n",
+         enc_rdbreg(priv, ENC_MACON1), enc_rdbreg(priv, ENC_MACON3));
+  syslog(LOG_DEBUG, "  MAMXFL:   %02x %02x\n",
+         enc_rdbreg(priv, ENC_MAMXFLH), enc_rdbreg(priv, ENC_MAMXFLL));
+  syslog(LOG_DEBUG, "  MAADR:    %02x:%02x:%02x:%02x:%02x:%02x\n",
+         enc_rdbreg(priv, ENC_MAADR1), enc_rdbreg(priv, ENC_MAADR2),
+         enc_rdbreg(priv, ENC_MAADR3), enc_rdbreg(priv, ENC_MAADR4),
+         enc_rdbreg(priv, ENC_MAADR5), enc_rdbreg(priv, ENC_MAADR6));
 }
 #endif
 
 #if 0 /* Sometimes useful */
 static void enc_txdump(FAR struct enc_driver_s *priv)
 {
-  lowsyslog(LOG_DEBUG, "Tx Registers:\n");
-  lowsyslog(LOG_DEBUG, "  EIE:      %02x EIR:      %02x\n",
-            enc_rdgreg(priv, ENC_EIE), enc_rdgreg(priv, ENC_EIR));
-  lowsyslog(LOG_DEBUG, "  ESTAT:    %02x ECON1:    %02x\n",
-            enc_rdgreg(priv, ENC_ESTAT), enc_rdgreg(priv, ENC_ECON1));
-  lowsyslog(LOG_DEBUG, "  ETXST:    %02x %02x\n",
-            enc_rdbreg(priv, ENC_ETXSTH), enc_rdbreg(priv, ENC_ETXSTL));
-  lowsyslog(LOG_DEBUG, "  ETXND:    %02x %02x\n",
-            enc_rdbreg(priv, ENC_ETXNDH), enc_rdbreg(priv, ENC_ETXNDL));
-  lowsyslog(LOG_DEBUG, "  MACON1:   %02x MACON3:   %02x MACON4:   %02x\n",
-            enc_rdbreg(priv, ENC_MACON1), enc_rdbreg(priv, ENC_MACON3),
-            enc_rdbreg(priv, ENC_MACON4));
-  lowsyslog(LOG_DEBUG, "  MACON1:   %02x MACON3:   %02x MACON4:   %02x\n",
-            enc_rdbreg(priv, ENC_MACON1), enc_rdbreg(priv, ENC_MACON3),
-            enc_rdbreg(priv, ENC_MACON4));
-  lowsyslog(LOG_DEBUG, "  MABBIPG:  %02x MAIPG %02x %02x\n",
-            enc_rdbreg(priv, ENC_MABBIPG), enc_rdbreg(priv, ENC_MAIPGH),
-            enc_rdbreg(priv, ENC_MAIPGL));
-  lowsyslog(LOG_DEBUG, "  MACLCON1: %02x MACLCON2:   %02x\n",
-            enc_rdbreg(priv, ENC_MACLCON1), enc_rdbreg(priv, ENC_MACLCON2));
-  lowsyslog(LOG_DEBUG, "  MAMXFL:   %02x %02x\n",
-            enc_rdbreg(priv, ENC_MAMXFLH), enc_rdbreg(priv, ENC_MAMXFLL));
+  syslog(LOG_DEBUG, "Tx Registers:\n");
+  syslog(LOG_DEBUG, "  EIE:      %02x EIR:      %02x\n",
+         enc_rdgreg(priv, ENC_EIE), enc_rdgreg(priv, ENC_EIR));
+  syslog(LOG_DEBUG, "  ESTAT:    %02x ECON1:    %02x\n",
+         enc_rdgreg(priv, ENC_ESTAT), enc_rdgreg(priv, ENC_ECON1));
+  syslog(LOG_DEBUG, "  ETXST:    %02x %02x\n",
+         enc_rdbreg(priv, ENC_ETXSTH), enc_rdbreg(priv, ENC_ETXSTL));
+  syslog(LOG_DEBUG, "  ETXND:    %02x %02x\n",
+         enc_rdbreg(priv, ENC_ETXNDH), enc_rdbreg(priv, ENC_ETXNDL));
+  syslog(LOG_DEBUG, "  MACON1:   %02x MACON3:   %02x MACON4:   %02x\n",
+         enc_rdbreg(priv, ENC_MACON1), enc_rdbreg(priv, ENC_MACON3),
+         enc_rdbreg(priv, ENC_MACON4));
+  syslog(LOG_DEBUG, "  MACON1:   %02x MACON3:   %02x MACON4:   %02x\n",
+         enc_rdbreg(priv, ENC_MACON1), enc_rdbreg(priv, ENC_MACON3),
+         enc_rdbreg(priv, ENC_MACON4));
+  syslog(LOG_DEBUG, "  MABBIPG:  %02x MAIPG %02x %02x\n",
+         enc_rdbreg(priv, ENC_MABBIPG), enc_rdbreg(priv, ENC_MAIPGH),
+         enc_rdbreg(priv, ENC_MAIPGL));
+  syslog(LOG_DEBUG, "  MACLCON1: %02x MACLCON2:   %02x\n",
+         enc_rdbreg(priv, ENC_MACLCON1), enc_rdbreg(priv, ENC_MACLCON2));
+  syslog(LOG_DEBUG, "  MAMXFL:   %02x %02x\n",
+         enc_rdbreg(priv, ENC_MAMXFLH), enc_rdbreg(priv, ENC_MAMXFLL));
 }
 #endif
 
@@ -1127,7 +1135,7 @@ static int enc_txenqueue(FAR struct enc_driver_s *priv)
     }
   else
     {
-      nlldbg("no free descriptors\n");
+      nerr("ERROR: no free descriptors\n");
       ret = -ENOMEM;
     }
 
@@ -1165,7 +1173,7 @@ static int enc_txpoll(struct net_driver_s *dev)
    * the field d_len is set to a value > 0.
    */
 
-  nllvdbg("Poll result: d_len=%d\n", priv->dev.d_len);
+  ninfo("Poll result: d_len=%d\n", priv->dev.d_len);
 
   if (priv->dev.d_len > 0)
     {
@@ -1287,15 +1295,6 @@ static void enc_txif(FAR struct enc_driver_s *priv)
 
       wd_cancel(priv->txtimeout);
 
-      /* Then make sure that the TX poll timer is running (if it is already
-       * running, the following would restart it).  This is necessary to
-       * avoid certain race conditions where the polling sequence can be
-       * interrupted.
-       */
-
-      (void)wd_start(priv->txpoll, ENC_WDDELAY, enc_polltimer, 1,
-                     (wdparm_t)priv);
-
       /* Poll for TX packets from the networking layer */
 
       devif_poll(&priv->dev, enc_txpoll);
@@ -1331,7 +1330,7 @@ static void enc_rxldpkt(FAR struct enc_driver_s *priv,
 {
   DEBUGASSERT(priv != NULL && descr != NULL);
 
-  nllvdbg("load packet @%04x len: %d\n", descr->addr, descr->len);
+  ninfo("load packet @%04x len: %d\n", descr->addr, descr->len);
 
   /* Set the rx data pointer to the start of the received packet (ERXRDPT) */
 
@@ -1403,7 +1402,7 @@ static void enc_rxrmpkt(FAR struct enc_driver_s *priv, FAR struct enc_descr_s *d
 {
   uint16_t addr;
 
-  nllvdbg("free descr: %p\n", descr);
+  ninfo("free descr: %p\n", descr);
 
   /* If it is the last descriptor in the queue, advance ERXTAIL.
    * This way it is possible that gaps occcur. Maybe pending packets
@@ -1420,7 +1419,7 @@ static void enc_rxrmpkt(FAR struct enc_driver_s *priv, FAR struct enc_descr_s *d
 
           DEBUGASSERT(addr >= PKTMEM_RX_START &&  addr < PKTMEM_RX_END);
 
-          nllvdbg("ERXTAIL %04x\n", addr);
+          ninfo("ERXTAIL %04x\n", addr);
 
           enc_wrreg(priv, ENC_ERXTAIL, addr);
 
@@ -1490,7 +1489,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
 #ifdef CONFIG_NET_IPv4
       if (BUF->type == HTONS(ETHTYPE_IP))
         {
-          nllvdbg("IPv4 frame\n");
+          ninfo("IPv4 frame\n");
           NETDEV_RXIPV4(&priv->dev);
 
           /* Handle ARP on input then give the IPv4 packet to the network
@@ -1540,7 +1539,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
 #ifdef CONFIG_NET_IPv6
       if (BUF->type == HTONS(ETHTYPE_IP6))
         {
-          nllvdbg("Iv6 frame\n");
+          ninfo("Iv6 frame\n");
           NETDEV_RXIPV6(&priv->dev);
 
           /* Give the IPv6 packet to the network layer */
@@ -1587,7 +1586,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
 #ifdef CONFIG_NET_ARP
       if (BUF->type == htons(ETHTYPE_ARP))
         {
-          nllvdbg("ARP packet received (%02x)\n", BUF->type);
+          ninfo("ARP packet received (%02x)\n", BUF->type);
           NETDEV_RXARP(&priv->dev);
 
           arp_arpin(&priv->dev);
@@ -1612,7 +1611,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
 
           enc_rxrmpkt(priv, descr);
 
-          nlldbg("Unsupported packet type dropped (%02x)\n", htons(BUF->type));
+          nerr("ERROR: Unsupported packet type dropped (%02x)\n", htons(BUF->type));
           NETDEV_RXDROPPED(&priv->dev);
         }
 
@@ -1684,8 +1683,8 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
       rxstat        = (uint32_t)rsv[7] << 24 | (uint32_t)rsv[6] << 16 |
                       (uint32_t)rsv[5] << 8  | (uint32_t)rsv[4];
 
-      nllvdbg("Receiving packet, nextpkt: %04x pktlen: %d rxstat: %08x pktcnt: %d\n",
-             priv->nextpkt, pktlen, rxstat, pktcnt);
+      ninfo("Receiving packet, nextpkt: %04x pktlen: %d rxstat: %08x pktcnt: %d\n",
+            priv->nextpkt, pktlen, rxstat, pktcnt);
 
       /* We enqueue the packet first and remove it later if its faulty.
        * This way we avoid freeing packets that are not processed yet.
@@ -1707,7 +1706,7 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
 
       if ((rxstat & RXSTAT_OK) == 0)
         {
-          nlldbg("ERROR: RXSTAT: %08x\n", rxstat);
+          nerr("ERROR: RXSTAT: %08x\n", rxstat);
 
           /* Discard packet */
 
@@ -1719,7 +1718,7 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
 
       else if (pktlen > (CONFIG_NET_ETH_MTU + 4) || pktlen <= (ETH_HDRLEN + 4))
         {
-          nlldbg("Bad packet size dropped (%d)\n", pktlen);
+          nerr("ERROR: Bad packet size dropped (%d)\n", pktlen);
 
           /* Discard packet */
 
@@ -1774,17 +1773,17 @@ static void enc_rxabtif(FAR struct enc_driver_s *priv)
 #if 0
   /* Free the last received packet from the RX queue */
 
-  nlldbg("rx abort\n");
-  nlldbg("ESTAT:   %04x\n", enc_rdreg(priv, ENC_ESTAT));
-  nlldbg("EIR:     %04x\n", enc_rdreg(priv, ENC_EIR));
-  nlldbg("ERXTAIL: %04x\n", enc_rdreg(priv, ENC_ERXTAIL));
-  nlldbg("ERXHAED: %04x\n", enc_rdreg(priv, ENC_ERXHEAD));
+  ninfo("rx abort\n");
+  ninfo("ESTAT:   %04x\n", enc_rdreg(priv, ENC_ESTAT));
+  ninfo("EIR:     %04x\n", enc_rdreg(priv, ENC_EIR));
+  ninfo("ERXTAIL: %04x\n", enc_rdreg(priv, ENC_ERXTAIL));
+  ninfo("ERXHAED: %04x\n", enc_rdreg(priv, ENC_ERXHEAD));
 
   descr = (FAR struct enc_descr_s *)sq_peek(&priv->rxqueue);
 
   while (descr != NULL)
     {
-      nlldbg("addr: %04x len: %d\n", descr->addr, descr->len);
+      ninfo("addr: %04x len: %d\n", descr->addr, descr->len);
       descr = (FAR struct enc_descr_s *)sq_next(descr);
     }
 
@@ -1797,7 +1796,7 @@ static void enc_rxabtif(FAR struct enc_driver_s *priv)
     {
       enc_rxrmpkt(priv, descr);
 
-      nlldbg("pending packet freed\n");
+      ninfo("pending packet freed\n");
     }
   else
     {
@@ -1827,14 +1826,13 @@ static void enc_rxabtif(FAR struct enc_driver_s *priv)
 static void enc_irqworker(FAR void *arg)
 {
   FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)arg;
-  net_lock_t lock;
   uint16_t eir;
 
   DEBUGASSERT(priv);
 
   /* Get exclusive access to both the network and the SPI bus. */
 
-  lock = net_lock();
+  net_lock();
   enc_lock(priv);
 
   /* A good practice is for the host controller to clear the Global Interrupt
@@ -1859,7 +1857,7 @@ static void enc_irqworker(FAR void *arg)
        * settings.
        */
 
-      nllvdbg("EIR: %04x\n", eir);
+      ninfo("EIR: %04x\n", eir);
 
       if ((eir & EIR_DMAIF) != 0) /* DMA interrupt */
         {
@@ -1978,7 +1976,7 @@ static void enc_irqworker(FAR void *arg)
   /* Release lock on the SPI bus and the network */
 
   enc_unlock(priv);
-  net_unlock(lock);
+  net_unlock();
 }
 
 /****************************************************************************
@@ -2017,7 +2015,7 @@ static int enc_interrupt(int irq, FAR void *context)
    */
 
   priv->lower->disable(priv->lower);
-  return work_queue(HPWORK, &priv->irqwork, enc_irqworker, (FAR void *)priv, 0);
+  return work_queue(ENCWORK, &priv->irqwork, enc_irqworker, (FAR void *)priv, 0);
 }
 
 /****************************************************************************
@@ -2040,15 +2038,14 @@ static int enc_interrupt(int irq, FAR void *context)
 static void enc_toworker(FAR void *arg)
 {
   FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)arg;
-  net_lock_t lock;
   int ret;
 
-  nlldbg("Tx timeout\n");
+  nerr("ERROR: Tx timeout\n");
   DEBUGASSERT(priv);
 
   /* Get exclusive access to the network. */
 
-  lock = net_lock();
+  net_lock();
 
   /* Increment statistics and dump debug info */
 
@@ -2070,7 +2067,7 @@ static void enc_toworker(FAR void *arg)
 
   /* Release the network */
 
-  net_unlock(lock);
+  net_unlock();
 }
 
 /****************************************************************************
@@ -2109,7 +2106,7 @@ static void enc_txtimeout(int argc, uint32_t arg, ...)
    * can occur until we restart the Tx timeout watchdog.
    */
 
-  ret = work_queue(HPWORK, &priv->towork, enc_toworker, (FAR void *)priv, 0);
+  ret = work_queue(ENCWORK, &priv->towork, enc_toworker, (FAR void *)priv, 0);
   (void)ret;
   DEBUGASSERT(ret == OK);
 }
@@ -2134,13 +2131,12 @@ static void enc_txtimeout(int argc, uint32_t arg, ...)
 static void enc_pollworker(FAR void *arg)
 {
   FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)arg;
-  net_lock_t lock;
 
   DEBUGASSERT(priv);
 
   /* Get exclusive access to both the network and the SPI bus. */
 
-  lock = net_lock();
+  net_lock();
   enc_lock(priv);
 
   /* Verify that the hardware is ready to send another packet.  The driver
@@ -2162,7 +2158,7 @@ static void enc_pollworker(FAR void *arg)
   /* Release lock on the SPI bus and the network */
 
   enc_unlock(priv);
-  net_unlock(lock);
+  net_unlock();
 
   /* Setup the watchdog poll timer again */
 
@@ -2204,7 +2200,7 @@ static void enc_polltimer(int argc, uint32_t arg, ...)
    * occur until we restart the poll timeout watchdog.
    */
 
-  ret = work_queue(HPWORK, &priv->pollwork, enc_pollworker, (FAR void *)priv, 0);
+  ret = work_queue(ENCWORK, &priv->pollwork, enc_pollworker, (FAR void *)priv, 0);
   (void)ret;
   DEBUGASSERT(ret == OK);
 }
@@ -2231,8 +2227,8 @@ static int enc_ifup(struct net_driver_s *dev)
   FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)dev->d_private;
   int ret;
 
-  nlldbg("Bringing up: %d.%d.%d.%d\n",
-         dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
+  ninfo("Bringing up: %d.%d.%d.%d\n",
+        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
         (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
   /* Lock the SPI bus so that we have exclusive access */
@@ -2307,9 +2303,9 @@ static int enc_ifdown(struct net_driver_s *dev)
   irqstate_t flags;
   int ret;
 
-  nlldbg("Taking down: %d.%d.%d.%d\n",
-         dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-         (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+  ninfo("Taking down: %d.%d.%d.%d\n",
+        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
+        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
   /* Lock the SPI bus so that we have exclusive access */
 
@@ -2420,7 +2416,7 @@ static int enc_rxavail(struct net_driver_s *dev)
 
   if (!sq_empty(&priv->rxqueue))
     {
-      nllvdbg("RX queue not empty, trying to dispatch\n");
+      ninfo("RX queue not empty, trying to dispatch\n");
       enc_rxdispatch(priv);
     }
 
@@ -2546,7 +2542,7 @@ static void enc_pwrsave(FAR struct enc_driver_s *priv)
 {
   uint16_t regval;
 
-  nllvdbg("Set PWRSV\n");
+  ninfo("Set PWRSV\n");
 
   /* 1. Turn off AES */
 
@@ -2597,7 +2593,7 @@ static void enc_ldmacaddr(FAR struct enc_driver_s *priv)
   uint16_t regval;
   uint8_t *mac = priv->dev.d_mac.ether_addr_octet;
 
-  nvdbg("Using ENCX24J600's built in MAC address\n");
+  ninfo("Using ENCX24J600's built in MAC address\n");
 
   regval = enc_rdreg(priv, ENC_MAADR1);
   mac[0] = regval & 0xff;
@@ -2648,7 +2644,7 @@ static void enc_setmacaddr(FAR struct enc_driver_s *priv)
     {
       /* There is a user defined mac address. Write it to the ENCXJ600 */
 
-      nvdbg("Using an user defined MAC address\n");
+      ninfo("Using an user defined MAC address\n");
 
       enc_wrreg(priv, ENC_MAADR1, (uint16_t)mac[1] << 8 | (uint16_t)mac[0]);
       enc_wrreg(priv, ENC_MAADR2, (uint16_t)mac[3] << 8 | (uint16_t)mac[2]);
@@ -2728,7 +2724,7 @@ static int enc_reset(FAR struct enc_driver_s *priv)
   int ret;
   uint16_t regval;
 
-  nllvdbg("Reset\n");
+  ninfo("Reset\n");
 
   do
     {
@@ -2742,7 +2738,7 @@ static int enc_reset(FAR struct enc_driver_s *priv)
 
   if (ret != OK)
     {
-      nlldbg("ERROR: encx24j600 clock failed to become ready\n");
+      nerr("ERROR: encx24j600 clock failed to become ready\n");
       return -ENODEV;
     }
 
@@ -2756,7 +2752,7 @@ static int enc_reset(FAR struct enc_driver_s *priv)
 
   if (regval != 0x0000)
     {
-      nlldbg("ERROR: encx24j600 seems not to be reset properly\n");
+      nerr("ERROR: encx24j600 seems not to be reset properly\n");
       return -ENODEV;
     }
 
@@ -2793,7 +2789,7 @@ static int enc_reset(FAR struct enc_driver_s *priv)
     }
   while ((regval & PHSTAT1_ANDONE) != 0);
 
-  nllvdbg("Auto-negotation completed\n");
+  ninfo("Auto-negotation completed\n");
 
 #endif
 
@@ -2813,7 +2809,7 @@ static int enc_reset(FAR struct enc_driver_s *priv)
 #if 0
   if (ret != OK)
     {
-      nlldbg("ERROR: encx24j600 failed to establish link\n");
+      nerr("ERROR: encx24j600 failed to establish link\n");
       return -ENODEV;
     }
 #endif
@@ -2858,6 +2854,7 @@ int enc_initialize(FAR struct spi_dev_s *spi,
   /* Initialize the driver structure */
 
   memset(g_encx24j600, 0, CONFIG_ENCX24J600_NINTERFACES*sizeof(struct enc_driver_s));
+  priv->dev.d_buf     = g_pktbuf;     /* Single packet buffer */
   priv->dev.d_ifup    = enc_ifup;     /* I/F up (new IP address) callback */
   priv->dev.d_ifdown  = enc_ifdown;   /* I/F down callback */
   priv->dev.d_txavail = enc_txavail;  /* New TX data callback */

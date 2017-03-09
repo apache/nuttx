@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/stdio/lib_nulloutstream.c
  *
- *   Copyright (C) 2007-2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -76,9 +76,7 @@ static void nulloutstream_putc(FAR struct lib_outstream_s *this, int ch)
 void lib_nulloutstream(FAR struct lib_outstream_s *nulloutstream)
 {
   nulloutstream->put   = nulloutstream_putc;
-#ifdef CONFIG_STDIO_LINEBUFFER
   nulloutstream->flush = lib_noflush;
-#endif
   nulloutstream->nput  = 0;
 }
 

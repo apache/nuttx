@@ -101,4 +101,3 @@
 #define FIREWALL_CR_VDE                 (1 << 2) /* Bit 2: Volatile data execution */
 
 #endif /* __ARCH_ARM_SRC_STM32L4_CHIP_STM32L4X6XX_FIREWALL_H */
-

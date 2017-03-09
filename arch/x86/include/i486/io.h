@@ -1,6 +1,5 @@
 /****************************************************************************
  * arch/x86/include/i486/io.h
- * arch/chip/io.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

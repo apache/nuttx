@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/nucleo-l476rg/src/nucleo-l476rg.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Authors: Frank Bennett
  *            Gregory Nutt <gnutt@nuttx.org>
  *            Sebastien Lorquet <sebastien@lorquet.fr>
@@ -328,15 +328,27 @@ void stm32_spiinitialize(void);
 void stm32_usbinitialize(void);
 
 /************************************************************************************
- * Name: board_adc_initialize
+ * Name: stm32_pwm_setup
  *
  * Description:
- *   Initialize and register the ADC driver(s)
+ *   Initialize PWM and register the PWM device.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_PWM
+int stm32_pwm_setup(void);
+#endif
+
+/************************************************************************************
+ * Name: stm32_adc_setup
+ *
+ * Description:
+ *   Initialize ADC and register the ADC driver.
  *
  ************************************************************************************/
 
 #ifdef CONFIG_ADC
-int board_adc_initialize(void);
+int stm32_adc_setup(void);
 #endif
 
 /****************************************************************************
@@ -349,6 +361,30 @@ int board_adc_initialize(void);
 
 #ifdef CONFIG_AJOYSTICK
 int board_ajoy_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: board_timer_driver_initialize
+ *
+ * Description:
+ *   Initialize and register a timer
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_TIMER
+int board_timer_driver_initialize(FAR const char *devpath, int timer);
+#endif
+
+/****************************************************************************
+ * Name: stm32l4_qencoder_initialize
+ *
+ * Description:
+ *   Initialize and register a qencoder
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_QENCODER
+int stm32l4_qencoder_initialize(FAR const char *devpath, int timer);
 #endif
 
 #endif /* __CONFIGS_NUCLEO_L476RG_SRC_NUCLEO_L476RG_H */

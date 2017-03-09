@@ -295,7 +295,7 @@
 #define USBMSC_TRACEERR_CMDREADREADFAIL              0x0094
 #define USBMSC_TRACEERR_CMDREADSUBMIT                0x0095
 #define USBMSC_TRACEERR_CMDREADWRRQEMPTY             0x0096
-#define USBMSC_TRACEERR_CMDSTATUSRDREQLISTEMPTY      0x0097
+#define USBMSC_TRACEERR_CMDSTATUSWRREQLISTEMPTY      0x0097
 #define USBMSC_TRACEERR_CMDUNEVIOLATION              0x0098
 #define USBMSC_TRACEERR_CMDWRITERDSUBMIT             0x0099
 #define USBMSC_TRACEERR_CMDWRITERDRQEMPTY            0x009a
@@ -480,7 +480,7 @@ EXTERN const struct trace_msg_t g_usb_trace_strings_intdecode[];
  *
  ****************************************************************************/
 
-#if defined(CONFIG_USBDEV_TRACE) || (defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_USB))
+#if defined(CONFIG_USBDEV_TRACE) || (defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_USB))
 usbtrace_idset_t usbtrace_enable(usbtrace_idset_t idset);
 #else
 #  define usbtrace_enable(idset)
@@ -497,7 +497,7 @@ usbtrace_idset_t usbtrace_enable(usbtrace_idset_t idset);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_USBDEV_TRACE) || (defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_USB))
+#if defined(CONFIG_USBDEV_TRACE) || (defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_USB))
 void usbtrace(uint16_t event, uint16_t value);
 #else
 #  define usbtrace(event, value)

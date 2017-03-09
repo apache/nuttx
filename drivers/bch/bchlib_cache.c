@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/bch/bchlib_cache.c
  *
- *   Copyright (C) 2008-2009, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,25 +45,11 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/fs/fs.h>
-
 #include "bch.h"
 
 #if defined(CONFIG_BCH_ENCRYPTION)
 #  include <crypto/crypto.h>
 #endif
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -156,7 +142,7 @@ int bchlib_flushsector(FAR struct bchlib_s *bch)
       ret = inode->u.i_bops->write(inode, bch->buffer, bch->sector, 1);
       if (ret < 0)
         {
-          fdbg("Write failed: %d\n");
+          ferr("Write failed: %d\n");
         }
 
 #if defined(CONFIG_BCH_ENCRYPTION)
@@ -201,7 +187,7 @@ int bchlib_readsector(FAR struct bchlib_s *bch, size_t sector)
       ret = inode->u.i_bops->read(inode, bch->buffer, sector, 1);
       if (ret < 0)
         {
-          fdbg("Read failed: %d\n");
+          ferr("Read failed: %d\n");
         }
       bch->sector = sector;
 #if defined(CONFIG_BCH_ENCRYPTION)

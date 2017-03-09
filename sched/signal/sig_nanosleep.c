@@ -46,6 +46,7 @@
 
 #include <nuttx/clock.h>
 #include <nuttx/irq.h>
+#include <nuttx/cancelpt.h>
 
 #include "clock/clock.h"
 
@@ -106,11 +107,14 @@ int nanosleep(FAR const struct timespec *rqtp, FAR struct timespec *rmtp)
   irqstate_t flags;
   systime_t starttick;
   sigset_t set;
-  struct siginfo value;
   int errval;
-#ifdef CONFIG_DEBUG /* Warning avoidance */
+#ifdef CONFIG_DEBUG_ASSERTIONS /* Warning avoidance */
   int ret;
 #endif
+
+  /* nanosleep() is a cancellation point */
+
+  (void)enter_cancellation_point();
 
   if (!rqtp || rqtp->tv_nsec < 0 || rqtp->tv_nsec >= 1000000000)
     {
@@ -135,10 +139,10 @@ int nanosleep(FAR const struct timespec *rqtp, FAR struct timespec *rmtp)
 
   /* nanosleep is a simple application of sigtimedwait. */
 
-#ifdef CONFIG_DEBUG /* Warning avoidance */
-  ret = sigtimedwait(&set, &value, rqtp);
+#ifdef CONFIG_DEBUG_ASSERTIONS /* Warning avoidance */
+  ret = sigtimedwait(&set, NULL, rqtp);
 #else
-  (void)sigtimedwait(&set, &value, rqtp);
+  (void)sigtimedwait(&set, NULL, rqtp);
 #endif
 
   /* sigtimedwait() cannot succeed.  It should always return error with
@@ -154,6 +158,7 @@ int nanosleep(FAR const struct timespec *rqtp, FAR struct timespec *rmtp)
       /* The timeout "error" is the normal, successful result */
 
       leave_critical_section(flags);
+      leave_cancellation_point();
       return OK;
     }
 
@@ -166,6 +171,11 @@ int nanosleep(FAR const struct timespec *rqtp, FAR struct timespec *rmtp)
       systime_t elapsed;
       systime_t remaining;
       int ticks;
+
+      /* REVISIT: The conversion from time to ticks and back could
+       * be avoided.  clock_timespec_subtract() would be used instead
+       * to get the time difference.
+       */
 
       /* First get the number of clock ticks that we were requested to
        * wait.
@@ -198,5 +208,6 @@ int nanosleep(FAR const struct timespec *rqtp, FAR struct timespec *rmtp)
 
 errout:
   set_errno(errval);
+  leave_cancellation_point();
   return ERROR;
 }

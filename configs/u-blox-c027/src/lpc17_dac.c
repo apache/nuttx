@@ -85,14 +85,14 @@ int dac_devinit(void)
       dac = lpc17_dacinitialize();
       if (dac == NULL)
         {
-          adbg("ERROR: Failed to get dac interface\n");
+          aerr("ERROR: Failed to get dac interface\n");
           return -ENODEV;
         }
 
       ret = dac_register("/dev/dac0", dac);
       if (ret < 0)
         {
-          adbg("dac_register failed: %d\n", ret);
+          aerr("ERROR: dac_register failed: %d\n", ret);
           return ret;
         }
 

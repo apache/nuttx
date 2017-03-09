@@ -150,11 +150,11 @@ int nxflat_load(struct nxflat_loadinfo_s *loadinfo)
                                     MAP_SHARED | MAP_FILE, loadinfo->filfd, 0);
   if (loadinfo->ispace == (uint32_t)MAP_FAILED)
     {
-      bdbg("Failed to map NXFLAT ISpace: %d\n", errno);
+      berr("Failed to map NXFLAT ISpace: %d\n", errno);
       return -errno;
     }
 
-  bvdbg("Mapped ISpace (%d bytes) at %08x\n", loadinfo->isize, loadinfo->ispace);
+  binfo("Mapped ISpace (%d bytes) at %08x\n", loadinfo->isize, loadinfo->ispace);
 
   /* The following call allocate D-Space memory and will provide a pointer
    * to the allocated (but still uninitialized) D-Space memory.
@@ -163,11 +163,11 @@ int nxflat_load(struct nxflat_loadinfo_s *loadinfo)
   ret = nxflat_addrenv_alloc(loadinfo, loadinfo->dsize);
   if (ret < 0)
     {
-      bdbg("ERROR: nxflat_addrenv_alloc() failed: %d\n", ret);
+      berr("ERROR: nxflat_addrenv_alloc() failed: %d\n", ret);
       return ret;
     }
 
-  bvdbg("Allocated DSpace (%d bytes) at %p\n",
+  binfo("Allocated DSpace (%d bytes) at %p\n",
         loadinfo->dsize, loadinfo->dspace->region);
 
   /* If CONFIG_ARCH_ADDRENV=y, then the D-Space allocation lies in an address
@@ -180,7 +180,7 @@ int nxflat_load(struct nxflat_loadinfo_s *loadinfo)
   ret = nxflat_addrenv_select(loadinfo);
   if (ret < 0)
     {
-      bdbg("ERROR: nxflat_addrenv_select() failed: %d\n", ret);
+      berr("ERROR: nxflat_addrenv_select() failed: %d\n", ret);
       return ret;
     }
 #endif
@@ -193,11 +193,11 @@ int nxflat_load(struct nxflat_loadinfo_s *loadinfo)
                     dreadsize, doffset);
   if (ret < 0)
     {
-      bdbg("Failed to read .data section: %d\n", ret);
+      berr("Failed to read .data section: %d\n", ret);
       goto errout;
     }
 
-  bvdbg("TEXT: %08x Entry point offset: %08x Data offset: %08x\n",
+  binfo("TEXT: %08x Entry point offset: %08x Data offset: %08x\n",
       loadinfo->ispace, loadinfo->entryoffs, doffset);
 
   /* Restore the original address environment */
@@ -206,7 +206,7 @@ int nxflat_load(struct nxflat_loadinfo_s *loadinfo)
   ret = nxflat_addrenv_restore(loadinfo);
   if (ret < 0)
     {
-      bdbg("ERROR: nxflat_addrenv_restore() failed: %d\n", ret);
+      berr("ERROR: nxflat_addrenv_restore() failed: %d\n", ret);
       return ret;
     }
 #endif

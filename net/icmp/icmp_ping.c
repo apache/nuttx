@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/icmp/icmp_ping.c
  *
- *   Copyright (C) 2008-2012, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2012, 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,6 +51,7 @@
 #include <net/if.h>
 
 #include <nuttx/clock.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
@@ -154,7 +155,7 @@ static uint16_t ping_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
   FAR uint8_t *ptr;
   int i;
 
-  nllvdbg("flags: %04x\n", flags);
+  ninfo("flags: %04x\n", flags);
 
   if (pstate)
     {
@@ -162,7 +163,7 @@ static uint16_t ping_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
 
       if ((flags & NETDEV_DOWN) != 0)
         {
-          nlldbg("ERROR: Interface is down\n");
+          nerr("ERROR: Interface is down\n");
           pstate->png_result = -ENETUNREACH;
           goto end_wait;
         }
@@ -177,8 +178,8 @@ static uint16_t ping_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
         {
           FAR struct icmp_iphdr_s *icmp = (FAR struct icmp_iphdr_s *)conn;
 
-          nllvdbg("ECHO reply: id=%d seqno=%d\n",
-                  ntohs(icmp->id), ntohs(icmp->seqno));
+          ninfo("ECHO reply: id=%d seqno=%d\n",
+                ntohs(icmp->id), ntohs(icmp->seqno));
 
           if (ntohs(icmp->id) == pstate->png_id)
             {
@@ -236,7 +237,7 @@ static uint16_t ping_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
            * of the ICMP header.
            */
 
-          nllvdbg("Send ECHO request: seqno=%d\n", pstate->png_seqno);
+          ninfo("Send ECHO request: seqno=%d\n", pstate->png_seqno);
 
           dev->d_sndlen = pstate->png_datlen + 4;
           icmp_send(dev, &pstate->png_addr);
@@ -262,12 +263,12 @@ static uint16_t ping_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
                * that the destination address is not reachable.
                */
 
-              nlldbg("Not reachable\n");
+              nerr("ERROR:Not reachable\n");
               failcode = -ENETUNREACH;
             }
           else
             {
-              nlldbg("Ping timeout\n");
+              nerr("ERROR:Ping timeout\n");
               failcode = -ETIMEDOUT;
             }
 
@@ -283,7 +284,7 @@ static uint16_t ping_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
   return flags;
 
 end_wait:
-  nllvdbg("Resuming\n");
+  ninfo("Resuming\n");
 
   /* Do not allow any further callbacks */
 
@@ -333,7 +334,6 @@ int icmp_ping(in_addr_t addr, uint16_t id, uint16_t seqno, uint16_t datalen,
 {
   FAR struct net_driver_s *dev;
   struct icmp_ping_s state;
-  net_lock_t save;
 #ifdef CONFIG_NET_ARP_SEND
   int ret;
 #endif
@@ -347,7 +347,7 @@ int icmp_ping(in_addr_t addr, uint16_t id, uint16_t seqno, uint16_t datalen,
 #endif
   if (dev == 0)
     {
-      ndbg("ERROR: Not reachable\n");
+      nerr("ERROR: Not reachable\n");
       return -ENETUNREACH;
     }
 
@@ -357,14 +357,20 @@ int icmp_ping(in_addr_t addr, uint16_t id, uint16_t seqno, uint16_t datalen,
   ret = arp_send(addr);
   if (ret < 0)
     {
-      ndbg("ERROR: Not reachable\n");
+      nerr("ERROR: Not reachable\n");
       return -ENETUNREACH;
     }
 #endif
 
   /* Initialize the state structure */
 
+  /* This semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
   sem_init(&state.png_sem, 0, 0);
+  sem_setprotocol(&state.png_sem, SEM_PRIO_NONE);
+
   state.png_ticks  = DSEC2TICK(dsecs); /* System ticks to wait */
   state.png_result = -ENOMEM;          /* Assume allocation failure */
   state.png_addr   = addr;             /* Address of the peer to be ping'ed */
@@ -373,7 +379,7 @@ int icmp_ping(in_addr_t addr, uint16_t id, uint16_t seqno, uint16_t datalen,
   state.png_datlen = datalen;          /* The length of data to send in the ECHO request */
   state.png_sent   = false;            /* ECHO request not yet sent */
 
-  save             = net_lock();
+  net_lock();
   state.png_time   = clock_systimer();
 
   /* Set up the callback */
@@ -397,13 +403,13 @@ int icmp_ping(in_addr_t addr, uint16_t id, uint16_t seqno, uint16_t datalen,
        * re-enabled when the task restarts.
        */
 
-      nllvdbg("Start time: 0x%08x seqno: %d\n", state.png_time, seqno);
+      ninfo("Start time: 0x%08x seqno: %d\n", state.png_time, seqno);
       net_lockedwait(&state.png_sem);
 
       icmp_callback_free(dev, state.png_cb);
     }
 
-  net_unlock(save);
+  net_unlock();
 
   /* Return the negated error number in the event of a failure, or the
    * sequence number of the ECHO reply on success.
@@ -411,12 +417,12 @@ int icmp_ping(in_addr_t addr, uint16_t id, uint16_t seqno, uint16_t datalen,
 
   if (!state.png_result)
     {
-      nllvdbg("Return seqno=%d\n", state.png_seqno);
+      ninfo("Return seqno=%d\n", state.png_seqno);
       return (int)state.png_seqno;
     }
   else
     {
-      nlldbg("Return error=%d\n", -state.png_result);
+      nerr("ERROR: Return error=%d\n", -state.png_result);
       return state.png_result;
     }
 }

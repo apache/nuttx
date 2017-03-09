@@ -79,12 +79,12 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
 # define IDX 0
 #endif
 
+#if defined(CONFIG_MM_SMALL) && !defined(CONFIG_SMALL_MEMORY)
   /* If the MCU handles wide addresses but the memory manager is configured
    * for a small heap, then verify that the caller is  not doing something
    * crazy.
    */
 
-#if defined(CONFIG_MM_SMALL) && !defined(CONFIG_SMALL_MEMORY)
   DEBUGASSERT(heapsize <= MMSIZE_MAX+1);
 #endif
 
@@ -96,7 +96,7 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
   heapend  = MM_ALIGN_DOWN((uintptr_t)heapstart + (uintptr_t)heapsize);
   heapsize = heapend - heapbase;
 
-  mlldbg("Region %d: base=%p size=%u\n", IDX+1, heapstart, heapsize);
+  minfo("Region %d: base=%p size=%u\n", IDX+1, heapstart, heapsize);
 
   /* Add the size of this region to the total size of the heap */
 
@@ -157,7 +157,7 @@ void mm_initialize(FAR struct mm_heap_s *heap, FAR void *heapstart,
 {
   int i;
 
-  mlldbg("Heap: start=%p size=%u\n", heapstart, heapsize);
+  minfo("Heap: start=%p size=%u\n", heapstart, heapsize);
 
   /* The following two lines have cause problems for some older ZiLog
    * compilers in the past (but not the more recent).  Life is easier if we
