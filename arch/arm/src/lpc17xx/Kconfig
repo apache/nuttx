@@ -489,8 +489,8 @@ config ADC0_AVERAGE
 	default 200
 
 config ADC0_MASK
-	int "ADC0 mask"
-	default 1
+	hex "ADC0 mask"
+	default 0x01
 
 config ADC0_SPS
 	int "ADC0 SPS"
