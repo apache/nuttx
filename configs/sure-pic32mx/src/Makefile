@@ -53,9 +53,6 @@ endif
 
 ifeq ($(CONFIG_PIC32MX_USBDEV),y)
 CSRCS += pic32mx_usbdev.c
-ifeq ($(CONFIG_EXAMPLES_USBTERM_DEVINIT),y)
-CSRCS += pic32mx_usbterm.c
-endif
 endif
 
 ifeq ($(CONFIG_LCD_LCD1602),y)
