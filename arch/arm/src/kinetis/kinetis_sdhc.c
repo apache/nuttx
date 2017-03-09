@@ -92,6 +92,18 @@
 #  undef CONFIG_SDIO_XFRDEBUG
 #endif
 
+/* Enable pull-up resistors
+ *
+ * Kinetis does not have pullups on all their development boards
+ * So allow the the board config to enable them.
+ */
+
+#if defined(BOARD_SDHC_ENABLE_PULLUPS)
+#  define BOARD_SDHC_PULLUP_ENABLE _PIN_INPUT_PULLUP
+#else
+#  define BOARD_SDHC_PULLUP_ENABLE 0
+#endif
+
 /* SDCLK frequencies corresponding to various modes of operation.  These
  * values may be provided in either the NuttX configuration file or in
  * the board.h file
@@ -2844,29 +2856,29 @@ FAR struct sdio_dev_s *sdhc_initialize(int slotno)
 #ifndef CONFIG_SDIO_MUXBUS
   /* Data width 1, 4 or 8 */
 
-  kinetis_pinconfig(PIN_SDHC0_D0);
+  kinetis_pinconfig(PIN_SDHC0_D0 | BOARD_SDHC_PULLUP_ENABLE);
 
   /* Data width 4 or 8 */
 
 #ifndef CONFIG_KINETIS_SDHC_WIDTH_D1_ONLY
-  kinetis_pinconfig(PIN_SDHC0_D1);
-  kinetis_pinconfig(PIN_SDHC0_D2);
-  kinetis_pinconfig(PIN_SDHC0_D3);
+  kinetis_pinconfig(PIN_SDHC0_D1 | BOARD_SDHC_PULLUP_ENABLE);
+  kinetis_pinconfig(PIN_SDHC0_D2 | BOARD_SDHC_PULLUP_ENABLE);
+  kinetis_pinconfig(PIN_SDHC0_D3 | BOARD_SDHC_PULLUP_ENABLE);
 
   /* Data width 8 (not supported) */
 
 #if 0
-  kinetis_pinconfig(PIN_SDHC0_D4);
-  kinetis_pinconfig(PIN_SDHC0_D5);
-  kinetis_pinconfig(PIN_SDHC0_D6);
-  kinetis_pinconfig(PIN_SDHC0_D7);
+  kinetis_pinconfig(PIN_SDHC0_D4 | BOARD_SDHC_PULLUP_ENABLE);
+  kinetis_pinconfig(PIN_SDHC0_D5 | BOARD_SDHC_PULLUP_ENABLE);
+  kinetis_pinconfig(PIN_SDHC0_D6 | BOARD_SDHC_PULLUP_ENABLE);
+  kinetis_pinconfig(PIN_SDHC0_D7 | BOARD_SDHC_PULLUP_ENABLE);
 #endif
 #endif
 
   /* Clocking and CMD pins (all data widths) */
 
   kinetis_pinconfig(PIN_SDHC0_DCLK);
-  kinetis_pinconfig(PIN_SDHC0_CMD);
+  kinetis_pinconfig(PIN_SDHC0_CMD | BOARD_SDHC_PULLUP_ENABLE);
 #endif
 
   /* Reset the card and assure that it is in the initial, unconfigured
