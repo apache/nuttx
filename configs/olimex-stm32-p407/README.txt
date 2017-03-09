@@ -155,7 +155,7 @@ OTGFS Host
     CONFIG_STM32_SYSCFG    - Needed
     CONFIG_SCHED_WORKQUEUE - Worker thread support is required
 
-  Options:
+  STM32 Options:
 
     CONFIG_STM32_OTGFS_RXFIFO_SIZE - Size of the RX FIFO in 32-bit words.
       Default 128 (512 bytes)
@@ -171,10 +171,24 @@ OTGFS Host
     CONFIG_STM32_USBHOST_PKTDUMP - Dump all incoming and outgoing USB
       packets. Depends on CONFIG_DEBUG_FEATURES.
 
+   Olimex STM32 P407 Configuration:
+
+     CONFIG_STM32F4DISCO_OLIMEXP407_PRIO - Priority of the USB host watier
+       thread (default 100).
+     CONFIG_STM32F4DISCO_OLIMEXP407_STACKSIZE - Stacksize of the USB host
+       waiter thread (default 1024)
+
   Class Driver Configuration
   --------------------------
   Individual class drivers have additional configuration requirements.  The
   USB mass storage class, for example, requires FAT file system support.
+
+    CONFIG_USBHOST_MSC=y
+
+    CONFIG_FS_FAT=y
+    CONFIG_FAT_LCNAMES=y
+    CONFIG_FAT_LFN=y
+    CONFIG_FAT_MAXFNAME=32
 
 Configurations
 ==============
@@ -321,7 +335,13 @@ must be is one of the following.
 
     NOTES:
 
-    1. Kernel Modules / Shared Libraries
+    1. USB host support for USB FLASH sticks is enbabled.  See the notes
+       above under "OTGFS Host".
+
+       STATUS: I have seen this work with some FLASH sticks but not with
+       others.  This probably needs a little TLC to get 100% reliable.
+
+    2. Kernel Modules / Shared Libraries
 
        I used this configuration for testing NuttX kernel modules in the
        FLAT build with the following configuration additions to the
