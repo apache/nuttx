@@ -463,7 +463,7 @@ struct i2c_master_s *lpc43_i2cbus_initialize(int port)
     {
       priv           = &g_i2c0dev;
       priv->base     = LPC43_I2C0_BASE;
-      priv->irqid    = LPC43M0_IRQ_I2C0;
+      priv->irqid    = LPC43M4_IRQ_I2C0;
       priv->baseFreq = BOARD_ABP1_FREQUENCY;
 
       /* Enable, set mode */
@@ -496,7 +496,7 @@ struct i2c_master_s *lpc43_i2cbus_initialize(int port)
     {
       priv        = &g_i2c1dev;
       priv->base  = LPC43_I2C1_BASE;
-      priv->irqid = LPC43M0_IRQ_I2C1;
+      priv->irqid = LPC43M4_IRQ_I2C1;
       priv->baseFreq = BOARD_ABP3_FREQUENCY;
 
       /* No need to enable */
