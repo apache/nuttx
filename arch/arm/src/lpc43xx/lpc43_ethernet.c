@@ -110,11 +110,10 @@
 #  error "Both CONFIG_LPC43_MII and CONFIG_LPC43_RMII defined"
 #endif
 
+#ifdef CONFIG_LPC43_AUTONEG
 #  ifndef CONFIG_LPC43_PHYSR
 #    error "CONFIG_LPC43_PHYSR must be defined in the NuttX configuration"
 #  endif
-
-#ifndef CONFIG_LPC43_AUTONEG
 #  ifdef CONFIG_LPC43_PHYSR_ALTCONFIG
 #    ifndef CONFIG_LPC43_PHYSR_ALTMODE
 #      error "CONFIG_LPC43_PHYSR_ALTMODE must be defined in the NuttX configuration"
@@ -3337,21 +3336,22 @@ static inline void lpc43_ethgpioconfig(FAR struct lpc43_ethmac_s *priv)
    * MII_RX_DV, MII_CRS, MII_COL, MDC, MDIO
    */
 
-  lpc43_pin_config(GPIO_ETH_MII_COL);
-  lpc43_pin_config(GPIO_ETH_MII_CRS);
-  lpc43_pin_config(GPIO_ETH_MII_RXD0);
-  lpc43_pin_config(GPIO_ETH_MII_RXD1);
-  lpc43_pin_config(GPIO_ETH_MII_RXD2);
-  lpc43_pin_config(GPIO_ETH_MII_RXD3);
-  lpc43_pin_config(GPIO_ETH_MII_RX_CLK);
-  lpc43_pin_config(GPIO_ETH_MII_RX_DV);
-  lpc43_pin_config(GPIO_ETH_MII_RX_ER);
-  lpc43_pin_config(GPIO_ETH_MII_TXD0);
-  lpc43_pin_config(GPIO_ETH_MII_TXD1);
-  lpc43_pin_config(GPIO_ETH_MII_TXD2);
-  lpc43_pin_config(GPIO_ETH_MII_TXD3);
-  lpc43_pin_config(GPIO_ETH_MII_TX_CLK);
-  lpc43_pin_config(GPIO_ETH_MII_TX_EN);
+  lpc43_pin_config(PINCONF_ENET_MII_COL);
+  lpc43_pin_config(PINCONF_ENET_MII_CRS);
+  lpc43_pin_config(PINCONF_ENET_MII_RXD0);
+  lpc43_pin_config(PINCONF_ENET_MII_RXD1);
+  lpc43_pin_config(PINCONF_ENET_MII_RXD2);
+  lpc43_pin_config(PINCONF_ENET_MII_RXD3);
+  lpc43_pin_config(PINCONF_ENET_MII_RX_CLK);
+  lpc43_pin_config(PINCONF_ENET_MII_RX_DV);
+  lpc43_pin_config(PINCONF_ENET_MII_RX_ER);
+  lpc43_pin_config(PINCONF_ENET_MII_TXD0);
+  lpc43_pin_config(PINCONF_ENET_MII_TXD1);
+  lpc43_pin_config(PINCONF_ENET_MII_TXD2);
+  lpc43_pin_config(PINCONF_ENET_MII_TXD3);
+  lpc43_pin_config(PINCONF_ENET_MII_TX_CLK);
+  lpc43_pin_config(PINCONF_ENET_MII_TX_EN);
+  lpc43_pin_config(PINCONF_ENET_MII_TX_ER);
 
   /* Set up the RMII interface. */
 
