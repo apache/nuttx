@@ -1886,7 +1886,13 @@ static ssize_t stm32_in_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
 
               if (xfrd > 0)
                 {
-                  /* Yes, return the amount of data received */
+                  /* Yes, return the amount of data received.
+                   *
+                   * REVISIT: This behavior is clearly correct for CDC/ACM
+                   * bulk transfers and HID interrupt transfers.  But I am
+                   * not so certain for MSC bulk transfers which, I think,
+                   * could have NAKed packets in the middle of a transfer.
+                   */
 
                   return xfrd;
                 }
