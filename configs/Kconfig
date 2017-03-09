@@ -155,6 +155,16 @@ config ARCH_BOARD_ESP32CORE
 		of two CPUs is symmetric, meaning they use the same addresses to
 		access the same memory.
 
+config ARCH_BOARD_EZ80F910200KITG
+	bool "ZiLOG ez80f910200kitg development kit"
+	depends on ARCH_CHIP_EZ80F91
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	---help---
+		ez80Acclaim! Microcontroller.  This port use the Zilog ez80f910200kitg
+		development kit, eZ80F091 part, and the Zilog ZDS-II Windows command line
+		tools.  The development environment is Cygwin under WinXP.
+
 config ARCH_BOARD_EZ80F910200ZCO
 	bool "ZiLOG ez80f910200zco development kit"
 	depends on ARCH_CHIP_EZ80F91
