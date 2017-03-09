@@ -101,6 +101,10 @@
 #  define  ARMV7M_PERIPHERAL_INTERRUPTS 53
 #  include "chip/lpc435357_memorymap.h"
 #  include "chip/lpc4357fet256_pinconfig.h"
+#elif defined(CONFIG_ARCH_CHIP_LPC4337FET256)
+#  define  ARMV7M_PERIPHERAL_INTERRUPTS 53
+#  include "chip/lpc435357_memorymap.h"
+#  include "chip/lpc4310203050_pinconfig.h"
 #elif defined(CONFIG_ARCH_CHIP_LPC4350FBD208)
 #  define  ARMV7M_PERIPHERAL_INTERRUPTS 53
 #  include "chip/lpc4310203050_memorymap.h"
