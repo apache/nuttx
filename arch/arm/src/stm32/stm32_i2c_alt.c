@@ -678,15 +678,15 @@ static int stm32_i2c_sem_waitdone(FAR struct stm32_i2c_priv_s *priv)
 
   do
     {
+      /* Calculate the elapsed time */
+
+      elapsed = clock_systimer() - start;
+
       /* Poll by simply calling the timer interrupt handler until it
        * reports that it is done.
        */
 
       stm32_i2c_isr(priv);
-
-      /* Calculate the elapsed time */
-
-      elapsed = clock_systimer() - start;
     }
 
   /* Loop until the transfer is complete. */
