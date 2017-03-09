@@ -2544,18 +2544,6 @@ static inline void stm32_gint_hcinisr(FAR struct stm32_usbhost_s *priv,
         }
       else if (chan->chreason == CHREASON_NAK)
         {
-          /* Halt on NAK only happens on an INTR channel.  Fetch the HCCHAR register
-           * and check for an interrupt endpoint.
-           */
-
-          regval = stm32_getreg(STM32_OTGHS_HCCHAR(chidx));
-          if ((regval & OTGHS_HCCHAR_EPTYP_MASK) == OTGHS_HCCHAR_EPTYP_INTR)
-            {
-              /* Toggle the IN data toggle (Used by Bulk and INTR only) */
-
-              chan->indata1 ^= true;
-            }
-
           /* Set the NAK error result */
 
           chan->result = EAGAIN;
