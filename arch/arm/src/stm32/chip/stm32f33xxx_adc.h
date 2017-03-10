@@ -151,9 +151,9 @@
 #define STM32_ADC2_DIFSEL            (STM32_ADC2_BASE+STM32_ADC_DIFSEL_OFFSET)
 #define STM32_ADC2_CALFACT           (STM32_ADC2_BASE+STM32_ADC_CALFACT_OFFSET)
 
-#define STM32_ADC12_CSR              (STM32_ADC12_BASE+STM32_ADC_CSR_OFFSET)
-#define STM32_ADC12_CCR              (STM32_ADC12_BASE+STM32_ADC_CCR_OFFSET)
-#define STM32_ADC12_CDR              (STM32_ADC12_BASE+STM32_ADC_CDR_OFFSET)
+#define STM32_ADC12_CSR              (STM32_ADC12_CMN_BASE+STM32_ADC_CSR_OFFSET)
+#define STM32_ADC12_CCR              (STM32_ADC12_CMN_BASE+STM32_ADC_CCR_OFFSET)
+#define STM32_ADC12_CDR              (STM32_ADC12_CMN_BASE+STM32_ADC_CDR_OFFSET)
 
 /* Register Bitfield Definitions ********************************************************************/
 /* ADC interrupt and status register (ISR) and ADC interrupt enable register (IER) */
