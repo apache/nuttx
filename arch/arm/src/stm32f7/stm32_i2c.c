@@ -1038,7 +1038,7 @@ static inline void stm32_i2c_sem_waitstop(FAR struct stm32_i2c_priv_s *priv)
 
       elapsed = clock_systimer() - start;
 
-     /* Check for STOP condition */
+      /* Check for STOP condition */
 
       cr = stm32_i2c_getreg32(priv, STM32_I2C_CR2_OFFSET);
       if ((cr & I2C_CR2_STOP) == 0)
