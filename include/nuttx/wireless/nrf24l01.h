@@ -92,10 +92,8 @@
 
 #ifdef NRF24L01_DEBUG
 # define werr(format, ...)           _err(format, ##__VA_ARGS__)
-# define werr(format, ...)           _err(format, ##__VA_ARGS__)
 # define winfo(format, ...)          _info(format, ##__VA_ARGS__)
 #else
-# define werr(x...)
 # define werr(x...)
 # define winfo(x...)
 #endif
