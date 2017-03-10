@@ -1910,6 +1910,14 @@ static ssize_t stm32l4_in_transfer(FAR struct stm32l4_usbhost_s *priv,
 
                       return (ssize_t)ret;
                     }
+
+                  /* Wait a bit before retrying after a NAK.
+                   *
+                   * REVISIT:  This is intended to give the CPU a break from
+                   * the tight polling loop.  But are there performance issues?
+                   */
+
+                  usleep(1000);
                 }
             }
           else

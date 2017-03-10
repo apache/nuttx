@@ -1,8 +1,8 @@
 /****************************************************************************
- * libc/pthread/pthread_condattr_init.c
+ * configs/photon/src/dfu_signature.c
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Author: Simon Piriou <spiriou31@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -37,47 +37,41 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <pthread.h>
-#include <debug.h>
-#include <errno.h>
+#include <stdint.h>
 
 /****************************************************************************
- * Public Functions
+ * Private Types
  ****************************************************************************/
 
-/****************************************************************************
- * Function:  pthread_condattr_init
- *
- * Description:
- *   Operations on condition variable attributes
- *
- * Parameters:
- *   None
- *
- * Return Value:
- *   None
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-int pthread_condattr_init(FAR pthread_condattr_t *attr)
+__attribute__((packed)) struct dfu_signature
 {
-  int ret = OK;
+  uint32_t linker_start_address;
+  uint32_t linker_end_address;
+  uint8_t  reserved[4];
+  uint16_t board_id;
+  uint8_t  firmware_type1;
+  uint8_t  firmware_type2;
+  uint8_t  reserved2[8];
+};
 
-  linfo("attr=0x%p\n", attr);
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
 
-  if (!attr)
-    {
-      ret = EINVAL;
-    }
-  else
-    {
-      *attr = 0;
-    }
+extern uint32_t _firmware_start;
+extern uint32_t _firmware_end;
 
-  linfo("Returning %d\n", ret);
-  return ret;
-}
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+__attribute__((externally_visible, section(".dfu_signature")))
+  const struct dfu_signature dfu_sign =
+{
+  (uint32_t)&_firmware_start, /* Flash image start address */
+  (uint32_t)&_firmware_end,   /* Flash image end address */
+  {0, 0, 0, 0},               /* reserved */
+  6,                          /* Current board is photon */
+  4, 1,                       /* Firmware is "system-part1" */
+  {0, 0, 0, 0, 0, 0, 0, 0}    /* reserved */
+};

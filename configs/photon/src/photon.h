@@ -1,8 +1,8 @@
 /****************************************************************************
- * libc/pthread/pthread_condattr_init.c
+ * configs/photon/src/photon.h
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Author: Simon Piriou <spiriou31@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,51 +33,34 @@
  *
  ****************************************************************************/
 
+#ifndef __CONFIGS_PHOTON_SRC_PHOTON_H
+#define __CONFIGS_PHOTON_SRC_PHOTON_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
+#include <arch/stm32/chip.h>
 
-#include <pthread.h>
-#include <debug.h>
-#include <errno.h>
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public data
+ ****************************************************************************/
+
+#ifndef __ASSEMBLY__
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Function:  pthread_condattr_init
- *
- * Description:
- *   Operations on condition variable attributes
- *
- * Parameters:
- *   None
- *
- * Return Value:
- *   None
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-int pthread_condattr_init(FAR pthread_condattr_t *attr)
-{
-  int ret = OK;
-
-  linfo("attr=0x%p\n", attr);
-
-  if (!attr)
-    {
-      ret = EINVAL;
-    }
-  else
-    {
-      *attr = 0;
-    }
-
-  linfo("Returning %d\n", ret);
-  return ret;
-}
+#endif /* __ASSEMBLY__ */
+#endif /* __CONFIGS_PHOTON_SRC_PHOTON_H */

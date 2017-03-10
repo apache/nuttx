@@ -1,8 +1,8 @@
 /****************************************************************************
- * libc/pthread/pthread_condattr_init.c
+ * config/photon/src/stm32_appinit.c
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Author: Simon Piriou <spiriou31@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,45 +39,48 @@
 
 #include <nuttx/config.h>
 
-#include <pthread.h>
-#include <debug.h>
-#include <errno.h>
+#include <nuttx/board.h>
+
+#include "photon.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifndef OK
+#  define OK 0
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  pthread_condattr_init
+ * Name: board_app_initialize
  *
  * Description:
- *   Operations on condition variable attributes
+ *   Perform application specific initialization.  This function is never
+ *   called directly from application code, but only indirectly via the
+ *   (non-standard) boardctl() interface using the command BOARDIOC_INIT.
  *
- * Parameters:
- *   None
+ * Input Parameters:
+ *   arg - The boardctl() argument is passed to the board_app_initialize()
+ *         implementation without modification.  The argument has no
+ *         meaning to NuttX; the meaning of the argument is a contract
+ *         between the board-specific initalization logic and the the
+ *         matching application logic.  The value cold be such things as a
+ *         mode enumeration value, a set of DIP switch switch settings, a
+ *         pointer to configuration data read from a file or serial FLASH,
+ *         or whatever you would like to do with it.  Every implementation
+ *         should accept zero/NULL as a default configuration.
  *
- * Return Value:
- *   None
- *
- * Assumptions:
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure to indicate the nature of the failure.
  *
  ****************************************************************************/
 
-int pthread_condattr_init(FAR pthread_condattr_t *attr)
+int board_app_initialize(uintptr_t arg)
 {
-  int ret = OK;
-
-  linfo("attr=0x%p\n", attr);
-
-  if (!attr)
-    {
-      ret = EINVAL;
-    }
-  else
-    {
-      *attr = 0;
-    }
-
-  linfo("Returning %d\n", ret);
-  return ret;
+  return OK;
 }

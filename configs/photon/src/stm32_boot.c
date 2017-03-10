@@ -1,8 +1,8 @@
-/****************************************************************************
- * libc/pthread/pthread_condattr_init.c
+/************************************************************************************
+ * configs/photon/src/stm32_boot.c
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Author: Simon Piriou <spiriou31@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -31,53 +31,34 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
-/****************************************************************************
+/************************************************************************************
  * Included Files
- ****************************************************************************/
+ ************************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <pthread.h>
-#include <debug.h>
-#include <errno.h>
+#include <nuttx/board.h>
+#include <arch/board/board.h>
 
-/****************************************************************************
+#include "up_arch.h"
+#include "photon.h"
+
+/************************************************************************************
  * Public Functions
- ****************************************************************************/
+ ************************************************************************************/
 
-/****************************************************************************
- * Function:  pthread_condattr_init
+/************************************************************************************
+ * Name: stm32_boardinitialize
  *
  * Description:
- *   Operations on condition variable attributes
+ *   All STM32 architectures must provide the following entry point.  This entry point
+ *   is called early in the initialization -- after all memory has been configured
+ *   and mapped but before any devices have been initialized.
  *
- * Parameters:
- *   None
- *
- * Return Value:
- *   None
- *
- * Assumptions:
- *
- ****************************************************************************/
+ ************************************************************************************/
 
-int pthread_condattr_init(FAR pthread_condattr_t *attr)
+void stm32_boardinitialize(void)
 {
-  int ret = OK;
-
-  linfo("attr=0x%p\n", attr);
-
-  if (!attr)
-    {
-      ret = EINVAL;
-    }
-  else
-    {
-      *attr = 0;
-    }
-
-  linfo("Returning %d\n", ret);
-  return ret;
 }
