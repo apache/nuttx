@@ -93,7 +93,7 @@ static inline FAR struct semholder_s *sem_allocholder(sem_t *sem)
 
 #if CONFIG_SEM_PREALLOCHOLDERS > 0
   pholder = g_freeholders;
-  if (pholder)
+  if (pholder != NULL)
     {
       /* Remove the holder from the free list an put it into the semaphore's
        * holder list
@@ -108,7 +108,7 @@ static inline FAR struct semholder_s *sem_allocholder(sem_t *sem)
       pholder->counts  = 0;
     }
 #else
-  if (!sem->holder.htcb)
+  if (sem->holder.htcb == NULL)
     {
       pholder          = &sem->holder;
       pholder->counts  = 0;
@@ -194,11 +194,11 @@ static inline void sem_freeholder(sem_t *sem, FAR struct semholder_s *pholder)
        curr && curr != pholder;
        prev = curr, curr = curr->flink);
 
-  if (curr)
+  if (curr != NULL)
     {
       /* Remove the holder from the list */
 
-      if (prev)
+      if (prev != NULL)
         {
           prev->flink = pholder->flink;
         }
@@ -241,7 +241,7 @@ static int sem_foreachholder(FAR sem_t *sem, holderhandler_t handler,
 #endif
       /* The initial "built-in" container may hold a NULL holder */
 
-      if (pholder->htcb)
+      if (pholder->htcb != NULL)
         {
           /* Call the handler */
 
@@ -637,7 +637,7 @@ static inline void sem_restorebaseprio_irq(FAR struct tcb_s *stcb,
    * next highest pending priority.
    */
 
-  if (stcb)
+  if (stcb != NULL)
     {
       /* Drop the priority of all holder threads */
 
@@ -701,7 +701,7 @@ static inline void sem_restorebaseprio_task(FAR struct tcb_s *stcb,
    * next highest pending priority.
    */
 
-  if (stcb)
+  if (stcb != NULL)
     {
       /* The currently executed thread should be the lower priority
        * thread that just posted the count and caused this action.
@@ -736,7 +736,7 @@ static inline void sem_restorebaseprio_task(FAR struct tcb_s *stcb,
    */
 
   pholder = sem_findholder(sem, rtcb);
-  if (pholder)
+  if (pholder != NULL)
     {
       /* When no more counts are held, remove the holder from the list.  The
        * count was decremented in sem_releaseholder.
@@ -817,13 +817,13 @@ void sem_destroyholder(FAR sem_t *sem)
    */
 
 #if CONFIG_SEM_PREALLOCHOLDERS > 0
-  if (sem->hhead)
+  if (sem->hhead != NULL)
     {
       serr("ERROR: Semaphore destroyed with holders\n");
       (void)sem_foreachholder(sem, sem_recoverholders, NULL);
     }
 #else
-  if (sem->holder.htcb)
+  if (sem->holder.htcb != NULL)
     {
       serr("ERROR: Semaphore destroyed with holder\n");
     }
@@ -952,7 +952,7 @@ void sem_releaseholder(FAR sem_t *sem)
   /* Find the container for this holder */
 
   pholder = sem_findholder(sem, rtcb);
-  if (pholder && pholder->counts > 0)
+  if (pholder != NULL && pholder->counts > 0)
     {
       /* Decrement the counts on this holder -- the holder will be freed
        * later in sem_restorebaseprio.
