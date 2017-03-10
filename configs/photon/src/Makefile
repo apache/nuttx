@@ -1,7 +1,7 @@
 ############################################################################
 # configs/photon/src/Makefile
 #
-#   Copyright (C) 2011-2013, 2015-2016 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2017 Gregory Nutt. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions

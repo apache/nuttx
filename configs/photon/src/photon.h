@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/photon/src/photon.h
  *
- *   Copyright (C) 2011-2012, 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Simon Piriou <spiriou31@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,7 +47,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration *************************************************************/
 
 /****************************************************************************
  * Public Types

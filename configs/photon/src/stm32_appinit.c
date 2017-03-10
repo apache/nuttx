@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/photon/src/stm32_appinit.c
  *
- *   Copyright (C) 2012, 2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Simon Piriou <spiriou31@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
