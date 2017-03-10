@@ -108,16 +108,21 @@ static inline FAR struct semholder_s *sem_allocholder(sem_t *sem)
       pholder->counts  = 0;
     }
 #else
-  if (sem->holder.htcb == NULL)
+  if (sem->holder[0].htcb == NULL)
     {
-      pholder          = &sem->holder;
+      pholder          = &sem->holder[0];
+      pholder->counts  = 0;
+    }
+  else if (sem->holder[1].htcb == NULL)
+    {
+      pholder          = &sem->holder[1];
       pholder->counts  = 0;
     }
 #endif
   else
     {
       serr("ERROR: Insufficient pre-allocated holders\n");
-      pholder = NULL;
+      pholder          = NULL;
     }
 
   return pholder;
@@ -132,15 +137,12 @@ static FAR struct semholder_s *sem_findholder(sem_t *sem,
 {
   FAR struct semholder_s *pholder;
 
+#if CONFIG_SEM_PREALLOCHOLDERS > 0
   /* Try to find the holder in the list of holders associated with this
    * semaphore
    */
 
-#if CONFIG_SEM_PREALLOCHOLDERS > 0
-  for (pholder = sem->hhead; pholder; pholder = pholder->flink)
-#else
-  pholder = &sem->holder;
-#endif
+  for (pholder = sem->hhead; pholder != NULL; pholder = pholder->flink)
     {
       if (pholder->htcb == htcb)
         {
@@ -149,6 +151,22 @@ static FAR struct semholder_s *sem_findholder(sem_t *sem,
           return pholder;
         }
     }
+#else
+  int i;
+
+  /* We have two hard-allocated holder structuse in sem_t */
+
+  for (i = 0; i < 2; i++)
+    {
+      pholder = &sem->pholder[i];
+      if (pholder->htcb == htcb)
+        {
+          /* Got it! */
+
+          return pholder;
+        }
+    }
+#endif
 
   /* The holder does not appear in the list */
 
@@ -223,23 +241,20 @@ static int sem_foreachholder(FAR sem_t *sem, holderhandler_t handler,
                              FAR void *arg)
 {
   FAR struct semholder_s *pholder;
-#if CONFIG_SEM_PREALLOCHOLDERS > 0
-  FAR struct semholder_s *next;
-#endif
   int ret = 0;
 
 #if CONFIG_SEM_PREALLOCHOLDERS > 0
+  FAR struct semholder_s *next;
+
   for (pholder = sem->hhead; pholder && ret == 0; pholder = next)
-#else
-  pholder = &sem->holder;
-#endif
     {
-#if CONFIG_SEM_PREALLOCHOLDERS > 0
       /* In case this holder gets deleted */
 
       next = pholder->flink;
-#endif
-      /* The initial "built-in" container may hold a NULL holder */
+
+      /* Check if there is a handler... there should always be one
+       * in this configuration.
+       */
 
       if (pholder->htcb != NULL)
         {
@@ -248,6 +263,25 @@ static int sem_foreachholder(FAR sem_t *sem, holderhandler_t handler,
           ret = handler(pholder, sem, arg);
         }
     }
+#else
+  int i;
+
+  /* We have two hard-allocated holder structures in sem_t */
+
+  for (i = 0; i < 2; i++)
+    {
+      pholder = &sem->holder[i];
+
+      /* The hard-allocated containers may hold a NULL holder */
+
+      if (pholder->htcb != NULL)
+        {
+          /* Call the handler */
+
+          ret = handler(pholder, sem, arg);
+        }
+    }
+#endif
 
   return ret;
 }
@@ -823,12 +857,13 @@ void sem_destroyholder(FAR sem_t *sem)
       (void)sem_foreachholder(sem, sem_recoverholders, NULL);
     }
 #else
-  if (sem->holder.htcb != NULL)
+  if (sem->holder[0].htcb != NULL || sem->holder[0].htcb != NULL)
     {
       serr("ERROR: Semaphore destroyed with holder\n");
     }
 
-  sem->holder.htcb = NULL;
+  sem->holder[0].htcb = NULL;
+  sem->holder[1].htcb = NULL;
 #endif
 }
 
