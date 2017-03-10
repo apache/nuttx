@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/olimex-lpc-h3131/src/lpc31_hidkbd.c
+ * libc/string/lib_strerrorr.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,34 +39,36 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/usb/usbhost.h>
-
-#include "lpc31.h"
-#include "lpc_h3131.h"
-
-#if defined(CONFIG_LPC31_USBOTG) && defined(CONFIG_USBHOST) && \
-    defined(CONFIG_EXAMPLES_HIDKBD)
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#include <sys/types.h>
+#include <string.h>
+#include <assert.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: arch_usbhost_initialize
+ * Name: strerror_r
  *
  * Description:
- *   The apps/example/hidkbd test requires that platform-specific code
- *   provide a wrapper called arch_usbhost_initialize() that will perform
- *   the actual USB host initialization.
+ *   The strerror_r() function is similar to strerror(), but is thread safe.
+ *   It returns the error string in the user-supplied buffer 'buf' of length
+ *  'buflen'.
+ *
+ * Returned Value:
+ *  strerror_r() returns 0 on success. On error, a (positive) error number is
+ *  returned.
+ *
+ * Portability:
+ *   Specified in POSIX.1-2001
  *
  ****************************************************************************/
 
-struct usbhost_connection_s *arch_usbhost_initialize(void)
+int strerror_r(int errnum, FAR char *buf, size_t buflen)
 {
-  return lpc31_ehci_initialize(0);
+  FAR const char *errstr = strerror(errnum);
+
+  DEBUGASSERT(buf != NULL);
+  (void)strncpy(buf, errstr, buflen);
+  return OK;
 }
-#endif /* CONFIG_LPC31_USBOTG && CONFIG_USBHOST && CONFIG_EXAMPLES_HIDKBD */

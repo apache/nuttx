@@ -59,7 +59,7 @@
 #define LPC43_GPDMA_SOFTSREQ_OFFSET       0x0024 /* DMA Software Single Request Register */
 #define LPC43_GPDMA_SOFTLBREQ_OFFSET      0x0028 /* DMA Software Last Burst Request Register */
 #define LPC43_GPDMA_SOFTLSREQ_OFFSET      0x002c /* DMA Software Last Single Request Register */
-#define LPC43_GPDMA_CONFIG_OFFSET         0x0030 /* DMA Configuration Register */
+#define LPC43_GPDMA_GLOBAL_CONFIG_OFFSET  0x0030 /* DMA Configuration Register */
 #define LPC43_GPDMA_SYNC_OFFSET           0x0034 /* DMA Synchronization Register */
 
 /* Channel registers */
@@ -139,7 +139,7 @@
 #define LPC43_GPDMA_SOFTSREQ              (LPC43_DMA_BASE+LPC43_GPDMA_SOFTSREQ_OFFSET)
 #define LPC43_GPDMA_SOFTLBREQ             (LPC43_DMA_BASE+LPC43_GPDMA_SOFTLBREQ_OFFSET)
 #define LPC43_GPDMA_SOFTLSREQ             (LPC43_DMA_BASE+LPC43_GPDMA_SOFTLSREQ_OFFSET)
-#define LPC43_GPDMA_CONFIG                (LPC43_DMA_BASE+LPC43_GPDMA_CONFIG_OFFSET)
+#define LPC43_GPDMA_GLOBAL_CONFIG         (LPC43_DMA_BASE+LPC43_GPDMA_GLOBAL_CONFIG_OFFSET)
 #define LPC43_GPDMA_SYNC                  (LPC43_DMA_BASE+LPC43_GPDMA_SYNC_OFFSET)
 
 /* Channel registers */
@@ -261,9 +261,9 @@
                                                      /* Bits 16-31: Reserved */
 /* DMA Configuration Register */
 
-#define GPDMA_CONFIG_ENA                  (1 << 0)  /* Bit 0:  DMA Controller enable */
-#define GPDMA_CONFIG_M0                   (1 << 1)  /* Bit 1:  AHB Master 0 endianness configuration */
-#define GPDMA_CONFIG_M1                   (1 << 2)  /* Bit 2:  M1 AHB Master 1 endianness configuration */
+#define GPDMA_GLOBAL_CONFIG_ENA           (1 << 0)  /* Bit 0:  DMA Controller enable */
+#define GPDMA_GLOBAL_CONFIG_M0            (1 << 1)  /* Bit 1:  AHB Master 0 endianness configuration */
+#define GPDMA_GLOBAL_CONFIG_M1            (1 << 2)  /* Bit 2:  M1 AHB Master 1 endianness configuration */
                                                     /* Bits 3-31: Reserved */
 /* DMA Synchronization Register */
 
@@ -283,15 +283,15 @@
 #define GPDMA_CONTROL_XFRSIZE_SHIFT      (0)       /* Bits 0-11: Transfer size in number of transfers */
 #define GPDMA_CONTROL_XFRSIZE_MASK       (0xfff << GPDMA_CONTROL_XFRSIZE_SHIFT)
 #define GPDMA_CONTROL_SBSIZE_SHIFT       (12)      /* Bits 12-14: Source burst size */
-#define GPDMA_CONTROL_SBSIZE_MASK        (7 << GPDMA_CONTROL_XFRSIZE_MASK)
-#  define GPDMA_CONTROL_SBSIZE_1         (0 << GPDMA_CONTROL_XFRSIZE_MASK) /* Source burst size = 1 */
-#  define GPDMA_CONTROL_SBSIZE_4         (1 << GPDMA_CONTROL_XFRSIZE_MASK) /* Source burst size = 4 */
-#  define GPDMA_CONTROL_SBSIZE_8         (2 << GPDMA_CONTROL_XFRSIZE_MASK) /* Source burst size = 8 */
-#  define GPDMA_CONTROL_SBSIZE_16        (3 << GPDMA_CONTROL_XFRSIZE_MASK) /* Source burst size = 16 */
-#  define GPDMA_CONTROL_SBSIZE_32        (4 << GPDMA_CONTROL_XFRSIZE_MASK) /* Source burst size = 32 */
-#  define GPDMA_CONTROL_SBSIZE_64        (5 << GPDMA_CONTROL_XFRSIZE_MASK) /* Source burst size = 64 */
-#  define GPDMA_CONTROL_SBSIZE_128       (6 << GPDMA_CONTROL_XFRSIZE_MASK) /* Source burst size = 128 */
-#  define GPDMA_CONTROL_SBSIZE_256       (7 << GPDMA_CONTROL_XFRSIZE_MASK) /* Source burst size = 256 */
+#define GPDMA_CONTROL_SBSIZE_MASK        (7 << GPDMA_CONTROL_SBSIZE_SHIFT)
+#  define GPDMA_CONTROL_SBSIZE_1         (0 << GPDMA_CONTROL_SBSIZE_SHIFT) /* Source burst size = 1 */
+#  define GPDMA_CONTROL_SBSIZE_4         (1 << GPDMA_CONTROL_SBSIZE_SHIFT) /* Source burst size = 4 */
+#  define GPDMA_CONTROL_SBSIZE_8         (2 << GPDMA_CONTROL_SBSIZE_SHIFT) /* Source burst size = 8 */
+#  define GPDMA_CONTROL_SBSIZE_16        (3 << GPDMA_CONTROL_SBSIZE_SHIFT) /* Source burst size = 16 */
+#  define GPDMA_CONTROL_SBSIZE_32        (4 << GPDMA_CONTROL_SBSIZE_SHIFT) /* Source burst size = 32 */
+#  define GPDMA_CONTROL_SBSIZE_64        (5 << GPDMA_CONTROL_SBSIZE_SHIFT) /* Source burst size = 64 */
+#  define GPDMA_CONTROL_SBSIZE_128       (6 << GPDMA_CONTROL_SBSIZE_SHIFT) /* Source burst size = 128 */
+#  define GPDMA_CONTROL_SBSIZE_256       (7 << GPDMA_CONTROL_SBSIZE_SHIFT) /* Source burst size = 256 */
 #define GPDMA_CONTROL_DBSIZE_SHIFT       (15)      /* Bits 15-17: Destination burst size */
 #define GPDMA_CONTROL_DBSIZE_MASK        (7 << GPDMA_CONTROL_DBSIZE_SHIFT)
 #  define GPDMA_CONTROL_DBSIZE_1         (0 << GPDMA_CONTROL_DBSIZE_SHIFT) /* Destination burst size = 1 */
@@ -312,8 +312,12 @@
 #  define GPDMA_CONTROL_DWIDTH_BYTE      (0 << GPDMA_CONTROL_DWIDTH_SHIFT) /* Byte (8-bit) */
 #  define GPDMA_CONTROL_DWIDTH_HWORD     (1 << GPDMA_CONTROL_DWIDTH_SHIFT) /* Halfword (16-bit) */
 #  define GPDMA_CONTROL_DWIDTH_WORD      (2 << GPDMA_CONTROL_DWIDTH_SHIFT) /* Word (32-bit) */
-#define GPDMA_CONTROL_SS                 (1 << 24) /* Bit 24: Source AHB master select */
-#define GPDMA_CONTROL_DS                 (1 << 25) /* Bit 25: Destination AHB master select */
+#define GPDMA_CONTROL_S_SHIFT            (24) /* Bit 24: Source AHB master select */
+# define GPDMA_CONTROL_S0                (0 << GPDMA_CONTROL_S_SHIFT) /* AHB Master 0 selected for source transfer. */
+# define GPDMA_CONTROL_S1                (1 << GPDMA_CONTROL_S_SHIFT) /* AHB Master 1 selected for source transfer. */
+#define GPDMA_CONTROL_D_SHIFT            (25) /* Bit 25: Destination AHB master select */
+# define GPDMA_CONTROL_D0                (0 << GPDMA_CONTROL_D_SHIFT) /* AHB Master 0 selected for destination transfer. */
+# define GPDMA_CONTROL_D1                (1 << GPDMA_CONTROL_D_SHIFT) /* AHB Master 1 selected for destination transfer. */
 #define GPDMA_CONTROL_SI                 (1 << 26) /* Bit 26: Source increment */
 #define GPDMA_CONTROL_DI                 (1 << 27) /* Bit 27: Destination increment */
 #define GPDMA_CONTROL_PROT1              (1 << 28) /* Bit 28: Privileged mode */

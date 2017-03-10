@@ -685,18 +685,6 @@ Where <subdir> is one of the following:
        System Type -> PIC32MX Peripheral Support:
           CONFIG_PIC32MX_USBDEV=y   : Enable PIC32 USB device support
 
-      examples/usbterm - This option can be enabled by adding the following
-      to the NuttX configuration file:
-
-        Application Configuration->Examples:
-          CONFIG_EXAMPLES_USBTERM=y : Selects /apps/examples/usbterm
-
-      And by enabling one of the USB serial devices:
-
-        Drivers->USB Device Driver Support
-          CONFIG_PL2303=y           : Enable the Prolifics PL2303 emulation
-          CONFIG_CDCACM=y           : or the CDC/ACM serial driver (not both)
-
       system/cdcacm -  The system/cdcacm program can be included as an
       function by dding the following to the NuttX configuration file:
 

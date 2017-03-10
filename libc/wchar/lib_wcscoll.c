@@ -61,4 +61,5 @@ int wcscoll(FAR const wchar_t *a, FAR const wchar_t *b)
 {
   return wcscmp(a, b);
 }
-#endif
+
+#endif /* CONFIG_LIBC_WCHAR */

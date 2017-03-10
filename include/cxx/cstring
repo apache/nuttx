@@ -57,6 +57,7 @@ namespace std
   using ::strdup;
   using ::strndup;
   using ::strerror;
+  using ::strerror_r;
   using ::strlen;
   using ::strnlen;
   using ::strcat;

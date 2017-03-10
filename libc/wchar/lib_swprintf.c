@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/ubw32/src/pic32_usbterm.c
+ * libc/wchar/lib_swprintf.c
  *
- *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,66 +39,43 @@
 
 #include <nuttx/config.h>
 
-#include <stdbool.h>
-#include <debug.h>
+#include <sys/types.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <wchar.h>
+#include "libc.h"
 
-#include <nuttx/usb/usbdev.h>
+#include <nuttx/streams.h>
 
-#include "pic32mx.h"
-#include "ubw32.h"
-
-#if defined(CONFIG_PIC32MX_USBDEV) && defined(CONFIG_EXAMPLES_USBTERM_DEVINIT)
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#ifdef CONFIG_LIBC_WCHAR
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name:
- *
- * Description:
- *   If CONFIG_EXAMPLES_USBTERM_DEVINIT is defined, then the example will
- *   call this user provided function as part of its initialization.
- *
+ * swprintf
  ****************************************************************************/
 
-int usbterm_devinit(void)
+int swprintf(FAR wchar_t *buf, size_t maxlen, FAR const wchar_t *fmt, ...)
 {
-  /* The UBW32 has no way to know when the USB is connected.  So we will fake
-   * it and tell the USB driver that the USB is connected now.
-   *
-   * If examples/usbterm is built as an NSH built-in application, then
-   * pic32mx_usbattach() will be called in board_app_initialize().
-   */
+  struct lib_memoutstream_s memoutstream;
+  va_list ap;
+  int n;
 
-#ifndef CONFIG_NSH_BUILTIN_APPS
-  pic32mx_usbattach();
-#endif
-  return OK;
+  /* Initialize a memory stream to write to the buffer */
+
+  lib_memoutstream((FAR struct lib_memoutstream_s *)&memoutstream,
+                   (FAR char *) buf, LIB_BUFLEN_UNKNOWN);
+
+  /* Then let lib_vsprintf do the real work */
+
+  va_start(ap, fmt);
+  n = lib_vsprintf((FAR struct lib_outstream_s *)&memoutstream.public,
+                   (FAR const char *)fmt, ap);
+  va_end(ap);
+
+  return n;
 }
 
-/****************************************************************************
- * Name:
- *
- * Description:
- *   If CONFIG_EXAMPLES_USBTERM_DEVINIT is defined, then the example will
- *   call this user provided function as part of its termination sequence.
- *
- ****************************************************************************/
-
-void usbterm_devuninit(void)
-{
-  /* Tell the USB driver that the USB is no longer connected */
-
-  pic32mx_usbdetach();
-}
-
-#endif /* CONFIG_PIC32MX_USBDEV && CONFIG_EXAMPLES_USBTERM_DEVINIT */
+#endif /* CONFIG_LIBC_WCHAR */

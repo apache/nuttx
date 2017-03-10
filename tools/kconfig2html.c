@@ -56,10 +56,10 @@
 
 #define LINE_SIZE        1024
 #define SCRATCH_SIZE     2048
-#define MAX_DEPENDENCIES 100
+#define MAX_DEPENDENCIES 128
 #define MAX_LEVELS       100
 #define MAX_SELECT       64
-#define MAX_DEFAULTS     128
+#define MAX_DEFAULTS     196
 #define TAB_SIZE         4
 #define VAR_SIZE         80
 #define HTML_VAR_SIZE    (2*VAR_SIZE + 64)

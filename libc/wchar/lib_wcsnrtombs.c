@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/olimex-lpc1766stk/src/lpc17_hidkbd.c
+ * libc/stdio/lib_asprintf.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,49 +37,57 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#include <sys/types.h>
+#include <wchar.h>
 
-#include <debug.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <errno.h>
 
-#include <nuttx/usb/usbhost.h>
-
-#include "lpc17_usbhost.h"
-
-#if defined(CONFIG_LPC17_USBHOST) && defined(CONFIG_USBHOST) && \
-    defined(CONFIG_EXAMPLES_HIDKBD)
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#ifdef CONFIG_LIBC_WCHAR
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: arch_usbhost_initialize
+ * Name:
  *
  * Description:
- *   The apps/example/hidkbd test requires that platform-specific code
- *   provide a wrapper called arch_usbhost_initialize() that will perform
- *   the actual USB host initialization.
+ *   The 'wcsrtombs' function converts a string of wide characters
+ *   indirectly pointed to by 'src' to a corresponding multibyte character
+ *   string stored in the array pointed to by 'dst'.  No more than 'len'
+ *   bytes are written to'dst'.
  *
+ *   If 'dst' is NULL, no characters are stored.
+ *
+ *   If 'dst' is not NULL, the pointer pointed to by 'src' is updated to
+ *   point to the character after the one that conversion stopped at.  If
+ *   conversion stops because a null character is encountered, *'src' is set
+ *   to NULL.
+ *
+ *   The mbstate_t argument, 'ps', is used to keep track of the shift state.
+ *   If it is NULL, 'wcsrtombs' uses an internal, static mbstate_t object,
+ *   which is initialized to the initial conversion state at program startup.
+ *
+ *   The 'wcsnrtombs' function behaves identically to 'wcsrtombs', except
+ *   that conversion stops after reading at most 'nwc' characters from the
+ *   buffer pointed to by 'src'.
+ *
+ * Returned Value:
+ *   The 'wcsrtombs' and 'wcsnrtombs' functions return the number of bytes
+ *   stored in the array pointed to by 'dst' (not including any terminating
+ *   null), if successful, otherwise it returns (size_t)-1.
+ *
+ * Portability:
+ *   'wcsrtombs' is defined by C99 standard.
+ *   'wcsnrtombs' is defined by the POSIX.1-2008 standard.
  ****************************************************************************/
 
-struct usbhost_connection_s *arch_usbhost_initialize(void)
+size_t wcsnrtombs(FAR char *dst, FAR const wchar_t **src, size_t nwc,
+                  size_t len, mbstate_t *ps)
 {
-#ifdef CONFIG_USBHOST_HUB
-  int ret;
-
-  /* Initialize USB hub support */
-
-  ret = usbhost_hub_initialize();
-  if (ret < 0)
-    {
-      uerr("ERROR: usbhost_hub_initialize failed: %d\n", ret);
-    }
-#endif
-
-  return lpc17_usbhost_initialize(0);
+  return len;
 }
-#endif /* CONFIG_LPC17_USBHOST && CONFIG_USBHOST && CONFIG_EXAMPLES_HIDKBD */
+
+#endif /* CONFIG_LIBC_WCHAR */

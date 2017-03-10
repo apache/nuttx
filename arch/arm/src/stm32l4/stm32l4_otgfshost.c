@@ -1832,17 +1832,19 @@ static ssize_t stm32l4_in_transfer(FAR struct stm32l4_usbhost_s *priv,
 {
   FAR struct stm32l4_chan_s *chan;
   systime_t start;
-  systime_t elapsed;
+  ssize_t xfrd;
   int ret;
 
   /* Loop until the transfer completes (i.e., buflen is decremented to zero)
-   * or a fatal error occurs (any error other than a simple NAK)
+   * or a fatal error occurs any error other than a simple NAK.  NAK would
+   * simply indicate the end of the transfer (short-transfer).
    */
 
   chan         = &priv->chan[chidx];
   chan->buffer = buffer;
   chan->buflen = buflen;
   chan->xfrd   = 0;
+  xfrd         = 0;
 
   start = clock_systimer();
   while (chan->xfrd < chan->buflen)
@@ -1869,36 +1871,72 @@ static ssize_t stm32l4_in_transfer(FAR struct stm32l4_usbhost_s *priv,
 
       ret = stm32l4_chan_wait(priv, chan);
 
-      /* EAGAIN indicates that the device NAKed the transfer and we need
-       * do try again.  Anything else (success or other errors) will
-       * cause use to return
-       */
+      /* EAGAIN indicates that the device NAKed the transfer. */
 
       if (ret < 0)
         {
-          usbhost_trace1(OTGFS_TRACE1_TRNSFRFAILED, ret);
-
-          /* Check for a special case:  If (1) the transfer was NAKed and (2)
-           * no Tx FIFO empty or Rx FIFO not-empty event occurred, then we
-           * should be able to just flush the Rx and Tx FIFOs and try again.
-           * We can detect this latter case because the then the transfer
-           * buffer pointer and buffer size will be unaltered.
+          /* The transfer failed.  If we received a NAK, return all data
+           * buffered so far (if any).
            */
 
-          elapsed = clock_systimer() - start;
-          if (ret != -EAGAIN ||                  /* Not a NAK condition OR */
-              elapsed >= STM32L4_DATANAK_DELAY ||  /* Timeout has elapsed OR */
-              chan->xfrd > 0)                    /* Data has been partially transferred */
+          if (ret == -EAGAIN)
             {
+              /* Was data buffered prior to the NAK? */
+
+              if (xfrd > 0)
+                {
+                  /* Yes, return the amount of data received.
+                   *
+                   * REVISIT: This behavior is clearly correct for CDC/ACM
+                   * bulk transfers and HID interrupt transfers.  But I am
+                   * not so certain for MSC bulk transfers which, I think,
+                   * could have NAKed packets in the middle of a transfer.
+                   */
+
+                  return xfrd;
+                }
+              else
+                {
+                  /* Get the elapsed time.  Has the timeout elapsed?
+                   * if not then try again.
+                   */
+
+                  systime_t elapsed = clock_systimer() - start;
+                  if (elapsed >= STM32L4_DATANAK_DELAY)
+                    {
+                      /* Timeout out... break out returning the NAK as
+                       * as a failure.
+                       */
+
+                      return (ssize_t)ret;
+                    }
+                }
+            }
+          else
+            {
+              /* Some unexpected, fatal error occurred. */
+
+              usbhost_trace1(OTGFS_TRACE1_TRNSFRFAILED, ret);
+
               /* Break out and return the error */
 
               uerr("ERROR: stm32l4_chan_wait failed: %d\n", ret);
               return (ssize_t)ret;
             }
         }
+      else
+        {
+          /* Successfully received another chunk of data... add that to the
+           * runing total.  Then continue reading until we read 'buflen'
+           * bytes of data or until the the devices NAKs (implying a short
+           * packet).
+           */
+
+          xfrd += chan->xfrd;
+        }
     }
 
-  return (ssize_t)chan->xfrd;
+  return xfrd;
 }
 
 /****************************************************************************
@@ -2506,18 +2544,6 @@ static inline void stm32l4_gint_hcinisr(FAR struct stm32l4_usbhost_s *priv,
         }
       else if (chan->chreason == CHREASON_NAK)
         {
-          /* Halt on NAK only happens on an INTR channel.  Fetch the HCCHAR register
-           * and check for an interrupt endpoint.
-           */
-
-          regval = stm32l4_getreg(STM32L4_OTGFS_HCCHAR(chidx));
-          if ((regval & OTGFS_HCCHAR_EPTYP_MASK) == OTGFS_HCCHAR_EPTYP_INTR)
-            {
-              /* Toggle the IN data toggle (Used by Bulk and INTR only) */
-
-              chan->indata1 ^= true;
-            }
-
           /* Set the NAK error result */
 
           chan->result = EAGAIN;
@@ -2562,7 +2588,8 @@ static inline void stm32l4_gint_hcinisr(FAR struct stm32l4_usbhost_s *priv,
 #if 1
       /* Halt the interrupt channel */
 
-      if (chan->eptype == OTGFS_EPTYPE_INTR)
+      if (chan->eptype == OTGFS_EPTYPE_INTR ||
+          chan->eptype == OTGFS_EPTYPE_BULK)
         {
           /* Halt the channel -- the CHH interrupt is expected next */
 
@@ -2573,11 +2600,13 @@ static inline void stm32l4_gint_hcinisr(FAR struct stm32l4_usbhost_s *priv,
        * REVISIT: This can cause a lot of interrupts!
        */
 
-      else if (chan->eptype == OTGFS_EPTYPE_CTRL ||
-               chan->eptype == OTGFS_EPTYPE_BULK)
+      else if (chan->eptype == OTGFS_EPTYPE_CTRL /*||
+               chan->eptype == OTGFS_EPTYPE_BULK*/)
         {
           /* Re-activate the channel by clearing CHDIS and assuring that
            * CHENA is set
+           *
+           * TODO: set channel reason to NACK?
            */
 
           regval  = stm32l4_getreg(STM32L4_OTGFS_HCCHAR(chidx));
@@ -2585,6 +2614,7 @@ static inline void stm32l4_gint_hcinisr(FAR struct stm32l4_usbhost_s *priv,
           regval &= ~OTGFS_HCCHAR_CHDIS;
           stm32l4_putreg(STM32L4_OTGFS_HCCHAR(chidx), regval);
         }
+
 #else
       /* Halt all transfers on the NAK -- the CHH interrupt is expected next */
 

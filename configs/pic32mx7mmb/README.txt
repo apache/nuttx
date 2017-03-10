@@ -673,17 +673,6 @@ Where <subdir> is one of the following:
        Other USB other device configurations can be enabled and
        included as NSH built-in built in functions.
 
-       examples/usbterm - This option can be enabled by adding the
-       following to the NuttX configuration file:
-
-         CONFIG_EXAMPLES_USBTERM=y
-
-       And by enabling one of the USB serial devices:
-
-         CONFIG_USBMSC=n         : Disable USB mass storage device.
-         CONFIG_PL2303=y         : Enable the Prolifics PL2303 emulation
-         CONFIG_CDCACM=y         : or the CDC/ACM serial driver (not both)
-
        system/cdcacm -  The system/cdcacm program can be included as an
        function by adding the following to the NuttX configuration file:
 
