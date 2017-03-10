@@ -93,6 +93,9 @@
 /* power-down -> standby transition timing (in us).  Note: this value is probably larger than required. */
 #define NRF24L01_TPD2STBY_DELAY  4500
 
+/* max time to wait for TX irq (in ms) */
+#define NRF24L01_MAX_TX_IRQ_WAIT 2000
+
 #define FIFO_PKTLEN_MASK  0x1F   /* 5 ls bits used to store packet length */
 #define FIFO_PKTLEN_SHIFT 0
 #define FIFO_PIPENO_MASK  0xE0   /* 3 ms bits used to store pipe # */
@@ -134,6 +137,7 @@ struct nrf24l01_dev_s
 
   uint8_t last_recvpipeno;
   sem_t sem_tx;
+  bool tx_pending; /* is userspace waiting for TX IRQ? - accessor needs to hold lock on SPI bus */
 
 #ifdef CONFIG_WL_NRF24L01_RXSUPPORT
   uint8_t *rx_fifo;         /* Circular RX buffer.  [pipe# / pkt_len] [packet data...] */
@@ -193,9 +197,9 @@ static int nrf24l01_unregister(FAR struct nrf24l01_dev_s *dev);
 
 #ifdef CONFIG_WL_NRF24L01_RXSUPPORT
 
-void fifoput(struct nrf24l01_dev_s *dev, uint8_t pipeno,
+static void fifoput(struct nrf24l01_dev_s *dev, uint8_t pipeno,
              FAR uint8_t *buffer, uint8_t buflen);
-uint8_t fifoget(struct nrf24l01_dev_s *dev, FAR uint8_t *buffer,
+static uint8_t fifoget(struct nrf24l01_dev_s *dev, FAR uint8_t *buffer,
              uint8_t buflen, FAR uint8_t *pipeno);
 static void nrf24l01_worker(FAR void *arg);
 
@@ -419,7 +423,7 @@ static uint8_t nrf24l01_setregbit(struct nrf24l01_dev_s *dev, uint8_t reg,
 
 /* RX fifo mgt */
 
-void fifoput(struct nrf24l01_dev_s *dev, uint8_t pipeno, uint8_t *buffer, uint8_t buflen)
+static void fifoput(struct nrf24l01_dev_s *dev, uint8_t pipeno, uint8_t *buffer, uint8_t buflen)
 {
   sem_wait(&dev->sem_fifo);
   while (dev->fifo_len + buflen + 1 > CONFIG_WL_NRF24L01_RXFIFO_LEN)
@@ -447,14 +451,18 @@ void fifoput(struct nrf24l01_dev_s *dev, uint8_t pipeno, uint8_t *buffer, uint8_
   sem_post(&dev->sem_fifo);
 }
 
-uint8_t fifoget(struct nrf24l01_dev_s *dev, uint8_t *buffer, uint8_t buflen, uint8_t *pipeno)
+static uint8_t fifoget(struct nrf24l01_dev_s *dev, uint8_t *buffer, uint8_t buflen, uint8_t *pipeno)
 {
   uint8_t pktlen;
   uint8_t i;
 
   sem_wait(&dev->sem_fifo);
 
-  ASSERT(dev->fifo_len > 0);
+  if ( dev->fifo_len == 0 ) /* sem_rx contains count of inserted packets in FIFO, but FIFO can overflow - fail smart */
+    {
+      pktlen = 0;
+      goto no_data;
+    }
 
   pktlen = FIFO_PKTLEN(dev);
   if (NULL != pipeno)
@@ -479,6 +487,7 @@ uint8_t fifoget(struct nrf24l01_dev_s *dev, uint8_t *buffer, uint8_t buflen, uin
 
   dev->fifo_len -= (pktlen + 1);
 
+  no_data:
   sem_post(&dev->sem_fifo);
   return pktlen;
 }
@@ -489,7 +498,7 @@ static int nrf24l01_irqhandler(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct nrf24l01_dev_s *dev = (FAR struct nrf24l01_dev_s *)arg;
 
-  winfo("*IRQ*");
+  winfo("*IRQ*\n");
 
 #ifdef CONFIG_WL_NRF24L01_RXSUPPORT
 
@@ -548,6 +557,8 @@ static void nrf24l01_worker(FAR void *arg)
 
       winfo("RX_DR is set!\n");
 
+      bool has_data = false;
+
       /* Read and store all received payloads */
 
       do
@@ -563,6 +574,12 @@ static void nrf24l01_worker(FAR void *arg)
            */
 
           pipeno = (status & NRF24L01_RX_P_NO_MASK) >> NRF24L01_RX_P_NO_SHIFT;
+          if ( pipeno >= NRF24L01_PIPE_COUNT ) /* 6=invalid 7=fifo empty */
+            {
+              werr("invalid pipe rx: %d\n", (int)pipeno);
+              nrf24l01_flush_rx(dev);
+              break;
+            }
 
           pktlen = dev->pipedatalen[pipeno];
           if (NRF24L01_DYN_LENGTH == pktlen)
@@ -572,11 +589,19 @@ static void nrf24l01_worker(FAR void *arg)
               nrf24l01_access(dev, MODE_READ, NRF24L01_R_RX_PL_WID, &pktlen, 1);
             }
 
+          if ( pktlen > NRF24L01_MAX_PAYLOAD_LEN ) /* bad length */
+            {
+              werr("invalid length in rx: %d\n", (int)pktlen);
+              nrf24l01_flush_rx(dev);
+              break;
+            }
+
           /* Get payload content */
 
           nrf24l01_access(dev, MODE_READ, NRF24L01_R_RX_PAYLOAD, buf, pktlen);
 
           fifoput(dev, pipeno, buf, pktlen);
+          has_data = true;
           sem_post(&dev->sem_rx);  /* Wake-up any thread waiting in recv */
 
           status = nrf24l01_readreg(dev, NRF24L01_FIFO_STATUS, &fifo_status, 1);
@@ -584,7 +609,17 @@ static void nrf24l01_worker(FAR void *arg)
           winfo("FIFO_STATUS=%02x\n", fifo_status);
           winfo("STATUS=%02x\n", status);
         }
-      while (!(fifo_status | NRF24L01_RX_EMPTY));
+      while ( !(fifo_status & NRF24L01_RX_EMPTY) ); /* 1=empty 0=more data */
+
+#ifndef CONFIG_DISABLE_POLL
+      if (dev->pfd && has_data)
+        {
+          dev->pfd->revents |= POLLIN;  /* Data available for input */
+
+          winfo("Wake up polled fd\n");
+          sem_post(dev->pfd->sem);
+        }
+#endif
 
       /* Clear interrupt sources */
 
@@ -593,23 +628,24 @@ static void nrf24l01_worker(FAR void *arg)
       /* Restore CE */
 
       nrf24l01_chipenable(dev, ce);
-
-#ifndef CONFIG_DISABLE_POLL
-      if (dev->pfd)
-        {
-          dev->pfd->revents |= POLLIN;  /* Data available for input */
-
-          winfo("Wake up polled fd");
-          sem_post(dev->pfd->sem);
-        }
-#endif
     }
 
   if (status & (NRF24L01_TX_DS | NRF24L01_MAX_RT))
     {
-      /* The actual work is done in the send function */
+       /* confirm send */
 
-      sem_post(&dev->sem_tx);
+       nrf24l01_chipenable(dev, false);
+
+       if ( dev->tx_pending )
+         {
+           /* The actual work is done in the send function */
+
+           sem_post(&dev->sem_tx);
+         }
+       else
+         {
+           werr("invalid length in rx: %d\n", (int)pktlen);
+         }
     }
 
   if (dev->state == ST_RX)
@@ -679,32 +715,39 @@ static int dosend(FAR struct nrf24l01_dev_s *dev, FAR const uint8_t *data, size_
 
   nrf24l01_tostate(dev, ST_STANDBY);
 
+  /* flush old - can't harm */
+
+  nrf24l01_flush_tx(dev);
+
   /* Write payload */
 
   nrf24l01_access(dev, MODE_WRITE, NRF24L01_W_TX_PAYLOAD, (FAR uint8_t *)data, datalen);
 
-  /* Enable CE to start transmission */
-
-  nrf24l01_chipenable(dev, true);
+  dev->tx_pending = true;
 
   /* Free the SPI bus during the IRQ wait */
 
   nrf24l01_unlock(dev->spi);
 
-  /* Wait for IRQ  (TX_DS or MAX_RT) */
+  /* cause rising CE edge to start transmission */
 
-  while (sem_wait(&dev->sem_tx) != 0)
-    {
-      /* Note that we really need to wait here, as the interrupt source
-       * (either TX_DS in case of success, or MAX_RT for failure) needs to be cleared.
-       */
+  nrf24l01_chipenable(dev, true);
 
-      DEBUGASSERT(errno == EINTR);
-    }
+  /* Wait for IRQ (TX_DS or MAX_RT) - but don't hang on lost IRQ */
+  result = sem_tickwait(&dev->sem_tx, clock_systimer(), MSEC2TICK(NRF24L01_MAX_TX_IRQ_WAIT));
 
   /* Re-acquire the SPI bus */
 
   nrf24l01_lock(dev->spi);
+
+  dev->tx_pending = false;
+
+  if ( result < 0 )
+  {
+     werr("wait for irq failed\n");
+     nrf24l01_flush_tx(dev);
+     goto out;
+  }
 
   status = nrf24l01_readreg(dev, NRF24L01_OBSERVE_TX, &obsvalue, 1);
   if (status & NRF24L01_TX_DS)
@@ -719,7 +762,7 @@ static int dosend(FAR struct nrf24l01_dev_s *dev, FAR const uint8_t *data, size_
     }
   else if (status & NRF24L01_MAX_RT)
     {
-      winfo("MAX_RT!\n", dev->lastxmitcount);
+      winfo("MAX_RT! (lastxmitcount=%d)\n", dev->lastxmitcount);
       result = -ECOMM;
       dev->lastxmitcount = NRF24L01_XMIT_MAXRT;
 
@@ -735,9 +778,14 @@ static int dosend(FAR struct nrf24l01_dev_s *dev, FAR const uint8_t *data, size_
       result = -EIO;
     }
 
+  out:
+
   /* Clear interrupt sources */
 
   nrf24l01_writeregbyte(dev, NRF24L01_STATUS, NRF24L01_TX_DS | NRF24L01_MAX_RT);
+
+  /* Clear fifo */
+  nrf24l01_flush_tx(dev);
 
   /* Restore state */
 
@@ -1152,6 +1200,16 @@ static int nrf24l01_poll(FAR struct file *filep, FAR struct pollfd *fds,
         }
 
       dev->pfd = fds;
+
+      /* is there is already data in the fifo? then trigger POLLIN now - don't wait for RX */
+      sem_wait(&dev->sem_fifo);
+      if ( dev->fifo_len > 0 )
+      {
+          dev->pfd->revents |= POLLIN;  /* Data available for input */
+          sem_post(dev->pfd->sem);
+      }
+      sem_post(&dev->sem_fifo);
+
     }
   else  /* Tear it down */
     {
