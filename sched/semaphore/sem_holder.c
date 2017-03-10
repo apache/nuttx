@@ -158,7 +158,7 @@ static FAR struct semholder_s *sem_findholder(sem_t *sem,
 
   for (i = 0; i < 2; i++)
     {
-      pholder = &sem->pholder[i];
+      pholder = &sem->holder[i];
       if (pholder->htcb == htcb)
         {
           /* Got it! */
