@@ -20,24 +20,42 @@ Board Support
 
 The following peripherals are available in this configuration.
 
- - LEDs:       show the sytem status
+ - LEDs:       Show the sytem status
 
  - Buttons:    TAMPER-button, WKUP-button, J1-Joystick (consists of RIGHT-,
-               UP-, LEFT-, DOWN-, and CENTER-button). Built in app
-               'buttons' works.
+               UP-, LEFT-, DOWN-, and CENTER-button).
 
  - ADC:        ADC1 samples the red trim potentiometer AN_TR
                Built in app 'adc' works.
 
  - USB-FS-OTG: There is a USB-A-connector (host) connected to the full
-               speed STM32 inputs.
+               speed STM32 OTG inputs.
 
  - USB-HS-OTG: The other connector (device) is connected to the high speed
-               STM32 inputs.
+               STM32 OTG inputs.
 
- - CAN:        Built in app 'can' works, but apart from that not really tested.
+ - CAN:        Built in app 'can' works, but apart from that not really
+               tested.
 
  - Ethernet:   Ping to other station on the network works.
+
+ - microSD:    Not fully functional.  See below.
+
+ - LCD:        Nokia 6610. This is similar the Nokia 6100 LCD used on other
+               Olimex boards.  There is a driver for that LCD at
+               drivers/lcd/nokia6100.c, however, it is not properly
+               integrated.  It uses a 9-bit SPI interface which is difficult
+               to get working properly.
+
+- External     Support is included for the onboard SRAM.  It uses SRAM
+  SRAM:        settings from another board that might need to be tweaked.
+               Difficult to test because the SRAM conflicts with both
+               RS232 ports.
+
+- Other:       Buzzer, Camera, Temperature sensor, audio have not been
+               tested.
+
+ If so, then it requires a 9-bit
 
 microSD Card Interface
 ======================
@@ -204,6 +222,13 @@ OTGFS Host
     CONFIG_EXAMPLES_HIDKBD_DEFPRIO=50
     CONFIG_EXAMPLES_HIDKBD_DEVNAME="/dev/kbda"
     CONFIG_EXAMPLES_HIDKBD_STACKSIZE=1024
+
+  STATUS: The MSC configurations seems fully functional.  The HIDKBD seems rather
+  flaky.  Sometimes the LEDs become very bright (indicating that it is being
+  swamped with interrupts).  Data input is not clean with apps/examples/hidkbd:
+  There are missing characters and sometimes duplicated characters.  This implies
+  some logic issues, probably in drivers/usbhost/usbhost_hidkbd, with polling and
+  data filtering.
 
 Configurations
 ==============
@@ -404,7 +429,7 @@ STATUS
   feature configurations.
 
   CCM memory is not included in the heap (CONFIG_STM32_CCMEXCLUDE=y) because
-  it does no suport DMA, leaving only 128KiB for program usage.
+  it does not suport DMA, leaving only 128KiB for program usage.
 
 2107-01-23:  Added the the knsh configuration and support for the PROTECTED
   build mode.
