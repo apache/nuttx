@@ -146,6 +146,10 @@
 #define STM32_APB2_TIM10_CLKIN  (2*STM32_PCLK2_FREQUENCY)
 #define STM32_APB2_TIM11_CLKIN  (2*STM32_PCLK2_FREQUENCY)
 
+/* USB OTG HS definitions ***********************************************************/
+/* Do not enable external PHY clock or OTG_HS module will not work */
+#define BOARD_DISABLE_USBOTG_HSULPI 1
+
 /* Alternate function pin selections ************************************************/
 /* UART1 */
 
