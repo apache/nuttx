@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/photon/src/photon.h
+ * configs/photon/src/stm32_leds.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Simon Piriou <spiriou31@gmail.com>
@@ -33,78 +33,50 @@
  *
  ****************************************************************************/
 
-#ifndef __CONFIGS_PHOTON_SRC_PHOTON_H
-#define __CONFIGS_PHOTON_SRC_PHOTON_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
-#include <arch/stm32/chip.h>
+#include <debug.h>
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#include <arch/board/board.h>
+#include "photon.h"
 
-/* LEDs */
-
-#define GPIO_LED1       (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
-                         GPIO_OUTPUT_CLEAR|GPIO_PORTA|GPIO_PIN13)
-
-/* BUTTONS -- EXTI interrupts are available on Photon board button */
-
-#define MIN_IRQBUTTON   BOARD_BUTTON1
-#define MAX_IRQBUTTON   BOARD_BUTTON1
-#define NUM_IRQBUTTONS  1
-
-#define GPIO_BUTTON1    (GPIO_INPUT|GPIO_PULLUP|GPIO_EXTI|GPIO_PORTC|GPIO_PIN7)
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/****************************************************************************
- * Public data
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
+#include "stm32_gpio.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: photon_watchdog_initialize()
- *
- * Description:
- *   Perform architecture-specific initialization of the Watchdog hardware.
- *
- * Input parameters:
- *   None
- *
- * Returned Value:
- *   Zero on success; a negated errno value on failure.
- *
+ * Name: board_userled_initialize
  ****************************************************************************/
 
-#ifdef CONFIG_PHOTON_WDG
-int photon_watchdog_initialize(void);
-#endif
+void board_userled_initialize(void)
+{
+  /* Configure Photon LED gpio as output */
+
+  stm32_configgpio(GPIO_LED1);
+}
 
 /****************************************************************************
- * Name: stm32_usbinitialize
- *
- * Description:
- *   Called from stm32_usbinitialize very early in initialization to setup
- *   USB-related GPIO pins for the Photon board.
- *
+ * Name: board_userled
  ****************************************************************************/
 
-#ifdef CONFIG_STM32_OTGHS
-void weak_function stm32_usbinitialize(void);
-#endif
+void board_userled(int led, bool ledon)
+{
+  if (led == BOARD_LED1)
+    {
+      stm32_gpiowrite(GPIO_LED1, ledon);
+    }
+}
 
-#endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_PHOTON_SRC_PHOTON_H */
+/****************************************************************************
+ * Name: board_userled_all
+ ****************************************************************************/
+
+void board_userled_all(uint8_t ledset)
+{
+  stm32_gpiowrite(GPIO_LED1, !!(ledset & BOARD_LED1_BIT));
+}

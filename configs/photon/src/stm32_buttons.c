@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/photon/src/photon.h
+ * configs/photon/src/stm32_buttons.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Simon Piriou <spiriou31@gmail.com>
@@ -33,78 +33,68 @@
  *
  ****************************************************************************/
 
-#ifndef __CONFIGS_PHOTON_SRC_PHOTON_H
-#define __CONFIGS_PHOTON_SRC_PHOTON_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
-#include <arch/stm32/chip.h>
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#include <debug.h>
+#include <errno.h>
 
-/* LEDs */
+#include <arch/board/board.h>
+#include "photon.h"
 
-#define GPIO_LED1       (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
-                         GPIO_OUTPUT_CLEAR|GPIO_PORTA|GPIO_PIN13)
-
-/* BUTTONS -- EXTI interrupts are available on Photon board button */
-
-#define MIN_IRQBUTTON   BOARD_BUTTON1
-#define MAX_IRQBUTTON   BOARD_BUTTON1
-#define NUM_IRQBUTTONS  1
-
-#define GPIO_BUTTON1    (GPIO_INPUT|GPIO_PULLUP|GPIO_EXTI|GPIO_PORTC|GPIO_PIN7)
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/****************************************************************************
- * Public data
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
+#include "stm32_gpio.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: photon_watchdog_initialize()
- *
- * Description:
- *   Perform architecture-specific initialization of the Watchdog hardware.
- *
- * Input parameters:
- *   None
- *
- * Returned Value:
- *   Zero on success; a negated errno value on failure.
- *
+ * Name: board_button_initialize
  ****************************************************************************/
 
-#ifdef CONFIG_PHOTON_WDG
-int photon_watchdog_initialize(void);
-#endif
+void board_button_initialize(void)
+{
+  /* Configure Photon button gpio as input */
+
+  stm32_configgpio(GPIO_BUTTON1);
+}
 
 /****************************************************************************
- * Name: stm32_usbinitialize
- *
- * Description:
- *   Called from stm32_usbinitialize very early in initialization to setup
- *   USB-related GPIO pins for the Photon board.
- *
+ * Name: board_buttons
  ****************************************************************************/
 
-#ifdef CONFIG_STM32_OTGHS
-void weak_function stm32_usbinitialize(void);
-#endif
+uint8_t board_buttons(void)
+{
+  /* Check the state of the only button */
 
-#endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_PHOTON_SRC_PHOTON_H */
+  if (stm32_gpioread(GPIO_BUTTON1))
+    {
+      return BOARD_BUTTON1_BIT;
+    }
+
+  return 0;
+}
+
+/****************************************************************************
+ * Name: board_button_irq
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_IRQBUTTONS
+int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
+{
+  if (id != BOARD_BUTTON1)
+    {
+      /* Invalid button id */
+
+      return -EINVAL;
+    }
+
+  /* Configure interrupt on falling edge only */
+
+  return stm32_gpiosetevent(GPIO_BUTTON1, false, true, false,
+                            irqhandler, arg);
+}
+#endif /* CONFIG_ARCH_IRQBUTTONS */

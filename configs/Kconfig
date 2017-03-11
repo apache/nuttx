@@ -959,6 +959,9 @@ config ARCH_BOARD_SPARK
 config ARCH_BOARD_PHOTON
 	bool "Photon wifi board"
 	depends on ARCH_CHIP_STM32F205RG
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		A configuration for the Photon from Particle Devices
 		(https://www.particle.io). This board features the STM32F205RGY6

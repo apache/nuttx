@@ -38,15 +38,15 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
-#include "photon.h"
-#include <debug.h>
-#include <errno.h>
+#include <syslog.h>
 
+#include "photon.h"
 #include "stm32_wdg.h"
+#include <nuttx/input/buttons.h>
+#include <nuttx/leds/userled.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -89,6 +89,36 @@ int board_app_initialize(uintptr_t arg)
 {
   int ret = OK;
 
+#ifdef CONFIG_USERLED
+#ifdef CONFIG_USERLED_LOWER
+  /* Register the LED driver */
+
+  ret = userled_lower_initialize("/dev/userleds");
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+      return ret;
+    }
+#else
+  board_userled_initialize();
+#endif /* CONFIG_USERLED_LOWER */
+#endif /* CONFIG_USERLED */
+
+#ifdef CONFIG_BUTTONS
+#ifdef CONFIG_BUTTONS_LOWER
+  /* Register the BUTTON driver */
+
+  ret = btn_lower_initialize("/dev/buttons");
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
+      return ret;
+    }
+#else
+  board_button_initialize();
+#endif /* CONFIG_BUTTONS_LOWER */
+#endif /* CONFIG_BUTTONS */
+
 #ifdef CONFIG_STM32_IWDG
   stm32_iwdginitialize("/dev/watchdog0", STM32_LSI_FREQUENCY);
 #endif
@@ -100,9 +130,10 @@ int board_app_initialize(uintptr_t arg)
   ret = photon_watchdog_initialize();
   if (ret != OK)
     {
-      serr("Failed to start watchdog thread: %d\n", errno);
+      syslog(LOG_ERR, "Failed to start watchdog thread: %d\n", ret);
       return ret;
     }
 #endif
+
   return ret;
 }

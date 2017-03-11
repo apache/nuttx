@@ -41,8 +41,16 @@ ifeq ($(CONFIG_PHOTON_DFU_BOOTLOADER),y)
 CSRCS += dfu_signature.c
 endif
 
+ifeq ($(CONFIG_BUTTONS),y)
+CSRCS += stm32_buttons.c
+endif
+
+ifeq ($(CONFIG_USERLED),y)
+CSRCS += stm32_leds.c
+endif
+
 ifeq ($(CONFIG_PHOTON_WDG),y)
-CSRCS += photon_wdt.c
+CSRCS += stm32_wdt.c
 endif
 
 ifeq ($(CONFIG_STM32_OTGHS),y)

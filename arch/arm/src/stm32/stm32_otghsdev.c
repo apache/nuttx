@@ -5325,14 +5325,14 @@ static void stm32_hwinitialize(FAR struct stm32_usbdev_s *priv)
    * some bug / errata in the chip.
    */
 
-  regval = stm32_getreg(STM32_RCC_AHB1LPENR);
+  regval  = stm32_getreg(STM32_RCC_AHB1LPENR);
   regval &= ~RCC_AHB1ENR_OTGHSULPIEN;
   stm32_putreg(regval, STM32_RCC_AHB1LPENR);
 
   /* Enable the interrupts in the INTMSK */
 
-  regval = (OTGHS_GINT_RXFLVL | OTGHS_GINT_USBSUSP | OTGHS_GINT_ENUMDNE |
-            OTGHS_GINT_IEP | OTGHS_GINT_OEP | OTGHS_GINT_USBRST);
+  regval  = (OTGHS_GINT_RXFLVL | OTGHS_GINT_USBSUSP | OTGHS_GINT_ENUMDNE |
+             OTGHS_GINT_IEP | OTGHS_GINT_OEP | OTGHS_GINT_USBRST);
 
 #ifdef CONFIG_USBDEV_ISOCHRONOUS
   regval |= (OTGHS_GINT_IISOIXFR | OTGHS_GINT_IISOOXFR);

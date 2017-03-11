@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/photon/src/photon_wdt.c
+ * configs/photon/src/stm32_wdt.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Simon Piriou <spiriou31@gmail.com>
