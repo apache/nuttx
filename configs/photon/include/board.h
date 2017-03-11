@@ -148,6 +148,7 @@
 
 /* USB OTG HS definitions ***********************************************************/
 /* Do not enable external PHY clock or OTG_HS module will not work */
+
 #define BOARD_DISABLE_USBOTG_HSULPI 1
 
 /* LED definitions ******************************************************************/

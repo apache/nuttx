@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/photon/src/photon_leds.c
+ * configs/photon/src/stm32_leds.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Simon Piriou <spiriou31@gmail.com>
@@ -44,10 +44,6 @@
 #include "photon.h"
 
 #include "stm32_gpio.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions

@@ -42,15 +42,15 @@ CSRCS += dfu_signature.c
 endif
 
 ifeq ($(CONFIG_BUTTONS),y)
-CSRCS += photon_buttons.c
+CSRCS += stm32_buttons.c
 endif
 
 ifeq ($(CONFIG_USERLED),y)
-CSRCS += photon_leds.c
+CSRCS += stm32_leds.c
 endif
 
 ifeq ($(CONFIG_PHOTON_WDG),y)
-CSRCS += photon_wdt.c
+CSRCS += stm32_wdt.c
 endif
 
 ifeq ($(CONFIG_STM32_OTGHS),y)

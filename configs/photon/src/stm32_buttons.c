@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/photon/src/photon_buttons.c
+ * configs/photon/src/stm32_buttons.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Simon Piriou <spiriou31@gmail.com>
@@ -38,16 +38,14 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <debug.h>
+#include <errno.h>
 
 #include <arch/board/board.h>
 #include "photon.h"
 
 #include "stm32_gpio.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -80,22 +78,23 @@ uint8_t board_buttons(void)
   return 0;
 }
 
-#ifdef CONFIG_ARCH_IRQBUTTONS
-
 /****************************************************************************
  * Name: board_button_irq
  ****************************************************************************/
 
+#ifdef CONFIG_ARCH_IRQBUTTONS
 int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
-  if (id != BOARD_BUTTON1) {
-    /* Invalid button id */
-    return ERROR;
-  }
+  if (id != BOARD_BUTTON1)
+    {
+      /* Invalid button id */
+
+      return -EINVAL;
+    }
 
   /* Configure interrupt on falling edge only */
 
-  return stm32_gpiosetevent(GPIO_BUTTON1, false, true, false, irqhandler, arg);
+  return stm32_gpiosetevent(GPIO_BUTTON1, false, true, false,
+                            irqhandler, arg);
 }
-
 #endif /* CONFIG_ARCH_IRQBUTTONS */
