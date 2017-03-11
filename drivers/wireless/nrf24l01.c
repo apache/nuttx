@@ -42,7 +42,6 @@
  * Todo:
  *   - Add support for payloads in ACK packets  (?)
  *   - Add compatibility with nRF24L01 (not +)  hardware  (?)
- *
  */
 
 /****************************************************************************
@@ -116,11 +115,15 @@
 #define FIFO_PIPENO_MASK  0xE0   /* 3 ms bits used to store pipe # */
 #define FIFO_PIPENO_SHIFT 4
 
-#define FIFO_PKTLEN(dev) (((dev->rx_fifo[dev->nxt_read] & FIFO_PKTLEN_MASK) >> FIFO_PKTLEN_SHIFT) + 1)
-#define FIFO_PIPENO(dev) (((dev->rx_fifo[dev->nxt_read] & FIFO_PIPENO_MASK) >> FIFO_PIPENO_SHIFT))
-#define FIFO_HEADER(pktlen,pipeno) ((pktlen - 1) | (pipeno << FIFO_PIPENO_SHIFT))
+#define FIFO_PKTLEN(dev) \
+  (((dev->rx_fifo[dev->nxt_read] & FIFO_PKTLEN_MASK) >> FIFO_PKTLEN_SHIFT) + 1)
+#define FIFO_PIPENO(dev) \
+  (((dev->rx_fifo[dev->nxt_read] & FIFO_PIPENO_MASK) >> FIFO_PIPENO_SHIFT))
+#define FIFO_HEADER(pktlen,pipeno) \
+  ((pktlen - 1) | (pipeno << FIFO_PIPENO_SHIFT))
 
-#define DEV_NAME   "/dev/nrf24l01"
+#define DEV_NAME          "/dev/nrf24l01"
+#define FL_AA_ENABLED     (1 << 0)
 
 /****************************************************************************
  * Private Data Types
@@ -131,8 +134,6 @@ typedef enum
   MODE_READ,
   MODE_WRITE
 } nrf24l01_access_mode_t;
-
-#define FL_AA_ENABLED  (1 << 0)
 
 struct nrf24l01_dev_s
 {
@@ -800,6 +801,7 @@ static void nrf24l01_tostate(struct nrf24l01_dev_s *dev,
     {
     case ST_UNKNOWN:
       /* Power down the module here... */
+
     case ST_POWER_DOWN:
       nrf24l01_chipenable(dev, false);
       nrf24l01_setregbit(dev, NRF24L01_CONFIG, NRF24L01_PWR_UP, false);
@@ -1928,7 +1930,8 @@ uint32_t nrf24l01_getradiofreq(FAR struct nrf24l01_dev_s *dev)
 
 int nrf24l01_setaddrwidth(FAR struct nrf24l01_dev_s *dev, uint32_t width)
 {
-  CHECK_ARGS(dev && width <= NRF24L01_MAX_ADDR_LEN && width >= NRF24L01_MIN_ADDR_LEN);
+  CHECK_ARGS(dev && width <= NRF24L01_MAX_ADDR_LEN &&
+             width >= NRF24L01_MIN_ADDR_LEN);
 
   nrf24l01_lock(dev->spi);
   nrf24l01_writeregbyte(dev, NRF24L01_SETUP_AW, width-2);
