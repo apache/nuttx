@@ -40,8 +40,13 @@
 #include <nuttx/config.h>
 
 #include <nuttx/board.h>
+#include <arch/board/board.h>
 
 #include "photon.h"
+#include <debug.h>
+#include <errno.h>
+
+#include "stm32_wdg.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -82,5 +87,22 @@
 
 int board_app_initialize(uintptr_t arg)
 {
-  return OK;
+  int ret = OK;
+
+#ifdef CONFIG_STM32_IWDG
+  stm32_iwdginitialize("/dev/watchdog0", STM32_LSI_FREQUENCY);
+#endif
+
+#ifdef CONFIG_PHOTON_WDG
+
+  /* Start WDG kicker thread */
+
+  ret = photon_watchdog_initialize();
+  if (ret != OK)
+    {
+      serr("Failed to start watchdog thread: %d\n", errno);
+      return ret;
+    }
+#endif
+  return ret;
 }

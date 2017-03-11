@@ -41,6 +41,10 @@ ifeq ($(CONFIG_PHOTON_DFU_BOOTLOADER),y)
 CSRCS += dfu_signature.c
 endif
 
+ifeq ($(CONFIG_PHOTON_WDG),y)
+CSRCS += photon_wdt.c
+endif
+
 ifeq ($(CONFIG_NSH_LIBRARY),y)
 CSRCS += stm32_appinit.c
 endif
