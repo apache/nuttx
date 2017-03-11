@@ -322,7 +322,6 @@ static int sem_boostholderprio(FAR struct semholder_s *pholder,
     }
 
 #if CONFIG_SEM_NNESTPRIO > 0
-
   /* If the priority of the thread that is waiting for a count is greater
    * than the base priority of the thread holding a count, then we may need
    * to adjust the holder's priority now or later to that priority.
