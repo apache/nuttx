@@ -62,5 +62,23 @@
  * Public Functions
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: photon_watchdog_initialize()
+ *
+ * Description:
+ *   Perform architecture-specific initialization of the Watchdog hardware.
+ *
+ * Input parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PHOTON_WDG
+int photon_watchdog_initialize(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_PHOTON_SRC_PHOTON_H */
