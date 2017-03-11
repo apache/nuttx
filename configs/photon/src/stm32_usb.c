@@ -1,8 +1,7 @@
 /************************************************************************************
- * configs/photon/src/stm32_boot.c
+ * configs/photon/src/stm32_usb.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
- *   Author: Simon Piriou <spiriou31@gmail.com>
+ *   Copyright (C) 2012-2013, 2015, 2017 Gregory Nutt. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -38,39 +37,55 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <nuttx/board.h>
-#include <arch/board/board.h>
-
-#include "up_arch.h"
 #include "photon.h"
+#include <debug.h>
+
+#include <stdbool.h>
+#include <nuttx/usb/usbdev.h>
+
+/************************************************************************************
+ * Pre-processor Definitions
+ ************************************************************************************/
+
+/************************************************************************************
+ * Private Data
+ ************************************************************************************/
+
+/************************************************************************************
+ * Private Functions
+ ************************************************************************************/
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32_boardinitialize
+ * Name: stm32_usbinitialize
  *
  * Description:
- *   All STM32 architectures must provide the following entry point.  This entry point
- *   is called early in the initialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
+ *   Called from stm32_usbinitialize very early in inialization to setup USB-related
+ *   GPIO pins for the Photon board.
  *
  ************************************************************************************/
 
-void stm32_boardinitialize(void)
+void stm32_usbinitialize(void)
 {
-#ifdef CONFIG_STM32_OTGHS
-  /* Initialize USB if the 1) OTG HS controller is in the configuration and 2)
-   * disabled, and 3) the weak function stm32_usbinitialize() has been brought
-   * into the build. Presumably either CONFIG_USBDEV or CONFIG_USBHOST is also
-   * selected.
-   */
-
-  if (stm32_usbinitialize)
-    {
-      stm32_usbinitialize();
-    }
-#endif
 }
+
+/************************************************************************************
+ * Name:  stm32_usbsuspend
+ *
+ * Description:
+ *   Board logic must provide the stm32_usbsuspend logic if the USBDEV driver is
+ *   used.  This function is called whenever the USB enters or leaves suspend mode.
+ *   This is an opportunity for the board logic to shutdown clocks, power, etc.
+ *   while the USB is suspended.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_USBDEV
+void stm32_usbsuspend(FAR struct usbdev_s *dev, bool resume)
+{
+  uinfo("resume: %d\n", resume);
+}
+#endif

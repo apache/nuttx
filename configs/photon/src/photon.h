@@ -80,5 +80,18 @@
 int photon_watchdog_initialize(void);
 #endif
 
+/****************************************************************************
+ * Name: stm32_usbinitialize
+ *
+ * Description:
+ *   Called from stm32_usbinitialize very early in initialization to setup
+ *   USB-related GPIO pins for the Photon board.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_STM32_OTGHS
+void weak_function stm32_usbinitialize(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_PHOTON_SRC_PHOTON_H */
