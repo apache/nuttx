@@ -48,6 +48,19 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* LEDs */
+
+#define GPIO_LED1       (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                         GPIO_OUTPUT_CLEAR|GPIO_PORTA|GPIO_PIN13)
+
+/* BUTTONS -- EXTI interrupts are available on Photon board button */
+
+#define MIN_IRQBUTTON   BOARD_BUTTON1
+#define MAX_IRQBUTTON   BOARD_BUTTON1
+#define NUM_IRQBUTTONS  1
+
+#define GPIO_BUTTON1    (GPIO_INPUT|GPIO_PULLUP|GPIO_EXTI|GPIO_PORTC|GPIO_PIN7)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

@@ -146,6 +146,22 @@
 #define STM32_APB2_TIM10_CLKIN  (2*STM32_PCLK2_FREQUENCY)
 #define STM32_APB2_TIM11_CLKIN  (2*STM32_PCLK2_FREQUENCY)
 
+/* USB OTG HS definitions ***********************************************************/
+/* Do not enable external PHY clock or OTG_HS module will not work */
+#define BOARD_DISABLE_USBOTG_HSULPI 1
+
+/* LED definitions ******************************************************************/
+
+#define BOARD_LED1        0
+#define BOARD_NLEDS       1
+#define BOARD_LED1_BIT    (1 << BOARD_LED1)
+
+/* Button definitions ***************************************************************/
+
+#define BOARD_BUTTON1     0
+#define NUM_BUTTONS       1
+#define BOARD_BUTTON1_BIT (1 << BOARD_BUTTON1)
+
 /* Alternate function pin selections ************************************************/
 /* UART1 */
 

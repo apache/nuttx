@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/photon/src/stm32_appinit.c
+ * configs/photon/src/photon_leds.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Simon Piriou <spiriou31@gmail.com>
@@ -38,101 +38,49 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/board.h>
+#include <debug.h>
+
 #include <arch/board/board.h>
-
-#include <syslog.h>
-
 #include "photon.h"
-#include "stm32_wdg.h"
-#include <nuttx/input/buttons.h>
-#include <nuttx/leds/userled.h>
+
+#include "stm32_gpio.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#ifndef OK
-#  define OK 0
-#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_app_initialize
- *
- * Description:
- *   Perform application specific initialization.  This function is never
- *   called directly from application code, but only indirectly via the
- *   (non-standard) boardctl() interface using the command BOARDIOC_INIT.
- *
- * Input Parameters:
- *   arg - The boardctl() argument is passed to the board_app_initialize()
- *         implementation without modification.  The argument has no
- *         meaning to NuttX; the meaning of the argument is a contract
- *         between the board-specific initalization logic and the the
- *         matching application logic.  The value cold be such things as a
- *         mode enumeration value, a set of DIP switch switch settings, a
- *         pointer to configuration data read from a file or serial FLASH,
- *         or whatever you would like to do with it.  Every implementation
- *         should accept zero/NULL as a default configuration.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure to indicate the nature of the failure.
- *
+ * Name: board_userled_initialize
  ****************************************************************************/
 
-int board_app_initialize(uintptr_t arg)
+void board_userled_initialize(void)
 {
-  int ret = OK;
+  /* Configure Photon LED gpio as output */
 
-#ifdef CONFIG_USERLED
-#ifdef CONFIG_USERLED_LOWER
-  /* Register the LED driver */
+  stm32_configgpio(GPIO_LED1);
+}
 
-  ret = userled_lower_initialize("/dev/userleds");
-  if (ret != OK)
+/****************************************************************************
+ * Name: board_userled
+ ****************************************************************************/
+
+void board_userled(int led, bool ledon)
+{
+  if (led == BOARD_LED1)
     {
-      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
-      return ret;
+      stm32_gpiowrite(GPIO_LED1, ledon);
     }
-#else
-  board_userled_initialize();
-#endif /* CONFIG_USERLED_LOWER */
-#endif /* CONFIG_USERLED */
+}
 
-#ifdef CONFIG_BUTTONS
-#ifdef CONFIG_BUTTONS_LOWER
-  /* Register the BUTTON driver */
+/****************************************************************************
+ * Name: board_userled_all
+ ****************************************************************************/
 
-  ret = btn_lower_initialize("/dev/buttons");
-  if (ret != OK)
-    {
-      syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
-      return ret;
-    }
-#else
-  board_button_initialize();
-#endif /* CONFIG_BUTTONS_LOWER */
-#endif /* CONFIG_BUTTONS */
-
-#ifdef CONFIG_STM32_IWDG
-  stm32_iwdginitialize("/dev/watchdog0", STM32_LSI_FREQUENCY);
-#endif
-
-#ifdef CONFIG_PHOTON_WDG
-
-  /* Start WDG kicker thread */
-
-  ret = photon_watchdog_initialize();
-  if (ret != OK)
-    {
-      syslog(LOG_ERR, "Failed to start watchdog thread: %d\n", ret);
-      return ret;
-    }
-#endif
-  return ret;
+void board_userled_all(uint8_t ledset)
+{
+  stm32_gpiowrite(GPIO_LED1, !!(ledset & BOARD_LED1_BIT));
 }
