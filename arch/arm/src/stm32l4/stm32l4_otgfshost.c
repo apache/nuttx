@@ -1956,6 +1956,13 @@ static ssize_t stm32l4_in_transfer(FAR struct stm32l4_usbhost_s *priv,
                       delay = 1000;
                     }
 
+                  /* Wait for the next polling interval.
+                   *
+                   * REVISIT:  This delay could require more resolution than
+                   * is provided by the system timer.  In that case, the
+                   * delay could be significantly longer than required.
+                   */
+
                   usleep(delay);
                 }
             }
