@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/photon/src/photon.h
+ * configs/photon/src/stm32_wlan.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Simon Piriou <spiriou31@gmail.com>
@@ -33,110 +33,97 @@
  *
  ****************************************************************************/
 
-#ifndef __CONFIGS_PHOTON_SRC_PHOTON_H
-#define __CONFIGS_PHOTON_SRC_PHOTON_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
-#include <arch/stm32/chip.h>
+#include <debug.h>
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#include <arch/board/board.h>
+#include <nuttx/wireless/ieee80211/bcmf_sdio.h>
+#include <nuttx/wireless/ieee80211/bcmf_board.h>
+#include "photon.h"
 
-/* LEDs */
-
-#define GPIO_LED1       (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
-                         GPIO_OUTPUT_CLEAR|GPIO_PORTA|GPIO_PIN13)
-
-/* BUTTONS -- EXTI interrupts are available on Photon board button */
-
-#define MIN_IRQBUTTON   BOARD_BUTTON1
-#define MAX_IRQBUTTON   BOARD_BUTTON1
-#define NUM_IRQBUTTONS  1
-
-#define GPIO_BUTTON1    (GPIO_INPUT|GPIO_PULLUP|GPIO_EXTI|GPIO_PORTC|GPIO_PIN7)
-
-/* WLAN chip */
-
-#define SDIO_WLAN0_SLOTNO 0 /* Photon board has only one sdio device */
-#define SDIO_WLAN0_MINOR  0 /* Register "wlan0" device */
-
-#define GPIO_WLAN0_RESET (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
-                          GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN1)
-
-#define GPIO_WLAN0_32K_CLK (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
-                            GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN1)
-
-#define GPIO_WLAN0_OOB_INT (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|\
-                           GPIO_PORTB|GPIO_PIN0)
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/****************************************************************************
- * Public data
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
+#include "stm32_gpio.h"
+#include "stm32_sdio.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: photon_watchdog_initialize()
- *
- * Description:
- *   Perform architecture-specific initialization of the Watchdog hardware.
- *
- * Input parameters:
- *   None
- *
- * Returned Value:
- *   Zero on success; a negated errno value on failure.
- *
+ * Name: bcmf_board_reset
  ****************************************************************************/
 
-#ifdef CONFIG_PHOTON_WDG
-int photon_watchdog_initialize(void);
-#endif
+void bcmf_board_reset(int minor, bool reset)
+{
+  if (minor != SDIO_WLAN0_MINOR)
+    {
+      return;
+    }
+
+  stm32_gpiowrite(GPIO_WLAN0_RESET, !reset);
+}
+
+/****************************************************************************
+ * Name: bcmf_board_power
+ ****************************************************************************/
+
+void bcmf_board_power(int minor, bool power)
+{
+  /* Power signal is not used on Photon board */
+}
+
+/****************************************************************************
+ * Name: bcmf_board_initialize
+ ****************************************************************************/
+
+void bcmf_board_initialize(int minor)
+{
+  if (minor != SDIO_WLAN0_MINOR)
+    {
+      return;
+    }
+
+  /* Configure reset pin */
+
+  stm32_configgpio(GPIO_WLAN0_RESET);
+
+  /* Put wlan chip in reset state */
+
+  bcmf_board_reset(minor, true);
+}
 
 /****************************************************************************
  * Name: photon_wlan_initialize
- *
- * Description:
- *   Initialize wlan hardware and driver for Photon board.
- *
- * Input parameters:
- *   None
- *
- * Returned Value:
- *   Zero on success; a negated errno value on failure.
- *
  ****************************************************************************/
 
-#ifdef CONFIG_PHOTON_WLAN
-int photon_wlan_initialize(void);
-#endif
+int photon_wlan_initialize()
+{
+  int ret;
+  struct sdio_dev_s *sdio_dev;
 
-/****************************************************************************
- * Name: stm32_usbinitialize
- *
- * Description:
- *   Called from stm32_usbinitialize very early in initialization to setup
- *   USB-related GPIO pins for the Photon board.
- *
- ****************************************************************************/
+  /* Initialize sdio interface */
+  _info("Initializing SDIO slot %d\n", SDIO_WLAN0_SLOTNO);
 
-#ifdef CONFIG_STM32_OTGHS
-void weak_function stm32_usbinitialize(void);
-#endif
+  sdio_dev = sdio_initialize(SDIO_WLAN0_SLOTNO);
 
-#endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_PHOTON_SRC_PHOTON_H */
+  if (!sdio_dev)
+    {
+      _err("ERROR: Failed to initialize SDIO with slot %d\n",
+             SDIO_WLAN0_SLOTNO);
+      return ERROR;
+    }
+
+  /* Bind the SDIO interface to the bcmf driver */
+  ret = bcmf_sdio_initialize(SDIO_WLAN0_MINOR, sdio_dev);
+
+  if (ret != OK)
+    {
+      _err("ERROR: Failed to bind SDIO to bcmf driver\n");
+      /* FIXME deinitialize sdio device */
+      return ERROR;
+    }
+  return OK;
+}

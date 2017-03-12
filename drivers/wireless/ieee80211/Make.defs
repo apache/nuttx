@@ -1,5 +1,5 @@
 ############################################################################
-# configs/photon/src/Makefile
+# drivers/wireless/ieee80211/Make.defs
 #
 #   Copyright (C) 2017 Gregory Nutt. All rights reserved.
 #
@@ -32,37 +32,22 @@
 #
 ############################################################################
 
--include $(TOPDIR)/Make.defs
+# Include nothing if IEEE 802.11 is disabled
 
-ASRCS =
-CSRCS = stm32_boot.c
+ifeq ($(CONFIG_DRIVERS_IEEE80211),y)
 
-ifeq ($(CONFIG_PHOTON_DFU_BOOTLOADER),y)
-CSRCS += dfu_signature.c
+# Include common IEEE 802.11 files into the build
+
+# Include IEEE 802.11 drivers into the build
+
+ifeq ($(CONFIG_IEEE80211_BROADCOM_FULLMAC_SDIO),y)
+  CSRCS += bcmf_sdio.c
 endif
 
-ifeq ($(CONFIG_BUTTONS),y)
-CSRCS += stm32_buttons.c
-endif
+# Include IEEE 802.11 build support
 
-ifeq ($(CONFIG_USERLED),y)
-CSRCS += stm32_leds.c
-endif
+DEPPATH += --dep-path wireless$(DELIM)ieee80211
+VPATH += :wireless$(DELIM)ieee80211
+CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)wireless$(DELIM)ieee80211}
 
-ifeq ($(CONFIG_PHOTON_WDG),y)
-CSRCS += stm32_wdt.c
-endif
-
-ifeq ($(CONFIG_PHOTON_WLAN),y)
-CSRCS += stm32_wlan.c
-endif
-
-ifeq ($(CONFIG_STM32_OTGHS),y)
-CSRCS += stm32_usb.c
-endif
-
-ifeq ($(CONFIG_NSH_LIBRARY),y)
-CSRCS += stm32_appinit.c
-endif
-
-include $(TOPDIR)/configs/Board.mk
+endif # CONFIG_DRIVERS_IEEE80211
