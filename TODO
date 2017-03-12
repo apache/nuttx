@@ -507,7 +507,7 @@ o Kernel/Protected Build
                in the nuttx/ directory.  However, the user interfaces must be
                moved into a NuttX library or into apps/.  Currently
                applications calls to the NxTerm user interfaces are
-               undefined.
+               undefined in the Kernel/Protected builds.
   Status:      Open
   Priority:    Medium
 
