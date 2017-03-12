@@ -51,4 +51,8 @@ config PHOTON_WDG_THREAD_STACKSIZE
 endif # PHOTON_WDG_THREAD
 endif # PHOTON_WDG
 
+config PHOTON_WLAN
+	bool "Enable WLAN chip support"
+	depends on IEEE80211_BROADCOM_FULLMAC_SDIO
+
 endif
