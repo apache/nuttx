@@ -213,6 +213,7 @@ struct stm32l4_chan_s
   uint8_t           eptype;    /* See OTGFS_EPTYPE_* definitions */
   uint8_t           funcaddr;  /* Device function address */
   uint8_t           speed;     /* Device speed */
+  uint8_t           interval;  /* Interrupt/isochronous EP polling interval */
   uint8_t           pid;       /* Data PID */
   uint8_t           npackets;  /* Number of packets (for data toggle) */
   bool              inuse;     /* True: This channel is "in use" */
@@ -1212,6 +1213,7 @@ static int stm32l4_ctrlchan_alloc(FAR struct stm32l4_usbhost_s *priv,
   chan->eptype    = OTGFS_EPTYPE_CTRL;
   chan->funcaddr  = funcaddr;
   chan->speed     = speed;
+  chan->interval  = 0;
   chan->maxpacket = STM32L4_EP0_DEF_PACKET_SIZE;
   chan->indata1   = false;
   chan->outdata1  = false;
@@ -1236,6 +1238,7 @@ static int stm32l4_ctrlchan_alloc(FAR struct stm32l4_usbhost_s *priv,
   chan->eptype    = OTGFS_EPTYPE_CTRL;
   chan->funcaddr  = funcaddr;
   chan->speed     = speed;
+  chan->interval  = 0;
   chan->maxpacket = STM32L4_EP0_DEF_PACKET_SIZE;
   chan->indata1   = false;
   chan->outdata1  = false;
@@ -1365,6 +1368,7 @@ static int stm32l4_xfrep_alloc(FAR struct stm32l4_usbhost_s *priv,
   chan->eptype    = epdesc->xfrtype;
   chan->funcaddr  = hport->funcaddr;
   chan->speed     = hport->speed;
+  chan->interval  = epdesc->interval;
   chan->maxpacket = epdesc->mxpacketsize;
   chan->indata1   = false;
   chan->outdata1  = false;
@@ -1897,6 +1901,8 @@ static ssize_t stm32l4_in_transfer(FAR struct stm32l4_usbhost_s *priv,
                 }
               else
                 {
+                  useconds_t delay;
+
                   /* Get the elapsed time.  Has the timeout elapsed?
                    * if not then try again.
                    */
@@ -1911,13 +1917,46 @@ static ssize_t stm32l4_in_transfer(FAR struct stm32l4_usbhost_s *priv,
                       return (ssize_t)ret;
                     }
 
-                  /* Wait a bit before retrying after a NAK.
-                   *
-                   * REVISIT:  This is intended to give the CPU a break from
-                   * the tight polling loop.  But are there performance issues?
-                   */
+                  /* Wait a bit before retrying after a NAK. */
 
-                  usleep(1000);
+                  if (chan->eptype == OTGFS_HCCHAR_EPTYP_INTR)
+                    {
+                      /* For interrupt (and isochronous) endpoints, the
+                       * polling rate is determined by the bInterval field
+                       * of the endpoint descriptor (in units of frames
+                       * which we treat as milliseconds here).
+                       */
+
+                      if (chan->interval > 0)
+                        {
+                          /* Convert the delay to units of microseconds */
+
+                          delay = (useconds_t)chan->interval * 1000;
+                        }
+                      else
+                        {
+                          /* Out of range! For interrupt endpoints, the valid
+                           * range is 1-255 frames.  Assume one frame.
+                           */
+
+                          delay = 1000;
+                        }
+                    }
+                  else
+                    {
+                      /* For Isochronous endpoints, bInterval must be 1.  Bulk
+                       * endpoints do not have a polling interval.  Rather,
+                       * the should wait until data is received.
+                       *
+                       * REVISIT:  For bulk endpoints this 1 msec delay is only
+                       * intended to give the CPU a break from the bulk EP tight
+                       * polling loop.  But are there performance issues?
+                       */
+
+                      delay = 1000;
+                    }
+
+                  usleep(delay);
                 }
             }
           else

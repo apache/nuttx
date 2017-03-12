@@ -135,5 +135,17 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
+#ifdef CONFIG_PHOTON_WLAN
+
+  /* Initialize wlan driver and hardware */
+
+  ret = photon_wlan_initialize();
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "Failed to initialize wlan: %d\n", ret);
+      return ret;
+    }
+#endif
+
   return ret;
 }
