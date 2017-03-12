@@ -67,7 +67,10 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
-/* Data link layer type */
+
+/* Data link layer type.  This type is used with netdev_register in order to
+ * identify the type of the network driver.
+ */
 
 enum net_lltype_e
 {
@@ -75,7 +78,7 @@ enum net_lltype_e
   NET_LL_LOOPBACK,     /* Local loopback */
   NET_LL_SLIP,         /* Serial Line Internet Protocol (SLIP) */
   NET_LL_TUN,          /* TUN Virtual Network Device */
-  NET_LL_IEEE80211     /* IEEE 802.11 */
+  NET_LL_IEEE80211,    /* IEEE 802.11 */
   NET_LL_6LOWPAN       /* IEEE 802.15.4 6LoWPAN */
 };
 
