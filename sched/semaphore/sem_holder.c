@@ -154,6 +154,7 @@ static FAR struct semholder_s *sem_findholder(sem_t *sem,
     }
 #else
   int i;
+  pholder = NULL;
 
   /* We have two hard-allocated holder structuse in sem_t */
 
