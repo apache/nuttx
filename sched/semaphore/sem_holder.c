@@ -125,7 +125,7 @@ static inline FAR struct semholder_s *sem_allocholder(sem_t *sem)
       pholder          = NULL;
     }
 
-  DEBUGASSERT(pholder != NULL)
+  DEBUGASSERT(pholder != NULL);
   return pholder;
 }
 
