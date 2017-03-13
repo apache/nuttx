@@ -125,6 +125,7 @@ static inline FAR struct semholder_s *sem_allocholder(sem_t *sem)
       pholder          = NULL;
     }
 
+  DEBUGASSERT(pholder != NULL)
   return pholder;
 }
 
@@ -318,6 +319,7 @@ static int sem_boostholderprio(FAR struct semholder_s *pholder,
   if (!sched_verifytcb(htcb))
     {
       serr("ERROR: TCB 0x%08x is a stale handle, counts lost\n", htcb);
+      DEBUGASSERT(!sched_verifytcb(htcb));
       sem_freeholder(sem, pholder);
     }
 
@@ -355,6 +357,7 @@ static int sem_boostholderprio(FAR struct semholder_s *pholder,
               else
                 {
                   serr("ERROR: CONFIG_SEM_NNESTPRIO exceeded\n");
+                  DEBUGASSERT(htcb->npend_reprio < CONFIG_SEM_NNESTPRIO);
                 }
             }
 
@@ -468,6 +471,7 @@ static int sem_restoreholderprio(FAR struct semholder_s *pholder,
   if (!sched_verifytcb(htcb))
     {
       serr("ERROR: TCB 0x%08x is a stale handle, counts lost\n", htcb);
+      DEBUGASSERT(!sched_verifytcb(htcb));
       sem_freeholder(sem, pholder);
     }
 
@@ -853,11 +857,13 @@ void sem_destroyholder(FAR sem_t *sem)
   if (sem->hhead != NULL)
     {
       serr("ERROR: Semaphore destroyed with holders\n");
+      DEBUGASSERT(sem->hhead != NULL);
       (void)sem_foreachholder(sem, sem_recoverholders, NULL);
     }
 #else
   if (sem->holder[0].htcb != NULL || sem->holder[0].htcb != NULL)
     {
+      DEBUGASSERT(sem->holder[0].htcb != NULL || sem->holder[0].htcb != NULL);
       serr("ERROR: Semaphore destroyed with holder\n");
     }
 
