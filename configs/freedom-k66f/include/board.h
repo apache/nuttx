@@ -143,6 +143,15 @@
 #define BOARD_TPM_CLKSRC     SIM_SOPT2_TPMSRC_MCGCLK
 #define BOARD_TPM_FREQ       BOARD_SIM_CLKDIV3_FREQ
 
+/* SDHC pull-up resistors **********************************************************/
+
+/*
+ * Kinetis does not have pullups on their Freedom-K66F board
+ * So allow the the board config to enable them.
+ */
+
+#define BOARD_SDHC_ENABLE_PULLUPS 1
+
 /* SDHC clocking ********************************************************************/
 
 /* SDCLK configurations corresponding to various modes of operation.   Formula is:

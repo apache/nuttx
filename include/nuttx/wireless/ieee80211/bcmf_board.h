@@ -1,8 +1,8 @@
 /****************************************************************************
- * configs/olimex-lpc1766stk/src/lpc17_hidkbd.c
+ * include/nuttx/wireless/ieee80211/bcmf_board.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Author: Simon Piriou <spiriou31@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,53 +33,78 @@
  *
  ****************************************************************************/
 
+#ifndef __INCLUDE_NUTTX_WIRELESS_IEEE80211_BCMF_BOARD_H
+#define __INCLUDE_NUTTX_WIRELESS_IEEE80211_BCMF_BOARD_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#include <stdbool.h>
 
-#include <debug.h>
-
-#include <nuttx/usb/usbhost.h>
-
-#include "lpc17_usbhost.h"
-
-#if defined(CONFIG_LPC17_USBHOST) && defined(CONFIG_USBHOST) && \
-    defined(CONFIG_EXAMPLES_HIDKBD)
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: arch_usbhost_initialize
- *
- * Description:
- *   The apps/example/hidkbd test requires that platform-specific code
- *   provide a wrapper called arch_usbhost_initialize() that will perform
- *   the actual USB host initialization.
- *
- ****************************************************************************/
-
-struct usbhost_connection_s *arch_usbhost_initialize(void)
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
 {
-#ifdef CONFIG_USBHOST_HUB
-  int ret;
-
-  /* Initialize USB hub support */
-
-  ret = usbhost_hub_initialize();
-  if (ret < 0)
-    {
-      uerr("ERROR: usbhost_hub_initialize failed: %d\n", ret);
-    }
+#else
+#define EXTERN extern
 #endif
 
-  return lpc17_usbhost_initialize(0);
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/************************************************************************************
+ * Function: bcmf_board_initialize
+ *
+ * Description:
+ *   Board specific function called from Broadcom FullMAC driver
+ *   that must be implemented to configure WLAN chip GPIOs
+ *
+ * Parameters:
+ *   minor - zero based minor device number which is unique
+ *           for each wlan device.
+ ************************************************************************************/
+
+void bcmf_board_initialize(int minor);
+
+/************************************************************************************
+ * Function: bcmf_board_power
+ *
+ * Description:
+ *   Board specific function called from Broadcom FullMAC driver
+ *   that must be implemented to power WLAN chip
+ *
+ * Parameters:
+ *   minor - zero based minor device number which is unique
+ *           for each wlan device.
+ *   power - true to power WLAN chip else false
+ ************************************************************************************/
+
+void bcmf_board_power(int minor, bool power);
+
+/************************************************************************************
+ * Function: bcmf_board_reset
+ *
+ * Description:
+ *   Board specific function called from Broadcom FullMAC driver
+ *   that must be implemented to reset WLAN chip
+ *
+ * Parameters:
+ *   minor - zero based minor device number which is unique
+ *           for each wlan device.
+ *   reset - true to set WLAN chip in reset state else false
+ ************************************************************************************/
+
+void bcmf_board_reset(int minor, bool reset);
+
+#undef EXTERN
+#ifdef __cplusplus
 }
-#endif /* CONFIG_LPC17_USBHOST && CONFIG_USBHOST && CONFIG_EXAMPLES_HIDKBD */
+#endif
+
+#endif /* __INCLUDE_NUTTX_WIRELESS_IEEE80211_BCMF_BOARD_H */

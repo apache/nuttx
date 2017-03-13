@@ -1,8 +1,8 @@
 /****************************************************************************
- * configs/olimex-lpc-h3131/src/lpc31_hidkbd.c
+ * configs/photon/src/stm32_leds.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Author: Simon Piriou <spiriou31@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -38,35 +38,45 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <debug.h>
 
-#include <nuttx/usb/usbhost.h>
+#include <arch/board/board.h>
+#include "photon.h"
 
-#include "lpc31.h"
-#include "lpc_h3131.h"
-
-#if defined(CONFIG_LPC31_USBOTG) && defined(CONFIG_USBHOST) && \
-    defined(CONFIG_EXAMPLES_HIDKBD)
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#include "stm32_gpio.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: arch_usbhost_initialize
- *
- * Description:
- *   The apps/example/hidkbd test requires that platform-specific code
- *   provide a wrapper called arch_usbhost_initialize() that will perform
- *   the actual USB host initialization.
- *
+ * Name: board_userled_initialize
  ****************************************************************************/
 
-struct usbhost_connection_s *arch_usbhost_initialize(void)
+void board_userled_initialize(void)
 {
-  return lpc31_ehci_initialize(0);
+  /* Configure Photon LED gpio as output */
+
+  stm32_configgpio(GPIO_LED1);
 }
-#endif /* CONFIG_LPC31_USBOTG && CONFIG_USBHOST && CONFIG_EXAMPLES_HIDKBD */
+
+/****************************************************************************
+ * Name: board_userled
+ ****************************************************************************/
+
+void board_userled(int led, bool ledon)
+{
+  if (led == BOARD_LED1)
+    {
+      stm32_gpiowrite(GPIO_LED1, ledon);
+    }
+}
+
+/****************************************************************************
+ * Name: board_userled_all
+ ****************************************************************************/
+
+void board_userled_all(uint8_t ledset)
+{
+  stm32_gpiowrite(GPIO_LED1, !!(ledset & BOARD_LED1_BIT));
+}

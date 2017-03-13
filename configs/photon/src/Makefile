@@ -1,8 +1,7 @@
-#!/bin/bash
-# configs/mbed/hidkbd/setenv.sh
+############################################################################
+# configs/photon/src/Makefile
 #
-#   Copyright (C) 2011 Gregory Nutt. All rights reserved.
-#   Author: Gregory Nutt <gnutt@nuttx.org>
+#   Copyright (C) 2017 Gregory Nutt. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -31,17 +30,39 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
+############################################################################
 
-if [ "$(basename $0)" = "setenv.sh" ] ; then
-  echo "You must source this script, not run it!" 1>&2
-  exit 1
-fi
+-include $(TOPDIR)/Make.defs
 
-if [ -z "${PATH_ORIG}" ]; then export PATH_ORIG="${PATH}"; fi
+ASRCS =
+CSRCS = stm32_boot.c
 
-WD=`pwd`
-export LPCTOOL_DIR="${WD}/configs/mbed/tools"
-export BUILDROOT_BIN="${WD}/../buildroot/build_arm_nofpu/staging_dir/bin"
-export PATH="${BUILDROOT_BIN}:${LPCTOOL_DIR}:/sbin:/usr/sbin:${PATH_ORIG}"
+ifeq ($(CONFIG_PHOTON_DFU_BOOTLOADER),y)
+CSRCS += dfu_signature.c
+endif
 
-echo "PATH : ${PATH}"
+ifeq ($(CONFIG_BUTTONS),y)
+CSRCS += stm32_buttons.c
+endif
+
+ifeq ($(CONFIG_USERLED),y)
+CSRCS += stm32_leds.c
+endif
+
+ifeq ($(CONFIG_PHOTON_WDG),y)
+CSRCS += stm32_wdt.c
+endif
+
+ifeq ($(CONFIG_PHOTON_WLAN),y)
+CSRCS += stm32_wlan.c
+endif
+
+ifeq ($(CONFIG_STM32_OTGHS),y)
+CSRCS += stm32_usb.c
+endif
+
+ifeq ($(CONFIG_NSH_LIBRARY),y)
+CSRCS += stm32_appinit.c
+endif
+
+include $(TOPDIR)/configs/Board.mk

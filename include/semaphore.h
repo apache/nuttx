@@ -93,7 +93,7 @@ struct sem_s
 # if CONFIG_SEM_PREALLOCHOLDERS > 0
   FAR struct semholder_s *hhead; /* List of holders of semaphore counts */
 # else
-  struct semholder_s holder;     /* Single holder */
+  struct semholder_s holder[2];  /* Slot for old and new holder */
 # endif
 #endif
 };
@@ -104,12 +104,15 @@ typedef struct sem_s sem_t;
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
 # if CONFIG_SEM_PREALLOCHOLDERS > 0
-#  define SEM_INITIALIZER(c) {(c), 0, NULL}  /* semcount, flags, hhead */
+#  define SEM_INITIALIZER(c) \
+    {(c), 0, NULL}                 /* semcount, flags, hhead */
 # else
-#  define SEM_INITIALIZER(c) {(c), 0, SEMHOLDER_INITIALIZER} /* semcount, flags, holder */
+#  define SEM_INITIALIZER(c) \
+    {(c), 0, {SEMHOLDER_INITIALIZER, SEMHOLDER_INITIALIZER}} /* semcount, flags, holder[2] */
 # endif
 #else
-#  define SEM_INITIALIZER(c) {(c)} /* semcount */
+#  define SEM_INITIALIZER(c) \
+    {(c)}                         /* semcount */
 #endif
 
 /****************************************************************************

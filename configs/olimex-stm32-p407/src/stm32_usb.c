@@ -51,6 +51,7 @@
 #include <nuttx/usb/usbhost.h>
 #include <nuttx/usb/usbdev_trace.h>
 
+#include "up_arch.h"
 #include "stm32.h"
 #include "stm32_otgfs.h"
 #include "olimex-stm32-p407.h"
@@ -68,16 +69,12 @@
 #  undef HAVE_USB
 #endif
 
-#ifndef CONFIG_USBHOST_DEFPRIO
-#  define CONFIG_USBHOST_DEFPRIO 50
+#ifndef CONFIG_OLIMEXP407_USBHOST_PRIO
+#  define CONFIG_OLIMEXP407_USBHOST_PRIO 100
 #endif
 
-#ifndef CONFIG_USBHOST_STACKSIZE
-#  ifdef CONFIG_USBHOST_HUB
-#    define CONFIG_USBHOST_STACKSIZE 1536
-#  else
-#    define CONFIG_USBHOST_STACKSIZE 1024
-#  endif
+#ifndef CONFIG_OLIMEXP407_USBHOST_STACKSIZE
+#  define CONFIG_OLIMEXP407_USBHOST_STACKSIZE 1024
 #endif
 
 /************************************************************************************
@@ -134,21 +131,21 @@ static int usbhost_waiter(int argc, char *argv[])
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32_usbdev_setup
+ * Name: stm32_usb_configure
  *
  * Description:
- *   Called from stm32_usbdev_setup very early in inialization to setup USB-related
- *   GPIO pins for the STM32F4Discovery board.
+ *   Called from stm32_boardinitialize very early in inialization to setup USB-related
+ *   GPIO pins for the Olimex STM32 P407 board.
  *
  ************************************************************************************/
 
-void stm32_usbdev_setup(void)
+void stm32_usb_configure(void)
 {
+#ifdef CONFIG_STM32_OTGFS
   /* The OTG FS has an internal soft pull-up.  No GPIO configuration is required */
 
-  /* Configure the OTG FS VBUS sensing GPIO, and Power On GPIOs */
+  /* Configure the OTG FS VBUS sensing GPIO, Power On, and Overcurrent GPIOs */
 
-#ifdef CONFIG_STM32_OTGFS
   stm32_configgpio(GPIO_OTGFS_VBUS);
   stm32_configgpio(GPIO_OTGFS_PWRON);
   stm32_configgpio(GPIO_OTGFS_OVER);
@@ -169,9 +166,7 @@ void stm32_usbdev_setup(void)
 int stm32_usbhost_setup(void)
 {
   int pid;
-#if defined(CONFIG_USBHOST_HUB) || defined(CONFIG_USBHOST_MSC) || defined(CONFIG_USBHOST_CDCACM)
   int ret;
-#endif
 
   /* First, register all of the class drivers needed to support the drivers
    * that we care about:
@@ -190,7 +185,7 @@ int stm32_usbhost_setup(void)
 #endif
 
 #ifdef CONFIG_USBHOST_MSC
-  /* Register the USB host Mass Storage Class */
+  /* Register the USB mass storage class class */
 
   ret = usbhost_msc_initialize();
   if (ret != OK)
@@ -209,6 +204,28 @@ int stm32_usbhost_setup(void)
     }
 #endif
 
+#ifdef CONFIG_USBHOST_HIDKBD
+  /* Initialize the HID keyboard class */
+
+  ret = usbhost_kbdinit();
+  if (ret != OK)
+    {
+      uerr("ERROR: Failed to register the HID keyboard class\n");
+    }
+#endif
+
+#ifdef CONFIG_USBHOST_HIDMOUSE
+  /* Initialize the HID mouse class */
+
+  ret = usbhost_mouse_init();
+  if (ret != OK)
+    {
+      uerr("ERROR: Failed to register the HID mouse class\n");
+    }
+#endif
+
+  UNUSED(ret);
+
   /* Then get an instance of the USB host interface */
 
   uinfo("Initialize USB host\n");
@@ -219,37 +236,13 @@ int stm32_usbhost_setup(void)
 
       uinfo("Start usbhost_waiter\n");
 
-      pid = task_create("usbhost", CONFIG_USBHOST_DEFPRIO,
-                        CONFIG_USBHOST_STACKSIZE,
+      pid = task_create("usbhost", CONFIG_OLIMEXP407_USBHOST_PRIO,
+                        CONFIG_OLIMEXP407_USBHOST_STACKSIZE,
                         (main_t)usbhost_waiter, (FAR char * const *)NULL);
       return pid < 0 ? -ENOEXEC : OK;
     }
 
   return -ENODEV;
-}
-#endif
-
-/************************************************************************************
- * Name: stm32_setup_overcurrent
- *
- * Description:
- *   Setup to receive an interrupt-level callback if an overcurrent condition is
- *   detected.
- *
- * Input Parameter:
- *   handler - New overcurrent interrupt handler
- *   arg     - The argument provided for the interrupt handler
- *
- * Returned value:
- *   Zero (OK) is returned on success.  Otherwise, a negated errno value is returned
- *   to indicate the nature of the failure.
- *
- ************************************************************************************/
-
-#ifdef CONFIG_USBHOST
-int stm32_setup_overcurrent(xcpt_t handler, void *arg)
-{
-  return stm32_gpiosetevent(GPIO_OTGFS_OVER, true, true, true, handler, arg);
 }
 #endif
 
@@ -296,6 +289,30 @@ void stm32_usbhost_vbusdrive(int iface, bool enable)
 
       stm32_gpiowrite(GPIO_OTGFS_PWRON, true);
     }
+}
+#endif
+
+/************************************************************************************
+ * Name: stm32_setup_overcurrent
+ *
+ * Description:
+ *   Setup to receive an interrupt-level callback if an overcurrent condition is
+ *   detected.
+ *
+ * Input Parameter:
+ *   handler - New overcurrent interrupt handler
+ *   arg     - The argument provided for the interrupt handler
+ *
+ * Returned value:
+ *   Zero (OK) is returned on success.  Otherwise, a negated errno value is returned
+ *   to indicate the nature of the failure.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_USBHOST
+int stm32_setup_overcurrent(xcpt_t handler, void *arg)
+{
+  return stm32_gpiosetevent(GPIO_OTGFS_OVER, true, true, true, handler, arg);
 }
 #endif
 

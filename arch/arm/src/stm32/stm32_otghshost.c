@@ -217,6 +217,7 @@ struct stm32_chan_s
   uint8_t           eptype;    /* See OTGHS_EPTYPE_* definitions */
   uint8_t           funcaddr;  /* Device function address */
   uint8_t           speed;     /* Device speed */
+  uint8_t           interval;  /* Interrupt/isochronous EP polling interval */
   uint8_t           pid;       /* Data PID */
   uint8_t           npackets;  /* Number of packets (for data toggle) */
   bool              inuse;     /* True: This channel is "in use" */
@@ -1215,6 +1216,7 @@ static int stm32_ctrlchan_alloc(FAR struct stm32_usbhost_s *priv,
   chan->eptype    = OTGHS_EPTYPE_CTRL;
   chan->funcaddr  = funcaddr;
   chan->speed     = speed;
+  chan->interval  = 0;
   chan->maxpacket = STM32_EP0_DEF_PACKET_SIZE;
   chan->indata1   = false;
   chan->outdata1  = false;
@@ -1239,6 +1241,7 @@ static int stm32_ctrlchan_alloc(FAR struct stm32_usbhost_s *priv,
   chan->eptype    = OTGHS_EPTYPE_CTRL;
   chan->funcaddr  = funcaddr;
   chan->speed     = speed;
+  chan->interval  = 0;
   chan->maxpacket = STM32_EP0_DEF_PACKET_SIZE;
   chan->indata1   = false;
   chan->outdata1  = false;
@@ -1368,6 +1371,7 @@ static int stm32_xfrep_alloc(FAR struct stm32_usbhost_s *priv,
   chan->eptype    = epdesc->xfrtype;
   chan->funcaddr  = hport->funcaddr;
   chan->speed     = hport->speed;
+  chan->interval  = epdesc->interval;
   chan->maxpacket = epdesc->mxpacketsize;
   chan->indata1   = false;
   chan->outdata1  = false;
@@ -1832,6 +1836,7 @@ static ssize_t stm32_in_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
                                  FAR uint8_t *buffer, size_t buflen)
 {
   FAR struct stm32_chan_s *chan;
+  systime_t start;
   ssize_t xfrd;
   int ret;
 
@@ -1846,6 +1851,7 @@ static ssize_t stm32_in_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
   chan->xfrd   = 0;
   xfrd         = 0;
 
+  start = clock_systimer();
   while (chan->xfrd < chan->buflen)
     {
       /* Set up for the wait BEFORE starting the transfer */
@@ -1870,11 +1876,7 @@ static ssize_t stm32_in_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
 
       ret = stm32_chan_wait(priv, chan);
 
-      /* EAGAIN indicates that the device NAKed the transfer.  In the case
-       * of a NAK, we do not retry but rather assume that the transfer is
-       * commplete and return the data that we have received.  Retry could
-       * be handled in class driver.
-       */
+      /* EAGAIN indicates that the device NAKed the transfer. */
 
       if (ret < 0)
         {
@@ -1888,27 +1890,105 @@ static ssize_t stm32_in_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
 
               if (xfrd > 0)
                 {
-                  /* Yes, return the amount of data received */
+                  /* Yes, return the amount of data received.
+                   *
+                   * REVISIT: This behavior is clearly correct for CDC/ACM
+                   * bulk transfers and HID interrupt transfers.  But I am
+                   * not so certain for MSC bulk transfers which, I think,
+                   * could have NAKed packets in the middle of a transfer.
+                   */
 
                   return xfrd;
                 }
               else
                 {
-                  /* No... Break out and return the NAK */
+                  useconds_t delay;
 
-                  return (ssize_t)ret;
+                  /* Get the elapsed time.  Has the timeout elapsed?
+                   * if not then try again.
+                   */
+
+                  systime_t elapsed = clock_systimer() - start;
+                  if (elapsed >= STM32_DATANAK_DELAY)
+                    {
+                      /* Timeout out... break out returning the NAK as
+                       * as a failure.
+                       */
+
+                      return (ssize_t)ret;
+                    }
+
+                  /* Wait a bit before retrying after a NAK. */
+
+                  if (chan->eptype == OTGFS_HCCHAR_EPTYP_INTR)
+                    {
+                      /* For interrupt (and isochronous) endpoints, the
+                       * polling rate is determined by the bInterval field
+                       * of the endpoint descriptor (in units of frames
+                       * which we treat as milliseconds here).
+                       */
+
+                      if (chan->interval > 0)
+                        {
+                          /* Convert the delay to units of microseconds */
+
+                          delay = (useconds_t)chan->interval * 1000;
+                        }
+                      else
+                        {
+                          /* Out of range! For interrupt endpoints, the valid
+                           * range is 1-255 frames.  Assume one frame.
+                           */
+
+                          delay = 1000;
+                        }
+                    }
+                  else
+                    {
+                      /* For Isochronous endpoints, bInterval must be 1.  Bulk
+                       * endpoints do not have a polling interval.  Rather,
+                       * the should wait until data is received.
+                       *
+                       * REVISIT:  For bulk endpoints this 1 msec delay is only
+                       * intended to give the CPU a break from the bulk EP tight
+                       * polling loop.  But are there performance issues?
+                       */
+
+                      delay = 1000;
+                    }
+
+                  /* Wait for the next polling interval.
+                   *
+                   * REVISIT:  This delay could require more resolution than
+                   * is provided by the system timer.  In that case, the
+                   * delay could be significantly longer than required.
+                   */
+
+                  usleep(delay);
                 }
             }
+          else
+            {
+              /* Some unexpected, fatal error occurred. */
 
-          usbhost_trace1(OTGHS_TRACE1_TRNSFRFAILED, ret);
+              usbhost_trace1(OTGHS_TRACE1_TRNSFRFAILED, ret);
 
-          /* Break out and return the error */
+              /* Break out and return the error */
 
-          uerr("ERROR: stm32_chan_wait failed: %d\n", ret);
-          return (ssize_t)ret;
+              uerr("ERROR: stm32_chan_wait failed: %d\n", ret);
+              return (ssize_t)ret;
+            }
         }
+      else
+        {
+          /* Successfully received another chunk of data... add that to the
+           * runing total.  Then continue reading until we read 'buflen'
+           * bytes of data or until the the devices NAKs (implying a short
+           * packet).
+           */
 
-      xfrd += chan->xfrd;
+          xfrd += chan->xfrd;
+        }
     }
 
   return xfrd;
@@ -2518,18 +2598,6 @@ static inline void stm32_gint_hcinisr(FAR struct stm32_usbhost_s *priv,
         }
       else if (chan->chreason == CHREASON_NAK)
         {
-          /* Halt on NAK only happens on an INTR channel.  Fetch the HCCHAR register
-           * and check for an interrupt endpoint.
-           */
-
-          regval = stm32_getreg(STM32_OTGHS_HCCHAR(chidx));
-          if ((regval & OTGHS_HCCHAR_EPTYP_MASK) == OTGHS_HCCHAR_EPTYP_INTR)
-            {
-              /* Toggle the IN data toggle (Used by Bulk and INTR only) */
-
-              chan->indata1 ^= true;
-            }
-
           /* Set the NAK error result */
 
           chan->result = EAGAIN;

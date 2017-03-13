@@ -1,8 +1,8 @@
 /****************************************************************************
- * configs/mbed/src/lpc17_hidkbd.c
+ * configs/photon/src/stm32_buttons.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Author: Simon Piriou <spiriou31@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -40,46 +40,61 @@
 #include <nuttx/config.h>
 
 #include <debug.h>
+#include <errno.h>
 
-#include <nuttx/usb/usbhost.h>
+#include <arch/board/board.h>
+#include "photon.h"
 
-#include "lpc17_usbhost.h"
-
-#if defined(CONFIG_LPC17_USBHOST) && defined(CONFIG_USBHOST) && \
-    defined(CONFIG_EXAMPLES_HIDKBD)
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#include "stm32_gpio.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: arch_usbhost_initialize
- *
- * Description:
- *   The apps/example/hidkbd test requires that platform-specific code
- *   provide a wrapper called arch_usbhost_initialize() that will perform
- *   the actual USB host initialization.
- *
+ * Name: board_button_initialize
  ****************************************************************************/
 
-struct usbhost_connection_s *arch_usbhost_initialize(void)
+void board_button_initialize(void)
 {
-#ifdef CONFIG_USBHOST_HUB
-  int ret;
+  /* Configure Photon button gpio as input */
 
-  /* Initialize USB hub class support */
-
-  ret = usbhost_hub_initialize();
-  if (ret < 0)
-    {
-      uerr("ERROR: usbhost_hub_initialize failed: %d\n", ret);
-    }
-#endif
-
-  return lpc17_usbhost_initialize(0);
+  stm32_configgpio(GPIO_BUTTON1);
 }
-#endif /* CONFIG_LPC17_USBHOST && CONFIG_USBHOST && CONFIG_EXAMPLES_HIDKBD */
+
+/****************************************************************************
+ * Name: board_buttons
+ ****************************************************************************/
+
+uint8_t board_buttons(void)
+{
+  /* Check the state of the only button */
+
+  if (stm32_gpioread(GPIO_BUTTON1))
+    {
+      return BOARD_BUTTON1_BIT;
+    }
+
+  return 0;
+}
+
+/****************************************************************************
+ * Name: board_button_irq
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_IRQBUTTONS
+int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
+{
+  if (id != BOARD_BUTTON1)
+    {
+      /* Invalid button id */
+
+      return -EINVAL;
+    }
+
+  /* Configure interrupt on falling edge only */
+
+  return stm32_gpiosetevent(GPIO_BUTTON1, false, true, false,
+                            irqhandler, arg);
+}
+#endif /* CONFIG_ARCH_IRQBUTTONS */
