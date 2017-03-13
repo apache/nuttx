@@ -64,7 +64,7 @@
 #  include <nuttx/net/igmp.h>
 #endif
 
-#ifdef CONFIG_NETDEV_NETDEV_WIRELESS_IOCTL
+#ifdef CONFIG_NETDEV_WIRELESS_IOCTL
 #  include <nuttx/wireless/wireless.h>
 #endif
 
@@ -329,7 +329,7 @@ static void ioctl_setipv6addr(FAR net_ipv6addr_t outaddr,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NETDEV_NETDEV_WIRELESS_IOCTL)
+#if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NETDEV_WIRELESS_IOCTL)
 static FAR struct net_driver_s *netdev_wifrdev(FAR struct iwreq *req)
 {
   if (req != NULL)
@@ -363,7 +363,7 @@ static FAR struct net_driver_s *netdev_wifrdev(FAR struct iwreq *req)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NETDEV_NETDEV_WIRELESS_IOCTL)
+#if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NETDEV_WIRELESS_IOCTL)
 static int netdev_wifrioctl(FAR struct socket *psock, int cmd,
                             FAR struct iwreq *req)
 {
@@ -376,10 +376,10 @@ static int netdev_wifrioctl(FAR struct socket *psock, int cmd,
     {
       /* Get the wireless device associated with the IOCTL command */
 
-      dev = netdev_ifrdev(req);
+      dev = netdev_wifrdev(req);
       if (dev)
         {
-          /* For now, just forward the IOCTL to the wireless driver */
+          /* Just forward the IOCTL to the wireless driver */
 
           ret = dev->d_ioctl(dev, cmd, ((long)(uintptr_t)req));
         }
@@ -1160,7 +1160,7 @@ int psock_ioctl(FAR struct socket *psock, int cmd, unsigned long arg)
 
   ret = netdev_ifrioctl(psock, cmd, (FAR struct ifreq *)((uintptr_t)arg));
 
-#if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NETDEV_NETDEV_WIRELESS_IOCTL)
+#if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NETDEV_WIRELESS_IOCTL)
   /* Check a wireless network command */
 
   if (ret == -ENOTTY)
