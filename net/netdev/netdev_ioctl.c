@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/netdev/netdev_ioctl.c
  *
- *   Copyright (C) 2007-2012, 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2012, 2015-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -1260,7 +1260,7 @@ void netdev_ifup(FAR struct net_driver_s *dev)
 {
   /* Make sure that the device supports the d_ifup() method */
 
-  if (dev->d_ifup)
+  if (dev->d_ifup != NULL)
     {
       /* Is the interface already up? */
 
@@ -1282,7 +1282,7 @@ void netdev_ifdown(FAR struct net_driver_s *dev)
 {
   /* Check sure that the device supports the d_ifdown() method */
 
-  if (dev->d_ifdown)
+  if (dev->d_ifdown != NULL)
     {
       /* Is the interface already down? */
 
