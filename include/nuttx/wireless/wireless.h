@@ -59,6 +59,10 @@
  ************************************************************************************/
 
 /* Network Driver IOCTL Commands ****************************************************/
+/* Use of these IOCTL commands requires a socket descriptor created by the socket()
+ * interface.
+ */
+
 /* Wireless identification */
 
 #define SIOCSIWCOMMIT       _WLIOC(0x0001)  /* Commit pending changes to driver */
@@ -154,15 +158,22 @@
 
 /* Character Driver IOCTL commands *************************************************/
 /* Non-compatible, NuttX only IOCTL definitions for use with low-level wireless
- * drivers that are accessed via a character device.
+ * drivers that are accessed via a character device.  Use of these IOCTL commands
+ * requires a file descriptor created by the open() interface.
  */
 
-#define WLIOC_SETRADIOFREQ  _WLIOC(0x0033)  /* arg: Pointer to uint32_t, frequency value (in Mhz) */
-#define WLIOC_GETRADIOFREQ  _WLIOC(0x0034)  /* arg: Pointer to uint32_t, frequency value (in Mhz) */
-#define WLIOC_SETADDR       _WLIOC(0x0035)  /* arg: Pointer to address value, format of the address is driver specific */
-#define WLIOC_GETADDR       _WLIOC(0x0036)  /* arg: Pointer to address value, format of the address is driver specific */
-#define WLIOC_SETTXPOWER    _WLIOC(0x0037)  /* arg: Pointer to int32_t, output power (in dBm) */
-#define WLIOC_GETTXPOWER    _WLIOC(0x0038)  /* arg: Pointer to int32_t, output power (in dBm) */
+#define WLIOC_SETRADIOFREQ  _WLIOC(0x0033)  /* arg: Pointer to uint32_t, frequency
+                                             * value (in Mhz) */
+#define WLIOC_GETRADIOFREQ  _WLIOC(0x0034)  /* arg: Pointer to uint32_t, frequency
+                                             * value (in Mhz) */
+#define WLIOC_SETADDR       _WLIOC(0x0035)  /* arg: Pointer to address value, format
+                                             * of the address is driver specific */
+#define WLIOC_GETADDR       _WLIOC(0x0036)  /* arg: Pointer to address value, format
+                                             * of the address is driver specific */
+#define WLIOC_SETTXPOWER    _WLIOC(0x0037)  /* arg: Pointer to int32_t, output power
+                                             * (in dBm) */
+#define WLIOC_GETTXPOWER    _WLIOC(0x0038)  /* arg: Pointer to int32_t, output power
+                                             * (in dBm) */
 
 /* Device-specific IOCTL commands **************************************************/
 

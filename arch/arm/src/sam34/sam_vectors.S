@@ -362,7 +362,7 @@ exception_common:
 	 *
 	 * Here:
 	 *   r0 = Address of the register save area
-
+	 *
 	 * NOTE: It is a requirement that up_restorefpu() preserve the value of
 	 * r0!
 	 */
