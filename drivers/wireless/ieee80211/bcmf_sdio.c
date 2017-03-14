@@ -50,6 +50,7 @@
 #include <nuttx/sdio.h>
 #include <nuttx/arch.h>
 
+#include <nuttx/wireless/ieee80211/mmc_sdio.h>
 #include <nuttx/wireless/ieee80211/bcmf_sdio.h>
 #include <nuttx/wireless/ieee80211/bcmf_board.h>
 
@@ -59,7 +60,19 @@
 
 #define BCMF_DEVICE_RESET_DELAY_MS 10
 #define BCMF_DEVICE_START_DELAY_MS 10
-#define BCMF_DEVICE_IDLE_DELAY_MS  50
+#define BCMF_CLOCK_SETUP_DELAY_MS  500
+
+#define SDIO_FN1_CHIPCLKCSR     0x1000E /* Clock Control Source Register */
+#define SDIO_FN1_PULLUP         0x1000F /* Pull-up Control Register for cmd, D0-2 lines */
+
+#define SDIO_FN1_CHIPCLKCSR_FORCE_ALP           0x01
+#define SDIO_FN1_CHIPCLKCSR_FORCE_HT            0x02
+#define SDIO_FN1_CHIPCLKCSR_FORCE_ILP           0x04
+#define SDIO_FN1_CHIPCLKCSR_ALP_AVAIL_REQ       0x08
+#define SDIO_FN1_CHIPCLKCSR_HT_AVAIL_REQ        0x10
+#define SDIO_FN1_CHIPCLKCSR_FORCE_HW_CLKREQ_OFF 0x20
+#define SDIO_FN1_CHIPCLKCSR_ALP_AVAIL           0x40
+#define SDIO_FN1_CHIPCLKCSR_HT_AVAIL            0x80
 
 /****************************************************************************
  * Private Types
@@ -77,8 +90,17 @@ struct bcmf_dev_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static int  bcmf_sendcmdpoll(FAR struct bcmf_dev_s *priv,
-              uint32_t cmd, uint32_t arg);
+static int  bcmf_transfer_bytes(FAR struct bcmf_dev_s *priv, bool write,
+                                uint8_t function, uint32_t address,
+                                uint8_t *buf, unsigned int len);
+
+static int  bcmf_read_reg(FAR struct bcmf_dev_s *priv, uint8_t function,
+                          uint32_t address, uint8_t *reg,
+                          unsigned int len);
+
+static int  bcmf_write_reg(FAR struct bcmf_dev_s *priv, uint8_t function,
+                          uint32_t address, uint32_t reg,
+                          unsigned int len);
 
 static int  bcmf_probe(FAR struct bcmf_dev_s *priv);
 static int  bcmf_hwinitialize(FAR struct bcmf_dev_s *priv);
@@ -93,29 +115,50 @@ static void bcmf_hwuninitialize(FAR struct bcmf_dev_s *priv);
  ****************************************************************************/
 
 /****************************************************************************
- * Name: bcmf_sendcmdpoll
+ * Name: bcmf_transfer_bytes
  ****************************************************************************/
 
-int bcmf_sendcmdpoll(FAR struct bcmf_dev_s *priv, uint32_t cmd, uint32_t arg)
+int bcmf_transfer_bytes(FAR struct bcmf_dev_s *priv, bool write,
+                        uint8_t function, uint32_t address,
+                        uint8_t *buf, unsigned int len)
 {
-  int ret;
+  /*  Use rw_io_direct method if len is 1 */
 
-  /* Send the command */
-
-  ret = SDIO_SENDCMD(priv->sdio_dev, cmd, arg);
-  if (ret == OK)
+  if (len == 1)
     {
-      /* Then poll-wait until the response is available */
-
-      ret = SDIO_WAITRESPONSE(priv->sdio_dev, cmd);
-      if (ret != OK)
-        {
-          _err("ERROR: Wait for response to cmd: %08x failed: %d\n",
-               cmd, ret);
-        }
+      return sdio_io_rw_direct(priv->sdio_dev, write,
+                               function, address, *buf, buf);
     }
 
-  return ret;
+    // return sdio_io_rw_extended(priv->sdio_dev, write,
+    //                            function, address, *buf, buf);
+    return -EINVAL;
+}
+
+/****************************************************************************
+ * Name: bcmf_read_reg
+ ****************************************************************************/
+
+int bcmf_read_reg(FAR struct bcmf_dev_s *priv, uint8_t function,
+                  uint32_t address, uint8_t *reg, unsigned int len)
+{
+  return bcmf_transfer_bytes(priv, false, function, address, reg, len);
+}
+
+/****************************************************************************
+ * Name: bcmf_write_reg
+ ****************************************************************************/
+
+int bcmf_write_reg(FAR struct bcmf_dev_s *priv, uint8_t function,
+                   uint32_t address, uint32_t reg, unsigned int len)
+{
+  if (len > 4)
+    {
+      return -EINVAL;
+    }
+
+  return bcmf_transfer_bytes(priv, true, function, address,
+                             (uint8_t*)&reg, len);
 }
 
 /****************************************************************************
@@ -125,38 +168,87 @@ int bcmf_sendcmdpoll(FAR struct bcmf_dev_s *priv, uint32_t cmd, uint32_t arg)
 int bcmf_probe(FAR struct bcmf_dev_s *priv)
 {
   int ret;
-  uint32_t data = 0;
+  uint8_t value;
+  int loops;
 
-  /* Set device state from reset to idle */
+  /* Probe sdio card compatible device */
 
-  bcmf_sendcmdpoll(priv, MMCSD_CMD0, 0);
-  up_mdelay(BCMF_DEVICE_START_DELAY_MS);
-
-  /* Send IO_SEND_OP_COND command */
-
-  ret = bcmf_sendcmdpoll(priv, SDIO_CMD5, 0);
-
+  ret = sdio_probe(priv->sdio_dev);
   if (ret != OK)
     {
       goto exit_error;
     }
 
-  /* Receive R4 response */
+  /* Enable bus FN1 */
 
-  ret = SDIO_RECVR4(priv->sdio_dev, SDIO_CMD5, &data);
-
+  ret = sdio_enable_function(priv->sdio_dev, 1);
   if (ret != OK)
     {
       goto exit_error;
     }
 
-  /* Broadcom chips have 2 additional functions and wide voltage range */
+  /* Set FN0 / FN1 / FN2 default block size */
 
-  if ((((data >> 28) & 7) != 2) ||
-      (((data >> 8)  & 0xff80) != 0xff80))
+  ret = sdio_set_blocksize(priv->sdio_dev, 0, 64);
+  if (ret != OK)
     {
       goto exit_error;
     }
+
+  ret = sdio_set_blocksize(priv->sdio_dev, 1, 64);
+  if (ret != OK)
+    {
+      goto exit_error;
+    }
+
+  ret = sdio_set_blocksize(priv->sdio_dev, 2, 64);
+  if (ret != OK)
+    {
+      goto exit_error;
+    }
+
+  /* Enable device interrupts for FN0, FN1 and FN2 */
+
+  ret = sdio_io_rw_direct(priv->sdio_dev, true, 0, SDIO_CCCR_INTEN,
+                          (1 << 0) | (1 << 1) | (1 << 2), NULL);
+  if (ret != OK)
+    {
+      goto exit_error;
+    }
+
+
+  /* Default device clock speed is up to 25 Mhz
+   * We could set EHS bit to operate at a clock rate up to 50 Mhz */
+
+  SDIO_CLOCK(priv->sdio_dev, CLOCK_SD_TRANSFER_4BIT);
+  up_mdelay(BCMF_CLOCK_SETUP_DELAY_MS);
+
+  /* Wait for function 1 to be ready */
+
+  loops = 10;
+  while (--loops > 0)
+    {
+      up_mdelay(1);
+
+      ret = sdio_io_rw_direct(priv->sdio_dev, false, 0, SDIO_CCCR_IORDY, 0, &value);
+      if (ret != OK)
+        {
+          return ret;
+        }
+
+      if (value & (1 << 1))
+        {
+          /* Function 1 is ready */
+          break;
+        }
+    }
+
+  if (loops <= 0)
+    {
+      return -ETIMEDOUT;
+    }
+
+  _info("sdio fn1 ready\n");
 
   return OK;
 
@@ -164,6 +256,89 @@ exit_error:
 
   _err("ERROR: failed to probe device %d\n", priv->minor);
   return ret;
+}
+
+/****************************************************************************
+ * Name: bcmf_businitialize
+ ****************************************************************************/
+
+ int bcmf_businitialize(FAR struct bcmf_dev_s *priv)
+{
+  int ret;
+  int loops;
+
+  /* Send Active Low-Power clock request */
+
+  ret = bcmf_write_reg(priv, 1, SDIO_FN1_CHIPCLKCSR,
+            SDIO_FN1_CHIPCLKCSR_FORCE_HW_CLKREQ_OFF |
+            SDIO_FN1_CHIPCLKCSR_ALP_AVAIL_REQ |
+            SDIO_FN1_CHIPCLKCSR_FORCE_ALP, 1);
+
+  if (ret != OK)
+    {
+      return ret;;
+    }
+
+  loops = 10;
+  while (--loops > 0)
+    {
+      uint8_t value;
+
+      up_mdelay(10);
+      ret = bcmf_read_reg(priv, 1, SDIO_FN1_CHIPCLKCSR, &value, 1);
+
+      if (ret != OK)
+        {
+          return ret;
+        }
+
+      if (value & SDIO_FN1_CHIPCLKCSR_ALP_AVAIL)
+        {
+          /* Active Low-Power clock is ready */
+          break;
+        }
+    }
+
+  if (loops <= 0)
+    {
+      _err("failed to enable ALP\n");
+      return -ETIMEDOUT;
+    }
+
+  /* Clear Active Low-Power clock request */
+
+  ret = bcmf_write_reg(priv, 1, SDIO_FN1_CHIPCLKCSR, 0, 1);
+  if (ret != OK)
+    {
+      return ret;
+    }
+
+  /* Disable pull-ups on SDIO cmd, d0-2 lines */
+
+  ret = bcmf_write_reg(priv, 1, SDIO_FN1_PULLUP, 0, 1);
+  if (ret != OK)
+    {
+      return ret;
+    }
+
+  /* Enable oob gpio interrupt */
+
+  // bcmf_board_setup_oob_irq(priv->minor, bcmf_oob_irq, (void*)priv);
+
+  /* Enable F2 interrupt only */
+
+  /* Upload firmware */
+
+  /* Enable function 2 */
+
+  // ret = sdio_enable_function(priv->sdio_dev, 2);
+  // if (ret != OK)
+  //   {
+  //     goto exit_error;
+  //   }
+
+
+  return OK;
 }
 
 /****************************************************************************
@@ -252,6 +427,15 @@ int bcmf_sdio_initialize(int minor, FAR struct sdio_dev_s *dev)
   /* Probe device */
 
   ret = bcmf_probe(priv);
+
+  if (ret != OK)
+    {
+      goto exit_uninit_hw;
+    }
+
+  /* Initialize device */
+
+  ret = bcmf_businitialize(priv);
 
   if (ret != OK)
     {

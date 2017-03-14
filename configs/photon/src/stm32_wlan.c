@@ -96,6 +96,26 @@ void bcmf_board_initialize(int minor)
 }
 
 /****************************************************************************
+ * Name: bcmf_board_setup_oob_irq
+ ****************************************************************************/
+
+void bcmf_board_setup_oob_irq(int minor)
+{
+  if (minor != SDIO_WLAN0_MINOR)
+    {
+      return;
+    }
+
+  /* Configure reset pin */
+
+  stm32_configgpio(GPIO_WLAN0_RESET);
+
+  /* Put wlan chip in reset state */
+
+  bcmf_board_reset(minor, true);
+}
+
+/****************************************************************************
  * Name: photon_wlan_initialize
  ****************************************************************************/
 
