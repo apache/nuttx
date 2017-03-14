@@ -270,6 +270,19 @@ config ARCH_CHIP_TMS570
 	---help---
 		TI TMS570 family
 
+config ARCH_CHIP_XMC4
+	bool "Infineon XMC4xxx"
+	select ARCH_HAVE_CMNVECTOR
+	select ARCH_CORTEXM4
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_RAMFUNCS
+	select ARCH_HAVE_I2CRESET
+	select ARM_HAVE_MPU_UNIFIED
+	select ARMV7M_CMNVECTOR
+	select ARMV7M_HAVE_STACKCHECK
+	---help---
+		Infineon XMC4xxx(ARM Cortex-M4) architectures
+
 config ARCH_CHIP_MOXART
 	bool "MoxART"
 	select ARCH_ARM7TDMI
@@ -691,6 +704,9 @@ source arch/arm/src/str71x/Kconfig
 endif
 if ARCH_CHIP_TMS570
 source arch/arm/src/tms570/Kconfig
+endif
+if ARCH_CHIP_XMC4
+source arch/arm/src/xmc4/Kconfig
 endif
 if ARCH_CHIP_MOXART
 source arch/arm/src/moxart/Kconfig

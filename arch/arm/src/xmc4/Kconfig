@@ -1,0 +1,328 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "XMC4xxx Configuration Options"
+
+choice
+	prompt "XMC4xxx Chip Selection"
+	default ARCH_CHIP_XMC4500
+	depends on ARCH_CHIP_XMC4
+
+config ARCH_CHIP_XMC4500
+	bool "XMC4500"
+
+endchoice
+
+# These "hidden" settings determine is a peripheral option is available for
+# the selection MCU
+
+
+# When there are multiple instances of a device, these "hidden" settings
+# will automatically be selected and will represent the 'OR' of the
+# instances selected.
+
+config XMC4_USIC
+	bool
+	default n
+
+config XMC4_USCI_UART
+	bool
+	default n
+	select MCU_SERIAL
+
+config XMC4_USCI_LIN
+	bool
+	default n
+
+config XMC4_USCI_SPI
+	bool
+	default n
+
+config XMC4_USCI_I2C
+	bool
+	default n
+
+config XMC4_USCI_I2S
+	bool
+	default n
+
+# Chip families
+
+menu "ARCH_CHIP_XMC4 Peripheral Support"
+
+config XMC4_USIC0
+	bool "USIC0"
+	default n
+	select XMC4_USIC
+	---help---
+		Support USIC0
+
+config XMC4_USIC1
+	bool "USIC1"
+	default n
+	---help---
+		Support USIC1
+
+config XMC4_USIC2
+	bool "USIC3"
+	default n
+	select XMC4_USIC
+	---help---
+		Support USIC2
+
+config XMC4_USIC3
+	bool "USIC3"
+	default n
+	select XMC4_USIC
+	---help---
+		Support USIC3
+
+config XMC4_USIC4
+	bool "USIC4"
+	default n
+	select XMC4_USIC
+	---help---
+		Support USIC4
+
+config XMC4_USIC5
+	bool "USIC5"
+	default n
+	select XMC4_USIC
+	---help---
+		Support USIC5
+
+endmenu
+
+menu "XMC4xxx USIC Configuration"
+	depends on XMC4_USIC
+
+choice
+	prompt "USIC0 Configuration"
+	default XMC4_USIC0_ISUART
+	depends on XMC4_USIC0
+
+config XMC4_USIC0_ISUART
+	bool "UART"
+	select UART0_SERIALDRIVER
+	select XMC4_USCI_UART
+	---help---
+		Configure USIC0 as a UART
+
+config XMC4_USIC0_ISLIN
+	bool "LIN"
+	select XMC4_USCI_LIN
+	---help---
+		Configure USIC0 as a LIN UART
+
+config XMC4_USIC0_ISSPI
+	bool "SPI"
+	select XMC4_USCI_SPI
+	---help---
+		Configure USIC0 For SPI communications
+
+config XMC4_USIC0_ISI2C
+	bool "I2C"
+	select XMC4_USCI_I2C
+	---help---
+		Configure USIC0 For I2C communications
+
+config XMC4_USIC0_ISI2S
+	bool "I2S"
+	select XMC4_USCI_I2S
+	---help---
+		Configure USIC0 For I2S audio
+
+endchoice # USIC0 Configuration
+
+choice
+	prompt "USIC1 Configuration"
+	default XMC4_USIC1_ISUART
+	depends on XMC4_USIC1
+
+config XMC4_USIC1_ISUART
+	bool "UART"
+	select UART1_SERIALDRIVER
+	select XMC4_USCI_UART
+	---help---
+		Configure USIC1 as a UART
+
+config XMC4_USIC1_ISLIN
+	bool "LIN"
+	select XMC4_USCI_LIN
+	---help---
+		Configure USIC1 as a LIN UART
+
+config XMC4_USIC1_ISSPI
+	bool "SPI"
+	select XMC4_USCI_SPI
+	---help---
+		Configure USIC1 For SPI communications
+
+config XMC4_USIC1_ISI2C
+	bool "I2C"
+	select XMC4_USCI_I2C
+	---help---
+		Configure USIC1 For I2C communications
+
+config XMC4_USIC1_ISI2S
+	bool "I2S"
+	select XMC4_USCI_I2S
+	---help---
+		Configure USIC1 For I2S audio
+
+endchoice # USIC1 Configuration
+
+choice
+	prompt "USIC2 Configuration"
+	default XMC4_USIC2_ISUART
+	depends on XMC4_USIC2
+
+config XMC4_USIC2_ISUART
+	bool "UART"
+	select UART2_SERIALDRIVER
+	select XMC4_USCI_UART
+	---help---
+		Configure USIC2 as a UART
+
+config XMC4_USIC2_ISLIN
+	bool "LIN"
+	select XMC4_USCI_LIN
+	---help---
+		Configure USIC2 as a LIN UART
+
+config XMC4_USIC2_ISSPI
+	bool "SPI"
+	select XMC4_USCI_SPI
+	---help---
+		Configure USIC2 For SPI communications
+
+config XMC4_USIC2_ISI2C
+	bool "I2C"
+	select XMC4_USCI_I2C
+	---help---
+		Configure USIC2 For I2C communications
+
+config XMC4_USIC2_ISI2S
+	bool "I2S"
+	select XMC4_USCI_I2S
+	---help---
+		Configure USIC2 For I2S audio
+
+endchoice # USIC2 Configuration
+
+choice
+	prompt "USIC3 Configuration"
+	default XMC4_USIC3_ISUART
+	depends on XMC4_USIC3
+
+config XMC4_USIC3_ISUART
+	bool "UART"
+	select UART3_SERIALDRIVER
+	select XMC4_USCI_UART
+	---help---
+		Configure USIC3 as a UART
+
+config XMC4_USIC3_ISLIN
+	bool "LIN"
+	select XMC4_USCI_LIN
+	---help---
+		Configure USIC3 as a LIN UART
+
+config XMC4_USIC3_ISSPI
+	bool "SPI"
+	select XMC4_USCI_SPI
+	---help---
+		Configure USIC3 For SPI communications
+
+config XMC4_USIC3_ISI2C
+	bool "I2C"
+	select XMC4_USCI_I2C
+	---help---
+		Configure USIC3 For I2C communications
+
+config XMC4_USIC3_ISI2S
+	bool "I2S"
+	select XMC4_USCI_I2S
+	---help---
+		Configure USIC3 For I2S audio
+
+endchoice # USIC3 Configuration
+
+choice
+	prompt "USIC4 Configuration"
+	default XMC4_USIC4_ISUART
+	depends on XMC4_USIC4
+
+config XMC4_USIC4_ISUART
+	bool "UART"
+	select UART4_SERIALDRIVER
+	select XMC4_USCI_UART
+	---help---
+		Configure USIC4 as a UART
+
+config XMC4_USIC4_ISLIN
+	bool "LIN"
+	select XMC4_USCI_LIN
+	---help---
+		Configure USIC4 as a LIN UART
+
+config XMC4_USIC4_ISSPI
+	bool "SPI"
+	select XMC4_USCI_SPI
+	---help---
+		Configure USIC4 For SPI communications
+
+config XMC4_USIC4_ISI2C
+	bool "I2C"
+	select XMC4_USCI_I2C
+	---help---
+		Configure USIC4 For I2C communications
+
+config XMC4_USIC4_ISI2S
+	bool "I2S"
+	select XMC4_USCI_I2S
+	---help---
+		Configure USIC4 For I2S audio
+
+endchoice # USIC4 Configuration
+
+choice
+	prompt "USIC5 Configuration"
+	default XMC4_USIC5_ISUART
+	depends on XMC4_USIC5
+
+config XMC4_USIC5_ISUART
+	bool "UART"
+	select UART0_SERIALDRIVER
+	select XMC4_USCI_UART
+	---help---
+		Configure USIC5 as a UART
+
+config XMC4_USIC5_ISLIN
+	bool "LIN"
+	select XMC4_USCI_LIN
+	---help---
+		Configure USIC5 as a LIN UART
+
+config XMC4_USIC5_ISSPI
+	bool "SPI"
+	select XMC4_USCI_SPI
+	---help---
+		Configure USIC5 For SPI communications
+
+config XMC4_USIC5_ISI2C
+	bool "I2C"
+	select XMC4_USCI_I2C
+	---help---
+		Configure USIC5 For I2C communications
+
+config XMC4_USIC5_ISI2S
+	bool "I2S"
+	select XMC4_USCI_I2S
+	---help---
+		Configure USIC5 For I2S audio
+
+endchoice # USIC5 Configuration
+endmenu # XMC4xxx USIC Configuration
