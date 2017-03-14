@@ -125,7 +125,7 @@ static inline FAR struct semholder_s *sem_allocholder(sem_t *sem)
       pholder          = NULL;
     }
 
-  DEBUGASSERT(pholder != NULL)
+  DEBUGASSERT(pholder != NULL);
   return pholder;
 }
 
@@ -379,8 +379,16 @@ static int sem_boostholderprio(FAR struct semholder_s *pholder,
            * saved priority and not to the base priority.
            */
 
-          htcb->pend_reprios[htcb->npend_reprio] = rtcb->sched_priority;
-          htcb->npend_reprio++;
+          if (htcb->npend_reprio < CONFIG_SEM_NNESTPRIO)
+            {
+              htcb->pend_reprios[htcb->npend_reprio] = rtcb->sched_priority;
+              htcb->npend_reprio++;
+            }
+          else
+            {
+              serr("ERROR: CONFIG_SEM_NNESTPRIO exceeded\n");
+              DEBUGASSERT(htcb->npend_reprio < CONFIG_SEM_NNESTPRIO);
+            }
         }
     }
 
