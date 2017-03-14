@@ -235,7 +235,7 @@ exception_common:
 	 *
 	 * Here:
 	 *   r0 = Address of the register save area
-	
+
 	 * NOTE: It is a requirement that up_restorefpu() preserve the value of
 	 * r0!
 	 */
@@ -355,7 +355,7 @@ exception_common:
 	.global	g_intstackbase
 	.align	8
 g_intstackalloc:
-	.skip	(CONFIG_ARCH_INTERRUPTSTACK & ~7)
+	.skip	((CONFIG_ARCH_INTERRUPTSTACK + 4) & ~7)
 g_intstackbase:
 	.size	g_intstackalloc, .-g_intstackalloc
 #endif
