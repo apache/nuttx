@@ -279,7 +279,7 @@ void __start(void)
 
   /* Disable the watchdog timer */
 
-  kinetis_wddisable();
+  xmc4_wddisable();
 
   /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
    * certain that there are no issues with the state of global variables.
@@ -318,7 +318,7 @@ void __start(void)
    * RAM functions having been copied to RAM).
    */
 
-  xmc4_clock_config();
+  xmc4_clock_configure();
 
   /* Configure the uart and perform early serial initialization so that we
    * can get debug output as soon as possible (This depends on clock

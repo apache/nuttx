@@ -505,10 +505,21 @@
 #define SCU_CLKSET_
 /* Clock clear Control Register */
 #define SCU_CLKCLR_
+
 /* System Clock Control */
-#define SCU_SYSCLKCR_
+
+#define SCU_SYSCLKCR_SYSDIV_SHIFT   (0)  /* Bits 0-7: System Clock Division Value */
+#define SCU_SYSCLKCR_SYSDIV_MASK    (0xff << SCU_CLK_SYSCLKCR_SYSDIV_SHIFT)
+#  define SCU_SYSCLKCR_SYSDIV(n)    ((uint32_t)((n)-1) << SCU_CLK_SYSCLKCR_SYSDIV_SHIFT)
+
+#define SCU_SYSCLKCR_SYSSEL         (1 << 16)  /* Bit 16: System Clock Selection Value */
+#  define SCU_SYSCLKCR_SYSSEL_OFI   (0)        /*         0=OFI clock */
+#  define SCU_SYSCLKCR_SYSSEL_PLL   (1 << 16)  /*         1=PLL clock */
+
 /* CPU Clock Control */
-#define SCU_CPUCLKCR_
+
+#define SCU_CPUCLKCR_CPUDIV         (1 << 0)   /* Bit 0: CPU Clock Divider Enable */
+
 /* Peripheral Bus Clock Control */
 #define SCU_PBCLKCR_
 /* USB Clock Control */
@@ -562,13 +573,44 @@
 /* PLL Control SCU Registers */
 
 /* System PLL Status Register */
-#define SCU_PLLSTAT_
+
+#define SCU_PLLSTAT_VCOBYST         (1 << 0)  /* Bit 0:  VCO Bypass Status */
+#define SCU_PLLSTAT_PWDSTAT         (1 << 1)  /* Bit 1:  PLL Power-saving Mode Status */
+#define SCU_PLLSTAT_VCOLOCK         (1 << 2)  /* Bit 2:  PLL LOCK Status */
+#define SCU_PLLSTAT_K1RDY           (1 << 4)  /* Bit 4:  K1 Divider Ready Status */
+#define SCU_PLLSTAT_K2RDY           (1 << 5)  /* Bit 5:  K2 Divider Ready Status */
+#define SCU_PLLSTAT_BY              (1 << 6)  /* Bit 6:  Bypass Mode Status */
+#define SCU_PLLSTAT_PLLLV           (1 << 7)  /* Bit 7:  Oscillator for PLL Valid Low Status */
+#define SCU_PLLSTAT_PLLHV           (1 << 8)  /* Bit 8:  Oscillator for PLL Valid High Status */
+#define SCU_PLLSTAT_PLLSP           (1 << 9)  /* Bit 9:  Oscillator for PLL Valid Spike Status */
+
 /* System PLL Configuration 0 Register */
 #define SCU_PLLCON0_
+
 /* System PLL Configuration 1 Register */
-#define SCU_PLLCON1_
+
+#define SCU_PLLCON1_K1DIV_SHIFT     (0)       /* Bits 0-6: K1-Divider Value */
+#define SCU_PLLCON1_K1DIV_MASK      (0x7f << SCU_PLLCON1_K1DIV_SHIFT)
+#  define SCU_PLLCON1_K1DIV(n)      ((uint32_t)((n)-1) << SCU_PLLCON1_K1DIV_SHIFT)
+#define SCU_PLLCON1_NDIV_SHIFT      (8)       /* Bits 8-14: N-Divider Value */
+#define SCU_PLLCON1_NDIV_MASK       (0x7f << SCU_PLLCON1_NDIV_SHIFT)
+#  define SCU_PLLCON1_NDIV(n)       ((uint32_t)((n)-1) << SCU_PLLCON1_NDIV_SHIFT)
+#define SCU_PLLCON1_K2DIV_SHIFT     (16)      /* Bit 16-22: K2-Divider Value */
+#define SCU_PLLCON1_K2DIV_MASK      (0x7f << SCU_PLLCON1_K2DIV_SHIFT)
+#  define SCU_PLLCON1_K2DIV(n)      ((uint32_t)((n)-1) << SCU_PLLCON1_K2DIV_SHIFT)
+#define SCU_PLLCON1_PDIV_SHIFT      (24)      /* Bits 24-27: P-Divider Value */
+#define SCU_PLLCON1_PDIV_MASK       (0x7f << SCU_PLLCON1_PDIV_SHIFT)
+#  define SCU_PLLCON1_PDIV(n)       ((uint32_t)((n)-1) << SCU_PLLCON1_PDIV_SHIFT)
+
 /* System PLL Configuration 2 Register */
-#define SCU_PLLCON2_
+
+#define SCU_PLLCON2_PINSEL          (1 << 0)  /* Bit 0: P-Divider Input Selection */
+#  define SCU_PLLCON2_PINSEL_PLL    (0)       /*        0=PLL external oscillator selected */
+#  define SCU_PLLCON2_PINSEL_OFI    (1 << 0)  /*        1=Backup clock source selected */
+#define SCU_PLLCON2_K1INSEL         (1 << 8)  /* Bit 8: K1-Divider Input */
+#  define SCU_PLLCON2_K1INSEL_PLL   (0)       /*        0=PLL external oscillator selected */
+#  define SCU_PLLCON2_K1INSEL_OFI   (1 << 8)  /*        1=Backup clock source selected */
+
 /* USB PLL Status Register */
 #define SCU_USBPLLSTAT_
 /* USB PLL Control Register */
