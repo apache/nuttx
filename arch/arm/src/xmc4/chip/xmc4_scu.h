@@ -421,25 +421,30 @@
 
 /* Trap Control Registers */
 
-/* Trap Status Register */
-#define SCU_TRAPSTAT_
-/* Trap Raw Status Register */
-#define SCU_TRAPRAW_
-/* Trap Mask Register */
-#define SCU_TRAPDIS_
-/* Trap Clear Register */
-#define SCU_TRAPCLR_
-/* Trap Set Register */
-#define SCU_TRAPSET_
+/* Trap Status Register, Trap Raw Status Register, Trap Mask Register, Trap Clear
+ * Register, and Trap Set Register
+ */
+
+#define SCU_TRAP_SOSCWDGT           (1 << 0)  /* Bit 0:  OSC_HP Oscillator Watchdog Trap */
+#define SCU_TRAP_SVCOLCKT           (1 << 2)  /* Bit 2:  System VCO Lock Trap */
+#define SCU_TRAP_UVCOLCKT           (1 << 3)  /* Bit 3:  USB VCO Lock Trap */
+#define SCU_TRAP_PET                (1 << 4)  /* Bit 4:  Parity Error Trap */
+#define SCU_TRAP_BRWNT              (1 << 5)  /* Bit 5:  Brown Out Trap */
+#define SCU_TRAP_ULPWDGT            (1 << 6)  /* Bit 6:  OSC_ULP Oscillator Watchdog Trap */
+#define SCU_TRAP_BWERR0T            (1 << 7)  /* Bit 7:  Peripheral Bridge 0 Trap */
+#define SCU_TRAP_BWERR1T            (1 << 8)  /* Bit 8:  Peripheral Bridge 1 Trap */
 
 /* Power Control SCU Registers */
 
-/* Power Status Register */
-#define SCU_PWRSTAT_
-/* Power Set Control Register */
-#define SCU_PWRSET_
-/* Power Clear Control Register */
-#define SCU_PWRCLR_
+/* Power Status Register, Power Set Control Register, and Power Clear
+ * Control Register
+ */
+
+#define SCU_PWR_HIBEN               (1 << 0)  /* Bit 0:  Hibernate Domain Enable State */
+#define SCU_PWR_USBPHYPDQ           (1 << 16) /* Bit 16: USB PHY Transceiver State */
+#define SCU_PWR_USBOTGEN            (1 << 17) /* Bit 17: USB On-The-Go Comparators State */
+#define SCU_PWR_USBPUWQ             (1 << 18) /* Bit 18: USB Weak Pull-Up at PADN State */
+
 /* EVR Status Register */
 #define SCU_EVRSTAT_
 /* EVR VADC Status Register */
@@ -467,11 +472,34 @@
 /* Reset SCU Registers */
 
 /* System Reset Status */
-#define SCU_RSTSTAT_
+
+#define SCU_RSTSTAT_RSTSTAT_SHIFT   (0)     /* Bits 0-7: Reset Status Information */
+#define SCU_RSTSTAT_RSTSTAT_MASK    (0xff << SCU_RSTSTAT_RSTSTAT_SHIFT)
+#  define SCU_RSTSTAT_RSTSTAT_PORST   (1 << SCU_RSTSTAT_RSTSTAT_SHIFT)   /* PORST reset */
+#  define SCU_RSTSTAT_RSTSTAT_SWD     (2 << SCU_RSTSTAT_RSTSTAT_SHIFT)   /* SWD reset */
+#  define SCU_RSTSTAT_RSTSTAT_PV      (4 << SCU_RSTSTAT_RSTSTAT_SHIFT)   /* PV reset */
+#  define SCU_RSTSTAT_RSTSTAT_CPUSYS  (8 << SCU_RSTSTAT_RSTSTAT_SHIFT)   /* CPU system reset */
+#  define SCU_RSTSTAT_RSTSTAT_CPULOCK (16 << SCU_RSTSTAT_RSTSTAT_SHIFT)  /* CPU lockup reset */
+#  define SCU_RSTSTAT_RSTSTAT_WDT     (32 << SCU_RSTSTAT_RSTSTAT_SHIFT)  /* WDT reset */
+#  define SCU_RSTSTAT_RSTSTAT_PERR    (128 << SCU_RSTSTAT_RSTSTAT_SHIFT) /* Parity Error reset */
+
+#define SCU_RSTSTAT_HIBWK           (1 << 8)  /* Bit 8:  Hibernate Wake-up Status */
+#define SCU_RSTSTAT_HIBRS           (1 << 9)  /* Bit 9:  Hibernate Reset Status */
+#define SCU_RSTSTAT_LCKEN           (1 << 10) /* Bit 10: Enable Lockup Status */
+
 /* Reset Set Register */
-#define SCU_RSTSET_
+
+#define SCU_RSTSET_HIBWK            (1 << 8)  /* Bit 8:  Hibernate Wake-up Reset Status */
+#define SCU_RSTSET_HIBRS            (1 << 9)  /* Bit 9:  Hibernate Reset Reset Status */
+#define SCU_RSTSET_LCKEN            (1 << 10) /* Bit 10: Enable Lockup Reset Status */
+
 /* Reset Clear Register */
-#define SCU_RSTCLR_
+
+#define SCU_RSTCLR_RSCLR            (1 << 0)  /* Bit 0:  Clear Reset Status */
+#define SCU_RSTCLR_HIBWK            (1 << 8)  /* Bit 8:  Clear Hibernate Wake-up Reset Status */
+#define SCU_RSTCLR_HIBRS            (1 << 9)  /* Bit 9:  Clear Hibernate Reset */
+#define SCU_RSTCLR_LCKEN            (1 << 10) /* Bit 10: Clear Hibernate Reset */
+
 /* Peripheral Reset Status Register 0 */
 #define SCU_PRSTAT0_
 /* Peripheral Reset Set Register 0 */
@@ -585,7 +613,17 @@
 #define SCU_PLLSTAT_PLLSP           (1 << 9)  /* Bit 9:  Oscillator for PLL Valid Spike Status */
 
 /* System PLL Configuration 0 Register */
-#define SCU_PLLCON0_
+
+#define SCU_PLLCON0_VCOBYP          (1 << 0)  /* Bit 0:  VCO Bypass */
+#define SCU_PLLCON0_VCOPWD          (1 << 1)  /* Bit 1:  VCO Power Saving Mode */
+#define SCU_PLLCON0_VCOTR           (1 << 2)  /* Bit 2:  VCO Trim Control */
+#define SCU_PLLCON0_FINDIS          (1 << 4)  /* Bit 4:  Disconnect Oscillator from VCO */
+#define SCU_PLLCON0_OSCDISCDIS      (1 << 6)  /* Bit 6:  Oscillator Disconnect Disable */
+#define SCU_PLLCON0_PLLPWD          (1 << 16) /* Bit 16: PLL Power Saving Mode */
+#define SCU_PLLCON0_OSCRES          (1 << 17) /* Bit 17: Oscillator Watchdog Reset */
+#define SCU_PLLCON0_RESLD           (1 << 18) /* Bit 18: Restart VCO Lock Detection */
+#define SCU_PLLCON0_AOTREN          (1 << 19) /* Bit 19: Automatic Oscillator Calibration Enable */
+#define SCU_PLLCON0_FOTR            (1 << 20) /* Bit 20: Factory Oscillator Calibration */
 
 /* System PLL Configuration 1 Register */
 
