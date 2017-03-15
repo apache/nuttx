@@ -59,6 +59,10 @@
  ************************************************************************************/
 
 /* Network Driver IOCTL Commands ****************************************************/
+/* Use of these IOCTL commands requires a socket descriptor created by the socket()
+ * interface.
+ */
+
 /* Wireless identification */
 
 #define SIOCSIWCOMMIT       _WLIOC(0x0001)  /* Commit pending changes to driver */
@@ -149,19 +153,27 @@
 
 #define SIOCSIWPMKSA        _WLIOC(0x0032)  /* PMKSA cache operation */
 
+#define WL_FIRSTCHAR        0x0033
 #define WL_NNETCMDS         0x0032
 
 /* Character Driver IOCTL commands *************************************************/
 /* Non-compatible, NuttX only IOCTL definitions for use with low-level wireless
- * drivers that are accessed via a character device.
+ * drivers that are accessed via a character device.  Use of these IOCTL commands
+ * requires a file descriptor created by the open() interface.
  */
 
-#define WLIOC_SETRADIOFREQ  _WLIOC(0x0033)  /* arg: Pointer to uint32_t, frequency value (in Mhz) */
-#define WLIOC_GETRADIOFREQ  _WLIOC(0x0034)  /* arg: Pointer to uint32_t, frequency value (in Mhz) */
-#define WLIOC_SETADDR       _WLIOC(0x0035)  /* arg: Pointer to address value, format of the address is driver specific */
-#define WLIOC_GETADDR       _WLIOC(0x0036)  /* arg: Pointer to address value, format of the address is driver specific */
-#define WLIOC_SETTXPOWER    _WLIOC(0x0037)  /* arg: Pointer to int32_t, output power (in dBm) */
-#define WLIOC_GETTXPOWER    _WLIOC(0x0038)  /* arg: Pointer to int32_t, output power (in dBm) */
+#define WLIOC_SETRADIOFREQ  _WLIOC(0x0033)  /* arg: Pointer to uint32_t, frequency
+                                             * value (in Mhz) */
+#define WLIOC_GETRADIOFREQ  _WLIOC(0x0034)  /* arg: Pointer to uint32_t, frequency
+                                             * value (in Mhz) */
+#define WLIOC_SETADDR       _WLIOC(0x0035)  /* arg: Pointer to address value, format
+                                             * of the address is driver specific */
+#define WLIOC_GETADDR       _WLIOC(0x0036)  /* arg: Pointer to address value, format
+                                             * of the address is driver specific */
+#define WLIOC_SETTXPOWER    _WLIOC(0x0037)  /* arg: Pointer to int32_t, output power
+                                             * (in dBm) */
+#define WLIOC_GETTXPOWER    _WLIOC(0x0038)  /* arg: Pointer to int32_t, output power
+                                             * (in dBm) */
 
 /* Device-specific IOCTL commands **************************************************/
 
@@ -185,7 +197,7 @@
 #define NRF24L01_FIRST      (CC3000_FIRST + CC3000_NCMDS)
 #define NRF24L01_NCMDS      14
 
-/* Other Definitions ****************************************************************/
+/* Other Common Wireless Definitions ***********************************************/
 
 /* Maximum size of the ESSID and NICKN strings */
 
@@ -195,6 +207,7 @@
  * Public Types
  ************************************************************************************/
 /* TODO:
+ *
  * - Add types for statistics (struct iw_statistics and related)
  * - Add struct iw_range for use with IOCTL commands that need exchange mode data
  *   that could not fit in iwreq.
@@ -203,6 +216,8 @@
  * - WPA support.
  * - Wireless events.
  * - Various flag definitions.
+ *
+ * These future additions will all need to be compatible with BSD/Linux definitions.
  */
 
 /* Generic format for most parameters that fit in a int32_t */
@@ -280,17 +295,17 @@ union iwreq_data
  
   struct iw_param param;    /* Other small parameters */
   struct iw_point data;     /* Other large parameters */
- };
+};
  
- /* This is the structure used to exchange data in wireless IOCTLs.  This structure
-  * is the same as 'struct ifreq', but defined for use with wireless IOCTLs.
-  */
+/* This is the structure used to exchange data in wireless IOCTLs.  This structure
+ * is the same as 'struct ifreq', but defined for use with wireless IOCTLs.
+ */
 
 struct iwreq
 {
   char ifrn_name[IFNAMSIZ];    /* Interface name, e.g. "eth0" */
   union iwreq_data u;          /* Data payload */
- };
+};
 
 #endif /* CONFIG_DRIVERS_WIRELESS */
 #endif /* __INCLUDE_NUTTX_WIRELESS_H */
