@@ -65,7 +65,11 @@
  ************************************************************************************/
 
 #ifndef CONFIG_SCHED_HPWORK
-#error High priority work queue required in this driver
+#  error High priority work queue required in this driver
+#endif
+
+#ifndef CONFIG_SPI_EXCHANGE
+#  error CONFIG_SPI_EXCHANGE required for this driver
 #endif
 
 #ifndef CONFIG_IEEE802154_at86rf23x_SPIMODE
@@ -84,38 +88,36 @@
 #define AT86RF23X_RXMODE_AUTOACK 3
 
 /* Definitions for PA control on high power modules */
+
 #define AT86RF23X_PA_AUTO  1
 #define AT86RF23X_PA_ED    2
 #define AT86RF23X_PA_SLEEP 3
-
 
 /************************************************************************************
  * Private Types
  ************************************************************************************/
 
-/*
- * AT86RF23x device instance
+/* AT86RF23x device instance
  *
  * Make sure that struct ieee802154_radio_s remains first.  If not it will break the
  * code
- *
  */
+
 struct at86rf23x_dev_s
 {
-  struct ieee802154_radio_s           	ieee;      /* Public device instance */
-  FAR struct spi_dev_s              	*spi;      /* Saved SPI interface instance */
-  struct work_s                     	irqwork;   /* Interrupt continuation work queue support */
-  FAR const struct at86rf23x_lower_s 	*lower;    /* Low-level MCU-specific support */
-  uint16_t                          	panid;     /* PAN identifier, FFFF = not set */
-  uint16_t                          	saddr;     /* short address, FFFF = not set */
-  uint8_t                           	eaddr[8];  /* extended address, FFFFFFFFFFFFFFFF = not set */
-  uint8_t                           	channel;   /* 11 to 26 for the 2.4 GHz band */
-  uint8_t                           	devmode;   /* device mode: device, coord, pancoord */
-  uint8_t                           	paenabled; /* enable usage of PA */
-  uint8_t                           	rxmode;    /* Reception mode: Main, no CRC, promiscuous */
-  int32_t                           	txpower;   /* TX power in mBm = dBm/100 */
-  struct ieee802154_cca_s           	cca;       /* Clear channel assessement method */
-
+  struct ieee802154_radio_s           ieee;      /* Public device instance */
+  FAR struct spi_dev_s               *spi;       /* Saved SPI interface instance */
+  struct work_s                       irqwork;   /* Interrupt continuation work queue support */
+  FAR const struct at86rf23x_lower_s *lower;     /* Low-level MCU-specific support */
+  uint16_t                            panid;     /* PAN identifier, FFFF = not set */
+  uint16_t                            saddr;     /* Short address, FFFF = not set */
+  uint8_t                             eaddr[8];  /* Extended address, FFFFFFFFFFFFFFFF = not set */
+  uint8_t                             channel;   /* 11 to 26 for the 2.4 GHz band */
+  uint8_t                             devmode;   /* Device mode: device, coord, pancoord */
+  uint8_t                             paenabled; /* Enable usage of PA */
+  uint8_t                             rxmode;    /* Reception mode: Main, no CRC, promiscuous */
+  int32_t                             txpower;   /* TX power in mBm = dBm/100 */
+  struct ieee802154_cca_s             cca;       /* Clear channel assessement method */
 };
 
 /****************************************************************************
@@ -123,45 +125,74 @@ struct at86rf23x_dev_s
  ****************************************************************************/
 
 /* Internal operations */
+
 static void at86rf23x_lock(FAR struct spi_dev_s *spi);
 static void at86rf23x_unlock(FAR struct spi_dev_s *spi);
-static void at86rf23x_setreg(FAR struct spi_dev_s *spi, uint32_t addr, uint8_t val);
+static void at86rf23x_setreg(FAR struct spi_dev_s *spi, uint32_t addr,
+              uint8_t val);
 static uint8_t at86rf23x_getreg(FAR struct spi_dev_s *spi, uint32_t addr);
-static int at86rf23x_writeframe(FAR struct spi_dev_s *spi, uint8_t *frame, uint8_t len);
-static uint8_t at86rf23x_readframe(FAR struct spi_dev_s *spi, uint8_t *frame_rx);
-static int  at86rf23x_setTRXstate(FAR struct at86rf23x_dev_s *dev, uint8_t state, uint8_t force);
+static int  at86rf23x_writeframe(FAR struct spi_dev_s *spi, FAR uint8_t *frame,
+              uint8_t len);
+static uint8_t at86rf23x_readframe(FAR struct spi_dev_s *spi,
+              FAR uint8_t *frame_rx);
+static int  at86rf23x_setTRXstate(FAR struct at86rf23x_dev_s *dev,
+              uint8_t state, uint8_t force);
 static  uint8_t at86rf23x_getTRXstate(FAR struct at86rf23x_dev_s *dev);
 static int  at86rf23x_resetrf(FAR struct at86rf23x_dev_s *dev);
 static int  at86rf23x_initialize(FAR struct at86rf23x_dev_s *dev);
 
-static int     at86rf23x_regdump(FAR struct at86rf23x_dev_s *dev);
-static void    at86rf23x_irqwork_rx(FAR struct at86rf23x_dev_s *dev);
-static void    at86rf23x_irqwork_tx(FAR struct at86rf23x_dev_s *dev);
-static void    at86rf23x_irqworker(FAR void *arg);
-static int     at86rf23x_interrupt(int irq, FAR void *context);
+static int  at86rf23x_regdump(FAR struct at86rf23x_dev_s *dev);
+static void at86rf23x_irqwork_rx(FAR struct at86rf23x_dev_s *dev);
+static void at86rf23x_irqwork_tx(FAR struct at86rf23x_dev_s *dev);
+static void at86rf23x_irqworker(FAR void *arg);
+static int  at86rf23x_interrupt(int irq, FAR void *context);
 
 /* Driver operations */
-static int     at86rf23x_setchannel  (FAR struct ieee802154_radio_s *ieee, uint8_t chan);
-static int     at86rf23x_getchannel  (FAR struct ieee802154_radio_s *ieee, FAR uint8_t *chan);
-static int     at86rf23x_setpanid    (FAR struct ieee802154_radio_s *ieee, uint16_t panid);
-static int     at86rf23x_getpanid    (FAR struct ieee802154_radio_s *ieee, FAR uint16_t *panid);
-static int     at86rf23x_setsaddr    (FAR struct ieee802154_radio_s *ieee, uint16_t saddr);
-static int     at86rf23x_getsaddr    (FAR struct ieee802154_radio_s *ieee, FAR uint16_t *saddr);
-static int     at86rf23x_seteaddr    (FAR struct ieee802154_radio_s *ieee, FAR uint8_t *eaddr);
-static int     at86rf23x_geteaddr    (FAR struct ieee802154_radio_s *ieee, FAR uint8_t *eaddr);
-static int     at86rf23x_setpromisc  (FAR struct ieee802154_radio_s *ieee, bool promisc);
-static int     at86rf23x_getpromisc  (FAR struct ieee802154_radio_s *ieee, FAR bool *promisc);
-static int     at86rf23x_setdevmode  (FAR struct ieee802154_radio_s *ieee, uint8_t mode);
-static int     at86rf23x_getdevmode  (FAR struct ieee802154_radio_s *ieee, FAR uint8_t *mode);
-static int     at86rf23x_settxpower  (FAR struct ieee802154_radio_s *ieee, int32_t txpwr);
-static int     at86rf23x_gettxpower  (FAR struct ieee802154_radio_s *ieee, FAR int32_t *txpwr);
-static int     at86rf23x_setcca      (FAR struct ieee802154_radio_s *ieee, FAR struct ieee802154_cca_s *cca);
-static int     at86rf23x_getcca      (FAR struct ieee802154_radio_s *ieee, FAR struct ieee802154_cca_s *cca);
-static int     at86rf23x_ioctl       (FAR struct ieee802154_radio_s *ieee, int cmd, unsigned long arg);
-static int     at86rf23x_energydetect(FAR struct ieee802154_radio_s *ieee, FAR uint8_t *energy);
-static int     at86rf23x_rxenable    (FAR struct ieee802154_radio_s *ieee, bool state, FAR struct ieee802154_packet_s *packet);
-static int     at86rf23x_transmit    (FAR struct ieee802154_radio_s *ieee, FAR struct ieee802154_packet_s *packet);
 
+static int  at86rf23x_setchannel(FAR struct ieee802154_radio_s *ieee,
+              uint8_t chan);
+static int  at86rf23x_getchannel(FAR struct ieee802154_radio_s *ieee,
+              FAR uint8_t *chan);
+static int  at86rf23x_setpanid(FAR struct ieee802154_radio_s *ieee,
+              uint16_t panid);
+static int  at86rf23x_getpanid(FAR struct ieee802154_radio_s *ieee,
+              FAR uint16_t *panid);
+static int  at86rf23x_setsaddr(FAR struct ieee802154_radio_s *ieee,
+              uint16_t saddr);
+static int  at86rf23x_getsaddr(FAR struct ieee802154_radio_s *ieee,
+              FAR uint16_t *saddr);
+static int  at86rf23x_seteaddr(FAR struct ieee802154_radio_s *ieee,
+              FAR uint8_t *eaddr);
+static int  at86rf23x_geteaddr(FAR struct ieee802154_radio_s *ieee,
+              FAR uint8_t *eaddr);
+static int  at86rf23x_setpromisc(FAR struct ieee802154_radio_s *ieee,
+              bool promisc);
+static int  at86rf23x_getpromisc(FAR struct ieee802154_radio_s *ieee,
+              FAR bool *promisc);
+static int  at86rf23x_setdevmode(FAR struct ieee802154_radio_s *ieee,
+              uint8_t mode);
+static int  at86rf23x_getdevmode(FAR struct ieee802154_radio_s *ieee,
+              FAR uint8_t *mode);
+static int  at86rf23x_settxpower(FAR struct ieee802154_radio_s *ieee,
+              int32_t txpwr);
+static int  at86rf23x_gettxpower(FAR struct ieee802154_radio_s *ieee,
+              FAR int32_t *txpwr);
+static int  at86rf23x_setcca(FAR struct ieee802154_radio_s *ieee,
+              FAR struct ieee802154_cca_s *cca);
+static int  at86rf23x_getcca(FAR struct ieee802154_radio_s *ieee,
+              FAR struct ieee802154_cca_s *cca);
+static int  at86rf23x_ioctl(FAR struct ieee802154_radio_s *ieee, int cmd,
+              unsigned long arg);
+static int  at86rf23x_energydetect(FAR struct ieee802154_radio_s *ieee,
+              FAR uint8_t *energy);
+static int  at86rf23x_rxenable(FAR struct ieee802154_radio_s *ieee,
+              bool state, FAR struct ieee802154_packet_s *packet);
+static int  at86rf23x_transmit(FAR struct ieee802154_radio_s *ieee,
+              FAR struct ieee802154_packet_s *packet);
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
 
 /* These are pointers to ALL registered at86rf23x devices.
  * This table is used during irqs to find the context
@@ -174,37 +205,32 @@ static struct at86rf23x_dev_s g_at86rf23x_devices[1];
 
 static const struct ieee802154_radioops_s at86rf23x_devops =
 {
-  .setchannel = at86rf23x_setchannel,
-  .getchannel = at86rf23x_getchannel,
-  .setpanid = at86rf23x_setpanid,
-  .getpanid = at86rf23x_getpanid,
-  .setsaddr = at86rf23x_setsaddr,
-  .getsaddr = at86rf23x_getsaddr,
-  .seteaddr = at86rf23x_seteaddr,
-  .geteaddr = at86rf23x_geteaddr,
-  .setpromisc = at86rf23x_setpromisc,
-  .getpromisc = at86rf23x_getpromisc,
-  .setdevmode = at86rf23x_setdevmode,
-  .getdevmode = at86rf23x_getdevmode,
-  .settxpower = at86rf23x_settxpower,
-  .gettxpower = at86rf23x_gettxpower,
-  .setcca = at86rf23x_setcca,
-  .getcca = at86rf23x_getcca,
-  .ioctl = at86rf23x_ioctl,
+  .setchannel   = at86rf23x_setchannel,
+  .getchannel   = at86rf23x_getchannel,
+  .setpanid     = at86rf23x_setpanid,
+  .getpanid     = at86rf23x_getpanid,
+  .setsaddr     = at86rf23x_setsaddr,
+  .getsaddr     = at86rf23x_getsaddr,
+  .seteaddr     = at86rf23x_seteaddr,
+  .geteaddr     = at86rf23x_geteaddr,
+  .setpromisc   = at86rf23x_setpromisc,
+  .getpromisc   = at86rf23x_getpromisc,
+  .setdevmode   = at86rf23x_setdevmode,
+  .getdevmode   = at86rf23x_getdevmode,
+  .settxpower   = at86rf23x_settxpower,
+  .gettxpower   = at86rf23x_gettxpower,
+  .setcca       = at86rf23x_setcca,
+  .getcca       = at86rf23x_getcca,
+  .ioctl        = at86rf23x_ioctl,
   .energydetect = at86rf23x_energydetect,
-  .rxenable = at86rf23x_rxenable,
-  .transmit = at86rf23x_transmit
+  .rxenable     = at86rf23x_rxenable,
+  .transmit     = at86rf23x_transmit
 };
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-#ifndef CONFIG_SPI_EXCHANGE
-#error CONFIG_SPI_EXCHANGE required for this driver
-#endif
-
-/* hardware access routines */
-
+ 
 /****************************************************************************
  * Name: at86rf23x_lock
  *
@@ -215,11 +241,10 @@ static const struct ieee802154_radioops_s at86rf23x_devops =
 
 static void at86rf23x_lock(FAR struct spi_dev_s *spi)
 {
-  SPI_LOCK        (spi, 1);
-  SPI_SETBITS     (spi, 8);
-  SPI_SETMODE     (spi, CONFIG_IEEE802154_at86rf23x_SPIMODE   );
-  SPI_SETFREQUENCY(spi, CONFIG_IEEE802154_at86rf23x_FREQUENCY );
-
+  SPI_LOCK(spi, 1);
+  SPI_SETBITS(spi, 8);
+  SPI_SETMODE(spi, CONFIG_IEEE802154_at86rf23x_SPIMODE);
+  SPI_SETFREQUENCY(spi, CONFIG_IEEE802154_at86rf23x_FREQUENCY);
 }
 
 /****************************************************************************
@@ -232,7 +257,7 @@ static void at86rf23x_lock(FAR struct spi_dev_s *spi)
 
 static void at86rf23x_unlock(FAR struct spi_dev_s *spi)
 {
-  SPI_LOCK(spi,0);
+  SPI_LOCK(spi, 0);
 }
 
 /****************************************************************************
@@ -243,7 +268,8 @@ static void at86rf23x_unlock(FAR struct spi_dev_s *spi)
  *
  ****************************************************************************/
 
-static void at86rf23x_setreg(FAR struct spi_dev_s *spi, uint32_t addr, uint8_t val)
+static void at86rf23x_setreg(FAR struct spi_dev_s *spi, uint32_t addr,
+                             uint8_t val)
 {
   uint8_t reg[2];
 
@@ -258,7 +284,6 @@ static void at86rf23x_setreg(FAR struct spi_dev_s *spi, uint32_t addr, uint8_t v
   at86rf23x_unlock(spi);
 
   vdbg("0x%02X->r[0x%02X]\n", val, addr);
-
 }
 
 /****************************************************************************
@@ -268,25 +293,27 @@ static void at86rf23x_setreg(FAR struct spi_dev_s *spi, uint32_t addr, uint8_t v
  *   Return the value of an at86rf23x device register
  *
  ****************************************************************************/
+
 static uint8_t at86rf23x_getreg(FAR struct spi_dev_s *spi, uint32_t addr)
 {
-    uint8_t reg[2];
-    uint8_t val[2];
+  uint8_t reg[2];
+  uint8_t val[2];
 
-    /* Add Read mask to desired register */
-    reg[0] = addr | RF23X_SPI_REG_READ;
+  /* Add Read mask to desired register */
 
-    at86rf23x_lock (spi);
+  reg[0] = addr | RF23X_SPI_REG_READ;
 
-    SPI_SELECT     (spi, SPIDEV_IEEE802154, true);
-    SPI_EXCHANGE   (spi, reg, val, 2);
-    SPI_SELECT     (spi, SPIDEV_IEEE802154, false);
+  at86rf23x_lock (spi);
 
-    at86rf23x_unlock(spi);
+  SPI_SELECT(spi, SPIDEV_IEEE802154, true);
+  SPI_EXCHANGE(spi, reg, val, 2);
+  SPI_SELECT(spi, SPIDEV_IEEE802154, false);
 
-    vdbg("r[0x%02X]=0x%02X\n",addr,val[1]);
+  at86rf23x_unlock(spi);
 
-    return val[1];
+  vdbg("r[0x%02X]=0x%02X\n",addr,val[1]);
+
+  return val[1];
 }
 
 /****************************************************************************
@@ -298,17 +325,15 @@ static uint8_t at86rf23x_getreg(FAR struct spi_dev_s *spi, uint32_t addr)
  *   register.
  *
  ****************************************************************************/
-static void at86rf23x_setregbits(FAR struct spi_dev_s *spi,
-					       uint8_t addr,
-					       uint8_t pos,
-					       uint8_t mask,
-					       uint8_t val)
-{
-	uint8_t reg;
 
-	reg = at86rf23x_getreg(spi, addr);
-	reg = (reg & ~(mask << pos)) | (val << pos);
-	at86rf23x_setreg(spi, addr, reg);
+static void at86rf23x_setregbits(FAR struct spi_dev_s *spi, uint8_t addr,
+                                 uint8_t pos, uint8_t mask, uint8_t val)
+{
+  uint8_t reg;
+
+  reg = at86rf23x_getreg(spi, addr);
+  reg = (reg & ~(mask << pos)) | (val << pos);
+  at86rf23x_setreg(spi, addr, reg);
 }
 
 /****************************************************************************
@@ -318,17 +343,16 @@ static void at86rf23x_setregbits(FAR struct spi_dev_s *spi,
  *   Return the value of an section of the at86rf23x device register.
  *
  ****************************************************************************/
-static uint8_t at86rf23x_getregbits(FAR struct spi_dev_s *spi,
-						  uint8_t addr,
-						  uint8_t pos,
-						  uint8_t mask)
+
+static uint8_t at86rf23x_getregbits(FAR struct spi_dev_s *spi, uint8_t addr,
+                                    uint8_t pos, uint8_t mask)
 {
-	uint8_t val;
+  uint8_t val;
 
-	val = at86rf23x_getreg(spi, addr);
-	val = (val >> pos) & mask;
+  val = at86rf23x_getreg(spi, addr);
+  val = (val >> pos) & mask;
 
-	return val;
+  return val;
 }
 
 /****************************************************************************
@@ -339,23 +363,25 @@ static uint8_t at86rf23x_getregbits(FAR struct spi_dev_s *spi,
  *   initiate the transfer, just write to the buffer.
  *
  ****************************************************************************/
-static int at86rf23x_writeframe(FAR struct spi_dev_s *spi, uint8_t *frame, uint8_t len)
+
+static int at86rf23x_writeframe(FAR struct spi_dev_s *spi, FAR uint8_t *frame,
+                                uint8_t len)
 {
-//	report_packet(frame_wr, len);
-	uint8_t reg = RF23X_SPI_FRAME_WRITE;
+//report_packet(frame_wr, len);
+  uint8_t reg = RF23X_SPI_FRAME_WRITE;
 
-    at86rf23x_lock(spi);
+  at86rf23x_lock(spi);
 
-    SPI_SELECT(spi, SPIDEV_IEEE802154, true);
+  SPI_SELECT(spi, SPIDEV_IEEE802154, true);
 
-    SPI_SNDBLOCK(spi, &reg, 1);
-    SPI_SNDBLOCK(spi, &frame, len);
+  SPI_SNDBLOCK(spi, &reg, 1);
+  SPI_SNDBLOCK(spi, &frame, len);
 
-    SPI_SELECT(spi, SPIDEV_IEEE802154, false);
+  SPI_SELECT(spi, SPIDEV_IEEE802154, false);
 
-    at86rf23x_unlock(spi);
+  at86rf23x_unlock(spi);
 
-    return len;
+  return len;
 }
 
 /****************************************************************************
@@ -366,25 +392,26 @@ static int at86rf23x_writeframe(FAR struct spi_dev_s *spi, uint8_t *frame, uint8
  *   indicates a frame has been received.
  *
  ****************************************************************************/
-static uint8_t at86rf23x_readframe(FAR struct spi_dev_s *spi, uint8_t *frame_rx)
+
+static uint8_t at86rf23x_readframe(FAR struct spi_dev_s *spi,
+                                   FAR uint8_t *frame_rx)
 {
-    uint8_t len, reg;
+  uint8_t len, reg;
 
-    reg = RF23X_SPI_FRAME_READ;
+  reg = RF23X_SPI_FRAME_READ;
 
-    at86rf23x_lock(spi);
-    SPI_SELECT(spi, SPIDEV_IEEE802154, true);
+  at86rf23x_lock(spi);
+  SPI_SELECT(spi, SPIDEV_IEEE802154, true);
 
-    SPI_SNDBLOCK(spi, &reg, 1);
-    SPI_RECVBLOCK(spi, &len, 1);
-    SPI_RECVBLOCK(spi, frame_rx, len+3);
+  SPI_SNDBLOCK(spi, &reg, 1);
+  SPI_RECVBLOCK(spi, &len, 1);
+  SPI_RECVBLOCK(spi, frame_rx, len+3);
 
-    SPI_SELECT(spi, SPIDEV_IEEE802154, false);
-    at86rf23x_unlock(spi);
+  SPI_SELECT(spi, SPIDEV_IEEE802154, false);
+  at86rf23x_unlock(spi);
 
-    return len;
+  return len;
 }
-
 
 /****************************************************************************
  * Name: at86rf23x_getTRXstate
@@ -393,9 +420,10 @@ static uint8_t at86rf23x_readframe(FAR struct spi_dev_s *spi, uint8_t *frame_rx)
  *   Return the current status of the TRX state machine.
  *
  ****************************************************************************/
+
 static uint8_t at86rf23x_getTRXstate(FAR struct at86rf23x_dev_s *dev)
 {
-	return at86rf23x_getregbits(dev->spi, RF23X_TRXSTATUS_STATUS);
+  return at86rf23x_getregbits(dev->spi, RF23X_TRXSTATUS_STATUS);
 }
 
 /****************************************************************************
@@ -409,15 +437,19 @@ static uint8_t at86rf23x_getTRXstate(FAR struct at86rf23x_dev_s *dev)
  *   510us.
  *
  ****************************************************************************/
-static int at86rf23x_setTRXstate(FAR struct at86rf23x_dev_s *dev, uint8_t state, uint8_t force)
+
+static int at86rf23x_setTRXstate(FAR struct at86rf23x_dev_s *dev,
+                                 uint8_t state, uint8_t force)
 {
   /* Get the current state of the transceiver */
+
   uint8_t status = at86rf23x_getTRXstate(dev);
 
   int ret = OK;
 
   /* TODO I don't have every state included verify this will work with SLEEP */
-  if((status != TRX_STATUS_TRXOFF) &&
+
+  if ((status != TRX_STATUS_TRXOFF) &&
      (status != TRX_STATUS_RXON) &&
      (status != TRX_STATUS_PLLON) &&
      (status != TRX_STATUS_RXAACKON) &&
@@ -431,164 +463,161 @@ static int at86rf23x_setTRXstate(FAR struct at86rf23x_dev_s *dev, uint8_t state,
   int8_t init_status = status;
 
   /* Start the state change */
+
   switch(state)
     {
     case TRX_CMD_TRXOFF:
-      if(status == TRX_STATUS_TRXOFF)
-	{
-	  break;
-	}
-      /* verify in a state that will transfer to TRX_OFF if not check if force is required */
-      if( (status == TRX_STATUS_RXON) ||
-		      (status == TRX_STATUS_PLLON) ||
-		      (status == TRX_STATUS_RXAACKON) ||
-		      (status == TRX_STATUS_TXARETON))
-	{
-	  at86rf23x_setregbits(dev->spi, RF23X_TRXCMD_STATE, TRX_CMD_TRXOFF);
-	  up_udelay(RF23X_TIME_TRANSITION_PLL_ACTIVE);
-	}
-      else if(status == TRX_STATUS_PON)
-	{
-	  at86rf23x_setregbits(dev->spi, RF23X_TRXCMD_STATE, TRX_CMD_TRXOFF);
-	  up_udelay(RF23X_TIME_P_ON_TO_TRXOFF);
-	}
-      else if(force)
-	{
-	  at86rf23x_setregbits(dev->spi, RF23X_TRXCMD_STATE, TRX_CMD_FORCETRXOFF);
-	  up_udelay(RF23X_TIME_FORCE_TRXOFF);
-	}
+      if (status == TRX_STATUS_TRXOFF)
+        {
+          break;
+        }
+
+      /* verify in a state that will transfer to TRX_OFF if not check if
+       * force is required.
+       */
+
+      if ((status == TRX_STATUS_RXON) ||
+          (status == TRX_STATUS_PLLON) ||
+          (status == TRX_STATUS_RXAACKON) ||
+          (status == TRX_STATUS_TXARETON))
+        {
+          at86rf23x_setregbits(dev->spi, RF23X_TRXCMD_STATE, TRX_CMD_TRXOFF);
+          up_udelay(RF23X_TIME_TRANSITION_PLL_ACTIVE);
+        }
+      else if (status == TRX_STATUS_PON)
+        {
+          at86rf23x_setregbits(dev->spi, RF23X_TRXCMD_STATE, TRX_CMD_TRXOFF);
+          up_udelay(RF23X_TIME_P_ON_TO_TRXOFF);
+        }
+      else if (force)
+        {
+          at86rf23x_setregbits(dev->spi, RF23X_TRXCMD_STATE, TRX_CMD_FORCETRXOFF);
+          up_udelay(RF23X_TIME_FORCE_TRXOFF);
+        }
 
       status = at86rf23x_getregbits(dev->spi, RF23X_TRXSTATUS_STATUS);
+      if (status != TRX_STATUS_TRXOFF)
+        {
+          ret = ERROR;
+        }
 
-      if(status != TRX_STATUS_TRXOFF)
-	{
-	  ret = ERROR;
-	}
-
-    break;
+      break;
 
     case TRX_CMD_RX_ON:
-
-	    if(status == TRX_STATUS_RXON)
-	      {
-		break;
-	      }
-
-	    if (status == TRX_STATUS_TRXOFF)
-	      {
-		at86rf23x_setregbits(dev->spi, RF23X_TRXCMD_STATE, TRX_CMD_RX_ON);
-		up_udelay(RF23X_TIME_TRXOFF_TO_PLL);
-	      }
-
-	    else if((status == TRX_STATUS_RXAACKON) ||
-			    (status == TRX_STATUS_RXON) ||
-			    (status == TRX_STATUS_PLLON) ||
-			    (status == TRX_STATUS_TXARETON))
-	    {
-		at86rf23x_setregbits(dev->spi, RF23X_TRXCMD_STATE, TRX_CMD_RX_ON);
-		up_udelay(RF23X_TIME_TRANSITION_PLL_ACTIVE);
-	    }
-
-	    status = at86rf23x_getregbits(dev->spi, RF23X_TRXSTATUS_STATUS);
-
-	    if(status != TRX_STATUS_RXON)
-	      {
-		ret = ERROR;
-	      }
-    break;
-
-    /*	transition to PLL_ON */
-    case TRX_CMD_PLL_ON:
-
-      if(status == TRX_STATUS_PLLON)
-	{
-	  break;
-	}
+      if (status == TRX_STATUS_RXON)
+        {
+          break;
+        }
 
       if (status == TRX_STATUS_TRXOFF)
-	{
-	  at86rf23x_setregbits(dev->spi, RF23X_TRXCMD_STATE, TRX_CMD_PLL_ON);
-	  up_udelay(RF23X_TIME_TRXOFF_TO_PLL);
-	}
-      else
-	{
-	  at86rf23x_setregbits(dev->spi, RF23X_TRXCMD_STATE, TRX_CMD_PLL_ON);
-	  up_udelay(RF23X_TIME_TRANSITION_PLL_ACTIVE);
-	}
+        {
+          at86rf23x_setregbits(dev->spi, RF23X_TRXCMD_STATE, TRX_CMD_RX_ON);
+          up_udelay(RF23X_TIME_TRXOFF_TO_PLL);
+        }
+      else if ((status == TRX_STATUS_RXAACKON) ||
+               (status == TRX_STATUS_RXON) ||
+               (status == TRX_STATUS_PLLON) ||
+               (status == TRX_STATUS_TXARETON))
+        {
+          at86rf23x_setregbits(dev->spi, RF23X_TRXCMD_STATE, TRX_CMD_RX_ON);
+          up_udelay(RF23X_TIME_TRANSITION_PLL_ACTIVE);
+        }
 
       status = at86rf23x_getregbits(dev->spi, RF23X_TRXSTATUS_STATUS);
+      if (status != TRX_STATUS_RXON)
+        {
+          ret = ERROR;
+        }
 
-      if(status != TRX_STATUS_PLLON)
-	{
-	  ret = ERROR;
-	}
+      break;
+
+    /* Transition to PLL_ON */
+
+    case TRX_CMD_PLL_ON:
+      if (status == TRX_STATUS_PLLON)
+        {
+          break;
+        }
+
+      if (status == TRX_STATUS_TRXOFF)
+        {
+          at86rf23x_setregbits(dev->spi, RF23X_TRXCMD_STATE, TRX_CMD_PLL_ON);
+          up_udelay(RF23X_TIME_TRXOFF_TO_PLL);
+        }
+      else
+        {
+          at86rf23x_setregbits(dev->spi, RF23X_TRXCMD_STATE, TRX_CMD_PLL_ON);
+          up_udelay(RF23X_TIME_TRANSITION_PLL_ACTIVE);
+        }
+
+      status = at86rf23x_getregbits(dev->spi, RF23X_TRXSTATUS_STATUS);
+      if (status != TRX_STATUS_PLLON)
+        {
+          ret = ERROR;
+        }
+
       break;
 
     case TRX_CMD_RX_AACK_ON:
-
-      if(status == TRX_STATUS_RXAACKON)
-	{
-	  break;
-	}
+      if (status == TRX_STATUS_RXAACKON)
+        {
+          break;
+       }
 
       if (status == TRX_STATUS_TRXOFF || status == TRX_STATUS_TXARETON)
-	{
-	  at86rf23x_setregbits(dev->spi, RF23X_TRXCMD_STATE, TRX_CMD_RX_ON);
+        {
+          at86rf23x_setregbits(dev->spi, RF23X_TRXCMD_STATE, TRX_CMD_RX_ON);
 
-	  (status == TRX_STATUS_TRXOFF) ? up_udelay(RF23X_TIME_TRXOFF_TO_PLL) :
-		up_udelay(RF23X_TIME_TRANSITION_PLL_ACTIVE);
-	}
+          (status == TRX_STATUS_TRXOFF) ? up_udelay(RF23X_TIME_TRXOFF_TO_PLL) :
+          up_udelay(RF23X_TIME_TRANSITION_PLL_ACTIVE);
+        }
 
       status = at86rf23x_getTRXstate(dev);
-
       if ((status == TRX_STATUS_RXON) || (status == TRX_STATUS_PLLON))
-	{
-	  at86rf23x_setregbits(dev->spi, RF23X_TRXCMD_STATE, TRX_CMD_RX_AACK_ON);
-	  up_udelay(RF23X_TIME_TRANSITION_PLL_ACTIVE);
-	}
+        {
+          at86rf23x_setregbits(dev->spi, RF23X_TRXCMD_STATE, TRX_CMD_RX_AACK_ON);
+          up_udelay(RF23X_TIME_TRANSITION_PLL_ACTIVE);
+        }
 
       status = at86rf23x_getregbits(dev->spi, RF23X_TRXSTATUS_STATUS);
-
-      if(status != TRX_STATUS_RXAACKON)
-	{
-	  ret = ERROR;
-	}
+      if (status != TRX_STATUS_RXAACKON)
+        {
+          ret = ERROR;
+        }
 
       break;
 
     case TRX_STATUS_TXARETON:
-
-      if(status == TRX_STATUS_TXARETON)
-	{
-	  break;
-	}
+      if (status == TRX_STATUS_TXARETON)
+        {
+          break;
+        }
 
       if (status == TRX_STATUS_TRXOFF)
-	{
-	  at86rf23x_setregbits(dev->spi, RF23X_TRXCMD_STATE, TRX_CMD_RX_ON);
-	  up_udelay(RF23X_TIME_TRXOFF_TO_PLL);
-	}
+        {
+          at86rf23x_setregbits(dev->spi, RF23X_TRXCMD_STATE, TRX_CMD_RX_ON);
+          up_udelay(RF23X_TIME_TRXOFF_TO_PLL);
+        }
 
       if ((status == TRX_STATUS_RXON) || (status == TRX_STATUS_PLLON))
-	{
-	  at86rf23x_setregbits(dev->spi, RF23X_TRXCMD_STATE, TRX_CMD_TX_ARET_ON);
-	  up_udelay(RF23X_TIME_TRANSITION_PLL_ACTIVE);
-	}
+        {
+          at86rf23x_setregbits(dev->spi, RF23X_TRXCMD_STATE, TRX_CMD_TX_ARET_ON);
+          up_udelay(RF23X_TIME_TRANSITION_PLL_ACTIVE);
+        }
       else if (status == TRX_STATUS_RXAACKON)
-	{
-	  at86rf23x_setregbits(dev->spi, RF23X_TRXCMD_STATE, TRX_CMD_RX_ON);
-	  up_udelay(RF23X_TIME_TRANSITION_PLL_ACTIVE);
+        {
+          at86rf23x_setregbits(dev->spi, RF23X_TRXCMD_STATE, TRX_CMD_RX_ON);
+          up_udelay(RF23X_TIME_TRANSITION_PLL_ACTIVE);
 
-	  at86rf23x_setregbits(dev->spi, RF23X_TRXCMD_STATE, TRX_CMD_TX_ARET_ON);
-	  up_udelay(RF23X_TIME_TRANSITION_PLL_ACTIVE);
-	}
+          at86rf23x_setregbits(dev->spi, RF23X_TRXCMD_STATE, TRX_CMD_TX_ARET_ON);
+          up_udelay(RF23X_TIME_TRANSITION_PLL_ACTIVE);
+        }
 
       status = at86rf23x_getregbits(dev->spi, RF23X_TRXSTATUS_STATUS);
-
-      if(status != TRX_STATUS_TXARETON)
-	{
-	  ret = ERROR;
-	}
+      if (status != TRX_STATUS_TXARETON)
+        {
+          ret = ERROR;
+        }
 
       break;
 
@@ -606,19 +635,16 @@ static int at86rf23x_setTRXstate(FAR struct at86rf23x_dev_s *dev, uint8_t state,
       dbg("%s \n", EINVAL_STR);
       init_status = 0;/* Placed this here to keep compiler happy when not in debug */
       return -EINVAL;
-
     }
-  if(ret == ERROR)
+
+  if (ret == ERROR)
     {
       dbg("State Transistion Error\n");
     }
 
   vdbg("Radio state change state[0x%02x]->state[0x%02x]\n", init_status, status);
-
   return ret;
 }
-
-/* Publicized driver routines */
 
 /****************************************************************************
  * Name: at86rf23x_setchannel
@@ -634,34 +660,40 @@ static int at86rf23x_setTRXstate(FAR struct at86rf23x_dev_s *dev, uint8_t state,
  *
  *
  ****************************************************************************/
-static int at86rf23x_setchannel(FAR struct ieee802154_radio_s *ieee, uint8_t chan)
+
+static int at86rf23x_setchannel(FAR struct ieee802154_radio_s *ieee,
+                                uint8_t chan)
 {
   FAR struct at86rf23x_dev_s *dev = (FAR struct at86rf23x_dev_s *)ieee;
   uint8_t state;
 
   /* Validate if chan is a valid channel */
-  if(chan<11 || chan>26)
+
+  if (chan < 11 || chan > 26)
     {
       dbg("Invalid requested chan: %d\n",chan);
       return -EINVAL;
     }
 
   /* Validate we are in an acceptable mode to change the channel */
-	state = at86rf23x_getTRXstate(dev);
 
-	if((TRX_STATUS_SLEEP == state) || (TRX_STATUS_PON == state)) {
-		dbg("Radio in invalid mode [%02x] to set the channel\n", state);
-		return ERROR;
-	}
+  state = at86rf23x_getTRXstate(dev);
+
+  if ((TRX_STATUS_SLEEP == state) || (TRX_STATUS_PON == state))
+    {
+      dbg("Radio in invalid mode [%02x] to set the channel\n", state);
+      return ERROR;
+    }
+
   /* Set the Channel on the transceiver */
 
   at86rf23x_setregbits(dev->spi, RF23X_CCA_BITS_CHANNEL, chan);
 
   /* Set the channel within local device */
+
   dev->channel = chan;
 
   vdbg("CHANNEL Changed to %d\n", chan);
-
   return OK;
 }
 
@@ -681,16 +713,19 @@ static int at86rf23x_setchannel(FAR struct ieee802154_radio_s *ieee, uint8_t cha
  *
  *
  ****************************************************************************/
-static int at86rf23x_getchannel(FAR struct ieee802154_radio_s *ieee, FAR uint8_t *chan)
+
+static int at86rf23x_getchannel(FAR struct ieee802154_radio_s *ieee,
+                                FAR uint8_t *chan)
 {
   FAR struct at86rf23x_dev_s *dev = (FAR struct at86rf23x_dev_s *)ieee;
 
   /* Set the Channel on the transceiver */
+
   *chan = at86rf23x_getregbits(dev->spi, RF23X_CCA_BITS_CHANNEL);
 
   /* Set the channel within local device */
-  dev->channel = *chan;
 
+  dev->channel = *chan;
   return OK;
 }
 
@@ -701,7 +736,9 @@ static int at86rf23x_getchannel(FAR struct ieee802154_radio_s *ieee, FAR uint8_t
  *   Define the PAN ID for the network.
  *
  ****************************************************************************/
-static int at86rf23x_setpanid(FAR struct ieee802154_radio_s *ieee, uint16_t panid)
+
+static int at86rf23x_setpanid(FAR struct ieee802154_radio_s *ieee,
+                              uint16_t panid)
 {
   FAR struct at86rf23x_dev_s *dev = (struct at86rf23x_dev_s *)ieee;
   uint8_t *pan = (uint8_t *)&panid;
@@ -719,14 +756,17 @@ static int at86rf23x_setpanid(FAR struct ieee802154_radio_s *ieee, uint16_t pani
  *   Define the PAN ID for the network.
  *
  ****************************************************************************/
-static int at86rf23x_getpanid(FAR struct ieee802154_radio_s *ieee, FAR uint16_t *panid)
+
+static int at86rf23x_getpanid(FAR struct ieee802154_radio_s *ieee,
+                              FAR uint16_t *panid)
 {
   FAR struct at86rf23x_dev_s *dev = (struct at86rf23x_dev_s *)ieee;
   uint8_t *pan = (uint8_t *)panid;
+
   /* TODO: Check if we need to pay attention to endianness */
+
   pan[0] = at86rf23x_getreg(dev->spi, RF23X_REG_PANID0);
   pan[1] = at86rf23x_getreg(dev->spi, RF23X_REG_PANID1);
-
   return OK;
 }
 
@@ -737,7 +777,9 @@ static int at86rf23x_getpanid(FAR struct ieee802154_radio_s *ieee, FAR uint16_t 
  *   Define the Short Address for the device.
  *
  ****************************************************************************/
-static int at86rf23x_setsaddr(FAR struct ieee802154_radio_s *ieee, uint16_t saddr)
+
+static int at86rf23x_setsaddr(FAR struct ieee802154_radio_s *ieee,
+                              uint16_t saddr)
 {
   FAR struct at86rf23x_dev_s *dev = (struct at86rf23x_dev_s *)ieee;
   uint8_t *addr = (uint8_t *)&saddr;
@@ -755,11 +797,15 @@ static int at86rf23x_setsaddr(FAR struct ieee802154_radio_s *ieee, uint16_t sadd
  *   Get the short address of the device.
  *
  ****************************************************************************/
-static int at86rf23x_getsaddr(FAR struct ieee802154_radio_s *ieee, FAR uint16_t *saddr)
+
+static int at86rf23x_getsaddr(FAR struct ieee802154_radio_s *ieee,
+                              FAR uint16_t *saddr)
 {
   FAR struct at86rf23x_dev_s *dev = (struct at86rf23x_dev_s *)ieee;
   uint8_t *addr = (uint8_t *)saddr;
+
   /* TODO: Check if we need to pay attention to endianness */
+
   addr[0] = at86rf23x_getreg(dev->spi, RF23X_REG_SADDR0);
   addr[1] = at86rf23x_getreg(dev->spi, RF23X_REG_SADDR1);
 
@@ -773,10 +819,14 @@ static int at86rf23x_getsaddr(FAR struct ieee802154_radio_s *ieee, FAR uint16_t 
  *   Set the IEEE address of the device.
  *
  ****************************************************************************/
-static int at86rf23x_seteaddr(FAR struct ieee802154_radio_s *ieee, FAR uint8_t *eaddr)
+
+static int at86rf23x_seteaddr(FAR struct ieee802154_radio_s *ieee,
+                              FAR uint8_t *eaddr)
 {
   FAR struct at86rf23x_dev_s *dev = (struct at86rf23x_dev_s *)ieee;
+
   /* TODO: Check if we need to pay attention to endianness */
+
   at86rf23x_setreg(dev->spi, RF23X_REG_IEEEADDR0, eaddr[0]);
   at86rf23x_setreg(dev->spi, RF23X_REG_IEEEADDR1, eaddr[1]);
   at86rf23x_setreg(dev->spi, RF23X_REG_IEEEADDR2, eaddr[2]);
@@ -796,10 +846,14 @@ static int at86rf23x_seteaddr(FAR struct ieee802154_radio_s *ieee, FAR uint8_t *
  *   Get the IEEE address of the device.
  *
  ****************************************************************************/
-static int at86rf23x_geteaddr(FAR struct ieee802154_radio_s *ieee, FAR uint8_t *eaddr)
+
+static int at86rf23x_geteaddr(FAR struct ieee802154_radio_s *ieee,
+                              FAR uint8_t *eaddr)
 {
   FAR struct at86rf23x_dev_s *dev = (struct at86rf23x_dev_s *)ieee;
+
   /* TODO: Check if we need to pay attention to endianness */
+
   eaddr[0] = at86rf23x_getreg(dev->spi, RF23X_REG_IEEEADDR0);
   eaddr[1] = at86rf23x_getreg(dev->spi, RF23X_REG_IEEEADDR1);
   eaddr[2] = at86rf23x_getreg(dev->spi, RF23X_REG_IEEEADDR2);
@@ -819,16 +873,18 @@ static int at86rf23x_geteaddr(FAR struct ieee802154_radio_s *ieee, FAR uint8_t *
  *   enable/disable promiscuous mode.
  *
  ****************************************************************************/
-static int at86rf23x_setpromisc(FAR struct ieee802154_radio_s *ieee, bool promisc)
+
+static int at86rf23x_setpromisc(FAR struct ieee802154_radio_s *ieee,
+                                bool promisc)
 {
   FAR struct at86rf23x_dev_s *dev = (struct at86rf23x_dev_s *)ieee;
 
   /* TODO: Check what mode I should be in to activate promiscuous mode:
    * This is way to simple of an implementation.  Many other things should be set
    * and/or checked before we set the device into promiscuous mode
-   * */
-  at86rf23x_setregbits(dev->spi, RF23X_XAHCTRL1_BITS_PROM_MODE, promisc);
+   */
 
+  at86rf23x_setregbits(dev->spi, RF23X_XAHCTRL1_BITS_PROM_MODE, promisc);
   return OK;
 }
 
@@ -839,12 +895,13 @@ static int at86rf23x_setpromisc(FAR struct ieee802154_radio_s *ieee, bool promis
  *   Check if the device is in promiscuous mode.
  *
  ****************************************************************************/
-static int at86rf23x_getpromisc(FAR struct ieee802154_radio_s *ieee, FAR bool *promisc)
+
+static int at86rf23x_getpromisc(FAR struct ieee802154_radio_s *ieee,
+                                FAR bool *promisc)
 {
   FAR struct at86rf23x_dev_s *dev = (struct at86rf23x_dev_s *)ieee;
 
   *promisc = at86rf23x_getregbits(dev->spi, RF23X_XAHCTRL1_BITS_PROM_MODE);
-
   return OK;
 }
 
@@ -855,31 +912,33 @@ static int at86rf23x_getpromisc(FAR struct ieee802154_radio_s *ieee, FAR bool *p
  *   Check if the device is in promiscuous mode.
  *
  ****************************************************************************/
-static int at86rf23x_setdevmode(FAR struct ieee802154_radio_s *ieee, uint8_t mode)
+
+static int at86rf23x_setdevmode(FAR struct ieee802154_radio_s *ieee,
+                                uint8_t mode)
 {
   FAR struct at86rf23x_dev_s *dev = (struct at86rf23x_dev_s *)ieee;
 
-  /* define dev mode */
-  if(mode == IEEE802154_MODE_PANCOORD)
-  {
-	  at86rf23x_setregbits(dev->spi, RF23X_CSMASEED1_IAMCOORD_BITS, 0x01);
-  }
-  else if(mode == IEEE802154_MODE_COORD)
-  {
-		  /* ????? */
-  }
-  else if(mode == IEEE802154_MODE_DEVICE)
-  {
-	  at86rf23x_setregbits(dev->spi, RF23X_CSMASEED1_IAMCOORD_BITS, 0x00);
-  }
+  /* Define dev mode */
+
+  if (mode == IEEE802154_MODE_PANCOORD)
+    {
+      at86rf23x_setregbits(dev->spi, RF23X_CSMASEED1_IAMCOORD_BITS, 0x01);
+    }
+  else if (mode == IEEE802154_MODE_COORD)
+    {
+      /* ????? */
+    }
+  else if (mode == IEEE802154_MODE_DEVICE)
+    {
+      at86rf23x_setregbits(dev->spi, RF23X_CSMASEED1_IAMCOORD_BITS, 0x00);
+    }
   else
-  {
-  return -EINVAL;
-  }
+    {
+    return -EINVAL;
+    }
 
-    dev->devmode = mode;
-
-    return OK;
+  dev->devmode = mode;
+  return OK;
 }
 
 /****************************************************************************
@@ -889,14 +948,15 @@ static int at86rf23x_setdevmode(FAR struct ieee802154_radio_s *ieee, uint8_t mod
  *   get the device mode type of the radio.
  *
  ****************************************************************************/
-static int at86rf23x_getdevmode  (FAR struct ieee802154_radio_s *ieee, FAR uint8_t *mode)
+
+static int at86rf23x_getdevmode(FAR struct ieee802154_radio_s *ieee,
+                                FAR uint8_t *mode)
 {
   FAR struct at86rf23x_dev_s *dev = (struct at86rf23x_dev_s *)ieee;
   int val;
 
   val = at86rf23x_getregbits(dev->spi, RF23X_CSMASEED1_IAMCOORD_BITS);
-
-  if(val == 1)
+  if (val == 1)
     {
       *mode = IEEE802154_MODE_PANCOORD;
     }
@@ -915,15 +975,17 @@ static int at86rf23x_getdevmode  (FAR struct ieee802154_radio_s *ieee, FAR uint8
  *   set the tx power attenuation or amplification
  *
  ****************************************************************************/
-static int at86rf23x_settxpower(FAR struct ieee802154_radio_s *ieee, int32_t txpwr)
+
+static int at86rf23x_settxpower(FAR struct ieee802154_radio_s *ieee,
+                                int32_t txpwr)
 {
   FAR struct at86rf23x_dev_s *dev = (struct at86rf23x_dev_s *)ieee;
 
   /* TODO: this needs alot of work to make sure all chips can share this function */
 
   /* Right now we only set tx power to 0 */
-  at86rf23x_setreg(dev->spi, RF23X_REG_TXPWR, RF23X_TXPWR_0);
 
+  at86rf23x_setreg(dev->spi, RF23X_REG_TXPWR, RF23X_TXPWR_0);
   return OK;
 }
 
@@ -934,67 +996,86 @@ static int at86rf23x_settxpower(FAR struct ieee802154_radio_s *ieee, int32_t txp
  *  get the tx power attenuation or amplification.
  *
  ****************************************************************************/
-static int at86rf23x_gettxpower(FAR struct ieee802154_radio_s *ieee, FAR int32_t *txpwr)
+
+static int at86rf23x_gettxpower(FAR struct ieee802154_radio_s *ieee,
+                                FAR int32_t *txpwr)
 {
-  /* TODO: this needs alot of work to make sure all chips can share this function */
   FAR struct at86rf23x_dev_s *dev = (struct at86rf23x_dev_s *)ieee;
   uint8_t reg;
-	  /* TODO: this needs alot of work to make sure all chips can share this function */
+
+  /* TODO: this needs alot of work to make sure all chips can share this
+   * function.
+   */
 
   /* Right now we only get negative values */
-  reg = at86rf23x_getreg(dev->spi, RF23X_REG_TXPWR);
 
-  switch(reg)
-  {
-  case RF23X_TXPWR_POS_4:
-	  *txpwr = 0;
-	  break;
-  case RF23X_TXPWR_POS_3_7:
-	  *txpwr = 0;
-	  break;
-  case RF23X_TXPWR_POS_3_4:
-	  *txpwr = 0;
-	  break;
-  case RF23X_TXPWR_POS_3:
-	  *txpwr = 0;
-	  break;
-  case RF23X_TXPWR_POS_2_5:
-	  *txpwr = 0;
-	  break;
-  case RF23X_TXPWR_POS_2:
-	  *txpwr = 0;
-	  break;
-  case RF23X_TXPWR_POS_1:
-	  *txpwr = 0;
-	  break;
-  case RF23X_TXPWR_0:
-	  *txpwr = 0;
-	  break;
-  case RF23X_TXPWR_NEG_1:
-	  *txpwr = 1000;
-	  break;
-  case RF23X_TXPWR_NEG_2:
-	  *txpwr = 2000;
-	  break;
-  case RF23X_TXPWR_NEG_3:
-	  *txpwr = 3000;
-	  break;
-  case RF23X_TXPWR_NEG_4:
-	  *txpwr = 4000;
-	  break;
-  case RF23X_TXPWR_NEG_6:
-	  *txpwr = 6000;
-	  break;
-  case RF23X_TXPWR_NEG_8:
-	  *txpwr = 8000;
-	  break;
-  case RF23X_TXPWR_NEG_12:
-	  *txpwr = 12000;
-	  break;
-  case RF23X_TXPWR_NEG_17:
-	  *txpwr = 17000;
-	  break;
-  }
+  reg = at86rf23x_getreg(dev->spi, RF23X_REG_TXPWR);
+  switch (reg)
+    {
+    case RF23X_TXPWR_POS_4:
+      *txpwr = 0;
+      break;
+
+    case RF23X_TXPWR_POS_3_7:
+      *txpwr = 0;
+      break;
+
+    case RF23X_TXPWR_POS_3_4:
+      *txpwr = 0;
+      break;
+
+    case RF23X_TXPWR_POS_3:
+      *txpwr = 0;
+      break;
+
+   case RF23X_TXPWR_POS_2_5:
+     *txpwr = 0;
+      break;
+
+    case RF23X_TXPWR_POS_2:
+      *txpwr = 0;
+      break;
+
+    case RF23X_TXPWR_POS_1:
+      *txpwr = 0;
+      break;
+
+    case RF23X_TXPWR_0:
+      *txpwr = 0;
+      break;
+
+    case RF23X_TXPWR_NEG_1:
+      *txpwr = 1000;
+      break;
+
+    case RF23X_TXPWR_NEG_2:
+      *txpwr = 2000;
+      break;
+
+    case RF23X_TXPWR_NEG_3:
+      *txpwr = 3000;
+      break;
+
+    case RF23X_TXPWR_NEG_4:
+      *txpwr = 4000;
+      break;
+
+    case RF23X_TXPWR_NEG_6:
+      *txpwr = 6000;
+      break;
+
+    case RF23X_TXPWR_NEG_8:
+      *txpwr = 8000;
+      break;
+
+    case RF23X_TXPWR_NEG_12:
+      *txpwr = 12000;
+      break;
+
+    case RF23X_TXPWR_NEG_17:
+      *txpwr = 17000;
+      break;
+    }
 
   return OK;
 }
@@ -1008,7 +1089,9 @@ static int at86rf23x_gettxpower(FAR struct ieee802154_radio_s *ieee, FAR int32_t
  *
  *
  ****************************************************************************/
-static int at86rf23x_setcca(FAR struct ieee802154_radio_s *ieee, FAR struct ieee802154_cca_s *cca)
+
+static int at86rf23x_setcca(FAR struct ieee802154_radio_s *ieee,
+                            FAR struct ieee802154_cca_s *cca)
 {
   FAR struct at86rf23x_dev_s *dev = (struct at86rf23x_dev_s *)ieee;
 
@@ -1018,6 +1101,7 @@ static int at86rf23x_setcca(FAR struct ieee802154_radio_s *ieee, FAR struct ieee
     {
       return -EINVAL;
     }
+
   if (cca->use_cs && cca->csth > 0x0f)
     {
       return -EINVAL;
@@ -1025,15 +1109,15 @@ static int at86rf23x_setcca(FAR struct ieee802154_radio_s *ieee, FAR struct ieee
 
   if (cca->use_ed)
     {
-	  at86rf23x_setregbits(dev->spi, RF23X_CCA_BITS_MODE, RF23X_CCA_MODE_ED);
+      at86rf23x_setregbits(dev->spi, RF23X_CCA_BITS_MODE, RF23X_CCA_MODE_ED);
     }
+
   if (cca->use_cs)
     {
-	  at86rf23x_setregbits(dev->spi, RF23X_CCA_BITS_MODE, RF23X_CCA_MODE_CS);
+      at86rf23x_setregbits(dev->spi, RF23X_CCA_BITS_MODE, RF23X_CCA_MODE_CS);
     }
 
   memcpy(&dev->cca, cca, sizeof(struct ieee802154_cca_s));
-
   return OK;
 }
 
@@ -1044,7 +1128,9 @@ static int at86rf23x_setcca(FAR struct ieee802154_radio_s *ieee, FAR struct ieee
  *   Get CCA for ???: TODO: need to implement
  *
  ****************************************************************************/
-static int at86rf23x_getcca(FAR struct ieee802154_radio_s *ieee, FAR struct ieee802154_cca_s *cca)
+
+static int at86rf23x_getcca(FAR struct ieee802154_radio_s *ieee,
+                            FAR struct ieee802154_cca_s *cca)
 {
   FAR struct at86rf23x_dev_s *dev = (struct at86rf23x_dev_s *)ieee;
 
@@ -1063,15 +1149,22 @@ static int at86rf23x_getcca(FAR struct ieee802154_radio_s *ieee, FAR struct ieee
  *   Control operations for the radio.
  *
  ****************************************************************************/
-static int at86rf23x_ioctl(FAR struct ieee802154_radio_s *ieee, int cmd, unsigned long arg)
+
+static int at86rf23x_ioctl(FAR struct ieee802154_radio_s *ieee, int cmd,
+                           unsigned long arg)
 {
   FAR struct at86rf23x_dev_s *dev = (FAR struct at86rf23x_dev_s *)ieee;
-  switch(cmd)
+
+  switch (cmd)
     {
-      case 1000: return at86rf23x_regdump(dev);
-      default: return -EINVAL;
+      case 1000:
+        return at86rf23x_regdump(dev);
+
+      default:
+        return -ENOTTY;
     }
 }
+
 /****************************************************************************
  * Name: at86rf23x_energydetect
  *
@@ -1079,9 +1172,9 @@ static int at86rf23x_ioctl(FAR struct ieee802154_radio_s *ieee, int cmd, unsigne
  *   Perform energy detection scan. TODO: Need to implement.
  *
  ****************************************************************************/
-static int at86rf23x_energydetect(FAR struct ieee802154_radio_s *ieee, FAR uint8_t *energy)
+static int at86rf23x_energydetect(FAR struct ieee802154_radio_s *ieee,
+                                  FAR uint8_t *energy)
 {
-
 #warning at86rf23x_energydetect not implemented.
 
   /* Not yet implemented */
@@ -1096,19 +1189,19 @@ static int at86rf23x_energydetect(FAR struct ieee802154_radio_s *ieee, FAR uint8
  *   Initialize the radio.
  *
  ****************************************************************************/
+
 int at86rf23x_initialize(FAR struct at86rf23x_dev_s *dev)
 {
-	uint8_t part;
-	uint8_t version;
+  uint8_t part;
+  uint8_t version;
 
-	at86rf23x_resetrf(dev);
+  at86rf23x_resetrf(dev);
 
-	part = at86rf23x_getreg(dev->spi, RF23X_REG_PART);
-	version = at86rf23x_getreg(dev->spi, RF23X_REG_VERSION);
+  part = at86rf23x_getreg(dev->spi, RF23X_REG_PART);
+  version = at86rf23x_getreg(dev->spi, RF23X_REG_VERSION);
 
-	dbg("Radio part: 0x%02x version: 0x%02x found\n", part, version);
-
-	return OK;
+  dbg("Radio part: 0x%02x version: 0x%02x found\n", part, version);
+  return OK;
 }
 
 /****************************************************************************
@@ -1119,34 +1212,37 @@ int at86rf23x_initialize(FAR struct at86rf23x_dev_s *dev)
  *   TRX_OFF state.
  *
  ****************************************************************************/
+
 static int at86rf23x_resetrf(FAR struct at86rf23x_dev_s *dev)
 {
   FAR const struct at86rf23x_lower_s *lower = dev->lower;
   uint8_t trx_status, retry_cnt = 0;
 
   /* Reset the radio */
+
   lower->reset(lower, 0);
   lower->slptr(lower, 0);
 
   up_udelay(RF23X_TIME_RESET);
   lower->reset(lower, 1);
 
-
   /* Dummy read of IRQ register */
+
   at86rf23x_getreg(dev->spi, RF23X_REG_IRQ_STATUS);
 
   do
-  {
-    trx_status = at86rf23x_setTRXstate(dev, TRX_CMD_TRXOFF, true);
-
-    if (retry_cnt == RF23X_MAX_RETRY_RESET_TO_TRX_OFF)
     {
-      dbg("Reset of transceiver failed\n");
-      return ERROR;
-    }
+      trx_status = at86rf23x_setTRXstate(dev, TRX_CMD_TRXOFF, true);
 
-    retry_cnt++;
-  } while (trx_status != OK);
+      if (retry_cnt == RF23X_MAX_RETRY_RESET_TO_TRX_OFF)
+        {
+          dbg("Reset of transceiver failed\n");
+          return ERROR;
+        }
+
+      retry_cnt++;
+    }
+  while (trx_status != OK);
 
   return OK;
 }
@@ -1159,12 +1255,14 @@ static int at86rf23x_resetrf(FAR struct at86rf23x_dev_s *dev)
  *   RX messages.
  *
  ****************************************************************************/
+
 static int at86rf23x_rxenable(FAR struct ieee802154_radio_s *ieee, bool state,
-		FAR struct ieee802154_packet_s *packet)
+                              FAR struct ieee802154_packet_s *packet)
 {
   FAR struct at86rf23x_dev_s *dev = (FAR struct at86rf23x_dev_s *)ieee;
 
   /* Set the radio to the receive state */
+
   return at86rf23x_setTRXstate(dev, TRX_CMD_RX_ON, false);
 
   /* Enable the RX IRQ */
@@ -1176,6 +1274,7 @@ static int at86rf23x_rxenable(FAR struct ieee802154_radio_s *ieee, bool state,
    */
 
   /* Set buffer to receive next packet */
+
   ieee->rxbuf = packet;
 }
 
@@ -1186,11 +1285,12 @@ static int at86rf23x_rxenable(FAR struct ieee802154_radio_s *ieee, bool state,
  *   Actual interrupt handler ran inside privileged space.
  *
  ****************************************************************************/
+
 static int at86rf23x_interrupt(int irq, FAR void *context)
 {
-
-  /* To support multiple devices,
-   * retrieve the priv structure using the irq number */
+  /* To support multiple devices, retrieve the priv structure using the irq
+   * number.
+   */
 
   register FAR struct at86rf23x_dev_s *dev = &g_at86rf23x_devices[0];
 
@@ -1207,10 +1307,12 @@ static int at86rf23x_interrupt(int irq, FAR void *context)
    * actually performed.  This is to prevent overrun of the worker thread.
    * Interrupts are re-enabled in enc_irqworker() when the work is completed.
    */
-  dev->lower->irq(dev->lower, NULL, FALSE);
-  //	  dev->lower->enable(dev->lower, FALSE);
 
-  return work_queue(HPWORK, &dev->irqwork, at86rf23x_irqworker, (FAR void *)dev, 0);
+  dev->lower->irq(dev->lower, NULL, FALSE);
+  //dev->lower->enable(dev->lower, FALSE);
+
+  return work_queue(HPWORK, &dev->irqwork, at86rf23x_irqworker,
+                    (FAR void *)dev, 0);
 }
 
 /****************************************************************************
@@ -1222,31 +1324,35 @@ static int at86rf23x_interrupt(int irq, FAR void *context)
  *   them out.
  *
  ****************************************************************************/
+
 static int at86rf23x_regdump(FAR struct at86rf23x_dev_s *dev)
 {
   uint32_t i;
   char buf[4+16*3+2+1];
-
   int len=0;
+
   printf("RF23X regs:\n");
 
   for (i=0;i<0x30;i++)
     {
-	  /* First row and every 15 regs */
-      if ((i & 0x0f) == 0)
-	{
-	  len = sprintf(buf, "%02x: ",i&0xFF);
-	}
+      /* First row and every 15 regs */
 
-      /* print the register value */
+      if ((i & 0x0f) == 0)
+       {
+         len = sprintf(buf, "%02x: ",i&0xFF);
+       }
+
+      /* Print the register value */
+
       len += sprintf(buf+len, "%02x ", at86rf23x_getreg(dev->spi, i));
 
-      /* at the end of each 15 regs or end of rf233s regs and actually print dbg message*/
+      /* At the end of each 15 regs or end of rf233s regs and actually print dbg message*/
+
       if ((i&15)==15 || i == 0x2f)
-	{
-	  sprintf(buf+len, "\n");
-	  printf("%s",buf);
-	}
+        {
+          sprintf(buf+len, "\n");
+          printf("%s",buf);
+        }
     }
 
   /* TODO: I have a few more regs that are not consecutive.  Will print later */
@@ -1261,30 +1367,33 @@ static int at86rf23x_regdump(FAR struct at86rf23x_dev_s *dev)
  *   Actual thread to handle the irq outside of privaleged mode.
  *
  ****************************************************************************/
+
 static void at86rf23x_irqworker(FAR void *arg)
 {
   FAR struct at86rf23x_dev_s *dev = (FAR struct at86rf23x_dev_s *)arg;
-
   uint8_t irq_status = at86rf23x_getreg(dev->spi, RF23X_REG_IRQ_STATUS);
 
   vdbg("IRQ: 0x%02X\n", irq_status);
 
-  if((irq_status & (1<<3)) != 0)
+  if ((irq_status & (1<<3)) != 0)
     {
-      if((irq_status & (1<<2)) != 0)
-	{
-	  at86rf23x_irqwork_rx(dev);
-	}
+      if ((irq_status & (1<<2)) != 0)
+        {
+          at86rf23x_irqwork_rx(dev);
+        }
       else
-	{
-	  at86rf23x_irqwork_tx(dev);
-	}
+        {
+          at86rf23x_irqwork_tx(dev);
+       }
     }
   else
     {
       dbg("Unknown IRQ Status: %d\n", irq_status);
 
-      /* Re enable the IRQ even if we don't know how to handle previous status*/
+      /* Re enable the IRQ even if we don't know how to handle previous
+       * status.
+       */
+
       dev->lower->irq(dev->lower, NULL, true);
     }
 }
@@ -1296,6 +1405,7 @@ static void at86rf23x_irqworker(FAR void *arg)
  *   Misc/unofficial device controls.
  *
  ****************************************************************************/
+
 static void at86rf23x_irqwork_rx(FAR struct at86rf23x_dev_s *dev)
 {
   uint8_t rx_len;
@@ -1309,13 +1419,14 @@ static void at86rf23x_irqwork_rx(FAR struct at86rf23x_dev_s *dev)
   dev->ieee.rxbuf->rssi = 0;
 
   sem_post(&dev->ieee.rxsem);
-  /*
-   * TODO:
-   * 	Not to sure yet what I should do here.  I will something
-   * 	soon.
+
+  /* TODO:
+   *   Not to sure yet what I should do here.  I will something
+   *   soon.
    */
 
   /* Re enable the IRQ */
+
   dev->lower->irq(dev->lower, NULL, true);
 }
 
@@ -1326,23 +1437,21 @@ static void at86rf23x_irqwork_rx(FAR struct at86rf23x_dev_s *dev)
  *   Misc/unofficial device controls.
  *
  ****************************************************************************/
+
 static void at86rf23x_irqwork_tx(FAR struct at86rf23x_dev_s *dev)
 {
   vdbg("6LOWPAN:Tx IRQ\n");
 
-  /*
-   * TODO:
-   * 	There needs to be more here but for now just alert the waiting
-   * 	thread.  Maybe put it back into Rx mode
-   *
+  /* TODO:
+   *   There needs to be more here but for now just alert the waiting
+   *   thread.  Maybe put it back into Rx mode
    */
 
   /* Re enable the IRQ */
+
   dev->lower->irq(dev->lower, NULL, true);
 
   sem_post(&dev->ieee.txsem);
-
-
 }
 
 /****************************************************************************
@@ -1354,30 +1463,37 @@ static void at86rf23x_irqwork_tx(FAR struct at86rf23x_dev_s *dev)
  *   transmission
  *
  ****************************************************************************/
-static int at86rf23x_transmit(FAR struct ieee802154_radio_s *ieee, FAR struct ieee802154_packet_s *packet)
+
+static int at86rf23x_transmit(FAR struct ieee802154_radio_s *ieee,
+                              FAR struct ieee802154_packet_s *packet)
 {
   FAR struct at86rf23x_dev_s *dev = (FAR struct at86rf23x_dev_s *)ieee;
-  /*
-   * TODO:
-   * 	  A plan needs to be made on when we declare the transmission successful.
-   * 	  	1.  If the packet is sent
-   * 	  	2.  If we receive an ACK.
-   * 	  	3.  Where do we control the retry process?
+
+  /* TODO:
+   *     A plan needs to be made on when we declare the transmission successful.
+   *       1.  If the packet is sent
+   *       2.  If we receive an ACK.
+   *       3.  Where do we control the retry process?
    */
 
-  if(at86rf23x_setTRXstate(dev, TRX_CMD_PLL_ON, false))
-  {
+  if (at86rf23x_setTRXstate(dev, TRX_CMD_PLL_ON, false))
+    {
       at86rf23x_writeframe(dev->spi, packet->data, packet->len);
-  }
+    }
   else
-  {
+    {
       dbg("Transmit could not put the radio in a Tx state\n");
       return ERROR;
-  }
+    }
 
-  /* put the thread that requested transfer to a waiting state */
+  /* Put the thread that requested transfer to a waiting state */
+
   sem_wait(&dev->ieee.txsem);
-  /*TODO Verify that I want to stay in the PLL state or if I want to roll back to RX_ON */
+
+  /* TODO Verify that I want to stay in the PLL state or if I want to roll
+   * back to RX_ON.
+   */
+
   return OK;
 }
 
@@ -1393,18 +1509,22 @@ static int at86rf23x_transmit(FAR struct ieee802154_radio_s *ieee, FAR struct ie
  *
  ****************************************************************************/
 
-FAR struct ieee802154_radio_s *at86rf23x_init(FAR struct spi_dev_s *spi, FAR const struct at86rf23x_lower_s *lower)
+FAR struct ieee802154_radio_s *at86rf23x_init(FAR struct spi_dev_s *spi,
+                                              FAR const struct at86rf23x_lower_s *lower)
 {
   FAR struct at86rf23x_dev_s *dev;
   struct ieee802154_cca_s   cca;
 
   dev = &g_at86rf23x_devices[0];
+
   /* Attach the interface, lower driver, and devops */
+
   dev->spi = spi;
   dev->lower = lower;
   dev->ieee.ops = &at86rf23x_devops;
 
-  /* attach irq */
+  /* Attach irq */
+
   if (lower->irq(lower, at86rf23x_interrupt, false) != OK)
     {
       return NULL;
@@ -1413,65 +1533,68 @@ FAR struct ieee802154_radio_s *at86rf23x_init(FAR struct spi_dev_s *spi, FAR con
   sem_init(&dev->ieee.rxsem, 0, 0);
   sem_init(&dev->ieee.txsem, 0, 0);
 
-  /*Initialize device */
+  /* Initialize device */
+
   at86rf23x_initialize(dev);
 
   /* Configure the desired IRQs of the devices */
+
   at86rf23x_setreg(dev->spi, RF23X_REG_IRQ_MASK, RF23X_IRQ_MASK_DEFAULT);
 
   /* Turn the PLL to the on state */
+
   at86rf23x_setTRXstate(dev, TRX_CMD_PLL_ON, false);
 
-
-  /*SEED value of the CSMA backoff algorithm. */
-
+  /* SEED value of the CSMA backoff algorithm. */
 
 #ifdef RF23X_ANTENNA_DIVERSITY
+  /* Use antenna diversity */
 
-	/* Use antenna diversity */
-	trx_bit_write(SR_ANT_CTRL, ANTENNA_DEFAULT);
-	trx_bit_write(SR_PDT_THRES, THRES_ANT_DIV_ENABLE);
-	trx_bit_write(SR_ANT_DIV_EN, ANT_DIV_ENABLE);
-	trx_bit_write(SR_ANT_EXT_SW_EN, ANT_EXT_SW_ENABLE);
-
+  trx_bit_write(SR_ANT_CTRL, ANTENNA_DEFAULT);
+  trx_bit_write(SR_PDT_THRES, THRES_ANT_DIV_ENABLE);
+  trx_bit_write(SR_ANT_DIV_EN, ANT_DIV_ENABLE);
+  trx_bit_write(SR_ANT_EXT_SW_EN, ANT_EXT_SW_ENABLE);
 #endif
 
 #ifdef RF23X_TIMESTAMP
-
-	/* Enable timestamp init code goes here */
+  /* Enable timestamp init code goes here */
 
 #endif
 
 #ifdef RF23X_RF_FRONTEND_CTRL
-
-	/* Init front end control code goes here */
+  /* Init front end control code goes here */
 
 #endif
+
   /* Set the channel of the radio */
+
   at86rf23x_setchannel(&dev->ieee, 12);
 
   /* Configure the Pan id */
-  //  at86rf23x_setpanid  (&dev->ieee, IEEE802154_PAN_DEFAULT);
+
+  //at86rf23x_setpanid  (&dev->ieee, IEEE802154_PAN_DEFAULT);
+
   /* Configure the Short Addr */
-  //  at86rf23x_setsaddr  (&dev->ieee, IEEE802154_SADDR_UNSPEC);
+
+  //at86rf23x_setsaddr  (&dev->ieee, IEEE802154_SADDR_UNSPEC);
+
   /* Configure the IEEE Addr */
-//  at86rf23x_seteaddr  (&dev->ieee, IEEE802154_EADDR_UNSPEC);
+
+  //at86rf23x_seteaddr  (&dev->ieee, IEEE802154_EADDR_UNSPEC);
 
   /* Default device params at86rf23x defaults to energy detect only */
+
   cca.use_ed = 1;
   cca.use_cs = 0;
-  cca.edth = 0x60; /* CCA mode ED, no carrier sense, recommenced ED threshold -69 dBm */
+  cca.edth = 0x60; /* CCA mode ED, no carrier sense, recommenced ED
+                    * threshold -69 dBm */
   at86rf23x_setcca(&dev->ieee, &cca);
 
-
-
   /* Put the Device to RX ON Mode */
- // at86rf23x_setTRXstate(dev, TRX_CMD_RX_ON, false );
-
+  //at86rf23x_setTRXstate(dev, TRX_CMD_RX_ON, false);
 
   /* Enable Radio IRQ */
-  lower->irq(lower, at86rf23x_interrupt, true);
 
+  lower->irq(lower, at86rf23x_interrupt, true);
   return &dev->ieee;
 }
-
