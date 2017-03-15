@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_IEEE802154_MRF24J40_H
-#define __DRIVERS_IEEE802154_MRF24J40_H
+#ifndef __DRIVERS_WIRELESS_IEEE802154_MRF24J40_H
+#define __DRIVERS_WIRELESS_IEEE802154_MRF24J40_H
 
 /* MRF24J40 Registers *******************************************************/
 
@@ -214,4 +214,4 @@
 #define MRF24J40_TXSTAT_X_SHIFT    6
 #define MRF24J40_TXSTAT_X_MASK     (3 << MRF24J40_TXSTAT_X_SHIFT)
 
-#endif /* __DRIVERS_IEEE802154_MRF24J40_H */
+#endif /* __DRIVERS_WIRELESS_IEEE802154_MRF24J40_H */
