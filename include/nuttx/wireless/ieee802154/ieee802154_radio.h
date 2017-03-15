@@ -86,7 +86,8 @@ struct ieee802154_radio_s;
 
 struct ieee802154_radioops_s
 {
-  CODE int (*setchannel)(FAR struct ieee802154_radio_s *dev, uint8_t channel);
+  CODE int (*setchannel)(FAR struct ieee802154_radio_s *dev,
+             uint8_t channel);
   CODE int (*getchannel)(FAR struct ieee802154_radio_s *dev,
              FAR uint8_t *channel);
 
@@ -107,7 +108,8 @@ struct ieee802154_radioops_s
   CODE int (*getpromisc)(FAR struct ieee802154_radio_s *dev,
              FAR bool *promisc);
 
-  CODE int (*setdevmode)(FAR struct ieee802154_radio_s *dev, uint8_t devmode);
+  CODE int (*setdevmode)(FAR struct ieee802154_radio_s *dev,
+             uint8_t devmode);
   CODE int (*getdevmode)(FAR struct ieee802154_radio_s *dev,
              FAR uint8_t *devmode);
 
@@ -139,14 +141,21 @@ struct ieee802154_radio_s
 
   /* Packet reception management */
 
-  struct ieee802154_packet_s *rxbuf; /* packet reception buffer, filled by rx interrupt, NULL if rx not enabled */
-  sem_t rxsem;                       /* Semaphore posted after reception of a packet */
+  struct ieee802154_packet_s *rxbuf; /* packet reception buffer, filled by
+                                      * rx interrupt, NULL if rx not enabled */
+  sem_t rxsem;                       /* Semaphore posted after reception of
+                                      * a packet */
 
   /* Packet transmission management */
-  bool txok;                         /* Last transmission status, filled by tx interrupt */
-  bool txbusy;                       /* Last transmission failed because channel busy */
-  uint8_t txretries;                 /* Last transmission required this much retries */
-  sem_t txsem;                       /* Semaphore posted after transmission of a packet */
+
+  bool txok;                         /* Last transmission status, filled by
+                                      * tx interrupt */
+  bool txbusy;                       /* Last transmission failed because
+                                      * channel busy */
+  uint8_t txretries;                 /* Last transmission required this much
+                                      * retries */
+  sem_t txsem;                       /* Semaphore posted after transmission
+                                      * of a packet */
 };
 
 #ifdef __cplusplus
