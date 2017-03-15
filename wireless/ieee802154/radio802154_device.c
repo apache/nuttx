@@ -88,7 +88,7 @@ static const struct file_operations radio802154dev_fops =
   radio802154dev_close, /* close */
   radio802154dev_read , /* read */
   radio802154dev_write, /* write */
-  NULL,                /* seek */
+  NULL,                 /* seek */
   radio802154dev_ioctl  /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
   , NULL               /* poll */
