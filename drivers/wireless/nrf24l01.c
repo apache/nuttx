@@ -221,7 +221,7 @@ static uint8_t fifoget(struct nrf24l01_dev_s *dev, FAR uint8_t *buffer,
 static void nrf24l01_worker(FAR void *arg);
 #endif
 
-#ifdef NRF24L01_DEBUG
+#ifdef CONFIG_DEBUG_WIRELESS
 static void binarycvt(char *deststr, const uint8_t *srcbin, size_t srclen)
 #endif
 
@@ -595,7 +595,7 @@ static int nrf24l01_irqhandler(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct nrf24l01_dev_s *dev = (FAR struct nrf24l01_dev_s *)arg;
 
-  winfo("*IRQ*\n");
+  wlinfo("*IRQ*\n");
 
 #ifdef CONFIG_WL_NRF24L01_RXSUPPORT
   /* If RX is enabled we delegate the actual work to bottom-half handler */
@@ -667,7 +667,7 @@ static void nrf24l01_worker(FAR void *arg)
       bool has_data = false;
 #endif
 
-      winfo("RX_DR is set!\n");
+      wlinfo("RX_DR is set!\n");
 
       /* Read and store all received payloads */
 
@@ -686,7 +686,7 @@ static void nrf24l01_worker(FAR void *arg)
           pipeno = (status & NRF24L01_RX_P_NO_MASK) >> NRF24L01_RX_P_NO_SHIFT;
           if (pipeno >= NRF24L01_PIPE_COUNT) /* 6=invalid 7=fifo empty */
             {
-              werr("invalid pipe rx: %d\n", (int)pipeno);
+              wlerr("invalid pipe rx: %d\n", (int)pipeno);
               nrf24l01_flush_rx(dev);
               break;
             }
@@ -703,7 +703,7 @@ static void nrf24l01_worker(FAR void *arg)
 
           if (pktlen > NRF24L01_MAX_PAYLOAD_LEN) /* bad length */
             {
-              werr("invalid length in rx: %d\n", (int)pktlen);
+              wlerr("invalid length in rx: %d\n", (int)pktlen);
               nrf24l01_flush_rx(dev);
               break;
             }
@@ -720,8 +720,8 @@ static void nrf24l01_worker(FAR void *arg)
 
           status = nrf24l01_readreg(dev, NRF24L01_FIFO_STATUS, &fifo_status, 1);
 
-          winfo("FIFO_STATUS=%02x\n", fifo_status);
-          winfo("STATUS=%02x\n", status);
+          wlinfo("FIFO_STATUS=%02x\n", fifo_status);
+          wlinfo("STATUS=%02x\n", status);
         }
       while ((fifo_status & NRF24L01_RX_EMPTY) == 0);
 
@@ -730,7 +730,7 @@ static void nrf24l01_worker(FAR void *arg)
         {
           dev->pfd->revents |= POLLIN;  /* Data available for input */
 
-          winfo("Wake up polled fd\n");
+          wlinfo("Wake up polled fd\n");
           sem_post(dev->pfd->sem);
         }
 #endif
@@ -758,7 +758,7 @@ static void nrf24l01_worker(FAR void *arg)
          }
        else
          {
-           werr("invalid length in rx: %d\n", (int)pktlen);
+           wlerr("invalid length in rx: %d\n", (int)pktlen);
          }
     }
 
@@ -874,7 +874,7 @@ static int dosend(FAR struct nrf24l01_dev_s *dev, FAR const uint8_t *data,
 
   if (result < 0)
     {
-       werr("wait for irq failed\n");
+       wlerr("wait for irq failed\n");
        nrf24l01_flush_tx(dev);
        goto out;
     }
@@ -888,11 +888,11 @@ static int dosend(FAR struct nrf24l01_dev_s *dev, FAR const uint8_t *data,
       dev->lastxmitcount = (obsvalue & NRF24L01_ARC_CNT_MASK)
           >> NRF24L01_ARC_CNT_SHIFT;
 
-      winfo("Transmission OK (lastxmitcount=%d)\n", dev->lastxmitcount);
+      wlinfo("Transmission OK (lastxmitcount=%d)\n", dev->lastxmitcount);
     }
   else if (status & NRF24L01_MAX_RT)
     {
-      winfo("MAX_RT! (lastxmitcount=%d)\n", dev->lastxmitcount);
+      wlinfo("MAX_RT! (lastxmitcount=%d)\n", dev->lastxmitcount);
       result = -ECOMM;
       dev->lastxmitcount = NRF24L01_XMIT_MAXRT;
 
@@ -906,7 +906,7 @@ static int dosend(FAR struct nrf24l01_dev_s *dev, FAR const uint8_t *data,
     {
       /* Unexpected... */
 
-      werr("ERROR: No TX_DS nor MAX_RT bit set in STATUS reg!\n");
+      wlerr("ERROR: No TX_DS nor MAX_RT bit set in STATUS reg!\n");
       result = -EIO;
     }
 
@@ -930,7 +930,7 @@ out:
  * Name: binarycvt
  ****************************************************************************/
 
-#ifdef NRF24L01_DEBUG
+#ifdef CONFIG_DEBUG_WIRELESS
 static void binarycvt(char *deststr, const uint8_t *srcbin, size_t srclen)
 {
   int i = 0;
@@ -958,7 +958,7 @@ static int nrf24l01_open(FAR struct file *filep)
   FAR struct nrf24l01_dev_s *dev;
   int result;
 
-  winfo("Opening nRF24L01 dev\n");
+  wlinfo("Opening nRF24L01 dev\n");
 
   DEBUGASSERT(filep);
   inode = filep->f_inode;
@@ -1004,7 +1004,7 @@ static int nrf24l01_close(FAR struct file *filep)
   FAR struct inode *inode;
   FAR struct nrf24l01_dev_s *dev;
 
-  winfo("Closing nRF24L01 dev\n");
+  wlinfo("Closing nRF24L01 dev\n");
   DEBUGASSERT(filep);
   inode = filep->f_inode;
 
@@ -1103,7 +1103,7 @@ static int nrf24l01_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct nrf24l01_dev_s *dev;
   int result = OK;
 
-  winfo("cmd: %d arg: %ld\n", cmd, arg);
+  wlinfo("cmd: %d arg: %ld\n", cmd, arg);
   DEBUGASSERT(filep);
   inode = filep->f_inode;
 
@@ -1347,7 +1347,7 @@ static int nrf24l01_poll(FAR struct file *filep, FAR struct pollfd *fds,
   FAR struct nrf24l01_dev_s *dev;
   int result = OK;
 
-  winfo("setup: %d\n", (int)setup);
+  wlinfo("setup: %d\n", (int)setup);
   DEBUGASSERT(filep && fds);
   inode = filep->f_inode;
 
@@ -1501,12 +1501,12 @@ int nrf24l01_register(FAR struct spi_dev_s *spi,
 
   /* Register the device as an input device */
 
-  winfo("Registering " DEV_NAME "\n");
+  wlinfo("Registering " DEV_NAME "\n");
 
   result = register_driver(DEV_NAME, &nrf24l01_fops, 0666, dev);
   if (result < 0)
     {
-      werr("ERROR: register_driver() failed: %d\n", result);
+      wlerr("ERROR: register_driver() failed: %d\n", result);
       nrf24l01_unregister(dev);
     }
 
@@ -1990,7 +1990,7 @@ int nrf24l01_sendto(FAR struct nrf24l01_dev_s *dev, FAR const uint8_t *data,
 
   if ((dev->en_aa & 1) && (memcmp(destaddr, dev->pipe0addr, dev->addrlen)))
     {
-      winfo("Change pipe #0 addr to dest addr\n");
+      wlinfo("Change pipe #0 addr to dest addr\n");
       nrf24l01_writereg(dev, NRF24L01_RX_ADDR_P0, destaddr,
                         NRF24L01_MAX_ADDR_LEN);
       pipeaddrchg = true;
@@ -2004,7 +2004,7 @@ int nrf24l01_sendto(FAR struct nrf24l01_dev_s *dev, FAR const uint8_t *data,
 
       nrf24l01_writereg(dev, NRF24L01_RX_ADDR_P0, dev->pipe0addr,
                         NRF24L01_MAX_ADDR_LEN);
-      winfo("Pipe #0 default addr restored\n");
+      wlinfo("Pipe #0 default addr restored\n");
     }
 
   nrf24l01_unlock(dev->spi);
@@ -2045,7 +2045,7 @@ ssize_t nrf24l01_recv(struct nrf24l01_dev_s *dev, uint8_t *buffer,
  * Name: nrf24l01_dumpregs
  ****************************************************************************/
 
-#ifdef NRF24L01_DEBUG
+#ifdef CONFIG_DEBUG_WIRELESS
 void nrf24l01_dumpregs(struct nrf24l01_dev_s *dev)
 {
   uint8_t addr[NRF24L01_MAX_ADDR_LEN];
@@ -2097,17 +2097,17 @@ void nrf24l01_dumpregs(struct nrf24l01_dev_s *dev)
   syslog(LOG_INFO, "FEATURE:   %02x\n",
          nrf24l01_readregbyte(dev, NRF24L01_FEATURE));
 }
-#endif /* NRF24L01_DEBUG */
+#endif /* CONFIG_DEBUG_WIRELESS */
 
 /****************************************************************************
  * Name: nrf24l01_dumprxfifo
  ****************************************************************************/
 
-#if defined(NRF24L01_DEBUG) && defined(CONFIG_WL_NRF24L01_RXSUPPORT)
+#if defined(CONFIG_DEBUG_WIRELESS) && defined(CONFIG_WL_NRF24L01_RXSUPPORT)
 void nrf24l01_dumprxfifo(struct nrf24l01_dev_s *dev)
 {
   syslog(LOG_INFO, "bytes count: %d\n", dev->fifo_len);
   syslog(LOG_INFO, "next read:   %d,  next write: %d\n",
          dev->nxt_read, dev-> nxt_write);
 }
-#endif /* NRF24L01_DEBUG && CONFIG_WL_NRF24L01_RXSUPPORT */
+#endif /* CONFIG_DEBUG_WIRELESS && CONFIG_WL_NRF24L01_RXSUPPORT */
