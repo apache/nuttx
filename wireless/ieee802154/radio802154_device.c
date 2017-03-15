@@ -1,9 +1,10 @@
 /****************************************************************************
- * drivers/ieee802154/ieee802154_device.c
+ * drivers/ieee802154/radio802154_device.c
  *
  *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2014-2015 Sebastien Lorquet. All rights reserved.
  *   Author: Sebastien Lorquet <sebastien@lorquet.fr>
+ *   Author: Anthony Merlino <anthony@vergeaero.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,7 +57,7 @@
  * Private Types
  ****************************************************************************/
 
-struct ieee802154_devwrapper_s
+struct radio802154_devwrapper_s
 {
   FAR struct ieee802154_radio_s *child;
   sem_t devsem;                         /* Device access serialization semaphore */
@@ -67,28 +68,28 @@ struct ieee802154_devwrapper_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static void ieee802154dev_semtake(FAR struct ieee802154_devwrapper_s *dev);
-static int  ieee802154dev_open(FAR struct file *filep);
-static int  ieee802154dev_close(FAR struct file *filep);
-static ssize_t ieee802154dev_read(FAR struct file *filep, FAR char *buffer,
+static void radio802154dev_semtake(FAR struct radio802154_devwrapper_s *dev);
+static int  radio802154dev_open(FAR struct file *filep);
+static int  radio802154dev_close(FAR struct file *filep);
+static ssize_t radio802154dev_read(FAR struct file *filep, FAR char *buffer,
               size_t len);
-static ssize_t ieee802154dev_write(FAR struct file *filep,
+static ssize_t radio802154dev_write(FAR struct file *filep,
               FAR const char *buffer, size_t len);
-static int  ieee802154dev_ioctl(FAR struct file *filep, int cmd,
+static int  radio802154dev_ioctl(FAR struct file *filep, int cmd,
               unsigned long arg);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static const struct file_operations ieee802154dev_fops =
+static const struct file_operations radio802154dev_fops =
 {
-  ieee802154dev_open , /* open */
-  ieee802154dev_close, /* close */
-  ieee802154dev_read , /* read */
-  ieee802154dev_write, /* write */
+  radio802154dev_open , /* open */
+  radio802154dev_close, /* close */
+  radio802154dev_read , /* read */
+  radio802154dev_write, /* write */
   NULL,                /* seek */
-  ieee802154dev_ioctl  /* ioctl */
+  radio802154dev_ioctl  /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
   , NULL               /* poll */
 #endif
@@ -102,14 +103,14 @@ static const struct file_operations ieee802154dev_fops =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ieee802154dev_semtake
+ * Name: radio802154dev_semtake
  *
  * Description:
  *   Acquire the semaphore used for access serialization.
  *
  ****************************************************************************/
 
-static void ieee802154dev_semtake(FAR struct ieee802154_devwrapper_s *dev)
+static void radio802154dev_semtake(FAR struct radio802154_devwrapper_s *dev)
 {
   /* Take the semaphore (perhaps waiting) */
 
@@ -124,30 +125,30 @@ static void ieee802154dev_semtake(FAR struct ieee802154_devwrapper_s *dev)
 }
 
 /****************************************************************************
- * Name: ieee802154dev_semgive
+ * Name: radio802154dev_semgive
  *
  * Description:
  *   Release the semaphore used for access serialization.
  *
  ****************************************************************************/
 
-static inline void ieee802154dev_semgive(FAR struct ieee802154_devwrapper_s *dev)
+static inline void radio802154dev_semgive(FAR struct radio802154_devwrapper_s *dev)
 {
   sem_post(&dev->devsem);
 }
 
 /****************************************************************************
- * Name: ieee802154dev_open
+ * Name: radio802154dev_open
  *
  * Description:
- *   Open the MRF24J40 device.
+ *   Open the 802.15.4 radio character device.
  *
  ****************************************************************************/
 
-static int ieee802154dev_open(FAR struct file *filep)
+static int radio802154dev_open(FAR struct file *filep)
 {
   FAR struct inode *inode;
-  FAR struct ieee802154_devwrapper_s *dev;
+  FAR struct radio802154_devwrapper_s *dev;
 
   DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode = filep->f_inode;
@@ -156,7 +157,7 @@ static int ieee802154dev_open(FAR struct file *filep)
 
   /* Get exclusive access to the driver data structures */
 
-  ieee802154dev_semtake(dev);
+  radio802154dev_semtake(dev);
 
   if (dev->opened)
     {
@@ -174,22 +175,22 @@ static int ieee802154dev_open(FAR struct file *filep)
       dev->opened = true;
     }
 
-  ieee802154dev_semgive(dev);
+  radio802154dev_semgive(dev);
   return OK;
 }
 
 /****************************************************************************
- * Name: ieee802154dev_close
+ * Name: radio802154dev_close
  *
  * Description:
- *   Close the MRF24J40 device.
+ *   Close the 802.15.4 radio character device.
  *
  ****************************************************************************/
 
-static int ieee802154dev_close(FAR struct file *filep)
+static int radio802154dev_close(FAR struct file *filep)
 {
   FAR struct inode *inode;
-  FAR struct ieee802154_devwrapper_s *dev;
+  FAR struct radio802154_devwrapper_s *dev;
   int ret = OK;
 
   DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
@@ -199,7 +200,7 @@ static int ieee802154dev_close(FAR struct file *filep)
 
   /* Get exclusive access to the driver data structures */
 
-  ieee802154dev_semtake(dev);
+  radio802154dev_semtake(dev);
 
   if (!dev->opened)
     {
@@ -217,12 +218,12 @@ static int ieee802154dev_close(FAR struct file *filep)
       dev->opened = false;
     }
 
-  ieee802154dev_semgive(dev);
+  radio802154dev_semgive(dev);
   return ret;
 }
 
 /****************************************************************************
- * Name: ieee802154dev_read
+ * Name: radio802154dev_read
  *
  * Description:
  *   Return the last received packet.
@@ -231,10 +232,10 @@ static int ieee802154dev_close(FAR struct file *filep)
  *
  ****************************************************************************/
 
-static ssize_t ieee802154dev_read(FAR struct file *filep, FAR char *buffer, size_t len)
+static ssize_t radio802154dev_read(FAR struct file *filep, FAR char *buffer, size_t len)
 {
   FAR struct inode *inode;
-  FAR struct ieee802154_devwrapper_s *dev;
+  FAR struct radio802154_devwrapper_s *dev;
   FAR struct ieee802154_packet_s *buf;
   int ret = OK;
 
@@ -285,21 +286,21 @@ done:
 }
 
 /****************************************************************************
- * Name: ieee802154dev_write
+ * Name: radio802154dev_write
  *
  * Description:
  *   Send a packet immediately.
  *   TODO: Put a packet in the send queue. The packet will be sent as soon
- *   as possible.  The buffer must point to a struct ieee802154_packet_s
+ *   as possible.  The buffer must point to a struct radio802154_packet_s
  *   with the correct length.
  *
  ****************************************************************************/
 
-static ssize_t ieee802154dev_write(FAR struct file *filep,
+static ssize_t radio802154dev_write(FAR struct file *filep,
                                    FAR const char *buffer, size_t len)
 {
   FAR struct inode *inode;
-  FAR struct ieee802154_devwrapper_s *dev;
+  FAR struct radio802154_devwrapper_s *dev;
   FAR struct ieee802154_packet_s *packet;
   FAR struct timespec timeout;
   int ret = OK;
@@ -364,18 +365,18 @@ done:
 }
 
 /****************************************************************************
- * Name: ieee802154dev_ioctl
+ * Name: radio802154dev_ioctl
  *
  * Description:
  *   Control the MRF24J40 device. This is where the real operations happen.
  *
  ****************************************************************************/
 
-static int ieee802154dev_ioctl(FAR struct file *filep, int cmd,
+static int radio802154dev_ioctl(FAR struct file *filep, int cmd,
                                    unsigned long arg)
 {
   FAR struct inode *inode;
-  FAR struct ieee802154_devwrapper_s *dev;
+  FAR struct radio802154_devwrapper_s *dev;
   FAR struct ieee802154_radio_s *child;
   int ret = OK;
 
@@ -466,30 +467,35 @@ static int ieee802154dev_ioctl(FAR struct file *filep, int cmd,
 }
 
 /****************************************************************************
- * Name: ieee802154dev_register
+ * Name: radio802154dev_register
  *
  * Description:
- *   Register /dev/ieee%d
+ *   Register a character driver to access the IEEE 802.15.4 radio from
+ *   user-space
+ *
+ * Input Parameters:
+ *   radio - Pointer to the radio struct to be registerd.
+ *   devname - The name of the IEEE 802.15.4 radio to be registered.
+ *
+ * Returned Values:
+ *   Zero (OK) is returned on success.  Otherwise a negated errno value is
+ *   returned to indicate the nature of the failure.
  *
  ****************************************************************************/
 
-int ieee802154_register(FAR struct ieee802154_radio_s *ieee,
-                        unsigned int minor)
+int radio802154dev_register(FAR struct ieee802154_radio_s *radio, FAR char *devname)
 {
-  FAR struct ieee802154_devwrapper_s *dev;
-  char devname[16];
+  FAR struct radio802154_devwrapper_s *dev;
 
-  dev = kmm_zalloc(sizeof(struct ieee802154_devwrapper_s));
+  dev = kmm_zalloc(sizeof(struct radio802154_devwrapper_s));
   if (dev == NULL)
     {
       return -ENOMEM;
     }
 
-  dev->child = ieee;
+  dev->child = radio;
 
   sem_init(&dev->devsem, 0, 1); /* Allow the device to be opened once before blocking */
 
-  sprintf(devname, "/dev/ieee%d", minor);
-
-  return register_driver(devname, &ieee802154dev_fops, 0666, dev);
+  return register_driver(devname, &radio802154dev_fops, 0666, dev);
 }
