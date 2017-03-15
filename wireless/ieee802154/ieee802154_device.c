@@ -34,9 +34,14 @@
  *
  ****************************************************************************/
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
@@ -47,22 +52,30 @@
 #include <nuttx/wireless/ieee802154/ieee802154_radio.h>
 #include <nuttx/ieee802154/ieee802154_dev.h>
 
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
 struct ieee802154_devwrapper_s
 {
-  FAR struct ieee802154_radio_s     *child;
-  sem_t                             devsem;      /* Device access serialization semaphore */
-  int                               opened;   /* this device can only be opened once */
+  FAR struct ieee802154_radio_s *child;
+  sem_t devsem;                         /* Device access serialization semaphore */
+  bool opened;                          /* This device can only be opened once */
 };
 
-/* when rx interrupt is complete, it calls sem_post(&dev->rxsem); */
-/* when tx interrupt is complete, it calls sem_post(&dev->txsem); */
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
 
-static void    ieee802154dev_semtake(FAR struct ieee802154_devwrapper_s *dev);
-static int     ieee802154dev_open   (FAR struct file *filep);
-static int     ieee802154dev_close  (FAR struct file *filep);
-static ssize_t ieee802154dev_read   (FAR struct file *filep, FAR char *buffer, size_t len);
-static ssize_t ieee802154dev_write  (FAR struct file *filep, FAR const char *buffer, size_t len);
-static int     ieee802154dev_ioctl  (FAR struct file *filep, int cmd, unsigned long arg);
+static void ieee802154dev_semtake(FAR struct ieee802154_devwrapper_s *dev);
+static int  ieee802154dev_open(FAR struct file *filep);
+static int  ieee802154dev_close(FAR struct file *filep);
+static ssize_t ieee802154dev_read(FAR struct file *filep, FAR char *buffer,
+              size_t len);
+static ssize_t ieee802154dev_write(FAR struct file *filep,
+              FAR const char *buffer, size_t len);
+static int  ieee802154dev_ioctl(FAR struct file *filep, int cmd,
+              unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -74,12 +87,19 @@ static const struct file_operations ieee802154dev_fops =
   ieee802154dev_close, /* close */
   ieee802154dev_read , /* read */
   ieee802154dev_write, /* write */
-  0                  , /* seek */
+  NULL,                /* seek */
   ieee802154dev_ioctl  /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
-  , 0                  /* poll */
+  , NULL               /* poll */
+#endif
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL               /* unlink */
 #endif
 };
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: ieee802154dev_semtake
@@ -98,7 +118,8 @@ static void ieee802154dev_semtake(FAR struct ieee802154_devwrapper_s *dev)
       /* The only case that an error should occur here is if
        * the wait was awakened by a signal.
        */
-      ASSERT(errno == EINTR);
+
+      DEBUGASSERT(errno == EINTR);
     }
 }
 
@@ -125,24 +146,32 @@ static inline void ieee802154dev_semgive(FAR struct ieee802154_devwrapper_s *dev
 
 static int ieee802154dev_open(FAR struct file *filep)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct ieee802154_devwrapper_s *dev = inode->i_private;
+  FAR struct inode *inode;
+  FAR struct ieee802154_devwrapper_s *dev;
+
+  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
+  inode = filep->f_inode;
+  dev   = inode->i_private;
+  DEBUGASSERT(dev != NULL);
+
+  /* Get exclusive access to the driver data structures */
 
   ieee802154dev_semtake(dev);
 
   if (dev->opened)
     {
+      /* Already opened */
+
       return -EMFILE;
     }
   else
     {
-
       /* Enable interrupts (only rx for now)*/
 
       //mrf24j40_setreg(dev->spi, MRF24J40_INTCON, ~(MRF24J40_INTCON_RXIE) );
       //dev->lower->enable(dev->lower, TRUE);
 
-      dev->opened = TRUE;
+      dev->opened = true;
     }
 
   ieee802154dev_semgive(dev);
@@ -159,15 +188,24 @@ static int ieee802154dev_open(FAR struct file *filep)
 
 static int ieee802154dev_close(FAR struct file *filep)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct ieee802154_devwrapper_s *dev = inode->i_private;
+  FAR struct inode *inode;
+  FAR struct ieee802154_devwrapper_s *dev;
   int ret = OK;
+
+  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
+  inode = filep->f_inode;
+  dev   = inode->i_private;
+  DEBUGASSERT(dev != NULL);
+
+  /* Get exclusive access to the driver data structures */
 
   ieee802154dev_semtake(dev);
 
-  if(!dev->opened)
+  if (!dev->opened)
     {
-    ret = -EIO;
+      /* Driver has not been opened */
+
+      ret = -EIO;
     }
   else
     {
@@ -176,7 +214,7 @@ static int ieee802154dev_close(FAR struct file *filep)
       //mrf24j40_setreg(dev->spi, MRF24J40_INTCON, 0xFF );
       //dev->lower->enable(dev->lower, FALSE);
 
-      dev->opened = FALSE;
+      dev->opened = false;
     }
 
   ieee802154dev_semgive(dev);
@@ -195,13 +233,20 @@ static int ieee802154dev_close(FAR struct file *filep)
 
 static ssize_t ieee802154dev_read(FAR struct file *filep, FAR char *buffer, size_t len)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct ieee802154_devwrapper_s *dev = inode->i_private;
+  FAR struct inode *inode;
+  FAR struct ieee802154_devwrapper_s *dev;
+  FAR struct ieee802154_packet_s *buf;
   int ret = OK;
 
-  FAR struct ieee802154_packet_s *buf = (FAR struct ieee802154_packet_s*)buffer;
+  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
+  inode = filep->f_inode;
+  dev   = inode->i_private;
+  DEBUGASSERT(dev != NULL && buffer != NULL);
+  buf = (FAR struct ieee802154_packet_s*)buffer;
 
-  if (len<sizeof(struct ieee802154_packet_s))
+  /* Get exclusive access to the driver data structures */
+
+  if (len < sizeof(struct ieee802154_packet_s))
     {
       ret = -EINVAL;
       goto done;
@@ -218,6 +263,7 @@ static ssize_t ieee802154dev_read(FAR struct file *filep, FAR char *buffer, size
   /* if no packet is received, this will produce -EAGAIN
    * The user is responsible for sleeping until sth arrives
    */
+
 #if 0
   ret = sem_trywait(&dev->child->rxsem);
 #else
@@ -229,13 +275,12 @@ static ssize_t ieee802154dev_read(FAR struct file *filep, FAR char *buffer, size
       goto done;
     }
 
-  /* disable read until we have process the current read */
-  dev->child->ops->rxenable(dev->child, 0, NULL);
+  /* Disable read until we have process the current read */
 
+  dev->child->ops->rxenable(dev->child, 0, NULL);
   ret = buf->len;
 
 done:
-
   return ret;
 }
 
@@ -244,61 +289,76 @@ done:
  *
  * Description:
  *   Send a packet immediately.
- *   TODO: Put a packet in the send queue. The packet will be sent as soon as possible.
- *   The buffer must point to a struct ieee802154_packet_s with the correct length.
+ *   TODO: Put a packet in the send queue. The packet will be sent as soon
+ *   as possible.  The buffer must point to a struct ieee802154_packet_s
+ *   with the correct length.
  *
  ****************************************************************************/
 
-static ssize_t ieee802154dev_write(FAR struct file *filep, FAR const char *buffer, size_t len)
+static ssize_t ieee802154dev_write(FAR struct file *filep,
+                                   FAR const char *buffer, size_t len)
 {
-  FAR struct inode                     *inode = filep->f_inode;
-  FAR struct ieee802154_devwrapper_s   *dev   = inode->i_private;
-  FAR struct ieee802154_packet_s       *packet;
-  int      ret = OK;
-
-  /* TODO: Make this an option or have a new method of doing timeout from ioctrl */
+  FAR struct inode *inode;
+  FAR struct ieee802154_devwrapper_s *dev;
+  FAR struct ieee802154_packet_s *packet;
   FAR struct timespec timeout;
+  int ret = OK;
+
+  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
+  inode = filep->f_inode;
+  dev   = inode->i_private;
+  DEBUGASSERT(dev != NULL);
+
+  /* Get exclusive access to the driver data structures */
+
+  /* TODO: Make this an option or have a new method of doing timeout from
+   * ioctrl.
+   */
 
   timeout.tv_sec = 1;
   timeout.tv_nsec = 0;
 
-  /* sanity checks */
+  /* Sanity checks */
 
-  if (len<sizeof(struct ieee802154_packet_s))
+  if (len < sizeof(struct ieee802154_packet_s))
     {
       ret = -EINVAL;
-  //    goto done;
-/* TODO Double check I like having assert here.  It is a bigger problem if buffers are to small */
-     DEBUGASSERT(0);
+      //goto done;
+
+      /* TODO Double check I like having assert here.  It is a bigger problem
+       * if buffers are to small.
+       */
+
+      DEBUGASSERT(0);
     }
 
   packet = (FAR struct ieee802154_packet_s*) buffer;
-  if (packet->len > 125) /* Max len 125, 2 FCS bytes auto added by mrf*/
+  if (packet->len > 125) /* Max len 125, 2 FCS bytes auto added by mrf */
     {
       ret = -EPERM;
-     // goto done;
+      //goto done;
       DEBUGASSERT(0);
     }
 
   /* Copy packet to normal device TX fifo.
    * Beacons and GTS transmission will be handled via IOCTLs
    */
-  ret = dev->child->ops->transmit(dev->child, packet);
 
-  if(ret != packet->len)
+  ret = dev->child->ops->transmit(dev->child, packet);
+  if (ret != packet->len)
     {
       ret = -EPERM;
       goto done;
     }
 
-  if(sem_timedwait(&dev->child->txsem, &timeout))
+  if (sem_timedwait(&dev->child->txsem, &timeout))
     {
       dbg("Radio Device timedout on Tx\n");
     }
 
 done:
 
-  /* okay, tx interrupt received. check transmission status to decide success. */
+  /* Okay, tx interrupt received. check transmission status to decide success. */
 
   return ret;
 }
@@ -311,33 +371,95 @@ done:
  *
  ****************************************************************************/
 
-static int ieee802154dev_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+static int ieee802154dev_ioctl(FAR struct file *filep, int cmd,
+                                   unsigned long arg)
 {
-  FAR struct inode                   *inode = filep->f_inode;
-  FAR struct ieee802154_devwrapper_s *dev   = inode->i_private;
-  FAR struct ieee802154_radio_s        *child = dev->child;
+  FAR struct inode *inode;
+  FAR struct ieee802154_devwrapper_s *dev;
+  FAR struct ieee802154_radio_s *child;
   int ret = OK;
 
-  switch(cmd)
+  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
+  inode = filep->f_inode;
+  dev   = inode->i_private;
+  DEBUGASSERT(dev != NULL && dev->child != NULL;
+  child = dev->child;
+
+  /* Get exclusive access to the driver data structures */
+
+  switch (cmd)
     {
-      case MAC854IOCSCHAN   : ret = child->ops->setchannel  (child, (uint8_t)                     arg); break;
-      case MAC854IOCGCHAN   : ret = child->ops->getchannel  (child, (FAR uint8_t*)                arg); break;
-      case MAC854IOCSPANID  : ret = child->ops->setpanid    (child, (uint16_t)                    arg); break;
-      case MAC854IOCGPANID  : ret = child->ops->getpanid    (child, (FAR uint16_t*)               arg); break;
-      case MAC854IOCSSADDR  : ret = child->ops->setsaddr    (child, (uint16_t)                    arg); break;
-      case MAC854IOCGSADDR  : ret = child->ops->getsaddr    (child, (FAR uint16_t*)               arg); break;
-      case MAC854IOCSEADDR  : ret = child->ops->seteaddr    (child, (FAR uint8_t*)                arg); break;
-      case MAC854IOCGEADDR  : ret = child->ops->geteaddr    (child, (FAR uint8_t*)                arg); break;
-      case MAC854IOCSPROMISC: ret = child->ops->setpromisc  (child, (bool)                        arg); break;
-      case MAC854IOCGPROMISC: ret = child->ops->getpromisc  (child, (FAR bool*)                   arg); break;
-      case MAC854IOCSDEVMODE: ret = child->ops->setdevmode  (child, (uint8_t)                     arg); break;
-      case MAC854IOCGDEVMODE: ret = child->ops->getdevmode  (child, (FAR uint8_t*)                arg); break;
-      case MAC854IOCSTXP    : ret = child->ops->settxpower  (child, (int32_t)                     arg); break;
-      case MAC854IOCGTXP    : ret = child->ops->gettxpower  (child, (FAR int32_t*)                arg); break;
-      case MAC854IOCSCCA    : ret = child->ops->setcca      (child, (FAR struct ieee802154_cca_s*)arg); break;
-      case MAC854IOCGCCA    : ret = child->ops->getcca      (child, (FAR struct ieee802154_cca_s*)arg); break;
-      case MAC854IOCGED     : ret = child->ops->energydetect(child, (FAR uint8_t*)                arg); break;
-      default               : ret = child->ops->ioctl       (child, cmd, arg);
+      case MAC854IOCSCHAN:
+        ret = child->ops->setchannel(child, (uint8_t)arg);
+        break;
+
+      case MAC854IOCGCHAN:
+        ret = child->ops->getchannel(child, (FAR uint8_t*)arg);
+        break;
+
+      case MAC854IOCSPANID:
+        ret = child->ops->setpanid(child, (uint16_t)arg);
+        break;
+
+      case MAC854IOCGPANID:
+        ret = child->ops->getpanid(child, (FAR uint16_t*)arg);
+        break;
+
+      case MAC854IOCSSADDR:
+        ret = child->ops->setsaddr(child, (uint16_t)arg);
+        break;
+
+      case MAC854IOCGSADDR:
+        ret = child->ops->getsaddr(child, (FAR uint16_t*)arg);
+        break;
+
+      case MAC854IOCSEADDR:
+        ret = child->ops->seteaddr(child, (FAR uint8_t*)arg);
+        break;
+
+      case MAC854IOCGEADDR:
+        ret = child->ops->geteaddr(child, (FAR uint8_t*)arg);
+        break;
+
+      case MAC854IOCSPROMISC:
+        ret = child->ops->setpromisc(child, (bool)arg);
+        break;
+
+      case MAC854IOCGPROMISC:
+        ret = child->ops->getpromisc(child, (FAR bool*)arg);
+        break;
+
+      case MAC854IOCSDEVMODE:
+        ret = child->ops->setdevmode(child, (uint8_t)arg);
+        break;
+
+      case MAC854IOCGDEVMODE:
+        ret = child->ops->getdevmode(child, (FAR uint8_t*)arg);
+        break;
+
+      case MAC854IOCSTXP:
+        ret = child->ops->settxpower(child, (int32_t)arg);
+        break;
+
+      case MAC854IOCGTXP:
+        ret = child->ops->gettxpower(child, (FAR int32_t*)arg);
+        break;
+
+      case MAC854IOCSCCA:
+        ret = child->ops->setcca(child, (FAR struct ieee802154_cca_s*)arg);
+        break;
+
+      case MAC854IOCGCCA:
+        ret = child->ops->getcca(child, (FAR struct ieee802154_cca_s*)arg);
+        break;
+
+      case MAC854IOCGED:
+        ret = child->ops->energydetect(child, (FAR uint8_t*)arg);
+        break;
+
+      default:
+        ret = child->ops->ioctl(child, cmd,arg);
+        break;
     }
 
   return ret;
@@ -351,24 +473,23 @@ static int ieee802154dev_ioctl(FAR struct file *filep, int cmd, unsigned long ar
  *
  ****************************************************************************/
 
-int ieee802154_register(FAR struct ieee802154_radio_s *ieee, unsigned int minor)
+int ieee802154_register(FAR struct ieee802154_radio_s *ieee,
+                        unsigned int minor)
 {
-  char                               devname[16];
   FAR struct ieee802154_devwrapper_s *dev;
+  char devname[16];
 
   dev = kmm_zalloc(sizeof(struct ieee802154_devwrapper_s));
-
-  if (!dev)
+  if (dev == NULL)
     {
       return -ENOMEM;
     }
 
   dev->child = ieee;
 
-  sem_init(&dev->devsem  , 0, 1); /* Allow the device to be opened once before blocking */
+  sem_init(&dev->devsem, 0, 1); /* Allow the device to be opened once before blocking */
 
   sprintf(devname, "/dev/ieee%d", minor);
 
   return register_driver(devname, &ieee802154dev_fops, 0666, dev);
 }
-
