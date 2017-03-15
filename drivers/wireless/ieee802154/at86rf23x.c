@@ -283,7 +283,7 @@ static void at86rf23x_setreg(FAR struct spi_dev_s *spi, uint32_t addr,
   SPI_SELECT(spi, SPIDEV_IEEE802154, false);
   at86rf23x_unlock(spi);
 
-  vdbg("0x%02X->r[0x%02X]\n", val, addr);
+  wlinfo("0x%02X->r[0x%02X]\n", val, addr);
 }
 
 /****************************************************************************
@@ -311,7 +311,7 @@ static uint8_t at86rf23x_getreg(FAR struct spi_dev_s *spi, uint32_t addr)
 
   at86rf23x_unlock(spi);
 
-  vdbg("r[0x%02X]=0x%02X\n",addr,val[1]);
+  wlinfo("r[0x%02X]=0x%02X\n",addr,val[1]);
 
   return val[1];
 }
@@ -456,7 +456,7 @@ static int at86rf23x_setTRXstate(FAR struct at86rf23x_dev_s *dev,
      (status != TRX_STATUS_TXARETON) &&
      (status != TRX_STATUS_PON))
     {
-      dbg("Invalid State\n");
+      wlerr("ERROR: Invalid State\n");
       return ERROR;
     }
 
@@ -632,17 +632,17 @@ static int at86rf23x_setTRXstate(FAR struct at86rf23x_dev_s *dev,
       break;
 
     default:
-      dbg("%s \n", EINVAL_STR);
+      wlerr("ERRPR: %s \n", EINVAL_STR);
       init_status = 0;/* Placed this here to keep compiler happy when not in debug */
       return -EINVAL;
     }
 
   if (ret == ERROR)
     {
-      dbg("State Transistion Error\n");
+      wlerr("ERROR: State Transistion Error\n");
     }
 
-  vdbg("Radio state change state[0x%02x]->state[0x%02x]\n", init_status, status);
+  wlinfo("Radio state change state[0x%02x]->state[0x%02x]\n", init_status, status);
   return ret;
 }
 
@@ -671,7 +671,7 @@ static int at86rf23x_setchannel(FAR struct ieee802154_radio_s *ieee,
 
   if (chan < 11 || chan > 26)
     {
-      dbg("Invalid requested chan: %d\n",chan);
+      wlerr("ERROR: Invalid requested chan: %d\n",chan);
       return -EINVAL;
     }
 
@@ -681,7 +681,7 @@ static int at86rf23x_setchannel(FAR struct ieee802154_radio_s *ieee,
 
   if ((TRX_STATUS_SLEEP == state) || (TRX_STATUS_PON == state))
     {
-      dbg("Radio in invalid mode [%02x] to set the channel\n", state);
+      wlerr("ERROR: Radio in invalid mode [%02x] to set the channel\n", state);
       return ERROR;
     }
 
@@ -693,7 +693,7 @@ static int at86rf23x_setchannel(FAR struct ieee802154_radio_s *ieee,
 
   dev->channel = chan;
 
-  vdbg("CHANNEL Changed to %d\n", chan);
+  wlinfo("CHANNEL Changed to %d\n", chan);
   return OK;
 }
 
@@ -1200,7 +1200,7 @@ int at86rf23x_initialize(FAR struct at86rf23x_dev_s *dev)
   part = at86rf23x_getreg(dev->spi, RF23X_REG_PART);
   version = at86rf23x_getreg(dev->spi, RF23X_REG_VERSION);
 
-  dbg("Radio part: 0x%02x version: 0x%02x found\n", part, version);
+  wlinfo("Radio part: 0x%02x version: 0x%02x found\n", part, version);
   return OK;
 }
 
@@ -1236,7 +1236,7 @@ static int at86rf23x_resetrf(FAR struct at86rf23x_dev_s *dev)
 
       if (retry_cnt == RF23X_MAX_RETRY_RESET_TO_TRX_OFF)
         {
-          dbg("Reset of transceiver failed\n");
+          wlerr("ERROR: Reset of transceiver failed\n");
           return ERROR;
         }
 
@@ -1346,9 +1346,11 @@ static int at86rf23x_regdump(FAR struct at86rf23x_dev_s *dev)
 
       len += sprintf(buf+len, "%02x ", at86rf23x_getreg(dev->spi, i));
 
-      /* At the end of each 15 regs or end of rf233s regs and actually print dbg message*/
+      /* At the end of each 15 regs or end of rf233s regs and actually print
+       * debug message.
+       */
 
-      if ((i&15)==15 || i == 0x2f)
+      if ((i&15) == 15 || i == 0x2f)
         {
           sprintf(buf+len, "\n");
           printf("%s",buf);
@@ -1373,7 +1375,7 @@ static void at86rf23x_irqworker(FAR void *arg)
   FAR struct at86rf23x_dev_s *dev = (FAR struct at86rf23x_dev_s *)arg;
   uint8_t irq_status = at86rf23x_getreg(dev->spi, RF23X_REG_IRQ_STATUS);
 
-  vdbg("IRQ: 0x%02X\n", irq_status);
+  wlinfo("IRQ: 0x%02X\n", irq_status);
 
   if ((irq_status & (1<<3)) != 0)
     {
@@ -1388,7 +1390,7 @@ static void at86rf23x_irqworker(FAR void *arg)
     }
   else
     {
-      dbg("Unknown IRQ Status: %d\n", irq_status);
+      wlerr("ERROR: Unknown IRQ Status: %d\n", irq_status);
 
       /* Re enable the IRQ even if we don't know how to handle previous
        * status.
@@ -1410,7 +1412,7 @@ static void at86rf23x_irqwork_rx(FAR struct at86rf23x_dev_s *dev)
 {
   uint8_t rx_len;
 
-  vdbg("6LOWPAN:Rx IRQ\n");
+  wlinfo("6LOWPAN:Rx IRQ\n");
 
   rx_len = at86rf23x_readframe(dev->spi, dev->ieee.rxbuf->data);
 
@@ -1440,7 +1442,7 @@ static void at86rf23x_irqwork_rx(FAR struct at86rf23x_dev_s *dev)
 
 static void at86rf23x_irqwork_tx(FAR struct at86rf23x_dev_s *dev)
 {
-  vdbg("6LOWPAN:Tx IRQ\n");
+  wlinfo("6LOWPAN:Tx IRQ\n");
 
   /* TODO:
    *   There needs to be more here but for now just alert the waiting
@@ -1482,7 +1484,7 @@ static int at86rf23x_transmit(FAR struct ieee802154_radio_s *ieee,
     }
   else
     {
-      dbg("Transmit could not put the radio in a Tx state\n");
+      wlerr("ERROR: Transmit could not put the radio in a Tx state\n");
       return ERROR;
     }
 

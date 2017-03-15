@@ -342,7 +342,7 @@ static uint8_t mrf24j40_getreg(FAR struct spi_dev_s *spi, uint32_t addr)
   SPI_SELECT     (spi, SPIDEV_IEEE802154, false);
   mrf24j40_unlock(spi);
 
-  /*winfo("r[%04X]=%02X\n", addr, rx[len-1]);*/
+  /*wlinfo("r[%04X]=%02X\n", addr, rx[len-1]);*/
   return rx[len-1];
 }
 
@@ -482,7 +482,7 @@ static int mrf24j40_setrxmode(FAR struct mrf24j40_radio_s *dev, int mode)
   mrf24j40_setreg(dev->spi, MRF24J40_RXMCR, reg);
 
   dev->rxmode = mode;
-  winfo("%u\n", (unsigned)mode);
+  wlinfo("%u\n", (unsigned)mode);
   return OK;
 }
 
@@ -508,7 +508,7 @@ static int mrf24j40_setchannel(FAR struct ieee802154_radio_s *ieee,
   FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)ieee;
   if (chan<11 || chan>26)
     {
-      werr("ERROR: Invalid chan: %d\n",chan);
+      wlerr("ERROR: Invalid chan: %d\n",chan);
       return -EINVAL;
     }
 
@@ -523,7 +523,7 @@ static int mrf24j40_setchannel(FAR struct ieee802154_radio_s *ieee,
   mrf24j40_resetrfsm(dev);
 
   dev->channel = chan;
-  //winfo("%u\n", (unsigned)chan);
+  //wlinfo("%u\n", (unsigned)chan);
 
   return OK;
 }
@@ -563,7 +563,7 @@ static int mrf24j40_setpanid(FAR struct ieee802154_radio_s *ieee,
   mrf24j40_setreg(dev->spi, MRF24J40_PANIDL, (uint8_t)(panid&0xFF));
 
   dev->panid = panid;
-  winfo("%04X\n", (unsigned)panid);
+  wlinfo("%04X\n", (unsigned)panid);
 
   return OK;
 }
@@ -605,7 +605,7 @@ static int mrf24j40_setsaddr(FAR struct ieee802154_radio_s *ieee,
   mrf24j40_setreg(dev->spi, MRF24J40_SADRL, (uint8_t)(saddr&0xFF));
 
   dev->saddr = saddr;
-  winfo("%04X\n", (unsigned)saddr);
+  wlinfo("%04X\n", (unsigned)saddr);
   return OK;
 }
 
@@ -817,7 +817,7 @@ static int mrf24j40_settxpower(FAR struct ieee802154_radio_s *ieee,
       return -EINVAL;
     }
 
-  winfo("remaining attenuation: %d mBm\n",txpwr);
+  wlinfo("remaining attenuation: %d mBm\n",txpwr);
 
   switch(txpwr/100)
     {
@@ -935,7 +935,7 @@ static int mrf24j40_regdump(FAR struct mrf24j40_radio_s *dev)
   char buf[4+16*3+2+1];
   int len=0;
 
-  winfo("Short regs:\n");
+  wlinfo("Short regs:\n");
 
   for (i = 0; i < 0x40; i++)
     {
@@ -948,11 +948,11 @@ static int mrf24j40_regdump(FAR struct mrf24j40_radio_s *dev)
       if ((i & 15) == 15)
         {
           sprintf(buf+len, "\n");
-          winfo("%s", buf);
+          wlinfo("%s", buf);
         }
     }
 
-  winfo("Long regs:\n");
+  wlinfo("Long regs:\n");
   for (i=0x80000200;i<0x80000250;i++)
     {
       if ((i&15)==0)
@@ -964,7 +964,7 @@ static int mrf24j40_regdump(FAR struct mrf24j40_radio_s *dev)
       if ((i & 15) == 15)
         {
           sprintf(buf+len, "\n");
-          winfo("%s", buf);
+          wlinfo("%s", buf);
         }
     }
 
@@ -990,7 +990,7 @@ static int mrf24j40_ioctl(FAR struct ieee802154_radio_s *ieee, int cmd,
         return mrf24j40_regdump(dev);
 
       case 1001: dev->paenabled = (uint8_t)arg;
-        winfo("PA %sabled\n", arg ? "en" : "dis");
+        wlinfo("PA %sabled\n", arg ? "en" : "dis");
         return OK;
 
       default:
@@ -1081,7 +1081,7 @@ static int mrf24j40_transmit(FAR struct ieee802154_radio_s *ieee, FAR struct iee
   fc1 = packet->data[0];
   fc2 = packet->data[1];
 
- // winfo("fc1 %02X fc2 %02X\n", fc1,fc2);
+ // wlinfo("fc1 %02X fc2 %02X\n", fc1,fc2);
 
   if ((fc2 & IEEE802154_FC2_DADDR) == IEEE802154_DADDR_SHORT)
     {
@@ -1111,7 +1111,7 @@ static int mrf24j40_transmit(FAR struct ieee802154_radio_s *ieee, FAR struct iee
       hlen += 8; /* Ext saddr */
     }
 
-//  winfo("hlen %d\n",hlen);
+//  wlinfo("hlen %d\n",hlen);
 
   /* Header len, 0, TODO for security modes */
 
@@ -1170,7 +1170,7 @@ static void mrf24j40_irqwork_tx(FAR struct mrf24j40_radio_s *dev)
   dev->ieee.txretries = (reg & MRF24J40_TXSTAT_X_MASK) >> MRF24J40_TXSTAT_X_SHIFT;
   dev->ieee.txbusy    = (reg & MRF24J40_TXSTAT_CCAFAIL) == MRF24J40_TXSTAT_CCAFAIL;
 
-  //winfo("TXSTAT%02X!\n", txstat);
+  //wlinfo("TXSTAT%02X!\n", txstat);
 #warning TODO report errors
   UNUSED(txstat);
 
@@ -1232,7 +1232,7 @@ static void mrf24j40_irqwork_rx(FAR struct mrf24j40_radio_s *dev)
   uint32_t index;
   uint8_t  reg;
 
-  /*winfo("!\n");*/
+  /*wlinfo("!\n");*/
 
   /* Disable rx int */
 
@@ -1248,7 +1248,7 @@ static void mrf24j40_irqwork_rx(FAR struct mrf24j40_radio_s *dev)
 
   addr = MRF24J40_RXBUF_BASE;
   dev->ieee.rxbuf->len = mrf24j40_getreg(dev->spi, addr++);
-  /*winfo("len %3d\n", dev->ieee.rxbuf->len);*/
+  /*wlinfo("len %3d\n", dev->ieee.rxbuf->len);*/
 
   for (index = 0; index < dev->ieee.rxbuf->len; index++)
     {
@@ -1303,7 +1303,7 @@ static void mrf24j40_irqworker(FAR void *arg)
   /* Read and store INTSTAT - this clears the register. */
 
   intstat = mrf24j40_getreg(dev->spi, MRF24J40_INTSTAT);
-//  winfo("INT%02X\n", intstat);
+//  wlinfo("INT%02X\n", intstat);
 
   /* Do work according to the pending interrupts */
 

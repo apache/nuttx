@@ -353,7 +353,7 @@ static ssize_t ieee802154dev_write(FAR struct file *filep,
 
   if (sem_timedwait(&dev->child->txsem, &timeout))
     {
-      _err("Radio Device timedout on Tx\n");
+      wlerr("Radio Device timedout on Tx\n");
     }
 
 done:
