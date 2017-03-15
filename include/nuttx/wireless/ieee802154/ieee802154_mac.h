@@ -60,6 +60,36 @@
 #define IEEE802154_SADDR_BCAST  (uint16_t)0xFFFE
 #define IEEE802154_EADDR_UNSPEC (uint8_t*)"\xff\xff\xff\xff\xff\xff\xff\xff"
 
+/* IEEE 802.15.4 PHY constants */
+
+#define MAC802154_aMaxPHYPacketSize       127
+#define MAC802154_aTurnaroundTime         12 /*symbol periods*/
+
+/* IEEE 802.15.4 MAC constants */
+
+#define MAC802154_aBaseSlotDuration       60
+#define MAC802154_aNumSuperframeSlots     16
+#define MAC802154_aBaseSuperframeDuration (MAC802154_aBaseSlotDuration * MAC802154_aNumSuperframeSlots)
+#define MAC802154_aMaxBE                  5
+#define MAC802154_aMaxBeaconOverhead      75
+#define MAC802154_aMaxBeaconPayloadLength (MAC802154_aMaxPHYPacketSize - MAC802154_aMaxBeaconOverhead)
+#define MAC802154_aGTSDescPersistenceTime 4
+#define MAC802154_aMaxFrameOverhead       25
+#define MAC802154_aMaxFrameResponseTime   1220
+#define MAC802154_aMaxFrameRetries        3
+#define MAC802154_aMaxLostBeacons         4
+#define MAC802154_aMaxMACFrameSize        (MAC802154_aMaxPHYPacketSize - MAC802154_aMaxFrameOverhead)
+#define MAC802154_aMaxSIFSFrameSize       18
+#define MAC802154_aMinCAPLength           440
+#define MAC802154_aMinLIFSPeriod          40
+#define MAC802154_aMinSIFSPeriod          12
+#define MAC802154_aResponseWaitTime       (32 * MAC802154_aBaseSuperframeDuration)
+#define MAC802154_aUnitBackoffPeriod      20
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
 /* IEEE 802.15.4 MAC status codes */
 
 enum
@@ -88,32 +118,8 @@ enum
   MAC802154_STATUS_UNSUPPORTED_ATTRIBUTE
 };
 
-/* IEEE 802.15.4 PHY constants */
-#define MAC802154_aMaxPHYPacketSize       127
-#define MAC802154_aTurnaroundTime         12 /*symbol periods*/
-
-/* IEEE 802.15.4 MAC constants */
-#define MAC802154_aBaseSlotDuration       60
-#define MAC802154_aNumSuperframeSlots     16
-#define MAC802154_aBaseSuperframeDuration (MAC802154_aBaseSlotDuration * MAC802154_aNumSuperframeSlots)
-#define MAC802154_aMaxBE                  5
-#define MAC802154_aMaxBeaconOverhead      75
-#define MAC802154_aMaxBeaconPayloadLength (MAC802154_aMaxPHYPacketSize - MAC802154_aMaxBeaconOverhead)
-#define MAC802154_aGTSDescPersistenceTime 4
-#define MAC802154_aMaxFrameOverhead       25
-#define MAC802154_aMaxFrameResponseTime   1220
-#define MAC802154_aMaxFrameRetries        3
-#define MAC802154_aMaxLostBeacons         4
-#define MAC802154_aMaxMACFrameSize        (MAC802154_aMaxPHYPacketSize - MAC802154_aMaxFrameOverhead)
-#define MAC802154_aMaxSIFSFrameSize       18
-#define MAC802154_aMinCAPLength           440
-#define MAC802154_aMinLIFSPeriod          40
-#define MAC802154_aMinSIFSPeriod          12
-#define MAC802154_aResponseWaitTime       (32 * MAC802154_aBaseSuperframeDuration)
-#define MAC802154_aUnitBackoffPeriod      20
-
-
 /* IEEE 802.15.4 PHY/MAC PIB attributes IDs */
+
 enum
 {
   MAC802154_phyCurrentChannel = 0x00,
@@ -166,90 +172,95 @@ struct ieee802154_addr_s
 {
   uint8_t ia_len;            /* structure length, 0/2/8 */
   uint16_t ia_panid;         /* PAN identifier, can be IEEE802154_PAN_UNSPEC */
-  union {
+  union
+  {
     uint16_t _ia_saddr;      /* short address */
     uint8_t  _ia_eaddr[8];   /* extended address */
   } ia_addr;
+
 #define ia_saddr ia_addr._ia_saddr
 #define ia_eaddr ia_addr._ia_eaddr
 };
+
 #define IEEE802154_ADDRSTRLEN 22 /* (2*2+1+8*2, PPPP/EEEEEEEEEEEEEEEE) */
 
 /* Operations */
 
-struct ieee802154_mac_s;
+struct ieee802154_mac_s; /* Forward reference */
 
 struct ieee802154_macops_s
 {
   /* Requests, confirmed asynchronously via callbacks */
 
-  CODE int req_data        (struct ieee802154_mac_s *mac, /* Transmit a data frame */
-                            uint8_t handle,
-                            uint8_t *buf,
-                            int len);
+  /* Transmit a data frame */
 
-  CODE int req_purge       (struct ieee802154_mac_s *mac, /* Cancel transmission of a data frame */
-                            uint8_t handle);
+  CODE int (*req_data)(FAR struct ieee802154_mac_s *mac, uint8_t handle,
+                       FAR uint8_t *buf, int len);
 
-  CODE int req_associate   (struct ieee802154_mac_s *mac, /* Start association with coordinator */
-                            uint16_t panid,
+  /* Cancel transmission of a data frame */
+
+  CODE int (*req_purge)(FAR struct ieee802154_mac_s *mac, uint8_t handle);
+
+  /* Start association with coordinator */
+
+  CODE int (*req_associate)(FAR struct ieee802154_mac_s *mac, uint16_t panid,
                             uint8_t *coordeadr);
 
-  CODE int req_disassociate(struct ieee802154_mac_s *mac, /* Start disassociation with coordinator */
-                            uint8_t *eadr,
-                            uint8_t reason);
+  /* Start disassociation with coordinator */
 
-  CODE int req_get         (struct ieee802154_mac_s *mac, /* Read the PIB */
-                            int attribute);
+  CODE int (*req_disassociate)(FAR struct ieee802154_mac_s *mac,
+                               FAR uint8_t *eadr, uint8_t reason);
 
-  CODE int req_gts         (struct ieee802154_mac_s *mac, /* Allocate or deallocate a GTS */ 
-                            uint8_t* characteristics);
+  /* Read the PIB */
 
-  CODE int req_reset       (struct ieee802154_mac_s *mac, /* MAC layer reset */
-                            bool setdefaults);
+  CODE int (*req_get)(FAR struct ieee802154_mac_s *mac, int attribute);
 
-  CODE int req_rxenable    (struct ieee802154_mac_s *mac, /* PHY receiver control */
-                            bool deferrable,
-                            int ontime,
-                            int duration);
+  /* Allocate or deallocate a GTS */
 
-  CODE int req_scan        (struct ieee802154_mac_s *mac, /* Start a network scan */
-                            uint8_t type,
-                            uint32_t channels,
-                            int duration);
+  CODE int (*req_gts)(FAR struct ieee802154_mac_s *mac,
+                      FAR uint8_t *characteristics);
 
-  CODE int req_set         (struct ieee802154_mac_s *mac, /* Change the PIB */
-                            int attribute,
-                            uint8_t *value,
-                            int valuelen);
+  /* MAC layer reset */
 
-  CODE int req_start       (struct ieee802154_mac_s *mac, 
-                            uint16_t panid,
-                            int channel,
-                            uint8_t bo,
-                            uint8_t fo,
-                            bool coord,
-                            bool batext,
-                            bool realign);
+  CODE int (*req_reset)(FAR struct ieee802154_mac_s *mac, bool setdefaults);
 
-  CODE int req_sync        (struct ieee802154_mac_s *mac, 
-                            int channel,
-                            bool track);
+  /* PHY receiver control */
 
-  CODE int req_poll        (struct ieee802154_mac_s *mac, 
-                            uint8_t *coordaddr);
+  CODE int (*req_rxenable)(FAR struct ieee802154_mac_s *mac, bool deferrable,
+                           int ontime, int duration);
+
+  /* Start a network scan */
+
+  CODE int (*req_scan)(FAR struct ieee802154_mac_s *mac, uint8_t type,
+                       uint32_t channels, int duration);
+
+  /* Change the PIB */
+
+  CODE int (*req_set)(FAR struct ieee802154_mac_s *mac, int attribute,
+                      FAR uint8_t *value, int valuelen);
+
+  CODE int (*req_start)(FAR struct ieee802154_mac_s *mac, uint16_t panid,
+                        int channel, uint8_t bo, uint8_t fo, bool coord,
+                        bool batext, bool realign);
+
+  CODE int (*req_sync)(FAR struct ieee802154_mac_s *mac, int channel,
+                       bool track);
+
+  CODE int (*req_poll)(FAR struct ieee802154_mac_s *mac,
+                       FAR uint8_t *coordaddr);
 
   /* Synchronous Responses to Indications received via callbacks */
 
-  CODE int rsp_associate   (struct ieee802154_mac_s *mac,  /* Reply to an association request */
-                            uint8_t eadr,
-                            uint16_t saddr,
-                            int status);
+  /* Reply to an association request */
 
-  CODE int rsp_orphan      (struct ieee802154_mac_s *mac,  /* Orphan device management */
-                            uint8_t *orphanaddr,
-                            uint16_t saddr,
-                            bool associated);
+  CODE int (*rsp_associate)(FAR struct ieee802154_mac_s *mac, uint8_t eadr,
+                            uint16_t saddr, int status);
+
+  /* Orphan device management */
+
+  CODE int (*rsp_orphan)(FAR struct ieee802154_mac_s *mac,
+                         FAR uint8_t *orphanaddr, uint16_t saddr,
+                         bool associated);
 };
 
 /* Notifications */
@@ -258,74 +269,95 @@ struct ieee802154_maccb_s
 {
   /* Asynchronous confirmations to requests */
 
-  CODE int conf_data        (struct ieee802154_mac_s *mac, /* Data frame was received by remote device */
-                             uint8_t *buf,
-                             int len);
-  CODE int conf_purge       (struct ieee802154_mac_s *mac, /* Data frame was purged */
-                             uint8_t handle,
-                             int status);
-  CODE int conf_associate   (struct ieee802154_mac_s *mac, /* Association request completed */
-                             uint16_t saddr,
-                             int status);
-  CODE int conf_disassociate(struct ieee802154_mac_s *mac, /* Disassociation request completed */
-                             int status);
-  CODE int conf_get         (struct ieee802154_mac_s *mac, /* PIB data returned */
-                             int status,
-                             int attribute,
-                             uint8_t *value,
-                             int valuelen);
-  CODE int conf_gts         (struct ieee802154_mac_s *mac, /* GTS management completed */
-                             uint8_t *characteristics,
-                             int status);
-  CODE int conf_reset       (struct ieee802154_mac_s *mac, /* MAC reset completed */
-                             int status);
-  CODE int conf_rxenable    (struct ieee802154_mac_s *mac,
-                             int status);
-  CODE int conf_scan        (struct ieee802154_mac_s *mac,
-                             int status,
-                             uint8_t type,
-                             uint32_t unscanned,
-                             int rsltsize,
-                             uint8_t *edlist,
-                             uint8_t *pandescs);
-  CODE int conf_set         (struct ieee802154_mac_s *mac,
-                             int status, int attribute);
-  CODE int conf_start       (struct ieee802154_mac_s *mac,
-                             int status);
-  CODE int conf_poll        (struct ieee802154_mac_s *mac,
-                             int status);
+  /* Data frame was received by remote device */
+
+  CODE int (*conf_data)(FAR struct ieee802154_mac_s *mac,
+                        FAR uint8_t *buf, int len);
+
+  /* Data frame was purged */
+
+  CODE int (*conf_purge)(FAR struct ieee802154_mac_s *mac, uint8_t handle,
+                         int status);
+
+  /* Association request completed */
+
+  CODE int (*conf_associate)(FAR struct ieee802154_mac_s *mac,
+                             uint16_t saddr, int status);
+
+  /* Disassociation request completed */
+
+  CODE int (*conf_disassociate)(FAR struct ieee802154_mac_s *mac,
+                                int status);
+
+  /* PIB data returned */
+
+  CODE int (*conf_get)(FAR struct ieee802154_mac_s *mac, int status,
+                       int attribute, FAR uint8_t *value,
+                       int valuelen);
+
+  /* GTS management completed */
+
+  CODE int (*conf_gts)(FAR struct ieee802154_mac_s *mac,
+                       FAR uint8_t *characteristics, int status);
+
+  /* MAC reset completed */
+
+  CODE int (*conf_reset)(FAR struct ieee802154_mac_s *mac, int status);
+
+  CODE int (*conf_rxenable)(FAR struct ieee802154_mac_s *mac, int status);
+
+  CODE int (*conf_scan)(FAR struct ieee802154_mac_s *mac, int status,
+                        uint8_t type, uint32_t unscanned, int rsltsize,
+                        FAR uint8_t *edlist, FAR uint8_t *pandescs);
+
+  CODE int (*conf_set)(FAR struct ieee802154_mac_s *mac, int status,
+                       int attribute);
+
+  CODE int (*conf_start)(FAR struct ieee802154_mac_s *mac, int status);
+
+  CODE int (*conf_poll)(FAR struct ieee802154_mac_s *mac, int status);
 
   /* Asynchronous event indications, replied to synchronously with responses */
 
-  CODE int ind_data         (struct ieee802154_mac_s *mac, /* Data frame received */
-                             uint8_t *buf,
-                             int len);
-  CODE int ind_associate    (struct ieee802154_mac_s *mac, /* Association request received */
-                             uint16_t clipanid,
-                             uint8_t *clieaddr);
-  CODE int ind_disassociate (struct ieee802154_mac_s *mac, /* Disassociation request received */
-                             uint8_t *eadr,
-                             uint8_t reason);
-  CODE int ind_beaconnotify (struct ieee802154_mac_s *mac, /* Beacon notification */
-                             uint8_t *bsn,
-                             uint_t *pandesc,
-                             uint8_t *sdu,
-                             int sdulen);
-  CODE int ind_gts          (struct ieee802154_mac_s *mac, /* GTS management request received */
-                             uint8_t *devaddr,
-                             uint8_t *characteristics);
-  CODE int ind_orphan       (struct ieee802154_mac_s *mac, /* Orphan device detected */
-                             uint8_t *orphanaddr);
-  CODE int ind_commstatus   (struct ieee802154_mac_s *mac,
-                             uint16_t panid,
-                             uint8_t *src,
-                             uint8_t *dst,
-                             int status);
-  CODE int ind_syncloss     (struct ieee802154_mac_s *mac,
-                             int reason);
+  /* Data frame received */
+
+  CODE int (*ind_data)(FAR struct ieee802154_mac_s *mac, FAR uint8_t *buf,
+                       int len);
+
+  /* Association request received */
+
+  CODE int (*ind_associate)(FAR struct ieee802154_mac_s *mac,
+                            uint16_t clipanid, FAR uint8_t *clieaddr);
+
+   /* Disassociation request received */
+
+  CODE int (*ind_disassociate)(FAR struct ieee802154_mac_s *mac,
+                               FAR uint8_t *eadr, uint8_t reason);
+
+  /* Beacon notification */
+
+  CODE int (*ind_beaconnotify)(FAR struct ieee802154_mac_s *mac,
+                               FAR uint8_t *bsn, FAR uint_t *pandesc,
+                               FAR uint8_t *sdu, int sdulen);
+
+  /* GTS management request received */
+
+  CODE int (*ind_gts)(FAR struct ieee802154_mac_s *mac,
+                      FAR uint8_t *devaddr, FAR uint8_t *characteristics);
+
+  /* Orphan device detected */
+
+  CODE int (*ind_orphan)(FAR struct ieee802154_mac_s *mac,
+                         FAR uint8_t *orphanaddr);
+
+  CODE int (*ind_commstatus)(FAR struct ieee802154_mac_s *mac,
+                             uint16_t panid, FAR uint8_t *src,
+                             FAR uint8_t *dst, int status);
+
+  CODE int (*ind_syncloss)(FAR struct ieee802154_mac_s *mac, int reason);
 };
 
-struct ieee802154_radio_s;
+struct ieee802154_radio_s; /* Forware reference */
 
 struct ieee802154_mac_s
 {
@@ -346,8 +378,7 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-/*
- * Instanciate a 802.15.4 MAC from a 802.15.4 radio device.
+/* Instanciate a 802.15.4 MAC from a 802.15.4 radio device.
  * To create a 802.15.4 MAC, you need to pass:
  *  - an instance of a radio driver in radiodev
  *  - a pointer to a structure that contains MAC callback routines to
@@ -356,9 +387,12 @@ extern "C"
  *  responses.
  * This API does not create any device accessible to userspace. If you want to
  * call these APIs from userspace, you have to wrap your mac in a character
- * device via mac802154_device.c . 
+ * device via mac802154_device.c .
  */
-FAR struct ieee802154_mac_s * mac802154_register(FAR struct ieee802154_radio_s *radiodev, struct ieee802154_maccb_s *callbacks);
+
+FAR struct ieee802154_mac_s *
+  mac802154_register(FAR struct ieee802154_radio_s *radiodev,
+                     FAR struct ieee802154_maccb_s *callbacks);
 
 #undef EXTERN
 #ifdef __cplusplus
