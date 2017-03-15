@@ -735,7 +735,7 @@ endif # DEBUG_NET
 config DEBUG_WIRELESS
 	bool "Wireless Debug Features"
 	default n
-	depends on WIRELESS | DRIVERS_WIRELESS
+	depends on WIRELESS || DRIVERS_WIRELESS
 	---help---
 		Enable DEBUG_WIRELESS debug features.
 
