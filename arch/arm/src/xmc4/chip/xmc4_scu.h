@@ -626,18 +626,26 @@
 #define SCU_SYSCLKCR_SYSDIV_MASK    (0xff << SCU_CLK_SYSCLKCR_SYSDIV_SHIFT)
 #  define SCU_SYSCLKCR_SYSDIV(n)    ((uint32_t)((n)-1) << SCU_CLK_SYSCLKCR_SYSDIV_SHIFT)
 
-#define SCU_SYSCLKCR_SYSSEL         (1 << 16)  /* Bit 16: System Clock Selection Value */
-#  define SCU_SYSCLKCR_SYSSEL_OFI   (0)        /*         0=OFI clock */
-#  define SCU_SYSCLKCR_SYSSEL_PLL   (1 << 16)  /*         1=PLL clock */
+#define SCU_SYSCLKCR_SYSSEL         (1 << 16) /* Bit 16: System Clock Selection Value */
+#  define SCU_SYSCLKCR_SYSSEL_OFI   (0)       /*         0=OFI clock */
+#  define SCU_SYSCLKCR_SYSSEL_PLL   (1 << 16) /*         1=PLL clock */
 
 /* CPU Clock Control */
 
-#define SCU_CPUCLKCR_CPUDIV         (1 << 0)   /* Bit 0: CPU Clock Divider Enable */
+#define SCU_CPUCLKCR_CPUDIV         (1 << 0)  /* Bit 0: CPU Clock Divider Enable */
 
 /* Peripheral Bus Clock Control */
 #define SCU_PBCLKCR_
+
 /* USB Clock Control */
-#define SCU_USBCLKCR_
+
+#define SCU_USBCLKCR_USBDIV_SHIFT   (0)       /* Bits 0-2: USB Clock Divider Value */
+#define SCU_USBCLKCR_USBDIV_MASK    (7 << SCU_CLK_USBCLKCR_USBDIV_SHIFT)
+#  define SCU_SYSCLKCR_USBDIV(n)    ((uint32_t)((n)-1) << SCU_CLK_USBCLKCR_USBDIV_SHIFT)
+#define SCU_USBCLKCR_USBSEL         (1 << 16) /* Bit 16: USB Clock Selection Value */
+#  define SCU_USBCLKCR_USBSEL_USBPLL (0)      /*         0=USB PLL Clock */
+#  define SCU_USBCLKCR_USBSEL_PLL   (1 << 16) /*         1= PLL Clock */
+
 /* EBU Clock Control */
 #define SCU_EBUCLKCR_
 /* CCU Clock Control */
@@ -752,10 +760,34 @@
 #  define SCU_PLLCON2_K1INSEL_OFI   (1 << 8)  /*        1=Backup clock source selected */
 
 /* USB PLL Status Register */
-#define SCU_USBPLLSTAT_
+
+#define SCU_USBPLLSTAT_VCOBYST      (1 << 0)  /* Bit 0:  VCO Bypass Status */
+#define SCU_USBPLLSTAT_PWDSTAT      (1 << 1)  /* Bit 1:  PLL Power-saving Mode Status */
+#define SCU_USBPLLSTAT_VCOLOCK      (1 << 2)  /* Bit 2:  PLL VCO Lock Status */
+#define SCU_USBPLLSTAT_BY           (1 << 6)  /* Bit 6:  Bypass Mode Status */
+#define SCU_USBPLLSTAT_VCOLOCKED    (1 << 7)  /* Bit 7:  PLL LOCK Status */
+
 /* USB PLL Control Register */
-#define SCU_USBPLLCON_
+
+#define SCU_USBPLLCON_VCOBYP        (1 << 0)  /* Bit 0:  VCO Bypass */
+#define SCU_USBPLLCON_VCOPWD        (1 << 1)  /* Bit 1:  VCO Power Saving Mode */
+#define SCU_USBPLLCON_VCOTR         (1 << 2)  /* Bit 2:  VCO Trim Control */
+#define SCU_USBPLLCON_FINDIS        (1 << 4)  /* Bit 4:  Disconnect Oscillator from VCO */
+#define SCU_USBPLLCON_OSCDISCDIS    (1 << 6)  /* Bit 6:  Oscillator Disconnect Disable */
+#define SCU_USBPLLCON_NDIV_SHIFT    (8)       /* Bits 8-14: N-Divider Val */
+#define SCU_USBPLLCON_NDIV_MASK     (0x7f << SCU_USBPLLCON_NDIV_SHIFT)
+#  define SCU_USBPLLCON_NDIV(n)     ((uint32_t)((n)-1) << SCU_USBPLLCON_NDIV_SHIFT)
+#define SCU_USBPLLCON_PLLPWD        (1 << 16) /* Bit 16: PLL Power Saving Mode */
+#define SCU_USBPLLCON_RESLD         (1 << 18) /* Bit 18: Restart VCO Lock Detection */
+#define SCU_USBPLLCON_PDIV_SHIFT    (24)      /* Bits 24-27: P-Divider Value */
+#define SCU_USBPLLCON_PDIV_MASK     (15 << SCU_USBPLLCON_PDIV_SHIFT)
+#  define SCU_USBPLLCON_PDIV(n)     ((uint32_t)((n)-1) << SCU_USBPLLCON_PDIV_SHIFT)
+
 /* Clock Multiplexing Status Register */
-#define SCU_CLKMXSTAT_
+
+#define SCU_CLKMXSTAT_SYSCLKMUX_SHIFT (0)     /* Bits 0-1: System Clock Multiplexing Status */
+#define SCU_CLKMXSTAT_SYSCLKMUX_MASK  (3 << SCU_CLKMXSTAT_SYSCLKMUX_SHIFT)
+#  define SCU_CLKMXSTAT_SYSCLKMUX_OFI (1 << SCU_CLKMXSTAT_SYSCLKMUX_SHIFT)
+#  define SCU_CLKMXSTAT_SYSCLKMUX_PLL (2 << SCU_CLKMXSTAT_SYSCLKMUX_SHIFT)
 
 #endif /* __ARCH_ARM_SRC_XMC4_CHIP_XMC4_SCU_H */

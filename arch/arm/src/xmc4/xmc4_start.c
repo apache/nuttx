@@ -48,6 +48,7 @@
 
 #include "up_arch.h"
 #include "up_internal.h"
+#include "chip/xmc4_flash.h"
 
 #include "xmc4_userspace.h"
 
@@ -62,6 +63,8 @@
 #ifdef CONFIG_ARCH_FPU
 static inline void xmc4_fpu_config(void);
 #endif
+static inline void xmc4_unaligned(void);
+static inline void xmc4_flash_waitstates(void);
 #ifdef CONFIG_STACK_COLORATION
 static void go_os_start(void *pv, unsigned int nbytes)
   __attribute__ ((naked, no_instrument_function, noreturn));
@@ -215,6 +218,41 @@ static inline void xmc4_fpu_config(void)
 #endif
 
 /****************************************************************************
+ * Name: xmc4_unaligned
+ *
+ * Description:
+ *   Enable unaligned memory access by setting SCB_CCR.UNALIGN_TRP = 0
+ *
+ ****************************************************************************/
+
+static inline void xmc4_unaligned(void)
+{
+  uint32_t regval;
+
+  regval = getreg32(NVIC_CFGCON);
+  regval &= ~NVIC_CFGCON_UNALIGNTRP;
+  putreg32(regval, NVIC_CFGCON);
+}
+
+/****************************************************************************
+ * Name: xmc4_flash_waitstates
+ *
+ * Description:
+ *   Enable unaligned memory access by setting SCB_CCR.UNALIGN_TRP = 0
+ *
+ ****************************************************************************/
+
+static inline void xmc4_flash_waitstates(void)
+{
+  uint32_t regval;
+
+  regval = getreg32(XMC4_FLASH_FCON);
+  regval &= ~FLASH_FCON_WSPFLASH_MASK;
+  regval |= FLASH_FCON_WSPFLASH(BOARD_FLASH_WS);
+  putreg32(regval, XMC4_FLASH_FCON);
+}
+
+/****************************************************************************
  * Name: go_os_start
  *
  * Description:
@@ -281,6 +319,10 @@ void __start(void)
 
   xmc4_wddisable();
 
+  /* Enable unaligned memory access */
+
+  xmc4_unaligned();
+
   /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
    * certain that there are no issues with the state of global variables.
    */
@@ -313,6 +355,10 @@ void __start(void)
       *dest++ = *src++;
     }
 #endif
+
+  /* Set FLASH wait states prior to the configuration of clocking */
+
+  xmc4_flash_waitstates();
 
   /* Perform clock and Kinetis module initialization (This depends on
    * RAM functions having been copied to RAM).

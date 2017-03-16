@@ -217,7 +217,7 @@
 #define XMC4_FCE_KE2_BASE           0x50020060
 #define XMC4_FCE_KE3_BASE           0x50020080
 
-#define XMC4_PMU0_BASE              0x58000508
+#define XMC4_PMU0_BASE              0x58000500
 #define XMC4_FLASH0_BASE            0x58001000
 #define XMC4_PREF_BASE              0x58004000
 #define XMC4_EBU_BASE               0x58008000

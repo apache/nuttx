@@ -65,6 +65,8 @@
  * fOFI = 24MHz => fWDT = 24MHz
  */
 
+#undef BOARD_FOFI_CALIBRATION              /* Enable factory calibration */
+
 /* On-board crystals
  *
  *   NOTE: Only the XMC4500 Relax Kit-V1 provides the 32.768KHz RTC crystal.  It
@@ -87,6 +89,7 @@
  *      = 288MHz
  */
 
+#define BOARD_ENABLE_PLL          1
 #define BOARD_PLL_PDIV            2
 #define BOARD_PLL_NDIV            48
 #define BOARD_PLL_K2DIV           1
@@ -119,8 +122,13 @@
  * fUSBPLLVCO <= 520 MHz
  */
 
+#undef  BOARD_ENABLE_USBPLL
 #define BOARD_USB_PDIV            2
 #define BOARD_USB_NDIV            64
+
+/* FLASH wait states */
+
+#define BOARD_FLASH_WS            5
 
 /************************************************************************************
  * Public Data
