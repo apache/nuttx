@@ -57,6 +57,7 @@
 
 #include "up_arch.h"
 #include "chip/xmc4_scu.h"
+#include "xmc4_clockconfig.h"
 
 #include <arch/board/board.h>
 
@@ -83,7 +84,7 @@
 #define SCU_PLLSTAT_OSC_USABLE \
   (SCU_PLLSTAT_PLLHV | SCU_PLLSTAT_PLLLV |  SCU_PLLSTAT_PLLSP)
 
-#ifndef BOARD_PLL_CLOCKSRC_XTAL
+#ifdef BOARD_PLL_CLOCKSRC_XTAL
 #  define VCO ((BOARD_XTAL_FREQUENCY / BOARD_PLL_PDIV) * BOARD_PLL_NDIV)
 #else /* BOARD_PLL_CLOCKSRC_XTAL */
 
@@ -171,7 +172,7 @@ void xmc4_clock_configure(void)
 
   regval  = getreg32(XMC4_SCU_PLLCON0);
   regval |= SCU_PLLCON0_FOTR;
-  putreg(regval, XMC4_SCU_PLLCON0);
+  putreg32(regval, XMC4_SCU_PLLCON0);
 #else
   /* Automatic calibration uses the fSTDBY */
 
@@ -195,10 +196,9 @@ void xmc4_clock_configure(void)
   /* Remove the reset only if HIB domain were in a state of reset */
 
   regval = getreg32(XMC4_SCU_RSTSTAT);
-  if ((regval & SCU_RSTSTAT_HIBRS) ! = 0)
+  if ((regval & SCU_RSTSTAT_HIBRS) != 0)
     {
-  regval = getreg32(XMC4_SCU_RSTSTAT);
-      SCU_RESET->RSTCLR |= SCU_RESET_RSTCLR_HIBRS_Msk;
+      regval = putreg32(SCU_RSTCLR_HIBRS, XMC4_SCU_RSTCLR);
       delay(DELAY_CNT_150US_50MHZ);
     }
 
@@ -271,19 +271,19 @@ void xmc4_clock_configure(void)
 
   regval  = getreg32(XMC4_SCU_PLLCON0);
   regval |= SCU_PLLCON0_AOTREN;
-  putreg(regval, XMC4_SCU_PLLCON0);
+  putreg32(regval, XMC4_SCU_PLLCON0);
 
 #endif /* BOARD_FOFI_CALIBRATION  */
 
   delay(DELAY_CNT_50US_50MHZ);
 
-#if BOARD_ENABLE_PLL
+#ifdef BOARD_ENABLE_PLL
 
   /* Enable PLL */
 
   regval  = getreg32(XMC4_SCU_PLLCON0);
   regval &= ~(SCU_PLLCON0_VCOPWD | SCU_PLLCON0_PLLPWD);
-  putreg(regval, XMC4_SCU_PLLCON0);
+  putreg32(regval, XMC4_SCU_PLLCON0);
 
 #ifdef BOARD_PLL_CLOCKSRC_XTAL
   /* Enable OSC_HP */
@@ -292,7 +292,7 @@ void xmc4_clock_configure(void)
     {
       regval  = getreg32(XMC4_SCU_OSCHPCTRL);
       regval &= ~(SCU_OSCHPCTRL_MODE_MASK | SCU_OSCHPCTRL_OSCVAL_MASK);
-      regval |= ((OSCHP_GetFrequency() / FOSCREF) - 1) << SCU_OSCHPCTRL_OSCVAL_SHIFT;
+      regval |= ((BOARD_XTAL_FREQUENCY / FOSCREF) - 1) << SCU_OSCHPCTRL_OSCVAL_SHIFT;
       putreg32(regval, XMC4_SCU_OSCHPCTRL);
 
       /* Select OSC_HP clock as PLL input */
@@ -305,7 +305,7 @@ void xmc4_clock_configure(void)
 
       regval  = getreg32(XMC4_SCU_PLLCON0);
       regval &= ~SCU_PLLCON0_OSCRES;
-      putreg(regval, XMC4_SCU_PLLCON0);
+      putreg32(regval, XMC4_SCU_PLLCON0);
 
       /* Wait till OSC_HP output frequency is usable */
 
@@ -330,36 +330,36 @@ void xmc4_clock_configure(void)
 
   regval  = getreg32(XMC4_SCU_PLLCON0);
   regval |= SCU_PLLCON0_VCOBYP;
-  putreg(regval, XMC4_SCU_PLLCON0);
+  putreg32(regval, XMC4_SCU_PLLCON0);
 
   /* Disconnect Oscillator from PLL */
 
   regval |= SCU_PLLCON0_FINDIS;
-  putreg(regval, XMC4_SCU_PLLCON0);
+  putreg32(regval, XMC4_SCU_PLLCON0);
 
   /* Setup divider settings for main PLL */
 
   regval = (SCU_PLLCON1_NDIV(BOARD_PLL_NDIV) |
             SCU_PLLCON1_K2DIV(PLL_K2DIV_24MHZ) |
-            SCU_PLLCON1_PDIV(BOARD_PLL_PDIV);
+            SCU_PLLCON1_PDIV(BOARD_PLL_PDIV));
   putreg32(regval, XMC4_SCU_PLLCON1);
 
   /* Set OSCDISCDIS */
 
   regval  = getreg32(XMC4_SCU_PLLCON0);
   regval |= SCU_PLLCON0_OSCDISCDIS;
-  putreg(regval, XMC4_SCU_PLLCON0);
+  putreg32(regval, XMC4_SCU_PLLCON0);
 
   /* Connect Oscillator to PLL */
 
   regval  = getreg32(XMC4_SCU_PLLCON0);
   regval &= ~SCU_PLLCON0_FINDIS;
-  putreg(regval, XMC4_SCU_PLLCON0);
+  putreg32(regval, XMC4_SCU_PLLCON0);
 
   /* Restart PLL Lock detection */
 
   regval |= SCU_PLLCON0_RESLD;
-  putreg(regval, XMC4_SCU_PLLCON0);
+  putreg32(regval, XMC4_SCU_PLLCON0);
 
   /* wait for PLL Lock at 24MHz*/
 
@@ -371,7 +371,7 @@ void xmc4_clock_configure(void)
 
   regval  = getreg32(XMC4_SCU_PLLCON0);
   regval &= ~SCU_PLLCON0_VCOBYP;
-  putreg(regval, XMC4_SCU_PLLCON0);
+  putreg32(regval, XMC4_SCU_PLLCON0);
 
   /* Wait for normal mode */
 
@@ -393,7 +393,7 @@ void xmc4_clock_configure(void)
   putreg32(WDTCLKCR_VALUE, XMC4_SCU_WDTCLKCR);
   putreg32(EBUCLKCR_VALUE, XMC4_SCU_EBUCLKCR);
   putreg32(USBCLKCR_VALUE | USB_DIV, XMC4_SCU_USBCLKCR);
-  putreg32(EXTCLKCR_VALUE, EXTCLKCR);
+  putreg32(EXTCLKCR_VALUE, XMC4_SCU_EXTCLKCR);
 
 #if BOARD_ENABLE_PLL
   /* PLL frequency stepping...*/
@@ -401,7 +401,7 @@ void xmc4_clock_configure(void)
 
   regval  = getreg32(XMC4_SCU_PLLCON0);
   regval &= ~SCU_PLLCON0_OSCDISCDIS;
-  putreg(regval, XMC4_SCU_PLLCON0);
+  putreg32(regval, XMC4_SCU_PLLCON0);
 
   regval = (SCU_PLLCON1_NDIV(BOARD_PLL_NDIV) |
             SCU_PLLCON1_K2DIV(PLL_K2DIV_48MHZ) |
@@ -440,7 +440,7 @@ void xmc4_clock_configure(void)
 
 #endif /* BOARD_ENABLE_PLL */
 
-#if BOARD_ENABLE_USBPLL
+#ifdef BOARD_ENABLE_USBPLL
   /* Enable USB PLL first */
 
   regval = getreg32(XMC4_SCU_USBPLLCON);
@@ -461,19 +461,19 @@ void xmc4_clock_configure(void)
 
           regval  = getreg32(XMC4_SCU_PLLCON0);
           regval &= ~(SCU_PLLCON0_VCOPWD | SCU_PLLCON0_PLLPWD);
-          putreg(regval, XMC4_SCU_PLLCON0);
+          putreg32(regval, XMC4_SCU_PLLCON0);
         }
 
       regval  = getreg32(XMC4_SCU_OSCHPCTRL);
       regval &= ~(SCU_OSCHPCTRL_MODE_MASK | SCU_OSCHPCTRL_OSCVAL_MASK);
-      regval |= ((OSCHP_GetFrequency() / FOSCREF) - 1) << SCU_OSCHPCTRL_OSCVAL_SHIFT;
+      regval |= ((BOARD_XTAL_FREQUENCY / FOSCREF) - 1) << SCU_OSCHPCTRL_OSCVAL_SHIFT;
       putreg32(regval, XMC4_SCU_OSCHPCTRL);
 
       /* Restart OSC Watchdog */
 
       regval  = getreg32(XMC4_SCU_PLLCON0);
       regval &= ~SCU_PLLCON0_OSCRES;
-      putreg(regval, XMC4_SCU_PLLCON0);
+      putreg32(regval, XMC4_SCU_PLLCON0);
 
       /* Wait till OSC_HP output frequency is usable */
 
@@ -527,7 +527,7 @@ void xmc4_clock_configure(void)
 
   /* Enable selected clocks */
 
-  putreg32(CLKSET_VALUE, XMC4_SCU_CLKSET)
+  putreg32(CLKSET_VALUE, XMC4_SCU_CLKSET);
 }
 
 /****************************************************************************
@@ -605,7 +605,7 @@ uint32_t xmc4_get_coreclock(void)
 
   /* Check if the fSYS clock is divided by two to produce fCPU clock. */
 
-  regval = getreg32(CPUCLKCR);
+  regval = getreg32(XMC4_SCU_CPUCLKCR);
   if ((regval & SCU_CPUCLKCR_CPUDIV) != 0)
     {
       temp = temp >> 1;

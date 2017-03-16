@@ -185,9 +185,9 @@
 
 /* Oscillator Control SCU Registers */
 
-#define XMC4_OCU_OSCHPSTAT_OFFSET   0x0000    /* OSC_HP Status Register */
-#define XMC4_OCU_OSCHPCTRL_OFFSET   0x0004    /* OSC_HP Control Register */
-#define XMC4_OCU_CLKCALCONST_OFFSET 0x000c    /* Clock Calibration Constant Register */
+#define XMC4_SCU_OSCHPSTAT_OFFSET   0x0000    /* OSC_HP Status Register */
+#define XMC4_SCU_OSCHPCTRL_OFFSET   0x0004    /* OSC_HP Control Register */
+#define XMC4_SCU_CLKCALCONST_OFFSET 0x000c    /* Clock Calibration Constant Register */
 
 /* PLL Control SCU Registers */
 
@@ -623,8 +623,8 @@
 /* System Clock Control */
 
 #define SCU_SYSCLKCR_SYSDIV_SHIFT   (0)  /* Bits 0-7: System Clock Division Value */
-#define SCU_SYSCLKCR_SYSDIV_MASK    (0xff << SCU_CLK_SYSCLKCR_SYSDIV_SHIFT)
-#  define SCU_SYSCLKCR_SYSDIV(n)    ((uint32_t)((n)-1) << SCU_CLK_SYSCLKCR_SYSDIV_SHIFT)
+#define SCU_SYSCLKCR_SYSDIV_MASK    (0xff << SCU_SYSCLKCR_SYSDIV_SHIFT)
+#  define SCU_SYSCLKCR_SYSDIV(n)    ((uint32_t)((n)-1) << SCU_SYSCLKCR_SYSDIV_SHIFT)
 
 #define SCU_SYSCLKCR_SYSSEL         (1 << 16) /* Bit 16: System Clock Selection Value */
 #  define SCU_SYSCLKCR_SYSSEL_OFI   (0)       /*         0=OFI clock */
@@ -640,8 +640,8 @@
 /* USB Clock Control */
 
 #define SCU_USBCLKCR_USBDIV_SHIFT   (0)       /* Bits 0-2: USB Clock Divider Value */
-#define SCU_USBCLKCR_USBDIV_MASK    (7 << SCU_CLK_USBCLKCR_USBDIV_SHIFT)
-#  define SCU_SYSCLKCR_USBDIV(n)    ((uint32_t)((n)-1) << SCU_CLK_USBCLKCR_USBDIV_SHIFT)
+#define SCU_USBCLKCR_USBDIV_MASK    (7 << SCU_USBCLKCR_USBDIV_SHIFT)
+#  define SCU_SYSCLKCR_USBDIV(n)    ((uint32_t)((n)-1) << SCU_USBCLKCR_USBDIV_SHIFT)
 #define SCU_USBCLKCR_USBSEL         (1 << 16) /* Bit 16: USB Clock Selection Value */
 #  define SCU_USBCLKCR_USBSEL_USBPLL (0)      /*         0=USB PLL Clock */
 #  define SCU_USBCLKCR_USBSEL_PLL   (1 << 16) /*         1= PLL Clock */

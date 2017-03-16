@@ -48,11 +48,11 @@
 
 /* Get customizations for each supported chip */
 
-#if defined(CONFIG_ARCH_XMC4500)
+#if defined(CONFIG_ARCH_CHIP_XMC4500)
 #  define XM4_NUSIC           3          /* Three USIC modules: USCI0-2 */
 
 #else
-#  error "Unsupported XMC4000 chip"
+#  error "Unsupported XMC4xxx chip"
 #endif
 
 /* NVIC priority levels *************************************************************/

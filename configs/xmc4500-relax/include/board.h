@@ -130,6 +130,68 @@
 
 #define BOARD_FLASH_WS            5
 
+/* LED definitions ******************************************************************/
+/* The XMC4500 Relax Lite v1 board has two LEDs:
+ *
+ * LED1 P1.1 High output illuminates
+ * LED2 P1.0 High output illuminates
+ *
+ * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any
+ * way.  The following definitions are used to access individual LEDs.
+ */
+
+/* LED index values for use with board_userled() */
+
+#define BOARD_LED0        0
+#define BOARD_LED1        1
+#define BOARD_NLEDS       2
+
+/* LED bits for use with board_userled_all() */
+
+#define BOARD_LED0_BIT    (1 << BOARD_LED0)
+#define BOARD_LED1_BIT    (1 << BOARD_LED1)
+
+/* These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
+ * defined.  In that case, the usage by the board port is defined in
+ * include/board.h and src/sam_autoleds.c. The LEDs are used to encode
+ * OS-related events as follows:
+ *
+ *   SYMBOL                  Meaning                     LED state
+ *                                                      LED2   LED1
+ *   ---------------------  --------------------------  ------ ------ */
+
+#define LED_STARTED       0 /* NuttX has been started   OFF    OFF    */
+#define LED_HEAPALLOCATE  0 /* Heap has been allocated  OFF    OFF    */
+#define LED_IRQSENABLED   0 /* Interrupts enabled       OFF    OFF    */
+#define LED_STACKCREATED  1 /* Idle stack created       ON     OFF    */
+#define LED_INIRQ         2 /* In an interrupt           No change    */
+#define LED_SIGNAL        2 /* In a signal handler       No change    */
+#define LED_ASSERTION     2 /* An assertion failed       No change    */
+#define LED_PANIC         3 /* The system has crashed   N/C  Blinking */
+#undef  LED_IDLE            /* MCU is is sleep mode      Not used     */
+
+/* Thus if LED0 is statically on, NuttX has successfully booted and is,
+ * apparently, running normally.  If LED1 is flashing at approximately
+ * 2Hz, then a fatal error has been detected and the system has halted.
+ *
+ * NOTE: That LED0 is not used after completion of booting and may
+ * be used by other board-specific logic.
+ */
+
+/* Button definitions ***************************************************************/
+/* The XMC4500 Relax Lite v1 board has two buttons:
+ *
+ * BUTTON1 P1.14 Low input sensed when button pressed
+ * BUTTON2 P1.15 Low input sensed when button pressed
+ */
+
+#define BUTTON_0          0
+#define BUTTON_1          1
+#define NUM_BUTTONS       2
+
+#define BUTTON_0_BIT      (1 << BUTTON_0)
+#define BUTTON_1_BIT      (1 << BUTTON_1)
+
 /************************************************************************************
  * Public Data
  ************************************************************************************/

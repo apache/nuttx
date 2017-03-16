@@ -37,8 +37,8 @@
  * through nuttx/irq.h
  */
 
-#ifndef __ARCH_ARM_INCLUDE_XM4_IRQ_H
-#define __ARCH_ARM_INCLUDE_XM4_IRQ_H
+#ifndef __ARCH_ARM_INCLUDE_XMC4_IRQ_H
+#define __ARCH_ARM_INCLUDE_XMC4_IRQ_H
 
 /************************************************************************************
  * Included Files
@@ -58,26 +58,26 @@
 
 /* Processor Exceptions (vectors 0-15) */
 
-#define XM4_IRQ_RESERVED      (0)   /* Reserved vector (only used with CONFIG_DEBUG_FEATURES) */
-                                        /* Vector  0: Reset stack pointer value */
-                                        /* Vector  1: Reset (not handler as an IRQ) */
-#define XM4_IRQ_NMI           (2)   /* Vector  2: Non-Maskable Interrupt (NMI) */
-#define XM4_IRQ_HARDFAULT     (3)   /* Vector  3: Hard fault */
-#define XM4_IRQ_MEMFAULT      (4)   /* Vector  4: Memory management (MPU) */
-#define XM4_IRQ_BUSFAULT      (5)   /* Vector  5: Bus fault */
-#define XM4_IRQ_USAGEFAULT    (6)   /* Vector  6: Usage fault */
-                                        /* Vectors 7-10: Reserved */
-#define XM4_IRQ_SVCALL        (11)  /* Vector 11: SVC call */
-#define XM4_IRQ_DBGMONITOR    (12)  /* Vector 12: Debug Monitor */
-                                        /* Vector 13: Reserved */
-#define XM4_IRQ_PENDSV        (14)  /* Vector 14: Pendable system service request */
-#define XM4_IRQ_SYSTICK       (15)  /* Vector 15: System tick */
+#define XMC4_IRQ_RESERVED      (0)   /* Reserved vector (only used with CONFIG_DEBUG_FEATURES) */
+                                     /* Vector  0: Reset stack pointer value */
+                                     /* Vector  1: Reset (not handler as an IRQ) */
+#define XMC4_IRQ_NMI           (2)   /* Vector  2: Non-Maskable Interrupt (NMI) */
+#define XMC4_IRQ_HARDFAULT     (3)   /* Vector  3: Hard fault */
+#define XMC4_IRQ_MEMFAULT      (4)   /* Vector  4: Memory management (MPU) */
+#define XMC4_IRQ_BUSFAULT      (5)   /* Vector  5: Bus fault */
+#define XMC4_IRQ_USAGEFAULT    (6)   /* Vector  6: Usage fault */
+                                     /* Vectors 7-10: Reserved */
+#define XMC4_IRQ_SVCALL        (11)  /* Vector 11: SVC call */
+#define XMC4_IRQ_DBGMONITOR    (12)  /* Vector 12: Debug Monitor */
+                                     /* Vector 13: Reserved */
+#define XMC4_IRQ_PENDSV        (14)  /* Vector 14: Pendable system service request */
+#define XMC4_IRQ_SYSTICK       (15)  /* Vector 15: System tick */
 
 /* External interrupts (vectors >= 16).  These definitions are chip-specific */
 
-#define XM4_IRQ_FIRST        (16) /* Vector number of the first external interrupt */
+#define XMC4_IRQ_FIRST         (16)  /* Vector number of the first external interrupt */
 
-#if defined(CONFIG_ARCH_XMC4500)
+#if defined(CONFIG_ARCH_CHIP_XMC4500)
 #  include <arch/xmc4/xmc4500_irq.h>
 #else
   /* The interrupt vectors for other parts are defined in other documents and may or
@@ -116,5 +116,5 @@ extern "C"
 #endif
 #endif
 
-#endif /* __ARCH_ARM_INCLUDE_XM4_IRQ_H */
+#endif /* __ARCH_ARM_INCLUDE_XMC4_IRQ_H */
 

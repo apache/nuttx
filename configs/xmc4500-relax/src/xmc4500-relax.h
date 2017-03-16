@@ -46,9 +46,21 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* LEDs */
+/* LEDs
+ *
+ * The XMC4500 Relax Lite v1 board has two LEDs:
+ *
+ * LED1 P1.1 High output illuminates
+ * LED2 P1.0 High output illuminates
+ */
 
-/* BUTTONS  */
+/* BUTTONS
+ *
+ * The XMC4500 Relax Lite v1 board has two buttons:
+ *
+ * BUTTON1 P1.14 Low input sensed when button pressed
+ * BUTTON2 P1.15 Low input sensed when button pressed
+ */
 
 /****************************************************************************
  * Public Types
