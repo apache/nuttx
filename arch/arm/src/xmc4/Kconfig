@@ -50,7 +50,7 @@ config XMC4_USCI_I2S
 
 # Chip families
 
-menu "ARCH_CHIP_XMC4 Peripheral Support"
+menu "XMC4xxx Peripheral Support"
 
 config XMC4_USIC0
 	bool "USIC0"

@@ -1270,6 +1270,15 @@ config ARCH_BOARD_VIEWTOOL_STM32F107
 		board may be fitted with either: (1) STM32F107VCT6 or (2) STM32F103VCT6.
 		See http://www.viewtool.com/ for further information.
 
+config ARCH_BOARD_XMC4500RELAX
+	bool "Infineon XMC4500 Relax"
+	depends on ARCH_CHIP_XMC4500
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		Infineon XMC4000 Relax Lite v1
+
 config ARCH_BOARD_XTRS
 	bool "XTRS TRS80 Model 3 emulation"
 	depends on ARCH_CHIP_Z80
@@ -1531,6 +1540,7 @@ config ARCH_BOARD
 	default "ubw32"                    if ARCH_BOARD_UBW32
 	default "us7032evb1"               if ARCH_BOARD_US7032EVB1
 	default "viewtool-stm32f107"       if ARCH_BOARD_VIEWTOOL_STM32F107
+	default "xmc4500-relax"            if ARCH_BOARD_XMC4500RELAX
 	default "xtrs"                     if ARCH_BOARD_XTRS
 	default "z16f2800100zcog"          if ARCH_BOARD_Z16F2800100ZCOG
 	default "z80sim"                   if ARCH_BOARD_Z80SIM
@@ -1935,6 +1945,9 @@ source "configs/us7032evb1/Kconfig"
 endif
 if ARCH_BOARD_VIEWTOOL_STM32F107
 source "configs/viewtool-stm32f107/Kconfig"
+endif
+if ARCH_BOARD_XMC4500RELAX
+source "configs/xmc4500-relax/Kconfig"
 endif
 if ARCH_BOARD_XTRS
 source "configs/xtrs/Kconfig"
