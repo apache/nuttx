@@ -117,9 +117,10 @@
 #define XMC4_CCU81_CC83_BASE        0x40024400
 #define XMC4_POSIF0_BASE            0x40028000
 #define XMC4_POSIF1_BASE            0x4002c000
-#define XMC4_USIC0_BASE             0x40030008
+#define XMC4_USIC0_BASE             0x40030000
 #define XMC4_USIC0_CH0_BASE         0x40030000
 #define XMC4_USIC0_CH1_BASE         0x40030200
+#define XMC4_USIC0_RAM_BASE         0x40030400
 #define XMC4_ERU1_BASE              0x40044000
 
 #define XMC4_PBA1_BASE              0x48000000
@@ -139,12 +140,14 @@
 #define XMC4_CAN_MO_BASE            0x48015000
 #define XMC4_DAC_BASE               0x48018000
 #define XMC4_SDMMC_BASE             0x4801c000
+#define XMC4_USIC1_BASE             0x48020000
 #define XMC4_USIC1_CH0_BASE         0x48020000
-#define XMC4_USIC1_BASE             0x48020008
 #define XMC4_USIC1_CH1_BASE         0x48020200
+#define XMC4_USIC1_RAM_BASE         0x48020400
+#define XMC4_USIC2_BASE             0x48024000
 #define XMC4_USIC2_CH0_BASE         0x48024000
-#define XMC4_USIC2_BASE             0x48024008
 #define XMC4_USIC2_CH1_BASE         0x48024200
+#define XMC4_USIC2_CH1_BASE         0x48024400
 #define XMC4_PORT0_BASE             0x48028000
 #define XMC4_PORT1_BASE             0x48028100
 #define XMC4_PORT2_BASE             0x48028200
