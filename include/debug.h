@@ -233,6 +233,24 @@
 #  define ninfo(x...)
 #endif
 
+#ifdef CONFIG_DEBUG_WIRELESS_ERROR
+#  define wlerr(format, ...)    _err(format, ##__VA_ARGS__)
+#else
+#  define wlerr(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_WIRELESS_WARN
+#  define wlwarn(format, ...)   _warn(format, ##__VA_ARGS__)
+#else
+#  define wlwarn(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_WIRELESS_INFO
+#  define wlinfo(format, ...)  _info(format, ##__VA_ARGS__)
+#else
+#  define wlinfo(x...)
+#endif
+
 #ifdef CONFIG_DEBUG_FS_ERROR
 #  define ferr(format, ...)     _err(format, ##__VA_ARGS__)
 #else
@@ -777,6 +795,24 @@
 #  define ninfo       (void)
 #endif
 
+#ifdef CONFIG_DEBUG_WIRELESS_ERROR
+#  define wlerr       _err
+#else
+#  define wlerr       (void)
+#endif
+
+#ifdef CONFIG_DEBUG_WIRELESS_WARN
+#  define wlwarn      _warn
+#else
+#  define wlwarn      (void)
+#endif
+
+#ifdef CONFIG_DEBUG_WIRELESS_INFO
+#  define wlinfo      _info
+#else
+#  define wlinfo      (void)
+#endif
+
 #ifdef CONFIG_DEBUG_FS_ERROR
 #  define ferr         _err
 #else
@@ -1265,6 +1301,14 @@
 #else
 #  define nerrdumpbuffer(m,b,n)
 #  define ninfodumpbuffer(m,b,n)
+#endif
+
+#ifdef CONFIG_DEBUG_WIRELESS
+#  define wlerrdumpbuffer(m,b,n)  errdumpbuffer(m,b,n)
+#  define wlinfodumpbuffer(m,b,n) infodumpbuffer(m,b,n)
+#else
+#  define wlerrdumpbuffer(m,b,n)
+#  define wlinfodumpbuffer(m,b,n)
 #endif
 
 #ifdef CONFIG_DEBUG_FS

@@ -732,6 +732,38 @@ config DEBUG_NET_INFO
 
 endif # DEBUG_NET
 
+config DEBUG_WIRELESS
+	bool "Wireless Debug Features"
+	default n
+	depends on WIRELESS || DRIVERS_WIRELESS
+	---help---
+		Enable DEBUG_WIRELESS debug features.
+
+if DEBUG_WIRELESS
+
+config DEBUG_WIRELESS_ERROR
+	bool "Wireless Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable wireless error output to SYSLOG.
+
+config DEBUG_WIRELESS_WARN
+	bool "Wireless Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable wireless warning output to SYSLOG.
+
+config DEBUG_WIRELESS_INFO
+	bool "Wireless Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable wireless informational output to SYSLOG.
+
+endif # DEBUG_WIRELESS
+
 config DEBUG_SCHED
 	bool "Scheduler Debug Features"
 	default n
