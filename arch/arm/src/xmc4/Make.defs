@@ -110,9 +110,9 @@ endif
 
 CHIP_ASRCS  =
 
-CHIP_CSRCS  = xmc4_allocateheap.c xmc4_clockconfig.c xmc4_clrpend.c
-CHIP_CSRCS += xmc4_idle.c xmc4_irq.c xmc4_lowputc.c xmc4_gpio.c
-CHIP_CSRCS += xmc4_serialinit.c xmc4_serial.c xmc4_start.c xmc4_uid.c
+CHIP_CSRCS  = xmc4_allocateheap.c xmc4_clockconfig.c xmc4_clockutils.c
+CHIP_CSRCS += xmc4_clrpend.c xmc4_idle.c xmc4_irq.c xmc4_lowputc.c
+CHIP_CSRCS += xmc4_gpio.c xmc4_serial.c xmc4_start.c
 
 # Configuration-dependent Kinetis files
 
