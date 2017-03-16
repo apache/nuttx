@@ -326,9 +326,9 @@
 
 /* Oscillator Control SCU Registers */
 
-#define XMC4_OSCU_OSCHPSTAT         (XMC4_SCU_OSC_BASE+XMC4_OSCU_OSCHPSTAT_OFFSET)
-#define XMC4_OSCU_OSCHPCTRL         (XMC4_SCU_OSC_BASE+XMC4_OSCU_OSCHPCTRL_OFFSET)
-#define XMC4_OSCU_CLKCALCONST       (XMC4_SCU_OSC_BASE+XMC4_OSCU_CLKCALCONST_OFFSET)
+#define XMC4_SCU_OSCHPSTAT          (XMC4_SCU_OSC_BASE+XMC4_SCU_OSCHPSTAT_OFFSET)
+#define XMC4_SCU_OSCHPCTRL          (XMC4_SCU_OSC_BASE+XMC4_SCU_OSCHPCTRL_OFFSET)
+#define XMC4_SCU_CLKCALCONST        (XMC4_SCU_OSC_BASE+XMC4_SCU_CLKCALCONST_OFFSET)
 
 /* PLL Control SCU Registers */
 
@@ -370,8 +370,23 @@
 #define SCU_G0ORCEN_
 /* Out-Of-Range Comparator Enable Register 1 */
 #define SCU_G1ORCEN_
+
 /* Mirror Update Status Register */
-#define SCU_MIRRSTS_
+
+#define SCU_MIRRSTS_HDCLR           (1 << 1)  /* Bit 1:  HDCLR Mirror Register Write Status */
+#define SCU_MIRRSTS_HDSET           (1 << 2)  /* Bit 2:  HDSET Mirror Register Write Status */
+#define SCU_MIRRSTS_HDCR            (1 << 3)  /* Bit 3:  HDCR Mirror Register Write Status */
+#define SCU_MIRRSTS_OSCSICTRL       (1 << 5)  /* Bit 5:  OSCSICTRL Mirror Register Write Status */
+#define SCU_MIRRSTS_OSCULSTAT       (1 << 6)  /* Bit 6:  OSCULSTAT Mirror Register Write Status */
+#define SCU_MIRRSTS_OSCULCTRL       (1 << 7)  /* Bit 7:  OSCULCTRL Mirror Register Write Status */
+#define SCU_MIRRSTS_RTC_CTR         (1 << 8)  /* Bit 8:  RTC CTR Mirror Register Write Status */
+#define SCU_MIRRSTS_RTC_ATIM0       (1 << 9)  /* Bit 9:  RTC ATIM0 Mirror Register Write Status */
+#define SCU_MIRRSTS_RTC_ATIM1       (1 << 10) /* Bit 10: RTC ATIM1 Mirror Register Write Status */
+#define SCU_MIRRSTS_RTC_TIM0        (1 << 11) /* Bit 11: RTC TIM0 Mirror Register Write Status */
+#define SCU_MIRRSTS_RTC_TIM1        (1 << 12) /* Bit 12: RTC TIM1 Mirror Register Write Status */
+#define SCU_MIRRSTS_RMX             (1 << 13) /* Bit 13: Retention Memory Access Register Update Status */
+#define SCU_MIRRSTS_RTC_MSKSR       (1 << 14) /* Bit 14: RTC MSKSSR Mirror Register Write Status */
+#define SCU_MIRRSTS_RTC_CLRSR       (1 << 15) /* Bit 15: RTC CLRSR Mirror Register Write Status */
 
 /* Ethernet Control SCU Resters */
 
@@ -452,22 +467,93 @@
 /* Power Monitor Value */
 #define SCU_PWRMON_
 
-/* HCU Registers */
-
+/* Hibernation SCU Registers */
 /* Hibernate Domain Status Register */
-#define SCU_HDSTAT_
+
+#define SCU_HDSTAT_EPEV              (1 << 0)  /* Bit 0:  Wake-up Pin Event Positive Edge Status */
+#define SCU_HDSTAT_ENEV              (1 << 1)  /* Bit 1:  Wake-up Pin Event Negative Edge Status */
+#define SCU_HDSTAT_RTCEV             (1 << 2)  /* Bit 2:  RTC Event Status */
+#define SCU_HDSTAT_ULPWDG            (1 << 3)  /* Bit 3:  ULP WDG Alarm Status */
+#define SCU_HDSTAT_HIBNOUT           (1 << 4)  /* Bit 3:  Hibernate Control Status */
+
 /* Hibernate Domain Status Clear Register */
-#define SCU_HDCLR_
+
+#define SCU_HDCLR_EPEV              (1 << 0)  /* Bit 0:  Wake-up Pin Event Positive Edge Clear */
+#define SCU_HDCLR_ENEV              (1 << 1)  /* Bit 1:  Wake-up Pin Event Negative Edge Clear */
+#define SCU_HDCLR_RTCEV             (1 << 2)  /* Bit 2:  RTC Event Clear */
+#define SCU_HDCLR_ULPWDG            (1 << 3)  /* Bit 3:  ULP WDG Alarm Clear */
+
 /* Hibernate Domain Status Set Register */
-#define SCU_HDSET_
+
+#define SCU_HDSET_EPEV              (1 << 0)  /* Bit 0:  Wake-up Pin Event Positive Edge Set */
+#define SCU_HDSET_ENEV              (1 << 1)  /* Bit 1:  Wake-up Pin Event Negative Edge Set */
+#define SCU_HDSET_RTCEV             (1 << 2)  /* Bit 2:  RTC Event Set */
+#define SCU_HDSET_ULPWDG            (1 << 3)  /* Bit 3:  ULP WDG Alarm Set */
+
 /* Hibernate Domain Control Register */
-#define SCU_HDCR_
+
+#define SCU_HDCR_WKPEP              (1 << 0)  /* Bit 0:  Wake-Up on Pin Event Positive Edge Enable */
+#define SCU_HDCR_WKPEN              (1 << 1)  /* Bit 1:  Wake-up on Pin Event Negative Edge Enable */
+#define SCU_HDCR_RTCE               (1 << 2)  /* Bit 2:  Wake-up on RTC Event Enable */
+#define SCU_HDCR_ULPWDGEN           (1 << 3)  /* Bit 3:  ULP WDG Alarm Enable */
+#define SCU_HDCR_HIB                (1 << 4)  /* Bit 4:  Hibernate Request Value Set */
+#define SCU_HDCR_RCS                (1 << 6)  /* Bit 6:  fRTC Clock Selection */
+#  define SCU_HDCR_RCS_OSI          (0)       /*         0=fOSI */
+#  define SCU_HDCR_RCS_ULP          (1 << 6)  /*         1=fULP */
+#define SCU_HDCR_STDBYSEL           (1 << 7)  /* Bit 7:  fSTDBY Clock Selection */
+#  define SCU_HDCR_STDBYSEL_OSI     (0)       /*         0=fOSI */
+#  define SCU_HDCR_STDBYSEL_ULP     (1 << 7)  /*         1=fULP */
+#define SCU_HDCR_WKUPSEL            (1 << 8)  /* Bit 8:  Wake-Up from Hibernate Trigger Input Select */
+#  define SCU_HDCR_WKUPSEL_HIBIO1   (0)       /*         0=HIB_IO_1 pin selected */
+#  define SCU_HDCR_WKUPSEL_HIBIO0   (1 << 8)  /*         1=HIB_IO_0 pin selected */
+#define SCU_HDCR_GPI0SEL            (1 << 10) /* Bit 10: General Purpose Input 0 Selection */
+#  define SCU_HDCR_GPIOSEL_HIBIO1   (0)       /*         0=HIB_IO_1 pin selected */
+#  define SCU_HDCR_GPIOSEL_HIBIO0   (1 << 10) /*         1=HIB_IO_0 pin selected */
+#define SCU_HDCR_HIBIO0POL          (1 << 12) /* Bit 12: HIBIO0 Polarity Set */
+#  define SCU_HDCR_HIBIO0POL_DIR    (0)       /*         0=Direct */
+#  define SCU_HDCR_HIBIO0POL_INV    (1 << 12) /*         1=Inverted */
+#define SCU_HDCR_HIBIO1POL          (1 << 13) /* Bit 13: HIBIO1 Polarity Set */
+#  define SCU_HDCR_HIBIO1POL_DIR    (0)       /*         0=Direct */
+#  define SCU_HDCR_HIBIO1POL_INV    (1 << 13) /*         1=Inverted */
+#define SCU_HDCR_HIBIO0SEL_SHIFT    (16)      /* Bits 16-19: HIB_IO_0 Pin I/O Control */
+#define SCU_HDCR_HIBIO0SEL_MASK     (15 << SCU_HDCR_HIBIO0SEL_SHIFT)
+#  define SCU_HDCR_HIBIO0SEL_DIR    (0 << SCU_HDCR_HIBIO0SEL_SHIFT)  /* Direct input */
+#  define SCU_HDCR_HIBIO0SEL_DIRPD  (1 << SCU_HDCR_HIBIO0SEL_SHIFT)  /* Direct input, Input pull-down */
+#  define SCU_HDCR_HIBIO0SEL_DIRPU  (2 << SCU_HDCR_HIBIO0SEL_SHIFT)  /* Direct input, Input pull-up */
+#  define SCU_HDCR_HIBIO0SEL_PP     (8 << SCU_HDCR_HIBIO0SEL_SHIFT)  /*  Push-pull HIB Control output */
+#  define SCU_HDCR_HIBIO0SEL_PPWDT  (9 << SCU_HDCR_HIBIO0SEL_SHIFT)  /* Push-pull WDT service output */
+#  define SCU_HDCR_HIBIO0SEL_PPGPIO (10 << SCU_HDCR_HIBIO0SEL_SHIFT) /* Push-pull GPIO output */
+#  define SCU_HDCR_HIBIO0SEL_OD     (12 << SCU_HDCR_HIBIO0SEL_SHIFT) /* Open-drain HIB Control output */
+#  define SCU_HDCR_HIBIO0SEL_ODWDT  (13 << SCU_HDCR_HIBIO0SEL_SHIFT) /* Open-drain WDT service output */
+#  define SCU_HDCR_HIBIO0SEL_ODGPIO (14 << SCU_HDCR_HIBIO0SEL_SHIFT) /* Open-drain GPIO output */
+#define SCU_HDCR_HIBIO1SEL_SHIFT    (20)      /* Bits 20-23: HIB_IO_1 Pin I/O Control */
+#define SCU_HDCR_HIBIO1SEL_MASK     (15 << SCU_HDCR_HIBIO1SEL_SHIFT)
+#  define SCU_HDCR_HIBIO1SEL_DIR    (0 << SCU_HDCR_HIBIO1SEL_SHIFT)  /* Direct input */
+#  define SCU_HDCR_HIBIO1SEL_DIRPD  (1 << SCU_HDCR_HIBIO1SEL_SHIFT)  /* Direct input, Input pull-down */
+#  define SCU_HDCR_HIBIO1SEL_DIRPU  (2 << SCU_HDCR_HIBIO1SEL_SHIFT)  /* Direct input, Input pull-up */
+#  define SCU_HDCR_HIBIO1SEL_PP     (8 << SCU_HDCR_HIBIO1SEL_SHIFT)  /*  Push-pull HIB Control output */
+#  define SCU_HDCR_HIBIO1SEL_PPWDT  (9 << SCU_HDCR_HIBIO1SEL_SHIFT)  /* Push-pull WDT service output */
+#  define SCU_HDCR_HIBIO1SEL_PPGPIO (10 << SCU_HDCR_HIBIO1SEL_SHIFT) /* Push-pull GPIO output */
+#  define SCU_HDCR_HIBIO1SEL_OD     (12 << SCU_HDCR_HIBIO1SEL_SHIFT) /* Open-drain HIB Control output */
+#  define SCU_HDCR_HIBIO1SEL_ODWDT  (13 << SCU_HDCR_HIBIO1SEL_SHIFT) /* Open-drain WDT service output */
+#  define SCU_HDCR_HIBIO1SEL_ODGPIO (14 << SCU_HDCR_HIBIO1SEL_SHIFT) /* Open-drain GPIO output */
+
 /* Internal 32.768 kHz Clock Source Control Register */
 #define SCU_OSCSICTRL_
+
 /* OSC_ULP Status Register */
-#define SCU_OSCULSTAT_
+
+#define SCU_OSCULSTAT_X1D           (1 << 0)  /* Bit 0: XTAL1 Data Value */
+
 /* OSC_ULP Control Register */
-#define SCU_OSCULCTRL_
+
+#define SCU_OSCULCTRL_X1DEN         (1 << 0)  /* Bit 0: XTAL1 Data General Purpose Input Enable */
+#define SCU_OSCULCTRL_MODE_SHIFT    (4)       /* Bits 4-5: Oscillator Mode */
+#define SCU_OSCULCTRL_MODE_MASK     (3 << SCU_OSCULCTRL_MODE_SHIFT)
+#  define SCU_OSCULCTRL_MODE_OPER   (0 << SCU_OSCULCTRL_MODE_SHIFT) /* OSC enabled in operation */
+#  define SCU_OSCULCTRL_MODE_BYPASS (1 << SCU_OSCULCTRL_MODE_SHIFT) /* OSC enabled in bypass */
+#  define SCU_OSCULCTRL_MODE_PDN    (2 << SCU_OSCULCTRL_MODE_SHIFT) /* OSC power down */
+#  define SCU_OSCULCTRL_MODE_PDNGPI (3 << SCU_OSCULCTRL_MODE_SHIFT) /* OSC power down, GPI possible */
 
 /* Reset SCU Registers */
 
@@ -592,11 +678,27 @@
 /* Oscillator Control SCU Registers */
 
 /* OSC_HP Status Register */
-#define OSCU_OSCHPSTAT_
+#define SCU_OSCHPSTAT_
+
 /* OSC_HP Control Register */
-#define OSCU_OSCHPCTRL_
+
+#define SCU_OSCHPCTRL_X1DEN         (1 << 0)  /* Bit 0:  XTAL1 Data Enable */
+#define SCU_OSCHPCTRL_SHBY          (1 << 1)  /* Bit 1:  Shaper Bypass */
+#define SCU_OSCHPCTRL_GAINSEL_SHIFT (2)       /* Bits 2-3: */
+#define SCU_OSCHPCTRL_GAINSEL_MASK  (3 << SCU_OSCHPCTRL_GAINSEL_SHIFT)
+#  define SCU_OSCHPCTRL_GAINSEL(n)  ((uint32_t)(n) << SCU_OSCHPCTRL_GAINSEL_SHIFT)
+#define SCU_OSCHPCTRL_MODE_SHIFT    (4)
+#define SCU_OSCHPCTRL_MODE_MASK     (3 << SCU_OSCHPCTRL_MODE_SHIFT)
+#  define SCU_OSCHPCTRL_MODE_XTAL   (0 << SCU_OSCHPCTRL_MODE_SHIFT) /* External Crystal Mode */
+#  define SCU_OSCHPCTRL_MODE_DIS    (1 << SCU_OSCHPCTRL_MODE_SHIFT) /* OSC is disabled */
+#  define SCU_OSCHPCTRL_MODE_EXTIN  (2 << SCU_OSCHPCTRL_MODE_SHIFT) /*  External Input Clock Mode */
+#  define SCU_OSCHPCTRL_MODE_DISPSM (3 << SCU_OSCHPCTRL_MODE_SHIFT) /* OSC is disabled, Power-Saving Mode */
+#define SCU_OSCHPCTRL_OSCVAL_SHIFT  (16)
+#define SCU_OSCHPCTRL_OSCVAL_MASK   (15 << SCU_OSCHPCTRL_OSCVAL_SHIFT)
+#  define SCU_OSCHPCTRL_OSCVAL(n)   ((uint32_t)((n)-1) << SCU_OSCHPCTRL_OSCVAL_SHIFT)
+
 /* Clock Calibration Constant Register */
-#define OSCU_CLKCALCONST_
+#define SCU_CLKCALCONST_
 
 /* PLL Control SCU Registers */
 
