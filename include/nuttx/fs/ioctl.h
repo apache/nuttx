@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/fs/ioctl.h
  *
- *   Copyright (C) 2008, 2009, 2011-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2009, 2011-2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -86,7 +86,8 @@
 #define _SPIBASE        (0x2100) /* SPI driver commands */
 #define _GPIOBASE       (0x2200) /* GPIO driver commands */
 #define _CLIOCBASE      (0x2300) /* Contactless modules ioctl commands */
-#define _MAC854BASE     (0x2400) /* 802.15.4 device ioctl commands */
+#define _MAC802154BASE  (0x2400) /* 802.15.4 MAC ioctl commands */
+#define _RAD802154BASE  (0x2500) /* 802.15.4 Radio ioctl commands */
 
 /* boardctl() commands share the same number space */
 
@@ -403,10 +404,16 @@
 #define _CLIOC(nr)        _IOC(_CLIOCBASE,nr)
 
 /* 802.15.4 MAC driver ioctl definitions *******************************************/
-/* (see nuttx/ieee802154/ieee802154_dev.h */
+/* (see nuttx/include/wireless/ieee802154/ieee802154_mac.h */
 
-#define _MAC854IOCVALID(c)   (_IOC_TYPE(c)==_MAC854BASE)
-#define _MAC854IOC(nr)       _IOC(_MAC854BASE,nr)
+#define _MAC802154IOCVALID(c)   (_IOC_TYPE(c)==_MAC802154BASE)
+#define _MAC802154IOC(nr)       _IOC(_MAC802154BASE,nr)
+
+/* 802.15.4 Radio driver ioctl definitions *******************************************/
+/* (see nuttx/ieee802154/wireless/ieee802154_radio.h */
+
+#define _RAD802154IOCVALID(c)    (_IOC_TYPE(c)==_RADIO802154BASE)
+#define _RAD802154IOC(nr)       _IOC(_RADIO802154BASE,nr)
 
 /* boardctl() command definitions *******************************************/
 
