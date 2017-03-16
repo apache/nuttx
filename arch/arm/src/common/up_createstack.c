@@ -66,22 +66,11 @@
 #  define HAVE_KERNEL_HEAP 1
 #endif
 
-/* ARM requires at least a 4-byte stack alignment.  For use with EABI and
- * floating point, the stack must be aligned to 8-byte addresses.
+/* For use with EABI and floating point, the stack must be aligned to 8-byte
+ * addresses.
  */
 
-#ifndef CONFIG_STACK_ALIGNMENT
-
-/* The symbol  __ARM_EABI__ is defined by GCC if EABI is being used.  If you
- * are not using GCC, make sure that CONFIG_STACK_ALIGNMENT is set correctly!
- */
-
-#  ifdef __ARM_EABI__
-#    define CONFIG_STACK_ALIGNMENT 8
-#  else
-#    define CONFIG_STACK_ALIGNMENT 4
-#  endif
-#endif
+#define CONFIG_STACK_ALIGNMENT 8
 
 /* Stack alignment macros */
 
@@ -233,9 +222,9 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
       top_of_stack = (uint32_t)tcb->stack_alloc_ptr + stack_size - 4;
 
-      /* The ARM stack must be aligned; 4 byte alignment for OABI and
-       * 8-byte alignment for EABI. If necessary top_of_stack must be
-       * rounded down to the next boundary
+      /* The ARM stack must be aligned to 8-byte alignment for EABI.
+       * If necessary top_of_stack must be rounded down to the next 
+       * boundary
        */
 
       top_of_stack = STACK_ALIGN_DOWN(top_of_stack);
